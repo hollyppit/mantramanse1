@@ -2693,6 +2693,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return `<span class="cat">궁합 일주 · 내 일주 ${x.myDay}</span><h3>${x.ganzhi} (${x.ganzhiK}) · 궁합 분석</h3>
       <div class="cp-pills"><span class="pill">종합 보완도 <b>${x.score}</b></span><span class="pill">${x.type}</span><span class="pill ${cpTone(x.condition)}">${x.condition}</span></div>
       <p class="small muted">${CP_TYPE_INFO[x.type]}</p>
+      <h4>${x.ganzhi} 일주의 특징</h4>
+      <div class="facts">${gzFacts(x.ganzhiK)}</div>
+      <p class="small" style="color:var(--ink-2)">${esc(GL[x.ganzhiK] ? GL[x.ganzhiK][1] : '')}</p>
+      <h4>내 원국과의 궁합</h4>
       <div class="cp-parts">${x.parts.map(p => `<div class="cp-part"><span>${p.label}</span><span class="cp-mk ${p.v > 0.05 ? 'good' : p.v < -0.05 ? 'bad' : ''}">${p.key === 'excess' ? (x.excessRisk >= 0.5 ? '높음' : x.excessRisk >= 0.25 ? '보통' : '낮음') : cpMark(p.v)}</span><em class="num">${cpPts(p.pts)}</em></div>`).join('')}</div>
       <h4>핵심 이유</h4><ul class="pos-ul small">${x.reasons.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
       <p class="small">상대 일간은 나에게 <b>${x.stemTG}</b>, 일지 정기는 <b>${x.branchTG}</b> 십성으로 작용합니다.</p>
