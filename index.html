@@ -347,6 +347,16 @@ tr.row-g-avoid td { background: color-mix(in srgb, var(--bad) 7%, transparent); 
 .zg-b .v { text-align: right; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .zg-dh { display: block; }
 .zg-dh g { cursor: pointer; }
+.zm { display: grid; grid-template-columns: 74px repeat(4, minmax(0, 1fr)); gap: 4px; align-items: stretch; font-size: 0.78rem; }
+.zm-h { text-align: center; font-weight: 700; color: var(--ink-3); font-size: 0.7rem; display: grid; gap: 2px; justify-items: center; align-content: end; }
+.zm-h .hw { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; color: #fff; font-weight: 800; font-size: 0.75rem; }
+.zm-r { align-self: center; font-size: 0.74rem; color: var(--ink-2); }
+.zm-c { text-align: center; background: var(--surface-2); border-radius: 10px; padding: 6px 2px; cursor: pointer; display: grid; gap: 1px; line-height: 1.25; min-width: 0; }
+.zm-c small { color: var(--ink-3); font-size: 0.64rem; }
+.zm-c.muted { cursor: default; }
+.zbd { display: flex; gap: 3px; height: 30px; border-radius: 10px; overflow: hidden; }
+.zbd > span { display: grid; place-items: center; color: #fff; font-size: 0.72rem; font-weight: 800; min-width: 0; }
+.zbd .term { color: #fff; text-decoration: none; }
 .zc-heat { position: absolute; left: 0; bottom: 0; height: 4px; border-radius: 0 4px 0 12px; opacity: .85; }
 .fx { display: grid; gap: 8px; }
 .fx h4, .detail h4 { font-size: 0.84rem; font-family: var(--f-head); margin: 4px 0 0; }
@@ -1859,6 +1869,45 @@ Object.assign(GLOSSARY, {
   '조객': ['자미 12신', '조문 온 손님이라는 뜻입니다. 슬픈 소식이나 상사를 조심하라는 뜻입니다.'],
 });
 
+
+/* 자미두수 용어: 맨 앞에 "쉽게 말해" 한 줄을 붙인다 */
+(function () {
+  const EASY = {
+    '자미두수': '별자리로 보는 "삶의 영역별 성적표"',
+    '명반': '내 인생의 별 지도(12칸)',
+    '오행국': '내 운이 도는 속도와 그릇의 종류',
+    '대한': '10년마다 바뀌는 인생 계절',
+    '유년': '올해 한 해의 운',
+    '신궁': '중년 이후 진짜 나의 모습이 드러나는 자리',
+    '명주': '타고난 기질을 대표하는 별',
+    '신주': '살면서 드러나는 모습을 대표하는 별',
+    '사화': '별에 붙는 4가지 스위치 (록=이득, 권=힘, 과=인정, 기=막힘)',
+    '화록': '잘 풀리고 이득이 생기는 스위치',
+    '화권': '내가 주도하고 힘이 실리는 스위치',
+    '화과': '인정받고 도움을 받는 스위치',
+    '화기': '막히고 신경 쓰이는 스위치 (집중하는 영역이기도 함)',
+    '삼방사정': '한 칸을 볼 때 같이 봐야 하는 네 칸(나·맞은편·삼합 2칸)',
+    '대궁': '맞은편 칸',
+    '공궁': '주성이 없는 칸 — 맞은편 별을 빌려서 봄',
+    '별의 밝기': '같은 별도 자리에 따라 힘이 다름 (묘·왕이 강함, 함이 약함)',
+    '대한 사화': '이 10년의 이득·힘·인정·막힘 자리',
+    '유년 사화': '올해의 이득·힘·인정·막힘 자리',
+    '잡성': '분위기를 더하는 작은 별 (양념처럼 참고)',
+    '비성 사화': '한 칸의 기운이 다른 칸으로 흘러가는 길',
+    '자화': '자기 칸 안에서 스스로 만들고 스스로 쓰는 기운',
+    '12신': '칸마다 붙는 작은 신 4세트 (참고용)',
+    '자미': '리더·황제의 별', '천기': '머리 좋은 기획자의 별', '태양': '베푸는 열정가의 별', '무곡': '돈과 결단의 별',
+    '천동': '편안하고 복 많은 낙천가의 별', '염정': '열정과 원칙이 함께 있는 별', '천부': '재물을 지키는 곳간지기의 별', '태음': '섬세하고 알뜰한 달의 별',
+    '탐랑': '욕망과 재주, 매력의 별', '거문': '말솜씨와 분석의 별', '천상': '믿음직한 2인자·조율가의 별', '천량': '돌봐 주는 어른의 별',
+    '칠살': '도전하는 장군의 별', '파군': '부수고 새로 시작하는 개척자의 별',
+    '좌보': '옆에서 돕는 사람 복', '우필': '뒤에서 돕는 사람 복', '문창': '공부·글솜씨의 복', '문곡': '재주·말솜씨의 복',
+    '천괴': '낮의 귀인', '천월': '밤의 귀인', '녹존': '안정된 수입의 별', '천마': '움직여야 돈이 되는 별', '홍란': '연애·결혼의 기쁨', '천희': '경사·기쁜 소식',
+    '경양': '날카로운 경쟁·다툼', '타라': '질질 끌리는 지연', '화성': '급하고 불같은 변화', '영성': '속으로 끓는 스트레스', '지공': '허공에 뜨는 계획', '지겁': '갑작스러운 손실',
+  };
+  for (const [k, t] of Object.entries(EASY)) if (GLOSSARY[k]) GLOSSARY[k][1] = '💡 쉽게 말해 ' + t + '. ' + GLOSSARY[k][1];
+  GLOSSARY['궁 강도 점수'] = ['자미두수', '💡 쉽게 말해 "이 영역에 힘이 얼마나 실려 있나"를 내 명반 안에서 비교한 점수입니다. 궁 안의 주성 밝기, 길성(+)·살성(−), 사화(록·권·과 +, 기 −)를 합산하고, 삼방사정(그 칸 50%·맞은편 25%·삼합 25%)을 섞어 계산합니다. 50은 내 12궁의 평균이며, 높다고 무조건 좋고 낮다고 나쁜 것이 아니라 "지금 힘이 쏠린 곳"과 "보완할 곳"을 보는 용도입니다.'];
+})();
+
 /* 관리자가 수정하기 전의 기본 문구 */
 var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) => [k, v[1]]));
 
@@ -2744,6 +2793,43 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     });
     return `<div style="overflow-x:auto">${s}</svg></div>`;
   }
+
+  // 유년 흐름: 앞으로 10년, 해마다 유년 명궁 칸의 강도
+  function zwLiuChart(zw, sc, Y0) {
+    const start = Math.max(zw.lunar.y, Y0 - 2), n = 10, W = n * 56, H = 176, T = 22, B = 46, step = W / n, base = H - B, hMax = base - T;
+    let s = `<svg class="zg-dh" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="유년 흐름">`;
+    s += `<line x1="0" x2="${W}" y1="${base - hMax * 0.5}" y2="${base - hMax * 0.5}" style="stroke:var(--line)" stroke-dasharray="3 3"/>`;
+    for (let i = 0; i < n; i++) {
+      const Y = start + i, per = M.ziweiPeriod(zw, Y), p = zw.palaces[per.liuB], cx = step * (i + 0.5), h = hMax * sc[p.b] / 100, top = base - h, on = Y === Y0;
+      const lu = Object.entries(per.liuSihwa).find(([, h2]) => h2 === '록'), gi = Object.entries(per.liuSihwa).find(([, h2]) => h2 === '기');
+      s += `<g data-zwy="${Y}"><rect x="${cx - step / 2}" y="0" width="${step}" height="${H}" style="fill:${on ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'transparent'}"/>`;
+      s += `<rect x="${cx - 15}" y="${top}" width="30" height="${h}" rx="4" style="fill:${zwGradeCol(sc[p.b])};${on ? 'stroke:var(--ink);stroke-width:2' : ''}"/>`;
+      s += `<text x="${cx}" y="${top - 5}" text-anchor="middle" style="fill:var(--ink-2);font-size:10px;font-weight:700">${sc[p.b]}</text>`;
+      s += `<text x="${cx}" y="${base + 14}" text-anchor="middle" style="fill:var(--ink);font-size:11px;font-weight:800">${Y}</text>`;
+      s += `<text x="${cx}" y="${base + 27}" text-anchor="middle" style="fill:var(--ink-3);font-size:9.5px">${p.name.replace('궁', '')} · ${per.age}세</text>`;
+      const lp = lu ? zw.palaces[zw.pos[lu[0]]].name.replace('궁', '') : '', gp = gi ? zw.palaces[zw.pos[gi[0]]].name.replace('궁', '') : '';
+      s += `<text x="${cx}" y="${base + 39}" text-anchor="middle" style="font-size:9px"><tspan style="fill:var(--good)">록${lp}</tspan> <tspan style="fill:var(--bad)">기${gp}</tspan></text></g>`;
+    }
+    return `<div style="overflow-x:auto">${s}</svg></div>`;
+  }
+  // 사화 지도: 생년·대한·유년 사화가 어느 궁(영역)에 떨어지는지 한 표로
+  function zwSihwaMap(zw, per) {
+    const rows = [['생년', zw.sihwa], ['대한 ' + (per.dh ? per.dh.daehan[0] + '~' + per.dh.daehan[1] + '세' : ''), per.dhSihwa], ['유년 ' + per.Y + '년', per.liuSihwa]];
+    const inv = m => { const o = {}; Object.entries(m).forEach(([n, h]) => o[h] = n); return o; };
+    let s = '<div class="zm"><span></span>' + Object.entries(HWA).map(([h, [nm, c]]) => `<span class="zm-h"><span class="hw ${c}">${h}</span> ${ZW_HW_PLAIN[h].split(' ').slice(0, 2).join(' ')}</span>`).join('');
+    rows.forEach(([lab, m]) => {
+      const o = inv(m);
+      s += `<b class="zm-r">${lab}</b>` + Object.keys(HWA).map(h => { const n = o[h]; if (!n) return '<span class="zm-c muted">—</span>'; const q = zw.palaces[zw.pos[n]]; return `<span class="zm-c" data-zw="${q.b}">${term(n)}<br><b>${q.name.replace('궁', '')}</b><small>${ZW_DOM[q.name]}</small></span>`; }).join('');
+    });
+    return s + '</div>';
+  }
+  // 별 밝기 분포: 명반에 있는 주성·길성·살성이 얼마나 밝은 자리에 있는지
+  function zwBrightDist(zw) {
+    const order = ['묘', '왕', '득', '리', '평', '불', '함'], cnt = {}; let tot = 0;
+    zw.palaces.forEach(p => [...p.main, ...p.good, ...p.bad].forEach(n => { const b = M.zwBright(n, p.b); if (b) { cnt[b] = (cnt[b] || 0) + 1; tot++; } }));
+    const col = { 묘: 'var(--good)', 왕: 'var(--good)', 득: 'var(--accent-2)', 리: 'var(--accent-2)', 평: 'var(--ink-3)', 불: 'var(--seal)', 함: 'var(--bad)' };
+    return { tot, cnt, html: '<div class="zbd">' + order.filter(b => cnt[b]).map(b => `<span style="flex:${cnt[b]};background:${col[b]}" title="${b} ${cnt[b]}개">${term('별의 밝기', b)} ${cnt[b]}</span>`).join('') + '</div>' };
+  }
   function renderZiwei() {
     const ch = S.ch, zw = ch.ziwei, nowY = zwNowY();
     const Y = S.zwY ?? nowY, per = M.ziweiPeriod(zw, Y);
@@ -2775,6 +2861,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <span class="zc-legend">${Object.values(HWA).map(([n, c]) => `<span class="hw ${c}">${n.slice(1)}</span>${term(n, n)}`).join(' ')}</span>
     </div>`;
 
+    const bd = zwBrightDist(zw);
     const order = zw.palaces.slice().sort((a, b) => sc[b.b] - sc[a.b]);
     const best = order.slice(0, 3), worst = order.slice(-3).reverse();
     const mp = zw.palaces[zw.ming], mMain = mp.main.length ? mp.main : zw.palaces[(zw.ming + 6) % 12].main;
@@ -2804,7 +2891,23 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="card-h"><h2>10년 ${term('대한')} 흐름 그래프</h2><span class="muted small">나이순 · 막대 = 그 10년 동안 명궁 역할을 하는 칸의 강도</span></div>
       ${zwDaehanChart(zw, sc, per, selB)}
       <p class="note">막대 하나가 10년입니다. 초록 배경이 지금 걷는 대한이며, 막대가 높을수록 그 10년은 해당 영역을 중심으로 힘이 실린다고 읽습니다.</p>
+    </section>
+    <section class="card">
+      <div class="card-h"><h2>${term('유년')} 흐름 그래프 <span class="muted small">앞으로 10년</span></h2></div>
+      ${zwLiuChart(zw, sc, Y)}
+      <p class="note">막대는 그해 명궁 역할을 하는 칸의 강도, 아래 글자는 그해 화록(초록)·화기(빨강)가 떨어지는 궁입니다. 해를 누르면 아래 명반과 운이 그해로 바뀝니다.</p>
+    </section>
+    <section class="card">
+      <div class="card-h"><h2>${term('사화')} 지도 <span class="muted small">이득·힘·인정·막힘이 어디로 가나</span></h2></div>
+      ${zwSihwaMap(zw, per)}
+      <p class="note">가로줄은 시기(평생 바탕 → 지금 10년 → 올해), 세로줄은 네 가지 스위치입니다. 칸을 누르면 그 궁의 풀이로 이동합니다. 같은 궁에 록과 기가 겹치면 "기회와 걱정이 함께 있는 영역"으로 읽습니다.</p>
+    </section>
+    <section class="card">
+      <div class="card-h"><h2>별의 힘 분포 <span class="muted small">${bd.tot}개 별</span></h2></div>
+      ${bd.html}
+      <p class="note">내 명반의 별들이 얼마나 밝은 자리에 앉아 있는지의 비율입니다. 초록이 많을수록 별의 좋은 성질이 잘 드러나고, 빨강이 많으면 약점이 드러나기 쉬워 신경 쓸 영역이 늘어납니다. ${term('별의 밝기')}는 유파마다 조금씩 다릅니다.</p>
     </section>`;
+
     return `${overview}<section class="card">
       <div class="card-h"><h2>${term('자미두수')} ${term('명반', '명반')}</h2>
         <span class="seg" role="group" aria-label="보는 해"><button data-act="zwy:-1" aria-label="이전 해">‹</button><button data-act="zwy:0">${Y}년 · ${per.age}세</button><button data-act="zwy:1" aria-label="다음 해">›</button></span></div>
@@ -3451,6 +3554,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     }
     const pk = t.closest('[data-pick]');
     if (pk) { pick(pk.dataset.pick); return; }
+    const zy = t.closest('[data-zwy]');
+    if (zy) { S.zwY = +zy.dataset.zwy; render(); return; }
     const zc = t.closest('[data-zw]');
     if (zc) { S.zwSel = +zc.dataset.zw; render(); }
   });
