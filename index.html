@@ -367,6 +367,23 @@ tr.row-g-avoid td { background: color-mix(in srgb, var(--bad) 7%, transparent); 
 .zbd { display: flex; gap: 3px; height: 30px; border-radius: 10px; overflow: hidden; }
 .zbd > span { display: grid; place-items: center; color: #fff; font-size: 0.72rem; font-weight: 800; min-width: 0; }
 .zbd .term { color: #fff; text-decoration: none; }
+.dom { display: grid; gap: 8px; }
+.dom-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px; }
+.dom-g { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 720px) { .dom-g { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.dcard { display: grid; gap: 2px; justify-items: start; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 10px 12px; cursor: pointer; min-width: 0; }
+.dcard:hover { background: var(--surface-2); }
+.dcard .dn { font-size: 0.78rem; color: var(--ink-3); font-weight: 700; }
+.dcard .dv { font-size: 1.6rem; line-height: 1.1; }
+.dcard .db { font-size: 0.8rem; font-weight: 800; color: var(--ink-2); }
+.dcard .dt { font-size: 0.7rem; color: var(--ink-3); line-height: 1.3; }
+.dbar { display: block; width: 100%; height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin-top: 4px; }
+.dbar i { display: block; height: 100%; border-radius: 3px; }
+.dom-n { margin: 0; }
+.dparts { display: grid; gap: 6px; }
+.dpart { display: grid; grid-template-columns: 9em 1fr 2.4em; gap: 8px; align-items: center; font-size: 0.86rem; }
+.dpart .dbar { margin-top: 0; height: 8px; }
+.dpart b { text-align: right; }
 .volbox { display: grid; gap: 6px; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--d-chg) 8%, var(--surface)); }
 .volh { font-size: 0.86rem; }
 .volbar { height: 10px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
@@ -1483,6 +1500,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       const du = daeunAt(ch, mid);
       const it = luckItem(ch, yearPillarOf(Y), "seun", du && du.ev);
       it.daeun = du;
+      it.year = Y; it.midMs = mid;   // 분야별 지수가 상위 운(대운)을 찾을 때 쓰는 기간 내 시각
       it.age = Y - ch.solar.y; // 만 나이(생일 이후 기준 근사)
       out.push(it);
     }
@@ -1789,8 +1807,361 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     return m[partner];
   }
 
+
+  // ───────────── 분야별 지수: 애정운 · 재물운 · 건강 지수 · 사고수 ─────────────
+  // 흐름 점수·시기 유형·변동성·억부/조후·삼재를 바꾸지 않고, 그 결과를 읽어 분야별 상태를 계산하는 별도 계층이다.
+  //   extractLuckFeatures  운 한 기둥에서 공통 특징(십성 끌어옴·오행 균형 효과·조후 효과·합충 신호·신살)을 한 번만 추출
+  //   evaluateLove/Wealth/Health/Accident  특징을 받아 지표별 성분(0~100)을 계산
+  //   evaluateDomainLuck   같은 엔진으로 대운·세운·월운·일진을 계산하고 상위 운의 배경을 DOMAIN_LEVEL_WEIGHTS로 섞는다
+  // 어떤 지표도 "재성 있음 → 재물운 높음"처럼 단일 조건으로 정하지 않는다. 항상 여러 성분의 합성이며, 근거는 reasons에 남는다.
+  // 모든 가중치·임계값은 아래 CONFIG 객체에서만 조절한다.
+  const DOMAIN_COMMON = {
+    balanceShare: 0.25, balanceFull: 0.35,               // 운 오행이 원국에 섞이는 비율 / 균형 개선폭 만점
+    overload: { from: 34, to: 50 }, newSkewFrom: 34, newSkewMax: 30, lackBelow: 12, lackFill: 0.3,
+    ramp: [0.1, 0.7],                                    // 십성 묶음 끌어옴(0~1)을 0~1로 바꾸는 구간
+    stack: 0.7, tensionSat: 1.2, bondSat: 1.2,           // 여러 관계를 큰 것부터 stack^순번으로 겹쳐 세고 포화시킴
+    posW: { day: 1, month: 0.85, hour: 0.55, year: 0.35 },
+    tension: { '충': 1, '형': 0.7, '원진': 0.55, '귀문관': 0.45, '해': 0.45, '파': 0.35, '천간충': 0.8 },   // 긴장·마찰 신호의 세기(사건 예측이 아님)
+    bond: { '육합': 0.8, '삼합': 1, '방합': 0.85, '반합': 0.6, '천간합': 0.6 },                            // 결속 신호의 세기
+    activate: { '육합': 1, '삼합': 1, '방합': 0.9, '반합': 0.6, '충': 0.9, '형': 0.7, '원진': 0.6, '귀문관': 0.5, '해': 0.5, '파': 0.5, '천간합': 0.8, '천간충': 0.5 },   // 그 궁이 "움직이는" 정도(합·충 모두 활성)
+    activateGain: 0.75,
+    strengthWeak: [0, 30], strengthStrong: [0, 20],       // 돕는 힘이 50에서 얼마나 벗어났는지 → 0~1
+    coreMin: 0.4,                                        // 핵심 궁(일·월) 신호로 세는 최소 세기
+  };
+  const LOVE_CONFIG = {
+    activity: { palace: 0.36, stemRel: 0.12, star: 0.20, expression: 0.12, charm: 0.08, baseline: 0.08, starNorm: 0.9, scale: 1.45 },
+    charm: { hongyeom: 0.6, dohwa: 0.6, cheoneul: 0.3 },
+    fit: { general: 0.6, own: 0.5, eokbu: 0.25, johu: 0.25, spouseAux: 14, spouseLack: 15, spouseOver: 35, spouseFill: 0.3, pairHap: 9, pairClash: -6 },   // general: 공통 적합도(억부·조후)의 반영 비율. 배우자성은 보조 성분(성별에 따라 재성 또는 관성)
+    stability: { base: 68, hap: 20, clash: 42, harm: 26, tension: 0.10, vol: 0.08, volFrom: 50, protect: 6 },
+    volatility: { vol: 0.5, palace: 0.5, harmWeight: 0.7, completeWeight: 0.5 },
+    score: { activity: 0.34, fit: 0.38, stability: 0.28, spread: 1.35 },   // spread: 50점 기준 편차를 벌려 지표 간 눈금을 맞춘다(성분 값은 그대로)
+    tags: { active: 60, develop: 50, fit: 55, stable: 65, fitStable: 50, vol: 60, quiet: 38, quietStable: 50 },
+  };
+  const WEALTH_CONFIG = {
+    activity: { earn: 0.30, produce: 0.18, link: 0.24, peers: 0.10, officer: 0.06, monthPalace: 0.06, baseline: 0.04, scale: 1.6 },
+    fit: { general: 0.5, own: 0.4, eokbu: 0.3, johu: 0.3, weakBurden: 30, strongBonus: 16, support: 10, overload: 6, patternHit: 0.4,
+      pattern: { '재다신약': -10, '군겁쟁재': -10, '식상과다(설기)': -6 } },
+    stability: { base: 70, vol: 0.12, volFrom: 40, tension: 0.08, monthClash: 22, burden: 22, peers: 16, accumulate: 14, bond: 0.10 },
+    volatility: { vol: 0.6, month: 0.25, peers: 0.15 },
+    score: { activity: 0.30, fit: 0.40, stability: 0.30, spread: 1.5 },
+    tags: { earn: 60, harvest: 0.5, harvestFit: 55, biz: 55, bizProduce: 0.45, bizPeers: 0.3, stable: 65, fitStable: 55, vol: 60, spend: 45, spendActivity: 50, base: 0.45, baseActivity: 50 },
+  };
+  const HEALTH_CONFIG = {
+    balance: { base: 55, gain: 35, fill: 10, overload: 25, newSkew: 10 },
+    climate: { neutral: 65, from: 0.3, to: 1.2 },
+    load: { strength: 0.56, tension: 0.12, vol: 0.10, misfit: 0.12, skewFrom: 0.08, skewTo: 0.5, exFrom: 0.3, exTo: 0.9, volFrom: 60, volTo: 100, misfitTo: 60 },   // 변동성은 부담에 일부만 반영
+    recovery: { base: 45, protect: 28, fit: 10, bond: 10, tension: 6, fitFull: 60 },
+    score: { balance: 0.27, climate: 0.23, load: 0.35, recovery: 0.15 },
+    tags: { good: 70, care: 55 },
+  };
+  const ACCIDENT_CONFIG = {
+    weights: { volatility: 0.24, conflict: 0.32, overload: 0.16, instability: 0.18, sinsal: 0.10 },   // 신살은 전체의 10%로 제한
+    synergy: { from: 55, gain: 0.18, solo: 0.95, none: 0.85 },        // 높은 성분이 겹칠수록 배율↑, 하나만 높거나 없으면 배율↓
+    conflict: { posW: { day: 1, month: 0.9, hour: 0.55, year: 0.35 }, stack: 0.7, sat: 1.2, overlapBonus: 0.15 },
+    overload: { element: 0.6, strength: 0.4, newSkew: 0.15 },
+    instability: { misfit: 0.55, pattern: 0.25, climate: 0.20, misfitFrom: 10, misfitTo: 70, patternHit: 0.35,
+      patterns: ['관살혼잡', '상관견관', '군겁쟁재', '재다신약', '관살과다'] },
+    sinsal: { '양인살': 0.45, '백호대살': 0.40, '괴강살': 0.30, '공망': 0.15 },   // 전통적으로 주의 신호로 읽는 것만, 보조로만 사용
+  };
+  // 하위 운을 계산할 때 상위 운의 배경을 섞는 비율(합 1로 정규화). emphasis는 변동·긴장 신호를 시간 단위별로 얼마나 크게 볼지
+  const DOMAIN_LEVEL_WEIGHTS = {
+    daeun: { self: 1, chain: {}, emphasis: 0.8 },
+    seun: { self: 0.70, chain: { daeun: 0.30 }, emphasis: 1 },
+    wolun: { self: 0.60, chain: { daeun: 0.15, seun: 0.25 }, emphasis: 1.05 },
+    ilun: { self: 0.60, chain: { daeun: 0.08, seun: 0.12, wolun: 0.20 }, emphasis: 1.15 },
+  };
+  const DOMAIN_SCORE_THRESHOLDS = {
+    love: [[85, '매우 높음'], [70, '높음'], [55, '무난'], [40, '다소 낮음'], [0, '낮음']],
+    wealth: [[85, '매우 높음'], [70, '높음'], [55, '무난'], [40, '다소 낮음'], [0, '낮음']],
+    health: [[85, '안정도 매우 높음'], [70, '안정도 높음'], [55, '무난'], [40, '관리'], [25, '부담 높음'], [0, '부담 매우 높음']],
+    accident: [[85, '주의 신호 매우 높음'], [70, '주의 높음'], [55, '주의'], [40, '보통'], [25, '약간 있음'], [0, '낮음']],
+  };
+  const DOMAIN_KEYS = ['love', 'wealth', 'health', 'accident'];
+  const domainBand = (key, v) => DOMAIN_SCORE_THRESHOLDS[key].find(b => v >= b[0])[1];
+  const _dmF = new WeakMap(), _dmO = new WeakMap();
+  const dRamp = v => lramp(v, DOMAIN_COMMON.ramp[0], DOMAIN_COMMON.ramp[1]);
+  const posOf = r => r.members.filter(m => m !== 'luck');
+  // 관계 목록을 자리 가중치·겹침 누적으로 세는 공통 함수 → 0~100
+  function relSignal(rels, table, posW, stack, sat, bonusRaw = 0) {
+    const v = rels.filter(r => table[r.type] != null).map(r => table[r.type] * Math.max(...posOf(r).map(o => posW[o] ?? 0.3))).sort((a, b) => b - a);
+    return 100 * (1 - Math.exp(-(v.reduce((s, x, i) => s + x * stack ** i, 0) + bonusRaw) / sat));
+  }
+  const orAll = xs => 1 - xs.reduce((p, x) => p * (1 - lclamp(x, 0, 1)), 1);   // 여러 신호의 겹침(확률 합성 방식으로 포화)
+
+  // ── 공통 특징 추출: 운 한 기둥 → 모든 분야 평가가 쓰는 재료
+  function extractLuckFeatures(ch, p, level = 'seun') {
+    const pp = { s: p.s, b: p.b, i: gzIndex(p.s, p.b) };
+    let m = _dmF.get(ch); if (!m) _dmF.set(ch, m = {});
+    const ck = level + ':' + pp.i;
+    if (m[ck]) return m[ck];
+    const C = DOMAIN_COMMON, ev = evaluateLuck(ch, pp, level), { rels, sinsal } = luckRelations(ch, pp);
+    const d = ch.pillars.day, dEl = stemEl(d.s), L = LUCK_CFG.levels[level] || LUCK_CFG.levels.ilun, G = ch.weights.groups, st = ch.strength;
+    const g = groupPull(dEl, pp);                                         // 십성 묶음(0 비겁 1 식상 2 재성 3 관성 4 인성)을 이 운이 끌어오는 정도
+    const elv = [0, 0, 0, 0, 0]; elv[stemEl(pp.s)] += L.stemW; for (const [hs, dd] of HIDDEN[pp.b]) elv[stemEl(hs)] += (1 - L.stemW) * dd / 30;
+    const pct = ch.weights.pct, sh = C.balanceShare, after = pct.map((v, e) => (1 - sh) * v + sh * 100 * elv[e]);
+    const dev = a => a.reduce((s, v) => s + Math.abs(v - 20), 0);
+    const balanceGain = lclamp((dev(pct) - dev(after)) / Math.max(dev(pct), 20) / C.balanceFull, -1, 1);
+    let ovEl = null, ovLevel = 0;
+    after.forEach((v, e) => { if (v > pct[e] + 0.5) { const lv = lramp(v, C.overload.from, C.overload.to); if (lv > ovLevel) { ovLevel = lv; ovEl = e; } } });
+    const newSkew = after.some((v, e) => pct[e] < C.newSkewMax && v >= C.newSkewFrom);
+    const filled = elv.map((w, e) => pct[e] < C.lackBelow && w >= C.lackFill ? e : -1).filter(e => e >= 0);
+    const jo = lclamp(johuFit(ch, pp, L.stemW).v / 100, -1, 1), c = ch.climate, extremity = Math.max(Math.abs(c.temp) / 0.6, Math.abs(c.hum) / 0.8);
+    const isT = r => C.tension[r.type] != null, isB = r => C.bond[r.type] != null;
+    const tensionRels = rels.filter(isT), bondRels = rels.filter(isB);
+    const tension = relSignal(tensionRels, C.tension, C.posW, C.stack, C.tensionSat), bond = relSignal(bondRels, C.bond, C.posW, C.stack, C.bondSat);
+    const palace = pos => {                                                // 특정 궁(일지=배우자궁, 월지=사회·재물궁)과 맺는 관계
+      const rs = rels.filter(r => r.kind === 'branch' && r.members.includes(pos));
+      const only = tab => orAll(rs.filter(r => tab[r.type] != null).map(r => tab[r.type]));
+      const clash = orAll(rs.filter(r => r.type === '충').map(() => C.tension['충'])), harm = orAll(rs.filter(r => isT(r) && r.type !== '충').map(r => C.tension[r.type]));
+      return { rels: rs, act: orAll(rs.map(r => (C.activate[r.type] ?? 0.3) * C.activateGain)), tension: only(C.tension), bond: only(C.bond), clash, harm, complete: rs.some(r => r.type === '삼합' || r.type === '방합') ? 1 : 0 };
+    };
+    const sp = palace('day'), mo = palace('month');
+    const dayStem = rels.filter(r => r.kind === 'stem' && r.members.includes('day'));
+    const base = ch.sinsalBase === 'day' ? d.b : ch.pillars.year.b;
+    const sinNames = sinsal.map(x => x.name);
+    const coreN = rels.filter(r => posOf(r).some(o => o === 'day' || o === 'month') && Math.max(C.tension[r.type] ?? 0, C.bond[r.type] ?? 0) >= C.coreMin).length;
+    const wk = lramp(50 - st.help, ...C.strengthWeak), sg = lramp(st.help - 50, ...C.strengthStrong);
+    return m[ck] = {
+      pillar: pp, level, ev, rels, sinsal, sinNames, g, G, pct, after, elv, balanceGain, ovEl, ovLevel, newSkew, filled, jo, extremity,
+      fit: ev.ownFit, eokbu: ev.eokbuScore, johu: ev.johuScore, vol: ev.volatilityScore, volSignals: ev.volatilitySignals, help: st.help, zone: st.zone, weak: wk, strong: sg,
+      tension, bond, tensionRels, bondRels, spouse: sp, month: mo, stemHap: dayStem.some(r => r.type === '천간합'), stemClash: dayStem.some(r => r.type === '천간충'),
+      dohwa: sinsal12(base, pp.b) === '연살', coreN, patterns: ch.patterns.list.map(x => x.name), gender: ch.gender === 'F' ? 'F' : 'M',
+    };
+  }
+
+  const relText = r => `${relWhere(r)} ${r.name}`;
+  const pushR = (arr, mag, text) => { if (text) arr.push({ mag, text }); };
+  const finishReasons = arr => arr.filter(x => x.mag > 0).sort((a, b) => b.mag - a.mag).slice(0, 6).map(x => x.text);
+
+  // ── 애정운
+  function evaluateLove(F, k) {                                           // k: 시간 단위별 강조 배율(변동·긴장 신호)
+    const Q = LOVE_CONFIG, A = Q.activity, sp = F.spouse, R = [];
+    const tension = lclamp(F.tension * k, 0, 100), vol = lclamp(F.vol * k, 0, 100);
+    const stemRel = F.stemHap ? 0.8 : F.stemClash ? 0.5 : 0;
+    const star = Math.min(1, (F.g[2] + F.g[3]) / A.starNorm), expr = dRamp(F.g[1]);
+    const charm = Math.min(1, (F.sinNames.includes('홍염살') ? Q.charm.hongyeom : 0) + (F.dohwa ? Q.charm.dohwa : 0) + (F.sinNames.includes('천을귀인') ? Q.charm.cheoneul : 0));
+    const activity = 100 * lclamp(A.scale * (A.palace * sp.act + A.stemRel * stemRel + A.star * star + A.expression * expr + A.charm * charm + A.baseline), 0, 1);
+    // 적합도: 원국에 맞는 정도(억부·조후) + 배우자성 보조
+    const aux = F.gender === 'F' ? 3 : 2;
+    let auxV = 0;
+    if (F.G[aux] < Q.fit.spouseLack && F.g[aux] >= Q.fit.spouseFill) auxV = Q.fit.spouseAux; else if (F.G[aux] > Q.fit.spouseOver && F.g[aux] >= Q.fit.spouseFill) auxV = -Q.fit.spouseAux / 2;
+    const pairV = F.stemHap ? Q.fit.pairHap : F.stemClash ? Q.fit.pairClash : 0;
+    const fit = lclamp(50 + Q.fit.general * 0.5 * (Q.fit.own * F.fit + Q.fit.eokbu * F.eokbu + Q.fit.johu * F.johu) + auxV + pairV, 0, 100);
+    const S = Q.stability;
+    const stability = lclamp(S.base + S.hap * sp.bond - S.clash * sp.clash - S.harm * sp.harm - S.tension * tension - S.vol * Math.max(0, vol - S.volFrom) + S.protect * dRamp(F.g[4]), 0, 100);
+    const V = Q.volatility, change = Math.min(1, sp.clash + V.harmWeight * sp.harm + V.completeWeight * sp.complete);
+    const volatility = lclamp(V.vol * vol + V.palace * 100 * change, 0, 100);
+    const why = [];
+    sp.rels.forEach(r => pushR(why, 30 * (DOMAIN_COMMON.activate[r.type] ?? 0.3), `배우자궁(일지) ${relText(r)} — ${DOMAIN_COMMON.bond[r.type] != null ? '결속' : '긴장'} 신호로 관계 활동이 움직입니다`));
+    if (F.stemHap) pushR(why, 22, '일간과 운 천간이 합 — 관계 연결 신호'); if (F.stemClash) pushR(why, 18, '일간과 운 천간이 충 — 관계에서 주도권 자극');
+    pushR(why, 20 * star, `재성·관성 기운이 ${Math.round(F.g[2] * 100)}%·${Math.round(F.g[3] * 100)}% 들어와 이성·관계 활동이 활성화됩니다`);
+    pushR(why, 14 * expr, `식상 기운(${Math.round(F.g[1] * 100)}%)으로 표현·매력 활동이 늘어납니다`);
+    if (F.dohwa || F.sinNames.includes('홍염살')) pushR(why, 8, '도화·홍염 계열 매력 신호가 있습니다(보조 신호)');
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    if (auxV) pushR(why, 10, auxV > 0 ? '원국에서 부족한 배우자성 기운이 채워집니다(전통 해석 보조)' : '원국에 이미 많은 배우자성 기운이 더 강해집니다(전통 해석 보조)');
+    if (sp.tension > 0.3) pushR(why, 25 * sp.tension, '배우자궁에 긴장 신호가 있어 안정성이 낮아집니다(변동성은 별도 성분)');
+    if (vol >= 50) pushR(why, vol / 4, `변동성 ${Math.round(vol)} — 관계 환경이 움직이기 쉽습니다`);
+    return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why) };
+  }
+  function scoreLove(c) { const S = LOVE_CONFIG.score; return lclamp(50 + S.spread * (S.activity * c.activity + S.fit * c.fit + S.stability * c.stability - 50), 0, 100); }
+
+  // ── 재물운
+  function evaluateWealth(F, k) {
+    const Q = WEALTH_CONFIG, A = Q.activity, R = [];
+    const tension = lclamp(F.tension * k, 0, 100), vol = lclamp(F.vol * k, 0, 100);
+    const r0 = dRamp(F.g[0]), r1 = dRamp(F.g[1]), r2 = dRamp(F.g[2]), r3 = dRamp(F.g[3]), r4 = dRamp(F.g[4]), link = Math.sqrt(r1 * r2), mo = F.month;
+    const activity = 100 * lclamp(A.scale * (A.earn * r2 + A.produce * r1 + A.link * link + A.peers * r0 + A.officer * r3 + A.monthPalace * mo.act + A.baseline), 0, 1);
+    // 적합도: 재정적으로 유리한가 — 재성을 원국이 감당하는가
+    const burden = F.weak * r2;
+    const fitBase = 50 + Q.fit.general * 0.5 * (Q.fit.own * F.fit + Q.fit.eokbu * F.eokbu + Q.fit.johu * F.johu);
+    let adj = -Q.fit.weakBurden * burden + Q.fit.strongBonus * F.strong * Math.max(link, 0.5 * r2) + Q.fit.support * F.weak * r4 - Q.fit.overload * F.ovLevel;
+    const gi = { '재다신약': 2, '군겁쟁재': 0, '식상과다(설기)': 1 };
+    for (const [name, val] of Object.entries(Q.fit.pattern)) if (F.patterns.includes(name) && F.g[gi[name]] >= Q.fit.patternHit) adj += val;
+    const fit = lclamp(fitBase + adj, 0, 100);
+    const S = Q.stability, monthClash = Math.max(mo.clash, mo.harm * 0.6);
+    const stability = lclamp(S.base - S.vol * Math.max(0, vol - S.volFrom) - S.tension * tension - S.monthClash * monthClash - S.burden * burden - S.peers * r0 + S.accumulate * r4 + S.bond * F.bond, 0, 100);
+    const V = Q.volatility, monthChange = Math.min(1, mo.clash + 0.7 * mo.harm + 0.5 * mo.complete);
+    const volatility = lclamp(V.vol * vol + V.month * 100 * monthChange + V.peers * 100 * r0, 0, 100);
+    const why = [];
+    pushR(why, 30 * r2, `재성 기운이 ${Math.round(F.g[2] * 100)}% 들어와 돈의 움직임이 활성화됩니다`);
+    pushR(why, 24 * link, `식상(${Math.round(F.g[1] * 100)}%)과 재성이 함께 들어와 활동이 수입으로 이어지는 흐름(식상→재성)입니다`);
+    pushR(why, 10 * r0, `비겁 기운(${Math.round(F.g[0] * 100)}%)이 들어와 경쟁·분산 요소가 늘어납니다`);
+    mo.rels.forEach(r => pushR(why, 18, `월지(일·재정 환경) ${relText(r)} — 재정 환경이 움직입니다`));
+    if (burden >= 0.25) pushR(why, 24 * burden, `원국이 약한 편(돕는 힘 ${Math.round(F.help)}%)인데 재성이 강하게 들어와 재정 부담이 커집니다(적합도 하락)`);
+    if (F.strong > 0.3 && link > 0.3) pushR(why, 12, '원국이 재성을 감당할 힘이 있고 식상→재성 흐름이 있어 재정적으로 유리합니다');
+    if (F.weak > 0.3 && r4 > 0.3) pushR(why, 8, '인성 기운이 약한 원국을 받쳐 재정 부담을 덜어 줍니다');
+    if (F.ovLevel > 0.3) pushR(why, 12 * F.ovLevel, `${EL_K[F.ovEl]} 오행이 원국에서 더 쏠립니다(오행 과잉)`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 재정 안정성 하락 요인`);
+    if (vol >= 50) pushR(why, vol / 4, `변동성 ${Math.round(vol)} — 재정 변동이 커지기 쉽습니다`);
+    return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { r0, r1, r2, r4, link, burden } };
+  }
+  function scoreWealth(c) { const S = WEALTH_CONFIG.score; return lclamp(50 + S.spread * (S.activity * c.activity + S.fit * c.fit + S.stability * c.stability - 50), 0, 100); }
+
+  // ── 건강 지수 (명리 모델 안의 균형·부담 지표. 진단이나 발생 가능성이 아니다)
+  function evaluateHealth(F, k) {
+    const Q = HEALTH_CONFIG, R = [];
+    const tension = lclamp(F.tension * k, 0, 100), vol = lclamp(F.vol * k, 0, 100);
+    const B = Q.balance;
+    const balance = lclamp(B.base + B.gain * F.balanceGain + B.fill * Math.min(1, F.filled.length) - B.overload * F.ovLevel - B.newSkew * (F.newSkew ? 1 : 0), 0, 100);
+    const K = Q.climate, w = lramp(F.extremity, K.from, K.to);
+    const climate = lclamp(K.neutral * (1 - w) + (50 + 50 * F.jo) * w, 0, 100);
+    const Lc = Q.load, skewN = lramp(Math.abs(F.help - 50) / 50, Lc.skewFrom, Lc.skewTo), ex = F.help > 50 ? F.g[0] + F.g[4] : F.g[1] + F.g[2] + F.g[3], exN = lramp(ex, Lc.exFrom, Lc.exTo);
+    const L1 = 100 * skewN * exN, L3 = 100 * lramp(vol, Lc.volFrom, Lc.volTo), L4 = 100 * lramp(-F.fit, 0, Lc.misfitTo);
+    const load = lclamp(Lc.strength * L1 + Lc.tension * tension + Lc.vol * L3 + Lc.misfit * L4, 0, 100);
+    const Rq = Q.recovery;
+    const recovery = lclamp(Rq.base + Rq.protect * dRamp(F.g[4]) + Rq.fit * lclamp(F.fit / Rq.fitFull, -1, 1) + Rq.bond * F.bond / 100 - Rq.tension * tension / 100, 0, 100);
+    const why = [];
+    if (F.balanceGain > 0.15) pushR(why, 30 * F.balanceGain, `현재 운이 원국의 오행 편중을 일부 완화합니다`); else if (F.balanceGain < -0.15) pushR(why, -30 * F.balanceGain, `현재 운이 원국의 오행 편중을 더 키웁니다`);
+    if (F.filled.length) pushR(why, 14, `부족한 ${F.filled.map(e => EL_K[e]).join('·')} 오행을 채워 줍니다`);
+    if (F.ovLevel > 0.25) pushR(why, 26 * F.ovLevel, `${EL_K[F.ovEl]} 기운이 중첩되어 편중이 심해집니다(부담 증가)`);
+    if (F.newSkew) pushR(why, 10, '새로운 오행 쏠림이 생길 수 있습니다');
+    if (w > 0.3 && F.jo > 0.15) pushR(why, 24 * F.jo, '조후 균형이 개선됩니다(한난조습의 치우침 완화)'); else if (w > 0.3 && F.jo < -0.15) pushR(why, -24 * F.jo, '조후 치우침이 심해집니다');
+    if (L1 > 25) pushR(why, L1 / 3, `${F.help > 50 ? '이미 강한 원국' : '이미 약한 원국'}을 ${F.help > 50 ? '더 강하게' : '더 소모시키는'} 기운(${Math.round(ex * 100)}%)이 들어와 부담이 커집니다`);
+    if (tension > 25) pushR(why, tension / 4, `합충형파해 긴장 ${Math.round(tension)} 누적 — 부담도에 반영`);
+    if (L3 > 0) pushR(why, L3 / 8, `변동성 ${Math.round(vol)}가 매우 높아 부담도에 일부 반영됩니다(변동성만으로 크게 낮추지 않음)`);
+    if (L4 > 20) pushR(why, L4 / 4, `원국 적합도가 낮아(흐름 점수 ${Math.round(F.fit)}) 부담이 커집니다`);
+    if (dRamp(F.g[4]) > 0.35) pushR(why, 12, '인성 기운이 들어와 회복·보호 신호가 늘어납니다(참고)');
+    return { comps: { balance, climate, load, recovery, volatility: vol }, reasons: finishReasons(why), aux: { skewN, exN } };
+  }
+  function scoreHealth(c) { const S = HEALTH_CONFIG.score; return lclamp(S.balance * c.balance + S.climate * c.climate + S.load * (100 - c.load) + S.recovery * c.recovery, 0, 100); }
+
+  // ── 사고수 (accidentRiskIndex): 변동·충돌·과부하 신호가 얼마나 겹치는가. 사고 발생 확률이 아니다
+  function evaluateAccident(F, k, hp) {
+    const Q = ACCIDENT_CONFIG, R = [], Ccf = Q.conflict;
+    const vol = lclamp(F.vol * k, 0, 100);
+    const nCore = F.rels.filter(r => DOMAIN_COMMON.tension[r.type] != null && posOf(r).some(o => o === 'day' || o === 'month') && DOMAIN_COMMON.tension[r.type] >= DOMAIN_COMMON.coreMin).length;
+    const conflict = lclamp(relSignal(F.tensionRels, DOMAIN_COMMON.tension, Ccf.posW, Ccf.stack, Ccf.sat, nCore >= 2 ? Ccf.overlapBonus * (nCore - 1) : 0) * k, 0, 100);
+    const O = Q.overload, overload = 100 * lclamp(O.element * F.ovLevel + O.strength * hp.skewN * hp.exN + O.newSkew * (F.newSkew ? 1 : 0), 0, 1);
+    const I = Q.instability, patHit = Q.instability.patterns.some(name => F.patterns.includes(name) && ({ '관살혼잡': F.g[3], '상관견관': F.g[1], '군겁쟁재': F.g[0], '재다신약': F.g[2], '관살과다': F.g[3] }[name] >= I.patternHit)) ? 1 : 0;
+    const instability = 100 * lclamp(I.misfit * lramp(-F.fit, I.misfitFrom, I.misfitTo) + I.pattern * patHit + I.climate * Math.max(0, -F.jo), 0, 1);
+    const sinsalHits = Object.entries(Q.sinsal).filter(([n]) => F.sinNames.includes(n));
+    const sinsal = 100 * Math.min(1, sinsalHits.reduce((s, [, w]) => s + w, 0));
+    const why = [];
+    F.tensionRels.forEach(r => pushR(why, 26 * (DOMAIN_COMMON.tension[r.type] ?? 0.4) * Math.max(...posOf(r).map(o => Ccf.posW[o] ?? 0.3)), `${relText(r)} — 긴장·변화 신호(사건 예측이 아님)`));
+    if (nCore >= 2) pushR(why, 30, `핵심 궁(일주·월주)에 긴장 관계 ${nCore}개가 중첩됩니다`);
+    if (vol >= 50) pushR(why, vol / 3, `변동성 ${Math.round(vol)} — 변화 신호가 강한 시기입니다`);
+    if (F.ovLevel > 0.25) pushR(why, 24 * F.ovLevel, `${EL_K[F.ovEl]} 오행이 원국에서 더 쏠려 과부하 신호가 있습니다`);
+    if (hp.skewN * hp.exN > 0.3) pushR(why, 22 * hp.skewN * hp.exN, '원국의 강약 치우침을 운이 더 키워 구조 부담이 커집니다');
+    if (F.fit < -20) pushR(why, -F.fit / 3, `원국 적합도가 낮아(흐름 점수 ${Math.round(F.fit)}) 구조가 불안정합니다`);
+    if (patHit) pushR(why, 18, '원국의 구조적 약점(관살혼잡·군겁쟁재 등)을 운이 자극합니다');
+    if (sinsalHits.length) pushR(why, 10, `${sinsalHits.map(x => x[0]).join('·')} 신호(전통 참고 — 점수 기여는 최대 ${Math.round(Q.weights.sinsal * 100)}%로 제한)`);
+    return { comps: { volatility: vol, conflict, overload, instability, sinsal }, reasons: finishReasons(why), aux: { nCore } };
+  }
+  function scoreAccident(c) {
+    const Q = ACCIDENT_CONFIG, W = Q.weights, base = W.volatility * c.volatility + W.conflict * c.conflict + W.overload * c.overload + W.instability * c.instability + W.sinsal * c.sinsal;
+    const nHigh = [c.volatility, c.conflict, c.overload, c.instability].filter(v => v >= Q.synergy.from).length;
+    const mult = nHigh >= 2 ? 1 + Q.synergy.gain * (nHigh - 1) : nHigh === 1 ? Q.synergy.solo : Q.synergy.none;
+    return { score: lclamp(base * mult, 0, 100), base, mult, nHigh };
+  }
+
+  // ── 태그·요약 (성분 조합으로 정하며, 성분이 서로 달라 같은 숫자를 복사하지 않는다)
+  function tagsLove(c, F) {
+    const T = LOVE_CONFIG.tags, out = [];
+    if (c.activity >= T.active) out.push('만남활성');
+    if (c.activity >= T.develop && c.fit >= T.fit && (F.spouse.bond > 0.3 || F.stemHap || F.bond > 30)) out.push('관계발전');
+    if (c.stability >= T.stable && c.fit >= T.fitStable) out.push('관계안정');
+    if (c.volatility >= T.vol) out.push('관계변동');
+    if (c.activity < T.quiet && c.stability >= T.quietStable) out.push('내실기');
+    return out.slice(0, 3);
+  }
+  function summaryLove(c) {
+    const T = LOVE_CONFIG.tags, hiA = c.activity >= T.active, hiS = c.stability >= T.stable, hiV = c.volatility >= T.vol;
+    if (hiA && hiV) return '관계 활동이 활발하지만 변동도 큰 시기입니다.';
+    if (hiA && !hiS) return '관계 활동은 활발하지만 안정성은 낮은 시기입니다.';
+    if (hiA && hiS) return '관계 활동이 활발하고 안정성도 받쳐 주는 시기입니다.';
+    if (c.activity < T.quiet && hiS) return '관계 활동은 조용하고 안정적으로 다지는 시기입니다.';
+    if (hiV) return '관계 환경의 변동 신호가 큰 시기입니다.';
+    return '관계 영역에 뚜렷한 쏠림이 없는 무난한 시기입니다.';
+  }
+  function tagsWealth(c, a) {
+    const T = WEALTH_CONFIG.tags, out = [];
+    if (c.activity >= T.earn && (a.r2 >= 0.3 || a.link >= 0.3)) out.push('수입활성');
+    if (a.r2 >= T.harvest && c.fit >= T.harvestFit) out.push('성과회수');
+    if (a.r1 >= T.bizProduce && a.r0 >= T.bizPeers && c.activity >= T.biz) out.push('사업활성');
+    if (c.stability >= T.stable && c.fit >= T.fitStable) out.push('재정안정');
+    if (c.volatility >= T.vol) out.push('재정변동');
+    if (c.fit < T.spend && c.activity >= T.spendActivity) out.push('지출관리');
+    if (a.r4 >= T.base && c.activity < T.baseActivity) out.push('기반축적');
+    return out.slice(0, 3);
+  }
+  function summaryWealth(c) {
+    const hiA = c.activity >= 65, loF = c.fit < 50, loS = c.stability < 50, hiV = c.volatility >= 65;
+    if (hiA && (loF || loS) && hiV) return '재정 활동은 매우 활발하지만 변동과 부담도 큰 시기입니다.';
+    if (hiA && loF) return '돈의 움직임은 활발하지만 재정적으로 유리한 구조는 아닙니다.';
+    if (hiA && c.fit >= 55 && c.stability >= 55) return '재정 활동이 활발하고 재정적으로도 유리한 시기입니다.';
+    if (hiA) return '돈의 움직임이 활발한 시기입니다. 유리한지는 적합도와 안정성을 함께 보세요.';
+    if (c.activity < 40 && c.stability >= 60) return '재정 활동은 잠잠하지만 안정적으로 지키기 좋은 시기입니다.';
+    if (hiV) return '재정 환경의 변동 신호가 큰 시기입니다.';
+    return '재정 영역에 뚜렷한 쏠림이 없는 무난한 시기입니다.';
+  }
+  function summaryHealth(c) {
+    if (c.load >= 60) return '균형·부담 면에서 관리가 필요한 시기입니다.';
+    if (c.balance >= 65 && c.climate >= 60) return '오행 균형과 조후 균형이 대체로 안정적인 시기입니다.';
+    if (c.recovery >= 65) return '회복·보호 신호가 받쳐 주는 시기입니다.';
+    return '균형·부담 면에서 무난한 시기입니다.';
+  }
+  function summaryAccident(sc) {
+    if (sc.nHigh >= 3) return '여러 주의 신호가 동시에 중첩된 시기입니다. 일정·체력·주변 환경을 여유 있게 점검하세요.';
+    if (sc.nHigh === 2) return '두 가지 이상의 주의 신호가 겹칩니다. 서두르거나 무리하는 일정은 줄이는 편이 좋습니다.';
+    if (sc.nHigh === 1) return '한 가지 신호만 두드러져 전체 주의도는 제한적입니다.';
+    return '주의 신호가 두드러지지 않는 시기입니다.';
+  }
+
+  // ── 시간 단위별 상위 운(대운→세운→월운→일진) 찾기
+  function domainAncestors(ch, level, context) {
+    const P = context.parents || {}, ms = context.ms, out = [];
+    const need = { seun: ['daeun'], wolun: ['daeun', 'seun'], ilun: ['daeun', 'seun', 'wolun'] }[level] || [];
+    for (const a of need) {
+      let p = P[a];
+      if (!p && ms != null) p = a === 'daeun' ? daeunAt(ch, ms) : a === 'seun' ? yearPillarAt(ms) : monthPillarAt(ms);
+      if (p) out.push({ level: a, p });
+    }
+    return out;
+  }
+  function domainOwn(ch, p, level) {
+    const F = extractLuckFeatures(ch, p, level), k = DOMAIN_LEVEL_WEIGHTS[level].emphasis;
+    let m = _dmO.get(ch); if (!m) _dmO.set(ch, m = {});
+    const ck = level + ':' + F.pillar.i;
+    if (m[ck]) return m[ck];
+    const health = evaluateHealth(F, k);
+    return m[ck] = { F, love: evaluateLove(F, k), wealth: evaluateWealth(F, k), health, accident: evaluateAccident(F, k, health.aux) };
+  }
+  const blendComps = (list, key) => {
+    const out = {}; let tw = 0; list.forEach(x => { tw += x.w; });
+    for (const c of Object.keys(list[list.length - 1].own[key].comps)) out[c] = list.reduce((s, x) => s + x.w * x.own[key].comps[c], 0) / tw;
+    return out;
+  };
+  // 같은 엔진으로 네 지수를 한꺼번에 계산. level: daeun·seun·wolun·ilun(=iljin), context.ms: 그 운 기간 안의 시각(상위 운을 찾는 데 씀)
+  function evaluateDomainLuck(ch, p, level = 'seun', context = {}) {
+    const lv = level === 'iljin' ? 'ilun' : level, W = DOMAIN_LEVEL_WEIGHTS[lv];
+    if (!W) throw new Error('level: ' + level);
+    const anc = domainAncestors(ch, lv, context);
+    const list = [...anc.map(a => ({ level: a.level, p: a.p, w: W.chain[a.level] ?? 0 })), { level: lv, p, w: W.self }].filter(x => x.w > 0).map(x => ({ ...x, own: domainOwn(ch, x.p, x.level) }));
+    const tw = list.reduce((s, x) => s + x.w, 0), self = list[list.length - 1], chainNote = list.length > 1 ? `상위 운 반영: ${list.slice(0, -1).map(x => `${x.level === 'daeun' ? '대운' : x.level === 'seun' ? '세운' : '월운'} ${gzName(x.p)} ${Math.round(x.w / tw * 100)}%`).join(' · ')} · 이 운 자체 ${Math.round(self.w / tw * 100)}%` : '';
+    const res = { level: lv, chain: list.map(x => ({ level: x.level, ganzhi: gzName(x.p), weight: x.w / tw })), chainNote };
+    // 애정
+    let c = blendComps(list, 'love'); let score = Math.round(scoreLove(c));
+    res.love = { key: 'love', score, band: domainBand('love', score), components: c, tags: tagsLove(c, self.own.F), summary: summaryLove(c), reasons: self.own.love.reasons,
+      parts: [{ key: 'activity', label: '관계 활성도', v: c.activity, w: LOVE_CONFIG.score.activity }, { key: 'fit', label: '원국 적합도', v: c.fit, w: LOVE_CONFIG.score.fit }, { key: 'stability', label: '관계 안정성', v: c.stability, w: LOVE_CONFIG.score.stability }, { key: 'volatility', label: '관계 변동성(점수 미반영·참고)', v: c.volatility, w: 0 }] };
+    // 재물
+    c = blendComps(list, 'wealth'); score = Math.round(scoreWealth(c));
+    res.wealth = { key: 'wealth', score, band: domainBand('wealth', score), components: c, tags: tagsWealth(c, self.own.wealth.aux), summary: summaryWealth(c), reasons: self.own.wealth.reasons,
+      parts: [{ key: 'activity', label: '재정 활동성', v: c.activity, w: WEALTH_CONFIG.score.activity }, { key: 'fit', label: '재정 적합도', v: c.fit, w: WEALTH_CONFIG.score.fit }, { key: 'stability', label: '재정 안정성', v: c.stability, w: WEALTH_CONFIG.score.stability }, { key: 'volatility', label: '재정 변동성(점수 미반영·참고)', v: c.volatility, w: 0 }] };
+    // 건강
+    c = blendComps(list, 'health'); score = Math.round(scoreHealth(c));
+    res.health = { key: 'health', score, band: domainBand('health', score), components: c, tags: [], summary: summaryHealth(c), reasons: self.own.health.reasons,
+      parts: [{ key: 'balance', label: '오행 균형', v: c.balance, w: HEALTH_CONFIG.score.balance }, { key: 'climate', label: '조후 균형', v: c.climate, w: HEALTH_CONFIG.score.climate }, { key: 'load', label: '부담도(낮을수록 좋음)', v: c.load, w: HEALTH_CONFIG.score.load, inverse: true }, { key: 'recovery', label: '회복 신호', v: c.recovery, w: HEALTH_CONFIG.score.recovery }, { key: 'volatility', label: '변동성(부담도에 일부 반영)', v: c.volatility, w: 0 }] };
+    // 사고수
+    c = blendComps(list, 'accident'); const sc = scoreAccident(c); score = Math.round(sc.score);
+    const accW = ACCIDENT_CONFIG.weights;
+    res.accident = { key: 'accident', score, cautionIndex: score, accidentRiskIndex: score, band: domainBand('accident', score), components: c, tags: [], summary: summaryAccident(sc), reasons: self.own.accident.reasons, synergy: { nHigh: sc.nHigh, mult: sc.mult, base: sc.base },
+      parts: [{ key: 'volatility', label: '변동성', v: c.volatility, w: accW.volatility }, { key: 'conflict', label: '충돌 신호', v: c.conflict, w: accW.conflict }, { key: 'overload', label: '과부하', v: c.overload, w: accW.overload }, { key: 'instability', label: '구조 불안정', v: c.instability, w: accW.instability }, { key: 'sinsal', label: '신살 참고', v: c.sinsal, w: accW.sinsal }] };
+    return res;
+  }
+
   G.Manse = {
-    compute, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
+    compute, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, mainHidden, yang, gzName, gzNameK,
@@ -3011,6 +3382,131 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="small muted">간지 ${gzBtn(x, kind)}를 누르면 이 간지의 성질과 ${kname}으로 들어올 때의 뜻을 볼 수 있습니다.</p>
     </div>`;
   }
+
+  // ───────────── 분야별 지수(애정·재물·건강·사고수) 화면 ─────────────
+  // 계산은 M.evaluateDomainLuck(기존 운 평가 결과를 읽는 별도 계층)이며, 이 절은 표시만 맡는다.
+  const DOM_ORDER = ['love', 'wealth', 'health', 'accident'];
+  const DOM_INFO = {
+    love: { name: '애정', full: '애정운', sub: '관계 영역의 활성도·적합도·안정성을 종합한 지표', note: '애정운은 관계 영역의 활성·적합·안정·변동을 명리 모델로 계산한 참고 지표이며, 만남이나 이별 같은 사건을 예측하지 않습니다.' },
+    wealth: { name: '재물', full: '재물운', sub: '재정 활동의 활성도·적합도·안정성을 종합한 지표', note: '재물운은 재정 활동·적합·안정·변동을 명리 모델로 계산한 참고 지표이며, 수입이나 손실의 금액·결과를 예측하지 않습니다.' },
+    health: { name: '건강', full: '건강 지수', label: '건강 균형', sub: '오행 균형·조후·부담도를 바탕으로 한 명리적 균형 지표', note: '건강 지수는 명리 해석상의 균형·부담 지표이며 질병의 진단이나 발생 가능성을 의미하지 않습니다.' },
+    accident: { name: '사고수', full: '사고수', short: '사고수는 사고 발생 확률을 의미하지 않습니다.', sub: '변동·충돌·과부하 신호의 중첩 정도를 나타내는 주의 지표', note: '사고수는 명리학적 변화·충돌·부담 신호를 수치화한 참고 지표입니다. 실제 사고 발생 여부나 확률을 예측하지 않습니다. 사고 발생 확률을 의미하지 않으며, 높을수록 주의 신호가 많이 겹쳤다는 뜻입니다.' },
+  };
+  // 시간 단위별 해석 범위
+  const DOM_SCOPE = {
+    daeun: { love: '10년 동안의 관계 환경', wealth: '10년 동안의 재정 환경', health: '10년 동안의 균형·부담 환경', accident: '10년 동안의 주의 신호 환경입니다. 10년 동안 사고가 난다는 뜻이 아닙니다' },
+    seun: { love: '해당 연도의 관계 활성·부담', wealth: '해당 연도의 재정 활성·부담', health: '해당 연도의 균형·부담', accident: '해당 연도의 주의 신호 환경입니다' },
+    wolun: { love: '해당 달의 구체적인 관계 흐름', wealth: '해당 달의 구체적인 재정 흐름', health: '해당 달의 균형·부담 흐름', accident: '해당 달의 주의 신호입니다' },
+    ilun: { love: '해당 날짜의 단기적인 관계 흐름', wealth: '해당 날짜의 단기적인 재정 흐름', health: '해당 날짜의 단기적인 균형·부담 흐름', accident: '해당 날짜의 단기적인 주의 신호입니다' },
+  };
+  const DOM_LEVEL_NAME = { daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
+  // 점수 색: 애정·재물·건강은 높을수록, 사고수는 낮을수록 좋은 쪽 색. 색만으로 뜻을 전하지 않도록 항상 숫자·단계 글자를 함께 쓴다
+  function domCol(key, v) {
+    const g = key === 'accident' ? 100 - v : v;
+    return g >= 70 ? 'var(--good)' : g >= 55 ? 'var(--accent)' : g >= 40 ? 'var(--ink-3)' : g >= 25 ? 'var(--d-chg)' : 'var(--bad)';
+  }
+  const domLabel = (key, r) => key === 'health' ? `건강 균형 ${r.score}` : `${DOM_INFO[key].name} ${r.score}`;
+  const domCtx = (x, kind) => kind === 'seun' ? { ms: x.midMs } : kind === 'wolun' ? { ms: x.startMs + 12 * 864e5 } : kind === 'ilun' ? { ms: Date.UTC(x.date[0], x.date[1] - 1, x.date[2], 3) } : {};
+  const domOf = (x, kind) => M.evaluateDomainLuck(S.ch, x, kind, domCtx(x, kind));
+  const DOM_CTX = {}; let domSeq = 0;
+  // 상세 화면의 2×2 카드
+  function domainBox(x, kind, title) {
+    let res; try { res = domOf(x, kind); } catch (e) { return ''; }
+    const id = 'd' + (++domSeq); DOM_CTX[id] = { res, kind, title };
+    return `<div class="dom"><div class="dom-h"><b>분야별 지수</b><span class="muted small">${DOM_LEVEL_NAME[kind]} 기준 · 누르면 근거가 열립니다</span></div>
+      <div class="dom-g">${DOM_ORDER.map(k => { const r = res[k];
+        return `<button type="button" class="dcard" data-dom="${id}:${k}" aria-label="${DOM_INFO[k].full} ${r.score} ${r.band}"><span class="dn">${k === 'health' ? '건강 균형' : DOM_INFO[k].name}</span><b class="dv num" style="color:${domCol(k, r.score)}">${r.score}</b><span class="db">${r.band}</span>${r.tags.length ? `<span class="dt">${r.tags.join(' · ')}</span>` : ''}<span class="dbar"><i style="width:${r.score}%;background:${domCol(k, r.score)}"></i></span></button>`; }).join('')}</div>
+      <p class="small muted dom-n">${DOM_INFO.health.note} ${DOM_INFO.accident.short}</p></div>`;
+  }
+  const domRow = (label, v, inverse) => `<div class="dpart"><span>${label}</span><span class="dbar"><i style="width:${Math.round(v)}%;background:${domCol('health', inverse ? 100 - v : v)}"></i></span><b class="num">${Math.round(v)}</b></div>`;
+  // 상세 시트(분야 하나)
+  function domSheetHTML(sel) {
+    const ctx = DOM_CTX[sel.id]; if (!ctx) return '<p>표시할 정보가 없습니다.</p><button class="btn x" data-act="close">닫기</button>';
+    const { res, kind, title } = ctx, k = sel.key, r = res[k], I = DOM_INFO[k], c = r.components;
+    const head = k === 'health' ? `${I.full} ${r.score} · ${r.band}` : k === 'accident' ? `사고수 ${r.score} · ${r.band}` : `${I.full} ${r.score} · ${r.band}`;
+    const rows = k === 'accident' ? r.parts.map(p => domRow(p.label, p.v, true)).join('')
+      : k === 'health' ? r.parts.map(p => p.key === 'volatility' ? domRow(p.label, p.v, true) : domRow(p.label, p.v, p.inverse)).join('')
+        : r.parts.map(p => p.key === 'volatility' ? domRow(p.label, p.v, true) : domRow(p.label, p.v, false)).join('');
+    const weights = r.parts.filter(p => p.w > 0).map(p => `${p.label.replace(/\(.*\)/, '')} ${Math.round(p.w * 100)}%`).join(' · ');
+    return `<span class="cat">${DOM_LEVEL_NAME[kind]} · ${esc(title || '')}</span><h3>${head}</h3>
+      <div class="cp-pills">${r.tags.map(t => `<span class="pill">${t}</span>`).join('')}<span class="pill">${DOM_SCOPE[kind][k].split('입니다')[0]}</span></div>
+      <p class="cp-sum">${r.summary}</p>
+      <div class="dparts">${rows}</div>
+      <p class="small muted">${k === 'accident' ? `구성: ${weights} (신살은 보조로만, 높은 성분이 겹칠수록 배율 ${r.synergy.mult.toFixed(2)} — 성분 ${r.synergy.nHigh}개가 기준 이상)` : `구성: ${weights}${k === 'health' ? ' (변동성은 부담도에 일부만 반영)' : ' (변동성은 점수에 넣지 않고 따로 보여 줍니다)'}`}</p>
+      <h4>핵심 이유</h4><ul class="pos-ul small">${r.reasons.length ? r.reasons.map(t => `<li>${esc(t)}</li>`).join('') : '<li>뚜렷한 쏠림이 없는 무난한 시기입니다.</li>'}</ul>
+      ${res.chainNote ? `<p class="small muted">${esc(res.chainNote)}</p>` : ''}
+      <p class="small muted"><b>${DOM_LEVEL_NAME[kind]}에서의 의미</b> — ${DOM_SCOPE[kind][k]}</p>
+      <p class="cp-disc">${I.note}</p>
+      <button class="btn x" data-act="close">닫기</button>`;
+  }
+
+  // ── 지표 선택과 그래프
+  const METRICS = [['flow', '전체 흐름'], ['love', '애정'], ['wealth', '재물'], ['health', '건강'], ['accident', '사고수']];
+  const isDomain = () => DOM_ORDER.includes(S.metric);
+  function metricBar() {
+    const m = S.metric || 'flow', info = DOM_INFO[m];
+    return `<section class="card"><div class="card-h"><h2>그래프 지표</h2><span class="note">아래 대운·연도·월운 그래프와 일진 달력에 적용됩니다</span></div>
+      <div class="cp-filters" role="group" aria-label="그래프 지표">${METRICS.map(([k, l]) => `<button type="button" class="opt" data-act="metric:${k}" aria-pressed="${m === k}">${l}</button>`).join('')}</div>
+      <p class="small" style="color:var(--ink-2)">${m === 'flow' ? '전체 흐름: 원국의 불균형을 들어오는 운이 보완하는지 심화하는지를 나타내는 −100~+100의 상대 지표입니다.' : `<b>${info.full}</b> — ${info.sub}. 0~100 눈금이며 ${m === 'accident' ? '높을수록 주의 신호가 많이 겹쳤다는 뜻입니다.' : '높을수록 그 지표의 값이 큽니다.'}`}</p>
+      ${m === 'health' || m === 'accident' ? `<p class="cp-disc">${info.note}</p>` : m !== 'flow' ? `<p class="small muted">${info.note}</p>` : ''}
+    </section>`;
+  }
+  const chartLegend = () => !isDomain() ? modeLegend() : `<div class="legend"><span>막대 높이 = ${DOM_INFO[S.metric].full} 점수(0~100)</span>${S.metric === 'accident' ? '<span><i class="sw" style="background:var(--good)"></i>낮음</span><span><i class="sw" style="background:var(--d-chg)"></i>주의</span><span><i class="sw" style="background:var(--bad)"></i>주의 높음</span>' : '<span><i class="sw" style="background:var(--good)"></i>높음</span><span><i class="sw" style="background:var(--ink-3)"></i>보통</span><span><i class="sw" style="background:var(--bad)"></i>낮음</span>'}<span>단계 글자는 누르면 나오는 상세와 툴팁에 표시됩니다</span></div>`;
+  function domTip(title, res) { const k = S.metric, r = res[k]; return `<b>${esc(title)}</b><br>${DOM_INFO[k].full} <b>${r.score}</b> · ${r.band}${r.tags.length ? `<br>${r.tags.join(' · ')}` : ''}<br>${r.summary}${r.reasons.slice(0, 2).map(t => `<br>· ${esc(t)}`).join('')}`; }
+  // 0~100 눈금 막대(대운·월운)
+  function drawDomainDiv(el, items) {
+    const k = S.metric, n = items.length, cw = el.clientWidth || 320, W = Math.max(cw, n * 40), H = 246, L = 34, R = 6, T = 30, B = 54;
+    const step = (W - L - R) / n, bw = Math.min(30, step * 0.58), y = v => T + (100 - v) / 100 * (H - T - B);
+    let s = svgEl(W, H);
+    for (const g of [0, 25, 50, 75, 100]) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'};stroke-width:1" ${g && g !== 100 ? 'stroke-dasharray="3 3"' : ''}/><text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g}</text>`;
+    items.forEach((it, i) => {
+      const cx = L + step * (i + 0.5), h = Math.max(2, y(0) - y(it.v)), top = y(it.v), x0 = cx - bw / 2, r = Math.min(4, h / 2);
+      s += `<path d="M${x0},${y(0)} V${top + r} Q${x0},${top} ${x0 + r},${top} H${x0 + bw - r} Q${x0 + bw},${top} ${x0 + bw},${top + r} V${y(0)} Z" style="fill:${domCol(k, it.v)};${it.sel ? 'stroke:var(--ink);stroke-width:2' : ''}"/>`;
+      s += `<text x="${cx}" y="${top - 5}" text-anchor="middle" style="fill:var(--ink-2);font-size:10px;font-weight:700">${it.v}</text>`;
+      if (it.cur) s += `<circle cx="${cx}" cy="${T - 12}" r="3" style="fill:var(--seal)"/>`;
+      s += `<text x="${cx}" y="${H - B + 18}" text-anchor="middle" style="fill:var(--ink);font-size:14px;font-weight:${it.sel ? 900 : 700};font-family:var(--f-display)">${it.label}</text>`;
+      s += `<text x="${cx}" y="${H - B + 33}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${it.sub}</text>`;
+      if (it.sub2) s += `<text x="${cx}" y="${H - B + 45}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${it.sub2}</text>`;
+      s += `<rect class="hit" x="${cx - step / 2}" y="0" width="${step}" height="${H}" style="fill:transparent" data-pick="${it.pick}" data-tip="${esc(it.tip)}"/>`;
+    });
+    el.innerHTML = s + '</svg>';
+  }
+  // 0~100 눈금 막대(연도별 90년)
+  function drawDomainLife(el) {
+    const ch = S.ch, k = S.metric, y0 = ch.solar.y, y1 = Math.min(y0 + 90, M.MAX_Y - 1), data = M.seunRange(ch, y0, y1).map(x => ({ year: x.year, age: x.age, x, res: domOf(x, 'seun') }));
+    const cw = el.clientWidth || 320, W = Math.max(cw, 320), H = 270, L = 34, R = 18, T = 26, B = 46;
+    const x = Y => L + (Y - y0) / (y1 - y0) * (W - L - R), y = v => T + (100 - v) / 100 * (H - T - B);
+    let s = svgEl(W, H);
+    ch.daeun.list.forEach((d, i) => { const a = Math.max(y0, d.startYear), b = Math.min(y1, d.startYear + 10); if (b <= a) return; if (i % 2 === 0) s += `<rect x="${x(a)}" y="${T}" width="${x(b) - x(a)}" height="${H - T - B}" style="fill:var(--surface-2)"/>`; if (x(b) - x(a) > 28) s += `<text x="${(x(a) + x(b)) / 2}" y="${T - 9}" text-anchor="middle" style="fill:var(--ink-2);font-size:12px;font-weight:700;font-family:var(--f-display)">${M.gzName(d)}</text>`; });
+    for (const g of [0, 25, 50, 75, 100]) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'}" ${g && g !== 100 ? 'stroke-dasharray="3 3"' : ''}/><text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g}</text>`;
+    for (let Y = Math.ceil(y0 / 10) * 10; Y <= y1; Y += 10) s += `<text x="${x(Y)}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${Y}</text>`;
+    const bw = Math.max(1.5, (W - L - R) / (y1 - y0 + 1) - 1.2);
+    data.forEach(d => { const v = d.res[k].score, top = y(v), h = Math.max(1.5, y(0) - top); s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${top.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${domCol(k, v)}"/>`; });
+    const curY = M.yearPillarAt(NOW).sajuYear;
+    if (curY >= y0 && curY <= y1) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.5" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T + 11}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
+    const sel = S.sel && S.sel.kind === 'seun' ? S.sel.Y : null;
+    if (sel && sel >= y0 && sel <= y1) { const d = data.find(q => q.year === sel); if (d) s += `<circle cx="${x(sel)}" cy="${y(d.res[k].score)}" r="4.5" style="fill:var(--ink);stroke:var(--surface);stroke-width:2"/>`; }
+    s += `<line class="xh" x1="0" x2="0" y1="${T}" y2="${H - B}" style="stroke:var(--ink);stroke-width:1;opacity:0"/><circle class="xd" r="4" style="fill:var(--ink);opacity:0"/><rect class="hit ov" x="${L}" y="0" width="${W - L - R}" height="${H}" style="fill:transparent"/>`;
+    el.innerHTML = s + '</svg>';
+    const svg = el.querySelector('svg'), ov = el.querySelector('.ov'), xh = el.querySelector('.xh'), xd = el.querySelector('.xd');
+    const nearest = ev => { const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * (W / r.width), Y = Math.round(y0 + (px - L) / (W - L - R) * (y1 - y0)); return data.find(d => d.year === Math.max(y0, Math.min(y1, Y))); };
+    ov.addEventListener('mousemove', ev => { const d = nearest(ev); if (!d) return; xh.setAttribute('x1', x(d.year)); xh.setAttribute('x2', x(d.year)); xh.style.opacity = .35; xd.setAttribute('cx', x(d.year)); xd.setAttribute('cy', y(d.res[k].score)); xd.style.opacity = 1; showTip(ev, domTip(`${d.year}년 (만 ${d.age}세) ${M.gzName(d.x)}`, d.res)); });
+    ov.addEventListener('mouseleave', () => { xh.style.opacity = 0; xd.style.opacity = 0; hideTip(); });
+    ov.addEventListener('click', ev => { const d = nearest(ev); if (d) pick('seun:' + d.year); });
+  }
+
+  // 지표 선택 시 대운·연도·월운 그래프
+  function drawDomainChart(el, k) {
+    const ch = S.ch, m = S.metric;
+    if (k === 'daeun') {
+      const cur = M.daeunAt(ch, NOW);
+      drawDomainDiv(el, ch.daeun.list.map((d, i) => { const r = domOf(d, 'daeun'); return { v: r[m].score, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: domTip(`${d.startAge}세 대운 ${M.gzName(d)}`, r) }; }));
+    } else if (k === 'wolun') {
+      const ms = M.wolun(ch, S.selYear);
+      drawDomainDiv(el, ms.map((x, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity, r = domOf(x, 'wolun'); return { v: r[m].score, label: M.gzName(x), sub: x.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: NOW >= x.startMs && NOW < nx, tip: domTip(`${x.termName}~ ${M.gzName(x)}`, r) }; }));
+    } else if (k === 'life') drawDomainLife(el);
+  }
+
   // 변동성: 길흉이 아니라 변화 신호의 세기. 왜 이 값인지 실제 근거(관계)를 함께 보여준다
   function volBox(e) {
     const v = Math.round(e.volatilityScore), sig = e.volatilitySignals.slice(0, 4);
@@ -3065,7 +3561,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${condTag(e.condition)} <b class="num">${signed(luckV(x))}</b></span></div>
       ${banner}
       <div class="small" style="color:var(--ink-2)">${luckCells(x)}</div>
-      ${kind ? (kind === 'ilun' ? dayBox(x) : phaseBox(x, kind)) + luckEffects(x, kind) : ''}
+      ${kind ? (kind === 'ilun' ? dayBox(x) : phaseBox(x, kind)) + domainBox(x, kind, title) + luckEffects(x, kind) : ''}
       <h4 style="margin:4px 0 0">${term('흐름 점수')} 근거</h4>
       <div class="small muted">${comps.map(([n, k, v]) => `${n} ${signed(v)} × ${Math.round(w[k] * 100)}%`).join(' · ')} — 가중치는 이 사주의 강약·기후 치우침에 따라 정해집니다.</div>
       <ul class="small" style="margin:4px 0 0;padding-left:18px">${e.reasons.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
@@ -3099,15 +3595,15 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const tint = (v, dm) => `color-mix(in srgb, ${dmCol(dm)} ${14 + Math.round(Math.min(80, Math.abs(v)) / 80 * 36)}%, var(--surface))`;
     const dayBtn = q => `<button type="button" class="chip ${q.v >= 0 ? 'good' : 'bad'}" data-pick="ilun:${q.d}" style="border:0;cursor:pointer">${cm}/${q.d} ${M.gzName(q.x)} ${signed(q.v)}</button>`;
     const cells = scored.map(({ d, v, x }) => {
-      const dm = dayMode(x).mode;
+      const dm = dayMode(x).mode, mv = isDomain() ? domOf(x, 'ilun')[S.metric] : null;
       const isT = cy === TODAY[0] && cm === TODAY[1] && d === TODAY[2];
       const son = M.sonOf(x.lunar.d) === '없음';
       const strong = Math.abs(v) >= 45;
-      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}" style="background:${tint(v, dm)}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''} · ${dm} · ${x.ev.condition + ' ' + signed(v)}">
+      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}" style="background:${mv ? `color-mix(in srgb, ${domCol(S.metric, mv.score)} 28%, var(--surface))` : tint(v, dm)}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''} · ${dm} · ${x.ev.condition + ' ' + signed(v)}${mv ? ' · ' + DOM_INFO[S.metric].full + ' ' + mv.score + ' ' + mv.band : ''}">
         <span class="ctop"><span class="dn">${d}</span>${son ? '<span class="son" title="손 없는 날">손</span>' : ''}</span>
         <span class="dg">${M.gzName(x)}</span>
         <span class="dmn" style="color:${dmCol(dm)}">${dm.slice(0, 2)}</span>
-        <span class="sc${strong ? ' strong' : ''}">${signed(v)}</span>
+        <span class="sc${strong ? ' strong' : ''}">${mv ? mv.score : signed(v)}</span>
         <span class="ld">${x.lunar.d === 1 ? x.lunar.m + '월' : x.lunar.d}</span></button>`;
     }).join('');
     return `<section class="card">
@@ -3170,23 +3666,24 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         ${nowCard('ilun', term('일운'), il, '오늘')}
       </div>${nowDetail}
     </section>
+    ${metricBar()}
     <section class="card">
       <div class="card-h"><h2>${term('대운')} 흐름 <span class="lvl">${LEVEL_ROLE.daeun}</span></h2><span class="note">${ch.daeun.forward ? term('순행') : term('역행')} · ${term('대운수')} ${ch.daeun.num} (정확히 ${ch.daeun.exact.toFixed(2)}년)</span></div>
-      ${modeLegend()}
+      ${chartLegend()}
       <div class="chart" data-chart="daeun"></div>
       <div class="lts">${ch.daeun.list.map((x, i) => luckTile(x, `${x.startAge}세 · ${x.startYear}`, 'daeun:' + i, sel.kind === 'daeun' && sel.i === i, du === x)).join('')}</div>
       ${daeunDetail || '<p class="note">막대 높이는 흐름 점수, 색은 시기 유형입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>연도별 흐름 · ${term('세운')} <span class="lvl">${LEVEL_ROLE.seun}</span></h2></div>
-      ${modeLegend()}
+      ${chartLegend()}
       <div class="chart" data-chart="life"></div>
       ${yearSummary(curY)}
       ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 시기 유형(공격·확장·수확·축적·변동·방어)입니다. 순풍·보통·주의·부담 같은 상태는 툴팁과 타일 배지로 따로 보입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>${Y}년 ${term('월운')} <span class="lvl">${LEVEL_ROLE.wolun}</span></h2><span class="seg"><button data-act="year:-1" aria-label="이전 해">‹</button><button data-act="year:1" aria-label="다음 해">›</button></span></div>
-      ${modeLegend()}
+      ${chartLegend()}
       <div class="chart" data-chart="wolun"></div>
       <div class="lts">${M.wolun(ch, Y).map((x, i, a) => luckTile(x, `${x.termName} · ${kstYMD(x.startMs)[1]}월`, 'wolun:' + i, sel.kind === 'wolun' && sel.i === i, NOW >= x.startMs && NOW < (a[i + 1] ? a[i + 1].startMs : Infinity))).join('')}</div>
       ${wolDetail || `<p class="note">입춘(${Y}.2.4 무렵)부터 다음 해 소한까지의 12개월입니다. 막대를 누르면 그 달의 ${term('일운')} 달력으로 이동합니다.</p>`}
@@ -4594,6 +5091,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const curMs = NOW;
     document.querySelectorAll('[data-chart]').forEach(el => {
       const k = el.dataset.chart;
+      if (isDomain()) { drawDomainChart(el, k); return; }
       if (k === 'daeun') {
         const cur = M.daeunAt(ch, curMs);
         drawDiv(el, ch.daeun.list.map((d, i) => ({ v: luckV(d), cond: d.ev.condition, ph: luckMode(d).mode, alt: showGhost() ? altOf(d) : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: luckTip(`${d.startAge}세 대운 ${M.gzName(d)} (${d.stemTG}/${d.branchTG})`, d) })));
@@ -4738,10 +5236,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   function renderSheet() {
     let sh = document.getElementById('sheet');
-    if (!S.sheet && !S.cpSheet) { if (sh) sh.remove(); return; }
+    if (!S.sheet && !S.cpSheet && !S.domSheet) { if (sh) sh.remove(); return; }
     if (!sh) { sh = document.createElement('div'); sh.id = 'sheet'; document.body.appendChild(sh); }
     if (!S.sheet) {
-      sh.innerHTML = `<div class="sheet-bg" data-act="close"><div class="sheet" role="dialog" aria-modal="true" aria-label="궁합 분석">${cpSheetHTML(S.ch, S.cpSheet)}</div></div>`;
+      sh.innerHTML = `<div class="sheet-bg" data-act="close"><div class="sheet" role="dialog" aria-modal="true" aria-label="궁합 분석">${S.domSheet ? domSheetHTML(S.domSheet) : cpSheetHTML(S.ch, S.cpSheet)}</div></div>`;
       sh.querySelector('.x').focus(); return;
     }
     const key = S.sheet, [c, t] = GL[key];
@@ -4804,13 +5302,16 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   document.addEventListener('click', ev => {
     const t = ev.target;
     const cpb = t.closest('[data-cp]');
-    if (cpb) { const [k, i] = cpb.dataset.cp.split(':'); S.cpSheet = { k, i: +i }; S.sheet = null; renderSheet(); return; }
+    if (cpb) { const [k, i] = cpb.dataset.cp.split(':'); S.cpSheet = { k, i: +i }; S.domSheet = null; S.sheet = null; renderSheet(); return; }
+    const dmb = t.closest('[data-dom]');
+    if (dmb) { const [id, key] = dmb.dataset.dom.split(':'); S.domSheet = { id, key }; S.cpSheet = null; S.sheet = null; renderSheet(); return; }
     const tm = t.closest('.term');
     if (tm) { ev.preventDefault(); S.sheet = tm.dataset.term; S.sheetPos = tm.dataset.pos || null; S.sheetVol = tm.dataset.vol ? VOL_CTX[tm.dataset.vol] || null : null; renderSheet(); return; }
     const act = t.closest('[data-act]');
     if (act) {
       const a = act.dataset.act;
-      if (a === 'close') { if (t === act || t.classList.contains('x')) { S.sheet = null; S.cpSheet = null; S.sheetVol = null; renderSheet(); } return; }
+      if (a === 'close') { if (t === act || t.classList.contains('x')) { S.sheet = null; S.cpSheet = null; S.domSheet = null; S.sheetVol = null; renderSheet(); } return; }
+      if (a.startsWith('metric:')) { S.metric = a.slice(7); render(); return; }
       if (a === 'cp-all') { S.cpAll = !S.cpAll; render(); return; }
       if (a.startsWith('cp-p:')) { S.cpPartner = a.slice(5); render(); return; }
       if (a.startsWith('cp-s:')) { S.cpSort = a.slice(5); render(); return; }
@@ -4866,7 +5367,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     render();
   });
   document.addEventListener('input', ev => { if (ev.target.id === 'gl-q') { S.glq = ev.target.value; document.getElementById('gl-list').innerHTML = glList(); } });
-  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && S.cpSheet && !S.sheet) { S.cpSheet = null; renderSheet(); } if (ev.key === 'Escape' && S.sheet) { const ta = document.getElementById('gl-edit'); if (!ta || ta.value === GL[S.sheet][1]) { S.sheet = null; renderSheet(); } } if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('.nowc')) { ev.preventDefault(); pick(ev.target.dataset.pick); }
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && (S.cpSheet || S.domSheet) && !S.sheet) { S.cpSheet = null; S.domSheet = null; renderSheet(); } if (ev.key === 'Escape' && S.sheet) { const ta = document.getElementById('gl-edit'); if (!ta || ta.value === GL[S.sheet][1]) { S.sheet = null; renderSheet(); } } if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('.nowc')) { ev.preventDefault(); pick(ev.target.dataset.pick); }
     if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('[data-zw]')) { ev.preventDefault(); S.zwSel = +ev.target.dataset.zw; render(); } });
   let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(drawCharts, 150); });
 
