@@ -128,6 +128,9 @@ td.empty { color: var(--ink-3); background: var(--surface-2); border-radius: 14p
 .pill.b-길 { background: var(--good); color: var(--surface); } .pill.b-소길 { background: var(--good-soft); color: var(--good); }
 .pill.b-평 { background: var(--surface-2); color: var(--ink-2); }
 .pill.b-소흉 { background: var(--bad-soft); color: var(--bad); } .pill.b-흉 { background: var(--bad); color: var(--surface); }
+.pill.b-순풍 { background: var(--good-soft); color: var(--good); } .pill.b-보통 { background: var(--surface-2); color: var(--ink-2); }
+.pill.b-주의 { background: color-mix(in srgb, var(--d-chg) 18%, var(--surface)); color: var(--d-chg); } .pill.b-부담 { background: var(--bad-soft); color: var(--bad); }
+button.pill { border: 0; cursor: pointer; font-family: inherit; }
 .pill.lv-강 { background: var(--bad); color: var(--surface); } .pill.lv-약 { background: var(--bad-soft); color: var(--bad); } .pill.lv-참고 { background: var(--surface-2); color: var(--ink-2); }
 
 /* 목록·표 */
@@ -342,6 +345,12 @@ tr.row-g-avoid td { background: color-mix(in srgb, var(--bad) 7%, transparent); 
 .sheet .acts .grow { flex: 1; }
 .admin-msg { font-size: 0.82rem; font-weight: 600; color: var(--ink-3); }
 .admin-msg.ok { color: var(--good); } .admin-msg.err { color: var(--seal); }
+.sj-chip { border: 0; cursor: pointer; background: color-mix(in srgb, var(--d-chg) 16%, var(--surface)); color: var(--d-chg); font-weight: 700; }
+.sj-banner { display: grid; gap: 2px; padding: 8px 12px; border-radius: 12px; background: var(--surface-2); border-left: 4px solid var(--d-chg); }
+g.sj { cursor: pointer; text-decoration: none; }
+.admin-link-row { text-align: right; margin-top: 24px; }
+.admin-link { font-size: 0.7rem; color: var(--ink-3); text-decoration: none; padding: 3px 8px; border: 1px solid var(--line); border-radius: 999px; }
+.admin-link:hover { color: var(--accent); border-color: var(--accent); }
 .admin-badge { font-size: 0.72rem; font-weight: 800; color: #fff; background: var(--seal); border-radius: 999px; padding: 3px 9px; }
 .chip.edited { background: #FFF1D6; color: #946B00; }
 .term.gterm { text-decoration: none; display: block; width: 100%; border-radius: 12px; }
@@ -879,42 +888,221 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     return out;
   }
 
-  // 운 한 기둥의 길흉 점수 (분해 포함)
-  function scoreLuck(ch, yong, p, opts = {}) {
-    if (!yong || !yong.applicable) return null;
-    const R = { '용신': 2, '희신': 1, '한신': 0, '구신': -1, '기신': -2 };
-    const r = e => R[yong.roles[e]];
-    const stemW = opts.stemW ?? 0.4;
-    const stemPart = r(stemEl(p.s));
+  // ───────────── 운 평가 엔진 ─────────────
+  // 운 한 기둥을 네 개의 독립 축으로 평가한다. 대운·세운·월운·일진·시진 모두 이 엔진 하나를 쓰고,
+  // 시간 단위(level)에 따라 달라지는 것은 LUCK_CFG.levels의 가중치와 화면의 풀이 문구뿐이다.
+  //   fitScore       흐름 점수(−100~+100): 원국의 불균형을 이 운이 보완(+)하는지 심화(−)하는지의 상대 지표
+  //   activityType   어떤 십성 작용이 주도하는가(공격·확장·수확·축적)
+  //   changeScore    합·충·형·파·해로 구조가 바뀌는 정도(0~100)
+  //   intensityScore 작용의 세기(0~100)
+  // phase(시기 유형)는 위 축을 종합해 정하고, condition(순풍·보통·주의·부담)은 fitScore로만 정한다.
+  // 임계값과 가중치는 모두 이 객체에 모은다.
+  const LUCK_CFG = {
+    // 시간 단위별: stemW 천간 반영 비율 / parent 상위 운(대운)과 섞는 비율 / mul 성분 가중치 배율
+    levels: {
+      daeun: { stemW: 0.4, parent: 0, mul: { eokbu: 1, johu: 1, relation: 0.8, structure: 1.2 } },
+      seun: { stemW: 0.5, parent: 0.4, mul: { eokbu: 1, johu: 1, relation: 1, structure: 1 } },
+      wolun: { stemW: 0.5, parent: 0.4, mul: { eokbu: 1, johu: 1, relation: 1.1, structure: 0.9 } },
+      ilun: { stemW: 0.5, parent: 0, mul: { eokbu: 0.8, johu: 0.8, relation: 1.4, structure: 0.7 } },
+      sijin: { stemW: 0.5, parent: 0, mul: { eokbu: 0.8, johu: 0.8, relation: 1.4, structure: 0.7 } },
+    },
+    // 성분 가중치: 사주 상태(강약 치우침·기후 치우침)에 따라 동적으로 정하고 합이 1이 되게 정규화한다
+    weights: {
+      eokbuBase: 0.2, eokbuGain: 1.0, skewOn: 3, skewFull: 25,   // skew = |돕는 힘 − 50|(%p)
+      johuBase: 0.1, johuGain: 1.0, climOn: 0.4, climFull: 1.6,  // clim = 기후 치우침 / 조후 기준(1 이상이면 조후 필요)
+      relation: 0.5, structure: 0.35, tonggwan: 0.6,
+      selectedBoost: 1.25,   // 사용자가 고른 학파의 가중치 배율
+      ghostMin: 0.12,        // 조후 가중치가 이보다 작으면 흐린 비교 막대를 그리지 않는다
+    },
+    climate: { share: 0.25, comfort: 0.5, full: 1.2 },  // 운이 원국 기후를 움직이는 비율 / 무시할 편차 / 만점 개선폭
+    relationScale: 4,      // 관계 합산(대략 ±15)을 ±100 축으로
+    structure: { neutralPct: 20, scale: 0.8, pattern: { '관살혼잡': -12, '상관견관': -10, '군겁쟁재': -12, '효신탈식(도식)': -8 } },
+    condition: { tailwind: 18, caution: -12, burden: -35 },   // 흐름 점수 → 순풍 / 보통 / 주의 / 부담
+    change: {
+      threshold: 55, sat: 50, stack: 0.75,   // changeScore = 100 × (1 − e^(−점수합/sat)), 큰 신호부터 stack^순번을 곱해 누적; threshold 이상이면 전환기 우선
+      complete: 25, completeCore: 10, half: 8,   // 삼합·방합 완성(+일지·월지가 낀 경우) / 반합
+      // 자리별 점수: [일, 월, 시, 년]
+      pos: { '충': [40, 36, 22, 15], '형': [24, 22, 12, 8], '파': [8, 7, 4, 3], '해': [5, 5, 3, 2], '천간충': [32, 14, 7, 7], '천간합': [12, 6, 3, 3], '육합': [10, 9, 5, 4] },
+    },
+    intensity: { conc: [0.3, 0.6], gap: 25, relLoad: 20, w: [0.4, 0.3, 0.3] },
+    defense: { fit: -20, intensity: 50, hardFit: -45, hardIntensity: 30 },
+    attackNorm: 0.65,        // 비겁+식상 두 묶음을 다른 묶음과 공정하게 비교하기 위한 보정
+    hourExecFit: 12,         // 시진 '실행' 등급의 최소 흐름 점수
+  };
+  const ACT_PHASE = { '공격': '공격기', '확장': '확장기', '수확': '수확기', '축적': '축적기' };
+  const ROLE_V = { '용신': 2, '희신': 1, '한신': 0, '구신': -1, '기신': -2 };
+  const lclamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lramp = (v, a, b) => lclamp((v - a) / (b - a), 0, 1);
+  const conditionOf = v => { const c = LUCK_CFG.condition; return v >= c.tailwind ? '순풍' : v > c.caution ? '보통' : v > c.burden ? '주의' : '부담'; };
+  const bandOf = conditionOf;
+
+  // 성분 가중치(사주·시간 단위별로 한 번만 계산)
+  const _lw = new WeakMap();
+  function luckWeights(ch, level) {
+    let byLevel = _lw.get(ch); if (!byLevel) _lw.set(ch, byLevel = {});
+    if (byLevel[level]) return byLevel[level];
+    const C = LUCK_CFG.weights, L = LUCK_CFG.levels[level] || LUCK_CFG.levels.ilun, a = methodAdvice(ch);
+    const sE = lramp(a.skew, C.skewOn, C.skewFull), sJ = lramp(a.clim, C.climOn, C.climFull);
+    const ton = ch.yongAll.tonggwan;
+    const raw = {
+      eokbu: (C.eokbuBase + C.eokbuGain * sE) * (ch.school === 'eokbu' ? C.selectedBoost : 1),
+      johu: (C.johuBase + C.johuGain * sJ) * (ch.school === 'johu' ? C.selectedBoost : 1),
+      relation: C.relation, structure: C.structure,
+      tonggwan: ch.school === 'tonggwan' && ton && ton.applicable ? C.tonggwan : 0,
+    };
+    let sum = 0; for (const k in raw) { raw[k] *= L.mul[k] ?? 1; sum += raw[k]; }
+    const w = {}; for (const k in raw) w[k] = raw[k] / sum;
+    // 흐린 비교 막대: 두 기준 중 덜 앞세운 쪽
+    const ghost = w.johu >= C.ghostMin ? (w.eokbu >= w.johu ? 'johu' : 'eokbu') : null;
+    return byLevel[level] = { ...w, sE, sJ, clim: a.clim, skew: a.skew, ghost };
+  }
+
+  // 오행 부합도: 용신 체계의 역할(용·희·한·구·기)로 운 천간·지지(지장간 가중)를 평가
+  function elementFit(yong, p, stemW, tag) {
+    const r = e => ROLE_V[yong.roles[e]];
     let bp = 0; for (const [hs, dd] of HIDDEN[p.b]) bp += r(stemEl(hs)) * dd / 30;
-    const base = (stemW * stemPart + (1 - stemW) * bp) / 2 * 100;
-    const parts = [{ label: `오행 부합 (천간 ${STEM[p.s]}:${yong.roles[stemEl(p.s)]}, 지지 ${BR[p.b]}:지장간 가중)`, v: base }];
-    // 원국과의 관계
-    const natal = POS.filter(k => ch.pillars[k]).map(k => ({ id: k, s: ch.pillars[k].s, b: ch.pillars[k].b }));
-    const rels = relationsAmong([...natal, { id: 'luck', s: p.s, b: p.b }]).filter(x => x.members.includes('luck'));
-    const posW = { day: 1, month: 0.8, year: 0.5, hour: 0.5 };
+    const v = (stemW * r(stemEl(p.s)) + (1 - stemW) * bp) / 2 * 100;
+    return { v, label: `${tag} 오행 부합 (천간 ${STEM[p.s]}:${yong.roles[stemEl(p.s)]}, 지지 ${BR[p.b]}:지장간 가중)` };
+  }
+  // 조후: 운이 원국의 한난조습 치우침을 줄이는지(+) 키우는지(−). 용신 유무와 무관하게 연속값으로 계산
+  function climateGain(ch, p, stemW) {
+    const c = ch.climate, K = LUCK_CFG.climate;
+    const lt = stemW * STEM_TEMP[p.s] + (1 - stemW) * BR_TEMP[p.b], lh = stemW * STEM_HUM[p.s] + (1 - stemW) * BR_HUM[p.b];
+    const dev = (x, k) => Math.max(0, Math.abs(x) / k - K.comfort);
+    const nt = (1 - K.share) * c.temp + K.share * lt, nh = (1 - K.share) * c.hum + K.share * lh;
+    return { gain: dev(c.temp, 0.6) - dev(nt, 0.6) + dev(c.hum, 0.8) - dev(nh, 0.8), lt, lh };
+  }
+  // 60갑자 전체 평균을 빼서, 극단적인 기후의 사주가 평균적으로 한쪽으로 치우치지 않게 맞춘다
+  const _jb = new WeakMap();
+  function climateBase(ch, stemW) {
+    let m = _jb.get(ch); if (!m) _jb.set(ch, m = {});
+    if (m[stemW] == null) { let s = 0; for (let i = 0; i < 60; i++) s += climateGain(ch, gz(i), stemW).gain; m[stemW] = s / 60; }
+    return m[stemW];
+  }
+  const johuFit = (ch, p, stemW) => {
+    const { gain, lt, lh } = climateGain(ch, p, stemW), c = ch.climate;
+    const v = lclamp((gain - climateBase(ch, stemW)) / LUCK_CFG.climate.full * 100, -100, 100);
+    const wordT = lt > 0.3 ? '더운' : lt < -0.3 ? '찬' : '', wordH = lh > 0.3 ? '습한' : lh < -0.3 ? '마른' : '';
+    const luckWord = [wordT, wordH].filter(Boolean).join('·') || '고른';
+    const natal = c.temp >= 0.6 ? '더운' : c.temp <= -0.6 ? '추운' : c.hum >= 0.8 ? '습한' : c.hum <= -0.8 ? '건조한' : '기후가 고른';
+    return { v, label: `조후 (${natal} 원국에 ${luckWord} 기운이 들어옴)` };
+  };
+
+  // 운 글자가 원국과 만드는 합·충 등을 오행 역할에 따라 점수화(관계 성분)
+  function relationParts(ch, p, rels, r, roleTxt) {
+    const parts = [], posW = { day: 1, month: 0.8, year: 0.5, hour: 0.5 };
     for (const x of rels) {
-      const other = x.members.find(m => m !== 'luck');
-      const w = posW[other] || 0.6;
+      const other = x.members.find(m => m !== 'luck'), w = posW[other] || 0.6;
       if (x.type === '충') {
-        const tb = ch.pillars[other].b; const tr = r(BR_EL[tb]);
-        const v = (-tr * 5 - 5) * w;
-        parts.push({ label: `${x.name} — ${POS_K[other]}지(${yong.roles[BR_EL[tb]]}) 충돌·변동`, v });
+        const tb = ch.pillars[other].b;
+        parts.push({ label: `${x.name} — ${POS_K[other]}지(${roleTxt(BR_EL[tb])}) 충돌·변동`, v: (-r(BR_EL[tb]) * 5 - 5) * w });
       } else if (['육합', '삼합', '반합', '방합'].includes(x.type) && x.el != null) {
-        const v = r(x.el) * 5 * w;
-        parts.push({ label: `${x.name} — ${EL_K[x.el]}(${yong.roles[x.el]}) 기운 형성`, v });
+        parts.push({ label: `${x.name} — ${EL_K[x.el]}(${roleTxt(x.el)}) 기운 형성`, v: r(x.el) * 5 * w });
       } else if (x.type === '천간합' && x.el != null && other === 'day') {
-        parts.push({ label: `${x.name} — 일간이 묶임(합화 ${yong.roles[x.el]})`, v: r(x.el) * 3 });
+        parts.push({ label: `${x.name} — 일간이 묶임(합화 ${roleTxt(x.el)})`, v: r(x.el) * 3 });
       } else if (x.type === '천간충' && other === 'day') {
         parts.push({ label: `${x.name} — 일간 충돌`, v: -5 });
       }
     }
     if (CHEONEUL[ch.pillars.day.s].includes(p.b)) parts.push({ label: '천을귀인 운', v: 5 });
-    let total = parts.reduce((a, b) => a + b.v, 0);
-    total = Math.max(-100, Math.min(100, total));
-    return { total, parts, band: bandOf(total) };
+    return parts;
   }
-  const bandOf = v => v >= 35 ? '길' : v >= 12 ? '소길' : v > -12 ? '평' : v > -35 ? '소흉' : '흉';
+  // 변화 점수: 자리별 점수를 누적하되 100에 가까워질수록 완만하게 쌓는다
+  function changeOf(rels) {
+    const C = LUCK_CFG.change, posIdx = { day: 0, month: 1, hour: 2, year: 3 }, hits = [];
+    for (const x of rels) {
+      const others = x.members.filter(m => m !== 'luck'); let pts = 0;
+      if (x.type === '삼합' || x.type === '방합') pts = C.complete + (others.some(o => o === 'day' || o === 'month') ? C.completeCore : 0);
+      else if (x.type === '반합') pts = C.half;
+      else if (C.pos[x.type]) pts = Math.max(...others.map(o => C.pos[x.type][posIdx[o]] ?? 0));
+      if (pts > 0) hits.push({ r: x, pts });
+    }
+    hits.sort((a, b) => b.pts - a.pts);
+    const sum = hits.reduce((a, h, i) => a + h.pts * C.stack ** i, 0);
+    return { score: 100 * (1 - Math.exp(-sum / C.sat)), hits };
+  }
+  // 이 운 글자가 일간 기준 어느 십성 묶음(0 비겁 1 식상 2 재성 3 관성 4 인성)을 얼마나 끌어오는지
+  function groupPull(dEl, p) {
+    const g = [0, 0, 0, 0, 0];
+    g[groupOfEl(dEl, stemEl(p.s))] += 0.4;
+    for (const [hs, dd] of HIDDEN[p.b]) g[groupOfEl(dEl, stemEl(hs))] += 0.6 * dd / 30;
+    return g;
+  }
+  const relWhere = r => r.members.filter(m => m !== 'luck').map(m => POS_K[m] + (r.kind === 'stem' ? '간' : '지')).join('·');
+
+  function evaluateLuck(ch, p, level = 'ilun', opts = {}) {
+    const C = LUCK_CFG, L = C.levels[level] || C.levels.ilun, stemW = opts.stemW ?? L.stemW;
+    const W = luckWeights(ch, level), dEl = stemEl(ch.pillars.day.s), G = ch.weights.groups;
+    const { rels } = luckRelations(ch, p);
+    // 성분 점수(각각 −100~+100)
+    const eok = elementFit(ch.yongAll.eokbu, p, stemW, '억부');
+    const jo = johuFit(ch, p, stemW);
+    const ton = W.tonggwan > 0 ? elementFit(ch.yongAll.tonggwan, p, stemW, '통관') : null;
+    // 관계 성분의 오행 역할은 억부·조후(·통관) 가중치대로 섞는다. 조후는 연속값이라 온도 기준 역할값으로 환산한다.
+    const yw = W.eokbu + W.tonggwan + W.johu;
+    const rBlend = e => {
+      const eokR = ROLE_V[ch.yongAll.eokbu.roles[e]], tonR = ton ? ROLE_V[ch.yongAll.tonggwan.roles[e]] : 0;
+      const jy = ch.yongAll.johu, joR = jy.applicable ? ROLE_V[jy.roles[e]] : 0;
+      return (W.eokbu * eokR + W.tonggwan * tonR + W.johu * joR) / yw;
+    };
+    const roleTxt = e => { const a = ch.yongAll.eokbu.roles[e], jy = ch.yongAll.johu; return jy.applicable && jy.roles[e] !== a ? `억부 ${a}·조후 ${jy.roles[e]}` : a; };
+    const relP = relationParts(ch, p, rels, rBlend, roleTxt);
+    const relRaw = relP.reduce((a, x) => a + x.v, 0);
+    const relationScore = lclamp(relRaw * C.relationScale, -100, 100);
+    // 구조 성분: 원국에서 모자란 십성 묶음을 채우면 +, 이미 넘치는 묶음을 더 키우면 −
+    const g = groupPull(dEl, p), S = C.structure;
+    // 활동 유형: 비겁+식상은 두 묶음의 합이므로 보정해 다른 묶음과 견준다. 주도 십성은 이긴 유형 안에서 가장 센 묶음
+    const act = { '공격': (g[0] + g[1]) * C.attackNorm, '확장': g[3], '수확': g[2], '축적': g[4] };
+    const activityType = Object.keys(act).reduce((a, k) => act[k] > act[a] ? k : a, '공격');
+    const top = activityType === '공격' ? (g[0] >= g[1] ? 0 : 1) : { '확장': 3, '수확': 2, '축적': 4 }[activityType];
+    const need = G.map(pc => (S.neutralPct - pc) / S.neutralPct);
+    let structRaw = 0; g.forEach((v, i) => structRaw += v * need[i]);
+    const structP = [];
+    let patAdj = 0;
+    for (const pt of ch.patterns.list) {
+      const adj = S.pattern[pt.name]; if (adj == null || pt.level === '참고') continue;
+      const hit = (pt.name === '관살혼잡' && g[3] >= 0.4) || (pt.name === '상관견관' && g[1] >= 0.4) || (pt.name === '군겁쟁재' && g[0] >= 0.4) || (pt.name === '효신탈식(도식)' && g[4] >= 0.4);
+      if (hit) { patAdj += adj; structP.push({ label: `${pt.name} 구조에 ${TG_GROUP[top]} 기운이 겹침`, v: adj }); }
+    }
+    const structureScore = lclamp(structRaw * 100 * S.scale + patAdj, -100, 100);
+    const structLabel = `십성 균형 — 원국 ${TG_GROUP[top]} ${G[top].toFixed(0)}%에 ${TG_GROUP[top]} 기운이 ${G[top] < S.neutralPct ? '채워짐' : '더해짐'}`;
+    // 종합
+    const ownFit = lclamp(W.eokbu * eok.v + W.johu * jo.v + W.relation * relationScore + W.structure * structureScore + (ton ? W.tonggwan * ton.v : 0), -100, 100);
+    const parent = opts.parent && L.parent ? opts.parent : null;
+    const fitScore = parent ? lclamp((1 - L.parent) * ownFit + L.parent * parent.fitScore, -100, 100) : ownFit;
+    // 변화·강도
+    const ch2 = changeOf(rels), changeScore = ch2.score;
+    const I = C.intensity, conc = lramp(Math.max(...g), I.conc[0], I.conc[1]);
+    const relLoad = lclamp(relP.reduce((a, x) => a + Math.abs(x.v), 0) / I.relLoad, 0, 1) * 0.5 + lclamp(ch2.hits.reduce((a, h) => a + h.pts, 0) / 60, 0, 1) * 0.5;
+    const gap = lclamp(Math.abs(G[top] - S.neutralPct) / I.gap, 0, 1);
+    const intensityScore = 100 * (I.w[0] * conc + I.w[1] * relLoad + I.w[2] * gap);
+    // 시기 유형
+    const D = C.defense, condition = conditionOf(fitScore);
+    let phase, why;
+    if (fitScore <= D.hardFit && intensityScore >= D.hardIntensity) { phase = '방어기'; why = `흐름 점수 ${Math.round(fitScore)}로 부담이 크고 작용 강도(${Math.round(intensityScore)})도 있어 감당 범위를 넘을 수 있음`; }
+    else if (changeScore >= C.change.threshold) { phase = '전환기'; why = `변화 점수 ${Math.round(changeScore)} — 구조 재편 신호: ${ch2.hits.slice(0, 2).map(h => `${relWhere(h.r)} ${h.r.name}`).join(', ')}`; }
+    else if (fitScore <= D.fit && intensityScore >= D.intensity) { phase = '방어기'; why = `흐름 점수 ${Math.round(fitScore)}와 작용 강도 ${Math.round(intensityScore)}가 함께 높아 리스크 관리가 필요`; }
+    else { phase = ACT_PHASE[activityType]; why = `${TG_GROUP[top]} 기운이 주도해 ${activityType} 성향`; }
+    const tendency = ACT_PHASE[activityType].replace('기', '') + ' 성향' + (phase === ACT_PHASE[activityType] && (condition === '주의' || condition === '부담') ? ` + ${condition}` : '');
+    // 근거 문장: 시기 판정 이유 + 기여가 큰 성분 2~3개
+    const parts = [{ label: eok.label, v: W.eokbu * eok.v, comp: 'eokbu' }, { label: jo.label, v: W.johu * jo.v, comp: 'johu' }];
+    if (ton) parts.push({ label: ton.label, v: W.tonggwan * ton.v, comp: 'tonggwan' });
+    relP.forEach(x => parts.push({ label: x.label, v: W.relation * C.relationScale * x.v, comp: 'relation' }));
+    parts.push({ label: structLabel, v: W.structure * structureScore - structP.reduce((a, x) => a + x.v, 0) * W.structure, comp: 'structure' });
+    structP.forEach(x => parts.push({ label: x.label, v: W.structure * x.v, comp: 'structure' }));
+    const phrase = v => v >= 6 ? '보완' : v <= -6 ? '부담을 높임' : '영향 작음';
+    const reasons = [why, ...[...parts].sort((a, b) => Math.abs(b.v) - Math.abs(a.v)).slice(0, 3).filter(x => Math.abs(x.v) >= 1).map(x => `${x.label} → ${phrase(x.v)}`)].slice(0, 4);
+    const relations = rels.map(r => `${relWhere(r)} ${r.name}`);
+    // 흐린 비교 막대: 덜 앞세운 기준 하나만 단독으로 본 점수
+    let alt = null;
+    if (W.ghost) { const own = W.ghost === 'johu' ? jo.v : eok.v; alt = { school: W.ghost, value: parent && parent.alt ? (1 - L.parent) * own + L.parent * parent.alt.value : own }; }
+    return {
+      level, fitScore, ownFit, eokbuScore: eok.v, johuScore: jo.v, relationScore, structureScore, tonggwanScore: ton ? ton.v : null,
+      weights: { eokbu: W.eokbu, johu: W.johu, relation: W.relation, structure: W.structure, tonggwan: W.tonggwan },
+      changeScore, intensityScore, activityType, tendency, dominantTenGodGroup: TG_GROUP[top], grp: top,
+      phase, condition, reasons, parts, relations, triggers: ch2.hits.filter(h => h.pts >= 10).sort((a, b) => b.pts - a.pts).map(h => `${relWhere(h.r)} ${h.r.name}`), alt,
+    };
+  }
 
   // ───────────── 메인 ─────────────
   function compute(inp) {
@@ -997,7 +1185,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     ch.patterns = patterns(ch, ch.weights, ch.strength);
     ch.daeun = daeun(ch);
     ch.ziwei = ziwei(ch, P);
-    ch.daeun.list.forEach(x => { x.score = scoreLuck(ch, ch.yong, x, { stemW: 0.4 }); x.stemTG = tenGod(d, x.s); x.branchTG = tenGod(d, mainHidden(x.b)); x.unseong = unseong(d, x.b); x.sinsal12 = sinsal12(base, x.b); });
+    ch.daeun.list.forEach(x => Object.assign(x, luckItem(ch, x, "daeun")));
     return ch;
   }
 
@@ -1114,35 +1302,19 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   }
 
   // 세운·월운·일운 (차트 기준)
-  function luckItem(ch, p, stemW) {
+  // level: daeun·seun·wolun·ilun·sijin / parentEv: 세운·월운이 섞을 상위(대운)의 평가 결과
+  // score.total = 이 운 자체의 흐름 점수, combined = 상위 운과 섞은 최종 흐름 점수(그래프 높이)
+  function luckItem(ch, p, level, parentEv) {
     const d = ch.pillars.day.s;
     const base = ch.sinsalBase === 'day' ? ch.pillars.day.b : ch.pillars.year.b;
-    return { ...p, stemTG: tenGod(d, p.s), branchTG: tenGod(d, mainHidden(p.b)), unseong: unseong(d, p.b), sinsal12: sinsal12(base, p.b), score: scoreLuck(ch, ch.yong, p, { stemW }) };
+    const ev = evaluateLuck(ch, p, level, { parent: parentEv });
+    return { ...p, stemTG: tenGod(d, p.s), branchTG: tenGod(d, mainHidden(p.b)), unseong: unseong(d, p.b), sinsal12: sinsal12(base, p.b), ev, combined: ev.fitScore, score: { total: ev.ownFit, band: conditionOf(ev.ownFit), parts: ev.parts } };
   }
   // 들어오는 운(p)이 원국과 만드는 합·충·형 등과, 운 글자에 붙는 신살
   function luckRelations(ch, p) {
     const natal = POS.filter(k => ch.pillars[k]).map(k => ({ id: k, s: ch.pillars[k].s, b: ch.pillars[k].b }));
     const rels = relationsAmong([...natal, { id: 'luck', s: p.s, b: p.b }]).filter(x => x.members.includes('luck'));
     return { rels, sinsal: sinsalFor(ch, { id: 'luck', s: p.s, b: p.b }) };
-  }
-  // 운의 시기: 공격기(힘·환경 모두 받쳐 줌) / 전환기(충·합으로 변화) / 축적기(기반 다지기) / 방어기(부담이 감당보다 큼)
-  function luckPhase(ch, p, v) {
-    const dEl = stemEl(ch.pillars.day.s), g = [0, 0, 0, 0, 0];
-    g[groupOfEl(dEl, stemEl(p.s))] += 0.4;
-    for (const [hs, dd] of HIDDEN[p.b]) g[groupOfEl(dEl, stemEl(hs))] += 0.6 * dd / 30;
-    const grp = g.indexOf(Math.max(...g));
-    const triggers = luckRelations(ch, p).rels.filter(r => {
-      const o = r.members.find(m => m !== 'luck'), core = o === 'day' || o === 'month';
-      return (['충', '형'].includes(r.type) && core) || (r.type === '천간충' && o === 'day') || (['삼합', '방합'].includes(r.type) && r.members.some(m => m === 'day' || m === 'month'));
-    });
-    const weak = ch.strength.help < 50;
-    let phase;
-    if (triggers.length) phase = '전환기';
-    else if (v >= 12) phase = [1, 2, 3].includes(grp) ? '공격기' : '축적기';
-    else if (v <= -12) phase = '방어기';
-    else phase = weak && [1, 2, 3].includes(grp) ? '방어기' : '축적기';
-    const where = r => r.members.filter(m => m !== 'luck').map(m => POS_K[m] + (r.kind === 'stem' ? '간' : '지')).join('·');
-    return { phase, grp, group: TG_GROUP[grp], triggers: triggers.map(r => `${where(r)} ${r.name}`) };
   }
   // 조후론과 억부론 중 무엇을 앞세울지
   function methodAdvice(ch) {
@@ -1160,30 +1332,28 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     else { verdict = '병행'; why = `기후도 치우쳤고(조후 ${EL_K[jo.yong]} 필요) 강약도 치우쳤는데(${st.zone}), 조후 용신이 억부 기준으로는 ${joRole}이라 두 기준이 부딪칩니다. 두 그래프를 함께 보고, 두 기준이 모두 좋은 시기를 가장 좋게 봅니다.`; }
     return { verdict, why, clim, skew, agree, joRole, eokYong: eok.yong, joYong: jo.applicable ? jo.yong : null };
   }
-  const combinedScore = (a, b) => combined(a, b);
   function daeunAt(ch, ms) { let cur = null; for (const x of ch.daeun.list) if (x.startMs <= ms) cur = x; return cur; }
-  function combined(a, b) { if (!a || !b) return (a || b || { total: 0 }).total; return Math.max(-100, Math.min(100, 0.4 * a.total + 0.6 * b.total)); }
   function seunRange(ch, fromY, toY) {
     const out = [];
     for (let Y = fromY; Y <= toY; Y++) {
       if (Y < MIN_Y || Y > MAX_Y - 1) continue;
-      const it = luckItem(ch, yearPillarOf(Y), 0.5);
       const mid = termsOf(Y)[2] + 180 * 86400000;
       const du = daeunAt(ch, mid);
-      it.daeun = du; it.combined = combined(du && du.score, it.score);
+      const it = luckItem(ch, yearPillarOf(Y), "seun", du && du.ev);
+      it.daeun = du;
       it.age = Y - ch.solar.y; // 만 나이(생일 이후 기준 근사)
       out.push(it);
     }
     return out;
   }
   function wolun(ch, Y) {
-    return monthsOfYear(Y).map(m => { const it = luckItem(ch, m, 0.5); const du = daeunAt(ch, m.startMs); it.combined = combined(du && du.score, it.score); return it; });
+    return monthsOfYear(Y).map(m => { const du = daeunAt(ch, m.startMs); return luckItem(ch, m, "wolun", du && du.ev); });
   }
   function ilun(ch, y, m) {
     const days = new Date(Date.UTC(y, m, 0)).getUTCDate(); const out = [];
     for (let d = 1; d <= days; d++) {
       const J = jdnFromYMD(y, m, d);
-      const it = luckItem(ch, dayPillarOfJdn(J), 0.5);
+      const it = luckItem(ch, dayPillarOfJdn(J), "ilun");
       it.date = [y, m, d];
       it.lunar = solarToLunar(y, m, d);
       out.push(it);
@@ -1191,12 +1361,31 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     return out;
   }
 
+  // ───────────── 삼재 (전통 민속 참고 정보) ─────────────
+  // 흐름 점수·용신·시기 유형 계산에는 쓰지 않는다. 띠(출생년 지지)의 삼합 그룹마다 들·눌·날삼재가 되는 세 해의 지지.
+  // 지지 번호: 子0 丑1 寅2 卯3 辰4 巳5 午6 未7 申8 酉9 戌10 亥11
+  const SAMJAE_RULES = {
+    groups: [
+      { name: '신자진(원숭이·쥐·용)띠', birth: [8, 0, 4], years: [2, 3, 4] },     // 인·묘·진년
+      { name: '해묘미(돼지·토끼·양)띠', birth: [11, 3, 7], years: [5, 6, 7] },    // 사·오·미년
+      { name: '인오술(호랑이·말·개)띠', birth: [2, 6, 10], years: [8, 9, 10] },   // 신·유·술년
+      { name: '사유축(뱀·닭·소)띠', birth: [5, 9, 1], years: [11, 0, 1] },        // 해·자·축년
+    ],
+    stages: ['들삼재', '눌삼재', '날삼재'],
+  };
+  // birthYearBranch: 출생년 지지 번호(0~11), targetYear: 양력 연도(세운 기준 해, 지지는 (연도−4) mod 12)
+  function getSamjae(birthYearBranch, targetYear) {
+    const g = SAMJAE_RULES.groups.find(x => x.birth.includes(birthYearBranch));
+    const idx = g ? g.years.indexOf(mod(targetYear - 4, 12)) : -1;
+    return { active: idx >= 0, stage: idx >= 0 ? SAMJAE_RULES.stages[idx] : null, group: g ? g.name : null, targetYear };
+  }
+
   const hourPillarsOfDay = ds => Array.from({ length: 12 }, (_, hb) => gz(gzIndex(hourStem(ds, hb), hb)));
   // 손 방향: 음력 일 끝자리 1·2 동, 3·4 남, 5·6 서, 7·8 북, 9·0 없음
   const sonOf = ld => ['없음', '동', '동', '남', '남', '서', '서', '북', '북', '없음'][ld % 10];
 
   G.Manse = {
-    compute, luckItem, luckRelations, luckPhase, methodAdvice, scoreLuck, combinedScore, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
+    compute, getSamjae, SAMJAE_RULES, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, mainHidden, yang, gzName, gzNameK,
@@ -1358,27 +1547,35 @@ var GLOSSARY = {
   '세운': ['운', '해마다 바뀌는 그해의 기운입니다. 예: 2026년은 병오년입니다. 입춘을 기준으로 바뀝니다. 대운이 10년의 계절이라면 세운은 그해의 날씨와 같습니다.'],
   '월운': ['운', '달마다 바뀌는 기운입니다. 매달 절기(입춘·경칩 등)를 기준으로 바뀝니다.'],
   '일운': ['운', '날마다 바뀌는 그날의 기운으로 "일진"이라고도 합니다. 달력의 점수는 그날의 간지가 이 사주에 필요한 기운(용신)인지를 따져 매긴 값입니다.'],
-  '손 없는 날': ['운', '민간 풍습에서 "손"은 날짜마다 방향을 옮겨 다니며 사람의 일을 방해한다는 귀신입니다. 음력 날짜 끝자리가 9·0인 날(9·10·19·20·29·30일)에는 손이 하늘로 올라가 없다고 봐서 이사·결혼 날로 선호합니다. 사주 해석과는 별개인 풍습이라 이 앱의 길흉 점수에는 반영하지 않습니다.'],
+  '삼재': ['운', '삼재는 전통 민속에서 사람의 띠를 기준으로 일정한 주기에 걸쳐 주의가 필요하다고 보는 3년의 시기를 말합니다.\n보통 첫해를 들삼재, 두 번째 해를 눌삼재, 세 번째 해를 날삼재라고 부릅니다.\n이 앱에서는 삼재를 전통적인 참고 정보로 표시하며, 삼재라는 이유만으로 해당 연도의 흐름 점수를 낮추지는 않습니다.\n실제 운세 흐름은 원국과 대운·세운의 오행, 십신, 합충형파해, 억부·조후 등의 관계를 별도로 계산합니다.'],
+  '들삼재': ['운', '삼재가 시작되는 첫 번째 해를 뜻합니다. 전통적으로 새로운 변화나 외부 환경의 변동에 주의를 기울이는 시기로 해석합니다.'],
+  '눌삼재': ['운', '삼재의 두 번째 해를 뜻합니다. 전통적으로 삼재의 영향이 이어지는 시기로 해석합니다.'],
+  '날삼재': ['운', '삼재의 마지막 해를 뜻합니다. 전통적으로 삼재의 흐름에서 벗어나는 과정으로 해석합니다.'],
+  '손 없는 날': ['운', '민간 풍습에서 "손"은 날짜마다 방향을 옮겨 다니며 사람의 일을 방해한다는 귀신입니다. 음력 날짜 끝자리가 9·0인 날(9·10·19·20·29·30일)에는 손이 하늘로 올라가 없다고 봐서 이사·결혼 날로 선호합니다. 사주 해석과는 별개인 풍습이라 이 앱의 흐름 점수에는 반영하지 않습니다.'],
   '시진': ['운', '하루 24시간을 12지지로 나눈 2시간 단위입니다. 자시(밤 11시~새벽 1시)부터 해시(밤 9~11시)까지입니다.'],
-  '길흉 점수': ['운', '이 앱이 계산한 운의 점수(−100~+100)입니다. 들어오는 운이 내 사주에 필요한 기운(용신·희신)이면 올라가고, 꺼리는 기운(기신·구신)이면 내려갑니다. 좋은 합이나 귀인이 있으면 더하고, 중요한 자리를 충하면 뺍니다. 그래프는 대운 40% + 세운 60%로 합산합니다. 해석을 돕는 참고용 모델이며, 통계적으로 검증된 예측이 아닙니다.'],
+  '흐름 점수': ['운', '들어오는 운이 현재 원국의 불균형을 얼마나 보완하거나 심화시키는지를 나타내는 상대 지표입니다(−100~+100). 미래의 행운·불운 확률이 아닙니다.\n+ 값은 원국에 필요한 방향과 잘 맞는다는 뜻, 0 부근은 영향이 섞이거나 중립, − 값은 기존 불균형이나 부담을 강화한다는 뜻입니다.\n네 성분을 사주에 맞춰 섞습니다. 억부(신강·신약을 맞추는 오행), 조후(한난조습 치우침을 줄이는지), 관계(원국과의 합·충·귀인), 구조(원국에서 모자란 십성 묶음을 채우는지). 강약 치우침이 크면 억부, 기후 치우침이 크면 조후 비중이 커지고, 둘 다 크지 않은 중화 사주는 특정 용신 하나의 영향력이 줄어듭니다.\n세운·월운은 대운과 40%:60%로 섞습니다. 해석을 돕는 참고용 모델이며 통계적으로 검증된 예측이 아닙니다.'],
+  '상태 순풍': ['운의 시기', '상태 순풍: 흐름 점수가 높아, 이 시기에 활성화되는 일이 원국에 필요한 방향을 보완하는 상태입니다. 어떤 일이 활성화되는지는 시기 유형(공격기·수확기 등)이 따로 알려 줍니다.'],
+  '상태 보통': ['운의 시기', '상태 보통: 보완과 부담이 섞이거나 영향이 중립적인 상태입니다.'],
+  '상태 주의': ['운의 시기', '상태 주의: 활성화되는 일이 원국의 기존 불균형을 조금 키우는 상태입니다. 시기 유형은 그대로 두고, 그 일을 할 때 리스크 관리가 필요하다는 뜻입니다. 예: 수확기 + 주의 = 결과 회수 성향은 강하지만 무리한 확장·지출은 점검.'],
+  '상태 부담': ['운의 시기', '상태 부담: 활성화되는 일이 원국의 불균형을 크게 키워 부담이 큰 상태입니다. 작용 강도까지 높으면 시기 유형이 방어기가 됩니다.'],
 
   // ── 운의 시기
-  '운의 시기': ['운의 시기', '운을 좋다·나쁘다로만 보지 않고, 그 시기에 무엇을 하면 좋은지로 나눈 것입니다. 공격기·확장기·수확기·축적기·전환기·방어기 여섯 가지가 있습니다.\n같은 이름이라도 운의 단위마다 풀이가 다릅니다. 대운은 10년짜리 인생 전략, 세운은 1년의 운영 전략, 월운은 1개월의 전술, 일진은 하루의 행동(공격일·확장일 등), 시진은 실행 타이밍(◎ 실행·○ 활용·△ 주의·× 회피)입니다.\n같은 시기라도 들어오는 기운에 따라 할 일이 다릅니다. 비겁(나와 같은 기운)이면 협상·독립·결단, 식상(내가 만드는 기운)이면 창작·출시·유통, 재성(내가 다루는 기운)이면 매출·사업·연애 기회, 관성(나를 다스리는 기운)이면 직책·평가·성과와 과부하 관리, 인성(나를 돕는 기운)이면 시스템·재무·기반 구축에 힘을 쓰기 좋습니다.'],
-  '공격기': ['운의 시기', '의미: 새로운 판을 뚫는 때입니다. 들어오는 운이 내 사주에 필요한 기운이면서, 나와 같은 기운(비겁)이나 내가 만드는 기운(식상)이 강해질 때입니다.\n행동: 대운(10년)은 창업·이직·새 분야 진출, 세운(1년)은 신규 계약·론칭·영업, 월운(1개월)은 제안서 발송·미팅·출시에 힘을 씁니다.'],
-  '확장기': ['운의 시기', '의미: 이미 검증된 것을 키우는 때입니다. 필요한 기운이 들어오면서 규칙·조직·지위의 기운(관성)이 강해질 때입니다. 공격기가 새 길을 뚫는 때라면, 확장기는 이미 되는 것을 크게 만드는 때입니다.\n행동: 대운은 규모 확대·승진·조직 키우기, 세운은 증액·재계약·파트너십·확장 투자, 월운은 광고 증액·재구매 유도·협업 확대.'],
-  '수확기': ['운의 시기', '의미: 이미 만들어 놓은 것을 현금화하는 때입니다. 필요한 기운이 들어오면서 재물·결과의 기운(재성)이 강해질 때입니다. 새로운 걸 벌이기보다 거둬들이는 편이 이득입니다.\n행동: 대운은 자산화·지분 정리·정산, 세운은 계약 확정·수금·판매·성과 회수, 월운은 청구·수금·마감·판매 집중.'],
-  '전환기': ['운의 시기', '의미: 충·합으로 변화가 커지는 때입니다. 들어오는 운이 나의 핵심 자리(일지·월지·일간)와 부딪치거나(충·형) 크게 묶일 때(삼합·방합)입니다. 좋은 쪽으로도 나쁜 쪽으로도 판이 바뀝니다.\n행동: 대운은 업종 전환·이주·인생 재설계, 세운은 조직 개편·이사·이직·사업 모델 변경, 월운은 계약 해지·거래처 교체·리뉴얼. 틀을 바꾸는 일을 계획적으로 하면 변화를 내 편으로 만들 수 있습니다.'],
-  '축적기': ['운의 시기', '의미: 기반을 만드는 힘이 좋은 때입니다. 나를 채워 주는 기운(인성)이 들어오거나, 크게 좋지도 나쁘지도 않아 차분히 쌓기 좋은 때입니다.\n행동: 대운은 학위·자격·전문성 쌓기, 세운은 제품 개발·교육·시스템 정비, 월운은 제작·기획·문서·재무 점검. 당장의 성과보다 다음 공격기를 위한 준비에 집중합니다.'],
-  '방어기': ['운의 시기', '의미: 부담이 내 감당 능력보다 커지기 쉬운 때입니다. 내 사주가 꺼리는 기운이 들어오거나, 힘이 약한데 일·돈·책임이 몰려올 때입니다.\n행동: 대운은 부채·건강 관리와 위험 분산, 세운은 현금 보존·비용 절감·하던 일 완주, 월운은 지출 줄이기·일정 여유 두기·휴식. 방어기는 나쁜 때가 아니라 지키는 편이 이득인 때입니다.'],
+  '운의 시기': ['운의 시기', '운을 좋다·나쁘다로 가르지 않고, 그 시기에 어떤 활동·환경이 가장 강하게 나타나는지로 나눈 것입니다. 공격기·확장기·수확기·축적기·전환기·방어기 여섯 가지가 있습니다.\n시기 유형(무엇이 활성화되는가)과 상태(순풍·보통·주의·부담: 그 활성화가 원국에 얼마나 맞는가)는 따로 봅니다. 예: 수확기 + 순풍, 공격기 + 주의.\n같은 이름이라도 운의 단위마다 풀이가 다릅니다. 대운은 10년짜리 장기 환경, 세운은 1년의 실행 환경, 월운은 1개월의 전술, 일진은 하루의 행동(공격일·확장일 등), 시진은 실행 타이밍(◎ 실행·○ 활용·△ 주의·× 회피)입니다.\n들어오는 기운에 따라 성향이 다릅니다. 비겁·식상이면 공격, 관성이면 확장, 재성이면 수확, 인성이면 축적 성향입니다. 다만 이것만으로 정하지 않고 변화 점수·흐름 점수·작용 강도를 함께 봅니다.'],
+  '공격기': ['운의 시기', '의미: 새로운 활동·표현·생산·경쟁·독립·개척 작용이 강한 때입니다. 나와 같은 기운(비겁)이나 내가 만드는 기운(식상)이 주도합니다.\n행동: 대운(10년)은 창업·이직·새 분야 진출, 세운(1년)은 신규 계약·론칭·영업, 월운(1개월)은 제안서 발송·미팅·출시. 상태가 주의·부담이면 속도를 조절합니다.'],
+  '확장기': ['운의 시기', '의미: 사회적 역할·책임·조직·지위·외부 영향력이 커지는 작용이 강한 때입니다. 관성이 주도합니다. 공격기가 새 길을 뚫는 때라면, 확장기는 역할과 영향력을 넓히는 때입니다.\n행동: 대운은 규모 확대·승진·조직 키우기, 세운은 증액·재계약·파트너십, 월운은 광고 증액·협업 확대. 상태가 주의·부담이면 과부하를 관리합니다.'],
+  '수확기': ['운의 시기', '의미: 재물·거래·결과물·현금화·성과 회수 작용이 강한 때입니다. 재성이 주도합니다.\n행동: 대운은 자산화·지분 정리·정산, 세운은 계약 확정·수금·판매·성과 회수, 월운은 청구·수금·마감. 상태가 주의·부담이면 "수확 성향 + 주의"로 읽고 지출·확장을 점검합니다.'],
+  '전환기': ['운의 시기', '의미: 합·충·형·파·해로 구조가 재편되는 신호(변화 점수)가 기준을 넘은 때입니다. 일지·월지 충, 일간 천간충처럼 핵심 자리의 변화는 점수가 크고, 년주 변화는 작으며, 삼합·방합 완성이나 여러 신호의 겹침은 점수를 더합니다.\n행동: 대운은 업종 전환·이주·인생 재설계, 세운은 조직 개편·이사·이직·사업 모델 변경, 월운은 계약 해지·거래처 교체·리뉴얼. 변화가 원국에 맞는지는 상태(순풍·주의 등)가 따로 알려 줍니다.'],
+  '축적기': ['운의 시기', '의미: 학습·회복·준비·보호·시스템·내부 기반을 쌓는 작용이 강한 때입니다. 인성이 주도합니다.\n행동: 대운은 학위·자격·전문성 쌓기, 세운은 제품 개발·교육·시스템 정비, 월운은 제작·기획·문서·재무 점검. 당장의 성과보다 다음 시기를 위한 기반에 집중합니다.'],
+  '방어기': ['운의 시기', '의미: 흐름 점수가 크게 낮으면서 작용 강도도 높아, 현재 원국이 감당할 범위를 넘을 가능성이 있는 때입니다. 나쁜 때라는 뜻이 아니라 리스크 관리가 필요하다는 뜻입니다.\n행동: 대운은 부채·건강 관리와 위험 분산, 세운은 현금 보존·비용 절감·하던 일 완주, 월운은 지출 줄이기·일정 여유 두기·휴식.'],
 
   // ── 일진 행동모드·시진 실행 등급
-  '일진 행동모드': ['운의 시기', '하루를 좋다·나쁘다가 아니라 "오늘 무엇을 하기 좋은가"로 나눈 여섯 가지입니다. 공격일(새 판을 뚫음), 확장일(검증된 것을 키움), 수확일(결과를 회수), 축적일(내부 역량 강화), 전환일(구조를 바꿈), 방어일(손실 가능성 관리)이 있습니다. 방어일도 흉일이 아니라 "지키기 좋은 날"입니다.'],
+  '일진 행동모드': ['운의 시기', '하루를 "오늘 어떤 성격의 일이 활성화되는가"로 나눈 여섯 가지입니다. 공격일(새 판을 뚫음), 확장일(역할·영향력을 키움), 수확일(결과를 회수), 축적일(내부 역량 강화), 전환일(구조를 바꿈), 방어일(리스크 관리)이 있습니다. 순풍·보통·주의·부담 상태는 따로 표시됩니다.'],
   '공격일': ['운의 시기', '핵심 의미: 새로운 판을 뚫는 날입니다. 필요한 기운이 들어오면서 나와 같은 기운(비겁)이나 내가 만드는 기운(식상)이 강해질 때입니다.\n그날 할 일: 제안·투고·영업·협상·고백·발표.'],
   '확장일': ['운의 시기', '핵심 의미: 검증된 것을 키우는 날입니다. 필요한 기운이 들어오면서 규칙·조직·지위의 기운(관성)이 강해질 때입니다.\n그날 할 일: 증액·재계약·파트너십·홍보 확대.'],
   '수확일': ['운의 시기', '핵심 의미: 결과를 회수하는 날입니다. 필요한 기운이 들어오면서 재물·결과의 기운(재성)이 강해질 때입니다.\n그날 할 일: 계약 확정·수금·판매·성과 회수.'],
   '축적일': ['운의 시기', '핵심 의미: 내부 역량을 강화하는 날입니다. 나를 채워 주는 기운(인성)이 들어오거나, 크게 좋지도 나쁘지도 않은 날입니다.\n그날 할 일: 제작·기획·공부·문서·재무·저축.'],
   '전환일': ['운의 시기', '핵심 의미: 기존 구조를 바꾸는 날입니다. 그날의 글자가 나의 핵심 자리(일지·월지·일간)와 충·형을 만들거나 크게 합을 이룰 때입니다.\n그날 할 일: 해지·이직·이사·정리·리뉴얼.'],
-  '방어일': ['운의 시기', '핵심 의미: 손실 가능성을 관리하는 날입니다. 흉일이라는 뜻이 아니라, 새로 벌이기보다 지키는 편이 이득인 날입니다.\n그날 할 일: 검토·유지·완료·휴식·현금 보존.'],
+  '방어일': ['운의 시기', '핵심 의미: 부담이 감당 범위를 넘을 수 있어 리스크를 관리하는 날입니다. 새로 벌이기보다 지키는 편이 맞는 날입니다.\n그날 할 일: 검토·유지·완료·휴식·현금 보존.'],
   '실행 등급': ['운의 시기', '시진(2시간 단위)마다 "오늘의 목적"과 얼마나 잘 맞는지를 네 단계로 매긴 것입니다. ◎ 실행, ○ 활용, △ 주의, × 회피가 있습니다. 목적(일반·계약·돈·창작)을 고르면 그 목적에 맞는 기운이 들어오는 시간에 ◎가 붙습니다. 계약은 관성·인성, 돈은 재성·식상, 창작은 식상·인성 기운을 봅니다.'],
   '실행': ['운의 시기', '◎ 실행: 그날의 목적과 시진이 잘 맞는 시간입니다. 중요한 전화, 제출, 계약 서명, 공개 버튼 누르기처럼 결과가 생기는 행동을 이 시간에 둡니다.'],
   '활용': ['운의 시기', '○ 활용: 특별히 강하지는 않지만 안정적인 시간입니다. 회의·업무·제작 같은 일반적인 일에 무난합니다.'],
@@ -1674,19 +1871,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const relTarget = (x) => { const o = x.members.find(m => m !== 'luck'); return o ? M.POS_K[o] + (x.kind === 'stem' ? '간' : '지') : ''; };
   // 같은 시기라도 들어오는 기운(십성 묶음)에 따라 할 일이 다르다
   const GROUP_ACT = { '비겁': '협상·독립·결단', '식상': '창작·출시·유통', '재성': '매출·사업·연애 기회', '관성': '직책·평가·성과, 그리고 과부하 관리', '인성': '시스템·재무·기반 구축·공부' };
-  const luckV = x => x.combined ?? (x.score ? x.score.total : 0);
-  const phOf = x => M.luckPhase(S.ch, x, luckV(x));
-  // 비교용으로 뒤에 흐리게 겹쳐 보여줄 기준: 억부를 보고 있으면 조후, 그 밖(조후·통관)이면 억부
-  const altSchool = () => {
-    const cur = S.ch.yong.school, all = S.ch.yongAll;
-    if (cur === 'eokbu') return all.johu.applicable ? 'johu' : null;
-    return all.eokbu.applicable ? 'eokbu' : null;
-  };
+  // 흐름 점수(그래프 높이) = 상위 운과 섞은 fitScore. 시기 유형·상태·근거는 모두 M.evaluateLuck 결과(x.ev)에서 읽는다
+  const luckV = x => x.ev ? x.ev.fitScore : 0;
+  const phOf = x => x.ev;
+  // 비교용으로 뒤에 흐리게 겹쳐 보여줄 기준: 흐름 점수에서 덜 앞세운 쪽(억부 또는 조후)을 단독으로 본 값
+  const altSchool = () => { const l = S.ch.daeun.list[0]; return l && l.ev.alt ? l.ev.alt.school : null; };
   const showGhost = () => altSchool() != null;
   const schoolName = k => M.SCHOOLS[k].split(' ')[0];
-  const altScoreObj = (p, stemW) => M.scoreLuck(S.ch, S.ch.yongAll[altSchool()], p, { stemW });
-  const altDaeunAt = ms => { const d = M.daeunAt(S.ch, ms); return d ? altScoreObj(d, 0.4) : null; };
-  const altCombined = (p, ms) => M.combinedScore(altDaeunAt(ms), altScoreObj(p, 0.5));
+  const altOf = x => x.ev && x.ev.alt ? x.ev.alt.value : null;
   // 일진 6가지 행동모드: [색 이름, 핵심 의미, 그날 할 일]
   const DAYMODE = {
     '공격일': ['d-atk', '새로운 판을 뚫음', '제안·투고·영업·협상·고백·발표'],
@@ -1696,18 +1888,28 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     '전환일': ['d-chg', '기존 구조를 바꿈', '해지·이직·이사·정리·리뉴얼'],
     '방어일': ['d-def', '손실 가능성 관리', '검토·유지·완료·휴식·현금 보존'],
   };
+  // 그래프 툴팁: 이 판정을 만든 값과 이유를 한 번에 보여준다. 억부·조후·관계·구조는 가중치를 곱한 기여 점수
+  const COND_COL = { '순풍': 'var(--good)', '보통': 'var(--ink-3)', '주의': 'var(--d-chg)', '부담': 'var(--bad)' };
+  function luckTip(title, x) {
+    const e = x.ev, w = e.weights, c = (k, sc) => signed(w[k] * sc);
+    return `<b>${esc(title)}</b><br>흐름 점수 <b>${signed(luckV(x))}</b> · 시기 <b>${e.phase}</b> · 상태 <b>${e.condition}</b>`
+      + `<br>주도 십성 ${e.dominantTenGodGroup} (${e.tendency})`
+      + `<br>억부 영향 ${c('eokbu', e.eokbuScore)} · 조후 영향 ${c('johu', e.johuScore)} · 관계 ${c('relation', e.relationScore)} · 구조 ${c('structure', e.structureScore)}`
+      + `<br>변화 압력 ${Math.round(e.changeScore)} · 작용 강도 ${Math.round(e.intensityScore)}`
+      + `<br>합충형파해 ${e.relations.length ? e.relations.map(esc).join(', ') : '없음'}`
+      + e.reasons.map(r => `<br>· ${esc(r)}`).join('');
+  }
+  // 삼재: 참고 정보 레이어. 점수·시기 유형과 무관하며, 배지는 기존 용어 시트(.term)를 그대로 쓴다
+  const samjaeOf = Y => M.getSamjae(S.ch.pillars.year.b, Y);
+  const samjaeTag = sj => sj.active ? `<span class="term chip sj-chip" data-term="${sj.stage}">${sj.stage}</span>` : '';
+  const samjaeBanner = Y => { const sj = samjaeOf(Y); return sj.active ? `<div class="sj-banner"><div><b>${term('삼재')} · ${term(sj.stage)}</b> <span class="muted small">전통 민속 참고 신호 · ${sj.group}</span></div><div class="small muted">삼재는 흐름 점수에 감점되지 않습니다.</div></div>` : ''; };
   const dmCol = m => `var(--${DAYMODE[m][0]})`;
   const dmTag = m => `<span class="ph ${DAYMODE[m][0]}">${m}</span>`;
   const dmBtn = m => `<button type="button" class="term ph ${DAYMODE[m][0]}" data-term="${m}">${m}</button>`;
-  // 전환 조건이면 전환일, 점수가 좋으면 들어오는 기운(비겁·식상→공격, 재성→수확, 관성→확장, 인성→축적), 나쁘면 방어일
+  // 시기 유형은 evaluateLuck가 정한다(십성 주도 성향 + 변화 점수 + 흐름 점수 + 작용 강도). 여기서는 이름만 바꾼다.
   function dayMode(x) {
-    const p = phOf(x), v = luckV(x);
-    let mode;
-    if (p.phase === '전환기') mode = '전환일';
-    else if (v >= 12) mode = ['공격일', '공격일', '수확일', '확장일', '축적일'][p.grp];
-    else if (v <= -12 || p.phase === '방어기') mode = '방어일';
-    else mode = '축적일';
-    return { ...p, mode };
+    const p = phOf(x);
+    return { ...p, group: p.dominantTenGodGroup, mode: p.phase.replace('기', '일') };
   }
   // 대운·세운·월운 6분류: 규칙은 일진 행동모드와 같고, 풀이는 운의 단위마다 다르다
   // 대운 = 10년 인생 전략, 세운 = 1년 운영 전략, 월운 = 1개월 전술 (일진 = 하루의 행동, 시진 = 실행 타이밍)
@@ -1739,27 +1941,31 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     }],
   };
   const LEVEL_ROLE = { daeun: '10년 인생 전략', seun: '1년 운영 전략', wolun: '1개월 전술', ilun: '하루의 행동', sijin: '실행 타이밍' };
-  const luckMode = x => { const d = dayMode(x); return { ...d, mode: d.mode.replace('일', '기') }; };
+  const luckMode = x => { const p = phOf(x); return { ...p, group: p.dominantTenGodGroup, mode: p.phase }; };
+  // 상태(순풍·보통·주의·부담): 무엇이 활성화되는가(시기 유형)와 별개로, 그 활성화가 원국에 얼마나 맞는가
+  const CONDS = { '순풍': '순풍', '보통': '보통', '주의': '주의', '부담': '부담' };
+  const condTag = c => `<button type="button" class="term pill b-${c}" data-term="상태 ${c}">${c}</button>`;
   const m6Col = m => `var(--${MODE6_COL[m]})`;
   const m6Tag = m => `<span class="ph ${MODE6_COL[m]}">${m}</span>`;
   const m6Btn = m => `<button type="button" class="term ph ${MODE6_COL[m]}" data-term="${m}">${m}</button>`;
-  const modeLegend = () => `<div class="legend">${Object.keys(MODE6_COL).map(m => `<span><i class="sw" style="background:${m6Col(m)}"></i>${term(m)}</span>`).join('')}${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))} 기준</span>` : ''}</div>`;
+  const modeLegend = () => `<div class="legend">${Object.keys(MODE6_COL).map(m => `<span><i class="sw" style="background:${m6Col(m)}"></i>${term(m)}</span>`).join('')}<span>막대 높이 = 흐름 점수 · 색 = 시기 유형</span><span>배지 ${Object.keys(CONDS).map(c => `<span class="pill b-${c}">${c}</span>`).join(' ')}</span>${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))}만 따로 본 값</span>` : ''}</div>`;
   // 시진 4단계 실행 등급. 목적마다 맞는 기운(십성 묶음 번호: 0 비겁 1 식상 2 재성 3 관성 4 인성)
   const PURPOSE = { gen: ['일반', null], deal: ['계약', [3, 4]], money: ['돈', [2, 1]], create: ['창작', [1, 4]] };
   const GRADE = { '실행': ['◎', 'g-go'], '활용': ['○', 'g-use'], '주의': ['△', 'g-warn'], '회피': ['×', 'g-avoid'] };
   const gradeTag = g => `<button type="button" class="term gr ${GRADE[g][1]}" data-term="${g}">${GRADE[g][0]} ${g}</button>`;
   function hourGrade(dayX, hp, it) {
-    const v = it.score ? it.score.total : 0, grp = phOf(it).grp;
+    const v = luckV(it), grp = phOf(it).grp;
     const natal = M.luckRelations(S.ch, hp).rels.filter(r => ['충', '형', '파', '해', '천간충'].includes(r.type) && r.members.some(m => m === 'day' || m === 'month'));
     const withDay = M.relationsAmong([{ id: 'dayx', s: dayX.s, b: dayX.b }, { id: 'luck', s: hp.s, b: hp.b }]).filter(r => ['충', '형', '천간충'].includes(r.type));
     const risks = [...natal.map(r => `${relTarget(r)} ${r.type}`), ...withDay.map(r => `그날 일진과 ${r.type}`)];
     const want = PURPOSE[S.inp.purpose || 'gen'][1];
     const fit = want ? want.includes(grp) : v >= 25;
+    const cond = phOf(it).condition;
     const hardClash = withDay.some(r => r.type === '충' || r.type === '천간충') || natal.some(r => r.type === '충' && r.members.includes('day'));
     let g;
-    if (v <= -35 || (hardClash && v < 0)) g = '회피';
-    else if (risks.length || v <= -12) g = '주의';
-    else if (v >= 12 && fit) g = '실행';
+    if (cond === '부담' || (hardClash && v < 0)) g = '회피';
+    else if (risks.length || cond === '주의') g = '주의';
+    else if (v >= M.LUCK_CFG.hourExecFit && fit) g = '실행';
     else g = '활용';
     return { g, risks, fit, grp };
   }
@@ -2062,7 +2268,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <div class="li"><span class="k">강약 치우침</span><span class="v small">${term(st.zone)} · 나를 돕는 힘 <b class="num">${st.help.toFixed(1)}%</b> (중간 50%에서 ${a.skew.toFixed(0)}%p)</span><span></span></div>
         <div class="li"><span class="k">두 기준의 용신</span><span class="v small">${term('억부')} <b class="eltxt ${ECLS[a.eokYong]}">${elLabel(a.eokYong)}</b>${a.joYong != null ? ` · ${term('조후')} <b class="eltxt ${ECLS[a.joYong]}">${elLabel(a.joYong)}</b> (억부 기준으로는 ${a.joRole})` : ' · 조후 용신 없음'}</span><span></span></div>
       </div>
-      ${compact ? '' : `<p class="note">운세 흐름에서는 지금 고른 기준과 반대편(억부↔조후) 점수가 흐린 막대로 함께 보입니다. 병행이면 두 기준이 모두 좋은 시기를 가장 좋은 때로 봅니다.${ch.school !== want && a.verdict !== '병행' ? ` <button type="button" class="btn" data-set="school:${want}">${a.verdict} 기준으로 보기</button>` : ''}</p>`}
+      ${compact ? '' : `<p class="note">운세 흐름의 흐름 점수는 억부·조후를 이 사주의 치우침에 맞춰 섞어 계산하고, 덜 앞세운 기준을 단독으로 본 값이 흐린 막대로 함께 보입니다. 병행이면 두 기준이 모두 보완되는 시기에 흐름 점수가 가장 높아집니다.${ch.school !== want && a.verdict !== '병행' ? ` <button type="button" class="btn" data-set="school:${want}">${a.verdict} 기준으로 보기</button>` : ''}</p>`}
     </div>`;
   }
   function climateCard(ch) {
@@ -2167,7 +2373,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${!chosen.applicable ? `<div class="warn"><b>${M.SCHOOLS[ch.school]} 해당 없음</b><span>${esc(chosen.log[chosen.log.length - 1])}</span><span>아래 역할과 운세 그래프는 억부 기준으로 표시합니다.</span></div>` : ''}
       <div class="roles">${order.map(r => { const e = elOf(r); return `<div class="role ${ECLS[e]}${r === '용신' ? ' main' : ''}"><span class="rn">${term(r)}</span><span class="rg">${M.EL[e]}</span><span class="rp">${M.EL_K[e]} · ${M.TG_GROUP[(e - dEl + 5) % 5]}</span><span class="rp num">원국 ${ch.weights.pct[e].toFixed(0)}%</span></div>`; }).join('')}</div>
       <div><h3 style="margin-bottom:8px">판단 근거 · ${M.SCHOOLS[y.school]}</h3><ol class="log">${y.log.map(l => `<li>${esc(l)}</li>`).join('')}</ol></div>
-      <p class="note">선택한 학파가 운세 흐름의 길흉 점수에 그대로 쓰입니다. 학파를 바꾸면 그래프도 바뀝니다.</p>
+      <p class="note">선택한 학파는 흐름 점수에서 해당 기준의 가중치를 높입니다. 강약·기후 치우침이 크면 학파와 관계없이 억부·조후 비중이 자동으로 조정되고, 합충·십성 균형도 함께 반영됩니다.</p>
     </section>
     <section class="card"><div class="card-h"><h2>조후론 vs 억부론</h2><span class="note">근거는 오행·강약 탭의 한난조습</span></div>${adviceCard(ch)}</section>
     ${renderSchoolInfo(ch)}
@@ -2205,7 +2411,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <span class="lt-tg">${x.branchTG}</span>
       <span class="lt-us">${x.unseong} · ${x.sinsal12}</span>
       <span class="lt-ev">${luckChips(x)}</span>
-      <span class="lt-sc">${m6Tag(luckMode(x).mode)}</span>
+      <span class="lt-sc">${m6Tag(luckMode(x).mode)} ${pill(x.ev.condition)}</span>${x.year && x.ev.level === "seun" ? samjaeTag(samjaeOf(x.year)) : ""}
     </button>`;
   }
   // 이 시기에 들어오는 오행과 원국과의 작용(합·충·형·신살)을 풀어 쓴다
@@ -2238,13 +2444,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   function phaseBox(x, kind) {
     const p = luckMode(x), name = p.mode, [role, texts] = LEVEL[kind], [mean, act] = texts[name];
-    const alt = showGhost() ? (kind === 'daeun' ? altScoreObj(x, 0.4).total : kind === 'seun' ? M.combinedScore(x.daeun ? altScoreObj(x.daeun, 0.4) : null, altScoreObj(x, 0.5)) : kind === 'wolun' ? altCombined(x, x.startMs) : altScoreObj(x, 0.5).total) : null;
+    const alt = showGhost() ? altOf(x) : null;
     return `<div class="phbox dm-bg" style="--dm:${m6Col(name)}">
-      <div class="phbox-h">${m6Btn(name)} <b>${mean}</b> <span class="muted small">${LEVEL_ROLE[kind]}</span></div>
+      <div class="phbox-h">${m6Btn(name)} ${condTag(p.condition)} <b>${mean}</b> <span class="muted small">${LEVEL_ROLE[kind]}</span></div>
       <div class="small">할 일: <b>${act}</b></div>
-      <div class="small">이 시기에 주로 들어오는 기운은 ${term(p.group)}입니다 → <b>${GROUP_ACT[p.group]}</b>에 힘을 쓰기 좋습니다.</div>
+      <div class="small">흐름 점수 <b class="num">${signed(luckV(x))}</b> · 변화 압력 <b class="num">${Math.round(p.changeScore)}</b> · 작용 강도 <b class="num">${Math.round(p.intensityScore)}</b> <span class="muted">(${p.tendency})</span></div>
+      <div class="small">이 시기에 주로 들어오는 기운은 ${term(p.group)}입니다 → <b>${GROUP_ACT[p.group]}</b>에 힘을 쓰는 성향입니다.</div>
       ${p.triggers.length ? `<div class="small">변화의 계기: ${p.triggers.map(esc).join(', ')}</div>` : ''}
-      ${alt != null ? `<div class="small muted">${schoolName(altSchool())} 기준으로 보면 ${signed(alt)}점 (${M.bandOf(alt)}) — 지금 보는 ${schoolName(S.ch.yong.school)} 기준과 ${Math.sign(alt) === Math.sign(luckV(x)) ? '같은 방향' : '다른 방향'}입니다.</div>` : ''}
+      ${alt != null ? `<div class="small muted">${schoolName(altSchool())} 기준만 따로 보면 ${signed(alt)}점 (${M.conditionOf(alt)}) — 종합 흐름과 ${Math.sign(alt) === Math.sign(luckV(x)) ? '같은 방향' : '다른 방향'}입니다.</div>` : ''}
     </div>`;
   }
   // 일진 풀이: 행동모드와 판정 순서(세운 → 월운 → 일진 → 목적 → 시진)
@@ -2256,31 +2463,38 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const hn = h => `${M.BR_K[h.hb]}시`;
     const step = (n, label, body) => `<div class="jstep"><span class="jn">${n}</span><span class="jl">${label}</span><span class="jb">${body}</span></div>`;
     return `<div class="phbox dm-bg" style="--dm:${dmCol(dm.mode)}">
-      <div class="phbox-h">${dmBtn(dm.mode)} <b>${mean}</b></div>
+      <div class="phbox-h">${dmBtn(dm.mode)} ${condTag(dm.condition)} <b>${mean}</b></div>
       <div class="small">그날 할 일: <b>${act}</b></div>
+      <div class="small">흐름 점수 <b class="num">${signed(luckV(x))}</b> · 변화 압력 <b class="num">${Math.round(dm.changeScore)}</b> · 작용 강도 <b class="num">${Math.round(dm.intensityScore)}</b> <span class="muted">(${dm.tendency})</span></div>
       <div class="small">들어오는 기운은 ${term(dm.group)} → ${GROUP_ACT[dm.group]}</div>
       ${dm.triggers.length ? `<div class="small">변화의 계기: ${dm.triggers.map(esc).join(', ')}</div>` : ''}
-      ${dm.mode === '방어일' ? '<div class="small muted">방어일은 흉일이 아닙니다. 새 일을 벌이기보다 지키고 마무리하기 좋은 날이라는 뜻입니다.</div>' : ''}
+      ${dm.mode === '방어일' ? '<div class="small muted">방어일은 부담이 감당 범위를 넘을 수 있어 리스크 관리가 필요하다는 뜻입니다. 새 일을 벌이기보다 지키고 마무리하는 편이 맞습니다.</div>' : ''}
     </div>
     <div class="judge"><h4>${term('판정 순서')}</h4>
-      ${step('①', '세운', se ? `${M.gzName(se)} ${m6Tag(luckMode(se).mode)} 올해 기본 환경` : '—')}
-      ${step('②', '월운', wm ? `${M.gzName(wm)} ${m6Tag(luckMode(wm).mode)} 이번 달 행동 방향` : '—')}
-      ${step('③', '일진', `${M.gzName(x)} ${dmTag(dm.mode)} 오늘의 행동모드`)}
+      ${step('①', '세운', se ? `${M.gzName(se)} ${m6Tag(luckMode(se).mode)} ${pill(se.ev.condition)} 올해 기본 환경` : '—')}
+      ${step('②', '월운', wm ? `${M.gzName(wm)} ${m6Tag(luckMode(wm).mode)} ${pill(wm.ev.condition)} 이번 달 행동 방향` : '—')}
+      ${step('③', '일진', `${M.gzName(x)} ${dmTag(dm.mode)} ${pill(dm.condition)} 오늘의 행동모드`)}
       ${step('④', '목적', `<b>${PURPOSE[S.inp.purpose || 'gen'][0]}</b> <span class="muted">(아래 시진 표에서 바꿀 수 있어요)</span>`)}
       ${step('⑤', '시진', best.length ? `◎ 실행: <b>${best.map(hn).join(' · ')}</b>` : ok.length ? `◎ 시간이 없어 ○ 활용 시간을 씁니다: ${ok.map(hn).join(' · ')}` : '중요한 일은 다른 날로 옮기는 편이 좋습니다.')}
     </div>`;
   }
-  function detailHTML(title, x, extra = '', kind = '') {
-    if (!x || !x.score) return '';
-    return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${pill(x.score.band)} <b class="num">${signed(x.score.total)}</b></span></div>
+  function detailHTML(title, x, extra = '', kind = '', banner = '') {
+    if (!x || !x.ev) return '';
+    const e = x.ev, w = e.weights;
+    const comps = [['억부', 'eokbu', e.eokbuScore], ['조후', 'johu', e.johuScore], ['관계', 'relation', e.relationScore], ['구조', 'structure', e.structureScore]];
+    if (e.tonggwanScore != null) comps.splice(2, 0, ['통관', 'tonggwan', e.tonggwanScore]);
+    return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${condTag(e.condition)} <b class="num">${signed(luckV(x))}</b></span></div>
+      ${banner}
       <div class="small" style="color:var(--ink-2)">${luckCells(x)}</div>
       ${kind ? (kind === 'ilun' ? dayBox(x) : phaseBox(x, kind)) + luckEffects(x, kind) : ''}
-      <h4 style="margin:4px 0 0">점수 근거</h4>
-      <div class="parts">${x.score.parts.map(p => `<div class="part"><span>${esc(p.label)}</span><span class="pv ${p.v > 0.5 ? 'pos' : p.v < -0.5 ? 'neg' : ''}">${signed(p.v)}</span></div>`).join('')}</div>${extra}</div>`;
+      <h4 style="margin:4px 0 0">${term('흐름 점수')} 근거</h4>
+      <div class="small muted">${comps.map(([n, k, v]) => `${n} ${signed(v)} × ${Math.round(w[k] * 100)}%`).join(' · ')} — 가중치는 이 사주의 강약·기후 치우침에 따라 정해집니다.</div>
+      <ul class="small" style="margin:4px 0 0;padding-left:18px">${e.reasons.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
+      <div class="parts">${e.parts.map(p => `<div class="part"><span>${esc(p.label)}</span><span class="pv ${p.v > 0.5 ? 'pos' : p.v < -0.5 ? 'neg' : ''}">${signed(p.v)}</span></div>`).join('')}</div>${extra}</div>`;
   }
   function sijinRows(dayItem, ymd) {
     const ch = S.ch, shift = (ch.timeMode === 'lmt' || ch.timeMode === 'ast') ? Math.round(ch.lon * 4 - 540) : 0;
-    return M.hourPillarsOfDay(dayItem.s).map((hp, hb) => { const it = M.luckItem(ch, hp, 0.5); return { hp, hb, it, st: 23 * 60 + hb * 120 - shift, gr: hourGrade(dayItem, hp, it) }; });
+    return M.hourPillarsOfDay(dayItem.s).map((hp, hb) => { const it = M.luckItem(ch, hp, 'sijin'); return { hp, hb, it, st: 23 * 60 + hb * 120 - shift, gr: hourGrade(dayItem, hp, it) }; });
   }
   function sijinTable(dayItem, ymd) {
     const ch = S.ch;
@@ -2290,7 +2504,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const nowMin = (() => { const t = new Date(NOW + 540 * 60000); return t.getUTCHours() * 60 + t.getUTCMinutes(); })();
     const rows = sijinRows(dayItem, ymd).map(({ hp, hb, it, st, gr }) => {
       const cur = isToday && ((nowMin - st) % 1440 + 1440) % 1440 < 120;
-      const v = it.score ? it.score.total : 0;
+      const v = luckV(it);
       return `<tr class="${cur ? 'cur' : ''} row-${GRADE[gr.g][1]}"><td>${M.BR_K[hb]}시</td><td class="num">${hm(st)}~${hm(st + 120)}</td><td class="gz">${M.gzName(hp)}</td><td class="small">${term(it.stemTG)}/${term(it.branchTG)}</td><td>${gradeTag(gr.g)} <span class="num small muted">${signed(v)}</span>${gr.risks.length ? `<div class="small muted">${gr.risks.map(esc).join(', ')}</div>` : ''}</td></tr>`;
     }).join('');
     return `<div><div class="card-h" style="margin:6px 0"><h3>시진 (時辰) · ${term('실행 등급')} <span class="lvl">${LEVEL_ROLE.sijin}</span></h3><div class="field"><span>오늘의 목적</span>${seg('purpose', Object.entries(PURPOSE).map(([k, [l]]) => [k, l]), S.inp.purpose || 'gen')}</div></div>
@@ -2298,9 +2512,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">◎ 실행 = 목적과 잘 맞아 결과가 생기는 행동(전화·제출·서명·공개)을 두기 좋은 시간, ○ 활용 = 안정적이라 회의·업무·제작에 무난, △ 주의 = 충·형 같은 불안 요소가 있어 중요한 결정은 옮기기, × 회피 = 그날과 충돌이 강해 중요한 일은 피하기. 목적을 바꾸면 ◎ 시간이 달라집니다. 시각은 ${shift ? `출생지 경도 보정(${shift}분)을 적용한 표준시입니다` : '한국 표준시 그대로입니다'}. 자시는 전날 밤부터 시작합니다${ch.jasi === 'ya' ? ' (야자시 설정: 밤 11시~자정은 다음 날 기준 천간을 씁니다)' : ''}.</p></div>`;
   }
   function renderCalendar(cy, cm, cal, firstDow, sel, ilDetail) {
-    const scored = cal.map((x, i) => ({ d: i + 1, v: x.score ? x.score.total : 0, x }));
-    const best = [...scored].sort((a, b) => b.v - a.v).filter(q => q.v >= 12).slice(0, 3);
-    const worst = [...scored].sort((a, b) => a.v - b.v).filter(q => q.v <= -12).slice(0, 3);
+    const scored = cal.map((x, i) => ({ d: i + 1, v: luckV(x), x }));
+    const CC = M.LUCK_CFG.condition;
+    const best = [...scored].sort((a, b) => b.v - a.v).filter(q => q.v >= CC.tailwind).slice(0, 3);
+    const worst = [...scored].sort((a, b) => a.v - b.v).filter(q => q.v <= CC.caution).slice(0, 3);
     // 칸 색 = 시기, 진하기 = 점수 크기
     const tint = (v, dm) => `color-mix(in srgb, ${dmCol(dm)} ${14 + Math.round(Math.min(80, Math.abs(v)) / 80 * 36)}%, var(--surface))`;
     const dayBtn = q => `<button type="button" class="chip ${q.v >= 0 ? 'good' : 'bad'}" data-pick="ilun:${q.d}" style="border:0;cursor:pointer">${cm}/${q.d} ${M.gzName(q.x)} ${signed(q.v)}</button>`;
@@ -2309,7 +2524,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const isT = cy === TODAY[0] && cm === TODAY[1] && d === TODAY[2];
       const son = M.sonOf(x.lunar.d) === '없음';
       const strong = Math.abs(v) >= 45;
-      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}" style="background:${tint(v, dm)}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''} · ${dm} · ${x.score ? x.score.band + ' ' + signed(v) : ''}">
+      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}" style="background:${tint(v, dm)}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''} · ${dm} · ${x.ev.condition + ' ' + signed(v)}">
         <span class="ctop"><span class="dn">${d}</span>${son ? '<span class="son" title="손 없는 날">손</span>' : ''}</span>
         <span class="dg">${M.gzName(x)}</span>
         <span class="dmn" style="color:${dmCol(dm)}">${dm.slice(0, 2)}</span>
@@ -2318,26 +2533,27 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     }).join('');
     return `<section class="card">
       <div class="card-h"><h2>${cy}년 ${cm}월 ${term('일운', '일진')} 달력 <span class="lvl">${LEVEL_ROLE.ilun}</span></h2><span class="seg"><button data-act="ym:-1" aria-label="이전 달">‹</button><button data-act="ym:1" aria-label="다음 달">›</button></span></div>
-      <div class="legend">${Object.keys(DAYMODE).map(m => `<span><i class="sw" style="background:${dmCol(m)}"></i>${term(m)}</span>`).join('')}<span>색이 진할수록 점수가 큼</span><span><span class="son">손</span> ${term('손 없는 날')}</span><span>칸 아래 숫자 = 음력 일</span></div>
+      <div class="legend">${Object.keys(DAYMODE).map(m => `<span><i class="sw" style="background:${dmCol(m)}"></i>${term(m)}</span>`).join('')}<span>색이 진할수록 흐름 점수의 크기가 큼</span><span><span class="son">손</span> ${term('손 없는 날')}</span><span>칸 아래 숫자 = 음력 일</span></div>
       <div class="cal">${['일', '월', '화', '수', '목', '금', '토'].map(d => `<span class="dow">${d}</span>`).join('')}${'<span></span>'.repeat(firstDow)}${cells}</div>
       <div class="list">
-        <div class="li"><span class="k">이달 길일</span><span class="v">${best.length ? best.map(dayBtn).join('') : '<span class="muted small">+12 이상인 날이 없습니다</span>'}</span><span></span></div>
-        <div class="li"><span class="k">이달 주의일</span><span class="v">${worst.length ? worst.map(dayBtn).join('') : '<span class="muted small">−12 이하인 날이 없습니다</span>'}</span><span></span></div>
+        <div class="li"><span class="k">순풍이 강한 날</span><span class="v">${best.length ? best.map(dayBtn).join('') : `<span class="muted small">+${CC.tailwind} 이상인 날이 없습니다</span>`}</span><span></span></div>
+        <div class="li"><span class="k">리스크 관리일</span><span class="v">${worst.length ? worst.map(dayBtn).join('') : `<span class="muted small">${CC.caution} 이하인 날이 없습니다</span>`}</span><span></span></div>
       </div>
-      ${ilDetail || '<p class="note">날짜를 누르면 그날의 행동모드, 판정 순서, 점수 근거와 12시진 실행 등급이 열립니다. 일진 점수는 이 사주의 용신 기준으로 그날 간지만 평가한 값이며, 대운·세운의 큰 흐름은 위 그래프에서 봅니다.</p>'}
+      ${ilDetail || '<p class="note">날짜를 누르면 그날의 행동모드, 판정 순서, 점수 근거와 12시진 실행 등급이 열립니다. 일진 흐름 점수는 이 사주의 억부·조후·관계·구조를 종합해 그날 간지만 평가한 값이며, 대운·세운의 큰 흐름은 위 그래프에서 봅니다.</p>'}
     </section>`;
   }
   function yearSummary(curY) {
     const ch = S.ch;
     const ys = M.seunRange(ch, curY, curY + 9);
-    const best = [...ys].sort((a, b) => b.combined - a.combined).filter(q => q.combined >= 12).slice(0, 3);
-    const worst = [...ys].sort((a, b) => a.combined - b.combined).filter(q => q.combined <= -12).slice(0, 3);
+    const CC = M.LUCK_CFG.condition;
+    const best = [...ys].sort((a, b) => b.combined - a.combined).filter(q => q.combined >= CC.tailwind).slice(0, 3);
+    const worst = [...ys].sort((a, b) => a.combined - b.combined).filter(q => q.combined <= CC.caution).slice(0, 3);
     const btn = q => `<button type="button" class="chip ${q.combined >= 0 ? 'good' : 'bad'}" data-pick="seun:${q.year}" style="border:0;cursor:pointer">${q.year} ${M.gzName(q)} ${signed(q.combined)}</button>`;
-    const strip = `<div class="lts">${ys.map(q => luckTile({ ...q, score: { band: M.bandOf(q.combined) } }, `${q.year} · ${q.age}세`, 'seun:' + q.year, S.sel && S.sel.kind === 'seun' && S.sel.Y === q.year, q.year === curY)).join('')}</div>`;
+    const strip = `<div class="lts">${ys.map(q => luckTile(q, `${q.year} · ${q.age}세`, 'seun:' + q.year, S.sel && S.sel.kind === 'seun' && S.sel.Y === q.year, q.year === curY)).join('')}</div>`;
     return `<div><h3 style="margin-bottom:8px">앞으로 10년</h3>${strip}</div>
       <div class="list">
-        <div class="li"><span class="k">길한 해</span><span class="v">${best.length ? best.map(btn).join('') : '<span class="muted small">+12 이상인 해가 없습니다</span>'}</span><span></span></div>
-        <div class="li"><span class="k">주의할 해</span><span class="v">${worst.length ? worst.map(btn).join('') : '<span class="muted small">−12 이하인 해가 없습니다</span>'}</span><span></span></div>
+        <div class="li"><span class="k">순풍이 강한 해</span><span class="v">${best.length ? best.map(btn).join('') : `<span class="muted small">+${CC.tailwind} 이상인 해가 없습니다</span>`}</span><span></span></div>
+        <div class="li"><span class="k">리스크 관리할 해</span><span class="v">${worst.length ? worst.map(btn).join('') : `<span class="muted small">${CC.caution} 이하인 해가 없습니다</span>`}</span><span></span></div>
       </div>`;
   }
   function renderLuck() {
@@ -2347,12 +2563,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const se = M.seunRange(ch, curY, curY)[0];
     const wm = M.wolun(ch, curY); let curM = wm[0]; wm.forEach(m => { if (m.startMs <= NOW) curM = m; });
     const il = M.ilun(ch, TODAY[0], TODAY[1])[TODAY[2] - 1];
-    const nowCard = (k, lbl, x, sub) => `<div class="nowc" role="button" tabindex="0" data-pick="now:${k}"><span class="lbl">${lbl}</span><span class="gzb">${x ? M.gzName(x) : '—'}</span><span class="tgs">${x ? `${x.stemTG} · ${x.branchTG}` : '대운 전'}</span><span>${x && x.score ? (k === 'ilun' ? dmTag(dayMode(x).mode) : m6Tag(luckMode(x).mode)) : ''} <span class="muted small">${sub}</span></span></div>`;
+    const nowCard = (k, lbl, x, sub) => `<div class="nowc" role="button" tabindex="0" data-pick="now:${k}"><span class="lbl">${lbl}</span><span class="gzb">${x ? M.gzName(x) : '—'}</span><span class="tgs">${x ? `${x.stemTG} · ${x.branchTG}` : '대운 전'}</span><span>${x && x.score ? (k === 'ilun' ? dmTag(dayMode(x).mode) : m6Tag(luckMode(x).mode)) + ' ' + pill(x.ev.condition) : ''} <span class="muted small">${sub}</span></span></div>`;
     const sel = S.sel || {};
     let nowDetail = '';
     if (sel.kind === 'now') {
       const map = { daeun: [du, `현재 대운 ${du ? M.gzName(du) : ''}`], seun: [se, `${curY}년 세운 ${M.gzName(se)}`], wolun: [curM, `이번 달 월운 ${M.gzName(curM)} (${curM.termName}부터)`], ilun: [il, `오늘 일운 ${M.gzName(il)}`] };
-      const [x, t] = map[sel.k]; nowDetail = detailHTML(t, x, "", sel.k);
+      const [x, t] = map[sel.k]; nowDetail = detailHTML(t, x, "", sel.k, sel.k === 'seun' ? samjaeBanner(curY) : '');
     }
     const Y = S.selYear;
     const [cy, cm] = S.selYM;
@@ -2360,14 +2576,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const firstDow = new Date(Date.UTC(cy, cm - 1, 1)).getUTCDay();
     let daeunDetail = '', seunDetail = '', wolDetail = '', ilDetail = '';
     if (sel.kind === 'daeun') { const x = ch.daeun.list[sel.i]; daeunDetail = detailHTML(`${x.startAge}세 대운 ${M.gzName(x)} (${x.startYear}~${x.startYear + 9})`, x, `<p class="note">정확한 시작: ${fmtKST(x.startMs)}</p>`, "daeun"); }
-    if (sel.kind === 'seun') { const x = M.seunRange(ch, sel.Y, sel.Y)[0]; if (x) seunDetail = detailHTML(`${sel.Y}년 세운 ${M.gzName(x)}`, x, x.daeun ? `<p class="small">대운 ${M.gzName(x.daeun)} ${signed(x.daeun.score.total)} × 40% + 세운 ${signed(x.score.total)} × 60% = 종합 <b class="num">${signed(x.combined)}</b></p>` : '', "seun"); }
-    if (sel.kind === 'wolun') { const x = M.wolun(ch, Y)[sel.i]; wolDetail = detailHTML(`${Y}년 ${x.termName}부터 월운 ${M.gzName(x)}`, x, `<p class="note">시작: ${fmtKST(x.startMs)} · 대운과의 종합 ${signed(x.combined)}</p>`, "wolun"); }
+    if (sel.kind === 'seun') { const x = M.seunRange(ch, sel.Y, sel.Y)[0]; if (x) seunDetail = detailHTML(`${sel.Y}년 세운 ${M.gzName(x)}`, x, x.daeun ? `<p class="small">대운 ${M.gzName(x.daeun)} ${signed(x.daeun.score.total)} × 40% + 세운 ${signed(x.score.total)} × 60% = 흐름 점수 <b class="num">${signed(x.combined)}</b></p>` : '', "seun", samjaeBanner(sel.Y)); }
+    if (sel.kind === 'wolun') { const x = M.wolun(ch, Y)[sel.i]; wolDetail = detailHTML(`${Y}년 ${x.termName}부터 월운 ${M.gzName(x)}`, x, `<p class="note">시작: ${fmtKST(x.startMs)} · 대운과 섞은 흐름 점수 ${signed(x.combined)}</p>`, "wolun"); }
     if (sel.kind === 'ilun') { const x = cal[sel.d - 1]; if (x) ilDetail = detailHTML(`${cy}.${pad(cm)}.${pad(sel.d)} 일진 ${M.gzName(x)}`, x, `<p class="small">음력 ${x.lunar.m}${x.lunar.leap ? '(윤)' : ''}월 ${x.lunar.d}일 · ${term('손 없는 날', '손')} ${M.sonOf(x.lunar.d) === '없음' ? '<b>없음 (손 없는 날)</b>' : M.sonOf(x.lunar.d) + '쪽'}</p>` + sijinTable(x, [cy, cm, sel.d]), "ilun"); }
     const tint = v => { const a = Math.min(100, Math.abs(v)) * 0.6; return v >= 0 ? `color-mix(in srgb, var(--good) ${a}%, var(--surface-2))` : `color-mix(in srgb, var(--bad) ${a}%, var(--surface-2))`; };
     return `
-    ${ch.yongFallback ? `<div class="warn"><b>용신 기준</b><span>${M.SCHOOLS[ch.school]}이 이 사주에 해당하지 않아 억부 기준으로 점수를 냅니다.</span></div>` : ''}
+    ${ch.yongFallback ? `<div class="warn"><b>용신 기준</b><span>${M.SCHOOLS[ch.school]}이 이 사주에 해당하지 않아 억부 기준 용신을 표시합니다. 흐름 점수는 억부·조후를 자동 가중해 계산합니다.</span></div>` : ''}
     <section class="card">
-      <div class="card-h"><h2>지금의 운</h2><span class="note">${TODAY.join('.')} 기준 · 용신 ${M.SCHOOLS[ch.yong.school].split(' ')[0]}</span></div>
+      <div class="card-h"><h2>지금의 운</h2><span class="note">${TODAY.join('.')} 기준 · 억부·조후 자동 가중</span></div>
       <div class="now">
         ${nowCard('daeun', term('대운'), du, du ? `${du.startAge}세~` : '')}
         ${nowCard('seun', term('세운'), se, `${curY}`)}
@@ -2380,14 +2596,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${modeLegend()}
       <div class="chart" data-chart="daeun"></div>
       <div class="lts">${ch.daeun.list.map((x, i) => luckTile(x, `${x.startAge}세 · ${x.startYear}`, 'daeun:' + i, sel.kind === 'daeun' && sel.i === i, du === x)).join('')}</div>
-      ${daeunDetail || '<p class="note">막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
+      ${daeunDetail || '<p class="note">막대 높이는 흐름 점수, 색은 시기 유형입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>연도별 흐름 · ${term('세운')} <span class="lvl">${LEVEL_ROLE.seun}</span></h2></div>
       ${modeLegend()}
       <div class="chart" data-chart="life"></div>
       ${yearSummary(curY)}
-      ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60% 종합 점수, 색은 6분류(공격·확장·수확·축적·전환·방어)입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
+      ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 시기 유형(공격·확장·수확·축적·전환·방어)입니다. 순풍·보통·주의·부담 같은 상태는 툴팁과 타일 배지로 따로 보입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>${Y}년 ${term('월운')} <span class="lvl">${LEVEL_ROLE.wolun}</span></h2><span class="seg"><button data-act="year:-1" aria-label="이전 해">‹</button><button data-act="year:1" aria-label="다음 해">›</button></span></div>
@@ -2397,7 +2613,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${wolDetail || `<p class="note">입춘(${Y}.2.4 무렵)부터 다음 해 소한까지의 12개월입니다. 막대를 누르면 그 달의 ${term('일운')} 달력으로 이동합니다.</p>`}
     </section>
     ${renderCalendar(cy, cm, cal, firstDow, sel, ilDetail)}
-    <p class="note">길흉 점수는 선택한 용신 기준으로 운의 오행·합충·귀인을 합산한 해석 모델입니다. 계산 방식은 ${term('길흉 점수', '길흉 점수 설명')}에 있습니다. 통계적으로 검증된 예측값이 아닙니다.</p>`;
+    <p class="note">흐름 점수는 현재 원국의 불균형을 들어오는 운이 얼마나 보완하거나 심화시키는지를 나타내는 상대 지표이며, 미래의 행운·불운 확률이 아닙니다. 계산 방식은 ${term('흐름 점수')}에 있습니다.</p>`;
   }
 
   // ───────────── 자미두수 ─────────────
@@ -2880,7 +3096,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function svgEl(W, H) { return `<svg xmlns="${NS}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img">`; }
   function drawDiv(el, items, opt = {}) {
     const n = items.length; const cw = el.clientWidth || 320;
-    const W = Math.max(cw, n * 40), H = 236, L = 34, R = 6, T = 12, B = 54;
+    const W = Math.max(cw, n * 40), H = 246, L = 34, R = 6, T = 30, B = 54;
     const step = (W - L - R) / n, bw = Math.min(30, step * 0.58);
     const y = v => T + (100 - v) / 200 * (H - T - B);
     let s = svgEl(W, H);
@@ -2897,11 +3113,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const d = v >= 0 ? `M${x0},${y0} V${top + r} Q${x0},${top} ${x0 + r},${top} H${x0 + bw - r} Q${x0 + bw},${top} ${x0 + bw},${top + r} V${y0} Z`
         : `M${x0},${y0} V${top + h - r} Q${x0},${top + h} ${x0 + r},${top + h} H${x0 + bw - r} Q${x0 + bw},${top + h} ${x0 + bw},${top + h - r} V${y0} Z`;
       s += `<path d="${d}" style="fill:${col};${it.sel ? 'stroke:var(--ink);stroke-width:2' : ''}"/>`;
+      if (it.cond) { const by = v >= 0 ? top - 15 : top + h + 4; s += `<rect x="${cx - 8}" y="${by}" width="16" height="11" rx="5.5" style="fill:${COND_COL[it.cond]};opacity:.9"/><text x="${cx}" y="${by + 8.5}" text-anchor="middle" style="fill:#fff;font-size:8px;font-weight:700">${it.cond[0]}</text>`; }
       if (it.cur) s += `<circle cx="${cx}" cy="${T + 2}" r="3" style="fill:var(--seal)"/>`;
       s += `<text x="${cx}" y="${H - B + 18}" text-anchor="middle" style="fill:var(--ink);font-size:14px;font-weight:${it.sel ? 900 : 700};font-family:var(--f-display)">${it.label}</text>`;
       s += `<text x="${cx}" y="${H - B + 33}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${it.sub}</text>`;
       if (it.sub2) s += `<text x="${cx}" y="${H - B + 45}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${it.sub2}</text>`;
-      if (it.sel) s += `<text x="${cx}" y="${v >= 0 ? top - 5 : top + h + 12}" text-anchor="middle" style="fill:var(--ink);font-size:11px;font-weight:700">${signed(v)}</text>`;
+      if (it.sel) s += `<text x="${cx}" y="${v >= 0 ? top - 18 : top + h + 27}" text-anchor="middle" style="fill:var(--ink);font-size:11px;font-weight:700">${signed(v)}</text>`;
       s += `<rect class="hit" x="${cx - step / 2}" y="0" width="${step}" height="${H}" style="fill:transparent" data-pick="${it.pick}" data-tip="${esc(it.tip)}"/>`;
     });
     el.innerHTML = s + '</svg>';
@@ -2909,7 +3126,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function drawLife(el) {
     const ch = S.ch; const y0 = ch.solar.y, y1 = Math.min(y0 + 90, M.MAX_Y - 1);
     const data = M.seunRange(ch, y0, y1);
-    const cw = el.clientWidth || 320, W = Math.max(cw, 320), H = 250, L = 34, R = 18, T = 26, B = 26;
+    const cw = el.clientWidth || 320, W = Math.max(cw, 320), H = 270, L = 34, R = 18, T = 26, B = 46;
     const x = Y => L + (Y - y0) / (y1 - y0) * (W - L - R);
     const y = v => T + (100 - v) / 200 * (H - T - B);
     let s = svgEl(W, H);
@@ -2923,13 +3140,20 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     for (let Y = Math.ceil(y0 / 10) * 10; Y <= y1; Y += 10) s += `<text x="${x(Y)}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${Y}</text>`;
     const bw = Math.max(1.5, (W - L - R) / (y1 - y0 + 1) - 1.2);
     data.forEach(d => { const v = d.combined, yy = y(v), z = y(0); const h = Math.max(1.5, Math.abs(yy - z)); const col = m6Col(luckMode(d).mode); s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${Math.min(yy, z).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${col}"/>`; });
-    if (showGhost()) s += `<polyline class="ghost-line" points="${data.map(d => `${x(d.year).toFixed(1)},${y(M.combinedScore(d.daeun ? altScoreObj(d.daeun, 0.4) : null, altScoreObj(d, 0.5))).toFixed(1)}`).join(' ')}"/>`;
+    if (showGhost()) s += `<polyline class="ghost-line" points="${data.map(d => `${x(d.year).toFixed(1)},${y(altOf(d)).toFixed(1)}`).join(' ')}"/>`;
     const curY = M.yearPillarAt(NOW).sajuYear;
     if (curY >= y0 && curY <= y1) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.5" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T + 11}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
     const sel = S.sel && S.sel.kind === 'seun' ? S.sel.Y : null;
     if (sel && sel >= y0 && sel <= y1) { const d = data.find(q => q.year === sel); if (d) s += `<circle cx="${x(sel)}" cy="${y(d.combined)}" r="4.5" style="fill:var(--ink);stroke:var(--surface);stroke-width:2"/>`; }
     s += `<line class="xh" x1="0" x2="0" y1="${T}" y2="${H - B}" style="stroke:var(--ink);stroke-width:1;opacity:0"/><circle class="xd" r="4" style="fill:var(--ink);opacity:0"/>`;
     s += `<rect class="hit ov" x="${L}" y="0" width="${W - L - R}" height="${H}" style="fill:transparent"/>`;
+    // 삼재 배지(참고 정보): 막대·점수·색에는 영향 없음. 연도 라벨 위쪽에 작게 표시하고 누르면 용어 설명이 열린다
+    const stepX = (W - L - R) / (y1 - y0 + 1);
+    data.forEach(d => {
+      const sj = samjaeOf(d.year); if (!sj.active) return;
+      const bwid = Math.max(2.5, stepX - 0.8), bx = x(d.year) - bwid / 2, by = H - B + 6;
+      s += `<g class="term sj" data-term="${sj.stage}"><title>${sj.stage}</title><rect x="${bx.toFixed(1)}" y="${by}" width="${bwid.toFixed(1)}" height="12" rx="2.5" style="fill:var(--d-chg);opacity:.85"/>${stepX >= 8 ? `<text x="${x(d.year).toFixed(1)}" y="${by + 9}" text-anchor="middle" style="fill:#fff;font-size:8px;font-weight:700">${sj.stage[0]}</text>` : ''}</g>`;
+    });
     el.innerHTML = s + '</svg>';
     const svg = el.querySelector('svg'), ov = el.querySelector('.ov'), xh = el.querySelector('.xh'), xd = el.querySelector('.xd');
     const nearest = ev => { const r = svg.getBoundingClientRect(); const px = (ev.clientX - r.left) * (W / r.width); const Y = Math.round(y0 + (px - L) / (W - L - R) * (y1 - y0)); return data.find(d => d.year === Math.max(y0, Math.min(y1, Y))); };
@@ -2937,7 +3161,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const d = nearest(ev); if (!d) return;
       xh.setAttribute('x1', x(d.year)); xh.setAttribute('x2', x(d.year)); xh.style.opacity = .35;
       xd.setAttribute('cx', x(d.year)); xd.setAttribute('cy', y(d.combined)); xd.style.opacity = 1;
-      showTip(ev, `${d.year}년 (만 ${d.age}세) ${M.gzName(d)} · <b>${luckMode(d).mode}</b><br>세운 ${signed(d.score.total)} · 대운 ${d.daeun ? M.gzName(d.daeun) + ' ' + signed(d.daeun.score.total) : '시작 전'}<br>종합 <b>${signed(d.combined)}</b> · ${M.bandOf(d.combined)}`);
+      { const sj = samjaeOf(d.year); showTip(ev, luckTip(`${d.year}년 (만 ${d.age}세) ${M.gzName(d)}`, d) + (sj.active ? `<br>삼재 · ${sj.stage} (전통 참고, 점수 미반영)` : '')); }
     });
     ov.addEventListener('mouseleave', () => { xh.style.opacity = 0; xd.style.opacity = 0; hideTip(); });
     ov.addEventListener('click', ev => { const d = nearest(ev); if (d) pick('seun:' + d.year); });
@@ -2949,10 +3173,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const k = el.dataset.chart;
       if (k === 'daeun') {
         const cur = M.daeunAt(ch, curMs);
-        drawDiv(el, ch.daeun.list.map((d, i) => ({ v: d.score.total, ph: luckMode(d).mode, alt: showGhost() ? altScoreObj(d, 0.4).total : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: `${d.startAge}세 대운 ${M.gzName(d)} · ${d.stemTG}/${d.branchTG} · ${d.score.band} ${signed(d.score.total)}` })));
+        drawDiv(el, ch.daeun.list.map((d, i) => ({ v: luckV(d), cond: d.ev.condition, ph: luckMode(d).mode, alt: showGhost() ? altOf(d) : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: luckTip(`${d.startAge}세 대운 ${M.gzName(d)} (${d.stemTG}/${d.branchTG})`, d) })));
       } else if (k === 'wolun') {
         const ms = M.wolun(ch, S.selYear);
-        drawDiv(el, ms.map((m, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity; return { v: m.combined, ph: luckMode(m).mode, alt: showGhost() ? altCombined(m, m.startMs) : null, label: M.gzName(m), sub: m.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: curMs >= m.startMs && curMs < nx, tip: `${m.termName}~ ${M.gzName(m)} · ${m.stemTG}/${m.branchTG} · 월운 ${signed(m.score.total)} · 대운 합산 ${signed(m.combined)}` }; }));
+        drawDiv(el, ms.map((m, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity; return { v: luckV(m), cond: m.ev.condition, ph: luckMode(m).mode, alt: showGhost() ? altOf(m) : null, label: M.gzName(m), sub: m.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: curMs >= m.startMs && curMs < nx, tip: luckTip(`${m.termName}~ ${M.gzName(m)} (${m.stemTG}/${m.branchTG})`, m) }; }));
       } else if (k === 'life') drawLife(el);
     });
   }
@@ -2990,7 +3214,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     else if (S.tab === 'luck') body = renderLuck();
     else if (S.tab === 'zw') body = S.ch.ziwei ? renderZiwei() : renderWonguk();
     else body = renderGl();
-    root.innerHTML = renderTop() + `<main class="wrap" style="padding-top:16px">${renderAdminLogin()}${renderForm()}${body}</main>`;
+    root.innerHTML = renderTop() + `<main class="wrap" style="padding-top:16px">${renderAdminLogin()}${renderForm()}${body}${adminPw ? '' : '<div class="admin-link-row"><a class="admin-link" href="#admin" onclick="setTimeout(()=>scrollTo(0,0),0)">관리자</a></div>'}</main>`;
     drawCharts();
     renderSheet();
   }
