@@ -14,6 +14,7 @@
   --line: #E7EAF1; --accent: #2F5BFF; --accent-2: #7B61FF; --accent-soft: #ECF0FF; --seal: #FF5B4A;
   --wood: #1F8A5B; --fire: #D8412F; --earth: #D9A520; --metal: #7A68B8; --water: #2A48A0;
   --wood-ink: #17744B; --fire-ink: #C9331F; --earth-ink: #946B00; --metal-ink: #5F4E9E; --water-ink: #2A48A0;
+  --d-atk: #1E9E57; --d-ext: #0E9AA7; --d-hrv: #8A5CF6; --d-acc: #2F6BFF; --d-chg: #E08A00; --d-def: #E5533D;
   --ph-atk: #1E9E57; --ph-chg: #E08A00; --ph-acc: #2F6BFF; --ph-def: #E5533D;
   --good: #1E9E57; --bad: #F0563F; --mid: #BAC1CE; --good-soft: #E3F5EA; --bad-soft: #FFEAE6;
   --shadow: 0 1px 2px rgba(18, 21, 31, .04), 0 10px 30px -12px rgba(30, 40, 90, .12);
@@ -240,6 +241,19 @@ button.ph { cursor: pointer; } button.ph:hover { color: #fff; filter: brightness
 .chart .ghost { fill: var(--ink-3); opacity: .16; }
 .chart .ghost-line { fill: none; stroke: var(--ink-2); stroke-width: 1.4; opacity: .45; stroke-linejoin: round; }
 .sw.ghost { background: color-mix(in srgb, var(--ink-3) 30%, var(--surface)); }
+/* 일진 행동모드·시진 등급 */
+.d-atk { background: var(--d-atk); } .d-ext { background: var(--d-ext); } .d-hrv { background: var(--d-hrv); } .d-acc { background: var(--d-acc); } .d-chg { background: var(--d-chg); } .d-def { background: var(--d-def); }
+.dm-bg { background: color-mix(in srgb, var(--dm) 9%, var(--surface)); border-color: var(--dm); }
+.cal .dmn { font-size: 0.64rem; font-weight: 800; line-height: 1.1; }
+.gr { border: 0; cursor: pointer; font-size: 0.74rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; text-decoration: none; white-space: nowrap; }
+.gr.g-go { background: var(--good); color: #fff; } .gr.g-use { background: var(--surface-2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.gr.g-warn { background: #FFF1D6; color: #946B00; } .gr.g-avoid { background: var(--bad); color: #fff; }
+.gr:hover { filter: brightness(1.05); }
+tr.row-g-go td { background: color-mix(in srgb, var(--good) 8%, transparent); }
+tr.row-g-avoid td { background: color-mix(in srgb, var(--bad) 7%, transparent); }
+.judge { display: grid; gap: 4px; }
+.jstep { display: grid; grid-template-columns: 22px 44px 1fr; gap: 6px; align-items: center; font-size: 0.84rem; padding: 6px 8px; border-radius: 10px; background: var(--surface-2); }
+.jn { font-weight: 800; color: var(--ink-3); } .jl { font-weight: 800; }
 /* 한난조습 지도 */
 .cmap-wrap { display: grid; grid-template-columns: minmax(0, 300px) 1fr; gap: 18px; align-items: center; }
 @media (max-width: 600px) { .cmap-wrap { grid-template-columns: 1fr; } }
@@ -1337,6 +1351,21 @@ var GLOSSARY = {
   '축적기': ['운의 시기', '의미: 기반을 만드는 힘이 좋은 때입니다. 나를 채워 주는 기운(인성·비겁)이 들어오거나, 크게 좋지도 나쁘지도 않아 차분히 쌓기 좋은 때입니다.\n행동: 제작·저축·시스템 만들기·실력 쌓기. 당장의 성과보다 다음 공격기를 위한 준비에 집중합니다.'],
   '방어기': ['운의 시기', '의미: 부담이 내 감당 능력보다 커지기 쉬운 때입니다. 내 사주가 꺼리는 기운이 들어오거나, 힘이 약한데 일·돈·책임이 몰려올 때입니다.\n행동: 현금 보존·정리·완주. 새 일을 벌이기보다 하던 일을 마무리하고, 지출과 무리한 약속을 줄입니다.'],
 
+  // ── 일진 행동모드·시진 실행 등급
+  '일진 행동모드': ['운의 시기', '하루를 좋다·나쁘다가 아니라 "오늘 무엇을 하기 좋은가"로 나눈 여섯 가지입니다. 공격일(새 판을 뚫음), 확장일(검증된 것을 키움), 수확일(결과를 회수), 축적일(내부 역량 강화), 전환일(구조를 바꿈), 방어일(손실 가능성 관리)이 있습니다. 방어일도 흉일이 아니라 "지키기 좋은 날"입니다.'],
+  '공격일': ['운의 시기', '핵심 의미: 새로운 판을 뚫는 날입니다. 필요한 기운이 들어오면서 나와 같은 기운(비겁)이나 내가 만드는 기운(식상)이 강해질 때입니다.\n그날 할 일: 제안·투고·영업·협상·고백·발표.'],
+  '확장일': ['운의 시기', '핵심 의미: 검증된 것을 키우는 날입니다. 필요한 기운이 들어오면서 규칙·조직·지위의 기운(관성)이 강해질 때입니다.\n그날 할 일: 증액·재계약·파트너십·홍보 확대.'],
+  '수확일': ['운의 시기', '핵심 의미: 결과를 회수하는 날입니다. 필요한 기운이 들어오면서 재물·결과의 기운(재성)이 강해질 때입니다.\n그날 할 일: 계약 확정·수금·판매·성과 회수.'],
+  '축적일': ['운의 시기', '핵심 의미: 내부 역량을 강화하는 날입니다. 나를 채워 주는 기운(인성)이 들어오거나, 크게 좋지도 나쁘지도 않은 날입니다.\n그날 할 일: 제작·기획·공부·문서·재무·저축.'],
+  '전환일': ['운의 시기', '핵심 의미: 기존 구조를 바꾸는 날입니다. 그날의 글자가 나의 핵심 자리(일지·월지·일간)와 충·형을 만들거나 크게 합을 이룰 때입니다.\n그날 할 일: 해지·이직·이사·정리·리뉴얼.'],
+  '방어일': ['운의 시기', '핵심 의미: 손실 가능성을 관리하는 날입니다. 흉일이라는 뜻이 아니라, 새로 벌이기보다 지키는 편이 이득인 날입니다.\n그날 할 일: 검토·유지·완료·휴식·현금 보존.'],
+  '실행 등급': ['운의 시기', '시진(2시간 단위)마다 "오늘의 목적"과 얼마나 잘 맞는지를 네 단계로 매긴 것입니다. ◎ 실행, ○ 활용, △ 주의, × 회피가 있습니다. 목적(일반·계약·돈·창작)을 고르면 그 목적에 맞는 기운이 들어오는 시간에 ◎가 붙습니다. 계약은 관성·인성, 돈은 재성·식상, 창작은 식상·인성 기운을 봅니다.'],
+  '실행': ['운의 시기', '◎ 실행: 그날의 목적과 시진이 잘 맞는 시간입니다. 중요한 전화, 제출, 계약 서명, 공개 버튼 누르기처럼 결과가 생기는 행동을 이 시간에 둡니다.'],
+  '활용': ['운의 시기', '○ 활용: 특별히 강하지는 않지만 안정적인 시간입니다. 회의·업무·제작 같은 일반적인 일에 무난합니다.'],
+  '주의': ['운의 시기', '△ 주의: 원국의 일지·월지나 그날 일진과 충·형·파·해 같은 불안 요소가 있는 시간입니다. 중요한 결정은 가능하면 다른 시간대로 옮깁니다.'],
+  '회피': ['운의 시기', '× 회피: 그날의 목적과 충돌이 상당히 강한 시간입니다(그날 일진과 정면 충돌하거나 점수가 크게 낮음). 굳이 이 시간에 중요한 일을 둘 이유가 없다면 피합니다.'],
+  '판정 순서': ['운의 시기', '하루를 판단할 때 큰 흐름에서 작은 흐름 순서로 봅니다. ① 세운(올해 기본 환경) → ② 월운(이번 달 행동 방향) → ③ 일진(오늘의 행동모드) → ④ 목적(계약인지, 돈인지, 창작인지) → ⑤ 시진(실제 실행 시간).'],
+
   // ── 구조
   '관살혼잡': ['구조', '정관(규칙)과 편관(압박)이 함께 있는 구조입니다. 나를 누르는 기준이 여러 방향에서 들어와 진로·직장·이성 관계에서 선택이 복잡해진다고 봅니다. 식신이 편관을 다스리거나 한쪽이 합으로 묶이면 문제가 줄어듭니다. 천간에 둘 다 있으면 "강", 지지까지 포함해야 성립하면 "약"으로 표시합니다.'],
   '상관견관': ['구조', '상관(반항·자유로운 표현)이 정관(규칙·윗사람)을 공격하는 구조입니다. 조직이나 윗사람과 부딪치기 쉽고 말실수로 구설에 오르기 쉽다고 봅니다. 인성(공부·절제)이나 재성이 사이에 있으면 완화됩니다.'],
@@ -1637,12 +1666,59 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const phBtn = ph => `<button type="button" class="term ph ph-${PHASE[ph][0]}" data-term="${ph}">${ph}</button>`;
   const luckV = x => x.combined ?? (x.score ? x.score.total : 0);
   const phOf = x => M.luckPhase(S.ch, x, luckV(x));
-  // 다른 학파를 골랐을 때 뒤에 흐리게 겹쳐 보여줄 억부 기준 점수
-  const showGhost = () => S.ch.school !== 'eokbu' && !S.ch.yongFallback && S.ch.yongAll.eokbu.applicable;
-  const eokScoreObj = (p, stemW) => M.scoreLuck(S.ch, S.ch.yongAll.eokbu, p, { stemW });
-  const eokDaeunAt = ms => { const d = M.daeunAt(S.ch, ms); return d ? eokScoreObj(d, 0.4) : null; };
-  const eokCombined = (p, ms) => M.combinedScore(eokDaeunAt(ms), eokScoreObj(p, 0.5));
-  const phaseLegend = () => `<div class="legend">${Object.keys(PHASE).map(ph => `<span><i class="sw" style="background:${phCol(ph)}"></i>${term(ph)}</span>`).join('')}${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term('억부')} 기준</span>` : ''}</div>`;
+  // 비교용으로 뒤에 흐리게 겹쳐 보여줄 기준: 억부를 보고 있으면 조후, 그 밖(조후·통관)이면 억부
+  const altSchool = () => {
+    const cur = S.ch.yong.school, all = S.ch.yongAll;
+    if (cur === 'eokbu') return all.johu.applicable ? 'johu' : null;
+    return all.eokbu.applicable ? 'eokbu' : null;
+  };
+  const showGhost = () => altSchool() != null;
+  const schoolName = k => M.SCHOOLS[k].split(' ')[0];
+  const altScoreObj = (p, stemW) => M.scoreLuck(S.ch, S.ch.yongAll[altSchool()], p, { stemW });
+  const altDaeunAt = ms => { const d = M.daeunAt(S.ch, ms); return d ? altScoreObj(d, 0.4) : null; };
+  const altCombined = (p, ms) => M.combinedScore(altDaeunAt(ms), altScoreObj(p, 0.5));
+  const phaseLegend = () => `<div class="legend">${Object.keys(PHASE).map(ph => `<span><i class="sw" style="background:${phCol(ph)}"></i>${term(ph)}</span>`).join('')}${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))} 기준</span>` : ''}</div>`;
+  // 일진 6가지 행동모드: [색 이름, 핵심 의미, 그날 할 일]
+  const DAYMODE = {
+    '공격일': ['d-atk', '새로운 판을 뚫음', '제안·투고·영업·협상·고백·발표'],
+    '확장일': ['d-ext', '검증된 것을 키움', '증액·재계약·파트너십·홍보 확대'],
+    '수확일': ['d-hrv', '결과를 회수', '계약 확정·수금·판매·성과 회수'],
+    '축적일': ['d-acc', '내부 역량 강화', '제작·기획·공부·문서·재무·저축'],
+    '전환일': ['d-chg', '기존 구조를 바꿈', '해지·이직·이사·정리·리뉴얼'],
+    '방어일': ['d-def', '손실 가능성 관리', '검토·유지·완료·휴식·현금 보존'],
+  };
+  const dmCol = m => `var(--${DAYMODE[m][0]})`;
+  const dmTag = m => `<span class="ph ${DAYMODE[m][0]}">${m}</span>`;
+  const dmBtn = m => `<button type="button" class="term ph ${DAYMODE[m][0]}" data-term="${m}">${m}</button>`;
+  // 전환 조건이면 전환일, 점수가 좋으면 들어오는 기운(비겁·식상→공격, 재성→수확, 관성→확장, 인성→축적), 나쁘면 방어일
+  function dayMode(x) {
+    const p = phOf(x), v = luckV(x);
+    let mode;
+    if (p.phase === '전환기') mode = '전환일';
+    else if (v >= 12) mode = ['공격일', '공격일', '수확일', '확장일', '축적일'][p.grp];
+    else if (v <= -12 || p.phase === '방어기') mode = '방어일';
+    else mode = '축적일';
+    return { ...p, mode };
+  }
+  // 시진 4단계 실행 등급. 목적마다 맞는 기운(십성 묶음 번호: 0 비겁 1 식상 2 재성 3 관성 4 인성)
+  const PURPOSE = { gen: ['일반', null], deal: ['계약', [3, 4]], money: ['돈', [2, 1]], create: ['창작', [1, 4]] };
+  const GRADE = { '실행': ['◎', 'g-go'], '활용': ['○', 'g-use'], '주의': ['△', 'g-warn'], '회피': ['×', 'g-avoid'] };
+  const gradeTag = g => `<button type="button" class="term gr ${GRADE[g][1]}" data-term="${g}">${GRADE[g][0]} ${g}</button>`;
+  function hourGrade(dayX, hp, it) {
+    const v = it.score ? it.score.total : 0, grp = phOf(it).grp;
+    const natal = M.luckRelations(S.ch, hp).rels.filter(r => ['충', '형', '파', '해', '천간충'].includes(r.type) && r.members.some(m => m === 'day' || m === 'month'));
+    const withDay = M.relationsAmong([{ id: 'dayx', s: dayX.s, b: dayX.b }, { id: 'luck', s: hp.s, b: hp.b }]).filter(r => ['충', '형', '천간충'].includes(r.type));
+    const risks = [...natal.map(r => `${relTarget(r)} ${r.type}`), ...withDay.map(r => `그날 일진과 ${r.type}`)];
+    const want = PURPOSE[S.inp.purpose || 'gen'][1];
+    const fit = want ? want.includes(grp) : v >= 25;
+    const hardClash = withDay.some(r => r.type === '충' || r.type === '천간충') || natal.some(r => r.type === '충' && r.members.includes('day'));
+    let g;
+    if (v <= -35 || (hardClash && v < 0)) g = '회피';
+    else if (risks.length || v <= -12) g = '주의';
+    else if (v >= 12 && fit) g = '실행';
+    else g = '활용';
+    return { g, risks, fit, grp };
+  }
   const relTone = t => ['육합', '삼합', '반합', '방합', '천간합'].includes(t) ? 'good' : ['충', '천간충', '형'].includes(t) ? 'bad' : '';
 
   // 관리자 모드: 수정 문구는 서버(KV)에 저장되고, 비밀번호는 이 탭(sessionStorage)에만 둔다
@@ -1942,7 +2018,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <div class="li"><span class="k">강약 치우침</span><span class="v small">${term(st.zone)} · 나를 돕는 힘 <b class="num">${st.help.toFixed(1)}%</b> (중간 50%에서 ${a.skew.toFixed(0)}%p)</span><span></span></div>
         <div class="li"><span class="k">두 기준의 용신</span><span class="v small">${term('억부')} <b class="eltxt ${ECLS[a.eokYong]}">${elLabel(a.eokYong)}</b>${a.joYong != null ? ` · ${term('조후')} <b class="eltxt ${ECLS[a.joYong]}">${elLabel(a.joYong)}</b> (억부 기준으로는 ${a.joRole})` : ' · 조후 용신 없음'}</span><span></span></div>
       </div>
-      ${compact ? '' : `<p class="note">운세 흐름에서 조후를 고르면 억부 기준 점수가 흐린 막대로 함께 보입니다. 병행이면 두 기준이 모두 좋은 시기를 가장 좋은 때로 봅니다.${ch.school !== want && a.verdict !== '병행' ? ` <button type="button" class="btn" data-set="school:${want}">${a.verdict} 기준으로 보기</button>` : ''}</p>`}
+      ${compact ? '' : `<p class="note">운세 흐름에서는 지금 고른 기준과 반대편(억부↔조후) 점수가 흐린 막대로 함께 보입니다. 병행이면 두 기준이 모두 좋은 시기를 가장 좋은 때로 봅니다.${ch.school !== want && a.verdict !== '병행' ? ` <button type="button" class="btn" data-set="school:${want}">${a.verdict} 기준으로 보기</button>` : ''}</p>`}
     </div>`;
   }
   function climateCard(ch) {
@@ -2118,22 +2194,49 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   function phaseBox(x, kind) {
     const p = phOf(x), [c, mean, act] = PHASE[p.phase];
-    const alt = showGhost() ? (kind === 'daeun' ? eokScoreObj(x, 0.4).total : kind === 'seun' ? M.combinedScore(x.daeun ? eokScoreObj(x.daeun, 0.4) : null, eokScoreObj(x, 0.5)) : kind === 'wolun' ? eokCombined(x, x.startMs) : eokScoreObj(x, 0.5).total) : null;
+    const alt = showGhost() ? (kind === 'daeun' ? altScoreObj(x, 0.4).total : kind === 'seun' ? M.combinedScore(x.daeun ? altScoreObj(x.daeun, 0.4) : null, altScoreObj(x, 0.5)) : kind === 'wolun' ? altCombined(x, x.startMs) : altScoreObj(x, 0.5).total) : null;
     return `<div class="phbox ph-bg-${c}">
       <div class="phbox-h">${phBtn(p.phase)} <b>${mean}</b></div>
       <div class="small">할 일: <b>${act}</b></div>
       <div class="small">이 시기에 주로 들어오는 기운은 ${term(p.group)}입니다 → <b>${GROUP_ACT[p.group]}</b>에 힘을 쓰기 좋습니다.</div>
       ${p.triggers.length ? `<div class="small">변화의 계기: ${p.triggers.map(esc).join(', ')}</div>` : ''}
-      ${alt != null ? `<div class="small muted">억부 기준으로 보면 ${signed(alt)}점 (${M.bandOf(alt)}) — 지금 고른 ${M.SCHOOLS[S.ch.school].split(' ')[0]} 기준과 ${Math.sign(alt) === Math.sign(luckV(x)) ? '같은 방향' : '다른 방향'}입니다.</div>` : ''}
+      ${alt != null ? `<div class="small muted">${schoolName(altSchool())} 기준으로 보면 ${signed(alt)}점 (${M.bandOf(alt)}) — 지금 보는 ${schoolName(S.ch.yong.school)} 기준과 ${Math.sign(alt) === Math.sign(luckV(x)) ? '같은 방향' : '다른 방향'}입니다.</div>` : ''}
+    </div>`;
+  }
+  // 일진 풀이: 행동모드와 판정 순서(세운 → 월운 → 일진 → 목적 → 시진)
+  function dayBox(x) {
+    const ch = S.ch, dm = dayMode(x), [c, mean, act] = DAYMODE[dm.mode];
+    const ms = Date.UTC(x.date[0], x.date[1] - 1, x.date[2], 3), Y = M.yearPillarAt(ms).sajuYear;
+    const se = M.seunRange(ch, Y, Y)[0], wm = M.wolun(ch, Y).filter(m => m.startMs <= ms).pop();
+    const hours = sijinRows(x, x.date), best = hours.filter(h => h.gr.g === '실행'), ok = hours.filter(h => h.gr.g === '활용');
+    const hn = h => `${M.BR_K[h.hb]}시`;
+    const step = (n, label, body) => `<div class="jstep"><span class="jn">${n}</span><span class="jl">${label}</span><span class="jb">${body}</span></div>`;
+    return `<div class="phbox dm-bg" style="--dm:${dmCol(dm.mode)}">
+      <div class="phbox-h">${dmBtn(dm.mode)} <b>${mean}</b></div>
+      <div class="small">그날 할 일: <b>${act}</b></div>
+      <div class="small">들어오는 기운은 ${term(dm.group)} → ${GROUP_ACT[dm.group]}</div>
+      ${dm.triggers.length ? `<div class="small">변화의 계기: ${dm.triggers.map(esc).join(', ')}</div>` : ''}
+      ${dm.mode === '방어일' ? '<div class="small muted">방어일은 흉일이 아닙니다. 새 일을 벌이기보다 지키고 마무리하기 좋은 날이라는 뜻입니다.</div>' : ''}
+    </div>
+    <div class="judge"><h4>${term('판정 순서')}</h4>
+      ${step('①', '세운', se ? `${M.gzName(se)} ${phTag(phOf(se).phase)} 올해 기본 환경` : '—')}
+      ${step('②', '월운', wm ? `${M.gzName(wm)} ${phTag(phOf(wm).phase)} 이번 달 행동 방향` : '—')}
+      ${step('③', '일진', `${M.gzName(x)} ${dmTag(dm.mode)} 오늘의 행동모드`)}
+      ${step('④', '목적', `<b>${PURPOSE[S.inp.purpose || 'gen'][0]}</b> <span class="muted">(아래 시진 표에서 바꿀 수 있어요)</span>`)}
+      ${step('⑤', '시진', best.length ? `◎ 실행: <b>${best.map(hn).join(' · ')}</b>` : ok.length ? `◎ 시간이 없어 ○ 활용 시간을 씁니다: ${ok.map(hn).join(' · ')}` : '중요한 일은 다른 날로 옮기는 편이 좋습니다.')}
     </div>`;
   }
   function detailHTML(title, x, extra = '', kind = '') {
     if (!x || !x.score) return '';
     return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${pill(x.score.band)} <b class="num">${signed(x.score.total)}</b></span></div>
       <div class="small" style="color:var(--ink-2)">${luckCells(x)}</div>
-      ${kind ? phaseBox(x, kind) + luckEffects(x, kind) : ''}
+      ${kind ? (kind === 'ilun' ? dayBox(x) : phaseBox(x, kind)) + luckEffects(x, kind) : ''}
       <h4 style="margin:4px 0 0">점수 근거</h4>
       <div class="parts">${x.score.parts.map(p => `<div class="part"><span>${esc(p.label)}</span><span class="pv ${p.v > 0.5 ? 'pos' : p.v < -0.5 ? 'neg' : ''}">${signed(p.v)}</span></div>`).join('')}</div>${extra}</div>`;
+  }
+  function sijinRows(dayItem, ymd) {
+    const ch = S.ch, shift = (ch.timeMode === 'lmt' || ch.timeMode === 'ast') ? Math.round(ch.lon * 4 - 540) : 0;
+    return M.hourPillarsOfDay(dayItem.s).map((hp, hb) => { const it = M.luckItem(ch, hp, 0.5); return { hp, hb, it, st: 23 * 60 + hb * 120 - shift, gr: hourGrade(dayItem, hp, it) }; });
   }
   function sijinTable(dayItem, ymd) {
     const ch = S.ch;
@@ -2141,41 +2244,43 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const hm = m => pad(Math.floor(((m % 1440) + 1440) % 1440 / 60)) + ':' + pad(((m % 60) + 60) % 60);
     const isToday = ymd[0] === TODAY[0] && ymd[1] === TODAY[1] && ymd[2] === TODAY[2];
     const nowMin = (() => { const t = new Date(NOW + 540 * 60000); return t.getUTCHours() * 60 + t.getUTCMinutes(); })();
-    const rows = M.hourPillarsOfDay(dayItem.s).map((hp, hb) => {
-      const it = M.luckItem(ch, hp, 0.5);
-      const st = 23 * 60 + hb * 120 - shift, en = st + 120;
+    const rows = sijinRows(dayItem, ymd).map(({ hp, hb, it, st, gr }) => {
       const cur = isToday && ((nowMin - st) % 1440 + 1440) % 1440 < 120;
       const v = it.score ? it.score.total : 0;
-      return `<tr class="${cur ? 'cur' : ''}"><td>${M.BR_K[hb]}시</td><td class="num">${hm(st)}~${hm(en)}</td><td class="gz">${M.gzName(hp)}</td><td class="small">${term(it.stemTG)}/${term(it.branchTG)}</td><td>${it.score ? pill(it.score.band) : ''} <span class="num small">${signed(v)}</span></td></tr>`;
+      return `<tr class="${cur ? 'cur' : ''} row-${GRADE[gr.g][1]}"><td>${M.BR_K[hb]}시</td><td class="num">${hm(st)}~${hm(st + 120)}</td><td class="gz">${M.gzName(hp)}</td><td class="small">${term(it.stemTG)}/${term(it.branchTG)}</td><td>${gradeTag(gr.g)} <span class="num small muted">${signed(v)}</span>${gr.risks.length ? `<div class="small muted">${gr.risks.map(esc).join(', ')}</div>` : ''}</td></tr>`;
     }).join('');
-    return `<div><h3 style="margin:6px 0">시진 (時辰)</h3><div class="tbl-wrap"><table class="dt"><thead><tr><th>시진</th><th>시각</th><th>간지</th><th>십성</th><th>길흉</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <p class="note">시각은 ${shift ? `출생지 경도 보정(${shift}분)을 적용한 표준시입니다` : '한국 표준시 그대로입니다'}. 자시는 전날 밤부터 시작합니다${ch.jasi === 'ya' ? ' (야자시 설정: 밤 11시~자정은 다음 날 기준 천간을 씁니다)' : ''}.</p></div>`;
+    return `<div><div class="card-h" style="margin:6px 0"><h3>시진 (時辰) · ${term('실행 등급')}</h3><div class="field"><span>오늘의 목적</span>${seg('purpose', Object.entries(PURPOSE).map(([k, [l]]) => [k, l]), S.inp.purpose || 'gen')}</div></div>
+      <div class="tbl-wrap"><table class="dt"><thead><tr><th>시진</th><th>시각</th><th>간지</th><th>십성</th><th>등급</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="note">◎ 실행 = 목적과 잘 맞아 결과가 생기는 행동(전화·제출·서명·공개)을 두기 좋은 시간, ○ 활용 = 안정적이라 회의·업무·제작에 무난, △ 주의 = 충·형 같은 불안 요소가 있어 중요한 결정은 옮기기, × 회피 = 그날과 충돌이 강해 중요한 일은 피하기. 목적을 바꾸면 ◎ 시간이 달라집니다. 시각은 ${shift ? `출생지 경도 보정(${shift}분)을 적용한 표준시입니다` : '한국 표준시 그대로입니다'}. 자시는 전날 밤부터 시작합니다${ch.jasi === 'ya' ? ' (야자시 설정: 밤 11시~자정은 다음 날 기준 천간을 씁니다)' : ''}.</p></div>`;
   }
   function renderCalendar(cy, cm, cal, firstDow, sel, ilDetail) {
     const scored = cal.map((x, i) => ({ d: i + 1, v: x.score ? x.score.total : 0, x }));
     const best = [...scored].sort((a, b) => b.v - a.v).filter(q => q.v >= 12).slice(0, 3);
     const worst = [...scored].sort((a, b) => a.v - b.v).filter(q => q.v <= -12).slice(0, 3);
-    const tint = v => { const a = Math.round(Math.min(80, Math.abs(v)) / 80 * 44); return v >= 0 ? `color-mix(in srgb, var(--good) ${a}%, var(--surface-2))` : `color-mix(in srgb, var(--bad) ${a}%, var(--surface-2))`; };
+    // 칸 색 = 시기, 진하기 = 점수 크기
+    const tint = (v, dm) => `color-mix(in srgb, ${dmCol(dm)} ${14 + Math.round(Math.min(80, Math.abs(v)) / 80 * 36)}%, var(--surface))`;
     const dayBtn = q => `<button type="button" class="chip ${q.v >= 0 ? 'good' : 'bad'}" data-pick="ilun:${q.d}" style="border:0;cursor:pointer">${cm}/${q.d} ${M.gzName(q.x)} ${signed(q.v)}</button>`;
     const cells = scored.map(({ d, v, x }) => {
+      const dm = dayMode(x).mode;
       const isT = cy === TODAY[0] && cm === TODAY[1] && d === TODAY[2];
       const son = M.sonOf(x.lunar.d) === '없음';
       const strong = Math.abs(v) >= 45;
-      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}" style="background:${tint(v)}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''} · ${x.score ? x.score.band + ' ' + signed(v) : ''}">
+      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}" style="background:${tint(v, dm)}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''} · ${dm} · ${x.score ? x.score.band + ' ' + signed(v) : ''}">
         <span class="ctop"><span class="dn">${d}</span>${son ? '<span class="son" title="손 없는 날">손</span>' : ''}</span>
         <span class="dg">${M.gzName(x)}</span>
+        <span class="dmn" style="color:${dmCol(dm)}">${dm.slice(0, 2)}</span>
         <span class="sc${strong ? ' strong' : ''}">${signed(v)}</span>
         <span class="ld">${x.lunar.d === 1 ? x.lunar.m + '월' : x.lunar.d}</span></button>`;
     }).join('');
     return `<section class="card">
       <div class="card-h"><h2>${cy}년 ${cm}월 ${term('일운', '일진')} 달력</h2><span class="seg"><button data-act="ym:-1" aria-label="이전 달">‹</button><button data-act="ym:0">이번 달</button><button data-act="ym:1" aria-label="다음 달">›</button></span></div>
-      <div class="legend"><span><i class="sw" style="background:var(--good)"></i>길한 날</span><span><i class="sw" style="background:var(--bad)"></i>흉한 날</span><span><span class="son">손</span> ${term('손 없는 날')}</span><span>칸 아래 숫자 = 음력 일</span></div>
+      <div class="legend">${Object.keys(DAYMODE).map(m => `<span><i class="sw" style="background:${dmCol(m)}"></i>${term(m)}</span>`).join('')}<span>색이 진할수록 점수가 큼</span><span><span class="son">손</span> ${term('손 없는 날')}</span><span>칸 아래 숫자 = 음력 일</span></div>
       <div class="cal">${['일', '월', '화', '수', '목', '금', '토'].map(d => `<span class="dow">${d}</span>`).join('')}${'<span></span>'.repeat(firstDow)}${cells}</div>
       <div class="list">
         <div class="li"><span class="k">이달 길일</span><span class="v">${best.length ? best.map(dayBtn).join('') : '<span class="muted small">+12 이상인 날이 없습니다</span>'}</span><span></span></div>
         <div class="li"><span class="k">이달 주의일</span><span class="v">${worst.length ? worst.map(dayBtn).join('') : '<span class="muted small">−12 이하인 날이 없습니다</span>'}</span><span></span></div>
       </div>
-      ${ilDetail || '<p class="note">날짜를 누르면 그날의 점수 근거와 12시진(시간대별 간지·길흉)이 열립니다. 일진 점수는 이 사주의 용신 기준으로 그날 간지만 평가한 값이며, 대운·세운의 큰 흐름은 위 그래프에서 봅니다.</p>'}
+      ${ilDetail || '<p class="note">날짜를 누르면 그날의 행동모드, 판정 순서, 점수 근거와 12시진 실행 등급이 열립니다. 일진 점수는 이 사주의 용신 기준으로 그날 간지만 평가한 값이며, 대운·세운의 큰 흐름은 위 그래프에서 봅니다.</p>'}
     </section>`;
   }
   function yearSummary(curY) {
@@ -2198,7 +2303,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const se = M.seunRange(ch, curY, curY)[0];
     const wm = M.wolun(ch, curY); let curM = wm[0]; wm.forEach(m => { if (m.startMs <= NOW) curM = m; });
     const il = M.ilun(ch, TODAY[0], TODAY[1])[TODAY[2] - 1];
-    const nowCard = (k, lbl, x, sub) => `<div class="nowc" role="button" tabindex="0" data-pick="now:${k}"><span class="lbl">${lbl}</span><span class="gzb">${x ? M.gzName(x) : '—'}</span><span class="tgs">${x ? `${x.stemTG} · ${x.branchTG}` : '대운 전'}</span><span>${x && x.score ? phTag(phOf(x).phase) : ''} <span class="muted small">${sub}</span></span></div>`;
+    const nowCard = (k, lbl, x, sub) => `<div class="nowc" role="button" tabindex="0" data-pick="now:${k}"><span class="lbl">${lbl}</span><span class="gzb">${x ? M.gzName(x) : '—'}</span><span class="tgs">${x ? `${x.stemTG} · ${x.branchTG}` : '대운 전'}</span><span>${x && x.score ? (k === 'ilun' ? dmTag(dayMode(x).mode) : phTag(phOf(x).phase)) : ''} <span class="muted small">${sub}</span></span></div>`;
     const sel = S.sel || {};
     let nowDetail = '';
     if (sel.kind === 'now') {
@@ -2402,7 +2507,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     for (let Y = Math.ceil(y0 / 10) * 10; Y <= y1; Y += 10) s += `<text x="${x(Y)}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${Y}</text>`;
     const bw = Math.max(1.5, (W - L - R) / (y1 - y0 + 1) - 1.2);
     data.forEach(d => { const v = d.combined, yy = y(v), z = y(0); const h = Math.max(1.5, Math.abs(yy - z)); const col = phCol(phOf(d).phase); s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${Math.min(yy, z).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${col}"/>`; });
-    if (showGhost()) s += `<polyline class="ghost-line" points="${data.map(d => `${x(d.year).toFixed(1)},${y(M.combinedScore(d.daeun ? eokScoreObj(d.daeun, 0.4) : null, eokScoreObj(d, 0.5))).toFixed(1)}`).join(' ')}"/>`;
+    if (showGhost()) s += `<polyline class="ghost-line" points="${data.map(d => `${x(d.year).toFixed(1)},${y(M.combinedScore(d.daeun ? altScoreObj(d.daeun, 0.4) : null, altScoreObj(d, 0.5))).toFixed(1)}`).join(' ')}"/>`;
     const curY = M.yearPillarAt(NOW).sajuYear;
     if (curY >= y0 && curY <= y1) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.5" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T + 11}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
     const sel = S.sel && S.sel.kind === 'seun' ? S.sel.Y : null;
@@ -2428,10 +2533,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const k = el.dataset.chart;
       if (k === 'daeun') {
         const cur = M.daeunAt(ch, curMs);
-        drawDiv(el, ch.daeun.list.map((d, i) => ({ v: d.score.total, ph: phOf(d).phase, alt: showGhost() ? eokScoreObj(d, 0.4).total : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: `${d.startAge}세 대운 ${M.gzName(d)} · ${d.stemTG}/${d.branchTG} · ${d.score.band} ${signed(d.score.total)}` })));
+        drawDiv(el, ch.daeun.list.map((d, i) => ({ v: d.score.total, ph: phOf(d).phase, alt: showGhost() ? altScoreObj(d, 0.4).total : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: `${d.startAge}세 대운 ${M.gzName(d)} · ${d.stemTG}/${d.branchTG} · ${d.score.band} ${signed(d.score.total)}` })));
       } else if (k === 'wolun') {
         const ms = M.wolun(ch, S.selYear);
-        drawDiv(el, ms.map((m, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity; return { v: m.combined, ph: phOf(m).phase, alt: showGhost() ? eokCombined(m, m.startMs) : null, label: M.gzName(m), sub: m.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: curMs >= m.startMs && curMs < nx, tip: `${m.termName}~ ${M.gzName(m)} · ${m.stemTG}/${m.branchTG} · 월운 ${signed(m.score.total)} · 대운 합산 ${signed(m.combined)}` }; }));
+        drawDiv(el, ms.map((m, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity; return { v: m.combined, ph: phOf(m).phase, alt: showGhost() ? altCombined(m, m.startMs) : null, label: M.gzName(m), sub: m.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: curMs >= m.startMs && curMs < nx, tip: `${m.termName}~ ${M.gzName(m)} · ${m.stemTG}/${m.branchTG} · 월운 ${signed(m.score.total)} · 대운 합산 ${signed(m.combined)}` }; }));
       } else if (k === 'life') drawLife(el);
     });
   }
