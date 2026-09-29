@@ -15,7 +15,6 @@
   --wood: #1F8A5B; --fire: #D8412F; --earth: #D9A520; --metal: #7A68B8; --water: #2A48A0;
   --wood-ink: #17744B; --fire-ink: #C9331F; --earth-ink: #946B00; --metal-ink: #5F4E9E; --water-ink: #2A48A0;
   --d-atk: #1E9E57; --d-ext: #0E9AA7; --d-hrv: #8A5CF6; --d-acc: #2F6BFF; --d-chg: #E08A00; --d-def: #E5533D;
-  --ph-atk: #1E9E57; --ph-chg: #E08A00; --ph-acc: #2F6BFF; --ph-def: #E5533D;
   --good: #1E9E57; --bad: #F0563F; --mid: #BAC1CE; --good-soft: #E3F5EA; --bad-soft: #FFEAE6;
   --shadow: 0 1px 2px rgba(18, 21, 31, .04), 0 10px 30px -12px rgba(30, 40, 90, .12);
   --f-display: "Noto Serif KR", "Nanum Myeongjo", "Apple SD Gothic Neo", serif;
@@ -231,18 +230,14 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 /* 운의 시기 */
 .ph { display: inline-block; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; color: #fff; text-decoration: none; border: 0; line-height: 1.4; }
 button.ph { cursor: pointer; } button.ph:hover { color: #fff; filter: brightness(1.08); }
-.ph-atk { background: var(--ph-atk); } .ph-chg { background: var(--ph-chg); } .ph-acc { background: var(--ph-acc); } .ph-def { background: var(--ph-def); }
 .phbox { border-radius: 14px; padding: 10px 12px; display: grid; gap: 4px; border-left: 4px solid; }
 .phbox-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.ph-bg-atk { background: color-mix(in srgb, var(--ph-atk) 9%, var(--surface)); border-color: var(--ph-atk); }
-.ph-bg-chg { background: color-mix(in srgb, var(--ph-chg) 10%, var(--surface)); border-color: var(--ph-chg); }
-.ph-bg-acc { background: color-mix(in srgb, var(--ph-acc) 8%, var(--surface)); border-color: var(--ph-acc); }
-.ph-bg-def { background: color-mix(in srgb, var(--ph-def) 8%, var(--surface)); border-color: var(--ph-def); }
 .chart .ghost { fill: var(--ink-3); opacity: .16; }
 .chart .ghost-line { fill: none; stroke: var(--ink-2); stroke-width: 1.4; opacity: .45; stroke-linejoin: round; }
 .sw.ghost { background: color-mix(in srgb, var(--ink-3) 30%, var(--surface)); }
 /* 일진 행동모드·시진 등급 */
 .d-atk { background: var(--d-atk); } .d-ext { background: var(--d-ext); } .d-hrv { background: var(--d-hrv); } .d-acc { background: var(--d-acc); } .d-chg { background: var(--d-chg); } .d-def { background: var(--d-def); }
+.lvl { display: inline-block; margin-left: 6px; font-size: 0.7rem; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 999px; vertical-align: 2px; font-family: var(--f-body); }
 .dm-bg { background: color-mix(in srgb, var(--dm) 9%, var(--surface)); border-color: var(--dm); }
 .cal .dmn { font-size: 0.64rem; font-weight: 800; line-height: 1.1; }
 .gr { border: 0; cursor: pointer; font-size: 0.74rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; text-decoration: none; white-space: nowrap; }
@@ -1345,11 +1340,13 @@ var GLOSSARY = {
   '길흉 점수': ['운', '이 앱이 계산한 운의 점수(−100~+100)입니다. 들어오는 운이 내 사주에 필요한 기운(용신·희신)이면 올라가고, 꺼리는 기운(기신·구신)이면 내려갑니다. 좋은 합이나 귀인이 있으면 더하고, 중요한 자리를 충하면 뺍니다. 그래프는 대운 40% + 세운 60%로 합산합니다. 해석을 돕는 참고용 모델이며, 통계적으로 검증된 예측이 아닙니다.'],
 
   // ── 운의 시기
-  '운의 시기': ['운의 시기', '운을 좋다·나쁘다로만 보지 않고, 그 시기에 무엇을 하면 좋은지로 나눈 것입니다. 공격기·전환기·축적기·방어기 네 가지가 있습니다. 같은 공격기라도 들어오는 기운에 따라 할 일이 다릅니다. 비겁(나와 같은 기운)이면 협상·독립·결단, 식상(내가 만드는 기운)이면 창작·출시·유통, 재성(내가 다루는 기운)이면 매출·사업·연애 기회, 관성(나를 다스리는 기운)이면 직책·평가·성과와 과부하 관리, 인성(나를 돕는 기운)이면 시스템·재무·기반 구축에 힘을 쓰기 좋습니다.'],
-  '공격기': ['운의 시기', '의미: 내 힘과 환경이 같이 받쳐 주는 때입니다. 들어오는 운이 내 사주에 필요한 기운이면서, 밖으로 쓰는 힘(식상·재성·관성)이 강해질 때입니다.\n행동: 론칭·협상·확장·승부. 미뤄 둔 일을 시작하고, 기회를 적극적으로 잡는 시기입니다.'],
-  '전환기': ['운의 시기', '의미: 충·합으로 변화가 커지는 때입니다. 들어오는 운이 나의 핵심 자리(일지·월지·일간)와 부딪치거나(충·형) 크게 묶일 때(삼합·방합)입니다. 좋은 쪽으로도 나쁜 쪽으로도 판이 바뀝니다.\n행동: 이동·교체·구조 변경. 이사, 이직, 조직 개편처럼 틀을 바꾸는 일을 계획적으로 하면 변화를 내 편으로 만들 수 있습니다.'],
-  '축적기': ['운의 시기', '의미: 기반을 만드는 힘이 좋은 때입니다. 나를 채워 주는 기운(인성·비겁)이 들어오거나, 크게 좋지도 나쁘지도 않아 차분히 쌓기 좋은 때입니다.\n행동: 제작·저축·시스템 만들기·실력 쌓기. 당장의 성과보다 다음 공격기를 위한 준비에 집중합니다.'],
-  '방어기': ['운의 시기', '의미: 부담이 내 감당 능력보다 커지기 쉬운 때입니다. 내 사주가 꺼리는 기운이 들어오거나, 힘이 약한데 일·돈·책임이 몰려올 때입니다.\n행동: 현금 보존·정리·완주. 새 일을 벌이기보다 하던 일을 마무리하고, 지출과 무리한 약속을 줄입니다.'],
+  '운의 시기': ['운의 시기', '운을 좋다·나쁘다로만 보지 않고, 그 시기에 무엇을 하면 좋은지로 나눈 것입니다. 공격기·확장기·수확기·축적기·전환기·방어기 여섯 가지가 있습니다.\n같은 이름이라도 운의 단위마다 풀이가 다릅니다. 대운은 10년짜리 인생 전략, 세운은 1년의 운영 전략, 월운은 1개월의 전술, 일진은 하루의 행동(공격일·확장일 등), 시진은 실행 타이밍(◎ 실행·○ 활용·△ 주의·× 회피)입니다.\n같은 시기라도 들어오는 기운에 따라 할 일이 다릅니다. 비겁(나와 같은 기운)이면 협상·독립·결단, 식상(내가 만드는 기운)이면 창작·출시·유통, 재성(내가 다루는 기운)이면 매출·사업·연애 기회, 관성(나를 다스리는 기운)이면 직책·평가·성과와 과부하 관리, 인성(나를 돕는 기운)이면 시스템·재무·기반 구축에 힘을 쓰기 좋습니다.'],
+  '공격기': ['운의 시기', '의미: 새로운 판을 뚫는 때입니다. 들어오는 운이 내 사주에 필요한 기운이면서, 나와 같은 기운(비겁)이나 내가 만드는 기운(식상)이 강해질 때입니다.\n행동: 대운(10년)은 창업·이직·새 분야 진출, 세운(1년)은 신규 계약·론칭·영업, 월운(1개월)은 제안서 발송·미팅·출시에 힘을 씁니다.'],
+  '확장기': ['운의 시기', '의미: 이미 검증된 것을 키우는 때입니다. 필요한 기운이 들어오면서 규칙·조직·지위의 기운(관성)이 강해질 때입니다. 공격기가 새 길을 뚫는 때라면, 확장기는 이미 되는 것을 크게 만드는 때입니다.\n행동: 대운은 규모 확대·승진·조직 키우기, 세운은 증액·재계약·파트너십·확장 투자, 월운은 광고 증액·재구매 유도·협업 확대.'],
+  '수확기': ['운의 시기', '의미: 이미 만들어 놓은 것을 현금화하는 때입니다. 필요한 기운이 들어오면서 재물·결과의 기운(재성)이 강해질 때입니다. 새로운 걸 벌이기보다 거둬들이는 편이 이득입니다.\n행동: 대운은 자산화·지분 정리·정산, 세운은 계약 확정·수금·판매·성과 회수, 월운은 청구·수금·마감·판매 집중.'],
+  '전환기': ['운의 시기', '의미: 충·합으로 변화가 커지는 때입니다. 들어오는 운이 나의 핵심 자리(일지·월지·일간)와 부딪치거나(충·형) 크게 묶일 때(삼합·방합)입니다. 좋은 쪽으로도 나쁜 쪽으로도 판이 바뀝니다.\n행동: 대운은 업종 전환·이주·인생 재설계, 세운은 조직 개편·이사·이직·사업 모델 변경, 월운은 계약 해지·거래처 교체·리뉴얼. 틀을 바꾸는 일을 계획적으로 하면 변화를 내 편으로 만들 수 있습니다.'],
+  '축적기': ['운의 시기', '의미: 기반을 만드는 힘이 좋은 때입니다. 나를 채워 주는 기운(인성)이 들어오거나, 크게 좋지도 나쁘지도 않아 차분히 쌓기 좋은 때입니다.\n행동: 대운은 학위·자격·전문성 쌓기, 세운은 제품 개발·교육·시스템 정비, 월운은 제작·기획·문서·재무 점검. 당장의 성과보다 다음 공격기를 위한 준비에 집중합니다.'],
+  '방어기': ['운의 시기', '의미: 부담이 내 감당 능력보다 커지기 쉬운 때입니다. 내 사주가 꺼리는 기운이 들어오거나, 힘이 약한데 일·돈·책임이 몰려올 때입니다.\n행동: 대운은 부채·건강 관리와 위험 분산, 세운은 현금 보존·비용 절감·하던 일 완주, 월운은 지출 줄이기·일정 여유 두기·휴식. 방어기는 나쁜 때가 아니라 지키는 편이 이득인 때입니다.'],
 
   // ── 일진 행동모드·시진 실행 등급
   '일진 행동모드': ['운의 시기', '하루를 좋다·나쁘다가 아니라 "오늘 무엇을 하기 좋은가"로 나눈 여섯 가지입니다. 공격일(새 판을 뚫음), 확장일(검증된 것을 키움), 수확일(결과를 회수), 축적일(내부 역량 강화), 전환일(구조를 바꿈), 방어일(손실 가능성 관리)이 있습니다. 방어일도 흉일이 아니라 "지키기 좋은 날"입니다.'],
@@ -1652,18 +1649,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const POS_AREA = { year: '조상·집안 배경과 어린 시절', month: '부모·형제, 청년기와 직장 환경', day: '배우자와 가정, 나의 속마음', hour: '자녀·아랫사람, 노년기와 일의 결과' };
   const LUCK_AREA = { daeun: ['대운', '이 10년 동안'], seun: ['세운', '이 해에'], wolun: ['월운', '이 달에'], ilun: ['일운', '이 날에'] };
   const relTarget = (x) => { const o = x.members.find(m => m !== 'luck'); return o ? M.POS_K[o] + (x.kind === 'stem' ? '간' : '지') : ''; };
-  // 운의 네 시기: [색 이름, 의미, 행동]
-  const PHASE = {
-    '공격기': ['atk', '내 힘과 환경이 같이 받쳐 줌', '론칭·협상·확장·승부'],
-    '전환기': ['chg', '충·합으로 변화가 커짐', '이동·교체·구조 변경'],
-    '축적기': ['acc', '기반을 만드는 힘이 좋음', '제작·저축·시스템·실력 쌓기'],
-    '방어기': ['def', '부담이 내 감당 능력보다 커지기 쉬움', '현금 보존·정리·완주'],
-  };
   // 같은 시기라도 들어오는 기운(십성 묶음)에 따라 할 일이 다르다
   const GROUP_ACT = { '비겁': '협상·독립·결단', '식상': '창작·출시·유통', '재성': '매출·사업·연애 기회', '관성': '직책·평가·성과, 그리고 과부하 관리', '인성': '시스템·재무·기반 구축·공부' };
-  const phCol = ph => `var(--ph-${PHASE[ph][0]})`;
-  const phTag = ph => `<span class="ph ph-${PHASE[ph][0]}">${ph}</span>`;
-  const phBtn = ph => `<button type="button" class="term ph ph-${PHASE[ph][0]}" data-term="${ph}">${ph}</button>`;
   const luckV = x => x.combined ?? (x.score ? x.score.total : 0);
   const phOf = x => M.luckPhase(S.ch, x, luckV(x));
   // 비교용으로 뒤에 흐리게 겹쳐 보여줄 기준: 억부를 보고 있으면 조후, 그 밖(조후·통관)이면 억부
@@ -1677,7 +1664,6 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const altScoreObj = (p, stemW) => M.scoreLuck(S.ch, S.ch.yongAll[altSchool()], p, { stemW });
   const altDaeunAt = ms => { const d = M.daeunAt(S.ch, ms); return d ? altScoreObj(d, 0.4) : null; };
   const altCombined = (p, ms) => M.combinedScore(altDaeunAt(ms), altScoreObj(p, 0.5));
-  const phaseLegend = () => `<div class="legend">${Object.keys(PHASE).map(ph => `<span><i class="sw" style="background:${phCol(ph)}"></i>${term(ph)}</span>`).join('')}${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))} 기준</span>` : ''}</div>`;
   // 일진 6가지 행동모드: [색 이름, 핵심 의미, 그날 할 일]
   const DAYMODE = {
     '공격일': ['d-atk', '새로운 판을 뚫음', '제안·투고·영업·협상·고백·발표'],
@@ -1700,6 +1686,41 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     else mode = '축적일';
     return { ...p, mode };
   }
+  // 대운·세운·월운 6분류: 규칙은 일진 행동모드와 같고, 풀이는 운의 단위마다 다르다
+  // 대운 = 10년 인생 전략, 세운 = 1년 운영 전략, 월운 = 1개월 전술 (일진 = 하루의 행동, 시진 = 실행 타이밍)
+  const MODE6_COL = { '공격기': 'd-atk', '확장기': 'd-ext', '수확기': 'd-hrv', '축적기': 'd-acc', '전환기': 'd-chg', '방어기': 'd-def' };
+  const LEVEL = {
+    daeun: ['10년 인생 전략', {
+      '공격기': ['새 분야에 뛰어들어 판을 넓히는 10년', '창업·이직·새 분야 진출·브랜드 만들기'],
+      '확장기': ['이미 자리 잡은 것을 키우는 10년', '규모 확대·승진·조직 키우기·자산 늘리기'],
+      '수확기': ['쌓아 온 것을 거두는 10년', '자산화·지분 정리·부동산·정산·다음 단계 준비'],
+      '축적기': ['실력과 기반을 쌓는 10년', '학위·자격·전문성·저축·시스템 구축'],
+      '전환기': ['인생의 판이 바뀌는 10년', '업종 전환·이주·관계 재편·인생 재설계'],
+      '방어기': ['무리하지 않고 지키는 10년', '부채 관리·건강 관리·핵심 유지·위험 분산'],
+    }],
+    seun: ['1년 운영 전략', {
+      '공격기': ['새 계약을 따오는 해', '신규 계약·론칭·영업·협상·승부'],
+      '확장기': ['이미 검증된 것을 키우는 해', '증액·재계약·파트너십·확장 투자·홍보 확대'],
+      '수확기': ['만들어 놓은 것을 현금화하는 해', '계약 확정·수금·판매·정산·성과 회수'],
+      '축적기': ['기반을 다지는 해', '제품 개발·교육·시스템 정비·저축'],
+      '전환기': ['구조를 바꾸는 해', '조직 개편·이사·이직·사업 모델 변경'],
+      '방어기': ['지키는 해', '현금 보존·비용 절감·위험 점검·하던 일 완주'],
+    }],
+    wolun: ['1개월 전술', {
+      '공격기': ['밖으로 나가는 달', '제안서 발송·미팅 잡기·출시·영업 집중'],
+      '확장기': ['되는 것에 힘을 싣는 달', '광고 증액·재구매 유도·협업 확대'],
+      '수확기': ['거둬들이는 달', '청구·수금·마감·판매 집중·성과 보고'],
+      '축적기': ['안을 다지는 달', '제작·기획·공부·문서 정리·재무 점검'],
+      '전환기': ['바꾸기 좋은 달', '계약 해지·거래처 교체·이사·리뉴얼'],
+      '방어기': ['버티는 달', '지출 줄이기·일정 여유 두기·마무리·휴식'],
+    }],
+  };
+  const LEVEL_ROLE = { daeun: '10년 인생 전략', seun: '1년 운영 전략', wolun: '1개월 전술', ilun: '하루의 행동', sijin: '실행 타이밍' };
+  const luckMode = x => { const d = dayMode(x); return { ...d, mode: d.mode.replace('일', '기') }; };
+  const m6Col = m => `var(--${MODE6_COL[m]})`;
+  const m6Tag = m => `<span class="ph ${MODE6_COL[m]}">${m}</span>`;
+  const m6Btn = m => `<button type="button" class="term ph ${MODE6_COL[m]}" data-term="${m}">${m}</button>`;
+  const modeLegend = () => `<div class="legend">${Object.keys(MODE6_COL).map(m => `<span><i class="sw" style="background:${m6Col(m)}"></i>${term(m)}</span>`).join('')}${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))} 기준</span>` : ''}</div>`;
   // 시진 4단계 실행 등급. 목적마다 맞는 기운(십성 묶음 번호: 0 비겁 1 식상 2 재성 3 관성 4 인성)
   const PURPOSE = { gen: ['일반', null], deal: ['계약', [3, 4]], money: ['돈', [2, 1]], create: ['창작', [1, 4]] };
   const GRADE = { '실행': ['◎', 'g-go'], '활용': ['○', 'g-use'], '주의': ['△', 'g-warn'], '회피': ['×', 'g-avoid'] };
@@ -2161,7 +2182,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <span class="lt-tg">${x.branchTG}</span>
       <span class="lt-us">${x.unseong} · ${x.sinsal12}</span>
       <span class="lt-ev">${luckChips(x)}</span>
-      <span class="lt-sc">${phTag(phOf(x).phase)}</span>
+      <span class="lt-sc">${m6Tag(luckMode(x).mode)}</span>
     </button>`;
   }
   // 이 시기에 들어오는 오행과 원국과의 작용(합·충·형·신살)을 풀어 쓴다
@@ -2193,10 +2214,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     </div>`;
   }
   function phaseBox(x, kind) {
-    const p = phOf(x), [c, mean, act] = PHASE[p.phase];
+    const p = luckMode(x), name = p.mode, [role, texts] = LEVEL[kind], [mean, act] = texts[name];
     const alt = showGhost() ? (kind === 'daeun' ? altScoreObj(x, 0.4).total : kind === 'seun' ? M.combinedScore(x.daeun ? altScoreObj(x.daeun, 0.4) : null, altScoreObj(x, 0.5)) : kind === 'wolun' ? altCombined(x, x.startMs) : altScoreObj(x, 0.5).total) : null;
-    return `<div class="phbox ph-bg-${c}">
-      <div class="phbox-h">${phBtn(p.phase)} <b>${mean}</b></div>
+    return `<div class="phbox dm-bg" style="--dm:${m6Col(name)}">
+      <div class="phbox-h">${m6Btn(name)} <b>${mean}</b> <span class="muted small">${LEVEL_ROLE[kind]}</span></div>
       <div class="small">할 일: <b>${act}</b></div>
       <div class="small">이 시기에 주로 들어오는 기운은 ${term(p.group)}입니다 → <b>${GROUP_ACT[p.group]}</b>에 힘을 쓰기 좋습니다.</div>
       ${p.triggers.length ? `<div class="small">변화의 계기: ${p.triggers.map(esc).join(', ')}</div>` : ''}
@@ -2219,8 +2240,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${dm.mode === '방어일' ? '<div class="small muted">방어일은 흉일이 아닙니다. 새 일을 벌이기보다 지키고 마무리하기 좋은 날이라는 뜻입니다.</div>' : ''}
     </div>
     <div class="judge"><h4>${term('판정 순서')}</h4>
-      ${step('①', '세운', se ? `${M.gzName(se)} ${phTag(phOf(se).phase)} 올해 기본 환경` : '—')}
-      ${step('②', '월운', wm ? `${M.gzName(wm)} ${phTag(phOf(wm).phase)} 이번 달 행동 방향` : '—')}
+      ${step('①', '세운', se ? `${M.gzName(se)} ${m6Tag(luckMode(se).mode)} 올해 기본 환경` : '—')}
+      ${step('②', '월운', wm ? `${M.gzName(wm)} ${m6Tag(luckMode(wm).mode)} 이번 달 행동 방향` : '—')}
       ${step('③', '일진', `${M.gzName(x)} ${dmTag(dm.mode)} 오늘의 행동모드`)}
       ${step('④', '목적', `<b>${PURPOSE[S.inp.purpose || 'gen'][0]}</b> <span class="muted">(아래 시진 표에서 바꿀 수 있어요)</span>`)}
       ${step('⑤', '시진', best.length ? `◎ 실행: <b>${best.map(hn).join(' · ')}</b>` : ok.length ? `◎ 시간이 없어 ○ 활용 시간을 씁니다: ${ok.map(hn).join(' · ')}` : '중요한 일은 다른 날로 옮기는 편이 좋습니다.')}
@@ -2249,7 +2270,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const v = it.score ? it.score.total : 0;
       return `<tr class="${cur ? 'cur' : ''} row-${GRADE[gr.g][1]}"><td>${M.BR_K[hb]}시</td><td class="num">${hm(st)}~${hm(st + 120)}</td><td class="gz">${M.gzName(hp)}</td><td class="small">${term(it.stemTG)}/${term(it.branchTG)}</td><td>${gradeTag(gr.g)} <span class="num small muted">${signed(v)}</span>${gr.risks.length ? `<div class="small muted">${gr.risks.map(esc).join(', ')}</div>` : ''}</td></tr>`;
     }).join('');
-    return `<div><div class="card-h" style="margin:6px 0"><h3>시진 (時辰) · ${term('실행 등급')}</h3><div class="field"><span>오늘의 목적</span>${seg('purpose', Object.entries(PURPOSE).map(([k, [l]]) => [k, l]), S.inp.purpose || 'gen')}</div></div>
+    return `<div><div class="card-h" style="margin:6px 0"><h3>시진 (時辰) · ${term('실행 등급')} <span class="lvl">${LEVEL_ROLE.sijin}</span></h3><div class="field"><span>오늘의 목적</span>${seg('purpose', Object.entries(PURPOSE).map(([k, [l]]) => [k, l]), S.inp.purpose || 'gen')}</div></div>
       <div class="tbl-wrap"><table class="dt"><thead><tr><th>시진</th><th>시각</th><th>간지</th><th>십성</th><th>등급</th></tr></thead><tbody>${rows}</tbody></table></div>
       <p class="note">◎ 실행 = 목적과 잘 맞아 결과가 생기는 행동(전화·제출·서명·공개)을 두기 좋은 시간, ○ 활용 = 안정적이라 회의·업무·제작에 무난, △ 주의 = 충·형 같은 불안 요소가 있어 중요한 결정은 옮기기, × 회피 = 그날과 충돌이 강해 중요한 일은 피하기. 목적을 바꾸면 ◎ 시간이 달라집니다. 시각은 ${shift ? `출생지 경도 보정(${shift}분)을 적용한 표준시입니다` : '한국 표준시 그대로입니다'}. 자시는 전날 밤부터 시작합니다${ch.jasi === 'ya' ? ' (야자시 설정: 밤 11시~자정은 다음 날 기준 천간을 씁니다)' : ''}.</p></div>`;
   }
@@ -2273,7 +2294,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <span class="ld">${x.lunar.d === 1 ? x.lunar.m + '월' : x.lunar.d}</span></button>`;
     }).join('');
     return `<section class="card">
-      <div class="card-h"><h2>${cy}년 ${cm}월 ${term('일운', '일진')} 달력</h2><span class="seg"><button data-act="ym:-1" aria-label="이전 달">‹</button><button data-act="ym:0">이번 달</button><button data-act="ym:1" aria-label="다음 달">›</button></span></div>
+      <div class="card-h"><h2>${cy}년 ${cm}월 ${term('일운', '일진')} 달력 <span class="lvl">${LEVEL_ROLE.ilun}</span></h2><span class="seg"><button data-act="ym:-1" aria-label="이전 달">‹</button><button data-act="ym:0">이번 달</button><button data-act="ym:1" aria-label="다음 달">›</button></span></div>
       <div class="legend">${Object.keys(DAYMODE).map(m => `<span><i class="sw" style="background:${dmCol(m)}"></i>${term(m)}</span>`).join('')}<span>색이 진할수록 점수가 큼</span><span><span class="son">손</span> ${term('손 없는 날')}</span><span>칸 아래 숫자 = 음력 일</span></div>
       <div class="cal">${['일', '월', '화', '수', '목', '금', '토'].map(d => `<span class="dow">${d}</span>`).join('')}${'<span></span>'.repeat(firstDow)}${cells}</div>
       <div class="list">
@@ -2303,7 +2324,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const se = M.seunRange(ch, curY, curY)[0];
     const wm = M.wolun(ch, curY); let curM = wm[0]; wm.forEach(m => { if (m.startMs <= NOW) curM = m; });
     const il = M.ilun(ch, TODAY[0], TODAY[1])[TODAY[2] - 1];
-    const nowCard = (k, lbl, x, sub) => `<div class="nowc" role="button" tabindex="0" data-pick="now:${k}"><span class="lbl">${lbl}</span><span class="gzb">${x ? M.gzName(x) : '—'}</span><span class="tgs">${x ? `${x.stemTG} · ${x.branchTG}` : '대운 전'}</span><span>${x && x.score ? (k === 'ilun' ? dmTag(dayMode(x).mode) : phTag(phOf(x).phase)) : ''} <span class="muted small">${sub}</span></span></div>`;
+    const nowCard = (k, lbl, x, sub) => `<div class="nowc" role="button" tabindex="0" data-pick="now:${k}"><span class="lbl">${lbl}</span><span class="gzb">${x ? M.gzName(x) : '—'}</span><span class="tgs">${x ? `${x.stemTG} · ${x.branchTG}` : '대운 전'}</span><span>${x && x.score ? (k === 'ilun' ? dmTag(dayMode(x).mode) : m6Tag(luckMode(x).mode)) : ''} <span class="muted small">${sub}</span></span></div>`;
     const sel = S.sel || {};
     let nowDetail = '';
     if (sel.kind === 'now') {
@@ -2332,22 +2353,22 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       </div>${nowDetail}
     </section>
     <section class="card">
-      <div class="card-h"><h2>${term('대운')} 흐름</h2><span class="note">${ch.daeun.forward ? term('순행') : term('역행')} · ${term('대운수')} ${ch.daeun.num} (정확히 ${ch.daeun.exact.toFixed(2)}년)</span></div>
-      ${phaseLegend()}
+      <div class="card-h"><h2>${term('대운')} 흐름 <span class="lvl">${LEVEL_ROLE.daeun}</span></h2><span class="note">${ch.daeun.forward ? term('순행') : term('역행')} · ${term('대운수')} ${ch.daeun.num} (정확히 ${ch.daeun.exact.toFixed(2)}년)</span></div>
+      ${modeLegend()}
       <div class="chart" data-chart="daeun"></div>
       <div class="lts">${ch.daeun.list.map((x, i) => luckTile(x, `${x.startAge}세 · ${x.startYear}`, 'daeun:' + i, sel.kind === 'daeun' && sel.i === i, du === x)).join('')}</div>
       ${daeunDetail || '<p class="note">막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
     </section>
     <section class="card">
-      <div class="card-h"><h2>연도별 길흉 · ${term('세운')}</h2></div>
-      ${phaseLegend()}
+      <div class="card-h"><h2>연도별 흐름 · ${term('세운')} <span class="lvl">${LEVEL_ROLE.seun}</span></h2></div>
+      ${modeLegend()}
       <div class="chart" data-chart="life"></div>
       ${yearSummary(curY)}
-      ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60% 종합 점수, 색은 시기(공격·전환·축적·방어)입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
+      ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60% 종합 점수, 색은 6분류(공격·확장·수확·축적·전환·방어)입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
     </section>
     <section class="card">
-      <div class="card-h"><h2>${Y}년 ${term('월운')}</h2><span class="seg"><button data-act="year:-1" aria-label="이전 해">‹</button><button data-act="year:0">올해</button><button data-act="year:1" aria-label="다음 해">›</button></span></div>
-      ${phaseLegend()}
+      <div class="card-h"><h2>${Y}년 ${term('월운')} <span class="lvl">${LEVEL_ROLE.wolun}</span></h2><span class="seg"><button data-act="year:-1" aria-label="이전 해">‹</button><button data-act="year:0">올해</button><button data-act="year:1" aria-label="다음 해">›</button></span></div>
+      ${modeLegend()}
       <div class="chart" data-chart="wolun"></div>
       <div class="lts">${M.wolun(ch, Y).map((x, i, a) => luckTile(x, `${x.termName} · ${kstYMD(x.startMs)[1]}월`, 'wolun:' + i, sel.kind === 'wolun' && sel.i === i, NOW >= x.startMs && NOW < (a[i + 1] ? a[i + 1].startMs : Infinity))).join('')}</div>
       ${wolDetail || `<p class="note">입춘(${Y}.2.4 무렵)부터 다음 해 소한까지의 12개월입니다. 막대를 누르면 그 달의 ${term('일운')} 달력으로 이동합니다.</p>`}
@@ -2475,7 +2496,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     items.forEach((it, i) => {
       const cx = L + step * (i + 0.5), v = it.v ?? 0, y0 = y(0), y1 = y(v);
       const top = Math.min(y0, y1), h = Math.max(Math.abs(y1 - y0), 2);
-      const col = it.ph ? phCol(it.ph) : Math.abs(v) < 1 ? 'var(--mid)' : v > 0 ? 'var(--good)' : 'var(--bad)';
+      const col = it.ph ? m6Col(it.ph) : Math.abs(v) < 1 ? 'var(--mid)' : v > 0 ? 'var(--good)' : 'var(--bad)';
       if (it.alt != null) { const ya = y(it.alt); s += `<rect x="${cx - bw / 2 - 4}" y="${Math.min(y0, ya)}" width="${bw + 8}" height="${Math.max(Math.abs(ya - y0), 2)}" rx="3" class="ghost"/>`; }
       const r = Math.min(4, h / 2), x0 = cx - bw / 2;
       const d = v >= 0 ? `M${x0},${y0} V${top + r} Q${x0},${top} ${x0 + r},${top} H${x0 + bw - r} Q${x0 + bw},${top} ${x0 + bw},${top + r} V${y0} Z`
@@ -2506,7 +2527,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     for (const g of [50, 0, -50]) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'}" ${g ? 'stroke-dasharray="3 3"' : ''}/><text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g > 0 ? '+' + g : g < 0 ? '−' + (-g) : '0'}</text>`;
     for (let Y = Math.ceil(y0 / 10) * 10; Y <= y1; Y += 10) s += `<text x="${x(Y)}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${Y}</text>`;
     const bw = Math.max(1.5, (W - L - R) / (y1 - y0 + 1) - 1.2);
-    data.forEach(d => { const v = d.combined, yy = y(v), z = y(0); const h = Math.max(1.5, Math.abs(yy - z)); const col = phCol(phOf(d).phase); s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${Math.min(yy, z).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${col}"/>`; });
+    data.forEach(d => { const v = d.combined, yy = y(v), z = y(0); const h = Math.max(1.5, Math.abs(yy - z)); const col = m6Col(luckMode(d).mode); s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${Math.min(yy, z).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${col}"/>`; });
     if (showGhost()) s += `<polyline class="ghost-line" points="${data.map(d => `${x(d.year).toFixed(1)},${y(M.combinedScore(d.daeun ? altScoreObj(d.daeun, 0.4) : null, altScoreObj(d, 0.5))).toFixed(1)}`).join(' ')}"/>`;
     const curY = M.yearPillarAt(NOW).sajuYear;
     if (curY >= y0 && curY <= y1) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.5" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T + 11}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
@@ -2521,7 +2542,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const d = nearest(ev); if (!d) return;
       xh.setAttribute('x1', x(d.year)); xh.setAttribute('x2', x(d.year)); xh.style.opacity = .35;
       xd.setAttribute('cx', x(d.year)); xd.setAttribute('cy', y(d.combined)); xd.style.opacity = 1;
-      showTip(ev, `${d.year}년 (만 ${d.age}세) ${M.gzName(d)} · <b>${phOf(d).phase}</b><br>세운 ${signed(d.score.total)} · 대운 ${d.daeun ? M.gzName(d.daeun) + ' ' + signed(d.daeun.score.total) : '시작 전'}<br>종합 <b>${signed(d.combined)}</b> · ${M.bandOf(d.combined)}`);
+      showTip(ev, `${d.year}년 (만 ${d.age}세) ${M.gzName(d)} · <b>${luckMode(d).mode}</b><br>세운 ${signed(d.score.total)} · 대운 ${d.daeun ? M.gzName(d.daeun) + ' ' + signed(d.daeun.score.total) : '시작 전'}<br>종합 <b>${signed(d.combined)}</b> · ${M.bandOf(d.combined)}`);
     });
     ov.addEventListener('mouseleave', () => { xh.style.opacity = 0; xd.style.opacity = 0; hideTip(); });
     ov.addEventListener('click', ev => { const d = nearest(ev); if (d) pick('seun:' + d.year); });
@@ -2533,10 +2554,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const k = el.dataset.chart;
       if (k === 'daeun') {
         const cur = M.daeunAt(ch, curMs);
-        drawDiv(el, ch.daeun.list.map((d, i) => ({ v: d.score.total, ph: phOf(d).phase, alt: showGhost() ? altScoreObj(d, 0.4).total : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: `${d.startAge}세 대운 ${M.gzName(d)} · ${d.stemTG}/${d.branchTG} · ${d.score.band} ${signed(d.score.total)}` })));
+        drawDiv(el, ch.daeun.list.map((d, i) => ({ v: d.score.total, ph: luckMode(d).mode, alt: showGhost() ? altScoreObj(d, 0.4).total : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: `${d.startAge}세 대운 ${M.gzName(d)} · ${d.stemTG}/${d.branchTG} · ${d.score.band} ${signed(d.score.total)}` })));
       } else if (k === 'wolun') {
         const ms = M.wolun(ch, S.selYear);
-        drawDiv(el, ms.map((m, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity; return { v: m.combined, ph: phOf(m).phase, alt: showGhost() ? altCombined(m, m.startMs) : null, label: M.gzName(m), sub: m.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: curMs >= m.startMs && curMs < nx, tip: `${m.termName}~ ${M.gzName(m)} · ${m.stemTG}/${m.branchTG} · 월운 ${signed(m.score.total)} · 대운 합산 ${signed(m.combined)}` }; }));
+        drawDiv(el, ms.map((m, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity; return { v: m.combined, ph: luckMode(m).mode, alt: showGhost() ? altCombined(m, m.startMs) : null, label: M.gzName(m), sub: m.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: curMs >= m.startMs && curMs < nx, tip: `${m.termName}~ ${M.gzName(m)} · ${m.stemTG}/${m.branchTG} · 월운 ${signed(m.score.total)} · 대운 합산 ${signed(m.combined)}` }; }));
       } else if (k === 'life') drawLife(el);
     });
   }
