@@ -367,6 +367,43 @@ tr.row-g-avoid td { background: color-mix(in srgb, var(--bad) 7%, transparent); 
 .zbd { display: flex; gap: 3px; height: 30px; border-radius: 10px; overflow: hidden; }
 .zbd > span { display: grid; place-items: center; color: #fff; font-size: 0.72rem; font-weight: 800; min-width: 0; }
 .zbd .term { color: #fff; text-decoration: none; }
+.cp-title { display: grid; gap: 4px; margin-top: 6px; }
+.cp-title h2 { font-size: 1.3rem; }
+.cp-els { display: grid; gap: 8px; }
+.cp-row { display: grid; grid-template-columns: 34px 1fr 34px auto; gap: 4px 10px; align-items: center; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 10px 12px; cursor: pointer; }
+.cp-row:hover { background: var(--surface-2); }
+.cp-el { font-family: var(--f-display); font-size: 1.5rem; font-weight: 900; line-height: 1; }
+.cp-bar { height: 10px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
+.cp-bar i { display: block; height: 100%; border-radius: 5px; background: var(--c, var(--accent)); }
+.cp-sc { text-align: right; font-variant-numeric: tabular-nums; }
+.cp-lab { font-size: 0.72rem; font-weight: 800; color: var(--ink-2); white-space: nowrap; }
+.cp-lab.good { color: var(--good); } .cp-lab.bad { color: var(--bad); }
+.cp-why { grid-column: 2 / -1; font-size: 0.8rem; color: var(--ink-3); line-height: 1.4; }
+.cp-h3 { margin: 6px 0 -4px; }
+.cp-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.cp-all { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; }
+@media (max-width: 560px) { .cp-tiles { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); } }
+.cp-gz { display: grid; justify-items: center; gap: 1px; padding: 8px 4px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); cursor: pointer; line-height: 1.25; }
+.cp-gz:hover { background: var(--surface-2); }
+.cp-gz .g { font-family: var(--f-display); font-size: 1.35rem; font-weight: 900; }
+.cp-gz .k { font-size: 0.68rem; color: var(--ink-3); }
+.cp-gz .sc { font-size: 1rem; font-variant-numeric: tabular-nums; }
+.cp-gz .ty { font-size: 0.68rem; font-weight: 700; color: var(--ink-2); }
+.cp-gz .co { font-size: 0.64rem; font-weight: 800; color: var(--ink-3); }
+.cp-gz .co.good { color: var(--good); } .cp-gz .co.bad { color: var(--bad); }
+.cp-filters { display: flex; flex-wrap: wrap; gap: 5px; }
+.cp-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.cp-pills .pill { background: var(--surface-2); color: var(--ink-2); font-size: 0.8rem; }
+.cp-pills .pill.good { background: var(--good-soft); color: var(--good); } .cp-pills .pill.bad { background: var(--bad-soft); color: var(--bad); }
+.cp-line, .cp-part { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 0.92rem; }
+.cp-line b.pos { color: var(--good); } .cp-line b.neg { color: var(--bad); }
+.cp-parts { display: grid; }
+.cp-part { display: grid; grid-template-columns: 1fr auto 48px; }
+.cp-part em { font-style: normal; text-align: right; color: var(--ink-3); }
+.cp-mk { font-weight: 900; letter-spacing: 0.1em; color: var(--ink-3); } .cp-mk.good { color: var(--good); } .cp-mk.bad { color: var(--bad); }
+.cp-sum { font-size: 0.9rem; color: var(--ink-2); line-height: 1.6; }
+.cp-disc { font-size: 0.82rem; color: var(--ink-2); background: var(--surface-2); border-radius: 12px; padding: 10px 12px; }
+.sheet h4 { margin: 6px 0 0; font-size: 0.9rem; }
 .pkgs { display: grid; gap: 8px; }
 .pkgd { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
 .pkgd[open] { background: var(--surface); }
@@ -1445,8 +1482,190 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   // 손 방향: 음력 일 끝자리 1·2 동, 3·4 남, 5·6 서, 7·8 북, 9·0 없음
   const sonOf = ld => ['없음', '동', '동', '남', '남', '서', '서', '북', '북', '없음'][ld % 10];
 
+
+  // ───────────── 궁합 기운: 나와 조화로운 오행·일주 후보 ─────────────
+  // 운세 흐름(evaluateLuck·LUCK_CFG)과는 완전히 별개의 계산이다. 점수·가중치도 이 config 한 곳에서만 조절한다.
+  // 모든 성분은 −1~+1(과잉 위험만 0~1)로 만들고, 성분별 가중치를 곱해 50점 기준에서 더하고 뺀다.
+  const COMPAT_CONFIG = {
+    // ── 궁합 오행: 이 오행을 가진 사람이 내 원국을 얼마나 보완하나
+    element: { eokbu: 34, johu: 26, balance: 22, tenGod: 8, excessPenalty: 10, scale: 0.55 },
+    eokbuMix: { struct: 0.7, role: 0.3, weakCenter: 30 },          // 강약 구조 70% + 억부 용신 역할 30%, 돕는 힘 20%·80%에서 ±1
+    climateModel: { share: 0.3, comfort: 0.3, tempK: 0.6, humK: 0.8, full: 1.2 },
+    balance: { ideal: 20, lackBelow: 15, over: 30, support: 0.3, own: 0.8 },
+    pattern: { '관살혼잡': [3, -0.6], '상관견관': [1, -0.5], '식상과다(설기)': [1, -0.6], '재다신약': [2, -0.7], '관살과다': [3, -0.7], '군겁쟁재': [0, -0.6], '효신탈식(도식)': [4, -0.5], '살인상생': [4, 0.4], '식신제살': [1, 0.3], '상관패인': [4, 0.4] },
+    patternLevel: { '강': 1, '약': 0.6, '참고': 0.5 },
+    spouse: { lackBelow: 15, overAbove: 35, bonus: 0.4, penalty: 0.3 },   // 남 재성·여 관성이 모자라면 채우는 쪽 가산
+    excess: { elFrom: 24, elTo: 42, groupFrom: 32, groupTo: 50, groupW: 0.8 },
+    // ── 궁합 일주: 상대 일간·일지를 가정한 간이 분석
+    dayStem: 0.55, dayBranch: 0.45,                                 // 오행 성분에서 일간과 일지(지장간 가중)가 차지하는 몫
+    elementBalance: 28, climate: 18, tenGod: 8, stemRelation: 10, branchRelation: 14, natalRelations: 10, excessPenalty: 10,
+    scale: 0.8, natalGain: 1.6,
+    posW: { day: 1, month: 0.5, year: 0.3, hour: 0.4 },              // 사용자 일간·일지가 가장 무겁고 월·시·년은 가볍게
+    bond: { '육합': 0.5, '반합': 0.35, '삼합': 0.6, '방합': 0.5, '천간합': 0.35 },
+    friction: { '충': 0.55, '형': 0.4, '원진': 0.35, '해': 0.3, '파': 0.2, '귀문관': 0.25, '천간충': 0.4 },
+    stemGroup: [0.15, 0.1, 0.1, -0.1, 0.3], yinyang: 0.12, sameBranch: 0.1,
+    relieve: 0.4,                                                    // 충이 이미 과한(불리한) 기운을 깨는 경우 마찰을 덜어 주는 비율
+    type: { frictionStim: 0.4, frictionStimAll: 0.85, bondStable: 0.35, frictionStable: 0.15, compFit: 0.2, compFitStrong: 0.45, active: 0.6 },
+    condition: { high: 66, ok: 55, low: 30, risk: 0.55, highRisk: 0.35 },
+  };
+  const CP_EL_TEMP = [0.4, 2, 0.2, -0.6, -2], CP_EL_HUM = [0.3, -2, -0.4, 0.3, 2]; // 목화토금수의 온도·습도 성향
+  const _cpEl = new WeakMap(), _cpDay = new WeakMap();
+
+  // 오행 e를 상대가 가져올 때의 성분 (−1~+1, excess는 0~1)
+  function cpElParts(ch, e) {
+    let m = _cpEl.get(ch); if (!m) _cpEl.set(ch, m = {});
+    if (m[e]) return m[e];
+    const C = COMPAT_CONFIG, w = ch.weights, st = ch.strength, dEl = stemEl(ch.pillars.day.s), g = groupOfEl(dEl, e);
+    // 억부: 신약이면 비겁·인성이, 신강이면 식상·재성·관성이 보완. 용신 역할은 30%만 섞는다
+    const s = lclamp((50 - st.help) / C.eokbuMix.weakCenter, -1, 1);
+    const weak = [1, -0.5, -0.7, -0.8, 1], strong = [-1, 0.8, 0.8, 1, -0.8];
+    const struct = s >= 0 ? weak[g] * s : strong[g] * -s;
+    const eokbu = lclamp(C.eokbuMix.struct * struct + C.eokbuMix.role * ROLE_V[ch.yongAll.eokbu.roles[e]] / 2, -1, 1);
+    // 조후: 원국의 한난조습 치우침을 줄이는지 (다섯 오행 평균을 빼서 상대 비교)
+    const K = C.climateModel, c = ch.climate, dev = (x, k) => Math.max(0, Math.abs(x) / k - K.comfort);
+    const gain = el => { const nt = (1 - K.share) * c.temp + K.share * CP_EL_TEMP[el], nh = (1 - K.share) * c.hum + K.share * CP_EL_HUM[el]; return dev(c.temp, K.tempK) - dev(nt, K.tempK) + dev(c.hum, K.humK) - dev(nh, K.humK); };
+    const gs = [0, 1, 2, 3, 4].map(gain), mean = gs.reduce((a, b) => a + b, 0) / 5;
+    const johu = lclamp((gs[e] - mean) / K.full, -1, 1);
+    // 균형: 적은 오행을 채우거나 많은 오행을 눌러 주는가
+    const B = C.balance, pct = w.pct;
+    let sup = 0;
+    for (let x = 0; x < 5; x++) {
+      if (x === e) continue;
+      const def = Math.max(0, (B.lackBelow - pct[x]) / B.lackBelow), exc = Math.min(1, Math.max(0, (pct[x] - B.over) / 20));
+      if (generates(e) === x) sup += B.support * def;
+      if (controls(e) === x) sup += B.support * exc;
+    }
+    const balance = lclamp(B.own * lclamp((B.ideal - pct[e]) / B.ideal, -1, 1) + sup, -1, 1);
+    // 십성 작용: 원국 구조의 약점을 더 키우면 −, 풀어 주면 +. 배우자성이 모자라면 채우는 쪽 +
+    let tg = 0;
+    for (const pt of ch.patterns.list) {
+      const r = C.pattern[pt.name]; if (!r || r[0] !== g) continue;
+      tg += r[1] * (C.patternLevel[pt.level] ?? 0.5);
+    }
+    const sg = ch.gender === 'F' ? 3 : 2, SP = C.spouse;
+    if (g === sg) { if (w.groups[sg] < SP.lackBelow) tg += SP.bonus; else if (w.groups[sg] > SP.overAbove) tg -= SP.penalty; }
+    const tenGod = lclamp(tg, -1, 1);
+    const X = C.excess;
+    const excess = Math.max(lramp(pct[e], X.elFrom, X.elTo), X.groupW * lramp(w.groups[g], X.groupFrom, X.groupTo));
+    return m[e] = { eokbu, johu, balance, tenGod, excess, group: g };
+  }
+  const cpElFit = q => { const W = COMPAT_CONFIG.element; return lclamp((q.eokbu * W.eokbu + q.johu * W.johu + q.balance * W.balance + q.tenGod * W.tenGod - q.excess * W.excessPenalty) / (W.eokbu + W.johu + W.balance + W.tenGod), -1, 1); };
+  const cpNatalWord = c => c.temp >= 0.6 ? '더운' : c.temp <= -0.6 ? '추운' : c.hum >= 0.8 ? '습한' : c.hum <= -0.8 ? '건조한' : '';
+
+  function evaluateCompatibleElement(ch, e) {
+    const C = COMPAT_CONFIG, W = C.element, p = cpElParts(ch, e), pct = ch.weights.pct[e], st = ch.strength;
+    const pts = { eokbu: p.eokbu * W.eokbu * W.scale, johu: p.johu * W.johu * W.scale, balance: p.balance * W.balance * W.scale, tenGod: p.tenGod * W.tenGod * W.scale, excess: -p.excess * W.excessPenalty * W.scale };
+    const score = Math.round(lclamp(50 + pts.eokbu + pts.johu + pts.balance + pts.tenGod + pts.excess, 0, 100));
+    const tgName = TG_GROUP[p.group], weak = st.help < 50, nat = cpNatalWord(ch.climate);
+    const rs = [], add = (mag, t) => rs.push([mag, t]);
+    if (Math.abs(p.eokbu) >= 0.2) add(Math.abs(p.eokbu) * W.eokbu, p.eokbu > 0 ? `${st.zone} 사주라 ${tgName}(${EL_K[e]}) 기운이 ${weak ? '나를 돕습니다' : '넘치는 힘을 덜어 줍니다'}` : `${st.zone} 사주에 ${tgName}(${EL_K[e]}) 기운은 ${weak ? '나를 더 소모시킵니다' : '이미 강한 힘을 더 키웁니다'}`);
+    if (Math.abs(p.johu) >= 0.15) add(Math.abs(p.johu) * W.johu, p.johu > 0 ? `${nat ? nat + ' ' : ''}원국의 온도·습도를 ${EL_K[e]} 기운이 맞춰 줍니다` : `${EL_K[e]} 기운이 ${nat || '원국의'} 기후 치우침을 더 키웁니다`);
+    if (Math.abs(p.balance) >= 0.2) add(Math.abs(p.balance) * W.balance, p.balance > 0 ? `원국에 ${EL_K[e]}이 ${pct.toFixed(0)}%로 ${pct < 15 ? '적어 채워 줍니다' : '적당해 균형을 돕습니다'}` : `원국에 ${EL_K[e]}이 이미 ${pct.toFixed(0)}%로 많아 더해지면 쏠립니다`);
+    if (Math.abs(p.tenGod) >= 0.2) add(Math.abs(p.tenGod) * W.tenGod, p.tenGod > 0 ? `${tgName} 기운이 원국의 구조를 풀어 줍니다` : `${tgName} 기운이 원국의 ${ch.patterns.list.filter(pt => C.pattern[pt.name] && C.pattern[pt.name][0] === p.group).map(pt => pt.name).join('·') || '약점'} 구조를 키웁니다`);
+    if (p.excess >= 0.3) add(p.excess * W.excessPenalty, `이미 많은 기운이라 과잉 위험이 있습니다`);
+    const reasons = rs.sort((a, b) => b[0] - a[0]).map(x => x[1]);
+    if (!reasons.length) reasons.push('원국에 뚜렷한 보완도 쏠림도 만들지 않는 무난한 기운입니다');
+    const label = score >= 75 ? '보완도 높음' : score >= 62 ? '조화도 높음' : score >= 48 ? '무난' : (p.excess >= 0.5 || p.balance < -0.4) ? '과잉 주의' : score >= 38 ? '혼합' : '조화 낮음';
+    return { element: e, score, label, eokbuFit: p.eokbu, johuFit: p.johu, balanceFit: p.balance, tenGodGroup: tgName, tenGodEffect: p.tenGod, excessRisk: p.excess, pts, reasons };
+  }
+
+  // 일주 후보 한 개(천간 s, 지지 b)를 사용자 원국과 비교
+  function evaluateDayPillarCompatibility(ch, s, b) {
+    const C = COMPAT_CONFIG, T = C.type, d = ch.pillars.day, dEl = stemEl(d.s), myB = d.b;
+    const stemQ = cpElParts(ch, stemEl(s)), hid = HIDDEN[b].map(([hs, dd]) => ({ hs, w: dd / 30, q: cpElParts(ch, stemEl(hs)) }));
+    const mixv = k => (C.dayStem * stemQ[k] + C.dayBranch * hid.reduce((a, h) => a + h.q[k] * h.w, 0)) / (C.dayStem + C.dayBranch);
+    const eokbu = mixv('eokbu'), johu = mixv('johu'), balance = mixv('balance'), tenGodC = mixv('tenGod'), excess = mixv('excess');
+    const EW = C.element;
+    const elementBalance = (EW.eokbu * eokbu + EW.balance * balance) / (EW.eokbu + EW.balance);
+    // 일간 ↔ 일간: 생극·음양·천간합·천간충 (합이 있어도 자동 최고점 아님)
+    let sv = C.stemGroup[groupOfEl(dEl, stemEl(s))] + (yang(s) !== yang(d.s) ? C.yinyang : 0);
+    const tags = [];
+    for (const r of relationsAmong([{ id: 'me', s: d.s }, { id: 'you', s }])) {
+      if (r.type === '천간합') { sv += C.bond['천간합']; tags.push({ kind: 'bond', where: '일간', name: r.name, v: C.bond['천간합'] }); }
+      else if (r.type === '천간충') { sv -= C.friction['천간충']; tags.push({ kind: 'friction', where: '일간', name: r.name, v: C.friction['천간충'] }); }
+    }
+    const stemRelation = lclamp(sv, -1, 1);
+    // 일지 ↔ 일지: 합은 결속, 충·형 등은 변화·마찰 신호로 따로 센다
+    let bond = 0, fr = 0;
+    for (const r of relationsAmong([{ id: 'me', b: myB }, { id: 'you', b }])) {
+      if (C.bond[r.type] != null) { bond += C.bond[r.type]; tags.push({ kind: 'bond', where: '일지', name: r.name, v: C.bond[r.type] }); }
+      else if (C.friction[r.type] != null) {
+        let f = C.friction[r.type];
+        if (r.type === '충') { const fit = cpElFit(cpElParts(ch, stemEl(mainHidden(myB)))); if (fit < 0) f *= 1 - C.relieve * Math.min(1, -fit * 2); }
+        fr += f; tags.push({ kind: 'friction', where: '일지', name: r.name, v: f });
+      }
+    }
+    if (myB === b) { bond += C.sameBranch; tags.push({ kind: 'bond', where: '일지', name: `${BR[b]}${BR[b]} 같은 지지`, v: C.sameBranch }); }
+    const branchRelation = lclamp(bond - fr, -1, 1);
+    // 원국 전체(년·월·시 위주, 일과의 단독 쌍은 위에서 이미 계산)
+    const natal = POS.filter(k => ch.pillars[k]).map(k => ({ id: k, s: ch.pillars[k].s, b: ch.pillars[k].b }));
+    let nB = 0, nF = 0;
+    for (const r of relationsAmong([...natal, { id: 'you', s, b }])) {
+      if (!r.members.includes('you') || (r.members.length === 2 && r.members.includes('day'))) continue;
+      const others = r.members.filter(m => m !== 'you'), w = Math.max(...others.map(o => C.posW[o] ?? 0.3));
+      const where = others.map(o => POS_K[o] + (r.kind === 'stem' ? '간' : '지')).join('·');
+      if (C.bond[r.type] != null) {
+        const fit = r.el != null ? cpElFit(cpElParts(ch, r.el)) : 0, v = C.bond[r.type] * w * (1 + 0.5 * fit);
+        nB += v; tags.push({ kind: 'bond', where, name: r.name, v });
+      } else if (C.friction[r.type] != null) {
+        let f = C.friction[r.type] * w;
+        if (r.type === '충') { const ob = others.map(o => ch.pillars[o] && ch.pillars[o].b).find(x => x != null); if (ob != null) { const fit = cpElFit(cpElParts(ch, stemEl(mainHidden(ob)))); if (fit < 0) f *= 1 - C.relieve * Math.min(1, -fit * 2); } }
+        nF += f; tags.push({ kind: 'friction', where, name: r.name, v: f });
+      }
+    }
+    const natalRelations = lclamp((nB - nF) * C.natalGain, -1, 1);
+    const risk = lclamp(1.1 * fr + 0.6 * nF + 0.5 * excess + 0.15 * Math.max(0, -elementBalance) + 0.1 * Math.max(0, -johu), 0, 1);
+    const parts = [
+      { key: 'elementBalance', label: '오행 보완', v: elementBalance, w: C.elementBalance },
+      { key: 'climate', label: '조후 보완', v: johu, w: C.climate },
+      { key: 'stemRelation', label: '일간 관계', v: stemRelation, w: C.stemRelation },
+      { key: 'branchRelation', label: '일지 관계', v: branchRelation, w: C.branchRelation },
+      { key: 'natalRelations', label: '원국 합충', v: natalRelations, w: C.natalRelations },
+      { key: 'tenGod', label: '십성 작용', v: tenGodC, w: C.tenGod },
+      { key: 'excess', label: '과잉 위험', v: -excess, w: C.excessPenalty },
+    ].map(x => ({ ...x, pts: x.v * x.w * C.scale }));
+    const score = Math.round(lclamp(50 + parts.reduce((a, x) => a + x.pts, 0), 0, 100));
+    // 유형: 마찰이 크면 상호자극, 결속이 크면 안정, 부족·과다를 채우면 보완, 식상·재성·관성 기운이 주도하면 활성
+    const supply = [0, 0, 0, 0, 0];
+    supply[groupOfEl(dEl, stemEl(s))] += C.dayStem;
+    hid.forEach(h => { supply[groupOfEl(dEl, stemEl(h.hs))] += C.dayBranch * h.w; });
+    const activeShare = (supply[1] + supply[2] + supply[3]) / (C.dayStem + C.dayBranch);
+    const compFit = (C.elementBalance * elementBalance + C.climate * johu) / (C.elementBalance + C.climate);
+    let type;
+    if (fr >= T.frictionStim || fr + nF >= T.frictionStimAll) type = '상호자극형';
+    else if (bond >= T.bondStable && fr <= T.frictionStable && compFit < T.compFitStrong) type = '안정형';
+    else if (compFit >= T.compFit) type = '보완형';
+    else if (activeShare >= T.active && score >= 50) type = '활성형';
+    else type = '혼합형';
+    const Q = C.condition;
+    const condition = (risk >= Q.risk || score < Q.low) ? '주의 요소 있음' : (score >= Q.high && risk < Q.highRisk) ? '조화 높음' : score >= Q.ok ? '조화' : '혼합';
+    // 핵심 이유·주의
+    const dName = STEM[d.s] + BR[d.b], gName = STEM[s] + BR[b], sTG = tenGod(d.s, s), bTG = tenGod(d.s, mainHidden(b));
+    const reasons = [];
+    reasons.push(`${STEM[s]}${EL[stemEl(s)]}은 나(${STEM[d.s]}) 기준 ${sTG}(${TG_GROUP[groupOfEl(dEl, stemEl(s))]}) 기운입니다`);
+    reasons.push(`${BR[b]}의 지장간(${hid.map(h => STEM[h.hs]).join('·')})이 ${hid.slice().sort((a, x) => x.w - a.w).map(h => EL_K[stemEl(h.hs)]).filter((v, i, a) => a.indexOf(v) === i).join('·')} 기운을 공급합니다`);
+    if (elementBalance >= 0.2) reasons.push('억부·오행 균형 면에서 원국의 부족한 곳을 채워 줍니다');
+    else if (elementBalance <= -0.2) reasons.push('억부·오행 균형 면에서 원국의 쏠림을 키우는 편입니다');
+    if (johu >= 0.15) reasons.push(`${cpNatalWord(ch.climate) || '원국'}의 기후 치우침을 ${johu > 0.4 ? '크게 ' : ''}맞춰 줍니다`); else if (johu <= -0.15) reasons.push('원국의 기후 치우침을 더 키웁니다');
+    tags.filter(t => t.kind === 'bond').forEach(t => reasons.push(`${t.where} ${t.name} — 결속·연결 신호`));
+    const cautions = tags.filter(t => t.kind === 'friction').map(t => `${t.where} ${t.name} — 변화·마찰 신호${t.name.includes('충') ? '(불리한 기운을 깨는 효과가 있으면 완화)' : ''}`);
+    if (excess >= 0.3) cautions.push('이미 많은 오행을 더 키울 수 있어 과잉 위험이 있습니다');
+    const i = gzIndex(s, b);
+    return {
+      i, s, b, ganzhi: gName, ganzhiK: STEM_K[s] + BR_K[b], score, type, condition, risk,
+      elementFit: elementBalance, stemRelation, branchRelation, tenGodEffect: tenGodC, climateFit: johu, balanceFit: balance, relationFit: natalRelations, excessRisk: excess,
+      bond, friction: fr, natalBond: nB, natalFriction: nF, activeShare, compFit, stemTG: sTG, branchTG: bTG, parts, tags, reasons, cautions, myDay: dName,
+    };
+  }
+  // 60갑자 전체 평가(점수 순)
+  function compatDayPillars(ch) {
+    let all = _cpDay.get(ch);
+    if (!all) { all = []; for (let i = 0; i < 60; i++) all.push(evaluateDayPillarCompatibility(ch, i % 10, i % 12)); all.sort((a, x) => x.score - a.score || a.risk - x.risk); _cpDay.set(ch, all); }
+    return all;
+  }
+
   G.Manse = {
-    compute, getSamjae, SAMJAE_RULES, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
+    compute, getSamjae, SAMJAE_RULES, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, mainHidden, yang, gzName, gzNameK,
@@ -2387,6 +2606,101 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${adviceCard(ch)}
     </section>`;
   }
+
+  // ───────────── 나와 조화로운 기운 (궁합 오행·궁합 일주) ─────────────
+  // 운세 흐름 점수와는 별개. 계산은 M.evaluateCompatibleElement / M.evaluateDayPillarCompatibility (COMPAT_CONFIG 한 곳에서 조절)
+  const CP_TYPES = ['보완형', '활성형', '안정형', '상호자극형', '혼합형'];
+  const CP_TYPE_INFO = {
+    '보완형': '원국의 부족하거나 과한 곳을 채워 주는 조합입니다.',
+    '활성형': '식상·재성·관성 쪽 기운이 주도해 활동성과 추진력을 더하는 조합입니다.',
+    '안정형': '합의 결속이 크고 마찰이 적어 편안하게 이어지는 조합입니다.',
+    '상호자극형': '충·형 같은 자극이 커서 변화와 마찰이 함께 오는 조합입니다. 나쁘다는 뜻이 아니라 서로를 크게 흔드는 관계입니다.',
+    '혼합형': '보완·자극·결속이 어느 한쪽으로 뚜렷하게 기울지 않은 조합입니다.',
+  };
+  const CP_FILTERS = ['전체', ...CP_TYPES.slice(0, 4), '주의 요소 있음'];
+  const cpTone = c => c === '조화 높음' || c === '조화' ? 'good' : c === '주의 요소 있음' ? 'bad' : '';
+  const cpMark = v => { const a = Math.abs(v), m = a >= 0.6 ? 3 : a >= 0.3 ? 2 : a >= 0.1 ? 1 : 0; return m ? (v > 0 ? '+' : '−').repeat(m) : '·'; };
+  const cpPts = v => { const r = Math.round(v); return r > 0 ? `+${r}` : r < 0 ? `−${-r}` : '0'; };
+  const cpDisclaimer = '궁합 일주는 상대방의 일주(두 글자)만 가정한 참고 분석입니다. 실제 궁합은 두 사람의 전체 원국을 비교하면 결과가 달라질 수 있습니다.';
+
+  function renderCompat(ch) {
+    const els = [0, 1, 2, 3, 4].map(e => M.evaluateCompatibleElement(ch, e)).sort((a, b) => b.score - a.score);
+    const all = M.compatDayPillars(ch);
+    const good = all.filter(x => x.condition !== '주의 요소 있음').slice(0, 5);
+    const risky = all.filter(x => x.risk >= 0.3).sort((a, b) => b.risk - a.risk || a.score - b.score).slice(0, 5);
+    const filt = S.cpFilter || 'all', fl = CP_FILTERS.includes(filt) ? filt : '전체';
+    const list = all.filter(x => fl === '전체' || (fl === '주의 요소 있음' ? x.condition === fl : x.type === fl));
+    const tile = x => `<button type="button" class="cp-gz" data-cp="gz:${x.i}"><span class="g"><span class="eltxt ${ECLS[M.stemEl(x.s)]}">${M.STEM[x.s]}</span><span class="eltxt ${ECLS[M.BR_EL[x.b]]}">${M.BR[x.b]}</span></span><span class="k">${x.ganzhiK}</span><b class="sc">${x.score}</b><span class="ty">${x.type}</span><span class="co ${cpTone(x.condition)}">${x.condition}</span></button>`;
+    const cfg = M.COMPAT_CONFIG;
+    return `
+    <div class="cp-title"><h2>나와 조화로운 기운</h2><p class="note">내 원국의 억부·조후·오행 균형·십성 구조를 기준으로, 어떤 기운이 나를 보완하고 어떤 기운이 부딪히는지 계산한 참고 분석입니다. 운세 흐름 점수와는 별개입니다.</p></div>
+    <section class="card">
+      <div class="card-h"><h2>궁합 오행</h2><span class="note">누르면 근거가 열립니다</span></div>
+      <div class="cp-els">${els.map(r => `<button type="button" class="cp-row ${ECLS[r.element]}" data-cp="el:${r.element}">
+        <span class="cp-el eltxt ${ECLS[r.element]}">${M.EL[r.element]}</span>
+        <span class="cp-bar"><i style="width:${r.score}%"></i></span><b class="cp-sc">${r.score}</b><span class="cp-lab ${r.score >= 62 ? 'good' : r.label === '과잉 주의' || r.score < 38 ? 'bad' : ''}">${r.label}</span>
+        <span class="cp-why">${esc(r.reasons[0])}</span></button>`).join('')}</div>
+      <p class="note">용신을 그대로 옮긴 표가 아닙니다. 억부·조후·균형·십성 작용·과잉 위험을 따로 계산해 합친 값이며, 특정 오행의 사람이 무조건 좋다·나쁘다는 뜻이 아닙니다.</p>
+    </section>
+    <section class="card">
+      <div class="card-h"><h2>궁합 일주</h2><span class="note">60일주 전체를 내 원국과 비교</span></div>
+      <h3 class="cp-h3">보완도가 높은 일주</h3>
+      <div class="cp-tiles">${good.map(tile).join('')}</div>
+      <h3 class="cp-h3">충돌·마찰에 주의할 일주 <span class="muted small">일지 충·형 등 자극이 큰 순</span></h3>
+      <div class="cp-tiles">${risky.map(tile).join('')}</div>
+      <div class="frow"><button class="btn" data-act="cp-all">${S.cpAll ? '전체 접기' : '60일주 전체 보기'}</button></div>
+      ${S.cpAll ? `<div class="cp-filters" role="group" aria-label="유형 필터">${CP_FILTERS.map(f => `<button type="button" class="opt" data-act="cp-f:${f}" aria-pressed="${fl === f}">${f}${f === '전체' ? ` ${all.length}` : ` ${all.filter(x => f === '주의 요소 있음' ? x.condition === f : x.type === f).length}`}</button>`).join('')}</div>
+        <div class="cp-all">${list.map(tile).join('') || '<p class="muted small">해당하는 일주가 없습니다.</p>'}</div>` : ''}
+      <p class="note">${cpDisclaimer}</p>
+    </section>
+    <section class="card">
+      <div class="card-h"><h2>궁합 판단 기준</h2><span class="note">눌러서 펼치기</span></div>
+      <div class="acc">
+        <details><summary><b>궁합 오행은 어떻게 계산하나</b><span class="small muted" style="display:block">다섯 성분을 각각 계산해 50점 기준에서 더하고 뺍니다</span></summary>
+          <dl><dt>억부 보완 (최대 ±${cfg.element.eokbu})</dt><dd>신약이면 비겁·인성, 신강이면 식상·재성·관성을 채우는 정도입니다. 강약 구조가 70%, 억부 용신 역할이 30%입니다.</dd>
+          <dt>조후 보완 (최대 ±${cfg.element.johu})</dt><dd>이 오행이 들어왔을 때 원국의 온도·습도 치우침이 줄어드는 정도입니다.</dd>
+          <dt>균형 (최대 ±${cfg.element.balance})</dt><dd>부족한 오행을 채우거나 넘치는 오행을 눌러 주는 효과입니다.</dd>
+          <dt>십성 작용 (최대 ±${cfg.element.tenGod})</dt><dd>관살혼잡·재다신약 같은 원국 구조의 약점을 키우는지 풀어 주는지, 배우자성(남 재성·여 관성)이 부족한지를 봅니다.</dd>
+          <dt>과잉 위험 (최대 −${cfg.element.excessPenalty})</dt><dd>이미 많은 오행이나 십성을 더 키우는 위험입니다.</dd></dl></details>
+        <details><summary><b>궁합 일주는 어떻게 계산하나</b><span class="small muted" style="display:block">상대의 일간·일지와 내 원국 전체의 관계를 봅니다</span></summary>
+          <dl><dt>오행 보완 (±${cfg.elementBalance})·조후 (±${cfg.climate})·십성 (±${cfg.tenGod})</dt><dd>상대 일간(${Math.round(cfg.dayStem * 100)}%)과 일지의 지장간(${Math.round(cfg.dayBranch * 100)}%, 여기·중기·정기 일수로 가중)이 공급하는 오행을 위 오행 기준으로 평가합니다.</dd>
+          <dt>일간 관계 (±${cfg.stemRelation})</dt><dd>생극·음양·천간합·천간충. 천간합이 있어도 자동으로 최고점이 되지 않습니다.</dd>
+          <dt>일지 관계 (±${cfg.branchRelation})</dt><dd>육합·삼합(반합)은 결속, 충·형·원진·해·파는 변화·마찰 신호로 따로 셉니다. 충이 이미 과한 기운을 깨는 경우에는 마찰을 덜어 줍니다.</dd>
+          <dt>원국 합충 (±${cfg.natalRelations})</dt><dd>내 년·월·시와 만드는 관계입니다. 일간·일지 관계보다 가볍게(월 ${cfg.posW.month}·시 ${cfg.posW.hour}·년 ${cfg.posW.year}배) 반영합니다.</dd>
+          <dt>과잉 위험 (−${cfg.excessPenalty})</dt><dd>이미 많은 오행을 더 키우는 위험입니다.</dd></dl></details>
+        <details><summary><b>유형과 조건</b><span class="small muted" style="display:block">점수와 관계의 성격을 따로 판정합니다</span></summary>
+          <dl>${CP_TYPES.map(t => `<dt>${t}</dt><dd>${CP_TYPE_INFO[t]}</dd>`).join('')}
+          <dt>조화 높음 · 조화 · 혼합 · 주의 요소 있음</dt><dd>점수와 위험도로 정하는 종합 조건입니다. 마찰이 큰 조합은 점수가 높아도 "주의 요소 있음"으로 표시합니다.</dd></dl></details>
+        <details><summary><b>한계</b></summary><dl><dd>${cpDisclaimer} 점수는 좋고 나쁨의 판정이 아니라 내 원국을 기준으로 한 상대 지표이며, 억부·조후의 단순화 모델에 기대고 있습니다.</dd></dl></details>
+      </div>
+    </section>`;
+  }
+
+  // 누르면 열리는 상세 시트
+  function cpSheetHTML(ch, sel) {
+    const bar = (label, v, w) => `<div class="cp-part"><span>${label}</span><span class="cp-mk ${v > 0.05 ? 'good' : v < -0.05 ? 'bad' : ''}">${cpMark(v)}</span></div>`;
+    if (sel.k === 'el') {
+      const r = M.evaluateCompatibleElement(ch, sel.i), st = ch.strength;
+      const rows = [['억부 보완', r.pts.eokbu], ['조후 보완', r.pts.johu], ['오행 균형', r.pts.balance], ['십성 관계', r.pts.tenGod], ['과잉 위험', r.pts.excess]];
+      return `<span class="cat">궁합 오행</span><h3>${M.EL[sel.i]} ${M.EL_K[sel.i]} · 보완도 ${r.score}</h3>
+        <div class="cp-pills"><span class="pill ${r.score >= 62 ? 'good' : r.score < 38 ? 'bad' : ''}">${r.label}</span><span class="pill">${r.tenGodGroup} 기운</span></div>
+        <div class="list">${rows.map(([l, v]) => `<div class="cp-line"><span>${l}</span><b class="${v > 0.4 ? 'pos' : v < -0.4 ? 'neg' : ''}">${cpPts(v)}</b></div>`).join('')}</div>
+        <p class="cp-sum">${esc(r.reasons.join('. ') + '.')}</p>
+        <p class="small muted">${st.zone} 사주(돕는 힘 ${st.help.toFixed(0)}%)를 기준으로 계산했습니다. 절대적으로 "${M.EL_K[sel.i]} 기운의 사람이 최고의 배우자"라는 뜻이 아니라, 지금 원국에서 ${M.EL_K[sel.i]} 기운이 들어올 때 나타나는 상대적 효과입니다.</p>
+        <button class="btn x" data-act="close">닫기</button>`;
+    }
+    const x = M.compatDayPillars(ch).find(q => q.i === sel.i);
+    return `<span class="cat">궁합 일주 · 내 일주 ${x.myDay}</span><h3>${x.ganzhi} (${x.ganzhiK}) · 궁합 분석</h3>
+      <div class="cp-pills"><span class="pill">종합 보완도 <b>${x.score}</b></span><span class="pill">${x.type}</span><span class="pill ${cpTone(x.condition)}">${x.condition}</span></div>
+      <p class="small muted">${CP_TYPE_INFO[x.type]}</p>
+      <div class="cp-parts">${x.parts.map(p => `<div class="cp-part"><span>${p.label}</span><span class="cp-mk ${p.v > 0.05 ? 'good' : p.v < -0.05 ? 'bad' : ''}">${p.key === 'excess' ? (x.excessRisk >= 0.5 ? '높음' : x.excessRisk >= 0.25 ? '보통' : '낮음') : cpMark(p.v)}</span><em class="num">${cpPts(p.pts)}</em></div>`).join('')}</div>
+      <h4>핵심 이유</h4><ul class="pos-ul small">${x.reasons.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
+      <p class="small">상대 일간은 나에게 <b>${x.stemTG}</b>, 일지 정기는 <b>${x.branchTG}</b> 십성으로 작용합니다.</p>
+      ${x.cautions.length ? `<h4>주의</h4><ul class="pos-ul small">${x.cautions.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+      <p class="cp-disc">${cpDisclaimer}</p>
+      <button class="btn x" data-act="close">닫기</button>`;
+  }
+
   function renderOhaeng() {
     const ch = S.ch, w = ch.weights, st = ch.strength, dEl = M.stemEl(ch.pillars.day.s);
     const models = Object.entries(M.MODELS);
@@ -2426,7 +2740,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">득령·득지·득세는 전통적인 세 가지 점검입니다. 비율과 방향이 다르면 판단이 애매한 사주입니다.</p>
     </section>
     </div>
-    ${climateCard(ch)}`;
+    ${climateCard(ch)}
+    ${renderCompat(ch)}`;
   }
 
   // ───────────── 용신 ─────────────
@@ -4220,7 +4535,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
 
   // ───────────── 툴팁 ─────────────
   let tipEl = null;
+  // 터치 기기에는 hover가 없어 탭 한 번에 툴팁이 남아 버리므로 마우스가 있는 환경에서만 띄운다
+  const CAN_HOVER = !window.matchMedia || matchMedia('(hover: hover) and (pointer: fine)').matches;
   function showTip(ev, html) {
+    if (!CAN_HOVER) return;
     if (!tipEl) { tipEl = document.createElement('div'); tipEl.className = 'tip'; document.body.appendChild(tipEl); }
     tipEl.innerHTML = html; tipEl.hidden = false;
     const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
@@ -4232,7 +4550,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function hideTip() { if (tipEl) tipEl.hidden = true; }
   document.addEventListener('mousemove', ev => {
     const t = ev.target.closest && ev.target.closest('[data-tip]');
-    if (t) showTip(ev, esc(t.getAttribute('data-tip'))); else if (!ev.target.closest || !ev.target.closest('.ov')) hideTip();
+    if (t) showTip(ev, t.getAttribute('data-tip')); else if (!ev.target.closest || !ev.target.closest('.ov')) hideTip();
   });
 
   // ───────────── 렌더 ─────────────
@@ -4257,8 +4575,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   function renderSheet() {
     let sh = document.getElementById('sheet');
-    if (!S.sheet) { if (sh) sh.remove(); return; }
+    if (!S.sheet && !S.cpSheet) { if (sh) sh.remove(); return; }
     if (!sh) { sh = document.createElement('div'); sh.id = 'sheet'; document.body.appendChild(sh); }
+    if (!S.sheet) {
+      sh.innerHTML = `<div class="sheet-bg" data-act="close"><div class="sheet" role="dialog" aria-modal="true" aria-label="궁합 분석">${cpSheetHTML(S.ch, S.cpSheet)}</div></div>`;
+      sh.querySelector('.x').focus(); return;
+    }
     const key = S.sheet, [c, t] = GL[key];
     const edited = key in OVR;
     const body = adminPw
@@ -4317,12 +4639,16 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   document.addEventListener('click', ev => {
     const t = ev.target;
+    const cpb = t.closest('[data-cp]');
+    if (cpb) { const [k, i] = cpb.dataset.cp.split(':'); S.cpSheet = { k, i: +i }; S.sheet = null; renderSheet(); return; }
     const tm = t.closest('.term');
     if (tm) { ev.preventDefault(); S.sheet = tm.dataset.term; S.sheetPos = tm.dataset.pos || null; renderSheet(); return; }
     const act = t.closest('[data-act]');
     if (act) {
       const a = act.dataset.act;
-      if (a === 'close') { if (t === act || t.classList.contains('x')) { S.sheet = null; renderSheet(); } return; }
+      if (a === 'close') { if (t === act || t.classList.contains('x')) { S.sheet = null; S.cpSheet = null; renderSheet(); } return; }
+      if (a === 'cp-all') { S.cpAll = !S.cpAll; render(); return; }
+      if (a.startsWith('cp-f:')) { S.cpFilter = a.slice(5); render(); return; }
       if (a === 'gl-save' || a === 'gl-reset') { saveTerm(a === 'gl-reset'); return; }
       if (a === 'admin-out') { adminLogout(''); return; }
       if (a.startsWith('pk-reset:')) { const k = a.slice(9); if (k === 'tr') PK.tr.cards = {}; else PK[k] = {}; pkSave(); render(); return; }
@@ -4374,7 +4700,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     render();
   });
   document.addEventListener('input', ev => { if (ev.target.id === 'gl-q') { S.glq = ev.target.value; document.getElementById('gl-list').innerHTML = glList(); } });
-  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && S.sheet) { const ta = document.getElementById('gl-edit'); if (!ta || ta.value === GL[S.sheet][1]) { S.sheet = null; renderSheet(); } } if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('.nowc')) { ev.preventDefault(); pick(ev.target.dataset.pick); }
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && S.cpSheet && !S.sheet) { S.cpSheet = null; renderSheet(); } if (ev.key === 'Escape' && S.sheet) { const ta = document.getElementById('gl-edit'); if (!ta || ta.value === GL[S.sheet][1]) { S.sheet = null; renderSheet(); } } if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('.nowc')) { ev.preventDefault(); pick(ev.target.dataset.pick); }
     if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('[data-zw]')) { ev.preventDefault(); S.zwSel = +ev.target.dataset.zw; render(); } });
   let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(drawCharts, 150); });
 
