@@ -392,6 +392,11 @@ tr.row-g-avoid td { background: color-mix(in srgb, var(--bad) 7%, transparent); 
 .cp-gz .co { font-size: 0.64rem; font-weight: 800; color: var(--ink-3); }
 .cp-gz .co.good { color: var(--good); } .cp-gz .co.bad { color: var(--bad); }
 .cp-filters { display: flex; flex-wrap: wrap; gap: 5px; }
+.cp-att { display: grid; gap: 8px; margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--line); }
+.cp-att-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.cp-h4 { margin: 8px 0 -2px; font-size: 0.92rem; }
+.cp-att-box { display: grid; gap: 8px; }
+.cp-att-r { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .cp-pills { display: flex; flex-wrap: wrap; gap: 6px; }
 .cp-pills .pill { background: var(--surface-2); color: var(--ink-2); font-size: 0.8rem; }
 .cp-pills .pill.good { background: var(--good-soft); color: var(--good); } .cp-pills .pill.bad { background: var(--bad-soft); color: var(--bad); }
@@ -1664,8 +1669,89 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     return all;
   }
 
+
+  // ───────────── 끌림: 내가 끌리는 일주 / 나를 좋아하는 일주 / 서로 끌리는 일주 ─────────────
+  // 궁합 점수(보완도)와는 다른 축이다. "끌림"은 배우자성·합·매력 신살처럼 마음이 움직이는 신호를 본다.
+  // 상대의 전체 사주는 모르므로 상대의 일주 두 글자만 가정하고, 상대 입장의 계산은 "그 일간이 나를 어떻게 보는가"로 단순화한다.
+  COMPAT_CONFIG.attract = {
+    // 내가 끌리는 방향(나 → 상대)과 나를 좋아하는 방향(상대 → 나)의 성분별 가중치. 각각 합 100
+    toThem: { spouse: 32, stemHap: 18, branchBond: 15, charm: 14, need: 9, charge: 6, yinyang: 6 },
+    toMe: { spouse: 36, stemHap: 20, branchBond: 17, charm: 15, charge: 6, yinyang: 6 },
+    scale: 1.2,
+    star: { main: 1, sub: 0.7, branchShare: 0.38 },   // 정(正)은 1, 편(偏)은 0.7, 일지 정기는 38%만 반영
+    charm: { hongyeom: 1, dohwa: 0.8, cheoneul: 0.7, extra: 0.2 },
+    bond: { yukhap: 1, banhap: 0.65, natalYukhap: 0.35 },
+    charge: { '원진': 0.8, '귀문관': 0.8, '충': 0.5, '형': 0.4 },
+    yinyangSame: 0.3,
+  };
+  const _cpAt = new WeakMap();
+  // partner: 'opposite'(이성 기준, 전통 배우자성) | 'any'(성별 무관: 재성·관성을 모두 배우자성으로)
+  function cpStarMap(gender, partner) {
+    if (partner === 'any') return { '정재': 1, '정관': 1, '편재': 0.7, '편관': 0.7 };
+    return gender === 'F' ? { '정관': 1, '편관': 0.7 } : { '정재': 1, '편재': 0.7 };
+  }
+  function cpCharm(viewStem, viewBranches, target) {
+    const Q = COMPAT_CONFIG.attract.charm, hits = [];
+    if (HONGYEOM[viewStem] === target) hits.push(['홍염살', Q.hongyeom]);
+    if (viewBranches.some(vb => sinsal12(vb, target) === '연살')) hits.push(['도화(연살)', Q.dohwa]);
+    if (CHEONEUL[viewStem].includes(target)) hits.push(['천을귀인', Q.cheoneul]);
+    if (!hits.length) return { v: 0, names: [] };
+    hits.sort((a, x) => x[1] - a[1]);
+    return { v: Math.min(1, hits[0][1] + Q.extra * (hits.length - 1)), names: hits.map(h => h[0]) };
+  }
+  function evaluateAttraction(ch, s, b, partner = 'opposite') {
+    const A = COMPAT_CONFIG.attract, d = ch.pillars.day, myG = ch.gender === 'F' ? 'F' : 'M', myB = d.b, yb = ch.pillars.year.b;
+    const pairRels = relationsAmong([{ id: 'me', s: d.s, b: myB }, { id: 'you', s, b }]);
+    const stemHapRel = pairRels.find(r => r.type === '천간합');
+    const yuk = pairRels.find(r => r.type === '육합'), ban = pairRels.find(r => r.type === '반합' || r.type === '삼합');
+    // 원국 다른 기둥과의 지지 육합(가볍게)
+    const natalHap = POS.filter(k => k !== 'day' && ch.pillars[k]).map(k => ({ k, r: relationsAmong([{ id: 'n', b: ch.pillars[k].b }, { id: 'you', b }]).find(r => r.type === '육합') })).filter(x => x.r);
+    const branchBond = yuk ? A.bond.yukhap : ban ? A.bond.banhap : natalHap.length ? A.bond.natalYukhap : 0;
+    const bondName = yuk ? yuk.name : ban ? ban.name : natalHap.length ? `${POS_K[natalHap[0].k]}지 ${natalHap[0].r.name}` : '';
+    const chargeRel = pairRels.filter(r => A.charge[r.type] != null).sort((a, x) => A.charge[x.type] - A.charge[a.type])[0];
+    const charge = chargeRel ? A.charge[chargeRel.type] : 0;
+    const yy = yang(s) !== yang(d.s) ? 1 : A.yinyangSame;
+    const compFit = evaluateDayPillarCompatibility(ch, s, b).compFit;
+    const dir = (viewer) => {
+      // viewer: 'me' → 내가 상대에게 끌림 / 'you' → 상대가 나에게 끌림
+      const vS = viewer === 'me' ? d.s : s, oS = viewer === 'me' ? s : d.s, oB = viewer === 'me' ? b : myB;
+      const vG = viewer === 'me' ? myG : (myG === 'F' ? 'M' : 'F'), map = cpStarMap(vG, partner);
+      const tgS = tenGod(vS, oS), tgB = tenGod(vS, mainHidden(oB));
+      const star = (map[tgS] || 0) * (1 - A.star.branchShare) + (map[tgB] || 0) * A.star.branchShare;
+      const charm = viewer === 'me' ? cpCharm(d.s, [myB, yb], b) : cpCharm(s, [b], myB);
+      const W = viewer === 'me' ? A.toThem : A.toMe;
+      const comps = [
+        { key: 'spouse', label: '배우자성(십성)', v: star, w: W.spouse },
+        { key: 'stemHap', label: '일간 천간합', v: stemHapRel ? 1 : 0, w: W.stemHap },
+        { key: 'branchBond', label: '지지 합·결속', v: branchBond, w: W.branchBond },
+        { key: 'charm', label: '매력 신살', v: charm.v, w: W.charm },
+        ...(viewer === 'me' ? [{ key: 'need', label: '내게 필요한 기운', v: Math.max(0, compFit), w: W.need }] : []),
+        { key: 'charge', label: '강한 자극(원진·충)', v: charge, w: W.charge },
+        { key: 'yinyang', label: '음양 조화', v: yy, w: W.yinyang },
+      ].map(x => ({ ...x, pts: x.v * x.w }));
+      const raw = comps.reduce((a, x) => a + x.pts, 0), score = Math.round(Math.min(100, raw * A.scale));
+      const reasons = [];
+      if (star >= 0.3) reasons.push(viewer === 'me' ? `${STEM[s]}은 나(${STEM[d.s]})에게 ${tgS}${tgB !== tgS && (map[tgB] || 0) ? `, 일지 정기는 ${tgB}` : ''} — ${vG === 'F' ? '여성' : '남성'}의 배우자성에 해당합니다${partner === 'any' ? '(성별 무관 기준)' : ''}` : `상대(${STEM[s]}) 기준으로 내 일간 ${STEM[d.s]}은 ${tgS}${tgB !== tgS && (map[tgB] || 0) ? `, 내 일지 정기는 ${tgB}` : ''} — 상대의 배우자성에 해당합니다`);
+      if (stemHapRel) reasons.push(`${stemHapRel.name} — 일간끼리 서로 끌어당기는 대표적인 관계입니다`);
+      if (branchBond) reasons.push(`${bondName} — 지지가 결속되어 편안하게 이어지는 신호입니다`);
+      if (charm.v) reasons.push(viewer === 'me' ? `${BR[b]}는 내 ${charm.names.join('·')} 자리라 매력이 통합니다` : `내 일지 ${BR[myB]}가 상대의 ${charm.names.join('·')} 자리라 상대가 매력을 느끼기 쉽습니다`);
+      if (viewer === 'me' && compFit >= 0.2) reasons.push('내 사주가 필요로 하는 기운을 채워 주는 일주입니다');
+      if (charge >= 0.4) reasons.push(`${chargeRel.name} — 끌림과 함께 마찰·자극도 큰 관계라 끌림이 강해도 주의가 필요합니다`);
+      if (!reasons.length) reasons.push('뚜렷한 끌림 신호가 적은 일주입니다');
+      return { score, comps, reasons };
+    };
+    const to = dir('me'), from = dir('you');
+    return { toThem: to, toMe: from, mutual: Math.round(Math.sqrt(to.score * from.score)) };
+  }
+  // 60일주 전체의 끌림 (궁합 결과와 합쳐서 돌려준다)
+  function compatAttraction(ch, partner = 'opposite') {
+    let m = _cpAt.get(ch); if (!m) _cpAt.set(ch, m = {});
+    if (!m[partner]) m[partner] = compatDayPillars(ch).map(x => ({ ...x, attract: evaluateAttraction(ch, x.s, x.b, partner) }));
+    return m[partner];
+  }
+
   G.Manse = {
-    compute, getSamjae, SAMJAE_RULES, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
+    compute, getSamjae, SAMJAE_RULES, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, mainHidden, yang, gzName, gzNameK,
@@ -2625,12 +2711,15 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
 
   function renderCompat(ch) {
     const els = [0, 1, 2, 3, 4].map(e => M.evaluateCompatibleElement(ch, e)).sort((a, b) => b.score - a.score);
-    const all = M.compatDayPillars(ch);
+    const partner = S.cpPartner || 'opposite', all = M.compatAttraction(ch, partner);
     const good = all.filter(x => x.condition !== '주의 요소 있음').slice(0, 5);
     const risky = all.filter(x => x.risk >= 0.3).sort((a, b) => b.risk - a.risk || a.score - b.score).slice(0, 5);
     const filt = S.cpFilter || 'all', fl = CP_FILTERS.includes(filt) ? filt : '전체';
     const list = all.filter(x => fl === '전체' || (fl === '주의 요소 있음' ? x.condition === fl : x.type === fl));
-    const tile = x => `<button type="button" class="cp-gz" data-cp="gz:${x.i}"><span class="g"><span class="eltxt ${ECLS[M.stemEl(x.s)]}">${M.STEM[x.s]}</span><span class="eltxt ${ECLS[M.BR_EL[x.b]]}">${M.BR[x.b]}</span></span><span class="k">${x.ganzhiK}</span><b class="sc">${x.score}</b><span class="ty">${x.type}</span><span class="co ${cpTone(x.condition)}">${x.condition}</span></button>`;
+    const sortBy = ['to', 'from', 'mutual'].includes(S.cpSort) ? S.cpSort : 'compat';
+    const val = (x, m) => m === 'to' ? x.attract.toThem.score : m === 'from' ? x.attract.toMe.score : m === 'mutual' ? x.attract.mutual : x.score;
+    const topKey = (x, m) => { const cs = (m === 'from' ? x.attract.toMe : x.attract.toThem).comps.filter(c => c.key !== 'yinyang' && c.key !== 'charge'); const t = cs.slice().sort((a, b) => b.pts - a.pts)[0]; return t && t.pts > 0 ? t.label : '약한 신호'; };
+    const tile = (x, m = 'compat') => `<button type="button" class="cp-gz" data-cp="gz:${x.i}"><span class="g"><span class="eltxt ${ECLS[M.stemEl(x.s)]}">${M.STEM[x.s]}</span><span class="eltxt ${ECLS[M.BR_EL[x.b]]}">${M.BR[x.b]}</span></span><span class="k">${x.ganzhiK}</span><b class="sc">${val(x, m)}</b><span class="ty">${m === 'compat' ? x.type : topKey(x, m)}</span><span class="co ${cpTone(x.condition)}">${m === 'compat' ? x.condition : '궁합 ' + x.condition}</span></button>`;
     const cfg = M.COMPAT_CONFIG;
     return `
     <div class="cp-title"><h2>나와 조화로운 기운</h2><p class="note">내 원국의 억부·조후·오행 균형·십성 구조를 기준으로, 어떤 기운이 나를 보완하고 어떤 기운이 부딪히는지 계산한 참고 분석입니다. 운세 흐름 점수와는 별개입니다.</p></div>
@@ -2648,9 +2737,21 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="cp-tiles">${good.map(tile).join('')}</div>
       <h3 class="cp-h3">충돌·마찰에 주의할 일주 <span class="muted small">일지 충·형 등 자극이 큰 순</span></h3>
       <div class="cp-tiles">${risky.map(tile).join('')}</div>
+      <div class="cp-att">
+        <div class="cp-att-h"><h3 class="cp-h3">끌림 — 마음이 움직이는 일주</h3>
+          <div class="cp-filters" role="group" aria-label="상대 기준">${[['opposite', '이성 기준(전통)'], ['any', '성별 무관']].map(([k, l]) => `<button type="button" class="opt" data-act="cp-p:${k}" aria-pressed="${partner === k}">${l}</button>`).join('')}</div></div>
+        <p class="note">궁합(보완도)과는 다른 축입니다. 배우자성 십성, 일간 천간합, 지지 합, 홍염·도화·천을귀인, 원진·충 같은 강한 자극을 봅니다. 끌림이 강해도 궁합 조건이 "주의 요소 있음"일 수 있습니다.</p>
+        <h4 class="cp-h4">내가 끌리는 일주 <span class="muted small">내 사주가 좋아하는 타입</span></h4>
+        <div class="cp-tiles">${all.slice().sort((a, b) => val(b, 'to') - val(a, 'to') || b.score - a.score).slice(0, 5).map(x => tile(x, 'to')).join('')}</div>
+        <h4 class="cp-h4">나를 좋아하는 일주 <span class="muted small">상대 일주가 나를 좋아하기 쉬운 조합</span></h4>
+        <div class="cp-tiles">${all.slice().sort((a, b) => val(b, 'from') - val(a, 'from') || b.score - a.score).slice(0, 5).map(x => tile(x, 'from')).join('')}</div>
+        <h4 class="cp-h4">서로 끌리는 일주 <span class="muted small">양쪽 끌림이 모두 높은 조합</span></h4>
+        <div class="cp-tiles">${all.slice().sort((a, b) => val(b, 'mutual') - val(a, 'mutual') || b.score - a.score).slice(0, 5).map(x => tile(x, 'mutual')).join('')}</div>
+      </div>
       <div class="frow"><button class="btn" data-act="cp-all">${S.cpAll ? '전체 접기' : '60일주 전체 보기'}</button></div>
-      ${S.cpAll ? `<div class="cp-filters" role="group" aria-label="유형 필터">${CP_FILTERS.map(f => `<button type="button" class="opt" data-act="cp-f:${f}" aria-pressed="${fl === f}">${f}${f === '전체' ? ` ${all.length}` : ` ${all.filter(x => f === '주의 요소 있음' ? x.condition === f : x.type === f).length}`}</button>`).join('')}</div>
-        <div class="cp-all">${list.map(tile).join('') || '<p class="muted small">해당하는 일주가 없습니다.</p>'}</div>` : ''}
+      ${S.cpAll ? `<div class="cp-filters" role="group" aria-label="정렬">${[['compat', '궁합 점수순'], ['to', '내가 끌림순'], ['from', '나를 좋아함순'], ['mutual', '서로 끌림순']].map(([k, l]) => `<button type="button" class="opt" data-act="cp-s:${k}" aria-pressed="${sortBy === k}">${l}</button>`).join('')}</div>
+        <div class="cp-filters" role="group" aria-label="유형 필터">${CP_FILTERS.map(f => `<button type="button" class="opt" data-act="cp-f:${f}" aria-pressed="${fl === f}">${f}${f === '전체' ? ` ${all.length}` : ` ${all.filter(x => f === '주의 요소 있음' ? x.condition === f : x.type === f).length}`}</button>`).join('')}</div>
+        <div class="cp-all">${list.slice().sort((a, b) => val(b, sortBy) - val(a, sortBy) || b.score - a.score).map(x => tile(x, sortBy)).join('') || '<p class="muted small">해당하는 일주가 없습니다.</p>'}</div>` : ''}
       <p class="note">${cpDisclaimer}</p>
     </section>
     <section class="card">
@@ -2668,6 +2769,11 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
           <dt>일지 관계 (±${cfg.branchRelation})</dt><dd>육합·삼합(반합)은 결속, 충·형·원진·해·파는 변화·마찰 신호로 따로 셉니다. 충이 이미 과한 기운을 깨는 경우에는 마찰을 덜어 줍니다.</dd>
           <dt>원국 합충 (±${cfg.natalRelations})</dt><dd>내 년·월·시와 만드는 관계입니다. 일간·일지 관계보다 가볍게(월 ${cfg.posW.month}·시 ${cfg.posW.hour}·년 ${cfg.posW.year}배) 반영합니다.</dd>
           <dt>과잉 위험 (−${cfg.excessPenalty})</dt><dd>이미 많은 오행을 더 키우는 위험입니다.</dd></dl></details>
+        <details><summary><b>끌림은 어떻게 계산하나</b><span class="small muted" style="display:block">배우자성·합·매력 신호를 두 방향으로 계산합니다</span></summary>
+          <dl><dt>내가 끌리는 일주 (나 → 상대)</dt><dd>배우자성 십성(${cfg.attract.toThem.spouse}), 일간 천간합(${cfg.attract.toThem.stemHap}), 지지 합(${cfg.attract.toThem.branchBond}), 홍염·도화·천을귀인(${cfg.attract.toThem.charm}), 내게 필요한 기운(${cfg.attract.toThem.need}), 원진·충 같은 강한 자극(${cfg.attract.toThem.charge}), 음양 조화(${cfg.attract.toThem.yinyang}) 순으로 반영합니다.</dd>
+          <dt>나를 좋아하는 일주 (상대 → 나)</dt><dd>상대 일간을 기준으로 내 일간·일지가 상대의 배우자성인지, 내 일지가 상대의 매력 신살 자리인지를 봅니다. 상대의 전체 사주를 모르므로 "상대 일간이 나를 어떻게 보는가"로 단순화한 것입니다.</dd>
+          <dt>서로 끌리는 일주</dt><dd>두 방향 점수의 기하평균입니다. 한쪽만 높으면 낮게 나옵니다.</dd>
+          <dt>상대 기준</dt><dd>기본은 이성 기준(남성은 재성, 여성은 관성이 배우자성)입니다. "성별 무관"을 고르면 재성·관성을 모두 배우자성으로 봅니다.</dd></dl></details>
         <details><summary><b>유형과 조건</b><span class="small muted" style="display:block">점수와 관계의 성격을 따로 판정합니다</span></summary>
           <dl>${CP_TYPES.map(t => `<dt>${t}</dt><dd>${CP_TYPE_INFO[t]}</dd>`).join('')}
           <dt>조화 높음 · 조화 · 혼합 · 주의 요소 있음</dt><dd>점수와 위험도로 정하는 종합 조건입니다. 마찰이 큰 조합은 점수가 높아도 "주의 요소 있음"으로 표시합니다.</dd></dl></details>
@@ -2689,13 +2795,16 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <p class="small muted">${st.zone} 사주(돕는 힘 ${st.help.toFixed(0)}%)를 기준으로 계산했습니다. 절대적으로 "${M.EL_K[sel.i]} 기운의 사람이 최고의 배우자"라는 뜻이 아니라, 지금 원국에서 ${M.EL_K[sel.i]} 기운이 들어올 때 나타나는 상대적 효과입니다.</p>
         <button class="btn x" data-act="close">닫기</button>`;
     }
-    const x = M.compatDayPillars(ch).find(q => q.i === sel.i);
+    const x = M.compatAttraction(ch, S.cpPartner || 'opposite').find(q => q.i === sel.i), at = x.attract;
     return `<span class="cat">궁합 일주 · 내 일주 ${x.myDay}</span><h3>${x.ganzhi} (${x.ganzhiK}) · 궁합 분석</h3>
       <div class="cp-pills"><span class="pill">종합 보완도 <b>${x.score}</b></span><span class="pill">${x.type}</span><span class="pill ${cpTone(x.condition)}">${x.condition}</span></div>
       <p class="small muted">${CP_TYPE_INFO[x.type]}</p>
       <h4>${x.ganzhi} 일주의 특징</h4>
       <div class="facts">${gzFacts(x.ganzhiK)}</div>
       <p class="small" style="color:var(--ink-2)">${esc(GL[x.ganzhiK] ? GL[x.ganzhiK][1] : '')}</p>
+      <h4>끌림 <span class="muted small">${(S.cpPartner || 'opposite') === 'any' ? '성별 무관 기준' : '이성 기준'}</span></h4>
+      <div class="cp-att-box">${[['내가 끌림', at.toThem], ['나를 좋아함', at.toMe]].map(([l, r]) => `<div><div class="cp-att-r"><b>${l}</b><span class="pill ${r.score >= 60 ? 'good' : ''}">${r.score}</span></div><ul class="pos-ul small">${r.reasons.slice(0, 3).map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>`).join('')}
+        <div class="cp-att-r"><b>서로 끌림</b><span class="pill ${at.mutual >= 60 ? 'good' : ''}">${at.mutual}</span></div></div>
       <h4>내 원국과의 궁합</h4>
       <div class="cp-parts">${x.parts.map(p => `<div class="cp-part"><span>${p.label}</span><span class="cp-mk ${p.v > 0.05 ? 'good' : p.v < -0.05 ? 'bad' : ''}">${p.key === 'excess' ? (x.excessRisk >= 0.5 ? '높음' : x.excessRisk >= 0.25 ? '보통' : '낮음') : cpMark(p.v)}</span><em class="num">${cpPts(p.pts)}</em></div>`).join('')}</div>
       <h4>핵심 이유</h4><ul class="pos-ul small">${x.reasons.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
@@ -4652,6 +4761,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const a = act.dataset.act;
       if (a === 'close') { if (t === act || t.classList.contains('x')) { S.sheet = null; S.cpSheet = null; renderSheet(); } return; }
       if (a === 'cp-all') { S.cpAll = !S.cpAll; render(); return; }
+      if (a.startsWith('cp-p:')) { S.cpPartner = a.slice(5); render(); return; }
+      if (a.startsWith('cp-s:')) { S.cpSort = a.slice(5); render(); return; }
       if (a.startsWith('cp-f:')) { S.cpFilter = a.slice(5); render(); return; }
       if (a === 'gl-save' || a === 'gl-reset') { saveTerm(a === 'gl-reset'); return; }
       if (a === 'admin-out') { adminLogout(''); return; }
