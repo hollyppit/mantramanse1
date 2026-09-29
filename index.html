@@ -37,6 +37,16 @@ button { font: inherit; color: inherit; }
 .small { font-size: 0.82rem; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
 
+/* 내보내기(PDF·이미지) */
+.xp button { font-size: 0.8rem; }
+.xp button[disabled] { opacity: .6; cursor: wait; }
+.xs { position: absolute; left: -10000px; top: 0; width: 714px; background: #fff; color: var(--ink); padding: 0; display: grid; gap: 12px; font-size: 15px; }
+.xs .card { box-shadow: none; }
+.xs .du-strip { grid-auto-flow: row; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); overflow: visible; }
+.xs-head { display: grid; gap: 2px; padding: 4px 2px 8px; border-bottom: 2px solid var(--ink); }
+.xs-head b { font-family: var(--f-head); font-size: 1.25rem; }
+.xs-head span { font-size: 0.82rem; color: var(--ink-2); }
+
 /* 상단 */
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 78%, transparent); -webkit-backdrop-filter: saturate(1.6) blur(14px); backdrop-filter: saturate(1.6) blur(14px); padding-block: 12px 10px; margin: 0 -16px; padding-inline: 16px; border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
 .top-in { max-width: 980px; margin: 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -2105,6 +2115,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="brand"><div class="seal" aria-hidden="true">萬<br>歲</div><h1>만트라 만세력</h1></div>
       <div class="who">${whoLine()}</div>
       ${adminPw ? `<span class="admin-badge">관리자</span><button class="btn" data-act="admin-out">로그아웃</button>` : ''}
+      <span class="seg xp" role="group" aria-label="내보내기"><button type="button" data-export="pdf" title="현재 탭을 A4 PDF로 저장">PDF</button><button type="button" data-export="png" title="현재 탭을 A4 이미지(PNG)로 저장">이미지</button></span>
       <button class="btn${S.editing ? '' : ' primary'}" data-act="edit">${S.editing ? '입력 닫기' : '사주 입력'}</button>
     </div>
     <nav class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="tab" role="tab" data-tab="${k}" aria-selected="${S.tab === k}">${l}</button>`).join('')}</nav></header>`;
@@ -3419,6 +3430,98 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       } else if (k === 'life') drawLife(el);
     });
   }
+
+  // ───────────── 내보내기: 현재 탭을 A4(794×1123px @96dpi) PDF / PNG로 ─────────────
+  const XP = { busy: false };
+  const loadScript = src => new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.onload = res; el.onerror = () => rej(new Error('라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하세요.')); document.head.appendChild(el); });
+  async function xpLibs(needPdf) {
+    if (!window.html2canvas) await loadScript('https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js');
+    if (needPdf && !(window.jspdf && window.jspdf.jsPDF)) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  }
+  // 내용이 든 카드들을 A4 폭(714px) 스테이지에 복제한다. SVG는 CSS 변수가 풀리지 않으므로 계산된 값을 인라인으로 박아 둔다.
+  function xpStage(tabLabel) {
+    const stage = document.createElement('div'); stage.className = 'wrap xs';
+    const tmp = document.createElement('div'); tmp.innerHTML = whoLine();
+    const head = document.createElement('div'); head.className = 'xs-head';
+    head.innerHTML = `<b>만트라 만세력 · ${esc(tabLabel)}</b><span>${esc(tmp.textContent)}</span><span>${new Date().toLocaleDateString('ko-KR')} 출력</span>`;
+    stage.appendChild(head);
+    document.querySelectorAll('main.wrap > section.card, main.wrap > p.note').forEach(el => { if (!el.classList.contains('form')) stage.appendChild(el.cloneNode(true)); });
+    document.body.appendChild(stage);
+    stage.querySelectorAll('svg').forEach(svg => {
+      if (+svg.getAttribute('width') > 660) { svg.style.width = '100%'; svg.style.height = 'auto'; }
+      svg.querySelectorAll('*').forEach(el => {
+        const cs = getComputedStyle(el);
+        ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'opacity', 'fill-opacity', 'font-size', 'font-weight', 'font-family', 'text-anchor'].forEach(k => { el.style.setProperty(k, cs.getPropertyValue(k)); });
+      });
+    });
+    // html2canvas는 inset 그림자를 칠해 버리므로 같은 굵기의 테두리로 바꾼다
+    stage.querySelectorAll('*').forEach(el => {
+      const bs = getComputedStyle(el).boxShadow;
+      if (!bs || bs === 'none' || !bs.includes('inset')) return;
+      const m = bs.match(/^(rgba?\([^)]+\))\s+0px 0px 0px (\d+(?:\.\d+)?)px inset$/);
+      el.style.boxShadow = 'none';
+      if (m && m[1] !== 'rgba(0, 0, 0, 0)') { el.style.border = m[2] + 'px solid ' + m[1]; }
+    });
+    stage.querySelectorAll('.tip').forEach(e => e.remove());
+    return stage;
+  }
+  async function xpRender(tabLabel) {
+    const PW = 794, PH = 1123, MX = 40, MT = 36, MB = 44, GAP = 12, SC = 2, UH = PH - MT - MB;
+    const stage = xpStage(tabLabel);
+    try {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      const items = [];
+      for (const el of [...stage.children]) {
+        const c = await window.html2canvas(el, { scale: SC, backgroundColor: '#ffffff', useCORS: true, logging: false });
+        items.push(c);
+      }
+      const pages = []; let cv = null, y = 0;
+      const newPage = () => { cv = document.createElement('canvas'); cv.width = PW * SC; cv.height = PH * SC; const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); pages.push(cv); y = 0; };
+      newPage();
+      items.forEach((c, idx) => {
+        const h = c.height / SC;
+        if (y > 0 && y + h > UH) newPage();
+        if (h <= UH) { cv.getContext('2d').drawImage(c, MX * SC, (MT + y) * SC); y += h + GAP; return; }
+        let sy = 0; // 한 쪽보다 긴 카드는 여러 쪽으로 자른다
+        while (sy < c.height) {
+          const room = (UH - y) * SC, sh = Math.min(c.height - sy, room);
+          cv.getContext('2d').drawImage(c, 0, sy, c.width, sh, MX * SC, (MT + y) * SC, c.width, sh);
+          sy += sh; y += sh / SC + GAP;
+          if (sy < c.height) newPage();
+        }
+      });
+      pages.forEach((pc, i) => { const g = pc.getContext('2d'); g.fillStyle = '#8089A0'; g.font = `${11 * SC}px sans-serif`; g.textAlign = 'center'; g.fillText(`만트라 만세력 · ${tabLabel} · ${i + 1} / ${pages.length}`, PW * SC / 2, (PH - 20) * SC); });
+      return pages;
+    } finally { stage.remove(); }
+  }
+  async function xpExport(kind, btn) {
+    if (XP.busy) return;
+    XP.busy = true;
+    const btns = document.querySelectorAll('[data-export]'), old = btn.textContent;
+    btns.forEach(b => b.disabled = true); btn.textContent = '만드는 중…';
+    try {
+      const sel = document.querySelector('.tab[aria-selected="true"]');
+      const label = sel ? sel.textContent.trim() : '만세력';
+      await xpLibs(kind === 'pdf');
+      const pages = await xpRender(label);
+      const who = (S.inp && S.inp.name ? S.inp.name : '') || new Date().toISOString().slice(0, 10);
+      const base = `만세력_${label}_${who}`.replace(/[\\/:*?"<>|\s]+/g, '_');
+      if (kind === 'pdf') {
+        const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+        pages.forEach((pc, i) => { if (i) pdf.addPage('a4', 'portrait'); pdf.addImage(pc.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297); });
+        pdf.save(base + '.pdf');
+      } else {
+        for (let i = 0; i < pages.length; i++) {
+          await new Promise(res => pages[i].toBlob(bl => {
+            const a = document.createElement('a'); a.href = URL.createObjectURL(bl); a.download = pages.length > 1 ? `${base}_${i + 1}.png` : base + '.png';
+            document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); setTimeout(res, 350);
+          }, 'image/png'));
+        }
+      }
+    } catch (e) { alert('내보내기에 실패했습니다: ' + (e && e.message ? e.message : e)); }
+    finally { XP.busy = false; btns.forEach(b => b.disabled = false); btn.textContent = old; }
+  }
+  document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-export]'); if (b) xpExport(b.dataset.export, b); });
 
   // ───────────── 툴팁 ─────────────
   let tipEl = null;
