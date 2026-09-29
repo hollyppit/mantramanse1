@@ -26,8 +26,8 @@ const TYPES = {
   'K 억부≠조후(반대)': c => jo(c).applicable && ['기신', '구신'].includes(eok(c).roles[jo(c).yong]),
   'ALL': () => true,
 };
-const PH = ['공격기', '확장기', '수확기', '축적기', '전환기', '방어기'], CO = ['순풍', '보통', '주의', '부담'];
-const NUM = ['fitScore', 'ownFit', 'eokbuScore', 'johuScore', 'relationScore', 'structureScore', 'changeScore', 'intensityScore'];
+const PH = ['공격기', '확장기', '수확기', '축적기', '변동기', '방어기'], CO = ['순풍', '보통', '주의', '부담'];
+const NUM = ['fitScore', 'ownFit', 'eokbuScore', 'johuScore', 'relationScore', 'structureScore', 'volatilityScore', 'intensityScore'];
 const pct = (o, ks, n) => ks.map(k => String(Math.round((o[k] || 0) / n * 100)).padStart(3)).join(' ');
 const fails = [];
 console.log(`차트 ${charts.length}개 · 단위 ${LEVEL} · 학파 ${SCHOOL} · 각 사주에 60갑자 전부를 운으로 대입`);
@@ -43,7 +43,7 @@ for (const [name, f] of Object.entries(TYPES)) {
     if (ev.parts.some(x => !Number.isFinite(x.v) || /undefined|NaN/.test(x.label))) fails.push(`${name}: parts 이상`);
     if (Math.abs(ev.fitScore) > 100.0001) fails.push(`${name}: 범위 초과 ${ev.fitScore}`);
     sum += ev.fitScore; sq += ev.fitScore ** 2; n++; ph[ev.phase] = (ph[ev.phase] || 0) + 1; co[ev.condition] = (co[ev.condition] || 0) + 1;
-    chg += ev.changeScore; int += ev.intensityScore; wE += ev.weights.eokbu; wJ += ev.weights.johu;
+    chg += ev.volatilityScore; int += ev.intensityScore; wE += ev.weights.eokbu; wJ += ev.weights.johu;
   }
   const m = sum / n;
   console.log(name.padEnd(18), String(cs.length).padStart(4), m.toFixed(1).padStart(5), Math.sqrt(sq / n - m * m).toFixed(1).padStart(7), '|', pct(ph, PH, n), '|', pct(co, CO, n).replace(/ {2}/g, '   '), '|', (chg / n).toFixed(0).padStart(3), (int / n).toFixed(0).padStart(4), (wE / n).toFixed(2), (wJ / n).toFixed(2));
