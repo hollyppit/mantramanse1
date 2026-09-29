@@ -252,6 +252,8 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .hw.o-yr { border-style: dashed; }
 .zs .hw.o-dh:hover, .zs .hw.o-yr:hover { color: var(--ink); }
 .zb { font-size: 0.58rem; font-weight: 700; line-height: 1.3; padding: 0 3px; margin-left: 2px; border-radius: 4px; background: var(--surface); color: var(--ink-3); box-shadow: inset 0 0 0 1px var(--line); text-decoration: none; vertical-align: 2px; }
+.zc-g12 { display: flex; flex-wrap: wrap; gap: 0 4px; }
+.zc-g12 .term { font-size: 0.6rem; color: var(--accent-2); text-decoration: none; }
 .zc-adj { display: flex; flex-wrap: wrap; gap: 0 4px; align-content: start; }
 .zc-adj .term { font-size: 0.6rem; color: var(--ink-3); text-decoration: none; }
 .chip .hw { display: inline-grid; place-items: center; width: 14px; height: 14px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; color: #fff; }
@@ -990,6 +992,18 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       '천상(傷)': palaceOf('노복궁'), '천사': palaceOf('질액궁'),
     };
   }
+  // 칸마다 하나씩 붙는 12신 네 계열
+  const ZW_CS12 = ['장생', '목욕', '관대', '임관', '제왕', '쇠', '병', '사', '묘', '절', '태', '양'];
+  const ZW_BS12 = ['박사', '역사', '청룡', '소모', '장군', '주서', '비렴(박사)', '희신(박사)', '병부', '대모', '복병', '관부'];
+  const ZW_JQ12 = ['장성', '반안', '세역', '식신', '화개', '겁살', '재살', '천살', '지배', '함지', '월살', '망신'];
+  const ZW_SQ12 = ['세건', '회기', '상문', '관삭', '관부', '소모', '대모', '용덕', '백호', '천덕', '조객', '병부'];
+  function ziwei12(guk, forward, lu, yb) {
+    const cs0 = { 2: 8, 3: 11, 4: 5, 5: 8, 6: 2 }[guk], dir = forward ? 1 : -1, jq0 = [0, 9, 6, 3][mod(yb, 4)];
+    return b => ({
+      cs: ZW_CS12[mod((b - cs0) * dir, 12)], bs: ZW_BS12[mod((b - lu) * dir, 12)],
+      jq: ZW_JQ12[mod(b - jq0, 12)], sq: ZW_SQ12[mod(b - yb, 12)],
+    });
+  }
   function ziwei(ch, P) {
     if (!P.hour) return null;
     const t = new Date((P.jdn - 2440588) * 86400000);
@@ -1019,15 +1033,18 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     pos.shen = shen;
     const adj = ziweiAdj(ys, yb, m, d, h, ming, pos, name => mod(ming - ZW_PALACE.indexOf(name), 12));
     delete pos.shen;
+    const g12 = ziwei12(guk, forward, lu, yb);
     const palaces = Array.from({ length: 12 }, (_, b) => {
       const k = forward ? mod(b - ming, 12) : mod(ming - b, 12);
       return {
-        b, s: stemOf(b), name: ZW_PALACE[mod(ming - b, 12)], shen: b === shen,
+        b, s: stemOf(b), g12: g12(b), name: ZW_PALACE[mod(ming - b, 12)], shen: b === shen,
         main: ZW_MAIN.filter(n => pos[n] === b), good: ZW_GOOD.filter(n => pos[n] === b), bad: ZW_BAD.filter(n => pos[n] === b),
         adj: ZW_ADJ.filter(n => adj[n] === b),
         daehan: [guk + 10 * k, guk + 10 * k + 9],
       };
     });
+    // 비성 사화: 각 궁의 천간으로 날리는 사화가 어느 궁에 떨어지는지
+    for (const p of palaces) p.fly = Object.entries(zwSihwa(p.s)).map(([n, hw]) => ({ star: n, hw, to: pos[n] }));
     return { lunar: L, month: m, hour: h, ys, yb, ming, shen, guk, gukEl, pos, adj, sihwa, forward, palaces, mingju: ZW_MINGJU[ming], shinju: ZW_SHINJU[yb] };
   }
   // 음력 Y년의 운: 그해 나이(세는나이)가 속한 대한 궁과 대한 사화, 유년 명궁과 유년 사화
@@ -1461,6 +1478,37 @@ Object.assign(GLOSSARY, {
   '순공': ['자미 잡성', '태어난 해 간지의 공망 자리입니다. 그 칸의 기운이 비어 작용이 약해지거나 늦어진다고 봅니다. 사주의 공망과 같은 원리입니다.'],
   '천상(傷)': ['자미 잡성', '다침과 손해의 별로, 늘 노복궁에 들어갑니다. 주성 천상(天相)과는 다른 별입니다. 대한이나 유년이 이 칸에 오면 손실을 조심하라고 봅니다.'],
   '천사': ['자미 잡성', '재앙을 전하는 사자의 별로, 늘 질액궁에 들어갑니다. 대한이나 유년이 이 칸에 오면 건강과 사고를 조심하라고 봅니다.'],
+
+  // ── 비성 사화
+  '비성 사화': ['자미두수', '"날아가는 사화"라는 뜻입니다. 12궁은 저마다 천간을 갖고 있고, 그 천간으로도 사화(록·권·과·기)가 생깁니다. 예: 재백궁의 천간이 갑(甲)이면 염정 화록이 생기는데, 염정이 부처궁에 있으면 "재백궁이 부처궁으로 록을 날린다" = 돈이 배우자 쪽으로 흐른다고 풉니다. 어느 궁이 어느 궁에 영향을 주는지 보는 사화파(비성파)의 핵심 기법입니다.'],
+  '자화': ['자미두수', '한 궁의 천간으로 생긴 사화가 바로 그 궁 안의 별에 붙는 것입니다. 스스로 만들어 스스로 쓰는 셈이라, 자화록은 알아서 잘 풀리되 오래 쌓이지 않고, 자화기는 스스로 문제를 만들거나 새어 나가는 것으로 봅니다.'],
+
+  // ── 12신
+  '12신': ['자미 12신', '칸마다 하나씩 붙는 작은 신(神) 네 계열입니다. 장생 12신(기운의 성장 단계), 박사 12신(녹존에서 출발하는 길흉), 장전 12신(태어난 해 삼합 기준, 사주의 12신살과 같은 체계), 세전 12신(태어난 해 지지에서 출발)이 있습니다. 주성보다 힘이 약해 참고용으로 봅니다.'],
+  '장생 12신': ['자미 12신', '오행국에서 출발해 칸마다 장생·목욕·관대·임관·제왕·쇠·병·사·묘·절·태·양을 붙입니다. 사주의 12운성과 같은 단계로, 그 칸의 기운이 자라는 중인지 약해지는 중인지를 봅니다.'],
+  '박사 12신': ['자미 12신', '녹존이 있는 칸에서 출발해 박사·역사·청룡·소모·장군·주서·비렴·희신·병부·대모·복병·관부를 붙입니다. 재물과 일의 길흉을 더해 봅니다.'],
+  '장전 12신': ['자미 12신', '태어난 해의 삼합에 따라 장성에서 출발해 장성·반안·세역·식신·화개·겁살·재살·천살·지배·함지·월살·망신을 붙입니다. 사주의 12신살과 같은 체계라 설명도 같습니다(세역=역마살, 식신=육해살, 지배=지살, 함지=연살).'],
+  '세전 12신': ['자미 12신', '태어난 해의 지지 칸에서 출발해 세건·회기·상문·관삭·관부·소모·대모·용덕·백호·천덕·조객·병부를 붙입니다. 해마다의 길흉, 특히 경조사와 관재를 볼 때 참고합니다.'],
+  '임관': ['자미 12신', '장생 12신의 네 번째 단계로, 사주 12운성의 건록과 같습니다. 사회에 나가 제 힘으로 서는 단계로, 자립과 안정된 실력을 뜻합니다.'],
+  '박사': ['자미 12신', '박사 12신의 첫째로, 늘 녹존과 같은 칸에 있습니다. 총명함과 지혜, 학문과 문서의 좋은 기운입니다.'],
+  '역사': ['자미 12신', '힘센 장사라는 뜻입니다. 권세와 힘을 뜻하지만, 경양과 함께하면 거칠어진다고 봅니다.'],
+  '청룡': ['자미 12신', '푸른 용이라는 뜻으로 기쁜 일과 경사를 뜻합니다. 재물이 들어오는 좋은 기운으로 봅니다.'],
+  '소모': ['자미 12신', '"작은 소모"라는 뜻입니다. 자잘하게 돈이 새거나 물건을 잃는 것을 조심하라는 뜻입니다.'],
+  '장군': ['자미 12신', '장군의 기운으로 위엄과 용맹, 추진력을 뜻합니다. 지나치면 성급하고 고집스러워진다고 봅니다.'],
+  '주서': ['자미 12신', '글과 문서를 맡는 관리라는 뜻입니다. 문서·계약·학업에 좋은 기운입니다.'],
+  '비렴(박사)': ['자미 12신', '박사 12신의 비렴(飛廉)입니다. 잡성 비렴(蜚廉)과는 다른 별입니다. 구설과 소인의 방해, 고독을 조심하라는 뜻입니다.'],
+  '희신(박사)': ['자미 12신', '박사 12신의 희신(喜神)으로, 용신의 희신과는 다른 뜻입니다. 기쁜 일, 경사, 좋은 소식을 뜻합니다.'],
+  '병부': ['자미 12신', '병을 부르는 부적이라는 뜻입니다. 잔병치레와 건강 관리에 신경 쓰라는 신호로 봅니다.'],
+  '대모': ['자미 12신', '"큰 소모"라는 뜻입니다. 큰돈이 나가거나 손재가 생기는 것을 조심하라는 뜻입니다.'],
+  '복병': ['자미 12신', '숨어 있는 군사라는 뜻입니다. 보이지 않는 방해, 뒤에서의 시비를 조심하라는 뜻입니다.'],
+  '관부': ['자미 12신', '관청이라는 뜻입니다. 소송, 관재, 시비에 휘말리는 것을 조심하라는 뜻입니다.'],
+  '세건': ['자미 12신', '세전 12신의 첫째로, 그해의 주인 자리입니다. 그해의 길흉이 두드러지는 칸으로 봅니다.'],
+  '회기': ['자미 12신', '어둠과 막힘의 기운입니다. 일이 답답하게 풀리지 않는 것을 뜻합니다.'],
+  '상문': ['자미 12신', '상갓집 문이라는 뜻입니다. 상사(喪事)나 슬픈 소식을 조심하라는 뜻입니다.'],
+  '관삭': ['자미 12신', '줄로 묶는다는 뜻입니다. 구속, 얽매임, 일이 꼬이는 것을 뜻합니다.'],
+  '용덕': ['자미 12신', '용의 덕이라는 뜻으로, 흉함을 풀어 주고 도움을 받게 하는 좋은 기운입니다.'],
+  '백호': ['자미 12신', '흰 호랑이라는 뜻입니다. 다침, 사고, 상사를 조심하라는 뜻입니다.'],
+  '조객': ['자미 12신', '조문 온 손님이라는 뜻입니다. 슬픈 소식이나 상사를 조심하라는 뜻입니다.'],
 });
 
 /* 관리자가 수정하기 전의 기본 문구 */
@@ -2058,6 +2106,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const ZW_GRID = { 5: [1, 1], 6: [1, 2], 7: [1, 3], 8: [1, 4], 4: [2, 1], 9: [2, 4], 3: [3, 1], 10: [3, 4], 2: [4, 1], 1: [4, 2], 0: [4, 3], 11: [4, 4] };
   const HWA = { '록': ['화록', 'hl'], '권': ['화권', 'hg'], '과': ['화과', 'hk'], '기': ['화기', 'hj'] };
   const ZW_MAIN_SET = new Set(['자미', '천기', '태양', '무곡', '천동', '염정', '천부', '태음', '탐랑', '거문', '천상', '천량', '칠살', '파군']);
+  const G12_KEY = { 장성: '장성살', 반안: '반안살', 세역: '역마살', 식신: '육해살', 화개: '화개살', 지배: '지살', 함지: '연살', 망신: '망신살' };
+  const g12Term = (n, fam) => term(fam === 'jq' && G12_KEY[n] ? G12_KEY[n] : n, n.replace(/\(.*\)/, ''));
+  const G12_FAM = [['cs', '장생 12신'], ['bs', '박사 12신'], ['jq', '장전 12신'], ['sq', '세전 12신']];
+  function flyHTML(zw, p) {
+    const out = p.fly.map(f => `<span class="chip"><span class="hw ${HWA[f.hw][1]}">${f.hw}</span> ${term(f.star)} → ${f.to === p.b ? '<b>' + term('자화', '자화') + '</b>' : term(zw.palaces[f.to].name)}</span>`).join('');
+    const inn = zw.palaces.flatMap(q => q.fly.filter(f => f.to === p.b && q.b !== p.b).map(f => `<span class="chip">${term(q.name)}에서 <span class="hw ${HWA[f.hw][1]}">${f.hw}</span> ${term(f.star)}</span>`)).join('');
+    return { out, inn };
+  }
   const zwNowY = () => M.solarToLunar(TODAY[0], TODAY[1], TODAY[2]).y; // 지금의 음력 해
   // 별 하나: 이름, 밝기, 생년 사화(채운 배지), 보기 설정에 따라 대한 사화(대)·유년 사화(년) 배지
   function zwStar(n, cls, b, per) {
@@ -2081,6 +2137,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <div class="zc-main">${p.main.length ? p.main.map(n => zwStar(n, 'main', p.b, per)).join('') : `<span class="muted small">${term('공궁', '공궁')}</span>`}</div>
         <div class="zc-sub">${p.good.map(n => zwStar(n, 'good', p.b, per)).join('')}${p.bad.map(n => zwStar(n, 'bad', p.b, per)).join('')}</div>
         ${S.zwAdj !== false ? `<div class="zc-adj">${p.adj.map(n => term(n)).join('')}</div>` : ''}
+        ${S.zwG12 ? `<div class="zc-g12">${G12_FAM.map(([f]) => g12Term(p.g12[f], f)).join('')}</div>` : ''}
         <div class="zc-foot"><span class="zc-name">${term(p.name)}${p.shen ? ` <span class="zc-tag">${term('신궁', '身')}</span>` : ''}${p.b === per.liuB ? ` <span class="zc-tag zc-yr">${term('유년', '유년')}</span>` : ''}</span>
           <span class="zc-gz">${M.STEM[p.s]}${M.BR[p.b]}</span></div>
         <div class="zc-dh num">${p.daehan[0]}~${p.daehan[1]}</div>
@@ -2104,6 +2161,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="frow" style="gap:8px 14px">
         <div class="field"><span>사화 보기</span>${seg('zwHw', [['birth', '생년만'], ['dh', '+ 대한'], ['yr', '+ 대한 + 유년']], S.inp.zwHw || 'birth')}</div>
         <label class="check"><input type="checkbox" id="zw-adj" ${S.zwAdj !== false ? 'checked' : ''}> ${term('잡성', '잡성')} 표시</label>
+        <label class="check"><input type="checkbox" id="zw-g12" ${S.zwG12 ? 'checked' : ''}> ${term('12신', '12신')} 표시</label>
       </div>
       <div class="zw">${zw.palaces.map(cell).join('')}${center}</div>
       <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>명궁</span><span><i class="sw" style="background:var(--good)"></i>${Y}년의 ${term('대한')}</span><span><span class="zc-tag zc-yr">유년</span> ${Y}년 ${term('유년')} 명궁</span><span>별 옆 작은 글자 = ${term('별의 밝기', '밝기')}</span><span>칸 아래 숫자 = 대한 나이(세는나이)</span></div>
@@ -2121,6 +2179,11 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="small" style="color:var(--ink-2)">${esc(GL[sel.name][1])}</p>
       <div class="list">${sel.main.map(n => starLine(n, 'main')).join('')}${sel.good.map(n => starLine(n, 'good')).join('')}${sel.bad.map(n => starLine(n, 'bad')).join('')}${sel.adj.map(n => starLine(n, 'adj')).join('')}</div>
       ${!sel.main.length ? `<p class="small">주성이 없는 ${term('공궁')}이라 마주 보는 ${term(opp.name)}의 ${opp.main.length ? opp.main.map(n => term(n)).join('·') : '별'}을 빌려 봅니다.</p>` : ''}
+      <div class="list">
+        <div class="li"><span class="k">${term('12신')}</span><span class="v small">${G12_FAM.map(([f, l]) => `${term(l)} ${g12Term(sel.g12[f], f)}`).join(' · ')}</span><span></span></div>
+        <div class="li"><span class="k">${term('비성 사화')}</span><span class="v"><span class="small">이 칸의 천간 ${M.STEM[sel.s]}로 날리는 사화</span>${flyHTML(zw, sel).out}</span><span></span></div>
+        <div class="li"><span class="k">들어오는 사화</span><span class="v">${flyHTML(zw, sel).inn || '<span class="small muted">다른 칸에서 이 칸으로 날아오는 사화가 없습니다.</span>'}</span><span></span></div>
+      </div>
       <p class="small">${term('삼방사정')}: ${term(opp.name)}(마주 봄, ${opp.main.map(n => term(n)).join('·') || '공궁'}) · ${tri.map(p => `${term(p.name)}(${p.main.map(n => term(n)).join('·') || '공궁'})`).join(' · ')}</p>
     </section>
     <p class="note">명반은 삼합파의 일반적인 배치 규칙으로 계산합니다. 음력 날짜와 시진은 사주와 같은 시간 기준(${M.TIME_MODES[ch.timeMode]}, ${ch.jasi === 'jeong' ? '정자시' : '야자시'})을 따릅니다. 윤달생은 15일까지 그 달, 16일부터 다음 달로 봅니다. 사화·밝기·잡성은 유파마다 조금씩 다를 수 있습니다(예: 경년 화과를 천부로 보는 유파도 있습니다).</p>`;
@@ -2347,6 +2410,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const id = ev.target.id;
     if (id === 'f-hu' || id === 'f-city' || id === 'f-y') { readForm(); render(); }
     if (id === 'zw-adj') { S.zwAdj = ev.target.checked; render(); }
+    if (id === 'zw-g12') { S.zwG12 = ev.target.checked; render(); }
   });
   document.addEventListener('submit', ev => {
     ev.preventDefault();
