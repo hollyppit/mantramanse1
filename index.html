@@ -231,8 +231,8 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .lt-ev { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; min-height: 20px; }
 .lt-ev .chip { font-size: 0.64rem; padding: 1px 5px; }
 /* 자미두수 명반 */
-.zw { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(118px, auto)); gap: 4px; }
-.zc { position: relative; border-radius: 12px; background: var(--surface-2); padding: 6px 6px 18px; display: grid; grid-template-rows: auto 1fr auto; gap: 3px; cursor: pointer; min-width: 0; box-shadow: inset 0 0 0 1px transparent; }
+.zw { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(132px, auto)); gap: 4px; }
+.zc { position: relative; border-radius: 12px; background: var(--surface-2); padding: 6px 6px 18px; display: grid; grid-template-rows: auto auto 1fr auto; gap: 3px; cursor: pointer; min-width: 0; box-shadow: inset 0 0 0 1px transparent; }
 .zc:hover { box-shadow: inset 0 0 0 2px var(--line); }
 .zc.ming { background: var(--accent-soft); }
 .zc.curdh { box-shadow: inset 0 0 0 2px var(--good); }
@@ -240,12 +240,22 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .zc-main { display: flex; flex-wrap: wrap; gap: 2px 6px; }
 .zc-main .zs .term { font-weight: 800; font-size: 0.92rem; color: var(--ink); text-decoration: none; }
 .zc-sub { display: flex; flex-wrap: wrap; gap: 0 5px; align-content: start; }
-.zs { white-space: nowrap; }
+.zs { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 1px; min-width: 0; max-width: 100%; }
+.zs > .term:first-child { white-space: nowrap; }
 .zs.good .term { font-size: 0.72rem; color: var(--good); text-decoration: none; }
 .zs.bad .term { font-size: 0.72rem; color: var(--bad); text-decoration: none; }
 .zs .hw, .zc-legend .hw { display: inline-grid; place-items: center; width: 15px; height: 15px; margin-left: 1px; border-radius: 4px; font-size: 0.62rem; font-weight: 800; color: #fff; vertical-align: 2px; text-decoration: none; }
 .hw.hl { background: var(--good); } .hw.hg { background: var(--accent-2); } .hw.hk { background: var(--accent); } .hw.hj { background: var(--bad); }
 .zs .hw:hover { color: #fff; }
+.hw.o-dh, .hw.o-yr { width: auto; padding: 0 3px; background: var(--surface); border: 1.5px solid currentColor; }
+.hw.o-dh.hl, .hw.o-yr.hl { color: var(--good); } .hw.o-dh.hg, .hw.o-yr.hg { color: var(--accent-2); } .hw.o-dh.hk, .hw.o-yr.hk { color: var(--accent); } .hw.o-dh.hj, .hw.o-yr.hj { color: var(--bad); }
+.hw.o-yr { border-style: dashed; }
+.zs .hw.o-dh:hover, .zs .hw.o-yr:hover { color: var(--ink); }
+.zb { font-size: 0.58rem; font-weight: 700; line-height: 1.3; padding: 0 3px; margin-left: 2px; border-radius: 4px; background: var(--surface); color: var(--ink-3); box-shadow: inset 0 0 0 1px var(--line); text-decoration: none; vertical-align: 2px; }
+.zc-adj { display: flex; flex-wrap: wrap; gap: 0 4px; align-content: start; }
+.zc-adj .term { font-size: 0.6rem; color: var(--ink-3); text-decoration: none; }
+.chip .hw { display: inline-grid; place-items: center; width: 14px; height: 14px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; color: #fff; }
+.li .v .chip { margin: 2px 2px 0 0; }
 .zc-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 4px; }
 .zc-name { font-size: 0.74rem; font-weight: 800; color: var(--ink-2); white-space: nowrap; }
 .zc.ming .zc-name .term { color: var(--accent); }
@@ -946,6 +956,40 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   const ZW_MAIN = ['자미', '천기', '태양', '무곡', '천동', '염정', '천부', '태음', '탐랑', '거문', '천상', '천량', '칠살', '파군'];
   const ZW_GOOD = ['좌보', '우필', '문창', '문곡', '천괴', '천월', '녹존', '천마', '홍란', '천희'];
   const ZW_BAD = ['경양', '타라', '화성', '영성', '지공', '지겁'];
+  // 별의 밝기(묘왕득리평불함). 문자열은 寅궁부터 丑궁까지 12칸, 공백 = 해당 없음
+  const ZW_BRIGHT = {
+    '자미': '왕왕득왕묘묘왕왕득왕평묘', '천기': '득왕리평묘함득왕리평묘함', '태양': '왕묘왕왕왕득득평불함함불', '무곡': '득리묘평왕묘득리묘평왕묘',
+    '천동': '리평평묘함불왕평평묘왕불', '염정': '묘평리함평리묘평리함평리', '천부': '묘득묘득왕묘득왕묘득묘묘', '태음': '왕함함함불불리왕왕묘묘묘',
+    '탐랑': '평리묘함왕묘평리묘함왕묘', '거문': '묘묘함왕왕불묘묘함왕왕불', '천상': '묘함득득묘득묘함득득묘묘', '천량': '묘묘묘함묘왕함득묘함묘왕',
+    '칠살': '묘왕묘평왕묘묘왕묘평왕묘', '파군': '득함왕평묘왕득함왕평묘왕',
+    '문창': '함리득묘함리득묘함리득묘', '문곡': '평왕득묘함왕득묘함왕득묘', '화성': '묘리함득묘리함득묘리함득', '영성': '묘리함득묘리함득묘리함득',
+    '경양': ' 함묘 함묘 함묘 함묘', '타라': '함 묘함 묘함 묘함 묘',
+  };
+  const zwBright = (n, b) => { const s = ZW_BRIGHT[n]; const c = s ? s[mod(b - 2, 12)] : ''; return c && c !== ' ' ? c : ''; };
+  const zwSihwa = stem => { const o = {}; ZW_SIHWA[stem].forEach((n, i) => o[n] = '록권과기'[i]); return o; };
+  // 잡성: 연간·연지·월·시·일로 정하는 작은 별들 (이름 → 궁 지지)
+  const ZW_ADJ = ['천관', '천복', '천주', '천재', '천수', '용지', '봉각', '천곡', '천허', '천덕', '월덕', '천공', '고진', '과숙', '비렴', '파쇄', '화개', '함지', '연해', '해신', '천형', '천요', '천무', '음살', '태보', '봉고', '삼태', '팔좌', '은광', '천귀', '절로', '절공', '순공', '천상(傷)', '천사'];
+  function ziweiAdj(ys, yb, m, d, h, ming, pos, palaceOf) {
+    const g4 = mod(yb, 4), mi = mod(m - 1, 12);
+    const jeol = [8, 6, 4, 2, 0][ys % 5]; // 절로공망: 갑기 申酉, 을경 午未, 병신 辰巳, 정임 寅卯, 무계 子丑
+    const head = mod(yb - ys, 12); // 연주가 속한 순(旬)의 첫 지지
+    const sun = [mod(head + 10, 12), mod(head + 11, 12)].find(b => b % 2 === yb % 2);
+    return {
+      '천관': [7, 4, 5, 2, 3, 9, 11, 9, 10, 6][ys], '천복': [9, 8, 0, 11, 3, 2, 6, 5, 6, 5][ys], '천주': [5, 6, 0, 5, 6, 8, 2, 6, 9, 11][ys],
+      '천재': mod(ming + yb, 12), '천수': mod(pos.shen + yb, 12),
+      '용지': mod(4 + yb, 12), '봉각': mod(10 - yb, 12), '천곡': mod(6 - yb, 12), '천허': mod(6 + yb, 12),
+      '천덕': mod(9 + yb, 12), '월덕': mod(5 + yb, 12), '천공': mod(yb + 1, 12),
+      '고진': [2, 5, 8, 11][Math.floor(mod(yb + 1, 12) / 3)], '과숙': [10, 1, 4, 7][Math.floor(mod(yb + 1, 12) / 3)],
+      '비렴': [8, 9, 10, 5, 6, 7, 2, 3, 4, 11, 0, 1][yb], '파쇄': [5, 1, 9][yb % 3],
+      '화개': [4, 1, 10, 7][g4], '함지': [9, 6, 3, 0][g4], '연해': mod(10 - yb, 12),
+      '해신': [8, 10, 0, 2, 4, 6][Math.floor(mi / 2)], '천형': mod(9 + mi, 12), '천요': mod(1 + mi, 12),
+      '천무': [5, 8, 2, 11][mi % 4], '음살': [2, 0, 10, 8, 6, 4][mi % 6],
+      '태보': mod(6 + h, 12), '봉고': mod(2 + h, 12),
+      '삼태': mod(pos['좌보'] + d - 1, 12), '팔좌': mod(pos['우필'] - d + 1, 12), '은광': mod(pos['문창'] + d - 2, 12), '천귀': mod(pos['문곡'] + d - 2, 12),
+      '절로': jeol, '절공': jeol + 1, '순공': sun,
+      '천상(傷)': palaceOf('노복궁'), '천사': palaceOf('질액궁'),
+    };
+  }
   function ziwei(ch, P) {
     if (!P.hour) return null;
     const t = new Date((P.jdn - 2440588) * 86400000);
@@ -970,17 +1014,28 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       '화성': mod([2, 3, 1, 9][g4] + h, 12), '영성': mod([10, 10, 3, 10][g4] + h, 12),
       '지겁': mod(11 + h, 12), '지공': mod(11 - h, 12), '천마': [2, 11, 8, 5][g4], '홍란': hong, '천희': mod(hong + 6, 12),
     });
-    const sihwa = {}; ZW_SIHWA[ys].forEach((n, i) => sihwa[n] = '록권과기'[i]);
+    const sihwa = zwSihwa(ys);
     const forward = yang(ys) === (ch.gender === 'M');
+    pos.shen = shen;
+    const adj = ziweiAdj(ys, yb, m, d, h, ming, pos, name => mod(ming - ZW_PALACE.indexOf(name), 12));
+    delete pos.shen;
     const palaces = Array.from({ length: 12 }, (_, b) => {
       const k = forward ? mod(b - ming, 12) : mod(ming - b, 12);
       return {
         b, s: stemOf(b), name: ZW_PALACE[mod(ming - b, 12)], shen: b === shen,
         main: ZW_MAIN.filter(n => pos[n] === b), good: ZW_GOOD.filter(n => pos[n] === b), bad: ZW_BAD.filter(n => pos[n] === b),
+        adj: ZW_ADJ.filter(n => adj[n] === b),
         daehan: [guk + 10 * k, guk + 10 * k + 9],
       };
     });
-    return { lunar: L, month: m, hour: h, ys, yb, ming, shen, guk, gukEl, pos, sihwa, forward, palaces, mingju: ZW_MINGJU[ming], shinju: ZW_SHINJU[yb] };
+    return { lunar: L, month: m, hour: h, ys, yb, ming, shen, guk, gukEl, pos, adj, sihwa, forward, palaces, mingju: ZW_MINGJU[ming], shinju: ZW_SHINJU[yb] };
+  }
+  // 음력 Y년의 운: 그해 나이(세는나이)가 속한 대한 궁과 대한 사화, 유년 명궁과 유년 사화
+  function ziweiPeriod(zw, Y) {
+    const age = Y - zw.lunar.y + 1;
+    const dh = zw.palaces.find(p => age >= p.daehan[0] && age <= p.daehan[1]) || null;
+    const liuB = mod(Y - 4, 12), liuS = mod(Y - 4, 10);
+    return { Y, age, dh, dhSihwa: dh ? zwSihwa(dh.s) : {}, liuB, liuS, liuSihwa: zwSihwa(liuS) };
   }
 
   // 세운·월운·일운 (차트 기준)
@@ -1030,7 +1085,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   const sonOf = ld => ['없음', '동', '동', '남', '남', '서', '서', '북', '북', '없음'][ld % 10];
 
   G.Manse = {
-    compute, luckItem, luckRelations, ZW_PALACE, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
+    compute, luckItem, luckRelations, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, mainHidden, yang, gzName, gzNameK,
@@ -1363,6 +1418,49 @@ Object.assign(GLOSSARY, {
   '영성': ['자미 보좌성', '속에서 타는 불의 별로, 조심해야 할 여섯 살성 중 하나입니다. 속으로 끓는 불만, 은근한 스트레스를 뜻합니다.'],
   '지공': ['자미 보좌성', '"텅 빈" 별로, 조심해야 할 여섯 살성 중 하나입니다. 계획이 허공에 뜨거나 손재가 생기는 것을 뜻하지만, 기발한 발상과 정신적 깊이가 되기도 합니다.'],
   '지겁': ['자미 보좌성', '"빼앗기는" 별로, 조심해야 할 여섯 살성 중 하나입니다. 갑작스러운 손실과 좌절을 뜻하지만, 틀을 깨는 대담함이 되기도 합니다.'],
+
+  // ── 밝기·운의 사화
+  '별의 밝기': ['자미두수', '같은 별이라도 어느 칸(지지)에 있느냐에 따라 힘이 다릅니다. 가장 밝은 것부터 묘(廟, 아주 강함)·왕(旺, 강함)·득(得, 제자리를 얻음)·리(利, 조금 유리)·평(平, 보통)·불(不, 조금 약함)·함(陷, 약함, 빛이 가려짐) 순입니다. 밝은 별은 좋은 성질이 잘 드러나고, 어두운 별은 약점이 드러나기 쉽다고 봅니다. 밝기 표는 유파마다 몇 칸씩 다를 수 있습니다.'],
+  '대한 사화': ['자미두수', '10년 대한 칸의 천간으로 새로 정해지는 사화입니다. 태어난 해의 사화(생년 사화)가 평생의 바탕이라면, 대한 사화는 그 10년 동안 어떤 영역에 기회(록)·힘(권)·인정(과)·막힘(기)이 생기는지를 보여줍니다. 명반에서는 "대"가 붙은 테두리 배지로 표시합니다.'],
+  '유년 사화': ['자미두수', '그해 천간으로 정해지는 사화입니다. 예: 병(丙)년에는 천동 화록, 천기 화권, 문창 화과, 염정 화기가 됩니다. 그해에 어느 영역이 잘 풀리고 어디서 막히는지를 봅니다. 명반에서는 "년"이 붙은 점선 테두리 배지로 표시합니다.'],
+  '잡성': ['자미두수', '14주성과 주요 보좌성 외에 명반에 들어가는 작은 별들입니다. 힘은 약하지만 연애·학업·질병·고독 같은 구체적인 분위기를 더해 줍니다. 해석할 때는 주성을 먼저 보고, 잡성은 양념처럼 참고합니다.'],
+
+  // ── 잡성
+  '천관': ['자미 잡성', '벼슬의 별입니다. 승진, 직위, 공적인 명예와 인연이 있다고 봅니다.'],
+  '천복': ['자미 잡성', '복을 받는 별입니다. 먹고사는 복, 편안하게 누리는 복이 있다고 봅니다.'],
+  '천주': ['자미 잡성', '부엌의 별입니다. 먹을 복, 요리 솜씨, 음식과 관련된 인연을 뜻합니다.'],
+  '천재': ['자미 잡성', '재능의 별입니다. 타고난 재주와 총명함을 뜻합니다.'],
+  '천수': ['자미 잡성', '장수의 별입니다. 건강하게 오래 사는 기운, 어른스러움을 뜻합니다.'],
+  '용지': ['자미 잡성', '용이 사는 연못이라는 뜻으로 봉각과 짝을 이룹니다. 품위, 예술적 재능, 시험운을 뜻합니다.'],
+  '봉각': ['자미 잡성', '봉황의 누각이라는 뜻으로 용지와 짝을 이룹니다. 멋과 명예, 좋은 평판을 뜻합니다.'],
+  '천곡': ['자미 잡성', '우는 별로 천허와 짝을 이룹니다. 슬픔, 걱정, 눈물 흘릴 일을 뜻합니다.'],
+  '천허': ['자미 잡성', '텅 빈 별로 천곡과 짝을 이룹니다. 허전함, 공허함, 실속 없음을 뜻합니다.'],
+  '천덕': ['자미 잡성', '하늘의 덕이라는 뜻입니다. 나쁜 일을 누그러뜨리고 어려울 때 도움을 받게 해 준다고 봅니다.'],
+  '월덕': ['자미 잡성', '달의 덕이라는 뜻입니다. 천덕처럼 흉함을 줄여 주고 성품을 온화하게 한다고 봅니다.'],
+  '천공': ['자미 잡성', '하늘이 빈 별입니다. 계획이 뜻대로 안 되고 헛수고하기 쉽다고 보지만, 정신적인 깊이와 발상이 되기도 합니다.'],
+  '고진': ['자미 잡성', '외로운 별로 과숙과 짝을 이룹니다. 혼자 있는 시간이 많고 독립적인 성향을 뜻합니다. 남성에게 더 강하게 작용한다고 봅니다.'],
+  '과숙': ['자미 잡성', '홀로 지내는 별로 고진과 짝을 이룹니다. 외로움과 독립심을 뜻하며, 여성에게 더 강하게 작용한다고 봅니다.'],
+  '비렴': ['자미 잡성', '날아다니는 벌레라는 뜻입니다. 구설수, 뒷말, 사소한 방해를 조심하라는 별입니다.'],
+  '파쇄': ['자미 잡성', '깨지고 부서지는 별입니다. 일이 자잘하게 어그러지거나 물건이 망가지는 것을 뜻합니다.'],
+  '화개': ['자미 잡성', '꽃을 덮는 덮개라는 뜻입니다. 학문·종교·예술에 대한 관심, 혼자 깊이 파고드는 성향을 뜻합니다.'],
+  '함지': ['자미 잡성', '도화(桃花)의 별입니다. 매력, 이성 관계, 유흥을 뜻합니다. 지나치면 이성 문제를 조심하라고 봅니다.'],
+  '연해': ['자미 잡성', '태어난 해 기준으로 어려움을 풀어 주는 별입니다. 막힌 일이 풀리고 걱정이 해소된다고 봅니다.'],
+  '해신': ['자미 잡성', '태어난 달 기준으로 어려움을 풀어 주는 별입니다. 다툼이나 문제가 원만히 해결된다고 봅니다.'],
+  '천형': ['자미 잡성', '형벌의 별입니다. 규율, 법, 수술, 엄격함을 뜻합니다. 법조·의료·군경 쪽에서는 오히려 힘이 됩니다.'],
+  '천요': ['자미 잡성', '요염한 별입니다. 매력과 풍류, 예술적 감각, 이성 인연을 뜻합니다.'],
+  '천무': ['자미 잡성', '무당의 별입니다. 직관, 종교·신비한 것에 대한 관심, 물려받는 유산을 뜻합니다.'],
+  '음살': ['자미 잡성', '어두운 기운의 별입니다. 뒤에서 방해하는 사람, 원인 모를 불안을 조심하라는 뜻입니다.'],
+  '태보': ['자미 잡성', '높은 벼슬의 별로 봉고와 짝을 이룹니다. 지위와 명예를 돕는다고 봅니다.'],
+  '봉고': ['자미 잡성', '임금의 문서를 받는 별로 태보와 짝을 이룹니다. 상장·자격·명예로운 문서를 뜻합니다.'],
+  '삼태': ['자미 잡성', '높은 자리의 별로 팔좌와 짝을 이룹니다. 지위가 오르고 체면이 서는 것을 뜻합니다.'],
+  '팔좌': ['자미 잡성', '높은 자리의 별로 삼태와 짝을 이룹니다. 좋은 자리와 대접받는 것을 뜻합니다.'],
+  '은광': ['자미 잡성', '은혜의 빛이라는 뜻으로 천귀와 짝을 이룹니다. 윗사람의 인정과 특별한 대우를 뜻합니다.'],
+  '천귀': ['자미 잡성', '귀한 별로 은광과 짝을 이룹니다. 귀인의 도움과 명예를 뜻합니다.'],
+  '절로': ['자미 잡성', '"길이 끊긴다"는 뜻의 절로공망 중 하나입니다. 일이 도중에 막히거나 멈추는 것을 뜻하며, 젊을 때 더 강하게 작용한다고 봅니다.'],
+  '절공': ['자미 잡성', '절로공망의 다른 한 자리입니다. 절로처럼 일이 중간에 끊기거나 허사가 되는 것을 뜻합니다.'],
+  '순공': ['자미 잡성', '태어난 해 간지의 공망 자리입니다. 그 칸의 기운이 비어 작용이 약해지거나 늦어진다고 봅니다. 사주의 공망과 같은 원리입니다.'],
+  '천상(傷)': ['자미 잡성', '다침과 손해의 별로, 늘 노복궁에 들어갑니다. 주성 천상(天相)과는 다른 별입니다. 대한이나 유년이 이 칸에 오면 손실을 조심하라고 봅니다.'],
+  '천사': ['자미 잡성', '재앙을 전하는 사자의 별로, 늘 질액궁에 들어갑니다. 대한이나 유년이 이 칸에 오면 건강과 사고를 조심하라고 봅니다.'],
 });
 
 /* 관리자가 수정하기 전의 기본 문구 */
@@ -1959,53 +2057,74 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 명반 배치: 4×4 칸의 가장자리에 지지를 고정 (巳午未申 / 辰·酉 / 卯·戌 / 寅丑子亥)
   const ZW_GRID = { 5: [1, 1], 6: [1, 2], 7: [1, 3], 8: [1, 4], 4: [2, 1], 9: [2, 4], 3: [3, 1], 10: [3, 4], 2: [4, 1], 1: [4, 2], 0: [4, 3], 11: [4, 4] };
   const HWA = { '록': ['화록', 'hl'], '권': ['화권', 'hg'], '과': ['화과', 'hk'], '기': ['화기', 'hj'] };
+  const ZW_MAIN_SET = new Set(['자미', '천기', '태양', '무곡', '천동', '염정', '천부', '태음', '탐랑', '거문', '천상', '천량', '칠살', '파군']);
   const zwNowY = () => M.solarToLunar(TODAY[0], TODAY[1], TODAY[2]).y; // 지금의 음력 해
-  const zwAge = () => zwNowY() - S.ch.ziwei.lunar.y + 1; // 세는나이
-  function zwStar(n, cls) {
-    const zw = S.ch.ziwei, hw = zw.sihwa[n];
-    return `<span class="zs ${cls}">${term(n)}${hw ? `<button type="button" class="term hw ${HWA[hw][1]}" data-term="${HWA[hw][0]}">${hw}</button>` : ''}</span>`;
+  // 별 하나: 이름, 밝기, 생년 사화(채운 배지), 보기 설정에 따라 대한 사화(대)·유년 사화(년) 배지
+  function zwStar(n, cls, b, per) {
+    const zw = S.ch.ziwei, hw = zw.sihwa[n], br = M.zwBright(n, b);
+    const badge = (h, pre, kind) => `<button type="button" class="term hw ${HWA[h][1]}${kind ? ' ' + kind : ''}" data-term="${kind === 'o-dh' ? '대한 사화' : kind === 'o-yr' ? '유년 사화' : HWA[h][0]}" title="${pre}${HWA[h][0]}">${pre}${h}</button>`;
+    const show = S.inp.zwHw || 'birth';
+    return `<span class="zs ${cls}">${term(n)}${br ? `<button type="button" class="term zb" data-term="별의 밝기">${br}</button>` : ''}${hw ? badge(hw, '', '') : ''}${show !== 'birth' && per.dhSihwa[n] ? badge(per.dhSihwa[n], '대', 'o-dh') : ''}${show === 'yr' && per.liuSihwa[n] ? badge(per.liuSihwa[n], '년', 'o-yr') : ''}</span>`;
+  }
+  // 사화가 어느 궁의 어느 별에 붙었는지
+  function sihwaWhere(map) {
+    const zw = S.ch.ziwei;
+    return Object.entries(map).map(([n, h]) => { const p = zw.palaces[zw.pos[n]]; return `<span class="chip"><span class="hw ${HWA[h][1]}">${h}</span> ${term(n)} → ${term(p.name)}</span>`; }).join('');
   }
   function renderZiwei() {
-    const ch = S.ch, zw = ch.ziwei, age = zwAge();
-    const liuB = ((zwNowY() - 4) % 12 + 12) % 12;
+    const ch = S.ch, zw = ch.ziwei, nowY = zwNowY();
+    const Y = S.zwY ?? nowY, per = M.ziweiPeriod(zw, Y);
     const selB = S.zwSel ?? zw.ming;
     const cell = p => {
-      const [r, c] = ZW_GRID[p.b], curDh = age >= p.daehan[0] && age <= p.daehan[1];
-      return `<div class="zc${p.b === zw.ming ? ' ming' : ''}${p.b === selB ? ' sel' : ''}${curDh ? ' curdh' : ''}" style="grid-area:${r}/${c}" data-zw="${p.b}" role="button" tabindex="0">
-        <div class="zc-main">${p.main.length ? p.main.map(n => zwStar(n, 'main')).join('') : `<span class="muted small">${term('공궁', '공궁')}</span>`}</div>
-        <div class="zc-sub">${p.good.map(n => zwStar(n, 'good')).join('')}${p.bad.map(n => zwStar(n, 'bad')).join('')}</div>
-        <div class="zc-foot"><span class="zc-name">${term(p.name)}${p.shen ? ` <span class="zc-tag">${term('신궁', '身')}</span>` : ''}${p.b === liuB ? ' <span class="zc-tag zc-yr">올해</span>' : ''}</span>
+      const [r, c] = ZW_GRID[p.b], isDh = per.dh && per.dh.b === p.b;
+      return `<div class="zc${p.b === zw.ming ? ' ming' : ''}${p.b === selB ? ' sel' : ''}${isDh ? ' curdh' : ''}" style="grid-area:${r}/${c}" data-zw="${p.b}" role="button" tabindex="0">
+        <div class="zc-main">${p.main.length ? p.main.map(n => zwStar(n, 'main', p.b, per)).join('') : `<span class="muted small">${term('공궁', '공궁')}</span>`}</div>
+        <div class="zc-sub">${p.good.map(n => zwStar(n, 'good', p.b, per)).join('')}${p.bad.map(n => zwStar(n, 'bad', p.b, per)).join('')}</div>
+        ${S.zwAdj !== false ? `<div class="zc-adj">${p.adj.map(n => term(n)).join('')}</div>` : ''}
+        <div class="zc-foot"><span class="zc-name">${term(p.name)}${p.shen ? ` <span class="zc-tag">${term('신궁', '身')}</span>` : ''}${p.b === per.liuB ? ` <span class="zc-tag zc-yr">${term('유년', '유년')}</span>` : ''}</span>
           <span class="zc-gz">${M.STEM[p.s]}${M.BR[p.b]}</span></div>
         <div class="zc-dh num">${p.daehan[0]}~${p.daehan[1]}</div>
       </div>`;
     };
     const L = zw.lunar, sel = zw.palaces[selB];
     const opp = zw.palaces[(selB + 6) % 12], tri = [zw.palaces[(selB + 4) % 12], zw.palaces[(selB + 8) % 12]];
-    const starsOf = p => [...p.main, ...p.good, ...p.bad];
-    const starLine = n => `<div class="li"><span class="k">${zwStar(n, ZW_MAIN_SET.has(n) ? 'main' : sel.bad.includes(n) ? 'bad' : 'good')}</span><span class="v small" style="color:var(--ink-2)">${esc(GL[n][1])}</span><span></span></div>`;
+    const starLine = (n, cls) => `<div class="li"><span class="k">${cls === 'adj' ? term(n) : zwStar(n, cls, sel.b, per)}</span><span class="v small" style="color:var(--ink-2)">${esc(GL[n][1])}</span><span></span></div>`;
+    const liuP = zw.palaces[per.liuB];
     const center = `<div class="zc-center">
       <b class="zt">${S.inp.name ? esc(S.inp.name) + ' · ' : ''}${S.inp.gender === 'M' ? '남' : '여'}</b>
       <span>음력 ${L.y}.${pad(L.m)}.${pad(L.d)}${L.leap ? ' (윤달)' : ''} ${M.BR[zw.hour]}시</span>
       <span>${M.STEM[zw.ys]}${M.BR[zw.yb]}년생 · ${term('오행국', ['', '', '수2국', '목3국', '금4국', '토5국', '화6국'][zw.guk])}</span>
       <span>${term('명주')} ${term(zw.mingju)} · ${term('신주')} ${term(zw.shinju)}</span>
-      <span>${term('대한')} ${zw.forward ? '시계 방향' : '시계 반대 방향'} · 올해 ${age}세</span>
+      <span>${term('대한')} ${zw.forward ? '시계 방향' : '시계 반대 방향'}</span>
       <span class="zc-legend">${Object.values(HWA).map(([n, c]) => `<span class="hw ${c}">${n.slice(1)}</span>${term(n, n)}`).join(' ')}</span>
     </div>`;
     return `<section class="card">
-      <div class="card-h"><h2>${term('자미두수')} ${term('명반', '명반')}</h2><span class="note">칸을 누르면 아래에 풀이가 열리고, 별 이름을 누르면 설명이 열립니다</span></div>
+      <div class="card-h"><h2>${term('자미두수')} ${term('명반', '명반')}</h2>
+        <span class="seg" role="group" aria-label="보는 해"><button data-act="zwy:-1" aria-label="이전 해">‹</button><button data-act="zwy:0">${Y}년 · ${per.age}세</button><button data-act="zwy:1" aria-label="다음 해">›</button></span></div>
+      <div class="frow" style="gap:8px 14px">
+        <div class="field"><span>사화 보기</span>${seg('zwHw', [['birth', '생년만'], ['dh', '+ 대한'], ['yr', '+ 대한 + 유년']], S.inp.zwHw || 'birth')}</div>
+        <label class="check"><input type="checkbox" id="zw-adj" ${S.zwAdj !== false ? 'checked' : ''}> ${term('잡성', '잡성')} 표시</label>
+      </div>
       <div class="zw">${zw.palaces.map(cell).join('')}${center}</div>
-      <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>명궁</span><span><i class="sw" style="background:var(--good)"></i>지금의 대한</span><span><span class="zc-tag zc-yr">올해</span> ${term('유년')} 명궁</span><span>칸 아래 숫자 = ${term('대한')} 나이(세는나이)</span></div>
+      <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>명궁</span><span><i class="sw" style="background:var(--good)"></i>${Y}년의 ${term('대한')}</span><span><span class="zc-tag zc-yr">유년</span> ${Y}년 ${term('유년')} 명궁</span><span>별 옆 작은 글자 = ${term('별의 밝기', '밝기')}</span><span>칸 아래 숫자 = 대한 나이(세는나이)</span></div>
+    </section>
+    <section class="card">
+      <div class="card-h"><h2>${Y}년 운 <span class="muted small">세는나이 ${per.age}세 · ${M.STEM[per.liuS]}${M.BR[per.liuB]}년</span></h2></div>
+      <div class="list">
+        <div class="li"><span class="k">${term('대한')}</span><span class="v">${per.dh ? `<b>${term(per.dh.name)}</b> ${M.STEM[per.dh.s]}${M.BR[per.dh.b]} · ${per.dh.daehan[0]}~${per.dh.daehan[1]}세 <span class="small">이 10년은 ${term(per.dh.name)} 칸이 명궁 역할을 합니다. ${term('대한 사화')}(대한 칸의 천간 ${M.STEM[per.dh.s]} 기준):</span>${sihwaWhere(per.dhSihwa)}` : '<span class="muted small">첫 대한 시작 전입니다.</span>'}</span><span></span></div>
+        <div class="li"><span class="k">${term('유년')}</span><span class="v"><b>${term(liuP.name)}</b> 칸이 올해의 명궁 <span class="small">${M.BR[per.liuB]}년이라 ${M.BR[per.liuB]} 칸이 유년 명궁이 됩니다. ${term('유년 사화')}(그해 천간 ${M.STEM[per.liuS]} 기준):</span>${sihwaWhere(per.liuSihwa)}</span><span></span></div>
+      </div>
+      <p class="note">위 "사화 보기"에서 대한·유년 사화를 명반 위에 겹쳐 볼 수 있습니다. 생년 사화는 색칠된 배지, 대한 사화는 "대", 유년 사화는 "년"이 붙은 테두리 배지입니다.</p>
     </section>
     <section class="card">
       <div class="card-h"><h2>${term(sel.name)} <span class="muted small">${M.STEM[sel.s]}${M.BR[sel.b]} · ${sel.daehan[0]}~${sel.daehan[1]}세 대한</span></h2>${sel.shen ? `<span class="pill" style="background:var(--accent);color:#fff">${term('신궁')}</span>` : ''}</div>
       <p class="small" style="color:var(--ink-2)">${esc(GL[sel.name][1])}</p>
-      ${starsOf(sel).length ? `<div class="list">${starsOf(sel).map(starLine).join('')}</div>` : ''}
+      <div class="list">${sel.main.map(n => starLine(n, 'main')).join('')}${sel.good.map(n => starLine(n, 'good')).join('')}${sel.bad.map(n => starLine(n, 'bad')).join('')}${sel.adj.map(n => starLine(n, 'adj')).join('')}</div>
       ${!sel.main.length ? `<p class="small">주성이 없는 ${term('공궁')}이라 마주 보는 ${term(opp.name)}의 ${opp.main.length ? opp.main.map(n => term(n)).join('·') : '별'}을 빌려 봅니다.</p>` : ''}
       <p class="small">${term('삼방사정')}: ${term(opp.name)}(마주 봄, ${opp.main.map(n => term(n)).join('·') || '공궁'}) · ${tri.map(p => `${term(p.name)}(${p.main.map(n => term(n)).join('·') || '공궁'})`).join(' · ')}</p>
     </section>
-    <p class="note">명반은 삼합파의 일반적인 배치 규칙으로 계산합니다. 음력 날짜와 시진은 사주와 같은 시간 기준(${M.TIME_MODES[ch.timeMode]}, ${ch.jasi === 'jeong' ? '정자시' : '야자시'})을 따릅니다. 윤달생은 15일까지 그 달, 16일부터 다음 달로 봅니다. 사화와 일부 보좌성은 유파마다 조금씩 다를 수 있습니다(예: 경년 화과를 천부로 보는 유파도 있습니다).</p>`;
+    <p class="note">명반은 삼합파의 일반적인 배치 규칙으로 계산합니다. 음력 날짜와 시진은 사주와 같은 시간 기준(${M.TIME_MODES[ch.timeMode]}, ${ch.jasi === 'jeong' ? '정자시' : '야자시'})을 따릅니다. 윤달생은 15일까지 그 달, 16일부터 다음 달로 봅니다. 사화·밝기·잡성은 유파마다 조금씩 다를 수 있습니다(예: 경년 화과를 천부로 보는 유파도 있습니다).</p>`;
   }
-  const ZW_MAIN_SET = new Set(['자미', '천기', '태양', '무곡', '천동', '염정', '천부', '태음', '탐랑', '거문', '천상', '천량', '칠살', '파군']);
 
   // ───────────── 용어 ─────────────
   function glList() {
@@ -2207,6 +2326,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (a === 'admin-out') { adminLogout(''); return; }
       if (a === 'edit') { if (S.editing) readForm(); S.editing = !S.editing; render(); return; }
       if (a.startsWith('year:')) { const d = +a.slice(5); S.selYear = d === 0 ? M.yearPillarAt(NOW).sajuYear : Math.max(M.MIN_Y, Math.min(M.MAX_Y - 2, S.selYear + d)); if (S.sel && S.sel.kind === 'wolun') S.sel = null; render(); return; }
+      if (a.startsWith('zwy:')) { const d = +a.slice(4); S.zwY = d === 0 ? zwNowY() : Math.max(S.ch.ziwei.lunar.y, (S.zwY ?? zwNowY()) + d); render(); return; }
       if (a.startsWith('ym:')) { const d = +a.slice(3); if (d === 0) S.selYM = [TODAY[0], TODAY[1]]; else { let [y, m] = S.selYM; m += d; if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; } S.selYM = [y, m]; } if (S.sel && S.sel.kind === 'ilun') S.sel = null; render(); return; }
     }
     const tb = t.closest('[data-tab]');
@@ -2226,6 +2346,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   document.addEventListener('change', ev => {
     const id = ev.target.id;
     if (id === 'f-hu' || id === 'f-city' || id === 'f-y') { readForm(); render(); }
+    if (id === 'zw-adj') { S.zwAdj = ev.target.checked; render(); }
   });
   document.addEventListener('submit', ev => {
     ev.preventDefault();
@@ -2233,7 +2354,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     readForm();
     try { validate(); } catch (e) { S.err = e.message; render(); return; }
     run();
-    if (!S.err) { S.isExample = false; S.editing = false; S.sel = null; S.zwSel = null; save(); }
+    if (!S.err) { S.isExample = false; S.editing = false; S.sel = null; S.zwSel = null; S.zwY = null; save(); }
     render();
   });
   document.addEventListener('input', ev => { if (ev.target.id === 'gl-q') { S.glq = ev.target.value; document.getElementById('gl-list').innerHTML = glList(); } });
