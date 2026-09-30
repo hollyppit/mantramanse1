@@ -26,7 +26,7 @@ const TYPES = {
   'K 억부≠조후(반대)': c => jo(c).applicable && ['기신', '구신'].includes(eok(c).roles[jo(c).yong]),
   'ALL': () => true,
 };
-const PH = ['공격기', '확장기', '수확기', '축적기', '변동기', '방어기'], CO = ['순풍', '보통', '주의', '부담'];
+const PH = ['기회기', '확장기', '수확기', '축적기', '변동기', '방어기'], CO = ['순풍', '보통', '주의', '부담'];
 const NUM = ['fitScore', 'ownFit', 'eokbuScore', 'johuScore', 'relationScore', 'structureScore', 'volatilityScore', 'intensityScore'];
 const pct = (o, ks, n) => ks.map(k => String(Math.round((o[k] || 0) / n * 100)).padStart(3)).join(' ');
 const fails = [];
