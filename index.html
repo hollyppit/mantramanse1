@@ -405,6 +405,13 @@ tr.row-g-avoid td { background: color-mix(in srgb, var(--bad) 7%, transparent); 
 .cr-env + .cr-env { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
 .cr-detail { margin-top: 8px; }
 @media (max-width: 560px) { .cr-row { grid-template-columns: 6.5em 1fr 2em; } .cr-lab { grid-column: 1 / -1; } .cr-ax { grid-template-columns: 3.6em 1fr 3.6em; } .cr-v { grid-column: 2; } }
+.rt-dm { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 1.05rem; }
+.rt-ms { display: grid; gap: 10px; }
+.rt-m { display: grid; grid-template-columns: 7.2em 1fr 2.8em; gap: 2px 10px; align-items: center; font-size: 0.88rem; }
+.rt-l { font-weight: 700; } .rt-s { grid-column: 2 / -1; font-size: 0.78rem; color: var(--ink-3); }
+.rt-ch { display: flex; flex-wrap: wrap; gap: 4px; }
+.rt-fit { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.88rem; } .rt-fit b.pos { color: var(--good); } .rt-fit b.neg { color: var(--bad); } .rt-fit i { font-style: normal; color: var(--ink-3); }
+.rt-box { margin-top: 4px; }
 .cp-title { display: grid; gap: 4px; margin-top: 6px; }
 .cp-title h2 { font-size: 1.3rem; }
 .cp-els { display: grid; gap: 8px; }
@@ -2549,8 +2556,187 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     return Object.fromEntries(CAREER_KEYS.map(k => { const tw = CAREER_CONFIG.categories[k].tg; return [k, Math.round(100 * tw.reduce((s, x, g) => s + x * occ[g], 0) / Math.max(...tw))]; }));
   }
 
+  // ───────────── 일간의 뿌리 · 통근 (설명 지표 · 흐름 점수와 독립) ─────────────
+  // 네 가지를 분리한다: ① 원국 통근 ② 운에서 들어오는 근의 보강 ③ 기존 근의 안정성/교란 ④ 현재 시점의 통근 상태.
+  // 원국의 무근/유근 판정은 운 때문에 바뀌지 않는다. 운의 근은 luckRootSupport로 따로 계산한다.
+  // 이 계층은 기존 계산(ch.*, evaluateLuck, luckRelations, cpElParts, luckWeights)을 읽기만 하고 흐름 점수·변동성·시기 분류에 넣지 않는다.
+  // 같은 충·형이 두 번 점수에 들어가지 않도록, rootStability는 어떤 기존 점수에도 되돌려 주지 않는다(볼 수만 있는 지표).
+  // 학파에 따라 갈리는 규칙은 ROOT_RULES에 모아 드러내고, 임계값·가중치는 ROOT_CONFIG·ROOT_LEVEL_WEIGHTS에만 둔다.
+  const ROOT_RULES = {
+    // 근으로 인정하는 지장간: 일간과 같은 천간(비견 근)은 가장 강하게, 같은 오행이지만 음양이 다른 천간(겁재 근)은 다르게 센다.
+    sameStem: { rootType: '비견 근(같은 천간)', base: 1.0 },
+    sameElementOpposite: { rootType: '겁재 근(같은 오행·다른 음양)', base: { yang: 0.8, yin: 0.8 } },   // 양간·음간 일간을 따로 조절할 수 있게 분리. 기본은 같은 값
+    inseong: { enabled: false, rootType: '인성 생근(생해 주는 오행)', base: 0.25 },                        // 인성 지장간을 뿌리로 보는 학파가 있어 끄고 켤 수 있게만 둔다(기본 꺼짐)
+    // 이 앱이 근으로 세지 않는 것(구현하지 않은 학파별 규칙)
+    notCounted: ['입묘(墓庫) 근: 일간의 묘지에 앉은 것을 근으로 보는 견해', '12운성 기반 통근(장생·건록·제왕 등을 근으로 보는 견해)', '합화로 일간 오행이 새로 생긴 것', '천간 투출(지지가 아니라 천간에 같은 오행이 있는 것)'],
+  };
+  const ROOT_CONFIG = {
+    levels: [[85, '매우 강한 통근'], [70, '강한 통근'], [50, '통근'], [30, '약한 통근'], [1, '매우 약한 통근'], [0, '무근']],   // 이 점수 이상 → 등급
+    hiddenStemWeight: { main: 1.0, middle: 0.55, residual: 0.35 },   // 본기 > 중기 > 여기
+    palaceWeight: { year: 0.6, month: 1.0, day: 0.9, hour: 0.7 },    // 월지가 가장 크고 일지·시지·년지 순. 득령(월령의 계절 지원)과 별개로 "그 자리의 뿌리"만 센다
+    natalSat: 1.1,          // natalRootScore = 100 × (1 − e^(−Σ기여/natalSat)). 여러 근이 겹칠수록 더해지는 폭이 줄어든다
+    luckSat: 0.9,           // 운의 지지 하나가 주는 근 보강 점수의 포화 기준(지지 하나이므로 원국보다 작게)
+    current: { natalWeight: 1 },     // 현재 통근 = 1 − (1 − 원국 통근×natalWeight)·Π(1 − 운 근 효과): 덧셈이 아니라 겹침(diminishing return)
+    supportBands: [[55, '강한 근'], [30, '보조 근'], [1, '약한 근']],
+    changeBands: [[40, '강하게 보강'], [20, '보강'], [5, '약하게 보강'], [0, '추가 근 없음']],   // 현재 통근 − 원국 통근
+    stabilityBands: [[80, '안정'], [60, '대체로 안정'], [40, '변동 있음'], [0, '교란 신호 강함']],
+    // 원국의 근 자리 지지와 운의 지지가 만드는 관계가 "근의 안정성"에 주는 영향(1 = 충). 근을 없애는 값이 아니라 안정성 신호다
+    disturbance: { '충': 1.0, '형': 0.6, '파': 0.3, '해': 0.3, '원진': 0.2, '육합': 0.2, '삼합': 0.15, '반합': 0.1, '방합': 0.15 },
+    bondTypes: ['육합', '삼합', '반합', '방합'],   // 합은 결속인지 변화인지 합화가 성립하는지 이 앱이 판정하지 않으므로 "합 관계 발생"으로만 표시하고 작은 값만 준다
+    stabilitySat: 1.0,      // rootStability = 100 × e^(−Σ교란/stabilitySat)
+    fit: { eokbuHalf: 25, label: [[15, '높음'], [5, '다소 높음'], [-5, '보통'], [-15, '다소 낮음'], [-Infinity, '낮음']] },   // 돕는 힘이 50%에서 ±25%p 벗어나면 억부 필요도 ±1
+  };
+  // 지속 기간의 계층: 대운(10년) > 세운(1년) > 월운(1개월) > 일진(1일). 단순 합산하지 않고 겹침 공식(1 − Π(1 − 가중×점수))으로 합친다
+  const ROOT_LEVEL_WEIGHTS = { daeun: 1.0, seun: 0.7, wolun: 0.4, ilun: 0.2 };
+  const ROOT_LEVEL_NAME = { daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
+  const ROOT_DEPTH_K = { main: '본기', middle: '중기', residual: '여기' };
+  const rootLevelKey = l => l === 'iljin' ? 'ilun' : l;
+  const rootBand = (bands, v) => { const b = bands.find(x => v >= x[0]); return b ? b[1] : bands[bands.length - 1][1]; };
+  const rootLevelLabel = score => rootBand(ROOT_CONFIG.levels, score);
+  // 지장간 배열은 [여기·중기·정기] 순이다(hiddenLabels와 같은 정의). 마지막이 본기, 세 개일 때 가운데가 중기, 나머지는 여기
+  const rootDepth = (b, i) => { const n = HIDDEN[b].length; return i === n - 1 ? 'main' : (n === 3 && i === 1 ? 'middle' : 'residual'); };
+  // 지장간 데이터가 본기·중기·여기 정의와 일치하는지 검증한다(배열 순서를 그냥 가정하지 않는다)
+  function validateRootHiddenData() {
+    const CANON = [9, 5, 0, 1, 4, 2, 3, 5, 6, 7, 4, 8], issues = [];   // 子癸 丑己 寅甲 卯乙 辰戊 巳丙 午丁 未己 申庚 酉辛 戌戊 亥壬
+    for (let b = 0; b < 12; b++) {
+      const arr = HIDDEN[b], labels = hiddenLabels(b);
+      arr.forEach((_, i) => { const want = { main: '정기', middle: '중기', residual: '여기' }[rootDepth(b, i)];   // 앱의 지장간 표기는 본기를 '정기'라 부른다
+        if (labels[i] !== want) issues.push(`${BR[b]}: ${i}번째 라벨(${labels[i]})과 깊이(${want})가 다름`); });
+      const mainIdx = arr.reduce((m, x, i) => x[1] > arr[m][1] ? i : m, 0);
+      if (mainIdx !== arr.length - 1) issues.push(`${BR[b]}: 일수가 가장 많은 지장간이 마지막(본기)이 아님`);
+      if (mainHidden(b) !== CANON[b]) issues.push(`${BR[b]}: 본기가 ${STEM[mainHidden(b)]}이며 표준(${STEM[CANON[b]]})과 다름`);
+      const w = arr.map(x => x[1]); if (arr.length > 1 && !(w[arr.length - 1] >= Math.max(...w))) issues.push(`${BR[b]}: 본기 일수가 최대가 아님`);
+    }
+    return { ok: !issues.length, issues };
+  }
+  // 일간 d에게 지장간 h가 근인가. 같은 오행이라는 이유만으로 모두 같은 강도로 세지 않는다
+  function getRootRelation(d, h) {
+    const R = ROOT_RULES, dEl = stemEl(d), hEl = stemEl(h);
+    if (h === d) return { isRoot: true, rootType: R.sameStem.rootType, baseStrength: R.sameStem.base, reason: `지장간 ${STEM[h]}: 일간 ${STEM[d]}과 같은 천간` };
+    if (hEl === dEl) return { isRoot: true, rootType: R.sameElementOpposite.rootType, baseStrength: R.sameElementOpposite.base[yang(d) ? 'yang' : 'yin'], reason: `지장간 ${STEM[h]}: 일간 ${STEM[d]}과 오행(${EL_K[dEl]})은 같고 음양이 다름` };
+    if (R.inseong.enabled && hEl === generatorOf(dEl)) return { isRoot: true, rootType: R.inseong.rootType, baseStrength: R.inseong.base, reason: `지장간 ${STEM[h]}: 일간을 생해 주는 오행(${EL_K[hEl]})` };
+    return { isRoot: false, rootType: null, baseStrength: 0, reason: `지장간 ${STEM[h]}: 일간 ${STEM[d]}의 근이 아님` };
+  }
+  // 10개 일간별로 어떤 지지의 어떤 지장간이 근으로 인정되는지 표로 펼친다(보고·검증용)
+  function rootRuleTable() {
+    return Array.from({ length: 10 }, (_, d) => ({ dayStem: STEM[d], roots: Array.from({ length: 12 }, (_, b) => HIDDEN[b].map(([h], i) => ({ b, h, i })).filter(x => getRootRelation(d, x.h).isRoot).map(x => { const r = getRootRelation(d, x.h), dp = rootDepth(x.b, x.i); return { branch: BR[x.b], stem: STEM[x.h], depth: ROOT_DEPTH_K[dp], rootType: r.rootType, weight: +(r.baseStrength * ROOT_CONFIG.hiddenStemWeight[dp]).toFixed(3) }; })).flat() }));
+  }
+
+  // ① 원국 통근
+  const _rootNatal = new WeakMap();
+  function analyzeNatalRoot(ch) {
+    let r = _rootNatal.get(ch); if (r) return r;
+    const C = ROOT_CONFIG, d = ch.pillars.day.s, roots = [];
+    for (const k of POS) {
+      const p = ch.pillars[k]; if (!p) continue;
+      HIDDEN[p.b].forEach(([h], i) => {
+        const rel = getRootRelation(d, h); if (!rel.isRoot) return;
+        const depth = rootDepth(p.b, i), contribution = C.palaceWeight[k] * C.hiddenStemWeight[depth] * rel.baseStrength;
+        roots.push({ pillar: k, branch: BR[p.b], branchIdx: p.b, hiddenStem: STEM[h], hiddenStemIdx: h, depth, depthK: ROOT_DEPTH_K[depth], rootType: rel.rootType, baseStrength: rel.baseStrength, contribution, strength: Math.round(100 * (1 - Math.exp(-contribution / C.natalSat))), reason: `${POS_K[k]}지 ${BR[p.b]}의 ${ROOT_DEPTH_K[depth]} ${STEM[h]} — ${rel.reason}` });
+      });
+    }
+    const raw = roots.reduce((s, x) => s + x.contribution, 0), hasNatalRoot = roots.length > 0;
+    const natalRootScore = hasNatalRoot ? Math.max(1, Math.round(100 * (1 - Math.exp(-raw / C.natalSat)))) : 0;
+    const strongestRoot = roots.slice().sort((a, b) => b.contribution - a.contribution)[0] || null;
+    const pillarShare = {}; for (const k of POS) pillarShare[k] = raw > 0 ? roots.filter(x => x.pillar === k).reduce((s, x) => s + x.contribution, 0) / raw : 0;
+    const st = ch.strength, dEl = stemEl(d);
+    const reasons = hasNatalRoot ? [`일간 ${STEM[d]}(${EL_K[dEl]})의 근이 ${roots.length}곳 확인됨 — 가장 큰 근은 ${strongestRoot.reason}`, ...(roots.length > 1 ? [`근이 여러 곳이라 겹치는 만큼 점수 증가폭은 줄어듭니다(합산 ${raw.toFixed(2)} → ${natalRootScore})`] : [])]
+      : [`원국의 네 지지와 지장간에서 일간 ${STEM[d]}과 같은 오행의 지장간이 확인되지 않습니다`];
+    // 득령·득지·득세(월령의 계절 지원 등)는 통근과 다른 개념이므로 strength 결과를 그대로 읽어 따로 둔다. 서로를 판정하지 않는다
+    const seasonalSupport = { deukryeong: st.deukryeong, deukji: st.deukji, deukse: st.deukse, help: st.help, zone: st.zone, note: '득령은 월지 본기가 일간을 돕는지(비겁·인성 포함)를 보는 계절 지원이고, 통근은 같은 오행의 뿌리가 지장간에 있는지를 봅니다. 통근이 강해도 신강으로, 무근이라고 신약으로 자동 판정하지 않습니다.' };
+    r = { dayMaster: STEM[d], dayMasterK: STEM_K[d], dayElement: dEl, hasNatalRoot, natalRootScore, natalRootLevel: rootLevelLabel(natalRootScore), roots, strongestRoot, pillarShare, rawContribution: raw, reasons, seasonalSupport };
+    _rootNatal.set(ch, r); return r;
+  }
+
+  // ② 운에서 들어오는 근의 보강. 원국의 hasNatalRoot는 건드리지 않는다
+  function analyzeLuckRootSupport(ch, p, level = 'seun') {
+    const C = ROOT_CONFIG, lv = rootLevelKey(level), d = ch.pillars.day.s, roots = [];
+    HIDDEN[p.b].forEach(([h], i) => {
+      const rel = getRootRelation(d, h); if (!rel.isRoot) return;
+      const depth = rootDepth(p.b, i), contribution = C.hiddenStemWeight[depth] * rel.baseStrength;
+      roots.push({ branch: BR[p.b], branchIdx: p.b, hiddenStem: STEM[h], depth, depthK: ROOT_DEPTH_K[depth], rootType: rel.rootType, contribution, strength: Math.round(100 * (1 - Math.exp(-contribution / C.luckSat))), reason: `${ROOT_LEVEL_NAME[lv]} ${BR[p.b]}의 ${ROOT_DEPTH_K[depth]} ${STEM[h]} → 일간 ${STEM[d]}의 근 (${rel.rootType})` });
+    });
+    const raw = roots.reduce((s, x) => s + x.contribution, 0), providesRoot = roots.length > 0;
+    const supportScore = providesRoot ? Math.max(1, Math.round(100 * (1 - Math.exp(-raw / C.luckSat)))) : 0;
+    const durationWeight = ROOT_LEVEL_WEIGHTS[lv], effect = supportScore * durationWeight;
+    const nat = analyzeNatalRoot(ch), same = nat.roots.filter(x => x.branchIdx === p.b);
+    const reasons = providesRoot ? [`${ROOT_LEVEL_NAME[lv]} ${BR[p.b]}에서 일간을 지지하는 근 ${roots.length}곳이 들어옵니다`, ...(same.length ? [`같은 지지(${BR[p.b]})가 원국에도 근으로 있어, 원국의 근이 다시 강조되는 환경입니다(원국 판정은 그대로)`] : [])] : [`${ROOT_LEVEL_NAME[lv]} ${BR[p.b]}의 지장간에는 일간의 근이 없습니다`];
+    return { level: lv, providesRoot, supportScore, branch: BR[p.b], branchIdx: p.b, roots, durationWeight, effect, kind: providesRoot ? rootBand(C.supportBands, supportScore) : null, reasons };
+  }
+
+  // 근 보강이 이 원국의 균형에 적합한가: 억부와 조후를 따로 본 뒤 기존 가중치로만 섞는다(−100~+100). 흐름 점수에는 넣지 않는다
+  function rootFitEffect(ch, change, levelKey = 'seun') {
+    const F = ROOT_CONFIG.fit, st = ch.strength, need = lclamp((50 - st.help) / F.eokbuHalf, -1, 1);
+    const joh = cpElParts(ch, stemEl(ch.pillars.day.s)).johu;   // 일간과 같은 오행이 더해질 때 원국의 한난조습 치우침이 줄어드는 정도(−1~+1)
+    const eokbuFit = Math.round(need * change), johuFit = Math.round(joh * change);
+    const W = luckWeights(ch, rootLevelKey(levelKey)), overallFit = Math.round((W.eokbu * eokbuFit + W.johu * johuFit) / ((W.eokbu + W.johu) || 1));
+    const lab = v => F.label.find(x => v >= x[0])[1];
+    let note;
+    if (change < 5) note = '추가되는 근이 작아 균형에 미치는 영향이 거의 없습니다.';
+    else if (eokbuFit >= 8 && johuFit <= -8) note = '일간의 기반은 보강되지만 조후 측면에서는 일부 부담이 동반됩니다.';
+    else if (eokbuFit <= -8 && johuFit >= 8) note = '이미 일간을 돕는 힘이 충분해 억부상으로는 한쪽으로 더 기울 수 있으나 조후 측면에서는 일부 도움이 됩니다.';
+    else if (eokbuFit >= 8) note = '일간의 기반이 보강되어 억부상 균형에 도움이 될 수 있습니다.';
+    else if (eokbuFit <= -8) note = '일간을 돕는 힘이 이미 충분한 원국이라 근 보강이 강약 균형을 한쪽으로 더 기울일 수 있습니다.';
+    else note = '억부·조후 모두 뚜렷한 유불리는 없습니다.';
+    return { rootSupportChange: Math.round(change), eokbuFit, johuFit, overallFit, eokbuLabel: lab(eokbuFit), johuLabel: lab(johuFit), overallLabel: lab(overallFit), note, eokbuNeed: need, johuBase: joh };
+  }
+
+  // ③ 기존 근의 안정성: 원국의 근이 있는 지지가 운의 지지와 만드는 관계. 근을 지우지 않고 안정성 신호로만 쓴다
+  function rootStabilityOf(ch, layers) {
+    const C = ROOT_CONFIG, nat = analyzeNatalRoot(ch), signals = [];
+    if (!nat.hasNatalRoot) return { stability: null, label: '해당 없음', signals };
+    let sum = 0;
+    for (const { level, p } of layers) {
+      const { rels } = luckRelations(ch, p);
+      for (const x of rels) {
+        const T = C.disturbance[x.type]; if (!T || x.kind !== 'branch') continue;
+        const others = x.members.filter(m => m !== 'luck'), share = Math.min(1, others.reduce((s, m) => s + (nat.pillarShare[m] || 0), 0));
+        if (share <= 0) continue;
+        const impact = T * share * ROOT_LEVEL_WEIGHTS[level], bond = C.bondTypes.includes(x.type);
+        sum += impact;
+        signals.push({ level, levelName: ROOT_LEVEL_NAME[level], type: x.type, name: x.name, pillars: others, impact, kind: bond ? 'bond' : 'disturb', text: bond ? `${ROOT_LEVEL_NAME[level]} ${BR[p.b]}와 ${others.map(m => POS_K[m] + '지').join('·')}의 ${x.name} — 합 관계 발생(결속인지 변화인지는 판정하지 않음)` : `${ROOT_LEVEL_NAME[level]} ${BR[p.b]}와 ${others.map(m => POS_K[m] + '지').join('·')}의 ${x.name} — 근이 있는 자리에 변화 신호` });
+      }
+    }
+    signals.sort((a, b) => b.impact - a.impact);
+    const stability = Math.round(100 * Math.exp(-sum / C.stabilitySat));
+    return { stability, label: rootBand(C.stabilityBands, stability), signals };
+  }
+
+  // ④ 현재 시점의 통근 상태. daeun·seun·wolun·iljin은 간지({s, b}) 또는 null
+  function evaluateCurrentRootState(ch, daeun, seun, wolun, iljin) {
+    const C = ROOT_CONFIG, nat = analyzeNatalRoot(ch), ps = { daeun, seun, wolun, ilun: iljin }, layers = [], out = { natal: nat };
+    for (const lv of ['daeun', 'seun', 'wolun', 'ilun']) { const p = ps[lv]; out[lv === 'ilun' ? 'iljin' : lv] = p ? analyzeLuckRootSupport(ch, p, lv) : null; if (p) layers.push({ level: lv, p, sup: out[lv === 'ilun' ? 'iljin' : lv] }); }
+    // 덧셈이 아니라 겹침: 층마다 (지속 가중 × 근 점수)를 확률처럼 합친다. 원국도 같은 식에 들어가므로 근이 많아도 100을 넘지 않는다
+    const luckCombined = 1 - layers.reduce((m, l) => m * (1 - l.sup.effect / 100), 1);
+    const natalN = nat.natalRootScore / 100 * C.current.natalWeight;
+    const currentRootSupport = Math.round(100 * (1 - (1 - natalN) * (1 - luckCombined)));
+    const change = Math.max(0, currentRootSupport - nat.natalRootScore), changeLabel = rootBand(C.changeBands, change);
+    const st = rootStabilityOf(ch, layers), provided = layers.filter(l => l.sup.providesRoot);
+    const fitLevel = provided.length ? provided[0].level : 'seun';
+    const fit = rootFitEffect(ch, change, fitLevel);
+    const changes = provided.map(l => ({ level: l.level, levelName: ROOT_LEVEL_NAME[l.level], branch: l.sup.branch, kind: l.sup.kind, score: l.sup.supportScore, text: `${ROOT_LEVEL_NAME[l.level]} ${l.sup.branch} — ${l.sup.kind} 유입` }));
+    const pieces = [nat.hasNatalRoot ? `원국 ${nat.natalRootLevel}` : '원국 무근'];
+    pieces.push(change >= 5 ? '운에서 근 보강' : (nat.hasNatalRoot ? '추가되는 근 없음' : '운에서도 근 보강 없음'));
+    if (st.stability != null && st.stability < 60) pieces.push('근 구조에 변동 신호');
+    const levelNames = provided.map(l => ROOT_LEVEL_NAME[l.level]).join('·');
+    const reasons = [];
+    if (provided.length >= 2) reasons.push(`${levelNames}에서 근이 겹쳐 들어와 현재 일간의 기반이 보강되는 흐름입니다`);
+    else if (provided.length === 1) reasons.push(`${levelNames}에서 일간을 지지하는 근이 들어옵니다`);
+    if (nat.natalRootScore > 0 && !provided.length) reasons.push('운에서 추가되는 근이 없어도 원국의 통근은 그대로 유지됩니다(감점하지 않음)');
+    st.signals.slice(0, 3).forEach(s => reasons.push(s.text));
+    return { ...out, currentRootSupport, rootSupportChange: change, changeLabel, rootStability: st.stability, rootStabilityLabel: st.label, stabilitySignals: st.signals, status: pieces.join(' · '), changes, fit, reasons, layers: layers.map(l => ({ level: l.level, supportScore: l.sup.supportScore, effect: l.sup.effect })) };
+  }
+  // 화면용 한 문단 설명. "무근이 유근으로 바뀌었다"는 표현은 쓰지 않는다
+  function rootSummary(s) {
+    const n = s.natal, names = s.changes.map(c => c.levelName).join('·'), weakSt = s.rootStability != null && s.rootStability < 60;
+    if (!n.hasNatalRoot) return s.rootSupportChange >= 5 ? `원국에서는 일간의 직접적인 근이 확인되지 않지만 현재 ${names}에서 일간을 지지하는 근이 들어오고 있습니다. 원국의 무근 판정 자체는 바뀌지 않습니다.` : '원국과 현재 운 모두에서 일간의 직접적인 근이 확인되지 않습니다. 무근 자체를 좋거나 나쁘다고 판단하지 않습니다.';
+    if (weakSt) return `원국의 ${n.natalRootLevel} 자체가 사라지는 것은 아니지만 현재 운에서 근이 있는 자리에 변화 신호가 발생하고 있습니다.${s.rootSupportChange >= 5 ? ` 동시에 ${names}에서 근이 보강됩니다.` : ''}`;
+    if (s.rootSupportChange >= 5) return n.natalRootScore < 50 ? `원국의 뿌리는 ${n.natalRootLevel}이지만 ${names}에서 근이 ${s.changes.length >= 2 ? '중첩되어 ' : ''}들어와 현재 일간의 기반이 보강되는 흐름입니다.` : `원국의 ${n.natalRootLevel}이 유지되는 가운데 ${names}에서 근이 더해집니다.`;
+    return `원국의 ${n.natalRootLevel}이 그대로 유지되며, 현재 운에서 추가되는 근은 없습니다.`;
+  }
+
   G.Manse = {
-    compute, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
+    compute, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, mainHidden, yang, gzName, gzNameK,
@@ -2718,6 +2904,10 @@ var GLOSSARY = {
   '날삼재': ['운', '삼재의 마지막 해를 뜻합니다. 전통적으로 삼재의 흐름에서 벗어나는 과정으로 해석합니다.'],
   '손 없는 날': ['운', '민간 풍습에서 "손"은 날짜마다 방향을 옮겨 다니며 사람의 일을 방해한다는 귀신입니다. 음력 날짜 끝자리가 9·0인 날(9·10·19·20·29·30일)에는 손이 하늘로 올라가 없다고 봐서 이사·결혼 날로 선호합니다. 사주 해석과는 별개인 풍습이라 이 앱의 흐름 점수에는 반영하지 않습니다.'],
   '시진': ['운', '하루 24시간을 12지지로 나눈 2시간 단위입니다. 자시(밤 11시~새벽 1시)부터 해시(밤 9~11시)까지입니다.'],
+  '통근': ['구조', '통근은 일간이 지지와 지장간에서 자신의 뿌리를 얻고 있는지를 살펴보는 개념입니다. 일간이 원국 안에서 어느 정도 기반을 확보하고 있는지를 해석하는 요소 중 하나입니다.'],
+  '무근': ['구조', '무근은 원국의 지지에서 일간이 직접적으로 의지할 근이 확인되지 않는 상태입니다. 무근 자체를 좋거나 나쁘다고 판단하지 않으며 신강·신약 역시 통근 하나만으로 결정하지 않습니다.'],
+  '운의 근 보강': ['구조', '원국의 통근 여부와 별개로 대운·세운·월운·일진의 지지에서 일간을 지지하는 근이 들어오는 현상을 말합니다. 원국 자체가 바뀌는 것은 아닙니다.'],
+  '근 안정성': ['구조', '원국의 뿌리가 현재 운과 맺는 관계를 바탕으로 변화·교란 신호가 얼마나 나타나는지를 보여주는 참고 지표입니다.'],
   '흐름 점수': ['운', '들어오는 운이 현재 원국의 불균형을 얼마나 보완하거나 심화시키는지를 나타내는 상대 지표입니다(−100~+100). 미래의 행운·불운 확률이 아닙니다.\n+ 값은 원국에 필요한 방향과 잘 맞는다는 뜻, 0 부근은 영향이 섞이거나 중립, − 값은 기존 불균형이나 부담을 강화한다는 뜻입니다.\n네 성분을 사주에 맞춰 섞습니다. 억부(신강·신약을 맞추는 오행), 조후(한난조습 치우침을 줄이는지), 관계(원국과의 합·충·귀인), 구조(원국에서 모자란 십성 묶음을 채우는지). 강약 치우침이 크면 억부, 기후 치우침이 크면 조후 비중이 커지고, 둘 다 크지 않은 중화 사주는 특정 용신 하나의 영향력이 줄어듭니다.\n세운·월운은 대운과 40%:60%로 섞습니다. 해석을 돕는 참고용 모델이며 통계적으로 검증된 예측이 아닙니다.'],
   '상태 순풍': ['운의 시기', '상태 순풍: 흐름 점수가 높아, 이 시기에 활성화되는 일이 원국에 필요한 방향을 보완하는 상태입니다. 어떤 일이 활성화되는지는 시기 유형(기회기·수확기 등)이 따로 알려 줍니다.'],
   '상태 보통': ['운의 시기', '상태 보통: 보완과 부담이 섞이거나 영향이 중립적인 상태입니다.'],
@@ -3657,6 +3847,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     </section>`;
   }
   function crSheetHTML(ch, sel) {
+    if (sel.key === 'detail') return rootSheetHTML(ch);
     const P = M.careerProfile(ch), c = P.byKey[sel.key], def = M.CAREER_CONFIG.categories[sel.key];
     if (!c) return '<p>표시할 정보가 없습니다.</p><button class="btn x" data-act="close">닫기</button>';
     const li = a => a.length ? a.map(t => `<li>${esc(t)}</li>`).join('') : '<li>뚜렷한 항목이 없습니다.</li>';
@@ -3672,6 +3863,86 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <h4>관련 활동 예시</h4><p class="small">${c.examples.map(esc).join(' · ')}</p>
       <p class="small muted">직업 예시는 이 분야를 포함하는 여러 분야 조합 중 내 원국 점수가 높은 순으로 고른 것이며, 점수의 원인이 아닙니다. 재물운과는 별개의 지표입니다.</p>
       <p class="cp-disc">${CR_DISC}</p>
+      <button class="btn x" data-act="close">닫기</button>`;
+  }
+
+  // ───────────── 일간의 뿌리 · 통근 (원국 + 현재 운 · 흐름 점수와 독립) ─────────────
+  // 계산은 M.analyzeNatalRoot / analyzeLuckRootSupport / evaluateCurrentRootState (ROOT_CONFIG·ROOT_LEVEL_WEIGHTS 한 곳에서 조절). 이 절은 표시만 맡는다.
+  const RT_DISC = '통근은 원국 구조에서 일간이 얻는 기반을 설명하는 참고 지표입니다. 성격·의지·성패·사건과 연결해 해석하지 않으며, 흐름 점수에도 반영되지 않습니다.';
+  // 현재 시점(오늘)의 대운·세운·월운·일진 간지
+  function rootNowCtx(ch) {
+    const curY = M.yearPillarAt(NOW).sajuYear, wm = M.wolun(ch, curY); let curM = wm[0]; wm.forEach(m => { if (m.startMs <= NOW) curM = m; });
+    const il = M.ilun(ch, TODAY[0], TODAY[1])[TODAY[2] - 1];
+    return { daeun: M.daeunAt(ch, NOW), seun: M.yearPillarOf(curY), wolun: curM, iljin: il };
+  }
+  // 상세 화면(대운·세운·월운·일진)에서 그 시점 기준으로 위쪽 운을 채운다
+  function rootCtx(x, kind) {
+    const ch = S.ch;
+    if (kind === 'daeun') return { daeun: x };
+    if (kind === 'seun') return { daeun: x.daeun || M.daeunAt(ch, x.midMs), seun: x };
+    if (kind === 'wolun') { const ms = x.startMs + 12 * 864e5, Y = M.yearPillarAt(ms).sajuYear; return { daeun: M.daeunAt(ch, ms), seun: M.yearPillarOf(Y), wolun: x }; }
+    const ms = Date.UTC(x.date[0], x.date[1] - 1, x.date[2], 3), Y = M.yearPillarAt(ms).sajuYear;
+    return { daeun: M.daeunAt(ch, ms), seun: M.yearPillarOf(Y), wolun: M.wolun(ch, Y).filter(m => m.startMs <= ms).pop(), iljin: x };
+  }
+  const rtFit = v => v >= 5 ? 'pos' : v <= -5 ? 'neg' : '';
+  function rtFitLines(f) { return `<div class="rt-fit"><span>억부 적합도 <b class="${rtFit(f.eokbuFit)}">${f.eokbuLabel}</b> <i class="num">${signed(f.eokbuFit)}</i></span><span>조후 적합도 <b class="${rtFit(f.johuFit)}">${f.johuLabel}</b> <i class="num">${signed(f.johuFit)}</i></span></div><p class="small muted">${esc(f.note)}</p>`; }
+  function renderRoot(ch) {
+    const c = rootNowCtx(ch), s = M.evaluateCurrentRootState(ch, c.daeun, c.seun, c.wolun, c.iljin), n = s.natal, dEl = n.dayElement;
+    const up = s.rootSupportChange >= 5;
+    const meter = (label, v, txt, arrow) => `<div class="rt-m"><span class="rt-l">${label}</span><span class="cr-bar"><i style="width:${v == null ? 0 : v}%"></i></span><b class="num">${v == null ? '—' : v}${arrow ? ' ↑' : ''}</b><span class="rt-s">${txt}</span></div>`;
+    return `
+    <section class="card">
+      <div class="card-h"><h2>일간의 뿌리 · 통근</h2><span class="pill ${n.hasNatalRoot ? '' : 'b-평'}" style="background:var(--surface-2);color:var(--ink-2)">${n.natalRootLevel}</span></div>
+      <div class="rt-dm"><span class="eltxt ${ECLS[dEl]}">${n.dayMaster} ${M.EL_K[dEl]}</span><span class="muted small">일간 · 원국 기준 고정 값과 현재 운의 보강을 따로 봅니다</span></div>
+      <div class="rt-ms">
+        ${meter('원국 통근', n.natalRootScore, n.hasNatalRoot ? n.natalRootLevel : '무근', false)}
+        ${meter('현재 통근 환경', s.currentRootSupport, up ? s.changeLabel : '원국과 같음', up)}
+        ${meter('현재 근 안정성', s.rootStability, s.rootStability == null ? '해당 없음(근이 없음)' : s.rootStabilityLabel, false)}
+      </div>
+      ${s.changes.length ? `<h4 class="cp-h4">현재 보강 신호</h4><div class="rt-ch">${s.changes.map(x => `<span class="chip good">${x.text.replace(' 유입', ' +')}</span>`).join('')}</div>` : '<p class="small muted">현재 대운·세운·월운·일진에서 새로 들어오는 근은 없습니다. 원국의 통근은 그대로 유지됩니다.</p>'}
+      ${s.stabilitySignals.length ? `<div class="rt-ch">${s.stabilitySignals.slice(0, 2).map(g => `<span class="chip ${g.kind === 'disturb' ? 'bad' : ''}">${esc(g.text)}</span>`).join('')}</div>` : ''}
+      <p class="cp-sum">${esc(M.rootSummary(s))}</p>
+      ${up ? rtFitLines(s.fit) : ''}
+      <div class="frow"><button class="btn" data-cr="root:detail">자세히 보기</button></div>
+      <p class="note">통근 강도(0~100)는 일간 힘의 퍼센트가 아니라 앱 내부의 상대 지표입니다. 득령과는 다른 개념이며, 통근이 강하다고 신강, 무근이라고 신약으로 판정하지 않습니다.</p>
+    </section>`;
+  }
+  // 대운·세운·월운·일진 상세의 통근 변화 박스
+  function rootBox(x, kind) {
+    let st; try { const c = rootCtx(x, kind); st = M.evaluateCurrentRootState(S.ch, c.daeun, c.seun, c.wolun, c.iljin); } catch (e) { return ''; }
+    const own = st[kind === 'ilun' ? 'iljin' : kind], n = st.natal; if (!own) return '';
+    const f = M.rootFitEffect(S.ch, own.effect, kind), names = { daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
+    const line = (lv, p) => p ? `<li>${names[lv]} ${p.branch}: ${p.providesRoot ? `<b>${p.kind}</b> ${p.roots.map(r => `${r.hiddenStem}(${r.depthK})`).join('·')}` : '근 없음'}${lv !== kind && p.providesRoot ? ' 유지' : ''}</li>` : '';
+    const lead = { daeun: own.providesRoot ? `${own.supportScore >= 55 ? '이 대운에서는 일간을 지지하는 기반이 원국보다 강화됩니다.' : '이 대운의 지지에서 일간을 지지하는 근이 ' + (own.supportScore >= 30 ? '보조적으로' : '약하게') + ' 더해집니다.'} (${own.branch}의 지장간 ${own.roots.map(r => r.hiddenStem).join('·')} → 일간 ${n.dayMaster}의 근)` : '이 대운의 지지에는 일간의 근이 없어 원국의 근 환경이 그대로 이어집니다.',
+      seun: own.providesRoot ? (st.daeun && st.daeun.providesRoot ? '대운의 근이 유지되는 가운데 세운에서 근이 더해져 근 보강이 중첩됩니다.' : '이 해에 일간을 지지하는 근이 들어옵니다.') : '이 해의 지지에는 일간의 근이 없습니다. 대운과 원국의 근 환경이 그대로 이어집니다.',
+      wolun: own.providesRoot ? '이 달에 일간을 지지하는 근이 단기적으로 더해집니다.' : '이 달에는 추가되는 근이 없습니다. 대운·세운의 배경이 그대로 이어집니다.',
+      ilun: own.providesRoot ? '오늘 일진에서 일간을 보조하는 근이 일시적으로 들어옵니다.' : '오늘 일진에서 추가되는 근은 없습니다.' }[kind];
+    return `<div class="volbox rt-box"><div class="volh"><span>통근 변화 <b>${own.providesRoot ? (kind === 'ilun' ? '약함' : own.kind) : '변화 없음'}</b> <span class="muted small">· ${{ daeun: '장기간 유지되는 근 환경', seun: '해당 연도의 근 보강', wolun: '해당 월의 단기 보강', ilun: '일시적인 보강' }[kind]}</span></span></div>
+      <div class="small">${lead}</div>
+      <ul class="pos-ul small">${['daeun', 'seun', 'wolun'].map(lv => lv === 'ilun' ? '' : line(lv, st[lv])).join('')}${kind === 'ilun' ? line('ilun', st.iljin) : ''}</ul>
+      <div class="small">원국 통근 <b class="num">${n.natalRootScore}</b> · ${n.hasNatalRoot ? n.natalRootLevel : '무근'} → 현재 통근 환경 <b class="num">${st.currentRootSupport}</b>${st.rootStability != null ? ` · 근 안정성 <b class="num">${st.rootStability}</b> (${st.rootStabilityLabel})` : ''}</div>
+      ${own.providesRoot ? rtFitLines(f) : ''}</div>`;
+  }
+  function rootSheetHTML(ch) {
+    const c = rootNowCtx(ch), s = M.evaluateCurrentRootState(ch, c.daeun, c.seun, c.wolun, c.iljin), n = s.natal, ss = n.seasonalSupport;
+    const lv = [['daeun', '대운'], ['seun', '세운'], ['wolun', '월운'], ['iljin', '일진']];
+    return `<span class="cat">일간의 뿌리 · 통근</span><h3>일간 ${n.dayMaster}${M.EL_K[n.dayElement]} · 원국 통근 ${n.natalRootScore} · ${n.hasNatalRoot ? n.natalRootLevel : '무근'}</h3>
+      <div class="cp-pills"><span class="pill">${esc(s.status)}</span></div>
+      <h4>원국의 근</h4>
+      ${n.roots.length ? `<div class="tbl-wrap"><table class="dt"><thead><tr><th>자리</th><th>지지</th><th>지장간</th><th>깊이</th><th>종류</th><th>강도</th></tr></thead><tbody>${n.roots.map(r => `<tr><td>${M.POS_K[r.pillar]}지</td><td>${r.branch}</td><td>${r.hiddenStem}</td><td>${r.depthK}</td><td class="small">${esc(r.rootType)}</td><td class="num">${r.strength}</td></tr>`).join('')}</tbody></table></div>` : '<p class="small">원국의 지지와 지장간에서 일간의 근이 확인되지 않습니다.</p>'}
+      <p class="small muted">${n.reasons.map(esc).join(' ')}</p>
+      <h4>통근과 득령은 다른 개념</h4>
+      <div class="small">득령 ${ss.deukryeong ? 'O' : 'X'} · 득지 ${ss.deukji ? 'O' : 'X'} · 득세 ${ss.deukse ? 'O' : 'X'} · 나를 돕는 힘 ${ss.help.toFixed(0)}%(${ss.zone}) · 통근 ${n.natalRootScore}(${n.hasNatalRoot ? n.natalRootLevel : '무근'})</div>
+      <p class="small muted">${esc(ss.note)}</p>
+      <h4>현재 운의 근 환경</h4>
+      <div class="cp-parts">${lv.map(([k, nm]) => { const p = s[k]; return p ? `<div class="cp-part"><span>${nm} ${p.branch}</span><span class="dbar"><i style="width:${p.supportScore}%"></i></span><b class="num">${p.supportScore}</b></div><p class="small muted" style="margin:0">${p.providesRoot ? p.kind + ' · ' + esc(p.roots.map(r => r.hiddenStem + '(' + r.depthK + ')').join(' ')) : '근 없음'} · 지속 가중 ${p.durationWeight}</p>` : ''; }).join('')}</div>
+      <div class="small">현재 통근 환경 <b class="num">${s.currentRootSupport}</b> (원국 ${n.natalRootScore}에서 ${signed(s.rootSupportChange)}) · 근 안정성 <b class="num">${s.rootStability == null ? '—' : s.rootStability}</b> ${s.rootStability == null ? '' : '(' + s.rootStabilityLabel + ')'}</div>
+      <p class="small muted">운의 근이 들어와도 원국의 무근/유근 판정은 바뀌지 않습니다. 대운·세운·월운·일진은 지속 기간에 따라 가중(${Object.entries(M.ROOT_LEVEL_WEIGHTS).map(([k, v]) => `${{ daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' }[k]} ${v}`).join(' · ')})하고, 덧셈이 아니라 겹침으로 합쳐 100을 넘지 않습니다.</p>
+      ${s.stabilitySignals.length ? `<h4>근 안정성 신호</h4><ul class="pos-ul small">${s.stabilitySignals.slice(0, 5).map(g => `<li>${esc(g.text)}</li>`).join('')}</ul><p class="small muted">충·형·파·해는 근을 없애지 않고 안정성 신호로만 반영합니다. 합은 결속인지 변화인지 판정하지 않아 작은 값만 줍니다.</p>` : ''}
+      <h4>억부·조후 적합도 <span class="muted small">근 보강 ${signed(s.rootSupportChange)} 기준</span></h4>
+      ${rtFitLines(s.fit)}
+      <p class="small muted">근 보강은 "일간을 지지하는 힘의 증가"일 뿐 좋은 운이라는 뜻이 아니며, 흐름 점수·시기 분류·개운 안내에는 반영하지 않습니다.</p>
+      <p class="cp-disc">${RT_DISC}</p>
       <button class="btn x" data-act="close">닫기</button>`;
   }
 
@@ -3714,6 +3985,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">득령·득지·득세는 전통적인 세 가지 점검입니다. 비율과 방향이 다르면 판단이 애매한 사주입니다.</p>
     </section>
     </div>
+    ${renderRoot(ch)}
     ${climateCard(ch)}
     ${renderCompat(ch)}
     ${renderCareer(ch)}`;
@@ -4025,7 +4297,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${condTag(e.condition)} <b class="num">${signed(luckV(x))}</b></span></div>
       ${banner}
       <div class="small" style="color:var(--ink-2)">${luckCells(x)}</div>
-      ${kind ? (kind === 'ilun' ? dayBox(x) : phaseBox(x, kind)) + domainBox(x, kind, title) + luckEffects(x, kind) : ''}
+      ${kind ? (kind === 'ilun' ? dayBox(x) : phaseBox(x, kind)) + domainBox(x, kind, title) + rootBox(x, kind) + luckEffects(x, kind) : ''}
       <h4 style="margin:4px 0 0">${term('흐름 점수')} 근거</h4>
       <div class="small muted">${comps.map(([n, k, v]) => `${n} ${signed(v)} × ${Math.round(w[k] * 100)}%`).join(' · ')} — 가중치는 이 사주의 강약·기후 치우침에 따라 정해집니다.</div>
       <ul class="small" style="margin:4px 0 0;padding-left:18px">${e.reasons.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
