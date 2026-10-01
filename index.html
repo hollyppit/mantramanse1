@@ -627,13 +627,13 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
 
   // ───────────── L1: 시간 ─────────────
   const TZ = [
-    [-8.64e15, 507.87], [Date.UTC(1908, 2, 31, 16), 510], [Date.UTC(1911, 11, 31, 16), 540],
+    [-8.64e15, 507.87], [Date.UTC(1908, 2, 31, 15, 32, 8), 510], [Date.UTC(1911, 11, 31, 15, 30), 540],
     [Date.UTC(1948, 4, 31, 15), 600], [Date.UTC(1948, 8, 12, 14), 540], [Date.UTC(1949, 3, 2, 15), 600], [Date.UTC(1949, 8, 10, 14), 540],
     [Date.UTC(1950, 2, 31, 15), 600], [Date.UTC(1950, 8, 9, 14), 540], [Date.UTC(1951, 4, 5, 15), 600], [Date.UTC(1951, 8, 8, 14), 540],
-    [Date.UTC(1954, 2, 20, 15), 510], [Date.UTC(1955, 4, 4, 16), 570], [Date.UTC(1955, 8, 8, 15), 510], [Date.UTC(1956, 4, 19, 16), 570],
-    [Date.UTC(1956, 8, 29, 15), 510], [Date.UTC(1957, 4, 4, 16), 570], [Date.UTC(1957, 8, 21, 15), 510], [Date.UTC(1958, 4, 3, 16), 570],
-    [Date.UTC(1958, 8, 20, 15), 510], [Date.UTC(1959, 4, 2, 16), 570], [Date.UTC(1959, 8, 19, 15), 510], [Date.UTC(1960, 3, 30, 16), 570],
-    [Date.UTC(1960, 8, 17, 15), 510], [Date.UTC(1961, 7, 9, 16), 540], [Date.UTC(1987, 4, 9, 17), 600], [Date.UTC(1987, 9, 10, 17), 540],
+    [Date.UTC(1954, 2, 20, 15), 510], [Date.UTC(1955, 4, 4, 15, 30), 570], [Date.UTC(1955, 8, 8, 14, 30), 510], [Date.UTC(1956, 4, 19, 15, 30), 570],
+    [Date.UTC(1956, 8, 29, 14, 30), 510], [Date.UTC(1957, 4, 4, 15, 30), 570], [Date.UTC(1957, 8, 21, 14, 30), 510], [Date.UTC(1958, 4, 3, 15, 30), 570],
+    [Date.UTC(1958, 8, 20, 14, 30), 510], [Date.UTC(1959, 4, 2, 15, 30), 570], [Date.UTC(1959, 8, 19, 14, 30), 510], [Date.UTC(1960, 3, 30, 15, 30), 570],
+    [Date.UTC(1960, 8, 17, 14, 30), 510], [Date.UTC(1961, 7, 9, 15, 30), 540], [Date.UTC(1987, 4, 9, 17), 600], [Date.UTC(1987, 9, 10, 17), 540],
     [Date.UTC(1988, 4, 7, 17), 600], [Date.UTC(1988, 9, 8, 17), 540],
   ];
   function tzOffset(utc) { let o = TZ[0][1]; for (const [t, off] of TZ) { if (utc >= t) o = off; else break; } return o; }
@@ -649,7 +649,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const d = new Date(utc);
     const start = Date.UTC(d.getUTCFullYear(), 0, 1);
     const doy = (utc - start) / 86400000;
-    const g = 2 * Math.PI / 365 * (doy - 1 + (d.getUTCHours() - 12) / 24);
+    const g = 2 * Math.PI / 365 * (doy - 0.5);   // doy는 1월 1일 0시부터의 경과 일수(소수) → NOAA의 (일차−1+(시−12)/24)와 같다
     return 229.18 * (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g) - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g));
   }
   const TIME_MODES = {
@@ -1020,6 +1020,16 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     return { list: out, tuchul };
   }
 
+  // 월령 사령(司令): 절입 후 경과 일수로 월지 지장간 중 지금 주도권을 쥔 글자를 찾는다. 표시용 정보이며 강약·용신 점수에는 쓰지 않는다.
+  function saryeong(ch) {
+    const jie = ch.pillars.month.jie, b = ch.pillars.month.b;
+    const day = Math.max(0, Math.floor((ch.utc - jie.t) / 86400000));   // 절입일 = 0일째
+    let acc = 0, idx = HIDDEN[b].length - 1;
+    for (let i = 0; i < HIDDEN[b].length; i++) { acc += HIDDEN[b][i][1]; if (day < acc) { idx = i; break; } }
+    const s = HIDDEN[b][idx][0];
+    return { day: day + 1, stem: s, label: hiddenLabels(b)[idx], tg: tenGod(ch.pillars.day.s, s), jie: jie.name };
+  }
+
   // ───────────── 운 ─────────────
   function daeun(ch) {
     const fwd = (yang(ch.pillars.year.s) && ch.gender === 'M') || (!yang(ch.pillars.year.s) && ch.gender === 'F');
@@ -1028,7 +1038,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const diffMs = Math.abs(target.t - ch.utc);
     const days = diffMs / 86400000;
     const exact = days / 3;
-    let num = Math.round(exact); if (num < 1) num = 1;
+    let num = Math.round(exact); if (num < 1) num = 1;   // 대운수는 최소 1로 표기. 실제 시작은 startMs(출생 후 startMonths개월)
     const startMs = ch.utc + diffMs * 120;
     const list = [];
     for (let k = 1; k <= 10; k++) {
@@ -1036,7 +1046,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       const st = startMs + (k - 1) * 10 * 365.2422 * 86400000;
       list.push({ ...gz(idx), startMs: st, startAge: num + (k - 1) * 10, startYear: new Date(st).getUTCFullYear() });
     }
-    return { forward: fwd, days, exact, num, startMs, jie: target, list };
+    return { forward: fwd, days, exact, num, startMs, startMonths: Math.round(diffMs * 4 / 86400000), jie: target, list };
   }
   function yearPillarOf(Y) { return { ...gz(mod(Y - 4, 60)), year: Y }; }
   function monthsOfYear(Y) { // 입춘 Y ~ 소한 Y+1
@@ -1549,6 +1559,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     ch.yong = ch.yongAll[ch.school].applicable ? ch.yongAll[ch.school] : ch.yongAll.eokbu;
     ch.yongFallback = !ch.yongAll[ch.school].applicable;
     ch.patterns = patterns(ch, ch.weights, ch.strength);
+    ch.saryeong = saryeong(ch);
     ch.daeun = daeun(ch);
     ch.ziwei = ziwei(ch, P);
     ch.daeun.list.forEach(x => Object.assign(x, luckItem(ch, x, "daeun")));
@@ -1708,7 +1719,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       const it = luckItem(ch, yearPillarOf(Y), "seun", du && du.ev);
       it.daeun = du;
       it.year = Y; it.midMs = mid;   // 분야별 지수가 상위 운(대운)을 찾을 때 쓰는 기간 내 시각
-      it.age = Y - ch.solar.y; // 만 나이(생일 이후 기준 근사)
+      it.age = Y - ch.solar.y; // 연 나이(그해 − 출생연도). 만 나이가 아니다
       out.push(it);
     }
     return out;
@@ -2849,6 +2860,7 @@ var GLOSSARY = {
   '오행': ['기초', '세상의 기운을 나무(목)·불(화)·흙(토)·쇠(금)·물(수) 다섯 가지로 나눈 것입니다. 서로 돕는 순서(생): 나무→불→흙→쇠→물→나무. 예를 들어 나무는 불을 피우고, 물은 나무를 키웁니다. 서로 누르는 순서(극): 나무→흙→물→불→쇠→나무. 예를 들어 물은 불을 끄고, 쇠(도끼)는 나무를 벱니다.'],
   '음양': ['기초', '모든 글자는 양(적극적·밖으로 뻗는 기운) 또는 음(차분함·안으로 모으는 기운)으로 나뉩니다. 같은 오행이라도 음양이 같은지 다른지에 따라 십성 이름이 달라집니다. 예: 나와 같은 오행이면서 음양도 같으면 비견, 음양이 다르면 겁재입니다.'],
   '절기': ['기초', '1년 동안 태양이 지나는 길을 24등분한 날짜입니다(입춘, 경칩, 청명…). 사주에서는 음력 1일이 아니라 이 중 12개 절기(입춘·경칩·청명 등)가 올 때 달이 바뀝니다. 그래서 같은 음력 달에 태어나도 월주가 다를 수 있습니다.'],
+  '사령': ['기초', '월지 속 지장간 가운데 태어난 날 지금 주도권을 쥔 글자입니다. 절입 후 며칠째인지로 여기·중기·정기를 나눕니다. 이 앱에서는 참고용으로만 보여 주며 강약·용신 점수에는 반영하지 않습니다.'],
   '절입': ['기초', '절기가 시작되는 정확한 시각입니다. 이 시각 전에 태어났는지 후에 태어났는지에 따라 월주가 달라지고, 입춘 시각 전후로는 년주(띠)까지 달라집니다. 이 앱은 천문 계산으로 분 단위까지 구합니다.'],
   '입춘': ['기초', '사주에서 새해가 시작되는 날로, 보통 양력 2월 4일 무렵입니다. 1월 1일이나 음력 설날이 아니라 입춘 시각에 띠(년주)가 바뀝니다. 예: 2월 3일생은 아직 전년도 띠일 수 있습니다.'],
   '만세력': ['기초', '날짜마다 그날의 년·월·일 간지와 절기를 적어 둔 달력입니다. 사주를 세우려면 반드시 필요합니다. 이 앱은 표를 옮겨 적지 않고 천문 계산으로 직접 만듭니다.'],
@@ -3393,7 +3405,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 삼재: 참고 정보 레이어. 점수·주 흐름과 무관하며, 배지는 기존 용어 시트(.term)를 그대로 쓴다
   const samjaeOf = Y => M.getSamjae(S.ch.pillars.year.b, Y);
   const samjaeTag = sj => sj.active ? `<span class="term chip sj-chip" data-term="${sj.stage}">${sj.stage}</span>` : '';
-  const samjaeBanner = Y => { const sj = samjaeOf(Y); return sj.active ? `<div class="sj-banner"><div><b>${term('삼재')} · ${term(sj.stage)}</b> <span class="muted small">전통 민속 참고 신호 · ${sj.group}</span></div><div class="small muted">삼재는 흐름 점수에 감점되지 않습니다.</div></div>` : ''; };
+  const samjaeBanner = Y => {
+    const sj = samjaeOf(Y), lb = S.ch.lunar ? ((S.ch.lunar.y - 4) % 12 + 12) % 12 : S.ch.pillars.year.b, alt = lb !== S.ch.pillars.year.b ? M.getSamjae(lb, Y) : null;
+    if (!sj.active && !(alt && alt.active)) return '';
+    const note = alt ? `<div class="small muted">띠 기준 차이: 사주(입춘)로는 ${M.BR_K[S.ch.pillars.year.b]}년생, 설날 기준 민간 띠로는 ${M.BR_K[lb]}년생이라 삼재 여부가 ${sj.active === alt.active ? '같지만 단계가 다를 수 있습니다' : '달라집니다'}${alt.active ? ` (설날 기준: ${alt.stage})` : ' (설날 기준: 해당 없음)'}.</div>` : '';
+    return `<div class="sj-banner"><div><b>${term('삼재')} · ${sj.active ? term(sj.stage) : '사주 기준 해당 없음'}</b> <span class="muted small">전통 민속 참고 신호 · ${sj.group || alt.group}</span></div><div class="small muted">삼재는 흐름 점수에 감점되지 않습니다. 기본은 입춘 기준 연지로 계산합니다.</div>${note}</div>`;
+  };
   // 주 흐름 내부 키는 옛 6분류 문자열(기회기 등)을 그대로 쓴다(색·용어 키 호환). 화면에는 '기회' 같은 짧은 이름만 보인다.
   const flowTxt = m => String(m).replace(/[기일]$/, '');
   const dmCol = m => `var(--${DAYMODE[m][0]})`;
@@ -3586,7 +3603,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   function validate() {
     const i = S.inp;
-    const n = (v, a, b, name) => { const x = Number(v); if (!Number.isInteger(x) || x < a || x > b) throw new Error(`${name}을(를) ${a}~${b} 사이로 입력하세요`); };
+    const n = (v, a, b, name) => { const x = String(v).trim() === '' ? NaN : Number(v); if (!Number.isInteger(x) || x < a || x > b) throw new Error(`${name}을(를) ${a}~${b} 사이로 입력하세요`); };
     n(i.year, M.MIN_Y, M.MAX_Y - 1, '년'); n(i.month, 1, 12, '월'); n(i.day, 1, 31, '일');
     if (!i.hourUnknown) { n(i.hour, 0, 23, '시'); n(i.minute, 0, 59, '분'); }
     const lon = Number(i.lon); if (!(lon >= 120 && lon <= 135)) throw new Error('경도는 120~135° 범위로 입력하세요 (한국 표준시 지역)');
@@ -3646,6 +3663,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <span>월 기준 ${term('절입')} <b>${jie.name}</b> ${fmtKST(jie.t)}</span>
         <span>${term('대운')} <b>${du.forward ? '순행' : '역행'} · ${term('대운수')} ${du.num}</b></span>
         <span>${term('공망')} <b>${ch.gongmang.day.map(b => M.BR[b]).join('')}</b></span>
+        <span>월령 ${term('사령', '사령')} <b>${M.STEM[ch.saryeong.stem]}(${ch.saryeong.label}) · ${ch.saryeong.tg}</b> <span class="muted">(${ch.saryeong.jie} 후 ${ch.saryeong.day}일째)</span></span>
       </div>
       ${table}
     </section>
@@ -4400,7 +4418,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const ms = Date.UTC(x.date[0], x.date[1] - 1, x.date[2], 3), Y = M.yearPillarAt(ms).sajuYear;
     const se = M.seunRange(ch, Y, Y)[0], wm = M.wolun(ch, Y).filter(m => m.startMs <= ms).pop();
     const hours = sijinRows(x, x.date), best = hours.filter(h => h.gr.g === '실행'), ok = hours.filter(h => h.gr.g === '활용');
-    const hn = h => `${M.BR_K[h.hb]}시`;
+    const hn = h => `${M.BR_K[h.hb]}시${h.tag || ""}`;
     const step = (n, label, body) => `<div class="jstep"><span class="jn">${n}</span><span class="jl">${label}</span><span class="jb">${body}</span></div>`;
     const f = dm.flow;
     return `<div class="phbox dm-bg" style="--dm:${dmCol(dm.mode)}">
@@ -4496,7 +4514,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   function sijinRows(dayItem, ymd) {
     const ch = S.ch, shift = (ch.timeMode === 'lmt' || ch.timeMode === 'ast') ? Math.round(ch.lon * 4 - 540) : 0;
-    return M.hourPillarsOfDay(dayItem.s).map((hp, hb) => { const it = M.luckItem(ch, hp, 'sijin'); return { hp, hb, it, st: 23 * 60 + hb * 120 - shift, gr: hourGrade(dayItem, hp, it) }; });
+    // 子시는 두 칸으로 나눈다: 00:00~01:00은 그날 일간, 23:00~24:00은 다음 날 일간으로 시간 천간을 정한다(정자시·야자시 모두 시주는 같다)
+    const base = M.hourPillarsOfDay(dayItem.s), late = M.hourPillarsOfDay((dayItem.s + 1) % 10)[0];
+    const slots = [{ hp: base[0], hb: 0, st: 1440 - shift, len: 60, tag: '(00~01시)' }, ...base.slice(1).map((hp, i) => ({ hp, hb: i + 1, st: 23 * 60 + (i + 1) * 120 - shift, len: 120, tag: '' })), { hp: late, hb: 0, st: 23 * 60 - shift, len: 60, tag: '(23~24시)' }];
+    return slots.map(({ hp, hb, st, len, tag }) => { const it = M.luckItem(ch, hp, 'sijin'); return { hp, hb, len, tag, it, st, gr: hourGrade(dayItem, hp, it) }; });
   }
   function sijinTable(dayItem, ymd) {
     const ch = S.ch;
@@ -4504,10 +4525,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const hm = m => pad(Math.floor(((m % 1440) + 1440) % 1440 / 60)) + ':' + pad(((m % 60) + 60) % 60);
     const isToday = ymd[0] === TODAY[0] && ymd[1] === TODAY[1] && ymd[2] === TODAY[2];
     const nowMin = (() => { const t = new Date(NOW + 540 * 60000); return t.getUTCHours() * 60 + t.getUTCMinutes(); })();
-    const rows = sijinRows(dayItem, ymd).map(({ hp, hb, it, st, gr }) => {
-      const cur = isToday && ((nowMin - st) % 1440 + 1440) % 1440 < 120;
+    const rows = sijinRows(dayItem, ymd).map(({ hp, hb, it, st, gr, len, tag }) => {
+      const cur = isToday && ((nowMin - st) % 1440 + 1440) % 1440 < len;
       const v = luckV(it);
-      return `<tr class="${cur ? 'cur' : ''} row-${GRADE[gr.g][1]}"><td>${M.BR_K[hb]}시</td><td class="num">${hm(st)}~${hm(st + 120)}</td><td class="gz">${M.gzName(hp)}</td><td class="small">${term(it.stemTG)}/${term(it.branchTG)}</td><td>${gradeTag(gr.g)} <span class="num small muted">${signed(v)}</span>${gr.risks.length ? `<div class="small muted">${gr.risks.map(esc).join(', ')}</div>` : ''}</td></tr>`;
+      return `<tr class="${cur ? 'cur' : ''} row-${GRADE[gr.g][1]}"><td>${M.BR_K[hb]}시${tag ? ` <span class="small muted">${tag}</span>` : ''}</td><td class="num">${hm(st)}~${hm(st + len)}</td><td class="gz">${M.gzName(hp)}</td><td class="small">${term(it.stemTG)}/${term(it.branchTG)}</td><td>${gradeTag(gr.g)} <span class="num small muted">${signed(v)}</span>${gr.risks.length ? `<div class="small muted">${gr.risks.map(esc).join(', ')}</div>` : ''}</td></tr>`;
     }).join('');
     return `<div><div class="card-h" style="margin:6px 0"><h3>시진 (時辰) · ${term('실행 등급')} <span class="lvl">${LEVEL_ROLE.sijin}</span></h3><div class="field"><span>오늘의 목적</span>${seg('purpose', Object.entries(PURPOSE).map(([k, [l]]) => [k, l]), S.inp.purpose || 'gen')}</div></div>
       <div class="tbl-wrap"><table class="dt"><thead><tr><th>시진</th><th>시각</th><th>간지</th><th>십성</th><th>등급</th></tr></thead><tbody>${rows}</tbody></table></div>
@@ -4577,7 +4598,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const cal = M.ilun(ch, cy, cm);
     const firstDow = new Date(Date.UTC(cy, cm - 1, 1)).getUTCDay();
     let daeunDetail = '', seunDetail = '', wolDetail = '', ilDetail = '';
-    if (sel.kind === 'daeun') { const x = ch.daeun.list[sel.i]; daeunDetail = detailHTML(`${x.startAge}세 대운 ${M.gzName(x)} (${x.startYear}~${x.startYear + 9})`, x, `<p class="note">정확한 시작: ${fmtKST(x.startMs)}</p>`, "daeun"); }
+    if (sel.kind === 'daeun') { const x = ch.daeun.list[sel.i]; daeunDetail = detailHTML(`${x.startAge}세 대운 ${M.gzName(x)} (${x.startYear}~${x.startYear + 9})`, x, `<p class="note">정확한 시작: ${fmtKST(x.startMs)}${sel.i === 0 && ch.daeun.exact < 0.5 ? ` · 대운수는 최소 1로 표기하지만 실제로는 출생 후 약 ${ch.daeun.startMonths}개월에 시작합니다` : ''}</p>`, "daeun"); }
     if (sel.kind === 'seun') { const x = M.seunRange(ch, sel.Y, sel.Y)[0]; if (x) seunDetail = detailHTML(`${sel.Y}년 세운 ${M.gzName(x)}`, x, x.daeun ? `<p class="small">대운 ${M.gzName(x.daeun)} ${signed(x.daeun.score.total)} × 40% + 세운 ${signed(x.score.total)} × 60% = 흐름 점수 <b class="num">${signed(x.combined)}</b></p>` : '', "seun", samjaeBanner(sel.Y)); }
     if (sel.kind === 'wolun') { const x = M.wolun(ch, Y)[sel.i]; wolDetail = detailHTML(`${Y}년 ${x.termName}부터 월운 ${M.gzName(x)}`, x, `<p class="note">시작: ${fmtKST(x.startMs)} · 대운과 섞은 흐름 점수 ${signed(x.combined)}</p>`, "wolun"); }
     if (sel.kind === 'ilun') { const x = cal[sel.d - 1]; if (x) ilDetail = detailHTML(`${cy}.${pad(cm)}.${pad(sel.d)} 일진 ${M.gzName(x)}`, x, `<p class="small">음력 ${x.lunar.m}${x.lunar.leap ? '(윤)' : ''}월 ${x.lunar.d}일 · ${term('손 없는 날', '손')} ${M.sonOf(x.lunar.d) === '없음' ? '<b>없음 (손 없는 날)</b>' : M.sonOf(x.lunar.d) + '쪽'}</p>` + sijinTable(x, [cy, cm, sel.d]), "ilun"); }
@@ -6012,7 +6033,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const d = nearest(ev); if (!d) return;
       xh.setAttribute('x1', x(d.year)); xh.setAttribute('x2', x(d.year)); xh.style.opacity = .35;
       xd.setAttribute('cx', x(d.year)); xd.setAttribute('cy', y(d.combined)); xd.style.opacity = 1;
-      { const sj = samjaeOf(d.year); showTip(ev, luckTip(`${d.year}년 (만 ${d.age}세) ${M.gzName(d)}`, d) + (sj.active ? `<br>삼재 · ${sj.stage} (전통 참고, 점수 미반영)` : '')); }
+      { const sj = samjaeOf(d.year); showTip(ev, luckTip(`${d.year}년 (연 나이 ${d.age}세) ${M.gzName(d)}`, d) + (sj.active ? `<br>삼재 · ${sj.stage} (전통 참고, 점수 미반영)` : '')); }
     });
     ov.addEventListener('mouseleave', () => { xh.style.opacity = 0; xd.style.opacity = 0; hideTip(); });
     ov.addEventListener('click', ev => { const d = nearest(ev); if (d) pick('seun:' + d.year); });
