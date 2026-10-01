@@ -409,6 +409,11 @@ tr.row-g-avoid td { background: color-mix(in srgb, var(--bad) 7%, transparent); 
 .cr-axes { display: grid; gap: 10px; }
 .cr-ax { display: grid; grid-template-columns: 4.6em 1fr 4.6em auto; gap: 2px 8px; align-items: center; font-size: 0.86rem; }
 .cr-ax .r { text-align: right; } .cr-ax .l, .cr-ax .r { color: var(--ink-3); } .cr-ax .on { color: var(--ink); font-weight: 800; }
+.cr-bar2 { position: relative; display: flex; height: 12px; border-radius: 6px; overflow: hidden; }
+.cr-bar2 i { display: block; height: 100%; }
+.cr-bar2 .a { background: var(--accent); } .cr-bar2 .b { background: #F29A3C; }
+.cr-bar2::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--surface); opacity: .9; }
+.cr-ax .l.on { color: var(--accent); } .cr-ax .r.on { color: #C46A0A; }
 .cr-bar, .cr-b { height: 10px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
 .cr-bar i, .cr-b i { display: block; height: 100%; border-radius: 5px; background: var(--accent); }
 .cr-v { font-size: 0.78rem; color: var(--ink-2); } .cr-w { grid-column: 2 / -1; font-size: 0.74rem; color: var(--ink-3); }
@@ -3925,7 +3930,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function renderCareer(ch) {
     const P = M.careerProfile(ch), ws = P.workStyle, cfg = M.CAREER_CONFIG;
     const axis = a => { const x = ws[a], [pn, pv] = M.careerPole(a, x.value);
-      return `<div class="cr-ax"><span class="l${x.value >= 50 ? ' on' : ''}">${x.left}</span><span class="cr-bar"><i style="width:${x.value}%"></i></span><span class="r${x.value < 50 ? ' on' : ''}">${x.right}</span><span class="cr-v num">${x.value} / ${x.other}</span><span class="cr-w">${pn} 쪽 · ${M.careerLevelWord(pv)}</span></div>`; };
+      return `<div class="cr-ax"><span class="l${x.value >= 50 ? ' on' : ''}">${x.left}</span><span class="cr-bar2" role="img" aria-label="${x.left} ${x.value}, ${x.right} ${x.other}"><i class="a" style="width:${x.value}%"></i><i class="b" style="width:${x.other}%"></i></span><span class="r${x.value < 50 ? ' on' : ''}">${x.right}</span><span class="cr-v num">${x.value} / ${x.other}</span><span class="cr-w">${pn} 쪽 · ${M.careerLevelWord(pv)}</span></div>`; };
     const row = c => `<button type="button" class="cr-row" data-cr="cat:${c.category}"><b class="cr-n">${c.name}</b><span class="cr-b"><i style="width:${c.score}%"></i></span><b class="cr-s num">${c.score}</b><span class="cr-lab ${crTone(c.score)}">${c.band}</span><span class="cr-why">${esc(c.reasons[0] || '')}</span></button>`;
     const topRow = c => `<button type="button" class="cr-row" data-cr="cat:${c.category}"><b class="cr-n">${c.name}</b><span class="cr-b"><i style="width:${c.score}%"></i></span><b class="cr-s num">${c.score}</b><span class="cr-lab ${crTone(c.score)}">${c.band}</span><span class="cr-why">${esc(cfg.categories[c.category].what)} — ${esc(c.strengths[0] || c.reasons[0] || '')}</span><span class="cr-more">자세히 보기 ›</span></button>`;
     return `
