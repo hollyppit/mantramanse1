@@ -26,31 +26,34 @@ const TYPES = {
   'K 억부≠조후(반대)': c => jo(c).applicable && ['기신', '구신'].includes(eok(c).roles[jo(c).yong]),
   'ALL': () => true,
 };
-const PH = ['기회기', '확장기', '수확기', '축적기', '변동기', '방어기'], CO = ['순풍', '보통', '주의', '부담'];
+const PH = ['기회기', '확장기', '수확기', '축적기'], CO = ['순풍', '보통', '주의', '부담'];
 const NUM = ['fitScore', 'ownFit', 'eokbuScore', 'johuScore', 'relationScore', 'structureScore', 'volatilityScore', 'intensityScore'];
 const pct = (o, ks, n) => ks.map(k => String(Math.round((o[k] || 0) / n * 100)).padStart(3)).join(' ');
 const fails = [];
 console.log(`차트 ${charts.length}개 · 단위 ${LEVEL} · 학파 ${SCHOOL} · 각 사주에 60갑자 전부를 운으로 대입`);
-console.log('유형'.padEnd(18), 'n'.padStart(4), '평균', ' 표준편차', '| ' + PH.map(p => p.slice(0, 2)).join(' ') + ' | ' + CO.join(' ') + ' | 변화 강도 억부w 조후w');
+console.log('유형'.padEnd(18), 'n'.padStart(4), '평균', ' 표준편차', '| ' + PH.map(p => p.slice(0, 2)).join(' ') + ' | ' + CO.join(' ') + ' | +변동 +방어 | 변화 강도 억부w 조후w');
 for (const [name, f] of Object.entries(TYPES)) {
   const cs = charts.filter(f); if (!cs.length) { console.log(name.padEnd(18), '해당 사주 없음'); continue; }
-  let sum = 0, sq = 0, n = 0, chg = 0, int = 0, wE = 0, wJ = 0; const ph = {}, co = {};
+  let ovV = 0, ovD = 0, sum = 0, sq = 0, n = 0, chg = 0, int = 0, wE = 0, wJ = 0; const ph = {}, co = {};
   for (const c of cs) for (const p of pillars) {
     const ev = M.evaluateLuck(c, p, LEVEL);
     for (const k of NUM) if (!Number.isFinite(ev[k])) fails.push(`${name}: ${k}=${ev[k]}`);
+    if (ev.overlays.volatility.active !== (ev.volatilityScore >= M.FLOW_CONFIG.overlay.volatility) || !Number.isFinite(ev.defenseLoad) || ev.defenseLoad < 0 || ev.defenseLoad > 100.0001) fails.push(`${name}: overlay/defense 이상`);
+    if (ev.overlays.volatility.active) ovV++; if (ev.overlays.defense.active) ovD++;
     if (!PH.includes(ev.phase) || !CO.includes(ev.condition) || !ev.activityType || !ev.dominantTenGodGroup) fails.push(`${name}: 빈 phase/condition (${ev.phase}/${ev.condition})`);
-    if (ev.reasons.length < 1 || ev.reasons.length > 4 || ev.reasons.some(r => /undefined|NaN/.test(r))) fails.push(`${name}: reasons 이상`);
+    if (ev.reasons.length < 1 || ev.reasons.length > 6 || ev.reasons.some(r => /undefined|NaN/.test(r))) fails.push(`${name}: reasons 이상`);
     if (ev.parts.some(x => !Number.isFinite(x.v) || /undefined|NaN/.test(x.label))) fails.push(`${name}: parts 이상`);
     if (Math.abs(ev.fitScore) > 100.0001) fails.push(`${name}: 범위 초과 ${ev.fitScore}`);
     sum += ev.fitScore; sq += ev.fitScore ** 2; n++; ph[ev.phase] = (ph[ev.phase] || 0) + 1; co[ev.condition] = (co[ev.condition] || 0) + 1;
     chg += ev.volatilityScore; int += ev.intensityScore; wE += ev.weights.eokbu; wJ += ev.weights.johu;
   }
   const m = sum / n;
-  console.log(name.padEnd(18), String(cs.length).padStart(4), m.toFixed(1).padStart(5), Math.sqrt(sq / n - m * m).toFixed(1).padStart(7), '|', pct(ph, PH, n), '|', pct(co, CO, n).replace(/ {2}/g, '   '), '|', (chg / n).toFixed(0).padStart(3), (int / n).toFixed(0).padStart(4), (wE / n).toFixed(2), (wJ / n).toFixed(2));
+  console.log(name.padEnd(18), String(cs.length).padStart(4), m.toFixed(1).padStart(5), Math.sqrt(sq / n - m * m).toFixed(1).padStart(7), '|', pct(ph, PH, n), '|', pct(co, CO, n).replace(/ {2}/g, '   '), '|', pct({ v: ovV, d: ovD }, ['v', 'd'], n).replace(/ {2}/g, '   '), '   |', (chg / n).toFixed(0).padStart(3), (int / n).toFixed(0).padStart(4), (wE / n).toFixed(2), (wJ / n).toFixed(2));
   // 편향 검사: 유형별 평균 흐름 점수가 0에서 멀지 않고, 어느 시기 유형도 한 유형이 절반 이상을 차지하지 않는다
   if (n >= 300 && Math.abs(m) > 6) fails.push(`${name}: 평균 흐름 점수 ${m.toFixed(1)} — 한 방향 편향`);
   if (n >= 300 && Math.max(...PH.map(p => (ph[p] || 0) / n)) > 0.5) fails.push(`${name}: 한 시기 유형이 50% 초과`);
-  if (n >= 300 && (ph['방어기'] || 0) / n > 0.25) fails.push(`${name}: 방어기 비중 25% 초과`);
+  if (n >= 300 && ovD / n > 0.45) fails.push(`${name}: 방어 overlay 비중 45% 초과`);
+  if (n >= 300 && ovV / n > 0.6) fails.push(`${name}: 변동 overlay 비중 60% 초과`);
 }
 console.log(fails.length ? `\n실패 ${fails.length}건\n` + [...new Set(fails)].slice(0, 20).join('\n') : '\nNaN/undefined/빈 phase 없음, 유형별 편향 기준 통과');
 process.exit(fails.length ? 1 : 0);

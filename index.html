@@ -210,7 +210,7 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .nowc .tgs { font-size: 0.76rem; color: var(--ink-2); }
 .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
 .cal .dow { font-size: 0.7rem; color: var(--ink-3); text-align: center; font-weight: 600; }
-.cal button { border: 1px solid transparent; border-radius: 12px; padding: 5px 2px; min-height: 68px; cursor: pointer; display: grid; gap: 1px; justify-items: center; align-content: start; background: var(--surface-2); }
+.cal button { border: 1px solid transparent; border-radius: 12px; padding: 5px 2px; min-height: 78px; cursor: pointer; display: grid; gap: 1px; justify-items: center; align-content: start; background: var(--surface-2); }
 .cal button { position: relative; }
 .cal .ctop { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 3px; }
 .son { display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; background: var(--seal); color: var(--surface); font-size: 9px; font-weight: 700; line-height: 1; }
@@ -255,6 +255,22 @@ button.ph { cursor: pointer; } button.ph:hover { color: #fff; filter: brightness
 .lvl { display: inline-block; margin-left: 6px; font-size: 0.7rem; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 999px; vertical-align: 2px; font-family: var(--f-body); }
 .dm-bg { background: color-mix(in srgb, var(--dm) 9%, var(--surface)); border-color: var(--dm); }
 .cal .dmn { font-size: 0.64rem; font-weight: 800; line-height: 1.1; }
+.cal .dmn .ovm { display: block; font-style: normal; font-size: 0.56rem; font-weight: 800; }
+.ov-volatility { color: var(--d-chg); } .ov-defense { color: var(--d-def); }
+.ovb { display: inline-block; font-size: 0.68rem; font-weight: 800; padding: 1px 7px; border-radius: 999px; border: 1.5px solid currentColor; background: transparent; line-height: 1.4; margin-left: 3px; }
+button.ovb { cursor: pointer; font-family: inherit; }
+.flowbars { display: grid; gap: 4px; margin: 4px 0; }
+.fb { display: grid; grid-template-columns: 112px 1fr 30px; gap: 8px; align-items: center; font-size: 0.78rem; }
+.fb .fn { color: var(--ink-2); } .fb.main .fn { color: var(--ink); font-weight: 800; } .fb.sec .fn { font-weight: 700; color: var(--ink); }
+.fb .num { text-align: right; }
+.carc { display: block; }
+.carc summary { cursor: pointer; font-weight: 800; }
+.carstack { display: grid; margin: 8px 0; }
+.cs-item { display: grid; grid-template-columns: 26px 1fr; gap: 10px; padding: 6px 0; align-items: start; }
+.cs-ic svg { width: 22px; height: 22px; stroke: var(--ink-2); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.cs-item b { font-size: 0.9rem; } .cs-item .small { display: block; }
+.cs-arrow { margin-left: 8px; color: var(--ink-3); font-size: 0.8rem; line-height: 1; }
+.cs-now { color: var(--ink); }
 .gr { border: 0; cursor: pointer; font-size: 0.74rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; text-decoration: none; white-space: nowrap; }
 .gr.g-go { background: var(--good); color: #fff; } .gr.g-use { background: var(--surface-2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
 .gr.g-warn { background: #FFF1D6; color: #946B00; } .gr.g-avoid { background: var(--bad); color: #fff; }
@@ -1041,11 +1057,12 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   // 시간 단위(level)에 따라 달라지는 것은 LUCK_CFG.levels의 가중치와 화면의 풀이 문구뿐이다.
   //   fitScore       흐름 점수(−100~+100): 원국의 불균형을 이 운이 보완(+)하는지 심화(−)하는지의 상대 지표
   //   opportunityActivation 새로운 활동·선택지가 얼마나 활성화되는가(0~100). 흐름 점수·변동성과 독립이다
-  //   activityType   기회·확장·수확·축적 중 무엇이 가장 활성화되는가(십성 하나가 아니라 활성도 네 가지를 견줘 정한다)
+  //   activityType   기회·확장·수확·축적 중 무엇이 가장 활성화되는가(십성 하나가 아니라 활성도 네 가지를 견줘 정한다) = primaryFlow
+  //   defenseLoad    방어 부담도(0~100): 흐름 적합도·억부·구조·조후·관계 부담과 변동×부적합, 작용 강도로 만든다(사고수를 읽지 않는다)
   //   volatilityScore 합·충·형·파·해가 원국 구조를 움직이는 변화 신호의 세기(0~100). 길흉이 아니라 변동성이다
   //   intensityScore 작용의 세기(0~100)
-  // phase(시기 유형)는 위 축을 종합해 정하고, condition(순풍·보통·주의·부담)은 fitScore로만 정한다.
-  // 변동성은 흐름 점수와 독립이다: 변동성이 높다고 fitScore를 깎지 않으며, 변동기 · 순풍/보통/주의/부담이 모두 가능하다.
+  // 운의 흐름은 서로 경쟁하지 않는 세 층이다: 주 흐름(primaryFlow = 네 활성도 중 최고점) + 상태 overlay(변동·방어, 독립) + condition(순풍·보통·주의·부담, fitScore로만). phase는 옛 UI 호환용 키다. FLOW_CONFIG 참고.
+  // 변동성은 흐름 점수와 독립이다: 변동성이 높다고 fitScore를 깎지 않으며, 변동 overlay · 순풍/보통/주의/부담이 모두 가능하다.
   // 임계값과 가중치는 모두 이 객체에 모은다.
   const LUCK_CFG = {
     // 시간 단위별: stemW 천간 반영 비율 / parent 상위 운(대운)과 섞는 비율 / mul 성분 가중치 배율
@@ -1069,7 +1086,6 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     structure: { neutralPct: 20, scale: 0.8, pattern: { '관살혼잡': -12, '상관견관': -10, '군겁쟁재': -12, '효신탈식(도식)': -8 } },
     condition: { tailwind: 18, caution: -12, burden: -35 },   // 흐름 점수 → 순풍 / 보통 / 주의 / 부담
     intensity: { conc: [0.3, 0.6], gap: 25, relLoad: 20, w: [0.4, 0.3, 0.3] },
-    defense: { fit: -20, intensity: 50, hardFit: -45, hardIntensity: 30 },
     attackNorm: 0.65,        // (주도 십성 top을 정하는 보조 계산) 비겁+식상 두 묶음을 다른 묶음과 공정하게 비교하기 위한 보정
     // ── 기회 활성도 · 시기 활성도 (기회기/확장기/수확기/축적기를 가르는 기준). 순서는 모두 [비겁, 식상, 재성, 관성, 인성]
     opportunity: {
@@ -1086,7 +1102,6 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       expansion: { w: [0.5, 0.3, 0.5, 1.0, 0.2], presence: [8, 25], floor: 0.4 },
       harvest: { w: [0.1, 0.4, 1.0, 0.2, 0], presence: [8, 25], floor: 0.4, flow: 0.3 },   // flow: 원국 식상이 있는데 재성이 들어오면(식상생재) 결과 회수 가산
       accumulation: { w: [0.3, 0, 0, 0.1, 1.0] },
-      pick: { min: 40, weights: { '기회': 1, '확장': 1, '수확': 1, '축적': 1 } },   // 기회기는 기회 활성도가 min 이상일 때만 대표 시기가 될 수 있다
       types: { relMin: 0.35, max: 3, names: ['독립·협업·경쟁·인맥', '창작·표현·생산·출시', '사업·거래·재정 활동', '직책·조직·사회적 역할', '학습·자격·연구·지원'] },
       reasonMin: 0.025, companionMin: 60, high: 60, low: 40,
     },
@@ -1097,7 +1112,6 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   // volatility = 100 × (1 − e^(−점수합/sat)). 신호를 큰 것부터 stack^순번으로 겹쳐 더한다(여러 신호가 겹치면 누적, 한 신호가 약하면 낮게 머문다).
   const VOLATILITY_CONFIG = {
     bands: [[25, '안정적'], [50, '움직임 있음'], [70, '변동성 높음'], [Infinity, '변동성 매우 높음']],   // 점수 미만 → 단계 (0~24 · 25~49 · 50~69 · 70~100)
-    phaseThreshold: 55,      // 이 이상이면 시기 유형이 변동기(방어기 판정보다는 뒤)
     sat: 50, stack: 0.75,
     // 관계별 기본 세기(자리 배율 1 기준). kind는 자리 배율표를 고른다
     base: {
@@ -1118,7 +1132,42 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     hitMin: 10,              // 상세·기록에 "주요 변화 신호"로 올리는 최소 점수
   };
   const volBand = v => VOLATILITY_CONFIG.bands.find(b => v < b[0])[1];
-  const ACT_PHASE = { '기회': '기회기', '확장': '확장기', '수확': '수확기', '축적': '축적기' };
+  // ───────────── 운의 흐름 구조: 주 흐름 + 상태 overlay + 적합 상태 ─────────────
+  // 서로 다른 질문에 답하는 세 층을 하나의 if/else에서 경쟁시키지 않는다.
+  //   ① 주 흐름(무엇이 활성화되는가)  기회·확장·수확·축적 — 네 활성도(0~100)를 모두 계산하고 최고점이 primaryFlow
+  //   ② 상태 overlay(얼마나 변하고 부담스러운가)  변동(volatilityScore) · 방어(defenseLoad) — 서로 독립, 동시에 붙을 수 있다
+  //   ③ 적합 상태(나에게 얼마나 맞는가)  순풍·보통·주의·부담 — fitScore로만 정한다
+  // 임계값·가중치는 모두 여기서만 조절한다.
+  const FLOW_CONFIG = {
+    keys: ['opportunity', 'expansion', 'harvest', 'accumulation'],          // 동점일 때의 우선순서이기도 하다
+    names: { opportunity: '기회', expansion: '확장', harvest: '수확', accumulation: '축적' },
+    legacy: { opportunity: '기회기', expansion: '확장기', harvest: '수확기', accumulation: '축적기' },   // 옛 6분류 문자열(색·용어 키 호환용). 변동기·방어기는 overlay로 이동
+    secondary: { maxGap: 8, min: 45 },                                       // 1·2위 차이가 maxGap 이하이고 2위가 min 이상이면 동반 흐름
+    overlay: { volatility: 55, defense: 40 },                                // 이 점수 이상이면 변동·방어 overlay를 붙인다(옛 변동기 기준 55 유지. 일지·월지 충 하나가 이 근처)
+    defense: {
+      // 방어 부담도(defenseLoad) = 100 × (fit·억부·구조·조후·관계·변동×부적합 성분의 가중합) × (1 − mix + mix × 작용 강도/100)
+      // fitScore·성분 점수·변동성·작용 강도만 읽는다. 사고수·분야 지수는 읽지 않는다(분야 지수가 이 값을 읽으면 순환이 된다).
+      w: { fit: 0.30, eokbu: 0.10, structure: 0.12, johu: 0.10, relation: 0.13, volFit: 0.25 },
+      ramp: 60,              // 성분 점수가 −ramp이면 그 성분의 부담이 최대
+      volFitRamp: 40,        // 변동성이 높은데 흐름 점수가 이만큼 낮으면 '변동×부적합' 부담이 최대
+      intensityMix: 0.35,    // 작용 강도가 부담을 증폭하는 비율
+    },
+  };
+  // 시간 단위별 주 흐름 배율: 긴 단위일수록 기반·확대 흐름이, 짧은 단위일수록 활동·회수 흐름이 조금 더 잘 드러나게 한다(±10% 이내). 별도 알고리즘은 없다.
+  const LEVEL_WEIGHTS = {
+    daeun: { opportunity: 1, expansion: 1.08, harvest: 1, accumulation: 1.08 },
+    seun: { opportunity: 1, expansion: 1, harvest: 1, accumulation: 1 },
+    wolun: { opportunity: 1, expansion: 1, harvest: 1.04, accumulation: 0.98 },
+    ilun: { opportunity: 1.04, expansion: 1, harvest: 1.04, accumulation: 0.96 },
+    sijin: { opportunity: 1.04, expansion: 1, harvest: 1.04, accumulation: 0.96 },
+  };
+  // 옛 6분류 문자열 → 새 구조 (저장·캐시·외부 데이터가 옛 값을 가져와도 읽히게 한다)
+  const LEGACY_PHASE_MAP = {
+    '기회기': { primary: 'opportunity' }, '확장기': { primary: 'expansion' }, '수확기': { primary: 'harvest' }, '축적기': { primary: 'accumulation' },
+    '변동기': { overlay: 'volatility' }, '방어기': { overlay: 'defense' },
+    '기회일': { primary: 'opportunity' }, '확장일': { primary: 'expansion' }, '수확일': { primary: 'harvest' }, '축적일': { primary: 'accumulation' }, '변동일': { overlay: 'volatility' }, '방어일': { overlay: 'defense' },
+  };
+  const flowKeyOf = name => Object.keys(FLOW_CONFIG.names).find(k => FLOW_CONFIG.names[k] === name);
   const OPP_TYPE_SHORT = ['독립·협업·경쟁·인맥', '창작·표현·생산·출시', '사업·거래·재정 활동', '직책·조직·사회적 역할', '학습·자격·연구·지원'];
   const ROLE_V = { '용신': 2, '희신': 1, '한신': 0, '구신': -1, '기신': -2 };
   const lclamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -1280,6 +1329,19 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     return '새로운 선택지는 많이 생길 수 있지만 부담이나 리스크도 함께 커서, 선별과 리스크 관리가 중요한 흐름입니다.';
   }
 
+  // 점수 → 주 흐름·동반 흐름·overlay·적합 상태. 서로 경쟁하지 않는 세 층을 한 곳에서 조합한다(순수 함수라 점수만으로 검증할 수 있다).
+  //   flows 네 활성도 / vol·def 변동성·부담도 점수(0~100) / fit 흐름 적합도(−100~+100)
+  function composeFlowState(flows, vol, def, fit) {
+    const F = FLOW_CONFIG;
+    const ranked = [...F.keys].sort((a, b) => flows[b] - flows[a] || F.keys.indexOf(a) - F.keys.indexOf(b));   // 동점이면 F.keys 순서
+    const primaryFlow = ranked[0], second = ranked[1];
+    const secondaryFlow = flows[second] >= F.secondary.min && flows[primaryFlow] - flows[second] <= F.secondary.maxGap ? second : null;
+    const on = { volatility: vol >= F.overlay.volatility, defense: def >= F.overlay.defense };
+    // 작은 칸(일진 캘린더)에 붙일 overlay 하나: 기준을 더 많이 넘긴 쪽(기준 대비 초과 비율), 같으면 방어
+    const ex = k => on[k] ? ((k === 'volatility' ? vol : def) - F.overlay[k]) / (100 - F.overlay[k]) : -1;
+    const topOverlay = !on.volatility && !on.defense ? null : ex('defense') >= ex('volatility') ? 'defense' : 'volatility';
+    return { primaryFlow, secondaryFlow, on, topOverlay, condition: conditionOf(fit) };
+  }
   function evaluateLuck(ch, p, level = 'ilun', opts = {}) {
     const C = LUCK_CFG, L = C.levels[level] || C.levels.ilun, stemW = opts.stemW ?? L.stemW;
     const W = luckWeights(ch, level), dEl = stemEl(ch.pillars.day.s), G = ch.weights.groups;
@@ -1327,55 +1389,86 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const relLoad = lclamp(relP.reduce((a, x) => a + Math.abs(x.v), 0) / I.relLoad, 0, 1) * 0.5 + lclamp(vol.signals.reduce((a, h) => a + h.pts, 0) / 60, 0, 1) * 0.5;
     const gap = lclamp(Math.abs(G[top] - S.neutralPct) / I.gap, 0, 1);
     const intensityScore = 100 * (I.w[0] * conc + I.w[1] * relLoad + I.w[2] * gap);
-    // 시기 유형
-    const opp = opportunityOf(g, G, need, rels);
-    const D = C.defense, condition = conditionOf(fitScore);
-    // 기회·확장·수확·축적 중 가장 활성화되는 것(대표 시기가 방어기·변동기여도 활동 유형은 남긴다). 기회기는 기회 활성도가 기준 이상일 때만 된다
-    const PK = C.opportunity.pick, sc = { '기회': opp.activation * PK.weights['기회'], '확장': opp.expansion * PK.weights['확장'], '수확': opp.harvest * PK.weights['수확'], '축적': opp.accumulation * PK.weights['축적'] };
-    if (opp.activation < PK.min) sc['기회'] = -1;
-    const activityType = Object.keys(sc).reduce((a, k) => sc[k] > sc[a] ? k : a, '축적');
-    let phase, why;
-    if (fitScore <= D.hardFit && intensityScore >= D.hardIntensity) { phase = '방어기'; why = `흐름 점수 ${Math.round(fitScore)}로 부담이 크고 작용 강도(${Math.round(intensityScore)})도 있어 감당 범위를 넘을 수 있음`; }
-    else if (volatilityScore >= VOLATILITY_CONFIG.phaseThreshold) { phase = '변동기'; why = `변동성 ${Math.round(volatilityScore)}(${vol.band}) — 변화 신호: ${vol.signals.slice(0, 2).map(h => h.text).join(', ')}`; }
-    else if (fitScore <= D.fit && intensityScore >= D.intensity) { phase = '방어기'; why = `흐름 점수 ${Math.round(fitScore)}와 작용 강도 ${Math.round(intensityScore)}가 함께 높아 리스크 관리가 필요`; }
-    else {
-      phase = ACT_PHASE[activityType];
-      const oname = opp.types.map(t => t.name).join(' · ');
-      why = activityType === '기회' ? `새로운 활동 신호(기회 활성도 ${opp.activation}) — 주요 기회: ${oname || '뚜렷한 종류 없음'}`
-        : activityType === '확장' ? `이미 있는 활동·역할을 키우는 신호(확장 ${opp.expansion})가 가장 강하고, 기회 활성도는 ${opp.activation}`
-          : activityType === '수확' ? `이미 만든 결과를 거두는 신호(수확 ${opp.harvest})가 가장 강하고, 기회 활성도는 ${opp.activation}`
-            : `기반·역량을 쌓는 신호(축적 ${opp.accumulation})가 가장 강하고, 기회 활성도는 ${opp.activation}`;
-    }
-    const tendency = activityType + ' 성향' + (phase === ACT_PHASE[activityType] && (condition === '주의' || condition === '부담') ? ` + ${condition}` : '');
-    // 근거 문장: 시기 판정 이유 + 기여가 큰 성분 2~3개
+    // ── 주 흐름 · overlay · 적합 상태 (서로 경쟁하지 않는 세 층)
+    const opp = opportunityOf(g, G, need, rels), condition = conditionOf(fitScore);
+    const F = FLOW_CONFIG, LW = LEVEL_WEIGHTS[level] || LEVEL_WEIGHTS.ilun;
+    const raw4 = { opportunity: opp.activation, expansion: opp.expansion, harvest: opp.harvest, accumulation: opp.accumulation };
+    const flows = {}; for (const k of F.keys) flows[k] = Math.round(lclamp(raw4[k] * (LW[k] ?? 1), 0, 100));
+    // 방어 부담도: 사고수·분야 지수가 아니라 이 운의 성분 점수(fit·억부·구조·조후·관계)와 변동성·작용 강도만 읽는다(순환 방지)
+    const DF = F.defense, neg = v => lramp(-v, 0, DF.ramp);
+    const defParts = { fit: neg(fitScore), eokbu: neg(eok.v), structure: neg(structureScore), johu: neg(jo.v), relation: neg(relationScore), volFit: (volatilityScore / 100) * lramp(-fitScore, 0, DF.volFitRamp) };
+    let defRaw = 0, defW = 0; for (const k in DF.w) { defRaw += DF.w[k] * defParts[k]; defW += DF.w[k]; }
+    const defenseLoad = 100 * (defRaw / defW) * (1 - DF.intensityMix + DF.intensityMix * intensityScore / 100);
+    const defenseBand = defenseLoad >= 60 ? '매우 높음' : defenseLoad >= F.overlay.defense ? '높음' : defenseLoad >= 15 ? '보통' : '낮음';
+    const flowState = composeFlowState(flows, volatilityScore, defenseLoad, fitScore), { primaryFlow, secondaryFlow, topOverlay } = flowState;
+    const overlays = {
+      volatility: { active: flowState.on.volatility, score: Math.round(volatilityScore), band: vol.band },
+      defense: { active: flowState.on.defense, score: Math.round(defenseLoad), band: defenseBand },
+    };
+    const activityType = F.names[primaryFlow], phase = F.legacy[primaryFlow];   // 옛 UI 호환 키(기회기·확장기·수확기·축적기). 변동기·방어기는 더 이상 나오지 않는다
+    const oname = opp.types.map(t => t.name).join(' · ');
+    const why = primaryFlow === 'opportunity' ? `새로운 활동 신호(기회 활성도 ${flows.opportunity}) — 주요 기회: ${oname || '뚜렷한 종류 없음'}`
+      : primaryFlow === 'expansion' ? `이미 있는 활동·역할을 키우는 신호(확장 ${flows.expansion})가 가장 강하고, 기회 활성도는 ${flows.opportunity}`
+        : primaryFlow === 'harvest' ? `이미 만든 결과를 거두는 신호(수확 ${flows.harvest})가 가장 강하고, 기회 활성도는 ${flows.opportunity}`
+          : `기반·역량을 쌓는 신호(축적 ${flows.accumulation})가 가장 강하고, 기회 활성도는 ${flows.opportunity}`;
+    const ovWhy = [];
+    if (overlays.volatility.active) ovWhy.push(`변동 — 변동성 ${overlays.volatility.score}(${vol.band}): ${vol.signals.slice(0, 2).map(h => h.text).join(', ')}`);
+    if (overlays.defense.active) ovWhy.push(`방어 — 부담도 ${overlays.defense.score}: 흐름 점수 ${Math.round(fitScore)}, 작용 강도 ${Math.round(intensityScore)}${volatilityScore >= 50 && fitScore < 0 ? ', 변화 신호와 부적합이 겹침' : ''}`);
+    const tendency = activityType + ' 성향' + (overlays.volatility.active ? ' + 변동' : '') + (overlays.defense.active ? ' + 방어' : '') + (condition === '주의' || condition === '부담' ? ` · ${condition}` : '');
+    // 근거 문장: 흐름 판정 이유 + overlay 이유 + 기여가 큰 성분 2~3개
     const parts = [{ label: eok.label, v: W.eokbu * eok.v, comp: 'eokbu' }, { label: jo.label, v: W.johu * jo.v, comp: 'johu' }];
     if (ton) parts.push({ label: ton.label, v: W.tonggwan * ton.v, comp: 'tonggwan' });
     relP.forEach(x => parts.push({ label: x.label, v: W.relation * C.relationScale * x.v, comp: 'relation' }));
     parts.push({ label: structLabel, v: W.structure * structureScore - structP.reduce((a, x) => a + x.v, 0) * W.structure, comp: 'structure' });
     structP.forEach(x => parts.push({ label: x.label, v: W.structure * x.v, comp: 'structure' }));
     const phrase = v => v >= 6 ? '보완' : v <= -6 ? '부담을 높임' : '영향 작음';
-    const reasons = [why, ...[...parts].sort((a, b) => Math.abs(b.v) - Math.abs(a.v)).slice(0, 3).filter(x => Math.abs(x.v) >= 1).map(x => `${x.label} → ${phrase(x.v)}`)].slice(0, 4);
-    // 대표 시기 하나만 표시하더라도 다른 강한 신호는 동반 신호로 보존한다
+    const reasons = [why, ...ovWhy, ...[...parts].sort((a, b) => Math.abs(b.v) - Math.abs(a.v)).slice(0, 3).filter(x => Math.abs(x.v) >= 1).map(x => `${x.label} → ${phrase(x.v)}`)].slice(0, 6);
+    // 동반 신호: 주 흐름이 아닌 다른 흐름 중 기준 이상인 것(변동·방어는 overlay로 따로 표시)
     const OP = C.opportunity, companions = [];
-    if (phase !== '기회기' && opp.activation >= OP.companionMin) companions.push({ key: 'opportunity', text: `기회 활성도 높음(${opp.activation})`, value: opp.activation });
-    if (phase !== '확장기' && opp.expansion >= OP.companionMin) companions.push({ key: 'expansion', text: `기존 활동·역할 확대 신호 높음(${opp.expansion})`, value: opp.expansion });
-    if (phase !== '수확기' && opp.harvest >= OP.companionMin) companions.push({ key: 'harvest', text: `재물·결과 회수 활동 높음(${opp.harvest})`, value: opp.harvest });
-    if (phase !== '축적기' && opp.accumulation >= OP.companionMin) companions.push({ key: 'accumulation', text: `기반·역량 축적 신호 높음(${opp.accumulation})`, value: opp.accumulation });
-    if (phase !== '변동기' && volatilityScore >= VOLATILITY_CONFIG.bands[1][0]) companions.push({ key: 'volatility', text: `변동성 ${Math.round(volatilityScore)}(${vol.band})`, value: Math.round(volatilityScore) });
-    if (phase !== '방어기' && (condition === '주의' || condition === '부담')) companions.push({ key: 'load', text: `흐름 점수 ${Math.round(fitScore)} — ${condition} 신호`, value: Math.round(-fitScore) });
+    const compText = { opportunity: v => `기회 활성도 높음(${v})`, expansion: v => `기존 활동·역할 확대 신호 높음(${v})`, harvest: v => `재물·결과 회수 활동 높음(${v})`, accumulation: v => `기반·역량 축적 신호 높음(${v})` };
+    for (const k of F.keys) if (k !== primaryFlow && flows[k] >= OP.companionMin) companions.push({ key: k, text: compText[k](flows[k]), value: flows[k] });
     const relations = rels.map(r => `${relWhere(r)} ${r.name}`);
     // 흐린 비교 막대: 덜 앞세운 기준 하나만 단독으로 본 점수
     let alt = null;
     if (W.ghost) { const own = W.ghost === 'johu' ? jo.v : eok.v; alt = { school: W.ghost, value: parent && parent.alt ? (1 - L.parent) * own + L.parent * parent.alt.value : own }; }
+    const flow = { flows, primaryFlow, secondaryFlow, overlays, topOverlay, condition: { name: condition, fitScore }, reasons, defenseParts: defParts };
     return {
       level, fitScore, ownFit, eokbuScore: eok.v, johuScore: jo.v, relationScore, structureScore, tonggwanScore: ton ? ton.v : null,
       weights: { eokbu: W.eokbu, johu: W.johu, relation: W.relation, structure: W.structure, tonggwan: W.tonggwan },
-      volatilityScore, volatilityBand: vol.band, volatilitySignals: vol.signals.map(g => ({ text: g.text, means: g.means, pts: g.pts, type: g.type, core: g.core })), volatilityOverlap: vol.nCore, intensityScore, activityType, tendency, dominantTenGodGroup: TG_GROUP[top], grp: top,
-      opportunityActivation: opp.activation, opportunityType: opp.types.map(t => t.name), opportunityReasons: opp.reasons, opportunityComponents: opp.comps,
-      phaseScores: { opportunity: opp.activation, expansion: opp.expansion, harvest: opp.harvest, accumulation: opp.accumulation, volatility: Math.round(volatilityScore), fit: Math.round(fitScore), intensity: Math.round(intensityScore) }, companions,
+      volatilityScore, volatilityBand: vol.band, volatilitySignals: vol.signals.map(g => ({ text: g.text, means: g.means, pts: g.pts, type: g.type, core: g.core })), volatilityOverlap: vol.nCore, intensityScore, defenseLoad, activityType, primaryFlow, secondaryFlow, overlays, topOverlay, flow, tendency, dominantTenGodGroup: TG_GROUP[top], grp: top,
+      opportunityActivation: flows.opportunity, opportunityType: opp.types.map(t => t.name), opportunityReasons: opp.reasons, opportunityComponents: opp.comps,
+      phaseScores: { ...flows, volatility: Math.round(volatilityScore), defense: Math.round(defenseLoad), fit: Math.round(fitScore), intensity: Math.round(intensityScore) }, companions,
       phase, condition, reasons, parts, relations, triggers: vol.signals.filter(h => h.pts >= VOLATILITY_CONFIG.hitMin).map(h => h.text), alt,
     };
   }
+
+  // ───────────── 운의 흐름 공개 API ─────────────
+  // evaluateLuckFlow: 운 한 기둥 → { flows, primaryFlow, secondaryFlow, overlays, condition, reasons }. 대운·세운·월운·일진·시진이 같은 엔진(evaluateLuck)을 쓴다.
+  function evaluateLuckFlow(ch, p, level = 'ilun', context = {}) {
+    const ev = evaluateLuck(ch, p, level, { parent: context.parent ?? context.parentEv, stemW: context.stemW });
+    return ev.flow;
+  }
+  const flowName = k => FLOW_CONFIG.names[k] || '';
+  // "기회 + 변동 · 순풍" 형태의 짧은 표기. opts.overlay: 'all'(기본) | 'top'(가장 중요한 overlay 하나) | 'none'
+  function flowLabel(ev, opts = {}) {
+    const f = ev.flow || ev, ov = opts.overlay || 'all';
+    const list = ov === 'none' ? [] : ov === 'top' ? (f.topOverlay ? [f.topOverlay] : []) : ['volatility', 'defense'].filter(k => f.overlays[k].active);
+    const OVN = { volatility: '변동', defense: '방어' };
+    return flowName(f.primaryFlow) + list.map(k => ' + ' + OVN[k]).join('') + (opts.condition === false ? '' : ' · ' + f.condition.name);
+  }
+  // 실제 계산값만 문장 틀에 넣는다(새로운 명리 판단을 만들지 않는다)
+  const FLOW_DESC = { opportunity: '새로운 활동과 선택지의 활성', expansion: '이미 있는 활동·역할의 확대', harvest: '만들어 둔 결과의 회수', accumulation: '기반·역량의 축적' };
+  const FIT_DESC = { '순풍': '현재 원국과의 적합도는 양호합니다.', '보통': '현재 원국과의 적합도는 보완과 부담이 섞여 중립적입니다.', '주의': '현재 원국의 기존 불균형을 조금 키울 수 있어 점검이 필요합니다.', '부담': '현재 원국의 불균형을 크게 키울 수 있어 부담이 큽니다.' };
+  function flowSummary(ev) {
+    const f = ev.flow || ev, F = FLOW_CONFIG, o = f.overlays;
+    const s = [`${FLOW_DESC[f.primaryFlow]} 신호가 가장 강합니다(${f.flows[f.primaryFlow]}).` + (f.secondaryFlow ? ` ${FLOW_DESC[f.secondaryFlow]} 신호도 비슷한 세기(${f.flows[f.secondaryFlow]})로 함께 나타납니다.` : '')];
+    s.push(o.volatility.active ? `변화량은 ${o.volatility.band}(${o.volatility.score})으로 기존 구조가 움직이기 쉽습니다.` : `변화량은 ${o.volatility.band}(${o.volatility.score}) 수준입니다.`);
+    s.push(o.defense.active ? `부담도는 ${o.defense.score}(${o.defense.band})로 리스크 관리가 필요합니다.` : `부담도는 ${o.defense.score}(${o.defense.band}) 수준으로 기준(${F.overlay.defense})을 넘지 않습니다.`);
+    s.push(FIT_DESC[f.condition.name]);
+    return s.join(' ');
+  }
+  // 옛 6분류 문자열 하나를 새 구조로 읽는다: 주 흐름 키 또는 overlay 키
+  const migrateLegacyPhase = str => LEGACY_PHASE_MAP[str] || null;
 
   // ───────────── 메인 ─────────────
   function compute(inp) {
@@ -1636,7 +1729,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   }
 
   // ───────────── 삼재 (전통 민속 참고 정보) ─────────────
-  // 흐름 점수·용신·시기 유형 계산에는 쓰지 않는다. 띠(출생년 지지)의 삼합 그룹마다 들·눌·날삼재가 되는 세 해의 지지.
+  // 흐름 점수·용신·주 흐름 계산에는 쓰지 않는다. 띠(출생년 지지)의 삼합 그룹마다 들·눌·날삼재가 되는 세 해의 지지.
   // 지지 번호: 子0 丑1 寅2 卯3 辰4 巳5 午6 未7 申8 酉9 戌10 亥11
   const SAMJAE_RULES = {
     groups: [
@@ -1923,7 +2016,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
 
 
   // ───────────── 분야별 지수: 애정운 · 재물운 · 건강 지수 · 사고수 ─────────────
-  // 흐름 점수·시기 유형·변동성·억부/조후·삼재를 바꾸지 않고, 그 결과를 읽어 분야별 상태를 계산하는 별도 계층이다.
+  // 흐름 점수·주 흐름·변동성·억부/조후·삼재를 바꾸지 않고, 그 결과를 읽어 분야별 상태를 계산하는 별도 계층이다.
   //   extractLuckFeatures  운 한 기둥에서 공통 특징(십성 끌어옴·오행 균형 효과·조후 효과·합충 신호·신살)을 한 번만 추출
   //   evaluateLove/Wealth/Health/Accident  특징을 받아 지표별 성분(0~100)을 계산
   //   evaluateDomainLuck   같은 엔진으로 대운·세운·월운·일진을 계산하고 상위 운의 배경을 DOMAIN_LEVEL_WEIGHTS로 섞는다
@@ -2736,7 +2829,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   }
 
   G.Manse = {
-    compute, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
+    compute, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, mainHidden, yang, gzName, gzNameK,
@@ -2909,36 +3002,31 @@ var GLOSSARY = {
   '운의 근 보강': ['구조', '원국의 통근 여부와 별개로 대운·세운·월운·일진의 지지에서 일간을 지지하는 근이 들어오는 현상을 말합니다. 원국 자체가 바뀌는 것은 아닙니다.'],
   '근 안정성': ['구조', '원국의 뿌리가 현재 운과 맺는 관계를 바탕으로 변화·교란 신호가 얼마나 나타나는지를 보여주는 참고 지표입니다.'],
   '흐름 점수': ['운', '들어오는 운이 현재 원국의 불균형을 얼마나 보완하거나 심화시키는지를 나타내는 상대 지표입니다(−100~+100). 미래의 행운·불운 확률이 아닙니다.\n+ 값은 원국에 필요한 방향과 잘 맞는다는 뜻, 0 부근은 영향이 섞이거나 중립, − 값은 기존 불균형이나 부담을 강화한다는 뜻입니다.\n네 성분을 사주에 맞춰 섞습니다. 억부(신강·신약을 맞추는 오행), 조후(한난조습 치우침을 줄이는지), 관계(원국과의 합·충·귀인), 구조(원국에서 모자란 십성 묶음을 채우는지). 강약 치우침이 크면 억부, 기후 치우침이 크면 조후 비중이 커지고, 둘 다 크지 않은 중화 사주는 특정 용신 하나의 영향력이 줄어듭니다.\n세운·월운은 대운과 40%:60%로 섞습니다. 해석을 돕는 참고용 모델이며 통계적으로 검증된 예측이 아닙니다.'],
-  '상태 순풍': ['운의 시기', '상태 순풍: 흐름 점수가 높아, 이 시기에 활성화되는 일이 원국에 필요한 방향을 보완하는 상태입니다. 어떤 일이 활성화되는지는 시기 유형(기회기·수확기 등)이 따로 알려 줍니다.'],
+  '상태 순풍': ['운의 흐름', "상태 순풍: 흐름 적합도가 높아, 활성화되는 일이 원국에 필요한 방향을 보완하는 상태입니다. 어떤 일이 활성화되는지는 주 흐름(기회·확장·수확·축적)이 따로 알려 줍니다."],
   '상태 보통': ['운의 시기', '상태 보통: 보완과 부담이 섞이거나 영향이 중립적인 상태입니다.'],
-  '상태 주의': ['운의 시기', '상태 주의: 활성화되는 일이 원국의 기존 불균형을 조금 키우는 상태입니다. 시기 유형은 그대로 두고, 그 일을 할 때 리스크 관리가 필요하다는 뜻입니다. 예: 수확기 + 주의 = 결과 회수 성향은 강하지만 무리한 확장·지출은 점검.'],
-  '상태 부담': ['운의 시기', '상태 부담: 활성화되는 일이 원국의 불균형을 크게 키워 부담이 큰 상태입니다. 작용 강도까지 높으면 시기 유형이 방어기가 됩니다.'],
+  '상태 주의': ['운의 흐름', "상태 주의: 활성화되는 일이 원국의 기존 불균형을 조금 키우는 상태입니다. 주 흐름은 그대로 두고, 그 일을 할 때 리스크 관리가 필요하다는 뜻입니다. 예: 수확 · 주의 = 결과 회수 신호는 강하지만 무리한 확장·지출은 점검."],
+  '상태 부담': ['운의 흐름', "상태 부담: 활성화되는 일이 원국의 불균형을 크게 키워 부담이 큰 상태입니다. 주 흐름은 사라지지 않고 그대로 표시되며, 부담도가 기준을 넘으면 방어 신호가 함께 붙습니다."],
 
   // ── 운의 시기
-  '운의 시기': ['운의 시기', '운을 좋다·나쁘다로 가르지 않고, 그 시기에 어떤 활동·환경이 가장 강하게 나타나는지로 나눈 것입니다. 여섯 가지의 정의는 이렇습니다.\n기회기 = 새로운 가능성·시작·활동이 활성화되는 시기 / 확장기 = 이미 존재하는 활동·역할·영향력을 키우는 시기 / 수확기 = 만들어 놓은 결과·성과·재정적 결과를 회수하는 시기 / 축적기 = 역량·지식·자원·기반을 쌓는 시기 / 변동기 = 기존 구조의 변화와 재편 신호가 강한 시기 / 방어기 = 부담과 과부하가 커져 리스크 관리가 중요한 시기.\n변동기는 변화 신호의 강도(변동성)이고 방어기는 부담·리스크 관리라서 기회기와는 서로 다른 축입니다. 기회 활성도와 변동성은 따로 계산해서 둘이 함께 높을 수도 있고, 이때 대표 시기는 하나만 표시하되 상세 화면에 동반 신호로 남깁니다.\n시기 유형(무엇이 활성화되는가)과 상태(순풍·보통·주의·부담: 그 활성화가 원국에 얼마나 맞는가)는 따로 봅니다. 예: 수확기 + 순풍, 기회기 + 주의. 기회기라는 이유로 흐름 점수가 올라가지 않고, 흐름 점수가 높다고 기회기가 되지도 않습니다.\n같은 이름이라도 운의 단위마다 풀이가 다릅니다. 대운은 10년짜리 장기 환경, 세운은 1년의 실행 환경, 월운은 1개월의 전술, 일진은 하루의 행동(기회일·확장일 등), 시진은 실행 타이밍(◎ 실행·○ 활용·△ 주의·× 회피)입니다.\n대표 시기는 방어기 → 변동기 → 기회기·확장기·수확기·축적기 순으로 정합니다. 앞의 둘은 부담·변화가 매우 클 때만 앞서고, 그렇지 않으면 기회·확장·수확·축적 활성도 중 가장 큰 것이 대표가 됩니다.'],
-  '기회기': ['운의 시기', '새로운 활동이나 선택지가 활성화되는 시기입니다. 새로운 일, 프로젝트, 제안, 만남, 도전 등 기존에 없던 가능성을 탐색하기 좋은 흐름입니다.\n기회가 많다는 것이 반드시 좋은 결과나 성공을 의미하지는 않습니다. 실제 유불리는 흐름 점수, 변동성, 재물·애정·건강 등의 분야별 지표와 함께 확인합니다.\n판정: "기회 활성도"(0~100)와 확장·수확·축적 활성도를 견줘 가장 강한 것을 대표 시기로 삼고, 기회 활성도가 40 이상일 때만 기회기가 됩니다. 기회 활성도는 새 활동을 만드는 십성의 활성, 표현·생산, 독립·주도, 외부 제안, 원국에서 모자랐던 기능의 보완, 새로운 합 관계, 원국에 없던 새 작용을 함께 봅니다. 십성 하나로 정하지 않으며, 비겁이 많아도 원국에 이미 익숙한 작용이면 기회보다 확장으로 읽힙니다.\n종류: 비겁은 독립·협업·경쟁·인맥, 식상은 창작·표현·생산·출시, 재성은 사업·거래·재정 활동, 관성은 직책·조직·사회적 역할, 인성은 학습·자격·연구·지원 기회를 만듭니다.\n구분: 기회기는 새로 시작하거나 발견하는 흐름, 확장기는 이미 있는 것을 키우는 흐름, 수확기는 이미 만든 결과를 거두는 흐름, 축적기는 내부 기반을 쌓는 흐름입니다. 변동기는 기존 구조의 변화량(변동성)이라 기회 활성도와 따로 계산하며, 둘이 함께 높을 수 있습니다.\n대운은 새로운 분야나 삶의 방향을 탐색할 가능성이 커지는 장기 환경, 세운은 새로운 프로젝트·제안·계약이 활성화되기 쉬운 해, 월운은 새 일을 시도하거나 제안·실행하기 좋은 활동 구간, 일진(기회일)은 새로운 제안·연락·시도에 활용할 수 있는 날입니다. 반드시 행동해야 한다는 뜻은 아닙니다.'],
-  '확장기': ['운의 시기', '이미 존재하는 활동·역할·영향력을 키우는 시기입니다. 관성이 주도하며, 원국에 그 기운이 이미 있을 때 뚜렷해집니다.\n기회기가 새로운 것을 시작하거나 발견하는 때라면, 확장기는 이미 있는 사업·프로젝트·관계·직책을 넓히는 때입니다. 예: 기존 사업 규모 확대, 프로젝트 확장, 승진, 조직 확대, 기존 관계 강화.\n행동: 대운은 규모 확대·승진·조직 키우기, 세운은 증액·재계약·파트너십, 월운은 광고 증액·협업 확대. 상태가 주의·부담이면 과부하를 관리합니다.'],
-  '수확기': ['운의 시기', '만들어 놓은 결과·성과·재정적 결과를 회수하는 시기입니다. 재성이 주도하며, 원국에 결과물(식상 등)이 이미 있을 때 뚜렷해집니다.\n기회기가 새로운 가능성의 등장이라면, 수확기는 기존 활동의 결과 회수입니다. 예: 신규 계약 제안은 기회, 계약 확정·대금 회수는 수확. 신제품 기획·출시는 기회, 판매 성과·정산은 수확.\n행동: 대운은 자산화·지분 정리·정산, 세운은 계약 확정·수금·판매·성과 회수, 월운은 청구·수금·마감. 상태가 주의·부담이면 "수확 성향 + 주의"로 읽고 지출·확장을 점검합니다.'],
-  '변동기': ['운의 시기', '의미: 기존 흐름이 유지되기보다 움직임과 변화가 커지는 시기입니다. 평소보다 변화 신호가 강하게 나타나, 직업·관계·환경·계획 등이 움직이거나 방향이 바뀔 가능성에 주목합니다.\n변동성이 높다는 것은 좋은 일이나 나쁜 일이 반드시 발생한다는 뜻이 아닙니다. 변동 자체는 길흉을 의미하지 않으며, 변화가 현재 사주에 유리한 방향인지 부담이 되는 방향인지는 흐름 점수와 상태(순풍·보통·주의·부담)를 함께 확인합니다. 변동기 · 순풍, 변동기 · 주의처럼 어떤 상태와도 짝지어질 수 있습니다.\n핵심 키워드: 변화 · 이동 · 재편 · 방향 변경 · 변동성\n판정: 합·충·형·파·해가 원국의 핵심 자리를 움직이는 정도를 0~100의 변동성으로 계산합니다. 일주·월주에 닿으면 무겁게, 시주는 중간, 년주는 가볍게 보며, 여러 신호가 겹치면 누적됩니다. 관계 하나가 있다고 곧바로 변동기가 되지는 않고, 변동성이 기준(55) 이상일 때 변동기입니다.\n방어기와의 차이: 변동기는 변화량(변동성)이고, 방어기는 부담과 리스크 관리입니다.'],
+  '운의 시기': ['운의 흐름', "운의 흐름은 세 가지 정보를 함께 보여줍니다.\n① 무엇이 활성화되는가? 기회 · 확장 · 수확 · 축적 — 네 가지 활성도(0~100)를 모두 계산하고 가장 높은 것이 주 흐름입니다. 1·2위가 비슷하면 동반 흐름도 함께 표시합니다.\n② 변화와 부담은 어느 정도인가? 변동 · 방어 — 주 흐름을 바꾸지 않고 덧붙는 상태 신호입니다. 변동은 기존 구조가 얼마나 움직이는가(변동성), 방어는 부담·리스크 관리가 얼마나 필요한가(부담도)입니다. 둘은 서로 독립이라 함께 붙을 수도 있습니다.\n③ 나에게 얼마나 잘 맞는가? 순풍 · 보통 · 주의 · 부담 — 흐름 적합도(−100~+100)로만 정합니다.\n예: \"기회 + 변동 · 순풍\" = 새로운 가능성이 활성화되고 변화도 많은 편이지만 현재 원국과의 적합도는 비교적 좋은 흐름. \"수확 + 방어 · 주의\" = 결과 회수 신호는 강하지만 부담 관리가 필요한 흐름.\n세 가지는 서로 다른 질문에 답하므로 하나로 합쳐 고르지 않습니다. 변동성이 높다고 주 흐름이 바뀌지 않고, 흐름 적합도가 낮아도 기회 활성도는 높을 수 있습니다.\n같은 이름이라도 운의 단위마다 풀이가 다릅니다. 대운은 10년짜리 장기 환경, 세운은 1년의 실행 환경, 월운은 1개월의 전술, 일진은 하루의 행동, 시진은 실행 타이밍입니다. 길흉 예언이 아니라 해석을 돕는 참고용 모델입니다."],
+  '운의 작동 방식': ['운의 흐름', "운은 한 요소만으로 결정되지 않습니다. 같은 자동차라도 어떤 도로를 달리는지, 날씨가 어떤지, 현재 노면 상태가 어떤지에 따라 주행 경험이 달라집니다. 사주도 마찬가지로 원국을 기준으로 대운·세운·월운·일진이 겹쳐 현재의 흐름을 만듭니다.\n원국 = 자동차(타고난 구조와 특성) · 대운 = 오래 달리는 도로(약 10년) · 세운 = 그해의 날씨 · 월운 = 현재 구간의 교통·노면 · 일진 = 오늘의 실제 주행 조건 · 시진 = 순간적인 신호·교통 변화.\n비가 온다고 반드시 사고가 나는 것이 아니듯, 특정 운이 들어왔다고 특정 사건이 반드시 발생하는 것은 아닙니다. 이 비유는 이해를 돕기 위한 설명이며 실제 사고 확률 같은 예측이 아닙니다."],
+  '기회기': ['운의 흐름', "기회 흐름: 새로운 가능성·시작·제안·진입 같은 새로운 활동이 활성화되는 흐름입니다. 새로운 일, 프로젝트, 제안, 만남, 도전 등 기존에 없던 가능성을 탐색하기 좋은 흐름입니다.\n기회가 많다는 것이 반드시 좋은 결과나 성공을 의미하지는 않습니다. 실제 유불리는 흐름 적합도, 변동성, 재물·애정·건강 등의 분야별 지표와 함께 확인합니다.\n판정: 기회·확장·수확·축적 활성도를 모두 계산해 가장 높은 것을 주 흐름으로 삼습니다. 기회 활성도는 새 활동을 만드는 십성의 활성, 표현·생산, 독립·주도, 외부 제안, 원국에서 모자랐던 기능의 보완, 새로운 합 관계, 원국에 없던 새 작용을 함께 봅니다. 십성 하나로 정하지 않으며, 비겁이 많아도 원국에 이미 익숙한 작용이면 기회보다 확장으로 읽힙니다.\n종류: 비겁은 독립·협업·경쟁·인맥, 식상은 창작·표현·생산·출시, 재성은 사업·거래·재정 활동, 관성은 직책·조직·사회적 역할, 인성은 학습·자격·연구·지원 기회를 만듭니다.\n구분: 기회는 새로 시작하거나 발견하는 흐름, 확장은 이미 있는 것을 키우는 흐름, 수확은 이미 만든 결과를 거두는 흐름, 축적은 내부 기반을 쌓는 흐름입니다. 변동·방어는 주 흐름이 아니라 따로 붙는 상태 신호입니다."],
+  '확장기': ['운의 흐름', "확장 흐름: 이미 존재하는 활동·역할·관계·영향력이 커지는 흐름입니다. 관성이 주도하며, 원국에 그 기운이 이미 있을 때 뚜렷해집니다.\n기회가 새로운 것을 시작하거나 발견하는 때라면, 확장은 이미 있는 사업·프로젝트·관계·직책을 넓히는 때입니다. 예: 기존 사업 규모 확대, 프로젝트 확장, 승진, 조직 확대, 기존 관계 강화.\n행동: 대운은 규모 확대·승진·조직 키우기, 세운은 증액·재계약·파트너십, 월운은 광고 증액·협업 확대. 흐름 적합도가 주의·부담이면 과부하를 관리합니다."],
+  '수확기': ['운의 흐름', "수확 흐름: 이미 만들어 놓은 활동에서 결과·성과·재정적 결과를 회수하는 흐름입니다. 재성이 주도하며, 원국에 결과물(식상 등)이 이미 있을 때 뚜렷해집니다. 재성이 들어온다고 무조건 수확이 되지는 않고, 식상→재성처럼 결과물이 현실 성과로 이어지는 구조도 함께 봅니다.\n기회가 새로운 가능성의 등장이라면, 수확은 기존 활동의 결과 회수입니다. 예: 신규 계약 제안은 기회, 계약 확정·대금 회수는 수확. 신제품 기획·출시는 기회, 판매 성과·정산은 수확.\n행동: 대운은 자산화·지분 정리·정산, 세운은 계약 확정·수금·판매·성과 회수, 월운은 청구·수금·마감. 흐름 적합도가 주의·부담이면 \"수확 · 주의\"로 읽고 지출·확장을 점검합니다."],
+  '변동기': ['운의 흐름', "변동 신호: 기존 구조가 얼마나 움직이고 재편되는가를 나타내는 상태 신호입니다. 변동성이 기준(55) 이상이면 주 흐름 옆에 \"변동\" 표시가 붙습니다. 주 흐름(기회·확장·수확·축적)은 그대로 유지됩니다.\n변동성이 높다는 것은 좋은 일이나 나쁜 일이 반드시 발생한다는 뜻이 아닙니다. 변동 자체는 길흉을 의미하지 않으며, 변화가 현재 사주에 유리한 방향인지 부담이 되는 방향인지는 흐름 적합도와 상태(순풍·보통·주의·부담)를 함께 확인합니다. 기회 + 변동 · 순풍, 수확 + 변동 · 주의처럼 어떤 흐름·상태와도 짝지어질 수 있습니다.\n핵심 키워드: 변화 · 이동 · 재편 · 방향 변경 · 변동성\n판정: 합·충·형·파·해가 원국의 핵심 자리를 움직이는 정도를 0~100의 변동성으로 계산합니다. 일주·월주에 닿으면 무겁게, 시주는 중간, 년주는 가볍게 보며, 여러 신호가 겹치면 누적됩니다.\n방어 신호와의 차이: 변동은 변화량(변동성)이고, 방어는 부담과 리스크 관리(부담도)입니다. 둘은 독립이라 함께 붙을 수 있습니다."],
   '기회 활성도': ['운의 시기', '새로운 활동이나 선택지를 만들어 낼 기운이 얼마나 활성화되는지를 0~100으로 나타낸 값입니다. 좋고 나쁨이 아니라 "새로운 가능성이 얼마나 열리는가"입니다.\n새 활동을 만드는 십성의 활성(28%), 표현·생산(12%), 독립·주도(12%), 외부 관계·제안(10%), 원국에서 부족했던 기능의 보완(14%), 새로운 합 관계(10%), 원국에 많지 않던 새 작용의 등장(14%)을 합칩니다. 비겁·식상만이 아니라 재성(새 거래), 관성(새 역할), 인성(새 학습·지원)도 각자 다른 종류의 기회를 만듭니다.\n흐름 점수·변동성과는 독립입니다. 기회가 많아도 흐름 점수가 낮으면 선별과 리스크 관리가 중요하고, 변동성이 낮으면 기존 구조는 안정적인 채로 새 선택지만 늘어날 수 있습니다.'],
   '변동성': ['운의 시기', '운의 글자가 원국의 핵심 자리를 얼마나 움직이는지, 곧 변화 신호의 세기를 0~100으로 나타낸 값입니다. 좋고 나쁨이 아니라 "얼마나 움직이는가"입니다.\n0~24 안정적 · 25~49 움직임 있음 · 50~69 변동성 높음 · 70~100 변동성 매우 높음.\n충·형·파·해·합은 각각 세기가 다르고(충이 가장 큼), 일지·월지에 닿을수록 크며, 삼합·방합 완성처럼 구조가 바뀔 수 있는 조합이나 여러 신호의 중첩이 점수를 더합니다. 변동성이 높아도 흐름 점수는 깎이지 않으며, 변화의 유불리는 흐름 점수와 상태로 따로 봅니다.'],
-  '축적기': ['운의 시기', '역량·지식·자원·기반을 쌓는 시기입니다. 인성이 주도합니다.\n기회기가 외부 활동과 새 선택지의 활성이라면, 축적기는 내부 기반의 축적입니다. 예: 새 프로젝트 진입은 기회, 기술 습득·연구·준비는 축적. 인성이 새로운 교육·자격·지원의 선택지를 만드는 경우에는 기회 활성도에도 일부 반영됩니다.\n행동: 대운은 학위·자격·전문성 쌓기, 세운은 제품 개발·교육·시스템 정비, 월운은 제작·기획·문서·재무 점검. 당장의 성과보다 다음 시기를 위한 기반에 집중합니다.'],
-  '방어기': ['운의 시기', '의미: 흐름 점수가 크게 낮으면서 작용 강도도 높아, 현재 원국이 감당할 범위를 넘을 가능성이 있는 때입니다. 나쁜 때라는 뜻이 아니라 리스크 관리가 필요하다는 뜻이며, 변화량이 아니라 부담을 기준으로 한 분류입니다.\n행동: 대운은 부채·건강 관리와 위험 분산, 세운은 현금 보존·비용 절감·하던 일 완주, 월운은 지출 줄이기·일정 여유 두기·휴식.'],
+  '축적기': ['운의 흐름', "축적 흐름: 미래 활동을 위한 역량·지식·자원·기반을 쌓는 흐름입니다. 인성이 주도하지만 인성이 있다고 무조건 축적이 되지는 않고, 전체 구조와 활동 성격을 함께 봅니다.\n기회가 외부 활동과 새 선택지의 활성이라면, 축적은 내부 기반의 축적입니다. 예: 새 프로젝트 진입은 기회, 기술 습득·연구·준비는 축적. 인성이 새로운 교육·자격·지원의 선택지를 만드는 경우에는 기회 활성도에도 일부 반영됩니다.\n행동: 대운은 학위·자격·전문성 쌓기, 세운은 제품 개발·교육·시스템 정비, 월운은 제작·기획·문서·재무 점검. 당장의 성과보다 다음 흐름을 위한 기반에 집중합니다."],
+  '방어기': ['운의 흐름', "방어 신호(부담도): 이 운에서 부담·과부하·리스크 관리가 얼마나 필요한가를 0~100으로 나타낸 상태 신호입니다. 부담도가 기준(40) 이상이면 주 흐름 옆에 \"방어\" 표시가 붙으며, 주 흐름은 그대로 유지됩니다. 나쁜 때라는 뜻이 아니라 보수적으로 운영할 필요가 있다는 뜻입니다.\n계산: 흐름 적합도 저하, 억부(강약) 불균형 심화, 십성 균형 악화, 조후 부담, 합·충 관계 부담, 변화 신호와 부적합의 결합을 가중합하고 작용 강도로 조금 증폭합니다. 사고수(충돌·과부하 등 별도 주의 신호)나 분야별 지수를 가져와 쓰지 않아서, 사고수와 같은 점수가 아닙니다.\n변동 신호와의 차이: 방어는 부담 관리, 변동은 변화량입니다. 기회 + 변동 + 방어처럼 함께 나타날 수 있고, 이때는 \"새로운 선택지는 활성화되지만 변화량과 부담도 함께 큰 흐름\"으로 읽습니다.\n행동: 대운은 부채·건강 관리와 위험 분산, 세운은 현금 보존·비용 절감·하던 일 완주, 월운은 지출 줄이기·일정 여유 두기·휴식."],
 
   // ── 일진 행동모드·시진 실행 등급
-  '일진 행동모드': ['운의 시기', '하루를 "오늘 어떤 성격의 일이 활성화되는가"로 나눈 여섯 가지입니다. 기회일(새로운 제안·연락·시도·실행의 활성), 확장일(이미 있는 활동을 키움), 수확일(결과 회수·정산), 축적일(준비·학습·정비), 변동일(변화·일정 변경·관계 재편 신호), 방어일(부담·과부하 관리)이 있습니다. 순풍·보통·주의·부담 상태는 따로 표시됩니다.'],
-  '기회일': ['운의 시기', '핵심 의미: 새로운 제안·연락·시도·실행의 활성도가 높은 날입니다. 기회 활성도(새 활동을 만드는 십성, 표현·생산, 독립·주도, 외부 제안, 원국에서 모자란 기능의 보완, 새로운 합 관계)가 가장 강할 때입니다.\n그날 활용할 수 있는 일: 제안·연락·투고·발표·새로운 시도. 반드시 실행해야 한다는 뜻은 아니며, 흐름 점수·상태가 주의·부담이면 선별해서 씁니다.'],
-  '확장일': ['운의 시기', '핵심 의미: 검증된 것을 키우는 날입니다. 필요한 기운이 들어오면서 규칙·조직·지위의 기운(관성)이 강해질 때입니다.\n그날 할 일: 증액·재계약·파트너십·홍보 확대.'],
-  '수확일': ['운의 시기', '핵심 의미: 결과를 회수하는 날입니다. 필요한 기운이 들어오면서 재물·결과의 기운(재성)이 강해질 때입니다.\n그날 할 일: 계약 확정·수금·판매·성과 회수.'],
-  '축적일': ['운의 시기', '핵심 의미: 내부 역량을 강화하는 날입니다. 나를 채워 주는 기운(인성)이 들어오거나, 크게 좋지도 나쁘지도 않은 날입니다.\n그날 할 일: 제작·기획·공부·문서·재무·저축.'],
-  '변동일': ['운의 시기', '핵심 의미: 변화 신호가 큰 날입니다. 그날의 글자가 나의 핵심 자리(일지·월지·일간)와 충·형을 만들거나 크게 합을 이룰 때입니다. 좋고 나쁨과는 별개이며 흐름 점수·상태와 함께 봅니다.\n그날 할 일: 일정·환경 변동에 유연하게 대응하고, 큰 결정은 한 번 더 확인한 뒤 진행.'],
-  '방어일': ['운의 시기', '핵심 의미: 부담이 감당 범위를 넘을 수 있어 리스크를 관리하는 날입니다. 새로 벌이기보다 지키는 편이 맞는 날입니다.\n그날 할 일: 검토·유지·완료·휴식·현금 보존.'],
+  '일진 행동모드': ['운의 흐름', "하루를 \"오늘 어떤 일이 활성화되는가\"로 읽습니다. 주 흐름(기회·확장·수확·축적) 하나가 칸의 색과 글자로 표시되고, 변동·방어 상태가 있으면 가장 중요한 하나가 \"+변동\" \"+방어\"로 붙습니다(날짜를 누르면 모두 보입니다). 순풍·보통·주의·부담은 흐름 적합도로 따로 표시됩니다."],
   '실행 등급': ['운의 시기', '시진(2시간 단위)마다 "오늘의 목적"과 얼마나 잘 맞는지를 네 단계로 매긴 것입니다. ◎ 실행, ○ 활용, △ 주의, × 회피가 있습니다. 목적(일반·계약·돈·창작)을 고르면 그 목적에 맞는 기운이 들어오는 시간에 ◎가 붙습니다. 계약은 관성·인성, 돈은 재성·식상, 창작은 식상·인성 기운을 봅니다.'],
   '실행': ['운의 시기', '◎ 실행: 그날의 목적과 시진이 잘 맞는 시간입니다. 중요한 전화, 제출, 계약 서명, 공개 버튼 누르기처럼 결과가 생기는 행동을 이 시간에 둡니다.'],
   '활용': ['운의 시기', '○ 활용: 특별히 강하지는 않지만 안정적인 시간입니다. 회의·업무·제작 같은 일반적인 일에 무난합니다.'],
   '주의': ['운의 시기', '△ 주의: 원국의 일지·월지나 그날 일진과 충·형·파·해 같은 불안 요소가 있는 시간입니다. 중요한 결정은 가능하면 다른 시간대로 옮깁니다.'],
   '회피': ['운의 시기', '× 회피: 그날의 목적과 충돌이 상당히 강한 시간입니다(그날 일진과 정면 충돌하거나 점수가 크게 낮음). 굳이 이 시간에 중요한 일을 둘 이유가 없다면 피합니다.'],
-  '판정 순서': ['운의 시기', '하루를 판단할 때 큰 흐름에서 작은 흐름 순서로 봅니다. ① 세운(올해 기본 환경) → ② 월운(이번 달 행동 방향) → ③ 일진(오늘의 행동모드) → ④ 목적(계약인지, 돈인지, 창작인지) → ⑤ 시진(실제 실행 시간).'],
+  '판정 순서': ['운의 시기', '하루를 판단할 때 큰 흐름에서 작은 흐름 순서로 봅니다. ① 세운(올해 기본 환경) → ② 월운(이번 달 행동 방향) → ③ 일진(오늘의 흐름) → ④ 목적(계약인지, 돈인지, 창작인지) → ⑤ 시진(실제 실행 시간).'],
 
   // ── 구조
   '관살혼잡': ['구조', '정관(규칙)과 편관(압박)이 함께 있는 구조입니다. 나를 누르는 기준이 여러 방향에서 들어와 진로·직장·이성 관계에서 선택이 복잡해진다고 봅니다. 식신이 편관을 다스리거나 한쪽이 합으로 묶이면 문제가 줄어듭니다. 천간에 둘 다 있으면 "강", 지지까지 포함해야 성립하면 "약"으로 표시합니다.'],
@@ -3267,7 +3355,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const relTarget = (x) => { const o = x.members.find(m => m !== 'luck'); return o ? M.POS_K[o] + (x.kind === 'stem' ? '간' : '지') : ''; };
   // 같은 시기라도 들어오는 기운(십성 묶음)에 따라 할 일이 다르다
   const GROUP_ACT = { '비겁': '협상·독립·결단', '식상': '창작·출시·유통', '재성': '매출·사업·연애 기회', '관성': '직책·평가·성과, 그리고 과부하 관리', '인성': '시스템·재무·기반 구축·공부' };
-  // 흐름 점수(그래프 높이) = 상위 운과 섞은 fitScore. 시기 유형·상태·근거는 모두 M.evaluateLuck 결과(x.ev)에서 읽는다
+  // 흐름 점수(그래프 높이) = 상위 운과 섞은 fitScore. 주 흐름·overlay·상태·근거는 모두 M.evaluateLuck 결과(x.ev, x.ev.flow)에서 읽는다
   const luckV = x => x.ev ? x.ev.fitScore : 0;
   const phOf = x => x.ev;
   // 비교용으로 뒤에 흐리게 겹쳐 보여줄 기준: 흐름 점수에서 덜 앞세운 쪽(억부 또는 조후)을 단독으로 본 값
@@ -3275,77 +3363,83 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const showGhost = () => altSchool() != null;
   const schoolName = k => M.SCHOOLS[k].split(' ')[0];
   const altOf = x => x.ev && x.ev.alt ? x.ev.alt.value : null;
-  // 일진 6가지 행동모드: [색 이름, 핵심 의미, 그날 할 일]
+  // 일진 주 흐름 4가지: [색 이름, 핵심 의미, 그날 할 일]. 변동·방어는 주 흐름이 아니라 상태 overlay(OVL)라 여기에 없다
   const DAYMODE = {
-    '기회일': ['d-atk', '새로운 제안·시도가 활성화됨', '제안·연락·투고·발표·새로운 시도에 활용할 수 있음'],
-    '확장일': ['d-ext', '이미 있는 활동을 키움', '증액·재계약·파트너십·홍보 확대'],
-    '수확일': ['d-hrv', '결과를 회수', '계약 확정·수금·판매·성과 회수'],
-    '축적일': ['d-acc', '내부 역량 강화', '제작·기획·공부·문서·재무·저축'],
-    '변동일': ['d-chg', '변화 신호가 큼', '일정·환경 변동에 유연하게 대응, 큰 결정은 확인 후'],
-    '방어일': ['d-def', '손실 가능성 관리', '검토·유지·완료·휴식·현금 보존'],
+    '기회기': ['d-atk', '새로운 제안·시도가 활성화됨', '제안·연락·투고·발표·새로운 시도에 활용할 수 있음'],
+    '확장기': ['d-ext', '이미 있는 활동을 키움', '증액·재계약·파트너십·홍보 확대'],
+    '수확기': ['d-hrv', '결과를 회수', '계약 확정·수금·판매·성과 회수'],
+    '축적기': ['d-acc', '내부 역량 강화', '제작·기획·공부·문서·재무·저축'],
+  };
+  // 상태 overlay: 주 흐름의 색을 덮어쓰지 않고 배지·테두리와 글자로 따로 표시한다. [표시 이름, 색 클래스, 용어 키, 한 줄 의미]
+  const OVL = {
+    volatility: ['변동', 'd-chg', '변동기', '기존 구조가 움직이는 정도가 큼'],
+    defense: ['방어', 'd-def', '방어기', '부담·리스크 관리가 필요함'],
   };
   // 그래프 툴팁: 이 판정을 만든 값과 이유를 한 번에 보여준다. 억부·조후·관계·구조는 가중치를 곱한 기여 점수
   const COND_COL = { '순풍': 'var(--good)', '보통': 'var(--ink-3)', '주의': 'var(--d-chg)', '부담': 'var(--bad)' };
+  // 막대 테두리: 방어 = 붉은 실선, 변동 = 주황 점선, 둘 다 = 붉은 실선(글자로 구분). 주 흐름 색은 그대로 둔다
+  const ovStroke = o => o.defense.active ? 'stroke:var(--d-def);stroke-width:2.2' : o.volatility.active ? 'stroke:var(--d-chg);stroke-width:2.2;stroke-dasharray:4 2' : '';
   function luckTip(title, x) {
-    const e = x.ev, w = e.weights, c = (k, sc) => signed(w[k] * sc);
-    return `<b>${esc(title)}</b><br>흐름 점수 <b>${signed(luckV(x))}</b> · 시기 <b>${e.phase}</b> · 상태 <b>${e.condition}</b>`
+    const e = x.ev, w = e.weights, c = (k, sc) => signed(w[k] * sc), f = e.flow, o = e.overlays;
+    return `<b>${esc(title)}</b><br>흐름 <b>${esc(M.flowLabel(e))}</b> · 흐름 적합도 <b>${signed(luckV(x))}</b>`
       + `<br>주도 십성 ${e.dominantTenGodGroup} (${e.tendency})`
       + `<br>억부 영향 ${c('eokbu', e.eokbuScore)} · 조후 영향 ${c('johu', e.johuScore)} · 관계 ${c('relation', e.relationScore)} · 구조 ${c('structure', e.structureScore)}`
-      + `<br>기회 활성도 ${e.opportunityActivation}${e.opportunityType.length && e.opportunityActivation >= 40 ? ' (' + e.opportunityType.join('·') + ')' : ''} · 변동성 ${Math.round(e.volatilityScore)}(${e.volatilityBand}) · 작용 강도 ${Math.round(e.intensityScore)}`
-      + (e.companions.length ? `<br>동반 신호: ${e.companions.map(c => esc(c.text)).join(', ')}` : '')
+      + `<br>활성도 기회 ${f.flows.opportunity} · 확장 ${f.flows.expansion} · 수확 ${f.flows.harvest} · 축적 ${f.flows.accumulation}${f.secondaryFlow ? ` (동반: ${M.flowName(f.secondaryFlow)})` : ''}`
+      + `<br>변동성 ${o.volatility.score}(${o.volatility.band}) · 부담도 ${o.defense.score}(${o.defense.band}) · 작용 강도 ${Math.round(e.intensityScore)}`
+      + (e.opportunityType.length && e.opportunityActivation >= 40 ? `<br>주요 기회: ${e.opportunityType.join('·')}` : '')
       + `<br>합충형파해 ${e.relations.length ? e.relations.map(esc).join(', ') : '없음'}`
       + e.reasons.map(r => `<br>· ${esc(r)}`).join('');
   }
-  // 삼재: 참고 정보 레이어. 점수·시기 유형과 무관하며, 배지는 기존 용어 시트(.term)를 그대로 쓴다
+  // 삼재: 참고 정보 레이어. 점수·주 흐름과 무관하며, 배지는 기존 용어 시트(.term)를 그대로 쓴다
   const samjaeOf = Y => M.getSamjae(S.ch.pillars.year.b, Y);
   const samjaeTag = sj => sj.active ? `<span class="term chip sj-chip" data-term="${sj.stage}">${sj.stage}</span>` : '';
   const samjaeBanner = Y => { const sj = samjaeOf(Y); return sj.active ? `<div class="sj-banner"><div><b>${term('삼재')} · ${term(sj.stage)}</b> <span class="muted small">전통 민속 참고 신호 · ${sj.group}</span></div><div class="small muted">삼재는 흐름 점수에 감점되지 않습니다.</div></div>` : ''; };
+  // 주 흐름 내부 키는 옛 6분류 문자열(기회기 등)을 그대로 쓴다(색·용어 키 호환). 화면에는 '기회' 같은 짧은 이름만 보인다.
+  const flowTxt = m => String(m).replace(/[기일]$/, '');
   const dmCol = m => `var(--${DAYMODE[m][0]})`;
-  const dmTag = m => `<span class="ph ${DAYMODE[m][0]}">${m}</span>`;
-  const dmBtn = (m, e) => `<button type="button" class="term ph ${DAYMODE[m][0]}" data-term="${m}"${m === '변동일' || m === '기회일' ? volAttr(e) : ''}>${m}</button>`;
-  // 시기 유형은 evaluateLuck가 정한다(십성 주도 성향 + 변화 점수 + 흐름 점수 + 작용 강도). 여기서는 이름만 바꾼다.
+  const dmTag = m => `<span class="ph ${DAYMODE[m][0]}">${flowTxt(m)}</span>`;
+  const dmBtn = (m, e) => `<button type="button" class="term ph ${DAYMODE[m][0]}" data-term="${m}"${m === '기회기' ? volAttr(e) : ''}>${flowTxt(m)}</button>`;
+  // 주 흐름·overlay·상태는 evaluateLuck 한 곳에서 정해진다(M.evaluateLuckFlow). 여기서는 이름만 읽는다.
   function dayMode(x) {
     const p = phOf(x);
-    return { ...p, group: p.dominantTenGodGroup, mode: p.phase.replace(/기$/, '일') };
+    return { ...p, group: p.dominantTenGodGroup, mode: p.phase };
   }
-  // 대운·세운·월운 6분류: 규칙은 일진 행동모드와 같고, 풀이는 운의 단위마다 다르다
+  // 대운·세운·월운: 주 흐름 규칙은 일진과 같고, 풀이는 운의 단위마다 다르다
   // 대운 = 10년 인생 전략, 세운 = 1년 운영 전략, 월운 = 1개월 전술 (일진 = 하루의 행동, 시진 = 실행 타이밍)
-  const MODE6_COL = { '기회기': 'd-atk', '확장기': 'd-ext', '수확기': 'd-hrv', '축적기': 'd-acc', '변동기': 'd-chg', '방어기': 'd-def' };
+  const MODE6_COL = { '기회기': 'd-atk', '확장기': 'd-ext', '수확기': 'd-hrv', '축적기': 'd-acc' };
   const LEVEL = {
     daeun: ['10년 인생 전략', {
       '기회기': ['새로운 분야나 삶의 방향을 탐색할 가능성이 커지는 장기 환경', '새 분야 탐색·이직이나 창업 검토·새로운 관계망 만들기'],
       '확장기': ['이미 자리 잡은 것을 키우는 10년', '규모 확대·승진·조직 키우기·자산 늘리기'],
       '수확기': ['쌓아 온 것을 거두는 10년', '자산화·지분 정리·부동산·정산·다음 단계 준비'],
       '축적기': ['실력과 기반을 쌓는 10년', '학위·자격·전문성·저축·시스템 구축'],
-      '변동기': ['변화 신호가 강한 10년', '직업·환경·관계·계획의 방향이 움직이기 쉬움'],
-      '방어기': ['무리하지 않고 지키는 10년', '부채 관리·건강 관리·핵심 유지·위험 분산'],
     }],
     seun: ['1년 운영 전략', {
       '기회기': ['새로운 프로젝트·제안·계약·활동이 활성화되기 쉬운 해', '신규 프로젝트·제안 검토·론칭 준비·새로운 협업'],
       '확장기': ['이미 검증된 것을 키우는 해', '증액·재계약·파트너십·확장 투자·홍보 확대'],
       '수확기': ['만들어 놓은 것을 현금화하는 해', '계약 확정·수금·판매·정산·성과 회수'],
       '축적기': ['기반을 다지는 해', '제품 개발·교육·시스템 정비·저축'],
-      '변동기': ['변화 신호가 강한 해', '조직·환경·계획의 재편과 방향 조정 가능성에 주목'],
-      '방어기': ['지키는 해', '현금 보존·비용 절감·위험 점검·하던 일 완주'],
     }],
     wolun: ['1개월 전술', {
       '기회기': ['새로운 일을 시도하거나 제안·실행하기 좋은 활동 구간', '제안서 발송·미팅·출시·새 연락 시도'],
       '확장기': ['되는 것에 힘을 싣는 달', '광고 증액·재구매 유도·협업 확대'],
       '수확기': ['거둬들이는 달', '청구·수금·마감·판매 집중·성과 보고'],
       '축적기': ['안을 다지는 달', '제작·기획·공부·문서 정리·재무 점검'],
-      '변동기': ['움직임이 커지는 달', '일정·거래·환경 변동에 대비하고 계획을 유연하게 조정'],
-      '방어기': ['버티는 달', '지출 줄이기·일정 여유 두기·마무리·휴식'],
     }],
   };
   const LEVEL_ROLE = { daeun: '10년 인생 전략', seun: '1년 운영 전략', wolun: '1개월 전술', ilun: '하루의 행동', sijin: '실행 타이밍' };
   const luckMode = x => { const p = phOf(x); return { ...p, group: p.dominantTenGodGroup, mode: p.phase }; };
-  // 상태(순풍·보통·주의·부담): 무엇이 활성화되는가(시기 유형)와 별개로, 그 활성화가 원국에 얼마나 맞는가
+  // 상태(순풍·보통·주의·부담): 무엇이 활성화되는가(주 흐름)와 별개로, 그 활성화가 원국에 얼마나 맞는가
   const CONDS = { '순풍': '순풍', '보통': '보통', '주의': '주의', '부담': '부담' };
   const condTag = c => `<button type="button" class="term pill b-${c}" data-term="상태 ${c}">${c}</button>`;
   const m6Col = m => `var(--${MODE6_COL[m]})`;
-  const m6Tag = m => `<span class="ph ${MODE6_COL[m]}">${m}</span>`;
-  const m6Btn = (m, e) => `<button type="button" class="term ph ${MODE6_COL[m]}" data-term="${m}"${m === '변동기' || m === '기회기' ? volAttr(e) : ''}>${m}</button>`;
-  const modeLegend = () => `<div class="legend">${Object.keys(MODE6_COL).map(m => `<span><i class="sw" style="background:${m6Col(m)}"></i>${term(m)}</span>`).join('')}<span>막대 높이 = 흐름 점수 · 색 = 시기 유형</span><span>배지 ${Object.keys(CONDS).map(c => `<span class="pill b-${c}">${c}</span>`).join(' ')}</span>${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))}만 따로 본 값</span>` : ''}</div>`;
+  const m6Tag = m => `<span class="ph ${MODE6_COL[m]}">${flowTxt(m)}</span>`;
+  const m6Btn = (m, e) => `<button type="button" class="term ph ${MODE6_COL[m]}" data-term="${m}"${m === '기회기' ? volAttr(e) : ''}>${flowTxt(m)}</button>`;
+  // overlay 배지: 글자로 의미를 전하고(변동·방어) 색은 보조. 버튼형은 용어 시트를 연다
+  const ovTag = k => `<span class="ovb ov-${k}">${OVL[k][0]}</span>`;
+  const ovBtn = (k, e) => `<button type="button" class="term ovb ov-${k}" data-term="${OVL[k][2]}"${volAttr(e)}>${OVL[k][0]}</button>`;
+  const ovTags = (e, btn) => ['volatility', 'defense'].filter(k => e.overlays[k].active).map(k => btn ? ovBtn(k, e) : ovTag(k)).join('');
+  const modeLegend = () => `<div class="legend">${Object.keys(MODE6_COL).map(m => `<span><i class="sw" style="background:${m6Col(m)}"></i>${term(m, flowTxt(m))}</span>`).join('')}<span>막대 높이 = 흐름 적합도 · 색 = 주 흐름</span><span>${ovTag('volatility')}${ovTag('defense')} ${term('변동기', '변동 신호')}·${term('방어기', '방어 신호')} = 막대 테두리와 아래 글자(변·방)</span><span>배지 ${Object.keys(CONDS).map(c => `<span class="pill b-${c}">${c}</span>`).join(' ')}</span>${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))}만 따로 본 값</span>` : ''}</div>`;
   // 시진 4단계 실행 등급. 목적마다 맞는 기운(십성 묶음 번호: 0 비겁 1 식상 2 재성 3 관성 4 인성)
   const PURPOSE = { gen: ['일반', null], deal: ['계약', [3, 4]], money: ['돈', [2, 1]], create: ['창작', [1, 4]] };
   const GRADE = { '실행': ['◎', 'g-go'], '활용': ['○', 'g-use'], '주의': ['△', 'g-warn'], '회피': ['×', 'g-avoid'] };
@@ -4074,7 +4168,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <span class="lt-tg">${x.branchTG}</span>
       <span class="lt-us">${x.unseong} · ${x.sinsal12}</span>
       <span class="lt-ev">${luckChips(x)}</span>
-      <span class="lt-sc">${m6Tag(luckMode(x).mode)} ${pill(x.ev.condition)}</span>${x.year && x.ev.level === "seun" ? samjaeTag(samjaeOf(x.year)) : ""}
+      <span class="lt-sc">${m6Tag(luckMode(x).mode)}${ovTags(x.ev, false)} ${pill(x.ev.condition)}</span>${x.year && x.ev.level === "seun" ? samjaeTag(samjaeOf(x.year)) : ""}
     </button>`;
   }
   // 이 시기에 들어오는 오행과 원국과의 작용(합·충·형·신살)을 풀어 쓴다
@@ -4230,41 +4324,77 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     } else if (k === 'life') drawDomainLife(el);
   }
 
-  // 변동성: 길흉이 아니라 변화 신호의 세기. 왜 이 값인지 실제 근거(관계)를 함께 보여준다
-  // 기회 활성도: 흐름 점수·변동성과 독립인 세 값을 나란히 보여 준다
+  // 운의 흐름 상세: 주 흐름 4개를 모두 보여 주고(최고점이 주 흐름), 변동·방어 overlay와 흐름 적합도는 따로 보여 준다
+  const FLOW_ROWS = [['opportunity', '기회', 'd-atk'], ['expansion', '확장', 'd-ext'], ['harvest', '수확', 'd-hrv'], ['accumulation', '축적', 'd-acc']];
+  function flowBars(e) {
+    const f = e.flow;
+    return `<div class="flowbars">${FLOW_ROWS.map(([k, n, c]) => `<div class="fb${k === f.primaryFlow ? ' main' : k === f.secondaryFlow ? ' sec' : ''}"><span class="fn">${n} 활성도${k === f.primaryFlow ? ' · 주' : k === f.secondaryFlow ? ' · 동반' : ''}</span><span class="volbar" style="--v:${f.flows[k]}"><i style="background:var(--${c})"></i></span><b class="num">${f.flows[k]}</b></div>`).join('')}</div>`;
+  }
+  function metricsBox(e) {
+    const o = e.overlays;
+    return `<div class="flowbars">
+      <div class="fb${o.volatility.active ? ' main' : ''}"><span class="fn">${term('변동성')}</span><span class="volbar" style="--v:${o.volatility.score}"><i style="background:var(--d-chg)"></i></span><b class="num">${o.volatility.score}</b></div>
+      <div class="fb${o.defense.active ? ' main' : ''}"><span class="fn">${term('방어기', '부담도')}</span><span class="volbar" style="--v:${o.defense.score}"><i style="background:var(--d-def)"></i></span><b class="num">${o.defense.score}</b></div>
+    </div>
+    <div class="small">변동성 <b class="num">${o.volatility.score}</b> · ${o.volatility.band} · 부담도 <b class="num">${o.defense.score}</b> · ${o.defense.band} · 흐름 적합도 <b class="num">${signed(e.fitScore)}</b> · ${e.condition}</div>`;
+  }
+  // 기회 활성도의 종류·근거(활성도 값 자체는 flowBars에 있다)
   function oppBox(e) {
-    const o = e.opportunityActivation, types = e.opportunityType, cs = e.companions || [];
-    return `<div class="volbox"><div class="volh"><span>${term('기회 활성도')} <b class="num">${o}</b> / 100</span></div>
-      <div class="volbar" style="--v:${o}"><i style="background:var(--d-atk)"></i></div>
-      <div class="small muted">${M.opportunityNote(e)}</div>
-      <div class="small">기회 활성도 <b class="num">${o}</b> · 변동성 <b class="num">${Math.round(e.volatilityScore)}</b> · 흐름 점수 <b class="num">${signed(e.fitScore)}</b></div>
-      ${types.length && o >= 40 ? `<div class="small"><b>주요 기회</b>: ${types.map(esc).join(' · ')}</div>` : ''}
-      ${e.opportunityReasons.length && o >= 40 ? `<ul class="pos-ul small">${e.opportunityReasons.slice(0, 4).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
-      ${cs.length ? `<div class="small"><b>동반 신호</b>: ${cs.map(c => esc(c.text)).join(' · ')}</div>` : ''}</div>`;
+    const o = e.opportunityActivation, types = e.opportunityType;
+    if (o < 40) return `<div class="small muted">${M.opportunityNote(e)}</div>`;
+    return `<div class="volbox"><div class="small muted">${M.opportunityNote(e)}</div>
+      ${types.length ? `<div class="small"><b>주요 기회</b>: ${types.map(esc).join(' · ')}</div>` : ''}
+      ${e.opportunityReasons.length ? `<ul class="pos-ul small">${e.opportunityReasons.slice(0, 4).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}</div>`;
   }
   function volBox(e) {
     const v = Math.round(e.volatilityScore), sig = e.volatilitySignals.slice(0, 4);
     return `<div class="volbox"><div class="volh"><span>${term('변동성')} <b class="num">${v}</b> / 100 · ${e.volatilityBand}</span></div>
-      <div class="volbar" style="--v:${v}"><i></i></div>
       <div class="small muted">${M.volatilityNote(e)}</div>
       ${sig.length ? `<div class="small"><b>주요 변화 신호</b></div><ul class="pos-ul small">${sig.map(g => `<li>${esc(g.text)} <span class="muted">— ${g.means}</span></li>`).join('')}${e.volatilityOverlap >= 2 ? `<li>핵심 궁(일주·월주) 관계 ${e.volatilityOverlap}개 중첩</li>` : ''}</ul>` : '<div class="small muted">원국과 만드는 합·충·형·파·해가 거의 없습니다.</div>'}</div>`;
   }
+  const DEF_PART = { fit: '흐름 적합도 저하', eokbu: '강약(억부) 불균형 심화', structure: '십성 균형 악화·구조 부담', johu: '조후(한난조습) 부담', relation: '합·충 관계 부담', volFit: '변화 신호와 부적합이 겹침' };
+  function defBox(e) {
+    const o = e.overlays.defense, parts = Object.entries(e.flow.defenseParts).filter(([, v]) => v >= 0.25).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    return `<div class="volbox"><div class="volh"><span>${term('방어기', '부담도')} <b class="num">${o.score}</b> / 100 · ${o.band}</span></div>
+      ${parts.length ? `<div class="small"><b>부담이 커지는 이유</b></div><ul class="pos-ul small">${parts.map(([k, v]) => `<li>${DEF_PART[k]} <span class="muted">— ${Math.round(v * 100)}%</span></li>`).join('')}</ul>` : '<div class="small muted">부담을 키우는 뚜렷한 요인이 없습니다.</div>'}
+      <div class="small muted">부담도는 이 운의 전반적인 부담 관리 필요성이며, 충돌·과부하를 따로 보는 사고수와는 다른 값입니다.</div></div>`;
+  }
   const VOL_CTX = {}; let volSeq = 0;
   const volAttr = e => { if (!e) return ''; const id = 'v' + (++volSeq); VOL_CTX[id] = e; return ` data-vol="${id}"`; };
+  // 운의 단위별 overlay 풀이
+  const LEVEL_OV = {
+    daeun: { volatility: '10년 동안 직업·환경·관계의 방향이 움직이기 쉬움', defense: '10년 중 무리한 확대보다 부채·건강 등 부담 점검이 필요' },
+    seun: { volatility: '올해 조직·환경·계획의 재편 가능성에 주목', defense: '올해는 현금 보존·비용 절감·하던 일 완주가 맞음' },
+    wolun: { volatility: '이번 달 일정·거래·환경 변동에 대비', defense: '이번 달은 지출 줄이기·일정 여유 두기가 맞음' },
+    ilun: { volatility: '오늘 일정·환경 변동에 유연하게 대응, 큰 결정은 확인 후', defense: '오늘은 검토·유지·마무리 위주로, 새 일은 무리하지 않기' },
+  };
+  function ovLines(e, kind) {
+    const t = LEVEL_OV[kind]; if (!t) return '';
+    return ['volatility', 'defense'].filter(k => e.overlays[k].active).map(k => `<div class="small">${ovBtn(k, e)} <b>${t[k]}</b></div>`).join('');
+  }
+  function flowHead(p, mainBtn) {
+    return `${mainBtn}${p.secondaryFlow ? `<span class="muted small">동반 ${M.flowName(p.secondaryFlow)}</span>` : ''}${ovTags(p, true)} ${condTag(p.condition)}`;
+  }
   function phaseBox(x, kind) {
     const p = luckMode(x), name = p.mode, [role, texts] = LEVEL[kind], [mean, act] = texts[name];
     const alt = showGhost() ? altOf(x) : null;
     return `<div class="phbox dm-bg" style="--dm:${m6Col(name)}">
-      <div class="phbox-h">${m6Btn(name, p)} ${condTag(p.condition)} <b>${mean}</b> <span class="muted small">${LEVEL_ROLE[kind]}</span></div>
+      <div class="phbox-h">${flowHead(p, m6Btn(name, p))} <b>${mean}</b> <span class="muted small">${LEVEL_ROLE[kind]}</span></div>
+      <div class="small">${esc(M.flowSummary(p))}</div>
       <div class="small">할 일: <b>${act}</b></div>
-      <div class="small">흐름 점수 <b class="num">${signed(luckV(x))}</b> · 작용 강도 <b class="num">${Math.round(p.intensityScore)}</b> <span class="muted">(${p.tendency})</span></div>
+      ${ovLines(p, kind)}
+      ${flowBars(p)}
+      ${metricsBox(p)}
+      <div class="small muted">작용 강도 ${Math.round(p.intensityScore)} (${esc(p.tendency)})</div>
       <div class="small">이 시기에 주로 들어오는 기운은 ${term(p.group)}입니다 → <b>${GROUP_ACT[p.group]}</b>에 힘을 쓰는 성향입니다.</div>
       ${oppBox(p)}
       ${volBox(p)}
+      ${defBox(p)}
       ${alt != null ? `<div class="small muted">${schoolName(altSchool())} 기준만 따로 보면 ${signed(alt)}점 (${M.conditionOf(alt)}) — 종합 흐름과 ${Math.sign(alt) === Math.sign(luckV(x)) ? '같은 방향' : '다른 방향'}입니다.</div>` : ''}
     </div>`;
   }
-  // 일진 풀이: 행동모드와 판정 순서(세운 → 월운 → 일진 → 목적 → 시진)
+  // 일진 풀이: 주 흐름·overlay와 판정 순서(세운 → 월운 → 일진 → 목적 → 시진)
+  const flowChips = x => m6Tag(luckMode(x).mode) + ovTags(x.ev, false) + ' ' + pill(x.ev.condition);
   function dayBox(x) {
     const ch = S.ch, dm = dayMode(x), [c, mean, act] = DAYMODE[dm.mode];
     const ms = Date.UTC(x.date[0], x.date[1] - 1, x.date[2], 3), Y = M.yearPillarAt(ms).sajuYear;
@@ -4272,22 +4402,83 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const hours = sijinRows(x, x.date), best = hours.filter(h => h.gr.g === '실행'), ok = hours.filter(h => h.gr.g === '활용');
     const hn = h => `${M.BR_K[h.hb]}시`;
     const step = (n, label, body) => `<div class="jstep"><span class="jn">${n}</span><span class="jl">${label}</span><span class="jb">${body}</span></div>`;
+    const f = dm.flow;
     return `<div class="phbox dm-bg" style="--dm:${dmCol(dm.mode)}">
-      <div class="phbox-h">${dmBtn(dm.mode, dm)} ${condTag(dm.condition)} <b>${mean}</b></div>
+      <div class="small muted">오늘의 주 흐름</div>
+      <div class="phbox-h">${flowHead(dm, dmBtn(dm.mode, dm))} <b>${mean}</b></div>
+      ${f.secondaryFlow ? `<div class="small">동반 흐름: <b>${M.flowName(f.secondaryFlow)}</b> (활성도 ${f.flows[f.secondaryFlow]})</div>` : ''}
+      <div class="small">${esc(M.flowSummary(dm))}</div>
       <div class="small">그날 할 일: <b>${act}</b></div>
-      <div class="small">흐름 점수 <b class="num">${signed(luckV(x))}</b> · 작용 강도 <b class="num">${Math.round(dm.intensityScore)}</b> <span class="muted">(${dm.tendency})</span></div>
-      <div class="small">들어오는 기운은 ${term(dm.group)} → ${GROUP_ACT[dm.group]}</div>
+      ${ovLines(dm, 'ilun')}
+      ${flowBars(dm)}
+      ${metricsBox(dm)}
+      <div class="small muted">작용 강도 ${Math.round(dm.intensityScore)} (${esc(dm.tendency)}) · 들어오는 기운은 ${term(dm.group)} → ${GROUP_ACT[dm.group]}</div>
       ${oppBox(dm)}
       ${volBox(dm)}
-      ${dm.mode === '방어일' ? '<div class="small muted">방어일은 부담이 감당 범위를 넘을 수 있어 리스크 관리가 필요하다는 뜻입니다. 새 일을 벌이기보다 지키고 마무리하는 편이 맞습니다.</div>' : ''}
+      ${defBox(dm)}
     </div>
     <div class="judge"><h4>${term('판정 순서')}</h4>
-      ${step('①', '세운', se ? `${M.gzName(se)} ${m6Tag(luckMode(se).mode)} ${pill(se.ev.condition)} 올해 기본 환경` : '—')}
-      ${step('②', '월운', wm ? `${M.gzName(wm)} ${m6Tag(luckMode(wm).mode)} ${pill(wm.ev.condition)} 이번 달 행동 방향` : '—')}
-      ${step('③', '일진', `${M.gzName(x)} ${dmTag(dm.mode)} ${pill(dm.condition)} 오늘의 행동모드`)}
+      ${step('①', '세운', se ? `${M.gzName(se)} ${flowChips(se)} 올해 기본 환경` : '—')}
+      ${step('②', '월운', wm ? `${M.gzName(wm)} ${flowChips(wm)} 이번 달 행동 방향` : '—')}
+      ${step('③', '일진', `${M.gzName(x)} ${flowChips(x)} 오늘의 흐름`)}
       ${step('④', '목적', `<b>${PURPOSE[S.inp.purpose || 'gen'][0]}</b> <span class="muted">(아래 시진 표에서 바꿀 수 있어요)</span>`)}
       ${step('⑤', '시진', best.length ? `◎ 실행: <b>${best.map(hn).join(' · ')}</b>` : ok.length ? `◎ 시간이 없어 ○ 활용 시간을 씁니다: ${ok.map(hn).join(' · ')}` : '중요한 일은 다른 날로 옮기는 편이 좋습니다.')}
     </div>`;
+  }
+
+  // 운의 작동 방식: 설명용 UI다(계산 아님). 실제 계산 결과만 문장 틀에 넣고 새 판단은 만들지 않는다
+  const CAR_ICON = {
+    car: '<path d="M5 17H3v-4l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5v4h-2"/><path d="M5 17h14"/><circle cx="7.5" cy="17" r="1.6"/><circle cx="16.5" cy="17" r="1.6"/>',
+    road: '<path d="M8 3 4 21M16 3l4 18M12 4v3M12 11v3M12 18v3"/>',
+    weather: '<path d="M7 18a4 4 0 1 1 .8-7.9A5 5 0 0 1 17.5 11 3.5 3.5 0 0 1 17 18z"/>',
+    signal: '<rect x="8" y="2" width="8" height="20" rx="2"/><circle cx="12" cy="7" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="17" r="1"/>',
+    pin: '<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+    bolt: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  };
+  const carIcon = k => `<span class="cs-ic" aria-hidden="true"><svg viewBox="0 0 24 24">${CAR_ICON[k]}</svg></span>`;
+  function carCard(ch, du, se, wm, il) {
+    const dm = ch.pillars.day, st = ch.strength;
+    let root = ''; try { const r = M.analyzeNatalRoot(ch); root = ` · 원국 ${r.natalRootLevel}`; } catch (e) { }
+    const fl = x => x ? `${M.gzName(x)} — ${esc(M.flowLabel(x.ev))}` : '—';
+    const now = (x, tail) => x ? `<span class="small cs-now">지금: <b>${fl(x)}</b>${tail || ''}</span>` : '<span class="small muted">지금: 해당 없음</span>';
+    const item = (ic, name, role, desc, nowHtml) => `<div class="cs-item">${carIcon(ic)}<div><b>${name}</b> <span class="muted small">= ${role}</span><span class="small muted">${desc}</span>${nowHtml || ''}</div></div>`;
+    const ar = '<div class="cs-arrow" aria-hidden="true">↓</div>';
+    const stack = [
+      item('car', term('원국'), '자동차', '내가 기본적으로 가지고 태어난 구조와 특성', `<span class="small cs-now">지금: <b>일간 ${M.STEM_K[dm.s]}(${M.EL_K[M.stemEl(dm.s)]}) · ${st.zone}</b>${root}</span>`),
+      item('road', term('대운'), '장기간 달리는 도로', '약 10년 동안 지속되는 큰 환경과 진행 방향', now(du)),
+      item('weather', term('세운'), '그해의 날씨', '같은 도로에서도 해마다 달라지는 연간 환경', now(se)),
+      item('signal', term('월운'), '현재 구간의 교통·노면', '이번 달 체감되는 구체적인 환경 변화', now(wm)),
+      item('pin', term('일운', '일진'), '오늘의 실제 주행 조건', '오늘 직접 마주치는 단기적인 흐름', now(il)),
+      item('bolt', term('시진'), '순간적인 신호·교통 변화', '시간대별로 달라지는 미세한 조건', '<span class="small muted">시간대별 실행 등급은 일진 상세의 시진 표에서 볼 수 있습니다.</span>'),
+    ].join(ar);
+    // 실제 계산 결과를 틀에 넣은 동적 설명(새 명리 판단 없음)
+    const f = x => x ? x.ev.flow : null, vol = x => x && x.ev.overlays.volatility.active, def = x => x && x.ev.overlays.defense.active;
+    let dyn = '';
+    if (du) {
+      dyn = `당신이라는 자동차가 지금 ${M.gzName(du)} 대운이라는 도로(${esc(M.flowLabel(du.ev))})를 달리고 있습니다.`;
+      if (se) dyn += ` 올해는 ${M.gzName(se)} 세운의 날씨(${esc(M.flowLabel(se.ev))})가 겹쳐 있고${vol(se) ? ', 변동 신호가 있어 날씨 변화가 큰 편이며' : ''}${def(se) ? `${vol(se) ? '' : ','} 부담도가 높아 보수적으로 운전할 필요가 있고` : ''}`;
+      if (wm && il) dyn += ` 이번 달은 ${M.gzName(wm)} 월운, 오늘은 ${M.gzName(il)} 일진(${esc(M.flowLabel(il.ev, { overlay: 'all' }))})의 조건입니다.`;
+      else dyn += '.';
+    } else dyn = '아직 대운이 시작되기 전이라 원국이라는 자동차만 놓여 있는 상태입니다.';
+    return `<details class="card carc"${S.carOpen ? ' open' : ''}><summary>운은 어떻게 작동하나요? <span class="muted small">사주와 운의 관계</span></summary>
+      <p class="small">${dyn}</p>
+      <div class="carstack">${stack}</div>
+      <p class="small">운은 한 요소만으로 결정되지 않습니다. 같은 자동차라도 어떤 도로를 달리는지, 날씨가 어떤지, 현재 노면 상태가 어떤지에 따라 주행 경험이 달라집니다. 사주도 마찬가지로 원국을 기준으로 대운·세운·월운·일진이 겹쳐 현재의 흐름을 만듭니다.</p>
+      <p class="small">비가 온다고 반드시 사고가 나는 것이 아니듯, 특정 운이 들어왔다고 특정 사건이 반드시 발생하는 것은 아닙니다.</p>
+      <div class="small"><b>점수는 이렇게 대응됩니다</b></div>
+      <ul class="pos-ul small">
+        <li>${term('흐름 점수', '흐름 적합도')} = 지금의 자동차와 주행 환경이 얼마나 잘 맞는가</li>
+        <li>${term('변동성')} = 주행 환경의 변화량 · ${term('방어기', '부담도')} = 보수적으로 운전해야 할 필요성</li>
+        <li>${term('통근')} = 자동차가 기본적으로 가진 접지 기반 (좋은 자동차라는 뜻이 아니라 일간의 기반을 보는 한 요소) · ${term('운의 근 보강')} = 현재 주행 환경에서 그 기반이 더해지는 것</li>
+      </ul>
+      <div class="small"><b>운의 흐름은 세 가지를 함께 보여줍니다</b></div>
+      <ul class="pos-ul small">
+        <li>① 무엇이 활성화되는가? <b>기회 · 확장 · 수확 · 축적</b></li>
+        <li>② 변화와 부담은 어느 정도인가? <b>변동 · 방어</b></li>
+        <li>③ 나에게 얼마나 잘 맞는가? <b>순풍 · 보통 · 주의 · 부담</b></li>
+      </ul>
+      <p class="small">예: <b>기회 + 변동 · 순풍</b> = 새로운 가능성이 활성화되고 변화도 많은 편이지만 현재 원국과의 적합도는 비교적 좋은 흐름. 자세한 정의는 ${term('운의 시기', '운의 흐름 구조')}를 보세요.</p>
+      <p class="note">실제 교통 안전 확률처럼 읽는 것이 아니라, 흐름을 이해하기 위한 비유입니다.</p></details>`;
   }
   function detailHTML(title, x, extra = '', kind = '', banner = '') {
     if (!x || !x.ev) return '';
@@ -4331,26 +4522,26 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const tint = (v, dm) => `color-mix(in srgb, ${dmCol(dm)} ${14 + Math.round(Math.min(80, Math.abs(v)) / 80 * 36)}%, var(--surface))`;
     const dayBtn = q => `<button type="button" class="chip ${q.v >= 0 ? 'good' : 'bad'}" data-pick="ilun:${q.d}" style="border:0;cursor:pointer">${cm}/${q.d} ${M.gzName(q.x)} ${signed(q.v)}</button>`;
     const cells = scored.map(({ d, v, x }) => {
-      const dm = dayMode(x).mode, mv = isDomain() ? domOf(x, 'ilun')[S.metric] : null;
+      const dm = dayMode(x).mode, top = x.ev.topOverlay, mv = isDomain() ? domOf(x, 'ilun')[S.metric] : null;
       const isT = cy === TODAY[0] && cm === TODAY[1] && d === TODAY[2];
       const son = M.sonOf(x.lunar.d) === '없음';
       const strong = Math.abs(v) >= 45;
-      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}" style="background:${mv ? `color-mix(in srgb, ${domCol(S.metric, mv.score)} 28%, var(--surface))` : tint(v, dm)}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''} · ${dm} · ${x.ev.condition + ' ' + signed(v)}${mv ? ' · ' + DOM_INFO[S.metric].full + ' ' + mv.score + ' ' + mv.band : ''}">
+      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}" style="background:${mv ? `color-mix(in srgb, ${domCol(S.metric, mv.score)} 28%, var(--surface))` : tint(v, dm)}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''} · ${M.flowLabel(x.ev)} · 흐름 ${signed(v)}${mv ? ' · ' + DOM_INFO[S.metric].full + ' ' + mv.score + ' ' + mv.band : ''}">
         <span class="ctop"><span class="dn">${d}</span>${son ? '<span class="son" title="손 없는 날">손</span>' : ''}</span>
         <span class="dg">${M.gzName(x)}</span>
-        <span class="dmn" style="color:${dmCol(dm)}">${dm.slice(0, 2)}</span>
+        <span class="dmn" style="color:${dmCol(dm)}">${flowTxt(dm)}${top ? `<em class="ovm ov-${top}">+${OVL[top][0]}</em>` : ''}</span>
         <span class="sc${strong ? ' strong' : ''}">${mv ? mv.score : signed(v)}</span>
         <span class="ld">${x.lunar.d === 1 ? x.lunar.m + '월' : x.lunar.d}</span></button>`;
     }).join('');
     return `<section class="card">
       <div class="card-h"><h2>${cy}년 ${cm}월 ${term('일운', '일진')} 달력 <span class="lvl">${LEVEL_ROLE.ilun}</span></h2><span class="seg"><button data-act="ym:-1" aria-label="이전 달">‹</button><button data-act="ym:1" aria-label="다음 달">›</button></span></div>
-      <div class="legend">${Object.keys(DAYMODE).map(m => `<span><i class="sw" style="background:${dmCol(m)}"></i>${term(m)}</span>`).join('')}<span>색이 진할수록 흐름 점수의 크기가 큼</span><span><span class="son">손</span> ${term('손 없는 날')}</span><span>칸 아래 숫자 = 음력 일</span></div>
+      <div class="legend">${Object.keys(DAYMODE).map(m => `<span><i class="sw" style="background:${dmCol(m)}"></i>${term(m, flowTxt(m))}</span>`).join('')}<span>${ovTag('volatility')}${ovTag('defense')} 칸 아래 +변동·+방어 = 가장 중요한 상태 하나</span><span>색이 진할수록 흐름 점수의 크기가 큼</span><span><span class="son">손</span> ${term('손 없는 날')}</span><span>칸 아래 숫자 = 음력 일</span></div>
       <div class="cal">${['일', '월', '화', '수', '목', '금', '토'].map(d => `<span class="dow">${d}</span>`).join('')}${'<span></span>'.repeat(firstDow)}${cells}</div>
       <div class="list">
         <div class="li"><span class="k">순풍이 강한 날</span><span class="v">${best.length ? best.map(dayBtn).join('') : `<span class="muted small">+${CC.tailwind} 이상인 날이 없습니다</span>`}</span><span></span></div>
         <div class="li"><span class="k">리스크 관리일</span><span class="v">${worst.length ? worst.map(dayBtn).join('') : `<span class="muted small">${CC.caution} 이하인 날이 없습니다</span>`}</span><span></span></div>
       </div>
-      ${ilDetail || '<p class="note">날짜를 누르면 그날의 행동모드, 판정 순서, 점수 근거와 12시진 실행 등급이 열립니다. 일진 흐름 점수는 이 사주의 억부·조후·관계·구조를 종합해 그날 간지만 평가한 값이며, 대운·세운의 큰 흐름은 위 그래프에서 봅니다.</p>'}
+      ${ilDetail || '<p class="note">날짜를 누르면 그날의 주 흐름·변동·방어 상태, 판정 순서, 점수 근거와 12시진 실행 등급이 열립니다. 일진 흐름 점수는 이 사주의 억부·조후·관계·구조를 종합해 그날 간지만 평가한 값이며, 대운·세운의 큰 흐름은 위 그래프에서 봅니다.</p>'}
     </section>`;
   }
   function yearSummary(curY) {
@@ -4392,6 +4583,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (sel.kind === 'ilun') { const x = cal[sel.d - 1]; if (x) ilDetail = detailHTML(`${cy}.${pad(cm)}.${pad(sel.d)} 일진 ${M.gzName(x)}`, x, `<p class="small">음력 ${x.lunar.m}${x.lunar.leap ? '(윤)' : ''}월 ${x.lunar.d}일 · ${term('손 없는 날', '손')} ${M.sonOf(x.lunar.d) === '없음' ? '<b>없음 (손 없는 날)</b>' : M.sonOf(x.lunar.d) + '쪽'}</p>` + sijinTable(x, [cy, cm, sel.d]), "ilun"); }
     const tint = v => { const a = Math.min(100, Math.abs(v)) * 0.6; return v >= 0 ? `color-mix(in srgb, var(--good) ${a}%, var(--surface-2))` : `color-mix(in srgb, var(--bad) ${a}%, var(--surface-2))`; };
     return `
+    ${carCard(ch, du, se, curM, il)}
     ${ch.yongFallback ? `<div class="warn"><b>용신 기준</b><span>${M.SCHOOLS[ch.school]}이 이 사주에 해당하지 않아 억부 기준 용신을 표시합니다. 흐름 점수는 억부·조후를 자동 가중해 계산합니다.</span></div>` : ''}
     <section class="card">
       <div class="card-h"><h2>지금의 운</h2><span class="note">${TODAY.join('.')} 기준 · 억부·조후 자동 가중</span></div>
@@ -4408,14 +4600,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${chartLegend()}
       <div class="chart" data-chart="daeun"></div>
       <div class="lts">${ch.daeun.list.map((x, i) => luckTile(x, `${x.startAge}세 · ${x.startYear}`, 'daeun:' + i, sel.kind === 'daeun' && sel.i === i, du === x)).join('')}</div>
-      ${daeunDetail || '<p class="note">막대 높이는 흐름 점수, 색은 시기 유형입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
+      ${daeunDetail || '<p class="note">막대 높이는 흐름 적합도, 색은 주 흐름(기회·확장·수확·축적)이고 변동·방어는 테두리와 아래 글자(변·방)입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>연도별 흐름 · ${term('세운')} <span class="lvl">${LEVEL_ROLE.seun}</span></h2></div>
       ${chartLegend()}
       <div class="chart" data-chart="life"></div>
       ${yearSummary(curY)}
-      ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 시기 유형(기회·확장·수확·축적·변동·방어)입니다. 순풍·보통·주의·부담 같은 상태는 툴팁과 타일 배지로 따로 보입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
+      ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 주 흐름(기회·확장·수확·축적), 테두리·아래 글자는 변동·방어 상태입니다. 순풍·보통·주의·부담 같은 상태는 툴팁과 타일 배지로 따로 보입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>${Y}년 ${term('월운')} <span class="lvl">${LEVEL_ROLE.wolun}</span></h2><span class="seg"><button data-act="year:-1" aria-label="이전 해">‹</button><button data-act="year:1" aria-label="다음 해">›</button></span></div>
@@ -4678,6 +4870,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const PK_KEY = STORE + '-pk';
   const PK = { gw: {}, fs: {}, tr: { topic: 'all', spread: 'three', cards: {} }, open: {} };
   try { const o = JSON.parse(localStorage.getItem(PK_KEY) || 'null'); if (o) { Object.assign(PK.gw, o.gw); Object.assign(PK.fs, o.fs); Object.assign(PK.tr, o.tr); Object.assign(PK.open, o.open); } } catch (e) { }
+  document.addEventListener('toggle', ev => { if (ev.target && ev.target.matches && ev.target.matches('details.carc')) S.carOpen = ev.target.open; }, true);
   document.addEventListener('toggle', ev => { const d = ev.target; if (d && d.matches && d.matches('details.pkgd')) { PK.open[d.dataset.gk] = d.open; try { localStorage.setItem(PK_KEY, JSON.stringify(PK)); } catch (e) { } } }, true);
   const pkSave = () => { try { localStorage.setItem(PK_KEY, JSON.stringify(PK)); } catch (e) { } };
   const josa = (w, a, b) => { const c = w.charCodeAt(w.length - 1); return w + (c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 ? a : b); };
@@ -5752,7 +5945,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function svgEl(W, H) { return `<svg xmlns="${NS}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img">`; }
   function drawDiv(el, items, opt = {}) {
     const n = items.length; const cw = el.clientWidth || 320;
-    const W = Math.max(cw, n * 40), H = 246, L = 34, R = 6, T = 30, B = 54;
+    const W = Math.max(cw, n * 40), H = 258, L = 34, R = 6, T = 30, B = 54;
     const step = (W - L - R) / n, bw = Math.min(30, step * 0.58);
     const y = v => T + (100 - v) / 200 * (H - T - B);
     let s = svgEl(W, H);
@@ -5768,7 +5961,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const r = Math.min(4, h / 2), x0 = cx - bw / 2;
       const d = v >= 0 ? `M${x0},${y0} V${top + r} Q${x0},${top} ${x0 + r},${top} H${x0 + bw - r} Q${x0 + bw},${top} ${x0 + bw},${top + r} V${y0} Z`
         : `M${x0},${y0} V${top + h - r} Q${x0},${top + h} ${x0 + r},${top + h} H${x0 + bw - r} Q${x0 + bw},${top + h} ${x0 + bw},${top + h - r} V${y0} Z`;
-      s += `<path d="${d}" style="fill:${col};${it.sel ? 'stroke:var(--ink);stroke-width:2' : ''}"/>`;
+      const ovs = it.ov ? ovStroke(it.ov) : '';
+      s += `<path d="${d}" style="fill:${col};${ovs}${it.sel ? ';stroke:var(--ink);stroke-width:2;stroke-dasharray:none' : ''}"/>`;
+      if (it.ov && (it.ov.volatility.active || it.ov.defense.active)) s += `<text x="${cx}" y="${H - 4}" text-anchor="middle" style="fill:${it.ov.defense.active ? 'var(--d-def)' : 'var(--d-chg)'};font-size:9px;font-weight:800">${it.ov.volatility.active ? '변' : ''}${it.ov.defense.active ? '방' : ''}</text>`;
       if (it.cond) { const by = v >= 0 ? top - 15 : top + h + 4; s += `<rect x="${cx - 8}" y="${by}" width="16" height="11" rx="5.5" style="fill:${COND_COL[it.cond]};opacity:.9"/><text x="${cx}" y="${by + 8.5}" text-anchor="middle" style="fill:#fff;font-size:8px;font-weight:700">${it.cond[0]}</text>`; }
       if (it.cur) s += `<circle cx="${cx}" cy="${T + 2}" r="3" style="fill:var(--seal)"/>`;
       s += `<text x="${cx}" y="${H - B + 18}" text-anchor="middle" style="fill:var(--ink);font-size:14px;font-weight:${it.sel ? 900 : 700};font-family:var(--f-display)">${it.label}</text>`;
@@ -5795,7 +5990,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     for (const g of [50, 0, -50]) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'}" ${g ? 'stroke-dasharray="3 3"' : ''}/><text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g > 0 ? '+' + g : g < 0 ? '−' + (-g) : '0'}</text>`;
     for (let Y = Math.ceil(y0 / 10) * 10; Y <= y1; Y += 10) s += `<text x="${x(Y)}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${Y}</text>`;
     const bw = Math.max(1.5, (W - L - R) / (y1 - y0 + 1) - 1.2);
-    data.forEach(d => { const v = d.combined, yy = y(v), z = y(0); const h = Math.max(1.5, Math.abs(yy - z)); const col = m6Col(luckMode(d).mode); s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${Math.min(yy, z).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${col}"/>`; });
+    data.forEach(d => { const v = d.combined, yy = y(v), z = y(0); const h = Math.max(1.5, Math.abs(yy - z)); const col = m6Col(luckMode(d).mode); s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${Math.min(yy, z).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${col};${ovStroke(d.ev.overlays)}"/>`; });
     if (showGhost()) s += `<polyline class="ghost-line" points="${data.map(d => `${x(d.year).toFixed(1)},${y(altOf(d)).toFixed(1)}`).join(' ')}"/>`;
     const curY = M.yearPillarAt(NOW).sajuYear;
     if (curY >= y0 && curY <= y1) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.5" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T + 11}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
@@ -5830,10 +6025,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (isDomain()) { drawDomainChart(el, k); return; }
       if (k === 'daeun') {
         const cur = M.daeunAt(ch, curMs);
-        drawDiv(el, ch.daeun.list.map((d, i) => ({ v: luckV(d), cond: d.ev.condition, ph: luckMode(d).mode, alt: showGhost() ? altOf(d) : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: luckTip(`${d.startAge}세 대운 ${M.gzName(d)} (${d.stemTG}/${d.branchTG})`, d) })));
+        drawDiv(el, ch.daeun.list.map((d, i) => ({ v: luckV(d), cond: d.ev.condition, ph: luckMode(d).mode, ov: d.ev.overlays, alt: showGhost() ? altOf(d) : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: luckTip(`${d.startAge}세 대운 ${M.gzName(d)} (${d.stemTG}/${d.branchTG})`, d) })));
       } else if (k === 'wolun') {
         const ms = M.wolun(ch, S.selYear);
-        drawDiv(el, ms.map((m, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity; return { v: luckV(m), cond: m.ev.condition, ph: luckMode(m).mode, alt: showGhost() ? altOf(m) : null, label: M.gzName(m), sub: m.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: curMs >= m.startMs && curMs < nx, tip: luckTip(`${m.termName}~ ${M.gzName(m)} (${m.stemTG}/${m.branchTG})`, m) }; }));
+        drawDiv(el, ms.map((m, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity; return { v: luckV(m), cond: m.ev.condition, ph: luckMode(m).mode, ov: m.ev.overlays, alt: showGhost() ? altOf(m) : null, label: M.gzName(m), sub: m.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: curMs >= m.startMs && curMs < nx, tip: luckTip(`${m.termName}~ ${M.gzName(m)} (${m.stemTG}/${m.branchTG})`, m) }; }));
       } else if (k === 'life') drawLife(el);
     });
   }
@@ -5984,13 +6179,15 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ? `<textarea id="gl-edit" aria-label="설명 문구">${esc(t)}</textarea>
         <div class="acts"><button class="btn primary" data-act="gl-save">저장</button>${edited ? '<button class="btn" data-act="gl-reset">기본 문구로 되돌리기</button>' : ''}<span class="grow"></span><span id="gl-msg" class="admin-msg">${edited ? '수정된 문구입니다' : '기본 문구입니다'}</span></div>`
       : `<p>${esc(t)}</p>`;
-    const title = c === '일간' ? `${key} 일간` : c === '육십갑자' ? `${key} (${gzHanja(key)})` : key;
+    const TERM_TITLE = { '운의 시기': '운의 흐름 구조', '기회기': '기회 흐름', '확장기': '확장 흐름', '수확기': '수확 흐름', '축적기': '축적 흐름', '변동기': '변동 신호', '방어기': '방어 신호', '일진 행동모드': '일진의 흐름', '운의 작동 방식': '운은 어떻게 작동하나요?' };
+    const title = c === '일간' ? `${key} 일간` : c === '육십갑자' ? `${key} (${gzHanja(key)})` : (TERM_TITLE[key] || key);
     sh.innerHTML = `<div class="sheet-bg" data-act="close"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(key)}"><span class="cat">${esc(c)}${adminPw ? ' · 관리자 편집' : ''}</span><h3>${esc(title)}</h3>
       ${c === '육십갑자' ? `<div class="facts">${gzFacts(key)}</div>` : ''}
       ${body}
       ${c === '육십갑자' ? gzPosHTML(key, S.sheetPos) : ''}
-      ${S.sheetVol && (key === '기회기' || key === '기회일') ? `<div class="facts"><b>이번 운의 기회 활성도 ${S.sheetVol.opportunityActivation} / 100</b><div class="volbar" style="--v:${S.sheetVol.opportunityActivation}"><i style="background:var(--d-atk)"></i></div><div class="small">${M.opportunityNote(S.sheetVol)}</div>${S.sheetVol.opportunityActivation >= 40 && S.sheetVol.opportunityType.length ? `<div class="small"><b>주요 기회</b></div><ul class="pos-ul small">${S.sheetVol.opportunityType.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}${S.sheetVol.opportunityActivation >= 40 && S.sheetVol.opportunityReasons.length ? `<div class="small"><b>판단 근거</b></div><ul class="pos-ul small">${S.sheetVol.opportunityReasons.slice(0, 5).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}<div class="small muted">변동성 ${Math.round(S.sheetVol.volatilityScore)} · 흐름 점수 ${signed(S.sheetVol.fitScore)} · 상태 ${S.sheetVol.condition} — 기회 활성도와 따로 확인하세요.</div></div>` : ''}
-      ${S.sheetVol && (key === '변동기' || key === '변동일') ? `<div class="facts"><b>이번 운의 변동성 ${Math.round(S.sheetVol.volatilityScore)} / 100 · ${S.sheetVol.volatilityBand}</b><div class="volbar" style="--v:${Math.round(S.sheetVol.volatilityScore)}"><i></i></div><div class="small">${M.volatilityNote(S.sheetVol)}</div>${S.sheetVol.volatilitySignals.length ? `<div class="small"><b>주요 변화 신호</b></div><ul class="pos-ul small">${S.sheetVol.volatilitySignals.slice(0, 5).map(g => `<li>${esc(g.text)} — ${g.means}</li>`).join('')}${S.sheetVol.volatilityOverlap >= 2 ? `<li>핵심 궁(일주·월주) 관계 ${S.sheetVol.volatilityOverlap}개 중첩</li>` : ''}</ul>` : ''}<div class="small muted">흐름 점수 ${signed(S.sheetVol.fitScore)} · 상태 ${S.sheetVol.condition} — 변동성과 별개로 확인하세요.</div></div>` : ''}
+      ${S.sheetVol && key === '기회기' ? `<div class="facts"><b>이번 운의 기회 활성도 ${S.sheetVol.opportunityActivation} / 100</b><div class="volbar" style="--v:${S.sheetVol.opportunityActivation}"><i style="background:var(--d-atk)"></i></div><div class="small">${M.opportunityNote(S.sheetVol)}</div>${S.sheetVol.opportunityActivation >= 40 && S.sheetVol.opportunityType.length ? `<div class="small"><b>주요 기회</b></div><ul class="pos-ul small">${S.sheetVol.opportunityType.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}${S.sheetVol.opportunityActivation >= 40 && S.sheetVol.opportunityReasons.length ? `<div class="small"><b>판단 근거</b></div><ul class="pos-ul small">${S.sheetVol.opportunityReasons.slice(0, 5).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}<div class="small muted">변동성 ${Math.round(S.sheetVol.volatilityScore)} · 부담도 ${S.sheetVol.overlays.defense.score} · 흐름 적합도 ${signed(S.sheetVol.fitScore)} · 상태 ${S.sheetVol.condition} — 기회 활성도와 따로 확인하세요.</div></div>` : ''}
+      ${S.sheetVol && key === '방어기' ? `<div class="facts"><b>이번 운의 부담도 ${S.sheetVol.overlays.defense.score} / 100 · ${S.sheetVol.overlays.defense.band}</b><div class="volbar" style="--v:${S.sheetVol.overlays.defense.score}"><i style="background:var(--d-def)"></i></div><ul class="pos-ul small">${Object.entries(S.sheetVol.flow.defenseParts).filter(([, v]) => v >= 0.25).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, v]) => `<li>${DEF_PART[k]} — ${Math.round(v * 100)}%</li>`).join('') || '<li>부담을 키우는 뚜렷한 요인이 없습니다.</li>'}</ul><div class="small muted">흐름 적합도 ${signed(S.sheetVol.fitScore)} · 변동성 ${Math.round(S.sheetVol.volatilityScore)} — 사고수와는 다른 값입니다.</div></div>` : ''}
+      ${S.sheetVol && key === '변동기' ? `<div class="facts"><b>이번 운의 변동성 ${Math.round(S.sheetVol.volatilityScore)} / 100 · ${S.sheetVol.volatilityBand}</b><div class="volbar" style="--v:${Math.round(S.sheetVol.volatilityScore)}"><i></i></div><div class="small">${M.volatilityNote(S.sheetVol)}</div>${S.sheetVol.volatilitySignals.length ? `<div class="small"><b>주요 변화 신호</b></div><ul class="pos-ul small">${S.sheetVol.volatilitySignals.slice(0, 5).map(g => `<li>${esc(g.text)} — ${g.means}</li>`).join('')}${S.sheetVol.volatilityOverlap >= 2 ? `<li>핵심 궁(일주·월주) 관계 ${S.sheetVol.volatilityOverlap}개 중첩</li>` : ''}</ul>` : ''}<div class="small muted">흐름 적합도 ${signed(S.sheetVol.fitScore)} · 상태 ${S.sheetVol.condition} — 변동성과 별개로 확인하세요.</div></div>` : ''}
       <button class="btn x" data-act="close">닫기</button></div></div>`;
     (sh.querySelector('#gl-edit') || sh.querySelector('.x')).focus();
   }

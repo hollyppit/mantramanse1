@@ -23,7 +23,7 @@ function snapshot(M, N) {
   }
   const IGN = process.argv.includes('--ignore-phase');
   const evF = ev => [ev.fitScore, ev.ownFit, ev.eokbuScore, ev.johuScore, ev.relationScore, ev.structureScore, ev.intensityScore, ...(IGN ? [] : [ev.phase]), ev.condition, ev.volatilityScore, ev.volatilityBand, ...(IGN ? [] : [ev.activityType]), ev.triggers, ev.relations].map(r3);
-  const out = { pillars: [], weights: [], strength: [], yong: [], climate: [], daeun: [], seun: [], wolun: [], ilun: [], samjae: [], domain: [], career: [] };
+  const out = { pillars: [], weights: [], strength: [], yong: [], climate: [], daeun: [], seun: [], wolun: [], ilun: [], samjae: [], domain: [], career: [], root: [] };
   for (const inp of inputs) {
     const c = M.compute(inp), pl = k => c.pillars[k] ? c.pillars[k].s + '-' + c.pillars[k].b : null;
     out.pillars.push([pl('year'), pl('month'), pl('day'), pl('hour'), c.gender]);
@@ -37,6 +37,7 @@ function snapshot(M, N) {
     out.ilun.push(M.ilun(c, 2026, 5).map(x => [x.s, x.b, ...evF(x.ev)]));
     if (M.evaluateDomainLuck) out.domain.push(M.seunRange(c, 2024, 2030).map(x => { const d = M.evaluateDomainLuck(c, x, 'seun', { ms: x.midMs }); return M.DOMAIN_KEYS.map(k => [d[k].score, d[k].band]); }));
     if (M.careerProfile) out.career.push(M.careerProfile(c).categories.map(x => [x.category, x.score, x.burden]));
+    if (M.analyzeNatalRoot) { const r = M.analyzeNatalRoot(c); out.root.push([r.hasNatalRoot, r.natalRootScore, r.natalRootLevel, r.roots.length, ...c.daeun.list.slice(0, 3).map(x => { const a = M.analyzeLuckRootSupport(c, x, 'daeun'); return a && typeof a === 'object' ? Object.values(a).filter(v => typeof v === 'number' || typeof v === 'boolean' || typeof v === 'string').map(r3) : null; })]); }
     out.samjae.push([2024, 2025, 2026, 2027].map(y => { const s = M.getSamjae(c.pillars.year.b, y); return [s.active, s.stage]; }));
   }
   return out;

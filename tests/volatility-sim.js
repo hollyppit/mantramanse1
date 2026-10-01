@@ -19,7 +19,7 @@ const rel = (type, pos, kind = 'branch', name = type) => ({ type, kind, name: `$
 const volOf = (c, rels) => M.calculateVolatility(c, rels);
 const c0 = charts[0];
 
-console.log(`차트 ${charts.length}개 × 60갑자 · 변동기 기준 ${V.phaseThreshold} · 단계 ${V.bands.map(x => x[1]).join(' / ')}`);
+console.log(`차트 ${charts.length}개 × 60갑자 · 변동 overlay 기준 ${M.FLOW_CONFIG.overlay.volatility} · 단계 ${V.bands.map(x => x[1]).join(' / ')}`);
 
 // ── 실제 운 전수 평가
 const evs = [];
@@ -34,14 +34,14 @@ for (const c of charts) for (const p of pillars) {
 const A = evs.filter(x => !x.rels.length);
 console.log(`A. 관계 없는 운 ${A.length}건: 최대 변동성 ${Math.max(...A.map(x => x.ev.volatilityScore)).toFixed(1)}`);
 ok(A.length > 0, 'A: 관계 없는 운 표본이 없음');
-ok(A.every(x => x.ev.volatilityScore < 25 && x.ev.phase !== '변동기'), 'A: 관계가 없는데 변동성 25 이상이거나 변동기');
+ok(A.every(x => x.ev.volatilityScore < 25 && !x.ev.overlays.volatility.active), 'A: 관계가 없는데 변동성 25 이상이거나 변동기');
 
 // B. 약한 관계 하나 → 변동기가 되면 안 됨
 const B = evs.filter(x => x.vol.signals.length === 1 && x.vol.signals[0].pts < 25);
-const Bph = B.filter(x => x.ev.phase === '변동기').length;
+const Bph = B.filter(x => x.ev.overlays.volatility.active).length;
 console.log(`B. 약한 신호 하나 ${B.length}건: 최대 변동성 ${Math.max(...B.map(x => x.ev.volatilityScore)).toFixed(1)}, 변동기 ${Bph}건`);
 ok(B.length > 0 && Bph === 0, `B: 약한 관계 하나로 변동기가 된 경우 ${Bph}건`);
-ok(B.every(x => x.ev.volatilityScore < V.phaseThreshold), 'B: 약한 신호 하나가 기준 이상');
+ok(B.every(x => x.ev.volatilityScore < M.FLOW_CONFIG.overlay.volatility), 'B: 약한 신호 하나가 기준 이상');
 
 // C. 일지·월지 충 → 변동성 상승 (년지 충보다 커야 함)
 const cDay = volOf(c0, [rel('충', 'day', 'branch', '일지충')]).score, cMonth = volOf(c0, [rel('충', 'month')]).score, cHour = volOf(c0, [rel('충', 'hour')]).score, cYear = volOf(c0, [rel('충', 'year')]).score;
@@ -61,18 +61,18 @@ const d4 = volOf(c0, [rel('충', 'day'), rel('천간충', 'month', 'stem'), rel(
 console.log(`D. 신호를 하나씩 더할 때 변동성 — ${[d1, d2, d3, d4].map(x => x.toFixed(0)).join(' → ')}`);
 ok(d1 < d2 && d2 < d3 && d3 < d4 && d4 <= 100, 'D: 신호가 겹쳐도 점수가 누적되지 않음');
 const weakOnly = volOf(c0, [rel('해', 'year'), rel('파', 'year')]).score;
-ok(weakOnly < V.phaseThreshold, 'D: 약한 신호 둘이 겹쳤다고 변동기가 됨');
+ok(weakOnly < M.FLOW_CONFIG.overlay.volatility, 'D: 약한 신호 둘이 겹쳤다고 변동기가 됨');
 const ov = volOf(c0, [rel('충', 'day'), rel('형', 'month')]), ovNo = volOf(c0, [rel('충', 'day'), rel('형', 'year')]);
 ok(ov.nCore === 2 && ov.overlapBonus > 0 && ovNo.overlapBonus === 0, 'D: 핵심 궁(일·월) 중첩 가산이 동작하지 않음');
 const compl = volOf(c0, [{ type: '삼합', kind: 'branch', name: '삼합', members: ['day', 'month', 'luck'] }]).score, half = volOf(c0, [{ type: '반합', kind: 'branch', name: '반합', members: ['month', 'luck'] }]).score;
 ok(compl > half, 'D: 삼합 완성이 반합보다 크지 않음');
 
 // E·F. 변동기는 어떤 상태와도 짝지어질 수 있다
-const chg = evs.filter(x => x.ev.phase === '변동기'), cnt = {};
+const chg = evs.filter(x => x.ev.overlays.volatility.active), cnt = {};
 chg.forEach(x => cnt[x.ev.condition] = (cnt[x.ev.condition] || 0) + 1);
 console.log(`E·F. 변동기 ${chg.length}건 — ${['순풍', '보통', '주의', '부담'].map(k => `${k} ${cnt[k] || 0}`).join(' · ')}`);
 for (const k of ['순풍', '보통', '주의', '부담']) ok((cnt[k] || 0) > 0, `E·F: 변동기 · ${k} 조합이 하나도 없음`);
-ok(chg.every(x => x.ev.volatilityScore >= V.phaseThreshold), '변동기인데 기준 미만');
+ok(chg.every(x => x.ev.volatilityScore >= M.FLOW_CONFIG.overlay.volatility), '변동기인데 기준 미만');
 // 변동성이 흐름 점수를 깎지 않는다: 변동성과 흐름 점수의 상관이 약해야 한다
 const mean = arr => arr.reduce((p, q) => p + q, 0) / arr.length;
 const xs = evs.map(x => x.ev.volatilityScore), ys = evs.map(x => x.ev.fitScore), mx = mean(xs), my = mean(ys);
@@ -86,13 +86,14 @@ ok(Math.abs(mean(hi.map(x => x.ev.fitScore)) - mean(lo.map(x => x.ev.fitScore)))
 const G = evs.filter(x => x.ev.volatilityScore < 25 && x.ev.fitScore <= -20);
 const gph = {}; G.forEach(x => gph[x.ev.phase] = (gph[x.ev.phase] || 0) + 1);
 console.log(`G. 변동성 낮음 + 흐름 낮음 ${G.length}건 — ${Object.entries(gph).map(([k, v]) => `${k} ${v}`).join(' · ')}`);
-ok(G.length > 0 && !gph['변동기'], 'G: 변동성이 낮은데 변동기로 분류됨');
-ok((gph['방어기'] || 0) > 0, 'G: 낮은 흐름 점수 + 강한 작용이 방어기로 잡히지 않음');
+ok(G.length > 0 && !G.some(x => x.ev.overlays.volatility.active), 'G: 변동성이 낮은데 변동기로 분류됨');
+ok(G.some(x => x.ev.overlays.defense.active), 'G: 낮은 흐름 점수가 방어 overlay로 잡히지 않음');
+ok(G.every(x => ['기회기', '확장기', '수확기', '축적기'].includes(x.ev.phase)), 'G: 주 흐름이 사라짐');
 
 // 분포와 문구 점검
 const bandCnt = {}; evs.forEach(x => bandCnt[x.ev.volatilityBand] = (bandCnt[x.ev.volatilityBand] || 0) + 1);
 console.log('\n변동성 단계 분포:', V.bands.map(x => `${x[1]} ${((bandCnt[x[1]] || 0) / evs.length * 100).toFixed(0)}%`).join(' · '), `· 변동기 ${(chg.length / evs.length * 100).toFixed(0)}%`);
-const gl = html.split('\n').find(l => l.startsWith("  '변동기': ['운의 시기'")) || '';
+const gl = html.split('\n').find(l => l.startsWith("  '변동기': ['운의 흐름'")) || '';
 ok(gl.includes('길흉을 의미하지 않으며'), '용어 사전: 변동기 정의에 "길흉을 의미하지 않으며"가 없음');
 for (const bad of ['흉운', '나쁜 일이 생기는', '손실이 발생', '반드시 이직', '반드시 이사', '반드시 이별']) ok(!gl.includes(bad), `용어 사전에 금지 표현 "${bad}"`);
 ok(!/전환기|전환일/.test(html), '"전환기"/"전환일" 문자열이 남아 있음');

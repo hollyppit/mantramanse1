@@ -29,7 +29,8 @@ for (const r of rows) {
   if (!Number.isFinite(e.opportunityActivation) || e.opportunityActivation < 0 || e.opportunityActivation > 100) bad++;
   for (const k of ['opportunity', 'expansion', 'harvest', 'accumulation']) if (!(e.phaseScores[k] >= 0 && e.phaseScores[k] <= 100)) bad++;
   if (!Array.isArray(e.opportunityType) || !Array.isArray(e.opportunityReasons) || !Array.isArray(e.companions)) nofield++;
-  if (!['기회기', '확장기', '수확기', '축적기', '변동기', '방어기'].includes(e.phase)) bad++;
+  if (!['기회기', '확장기', '수확기', '축적기'].includes(e.phase)) bad++;
+  if (!e.overlays || typeof e.overlays.volatility.active !== 'boolean' || typeof e.overlays.defense.active !== 'boolean' || !e.flow || e.flow.primaryFlow !== ['opportunity', 'expansion', 'harvest', 'accumulation'][['기회', '확장', '수확', '축적'].indexOf(e.activityType)]) bad++;
   if (['기회', '확장', '수확', '축적'].indexOf(e.activityType) < 0) bad++;
   if (banned.some(w => (e.reasons.join('') + e.opportunityReasons.join('') + M.opportunityNote(e)).includes(w))) bad++;
 }
@@ -54,17 +55,18 @@ ok(['순풍', '보통', '주의', '부담'].filter(k => hi.some(r => r.ev.condit
 // 2. 시기 분포
 console.log('\n2. 대표 시기 분포'); const phc = {}; rows.forEach(r => phc[r.ev.phase] = (phc[r.ev.phase] || 0) + 1);
 for (const [k, v] of Object.entries(phc).sort((x, y) => y[1] - x[1])) console.log('  ', k, (v / rows.length * 100).toFixed(1) + '%');
-for (const k of ['기회기', '확장기', '수확기', '축적기', '변동기', '방어기']) ok((phc[k] || 0) / rows.length > 0.02, `${k}가 거의 나오지 않음`);
+for (const k of ['기회기', '확장기', '수확기', '축적기']) ok((phc[k] || 0) / rows.length > 0.05, `${k}가 거의 나오지 않음`);
+console.log('   overlay: +변동', (rows.filter(r => r.ev.overlays.volatility.active).length / rows.length * 100).toFixed(1) + '% · +방어', (rows.filter(r => r.ev.overlays.defense.active).length / rows.length * 100).toFixed(1) + '%');
 ok((phc['기회기'] || 0) / rows.length < 0.4, '기회기가 40% 이상(편향)');
 
 // 3. 시나리오 A~K
 console.log('\n3. 시나리오');
-const notDef = r => r.ev.phase !== '방어기' && r.ev.phase !== '변동기';
+const notDef = r => true;   // 변동·방어는 주 흐름을 덮어쓰지 않으므로 모든 운이 대상이다
 const avgOf = (rs, f) => mean(rs.map(f));
 // A/B: 비겁·식상 운 + fit 높음/낮음
 const bs = rows.filter(r => r.g <= 1), A = bs.filter(r => r.ev.fitScore >= 18), B = bs.filter(r => r.ev.fitScore <= -12);
 console.log(`   A 비겁·식상 운 + fit 높음 ${A.length}건: 기회기 ${(A.filter(r => r.ev.phase === '기회기').length / A.length * 100).toFixed(0)}% 기회 ${avgOf(A, r => r.ev.opportunityActivation).toFixed(0)}`);
-console.log(`   B 비겁·식상 운 + fit 낮음 ${B.length}건: 기회 활성 ${avgOf(B, r => r.ev.opportunityActivation).toFixed(0)} · 주의/부담 ${(B.filter(r => ['주의', '부담'].includes(r.ev.condition)).length / B.length * 100).toFixed(0)}% · 기회기/변동기/방어기 ${['기회기', '변동기', '방어기'].map(k => B.filter(r => r.ev.phase === k).length).join('/')}`);
+console.log(`   B 비겁·식상 운 + fit 낮음 ${B.length}건: 기회 활성 ${avgOf(B, r => r.ev.opportunityActivation).toFixed(0)} · 주의/부담 ${(B.filter(r => ['주의', '부담'].includes(r.ev.condition)).length / B.length * 100).toFixed(0)}% · 기회기 ${B.filter(r => r.ev.phase === '기회기').length} · +변동 ${B.filter(r => r.ev.overlays.volatility.active).length} · +방어 ${B.filter(r => r.ev.overlays.defense.active).length}`);
 ok(A.length > 20 && B.length > 20, 'A/B 표본 부족'); ok(A.some(r => r.ev.phase === '기회기'), 'A: 기회기 가능해야 함');
 ok(avgOf(B, r => r.ev.opportunityActivation) > avgOf(rows, r => r.ev.opportunityActivation), 'B: 기회 활성이 평균보다 높아야 함');
 ok(B.filter(r => r.ev.opportunityActivation >= 60 && ['주의', '부담'].includes(r.ev.condition)).length > 0, 'B: 기회는 높은데 주의/부담인 경우가 있어야 함');
@@ -93,17 +95,18 @@ const gan = rows.filter(r => r.g === 3), rich = gan.filter(r => r.c.weights.grou
 console.log(`   관성 운: 원국 관성 많음 ${rich.length}건 확장 ${avgOf(rich, r => r.ev.phaseScores.expansion).toFixed(0)}/기회 ${avgOf(rich, r => r.ev.opportunityActivation).toFixed(0)} · 원국 관성 적음 ${poor.length}건 확장 ${avgOf(poor, r => r.ev.phaseScores.expansion).toFixed(0)}/기회 ${avgOf(poor, r => r.ev.opportunityActivation).toFixed(0)}`);
 ok(avgOf(rich, r => r.ev.phaseScores.expansion) > avgOf(poor, r => r.ev.phaseScores.expansion) + 8, '원국에 이미 있는 기운이 확장으로 읽히지 않음');
 ok(avgOf(poor, r => r.ev.opportunityActivation) > avgOf(rich, r => r.ev.opportunityActivation) + 5, '원국에 모자란 기운이 기회로 읽히지 않음');
-// I/J: 변동기·방어기
+// I/J: 변동·방어는 overlay다 — 주 흐름은 사라지지 않는다
 const I = rows.filter(r => r.ev.volatilityScore >= 55), J = rows.filter(r => r.ev.fitScore <= -20 && r.ev.intensityScore >= 50 && r.ev.volatilityScore < 55);
-console.log(`   I 변동성 ≥55: ${I.length}건 모두 변동기(방어기 제외) ${I.every(r => ['변동기', '방어기'].includes(r.ev.phase))} · J 부담+강도 → 방어기 ${J.filter(r => r.ev.phase === '방어기').length}/${J.length}`);
-ok(I.every(r => ['변동기', '방어기'].includes(r.ev.phase)), 'I: 변동성이 높은데 변동기가 아님'); ok(J.every(r => r.ev.phase === '방어기'), 'J: 부담이 크고 강도가 높은데 방어기가 아님');
+console.log(`   I 변동성 ≥55: ${I.length}건 모두 변동 overlay ${I.every(r => r.ev.overlays.volatility.active)} · 주 흐름 유지 ${I.every(r => r.ev.phase)} · J 부담+강도: ${J.length}건 평균 부담도 ${avgOf(J, r => r.ev.defenseLoad).toFixed(0)} (전체 ${avgOf(rows, r => r.ev.defenseLoad).toFixed(0)})`);
+ok(I.every(r => r.ev.overlays.volatility.active && ['기회기', '확장기', '수확기', '축적기'].includes(r.ev.phase)), 'I: 변동성이 높은데 변동 overlay가 없거나 주 흐름이 사라짐');
+ok(J.length > 20 && avgOf(J, r => r.ev.defenseLoad) > avgOf(rows, r => r.ev.defenseLoad) + 15, 'J: 부담이 크고 강도가 높은데 부담도가 높지 않음');
 // K: 기회와 변동성이 모두 높을 때 정보 보존
 const K = rows.filter(r => r.ev.opportunityActivation >= 60 && r.ev.volatilityScore >= 55);
 console.log(`   K 기회≥60 & 변동성≥55: ${K.length}건, 대표 시기 ${Object.entries(K.reduce((m, r) => (m[r.ev.phase] = (m[r.ev.phase] || 0) + 1, m), {})).map(([k, v]) => k + ' ' + v).join(' ')}`);
 ok(K.length > 10, 'K: 표본 부족');
 ok(K.every(r => r.ev.phaseScores.volatility === Math.round(r.ev.volatilityScore) && r.ev.phaseScores.opportunity === r.ev.opportunityActivation), 'K: 두 값이 함께 보존되지 않음');
 ok(K.filter(r => r.ev.phase !== '기회기').every(r => r.ev.companions.some(c => c.key === 'opportunity')), 'K: 기회 활성도가 동반 신호로 남지 않음');
-ok(K.filter(r => r.ev.phase !== '변동기' && r.ev.volatilityScore >= 50).every(r => r.ev.companions.some(c => c.key === 'volatility')), 'K: 변동성이 동반 신호로 남지 않음');
+ok(K.every(r => r.ev.overlays.volatility.active), 'K: 변동 overlay가 붙지 않음');
 
 // 4. fit·변동성을 바꾸지 않는다: 기존 값은 회귀 스냅샷이 담당하고, 여기서는 같은 운을 두 번 계산해 결정적임을 확인
 const c0 = charts[0], p0 = M.yearPillarOf(2027);
@@ -111,7 +114,7 @@ ok(JSON.stringify(M.evaluateLuck(c0, p0, 'seun')) === JSON.stringify(M.evaluateL
 
 // 5. 일진·월운·대운에서도 같은 체계
 let dOK = 0, dBad = 0;
-for (const c of charts.slice(0, 30)) { for (const x of M.ilun(c, 2026, 5)) { (['기회기', '확장기', '수확기', '축적기', '변동기', '방어기'].includes(x.ev.phase) && Number.isFinite(x.ev.opportunityActivation)) ? dOK++ : dBad++; } for (const x of c.daeun.list) (x.ev.phase && Number.isFinite(x.ev.opportunityActivation)) ? dOK++ : dBad++; for (const x of M.wolun(c, 2026)) (x.ev.phase && Number.isFinite(x.ev.opportunityActivation)) ? dOK++ : dBad++; }
+for (const c of charts.slice(0, 30)) { for (const x of M.ilun(c, 2026, 5)) { (['기회기', '확장기', '수확기', '축적기'].includes(x.ev.phase) && Number.isFinite(x.ev.opportunityActivation)) ? dOK++ : dBad++; } for (const x of c.daeun.list) (x.ev.phase && Number.isFinite(x.ev.opportunityActivation)) ? dOK++ : dBad++; for (const x of M.wolun(c, 2026)) (x.ev.phase && Number.isFinite(x.ev.opportunityActivation)) ? dOK++ : dBad++; }
 console.log(`\n5. 일진·월운·대운 ${dOK}건 정상 · 비정상 ${dBad}건`); ok(dBad === 0, '일진·월운·대운에서 시기·기회 활성도 누락');
 
 console.log(fails.length ? `\n실패 ${fails.length}건\n - ` + fails.join('\n - ') : '\n모든 검증 통과');
