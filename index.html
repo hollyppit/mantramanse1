@@ -48,6 +48,27 @@ button { font: inherit; color: inherit; }
 .xs-head b { font-family: var(--f-head); font-size: 1.25rem; }
 .xs-head span { font-size: 0.82rem; color: var(--ink-2); }
 
+/* 공유용 사주 카드 */
+.xc { width: 1080px; box-sizing: border-box; padding: 64px; background: linear-gradient(160deg, #fff 55%, #eef2ff); color: var(--ink); font-size: 28px; display: grid; gap: 28px; }
+.xc-top { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; border-bottom: 3px solid var(--ink); padding-bottom: 14px; }
+.xc-top b { font-family: var(--f-head); font-size: 34px; } .xc-top span { font-size: 20px; color: var(--ink-2); text-align: right; }
+.xc-title { font-family: var(--f-head); font-size: 64px; font-weight: 800; line-height: 1.15; }
+.xc-sub { font-size: 30px; color: var(--ink-2); margin-top: -14px; }
+.xc-four { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.xc-p { display: grid; gap: 8px; justify-items: center; text-align: center; padding: 14px 8px; border-radius: 20px; background: #fff; border: 2px solid var(--line); }
+.xc-p.me { border-color: var(--ink); border-width: 4px; }
+.xc-pl { font-size: 22px; font-weight: 700; color: var(--ink-2); } .xc-tg { font-size: 24px; font-weight: 700; } .xc-us { font-size: 20px; color: var(--ink-2); }
+.xc-g { width: 100%; height: 168px; border-radius: 16px; background: var(--c); color: var(--on); display: grid; place-items: center; align-content: center; }
+.xc-g b { font-size: 96px; line-height: 1; font-weight: 800; } .xc-g i { font-style: normal; font-size: 22px; opacity: .85; }
+.xc-sec { font-size: 26px; font-weight: 800; margin-top: 4px; }
+.xc-bars { display: grid; gap: 10px; }
+.xc-bar { display: grid; grid-template-columns: 44px 1fr 64px; gap: 14px; align-items: center; font-size: 24px; font-weight: 700; }
+.xc-bar div { height: 22px; background: #e8ebf3; border-radius: 99px; overflow: hidden; } .xc-bar i { display: block; height: 100%; background: var(--c); border-radius: 99px; } .xc-bar em { font-style: normal; text-align: right; color: var(--ink-2); }
+.xc-chips { display: flex; flex-wrap: wrap; gap: 10px; } .xc-chips span { font-size: 24px; font-weight: 700; padding: 6px 16px; border-radius: 99px; background: var(--surface-2); color: var(--ink-2); }
+.xc-chips span.g { background: var(--good-soft); color: var(--good); } .xc-chips span.b { background: var(--bad-soft); color: var(--bad); }
+.xc-foot { font-size: 20px; color: var(--ink-2); text-align: center; margin-top: 6px; }
+.chip.hl { outline: 1.5px solid var(--accent); }
+
 /* 상단 */
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 78%, transparent); -webkit-backdrop-filter: saturate(1.6) blur(14px); backdrop-filter: saturate(1.6) blur(14px); padding-block: 12px 10px; margin: 0 -16px; padding-inline: 16px; border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
 .top-in { max-width: 980px; margin: 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -852,6 +873,8 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   const SAMGI_WIN = [['year', 'month', 'day'], ['month', 'day', 'hour']];
   const GEUMSIN = ['乙丑', '己巳', '癸酉'];
   const POS_NAME = { year: '년주', month: '월주', day: '일주', hour: '시주' };
+  const TIANMUN = [3, 7, 10, 11]; // 卯未戌亥
+  const TANGHWA = { 2: [5, 8], 6: [6], 1: [10, 7] }; // 寅(巳申)·午(午)·丑(戌未)와 형을 이룰 때
   const GOSIN = b => [[2, 10], [5, 1], [8, 4], [11, 7]][Math.floor(mod(b + 1, 12) / 3)]; // 亥子丑,寅卯辰,巳午未,申酉戌 → [고신, 과숙]
 
   function sinsalFor(ch, target) { // target: {s?, b?, id}
@@ -879,6 +902,12 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       if (CHEONGWAN[d] === b) add('천관귀인', true, '일간 기준');
       if (CHEONBOK[d] === b) add('천복귀인', true, '일간 기준');
       if (ROK[(d + 2) % 10] === b) add('천주귀인', true, '일간 기준');
+      if (target.id === 'day' || target.id === 'hour') {
+        const gg = mb >= 2 && mb <= 4 ? [11, 0] : mb >= 5 && mb <= 7 ? [3, 7] : mb >= 8 && mb <= 10 ? [2, 10] : [1, 4]; // 봄 해자·여름 묘미·가을 인술·겨울 축진
+        if (gg.includes(b)) add('급각살', false, '월지 계절 기준');
+        if (TIANMUN.includes(b)) add('천문성', true, '지지 자체');
+      }
+      if (target.id !== 'luck' && TANGHWA[b] && Object.keys(ch.pillars).some(k => k !== target.id && ch.pillars[k] && TANGHWA[b].includes(ch.pillars[k].b))) add('탕화살', false, '인사신·축술미·오오 형');
       if (BOKSEONG[d].includes(b)) add('복성귀인', true, '일간 기준');
       if (target.id !== 'year') { if (b === mod(yb + 2, 12)) add('상문살', false, '년지 기준'); if (b === mod(yb - 2, 12)) add('조객살', false, '년지 기준'); }
       if (target.id === 'day' && tenGod(d, mainHidden(b)) === '편인') add('효신살', false, '일지 본기 편인');
@@ -916,6 +945,18 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     return out;
   }
 
+  // 공망 자리의 지지가 충·합을 만나 풀리는지(해공)
+  function gongmangFxOf(ch) {
+    const out = [];
+    for (const [base, label] of [['day', '일주'], ['year', '년주']]) {
+      for (const k of POS) {
+        const p = ch.pillars[k]; if (!p || k === base || !ch.gongmang[base].includes(p.b)) continue;
+        const rel = ch.relations.filter(r => r.kind === 'branch' && r.members.includes(k) && ['충', '육합', '삼합', '반합'].includes(r.type));
+        out.push({ base, label, pos: k, b: p.b, released: rel.map(r => ({ type: r.type, name: r.name })) });
+      }
+    }
+    return out;
+  }
   const gongmangOf = p => { const head = p.i - (p.i % 10); const hb = head % 12; return [mod(hb + 10, 12), mod(hb + 11, 12)]; };
 
   // ───────────── L3: 오행·강약 모델 ─────────────
@@ -1597,6 +1638,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     ch.relations = relationsAmong(items);
     ch.sinsal = {};
     for (const it of items) ch.sinsal[it.id] = sinsalFor(ch, it);
+    ch.gongmangFx = gongmangFxOf(ch);
     ch.model = inp.model || 'season';
     ch.weights = elementWeights(ch, ch.model);
     ch.weightsAll = Object.fromEntries(Object.keys(MODELS).map(m => [m, elementWeights(ch, m)]));
@@ -2888,7 +2930,61 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     return `원국의 ${n.natalRootLevel}이 그대로 유지되며, 현재 운에서 추가되는 근은 없습니다.`;
   }
 
+  // ───────────── 택일: 날짜별 길흉 참고 점수 (전통 기법의 조합, 흐름 점수와 무관) ─────────────
+  const JIAN12 = ['건', '제', '만', '평', '정', '집', '파', '위', '성', '수', '개', '폐'];
+  const TAEK_PURPOSE = {
+    //                        건  제  만  평  정  집  파    위  성  수  개  폐
+    move:     { label: '이사·입주',   jian: [4, -2, 8, 6, 6, 2, -10, -4, 8, -2, 8, -8],  son: true },
+    wedding:  { label: '결혼·상견례', jian: [4, -4, 8, 6, 6, 2, -10, -4, 8, -2, 8, -8],  son: true },
+    contract: { label: '계약·개업',   jian: [8, 2, 8, 6, 6, -2, -10, -4, 8, -2, 8, -8],  son: false },
+    trip:     { label: '여행·출발',   jian: [8, 0, 6, 6, 0, -4, -10, -4, 4, -2, 8, -6],  son: false },
+    exam:     { label: '시험·면접',   jian: [4, 2, 6, 4, 8, 0, -8, -4, 8, 0, 6, -6],     son: false },
+    surgery:  { label: '수술·치료',   jian: [-2, 4, 2, 2, 0, 2, 2, -4, 0, 6, 6, -4],     son: false },
+  };
+  const TAEK_REL = { '충': -18, '형': -8, '해': -5, '파': -4, '원진': -5, '육합': 8, '삼합': 6, '반합': 4, '방합': 3 };
+  const TAEK_POSW = { day: 1, year: 0.6, month: 0.5, hour: 0.4 };
+  const TAEK_ROLE = { '용신': 1, '희신': 0.6, '한신': 0, '구신': -0.6, '기신': -1 };
+  const TAEK_BANDS = [[74, '길일'], [62, '양호'], [48, '보통'], [-1, '피할 날']];
+  function pickDays(ch, purpose, y, m, d, n) {
+    const P = TAEK_PURPOSE[purpose] || TAEK_PURPOSE.move, dm = ch.pillars.day.s, roles = ch.yong && ch.yong.roles, out = [];
+    const J0 = jdnFromYMD(y, m, d);
+    for (let i = 0; i < n; i++) {
+      const J = J0 + i, [yy, mm, dd] = ymdFromJdn(J), dp = dayPillarOfJdn(J);
+      const mb = monthPillarAt(Date.UTC(yy, mm - 1, dd, 3)).b;
+      const rs = []; const push = (pts, text) => { if (pts) rs.push({ pts, text }); };
+      for (const k of POS) {
+        const p = ch.pillars[k]; if (!p) continue;
+        for (const r of relationsAmong([{ id: 'n', s: p.s, b: p.b }, { id: 't', s: dp.s, b: dp.b }])) {
+          const w = TAEK_REL[r.type]; if (w == null) continue;
+          push(Math.round(w * TAEK_POSW[k]), `내 ${POS_K[k]}지와 ${r.name}`);
+        }
+      }
+      const sk = key(dm, dp.s);
+      if (STEM_HAP[sk] != null) push(5, '내 일간과 천간합'); else if (STEM_CHUNG.includes(sk)) push(-6, '내 일간과 천간충');
+      if (CHEONEUL[dm].includes(dp.b)) push(6, '천을귀인이 되는 날');
+      const cd = CHEONDUK[mb]; if ((cd[0] === 's' && cd[1] === dp.s) || (cd[0] === 'b' && cd[1] === dp.b)) push(5, '천덕일');
+      if (WOLDUK(mb) === dp.s) push(5, '월덕일');
+      if (ch.gongmang.day.includes(dp.b)) push(-5, '내 일주의 공망 지지가 오는 날');
+      if (roles) {
+        const a = TAEK_ROLE[roles[stemEl(dp.s)]] || 0, c = TAEK_ROLE[roles[BR_EL[dp.b]]] || 0;
+        push(Math.round(a * 5), a > 0 ? '날의 천간이 용신·희신 오행' : '날의 천간이 기신·구신 오행');
+        push(Math.round(c * 3), c > 0 ? '날의 지지가 용신·희신 오행' : '날의 지지가 기신·구신 오행');
+      }
+      const jn = mod(dp.b - mb, 12);
+      push(P.jian[jn], `${JIAN12[jn]}일(12건제)`);
+      const lu = solarToLunar(yy, mm, dd);
+      if (P.son && lu && [9, 10, 19, 20, 29, 30].includes(lu.d)) push(6, '손 없는 날');
+      let score = Math.max(0, Math.min(100, 62 + rs.reduce((a, r) => a + r.pts, 0)));
+      if (P.jian[jn] <= -6) score = Math.min(score, 73); // 건제상 꺼리는 날(파·폐 등)은 다른 요인이 좋아도 길일로 올리지 않는다
+      const grade = TAEK_BANDS.find(([t]) => score >= t)[1];
+      rs.sort((a, b) => Math.abs(b.pts) - Math.abs(a.pts));
+      out.push({ y: yy, m: mm, d: dd, jdn: J, dow: (J + 1) % 7, pillar: dp, lunar: lu, jian: JIAN12[jn], score, grade, reasons: rs });
+    }
+    return out;
+  }
+
   G.Manse = {
+    pickDays, TAEK_PURPOSE, JIAN12, gongmangFxOf,
     compute, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
@@ -3036,6 +3132,13 @@ var GLOSSARY = {
   '천주귀인': ['신살', '"하늘의 주방"이라는 뜻의 길성입니다. 일간이 낳는 식신(먹을 복의 별)이 지지에서 안정적으로 자리 잡은 곳으로, 갑→사, 을→오, 병→사, 정→오, 무→신, 기→유, 경→해, 신→자, 임→인, 계→묘에 해당합니다. 의식주가 넉넉하고 음식·요리와 인연이 있다고 봅니다.'],
   '복음': ['운', '들어오는 운의 간지가 원국의 같은 간지와 똑같이 겹치는 것입니다. 같은 기운이 두 배로 쌓여 그 자리의 일이 반복되거나 정체되고, 기쁜 일은 더 커지고 힘든 일은 길어진다고 봅니다. 해당 기둥이 말하는 영역(년=조상·사회, 월=직장, 일=나·배우자, 시=자녀·말년)을 살펴보세요. 참고 신호이며 점수에는 반영하지 않습니다.'],
   '반음': ['운', '들어오는 운의 간지가 원국 기둥과 천간·지지 모두 정반대로 부딪치는 것입니다(천극지충). 그 기둥이 말하는 영역에서 급격한 변화, 이동, 뒤바뀜이 일어나기 쉽다고 봅니다. 나쁜 일만이 아니라 낡은 것을 정리하는 계기로도 풉니다. 참고 신호이며 점수에는 반영하지 않습니다.'],
+  '급각살': ['신살', '"다리를 급하게 다친다"는 뜻입니다. 태어난 달의 계절에 따라 봄(인묘진월)은 해·자, 여름(사오미월)은 묘·미, 가을(신유술월)은 인·술, 겨울(해자축월)은 축·진이 일지나 시지에 있을 때 붙습니다. 다리·관절을 다치거나 급한 사고를 조심하라는 신호로 봅니다. 학파마다 다른 참고용의 약한 살입니다.'],
+  '탕화살': ['신살', '"끓는 물과 불"이라는 뜻입니다. 인(寅)이 사·신과, 오(午)가 또 다른 오와, 축(丑)이 술·미와 함께 있어 형을 이룰 때 붙는 것으로 봅니다. 화상·약물·급체처럼 뜨겁거나 급한 일을 조심하라는 신호이며, 감정이 급하게 끓어오르는 성향으로도 풉니다. 학파마다 다른 참고용 살입니다.'],
+  '천문성': ['신살', '"하늘의 문"이라는 뜻입니다. 묘·미·술·해가 일지나 시지에 있을 때 붙는 것으로 봅니다. 직관력과 영감이 좋고 철학·종교·의학·역학처럼 눈에 보이지 않는 것을 다루는 일에 소질이 있다고 봅니다. 다만 몸이 약하거나 예민해지기 쉽다는 해석도 있습니다. 학파마다 해당 글자가 다릅니다.'],
+  '해공': ['공망', '공망(비어 있는 자리)이 충이나 합을 만나 어느 정도 풀리는 것을 말합니다. 공망 글자가 충을 맞으면 비어 있던 자리가 깨어나고, 합을 만나면 채워진다고 봅니다. 풀렸다고 해서 공망이 완전히 사라지는 것은 아니고 "작용이 약하거나 늦다"는 해석이 덜해진다는 정도로 읽습니다. 이 앱은 원국 안의 충·육합·삼합·반합만 따집니다.'],
+  '12건제': ['택일', '날짜마다 붙는 12가지 성격(건·제·만·평·정·집·파·위·성·수·개·폐)입니다. 그달의 월지에서 시작해 날의 지지가 몇 칸째인지로 정합니다. 만·평·정·성·개일은 대체로 좋고, 파·위·폐일은 대체로 꺼린다고 봅니다. 목적에 따라 좋은 날이 달라서(예: 개업은 건·개일, 이사는 만·성·개일) 이 앱은 목적별 가중치를 따로 둡니다.'],
+  '손 없는 날': ['택일', '음력 날짜가 9·10·19·20·29·30일인 날입니다. 악귀(손)가 없다고 보는 날이라 이사·결혼처럼 사람이 움직이는 일에 좋다고 봅니다. 민간에서 널리 쓰는 기준이라 이 앱도 이사·결혼 목적일 때 점수에 조금 더합니다.'],
+  '택일': ['택일', '일을 시작할 좋은 날을 고르는 것입니다. 이 앱은 날의 간지와 내 사주의 충·형·합, 귀인일, 12건제, 내 용신 오행을 함께 보며 점수로 보여 줍니다. 전통 기법을 조합한 참고 정보라서 흐름 점수와는 별개입니다.'],
   '십악대패일': ['신살', '"열 가지 큰 실패의 날"이라는 뜻입니다. 일주가 갑진·을사·병신·정해·무술·기축·경진·신사·임신·계해일 때 붙습니다. 타고난 재물이 새기 쉽다고 보는 옛 해석이며, 지금은 돈 관리를 꼼꼼히 하라는 정도의 참고로만 봅니다.'],
 
   // ── 강약
@@ -3595,12 +3698,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return `${S.isExample ? '<b style="color:var(--seal)">예시</b> · ' : ''}${nm}${i.gender === 'M' ? '남' : '여'} · ${d} · ${esc(i.city === '직접 입력' ? '경도 ' + i.lon + '°' : i.city)}${ch ? ' · ' + ['year', 'month', 'day', 'hour'].map(k => ch.pillars[k] ? M.gzName(ch.pillars[k]) : '').join(' ') : ''}`;
   }
   function renderTop() {
-    const tabs = [['wonguk', '원국'], ['rel', '관계·신살'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ['fs', '풍수'], ['tarot', '타로'], ['gl', '용어']];
+    const tabs = [['wonguk', '원국'], ['rel', '관계·신살'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ['tk', '택일'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ['fs', '풍수'], ['tarot', '타로'], ['gl', '용어']];
     return `<header class="top"><div class="top-in">
       <div class="brand"><div class="seal" aria-hidden="true">萬<br>歲</div><h1>만트라 만세력</h1></div>
       <div class="who">${whoLine()}</div>
       ${adminPw ? `<span class="admin-badge">관리자</span><button class="btn" data-act="admin-out">로그아웃</button>` : ''}
-      <span class="seg xp" role="group" aria-label="내보내기"><button type="button" data-export="pdf" title="현재 탭을 A4 PDF로 저장">PDF</button><button type="button" data-export="png" title="현재 탭을 A4 이미지(PNG)로 저장">이미지</button></span>
+      <span class="seg xp" role="group" aria-label="내보내기"><button type="button" data-export="pdf" title="현재 탭을 A4 PDF로 저장">PDF</button><button type="button" data-export="png" title="현재 탭을 A4 이미지(PNG)로 저장">이미지</button><button type="button" data-export="card" title="공유용 사주 카드 이미지로 저장">카드</button></span>
       <button class="btn${S.editing ? '' : ' primary'}" data-act="edit">${S.editing ? '입력 닫기' : '사주 입력'}</button>
     </div>
     <nav class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="tab" role="tab" data-tab="${k}" aria-selected="${S.tab === k}">${l}</button>`).join('')}</nav></header>`;
@@ -3768,6 +3871,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">강: 천간에 드러나거나 비율이 뚜렷함 · 약: 지지 정기까지 포함해야 성립 · 참고: 판단 보조. 구조가 성립해도 합·제어 관계에 따라 작용이 줄어들 수 있으며, 이 앱은 그 해소 여부를 판정하지 않습니다.</p>
       ${pat.tuchul.length ? `<div><h3 style="margin-bottom:6px">${term('투출')}</h3><div>${pat.tuchul.map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div></div>` : ''}
     </section>
+    ${sinsalSummary(ch)}
     <section class="card">
       <div class="card-h"><h2>신살과 길성</h2><span class="note">원국 전체 균형보다 비중이 낮은 보조 지표</span></div>
       <div class="list">${cols.map(k => `<div class="li"><span class="k">${M.POS_K[k]}주 ${M.gzName(ch.pillars[k])}</span><span class="v">${ch.sinsal[k].length ? ch.sinsal[k].map(x => `<span class="chip ${x.good ? 'good' : 'bad'}">${term(x.name)} <span style="opacity:.7">${x.basis}</span></span>`).join('') : '<span class="muted small">없음</span>'}</span><span class="small muted">${term(ch.cells[k].sinsal12)}</span></div>`).join('')}</div>
@@ -3776,7 +3880,181 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <div class="li"><span class="k">${term('공망')} · 년주</span><span class="v"><b>${gmY.map(b => M.BR[b] + M.BR_K[b]).join(' ')}</b> <span class="small muted">${hitY.length ? hitY.join('·') + '가 공망' : '원국 지지 중 해당 없음'}</span></span><span></span></div>
       </div>
       <p class="note">${term('12신살')}은 ${ch.sinsalBase === 'day' ? '일지' : '년지'} 기준입니다. 기준은 입력의 계산 기준 설정에서 바꿀 수 있습니다.</p>
+    </section>
+    ${upcomingSinsal(ch)}`;
+  }
+
+  // ───────────── 신살 한눈에 보기 · 다가오는 신살 ─────────────
+  // [핵심어, 한 줄 설명] — 요약 카드와 타임라인 힌트에 쓴다. 자세한 설명은 용어 사전(term)에 있다.
+  const SINSAL_BRIEF = {
+    '천을귀인': ['귀인의 도움', '어려울 때 도와주는 사람이 나타나는 가장 좋은 길성'],
+    '문창귀인': ['공부·시험', '글재주와 시험운이 좋은 별'],
+    '금여록': ['배우자·품위', '좋은 배우자와 품위 있는 생활을 뜻하는 길성'],
+    '암록': ['숨은 도움', '뜻밖의 도움과 드러나지 않는 재물'],
+    '건록': ['자립·직업', '스스로 설 수 있는 힘과 직업 안정'],
+    '양인살': ['추진력·과격함', '강한 추진력과 결단력, 과격함은 조심'],
+    '홍염살': ['이성 매력', '이성을 끄는 매력과 멋을 내는 감각'],
+    '천덕귀인': ['재난 완화', '나쁜 일이 크게 번지지 않게 막아 주는 별'],
+    '월덕귀인': ['너그러움', '나쁜 일을 줄여 주고 성품이 너그러운 별'],
+    '백호대살': ['사고 주의·강단', '다침·사고는 조심하되 강한 기질과 추진력으로 쓰는 살'],
+    '괴강살': ['강한 리더십', '리더십과 결단력이 강하나 극단으로 흐르기 쉬움'],
+    '고신살': ['혼자 있는 시간', '가족과 떨어지거나 혼자 지내는 경향'],
+    '과숙살': ['배우자와 거리', '배우자와 떨어져 지내기 쉬운 경향'],
+    '천의성': ['치유·돌봄', '의료·상담처럼 사람을 돌보는 일과 인연'],
+    '현침살': ['날카로움', '말과 시선이 날카롭고 예민, 정밀한 일에는 장점'],
+    '학당귀인': ['학문', '배움을 즐기고 공부·연구에 인연'],
+    '태극귀인': ['위기 극복·정신세계', '위기에서 도움을 받고 철학·종교에 관심'],
+    '낙정관살': ['함정·사고', '물가·높은 곳 사고나 갑작스러운 함정 주의'],
+    '천라지망': ['답답함·묶임', '일이 막히고 묶이는 느낌, 법적 문제 주의'],
+    '음양차착살': ['인연의 엇갈림', '연애·결혼에서 엇갈림 주의(참고용)'],
+    '고란살': ['독립심·혼자', '배우자 인연이 늦거나 혼자 있는 시간(참고용)'],
+    '십악대패일': ['재물 관리', '돈이 새기 쉬우니 꼼꼼한 관리(참고용)'],
+    '복성귀인': ['평탄한 복', '먹고사는 걱정이 덜한 복'],
+    '상문살': ['슬픈 소식', '상실·우울 주의, 남의 아픔을 헤아리는 마음'],
+    '조객살': ['경조사·이별', '경조사·이별·구설 주의'],
+    '효신살': ['치우친 생각', '윗사람과 엇갈림, 한 분야를 깊이 파는 집중력'],
+    '삼기귀인': ['비범한 재능', '드문 재능과 큰 뜻을 품는 길성'],
+    '금신살': ['날카로운 추진력', '칼날 같은 결단력과 추진력, 다툼은 주의'],
+    '천관귀인': ['직위·명예', '승진·직위와 공적 명예에 인연'],
+    '천복귀인': ['복록', '먹고사는 복과 편안히 누리는 복'],
+    '천주귀인': ['의식주 넉넉함', '의식주가 넉넉하고 음식과 인연'],
+    '급각살': ['급한 사고', '다리·급한 사고 주의(참고용)'],
+    '탕화살': ['화상·급변', '불·뜨거운 것·급한 일 주의(참고용)'],
+    '천문성': ['직관·영성', '직관력과 영적·학문적 감각'],
+    '복음': ['반복·정체', '같은 기운이 겹쳐 일이 반복되거나 정체'],
+    '반음': ['급변', '정반대로 부딪쳐 일어나는 급격한 변화'],
+    '겁살': ['손재 주의', '갑자기 잃는 일은 조심, 과감한 결단력'],
+    '재살': ['구속 주의', '갇히거나 묶이는 일은 조심'],
+    '천살': ['뜻밖의 일', '사람 힘으로 어쩔 수 없는 일 조심'],
+    '지살': ['새 출발', '이사·이직·새로운 시작'],
+    '연살': ['인기·이성(도화)', '사람을 끄는 매력과 이성 관계'],
+    '월살': ['더딤', '일이 막히고 더디게 풀림'],
+    '망신살': ['구설·표현', '체면·구설은 조심, 자신을 드러내는 힘'],
+    '장성살': ['리더십', '조직을 이끄는 리더십과 권위'],
+    '반안살': ['승진·안정', '승진·출세와 안정된 지위'],
+    '역마살': ['이동·변화', '이동·해외·출장·여행'],
+    '육해살': ['잔병·지연', '잔병치레와 지연은 주의, 돌봄과 헌신'],
+    '화개살': ['학문·예술·고독', '학문·종교·예술에 깊이 빠지는 기운'],
+  };
+  const SS_AREA = { year: '조상·어린 시절', month: '부모·직장', day: '배우자·나', hour: '자녀·말년' };
+  const SS_NOTABLE12 = ['연살', '역마살', '화개살', '장성살', '반안살', '망신살', '겁살', '재살', '지살'];
+  function gongmangFxHTML(ch) {
+    const fx = ch.gongmangFx || [];
+    if (!fx.length) return '<div class="li"><span class="k">' + term('해공') + '</span><span class="v small muted">원국 지지 중 공망에 든 글자가 없습니다.</span><span></span></div>';
+    return fx.map(f => `<div class="li"><span class="k">${term('해공')} · ${f.label}</span><span class="v"><b>${M.POS_K[f.pos]}지 ${M.BR[f.b]}${M.BR_K[f.b]}</b><span class="small muted">${f.released.length ? `${f.released.map(r => esc(r.name)).join(', ')}로 풀립니다 — 비어 있던 자리가 일부 채워진다고 봅니다` : '충·합이 없어 공망이 그대로 작용합니다 — 그 자리의 일이 약하거나 늦게 나타난다고 봅니다'}</span></span><span></span></div>`).join('');
+  }
+  function sinsalSummary(ch) {
+    const cols = ['year', 'month', 'day', 'hour'].filter(k => ch.pillars[k]);
+    const map = new Map();
+    for (const k of cols) for (const x of ch.sinsal[k]) { if (!map.has(x.name)) map.set(x.name, { good: x.good, pos: [] }); map.get(x.name).pos.push(k); }
+    const rows = [...map].map(([name, v]) => ({ name, good: v.good, pos: v.pos }));
+    const good = rows.filter(r => r.good), bad = rows.filter(r => !r.good);
+    const li = r => { const b = SINSAL_BRIEF[r.name] || ['', '']; return `<div class="li"><span class="k">${term(r.name)}</span><span class="v"><b>${esc(b[0])}</b><span class="small muted">${r.pos.map(k => `${M.POS_K[k]}주(${SS_AREA[k]})`).join(' · ')} — ${esc(b[1])}</span></span><span></span></div>`; };
+    const s12 = cols.map(k => { const n = ch.cells[k].sinsal12, b = SINSAL_BRIEF[n]; return `<span class="chip${SS_NOTABLE12.includes(n) ? ' hl' : ''}">${M.POS_K[k]} ${term(n)}${b ? ` <span style="opacity:.7">${esc(b[0])}</span>` : ''}</span>`; }).join('');
+    const lead = good.length >= bad.length ? '길성이 주의 신호보다 같거나 많이 잡힙니다.' : '주의 신호가 더 많이 잡히지만, 대부분의 살은 좋은 면과 조심할 면을 함께 가집니다.';
+    return `<section class="card">
+      <div class="card-h"><h2>내 사주 신살 한눈에 보기</h2><span class="note">길성 ${good.length}개 · 주의 ${bad.length}개 · ${lead}</span></div>
+      ${good.length ? `<h3 style="margin:4px 0">길성</h3><div class="list">${good.map(li).join('')}</div>` : ''}
+      ${bad.length ? `<h3 style="margin:10px 0 4px">주의 신호</h3><div class="list">${bad.map(li).join('')}</div>` : ''}
+      <h3 style="margin:10px 0 4px">${term('12신살')} (${ch.sinsalBase === 'day' ? '일지' : '년지'} 기준)</h3>
+      <div>${s12}</div>
+      <h3 style="margin:10px 0 4px">${term('공망')}과 ${term('해공')}</h3>
+      <div class="list">${gongmangFxHTML(ch)}</div>
+      <p class="note">신살은 오행 균형보다 비중이 낮은 보조 지표이며 점수 계산에는 아주 제한적으로만 쓰입니다. 같은 살도 어느 기둥에 있는지에 따라 의미가 달라서, 기둥 이름 옆 괄호가 그 영역을 뜻합니다.</p>
     </section>`;
+  }
+  // 올해 월별·앞으로 5년 동안 들어오는 신살
+  function upcomingSinsal(ch) {
+    const nowY = M.yearPillarAt(NOW).sajuYear;
+    const hint = names => { const k = names.map(n => SINSAL_BRIEF[n] && SINSAL_BRIEF[n][0]).filter(Boolean); return k.slice(0, 3).join(' · '); };
+    const chipsOf = x => {
+      const sin = M.luckRelations(ch, x).sinsal;
+      const names = [x.sinsal12, ...sin.map(q => q.name)];
+      const chips = [`<span class="chip${SS_NOTABLE12.includes(x.sinsal12) ? ' hl' : ''}">${term(x.sinsal12)}</span>`, ...sin.map(q => `<span class="chip ${q.good ? 'good' : 'bad'}">${term(q.name)}</span>`)];
+      return { chips: chips.join(''), hint: hint(names) };
+    };
+    let yrs = '', mos = '', head = '';
+    try {
+      const ys = M.seunRange(ch, nowY, nowY + 5);
+      yrs = ys.map(x => { const c = chipsOf(x), sj = samjaeTag(samjaeOf(x.year)); return `<tr class="${x.year === nowY ? 'cur' : ''}"><td class="num">${x.year}년<div class="small muted">${x.age}세</div></td><td class="gz">${M.gzName(x)}</td><td>${c.chips}${sj}</td><td class="small">${esc(c.hint)}</td></tr>`; }).join('');
+      const ms = M.wolun(ch, nowY);
+      mos = ms.map((x, i) => { const c = chipsOf(x), end = i < 11 ? ms[i + 1].startMs : x.startMs + 30 * 86400000, on = NOW >= x.startMs && NOW < end; return `<tr class="${on ? 'cur' : ''}"><td class="num">${kstYMD(x.startMs)[1]}월${on ? ' <span class="muted small">· 지금</span>' : ''}</td><td class="gz">${M.gzName(x)}</td><td>${c.chips}</td><td class="small">${esc(c.hint)}</td></tr>`; }).join('');
+      const cur = ys.find(x => x.year === nowY);
+      if (cur) { const c = chipsOf(cur); head = `<p class="small">올해(${nowY}년 ${M.gzName(cur)})에 들어오는 신살: ${c.chips}${c.hint ? ` — <b>${esc(c.hint)}</b>의 기운이 두드러지는 해입니다.` : ''}</p>`; }
+    } catch (e) { return ''; }
+    return `<section class="card">
+      <div class="card-h"><h2>다가오는 신살</h2><span class="note">운으로 들어오는 글자가 내 사주와 만나 붙는 신살 · 점수에는 반영하지 않는 참고 정보</span></div>
+      ${head}
+      <h3 style="margin:8px 0 4px">앞으로 5년 (세운)</h3>
+      <div class="tbl-wrap"><table class="dt"><thead><tr><th>해</th><th>간지</th><th>신살</th><th>핵심</th></tr></thead><tbody>${yrs}</tbody></table></div>
+      <h3 style="margin:12px 0 4px">${nowY}년 월별 (월운)</h3>
+      <div class="tbl-wrap"><table class="dt"><thead><tr><th>달</th><th>간지</th><th>신살</th><th>핵심</th></tr></thead><tbody>${mos}</tbody></table></div>
+      <p class="note">월은 절기 기준이라 양력 달과 며칠 어긋납니다. 12신살은 ${ch.sinsalBase === 'day' ? '일지' : '년지'} 기준, 복음·반음은 운의 간지가 원국 기둥과 같거나 정반대일 때 붙습니다.</p>
+    </section>`;
+  }
+
+  // ───────────── 택일 ─────────────
+  const tkState = () => (S.tk = S.tk || { purpose: 'move', days: 60, start: null });
+  const TK_WD = ['일', '월', '화', '수', '목', '금', '토'];
+  function renderTk() {
+    const ch = S.ch, T = tkState(), PU = M.TAEK_PURPOSE;
+    const sd = T.start ? T.start.split('-').map(Number) : TODAY;
+    let list;
+    try { list = M.pickDays(ch, T.purpose, sd[0], sd[1], sd[2], T.days); } catch (e) { return `<section class="card"><p class="err">날짜 범위를 계산할 수 없습니다: ${esc(e.message)}</p></section>`; }
+    const fmt = r => `${r.m}.${r.d}(${TK_WD[r.dow]})`;
+    const rs = (r, n) => r.reasons.slice(0, n).map(q => `${q.pts > 0 ? '+' : '−'}${Math.abs(q.pts)} ${esc(q.text)}`).join(' · ') || '특별한 요인 없음';
+    const cnt = g => list.filter(r => r.grade === g).length;
+    const row = r => `<div class="li"><span class="k num">${fmt(r)}<br><span class="small muted">${M.gzNameK(r.pillar)}일 · ${r.jian}</span></span><span class="v"><b>${r.grade} · ${r.score}점</b><span class="small muted">${rs(r, 4)}</span></span><span class="small muted">${r.lunar ? `음력 ${r.lunar.m}.${r.lunar.d}` : ''}</span></div>`;
+    const best = list.filter(r => r.grade === '길일').sort((a, b) => b.score - a.score || a.jdn - b.jdn).slice(0, 8);
+    const worst = list.filter(r => r.grade === '피할 날').sort((a, b) => a.score - b.score || a.jdn - b.jdn).slice(0, 6);
+    const startVal = `${sd[0]}-${pad(sd[1])}-${pad(sd[2])}`;
+    return `<section class="card">
+      <div class="card-h"><h2>택일 — 좋은 날 고르기</h2><span class="note">내 사주와 날짜의 간지가 만나는 관계를 보는 전통 참고 기법</span></div>
+      <div class="frow" style="gap:8px;flex-wrap:wrap">
+        <div class="seg" role="group" aria-label="목적">${Object.entries(PU).map(([k, v]) => `<button type="button" data-tk="purpose:${k}" aria-pressed="${T.purpose === k}">${v.label}</button>`).join('')}</div>
+      </div>
+      <div class="frow" style="gap:8px;flex-wrap:wrap;align-items:center">
+        <label class="field" style="flex:0 0 auto"><span>시작일</span><input type="date" id="tk-start" value="${startVal}"></label>
+        <div class="seg" role="group" aria-label="기간">${[30, 60, 90].map(n => `<button type="button" data-tk="days:${n}" aria-pressed="${T.days === n}">${n}일</button>`).join('')}</div>
+      </div>
+      <p class="small">${T.days}일 중 <b>길일 ${cnt('길일')}</b> · 양호 ${cnt('양호')} · 보통 ${cnt('보통')} · <b>피할 날 ${cnt('피할 날')}</b></p>
+    </section>
+    <section class="card"><div class="card-h"><h2>추천 날짜</h2><span class="note">${PU[T.purpose].label} · 점수 높은 순</span></div>${best.length ? `<div class="list">${best.map(row).join('')}</div>` : '<p class="muted small">이 기간에는 길일 등급인 날이 없습니다. 기간을 늘려 보세요.</p>'}</section>
+    <section class="card"><div class="card-h"><h2>피하면 좋은 날</h2><span class="note">충·형 등 내 사주와 부딪치는 날</span></div>${worst.length ? `<div class="list">${worst.map(row).join('')}</div>` : '<p class="muted small">뚜렷하게 피할 날이 없습니다.</p>'}</section>
+    <section class="card">
+      <details><summary><b>${T.days}일 전체 보기</b></summary>
+      <div class="tbl-wrap"><table class="dt"><thead><tr><th>날짜</th><th>일진</th><th>건제</th><th>등급</th><th>근거</th></tr></thead><tbody>${list.map(r => `<tr><td class="num">${fmt(r)}</td><td class="gz">${M.gzName(r.pillar)}</td><td>${r.jian}</td><td><span class="chip ${r.grade === '길일' ? 'good' : r.grade === '피할 날' ? 'bad' : ''}">${r.grade} ${r.score}</span></td><td class="small">${rs(r, 3)}</td></tr>`).join('')}</tbody></table></div></details>
+      <p class="note">점수는 ${term('12건제')}(그날의 성격), 날의 간지와 내 원국 기둥의 충·형·합, 천을귀인·천덕·월덕, 내 용신 오행과의 맞음, 내 공망 지지${PU[T.purpose].son ? ', ' + term('손 없는 날') : ''}을 더한 것입니다. 목적마다 건제 가중치가 다릅니다. 이 앱의 흐름 점수와는 별개의 참고 정보이며, 절기가 바뀌는 날의 월지는 그날 정오 기준으로 계산합니다. 중요한 일정은 날짜 하나에 의존하지 말고 현실 조건을 먼저 보세요.</p>
+    </section>`;
+  }
+
+  // ───────────── 공유용 사주 카드 (이미지) ─────────────
+  function xpCardStage() {
+    const ch = S.ch, d = ch.pillars.day.s, e = M.stemEl(d), y = ch.yong, cols = ['hour', 'day', 'month', 'year'];
+    const yongEl = y && y.roles ? +Object.keys(y.roles).find(k => y.roles[k] === '용신') : null;
+    const names = []; for (const k of ['year', 'month', 'day', 'hour']) for (const x of (ch.sinsal[k] || [])) if (!names.find(n => n.name === x.name)) names.push(x);
+    const picked = [...names.filter(x => x.good), ...names.filter(x => !x.good)].slice(0, 10);
+    const pill = k => { const p = ch.pillars[k], c = ch.cells[k]; if (!p || !c) return `<div class="xc-p"><div class="xc-pl">${M.POS_K[k]}주</div><div class="xc-tg">시간 미상</div></div>`; return `<div class="xc-p${k === 'day' ? ' me' : ''}"><div class="xc-pl">${M.POS_K[k]}주</div><div class="xc-tg">${c.stemTG === '일간' ? '일간(나)' : c.stemTG}</div><div class="xc-g ${ECLS[M.stemEl(p.s)]}"><b>${M.STEM[p.s]}</b><i>${M.STEM_K[p.s]}</i></div><div class="xc-g ${ECLS[M.BR_EL[p.b]]}"><b>${M.BR[p.b]}</b><i>${M.BR_K[p.b]}</i></div><div class="xc-tg">${c.branchTG}</div><div class="xc-us">${c.unseong} · ${c.sinsal12}</div></div>`; };
+    const bars = ch.weights.pct.map((v, i) => `<div class="xc-bar ${ECLS[i]}"><span>${M.EL_K[i]}</span><div><i style="width:${Math.max(3, Math.round(v))}%"></i></div><em>${Math.round(v)}%</em></div>`).join('');
+    const el = document.createElement('div'); el.className = 'xc';
+    const tmp = document.createElement('div'); tmp.innerHTML = whoLine();
+    el.innerHTML = `<div class="xc-top"><b>만트라 만세력</b><span>${esc(tmp.textContent)}</span></div>
+      <div class="xc-title">${esc(S.inp.name || '나')}의 사주</div>
+      <div class="xc-sub">${M.STEM[d]}${M.EL[e]} 일간 · ${ch.strength.zone} 사주 (${ch.strength.help.toFixed(0)}%)${yongEl != null ? ` · 용신 ${elLabel(yongEl)}` : ''}</div>
+      <div class="xc-four">${cols.map(pill).join('')}</div>
+      <div class="xc-sec">오행 분포</div><div class="xc-bars">${bars}</div>
+      <div class="xc-sec">주요 신살</div><div class="xc-chips">${picked.length ? picked.map(x => `<span class="${x.good ? 'g' : 'b'}">${x.name}</span>`).join('') : '<span>뚜렷한 신살 없음</span>'}</div>
+      <div class="xc-foot">${new Date().toLocaleDateString('ko-KR')} · mantramanse.pages.dev</div>`;
+    el.style.cssText = 'position:absolute;left:-10000px;top:0';
+    document.body.appendChild(el);
+    return el;
+  }
+  async function xpCardRender() {
+    const stage = xpCardStage();
+    try {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      return await window.html2canvas(stage, { scale: XP_MOBILE ? 1.5 : 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+    } finally { stage.remove(); }
   }
 
   // ───────────── 오행·강약 ─────────────
@@ -6221,9 +6499,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     btns.forEach(b => b.disabled = true); btn.textContent = '만드는 중…';
     try {
       const sel = document.querySelector('.tab[aria-selected="true"]');
-      const label = sel ? sel.textContent.trim() : '만세력';
+      const label = kind === 'card' ? '사주카드' : sel ? sel.textContent.trim() : '만세력';
       await xpLibs(kind === 'pdf');
-      const pages = await xpRender(label);
+      const pages = kind === 'card' ? [await xpCardRender()] : await xpRender(label);
       const who = (S.inp && S.inp.name ? S.inp.name : '') || new Date().toISOString().slice(0, 10);
       const base = `만세력_${label}_${who}`.replace(/[\\/:*?"<>|\s]+/g, '_');
       if (kind === 'pdf') {
@@ -6286,6 +6564,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     else if (S.tab === 'ohaeng') body = renderOhaeng();
     else if (S.tab === 'yong') body = renderYong();
     else if (S.tab === 'luck') body = renderLuck();
+    else if (S.tab === 'tk') body = renderTk();
     else if (S.tab === 'zw') body = S.ch.ziwei ? renderZiwei() : renderWonguk();
     else body = renderGl();
     root.innerHTML = renderTop() + `<main class="wrap" style="padding-top:16px">${renderAdminLogin()}${renderForm()}${body}${adminPw ? '' : '<div class="admin-link-row"><a class="admin-link" href="#admin" onclick="setTimeout(()=>scrollTo(0,0),0)">관리자</a></div>'}</main>`;
@@ -6389,6 +6668,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (a.startsWith('zwy:')) { const d = +a.slice(4); S.zwY = d === 0 ? zwNowY() : Math.max(S.ch.ziwei.lunar.y, (S.zwY ?? zwNowY()) + d); render(); return; }
       if (a.startsWith('ym:')) { const d = +a.slice(3); if (d === 0) S.selYM = [TODAY[0], TODAY[1]]; else { let [y, m] = S.selYM; m += d; if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; } S.selYM = [y, m]; } if (S.sel && S.sel.kind === 'ilun') S.sel = null; render(); return; }
     }
+    const tkb = t.closest('[data-tk]');
+    if (tkb) { const [k, v] = tkb.dataset.tk.split(':'); const T = tkState(); T[k] = k === 'days' ? +v : v; render(); return; }
     const tb = t.closest('[data-tab]');
     if (tb) { if (S.editing) readForm(); S.tab = tb.dataset.tab; try { localStorage.setItem(STORE + '-tab', S.tab); } catch (e) { } render(); return; }
     const op = t.closest('[data-opt]');
@@ -6418,6 +6699,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const id = ev.target.id;
     if (id === 'f-hu' || id === 'f-city' || id === 'f-y') { readForm(); render(); }
     if (id.startsWith('tr-c-')) { const p = id.slice(5), v = ev.target.value; if (v) PK.tr.cards[p] = [v, PK.tr.cards[p] ? PK.tr.cards[p][1] : false]; else delete PK.tr.cards[p]; pkSave(); render(); }
+    if (id === 'tk-start' && ev.target.value) { tkState().start = ev.target.value; render(); }
     if (id === 'zw-adj') { S.zwAdj = ev.target.checked; render(); }
     if (id === 'zw-g12') { S.zwG12 = ev.target.checked; render(); }
   });
