@@ -69,6 +69,14 @@ button { font: inherit; color: inherit; }
 .xc-foot { font-size: 20px; color: var(--ink-2); text-align: center; margin-top: 6px; }
 .chip.hl { outline: 1.5px solid var(--accent); }
 
+.rt-adv { display: grid; gap: 10px; margin: 6px 0; }
+.rt-ab { border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; background: var(--surface-2); }
+.rt-ab.on { border-color: var(--accent); background: var(--surface); }
+.rt-ab h4 { margin: 0 0 4px; font-size: 0.92rem; }
+.rt-ab ul { margin: 2px 0 6px; padding-left: 1.15em; }
+.rt-ab li { font-size: 0.82rem; line-height: 1.65; color: var(--ink-2); }
+@media (min-width: 720px) { .rt-adv { grid-template-columns: 1fr 1fr; } }
+
 /* 상단 */
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 78%, transparent); -webkit-backdrop-filter: saturate(1.6) blur(14px); backdrop-filter: saturate(1.6) blur(14px); padding-block: 12px 10px; margin: 0 -16px; padding-inline: 16px; border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
 .top-in { max-width: 980px; margin: 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -3848,6 +3856,121 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
 
   // ───────────── 관계·신살 ─────────────
   const memberName = (id, kind) => id === 'luck' ? '운' : M.POS_K[id] + (kind === 'stem' ? '간' : '지');
+  // ── 지지 관계 해석: 관계의 종류 × 두 기둥이 맡은 자리(년=조상·초년, 월=부모·직장, 일=나·배우자, 시=자녀·말년) ──
+  // [두 자리 이름, 부딪칠 때, 합쳐질 때]
+  const REL_PAIR = {
+    'year-month': ['조상·집안 배경(년지)과 부모·직장 환경(월지)', '어린 시절 집안 분위기와 부모·사회 환경의 결이 달라, 일찍 집을 떠나거나 가치관이 갈리기 쉽습니다.', '집안 배경과 부모·직장 환경이 잘 이어져, 어릴 때부터 주어진 환경의 도움을 받기 쉽습니다.'],
+    'year-day': ['조상·집안 배경(년지)과 나·배우자 자리(일지)', '타고난 집안의 틀과 내가 꾸리는 삶이 달라, 고향이나 집안의 방식에서 벗어나 자기 길을 가기 쉽습니다.', '집안의 뿌리와 내 가정이 한 흐름으로 이어져, 배우자나 가정에서 안정감을 얻기 쉽습니다.'],
+    'year-hour': ['조상·집안 배경(년지)과 자녀·말년(시지)', '어린 시절 환경과 말년의 모습이 크게 달라지는 경향으로 봅니다.', '뿌리와 말년이 이어져 노후가 안정되는 경향으로 봅니다.'],
+    'month-day': ['부모·직장 환경(월지)과 나·배우자 자리(일지)', '일과 가정, 또는 부모·직장과 배우자 사이에서 마음이 갈리기 쉽습니다. 직장 변동이나 이사가 가정에 영향을 줄 수 있습니다.', '직장·사회생활과 가정이 서로 힘이 되어, 일과 가정의 균형을 잡기 좋은 구조입니다. 배우자 인연이 직업 환경과 이어지기도 합니다.'],
+    'month-hour': ['부모·직장 환경(월지)과 자녀·말년(시지)', '지금의 직업 환경과 말년의 계획·자녀 문제가 엇갈려, 중년에 방향을 바꾸는 일이 생기기 쉽습니다.', '직업에서 쌓은 것이 말년과 자녀에게 이어지는 구조로 봅니다.'],
+    'day-hour': ['나·배우자 자리(일지)와 자녀·말년(시지)', '배우자와 자녀, 또는 가정과 노후 생활 사이에서 변화가 생기기 쉽습니다. 말년에 사는 곳이나 방식이 바뀌는 경향으로 봅니다.', '가정과 자녀가 화목하게 이어지고 노후에 의지할 곳이 있는 구조로 봅니다.'],
+  };
+  // [관계 자체의 뜻, 세기(1~3)]
+  const REL_VERB = {
+    '충': ['정반대 기운이 정면으로 부딪치는 가장 강한 작용이라, 변화·이동·갈등이 크게 나타납니다. 깨지는 면이 있지만 막힌 것을 뚫는 계기가 되기도 합니다.', 3],
+    '형': ['서로 벌을 주고 다듬는 작용이라, 시비·법적 문제·수술처럼 "고치고 다듬는" 일로 나타나기 쉽습니다. 긴장이 오래 쌓이는 편입니다.', 2],
+    '파': ['관계나 계획에 금이 가는 정도의 균열입니다. 충보다 약하고, 믿던 일이 어긋나거나 약속이 흔들리는 식으로 나타납니다.', 1],
+    '해': ['겉으로는 드러나지 않게 서로를 방해하는 작용입니다. 오해나 서운함이 쌓여 사이가 틀어지기 쉽습니다.', 1],
+    '원진': ['이유 없이 서로 밉거나 어긋나는 감정의 작용입니다. 가까운 사이일수록 사소한 일에 서운함이 쌓입니다.', 1],
+    '귀문관': ['예민함과 직관이 함께 커지는 작용입니다. 영감·감수성이 뛰어난 면과 신경이 날카로워지는 면이 함께 있습니다.', 1],
+    '육합': ['두 글자가 짝을 이뤄 묶이는 작용입니다. 서로 끌리고 협력하는 인연이지만, 묶인 만큼 다른 관계에는 힘이 덜 갈 수 있습니다.', 2],
+    '삼합': ['세 글자가 모여 하나의 오행 세력을 만드는 합 중 가장 강한 작용입니다. 그 오행의 성향이 사주 전체를 이끕니다.', 3],
+    '반합': ['삼합의 두 글자만 모인 작용입니다. 삼합보다 약하지만 같은 방향으로 기운이 모입니다. 빠진 한 글자가 운에서 오면 삼합이 완성됩니다.', 2],
+    '방합': ['같은 계절의 세 글자가 모여 그 오행이 크게 강해집니다. 힘이 한쪽으로 쏠려 균형을 따로 살펴야 합니다.', 3],
+  };
+  const REL_POS = ['year', 'month', 'day', 'hour'];
+  const REL_ADJ = ['year-month', 'month-day', 'day-hour'];
+  const REL_BAD = ['충', '형', '파', '해', '원진'], REL_GOOD = ['육합', '삼합', '반합', '방합'];
+  // 관계 하나를 세 덩어리로 풀어 준다: [자리의 뜻, 관계 자체의 뜻, 덧붙임(자형·공망·합충 겹침)]
+  function relNote(ch, r, all) {
+    const ids = r.members.slice().sort((a, b) => REL_POS.indexOf(a) - REL_POS.indexOf(b));
+    const verb = REL_VERB[r.type], bad = REL_BAD.includes(r.type), good = REL_GOOD.includes(r.type);
+    let place = '';
+    if (ids.length === 2) {
+      const key = ids.join('-'), pair = REL_PAIR[key];
+      if (pair) place = `<b>${pair[0]}</b> — ${bad ? pair[1] : good ? pair[2] : '이 두 자리에서 예민함과 직관이 함께 드러납니다.'} ${REL_ADJ.includes(key) ? '이웃한 자리라 작용이 직접적입니다.' : '떨어진 자리라 작용이 다소 약하고 늦게 나타납니다.'}`;
+    } else {
+      place = `<b>${ids.map(k => M.POS_K[k] + '지').join('·')}</b> 세 자리가 함께 얽혀 있습니다 — ${bad ? '여러 영역에서 같은 종류의 긴장이 겹쳐 나타납니다.' : good ? `이 세 자리의 영역이 ${r.el != null ? M.EL[r.el] + ' 기운으로 ' : ''}하나로 뭉칩니다.` : ''}`;
+    }
+    const notes = [];
+    if (r.type === '형' && ids.length === 2 && ch.pillars[ids[0]].b === ch.pillars[ids[1]].b) notes.push('같은 글자가 스스로 부딪치는 자형이라, 자신을 몰아붙이거나 같은 문제를 되풀이하기 쉽습니다.');
+    const gm = ids.filter(k => ch.cells[k] && (ch.cells[k].gongmang || ch.cells[k].gongmangY));
+    if (gm.length) notes.push(`${gm.map(k => M.POS_K[k] + '지').join('·')}가 공망에 든 자리라 이 작용이 약하게 또는 늦게 나타난다고 봅니다.`);
+    // 강한 합이 같은 글자의 충·형을 달래거나, 충·형이 합을 흔드는 경우(합충)
+    const strongBad = o => ['충', '형'].includes(o.type), strongGood = o => ['육합', '삼합', '방합'].includes(o.type);
+    const opp = all.filter(o => o !== r && o.members.some(m => r.members.includes(m)) && ((strongBad(r) && strongGood(o)) || (strongGood(r) && strongBad(o)))).slice(0, 2);
+    if (opp.length) notes.push(`같은 글자가 ${opp.map(o => o.name).join(', ')}과도 얽힌 합충 구조라, ${strongBad(r) ? '합이 충을 달래' : '충·형이 합을 흔들어'} 작용이 줄어들 수 있습니다.`);
+    return `<span class="small" style="color:var(--ink-2);margin-top:3px">${place}</span>${verb ? `<span class="small" style="color:var(--ink-2)">${verb[0]}</span>` : ''}${notes.map(n => `<span class="small muted">· ${n}</span>`).join('')}`;
+  }
+  function relSummary(ch, rels, suf = '지') {
+    if (!rels.length) return '';
+    const cnt = {}; rels.forEach(r => r.members.forEach(m => { cnt[m] = (cnt[m] || 0) + 1; }));
+    const top = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0];
+    const nb = rels.filter(r => REL_BAD.includes(r.type) || r.type === '천간충').length, ng = rels.filter(r => REL_GOOD.includes(r.type) || r.type === '천간합').length;
+    const mix = nb && ng ? '합과 충이 함께 있어 안정과 변화가 번갈아 오는 구조입니다.' : nb ? '부딪치는 관계 위주라 변화와 긴장이 잦은 구조입니다.' : ng ? '합치는 관계 위주라 안정적으로 묶이는 구조입니다.' : '';
+    return `<p class="small" style="margin:0 0 6px"><b>종합</b> — 합 ${ng}개 · 충돌 계열 ${nb}개. ${mix} 관계가 가장 많이 모인 자리는 <b>${M.POS_K[top[0]]}${suf}(${SS_AREA[top[0]]})</b>로 ${top[1]}개입니다.</p>`;
+  }
+  function relListBranch(ch, rels) {
+    if (!rels.length) return '<p class="muted small">원국 안에 해당 관계가 없습니다.</p>';
+    return relSummary(ch, rels) + `<div class="list">${rels.map(r => `<div class="li"><span class="k">${term(r.type)}</span><span class="v"><b>${esc(r.name)}</b><span class="small muted">${r.members.map(m => memberName(m, r.kind)).join(' ↔ ')}</span>${relNote(ch, r, rels)}</span><span></span></div>`).join('')}</div>`;
+  }
+  // ── 천간 관계 해석: 천간은 겉으로 드러나는 생각·의지·사회적 모습 ──
+  const REL_PAIR_S = {
+    'year-month': ['조상·초년의 모습(년간)과 부모·직장에서의 모습(월간)', '어릴 때 받은 가르침·집안의 생각과 사회에 나와 만든 생각이 달라, 일찍 독립심이 생기거나 윗사람과 의견이 갈리기 쉽습니다.', '집안에서 배운 가치관이 사회생활로 자연스럽게 이어져, 윗사람의 도움이나 인정을 받기 쉽습니다.'],
+    'year-day': ['집안의 영향(년간)과 나 자신(일간)', '집안이 기대한 모습과 내가 가고 싶은 모습이 달라, 집안의 방식에서 벗어나 자기 길을 가기 쉽습니다.', '집안의 영향과 내 생각이 잘 맞아, 어른의 도움이나 전통 속에서 안정을 얻기 쉽습니다.'],
+    'year-hour': ['집안의 영향(년간)과 자녀·말년의 모습(시간)', '어릴 때의 가치관과 말년·자녀에 대한 생각이 달라지는 경향으로 봅니다.', '어릴 때의 가치관이 말년·자녀에게까지 이어지는 경향으로 봅니다.'],
+    'month-day': ['부모·직장에서의 모습(월간)과 나 자신(일간)', '직장이나 부모의 요구와 내 생각이 부딪쳐 스트레스를 받기 쉽습니다. 일에서 뜻을 굽히거나 자리를 옮기는 일이 생길 수 있습니다.', '직장·사회의 흐름과 내 뜻이 맞아 일에서 인정받고 협력자를 얻기 쉽습니다.'],
+    'month-hour': ['부모·직장에서의 모습(월간)과 자녀·말년의 모습(시간)', '지금의 사회적 모습과 말년·자녀 쪽 생각이 엇갈려, 중년에 방향을 바꾸기 쉽습니다.', '일에서 쌓은 생각과 평판이 말년·자녀에게 이어지는 구조로 봅니다.'],
+    'day-hour': ['나 자신(일간)과 자녀·말년의 모습(시간)', '내 생각과 자녀·아랫사람의 생각이 달라 세대 차이나 의견 충돌이 생기기 쉽습니다.', '자녀·아랫사람과 뜻이 잘 통하고 말년에 정이 이어지는 구조로 봅니다.'],
+  };
+  const REL_VERB_S = {
+    '천간합': ['두 천간이 짝을 이뤄 서로 끌어당기는 작용입니다. 협력과 인연이 되지만, 서로에게 묶여 제 역할을 덜 하기도 합니다. 합으로 다른 오행이 되는지는 조건에 따라 달라서, 이 앱은 오행 비율에 반영하지 않습니다.'],
+    '천간충': ['정반대 성질의 두 천간이 부딪치는 작용입니다. 생각이나 목표의 충돌, 갑작스러운 변화로 나타나기 쉽습니다.'],
+  };
+  // 갑0 을1 병2 정3 무4 기5 경6 신7 임8 계9
+  const REL_STEM_FLAVOR = {
+    '0-5': '갑기합(중정지합) — 신뢰와 포용으로 묶이는 합입니다. 너그럽고 믿음직한 관계를 만듭니다.',
+    '1-6': '을경합(인의지합) — 의리와 정으로 묶이는 합입니다. 결단과 부드러움이 서로를 보완합니다.',
+    '2-7': '병신합(위엄지합) — 권위와 겉모습으로 묶이는 합입니다. 체면과 위엄을 중시하는 관계입니다.',
+    '3-8': '정임합(인수지합) — 정과 감정으로 이어지는 합입니다. 마음이 잘 통하지만 감정에 휘둘리기 쉽습니다.',
+    '4-9': '무계합(무정지합) — 조건과 이해관계로 묶이는 담백한 합입니다. 감정보다 실리로 이어지는 편입니다.',
+    '0-6': '갑경충 — 나무와 쇠의 충돌입니다. 뻗어 나가려는 뜻과 이를 꺾는 통제가 맞섭니다.',
+    '1-7': '을신충 — 풀과 날카로운 쇠의 충돌입니다. 섬세한 감정과 날 선 비판이 맞섭니다.',
+    '2-8': '병임충 — 불과 큰물의 충돌입니다. 열정과 냉철함이 크게 부딪치며, 천간충 중 가장 센 편으로 봅니다.',
+    '3-9': '정계충 — 촛불과 빗물의 충돌입니다. 속마음의 갈등이 커서 마음이 불안정해지기 쉽습니다.',
+  };
+  function relNoteStem(ch, r, all) {
+    const ids = r.members.slice().sort((a, b) => REL_POS.indexOf(a) - REL_POS.indexOf(b));
+    const isHap = r.type === '천간합', key = ids.join('-'), pair = REL_PAIR_S[key];
+    const place = pair ? `<b>${pair[0]}</b> — ${isHap ? pair[2] : pair[1]} ${REL_ADJ.includes(key) ? '이웃한 자리라 작용이 직접적입니다.' : '떨어진 자리라 작용이 다소 약하고 늦게 나타납니다.'}` : '';
+    const ss = ids.map(k => ch.pillars[k].s), fk = Math.min(...ss) + '-' + Math.max(...ss);
+    const lines = [];
+    if (REL_STEM_FLAVOR[fk]) lines.push(REL_STEM_FLAVOR[fk]);
+    lines.push(REL_VERB_S[r.type][0]);
+    const notes = [];
+    const tgOf = k => (ch.cells[k] && ch.cells[k].stemTG) || '';
+    const me = ids.includes('day');
+    if (me) {
+      const other = ids.find(k => k !== 'day'), tg = tgOf(other);
+      if (tg && TG_KW[tg]) notes.push(`일간(나)이 ${M.POS_K[other]}간 ${tg}(${TG_KW[tg]})과 ${isHap ? '합을 이룹니다. 이 영역에 마음이 끌려 묶이기 쉽습니다' : '충을 이룹니다. 이 영역에서 내 뜻과 현실이 부딪치기 쉽습니다'}.`);
+    } else {
+      const a = ids.map(k => `${M.POS_K[k]}간 ${tgOf(k)}`).filter(x => !x.endsWith(' ')).join(' · ');
+      if (a) notes.push(`두 글자는 일간 기준으로 ${a}입니다.`);
+    }
+    // 한 글자가 두 글자와 합을 이루면 하나를 두고 다투는 쟁합·투합
+    if (isHap) {
+      const dup = r.members.filter(m => all.filter(o => o.type === '천간합' && o.members.includes(m)).length >= 2);
+      if (dup.length) notes.push(`${dup.map(m => M.POS_K[m] + '간').join('·')}이 두 글자와 동시에 합하는 쟁합·투합 구조라, 마음이 한쪽으로 정해지지 못하고 갈리기 쉽습니다.`);
+    }
+    const opp = all.filter(o => o !== r && o.type !== r.type && o.members.some(m => r.members.includes(m))).slice(0, 2);
+    if (opp.length) notes.push(`같은 글자가 ${opp.map(o => o.name).join(', ')}과도 얽힌 합충 구조라, ${isHap ? '충이 합을 흔들어' : '합이 충을 달래'} 작용이 줄어들 수 있습니다.`);
+    return `<span class="small" style="color:var(--ink-2);margin-top:3px">${place}</span>${lines.map(l => `<span class="small" style="color:var(--ink-2)">${l}</span>`).join('')}${notes.map(n => `<span class="small muted">· ${n}</span>`).join('')}`;
+  }
+  function relListStem(ch, rels) {
+    if (!rels.length) return '<p class="muted small">원국 안에 해당 관계가 없습니다.</p>';
+    return relSummary(ch, rels, '간') + `<div class="list">${rels.map(r => `<div class="li"><span class="k">${term(r.type)}</span><span class="v"><b>${esc(r.name)}</b><span class="small muted">${r.members.map(m => memberName(m, r.kind)).join(' ↔ ')}</span>${relNoteStem(ch, r, rels)}</span><span></span></div>`).join('')}</div>`;
+  }
   function relList(rels) {
     if (!rels.length) return '<p class="muted small">원국 안에 해당 관계가 없습니다.</p>';
     return `<div class="list">${rels.map(r => `<div class="li"><span class="k">${term(r.type)}</span><span class="v"><b>${esc(r.name)}</b><span class="small muted">${r.members.map(m => memberName(m, r.kind)).join(' ↔ ')}</span></span><span></span></div>`).join('')}</div>`;
@@ -3862,8 +3985,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const hitY = cols.filter(k => k !== 'year' && gmY.includes(ch.pillars[k].b)).map(k => M.POS_K[k] + '지');
     return `
     <div class="grid2">
-      <section class="card"><h2>천간 관계</h2>${relList(stemR)}</section>
-      <section class="card"><h2>지지 관계</h2>${relList(brR)}</section>
+      <section class="card"><h2>천간 관계</h2>${relListStem(ch, stemR)}</section>
+      <section class="card"><h2>지지 관계</h2>${relListBranch(ch, brR)}</section>
     </div>
     <section class="card">
       <div class="card-h"><h2>구조 진단</h2><span class="note">관살혼잡·상관견관 같은 구조가 성립하는지와 그 근거</span></div>
@@ -4345,6 +4468,70 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   const rtFit = v => v >= 5 ? 'pos' : v <= -5 ? 'neg' : '';
   function rtFitLines(f) { return `<div class="rt-fit"><span>억부 적합도 <b class="${rtFit(f.eokbuFit)}">${f.eokbuLabel}</b> <i class="num">${signed(f.eokbuFit)}</i></span><span>조후 적합도 <b class="${rtFit(f.johuFit)}">${f.johuLabel}</b> <i class="num">${signed(f.johuFit)}</i></span></div><p class="small muted">${esc(f.note)}</p>`; }
+  // ── 통근 환경별 활용 안내: 뿌리가 강해진 환경 / 약한 환경에서 어떻게 지낼지 (참고용, 점수·길흉과 무관) ──
+  // 환경(운까지 합친 현재 통근) × 사주의 쏠림(나를 돕는 힘 %)으로 풀어 준다. 같은 "뿌리 강함"도 이미 힘이 센 사주와 약한 사주는 쓰임이 반대다.
+  const RT_TIP = {
+    strong: {
+      weak: { mean: '평소 기댈 곳이 적던 일간에게 받침이 생긴 환경입니다. 감당할 수 있는 일의 크기가 커지는 때입니다.',
+        do: ['미뤄 둔 도전·승진·이직·사업 확장처럼 책임이 따르는 일에 나서 보기', '자격·실력·성과를 눈에 보이는 결과로 만들어 두기 (이 환경이 지나도 남습니다)', '큰 결정이나 계약은 이 환경이 받쳐 주는 동안 진행하기'],
+        care: ['힘이 붙었다고 한꺼번에 벌이면 환경이 약해질 때 버거워집니다. 운이 바뀌어도 유지할 수 있는 규모로 하세요.'] },
+      strong: { mean: '이미 힘이 센 일간에게 뿌리가 더 단단해져, 힘이 한쪽으로 쏠리기 쉬운 환경입니다. 힘이 모자란 것이 아니라 어디에 쓰느냐가 관건입니다.',
+        do: ['힘을 바깥으로 쓰는 활동으로 돌리기 — 표현·창작·가르침(식상), 실행·사업·재테크(재성), 조직·책임·규칙(관성)', '혼자 밀어붙이기보다 협업·위임을 일부러 늘리기', '운동·여행처럼 에너지를 건강하게 쓰는 일정 만들기'],
+        care: ['고집·독주·말다툼, 과로와 과욕이 겉으로 드러나기 쉽습니다. 결정 전에 한 번 더 듣고 확인하세요.'] },
+      mid: { mean: '균형 잡힌 일간에게 기반이 더해진 환경입니다. 계획을 한 단계 키우기 좋은 때입니다.',
+        do: ['하던 일의 목표·규모를 한 단계 올리기', '장기 계획이나 공부·준비를 이 시기에 시작하기'],
+        care: ['한쪽으로 몰아넣어 균형이 깨지지 않게 여러 갈래로 나누어 투자하세요.'] },
+    },
+    mid: {
+      weak: { mean: '받쳐 주는 힘이 보통이라 무리하면 지치는 환경입니다.', do: ['기반을 다지는 일(공부·건강·인간관계 정비)과 도전을 반반 섞기'], care: ['한 번에 큰 변화를 만들기보다 단계를 나누세요.'] },
+      strong: { mean: '힘은 충분하고 뿌리 환경은 보통입니다.', do: ['힘을 쓸 곳(일·활동)을 구체적으로 정해 두기'], care: ['추진력이 앞서가지 않도록 점검 주기를 두세요.'] },
+      mid: { mean: '균형 잡힌 사주에 환경도 보통입니다. 큰 쏠림 없이 지내는 때입니다.', do: ['하던 일을 꾸준히 이어가며 내실 다지기'], care: ['특별히 조심할 쏠림은 없습니다.'] },
+    },
+    weak: {
+      weak: { mean: '기댈 곳이 적은 일간이 뿌리까지 약한 환경이라, 바깥 환경에 휘둘리기 쉽습니다. 확장보다 기반을 다지는 것이 먼저입니다.',
+        do: ['배움·자격·멘토·후원자, 안정된 거처처럼 나를 받쳐 주는 것 늘리기 (인성 보강)', '같은 편이 되어 줄 동료·가족·모임과 시간 보내기 (비겁 보강)', '수면·식사·운동 같은 루틴 지키기 — 체력이 곧 뿌리가 되는 시기입니다'],
+        care: ['보증·큰 대출·무리한 확장·과로는 피하세요.', '중요한 결정은 혼자 하지 말고 믿을 사람과 의논하세요.', '남의 일을 떠안는 것도 줄이세요.'] },
+      strong: { mean: '뿌리가 얕아도 다른 경로(계절·인성·비겁)로 힘은 이미 충분합니다. 통근이 약하다고 약해진 것은 아니지만, 힘이 땅에 닿지 못해 말과 계획만 앞서기 쉽습니다.',
+        do: ['구체적인 계획을 세우고 작은 실행부터 꾸준히 쌓기', '현장 경험·실무 경력처럼 발이 닿는 일에 시간 쓰기'],
+        care: ['기반 없이 일을 크게 벌이거나, 말만 앞서는 것을 조심하세요.'] },
+      mid: { mean: '무난한 사주에 받쳐 주는 힘이 적은 시기입니다. 현상을 유지하며 내실을 쌓기 좋습니다.', do: ['새로 벌이기보다 하던 일을 정리·보완하기', '배우고 준비하는 시간 갖기'], care: ['큰 투자나 이동은 환경이 보강될 때까지 미루는 편이 안전합니다.'] },
+    },
+  };
+  function rootAdviceHTML(ch, s) {
+    const n = s.natal, help = ch.strength.help, cur = s.currentRootSupport;
+    const side = help < 42 ? 'weak' : help > 58 ? 'strong' : 'mid', env = cur >= 50 ? 'strong' : cur < 30 ? 'weak' : 'mid';
+    const sideTxt = { weak: `신약 쪽(돕는 힘 ${help.toFixed(0)}%)`, strong: `신강 쪽(돕는 힘 ${help.toFixed(0)}%)`, mid: `균형 잡힌 쪽(돕는 힘 ${help.toFixed(0)}%)` }[side];
+    const roles = ch.yong && ch.yong.roles, elOf = r => roles ? Object.keys(roles).find(e => roles[e] === r) : undefined;
+    const ye = elOf('용신'), he = elOf('희신');
+    const yTxt = ye != null ? `내 용신 오행은 <b>${elLabel(+ye)}</b>${he != null ? `, 희신은 <b>${elLabel(+he)}</b>` : ''}입니다. ${side === 'strong' ? '힘을 바깥으로 쓸 때 이 오행의 활동·환경을 가까이하면 좋습니다.' : '부족한 힘을 채울 때 이 오행의 활동·환경(색·방향·직업 분위기)을 참고하세요.'}` : '';
+    const unstable = s.rootStability != null && s.rootStability < 60;
+    const box = (key, title, on) => {
+      const t = RT_TIP[key][side];
+      return `<div class="rt-ab${on ? ' on' : ''}"><h4>${title}${on ? ' <span class="chip good">지금 해당</span>' : ''}</h4><p class="small" style="margin:0 0 4px">${t.mean}</p>
+        <div class="small"><b>이렇게 지내면 좋아요</b></div><ul>${t.do.map(x => `<li>${x}</li>`).join('')}</ul>
+        <div class="small"><b>조심할 점</b></div><ul>${t.care.map(x => `<li>${x}</li>`).join('')}</ul></div>`;
+    };
+    // 앞으로 6년 동안 현재 통근 환경이 어떻게 달라지는지
+    let rows = '';
+    try {
+      const nowY = M.yearPillarAt(NOW).sajuYear;
+      const SHORT = { strong: { weak: '도전·확장의 적기', strong: '힘을 바깥으로 쓰고 협업하기', mid: '목표를 한 단계 키우기' }, mid: { weak: '기반과 도전을 반반', strong: '힘 쓸 곳을 정하기', mid: '내실 다지며 꾸준히' }, weak: { weak: '기반 다지기, 무리 금물', strong: '계획을 실행으로 연결', mid: '정리·보완, 큰 투자 보류' } };
+      const tip = e => SHORT[e][side];
+      rows = M.seunRange(ch, nowY, nowY + 5).map(x => {
+        const c = rootCtx(x, 'seun'), st = M.evaluateCurrentRootState(ch, c.daeun, c.seun, c.wolun, c.iljin), v = st.currentRootSupport, e = v >= 50 ? 'strong' : v < 30 ? 'weak' : 'mid';
+        return `<tr class="${x.year === nowY ? 'cur' : ''}"><td class="num">${x.year}년</td><td class="gz">${M.gzName(x)}</td><td class="num">${v}<span class="muted small"> (원국 ${n.natalRootScore}${st.rootSupportChange >= 1 ? ' +' + st.rootSupportChange : ' 동일'})</span></td><td><span class="chip ${e === 'strong' ? 'good' : e === 'weak' ? 'bad' : ''}">${{ strong: '강함', mid: '보통', weak: '약함' }[e]}</span></td><td class="small">${tip(e)}</td></tr>`;
+      }).join('');
+    } catch (e) { rows = ''; }
+    return `<h4 class="cp-h4">통근 환경별 활용 안내</h4>
+      <p class="small">내 사주는 <b>${sideTxt}</b>이고, 원국 통근은 <b>${n.natalRootScore}점(${n.hasNatalRoot ? n.natalRootLevel : '무근'})</b>, 지금 운까지 합친 통근 환경은 <b>${cur}점</b>(${{ strong: '강한 편', mid: '보통', weak: '약한 편' }[env]})입니다. 같은 "뿌리가 강한 환경"도 이미 힘이 센 사주와 약한 사주에게는 쓰임이 반대라서, 사주의 쏠림에 맞춰 풀었습니다.</p>
+      <div class="rt-adv">${box('strong', '뿌리가 강해진 환경에서는', env === 'strong')}${box('weak', '뿌리가 약한 환경에서는', env === 'weak')}${env === 'mid' ? box('mid', '뿌리가 보통인 환경에서는', true) : ''}</div>
+      ${!n.hasNatalRoot ? '<p class="small muted">원국이 무근이면 지지에 직접 기댈 곳이 없는 대신, 스승·가족·동료·자격처럼 사람과 제도로 받쳐 주는 간접 지원이 뿌리 역할을 합니다. 운에서 근이 들어오는 해를 아래 표에서 확인해 활용하세요.</p>' : ''}
+      ${unstable ? '<p class="small muted">· 지금은 근이 있는 자리에 충·형 같은 변화 신호가 함께 있어, 뿌리가 있어도 흔들릴 수 있습니다. 큰 결정은 서두르지 말고 점검한 뒤 진행하세요.</p>' : ''}
+      ${yTxt ? `<p class="small muted">· ${yTxt}</p>` : ''}
+      ${rows ? `<h4 class="cp-h4">앞으로 6년, 뿌리 환경은 이렇게 달라집니다</h4><div class="tbl-wrap"><table class="dt"><thead><tr><th>해</th><th>간지</th><th>통근 환경</th><th>구분</th><th>활용 방향</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="small muted">대운·세운이 합쳐진 값입니다(월운·일진은 포함하지 않음). 환경이 강한 해에는 도전과 확장을, 약한 해에는 기반 다지기를 앞세우는 식으로 일정을 나누어 보세요.</p>` : ''}
+      <p class="small muted">이 안내는 일간이 받는 기반을 어떻게 활용할지에 대한 참고이며, 길흉 판단이나 사건 예측이 아닙니다. 흐름 점수에도 반영하지 않습니다.</p>`;
+  }
   function renderRoot(ch) {
     const c = rootNowCtx(ch), s = M.evaluateCurrentRootState(ch, c.daeun, c.seun, c.wolun, c.iljin), n = s.natal, dEl = n.dayElement;
     const up = s.rootSupportChange >= 5;
@@ -4362,6 +4549,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${s.stabilitySignals.length ? `<div class="rt-ch">${s.stabilitySignals.slice(0, 2).map(g => `<span class="chip ${g.kind === 'disturb' ? 'bad' : ''}">${esc(g.text)}</span>`).join('')}</div>` : ''}
       <p class="cp-sum">${esc(M.rootSummary(s))}</p>
       ${up ? rtFitLines(s.fit) : ''}
+      ${rootAdviceHTML(ch, s)}
       <div class="frow"><button class="btn" data-cr="root:detail">자세히 보기</button></div>
       <p class="note">통근 강도(0~100)는 일간 힘의 퍼센트가 아니라 앱 내부의 상대 지표입니다. 득령과는 다른 개념이며, 통근이 강하다고 신강, 무근이라고 신약으로 판정하지 않습니다.</p>
     </section>`;
