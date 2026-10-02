@@ -6098,10 +6098,38 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
 
   // ───────────── 내보내기: 현재 탭을 A4(794×1123px @96dpi) PDF / PNG로 ─────────────
   const XP = { busy: false };
-  const loadScript = src => new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.onload = res; el.onerror = () => rej(new Error('라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하세요.')); document.head.appendChild(el); });
+  const XP_MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/i.test(navigator.platform || ''));
+  const loadScript = src => new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.onload = res; el.onerror = () => { el.remove(); rej(new Error('라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하세요.')); }; document.head.appendChild(el); });
+  const loadAny = async srcs => { let err; for (const u of srcs) { try { return await loadScript(u); } catch (e) { err = e; } } throw err; };
   async function xpLibs(needPdf) {
-    if (!window.html2canvas) await loadScript('https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js');
-    if (needPdf && !(window.jspdf && window.jspdf.jsPDF)) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    if (!window.html2canvas) await loadAny(['https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js', 'https://unpkg.com/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js']);
+    if (needPdf && !(window.jspdf && window.jspdf.jsPDF)) await loadAny(['https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js']);
+  }
+  // 모바일은 렌더링에 몇 초 걸려 터치 동작(user activation)이 끝나므로, 완성 후 "저장·공유" 시트를 띄워 새 터치에서 저장/공유하게 한다
+  function xpSheet(files, kind) {
+    const urls = files.map(f => URL.createObjectURL(f));
+    const canShare = !!(navigator.share && navigator.canShare && navigator.canShare({ files }));
+    const bg = document.createElement('div'); bg.className = 'sheet-bg';
+    const sh = document.createElement('div'); sh.className = 'sheet'; sh.style.maxHeight = '85vh'; bg.appendChild(sh);
+    const close = () => { bg.remove(); urls.forEach(u => URL.revokeObjectURL(u)); };
+    const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    const x = mk('button', 'btn x', '닫기'); x.type = 'button'; x.onclick = close; sh.appendChild(x);
+    sh.appendChild(mk('h3', '', kind === 'pdf' ? 'PDF가 준비됐어요' : `이미지 ${files.length}장이 준비됐어요`));
+    sh.appendChild(mk('p', '', canShare ? '아래 버튼을 눌러 파일 앱·카카오톡 등으로 저장하거나 보내세요.' : kind === 'pdf' ? '저장이 되지 않으면 "열기"를 누른 뒤 브라우저 메뉴에서 저장하세요.' : '저장이 되지 않으면 이미지를 길게 눌러 "이미지 저장"을 선택하세요.'));
+    const row = mk('div'); row.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px';
+    if (canShare) {
+      const b = mk('button', 'btn primary', '저장·공유'); b.type = 'button';
+      b.onclick = async () => { try { await navigator.share({ files, title: files[0].name }); } catch (e) { if (e && e.name !== 'AbortError') { b.textContent = '공유 실패 — 아래 버튼을 이용하세요'; } } };
+      row.appendChild(b);
+    }
+    files.forEach((f, i) => {
+      const a = mk('a', 'btn', files.length > 1 ? `${i + 1}쪽 다운로드` : '다운로드'); a.href = urls[i]; a.download = f.name; row.appendChild(a);
+    });
+    if (kind === 'pdf') { const a = mk('a', 'btn', '열기'); a.href = urls[0]; a.target = '_blank'; a.rel = 'noopener'; row.appendChild(a); }
+    sh.appendChild(row);
+    if (kind !== 'pdf') files.forEach((f, i) => { const im = mk('img'); im.src = urls[i]; im.alt = `${i + 1}쪽`; im.style.cssText = 'width:100%;border:1px solid var(--line);border-radius:8px'; sh.appendChild(im); });
+    bg.addEventListener('click', ev => { if (ev.target === bg) close(); });
+    document.body.appendChild(bg);
   }
   // 내용이 든 카드들을 A4 폭(714px) 스테이지에 복제한다. SVG는 CSS 변수가 풀리지 않으므로 계산된 값을 인라인으로 박아 둔다.
   function xpStage(tabLabel) {
@@ -6131,7 +6159,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return stage;
   }
   async function xpRender(tabLabel) {
-    const PW = 794, PH = 1123, MX = 40, MT = 36, MB = 44, GAP = 12, SC = 2, UH = PH - MT - MB;
+    const PW = 794, PH = 1123, MX = 40, MT = 36, MB = 44, GAP = 12, SC = XP_MOBILE ? 1.5 : 2, UH = PH - MT - MB;
     const stage = xpStage(tabLabel);
     try {
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
@@ -6173,8 +6201,17 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const base = `만세력_${label}_${who}`.replace(/[\\/:*?"<>|\s]+/g, '_');
       if (kind === 'pdf') {
         const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
-        pages.forEach((pc, i) => { if (i) pdf.addPage('a4', 'portrait'); pdf.addImage(pc.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297); });
-        pdf.save(base + '.pdf');
+        pages.forEach((pc, i) => { if (i) pdf.addPage('a4', 'portrait'); pdf.addImage(pc.toDataURL('image/jpeg', XP_MOBILE ? 0.85 : 0.92), 'JPEG', 0, 0, 210, 297); });
+        if (XP_MOBILE) xpSheet([new File([pdf.output('blob')], base + '.pdf', { type: 'application/pdf' })], 'pdf');
+        else pdf.save(base + '.pdf');
+      } else if (XP_MOBILE) {
+        const files = [];
+        for (let i = 0; i < pages.length; i++) {
+          const bl = await new Promise(res => pages[i].toBlob(res, 'image/png'));
+          if (!bl) throw new Error('이미지를 만들지 못했습니다. 화면이 너무 길면 다른 탭으로 나누어 시도하세요.');
+          files.push(new File([bl], pages.length > 1 ? `${base}_${i + 1}.png` : base + '.png', { type: 'image/png' }));
+        }
+        xpSheet(files, 'png');
       } else {
         for (let i = 0; i < pages.length; i++) {
           await new Promise(res => pages[i].toBlob(bl => {
