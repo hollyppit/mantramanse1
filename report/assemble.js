@@ -1,0 +1,48 @@
+// 무빙툰 클립 조합 규칙 (관리자 테스트 화면과 이후 공개 뷰어가 함께 쓴다)
+// 같은 입력(facts)과 같은 클립 목록이면 항상 같은 결과가 나온다.
+(function (root) {
+  var CHAPTERS = [
+    ['ch0', '序 일주의 각성'], ['ch1', '一 타고난 성정'], ['ch2', '二 인생의 길'], ['ch3', '三 인연의 장'], ['ch4', '四 재물의 장'],
+    ['ch5', '五 도약의 장'], ['ch6', '六 가족의 장'], ['ch7', '七 앞으로 십 년의 문'], ['ch8', '終 개운 종합 카드'],
+  ];
+  var STEMS = '갑을병정무기경신임계'.split(''), BRANCHES = '자축인묘진사오미신유술해'.split('');
+  var ILJU = (function () { var a = []; for (var i = 0; i < 60; i++) a.push(STEMS[i % 10] + BRANCHES[i % 12]); return a; })();
+  // 조건 항목: key → [표시 이름, 선택지]
+  var FIELDS = {
+    ilju: ['일주', ILJU],
+    ilgan: ['일간', STEMS],
+    ilji: ['일지', BRANCHES],
+    wolji: ['월지', BRANCHES],
+    yongEl: ['용신 오행', ['목', '화', '토', '금', '수']],
+    strength: ['신강약', ['극약', '태약', '신약', '중화', '신강', '태강', '극왕']],
+    dominant: ['가장 강한 십성군', ['비겁', '식상', '재성', '관성', '인성']],
+    gender: ['성별', ['남', '여']],
+  };
+
+  // 조건 항목별 구체성 가중치: 더 좁게 가리키는 조건(일주)이 넓은 조건(성별)보다 먼저 뽑힌다.
+  var WEIGHT = { ilju: 6, ilgan: 3, yongEl: 3, strength: 3, dominant: 2, wolji: 2, ilji: 2, gender: 1 };
+  // 클립 하나가 facts에 맞는가. 비어 있는 조건은 "상관없음".
+  function specified(clip) {
+    var c = clip.cond || {}, n = 0;
+    Object.keys(FIELDS).forEach(function (k) { if (c[k] && c[k].length) n += WEIGHT[k] || 1; });
+    return n;
+  }
+  function matches(clip, facts) {
+    var c = clip.cond || {};
+    return Object.keys(FIELDS).every(function (k) {
+      return !(c[k] && c[k].length) || c[k].indexOf(facts[k]) >= 0;
+    });
+  }
+
+  // 장마다 가장 구체적인 클립 1개를 고른다. 구체성 점수(조건 가중합) → 우선순위 → id 순.
+  function assemble(clips, facts) {
+    return CHAPTERS.map(function (ch) {
+      var cands = clips.filter(function (c) { return c.chapter === ch[0] && matches(c, facts); }).map(function (c) {
+        return { clip: c, spec: specified(c), pri: +c.priority || 0 };
+      }).sort(function (a, b) { return b.spec - a.spec || b.pri - a.pri || (a.clip.id < b.clip.id ? -1 : 1); });
+      return { chapter: ch[0], label: ch[1], pick: cands[0] ? cands[0].clip : null, specificity: cands[0] ? cands[0].spec : 0, candidates: cands };
+    });
+  }
+
+  root.Assemble = { CHAPTERS: CHAPTERS, FIELDS: FIELDS, ILJU: ILJU, assemble: assemble, matches: matches, specified: specified };
+})(typeof window !== 'undefined' ? window : globalThis);

@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>무빙툰 관리자 · 만트라</title>
+<style>
+:root { --bg:#0A0C14; --bg2:#10131E; --panel:#141828; --line:#262C42; --ink:#ECE7DB; --ink2:#B7B2A6; --ink3:#8A8678; --gold:#E0BC74; --gold-d:#A98846; --red:#FF8A78; --green:#62C2AE; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.6 "Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; }
+h1,h2,h3 { margin:0; font-family:"Noto Serif KR","Nanum Myeongjo",serif; }
+.wrap { max-width:1100px; margin:0 auto; padding:0 16px 64px; }
+header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 0; flex-wrap:wrap; }
+header h1 { font-size:1.2rem; color:var(--gold); }
+button, select, input, textarea { font:inherit; color:var(--ink); }
+button { cursor:pointer; border:1px solid var(--line); background:var(--panel); padding:7px 14px; border-radius:6px; }
+button:hover { border-color:var(--gold-d); }
+button.pri { background:linear-gradient(180deg,#F0D08A,#C9A257); color:#1A1308; border-color:var(--gold); font-weight:700; }
+button.danger { color:var(--red); }
+button:disabled { opacity:.5; cursor:default; }
+input[type=text], input[type=password], input[type=number], input[type=url], select, textarea { background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:7px 10px; width:100%; }
+textarea { resize:vertical; min-height:60px; }
+:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.tabs { display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:16px; flex-wrap:wrap; }
+.tabs button { border:0; border-bottom:2px solid transparent; border-radius:0; background:none; color:var(--ink2); padding:10px 16px; }
+.tabs button.on { color:var(--gold); border-color:var(--gold); }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; }
+.row { display:flex; gap:10px; flex-wrap:wrap; align-items:end; }
+.row > label { display:grid; gap:4px; font-size:.82rem; color:var(--ink2); }
+.muted { color:var(--ink3); font-size:.85rem; }
+.err { color:var(--red); } .ok { color:var(--green); }
+.chip { display:inline-block; font-size:.74rem; padding:1px 8px; border-radius:999px; background:#1E2440; color:var(--gold); margin:1px 2px 1px 0; white-space:nowrap; }
+.chip.gray { background:#1B1F30; color:var(--ink3); }
+table { width:100%; border-collapse:collapse; }
+th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { color:var(--ink3); font-weight:500; font-size:.8rem; }
+.hide { display:none !important; }
+.login { max-width:340px; margin:18vh auto 0; display:grid; gap:12px; }
+
+dialog { background:var(--bg2); color:var(--ink); border:1px solid var(--gold-d); border-radius:12px; padding:0; width:min(760px, 94vw); max-height:92vh; }
+dialog::backdrop { background:rgba(0,0,0,.6); }
+dialog form { display:grid; gap:14px; padding:20px; max-height:92vh; overflow:auto; }
+details { border:1px solid var(--line); border-radius:8px; padding:6px 12px; background:var(--panel); }
+summary { cursor:pointer; padding:4px 0; }
+.checks { display:grid; grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); gap:4px 8px; padding:8px 0; }
+.checks label { display:flex; gap:5px; align-items:center; font-size:.86rem; cursor:pointer; }
+.pbar { height:6px; background:var(--line); border-radius:3px; overflow:hidden; } .pbar i { display:block; height:100%; width:0; background:var(--gold); }
+
+.player { background:#000; border-radius:10px; overflow:hidden; aspect-ratio:9/16; max-height:70vh; margin:0 auto; position:relative; display:grid; place-items:center; }
+.player video { width:100%; height:100%; object-fit:contain; background:#000; }
+.player .ph { padding:24px; text-align:center; color:var(--ink2); }
+.cap { margin-top:8px; padding:8px 12px; border-left:2px solid var(--gold); background:var(--panel); min-height:2.4em; }
+.grid2 { display:grid; grid-template-columns:minmax(0,1fr) minmax(260px,340px); gap:16px; }
+@media (max-width:820px) { .grid2 { grid-template-columns:1fr; } }
+.seq { list-style:none; margin:0; padding:0; display:grid; gap:6px; }
+.seq li { border:1px solid var(--line); border-radius:8px; padding:8px 12px; background:var(--panel); cursor:pointer; }
+.seq li.cur { border-color:var(--gold); }
+.seq li.gap { border-style:dashed; color:var(--ink3); }
+.seq b { font-weight:500; }
+.facts { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; margin-top:12px; }
+.facts label { display:grid; gap:3px; font-size:.78rem; color:var(--ink3); }
+
+.cov { overflow:auto; max-height:70vh; border:1px solid var(--line); border-radius:8px; }
+.cov table { min-width:700px; font-size:.82rem; }
+.cov th, .cov td { padding:3px 8px; text-align:center; }
+.cov td.z { color:#5A5C6A; } .cov td.hit { background:#2A3320; color:var(--green); } .cov td.gen { background:#1E2440; color:var(--gold); }
+.cov td:first-child, .cov th:first-child { text-align:left; position:sticky; left:0; background:var(--bg2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 로그인 -->
+  <div id="loginBox" class="login">
+    <h1 style="color:var(--gold)">무빙툰 관리자</h1>
+    <input type="password" id="pw" placeholder="관리자 비밀번호" autocomplete="current-password">
+    <button class="pri" id="loginBtn">로그인</button>
+    <p class="muted err" id="loginMsg"></p>
+  </div>
+
+  <!-- 본문 -->
+  <div id="app" class="hide">
+    <header>
+      <h1>사주 무빙툰 · 관리자</h1>
+      <div class="row">
+        <span class="muted" id="saveState"></span>
+        <button class="pri" id="saveBtn" disabled>변경사항 저장</button>
+        <button id="logoutBtn">로그아웃</button>
+      </div>
+    </header>
+    <div class="tabs" role="tablist">
+      <button data-t="lib" class="on">클립 라이브러리</button>
+      <button data-t="test">조합 테스트</button>
+      <button data-t="cov">커버리지</button>
+    </div>
+
+    <!-- 라이브러리 -->
+    <div id="t-lib">
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <div class="row">
+            <label>장 필터<select id="fCh"></select></label>
+            <label>검색<input type="text" id="fQ" placeholder="제목 검색"></label>
+          </div>
+          <button class="pri" id="addBtn">+ 클립 추가</button>
+        </div>
+        <p class="muted" id="r2note" style="margin:10px 0 0"></p>
+      </div>
+      <div class="card" style="margin-top:12px;padding:0;overflow:auto">
+        <table>
+          <thead><tr><th>장</th><th>제목</th><th>조건</th><th>영상</th><th>우선</th><th></th></tr></thead>
+          <tbody id="libBody"></tbody>
+        </table>
+        <p class="muted" id="libEmpty" style="padding:16px">등록된 클립이 없습니다. “+ 클립 추가”로 시작하세요.</p>
+      </div>
+    </div>
+
+    <!-- 조합 테스트 -->
+    <div id="t-test" class="hide">
+      <div class="card">
+        <div class="row">
+          <label>생년<input type="number" id="bY" value="1990" style="width:84px"></label>
+          <label>월<input type="number" id="bM" value="5" style="width:64px"></label>
+          <label>일<input type="number" id="bD" value="17" style="width:64px"></label>
+          <label>시<input type="number" id="bH" value="14" style="width:64px"></label>
+          <label>분<input type="number" id="bMi" value="30" style="width:64px"></label>
+          <label>성별<select id="bG"><option value="M">남</option><option value="F">여</option></select></label>
+          <label>용신 학파<select id="bS"><option value="eokbu">억부</option><option value="johu">조후</option><option value="tonggwan">통관</option></select></label>
+          <button class="pri" id="runBtn">사주 계산 → 조합</button>
+        </div>
+        <p class="muted" id="engMsg" style="margin:8px 0 0">만세력 엔진은 앱과 같은 파일(engine.js)을 씁니다. 아래 값은 계산 결과이며, 직접 바꿔 가며 조합을 시험할 수 있습니다.</p>
+        <div class="facts" id="facts"></div>
+      </div>
+      <div class="grid2" style="margin-top:12px">
+        <div class="card">
+          <div class="player" id="player"><div class="ph">조합을 실행하면 여기서 순서대로 재생됩니다</div></div>
+          <div class="cap" id="playCap"></div>
+          <div class="row" style="margin-top:10px;justify-content:center">
+            <button id="prevBtn">◀ 이전</button><button id="playAll" class="pri">▶ 처음부터 재생</button><button id="nextBtn">다음 ▶</button>
+          </div>
+        </div>
+        <div class="card"><h3 style="font-size:1rem;margin-bottom:10px">선택된 순서</h3><ol class="seq" id="seq"></ol><p class="muted" id="seqSum" style="margin-top:10px"></p></div>
+      </div>
+    </div>
+
+    <!-- 커버리지 -->
+    <div id="t-cov" class="hide">
+      <div class="card"><p class="muted" style="margin:0">일주 60개 × 9개 장에서 어느 칸이 비어 있는지 봅니다. <span class="chip">초록</span> 해당 일주를 직접 지정한 클립이 있음 · <span class="chip">파랑</span> 조건 없는 공통 클립으로 채워짐 · 회색 0은 비어 있음.</p></div>
+      <div class="cov" style="margin-top:12px"><table id="covT"></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- 클립 편집 -->
+<dialog id="dlg">
+  <form method="dialog" id="clipForm">
+    <h3 id="dlgTitle">클립 편집</h3>
+    <div class="row">
+      <label style="flex:1 1 220px">제목<input type="text" id="eTitle" maxlength="80" required></label>
+      <label>장<select id="eCh"></select></label>
+      <label>우선순위<input type="number" id="ePri" value="0" min="-100" max="100" style="width:90px"></label>
+    </div>
+    <div>
+      <div class="muted" style="margin-bottom:6px">조건 — 아무것도 고르지 않은 항목은 “상관없음”입니다. 고른 항목이 모두 맞아야 이 클립이 후보가 되고, 더 구체적인 클립이 먼저 뽑힙니다(일주 6 · 일간/용신/신강약 3 · 십성군/월지/일지 2 · 성별 1점의 합).</div>
+      <div id="condBox" style="display:grid;gap:6px"></div>
+    </div>
+    <div class="card" style="background:var(--bg)">
+      <div class="row" style="align-items:center">
+        <label style="flex:1 1 200px">영상 파일 올리기 (mp4 · webm · mov)<input type="file" id="eFile" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov,.m4v"></label>
+        <button type="button" id="upBtn">업로드</button>
+      </div>
+      <div class="pbar hide" id="pbar" style="margin-top:8px"><i></i></div>
+      <label style="display:grid;gap:4px;margin-top:10px">또는 영상 주소 (https)<input type="url" id="eUrl" placeholder="https://…"></label>
+      <p class="muted" id="srcNow" style="margin:8px 0 0"></p>
+      <video id="ePrev" controls class="hide" style="width:100%;max-height:240px;margin-top:8px;background:#000;border-radius:8px"></video>
+    </div>
+    <label style="display:grid;gap:4px">자막·대사 (재생 중 아래에 표시)<textarea id="eCap" maxlength="500"></textarea></label>
+    <label style="display:grid;gap:4px">메모 (내부용)<input type="text" id="eNote" maxlength="300"></label>
+    <p class="err" id="dlgErr"></p>
+    <div class="row" style="justify-content:space-between">
+      <button type="button" class="danger" id="delBtn">삭제</button>
+      <div class="row"><button type="button" id="cancelBtn">취소</button><button type="submit" class="pri">확인</button></div>
+    </div>
+  </form>
+</dialog>
+
+<script src="../assemble.js"></script>
+<script>
+(function () {
+  var A = window.Assemble, $ = function (id) { return document.getElementById(id); };
+  var S = { pw: '', clips: [], dirty: false, r2: false, editing: null, facts: null, seq: [], cur: -1 };
+  function ss(k, v) { try { if (v == null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} }
+  function sg(k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function api(path, opt) {
+    opt = opt || {}; opt.headers = Object.assign({ authorization: 'Bearer ' + S.pw }, opt.headers || {});
+    return fetch(path, opt).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(d.error || ('오류 ' + r.status)); return d; }); });
+  }
+  function srcUrl(src) { return !src ? '' : src.type === 'r2' ? '/api/clipfile?k=' + encodeURIComponent(src.value) : src.value; }
+  function chLabel(id) { var c = A.CHAPTERS.filter(function (x) { return x[0] === id; })[0]; return c ? c[1] : id; }
+
+  // ── 로그인
+  function enter() { $('loginBox').classList.add('hide'); $('app').classList.remove('hide'); load(); }
+  function login() {
+    var pw = $('pw').value; if (!pw) return;
+    $('loginMsg').textContent = '';
+    fetch('/api/admin', { method: 'POST', headers: { authorization: 'Bearer ' + pw } }).then(function (r) {
+      if (!r.ok) return r.json().catch(function () { return {}; }).then(function (d) { throw new Error(d.error || '로그인 실패'); });
+      S.pw = pw; ss('mt_pw', pw); enter();
+    }).catch(function (e) { $('loginMsg').textContent = e.message; });
+  }
+  $('loginBtn').onclick = login; $('pw').onkeydown = function (e) { if (e.key === 'Enter') login(); };
+  $('logoutBtn').onclick = function () { if (S.dirty && !confirm('저장하지 않은 변경사항이 있습니다. 나갈까요?')) return; ss('mt_pw'); location.reload(); };
+  window.addEventListener('beforeunload', function (e) { if (S.dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  // ── 불러오기·저장
+  function load() {
+    api('/api/clips').then(function (d) { S.clips = d.clips || []; S.r2 = !!d.r2; S.dirty = false; renderAll(); })
+      .catch(function (e) { $('saveState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
+  }
+  function markDirty() { S.dirty = true; $('saveBtn').disabled = false; $('saveState').textContent = '저장하지 않은 변경사항'; renderLib(); renderCov(); }
+  $('saveBtn').onclick = function () {
+    $('saveBtn').disabled = true; $('saveState').textContent = '저장 중…';
+    api('/api/clips', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ clips: S.clips }) })
+      .then(function (d) { S.dirty = false; $('saveState').innerHTML = '<span class="ok">저장됨 (' + d.count + '개)</span>'; })
+      .catch(function (e) { $('saveBtn').disabled = false; $('saveState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
+  };
+
+  // ── 탭
+  document.querySelectorAll('.tabs button').forEach(function (b) {
+    b.onclick = function () {
+      document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
+      ['lib', 'test', 'cov'].forEach(function (t) { $('t-' + t).classList.toggle('hide', t !== b.dataset.t); });
+      if (b.dataset.t === 'cov') renderCov();
+    };
+  });
+
+  // ── 라이브러리
+  function renderAll() { renderFilters(); renderLib(); renderCov(); $('r2note').innerHTML = S.r2 ? '영상 업로드(R2) 연결됨' : '<span class="err">R2가 연결되지 않아 파일 업로드는 쓸 수 없습니다.</span> 영상 주소(https)를 직접 입력하면 됩니다.'; }
+  function renderFilters() {
+    var cur = $('fCh').value;
+    $('fCh').innerHTML = '<option value="">전체</option>' + A.CHAPTERS.map(function (c) { return '<option value="' + c[0] + '">' + esc(c[1]) + '</option>'; }).join('');
+    $('fCh').value = cur;
+    $('eCh').innerHTML = A.CHAPTERS.map(function (c) { return '<option value="' + c[0] + '">' + esc(c[1]) + '</option>'; }).join('');
+  }
+  $('fCh').onchange = $('fQ').oninput = function () { renderLib(); };
+  function condChips(c) {
+    var out = [];
+    Object.keys(A.FIELDS).forEach(function (k) { var v = c.cond && c.cond[k]; if (v && v.length) out.push('<span class="chip">' + esc(A.FIELDS[k][0]) + ' ' + esc(v.length > 4 ? v.slice(0, 4).join('·') + ' 외 ' + (v.length - 4) : v.join('·')) + '</span>'); });
+    return out.length ? out.join('') : '<span class="chip gray">공통(조건 없음)</span>';
+  }
+  function renderLib() {
+    var f = $('fCh').value, q = $('fQ').value.trim();
+    var list = S.clips.filter(function (c) { return (!f || c.chapter === f) && (!q || c.title.indexOf(q) >= 0); })
+      .sort(function (a, b) { return a.chapter < b.chapter ? -1 : a.chapter > b.chapter ? 1 : a.title < b.title ? -1 : 1; });
+    $('libEmpty').classList.toggle('hide', list.length > 0);
+    $('libBody').innerHTML = list.map(function (c) {
+      return '<tr><td>' + esc(chLabel(c.chapter)) + '</td><td>' + esc(c.title) + (c.note ? '<div class="muted">' + esc(c.note) + '</div>' : '') + '</td><td>' + condChips(c) + '</td><td>' +
+        (c.src ? '<span class="chip">' + (c.src.type === 'r2' ? '업로드' : '링크') + '</span>' : '<span class="chip gray err">영상 없음</span>') +
+        '</td><td>' + (c.priority || 0) + '</td><td><button data-id="' + esc(c.id) + '">편집</button></td></tr>';
+    }).join('');
+    $('libBody').querySelectorAll('button').forEach(function (b) { b.onclick = function () { openEditor(b.dataset.id); }; });
+  }
+
+  // ── 편집
+  function buildCond(sel) {
+    $('condBox').innerHTML = Object.keys(A.FIELDS).map(function (k) {
+      var f = A.FIELDS[k], on = (sel && sel[k]) || [];
+      return '<details' + (on.length ? ' open' : '') + '><summary>' + esc(f[0]) + (on.length ? ' <span class="chip">' + on.length + '개 선택</span>' : '') + '</summary><div class="checks" data-k="' + k + '">' +
+        f[1].map(function (v) { return '<label><input type="checkbox" value="' + esc(v) + '"' + (on.indexOf(v) >= 0 ? ' checked' : '') + '>' + esc(v) + '</label>'; }).join('') + '</div></details>';
+    }).join('');
+  }
+  function readCond() {
+    var c = {};
+    document.querySelectorAll('#condBox .checks').forEach(function (d) {
+      var v = Array.prototype.map.call(d.querySelectorAll('input:checked'), function (i) { return i.value; });
+      if (v.length) c[d.dataset.k] = v;
+    });
+    return c;
+  }
+  function setSrc(src) {
+    S.editing.src = src;
+    $('srcNow').textContent = src ? ('현재: ' + (src.type === 'r2' ? '업로드된 파일 ' : '링크 ') + src.value) : '현재: 영상 없음';
+    var v = $('ePrev'); if (src) { v.src = srcUrl(src); v.classList.remove('hide'); } else { v.removeAttribute('src'); v.classList.add('hide'); }
+  }
+  function openEditor(id) {
+    var c = id ? S.clips.filter(function (x) { return x.id === id; })[0] : null;
+    S.editing = c ? JSON.parse(JSON.stringify(c)) : { id: 'c' + Date.now().toString(36), title: '', chapter: $('fCh').value || 'ch0', cond: {}, src: null, caption: '', note: '', priority: 0, isNew: true };
+    $('dlgTitle').textContent = c ? '클립 편집' : '클립 추가';
+    $('eTitle').value = S.editing.title; $('eCh').value = S.editing.chapter; $('ePri').value = S.editing.priority || 0;
+    $('eCap').value = S.editing.caption || ''; $('eNote').value = S.editing.note || '';
+    $('eUrl').value = S.editing.src && S.editing.src.type === 'url' ? S.editing.src.value : '';
+    $('eFile').value = ''; $('dlgErr').textContent = ''; $('pbar').classList.add('hide');
+    $('delBtn').classList.toggle('hide', !c); $('upBtn').disabled = !S.r2; $('eFile').disabled = !S.r2;
+    buildCond(S.editing.cond); setSrc(S.editing.src); $('dlg').showModal();
+  }
+  $('addBtn').onclick = function () { openEditor(null); };
+  $('cancelBtn').onclick = function () { $('dlg').close(); };
+  $('eUrl').oninput = function () { var v = this.value.trim(); if (!v) { if (S.editing.src && S.editing.src.type === 'url') setSrc(null); } else setSrc({ type: 'url', value: v }); };
+  $('upBtn').onclick = function () {
+    var f = $('eFile').files[0]; if (!f) { $('dlgErr').textContent = '올릴 파일을 선택하세요'; return; }
+    $('dlgErr').textContent = ''; var bar = $('pbar'); bar.classList.remove('hide'); bar.firstChild.style.width = '0';
+    var x = new XMLHttpRequest(); x.open('POST', '/api/clipfile?name=' + encodeURIComponent(f.name)); x.setRequestHeader('authorization', 'Bearer ' + S.pw);
+    x.upload.onprogress = function (e) { if (e.lengthComputable) bar.firstChild.style.width = (e.loaded / e.total * 100) + '%'; };
+    $('upBtn').disabled = true;
+    x.onload = function () {
+      $('upBtn').disabled = false; var d = {}; try { d = JSON.parse(x.responseText); } catch (e) {}
+      if (x.status >= 200 && x.status < 300 && d.key) { $('eUrl').value = ''; setSrc({ type: 'r2', value: d.key }); } else $('dlgErr').textContent = d.error || ('업로드 실패 (' + x.status + ')');
+    };
+    x.onerror = function () { $('upBtn').disabled = false; $('dlgErr').textContent = '네트워크 오류'; };
+    x.send(f);
+  };
+  $('clipForm').onsubmit = function (e) {
+    e.preventDefault();
+    var c = S.editing; c.title = $('eTitle').value.trim(); c.chapter = $('eCh').value; c.priority = +$('ePri').value || 0;
+    c.caption = $('eCap').value; c.note = $('eNote').value; c.cond = readCond();
+    if (!c.title) { $('dlgErr').textContent = '제목을 입력하세요'; return; }
+    var isNew = c.isNew; delete c.isNew;
+    if (isNew) S.clips.push(c); else S.clips = S.clips.map(function (x) { return x.id === c.id ? c : x; });
+    $('dlg').close(); markDirty();
+  };
+  $('delBtn').onclick = function () {
+    if (!confirm('이 클립을 목록에서 삭제할까요? (저장 전에는 되돌릴 수 있습니다)\n업로드된 영상 파일은 R2에 남습니다.')) return;
+    S.clips = S.clips.filter(function (x) { return x.id !== S.editing.id; }); $('dlg').close(); markDirty();
+  };
+
+  // ── 조합 테스트
+  var engine = null;
+  function loadEngine() {
+    if (engine) return Promise.resolve(engine);
+    return new Promise(function (ok, fail) {
+      var s = document.createElement('script'); s.src = '/engine.js';
+      s.onload = function () { window.Manse ? ok((engine = window.Manse)) : fail(new Error('엔진 초기화 실패')); };
+      s.onerror = function () { fail(new Error('엔진 파일(/engine.js)을 불러오지 못했습니다')); };
+      document.head.appendChild(s);
+    });
+  }
+  function factsFromChart(ch, M, gender) {
+    var day = M.gzNameK(ch.pillars.day), month = M.gzNameK(ch.pillars.month);
+    var g = ch.weights.groups, names = ['비겁', '식상', '재성', '관성', '인성'], mi = 0;
+    for (var i = 1; i < 5; i++) if (g[i] > g[mi]) mi = i;
+    return { ilju: day, ilgan: day[0], ilji: day[1], wolji: month[1], strength: ch.strength.zone,
+      yongEl: ch.yong && ch.yong.applicable ? M.EL_K[ch.yong.yong] : '', dominant: names[mi], gender: gender === 'M' ? '남' : '여' };
+  }
+  function renderFacts() {
+    $('facts').innerHTML = Object.keys(A.FIELDS).map(function (k) {
+      var f = A.FIELDS[k], v = S.facts[k];
+      var opts = f[1].slice(); if (v && opts.indexOf(v) < 0) opts.push(v);
+      return '<label>' + esc(f[0]) + '<select data-k="' + k + '"><option value="">(없음)</option>' + opts.map(function (o) { return '<option' + (o === v ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></label>';
+    }).join('');
+    $('facts').querySelectorAll('select').forEach(function (s) { s.onchange = function () { S.facts[s.dataset.k] = s.value; runAssemble(); }; });
+  }
+  $('runBtn').onclick = function () {
+    $('engMsg').textContent = '엔진 불러오는 중…'; $('engMsg').className = 'muted';
+    loadEngine().then(function (M) {
+      var g = $('bG').value;
+      var ch = M.compute({ year: +$('bY').value, month: +$('bM').value, day: +$('bD').value, hour: +$('bH').value, minute: +$('bMi').value || 0, calendar: 'solar', gender: g, school: $('bS').value });
+      S.facts = factsFromChart(ch, M, g); renderFacts(); runAssemble();
+      $('engMsg').textContent = '계산 완료 — ' + S.facts.ilju + '일주 · ' + S.facts.strength + (S.facts.yongEl ? ' · 용신 ' + S.facts.yongEl : ' · 용신 없음') + '. 아래 값을 바꿔 가며 다시 조합해 볼 수 있습니다.';
+    }).catch(function (e) { $('engMsg').textContent = '계산 실패: ' + e.message; $('engMsg').className = 'muted err'; });
+  };
+  function runAssemble() {
+    S.seq = A.assemble(S.clips, S.facts); S.cur = -1;
+    var got = S.seq.filter(function (s) { return s.pick; }).length;
+    $('seq').innerHTML = S.seq.map(function (s, i) {
+      var p = s.pick;
+      return '<li data-i="' + i + '" class="' + (p ? '' : 'gap') + '"><b>' + esc(s.label) + '</b><div>' + (p ? esc(p.title) + (p.src ? '' : ' <span class="err">(영상 없음)</span>') : '— 해당 클립 없음') + '</div>' +
+        '<div class="muted">' + (p ? '구체성 ' + s.specificity + ' · 후보 ' + s.candidates.length + '개' : '후보 0개') + '</div></li>';
+    }).join('');
+    $('seq').querySelectorAll('li').forEach(function (li) { li.onclick = function () { play(+li.dataset.i); }; });
+    $('seqSum').textContent = '9개 장 중 ' + got + '개 채워짐' + (got < 9 ? ' (빈 장은 건너뛰고 안내 카드로 표시)' : '');
+  }
+  function play(i) {
+    if (i < 0 || i >= S.seq.length) return;
+    S.cur = i; var s = S.seq[i], p = s.pick, box = $('player');
+    document.querySelectorAll('#seq li').forEach(function (li, k) { li.classList.toggle('cur', k === i); });
+    $('playCap').textContent = p ? (s.label + ' — ' + (p.caption || '(자막 없음)')) : s.label;
+    if (p && p.src) {
+      box.innerHTML = '<video controls autoplay playsinline></video>'; var v = box.firstChild; v.src = srcUrl(p.src);
+      v.onended = function () { if (S.auto) play(i + 1); }; v.onerror = function () { box.innerHTML = '<div class="ph err">영상을 불러오지 못했습니다</div>'; };
+    } else {
+      box.innerHTML = '<div class="ph">' + esc(s.label) + '<br><span class="muted">' + (p ? '영상이 지정되지 않은 클립입니다' : '이 조건에 맞는 클립이 없습니다') + '</span></div>';
+      if (S.auto) setTimeout(function () { if (S.cur === i) play(i + 1); }, 1500);
+    }
+  }
+  $('playAll').onclick = function () { if (!S.seq.length) return; S.auto = true; play(0); };
+  $('prevBtn').onclick = function () { S.auto = false; play(Math.max(0, S.cur - 1)); };
+  $('nextBtn').onclick = function () { S.auto = false; play(Math.min(S.seq.length - 1, S.cur + 1)); };
+
+  // ── 커버리지
+  function renderCov() {
+    var chs = A.CHAPTERS, html = '<thead><tr><th>일주</th>' + chs.map(function (c) { return '<th>' + esc(c[1].split(' ')[0]) + '</th>'; }).join('') + '</tr></thead><tbody>';
+    var generic = {}; chs.forEach(function (c) { generic[c[0]] = S.clips.filter(function (x) { return x.chapter === c[0] && !(x.cond && x.cond.ilju && x.cond.ilju.length); }).length; });
+    A.ILJU.forEach(function (ij) {
+      html += '<tr><td>' + ij + '</td>' + chs.map(function (c) {
+        var n = S.clips.filter(function (x) { return x.chapter === c[0] && x.cond && x.cond.ilju && x.cond.ilju.indexOf(ij) >= 0; }).length;
+        return n ? '<td class="hit">' + n + '</td>' : generic[c[0]] ? '<td class="gen">공통</td>' : '<td class="z">0</td>';
+      }).join('') + '</tr>';
+    });
+    $('covT').innerHTML = html + '</tbody>';
+  }
+
+  var saved = sg('mt_pw');
+  if (saved) { S.pw = saved; fetch('/api/admin', { method: 'POST', headers: { authorization: 'Bearer ' + saved } }).then(function (r) { if (r.ok) enter(); else ss('mt_pw'); }).catch(function () {}); }
+})();
+</script>
+</body>
+</html>
