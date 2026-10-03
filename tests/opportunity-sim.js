@@ -2,7 +2,7 @@
 //   node tests/opportunity-sim.js [차트 수=300]
 // 기회 활성도가 흐름 점수·변동성과 독립인지, 십성 종류별 기회 유형, 기회/확장/수확/축적/변동/방어 우선순위, 동반 신호 보존, 금지 표현을 단언으로 확인한다.
 const fs = require('fs'), path = require('path'), vm = require('vm');
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'engine.js'), 'utf8');
 const a = html.indexOf('var MANSE_DATA'), b = html.indexOf('})(typeof window', a);
 vm.runInThisContext(html.slice(a, html.indexOf('\n', b)));
 const M = globalThis.Manse;

@@ -1,5 +1,5 @@
 // 기존 계산 결과가 바뀌지 않았는지 확인하는 회귀 스냅샷
-//   node tests/regression-snapshot.js <index.html 경로> [차트 수=120]      → 스냅샷의 SHA-1과 항목별 해시를 출력
+//   node tests/regression-snapshot.js <engine.js 경로> [차트 수=120]      → 스냅샷의 SHA-1과 항목별 해시를 출력
 //   node tests/regression-snapshot.js --compare <이전.html> <현재.html>    → 두 파일의 스냅샷을 항목별로 비교(다르면 종료 코드 1)
 //   --ignore-phase 를 붙이면 시기 유형(phase·activityType)만 비교에서 뺀다. 시기 분류 기준을 일부러 바꾼 뒤에 나머지가 그대로인지 볼 때 쓴다.
 // 사주 원국·오행 비율·강약·용신(3학파)·억부/조후·한난조습·대운·세운·월운·일진·흐름 점수·6분류·volatilityScore·삼재를 고정 표본으로 뽑아 해시한다.

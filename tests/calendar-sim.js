@@ -1,8 +1,8 @@
 // 역법 엔진(절기·음력·시간대·균시차·일주·시주·삼재) 검증
-//   node tests/calendar-sim.js [index.html 경로]
+//   node tests/calendar-sim.js [engine.js 경로]
 // 외부 기준: 태양 시황경 계산(절기), Node 내장 Asia/Seoul 시간대(서머타임), 알려진 설날·일진, 연속성/왕복 검사
 const fs = require('fs'), vm = require('vm');
-const file = process.argv[2] || require('path').join(__dirname, '..', 'index.html');
+const file = process.argv[2] || require('path').join(__dirname, '..', 'engine.js');
 const html = fs.readFileSync(file, 'utf8');
 const a = html.indexOf('var MANSE_DATA'), b = html.indexOf('})(typeof window', a);
 const ctx = vm.createContext({ console }); vm.runInContext(html.slice(a, html.indexOf('\n', b)), ctx);

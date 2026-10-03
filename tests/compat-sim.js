@@ -5,7 +5,7 @@
 //   - 한기 사주는 화(火), 열기 사주는 수(水), 건조 사주는 수, 습 사주는 화 쪽 후보가 조후 성분에서 높아야 한다
 //   - 일주 후보의 충·형 마찰은 '주의 요소'로 잡히되, 합이 있다고 무조건 최고점이 되지는 않아야 한다
 const fs = require('fs'), path = require('path'), vm = require('vm');
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'engine.js'), 'utf8');
 const a = html.indexOf('var MANSE_DATA'), b = html.indexOf('})(typeof window', a);
 vm.runInThisContext(html.slice(a, html.indexOf('\n', b)));
 const M = globalThis.Manse;

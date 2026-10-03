@@ -2,7 +2,7 @@
 //   node tests/career-sim.js [차트 수=4000] [--json]
 // 원국 유형 A~O, 12개 분야 정상 계산, 분야 편향(평균·상위 3위 빈도), 단일 규칙 부재, 운과의 분리를 단언으로 확인한다. 하나라도 어기면 종료 코드 1.
 const fs = require('fs'), path = require('path'), vm = require('vm');
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'engine.js'), 'utf8');
 const a = html.indexOf('var MANSE_DATA'), b = html.indexOf('})(typeof window', a);
 vm.runInThisContext(html.slice(a, html.indexOf('\n', b)));
 const M = globalThis.Manse;

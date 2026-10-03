@@ -2,7 +2,7 @@
 //   node tests/domain-sim.js [차트 수=400]
 // 원국 유형 A~L, 운 시나리오, 지표 간 독립성, 금지된 단일 규칙 부재, 상위 운 결합을 단언으로 확인한다. 하나라도 어기면 종료 코드 1.
 const fs = require('fs'), path = require('path'), vm = require('vm');
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'engine.js'), 'utf8');
 const a = html.indexOf('var MANSE_DATA'), b = html.indexOf('})(typeof window', a);
 vm.runInThisContext(html.slice(a, html.indexOf('\n', b)));
 const M = globalThis.Manse;

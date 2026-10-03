@@ -2,9 +2,10 @@
 //   node tests/volatility-sim.js [차트 수=400]
 // 요구 사항 A~G를 각각 단언으로 확인한다. 하나라도 어기면 종료 코드 1.
 const fs = require('fs'), path = require('path'), vm = require('vm');
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-const a = html.indexOf('var MANSE_DATA'), b = html.indexOf('})(typeof window', a);
-vm.runInThisContext(html.slice(a, html.indexOf('\n', b)));
+const eng = fs.readFileSync(path.join(__dirname, '..', 'engine.js'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8') + eng; // 문구 검사는 앱 화면과 엔진 전체를 본다
+const a = eng.indexOf('var MANSE_DATA'), b = eng.indexOf('})(typeof window', a);
+vm.runInThisContext(eng.slice(a, eng.indexOf('\n', b)));
 const M = globalThis.Manse, V = M.VOLATILITY_CONFIG;
 
 const N = +process.argv[2] || 400;

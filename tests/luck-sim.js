@@ -1,8 +1,8 @@
-// 운세 흐름 엔진(evaluateLuck) 검증: index.html의 계산 모듈을 그대로 꺼내 실행한다.
+// 운세 흐름 엔진(evaluateLuck) 검증: engine.js의 계산 모듈을 그대로 꺼내 실행한다.
 //   node tests/luck-sim.js [차트 수=600] [시간 단위=daeun|seun|wolun|ilun|sijin] [학파=eokbu|johu|tonggwan]
 // 사주 유형(A~K)별로 60갑자 전체를 운으로 넣어 (1) NaN·빈 값이 없는지 (2) 평균 흐름 점수·시기 분포가 한쪽으로 치우치지 않는지 본다.
 const fs = require('fs'), path = require('path'), vm = require('vm');
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'engine.js'), 'utf8');
 const a = html.indexOf('var MANSE_DATA'), b = html.indexOf('})(typeof window', a);
 vm.runInThisContext(html.slice(a, html.indexOf('\n', b)));
 const M = globalThis.Manse;

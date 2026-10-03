@@ -2,7 +2,7 @@
 //   node tests/root-sim.js [최대 차트 수=60000]
 // 10개 일간 × 시나리오 A~P, 그리고 원국/운 분리·지속 기간·포화·흐름 점수 비연결·억부/조후 분리·충합 처리·득령 분리를 단언으로 확인한다. 하나라도 어기면 종료 코드 1.
 const fs = require('fs'), path = require('path'), vm = require('vm');
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'engine.js'), 'utf8');
 const a = html.indexOf('var MANSE_DATA'), b = html.indexOf('})(typeof window', a);
 vm.runInThisContext(html.slice(a, html.indexOf('\n', b)));
 const M = globalThis.Manse;
