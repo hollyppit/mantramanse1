@@ -7,7 +7,7 @@
   var TR_OUT = [['cut', '컷 (바로 끝)'], ['fade', '페이드 아웃'], ['dissolve', '블러 디졸브'], ['slide-left', '왼쪽으로 밀며 퇴장'], ['slide-up', '위로 밀며 퇴장'], ['zoom-in', '줌 인하며 사라짐'], ['wipe', '와이프'], ['flash', '섬광']];
   var SUB_POS = [['bottom', '아래'], ['middle', '가운데'], ['top', '위']];
   var SUB_SIZE = [['S', '작게'], ['M', '보통'], ['L', '크게']];
-  var SUB_FONT = [['gothic', '고딕 (Noto Sans KR)'], ['myeongjo', '명조 (Noto Serif KR)'], ['gowun', '고운바탕 (부드러운 명조)'], ['hanna', '블랙한산스 (굵은 제목체)'], ['dohyeon', '도현체 (굵은 고딕)'], ['jua', '주아체 (둥근 귀여움)'], ['pen', '나눔펜 (손글씨)'], ['gaegu', '개구체 (손글씨)']];
+  var SUB_FONT = [['gothic', '고딕 (Noto Sans KR)'], ['pretty', '프리텐다드 (깔끔한 요즘 고딕)'], ['myeongjo', '명조 (Noto Serif KR)'], ['gowun', '고운바탕 (부드러운 명조)'], ['gowundodum', '고운돋움 (따뜻한 고딕)'], ['hanna', '블랙한산스 (굵은 제목체)'], ['dohyeon', '도현체 (굵은 고딕)'], ['bagel', '베이글팻원 (통통한 팝 제목체)'], ['jua', '주아체 (둥근 귀여움)'], ['dongle', '동글 (둥글고 작은 손글씨)'], ['gamja', '감자꽃 (말랑한 손글씨)'], ['hi', '하이멜로디 (귀여운 손글씨)'], ['single', '싱글데이 (일기장 손글씨)'], ['poor', '푸어스토리 (또박한 손글씨)'], ['pen', '나눔펜 (손글씨)'], ['gaegu', '개구체 (손글씨)'], ['dokdo', '동해독도 (거친 붓)'], ['brush', '나눔붓 (붓글씨)'], ['songmyung', '송명 (고전 서체)'], ['yeonsung', '연성 (붓펜 느낌)'], ['gugi', '구기 (레트로 게임풍)'], ['stylish', '스타일리시 (세련된 얇은 글씨)'], ['cute', '귀여운 폰트 (캐릭터풍)'], ['kirang', '기랑해랑 (장난스러운)'], ['sunflower', '해바라기 (선명한 고딕)']];
   var SUB_WEIGHT = [['400', '보통'], ['500', '중간'], ['700', '굵게'], ['900', '아주 굵게']];
   var SUB_ALIGN = [['center', '가운데'], ['left', '왼쪽'], ['right', '오른쪽']];
   var SUB_COLOR = [['ivory', '아이보리'], ['white', '흰색'], ['gold', '금색'], ['yellow', '노랑']];
@@ -48,8 +48,37 @@
 
   var COLORS = { ivory: '#ECE7DB', white: '#FFFFFF', gold: '#F0D08A', yellow: '#FFE66B' };
   var SIZES = { S: 4, M: 5, L: 6.5 };
-  var FONTS = { gothic: '"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif', myeongjo: '"Noto Serif KR","Nanum Myeongjo","Batang",serif', gowun: '"Gowun Batang","Noto Serif KR",serif', hanna: '"Black Han Sans","Noto Sans KR",sans-serif', dohyeon: '"Do Hyeon","Noto Sans KR",sans-serif', jua: '"Jua","Noto Sans KR",sans-serif', pen: '"Nanum Pen Script","Noto Sans KR",cursive', gaegu: '"Gaegu","Noto Sans KR",cursive' };
-  var FONT_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;500;700;900&family=Gowun+Batang:wght@400;700&family=Black+Han+Sans&family=Do+Hyeon&family=Jua&family=Nanum+Pen+Script&family=Gaegu:wght@400;700&display=swap';
+  var FONTS = {
+    gothic: '"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif',
+    pretty: '"Pretendard","Noto Sans KR",sans-serif',
+    myeongjo: '"Noto Serif KR","Nanum Myeongjo","Batang","Noto Sans KR",serif',
+    gowun: '"Gowun Batang","Noto Sans KR",serif',
+    gowundodum: '"Gowun Dodum","Noto Sans KR",sans-serif',
+    hanna: '"Black Han Sans","Noto Sans KR",sans-serif',
+    dohyeon: '"Do Hyeon","Noto Sans KR",sans-serif',
+    bagel: '"Bagel Fat One","Noto Sans KR",sans-serif',
+    jua: '"Jua","Noto Sans KR",sans-serif',
+    dongle: '"Dongle","Noto Sans KR",sans-serif',
+    gamja: '"Gamja Flower","Noto Sans KR",cursive',
+    hi: '"Hi Melody","Noto Sans KR",cursive',
+    single: '"Single Day","Noto Sans KR",cursive',
+    poor: '"Poor Story","Noto Sans KR",cursive',
+    pen: '"Nanum Pen Script","Noto Sans KR",cursive',
+    gaegu: '"Gaegu","Noto Sans KR",cursive',
+    dokdo: '"East Sea Dokdo","Noto Sans KR",cursive',
+    brush: '"Nanum Brush Script","Noto Sans KR",cursive',
+    songmyung: '"Song Myung","Noto Sans KR",serif',
+    yeonsung: '"Yeon Sung","Noto Sans KR",cursive',
+    gugi: '"Gugi","Noto Sans KR",sans-serif',
+    stylish: '"Stylish","Noto Sans KR",sans-serif',
+    cute: '"Cute Font","Noto Sans KR",cursive',
+    kirang: '"Kirang Haerang","Noto Sans KR",cursive',
+    sunflower: '"Sunflower","Noto Sans KR",sans-serif',
+  };
+  // 글자 자체가 작게 설계된 글씨체는 같은 크기로 보이도록 키운다
+  var FONT_SCALE = { dongle: 1.6, pen: 1.4, brush: 1.4, cute: 1.25, dokdo: 1.3, gamja: 1.1, gaegu: 1.1 };
+  var FONT_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;500;700;900&family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Black+Han+Sans&family=Do+Hyeon&family=Jua&family=Nanum+Pen+Script&family=Gaegu:wght@400;700&family=Dongle:wght@400;700&family=Bagel+Fat+One&family=East+Sea+Dokdo&family=Gamja+Flower&family=Hi+Melody&family=Yeon+Sung&family=Single+Day&family=Gugi&family=Song+Myung&family=Sunflower:wght@500;700&family=Poor+Story&family=Stylish&family=Cute+Font&family=Kirang+Haerang&family=Nanum+Brush+Script&display=swap';
+  var FONT_CSS2 = 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css';
   var css = '.fx-wrap{position:absolute;inset:0;overflow:hidden;background:#000;container-type:inline-size}' +
     '.fx-stage{position:absolute;inset:0;animation-duration:var(--fxd,.5s);animation-fill-mode:both;animation-timing-function:ease}' +
     '.fx-stage video{width:100%;height:100%;background:#000;display:block}' +
@@ -69,7 +98,7 @@
   function injectCss() {
     if (typeof document === 'undefined' || document.getElementById('fx-css')) return;
     var s = document.createElement('style'); s.id = 'fx-css'; s.textContent = css; document.head.appendChild(s);
-    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = FONT_CSS; document.head.appendChild(l);
+    [FONT_CSS, FONT_CSS2].forEach(function (u) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = u; document.head.appendChild(l); });
   }
 
   function voices() { try { return (root.speechSynthesis && root.speechSynthesis.getVoices()) || []; } catch (e) { return []; } }
@@ -114,7 +143,7 @@
         if (!curCue) return;
         var el = document.createElement('div');
         el.className = 'fx-sub fx-bg-' + fx.sub.bg; el.style.color = /^#[0-9a-f]{3,8}$/i.test(fx.sub.colorHex) ? fx.sub.colorHex : (COLORS[fx.sub.color] || COLORS.ivory);
-        el.style.fontSize = (fx.sub.fs > 0 ? fx.sub.fs : (SIZES[fx.sub.size] || 5)) + 'cqw';
+        el.style.fontSize = (fx.sub.fs > 0 ? fx.sub.fs : (SIZES[fx.sub.size] || 5)) * (FONT_SCALE[fx.sub.font] || 1) + 'cqw';
         el.style.fontFamily = FONTS[fx.sub.font] || FONTS.gothic; el.style.fontWeight = fx.sub.weight; el.style.lineHeight = fx.sub.lh; el.style.letterSpacing = (fx.sub.ls / 100) + 'em';
         if (fx.sub.anim !== 'none' && fx.sub.anim !== 'type') el.style.animationName = 'fx-sa-' + fx.sub.anim;
         if (fx.sub.anim !== 'type') el.textContent = curCue.t;
