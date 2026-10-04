@@ -4,7 +4,22 @@
 import { json, isAdmin, configError } from '../_lib.js';
 
 const CLIPS_KEY = 'clips:index';
-const CHAPTERS = ['ch0', 'ch1', 'ch2', 'ch3', 'ch4', 'ch5', 'ch6', 'ch7', 'ch8'];
+// 장(章)은 관리자가 이름·순서·개수를 바꿀 수 있다. 저장된 값이 없으면 이 기본 9장을 쓴다. (report/assemble.js의 CHAPTERS와 같게 유지)
+const DEFAULT_CHAPTERS = [['ch0', '序 일주의 각성'], ['ch1', '一 타고난 성정'], ['ch2', '二 인생의 길'], ['ch3', '三 인연의 장'], ['ch4', '四 재물의 장'],
+  ['ch5', '五 도약의 장'], ['ch6', '六 가족의 장'], ['ch7', '七 앞으로 십 년의 문'], ['ch8', '終 개운 종합 카드']].map(([id, name]) => ({ id, name }));
+const MAX_CHAPTERS = 40, MAX_FOLDERS = 200;
+
+// [{id,name}] 목록 검증. 형식이 틀리면 null.
+function cleanNamed(list, max, min) {
+  if (!Array.isArray(list) || list.length > max || list.length < min) return null;
+  const out = [], seen = new Set();
+  for (const x of list) {
+    const id = String((x && x.id) || ''), name = String((x && x.name) || '').trim().slice(0, 30);
+    if (!/^[\w-]{1,20}$/.test(id) || !name || seen.has(id)) return null;
+    seen.add(id); out.push({ id, name });
+  }
+  return out;
+}
 const COND_KEYS = ['ilju', 'ilgan', 'ilji', 'wolji', 'yongEl', 'strength', 'dominant', 'gender'];
 const MAX_CLIPS = 3000;
 
@@ -48,10 +63,10 @@ function cleanFx(fx) {
   return out;
 }
 
-function clean(c) {
+function clean(c, chapterIds, folderIds) {
   if (!c || typeof c !== 'object') return null;
   const id = String(c.id || '').slice(0, 40), title = String(c.title || '').trim().slice(0, 80);
-  if (!/^[\w-]{1,40}$/.test(id) || !title || !CHAPTERS.includes(c.chapter)) return null;
+  if (!/^[\w-]{1,40}$/.test(id) || !title || !chapterIds.has(c.chapter)) return null;
   const cond = {};
   for (const k of COND_KEYS) {
     const v = c.cond && c.cond[k];
@@ -62,7 +77,7 @@ function clean(c) {
   if (s.type === 'r2' && /^[\w.-]{1,120}$/.test(s.value || '')) src = { type: 'r2', value: s.value };
   else if (s.type === 'url' && /^https:\/\/[^\s]{1,500}$/.test(s.value || '')) src = { type: 'url', value: s.value };
   else if (s.type) return null; // 알 수 없는 형식
-  return { id, title, chapter: c.chapter, cond, src, caption: String(c.caption || '').slice(0, 500), note: String(c.note || '').slice(0, 300), fx: cleanFx(c.fx), priority: Math.max(-100, Math.min(100, +c.priority || 0)) };
+  return { id, title, chapter: c.chapter, folder: folderIds.has(c.folder) ? c.folder : '', cond, src, caption: String(c.caption || '').slice(0, 500), note: String(c.note || '').slice(0, 300), fx: cleanFx(c.fx), priority: Math.max(-100, Math.min(100, +c.priority || 0)) };
 }
 
 export async function onRequestGet({ request, env }) {
@@ -70,7 +85,7 @@ export async function onRequestGet({ request, env }) {
   if (err) return json({ error: err }, 500);
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   const data = (await env.GLOSSARY_KV.get(CLIPS_KEY, 'json')) || { clips: [] };
-  return json({ clips: data.clips || [], defaults: data.defaults || {}, r2: !!env.CLIPS_R2 });
+  return json({ clips: data.clips || [], defaults: data.defaults || {}, chapters: data.chapters || DEFAULT_CHAPTERS, folders: data.folders || [], r2: !!env.CLIPS_R2 });
 }
 
 export async function onRequestPut({ request, env }) {
@@ -80,15 +95,20 @@ export async function onRequestPut({ request, env }) {
   let body;
   try { body = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); }
   if (!body || !Array.isArray(body.clips) || body.clips.length > MAX_CLIPS) return json({ error: '클립 목록이 올바르지 않습니다' }, 400);
+  const prev = (await env.GLOSSARY_KV.get(CLIPS_KEY, 'json')) || {};
+  const chapters = body.chapters === undefined ? (prev.chapters || DEFAULT_CHAPTERS) : cleanNamed(body.chapters, MAX_CHAPTERS, 1);
+  if (!chapters) return json({ error: '장 목록이 올바르지 않습니다 (1~40개, 이름 필수, 중복 id 불가)' }, 400);
+  const folders = body.folders === undefined ? (prev.folders || []) : cleanNamed(body.folders, MAX_FOLDERS, 0);
+  if (!folders) return json({ error: '폴더 목록이 올바르지 않습니다' }, 400);
+  const chapterIds = new Set(chapters.map(c => c.id)), folderIds = new Set(folders.map(f => f.id));
   const clips = [], seen = new Set();
   for (const raw of body.clips) {
-    const c = clean(raw);
+    const c = clean(raw, chapterIds, folderIds);
     if (!c) return json({ error: `클립 형식 오류: ${String(raw && (raw.title || raw.id) || '').slice(0, 30)}` }, 400);
     if (seen.has(c.id)) return json({ error: `중복된 id: ${c.id}` }, 400);
     seen.add(c.id); clips.push(c);
   }
-  const prev = (await env.GLOSSARY_KV.get(CLIPS_KEY, 'json')) || {};
   const defaults = body.defaults === undefined ? (prev.defaults || {}) : cleanFx({ ...body.defaults, cues: undefined });
-  await env.GLOSSARY_KV.put(CLIPS_KEY, JSON.stringify({ clips, defaults, at: new Date().toISOString() }));
+  await env.GLOSSARY_KV.put(CLIPS_KEY, JSON.stringify({ clips, defaults, chapters, folders, at: new Date().toISOString() }));
   return json({ ok: true, count: clips.length });
 }

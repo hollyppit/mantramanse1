@@ -34,9 +34,10 @@
     });
   }
 
+  // chapters = [[id, 이름], …] (관리자에서 바꾼 장 목록, 생략하면 기본 9장). 장 순서가 곧 재생 순서.
   // 장마다 가장 구체적인 클립 1개를 고른다. 구체성 점수(조건 가중합) → 우선순위 → id 순.
-  function assemble(clips, facts) {
-    return CHAPTERS.map(function (ch) {
+  function assemble(clips, facts, chapters) {
+    return (chapters || CHAPTERS).map(function (ch) {
       var cands = clips.filter(function (c) { return c.chapter === ch[0] && matches(c, facts); }).map(function (c) {
         return { clip: c, spec: specified(c), pri: +c.priority || 0 };
       }).sort(function (a, b) { return b.spec - a.spec || b.pri - a.pri || (a.clip.id < b.clip.id ? -1 : 1); });
