@@ -2,7 +2,7 @@
 const http = require('http'), fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json' };
-let intro = { on: false, src: null, sound: 'off', skipAfter: 0, once: 'session' }, clips = [], defaults = {}, chapters = null, folders = [], files = {};
+let intro = { on: false, src: null, skipAfter: 0, once: 'session' }, clips = [], defaults = {}, chapters = null, folders = [], files = {};
 const send = (r, code, obj) => { r.statusCode = code; r.setHeader('content-type', 'application/json; charset=utf-8'); r.end(JSON.stringify(obj)); };
 const authed = q => (q.headers.authorization || '') === 'Bearer test';
 const body = q => new Promise(res => { const b = []; q.on('data', c => b.push(c)); q.on('end', () => res(Buffer.concat(b))); });
@@ -35,7 +35,7 @@ http.createServer(async (q, r) => {
   }
   if (p === '/api/intro') {
     const urlOf = c => !c.src ? '' : c.src.type === 'r2' ? '/api/clipfile?k=' + encodeURIComponent(c.src.value) : c.src.value;
-    if (q.method === 'PUT') { if (!authed(q)) return send(r, 401, { error: '관리자 인증이 필요합니다' }); const b = JSON.parse((await body(q)).toString()); if (b.on && !b.src) return send(r, 400, { error: '영상을 올리거나 주소를 입력한 뒤 켜세요' }); intro = { on: !!b.on, src: b.src || null, sound: b.sound === 'on' ? 'on' : 'off', skipAfter: +b.skipAfter || 0, once: b.once === 'always' ? 'always' : 'session' }; return send(r, 200, { ok: true, ...intro, url: urlOf(intro) }); }
+    if (q.method === 'PUT') { if (!authed(q)) return send(r, 401, { error: '관리자 인증이 필요합니다' }); const b = JSON.parse((await body(q)).toString()); if (b.on && !b.src) return send(r, 400, { error: '영상을 올리거나 주소를 입력한 뒤 켜세요' }); intro = { on: !!b.on, src: b.src || null, skipAfter: +b.skipAfter || 0, once: b.once === 'always' ? 'always' : 'session' }; return send(r, 200, { ok: true, ...intro, url: urlOf(intro) }); }
     if (!authed(q) && (!intro.on || !intro.src)) return send(r, 200, { on: false });
     return send(r, 200, { ...intro, url: urlOf(intro) });
   }

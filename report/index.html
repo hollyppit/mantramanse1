@@ -157,7 +157,7 @@ footer p + p { margin-top: 6px; }
 #intro video { width: 100%; height: 100%; object-fit: contain; }
 #intro button { position: absolute; top: max(14px, env(safe-area-inset-top)); border: 1px solid rgba(236,231,219,.45); background: rgba(10,12,20,.55); color: var(--ink); font: inherit; font-size: .85rem; padding: 8px 14px; border-radius: 999px; cursor: pointer; backdrop-filter: blur(6px); }
 #intro button:hover { border-color: var(--gold); color: var(--gold); }
-#intro .skip { right: 14px; } #intro .snd { left: 14px; }
+#intro .skip { right: 14px; }
 </style>
 </head>
 <body>
@@ -385,7 +385,7 @@ footer p + p { margin-top: 6px; }
 (function () {
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // 입장 인트로: 관리자가 켜 둔 경우에만. 소리는 브라우저 정책상 막힐 수 있어 실패하면 음소거로 재생하고 버튼으로 켜게 한다.
+  // 입장 인트로: 관리자가 켜 둔 경우에만. 항상 음소거로 재생한다.
   (function () {
     if (reduce) return;
     try { if (sessionStorage.getItem('mt_intro') === '1') return; } catch (e) {}
@@ -393,11 +393,8 @@ footer p + p { margin-top: 6px; }
       if (!c.on || !c.url) return;
       if (c.once !== 'always') { try { sessionStorage.setItem('mt_intro', '1'); } catch (e) {} }
       var box = document.createElement('div'); box.id = 'intro'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', '입장 영상');
-      var v = document.createElement('video'); v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto'; v.muted = c.sound !== 'on'; v.src = c.url;
+      var v = document.createElement('video'); v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto'; v.muted = true; v.src = c.url;
       var skip = document.createElement('button'); skip.className = 'skip'; skip.type = 'button'; skip.textContent = '건너뛰기 ›';
-      var snd = document.createElement('button'); snd.className = 'snd'; snd.type = 'button';
-      function lab() { snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; } lab();
-      snd.onclick = function () { v.muted = !v.muted; lab(); if (v.paused) v.play().catch(function () {}); };
       var done = false;
       function close() {
         if (done) return; done = true; document.documentElement.style.overflow = ''; box.classList.add('out'); v.pause();
@@ -406,10 +403,10 @@ footer p + p { margin-top: 6px; }
       skip.onclick = close; v.onended = close; v.onerror = close;
       document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } });
       var wait = +c.skipAfter || 0; if (wait) { skip.style.display = 'none'; setTimeout(function () { skip.style.display = ''; }, wait * 1000); }
-      box.appendChild(v); box.appendChild(snd); box.appendChild(skip);
+      box.appendChild(v); box.appendChild(skip);
       document.body.appendChild(box); document.documentElement.style.overflow = 'hidden';
       var pr = v.play();
-      if (pr && pr.catch) pr.catch(function () { v.muted = true; lab(); v.play().catch(close); }); // 소리 재생이 막히면 음소거로 재시도, 그래도 안 되면 인트로 생략
+      if (pr && pr.catch) pr.catch(close); // 재생이 막히면 인트로 생략
       setTimeout(close, 60000); // 안전장치
     }).catch(function () {});
   })();

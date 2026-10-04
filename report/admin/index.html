@@ -212,10 +212,9 @@ summary { cursor:pointer; padding:4px 0; }
     <!-- 입장 인트로 -->
     <div id="t-intro" class="hide">
       <div class="card" style="max-width:640px">
-        <p class="muted" style="margin:0 0 12px">판매 페이지(/report/)에 들어올 때 전체 화면으로 먼저 재생되는 영상입니다. 이 탭의 저장은 클립 저장과 별개로 바로 반영됩니다.</p>
+        <p class="muted" style="margin:0 0 12px">판매 페이지(/report/)에 들어올 때 전체 화면으로 먼저 음소거로 재생되는 영상입니다. 이 탭의 저장은 클립 저장과 별개로 바로 반영됩니다.</p>
         <div class="row" style="align-items:center;gap:16px">
           <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="inOn" style="width:auto"> <b>인트로 켜기</b></label>
-          <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="inSound" style="width:auto"> 소리 켜고 시작 <span class="muted">(브라우저가 막으면 자동 음소거)</span></label>
         </div>
         <div class="row" style="margin-top:12px">
           <label>건너뛰기 버튼 표시<select id="inSkip"><option value="0">처음부터</option><option value="2">2초 후</option><option value="4">4초 후</option></select></label>
@@ -487,7 +486,7 @@ summary { cursor:pointer; padding:4px 0; }
   }
   function introLoad() {
     api('/api/intro').then(function (d) {
-      IN.src = d.src || null; $('inOn').checked = !!d.on; $('inSound').checked = d.sound === 'on';
+      IN.src = d.src || null; $('inOn').checked = !!d.on;
       $('inSkip').value = String(d.skipAfter || 0); $('inOnce').value = d.once || 'session'; $('inUrl').value = IN.src && IN.src.type === 'url' ? IN.src.value : '';
       $('inUp').disabled = $('inFile').disabled = !S.r2; introShow();
     }).catch(function (e) { $('inState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
@@ -508,7 +507,7 @@ summary { cursor:pointer; padding:4px 0; }
   };
   $('inSave').onclick = function () {
     $('inState').textContent = '저장 중…';
-    api('/api/intro', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: $('inOn').checked, src: IN.src, sound: $('inSound').checked ? 'on' : 'off', skipAfter: +$('inSkip').value, once: $('inOnce').value }) })
+    api('/api/intro', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: $('inOn').checked, src: IN.src, skipAfter: +$('inSkip').value, once: $('inOnce').value }) })
       .then(function () { $('inState').innerHTML = '<span class="ok">저장됨 — ' + ($('inOn').checked ? '켜짐' : '꺼짐') + '</span>'; })
       .catch(function (e) { $('inState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };

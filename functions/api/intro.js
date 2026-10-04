@@ -1,5 +1,5 @@
 // 판매 페이지(/report/) 인트로 영상 설정
-// GET /api/intro — 공개. { on, src: {type,value}|null, url, sound, skipAfter, once } (꺼져 있거나 영상이 없으면 on=false)
+// GET /api/intro — 공개. { on, src: {type,value}|null, url, skipAfter, once } (꺼져 있거나 영상이 없으면 on=false)
 // PUT /api/intro — 관리자 전용. 같은 형식으로 저장
 // 저장 위치: GLOSSARY_KV의 'intro:config' 키. 영상 파일은 /api/clipfile(R2)에 올린다.
 import { json, isAdmin, configError } from '../_lib.js';
@@ -12,7 +12,7 @@ function clean(b) {
   if (s.type === 'r2' && /^[\w.-]{1,120}$/.test(s.value || '')) src = { type: 'r2', value: s.value };
   else if (s.type === 'url' && /^https:\/\/[^\s]{1,500}$/.test(s.value || '')) src = { type: 'url', value: s.value };
   const skip = Math.round(Math.max(0, Math.min(30, +b.skipAfter || 0)) * 10) / 10;
-  return { on: !!b.on, src, sound: b.sound === 'on' ? 'on' : 'off', skipAfter: skip, once: b.once === 'always' ? 'always' : 'session' };
+  return { on: !!b.on, src, skipAfter: skip, once: b.once === 'always' ? 'always' : 'session' };
 }
 
 const urlOf = (src) => !src ? '' : src.type === 'r2' ? '/api/clipfile?k=' + encodeURIComponent(src.value) : src.value;
