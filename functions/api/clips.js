@@ -75,7 +75,20 @@ function clean(c, chapterIds, folderIds, byId) {
   return { id, title, chapter: chapterIds.has(c.chapter) ? c.chapter : '', folder, cond, src, caption: String(c.caption || '').slice(0, 500), draft: String(c.draft || '').slice(0, 1500), note: String(c.note || '').slice(0, 300), fx: cleanFx(c.fx), priority: Math.max(-100, Math.min(100, +c.priority || 0)) };
 }
 
+// GET /api/clips?public=1 — 스토리 페이지가 사용자 사주에 맞는 영상을 고를 때 쓰는 공개 목록. 조합에 필요한 값만 내보낸다(대본·메모·연출은 제외).
+async function publicList(env) {
+  if (!env.GLOSSARY_KV) return json({ clips: [], folders: [], chapters: DEFAULT_CHAPTERS });
+  const data = (await env.GLOSSARY_KV.get(CLIPS_KEY, 'json')) || {};
+  const url = s => (!s ? '' : s.type === 'r2' ? '/api/clipfile?k=' + encodeURIComponent(s.value) : s.value);
+  return json({
+    chapters: data.chapters || DEFAULT_CHAPTERS,
+    folders: (data.folders || []).map(f => ({ id: f.id, parent: f.parent, chapter: f.chapter, priority: f.priority, cond: f.cond })),
+    clips: (data.clips || []).filter(c => c.src).map(c => ({ id: c.id, chapter: c.chapter, folder: c.folder, priority: c.priority, cond: c.cond, url: url(c.src), caption: c.caption })),
+  });
+}
+
 export async function onRequestGet({ request, env }) {
+  if (new URL(request.url).searchParams.get('public') === '1') return publicList(env);
   const err = configError(env);
   if (err) return json({ error: err }, 500);
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);

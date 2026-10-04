@@ -47,7 +47,7 @@
   var GROUPS = [
     ['page', '페이지 기본', 'settings', [['brandName', '위쪽 가운데 이름', 't'], ['pageTitle', '브라우저 탭 제목', 't'], ['pageDesc', '검색·공유 설명', 'l'], ['priceText', '가격 표시 (비우면 표시 안 함)', 't'],
       ['skipLink', '오른쪽 위 바로가기', 'o', [['text', '글자', 't']]], ['purchase', '구매 버튼 동작', 'o', [['mode', '방식', 's', [['waitlist', '출시 알림(이메일) 받기'], ['link', '결제 페이지로 이동']]], ['href', '결제 페이지 주소(/ 또는 https://)', 't']]],
-      ['hideEmptyMediaInProduction', '이미지·영상이 없는 블록은 숨기기', 'b']]],
+      ['resultClipChapter', '결과 화면 영상: 쓸 장 id (예: ch0 · 비우면 영상이 있는 첫 장)', 't'], ['hideEmptyMediaInProduction', '이미지·영상이 없는 블록은 숨기기', 'b']]],
     ['interest', '관심사 선택지', 'interests', null],
     ['result', '무료 결과 화면', 'result', [['title', '제목 ({name}=이름)', 't'], ['titleNoName', '이름이 없을 때 제목', 't'], ['subject', '주어 ({name}=이름)', 't'], ['subjectNoName', '이름이 없을 때 주어', 't'],
       ['elementTrait', '일간 오행별 한 줄', 'o', [['목', '목', 't'], ['화', '화', 't'], ['토', '토', 't'], ['금', '금', 't'], ['수', '수', 't']]],

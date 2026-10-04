@@ -12,6 +12,7 @@ http.createServer(async (q, r) => {
   if (p === '/api/waitlist' && q.method === 'POST') { await body(q); return send(r, 200, { ok: true }); }
   if (p === '/api/admin') return authed(q) ? send(r, 200, { ok: true }) : send(r, 401, { error: '비밀번호가 맞지 않습니다' });
   if (p === '/api/clips') {
+    if (u.searchParams.get('public')) { const cs = chapters || [['ch0', 'a']].map(([id, name]) => ({ id, name })); return send(r, 200, { chapters: cs, folders, clips: clips.filter(c => c.src).map(c => ({ id: c.id, chapter: c.chapter, folder: c.folder, priority: c.priority, cond: c.cond, url: c.src.type === 'r2' ? '/api/clipfile?k=' + encodeURIComponent(c.src.value) : c.src.value, caption: c.caption })) }); }
     if (!authed(q)) return send(r, 401, { error: '관리자 인증이 필요합니다' });
     if (q.method === 'GET') return send(r, 200, { clips, defaults, chapters: chapters || [['ch0', '序 일주의 각성'], ['ch1', '一 타고난 성정'], ['ch2', '二 인생의 길'], ['ch3', '三 인연의 장'], ['ch4', '四 재물의 장'], ['ch5', '五 도약의 장'], ['ch6', '六 가족의 장'], ['ch7', '七 앞으로 십 년의 문'], ['ch8', '終 개운 종합 카드']].map(([id, name]) => ({ id, name })), folders, r2: true });
     if (q.method === 'PUT') { const b = JSON.parse((await body(q)).toString()); clips = b.clips; defaults = b.defaults || {}; chapters = b.chapters || chapters; folders = b.folders || folders; return send(r, 200, { ok: true, count: clips.length }); }

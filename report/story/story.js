@@ -165,6 +165,37 @@
   function interestText() { var it = (C.interests || []).filter(function (x) { return x.key === S.interest; })[0]; return it ? it.text : ''; }
   function withInterest(tpl) { var t = interestText(); return t ? String(tpl || '').replace('{interest}', t) : ''; }
 
+  // 관리자에서 올린 클립 중 이 사주에 맞는 영상 한 편을 고른다 (조합 규칙은 관리자 "조합 테스트"와 같은 report/assemble.js).
+  var clipData = null, clipLoading = null;
+  function loadClips() {
+    if (clipLoading) return clipLoading;
+    clipLoading = fetch('/api/clips?public=1').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { clipData = d && d.clips ? d : { clips: [] }; }).catch(function () { clipData = { clips: [] }; });
+    return clipLoading;
+  }
+  function factsOf(ch) {
+    var m = M(), day = m.gzNameK(ch.pillars.day), month = m.gzNameK(ch.pillars.month), g = ch.weights.groups, names = ['비겁', '식상', '재성', '관성', '인성'], mi = 0;
+    for (var i = 1; i < 5; i++) if (g[i] > g[mi]) mi = i;
+    return { ilju: day, ilgan: day[0], ilji: day[1], wolji: month[1], strength: ch.strength.zone, yongEl: ch.yong && ch.yong.applicable ? m.EL_K[ch.yong.yong] : '', dominant: names[mi], gender: ch.gender === 'M' ? '남' : '여' };
+  }
+  function pickClip(ch) {
+    if (!clipData || !clipData.clips.length || !root.Assemble) return null;
+    try {
+      var chs = (clipData.chapters || []).map(function (c) { return [c.id, c.name]; }), want = C.settings && C.settings.resultClipChapter;
+      var rows = root.Assemble.assemble(clipData.clips, factsOf(ch), chs.length ? chs : undefined, clipData.folders || []);
+      var row = want ? rows.filter(function (r) { return r.chapter === want; })[0] : rows.filter(function (r) { return r.pick; })[0];
+      return row && row.pick ? row.pick : null;
+    } catch (e) { return null; }
+  }
+
+  // 결과 아래 영상/이미지: 맞는 클립이 있으면 영상, 없으면 content.js 의 이미지(없으면 자리표시)
+  function resultMedia(R, ch) {
+    var clip = pickClip(ch);
+    if (clip && media(clip.url)) {
+      return BLOCKS.video({ src: clip.url, autoplay: true, muted: true, loop: true, aspectRatio: '9/16', width: 'narrow' });
+    }
+    return R.image ? '<figure class="fig w-narrow">' + pic(R.image, { ar: '1/1' }) + '</figure>' : '';
+  }
+
   var COMPONENTS = {
     // 사주 입력: 만세력 앱과 같은 입력값·같은 계산(Manse.compute)을 쓴다. 계산 로직은 건드리지 않는다.
     SajuInput: {
@@ -206,6 +237,7 @@
           try { ch = M().compute(inp); } catch (err) { msg.textContent = (err && err.message) || '입력을 확인해 주세요.'; return; }
           S.chart = ch; S.name = String(f.name.value || '').trim().slice(0, 20);
           track('saju_analysis_completed', { interest: S.interest || '', hour_known: hasT }); // 생년월일 등 개인정보는 보내지 않는다
+          loadClips().then(function () { paint('FreeResult'); });
           paint('FreeResult'); paint('FlowPreview'); paint('LockedContent'); paint('Paywall');
           gate(); scrollToId('freeResult');
         });
@@ -226,7 +258,7 @@
         return '<p class="kicker">FREE</p><h2 class="hl hl-l">' + esc(nm ? String(R.title || '{name}님의 기본 기질').replace('{name}', nm) : (R.titleNoName || '당신의 기본 기질')) + '</h2>' +
           '<div class="pillars" aria-label="사주 네 기둥">' + cell('hour', '시주') + cell('day', '일주') + cell('month', '월주') + cell('year', '연주') + '</div>' +
           '<p class="me-line">나를 뜻하는 글자는 <b>' + esc(m.STEM_K[d.s]) + '(' + esc(m.STEM[d.s]) + ') · ' + esc(el) + '</b></p>' +
-          '<p class="sum">' + summary + '</p>' + (R.image ? '<figure class="fig w-narrow">' + pic(R.image, { ar: '1/1' }) + '</figure>' : '') +
+          '<p class="sum">' + summary + '</p>' + resultMedia(R, ch) +
           (il ? '<p class="note ctr">' + esc(il) + '</p>' : '') + (R.flowHint ? '<p class="body emph">' + fmt(R.flowHint) + '</p>' : '');
       },
     },
@@ -475,6 +507,7 @@
   var host0 = null, started = false;
   function sample() { // 미리보기용 예시 사주 (분석 후 화면까지 보이도록)
     if (!M()) return; try { S.chart = M().compute({ year: 1990, month: 5, day: 15, hour: 14, minute: 0, calendar: 'solar', gender: 'F', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' }); S.flowOpen = true; S.name = '예시'; } catch (e) { }
+    loadClips().then(function () { if (started) paint('FreeResult'); });
   }
   function render() {
     var host = host0, y = root.scrollY;
