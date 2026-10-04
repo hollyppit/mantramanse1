@@ -100,8 +100,11 @@
       return '<figure class="fig w-' + (/^(narrow|wide|normal)$/.test(b.width) ? b.width : 'normal') + '">' + pic(b, { ar: '4/5' }) + (b.caption ? '<figcaption>' + fmt(pick(b.caption)) + '</figcaption>' : '') + '</figure>';
     },
     imageText: function (b) {
-      return '<div class="it ' + (b.imagePosition === 'right' ? 'right' : 'left') + '"><figure class="fig">' + pic(b, { ar: '4/5' }) + '</figure><div class="it-t">' +
-        (b.title ? '<h3 class="tt">' + fmt(pick(b.title)) + '</h3>' : '') + (b.body ? '<p class="body">' + fmt(pick(b.body)) + '</p>' : '') + '</div></div>';
+      var pos = /^(left|right|top|bottom)$/.test(b.imagePosition) ? b.imagePosition : 'left', stack = pos === 'top' || pos === 'bottom';
+      var ar = ratio(b.aspectRatio, '4/5'), p = ar.split('/'), r = (+p[0]) / (+p[1]) || 0.8;
+      var fig = '<figure class="fig" style="--r:' + r + '">' + pic(b, { ar: ar }) + '</figure>';
+      var txt = '<div class="it-t">' + (b.title ? '<h3 class="tt big">' + lines(fmt(pick(b.title)), b.anim) + '</h3>' : '') + (b.body ? '<p class="body">' + fmt(pick(b.body)) + '</p>' : '') + '</div>';
+      return '<div class="it p-' + pos + (stack ? ' stack' : '') + '">' + (pos === 'bottom' ? txt + fig : fig + txt) + '</div>';
     },
     fullImage: function (b) {
       return '<figure class="fig full" style="--h:' + esc(/^\d+(\.\d+)?(svh|vh|px|vw)$/.test(b.height) ? b.height : '70svh') + '">' + pic(Object.assign({}, b, { aspectRatio: '' }), {}) + (b.caption ? '<figcaption>' + fmt(pick(b.caption)) + '</figcaption>' : '') + '</figure>';

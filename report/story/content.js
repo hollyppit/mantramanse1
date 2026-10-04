@@ -12,6 +12,7 @@
 
    ■ 자주 하는 일
      문장 하나 추가      → { type: 'headline', title: '새 문장' },  를 원하는 위치에 붙여 넣기
+     글+그림 한 세트     → { type: 'imageText', title: '문장', src: '...', alt: '...', imagePosition: 'top' },  (top=그림 위·글 아래, bottom=글 위·그림 아래, left/right=옆으로)
      이미지 하나 추가    → { type: 'image', src: 'story/story-01.webp', alt: '설명' },  를 붙여 넣기
      글 + 그림 한 세트   → { type: 'imageText', src: '...', alt: '...', title: '...', body: '...', imagePosition: 'left' },
      (더 많은 예시는 맨 아래 "복사해서 쓰는 예시" 참고)
@@ -41,7 +42,8 @@
      text        설명 글. title, subtitle, body, emphasis(true면 강조 스타일)
      quote       강조 문구. text, cite(출처, 선택)
      image       이미지. src, srcMobile, alt, caption, width('narrow'|'normal'|'wide'), aspectRatio('4/5','16/9'…), objectFit('cover'|'contain'), todo
-     imageText   그림+글. src, alt, title, body, imagePosition('left'|'right')  (모바일에서는 위아래로 쌓임)
+     imageText   그림+글을 한 화면에. src, alt, title, body, aspectRatio, imagePosition('top'|'bottom'|'left'|'right')
+                 top/bottom = 위아래로 쌓음(휴대폰 한 화면에 그림과 글이 함께 보이도록 그림 높이를 제한), left/right = 큰 화면에서 좌우 배치(모바일은 위아래)
      fullImage   화면을 크게 쓰는 이미지. src, alt, caption, height('70svh' 등)
      gallery     이미지 2~4장. items: [{src, alt, caption}], columns(2~4)
      video       영상. src, poster, autoplay, muted, loop, aspectRatio, caption, todo
@@ -167,20 +169,16 @@
 
     /* ===== 01 PROBLEM : "이거 내 얘기인데?" ===== */
     { type: 'headline', id: 'hero', track: 'problem_section_viewed', kicker: '만트라 사주 무빙툰', title: COPY.heroHeadline, size: 'xl', fullscreen: true, scrollHint: true, startButton: '스크롤하기', anim: 'lines' },
-    { type: 'headline', title: COPY.problemQuestion, size: 'l', anim: 'lines' },
-    { type: 'image', src: 'problem/problem-01.webp', alt: '노력하지만 결과가 나오지 않아 고민하는 사람', aspectRatio: '4/5', width: 'normal',
+    { type: 'imageText', title: COPY.problemQuestion, imagePosition: 'top', src: 'problem/problem-01.webp', alt: '노력하지만 결과가 나오지 않아 고민하는 사람', aspectRatio: '4/5', anim: 'lines',
       todo: '노력하지만 결과가 나오지 않아 고민하는 인물 이미지 또는 웹툰 컷 삽입' },
-    { type: 'headline', title: '지금 밀어붙여야 할까,\n기다려야 할까?', size: 'l', anim: 'lines' },
-    { type: 'image', src: 'problem/problem-02.webp', alt: '두 갈래 길 앞에 선 사람', aspectRatio: '4/5', width: 'normal',
+    { type: 'imageText', title: '지금 밀어붙여야 할까,\n기다려야 할까?', imagePosition: 'top', src: 'problem/problem-02.webp', alt: '두 갈래 길 앞에 선 사람', aspectRatio: '4/5', anim: 'lines',
       todo: '두 갈래 길 또는 선택을 표현하는 이미지 삽입' },
-    { type: 'headline', title: '돈은 언제쯤 풀릴까?', size: 'm' },
-    { type: 'headline', title: '이 사람과 계속 가도 될까?', size: 'm' },
+    { type: 'headline', title: '돈은 언제쯤 풀릴까?\n이 사람과 계속 가도 될까?', size: 'm', anim: 'lines' },
     { type: 'headline', title: '내 인생에도\n잘 풀리는 때가 있을까?', size: 'l', anim: 'lines' },
     { type: 'spacer', size: 'large' },
 
     /* ===== 02 INSIGHT : "사람마다 타이밍이 다르구나" ===== */
-    { type: 'headline', id: 'insight', track: 'insight_section_viewed', title: COPY.insightHeadline, size: 'xl', fullscreen: true, anim: 'lines' },
-    { type: 'image', src: 'insight/insight-01.webp', alt: '계절이 바뀌듯 흘러가는 시간', aspectRatio: '16/10', width: 'wide',
+    { type: 'imageText', id: 'insight', track: 'insight_section_viewed', fullscreen: true, title: COPY.insightHeadline, imagePosition: 'bottom', src: 'insight/insight-01.webp', alt: '계절이 바뀌듯 흘러가는 시간', aspectRatio: '16/10', anim: 'lines',
       todo: '계절 또는 시간의 흐름을 표현하는 일러스트 삽입' },
     { type: 'chain', title: '지금의 나는 이렇게 만들어집니다', items: ['타고난 기질', '현재의 흐름', '나의 선택'], direction: 'row', result: '현재의 나' },
     { type: 'text', body: '어떤 사람은 *움직일 때* 기회를 잡고,\n어떤 사람은 *기다릴 때* 손실을 피합니다.', align: 'center' },
@@ -229,11 +227,9 @@
 
     /* ===== 09 STORY CONTENT : 무료 결과와 운 흐름 사이 ===== */
     { type: 'spacer', size: 'medium', requires: 'chart' },
-    { type: 'headline', requires: 'chart', title: '그런데 같은 사람도\n언제나 같은 모습으로\n살아가지는 않습니다.', size: 'l', anim: 'lines' },
-    { type: 'image', requires: 'chart', src: 'story/story-01.webp', alt: '일이 술술 풀리는 시기의 사람', aspectRatio: '4/5', width: 'normal',
+    { type: 'imageText', requires: 'chart', title: '그런데 같은 사람도\n언제나 같은 모습으로\n살아가지는 않습니다.', imagePosition: 'top', src: 'story/story-01.webp', alt: '일이 술술 풀리는 시기의 사람', aspectRatio: '4/5', anim: 'lines',
       todo: '일이 빠르게 풀리는 시기를 표현하는 컷 삽입' },
-    { type: 'headline', requires: 'chart', title: '어떤 시기에는\n일이 빠르게 풀리고', size: 'm', anim: 'lines' },
-    { type: 'image', requires: 'chart', src: 'story/story-02.webp', alt: '아무리 노력해도 제자리 같은 시기의 사람', aspectRatio: '4/5', width: 'normal',
+    { type: 'imageText', requires: 'chart', title: '어떤 시기에는\n일이 빠르게 풀리고', imagePosition: 'top', src: 'story/story-02.webp', alt: '아무리 노력해도 제자리 같은 시기의 사람', aspectRatio: '4/5', anim: 'lines',
       todo: '노력해도 제자리처럼 느껴지는 시기를 표현하는 컷 삽입' },
     { type: 'headline', requires: 'chart', title: '어떤 시기에는\n아무리 노력해도\n제자리처럼 느껴집니다.', size: 'm', anim: 'lines' },
     { type: 'quote', requires: 'chart', text: '그 차이를 만드는 것이\n*운의 흐름*입니다.' },
@@ -254,14 +250,11 @@
 
     /* ===== 13 PAYWALL STORY : 결제 버튼 전의 마지막 이야기 ===== */
     { type: 'spacer', requires: 'flowOpen', size: 'large' },
-    { type: 'headline', requires: 'flowOpen', title: '인생에는\n움직여야 할 때가 있고', size: 'l', anim: 'lines' },
-    { type: 'image', requires: 'flowOpen', src: 'paywall/paywall-01.webp', alt: '앞으로 나아가는 사람', aspectRatio: '4/5', width: 'normal',
+    { type: 'imageText', requires: 'flowOpen', title: '인생에는\n움직여야 할 때가 있고', imagePosition: 'top', src: 'paywall/paywall-01.webp', alt: '앞으로 나아가는 사람', aspectRatio: '4/5', anim: 'lines',
       todo: '움직여야 할 때를 표현하는 컷 삽입' },
-    { type: 'headline', requires: 'flowOpen', title: '기다려야 할 때가 있습니다.', size: 'l', anim: 'lines' },
-    { type: 'image', requires: 'flowOpen', src: 'paywall/paywall-02.webp', alt: '조용히 기다리는 사람', aspectRatio: '4/5', width: 'normal',
+    { type: 'imageText', requires: 'flowOpen', title: '기다려야 할 때가 있습니다.', imagePosition: 'top', src: 'paywall/paywall-02.webp', alt: '조용히 기다리는 사람', aspectRatio: '4/5', anim: 'lines',
       todo: '기다려야 할 때를 표현하는 컷 삽입' },
-    { type: 'headline', requires: 'flowOpen', title: '중요한 건\n그 *타이밍*을 알아보는 것입니다.', size: 'l', anim: 'lines' },
-    { type: 'image', requires: 'flowOpen', src: 'paywall/paywall-03.webp', alt: '시계와 달의 흐름', aspectRatio: '16/10', width: 'wide',
+    { type: 'imageText', requires: 'flowOpen', title: '중요한 건\n그 *타이밍*을 알아보는 것입니다.', imagePosition: 'top', src: 'paywall/paywall-03.webp', alt: '시계와 달의 흐름', aspectRatio: '16/10', anim: 'lines',
       todo: '타이밍을 알아보는 장면(시계·달·계절 등) 컷 삽입' },
     { type: 'spacer', requires: 'flowOpen', size: 'medium' },
     { type: 'headline', requires: 'flowOpen', id: 'paywallStory', track: 'paywall_viewed', title: COPY.paywallHeadline, size: 'xl', fullscreen: true, anim: 'lines' },
