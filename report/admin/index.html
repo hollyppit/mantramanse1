@@ -81,7 +81,10 @@ summary { cursor:pointer; padding:4px 0; }
 .flist li .ct { color:var(--ink3); font-size:.78rem; }
 .flist li button { padding:0 5px; font-size:.75rem; border-color:transparent; background:none; color:var(--ink3); }
 .flist li button:hover { color:var(--gold); }
-.flist li button { display:none; } .flist li:hover button, .flist li.on button { display:inline-block; }
+.flist li { flex-wrap:wrap; }
+.flist li button { display:none; } .flist li button.always { display:inline-block; font-size:.9rem; }
+.flist li .acts { display:none; flex-basis:100%; gap:2px; justify-content:flex-end; padding:2px 0 0; } .flist li:hover .acts, .flist li.on .acts { display:flex; }
+.flist li .acts button { display:inline-block; border:1px solid var(--line); border-radius:5px; padding:1px 7px; }
 #libBody tr[draggable=true] { cursor:grab; }
 #libBody tr.drag { opacity:.4; }
 .grip { cursor:grab; color:var(--ink3); user-select:none; padding:0 4px; font-size:1.05rem; line-height:1; }
@@ -464,9 +467,9 @@ summary { cursor:pointer; padding:4px 0; }
       opt = opt || {};
       var real = !!opt.real, f = real ? fById(id) : null, hasKids = real && kids(id).length;
       return '<li data-id="' + esc(id) + '"' + (real ? ' data-real="1"' : '') + ' class="' + (S.folder === id ? 'on' : '') + '" style="padding-left:' + (8 + (opt.depth || 0) * 14) + 'px">' +
-        (real ? '<span class="grip" title="끌어서 이동 (다른 폴더 위에 놓으면 그 안으로, 위/아래 가장자리에 놓으면 순서 변경)">⠿</span><span class="tg" data-a="tg">' + (hasKids ? (S.collapsed[id] ? '▸' : '▾') : '') + '</span>' : '') +
+        (real ? '<span class="grip" title="끌어서 이동 (이름을 더블클릭하면 이름 변경, 다른 폴더 위에 놓으면 그 안으로, 위/아래 가장자리에 놓으면 순서 변경)">⠿</span><span class="tg" data-a="tg">' + (hasKids ? (S.collapsed[id] ? '▸' : '▾') : '') + '</span>' : '') +
         '<span class="nm" title="' + esc(name) + '">' + (real ? '📁 ' : '') + esc(name) + '</span>' + (real && f.priority ? '<span class="pri" title="폴더 우선순위">★' + (f.priority > 0 ? '+' : '') + f.priority + '</span>' : '') + '<span class="ct">' + folderCount(id) + '</span>' +
-        (real ? '<button data-a="up" title="같은 단계에서 위로">▲</button><button data-a="down" title="같은 단계에서 아래로">▼</button><button data-a="sub" title="하위 폴더 추가">＋</button><button data-a="set" title="폴더 설정 (이름·상위 폴더·우선순위·공통 조건·공통 연출·일괄 편집)">⚙</button><button data-a="del" title="폴더 삭제">✕</button>' : '') + '</li>';
+        (real ? '<button class="always" data-a="set" title="폴더 설정: 이름 바꾸기, 상위 폴더, 우선순위, 공통 조건·연출, 일괄 편집">⚙</button><span class="acts"><button data-a="up" title="같은 단계에서 위로">▲ 위</button><button data-a="down" title="같은 단계에서 아래로">▼ 아래</button><button data-a="sub" title="하위 폴더 추가">＋ 하위 폴더</button><button data-a="ren" title="이름 바꾸기">✎ 이름</button><button data-a="del" title="폴더 삭제">✕ 삭제</button></span>' : '') + '</li>';
     }
     html += li('__all', '전체') + li('__none', '미분류');
     (function walk(pid, depth) { kids(pid).forEach(function (f) { html += li(f.id, f.name, { real: true, depth: depth }); if (!S.collapsed[f.id]) walk(f.id, depth + 1); }); })('', 0);
@@ -477,7 +480,7 @@ summary { cursor:pointer; padding:4px 0; }
         var a = e.target.dataset && e.target.dataset.a;
         if (!a) { S.folder = id; renderFolders(); renderLib(); return; }
         if (a === 'tg') { S.collapsed[id] = !S.collapsed[id]; renderFolders(); return; }
-        if (a === 'sub') addFolder(id); else if (a === 'set') openFolderDlg(id); else if (a === 'del') deleteFolder(id); else moveSibling(id, a === 'up' ? -1 : 1);
+        if (a === 'sub') addFolder(id); else if (a === 'ren') renameFolder(id); else if (a === 'set') openFolderDlg(id); else if (a === 'del') deleteFolder(id); else moveSibling(id, a === 'up' ? -1 : 1);
       };
       el.ondragover = function (e) {
         if (S.dragFolder) { // 폴더를 끄는 중: 위/아래 가장자리 = 순서, 가운데 = 그 폴더 안으로
@@ -497,6 +500,12 @@ summary { cursor:pointer; padding:4px 0; }
       };
     });
   }
+  function renameFolder(id) {
+    var f = fById(id); if (!f) return;
+    var name = (prompt('폴더 이름 바꾸기', f.name) || '').trim().slice(0, 30); if (!name || name === f.name) return;
+    f.name = name; markDirty();
+  }
+  $('folderList').addEventListener('dblclick', function (e) { var el = e.target.closest && e.target.closest('li[data-real]'); if (el && e.target.classList.contains('nm')) renameFolder(el.dataset.id); });
   function clearZones() { $('folderList').querySelectorAll('li').forEach(function (l) { l.classList.remove('dz-before', 'dz-after', 'dz-in', 'over'); }); }
   function zoneOf(e, el, id) {
     if (id === '__all') return 'dz-in';
