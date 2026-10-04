@@ -7,7 +7,59 @@
   var TR_OUT = [['cut', '컷 (바로 끝)'], ['fade', '페이드 아웃'], ['dissolve', '블러 디졸브'], ['slide-left', '왼쪽으로 밀며 퇴장'], ['slide-up', '위로 밀며 퇴장'], ['zoom-in', '줌 인하며 사라짐'], ['wipe', '와이프'], ['flash', '섬광']];
   var SUB_POS = [['bottom', '아래'], ['middle', '가운데'], ['top', '위']];
   var SUB_SIZE = [['S', '작게'], ['M', '보통'], ['L', '크게']];
-  var SUB_FONT = [['gothic', '고딕 (Noto Sans KR)'], ['pretty', '프리텐다드 (깔끔한 요즘 고딕)'], ['myeongjo', '명조 (Noto Serif KR)'], ['gowun', '고운바탕 (부드러운 명조)'], ['gowundodum', '고운돋움 (따뜻한 고딕)'], ['hanna', '블랙한산스 (굵은 제목체)'], ['dohyeon', '도현체 (굵은 고딕)'], ['bagel', '베이글팻원 (통통한 팝 제목체)'], ['jua', '주아체 (둥근 귀여움)'], ['dongle', '동글 (둥글고 작은 손글씨)'], ['gamja', '감자꽃 (말랑한 손글씨)'], ['hi', '하이멜로디 (귀여운 손글씨)'], ['single', '싱글데이 (일기장 손글씨)'], ['poor', '푸어스토리 (또박한 손글씨)'], ['pen', '나눔펜 (손글씨)'], ['gaegu', '개구체 (손글씨)'], ['dokdo', '동해독도 (거친 붓)'], ['brush', '나눔붓 (붓글씨)'], ['songmyung', '송명 (고전 서체)'], ['yeonsung', '연성 (붓펜 느낌)'], ['gugi', '구기 (레트로 게임풍)'], ['stylish', '스타일리시 (세련된 얇은 글씨)'], ['cute', '귀여운 폰트 (캐릭터풍)'], ['kirang', '기랑해랑 (장난스러운)'], ['sunflower', '해바라기 (선명한 고딕)']];
+  // 눈누(noonnu) 무료 폰트: [키, 표시 이름, 글꼴 이름, 파일 경로(jsDelivr), 대체 계열]. 글자를 쓸 때만 내려받는다.
+  var CUSTOM_FONTS = [
+    ['eulji', '배민 을지로체 (굵은 간판체)', 'BMEULJIRO', 'noonfonts_twelve@1.2/BMEULJIRO.woff', 'sans-serif'],
+    ['eulji10', '배민 을지로10년후체 (레트로 간판)', 'BMEuljiro10yearslater', 'noonfonts_20-10-21@1.1/BMEuljiro10yearslater.woff', 'sans-serif'],
+    ['euljioldae', '배민 을지로오래오래체 (붓 느낌 간판)', 'BMEuljirooraeorae', 'noonfonts_2110@1.0/BMEuljirooraeorae.woff2', 'sans-serif'],
+    ['hannapro', '배민 한나체 Pro (둥근 제목체)', 'BMHANNAPro', 'noonfonts_seven@1.2/BMHANNAPro.woff', 'sans-serif'],
+    ['melona', '빙그레 메로나체 (말랑한 제목체)', 'BinggraeMelona', 'noonfonts_twelve@1.2/BinggraeMelona-Bold.woff', 'sans-serif'],
+    ['taom', '빙그레 따옴체 (손맛 나는 고딕)', 'BinggraeTaom', 'noonfonts_2302@1.1/BinggraeTaom-Bold.woff2', 'sans-serif'],
+    ['binggrae', '빙그레체 (귀여운 둥근체)', 'Binggrae', 'noonfonts_one@1.0/Binggrae-Bold.woff', 'sans-serif'],
+    ['lv1', '넥슨 Lv1 고딕', 'NEXON Lv1 Gothic', 'noonfonts_20-04@2.3/NEXON Lv1 Gothic OTF Bold.woff', 'sans-serif'],
+    ['lv2', '넥슨 Lv2 고딕', 'NEXON Lv2 Gothic', 'noonfonts_20-04@2.3/NEXON Lv2 Gothic Bold.woff', 'sans-serif'],
+    ['football', '넥슨 풋볼고딕 (스포츠 느낌)', 'NEXONFootballGothic', 'noonfonts_20-04@2.3/NEXONFootballGothicBA1.woff', 'sans-serif'],
+    ['bazzi', '넥슨 배찌체 (캐릭터풍)', 'Bazzi', 'noonfonts_20-04@2.3/Bazzi.woff', 'sans-serif'],
+    ['maple', '메이플스토리체 (게임 자막풍)', 'MaplestoryOTF', 'noonfonts_20-04@2.3/MaplestoryOTFBold.woff', 'sans-serif'],
+    ['cookie', '쿠키런체 (통통한 게임체)', 'CookieRunOTF', 'noonfonts_twelve@1.2/CookieRunOTF-Black00.woff', 'sans-serif'],
+    ['infinity', '인피니티산스 (선명한 고딕)', 'InfinitySans', 'noonfonts_20-04@2.3/InfinitySans-BoldA1.woff', 'sans-serif'],
+    ['yes', '예스체 (예스24 고딕)', 'YESGothic', 'noonfonts_13@1.0/YESGothic-Bold.woff', 'sans-serif'],
+    ['ridi', '리디바탕 (소설책 명조)', 'RIDIBatang', 'noonfonts_twelve@1.2/RIDIBatang.woff', 'serif'],
+    ['gmarket', '지마켓 산스 (굵은 고딕)', 'GmarketSans', 'noonfonts_2001@1.4/GmarketSansBold.woff', 'sans-serif'],
+    ['suit', 'SUIT (모던 고딕)', 'SUIT', 'noonfonts_suit@1.0/SUIT-ExtraBold.woff2', 'sans-serif'],
+    ['paperlogy', '페이퍼로지 (트렌디 고딕)', 'Paperlogy', '2408-3@1.0/Paperlogy-9Black.woff2', 'sans-serif'],
+    ['spoqa', '스포카 한 산스 Neo', 'SpoqaHanSansNeo', 'noonfonts_2108@1.2/SpoqaHanSansNeo-Bold.woff', 'sans-serif'],
+    ['nsround', '나눔스퀘어 라운드', 'NanumSquareRound', 'noonfonts_two@1.0/NanumSquareRound.woff', 'sans-serif'],
+    ['ssurround', '카페24 써라운드 (둥근 강조체)', 'Cafe24Ssurround', 'noonfonts_2105_2@1.1/Cafe24Ssurround.woff', 'sans-serif'],
+    ['dangdang', '카페24 당당해체 (또렷한 고딕)', 'Cafe24Dangdanghae', 'noonfonts_2001@1.4/Cafe24Dangdanghae.woff', 'sans-serif'],
+    ['supermagic', '카페24 슈퍼매직 (마술 간판풍)', 'Cafe24Supermagic', 'noonfonts_2307-2@1.0/Cafe24Supermagic-Bold-v1.0.woff2', 'sans-serif'],
+    ['meongi', '카페24 멍이 (말랑 손글씨)', 'Cafe24Meongi', '2405-3@1.1/Cafe24Meongi-B-v1.0.woff2', 'sans-serif'],
+    ['lotte', '롯데리아 찹땡겨체 (쫀득한 제목체)', 'LOTTERIACHAB', 'noonfonts_2302@1.1/LOTTERIACHAB.woff2', 'sans-serif'],
+    ['mango', '망고보드 또박체 (또박한 손글씨)', 'MangoDdobak', '2405-3@1.1/MangoDdobak-B.woff2', 'sans-serif'],
+    ['moneyround', '머니그라피 라운드', 'MoneygraphyRounded', '2411-2@1.0/Moneygraphy-Rounded.woff2', 'sans-serif'],
+    ['samlip', '삼립호빵체 (두툼한 제목체)', 'SDSamliphopangche', 'noonfonts-20-12@1.0/SDSamliphopangche_Basic.woff', 'sans-serif'],
+    ['eyes', '안경잡이체 (또렷한 얇은 글씨)', 'FOUREYES', 'noonfonts_2307-2@1.0/FOUREYES.woff2', 'sans-serif'],
+    ['bokeh', 'BOKEH (감성 얇은 영문 포함)', 'BOKEH', 'noonfonts_2307-2@1.0/BOKEH.woff2', 'sans-serif'],
+    ['crooked', 'CROOKED (삐뚤한 개성체)', 'CROOKED', 'noonfonts_2307-2@1.0/CROOKED.woff2', 'sans-serif'],
+    ['delta', '델타 유니버스 (SF 느낌)', 'DeltaUniverse', 'noonfonts_2307-2@1.0/DeltaUniverse-Regular.woff2', 'sans-serif'],
+    ['player', 'I AM A PLAYER (스포츠 로고풍)', 'IAMAPLAYER', 'noonfonts_2307-2@1.0/IAMAPLAYER.woff2', 'sans-serif'],
+    ['yacheR', '야놀자 야체 (굵은 광고체)', 'YanoljaYache', 'noonfonts_two@1.0/YanoljaYacheR.woff', 'sans-serif'],
+    ['kimhoon', 'KCC 김훈체 (필기체)', 'KCCKimhoon', 'noonfonts_one@1.0/KCC-Kimhoon-Regular.woff', 'cursive'],
+    ['eunyoung', 'KCC 은영체 (가는 손글씨)', 'KCCeunyoung', 'noonfonts_one@1.0/KCC-eunyoung-Regular.woff', 'cursive'],
+    ['dodam', 'KCC 도담도담체 (귀여운 고딕)', 'KCCDodamdodam', 'noonfonts_2302@1.1/KCC-DodamdodamR.woff2', 'sans-serif'],
+    ['muruk', 'KCC 무럭무럭체 (굵은 고딕)', 'KCCMurukmuruk', 'noonfonts_2302@1.1/KCCMurukmuruk.woff2', 'sans-serif'],
+    ['ahnjg', 'KCC 안중근체 (붓 느낌)', 'KCCAhnjunggeun', 'noonfonts_2302@1.1/KCCAhnjunggeun.woff2', 'serif'],
+    ['butpen', '학교안심 붓펜 (굵은 붓펜)', 'HakgyoansimButpen', 'noonfonts_2307-2@1.0/HakgyoansimButpenB.woff2', 'cursive'],
+    ['doldam', '학교안심 돌담 (투박한 손글씨)', 'HakgyoansimDoldam', 'noonfonts_2307-2@1.0/HakgyoansimDoldamB.woff2', 'cursive'],
+    ['sketchbook', '학교안심 스케치북 (연필 스케치)', 'HakgyoansimSketchbook', '2510-1@1.1/HakgyoansimSketchbookR.woff2', 'cursive'],
+    ['poster', '학교안심 포스터 (굵은 포스터체)', 'HakgyoansimPoster', '2511-1@1.0/HakgyoansimPosterB.woff2', 'sans-serif'],
+    ['parkdh', '온글잎 박다현체 (또박 손글씨)', 'OwnglyphParkDaHyun', '2411-3@1.0/Ownglyph_ParkDaHyun.woff2', 'cursive'],
+    ['meetme', '온글잎 만나자체 (캐주얼 손글씨)', 'OwnglyphMeetme', 'noonfonts_2402_1@1.0/Ownglyph_meetme-Rg.woff2', 'cursive'],
+    ['okticon', '온글잎 옥티콘 (깔끔 손글씨)', 'OwnglyphOkticon', '2408@1.0/Ownglyph_okticon-Bd.woff2', 'cursive'],
+  ];
+  var NOONNU = 'https://cdn.jsdelivr.net/gh/projectnoonnu/';
+  var SUB_FONT_BASE = [['gothic', '고딕 (Noto Sans KR)'], ['pretty', '프리텐다드 (깔끔한 요즘 고딕)'], ['myeongjo', '명조 (Noto Serif KR)'], ['gowun', '고운바탕 (부드러운 명조)'], ['gowundodum', '고운돋움 (따뜻한 고딕)'], ['hanna', '블랙한산스 (굵은 제목체)'], ['dohyeon', '도현체 (굵은 고딕)'], ['bagel', '베이글팻원 (통통한 팝 제목체)'], ['jua', '주아체 (둥근 귀여움)'], ['dongle', '동글 (둥글고 작은 손글씨)'], ['gamja', '감자꽃 (말랑한 손글씨)'], ['hi', '하이멜로디 (귀여운 손글씨)'], ['single', '싱글데이 (일기장 손글씨)'], ['poor', '푸어스토리 (또박한 손글씨)'], ['pen', '나눔펜 (손글씨)'], ['gaegu', '개구체 (손글씨)'], ['dokdo', '동해독도 (거친 붓)'], ['brush', '나눔붓 (붓글씨)'], ['songmyung', '송명 (고전 서체)'], ['yeonsung', '연성 (붓펜 느낌)'], ['gugi', '구기 (레트로 게임풍)'], ['stylish', '스타일리시 (세련된 얇은 글씨)'], ['cute', '귀여운 폰트 (캐릭터풍)'], ['kirang', '기랑해랑 (장난스러운)'], ['sunflower', '해바라기 (선명한 고딕)']];
+  var SUB_FONT = SUB_FONT_BASE.concat(CUSTOM_FONTS.map(function (c) { return [c[0], c[1]]; }));
   var SUB_WEIGHT = [['400', '보통'], ['500', '중간'], ['700', '굵게'], ['900', '아주 굵게']];
   var SUB_ALIGN = [['center', '가운데'], ['left', '왼쪽'], ['right', '오른쪽']];
   var SUB_COLOR = [['ivory', '아이보리'], ['white', '흰색'], ['gold', '금색'], ['yellow', '노랑']];
@@ -77,6 +129,7 @@
   };
   // 글자 자체가 작게 설계된 글씨체는 같은 크기로 보이도록 키운다
   var FONT_SCALE = { dongle: 1.6, pen: 1.4, brush: 1.4, cute: 1.25, dokdo: 1.3, gamja: 1.1, gaegu: 1.1 };
+  CUSTOM_FONTS.forEach(function (c) { FONTS[c[0]] = '"' + c[2] + '","Noto Sans KR",' + c[4]; });
   var FONT_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;500;700;900&family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Black+Han+Sans&family=Do+Hyeon&family=Jua&family=Nanum+Pen+Script&family=Gaegu:wght@400;700&family=Dongle:wght@400;700&family=Bagel+Fat+One&family=East+Sea+Dokdo&family=Gamja+Flower&family=Hi+Melody&family=Yeon+Sung&family=Single+Day&family=Gugi&family=Song+Myung&family=Sunflower:wght@500;700&family=Poor+Story&family=Stylish&family=Cute+Font&family=Kirang+Haerang&family=Nanum+Brush+Script&display=swap';
   var FONT_CSS2 = 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css';
   var css = '.fx-wrap{position:absolute;inset:0;overflow:hidden;background:#000;container-type:inline-size}' +
@@ -97,7 +150,7 @@
     '@keyframes fx-sa-fade{from{opacity:0}}@keyframes fx-sa-rise{from{opacity:0;transform:translateY(.7em)}}@keyframes fx-sa-pop{from{opacity:0;transform:scale(.8)}}';
   function injectCss() {
     if (typeof document === 'undefined' || document.getElementById('fx-css')) return;
-    var s = document.createElement('style'); s.id = 'fx-css'; s.textContent = css; document.head.appendChild(s);
+    var s = document.createElement('style'); s.id = 'fx-css'; s.textContent = css + CUSTOM_FONTS.map(function (c) { return '@font-face{font-family:"' + c[2] + '";src:url("' + NOONNU + encodeURI(c[3]) + '");font-weight:100 900;font-display:swap}'; }).join(''); document.head.appendChild(s);
     [FONT_CSS, FONT_CSS2].forEach(function (u) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = u; document.head.appendChild(l); });
   }
 
