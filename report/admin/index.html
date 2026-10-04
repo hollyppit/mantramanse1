@@ -273,6 +273,17 @@ summary { cursor:pointer; padding:4px 0; }
           <p class="muted" id="inInfo_mo" style="margin:8px 0 0"></p>
           <video id="inPrev_mo" controls playsinline muted style="display:none;width:100%;max-width:240px;margin-top:8px;border-radius:8px;background:#000"></video>
         </div>
+        <div class="card" style="margin-top:12px">
+          <b>인트로 문구</b> <span class="muted">영상 위에 글자를 띄웁니다. 비워 두면 영상만 재생됩니다. 시간은 영상 시작 기준 초입니다.</span>
+          <div id="inCues" style="margin-top:8px"></div>
+          <button type="button" id="inCueAdd" style="margin-top:6px">+ 문구 추가</button>
+          <details style="margin-top:10px" open><summary>글자 모양·위치·애니메이션</summary><p class="muted" style="margin:6px 0 0;font-size:.78rem">비워 두면 기본값을 씁니다. 글씨체, 크기, 색, 테두리, 그림자·글로우, 위치, 등장·퇴장 애니메이션, 강조 효과를 고를 수 있어요.</p><div id="inFx" style="margin-top:8px"></div></details>
+          <div class="row" style="margin-top:10px;align-items:center"><button type="button" id="inPlay">▶ 문구 미리보기</button><button type="button" id="inPlayStop">■ 정지</button>
+            <label style="flex-direction:row;align-items:center;gap:6px"><input type="radio" name="inDev" value="mo" checked style="width:auto"> 모바일 영상</label>
+            <label style="flex-direction:row;align-items:center;gap:6px"><input type="radio" name="inDev" value="pc" style="width:auto"> 웹 영상</label></div>
+          <div id="inStage" style="margin:10px 0 0;position:relative;background:#000;border-radius:8px;overflow:hidden;width:100%;max-width:300px;aspect-ratio:9/16"></div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:12px"><input type="checkbox" id="inAuto" checked style="width:auto"> <b>올릴 때 자동으로 줄이기</b> <span class="muted">(웹용 가로 1280px · 모바일용 가로 720px 이하, 소리 제거 · 줄이는 동안 이 탭을 보이는 상태로 두세요)</span></label>
         <p class="muted" style="margin:10px 0 0;font-size:.8rem">한쪽만 올리면 모든 기기에서 그 영상이 재생됩니다.</p>
         <div class="row" style="margin-top:14px;align-items:center"><button class="pri" id="inSave">저장</button><span class="muted" id="inState"></span></div>
         <p class="muted" style="margin:12px 0 0;font-size:.8rem">권장: 가로 720~1080px, mp4(H.264), 소리 포함, 3MB 이내. 큰 파일은 첫 방문자가 오래 기다립니다.</p>
@@ -525,6 +536,67 @@ summary { cursor:pointer; padding:4px 0; }
   };
 
   // ── 입장 인트로 (클립 저장과 별개로 /api/intro에 바로 저장)
+  function mb(n) { return (n / 1048576).toFixed(1) + 'MB'; }
+  // 영상을 브라우저에서 줄인다: 재생하면서 작은 캔버스에 그려 다시 녹화한다(소리는 뺀다 — 인트로는 항상 음소거). 줄이지 못하면 null.
+  function shrinkVideo(file, maxW, onProg) {
+    return new Promise(function (ok) {
+      var mime = ['video/mp4;codecs=avc1.42E01E', 'video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'].filter(function (t) { return window.MediaRecorder && MediaRecorder.isTypeSupported(t); })[0];
+      if (!mime) return ok(null);
+      var url = URL.createObjectURL(file), v = document.createElement('video'), done = false;
+      function fin(r) { if (done) return; done = true; URL.revokeObjectURL(url); v.pause(); v.removeAttribute('src'); ok(r); }
+      v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = url; v.onerror = function () { fin(null); };
+      v.onloadedmetadata = function () {
+        var w = v.videoWidth, h = v.videoHeight, dur = v.duration;
+        if (!w || !isFinite(dur) || dur > 180) return fin(null);
+        var k = Math.min(1, maxW / w);
+        if (k === 1 && file.size <= 3 * 1048576) return fin(null); // 이미 충분히 작다
+        var cw = Math.round(w * k / 2) * 2, ch = Math.round(h * k / 2) * 2, cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+        var g = cv.getContext('2d'), rec, chunks = [];
+        try { rec = new MediaRecorder(cv.captureStream(), { mimeType: mime, videoBitsPerSecond: cw >= 1000 ? 4000000 : 2500000 }); } catch (e) { return fin(null); }
+        rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+        rec.onstop = function () {
+          var ext = /mp4/.test(mime) ? 'mp4' : 'webm', blob = new Blob(chunks, { type: mime.split(';')[0] });
+          fin(blob.size > dur * 30000 ? new File([blob], file.name.replace(/\.[^.]+$/, '') + '_web.' + ext, { type: blob.type }) : null);
+        };
+        function frame() {
+          if (done) return; g.drawImage(v, 0, 0, cw, ch); onProg(Math.min(1, v.currentTime / dur));
+          if (v.ended) return;
+          if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(frame); else requestAnimationFrame(frame);
+        }
+        v.onended = function () { g.drawImage(v, 0, 0, cw, ch); setTimeout(function () { if (rec.state !== 'inactive') rec.stop(); }, 200); };
+        rec.start(); v.play().then(frame).catch(function () { fin(null); });
+        setTimeout(function () { if (!done && rec.state !== 'inactive') rec.stop(); }, (dur + 20) * 1000); // 안전장치
+      };
+    });
+  }
+  // 인트로 문구: 줄(문구·시작·끝) + 글자 연출(기존 클립 자막과 같은 옵션). 연출 옵션은 report/fx.js의 sub·trans 그룹을 그대로 쓴다.
+  function inCueRow(c) {
+    var d = document.createElement('div'); d.className = 'row'; d.style.cssText = 'margin:6px 0;align-items:flex-end;flex-wrap:nowrap';
+    d.innerHTML = '<label style="flex:1 1 auto;min-width:0">문구<textarea class="ict" rows="2" maxlength="200" placeholder="줄바꿈 가능"></textarea></label><label style="width:76px">시작(초)<input type="number" class="ics" min="0" max="3600" step="0.1"></label><label style="width:76px">끝(초)<input type="number" class="ice" min="0" max="3600" step="0.1"></label><button type="button" class="danger" title="삭제">✕</button>';
+    d.querySelector('.ict').value = c.t || ''; d.querySelector('.ics').value = c.s == null ? 0 : c.s; d.querySelector('.ice').value = c.e == null ? 3 : c.e;
+    d.querySelector('button').onclick = function () { d.remove(); };
+    $('inCues').appendChild(d);
+  }
+  function inCuesRead() {
+    return Array.prototype.map.call($('inCues').querySelectorAll('.row'), function (d) { return { t: d.querySelector('.ict').value.trim(), s: +d.querySelector('.ics').value || 0, e: +d.querySelector('.ice').value || 0 }; }).filter(function (c) { return c.t && c.e > c.s; });
+  }
+  function inFxRead() { var fx = readFx($('inFx')); var out = {}; if (fx.sub) out.sub = fx.sub; if (fx.trans) out.trans = fx.trans; out.cues = inCuesRead(); return out; }
+  function inFxBuild(fx) {
+    fxForm($('inFx'), fx, '(기본)');
+    $('inFx').querySelectorAll('details').forEach(function (d) { var el = d.querySelector('[data-g]'); if (el && el.dataset.g !== 'sub' && el.dataset.g !== 'trans') d.remove(); });
+    $('inCues').innerHTML = ''; ((fx && fx.cues) || []).forEach(inCueRow);
+  }
+  $('inCueAdd').onclick = function () { var last = Array.prototype.slice.call($('inCues').querySelectorAll('.ice')).pop(); var s = last ? +last.value || 0 : 0; inCueRow({ t: '', s: s + 0.3, e: s + 3 }); };
+  var inPlayer = null;
+  function inStop() { if (inPlayer) { inPlayer.stop(); inPlayer = null; } $('inStage').innerHTML = ''; }
+  $('inPlayStop').onclick = inStop;
+  $('inPlay').onclick = function () {
+    inStop();
+    var dev = (document.querySelector('input[name=inDev]:checked') || {}).value || 'mo', src = IN[dev === 'pc' ? 'pc' : 'mo'] || IN[dev === 'pc' ? 'mo' : 'pc'];
+    var st = $('inStage'); st.style.aspectRatio = dev === 'pc' ? '16/9' : '9/16'; st.style.maxWidth = dev === 'pc' ? '560px' : '300px';
+    var fx = inFxRead(); fx.video = { loop: 'freeze', hold: 0.4 };
+    inPlayer = F.play(st, { clip: { fx: fx }, url: src ? srcUrl(src) : '', muteVideo: true, silent: true, defaults: {}, onend: function () { $('inState').textContent = '미리보기 끝'; } });
+  };
   var IN = { pc: null, mo: null };
   function introShow(k) {
     var src = IN[k], u = src ? srcUrl(src) : '', v = $('inPrev_' + k);
@@ -534,7 +606,7 @@ summary { cursor:pointer; padding:4px 0; }
   function introLoad() {
     api('/api/intro').then(function (d) {
       IN.pc = d.src || null; IN.mo = d.srcMobile || null; $('inOn').checked = !!d.on;
-      $('inSkip').value = String(d.skipAfter || 0); $('inOnce').value = d.once || 'session';
+      inFxBuild(d.fx); $('inSkip').value = String(d.skipAfter || 0); $('inOnce').value = d.once || 'session';
       ['pc', 'mo'].forEach(function (k) { $('inUrl_' + k).value = IN[k] && IN[k].type === 'url' ? IN[k].value : ''; $('inUp_' + k).disabled = $('inFile_' + k).disabled = !S.r2; introShow(k); });
     }).catch(function (e) { $('inState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   }
@@ -544,20 +616,27 @@ summary { cursor:pointer; padding:4px 0; }
     $('inUp_' + k).onclick = function () {
       var f = $('inFile_' + k).files[0]; if (!f) { $('inState').innerHTML = '<span class="err">올릴 파일을 선택하세요</span>'; return; }
       var bar = $('inBar_' + k); bar.classList.remove('hide'); bar.firstChild.style.width = '0'; $('inUp_' + k).disabled = true;
-      var x = new XMLHttpRequest(); x.open('POST', '/api/clipfile?name=' + encodeURIComponent(f.name)); x.setRequestHeader('authorization', 'Bearer ' + S.pw);
-      x.upload.onprogress = function (e) { if (e.lengthComputable) bar.firstChild.style.width = (e.loaded / e.total * 100) + '%'; };
-      x.onload = function () {
-        $('inUp_' + k).disabled = false; var d = {}; try { d = JSON.parse(x.responseText); } catch (e) {}
-        if (x.status >= 200 && x.status < 300 && d.key) { IN[k] = { type: 'r2', value: d.key }; $('inUrl_' + k).value = ''; introShow(k); $('inState').textContent = '업로드됨 — 저장을 눌러 반영하세요'; }
-        else $('inState').innerHTML = '<span class="err">' + esc(d.error || ('업로드 실패 (' + x.status + ')')) + '</span>';
-      };
-      x.onerror = function () { $('inUp_' + k).disabled = false; $('inState').innerHTML = '<span class="err">네트워크 오류</span>'; };
-      x.send(f);
+      var pre = $('inAuto').checked ? shrinkVideo(f, k === 'pc' ? 1280 : 720, function (p) { bar.firstChild.style.width = (p * 100) + '%'; $('inState').textContent = '영상 줄이는 중… ' + Math.round(p * 100) + '% (이 탭을 그대로 두세요)'; }) : Promise.resolve(null);
+      pre.then(function (small) {
+        var up = f, note = '';
+        if (small && small.size < f.size) { up = small; note = ' (' + mb(f.size) + ' → ' + mb(small.size) + '로 줄임)'; }
+        else if ($('inAuto').checked) note = ' (줄일 필요가 없거나 줄이지 못해 원본 그대로 올림 — 줄이려면 이 탭을 보이는 상태로 두세요)';
+        bar.firstChild.style.width = '0'; $('inState').textContent = '업로드 중…';
+        var x = new XMLHttpRequest(); x.open('POST', '/api/clipfile?name=' + encodeURIComponent(up.name)); x.setRequestHeader('authorization', 'Bearer ' + S.pw);
+        x.upload.onprogress = function (e) { if (e.lengthComputable) bar.firstChild.style.width = (e.loaded / e.total * 100) + '%'; };
+        x.onload = function () {
+          $('inUp_' + k).disabled = false; var d = {}; try { d = JSON.parse(x.responseText); } catch (e) {}
+          if (x.status >= 200 && x.status < 300 && d.key) { IN[k] = { type: 'r2', value: d.key }; $('inUrl_' + k).value = ''; introShow(k); $('inState').textContent = '업로드됨' + note + ' — 저장을 눌러 반영하세요'; }
+          else $('inState').innerHTML = '<span class="err">' + esc(d.error || ('업로드 실패 (' + x.status + ')')) + '</span>';
+        };
+        x.onerror = function () { $('inUp_' + k).disabled = false; $('inState').innerHTML = '<span class="err">네트워크 오류</span>'; };
+        x.send(up);
+      });
     };
   });
   $('inSave').onclick = function () {
     $('inState').textContent = '저장 중…';
-    api('/api/intro', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: $('inOn').checked, src: IN.pc, srcMobile: IN.mo, skipAfter: +$('inSkip').value, once: $('inOnce').value }) })
+    api('/api/intro', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: $('inOn').checked, src: IN.pc, srcMobile: IN.mo, fx: inFxRead(), skipAfter: +$('inSkip').value, once: $('inOnce').value }) })
       .then(function () { $('inState').innerHTML = '<span class="ok">저장됨 — ' + ($('inOn').checked ? '켜짐' : '꺼짐') + '</span>'; })
       .catch(function (e) { $('inState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };
