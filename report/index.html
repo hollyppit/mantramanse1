@@ -390,10 +390,12 @@ footer p + p { margin-top: 6px; }
     if (reduce) return;
     try { if (sessionStorage.getItem('mt_intro') === '1') return; } catch (e) {}
     fetch('/api/intro').then(function (r) { return r.ok ? r.json() : { on: false }; }).then(function (c) {
-      if (!c.on || !c.url) return;
+      var mobile = window.matchMedia('(max-width: 768px)').matches;
+      var url = mobile ? (c.urlMobile || c.url) : (c.url || c.urlMobile);
+      if (!c.on || !url) return;
       if (c.once !== 'always') { try { sessionStorage.setItem('mt_intro', '1'); } catch (e) {} }
       var box = document.createElement('div'); box.id = 'intro'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', '입장 영상');
-      var v = document.createElement('video'); v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto'; v.muted = true; v.src = c.url;
+      var v = document.createElement('video'); v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto'; v.muted = true; v.src = url;
       var skip = document.createElement('button'); skip.className = 'skip'; skip.type = 'button'; skip.textContent = '건너뛰기 ›';
       var done = false;
       function close() {

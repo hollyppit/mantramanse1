@@ -220,14 +220,29 @@ summary { cursor:pointer; padding:4px 0; }
           <label>건너뛰기 버튼 표시<select id="inSkip"><option value="0">처음부터</option><option value="2">2초 후</option><option value="4">4초 후</option></select></label>
           <label>다시 보여주기<select id="inOnce"><option value="session">탭을 새로 열 때만</option><option value="always">들어올 때마다</option></select></label>
         </div>
-        <div class="row" style="margin-top:12px;align-items:flex-end">
-          <label style="flex:1 1 240px">영상 주소(https) 직접 입력<input type="text" id="inUrl" placeholder="https://..."></label>
-          <label>또는 파일 업로드<input type="file" id="inFile" accept="video/mp4,video/webm,video/quicktime"></label>
-          <button id="inUp">업로드</button>
+        <div class="card" style="margin-top:12px">
+          <b>웹(PC)용 인트로</b> <span class="muted">화면 폭 768px 초과에서 재생 · 가로 영상 권장</span>
+          <div class="row" style="margin-top:8px;align-items:flex-end">
+            <label style="flex:1 1 220px">영상 주소(https) 직접 입력<input type="text" id="inUrl_pc" placeholder="https://..."></label>
+            <label>또는 파일 업로드<input type="file" id="inFile_pc" accept="video/mp4,video/webm,video/quicktime"></label>
+            <button id="inUp_pc">업로드</button><button id="inClr_pc" title="이 영상을 비웁니다">비우기</button>
+          </div>
+          <div class="pbar hide" id="inBar_pc" style="margin-top:8px"><i></i></div>
+          <p class="muted" id="inInfo_pc" style="margin:8px 0 0"></p>
+          <video id="inPrev_pc" controls playsinline muted style="display:none;width:100%;max-width:480px;margin-top:8px;border-radius:8px;background:#000"></video>
         </div>
-        <div class="pbar hide" id="inBar" style="margin-top:8px"><i></i></div>
-        <p class="muted" id="inInfo" style="margin:8px 0 0"></p>
-        <video id="inPrev" controls playsinline style="display:none;width:100%;max-width:320px;margin-top:12px;border-radius:8px;background:#000"></video>
+        <div class="card" style="margin-top:12px">
+          <b>모바일용 인트로</b> <span class="muted">화면 폭 768px 이하에서 재생 · 세로 영상 권장</span>
+          <div class="row" style="margin-top:8px;align-items:flex-end">
+            <label style="flex:1 1 220px">영상 주소(https) 직접 입력<input type="text" id="inUrl_mo" placeholder="https://..."></label>
+            <label>또는 파일 업로드<input type="file" id="inFile_mo" accept="video/mp4,video/webm,video/quicktime"></label>
+            <button id="inUp_mo">업로드</button><button id="inClr_mo" title="이 영상을 비웁니다">비우기</button>
+          </div>
+          <div class="pbar hide" id="inBar_mo" style="margin-top:8px"><i></i></div>
+          <p class="muted" id="inInfo_mo" style="margin:8px 0 0"></p>
+          <video id="inPrev_mo" controls playsinline muted style="display:none;width:100%;max-width:240px;margin-top:8px;border-radius:8px;background:#000"></video>
+        </div>
+        <p class="muted" style="margin:10px 0 0;font-size:.8rem">한쪽만 올리면 모든 기기에서 그 영상이 재생됩니다.</p>
         <div class="row" style="margin-top:14px;align-items:center"><button class="pri" id="inSave">저장</button><span class="muted" id="inState"></span></div>
         <p class="muted" style="margin:12px 0 0;font-size:.8rem">권장: 가로 720~1080px, mp4(H.264), 소리 포함, 3MB 이내. 큰 파일은 첫 방문자가 오래 기다립니다.</p>
       </div>
@@ -478,36 +493,39 @@ summary { cursor:pointer; padding:4px 0; }
   };
 
   // ── 입장 인트로 (클립 저장과 별개로 /api/intro에 바로 저장)
-  var IN = { src: null };
-  function introShow() {
-    var u = IN.src ? srcUrl(IN.src) : '', v = $('inPrev');
-    $('inInfo').textContent = IN.src ? '현재 영상: ' + (IN.src.type === 'r2' ? '업로드됨 (' + IN.src.value + ')' : IN.src.value) : '영상이 없습니다';
-    if (u) { v.src = u; v.style.display = 'block'; } else { v.removeAttribute('src'); v.style.display = 'none'; }
+  var IN = { pc: null, mo: null };
+  function introShow(k) {
+    var src = IN[k], u = src ? srcUrl(src) : '', v = $('inPrev_' + k);
+    $('inInfo_' + k).textContent = src ? '현재 영상: ' + (src.type === 'r2' ? '업로드됨 (' + src.value + ')' : src.value) : '영상이 없습니다';
+    if (u) { if (v.getAttribute('src') !== u) v.src = u; v.style.display = 'block'; } else { v.removeAttribute('src'); v.style.display = 'none'; }
   }
   function introLoad() {
     api('/api/intro').then(function (d) {
-      IN.src = d.src || null; $('inOn').checked = !!d.on;
-      $('inSkip').value = String(d.skipAfter || 0); $('inOnce').value = d.once || 'session'; $('inUrl').value = IN.src && IN.src.type === 'url' ? IN.src.value : '';
-      $('inUp').disabled = $('inFile').disabled = !S.r2; introShow();
+      IN.pc = d.src || null; IN.mo = d.srcMobile || null; $('inOn').checked = !!d.on;
+      $('inSkip').value = String(d.skipAfter || 0); $('inOnce').value = d.once || 'session';
+      ['pc', 'mo'].forEach(function (k) { $('inUrl_' + k).value = IN[k] && IN[k].type === 'url' ? IN[k].value : ''; $('inUp_' + k).disabled = $('inFile_' + k).disabled = !S.r2; introShow(k); });
     }).catch(function (e) { $('inState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   }
-  $('inUrl').oninput = function () { var v = this.value.trim(); IN.src = v ? { type: 'url', value: v } : (IN.src && IN.src.type === 'url' ? null : IN.src); introShow(); };
-  $('inUp').onclick = function () {
-    var f = $('inFile').files[0]; if (!f) { $('inState').innerHTML = '<span class="err">올릴 파일을 선택하세요</span>'; return; }
-    var bar = $('inBar'); bar.classList.remove('hide'); bar.firstChild.style.width = '0'; $('inUp').disabled = true;
-    var x = new XMLHttpRequest(); x.open('POST', '/api/clipfile?name=' + encodeURIComponent(f.name)); x.setRequestHeader('authorization', 'Bearer ' + S.pw);
-    x.upload.onprogress = function (e) { if (e.lengthComputable) bar.firstChild.style.width = (e.loaded / e.total * 100) + '%'; };
-    x.onload = function () {
-      $('inUp').disabled = false; var d = {}; try { d = JSON.parse(x.responseText); } catch (e) {}
-      if (x.status >= 200 && x.status < 300 && d.key) { IN.src = { type: 'r2', value: d.key }; $('inUrl').value = ''; introShow(); $('inState').textContent = '업로드됨 — 저장을 눌러 반영하세요'; }
-      else $('inState').innerHTML = '<span class="err">' + esc(d.error || ('업로드 실패 (' + x.status + ')')) + '</span>';
+  ['pc', 'mo'].forEach(function (k) {
+    $('inUrl_' + k).oninput = function () { var v = this.value.trim(); IN[k] = v ? { type: 'url', value: v } : (IN[k] && IN[k].type === 'url' ? null : IN[k]); introShow(k); };
+    $('inClr_' + k).onclick = function () { IN[k] = null; $('inUrl_' + k).value = ''; $('inFile_' + k).value = ''; introShow(k); $('inState').textContent = '비웠습니다 — 저장을 눌러 반영하세요'; };
+    $('inUp_' + k).onclick = function () {
+      var f = $('inFile_' + k).files[0]; if (!f) { $('inState').innerHTML = '<span class="err">올릴 파일을 선택하세요</span>'; return; }
+      var bar = $('inBar_' + k); bar.classList.remove('hide'); bar.firstChild.style.width = '0'; $('inUp_' + k).disabled = true;
+      var x = new XMLHttpRequest(); x.open('POST', '/api/clipfile?name=' + encodeURIComponent(f.name)); x.setRequestHeader('authorization', 'Bearer ' + S.pw);
+      x.upload.onprogress = function (e) { if (e.lengthComputable) bar.firstChild.style.width = (e.loaded / e.total * 100) + '%'; };
+      x.onload = function () {
+        $('inUp_' + k).disabled = false; var d = {}; try { d = JSON.parse(x.responseText); } catch (e) {}
+        if (x.status >= 200 && x.status < 300 && d.key) { IN[k] = { type: 'r2', value: d.key }; $('inUrl_' + k).value = ''; introShow(k); $('inState').textContent = '업로드됨 — 저장을 눌러 반영하세요'; }
+        else $('inState').innerHTML = '<span class="err">' + esc(d.error || ('업로드 실패 (' + x.status + ')')) + '</span>';
+      };
+      x.onerror = function () { $('inUp_' + k).disabled = false; $('inState').innerHTML = '<span class="err">네트워크 오류</span>'; };
+      x.send(f);
     };
-    x.onerror = function () { $('inUp').disabled = false; $('inState').innerHTML = '<span class="err">네트워크 오류</span>'; };
-    x.send(f);
-  };
+  });
   $('inSave').onclick = function () {
     $('inState').textContent = '저장 중…';
-    api('/api/intro', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: $('inOn').checked, src: IN.src, skipAfter: +$('inSkip').value, once: $('inOnce').value }) })
+    api('/api/intro', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: $('inOn').checked, src: IN.pc, srcMobile: IN.mo, skipAfter: +$('inSkip').value, once: $('inOnce').value }) })
       .then(function () { $('inState').innerHTML = '<span class="ok">저장됨 — ' + ($('inOn').checked ? '켜짐' : '꺼짐') + '</span>'; })
       .catch(function (e) { $('inState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };
