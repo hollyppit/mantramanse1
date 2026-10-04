@@ -497,6 +497,7 @@
   function meta() { // 이름·탭 제목·공유 설명
     var S1 = C.settings || {}, skip = document.getElementById('skipLink'), bn = document.getElementById('brandName');
     if (bn) bn.textContent = S1.brandName || '';
+    if (root.Ambient) root.Ambient.apply(S1.ambient);
     if (skip) { var sl = S1.skipLink || {}; skip.textContent = sl.text || ''; skip.hidden = !sl.text; skip.onclick = function () { scrollToId(sl.target || 'sajuInput'); }; }
     if (S1.pageTitle) { document.title = S1.pageTitle; var t = document.querySelector('meta[property="og:title"]'); if (t) t.setAttribute('content', S1.pageTitle); }
     if (S1.pageDesc) { ['meta[name=description]', 'meta[property="og:description"]'].forEach(function (q) { var m = document.querySelector(q); if (m) m.setAttribute('content', S1.pageDesc); }); }

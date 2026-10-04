@@ -86,6 +86,9 @@
     purchase: { mode: 'waitlist', href: '' },
     // 구매 영역에 보여줄 가격 (비워 두면 가격은 표시하지 않습니다)
     priceText: '',
+    // 배경 분위기 효과(글 뒤에서 은은하게 움직임). 관리자에서 켜고 끄고 세기를 조절합니다.
+    //   embers 불씨 · light 빛무리 · smoke 연기 / amount 양(0=없음, 1=기본, 2=많이) / speed 속도 / opacity 진하기(0~1) / color 불씨·빛 색
+    ambient: { embers: true, light: true, smoke: true, amount: 1, speed: 1, opacity: 0.8, color: '#E8B26A' },
     autoSpeed: 1,                                   // 자동 스크롤 속도 (1=기본, 2=두 배 빠르게, 0.5=절반 속도)
     brandName: '만트라 포춘',                       // 위쪽 가운데 이름
     pageTitle: '내 이야기의 시작 · 만트라 사주 무빙툰',  // 브라우저 탭 제목

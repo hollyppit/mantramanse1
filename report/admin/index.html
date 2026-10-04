@@ -744,7 +744,7 @@ summary { cursor:pointer; padding:4px 0; }
   function hmField(obj, d, onFocus) {
     var k = d[0], t = d[2], o = d[3], lab = mk('label', 'hmf' + (t === 'b' ? ' chk' : '')), el;
     if (t === 'b') {
-      el = mk('input'); el.type = 'checkbox'; el.checked = !!obj[k]; el.onchange = function () { if (el.checked) obj[k] = true; else delete obj[k]; hmChanged(); };
+      el = mk('input'); el.type = 'checkbox'; el.checked = !!obj[k]; el.onchange = function () { obj[k] = el.checked; hmChanged(); };
       lab.appendChild(el); lab.appendChild(mk('span', '', d[1])); return lab;
     }
     if (t === 'o') { // 묶음
@@ -755,6 +755,13 @@ summary { cursor:pointer; padding:4px 0; }
     if (t === 'A') return hmAction(obj, k, d[1]);
     var head = mk('span', '', d[1]);
     lab.appendChild(head);
+    if (t === 'c') { // 색: 고르기 + #rrggbb 직접 입력
+      var crow = mk('span'); crow.style.cssText = 'display:flex;gap:6px'; var pk = mk('input'); pk.type = 'color'; pk.style.cssText = 'width:44px;padding:2px;flex:none';
+      el = mk('input'); el.type = 'text'; el.maxLength = 7; el.placeholder = '#rrggbb (비우면 기본)'; el.value = obj[k] || ''; pk.value = /^#[0-9a-f]{6}$/i.test(el.value) ? el.value : '#e8b26a';
+      pk.oninput = function () { el.value = pk.value; obj[k] = pk.value; hmChanged(); };
+      el.oninput = function () { if (!el.value) delete obj[k]; else obj[k] = el.value; if (/^#[0-9a-f]{6}$/i.test(el.value)) { pk.value = el.value; } hmChanged(); };
+      crow.appendChild(pk); crow.appendChild(el); lab.appendChild(crow); return lab;
+    }
     if (t === 's') {
       el = mk('select'); o.forEach(function (x) { var op = mk('option', '', x[1]); op.value = x[0]; el.appendChild(op); });
       el.value = obj[k] == null ? '' : obj[k]; if (el.value !== (obj[k] == null ? '' : obj[k])) el.value = o[0][0];
