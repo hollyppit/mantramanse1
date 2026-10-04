@@ -22,7 +22,8 @@ async function apiError(r) {
     const d = await r.json(), det = d && d.detail;
     m = typeof det === 'string' ? det : det && det.message ? det.message : Array.isArray(det) ? det.map(x => x.msg).join('; ') : '';
   } catch { /* 본문이 JSON이 아님 */ }
-  return json({ error: `ElevenLabs 오류 ${r.status}${m ? ': ' + m : ''}` }, 502);
+  const hint = /permission/i.test(m) ? ' → API 키에 해당 권한이 없습니다. ElevenLabs의 API Keys에서 키 권한(Text to Speech 사용, Voices 읽기)을 켜거나 새 키를 만드세요. 목소리 목록 없이는 “목소리 ID 직접 입력”으로도 쓸 수 있습니다' : '';
+  return json({ error: `ElevenLabs 오류 ${r.status}${m ? ': ' + m : ''}${hint}` }, 502);
 }
 
 export async function onRequestGet({ request, env }) {

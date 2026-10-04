@@ -733,6 +733,14 @@ summary { cursor:pointer; padding:4px 0; }
     box.querySelectorAll('input[data-pick]').forEach(function (pk) {
       pk.oninput = function () { var t = pk.nextElementSibling; t.value = pk.value; t.dispatchEvent(new Event('input', { bubbles: true })); };
     });
+    box.querySelectorAll('select[data-elvoice]').forEach(function (sel) {
+      sel.addEventListener('change', function () {
+        if (sel.value !== '__custom') { sel.dataset.cur = sel.value; return; }
+        var id = (prompt('ElevenLabs 목소리 ID를 붙여넣으세요 (elevenlabs.io → Voices → 목소리 선택 → ID 복사)') || '').trim();
+        if (!/^[A-Za-z0-9]{10,40}$/.test(id)) { if (id) alert('목소리 ID 형식이 올바르지 않습니다.'); sel.value = sel.dataset.cur || ''; return; }
+        sel.dataset.cur = id; fillElVoices(); sel.value = id; sel.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+    });
     wireSamples(box); fillVoices(); fillElVoices();
   }
   // 목소리 샘플 듣기 (일레븐랩스 기본 샘플 / 한국어 테스트 문장 / 브라우저 음성)
@@ -791,7 +799,7 @@ summary { cursor:pointer; padding:4px 0; }
       var cur = sel.value || sel.dataset.cur || '', list = S.elVoices || [], known = list.some(function (v) { return v.id === cur; });
       var head = S.elVoices === null ? '(목소리 목록 불러오는 중…)' : S.elError ? '(목록을 불러오지 못함: ' + S.elError + ')' : '(선택 안 함)';
       sel.innerHTML = '<option value="">' + esc(head) + '</option>' + list.map(function (v) { return '<option value="' + esc(v.id) + '">' + esc(v.name) + (v.ko ? ' · 한국어 지원' : '') + (v.category ? ' · ' + esc(v.category) : '') + '</option>'; }).join('') +
-        (cur && !known ? '<option value="' + esc(cur) + '">' + esc(cur) + ' (목록에 없음)</option>' : '');
+        (cur && !known ? '<option value="' + esc(cur) + '">' + esc(cur) + ' (직접 입력/목록에 없음)</option>' : '') + '<option value="__custom">＋ 목소리 ID 직접 입력…</option>';
       sel.value = cur;
     });
   }
