@@ -39,7 +39,7 @@ const FX = {
   },
   voice: { on: ['off', 'on'], engine: ['browser', 'eleven'], name: 'S', mode: ['cue', 'whole'], rate: [0.5, 2], pitch: [0.5, 2], vol: [0, 1], delay: [0, 10],
     elVoice: 'I', elModel: ['eleven_multilingual_v2', 'eleven_v3', 'eleven_flash_v2_5', 'eleven_turbo_v2_5'], elStability: [0, 1], elSimilarity: [0, 1], elStyle: [0, 1], elSpeed: [0.7, 1.2] },
-  video: { speed: [0.25, 2], vol: [0, 1], fit: ['contain', 'cover'], loop: ['auto', 'reverse', 'black', 'freeze', 'off'], trimStart: [0, 600], trimEnd: [0, 600], hold: [0, 10] },
+  video: { speed: [0.25, 2], vol: [0, 1], duck: ['off', 'on'], duckVol: [0, 1], fadeIn: [0, 5], fadeOut: [0, 5], fit: ['contain', 'cover'], loop: ['auto', 'reverse', 'black', 'freeze', 'off'], trimStart: [0, 600], trimEnd: [0, 600], hold: [0, 10] },
 };
 const MAX_CUES = 80;
 

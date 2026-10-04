@@ -92,14 +92,14 @@
       ['elVoice', '일레븐랩스 목소리 (자막 줄마다 음성 파일을 만들어 씁니다)', 'elvoice', null, { only: 'eleven', wide: true }], ['elModel', '모델', 'sel', EL_MODELS, { only: 'eleven', wide: true }],
       ['elStability', '안정성 (낮을수록 감정 풍부)', 'num', { min: 0, max: 1, step: 0.05 }, { only: 'eleven' }], ['elSimilarity', '목소리 유사도', 'num', { min: 0, max: 1, step: 0.05 }, { only: 'eleven' }],
       ['elStyle', '스타일 과장', 'num', { min: 0, max: 1, step: 0.05 }, { only: 'eleven' }], ['elSpeed', '말 속도', 'num', { min: 0.7, max: 1.2, step: 0.05 }, { only: 'eleven' }]] },
-    { g: 'video', title: '영상 재생', items: [['speed', '재생 속도', 'num', { min: 0.25, max: 2, step: 0.05 }], ['vol', '영상 원음 볼륨(0~1)', 'num', { min: 0, max: 1, step: 0.1 }], ['fit', '화면 맞춤', 'sel', FIT], ['loop', '자막·음성이 영상보다 길 때', 'sel', LOOP, { wide: true }], ['trimStart', '앞부분 자르기(초)', 'num', { min: 0, max: 600, step: 0.1 }], ['trimEnd', '끝 지점(초, 0=끝까지)', 'num', { min: 0, max: 600, step: 0.1 }], ['hold', '마지막 화면 유지(초)', 'num', { min: 0, max: 10, step: 0.1 }]] },
+    { g: 'video', title: '영상 재생', items: [['speed', '재생 속도', 'num', { min: 0.25, max: 2, step: 0.05 }], ['vol', '영상 소리 볼륨 (0~1, 0 = 소리 끔)', 'num', { min: 0, max: 1, step: 0.05 }], ['duck', '목소리가 나올 때 영상 소리 줄이기', 'sel', ON_OFF], ['duckVol', '줄였을 때 영상 소리 볼륨(0~1)', 'num', { min: 0, max: 1, step: 0.05 }], ['fadeIn', '영상 소리 페이드 인(초)', 'num', { min: 0, max: 5, step: 0.1 }], ['fadeOut', '영상 소리 페이드 아웃(초)', 'num', { min: 0, max: 5, step: 0.1 }], ['fit', '화면 맞춤', 'sel', FIT], ['loop', '자막·음성이 영상보다 길 때', 'sel', LOOP, { wide: true }], ['trimStart', '앞부분 자르기(초)', 'num', { min: 0, max: 600, step: 0.1 }], ['trimEnd', '끝 지점(초, 0=끝까지)', 'num', { min: 0, max: 600, step: 0.1 }], ['hold', '마지막 화면 유지(초)', 'num', { min: 0, max: 10, step: 0.1 }]] },
   ];
 
   var BUILTIN = {
     trans: { 'in': 'fade', out: 'fade', dur: 0.5 },
     sub: { font: 'gothic', weight: '700', italic: 'normal', size: 'M', fs: 0, color: 'ivory', colorHex: '', align: 'center', lh: 1.45, ls: 0, pos: 'bottom', x: 50, y: -1, w: 90, rot: 0, strokeW: 0, strokeColor: '#000000', shOn: 'on', shX: 0, shY: 6, shBlur: 20, shColor: '#000000', glowBlur: 0, glowColor: '', bg: 'shade', bgColor: '', bgOpacity: -1, bgRadius: 30, padX: 60, padY: 20, anim: 'fade', animDur: 0.4, wordDelay: 0.08, typeSpeed: 14, animOut: 'fade', animOutDur: 0.3, emph: 'none', emphSpeed: 1.5 },
     voice: { on: 'off', engine: 'browser', name: '', mode: 'cue', rate: 1, pitch: 1, vol: 1, delay: 0.2, elVoice: '', elModel: 'eleven_multilingual_v2', elStability: 0.5, elSimilarity: 0.75, elStyle: 0, elSpeed: 1 },
-    video: { speed: 1, vol: 1, fit: 'contain', loop: 'auto', trimStart: 0, trimEnd: 0, hold: 0.5 },
+    video: { speed: 1, vol: 1, duck: 'off', duckVol: 0.3, fadeIn: 0, fadeOut: 0, fit: 'contain', loop: 'auto', trimStart: 0, trimEnd: 0, hold: 0.5 },
   };
   function resolve(fx, defaults) {
     var out = {};
@@ -193,7 +193,7 @@
     return v || all.filter(function (x) { return /^ko/i.test(x.lang); })[0] || null;
   }
 
-  // box 안에서 클립 하나를 재생한다. o = { clip, url, defaults, onend, onerror, audioUrl(음성 파일 키→주소), silent(소리 끔), minContent(자막·음성 길이를 이만큼으로 늘려 반복 동작 확인), onStatus(진행 상태 콜백), freeze(자막 한 줄을 정지 화면으로, freezeIndex = 몇 번째 줄), edit(정지 화면에서 직접 편집 콜백) }. { stop } 반환.
+  // box 안에서 클립 하나를 재생한다. o = { clip, url, defaults, onend, onerror, audioUrl(음성 파일 키→주소), silent(영상·목소리 모두 끔), muteVideo/muteVoice(각각 끔), minContent(자막·음성 길이를 이만큼으로 늘려 반복 동작 확인), onStatus(진행 상태 콜백), freeze(자막 한 줄을 정지 화면으로, freezeIndex = 몇 번째 줄), edit(정지 화면에서 직접 편집 콜백) }. { stop } 반환.
   function play(box, o) {
     injectCss();
     var clip = o.clip, fx = resolve(clip.fx, o.defaults), cues = cuesOf(clip);
@@ -211,7 +211,7 @@
     wrap.style.setProperty('--fxd', fx.trans.dur + 's'); stage.style.setProperty('--fxd', fx.trans.dur + 's');
     if (fx.trans['in'] !== 'cut') stage.style.animationName = 'fx-i-' + fx.trans['in'];
 
-    var wantVoice = fx.voice.on === 'on' && !o.silent && !o.freeze, eleven = fx.voice.engine === 'eleven';
+    var wantVoice = fx.voice.on === 'on' && !o.silent && !o.muteVoice && !o.freeze, eleven = fx.voice.engine === 'eleven';
     var speaking = wantVoice && !!root.speechSynthesis, audios = [];
     var audioUrl = o.audioUrl || function (k) { return '/api/clipfile?k=' + encodeURIComponent(k); };
     // 일레븐랩스로 미리 만든 음성 파일이 있으면 그것을, 없거나 실패하면 브라우저 음성으로 대신 읽는다
@@ -398,10 +398,29 @@
       }
       if (!v.seeking) { try { v.currentTime = target; } catch (e) {} }
     }
+    // 영상 소리 믹싱: 볼륨 × 페이드 인/아웃 × 더킹(목소리가 나오는 동안 영상 소리를 줄임). 더킹은 자막·음성 일정표로 계산하므로 목소리를 꺼 둔 미리보기에서도 확인된다.
+    var duckCur = 1, lastAud = 0;
+    function voiceActive(t) {
+      if (fx.voice.on !== 'on') return false;
+      for (var i = 0; i < cues.length; i++) {
+        var c = cues[i], st = c.s + (fx.voice.delay || 0), len = (eleven && c.a && c.d > 0) ? c.d : Math.min(c.e - c.s, c.t.length * 0.2 / (fx.voice.rate || 1));
+        if (t >= st && t < st + len) return true;
+      }
+      return false;
+    }
+    function updateAudio(t, now) {
+      if (!v || phase === 'tail' || dir < 0) return;
+      var dt = Math.min(0.2, (now - lastAud) / 1000), f = 1, V = fx.video; lastAud = now;
+      if (V.fadeIn > 0) f = Math.min(f, Math.max(0, t) / V.fadeIn);
+      var clipEnd = mode === 'off' ? segLen : Math.max(contentEnd, segLen);
+      if (V.fadeOut > 0 && clipEnd > 0) f = Math.min(f, Math.max(0, clipEnd - t) / V.fadeOut);
+      if (V.duck === 'on') duckCur += ((voiceActive(t) ? V.duckVol : 1) - duckCur) * Math.min(1, dt / 0.25);
+      try { v.volume = Math.max(0, Math.min(1, V.vol * f * duckCur)); } catch (e) {}
+    }
     // 미리보기 상태 표시용 (구간 번호·방향·진행)
     function status(t, now) {
       if (!o.onStatus || now - lastStatus < 100) return; lastStatus = now;
-      o.onStatus({ t: t, end: Math.max(contentEnd, v ? 0 : total), seg: seg, dir: dir, phase: phase, mode: mode, hasVideo: !!v, segLen: segLen });
+      o.onStatus({ t: t, end: Math.max(contentEnd, v ? 0 : total), seg: seg, dir: dir, phase: phase, mode: mode, hasVideo: !!v, segLen: segLen, vol: v ? v.volume : null, muted: v ? v.muted : false });
     }
     var t0 = 0, total = 0;
     function tick() {
@@ -421,6 +440,7 @@
         }
       }
       else { t = (now - t0) / 1000; if (!ended && t >= total) endMedia(); }
+      if (v) updateAudio(t, now);
       status(t, now);
       if (!ended) showCue(t); else if (v) showCue(t);
     }
@@ -436,7 +456,7 @@
       return { stop: function () { if (v) v.pause(); } };
     }
     if (v) {
-      v.src = o.url; v.playbackRate = fx.video.speed; v.volume = fx.video.vol; if (o.silent) v.muted = true;
+      v.src = o.url; v.playbackRate = fx.video.speed; v.volume = fx.video.vol; if (o.silent || o.muteVideo) v.muted = true;
       v.onerror = function () { if (!done) { done = true; clearInterval(raf); box.innerHTML = '<div class="ph err" style="padding:24px;text-align:center;color:#FF8A78">영상을 불러오지 못했습니다</div>'; if (o.onerror) o.onerror(); } };
       v.onloadedmetadata = function () {
         if (fx.video.trimStart > 0) try { v.currentTime = fx.video.trimStart; } catch (e) {}
