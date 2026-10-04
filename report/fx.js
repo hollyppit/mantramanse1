@@ -72,6 +72,7 @@
   var VOICE_ENGINE = [['browser', '브라우저 음성 (무료, 기기마다 음색 다름)'], ['eleven', '일레븐랩스 (미리 만든 음성 파일, 모든 기기 동일)']];
   var EL_MODELS = [['eleven_multilingual_v2', 'Multilingual v2 (안정적, 기본 추천)'], ['eleven_v3', 'v3 (표현력 최고, 안정성은 0 / 0.5 / 1 권장)'], ['eleven_flash_v2_5', 'Flash v2.5 (빠르고 저렴)'], ['eleven_turbo_v2_5', 'Turbo v2.5']];
   var VOICE_MODE = [['cue', '자막 줄마다 (자막과 동기)'], ['whole', '전체를 한 번에']];
+  var LOOP = [['auto', '영상을 처음부터 다시 반복'], ['reverse', '거꾸로 재생해서 왕복 반복 (앞→뒤→앞…)'], ['black', '검은 배경 유지 (영상이 끝나면 검은 화면에서 자막·음성 계속)'], ['freeze', '마지막 화면 정지 유지'], ['off', '반복 안 함 (영상이 끝나면 클립 종료)']];
   var FIT = [['contain', '전체 보이게 (여백)'], ['cover', '화면 가득 (잘림)']];
 
   // 폼 구성용 명세: [키, 이름, 형식, 선택지 또는 {min,max,step}]
@@ -91,14 +92,14 @@
       ['elVoice', '일레븐랩스 목소리 (자막 줄마다 음성 파일을 만들어 씁니다)', 'elvoice', null, { only: 'eleven', wide: true }], ['elModel', '모델', 'sel', EL_MODELS, { only: 'eleven', wide: true }],
       ['elStability', '안정성 (낮을수록 감정 풍부)', 'num', { min: 0, max: 1, step: 0.05 }, { only: 'eleven' }], ['elSimilarity', '목소리 유사도', 'num', { min: 0, max: 1, step: 0.05 }, { only: 'eleven' }],
       ['elStyle', '스타일 과장', 'num', { min: 0, max: 1, step: 0.05 }, { only: 'eleven' }], ['elSpeed', '말 속도', 'num', { min: 0.7, max: 1.2, step: 0.05 }, { only: 'eleven' }]] },
-    { g: 'video', title: '영상 재생', items: [['speed', '재생 속도', 'num', { min: 0.25, max: 2, step: 0.05 }], ['vol', '영상 원음 볼륨(0~1)', 'num', { min: 0, max: 1, step: 0.1 }], ['fit', '화면 맞춤', 'sel', FIT], ['trimStart', '앞부분 자르기(초)', 'num', { min: 0, max: 600, step: 0.1 }], ['trimEnd', '끝 지점(초, 0=끝까지)', 'num', { min: 0, max: 600, step: 0.1 }], ['hold', '마지막 화면 유지(초)', 'num', { min: 0, max: 10, step: 0.1 }]] },
+    { g: 'video', title: '영상 재생', items: [['speed', '재생 속도', 'num', { min: 0.25, max: 2, step: 0.05 }], ['vol', '영상 원음 볼륨(0~1)', 'num', { min: 0, max: 1, step: 0.1 }], ['fit', '화면 맞춤', 'sel', FIT], ['loop', '자막·음성이 영상보다 길 때', 'sel', LOOP, { wide: true }], ['trimStart', '앞부분 자르기(초)', 'num', { min: 0, max: 600, step: 0.1 }], ['trimEnd', '끝 지점(초, 0=끝까지)', 'num', { min: 0, max: 600, step: 0.1 }], ['hold', '마지막 화면 유지(초)', 'num', { min: 0, max: 10, step: 0.1 }]] },
   ];
 
   var BUILTIN = {
     trans: { 'in': 'fade', out: 'fade', dur: 0.5 },
     sub: { font: 'gothic', weight: '700', italic: 'normal', size: 'M', fs: 0, color: 'ivory', colorHex: '', align: 'center', lh: 1.45, ls: 0, pos: 'bottom', x: 50, y: -1, w: 90, rot: 0, strokeW: 0, strokeColor: '#000000', shOn: 'on', shX: 0, shY: 6, shBlur: 20, shColor: '#000000', glowBlur: 0, glowColor: '', bg: 'shade', bgColor: '', bgOpacity: -1, bgRadius: 30, padX: 60, padY: 20, anim: 'fade', animDur: 0.4, wordDelay: 0.08, typeSpeed: 14, animOut: 'fade', animOutDur: 0.3, emph: 'none', emphSpeed: 1.5 },
     voice: { on: 'off', engine: 'browser', name: '', mode: 'cue', rate: 1, pitch: 1, vol: 1, delay: 0.2, elVoice: '', elModel: 'eleven_multilingual_v2', elStability: 0.5, elSimilarity: 0.75, elStyle: 0, elSpeed: 1 },
-    video: { speed: 1, vol: 1, fit: 'contain', trimStart: 0, trimEnd: 0, hold: 0.5 },
+    video: { speed: 1, vol: 1, fit: 'contain', loop: 'auto', trimStart: 0, trimEnd: 0, hold: 0.5 },
   };
   function resolve(fx, defaults) {
     var out = {};
@@ -365,14 +366,56 @@
       if (!outCut) { stage.style.animationName = 'fx-o-' + fx.trans.out; }
       later(finish, Math.max(fx.video.hold, outCut ? 0 : d));
     }
+    // 자막·음성이 끝나는 시각(재생 시작 기준 초). 일레븐랩스 음성은 길이를 알 때 시작 지연까지 더해 계산한다.
+    var contentEnd = 0;
+    cues.forEach(function (c) {
+      if (c.e < 1e8) contentEnd = Math.max(contentEnd, c.e);
+      if (fx.voice.on === 'on' && eleven && c.a && c.d > 0) contentEnd = Math.max(contentEnd, c.s + (fx.voice.delay || 0) + c.d);
+    });
+    // 자막·음성이 영상보다 길 때(contentEnd) 영상 처리 방식 fx.video.loop:
+    //   auto = 처음부터 다시 반복 / reverse = 거꾸로 재생해 왕복 / black = 영상이 끝나면 검은 화면 유지 / freeze = 마지막 화면 정지 / off = 영상이 끝나면 종료
+    // 자막 시각 t는 구간(영상 한 번 재생 또는 되감기)을 이어 붙인 누적 시간이다. base = 지금 구간이 시작된 누적 시각.
+    var mode = fx.video.loop, base = 0, segLen = 0, dir = 1, phase = 'play', tailAt = 0, loopAt = 0, lastTick = 0;
+    function more(nextBase) { return segLen > 0.3 && nextBase < contentEnd - 0.05; } // 이 구간 뒤에도 자막·음성이 남아 있나
+    function seekStart() { try { v.currentTime = fx.video.trimStart; } catch (e) {} }
+    function playV() { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+    function videoEnded() { // 영상이 끝에 닿았을 때(앞으로 재생 중)
+      if (ended || !v || phase !== 'play' || dir < 0 || performance.now() - loopAt < 400) return;
+      var next = base + segLen; loopAt = performance.now();
+      if (mode === 'off' || !more(next)) return endMedia();
+      base = next;
+      if (mode === 'auto') { seekStart(); playV(); }
+      else if (mode === 'reverse') { dir = -1; v.pause(); lastTick = performance.now(); }
+      else { phase = 'tail'; tailAt = performance.now(); v.pause(); if (mode === 'black') v.style.visibility = 'hidden'; }
+    }
+    function reverseStep(now) { // 거꾸로 재생: 영상을 일시정지한 채 재생 위치를 조금씩 뒤로 옮긴다(영상 형식에 따라 끊겨 보일 수 있음)
+      var dt = Math.min(0.2, (now - lastTick) / 1000), nxt = v.currentTime - dt * fx.video.speed;
+      lastTick = now;
+      if (nxt <= fx.video.trimStart + 0.02) { // 처음에 닿음 → 구간 끝
+        var nb = base + segLen; if (!more(nb)) { base = nb; return endMedia(); }
+        base = nb; dir = 1; loopAt = now; seekStart(); playV(); return;
+      }
+      try { v.currentTime = nxt; } catch (e) {}
+    }
     var t0 = 0, total = 0;
     function tick() {
       if (done) return;
-      var t;
-      if (v) { t = v.currentTime - fx.video.trimStart; if (!ended && (v.ended || (fx.video.trimEnd > 0 && v.currentTime >= fx.video.trimEnd))) endMedia(); }
-      else { t = (performance.now() - t0) / 1000; if (!ended && t >= total) endMedia(); }
+      var t, now = performance.now();
+      if (v) {
+        if (phase === 'tail') { // 영상이 끝난 뒤 검은 화면/마지막 화면으로 자막·음성만 이어 간다
+          t = base + (now - tailAt) / 1000 * fx.video.speed; if (!ended && t >= contentEnd) endMedia();
+        } else {
+          var rel = v.currentTime - fx.video.trimStart;
+          if (dir > 0 && base > 0 && now - loopAt < 400 && rel > segLen * 0.5) rel = 0; // 되감는 짧은 순간에 시각이 앞서 튀지 않게
+          t = base + (dir > 0 ? rel : segLen - rel);
+          if (!ended) {
+            if (dir > 0) { if (v.ended || (fx.video.trimEnd > 0 && v.currentTime >= fx.video.trimEnd)) videoEnded(); }
+            else reverseStep(now);
+          }
+        }
+      }
+      else { t = (now - t0) / 1000; if (!ended && t >= total) endMedia(); }
       if (!ended) showCue(t); else if (v) showCue(t);
-      
     }
     function start() {
       if (fx.voice.mode === 'whole' && !eleven && speaking) { var all = cues.map(function (c) { return c.t; }).join(' '); later(function () { speak(all); }, fx.voice.delay); }
@@ -388,12 +431,15 @@
     if (v) {
       v.src = o.url; v.playbackRate = fx.video.speed; v.volume = fx.video.vol; if (o.silent) v.muted = true;
       v.onerror = function () { if (!done) { done = true; clearInterval(raf); box.innerHTML = '<div class="ph err" style="padding:24px;text-align:center;color:#FF8A78">영상을 불러오지 못했습니다</div>'; if (o.onerror) o.onerror(); } };
-      v.onloadedmetadata = function () { if (fx.video.trimStart > 0) try { v.currentTime = fx.video.trimStart; } catch (e) {} };
+      v.onloadedmetadata = function () {
+        if (fx.video.trimStart > 0) try { v.currentTime = fx.video.trimStart; } catch (e) {}
+        if (isFinite(v.duration)) segLen = Math.max(0, (fx.video.trimEnd > 0 && fx.video.trimEnd < v.duration ? fx.video.trimEnd : v.duration) - fx.video.trimStart);
+      };
+      v.addEventListener('ended', videoEnded);
       var go = v.play(); if (go && go.catch) go.catch(function () { v.muted = true; v.play().catch(function () {}); });
       start();
     } else {
-      var last = cues.filter(function (c) { return c.e < 1e8; }).reduce(function (m, c) { return Math.max(m, c.e); }, 0);
-      total = Math.max(last, 4); start();
+      total = Math.max(contentEnd, 4); start();
     }
     return { stop: function () { done = true; clearInterval(raf); timers.forEach(clearTimeout); try { root.speechSynthesis.cancel(); } catch (e) {} audios.forEach(function (a) { a.pause(); }); if (v) v.pause(); } };
   }
