@@ -42,13 +42,13 @@
      text        설명 글. title, subtitle, body, emphasis(true면 강조 스타일)
      quote       강조 문구. text, cite(출처, 선택)
      image       이미지. src, srcMobile, alt, caption, width('narrow'|'normal'|'wide'), aspectRatio('4/5','16/9'…), objectFit('cover'|'contain'), todo
-     imageText   그림+글을 한 화면에. src, alt, title, body, aspectRatio, imagePosition('top'|'bottom'|'left'|'right')
+     imageText   그림(또는 영상)+글을 한 화면에. src, alt, title, body, aspectRatio, mediaType('video'면 src를 영상으로), poster, autoplay, loop, imagePosition('top'|'bottom'|'left'|'right')
                  top/bottom = 위아래로 쌓음(휴대폰 한 화면에 그림과 글이 함께 보이도록 그림 높이를 제한), left/right = 큰 화면에서 좌우 배치(모바일은 위아래)
      fullImage   화면을 크게 쓰는 이미지. src, alt, caption, height('70svh' 등)
      gallery     이미지 2~4장. items: [{src, alt, caption}], columns(2~4)
      video       영상. src, poster, autoplay, muted, loop, aspectRatio, caption, todo
      chain       화살표로 이어지는 흐름. title, items:['A','B'], direction('down'|'row')
-     compare     비교. left:{label, items:[…]}, right:{label, items:[…], highlight:true}
+     compare     비교. left:{label, items:[…]}, right:{label, items:[…], highlight:true}, (선택) src·alt·caption·aspectRatio = 아래에 함께 보일 이미지, body = 아래 글
      stickySteps 이미지가 고정된 채 글만 바뀌는 구간(모바일은 일반 세로 스크롤). steps:[{title, text, src, alt, todo}]
      interest    "지금 가장 궁금한 것은?" 선택 카드 (선택값이 뒤쪽 문구에 반영됨)
      spacer      호흡 여백. size('small'|'medium'|'large'|'viewport')
@@ -200,17 +200,17 @@
     { type: 'headline', id: 'mantra', track: 'mantra_section_viewed', title: '그래서 만트라는\n사주를 조금 다르게 보여줍니다.', size: 'xl', fullscreen: true, anim: 'lines' },
     { type: 'compare',
       left: { label: '기존 방식', items: ['생년월일', '어려운 명리학 용어', '긴 텍스트 풀이'] },
-      right: { label: '만트라', items: ['나의 기질', '인생의 흐름', '지금의 위치', '행동 가이드'], highlight: true } },
-    { type: 'image', src: 'mantra/report-ui.webp', alt: '만트라 리포트 화면', aspectRatio: '9/16', width: 'narrow', caption: '실제 만트라 리포트 화면',
+      right: { label: '만트라', items: ['나의 기질', '인생의 흐름', '지금의 위치', '행동 가이드'], highlight: true },
+      src: 'mantra/report-ui.webp', alt: '만트라 리포트 화면', aspectRatio: '9/16', caption: '실제 만트라 리포트 화면',
+      body: '복잡한 명리학을 공부하지 않아도\n내 인생의 흐름을 *한눈에* 이해할 수 있도록.',
       todo: '실제 만트라 리포트 UI 이미지 삽입' },
-    { type: 'text', body: '복잡한 명리학을 공부하지 않아도\n내 인생의 흐름을 *한눈에* 이해할 수 있도록.' },
     { type: 'spacer', size: 'medium' },
 
     /* ===== 05 MOVING TOON : 몰입 구간 ===== */
-    { type: 'headline', id: 'movingtoon', track: 'movingtoon_preview_viewed', title: COPY.movingToonHeadline, size: 'xl', anim: 'lines' },
-    { type: 'video', src: '', poster: '', autoplay: true, muted: true, loop: true, aspectRatio: '9/16', width: 'narrow',
+    { type: 'imageText', id: 'movingtoon', track: 'movingtoon_preview_viewed', mediaType: 'video', imagePosition: 'top', title: COPY.movingToonHeadline, anim: 'lines',
+      src: '', poster: '', autoplay: true, loop: true, aspectRatio: '9/16',
+      body: '만트라는 당신의 사주를 분석해\n타고난 성향과 삶의 흐름을\n*당신만의 이야기*로 만들어 드립니다.',
       todo: '실제 사주 무빙툰 teaser 영상 삽입 (src: movingtoon/teaser.mp4, poster: movingtoon/teaser.webp)' },
-    { type: 'text', body: '만트라는 당신의 사주를 분석해\n타고난 성향과 삶의 흐름을\n*당신만의 이야기*로 만들어 드립니다.' },
     { type: 'cta', buttonText: '내 이야기는 어떻게 만들어질까?', action: 'scroll:interest', variant: 'ghost' },
     { type: 'spacer', size: 'medium' },
 

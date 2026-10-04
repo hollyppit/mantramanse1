@@ -102,7 +102,9 @@
     imageText: function (b) {
       var pos = /^(left|right|top|bottom)$/.test(b.imagePosition) ? b.imagePosition : 'left', stack = pos === 'top' || pos === 'bottom';
       var ar = ratio(b.aspectRatio, '4/5'), p = ar.split('/'), r = (+p[0]) / (+p[1]) || 0.8;
-      var fig = '<figure class="fig" style="--r:' + r + '">' + pic(b, { ar: ar }) + '</figure>';
+      var fig = b.mediaType === 'video'
+        ? '<div class="vwrap" style="--r:' + r + '">' + BLOCKS.video(Object.assign({}, b, { width: 'wide', caption: '', aspectRatio: ar })) + '</div>'
+        : '<figure class="fig" style="--r:' + r + '">' + pic(b, { ar: ar }) + '</figure>';
       var txt = '<div class="it-t">' + (b.title ? '<h3 class="tt big">' + lines(fmt(pick(b.title)), b.anim) + '</h3>' : '') + (b.body ? '<p class="body">' + fmt(pick(b.body)) + '</p>' : '') + '</div>';
       return '<div class="it p-' + pos + (stack ? ' stack' : '') + '">' + (pos === 'bottom' ? txt + fig : fig + txt) + '</div>';
     },
@@ -135,7 +137,10 @@
         return '<div class="cmp-c ' + cls + (c.highlight ? ' hi' : '') + '"><p class="cmp-l">' + esc(pick(c.label)) + '</p>' +
           (c.items || []).map(function (x, i) { return (i ? '<span class="op dn" aria-hidden="true">↓</span>' : '') + '<span class="node">' + fmt(pick(x)) + '</span>'; }).join('') + '</div>';
       }
-      return '<div class="cmp">' + col(b.left, 'l') + col(b.right, 'r') + '</div>';
+      var ar = ratio(b.aspectRatio, '9/16'), pr = ar.split('/'), r = (+pr[0]) / (+pr[1]) || 0.56;
+      return '<div class="cmp">' + col(b.left, 'l') + col(b.right, 'r') + '</div>' +
+        (b.src || b.todo ? '<figure class="fig cmp-img" style="--r:' + r + '">' + pic(b, { ar: ar }) + (b.caption ? '<figcaption>' + fmt(pick(b.caption)) + '</figcaption>' : '') + '</figure>' : '') +
+        (b.body ? '<p class="body" style="margin-top:26px">' + fmt(pick(b.body)) + '</p>' : '');
     },
     stickySteps: function (b) {
       var st = b.steps || [];
@@ -477,7 +482,7 @@
       if (!b || !BLOCKS[b.type]) { out.push(w + '알 수 없는 type'); return; }
       if (b.anim && !okAnim.test(b.anim)) out.push(w + '알 수 없는 anim "' + b.anim + '"');
       if (b.requires && !/^(chart|flowOpen)$/.test(b.requires)) out.push(w + '알 수 없는 requires "' + b.requires + '"');
-      if (/^(image|fullImage|imageText)$/.test(b.type) && !b.alt) out.push(w + 'alt 없음');
+      if ((/^(image|fullImage)$/.test(b.type) || (b.type === 'imageText' && b.mediaType !== 'video') || (b.type === 'compare' && b.src)) && !b.alt) out.push(w + 'alt 없음');
       if (b.type === 'video' && b.src && !b.poster) out.push(w + 'poster 없음(권장)');
       if (b.type === 'gallery') { var n = (b.items || []).length; if (n < 2 || n > 4) out.push(w + '이미지는 2~4장'); (b.items || []).forEach(function (it, j) { if (!it.alt) out.push(w + 'items[' + j + '] alt 없음'); }); }
       if (b.type === 'stickySteps') (b.steps || []).forEach(function (s, j) { if (!s.alt) out.push(w + 'steps[' + j + '] alt 없음'); });

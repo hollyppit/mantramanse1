@@ -765,15 +765,15 @@ summary { cursor:pointer; padding:4px 0; }
     } else if (t === 'ls') { // 한 줄에 하나
       el = mk('textarea'); el.rows = 3; el.value = (obj[k] || []).join('\n');
       el.oninput = function () { obj[k] = el.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean); hmChanged(); };
-    } else if (t === 'i' || t === 'v') {
+    } else if (t === 'i' || t === 'v' || t === 'm') {
       var wrap = mk('span', 'hmimg'), th = mk('img', 'hmthumb'); th.alt = '';
-      el = mk('input'); el.type = 'text'; el.placeholder = t === 'v' ? '영상 올리기 또는 주소' : '이미지 올리기 또는 경로 (예: problem/problem-01.webp)';
-      var file = mk('input'); file.type = 'file'; file.accept = t === 'v' ? 'video/mp4,video/webm' : 'image/*';
+      el = mk('input'); el.type = 'text'; el.placeholder = t === 'v' || t === 'm' ? (t === 'm' ? '이미지·영상 올리기 또는 주소' : '영상 올리기 또는 주소') : '이미지 올리기 또는 경로 (예: problem/problem-01.webp)';
+      var file = mk('input'); file.type = 'file'; file.accept = t === 'v' ? 'video/mp4,video/webm' : t === 'm' ? 'image/*,video/mp4,video/webm' : 'image/*';
       var up = mk('button', '', '올리기'); up.type = 'button';
       var msg = mk('span', 'muted'); msg.style.fontSize = '.74rem';
       function thumb() {
         var v = obj[k] || ''; var u = !v ? '' : /^(https:\/\/|\/)/.test(v) ? v : '/report/story/img/' + v;
-        if (t === 'i' && u) { th.src = u; th.style.display = ''; } else th.style.display = 'none';
+        if (t !== 'v' && u && !/\.(mp4|webm|mov|m4v)(\?|$)/i.test(u) && !/^\/api\/clipfile\?k=[\w-]+\.(mp4|webm|mov|m4v)$/i.test(u)) { th.src = u; th.style.display = ''; } else th.style.display = 'none';
       }
       el.value = obj[k] || ''; thumb();
       el.oninput = function () { if (el.value.trim()) obj[k] = el.value.trim(); else delete obj[k]; thumb(); hmChanged(); };
