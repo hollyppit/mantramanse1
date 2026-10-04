@@ -69,7 +69,9 @@
   var SUB_ANIM_OUT = [['none', '없음 (바로 사라짐)'], ['fade', '페이드'], ['fall', '아래로 내려가며'], ['lift', '위로 올라가며'], ['shrink', '작아지며'], ['blur', '블러'], ['slide-l', '왼쪽으로 슬라이드'], ['slide-r', '오른쪽으로 슬라이드']];
   var SUB_EMPH = [['none', '없음'], ['pulse', '두근두근 (커졌다 작아짐)'], ['float', '둥실둥실'], ['shake', '떨림'], ['blink', '깜빡임'], ['wobble', '흔들흔들'], ['glow', '반짝 빛남']];
   var ON_OFF = [['off', '끄기'], ['on', '켜기']];
-  var VOICE_ENGINE = [['browser', '브라우저 음성 (무료, 기기마다 음색 다름)'], ['eleven', '일레븐랩스 (미리 만든 음성 파일, 모든 기기 동일)']];
+  var VOICE_ENGINE = [['browser', '브라우저 음성 (무료, 기기마다 음색 다름)'], ['eleven', '일레븐랩스 (미리 만든 음성 파일, 모든 기기 동일)'], ['openai', 'OpenAI 음성 (미리 만든 음성 파일, 모든 기기 동일)']];
+  var OA_VOICES = [['alloy', 'alloy (중성적)'], ['ash', 'ash (차분한 남성)'], ['ballad', 'ballad (부드러운 감성)'], ['coral', 'coral (따뜻한 여성)'], ['echo', 'echo (남성)'], ['fable', 'fable (이야기꾼)'], ['nova', 'nova (밝은 여성)'], ['onyx', 'onyx (낮은 남성)'], ['sage', 'sage (침착한)'], ['shimmer', 'shimmer (맑은 여성)'], ['verse', 'verse (표현력 있는)'], ['marin', 'marin (자연스러운 여성)'], ['cedar', 'cedar (깊은 남성)']];
+  var OA_MODELS = [['gpt-4o-mini-tts', 'gpt-4o-mini-tts (최신·말투 지시 가능, 권장)'], ['tts-1', 'tts-1 (빠름)'], ['tts-1-hd', 'tts-1-hd (고음질)']];
   var EL_MODELS = [['eleven_multilingual_v2', 'Multilingual v2 (안정적, 기본 추천)'], ['eleven_v3', 'v3 (표현력 최고, 안정성은 0 / 0.5 / 1 권장)'], ['eleven_flash_v2_5', 'Flash v2.5 (빠르고 저렴)'], ['eleven_turbo_v2_5', 'Turbo v2.5']];
   var VOICE_FIT = [['stretch', '자막·영상을 늘려서 목소리를 끝까지 읽기 (권장)'], ['off', '정해 둔 시간 그대로 (목소리가 길면 다음 줄에서 끊김)']];
   var VOICE_MODE = [['cue', '자막 줄마다 (자막과 동기)'], ['whole', '전체를 한 번에']];
@@ -92,6 +94,8 @@
       ['name', '브라우저 목소리', 'voice', null, { only: 'browser', wide: true }], ['mode', '읽는 방식', 'sel', VOICE_MODE, { only: 'browser' }],
       ['rate', '속도', 'num', { min: 0.5, max: 2, step: 0.1 }, { only: 'browser' }], ['pitch', '음높이', 'num', { min: 0.5, max: 2, step: 0.1 }, { only: 'browser' }],
       ['elVoice', '일레븐랩스 목소리 (자막 줄마다 음성 파일을 만들어 씁니다)', 'elvoice', null, { only: 'eleven', wide: true }], ['elModel', '모델', 'sel', EL_MODELS, { only: 'eleven', wide: true }],
+      ['oaVoice', 'OpenAI 목소리 (자막 줄마다 음성 파일을 만들어 씁니다)', 'oavoice', OA_VOICES, { only: 'openai', wide: true }], ['oaModel', '모델', 'sel', OA_MODELS, { only: 'openai', wide: true }],
+      ['oaInstr', '말투 지시 (gpt-4o-mini-tts 전용. 예: 차분하고 신비로운 낭독체로, 천천히)', 'text', { max: 400 }, { only: 'openai', wide: true }], ['oaSpeed', '말 속도', 'num', { min: 0.5, max: 2, step: 0.05 }, { only: 'openai' }],
       ['elStability', '안정성 (낮을수록 감정 풍부)', 'num', { min: 0, max: 1, step: 0.05 }, { only: 'eleven' }], ['elSimilarity', '목소리 유사도', 'num', { min: 0, max: 1, step: 0.05 }, { only: 'eleven' }],
       ['elStyle', '스타일 과장', 'num', { min: 0, max: 1, step: 0.05 }, { only: 'eleven' }], ['elSpeed', '말 속도', 'num', { min: 0.7, max: 1.2, step: 0.05 }, { only: 'eleven' }]] },
     { g: 'video', title: '영상 재생', items: [['speed', '재생 속도', 'num', { min: 0.25, max: 2, step: 0.05 }], ['vol', '영상 소리 볼륨 (0~1, 0 = 소리 끔)', 'num', { min: 0, max: 1, step: 0.05 }], ['duck', '목소리가 나올 때 영상 소리 줄이기', 'sel', ON_OFF], ['duckVol', '줄였을 때 영상 소리 볼륨(0~1)', 'num', { min: 0, max: 1, step: 0.05 }], ['fadeIn', '영상 소리 페이드 인(초)', 'num', { min: 0, max: 5, step: 0.1 }], ['fadeOut', '영상 소리 페이드 아웃(초)', 'num', { min: 0, max: 5, step: 0.1 }], ['fit', '화면 맞춤', 'sel', FIT], ['loop', '자막·음성이 영상보다 길 때', 'sel', LOOP, { wide: true }], ['trimStart', '앞부분 자르기(초)', 'num', { min: 0, max: 600, step: 0.1 }], ['trimEnd', '끝 지점(초, 0=끝까지)', 'num', { min: 0, max: 600, step: 0.1 }], ['hold', '마지막 화면 유지(초)', 'num', { min: 0, max: 10, step: 0.1 }]] },
@@ -100,7 +104,7 @@
   var BUILTIN = {
     trans: { 'in': 'fade', out: 'fade', dur: 0.5 },
     sub: { font: 'gothic', weight: '700', italic: 'normal', size: 'M', fs: 0, color: 'ivory', colorHex: '', align: 'center', lh: 1.45, ls: 0, pos: 'bottom', x: 50, y: -1, w: 90, rot: 0, strokeW: 0, strokeColor: '#000000', shOn: 'on', shX: 0, shY: 6, shBlur: 20, shColor: '#000000', glowBlur: 0, glowColor: '', bg: 'shade', bgColor: '', bgOpacity: -1, bgRadius: 30, padX: 60, padY: 20, anim: 'fade', animDur: 0.4, wordDelay: 0.08, typeSpeed: 14, animOut: 'fade', animOutDur: 0.3, emph: 'none', emphSpeed: 1.5 },
-    voice: { on: 'off', engine: 'browser', name: '', mode: 'cue', rate: 1, pitch: 1, vol: 1, delay: 0.2, fit: 'stretch', pad: 0.3, elVoice: '', elModel: 'eleven_multilingual_v2', elStability: 0.5, elSimilarity: 0.75, elStyle: 0, elSpeed: 1 },
+    voice: { on: 'off', engine: 'browser', name: '', mode: 'cue', rate: 1, pitch: 1, vol: 1, delay: 0.2, fit: 'stretch', pad: 0.3, elVoice: '', elModel: 'eleven_multilingual_v2', elStability: 0.5, elSimilarity: 0.75, elStyle: 0, elSpeed: 1, oaVoice: 'coral', oaModel: 'gpt-4o-mini-tts', oaInstr: '', oaSpeed: 1 },
     video: { speed: 1, vol: 1, duck: 'off', duckVol: 0.3, fadeIn: 0, fadeOut: 0, fit: 'contain', loop: 'auto', trimStart: 0, trimEnd: 0, hold: 0.5 },
   };
   function resolve(fx, defaults) {
@@ -125,8 +129,8 @@
   // (줄 사이의 간격은 그대로.) 늘어난 전체 길이는 영상 반복 설정(fx.video.loop)이 이어 받는다.
   // 목소리 길이: 일레븐랩스로 만든 음성은 실제 길이(d), 그 밖에는 글자 수로 추정한다(브라우저 음성 약 0.18초/글자, 속도로 나눔).
   function stretchCues(cues, fx) {
-    var V = fx.voice; if (V.on !== 'on' || V.fit === 'off' || (V.engine !== 'eleven' && V.mode === 'whole')) return { cues: cues, added: 0 };
-    var eleven = V.engine === 'eleven', rate = (eleven ? V.elSpeed : V.rate) || 1, shift = 0;
+    var V = fx.voice; if (V.on !== 'on' || V.fit === 'off' || (V.engine === 'browser' && V.mode === 'whole')) return { cues: cues, added: 0 };
+    var eleven = V.engine === 'eleven' || V.engine === 'openai', rate = (V.engine === 'openai' ? V.oaSpeed : V.engine === 'eleven' ? V.elSpeed : V.rate) || 1, shift = 0;
     var out = cues.map(function (c) {
       var a = { t: c.t, s: c.s + shift, e: c.e + shift, a: c.a, d: c.d };
       if (c.e >= 1e8) return a; // 영상 내내 표시하는 자막은 그대로
@@ -229,7 +233,7 @@
     wrap.style.setProperty('--fxd', fx.trans.dur + 's'); stage.style.setProperty('--fxd', fx.trans.dur + 's');
     if (fx.trans['in'] !== 'cut') stage.style.animationName = 'fx-i-' + fx.trans['in'];
 
-    var wantVoice = fx.voice.on === 'on' && !o.silent && !o.muteVoice && !o.freeze, eleven = fx.voice.engine === 'eleven';
+    var wantVoice = fx.voice.on === 'on' && !o.silent && !o.muteVoice && !o.freeze, eleven = fx.voice.engine === 'eleven' || fx.voice.engine === 'openai'; // 미리 만든 음성 파일을 쓰는 엔진
     var speaking = wantVoice && !!root.speechSynthesis, audios = [];
     var audioUrl = o.audioUrl || function (k) { return '/api/clipfile?k=' + encodeURIComponent(k); };
     // 일레븐랩스로 미리 만든 음성 파일이 있으면 그것을, 없거나 실패하면 브라우저 음성으로 대신 읽는다

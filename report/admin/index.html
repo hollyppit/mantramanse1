@@ -92,6 +92,8 @@ summary { cursor:pointer; padding:4px 0; }
 .dragging { opacity:.35; }
 .chrow { display:grid; grid-template-columns:20px minmax(0,1fr) auto auto auto; gap:6px; margin-bottom:6px; align-items:center; }
 .chrow button { padding:6px 10px; }
+.labrow { display:grid; grid-template-columns:150px minmax(0,1fr) auto auto auto; gap:6px; margin-bottom:6px; align-items:center; }
+.labrow button { padding:6px 10px; white-space:nowrap; }
 .cue { display:grid; grid-template-columns:20px 78px 78px minmax(0,1fr) auto auto auto; gap:6px; margin-bottom:6px; align-items:center; }
 .cue button { padding:6px 10px; white-space:nowrap; }
 .cue textarea { min-height:0; resize:none; overflow:hidden; line-height:1.4; padding:7px 10px; }
@@ -239,7 +241,7 @@ summary { cursor:pointer; padding:4px 0; }
     <div class="card" style="background:var(--bg)">
       <div class="row" style="justify-content:space-between;align-items:center">
         <b>자막 타임라인</b>
-        <div class="row"><button type="button" id="cueGenAll" title="일레븐랩스로 모든 줄의 음성 파일을 만듭니다">🔊 전체 음성 만들기</button><button type="button" id="cueFit" title="음성이 있는 줄은 음성 길이에 맞춰 나타남/사라짐 시각을 이어 붙입니다">⏱ 음성 길이에 맞춰 시간 정리</button><button type="button" id="cueAuto" title="위 전체 문장을 줄/문장 단위로 나눠 영상 길이에 맞게 시간을 배분합니다">전체 문장에서 자동 나누기</button><button type="button" id="cueAdd">+ 줄 추가</button></div>
+        <div class="row"><button type="button" id="cueGenAll" title="선택한 엔진(일레븐랩스/OpenAI)으로 모든 줄의 음성 파일을 만듭니다">🔊 전체 음성 만들기</button><button type="button" id="cueFit" title="음성이 있는 줄은 음성 길이에 맞춰 나타남/사라짐 시각을 이어 붙입니다">⏱ 음성 길이에 맞춰 시간 정리</button><button type="button" id="cueAuto" title="위 전체 문장을 줄/문장 단위로 나눠 영상 길이에 맞게 시간을 배분합니다">전체 문장에서 자동 나누기</button><button type="button" id="cueAdd">+ 줄 추가</button></div>
       </div>
       <p class="muted" style="margin:6px 0 8px">줄마다 “몇 초에 나타나 몇 초에 사라지는지”를 정합니다. 시간은 앞부분 자르기를 반영한 재생 시작 기준(초)입니다. 겹치지 않게 입력하세요.</p>
       <details id="aiBox" open style="margin:0 0 10px">
@@ -263,7 +265,7 @@ summary { cursor:pointer; padding:4px 0; }
         <ol id="aiOut" style="margin:6px 0 0;padding-left:20px"></ol>
         <div class="row hide" id="aiAct" style="margin-top:8px"><button type="button" class="pri" id="aiApply">타임라인에 적용</button><button type="button" id="aiToCap">전체 문장 칸에만 넣기</button></div>
       </details>
-      <div class="cue muted" style="margin-bottom:2px"><span></span><span>나타남(초)</span><span>사라짐(초)</span><span>자막 내용</span><span>음성(일레븐랩스)</span><span></span><span></span></div>
+      <div class="cue muted" style="margin-bottom:2px"><span></span><span>나타남(초)</span><span>사라짐(초)</span><span>자막 내용</span><span>음성</span><span></span><span></span></div>
       <div id="cueBox"></div>
       <p class="muted" id="cueAudioMsg" style="margin:6px 0 0"></p>
       <p class="muted" style="margin:4px 0 0;font-size:.78rem">음성은 “연출 → 읽는 목소리”에서 <b>목소리 읽기: 켜기 · 엔진: 일레븐랩스</b>, “일레븐랩스 목소리”에서 목소리를 고른 뒤 만듭니다. 같은 문장·설정은 다시 만들지 않고 재사용하므로 크레딧이 추가로 들지 않습니다. 미리보기에서 들으려면 오른쪽 “🗣 목소리 듣기”를 체크하세요.</p>
@@ -334,6 +336,18 @@ summary { cursor:pointer; padding:4px 0; }
     </div>
     <p class="err" id="bkErr"></p>
     <div class="row" style="justify-content:flex-end"><button type="button" id="bkCancel">취소</button><button type="submit" class="pri">적용</button></div>
+  </form>
+</dialog>
+
+<!-- 목소리 비교 테스트 -->
+<dialog id="dlgLab">
+  <form method="dialog" id="labForm">
+    <h3>🎧 목소리 비교 테스트</h3>
+    <p class="muted" style="margin:0">같은 문장을 여러 엔진·목소리로 번갈아 들어 보고, 마음에 드는 것을 바로 적용합니다. 속도·모델·말투 지시 등은 현재 “목소리 설정” 값을 따릅니다. 일레븐랩스·OpenAI는 글자 수만큼 사용량이 들며, 같은 문장·설정은 저장된 파일을 재사용합니다.</p>
+    <label style="display:grid;gap:4px">테스트 문장<textarea id="labText" rows="2" maxlength="200"></textarea></label>
+    <div id="labRows"></div>
+    <div class="row" style="align-items:center"><button type="button" id="labAdd">+ 후보 추가</button><button type="button" class="pri" id="labAll">▶ 전체 순서대로 듣기</button><button type="button" id="labStop">■ 정지</button><span class="muted" id="labMsg"></span></div>
+    <div class="row" style="justify-content:flex-end"><button type="button" id="labClose">닫기</button></div>
   </form>
 </dialog>
 
@@ -762,6 +776,8 @@ summary { cursor:pointer; padding:4px 0; }
         if (it[2] === 'sel') h += '<select' + at + '><option value="">' + blank + '</option>' + it[3].map(function (o) { return '<option value="' + o[0] + '"' + (cur === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>';
         else if (it[2] === 'elvoice') h += '<span style="display:flex;gap:6px"><select' + at + ' data-elvoice="1" data-cur="' + esc(cur || '') + '" style="flex:1;min-width:0"></select><button type="button" data-elplay="pre" title="일레븐랩스가 제공하는 기본 샘플 (무료)">▶ 샘플</button><button type="button" data-elplay="ko" title="한 문장을 현재 모델·설정으로 만들어 들어봅니다 (약 25자 크레딧, 같은 설정이면 재사용)">▶ 한국어</button></span>';
         else if (it[2] === 'voice') h += '<span style="display:flex;gap:6px"><select' + at + ' data-voice="1" data-cur="' + esc(cur || '') + '" style="flex:1;min-width:0"></select><button type="button" data-brplay="1" title="이 기기에서 이 목소리로 한 문장을 읽어 봅니다">▶ 듣기</button></span>';
+        else if (it[2] === 'oavoice') h += '<span style="display:flex;gap:6px"><select' + at + ' style="flex:1;min-width:0"><option value="">' + blank + '</option>' + it[3].map(function (o) { return '<option value="' + o[0] + '"' + (cur === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select><button type="button" data-oaplay="1" title="한 문장을 현재 모델·말투 지시로 만들어 들어봅니다 (약 25자 사용량, 같은 설정이면 재사용)">▶ 한국어</button></span>';
+        else if (it[2] === 'text') h += '<input type="text"' + at + ' maxlength="' + ((it[3] && it[3].max) || 200) + '" placeholder="' + blank + '" value="' + esc(cur || '') + '">';
         else if (it[2] === 'color') h += '<span style="display:flex;gap:6px"><input type="color" data-pick="1" value="' + (/^#[0-9a-f]{6}$/i.test(cur || '') ? cur : '#ffffff') + '" style="width:44px;padding:2px;flex:none"><input type="text"' + at + ' maxlength="9" placeholder="' + blank + ' #RRGGBB" value="' + esc(cur || '') + '"></span>';
         else h += '<input type="number"' + at + ' min="' + it[3].min + '" max="' + it[3].max + '" step="' + it[3].step + '" placeholder="' + blank + (F.BUILTIN[grp.g][k] < 0 ? '' : ' ' + F.BUILTIN[grp.g][k]) + '" value="' + (cur == null ? '' : cur) + '">';
         return h + '</label>';
@@ -803,6 +819,15 @@ summary { cursor:pointer; padding:4px 0; }
         }
         b.disabled = true; b.textContent = '만드는 중…';
         api('/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: KO_SAMPLE, voiceId: id, model: v.elModel, stability: v.elStability, similarity: v.elSimilarity, style: v.elStyle, speed: v.elSpeed }) })
+          .then(function (r) { playUrl('/api/clipfile?k=' + encodeURIComponent(r.key)); })
+          .catch(function (e) { alert(e.message); })
+          .then(function () { b.disabled = false; b.textContent = label; });
+      };
+    });
+    box.querySelectorAll('[data-oaplay]').forEach(function (b) {
+      b.onclick = function () {
+        var v = voiceFrom(box), label = b.textContent; b.disabled = true; b.textContent = '만드는 중…';
+        api('/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ provider: 'openai', text: KO_SAMPLE, voice: v.oaVoice, model: v.oaModel, instructions: v.oaInstr, speed: v.oaSpeed }) })
           .then(function (r) { playUrl('/api/clipfile?k=' + encodeURIComponent(r.key)); })
           .catch(function (e) { alert(e.message); })
           .then(function () { b.disabled = false; b.textContent = label; });
@@ -850,7 +875,7 @@ summary { cursor:pointer; padding:4px 0; }
   function loadElVoices() {
     if (S.elVoices !== null && !S.elError) return;
     S.elVoices = null; S.elError = '';
-    api('/api/tts?voices=1').then(function (d) { S.elVoices = d.voices || []; }).catch(function (e) { S.elVoices = []; S.elError = e.message; }).then(fillElVoices);
+    api('/api/tts?voices=1').then(function (d) { S.elVoices = d.voices || []; }).catch(function (e) { S.elVoices = []; S.elError = e.message; }).then(function () { fillElVoices(); if ($('dlgLab').open) labRender(); });
   }
   $('defBtn').onclick = function () { loadElVoices(); fxForm($('defBox'), S.defaults, '(내장)'); $('dlgDef').showModal(); lpRun('def'); };
   $('defCancel').onclick = function () { $('dlgDef').close(); };
@@ -861,7 +886,7 @@ summary { cursor:pointer; padding:4px 0; }
   function voiceSettings() { return F.resolve(readFx($('fxBox')), defaultsFor($('eFolder').value)).voice; }
   // 문장·목소리·설정 서명: 음성을 만든 뒤 이것들이 바뀌었는지 알려 준다
   function sig(text) {
-    var v = voiceSettings(), str = [text, v.elVoice, v.elModel, v.elStability, v.elSimilarity, v.elStyle, v.elSpeed].join('|'), h = 5381;
+    var v = voiceSettings(), str = (v.engine === 'openai' ? ['openai', text, v.oaVoice, v.oaModel, v.oaInstr, v.oaSpeed] : [text, v.elVoice, v.elModel, v.elStability, v.elSimilarity, v.elStyle, v.elSpeed]).join('|'), h = 5381;
     for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
     return (h >>> 0).toString(36);
   }
@@ -869,7 +894,7 @@ summary { cursor:pointer; padding:4px 0; }
   function refreshRow(d) {
     var has = !!d.dataset.a, stale = has && d.dataset.ah !== sig(d.querySelector('.ct').value.trim()), g = d.querySelector('.cg'), pl = d.querySelector('.cpl');
     g.textContent = !has ? '🔊 만들기' : stale ? '⚠ 다시 만들기' : '🔄 다시'; g.classList.toggle('stale', stale);
-    g.title = !has ? '이 줄의 음성을 일레븐랩스로 만듭니다' : stale ? '문장이나 목소리 설정이 바뀌어 지금 음성과 다릅니다' : '새로 한 번 더 만듭니다 (크레딧 사용)';
+    g.title = !has ? '이 줄의 음성을 만듭니다 (일레븐랩스 또는 OpenAI)' : stale ? '문장이나 목소리 설정이 바뀌어 지금 음성과 다릅니다' : '새로 한 번 더 만듭니다 (크레딧 사용)';
     pl.classList.toggle('hide', !has); pl.title = has ? '들어보기 (' + (+d.dataset.d || '?') + '초)' : '';
   }
   function refreshRows() { $('cueBox').querySelectorAll('.cue').forEach(refreshRow); }
@@ -905,9 +930,11 @@ summary { cursor:pointer; padding:4px 0; }
   function genRow(d, force) {
     var text = d.querySelector('.ct').value.trim(), v = voiceSettings(), btn = d.querySelector('.cg');
     if (!text) return Promise.resolve();
-    if (!v.elVoice) { cueMsg('<span class="err">일레븐랩스 목소리를 먼저 고르세요 (연출 → 일레븐랩스 목소리)</span>'); return Promise.reject(new Error('no voice')); }
+    var oa = v.engine === 'openai';
+    if (v.engine === 'browser') { cueMsg('<span class="err">목소리 엔진이 “브라우저 음성”이라 음성 파일을 만들 수 없습니다. 연출 → 목소리 설정에서 일레븐랩스 또는 OpenAI를 고르세요</span>'); return Promise.reject(new Error('browser engine')); }
+    if (!oa && !v.elVoice) { cueMsg('<span class="err">일레븐랩스 목소리를 먼저 고르세요 (연출 → 목소리 설정)</span>'); return Promise.reject(new Error('no voice')); }
     btn.disabled = true; btn.textContent = '만드는 중…'; cueMsg('');
-    return api('/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: text, voiceId: v.elVoice, model: v.elModel, stability: v.elStability, similarity: v.elSimilarity, style: v.elStyle, speed: v.elSpeed, force: !!force }) })
+    return api('/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(oa ? { provider: 'openai', text: text, voice: v.oaVoice, model: v.oaModel, instructions: v.oaInstr, speed: v.oaSpeed, force: !!force } : { text: text, voiceId: v.elVoice, model: v.elModel, stability: v.elStability, similarity: v.elSimilarity, style: v.elStyle, speed: v.elSpeed, force: !!force }) })
       .then(function (r) { return measure(r.key).then(function (dur) { d.dataset.a = r.key; d.dataset.d = dur; d.dataset.ah = sig(text); return r; }); })
       .catch(function (e) { cueMsg('<span class="err">' + esc(e.message) + '</span>'); throw e; })
       .then(function (r) { btn.disabled = false; refreshRow(d); lpSchedule('fx'); return r; }, function (e) { btn.disabled = false; refreshRow(d); throw e; });
@@ -921,7 +948,7 @@ summary { cursor:pointer; padding:4px 0; }
     var rows = Array.prototype.filter.call($('cueBox').querySelectorAll('.cue'), function (d) { return d.querySelector('.ct').value.trim() && (!d.dataset.a || d.dataset.ah !== sig(d.querySelector('.ct').value.trim())); });
     if (!rows.length) { cueMsg('만들 음성이 없습니다 (모든 줄이 이미 최신입니다)'); return; }
     var chars = rows.reduce(function (n, d) { return n + d.querySelector('.ct').value.trim().length; }, 0);
-    if (!confirm(rows.length + '줄(약 ' + chars + '자)의 음성을 일레븐랩스로 만듭니다.\n계정의 크레딧이 사용됩니다 (이미 같은 설정으로 만든 문장은 재사용되어 차감되지 않습니다). 진행할까요?')) return;
+    if (!confirm(rows.length + '줄(약 ' + chars + '자)의 음성을 ' + (voiceSettings().engine === 'openai' ? 'OpenAI' : '일레븐랩스') + '로 만듭니다.\n계정의 크레딧이 사용됩니다 (이미 같은 설정으로 만든 문장은 재사용되어 차감되지 않습니다). 진행할까요?')) return;
     var i = 0, btn = $('cueGenAll'); btn.disabled = true;
     (function next() {
       if (i >= rows.length) { btn.disabled = false; cueMsg('<span class="ok">' + rows.length + '줄 음성 만들기 완료. “음성 길이에 맞춰 시간 정리”로 자막 시각을 맞출 수 있습니다.</span>'); return; }
@@ -1004,6 +1031,7 @@ summary { cursor:pointer; padding:4px 0; }
       '<label class="muted" style="display:flex;gap:6px;align-items:center;margin-top:8px;color:var(--gold)"><input type="checkbox" id="' + p + 'Edit"> ✋ 직접 편집 (끌어서 이동 · 손잡이로 크기 · 더블클릭으로 문장)</label>' +
       '<div id="' + p + 'EditBar" class="hide" style="margin:6px 0 2px"><div class="row" style="align-items:center"><label class="muted" style="display:flex;gap:6px;align-items:center">편집할 줄<select id="' + p + 'Cue" style="width:auto"></select></label><button type="button" id="' + p + 'Reset" title="위치·폭·글자 크기 값을 비워 기본값으로 되돌립니다">위치·크기 초기화</button></div>' +
       '<p class="muted" style="margin:6px 0 0;font-size:.78rem"><b>자막을 끌면</b> 위치(가운데에 자석처럼 붙음), <b>오른쪽 가장자리 손잡이</b>는 줄바꿈 폭, <b>모서리 손잡이</b>는 글자 크기, <b>더블클릭</b>하면 문장을 고칠 수 있고 Enter로 줄바꿈합니다. 입력칸 값도 함께 바뀝니다.</p></div>' +
+      '<button type="button" id="' + p + 'Lab" style="width:100%;margin-top:10px" title="같은 문장을 여러 엔진·목소리로 번갈아 들어 보기">🎧 목소리 비교 테스트</button>' +
       '<div id="' + p + 'Status" class="muted" style="margin-top:8px;font-size:.8rem;min-height:1.4em"></div><div class="pbar"><i id="' + p + 'Bar"></i></div>' +
       '<label class="muted" style="display:grid;gap:3px;margin-top:8px" title="자막·음성이 영상보다 길 때 영상이 어떻게 이어지는지 확인합니다. 비우면 실제 길이로 재생합니다.">반복 확인용 길이(초) — 자막·음성이 이만큼 길다고 가정<input type="number" id="' + p + 'Sim" min="0" max="300" step="1" placeholder="비움 = 실제 길이" style="width:100%"></label>' +
       '<label class="muted" style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="' + p + 'Freeze"> 자막 고정 보기 (애니메이션 없이 모양만)</label>' +
@@ -1039,6 +1067,97 @@ summary { cursor:pointer; padding:4px 0; }
     var n = Math.max(1, F.cuesOf(clip).length), sel = $(p + 'Cue');
     if (sel.options.length !== n) { var cur = sel.value; sel.innerHTML = Array.apply(null, Array(n)).map(function (_, i) { return '<option value="' + i + '">' + (i + 1) + '번째 줄</option>'; }).join(''); sel.value = Math.min(+cur || 0, n - 1); }
   }
+  // ── 목소리 비교 테스트: 같은 문장을 여러 엔진·목소리로 번갈아 듣고 마음에 드는 것을 적용한다
+  var LAB = { p: 'fx', rows: [], cancel: false };
+  function fieldOptions(g, k) { var out = []; F.FIELDS.forEach(function (grp) { if (grp.g === g) grp.items.forEach(function (it) { if (it[0] === k) out = it[3]; }); }); return out; }
+  function labSettings() { return LAB.p === 'fx' ? voiceSettings() : voiceFrom($('defBox')); }
+  function labVoices(engine) {
+    if (engine === 'browser') return F.voices().slice().sort(function (a, b) { return (/^ko/i.test(b.lang) ? 1 : 0) - (/^ko/i.test(a.lang) ? 1 : 0); }).map(function (v) { return [v.name, v.name + ' · ' + v.lang]; });
+    if (engine === 'eleven') return (S.elVoices || []).map(function (v) { return [v.id, v.name + (v.ko ? ' · 한국어 지원' : '')]; });
+    return fieldOptions('voice', 'oaVoice');
+  }
+  function labDefaultRows() {
+    var ko = F.voices().filter(function (v) { return /^ko/i.test(v.lang); }), rows = [];
+    if (ko.length) rows.push({ engine: 'browser', voice: ko[0].name });
+    var ev = (S.elVoices || []).filter(function (v) { return v.ko; })[0] || (S.elVoices || [])[0]; if (ev) rows.push({ engine: 'eleven', voice: ev.id });
+    rows.push({ engine: 'openai', voice: 'coral' }); rows.push({ engine: 'openai', voice: 'nova' });
+    return rows;
+  }
+  function labRender() {
+    $('labRows').innerHTML = LAB.rows.map(function (r, i) {
+      var opts = labVoices(r.engine), known = opts.some(function (o) { return o[0] === r.voice; });
+      return '<div class="labrow" data-i="' + i + '"><select class="le"><option value="browser"' + (r.engine === 'browser' ? ' selected' : '') + '>브라우저 음성</option><option value="eleven"' + (r.engine === 'eleven' ? ' selected' : '') + '>일레븐랩스</option><option value="openai"' + (r.engine === 'openai' ? ' selected' : '') + '>OpenAI</option></select>' +
+        '<select class="lv">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === r.voice ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + (r.voice && !known ? '<option value="' + esc(r.voice) + '" selected>' + esc(r.voice) + ' (직접 입력)</option>' : '') + (r.engine === 'eleven' ? '<option value="__custom">＋ 목소리 ID 직접 입력…</option>' : '') + '</select>' +
+        '<button type="button" class="lp pri">▶ 듣기</button><button type="button" class="la" title="이 목소리를 지금 편집 중인 설정에 적용">적용</button><button type="button" class="danger lx">✕</button></div>';
+    }).join('');
+    $('labRows').querySelectorAll('.labrow').forEach(function (el) {
+      var i = +el.dataset.i, r = LAB.rows[i];
+      el.querySelector('.le').onchange = function () { r.engine = this.value; var o = labVoices(r.engine); r.voice = o[0] ? o[0][0] : ''; labRender(); };
+      el.querySelector('.lv').onchange = function () {
+        if (this.value !== '__custom') { r.voice = this.value; return; }
+        var id = (prompt('ElevenLabs 목소리 ID를 붙여넣으세요') || '').trim();
+        if (/^[A-Za-z0-9]{10,40}$/.test(id)) r.voice = id; else if (id) alert('목소리 ID 형식이 올바르지 않습니다.'); labRender();
+      };
+      el.querySelector('.lp').onclick = function () { LAB.cancel = false; labPlay(r, this).catch(function (e) { if (e && e.message) $('labMsg').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; }); };
+      el.querySelector('.la').onclick = function () { labApply(r); };
+      el.querySelector('.lx').onclick = function () { LAB.rows.splice(i, 1); labRender(); };
+    });
+  }
+  // 한 후보를 재생한다. 끝나면 resolve (정지하면 바로 resolve).
+  function labPlay(r, btn) {
+    var text = $('labText').value.trim(), v = labSettings(); if (!text) return Promise.reject(new Error('테스트 문장을 입력하세요'));
+    if (!r.voice) return Promise.reject(new Error('목소리를 고르세요'));
+    $('labMsg').textContent = ''; var label = btn && btn.textContent; if (btn) { btn.disabled = true; btn.textContent = '…'; }
+    function done() { if (btn) { btn.disabled = false; btn.textContent = label; } }
+    if (r.engine === 'browser') {
+      if (!window.speechSynthesis) { done(); return Promise.reject(new Error('이 브라우저는 음성 합성을 지원하지 않습니다')); }
+      return new Promise(function (ok) {
+        var u = new SpeechSynthesisUtterance(text), vv = F.voices().filter(function (x) { return x.name === r.voice; })[0];
+        u.lang = vv ? vv.lang : 'ko-KR'; if (vv) u.voice = vv; u.rate = v.rate; u.pitch = v.pitch; u.volume = v.vol;
+        u.onend = u.onerror = function () { done(); ok(); }; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+      });
+    }
+    var body = r.engine === 'openai' ? { provider: 'openai', text: text, voice: r.voice, model: v.oaModel, instructions: v.oaInstr, speed: v.oaSpeed }
+      : { text: text, voiceId: r.voice, model: v.elModel, stability: v.elStability, similarity: v.elSimilarity, style: v.elStyle, speed: v.elSpeed };
+    return api('/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (res) {
+      done(); if (LAB.cancel) return;
+      return new Promise(function (ok) {
+        if (curAudio) curAudio.pause(); var a = curAudio = new Audio('/api/clipfile?k=' + encodeURIComponent(res.key));
+        a.onended = a.onerror = function () { ok(); }; a.play().catch(function () { ok(); });
+      });
+    }, function (e) { done(); throw e; });
+  }
+  // 고른 목소리를 지금 열려 있는 설정(클립 또는 기본 연출)의 목소리 설정에 넣는다
+  function labApply(r) {
+    var box = LAB.p === 'fx' ? $('fxBox') : $('defBox');
+    function setF(k, val) {
+      var el = box.querySelector('[data-g=voice][data-k=' + k + ']'); if (!el) return;
+      if (el.tagName === 'SELECT' && val && !Array.prototype.some.call(el.options, function (o) { return o.value === val; })) { var op = document.createElement('option'); op.value = val; op.textContent = val + ' (직접 입력)'; el.insertBefore(op, el.options[1] || null); }
+      el.value = val; if (el.dataset && 'cur' in el.dataset) el.dataset.cur = val;
+      el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    setF('on', 'on'); setF('engine', r.engine);
+    setF(r.engine === 'browser' ? 'name' : r.engine === 'eleven' ? 'elVoice' : 'oaVoice', r.voice);
+    $('labMsg').innerHTML = '<span class="ok">적용했습니다. 목소리 설정에서 확인하세요 (저장 전)</span>';
+  }
+  function openLab(p) {
+    LAB.p = p; LAB.cancel = false; loadElVoices(); if (!$('labText').value) $('labText').value = KO_SAMPLE;
+    if (!LAB.rows.length) LAB.rows = labDefaultRows();
+    $('labMsg').textContent = ''; labRender(); $('dlgLab').showModal();
+  }
+  function labStop() { LAB.cancel = true; try { window.speechSynthesis.cancel(); } catch (e) {} if (curAudio) curAudio.pause(); }
+  $('labAdd').onclick = function () { var o = labVoices('openai'); LAB.rows.push({ engine: 'openai', voice: o[0] ? o[0][0] : '' }); labRender(); };
+  $('labStop').onclick = labStop; $('labClose').onclick = function () { labStop(); $('dlgLab').close(); }; $('dlgLab').addEventListener('close', labStop);
+  $('labAll').onclick = function () {
+    LAB.cancel = false; var btns = $('labRows').querySelectorAll('.lp'), i = 0;
+    (function next() {
+      if (LAB.cancel || i >= LAB.rows.length) { $('labMsg').textContent = LAB.cancel ? '' : '모두 들었습니다'; return; }
+      $('labMsg').textContent = (i + 1) + ' / ' + LAB.rows.length + '번째 듣는 중…'; var k = i++;
+      labPlay(LAB.rows[k], btns[k]).then(next, function (e) { $('labMsg').innerHTML = '<span class="err">' + esc((e && e.message) || '오류') + '</span>'; next(); });
+    })();
+  };
+  ['fx', 'def'].forEach(function (p) { $(p + 'Lab').onclick = function () { openLab(p); }; });
+
   // 미리보기 아래에 현재 재생 상태(구간·방향·진행)를 보여 준다
   function lpStatus(p, st) {
     var txt;
