@@ -63,8 +63,11 @@
   var SUB_WEIGHT = [['400', '보통'], ['500', '중간'], ['700', '굵게'], ['900', '아주 굵게']];
   var SUB_ALIGN = [['center', '가운데'], ['left', '왼쪽'], ['right', '오른쪽']];
   var SUB_COLOR = [['ivory', '아이보리'], ['white', '흰색'], ['gold', '금색'], ['yellow', '노랑']];
-  var SUB_BG = [['none', '없음 (글자 테두리)'], ['shade', '반투명 띠'], ['box', '진한 박스']];
-  var SUB_ANIM = [['none', '없음'], ['fade', '페이드'], ['rise', '아래에서 떠오름'], ['pop', '팝'], ['type', '타자기']];
+  var SUB_BG = [['none', '없음'], ['shade', '반투명 띠'], ['box', '진한 박스']];
+  var SUB_ITALIC = [['normal', '기본'], ['italic', '기울임']];
+  var SUB_ANIM = [['none', '없음'], ['fade', '페이드'], ['rise', '아래에서 떠오름'], ['drop', '위에서 내려옴'], ['pop', '팝 (커지며 등장)'], ['zoom', '줌 (크게→원래)'], ['blur', '블러 풀림'], ['slide-l', '왼쪽에서 슬라이드'], ['slide-r', '오른쪽에서 슬라이드'], ['bounce', '튕기며 등장'], ['flip', '뒤집히며 등장'], ['type', '타자기 (글자씩)'], ['word', '단어 순차 등장'], ['char', '글자 순차 등장']];
+  var SUB_ANIM_OUT = [['none', '없음 (바로 사라짐)'], ['fade', '페이드'], ['fall', '아래로 내려가며'], ['lift', '위로 올라가며'], ['shrink', '작아지며'], ['blur', '블러'], ['slide-l', '왼쪽으로 슬라이드'], ['slide-r', '오른쪽으로 슬라이드']];
+  var SUB_EMPH = [['none', '없음'], ['pulse', '두근두근 (커졌다 작아짐)'], ['float', '둥실둥실'], ['shake', '떨림'], ['blink', '깜빡임'], ['wobble', '흔들흔들'], ['glow', '반짝 빛남']];
   var ON_OFF = [['off', '끄기'], ['on', '켜기']];
   var VOICE_MODE = [['cue', '자막 줄마다 (자막과 동기)'], ['whole', '전체를 한 번에']];
   var FIT = [['contain', '전체 보이게 (여백)'], ['cover', '화면 가득 (잘림)']];
@@ -73,15 +76,18 @@
   // 서버(functions/api/clips.js)의 검증표와 같은 범위를 쓴다. 한쪽을 바꾸면 다른 쪽도 바꿀 것.
   var FIELDS = [
     { g: 'trans', title: '장면 전환', items: [['in', '들어올 때', 'sel', TR_IN], ['out', '나갈 때', 'sel', TR_OUT], ['dur', '전환 시간(초)', 'num', { min: 0.1, max: 3, step: 0.1 }]] },
-    { g: 'sub', title: '자막 모양', items: [['font', '글씨체', 'sel', SUB_FONT], ['weight', '굵기', 'sel', SUB_WEIGHT], ['size', '크기(간단)', 'sel', SUB_SIZE], ['fs', '크기(세부, 화면폭의 %)', 'num', { min: 2, max: 14, step: 0.1 }], ['color', '글자색', 'sel', SUB_COLOR], ['colorHex', '글자색 직접(예: #FFD27A)', 'text'], ['bg', '배경', 'sel', SUB_BG], ['anim', '나타나는 효과', 'sel', SUB_ANIM], ['align', '정렬', 'sel', SUB_ALIGN], ['lh', '줄 간격(배)', 'num', { min: 1, max: 2.5, step: 0.05 }], ['ls', '자간(글자 크기의 %)', 'num', { min: -5, max: 30, step: 1 }],
-      ['pos', '위치(간단)', 'sel', SUB_POS], ['x', '가로 위치(왼쪽 끝 0 ~ 오른쪽 끝 100%)', 'num', { min: 0, max: 100, step: 1 }], ['y', '세로 위치(위 0 ~ 아래 100%), 지정하면 간단 위치 무시', 'num', { min: 0, max: 100, step: 1 }], ['w', '자막 폭(화면폭의 %)', 'num', { min: 20, max: 100, step: 1 }]] },
+    { g: 'sub', title: '자막 글자', items: [['font', '글씨체', 'sel', SUB_FONT], ['weight', '굵기', 'sel', SUB_WEIGHT], ['italic', '기울임', 'sel', SUB_ITALIC], ['size', '크기(간단)', 'sel', SUB_SIZE], ['fs', '크기(세부, 화면폭의 %)', 'num', { min: 2, max: 14, step: 0.1 }], ['color', '글자색(간단)', 'sel', SUB_COLOR], ['colorHex', '글자색 직접', 'color'], ['align', '정렬', 'sel', SUB_ALIGN], ['lh', '줄 간격(배)', 'num', { min: 1, max: 2.5, step: 0.05 }], ['ls', '자간(글자 크기의 %)', 'num', { min: -5, max: 30, step: 1 }]] },
+    { g: 'sub', title: '자막 위치·크기', items: [['pos', '위치(간단)', 'sel', SUB_POS], ['x', '가로 위치 (왼쪽 끝 0 ~ 오른쪽 끝 100%)', 'num', { min: 0, max: 100, step: 1 }], ['y', '세로 위치 (위 0 ~ 아래 100%), 지정하면 간단 위치 무시', 'num', { min: 0, max: 100, step: 1 }], ['w', '자막 폭(화면폭의 %)', 'num', { min: 20, max: 100, step: 1 }], ['rot', '기울기(도)', 'num', { min: -30, max: 30, step: 1 }]] },
+    { g: 'sub', title: '테두리·그림자·글로우', items: [['strokeW', '테두리 두께 (0=없음, 글자 크기의 %)', 'num', { min: 0, max: 15, step: 0.5 }], ['strokeColor', '테두리 색', 'color'], ['shOn', '그림자', 'sel', ON_OFF], ['shX', '그림자 가로 이동(%)', 'num', { min: -30, max: 30, step: 1 }], ['shY', '그림자 세로 이동(%)', 'num', { min: -30, max: 30, step: 1 }], ['shBlur', '그림자 번짐(%)', 'num', { min: 0, max: 60, step: 1 }], ['shColor', '그림자 색', 'color'], ['glowBlur', '글로우 세기 (0=없음)', 'num', { min: 0, max: 80, step: 1 }], ['glowColor', '글로우 색 (비우면 글자색)', 'color']] },
+    { g: 'sub', title: '자막 배경 박스', items: [['bg', '배경', 'sel', SUB_BG], ['bgColor', '배경 색', 'color'], ['bgOpacity', '배경 투명도 (0 투명~100 불투명, 비우면 프리셋)', 'num', { min: 0, max: 100, step: 1 }], ['bgRadius', '모서리 둥글기(%)', 'num', { min: 0, max: 100, step: 1 }], ['padX', '좌우 여백(글자 크기의 %)', 'num', { min: 0, max: 200, step: 5 }], ['padY', '상하 여백(글자 크기의 %)', 'num', { min: 0, max: 100, step: 5 }]] },
+    { g: 'sub', title: '자막 등장·퇴장·강조 효과', items: [['anim', '나타나는 효과', 'sel', SUB_ANIM], ['animDur', '나타나는 시간(초)', 'num', { min: 0.1, max: 3, step: 0.1 }], ['wordDelay', '단어/글자 순차 간격(초)', 'num', { min: 0.02, max: 1, step: 0.01 }], ['typeSpeed', '타자기 속도(초당 글자 수)', 'num', { min: 3, max: 60, step: 1 }], ['animOut', '사라지는 효과', 'sel', SUB_ANIM_OUT], ['animOutDur', '사라지는 시간(초)', 'num', { min: 0.1, max: 3, step: 0.1 }], ['emph', '떠 있는 동안 효과', 'sel', SUB_EMPH], ['emphSpeed', '효과 주기(초, 작을수록 빠름)', 'num', { min: 0.3, max: 6, step: 0.1 }]] },
     { g: 'voice', title: '읽는 목소리 (브라우저 음성 합성)', items: [['on', '목소리 읽기', 'sel', ON_OFF], ['name', '목소리', 'voice'], ['mode', '읽는 방식', 'sel', VOICE_MODE], ['rate', '속도', 'num', { min: 0.5, max: 2, step: 0.1 }], ['pitch', '음높이', 'num', { min: 0.5, max: 2, step: 0.1 }], ['vol', '볼륨(0~1)', 'num', { min: 0, max: 1, step: 0.1 }], ['delay', '읽기 시작 지연(초)', 'num', { min: 0, max: 10, step: 0.1 }]] },
     { g: 'video', title: '영상 재생', items: [['speed', '재생 속도', 'num', { min: 0.25, max: 2, step: 0.05 }], ['vol', '영상 원음 볼륨(0~1)', 'num', { min: 0, max: 1, step: 0.1 }], ['fit', '화면 맞춤', 'sel', FIT], ['trimStart', '앞부분 자르기(초)', 'num', { min: 0, max: 600, step: 0.1 }], ['trimEnd', '끝 지점(초, 0=끝까지)', 'num', { min: 0, max: 600, step: 0.1 }], ['hold', '마지막 화면 유지(초)', 'num', { min: 0, max: 10, step: 0.1 }]] },
   ];
 
   var BUILTIN = {
     trans: { 'in': 'fade', out: 'fade', dur: 0.5 },
-    sub: { font: 'gothic', weight: '700', size: 'M', fs: 0, color: 'ivory', colorHex: '', bg: 'shade', anim: 'fade', align: 'center', lh: 1.45, ls: 0, pos: 'bottom', x: 50, y: -1, w: 90 },
+    sub: { font: 'gothic', weight: '700', italic: 'normal', size: 'M', fs: 0, color: 'ivory', colorHex: '', align: 'center', lh: 1.45, ls: 0, pos: 'bottom', x: 50, y: -1, w: 90, rot: 0, strokeW: 0, strokeColor: '#000000', shOn: 'on', shX: 0, shY: 6, shBlur: 20, shColor: '#000000', glowBlur: 0, glowColor: '', bg: 'shade', bgColor: '', bgOpacity: -1, bgRadius: 30, padX: 60, padY: 20, anim: 'fade', animDur: 0.4, wordDelay: 0.08, typeSpeed: 14, animOut: 'fade', animOutDur: 0.3, emph: 'none', emphSpeed: 1.5 },
     voice: { on: 'off', name: '', mode: 'cue', rate: 1, pitch: 1, vol: 1, delay: 0.2 },
     video: { speed: 1, vol: 1, fit: 'contain', trimStart: 0, trimEnd: 0, hold: 0.5 },
   };
@@ -136,9 +142,8 @@
     '.fx-stage{position:absolute;inset:0;animation-duration:var(--fxd,.5s);animation-fill-mode:both;animation-timing-function:ease}' +
     '.fx-stage video{width:100%;height:100%;background:#000;display:block}' +
     '.fx-pos{position:absolute;pointer-events:none}' +
-    '.fx-pos[data-pos=top]{top:8%;transform:translateX(-50%)}.fx-pos[data-pos=middle]{top:50%;transform:translate(-50%,-50%)}.fx-pos[data-pos=bottom]{bottom:9%;transform:translateX(-50%)}' +
-    '.fx-sub{display:inline-block;max-width:100%;font-weight:700;white-space:pre-wrap;word-break:keep-all;padding:.2em .6em;border-radius:.3em;animation-duration:.4s;animation-fill-mode:both}' +
-    '.fx-bg-none{text-shadow:0 0 .15em #000,0 0 .15em #000,0 .06em .25em #000}.fx-bg-shade{background:rgba(0,0,0,.45);text-shadow:0 .05em .15em #000}.fx-bg-box{background:rgba(0,0,0,.82)}' +
+    '.fx-pos[data-pos=top]{top:8%}.fx-pos[data-pos=bottom]{bottom:9%}.fx-pos[data-pos=middle]{top:50%}' +
+    '.fx-sub{display:inline-block;max-width:100%;white-space:pre-wrap;word-break:keep-all}.fx-inner{display:inline-block;max-width:100%}.fx-w{display:inline-block;white-space:nowrap}' +
     '@keyframes fx-i-fade{from{opacity:0}}@keyframes fx-i-dissolve{from{opacity:0;filter:blur(14px)}}' +
     '@keyframes fx-i-slide-left{from{transform:translateX(100%)}}@keyframes fx-i-slide-right{from{transform:translateX(-100%)}}@keyframes fx-i-slide-up{from{transform:translateY(100%)}}' +
     '@keyframes fx-i-zoom-in{from{opacity:0;transform:scale(.7)}}@keyframes fx-i-zoom-out{from{opacity:0;transform:scale(1.4)}}' +
@@ -147,7 +152,13 @@
     '@keyframes fx-o-slide-left{to{transform:translateX(-100%)}}@keyframes fx-o-slide-up{to{transform:translateY(-100%)}}' +
     '@keyframes fx-o-zoom-in{to{opacity:0;transform:scale(1.4)}}@keyframes fx-o-wipe{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(0 0 0 100%)}}' +
     '@keyframes fx-o-flash{40%{opacity:1;filter:brightness(4)}to{opacity:0;filter:brightness(4)}}' +
-    '@keyframes fx-sa-fade{from{opacity:0}}@keyframes fx-sa-rise{from{opacity:0;transform:translateY(.7em)}}@keyframes fx-sa-pop{from{opacity:0;transform:scale(.8)}}';
+    '@keyframes fx-si-fade{from{opacity:0}}@keyframes fx-si-rise{from{opacity:0;transform:translateY(.7em)}}@keyframes fx-si-drop{from{opacity:0;transform:translateY(-.7em)}}@keyframes fx-si-pop{from{opacity:0;transform:scale(.8)}}' +
+    '@keyframes fx-si-zoom{from{opacity:0;transform:scale(1.7)}}@keyframes fx-si-blur{from{opacity:0;filter:blur(.4em)}}@keyframes fx-si-slide-l{from{opacity:0;transform:translateX(-1.5em)}}@keyframes fx-si-slide-r{from{opacity:0;transform:translateX(1.5em)}}' +
+    '@keyframes fx-si-bounce{from{opacity:0;transform:translateY(1.2em) scale(.9)}}@keyframes fx-si-flip{from{opacity:0;transform:perspective(20em) rotateX(90deg)}}' +
+    '@keyframes fx-so-fade{to{opacity:0}}@keyframes fx-so-fall{to{opacity:0;transform:translateY(.7em)}}@keyframes fx-so-lift{to{opacity:0;transform:translateY(-.7em)}}@keyframes fx-so-shrink{to{opacity:0;transform:scale(.8)}}' +
+    '@keyframes fx-so-blur{to{opacity:0;filter:blur(.4em)}}@keyframes fx-so-slide-l{to{opacity:0;transform:translateX(-1.5em)}}@keyframes fx-so-slide-r{to{opacity:0;transform:translateX(1.5em)}}' +
+    '@keyframes fx-se-pulse{50%{transform:scale(1.07)}}@keyframes fx-se-float{50%{transform:translateY(-.18em)}}@keyframes fx-se-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-.06em)}40%{transform:translateX(.06em)}60%{transform:translateX(-.04em)}80%{transform:translateX(.04em)}}' +
+    '@keyframes fx-se-blink{50%{opacity:.35}}@keyframes fx-se-wobble{25%{transform:rotate(-2.5deg)}75%{transform:rotate(2.5deg)}}@keyframes fx-se-glow{50%{filter:brightness(1.6) drop-shadow(0 0 .25em currentColor)}}';
   function injectCss() {
     if (typeof document === 'undefined' || document.getElementById('fx-css')) return;
     var s = document.createElement('style'); s.id = 'fx-css'; s.textContent = css + CUSTOM_FONTS.map(function (c) { return '@font-face{font-family:"' + c[2] + '";src:url("' + NOONNU + encodeURI(c[3]) + '");font-weight:100 900;font-display:swap}'; }).join(''); document.head.appendChild(s);
@@ -161,7 +172,7 @@
     return v || all.filter(function (x) { return /^ko/i.test(x.lang); })[0] || null;
   }
 
-  // box 안에서 클립 하나를 재생한다. o = { clip, url, defaults, onend, onerror }. { stop } 반환.
+  // box 안에서 클립 하나를 재생한다. o = { clip, url, defaults, onend, onerror, silent(소리 끔), freeze(첫 자막을 정지 화면으로) }. { stop } 반환.
   function play(box, o) {
     injectCss();
     var clip = o.clip, fx = resolve(clip.fx, o.defaults), cues = cuesOf(clip);
@@ -169,14 +180,17 @@
     var wrap = document.createElement('div'); wrap.className = 'fx-wrap';
     var stage = document.createElement('div'); stage.className = 'fx-stage';
     var pos = document.createElement('div'); pos.className = 'fx-pos'; pos.style.left = fx.sub.x + '%'; pos.style.width = fx.sub.w + '%'; pos.style.textAlign = fx.sub.align;
-    if (fx.sub.y >= 0) { pos.dataset.pos = 'custom'; pos.style.top = fx.sub.y + '%'; pos.style.transform = 'translate(-50%,-50%)'; } else pos.dataset.pos = fx.sub.pos;
+    var vert = fx.sub.y >= 0; // 세로 위치를 직접 지정하면 간단 위치(위/가운데/아래)는 무시
+    pos.dataset.pos = vert ? 'custom' : fx.sub.pos; if (vert) pos.style.top = fx.sub.y + '%';
+    pos.style.transform = 'translate(-50%,' + ((vert || fx.sub.pos === 'middle') ? '-50%' : '0') + ')' + (fx.sub.rot ? ' rotate(' + fx.sub.rot + 'deg)' : '');
     var v = null;
     if (o.url) { v = document.createElement('video'); v.playsInline = true; v.style.objectFit = fx.video.fit; stage.appendChild(v); }
+    if (!o.url) stage.style.background = 'linear-gradient(160deg,#1c2340,#0a0c14 70%)';
     stage.appendChild(pos); wrap.appendChild(stage); box.innerHTML = ''; box.appendChild(wrap);
     wrap.style.setProperty('--fxd', fx.trans.dur + 's'); stage.style.setProperty('--fxd', fx.trans.dur + 's');
     if (fx.trans['in'] !== 'cut') stage.style.animationName = 'fx-i-' + fx.trans['in'];
 
-    var speaking = fx.voice.on === 'on' && root.speechSynthesis;
+    var speaking = fx.voice.on === 'on' && root.speechSynthesis && !o.silent && !o.freeze;
     function speak(text) {
       if (!speaking || !text) return;
       try {
@@ -188,24 +202,58 @@
     }
     function later(fn, sec) { timers.push(setTimeout(function () { if (!done) fn(); }, Math.max(0, sec) * 1000)); }
 
+    function hex(c, d) { return /^#[0-9a-f]{3,8}$/i.test(c || '') ? c : d; }
+    function rgba(c, al) { c = c.replace('#', ''); if (c.length === 3) c = c.split('').map(function (x) { return x + x; }).join(''); var n = parseInt(c.slice(0, 6), 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + al + ')'; }
+    var outed = false, subEl = null;
+    // 자막 한 줄의 요소를 만든다 (글자·테두리·그림자·배경·등장/강조 효과 반영)
+    function buildSub(text) {
+      var S = fx.sub, el = document.createElement('div'), inner = document.createElement('span'), st = el.style, fr = !!o.freeze;
+      el.className = 'fx-sub'; inner.className = 'fx-inner';
+      var col = hex(S.colorHex, COLORS[S.color] || COLORS.ivory);
+      st.color = col; st.fontSize = (S.fs > 0 ? S.fs : (SIZES[S.size] || 5)) * (FONT_SCALE[S.font] || 1) + 'cqw';
+      st.fontFamily = FONTS[S.font] || FONTS.gothic; st.fontWeight = S.weight; st.fontStyle = S.italic; st.lineHeight = S.lh; st.letterSpacing = (S.ls / 100) + 'em';
+      st.padding = (S.padY / 100) + 'em ' + (S.padX / 100) + 'em'; st.borderRadius = (S.bgRadius / 100) + 'em';
+      if (S.bg !== 'none') st.background = rgba(hex(S.bgColor, '#000000'), S.bgOpacity >= 0 ? S.bgOpacity / 100 : (S.bg === 'box' ? 0.82 : 0.45));
+      if (S.strokeW > 0) { st.webkitTextStroke = (S.strokeW / 100) + 'em ' + hex(S.strokeColor, '#000000'); st.paintOrder = 'stroke fill'; }
+      var sh = [];
+      if (S.shOn === 'on') sh.push((S.shX / 100) + 'em ' + (S.shY / 100) + 'em ' + (S.shBlur / 100) + 'em ' + hex(S.shColor, '#000000'));
+      if (S.glowBlur > 0) { var gc = hex(S.glowColor, col), g = S.glowBlur / 100; sh.push('0 0 ' + g + 'em ' + gc, '0 0 ' + (g * 2) + 'em ' + gc); }
+      if (sh.length) st.textShadow = sh.join(',');
+      var seq = S.anim === 'word' || S.anim === 'char';
+      if (!fr && S.anim !== 'none' && S.anim !== 'type' && !seq) st.animation = 'fx-si-' + S.anim + ' ' + S.animDur + 's ' + (S.anim === 'bounce' ? 'cubic-bezier(.34,1.56,.64,1)' : 'ease') + ' both';
+      if (!fr && S.emph !== 'none') inner.style.animation = 'fx-se-' + S.emph + ' ' + S.emphSpeed + 's ease-in-out infinite';
+      if (!fr && S.anim === 'type') inner.textContent = '';
+      else if (!fr && seq) {
+        var k = 0;
+        text.split(/(\s+)/).forEach(function (tok) {
+          if (!tok) return;
+          if (/^\s+$/.test(tok)) { inner.appendChild(document.createTextNode(tok)); return; }
+          var wrapW = document.createElement('span'); wrapW.className = 'fx-w';
+          (S.anim === 'char' ? Array.from(tok) : [tok]).forEach(function (part) {
+            var sp = document.createElement('span'); sp.className = 'fx-w'; sp.textContent = part;
+            sp.style.animation = 'fx-si-rise ' + Math.max(S.animDur, 0.25) + 's ease both'; sp.style.animationDelay = (k++ * S.wordDelay) + 's'; wrapW.appendChild(sp);
+          });
+          inner.appendChild(wrapW);
+        });
+      } else inner.textContent = text;
+      el.appendChild(inner); return el;
+    }
     function showCue(t) {
       var i = -1;
       for (var k = 0; k < cues.length; k++) if (cues[k].s <= t && t < cues[k].e) { i = k; break; }
       if (i !== idx) {
-        idx = i; curCue = i >= 0 ? cues[i] : null; typed = -1; pos.innerHTML = '';
+        idx = i; curCue = i >= 0 ? cues[i] : null; typed = -1; outed = false; pos.innerHTML = ''; subEl = null;
         if (!curCue) return;
-        var el = document.createElement('div');
-        el.className = 'fx-sub fx-bg-' + fx.sub.bg; el.style.color = /^#[0-9a-f]{3,8}$/i.test(fx.sub.colorHex) ? fx.sub.colorHex : (COLORS[fx.sub.color] || COLORS.ivory);
-        el.style.fontSize = (fx.sub.fs > 0 ? fx.sub.fs : (SIZES[fx.sub.size] || 5)) * (FONT_SCALE[fx.sub.font] || 1) + 'cqw';
-        el.style.fontFamily = FONTS[fx.sub.font] || FONTS.gothic; el.style.fontWeight = fx.sub.weight; el.style.lineHeight = fx.sub.lh; el.style.letterSpacing = (fx.sub.ls / 100) + 'em';
-        if (fx.sub.anim !== 'none' && fx.sub.anim !== 'type') el.style.animationName = 'fx-sa-' + fx.sub.anim;
-        if (fx.sub.anim !== 'type') el.textContent = curCue.t;
-        pos.appendChild(el);
+        subEl = buildSub(curCue.t); pos.appendChild(subEl);
         if (fx.voice.mode === 'cue') { var txt = curCue.t; later(function () { try { root.speechSynthesis.cancel(); } catch (e) {} speak(txt); }, fx.voice.delay); }
       }
-      if (curCue && fx.sub.anim === 'type') { // 초당 14자씩 드러낸다
-        var n = Math.min(curCue.t.length, Math.floor((t - curCue.s) * 14) + 1);
-        if (n !== typed) { typed = n; pos.firstChild.textContent = curCue.t.slice(0, n); }
+      if (!curCue || o.freeze) return;
+      if (!outed && fx.sub.animOut !== 'none' && curCue.e < 1e8 && t >= curCue.e - fx.sub.animOutDur) {
+        outed = true; subEl.style.animation = 'fx-so-' + fx.sub.animOut + ' ' + fx.sub.animOutDur + 's ease both';
+      }
+      if (fx.sub.anim === 'type') {
+        var n = Math.min(curCue.t.length, Math.floor((t - curCue.s) * fx.sub.typeSpeed) + 1);
+        if (n !== typed) { typed = n; subEl.firstChild.textContent = curCue.t.slice(0, n); }
       }
     }
     function finish() { if (done) return; done = true; clearInterval(raf); if (o.onend) o.onend(); }
@@ -229,8 +277,14 @@
       if (fx.voice.mode === 'whole' && speaking) { var all = cues.map(function (c) { return c.t; }).join(' '); later(function () { speak(all); }, fx.voice.delay); }
       t0 = performance.now(); raf = setInterval(tick, 50);
     }
+    if (o.freeze) {
+      stage.style.animationName = 'none';
+      if (v) { v.src = o.url; v.muted = true; v.preload = 'metadata'; v.onloadedmetadata = function () { try { v.currentTime = fx.video.trimStart || 0.1; } catch (e) {} }; }
+      showCue(cues[0] ? cues[0].s : 0);
+      return { stop: function () { if (v) v.pause(); } };
+    }
     if (v) {
-      v.src = o.url; v.playbackRate = fx.video.speed; v.volume = fx.video.vol;
+      v.src = o.url; v.playbackRate = fx.video.speed; v.volume = fx.video.vol; if (o.silent) v.muted = true;
       v.onerror = function () { if (!done) { done = true; clearInterval(raf); box.innerHTML = '<div class="ph err" style="padding:24px;text-align:center;color:#FF8A78">영상을 불러오지 못했습니다</div>'; if (o.onerror) o.onerror(); } };
       v.onloadedmetadata = function () { if (fx.video.trimStart > 0) try { v.currentTime = fx.video.trimStart; } catch (e) {} };
       var go = v.play(); if (go && go.catch) go.catch(function () { v.muted = true; v.play().catch(function () {}); });

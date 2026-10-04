@@ -38,6 +38,12 @@ th { color:var(--ink3); font-weight:500; font-size:.8rem; }
 .hide { display:none !important; }
 .login { max-width:340px; margin:18vh auto 0; display:grid; gap:12px; }
 
+dialog.wide { width:min(1120px, 96vw); }
+.dlgcols { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:16px; align-items:start; }
+.dlgleft { display:grid; gap:14px; min-width:0; }
+.dlgright { position:sticky; top:0; }
+@media (max-width:900px) { .dlgcols { grid-template-columns:1fr; } .dlgright { position:static; } }
+.pvp { width:100%; max-height:none; }
 dialog { background:var(--bg2); color:var(--ink); border:1px solid var(--gold-d); border-radius:12px; padding:0; width:min(760px, 94vw); max-height:92vh; }
 dialog::backdrop { background:rgba(0,0,0,.6); }
 dialog form { display:grid; gap:14px; padding:20px; max-height:92vh; overflow:auto; }
@@ -191,9 +197,10 @@ summary { cursor:pointer; padding:4px 0; }
 </div>
 
 <!-- 클립 편집 -->
-<dialog id="dlg">
+<dialog id="dlg" class="wide">
   <form method="dialog" id="clipForm">
     <h3 id="dlgTitle">클립 편집</h3>
+    <div class="dlgcols"><div class="dlgleft">
     <div class="row">
       <label style="flex:1 1 220px">제목<input type="text" id="eTitle" maxlength="80" required></label>
       <label>장<select id="eCh"></select></label>
@@ -228,12 +235,8 @@ summary { cursor:pointer; padding:4px 0; }
       <div class="muted" style="margin-bottom:6px">연출 — 비워 둔 칸은 “기본 연출 설정” 값(없으면 내장 기본값)을 따릅니다. 이 클립에서만 다르게 하고 싶은 칸만 고르세요.</div>
       <div id="fxBox" style="display:grid;gap:6px"></div>
     </div>
-    <div class="card" style="background:var(--bg)">
-      <div class="row" style="justify-content:space-between;align-items:center"><b>연출 미리보기</b><div class="row"><button type="button" id="fxPlay" class="pri">▶ 미리보기</button><button type="button" id="fxStop">■ 정지</button></div></div>
-      <p class="muted" style="margin:6px 0 10px">지금 입력한 값(저장 전)으로 영상·자막·전환·목소리를 재생합니다. 목소리는 보는 사람의 기기·브라우저에 설치된 음성으로 나오므로 기기마다 음색이 다를 수 있습니다.</p>
-      <div class="player" id="fxPrev"><div class="ph">미리보기를 누르세요</div></div>
-    </div>
     <label style="display:grid;gap:4px">메모 (내부용)<input type="text" id="eNote" maxlength="300"></label>
+        </div><div class="dlgright" id="fxPrevHost"></div></div>
     <p class="err" id="dlgErr"></p>
     <div class="row" style="justify-content:space-between">
       <button type="button" class="danger" id="delBtn">삭제</button>
@@ -255,11 +258,13 @@ summary { cursor:pointer; padding:4px 0; }
 </dialog>
 
 <!-- 기본 연출 -->
-<dialog id="dlgDef">
+<dialog id="dlgDef" class="wide">
   <form method="dialog" id="defForm">
     <h3>기본 연출 설정</h3>
+    <div class="dlgcols"><div class="dlgleft">
     <p class="muted" style="margin:0">모든 클립에 공통으로 적용되는 연출입니다. 클립 편집에서 따로 지정한 칸만 이 값 대신 쓰입니다. 비워 두면 내장 기본값(페이드 전환 · 아래 반투명 자막 · 목소리 끔)입니다.</p>
     <div id="defBox" style="display:grid;gap:6px"></div>
+    </div><div class="dlgright" id="defPrevHost"></div></div>
     <div class="row" style="justify-content:flex-end"><button type="button" id="defCancel">취소</button><button type="submit" class="pri">확인</button></div>
   </form>
 </dialog>
@@ -471,16 +476,19 @@ summary { cursor:pointer; padding:4px 0; }
   // ── 연출 폼 (클립 편집·기본 연출 공용). 비워 둔 칸 = 상위 기본값을 따름
   function fxForm(box, vals, blank) {
     box.innerHTML = F.FIELDS.map(function (grp) {
-      var v = (vals && vals[grp.g]) || {}, n = Object.keys(v).length;
+      var v = (vals && vals[grp.g]) || {}, n = grp.items.filter(function (it) { return v[it[0]] !== undefined && v[it[0]] !== ''; }).length;
       return '<details' + (n ? ' open' : '') + '><summary>' + esc(grp.title) + (n ? ' <span class="chip">' + n + '개 지정</span>' : '') + '</summary><div class="fxgrid">' + grp.items.map(function (it) {
         var k = it[0], cur = v[k], at = ' data-g="' + grp.g + '" data-k="' + k + '"', h = '<label>' + esc(it[1]);
         if (it[2] === 'sel') h += '<select' + at + '><option value="">' + blank + '</option>' + it[3].map(function (o) { return '<option value="' + o[0] + '"' + (cur === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>';
         else if (it[2] === 'voice') h += '<select' + at + ' data-voice="1" data-cur="' + esc(cur || '') + '"></select>';
-        else if (it[2] === 'text') h += '<input type="text"' + at + ' maxlength="9" placeholder="' + blank + '" value="' + esc(cur || '') + '">';
+        else if (it[2] === 'color') h += '<span style="display:flex;gap:6px"><input type="color" data-pick="1" value="' + (/^#[0-9a-f]{6}$/i.test(cur || '') ? cur : '#ffffff') + '" style="width:44px;padding:2px;flex:none"><input type="text"' + at + ' maxlength="9" placeholder="' + blank + ' #RRGGBB" value="' + esc(cur || '') + '"></span>';
         else h += '<input type="number"' + at + ' min="' + it[3].min + '" max="' + it[3].max + '" step="' + it[3].step + '" placeholder="' + blank + (F.BUILTIN[grp.g][k] < 0 ? '' : ' ' + F.BUILTIN[grp.g][k]) + '" value="' + (cur == null ? '' : cur) + '">';
         return h + '</label>';
       }).join('') + '</div></details>';
     }).join('');
+    box.querySelectorAll('input[data-pick]').forEach(function (pk) {
+      pk.oninput = function () { var t = pk.nextElementSibling; t.value = pk.value; t.dispatchEvent(new Event('input', { bubbles: true })); };
+    });
     fillVoices();
   }
   function readFx(box) {
@@ -502,7 +510,7 @@ summary { cursor:pointer; padding:4px 0; }
     });
   }
   if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = fillVoices;
-  $('defBtn').onclick = function () { fxForm($('defBox'), S.defaults, '(내장)'); $('dlgDef').showModal(); };
+  $('defBtn').onclick = function () { fxForm($('defBox'), S.defaults, '(내장)'); $('dlgDef').showModal(); lpRun('def'); };
   $('defCancel').onclick = function () { $('dlgDef').close(); };
   $('defForm').onsubmit = function (e) { e.preventDefault(); S.defaults = readFx($('defBox')); $('dlgDef').close(); markDirty(); };
 
@@ -528,14 +536,42 @@ summary { cursor:pointer; padding:4px 0; }
     lines.forEach(function (l, i) { var e = i === lines.length - 1 ? total : at + total * w[i] / sum; addCue({ s: Math.round(at * 10) / 10, e: Math.round(e * 10) / 10, t: l }); at = e; });
   };
 
-  // ── 연출 미리보기 (저장 전 입력값으로 재생)
-  function stopPrev() { if (S.prevCtl) { S.prevCtl.stop(); S.prevCtl = null; } }
-  $('fxPlay').onclick = function () {
-    stopPrev(); var c = Object.assign({}, S.editing); readForm(c);
-    S.prevCtl = F.play($('fxPrev'), { clip: c, url: srcUrl(c.src), defaults: S.defaults });
-  };
-  $('fxStop').onclick = function () { stopPrev(); $('fxPrev').innerHTML = '<div class="ph">미리보기를 누르세요</div>'; };
-  $('dlg').addEventListener('close', function () { stopPrev(); $('fxPrev').innerHTML = '<div class="ph">미리보기를 누르세요</div>'; });
+  // ── 실시간 연출 미리보기 (저장 전 입력값 그대로, 입력하는 즉시 다시 재생). p = 'fx'(클립 편집) | 'def'(기본 연출)
+  var SAMPLE_CUES = [{ t: '운명은 정해진 것이 아니라\n읽어내는 것입니다', s: 0.4, e: 3.4 }, { t: '당신의 사주를 만트라가 풀어드립니다', s: 3.8, e: 6.8 }];
+  var LP = { fx: { ctl: null, timer: 0 }, def: { ctl: null, timer: 0 } };
+  function panelHtml(p) {
+    return '<div class="card" style="background:var(--bg)"><div class="row" style="justify-content:space-between;align-items:center"><b>미리보기</b><button type="button" class="pri" id="' + p + 'Play">▶ 다시 재생</button></div>' +
+      '<div class="player pvp" id="' + p + 'Prev" style="margin-top:10px"><div class="ph">미리보기</div></div>' +
+      '<label class="muted" style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="' + p + 'Freeze"> 자막 고정 보기 (애니메이션 없이 모양만)</label>' +
+      '<label class="muted" style="display:flex;gap:6px;align-items:center;margin-top:4px"><input type="checkbox" id="' + p + 'Sound"> 영상·목소리 소리 켜기</label>' +
+      '<p class="muted" style="margin:8px 0 0;font-size:.78rem">값을 바꾸면 바로 반영되어 반복 재생됩니다.' + (p === 'def' ? ' 예시 문장으로 보여 줍니다.' : '') + ' 영상이 없으면 어두운 배경에서 보입니다.</p></div>';
+  }
+  $('fxPrevHost').innerHTML = panelHtml('fx'); $('defPrevHost').innerHTML = panelHtml('def');
+  function lpSource(p) {
+    if (p === 'fx') {
+      var c = Object.assign({}, S.editing); readForm(c);
+      if (!(c.fx.cues && c.fx.cues.length) && !c.caption) c.fx = Object.assign({}, c.fx, { cues: SAMPLE_CUES });
+      return { clip: c, url: srcUrl(c.src), defaults: S.defaults };
+    }
+    return { clip: { caption: '', fx: { cues: SAMPLE_CUES } }, url: '', defaults: readFx($('defBox')) };
+  }
+  function lpStop(p) { var L = LP[p]; clearTimeout(L.timer); if (L.ctl) { L.ctl.stop(); L.ctl = null; } }
+  function lpRun(p) {
+    lpStop(p);
+    var dlg = p === 'fx' ? $('dlg') : $('dlgDef'); if (!dlg.open) return;
+    var src = lpSource(p), L = LP[p];
+    L.ctl = F.play($(p + 'Prev'), { clip: src.clip, url: src.url, defaults: src.defaults, silent: !$(p + 'Sound').checked, freeze: $(p + 'Freeze').checked,
+      onend: function () { L.timer = setTimeout(function () { lpRun(p); }, 700); } });
+  }
+  function lpSchedule(p) { clearTimeout(LP[p].timer); LP[p].timer = setTimeout(function () { lpRun(p); }, 250); }
+  ['fx', 'def'].forEach(function (p) { $(p + 'Play').onclick = function () { lpRun(p); }; $(p + 'Freeze').onchange = $(p + 'Sound').onchange = function () { lpRun(p); }; });
+  $('fxBox').addEventListener('input', function () { lpSchedule('fx'); }); $('fxBox').addEventListener('change', function () { lpSchedule('fx'); });
+  $('defBox').addEventListener('input', function () { lpSchedule('def'); }); $('defBox').addEventListener('change', function () { lpSchedule('def'); });
+  $('cueBox').addEventListener('input', function () { lpSchedule('fx'); }); $('cueBox').addEventListener('click', function (e) { if (e.target.tagName === 'BUTTON') lpSchedule('fx'); });
+  $('eCap').addEventListener('input', function () { lpSchedule('fx'); }); $('cueAuto').addEventListener('click', function () { lpSchedule('fx'); }); $('cueAdd').addEventListener('click', function () { lpSchedule('fx'); });
+  $('eUrl').addEventListener('input', function () { lpSchedule('fx'); });
+  $('dlg').addEventListener('close', function () { lpStop('fx'); $('fxPrev').innerHTML = '<div class="ph">미리보기</div>'; });
+  $('dlgDef').addEventListener('close', function () { lpStop('def'); $('defPrev').innerHTML = '<div class="ph">미리보기</div>'; });
   $('ePrev').addEventListener('loadedmetadata', function () { if (isFinite(this.duration)) $('srcNow').textContent += ' · 영상 길이 ' + this.duration.toFixed(1) + '초'; });
 
   // ── 편집
@@ -574,7 +610,7 @@ summary { cursor:pointer; padding:4px 0; }
     $('eFile').value = ''; $('dlgErr').textContent = ''; $('pbar').classList.add('hide');
     $('delBtn').classList.toggle('hide', !c); $('upBtn').disabled = !S.r2; $('eFile').disabled = !S.r2;
     fxForm($('fxBox'), S.editing.fx, '(기본)'); $('cueBox').innerHTML = ''; ((S.editing.fx && S.editing.fx.cues) || []).forEach(addCue);
-    buildCond(S.editing.cond); setSrc(S.editing.src); $('dlg').showModal();
+    buildCond(S.editing.cond); setSrc(S.editing.src); $('dlg').showModal(); lpRun('fx');
   }
   $('addBtn').onclick = function () { openEditor(null); };
   $('cancelBtn').onclick = function () { $('dlg').close(); };

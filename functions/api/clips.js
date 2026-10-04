@@ -24,11 +24,19 @@ const COND_KEYS = ['ilju', 'ilgan', 'ilji', 'wolji', 'yongEl', 'strength', 'domi
 const MAX_CLIPS = 3000;
 
 // 연출 옵션 검증표 (report/fx.js의 FIELDS와 같은 범위). 배열=허용 값, [min,max]=숫자 범위, 'S'=짧은 문자열, 'H'=#색상코드.
+const FONT_KEYS = ['gothic', 'pretty', 'myeongjo', 'gowun', 'gowundodum', 'hanna', 'dohyeon', 'bagel', 'jua', 'dongle', 'gamja', 'hi', 'single', 'poor', 'pen', 'gaegu', 'dokdo', 'brush', 'songmyung', 'yeonsung', 'gugi', 'stylish', 'cute', 'kirang', 'sunflower', 'eulji', 'eulji10', 'euljioldae', 'hannapro', 'melona', 'taom', 'binggrae', 'lv1', 'lv2', 'football', 'bazzi', 'maple', 'cookie', 'infinity', 'yes', 'ridi', 'gmarket', 'suit', 'paperlogy', 'spoqa', 'nsround', 'ssurround', 'dangdang', 'supermagic', 'meongi', 'lotte', 'mango', 'moneyround', 'samlip', 'eyes', 'bokeh', 'crooked', 'delta', 'player', 'yacheR', 'kimhoon', 'eunyoung', 'dodam', 'muruk', 'ahnjg', 'butpen', 'doldam', 'sketchbook', 'poster', 'parkdh', 'meetme', 'okticon'];
 const TR_IN = ['cut', 'fade', 'dissolve', 'slide-left', 'slide-right', 'slide-up', 'zoom-in', 'zoom-out', 'wipe', 'flash'];
 const TR_OUT = ['cut', 'fade', 'dissolve', 'slide-left', 'slide-up', 'zoom-in', 'wipe', 'flash'];
 const FX = {
   trans: { in: TR_IN, out: TR_OUT, dur: [0.1, 3] },
-  sub: { font: ['gothic', 'pretty', 'myeongjo', 'gowun', 'gowundodum', 'hanna', 'dohyeon', 'bagel', 'jua', 'dongle', 'gamja', 'hi', 'single', 'poor', 'pen', 'gaegu', 'dokdo', 'brush', 'songmyung', 'yeonsung', 'gugi', 'stylish', 'cute', 'kirang', 'eulji', 'eulji10', 'euljioldae', 'hannapro', 'melona', 'taom', 'binggrae', 'lv1', 'lv2', 'football', 'bazzi', 'maple', 'cookie', 'infinity', 'yes', 'ridi', 'gmarket', 'suit', 'paperlogy', 'spoqa', 'nsround', 'ssurround', 'dangdang', 'supermagic', 'meongi', 'lotte', 'mango', 'moneyround', 'samlip', 'eyes', 'bokeh', 'crooked', 'delta', 'player', 'yacheR', 'kimhoon', 'eunyoung', 'dodam', 'muruk', 'ahnjg', 'butpen', 'doldam', 'sketchbook', 'poster', 'parkdh', 'meetme', 'okticon', 'sunflower'], weight: ['400', '500', '700', '900'], size: ['S', 'M', 'L'], fs: [2, 14], color: ['ivory', 'white', 'gold', 'yellow'], colorHex: 'H', bg: ['none', 'shade', 'box'], anim: ['none', 'fade', 'rise', 'pop', 'type'], align: ['center', 'left', 'right'], lh: [1, 2.5], ls: [-5, 30], pos: ['bottom', 'middle', 'top'], x: [0, 100], y: [0, 100], w: [20, 100] },
+  sub: {
+    font: FONT_KEYS, weight: ['400', '500', '700', '900'], italic: ['normal', 'italic'], size: ['S', 'M', 'L'], fs: [2, 14], color: ['ivory', 'white', 'gold', 'yellow'], colorHex: 'H', align: ['center', 'left', 'right'], lh: [1, 2.5], ls: [-5, 30],
+    pos: ['bottom', 'middle', 'top'], x: [0, 100], y: [0, 100], w: [20, 100], rot: [-30, 30],
+    strokeW: [0, 15], strokeColor: 'H', shOn: ['off', 'on'], shX: [-30, 30], shY: [-30, 30], shBlur: [0, 60], shColor: 'H', glowBlur: [0, 80], glowColor: 'H',
+    bg: ['none', 'shade', 'box'], bgColor: 'H', bgOpacity: [0, 100], bgRadius: [0, 100], padX: [0, 200], padY: [0, 100],
+    anim: ['none', 'fade', 'rise', 'drop', 'pop', 'zoom', 'blur', 'slide-l', 'slide-r', 'bounce', 'flip', 'type', 'word', 'char'], animDur: [0.1, 3], wordDelay: [0.02, 1], typeSpeed: [3, 60],
+    animOut: ['none', 'fade', 'fall', 'lift', 'shrink', 'blur', 'slide-l', 'slide-r'], animOutDur: [0.1, 3], emph: ['none', 'pulse', 'float', 'shake', 'blink', 'wobble', 'glow'], emphSpeed: [0.3, 6],
+  },
   voice: { on: ['off', 'on'], name: 'S', mode: ['cue', 'whole'], rate: [0.5, 2], pitch: [0.5, 2], vol: [0, 1], delay: [0, 10] },
   video: { speed: [0.25, 2], vol: [0, 1], fit: ['contain', 'cover'], trimStart: [0, 600], trimEnd: [0, 600], hold: [0, 10] },
 };
