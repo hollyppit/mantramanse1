@@ -341,7 +341,7 @@
     if (b.anim === 'lines') cls.push('lines');
     var inner = BLOCKS[b.type] ? BLOCKS[b.type](b) : '';
     return '<section class="' + cls.filter(Boolean).join(' ') + '" data-i="' + i + '"' + (b.id ? ' id="' + esc(b.id) + '" data-id="' + esc(b.id) + '"' : '') + (b.requires ? ' data-req="' + esc(b.requires) + '" hidden' : '') +
-      (b.track ? ' data-track="' + esc(b.track) + '"' : '') + (b.type === 'component' ? ' data-comp="' + esc(b.name) + '"' : '') + (b.type === 'spacer' ? ' aria-hidden="true"' : '') + '><div class="in-w">' + inner + '</div></section>';
+      (b.track ? ' data-track="' + esc(b.track) + '"' : '') + (b.voice && media(b.voice) ? ' data-voice="' + esc(media(b.voice)) + '"' : '') + (b.type === 'component' ? ' data-comp="' + esc(b.name) + '"' : '') + (b.type === 'spacer' ? ' aria-hidden="true"' : '') + '><div class="in-w">' + inner + '</div></section>';
   }
   function build(host) {
     var pairs = [];
@@ -482,11 +482,63 @@
         if (!/^(scroll:.+|href:.+|flow:open|purchase)$/.test(a)) out.push(w + '알 수 없는 action "' + a + '"');
         if (a.indexOf('scroll:') === 0 && !ids[a.slice(7)]) out.push(w + 'scroll 대상 id 없음 "' + a.slice(7) + '"');
       }
-      ['src', 'srcMobile', 'poster'].forEach(function (k) { if (b[k] && !media(b[k])) out.push(w + k + ' 주소 형식 오류'); });
+      ['src', 'srcMobile', 'poster', 'voice'].forEach(function (k) { if (b[k] && !media(b[k])) out.push(w + k + ' 주소 형식 오류'); });
     });
     ['sajuInput', 'freeResult', 'flowPreview', 'locked', 'purchase', 'interest'].forEach(function (id) { if (!ids[id]) out.push('필수 블록 id 없음: ' + id); });
     return out;
   }
+
+  // ───────── 음성 나레이션 ─────────
+  // 블록에 voice(음성 파일)가 있으면 그 블록이 화면 가운데에 머물 때 재생한다. 위쪽 🔊 버튼으로 끄고 켠다(선택은 이 기기에 기억).
+  // 브라우저는 사용자가 화면을 한 번 만지기 전에는 소리를 막으므로, 막히면 안내 문구를 띄우고 첫 터치·클릭에 바로 이어서 재생한다.
+  var Voice = (function () {
+    var audio = null, muted = false, last = null, pending = null, timer = 0, vio2 = null, started = false;
+    try { muted = localStorage.getItem('mt_story_mute') === '1'; } catch (e) { }
+    function $b() { return document.getElementById('sndBtn'); }
+    function hint(on) { var h = document.getElementById('sndHint'); if (h) h.hidden = !on; }
+    function ui() {
+      var b = $b(); if (!b) return;
+      var any = !!document.querySelector('[data-voice]'); b.hidden = !any || PREVIEW;
+      b.textContent = muted ? '🔇' : '🔊'; b.setAttribute('aria-pressed', muted ? 'true' : 'false'); b.setAttribute('aria-label', muted ? '음성 켜기' : '음성 끄기'); b.title = muted ? '음성 켜기' : '음성 끄기';
+    }
+    function stop() { if (audio) { try { audio.pause(); } catch (e) { } } }
+    function play(el) {
+      if (!el || muted || PREVIEW) return;
+      var url = el.getAttribute('data-voice'); if (!url) return;
+      if (document.getElementById('intro')) { pending = el; return; } // 입장 영상이 끝난 뒤에
+      if (last === el && audio && !audio.paused && !audio.ended) return;
+      stop(); last = el;
+      audio = audio || new Audio(); audio.preload = 'auto'; audio.src = url;
+      var p; try { p = audio.play(); } catch (e) { p = null; }
+      if (p && p.then) p.then(function () { pending = null; hint(false); started = true; track('voice_played', { block: +el.getAttribute('data-i') }); }, function () { pending = el; hint(!muted); });
+    }
+    function retry() { if (pending && !muted) { var e = pending; pending = null; setTimeout(function () { if (!document.getElementById('intro')) play(e); else pending = e; }, 120); } }
+    function toggle() {
+      muted = !muted; try { localStorage.setItem('mt_story_mute', muted ? '1' : '0'); } catch (e) { }
+      if (muted) { stop(); pending = null; hint(false); } else if (last) { var e = last; last = null; play(e); }
+      ui(); track('voice_toggled', { muted: muted ? 1 : 0 });
+    }
+    function watch(scope) {
+      if (PREVIEW) return;
+      if (!vio2 && 'IntersectionObserver' in root) {
+        vio2 = new IntersectionObserver(function (es) {
+          es.forEach(function (e) {
+            if (e.isIntersecting) { clearTimeout(e.target._vt); e.target._vt = setTimeout(function () { play(e.target); }, 450); } // 지나치는 블록은 건너뛴다
+            else clearTimeout(e.target._vt); // 가운데를 벗어난 블록은 이미 재생 중이면 끝까지 둔다
+          });
+        }, { rootMargin: '-42% 0px -42% 0px' }); // 화면 가운데 띠에 걸린 블록
+      }
+      if (vio2) (scope || document).querySelectorAll('[data-voice]').forEach(function (el) { vio2.observe(el); });
+      ui();
+    }
+    function init() {
+      var b = $b(); if (b) b.onclick = toggle;
+      ['pointerdown', 'keydown', 'touchend', 'click'].forEach(function (ev) { document.addEventListener(ev, retry, { passive: true }); });
+      try { new MutationObserver(function () { if (pending && !document.getElementById('intro')) retry(); }).observe(document.body, { childList: true }); } catch (e) { }
+      var h = document.getElementById('sndHint'); if (h) h.onclick = retry;
+    }
+    return { watch: watch, init: init, ui: ui };
+  })();
 
   // ───────── 시작 ─────────
   // 관리자가 저장한 내용(/api/story)이 있으면 content.js 의 기본 내용 위에 덮어 쓴다.
@@ -513,14 +565,14 @@
     var host = host0, y = root.scrollY;
     build(host); bind0(host);
     host.querySelectorAll('[data-comp]').forEach(mountComp);
-    gate(); meta(); setupObservers();
+    gate(); meta(); setupObservers(); Voice.watch(host);
     if (PREVIEW) { host.querySelectorAll('.blk').forEach(function (el) { el.classList.add('in'); }); root.scrollTo(0, y); }
   }
   var bound = false;
   function bind0(host) { if (!bound) { bound = true; bind(host); } }
   function start() {
     if (started) return; started = true;
-    render(); chrome();
+    render(); chrome(); Voice.init();
     document.documentElement.classList.add('ready');
     var problems = validate(); if (DEV && problems.length && root.console) console.warn('[story] 콘텐츠 점검:\n' + problems.join('\n'));
     if (!PREVIEW) track('onboarding_started', { dev: DEV ? 1 : 0 }, true);

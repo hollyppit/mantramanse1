@@ -53,6 +53,7 @@ http.createServer(async (q, r) => {
       files[key] = await body(q); return send(r, 200, { ok: true, key });
     }
     const f = files[u.searchParams.get('k')]; if (!f) { r.statusCode = 404; return r.end('nf'); }
+    const kk = u.searchParams.get('k') || ''; if (/.(wav|mp3|ogg|m4a)$/.test(kk)) { r.setHeader('content-type', kk.endsWith('.wav') ? 'audio/wav' : 'audio/mpeg'); return r.end(f); }
     r.setHeader('content-type', /.(webp|png|jpe?g|gif)$/.test(u.searchParams.get('k')||'') ? 'image/' + (u.searchParams.get('k').split('.').pop().replace('jpg','jpeg')) : 'video/mp4'); return r.end(f);
   }
   let rel = decodeURIComponent(p); if (rel.endsWith('/')) rel += 'index.html';

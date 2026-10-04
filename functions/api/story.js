@@ -20,7 +20,7 @@ function clean(v, depth = 0, key = '') {
   if (typeof v === 'string') {
     v = v.slice(0, 3000);
     const t = v.trim();
-    if (/^(src|srcMobile|poster)$/.test(key) && t && !MEDIA_OK.test(t)) return '';
+    if (/^(src|srcMobile|poster|voice)$/.test(key) && t && !MEDIA_OK.test(t)) return '';
     if (key === 'href' && t && !HREF_OK.test(t)) return '';
     if (key === 'action' && t && !ACTION_OK.test(t)) return '';
     return v;
