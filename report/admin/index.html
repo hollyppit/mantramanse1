@@ -284,6 +284,11 @@ summary { cursor:pointer; padding:4px 0; }
       <label>상위 폴더<select id="fdParent"></select></label>
       <label>폴더 우선순위<input type="number" id="fdPri" value="0" min="-100" max="100" style="width:96px"></label>
     </div>
+    <div class="row" style="align-items:end">
+      <label>이 폴더의 장<select id="fdCh"></select></label>
+      <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px;flex:1 1 280px"><input type="checkbox" id="fdChReset" style="width:auto"> 안의 클립이 개별로 지정한 장도 풀어서 이 폴더의 장을 따르게 하기</label>
+    </div>
+    <p class="muted" style="margin:0">장을 지정하면 안의 클립은 장을 따로 고르지 않아도 이 장에 속합니다. 클립이 직접 장을 지정했다면 그 값이 우선합니다(위 체크로 한꺼번에 풀 수 있음).</p>
     <p class="muted" style="margin:0">우선순위: 이 폴더와 하위 폴더 안의 모든 클립의 우선순위에 <b>더해집니다</b>. 조건이 같을 때 합이 높은 클립이 먼저 뽑힙니다.</p>
     <div>
       <div class="muted" style="margin-bottom:6px"><b>공통 조건</b> — 이 폴더 안 모든 클립이 상속합니다. 클립이 같은 항목을 직접 고르면 클립 값이 우선합니다. 폴더에서 한 번 바꾸면 안의 클립을 하나씩 고칠 필요가 없습니다.</div>
@@ -365,6 +370,8 @@ summary { cursor:pointer; padding:4px 0; }
   function srcUrl(src) { return !src ? '' : src.type === 'r2' ? '/api/clipfile?k=' + encodeURIComponent(src.value) : src.value; }
   function chs() { return S.chapters.map(function (c) { return [c.id, c.name]; }); }
   function chLabel(id) { var c = S.chapters.filter(function (x) { return x.id === id; })[0]; return c ? c.name : id; }
+  function chOf(c) { return A.effective(c, S.folders).chapter; } // 클립의 실제 장 (비어 있으면 폴더의 장)
+  function chCell(c) { return c.chapter ? esc(chLabel(c.chapter)) : '<span class="muted" title="폴더의 장을 따름">📁 ' + esc(chLabel(chOf(c)) || '(장 없음)') + '</span>'; }
   function chIndex(id) { for (var i = 0; i < S.chapters.length; i++) if (S.chapters[i].id === id) return i; return 999; }
   function folderName(id) { var f = S.folders.filter(function (x) { return x.id === id; })[0]; return f ? f.name : ''; }
   // box 안의 itemSel 요소들을 끌어서 정렬한다. 손잡이(.grip)를 잡았을 때만 끌리므로 입력칸 글자 선택은 그대로 된다.
@@ -437,7 +444,7 @@ summary { cursor:pointer; padding:4px 0; }
   function renderFilters() {
     var cur = $('fCh').value;
     $('fCh').innerHTML = '<option value="">전체</option>' + chOptions(); $('fCh').value = cur;
-    var ec = $('eCh').value; $('eCh').innerHTML = chOptions(); if (ec) $('eCh').value = ec;
+    var ec = $('eCh').value; $('eCh').innerHTML = '<option value="">(폴더의 장 따름)</option>' + chOptions(); $('eCh').value = ec;
     var ef = $('eFolder').value; $('eFolder').innerHTML = folderOptions('(미분류)'); $('eFolder').value = ef;
     var bf = $('bulkFolder').value; $('bulkFolder').innerHTML = folderOptions('(미분류로)'); $('bulkFolder').value = bf;
     var bc = $('bulkCh').value; $('bulkCh').innerHTML = chOptions(); if (bc) $('bulkCh').value = bc;
@@ -571,9 +578,11 @@ summary { cursor:pointer; padding:4px 0; }
     var f = fById(id); if (!f) return; fdId = id; loadElVoices();
     $('fdTitle').textContent = '폴더 설정 — ' + folderPath(id); $('fdName').value = f.name; $('fdPri').value = f.priority || 0; $('fdErr').textContent = '';
     $('fdParent').innerHTML = folderOptions('(최상위)', id); $('fdParent').value = f.parent || '';
+    $('fdCh').innerHTML = '<option value="">(지정 안 함 — 상위 폴더를 따름)</option>' + chOptions(); $('fdCh').value = f.chapter || ''; $('fdChReset').checked = false;
     buildCond($('fdCond'), f.cond); fxForm($('fdFx'), f.fx, '(상위 값)');
     $('fdCount').textContent = '하위 폴더 포함 클립 ' + clipsIn(id, true).length + '개'; $('dlgFolder').showModal();
   }
+  $('fdCh').onchange = function () { $('fdChReset').checked = !!this.value; };
   $('fdCancel').onclick = function () { $('dlgFolder').close(); };
   $('fdDel').onclick = function () { if (deleteFolder(fdId)) $('dlgFolder').close(); };
   $('fdBulk').onclick = function () { openBulk(clipsIn(fdId, true).map(function (c) { return c.id; }), '폴더 “' + folderName(fdId) + '” (하위 폴더 포함)'); };
@@ -585,6 +594,14 @@ summary { cursor:pointer; padding:4px 0; }
       if ((parent ? depthOf(parent) : 0) + h > MAX_DEPTH) { $('fdErr').textContent = '폴더는 최대 ' + MAX_DEPTH + '단계까지 만들 수 있습니다'; return; }
       f.parent = parent;
     }
+    var newCh = $('fdCh').value, reset = $('fdChReset').checked && newCh, targets = [];
+    if (reset) {
+      targets = clipsIn(fdId, true).filter(function (c) { // 이 폴더가 장을 정해 주는 클립 중 개별 장을 지정한 것
+        var nearest = A.chain(S.folders, c.folder).filter(function (x) { return x.chapter || x.id === fdId; }).pop(); return c.chapter && nearest && nearest.id === fdId;
+      });
+      if (targets.length && !confirm('클립 ' + targets.length + '개의 개별 장 지정이 풀리고 “' + chLabel(newCh) + '”을(를) 따르게 됩니다. 진행할까요?')) return;
+    }
+    f.chapter = newCh; targets.forEach(function (c) { c.chapter = ''; });
     f.name = name; f.priority = Math.max(-100, Math.min(100, Math.round(+$('fdPri').value) || 0)); f.cond = readCond($('fdCond')); f.fx = readFx($('fdFx'));
     $('dlgFolder').close(); markDirty();
   };
@@ -595,7 +612,7 @@ summary { cursor:pointer; padding:4px 0; }
     if (!ids.length) { alert('대상 클립이 없습니다.'); return; }
     bkIds = ids; loadElVoices();
     $('bkInfo').textContent = label + ' — 클립 ' + ids.length + '개에 적용됩니다. 바꾸지 않을 항목은 “변경 안 함”으로 두세요.'; $('bkErr').textContent = '';
-    $('bkCh').innerHTML = '<option value="">변경 안 함</option>' + chOptions(); $('bkFolder').innerHTML = '<option value="__keep">변경 안 함</option><option value="">(미분류로)</option>' + folderOptions('', '').replace('<option value=""></option>', '');
+    $('bkCh').innerHTML = '<option value="__keep">변경 안 함</option><option value="__follow">폴더의 장을 따르게 (개별 장 지정 해제)</option>' + chOptions(); $('bkFolder').innerHTML = '<option value="__keep">변경 안 함</option><option value="">(미분류로)</option>' + folderOptions('', '').replace('<option value=""></option>', '');
     $('bkPriMode').value = ''; $('bkPri').value = 0; $('bkCondMode').value = ''; $('bkClearFx').checked = false;
     buildCond($('bkCond'), {}); fxForm($('bkFx'), {}, '(변경 안 함)'); $('dlgBulk').showModal();
   }
@@ -605,14 +622,14 @@ summary { cursor:pointer; padding:4px 0; }
     e.preventDefault();
     var ch = $('bkCh').value, fo = $('bkFolder').value, pm = $('bkPriMode').value, pv = Math.round(+$('bkPri').value) || 0, cm = $('bkCondMode').value, cv = readCond($('bkCond')), fxv = readFx($('bkFx')), clr = $('bkClearFx').checked;
     var did = [];
-    if (ch) did.push('장'); if (fo !== '__keep') did.push('폴더'); if (pm) did.push('우선순위'); if (cm) did.push('조건'); if (Object.keys(fxv).length || clr) did.push('연출');
+    if (ch !== '__keep') did.push('장'); if (fo !== '__keep') did.push('폴더'); if (pm) did.push('우선순위'); if (cm) did.push('조건'); if (Object.keys(fxv).length || clr) did.push('연출');
     if (!did.length) { $('bkErr').textContent = '바꿀 항목을 하나 이상 고르세요'; return; }
     if (cm && cm !== 'clear' && !Object.keys(cv).length) { $('bkErr').textContent = '조건 방식을 골랐다면 적용할 조건 값을 체크하세요'; return; }
     if (!confirm(bkIds.length + '개 클립에 [' + did.join(', ') + ']을(를) 적용합니다. 저장 전에는 되돌릴 수 있습니다. 진행할까요?')) return;
     var set = {}; bkIds.forEach(function (i) { set[i] = 1; });
     S.clips.forEach(function (c) {
       if (!set[c.id]) return;
-      if (ch) c.chapter = ch;
+      if (ch !== '__keep') c.chapter = ch === '__follow' ? '' : ch;
       if (fo !== '__keep') c.folder = fo;
       if (pm === 'set') c.priority = Math.max(-100, Math.min(100, pv)); else if (pm === 'add') c.priority = Math.max(-100, Math.min(100, (c.priority || 0) + pv));
       if (cm === 'clear') c.cond = {};
@@ -635,6 +652,8 @@ summary { cursor:pointer; padding:4px 0; }
 
   // 클립 편집 창의 “폴더에서 상속되는 조건” 안내
   function renderInherit() {
+    var fch = A.effective({ folder: $('eFolder').value, cond: {} }, S.folders).chapter;
+    $('eCh').options[0].textContent = fch ? '(폴더의 장 따름: ' + chLabel(fch) + ')' : '(폴더의 장 따름 — 이 폴더엔 장이 없음)';
     var e = A.effective({ folder: $('eFolder').value, cond: {} }, S.folders), keys = Object.keys(e.cond);
     $('condInherit').innerHTML = keys.length ? '📁 폴더에서 상속되는 조건: ' + keys.map(function (k) { return '<span class="chip gray">' + esc(A.FIELDS[k][0]) + ' ' + esc(e.cond[k].join('·')) + '</span>'; }).join('') + ' <span class="muted">(아래에서 같은 항목을 고르면 이 클립의 값이 우선합니다)</span>' : '';
   }
@@ -644,7 +663,7 @@ summary { cursor:pointer; padding:4px 0; }
   var chWork = [];
   function renderChRows() {
     $('chRows').innerHTML = chWork.map(function (c, i) {
-      var n = S.clips.filter(function (x) { return x.chapter === c.id; }).length;
+      var n = S.clips.filter(function (x) { return chOf(x) === c.id; }).length;
       return '<div class="chrow" data-i="' + i + '" data-id="' + esc(c.id) + '"><span class="grip" title="끌어서 순서 변경">⠿</span><input type="text" maxlength="30" value="' + esc(c.name) + '" placeholder="장 이름"><span class="muted">' + n + '개</span>' +
         '<span class="row" style="gap:4px"><button type="button" data-a="up"' + (i === 0 ? ' disabled' : '') + '>▲</button><button type="button" data-a="down"' + (i === chWork.length - 1 ? ' disabled' : '') + '>▼</button></span>' +
         '<button type="button" class="danger" data-a="del">삭제</button></div>';
@@ -656,7 +675,8 @@ summary { cursor:pointer; padding:4px 0; }
         b.onclick = function () {
           var a = b.dataset.a, c = chWork[i];
           if (a === 'del') {
-            var n = S.clips.filter(function (x) { return x.chapter === c.id; }).length;
+            var n = S.clips.filter(function (x) { return chOf(x) === c.id; }).length, nf = S.folders.filter(function (f) { return f.chapter === c.id; }).length;
+            if (nf) { $('chErr').textContent = '“' + c.name + '”을(를) 쓰는 폴더가 ' + nf + '개 있어 삭제할 수 없습니다. 먼저 폴더의 장을 바꾸세요.'; return; }
             if (n) { $('chErr').textContent = '“' + c.name + '”에 클립 ' + n + '개가 있어 삭제할 수 없습니다. 먼저 다른 장으로 옮기세요.'; return; }
             if (chWork.length <= 1) { $('chErr').textContent = '장은 최소 1개 있어야 합니다.'; return; }
             chWork.splice(i, 1);
@@ -690,8 +710,8 @@ summary { cursor:pointer; padding:4px 0; }
     var f = $('fCh').value, q = $('fQ').value.trim();
     return S.clips.filter(function (c) {
       var inFolder = S.folder === '__all' ? true : S.folder === '__none' ? (!c.folder || !fById(c.folder)) : ($('incSub').checked ? (c.folder === S.folder || descendants(S.folder).indexOf(c.folder) >= 0) : c.folder === S.folder);
-      return inFolder && (!f || c.chapter === f) && (!q || c.title.indexOf(q) >= 0);
-    }).sort(function (a, b) { return chIndex(a.chapter) - chIndex(b.chapter) || (a.title < b.title ? -1 : 1); });
+      return inFolder && (!f || chOf(c) === f) && (!q || c.title.indexOf(q) >= 0);
+    }).sort(function (a, b) { return chIndex(chOf(a)) - chIndex(chOf(b)) || (a.title < b.title ? -1 : 1); });
   }
   function selIds() { return Object.keys(S.sel).filter(function (k) { return S.sel[k]; }); }
   function renderBulk() {
@@ -701,7 +721,7 @@ summary { cursor:pointer; padding:4px 0; }
     var list = visibleClips();
     $('libEmpty').classList.toggle('hide', list.length > 0);
     $('libBody').innerHTML = list.map(function (c) {
-      return '<tr draggable="true" data-id="' + esc(c.id) + '"><td><input type="checkbox" class="sel"' + (S.sel[c.id] ? ' checked' : '') + '></td><td>' + esc(chLabel(c.chapter)) + '</td><td>' + esc(c.title) + (c.note ? '<div class="muted">' + esc(c.note) + '</div>' : '') + '</td><td>' +
+      return '<tr draggable="true" data-id="' + esc(c.id) + '"><td><input type="checkbox" class="sel"' + (S.sel[c.id] ? ' checked' : '') + '></td><td>' + chCell(c) + '</td><td>' + esc(c.title) + (c.note ? '<div class="muted">' + esc(c.note) + '</div>' : '') + '</td><td>' +
         (c.folder && folderName(c.folder) ? '<span class="chip">📁 ' + esc(folderName(c.folder)) + '</span>' : '<span class="chip gray">미분류</span>') + '</td><td>' + condChips(c) + '</td><td>' +
         (c.src ? '<span class="chip">' + (c.src.type === 'r2' ? '업로드' : '링크') + '</span>' : '<span class="chip gray err">영상 없음</span>') +
         '</td><td>' + (c.priority || 0) + (A.effective(c, S.folders).priority !== (c.priority || 0) ? ' <span class="muted" title="폴더 우선순위가 더해진 최종값">→ ' + A.effective(c, S.folders).priority + '</span>' : '') + '</td><td><button data-id="' + esc(c.id) + '">편집</button></td></tr>';
@@ -944,7 +964,7 @@ summary { cursor:pointer; padding:4px 0; }
     }).catch(function (e) { $('aiMsg').className = 'err'; $('aiMsg').textContent = e.message; })
       .then(function () { btns.forEach(function (b) { b.disabled = false; }); });
   }
-  $('aiScript').onclick = function () { aiRun('script', { chapter: chLabel($('eCh').value), title: $('eTitle').value.trim(), cond: condText(), existing: $('eCap').value }); };
+  $('aiScript').onclick = function () { aiRun('script', { chapter: chLabel($('eCh').value || A.effective({ folder: $('eFolder').value, cond: {} }, S.folders).chapter), title: $('eTitle').value.trim(), cond: condText(), existing: $('eCap').value }); };
   $('aiSplit').onclick = function () { var t = $('eCap').value.trim(); if (!t) { $('aiMsg').className = 'err'; $('aiMsg').textContent = '위의 자막·대사 전체 칸에 문장을 먼저 입력하세요'; return; } aiRun('split', { text: t }); };
   $('aiPolish').onclick = function () {
     var cur = readCues().map(function (c) { return c.t; }); if (!cur.length) cur = $('eCap').value.split(/\n+/).map(function (l) { return l.trim(); }).filter(Boolean);
@@ -1024,7 +1044,8 @@ summary { cursor:pointer; padding:4px 0; }
   function openEditor(id) {
     loadElVoices();
     var c = id ? S.clips.filter(function (x) { return x.id === id; })[0] : null;
-    S.editing = c ? JSON.parse(JSON.stringify(c)) : { id: 'c' + Date.now().toString(36), title: '', chapter: $('fCh').value || (S.chapters[0] && S.chapters[0].id) || '', folder: folderName(S.folder) ? S.folder : '', cond: {}, src: null, caption: '', note: '', priority: 0, isNew: true };
+    var newFolder = folderName(S.folder) ? S.folder : '', folderCh = A.effective({ folder: newFolder, cond: {} }, S.folders).chapter;
+    S.editing = c ? JSON.parse(JSON.stringify(c)) : { id: 'c' + Date.now().toString(36), title: '', chapter: $('fCh').value || (folderCh ? '' : (S.chapters[0] && S.chapters[0].id) || ''), folder: newFolder, cond: {}, src: null, caption: '', note: '', priority: 0, isNew: true };
     $('dlgTitle').textContent = c ? '클립 편집' : '클립 추가';
     $('eTitle').value = S.editing.title; $('eCh').value = S.editing.chapter; $('eFolder').value = S.editing.folder || ''; $('ePri').value = S.editing.priority || 0;
     $('eCap').value = S.editing.caption || ''; $('eNote').value = S.editing.note || '';
@@ -1053,6 +1074,7 @@ summary { cursor:pointer; padding:4px 0; }
   $('clipForm').onsubmit = function (e) {
     e.preventDefault();
     var c = S.editing; readForm(c);
+    if (!c.chapter && !A.effective(c, S.folders).chapter) { $('dlgErr').textContent = '장을 선택하세요 (선택한 폴더에도 지정된 장이 없습니다)'; return; }
     if (!c.title) { $('dlgErr').textContent = '제목을 입력하세요'; return; }
     var isNew = c.isNew; delete c.isNew;
     if (isNew) S.clips.push(c); else S.clips = S.clips.map(function (x) { return x.id === c.id ? c : x; });
@@ -1130,10 +1152,10 @@ summary { cursor:pointer; padding:4px 0; }
   function renderCov() {
     var chs = S.chapters.map(function (c) { return [c.id, c.name]; }), html = '<thead><tr><th>일주</th>' + chs.map(function (c) { return '<th>' + esc(c[1].split(' ')[0]) + '</th>'; }).join('') + '</tr></thead><tbody>';
     var eff = {}; S.clips.forEach(function (x) { eff[x.id] = A.effective(x, S.folders).cond; });
-    var generic = {}; chs.forEach(function (c) { generic[c[0]] = S.clips.filter(function (x) { return x.chapter === c[0] && !(eff[x.id].ilju && eff[x.id].ilju.length); }).length; });
+    var generic = {}; chs.forEach(function (c) { generic[c[0]] = S.clips.filter(function (x) { return chOf(x) === c[0] && !(eff[x.id].ilju && eff[x.id].ilju.length); }).length; });
     A.ILJU.forEach(function (ij) {
       html += '<tr><td>' + ij + '</td>' + chs.map(function (c) {
-        var n = S.clips.filter(function (x) { return x.chapter === c[0] && eff[x.id].ilju && eff[x.id].ilju.indexOf(ij) >= 0; }).length;
+        var n = S.clips.filter(function (x) { return chOf(x) === c[0] && eff[x.id].ilju && eff[x.id].ilju.indexOf(ij) >= 0; }).length;
         return n ? '<td class="hit">' + n + '</td>' : generic[c[0]] ? '<td class="gen">공통</td>' : '<td class="z">0</td>';
       }).join('') + '</tr>';
     });

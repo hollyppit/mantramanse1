@@ -43,23 +43,24 @@
   // 클립의 실제 적용값: 조건은 폴더에서 상속(아래 폴더가 위 폴더를, 클립이 폴더를 항목별로 덮어씀), 우선순위는 폴더들의 값을 더한다.
   // inherited = 폴더에서 온 조건 항목 목록(클립이 직접 지정한 항목은 제외)
   function effective(clip, folders) {
-    var cond = {}, pri = +clip.priority || 0, own = clip.cond || {}, fromFolder = {};
+    var cond = {}, pri = +clip.priority || 0, own = clip.cond || {}, fromFolder = {}, chapter = '';
     chain(folders, clip.folder).forEach(function (f) {
       var c = f.cond || {}; Object.keys(c).forEach(function (k) { if (c[k] && c[k].length) { cond[k] = c[k]; fromFolder[k] = 1; } });
-      pri += +f.priority || 0;
+      pri += +f.priority || 0; if (f.chapter) chapter = f.chapter; // 아래 폴더가 위 폴더의 장을 덮어쓴다
     });
+    if (clip.chapter) chapter = clip.chapter; // 클립이 직접 지정한 장이 최우선 (비어 있으면 폴더의 장을 따른다)
     Object.keys(own).forEach(function (k) { if (own[k] && own[k].length) { cond[k] = own[k]; delete fromFolder[k]; } });
-    return { cond: cond, priority: pri, inherited: Object.keys(fromFolder) };
+    return { cond: cond, priority: pri, chapter: chapter, inherited: Object.keys(fromFolder) };
   }
 
   // chapters = [[id, 이름], …] (관리자에서 바꾼 장 목록, 생략하면 기본 9장). 장 순서가 곧 재생 순서.
   // 장마다 가장 구체적인 클립 1개를 고른다. 구체성 점수(조건 가중합) → 우선순위 → id 순.
   function assemble(clips, facts, chapters, folders) {
     return (chapters || CHAPTERS).map(function (ch) {
-      var cands = clips.filter(function (c) { return c.chapter === ch[0]; }).map(function (c) {
+      var cands = clips.map(function (c) {
         var e = effective(c, folders), ec = { cond: e.cond };
-        return { clip: c, ec: ec, spec: specified(ec), pri: e.priority };
-      }).filter(function (x) { return matches(x.ec, facts); }).sort(function (a, b) { return b.spec - a.spec || b.pri - a.pri || (a.clip.id < b.clip.id ? -1 : 1); });
+        return { clip: c, ec: ec, chapter: e.chapter, spec: specified(ec), pri: e.priority };
+      }).filter(function (x) { return x.chapter === ch[0]; }).filter(function (x) { return matches(x.ec, facts); }).sort(function (a, b) { return b.spec - a.spec || b.pri - a.pri || (a.clip.id < b.clip.id ? -1 : 1); });
       return { chapter: ch[0], label: ch[1], pick: cands[0] ? cands[0].clip : null, specificity: cands[0] ? cands[0].spec : 0, candidates: cands };
     });
   }

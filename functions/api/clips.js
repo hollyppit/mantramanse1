@@ -89,7 +89,7 @@ function cleanCond(src) {
 
 // 폴더: { id, name, parent, priority, cond, fx }. 부모는 존재해야 하고 순환·깊이 8단계 초과는 거부한다. 형식이 틀리면 null.
 const MAX_DEPTH = 8;
-function cleanFolders(list) {
+function cleanFolders(list, chapterIds) {
   if (!Array.isArray(list) || list.length > MAX_FOLDERS) return null;
   const out = [], ids = new Set();
   for (const x of list) {
@@ -97,7 +97,7 @@ function cleanFolders(list) {
     if (!/^[\w-]{1,20}$/.test(id) || !name || ids.has(id)) return null;
     ids.add(id);
     const fx = cleanFx({ ...(x.fx || {}), cues: undefined });
-    out.push({ id, name, parent: String(x.parent || ''), priority: Math.max(-100, Math.min(100, Math.round(+x.priority || 0))), cond: cleanCond(x.cond), fx });
+    out.push({ id, name, chapter: chapterIds.has(x.chapter) ? x.chapter : '', parent: String(x.parent || ''), priority: Math.max(-100, Math.min(100, Math.round(+x.priority || 0))), cond: cleanCond(x.cond), fx });
   }
   const byId = new Map(out.map(f => [f.id, f]));
   for (const f of out) {
@@ -108,17 +108,25 @@ function cleanFolders(list) {
   return out;
 }
 
-function clean(c, chapterIds, folderIds) {
+// 폴더 체인에 장이 지정돼 있으면 그 장 id, 없으면 ''
+function folderChapter(byId, id) {
+  for (let n = 0; id && byId.has(id) && n < MAX_DEPTH + 1; n++) { const f = byId.get(id); if (f.chapter) return f.chapter; id = f.parent; }
+  return '';
+}
+
+function clean(c, chapterIds, folderIds, byId) {
   if (!c || typeof c !== 'object') return null;
   const id = String(c.id || '').slice(0, 40), title = String(c.title || '').trim().slice(0, 80);
-  if (!/^[\w-]{1,40}$/.test(id) || !title || !chapterIds.has(c.chapter)) return null;
+  const folder = folderIds.has(c.folder) ? c.folder : '';
+  // 장이 비어 있으면(폴더를 따름) 폴더 체인에 장이 있어야 한다
+  if (!/^[\w-]{1,40}$/.test(id) || !title || !(chapterIds.has(c.chapter) || (!c.chapter && folderChapter(byId, folder)))) return null;
   const cond = cleanCond(c.cond);
   const s = c.src || {};
   let src = null;
   if (s.type === 'r2' && /^[\w.-]{1,120}$/.test(s.value || '')) src = { type: 'r2', value: s.value };
   else if (s.type === 'url' && /^https:\/\/[^\s]{1,500}$/.test(s.value || '')) src = { type: 'url', value: s.value };
   else if (s.type) return null; // 알 수 없는 형식
-  return { id, title, chapter: c.chapter, folder: folderIds.has(c.folder) ? c.folder : '', cond, src, caption: String(c.caption || '').slice(0, 500), note: String(c.note || '').slice(0, 300), fx: cleanFx(c.fx), priority: Math.max(-100, Math.min(100, +c.priority || 0)) };
+  return { id, title, chapter: chapterIds.has(c.chapter) ? c.chapter : '', folder, cond, src, caption: String(c.caption || '').slice(0, 500), note: String(c.note || '').slice(0, 300), fx: cleanFx(c.fx), priority: Math.max(-100, Math.min(100, +c.priority || 0)) };
 }
 
 export async function onRequestGet({ request, env }) {
@@ -139,12 +147,13 @@ export async function onRequestPut({ request, env }) {
   const prev = (await env.GLOSSARY_KV.get(CLIPS_KEY, 'json')) || {};
   const chapters = body.chapters === undefined ? (prev.chapters || DEFAULT_CHAPTERS) : cleanNamed(body.chapters, MAX_CHAPTERS, 1);
   if (!chapters) return json({ error: '장 목록이 올바르지 않습니다 (1~40개, 이름 필수, 중복 id 불가)' }, 400);
-  const folders = body.folders === undefined ? (prev.folders || []) : cleanFolders(body.folders);
+  const chapterIds = new Set(chapters.map(c => c.id));
+  const folders = body.folders === undefined ? (prev.folders || []) : cleanFolders(body.folders, chapterIds);
   if (!folders) return json({ error: '폴더 목록이 올바르지 않습니다 (이름 필수, 중복·순환 불가, 최대 8단계)' }, 400);
-  const chapterIds = new Set(chapters.map(c => c.id)), folderIds = new Set(folders.map(f => f.id));
+  const folderIds = new Set(folders.map(f => f.id)), byId = new Map(folders.map(f => [f.id, f]));
   const clips = [], seen = new Set();
   for (const raw of body.clips) {
-    const c = clean(raw, chapterIds, folderIds);
+    const c = clean(raw, chapterIds, folderIds, byId);
     if (!c) return json({ error: `클립 형식 오류: ${String(raw && (raw.title || raw.id) || '').slice(0, 30)}` }, 400);
     if (seen.has(c.id)) return json({ error: `중복된 id: ${c.id}` }, 400);
     seen.add(c.id); clips.push(c);
