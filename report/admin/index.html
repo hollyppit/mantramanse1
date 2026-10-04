@@ -96,6 +96,7 @@ summary { cursor:pointer; padding:4px 0; }
 .cue button { padding:6px 10px; white-space:nowrap; }
 .cue .stale { color:var(--red); }
 .fxgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:8px; padding:8px 0; }
+.fxgrid label button { white-space:nowrap; } .fxgrid label.wide { grid-column:span 2; } .fxgrid label.hide { display:none; }
 .fxgrid label { display:grid; gap:3px; font-size:.78rem; color:var(--ink3); }
 #fxPrev { width:min(236px,60vw); max-height:none; }
 .cov { overflow:auto; max-height:70vh; border:1px solid var(--line); border-radius:8px; }
@@ -730,7 +731,7 @@ summary { cursor:pointer; padding:4px 0; }
     box.innerHTML = F.FIELDS.map(function (grp) {
       var v = (vals && vals[grp.g]) || {}, n = grp.items.filter(function (it) { return v[it[0]] !== undefined && v[it[0]] !== ''; }).length;
       return '<details' + (n ? ' open' : '') + '><summary>' + esc(grp.title) + (n ? ' <span class="chip">' + n + '개 지정</span>' : '') + '</summary><div class="fxgrid">' + grp.items.map(function (it) {
-        var k = it[0], cur = v[k], at = ' data-g="' + grp.g + '" data-k="' + k + '"', h = '<label>' + esc(it[1]);
+        var k = it[0], cur = v[k], at = ' data-g="' + grp.g + '" data-k="' + k + '"', o = it[4] || {}, h = '<label' + (o.only ? ' data-only="' + o.only + '"' : '') + (o.wide ? ' class="wide"' : '') + '>' + esc(it[1]);
         if (it[2] === 'sel') h += '<select' + at + '><option value="">' + blank + '</option>' + it[3].map(function (o) { return '<option value="' + o[0] + '"' + (cur === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>';
         else if (it[2] === 'elvoice') h += '<span style="display:flex;gap:6px"><select' + at + ' data-elvoice="1" data-cur="' + esc(cur || '') + '" style="flex:1;min-width:0"></select><button type="button" data-elplay="pre" title="일레븐랩스가 제공하는 기본 샘플 (무료)">▶ 샘플</button><button type="button" data-elplay="ko" title="한 문장을 현재 모델·설정으로 만들어 들어봅니다 (약 25자 크레딧, 같은 설정이면 재사용)">▶ 한국어</button></span>';
         else if (it[2] === 'voice') h += '<span style="display:flex;gap:6px"><select' + at + ' data-voice="1" data-cur="' + esc(cur || '') + '" style="flex:1;min-width:0"></select><button type="button" data-brplay="1" title="이 기기에서 이 목소리로 한 문장을 읽어 봅니다">▶ 듣기</button></span>';
@@ -750,7 +751,14 @@ summary { cursor:pointer; padding:4px 0; }
         sel.dataset.cur = id; fillElVoices(); sel.value = id; sel.dispatchEvent(new Event('change', { bubbles: true }));
       });
     });
-    wireSamples(box); fillVoices(); fillElVoices();
+    var eng = box.querySelector('select[data-g=voice][data-k=engine]');
+    if (eng) eng.addEventListener('change', function () { voiceVisibility(box); });
+    wireSamples(box); fillVoices(); fillElVoices(); voiceVisibility(box);
+  }
+  // 고른 엔진(비워 두면 상위 기본값의 엔진)에 해당하는 칸만 보인다. 숨긴 칸의 값은 그대로 보관된다.
+  function voiceVisibility(box) {
+    var eng = voiceFrom(box).engine;
+    box.querySelectorAll('label[data-only]').forEach(function (l) { l.classList.toggle('hide', l.dataset.only !== eng); });
   }
   // 목소리 샘플 듣기 (일레븐랩스 기본 샘플 / 한국어 테스트 문장 / 브라우저 음성)
   var KO_SAMPLE = '운명은 정해진 것이 아니라, 읽어내는 것입니다.';
