@@ -8,8 +8,6 @@ const MAX_BYTES = 90 * 1024 * 1024; // Pages Functions 요청 본문 한도(100M
 const TYPES = { mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime', m4v: 'video/mp4' };
 // 홈 화면 이미지(배경·장식). 영상보다 작게 제한한다.
 const IMAGES = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', avif: 'image/avif' };
-// 스토리 페이지 음성(나레이션)
-const AUDIO = { mp3: 'audio/mpeg', m4a: 'audio/mp4', wav: 'audio/wav', ogg: 'audio/ogg' };
 const MAX_IMAGE = 15 * 1024 * 1024;
 const KEY_RE = /^[\w.-]{1,120}$/;
 
@@ -49,8 +47,8 @@ export async function onRequestPost({ request, env }) {
   if (!env.CLIPS_R2) return noR2();
   const name = new URL(request.url).searchParams.get('name') || '';
   const ext = (name.split('.').pop() || '').toLowerCase();
-  const type = TYPES[ext] || IMAGES[ext] || AUDIO[ext], limit = IMAGES[ext] || AUDIO[ext] ? MAX_IMAGE : MAX_BYTES;
-  if (!type) return json({ error: 'mp4, webm, mov 영상, jpg, png, webp, gif, avif 이미지, mp3, m4a, wav, ogg 음성만 올릴 수 있습니다' }, 400);
+  const type = TYPES[ext] || IMAGES[ext], limit = IMAGES[ext] ? MAX_IMAGE : MAX_BYTES;
+  if (!type) return json({ error: 'mp4, webm, mov 영상이나 jpg, png, webp, gif, avif 이미지만 올릴 수 있습니다' }, 400);
   const len = +request.headers.get('content-length') || 0;
   if (!len || len > limit) return json({ error: `파일은 ${limit / 1048576 | 0}MB 이하여야 합니다` }, 413);
 

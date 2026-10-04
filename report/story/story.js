@@ -342,7 +342,7 @@
     if (b.anim === 'lines') cls.push('lines');
     var inner = BLOCKS[b.type] ? BLOCKS[b.type](b) : '';
     return '<section class="' + cls.filter(Boolean).join(' ') + '" data-i="' + i + '"' + (b.id ? ' id="' + esc(b.id) + '" data-id="' + esc(b.id) + '"' : '') + (b.requires ? ' data-req="' + esc(b.requires) + '" hidden' : '') +
-      (b.track ? ' data-track="' + esc(b.track) + '"' : '') + (b.voice && media(b.voice) ? ' data-voice="' + esc(media(b.voice)) + '"' : '') + (b.type === 'component' ? ' data-comp="' + esc(b.name) + '"' : '') + (b.type === 'spacer' ? ' aria-hidden="true"' : '') + '><div class="in-w">' + inner + '</div></section>';
+      (b.track ? ' data-track="' + esc(b.track) + '"' : '') + (b.type === 'component' ? ' data-comp="' + esc(b.name) + '"' : '') + (b.type === 'spacer' ? ' aria-hidden="true"' : '') + '><div class="in-w">' + inner + '</div></section>';
   }
   function build(host) {
     var pairs = [];
@@ -484,83 +484,14 @@
         if (!/^(scroll:.+|href:.+|flow:open|purchase|auto:start)$/.test(a)) out.push(w + '알 수 없는 action "' + a + '"');
         if (a.indexOf('scroll:') === 0 && !ids[a.slice(7)]) out.push(w + 'scroll 대상 id 없음 "' + a.slice(7) + '"');
       }
-      ['src', 'srcMobile', 'poster', 'voice'].forEach(function (k) { if (b[k] && !media(b[k])) out.push(w + k + ' 주소 형식 오류'); });
+      ['src', 'srcMobile', 'poster'].forEach(function (k) { if (b[k] && !media(b[k])) out.push(w + k + ' 주소 형식 오류'); });
     });
     ['sajuInput', 'freeResult', 'flowPreview', 'locked', 'purchase', 'interest'].forEach(function (id) { if (!ids[id]) out.push('필수 블록 id 없음: ' + id); });
     return out;
   }
 
-  // ───────── 음성 나레이션 ─────────
-  // 블록에 voice(음성 파일)가 있으면 그 블록이 화면 가운데에 머물 때 재생한다. 위쪽 🔊 버튼으로 끄고 켠다(선택은 이 기기에 기억).
-  // 브라우저는 사용자가 화면을 한 번 만지기 전에는 소리를 막으므로, 막히면 안내 문구를 띄우고 첫 터치·클릭에 바로 이어서 재생한다.
-  var Voice = (function () {
-    var audio = null, muted = false, last = null, pending = null, timer = 0, vio2 = null, started = false, held = false;
-    var SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-    try { muted = localStorage.getItem('mt_story_mute') === '1'; } catch (e) { }
-    function $b() { return document.getElementById('sndBtn'); }
-    function hint(on) { var h = document.getElementById('sndHint'); if (h) h.hidden = !on; }
-    function ui() {
-      var b = $b(); if (!b) return;
-      var any = !!document.querySelector('[data-voice]'); b.hidden = !any || PREVIEW;
-      b.textContent = muted ? '🔇' : '🔊'; b.setAttribute('aria-pressed', muted ? 'true' : 'false'); b.setAttribute('aria-label', muted ? '음성 켜기' : '음성 끄기'); b.title = muted ? '음성 켜기' : '음성 끄기';
-    }
-    function stop() { if (audio) { try { audio.pause(); } catch (e) { } } }
-    function play(el) {
-      if (!el || muted || PREVIEW) return;
-      var url = el.getAttribute('data-voice'); if (!url) return;
-      if (document.getElementById('intro')) { pending = el; return; } // 입장 영상이 끝난 뒤에
-      if (last === el && audio && !audio.paused && !audio.ended) return;
-      stop(); last = el;
-      audio = audio || new Audio(); audio.preload = 'auto'; audio.src = url;
-      var p; try { p = audio.play(); } catch (e) { p = null; }
-      if (p && p.then) p.then(function () { pending = null; hint(false); started = true; track('voice_played', { block: +el.getAttribute('data-i') }); }, function () { pending = el; hint(!muted); });
-    }
-    function retry() { if (pending && !muted) { var e = pending; pending = null; setTimeout(function () { if (!document.getElementById('intro')) play(e); else pending = e; }, 120); } }
-    function toggle() {
-      muted = !muted; try { localStorage.setItem('mt_story_mute', muted ? '1' : '0'); } catch (e) { }
-      if (muted) { stop(); pending = null; hint(false); } else if (last) { var e = last; last = null; play(e); }
-      ui(); track('voice_toggled', { muted: muted ? 1 : 0 });
-    }
-    function watch(scope) {
-      if (PREVIEW) return;
-      if (!vio2 && 'IntersectionObserver' in root) {
-        vio2 = new IntersectionObserver(function (es) {
-          es.forEach(function (e) {
-            if (held) return; // 자동 스크롤이 재생을 직접 맡는 동안
-            if (e.isIntersecting) { clearTimeout(e.target._vt); e.target._vt = setTimeout(function () { play(e.target); }, 450); } // 지나치는 블록은 건너뛴다
-            else clearTimeout(e.target._vt); // 가운데를 벗어난 블록은 이미 재생 중이면 끝까지 둔다
-          });
-        }, { rootMargin: '-42% 0px -42% 0px' }); // 화면 가운데 띠에 걸린 블록
-      }
-      if (vio2) (scope || document).querySelectorAll('[data-voice]').forEach(function (el) { vio2.observe(el); });
-      ui();
-    }
-    function init() {
-      var b = $b(); if (b) b.onclick = toggle;
-      ['pointerdown', 'keydown', 'touchend', 'click'].forEach(function (ev) { document.addEventListener(ev, retry, { passive: true }); });
-      try { new MutationObserver(function () { if (pending && !document.getElementById('intro')) retry(); }).observe(document.body, { childList: true }); } catch (e) { }
-      var h = document.getElementById('sndHint'); if (h) h.onclick = retry;
-    }
-    // 자동 스크롤용: 이 블록의 음성을 재생하고 끝나면(또는 실패·정지 시) 알린다. true = 끝까지 들려줌
-    function speak(el) {
-      return new Promise(function (res) {
-        var url = el.getAttribute('data-voice'); if (!url || muted) return res(false);
-        stop(); last = el; audio = audio || new Audio(); audio.src = url;
-        var done = false, t = setTimeout(function () { fin(false); }, 120000);
-        function fin(ok) { if (done) return; done = true; clearTimeout(t); audio.removeEventListener('ended', onE); audio.removeEventListener('error', onX); audio.removeEventListener('pause', onP); res(ok); }
-        function onE() { fin(true); } function onX() { fin(false); } function onP() { if (!audio.ended) fin(false); }
-        audio.addEventListener('ended', onE); audio.addEventListener('error', onX); audio.addEventListener('pause', onP);
-        var p; try { p = audio.play(); } catch (e) { p = null; }
-        if (p && p.catch) p.catch(function () { fin(false); }); else if (!p) fin(false);
-      });
-    }
-    function unlock() { audio = audio || new Audio(); try { audio.src = SILENT; var p = audio.play(); if (p && p.catch) p.catch(function () { }); } catch (e) { } }
-    return { watch: watch, init: init, ui: ui, speak: speak, unlock: unlock, stop: stop, hold: function (v) { held = !!v; } };
-  })();
-
   // ───────── 자동 스크롤 ─────────
-  // 첫 화면의 시작 버튼(action 'auto:start')을 누르면 블록을 차례로 내려가며 음성을 들려준다. 음성이 있으면 끝날 때까지,
-  // 없으면 글 길이만큼 머문 뒤 다음으로 간다. 사주 입력·관심사 선택·버튼처럼 사용자가 해야 하는 곳에서는 멈추고,
+  // 첫 화면의 시작 버튼(action 'auto:start')을 누르면 블록을 차례로 내려간다. 글 길이만큼 머문 뒤 다음으로 간다. 사주 입력·관심사 선택·버튼처럼 사용자가 해야 하는 곳에서는 멈추고,
   // 분석을 마치거나 "올해의 흐름 확인"을 누르면 이어서 내려간다. 화면을 만지거나 휠·키를 쓰면 즉시 멈춘다.
   var Auto = (function () {
     var started = false, wanted = false, running = false, finished = false, token = 0, cancelAnim = null;
@@ -601,25 +532,21 @@
       });
     }
     async function run(from, pass) { // pass: 첫 블록이 멈춤 지점(기능 블록)이어도 멈추지 않고 지나간다
-      var my = ++token; running = true; finished = false; Voice.hold(true); ui();
+      var my = ++token; running = true; finished = false; ui();
       var us = units(), i = from ? us.indexOf(from) : -1, i0 = -1; if (i < 0) i = firstAhead(us); i0 = i;
       for (; i < us.length; i++) {
-        var u = us[i], blk = u.closest('.blk');
+        var u = us[i];
         await glide(targetY(u), my); if (my !== token) return;
         await sleep(250); if (my !== token) return;
-        var spoke = false;
-        if (blk.hasAttribute('data-voice') && (u === blk || u === blk.querySelector('.ss-s'))) spoke = await Voice.speak(blk);
-        if (my !== token) return;
-        await sleep(spoke ? 600 : (isStop(u) ? 500 : dwell(u))); if (my !== token) return;
-        if (isStop(u) && !(pass && i === i0)) { running = false; Voice.hold(false); ui(); return; }
+        await sleep(isStop(u) ? 500 : dwell(u)); if (my !== token) return;
+        if (isStop(u) && !(pass && i === i0)) { running = false; ui(); return; }
       }
-      if (my === token) { running = false; finished = true; Voice.hold(false); ui(); }
+      if (my === token) { running = false; finished = true; ui(); }
     }
-    function interrupt() { if (!running) return; token++; running = false; if (cancelAnim) cancelAnim(); Voice.stop(); Voice.hold(false); ui(); track('auto_interrupted'); }
+    function interrupt() { if (!running) return; token++; running = false; if (cancelAnim) cancelAnim(); ui(); track('auto_interrupted'); }
     function begin() {
-      if (started) return; started = true; wanted = true; Voice.unlock();
+      if (started) return; started = true; wanted = true;
       document.querySelectorAll('.start').forEach(function (b) { b.hidden = true; });
-      var h = document.getElementById('sndHint'); if (h) h.hidden = true;
       track('auto_started'); run();
     }
     function toggle() { if (running) { wanted = false; interrupt(); } else { wanted = true; run(); } }
@@ -629,7 +556,7 @@
     }
     function init() {
       var b = btn(); if (b) b.onclick = toggle;
-      function user(e) { var t = e.target; if (t && t.closest && t.closest('#autoBtn, #sndBtn, #sndHint')) return; interrupt(); }
+      function user(e) { var t = e.target; if (t && t.closest && t.closest('#autoBtn')) return; interrupt(); }
       ['wheel', 'touchstart', 'pointerdown'].forEach(function (ev) { document.addEventListener(ev, user, { passive: true }); });
       document.addEventListener('keydown', function (e) { if (/^(ArrowUp|ArrowDown|PageUp|PageDown|Home|End| )$/.test(e.key)) interrupt(); });
     }
@@ -661,14 +588,14 @@
     var host = host0, y = root.scrollY;
     build(host); bind0(host);
     host.querySelectorAll('[data-comp]').forEach(mountComp);
-    gate(); meta(); setupObservers(); Voice.watch(host);
+    gate(); meta(); setupObservers();
     if (PREVIEW) { host.querySelectorAll('.blk').forEach(function (el) { el.classList.add('in'); }); root.scrollTo(0, y); }
   }
   var bound = false;
   function bind0(host) { if (!bound) { bound = true; bind(host); } }
   function start() {
     if (started) return; started = true;
-    render(); chrome(); Voice.init(); Auto.init();
+    render(); chrome(); Auto.init();
     document.documentElement.classList.add('ready');
     var problems = validate(); if (DEV && problems.length && root.console) console.warn('[story] 콘텐츠 점검:\n' + problems.join('\n'));
     if (!PREVIEW) track('onboarding_started', { dev: DEV ? 1 : 0 }, true);

@@ -740,27 +740,6 @@ summary { cursor:pointer; padding:4px 0; }
   }
   function blockIds() { return HM.story.blocks.map(function (b) { return b.id; }).filter(Boolean); }
 
-  // 이 블록을 읽어 줄 문장 (A안 기준, *강조* 표시 제거)
-  function plain(x) { if (isObj(x)) x = x.A; return String(x == null ? '' : x).replace(/\*/g, '').replace(/\s*\n\s*/g, ' ').trim(); }
-  function blockSpeech(b) {
-    var parts = ['kicker', 'title', 'headline', 'subtitle', 'body', 'text', 'description'].map(function (k) { return plain(b[k]); });
-    if (b.type === 'quote') parts = [plain(b.text)];
-    if (b.steps) parts = parts.concat(b.steps.map(function (s) { return plain(s.title) + '. ' + plain(s.text); }));
-    if (b.type === 'chain') parts = parts.concat([(b.items || []).map(plain).join(', '), plain(b.result)]);
-    return parts.filter(Boolean).join(' ').slice(0, 2000);
-  }
-  // 기본 연출의 목소리 설정(연출 → 목소리 설정)으로 음성 파일을 만든다 → 재생 주소
-  function genVoice(text) {
-    var v = F.resolve({}, S.defaults || {}).voice || {}, oa = v.engine === 'openai';
-    if (!text) return Promise.reject(new Error('읽어 줄 문구가 없습니다'));
-    if (text.length > 500) return Promise.reject(new Error('문구가 500자를 넘어 한 번에 만들 수 없습니다 (' + text.length + '자). 블록을 나누거나 음성을 직접 올려 주세요'));
-    if (v.engine === 'browser' || !v.engine) return Promise.reject(new Error('목소리 엔진이 정해져 있지 않습니다. 클립 라이브러리 → 기본 연출 → 목소리 설정에서 일레븐랩스 또는 OpenAI를 고르세요'));
-    if (!oa && !v.elVoice) return Promise.reject(new Error('일레븐랩스 목소리를 먼저 고르세요 (기본 연출 → 목소리 설정)'));
-    var body = oa ? { provider: 'openai', text: text, voice: v.oaVoice, model: v.oaModel, instructions: v.oaInstr, speed: v.oaSpeed }
-      : { text: text, voiceId: v.elVoice, model: v.elModel, stability: v.elStability, similarity: v.elSimilarity, style: v.elStyle, speed: v.elSpeed };
-    return api('/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (r) { return '/api/clipfile?k=' + encodeURIComponent(r.key); });
-  }
-
   // 칸 하나. d = [키, 이름, 종류, 옵션]
   function hmField(obj, d, onFocus) {
     var k = d[0], t = d[2], o = d[3], lab = mk('label', 'hmf' + (t === 'b' ? ' chk' : '')), el;
@@ -786,23 +765,6 @@ summary { cursor:pointer; padding:4px 0; }
     } else if (t === 'ls') { // 한 줄에 하나
       el = mk('textarea'); el.rows = 3; el.value = (obj[k] || []).join('\n');
       el.oninput = function () { obj[k] = el.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean); hmChanged(); };
-    } else if (t === 'au') { // 음성: 직접 올리기 또는 블록 문구로 만들기
-      var aw = mk('span'); aw.style.cssText = 'display:grid;gap:6px';
-      var ar = mk('span', 'hmimg'); el = mk('input'); el.type = 'text'; el.placeholder = '음성 올리기·만들기 또는 주소'; el.value = obj[k] || '';
-      var af = mk('input'); af.type = 'file'; af.accept = 'audio/mpeg,audio/mp4,audio/wav,audio/ogg,.mp3,.m4a,.wav,.ogg';
-      var aup = mk('button', '', '올리기'); aup.type = 'button'; var agen = mk('button', '', '문구로 만들기'); agen.type = 'button'; agen.title = '이 블록의 글을 기본 목소리로 읽은 음성 파일을 만듭니다(크레딧이 사용됩니다)';
-      var aclr = mk('button', 'sm', '✕'); aclr.type = 'button'; aclr.title = '음성 지우기';
-      var amsg = mk('span', 'muted'); amsg.style.fontSize = '.74rem'; var aud = mk('audio'); aud.controls = true; aud.style.cssText = 'width:100%;height:32px'; aud.preload = 'none';
-      function aset(u) { if (u) obj[k] = u; else delete obj[k]; el.value = u || ''; if (u) { aud.src = /^(https:\/\/|\/)/.test(u) ? u : '/report/story/img/' + u; aud.style.display = ''; } else aud.style.display = 'none'; hmChanged(); }
-      aset.init = function () { if (obj[k]) { aud.src = /^(https:\/\/|\/)/.test(obj[k]) ? obj[k] : '/report/story/img/' + obj[k]; } else aud.style.display = 'none'; }; aset.init();
-      el.oninput = function () { aset(el.value.trim()); };
-      aup.onclick = function () { af.click(); };
-      af.onchange = function () { var f = af.files[0]; if (!f) return; amsg.textContent = '올리는 중…'; aup.disabled = true;
-        hmUpload(f, 0, function (url) { aset(url); amsg.textContent = '올렸습니다 — 저장하면 반영됩니다'; aup.disabled = false; }, function (m) { amsg.textContent = m; aup.disabled = false; }); af.value = ''; };
-      agen.onclick = function () { agen.disabled = true; amsg.textContent = '만드는 중…'; genVoice(blockSpeech(obj)).then(function (u) { aset(u); amsg.textContent = '만들었습니다 — 저장하면 반영됩니다'; }, function (e) { amsg.textContent = e.message; }).then(function () { agen.disabled = false; }); };
-      aclr.onclick = function () { aset(''); amsg.textContent = ''; };
-      ar.appendChild(el); ar.appendChild(aup); ar.appendChild(agen); ar.appendChild(aclr); ar.appendChild(af);
-      aw.appendChild(ar); aw.appendChild(aud); aw.appendChild(amsg); lab.appendChild(aw); return lab;
     } else if (t === 'i' || t === 'v') {
       var wrap = mk('span', 'hmimg'), th = mk('img', 'hmthumb'); th.alt = '';
       el = mk('input'); el.type = 'text'; el.placeholder = t === 'v' ? '영상 올리기 또는 주소' : '이미지 올리기 또는 경로 (예: problem/problem-01.webp)';
@@ -856,7 +818,7 @@ summary { cursor:pointer; padding:4px 0; }
     var lab = mk('label', 'hmf'), v = String(obj[k] || ''), kind = v.indexOf('scroll:') === 0 ? 'scroll' : v.indexOf('href:') === 0 ? 'href' : v === 'purchase' ? 'purchase' : v === 'auto:start' ? 'auto' : 'flow';
     lab.appendChild(mk('span', '', label));
     var row = mk('span'); row.style.cssText = 'display:flex;gap:6px';
-    var sel = mk('select'); [['scroll', '다른 블록으로 이동'], ['flow', '올해의 흐름 열기'], ['purchase', '구매 영역으로 이동'], ['auto', '자동 스크롤+음성 시작'], ['href', '주소로 이동']].forEach(function (x) { var op = mk('option', '', x[1]); op.value = x[0]; sel.appendChild(op); });
+    var sel = mk('select'); [['scroll', '다른 블록으로 이동'], ['flow', '올해의 흐름 열기'], ['purchase', '구매 영역으로 이동'], ['auto', '자동 스크롤 시작'], ['href', '주소로 이동']].forEach(function (x) { var op = mk('option', '', x[1]); op.value = x[0]; sel.appendChild(op); });
     sel.value = kind;
     var tgt = mk('input'); tgt.type = 'text'; tgt.style.flex = '1'; tgt.value = kind === 'scroll' ? v.slice(7) : kind === 'href' ? v.slice(5) : '';
     var ids = blockIds(); if (ids.length) { tgt.setAttribute('list', 'idlist'); var dl = document.getElementById('idlist') || mk('datalist'); dl.id = 'idlist'; dl.innerHTML = ids.map(function (i) { return '<option value="' + esc(i) + '">'; }).join(''); document.body.appendChild(dl); }
@@ -924,7 +886,6 @@ summary { cursor:pointer; padding:4px 0; }
       var body = mk('div'); body.style.padding = '2px 6px 8px';
       var fields = b.type === 'component' ? (SCH.COMPONENT_FIELDS[b.name] || []) : (SCH.TYPES[b.type] || { fields: [] }).fields;
       if (!fields.length) body.appendChild(mk('p', 'muted', b.type === 'divider' ? '구분선은 바꿀 내용이 없습니다.' : '이 기능 블록은 계산 결과를 그대로 보여 줍니다. 아래 "문구 설정"에서 안의 문구를 고칠 수 있어요.'));
-      body.insertBefore(hmField(b, ['voice', '🔊 음성 (이 블록이 화면에 머물 때 재생)', 'au']), body.firstChild);
       fields.forEach(function (f) { body.appendChild(hmField(b, f)); });
       var adv = mk('details', 'hmg'); adv.appendChild(mk('summary', '', '고급 옵션 (언제 보일지·등장 효과·이름표)')); adv.firstChild.style.cssText = 'font-size:.8rem;color:var(--ink2)';
       SCH.COMMON.forEach(function (f) { adv.appendChild(hmField(b, f)); }); body.appendChild(adv);
@@ -945,18 +906,7 @@ summary { cursor:pointer; padding:4px 0; }
       var c = document.querySelector('#hmForm details[data-i="' + at + '"]'); if (c) c.scrollIntoView({ block: 'nearest' });
     };
     add.appendChild(sel); add.appendChild(ab);
-    var vb = mk('button', '', '🔊 음성 없는 블록 모두 만들기'); vb.type = 'button'; vb.title = '음성이 없고 읽을 글이 있는 블록마다 기본 목소리로 음성을 만듭니다';
-    vb.onclick = function () {
-      var t = st.blocks.filter(function (b) { return !b.voice && !b.hide && b.type !== 'component' && blockSpeech(b); });
-      if (!t.length) { alert('만들 블록이 없습니다.'); return; }
-      var chars = t.reduce(function (n, b) { return n + blockSpeech(b).length; }, 0), long = t.filter(function (b) { return blockSpeech(b).length > 500; });
-      if (!confirm(t.length + '개 블록, 약 ' + chars + '자의 음성을 만듭니다. 목소리 서비스 크레딧이 사용됩니다.' + (long.length ? '\n(500자를 넘는 ' + long.length + '개는 건너뜁니다)' : '') + '\n계속할까요?')) return;
-      vb.disabled = true; var n = 0, fail = '';
-      t.filter(function (b) { return blockSpeech(b).length <= 500; }).reduce(function (p, b) {
-        return p.then(function () { if (fail) return; vb.textContent = '만드는 중… ' + (++n) + '/' + t.length; return genVoice(blockSpeech(b)).then(function (u) { b.voice = u; hmChanged(); }, function (e) { fail = e.message; }); });
-      }, Promise.resolve()).then(function () { hmBuild(); $('hmState').innerHTML = fail ? '<span class="err">' + esc(fail) + '</span>' : '<span class="ok">음성 ' + n + '개를 만들었습니다 — 저장하면 반영됩니다</span>'; });
-    };
-    add.appendChild(vb); root.appendChild(add);
+    root.appendChild(add);
     // 3) 문구 설정 묶음
     root.appendChild(mk('div', 'hmsec', '문구 설정 (사주 입력·결과·구매 화면 등)'));
     SCH.GROUPS.forEach(function (g) {

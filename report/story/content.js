@@ -37,7 +37,7 @@
 
    ■ 블록 종류 (type)
      headline    큰 한 문장. title, kicker(위 작은 글씨), subtitle, size('xl'|'l'|'m'), fullscreen(true면 한 화면 가득), scrollHint(true면 아래 스크롤 안내),
-                 startButton(버튼 글자를 적으면 버튼이 생기고, 누르면 자동으로 내려가며 음성이 재생됩니다)
+                 startButton(버튼 글자를 적으면 버튼이 생기고, 누르면 자동으로 내려갑니다)
      text        설명 글. title, subtitle, body, emphasis(true면 강조 스타일)
      quote       강조 문구. text, cite(출처, 선택)
      image       이미지. src, srcMobile, alt, caption, width('narrow'|'normal'|'wide'), aspectRatio('4/5','16/9'…), objectFit('cover'|'contain'), todo
@@ -53,7 +53,6 @@
      divider     장면 전환 구분선
      cta         버튼. headline, description, buttonText, action, variant('primary'|'ghost')
                    action: 'scroll:블록id' | 'href:/주소' | 'flow:open'(운 흐름 열기) | 'purchase'(구매) | 'auto:start'(자동 스크롤 시작)
-     voice       (모든 블록 공통) 음성 파일. 블록이 화면 가운데에 오면 재생됩니다. 예) voice: 'voice/hero.mp3'
      component   기능 블록(수정 불필요). name: 'SajuInput' | 'FreeResult' | 'FlowPreview' | 'LockedContent' | 'Paywall'
 
    ■ A/B 문구
