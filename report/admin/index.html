@@ -283,7 +283,10 @@ summary { cursor:pointer; padding:4px 0; }
           <b>인트로 문구</b> <span class="muted">영상 위에 글자를 띄웁니다. 비워 두면 영상만 재생됩니다. 시간은 영상 시작 기준 초입니다.</span>
           <div id="inCues" style="margin-top:8px"></div>
           <button type="button" id="inCueAdd" style="margin-top:6px">+ 문구 추가</button>
-          <details style="margin-top:10px" open><summary>글자 모양·위치·애니메이션</summary><p class="muted" style="margin:6px 0 0;font-size:.78rem">비워 두면 기본값을 씁니다. 글씨체, 크기, 색, 테두리, 그림자·글로우, 위치, 등장·퇴장 애니메이션, 강조 효과를 고를 수 있어요.</p><div id="inFx" style="margin-top:8px"></div></details>
+          <details style="margin-top:10px" open><summary>글자 모양·위치·애니메이션</summary>
+            <p class="muted" style="margin:6px 0 0;font-size:.78rem">글자 크기는 <b>화면 폭에 비례</b>해서, 같은 값이어도 웹(넓은 화면)에서는 모바일보다 훨씬 크게 보입니다. <b>웹·모바일 탭</b>에서 기기별로 따로 맞추세요. 웹/모바일 칸을 비워 두면 공통 값을 씁니다.</p>
+            <div class="row" id="inFxTabs" style="margin:8px 0"><button type="button" data-d="base" class="pri">공통</button><button type="button" data-d="ow">웹 (PC)</button><button type="button" data-d="om">모바일</button></div>
+            <div id="inFx"></div><div id="inFxOw" class="hide"></div><div id="inFxOm" class="hide"></div></details>
           <div class="row" style="margin-top:10px;align-items:center"><button type="button" id="inPlay">▶ 문구 미리보기</button><button type="button" id="inPlayStop">■ 정지</button>
             <label style="flex-direction:row;align-items:center;gap:6px"><input type="radio" name="inDev" value="mo" checked style="width:auto"> 모바일 영상</label>
             <label style="flex-direction:row;align-items:center;gap:6px"><input type="radio" name="inDev" value="pc" style="width:auto"> 웹 영상</label></div>
@@ -586,12 +589,30 @@ summary { cursor:pointer; padding:4px 0; }
   function inCuesRead() {
     return Array.prototype.map.call($('inCues').querySelectorAll('.row'), function (d) { return { t: d.querySelector('.ict').value.trim(), s: +d.querySelector('.ics').value || 0, e: +d.querySelector('.ice').value || 0 }; }).filter(function (c) { return c.t && c.e > c.s; });
   }
-  function inFxRead() { var fx = readFx($('inFx')); var out = {}; if (fx.sub) out.sub = fx.sub; if (fx.trans) out.trans = fx.trans; out.cues = inCuesRead(); return out; }
-  function inFxBuild(fx) {
-    fxForm($('inFx'), fx, '(기본)');
-    $('inFx').querySelectorAll('details').forEach(function (d) { var el = d.querySelector('[data-g]'); if (el && el.dataset.g !== 'sub' && el.dataset.g !== 'trans') d.remove(); });
+  function inGroups(box) { var fx = readFx(box), out = {}; if (fx.sub) out.sub = fx.sub; if (fx.trans) out.trans = fx.trans; return out; }
+  // 공통(문구 포함) + 웹·모바일에서 덮어쓸 값
+  function inFxRead() { var out = inGroups($('inFx')); out.cues = inCuesRead(); return out; }
+  function inFxReadAll() { return { fx: inFxRead(), fxPc: inGroups($('inFxOw')), fxMobile: inGroups($('inFxOm')) }; }
+  // 기기(pc|mo)에서 실제로 쓰이는 연출: 공통 위에 그 기기의 값을 덮어쓴다
+  function inFxFor(dev) {
+    var all = inFxReadAll(), ov = dev === 'pc' ? all.fxPc : all.fxMobile, out = { cues: all.fx.cues };
+    ['sub', 'trans'].forEach(function (g) { var o = Object.assign({}, all.fx[g], ov[g]); if (Object.keys(o).length) out[g] = o; });
+    return out;
+  }
+  function inFxBuild(fx, ow, om) {
+    [['inFx', fx, '(기본)'], ['inFxOw', ow, '(공통과 같음)'], ['inFxOm', om, '(공통과 같음)']].forEach(function (x) {
+      var box = $(x[0]); fxForm(box, x[1], x[2]);
+      box.querySelectorAll('details').forEach(function (d) { var el = d.querySelector('[data-g]'); if (el && el.dataset.g !== 'sub' && el.dataset.g !== 'trans') d.remove(); });
+    });
     $('inCues').innerHTML = ''; ((fx && fx.cues) || []).forEach(inCueRow);
   }
+  $('inFxTabs').querySelectorAll('button').forEach(function (b) {
+    b.onclick = function () {
+      $('inFxTabs').querySelectorAll('button').forEach(function (x) { x.classList.toggle('pri', x === b); });
+      var d = b.dataset.d; $('inFx').classList.toggle('hide', d !== 'base'); $('inFxOw').classList.toggle('hide', d !== 'ow'); $('inFxOm').classList.toggle('hide', d !== 'om');
+      if (d !== 'base') { var r = document.querySelector('input[name=inDev][value=' + (d === 'ow' ? 'pc' : 'mo') + ']'); if (r) r.checked = true; } // 미리보기도 그 기기로
+    };
+  });
   $('inCueAdd').onclick = function () { var last = Array.prototype.slice.call($('inCues').querySelectorAll('.ice')).pop(); var s = last ? +last.value || 0 : 0; inCueRow({ t: '', s: s + 0.3, e: s + 3 }); };
   var inPlayer = null;
   function inStop() { if (inPlayer) { inPlayer.stop(); inPlayer = null; } $('inStage').innerHTML = ''; }
@@ -600,7 +621,7 @@ summary { cursor:pointer; padding:4px 0; }
     inStop();
     var dev = (document.querySelector('input[name=inDev]:checked') || {}).value || 'mo', src = IN[dev === 'pc' ? 'pc' : 'mo'] || IN[dev === 'pc' ? 'mo' : 'pc'];
     var st = $('inStage'); st.style.aspectRatio = dev === 'pc' ? '16/9' : '9/16'; st.style.maxWidth = dev === 'pc' ? '560px' : '300px';
-    var fx = inFxRead(); fx.video = { loop: 'freeze', hold: 0.4 };
+    var fx = inFxFor(dev === 'pc' ? 'pc' : 'mo'); fx.video = { loop: 'freeze', hold: 0.4 };
     inPlayer = F.play(st, { clip: { fx: fx }, url: src ? srcUrl(src) : '', muteVideo: true, silent: true, defaults: {}, onend: function () { $('inState').textContent = '미리보기 끝'; } });
   };
   var IN = { pc: null, mo: null };
@@ -612,7 +633,7 @@ summary { cursor:pointer; padding:4px 0; }
   function introLoad() {
     api('/api/intro').then(function (d) {
       IN.pc = d.src || null; IN.mo = d.srcMobile || null; $('inOn').checked = !!d.on;
-      inFxBuild(d.fx); $('inSkip').value = String(d.skipAfter || 0); $('inOnce').value = d.once || 'session';
+      inFxBuild(d.fx, d.fxPc, d.fxMobile); $('inSkip').value = String(d.skipAfter || 0); $('inOnce').value = d.once || 'session';
       ['pc', 'mo'].forEach(function (k) { $('inUrl_' + k).value = IN[k] && IN[k].type === 'url' ? IN[k].value : ''; $('inUp_' + k).disabled = $('inFile_' + k).disabled = !S.r2; introShow(k); });
     }).catch(function (e) { $('inState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   }
@@ -642,14 +663,14 @@ summary { cursor:pointer; padding:4px 0; }
   });
   $('inSave').onclick = function () {
     $('inState').textContent = '저장 중…';
-    api('/api/intro', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: $('inOn').checked, src: IN.pc, srcMobile: IN.mo, fx: inFxRead(), skipAfter: +$('inSkip').value, once: $('inOnce').value }) })
+    api('/api/intro', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: $('inOn').checked, src: IN.pc, srcMobile: IN.mo, fx: inFxRead(), fxPc: inGroups($('inFxOw')), fxMobile: inGroups($('inFxOm')), skipAfter: +$('inSkip').value, once: $('inOnce').value }) })
       .then(function () { $('inState').innerHTML = '<span class="ok">저장됨 — ' + ($('inOn').checked ? '켜짐' : '꺼짐') + '</span>'; })
       .catch(function (e) { $('inState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };
 
   // ── 홈 화면 편집 (클립 저장과 별개로 /api/home에 저장). 미리보기는 판매 페이지를 iframe으로 띄우고 설정을 postMessage로 보낸다.
   // 미리보기에서 글자·이미지를 누르면 경로(k)가 오고(mt-pick), 끌면 위치가 온다(mt-move). 서식은 글자가 속한 객체의 st[필드]에 저장한다.
-  var MH = window.MantraHome, HM = { cfg: null, dirty: false, mode: 'pc', open: {}, loaded: false, frameOn: false, sel: null };
+  var MH = window.MantraHome, HM = { cfg: null, dirty: false, mode: 'pc', open: {}, loaded: false, frameOn: false, sel: null, tgt: 'ow' }; // tgt: 값을 쓰는 대상 — base=공통, ow=웹(PC), om=모바일
   function hmSend(msg) { try { $('hmFrame').contentWindow.postMessage(msg, location.origin); } catch (e) {} }
   function hmPush() { if (HM.cfg && HM.frameOn) hmSend({ t: 'mt-home', cfg: HM.cfg }); }
   var hmTimer;
@@ -659,8 +680,13 @@ summary { cursor:pointer; padding:4px 0; }
     var W = HM.mode === 'pc' ? 1280 : 390, k = Math.min(1, bw / W);
     f.style.width = W + 'px'; f.style.height = (bh / k) + 'px'; f.style.transform = 'scale(' + k + ')'; f.style.left = Math.max(0, (bw - W * k) / 2) + 'px';
   }
-  $('hmPc').onclick = function () { HM.mode = 'pc'; $('hmPc').classList.add('pri'); $('hmMo').classList.remove('pri'); hmFit(); };
-  $('hmMo').onclick = function () { HM.mode = 'mo'; $('hmMo').classList.add('pri'); $('hmPc').classList.remove('pri'); hmFit(); };
+  function hmMode(m) { // 미리보기 기기를 바꾼다. 기기별 값을 편집 중이면 편집 대상도 같이 바뀐다.
+    HM.mode = m; $('hmPc').classList.toggle('pri', m === 'pc'); $('hmMo').classList.toggle('pri', m === 'mo'); hmFit();
+    if (HM.tgt !== 'base') HM.tgt = m === 'pc' ? 'ow' : 'om';
+    hmSelRender();
+  }
+  $('hmPc').onclick = function () { hmMode('pc'); };
+  $('hmMo').onclick = function () { hmMode('mo'); };
   window.addEventListener('resize', function () { if (!$('t-home').classList.contains('hide')) hmFit(); });
   $('hmFrame').addEventListener('load', function () { HM.frameOn = true; hmFit(); hmPush(); if (HM.sel) hmSend({ t: 'mt-sel', k: HM.sel }); });
   window.addEventListener('beforeunload', function (e) { if (HM.dirty) { e.preventDefault(); e.returnValue = ''; } });
@@ -761,19 +787,44 @@ summary { cursor:pointer; padding:4px 0; }
   var ST_DEFS = [['font', '글씨체', 'f'], ['sz', '크기 % (기본 100)', 'n', [20, 500, 5, 100]], ['wt', '굵기', 's', [['', '(기본)'], ['300', '얇게 300'], ['400', '보통 400'], ['500', '500'], ['600', '600'], ['700', '굵게 700'], ['900', '아주 굵게 900']]],
     ['color', '글자 색', 'c'], ['align', '정렬', 's', [['', '(기본)'], ['left', '왼쪽'], ['center', '가운데'], ['right', '오른쪽']]], ['ls', '글자 간격 (0.01em)', 'n', [-10, 80, 1, 0]],
     ['lh', '줄 간격 %', 'n', [80, 300, 5, null]], ['op', '투명도 %', 'n', [0, 100, 5, 100]], ['dx', '가로 이동 px', 'n', [-1000, 1000, 1, 0]], ['dy', '세로 이동 px', 'n', [-1000, 1000, 1, 0]], ['it', '기울임', 'b']];
+  var DEVNAME = { base: '공통', ow: '웹', om: '모바일' };
+  var DC_OV = ['x', 'y', 'w', 'rot', 'op']; // 장식 이미지에서 기기별로 따로 줄 수 있는 값
+  // 편집 대상 객체: 공통이면 root 자체, 웹·모바일이면 root.ow / root.om (공통 값 위에 덮어쓰는 값)
+  function hmTarget(root) { return HM.tgt === 'base' ? root : (root[HM.tgt] = root[HM.tgt] || {}); }
+  function hmWithBase(d, root) { // 기기별 값 칸의 안내 글(placeholder)에 공통 값을 보여 준다
+    if (d[2] !== 'n') return d;
+    var bv = HM.tgt === 'base' || root[d[0]] == null ? d[3][3] : root[d[0]], r = d.slice(); r[3] = [d[3][0], d[3][1], d[3][2], bv]; return r;
+  }
   function hmSelRender() {
     var box = $('hmSel'), info = hmResolve(HM.sel); box.innerHTML = '';
     if (!info) { HM.sel = null; box.innerHTML = '<span class="muted" style="font-size:.8rem">미리보기에서 글자나 이미지를 클릭하면 여기서 서식을 바꿉니다. (끌면 위치가 바뀝니다)</span>'; return; }
+    var isDc = info.kind === 'decor';
     var h = document.createElement('div'); h.className = 'row'; h.style.cssText = 'align-items:center;justify-content:space-between;margin-bottom:6px';
-    var tt = document.createElement('b'); tt.style.fontSize = '.85rem'; tt.textContent = info.kind === 'decor' ? '장식 이미지 ' + (info.idx + 1) + ' (' + (info.key === 'hero' ? '첫 화면' : ((info.base.eyebrow || info.base.title || info.base.id) + '')) + ')' : '선택: ' + hmFieldLabel(info);
+    var tt = document.createElement('b'); tt.style.fontSize = '.85rem'; tt.textContent = isDc ? '장식 이미지 ' + (info.idx + 1) + ' (' + (info.key === 'hero' ? '첫 화면' : ((info.base.eyebrow || info.base.title || info.base.id) + '')) + ')' : '선택: ' + hmFieldLabel(info);
     h.appendChild(tt); var bs = document.createElement('span'); bs.style.cssText = 'display:flex;gap:6px';
-    if (info.kind === 'decor') bs.appendChild(hmBtn('삭제', '이 장식 이미지 삭제', function () { info.list.splice(info.idx, 1); HM.sel = null; hmRebuild(); hmSelRender(); hmSend({ t: 'mt-sel', k: null }); }, 'danger'));
-    else bs.appendChild(hmBtn('서식 초기화', '이 글자의 서식을 지웁니다', function () { if (info.obj.st) delete info.obj.st[info.field]; hmSelRender(); hmChanged(); }));
+    var root = isDc ? info.obj : ((info.obj.st = info.obj.st || {})[info.field] = info.obj.st[info.field] || {});
+    if (isDc) bs.appendChild(hmBtn('삭제', '이 장식 이미지 삭제', function () { info.list.splice(info.idx, 1); HM.sel = null; hmRebuild(); hmSelRender(); hmSend({ t: 'mt-sel', k: null }); }, 'danger'));
+    bs.appendChild(hmBtn(HM.tgt === 'base' && !isDc ? '서식 초기화' : DEVNAME[HM.tgt] + ' 값 비우기', '현재 편집 대상(' + DEVNAME[HM.tgt] + ')의 값을 지웁니다', function () {
+      if (HM.tgt === 'base') { if (!isDc) delete info.obj.st[info.field]; } else delete root[HM.tgt];
+      hmSelRender(); hmChanged();
+    }));
     bs.appendChild(hmBtn('선택 해제', '', function () { HM.sel = null; hmSelRender(); hmSend({ t: 'mt-sel', k: null }); }));
     h.appendChild(bs); box.appendChild(h);
-    var g = document.createElement('div'); g.className = 'g2';
-    if (info.kind === 'decor') MH.DECOR.fields.forEach(function (d) { g.appendChild(hmField(info.obj, d)); });
-    else { var st = ((info.obj.st = info.obj.st || {})[info.field] = info.obj.st[info.field] || {}); ST_DEFS.forEach(function (d) { g.appendChild(hmField(st, d)); }); }
+    // 값 적용 대상: 공통 / 웹 / 모바일
+    var dv = document.createElement('div'); dv.className = 'row'; dv.style.cssText = 'align-items:center;gap:6px;margin-bottom:6px';
+    var dl = document.createElement('span'); dl.className = 'muted'; dl.style.fontSize = '.76rem'; dl.textContent = '값 적용 대상'; dv.appendChild(dl);
+    ['base', 'ow', 'om'].forEach(function (k) {
+      dv.appendChild(hmBtn(DEVNAME[k], k === 'base' ? '모든 기기에 적용되는 기본값' : k === 'ow' ? '화면이 넓을 때(PC)만 공통 값을 덮어씁니다' : '화면이 좁을 때(모바일)만 공통 값을 덮어씁니다', function () {
+        HM.tgt = k; if (k === 'ow' && HM.mode !== 'pc') { HM.mode = 'pc'; $('hmPc').classList.add('pri'); $('hmMo').classList.remove('pri'); hmFit(); } if (k === 'om' && HM.mode !== 'mo') { HM.mode = 'mo'; $('hmMo').classList.add('pri'); $('hmPc').classList.remove('pri'); hmFit(); }
+        hmSelRender();
+      }, HM.tgt === k ? 'pri' : ''));
+    });
+    var dn = document.createElement('span'); dn.className = 'muted'; dn.style.fontSize = '.74rem';
+    dn.textContent = HM.tgt === 'base' ? '모든 기기에 같이 적용' : DEVNAME[HM.tgt] + '에서만 다르게 — 비우면 공통 값';
+    dv.appendChild(dn); box.appendChild(dv);
+    var g = document.createElement('div'), tgt = hmTarget(root); g.className = 'g2';
+    if (isDc) MH.DECOR.fields.filter(function (d) { return HM.tgt === 'base' || DC_OV.indexOf(d[0]) >= 0; }).forEach(function (d) { g.appendChild(hmField(tgt, hmWithBase(d, root))); });
+    else ST_DEFS.forEach(function (d) { g.appendChild(hmField(tgt, hmWithBase(d, root))); });
     box.appendChild(g);
   }
   // 선택: 미리보기에서 눌렀거나(fromPreview) 양식 칸에 커서를 둔 경우
@@ -791,8 +842,9 @@ summary { cursor:pointer; padding:4px 0; }
     if (d.t === 'mt-pick') { if (d.k) hmSelect(d.k, true); else { HM.sel = null; hmSelRender(); } }
     else if (d.t === 'mt-move') {
       var info = hmResolve(d.k); if (!info) return;
-      if (info.kind === 'decor') { info.obj.x = d.x; info.obj.y = d.y; }
-      else { var st = (info.obj.st = info.obj.st || {}); (st[info.field] = st[info.field] || {}).dx = d.dx; st[info.field].dy = d.dy; }
+      var root = info.kind === 'decor' ? info.obj : ((info.obj.st = info.obj.st || {})[info.field] = info.obj.st[info.field] || {});
+      var dev = HM.tgt === 'base' ? 'base' : (d.dev || HM.tgt), t = dev === 'base' ? root : (root[dev] = root[dev] || {}); // 공통 편집 중이면 공통 값에, 아니면 끈 기기의 값에 쓴다
+      if (info.kind === 'decor') { t.x = d.x; t.y = d.y; } else { t.dx = d.dx; t.dy = d.dy; }
       hmSelRender(); hmChanged();
     }
   });

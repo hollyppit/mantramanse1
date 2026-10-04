@@ -226,6 +226,7 @@ body.pv .rv { opacity: 1; transform: none; }
 #intro button:hover { border-color: var(--gold); color: var(--gold); }
 #intro .skip { right: 14px; }
 </style>
+<style id="homeDev"></style>
 </head>
 <body>
 <div id="app">
@@ -254,7 +255,7 @@ body.pv .rv { opacity: 1; transform: none; }
   var H = window.MantraHome, reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var preview = /[?&]preview=1\b/.test(location.search); // 관리자 미리보기 창: 인트로 없이, 보내 주는 설정으로 다시 그린다
   var app = document.getElementById('app');
-  var els = { top: document.getElementById('top'), hero: document.getElementById('heroText'), heroBox: document.getElementById('hero'), heroBg: document.getElementById('heroBg'), secs: document.getElementById('secs'), foot: document.getElementById('foot') };
+  var els = { top: document.getElementById('top'), hero: document.getElementById('heroText'), heroBox: document.getElementById('hero'), heroBg: document.getElementById('heroBg'), dev: document.getElementById('homeDev'), secs: document.getElementById('secs'), foot: document.getElementById('foot') };
   var selK = null;
   if (preview) document.body.classList.add('pv');
   function mark(k) {
@@ -314,9 +315,12 @@ body.pv .rv { opacity: 1; transform: none; }
       var el = e.target.closest && e.target.closest('[data-k]');
       if (!el) { mark(null); post({ t: 'mt-pick', k: null }); return; }
       var k = el.dataset.k; mark(k); post({ t: 'mt-pick', k: k });
-      drag = { el: el, k: k, dc: el.classList.contains('dc'), sx: e.clientX, sy: e.clientY, moved: false };
-      if (drag.dc) { drag.x0 = parseFloat(el.style.left) || 0; drag.y0 = parseFloat(el.style.top) || 0; drag.rect = el.parentElement.getBoundingClientRect(); }
-      else { drag.dx0 = +el.dataset.dx || 0; drag.dy0 = +el.dataset.dy || 0; drag.zk = +el.dataset.zk || 1; }
+      // 화면 폭이 768px 이하면 모바일 값(om), 아니면 웹 값(ow)을 기준으로 옮긴다
+      var dev = window.matchMedia('(max-width: 768px)').matches ? 'om' : 'ow';
+      function ds(name, base) { var v = el.dataset[dev + name]; return v !== undefined ? +v : base; }
+      drag = { el: el, k: k, dev: dev, dc: el.classList.contains('dc'), sx: e.clientX, sy: e.clientY, moved: false };
+      if (drag.dc) { drag.x0 = ds('X', parseFloat(el.style.left) || 0); drag.y0 = ds('Y', parseFloat(el.style.top) || 0); drag.rect = el.parentElement.getBoundingClientRect(); }
+      else { drag.dx0 = ds('Dx', +el.dataset.dx || 0); drag.dy0 = ds('Dy', +el.dataset.dy || 0); drag.zk = ds('Zk', +el.dataset.zk || 1); }
     }, true);
     document.addEventListener('pointermove', function (e) {
       if (!drag) return;
@@ -325,14 +329,14 @@ body.pv .rv { opacity: 1; transform: none; }
       drag.moved = true; e.preventDefault();
       if (drag.dc) {
         drag.nx = Math.round((drag.x0 + ddx / (drag.rect.width || 1) * 100) * 10) / 10; drag.ny = Math.round((drag.y0 + ddy / (drag.rect.height || 1) * 100) * 10) / 10;
-        drag.el.style.left = drag.nx + '%'; drag.el.style.top = drag.ny + '%';
+        drag.el.style.setProperty('left', drag.nx + '%', 'important'); drag.el.style.setProperty('top', drag.ny + '%', 'important');
       } else {
         drag.ndx = Math.round(drag.dx0 + ddx); drag.ndy = Math.round(drag.dy0 + ddy);
-        drag.el.style.position = 'relative'; drag.el.style.left = (drag.ndx / drag.zk) + 'px'; drag.el.style.top = (drag.ndy / drag.zk) + 'px';
+        drag.el.style.setProperty('position', 'relative', 'important'); drag.el.style.setProperty('left', (drag.ndx / drag.zk) + 'px', 'important'); drag.el.style.setProperty('top', (drag.ndy / drag.zk) + 'px', 'important');
       }
     }, true);
     document.addEventListener('pointerup', function () {
-      if (drag && drag.moved) post(drag.dc ? { t: 'mt-move', k: drag.k, x: drag.nx, y: drag.ny } : { t: 'mt-move', k: drag.k, dx: drag.ndx, dy: drag.ndy });
+      if (drag && drag.moved) post(drag.dc ? { t: 'mt-move', k: drag.k, dev: drag.dev, x: drag.nx, y: drag.ny } : { t: 'mt-move', k: drag.k, dev: drag.dev, dx: drag.ndx, dy: drag.ndy });
       drag = null;
     }, true);
   }
@@ -365,7 +369,9 @@ body.pv .rv { opacity: 1; transform: none; }
         v.removeAttribute('src'); stage = document.createElement('div'); stage.style.cssText = 'position:absolute;inset:0'; box.appendChild(stage); box.appendChild(skip);
         var js = document.createElement('script'); js.src = 'fx.js';
         js.onload = function () {
-          var fx = Object.assign({}, c.fx, { video: { loop: 'freeze', hold: 0.3 } });
+          // 공통 연출 위에 이 기기(모바일/웹)용 값을 덮어쓴다 — 글자 크기는 화면 폭에 비례하므로 기기별로 따로 맞춘다
+          var ov = (mobile ? c.fxMobile : c.fxPc) || {}, fx = { cues: c.fx.cues, video: { loop: 'freeze', hold: 0.3 } };
+          ['sub', 'trans'].forEach(function (g) { var o = Object.assign({}, c.fx[g], ov[g]); if (Object.keys(o).length) fx[g] = o; });
           player = window.MovingFx.play(stage, { clip: { fx: fx }, url: url, muteVideo: true, silent: true, defaults: {}, onend: close, onerror: close });
         };
         js.onerror = close; document.head.appendChild(js);

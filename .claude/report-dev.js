@@ -41,7 +41,7 @@ http.createServer(async (q, r) => {
   }
   if (p === '/api/intro') {
     const u1 = x => !x ? '' : x.type === 'r2' ? '/api/clipfile?k=' + encodeURIComponent(x.value) : x.value, urlOf = c => ({ url: u1(c.src), urlMobile: u1(c.srcMobile) });
-    if (q.method === 'PUT') { if (!authed(q)) return send(r, 401, { error: '관리자 인증이 필요합니다' }); const b = JSON.parse((await body(q)).toString()); if (b.on && !b.src && !b.srcMobile) return send(r, 400, { error: '영상을 올리거나 주소를 입력한 뒤 켜세요' }); intro = { on: !!b.on, src: b.src || null, srcMobile: b.srcMobile || null, fx: b.fx || {}, skipAfter: +b.skipAfter || 0, once: b.once === 'always' ? 'always' : 'session' }; return send(r, 200, { ok: true, ...intro, ...urlOf(intro) }); }
+    if (q.method === 'PUT') { if (!authed(q)) return send(r, 401, { error: '관리자 인증이 필요합니다' }); const b = JSON.parse((await body(q)).toString()); if (b.on && !b.src && !b.srcMobile) return send(r, 400, { error: '영상을 올리거나 주소를 입력한 뒤 켜세요' }); intro = { on: !!b.on, src: b.src || null, srcMobile: b.srcMobile || null, fx: b.fx || {}, fxPc: b.fxPc || {}, fxMobile: b.fxMobile || {}, skipAfter: +b.skipAfter || 0, once: b.once === 'always' ? 'always' : 'session' }; return send(r, 200, { ok: true, ...intro, ...urlOf(intro) }); }
     if (!authed(q) && (!intro.on || !(intro.src || intro.srcMobile))) return send(r, 200, { on: false });
     return send(r, 200, { ...intro, ...urlOf(intro) });
   }

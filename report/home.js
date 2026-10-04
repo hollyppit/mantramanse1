@@ -120,13 +120,13 @@
   };
 
   // ── 글자 서식 → 인라인 스타일
-  function styleOf(st) {
+  function styleOf(st, force) {
     var c = [], k = 1;
     if (!st) return { css: '', k: 1, dx: 0, dy: 0 };
     if (+st.sz > 0) k = Math.max(0.2, Math.min(5, +st.sz / 100));
     var F = fonts();
     if (st.font && F[st.font]) c.push('font-family:' + F[st.font]);
-    if (k !== 1) c.push('zoom:' + k);
+    if (k !== 1 || force) c.push('zoom:' + k);
     if (+st.wt) c.push('font-weight:' + (+st.wt));
     if (hex(st.color)) c.push('color:' + st.color);
     if (/^(left|center|right)$/.test(st.align || '')) c.push('text-align:' + st.align);
@@ -135,12 +135,31 @@
     if (st.op !== undefined && st.op !== null && st.op !== '' && isFinite(+st.op)) c.push('opacity:' + (+st.op / 100));
     if (st.it) c.push('font-style:italic');
     var dx = num(st.dx, 0), dy = num(st.dy, 0);
-    if (dx || dy) c.push('position:relative;left:' + (dx / k) + 'px;top:' + (dy / k) + 'px'); // zoom이 길이도 키우므로 나눠서 실제 px로 맞춘다
+    if (dx || dy || force) c.push('position:relative;left:' + (dx / k) + 'px;top:' + (dy / k) + 'px'); // zoom이 길이도 키우므로 나눠서 실제 px로 맞춘다
     return { css: c.join(';'), k: k, dx: dx, dy: dy };
   }
+  // 기기별 값: st(또는 장식 이미지 객체)의 ow(웹, 화면 폭 769px 이상)·om(모바일, 768px 이하)이 공통 값 위에 덮어쓴다.
+  // 공통 값은 인라인 스타일로, 기기별 값은 @media 규칙(!important)으로 낸다.
+  var RULES = [], DEVMEDIA = { ow: '@media (min-width:769px)', om: '@media (max-width:768px)' };
+  function merged(o, dev) {
+    var r = {}; Object.keys(o).forEach(function (k) { if (k !== 'ow' && k !== 'om') r[k] = o[k]; });
+    var ov = o[dev]; if (ov) Object.keys(ov).forEach(function (k) { if (ov[k] !== undefined && ov[k] !== '' && ov[k] !== null) r[k] = ov[k]; });
+    return r;
+  }
+  function important(css) { return css.split(';').filter(Boolean).map(function (x) { return x + ' !important'; }).join(';'); }
+  function devRule(path, dev, css) { if (/^[\w\/-]+$/.test(path)) RULES.push(DEVMEDIA[dev] + '{[data-k="' + path + '"]{' + important(css) + '}}'); }
   function attr(path, st) {
-    var s = styleOf(st);
-    return ' data-k="' + esc(path) + '"' + (st ? ' data-dx="' + s.dx + '" data-dy="' + s.dy + '" data-zk="' + s.k + '"' : '') + (s.css ? ' style="' + esc(s.css) + '"' : '');
+    var s = styleOf(st && merged(st, '')), extra = '';
+    if (st) {
+      extra = ' data-dx="' + s.dx + '" data-dy="' + s.dy + '" data-zk="' + s.k + '"';
+      ['ow', 'om'].forEach(function (dev) {
+        if (!st[dev] || !Object.keys(st[dev]).length) return;
+        var e = styleOf(merged(st, dev), true);
+        extra += ' data-' + dev + '-dx="' + e.dx + '" data-' + dev + '-dy="' + e.dy + '" data-' + dev + '-zk="' + e.k + '"';
+        devRule(path, dev, e.css);
+      });
+    }
+    return ' data-k="' + esc(path) + '"' + extra + (s.css ? ' style="' + esc(s.css) + '"' : '');
   }
   // obj[field] 글자를 태그로 감싼다. 서식은 obj.st[field]
   function T(tag, cls, P, obj, field, html, extra) {
@@ -159,12 +178,18 @@
     var bs = (hex(o.bgColor) ? 'background:' + o.bgColor + ';' : '') + (fade ? 'mask-image:linear-gradient(transparent,#000 ' + fade + '%,#000 ' + (100 - fade) + '%,transparent);-webkit-mask-image:linear-gradient(transparent,#000 ' + fade + '%,#000 ' + (100 - fade) + '%,transparent)' : '');
     return '<div class="secbg' + (o.bgFixed ? ' fixed' : '') + '" aria-hidden="true"' + (bs ? ' style="' + esc(bs) + '"' : '') + '>' + pic(o.bgSrc, o.bgMobileSrc, '', is, base) + (dark ? '<i style="background:rgba(0,0,0,' + dark + ')"></i>' : '') + '</div>';
   }
+  function dcCss(d) {
+    return 'left:' + num(d.x, 50) + '%;top:' + num(d.y, 50) + '%;width:' + num(d.w, 30) + '%;transform:translate(-50%,-50%) rotate(' + num(d.rot, 0) + 'deg);opacity:' + num(d.op, 100) / 100;
+  }
   function decor(list, P) {
     var h = (list || []).map(function (d, i) {
       var u = img(d.src); if (!u) return '';
-      var st = 'left:' + num(d.x, 50) + '%;top:' + num(d.y, 50) + '%;width:' + num(d.w, 30) + '%;transform:translate(-50%,-50%) rotate(' + num(d.rot, 0) + 'deg);opacity:' + num(d.op, 100) / 100 +
-        (num(d.blur, 0) ? ';filter:blur(' + num(d.blur, 0) + 'px)' : '') + (/^(screen|multiply|soft-light)$/.test(d.blend || '') ? ';mix-blend-mode:' + d.blend : '');
-      return '<img class="dc ' + (d.layer === 'front' ? 'f' : 'b') + '" data-k="' + esc(P + '/decor/' + i) + '" src="' + esc(u) + '" alt="" style="' + esc(st) + '"' + (P === 'hero' ? '' : ' loading="lazy"') + ' draggable="false">';
+      var path = P + '/decor/' + i, st = dcCss(d) + (num(d.blur, 0) ? ';filter:blur(' + num(d.blur, 0) + 'px)' : '') + (/^(screen|multiply|soft-light)$/.test(d.blend || '') ? ';mix-blend-mode:' + d.blend : ''), extra = '';
+      ['ow', 'om'].forEach(function (dev) {
+        if (!d[dev] || !Object.keys(d[dev]).length) return;
+        var e = merged(d, dev); extra += ' data-' + dev + '-x="' + num(e.x, 50) + '" data-' + dev + '-y="' + num(e.y, 50) + '"'; devRule(path, dev, dcCss(e));
+      });
+      return '<img class="dc ' + (d.layer === 'front' ? 'f' : 'b') + '" data-k="' + esc(path) + '"' + extra + ' src="' + esc(u) + '" alt="" style="' + esc(st) + '"' + (P === 'hero' ? '' : ' loading="lazy"') + ' draggable="false">';
     }).join('');
     return h ? '<div class="decor" aria-hidden="true">' + h + '</div>' : '';
   }
@@ -262,6 +287,7 @@
 
   // els: { top, hero, heroBox, heroBg, secs, foot } (각각 내용을 채울 요소). cfg는 DEFAULTS와 같은 모양.
   function render(cfg, els) {
+    RULES = [];
     var b = cfg.brand || {}, h = cfg.hero || {};
     els.top.innerHTML = '<div class="wrap"><a class="brand" href="/report/"><span class="seal"' + attr('brand/seal', b.st && b.st.seal) + '>' + esc(b.seal) + '</span><span class="bn">' +
       T('span', '', 'brand', b, 'name', esc(b.name)) + (b.sub ? T('small', '', 'brand', b, 'sub', esc(b.sub)) : '') + '</span></a>' +
@@ -281,7 +307,9 @@
       return '<section class="sec t-' + esc(s.type) + '" id="' + esc(s.id) + '"' + (pad ? ' style="' + pad + '"' : '') + '>' + bgBox(s, false) + decor(s.decor, s.id) + R[s.type](s, s.id) + '</section>';
     }).join('');
     var f = cfg.footer || {};
+    if (els.dev) els.dev.textContent = '';
     els.foot.innerHTML = '<div class="wrap"><i class="orn" aria-hidden="true"></i>' + lines(f.lines).map(function (l) { return T('p', '', 'footer', f, 'lines', esc(l)); }).join('') + '</div>';
+    if (els.dev) els.dev.textContent = RULES.join(' ');
   }
 
   function copy(o) { return JSON.parse(JSON.stringify(o)); }

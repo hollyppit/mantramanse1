@@ -1,5 +1,5 @@
 // 판매 페이지(/report/) 인트로 영상 설정
-// GET /api/intro — 공개. { on, src, srcMobile, fx, url, urlMobile, skipAfter, once } (꺼져 있거나 영상이 없으면 on=false)
+// GET /api/intro — 공개. { on, src, srcMobile, fx, fxPc, fxMobile, url, urlMobile, skipAfter, once } — fx는 공통(문구 포함), fxPc·fxMobile은 그 기기에서 덮어쓸 글자 연출 (꺼져 있거나 영상이 없으면 on=false)
 // PUT /api/intro — 관리자 전용. 같은 형식으로 저장
 // 저장 위치: GLOSSARY_KV의 'intro:config' 키. 영상 파일은 /api/clipfile(R2)에 올린다.
 import { json, isAdmin, configError } from '../_lib.js';
@@ -17,7 +17,7 @@ function cleanSrc(s) {
 function clean(b) {
   const src = cleanSrc(b.src), srcMobile = cleanSrc(b.srcMobile);
   const skip = Math.round(Math.max(0, Math.min(30, +b.skipAfter || 0)) * 10) / 10;
-  return { on: !!b.on, src, srcMobile, fx: cleanFx(b.fx), skipAfter: skip, once: b.once === 'always' ? 'always' : 'session' };
+  return { on: !!b.on, src, srcMobile, fx: cleanFx(b.fx), fxPc: cleanFx(b.fxPc), fxMobile: cleanFx(b.fxMobile), skipAfter: skip, once: b.once === 'always' ? 'always' : 'session' };
 }
 
 const urlOf = (src) => !src ? '' : src.type === 'r2' ? '/api/clipfile?k=' + encodeURIComponent(src.value) : src.value;
