@@ -45,7 +45,7 @@
 
   // 기능 블록들이 쓰는 문구 묶음 (화면 이름, content.js 최상위 키, 칸)
   var GROUPS = [
-    ['page', '페이지 기본', 'settings', [['brandName', '위쪽 가운데 이름', 't'], ['pageTitle', '브라우저 탭 제목', 't'], ['pageDesc', '검색·공유 설명', 'l'], ['priceText', '가격 표시 (비우면 표시 안 함)', 't'],
+    ['page', '페이지 기본', 'settings', [['brandName', '위쪽 가운데 이름', 't'], ['pageTitle', '브라우저 탭 제목', 't'], ['pageDesc', '검색·공유 설명', 'l'], ['autoSpeed', '자동 스크롤 속도 (1=기본 · 2=두 배 빠르게 · 0.5=절반 속도)', 'n', [0.25, 4, 0.25]], ['priceText', '가격 표시 (비우면 표시 안 함)', 't'],
       ['skipLink', '오른쪽 위 바로가기', 'o', [['text', '글자', 't']]], ['purchase', '구매 버튼 동작', 'o', [['mode', '방식', 's', [['waitlist', '출시 알림(이메일) 받기'], ['link', '결제 페이지로 이동']]], ['href', '결제 페이지 주소(/ 또는 https://)', 't']]],
       ['resultClipChapter', '결과 화면 영상: 쓸 장 id (예: ch0 · 비우면 영상이 있는 첫 장)', 't'], ['hideEmptyMediaInProduction', '이미지·영상이 없는 블록은 숨기기', 'b']]],
     ['interest', '관심사 선택지', 'interests', null],

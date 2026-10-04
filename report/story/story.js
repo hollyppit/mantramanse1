@@ -515,12 +515,14 @@
       return false;
     }
     function targetY(u) { var r = u.getBoundingClientRect(), vh = root.innerHeight, top = r.top + root.scrollY; return Math.max(0, r.height < vh * 0.9 ? top - (vh - r.height) / 2 : top - 80); }
+    // 속도 배율(관리자 "자동 스크롤 속도", 1=기본 · 2=두 배 빠르게 · 0.5=절반). 이동 시간과 머무는 시간에 함께 적용한다.
+    function speed() { var v = +(C.settings && C.settings.autoSpeed); return v > 0 ? Math.min(4, Math.max(0.25, v)) : 1; }
     function sleep(ms) { return new Promise(function (res) { setTimeout(res, ms); }); }
-    function dwell(u) { var n = (u.innerText || '').trim().length; return n ? Math.min(7000, Math.max(1800, 1200 + n * 70)) : 2200; }
+    function dwell(u) { var n = (u.innerText || '').trim().length; return (n ? Math.min(7000, Math.max(1800, 1200 + n * 70)) : 2200) / speed(); }
     function firstAhead(us) { for (var i = 0; i < us.length; i++) if (us[i].getBoundingClientRect().bottom > root.innerHeight * 0.6) return i; return us.length; }
     function glide(y, my) {
       return new Promise(function (res) {
-        var y0 = root.scrollY, d = y - y0, ms = Math.min(1800, Math.max(700, Math.abs(d) * 0.9)), t0 = performance.now(), raf = 0, dead = false;
+        var y0 = root.scrollY, d = y - y0, ms = Math.min(1800, Math.max(700, Math.abs(d) * 0.9)) / speed(), t0 = performance.now(), raf = 0, dead = false;
         if (REDUCE || Math.abs(d) < 3) { root.scrollTo({ top: y, behavior: 'instant' }); return res(); }
         cancelAnim = function () { dead = true; cancelAnimationFrame(raf); res(); };
         (function f(t) {
@@ -537,8 +539,8 @@
       for (; i < us.length; i++) {
         var u = us[i];
         await glide(targetY(u), my); if (my !== token) return;
-        await sleep(250); if (my !== token) return;
-        await sleep(isStop(u) ? 500 : dwell(u)); if (my !== token) return;
+        await sleep(250 / speed()); if (my !== token) return;
+        await sleep(isStop(u) ? 500 / speed() : dwell(u)); if (my !== token) return;
         if (isStop(u) && !(pass && i === i0)) { running = false; ui(); return; }
       }
       if (my === token) { running = false; finished = true; ui(); }
