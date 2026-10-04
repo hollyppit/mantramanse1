@@ -2,7 +2,7 @@
 const http = require('http'), fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json' };
-let home = null, intro = { on: false, src: null, srcMobile: null, skipAfter: 0, once: 'session' }, clips = [], defaults = {}, chapters = null, folders = [], files = {};
+let story = null, intro = { on: false, src: null, srcMobile: null, skipAfter: 0, once: 'session' }, clips = [], defaults = {}, chapters = null, folders = [], files = {};
 const send = (r, code, obj) => { r.statusCode = code; r.setHeader('content-type', 'application/json; charset=utf-8'); r.end(JSON.stringify(obj)); };
 const authed = q => (q.headers.authorization || '') === 'Bearer test';
 const body = q => new Promise(res => { const b = []; q.on('data', c => b.push(c)); q.on('end', () => res(Buffer.concat(b))); });
@@ -33,11 +33,11 @@ http.createServer(async (q, r) => {
     const n = 1.2 * 8000, buf = Buffer.alloc(44 + n); buf.write('RIFF', 0); buf.writeUInt32LE(36 + n, 4); buf.write('WAVEfmt ', 8); buf.writeUInt32LE(16, 16); buf.writeUInt16LE(1, 20); buf.writeUInt16LE(1, 22); buf.writeUInt32LE(8000, 24); buf.writeUInt32LE(8000, 28); buf.writeUInt16LE(1, 32); buf.writeUInt16LE(8, 34); buf.write('data', 36); buf.writeUInt32LE(n, 40); buf.fill(128, 44);
     const key = 'tts-mock' + Date.now().toString(36) + '.mp3'; files[key] = buf; return send(r, 200, { ok: true, key, cached: false });
   }
-  if (p === '/api/home') {
-    if (q.method === 'GET') return send(r, 200, { home });
+  if (p === '/api/story') {
+    if (q.method === 'GET') return send(r, 200, { story });
     if (!authed(q)) return send(r, 401, { error: '관리자 인증이 필요합니다' });
-    if (q.method === 'PUT') { home = JSON.parse((await body(q)).toString()).home; return send(r, 200, { ok: true }); }
-    if (q.method === 'DELETE') { home = null; return send(r, 200, { ok: true }); }
+    if (q.method === 'PUT') { story = JSON.parse((await body(q)).toString()).story; return send(r, 200, { ok: true }); }
+    if (q.method === 'DELETE') { story = null; return send(r, 200, { ok: true }); }
   }
   if (p === '/api/intro') {
     const u1 = x => !x ? '' : x.type === 'r2' ? '/api/clipfile?k=' + encodeURIComponent(x.value) : x.value, urlOf = c => ({ url: u1(c.src), urlMobile: u1(c.srcMobile) });
@@ -58,4 +58,4 @@ http.createServer(async (q, r) => {
   const f = path.join(root, rel);
   if (!f.startsWith(root) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.statusCode = 404; return r.end('404'); }
   r.setHeader('content-type', TYPES[path.extname(f)] || 'application/octet-stream'); r.end(fs.readFileSync(f));
-}).listen(8766);
+}).listen(process.env.PORT || 8766);

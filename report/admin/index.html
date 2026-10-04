@@ -155,7 +155,7 @@ summary { cursor:pointer; padding:4px 0; }
       <button data-t="test">조합 테스트</button>
       <button data-t="cov">커버리지</button>
       <button data-t="intro">입장 인트로</button>
-      <button data-t="home">홈 화면</button>
+      <button data-t="home">스토리 페이지</button>
     </div>
 
     <!-- 라이브러리 -->
@@ -234,14 +234,13 @@ summary { cursor:pointer; padding:4px 0; }
     <div id="t-home" class="hide">
       <div class="hmgrid">
         <div class="hmleft">
-          <div class="row" style="align-items:center;margin-bottom:8px"><button class="pri" id="hmSave">저장</button><button class="danger" id="hmReset" title="저장된 내용을 지우고 내장 기본 문구로 되돌립니다">기본 문구로 되돌리기</button><span class="muted" id="hmState"></span></div>
-          <p class="muted" style="margin:0;font-size:.78rem">오른쪽 미리보기에서 <b>글자나 이미지를 클릭</b>하면 아래에 서식(글씨체·크기·색·위치…)이 나타나고, <b>끌어서 옮길 수</b> 있어요. 제목에서는 줄바꿈이 되고 <b>*별표*</b>로 감싼 글자는 금빛이 됩니다. 저장해야 실제 페이지에 적용됩니다.</p>
-          <div id="hmSel" class="card hmsel"></div>
+          <div class="row" style="align-items:center;margin-bottom:8px"><button class="pri" id="hmSave">저장</button><button class="danger" id="hmReset" title="저장된 스토리 내용을 지우고 처음 기본 내용으로 되돌립니다">기본 내용으로 되돌리기</button><span class="muted" id="hmState"></span></div>
+          <p class="muted" style="margin:0 0 6px;font-size:.78rem">블록을 <b>눌러 열면</b> 오른쪽 미리보기가 그 자리로 움직이고, 미리보기에서 블록을 눌러도 여기서 열려요. <b>≡ 손잡이를 끌어</b> 순서를 바꿉니다. 맨 아래 "문구 설정"에서 사주 입력·결과·구매 화면의 문구를 고칠 수 있어요.</p>
           <div class="hmed" id="hmForm"></div>
         </div>
         <div class="hmpv">
-          <div class="row" style="align-items:center;margin-bottom:8px"><button id="hmPc" class="pri">PC</button><button id="hmMo">모바일</button><span class="muted">미리보기 — 글자 <b>더블클릭 = 바로 고치기</b> · 끌면 이동 (인트로 영상·알림 신청은 동작하지 않음)</span></div>
-          <div id="hmBox"><iframe id="hmFrame" title="홈 화면 미리보기"></iframe></div>
+          <div class="row" style="align-items:center;margin-bottom:8px"><button id="hmPc" class="pri">PC</button><button id="hmMo">모바일</button><span class="muted">미리보기 — 분석 후 화면까지 예시 사주로 모두 펼쳐 보여 줍니다 (인트로·이메일 신청은 동작하지 않음)</span></div>
+          <div id="hmBox"><iframe id="hmFrame" title="스토리 페이지 미리보기"></iframe></div>
         </div>
       </div>
     </div>
@@ -249,7 +248,7 @@ summary { cursor:pointer; padding:4px 0; }
     <!-- 입장 인트로 -->
     <div id="t-intro" class="hide">
       <div class="card" style="max-width:640px">
-        <p class="muted" style="margin:0 0 12px">판매 페이지(/report/)에 들어올 때 전체 화면으로 먼저 음소거로 재생되는 영상입니다. 이 탭의 저장은 클립 저장과 별개로 바로 반영됩니다.</p>
+        <p class="muted" style="margin:0 0 12px">스토리 페이지(/report/)에 들어올 때 전체 화면으로 먼저 음소거로 재생되는 영상입니다. 이 탭의 저장은 클립 저장과 별개로 바로 반영됩니다.</p>
         <div class="row" style="align-items:center;gap:16px">
           <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="inOn" style="width:auto"> <b>인트로 켜기</b></label>
         </div>
@@ -469,7 +468,8 @@ summary { cursor:pointer; padding:4px 0; }
   </form>
 </dialog>
 
-<script src="../home.js"></script>
+<script src="../story/content.js"></script>
+<script src="../story/schema.js"></script>
 <script src="../assemble.js"></script>
 <script src="../fx.js"></script>
 <script>
@@ -668,29 +668,30 @@ summary { cursor:pointer; padding:4px 0; }
       .catch(function (e) { $('inState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };
 
-  // ── 홈 화면 편집 (클립 저장과 별개로 /api/home에 저장). 미리보기는 판매 페이지를 iframe으로 띄우고 설정을 postMessage로 보낸다.
-  // 미리보기에서 글자·이미지를 누르면 경로(k)가 오고(mt-pick), 끌면 위치가 온다(mt-move). 서식은 글자가 속한 객체의 st[필드]에 저장한다.
-  var MH = window.MantraHome, HM = { cfg: null, dirty: false, mode: 'pc', open: {}, loaded: false, frameOn: false, sel: null, tgt: 'ow' }; // tgt: 값을 쓰는 대상 — base=공통, ow=웹(PC), om=모바일
+  // ── 스토리 페이지 편집 (클립 저장과 별개로 /api/story 에 저장). 미리보기는 /report/?preview=1 을 iframe 으로 띄우고 내용을 postMessage 로 보낸다.
+  // 미리보기에서 블록을 누르면 왼쪽 목록에서 그 블록이 열리고(st-pick), 왼쪽에서 고르면 미리보기가 그 위치로 움직인다(st-sel).
+  var SC = window.OnboardingContent, SCH = window.StorySchema;
+  var HM = { story: null, dirty: false, mode: 'pc', loaded: false, frameOn: false, openIdx: -1, openGrp: '' };
   function hmSend(msg) { try { $('hmFrame').contentWindow.postMessage(msg, location.origin); } catch (e) {} }
-  function hmPush() { if (HM.cfg && HM.frameOn) hmSend({ t: 'mt-home', cfg: HM.cfg }); }
+  function hmPush() { if (HM.story && HM.frameOn) hmSend({ t: 'st-content', story: HM.story }); }
   var hmTimer;
-  function hmChanged() { HM.dirty = true; $('hmState').textContent = '저장하지 않은 변경'; clearTimeout(hmTimer); hmTimer = setTimeout(hmPush, 100); }
+  function hmChanged() { HM.dirty = true; $('hmState').textContent = '저장하지 않은 변경'; clearTimeout(hmTimer); hmTimer = setTimeout(hmPush, 120); }
   function hmFit() {
     var box = $('hmBox'), f = $('hmFrame'), bw = box.clientWidth, bh = box.clientHeight; if (!bw) return;
     var W = HM.mode === 'pc' ? 1280 : 390, k = Math.min(1, bw / W);
     f.style.width = W + 'px'; f.style.height = (bh / k) + 'px'; f.style.transform = 'scale(' + k + ')'; f.style.left = Math.max(0, (bw - W * k) / 2) + 'px';
-    hmSend({ t: 'mt-scale', k: k });
   }
-  function hmMode(m) { // 미리보기 기기를 바꾼다. 기기별 값을 편집 중이면 편집 대상도 같이 바뀐다.
-    HM.mode = m; $('hmPc').classList.toggle('pri', m === 'pc'); $('hmMo').classList.toggle('pri', m === 'mo'); hmFit();
-    if (HM.tgt !== 'base') HM.tgt = m === 'pc' ? 'ow' : 'om';
-    hmSelRender();
-  }
+  function hmMode(m) { HM.mode = m; $('hmPc').classList.toggle('pri', m === 'pc'); $('hmMo').classList.toggle('pri', m === 'mo'); hmFit(); }
   $('hmPc').onclick = function () { hmMode('pc'); };
   $('hmMo').onclick = function () { hmMode('mo'); };
   window.addEventListener('resize', function () { if (!$('t-home').classList.contains('hide')) hmFit(); });
-  $('hmFrame').addEventListener('load', function () { HM.frameOn = true; hmFit(); hmPush(); if (HM.sel) hmSend({ t: 'mt-sel', k: HM.sel }); });
+  $('hmFrame').addEventListener('load', function () { HM.frameOn = true; hmFit(); hmPush(); if (HM.openIdx >= 0) hmSend({ t: 'st-sel', i: HM.openIdx }); });
   window.addEventListener('beforeunload', function (e) { if (HM.dirty) { e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('message', function (e) {
+    if (e.origin !== location.origin) return; var d = e.data || {};
+    if (d.t === 'st-ready') { HM.frameOn = true; hmFit(); hmPush(); }
+    else if (d.t === 'st-pick' && HM.story && d.i >= 0 && d.i < HM.story.blocks.length) { HM.openIdx = d.i; hmBuild(); var c = document.querySelector('#hmForm details[data-i="' + d.i + '"]'); if (c) c.scrollIntoView({ block: 'nearest' }); }
+  });
 
   // 이미지 올리기: 브라우저에서 먼저 줄여(최대 가로 maxW, webp) 올린다. gif·svg는 그대로.
   function shrinkImage(file, maxW) {
@@ -720,246 +721,221 @@ summary { cursor:pointer; padding:4px 0; }
     });
   }
 
-  // 양식 칸 하나. d = [키, 이름, 종류, 선택지]. onFocus(): 글자 칸에 커서를 두면 미리보기에서 그 글자를 고른다.
-  function hmField(obj, d, onFocus) {
-    var k = d[0], t = d[2], o = d[3], lab = document.createElement('label'), el;
-    lab.className = 'hmf' + (t === 'b' ? ' chk' : '');
-    if (t === 'b') { el = document.createElement('input'); el.type = 'checkbox'; el.checked = !!obj[k]; el.onchange = function () { obj[k] = el.checked; hmChanged(); }; lab.appendChild(el); lab.appendChild(document.createTextNode(d[1])); return lab; }
-    var sp = document.createElement('span'); sp.textContent = d[1]; lab.appendChild(sp);
-    if (t === 's' || t === 'f') {
-      el = document.createElement('select');
-      var list = t === 'f' ? [['', '(기본)']].concat(F.SUB_FONT.map(function (f) { return [f[0], f[1]]; })) : o;
-      list.forEach(function (x) { var op = document.createElement('option'); op.value = x[0]; op.textContent = x[1]; el.appendChild(op); });
-      el.value = obj[k] == null ? (t === 'f' ? '' : o[0][0]) : obj[k]; if (t === 's' && obj[k] == null && el.value !== '') obj[k] = el.value;
-      el.onchange = function () { if (!el.value && (t === 'f' || o[0][0] === '')) delete obj[k]; else obj[k] = el.value; hmChanged(); };
-    } else if (t === 'n') {
-      el = document.createElement('input'); el.type = 'number'; el.min = o[0]; el.max = o[1]; el.step = o[2]; el.placeholder = o[3] == null ? '' : '기본 ' + o[3]; el.value = obj[k] == null ? '' : obj[k];
-      el.oninput = function () { if (el.value === '') delete obj[k]; else obj[k] = +el.value; hmChanged(); };
-    } else if (t === 'c') {
-      var row = document.createElement('span'); row.style.cssText = 'display:flex;gap:6px'; var pk = document.createElement('input'); pk.type = 'color'; pk.style.cssText = 'width:44px;padding:2px;flex:none';
-      el = document.createElement('input'); el.type = 'text'; el.maxLength = 9; el.placeholder = '#rrggbb (비우면 기본)'; el.value = obj[k] || ''; pk.value = /^#[0-9a-f]{6}$/i.test(el.value) ? el.value : '#ffffff';
-      pk.oninput = function () { el.value = pk.value; el.dispatchEvent(new Event('input')); };
-      el.oninput = function () { if (!el.value) delete obj[k]; else obj[k] = el.value; if (/^#[0-9a-f]{6}$/i.test(el.value)) pk.value = el.value; hmChanged(); };
-      row.appendChild(pk); row.appendChild(el); lab.appendChild(row); return lab;
-    } else if (t === 'i') {
-      var wrap = document.createElement('span'); wrap.className = 'hmimg'; var th = document.createElement('img'); th.className = 'hmthumb'; th.alt = '';
-      el = document.createElement('input'); el.type = 'text'; el.placeholder = '이미지 주소(https) 또는 오른쪽에서 올리기';
-      var fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'image/*'; var up = document.createElement('button'); up.type = 'button'; up.textContent = '올리기'; up.disabled = !S.r2; up.title = S.r2 ? '' : 'R2가 연결되지 않아 주소만 입력할 수 있습니다';
-      var clr = document.createElement('button'); clr.type = 'button'; clr.textContent = '✕'; clr.title = '이미지 지우기';
-      function show() { el.value = obj[k] || ''; if (obj[k]) { th.src = obj[k]; th.style.display = ''; } else th.style.display = 'none'; }
-      el.oninput = function () { if (!el.value.trim()) delete obj[k]; else obj[k] = el.value.trim(); show2(); hmChanged(); };
-      function show2() { if (obj[k]) { th.src = obj[k]; th.style.display = ''; } else th.style.display = 'none'; }
-      up.onclick = function () { fi.click(); };
-      fi.onchange = function () {
-        var f = fi.files[0]; if (!f) return; up.disabled = true; up.textContent = '올리는 중…';
-        hmUpload(f, /^bg/.test(k) ? 1920 : /mobile/i.test(k) ? 1080 : 1400, function (u, sm, orig) { obj[k] = u; show(); up.disabled = false; up.textContent = '올리기'; $('hmState').textContent = '이미지 올림 (' + mb(orig.size) + (sm !== orig ? ' → ' + mb(sm.size) : '') + ') — 저장을 눌러 반영하세요'; hmChanged(); },
-          function (m) { up.disabled = false; up.textContent = '올리기'; $('hmState').innerHTML = '<span class="err">' + esc(m) + '</span>'; });
-        fi.value = '';
-      };
-      clr.onclick = function () { delete obj[k]; show(); hmChanged(); };
-      show(); wrap.appendChild(th); wrap.appendChild(el); wrap.appendChild(up); wrap.appendChild(clr); wrap.appendChild(fi); lab.appendChild(wrap); return lab;
-    } else {
-      var multi = t === 'l' || !/(href|src)$/i.test(k); el = document.createElement(multi ? 'textarea' : 'input'); if (multi) { el.rows = t === 'l' ? 3 : 1; el.style.minHeight = '0'; } else el.type = 'text'; el.value = obj[k] == null ? '' : obj[k];
-      el.oninput = function () { obj[k] = el.value; hmChanged(); };
-    }
-    if (onFocus) el.addEventListener('focus', onFocus);
-    lab.appendChild(el); return lab;
+  // ── 스토리 편집: 양식 만들기
+  function copy(o) { return JSON.parse(JSON.stringify(o)); }
+  function mk(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function defaultStory() {
+    var d = {}; ['blocks', 'interests', 'settings', 'result', 'flow', 'locked', 'purchase'].forEach(function (k) { d[k] = copy(SC[k]); }); return d;
   }
-  function hmBtn(txt, title, fn, cls) { var b = document.createElement('button'); b.type = 'button'; b.className = 'sm ' + (cls || ''); b.textContent = txt; b.title = title; b.onclick = function (e) { e.preventDefault(); e.stopPropagation(); fn(); }; return b; }
-  function hmMove(arr, i, d) { var j = i + d; if (j < 0 || j >= arr.length) return false; var t = arr[i]; arr[i] = arr[j]; arr[j] = t; return true; }
-
-  // ── 경로(k) → 설정 객체. k 예: hero/title · s1/items/2/text · s1/decor/0
-  function hmResolve(k) {
-    if (!k || !HM.cfg) return null;
-    var p = k.split('/'), c = HM.cfg, base = (p[0] === 'hero' || p[0] === 'brand' || p[0] === 'footer') ? c[p[0]] : c.sections.filter(function (x) { return x.id === p[0]; })[0], r = p.slice(1);
-    if (!base) return null;
-    if (r[0] === 'decor') { var dd = (base.decor || [])[+r[1]]; return dd ? { kind: 'decor', obj: dd, list: base.decor, idx: +r[1], base: base, key: p[0] } : null; }
-    if (r[0] === 'items') { var it = (base.items || [])[+r[1]]; return it ? { kind: 'text', obj: it, field: r[2], base: base, key: p[0] } : null; }
-    return { kind: 'text', obj: base, field: r[0], base: base, key: p[0] };
+  function isObj(x) { return x && typeof x === 'object' && !Array.isArray(x); }
+  function deepMerge(base, over) {
+    if (!isObj(base) || !isObj(over)) return over === undefined ? base : over;
+    var o = Object.assign({}, base); Object.keys(over).forEach(function (k) { o[k] = isObj(over[k]) && isObj(base[k]) ? deepMerge(base[k], over[k]) : over[k]; }); return o;
   }
-  function hmDefs(info) {
-    if (info.key === 'brand') return MH.BRAND; if (info.key === 'hero') return MH.HERO; if (info.key === 'footer') return MH.FOOT;
-    var T = MH.TYPES[info.base.type] || {}; return (T.fields || []).concat((T.list && T.list.fields) || []);
-  }
-  // 미리보기 편집 막대 동작을 현재 편집 대상(공통/웹/모바일)에 적용한다
-  function hmApplyStyle(m) {
-    var info = hmResolve(m.k); if (!info) return;
-    var isDc = info.kind === 'decor', root = isDc ? info.obj : ((info.obj.st = info.obj.st || {})[info.field] = info.obj.st[info.field] || {}), t = hmTarget(root);
-    function cur(key, def) { return t[key] != null ? t[key] : (root[key] != null ? root[key] : def); }
-    if (m.op === 'del' && isDc) { info.list.splice(info.idx, 1); HM.sel = null; hmRebuild(); hmSelRender(); hmSend({ t: 'mt-sel', k: null }); return; }
-    if (m.op === 'sz' && !isDc) t.sz = Math.max(20, Math.min(500, Math.round(cur('sz', 100) + m.d)));
-    else if (m.op === 'w' && isDc) t.w = Math.max(2, Math.min(200, Math.round(cur('w', 30) + m.d)));
-    else if (m.op === 'rot' && isDc) t.rot = Math.max(-180, Math.min(180, Math.round(cur('rot', 0) + m.d)));
-    else if (m.op === 'wt' && !isDc) t.wt = String(+cur('wt', 400) >= 600 ? 400 : 700);
-    else if (m.op === 'set' && !isDc) { if (m.val === '' || m.val == null) delete t[m.key]; else t[m.key] = m.val; }
-    else return;
-    hmSelRender(); hmChanged();
-  }
-  function hmFieldLabel(info) {
-    var f = info.field, defs = [];
-    if (info.key === 'brand') defs = MH.BRAND; else if (info.key === 'hero') defs = MH.HERO; else if (info.key === 'footer') defs = MH.FOOT;
-    else { var T = MH.TYPES[info.base.type] || {}; defs = (T.fields || []).concat((T.list && T.list.fields) || []); }
-    var d = defs.filter(function (x) { return x[0] === f; })[0];
-    var where = info.key === 'hero' ? '첫 화면' : info.key === 'brand' ? '상단' : info.key === 'footer' ? '하단' : ((MH.TYPES[info.base.type] || {}).label || '');
-    return where + ' · ' + (d ? d[1] : f);
-  }
-  var ST_DEFS = [['font', '글씨체', 'f'], ['sz', '크기 % (기본 100, 1% 단위)', 'n', [20, 500, 1, 100]], ['wt', '굵기', 's', [['', '(기본)'], ['300', '얇게 300'], ['400', '보통 400'], ['500', '500'], ['600', '600'], ['700', '굵게 700'], ['900', '아주 굵게 900']]],
-    ['color', '글자 색', 'c'], ['align', '정렬', 's', [['', '(기본)'], ['left', '왼쪽'], ['center', '가운데'], ['right', '오른쪽']]], ['ls', '글자 간격 (0.01em)', 'n', [-10, 80, 0.5, 0]],
-    ['lh', '줄 간격 %', 'n', [80, 300, 1, null]], ['op', '투명도 %', 'n', [0, 100, 1, 100]], ['dx', '가로 이동 px', 'n', [-1000, 1000, 0.5, 0]], ['dy', '세로 이동 px', 'n', [-1000, 1000, 0.5, 0]], ['it', '기울임', 'b']];
-  var DEVNAME = { base: '공통', ow: '웹', om: '모바일' };
-  var DC_OV = ['x', 'y', 'w', 'rot', 'op']; // 장식 이미지에서 기기별로 따로 줄 수 있는 값
-  // 편집 대상 객체: 공통이면 root 자체, 웹·모바일이면 root.ow / root.om (공통 값 위에 덮어쓰는 값)
-  function hmTarget(root) { return HM.tgt === 'base' ? root : (root[HM.tgt] = root[HM.tgt] || {}); }
-  function hmWithBase(d, root) { // 기기별 값 칸의 안내 글(placeholder)에 공통 값을 보여 준다
-    if (d[2] !== 'n') return d;
-    var bv = HM.tgt === 'base' || root[d[0]] == null ? d[3][3] : root[d[0]], r = d.slice(); r[3] = [d[3][0], d[3][1], d[3][2], bv]; return r;
-  }
-  function hmSelRender() {
-    var box = $('hmSel'), info = hmResolve(HM.sel); box.innerHTML = '';
-    if (!info) { HM.sel = null; box.innerHTML = '<span class="muted" style="font-size:.8rem">미리보기에서 글자나 이미지를 클릭하면 여기서 서식을 바꿉니다. (끌면 위치가 바뀝니다)</span>'; return; }
-    var isDc = info.kind === 'decor';
-    var h = document.createElement('div'); h.className = 'row'; h.style.cssText = 'align-items:center;justify-content:space-between;margin-bottom:6px';
-    var tt = document.createElement('b'); tt.style.fontSize = '.85rem'; tt.textContent = isDc ? '장식 이미지 ' + (info.idx + 1) + ' (' + (info.key === 'hero' ? '첫 화면' : ((info.base.eyebrow || info.base.title || info.base.id) + '')) + ')' : '선택: ' + hmFieldLabel(info);
-    h.appendChild(tt); var bs = document.createElement('span'); bs.style.cssText = 'display:flex;gap:6px';
-    var root = isDc ? info.obj : ((info.obj.st = info.obj.st || {})[info.field] = info.obj.st[info.field] || {});
-    if (isDc) bs.appendChild(hmBtn('삭제', '이 장식 이미지 삭제', function () { info.list.splice(info.idx, 1); HM.sel = null; hmRebuild(); hmSelRender(); hmSend({ t: 'mt-sel', k: null }); }, 'danger'));
-    bs.appendChild(hmBtn(HM.tgt === 'base' && !isDc ? '서식 초기화' : DEVNAME[HM.tgt] + ' 값 비우기', '현재 편집 대상(' + DEVNAME[HM.tgt] + ')의 값을 지웁니다', function () {
-      if (HM.tgt === 'base') { if (!isDc) delete info.obj.st[info.field]; } else delete root[HM.tgt];
-      hmSelRender(); hmChanged();
-    }));
-    bs.appendChild(hmBtn('선택 해제', '', function () { HM.sel = null; hmSelRender(); hmSend({ t: 'mt-sel', k: null }); }));
-    h.appendChild(bs); box.appendChild(h);
-    // 값 적용 대상: 공통 / 웹 / 모바일
-    var dv = document.createElement('div'); dv.className = 'row'; dv.style.cssText = 'align-items:center;gap:6px;margin-bottom:6px';
-    var dl = document.createElement('span'); dl.className = 'muted'; dl.style.fontSize = '.76rem'; dl.textContent = '값 적용 대상'; dv.appendChild(dl);
-    ['base', 'ow', 'om'].forEach(function (k) {
-      dv.appendChild(hmBtn(DEVNAME[k], k === 'base' ? '모든 기기에 적용되는 기본값' : k === 'ow' ? '화면이 넓을 때(PC)만 공통 값을 덮어씁니다' : '화면이 좁을 때(모바일)만 공통 값을 덮어씁니다', function () {
-        HM.tgt = k; if (k === 'ow' && HM.mode !== 'pc') { HM.mode = 'pc'; $('hmPc').classList.add('pri'); $('hmMo').classList.remove('pri'); hmFit(); } if (k === 'om' && HM.mode !== 'mo') { HM.mode = 'mo'; $('hmMo').classList.add('pri'); $('hmPc').classList.remove('pri'); hmFit(); }
-        hmSelRender();
-      }, HM.tgt === k ? 'pri' : ''));
-    });
-    var dn = document.createElement('span'); dn.className = 'muted'; dn.style.fontSize = '.74rem';
-    dn.textContent = HM.tgt === 'base' ? '모든 기기에 같이 적용' : DEVNAME[HM.tgt] + '에서만 다르게 — 비우면 공통 값';
-    dv.appendChild(dn); box.appendChild(dv);
-    var g = document.createElement('div'), tgt = hmTarget(root); g.className = 'g2';
-    if (isDc) MH.DECOR.fields.filter(function (d) { return HM.tgt === 'base' || DC_OV.indexOf(d[0]) >= 0; }).forEach(function (d) { g.appendChild(hmField(tgt, hmWithBase(d, root))); });
-    else ST_DEFS.forEach(function (d) { g.appendChild(hmField(tgt, hmWithBase(d, root))); });
-    box.appendChild(g);
-  }
-  // 선택: 미리보기에서 눌렀거나(fromPreview) 양식 칸에 커서를 둔 경우
-  function hmSelect(k, fromPreview) {
-    HM.sel = k; hmSelRender();
-    if (k && fromPreview) { // 해당 섹션 양식을 열어 보여 준다
-      var id = k.split('/')[0], d = $('hmForm').querySelector('details[data-sec="' + id + '"]');
-      if (d) { d.open = true; HM.open['s:' + id] = true; d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
-    }
-    hmSend({ t: 'mt-sel', k: k, reveal: !fromPreview });
-  }
-  window.addEventListener('message', function (e) {
-    if (e.origin !== location.origin || e.source !== $('hmFrame').contentWindow) return;
-    var d = e.data || {};
-    if (d.t === 'mt-pick') { if (d.k) hmSelect(d.k, true); else { HM.sel = null; hmSelRender(); } }
-    else if (d.t === 'mt-edit') {
-      var ei = hmResolve(d.k); if (!ei || ei.kind !== 'text' || typeof ei.obj[ei.field] !== 'string' && ei.obj[ei.field] != null) return;
-      if (ei.key === 'footer') { $('hmState').textContent = '하단 문구는 왼쪽 "하단 문구" 칸에서 고쳐 주세요 (여러 줄이라 미리보기에서 바로 고칠 수 없습니다)'; return; }
-      var def = hmDefs(ei).filter(function (x) { return x[0] === ei.field; })[0];
-      hmSend({ t: 'mt-editstart', k: d.k, raw: ei.obj[ei.field] || '', multi: true });
-    }
-    else if (d.t === 'mt-text') {
-      var ti = hmResolve(d.k); if (!ti || ti.kind !== 'text') return;
-      ti.obj[ti.field] = String(d.value == null ? '' : d.value).slice(0, 3000); hmRebuild(); hmSelRender();
-    }
-    else if (d.t === 'mt-style') { hmApplyStyle(d); }
-    else if (d.t === 'mt-move') {
-      var info = hmResolve(d.k); if (!info) return;
-      var root = info.kind === 'decor' ? info.obj : ((info.obj.st = info.obj.st || {})[info.field] = info.obj.st[info.field] || {});
-      var dev = HM.tgt === 'base' ? 'base' : (d.dev || HM.tgt), t = dev === 'base' ? root : (root[dev] = root[dev] || {}); // 공통 편집 중이면 공통 값에, 아니면 끈 기기의 값에 쓴다
-      if (info.kind === 'decor') { t.x = d.x; t.y = d.y; } else { t.dx = d.dx; t.dy = d.dy; }
-      hmSelRender(); hmChanged();
-    }
-  });
-  function hmFocusSel(path) { return function () { var doc = $('hmFrame').contentDocument; if (doc && doc.querySelector('[data-k="' + path + '"]')) { HM.sel = path; hmSelRender(); hmSend({ t: 'mt-sel', k: path, reveal: true }); } }; }
-
-  function hmRebuild(scrollId) { var ed = $('hmForm'), top = ed.scrollTop; hmBuild(); ed.scrollTop = top; hmChanged(); if (scrollId) setTimeout(function () { hmSend({ t: 'mt-scroll', id: scrollId }); }, 200); }
-  function hmGroup(key, title, scrollId, fill, head, secId) {
-    var d = document.createElement('details'); d.className = 'hmg'; d.open = !!HM.open[key]; if (secId) d.dataset.sec = secId;
-    var sm = document.createElement('summary'), sp = document.createElement('span'); sp.textContent = title; sm.appendChild(sp); (head || []).forEach(function (b) { sm.appendChild(b); }); d.appendChild(sm);
-    var body = document.createElement('div'); d.appendChild(body); fill(body);
-    d.addEventListener('toggle', function (ev) { if (ev.target !== d) return; HM.open[key] = d.open; if (d.open && scrollId) hmSend({ t: 'mt-scroll', id: scrollId }); });
+  function mergeSaved(saved) {
+    var d = defaultStory(); if (!saved) return d;
+    ['settings', 'result', 'flow', 'locked', 'purchase'].forEach(function (k) { if (isObj(saved[k])) d[k] = deepMerge(d[k], saved[k]); });
+    ['blocks', 'interests'].forEach(function (k) { if (Array.isArray(saved[k])) d[k] = saved[k]; });
     return d;
   }
-  // 항목 목록(장면·카드·장식 이미지 등). P = 이 목록을 가진 객체의 경로 접두(선택 연동용)
-  function hmList(body, owner, L, P, scrollId) {
-    var items = owner[L.k] = owner[L.k] || [];
-    items.forEach(function (it, i) {
-      var Q = P + '/' + L.k + '/' + i, card = document.createElement('div'); card.className = 'hmitem';
-      var h = document.createElement('div'); h.className = 'hmh'; var b = document.createElement('b'); var t0 = it[L.title] ? String(it[L.title]).replace(/\n/g, ' ') : ''; b.textContent = L.label + ' ' + (i + 1) + (t0 ? ' · ' + t0.slice(L.k === 'decor' ? -24 : 0, L.k === 'decor' ? undefined : 40) : ''); h.appendChild(b);
-      if (L.k === 'decor') h.appendChild(hmBtn('선택', '미리보기에서 이 이미지를 고릅니다', function () { hmSelect(Q, false); }));
-      h.appendChild(hmBtn('▲', '위로', function () { if (hmMove(items, i, -1)) hmRebuild(); }));
-      h.appendChild(hmBtn('▼', '아래로', function () { if (hmMove(items, i, 1)) hmRebuild(); }));
-      h.appendChild(hmBtn('✕', '삭제', function () { if (confirm('이 ' + L.label + '을(를) 삭제할까요?')) { items.splice(i, 1); if (HM.sel && HM.sel.indexOf(Q) === 0) HM.sel = null; hmRebuild(); hmSelRender(); } }, 'danger'));
-      card.appendChild(h); L.fields.forEach(function (d) { card.appendChild(hmField(it, d, L.k === 'decor' ? null : hmFocusSel(Q + '/' + d[0]))); }); body.appendChild(card);
-    });
-    var add = document.createElement('button'); add.type = 'button'; add.textContent = '+ ' + L.label + ' 추가'; add.onclick = function () { items.push(MH.copy(L.blank)); hmRebuild(scrollId); if (L.k === 'decor') setTimeout(function () { hmSelect(P + '/decor/' + (items.length - 1), false); }, 250); }; body.appendChild(add);
+  function blockIds() { return HM.story.blocks.map(function (b) { return b.id; }).filter(Boolean); }
+
+  // 칸 하나. d = [키, 이름, 종류, 옵션]
+  function hmField(obj, d, onFocus) {
+    var k = d[0], t = d[2], o = d[3], lab = mk('label', 'hmf' + (t === 'b' ? ' chk' : '')), el;
+    if (t === 'b') {
+      el = mk('input'); el.type = 'checkbox'; el.checked = !!obj[k]; el.onchange = function () { if (el.checked) obj[k] = true; else delete obj[k]; hmChanged(); };
+      lab.appendChild(el); lab.appendChild(mk('span', '', d[1])); return lab;
+    }
+    if (t === 'o') { // 묶음
+      var box = mk('div', 'hmitem'); box.appendChild(mk('b', '', d[1])); box.firstChild.style.cssText = 'font-size:.82rem;font-weight:500';
+      obj[k] = isObj(obj[k]) ? obj[k] : {}; o.forEach(function (f) { box.appendChild(hmField(obj[k], f, onFocus)); }); return box;
+    }
+    if (t === 'L') return hmList(obj, k, d[1], o, onFocus);
+    if (t === 'A') return hmAction(obj, k, d[1]);
+    var head = mk('span', '', d[1]);
+    lab.appendChild(head);
+    if (t === 's') {
+      el = mk('select'); o.forEach(function (x) { var op = mk('option', '', x[1]); op.value = x[0]; el.appendChild(op); });
+      el.value = obj[k] == null ? '' : obj[k]; if (el.value !== (obj[k] == null ? '' : obj[k])) el.value = o[0][0];
+      el.onchange = function () { if (!el.value) delete obj[k]; else obj[k] = el.value; hmChanged(); };
+    } else if (t === 'n') {
+      el = mk('input'); el.type = 'number'; el.min = o[0]; el.max = o[1]; el.step = o[2]; el.value = obj[k] == null ? '' : obj[k];
+      el.oninput = function () { if (el.value === '') delete obj[k]; else obj[k] = +el.value; hmChanged(); };
+    } else if (t === 'ls') { // 한 줄에 하나
+      el = mk('textarea'); el.rows = 3; el.value = (obj[k] || []).join('\n');
+      el.oninput = function () { obj[k] = el.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean); hmChanged(); };
+    } else if (t === 'i' || t === 'v') {
+      var wrap = mk('span', 'hmimg'), th = mk('img', 'hmthumb'); th.alt = '';
+      el = mk('input'); el.type = 'text'; el.placeholder = t === 'v' ? '영상 올리기 또는 주소' : '이미지 올리기 또는 경로 (예: problem/problem-01.webp)';
+      var file = mk('input'); file.type = 'file'; file.accept = t === 'v' ? 'video/mp4,video/webm' : 'image/*';
+      var up = mk('button', '', '올리기'); up.type = 'button';
+      var msg = mk('span', 'muted'); msg.style.fontSize = '.74rem';
+      function thumb() {
+        var v = obj[k] || ''; var u = !v ? '' : /^(https:\/\/|\/)/.test(v) ? v : '/report/story/img/' + v;
+        if (t === 'i' && u) { th.src = u; th.style.display = ''; } else th.style.display = 'none';
+      }
+      el.value = obj[k] || ''; thumb();
+      el.oninput = function () { if (el.value.trim()) obj[k] = el.value.trim(); else delete obj[k]; thumb(); hmChanged(); };
+      up.onclick = function () { file.click(); };
+      file.onchange = function () {
+        var f = file.files[0]; if (!f) return; msg.textContent = '올리는 중…'; up.disabled = true;
+        hmUpload(f, 1400, function (url) { obj[k] = url; el.value = url; thumb(); msg.textContent = S.r2 ? '올렸습니다 — 저장하면 반영됩니다' : '올렸습니다'; up.disabled = false; hmChanged(); },
+          function (m) { msg.textContent = m; up.disabled = false; });
+        file.value = '';
+      };
+      th.onerror = function () { th.style.display = 'none'; };
+      wrap.appendChild(th); wrap.appendChild(el); wrap.appendChild(up); wrap.appendChild(file); lab.appendChild(wrap); lab.appendChild(msg); return lab;
+    } else { // t, l — A/B 문구 지원
+      var ab = (t === 't' || t === 'l') && isObj(obj[k]) && 'A' in obj[k];
+      var mkIn = function (get, set) {
+        var x = t === 'l' ? mk('textarea') : mk('input'); if (t === 'l') x.rows = 3; else x.type = 'text';
+        x.value = get() == null ? '' : get(); x.oninput = function () { set(x.value); hmChanged(); }; if (onFocus) x.onfocus = onFocus; return x;
+      };
+      if (ab) {
+        var pair = mk('span'); pair.style.cssText = 'display:grid;gap:4px';
+        ['A', 'B'].forEach(function (v) {
+          var r = mk('span'); r.style.cssText = 'display:flex;gap:6px;align-items:flex-start'; var tag = mk('b', '', v); tag.style.cssText = 'color:var(--gold);width:1.2em;flex:none;padding-top:6px';
+          var x = mkIn(function () { return obj[k][v]; }, function (val) { obj[k][v] = val; }); x.style.flex = '1'; r.appendChild(tag); r.appendChild(x); pair.appendChild(r);
+        });
+        head.textContent = d[1] + ' (A/B 시험 중)'; el = pair;
+        var off = mk('button', 'sm', 'A만 쓰기'); off.type = 'button'; off.style.cssText = 'justify-self:start;padding:1px 8px;font-size:.74rem';
+        off.onclick = function () { obj[k] = obj[k].A || ''; hmChanged(); hmBuild(); };
+        lab.appendChild(el); lab.appendChild(off); return lab;
+      }
+      el = mkIn(function () { return obj[k]; }, function (val) { obj[k] = val; });
+      if (t === 'l' || t === 't') {
+        var on = mk('button', 'sm', 'A/B 시험'); on.type = 'button'; on.title = '같은 자리에 두 가지 문구를 두고, 주소 뒤에 ?v=B 를 붙이면 B안이 나옵니다'; on.style.cssText = 'justify-self:start;padding:1px 8px;font-size:.74rem;margin-top:3px';
+        on.onclick = function () { obj[k] = { A: obj[k] || '', B: obj[k] || '' }; hmChanged(); hmBuild(); };
+        lab.appendChild(el); lab.appendChild(on); return lab;
+      }
+    }
+    if (onFocus) el.onfocus = onFocus;
+    lab.appendChild(el); return lab;
   }
-  function hmFields(body, obj, defs, P) { defs.forEach(function (d) { body.appendChild(hmField(obj, d, (d[2] === 't' || d[2] === 'l') ? hmFocusSel(P + '/' + d[0]) : null)); }); }
+  // 버튼 동작: 이동/흐름 열기/구매/주소
+  function hmAction(obj, k, label) {
+    var lab = mk('label', 'hmf'), v = String(obj[k] || ''), kind = v.indexOf('scroll:') === 0 ? 'scroll' : v.indexOf('href:') === 0 ? 'href' : v === 'purchase' ? 'purchase' : v === 'flow:open' ? 'flow' : 'flow';
+    lab.appendChild(mk('span', '', label));
+    var row = mk('span'); row.style.cssText = 'display:flex;gap:6px';
+    var sel = mk('select'); [['scroll', '다른 블록으로 이동'], ['flow', '올해의 흐름 열기'], ['purchase', '구매 영역으로 이동'], ['href', '주소로 이동']].forEach(function (x) { var op = mk('option', '', x[1]); op.value = x[0]; sel.appendChild(op); });
+    sel.value = kind;
+    var tgt = mk('input'); tgt.type = 'text'; tgt.style.flex = '1'; tgt.value = kind === 'scroll' ? v.slice(7) : kind === 'href' ? v.slice(5) : '';
+    var ids = blockIds(); if (ids.length) { tgt.setAttribute('list', 'idlist'); var dl = document.getElementById('idlist') || mk('datalist'); dl.id = 'idlist'; dl.innerHTML = ids.map(function (i) { return '<option value="' + esc(i) + '">'; }).join(''); document.body.appendChild(dl); }
+    function sync() {
+      tgt.style.display = sel.value === 'scroll' || sel.value === 'href' ? '' : 'none'; tgt.placeholder = sel.value === 'scroll' ? '블록 이름표 (예: sajuInput)' : '/주소 또는 https://…';
+      obj[k] = sel.value === 'scroll' ? 'scroll:' + tgt.value.trim() : sel.value === 'href' ? 'href:' + tgt.value.trim() : sel.value === 'purchase' ? 'purchase' : 'flow:open';
+    }
+    sel.onchange = function () { sync(); hmChanged(); }; tgt.oninput = function () { sync(); hmChanged(); }; sync();
+    row.appendChild(sel); row.appendChild(tgt); lab.appendChild(row); return lab;
+  }
+  // 항목 목록: 추가·삭제·위/아래
+  function hmList(obj, k, label, spec, onFocus) {
+    var box = mk('div'); box.appendChild(mk('div', 'hmsec', label)); box.lastChild.style.cssText = 'font-size:.82rem;margin:8px 0 2px';
+    obj[k] = Array.isArray(obj[k]) ? obj[k] : [];
+    function draw() {
+      box.querySelectorAll('.hmitem,.hmadd').forEach(function (x) { x.remove(); });
+      obj[k].forEach(function (it, i) {
+        var card = mk('details', 'hmitem'); var sum = mk('summary'); sum.style.cssText = 'display:flex;gap:6px;align-items:center;cursor:pointer';
+        var nm = mk('b', '', (spec.label || '항목') + ' ' + (i + 1) + (it[spec.title] ? ' · ' + String(typeof it[spec.title] === 'object' ? it[spec.title].A : it[spec.title]).replace(/\n/g, ' ').slice(0, 18) : '')); nm.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;font-size:.85rem';
+        sum.appendChild(nm);
+        [['↑', '위로', function () { if (i > 0) { var t = obj[k][i - 1]; obj[k][i - 1] = it; obj[k][i] = t; hmChanged(); draw(); } }],
+         ['↓', '아래로', function () { if (i < obj[k].length - 1) { var t = obj[k][i + 1]; obj[k][i + 1] = it; obj[k][i] = t; hmChanged(); draw(); } }],
+         ['✕', '삭제', function () { obj[k].splice(i, 1); hmChanged(); draw(); }]].forEach(function (b) {
+          var bt = mk('button', 'sm', b[0]); bt.type = 'button'; bt.title = b[1]; bt.onclick = function (e) { e.preventDefault(); e.stopPropagation(); b[2](); }; sum.appendChild(bt);
+        });
+        card.appendChild(sum); spec.fields.forEach(function (f) { card.appendChild(hmField(it, f, onFocus)); }); box.appendChild(card);
+      });
+      var add = mk('div', 'hmadd'), ab = mk('button', '', '+ ' + (spec.label || '항목') + ' 추가'); ab.type = 'button';
+      if (spec.max && obj[k].length >= spec.max) ab.disabled = true;
+      ab.onclick = function () { obj[k].push(copy(spec.blank)); hmChanged(); draw(); box.querySelectorAll('details.hmitem')[obj[k].length - 1].open = true; };
+      add.appendChild(ab); box.appendChild(add);
+    }
+    draw(); return box;
+  }
+
+  // 블록 한 개의 요약 글자
+  function blockSummary(b) {
+    var v = b.title || b.text || b.body || b.buttonText || b.headline || b.alt || b.size || (b.left && b.left.label) || (b.steps && b.steps[0] && b.steps[0].title) || '';
+    if (isObj(v)) v = v.A; return String(v || '').replace(/\*/g, '').replace(/\s+/g, ' ').slice(0, 26);
+  }
+  function blockLabel(b) { return b.type === 'component' ? '기능 · ' + (SCH.COMPONENT_NAMES[b.name] || b.name) : (SCH.TYPES[b.type] || {}).label || b.type; }
+
   function hmBuild() {
-    var root = $('hmForm'), c = HM.cfg; root.innerHTML = '';
-    root.appendChild(hmGroup('brand', '브랜드 · 상단', '_top', function (body) { hmFields(body, c.brand, MH.BRAND, 'brand'); }));
-    root.appendChild(hmGroup('hero', '첫 화면 문구 (큰 제목·버튼)', '_top', function (body) { hmFields(body, c.hero, MH.HERO, 'hero'); }));
-    root.appendChild(hmGroup('herobg', '첫 화면 배경 · 장식 이미지', '_top', function (body) {
-      MH.HERO_BG.forEach(function (d) { body.appendChild(hmField(c.hero, d)); });
-      var h = document.createElement('div'); h.className = 'hmsec'; h.textContent = '장식 이미지 (원하는 곳에 올리고 미리보기에서 끌어 옮깁니다)'; body.appendChild(h); hmList(body, c.hero, MH.DECOR, 'hero', '_top');
-    }));
-    var h = document.createElement('div'); h.className = 'hmsec'; h.textContent = '섹션 (위에서 아래 순서)'; root.appendChild(h);
-    c.sections.forEach(function (sec, i) {
-      var T = MH.TYPES[sec.type]; if (!T) return;
-      var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = sec.show !== false; cb.title = '페이지에 표시'; cb.style.width = 'auto';
-      cb.onclick = function (e) { e.stopPropagation(); }; cb.onchange = function () { sec.show = cb.checked; hmChanged(); };
-      var name = T.label + (sec.eyebrow ? ' · ' + sec.eyebrow : '');
-      root.appendChild(hmGroup('s:' + sec.id, name, sec.id, function (body) {
-        var a = document.createElement('p'); a.className = 'muted'; a.style.cssText = 'margin:6px 0;font-size:.76rem'; a.textContent = '이동 주소(앵커): #' + sec.id + ' — 버튼 이동 칸에 이 값을 쓰면 여기로 이동합니다'; body.appendChild(a);
-        hmFields(body, sec, T.fields, sec.id);
-        if (T.list) hmList(body, sec, T.list, sec.id, sec.id);
-        if (!T.noBg) {
-          body.appendChild(hmGroup('s:' + sec.id + ':bg', '배경 · 여백', sec.id, function (b2) { MH.BG.concat(MH.PAD).forEach(function (d) { b2.appendChild(hmField(sec, d)); }); }));
-          body.appendChild(hmGroup('s:' + sec.id + ':dc', '장식 이미지 (끌어서 배치)', sec.id, function (b2) { hmList(b2, sec, MH.DECOR, sec.id, sec.id); }));
-        }
-      }, [cb,
-        hmBtn('▲', '위로', function () { if (hmMove(c.sections, i, -1)) hmRebuild(sec.id); }),
-        hmBtn('▼', '아래로', function () { if (hmMove(c.sections, i, 1)) hmRebuild(sec.id); }),
-        hmBtn('✕', '섹션 삭제', function () { if (confirm('이 섹션을 삭제할까요? (저장 전에는 되돌릴 수 있습니다)')) { c.sections.splice(i, 1); hmRebuild(); } }, 'danger')], sec.id));
+    var root = $('hmForm'), st = HM.story, y = root.scrollTop; root.innerHTML = '';
+    // 1) 블록 목록
+    var top = mk('div', 'hmsec', '블록 (위에서 아래로 이어지는 순서)'); root.appendChild(top);
+    var list = mk('div', 'hmblocks');
+    st.blocks.forEach(function (b, i) {
+      var card = mk('details', 'hmg'); card.setAttribute('data-i', i); if (i === HM.openIdx) card.open = true;
+      var sum = mk('summary'); var grip = mk('span', 'grip', '≡'); grip.title = '끌어서 순서 바꾸기'; grip.style.cssText = 'cursor:grab;color:var(--ink2);padding:0 6px';
+      var nm = mk('span'); nm.innerHTML = '<b style="color:var(--gold)">' + (i + 1) + '</b> ' + esc(blockLabel(b)) + (blockSummary(b) ? ' <span class="muted">· ' + esc(blockSummary(b)) + '</span>' : '');
+      if (b.hide) nm.style.opacity = '.45';
+      sum.appendChild(grip); sum.appendChild(nm);
+      [[b.hide ? '숨김' : '보임', b.hide ? '숨긴 블록입니다. 누르면 다시 보입니다' : '누르면 이 블록을 잠시 숨깁니다', function () { if (b.hide) delete b.hide; else b.hide = true; }],
+       ['복제', '이 블록을 복사해 바로 아래에 붙입니다', function () { st.blocks.splice(i + 1, 0, copy(b)); delete st.blocks[i + 1].id; HM.openIdx = i + 1; }],
+       ['삭제', '이 블록을 지웁니다', function () { if (!confirm('이 블록을 삭제할까요?' + (b.type === 'component' ? '\n(사주 입력·결과·구매 같은 기능 블록입니다. 지우면 그 기능이 페이지에서 빠집니다)' : ''))) return false; st.blocks.splice(i, 1); HM.openIdx = -1; }]].forEach(function (a) {
+        var bt = mk('button', 'sm', a[0]); bt.type = 'button'; bt.title = a[1];
+        bt.onclick = function (e) { e.preventDefault(); e.stopPropagation(); if (a[2]() === false) return; hmChanged(); hmBuild(); }; sum.appendChild(bt);
+      });
+      card.appendChild(sum);
+      card.addEventListener('toggle', function () { // 열면 미리보기를 그 블록으로 옮긴다
+        if (card.open && HM.openIdx !== i) { HM.openIdx = i; list.querySelectorAll('details.hmg').forEach(function (x) { if (x !== card) x.open = false; }); hmSend({ t: 'st-sel', i: i, scroll: true }); }
+        else if (!card.open && HM.openIdx === i) HM.openIdx = -1;
+      });
+      var body = mk('div'); body.style.padding = '2px 6px 8px';
+      var fields = b.type === 'component' ? (SCH.COMPONENT_FIELDS[b.name] || []) : (SCH.TYPES[b.type] || { fields: [] }).fields;
+      if (!fields.length) body.appendChild(mk('p', 'muted', b.type === 'divider' ? '구분선은 바꿀 내용이 없습니다.' : '이 기능 블록은 계산 결과를 그대로 보여 줍니다. 아래 "문구 설정"에서 안의 문구를 고칠 수 있어요.'));
+      fields.forEach(function (f) { body.appendChild(hmField(b, f)); });
+      var adv = mk('details', 'hmg'); adv.appendChild(mk('summary', '', '고급 옵션 (언제 보일지·등장 효과·이름표)')); adv.firstChild.style.cssText = 'font-size:.8rem;color:var(--ink2)';
+      SCH.COMMON.forEach(function (f) { adv.appendChild(hmField(b, f)); }); body.appendChild(adv);
+      card.appendChild(body); list.appendChild(card);
     });
-    var add = document.createElement('div'); add.className = 'row'; add.style.margin = '10px 0';
-    var sel = document.createElement('select'); sel.style.width = 'auto'; Object.keys(MH.TYPES).forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = MH.TYPES[k].label; sel.appendChild(o); });
-    var ab = document.createElement('button'); ab.type = 'button'; ab.textContent = '+ 섹션 추가';
+    root.appendChild(list);
+    sortable(list, 'details.hmg[data-i]', { onStart: function () { list.querySelectorAll('details.hmg').forEach(function (x) { x.open = false; }); }, onMove: function () {
+      var order = [].map.call(list.children, function (c) { return +c.getAttribute('data-i'); }), nb = order.map(function (i) { return st.blocks[i]; });
+      HM.openIdx = -1; st.blocks = nb; hmChanged(); hmBuild();
+    } });
+    // 2) 블록 추가
+    var add = mk('div', 'row'); add.style.cssText = 'align-items:center;margin:10px 0 18px';
+    var sel = mk('select'); Object.keys(SCH.TYPES).filter(function (t) { return t !== 'component'; }).forEach(function (t) { var op = mk('option', '', SCH.TYPES[t].label); op.value = t; sel.appendChild(op); });
+    var ab = mk('button', 'pri', '+ 블록 추가'); ab.type = 'button'; ab.title = '지금 열려 있는 블록 바로 아래(없으면 맨 끝)에 추가합니다';
     ab.onclick = function () {
-      var T = MH.TYPES[sel.value], sec = { id: 's' + Date.now().toString(36).slice(-6), type: sel.value, show: true };
-      T.fields.forEach(function (d) { if (d[2] === 't' || d[2] === 'l') sec[d[0]] = ''; else if (d[2] === 'b') sec[d[0]] = false; });
-      if (T.fields.some(function (d) { return d[0] === 'title'; })) sec.title = '새 섹션'; if (T.list) sec[T.list.k] = [MH.copy(T.list.blank)];
-      c.sections.push(sec); HM.open['s:' + sec.id] = true; hmRebuild(sec.id);
+      var t = sel.value, nb = Object.assign({ type: t }, copy(SCH.TYPES[t].blank || {})), at = HM.openIdx >= 0 ? HM.openIdx + 1 : st.blocks.length;
+      st.blocks.splice(at, 0, nb); HM.openIdx = at; hmChanged(); hmBuild(); hmSend({ t: 'st-sel', i: at, scroll: true });
+      var c = document.querySelector('#hmForm details[data-i="' + at + '"]'); if (c) c.scrollIntoView({ block: 'nearest' });
     };
     add.appendChild(sel); add.appendChild(ab); root.appendChild(add);
-    root.appendChild(hmGroup('foot', '하단 문구', '_bottom', function (body) { c.footer = c.footer || {}; hmFields(body, c.footer, MH.FOOT, 'footer'); }));
+    // 3) 문구 설정 묶음
+    root.appendChild(mk('div', 'hmsec', '문구 설정 (사주 입력·결과·구매 화면 등)'));
+    SCH.GROUPS.forEach(function (g) {
+      var det = mk('details', 'hmg'); if (HM.openGrp === g[0]) det.open = true;
+      det.appendChild(mk('summary', '', g[1])); det.addEventListener('toggle', function () { if (det.open) HM.openGrp = g[0]; });
+      var holder = mk('div'); holder.style.padding = '2px 6px 8px';
+      if (g[0] === 'interest') holder.appendChild(hmList(st, 'interests', '선택 카드', SCH.INTEREST_FIELDS));
+      else { st[g[2]] = isObj(st[g[2]]) ? st[g[2]] : {}; g[3].forEach(function (f) { holder.appendChild(hmField(st[g[2]], f)); }); }
+      det.appendChild(holder); root.appendChild(det);
+    });
+    root.scrollTop = y;
   }
+
   function homeOpen() {
     if (!HM.frameOn && !$('hmFrame').getAttribute('src')) $('hmFrame').src = '/report/?preview=1';
     hmFit();
     if (HM.loaded) return;
-    api('/api/home').then(function (d) {
-      var h = d.home; if (h) { delete h.at; }
-      HM.cfg = h || MH.copy(MH.DEFAULTS); HM.loaded = true; hmBuild(); hmSelRender(); hmPush();
+    api('/api/story').then(function (d) {
+      HM.story = mergeSaved(d.story); HM.loaded = true; hmBuild(); hmPush();
     }).catch(function (e) { $('hmState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   }
   $('hmSave').onclick = function () {
-    if (!HM.cfg) return; $('hmState').textContent = '저장 중…';
-    api('/api/home', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ home: HM.cfg }) })
+    if (!HM.story) return; $('hmState').textContent = '저장 중…';
+    api('/api/story', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ story: HM.story }) })
       .then(function () { HM.dirty = false; $('hmState').innerHTML = '<span class="ok">저장됨 — 실제 페이지에 반영되었습니다</span>'; })
       .catch(function (e) { $('hmState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };
   $('hmReset').onclick = function () {
-    if (!confirm('저장된 홈 화면 내용을 지우고 기본 문구로 되돌립니다. 계속할까요?')) return;
-    api('/api/home', { method: 'DELETE' }).then(function () { HM.cfg = MH.copy(MH.DEFAULTS); HM.dirty = false; HM.open = {}; HM.sel = null; hmBuild(); hmSelRender(); hmPush(); $('hmState').innerHTML = '<span class="ok">기본 문구로 되돌렸습니다</span>'; })
+    if (!confirm('저장된 스토리 내용을 지우고 처음 기본 내용으로 되돌립니다. 계속할까요?')) return;
+    api('/api/story', { method: 'DELETE' }).then(function () { HM.story = defaultStory(); HM.dirty = false; HM.openIdx = -1; hmBuild(); hmPush(); $('hmState').innerHTML = '<span class="ok">기본 내용으로 되돌렸습니다</span>'; })
       .catch(function (e) { $('hmState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };
 

@@ -267,7 +267,7 @@
     // 구매: 결제 시스템이 아직 없어 기본은 출시 알림(/api/waitlist). settings.purchase.mode='link' + href 를 채우면 그 주소(결제 페이지)로 이동.
     Paywall: {
       render: function (b) {
-        var P = C.purchase || {}, price = (C.settings && C.settings.priceText) || (S.home && S.home.price) || '', il = withInterest(P.interestLine);
+        var P = C.purchase || {}, price = (C.settings && C.settings.priceText) || '', il = withInterest(P.interestLine);
         return '<div class="pay"><h2 class="hl hl-m">' + fmt(P.title || '') + '</h2><ul class="inc">' + (P.includes || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
           (il ? '<p class="note ctr">' + esc(il) + '</p>' : '') + (price ? '<p class="price">' + esc(price) + '</p>' : '') +
           '<button type="button" class="btn big" id="buyBtn">' + esc(pick(b.ctaText)) + '</button>' +
@@ -305,16 +305,21 @@
   var SPACE = { small: 'sp-s', medium: 'sp-m', large: 'sp-l', viewport: 'sp-v' };
   function wrap(b, i) {
     var anim = b.anim === 'lines' ? 'fade' : (/^(fade|fade-up|scale|reveal|none)$/.test(b.anim) ? b.anim : 'fade-up');
-    var cls = ['blk', 't-' + b.type, 'a-' + anim, b.align === 'left' ? 'al-l' : '', b.fullscreen ? 'fs' : '', b.type === 'spacer' ? (SPACE[b.size] || 'sp-m') : '', b.requires ? 'gated' : ''];
+    var cls = ['blk', b.hide ? 'is-hidden' : '', 't-' + b.type, 'a-' + anim, b.align === 'left' ? 'al-l' : '', b.fullscreen ? 'fs' : '', b.type === 'spacer' ? (SPACE[b.size] || 'sp-m') : '', b.requires ? 'gated' : ''];
     if (b.anim === 'lines') cls.push('lines');
     var inner = BLOCKS[b.type] ? BLOCKS[b.type](b) : '';
     return '<section class="' + cls.filter(Boolean).join(' ') + '" data-i="' + i + '"' + (b.id ? ' id="' + esc(b.id) + '" data-id="' + esc(b.id) + '"' : '') + (b.requires ? ' data-req="' + esc(b.requires) + '" hidden' : '') +
       (b.track ? ' data-track="' + esc(b.track) + '"' : '') + (b.type === 'component' ? ' data-comp="' + esc(b.name) + '"' : '') + (b.type === 'spacer' ? ' aria-hidden="true"' : '') + '><div class="in-w">' + inner + '</div></section>';
   }
   function build(host) {
-    var blocks = (C.blocks || []).filter(function (b) { return b && !b.hide && BLOCKS[b.type] && !((b.type === 'image' || b.type === 'fullImage' || b.type === 'video') && hideEmpty(b)); });
-    host.innerHTML = blocks.map(wrap).join('');
-    blocks.forEach(function (b, i) { host.children[i]._b = b; });
+    var pairs = [];
+    (C.blocks || []).forEach(function (b, i) {
+      if (!b || !BLOCKS[b.type]) return;
+      if (!PREVIEW && (b.hide || ((b.type === 'image' || b.type === 'fullImage' || b.type === 'video') && hideEmpty(b)))) return;
+      pairs.push([b, i]);
+    });
+    host.innerHTML = pairs.map(function (p) { return wrap(p[0], p[1]); }).join('');
+    pairs.forEach(function (p, k) { host.children[k]._b = p[0]; });
   }
   // 컴포넌트 다시 그리기 (분석 결과가 생긴 뒤)
   function paint(name) {
@@ -415,20 +420,13 @@
       if (tick) return; tick = true;
       requestAnimationFrame(function () { var h = document.documentElement.scrollHeight - innerHeight; bar.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, scrollY / h) : 0) + ')'; tick = false; });
     }, { passive: true });
-    var S1 = C.settings || {}, back = document.getElementById('backLink'), skip = document.getElementById('skipLink');
-    if (back && S1.backLink) { back.textContent = S1.backLink.text; back.setAttribute('href', /^(\/|https:\/\/)/.test(S1.backLink.href) ? S1.backLink.href : '/report/'); }
-    if (skip && S1.skipLink) { skip.textContent = S1.skipLink.text; skip.onclick = function () { scrollToId(S1.skipLink.target); }; }
   }
-
-  // 판매 페이지(/report) 관리자에 입력한 브랜드명·가격을 가져온다 (없으면 기본값)
-  function loadHome() {
-    return fetch('/api/home').then(function (r) { return r.ok ? r.json() : {}; }).then(function (d) {
-      var h = d && d.home; if (!h) return;
-      var name = h.brand && h.brand.name; if (name) { var bn = document.getElementById('brandName'); if (bn) bn.textContent = name; }
-      var sec = (h.sections || []).filter(function (s) { return s.type === 'prices' && s.show !== false; })[0], items = sec && sec.items || [];
-      var main = items.filter(function (i) { return i.main; })[0] || items[0];
-      if (main && main.amt && !/미정/.test(main.amt)) { S.home = { price: main.amt }; if (S.chart) paint('Paywall'); }
-    }).catch(function () { });
+  function meta() { // 이름·탭 제목·공유 설명
+    var S1 = C.settings || {}, skip = document.getElementById('skipLink'), bn = document.getElementById('brandName');
+    if (bn) bn.textContent = S1.brandName || '';
+    if (skip) { var sl = S1.skipLink || {}; skip.textContent = sl.text || ''; skip.hidden = !sl.text; skip.onclick = function () { scrollToId(sl.target || 'sajuInput'); }; }
+    if (S1.pageTitle) { document.title = S1.pageTitle; var t = document.querySelector('meta[property="og:title"]'); if (t) t.setAttribute('content', S1.pageTitle); }
+    if (S1.pageDesc) { ['meta[name=description]', 'meta[property="og:description"]'].forEach(function (q) { var m = document.querySelector(q); if (m) m.setAttribute('content', S1.pageDesc); }); }
   }
 
   // ───────── 콘텐츠 점검 (개발·테스트용) ─────────
@@ -459,15 +457,63 @@
   }
 
   // ───────── 시작 ─────────
-  function boot() {
-    var host = document.getElementById('story'); if (!host) return;
-    build(host); bind(host);
+  // 관리자가 저장한 내용(/api/story)이 있으면 content.js 의 기본 내용 위에 덮어 쓴다.
+  function isObj(x) { return x && typeof x === 'object' && !Array.isArray(x); }
+  function deepMerge(base, over) {
+    if (!isObj(base) || !isObj(over)) return over === undefined ? base : over;
+    var o = Object.assign({}, base); Object.keys(over).forEach(function (k) { o[k] = isObj(over[k]) && isObj(base[k]) ? deepMerge(base[k], over[k]) : over[k]; }); return o;
+  }
+  var DEFAULT_C = null;
+  function applyStory(st) {
+    if (!DEFAULT_C) DEFAULT_C = JSON.parse(JSON.stringify(C));
+    var base = JSON.parse(JSON.stringify(DEFAULT_C)); delete base.copy;
+    ['settings', 'result', 'flow', 'locked', 'purchase'].forEach(function (k) { if (st && isObj(st[k])) base[k] = deepMerge(base[k], st[k]); });
+    ['blocks', 'interests'].forEach(function (k) { if (st && Array.isArray(st[k])) base[k] = st[k]; });
+    Object.keys(base).forEach(function (k) { C[k] = base[k]; });
+  }
+  var PREVIEW = DOC && /[?&]preview=1\b/.test(location.search); // 관리자 미리보기: 보내 주는 내용으로 다시 그리고, 모든 단계를 펼쳐 보여 준다
+  var host0 = null, started = false;
+  function sample() { // 미리보기용 예시 사주 (분석 후 화면까지 보이도록)
+    if (!M()) return; try { S.chart = M().compute({ year: 1990, month: 5, day: 15, hour: 14, minute: 0, calendar: 'solar', gender: 'F', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' }); S.flowOpen = true; S.name = '예시'; } catch (e) { }
+  }
+  function render() {
+    var host = host0, y = root.scrollY;
+    build(host); bind0(host);
     host.querySelectorAll('[data-comp]').forEach(mountComp);
-    gate(); chrome(); setupObservers();
-    var problems = validate(); if (DEV && problems.length && root.console) console.warn('[story] 콘텐츠 점검:\n' + problems.join('\n'));
+    gate(); meta(); setupObservers();
+    if (PREVIEW) { host.querySelectorAll('.blk').forEach(function (el) { el.classList.add('in'); }); root.scrollTo(0, y); }
+  }
+  var bound = false;
+  function bind0(host) { if (!bound) { bound = true; bind(host); } }
+  function start() {
+    if (started) return; started = true;
+    render(); chrome();
     document.documentElement.classList.add('ready');
-    track('onboarding_started', { dev: DEV ? 1 : 0 }, true);
-    loadHome();
+    var problems = validate(); if (DEV && problems.length && root.console) console.warn('[story] 콘텐츠 점검:\n' + problems.join('\n'));
+    if (!PREVIEW) track('onboarding_started', { dev: DEV ? 1 : 0 }, true);
+  }
+  function boot() {
+    host0 = document.getElementById('story'); if (!host0) return;
+    if (PREVIEW) {
+      sample(); document.documentElement.classList.add('preview');
+      var sel = -1;
+      function mark() { host0.querySelectorAll('.blk.sel').forEach(function (x) { x.classList.remove('sel'); }); var el = host0.querySelector('.blk[data-i="' + sel + '"]'); if (el) el.classList.add('sel'); return el; }
+      root.addEventListener('message', function (e) {
+        if (e.origin !== location.origin) return; var d = e.data || {};
+        if (d.t === 'st-content' && d.story) { applyStory(d.story); if (started) render(); else start(); mark(); }
+        else if (d.t === 'st-sel') { sel = +d.i; var el = mark(); if (el && d.scroll) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      });
+      document.addEventListener('click', function (e) {
+        if (e.target.closest && e.target.closest('a')) e.preventDefault();
+        var el = e.target.closest && e.target.closest('.blk'); if (el) { sel = +el.getAttribute('data-i'); mark(); parent.postMessage({ t: 'st-pick', i: sel }, location.origin); }
+      }, true);
+      parent.postMessage({ t: 'st-ready' }, location.origin);
+      return;
+    }
+    // 저장된 내용을 받아 그린다 (1.5초 안에 못 받으면 기본 내용). 받는 동안 화면은 숨겨 기본 문구가 번쩍이지 않게 한다.
+    var timer = setTimeout(start, 1500);
+    fetch('/api/story').then(function (r) { return r.ok ? r.json() : {}; }).then(function (d) { clearTimeout(timer); if (d && d.story) applyStory(d.story); start(); })
+      .catch(function () { clearTimeout(timer); start(); });
   }
 
   root.Story = { validate: validate, track: track, pick: pick, media: media, fmt: fmt, BLOCKS: BLOCKS, COMPONENTS: COMPONENTS, state: S };
