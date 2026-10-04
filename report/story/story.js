@@ -205,6 +205,7 @@
     return R.image ? '<figure class="fig w-narrow">' + pic(R.image, { ar: '1/1' }) + '</figure>' : '';
   }
 
+  var FlowPreview; // COMPONENTS.FlowPreview (렌더·클릭 처리에서 서로 참조)
   var COMPONENTS = {
     // 사주 입력: 만세력 앱과 같은 입력값·같은 계산(Manse.compute)을 쓴다. 계산 로직은 건드리지 않는다.
     SajuInput: {
@@ -272,7 +273,8 @@
       },
     },
 
-    // 운 흐름 미리보기: 기존 월운 계산(Manse.wolun)과 분류(기회·확장·수확·축적 / 순풍·보통·주의)를 그대로 쓴다.
+    // 운 흐름 미리보기: 만세력 앱 "월운 흐름" 그래프와 같은 계산(Manse.wolun)·같은 읽는 법.
+    //   막대 높이 = 흐름 적합도(위로 길수록 유리, 아래로 내려가면 조심) · 색 = 주 흐름(기회·확장·수확·축적) · 변/방 = 변동·방어 신호
     FlowPreview: {
       render: function () {
         var ch = S.chart, m = M(); if (!ch || !m) return '';
@@ -280,17 +282,44 @@
         try {
           Y = m.yearPillarAt(now).sajuYear; list = m.wolun(ch, Y); seun = m.seunRange(ch, Y, Y)[0];
         } catch (e) { return '<p class="note ctr">운 흐름을 불러오지 못했습니다.</p>'; }
-        var cur = list[0]; list.forEach(function (x) { if (x.startMs <= now) cur = x; });
-        var tile = function (x) {
-          var mo = new Date(x.startMs + 9 * 3600e3).getUTCMonth() + 1, c = x.ev.flow.condition.name;
-          return '<div class="tl c-' + ({ '순풍': 'good', '주의': 'warn' }[c] || 'mid') + (x === cur ? ' now' : '') + '"><small>' + mo + '월~' + (x === cur ? ' · ' + esc(F.nowLabel || '지금') : '') + '</small><b>' + esc(m.flowLabel(x.ev, { condition: false, overlay: 'none' })) + '</b><span>' + esc(c) + '</span></div>';
-        };
-        var fs0 = m.flowSummary(cur.ev), k0 = fs0.indexOf('다. '), first = k0 > 0 ? fs0.slice(0, k0 + 2) : fs0; // 첫 문장만
+        var cur = 0; list.forEach(function (x, i) { if (x.startMs <= now) cur = i; });
+        var COL = { opportunity: '#1E9E57', expansion: '#0E9AA7', harvest: '#8A5CF6', accumulation: '#2F6BFF' };
+        var DESC = F.flowDesc || {};
+        var rows = list.map(function (x) {
+          var f = x.ev.flow, fs0 = m.flowSummary(x.ev), k0 = fs0.indexOf('다. ');
+          return { mo: new Date(x.startMs + 9 * 3600e3).getUTCMonth() + 1, fit: +x.ev.fitScore || 0, key: f.primaryFlow, name: m.flowName(f.primaryFlow), cond: f.condition.name,
+            vol: !!f.overlays.volatility.active, def: !!f.overlays.defense.active, sum: k0 > 0 ? fs0.slice(0, k0 + 2) : fs0 };
+        });
+        var top = Math.max(50, Math.max.apply(null, rows.map(function (r) { return Math.abs(r.fit); })));
+        var cols = rows.map(function (r, i) {
+          var v = Math.max(-1, Math.min(1, r.fit / top)), h = Math.max(3, Math.abs(v) * 50);
+          return '<button type="button" class="fc-col' + (i === cur ? ' now sel' : '') + '" data-i="' + i + '" style="--c:' + COL[r.key] + '" aria-label="' + r.mo + '월 ' + esc(r.name) + ' ' + esc(r.cond) + '">' +
+            '<span class="fc-area">' + (r.vol || r.def ? '<u class="fc-ov" style="' + (v >= 0 ? 'bottom:calc(50% + ' + h + '% + 2px)' : 'top:calc(50% + ' + h + '% + 2px)') + '">' + (r.vol ? '변' : '') + (r.def ? '방' : '') + '</u>' : '') +
+            '<b class="fc-bar' + (r.cond === '주의' || r.cond === '부담' ? ' warn' : '') + '" style="' + (v >= 0 ? 'bottom:50%' : 'top:50%') + ';height:' + h + '%"></b></span>' +
+            '<em>' + r.mo + '월</em><small style="color:' + COL[r.key] + '">' + esc(r.name) + '</small>' + (i === cur ? '<i class="fc-now">' + esc(F.nowLabel || '지금') + '</i>' : '') + '</button>';
+        }).join('');
+        var legend = Object.keys(COL).map(function (k) { return '<span><i style="background:' + COL[k] + '"></i><b>' + esc(m.flowName(k)) + '</b>' + (DESC[k] ? ' <small>' + esc(DESC[k]) + '</small>' : '') + '</span>'; }).join('');
+        FlowPreview.rows = rows; FlowPreview.desc = DESC;
         return '<p class="kicker">' + Y + '</p><h2 class="hl hl-l">' + fmt(F.title || '') + '</h2><p class="sub">' + fmt(F.lead || '') + '</p>' +
           '<p class="year-line">올해의 큰 흐름 <b>' + esc(m.flowLabel(seun.ev)) + '</b></p>' +
-          '<div class="tiles">' + list.map(tile).join('') + '</div>' +
-          '<p class="now-line"><b>지금 이 시기</b> ' + esc(m.flowLabel(cur.ev)) + '<br><span>' + esc(first) + '</span></p>' +
+          '<div class="fc" role="group" aria-label="월별 운 흐름 그래프"><span class="fc-y t">' + esc(F.axisUp || '유리') + '</span><span class="fc-y b">' + esc(F.axisDown || '조심') + '</span><div class="fc-plot">' + cols + '</div></div>' +
+          '<div class="fc-legend">' + legend + '</div>' +
+          '<div class="fc-detail" id="fcDetail" aria-live="polite">' + FlowPreview.detail(cur) + '</div>' +
           (F.lockedNote ? '<p class="note ctr">🔒 ' + esc(F.lockedNote) + '</p>' : '');
+      },
+      detail: function (i) {
+        var r = (FlowPreview.rows || [])[i]; if (!r) return '';
+        var d = (FlowPreview.desc || {})[r.key];
+        return '<b>' + r.mo + '월~ · ' + esc(r.name) + ' · ' + esc(r.cond) + '</b>' + (d ? '<span class="d">' + esc(d) + '</span>' : '') +
+          (r.vol ? '<span class="d">변화가 크게 일어나기 쉬운 달이에요.</span>' : '') + (r.def ? '<span class="d">무리하지 말고 방어에 신경 쓸 달이에요.</span>' : '') + '<small>' + esc(r.sum) + '</small>';
+      },
+      mount: function (el) {
+        var plot = el.querySelector('.fc-plot'); if (!plot) return;
+        plot.addEventListener('click', function (e) {
+          var c = e.target.closest && e.target.closest('.fc-col'); if (!c) return;
+          plot.querySelectorAll('.fc-col.sel').forEach(function (x) { x.classList.remove('sel'); }); c.classList.add('sel');
+          el.querySelector('#fcDetail').innerHTML = FlowPreview.detail(+c.getAttribute('data-i'));
+        });
       },
     },
 
@@ -341,6 +370,8 @@
       },
     },
   };
+
+  FlowPreview = COMPONENTS.FlowPreview;
 
   // ───────── 렌더링 ─────────
   var SPACE = { small: 'sp-s', medium: 'sp-m', large: 'sp-l', viewport: 'sp-v' };
