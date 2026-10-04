@@ -23,7 +23,8 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-sans); font-size: 16px; line-height: 1.8; overflow-x: hidden; word-break: keep-all; overflow-wrap: break-word; -webkit-font-smoothing: antialiased; }
+@keyframes pg { from { opacity: 0; } to { opacity: 1; } }
+body { animation: pg .7s ease both; margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-sans); font-size: 16px; line-height: 1.8; overflow-x: hidden; word-break: keep-all; overflow-wrap: break-word; -webkit-font-smoothing: antialiased; }
 h1, h2, h3, p, figure, blockquote, ul { margin: 0; padding: 0; }
 h1, h2, h3 { font-family: var(--f-serif); font-weight: 600; line-height: 1.45; letter-spacing: .01em; text-wrap: balance; }
 em { font-style: normal; background: linear-gradient(180deg, var(--gold-l), var(--gold-d)); -webkit-background-clip: text; background-clip: text; color: transparent; }

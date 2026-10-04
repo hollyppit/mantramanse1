@@ -229,6 +229,7 @@ body.pv .editing { outline: 2px solid #62C2AE !important; cursor: text; -webkit-
 /* 입장 인트로 */
 #intro { position: fixed; inset: 0; z-index: 1000; background: #000; display: grid; place-items: center; opacity: 1; transition: opacity .6s ease; }
 #intro.out { opacity: 0; pointer-events: none; }
+#intro.next { transition: background .45s ease; } #intro.next video, #intro.next > div { transition: opacity .45s ease; } #intro.next button { opacity: 0; transition: opacity .3s; }
 #intro video { width: 100%; height: 100%; object-fit: contain; }
 #intro button { position: absolute; top: max(14px, env(safe-area-inset-top)); border: 1px solid rgba(236,231,219,.45); background: rgba(10,12,20,.55); color: var(--ink); font: inherit; font-size: .85rem; padding: 8px 14px; border-radius: 999px; cursor: pointer; backdrop-filter: blur(6px); }
 #intro button:hover { border-color: var(--gold); color: var(--gold); }
@@ -448,10 +449,13 @@ body.pv .editing { outline: 2px solid #62C2AE !important; cursor: text; -webkit-
       var v = document.createElement('video'); v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto'; v.muted = true; v.src = url;
       var stage = null, player = null;
       var skip = document.createElement('button'); skip.className = 'skip'; skip.type = 'button'; skip.textContent = '건너뛰기 ›';
-      var done = false;
+      var done = false, INTRO_NEXT = '/report/story/';
+      try { var pf = document.createElement('link'); pf.rel = 'prefetch'; pf.href = INTRO_NEXT; document.head.appendChild(pf); } catch (e) {}
       function close() {
-        if (done) return; done = true; document.documentElement.style.overflow = ''; box.classList.add('out'); v.pause(); if (player) player.stop();
-        setTimeout(function () { box.remove(); }, 700);
+        if (done) return; done = true; v.pause(); if (player) player.stop();
+        // 인트로가 끝나면(건너뛰기 포함) 스토리 페이지로 바로 이어진다. 인트로 화면을 걷지 않고 덮은 채로 넘어가 끊김이 없다.
+        box.style.background = '#080A11'; box.classList.add('next'); v.style.opacity = '0'; if (stage) stage.style.opacity = '0';
+        setTimeout(function () { location.href = INTRO_NEXT; }, 450);
       }
       skip.onclick = close; v.onended = close; v.onerror = close;
       document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } });
