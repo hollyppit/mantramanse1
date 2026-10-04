@@ -36,7 +36,8 @@
      hide      true 로 두면 지우지 않고 잠시 숨깁니다
 
    ■ 블록 종류 (type)
-     headline    큰 한 문장. title, kicker(위 작은 글씨), subtitle, size('xl'|'l'|'m'), fullscreen(true면 한 화면 가득), scrollHint(true면 아래 스크롤 안내)
+     headline    큰 한 문장. title, kicker(위 작은 글씨), subtitle, size('xl'|'l'|'m'), fullscreen(true면 한 화면 가득), scrollHint(true면 아래 스크롤 안내),
+                 startButton(버튼 글자를 적으면 버튼이 생기고, 누르면 자동으로 내려가며 음성이 재생됩니다)
      text        설명 글. title, subtitle, body, emphasis(true면 강조 스타일)
      quote       강조 문구. text, cite(출처, 선택)
      image       이미지. src, srcMobile, alt, caption, width('narrow'|'normal'|'wide'), aspectRatio('4/5','16/9'…), objectFit('cover'|'contain'), todo
@@ -51,7 +52,8 @@
      spacer      호흡 여백. size('small'|'medium'|'large'|'viewport')
      divider     장면 전환 구분선
      cta         버튼. headline, description, buttonText, action, variant('primary'|'ghost')
-                   action: 'scroll:블록id' | 'href:/주소' | 'flow:open'(운 흐름 열기) | 'purchase'(구매)
+                   action: 'scroll:블록id' | 'href:/주소' | 'flow:open'(운 흐름 열기) | 'purchase'(구매) | 'auto:start'(자동 스크롤 시작)
+     voice       (모든 블록 공통) 음성 파일. 블록이 화면 가운데에 오면 재생됩니다. 예) voice: 'voice/hero.mp3'
      component   기능 블록(수정 불필요). name: 'SajuInput' | 'FreeResult' | 'FlowPreview' | 'LockedContent' | 'Paywall'
 
    ■ A/B 문구
@@ -164,7 +166,7 @@
   var BLOCKS = [
 
     /* ===== 01 PROBLEM : "이거 내 얘기인데?" ===== */
-    { type: 'headline', id: 'hero', track: 'problem_section_viewed', kicker: '만트라 사주 무빙툰', title: COPY.heroHeadline, size: 'xl', fullscreen: true, scrollHint: true, anim: 'lines' },
+    { type: 'headline', id: 'hero', track: 'problem_section_viewed', kicker: '만트라 사주 무빙툰', title: COPY.heroHeadline, size: 'xl', fullscreen: true, scrollHint: true, startButton: '스크롤하기', anim: 'lines' },
     { type: 'headline', title: COPY.problemQuestion, size: 'l', anim: 'lines' },
     { type: 'image', src: 'problem/problem-01.webp', alt: '노력하지만 결과가 나오지 않아 고민하는 사람', aspectRatio: '4/5', width: 'normal',
       todo: '노력하지만 결과가 나오지 않아 고민하는 인물 이미지 또는 웹툰 컷 삽입' },

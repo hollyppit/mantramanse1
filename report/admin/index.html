@@ -853,16 +853,16 @@ summary { cursor:pointer; padding:4px 0; }
   }
   // 버튼 동작: 이동/흐름 열기/구매/주소
   function hmAction(obj, k, label) {
-    var lab = mk('label', 'hmf'), v = String(obj[k] || ''), kind = v.indexOf('scroll:') === 0 ? 'scroll' : v.indexOf('href:') === 0 ? 'href' : v === 'purchase' ? 'purchase' : v === 'flow:open' ? 'flow' : 'flow';
+    var lab = mk('label', 'hmf'), v = String(obj[k] || ''), kind = v.indexOf('scroll:') === 0 ? 'scroll' : v.indexOf('href:') === 0 ? 'href' : v === 'purchase' ? 'purchase' : v === 'auto:start' ? 'auto' : 'flow';
     lab.appendChild(mk('span', '', label));
     var row = mk('span'); row.style.cssText = 'display:flex;gap:6px';
-    var sel = mk('select'); [['scroll', '다른 블록으로 이동'], ['flow', '올해의 흐름 열기'], ['purchase', '구매 영역으로 이동'], ['href', '주소로 이동']].forEach(function (x) { var op = mk('option', '', x[1]); op.value = x[0]; sel.appendChild(op); });
+    var sel = mk('select'); [['scroll', '다른 블록으로 이동'], ['flow', '올해의 흐름 열기'], ['purchase', '구매 영역으로 이동'], ['auto', '자동 스크롤+음성 시작'], ['href', '주소로 이동']].forEach(function (x) { var op = mk('option', '', x[1]); op.value = x[0]; sel.appendChild(op); });
     sel.value = kind;
     var tgt = mk('input'); tgt.type = 'text'; tgt.style.flex = '1'; tgt.value = kind === 'scroll' ? v.slice(7) : kind === 'href' ? v.slice(5) : '';
     var ids = blockIds(); if (ids.length) { tgt.setAttribute('list', 'idlist'); var dl = document.getElementById('idlist') || mk('datalist'); dl.id = 'idlist'; dl.innerHTML = ids.map(function (i) { return '<option value="' + esc(i) + '">'; }).join(''); document.body.appendChild(dl); }
     function sync() {
       tgt.style.display = sel.value === 'scroll' || sel.value === 'href' ? '' : 'none'; tgt.placeholder = sel.value === 'scroll' ? '블록 이름표 (예: sajuInput)' : '/주소 또는 https://…';
-      obj[k] = sel.value === 'scroll' ? 'scroll:' + tgt.value.trim() : sel.value === 'href' ? 'href:' + tgt.value.trim() : sel.value === 'purchase' ? 'purchase' : 'flow:open';
+      obj[k] = sel.value === 'scroll' ? 'scroll:' + tgt.value.trim() : sel.value === 'href' ? 'href:' + tgt.value.trim() : sel.value === 'purchase' ? 'purchase' : sel.value === 'auto' ? 'auto:start' : 'flow:open';
     }
     sel.onchange = function () { sync(); hmChanged(); }; tgt.oninput = function () { sync(); hmChanged(); }; sync();
     row.appendChild(sel); row.appendChild(tgt); lab.appendChild(row); return lab;

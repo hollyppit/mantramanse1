@@ -88,6 +88,7 @@
       return (b.kicker ? '<p class="kicker">' + fmt(pick(b.kicker)) + '</p>' : '') +
         '<h2 class="hl hl-' + size + '">' + lines(fmt(pick(b.title)), b.anim) + '</h2>' +
         (b.subtitle ? '<p class="sub">' + fmt(pick(b.subtitle)) + '</p>' : '') +
+        (b.startButton ? '<button type="button" class="btn start" data-action="auto:start">' + esc(pick(b.startButton)) + '</button>' : '') +
         (b.scrollHint ? '<div class="scroll-hint" aria-hidden="true"><span>SCROLL</span><i></i></div>' : '');
     },
     text: function (b) {
@@ -239,7 +240,7 @@
           track('saju_analysis_completed', { interest: S.interest || '', hour_known: hasT }); // 생년월일 등 개인정보는 보내지 않는다
           loadClips().then(function () { paint('FreeResult'); });
           paint('FreeResult'); paint('FlowPreview'); paint('LockedContent'); paint('Paywall');
-          gate(); scrollToId('freeResult');
+          gate(); scrollToId('freeResult'); Auto.continueAt('freeResult');
         });
       },
     },
@@ -377,11 +378,12 @@
     a = String(a || '');
     if (a.indexOf('scroll:') === 0) scrollToId(a.slice(7));
     else if (a.indexOf('href:') === 0) { var h = a.slice(5); if (/^(\/|https:\/\/)/.test(h)) location.href = h; }
+    else if (a === 'auto:start') Auto.begin();
     else if (a === 'flow:open') {
       if (!S.chart) { scrollToId('sajuInput'); return; }
       S.flowOpen = true; gate(); paint('FlowPreview'); paint('LockedContent'); paint('Paywall'); // 관심사 반영을 위해 다시 그린다
       var host = btn && btn.closest('.blk'); if (host && host._b && host._b.hideAfterAction) host.hidden = true;
-      scrollToId('flowPreview');
+      scrollToId('flowPreview'); Auto.continueAt('flowPreview');
     } else if (a === 'purchase') { scrollToId('purchase'); }
   }
   function bind(host) {
@@ -479,7 +481,7 @@
       if (b.type === 'component' && !COMPONENTS[b.name]) out.push(w + '알 수 없는 component "' + b.name + '"');
       if (b.type === 'cta') {
         var a = String(b.action || '');
-        if (!/^(scroll:.+|href:.+|flow:open|purchase)$/.test(a)) out.push(w + '알 수 없는 action "' + a + '"');
+        if (!/^(scroll:.+|href:.+|flow:open|purchase|auto:start)$/.test(a)) out.push(w + '알 수 없는 action "' + a + '"');
         if (a.indexOf('scroll:') === 0 && !ids[a.slice(7)]) out.push(w + 'scroll 대상 id 없음 "' + a.slice(7) + '"');
       }
       ['src', 'srcMobile', 'poster', 'voice'].forEach(function (k) { if (b[k] && !media(b[k])) out.push(w + k + ' 주소 형식 오류'); });
@@ -492,7 +494,8 @@
   // 블록에 voice(음성 파일)가 있으면 그 블록이 화면 가운데에 머물 때 재생한다. 위쪽 🔊 버튼으로 끄고 켠다(선택은 이 기기에 기억).
   // 브라우저는 사용자가 화면을 한 번 만지기 전에는 소리를 막으므로, 막히면 안내 문구를 띄우고 첫 터치·클릭에 바로 이어서 재생한다.
   var Voice = (function () {
-    var audio = null, muted = false, last = null, pending = null, timer = 0, vio2 = null, started = false;
+    var audio = null, muted = false, last = null, pending = null, timer = 0, vio2 = null, started = false, held = false;
+    var SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
     try { muted = localStorage.getItem('mt_story_mute') === '1'; } catch (e) { }
     function $b() { return document.getElementById('sndBtn'); }
     function hint(on) { var h = document.getElementById('sndHint'); if (h) h.hidden = !on; }
@@ -523,6 +526,7 @@
       if (!vio2 && 'IntersectionObserver' in root) {
         vio2 = new IntersectionObserver(function (es) {
           es.forEach(function (e) {
+            if (held) return; // 자동 스크롤이 재생을 직접 맡는 동안
             if (e.isIntersecting) { clearTimeout(e.target._vt); e.target._vt = setTimeout(function () { play(e.target); }, 450); } // 지나치는 블록은 건너뛴다
             else clearTimeout(e.target._vt); // 가운데를 벗어난 블록은 이미 재생 중이면 끝까지 둔다
           });
@@ -537,7 +541,99 @@
       try { new MutationObserver(function () { if (pending && !document.getElementById('intro')) retry(); }).observe(document.body, { childList: true }); } catch (e) { }
       var h = document.getElementById('sndHint'); if (h) h.onclick = retry;
     }
-    return { watch: watch, init: init, ui: ui };
+    // 자동 스크롤용: 이 블록의 음성을 재생하고 끝나면(또는 실패·정지 시) 알린다. true = 끝까지 들려줌
+    function speak(el) {
+      return new Promise(function (res) {
+        var url = el.getAttribute('data-voice'); if (!url || muted) return res(false);
+        stop(); last = el; audio = audio || new Audio(); audio.src = url;
+        var done = false, t = setTimeout(function () { fin(false); }, 120000);
+        function fin(ok) { if (done) return; done = true; clearTimeout(t); audio.removeEventListener('ended', onE); audio.removeEventListener('error', onX); audio.removeEventListener('pause', onP); res(ok); }
+        function onE() { fin(true); } function onX() { fin(false); } function onP() { if (!audio.ended) fin(false); }
+        audio.addEventListener('ended', onE); audio.addEventListener('error', onX); audio.addEventListener('pause', onP);
+        var p; try { p = audio.play(); } catch (e) { p = null; }
+        if (p && p.catch) p.catch(function () { fin(false); }); else if (!p) fin(false);
+      });
+    }
+    function unlock() { audio = audio || new Audio(); try { audio.src = SILENT; var p = audio.play(); if (p && p.catch) p.catch(function () { }); } catch (e) { } }
+    return { watch: watch, init: init, ui: ui, speak: speak, unlock: unlock, stop: stop, hold: function (v) { held = !!v; } };
+  })();
+
+  // ───────── 자동 스크롤 ─────────
+  // 첫 화면의 시작 버튼(action 'auto:start')을 누르면 블록을 차례로 내려가며 음성을 들려준다. 음성이 있으면 끝날 때까지,
+  // 없으면 글 길이만큼 머문 뒤 다음으로 간다. 사주 입력·관심사 선택·버튼처럼 사용자가 해야 하는 곳에서는 멈추고,
+  // 분석을 마치거나 "올해의 흐름 확인"을 누르면 이어서 내려간다. 화면을 만지거나 휠·키를 쓰면 즉시 멈춘다.
+  var Auto = (function () {
+    var started = false, wanted = false, running = false, finished = false, token = 0, cancelAnim = null;
+    function btn() { return document.getElementById('autoBtn'); }
+    function ui() {
+      var b = btn(); if (!b) return;
+      b.hidden = !started || (finished && !running);
+      b.textContent = running ? '⏸ 멈추기' : '▶ 이어서 보기'; b.setAttribute('aria-label', running ? '자동 스크롤 멈추기' : '자동 스크롤 이어서 보기');
+    }
+    function units() {
+      var out = [];
+      document.querySelectorAll('#story > .blk').forEach(function (b) {
+        if (b.hidden || b.classList.contains('t-spacer') || b.classList.contains('t-divider')) return;
+        if (b.classList.contains('t-stickySteps')) b.querySelectorAll('.ss-s').forEach(function (s) { out.push(s); }); else out.push(b);
+      });
+      return out;
+    }
+    function isStop(u) {
+      if (u.classList.contains('t-component') || u.classList.contains('t-interest')) return true;
+      if (u.classList.contains('t-cta')) { var a = u.querySelector('[data-action]'); return !(a && /^scroll:/.test(a.getAttribute('data-action') || '')); }
+      return false;
+    }
+    function targetY(u) { var r = u.getBoundingClientRect(), vh = root.innerHeight, top = r.top + root.scrollY; return Math.max(0, r.height < vh * 0.9 ? top - (vh - r.height) / 2 : top - 80); }
+    function sleep(ms) { return new Promise(function (res) { setTimeout(res, ms); }); }
+    function dwell(u) { var n = (u.innerText || '').trim().length; return n ? Math.min(7000, Math.max(1800, 1200 + n * 70)) : 2200; }
+    function firstAhead(us) { for (var i = 0; i < us.length; i++) if (us[i].getBoundingClientRect().bottom > root.innerHeight * 0.6) return i; return us.length; }
+    function glide(y, my) {
+      return new Promise(function (res) {
+        var y0 = root.scrollY, d = y - y0, ms = Math.min(1800, Math.max(700, Math.abs(d) * 0.9)), t0 = performance.now(), raf = 0, dead = false;
+        if (REDUCE || Math.abs(d) < 3) { root.scrollTo({ top: y, behavior: 'instant' }); return res(); }
+        cancelAnim = function () { dead = true; cancelAnimationFrame(raf); res(); };
+        (function f(t) {
+          if (dead || my !== token) return res();
+          var k = Math.min(1, (t - t0) / ms), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+          root.scrollTo({ top: y0 + d * e, behavior: 'instant' });
+          if (k < 1) raf = requestAnimationFrame(f); else res();
+        })(t0);
+      });
+    }
+    async function run(from, pass) { // pass: 첫 블록이 멈춤 지점(기능 블록)이어도 멈추지 않고 지나간다
+      var my = ++token; running = true; finished = false; Voice.hold(true); ui();
+      var us = units(), i = from ? us.indexOf(from) : -1, i0 = -1; if (i < 0) i = firstAhead(us); i0 = i;
+      for (; i < us.length; i++) {
+        var u = us[i], blk = u.closest('.blk');
+        await glide(targetY(u), my); if (my !== token) return;
+        await sleep(250); if (my !== token) return;
+        var spoke = false;
+        if (blk.hasAttribute('data-voice') && (u === blk || u === blk.querySelector('.ss-s'))) spoke = await Voice.speak(blk);
+        if (my !== token) return;
+        await sleep(spoke ? 600 : (isStop(u) ? 500 : dwell(u))); if (my !== token) return;
+        if (isStop(u) && !(pass && i === i0)) { running = false; Voice.hold(false); ui(); return; }
+      }
+      if (my === token) { running = false; finished = true; Voice.hold(false); ui(); }
+    }
+    function interrupt() { if (!running) return; token++; running = false; if (cancelAnim) cancelAnim(); Voice.stop(); Voice.hold(false); ui(); track('auto_interrupted'); }
+    function begin() {
+      if (started) return; started = true; wanted = true; Voice.unlock();
+      document.querySelectorAll('.start').forEach(function (b) { b.hidden = true; });
+      var h = document.getElementById('sndHint'); if (h) h.hidden = true;
+      track('auto_started'); run();
+    }
+    function toggle() { if (running) { wanted = false; interrupt(); } else { wanted = true; run(); } }
+    function continueAt(id) { // 분석 완료·흐름 열기 뒤에 이어서
+      if (!wanted || running) return;
+      setTimeout(function () { var el = document.getElementById(id); if (!el || el.hidden || running) return; finished = false; var us = units(); run(us.filter(function (u) { return u === el || el.contains(u); })[0], true); }, 1000);
+    }
+    function init() {
+      var b = btn(); if (b) b.onclick = toggle;
+      function user(e) { var t = e.target; if (t && t.closest && t.closest('#autoBtn, #sndBtn, #sndHint')) return; interrupt(); }
+      ['wheel', 'touchstart', 'pointerdown'].forEach(function (ev) { document.addEventListener(ev, user, { passive: true }); });
+      document.addEventListener('keydown', function (e) { if (/^(ArrowUp|ArrowDown|PageUp|PageDown|Home|End| )$/.test(e.key)) interrupt(); });
+    }
+    return { begin: begin, init: init, continueAt: continueAt, ui: ui };
   })();
 
   // ───────── 시작 ─────────
@@ -572,7 +668,7 @@
   function bind0(host) { if (!bound) { bound = true; bind(host); } }
   function start() {
     if (started) return; started = true;
-    render(); chrome(); Voice.init();
+    render(); chrome(); Voice.init(); Auto.init();
     document.documentElement.classList.add('ready');
     var problems = validate(); if (DEV && problems.length && root.console) console.warn('[story] 콘텐츠 점검:\n' + problems.join('\n'));
     if (!PREVIEW) track('onboarding_started', { dev: DEV ? 1 : 0 }, true);

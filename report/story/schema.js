@@ -19,7 +19,7 @@
   var IMG = [['src', '이미지', 'i'], ['srcMobile', '모바일용 이미지 (선택)', 'i'], ['alt', '이미지 설명(필수)', 't'], ['caption', '캡션', 't']];
 
   var TYPES = {
-    headline: { label: '큰 문장', fields: [['title', '문장', 'l'], ['kicker', '위 작은 글씨', 't'], ['subtitle', '아래 설명', 'l'], ['size', '크기', 's', [['xl', '아주 크게'], ['l', '크게'], ['m', '보통']]], ['fullscreen', '한 화면 가득', 'b'], ['scrollHint', '아래 스크롤 안내', 'b']], blank: { title: '새 문장', size: 'l' } },
+    headline: { label: '큰 문장', fields: [['title', '문장', 'l'], ['kicker', '위 작은 글씨', 't'], ['subtitle', '아래 설명', 'l'], ['size', '크기', 's', [['xl', '아주 크게'], ['l', '크게'], ['m', '보통']]], ['fullscreen', '한 화면 가득', 'b'], ['scrollHint', '아래 스크롤 안내', 'b'], ['startButton', '시작 버튼 글자 (누르면 자동 스크롤+음성 시작 · 비우면 버튼 없음)', 't']], blank: { title: '새 문장', size: 'l' } },
     text: { label: '설명 글', fields: [['title', '제목', 't'], ['subtitle', '부제', 't'], ['body', '본문', 'l'], ['emphasis', '강조 스타일', 'b']], blank: { body: '새 설명 글' } },
     quote: { label: '강조 문구', fields: [['text', '문구', 'l'], ['cite', '출처', 't']], blank: { text: '새 강조 문구' } },
     image: { label: '이미지', fields: IMG.concat([['width', '너비', 's', WIDTH], ['aspectRatio', '비율', 's', RATIO], ['objectFit', '채우기', 's', [['', '꽉 채우기'], ['contain', '잘리지 않게']]]]), blank: { src: '', alt: '', aspectRatio: '4/5' } },

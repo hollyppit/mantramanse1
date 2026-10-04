@@ -13,7 +13,7 @@ const MAX_BLOCKS = 200, MAX_BYTES = 400 * 1024;
 // 이미지·영상 주소: 이 사이트 이미지 폴더의 상대경로, 업로드 파일(/api/clipfile?k=), https 주소만
 const MEDIA_OK = /^(\/api\/clipfile\?k=[\w.-]{1,120}|https:\/\/[^\s"'<>]+|(?!\/)(?!.*\.\.)[\w가-힣./%-]{1,200})$/;
 const HREF_OK = /^(\/[^\s]*|https:\/\/[^\s]+)$/;
-const ACTION_OK = /^(scroll:[\w-]{1,40}|href:(\/[^\s]*|https:\/\/[^\s]+)|flow:open|purchase)$/;
+const ACTION_OK = /^(scroll:[\w-]{1,40}|href:(\/[^\s]*|https:\/\/[^\s]+)|flow:open|purchase|auto:start)$/;
 
 // 문자열·숫자·불리언·배열·객체만 남기고 길이를 제한한다. 화면에 그릴 때 모든 글자는 이스케이프되므로 글 내용 자체는 자유롭게 둔다.
 function clean(v, depth = 0, key = '') {
