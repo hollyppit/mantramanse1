@@ -37,7 +37,7 @@ const FX = {
     anim: ['none', 'fade', 'rise', 'drop', 'pop', 'zoom', 'blur', 'slide-l', 'slide-r', 'bounce', 'flip', 'type', 'word', 'char'], animDur: [0.1, 3], wordDelay: [0.02, 1], typeSpeed: [3, 60],
     animOut: ['none', 'fade', 'fall', 'lift', 'shrink', 'blur', 'slide-l', 'slide-r'], animOutDur: [0.1, 3], emph: ['none', 'pulse', 'float', 'shake', 'blink', 'wobble', 'glow'], emphSpeed: [0.3, 6],
   },
-  voice: { on: ['off', 'on'], engine: ['browser', 'eleven'], name: 'S', mode: ['cue', 'whole'], rate: [0.5, 2], pitch: [0.5, 2], vol: [0, 1], delay: [0, 10],
+  voice: { on: ['off', 'on'], engine: ['browser', 'eleven'], name: 'S', mode: ['cue', 'whole'], rate: [0.5, 2], pitch: [0.5, 2], vol: [0, 1], delay: [0, 10], fit: ['stretch', 'off'], pad: [0, 3],
     elVoice: 'I', elModel: ['eleven_multilingual_v2', 'eleven_v3', 'eleven_flash_v2_5', 'eleven_turbo_v2_5'], elStability: [0, 1], elSimilarity: [0, 1], elStyle: [0, 1], elSpeed: [0.7, 1.2] },
   video: { speed: [0.25, 2], vol: [0, 1], duck: ['off', 'on'], duckVol: [0, 1], fadeIn: [0, 5], fadeOut: [0, 5], fit: ['contain', 'cover'], loop: ['auto', 'reverse', 'black', 'freeze', 'off'], trimStart: [0, 600], trimEnd: [0, 600], hold: [0, 10] },
 };

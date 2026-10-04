@@ -1047,6 +1047,7 @@ summary { cursor:pointer; padding:4px 0; }
     else if (st.dir < 0) txt = '◀ 거꾸로 재생 중 (' + st.seg + '번째 구간)';
     else txt = '▶ 앞으로 재생 중 (' + st.seg + '번째 구간)' + (st.seg > 1 && st.mode === 'auto' ? ' · 처음부터 반복' : '');
     txt += ' · ' + Math.max(0, st.t).toFixed(1) + 's / ' + (st.end || 0).toFixed(1) + 's';
+    if (st.stretch > 0.05) txt += ' · 목소리 템포에 맞춰 +' + st.stretch.toFixed(1) + 's 연장됨';
     if (st.hasVideo && st.segLen) txt += ' (영상 ' + st.segLen.toFixed(1) + 's)';
     if (st.vol != null) txt += ' · 영상 소리 ' + Math.round(st.vol * 100) + '%' + (st.muted ? ' (듣기 꺼짐)' : '');
     $(p + 'Status').textContent = txt; $(p + 'Bar').style.width = (st.end > 0 ? Math.min(100, Math.max(0, st.t) / st.end * 100) : 0) + '%';

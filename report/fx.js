@@ -71,6 +71,7 @@
   var ON_OFF = [['off', '끄기'], ['on', '켜기']];
   var VOICE_ENGINE = [['browser', '브라우저 음성 (무료, 기기마다 음색 다름)'], ['eleven', '일레븐랩스 (미리 만든 음성 파일, 모든 기기 동일)']];
   var EL_MODELS = [['eleven_multilingual_v2', 'Multilingual v2 (안정적, 기본 추천)'], ['eleven_v3', 'v3 (표현력 최고, 안정성은 0 / 0.5 / 1 권장)'], ['eleven_flash_v2_5', 'Flash v2.5 (빠르고 저렴)'], ['eleven_turbo_v2_5', 'Turbo v2.5']];
+  var VOICE_FIT = [['stretch', '자막·영상을 늘려서 목소리를 끝까지 읽기 (권장)'], ['off', '정해 둔 시간 그대로 (목소리가 길면 다음 줄에서 끊김)']];
   var VOICE_MODE = [['cue', '자막 줄마다 (자막과 동기)'], ['whole', '전체를 한 번에']];
   var LOOP = [['auto', '영상을 처음부터 다시 반복'], ['reverse', '거꾸로 재생해서 왕복 반복 (앞→뒤→앞…)'], ['black', '검은 배경 유지 (영상이 끝나면 검은 화면에서 자막·음성 계속)'], ['freeze', '마지막 화면 정지 유지'], ['off', '반복 안 함 (영상이 끝나면 클립 종료)']];
   var FIT = [['contain', '전체 보이게 (여백)'], ['cover', '화면 가득 (잘림)']];
@@ -87,6 +88,7 @@
     { g: 'voice', title: '목소리 설정', items: [
       ['on', '목소리 읽기', 'sel', ON_OFF], ['engine', '목소리 엔진', 'sel', VOICE_ENGINE],
       ['vol', '볼륨(0~1)', 'num', { min: 0, max: 1, step: 0.1 }], ['delay', '읽기 시작 지연(초)', 'num', { min: 0, max: 10, step: 0.1 }],
+      ['fit', '목소리가 자막 시간보다 길 때', 'sel', VOICE_FIT, { wide: true }], ['pad', '목소리가 끝난 뒤 여유(초)', 'num', { min: 0, max: 3, step: 0.1 }],
       ['name', '브라우저 목소리', 'voice', null, { only: 'browser', wide: true }], ['mode', '읽는 방식', 'sel', VOICE_MODE, { only: 'browser' }],
       ['rate', '속도', 'num', { min: 0.5, max: 2, step: 0.1 }, { only: 'browser' }], ['pitch', '음높이', 'num', { min: 0.5, max: 2, step: 0.1 }, { only: 'browser' }],
       ['elVoice', '일레븐랩스 목소리 (자막 줄마다 음성 파일을 만들어 씁니다)', 'elvoice', null, { only: 'eleven', wide: true }], ['elModel', '모델', 'sel', EL_MODELS, { only: 'eleven', wide: true }],
@@ -98,7 +100,7 @@
   var BUILTIN = {
     trans: { 'in': 'fade', out: 'fade', dur: 0.5 },
     sub: { font: 'gothic', weight: '700', italic: 'normal', size: 'M', fs: 0, color: 'ivory', colorHex: '', align: 'center', lh: 1.45, ls: 0, pos: 'bottom', x: 50, y: -1, w: 90, rot: 0, strokeW: 0, strokeColor: '#000000', shOn: 'on', shX: 0, shY: 6, shBlur: 20, shColor: '#000000', glowBlur: 0, glowColor: '', bg: 'shade', bgColor: '', bgOpacity: -1, bgRadius: 30, padX: 60, padY: 20, anim: 'fade', animDur: 0.4, wordDelay: 0.08, typeSpeed: 14, animOut: 'fade', animOutDur: 0.3, emph: 'none', emphSpeed: 1.5 },
-    voice: { on: 'off', engine: 'browser', name: '', mode: 'cue', rate: 1, pitch: 1, vol: 1, delay: 0.2, elVoice: '', elModel: 'eleven_multilingual_v2', elStability: 0.5, elSimilarity: 0.75, elStyle: 0, elSpeed: 1 },
+    voice: { on: 'off', engine: 'browser', name: '', mode: 'cue', rate: 1, pitch: 1, vol: 1, delay: 0.2, fit: 'stretch', pad: 0.3, elVoice: '', elModel: 'eleven_multilingual_v2', elStability: 0.5, elSimilarity: 0.75, elStyle: 0, elSpeed: 1 },
     video: { speed: 1, vol: 1, duck: 'off', duckVol: 0.3, fadeIn: 0, fadeOut: 0, fit: 'contain', loop: 'auto', trimStart: 0, trimEnd: 0, hold: 0.5 },
   };
   function resolve(fx, defaults) {
@@ -118,6 +120,22 @@
       list.forEach(function (f) { Object.assign(out[g], (f.fx && f.fx[g]) || {}); });
     });
     return out;
+  }
+  // 목소리 템포에 맞춰 자막 시각을 늘린다. 한 줄의 목소리가 그 줄의 자막 시간보다 길면 그만큼 그 줄을 늘리고, 뒤의 모든 줄을 같은 만큼 뒤로 민다.
+  // (줄 사이의 간격은 그대로.) 늘어난 전체 길이는 영상 반복 설정(fx.video.loop)이 이어 받는다.
+  // 목소리 길이: 일레븐랩스로 만든 음성은 실제 길이(d), 그 밖에는 글자 수로 추정한다(브라우저 음성 약 0.18초/글자, 속도로 나눔).
+  function stretchCues(cues, fx) {
+    var V = fx.voice; if (V.on !== 'on' || V.fit === 'off' || (V.engine !== 'eleven' && V.mode === 'whole')) return { cues: cues, added: 0 };
+    var eleven = V.engine === 'eleven', rate = (eleven ? V.elSpeed : V.rate) || 1, shift = 0;
+    var out = cues.map(function (c) {
+      var a = { t: c.t, s: c.s + shift, e: c.e + shift, a: c.a, d: c.d };
+      if (c.e >= 1e8) return a; // 영상 내내 표시하는 자막은 그대로
+      var len = (eleven && c.a && c.d > 0) ? c.d : c.t.replace(/\s+/g, '').length * 0.18 / rate;
+      var need = (V.delay || 0) + len + (V.pad || 0), cur = c.e - c.s;
+      if (need > cur) { shift += need - cur; a.e = a.s + need; }
+      return a;
+    });
+    return { cues: out, added: shift };
   }
   function cuesOf(clip) {
     var c = clip.fx && clip.fx.cues;
@@ -196,7 +214,7 @@
   // box 안에서 클립 하나를 재생한다. o = { clip, url, defaults, onend, onerror, audioUrl(음성 파일 키→주소), silent(영상·목소리 모두 끔), muteVideo/muteVoice(각각 끔), minContent(자막·음성 길이를 이만큼으로 늘려 반복 동작 확인), onStatus(진행 상태 콜백), freeze(자막 한 줄을 정지 화면으로, freezeIndex = 몇 번째 줄), edit(정지 화면에서 직접 편집 콜백) }. { stop } 반환.
   function play(box, o) {
     injectCss();
-    var clip = o.clip, fx = resolve(clip.fx, o.defaults), cues = cuesOf(clip);
+    var clip = o.clip, fx = resolve(clip.fx, o.defaults), stretched = stretchCues(cuesOf(clip), fx), cues = stretched.cues, stretchAdded = stretched.added;
     var done = false, ended = false, raf = 0, timers = [], idx = -2, curCue = null, typed = -1;
     var wrap = document.createElement('div'); wrap.className = 'fx-wrap';
     var stage = document.createElement('div'); stage.className = 'fx-stage';
@@ -216,7 +234,7 @@
     var audioUrl = o.audioUrl || function (k) { return '/api/clipfile?k=' + encodeURIComponent(k); };
     // 일레븐랩스로 미리 만든 음성 파일이 있으면 그것을, 없거나 실패하면 브라우저 음성으로 대신 읽는다
     function sayCue(cue) {
-      audios.forEach(function (a) { a.pause(); }); audios = [];
+      if (fx.voice.fit === 'off') { audios.forEach(function (a) { a.pause(); }); audios = []; }
       if (eleven && cue.a) {
         var au = new Audio(audioUrl(cue.a)); au.volume = fx.voice.vol; audios.push(au);
         var pr = au.play(); if (pr && pr.catch) pr.catch(function () { speak(cue.t); });
@@ -347,7 +365,7 @@
         idx = i; curCue = i >= 0 ? cues[i] : null; typed = -1; outed = false; pos.innerHTML = ''; subEl = null;
         if (!curCue) return;
         subEl = buildSub(curCue.t); pos.appendChild(subEl);
-        if (wantVoice && (fx.voice.mode === 'cue' || eleven)) { var cue = curCue; later(function () { try { root.speechSynthesis.cancel(); } catch (e) {} sayCue(cue); }, fx.voice.delay); }
+        if (wantVoice && (fx.voice.mode === 'cue' || eleven)) { var cue = curCue; later(function () { if (fx.voice.fit === 'off') { try { root.speechSynthesis.cancel(); } catch (e) {} } sayCue(cue); }, fx.voice.delay); }
       }
       if (!curCue || o.freeze) return;
       if (!outed && fx.sub.animOut !== 'none' && curCue.e < 1e8 && t >= curCue.e - fx.sub.animOutDur) {
@@ -420,7 +438,7 @@
     // 미리보기 상태 표시용 (구간 번호·방향·진행)
     function status(t, now) {
       if (!o.onStatus || now - lastStatus < 100) return; lastStatus = now;
-      o.onStatus({ t: t, end: Math.max(contentEnd, v ? 0 : total), seg: seg, dir: dir, phase: phase, mode: mode, hasVideo: !!v, segLen: segLen, vol: v ? v.volume : null, muted: v ? v.muted : false });
+      o.onStatus({ t: t, end: Math.max(contentEnd, v ? 0 : total), seg: seg, dir: dir, phase: phase, mode: mode, hasVideo: !!v, segLen: segLen, vol: v ? v.volume : null, muted: v ? v.muted : false, stretch: stretchAdded });
     }
     var t0 = 0, total = 0;
     function tick() {
@@ -471,5 +489,5 @@
     return { stop: function () { done = true; clearInterval(raf); timers.forEach(clearTimeout); try { root.speechSynthesis.cancel(); } catch (e) {} audios.forEach(function (a) { a.pause(); }); if (v) v.pause(); } };
   }
 
-  root.MovingFx = { folderDefaults: folderDefaults, FIELDS: FIELDS, BUILTIN: BUILTIN, resolve: resolve, cuesOf: cuesOf, play: play, voices: voices };
+  root.MovingFx = { stretchCues: stretchCues, folderDefaults: folderDefaults, FIELDS: FIELDS, BUILTIN: BUILTIN, resolve: resolve, cuesOf: cuesOf, play: play, voices: voices };
 })(typeof window !== 'undefined' ? window : globalThis);
