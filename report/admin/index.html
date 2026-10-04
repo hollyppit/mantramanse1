@@ -240,7 +240,7 @@ summary { cursor:pointer; padding:4px 0; }
           <div class="hmed" id="hmForm"></div>
         </div>
         <div class="hmpv">
-          <div class="row" style="align-items:center;margin-bottom:8px"><button id="hmPc" class="pri">PC</button><button id="hmMo">모바일</button><span class="muted">미리보기 (인트로 영상·알림 신청은 동작하지 않음)</span></div>
+          <div class="row" style="align-items:center;margin-bottom:8px"><button id="hmPc" class="pri">PC</button><button id="hmMo">모바일</button><span class="muted">미리보기 — 글자 <b>더블클릭 = 바로 고치기</b> · 끌면 이동 (인트로 영상·알림 신청은 동작하지 않음)</span></div>
           <div id="hmBox"><iframe id="hmFrame" title="홈 화면 미리보기"></iframe></div>
         </div>
       </div>
@@ -759,7 +759,7 @@ summary { cursor:pointer; padding:4px 0; }
       clr.onclick = function () { delete obj[k]; show(); hmChanged(); };
       show(); wrap.appendChild(th); wrap.appendChild(el); wrap.appendChild(up); wrap.appendChild(clr); wrap.appendChild(fi); lab.appendChild(wrap); return lab;
     } else {
-      el = document.createElement(t === 'l' ? 'textarea' : 'input'); if (t === 'l') el.rows = 3; else el.type = 'text'; el.value = obj[k] == null ? '' : obj[k];
+      var multi = t === 'l' || !/(href|src)$/i.test(k); el = document.createElement(multi ? 'textarea' : 'input'); if (multi) { el.rows = t === 'l' ? 3 : 1; el.style.minHeight = '0'; } else el.type = 'text'; el.value = obj[k] == null ? '' : obj[k];
       el.oninput = function () { obj[k] = el.value; hmChanged(); };
     }
     if (onFocus) el.addEventListener('focus', onFocus);
@@ -863,7 +863,7 @@ summary { cursor:pointer; padding:4px 0; }
       var ei = hmResolve(d.k); if (!ei || ei.kind !== 'text' || typeof ei.obj[ei.field] !== 'string' && ei.obj[ei.field] != null) return;
       if (ei.key === 'footer') { $('hmState').textContent = '하단 문구는 왼쪽 "하단 문구" 칸에서 고쳐 주세요 (여러 줄이라 미리보기에서 바로 고칠 수 없습니다)'; return; }
       var def = hmDefs(ei).filter(function (x) { return x[0] === ei.field; })[0];
-      hmSend({ t: 'mt-editstart', k: d.k, raw: ei.obj[ei.field] || '', multi: !!def && def[2] === 'l' });
+      hmSend({ t: 'mt-editstart', k: d.k, raw: ei.obj[ei.field] || '', multi: true });
     }
     else if (d.t === 'mt-text') {
       var ti = hmResolve(d.k); if (!ti || ti.kind !== 'text') return;

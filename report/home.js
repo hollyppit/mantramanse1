@@ -220,56 +220,56 @@
   }
 
   function head(s, P) {
-    return '<div class="head rv">' + (s.eyebrow ? T('div', 'eyebrow', P, s, 'eyebrow', esc(s.eyebrow)) : '') + (s.title ? T('h2', '', P, s, 'title', fmt(s.title)) : '') + (s.lead ? T('p', 'lead', P, s, 'lead', fmt(s.lead)) : '') + '</div>';
+    return '<div class="head rv">' + (s.eyebrow ? T('div', 'eyebrow', P, s, 'eyebrow', fmt(s.eyebrow)) : '') + (s.title ? T('h2', '', P, s, 'title', fmt(s.title)) : '') + (s.lead ? T('p', 'lead', P, s, 'lead', fmt(s.lead)) : '') + '</div>';
   }
   var R = {
     intro: function (s, P) { return '<div class="wrap">' + head(s, P) + '</div>'; },
     preview: function (s, P) {
-      var h = '<div class="head rv">' + (s.eyebrow ? T('div', 'eyebrow', P, s, 'eyebrow', esc(s.eyebrow)) : '') + (s.title ? T('h2', '', P, s, 'title', fmt(s.title)) : '') +
-        (s.badge ? T('span', 'badge', P, s, 'badge', esc(s.badge)) : '') + (s.note ? T('p', 'note', P, s, 'note', fmt(s.note)) : '') + '</div>';
+      var h = '<div class="head rv">' + (s.eyebrow ? T('div', 'eyebrow', P, s, 'eyebrow', fmt(s.eyebrow)) : '') + (s.title ? T('h2', '', P, s, 'title', fmt(s.title)) : '') +
+        (s.badge ? T('span', 'badge', P, s, 'badge', fmt(s.badge)) : '') + (s.note ? T('p', 'note', P, s, 'note', fmt(s.note)) : '') + '</div>';
       var panels = (s.items || []).map(function (p, i) {
         var Q = P + '/items/' + i, bg = img(p.bgSrc);
-        return '<div class="panel rv"><div class="art">' + (bg ? pic(bg, '', 'cover') : art(p.art, s.id + i)) + '</div>' + (p.sfx ? T('span', 'sfx', Q, p, 'sfx', esc(p.sfx), ' aria-hidden="true"') : '') +
-          (p.glyph ? '<div class="glyphwrap">' + T('div', 'glyph', Q, p, 'glyph', esc(p.glyph), ' aria-hidden="true"') + '</div>' : '') +
-          T('p', 'cap', Q, p, 'text', fmt(p.text) + (p.small ? T('small', '', Q, p, 'small', esc(p.small)) : '')) + '</div>';
+        return '<div class="panel rv"><div class="art">' + (bg ? pic(bg, '', 'cover') : art(p.art, s.id + i)) + '</div>' + (p.sfx ? T('span', 'sfx', Q, p, 'sfx', fmt(p.sfx), ' aria-hidden="true"') : '') +
+          (p.glyph ? '<div class="glyphwrap">' + T('div', 'glyph', Q, p, 'glyph', fmt(p.glyph), ' aria-hidden="true"') + '</div>' : '') +
+          T('p', 'cap', Q, p, 'text', fmt(p.text) + (p.small ? T('small', '', Q, p, 'small', fmt(p.small)) : '')) + '</div>';
       }).join('');
       return '<div class="wrap">' + h + '<div class="toon">' + panels + '</div></div>';
     },
     episodes: function (s, P) {
       return '<div class="wrap">' + head(s, P) + '<ol class="eps rv">' + (s.items || []).map(function (e, i) {
         var Q = P + '/items/' + i;
-        return '<li' + (e.hi ? ' class="hi"' : '') + '>' + T('span', 'no', Q, e, 'no', esc(e.no)) + '<div>' + T('b', '', Q, e, 'title', esc(e.title)) + T('span', '', Q, e, 'desc', fmt(e.desc)) + '</div></li>';
+        return '<li' + (e.hi ? ' class="hi"' : '') + '>' + T('span', 'no', Q, e, 'no', fmt(e.no)) + '<div>' + T('b', '', Q, e, 'title', fmt(e.title)) + T('span', '', Q, e, 'desc', fmt(e.desc)) + '</div></li>';
       }).join('') + '</ol>' + (s.note ? T('p', 'note ctr rv', P, s, 'note', fmt(s.note)) : '') + '</div>';
     },
     paths: function (s, P) {
       return '<div class="wrap">' + head(s, P) + '<div class="paths rv">' + (s.items || []).map(function (p, i) {
         var Q = P + '/items/' + i;
-        return '<div class="path' + (p.core ? ' core' : '') + '">' + T('h3', '', Q, p, 'title', esc(p.title)) + T('p', '', Q, p, 'text', fmt(p.text)) + '</div>';
+        return '<div class="path' + (p.core ? ' core' : '') + '">' + T('h3', '', Q, p, 'title', fmt(p.title)) + T('p', '', Q, p, 'text', fmt(p.text)) + '</div>';
       }).join('') + '</div></div>';
     },
     pillars: function (s, P) {
       return '<div class="wrap">' + head(s, P) + '<div class="pillars rv">' + (s.items || []).map(function (p, i) {
         var Q = P + '/items/' + i;
-        return '<div>' + T('b', '', Q, p, 'title', esc(p.title)) + T('p', '', Q, p, 'text', fmt(p.text)) + '</div>';
+        return '<div>' + T('b', '', Q, p, 'title', fmt(p.title)) + T('p', '', Q, p, 'text', fmt(p.text)) + '</div>';
       }).join('') + '</div></div>';
     },
     prices: function (s, P) {
       return '<div class="wrap">' + head(s, P) + '<div class="prices rv">' + (s.items || []).map(function (p, i) {
         var Q = P + '/items/' + i;
-        return '<div class="price' + (p.main ? ' main' : '') + '">' + (p.badge ? T('span', 'badge', Q, p, 'badge', esc(p.badge)) : '') + T('h3', '', Q, p, 'title', esc(p.title)) +
-          T('ul', '', Q, p, 'bullets', lines(p.bullets).map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('')) + (p.amt ? T('div', 'amt', Q, p, 'amt', esc(p.amt)) : '') + '</div>';
+        return '<div class="price' + (p.main ? ' main' : '') + '">' + (p.badge ? T('span', 'badge', Q, p, 'badge', fmt(p.badge)) : '') + T('h3', '', Q, p, 'title', fmt(p.title)) +
+          T('ul', '', Q, p, 'bullets', lines(p.bullets).map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('')) + (p.amt ? T('div', 'amt', Q, p, 'amt', fmt(p.amt)) : '') + '</div>';
       }).join('') + '</div>' + (s.note ? T('p', 'note ctr rv', P, s, 'note', fmt(s.note)) : '') + '</div>';
     },
     faq: function (s, P) {
       return '<div class="wrap">' + head(s, P) + '<div class="faq rv">' + (s.items || []).map(function (q, i) {
         var Q = P + '/items/' + i;
-        return '<details>' + T('summary', '', Q, q, 'q', esc(q.q)) + T('p', '', Q, q, 'a', fmt(q.a)) + '</details>';
+        return '<details>' + T('summary', '', Q, q, 'q', fmt(q.q)) + T('p', '', Q, q, 'a', fmt(q.a)) + '</details>';
       }).join('') + '</div></div>';
     },
     notify: function (s, P) {
       return '<div class="wrap">' + head(s, P) + '<div class="gate rv"><form class="signup" id="signup" novalidate data-done="' + esc(s.done) + '">' +
         '<div class="field"><input type="email" name="email" id="email" placeholder="이메일 주소" autocomplete="email" required aria-label="이메일 주소" maxlength="254">' +
-        T('button', 'btn', P, s, 'button', esc(s.button || '알림 신청'), ' type="submit" id="submitBtn"') + '</div>' +
+        T('button', 'btn', P, s, 'button', fmt(s.button || '알림 신청'), ' type="submit" id="submitBtn"') + '</div>' +
         '<div class="hp" aria-hidden="true"><label>웹사이트<input type="text" name="website" id="website" tabindex="-1" autocomplete="off"></label></div>' +
         '<label class="consent"><input type="checkbox" id="consent">' + T('span', '', P, s, 'consent', fmt(s.consent)) + '</label>' +
         '<p class="msg" id="msg" role="status" aria-live="polite"></p></form></div></div>';
@@ -289,14 +289,14 @@
   function render(cfg, els) {
     RULES = [];
     var b = cfg.brand || {}, h = cfg.hero || {};
-    els.top.innerHTML = '<div class="wrap"><a class="brand" href="/report/"><span class="seal"' + attr('brand/seal', b.st && b.st.seal) + '>' + esc(b.seal) + '</span><span class="bn">' +
-      T('span', '', 'brand', b, 'name', esc(b.name)) + (b.sub ? T('small', '', 'brand', b, 'sub', esc(b.sub)) : '') + '</span></a>' +
-      (b.backLabel ? T('a', 'back', 'brand', b, 'backLabel', esc(b.backLabel), ' href="' + esc(href(b.backHref)) + '"') : '') + '</div>';
-    els.hero.innerHTML = '<div class="hero-in">' + (h.kicker ? T('div', 'kicker', 'hero', h, 'kicker', esc(h.kicker)) : '') + T('h1', '', 'hero', h, 'title', fmt(h.title)) + (h.lead ? T('p', 'lead', 'hero', h, 'lead', fmt(h.lead)) : '') +
-      '<div class="cta-row">' + (h.cta1Label ? T('a', 'btn', 'hero', h, 'cta1Label', esc(h.cta1Label), ' href="' + esc(href(h.cta1Href)) + '"') : '') +
-      (h.cta2Label ? T('a', 'btn ghost', 'hero', h, 'cta2Label', esc(h.cta2Label), ' href="' + esc(href(h.cta2Href)) + '"') : '') + '</div>' +
-      (h.hint ? '<div class="scroll-hint"><i></i>' + T('span', '', 'hero', h, 'hint', esc(h.hint)) + '</div>' : '') + '</div>' +
-      (h.vertical ? T('div', 'hanja-v', 'hero', h, 'vertical', esc(h.vertical), ' aria-hidden="true"') : '') + decor(h.decor, 'hero');
+    els.top.innerHTML = '<div class="wrap"><a class="brand" href="/report/"><span class="seal"' + attr('brand/seal', b.st && b.st.seal) + '>' + fmt(b.seal) + '</span><span class="bn">' +
+      T('span', '', 'brand', b, 'name', fmt(b.name)) + (b.sub ? T('small', '', 'brand', b, 'sub', fmt(b.sub)) : '') + '</span></a>' +
+      (b.backLabel ? T('a', 'back', 'brand', b, 'backLabel', fmt(b.backLabel), ' href="' + esc(href(b.backHref)) + '"') : '') + '</div>';
+    els.hero.innerHTML = '<div class="hero-in">' + (h.kicker ? T('div', 'kicker', 'hero', h, 'kicker', fmt(h.kicker)) : '') + T('h1', '', 'hero', h, 'title', fmt(h.title)) + (h.lead ? T('p', 'lead', 'hero', h, 'lead', fmt(h.lead)) : '') +
+      '<div class="cta-row">' + (h.cta1Label ? T('a', 'btn', 'hero', h, 'cta1Label', fmt(h.cta1Label), ' href="' + esc(href(h.cta1Href)) + '"') : '') +
+      (h.cta2Label ? T('a', 'btn ghost', 'hero', h, 'cta2Label', fmt(h.cta2Label), ' href="' + esc(href(h.cta2Href)) + '"') : '') + '</div>' +
+      (h.hint ? '<div class="scroll-hint"><i></i>' + T('span', '', 'hero', h, 'hint', fmt(h.hint)) + '</div>' : '') + '</div>' +
+      (h.vertical ? T('div', 'hanja-v', 'hero', h, 'vertical', fmt(h.vertical), ' aria-hidden="true"') : '') + decor(h.decor, 'hero');
     if (els.heroBox) {
       els.heroBox.style.minHeight = Math.max(40, Math.min(100, num(h.h, 100))) + 'svh';
       els.heroBox.dataset.art = /^(stars|none)$/.test(h.art || '') ? h.art : 'all';
@@ -308,7 +308,7 @@
     }).join('');
     var f = cfg.footer || {};
     if (els.dev) els.dev.textContent = '';
-    els.foot.innerHTML = '<div class="wrap"><i class="orn" aria-hidden="true"></i>' + lines(f.lines).map(function (l) { return T('p', '', 'footer', f, 'lines', esc(l)); }).join('') + '</div>';
+    els.foot.innerHTML = '<div class="wrap"><i class="orn" aria-hidden="true"></i>' + lines(f.lines).map(function (l) { return T('p', '', 'footer', f, 'lines', fmt(l)); }).join('') + '</div>';
     if (els.dev) els.dev.textContent = RULES.join(' ');
   }
 
