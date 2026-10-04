@@ -1,5 +1,10 @@
 // 판매 페이지(/report/) 홈 화면 내용: 기본 문구(DEFAULTS), 관리자 편집 양식(TYPES), 화면 그리기(render).
 // 판매 페이지와 관리자 미리보기가 같은 코드를 쓴다. 저장된 설정은 /api/home (GLOSSARY_KV 'home:config').
+//
+// 글자 서식은 글자가 속한 객체의 st[필드]에 저장한다(예: section.st.title). 항목이 옮겨져도 서식이 따라간다.
+//   st = { font, sz(% 기본 100), wt, color, align, ls(0.01em), lh(%), op(%), it, dx, dy(px) }
+// 화면의 글자·이미지에는 data-k 경로를 붙여 미리보기에서 클릭·끌기로 고를 수 있다.
+//   hero/title · brand/name · footer/lines · <섹션id>/title · <섹션id>/items/2/text · <섹션id>/decor/0 · hero/decor/1
 (function () {
   'use strict';
 
@@ -8,13 +13,28 @@
   function fmt(s) { return esc(s).replace(/\n/g, '<br>').replace(/\*([^*\n]+)\*/g, '<em>$1</em>'); }
   function lines(s) { return String(s || '').split(/\n/).map(function (x) { return x.trim(); }).filter(Boolean); }
   function href(h) { h = String(h || '').trim(); return /^(#[\w-]*|\/[^\s]*|https:\/\/[^\s]+|mailto:[^\s]+)$/.test(h) ? h : '#'; }
+  function img(u) { u = String(u || '').trim(); return /^(\/api\/clipfile\?k=[\w.-]{1,120}|https:\/\/[^\s"'<>]+)$/.test(u) ? u : ''; }
+  function hex(c) { return /^#[0-9a-f]{3,8}$/i.test(c || '') ? c : ''; }
+  function num(v, d) { if (v === undefined || v === null || v === '') return d; v = +v; return isFinite(v) ? v : d; }
+  function fonts() { return (window.MovingFx && window.MovingFx.FONTS) || {}; }
 
-  // ── 편집 양식. t: t=한 줄, l=여러 줄, b=체크, s=선택(o: [[값,이름]...])
+  // ── 편집 양식. t: t=한 줄, l=여러 줄, b=체크, s=선택(o), n=숫자(o: [최소,최대,간격,기본값]), c=색, i=이미지, f=글씨체
   var ART = [['awaken', '각성 (돌아가는 기운의 고리)'], ['five', '오행 (다섯 빛깔의 구슬)'], ['road', '길 (산과 이어지는 길)'], ['gate', '문 (붉은 문)']];
+  // 배경·여백: 첫 화면과 모든 섹션이 함께 쓴다
+  var BG = [['bgSrc', '배경 이미지', 'i'], ['bgMobileSrc', '모바일용 배경 이미지 (없으면 위 이미지)', 'i'], ['bgColor', '배경 색 (선택)', 'c'],
+    ['bgOpacity', '배경 이미지 진하기 %', 'n', [0, 100, 5, 100]], ['bgDark', '어둡게 덮기 %', 'n', [0, 100, 5, 0]], ['bgBlur', '흐리게 px', 'n', [0, 30, 1, 0]],
+    ['bgX', '이미지 가로 위치 %', 'n', [0, 100, 1, 50]], ['bgY', '이미지 세로 위치 %', 'n', [0, 100, 1, 50]], ['bgFade', '위·아래 가장자리 흐려짐 %', 'n', [0, 40, 1, 12]],
+    ['bgFixed', '스크롤해도 배경 고정 (은은한 시차 효과)', 'b']];
+  var PAD = [['padTop', '위 여백 px', 'n', [0, 500, 5, null]], ['padBot', '아래 여백 px', 'n', [0, 500, 5, null]]];
+  var DECOR = { k: 'decor', label: '장식 이미지', title: 'src', fields: [['src', '이미지', 'i'], ['x', '가로 위치 % (구역 기준)', 'n', [-30, 130, 0.5, 50]], ['y', '세로 위치 %', 'n', [-30, 130, 0.5, 50]],
+    ['w', '너비 %', 'n', [2, 200, 1, 30]], ['rot', '회전 °', 'n', [-180, 180, 1, 0]], ['op', '투명도 %', 'n', [0, 100, 5, 100]], ['blur', '흐리게 px', 'n', [0, 30, 1, 0]],
+    ['layer', '겹침', 's', [['back', '글자 뒤'], ['front', '글자 앞']]], ['blend', '합성 방식', 's', [['normal', '보통'], ['screen', '밝게 (빛·안개)'], ['multiply', '어둡게'], ['soft-light', '부드럽게']]]],
+    blank: { src: '', x: 50, y: 50, w: 30, rot: 0, op: 100, layer: 'back', blend: 'normal' } };
+
   var TYPES = {
     intro: { label: '소개 문단', fields: [['eyebrow', '작은 제목', 't'], ['title', '제목', 'l'], ['lead', '본문', 'l']] },
     preview: { label: '장면 미리보기', fields: [['eyebrow', '작은 제목', 't'], ['title', '제목', 'l'], ['badge', '배지', 't'], ['note', '안내 문구', 'l']],
-      list: { k: 'items', label: '장면', title: 'text', fields: [['art', '그림', 's', ART], ['glyph', '큰 글자 (선택)', 't'], ['sfx', '세로 효과음 글자', 't'], ['text', '대사·문장', 'l'], ['small', '작은 설명', 't']], blank: { art: 'awaken', glyph: '', sfx: '', text: '새 장면', small: '' } } },
+      list: { k: 'items', label: '장면', title: 'text', fields: [['art', '그림', 's', ART], ['glyph', '큰 글자 (선택)', 't'], ['sfx', '세로 효과음 글자', 't'], ['text', '대사·문장', 'l'], ['small', '작은 설명', 't'], ['bgSrc', '이 장면의 배경 그림 (없으면 기본 그림)', 'i']], blank: { art: 'awaken', glyph: '', sfx: '', text: '새 장면', small: '' } } },
     episodes: { label: '장(章) 목록', fields: [['eyebrow', '작은 제목', 't'], ['title', '제목', 'l'], ['lead', '본문', 'l'], ['note', '아래 안내', 'l']],
       list: { k: 'items', label: '장', title: 'title', fields: [['no', '번호 글자', 't'], ['title', '이름', 't'], ['desc', '설명', 'l'], ['hi', '강조 (붉은 번호)', 'b']], blank: { no: '', title: '새 장', desc: '', hi: false } } },
     paths: { label: '카드 3열 (개운의 길)', fields: [['eyebrow', '작은 제목', 't'], ['title', '제목', 'l'], ['lead', '본문', 'l']],
@@ -26,9 +46,16 @@
     faq: { label: '자주 묻는 질문', fields: [['eyebrow', '작은 제목', 't'], ['title', '제목', 'l']],
       list: { k: 'items', label: '질문', title: 'q', fields: [['q', '질문', 't'], ['a', '답', 'l']], blank: { q: '새 질문', a: '' } } },
     notify: { label: '출시 알림 신청', fields: [['eyebrow', '작은 제목', 't'], ['title', '제목', 'l'], ['button', '버튼 글자', 't'], ['consent', '동의 문구', 'l'], ['done', '신청 완료 메시지', 'l']] },
+    image: { label: '이미지 · 배너', fields: [['src', '이미지', 'i'], ['mobileSrc', '모바일용 이미지 (없으면 위 이미지)', 'i'], ['alt', '이미지 설명 (읽어 주기용)', 't'],
+      ['width', '너비 %', 'n', [10, 100, 1, 100]], ['ratio', '가로세로 비율', 's', [['auto', '원본 그대로'], ['16/9', '가로 16:9'], ['21/9', '와이드 21:9'], ['4/3', '가로 4:3'], ['1/1', '정사각'], ['3/4', '세로 3:4'], ['9/16', '세로 9:16']]],
+      ['fit', '채우기', 's', [['cover', '꽉 채움 (잘릴 수 있음)'], ['contain', '전체 보이게']]], ['radius', '모서리 둥글기 px', 'n', [0, 80, 1, 3]], ['frame', '금빛 테두리 장식', 'b'], ['full', '화면 폭 가득 (양옆 여백 없음)', 'b'],
+      ['href', '클릭하면 이동할 주소 (선택)', 't'], ['caption', '이미지 아래 글', 'l']] },
+    spacer: { label: '여백', fields: [['h', '높이 px', 'n', [0, 800, 10, 80]]], noBg: true },
+    divider: { label: '구분 장식', fields: [['style', '모양', 's', [['diamond', '마름모를 낀 선'], ['line', '가는 선'], ['dots', '점 세 개']]]], noBg: true },
   };
   var BRAND = [['name', '브랜드 이름', 't'], ['sub', '부제', 't'], ['seal', '붉은 낙관 글자 (1~2자)', 't'], ['siteTitle', '브라우저 탭 제목', 't'], ['desc', '검색·공유 설명', 'l'], ['backLabel', '상단 오른쪽 링크 글자 (비우면 숨김)', 't'], ['backHref', '그 링크 주소', 't']];
   var HERO = [['kicker', '위쪽 한자 문구', 't'], ['title', '큰 제목', 'l'], ['lead', '설명', 'l'], ['cta1Label', '첫 번째 버튼 글자', 't'], ['cta1Href', '첫 번째 버튼 이동 (#notify 등)', 't'], ['cta2Label', '두 번째 버튼 글자 (비우면 숨김)', 't'], ['cta2Href', '두 번째 버튼 이동', 't'], ['vertical', '왼쪽 세로 한자', 't'], ['hint', '아래 스크롤 안내 글자', 't']];
+  var HERO_BG = [['art', '기본 달·산·별 장식', 's', [['all', '모두 보이기'], ['stars', '별만'], ['none', '모두 숨기기']]], ['h', '첫 화면 높이 (화면 높이의 %)', 'n', [40, 100, 5, 100]]].concat(BG);
   var FOOT = [['lines', '하단 문구 (한 줄에 하나)', 'l']];
 
   var DEFAULTS = {
@@ -92,6 +119,56 @@
     footer: { lines: '본 콘텐츠는 참고·오락 목적의 해석이며, 결과에 대한 의사결정과 책임은 이용자 본인에게 있습니다.\n© 만트라 스튜디오' },
   };
 
+  // ── 글자 서식 → 인라인 스타일
+  function styleOf(st) {
+    var c = [], k = 1;
+    if (!st) return { css: '', k: 1, dx: 0, dy: 0 };
+    if (+st.sz > 0) k = Math.max(0.2, Math.min(5, +st.sz / 100));
+    var F = fonts();
+    if (st.font && F[st.font]) c.push('font-family:' + F[st.font]);
+    if (k !== 1) c.push('zoom:' + k);
+    if (+st.wt) c.push('font-weight:' + (+st.wt));
+    if (hex(st.color)) c.push('color:' + st.color);
+    if (/^(left|center|right)$/.test(st.align || '')) c.push('text-align:' + st.align);
+    if (st.ls !== undefined && st.ls !== null && st.ls !== '' && isFinite(+st.ls)) c.push('letter-spacing:' + (+st.ls / 100) + 'em');
+    if (+st.lh) c.push('line-height:' + (+st.lh / 100));
+    if (st.op !== undefined && st.op !== null && st.op !== '' && isFinite(+st.op)) c.push('opacity:' + (+st.op / 100));
+    if (st.it) c.push('font-style:italic');
+    var dx = num(st.dx, 0), dy = num(st.dy, 0);
+    if (dx || dy) c.push('position:relative;left:' + (dx / k) + 'px;top:' + (dy / k) + 'px'); // zoom이 길이도 키우므로 나눠서 실제 px로 맞춘다
+    return { css: c.join(';'), k: k, dx: dx, dy: dy };
+  }
+  function attr(path, st) {
+    var s = styleOf(st);
+    return ' data-k="' + esc(path) + '"' + (st ? ' data-dx="' + s.dx + '" data-dy="' + s.dy + '" data-zk="' + s.k + '"' : '') + (s.css ? ' style="' + esc(s.css) + '"' : '');
+  }
+  // obj[field] 글자를 태그로 감싼다. 서식은 obj.st[field]
+  function T(tag, cls, P, obj, field, html, extra) {
+    return '<' + tag + (cls ? ' class="' + cls + '"' : '') + attr(P + '/' + field, obj && obj.st && obj.st[field]) + (extra || '') + '>' + html + '</' + tag + '>';
+  }
+
+  // ── 이미지·배경·장식
+  function pic(src, mob, cls, style, eager) {
+    src = img(src); mob = img(mob); var main = src || mob; if (!main) return '';
+    return '<picture>' + (mob && src ? '<source media="(max-width:768px)" srcset="' + esc(mob) + '">' : '') + '<img' + (cls ? ' class="' + cls + '"' : '') + ' src="' + esc(main) + '" alt=""' + (style ? ' style="' + esc(style) + '"' : '') + (eager ? '' : ' loading="lazy"') + ' decoding="async"></picture>';
+  }
+  function bgBox(o, base) {
+    if (!img(o.bgSrc) && !img(o.bgMobileSrc) && !hex(o.bgColor)) return '';
+    var op = num(o.bgOpacity, 100) / 100, dark = num(o.bgDark, 0) / 100, blur = num(o.bgBlur, 0), x = num(o.bgX, 50), y = num(o.bgY, 50), fade = num(o.bgFade, base ? 0 : 12);
+    var is = 'object-position:' + x + '% ' + y + '%;opacity:' + op + (blur ? ';filter:blur(' + blur + 'px);transform:scale(1.08)' : '');
+    var bs = (hex(o.bgColor) ? 'background:' + o.bgColor + ';' : '') + (fade ? 'mask-image:linear-gradient(transparent,#000 ' + fade + '%,#000 ' + (100 - fade) + '%,transparent);-webkit-mask-image:linear-gradient(transparent,#000 ' + fade + '%,#000 ' + (100 - fade) + '%,transparent)' : '');
+    return '<div class="secbg' + (o.bgFixed ? ' fixed' : '') + '" aria-hidden="true"' + (bs ? ' style="' + esc(bs) + '"' : '') + '>' + pic(o.bgSrc, o.bgMobileSrc, '', is, base) + (dark ? '<i style="background:rgba(0,0,0,' + dark + ')"></i>' : '') + '</div>';
+  }
+  function decor(list, P) {
+    var h = (list || []).map(function (d, i) {
+      var u = img(d.src); if (!u) return '';
+      var st = 'left:' + num(d.x, 50) + '%;top:' + num(d.y, 50) + '%;width:' + num(d.w, 30) + '%;transform:translate(-50%,-50%) rotate(' + num(d.rot, 0) + 'deg);opacity:' + num(d.op, 100) / 100 +
+        (num(d.blur, 0) ? ';filter:blur(' + num(d.blur, 0) + 'px)' : '') + (/^(screen|multiply|soft-light)$/.test(d.blend || '') ? ';mix-blend-mode:' + d.blend : '');
+      return '<img class="dc ' + (d.layer === 'front' ? 'f' : 'b') + '" data-k="' + esc(P + '/decor/' + i) + '" src="' + esc(u) + '" alt="" style="' + esc(st) + '"' + (P === 'hero' ? '' : ' loading="lazy"') + ' draggable="false">';
+    }).join('');
+    return h ? '<div class="decor" aria-hidden="true">' + h + '</div>' : '';
+  }
+
   // ── 장면 그림 (SVG). 색은 은은하게 낮춘 동양 판타지 팔레트
   function art(kind, n) {
     var d = '<svg viewBox="0 0 400 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">';
@@ -110,80 +187,104 @@
         '<path d="M112 145 H288" stroke="#B5432F" stroke-width="11" stroke-linecap="round"/><path d="M122 124 H278" stroke="#B5432F" stroke-width="6" stroke-linecap="round"/>' +
         '<rect x="152" y="155" width="96" height="130" fill="#CDB27A" opacity=".12"/></g><rect x="0" y="285" width="400" height="75" fill="#06070D"/>';
     } else {
-      d += '<defs><radialGradient id="ag' + n + '" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#383064"/><stop offset="1" stop-color="#0B0D18"/></radialGradient></defs><rect width="400" height="360" fill="url(#ag' + n + ')"/>' +
+      d += '<defs><radialGradient id="ag' + esc(n) + '" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#383064"/><stop offset="1" stop-color="#0B0D18"/></radialGradient></defs><rect width="400" height="360" fill="url(#ag' + esc(n) + ')"/>' +
         '<g class="orbit" style="transform-origin:200px 150px"><circle cx="200" cy="150" r="110" fill="none" stroke="#CDB27A" stroke-opacity=".22" stroke-dasharray="3 8"/><circle cx="310" cy="150" r="4" fill="#CDB27A"/></g>' +
         '<g class="orbit rev" style="transform-origin:200px 150px"><circle cx="200" cy="150" r="80" fill="none" stroke="#7FB5A5" stroke-opacity=".22" stroke-dasharray="2 7"/><circle cx="120" cy="150" r="3.5" fill="#7FB5A5"/></g>';
     }
     return d + '</svg>';
   }
 
-  function head(s) {
-    return '<div class="head rv">' + (s.eyebrow ? '<div class="eyebrow">' + esc(s.eyebrow) + '</div>' : '') + (s.title ? '<h2>' + fmt(s.title) + '</h2>' : '') + (s.lead ? '<p class="lead">' + fmt(s.lead) + '</p>' : '') + '</div>';
+  function head(s, P) {
+    return '<div class="head rv">' + (s.eyebrow ? T('div', 'eyebrow', P, s, 'eyebrow', esc(s.eyebrow)) : '') + (s.title ? T('h2', '', P, s, 'title', fmt(s.title)) : '') + (s.lead ? T('p', 'lead', P, s, 'lead', fmt(s.lead)) : '') + '</div>';
   }
   var R = {
-    intro: function (s) { return '<div class="wrap">' + head(s) + '</div>'; },
-    preview: function (s) {
-      var h = '<div class="head rv">' + (s.eyebrow ? '<div class="eyebrow">' + esc(s.eyebrow) + '</div>' : '') + (s.title ? '<h2>' + fmt(s.title) + '</h2>' : '') +
-        (s.badge ? '<span class="badge">' + esc(s.badge) + '</span>' : '') + (s.note ? '<p class="note">' + fmt(s.note) + '</p>' : '') + '</div>';
+    intro: function (s, P) { return '<div class="wrap">' + head(s, P) + '</div>'; },
+    preview: function (s, P) {
+      var h = '<div class="head rv">' + (s.eyebrow ? T('div', 'eyebrow', P, s, 'eyebrow', esc(s.eyebrow)) : '') + (s.title ? T('h2', '', P, s, 'title', fmt(s.title)) : '') +
+        (s.badge ? T('span', 'badge', P, s, 'badge', esc(s.badge)) : '') + (s.note ? T('p', 'note', P, s, 'note', fmt(s.note)) : '') + '</div>';
       var panels = (s.items || []).map(function (p, i) {
-        return '<div class="panel rv"><div class="art">' + art(p.art, s.id + i) + '</div>' + (p.sfx ? '<span class="sfx" aria-hidden="true">' + esc(p.sfx) + '</span>' : '') +
-          (p.glyph ? '<div class="glyphwrap"><div class="glyph" aria-hidden="true">' + esc(p.glyph) + '</div></div>' : '') +
-          '<p class="cap">' + fmt(p.text) + (p.small ? '<small>' + esc(p.small) + '</small>' : '') + '</p></div>';
+        var Q = P + '/items/' + i, bg = img(p.bgSrc);
+        return '<div class="panel rv"><div class="art">' + (bg ? pic(bg, '', 'cover') : art(p.art, s.id + i)) + '</div>' + (p.sfx ? T('span', 'sfx', Q, p, 'sfx', esc(p.sfx), ' aria-hidden="true"') : '') +
+          (p.glyph ? '<div class="glyphwrap">' + T('div', 'glyph', Q, p, 'glyph', esc(p.glyph), ' aria-hidden="true"') + '</div>' : '') +
+          T('p', 'cap', Q, p, 'text', fmt(p.text) + (p.small ? T('small', '', Q, p, 'small', esc(p.small)) : '')) + '</div>';
       }).join('');
       return '<div class="wrap">' + h + '<div class="toon">' + panels + '</div></div>';
     },
-    episodes: function (s) {
-      return '<div class="wrap">' + head(s) + '<ol class="eps rv">' + (s.items || []).map(function (e) {
-        return '<li' + (e.hi ? ' class="hi"' : '') + '><span class="no">' + esc(e.no) + '</span><div><b>' + esc(e.title) + '</b><span>' + fmt(e.desc) + '</span></div></li>';
-      }).join('') + '</ol>' + (s.note ? '<p class="note ctr rv">' + fmt(s.note) + '</p>' : '') + '</div>';
+    episodes: function (s, P) {
+      return '<div class="wrap">' + head(s, P) + '<ol class="eps rv">' + (s.items || []).map(function (e, i) {
+        var Q = P + '/items/' + i;
+        return '<li' + (e.hi ? ' class="hi"' : '') + '>' + T('span', 'no', Q, e, 'no', esc(e.no)) + '<div>' + T('b', '', Q, e, 'title', esc(e.title)) + T('span', '', Q, e, 'desc', fmt(e.desc)) + '</div></li>';
+      }).join('') + '</ol>' + (s.note ? T('p', 'note ctr rv', P, s, 'note', fmt(s.note)) : '') + '</div>';
     },
-    paths: function (s) {
-      return '<div class="wrap">' + head(s) + '<div class="paths rv">' + (s.items || []).map(function (p) {
-        return '<div class="path' + (p.core ? ' core' : '') + '"><h3>' + esc(p.title) + '</h3><p>' + fmt(p.text) + '</p></div>';
+    paths: function (s, P) {
+      return '<div class="wrap">' + head(s, P) + '<div class="paths rv">' + (s.items || []).map(function (p, i) {
+        var Q = P + '/items/' + i;
+        return '<div class="path' + (p.core ? ' core' : '') + '">' + T('h3', '', Q, p, 'title', esc(p.title)) + T('p', '', Q, p, 'text', fmt(p.text)) + '</div>';
       }).join('') + '</div></div>';
     },
-    pillars: function (s) {
-      return '<div class="wrap">' + head(s) + '<div class="pillars rv">' + (s.items || []).map(function (p) {
-        return '<div><b>' + esc(p.title) + '</b><p>' + fmt(p.text) + '</p></div>';
+    pillars: function (s, P) {
+      return '<div class="wrap">' + head(s, P) + '<div class="pillars rv">' + (s.items || []).map(function (p, i) {
+        var Q = P + '/items/' + i;
+        return '<div>' + T('b', '', Q, p, 'title', esc(p.title)) + T('p', '', Q, p, 'text', fmt(p.text)) + '</div>';
       }).join('') + '</div></div>';
     },
-    prices: function (s) {
-      return '<div class="wrap">' + head(s) + '<div class="prices rv">' + (s.items || []).map(function (p) {
-        return '<div class="price' + (p.main ? ' main' : '') + '">' + (p.badge ? '<span class="badge">' + esc(p.badge) + '</span>' : '') + '<h3>' + esc(p.title) + '</h3>' +
-          '<ul>' + lines(p.bullets).map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul>' + (p.amt ? '<div class="amt">' + esc(p.amt) + '</div>' : '') + '</div>';
-      }).join('') + '</div>' + (s.note ? '<p class="note ctr rv">' + fmt(s.note) + '</p>' : '') + '</div>';
+    prices: function (s, P) {
+      return '<div class="wrap">' + head(s, P) + '<div class="prices rv">' + (s.items || []).map(function (p, i) {
+        var Q = P + '/items/' + i;
+        return '<div class="price' + (p.main ? ' main' : '') + '">' + (p.badge ? T('span', 'badge', Q, p, 'badge', esc(p.badge)) : '') + T('h3', '', Q, p, 'title', esc(p.title)) +
+          T('ul', '', Q, p, 'bullets', lines(p.bullets).map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('')) + (p.amt ? T('div', 'amt', Q, p, 'amt', esc(p.amt)) : '') + '</div>';
+      }).join('') + '</div>' + (s.note ? T('p', 'note ctr rv', P, s, 'note', fmt(s.note)) : '') + '</div>';
     },
-    faq: function (s) {
-      return '<div class="wrap">' + head(s) + '<div class="faq rv">' + (s.items || []).map(function (q) {
-        return '<details><summary>' + esc(q.q) + '</summary><p>' + fmt(q.a) + '</p></details>';
+    faq: function (s, P) {
+      return '<div class="wrap">' + head(s, P) + '<div class="faq rv">' + (s.items || []).map(function (q, i) {
+        var Q = P + '/items/' + i;
+        return '<details>' + T('summary', '', Q, q, 'q', esc(q.q)) + T('p', '', Q, q, 'a', fmt(q.a)) + '</details>';
       }).join('') + '</div></div>';
     },
-    notify: function (s) {
-      return '<div class="wrap">' + head(s) + '<div class="gate rv"><form class="signup" id="signup" novalidate data-done="' + esc(s.done) + '">' +
+    notify: function (s, P) {
+      return '<div class="wrap">' + head(s, P) + '<div class="gate rv"><form class="signup" id="signup" novalidate data-done="' + esc(s.done) + '">' +
         '<div class="field"><input type="email" name="email" id="email" placeholder="이메일 주소" autocomplete="email" required aria-label="이메일 주소" maxlength="254">' +
-        '<button class="btn" type="submit" id="submitBtn">' + esc(s.button || '알림 신청') + '</button></div>' +
+        T('button', 'btn', P, s, 'button', esc(s.button || '알림 신청'), ' type="submit" id="submitBtn"') + '</div>' +
         '<div class="hp" aria-hidden="true"><label>웹사이트<input type="text" name="website" id="website" tabindex="-1" autocomplete="off"></label></div>' +
-        '<label class="consent"><input type="checkbox" id="consent"><span>' + fmt(s.consent) + '</span></label>' +
+        '<label class="consent"><input type="checkbox" id="consent">' + T('span', '', P, s, 'consent', fmt(s.consent)) + '</label>' +
         '<p class="msg" id="msg" role="status" aria-live="polite"></p></form></div></div>';
     },
+    image: function (s, P) {
+      var w = Math.max(10, Math.min(100, num(s.width, 100))), ratio = /^\d+\/\d+$/.test(s.ratio || '') ? s.ratio : '', r = num(s.radius, 3);
+      var inner = '<figure class="imgblk rv' + (s.frame ? ' frm' : '') + '" style="width:' + w + '%;border-radius:' + r + 'px"><div class="imgbox" style="' + (ratio ? 'aspect-ratio:' + ratio + ';' : '') + 'border-radius:' + r + 'px">' +
+        pic(s.src, s.mobileSrc, 'ib', 'object-fit:' + (s.fit === 'contain' ? 'contain' : 'cover')) + '</div>' + (s.caption ? T('figcaption', '', P, s, 'caption', fmt(s.caption)) : '') + '</figure>';
+      if (String(s.href || '').trim()) inner = '<a class="imglink" href="' + esc(href(s.href)) + '">' + inner + '</a>';
+      return s.full ? '<div class="imgfull">' + inner + '</div>' : '<div class="wrap">' + inner + '</div>';
+    },
+    spacer: function (s) { return '<div style="height:' + Math.max(0, Math.min(800, num(s.h, 80))) + 'px"></div>'; },
+    divider: function (s) { return '<div class="wrap rv"><i class="dv ' + (/^(line|dots)$/.test(s.style || '') ? s.style : 'diamond') + '"></i></div>'; },
   };
 
-  // els: { top, hero, secs, foot } (각각 내용을 채울 요소). cfg는 DEFAULTS와 같은 모양.
+  // els: { top, hero, heroBox, heroBg, secs, foot } (각각 내용을 채울 요소). cfg는 DEFAULTS와 같은 모양.
   function render(cfg, els) {
     var b = cfg.brand || {}, h = cfg.hero || {};
-    els.top.innerHTML = '<div class="wrap"><a class="brand" href="/report/"><span class="seal">' + esc(b.seal) + '</span><span class="bn">' + esc(b.name) + (b.sub ? '<small>' + esc(b.sub) + '</small>' : '') + '</span></a>' +
-      (b.backLabel ? '<a class="back" href="' + esc(href(b.backHref)) + '">' + esc(b.backLabel) + '</a>' : '') + '</div>';
-    els.hero.innerHTML = '<div class="hero-in">' + (h.kicker ? '<div class="kicker">' + esc(h.kicker) + '</div>' : '') + '<h1>' + fmt(h.title) + '</h1>' + (h.lead ? '<p class="lead">' + fmt(h.lead) + '</p>' : '') +
-      '<div class="cta-row">' + (h.cta1Label ? '<a class="btn" href="' + esc(href(h.cta1Href)) + '">' + esc(h.cta1Label) + '</a>' : '') +
-      (h.cta2Label ? '<a class="btn ghost" href="' + esc(href(h.cta2Href)) + '">' + esc(h.cta2Label) + '</a>' : '') + '</div>' +
-      (h.hint ? '<div class="scroll-hint"><i></i>' + esc(h.hint) + '</div>' : '') + '</div>' + (h.vertical ? '<div class="hanja-v" aria-hidden="true">' + esc(h.vertical) + '</div>' : '');
+    els.top.innerHTML = '<div class="wrap"><a class="brand" href="/report/"><span class="seal"' + attr('brand/seal', b.st && b.st.seal) + '>' + esc(b.seal) + '</span><span class="bn">' +
+      T('span', '', 'brand', b, 'name', esc(b.name)) + (b.sub ? T('small', '', 'brand', b, 'sub', esc(b.sub)) : '') + '</span></a>' +
+      (b.backLabel ? T('a', 'back', 'brand', b, 'backLabel', esc(b.backLabel), ' href="' + esc(href(b.backHref)) + '"') : '') + '</div>';
+    els.hero.innerHTML = '<div class="hero-in">' + (h.kicker ? T('div', 'kicker', 'hero', h, 'kicker', esc(h.kicker)) : '') + T('h1', '', 'hero', h, 'title', fmt(h.title)) + (h.lead ? T('p', 'lead', 'hero', h, 'lead', fmt(h.lead)) : '') +
+      '<div class="cta-row">' + (h.cta1Label ? T('a', 'btn', 'hero', h, 'cta1Label', esc(h.cta1Label), ' href="' + esc(href(h.cta1Href)) + '"') : '') +
+      (h.cta2Label ? T('a', 'btn ghost', 'hero', h, 'cta2Label', esc(h.cta2Label), ' href="' + esc(href(h.cta2Href)) + '"') : '') + '</div>' +
+      (h.hint ? '<div class="scroll-hint"><i></i>' + T('span', '', 'hero', h, 'hint', esc(h.hint)) + '</div>' : '') + '</div>' +
+      (h.vertical ? T('div', 'hanja-v', 'hero', h, 'vertical', esc(h.vertical), ' aria-hidden="true"') : '') + decor(h.decor, 'hero');
+    if (els.heroBox) {
+      els.heroBox.style.minHeight = Math.max(40, Math.min(100, num(h.h, 100))) + 'svh';
+      els.heroBox.dataset.art = /^(stars|none)$/.test(h.art || '') ? h.art : 'all';
+    }
+    if (els.heroBg) els.heroBg.innerHTML = bgBox(h, true);
     els.secs.innerHTML = (cfg.sections || []).filter(function (s) { return s && s.show !== false && R[s.type]; }).map(function (s) {
-      return '<section class="sec t-' + esc(s.type) + '" id="' + esc(s.id) + '">' + R[s.type](s) + '</section>';
+      var pad = (num(s.padTop, null) !== null ? 'padding-top:' + num(s.padTop, 0) + 'px;' : '') + (num(s.padBot, null) !== null ? 'padding-bottom:' + num(s.padBot, 0) + 'px' : '');
+      return '<section class="sec t-' + esc(s.type) + '" id="' + esc(s.id) + '"' + (pad ? ' style="' + pad + '"' : '') + '>' + bgBox(s, false) + decor(s.decor, s.id) + R[s.type](s, s.id) + '</section>';
     }).join('');
-    els.foot.innerHTML = '<div class="wrap"><i class="orn" aria-hidden="true"></i>' + lines((cfg.footer || {}).lines).map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') + '</div>';
+    var f = cfg.footer || {};
+    els.foot.innerHTML = '<div class="wrap"><i class="orn" aria-hidden="true"></i>' + lines(f.lines).map(function (l) { return T('p', '', 'footer', f, 'lines', esc(l)); }).join('') + '</div>';
   }
 
   function copy(o) { return JSON.parse(JSON.stringify(o)); }
-  var API = { DEFAULTS: DEFAULTS, TYPES: TYPES, BRAND: BRAND, HERO: HERO, FOOT: FOOT, render: render, copy: copy, esc: esc, fmt: fmt };
+  var API = { DEFAULTS: DEFAULTS, TYPES: TYPES, BRAND: BRAND, HERO: HERO, HERO_BG: HERO_BG, BG: BG, PAD: PAD, DECOR: DECOR, FOOT: FOOT, render: render, copy: copy, esc: esc, fmt: fmt };
   if (typeof window !== 'undefined') window.MantraHome = API;
 })();

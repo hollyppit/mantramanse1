@@ -37,7 +37,12 @@ th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line);
 th { color:var(--ink3); font-weight:500; font-size:.8rem; }
 .hide { display:none !important; }
 .hmgrid { display:grid; grid-template-columns:minmax(360px,470px) minmax(0,1fr); gap:16px; align-items:start; }
-.hmed { max-height:calc(100vh - 150px); overflow:auto; padding-right:6px; }
+.hmleft { display:flex; flex-direction:column; height:calc(100vh - 140px); min-height:480px; min-width:0; }
+.hmed { flex:1; min-height:0; overflow:auto; padding-right:6px; }
+.hmsel { max-height:44%; overflow:auto; margin:6px 0 8px; padding:10px 12px; flex:none; }
+.hmsel .g2 { display:grid; grid-template-columns:1fr 1fr; gap:4px 10px; } .hmsel .g2 .hmf { margin:4px 0; }
+.hmthumb { width:34px; height:34px; object-fit:cover; border-radius:4px; border:1px solid var(--line); background:#000; flex:none; }
+.hmimg { display:flex; gap:6px; align-items:center; } .hmimg input[type=text] { flex:1; min-width:0; } .hmimg input[type=file] { display:none; }
 .hmpv { position:sticky; top:8px; }
 #hmBox { height:calc(100vh - 170px); min-height:420px; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#000; position:relative; }
 #hmFrame { border:0; position:absolute; top:0; left:0; transform-origin:0 0; background:#080A11; }
@@ -50,7 +55,7 @@ th { color:var(--ink3); font-weight:500; font-size:.8rem; }
 details.hmg { margin:8px 0; } details.hmg > summary { display:flex; align-items:center; gap:6px; }
 details.hmg > summary > span { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .hmsec { margin:14px 0 4px; color:var(--gold); font-family:"Noto Serif KR",serif; }
-@media (max-width:1000px) { .hmgrid { grid-template-columns:1fr; } .hmed { max-height:none; } .hmpv { position:static; } }
+@media (max-width:1000px) { .hmgrid { grid-template-columns:1fr; } .hmleft { height:auto; } .hmed { max-height:none; } .hmpv { position:static; } }
 .login { max-width:340px; margin:18vh auto 0; display:grid; gap:12px; }
 
 dialog.wide { width:min(1120px, 96vw); }
@@ -228,9 +233,10 @@ summary { cursor:pointer; padding:4px 0; }
     <!-- 홈 화면 편집 -->
     <div id="t-home" class="hide">
       <div class="hmgrid">
-        <div>
+        <div class="hmleft">
           <div class="row" style="align-items:center;margin-bottom:8px"><button class="pri" id="hmSave">저장</button><button class="danger" id="hmReset" title="저장된 내용을 지우고 내장 기본 문구로 되돌립니다">기본 문구로 되돌리기</button><span class="muted" id="hmState"></span></div>
-          <p class="muted" style="margin:0 0 6px;font-size:.78rem">글자를 고치면 오른쪽 미리보기에 바로 반영됩니다. 제목에서는 줄바꿈이 되고, <b>*별표*</b>로 감싼 글자는 금빛으로 강조됩니다. 저장해야 실제 페이지에 적용됩니다.</p>
+          <p class="muted" style="margin:0;font-size:.78rem">오른쪽 미리보기에서 <b>글자나 이미지를 클릭</b>하면 아래에 서식(글씨체·크기·색·위치…)이 나타나고, <b>끌어서 옮길 수</b> 있어요. 제목에서는 줄바꿈이 되고 <b>*별표*</b>로 감싼 글자는 금빛이 됩니다. 저장해야 실제 페이지에 적용됩니다.</p>
+          <div id="hmSel" class="card hmsel"></div>
           <div class="hmed" id="hmForm"></div>
         </div>
         <div class="hmpv">
@@ -642,11 +648,12 @@ summary { cursor:pointer; padding:4px 0; }
   };
 
   // ── 홈 화면 편집 (클립 저장과 별개로 /api/home에 저장). 미리보기는 판매 페이지를 iframe으로 띄우고 설정을 postMessage로 보낸다.
-  var MH = window.MantraHome, HM = { cfg: null, dirty: false, mode: 'pc', open: {}, loaded: false, frameOn: false };
+  // 미리보기에서 글자·이미지를 누르면 경로(k)가 오고(mt-pick), 끌면 위치가 온다(mt-move). 서식은 글자가 속한 객체의 st[필드]에 저장한다.
+  var MH = window.MantraHome, HM = { cfg: null, dirty: false, mode: 'pc', open: {}, loaded: false, frameOn: false, sel: null };
   function hmSend(msg) { try { $('hmFrame').contentWindow.postMessage(msg, location.origin); } catch (e) {} }
   function hmPush() { if (HM.cfg && HM.frameOn) hmSend({ t: 'mt-home', cfg: HM.cfg }); }
   var hmTimer;
-  function hmChanged() { HM.dirty = true; $('hmState').textContent = '저장하지 않은 변경'; clearTimeout(hmTimer); hmTimer = setTimeout(hmPush, 120); }
+  function hmChanged() { HM.dirty = true; $('hmState').textContent = '저장하지 않은 변경'; clearTimeout(hmTimer); hmTimer = setTimeout(hmPush, 100); }
   function hmFit() {
     var box = $('hmBox'), f = $('hmFrame'), bw = box.clientWidth, bh = box.clientHeight; if (!bw) return;
     var W = HM.mode === 'pc' ? 1280 : 390, k = Math.min(1, bw / W);
@@ -655,44 +662,173 @@ summary { cursor:pointer; padding:4px 0; }
   $('hmPc').onclick = function () { HM.mode = 'pc'; $('hmPc').classList.add('pri'); $('hmMo').classList.remove('pri'); hmFit(); };
   $('hmMo').onclick = function () { HM.mode = 'mo'; $('hmMo').classList.add('pri'); $('hmPc').classList.remove('pri'); hmFit(); };
   window.addEventListener('resize', function () { if (!$('t-home').classList.contains('hide')) hmFit(); });
-  $('hmFrame').addEventListener('load', function () { HM.frameOn = true; hmFit(); hmPush(); });
+  $('hmFrame').addEventListener('load', function () { HM.frameOn = true; hmFit(); hmPush(); if (HM.sel) hmSend({ t: 'mt-sel', k: HM.sel }); });
   window.addEventListener('beforeunload', function (e) { if (HM.dirty) { e.preventDefault(); e.returnValue = ''; } });
 
-  function hmField(obj, d) {
-    var k = d[0], t = d[2], lab = document.createElement('label'), el;
+  // 이미지 올리기: 브라우저에서 먼저 줄여(최대 가로 maxW, webp) 올린다. gif·svg는 그대로.
+  function shrinkImage(file, maxW) {
+    return new Promise(function (ok) {
+      if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) return ok(file);
+      var url = URL.createObjectURL(file), im = new Image();
+      im.onerror = function () { URL.revokeObjectURL(url); ok(file); };
+      im.onload = function () {
+        URL.revokeObjectURL(url);
+        var k = Math.min(1, maxW / im.naturalWidth), w = Math.round(im.naturalWidth * k), h = Math.round(im.naturalHeight * k);
+        if (k === 1 && file.size < 400 * 1024) return ok(file);
+        var cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(im, 0, 0, w, h);
+        cv.toBlob(function (bl) {
+          if (!bl || bl.type !== 'image/webp' || (k === 1 && bl.size >= file.size)) return ok(file);
+          ok(new File([bl], file.name.replace(/\.[^.]+$/, '') + '.webp', { type: 'image/webp' }));
+        }, 'image/webp', 0.86);
+      };
+      im.src = url;
+    });
+  }
+  function hmUpload(file, maxW, done, fail) {
+    shrinkImage(file, maxW).then(function (f) {
+      var x = new XMLHttpRequest(); x.open('POST', '/api/clipfile?name=' + encodeURIComponent(f.name)); x.setRequestHeader('authorization', 'Bearer ' + S.pw);
+      x.onload = function () { var d = {}; try { d = JSON.parse(x.responseText); } catch (e) {} if (x.status >= 200 && x.status < 300 && d.key) done('/api/clipfile?k=' + encodeURIComponent(d.key), f, file); else fail(d.error || ('업로드 실패 (' + x.status + ')')); };
+      x.onerror = function () { fail('네트워크 오류'); };
+      x.send(f);
+    });
+  }
+
+  // 양식 칸 하나. d = [키, 이름, 종류, 선택지]. onFocus(): 글자 칸에 커서를 두면 미리보기에서 그 글자를 고른다.
+  function hmField(obj, d, onFocus) {
+    var k = d[0], t = d[2], o = d[3], lab = document.createElement('label'), el;
     lab.className = 'hmf' + (t === 'b' ? ' chk' : '');
     if (t === 'b') { el = document.createElement('input'); el.type = 'checkbox'; el.checked = !!obj[k]; el.onchange = function () { obj[k] = el.checked; hmChanged(); }; lab.appendChild(el); lab.appendChild(document.createTextNode(d[1])); return lab; }
     var sp = document.createElement('span'); sp.textContent = d[1]; lab.appendChild(sp);
-    if (t === 's') { el = document.createElement('select'); d[3].forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; el.appendChild(op); }); el.value = obj[k] || d[3][0][0]; obj[k] = el.value; el.onchange = function () { obj[k] = el.value; hmChanged(); }; }
-    else { el = document.createElement(t === 'l' ? 'textarea' : 'input'); if (t === 'l') el.rows = 3; else el.type = 'text'; el.value = obj[k] == null ? '' : obj[k]; el.oninput = function () { obj[k] = el.value; hmChanged(); }; }
+    if (t === 's' || t === 'f') {
+      el = document.createElement('select');
+      var list = t === 'f' ? [['', '(기본)']].concat(F.SUB_FONT.map(function (f) { return [f[0], f[1]]; })) : o;
+      list.forEach(function (x) { var op = document.createElement('option'); op.value = x[0]; op.textContent = x[1]; el.appendChild(op); });
+      el.value = obj[k] == null ? (t === 'f' ? '' : o[0][0]) : obj[k]; if (t === 's' && obj[k] == null && el.value !== '') obj[k] = el.value;
+      el.onchange = function () { if (!el.value && (t === 'f' || o[0][0] === '')) delete obj[k]; else obj[k] = el.value; hmChanged(); };
+    } else if (t === 'n') {
+      el = document.createElement('input'); el.type = 'number'; el.min = o[0]; el.max = o[1]; el.step = o[2]; el.placeholder = o[3] == null ? '' : '기본 ' + o[3]; el.value = obj[k] == null ? '' : obj[k];
+      el.oninput = function () { if (el.value === '') delete obj[k]; else obj[k] = +el.value; hmChanged(); };
+    } else if (t === 'c') {
+      var row = document.createElement('span'); row.style.cssText = 'display:flex;gap:6px'; var pk = document.createElement('input'); pk.type = 'color'; pk.style.cssText = 'width:44px;padding:2px;flex:none';
+      el = document.createElement('input'); el.type = 'text'; el.maxLength = 9; el.placeholder = '#rrggbb (비우면 기본)'; el.value = obj[k] || ''; pk.value = /^#[0-9a-f]{6}$/i.test(el.value) ? el.value : '#ffffff';
+      pk.oninput = function () { el.value = pk.value; el.dispatchEvent(new Event('input')); };
+      el.oninput = function () { if (!el.value) delete obj[k]; else obj[k] = el.value; if (/^#[0-9a-f]{6}$/i.test(el.value)) pk.value = el.value; hmChanged(); };
+      row.appendChild(pk); row.appendChild(el); lab.appendChild(row); return lab;
+    } else if (t === 'i') {
+      var wrap = document.createElement('span'); wrap.className = 'hmimg'; var th = document.createElement('img'); th.className = 'hmthumb'; th.alt = '';
+      el = document.createElement('input'); el.type = 'text'; el.placeholder = '이미지 주소(https) 또는 오른쪽에서 올리기';
+      var fi = document.createElement('input'); fi.type = 'file'; fi.accept = 'image/*'; var up = document.createElement('button'); up.type = 'button'; up.textContent = '올리기'; up.disabled = !S.r2; up.title = S.r2 ? '' : 'R2가 연결되지 않아 주소만 입력할 수 있습니다';
+      var clr = document.createElement('button'); clr.type = 'button'; clr.textContent = '✕'; clr.title = '이미지 지우기';
+      function show() { el.value = obj[k] || ''; if (obj[k]) { th.src = obj[k]; th.style.display = ''; } else th.style.display = 'none'; }
+      el.oninput = function () { if (!el.value.trim()) delete obj[k]; else obj[k] = el.value.trim(); show2(); hmChanged(); };
+      function show2() { if (obj[k]) { th.src = obj[k]; th.style.display = ''; } else th.style.display = 'none'; }
+      up.onclick = function () { fi.click(); };
+      fi.onchange = function () {
+        var f = fi.files[0]; if (!f) return; up.disabled = true; up.textContent = '올리는 중…';
+        hmUpload(f, /^bg/.test(k) ? 1920 : /mobile/i.test(k) ? 1080 : 1400, function (u, sm, orig) { obj[k] = u; show(); up.disabled = false; up.textContent = '올리기'; $('hmState').textContent = '이미지 올림 (' + mb(orig.size) + (sm !== orig ? ' → ' + mb(sm.size) : '') + ') — 저장을 눌러 반영하세요'; hmChanged(); },
+          function (m) { up.disabled = false; up.textContent = '올리기'; $('hmState').innerHTML = '<span class="err">' + esc(m) + '</span>'; });
+        fi.value = '';
+      };
+      clr.onclick = function () { delete obj[k]; show(); hmChanged(); };
+      show(); wrap.appendChild(th); wrap.appendChild(el); wrap.appendChild(up); wrap.appendChild(clr); wrap.appendChild(fi); lab.appendChild(wrap); return lab;
+    } else {
+      el = document.createElement(t === 'l' ? 'textarea' : 'input'); if (t === 'l') el.rows = 3; else el.type = 'text'; el.value = obj[k] == null ? '' : obj[k];
+      el.oninput = function () { obj[k] = el.value; hmChanged(); };
+    }
+    if (onFocus) el.addEventListener('focus', onFocus);
     lab.appendChild(el); return lab;
   }
   function hmBtn(txt, title, fn, cls) { var b = document.createElement('button'); b.type = 'button'; b.className = 'sm ' + (cls || ''); b.textContent = txt; b.title = title; b.onclick = function (e) { e.preventDefault(); e.stopPropagation(); fn(); }; return b; }
   function hmMove(arr, i, d) { var j = i + d; if (j < 0 || j >= arr.length) return false; var t = arr[i]; arr[i] = arr[j]; arr[j] = t; return true; }
+
+  // ── 경로(k) → 설정 객체. k 예: hero/title · s1/items/2/text · s1/decor/0
+  function hmResolve(k) {
+    if (!k || !HM.cfg) return null;
+    var p = k.split('/'), c = HM.cfg, base = (p[0] === 'hero' || p[0] === 'brand' || p[0] === 'footer') ? c[p[0]] : c.sections.filter(function (x) { return x.id === p[0]; })[0], r = p.slice(1);
+    if (!base) return null;
+    if (r[0] === 'decor') { var dd = (base.decor || [])[+r[1]]; return dd ? { kind: 'decor', obj: dd, list: base.decor, idx: +r[1], base: base, key: p[0] } : null; }
+    if (r[0] === 'items') { var it = (base.items || [])[+r[1]]; return it ? { kind: 'text', obj: it, field: r[2], base: base, key: p[0] } : null; }
+    return { kind: 'text', obj: base, field: r[0], base: base, key: p[0] };
+  }
+  function hmFieldLabel(info) {
+    var f = info.field, defs = [];
+    if (info.key === 'brand') defs = MH.BRAND; else if (info.key === 'hero') defs = MH.HERO; else if (info.key === 'footer') defs = MH.FOOT;
+    else { var T = MH.TYPES[info.base.type] || {}; defs = (T.fields || []).concat((T.list && T.list.fields) || []); }
+    var d = defs.filter(function (x) { return x[0] === f; })[0];
+    var where = info.key === 'hero' ? '첫 화면' : info.key === 'brand' ? '상단' : info.key === 'footer' ? '하단' : ((MH.TYPES[info.base.type] || {}).label || '');
+    return where + ' · ' + (d ? d[1] : f);
+  }
+  var ST_DEFS = [['font', '글씨체', 'f'], ['sz', '크기 % (기본 100)', 'n', [20, 500, 5, 100]], ['wt', '굵기', 's', [['', '(기본)'], ['300', '얇게 300'], ['400', '보통 400'], ['500', '500'], ['600', '600'], ['700', '굵게 700'], ['900', '아주 굵게 900']]],
+    ['color', '글자 색', 'c'], ['align', '정렬', 's', [['', '(기본)'], ['left', '왼쪽'], ['center', '가운데'], ['right', '오른쪽']]], ['ls', '글자 간격 (0.01em)', 'n', [-10, 80, 1, 0]],
+    ['lh', '줄 간격 %', 'n', [80, 300, 5, null]], ['op', '투명도 %', 'n', [0, 100, 5, 100]], ['dx', '가로 이동 px', 'n', [-1000, 1000, 1, 0]], ['dy', '세로 이동 px', 'n', [-1000, 1000, 1, 0]], ['it', '기울임', 'b']];
+  function hmSelRender() {
+    var box = $('hmSel'), info = hmResolve(HM.sel); box.innerHTML = '';
+    if (!info) { HM.sel = null; box.innerHTML = '<span class="muted" style="font-size:.8rem">미리보기에서 글자나 이미지를 클릭하면 여기서 서식을 바꿉니다. (끌면 위치가 바뀝니다)</span>'; return; }
+    var h = document.createElement('div'); h.className = 'row'; h.style.cssText = 'align-items:center;justify-content:space-between;margin-bottom:6px';
+    var tt = document.createElement('b'); tt.style.fontSize = '.85rem'; tt.textContent = info.kind === 'decor' ? '장식 이미지 ' + (info.idx + 1) + ' (' + (info.key === 'hero' ? '첫 화면' : ((info.base.eyebrow || info.base.title || info.base.id) + '')) + ')' : '선택: ' + hmFieldLabel(info);
+    h.appendChild(tt); var bs = document.createElement('span'); bs.style.cssText = 'display:flex;gap:6px';
+    if (info.kind === 'decor') bs.appendChild(hmBtn('삭제', '이 장식 이미지 삭제', function () { info.list.splice(info.idx, 1); HM.sel = null; hmRebuild(); hmSelRender(); hmSend({ t: 'mt-sel', k: null }); }, 'danger'));
+    else bs.appendChild(hmBtn('서식 초기화', '이 글자의 서식을 지웁니다', function () { if (info.obj.st) delete info.obj.st[info.field]; hmSelRender(); hmChanged(); }));
+    bs.appendChild(hmBtn('선택 해제', '', function () { HM.sel = null; hmSelRender(); hmSend({ t: 'mt-sel', k: null }); }));
+    h.appendChild(bs); box.appendChild(h);
+    var g = document.createElement('div'); g.className = 'g2';
+    if (info.kind === 'decor') MH.DECOR.fields.forEach(function (d) { g.appendChild(hmField(info.obj, d)); });
+    else { var st = ((info.obj.st = info.obj.st || {})[info.field] = info.obj.st[info.field] || {}); ST_DEFS.forEach(function (d) { g.appendChild(hmField(st, d)); }); }
+    box.appendChild(g);
+  }
+  // 선택: 미리보기에서 눌렀거나(fromPreview) 양식 칸에 커서를 둔 경우
+  function hmSelect(k, fromPreview) {
+    HM.sel = k; hmSelRender();
+    if (k && fromPreview) { // 해당 섹션 양식을 열어 보여 준다
+      var id = k.split('/')[0], d = $('hmForm').querySelector('details[data-sec="' + id + '"]');
+      if (d) { d.open = true; HM.open['s:' + id] = true; d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    }
+    hmSend({ t: 'mt-sel', k: k, reveal: !fromPreview });
+  }
+  window.addEventListener('message', function (e) {
+    if (e.origin !== location.origin || e.source !== $('hmFrame').contentWindow) return;
+    var d = e.data || {};
+    if (d.t === 'mt-pick') { if (d.k) hmSelect(d.k, true); else { HM.sel = null; hmSelRender(); } }
+    else if (d.t === 'mt-move') {
+      var info = hmResolve(d.k); if (!info) return;
+      if (info.kind === 'decor') { info.obj.x = d.x; info.obj.y = d.y; }
+      else { var st = (info.obj.st = info.obj.st || {}); (st[info.field] = st[info.field] || {}).dx = d.dx; st[info.field].dy = d.dy; }
+      hmSelRender(); hmChanged();
+    }
+  });
+  function hmFocusSel(path) { return function () { var doc = $('hmFrame').contentDocument; if (doc && doc.querySelector('[data-k="' + path + '"]')) { HM.sel = path; hmSelRender(); hmSend({ t: 'mt-sel', k: path, reveal: true }); } }; }
+
   function hmRebuild(scrollId) { var ed = $('hmForm'), top = ed.scrollTop; hmBuild(); ed.scrollTop = top; hmChanged(); if (scrollId) setTimeout(function () { hmSend({ t: 'mt-scroll', id: scrollId }); }, 200); }
-  function hmGroup(key, title, scrollId, fill, head) {
-    var d = document.createElement('details'); d.className = 'hmg'; d.open = !!HM.open[key];
+  function hmGroup(key, title, scrollId, fill, head, secId) {
+    var d = document.createElement('details'); d.className = 'hmg'; d.open = !!HM.open[key]; if (secId) d.dataset.sec = secId;
     var sm = document.createElement('summary'), sp = document.createElement('span'); sp.textContent = title; sm.appendChild(sp); (head || []).forEach(function (b) { sm.appendChild(b); }); d.appendChild(sm);
     var body = document.createElement('div'); d.appendChild(body); fill(body);
-    d.addEventListener('toggle', function () { HM.open[key] = d.open; if (d.open && scrollId) hmSend({ t: 'mt-scroll', id: scrollId }); });
+    d.addEventListener('toggle', function (ev) { if (ev.target !== d) return; HM.open[key] = d.open; if (d.open && scrollId) hmSend({ t: 'mt-scroll', id: scrollId }); });
     return d;
   }
-  function hmList(body, sec, L) {
-    var items = sec[L.k] = sec[L.k] || [];
+  // 항목 목록(장면·카드·장식 이미지 등). P = 이 목록을 가진 객체의 경로 접두(선택 연동용)
+  function hmList(body, owner, L, P, scrollId) {
+    var items = owner[L.k] = owner[L.k] || [];
     items.forEach(function (it, i) {
-      var card = document.createElement('div'); card.className = 'hmitem';
-      var h = document.createElement('div'); h.className = 'hmh'; var b = document.createElement('b'); b.textContent = L.label + ' ' + (i + 1) + (it[L.title] ? ' · ' + String(it[L.title]).replace(/\n/g, ' ') : ''); h.appendChild(b);
+      var Q = P + '/' + L.k + '/' + i, card = document.createElement('div'); card.className = 'hmitem';
+      var h = document.createElement('div'); h.className = 'hmh'; var b = document.createElement('b'); var t0 = it[L.title] ? String(it[L.title]).replace(/\n/g, ' ') : ''; b.textContent = L.label + ' ' + (i + 1) + (t0 ? ' · ' + t0.slice(L.k === 'decor' ? -24 : 0, L.k === 'decor' ? undefined : 40) : ''); h.appendChild(b);
+      if (L.k === 'decor') h.appendChild(hmBtn('선택', '미리보기에서 이 이미지를 고릅니다', function () { hmSelect(Q, false); }));
       h.appendChild(hmBtn('▲', '위로', function () { if (hmMove(items, i, -1)) hmRebuild(); }));
       h.appendChild(hmBtn('▼', '아래로', function () { if (hmMove(items, i, 1)) hmRebuild(); }));
-      h.appendChild(hmBtn('✕', '삭제', function () { if (confirm('이 ' + L.label + '을(를) 삭제할까요?')) { items.splice(i, 1); hmRebuild(); } }, 'danger'));
-      card.appendChild(h); L.fields.forEach(function (d) { card.appendChild(hmField(it, d)); }); body.appendChild(card);
+      h.appendChild(hmBtn('✕', '삭제', function () { if (confirm('이 ' + L.label + '을(를) 삭제할까요?')) { items.splice(i, 1); if (HM.sel && HM.sel.indexOf(Q) === 0) HM.sel = null; hmRebuild(); hmSelRender(); } }, 'danger'));
+      card.appendChild(h); L.fields.forEach(function (d) { card.appendChild(hmField(it, d, L.k === 'decor' ? null : hmFocusSel(Q + '/' + d[0]))); }); body.appendChild(card);
     });
-    var add = document.createElement('button'); add.type = 'button'; add.textContent = '+ ' + L.label + ' 추가'; add.onclick = function () { items.push(MH.copy(L.blank)); hmRebuild(sec.id); }; body.appendChild(add);
+    var add = document.createElement('button'); add.type = 'button'; add.textContent = '+ ' + L.label + ' 추가'; add.onclick = function () { items.push(MH.copy(L.blank)); hmRebuild(scrollId); if (L.k === 'decor') setTimeout(function () { hmSelect(P + '/decor/' + (items.length - 1), false); }, 250); }; body.appendChild(add);
   }
+  function hmFields(body, obj, defs, P) { defs.forEach(function (d) { body.appendChild(hmField(obj, d, (d[2] === 't' || d[2] === 'l') ? hmFocusSel(P + '/' + d[0]) : null)); }); }
   function hmBuild() {
     var root = $('hmForm'), c = HM.cfg; root.innerHTML = '';
-    root.appendChild(hmGroup('brand', '브랜드 · 상단', '_top', function (body) { MH.BRAND.forEach(function (d) { body.appendChild(hmField(c.brand, d)); }); }));
-    root.appendChild(hmGroup('hero', '첫 화면 (큰 제목·버튼)', '_top', function (body) { MH.HERO.forEach(function (d) { body.appendChild(hmField(c.hero, d)); }); }));
+    root.appendChild(hmGroup('brand', '브랜드 · 상단', '_top', function (body) { hmFields(body, c.brand, MH.BRAND, 'brand'); }));
+    root.appendChild(hmGroup('hero', '첫 화면 문구 (큰 제목·버튼)', '_top', function (body) { hmFields(body, c.hero, MH.HERO, 'hero'); }));
+    root.appendChild(hmGroup('herobg', '첫 화면 배경 · 장식 이미지', '_top', function (body) {
+      MH.HERO_BG.forEach(function (d) { body.appendChild(hmField(c.hero, d)); });
+      var h = document.createElement('div'); h.className = 'hmsec'; h.textContent = '장식 이미지 (원하는 곳에 올리고 미리보기에서 끌어 옮깁니다)'; body.appendChild(h); hmList(body, c.hero, MH.DECOR, 'hero', '_top');
+    }));
     var h = document.createElement('div'); h.className = 'hmsec'; h.textContent = '섹션 (위에서 아래 순서)'; root.appendChild(h);
     c.sections.forEach(function (sec, i) {
       var T = MH.TYPES[sec.type]; if (!T) return;
@@ -701,23 +837,28 @@ summary { cursor:pointer; padding:4px 0; }
       var name = T.label + (sec.eyebrow ? ' · ' + sec.eyebrow : '');
       root.appendChild(hmGroup('s:' + sec.id, name, sec.id, function (body) {
         var a = document.createElement('p'); a.className = 'muted'; a.style.cssText = 'margin:6px 0;font-size:.76rem'; a.textContent = '이동 주소(앵커): #' + sec.id + ' — 버튼 이동 칸에 이 값을 쓰면 여기로 이동합니다'; body.appendChild(a);
-        T.fields.forEach(function (d) { body.appendChild(hmField(sec, d)); });
-        if (T.list) hmList(body, sec, T.list);
+        hmFields(body, sec, T.fields, sec.id);
+        if (T.list) hmList(body, sec, T.list, sec.id, sec.id);
+        if (!T.noBg) {
+          body.appendChild(hmGroup('s:' + sec.id + ':bg', '배경 · 여백', sec.id, function (b2) { MH.BG.concat(MH.PAD).forEach(function (d) { b2.appendChild(hmField(sec, d)); }); }));
+          body.appendChild(hmGroup('s:' + sec.id + ':dc', '장식 이미지 (끌어서 배치)', sec.id, function (b2) { hmList(b2, sec, MH.DECOR, sec.id, sec.id); }));
+        }
       }, [cb,
         hmBtn('▲', '위로', function () { if (hmMove(c.sections, i, -1)) hmRebuild(sec.id); }),
         hmBtn('▼', '아래로', function () { if (hmMove(c.sections, i, 1)) hmRebuild(sec.id); }),
-        hmBtn('✕', '섹션 삭제', function () { if (confirm('이 섹션을 삭제할까요? (저장 전에는 되돌릴 수 있습니다)')) { c.sections.splice(i, 1); hmRebuild(); } }, 'danger')]));
+        hmBtn('✕', '섹션 삭제', function () { if (confirm('이 섹션을 삭제할까요? (저장 전에는 되돌릴 수 있습니다)')) { c.sections.splice(i, 1); hmRebuild(); } }, 'danger')], sec.id));
     });
     var add = document.createElement('div'); add.className = 'row'; add.style.margin = '10px 0';
     var sel = document.createElement('select'); sel.style.width = 'auto'; Object.keys(MH.TYPES).forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = MH.TYPES[k].label; sel.appendChild(o); });
     var ab = document.createElement('button'); ab.type = 'button'; ab.textContent = '+ 섹션 추가';
     ab.onclick = function () {
       var T = MH.TYPES[sel.value], sec = { id: 's' + Date.now().toString(36).slice(-6), type: sel.value, show: true };
-      T.fields.forEach(function (d) { sec[d[0]] = d[2] === 'b' ? false : ''; }); sec.title = '새 섹션'; if (T.list) sec[T.list.k] = [MH.copy(T.list.blank)];
+      T.fields.forEach(function (d) { if (d[2] === 't' || d[2] === 'l') sec[d[0]] = ''; else if (d[2] === 'b') sec[d[0]] = false; });
+      if (T.fields.some(function (d) { return d[0] === 'title'; })) sec.title = '새 섹션'; if (T.list) sec[T.list.k] = [MH.copy(T.list.blank)];
       c.sections.push(sec); HM.open['s:' + sec.id] = true; hmRebuild(sec.id);
     };
     add.appendChild(sel); add.appendChild(ab); root.appendChild(add);
-    root.appendChild(hmGroup('foot', '하단 문구', '_bottom', function (body) { c.footer = c.footer || {}; MH.FOOT.forEach(function (d) { body.appendChild(hmField(c.footer, d)); }); }));
+    root.appendChild(hmGroup('foot', '하단 문구', '_bottom', function (body) { c.footer = c.footer || {}; hmFields(body, c.footer, MH.FOOT, 'footer'); }));
   }
   function homeOpen() {
     if (!HM.frameOn && !$('hmFrame').getAttribute('src')) $('hmFrame').src = '/report/?preview=1';
@@ -725,7 +866,7 @@ summary { cursor:pointer; padding:4px 0; }
     if (HM.loaded) return;
     api('/api/home').then(function (d) {
       var h = d.home; if (h) { delete h.at; }
-      HM.cfg = h || MH.copy(MH.DEFAULTS); HM.loaded = true; hmBuild(); hmPush();
+      HM.cfg = h || MH.copy(MH.DEFAULTS); HM.loaded = true; hmBuild(); hmSelRender(); hmPush();
     }).catch(function (e) { $('hmState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   }
   $('hmSave').onclick = function () {
@@ -736,7 +877,7 @@ summary { cursor:pointer; padding:4px 0; }
   };
   $('hmReset').onclick = function () {
     if (!confirm('저장된 홈 화면 내용을 지우고 기본 문구로 되돌립니다. 계속할까요?')) return;
-    api('/api/home', { method: 'DELETE' }).then(function () { HM.cfg = MH.copy(MH.DEFAULTS); HM.dirty = false; HM.open = {}; hmBuild(); hmPush(); $('hmState').innerHTML = '<span class="ok">기본 문구로 되돌렸습니다</span>'; })
+    api('/api/home', { method: 'DELETE' }).then(function () { HM.cfg = MH.copy(MH.DEFAULTS); HM.dirty = false; HM.open = {}; HM.sel = null; hmBuild(); hmSelRender(); hmPush(); $('hmState').innerHTML = '<span class="ok">기본 문구로 되돌렸습니다</span>'; })
       .catch(function (e) { $('hmState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };
 

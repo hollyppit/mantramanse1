@@ -496,5 +496,5 @@
     return { stop: function () { done = true; clearInterval(raf); timers.forEach(clearTimeout); try { root.speechSynthesis.cancel(); } catch (e) {} audios.forEach(function (a) { a.pause(); }); if (v) v.pause(); } };
   }
 
-  root.MovingFx = { stretchCues: stretchCues, folderDefaults: folderDefaults, FIELDS: FIELDS, BUILTIN: BUILTIN, resolve: resolve, cuesOf: cuesOf, play: play, voices: voices };
+  root.MovingFx = { FONTS: FONTS, SUB_FONT: SUB_FONT, injectCss: injectCss, stretchCues: stretchCues, folderDefaults: folderDefaults, FIELDS: FIELDS, BUILTIN: BUILTIN, resolve: resolve, cuesOf: cuesOf, play: play, voices: voices };
 })(typeof window !== 'undefined' ? window : globalThis);

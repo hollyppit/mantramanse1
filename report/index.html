@@ -182,6 +182,42 @@ footer .orn { display: block; width: 7px; height: 7px; margin: 0 auto 26px; bord
   html { scroll-behavior: auto; }
 }
 
+/* 배경 이미지 · 장식 이미지 · 이미지/구분 섹션 */
+.sec { position: relative; isolation: isolate; overflow-x: clip; }
+.sec .wrap { z-index: 1; }
+.hero { isolation: isolate; }
+.secbg { position: absolute; inset: 0; z-index: -1; overflow: hidden; clip-path: inset(0); pointer-events: none; }
+.secbg picture { display: block; width: 100%; height: 100%; }
+.secbg img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.secbg i { position: absolute; inset: 0; }
+.secbg.fixed picture { display: contents; }
+.secbg.fixed img { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; }
+.hero[data-art="stars"] .moon, .hero[data-art="stars"] .mtn, .hero[data-art="stars"] .mist,
+.hero[data-art="none"] .moon, .hero[data-art="none"] .mtn, .hero[data-art="none"] .mist, .hero[data-art="none"] #stars { display: none; }
+.decor { position: absolute; inset: 0; pointer-events: none; }
+.dc { position: absolute; max-width: none; user-select: none; }
+.dc.b { z-index: 0; } .dc.f { z-index: 6; }
+.t-spacer { padding: 0; } .t-divider { padding: 56px 0 0; } .t-image { padding-top: 60px; }
+.imgfull .imgblk { width: 100% !important; border-radius: 0 !important; } .imgfull .imgbox { border-radius: 0 !important; }
+.imgblk { margin: 0 auto; }
+.imgbox { position: relative; overflow: hidden; background: #0C0F1A; }
+.imgbox picture { display: block; height: 100%; } .imgbox .ib { display: block; width: 100%; height: 100%; }
+.imgblk.frm .imgbox::after { content: ''; position: absolute; inset: 9px; border: 1px solid rgba(205, 178, 122, .28); pointer-events: none; }
+.imgblk figcaption { text-align: center; font-size: .85rem; color: var(--ink-3); margin-top: 12px; }
+.imglink { display: block; text-decoration: none; }
+.panel .art picture { display: block; width: 100%; height: 100%; } .panel .art img.cover { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dv { display: block; margin: 0 auto; height: 1px; width: min(320px, 70%); background: linear-gradient(90deg, transparent, var(--gold-d), transparent); position: relative; }
+.dv.diamond::after { content: ''; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; border: 1px solid var(--gold-d); background: var(--bg); transform: translate(-50%, -50%) rotate(45deg); }
+.dv.dots { height: auto; background: none; text-align: center; color: var(--gold-d); } .dv.dots::before { content: '· · ·'; letter-spacing: .5em; }
+
+/* 관리자 미리보기 창에서만: 글자·이미지를 눌러 고르고 끌어서 옮긴다 */
+body.pv { -webkit-user-select: none; user-select: none; }
+body.pv [data-k] { cursor: pointer; touch-action: none; }
+body.pv [data-k]:hover { outline: 1px dashed rgba(205, 178, 122, .8); outline-offset: 3px; }
+body.pv .sel { outline: 2px solid #CDB27A !important; outline-offset: 3px; }
+body.pv .dc { pointer-events: auto; cursor: move; }
+body.pv .rv { opacity: 1; transform: none; }
+
 /* 입장 인트로 */
 #intro { position: fixed; inset: 0; z-index: 1000; background: #000; display: grid; place-items: center; opacity: 1; transition: opacity .6s ease; }
 #intro.out { opacity: 0; pointer-events: none; }
@@ -197,6 +233,7 @@ footer .orn { display: block; width: 7px; height: 7px; margin: 0 auto 26px; bord
 
 <main>
   <div class="hero" id="hero">
+    <div id="heroBg" aria-hidden="true"></div>
     <canvas id="stars" aria-hidden="true"></canvas>
     <div class="moon" aria-hidden="true"></div>
     <svg class="mtn" data-speed=".10" viewBox="0 0 800 260" preserveAspectRatio="none" aria-hidden="true" style="height:46%"><defs><linearGradient id="mg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A3060" stop-opacity=".55"/><stop offset="1" stop-color="#10142A" stop-opacity=".2"/></linearGradient></defs><path d="M0 150 C60 120 90 100 140 120 C190 140 220 70 280 90 C340 110 380 60 440 85 C500 110 540 80 600 100 C660 120 720 90 800 120 L800 260 L0 260Z" fill="url(#mg1)"/></svg>
@@ -217,7 +254,22 @@ footer .orn { display: block; width: 7px; height: 7px; margin: 0 auto 26px; bord
   var H = window.MantraHome, reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var preview = /[?&]preview=1\b/.test(location.search); // 관리자 미리보기 창: 인트로 없이, 보내 주는 설정으로 다시 그린다
   var app = document.getElementById('app');
-  var els = { top: document.getElementById('top'), hero: document.getElementById('heroText'), secs: document.getElementById('secs'), foot: document.getElementById('foot') };
+  var els = { top: document.getElementById('top'), hero: document.getElementById('heroText'), heroBox: document.getElementById('hero'), heroBg: document.getElementById('heroBg'), secs: document.getElementById('secs'), foot: document.getElementById('foot') };
+  var selK = null;
+  if (preview) document.body.classList.add('pv');
+  function mark(k) {
+    document.querySelectorAll('.sel').forEach(function (x) { x.classList.remove('sel'); });
+    selK = k; if (!k) return;
+    var el = document.querySelector('[data-k="' + k.replace(/"/g, '\\"') + '"]'); if (el) el.classList.add('sel');
+  }
+  // 글씨체를 쓴 경우에만 폰트 목록(fx.js)을 불러온다. 미리보기에서는 항상 불러와 바로 고를 수 있게 한다.
+  function withFonts(cfg, cb) {
+    var need = preview || /"font":"/.test(JSON.stringify(cfg));
+    if (!need) return cb();
+    if (window.MovingFx) { window.MovingFx.injectCss(); return cb(); }
+    var sc = document.createElement('script'); sc.src = 'fx.js';
+    sc.onload = function () { window.MovingFx.injectCss(); cb(); }; sc.onerror = cb; document.head.appendChild(sc);
+  }
 
   // 스크롤 등장
   var io = ('IntersectionObserver' in window && !reduce && !preview) ? new IntersectionObserver(function (es) {
@@ -226,13 +278,14 @@ footer .orn { display: block; width: 7px; height: 7px; margin: 0 auto 26px; bord
   function observe() {
     document.querySelectorAll('.rv:not(.in)').forEach(function (el) { if (io) io.observe(el); else el.classList.add('in'); });
   }
-  function apply(cfg) {
+  function apply(cfg) { withFonts(cfg, function () { paint(cfg); }); }
+  function paint(cfg) {
     H.render(cfg, els);
     var b = cfg.brand || {};
     if (b.siteTitle) document.title = b.siteTitle;
     var m = document.querySelector('meta[name=description]'); if (m && b.desc) m.setAttribute('content', b.desc);
     var t = document.querySelector('meta[property="og:title"]'); if (t && b.siteTitle) t.setAttribute('content', b.siteTitle);
-    observe(); app.classList.add('ready');
+    observe(); mark(selK); app.classList.add('ready');
   }
 
   // 저장된 설정을 먼저 받아 그린다(받지 못하면 1.5초 뒤 내장 기본 문구). 받는 동안은 화면을 숨겨 기본 문구가 번쩍이지 않게 한다.
@@ -247,8 +300,42 @@ footer .orn { display: block; width: 7px; height: 7px; margin: 0 auto 26px; bord
     if (!preview || e.origin !== location.origin) return;
     var d = e.data || {};
     if (d.t === 'mt-home' && d.cfg) apply(d.cfg);
+    else if (d.t === 'mt-sel') { mark(d.k || null); var se = document.querySelector('.sel'); if (se && d.reveal) se.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     else if (d.t === 'mt-scroll') { var el = document.getElementById(d.id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); else if (d.id === '_top') scrollTo({ top: 0, behavior: 'smooth' }); else if (d.id === '_bottom') scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }
   });
+
+  // 미리보기: 글자·이미지를 누르면 관리자에게 알리고(mt-pick), 끌면 위치를 알린다(mt-move)
+  if (preview) {
+    var drag = null;
+    function post(m) { try { parent.postMessage(m, location.origin); } catch (e) {} }
+    document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('a')) e.preventDefault(); }, true);
+    document.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      var el = e.target.closest && e.target.closest('[data-k]');
+      if (!el) { mark(null); post({ t: 'mt-pick', k: null }); return; }
+      var k = el.dataset.k; mark(k); post({ t: 'mt-pick', k: k });
+      drag = { el: el, k: k, dc: el.classList.contains('dc'), sx: e.clientX, sy: e.clientY, moved: false };
+      if (drag.dc) { drag.x0 = parseFloat(el.style.left) || 0; drag.y0 = parseFloat(el.style.top) || 0; drag.rect = el.parentElement.getBoundingClientRect(); }
+      else { drag.dx0 = +el.dataset.dx || 0; drag.dy0 = +el.dataset.dy || 0; drag.zk = +el.dataset.zk || 1; }
+    }, true);
+    document.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      var ddx = e.clientX - drag.sx, ddy = e.clientY - drag.sy;
+      if (!drag.moved && Math.abs(ddx) + Math.abs(ddy) < 4) return;
+      drag.moved = true; e.preventDefault();
+      if (drag.dc) {
+        drag.nx = Math.round((drag.x0 + ddx / (drag.rect.width || 1) * 100) * 10) / 10; drag.ny = Math.round((drag.y0 + ddy / (drag.rect.height || 1) * 100) * 10) / 10;
+        drag.el.style.left = drag.nx + '%'; drag.el.style.top = drag.ny + '%';
+      } else {
+        drag.ndx = Math.round(drag.dx0 + ddx); drag.ndy = Math.round(drag.dy0 + ddy);
+        drag.el.style.position = 'relative'; drag.el.style.left = (drag.ndx / drag.zk) + 'px'; drag.el.style.top = (drag.ndy / drag.zk) + 'px';
+      }
+    }, true);
+    document.addEventListener('pointerup', function () {
+      if (drag && drag.moved) post(drag.dc ? { t: 'mt-move', k: drag.k, x: drag.nx, y: drag.ny } : { t: 'mt-move', k: drag.k, dx: drag.ndx, dy: drag.ndy });
+      drag = null;
+    }, true);
+  }
 
   // 입장 인트로: 관리자가 켜 둔 경우에만. 항상 음소거로 재생한다.
   (function () {

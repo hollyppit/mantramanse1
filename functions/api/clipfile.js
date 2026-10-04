@@ -1,11 +1,14 @@
 // 무빙툰 영상 파일 (R2 바인딩 CLIPS_R2 필요)
 // GET    /api/clipfile?k=<키>            — 영상 재생 (Range 지원). <video> 태그는 인증 헤더를 못 보내므로 공개, 키는 추측 불가능한 값
-// POST   /api/clipfile?name=<파일명>     — 영상 업로드, 본문은 파일 원본 (관리자 전용) → { key }
+// POST   /api/clipfile?name=<파일명>     — 영상(또는 홈 화면용 이미지) 업로드, 본문은 파일 원본 (관리자 전용) → { key }
 // DELETE /api/clipfile?k=<키>            — 영상 삭제 (관리자 전용)
 import { json, isAdmin } from '../_lib.js';
 
 const MAX_BYTES = 90 * 1024 * 1024; // Pages Functions 요청 본문 한도(100MB) 아래로
 const TYPES = { mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime', m4v: 'video/mp4' };
+// 홈 화면 이미지(배경·장식). 영상보다 작게 제한한다.
+const IMAGES = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', avif: 'image/avif' };
+const MAX_IMAGE = 15 * 1024 * 1024;
 const KEY_RE = /^[\w.-]{1,120}$/;
 
 const noR2 = () => json({ error: 'R2 바인딩(CLIPS_R2)이 설정되지 않았습니다. 영상 URL을 직접 입력하거나 R2를 연결하세요' }, 501);
@@ -44,13 +47,14 @@ export async function onRequestPost({ request, env }) {
   if (!env.CLIPS_R2) return noR2();
   const name = new URL(request.url).searchParams.get('name') || '';
   const ext = (name.split('.').pop() || '').toLowerCase();
-  if (!TYPES[ext]) return json({ error: 'mp4, webm, mov 파일만 올릴 수 있습니다' }, 400);
+  const type = TYPES[ext] || IMAGES[ext], limit = IMAGES[ext] ? MAX_IMAGE : MAX_BYTES;
+  if (!type) return json({ error: 'mp4, webm, mov 영상이나 jpg, png, webp, gif, avif 이미지만 올릴 수 있습니다' }, 400);
   const len = +request.headers.get('content-length') || 0;
-  if (!len || len > MAX_BYTES) return json({ error: `파일은 ${MAX_BYTES / 1048576 | 0}MB 이하여야 합니다` }, 413);
+  if (!len || len > limit) return json({ error: `파일은 ${limit / 1048576 | 0}MB 이하여야 합니다` }, 413);
 
   const rand = crypto.getRandomValues(new Uint8Array(9));
   const key = Array.from(rand, b => b.toString(16).padStart(2, '0')).join('') + '.' + ext;
-  await env.CLIPS_R2.put(key, request.body, { httpMetadata: { contentType: TYPES[ext] } });
+  await env.CLIPS_R2.put(key, request.body, { httpMetadata: { contentType: type } });
   return json({ ok: true, key, size: len });
 }
 
