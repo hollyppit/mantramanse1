@@ -624,7 +624,7 @@ summary { cursor:pointer; padding:4px 0; }
     var dev = (document.querySelector('input[name=inDev]:checked') || {}).value || 'mo', src = IN[dev === 'pc' ? 'pc' : 'mo'] || IN[dev === 'pc' ? 'mo' : 'pc'];
     var st = $('inStage'); st.style.aspectRatio = dev === 'pc' ? '16/9' : '9/16'; st.style.maxWidth = dev === 'pc' ? '560px' : '300px';
     var fx = inFxFor(dev === 'pc' ? 'pc' : 'mo'); fx.video = { loop: 'freeze', hold: 0.4 };
-    inPlayer = F.play(st, { clip: { fx: fx }, url: src ? srcUrl(src) : '', muteVideo: true, silent: true, defaults: {}, onend: function () { $('inState').textContent = '미리보기 끝'; } });
+    inPlayer = F.play(st, { refW: dev === 'pc' ? 1280 : 390, clip: { fx: fx }, url: src ? srcUrl(src) : '', muteVideo: true, silent: true, defaults: {}, onend: function () { $('inState').textContent = '미리보기 끝'; } });
   };
   var IN = { pc: null, mo: null };
   function introShow(k) {
@@ -1562,7 +1562,7 @@ summary { cursor:pointer; padding:4px 0; }
     function setSub(k, v) { var el = box.querySelector('[data-g=sub][data-k=' + k + ']'); if (!el) return; el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }
     return {
       onMove: function (x, y) { setSub('x', x); setSub('y', y); },
-      onResize: function (o) { if (o.w != null) setSub('w', o.w); if (o.fs != null) setSub('fs', o.fs); },
+      onResize: function (o) { if (o.w != null) setSub('w', o.w); if (o.fs != null) setSub('fs', o.fs); if (o.fpx != null) setSub('fpx', o.fpx); },
       onText: p !== 'fx' ? null : function (i, text) {
         var rows = Array.prototype.map.call($('cueBox').querySelectorAll('.cue'), function (d) { return { d: d, s: +d.querySelector('.cs').value, t: d.querySelector('.ct').value.trim() }; })
           .filter(function (r) { return r.t; }).sort(function (a, b) { return a.s - b.s; });
@@ -1692,7 +1692,7 @@ summary { cursor:pointer; padding:4px 0; }
   ['fx', 'def'].forEach(function (p) { $(p + 'Play').onclick = function () { lpRun(p); }; $(p + 'Freeze').onchange = $(p + 'Sound').onchange = $(p + 'VSound').onchange = $(p + 'Edit').onchange = $(p + 'Cue').onchange = $(p + 'Sim').onchange = function () { lpRun(p); };
     $(p + 'Reset').onclick = function () {
       var box = p === 'fx' ? $('fxBox') : $('defBox');
-      ['x', 'y', 'w', 'fs'].forEach(function (k) { var el = box.querySelector('[data-g=sub][data-k=' + k + ']'); if (el) { el.value = ''; el.dispatchEvent(new Event('input', { bubbles: true })); } });
+      ['x', 'y', 'w', 'fs', 'fpx'].forEach(function (k) { var el = box.querySelector('[data-g=sub][data-k=' + k + ']'); if (el) { el.value = ''; el.dispatchEvent(new Event('input', { bubbles: true })); } });
     };
   });
   $('fxBox').addEventListener('input', function () { lpSchedule('fx'); }); $('fxBox').addEventListener('change', function () { lpSchedule('fx'); });

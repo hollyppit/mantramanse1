@@ -33,7 +33,7 @@
           // 공통 연출 위에 이 기기(모바일/웹)용 값을 덮어쓴다 — 글자 크기는 화면 폭에 비례하므로 기기별로 따로 맞춘다
           var ov = (mobile ? c.fxMobile : c.fxPc) || {}, fx = { cues: c.fx.cues, video: { loop: 'freeze', hold: 0.3 } };
           ['sub', 'trans'].forEach(function (g) { var o = Object.assign({}, c.fx[g], ov[g]); if (Object.keys(o).length) fx[g] = o; });
-          player = window.MovingFx.play(stage, { clip: { fx: fx }, url: url, muteVideo: true, silent: true, defaults: {}, onend: close, onerror: close });
+          player = window.MovingFx.play(stage, { refW: mobile ? 390 : 1280, clip: { fx: fx }, url: url, muteVideo: true, silent: true, defaults: {}, onend: close, onerror: close });
         };
         js.onerror = close; document.head.appendChild(js);
         setTimeout(function () { var pv = stage.querySelector('video'); if (!done && pv && pv.currentTime === 0) close(); }, 6000); // 재생이 시작되지 않으면 생략

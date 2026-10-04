@@ -82,7 +82,7 @@
   // 서버(functions/api/clips.js)의 검증표와 같은 범위를 쓴다. 한쪽을 바꾸면 다른 쪽도 바꿀 것.
   var FIELDS = [
     { g: 'trans', title: '장면 전환', items: [['in', '들어올 때', 'sel', TR_IN], ['out', '나갈 때', 'sel', TR_OUT], ['dur', '전환 시간(초)', 'num', { min: 0.1, max: 3, step: 0.1 }]] },
-    { g: 'sub', title: '자막 글자', items: [['font', '글씨체', 'sel', SUB_FONT], ['weight', '굵기', 'sel', SUB_WEIGHT], ['italic', '기울임', 'sel', SUB_ITALIC], ['size', '크기(간단)', 'sel', SUB_SIZE], ['fs', '크기(세부, 화면폭의 %) — 0.05 단위, 비우면 위 간단 크기', 'num', { min: 0.5, max: 40, step: 0.05 }], ['color', '글자색(간단)', 'sel', SUB_COLOR], ['colorHex', '글자색 직접', 'color'], ['align', '정렬', 'sel', SUB_ALIGN], ['lh', '줄 간격(배)', 'num', { min: 0.8, max: 3, step: 0.01 }], ['ls', '자간(글자 크기의 %)', 'num', { min: -10, max: 60, step: 0.5 }]] },
+    { g: 'sub', title: '자막 글자', items: [['font', '글씨체', 'sel', SUB_FONT], ['weight', '굵기', 'sel', SUB_WEIGHT], ['italic', '기울임', 'sel', SUB_ITALIC], ['size', '크기(간단)', 'sel', SUB_SIZE], ['fpx', '글자 크기 (px 숫자) — 모바일은 폭 390px, 웹은 폭 1280px 화면에서의 크기. 쓰면 아래 세부·간단 크기보다 우선', 'num', { min: 6, max: 300, step: 1 }], ['fs', '크기(세부, 화면폭의 %) — 0.05 단위, 비우면 위 간단 크기', 'num', { min: 0.5, max: 40, step: 0.05 }], ['color', '글자색(간단)', 'sel', SUB_COLOR], ['colorHex', '글자색 직접', 'color'], ['align', '정렬', 'sel', SUB_ALIGN], ['lh', '줄 간격(배)', 'num', { min: 0.8, max: 3, step: 0.01 }], ['ls', '자간(글자 크기의 %)', 'num', { min: -10, max: 60, step: 0.5 }]] },
     { g: 'sub', title: '자막 위치·크기', items: [['pos', '위치(간단)', 'sel', SUB_POS], ['x', '가로 위치 (왼쪽 끝 0 ~ 오른쪽 끝 100%)', 'num', { min: 0, max: 100, step: 0.5 }], ['y', '세로 위치 (위 0 ~ 아래 100%), 지정하면 간단 위치 무시', 'num', { min: 0, max: 100, step: 0.5 }], ['w', '자막 폭(화면폭의 %)', 'num', { min: 10, max: 100, step: 0.5 }], ['rot', '기울기(도)', 'num', { min: -45, max: 45, step: 0.5 }]] },
     { g: 'sub', title: '테두리·그림자·글로우', items: [['strokeW', '테두리 두께 (0=없음, 글자 크기의 %)', 'num', { min: 0, max: 15, step: 0.1 }], ['strokeColor', '테두리 색', 'color'], ['shOn', '그림자', 'sel', ON_OFF], ['shX', '그림자 가로 이동(%)', 'num', { min: -30, max: 30, step: 1 }], ['shY', '그림자 세로 이동(%)', 'num', { min: -30, max: 30, step: 1 }], ['shBlur', '그림자 번짐(%)', 'num', { min: 0, max: 60, step: 1 }], ['shColor', '그림자 색', 'color'], ['glowBlur', '글로우 세기 (0=없음)', 'num', { min: 0, max: 80, step: 1 }], ['glowColor', '글로우 색 (비우면 글자색)', 'color']] },
     { g: 'sub', title: '자막 배경 박스', items: [['bg', '배경', 'sel', SUB_BG], ['bgColor', '배경 색', 'color'], ['bgOpacity', '배경 투명도 (0 투명~100 불투명, 비우면 프리셋)', 'num', { min: 0, max: 100, step: 1 }], ['bgRadius', '모서리 둥글기(%)', 'num', { min: 0, max: 100, step: 1 }], ['padX', '좌우 여백(글자 크기의 %)', 'num', { min: 0, max: 200, step: 5 }], ['padY', '상하 여백(글자 크기의 %)', 'num', { min: 0, max: 100, step: 5 }]] },
@@ -103,7 +103,7 @@
 
   var BUILTIN = {
     trans: { 'in': 'fade', out: 'fade', dur: 0.5 },
-    sub: { font: 'gothic', weight: '700', italic: 'normal', size: 'M', fs: 0, color: 'ivory', colorHex: '', align: 'center', lh: 1.45, ls: 0, pos: 'bottom', x: 50, y: -1, w: 90, rot: 0, strokeW: 0, strokeColor: '#000000', shOn: 'on', shX: 0, shY: 6, shBlur: 20, shColor: '#000000', glowBlur: 0, glowColor: '', bg: 'shade', bgColor: '', bgOpacity: -1, bgRadius: 30, padX: 60, padY: 20, anim: 'fade', animDur: 0.4, wordDelay: 0.08, typeSpeed: 14, animOut: 'fade', animOutDur: 0.3, emph: 'none', emphSpeed: 1.5, readCps: 8 },
+    sub: { font: 'gothic', weight: '700', italic: 'normal', size: 'M', fpx: 0, fs: 0, color: 'ivory', colorHex: '', align: 'center', lh: 1.45, ls: 0, pos: 'bottom', x: 50, y: -1, w: 90, rot: 0, strokeW: 0, strokeColor: '#000000', shOn: 'on', shX: 0, shY: 6, shBlur: 20, shColor: '#000000', glowBlur: 0, glowColor: '', bg: 'shade', bgColor: '', bgOpacity: -1, bgRadius: 30, padX: 60, padY: 20, anim: 'fade', animDur: 0.4, wordDelay: 0.08, typeSpeed: 14, animOut: 'fade', animOutDur: 0.3, emph: 'none', emphSpeed: 1.5, readCps: 8 },
     voice: { on: 'off', engine: 'browser', name: '', mode: 'cue', rate: 1, pitch: 1, vol: 1, delay: 0.2, fit: 'stretch', pad: 0.3, elVoice: '', elModel: 'eleven_multilingual_v2', elStability: 0.5, elSimilarity: 0.75, elStyle: 0, elSpeed: 1, oaVoice: 'coral', oaModel: 'gpt-4o-mini-tts', oaInstr: '', oaSpeed: 1 },
     video: { speed: 1, vol: 1, duck: 'off', duckVol: 0.3, fadeIn: 0, fadeOut: 0, fit: 'contain', loop: 'auto', trimStart: 0, trimEnd: 0, hold: 0.5 },
   };
@@ -261,13 +261,16 @@
 
     function hex(c, d) { return /^#[0-9a-f]{3,8}$/i.test(c || '') ? c : d; }
     function rgba(c, al) { c = c.replace('#', ''); if (c.length === 3) c = c.split('').map(function (x) { return x + x; }).join(''); var n = parseInt(c.slice(0, 6), 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + al + ')'; }
+    // px 크기는 기준 화면 폭(모바일 390 · 웹 1280)에서의 값이다. 실제 화면 폭에 비례해 커지거나 작아진다(기존 %크기와 같은 방식).
+    function refW() { return o.refW > 0 ? o.refW : ((stage.getBoundingClientRect().width || 1280) <= 768 ? 390 : 1280); }
+    function subPct(S) { return S.fpx > 0 ? S.fpx / refW() * 100 : (S.fs > 0 ? S.fs : (SIZES[S.size] || 5)); }
     var outed = false, subEl = null;
     // 자막 한 줄의 요소를 만든다 (글자·테두리·그림자·배경·등장/강조 효과 반영)
     function buildSub(text) {
       var S = fx.sub, el = document.createElement('div'), inner = document.createElement('span'), st = el.style, fr = !!o.freeze;
       el.className = 'fx-sub'; inner.className = 'fx-inner';
       var col = hex(S.colorHex, COLORS[S.color] || COLORS.ivory);
-      st.color = col; st.fontSize = (S.fs > 0 ? S.fs : (SIZES[S.size] || 5)) * (FONT_SCALE[S.font] || 1) + 'cqw';
+      st.color = col; st.fontSize = subPct(S) * (FONT_SCALE[S.font] || 1) + 'cqw';
       st.fontFamily = FONTS[S.font] || FONTS.gothic; st.fontWeight = S.weight; st.fontStyle = S.italic; st.lineHeight = S.lh; st.letterSpacing = (S.ls / 100) + 'em';
       st.padding = (S.padY / 100) + 'em ' + (S.padX / 100) + 'em'; st.borderRadius = (S.bgRadius / 100) + 'em';
       if (S.bg !== 'none') st.background = rgba(hex(S.bgColor, '#000000'), S.bgOpacity >= 0 ? S.bgOpacity / 100 : (S.bg === 'box' ? 0.82 : 0.45));
@@ -346,10 +349,10 @@
       // 글자 크기: 자막 오른쪽 아래 모서리 손잡이
       var hs = handle('right:-8px;bottom:-8px', 'nwse-resize'); el.appendChild(hs);
       drag(hs, function () {
-        var w0 = el.getBoundingClientRect().width, b0 = S.fs > 0 ? S.fs : (SIZES[S.size] || 5), nb = b0;
+        var w0 = el.getBoundingClientRect().width, b0 = subPct(S), nb = b0;
         return {
           move: function (dx) { nb = clamp(b0 * clamp((w0 + dx) / w0, 0.4, 3), 0.5, 40); el.style.fontSize = nb * (FONT_SCALE[S.font] || 1) + 'cqw'; },
-          end: function () { ed.onResize({ fs: r1(nb) }); },
+          end: function () { ed.onResize(S.fpx > 0 ? { fpx: Math.round(nb * refW() / 100) } : { fs: r1(nb) }); },
         };
       });
       // 문장 편집: 더블클릭 → 입력, Enter = 줄바꿈, 바깥을 누르거나 Esc = 완료
