@@ -36,6 +36,21 @@ table { width:100%; border-collapse:collapse; }
 th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
 th { color:var(--ink3); font-weight:500; font-size:.8rem; }
 .hide { display:none !important; }
+.hmgrid { display:grid; grid-template-columns:minmax(360px,470px) minmax(0,1fr); gap:16px; align-items:start; }
+.hmed { max-height:calc(100vh - 150px); overflow:auto; padding-right:6px; }
+.hmpv { position:sticky; top:8px; }
+#hmBox { height:calc(100vh - 170px); min-height:420px; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#000; position:relative; }
+#hmFrame { border:0; position:absolute; top:0; left:0; transform-origin:0 0; background:#080A11; }
+.hmf { display:grid; gap:3px; font-size:.8rem; color:var(--ink2); margin:8px 0; }
+.hmf.chk { display:flex; align-items:center; gap:8px; } .hmf.chk input { width:auto; }
+.hmitem { border:1px solid var(--line); border-radius:8px; padding:4px 10px 8px; margin:8px 0; background:var(--bg); }
+.hmitem > .hmh { display:flex; gap:6px; align-items:center; padding:4px 0; }
+.hmh b { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500; font-size:.85rem; }
+.hmh button, summary button.sm { padding:2px 8px; font-size:.78rem; }
+details.hmg { margin:8px 0; } details.hmg > summary { display:flex; align-items:center; gap:6px; }
+details.hmg > summary > span { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hmsec { margin:14px 0 4px; color:var(--gold); font-family:"Noto Serif KR",serif; }
+@media (max-width:1000px) { .hmgrid { grid-template-columns:1fr; } .hmed { max-height:none; } .hmpv { position:static; } }
 .login { max-width:340px; margin:18vh auto 0; display:grid; gap:12px; }
 
 dialog.wide { width:min(1120px, 96vw); }
@@ -135,6 +150,7 @@ summary { cursor:pointer; padding:4px 0; }
       <button data-t="test">조합 테스트</button>
       <button data-t="cov">커버리지</button>
       <button data-t="intro">입장 인트로</button>
+      <button data-t="home">홈 화면</button>
     </div>
 
     <!-- 라이브러리 -->
@@ -209,6 +225,21 @@ summary { cursor:pointer; padding:4px 0; }
       <div class="card"><p class="muted" style="margin:0">일주 60개 × 9개 장에서 어느 칸이 비어 있는지 봅니다. <span class="chip">초록</span> 해당 일주를 직접 지정한 클립이 있음 · <span class="chip">파랑</span> 조건 없는 공통 클립으로 채워짐 · 회색 0은 비어 있음.</p></div>
       <div class="cov" style="margin-top:12px"><table id="covT"></table></div>
     </div>
+    <!-- 홈 화면 편집 -->
+    <div id="t-home" class="hide">
+      <div class="hmgrid">
+        <div>
+          <div class="row" style="align-items:center;margin-bottom:8px"><button class="pri" id="hmSave">저장</button><button class="danger" id="hmReset" title="저장된 내용을 지우고 내장 기본 문구로 되돌립니다">기본 문구로 되돌리기</button><span class="muted" id="hmState"></span></div>
+          <p class="muted" style="margin:0 0 6px;font-size:.78rem">글자를 고치면 오른쪽 미리보기에 바로 반영됩니다. 제목에서는 줄바꿈이 되고, <b>*별표*</b>로 감싼 글자는 금빛으로 강조됩니다. 저장해야 실제 페이지에 적용됩니다.</p>
+          <div class="hmed" id="hmForm"></div>
+        </div>
+        <div class="hmpv">
+          <div class="row" style="align-items:center;margin-bottom:8px"><button id="hmPc" class="pri">PC</button><button id="hmMo">모바일</button><span class="muted">미리보기 (인트로 영상·알림 신청은 동작하지 않음)</span></div>
+          <div id="hmBox"><iframe id="hmFrame" title="홈 화면 미리보기"></iframe></div>
+        </div>
+      </div>
+    </div>
+
     <!-- 입장 인트로 -->
     <div id="t-intro" class="hide">
       <div class="card" style="max-width:640px">
@@ -418,6 +449,7 @@ summary { cursor:pointer; padding:4px 0; }
   </form>
 </dialog>
 
+<script src="../home.js"></script>
 <script src="../assemble.js"></script>
 <script src="../fx.js"></script>
 <script>
@@ -530,13 +562,114 @@ summary { cursor:pointer; padding:4px 0; }
       .catch(function (e) { $('inState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };
 
+  // ── 홈 화면 편집 (클립 저장과 별개로 /api/home에 저장). 미리보기는 판매 페이지를 iframe으로 띄우고 설정을 postMessage로 보낸다.
+  var MH = window.MantraHome, HM = { cfg: null, dirty: false, mode: 'pc', open: {}, loaded: false, frameOn: false };
+  function hmSend(msg) { try { $('hmFrame').contentWindow.postMessage(msg, location.origin); } catch (e) {} }
+  function hmPush() { if (HM.cfg && HM.frameOn) hmSend({ t: 'mt-home', cfg: HM.cfg }); }
+  var hmTimer;
+  function hmChanged() { HM.dirty = true; $('hmState').textContent = '저장하지 않은 변경'; clearTimeout(hmTimer); hmTimer = setTimeout(hmPush, 120); }
+  function hmFit() {
+    var box = $('hmBox'), f = $('hmFrame'), bw = box.clientWidth, bh = box.clientHeight; if (!bw) return;
+    var W = HM.mode === 'pc' ? 1280 : 390, k = Math.min(1, bw / W);
+    f.style.width = W + 'px'; f.style.height = (bh / k) + 'px'; f.style.transform = 'scale(' + k + ')'; f.style.left = Math.max(0, (bw - W * k) / 2) + 'px';
+  }
+  $('hmPc').onclick = function () { HM.mode = 'pc'; $('hmPc').classList.add('pri'); $('hmMo').classList.remove('pri'); hmFit(); };
+  $('hmMo').onclick = function () { HM.mode = 'mo'; $('hmMo').classList.add('pri'); $('hmPc').classList.remove('pri'); hmFit(); };
+  window.addEventListener('resize', function () { if (!$('t-home').classList.contains('hide')) hmFit(); });
+  $('hmFrame').addEventListener('load', function () { HM.frameOn = true; hmFit(); hmPush(); });
+  window.addEventListener('beforeunload', function (e) { if (HM.dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  function hmField(obj, d) {
+    var k = d[0], t = d[2], lab = document.createElement('label'), el;
+    lab.className = 'hmf' + (t === 'b' ? ' chk' : '');
+    if (t === 'b') { el = document.createElement('input'); el.type = 'checkbox'; el.checked = !!obj[k]; el.onchange = function () { obj[k] = el.checked; hmChanged(); }; lab.appendChild(el); lab.appendChild(document.createTextNode(d[1])); return lab; }
+    var sp = document.createElement('span'); sp.textContent = d[1]; lab.appendChild(sp);
+    if (t === 's') { el = document.createElement('select'); d[3].forEach(function (o) { var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1]; el.appendChild(op); }); el.value = obj[k] || d[3][0][0]; obj[k] = el.value; el.onchange = function () { obj[k] = el.value; hmChanged(); }; }
+    else { el = document.createElement(t === 'l' ? 'textarea' : 'input'); if (t === 'l') el.rows = 3; else el.type = 'text'; el.value = obj[k] == null ? '' : obj[k]; el.oninput = function () { obj[k] = el.value; hmChanged(); }; }
+    lab.appendChild(el); return lab;
+  }
+  function hmBtn(txt, title, fn, cls) { var b = document.createElement('button'); b.type = 'button'; b.className = 'sm ' + (cls || ''); b.textContent = txt; b.title = title; b.onclick = function (e) { e.preventDefault(); e.stopPropagation(); fn(); }; return b; }
+  function hmMove(arr, i, d) { var j = i + d; if (j < 0 || j >= arr.length) return false; var t = arr[i]; arr[i] = arr[j]; arr[j] = t; return true; }
+  function hmRebuild(scrollId) { var ed = $('hmForm'), top = ed.scrollTop; hmBuild(); ed.scrollTop = top; hmChanged(); if (scrollId) setTimeout(function () { hmSend({ t: 'mt-scroll', id: scrollId }); }, 200); }
+  function hmGroup(key, title, scrollId, fill, head) {
+    var d = document.createElement('details'); d.className = 'hmg'; d.open = !!HM.open[key];
+    var sm = document.createElement('summary'), sp = document.createElement('span'); sp.textContent = title; sm.appendChild(sp); (head || []).forEach(function (b) { sm.appendChild(b); }); d.appendChild(sm);
+    var body = document.createElement('div'); d.appendChild(body); fill(body);
+    d.addEventListener('toggle', function () { HM.open[key] = d.open; if (d.open && scrollId) hmSend({ t: 'mt-scroll', id: scrollId }); });
+    return d;
+  }
+  function hmList(body, sec, L) {
+    var items = sec[L.k] = sec[L.k] || [];
+    items.forEach(function (it, i) {
+      var card = document.createElement('div'); card.className = 'hmitem';
+      var h = document.createElement('div'); h.className = 'hmh'; var b = document.createElement('b'); b.textContent = L.label + ' ' + (i + 1) + (it[L.title] ? ' · ' + String(it[L.title]).replace(/\n/g, ' ') : ''); h.appendChild(b);
+      h.appendChild(hmBtn('▲', '위로', function () { if (hmMove(items, i, -1)) hmRebuild(); }));
+      h.appendChild(hmBtn('▼', '아래로', function () { if (hmMove(items, i, 1)) hmRebuild(); }));
+      h.appendChild(hmBtn('✕', '삭제', function () { if (confirm('이 ' + L.label + '을(를) 삭제할까요?')) { items.splice(i, 1); hmRebuild(); } }, 'danger'));
+      card.appendChild(h); L.fields.forEach(function (d) { card.appendChild(hmField(it, d)); }); body.appendChild(card);
+    });
+    var add = document.createElement('button'); add.type = 'button'; add.textContent = '+ ' + L.label + ' 추가'; add.onclick = function () { items.push(MH.copy(L.blank)); hmRebuild(sec.id); }; body.appendChild(add);
+  }
+  function hmBuild() {
+    var root = $('hmForm'), c = HM.cfg; root.innerHTML = '';
+    root.appendChild(hmGroup('brand', '브랜드 · 상단', '_top', function (body) { MH.BRAND.forEach(function (d) { body.appendChild(hmField(c.brand, d)); }); }));
+    root.appendChild(hmGroup('hero', '첫 화면 (큰 제목·버튼)', '_top', function (body) { MH.HERO.forEach(function (d) { body.appendChild(hmField(c.hero, d)); }); }));
+    var h = document.createElement('div'); h.className = 'hmsec'; h.textContent = '섹션 (위에서 아래 순서)'; root.appendChild(h);
+    c.sections.forEach(function (sec, i) {
+      var T = MH.TYPES[sec.type]; if (!T) return;
+      var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = sec.show !== false; cb.title = '페이지에 표시'; cb.style.width = 'auto';
+      cb.onclick = function (e) { e.stopPropagation(); }; cb.onchange = function () { sec.show = cb.checked; hmChanged(); };
+      var name = T.label + (sec.eyebrow ? ' · ' + sec.eyebrow : '');
+      root.appendChild(hmGroup('s:' + sec.id, name, sec.id, function (body) {
+        var a = document.createElement('p'); a.className = 'muted'; a.style.cssText = 'margin:6px 0;font-size:.76rem'; a.textContent = '이동 주소(앵커): #' + sec.id + ' — 버튼 이동 칸에 이 값을 쓰면 여기로 이동합니다'; body.appendChild(a);
+        T.fields.forEach(function (d) { body.appendChild(hmField(sec, d)); });
+        if (T.list) hmList(body, sec, T.list);
+      }, [cb,
+        hmBtn('▲', '위로', function () { if (hmMove(c.sections, i, -1)) hmRebuild(sec.id); }),
+        hmBtn('▼', '아래로', function () { if (hmMove(c.sections, i, 1)) hmRebuild(sec.id); }),
+        hmBtn('✕', '섹션 삭제', function () { if (confirm('이 섹션을 삭제할까요? (저장 전에는 되돌릴 수 있습니다)')) { c.sections.splice(i, 1); hmRebuild(); } }, 'danger')]));
+    });
+    var add = document.createElement('div'); add.className = 'row'; add.style.margin = '10px 0';
+    var sel = document.createElement('select'); sel.style.width = 'auto'; Object.keys(MH.TYPES).forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = MH.TYPES[k].label; sel.appendChild(o); });
+    var ab = document.createElement('button'); ab.type = 'button'; ab.textContent = '+ 섹션 추가';
+    ab.onclick = function () {
+      var T = MH.TYPES[sel.value], sec = { id: 's' + Date.now().toString(36).slice(-6), type: sel.value, show: true };
+      T.fields.forEach(function (d) { sec[d[0]] = d[2] === 'b' ? false : ''; }); sec.title = '새 섹션'; if (T.list) sec[T.list.k] = [MH.copy(T.list.blank)];
+      c.sections.push(sec); HM.open['s:' + sec.id] = true; hmRebuild(sec.id);
+    };
+    add.appendChild(sel); add.appendChild(ab); root.appendChild(add);
+    root.appendChild(hmGroup('foot', '하단 문구', '_bottom', function (body) { c.footer = c.footer || {}; MH.FOOT.forEach(function (d) { body.appendChild(hmField(c.footer, d)); }); }));
+  }
+  function homeOpen() {
+    if (!HM.frameOn && !$('hmFrame').getAttribute('src')) $('hmFrame').src = '/report/?preview=1';
+    hmFit();
+    if (HM.loaded) return;
+    api('/api/home').then(function (d) {
+      var h = d.home; if (h) { delete h.at; }
+      HM.cfg = h || MH.copy(MH.DEFAULTS); HM.loaded = true; hmBuild(); hmPush();
+    }).catch(function (e) { $('hmState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
+  }
+  $('hmSave').onclick = function () {
+    if (!HM.cfg) return; $('hmState').textContent = '저장 중…';
+    api('/api/home', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ home: HM.cfg }) })
+      .then(function () { HM.dirty = false; $('hmState').innerHTML = '<span class="ok">저장됨 — 실제 페이지에 반영되었습니다</span>'; })
+      .catch(function (e) { $('hmState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
+  };
+  $('hmReset').onclick = function () {
+    if (!confirm('저장된 홈 화면 내용을 지우고 기본 문구로 되돌립니다. 계속할까요?')) return;
+    api('/api/home', { method: 'DELETE' }).then(function () { HM.cfg = MH.copy(MH.DEFAULTS); HM.dirty = false; HM.open = {}; hmBuild(); hmPush(); $('hmState').innerHTML = '<span class="ok">기본 문구로 되돌렸습니다</span>'; })
+      .catch(function (e) { $('hmState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
+  };
+
   // ── 탭
   document.querySelectorAll('.tabs button').forEach(function (b) {
     b.onclick = function () {
       document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
-      ['lib', 'test', 'cov', 'intro'].forEach(function (t) { $('t-' + t).classList.toggle('hide', t !== b.dataset.t); });
+      ['lib', 'test', 'cov', 'intro', 'home'].forEach(function (t) { $('t-' + t).classList.toggle('hide', t !== b.dataset.t); });
       if (b.dataset.t === 'cov') renderCov();
       if (b.dataset.t === 'intro') introLoad();
+      document.querySelector('body > .wrap').style.maxWidth = b.dataset.t === 'home' ? '1700px' : '';
+      if (b.dataset.t === 'home') homeOpen();
       if (S.ctl) { S.ctl.stop(); S.ctl = null; S.auto = false; }
     };
   });
