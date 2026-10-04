@@ -242,10 +242,16 @@ summary { cursor:pointer; padding:4px 0; }
         <div class="row"><button type="button" id="cueGenAll" title="일레븐랩스로 모든 줄의 음성 파일을 만듭니다">🔊 전체 음성 만들기</button><button type="button" id="cueFit" title="음성이 있는 줄은 음성 길이에 맞춰 나타남/사라짐 시각을 이어 붙입니다">⏱ 음성 길이에 맞춰 시간 정리</button><button type="button" id="cueAuto" title="위 전체 문장을 줄/문장 단위로 나눠 영상 길이에 맞게 시간을 배분합니다">전체 문장에서 자동 나누기</button><button type="button" id="cueAdd">+ 줄 추가</button></div>
       </div>
       <p class="muted" style="margin:6px 0 8px">줄마다 “몇 초에 나타나 몇 초에 사라지는지”를 정합니다. 시간은 앞부분 자르기를 반영한 재생 시작 기준(초)입니다. 겹치지 않게 입력하세요.</p>
-      <details id="aiBox" style="margin:0 0 10px">
+      <details id="aiBox" open style="margin:0 0 10px">
         <summary>✨ AI로 자막 쓰기 <span class="muted">(Claude 메인 · 실패 시 GPT 자동 전환)</span></summary>
+        <label style="display:grid;gap:4px;margin-top:8px"><span class="muted">자막 초안 — 대충 써 넣으면 AI가 자막 규칙에 맞게 다듬어 줍니다 (줄글이나 메모 형태도 괜찮습니다)</span>
+          <textarea id="aiDraft" rows="4" maxlength="1500" placeholder="예) 갑목은 큰 나무라서 곧고 자존심이 세다. 남에게 고개 숙이는 걸 싫어하지만 그래서 외롭기도 함. 한번 마음먹으면 끝까지 간다."></textarea></label>
         <div class="row" style="margin-top:8px">
-          <label>줄 수<input type="number" id="aiN" value="4" min="1" max="12" style="width:72px"></label>
+          <button type="button" class="pri" id="aiDraftGo" title="초안의 뜻은 살리고 문장·줄 나눔을 자막에 맞게 다듬습니다">✨ 초안 다듬기</button>
+          <button type="button" id="aiDraftFromCues" title="지금 타임라인의 자막을 초안 칸으로 가져옵니다">타임라인 → 초안으로 가져오기</button>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <label>줄 수 <span class="muted">(비우면 초안은 자동, 새로 쓰기는 4줄)</span><input type="number" id="aiN" min="1" max="12" placeholder="자동" style="width:90px"></label>
           <label style="flex:1 1 260px">말투·방향 지시 (선택)<input type="text" id="aiTone" maxlength="300" placeholder="예: 차분하고 신비롭게, 비유를 한 번 넣기, 더 짧게"></label>
         </div>
         <div class="row" style="margin-top:8px">
@@ -957,9 +963,9 @@ summary { cursor:pointer; padding:4px 0; }
     return o;
   }
   function aiRun(task, extra) {
-    var btns = ['aiScript', 'aiSplit', 'aiPolish'].map($); btns.forEach(function (b) { b.disabled = true; });
+    var btns = ['aiScript', 'aiSplit', 'aiPolish', 'aiDraftGo', 'aiDraftFromCues'].map($); btns.forEach(function (b) { b.disabled = true; });
     $('aiMsg').textContent = 'AI가 쓰는 중… (최대 40초)'; $('aiMsg').className = 'muted'; $('aiOut').innerHTML = ''; $('aiAct').classList.add('hide');
-    var body = Object.assign({ task: task, n: +$('aiN').value || 4, tone: $('aiTone').value }, extra);
+    var body = Object.assign({ task: task, n: +$('aiN').value || undefined, tone: $('aiTone').value }, extra);
     api('/api/ai', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (d) {
       aiLines = d.lines; $('aiOut').innerHTML = aiLines.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join(''); $('aiAct').classList.remove('hide');
       var first = d.attempts && d.attempts[0] && !d.attempts[0].ok ? d.attempts[0].error : '';
@@ -968,6 +974,15 @@ summary { cursor:pointer; padding:4px 0; }
       .then(function () { btns.forEach(function (b) { b.disabled = false; }); });
   }
   $('aiScript').onclick = function () { aiRun('script', { chapter: chLabel($('eCh').value || A.effective({ folder: $('eFolder').value, cond: {} }, S.folders).chapter), title: $('eTitle').value.trim(), cond: condText(), existing: $('eCap').value }); };
+  $('aiDraftGo').onclick = function () {
+    var t = $('aiDraft').value.trim(); if (!t) { $('aiMsg').className = 'err'; $('aiMsg').textContent = '자막 초안을 먼저 입력하세요'; return; }
+    aiRun('draft', { text: t, chapter: chLabel($('eCh').value || A.effective({ folder: $('eFolder').value, cond: {} }, S.folders).chapter), title: $('eTitle').value.trim(), cond: condText() });
+  };
+  $('aiDraftFromCues').onclick = function () {
+    var cur = readCues().map(function (c) { return c.t; }); if (!cur.length && $('eCap').value.trim()) cur = [$('eCap').value.trim()];
+    if (!cur.length) { $('aiMsg').className = 'err'; $('aiMsg').textContent = '가져올 자막이 없습니다'; return; }
+    $('aiDraft').value = cur.join('\n'); $('aiMsg').className = 'muted'; $('aiMsg').textContent = '타임라인 자막을 초안으로 가져왔습니다. 말투·방향을 적고 “초안 다듬기”를 누르세요.';
+  };
   $('aiSplit').onclick = function () { var t = $('eCap').value.trim(); if (!t) { $('aiMsg').className = 'err'; $('aiMsg').textContent = '위의 자막·대사 전체 칸에 문장을 먼저 입력하세요'; return; } aiRun('split', { text: t }); };
   $('aiPolish').onclick = function () {
     var cur = readCues().map(function (c) { return c.t; }); if (!cur.length) cur = $('eCap').value.split(/\n+/).map(function (l) { return l.trim(); }).filter(Boolean);
