@@ -192,7 +192,7 @@
     return v || all.filter(function (x) { return /^ko/i.test(x.lang); })[0] || null;
   }
 
-  // box 안에서 클립 하나를 재생한다. o = { clip, url, defaults, onend, onerror, audioUrl(음성 파일 키→주소), silent(소리 끔), freeze(첫 자막을 정지 화면으로) }. { stop } 반환.
+  // box 안에서 클립 하나를 재생한다. o = { clip, url, defaults, onend, onerror, audioUrl(음성 파일 키→주소), silent(소리 끔), freeze(자막 한 줄을 정지 화면으로, freezeIndex = 몇 번째 줄), edit(정지 화면에서 직접 편집 콜백) }. { stop } 반환.
   function play(box, o) {
     injectCss();
     var clip = o.clip, fx = resolve(clip.fx, o.defaults), cues = cuesOf(clip);
@@ -269,6 +269,76 @@
       } else inner.textContent = text;
       el.appendChild(inner); return el;
     }
+    // 직접 편집: 끌어서 위치, 오른쪽 손잡이로 줄바꿈 폭, 모서리 손잡이로 글자 크기, 더블클릭으로 문장(Enter = 줄바꿈).
+    // o.edit = { onMove(x%, y%), onResize({ w%, fs }), onText(줄 번호, 문장) }. 값은 호출한 쪽이 입력칸에 반영한다.
+    function attachEdit(el, index) {
+      var ed = o.edit, S = fx.sub, inner = el.firstChild;
+      function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+      function r1(v) { return Math.round(v * 10) / 10; }
+      function handle(css, cursor) {
+        var h = document.createElement('div');
+        h.style.cssText = 'position:absolute;width:13px;height:13px;background:#E0BC74;border:2px solid #0A0C14;border-radius:3px;pointer-events:auto;touch-action:none;z-index:3;cursor:' + cursor + ';' + css;
+        return h;
+      }
+      pos.style.pointerEvents = 'none'; pos.style.outline = '1px dashed rgba(224,188,116,.8)';
+      el.style.pointerEvents = 'auto'; el.style.cursor = 'move'; el.style.outline = '1px solid rgba(224,188,116,.95)'; el.style.position = 'relative'; el.style.touchAction = 'none'; el.style.userSelect = 'none';
+      var guide = document.createElement('div'); guide.style.cssText = 'position:absolute;left:50%;top:0;bottom:0;width:0;border-left:1px dashed rgba(98,194,174,.9);display:none;pointer-events:none;z-index:2'; wrap.appendChild(guide);
+      function drag(target, onStart) { // 포인터를 잡고 끄는 공통 처리. onStart가 { move(dx,dy), end() }를 돌려준다
+        target.addEventListener('pointerdown', function (e) {
+          if (!(e.target === target || e.target === inner) || inner.isContentEditable) return; // 글자를 눌러도 끌 수 있다(손잡이는 각자 따로 처리)
+          e.preventDefault(); e.stopPropagation();
+          var sx = e.clientX, sy = e.clientY, st = onStart(), moved = false; target.setPointerCapture(e.pointerId);
+          function mv(ev) { moved = true; st.move(ev.clientX - sx, ev.clientY - sy); }
+          function up() { target.removeEventListener('pointermove', mv); target.removeEventListener('pointerup', up); guide.style.display = 'none'; if (moved) st.end(); }
+          target.addEventListener('pointermove', mv); target.addEventListener('pointerup', up);
+        });
+      }
+      // 이동 (가로 가운데 근처에서 자석처럼 붙는다)
+      function place(xp, yp) {
+        pos.dataset.pos = 'custom'; pos.style.left = xp + '%'; pos.style.top = yp + '%'; pos.style.bottom = 'auto';
+        pos.style.transform = 'translate(-50%,-50%)' + (S.rot ? ' rotate(' + S.rot + 'deg)' : '');
+      }
+      drag(el, function () {
+        var wr = wrap.getBoundingClientRect(), r = el.getBoundingClientRect(), cx0 = r.left + r.width / 2 - wr.left, cy0 = r.top + r.height / 2 - wr.top, last = null;
+        return {
+          move: function (dx, dy) {
+            var xp = clamp(cx0 + dx, 0, wr.width) / wr.width * 100, yp = clamp(cy0 + dy, 0, wr.height) / wr.height * 100, snap = Math.abs(xp - 50) < 1.5;
+            if (snap) xp = 50; guide.style.display = snap ? 'block' : 'none'; place(xp, yp); last = [xp, yp];
+          },
+          end: function () { if (last) ed.onMove(r1(last[0]), r1(last[1])); },
+        };
+      });
+      // 폭 (줄바꿈 기준): 오른쪽 가장자리 손잡이
+      var hw = handle('right:-8px;top:50%;margin-top:-7px', 'ew-resize'); pos.appendChild(hw);
+      drag(hw, function () {
+        var wr = wrap.getBoundingClientRect(), w0 = pos.getBoundingClientRect().width, pct = null;
+        return {
+          move: function (dx) { pct = clamp(w0 + 2 * dx, wr.width * 0.2, wr.width) / wr.width * 100; pos.style.width = pct + '%'; },
+          end: function () { ed.onResize({ w: r1(pct) }); },
+        };
+      });
+      // 글자 크기: 자막 오른쪽 아래 모서리 손잡이
+      var hs = handle('right:-8px;bottom:-8px', 'nwse-resize'); el.appendChild(hs);
+      drag(hs, function () {
+        var w0 = el.getBoundingClientRect().width, b0 = S.fs > 0 ? S.fs : (SIZES[S.size] || 5), nb = b0;
+        return {
+          move: function (dx) { nb = clamp(b0 * clamp((w0 + dx) / w0, 0.4, 3), 2, 14); el.style.fontSize = nb * (FONT_SCALE[S.font] || 1) + 'cqw'; },
+          end: function () { ed.onResize({ fs: r1(nb) }); },
+        };
+      });
+      // 문장 편집: 더블클릭 → 입력, Enter = 줄바꿈, 바깥을 누르거나 Esc = 완료
+      if (ed.onText) {
+        el.addEventListener('dblclick', function () {
+          if (inner.isContentEditable) return;
+          try { inner.contentEditable = 'plaintext-only'; } catch (e) { inner.contentEditable = 'true'; }
+          if (!inner.isContentEditable) inner.contentEditable = 'true';
+          el.style.cursor = 'text'; inner.focus();
+          var range = document.createRange(); range.selectNodeContents(inner); range.collapse(false); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        });
+        inner.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.preventDefault(); inner.blur(); } e.stopPropagation(); });
+        inner.addEventListener('blur', function () { if (!inner.isContentEditable) return; inner.contentEditable = 'false'; ed.onText(index, inner.textContent.replace(/\n+$/, '')); });
+      }
+    }
     function showCue(t) {
       var i = -1;
       for (var k = 0; k < cues.length; k++) if (cues[k].s <= t && t < cues[k].e) { i = k; break; }
@@ -311,7 +381,8 @@
     if (o.freeze) {
       stage.style.animationName = 'none';
       if (v) { v.src = o.url; v.muted = true; v.preload = 'metadata'; v.onloadedmetadata = function () { try { v.currentTime = fx.video.trimStart || 0.1; } catch (e) {} }; }
-      showCue(cues[0] ? cues[0].s : 0);
+      var fi = cues.length ? Math.max(0, Math.min(o.freezeIndex || 0, cues.length - 1)) : -1;
+      if (fi >= 0) { idx = fi; curCue = cues[fi]; subEl = buildSub(curCue.t); pos.appendChild(subEl); if (o.edit) attachEdit(subEl, fi); }
       return { stop: function () { if (v) v.pause(); } };
     }
     if (v) {

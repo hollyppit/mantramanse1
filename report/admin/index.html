@@ -94,6 +94,7 @@ summary { cursor:pointer; padding:4px 0; }
 .chrow button { padding:6px 10px; }
 .cue { display:grid; grid-template-columns:20px 78px 78px minmax(0,1fr) auto auto auto; gap:6px; margin-bottom:6px; align-items:center; }
 .cue button { padding:6px 10px; white-space:nowrap; }
+.cue textarea { min-height:0; resize:none; overflow:hidden; line-height:1.4; padding:7px 10px; }
 .cue .stale { color:var(--red); }
 .fxgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:8px; padding:8px 0; }
 .fxgrid label button { white-space:nowrap; } .fxgrid label.wide { grid-column:span 2; } .fxgrid label.hide { display:none; }
@@ -858,6 +859,7 @@ summary { cursor:pointer; padding:4px 0; }
     for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
     return (h >>> 0).toString(36);
   }
+  function fitRows(ta) { ta.rows = Math.min(4, (ta.value.match(/\n/g) || []).length + 1); }
   function refreshRow(d) {
     var has = !!d.dataset.a, stale = has && d.dataset.ah !== sig(d.querySelector('.ct').value.trim()), g = d.querySelector('.cg'), pl = d.querySelector('.cpl');
     g.textContent = !has ? '🔊 만들기' : stale ? '⚠ 다시 만들기' : '🔄 다시'; g.classList.toggle('stale', stale);
@@ -867,9 +869,10 @@ summary { cursor:pointer; padding:4px 0; }
   function refreshRows() { $('cueBox').querySelectorAll('.cue').forEach(refreshRow); }
   function addCue(c) {
     var d = document.createElement('div'); d.className = 'cue'; c = c || { s: '', e: '', t: '' };
-    d.innerHTML = '<span class="grip" title="끌어서 순서 변경 (시간 칸은 그대로, 문장과 음성이 이동)">⠿</span><input type="number" min="0" step="0.1" class="cs" value="' + esc(c.s) + '"><input type="number" min="0" step="0.1" class="ce" value="' + esc(c.e) + '"><input type="text" class="ct" maxlength="200" value="' + esc(c.t) + '">' +
+    d.innerHTML = '<span class="grip" title="끌어서 순서 변경 (시간 칸은 그대로, 문장과 음성이 이동)">⠿</span><input type="number" min="0" step="0.1" class="cs" value="' + esc(c.s) + '"><input type="number" min="0" step="0.1" class="ce" value="' + esc(c.e) + '"><textarea class="ct" rows="1" maxlength="200" placeholder="자막 (Enter = 줄바꿈)">' + esc(c.t) + '</textarea>' +
       '<button type="button" class="cg"></button><button type="button" class="cpl">▶</button><button type="button" class="danger cx">✕</button>';
     d.dataset.a = c.a || ''; d.dataset.d = c.d || ''; d.dataset.ah = c.ah || '';
+    var ta = d.querySelector('.ct'); fitRows(ta); ta.addEventListener('input', function () { fitRows(ta); });
     d.querySelector('.cx').onclick = function () { d.remove(); };
     d.querySelector('.ct').addEventListener('input', function () { refreshRow(d); });
     d.querySelector('.cg').onclick = function () { var has = !!d.dataset.a; genRow(d, has && d.dataset.ah === sig(d.querySelector('.ct').value.trim())).catch(function () {}); };
@@ -983,6 +986,9 @@ summary { cursor:pointer; padding:4px 0; }
   function panelHtml(p) {
     return '<div class="card" style="background:var(--bg)"><div class="row" style="justify-content:space-between;align-items:center"><b>미리보기</b><button type="button" class="pri" id="' + p + 'Play">▶ 다시 재생</button></div>' +
       '<div class="player pvp" id="' + p + 'Prev" style="margin-top:10px"><div class="ph">미리보기</div></div>' +
+      '<label class="muted" style="display:flex;gap:6px;align-items:center;margin-top:8px;color:var(--gold)"><input type="checkbox" id="' + p + 'Edit"> ✋ 직접 편집 (끌어서 이동 · 손잡이로 크기 · 더블클릭으로 문장)</label>' +
+      '<div id="' + p + 'EditBar" class="hide" style="margin:6px 0 2px"><div class="row" style="align-items:center"><label class="muted" style="display:flex;gap:6px;align-items:center">편집할 줄<select id="' + p + 'Cue" style="width:auto"></select></label><button type="button" id="' + p + 'Reset" title="위치·폭·글자 크기 값을 비워 기본값으로 되돌립니다">위치·크기 초기화</button></div>' +
+      '<p class="muted" style="margin:6px 0 0;font-size:.78rem"><b>자막을 끌면</b> 위치(가운데에 자석처럼 붙음), <b>오른쪽 가장자리 손잡이</b>는 줄바꿈 폭, <b>모서리 손잡이</b>는 글자 크기, <b>더블클릭</b>하면 문장을 고칠 수 있고 Enter로 줄바꿈합니다. 입력칸 값도 함께 바뀝니다.</p></div>' +
       '<label class="muted" style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="' + p + 'Freeze"> 자막 고정 보기 (애니메이션 없이 모양만)</label>' +
       '<label class="muted" style="display:flex;gap:6px;align-items:center;margin-top:4px"><input type="checkbox" id="' + p + 'Sound"> 영상·목소리 소리 켜기</label>' +
       '<p class="muted" style="margin:8px 0 0;font-size:.78rem">값을 바꾸면 바로 반영되어 반복 재생됩니다.' + (p === 'def' ? ' 예시 문장으로 보여 줍니다.' : '') + ' 영상이 없으면 어두운 배경에서 보입니다.</p></div>';
@@ -996,16 +1002,41 @@ summary { cursor:pointer; padding:4px 0; }
     }
     return { clip: { caption: '', fx: { cues: SAMPLE_CUES } }, url: '', defaults: readFx($('defBox')) };
   }
+  // 미리보기에서 직접 바꾼 값을 입력칸에 되돌려 넣는다 (그러면 평소처럼 즉시 다시 그려진다)
+  function lpEditCallbacks(p) {
+    var box = p === 'fx' ? $('fxBox') : $('defBox');
+    function setSub(k, v) { var el = box.querySelector('[data-g=sub][data-k=' + k + ']'); if (!el) return; el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }
+    return {
+      onMove: function (x, y) { setSub('x', x); setSub('y', y); },
+      onResize: function (o) { if (o.w != null) setSub('w', o.w); if (o.fs != null) setSub('fs', o.fs); },
+      onText: p !== 'fx' ? null : function (i, text) {
+        var rows = Array.prototype.map.call($('cueBox').querySelectorAll('.cue'), function (d) { return { d: d, s: +d.querySelector('.cs').value, t: d.querySelector('.ct').value.trim() }; })
+          .filter(function (r) { return r.t; }).sort(function (a, b) { return a.s - b.s; });
+        if (rows[i]) { var ta = rows[i].d.querySelector('.ct'); ta.value = text; fitRows(ta); refreshRow(rows[i].d); } else { $('eCap').value = text; }
+        lpSchedule('fx');
+      },
+    };
+  }
+  function lpCueSelect(p, clip) {
+    var n = Math.max(1, F.cuesOf(clip).length), sel = $(p + 'Cue');
+    if (sel.options.length !== n) { var cur = sel.value; sel.innerHTML = Array.apply(null, Array(n)).map(function (_, i) { return '<option value="' + i + '">' + (i + 1) + '번째 줄</option>'; }).join(''); sel.value = Math.min(+cur || 0, n - 1); }
+  }
   function lpStop(p) { var L = LP[p]; clearTimeout(L.timer); if (L.ctl) { L.ctl.stop(); L.ctl = null; } }
   function lpRun(p) {
     lpStop(p);
     var dlg = p === 'fx' ? $('dlg') : $('dlgDef'); if (!dlg.open) return;
-    var src = lpSource(p), L = LP[p];
-    L.ctl = F.play($(p + 'Prev'), { clip: src.clip, url: src.url, defaults: src.defaults, silent: !$(p + 'Sound').checked, freeze: $(p + 'Freeze').checked,
+    var src = lpSource(p), L = LP[p], edit = $(p + 'Edit').checked;
+    $(p + 'EditBar').classList.toggle('hide', !edit); lpCueSelect(p, src.clip);
+    L.ctl = F.play($(p + 'Prev'), { clip: src.clip, url: src.url, defaults: src.defaults, silent: !$(p + 'Sound').checked, freeze: $(p + 'Freeze').checked || edit, freezeIndex: +$(p + 'Cue').value || 0, edit: edit ? lpEditCallbacks(p) : null,
       onend: function () { L.timer = setTimeout(function () { lpRun(p); }, 700); } });
   }
   function lpSchedule(p) { clearTimeout(LP[p].timer); LP[p].timer = setTimeout(function () { lpRun(p); }, 250); }
-  ['fx', 'def'].forEach(function (p) { $(p + 'Play').onclick = function () { lpRun(p); }; $(p + 'Freeze').onchange = $(p + 'Sound').onchange = function () { lpRun(p); }; });
+  ['fx', 'def'].forEach(function (p) { $(p + 'Play').onclick = function () { lpRun(p); }; $(p + 'Freeze').onchange = $(p + 'Sound').onchange = $(p + 'Edit').onchange = $(p + 'Cue').onchange = function () { lpRun(p); };
+    $(p + 'Reset').onclick = function () {
+      var box = p === 'fx' ? $('fxBox') : $('defBox');
+      ['x', 'y', 'w', 'fs'].forEach(function (k) { var el = box.querySelector('[data-g=sub][data-k=' + k + ']'); if (el) { el.value = ''; el.dispatchEvent(new Event('input', { bubbles: true })); } });
+    };
+  });
   $('fxBox').addEventListener('input', function () { lpSchedule('fx'); }); $('fxBox').addEventListener('change', function () { lpSchedule('fx'); });
   $('defBox').addEventListener('input', function () { lpSchedule('def'); }); $('defBox').addEventListener('change', function () { lpSchedule('def'); });
   $('cueBox').addEventListener('input', function () { lpSchedule('fx'); }); $('cueBox').addEventListener('click', function (e) { if (e.target.tagName === 'BUTTON') lpSchedule('fx'); });
