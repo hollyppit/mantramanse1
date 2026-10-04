@@ -69,6 +69,8 @@
   var SUB_ANIM_OUT = [['none', '없음 (바로 사라짐)'], ['fade', '페이드'], ['fall', '아래로 내려가며'], ['lift', '위로 올라가며'], ['shrink', '작아지며'], ['blur', '블러'], ['slide-l', '왼쪽으로 슬라이드'], ['slide-r', '오른쪽으로 슬라이드']];
   var SUB_EMPH = [['none', '없음'], ['pulse', '두근두근 (커졌다 작아짐)'], ['float', '둥실둥실'], ['shake', '떨림'], ['blink', '깜빡임'], ['wobble', '흔들흔들'], ['glow', '반짝 빛남']];
   var ON_OFF = [['off', '끄기'], ['on', '켜기']];
+  var VOICE_ENGINE = [['browser', '브라우저 음성 (무료, 기기마다 음색 다름)'], ['eleven', '일레븐랩스 (미리 만든 음성 파일, 모든 기기 동일)']];
+  var EL_MODELS = [['eleven_multilingual_v2', 'Multilingual v2 (안정적, 기본 추천)'], ['eleven_v3', 'v3 (표현력 최고, 안정성은 0 / 0.5 / 1 권장)'], ['eleven_flash_v2_5', 'Flash v2.5 (빠르고 저렴)'], ['eleven_turbo_v2_5', 'Turbo v2.5']];
   var VOICE_MODE = [['cue', '자막 줄마다 (자막과 동기)'], ['whole', '전체를 한 번에']];
   var FIT = [['contain', '전체 보이게 (여백)'], ['cover', '화면 가득 (잘림)']];
 
@@ -81,14 +83,15 @@
     { g: 'sub', title: '테두리·그림자·글로우', items: [['strokeW', '테두리 두께 (0=없음, 글자 크기의 %)', 'num', { min: 0, max: 15, step: 0.5 }], ['strokeColor', '테두리 색', 'color'], ['shOn', '그림자', 'sel', ON_OFF], ['shX', '그림자 가로 이동(%)', 'num', { min: -30, max: 30, step: 1 }], ['shY', '그림자 세로 이동(%)', 'num', { min: -30, max: 30, step: 1 }], ['shBlur', '그림자 번짐(%)', 'num', { min: 0, max: 60, step: 1 }], ['shColor', '그림자 색', 'color'], ['glowBlur', '글로우 세기 (0=없음)', 'num', { min: 0, max: 80, step: 1 }], ['glowColor', '글로우 색 (비우면 글자색)', 'color']] },
     { g: 'sub', title: '자막 배경 박스', items: [['bg', '배경', 'sel', SUB_BG], ['bgColor', '배경 색', 'color'], ['bgOpacity', '배경 투명도 (0 투명~100 불투명, 비우면 프리셋)', 'num', { min: 0, max: 100, step: 1 }], ['bgRadius', '모서리 둥글기(%)', 'num', { min: 0, max: 100, step: 1 }], ['padX', '좌우 여백(글자 크기의 %)', 'num', { min: 0, max: 200, step: 5 }], ['padY', '상하 여백(글자 크기의 %)', 'num', { min: 0, max: 100, step: 5 }]] },
     { g: 'sub', title: '자막 등장·퇴장·강조 효과', items: [['anim', '나타나는 효과', 'sel', SUB_ANIM], ['animDur', '나타나는 시간(초)', 'num', { min: 0.1, max: 3, step: 0.1 }], ['wordDelay', '단어/글자 순차 간격(초)', 'num', { min: 0.02, max: 1, step: 0.01 }], ['typeSpeed', '타자기 속도(초당 글자 수)', 'num', { min: 3, max: 60, step: 1 }], ['animOut', '사라지는 효과', 'sel', SUB_ANIM_OUT], ['animOutDur', '사라지는 시간(초)', 'num', { min: 0.1, max: 3, step: 0.1 }], ['emph', '떠 있는 동안 효과', 'sel', SUB_EMPH], ['emphSpeed', '효과 주기(초, 작을수록 빠름)', 'num', { min: 0.3, max: 6, step: 0.1 }]] },
-    { g: 'voice', title: '읽는 목소리 (브라우저 음성 합성)', items: [['on', '목소리 읽기', 'sel', ON_OFF], ['name', '목소리', 'voice'], ['mode', '읽는 방식', 'sel', VOICE_MODE], ['rate', '속도', 'num', { min: 0.5, max: 2, step: 0.1 }], ['pitch', '음높이', 'num', { min: 0.5, max: 2, step: 0.1 }], ['vol', '볼륨(0~1)', 'num', { min: 0, max: 1, step: 0.1 }], ['delay', '읽기 시작 지연(초)', 'num', { min: 0, max: 10, step: 0.1 }]] },
+    { g: 'voice', title: '읽는 목소리', items: [['on', '목소리 읽기', 'sel', ON_OFF], ['engine', '목소리 엔진', 'sel', VOICE_ENGINE], ['name', '브라우저 목소리 (엔진이 브라우저일 때)', 'voice'], ['mode', '읽는 방식', 'sel', VOICE_MODE], ['rate', '속도', 'num', { min: 0.5, max: 2, step: 0.1 }], ['pitch', '음높이', 'num', { min: 0.5, max: 2, step: 0.1 }], ['vol', '볼륨(0~1)', 'num', { min: 0, max: 1, step: 0.1 }], ['delay', '읽기 시작 지연(초)', 'num', { min: 0, max: 10, step: 0.1 }]] },
+    { g: 'voice', title: '일레븐랩스 목소리 (엔진이 일레븐랩스일 때, 자막 줄마다 음성 파일을 만들어 씁니다)', items: [['elVoice', '목소리', 'elvoice'], ['elModel', '모델', 'sel', EL_MODELS], ['elStability', '안정성 (낮을수록 감정 풍부, 높을수록 차분)', 'num', { min: 0, max: 1, step: 0.05 }], ['elSimilarity', '목소리 유사도', 'num', { min: 0, max: 1, step: 0.05 }], ['elStyle', '스타일 과장', 'num', { min: 0, max: 1, step: 0.05 }], ['elSpeed', '말 속도', 'num', { min: 0.7, max: 1.2, step: 0.05 }]] },
     { g: 'video', title: '영상 재생', items: [['speed', '재생 속도', 'num', { min: 0.25, max: 2, step: 0.05 }], ['vol', '영상 원음 볼륨(0~1)', 'num', { min: 0, max: 1, step: 0.1 }], ['fit', '화면 맞춤', 'sel', FIT], ['trimStart', '앞부분 자르기(초)', 'num', { min: 0, max: 600, step: 0.1 }], ['trimEnd', '끝 지점(초, 0=끝까지)', 'num', { min: 0, max: 600, step: 0.1 }], ['hold', '마지막 화면 유지(초)', 'num', { min: 0, max: 10, step: 0.1 }]] },
   ];
 
   var BUILTIN = {
     trans: { 'in': 'fade', out: 'fade', dur: 0.5 },
     sub: { font: 'gothic', weight: '700', italic: 'normal', size: 'M', fs: 0, color: 'ivory', colorHex: '', align: 'center', lh: 1.45, ls: 0, pos: 'bottom', x: 50, y: -1, w: 90, rot: 0, strokeW: 0, strokeColor: '#000000', shOn: 'on', shX: 0, shY: 6, shBlur: 20, shColor: '#000000', glowBlur: 0, glowColor: '', bg: 'shade', bgColor: '', bgOpacity: -1, bgRadius: 30, padX: 60, padY: 20, anim: 'fade', animDur: 0.4, wordDelay: 0.08, typeSpeed: 14, animOut: 'fade', animOutDur: 0.3, emph: 'none', emphSpeed: 1.5 },
-    voice: { on: 'off', name: '', mode: 'cue', rate: 1, pitch: 1, vol: 1, delay: 0.2 },
+    voice: { on: 'off', engine: 'browser', name: '', mode: 'cue', rate: 1, pitch: 1, vol: 1, delay: 0.2, elVoice: '', elModel: 'eleven_multilingual_v2', elStability: 0.5, elSimilarity: 0.75, elStyle: 0, elSpeed: 1 },
     video: { speed: 1, vol: 1, fit: 'contain', trimStart: 0, trimEnd: 0, hold: 0.5 },
   };
   function resolve(fx, defaults) {
@@ -100,7 +103,7 @@
   }
   function cuesOf(clip) {
     var c = clip.fx && clip.fx.cues;
-    if (c && c.length) return c.map(function (x) { return { t: String(x.t || ''), s: +x.s || 0, e: +x.e || 0 }; }).filter(function (x) { return x.t && x.e > x.s; }).sort(function (a, b) { return a.s - b.s; });
+    if (c && c.length) return c.map(function (x) { return { t: String(x.t || ''), s: +x.s || 0, e: +x.e || 0, a: String(x.a || ''), d: +x.d || 0 }; }).filter(function (x) { return x.t && x.e > x.s; }).sort(function (a, b) { return a.s - b.s; });
     return clip.caption ? [{ t: clip.caption, s: 0, e: 1e9 }] : []; // 타임라인이 없으면 자막 전체를 내내 표시
   }
 
@@ -172,7 +175,7 @@
     return v || all.filter(function (x) { return /^ko/i.test(x.lang); })[0] || null;
   }
 
-  // box 안에서 클립 하나를 재생한다. o = { clip, url, defaults, onend, onerror, silent(소리 끔), freeze(첫 자막을 정지 화면으로) }. { stop } 반환.
+  // box 안에서 클립 하나를 재생한다. o = { clip, url, defaults, onend, onerror, audioUrl(음성 파일 키→주소), silent(소리 끔), freeze(첫 자막을 정지 화면으로) }. { stop } 반환.
   function play(box, o) {
     injectCss();
     var clip = o.clip, fx = resolve(clip.fx, o.defaults), cues = cuesOf(clip);
@@ -190,7 +193,18 @@
     wrap.style.setProperty('--fxd', fx.trans.dur + 's'); stage.style.setProperty('--fxd', fx.trans.dur + 's');
     if (fx.trans['in'] !== 'cut') stage.style.animationName = 'fx-i-' + fx.trans['in'];
 
-    var speaking = fx.voice.on === 'on' && root.speechSynthesis && !o.silent && !o.freeze;
+    var wantVoice = fx.voice.on === 'on' && !o.silent && !o.freeze, eleven = fx.voice.engine === 'eleven';
+    var speaking = wantVoice && !!root.speechSynthesis, audios = [];
+    var audioUrl = o.audioUrl || function (k) { return '/api/clipfile?k=' + encodeURIComponent(k); };
+    // 일레븐랩스로 미리 만든 음성 파일이 있으면 그것을, 없거나 실패하면 브라우저 음성으로 대신 읽는다
+    function sayCue(cue) {
+      audios.forEach(function (a) { a.pause(); }); audios = [];
+      if (eleven && cue.a) {
+        var au = new Audio(audioUrl(cue.a)); au.volume = fx.voice.vol; audios.push(au);
+        var pr = au.play(); if (pr && pr.catch) pr.catch(function () { speak(cue.t); });
+        au.onerror = function () { speak(cue.t); };
+      } else speak(cue.t);
+    }
     function speak(text) {
       if (!speaking || !text) return;
       try {
@@ -245,7 +259,7 @@
         idx = i; curCue = i >= 0 ? cues[i] : null; typed = -1; outed = false; pos.innerHTML = ''; subEl = null;
         if (!curCue) return;
         subEl = buildSub(curCue.t); pos.appendChild(subEl);
-        if (fx.voice.mode === 'cue') { var txt = curCue.t; later(function () { try { root.speechSynthesis.cancel(); } catch (e) {} speak(txt); }, fx.voice.delay); }
+        if (wantVoice && (fx.voice.mode === 'cue' || eleven)) { var cue = curCue; later(function () { try { root.speechSynthesis.cancel(); } catch (e) {} sayCue(cue); }, fx.voice.delay); }
       }
       if (!curCue || o.freeze) return;
       if (!outed && fx.sub.animOut !== 'none' && curCue.e < 1e8 && t >= curCue.e - fx.sub.animOutDur) {
@@ -274,7 +288,7 @@
       
     }
     function start() {
-      if (fx.voice.mode === 'whole' && speaking) { var all = cues.map(function (c) { return c.t; }).join(' '); later(function () { speak(all); }, fx.voice.delay); }
+      if (fx.voice.mode === 'whole' && !eleven && speaking) { var all = cues.map(function (c) { return c.t; }).join(' '); later(function () { speak(all); }, fx.voice.delay); }
       t0 = performance.now(); raf = setInterval(tick, 50);
     }
     if (o.freeze) {
@@ -293,7 +307,7 @@
       var last = cues.filter(function (c) { return c.e < 1e8; }).reduce(function (m, c) { return Math.max(m, c.e); }, 0);
       total = Math.max(last, 4); start();
     }
-    return { stop: function () { done = true; clearInterval(raf); timers.forEach(clearTimeout); try { root.speechSynthesis.cancel(); } catch (e) {} if (v) v.pause(); } };
+    return { stop: function () { done = true; clearInterval(raf); timers.forEach(clearTimeout); try { root.speechSynthesis.cancel(); } catch (e) {} audios.forEach(function (a) { a.pause(); }); if (v) v.pause(); } };
   }
 
   root.MovingFx = { FIELDS: FIELDS, BUILTIN: BUILTIN, resolve: resolve, cuesOf: cuesOf, play: play, voices: voices };
