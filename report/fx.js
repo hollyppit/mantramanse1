@@ -101,6 +101,17 @@
     });
     return out;
   }
+  // 폴더 체인의 공통 연출을 기본 연출(defaults) 위에 겹친다. 반환값은 resolve()·play()의 defaults로 쓴다.
+  function folderDefaults(folders, folderId, defaults) {
+    var map = {}, list = [], seen = {}, id = folderId; (folders || []).forEach(function (f) { map[f.id] = f; });
+    while (id && map[id] && !seen[id]) { seen[id] = 1; list.unshift(map[id]); id = map[id].parent; }
+    var out = {};
+    Object.keys(BUILTIN).forEach(function (g) {
+      out[g] = Object.assign({}, (defaults && defaults[g]) || {});
+      list.forEach(function (f) { Object.assign(out[g], (f.fx && f.fx[g]) || {}); });
+    });
+    return out;
+  }
   function cuesOf(clip) {
     var c = clip.fx && clip.fx.cues;
     if (c && c.length) return c.map(function (x) { return { t: String(x.t || ''), s: +x.s || 0, e: +x.e || 0, a: String(x.a || ''), d: +x.d || 0 }; }).filter(function (x) { return x.t && x.e > x.s; }).sort(function (a, b) { return a.s - b.s; });
@@ -310,5 +321,5 @@
     return { stop: function () { done = true; clearInterval(raf); timers.forEach(clearTimeout); try { root.speechSynthesis.cancel(); } catch (e) {} audios.forEach(function (a) { a.pause(); }); if (v) v.pause(); } };
   }
 
-  root.MovingFx = { FIELDS: FIELDS, BUILTIN: BUILTIN, resolve: resolve, cuesOf: cuesOf, play: play, voices: voices };
+  root.MovingFx = { folderDefaults: folderDefaults, FIELDS: FIELDS, BUILTIN: BUILTIN, resolve: resolve, cuesOf: cuesOf, play: play, voices: voices };
 })(typeof window !== 'undefined' ? window : globalThis);

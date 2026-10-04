@@ -78,15 +78,41 @@ function cleanFx(fx) {
   return out;
 }
 
+function cleanCond(src) {
+  const cond = {};
+  for (const k of COND_KEYS) {
+    const v = src && src[k];
+    if (Array.isArray(v) && v.length) cond[k] = v.slice(0, 80).map(x => String(x).slice(0, 8));
+  }
+  return cond;
+}
+
+// 폴더: { id, name, parent, priority, cond, fx }. 부모는 존재해야 하고 순환·깊이 8단계 초과는 거부한다. 형식이 틀리면 null.
+const MAX_DEPTH = 8;
+function cleanFolders(list) {
+  if (!Array.isArray(list) || list.length > MAX_FOLDERS) return null;
+  const out = [], ids = new Set();
+  for (const x of list) {
+    const id = String((x && x.id) || ''), name = String((x && x.name) || '').trim().slice(0, 30);
+    if (!/^[\w-]{1,20}$/.test(id) || !name || ids.has(id)) return null;
+    ids.add(id);
+    const fx = cleanFx({ ...(x.fx || {}), cues: undefined });
+    out.push({ id, name, parent: String(x.parent || ''), priority: Math.max(-100, Math.min(100, Math.round(+x.priority || 0))), cond: cleanCond(x.cond), fx });
+  }
+  const byId = new Map(out.map(f => [f.id, f]));
+  for (const f of out) {
+    if (f.parent && !byId.has(f.parent)) f.parent = '';
+    let depth = 1, cur = f;
+    while (cur.parent) { cur = byId.get(cur.parent); if (++depth > MAX_DEPTH || cur === f) return null; }
+  }
+  return out;
+}
+
 function clean(c, chapterIds, folderIds) {
   if (!c || typeof c !== 'object') return null;
   const id = String(c.id || '').slice(0, 40), title = String(c.title || '').trim().slice(0, 80);
   if (!/^[\w-]{1,40}$/.test(id) || !title || !chapterIds.has(c.chapter)) return null;
-  const cond = {};
-  for (const k of COND_KEYS) {
-    const v = c.cond && c.cond[k];
-    if (Array.isArray(v) && v.length) cond[k] = v.slice(0, 80).map(x => String(x).slice(0, 8));
-  }
+  const cond = cleanCond(c.cond);
   const s = c.src || {};
   let src = null;
   if (s.type === 'r2' && /^[\w.-]{1,120}$/.test(s.value || '')) src = { type: 'r2', value: s.value };
@@ -113,8 +139,8 @@ export async function onRequestPut({ request, env }) {
   const prev = (await env.GLOSSARY_KV.get(CLIPS_KEY, 'json')) || {};
   const chapters = body.chapters === undefined ? (prev.chapters || DEFAULT_CHAPTERS) : cleanNamed(body.chapters, MAX_CHAPTERS, 1);
   if (!chapters) return json({ error: '장 목록이 올바르지 않습니다 (1~40개, 이름 필수, 중복 id 불가)' }, 400);
-  const folders = body.folders === undefined ? (prev.folders || []) : cleanNamed(body.folders, MAX_FOLDERS, 0);
-  if (!folders) return json({ error: '폴더 목록이 올바르지 않습니다' }, 400);
+  const folders = body.folders === undefined ? (prev.folders || []) : cleanFolders(body.folders);
+  if (!folders) return json({ error: '폴더 목록이 올바르지 않습니다 (이름 필수, 중복·순환 불가, 최대 8단계)' }, 400);
   const chapterIds = new Set(chapters.map(c => c.id)), folderIds = new Set(folders.map(f => f.id));
   const clips = [], seen = new Set();
   for (const raw of body.clips) {
