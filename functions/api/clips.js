@@ -126,7 +126,7 @@ function clean(c, chapterIds, folderIds, byId) {
   if (s.type === 'r2' && /^[\w.-]{1,120}$/.test(s.value || '')) src = { type: 'r2', value: s.value };
   else if (s.type === 'url' && /^https:\/\/[^\s]{1,500}$/.test(s.value || '')) src = { type: 'url', value: s.value };
   else if (s.type) return null; // 알 수 없는 형식
-  return { id, title, chapter: chapterIds.has(c.chapter) ? c.chapter : '', folder, cond, src, caption: String(c.caption || '').slice(0, 500), note: String(c.note || '').slice(0, 300), fx: cleanFx(c.fx), priority: Math.max(-100, Math.min(100, +c.priority || 0)) };
+  return { id, title, chapter: chapterIds.has(c.chapter) ? c.chapter : '', folder, cond, src, caption: String(c.caption || '').slice(0, 500), draft: String(c.draft || '').slice(0, 1500), note: String(c.note || '').slice(0, 300), fx: cleanFx(c.fx), priority: Math.max(-100, Math.min(100, +c.priority || 0)) };
 }
 
 export async function onRequestGet({ request, env }) {

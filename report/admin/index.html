@@ -244,7 +244,7 @@ summary { cursor:pointer; padding:4px 0; }
       <p class="muted" style="margin:6px 0 8px">줄마다 “몇 초에 나타나 몇 초에 사라지는지”를 정합니다. 시간은 앞부분 자르기를 반영한 재생 시작 기준(초)입니다. 겹치지 않게 입력하세요.</p>
       <details id="aiBox" open style="margin:0 0 10px">
         <summary>✨ AI로 자막 쓰기 <span class="muted">(Claude 메인 · 실패 시 GPT 자동 전환)</span></summary>
-        <label style="display:grid;gap:4px;margin-top:8px"><span class="muted">자막 초안 — 대충 써 넣으면 AI가 자막 규칙에 맞게 다듬어 줍니다 (줄글이나 메모 형태도 괜찮습니다)</span>
+        <label style="display:grid;gap:4px;margin-top:8px"><span class="muted">자막 초안 — 대충 써 넣으면 AI가 자막 규칙에 맞게 다듬어 줍니다 (줄글이나 메모 형태도 괜찮습니다. 초안은 클립에 함께 저장됩니다)</span>
           <textarea id="aiDraft" rows="4" maxlength="1500" placeholder="예) 갑목은 큰 나무라서 곧고 자존심이 세다. 남에게 고개 숙이는 걸 싫어하지만 그래서 외롭기도 함. 한번 마음먹으면 끝까지 간다."></textarea></label>
         <div class="row" style="margin-top:8px">
           <button type="button" class="pri" id="aiDraftGo" title="초안의 뜻은 살리고 문장·줄 나눔을 자막에 맞게 다듬습니다">✨ 초안 다듬기</button>
@@ -1064,7 +1064,7 @@ summary { cursor:pointer; padding:4px 0; }
   // ── 편집
   function readForm(c) {
     c.title = $('eTitle').value.trim(); c.chapter = $('eCh').value; c.folder = $('eFolder').value; c.priority = +$('ePri').value || 0;
-    c.caption = $('eCap').value; c.note = $('eNote').value; c.cond = readCond();
+    c.caption = $('eCap').value; c.draft = $('aiDraft').value; c.note = $('eNote').value; c.cond = readCond();
     c.fx = readFx($('fxBox')); var cues = readCues(); if (cues.length) c.fx.cues = cues;
   }
   function buildCond(box, sel) {
@@ -1094,7 +1094,7 @@ summary { cursor:pointer; padding:4px 0; }
     S.editing = c ? JSON.parse(JSON.stringify(c)) : { id: 'c' + Date.now().toString(36), title: '', chapter: $('fCh').value || (folderCh ? '' : (S.chapters[0] && S.chapters[0].id) || ''), folder: newFolder, cond: {}, src: null, caption: '', note: '', priority: 0, isNew: true };
     $('dlgTitle').textContent = c ? '클립 편집' : '클립 추가';
     $('eTitle').value = S.editing.title; $('eCh').value = S.editing.chapter; $('eFolder').value = S.editing.folder || ''; $('ePri').value = S.editing.priority || 0;
-    $('eCap').value = S.editing.caption || ''; $('eNote').value = S.editing.note || '';
+    $('eCap').value = S.editing.caption || ''; $('aiDraft').value = S.editing.draft || ''; $('aiOut').innerHTML = ''; $('aiMsg').textContent = ''; $('aiAct').classList.add('hide'); $('eNote').value = S.editing.note || '';
     $('eUrl').value = S.editing.src && S.editing.src.type === 'url' ? S.editing.src.value : '';
     $('eFile').value = ''; $('dlgErr').textContent = ''; $('pbar').classList.add('hide');
     $('delBtn').classList.toggle('hide', !c); $('upBtn').disabled = !S.r2; $('eFile').disabled = !S.r2;
