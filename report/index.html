@@ -217,6 +217,14 @@ body.pv [data-k]:hover { outline: 1px dashed rgba(205, 178, 122, .8); outline-of
 body.pv .sel { outline: 2px solid #CDB27A !important; outline-offset: 3px; }
 body.pv .dc { pointer-events: auto; cursor: move; }
 body.pv .rv { opacity: 1; transform: none; }
+body.pv .editing { outline: 2px solid #62C2AE !important; cursor: text; -webkit-user-select: text !important; user-select: text !important; }
+#pvbar { position: absolute; z-index: 2147483000; display: none; gap: 4px; align-items: center; padding: 5px 6px; background: #12162A; border: 1px solid rgba(205, 178, 122, .65); border-radius: 8px; box-shadow: 0 6px 24px rgba(0, 0, 0, .6); font: 13px/1 system-ui, "Malgun Gothic", sans-serif; color: #ECE7DB; white-space: nowrap; -webkit-user-select: none; user-select: none; text-shadow: none; letter-spacing: 0; transform-origin: left bottom; }
+#pvbar button { background: #1D2340; color: #ECE7DB; border: 1px solid #333B5C; border-radius: 5px; padding: 6px 9px; cursor: pointer; font: inherit; }
+#pvbar button:hover { border-color: #CDB27A; }
+#pvbar button.warn { color: #FF9A88; }
+#pvbar select { max-width: 112px; background: #0A0C14; color: #ECE7DB; border: 1px solid #333B5C; border-radius: 5px; padding: 5px 4px; font: inherit; }
+#pvbar input[type=color] { width: 30px; height: 28px; padding: 0; border: 1px solid #333B5C; background: none; cursor: pointer; }
+#pvbar .sep { width: 1px; height: 20px; background: #333B5C; margin: 0 2px; }
 
 /* 입장 인트로 */
 #intro { position: fixed; inset: 0; z-index: 1000; background: #000; display: grid; place-items: center; opacity: 1; transition: opacity .6s ease; }
@@ -256,12 +264,71 @@ body.pv .rv { opacity: 1; transform: none; }
   var preview = /[?&]preview=1\b/.test(location.search); // 관리자 미리보기 창: 인트로 없이, 보내 주는 설정으로 다시 그린다
   var app = document.getElementById('app');
   var els = { top: document.getElementById('top'), hero: document.getElementById('heroText'), heroBox: document.getElementById('hero'), heroBg: document.getElementById('heroBg'), dev: document.getElementById('homeDev'), secs: document.getElementById('secs'), foot: document.getElementById('foot') };
-  var selK = null;
+  var selK = null, scaleK = 1, editing = null;
+  function post(m) { try { parent.postMessage(m, location.origin); } catch (e) {} }
   if (preview) document.body.classList.add('pv');
   function mark(k) {
     document.querySelectorAll('.sel').forEach(function (x) { x.classList.remove('sel'); });
-    selK = k; if (!k) return;
+    selK = k; if (!k) { showBar(); return; }
     var el = document.querySelector('[data-k="' + k.replace(/"/g, '\\"') + '"]'); if (el) el.classList.add('sel');
+    showBar();
+  }
+  // ── 선택한 글자·이미지 위에 뜨는 편집 막대 (미리보기 창이 축소돼 있어도 같은 크기로 보이도록 1/scaleK 배)
+  var bar = null;
+  function ebar() { if (!bar) { bar = document.createElement('div'); bar.id = 'pvbar'; document.body.appendChild(bar); } return bar; }
+  function showBar() {
+    if (!preview) return;
+    var b = ebar(), el = selK && !editing && document.querySelector('.sel');
+    if (!el) { b.style.display = 'none'; return; }
+    var dc = el.classList.contains('dc'), fl = (window.MovingFx && window.MovingFx.SUB_FONT) || [];
+    b.innerHTML = dc
+      ? '<button data-a="w-" title="작게">작게 −</button><button data-a="w+" title="크게">크게 +</button><span class="sep"></span><button data-a="r-" title="왼쪽으로 돌리기">⟲</button><button data-a="r+" title="오른쪽으로 돌리기">⟳</button><span class="sep"></span><button data-a="del" class="warn" title="삭제">삭제</button>'
+      : '<select data-a="font" title="글씨체"><option value="">글씨체</option>' + fl.map(function (f) { return '<option value="' + f[0] + '">' + H.esc(f[1]) + '</option>'; }).join('') + '</select>' +
+        '<button data-a="sz-" title="글자 작게">A−</button><button data-a="sz+" title="글자 크게">A+</button><button data-a="wt" title="굵게/보통"><b>B</b></button><span class="sep"></span>' +
+        '<button data-a="al" data-v="left" title="왼쪽 정렬">≡◂</button><button data-a="al" data-v="center" title="가운데 정렬">≡</button><button data-a="al" data-v="right" title="오른쪽 정렬">▸≡</button><input type="color" data-a="color" value="#ffffff" title="글자 색"><span class="sep"></span><button data-a="edit" title="글자 내용 고치기 (더블클릭도 가능)">✎ 고치기</button>';
+    b.style.display = 'flex'; b.style.transform = 'scale(' + (1 / scaleK) + ')';
+    var r = el.getBoundingClientRect(), h = b.offsetHeight, sx = window.scrollX, sy = window.scrollY, vis = h / scaleK;
+    var top = r.top + sy - 8 - h, below = false;
+    if (r.top - 8 - vis < 4) { top = r.bottom + sy + 8; below = true; b.style.transformOrigin = 'left top'; } else b.style.transformOrigin = 'left bottom';
+    b.style.top = top + 'px';
+    var maxL = document.documentElement.clientWidth - b.offsetWidth / scaleK - 4;
+    b.style.left = Math.max(4, Math.min(r.left + sx, maxL)) + 'px';
+    if (below) b.style.top = top + 'px';
+  }
+  function barPost(a, v) { // 막대 동작 → 관리자 편집기가 현재 편집 대상(공통/웹/모바일)에 반영
+    if (a === 'edit') return post({ t: 'mt-edit', k: selK });
+    var m = { t: 'mt-style', k: selK };
+    if (a === 'sz+' || a === 'sz-') { m.op = 'sz'; m.d = a === 'sz+' ? 5 : -5; }
+    else if (a === 'w+' || a === 'w-') { m.op = 'w'; m.d = a === 'w+' ? 5 : -5; }
+    else if (a === 'r+' || a === 'r-') { m.op = 'rot'; m.d = a === 'r+' ? 5 : -5; }
+    else if (a === 'wt') m.op = 'wt';
+    else if (a === 'del') m.op = 'del';
+    else { m.op = 'set'; m.key = a === 'al' ? 'align' : a; m.val = v; }
+    post(m);
+  }
+  // ── 글자 그 자리에서 고치기: 관리자에서 원문(*강조* 표시 포함)을 받아 입력하고, 끝나면 보낸다
+  function startEdit(k, raw, multi) {
+    var el = document.querySelector('[data-k="' + k.replace(/"/g, '\\"') + '"]'); if (!el || editing) return;
+    editing = { el: el, k: k, multi: multi, html: el.innerHTML };
+    el.textContent = raw; el.classList.add('editing'); editing.ws = el.style.whiteSpace; el.style.whiteSpace = 'pre-wrap'; // 입력한 줄바꿈이 공백으로 합쳐지지 않게
+    try { el.contentEditable = 'plaintext-only'; } catch (e) {} if (el.contentEditable !== 'plaintext-only') el.contentEditable = 'true';
+    el.focus();
+    var rg = document.createRange(); rg.selectNodeContents(el); var sl = window.getSelection(); sl.removeAllRanges(); sl.addRange(rg);
+    showBar();
+    el.onkeydown = function (e) {
+      e.stopPropagation();
+      if (e.key === 'Escape') { e.preventDefault(); endEdit(false); }
+      else if (e.key === 'Enter' && (!editing.multi || e.ctrlKey || e.metaKey)) { e.preventDefault(); endEdit(true); }
+      else if (e.key === ' ' && el.tagName === 'SUMMARY') { e.preventDefault(); document.execCommand('insertText', false, ' '); } // 질문 줄에서 스페이스가 펼침 동작을 하지 않게
+    };
+    el.onblur = function () { endEdit(true); };
+  }
+  function endEdit(save) {
+    if (!editing) return; var e = editing; editing = null;
+    e.el.onblur = null; e.el.onkeydown = null; e.el.contentEditable = 'false'; e.el.classList.remove('editing');
+    var val = e.el.innerText.replace(/\n+$/, ''); e.el.style.whiteSpace = e.ws || '';
+    if (save) post({ t: 'mt-text', k: e.k, value: val }); else e.el.innerHTML = e.html;
+    showBar();
   }
   // 글씨체를 쓴 경우에만 폰트 목록(fx.js)을 불러온다. 미리보기에서는 항상 불러와 바로 고를 수 있게 한다.
   function withFonts(cfg, cb) {
@@ -301,6 +368,8 @@ body.pv .rv { opacity: 1; transform: none; }
     if (!preview || e.origin !== location.origin) return;
     var d = e.data || {};
     if (d.t === 'mt-home' && d.cfg) apply(d.cfg);
+    else if (d.t === 'mt-scale') { scaleK = d.k > 0 ? d.k : 1; showBar(); }
+    else if (d.t === 'mt-editstart') startEdit(d.k, String(d.raw == null ? '' : d.raw), !!d.multi);
     else if (d.t === 'mt-sel') { mark(d.k || null); var se = document.querySelector('.sel'); if (se && d.reveal) se.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     else if (d.t === 'mt-scroll') { var el = document.getElementById(d.id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); else if (d.id === '_top') scrollTo({ top: 0, behavior: 'smooth' }); else if (d.id === '_bottom') scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }
   });
@@ -308,10 +377,15 @@ body.pv .rv { opacity: 1; transform: none; }
   // 미리보기: 글자·이미지를 누르면 관리자에게 알리고(mt-pick), 끌면 위치를 알린다(mt-move)
   if (preview) {
     var drag = null;
-    function post(m) { try { parent.postMessage(m, location.origin); } catch (e) {} }
     document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('a')) e.preventDefault(); }, true);
+    document.addEventListener('dblclick', function (e) {
+      var el = e.target.closest && e.target.closest('[data-k]:not(.dc)'); if (!el || editing) return;
+      if (e.target.closest('#pvbar')) return;
+      mark(el.dataset.k); post({ t: 'mt-pick', k: el.dataset.k }); post({ t: 'mt-edit', k: el.dataset.k });
+    }, true);
     document.addEventListener('pointerdown', function (e) {
       if (e.button !== 0) return;
+      if (e.target.closest && (e.target.closest('#pvbar') || e.target.closest('.editing'))) return; // 막대 조작·글자 입력 중에는 선택·끌기를 하지 않는다
       var el = e.target.closest && e.target.closest('[data-k]');
       if (!el) { mark(null); post({ t: 'mt-pick', k: null }); return; }
       var k = el.dataset.k; mark(k); post({ t: 'mt-pick', k: k });
@@ -335,9 +409,18 @@ body.pv .rv { opacity: 1; transform: none; }
         drag.el.style.setProperty('position', 'relative', 'important'); drag.el.style.setProperty('left', (drag.ndx / drag.zk) + 'px', 'important'); drag.el.style.setProperty('top', (drag.ndy / drag.zk) + 'px', 'important');
       }
     }, true);
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('#pvbar button'); if (!b) return;
+      e.preventDefault(); barPost(b.dataset.a, b.dataset.v);
+    }, true);
+    document.addEventListener('change', function (e) {
+      var t = e.target; if (!t.closest || !t.closest('#pvbar')) return;
+      if (t.dataset.a === 'font' || t.dataset.a === 'color') barPost(t.dataset.a, t.value);
+    }, true);
+    window.addEventListener('scroll', function () { if (selK) showBar(); }, { passive: true });
     document.addEventListener('pointerup', function () {
       if (drag && drag.moved) post(drag.dc ? { t: 'mt-move', k: drag.k, dev: drag.dev, x: drag.nx, y: drag.ny } : { t: 'mt-move', k: drag.k, dev: drag.dev, dx: drag.ndx, dy: drag.ndy });
-      drag = null;
+      drag = null; showBar();
     }, true);
   }
 

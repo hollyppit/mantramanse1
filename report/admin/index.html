@@ -679,6 +679,7 @@ summary { cursor:pointer; padding:4px 0; }
     var box = $('hmBox'), f = $('hmFrame'), bw = box.clientWidth, bh = box.clientHeight; if (!bw) return;
     var W = HM.mode === 'pc' ? 1280 : 390, k = Math.min(1, bw / W);
     f.style.width = W + 'px'; f.style.height = (bh / k) + 'px'; f.style.transform = 'scale(' + k + ')'; f.style.left = Math.max(0, (bw - W * k) / 2) + 'px';
+    hmSend({ t: 'mt-scale', k: k });
   }
   function hmMode(m) { // 미리보기 기기를 바꾼다. 기기별 값을 편집 중이면 편집 대상도 같이 바뀐다.
     HM.mode = m; $('hmPc').classList.toggle('pri', m === 'pc'); $('hmMo').classList.toggle('pri', m === 'mo'); hmFit();
@@ -776,6 +777,24 @@ summary { cursor:pointer; padding:4px 0; }
     if (r[0] === 'items') { var it = (base.items || [])[+r[1]]; return it ? { kind: 'text', obj: it, field: r[2], base: base, key: p[0] } : null; }
     return { kind: 'text', obj: base, field: r[0], base: base, key: p[0] };
   }
+  function hmDefs(info) {
+    if (info.key === 'brand') return MH.BRAND; if (info.key === 'hero') return MH.HERO; if (info.key === 'footer') return MH.FOOT;
+    var T = MH.TYPES[info.base.type] || {}; return (T.fields || []).concat((T.list && T.list.fields) || []);
+  }
+  // 미리보기 편집 막대 동작을 현재 편집 대상(공통/웹/모바일)에 적용한다
+  function hmApplyStyle(m) {
+    var info = hmResolve(m.k); if (!info) return;
+    var isDc = info.kind === 'decor', root = isDc ? info.obj : ((info.obj.st = info.obj.st || {})[info.field] = info.obj.st[info.field] || {}), t = hmTarget(root);
+    function cur(key, def) { return t[key] != null ? t[key] : (root[key] != null ? root[key] : def); }
+    if (m.op === 'del' && isDc) { info.list.splice(info.idx, 1); HM.sel = null; hmRebuild(); hmSelRender(); hmSend({ t: 'mt-sel', k: null }); return; }
+    if (m.op === 'sz' && !isDc) t.sz = Math.max(20, Math.min(500, Math.round(cur('sz', 100) + m.d)));
+    else if (m.op === 'w' && isDc) t.w = Math.max(2, Math.min(200, Math.round(cur('w', 30) + m.d)));
+    else if (m.op === 'rot' && isDc) t.rot = Math.max(-180, Math.min(180, Math.round(cur('rot', 0) + m.d)));
+    else if (m.op === 'wt' && !isDc) t.wt = String(+cur('wt', 400) >= 600 ? 400 : 700);
+    else if (m.op === 'set' && !isDc) { if (m.val === '' || m.val == null) delete t[m.key]; else t[m.key] = m.val; }
+    else return;
+    hmSelRender(); hmChanged();
+  }
   function hmFieldLabel(info) {
     var f = info.field, defs = [];
     if (info.key === 'brand') defs = MH.BRAND; else if (info.key === 'hero') defs = MH.HERO; else if (info.key === 'footer') defs = MH.FOOT;
@@ -840,6 +859,17 @@ summary { cursor:pointer; padding:4px 0; }
     if (e.origin !== location.origin || e.source !== $('hmFrame').contentWindow) return;
     var d = e.data || {};
     if (d.t === 'mt-pick') { if (d.k) hmSelect(d.k, true); else { HM.sel = null; hmSelRender(); } }
+    else if (d.t === 'mt-edit') {
+      var ei = hmResolve(d.k); if (!ei || ei.kind !== 'text' || typeof ei.obj[ei.field] !== 'string' && ei.obj[ei.field] != null) return;
+      if (ei.key === 'footer') { $('hmState').textContent = '하단 문구는 왼쪽 "하단 문구" 칸에서 고쳐 주세요 (여러 줄이라 미리보기에서 바로 고칠 수 없습니다)'; return; }
+      var def = hmDefs(ei).filter(function (x) { return x[0] === ei.field; })[0];
+      hmSend({ t: 'mt-editstart', k: d.k, raw: ei.obj[ei.field] || '', multi: !!def && def[2] === 'l' });
+    }
+    else if (d.t === 'mt-text') {
+      var ti = hmResolve(d.k); if (!ti || ti.kind !== 'text') return;
+      ti.obj[ti.field] = String(d.value == null ? '' : d.value).slice(0, 3000); hmRebuild(); hmSelRender();
+    }
+    else if (d.t === 'mt-style') { hmApplyStyle(d); }
     else if (d.t === 'mt-move') {
       var info = hmResolve(d.k); if (!info) return;
       var root = info.kind === 'decor' ? info.obj : ((info.obj.st = info.obj.st || {})[info.field] = info.obj.st[info.field] || {});
