@@ -20,7 +20,7 @@
     var a = Math.max(0, +cfg.amount || 0), area = W * H;
     E = []; SM = []; LT = [];
     if (cfg.embers) for (var i = 0, n = Math.min(80, Math.round(area / 26000 * a)); i < n; i++) E.push(ember(true));
-    if (cfg.smoke) for (var j = 0, m = Math.min(9, Math.max(1, Math.round(5 * a))); j < m; j++) SM.push({ x: rnd(0, W), y: rnd(0, H * 1.3), s: rnd(Math.max(W, H) * 0.35, Math.max(W, H) * 0.7), vy: rnd(5, 12), vx: rnd(-4, 4), a: rnd(0.04, 0.085), ph: rnd(0, 6.28) });
+    if (cfg.smoke) for (var j = 0, m = Math.min(12, Math.max(1, Math.round(7 * a))); j < m; j++) SM.push({ x: rnd(0, W), y: rnd(0, H * 1.3), s: rnd(Math.max(W, H) * 0.3, Math.max(W, H) * 0.6), vy: rnd(5, 12), vx: rnd(-4, 4), a: rnd(0.12, 0.22), ph: rnd(0, 6.28) });
     if (cfg.light) for (var k = 0; k < 3; k++) LT.push({ cx: rnd(0.2, 0.8), cy: rnd(0.2, 0.8), rx: rnd(0.1, 0.25), ry: rnd(0.08, 0.2), sp: rnd(0.04, 0.09), ph: rnd(0, 6.28), s: rnd(Math.max(W, H) * 0.5, Math.max(W, H) * 0.9), tone: k });
   }
   function ember(init) { return { x: rnd(0, W), y: init ? rnd(0, H) : H + rnd(5, 40), r: rnd(0.7, 2.3), vy: rnd(14, 42), sw: rnd(8, 26), f: rnd(0.8, 2.4), ph: rnd(0, 6.28), x0: 0 }; }
@@ -33,11 +33,11 @@
     T += dt * sp; ctx.clearRect(0, 0, W, H);
     // 연기: 위로 천천히 올라가며 퍼지는 회청색 안개
     if (SM.length) {
-      var sm = sprite('smoke', [150, 160, 195], 128, [[0, 0.5], [0.5, 0.18], [1, 0]]); ctx.globalCompositeOperation = 'source-over';
+      var sm = sprite('smoke', [175, 182, 215], 128, [[0, 0.75], [0.45, 0.32], [1, 0]]); ctx.globalCompositeOperation = 'source-over';
       SM.forEach(function (o) {
         o.y -= o.vy * dt * sp; o.x += (o.vx + Math.sin(T * 0.25 + o.ph) * 6) * dt * sp; if (o.y < -o.s * 0.6) { o.y = H + o.s * 0.5; o.x = rnd(0, W); }
         var fade = Math.min(1, Math.max(0, (o.y + o.s * 0.5) / (H * 0.35)), Math.max(0, (H + o.s - o.y) / (H * 0.35)));
-        ctx.globalAlpha = o.a * op * fade * 1.6; ctx.drawImage(sm, o.x - o.s / 2, o.y - o.s / 2, o.s, o.s);
+        ctx.globalAlpha = Math.min(1, o.a * op * fade * 2); ctx.drawImage(sm, o.x - o.s / 2, o.y - o.s / 2, o.s, o.s);
       });
     }
     // 빛: 크고 부드러운 빛무리가 천천히 떠다닌다 (밝게 겹침)
