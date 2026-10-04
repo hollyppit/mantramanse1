@@ -7,8 +7,8 @@ const TR_OUT = ['cut', 'fade', 'dissolve', 'slide-left', 'slide-up', 'zoom-in', 
 const FX = {
   trans: { in: TR_IN, out: TR_OUT, dur: [0.1, 3] },
   sub: {
-    font: FONT_KEYS, weight: ['400', '500', '700', '900'], italic: ['normal', 'italic'], size: ['S', 'M', 'L'], fs: [2, 14], color: ['ivory', 'white', 'gold', 'yellow'], colorHex: 'H', align: ['center', 'left', 'right'], lh: [1, 2.5], ls: [-5, 30],
-    pos: ['bottom', 'middle', 'top'], x: [0, 100], y: [0, 100], w: [20, 100], rot: [-30, 30],
+    font: FONT_KEYS, weight: ['400', '500', '700', '900'], italic: ['normal', 'italic'], size: ['S', 'M', 'L'], fs: [0.5, 40], color: ['ivory', 'white', 'gold', 'yellow'], colorHex: 'H', align: ['center', 'left', 'right'], lh: [0.8, 3], ls: [-10, 60],
+    pos: ['bottom', 'middle', 'top'], x: [0, 100], y: [0, 100], w: [10, 100], rot: [-45, 45],
     strokeW: [0, 15], strokeColor: 'H', shOn: ['off', 'on'], shX: [-30, 30], shY: [-30, 30], shBlur: [0, 60], shColor: 'H', glowBlur: [0, 80], glowColor: 'H',
     bg: ['none', 'shade', 'box'], bgColor: 'H', bgOpacity: [0, 100], bgRadius: [0, 100], padX: [0, 200], padY: [0, 100],
     anim: ['none', 'fade', 'rise', 'drop', 'pop', 'zoom', 'blur', 'slide-l', 'slide-r', 'bounce', 'flip', 'type', 'word', 'char'], animDur: [0.1, 3], wordDelay: [0.02, 1], typeSpeed: [3, 60],
