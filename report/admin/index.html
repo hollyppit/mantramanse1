@@ -369,6 +369,10 @@ summary { cursor:pointer; padding:4px 0; }
     <h3>기본 연출 설정</h3>
     <div class="dlgcols"><div class="dlgleft">
     <p class="muted" style="margin:0">모든 클립에 공통으로 적용되는 연출입니다. 클립 편집에서 따로 지정한 칸만 이 값 대신 쓰입니다. 비워 두면 내장 기본값(페이드 전환 · 아래 반투명 자막 · 목소리 끔)입니다.</p>
+    <div class="card" style="background:var(--bg)">
+      <div class="row" style="align-items:center"><button type="button" class="pri" id="defRecommend">✔ 권장 세팅: 자막·음성이 길어지면 영상도 늘리기</button><span class="muted" id="defRecMsg"></span></div>
+      <p class="muted" style="margin:8px 0 0;font-size:.82rem">아래 세 값을 한 번에 맞춥니다 — ① 자막·음성이 영상보다 길 때: <b>영상을 처음부터 다시 반복</b> ② 목소리가 자막 시간보다 길 때: <b>자막·영상을 늘려서 끝까지 읽기</b> ③ 자막 읽는 속도: <b>초당 8글자</b>(글자가 많으면 표시 시간을 늘림). 비워 두면 이 값이 내장 기본값으로 이미 적용됩니다. 예전에 다른 값을 저장해 두었다면 이 버튼으로 되돌리세요.</p>
+    </div>
     <div id="defBox" style="display:grid;gap:6px"></div>
     </div><div class="dlgright" id="defPrevHost"></div></div>
     <div class="row" style="justify-content:flex-end"><button type="button" id="defCancel">취소</button><button type="submit" class="pri">확인</button></div>
@@ -878,6 +882,11 @@ summary { cursor:pointer; padding:4px 0; }
     api('/api/tts?voices=1').then(function (d) { S.elVoices = d.voices || []; }).catch(function (e) { S.elVoices = []; S.elError = e.message; }).then(function () { fillElVoices(); if ($('dlgLab').open) labRender(); });
   }
   $('defBtn').onclick = function () { loadElVoices(); fxForm($('defBox'), S.defaults, '(내장)'); $('dlgDef').showModal(); lpRun('def'); };
+  $('defRecommend').onclick = function () {
+    var set = { video: { loop: 'auto' }, voice: { fit: 'stretch' }, sub: { readCps: 8 } };
+    Object.keys(set).forEach(function (g) { Object.keys(set[g]).forEach(function (k) { var el = $('defBox').querySelector('[data-g=' + g + '][data-k=' + k + ']'); if (el) { el.value = set[g][k]; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); } }); });
+    $('defRecMsg').innerHTML = '<span class="ok">적용했습니다. 아래 “확인”을 눌러 저장하세요</span>';
+  };
   $('defCancel').onclick = function () { $('dlgDef').close(); };
   $('defForm').onsubmit = function (e) { e.preventDefault(); S.defaults = readFx($('defBox')); $('dlgDef').close(); markDirty(); };
 

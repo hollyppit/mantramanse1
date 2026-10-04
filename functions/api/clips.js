@@ -35,7 +35,7 @@ const FX = {
     strokeW: [0, 15], strokeColor: 'H', shOn: ['off', 'on'], shX: [-30, 30], shY: [-30, 30], shBlur: [0, 60], shColor: 'H', glowBlur: [0, 80], glowColor: 'H',
     bg: ['none', 'shade', 'box'], bgColor: 'H', bgOpacity: [0, 100], bgRadius: [0, 100], padX: [0, 200], padY: [0, 100],
     anim: ['none', 'fade', 'rise', 'drop', 'pop', 'zoom', 'blur', 'slide-l', 'slide-r', 'bounce', 'flip', 'type', 'word', 'char'], animDur: [0.1, 3], wordDelay: [0.02, 1], typeSpeed: [3, 60],
-    animOut: ['none', 'fade', 'fall', 'lift', 'shrink', 'blur', 'slide-l', 'slide-r'], animOutDur: [0.1, 3], emph: ['none', 'pulse', 'float', 'shake', 'blink', 'wobble', 'glow'], emphSpeed: [0.3, 6],
+    animOut: ['none', 'fade', 'fall', 'lift', 'shrink', 'blur', 'slide-l', 'slide-r'], animOutDur: [0.1, 3], emph: ['none', 'pulse', 'float', 'shake', 'blink', 'wobble', 'glow'], emphSpeed: [0.3, 6], readCps: [0, 30],
   },
   voice: { on: ['off', 'on'], engine: ['browser', 'eleven', 'openai'], name: 'S', mode: ['cue', 'whole'], rate: [0.5, 2], pitch: [0.5, 2], vol: [0, 1], delay: [0, 10], fit: ['stretch', 'off'], pad: [0, 3],
     elVoice: 'I', elModel: ['eleven_multilingual_v2', 'eleven_v3', 'eleven_flash_v2_5', 'eleven_turbo_v2_5'], elStability: [0, 1], elSimilarity: [0, 1], elStyle: [0, 1], elSpeed: [0.7, 1.2],

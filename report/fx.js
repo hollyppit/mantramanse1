@@ -86,7 +86,7 @@
     { g: 'sub', title: '자막 위치·크기', items: [['pos', '위치(간단)', 'sel', SUB_POS], ['x', '가로 위치 (왼쪽 끝 0 ~ 오른쪽 끝 100%)', 'num', { min: 0, max: 100, step: 1 }], ['y', '세로 위치 (위 0 ~ 아래 100%), 지정하면 간단 위치 무시', 'num', { min: 0, max: 100, step: 1 }], ['w', '자막 폭(화면폭의 %)', 'num', { min: 20, max: 100, step: 1 }], ['rot', '기울기(도)', 'num', { min: -30, max: 30, step: 1 }]] },
     { g: 'sub', title: '테두리·그림자·글로우', items: [['strokeW', '테두리 두께 (0=없음, 글자 크기의 %)', 'num', { min: 0, max: 15, step: 0.5 }], ['strokeColor', '테두리 색', 'color'], ['shOn', '그림자', 'sel', ON_OFF], ['shX', '그림자 가로 이동(%)', 'num', { min: -30, max: 30, step: 1 }], ['shY', '그림자 세로 이동(%)', 'num', { min: -30, max: 30, step: 1 }], ['shBlur', '그림자 번짐(%)', 'num', { min: 0, max: 60, step: 1 }], ['shColor', '그림자 색', 'color'], ['glowBlur', '글로우 세기 (0=없음)', 'num', { min: 0, max: 80, step: 1 }], ['glowColor', '글로우 색 (비우면 글자색)', 'color']] },
     { g: 'sub', title: '자막 배경 박스', items: [['bg', '배경', 'sel', SUB_BG], ['bgColor', '배경 색', 'color'], ['bgOpacity', '배경 투명도 (0 투명~100 불투명, 비우면 프리셋)', 'num', { min: 0, max: 100, step: 1 }], ['bgRadius', '모서리 둥글기(%)', 'num', { min: 0, max: 100, step: 1 }], ['padX', '좌우 여백(글자 크기의 %)', 'num', { min: 0, max: 200, step: 5 }], ['padY', '상하 여백(글자 크기의 %)', 'num', { min: 0, max: 100, step: 5 }]] },
-    { g: 'sub', title: '자막 등장·퇴장·강조 효과', items: [['anim', '나타나는 효과', 'sel', SUB_ANIM], ['animDur', '나타나는 시간(초)', 'num', { min: 0.1, max: 3, step: 0.1 }], ['wordDelay', '단어/글자 순차 간격(초)', 'num', { min: 0.02, max: 1, step: 0.01 }], ['typeSpeed', '타자기 속도(초당 글자 수)', 'num', { min: 3, max: 60, step: 1 }], ['animOut', '사라지는 효과', 'sel', SUB_ANIM_OUT], ['animOutDur', '사라지는 시간(초)', 'num', { min: 0.1, max: 3, step: 0.1 }], ['emph', '떠 있는 동안 효과', 'sel', SUB_EMPH], ['emphSpeed', '효과 주기(초, 작을수록 빠름)', 'num', { min: 0.3, max: 6, step: 0.1 }]] },
+    { g: 'sub', title: '자막 등장·퇴장·강조 효과', items: [['readCps', '자막 읽는 속도 (초당 글자 수). 글자가 많은데 시간이 짧으면 표시 시간을 늘림, 0 = 사용 안 함', 'num', { min: 0, max: 30, step: 0.5 }, { wide: true }], ['anim', '나타나는 효과', 'sel', SUB_ANIM], ['animDur', '나타나는 시간(초)', 'num', { min: 0.1, max: 3, step: 0.1 }], ['wordDelay', '단어/글자 순차 간격(초)', 'num', { min: 0.02, max: 1, step: 0.01 }], ['typeSpeed', '타자기 속도(초당 글자 수)', 'num', { min: 3, max: 60, step: 1 }], ['animOut', '사라지는 효과', 'sel', SUB_ANIM_OUT], ['animOutDur', '사라지는 시간(초)', 'num', { min: 0.1, max: 3, step: 0.1 }], ['emph', '떠 있는 동안 효과', 'sel', SUB_EMPH], ['emphSpeed', '효과 주기(초, 작을수록 빠름)', 'num', { min: 0.3, max: 6, step: 0.1 }]] },
     { g: 'voice', title: '목소리 설정', items: [
       ['on', '목소리 읽기', 'sel', ON_OFF], ['engine', '목소리 엔진', 'sel', VOICE_ENGINE],
       ['vol', '볼륨(0~1)', 'num', { min: 0, max: 1, step: 0.1 }], ['delay', '읽기 시작 지연(초)', 'num', { min: 0, max: 10, step: 0.1 }],
@@ -103,7 +103,7 @@
 
   var BUILTIN = {
     trans: { 'in': 'fade', out: 'fade', dur: 0.5 },
-    sub: { font: 'gothic', weight: '700', italic: 'normal', size: 'M', fs: 0, color: 'ivory', colorHex: '', align: 'center', lh: 1.45, ls: 0, pos: 'bottom', x: 50, y: -1, w: 90, rot: 0, strokeW: 0, strokeColor: '#000000', shOn: 'on', shX: 0, shY: 6, shBlur: 20, shColor: '#000000', glowBlur: 0, glowColor: '', bg: 'shade', bgColor: '', bgOpacity: -1, bgRadius: 30, padX: 60, padY: 20, anim: 'fade', animDur: 0.4, wordDelay: 0.08, typeSpeed: 14, animOut: 'fade', animOutDur: 0.3, emph: 'none', emphSpeed: 1.5 },
+    sub: { font: 'gothic', weight: '700', italic: 'normal', size: 'M', fs: 0, color: 'ivory', colorHex: '', align: 'center', lh: 1.45, ls: 0, pos: 'bottom', x: 50, y: -1, w: 90, rot: 0, strokeW: 0, strokeColor: '#000000', shOn: 'on', shX: 0, shY: 6, shBlur: 20, shColor: '#000000', glowBlur: 0, glowColor: '', bg: 'shade', bgColor: '', bgOpacity: -1, bgRadius: 30, padX: 60, padY: 20, anim: 'fade', animDur: 0.4, wordDelay: 0.08, typeSpeed: 14, animOut: 'fade', animOutDur: 0.3, emph: 'none', emphSpeed: 1.5, readCps: 8 },
     voice: { on: 'off', engine: 'browser', name: '', mode: 'cue', rate: 1, pitch: 1, vol: 1, delay: 0.2, fit: 'stretch', pad: 0.3, elVoice: '', elModel: 'eleven_multilingual_v2', elStability: 0.5, elSimilarity: 0.75, elStyle: 0, elSpeed: 1, oaVoice: 'coral', oaModel: 'gpt-4o-mini-tts', oaInstr: '', oaSpeed: 1 },
     video: { speed: 1, vol: 1, duck: 'off', duckVol: 0.3, fadeIn: 0, fadeOut: 0, fit: 'contain', loop: 'auto', trimStart: 0, trimEnd: 0, hold: 0.5 },
   };
@@ -125,17 +125,20 @@
     });
     return out;
   }
-  // 목소리 템포에 맞춰 자막 시각을 늘린다. 한 줄의 목소리가 그 줄의 자막 시간보다 길면 그만큼 그 줄을 늘리고, 뒤의 모든 줄을 같은 만큼 뒤로 민다.
-  // (줄 사이의 간격은 그대로.) 늘어난 전체 길이는 영상 반복 설정(fx.video.loop)이 이어 받는다.
-  // 목소리 길이: 일레븐랩스로 만든 음성은 실제 길이(d), 그 밖에는 글자 수로 추정한다(브라우저 음성 약 0.18초/글자, 속도로 나눔).
+  // 자막·목소리가 길면 그만큼 자막 시각을 늘리고, 뒤의 모든 줄을 같은 만큼 뒤로 민다(줄 사이 간격은 그대로).
+  // 한 줄에 필요한 시간 = max(목소리 길이 + 시작 지연 + 여유, 글자 수 ÷ 자막 읽는 속도). 늘어난 전체 길이는 영상 반복 설정(fx.video.loop)이 이어 받아 영상도 그만큼 길어진다.
+  // 목소리 길이: 일레븐랩스/OpenAI 음성은 만든 파일의 실제 길이(d), 그 밖에는 글자 수로 추정한다(브라우저 음성 약 0.18초/글자, 속도로 나눔).
   function stretchCues(cues, fx) {
-    var V = fx.voice; if (V.on !== 'on' || V.fit === 'off' || (V.engine === 'browser' && V.mode === 'whole')) return { cues: cues, added: 0 };
-    var eleven = V.engine === 'eleven' || V.engine === 'openai', rate = (V.engine === 'openai' ? V.oaSpeed : V.engine === 'eleven' ? V.elSpeed : V.rate) || 1, shift = 0;
+    var V = fx.voice, cps = fx.sub.readCps > 0 ? fx.sub.readCps : 0;
+    var voiceOn = V.on === 'on' && V.fit !== 'off' && !(V.engine === 'browser' && V.mode === 'whole');
+    if (!voiceOn && !cps) return { cues: cues, added: 0 };
+    var file = V.engine === 'eleven' || V.engine === 'openai', rate = (V.engine === 'openai' ? V.oaSpeed : V.engine === 'eleven' ? V.elSpeed : V.rate) || 1, shift = 0;
     var out = cues.map(function (c) {
       var a = { t: c.t, s: c.s + shift, e: c.e + shift, a: c.a, d: c.d };
       if (c.e >= 1e8) return a; // 영상 내내 표시하는 자막은 그대로
-      var len = (eleven && c.a && c.d > 0) ? c.d : c.t.replace(/\s+/g, '').length * 0.18 / rate;
-      var need = (V.delay || 0) + len + (V.pad || 0), cur = c.e - c.s;
+      var chars = c.t.replace(/\s+/g, '').length, need = 0, cur = c.e - c.s;
+      if (voiceOn) need = (V.delay || 0) + ((file && c.a && c.d > 0) ? c.d : chars * 0.18 / rate) + (V.pad || 0);
+      if (cps) need = Math.max(need, chars / cps);
       if (need > cur) { shift += need - cur; a.e = a.s + need; }
       return a;
     });
