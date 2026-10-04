@@ -193,7 +193,7 @@
     return v || all.filter(function (x) { return /^ko/i.test(x.lang); })[0] || null;
   }
 
-  // box 안에서 클립 하나를 재생한다. o = { clip, url, defaults, onend, onerror, audioUrl(음성 파일 키→주소), silent(소리 끔), freeze(자막 한 줄을 정지 화면으로, freezeIndex = 몇 번째 줄), edit(정지 화면에서 직접 편집 콜백) }. { stop } 반환.
+  // box 안에서 클립 하나를 재생한다. o = { clip, url, defaults, onend, onerror, audioUrl(음성 파일 키→주소), silent(소리 끔), minContent(자막·음성 길이를 이만큼으로 늘려 반복 동작 확인), onStatus(진행 상태 콜백), freeze(자막 한 줄을 정지 화면으로, freezeIndex = 몇 번째 줄), edit(정지 화면에서 직접 편집 콜백) }. { stop } 반환.
   function play(box, o) {
     injectCss();
     var clip = o.clip, fx = resolve(clip.fx, o.defaults), cues = cuesOf(clip);
@@ -372,10 +372,11 @@
       if (c.e < 1e8) contentEnd = Math.max(contentEnd, c.e);
       if (fx.voice.on === 'on' && eleven && c.a && c.d > 0) contentEnd = Math.max(contentEnd, c.s + (fx.voice.delay || 0) + c.d);
     });
+    if (o.minContent > 0) contentEnd = Math.max(contentEnd, o.minContent); // 미리보기에서 반복 동작을 확인하려고 자막·음성 길이를 늘려 본다
     // 자막·음성이 영상보다 길 때(contentEnd) 영상 처리 방식 fx.video.loop:
     //   auto = 처음부터 다시 반복 / reverse = 거꾸로 재생해 왕복 / black = 영상이 끝나면 검은 화면 유지 / freeze = 마지막 화면 정지 / off = 영상이 끝나면 종료
     // 자막 시각 t는 구간(영상 한 번 재생 또는 되감기)을 이어 붙인 누적 시간이다. base = 지금 구간이 시작된 누적 시각.
-    var mode = fx.video.loop, base = 0, segLen = 0, dir = 1, phase = 'play', tailAt = 0, loopAt = 0, lastTick = 0;
+    var mode = fx.video.loop, base = 0, segLen = 0, dir = 1, phase = 'play', tailAt = 0, loopAt = 0, revAt = 0, revFrom = 0, seg = 1, lastStatus = 0;
     function more(nextBase) { return segLen > 0.3 && nextBase < contentEnd - 0.05; } // 이 구간 뒤에도 자막·음성이 남아 있나
     function seekStart() { try { v.currentTime = fx.video.trimStart; } catch (e) {} }
     function playV() { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
@@ -384,18 +385,23 @@
       var next = base + segLen; loopAt = performance.now();
       if (mode === 'off' || !more(next)) return endMedia();
       base = next;
-      if (mode === 'auto') { seekStart(); playV(); }
-      else if (mode === 'reverse') { dir = -1; v.pause(); lastTick = performance.now(); }
+      if (mode === 'auto') { seg++; seekStart(); playV(); }
+      else if (mode === 'reverse') { dir = -1; seg++; v.pause(); revAt = performance.now(); revFrom = v.currentTime; }
       else { phase = 'tail'; tailAt = performance.now(); v.pause(); if (mode === 'black') v.style.visibility = 'hidden'; }
     }
-    function reverseStep(now) { // 거꾸로 재생: 영상을 일시정지한 채 재생 위치를 조금씩 뒤로 옮긴다(영상 형식에 따라 끊겨 보일 수 있음)
-      var dt = Math.min(0.2, (now - lastTick) / 1000), nxt = v.currentTime - dt * fx.video.speed;
-      lastTick = now;
-      if (nxt <= fx.video.trimStart + 0.02) { // 처음에 닿음 → 구간 끝
+    function reverseStep(now) { // 거꾸로 재생: 영상은 일시정지한 채 시계에 맞는 위치로 되감아 간다.
+      // 위치를 시계로 계산하므로 프레임이 느리게 디코딩돼도 속도는 유지되고(프레임만 건너뜀), 이전 탐색이 끝나기 전에는 새 탐색을 걸지 않는다.
+      var target = revFrom - (now - revAt) / 1000 * fx.video.speed;
+      if (target <= fx.video.trimStart + 0.02) { // 처음에 닿음 → 구간 끝
         var nb = base + segLen; if (!more(nb)) { base = nb; return endMedia(); }
-        base = nb; dir = 1; loopAt = now; seekStart(); playV(); return;
+        base = nb; dir = 1; seg++; loopAt = now; seekStart(); playV(); return;
       }
-      try { v.currentTime = nxt; } catch (e) {}
+      if (!v.seeking) { try { v.currentTime = target; } catch (e) {} }
+    }
+    // 미리보기 상태 표시용 (구간 번호·방향·진행)
+    function status(t, now) {
+      if (!o.onStatus || now - lastStatus < 100) return; lastStatus = now;
+      o.onStatus({ t: t, end: Math.max(contentEnd, v ? 0 : total), seg: seg, dir: dir, phase: phase, mode: mode, hasVideo: !!v, segLen: segLen });
     }
     var t0 = 0, total = 0;
     function tick() {
@@ -407,7 +413,7 @@
         } else {
           var rel = v.currentTime - fx.video.trimStart;
           if (dir > 0 && base > 0 && now - loopAt < 400 && rel > segLen * 0.5) rel = 0; // 되감는 짧은 순간에 시각이 앞서 튀지 않게
-          t = base + (dir > 0 ? rel : segLen - rel);
+          t = dir > 0 ? base + rel : base + Math.min(segLen, (now - revAt) / 1000 * fx.video.speed); // 거꾸로일 때는 시계로 계산해 탐색이 늦어도 자막이 멈추지 않는다
           if (!ended) {
             if (dir > 0) { if (v.ended || (fx.video.trimEnd > 0 && v.currentTime >= fx.video.trimEnd)) videoEnded(); }
             else reverseStep(now);
@@ -415,6 +421,7 @@
         }
       }
       else { t = (now - t0) / 1000; if (!ended && t >= total) endMedia(); }
+      status(t, now);
       if (!ended) showCue(t); else if (v) showCue(t);
     }
     function start() {
