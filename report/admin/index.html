@@ -61,6 +61,11 @@ summary { cursor:pointer; padding:4px 0; }
 .facts { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; margin-top:12px; }
 .facts label { display:grid; gap:3px; font-size:.78rem; color:var(--ink3); }
 
+.cue { display:grid; grid-template-columns:78px 78px minmax(0,1fr) auto; gap:6px; margin-bottom:6px; align-items:center; }
+.cue button { padding:6px 10px; }
+.fxgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:8px; padding:8px 0; }
+.fxgrid label { display:grid; gap:3px; font-size:.78rem; color:var(--ink3); }
+#fxPrev { width:min(236px,60vw); max-height:none; }
 .cov { overflow:auto; max-height:70vh; border:1px solid var(--line); border-radius:8px; }
 .cov table { min-width:700px; font-size:.82rem; }
 .cov th, .cov td { padding:3px 8px; text-align:center; }
@@ -103,7 +108,7 @@ summary { cursor:pointer; padding:4px 0; }
             <label>장 필터<select id="fCh"></select></label>
             <label>검색<input type="text" id="fQ" placeholder="제목 검색"></label>
           </div>
-          <button class="pri" id="addBtn">+ 클립 추가</button>
+          <div class="row"><button id="defBtn" title="클립에서 따로 지정하지 않은 연출 값의 기본값">기본 연출 설정</button><button class="pri" id="addBtn">+ 클립 추가</button></div>
         </div>
         <p class="muted" id="r2note" style="margin:10px 0 0"></p>
       </div>
@@ -175,7 +180,25 @@ summary { cursor:pointer; padding:4px 0; }
       <p class="muted" id="srcNow" style="margin:8px 0 0"></p>
       <video id="ePrev" controls class="hide" style="width:100%;max-height:240px;margin-top:8px;background:#000;border-radius:8px"></video>
     </div>
-    <label style="display:grid;gap:4px">자막·대사 (재생 중 아래에 표시)<textarea id="eCap" maxlength="500"></textarea></label>
+    <label style="display:grid;gap:4px">자막·대사 전체 (타임라인 줄이 없으면 이 문장이 영상 내내 표시되고, 목소리도 이 문장을 읽습니다)<textarea id="eCap" maxlength="500"></textarea></label>
+    <div class="card" style="background:var(--bg)">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <b>자막 타임라인</b>
+        <div class="row"><button type="button" id="cueAuto" title="위 전체 문장을 줄/문장 단위로 나눠 영상 길이에 맞게 시간을 배분합니다">전체 문장에서 자동 나누기</button><button type="button" id="cueAdd">+ 줄 추가</button></div>
+      </div>
+      <p class="muted" style="margin:6px 0 8px">줄마다 “몇 초에 나타나 몇 초에 사라지는지”를 정합니다. 시간은 앞부분 자르기를 반영한 재생 시작 기준(초)입니다. 겹치지 않게 입력하세요.</p>
+      <div class="cue muted" style="margin-bottom:2px"><span>나타남(초)</span><span>사라짐(초)</span><span>자막 내용</span><span></span></div>
+      <div id="cueBox"></div>
+    </div>
+    <div>
+      <div class="muted" style="margin-bottom:6px">연출 — 비워 둔 칸은 “기본 연출 설정” 값(없으면 내장 기본값)을 따릅니다. 이 클립에서만 다르게 하고 싶은 칸만 고르세요.</div>
+      <div id="fxBox" style="display:grid;gap:6px"></div>
+    </div>
+    <div class="card" style="background:var(--bg)">
+      <div class="row" style="justify-content:space-between;align-items:center"><b>연출 미리보기</b><div class="row"><button type="button" id="fxPlay" class="pri">▶ 미리보기</button><button type="button" id="fxStop">■ 정지</button></div></div>
+      <p class="muted" style="margin:6px 0 10px">지금 입력한 값(저장 전)으로 영상·자막·전환·목소리를 재생합니다. 목소리는 보는 사람의 기기·브라우저에 설치된 음성으로 나오므로 기기마다 음색이 다를 수 있습니다.</p>
+      <div class="player" id="fxPrev"><div class="ph">미리보기를 누르세요</div></div>
+    </div>
     <label style="display:grid;gap:4px">메모 (내부용)<input type="text" id="eNote" maxlength="300"></label>
     <p class="err" id="dlgErr"></p>
     <div class="row" style="justify-content:space-between">
@@ -185,11 +208,22 @@ summary { cursor:pointer; padding:4px 0; }
   </form>
 </dialog>
 
+<!-- 기본 연출 -->
+<dialog id="dlgDef">
+  <form method="dialog" id="defForm">
+    <h3>기본 연출 설정</h3>
+    <p class="muted" style="margin:0">모든 클립에 공통으로 적용되는 연출입니다. 클립 편집에서 따로 지정한 칸만 이 값 대신 쓰입니다. 비워 두면 내장 기본값(페이드 전환 · 아래 반투명 자막 · 목소리 끔)입니다.</p>
+    <div id="defBox" style="display:grid;gap:6px"></div>
+    <div class="row" style="justify-content:flex-end"><button type="button" id="defCancel">취소</button><button type="submit" class="pri">확인</button></div>
+  </form>
+</dialog>
+
 <script src="../assemble.js"></script>
+<script src="../fx.js"></script>
 <script>
 (function () {
-  var A = window.Assemble, $ = function (id) { return document.getElementById(id); };
-  var S = { pw: '', clips: [], dirty: false, r2: false, editing: null, facts: null, seq: [], cur: -1 };
+  var A = window.Assemble, F = window.MovingFx, $ = function (id) { return document.getElementById(id); };
+  var S = { pw: '', clips: [], defaults: {}, ctl: null, prevCtl: null, dirty: false, r2: false, editing: null, facts: null, seq: [], cur: -1 };
   function ss(k, v) { try { if (v == null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} }
   function sg(k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -216,13 +250,13 @@ summary { cursor:pointer; padding:4px 0; }
 
   // ── 불러오기·저장
   function load() {
-    api('/api/clips').then(function (d) { S.clips = d.clips || []; S.r2 = !!d.r2; S.dirty = false; renderAll(); })
+    api('/api/clips').then(function (d) { S.clips = d.clips || []; S.defaults = d.defaults || {}; S.r2 = !!d.r2; S.dirty = false; renderAll(); })
       .catch(function (e) { $('saveState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   }
   function markDirty() { S.dirty = true; $('saveBtn').disabled = false; $('saveState').textContent = '저장하지 않은 변경사항'; renderLib(); renderCov(); }
   $('saveBtn').onclick = function () {
     $('saveBtn').disabled = true; $('saveState').textContent = '저장 중…';
-    api('/api/clips', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ clips: S.clips }) })
+    api('/api/clips', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ clips: S.clips, defaults: S.defaults }) })
       .then(function (d) { S.dirty = false; $('saveState').innerHTML = '<span class="ok">저장됨 (' + d.count + '개)</span>'; })
       .catch(function (e) { $('saveBtn').disabled = false; $('saveState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };
@@ -233,6 +267,7 @@ summary { cursor:pointer; padding:4px 0; }
       document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
       ['lib', 'test', 'cov'].forEach(function (t) { $('t-' + t).classList.toggle('hide', t !== b.dataset.t); });
       if (b.dataset.t === 'cov') renderCov();
+      if (S.ctl) { S.ctl.stop(); S.ctl = null; S.auto = false; }
     };
   });
 
@@ -263,7 +298,82 @@ summary { cursor:pointer; padding:4px 0; }
     $('libBody').querySelectorAll('button').forEach(function (b) { b.onclick = function () { openEditor(b.dataset.id); }; });
   }
 
+  // ── 연출 폼 (클립 편집·기본 연출 공용). 비워 둔 칸 = 상위 기본값을 따름
+  function fxForm(box, vals, blank) {
+    box.innerHTML = F.FIELDS.map(function (grp) {
+      var v = (vals && vals[grp.g]) || {}, n = Object.keys(v).length;
+      return '<details' + (n ? ' open' : '') + '><summary>' + esc(grp.title) + (n ? ' <span class="chip">' + n + '개 지정</span>' : '') + '</summary><div class="fxgrid">' + grp.items.map(function (it) {
+        var k = it[0], cur = v[k], at = ' data-g="' + grp.g + '" data-k="' + k + '"', h = '<label>' + esc(it[1]);
+        if (it[2] === 'sel') h += '<select' + at + '><option value="">' + blank + '</option>' + it[3].map(function (o) { return '<option value="' + o[0] + '"' + (cur === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>';
+        else if (it[2] === 'voice') h += '<select' + at + ' data-voice="1" data-cur="' + esc(cur || '') + '"></select>';
+        else if (it[2] === 'text') h += '<input type="text"' + at + ' maxlength="9" placeholder="' + blank + '" value="' + esc(cur || '') + '">';
+        else h += '<input type="number"' + at + ' min="' + it[3].min + '" max="' + it[3].max + '" step="' + it[3].step + '" placeholder="' + blank + (F.BUILTIN[grp.g][k] < 0 ? '' : ' ' + F.BUILTIN[grp.g][k]) + '" value="' + (cur == null ? '' : cur) + '">';
+        return h + '</label>';
+      }).join('') + '</div></details>';
+    }).join('');
+    fillVoices();
+  }
+  function readFx(box) {
+    var out = {};
+    box.querySelectorAll('[data-g]').forEach(function (el) {
+      if (el.value === '') return;
+      (out[el.dataset.g] = out[el.dataset.g] || {})[el.dataset.k] = el.type === 'number' ? +el.value : el.value;
+    });
+    return out;
+  }
+  function fillVoices() {
+    var all = F.voices().slice().sort(function (a, b) { return (/^ko/i.test(b.lang) ? 1 : 0) - (/^ko/i.test(a.lang) ? 1 : 0); });
+    document.querySelectorAll('select[data-voice]').forEach(function (s) {
+      var cur = s.value || s.dataset.cur || '';
+      var names = all.map(function (v) { return v.name; });
+      s.innerHTML = '<option value="">(자동: 한국어 음성)</option>' + all.map(function (v) { return '<option value="' + esc(v.name) + '">' + esc(v.name) + ' · ' + esc(v.lang) + '</option>'; }).join('') +
+        (cur && names.indexOf(cur) < 0 ? '<option value="' + esc(cur) + '">' + esc(cur) + ' (이 기기에 없음)</option>' : '');
+      s.value = cur;
+    });
+  }
+  if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = fillVoices;
+  $('defBtn').onclick = function () { fxForm($('defBox'), S.defaults, '(내장)'); $('dlgDef').showModal(); };
+  $('defCancel').onclick = function () { $('dlgDef').close(); };
+  $('defForm').onsubmit = function (e) { e.preventDefault(); S.defaults = readFx($('defBox')); $('dlgDef').close(); markDirty(); };
+
+  // ── 자막 타임라인
+  function addCue(c) {
+    var d = document.createElement('div'); d.className = 'cue'; c = c || { s: '', e: '', t: '' };
+    d.innerHTML = '<input type="number" min="0" step="0.1" class="cs" value="' + esc(c.s) + '"><input type="number" min="0" step="0.1" class="ce" value="' + esc(c.e) + '"><input type="text" class="ct" maxlength="200" value="' + esc(c.t) + '"><button type="button" class="danger">✕</button>';
+    d.querySelector('button').onclick = function () { d.remove(); };
+    $('cueBox').appendChild(d);
+  }
+  function readCues() {
+    return Array.prototype.map.call($('cueBox').querySelectorAll('.cue'), function (d) { return { s: +d.querySelector('.cs').value, e: +d.querySelector('.ce').value, t: d.querySelector('.ct').value.trim() }; }).filter(function (c) { return c.t; });
+  }
+  $('cueAdd').onclick = function () { var l = readCues().pop(); addCue({ s: l ? l.e : 0, e: l ? Math.round((l.e + 2) * 10) / 10 : 2, t: '' }); };
+  $('cueAuto').onclick = function () {
+    var raw = $('eCap').value.trim(); if (!raw) { $('dlgErr').textContent = '위의 자막·대사 전체 칸에 문장을 먼저 입력하세요'; return; }
+    $('dlgErr').textContent = '';
+    var lines = raw.split(/\n+/).reduce(function (a, l) { return a.concat(l.split(/(?<=[.!?。…])\s+/)); }, []).map(function (l) { return l.trim(); }).filter(Boolean);
+    var fv = readFx($('fxBox')).video || {}, dur = $('ePrev').duration, start = fv.trimStart || 0, end = fv.trimEnd > 0 ? fv.trimEnd : (isFinite(dur) ? dur : 0), total = end - start;
+    if (!(total > 0)) total = lines.length * 3;
+    var w = lines.map(function (l) { return Math.max(l.length, 4); }), sum = w.reduce(function (a, b) { return a + b; }, 0), at = 0;
+    $('cueBox').innerHTML = '';
+    lines.forEach(function (l, i) { var e = i === lines.length - 1 ? total : at + total * w[i] / sum; addCue({ s: Math.round(at * 10) / 10, e: Math.round(e * 10) / 10, t: l }); at = e; });
+  };
+
+  // ── 연출 미리보기 (저장 전 입력값으로 재생)
+  function stopPrev() { if (S.prevCtl) { S.prevCtl.stop(); S.prevCtl = null; } }
+  $('fxPlay').onclick = function () {
+    stopPrev(); var c = Object.assign({}, S.editing); readForm(c);
+    S.prevCtl = F.play($('fxPrev'), { clip: c, url: srcUrl(c.src), defaults: S.defaults });
+  };
+  $('fxStop').onclick = function () { stopPrev(); $('fxPrev').innerHTML = '<div class="ph">미리보기를 누르세요</div>'; };
+  $('dlg').addEventListener('close', function () { stopPrev(); $('fxPrev').innerHTML = '<div class="ph">미리보기를 누르세요</div>'; });
+  $('ePrev').addEventListener('loadedmetadata', function () { if (isFinite(this.duration)) $('srcNow').textContent += ' · 영상 길이 ' + this.duration.toFixed(1) + '초'; });
+
   // ── 편집
+  function readForm(c) {
+    c.title = $('eTitle').value.trim(); c.chapter = $('eCh').value; c.priority = +$('ePri').value || 0;
+    c.caption = $('eCap').value; c.note = $('eNote').value; c.cond = readCond();
+    c.fx = readFx($('fxBox')); var cues = readCues(); if (cues.length) c.fx.cues = cues;
+  }
   function buildCond(sel) {
     $('condBox').innerHTML = Object.keys(A.FIELDS).map(function (k) {
       var f = A.FIELDS[k], on = (sel && sel[k]) || [];
@@ -293,6 +403,7 @@ summary { cursor:pointer; padding:4px 0; }
     $('eUrl').value = S.editing.src && S.editing.src.type === 'url' ? S.editing.src.value : '';
     $('eFile').value = ''; $('dlgErr').textContent = ''; $('pbar').classList.add('hide');
     $('delBtn').classList.toggle('hide', !c); $('upBtn').disabled = !S.r2; $('eFile').disabled = !S.r2;
+    fxForm($('fxBox'), S.editing.fx, '(기본)'); $('cueBox').innerHTML = ''; ((S.editing.fx && S.editing.fx.cues) || []).forEach(addCue);
     buildCond(S.editing.cond); setSrc(S.editing.src); $('dlg').showModal();
   }
   $('addBtn').onclick = function () { openEditor(null); };
@@ -313,8 +424,7 @@ summary { cursor:pointer; padding:4px 0; }
   };
   $('clipForm').onsubmit = function (e) {
     e.preventDefault();
-    var c = S.editing; c.title = $('eTitle').value.trim(); c.chapter = $('eCh').value; c.priority = +$('ePri').value || 0;
-    c.caption = $('eCap').value; c.note = $('eNote').value; c.cond = readCond();
+    var c = S.editing; readForm(c);
     if (!c.title) { $('dlgErr').textContent = '제목을 입력하세요'; return; }
     var isNew = c.isNew; delete c.isNew;
     if (isNew) S.clips.push(c); else S.clips = S.clips.map(function (x) { return x.id === c.id ? c : x; });
@@ -373,12 +483,12 @@ summary { cursor:pointer; padding:4px 0; }
   }
   function play(i) {
     if (i < 0 || i >= S.seq.length) return;
+    if (S.ctl) { S.ctl.stop(); S.ctl = null; }
     S.cur = i; var s = S.seq[i], p = s.pick, box = $('player');
     document.querySelectorAll('#seq li').forEach(function (li, k) { li.classList.toggle('cur', k === i); });
     $('playCap').textContent = p ? (s.label + ' — ' + (p.caption || '(자막 없음)')) : s.label;
     if (p && p.src) {
-      box.innerHTML = '<video controls autoplay playsinline></video>'; var v = box.firstChild; v.src = srcUrl(p.src);
-      v.onended = function () { if (S.auto) play(i + 1); }; v.onerror = function () { box.innerHTML = '<div class="ph err">영상을 불러오지 못했습니다</div>'; };
+      S.ctl = F.play(box, { clip: p, url: srcUrl(p.src), defaults: S.defaults, onend: function () { if (S.auto) play(i + 1); } });
     } else {
       box.innerHTML = '<div class="ph">' + esc(s.label) + '<br><span class="muted">' + (p ? '영상이 지정되지 않은 클립입니다' : '이 조건에 맞는 클립이 없습니다') + '</span></div>';
       if (S.auto) setTimeout(function () { if (S.cur === i) play(i + 1); }, 1500);
