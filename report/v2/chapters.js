@@ -51,6 +51,47 @@
     return { acts: acts, chapters: out.filter(function (c) { return c.enabled !== false; }) };
   }
 
+  /* ── 프로젝트: 같은 챕터 라이브러리를 묶어 만드는 상품(종합·애정운·재물운·신년운세 …) ──────────────────
+     chapters: null 이면 "켜져 있는 챕터 전체". 아니면 [{id, act(1부터)}] 순서 그대로. acts 는 그 프로젝트의 ACT 제목/전환 문구. */
+  var ROMAN = ['ACT I', 'ACT II', 'ACT III', 'ACT IV', 'ACT V', 'ACT VI', 'ACT VII', 'ACT VIII', 'ACT IX'];
+  function pc(ids, acts) { return ids.map(function (id, i) { return { id: id, act: acts[i] }; }); }
+  var PROJECTS = [
+    { id: 'full', name: '종합 운세', desc: '타고난 나부터 운의 흐름, 개운법까지 20챕터 전체', enabled: true, accessLevel: 'free', requiredCompletionRate: null, acts: null, chapters: null },
+    { id: 'love', name: '애정운 특화', desc: '연애 성향·결혼·관계 유형과 올해의 인연 흐름', enabled: true, accessLevel: 'free', requiredCompletionRate: null,
+      acts: [{ title: '타고난 연애 기질', line: '당신이 사랑하는 방식부터 들여다봅니다.', pdfDone: '나의 연애 기질 분석이 리포트에 기록되었습니다.' }, { title: '관계 속의 나', line: '그 기질은 사람들 사이에서 어떻게 드러날까요?', pdfDone: '결혼·관계 분석이 추가되었습니다.' },
+        { title: '올해의 인연 흐름', line: '지금의 시간과 앞으로의 흐름을 봅니다.', pdfDone: '인연 흐름 분석이 추가되었습니다.' }, { title: '사랑을 쓰는 법', line: '알게 된 것을 어떻게 쓸지 정리합니다.', pdfDone: '당신의 연애 사용설명서가 완성되었습니다.' }],
+      chapters: pc(['c01', 'c03', 'c09', 'c10', 'c11', 'c12', 'c13', 'c16', 'c17', 'c18', 'c19', 'c20'], [1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4]) },
+    { id: 'wealth', name: '재물운 특화', desc: '돈을 대하는 행동 성향과 올해의 재물 전략', enabled: true, accessLevel: 'free', requiredCompletionRate: null,
+      acts: [{ title: '타고난 그릇', line: '돈과 일을 대하는 타고난 힘을 봅니다.', pdfDone: '나의 기질 분석이 리포트에 기록되었습니다.' }, { title: '돈을 쓰는 방식', line: '그 힘은 일과 재물에서 어떻게 쓰일까요?', pdfDone: '직업·재물 분석이 추가되었습니다.' },
+        { title: '재물의 계절', line: '지금 어느 계절에 서 있는지 봅니다.', pdfDone: '재물 흐름 분석이 추가되었습니다.' }, { title: '재물 전략', line: '행동으로 옮길 전략을 정리합니다.', pdfDone: '당신의 재물 사용설명서가 완성되었습니다.' }],
+      chapters: pc(['c01', 'c02', 'c04', 'c06', 'c07', 'c08', 'c16', 'c17', 'c18', 'c19', 'c20'], [1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4]) },
+    { id: 'newyear', name: '신년 운세', desc: '올해의 흐름과 앞으로 12개월, 이번 해의 행동 전략', enabled: true, accessLevel: 'free', requiredCompletionRate: null,
+      acts: [{ title: '나의 바탕', line: '올해를 보기 전에 나의 바탕부터 봅니다.', pdfDone: '나의 바탕 분석이 리포트에 기록되었습니다.' }, { title: '올해의 흐름', line: '지금 서 있는 계절과 올해, 달마다의 흐름을 봅니다.', pdfDone: '올해 흐름 분석이 추가되었습니다.' }, { title: '올해를 쓰는 법', line: '올해 어떻게 움직일지 정리합니다.', pdfDone: '당신의 올해 사용설명서가 완성되었습니다.' }],
+      chapters: pc(['c01', 'c16', 'c17', 'c18', 'c19', 'c20'], [1, 2, 2, 2, 3, 3]) },
+  ];
+
+  // 프로젝트 목록(기본 + 관리자 저장본, id 기준 덮어쓰기/추가)
+  function projects(saved) {
+    var m = {}, out = []; PROJECTS.forEach(function (p) { m[p.id] = JSON.parse(JSON.stringify(p)); });
+    ((saved && saved.projects) || []).forEach(function (p) { if (p && p.id) m[p.id] = Object.assign(m[p.id] || {}, p); });
+    Object.keys(m).forEach(function (k) { out.push(m[k]); }); return out;
+  }
+  // 프로젝트에 맞는 {acts, chapters, project}. chapters 번호(no)·ACT 는 프로젝트 안에서 다시 매긴다. saved = 관리자 저장본(content) 전체.
+  function forProject(saved, projectId) {
+    var base = merge(saved && saved.chapters), list = projects(saved), p = list.filter(function (x) { return x.id === projectId && x.enabled !== false; })[0] || list[0];
+    if (!p.chapters) { // 켜진 챕터 전체. 프로젝트의 ACT 문구가 있으면 번호 순으로 덮어쓴다
+      var acts0 = base.acts.map(function (a, i) { var d = (p.acts || [])[i]; return d ? Object.assign({}, a, { title: d.title || a.title, line: d.line || a.line, pdfDone: d.pdfDone || a.pdfDone }) : a; });
+      return { acts: acts0, chapters: base.chapters, project: p };
+    }
+    var by = {}; base.chapters.forEach(function (c) { by[c.id] = c; });
+    var chs = p.chapters.filter(function (x) { return by[x.id]; }).map(function (x, i) { var c = JSON.parse(JSON.stringify(by[x.id])); c.act = Math.max(1, x.act || 1); c.no = i + 1; c.order = i + 1; return c; });
+    var used = {}; chs.forEach(function (c) { used[c.act] = 1; });
+    var order = Object.keys(used).map(Number).sort(function (a, b) { return a - b; }), remap = {}; order.forEach(function (a, i) { remap[a] = i + 1; });
+    chs.forEach(function (c) { c.act = remap[c.act]; });
+    var acts = order.map(function (a, i) { var d = (p.acts || [])[a - 1] || {}; return { id: i + 1, roman: ROMAN[i] || 'ACT', title: d.title || '', line: d.line || '', pdfDone: d.pdfDone || '' }; });
+    return { acts: acts, chapters: chs, project: p };
+  }
+
   root.ReportV2 = root.ReportV2 || {};
-  root.ReportV2.Chapters = { ACTS: ACTS, CHAPTERS: CHAPTERS, merge: merge };
+  root.ReportV2.Chapters = { ACTS: ACTS, CHAPTERS: CHAPTERS, PROJECTS: PROJECTS, merge: merge, projects: projects, forProject: forProject };
 })(typeof window !== 'undefined' ? window : globalThis);

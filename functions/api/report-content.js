@@ -1,6 +1,6 @@
 // 리포트 v2 콘텐츠 저장본: 해석 모듈·개운법 라이브러리·챕터 설정·미디어 점수 가중치
 // GET /api/report-content — 공개. { content: { modules, remedies, chapters, scoring, version } | null }  (null 이면 코드의 기본 시드 report/v2/*.js 를 쓴다)
-// PUT /api/report-content — 관리자. { modules?, remedies?, chapters?, scoring? } 보낸 항목만 교체. 저장할 때마다 version 이 바뀌어 캐시 키가 갱신된다.
+// PUT /api/report-content — 관리자. { modules?, remedies?, chapters?, projects?, scoring? } 보낸 항목만 교체. 저장할 때마다 version 이 바뀌어 캐시 키가 갱신된다.
 // 저장: GLOSSARY_KV 'v2:content'.  모듈/개운법은 id 기준으로 코드 기본값 위에 덮어쓰기·추가되고, enabled:false 로 기본 항목을 끌 수 있다.
 import { json, isAdmin, configError } from '../_lib.js';
 
@@ -9,7 +9,7 @@ const MOD_CATS = ['identity', 'elements', 'personality', 'talent', 'shadow', 'ca
 const REM_TYPES = ['action', 'exercise', 'growth', 'people', 'place', 'environment', 'timing'];
 // 조건 키는 report/v2/rules.js 의 FIELDS 와 같다
 const COND_KEYS = ['dayPillar', 'dayMasterStem', 'dayMasterEl', 'gender', 'dominantEl', 'lackEl', 'yongEl', 'dominantGroup', 'weakestGroup', 'strength', 'hasRoot', 'pattern', 'star', 'career', 'daewoonSeason', 'seunSeason', 'monthSeason', 'needTag'];
-const ID_RE = /^[\w.-]{1,80}$/;
+const ID_RE = /^[\w.\-가-힣]{1,80}$/; // 기본 모듈 id 에 한글(예: identity_el_금)이 있다
 const str = (v, n) => (typeof v === 'string' ? v.slice(0, n) : '');
 const strs = (v, n = 20, len = 40) => (Array.isArray(v) ? v.slice(0, n).map(x => str(x, len)).filter(Boolean) : []);
 const MEDIA_OK = /^(\/api\/clipfile\?k=[\w.-]{1,120}|https:\/\/[^\s"'<>]+)$/;
@@ -43,6 +43,14 @@ function cleanChapter(c) {
     coverImage: MEDIA_OK.test(c.coverImage || '') ? c.coverImage : '', introText: str(c.introText, 300), disclaimer: str(c.disclaimer, 200) };
 }
 const cleanAct = a => (a && Number.isInteger(a.id) ? { id: a.id, title: str(a.title, 40), roman: str(a.roman, 12), line: str(a.line, 160), pdfDone: str(a.pdfDone, 120) } : null);
+// 프로젝트: 챕터 라이브러리를 묶은 상품. chapters 가 null 이면 켜진 챕터 전체. acts 는 그 프로젝트의 ACT 문구
+function cleanProject(p) {
+  if (!p || !ID_RE.test(p.id || '')) return null;
+  const chapters = Array.isArray(p.chapters) ? p.chapters.slice(0, 60).filter(x => x && ID_RE.test(x.id || '')).map(x => ({ id: x.id, act: Math.max(1, Math.min(9, Math.round(+x.act) || 1)) })) : null;
+  return { id: p.id, name: str(p.name, 40), desc: str(p.desc, 200), enabled: p.enabled !== false, accessLevel: p.accessLevel === 'premium' ? 'premium' : 'free',
+    requiredCompletionRate: typeof p.requiredCompletionRate === 'number' ? Math.max(0, Math.min(1, p.requiredCompletionRate)) : null,
+    acts: Array.isArray(p.acts) ? p.acts.slice(0, 9).map(a => ({ title: str(a && a.title, 40), line: str(a && a.line, 160), pdfDone: str(a && a.pdfDone, 120) })) : null, chapters };
+}
 function cleanScoring(s) {
   const o = {}; if (!s || typeof s !== 'object') return o;
   if (s.w && typeof s.w === 'object') { o.w = {}; for (const k of ['element', 'state', 'theme', 'emotion', 'action', 'chapter', 'scene', 'role', 'typePref']) if (Number.isFinite(+s.w[k])) o.w[k] = Math.max(0, Math.min(100, +s.w[k])); }
@@ -65,6 +73,7 @@ export async function onRequestPut({ request, env }) {
   if (Array.isArray(b.modules)) next.modules = uniq(b.modules.slice(0, 3000), cleanModule);
   if (Array.isArray(b.remedies)) next.remedies = uniq(b.remedies.slice(0, 1500), cleanRemedy);
   if (b.chapters && typeof b.chapters === 'object') next.chapters = { chapters: uniq((b.chapters.chapters || []).slice(0, 60), cleanChapter), acts: (b.chapters.acts || []).slice(0, 9).map(cleanAct).filter(Boolean) };
+  if (Array.isArray(b.projects)) next.projects = uniq(b.projects.slice(0, 40), cleanProject);
   if (b.scoring) next.scoring = cleanScoring(b.scoring);
   next.version = 'c' + Date.now().toString(36); // 콘텐츠가 바뀌면 리포트 캐시 키가 바뀐다
   const text = JSON.stringify(next);

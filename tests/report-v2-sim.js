@@ -19,6 +19,13 @@ ok(cfg.chapters.every(c => c.act >= 1 && c.act <= 4), 'ACT 지정');
 const cc = R.Chapters.merge({ chapters: [{ id: 'c05', enabled: false }, { id: 'c99', order: 99, act: 4, title: '추가', kind: 'module', moduleCategories: ['identity'], maxModules: 1 }] });
 ok(cc.chapters.length === 20 && !cc.chapters.some(c => c.id === 'c05') && cc.chapters.some(c => c.id === 'c99'), '관리자 저장본으로 챕터 비활성/추가');
 
+console.log('1b. 프로젝트');
+const PJ = R.Chapters.projects(null); ok(PJ.length === 4 && PJ.map(p => p.id).join() === 'full,love,wealth,newyear', '기본 프로젝트 4종');
+const fl = R.Chapters.forProject(null, 'full'); ok(fl.chapters.length === 20 && fl.acts.length === 4, 'full = 20챕터');
+for (const p of ['love', 'wealth', 'newyear']) { const x = R.Chapters.forProject(null, p); ok(x.chapters.every((c, i) => c.no === i + 1) && x.acts.every((a, i) => a.id === i + 1 && a.roman) && x.chapters.every(c => c.act >= 1 && c.act <= x.acts.length), p + ' 번호·ACT 재부여'); console.log('   ' + p + ': ' + x.chapters.length + '챕터 ' + x.acts.length + 'ACT'); }
+ok(R.Chapters.forProject(null, 'nope').project.id === 'full', '없는 프로젝트는 full');
+ok(R.Chapters.forProject({ projects: [{ id: 'love', enabled: false }] }, 'love').project.id === 'full', '비활성 프로젝트는 full');
+ok(R.Chapters.projects({ projects: [{ id: 'mine', name: '내 프로젝트', chapters: [{ id: 'c01', act: 1 }] }] }).length === 5, '새 프로젝트 추가');
 console.log('2. 샘플 사주 리포트');
 const ch = mk(1990, 5, 15, 14, 'M'), sd = R.SajuData.build(ch, { now });
 console.log('   일주', sd.dayPillar.ko, '· 신강약', sd.strength.zone, '· 용신', sd.usefulElements && sd.usefulElements.yong, '· 현재 대운', sd.currentDaewoon && sd.currentDaewoon.ganzhi, R.SajuData.SEASONS[sd.currentDaewoon.season], '· 올해', R.SajuData.SEASONS[sd.sewoon.season], '· unavailable', sd.unavailable.join(',') || '-');
@@ -42,6 +49,7 @@ ok(R.Compose.aiPayload(rep).chapters.length === 20, 'AI payload');
 console.log('   샘플:', rep.chapters[0].headline, '|', rep.plan.strategy.map(s => s.label).join('→'));
 console.log('   개운:', Object.entries(rep.remedies).map(([t, a]) => t + ':' + a.map(x => x.item.title).join('/')).join('  '));
 
+for (const pid of ['love', 'wealth', 'newyear']) { const pk = R.Compose.fromSaved({}, [], pid), r3 = R.Compose.build(sd, pk.lib, pk.cfg); ok(r3.chapters.length === pk.cfg.chapters.length && r3.chapters.every(c => c.headline && c.scenes.length >= 3) && r3.plan.strategy.length === 4, pid + ' 리포트 생성'); }
 console.log('3. 커버리지 (무작위 사주 600개)');
 let seed = 7; const rnd = n => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) % n;
 const empties = {}, seasons = {}, unav = {}; let thin = 0, groupsSeen = {};
@@ -65,6 +73,10 @@ const cov = V.awakeningCoverage(vids); ok(cov.of === 120 && cov.male === 1 && co
 console.log('   커버리지 남', cov.male + '/60 여', cov.female + '/60 전체', cov.total + '/120');
 ok(V.pickImage([{ id: 'a', url: '/a.webp', tags: ['wood', 'growth'] }], ['wood', 'forest']).image.id === 'a' && V.pickImage([], ['wood']) === null, '이미지 태그 선택·없을 때 null');
 
+console.log('4a. 서버 저장 검증과 기본 id');
+const srvSrc = fs.readFileSync(path.join(root, 'functions/api/report-content.js'), 'utf8'), idm = /const ID_RE = (\/.*\/);/.exec(srvSrc), idRe = idm && eval(idm[1]);
+ok(!!idRe, 'report-content ID_RE 추출');
+if (idRe) { const bad = R.Content.modules.concat(R.Remedy.LIBRARY).map(x => x.id).filter(id => !idRe.test(id)); ok(bad.length === 0, '기본 모듈·개운법 id 가 서버 검증을 통과(실패: ' + bad.slice(0, 3) + ')'); ok(R.Chapters.CHAPTERS.concat(R.Chapters.PROJECTS).every(x => idRe.test(x.id)), '챕터·프로젝트 id'); }
 console.log('4b. Media Scene Library (테스트용 가상 미디어)');
 const S = R.Scenes, TX = S.TAX, fx = [];
 let n = 0; // 원소 5 × 상태 12 × 형태를 섞은 가상 asset. URL 은 테스트용이며 배포 데이터가 아니다.

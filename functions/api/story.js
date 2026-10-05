@@ -1,4 +1,4 @@
-// 스토리 페이지(/report/) 내용
+// 온보딩 페이지(/report/) 내용
 // GET    /api/story — 공개. { story: {...}|null } (null이면 페이지가 report/story/content.js 의 기본 내용을 쓴다)
 // PUT    /api/story — 관리자 전용. { story: {...} } 저장
 // DELETE /api/story — 저장된 내용을 지우고 기본 내용으로 되돌린다

@@ -252,13 +252,14 @@
   }
 
   /* 커버리지 + 이미지 선택 테스트 (Scene Intent 를 직접 만들어 후보와 점수 이유를 본다) */
-  function coverageDlg() {
+  function coverageDlg(el) {
     var c = R.Scenes.coverage(M.list), row = function (k) { return '<div style="min-width:170px"><b>' + k.toUpperCase() + '</b>' + Object.keys(c[k]).map(function (t) { var low = c.warnings.some(function (w) { return w.kind === k && w.tag === t; }); return '<div class="' + (low ? 'v2warn' : '') + '">' + t + ' <b>' + c[k][t] + '</b>' + (low ? ' ⚠' : '') + '</div>'; }).join('') + '</div>'; };
     var html = '<h3>미디어 커버리지</h3><p class="muted">전체 ' + c.total + '개 · ' + Object.keys(c.byType).map(function (t) { return (TYPE_KO[t] || t) + ' ' + c.byType[t]; }).join(' · ') + '</p>' +
       '<div class="row" style="align-items:start">' + row('element') + row('state') + row('theme') + row('emotion') + '</div>' +
       (c.warnings.length ? '<p class="v2warn"><b>부족한 태그 ' + c.warnings.length + '개</b> — ' + c.warnings.slice(0, 14).map(function (w) { return w.tag + ' ' + w.have + '/' + w.recommended; }).join(', ') + (c.warnings.length > 14 ? ' …' : '') + '</p>' : '<p class="ok">권장 최소 수를 모두 채웠습니다.</p>') +
       '<hr style="border:0;border-top:1px solid var(--line)"><h3>선택 테스트</h3><p class="muted">원하는 장면의 의미를 고르면 Scene Intent 로 후보를 검색합니다.</p><div class="row">' + ['element', 'state', 'theme', 'emotion'].map(function (k) { return '<label>' + k + '<select data-t="' + k + '"><option value="">-</option>' + TAX[k].map(function (t) { return '<option>' + t + '</option>'; }).join('') + '</select></label>'; }).join('') + '<label>미디어 타입<select data-t="type"><option value="">전체</option>' + TAX.type.map(function (t) { return '<option>' + t + '</option>'; }).join('') + '</select></label><button id="tGo">검색</button></div><div id="tOut" style="margin-top:10px"></div><div class="row" style="justify-content:flex-end"><button id="x">닫기</button></div>';
-    var d = dlg(html, true); d.querySelector('#x').onclick = function () { d.close(); };
+    var d = el ? { querySelector: function (q) { return el.querySelector(q); } } : dlg(html, true); if (el) el.innerHTML = html.replace('<div class="row" style="justify-content:flex-end"><button id="x">닫기</button></div>', '');
+    if (!el) d.querySelector('#x').onclick = function () { d.close(); };
     d.querySelector('#tGo').onclick = function () {
       var v = function (k) { var x = d.querySelector('[data-t="' + k + '"]').value; return x ? [x] : []; }, ty = v('type');
       var it = { chapterKey: '', desiredElements: v('element'), desiredStates: v('state'), desiredThemes: v('theme'), desiredEmotion: v('emotion'), desiredActions: [], desiredScenes: [], preferredMediaType: ty, visualRole: '' };
@@ -345,8 +346,39 @@
     d.querySelector('#fC').onclick = function () { d.close(); }; d.querySelector('#fO').onclick = function () { A.fallback = { videoUrl: d.querySelector('#fV').value.trim(), videoWebm: d.querySelector('#fW').value.trim(), posterUrl: d.querySelector('#fP').value.trim(), title: fb.title || '' }; A.dirty = true; d.close(); awkRender(); };
   }
 
+  /* ── 기존 클립(구 9장 방식) → 새 라이브러리로 가져오기 ─────────────────────────────
+     일주+성별이 정해진 클립은 "각성 영상"으로, 나머지는 "장면 미디어(영상)"로 복사한다(원본 클립은 지우지 않는다). 태그는 일간 오행만 확실한 것만 붙인다. */
+  var STEM_EL = { '갑': 'wood', '을': 'wood', '병': 'fire', '정': 'fire', '무': 'earth', '기': 'earth', '경': 'metal', '신': 'metal', '임': 'water', '계': 'water' };
+  function importLegacy(done) {
+    Promise.all([api('/api/clips'), M.loaded ? Promise.resolve({ media: M.list }) : api('/api/media?all=1'), A.loaded ? Promise.resolve({ videos: A.videos, fallback: A.fallback }) : api('/api/awakening?all=1')]).then(function (r) {
+      var clips = r[0].clips || [], mlist = r[1].media || [], vids = r[2].videos || [], fb = r[2].fallback || A.fallback;
+      var srcUrl = function (x) { return !x ? '' : x.type === 'r2' ? mediaUrl(x.value) : x.value; };
+      var nAwk = 0, nMed = 0, skip = 0, haveMedia = {}; mlist.forEach(function (m) { haveMedia['legacy_' + m.id] = 1; if (m.legacyId) haveMedia[m.legacyId] = 1; });
+      clips.forEach(function (c) {
+        var url = srcUrl(c.src); if (!url) { skip++; return; }
+        var cd = c.cond || {}, ilju = (cd.ilju || []).length === 1 ? cd.ilju[0] : '', g = (cd.gender || []).length === 1 ? cd.gender[0] : '';
+        if (ilju && g) { // 일주 각성 영상
+          var p = R.Media.normPillar(ilju), gg = R.Media.normGender(g); if (!p || !gg) { skip++; return; }
+          var ex = vids.filter(function (v) { return v.dayPillar === p && v.gender === gg; })[0];
+          if (ex && (ex.videoUrl || ex.videoWebm)) { skip++; return; }
+          if (!ex) { ex = { dayPillar: p, gender: gg, videoUrl: '', videoWebm: '', posterUrl: '', guardianImageUrl: '', captionsUrl: '', title: p + '일주', subtitle: '', keywords: [], enabled: true }; vids.push(ex); }
+          ex.videoUrl = url; ex.title = ex.title || c.title || ''; nAwk++;
+        } else { // 장면 미디어
+          var lid = 'legacy_' + c.id; if (haveMedia[lid]) { skip++; return; }
+          var els = (cd.ilgan || []).map(function (s) { return STEM_EL[s]; }).filter(function (v, i, a) { return v && a.indexOf(v) === i; });
+          mlist.unshift({ id: lid, legacyId: c.id, type: 'video', url: url, webmUrl: '', thumbnailUrl: '', posterUrl: '', title: c.title || lid, description: '기존 클립에서 가져옴', elementTags: els.length === 1 ? els : [], stateTags: [], emotionTags: [], sceneTags: [], themeTags: [], chapterTags: [], actionTags: [], visualRole: [], orientation: 'portrait', duration: 0, loopable: false, hasAudio: true, priority: 40, enabled: true, tagsApproved: true, bytes: 0, uploadedAt: Date.now() }); nMed++;
+        }
+      });
+      M.list = mlist; M.loaded = true; M.dirty = M.dirty || nMed > 0; A.videos = vids; A.fallback = fb; A.loaded = true; A.dirty = A.dirty || nAwk > 0;
+      done && done({ awakening: nAwk, media: nMed, skipped: skip, total: clips.length });
+    }).catch(function (e) { toast(e.message, true); done && done(null); });
+  }
+
   window.V2Admin = {
-    open: function (tab, pw) { PW = pw; var root = document.getElementById('t-' + tab); if (tab === 'media') mediaOpen(root); else if (tab === 'awk') awkOpen(root); },
+    // root 를 주면 그 안에 그린다(클립 라이브러리의 하위 탭). 없으면 t-<tab> 컨테이너.
+    coverage: function (root, pw) { PW = pw; var go = function () { coverageDlg(root); }; if (M.loaded) go(); else api('/api/media?all=1').then(function (d) { M.list = d.media || []; M.loaded = true; go(); }).catch(function (e) { toast(e.message, true); }); },
+    importLegacy: function (pw, done) { PW = pw; importLegacy(done); },
+    open: function (tab, pw, rootEl) { PW = pw; var root = rootEl || document.getElementById('t-' + tab); if (tab === 'media') mediaOpen(root); else if (tab === 'awk') awkOpen(root); },
     parseName: parseName,
   };
 })();

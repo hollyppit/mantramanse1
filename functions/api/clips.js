@@ -75,7 +75,7 @@ function clean(c, chapterIds, folderIds, byId) {
   return { id, title, chapter: chapterIds.has(c.chapter) ? c.chapter : '', folder, cond, src, caption: String(c.caption || '').slice(0, 500), draft: String(c.draft || '').slice(0, 1500), note: String(c.note || '').slice(0, 300), fx: cleanFx(c.fx), priority: Math.max(-100, Math.min(100, +c.priority || 0)) };
 }
 
-// GET /api/clips?public=1 — 스토리 페이지가 사용자 사주에 맞는 영상을 고를 때 쓰는 공개 목록. 조합에 필요한 값만 내보낸다(대본·메모·연출은 제외).
+// GET /api/clips?public=1 — 온보딩 페이지가 사용자 사주에 맞는 영상을 고를 때 쓰는 공개 목록. 조합에 필요한 값만 내보낸다(대본·메모·연출은 제외).
 async function publicList(env) {
   if (!env.GLOSSARY_KV) return json({ clips: [], folders: [], chapters: DEFAULT_CHAPTERS });
   const data = (await env.GLOSSARY_KV.get(CLIPS_KEY, 'json')) || {};

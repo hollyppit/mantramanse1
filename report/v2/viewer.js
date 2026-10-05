@@ -36,6 +36,8 @@
   });
 
   /* ── 2. 계산 결과 → 데이터 로딩(단계형 안내) → 리포트 구성 ───────────────── */
+  // ?project=love 처럼 프로젝트(상품)를 고른다. 없거나 모르는 값이면 종합(full)
+  function projectId() { var m = /[?&]project=([\w.-]{1,40})/.exec(location.search); return m ? m[1] : 'full'; }
   function getJson(u) { return fetch(u).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }); }
   function start(ch, gender) {
     view('load'); var tx = $('#loadText'), i = 0, tick;
@@ -48,7 +50,7 @@
       var wait = Math.max(0, 2600 - (Date.now() - t0));
       return new Promise(function (ok) { setTimeout(function () { ok(a); }, wait); });
     }).then(function (a) {
-      S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media);
+      S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId());
       S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg); S.awk = a[2] || {};
       return aiCompose().then(function () { return a; });
     }).then(function () {
@@ -265,7 +267,7 @@
 
   // PDF 해금: 관리자 requiredCompletionRate(챕터 방문 비율) 또는 기본값(최종 챕터 도달)
   function checkUnlock() {
-    if (S.pdfUnlocked) return; var n = S.rep.chapters.length, rate = S.pack && S.pack.scoring && S.pack.scoring.requiredCompletionRate, visited = Object.keys(S.visited).length;
+    if (S.pdfUnlocked) return; var n = S.rep.chapters.length, rate = S.pack && S.pack.cfg && S.pack.cfg.project && S.pack.cfg.project.requiredCompletionRate; if (rate == null) rate = S.pack && S.pack.scoring && S.pack.scoring.requiredCompletionRate; var visited = Object.keys(S.visited).length;
     var ok = rate != null ? visited / n >= rate : !!S.visited[S.rep.chapters[n - 1].id];
     if (ok) { S.pdfUnlocked = true; T('pdf_unlocked', {}); }
   }

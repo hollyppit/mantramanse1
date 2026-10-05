@@ -170,9 +170,9 @@
   }
 
   // 서버 저장본 한 번에 적용: content = /api/report-content 의 content, media = /api/media 의 media
-  function fromSaved(content, media) {
+  function fromSaved(content, media, projectId) {
     content = content || {}; if (content.scoring) R.Scenes.configure(content.scoring);
-    return { lib: library({ modules: content.modules, remedies: content.remedies, media: media, version: content.version }), cfg: R.Chapters.merge(content.chapters), scoring: content.scoring || {} };
+    return { lib: library({ modules: content.modules, remedies: content.remedies, media: media, version: content.version }), cfg: R.Chapters.forProject(content, projectId || 'full'), scoring: content.scoring || {} };
   }
 
   // 서버(/api/compose) 응답 한 번에 적용. 어떤 부분이 이상해도 원본이 유지된다.

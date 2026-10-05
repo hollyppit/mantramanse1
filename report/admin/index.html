@@ -24,6 +24,7 @@ button:disabled { opacity:.5; cursor:default; }
 input[type=text], input[type=password], input[type=number], input[type=url], select, textarea { background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:7px 10px; width:100%; }
 textarea { resize:vertical; min-height:60px; }
 :focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+body:not([data-pane="lib"]) #saveBtn, body:not([data-pane="lib"]) #saveState { display:none; }
 .tabs { display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:16px; flex-wrap:wrap; }
 .tabs button { border:0; border-bottom:2px solid transparent; border-radius:0; background:none; color:var(--ink2); padding:10px 16px; }
 .tabs button.on { color:var(--gold); border-color:var(--gold); }
@@ -145,7 +146,7 @@ summary { cursor:pointer; padding:4px 0; }
   <!-- 본문 -->
   <div id="app" class="hide">
     <header>
-      <div class="row" style="align-items:center;gap:14px"><h1>사주 무빙툰 · 관리자</h1><a class="navbtn" href="/" target="_blank" rel="noopener" title="만트라 만세력(사주 계산 앱)을 새 탭으로 엽니다">만트라 만세력 ↗</a><a class="navbtn" href="/report/" target="_blank" rel="noopener" title="방문자가 보는 스토리 페이지를 새 탭으로 엽니다">스토리 페이지 ↗</a></div>
+      <div class="row" style="align-items:center;gap:14px"><h1>사주 무빙툰 · 관리자</h1><a class="navbtn" href="/" target="_blank" rel="noopener" title="만트라 만세력(사주 계산 앱)을 새 탭으로 엽니다">만트라 만세력 ↗</a><a class="navbtn" href="/report/" target="_blank" rel="noopener" title="방문자가 보는 온보딩 페이지를 새 탭으로 엽니다">온보딩 페이지 ↗</a></div>
       <div class="row">
         <span class="muted" id="saveState"></span>
         <button class="pri" id="saveBtn" disabled>변경사항 저장</button>
@@ -153,22 +154,15 @@ summary { cursor:pointer; padding:4px 0; }
       </div>
     </header>
     <div class="tabs" role="tablist">
-      <button data-t="lib" class="on">클립 라이브러리</button>
-      <button data-t="test">조합 테스트</button>
-      <button data-t="cov">커버리지</button>
-      <button data-t="intro">입장 인트로</button>
-      <button data-t="home">스토리 페이지</button>
-      <button data-t="media">미디어 라이브러리</button>
-      <button data-t="awk">각성 영상 (120)</button>
-      <button data-t="mod">해석 모듈</button>
-      <button data-t="rem">개운법</button>
-      <button data-t="chap">챕터·PDF 설정</button>
-      <button data-t="v2test">v2 조합 테스트</button>
-      <button data-t="v2cov">v2 커버리지</button>
+      <button data-t="v2clip" class="on">클립 라이브러리</button>
+      <button data-t="v2chap">챕터 관리</button>
+      <button data-t="v2test">조합 테스트</button>
+      <button data-t="v2proj">프로젝트</button>
+      <button data-t="v2set">설정</button>
     </div>
 
     <!-- 라이브러리 -->
-    <div id="t-lib" class="libwrap">
+    <div id="t-lib" class="libwrap hide">
      <aside class="card" id="folderBar">
        <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px"><b>폴더</b><button id="fAdd" title="새 폴더">+ 폴더</button></div>
        <ul id="folderList" class="flist"></ul>
@@ -235,9 +229,7 @@ summary { cursor:pointer; padding:4px 0; }
     </div>
 
     <!-- 커버리지 -->
-    <div id="t-media" class="hide"></div>
-    <div id="t-awk" class="hide"></div>
-    <div id="t-mod" class="hide"></div><div id="t-rem" class="hide"></div><div id="t-chap" class="hide"></div><div id="t-v2test" class="hide"></div><div id="t-v2cov" class="hide"></div>
+    <div id="t-v2clip"></div><div id="t-v2chap" class="hide"></div><div id="t-v2test" class="hide"></div><div id="t-v2proj" class="hide"></div><div id="t-v2set" class="hide"></div>
     <div id="t-cov" class="hide">
       <div class="card"><p class="muted" style="margin:0">일주 60개 × 9개 장에서 어느 칸이 비어 있는지 봅니다. <span class="chip">초록</span> 해당 일주를 직접 지정한 클립이 있음 · <span class="chip">파랑</span> 조건 없는 공통 클립으로 채워짐 · 회색 0은 비어 있음.</p></div>
       <div class="cov" style="margin-top:12px"><table id="covT"></table></div>
@@ -252,7 +244,7 @@ summary { cursor:pointer; padding:4px 0; }
         </div>
         <div class="hmpv">
           <div class="row" style="align-items:center;margin-bottom:8px"><button id="hmPc" class="pri">PC</button><button id="hmMo">모바일</button><span class="muted">미리보기 — 분석 후 화면까지 예시 사주로 모두 펼쳐 보여 줍니다 (인트로·이메일 신청은 동작하지 않음)</span></div>
-          <div id="hmBox"><iframe id="hmFrame" title="스토리 페이지 미리보기"></iframe></div>
+          <div id="hmBox"><iframe id="hmFrame" title="온보딩 페이지 미리보기"></iframe></div>
         </div>
       </div>
     </div>
@@ -260,7 +252,7 @@ summary { cursor:pointer; padding:4px 0; }
     <!-- 입장 인트로 -->
     <div id="t-intro" class="hide">
       <div class="card" style="max-width:640px">
-        <p class="muted" style="margin:0 0 12px">스토리 페이지(/report/)에 들어올 때 전체 화면으로 먼저 음소거로 재생되는 영상입니다. 이 탭의 저장은 클립 저장과 별개로 바로 반영됩니다.</p>
+        <p class="muted" style="margin:0 0 12px">온보딩 페이지(/report/)에 들어올 때 전체 화면으로 먼저 음소거로 재생되는 영상입니다. 이 탭의 저장은 클립 저장과 별개로 바로 반영됩니다.</p>
         <div class="row" style="align-items:center;gap:16px">
           <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="inOn" style="width:auto"> <b>인트로 켜기</b></label>
         </div>
@@ -495,6 +487,7 @@ summary { cursor:pointer; padding:4px 0; }
 <script src="../v2/compose.js"></script>
 <script src="v2-admin.js"></script>
 <script src="v2-content.js"></script>
+<script src="v2-shell.js"></script>
 <script>
 (function () {
   var A = window.Assemble, F = window.MovingFx, $ = function (id) { return document.getElementById(id); };
@@ -541,7 +534,7 @@ summary { cursor:pointer; padding:4px 0; }
   function newId(p) { return p + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
 
   // ── 로그인
-  function enter() { $('loginBox').classList.add('hide'); $('app').classList.remove('hide'); load(); }
+  function enter() { $('loginBox').classList.add('hide'); $('app').classList.remove('hide'); load(); showTab('v2clip'); }
   function login() {
     var pw = $('pw').value; if (!pw) return;
     $('loginMsg').textContent = '';
@@ -694,7 +687,7 @@ summary { cursor:pointer; padding:4px 0; }
       .catch(function (e) { $('inState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };
 
-  // ── 스토리 페이지 편집 (클립 저장과 별개로 /api/story 에 저장). 미리보기는 /report/?preview=1 을 iframe 으로 띄우고 내용을 postMessage 로 보낸다.
+  // ── 온보딩 페이지 편집 (클립 저장과 별개로 /api/story 에 저장). 미리보기는 /report/?preview=1 을 iframe 으로 띄우고 내용을 postMessage 로 보낸다.
   // 미리보기에서 블록을 누르면 왼쪽 목록에서 그 블록이 열리고(st-pick), 왼쪽에서 고르면 미리보기가 그 위치로 움직인다(st-sel).
   var SC = window.OnboardingContent, SCH = window.StorySchema;
   var HM = { story: null, dirty: false, mode: 'pc', loaded: false, frameOn: false, openIdx: -1, openGrp: '' };
@@ -1011,20 +1004,21 @@ summary { cursor:pointer; padding:4px 0; }
       .catch(function (e) { $('hmState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };
 
-  // ── 탭
-  document.querySelectorAll('.tabs button').forEach(function (b) {
-    b.onclick = function () {
-      document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
-      ['lib', 'test', 'cov', 'intro', 'home', 'media', 'awk', 'mod', 'rem', 'chap', 'v2test', 'v2cov'].forEach(function (t) { $('t-' + t).classList.toggle('hide', t !== b.dataset.t); });
-      if (b.dataset.t === 'media' || b.dataset.t === 'awk') window.V2Admin.open(b.dataset.t, S.pw);
-      if (/^(mod|rem|chap|v2test|v2cov)$/.test(b.dataset.t)) window.V2Content.open(b.dataset.t, S.pw);
-      if (b.dataset.t === 'cov') renderCov();
-      if (b.dataset.t === 'intro') introLoad();
-      document.querySelector('body > .wrap').style.maxWidth = b.dataset.t === 'home' ? '1700px' : '';
-      if (b.dataset.t === 'home') homeOpen();
-      if (S.ctl) { S.ctl.stop(); S.ctl = null; S.auto = false; }
-    };
-  });
+  // ── 탭: 위쪽 5개(클립 라이브러리·챕터 관리·조합 테스트·프로젝트·설정). 설정 안의 하위 화면(입장 인트로·온보딩 페이지·기존 클립)은 also 로 함께 보여 준다.
+  var PANES = ['lib', 'test', 'cov', 'intro', 'home', 'v2clip', 'v2chap', 'v2test', 'v2proj', 'v2set'];
+  function showTab(t, also) {
+    document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); });
+    PANES.forEach(function (p) { var e = $('t-' + p); if (e) e.classList.toggle('hide', !(p === t || p === also)); });
+    var cur = also || t; document.body.dataset.pane = cur;
+    if (/^v2/.test(t) && window.V2Shell) window.V2Shell.open(t, S.pw, also);
+    if (cur === 'cov') renderCov();
+    if (cur === 'intro') introLoad();
+    document.querySelector('body > .wrap').style.maxWidth = cur === 'home' ? '1700px' : '';
+    if (cur === 'home') homeOpen();
+    if (S.ctl) { S.ctl.stop(); S.ctl = null; S.auto = false; }
+  }
+  window.AdminShowTab = showTab;
+  document.querySelectorAll('.tabs button').forEach(function (b) { b.onclick = function () { showTab(b.dataset.t); }; });
 
   // ── 라이브러리
   function renderAll() { renderFilters(); renderFolders(); renderLib(); renderCov(); $('r2note').innerHTML = S.r2 ? '영상 업로드(R2) 연결됨' : '<span class="err">R2가 연결되지 않아 파일 업로드는 쓸 수 없습니다.</span> 영상 주소(https)를 직접 입력하면 됩니다.'; }
