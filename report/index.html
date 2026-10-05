@@ -258,13 +258,19 @@ em { font-style: normal; background: linear-gradient(180deg, var(--gold-l), var(
 .fx-ch.sel { outline: 1px dashed var(--gold); outline-offset: 2px; }
 .fx-hd { position: fixed; width: 14px; height: 14px; background: var(--gold); border: 1px solid #14100A; border-radius: 2px; cursor: nesw-resize; pointer-events: auto; touch-action: none; }
 .preview #cover, .preview .cv-in { pointer-events: none; }
-#cover { position: relative; z-index: 1; min-height: 100vh; min-height: 100svh; display: grid; place-items: center; overflow: hidden; padding: 64px 20px 40px; }
-.cv-in { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 100%; animation: pg 1.4s ease both; }
-.cv-lamp { height: min(50vh, 460px); height: min(50svh, 460px); width: min(70vw, 460px); display: grid; place-items: center; }
+.preview .cv-t, .preview .cv-s, .preview .cv-bw { pointer-events: auto; cursor: move; touch-action: none; user-select: none; }
+.cv-sel { outline: 1px dashed var(--gold); outline-offset: 4px; }
+#cover { position: relative; z-index: 1; min-height: calc(100svh + var(--cv-pt, 0svh) + var(--cv-pb, 0svh)); display: grid; place-items: center; overflow: hidden; padding: calc(64px + var(--cv-pt, 0svh)) 0 calc(40px + var(--cv-pb, 0svh)); }
+.cv-in { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; padding: 0 6vw; animation: pg 1.4s ease both; }
+.cv-lamp { align-self: center; height: min(50vh, 460px); height: min(50svh, 460px); width: min(70vw, 460px); display: grid; place-items: center; }
 .cv-img { max-width: 100%; max-height: 100%; object-fit: contain; -webkit-mask-image: radial-gradient(closest-side, #000 62%, transparent 100%); mask-image: radial-gradient(closest-side, #000 62%, transparent 100%); }
 .cv-img, .cv-glow { animation: cvFloat 7s ease-in-out infinite; will-change: transform; }
 @keyframes cvFloat { 0%, 100% { transform: translateY(8px) rotate(-.6deg); } 50% { transform: translateY(-10px) rotate(.6deg); } }
 .cv-glow { width: 70%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgba(232, 178, 106, .32), rgba(232, 178, 106, .08) 55%, transparent 100%); }
+.cv-t, .cv-s, .cv-bw { position: relative; }
+.cv-t { left: var(--cv-tx); top: var(--cv-ty); align-self: var(--cv-ta); text-align: var(--cv-ttx); }
+.cv-s { left: var(--cv-sx); top: var(--cv-sy); align-self: var(--cv-sa); text-align: var(--cv-stx); }
+.cv-bw { display: flex; flex-direction: column; align-items: var(--cv-ba, center); left: var(--cv-bx); top: var(--cv-by); align-self: var(--cv-ba); }
 .cv-t { margin-top: 26px; font-family: var(--cv-tf); font-size: var(--cv-ts, 17px); font-weight: var(--cv-tw, 400); letter-spacing: var(--cv-tl, 4px); color: var(--cv-tc, var(--ink)); text-shadow: none; }
 .cv-s { margin-top: 10px; font-family: var(--cv-sf); font-size: var(--cv-ss, 14px); color: var(--cv-sc, var(--ink-3)); letter-spacing: .04em; }
 .an-float { animation: cvTf var(--cv-as, 6s) ease-in-out infinite; }
@@ -275,7 +281,7 @@ em { font-style: normal; background: linear-gradient(180deg, var(--gold-l), var(
 .cv-btn { margin-top: 30px; font: inherit; font-family: var(--cv-bf); font-size: var(--cv-bs, 15px); letter-spacing: .3em; padding: 13px 34px 13px 38px; min-height: 48px; color: var(--gold); background: rgba(8, 10, 17, .55); border: 1px solid rgba(205, 178, 122, .45); border-radius: 2px; cursor: pointer; transition: color .3s, border-color .3s, background .3s, box-shadow .3s; }
 .cv-btn:hover { color: var(--gold-l); border-color: var(--gold-l); background: rgba(205, 178, 122, .07); box-shadow: 0 0 26px -8px rgba(235, 217, 170, .45); }
 .cv-arr { margin-top: 14px; font-size: .8rem; color: var(--ink-3); opacity: .5; }
-@media (max-width: 700px) { #cover { padding: 56px 16px 28px; } .cv-lamp { width: min(78vw, 340px); height: min(46svh, 340px); } .cv-t { margin-top: 20px; } }
+@media (max-width: 700px) { #cover { padding: calc(56px + var(--cv-pt, 0svh)) 0 calc(28px + var(--cv-pb, 0svh)); } .cv-lamp { width: min(78vw, 340px); height: min(46svh, 340px); } .cv-t { margin-top: 20px; } }
 .preview #cover { min-height: 70svh; }
 
 /* 입장 인트로 */

@@ -91,7 +91,7 @@
     ambient: { embers: true, light: true, smoke: true, amount: 1, speed: 1, opacity: 0.8, color: '#E8B26A' },
     // 인트로 커버: 스토리 맨 앞 한 화면. src 는 이미지(비우면 은은한 빛무리), show:false 면 숨김
     cover: { show: true, bgSrc: '', bgOpacity: 0.6, chars: [], src: '', alt: '신비한 등불', title: '만트라 사주팔자 무빙툰', sub: '당신의 기질과 흐름을 이야기로 만나다.', button: '둘러보기',
-      titleFont: 'serif', titleWeight: '400', titleSize: 17, titleSpacing: 4, titleColor: '#E9E4D8', titleAnim: '', subAnim: '', textAnimSpeed: 6, subColor: '#7C786C', subFont: 'sans', subSize: 14, buttonFont: 'sans', buttonSize: 15 },
+      titleFont: 'serif', titleWeight: '400', titleSize: 17, titleSpacing: 4, titleColor: '#E9E4D8', titleAnim: '', coverBottom: 25, coverBottomM: 30, subAnim: '', textAnimSpeed: 6, subColor: '#7C786C', subFont: 'sans', subSize: 14, buttonFont: 'sans', buttonSize: 15 },
     autoSpeed: 1,                                  // 자동 스크롤 속도 (1=기본, 2=두 배 빠르게, 0.5=절반 속도)
     brandName: '만트라 포춘',                       // 위쪽 가운데 이름
     pageTitle: '내 이야기의 시작 · 만트라 사주 무빙툰',  // 브라우저 탭 제목

@@ -567,6 +567,37 @@
     var o = Math.max(0, 1 - root.scrollY / (root.innerHeight * 0.75));
     [fxEl, fxFr].forEach(function (e) { e.style.opacity = o; e.style.visibility = o <= 0 ? 'hidden' : 'visible'; }); fxHandle();
   }
+  // 커버 글(브랜드명·서브 카피·버튼)은 PC/모바일 값이 따로 있다. 모바일 값(이름 끝에 M)이 비어 있으면 PC 값을 쓴다.
+  var CVN = { title: 't', sub: 's', button: 'b' }, ALIGN3 = { left: 'flex-start', center: 'center', right: 'flex-end' };
+  function pv(cv, k) { var m = cv[k + 'M']; return fxMob() && m != null && m !== '' ? m : cv[k]; }
+  function coverStyle(cv) {
+    function fnt(k) { return k === 'sans' ? 'var(--f-sans)' : k === 'serif' ? 'var(--f-serif)' : ''; }
+    function hex(v, d) { return /^#[0-9a-f]{3,8}$/i.test(String(v || '').trim()) ? String(v).trim() : d; }
+    function px(v, d) { v = +v; return (isFinite(v) && v > 0 ? v : d) + 'px'; }
+    function al(n) { var v = pv(cv, n + 'Align'); return ALIGN3[v] ? v : 'center'; }
+    var o = ['--cv-tf:' + (fnt(cv.titleFont) || 'var(--f-serif)'), '--cv-tw:' + (/^[1-9]00$/.test(cv.titleWeight) ? cv.titleWeight : 400), '--cv-ts:' + px(pv(cv, 'titleSize'), 17), '--cv-tl:' + (isFinite(+cv.titleSpacing) && cv.titleSpacing !== '' ? +cv.titleSpacing : 4) + 'px',
+      '--cv-tc:' + hex(cv.titleColor, '#E9E4D8'), '--cv-sc:' + hex(cv.subColor, '#7C786C'), '--cv-as:' + (isFinite(+cv.textAnimSpeed) && +cv.textAnimSpeed >= 1 ? +cv.textAnimSpeed : 6) + 's', '--cv-sf:' + (fnt(cv.subFont) || 'var(--f-sans)'), '--cv-ss:' + px(pv(cv, 'subSize'), 14), '--cv-bf:' + (fnt(cv.buttonFont) || 'var(--f-sans)'), '--cv-bs:' + px(pv(cv, 'buttonSize'), 15),
+      '--cv-pt:' + Math.max(0, num(pv(cv, 'coverTop'), 0)) + 'svh', '--cv-pb:' + Math.max(0, num(pv(cv, 'coverBottom'), 0)) + 'svh'];
+    Object.keys(CVN).forEach(function (n) { var c = CVN[n], a = al(n); o.push('--cv-' + c + 'x:' + num(pv(cv, n + 'X'), 0) + 'vw', '--cv-' + c + 'y:' + num(pv(cv, n + 'Y'), 0) + 'svh', '--cv-' + c + 'a:' + ALIGN3[a], '--cv-' + c + 'tx:' + a); });
+    return o.join(';');
+  }
+  function coverEdit(el) { // 관리자 미리보기: 글·버튼을 끌어 옮긴다 (PC 화면이면 PC 값, 모바일 화면이면 모바일 값)
+    if (el._edit) return; el._edit = true; var st = null;
+    el.addEventListener('pointerdown', function (e) {
+      var t = e.target.closest && e.target.closest('.cv-t, .cv-s, .cv-bw'); el.querySelectorAll('.cv-sel').forEach(function (x) { x.classList.remove('cv-sel'); });
+      if (!t) return; t.classList.add('cv-sel');
+      var n = t.classList.contains('cv-t') ? 'title' : t.classList.contains('cv-s') ? 'sub' : 'button', cv = C.settings.cover, m = fxMob(), sx = m ? 'M' : '';
+      if (m) ['X', 'Y'].forEach(function (k) { if (cv[n + k + 'M'] == null || cv[n + k + 'M'] === '') cv[n + k + 'M'] = num(cv[n + k], 0); });
+      st = { n: n, m: m, kx: n + 'X' + sx, ky: n + 'Y' + sx, x: e.clientX, y: e.clientY, cx: num(cv[n + 'X' + sx], 0), cy: num(cv[n + 'Y' + sx], 0), cv: cv };
+      try { t.setPointerCapture(e.pointerId); } catch (er) { } e.preventDefault();
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (!st) return; st.cv[st.kx] = Math.round((st.cx + (e.clientX - st.x) / root.innerWidth * 100) * 10) / 10; st.cv[st.ky] = Math.round((st.cy + (e.clientY - st.y) / root.innerHeight * 100) * 10) / 10;
+      el.setAttribute('style', coverStyle(st.cv));
+    });
+    function end() { if (!st) return; var s = st; st = null; try { parent.postMessage({ t: 'st-text', n: s.n, m: s.m, x: s.cv[s.kx], y: s.cv[s.ky] }, location.origin); } catch (er) { } }
+    el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+  }
   function cover() {
     var el = document.getElementById('cover'); if (!el) return;
     var cv = (C.settings && C.settings.cover) || {};
@@ -574,24 +605,21 @@
     if (!cv || cv.show === false) { el.hidden = true; el.innerHTML = ''; return; }
     var url = media(cv.src), alt = pick(cv.alt) || '';
     var img = url ? '<img class="cv-img" src="' + esc(url) + '" alt="' + esc(alt) + '" decoding="async" fetchpriority="high">' : '<div class="cv-glow" role="img" aria-label="' + esc(alt) + '"></div>';
-    function fnt(k) { return k === 'sans' ? 'var(--f-sans)' : k === 'serif' ? 'var(--f-serif)' : ''; }
-    function hex(v, d) { return /^#[0-9a-f]{3,8}$/i.test(String(v || '').trim()) ? String(v).trim() : d; }
     function an(v) { return /^(float|glow|both)$/.test(v) ? ' an-' + v : ''; }
-    function px(v, d) { v = +v; return (isFinite(v) && v > 0 ? v : d) + 'px'; }
-    var st = ['--cv-tf:' + (fnt(cv.titleFont) || 'var(--f-serif)'), '--cv-tw:' + (/^[1-9]00$/.test(cv.titleWeight) ? cv.titleWeight : 400), '--cv-ts:' + px(cv.titleSize, 17), '--cv-tl:' + (isFinite(+cv.titleSpacing) && cv.titleSpacing !== '' ? +cv.titleSpacing : 4) + 'px',
-      '--cv-tc:' + hex(cv.titleColor, '#E9E4D8'), '--cv-sc:' + hex(cv.subColor, '#7C786C'), '--cv-as:' + (isFinite(+cv.textAnimSpeed) && +cv.textAnimSpeed >= 1 ? +cv.textAnimSpeed : 6) + 's', '--cv-sf:' + (fnt(cv.subFont) || 'var(--f-sans)'), '--cv-ss:' + px(cv.subSize, 14), '--cv-bf:' + (fnt(cv.buttonFont) || 'var(--f-sans)'), '--cv-bs:' + px(cv.buttonSize, 15)].join(';');
-    el.setAttribute('style', st);
+    el.setAttribute('style', coverStyle(cv));
     el.hidden = false;
     el.innerHTML = '<div class="cv-in"><div class="cv-lamp">' + img + '</div>' +
       (cv.title ? '<h1 class="cv-t' + an(cv.titleAnim) + '">' + fmt(pick(cv.title)) + '</h1>' : '') + (cv.sub ? '<p class="cv-s' + an(cv.subAnim) + '">' + fmt(pick(cv.sub)) + '</p>' : '') +
-      (cv.button ? '<button type="button" class="cv-btn" data-cover="go">' + esc(pick(cv.button)) + '</button><span class="cv-arr" aria-hidden="true">↓</span>' : '') + '</div>';
+      (cv.button ? '<div class="cv-bw"><button type="button" class="cv-btn" data-cover="go">' + esc(pick(cv.button)) + '</button><span class="cv-arr" aria-hidden="true">↓</span></div>' : '') + '</div>';
     var i2 = el.querySelector('.cv-img'); if (i2) i2.onerror = function () { i2.outerHTML = '<div class="cv-glow"></div>'; };
     var go = el.querySelector('[data-cover]');
     if (go) go.onclick = function () {
+      if (PREVIEW) return; // 미리보기에서는 끌어서 옮기는 용도
       track('cover_enter', null, true);
-      if (PREVIEW) { var t = document.querySelector('#story > .blk'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
       Auto.begin(); // 첫 스토리 블록부터 자동으로 내려간다 (이미 시작했다면 이어서)
     };
+    if (PREVIEW) coverEdit(el);
+    if (!cover.bound) { cover.bound = true; root.addEventListener('resize', function () { var c = (C.settings && C.settings.cover) || {}; if (!el.hidden) el.setAttribute('style', coverStyle(c)); }); }
   }
   function meta() { // 이름·탭 제목·공유 설명
     var S1 = C.settings || {}, skip = document.getElementById('skipLink'), bn = document.getElementById('brandName');

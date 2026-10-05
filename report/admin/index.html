@@ -723,6 +723,12 @@ summary { cursor:pointer; padding:4px 0; }
         [].forEach.call(q(), function (x, k) { x.open = !!opened[k] || k === d.i; });
       }
     }
+    else if (d.t === 'st-text' && HM.story) { // 미리보기에서 브랜드명·서브 카피·버튼을 끌었다
+      var cv2 = (HM.story.settings || {}).cover; if (cv2 && /^(title|sub|button)$/.test(d.n)) {
+        var sx = d.m ? 'M' : ''; cv2[d.n + 'X' + sx] = d.x; cv2[d.n + 'Y' + sx] = d.y;
+        HM.openGrp = 'cover'; hmChanged(); hmBuild();
+      }
+    }
     else if (d.t === 'st-pick' && HM.story && d.i >= 0 && d.i < HM.story.blocks.length) { HM.openIdx = d.i; hmBuild(); var c = document.querySelector('#hmForm details[data-i="' + d.i + '"]'); if (c) c.scrollIntoView({ block: 'nearest' }); }
   });
 
