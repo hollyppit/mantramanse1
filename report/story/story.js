@@ -503,6 +503,11 @@
     if (!cv || cv.show === false) { el.hidden = true; el.innerHTML = ''; return; }
     var url = media(cv.src), alt = pick(cv.alt) || '';
     var img = url ? '<img class="cv-img" src="' + esc(url) + '" alt="' + esc(alt) + '" decoding="async" fetchpriority="high">' : '<div class="cv-glow" role="img" aria-label="' + esc(alt) + '"></div>';
+    function fnt(k) { return k === 'sans' ? 'var(--f-sans)' : k === 'serif' ? 'var(--f-serif)' : ''; }
+    function px(v, d) { v = +v; return (isFinite(v) && v > 0 ? v : d) + 'px'; }
+    var st = ['--cv-tf:' + (fnt(cv.titleFont) || 'var(--f-serif)'), '--cv-tw:' + (/^[1-9]00$/.test(cv.titleWeight) ? cv.titleWeight : 400), '--cv-ts:' + px(cv.titleSize, 17), '--cv-tl:' + (isFinite(+cv.titleSpacing) && cv.titleSpacing !== '' ? +cv.titleSpacing : 4) + 'px',
+      '--cv-sf:' + (fnt(cv.subFont) || 'var(--f-sans)'), '--cv-ss:' + px(cv.subSize, 14), '--cv-bf:' + (fnt(cv.buttonFont) || 'var(--f-sans)'), '--cv-bs:' + px(cv.buttonSize, 15)].join(';');
+    el.setAttribute('style', st);
     el.hidden = false;
     el.innerHTML = '<div class="cv-in"><div class="cv-lamp">' + img + '</div>' +
       (cv.title ? '<h1 class="cv-t">' + fmt(pick(cv.title)) + '</h1>' : '') + (cv.sub ? '<p class="cv-s">' + fmt(pick(cv.sub)) + '</p>' : '') +
