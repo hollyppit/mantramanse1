@@ -4,7 +4,7 @@
 // PUT  /api/awakening                      — 관리자. { videos: [...], ilgan?: [...], fallback?: {...}, publicBase?, textOnly? } 전체 저장 (textOnly: 영상 없어도 문구만 보여 주기)
 // 저장: GLOSSARY_KV 'awakening:index' → { videos, ilgan, fallback }
 import { json, isAdmin, configError } from '../_lib.js';
-import { cleanAwakening, cleanIlgan, normStem, MEDIA_OK, cleanPublicBase, publicizeClip } from '../_media.js';
+import { cleanAwakening, cleanIlgan, normStem, MEDIA_OK, cleanPublicBase, publicizeClip, sanitizeClipText, ilganTextMismatch, ijuTextMismatch } from '../_media.js';
 
 const KEY = 'awakening:index';
 const ok = v => (MEDIA_OK.test(v || '') ? v : '');
@@ -20,7 +20,9 @@ export async function onRequestGet({ request, env }) {
   const stem = c ? c.dayPillar[0] : normStem(q.get('pillar')), ig = stem && (d.ilgan || []).find(x => x.stem === stem && x.gender === (c ? c.gender : null) && x.enabled && (x.videoUrl || x.videoWebm || txt(x)));
   const base = cleanPublicBase(d.publicBase); // 설정돼 있으면 영상·이미지 주소를 R2 공개 도메인으로 바로 내보낸다(함수 호출 없이 재생)
   const pub = c => { const o = publicizeClip(base, c); if (o && typeof o === 'object') { const { guardianImageUrl, ...rest } = o; return rest; } return o || null; }; // 예전에 저장된 수호신 이미지 필드는 내보내지 않는다
-  return json({ video: pub(v), ilgan: pub(ig), fallback: pub(d.fallback), textOnly: !!d.textOnly });
+  // 저장된 문구가 다른 일간·일주를 말하면(예: 기토 항목에 경금 문구) 그 칸은 비워서 내보낸다
+  const sv = v && sanitizeClipText(v, t => ijuTextMismatch(c.dayPillar, t)), sg = ig && sanitizeClipText(ig, t => ilganTextMismatch(stem, t));
+  return json({ video: pub(sv), ilgan: pub(sg), fallback: pub(d.fallback), textOnly: !!d.textOnly });
 }
 
 export async function onRequestPut({ request, env }) {

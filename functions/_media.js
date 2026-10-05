@@ -63,6 +63,21 @@ export function normStem(v) {
   const s = String(v || '').trim(), c = s[0] || '', i = STEMS_K.indexOf(c) >= 0 ? STEMS_K.indexOf(c) : STEMS_H.indexOf(c);
   return i >= 0 ? STEMS_K[i] : null;
 }
+// ── 영상 항목 문구 검사(관리자 입력 오류 방지): 기토 영상에 경금 문구가 붙은 경우 등. report/v2/media.js 의 ilganTextMismatch·ijuTextMismatch 와 같은 규칙 ──
+const STEM_NAME = { 갑: '갑목', 을: '을목', 병: '병화', 정: '정화', 무: '무토', 기: '기토', 경: '경금', 신: '신금', 임: '임수', 계: '계수' }, EL_H = { 목: '木', 화: '火', 토: '土', 금: '金', 수: '水' };
+function stemsIn(text) {
+  const t = String(text || ''), out = [];
+  STEMS_K.split('').forEach((s, i) => { const nm = STEM_NAME[s], hj = STEMS_H[i] + EL_H[nm[1]]; if (t.includes(hj) || new RegExp('(^|[^가-힣])' + nm + '(?=$|[^가-힣]|[은는이가을를의과와도만로])').test(t)) out.push(s); });
+  return out;
+}
+export function ilganTextMismatch(stem, text) { const s = normStem(stem), f = stemsIn(text); return s && f.length && !f.includes(s) ? STEM_NAME[f[0]] : ''; }
+export function ijuTextMismatch(pillar, text) { const p = String(pillar || '').slice(0, 2), m = String(text || '').match(/[갑을병정무기경신임계][자축인묘진사오미신유술해](?=일주)/g) || []; return m.length && !m.includes(p) ? m[0] + '일주' : ''; }
+// 어긋난 칸만 비운다(영상 주소 등 나머지는 그대로). 비워진 칸은 화면에서 그 일간·일주의 기본 문구로 채워진다.
+export function sanitizeClipText(c, bad) {
+  if (!c || typeof c !== 'object') return c; const o = { ...c };
+  if (bad(o.title || '')) o.title = ''; if (bad(o.subtitle || '')) o.subtitle = ''; if (Array.isArray(o.keywords) && bad(o.keywords.join(' '))) o.keywords = [];
+  return o;
+}
 export function cleanIlgan(v) {
   if (!v || typeof v !== 'object') return null;
   const stem = normStem(v.stem), g = /^(m|male|남)/i.test(v.gender || '') ? 'M' : /^(f|female|여)/i.test(v.gender || '') ? 'F' : null; if (!stem || !g) return null;

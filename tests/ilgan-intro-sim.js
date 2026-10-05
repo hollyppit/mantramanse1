@@ -61,6 +61,14 @@ import(url.pathToFileURL(tmp).href).then(async X => {
     '갑을병정무기경신임계'.split('').forEach(s => { const t = IT.ilganTitle(s) + ' ' + IT.ilgan(s).join(' '); ok(M.ilganTextMismatch(s, t) === '', '기본 문구는 자기 일간으로 통과: ' + s); });
   }
 
+  // 서버: 저장돼 있는 어긋난 문구(기토 칸의 경금 부제)는 칸 단위로 비워서 내보낸다 — 제목처럼 맞는 칸은 그대로
+  Object.keys(doc).forEach(k => delete doc[k]); Object.assign(doc, { videos: [{ dayPillar: '기해', gender: 'M', videoUrl: '/api/clipfile?k=j1.mp4', title: '기해일주', subtitle: '초여름 햇살 곁의 강철, 경진일주입니다.', keywords: ['논밭'], enabled: true }],
+    ilgan: [{ stem: '기', gender: 'M', videoUrl: '/api/clipfile?k=g1.mp4', title: '당신은 기토입니다', subtitle: '당신은 경금, 단단하게 벼려진 바위와 강철입니다.\n결단이 빠르고 의리가 있으며', keywords: ['결단', '경금'], enabled: true }, { stem: '경', gender: 'M', videoUrl: '/api/clipfile?k=g2.mp4', title: '', subtitle: '당신은 경금, 단단한 바위입니다.', enabled: true }], fallback: null });
+  const gx = await get('?pillar=' + encodeURIComponent('기해') + '&gender=M');
+  ok(gx.ilgan && gx.ilgan.title === '당신은 기토입니다' && gx.ilgan.subtitle === '' && gx.ilgan.keywords.length === 0 && gx.ilgan.videoUrl, '서버: 기토 항목의 경금 부제·키워드만 비우고 제목·영상은 유지');
+  ok(gx.video && gx.video.title === '기해일주' && gx.video.subtitle === '' && gx.video.keywords.length === 1, '서버: 일주 항목의 다른 일주(경진) 부제만 비움');
+  const gk = await get('?pillar=' + encodeURIComponent('경진') + '&gender=M'); ok(gk.ilgan && gk.ilgan.subtitle.startsWith('당신은 경금'), '서버: 경금 항목의 경금 문구는 그대로');
+
   console.log(fails.length ? '\n실패 ' + fails.length + '건\n' + fails.map(f => ' ✗ ' + f).join('\n') : '\n모두 통과');
   process.exit(fails.length ? 1 : 0);
 });

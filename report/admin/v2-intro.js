@@ -28,6 +28,14 @@
   }
   var hasVideo = function (v) { return !!(v && (v.videoUrl || v.videoWebm)); };
   var hasText = function (v) { return !!(v && (v.title || v.subtitle || (v.keywords || []).length)); };
+  // 칸마다 "다른 일간/일주를 말하는가" 검사(report/v2/media.js 와 같은 규칙). 어긋나면 그 일간·일주 이름을 돌려준다
+  var mmText = function (r, t) { return r.kind === 'ilgan' ? R.Media.ilganTextMismatch(r.id, t) : R.Media.ijuTextMismatch(r.id, t); };
+  function badOf(r) { var v = recOf(r); return v ? (mmText(r, v.title || '') || mmText(r, v.subtitle || '') || mmText(r, (v.keywords || []).join(' '))) : ''; }
+  function fixBad() { // 어긋난 칸을 비운다(기본 문구로 돌아간다)
+    snapshot(); var n = 0;
+    ['ilgan', 'iju'].forEach(function (k) { rowsOf(k).forEach(function (r) { var v = recOf(r); if (!v) return; if (mmText(r, v.title || '')) { v.title = ''; n++; } if (mmText(r, v.subtitle || '')) { v.subtitle = ''; n++; } if (mmText(r, (v.keywords || []).join(' '))) { v.keywords = []; n++; } }); });
+    if (n) dirty(true); draw(true); C.toast(n ? n + '칸을 기본 문구로 되돌렸습니다 — 저장을 눌러 반영하세요' : '어긋난 문구가 없습니다');
+  }
   function defLines(r) { var T = R.IntroText; if (!T) return []; return r.kind === 'ilgan' ? T.ilgan(r.id) : T.iju(r.id); }
   function defTitle(r) { return r.kind === 'ilgan' ? r.id + ELN[r.id] + '의 기질을 타고났다' : r.id + '일주'; }
   function dirty(on) { I.dirty = on !== false; var b = $('[data-ivsave]', I.root); if (b) b.disabled = !I.dirty; }
@@ -73,14 +81,14 @@
     var rows = rowsOf(I.mode), f = I.f, q = f.q.trim();
     var list = rows.filter(function (r) {
       if (f.stem && r.stem !== f.stem) return false; if (f.branch && r.branch !== f.branch) return false; if (f.gender && r.g !== f.gender) return false;
-      var st = statusOf(r); if (f.status === 'novideo' && hasVideo(recOf(r))) return false; if (f.status === 'notext' && hasText(recOf(r))) return false; if (f.status === 'off' && st !== 'off') return false; if (f.status === 'done' && st !== 'full') return false;
+      var st = statusOf(r); if (f.status === 'novideo' && hasVideo(recOf(r))) return false; if (f.status === 'notext' && hasText(recOf(r))) return false; if (f.status === 'off' && st !== 'off') return false; if (f.status === 'done' && st !== 'full') return false; if (f.status === 'bad' && !badOf(r)) return false;
       if (q) { var v = recOf(r) || {}, hay = (r.id + (GK[r.g]) + (v.title || '') + (v.subtitle || '') + (v.keywords || []).join(' ')); if (hay.indexOf(q) < 0) return false; }
       return true;
     });
     var all = rows, nv = all.filter(function (r) { return hasVideo(recOf(r)); }).length, nt = all.filter(function (r) { return hasText(recOf(r)); }).length, ns = Object.keys(I.sel).filter(function (k) { return I.sel[k] && k.split('|')[0] === I.mode; }).length;
     var opt = function (arr, v, lbl) { return '<option value="">' + lbl + '</option>' + arr.map(function (x) { return '<option' + (v === x ? ' selected' : '') + '>' + x + '</option>'; }).join(''); };
     var h = '<div class="iv"><div class="card"><div class="ivbar"><b style="color:var(--gold)">일간·일주 소개</b><span class="muted">일간별 20개 · 일주별 120개의 영상과 문구를 한 곳에서. 회색 글자는 기본 문구예요 — 그대로 고쳐 쓰면 되고, 모두 지우면 기본 문구로 돌아갑니다.</span><span style="flex:1"></span>' +
-      '<button type="button" data-ivundo' + (I.undo ? '' : ' disabled') + '>되돌리기</button><button type="button" class="pri" data-ivsave' + (I.dirty ? '' : ' disabled') + '>저장</button></div>' +
+      '<button type="button" data-ivfix title="제목·부제·키워드가 다른 일간(일주)을 말하는 칸을 비워 기본 문구로 되돌립니다">어긋난 문구 고치기 (' + (rowsOf('ilgan').concat(rowsOf('iju')).filter(function (r) { return badOf(r); }).length) + ')</button><button type="button" data-ivundo' + (I.undo ? '' : ' disabled') + '>되돌리기</button><button type="button" class="pri" data-ivsave' + (I.dirty ? '' : ' disabled') + '>저장</button></div>' +
       '<div class="ivbar"><div class="sub2" data-ivmode><button type="button" data-m="ilgan" class="' + (I.mode === 'ilgan' ? 'on' : '') + '">일간 소개 (10×2 = 20)</button><button type="button" data-m="iju" class="' + (I.mode === 'iju' ? 'on' : '') + '">일주 소개 (60×2 = 120)</button></div>' +
       '<span class="stat muted"><span>영상 <b>' + nv + ' / ' + all.length + '</b></span><span>문구 <b>' + nt + ' / ' + all.length + '</b></span></span><span style="flex:1"></span>' +
       '<label class="navbtn" style="cursor:pointer">영상·포스터 한꺼번에 올리기<input type="file" data-ivfiles multiple accept="video/mp4,video/webm,image/*,.vtt" hidden></label><button type="button" data-ivcsvout>CSV 내려받기</button><label class="navbtn" style="cursor:pointer">CSV 올리기<input type="file" data-ivcsvin accept=".csv,text/csv" hidden></label></div>' +
@@ -92,14 +100,14 @@
       '<label>기본(fallback) 일주 영상 MP4<input type="text" data-ivfb="videoUrl" value="' + esc((I.fb || {}).videoUrl || '') + '"></label><label>fallback WebM<input type="text" data-ivfb="videoWebm" value="' + esc((I.fb || {}).videoWebm || '') + '"></label><label>fallback 포스터<input type="text" data-ivfb="posterUrl" value="' + esc((I.fb || {}).posterUrl || '') + '"></label></div></details>' +
       '<div class="ivbar"><select data-f="stem">' + opt(STEMS, f.stem, '일간 전체') + '</select>' + (I.mode === 'iju' ? '<select data-f="branch">' + opt(BRS, f.branch, '일지 전체') + '</select>' : '') +
       '<select data-f="gender"><option value="">남·여</option><option value="M"' + (f.gender === 'M' ? ' selected' : '') + '>남</option><option value="F"' + (f.gender === 'F' ? ' selected' : '') + '>여</option></select>' +
-      '<select data-f="status"><option value="">상태 전체</option><option value="novideo"' + (f.status === 'novideo' ? ' selected' : '') + '>영상 없음</option><option value="notext"' + (f.status === 'notext' ? ' selected' : '') + '>문구 없음(기본 문구)</option><option value="done"' + (f.status === 'done' ? ' selected' : '') + '>영상+문구 완료</option><option value="off"' + (f.status === 'off' ? ' selected' : '') + '>사용 안 함</option></select>' +
+      '<select data-f="status"><option value="">상태 전체</option><option value="novideo"' + (f.status === 'novideo' ? ' selected' : '') + '>영상 없음</option><option value="bad"' + (f.status === 'bad' ? ' selected' : '') + '>문구가 다른 일간을 말함</option><option value="notext"' + (f.status === 'notext' ? ' selected' : '') + '>문구 없음(기본 문구)</option><option value="done"' + (f.status === 'done' ? ' selected' : '') + '>영상+문구 완료</option><option value="off"' + (f.status === 'off' ? ' selected' : '') + '>사용 안 함</option></select>' +
       '<input type="text" data-f="q" value="' + esc(f.q) + '" placeholder="문구·키 검색" style="width:150px"><span style="flex:1"></span><span class="muted">보이는 ' + list.length + '개</span>' +
       '<button type="button" data-ivsel="vis">보이는 것 모두 선택</button><button type="button" data-ivsel="m">남성만</button><button type="button" data-ivsel="f">여성만</button><button type="button" data-ivsel="none">선택 해제</button></div></div>';
     h += ns ? bulkHtml(ns) : '';
     h += '<div class="card" style="margin-top:10px;overflow:auto;max-height:70vh"><table class="ivt"><tr><th style="width:26px"></th><th style="width:84px">대상</th><th style="width:130px">영상</th><th style="min-width:150px">제목</th><th style="min-width:260px">부제(문구 · 줄바꿈 가능)</th><th style="min-width:120px">키워드(쉼표)</th><th style="width:46px">사용</th><th style="width:96px">영상 올리기</th></tr>';
     list.forEach(function (r) {
       var v = recOf(r) || {}, k = keyOf(r.kind, r.id, r.g), dl = defLines(r).join('\n');
-      h += '<tr data-k="' + esc(k) + '"' + (v.enabled === false ? ' class="off"' : '') + '><td><input type="checkbox" data-sel' + (I.sel[k] ? ' checked' : '') + '></td><td><b>' + esc(r.id) + (r.kind === 'ilgan' ? ELN[r.id] : '') + '</b> <span class="vl">' + GK[r.g] + '</span></td>' +
+      h += '<tr data-k="' + esc(k) + '"' + (v.enabled === false ? ' class="off"' : '') + '><td><input type="checkbox" data-sel' + (I.sel[k] ? ' checked' : '') + '></td><td><b>' + esc(r.id) + (r.kind === 'ilgan' ? ELN[r.id] : '') + '</b> <span class="vl">' + GK[r.g] + '</span>' + (badOf(r) ? '<div style="color:#f0b8a8;font-size:.72rem">⚠ ' + esc(badOf(r)) + ' 문구</div>' : '') + '</td>' +
         '<td data-vc>' + chips(v) + '</td><td><input type="text" data-fld="title" class="' + (v.title ? '' : 'isdef') + '" value="' + esc(v.title || defTitle(r)) + '" placeholder="' + esc(defTitle(r)) + '" maxlength="60"></td>' +
         '<td><textarea data-fld="subtitle" class="' + (v.subtitle ? '' : 'isdef') + '" maxlength="400" rows="4" placeholder="' + esc(dl) + '">' + esc(v.subtitle || dl) + '</textarea></td><td><input type="text" data-fld="keywords" value="' + esc((v.keywords || []).join(', ')) + '"></td>' +
         '<td><input type="checkbox" data-en' + (v.enabled !== false ? ' checked' : '') + '></td><td><label class="navbtn" style="cursor:pointer;font-size:.74rem">파일 선택<input type="file" data-up accept="video/mp4,video/webm,image/*" hidden></label></td></tr>';
@@ -127,6 +135,7 @@
       var t = e.target;
       var m = t.closest('[data-ivmode] button'); if (m) { I.mode = m.dataset.m; I.f.stem = I.f.branch = ''; draw(); return; }
       if (t.closest('[data-ivsave]')) { save(); return; }
+      if (t.closest('[data-ivfix]')) { fixBad(); return; }
       if (t.closest('[data-ivundo]')) { if (I.undo) { var u = JSON.parse(I.undo); I.ilgan = u.ilgan; I.iju = u.iju; I.undo = null; dirty(true); draw(true); C.toast('되돌렸습니다'); } return; }
       var s = t.closest('[data-ivsel]'); if (s) { selectBy(s.dataset.ivsel, list); return; }
       if (t.closest('[data-ivcsvout]')) { csvOut(); return; }
@@ -167,17 +176,17 @@
   function bulk(act, list) {
     var rs = selected(); if (!rs.length) return; var box = $('.bulk', I.root), g = function (k) { var e = $('[data-b="' + k + '"]', box); return e ? (e.type === 'checkbox' ? e.checked : e.value) : ''; };
     if (act === 'clearvideo' && !confirm('선택한 ' + rs.length + '개의 영상·포스터 연결을 지웁니다(파일은 보관소에 남습니다). 계속할까요?')) return;
-    snapshot(); var n = 0;
+    snapshot(); var n = 0, skip = 0;
     rs.forEach(function (r) {
       var v = ensure(r), M = recOf({ kind: r.kind, id: r.id, g: 'M' }), F = recOf({ kind: r.kind, id: r.id, g: 'F' });
-      if (act === 'apply') { var T = g('title'), S = g('subtitle'), K = g('keywords'), ov = g('over'); if (T) { var ft = fill(T, r).trim(); if (ft && (ov || !v.title)) { v.title = ft.slice(0, 60); n++; } } if (S) { var fs = fill(S, r); if (fs.trim() && (ov || !v.subtitle)) { v.subtitle = fs.trim().slice(0, 200); n++; } } if (K) { if (ov || !(v.keywords || []).length) { v.keywords = fill(K, r).split(',').map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 8); n++; } } }
+      if (act === 'apply') { var T = g('title'), S = g('subtitle'), K = g('keywords'), ov = g('over'); if (T) { var ft = fill(T, r).trim(); if (ft && mmText(r, ft)) skip++; else if (ft && (ov || !v.title)) { v.title = ft.slice(0, 60); n++; } } if (S) { var fs = fill(S, r); if (fs.trim() && mmText(r, fs)) skip++; else if (fs.trim() && (ov || !v.subtitle)) { v.subtitle = fs.trim().slice(0, 200); n++; } } if (K) { if (ov || !(v.keywords || []).length) { v.keywords = fill(K, r).split(',').map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 8); n++; } } }
       else if (act === 'defaults') { if (g('over') || !v.subtitle) { v.subtitle = defLines(r).join('\n').slice(0, 200); n++; } }
       else if (act === 'on' || act === 'off') { v.enabled = act === 'on'; n++; }
       else if (act === 'cleartext') { v.title = ''; v.subtitle = ''; v.keywords = []; n++; }
       else if (act === 'clearvideo') { v.videoUrl = v.videoWebm = v.posterUrl = v.captionsUrl = ''; n++; }
       else if ((act === 'm2f' && r.g === 'M') || (act === 'f2m' && r.g === 'F')) { var o = ensure({ kind: r.kind, id: r.id, g: r.g === 'M' ? 'F' : 'M' }); o.title = v.title; o.subtitle = v.subtitle; o.keywords = (v.keywords || []).slice(); n++; }
     });
-    dirty(true); draw(true); C.toast(n ? n + '개 항목에 적용했습니다 — 저장을 눌러 반영하세요' : '바꿀 내용이 없습니다 (이미 쓴 문구는 "덮어쓰기"를 켜야 바뀝니다)');
+    dirty(true); draw(true); if (skip) C.toast(skip + '칸은 다른 일간·일주를 말하는 문구라 건너뛰었습니다. 문구에 {일간명}·{줄1}~{줄4} 같은 변수를 쓰면 항목마다 알맞게 채워집니다.', true); else C.toast(n ? n + '개 항목에 적용했습니다 — 저장을 눌러 반영하세요' : '바꿀 내용이 없습니다 (이미 쓴 문구는 "덮어쓰기"를 켜야 바뀝니다)');
   }
   function setFile(v, kind, url) { v[kind] = url; }
   function oneForAll(file, list) {
