@@ -504,9 +504,12 @@
   function fxMake(id, z) { var e = document.createElement('div'); e.id = id; e.setAttribute('aria-hidden', 'true'); e.style.zIndex = z; return e; }
   function fxList(cv) { return (Array.isArray(cv.chars) ? cv.chars : []).map(function (c, i) { return { c: c || {}, i: i, url: media((c || {}).src) }; }).filter(function (o) { return o.url; }); }
   function fxImg(i) { return document.querySelector('.fx-ch[data-ci="' + i + '"]'); }
+  function fxMob() { return root.innerWidth <= 700; } // 모바일 배치 기준 (CSS 의 700px 와 같음)
+  function fxKeys(c) { return fxMob() && c.mobile ? ['mx', 'my', 'msize'] : ['x', 'y', 'size']; }
   function fxPlace(img, c) {
-    var s = img.style;
-    s.left = num(c.x, 75) + '%'; s.bottom = num(c.y, 0) + '%'; s.height = Math.max(3, num(c.size, 60)) + 'svh';
+    var s = img.style, k = fxKeys(c);
+    s.display = fxMob() && c.mhide ? 'none' : '';
+    s.left = num(c[k[0]], num(c.x, 75)) + '%'; s.bottom = num(c[k[1]], num(c.y, 0)) + '%'; s.height = Math.max(3, num(c[k[2]], num(c.size, 60))) + 'svh';
     s.opacity = Math.min(1, Math.max(0, num(c.opacity, 1)));
     s.setProperty('--fl', c.flip ? -1 : 1);
     s.setProperty('--fa', Math.max(0, num(c.floatRange, 12)) + 'px'); s.setProperty('--fs', Math.max(1, num(c.floatSpeed, 7)) + 's'); s.setProperty('--ft', Math.max(0, num(c.tilt, 0.8)) + 'deg');
@@ -528,16 +531,18 @@
       if (!img && !hd) return;
       var i = hd ? fxSel : +img.getAttribute('data-ci'), c = ((C.settings.cover || {}).chars || [])[i]; if (!c) return;
       fxSel = i; fxHandle();
-      st = { mode: hd ? 'size' : 'move', x: e.clientX, y: e.clientY, cx: num(c.x, 75), cy: num(c.y, 0), cs: num(c.size, 60), c: c, i: i };
+      if (fxMob() && !c.mobile) { c.mobile = true; c.mx = num(c.x, 75); c.my = num(c.y, 0); c.msize = num(c.size, 60); } // 모바일 화면에서 만지면 모바일 따로 설정
+      var k = fxKeys(c);
+      st = { mode: hd ? 'size' : 'move', x: e.clientX, y: e.clientY, cx: num(c[k[0]], 75), cy: num(c[k[1]], 0), cs: num(c[k[2]], 60), c: c, i: i, k: k, m: fxMob() };
       try { t.setPointerCapture(e.pointerId); } catch (er) { } e.preventDefault();
     });
     el.addEventListener('pointermove', function (e) {
       if (!st) return; var dx = (e.clientX - st.x) / root.innerWidth * 100, dy = (e.clientY - st.y) / root.innerHeight * 100;
-      if (st.mode === 'move') { st.c.x = Math.round((st.cx + dx) * 10) / 10; st.c.y = Math.round((st.cy - dy) * 10) / 10; }
-      else st.c.size = Math.max(3, Math.round((st.cs - dy) * 10) / 10);
+      if (st.mode === 'move') { st.c[st.k[0]] = Math.round((st.cx + dx) * 10) / 10; st.c[st.k[1]] = Math.round((st.cy - dy) * 10) / 10; }
+      else st.c[st.k[2]] = Math.max(3, Math.round((st.cs - dy) * 10) / 10);
       var img = fxImg(st.i); if (img) fxPlace(img, st.c); fxHandle();
     });
-    function end() { if (!st) return; var c = st.c, i = st.i; st = null; try { parent.postMessage({ t: 'st-char', i: i, x: c.x, y: c.y, size: c.size }, location.origin); } catch (er) { } }
+    function end() { if (!st) return; var c = st.c, i = st.i, st0 = st; st = null; try { parent.postMessage({ t: 'st-char', i: i, m: st0.m, x: c[st0.k[0]], y: c[st0.k[1]], size: c[st0.k[2]] }, location.origin); } catch (er) { } }
     el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
   }
   function coverFx(cv) {
@@ -555,7 +560,7 @@
     list.forEach(function (o) { var img = fxImg(o.i); fxPlace(img, o.c); img.onload = fxHandle; });
     if (PREVIEW) fxHandle();
     fxOn = true; fxScroll();
-    if (!coverFx.bound) { coverFx.bound = true; root.addEventListener('scroll', fxScroll, { passive: true }); root.addEventListener('resize', function () { fxScroll(); fxHandle(); }); }
+    if (!coverFx.bound) { coverFx.bound = true; root.addEventListener('scroll', fxScroll, { passive: true }); root.addEventListener('resize', function () { fxScroll(); var cs = (C.settings.cover || {}).chars || []; document.querySelectorAll('.fx-ch').forEach(function (img) { var c = cs[+img.getAttribute('data-ci')]; if (c) fxPlace(img, c); }); fxHandle(); }); }
   }
   function fxScroll() {
     if (!fxEl || !fxOn) return;

@@ -695,7 +695,7 @@ summary { cursor:pointer; padding:4px 0; }
     else if (d.t === 'st-char' && HM.story) { // 미리보기에서 캐릭터를 끌었다: 값을 목록에 반영 (열려 있던 항목은 그대로 유지)
       var cv = (HM.story.settings || {}).cover, ch = cv && cv.chars && cv.chars[d.i];
       if (ch) {
-        ch.x = d.x; ch.y = d.y; ch.size = d.size;
+        if (d.m) { ch.mobile = true; ch.mx = d.x; ch.my = d.y; ch.msize = d.size; } else { ch.x = d.x; ch.y = d.y; ch.size = d.size; }
         var q = function () { var g = document.querySelector('#hmForm details.hmg'); return g ? g.querySelectorAll('details.hmitem') : []; };
         var opened = [].map.call(q(), function (x) { return x.open; });
         HM.openGrp = 'cover'; hmChanged(); hmBuild();
