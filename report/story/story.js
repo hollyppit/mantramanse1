@@ -498,23 +498,58 @@
   }
   // 인트로 커버 (스토리 맨 앞 한 화면). 관리자 settings.cover 로 이미지·문구·표시 여부를 바꾼다.
   // 배경·캐릭터: 화면에 고정된 층. 맨 처음에만 보이고 스크롤하면 서서히 사라진다.
-  var fxEl = null, fxOn = false;
+  // 캐릭터는 여러 장: x=가로 가운데(화면 너비의 %), y=아래 여백(화면 높이의 %), size=높이(화면 높이의 %).
+  // 관리자 미리보기(?preview=1)에서는 끌어서 옮기고, 오른쪽 위 네모를 끌어 크기를 바꾼다.
+  var fxEl = null, fxOn = false, fxSel = -1;
+  function fxList(cv) { return (Array.isArray(cv.chars) ? cv.chars : []).map(function (c, i) { return { c: c || {}, i: i, url: media((c || {}).src) }; }).filter(function (o) { return o.url; }); }
+  function fxPlace(img, c) {
+    img.style.left = num(c.x, 75) + '%'; img.style.bottom = num(c.y, 0) + '%'; img.style.height = Math.max(3, num(c.size, 60)) + 'svh';
+    img.style.opacity = Math.min(1, Math.max(0, num(c.opacity, 1)));
+  }
+  function fxHandle() {
+    var hd = fxEl && fxEl.querySelector('.fx-hd'); if (!hd) return;
+    var img = fxSel >= 0 && fxEl.querySelector('.fx-ch[data-ci="' + fxSel + '"]');
+    if (!img) { hd.hidden = true; return; }
+    var r = img.getBoundingClientRect(); hd.hidden = false; hd.style.left = (r.right - 7) + 'px'; hd.style.top = (r.top - 7) + 'px';
+    fxEl.querySelectorAll('.fx-ch').forEach(function (x) { x.classList.toggle('sel', x === img); });
+  }
+  function fxEdit() {
+    if (fxEl._edit) return; fxEl._edit = true; fxEl.classList.add('edit');
+    var st = null;
+    fxEl.addEventListener('pointerdown', function (e) {
+      var t = e.target, img = t.closest && t.closest('.fx-ch'), hd = t.closest && t.closest('.fx-hd');
+      if (!img && !hd) return;
+      var i = hd ? fxSel : +img.getAttribute('data-ci'), c = ((C.settings.cover || {}).chars || [])[i]; if (!c) return;
+      fxSel = i; fxHandle();
+      st = { mode: hd ? 'size' : 'move', x: e.clientX, y: e.clientY, cx: num(c.x, 75), cy: num(c.y, 0), cs: num(c.size, 60), c: c, i: i };
+      try { t.setPointerCapture(e.pointerId); } catch (er) { } e.preventDefault();
+    });
+    fxEl.addEventListener('pointermove', function (e) {
+      if (!st) return; var dx = (e.clientX - st.x) / root.innerWidth * 100, dy = (e.clientY - st.y) / root.innerHeight * 100;
+      if (st.mode === 'move') { st.c.x = Math.round((st.cx + dx) * 10) / 10; st.c.y = Math.round((st.cy - dy) * 10) / 10; }
+      else st.c.size = Math.max(3, Math.round((st.cs - dy) * 10) / 10);
+      var img = fxEl.querySelector('.fx-ch[data-ci="' + st.i + '"]'); if (img) fxPlace(img, st.c); fxHandle();
+    });
+    function end() { if (!st) return; var c = st.c, i = st.i; st = null; try { parent.postMessage({ t: 'st-char', i: i, x: c.x, y: c.y, size: c.size }, location.origin); } catch (er) { } }
+    fxEl.addEventListener('pointerup', end); fxEl.addEventListener('pointercancel', end);
+    document.addEventListener('pointerdown', function (e) { if (!e.target.closest || !e.target.closest('.fx-ch, .fx-hd')) { fxSel = -1; fxHandle(); } });
+  }
   function coverFx(cv) {
-    var on = !!(cv && cv.show !== false && (media(cv.bgSrc) || media(cv.charSrc)));
-    if (!on) { if (fxEl) fxEl.hidden = true; fxOn = false; return; }
+    var bg = cv && cv.show !== false ? media(cv.bgSrc) : '', list = cv && cv.show !== false ? fxList(cv) : [];
+    if (!bg && !list.length) { if (fxEl) fxEl.hidden = true; fxOn = false; return; }
     if (!fxEl) { fxEl = document.createElement('div'); fxEl.id = 'coverFx'; fxEl.setAttribute('aria-hidden', 'true'); document.body.insertBefore(fxEl, document.body.firstChild); }
-    var al = /^(left|center|right)$/.test(cv.charAlign) ? cv.charAlign : 'right', x = num(cv.charX, 0), base = al === 'left' ? 4 : al === 'right' ? 96 : 50;
-    var bg = media(cv.bgSrc), ch = media(cv.charSrc);
     fxEl.hidden = false;
     fxEl.innerHTML = (bg ? '<div class="fx-bg" style="background-image:url(&quot;' + esc(bg) + '&quot;);opacity:' + Math.min(1, Math.max(0, num(cv.bgOpacity, 0.6))) + '"></div>' : '') +
-      (ch ? '<img class="fx-ch" src="' + esc(ch) + '" alt="" decoding="async" style="height:' + Math.min(100, Math.max(10, num(cv.charSize, 70))) + 'svh;left:' + (base + x) + '%;transform:translateX(' + (al === 'left' ? '0' : al === 'right' ? '-100%' : '-50%') + ');opacity:' + Math.min(1, Math.max(0, num(cv.charOpacity, 1))) + '">' : '');
+      list.map(function (o) { return '<img class="fx-ch" data-ci="' + o.i + '" src="' + esc(o.url) + '" alt="" decoding="async" draggable="false">'; }).join('') + (PREVIEW ? '<i class="fx-hd" hidden></i>' : '');
+    list.forEach(function (o) { var img = fxEl.querySelector('.fx-ch[data-ci="' + o.i + '"]'); fxPlace(img, o.c); img.onload = fxHandle; });
+    if (PREVIEW) { fxEdit(); fxHandle(); }
     fxOn = true; fxScroll();
-    if (!coverFx.bound) { coverFx.bound = true; root.addEventListener('scroll', fxScroll, { passive: true }); root.addEventListener('resize', fxScroll); }
+    if (!coverFx.bound) { coverFx.bound = true; root.addEventListener('scroll', fxScroll, { passive: true }); root.addEventListener('resize', function () { fxScroll(); fxHandle(); }); }
   }
   function fxScroll() {
     if (!fxEl || !fxOn) return;
     var o = Math.max(0, 1 - root.scrollY / (root.innerHeight * 0.75));
-    fxEl.style.opacity = o; fxEl.style.visibility = o <= 0 ? 'hidden' : 'visible';
+    fxEl.style.opacity = o; fxEl.style.visibility = o <= 0 ? 'hidden' : 'visible'; fxHandle();
   }
   function cover() {
     var el = document.getElementById('cover'); if (!el) return;

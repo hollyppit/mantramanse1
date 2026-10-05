@@ -249,7 +249,11 @@ em { font-style: normal; background: linear-gradient(180deg, var(--gold-l), var(
 /* 인트로 커버 */
 #coverFx { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .fx-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
-.fx-ch { position: absolute; bottom: 0; width: auto; max-width: 90vw; object-fit: contain; }
+.fx-ch { position: absolute; width: auto; max-width: none; transform: translateX(-50%); }
+#coverFx.edit .fx-ch { pointer-events: auto; cursor: move; touch-action: none; user-select: none; }
+.fx-ch.sel { outline: 1px dashed var(--gold); outline-offset: 2px; }
+.fx-hd { position: fixed; width: 14px; height: 14px; background: var(--gold); border: 1px solid #14100A; border-radius: 2px; cursor: nesw-resize; pointer-events: auto; touch-action: none; }
+.preview #cover, .preview .cv-in { pointer-events: none; }
 #cover { position: relative; z-index: 1; min-height: 100vh; min-height: 100svh; display: grid; place-items: center; overflow: hidden; padding: 64px 20px 40px; }
 .cv-in { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 100%; animation: pg 1.4s ease both; }
 .cv-lamp { height: min(50vh, 460px); height: min(50svh, 460px); width: min(70vw, 460px); display: grid; place-items: center; }
