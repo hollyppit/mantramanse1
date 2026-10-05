@@ -81,7 +81,7 @@
     var title = cfg.title, sub = cfg.sub || '', kw = cfg.kw || [], poster = clip && clip.posterUrl || '', rp = cfg.kind === 'iju' ? 'awk' : 'ilgan', ev = cfg.kind === 'iju' ? 'iju' : 'ilgan';
     cap.innerHTML = '<div class="t" data-tx="' + rp + '.title">' + esc(title) + '</div>' + (sub ? '<div class="s" data-tx="' + rp + '.sub">' + esc(sub).replace(/\n/g, '<br>') + '</div>' : '') + (kw.length ? '<div class="k" data-tx="' + rp + '.kw">' + kw.map(function (k) { return '<span>' + esc(k) + '</span>'; }).join('') + '</div>' : '');
     function finish(kind) {
-      if (done) return; done = true; skip.hidden = true; snd.hidden = true;
+      if (done) return; done = true; skip.hidden = true; snd.hidden = true; if (R.Bgm) R.Bgm.duck(false);
       if (kind === 'completed') T(ev + '_video_completed', {}); else if (kind === 'skipped') T(ev + '_video_skipped', {});
       cfg.onDone(kind);
     }
@@ -102,7 +102,7 @@
       v.addEventListener('ended', function () { finish('completed'); });
       v.addEventListener('error', function () { if (!done) { v.remove(); still(); } }, true);
       var p = v.play(); if (p && p.catch) p.catch(function () { v.controls = false; if (poster) v.load(); setTimeout(function () { if (v.paused && !done) { v.remove(); still(); } }, 1200); });
-      snd.onclick = function () { v.muted = !v.muted; snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; };
+      snd.onclick = function () { v.muted = !v.muted; if (R.Bgm) R.Bgm.duck(!v.muted); snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; };
       skip.onclick = function () { v.pause(); finish('skipped'); };
     }
   }
@@ -122,7 +122,7 @@
     playStage({ textOnly: tOnly, kind: 'iju', clip: clip, title: (v && v.title) || (sd.dayPillar.ko + '일주'), sub: (v && v.subtitle) || introLines('iju'), kw: v && v.keywords, onDone: next });
   }
   var withCopy = function (scenes) { return R.Translator.applyCopy(scenes, S.pack && S.pack.sceneCopy, R.Narrator.heroVars(S.sd, S.name)); }; // 관리자가 고친 문구·이름 강조(content.sceneCopy)
-  function intro() { ilganStage(function () { ijuStage(prologue); }); }
+  function intro() { if (R.Bgm) R.Bgm.play('cinematic'); ilganStage(function () { ijuStage(prologue); }); } // 배경음악은 일간 인트로(첫 화면)부터 흐른다(입력 제출 = 사용자의 첫 터치)
   function cinemaMediaFor(used) { return function (sc) { if (sc.bg === 'black') return null; return R.Director.pickMedia(sc, (S.pack && S.pack.lib && S.pack.lib.media) || S.media, { usedIds: used }, sc.chapterId || 'c00'); }; }
   function playCinema(scenes, onEnd, label, skipLabel) {
     if (!R.CinemaRender || !scenes || !scenes.length) { onEnd('missing'); return; }
