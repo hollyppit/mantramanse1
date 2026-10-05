@@ -8,8 +8,10 @@
     dominantGroup: ['가장 강한 십성군', 3], weakestGroup: ['가장 약한 십성군', 2], strength: ['신강약', 3], hasRoot: ['원국 통근', 1],
     pattern: ['격국·구조', 3], star: ['신살', 2], career: ['직업 분야', 3],
     daewoonSeason: ['현재 대운 계절', 3], project: ['프로젝트(상품)', 4], seunSeason: ['올해 계절', 3], monthSeason: ['이달 계절', 3], needTag: ['필요 행동', 2],
+    monthBranch: ['월지(태어난 계절)', 3], dayBranch: ['일지(배우자 자리)', 2], groupHigh: ['과다한 십성군(35% 이상)', 3], groupZero: ['거의 없는 십성군(5% 미만)', 3],
   };
-  var ARRAY_FACTS = { pattern: 1, star: 1, career: 1, needTag: 1 };
+  var HIGH = 35, ZERO = 5; // 십성군 과다·결핍 기준(%) — 표현용 기준이며 엔진 계산이 아니다
+  var ARRAY_FACTS = { pattern: 1, star: 1, career: 1, needTag: 1, groupHigh: 1, groupZero: 1 };
 
   // sd(Structured Saju Data) → 평평한 사실. 값이 없으면 키 자체를 넣지 않는다.
   function flatten(sd, over) {
@@ -25,6 +27,11 @@
     if (sd.currentDaewoon && sd.currentDaewoon.season) f.daewoonSeason = sd.currentDaewoon.season;
     if (sd.sewoon && sd.sewoon.season) f.seunSeason = sd.sewoon.season;
     var m0 = (sd.monthlyLuck || [])[0]; if (m0 && m0.season) f.monthSeason = m0.season;
+    if (sd.pillars && sd.pillars.month) f.monthBranch = sd.pillars.month.ko[1];
+    f.dayBranch = sd.dayPillar.ko[1];
+    var gk = Object.keys(sd.groups || {});
+    f.groupHigh = gk.filter(function (g) { return sd.groups[g] >= HIGH; });
+    f.groupZero = gk.filter(function (g) { return sd.groups[g] < ZERO; });
     f.needTag = [];
     for (var k in (over || {})) f[k] = over[k];
     return f;
@@ -93,5 +100,5 @@
   }
 
   root.ReportV2 = root.ReportV2 || {};
-  root.ReportV2.Rules = { FIELDS: FIELDS, flatten: flatten, evaluate: evaluate, rank: rank, pick: pick, tpl: tpl, hash: hash, stable: stable };
+  root.ReportV2.Rules = { FIELDS: FIELDS, flatten: flatten, HIGH: HIGH, ZERO: ZERO, evaluate: evaluate, rank: rank, pick: pick, tpl: tpl, hash: hash, stable: stable };
 })(typeof window !== 'undefined' ? window : globalThis);

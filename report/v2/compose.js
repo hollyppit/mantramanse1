@@ -35,7 +35,10 @@
   }
 
   function vars(sd, facts) {
-    return Object.assign({}, facts, { el: sd.groupEl, groupEl: sd.groupEl, yongEl: facts.yongEl || sd.dominantEl, lackEl: facts.lackEl || '' });
+    var pct = {}, elPct = {};
+    Object.keys(sd.groups || {}).forEach(function (g) { pct[g] = Math.round(sd.groups[g]); });
+    Object.keys(sd.fiveElements || {}).forEach(function (e) { elPct[e] = Math.round(sd.fiveElements[e]); });
+    return Object.assign({}, facts, { el: sd.groupEl, groupEl: sd.groupEl, yongEl: facts.yongEl || sd.dominantEl, lackEl: facts.lackEl || '', pct: pct, elPct: elPct, strengthZone: sd.strength.zone });
   }
   function view(c, v) { // 선택된 모듈 → 화면용(템플릿 치환 포함)
     var T = R.Rules.tpl, m = c.mod;

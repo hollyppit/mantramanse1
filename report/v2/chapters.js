@@ -17,14 +17,14 @@
   }
 
   var CHAPTERS = [
-    C(1, 1, '나의 일주', '내가 타고난 한 글자의 이야기', 'module', ['identity']),
+    C(1, 1, '나의 일주', '내가 타고난 한 글자의 이야기', 'module', ['identity'], { maxModules: 2 }),
     C(2, 1, '내 안의 다섯 기운', '목·화·토·금·수의 균형', 'module', ['elements']),
-    C(3, 1, '타고난 성격과 기질', '나를 움직이는 기본 성향', 'module', ['personality']),
+    C(3, 1, '타고난 성격과 기질', '나를 움직이는 기본 성향', 'module', ['personality'], { maxModules: 4 }),
     C(4, 1, '숨겨진 재능', '아직 다 쓰지 않은 힘', 'module', ['talent']),
-    C(5, 1, '나의 약점과 그림자', '알아두면 덜 흔들리는 부분', 'module', ['shadow']),
-    C(6, 2, '직업 적성 진단', '어떤 환경과 역할에서 힘이 나는가', 'module', ['career'], { maxModules: 2 }),
+    C(5, 1, '나의 약점과 그림자', '알아두면 덜 흔들리는 부분', 'module', ['shadow'], { maxModules: 4 }),
+    C(6, 2, '직업 적성 진단', '어떤 환경과 역할에서 힘이 나는가', 'module', ['career'], { maxModules: 3 }),
     C(7, 2, '나의 성공 방식', '나에게 맞는 성과 내는 길', 'module', ['success']),
-    C(8, 2, '재물 그릇과 돈 버는 방식', '돈을 대하는 행동 성향', 'module', ['wealth'], { maxModules: 2 }),
+    C(8, 2, '재물 그릇과 돈 버는 방식', '돈을 대하는 행동 성향', 'module', ['wealth'], { maxModules: 3 }),
     C(9, 2, '연애 성향', '끌림과 사랑 표현의 방식', 'module', ['love']),
     C(10, 2, '결혼과 배우자', '오래 가는 관계에서 바라는 것', 'module', ['marriage']),
     C(11, 2, '대인관계 설명서', '사람을 대하는 나의 방식', 'module', ['relationship']),

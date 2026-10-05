@@ -94,6 +94,7 @@
     explanation: { media: true, types: ['image', 'symbol'], role: 'support', effect: ['parallax', 'low'] },
     visualMetaphor: { media: true, types: ['image', 'videoLoop', 'symbol'], role: 'atmosphere', effect: ['mist', 'low'] },
     dataVisualization: { media: false, types: [], role: 'support', effect: ['fade', 'low'] },
+    chart: { media: false, types: [], role: 'support', effect: ['fade', 'low'] },
     timeline: { media: false, types: [], role: 'support', effect: ['fade', 'low'] },
     recommendation: { media: true, types: ['image', 'symbol'], role: 'support', effect: ['fade', 'low'] },
     warning: { media: true, types: ['image', 'videoLoop'], role: 'atmosphere', effect: ['mist', 'low'] },
@@ -126,9 +127,12 @@
   }
 
   // 챕터 구조 → Scene 배열. 장면 종류 순서가 단조롭지 않게(연속 같은 media 타입 방지) 구성한다.
+  var CHART_OF = { c02: 'elements', c03: 'strength', c04: 'groups', c05: 'groups' };
+  function chartKind(c) { return CHART_OF[c.base || c.id] || null; }
   function planScenes(c) {
     var p = ['chapterIntro'];
     if (c.interpretation) p.push('insight');
+    if (chartKind(c)) p.push('chart'); // 계산된 분포를 그림으로(오행·신강약·십성군)
     if (c.items && c.kind === 'daewoon') p.push('timeline'); else if (c.items) p.push('dataVisualization');
     if (c.meaning || (c.details && c.details.length)) p.push('explanation');
     if (c.kind === 'remedy') p.push('recommendation');
@@ -162,6 +166,7 @@
       else if (st === 'warning') { sc.headline = '조심할 점'; sc.body = (c.extra && c.extra.caution && c.extra.caution[0]) || c.meaning; }
       else if (st === 'action') { sc.headline = '지금 할 수 있는 행동'; sc.bullets = [{ label: 'ACTION', items: c.action || [] }]; }
       else if (st === 'chapterEnding') { sc.headline = c.headline; sc.body = ''; }
+      else if (st === 'chart') { sc.headline = c.title; sc.chart = chartKind(c); }
       else if (st === 'dataVisualization' || st === 'timeline') { sc.headline = c.title; sc.data = c.items; }
       // 같은 종류가 연속되지 않게: 직전 장면과 같은 media type 이면 다른 타입을 우선
       if (rule.media && !(st === 'chapterEnding' && !c.interpretation)) {
@@ -205,6 +210,6 @@
   // 관리자 저장 가중치 적용(없는 값은 기본 유지)
   function configure(sc) { if (!sc) return CONFIG; if (sc.w) for (var k in sc.w) CONFIG.w[k] = +sc.w[k]; ['priorityDiv', 'adjacentChapter', 'sameTypeRun'].forEach(function (k) { if (typeof sc[k] === 'number') CONFIG[k] = sc[k]; }); return CONFIG; }
 
-  R.Scenes = { configure: configure, TAX: TAX, CONFIG: CONFIG, SCENE_RULES: SCENE_RULES, VIDEO_TYPES: VIDEO_TYPES, classify: classify, normalize: normalize, search: search, choose: choose, intent: intent, planScenes: planScenes,
+  R.Scenes = { configure: configure, TAX: TAX, CONFIG: CONFIG, SCENE_RULES: SCENE_RULES, VIDEO_TYPES: VIDEO_TYPES, classify: classify, normalize: normalize, search: search, choose: choose, intent: intent, planScenes: planScenes, chartKind: chartKind,
     buildChapterScenes: buildChapterScenes, actTransition: actTransition, coverage: coverage };
 })(typeof window !== 'undefined' ? window : globalThis);

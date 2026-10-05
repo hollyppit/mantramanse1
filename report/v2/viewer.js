@@ -150,6 +150,7 @@
         '<div class="no" data-tx="intro.no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="down" aria-hidden="true">SCROLL ↓</div></div></section>';
     }
     if (t === 'insight') return '<section class="scene rv" ' + id + '><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead" data-tx="insight.lead">' + lines(s.body) + '</p>' + (s.media ? media(s) : '') + '</section>';
+    if (t === 'chart') return '<section class="scene rv" ' + id + '>' + R.Charts.html(s.chart, S.sd) + '</section>';
     if (t === 'explanation') {
       var det = (c.details || []).map(function (d) { return '<div class="item"><b>' + esc(d.headline) + '</b><span>' + esc(d.summary) + '</span></div>'; }).join('');
       var mt = String(c.meaning || ''), cut = mt.search(/[.!?]\s/), first = cut > 0 ? mt.slice(0, cut + 1) : mt, rest = cut > 0 ? mt.slice(cut + 1).trim() : '';

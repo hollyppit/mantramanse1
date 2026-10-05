@@ -32,10 +32,11 @@
   }
   function bullets(c) { var s = (c.scenes || []).filter(function (x) { return x.sceneType === 'recommendation' && x.bullets; })[0]; return s ? s.bullets : []; }
 
-  function chapterPage(c, rep, n, total, who, color) {
+  function chapterPage(c, rep, n, total, who, color, sd) {
     var act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}, S = R.SajuData.SEASONS, h = '';
     h += '<div class="band"></div><div class="in"><div class="act">' + esc(act.roman || '') + ' · ' + esc(act.title || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2>' + esc(c.title) + '</h2><div class="sub">' + esc(c.subtitle || '') + '</div>' + heroImg(c) +
       '<div class="hl">' + nl(c.headline) + '</div><span class="fact">FACT · ' + esc(c.fact) + '</span><p>' + nl(c.interpretation) + '</p>';
+    var ck = R.Scenes.chartKind ? R.Scenes.chartKind(c) : null; if (ck && sd) h += '<div style="margin:10px 0">' + R.Charts.html(ck, sd, { theme: 'light' }) + '</div>';
     if (c.meaning) h += '<div class="cap">MEANING</div><p>' + nl(c.meaning) + '</p>';
     if (c.kind === 'daewoon' && c.items) h += '<div class="cap">10-YEAR SEASONS</div><table><tr><th>나이</th><th>기간</th><th>대운</th><th>계절</th><th>핵심</th></tr>' + c.items.map(function (d) { return '<tr' + (d.isCurrent ? ' style="background:#F3EEE1"' : '') + '><td>' + d.startAge + '세</td><td>' + d.startYear + '–' + d.endYear + '</td><td>' + esc(d.ganzhi) + '</td><td>' + (SEA_ICON[d.season] || '') + ' ' + esc(d.seasonName || '') + (d.isCurrent ? ' (지금)' : '') + '</td><td style="text-align:left">' + esc((d.module && d.module.headline) || '') + '</td></tr>'; }).join('') + '</table>';
     else if (c.kind === 'monthly' && c.items) h += '<div class="cap">12 MONTHS</div><div class="mo">' + c.items.map(function (m) { var x = (m.module && m.module.extra) || {}; return '<div><b>' + m.month + '월 · ' + (SEA_ICON[m.season] || '') + esc(m.seasonName || '') + '</b><br><span style="color:#6B6A63">DO ' + esc((x.dos || []).slice(0, 2).join(', ')) + '</span></div>'; }).join('') + '</div>';
@@ -71,7 +72,7 @@
       (sd.patterns.length ? '<div class="cap">PATTERNS</div><p>' + esc(sd.patterns.map(function (p) { return p.name; }).join(' · ')) + '</p>' : '') + '<div class="cap">NOTE</div><p style="color:#6B6A63;font-size:12px">이 표의 값은 만세력 계산 결과이며, 이후 해석은 이 값에 사람이 작성한 해석 모듈을 연결해 구성되었습니다.</p></div>', color, 2, total, who)); n++;
     // 3.. 챕터
     rep.chapters.forEach(function (c) {
-      n++; if (c.kind === 'summary' && c.plan) out.push(summaryPage(c, rep, n, total, who, color)); else out.push(chapterPage(c, rep, n, total, who, color));
+      n++; if (c.kind === 'summary' && c.plan) out.push(summaryPage(c, rep, n, total, who, color)); else out.push(chapterPage(c, rep, n, total, who, color, sd));
     });
     // 마무리
     n++;
