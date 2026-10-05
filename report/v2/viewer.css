@@ -256,3 +256,15 @@ dialog#drawer { border: 0; padding: 0; background: transparent; color: var(--ink
 @keyframes lanIn { to { opacity: 1; } }
 @keyframes lanOut { from { opacity: 1; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .lanx { display: none !important; } }
+
+/* 運路: 계절 칩의 한자 */
+.sea .hj { font-style: normal; font-weight: 600; letter-spacing: .02em; }
+
+/* 運路 흐름 차트: 먹이 번지듯 선이 그려진다(동작 줄이기에서는 정지) */
+@media (prefers-reduced-motion: no-preference) {
+  .ink-anim { stroke-dasharray: 1; stroke-dashoffset: 1; animation: ink-draw 2.6s cubic-bezier(.4, .1, .2, 1) .2s forwards; }
+  .ink-bleed.ink-anim { animation-duration: 3.2s; }
+  .ink-area { opacity: 0; animation: ink-fill 2s 1.2s ease forwards; }
+}
+@keyframes ink-draw { to { stroke-dashoffset: 0; } }
+@keyframes ink-fill { to { opacity: 1; } }

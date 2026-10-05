@@ -363,20 +363,47 @@
      어느 장면에 어떤 클립을 쓸지는 고정하지 않고 선택 로직(태그 점수 + AI)이 챕터 안에서 고른다. */
   var SCENE_KO = { chapterIntro: '챕터 첫 화면 (대표 이미지·영상)', insight: '핵심 해석', explanation: '의미 설명', visualMetaphor: '상징 장면', recommendation: '추천 카드', warning: '조심할 점', action: '행동', chapterEnding: '챕터 끝', transition: '전환' };
   var MTYPE_KO = { video: '영상', image: '이미지', videoLoop: '짧은 반복 영상', backgroundVideo: '배경 영상', character: '캐릭터 컷', symbol: '상징 이미지', chapterCover: '챕터 커버', transition: '전환 영상' };
-  var INTENT_KO = { element: '오행', state: '상태', theme: '주제', emotion: '감정', scene: '장면', role: '역할' };
-  var needsMedia = function (s) { return R.Scenes.SCENE_RULES[s.sceneType] && R.Scenes.SCENE_RULES[s.sceneType].media; };
+  var INTENT_KO = { element: '오행', state: '상태', theme: '주제', emotion: '감정', scene: '장면', role: '역할', action: '행동' };
+  var needsMedia = function (s) { if (s.sceneType === 'cinema') return s.kind === 'script' && s.bg !== 'black'; return R.Scenes.SCENE_RULES[s.sceneType] && R.Scenes.SCENE_RULES[s.sceneType].media; }; // 영화 장면(현실·은유 장면)도 클립이 필요하다. 검은 화면·타이틀·데이터 카드는 제외
   function intentTags(s) { // 장면 의도 → 분류별 태그(허용 목록에 있는 것만)
     var T = R.Scenes.TAX, it = s.intent || {}, f = function (arr, k) { return (arr || []).filter(function (x, i, a) { return T[k].indexOf(x) >= 0 && a.indexOf(x) === i; }); };
+    if (s.sceneType === 'cinema') { var mi = s.mediaIntent || {}, cl = R.Scenes.classify((s.cinema && s.cinema.mediaTags) || []); return { element: f(mi.elements, 'element'), state: f(mi.states, 'state'), emotion: f(mi.emotions, 'emotion'), scene: f((mi.scenes || []).concat(cl.scene || []), 'scene'), theme: f(mi.themes, 'theme'), role: [], action: f(mi.actions, 'action') }; }
     return { element: f(it.desiredElements, 'element'), state: f(it.desiredStates, 'state'), emotion: f(it.desiredEmotion, 'emotion'), scene: f(it.desiredScenes, 'scene'), theme: f(it.desiredThemes, 'theme'), role: f([it.visualRole], 'role') };
   }
   function sourceRow(c, s) {
-    var tg = intentTags(s), m = s.media, pre = (s.intent && s.intent.preferredMediaType) || [], by = {}; (ST.media || []).forEach(function (a) { by[a.id] = a; });
+    var cin = s.sceneType === 'cinema', tg = intentTags(s), m = s.media, pre = cin ? ['image', 'videoLoop', 'video', 'backgroundVideo'] : ((s.intent && s.intent.preferredMediaType) || []), by = {}; (ST.media || []).forEach(function (a) { by[a.id] = a; });
     var cands = (s.candidates || []).filter(function (x) { return x.score > 0; }), own = cands.filter(function (x) { var a = by[x.assetId]; return a && a.chapterIds && a.chapterIds.indexOf(c.id) >= 0; }).length;
-    var chips = ['element', 'state', 'theme', 'emotion', 'scene', 'role'].map(function (k) { return tg[k].length ? '<span class="pill">' + INTENT_KO[k] + ' ' + esc(tg[k].join('·')) + '</span>' : ''; }).join('');
+    var chips = ['element', 'state', 'theme', 'emotion', 'scene', 'role', 'action'].map(function (k) { return tg[k].length ? '<span class="pill">' + INTENT_KO[k] + ' ' + esc(tg[k].join('·')) + '</span>' : ''; }).join('');
     var status = m ? '<span class="pill" style="color:#7FE0BC;border-color:#2e6e57">선택됨 · ' + esc(m.assetId) + '</span>' : '<span class="pill w">클립 필요</span>';
-    return '<div class="srow2" data-cid="' + esc(c.id) + '" data-st="' + esc(s.sceneType) + '">' + (m ? thumb(m) : '<span class="thm" style="display:grid;place-items:center;color:var(--ink3);font-size:.68rem">없음</span>') + '<div style="flex:1;min-width:0"><b>' + esc(SCENE_KO[s.sceneType] || s.sceneType) + '</b> ' + status +
-      '<div class="muted" style="font-size:.76rem;margin:2px 0">필요한 클립: ' + esc(pre.map(function (t) { return MTYPE_KO[t] || t; }).join(' › ')) + ' · 이 챕터에서 쓸 수 있는 후보 ' + cands.length + '개' + (own ? ' (이 챕터 전용 ' + own + '개)' : '') + '</div><div style="display:flex;flex-wrap:wrap;gap:2px">' + chips + '</div>' +
+    var label = cin ? '영화 장면 · ' + esc(((((s.cinema || {}).segments || [])[0]) || {}).text || s.sceneId).slice(0, 18) + ' <small class="muted">' + esc(s.sceneId) + '</small>' : esc(SCENE_KO[s.sceneType] || s.sceneType);
+    return '<div class="srow2" data-cid="' + esc(c.id) + '" data-sid="' + esc(s.sceneId) + '" data-st="' + esc(s.sceneType) + '">' + (m ? thumb(m) : '<span class="thm" style="display:grid;place-items:center;color:var(--ink3);font-size:.68rem">없음</span>') + '<div style="flex:1;min-width:0"><b>' + label + '</b> ' + status +
+      '<div class="muted" style="font-size:.76rem;margin:2px 0">필요한 클립: ' + esc(pre.map(function (t) { return MTYPE_KO[t] || t; }).join(' › ')) + (cin ? ' · 태그 점수로 자동 선택(이 챕터 전용 우선)' : ' · 이 챕터에서 쓸 수 있는 후보 ' + cands.length + '개' + (own ? ' (이 챕터 전용 ' + own + '개)' : '')) + '</div><div style="display:flex;flex-wrap:wrap;gap:2px">' + chips + '</div>' +
       '<div class="row" style="margin-top:6px;gap:6px"><label class="navbtn" style="cursor:pointer;padding:3px 10px;font-size:.78rem">파일 올리기 → 보관함<input type="file" data-up accept="image/*,video/mp4,video/webm,video/quicktime" hidden></label><span class="muted" data-upmsg></span></div></div></div>';
+  }
+  /* ═════ 문장 · 이름 편집 (content.sceneCopy) ═════
+     프롤로그·엔딩·챕터 오프닝·현실 장면의 문장 조각, 이름 조각(name), 이름 강조(nameEmphasis), 부제를 고친다. 원본은 {hero} 자리표시자 상태로 보여 주고, 이름은 사용자 기기에서만 채워진다. */
+  function copyScenes(sel) {
+    var sd = TST.sd, N = R.Narrator, T = R.Translator, list;
+    if (sel === 'prologue') list = T.prologue(sd, 'x', N.heroVars(sd, 'x', true)); else if (sel === 'ending') list = T.ending(sd, 'x', N.heroVars(sd, 'x', true));
+    else { var c = ((TST.mask && TST.mask.chapters) || []).filter(function (x) { return x.id === sel; })[0]; list = c ? c.scenes.filter(function (s) { return s.sceneType === 'cinema'; }) : []; }
+    return list.filter(function (s) { return s.cinema && s.kind !== 'profile'; });
+  }
+  function copyPanel(sel) {
+    var list = copyScenes(sel); if (!list.length) return ''; var saved = ST.saved.sceneCopy || {};
+    return '<div class="cap2">문장 · 이름 편집</div><p class="muted" style="margin:0 0 4px;font-size:.78rem">한 줄이 한 호흡입니다. <code>{hero}</code>·<code>{hero은는}</code>·<code>{hero이가}</code>·<code>{hero을를}</code>·<code>{hero의}</code> 는 사용자 이름 자리(조사 자동). 이름 칸을 켜면 천천히 나타나 길게 머뭅니다 — 이름은 시작·공개·전환·엔딩에서만 쓰세요.</p>' + list.map(function (s) { return V2Cinema.copyCard(s, saved[s.sceneId]); }).join('');
+  }
+  function bindCopy(root) {
+    root.addEventListener('click', function (e) {
+      var card = e.target.closest('[data-cp]'); if (!card) return;
+      if (e.target.closest('[data-sgdel]')) { e.target.closest('.sgrow').remove(); return; }
+      if (e.target.closest('[data-sgadd]')) { V2Cinema.copyAdd(card, false); return; }
+      if (e.target.closest('[data-sgaddname]')) { V2Cinema.copyAdd(card, true); return; }
+      var id = card.dataset.cp, nx = clone(ST.saved.sceneCopy || {});
+      if (e.target.closest('[data-cpsave]')) {
+        var v = V2Cinema.copyRead(card); if (!v.segments.length) { toast('문장 조각이 비어 있습니다', true); return; } nx[id] = v;
+      } else if (e.target.closest('[data-cpreset]')) { if (!nx[id]) { toast('수정한 내용이 없습니다'); return; } delete nx[id]; } else return;
+      C.save({ sceneCopy: nx }).then(function () { ST.saved.sceneCopy = nx; toast('저장했습니다'); afterSourceChange(); }).catch(function (er) { toast(er.message, true); });
+    });
   }
   function missingCount(rep) { var n = 0; rep.chapters.forEach(function (c) { c.scenes.forEach(function (s) { if (needsMedia(s) && !s.media) n++; }); }); return n; }
   function afterSourceChange() { var p = TST.pane; if (p) p.refresh(); run(); }
@@ -384,10 +411,10 @@
   function bindSources(root) {
     root.addEventListener('change', function (e) {
       if (!e.target.matches('[data-up]')) return; var row = e.target.closest('.srow2'); if (!row) return;
-      var c = TST.rep.chapters.filter(function (x) { return x.id === row.dataset.cid; })[0], s = c && c.scenes.filter(function (x) { return x.sceneType === row.dataset.st; })[0], msg = row.querySelector('[data-upmsg]');
-      var file = e.target.files[0]; if (!file || !s) return; var tg = intentTags(s), pre = (s.intent.preferredMediaType || []);
+      var c = TST.rep.chapters.filter(function (x) { return x.id === row.dataset.cid; })[0] || (TST.extra || {})[row.dataset.cid], s = c && c.scenes.filter(function (x) { return x.sceneId === row.dataset.sid; })[0], msg = row.querySelector('[data-upmsg]');
+      var file = e.target.files[0]; if (!file || !s) return; var tg = intentTags(s), pre = s.sceneType === 'cinema' ? ['image', 'videoLoop'] : (s.intent.preferredMediaType || []), glob = !!(TST.extra || {})[c.id];
       msg.textContent = '올리는 중…';
-      A.quickAdd(file, { type: pre.filter(function (t) { return /^video|transition|image|character|symbol|chapterCover/.test(t); })[0], title: c.title + ' · ' + (SCENE_KO[s.sceneType] || s.sceneType), elementTags: tg.element, stateTags: tg.state, emotionTags: tg.emotion, sceneTags: tg.scene, themeTags: tg.theme, chapterTags: tg.theme.slice(0, 1), visualRole: tg.role, chapterIds: [c.id] }, PW, function (p) { msg.textContent = '올리는 중 ' + Math.round(p * 100) + '%'; })
+      A.quickAdd(file, { type: pre.filter(function (t) { return /^video|transition|image|character|symbol|chapterCover/.test(t); })[0], title: c.title + ' · ' + (SCENE_KO[s.sceneType] || s.sceneId), elementTags: tg.element, stateTags: tg.state, emotionTags: tg.emotion, sceneTags: tg.scene, themeTags: tg.theme, actionTags: tg.action || [], chapterTags: tg.theme.slice(0, 1), visualRole: tg.role, chapterIds: glob ? [] : [c.id] }, PW, function (p) { msg.textContent = '올리는 중 ' + Math.round(p * 100) + '%'; })
         .then(function (a) { ST.media = [a].concat(ST.media || []); toast('클립 보관함에 저장했습니다 · 이 챕터에서 자동으로 골라 씁니다'); afterSourceChange(); })
         .catch(function (er) { msg.textContent = er.message; toast(er.message, true); });
     });
@@ -424,7 +451,7 @@
         var inp = e.target.closest('[data-awup]'); if (!inp || !TST.sd) return; var f = inp.files[0]; if (!f) return; var msg = $('[data-awmsg]', $('#tInsp', root)), sd = TST.sd, kind = inp.dataset.awup, key = kind === 'ilgan' ? { stem: sd.dayMaster.stem, gender: sd.gender } : { pillar: sd.dayPillar.ko, gender: sd.gender };
         if (msg) msg.textContent = '올리는 중…'; A.quickAwakening(kind, key, f, PW, function (p) { if (msg) msg.textContent = '올리는 중 ' + Math.round(p * 100) + '%'; }).then(function () { awkMemo = null; toast('영상을 연결했습니다'); run(); }).catch(function (er) { if (msg) msg.textContent = er.message; toast(er.message, true); });
       });
-      bindSources($('#tInsp', root)); $('#tInsp', root).addEventListener('click', function (e) { if (e.target.closest('[data-allsrc]') && TST.rep) allSourcesDialog(); });
+      bindSources($('#tInsp', root)); bindCopy($('#tInsp', root)); $('#tInsp', root).addEventListener('click', function (e) { if (e.target.closest('[data-allsrc]') && TST.rep) allSourcesDialog(); });
       $('#tInsp', root).onclick = function (e) { var b = e.target.closest('[data-edit]'); if (!b) return; CH.pending = b.dataset.edit; CH.pendingModule = b.dataset.mod || null; if (built.chap) { CH.sel = CH.pending; CH.tab = b.dataset.mod ? 'mod' : 'set'; CH.pending = null; } else CH.sel = null; gotoTab('v2chap'); if (built.chap) chapDraw(); };
     }
     C.load().then(function () { drawForm(); drawProj(); run(); });
@@ -442,13 +469,13 @@
   function run() {
     var rail = $('#tRail'); rail.innerHTML = '<p class="muted">계산 중…</p>'; var my = ++TST.busy;
     report(TS.project).then(function (r) {
-      if (my !== TST.busy) return; TST.rep = r.rep; TST.sd = r.sd; var rep = r.rep, sd = r.sd;
+      if (my !== TST.busy) return; TST.rep = r.rep; TST.sd = r.sd; TST.pack = r.pack; TST.extra = null; try { TST.mask = R.Compose.build(r.sd, r.pack.lib, r.pack.cfg, { maskHero: true }); } catch (er) { TST.mask = null; } var rep = r.rep, sd = r.sd;
       var sn = function (s) { return s ? SEA[s] : '-'; };
       $('#tSum').innerHTML = '<b>' + esc(TS.date) + ' ' + esc(TS.time) + ' ' + (TS.gender === 'M' ? '남' : '여') + '</b> → <b style="color:var(--gold)">' + esc(sd.dayPillar.ko) + '일주</b> · ' + esc(sd.strength.zone) + ' · 용신 ' + esc(sd.usefulElements ? sd.usefulElements.yong : '없음') + ' · 대운 ' + esc(sd.currentDaewoon ? sn(sd.currentDaewoon.season) : '-') + ' · 올해 ' + esc(sd.sewoon ? sn(sd.sewoon.season) : '-') + ' <span class="muted">(' + esc(r.pack.cfg.project.name) + ' · ' + rep.chapters.length + '챕터)</span>';
-      var issues = 0, h = '<button type="button" data-c="ilgan" class="ri' + (TST.sel === 'ilgan' ? ' on' : '') + '"><span>🎬</span><b>일간 소개 영상</b></button><button type="button" data-c="awakening" class="ri' + (TST.sel === 'awakening' ? ' on' : '') + '"><span>🎬</span><b>일주 캐릭터 영상</b></button><button type="button" data-c="prologue" class="ri' + (TST.sel === 'prologue' ? ' on' : '') + '"><span>🎞</span><b>프롤로그 (MY STORY)</b></button>', act = 0;
+      var issues = 0, h = '<button type="button" data-c="ilgan" class="ri' + (TST.sel === 'ilgan' ? ' on' : '') + '"><span>🎬</span><b>일간 소개 영상</b></button><button type="button" data-c="awakening" class="ri' + (TST.sel === 'awakening' ? ' on' : '') + '"><span>🎬</span><b>일주 캐릭터 영상</b></button><button type="button" data-c="prologue" class="ri' + (TST.sel === 'prologue' ? ' on' : '') + '"><span>🎞</span><b>프롤로그 (運路)</b></button>', act = 0;
       rep.chapters.forEach(function (c) {
         if (c.act !== act) { act = c.act; var a = rep.acts.filter(function (x) { return x.id === act; })[0] || {}; h += '<div class="ract">' + esc(a.roman || '') + ' · ' + esc(a.title || '') + '</div>'; }
-        var fb = c.modules[0] && /_fallback$/.test(c.modules[0]), nm = c.scenes.filter(function (s) { return !s.media && R.Scenes.SCENE_RULES[s.sceneType].media; }).length; if (fb) issues++;
+        var fb = c.modules[0] && /_fallback$/.test(c.modules[0]), nm = c.scenes.filter(function (s) { return !s.media && needsMedia(s); }).length; if (fb) issues++;
         h += '<button type="button" data-c="' + esc(c.id) + '" class="ri' + (c.id === TST.sel ? ' on' : '') + '"><span>' + String(c.no).padStart(2, '0') + '</span><b>' + esc(c.title) + '</b>' + (fb ? '<i class="pill w" title="조건 있는 모듈이 없어 기본 안내만 나옵니다">기본안내</i>' : '') + (nm ? '<i class="pill" title="미디어가 없어 자리표시 장면이 나오는 장면 수">미디어 ' + nm + '</i>' : '') + '</button>';
       });
       h += '<button type="button" data-c="ending" class="ri' + (TST.sel === 'ending' ? ' on' : '') + '"><span>🎞</span><b>엔딩</b></button>';
@@ -468,13 +495,23 @@
       awakeningFor(sd).then(function (a) { var pk = a.pick; box.innerHTML = '<b>일주 캐릭터 영상</b><p class="muted">' + (pk.fallback ? '<span style="color:#FF9C8C">' + esc(pk.key) + ' 영상이 아직 없습니다 → ' + (pk.clip ? 'fallback 영상으로 진행' : 'fallback 도 없어 문구·정지 화면으로 진행') + '</span>' : '<span style="color:#7FE0BC">' + esc(pk.key) + ' 영상이 연결되어 있습니다.</span> ' + esc(pk.clip.title || '')) + '</p><div class="row"><button type="button" id="goAwk">일주 캐릭터 영상 등록하러 가기</button><label class="navbtn" style="cursor:pointer;margin-left:6px">이 일주·성별 영상 바로 올리기<input type="file" data-awup="iju" accept="video/mp4,video/webm,video/quicktime,image/*" hidden></label><span class="muted" data-awmsg></span></div>'; $('#goAwk', box).onclick = function () { gotoTab('v2clip'); var b = $('#clNav button[data-k=awk]'); if (b) b.click(); }; });
       return;
     }
-    if (TST.sel === 'prologue' || TST.sel === 'ending') { box.innerHTML = '<b>' + (TST.sel === 'prologue' ? '프롤로그' : '엔딩') + '</b><p class="muted">' + (TST.sel === 'prologue' ? '“모든 사람에게는 각자의 이야기가 있다” → 주인공 이름 → 타이틀 → 캐릭터 프로필 → 영화로 비유하면. 문장은 사주 사실(factualBasis)을 번역해 동적으로 만들어집니다.' : '“사주는 결말을 적어놓은 대본이 아니다” → “다음 장면을 만드는 사람은 결국 당신이다”.') + '</p><p class="muted">탭하면 멈추고, 건너뛰기로 넘어갑니다.</p>'; return; }
+    if (TST.sel === 'prologue' || TST.sel === 'ending') {
+      var N0 = R.Narrator, T0 = R.Translator, sel0 = TST.sel, sc0 = sel0 === 'prologue' ? T0.prologue(sd, '홍길동', N0.heroVars(sd, '홍길동')) : T0.ending(sd, '홍길동', N0.heroVars(sd, '홍길동')), used = [];
+      sc0.forEach(function (x) { if (needsMedia(x)) x.media = R.Director.pickMedia(x, TST.pack.lib.media, { usedIds: used }, x.chapterId || 'c00'); });
+      TST.extra = {}; TST.extra[sel0] = { id: sel0, title: sel0 === 'prologue' ? '프롤로그' : '엔딩', scenes: sc0 };
+      var miss0 = sc0.filter(function (x) { return needsMedia(x) && !x.media; }).length;
+      box.innerHTML = '<b>' + (sel0 === 'prologue' ? '프롤로그 · 運路' : '엔딩') + '</b><p class="muted">' + (sel0 === 'prologue' ? '갈대밭 → 산맥 → 산사 → 암전 → 해 → 이름 → 運路 타이틀 → 命. 이름이 없으면 이름 장면은 건너뜁니다.' : '해가 뜨는 산맥 → 이름 → 運路. 운명을 확정하지 않습니다.') + ' 문장은 사주 사실(factualBasis)을 번역해 만들어집니다.</p>' +
+        '<div class="cap2">필요한 클립 소스</div><p class="muted" style="margin:0 0 4px">이 영상 <b style="color:' + (miss0 ? '#FFC080' : '#7FE0BC') + '">' + (miss0 ? miss0 + '개 비어 있음' : '모두 있음') + '</b> · 올린 클립은 보관함에 저장되어 어느 챕터에서나 후보가 됩니다.</p>' +
+        sc0.filter(needsMedia).map(function (x) { return sourceRow(TST.extra[sel0], x); }).join('') + copyPanel(sel0) + '<p class="muted">탭하면 멈추고, 건너뛰기로 넘어갑니다.</p>';
+      return;
+    }
     var c = rep.chapters.filter(function (x) { return x.id === TST.sel; })[0]; if (!c) { box.innerHTML = ''; return; }
     var fb = c.modules[0] && /_fallback$/.test(c.modules[0]);
     var h = '<b>' + String(c.no).padStart(2, '0') + ' ' + esc(c.title) + '</b><p class="muted" style="margin:4px 0 8px">FACT · ' + esc(c.fact) + '</p>' + (fb ? '<p class="pill w" style="display:inline-block;margin:0 0 8px">조건 있는 모듈이 없어 기본 안내만 표시됩니다</p>' : '');
     h += '<div class="cap2">선택된 모듈</div>' + ((c.lead && c.lead.id) ? [c.lead].concat(c.details || []).map(function (m) { return '<div class="mrow"><div><b>' + esc(m.headline || m.id) + '</b><small>' + esc(m.id) + '</small>' + (TS.dbg && m.why && m.why.length ? '<div class="why">' + m.why.map(function (w) { return '<span class="' + (/✓/.test(w) ? 'hit' : 'miss') + '">' + esc(w) + '</span>'; }).join('') + '</div>' : (TS.dbg ? '<div class="why muted">조건 없음(항상 후보)</div>' : '')) + '</div><button type="button" data-edit="' + esc(c.id) + '" data-mod="' + esc(m.id) + '">수정</button></div>'; }).join('') : '<p class="muted">없음</p>');
     var miss1 = c.scenes.filter(function (x) { return needsMedia(x) && !x.media; }).length, missAll = missingCount(rep);
     h += '<div class="cap2">필요한 클립 소스</div><p class="muted" style="margin:0 0 4px">이 챕터 <b style="color:' + (miss1 ? '#FFC080' : '#7FE0BC') + '">' + (miss1 ? miss1 + '개 비어 있음' : '모두 있음') + '</b> · 프로젝트 전체 ' + missAll + '개 비어 있음 <button type="button" data-allsrc style="padding:2px 10px;font-size:.76rem">전체 보기</button></p>' + c.scenes.filter(needsMedia).map(function (s) { return sourceRow(c, s); }).join('') + '<p class="muted" style="font-size:.76rem;margin:6px 0 0">데이터 장면(월별·대운 표 등)은 클립 없이 화면 자체로 표시됩니다.</p>' + (TS.dbg ? '<div class="cap2">점수 근거</div>' + c.scenes.filter(function (x) { return x.media; }).map(function (x) { return '<div class="muted" style="font-size:.74rem">' + esc(x.sceneType) + ': ' + x.media.why.map(function (w) { return esc(w.label) + (w.v > 0 ? '+' : '') + w.v; }).join(' ') + '</div>'; }).join('') : '');
+    h += copyPanel(c.id);
     h += '<div class="row" style="margin-top:10px"><button type="button" data-edit="' + esc(c.id) + '">이 챕터 편집 →</button></div>';
     box.innerHTML = h;
   }

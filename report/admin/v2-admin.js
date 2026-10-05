@@ -438,7 +438,7 @@
       var isVid = /^video\//.test(file.type) || /\.(mp4|webm|mov|m4v)$/i.test(file.name), VIDEOISH = ['video', 'videoLoop', 'backgroundVideo', 'transition'], IMAGEISH = ['image', 'character', 'symbol', 'chapterCover'];
       var type = isVid ? (VIDEOISH.indexOf(preset.type) >= 0 ? preset.type : 'video') : (IMAGEISH.indexOf(preset.type) >= 0 ? preset.type : 'image');
       var a = { id: rid(), type: type, url: '', webmUrl: '', thumbnailUrl: '', posterUrl: '', title: preset.title || file.name.replace(/\.\w+$/, ''), description: preset.description || '', elementTags: preset.elementTags || [], stateTags: preset.stateTags || [], emotionTags: preset.emotionTags || [], sceneTags: preset.sceneTags || [],
-        themeTags: preset.themeTags || [], chapterTags: preset.chapterTags || [], chapterIds: preset.chapterIds || [], actionTags: [], visualRole: preset.visualRole || [], orientation: 'portrait', duration: 0, loopable: type === 'videoLoop', hasAudio: false, priority: 60, enabled: true, tagsApproved: true, bytes: file.size, uploadedAt: Date.now() };
+        themeTags: preset.themeTags || [], chapterTags: preset.chapterTags || [], chapterIds: preset.chapterIds || [], actionTags: preset.actionTags || [], visualRole: preset.visualRole || [], orientation: 'portrait', duration: 0, loopable: type === 'videoLoop', hasAudio: false, priority: 60, enabled: true, tagsApproved: true, bytes: file.size, uploadedAt: Date.now() };
       var step = isVid ? probeVideo(file) : shrinkImage(file).then(function (s) { file = s; return {}; });
       return step.then(function (info) {
         if (isVid) { a.duration = info.duration || 0; a.orientation = info.orientation || 'portrait'; }

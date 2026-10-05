@@ -1,4 +1,4 @@
-/* 시네마틱 장면 — MY LIFE AS A MOVIE. 모바일 9:16 기준. 움직임은 transform/opacity 위주(blur-in·focus-pull 만 filter). */
+/* 시네마틱 장면 — 運路 (Cinematic Eastern Fantasy). 모바일 9:16 기준. 움직임은 transform/opacity 위주(blur-in·focus-pull 만 filter). */
 #v-cinema { background: #000; position: relative; }
 .cn-stage { position: relative; width: 100%; height: 100svh; overflow: hidden; background: #000; color: #F3EEE2; cursor: pointer; user-select: none; -webkit-user-select: none; }
 @media (min-width: 700px) { .cn-stage { width: min(100vw, calc(100svh * 9 / 16)); margin: 0 auto; } }
@@ -163,3 +163,35 @@
   .cn-scene[class*="cn-tr-"] { animation-name: cn-fade !important; }
   .cn-scene.cn-leave { animation-duration: 300ms !important; }
 }
+
+/* ───── 運路: 사용자 이름 강조(nameEmphasis) — 이름은 특별한 시각 요소. 매 장면 반복하지 않고, 나올 때는 다른 움직임을 줄인다 ───── */
+.cn-seg[data-nm] { letter-spacing: .08em; }
+.cn-scene[data-nm-e="SOFT"] .cn-seg[data-nm] { color: #EFDDB2; }
+.cn-scene[data-nm-e="NORMAL"] .cn-seg[data-nm] { font-weight: 600; color: #F6E6BC; }
+.cn-scene[data-nm-e="STRONG"] .cn-seg[data-nm] { font-size: 1.5em; font-weight: 600; letter-spacing: .16em; color: #FFF1CC; --cn-a: cn-fade; --cn-d: 1600ms; text-shadow: 0 0 30px rgba(240, 215, 160, .45), 0 2px 20px rgba(0, 0, 0, .85); }
+.cn-scene[data-nm-e="TITLE"] .cn-seg[data-nm] { font-size: 2.3rem; font-weight: 500; letter-spacing: .3em; color: #FFF6DC; --cn-a: cn-title; --cn-d: 2200ms; text-shadow: 0 0 40px rgba(240, 215, 160, .5); }
+.cn-scene[data-cn-type="NAME_REVEAL"] .cn-txt { justify-content: center; }
+
+/* 한자 타이틀(運路·大運·歲運) */
+.cn-scene.cn-k-title .cn-seg[data-e] { font-size: 3.4rem; letter-spacing: .5em; text-indent: .5em; font-weight: 400; color: #FFF6DC; text-shadow: 0 0 36px rgba(240, 215, 160, .45); }
+.cn-scene.cn-k-title .cn-sub { line-height: 1.9; letter-spacing: .22em; font-size: .86rem; color: rgba(243, 238, 226, .78); white-space: normal; text-align: center; }
+.cn-kick { letter-spacing: .3em; }
+
+/* ───── 수묵풍 자리표시 배경: 클립이 없을 때 장면 프리셋의 분위기를 색으로만 보여 준다(사진 대신 먹·안개·빛) ───── */
+.cn-scene[data-cn-preset="DAWN"] .cn-ph { background: linear-gradient(180deg, #1a1d26 0%, #4a4a52 46%, #c9a56a 78%, #e8cf9c 100%); }
+.cn-scene[data-cn-preset="SUNRISE"] .cn-ph { background: radial-gradient(90% 60% at 50% 78%, #f0cf8c 0%, #b9783f 32%, #2a2330 72%, #0b0b12 100%); }
+.cn-scene[data-cn-preset="MIST"] .cn-ph { background: linear-gradient(180deg, #151a20 0%, #39434a 45%, #6d7a80 70%, #20262b 100%); }
+.cn-scene[data-cn-preset="MOUNTAIN"] .cn-ph { background: radial-gradient(120% 40% at 30% 72%, #2a343a 0%, transparent 70%), radial-gradient(120% 50% at 80% 80%, #1c252b 0%, transparent 72%), linear-gradient(180deg, #202830 0%, #566268 55%, #11161a 100%); }
+.cn-scene[data-cn-preset="WIND"] .cn-ph { background: linear-gradient(180deg, #202622 0%, #5f6a4b 60%, #c2b377 100%); }
+.cn-scene[data-cn-preset="RAIN"] .cn-ph { background: linear-gradient(180deg, #0d1218 0%, #2a3640 60%, #141a20 100%); }
+.cn-scene[data-cn-preset="MOON"] .cn-ph { background: radial-gradient(18% 14% at 68% 24%, #f3efdc 0%, rgba(243, 239, 220, .25) 40%, transparent 70%), linear-gradient(180deg, #05080f 0%, #131c2c 100%); }
+.cn-scene[data-cn-preset="FIRE"] .cn-ph { background: radial-gradient(70% 50% at 50% 70%, #e5894a 0%, #8a3a21 38%, #1a0e0c 80%); }
+.cn-scene[data-cn-preset="RIVER"] .cn-ph { background: linear-gradient(180deg, #1b232b 0%, #3f5663 55%, #17222b 100%); }
+.cn-scene[data-cn-preset="CROSSROAD"] .cn-ph { background: linear-gradient(115deg, transparent 46%, rgba(220, 200, 150, .14) 50%, transparent 54%), linear-gradient(65deg, transparent 46%, rgba(220, 200, 150, .14) 50%, transparent 54%), linear-gradient(180deg, #1c2224 0%, #4a5350 70%, #12161a 100%); }
+.cn-scene[data-cn-preset="BLADE"] .cn-ph { background: linear-gradient(100deg, transparent 49%, rgba(230, 235, 240, .22) 50%, transparent 51%), linear-gradient(180deg, #0d1014 0%, #2a3036 100%); }
+.cn-scene[data-cn-preset="GATE"] .cn-ph { background: radial-gradient(26% 40% at 50% 60%, #e9cf98 0%, rgba(233, 207, 152, .15) 60%, transparent 100%), linear-gradient(180deg, #0f1114 0%, #26282c 100%); }
+.cn-scene[data-cn-preset="SEASON_CHANGE"] .cn-ph { background: linear-gradient(90deg, #5b7f5c 0%, #b5a45f 34%, #8a4f35 62%, #cfd8de 100%); filter: saturate(.7) brightness(.55); }
+.cn-scene[data-cn-preset="STORM"] .cn-ph { background: linear-gradient(180deg, #06090d 0%, #25303a 55%, #0d1217 100%); }
+.cn-scene[data-cn-preset="SILENCE"] .cn-ph, .cn-scene[data-cn-preset="NAME_REVEAL"] .cn-ph { background: #000; }
+@media (prefers-reduced-motion: no-preference) { .cn-scene[data-cn-preset="MIST"].cn-run .cn-ph, .cn-scene[data-cn-preset="DAWN"].cn-run .cn-ph { animation: cn-ink 14s ease-in-out infinite alternate; } }
+@keyframes cn-ink { from { background-position: 0 0; transform: scale(1); } to { transform: scale(1.06); } }

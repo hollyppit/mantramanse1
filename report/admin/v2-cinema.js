@@ -16,8 +16,11 @@
     bgmMood: { cinematic: '시네마틱', minimal: '미니멀', ambient: '앰비언트', emotional: '감성', tension: '긴장', hopeful: '희망', reflective: '성찰' },
     mood: { calm: '고요', awe: '경외', reflective: '성찰', tense: '긴장', warm: '따뜻함', hopeful: '희망', lonely: '쓸쓸함', powerful: '힘' },
   };
-  var LABEL = { sceneType: '장면 종류', preset: '연출 프리셋', pacing: '호흡(Pacing)', motionIntensity: '모션 강도', imageMotion: '이미지 모션', transition: '전환', textAnimation: '글자 애니메이션', textPosition: '글자 위치', textSize: '글자 크기', textEmphasis: '글자 강조', bgmMood: 'BGM 분위기', mood: '분위기' };
-  var ORDER = ['sceneType', 'preset', 'pacing', 'motionIntensity', 'imageMotion', 'transition', 'textAnimation', 'textPosition', 'textSize', 'textEmphasis', 'bgmMood', 'mood'];
+  Object.assign(KO.sceneType, { NAME_REVEAL: '이름 공개', NATURE: '자연·풍경', REALITY: '현실 장면', DATA: '데이터', REFLECTION: '성찰·여백' });
+  Object.assign(KO.preset, { NAME_REVEAL: '이름 공개', DATA_VIEW: '데이터 보기', DAWN: '새벽', MIST: '운해·안개', MOUNTAIN: '산맥', WIND: '바람', RAIN: '비', MOON: '달', FIRE: '불꽃', RIVER: '강', CROSSROAD: '갈림길', BLADE: '검(결단)', GATE: '문', SEASON_CHANGE: '계절 변화', STORM: '폭풍', SUNRISE: '해돋이', SILENCE: '침묵' });
+  KO.nameEmphasis = { NONE: '없음', SOFT: '살짝', NORMAL: '보통', STRONG: '강하게', TITLE: '타이틀(암전·2초 머묾)' };
+  var LABEL = { sceneType: '장면 종류', preset: '연출 프리셋', pacing: '호흡(Pacing)', motionIntensity: '모션 강도', imageMotion: '이미지 모션', transition: '전환', textAnimation: '글자 애니메이션', textPosition: '글자 위치', textSize: '글자 크기', nameEmphasis: '이름 강조', textEmphasis: '글자 강조', bgmMood: 'BGM 분위기', mood: '분위기' };
+  var ORDER = ['sceneType', 'preset', 'nameEmphasis', 'pacing', 'motionIntensity', 'imageMotion', 'transition', 'textAnimation', 'textPosition', 'textSize', 'textEmphasis', 'bgmMood', 'mood'];
 
   function sel(prefix, k, v) {
     var o = '<option value="">(기본값 따름)</option>';
@@ -28,6 +31,7 @@
   function fields(val) {
     val = val || {}; var fp = val.focalPoint || {};
     return '<div class="v2cn" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px">' + ORDER.map(function (k) { return sel('', k, val[k]); }).join('') +
+      '<label>시각 은유 메모<input type="text" data-cn="visualMetaphor" maxlength="160" value="' + esc(val.visualMetaphor || '') + '" placeholder="예: 갈림길 앞에 선 산길"></label>' +
       '<label>오버레이 어둡기 (0~1)<input type="number" data-cn="overlayStrength" min="0" max="1" step="0.05" value="' + (val.overlayStrength == null ? '' : val.overlayStrength) + '" placeholder="기본"></label>' +
       '<label>초점 X % (0~100)<input type="number" data-cn="focalX" min="0" max="100" step="5" value="' + (fp.x == null ? '' : Math.round(fp.x * 100)) + '" placeholder="50"></label>' +
       '<label>초점 Y % (0~100)<input type="number" data-cn="focalY" min="0" max="100" step="5" value="' + (fp.y == null ? '' : Math.round(fp.y * 100)) + '" placeholder="50"></label>' +
@@ -57,5 +61,38 @@
       }).catch(function (e) { toast(e.message, true); }).then(function () { btn.disabled = false; btn.textContent = t; });
     };
   }
-  window.V2Cinema = { KO: KO, LABEL: LABEL, fields: fields, read: read, write: write, bindAi: bindAi };
+  /* ── 문장 · 이름 편집: 프롤로그·엔딩·챕터 연출 장면의 문장 조각을 고친다(content.sceneCopy 로 저장). {hero} 계열은 사용자 이름 자리표시자. ── */
+  var EMK = { soft: '약하게', normal: '보통', pause: '잠깐 멈춤', impact: '임팩트' };
+  function opt(map, v) { return Object.keys(map).map(function (k) { return '<option value="' + esc(k) + '"' + (k === v ? ' selected' : '') + '>' + esc(map[k]) + '</option>'; }).join(''); }
+  var ANK = {}; R.Cinema.TEXT_ANIMS.forEach(function (a) { ANK[a] = (KO.textAnimation && KO.textAnimation[a]) || a; });
+  function segRow(g) {
+    g = g || { text: '', emphasis: 'normal', animation: 'fade-up', block: 0 };
+    return '<div class="sgrow" style="display:grid;grid-template-columns:minmax(120px,1fr) 88px 104px 52px 52px 26px;gap:4px;margin:3px 0;align-items:center">' +
+      '<input type="text" data-sg="text" maxlength="120" value="' + esc(g.text) + '" placeholder="문장 조각 (한 호흡)">' +
+      '<select data-sg="emphasis" title="강조">' + opt(EMK, g.emphasis) + '</select><select data-sg="animation" title="글자 애니메이션">' + opt(ANK, g.animation) + '</select>' +
+      '<label title="사용자 이름이 나오는 조각입니다. 천천히 나타나고 길게 머뭅니다(이름 강조 설정에 따라)"><input type="checkbox" data-sg="name"' + (g.name ? ' checked' : '') + '> 이름</label>' +
+      '<input type="number" data-sg="block" min="0" max="40" value="' + (g.block || 0) + '" title="같은 번호는 한 화면에 함께 나오고, 번호가 바뀌면 이전 문장이 사라진 뒤 나옵니다">' +
+      '<button type="button" data-sgdel title="이 조각 지우기" style="padding:0">✕</button></div>';
+  }
+  // scene: 자리표시자 상태의 원본 장면, entry: 저장된 override(없으면 원본 문구를 보여 줌)
+  function copyCard(scene, entry) {
+    var segs = (entry && entry.segments) || (scene.cinema && scene.cinema.segments) || [], ne = (entry && entry.nameEmphasis) || (scene.cinema && scene.cinema.nameEmphasis) || '';
+    var first = (segs[0] || {}).text || '';
+    return '<details class="cpcard" data-cp="' + esc(scene.sceneId) + '" style="margin:6px 0;border:1px solid var(--line,#333);border-radius:8px;padding:6px 8px"><summary style="cursor:pointer"><b>' + esc(scene.sceneId) + '</b> <span class="muted">' + esc(first.slice(0, 22)) + (entry ? ' · <span style="color:#7FE0BC">수정됨</span>' : '') + '</span></summary>' +
+      '<div class="row" style="margin:6px 0;gap:8px;align-items:center"><label>이름 강조 <select data-cpne><option value="">(기본)</option>' + opt(KO.nameEmphasis, ne) + '</select></label>' +
+      (scene.sub != null ? '<label style="flex:1">부제 <input type="text" data-cpsub maxlength="120" style="width:100%" value="' + esc((entry && entry.sub != null) ? entry.sub : scene.sub).replace(/\n/g, '\\n') + '"></label>' : '') + '</div>' +
+      '<div data-cpsegs>' + segs.map(segRow).join('') + '</div>' +
+      '<div class="row" style="gap:6px;margin-top:6px"><button type="button" data-sgadd>+ 조각</button><button type="button" data-sgaddname>+ 이름 조각</button><span style="flex:1"></span><button type="button" data-cpreset>원래대로</button><button type="button" data-cpsave class="primary">이 장면 저장</button></div></details>';
+  }
+  function copyRead(card) {
+    var segs = [].map.call(card.querySelectorAll('.sgrow'), function (r) {
+      var g = {}; [].forEach.call(r.querySelectorAll('[data-sg]'), function (i) { var k = i.getAttribute('data-sg'); g[k] = i.type === 'checkbox' ? i.checked : i.value; });
+      g.text = String(g.text || '').trim(); g.name = g.name === true ? true : undefined; return g;
+    }).filter(function (g) { return g.text; });
+    var o = { segments: R.Cinema.clean({ segments: segs }).segments || [] }, ne = card.querySelector('[data-cpne]').value, sub = card.querySelector('[data-cpsub]');
+    if (ne) o.nameEmphasis = ne; if (sub) o.sub = sub.value.replace(/\\n/g, '\n'); return o;
+  }
+  function copyAdd(card, name) { var box = card.querySelector('[data-cpsegs]'), t = document.createElement('div'); t.innerHTML = segRow(name ? { text: '{hero}', emphasis: 'impact', animation: 'fade', block: 0, name: true } : null); box.appendChild(t.firstChild); }
+
+  window.V2Cinema = { copyCard: copyCard, copyRead: copyRead, copyAdd: copyAdd, KO: KO, LABEL: LABEL, fields: fields, read: read, write: write, bindAi: bindAi };
 })();

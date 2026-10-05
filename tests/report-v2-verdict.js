@@ -8,12 +8,12 @@ const M = globalThis.Manse, R = globalThis.ReportV2, fails = [];
 const ok = (c, m) => { if (!c) fails.push(m); };
 const cfg = R.Chapters.forProject(null, 'full'), lib = R.Compose.library(null), now = Date.UTC(2026, 9, 5);
 const sdOf = (y, m, d, h, g) => R.SajuData.build(M.compute({ year: y, month: m, day: d, hour: h, minute: 0, calendar: 'solar', leap: false, gender: g, city: '서울' }), { now });
-const FIRST = '이 이야기의 주인공에게는 한 가지 큰 동력이 있다.', BAN = /(반드시|무조건|확정|100%|틀림없)/;
+const FIRST = '타고난 명(命)에는 한 가지 큰 동력이 있다.', BAN = /(반드시|무조건|확정|100%|틀림없)/;
 const cases = [[1990, 5, 17, 14, 'M'], [1984, 2, 10, 6, 'F'], [1974, 9, 3, 23, 'M'], [2000, 12, 25, 12, 'F'], [1964, 1, 15, 11, 'M'], [1992, 6, 23, 1, 'M']];
 const srcs = {};
 cases.forEach(c => {
   const sd = sdOf.apply(null, c), rep = R.Compose.build(sd, lib, cfg), ch = rep.chapters[0], v = ch.verdict;
-  ok(ch.id === 'c00' && ch.title === '이 이야기의 주인공' && ch.subtitle === '가장 큰 동력과 아직 쓰이지 않은 부분', 'c00 제목·부제 ' + c);
+  ok(ch.id === 'c00' && ch.title === '運路 · 序章' && ch.subtitle === '타고난 가장 큰 동력과 아직 쓰이지 않은 부분', 'c00 제목·부제 ' + c);
   ok(ch.headline === FIRST, '첫 문장 고정');
   ok(ch.scenes.map(s => s.sceneType).join('>') === 'chapterIntro>verdictFind>verdictBlock>verdictEvidence>verdictAdvice>chapterEnding', '장면 순서 ' + ch.scenes.map(s => s.sceneType));
   ok(v.potential.name === R.Verdict.POTENTIAL[sd.dominantGroup] && v.potential.pct === Math.round(sd.groups[sd.dominantGroup]), '잠재력 이름·%');

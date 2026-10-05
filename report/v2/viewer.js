@@ -10,7 +10,7 @@
   var CITIES = [['서울', 126.98], ['부산', 129.08], ['대구', 128.60], ['인천', 126.70], ['광주', 126.85], ['대전', 127.38], ['울산', 129.31], ['세종', 127.29], ['수원', 127.03], ['고양', 126.83], ['성남', 127.14], ['용인', 127.18], ['청주', 127.49], ['천안', 127.15], ['전주', 127.15], ['목포', 126.39], ['여수', 127.66], ['포항', 129.36], ['경주', 129.22], ['안동', 128.73], ['창원', 128.68], ['진주', 128.11], ['춘천', 127.73], ['강릉', 128.90], ['제주', 126.53]];
   var EL_COLOR = { wood: '#5E9E78', fire: '#D0634A', earth: '#BC9C62', metal: '#AEB9C6', water: '#4A7AB5' };
   var SEA_ICON = { opportunity: '◆', expansion: '▲', harvest: '●', accumulation: '■', transition: '◇', defense: '▽' }; // 색만으로 상태를 구분하지 않도록 글자·기호를 함께 쓴다
-  var STAGES = ['주인공의 설정을 읽고 있습니다', '타고난 캐릭터를 그려 내고 있습니다', '시간의 흐름을 이어 붙이고 있습니다', '다음 장면을 위한 선택지를 찾고 있습니다', '한 편의 이야기로 구성하고 있습니다'];
+  var STAGES = ['타고난 명(命)을 읽고 있습니다', '기질과 힘의 방향을 가늠하고 있습니다', '10년마다 달라지는 운의 길을 이어 붙이고 있습니다', '움직일 때와 준비할 때를 가리고 있습니다', '한 편의 運路로 구성하고 있습니다'];
   var PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
   var S = { sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
   var view = function (v) { if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
@@ -107,7 +107,7 @@
   function ilganStage(next) { // 일간 소개 단계(영상이 있을 때만)
     var ig = S.awk && S.awk.ilgan, sd = S.sd;
     if (!ig || !(ig.videoUrl || ig.videoWebm)) { next(); return; }
-    playStage({ clip: ig, title: ig.title || ('이 이야기의 주인공은 ' + sd.dayMaster.stem + sd.dayMaster.el + '의 기질을 타고났다'), sub: ig.subtitle || introLines('ilgan'), kw: ig.keywords, onDone: next });
+    playStage({ clip: ig, title: ig.title || (sd.dayMaster.stem + sd.dayMaster.el + '의 기질을 타고났다'), sub: ig.subtitle || introLines('ilgan'), kw: ig.keywords, onDone: next });
   }
   /* ── 3b. 프롤로그 → 리포트. 사용자가 곧 이야기의 주인공이다. 결제·무료 결과 화면은 두지 않는다. ── */
   function ijuStage(next) { // 일주 캐릭터 영상(60일주×성별). 없으면 기본 영상, 그것도 없으면 이 단계는 건너뛴다
@@ -115,6 +115,7 @@
     if (!clip || !(clip.videoUrl || clip.videoWebm)) { next(); return; }
     playStage({ kind: 'iju', clip: clip, title: (v && v.title) || (sd.dayPillar.ko + '일주'), sub: (v && v.subtitle) || introLines('iju'), kw: v && v.keywords, onDone: next });
   }
+  var withCopy = function (scenes) { return R.Translator.applyCopy(scenes, S.pack && S.pack.sceneCopy, R.Narrator.heroVars(S.sd, S.name)); }; // 관리자가 고친 문구·이름 강조(content.sceneCopy)
   function intro() { ilganStage(function () { ijuStage(prologue); }); }
   function cinemaMediaFor(used) { return function (sc) { if (sc.bg === 'black') return null; return R.Director.pickMedia(sc, (S.pack && S.pack.lib && S.pack.lib.media) || S.media, { usedIds: used }, sc.chapterId || 'c00'); }; }
   function playCinema(scenes, onEnd, label, skipLabel) {
@@ -125,12 +126,12 @@
   /* 프롤로그: "모든 사람에게는 각자의 이야기가 있다" → 주인공 이름 → 타이틀 → 캐릭터 프로필 → 영화로 비유하면 → CHAPTER 01 */
   function prologue() {
     var sd = S.sd; T('prologue_started', {});
-    playCinema(R.Translator.prologue(sd, S.name, R.Narrator.heroVars(sd, S.name)), function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', {}); beginReader(); }, '프롤로그');
+    playCinema(withCopy(R.Translator.prologue(sd, S.name, R.Narrator.heroVars(sd, S.name))), function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', {}); beginReader(); }, '프롤로그');
   }
   /* 엔딩: 사주는 결말을 적어 놓은 대본이 아니다 … 다음 장면을 만드는 사람은 결국 당신이다 */
   function endingCinema(then) {
     var sd = S.sd; S.scroll[S.rep.chapters[S.idx].id] = window.scrollY; T('ending_started', {});
-    playCinema(R.Translator.ending(sd, S.name, R.Narrator.heroVars(sd, S.name)), function () { then(); }, '엔딩');
+    playCinema(withCopy(R.Translator.ending(sd, S.name, R.Narrator.heroVars(sd, S.name))), function () { then(); }, '엔딩');
   }
   var elKey = function (k) { return { '목': 'wood', '화': 'fire', '토': 'earth', '금': 'metal', '수': 'water' }[k] || 'water'; };
 
@@ -150,13 +151,14 @@
     if (!reduce && !s.cinemaAuto && s.effect && s.effect.particle) { for (var i = 0; i < 7; i++) parts += '<span style="left:' + ((i * 14 + (s.sceneId.length * 7)) % 96) + '%;animation-delay:' + (i * 1.3) + 's;--dx:' + (i % 2 ? 24 : -24) + 'px"></span>'; }
     return '<div class="' + (cls || 'media') + fxCls(s) + '" style="--pc:' + pc + '">' + (inner || '<div class="ph" aria-hidden="true"></div>') + (parts ? '<div class="pt" aria-hidden="true">' + parts + '</div>' : '') + '</div>';
   }
-  var seaChip = function (k, name) { return k ? '<span class="sea s-' + k + '"><b aria-hidden="true">' + SEA_ICON[k] + '</b>' + esc(name || SEA[k]) + '</span>' : ''; };
-  var list = function (a) { return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
+  var seaChip = function (k, name) { var hj = R.Translator && R.Translator.SEASON[k]; return k ? '<span class="sea s-' + k + '"><b aria-hidden="true">' + SEA_ICON[k] + '</b>' + (hj ? '<i class="hj" aria-hidden="true">' + hj.h + '</i> ' : '') + esc(name || SEA[k]) + '</span>' : ''; };
+  var list = function (a) { a = Array.isArray(a) ? a : (a ? [a] : []); return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
   var lines = function (t) { return esc(t).replace(/\n/g, '<br>'); };
 
   /* ── 시네마틱 장면: 챕터 오프닝·현실 장면(리더 안에서 화면에 들어오면 재생) ── */
   function layersOf(s) { return R.Director ? R.Director.layersFor(s, S.pack && S.pack.cinemaDefaults) : []; }
   function cinemaHtml(c, s) {
+    s = withCopy([s])[0];
     var inner = R.CinemaRender.html(s, { media: s.media, reduce: reduce, layers: layersOf(s), saveData: saveData, kicker: s.kind === 'opener' && s.hook ? s.hook.label : '' });
     var hold = Math.round((R.Cinema.build(s, layersOf(s)).timing.total) * 0.9);
     return '<section class="scene s-cinema' + (s.kind === 'opener' ? ' cn-opener' : '') + '" data-sc="' + esc(s.sceneId) + '" data-hold="' + hold + '"><div class="cn-inline">' + inner + '</div></section>';
@@ -199,7 +201,7 @@
     if (t === 'chapterEnding') {
       var last = S.idx >= S.rep.chapters.length - 1;
       return '<section class="scene s-end rv" ' + id + '>' + (c.disclaimer ? '<p class="disc" style="margin:0 0 26px">' + esc(c.disclaimer) + '</p>' : '') + (c.cta ? '<button type="button" class="btn" data-cta="' + esc(c.cta.action) + '" style="margin-bottom:26px">' + esc(c.cta.label) + '</button>' : '') +
-        '<p class="q" data-tx="end.quote">' + lines(c.headline) + '</p>' + (s.nextHook ? '<p class="nexthook"><small>NEXT SCENE · ' + esc(s.nextHook.label) + '</small>' + esc(s.nextHook.line) + '</p>' : '') + '<button type="button" class="btn gold big" id="nextBtn" disabled>' + (last ? '나의 이야기 마무리하기' : '다음 챕터 →') + '</button><p class="hint" id="nextHint">끝까지 읽으면 열립니다</p></section>';
+        '<p class="q" data-tx="end.quote">' + lines(c.headline) + '</p>' + (s.nextHook ? '<p class="nexthook"><small>다음 길 · ' + esc(s.nextHook.label) + '</small>' + lines(s.nextHook.line) + '</p>' : '') + '<button type="button" class="btn gold big" id="nextBtn" disabled>' + (last ? '나의 이야기 마무리하기' : '다음 챕터 →') + '</button><p class="hint" id="nextHint">끝까지 읽으면 열립니다</p></section>';
     }
     return '';
   }
@@ -340,7 +342,7 @@
   function finalView() {
     S.scroll[S.rep.chapters[S.idx].id] = window.scrollY; view('final'); T('report_completed', { viewed: Object.keys(S.visited).length }); checkUnlock();
     var rep = S.rep, a4 = rep.acts[rep.acts.length - 1], steps = rep.plan.strategy;
-    $('#v-final').innerHTML = '<div class="fin"><p class="kicker">END</p><h2>이 이야기의 다음 장면은<br>아직 쓰이지 않았다</h2><p>' + rep.chapters.length + '개의 챕터를 지나왔다.<br>타고난 캐릭터부터 시간의 흐름,<br>다음 장면을 위한 행동 전략까지.</p>' +
+    $('#v-final').innerHTML = '<div class="fin"><p class="kicker">運路</p><h2>' + (S.name ? esc(S.name) + '에게는,<br>' + esc(S.name) + '의 때가 있다.' : '모든 사람에게는,<br>각자의 때가 있다.') + '</h2><p>' + rep.chapters.length + '개의 챕터를 지나왔다.<br>타고난 명부터 운의 흐름,<br>움직일 때를 위한 행동 전략까지.</p>' +
       '<div class="cap" style="margin-top:28px">다음 장면의 전략</div><div class="strategy">' + steps.map(function (x, i) { return (i ? '<i aria-hidden="true">→</i>' : '') + '<b>' + esc(x.label) + '</b>'; }).join('') + '</div>' +
       '<div class="btns"><button type="button" class="btn gold big" id="fPdf"' + (S.pdfUnlocked ? '' : ' disabled') + '>나의 종합 리포트 PDF 받기</button><button type="button" class="btn big" id="fShare">공유 카드 만들기</button><button type="button" class="btn" id="fCompat">궁합 볼 사람 추가하기</button><button type="button" class="btn" id="fBack">리포트 다시 보기</button></div>' + (S.pdfUnlocked ? '' : '<p class="lock">더 많은 챕터를 읽으면 PDF가 열립니다.</p>') + '<p class="fine">사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></div>';
     $('#fBack').onclick = function () { view('reader'); go(S.rep.chapters.length - 1); };
@@ -495,8 +497,8 @@
         S.pack = R.Compose.fromSaved(m.content, S.media, m.project || 'full'); S.ts = S.pack.textStyles; S.rep = R.Compose.build(S.sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = { video: (m.awk && m.awk.video) || null, ilgan: (m.awk && m.awk.ilgan) || null, fallback: (m.awk && m.awk.fallback) || null }; S.visited = {}; S.ended = {};
         if (m.chapter === 'ilgan') { ilganStage(function () { }); return; }
         if (m.chapter === 'awakening') { ijuStage(function () { }); return; }
-        if (m.chapter === 'prologue') { playCinema(R.Translator.prologue(S.sd, S.name, R.Narrator.heroVars(S.sd, S.name)), function () { }, '프롤로그'); return; }
-        if (m.chapter === 'ending') { playCinema(R.Translator.ending(S.sd, S.name, R.Narrator.heroVars(S.sd, S.name)), function () { }, '엔딩'); return; }
+        if (m.chapter === 'prologue') { playCinema(withCopy(R.Translator.prologue(S.sd, S.name, R.Narrator.heroVars(S.sd, S.name))), function () { }, '프롤로그'); return; }
+        if (m.chapter === 'ending') { playCinema(withCopy(R.Translator.ending(S.sd, S.name, R.Narrator.heroVars(S.sd, S.name))), function () { }, '엔딩'); return; }
         var i = Math.max(0, S.rep.chapters.map(function (c) { return c.id; }).indexOf(m.chapter)); view('reader'); $('#barTot').textContent = S.rep.chapters.length;
         S.idx = i; var c = S.rep.chapters[i]; S.visited[c.id] = 1; render(c, i, true); window.scrollTo(0, 0);
       } catch (err) { $('#loadText').textContent = '미리보기를 만들지 못했습니다: ' + (err && err.message); view('load'); }

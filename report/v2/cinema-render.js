@@ -44,7 +44,7 @@
       idxs.forEach(function (i, k) {
         var s = segs[i], nx = k < idxs.length - 1 ? tm.at[idxs[k + 1]] : null;
         var anim = reduce && /^(slide|parallax|typewriter|word|zoom|blur|focus|impact)/.test(s.animation) ? 'fade' : s.animation;
-        txt += '<p class="cn-seg" data-e="' + s.emphasis + '" data-a="' + esc(anim) + '" style="--at:' + tm.at[i] + 'ms;' + (nx != null ? '--nx:' + nx + 'ms;' : '') + '">' + splitInner(s.text, anim, reduce) + '</p>';
+        txt += '<p class="cn-seg" data-e="' + s.emphasis + '"' + (s.name ? ' data-nm="1"' : '') + ' data-a="' + esc(anim) + '" style="--at:' + tm.at[i] + 'ms;' + (nx != null ? '--nx:' + nx + 'ms;' : '') + '">' + splitInner(s.text, anim, reduce) + '</p>';
       });
       txt += '</div>';
     });
@@ -53,12 +53,12 @@
       prof = '<dl class="cn-prof">' + scene.profile.map(function (r, i) { return '<div class="cn-row" style="--at:' + (tm.at[Math.min(i, tm.at.length - 1)] || 0) + 'ms"><dt>' + esc(r.label) + '</dt><dd>' + esc(r.value) + '</dd></div>'; }).join('') + '</dl>';
       txt = ''; // 프로필 카드는 카드 자체가 텍스트
     }
-    var sub = scene.sub ? '<p class="cn-sub" style="--at:' + (tm.end + 200) + 'ms">' + esc(scene.sub) + '</p>' : '';
+    var sub = scene.sub ? '<p class="cn-sub" style="--at:' + (tm.end + 200) + 'ms">' + esc(scene.sub).replace(/\n/g, '<br>') + '</p>' : '';
     var firstImpact = -1; segs.forEach(function (s, i) { if (firstImpact < 0 && s.emphasis === 'impact') firstImpact = i; });
     var dimAt = firstImpact >= 0 ? Math.max(0, tm.at[firstImpact] - 350) : -1;
     var style = '--cn-ov:' + c.overlayStrength + ';--cn-fx:' + Math.round(c.focalPoint.x * 100) + '%;--cn-fy:' + Math.round(c.focalPoint.y * 100) + '%;--cn-dur:' + tm.total + 'ms;--cn-amp:' + cv.amp + ';--cn-pan:' + cv.pan + '%;--pc:' + pc + ';' + (dimAt >= 0 ? '--dim-at:' + dimAt + 'ms;' : '');
     var cls = 'cn-scene' + (cv.on ? ' cn-cam-on' : '') + (dimAt >= 0 ? ' cn-has-impact' : '') + (reduce ? ' cn-reduce' : '') + (scene.kind === 'profile' ? ' cn-k-profile' : '') + (scene.kind === 'title' ? ' cn-k-title' : '');
-    return '<section class="' + cls + '" data-sc="' + esc(scene.sceneId || '') + '" data-cn-type="' + c.sceneType + '" data-cn-preset="' + (c.preset || '') + '" data-pos="' + c.textPosition + '" data-size="' + c.textSize + '" data-mi="' + c.motionIntensity + '" data-pace="' + c.pacing + '" data-motion="' + (cv.on ? c.imageMotion : 'none') + '" data-tr="' + trans + '" data-bgm="' + c.bgmMood + '" style="' + style + '">' +
+    return '<section class="' + cls + '" data-sc="' + esc(scene.sceneId || '') + '" data-cn-type="' + c.sceneType + '" data-cn-preset="' + (c.preset || '') + '" data-pos="' + c.textPosition + '" data-size="' + c.textSize + '" data-mi="' + c.motionIntensity + '" data-pace="' + c.pacing + '" data-motion="' + (cv.on ? c.imageMotion : 'none') + '" data-tr="' + trans + '" data-bgm="' + c.bgmMood + '" data-nm-e="' + c.nameEmphasis + '" style="' + style + '">' +
       '<div class="cn-bg"><div class="cn-cam">' + bg + '</div></div><div class="cn-dim" aria-hidden="true"></div><div class="cn-txt">' + (o.kicker ? '<div class="cn-kick">' + esc(o.kicker) + '</div>' : '') + txt + prof + sub + '</div></section>';
   }
 
@@ -80,7 +80,7 @@
     ui.innerHTML = '<button type="button" class="cn-skip">' + esc(o.skipLabel || '건너뛰기 ›') + '</button><div class="cn-pause" aria-hidden="true">❚❚</div><div class="cn-prog" aria-hidden="true"><i></i></div>';
     stage.appendChild(ui);
     var skipBtn = ui.querySelector('.cn-skip'), pauseEl = ui.querySelector('.cn-pause'), progEl = ui.querySelector('.cn-prog i');
-    stage.setAttribute('role', 'region'); stage.setAttribute('aria-label', o.label || '영화처럼 보는 나의 이야기');
+    stage.setAttribute('role', 'region'); stage.setAttribute('aria-label', o.label || '운의 흐름을 영화처럼 보는 장면');
     var items = scenes.map(function (s, i) { return { s: s, media: o.mediaFor ? o.mediaFor(s) : null, i: i }; });
 
     function sceneEl(it) {

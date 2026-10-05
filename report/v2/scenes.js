@@ -132,7 +132,7 @@
 
   // 챕터 구조 → Scene 배열. 장면 종류 순서가 단조롭지 않게(연속 같은 media 타입 방지) 구성한다.
   // 챕터마다 "만세력이 읽은 값"을 그림으로 먼저 보여 주고, 그 값을 근거로 풀이한다
-  var CHART_OF = { c01: 'pillars', c02: 'elements', c03: 'strength', c04: 'groups', c05: 'groups', c06: 'career', c07: 'yong', c08: 'groups', c09: 'spouse', c10: 'spouse', c11: 'groups', c12: 'yong', c13: 'pillars' };
+  var CHART_OF = { c01: 'pillars', c02: 'elements', c03: 'strength', c04: 'groups', c05: 'groups', c06: 'career', c07: 'yong', c08: 'groups', c09: 'spouse', c10: 'spouse', c11: 'groups', c12: 'yong', c13: 'pillars', c15: 'flow', c18: 'months' };
   function chartKind(c) { return CHART_OF[c.base || c.id] || null; }
   function planScenes(c) {
     if (c.verdict) return ['chapterIntro', 'verdictFind', 'verdictBlock'].concat(c.verdict.evidence ? ['verdictEvidence'] : [], ['verdictAdvice', 'chapterEnding']); // 총평: 발견 → 막힘 → 증거 → 조언
@@ -176,7 +176,7 @@
       }
       else if (st === 'action') { sc.headline = '지금 할 수 있는 행동'; sc.bullets = [{ label: 'ACTION', items: c.action || [], notes: c.actionNotes || [] }]; }
       else if (st === 'chapterEnding') { sc.headline = c.headline; sc.body = ''; }
-      else if (st === 'verdictFind') { sc.headline = '주인공의 동력'; sc.body = c.verdict.discover; sc.verdict = c.verdict.potential; }
+      else if (st === 'verdictFind') { sc.headline = '타고난 동력'; sc.body = c.verdict.discover; sc.verdict = c.verdict.potential; }
       else if (st === 'verdictBlock') { sc.headline = c.verdict.blocked.label; sc.body = c.verdict.blocked.text; sc.sub = c.verdict.blocked.headline; }
       else if (st === 'verdictEvidence') { sc.headline = '시간축 위의 한 지점'; sc.body = c.verdict.evidence.text; sc.evidence = { yes: c.verdict.evidence.yes, no: c.verdict.evidence.no }; }
       else if (st === 'verdictAdvice') { sc.headline = '다음 장면을 위한 두 걸음'; sc.body = c.verdict.advice.lead; sc.bullets = [{ label: 'ADVICE', items: c.verdict.advice.items }]; }

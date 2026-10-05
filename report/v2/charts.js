@@ -98,6 +98,59 @@
     return wrap(t, 'USEFUL ELEMENT · 용신', body + foot(t, '균형을 돕는 용신은 ' + u.yong + (u.hee ? ', 희신은 ' + u.hee : '') + '입니다.'), '용신 ' + u.yong + (u.hee ? ', 희신 ' + u.hee : ''));
   }
 
+
+  // ── 運路 흐름 차트: 먹이 번지는 능선(대운 10개 · 월운 12개). 계산이 아니라 엔진의 계절 값(season)을 그림으로 옮긴다. ──
+  //  높이는 계절 라벨의 "표시 순서"일 뿐 점수가 아니다(수치 축 없음). 숫자 대신 한자·이름·연도 라벨을 함께 쓴다(색·모양만으로 구분하지 않는다).
+  var LEVEL = { defense: 1, accumulation: 2, transition: 3, harvest: 4, opportunity: 5, expansion: 6 };
+  var SEA_H = { opportunity: ['機', '기회'], expansion: ['展', '확장'], harvest: ['收', '수확'], accumulation: ['蓄', '축적'], transition: ['轉', '전환'], defense: ['防', '방어'] };
+  var inkN = 0;
+  // 점들을 부드럽게 잇는 Catmull-Rom → 베지어
+  function smooth(p) {
+    var d = 'M' + p[0][0].toFixed(1) + ' ' + p[0][1].toFixed(1);
+    for (var i = 0; i < p.length - 1; i++) {
+      var a = p[i - 1] || p[i], b = p[i], c = p[i + 1], e = p[i + 2] || c;
+      d += ' C' + (b[0] + (c[0] - a[0]) / 6).toFixed(1) + ' ' + (b[1] + (c[1] - a[1]) / 6).toFixed(1) + ' ' + (c[0] - (e[0] - b[0]) / 6).toFixed(1) + ' ' + (c[1] - (e[1] - b[1]) / 6).toFixed(1) + ' ' + c[0].toFixed(1) + ' ' + c[1].toFixed(1);
+    }
+    return d;
+  }
+  // items: [{ label, season, now }], opts: { title, aria, note }
+  function ridge(items, t, o) {
+    items = (items || []).filter(function (x) { return x && LEVEL[x.season]; }); if (items.length < 3) return '';
+    var W = 360, H = 190, L = 22, Rr = 22, base = 118, step = 16, n = items.length, id = 'ink' + (++inkN), anim = t === THEME.dark;
+    var xs = function (i) { return L + (W - L - Rr) * i / (n - 1); }, ys = function (s) { return base - LEVEL[s] * step; };
+    var pts = items.map(function (x, i) { return [xs(i), ys(x.season)]; });
+    var far = items.map(function (x, i) { return [xs(i) + (W - L - Rr) / (n - 1) / 2, base - LEVEL[x.season] * step * 0.55 + 6]; });
+    var line = smooth(pts), farLine = smooth(far), area = line + ' L' + pts[n - 1][0].toFixed(1) + ' ' + base + ' L' + pts[0][0].toFixed(1) + ' ' + base + ' Z';
+    var nowI = -1; items.forEach(function (x, i) { if (x.now) nowI = i; });
+    var defs = '<defs><filter id="' + id + 'b" x="-5%" y="-30%" width="110%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="7"/><feGaussianBlur stdDeviation="1.6"/></filter>' +
+      '<filter id="' + id + 'e"><feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter>' +
+      '<linearGradient id="' + id + 'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + t.ink + '" stop-opacity=".26"/><stop offset="1" stop-color="' + t.ink + '" stop-opacity="0"/></linearGradient></defs>';
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="presentation" aria-hidden="true" style="display:block;overflow:visible">' + defs +
+      '<path d="' + farLine + ' L' + far[n - 1][0].toFixed(1) + ' ' + base + ' L' + far[0][0].toFixed(1) + ' ' + base + ' Z" fill="' + t.ink + '" opacity=".1" filter="url(#' + id + 'b)"/>' +
+      '<path class="ink-area" d="' + area + '" fill="url(#' + id + 'g)"/>' +
+      '<path class="ink-bleed' + (anim ? ' ink-anim' : '') + '" d="' + line + '" pathLength="1" fill="none" stroke="' + t.ink + '" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity=".2" filter="url(#' + id + 'b)"/>' +
+      '<path class="ink-line' + (anim ? ' ink-anim' : '') + '" d="' + line + '" pathLength="1" fill="none" stroke="' + t.ink + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#' + id + 'e)"/>';
+    if (nowI >= 0) svg += '<line x1="' + pts[nowI][0].toFixed(1) + '" x2="' + pts[nowI][0].toFixed(1) + '" y1="' + (pts[nowI][1] + 4).toFixed(1) + '" y2="' + base + '" stroke="' + t.line + '" stroke-width="1" stroke-dasharray="2 3"/><circle cx="' + pts[nowI][0].toFixed(1) + '" cy="' + pts[nowI][1].toFixed(1) + '" r="4.5" fill="' + t.line + '" stroke="' + t.ink + '" stroke-width="1"/>' +
+      '<text x="' + pts[nowI][0].toFixed(1) + '" y="' + (pts[nowI][1] - 10).toFixed(1) + '" text-anchor="middle" font-size="10" fill="' + t.line + '" font-weight="600">지금</text>';
+    items.forEach(function (x, i) {
+      var h = SEA_H[x.season], cx = xs(i).toFixed(1), cur = i === nowI;
+      svg += '<text x="' + cx + '" y="' + (base + 24) + '" text-anchor="middle" font-size="17" font-family="serif" fill="' + (cur ? t.line : t.ink) + '">' + h[0] + '</text>' +
+        '<text x="' + cx + '" y="' + (base + 38) + '" text-anchor="middle" font-size="8.5" fill="' + t.sub + '">' + esc(h[1]) + '</text>' +
+        '<text x="' + cx + '" y="' + (base + 51) + '" text-anchor="middle" font-size="8" fill="' + t.sub + '" opacity=".8">' + esc(x.label) + '</text>';
+    });
+    svg += '</svg>';
+    var aria = (o.aria || o.title) + ': ' + items.map(function (x) { return x.label + ' ' + SEA_H[x.season][1] + (x.now ? '(지금)' : ''); }).join(', ');
+    return wrap(t, o.title, svg + '<div style="font-size:11px;color:' + t.sub + ';margin-top:2px">능선이 높을수록 앞으로 나아가기 좋은 때, 낮을수록 점검하고 쌓아 두는 때에 가깝다(점수가 아니라 계절의 순서).</div>' + foot(t, o.note), aria);
+  }
+  function flow(sd, t) {
+    var cd = sd.currentDaewoon;
+    return ridge((sd.daewoon || []).map(function (x) { return { label: String(x.startYear), season: x.season, now: !!(cd && cd.startYear === x.startYear) }; }), t,
+      { title: 'DAEWOON · 大運 — 10년마다 달라지는 길', aria: '대운 흐름', note: cd && SEA_H[cd.season] ? '지금은 ' + cd.startYear + '년에 시작된 ' + SEA_H[cd.season][0] + '(' + SEA_H[cd.season][1] + ') 구간에 서 있다.' : '' });
+  }
+  function months(sd, t) {
+    return ridge((sd.monthlyLuck || []).map(function (m, i) { return { label: m.month + '월', season: m.season, now: !!m.isNow || i === 0 }; }), t, { title: 'MONTHLY · 月運 — 앞으로 열두 달', aria: '월운 흐름', note: '' });
+  }
+
   function html(kind, sd, opts) {
     opts = opts || {}; var t = THEME[opts.theme === 'light' ? 'light' : 'dark'];
     if (!sd) return '';
@@ -108,8 +161,10 @@
     if (kind === 'spouse') return pillars(sd, t, Object.assign({}, opts, { chapter: 'c09' }), true);
     if (kind === 'career') return career(sd, t);
     if (kind === 'yong') return yong(sd, t);
+    if (kind === 'flow') return flow(sd, t);
+    if (kind === 'months') return months(sd, t);
     return '';
   }
 
-  R.Charts = { html: html, KINDS: ['elements', 'groups', 'strength', 'pillars', 'spouse', 'career', 'yong'] };
+  R.Charts = { html: html, KINDS: ['elements', 'groups', 'strength', 'pillars', 'spouse', 'career', 'yong', 'flow', 'months'] };
 })(typeof window !== 'undefined' ? window : globalThis);

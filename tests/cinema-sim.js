@@ -26,8 +26,8 @@ ok(K.resolve({ sceneType: 'unknownType' }, []).sceneType === 'EXPLANATION', '알
 const bad = K.clean({ sceneType: 'NOPE', pacing: 'WARP', motionIntensity: 99, imageMotion: 'spin', transition: 'fireworks', textAnimation: 'explode', overlayStrength: 5, focalPoint: { x: 9, y: -1 }, segments: [{ text: '' }, { text: '가', emphasis: 'x' }] });
 ok(!('sceneType' in bad) && !('pacing' in bad) && bad.motionIntensity === 4 && !('imageMotion' in bad) && !('transition' in bad) && !('textAnimation' in bad) && bad.overlayStrength === 1 && bad.focalPoint.x === 1 && bad.focalPoint.y === 0 && bad.segments.length === 1 && bad.segments[0].emphasis === 'normal', '허용 밖 값은 버리거나 범위로 고정');
 
-console.log('3. 프리셋 14종 · 우선순위');
-ok(K.PRESET_NAMES.length === 14 && ['CINEMATIC_INTRO', 'CHARACTER_REVEAL', 'QUIET_REFLECTION', 'DAILY_REALITY', 'REALITY_CHECK', 'TENSION', 'DISCOVERY', 'TURNING_POINT', 'TIMELINE', 'WARNING', 'OPPORTUNITY', 'EMOTIONAL', 'CLIMAX', 'ENDING'].every(n => K.PRESETS[n]), '프리셋 14종');
+console.log('3. 프리셋 14종 + 運路 연출 프리셋 17종 · 우선순위');
+ok(K.PRESET_NAMES.length === 31 && ['NAME_REVEAL', 'DATA_VIEW', 'DAWN', 'MIST', 'MOUNTAIN', 'WIND', 'RAIN', 'MOON', 'FIRE', 'RIVER', 'CROSSROAD', 'BLADE', 'GATE', 'SEASON_CHANGE', 'STORM', 'SUNRISE', 'SILENCE'].every(n => K.PRESETS[n]) && K.SCENE_TYPES.length === 21 && ['NAME_REVEAL', 'NATURE', 'REALITY', 'DATA', 'REFLECTION'].every(t => K.TYPE_PRESET[t] && K.PRESETS[K.TYPE_PRESET[t]]) && ['CINEMATIC_INTRO', 'CHARACTER_REVEAL', 'QUIET_REFLECTION', 'DAILY_REALITY', 'REALITY_CHECK', 'TENSION', 'DISCOVERY', 'TURNING_POINT', 'TIMELINE', 'WARNING', 'OPPORTUNITY', 'EMOTIONAL', 'CLIMAX', 'ENDING'].every(n => K.PRESETS[n]), '프리셋 14종');
 K.PRESET_NAMES.forEach(n => { const c = K.clean(K.PRESETS[n]); ok(Object.keys(c).length === Object.keys(K.PRESETS[n]).length, n + ': 프리셋 값이 전부 허용값'); ok(K.SCENE_TYPES.includes(K.PRESETS[n].sceneType), n + ': sceneType'); });
 const rs = K.resolve({ sceneType: 'insight', cinema: { preset: 'TENSION' } }, []);
 ok(rs.sceneType === 'CONFLICT' && rs.pacing === 'FAST' && rs.imageMotion === 'pan-left' && rs.transition === 'hard-cut', '프리셋만 골라도 기본 연출 적용');
@@ -52,35 +52,47 @@ ok(b.sequence.some(m => m.target === 'background' && m.action === 'dim') && b.se
 const own = K.build({ cinema: { segments: [{ text: '가', block: 0 }], motionSequence: [{ at: 500, target: 'text-1', action: 'fade-up', duration: 300 }, { at: 0, target: 'evil', action: 'x' }] } }, []);
 ok(own.sequence.length === 1 && own.sequence[0].at === 500, '관리자 motionSequence 우선(잘못된 항목은 제거)');
 
-console.log('6. REAL-LIFE TRANSLATOR: 명리 용어는 화면에 나오지 않는다');
+console.log('6. 運路 TRANSLATOR: 현실 해석이 먼저, 명리 용어는 근거 한 줄로만');
 const all = [];
 cases.forEach(c => {
   const sd = sdOf.apply(null, c), vars = R.Narrator.heroVars(sd, '백진우');
-  const pr = T.prologue(sd, '백진우', vars), en = T.ending(sd, '백진우', vars), lifes = ['c03', 'c05', 'c08'].reduce((a, k) => a.concat(T.chapterScenes(k, sd, vars)), []);
-  const texts = [].concat(pr, en, lifes).reduce((a, s) => a.concat((s.cinema.segments || []).map(g => g.text), (s.profile || []).map(p => p.value)), []);
+  const pr = T.prologue(sd, '백진우', vars), en = T.ending(sd, '백진우', vars), lifes = ['c03', 'c05', 'c08', 'c15', 'c17', 'c18'].reduce((a, k) => a.concat(T.chapterScenes(k, sd, vars)), []);
+  const allSc = [].concat(pr, en, lifes), textOf = s => (s.cinema.segments || []).map(g => g.text).concat((s.profile || []).map(p => p.value), s.sub ? [s.sub] : []);
+  const texts = allSc.reduce((a, s) => a.concat(s.basisNote ? [] : textOf(s)), []); // 명리 근거 한 줄(basisNote)만 용어 허용
+  ok(allSc.filter(s => s.basisNote).every(s => /^명리에서는/.test(s.cinema.segments[0].text)) && allSc.some(s => s.basisNote), '명리 용어는 현실 해석 뒤 근거 한 줄(명리에서는 …)에만 ' + c);
+  ok(T.lint(allSc).length === 0, '금지 호칭(이 사람·주인공·이 인물·캐릭터·이 이야기) 없음 ' + c + ': ' + T.lint(allSc).join(' / '));
   all.push.apply(all, texts);
   ok(texts.every(t => !T.TERMS.test(t)), '화면 문구에 명리 용어(식상·재성·신약 …) 없음 ' + c + ': ' + texts.filter(t => T.TERMS.test(t)).join(' / '));
   ok(texts.every(t => !/수호|신령|각성|소환|선택받/.test(t)), '수호신 어휘 없음 ' + c);
   ok(texts.every(t => !/\{[^}]*\}/.test(t)), '미치환 자리표시자 없음');
   const p = T.profile(sd, '백진우'); ok(p.character === '백진우' && p.role && p.coreDrive && p.strength && p.weakness && p.hiddenDesire && /사이의 충돌$/.test(p.conflict), '캐릭터 프로필 7칸 동적 생성');
   ok(T.basis(sd).dominant === sd.dominantGroup && T.basis(sd).weakest === sd.weakestGroup && T.basis(sd).groups.length === 5, 'factualBasis 는 계산값 그대로(내부 보존)');
-  ok(pr.map(s => s.sceneId).join() === 'pro_1,pro_2,pro_3,pro_title,pro_hero,pro_profile,pro_analogy', '프롤로그 순서: ' + pr.map(s => s.sceneId));
-  ok(pr.find(s => s.sceneId === 'pro_title').cinema.segments[0].text === 'THE STORY OF 백진우' && T.prologue(sd, '', R.Narrator.heroVars(sd, '')).find(s => s.sceneId === 'pro_title').cinema.segments[0].text === 'MY STORY', '타이틀: THE STORY OF 이름 / MY STORY');
-  ok(/백진우다\.$/.test(pr.find(s => s.sceneId === 'pro_3').cinema.segments[1].text) && /지수다\.$/.test(T.ending(sd, '지수').find(s => s.sceneId === 'end_4').cinema.segments[1].text) && /민준이다\.$/.test(T.ending(sd, '민준').find(s => s.sceneId === 'end_4').cinema.segments[1].text), '이름 + 이다/다 받침 처리');
-  ok(T.ending(sd, '').find(s => s.sceneId === 'end_4').cinema.segments[1].text === '결국 당신이다.', '이름이 없으면 당신');
+  ok(pr.map(s => s.sceneId).join() === 'pro_1,pro_2,pro_3,pro_4,pro_5,pro_6,pro_7,pro_title,pro_born,pro_fixed,pro_myeong,pro_hero', '프롤로그 순서: ' + pr.map(s => s.sceneId));
+  ok(['DAWN', 'MOUNTAIN', 'MIST', 'SILENCE', 'SUNRISE', 'NAME_REVEAL'].every((p, i) => pr[i].cinema.preset === p), '오프닝 8장면: 갈대밭·산맥·산사·암전·해·이름');
+  const nameless = T.prologue(sd, '', R.Narrator.heroVars(sd, '')), ti = pr.find(s => s.sceneId === 'pro_title'), p6 = pr.find(s => s.sceneId === 'pro_6');
+  ok(ti.cinema.segments[0].text === '運路' && ti.sub === '백진우에게는,\n백진우의 때가 있다.' && nameless.find(s => s.sceneId === 'pro_title').sub === '모든 사람에게는,\n각자의 때가 있다.', '타이틀: 運路 + {이름}에게는, {이름}의 때가 있다');
+  ok(p6.cinema.segments[0].name === true && p6.cinema.nameEmphasis === 'TITLE' && p6.cinema.segments[0].text === '백진우' && !nameless.some(s => s.sceneId === 'pro_6'), '이름 공개 장면(TITLE 강조) — 이름이 없으면 건너뜀');
+  ok(K.build(p6, []).timing.total >= 2000 + 1500, '이름은 2초 이상 머문다');
+  ok(/백진우가 처음부터/.test(pr.find(s => s.sceneId === 'pro_myeong').cinema.segments[1].text) && /^백진우\.$/.test(pr.find(s => s.sceneId === 'pro_born').cinema.segments[0].text), '命 · 이름 조사 처리');
+  const e1 = T.ending(sd, '지수', R.Narrator.heroVars(sd, '지수')), e2 = T.ending(sd, '', R.Narrator.heroVars(sd, ''));
+  ok(e1.find(s => s.sceneId === 'end_title').sub === '지수에게는,\n지수의 때가 있다.' && e1.find(s => s.sceneId === 'end_3').cinema.segments[0].text === '지수' && !e2.some(s => s.sceneId === 'end_3'), '엔딩: 이름 → 運路 / 이름 없으면 건너뜀');
+  ok(e1.map(s => s.cinema.segments.map(g => g.text).join(' ')).join(' ').includes('운은 계속 움직인다') || e1[0].cinema.segments.some(g => /계속 움직인다/.test(g.text)), '엔딩은 운명을 확정하지 않는다');
 });
 const money = T.moneyScene(sdOf(1990, 5, 17, 14, 'M'), {}); ok(money.length === 1 && money[0].cinema.segments.length >= 4, '돈 장면');
+// (영화 비유 보조 도구 analogy 는 코드에 남아 있으나 運路 흐름에서는 쓰지 않는다)
 const anaTxt = cases.map(c => T.analogy(sdOf.apply(null, c)));
 ok(anaTxt.every(a => /영화로 비유한다면/.test(a.intro) && /구조와 비슷하다\.$/.test(a.tail) && !/입니다/.test(a.line)), '영화 비유는 단정하지 않고 "구조와 비슷하다"로 보조');
-ok(all.filter(t => /아이언맨|닥터 스트레인지|윌리 웡카|머니볼|캡틴|헤르미온느/.test(t)).length > 0, '영화 캐릭터는 설명 도구로만 등장');
+ok(all.filter(t => /아이언맨|닥터 스트레인지|윌리 웡카|머니볼|캡틴|헤르미온느/.test(t)).length === 0, '영화 캐릭터 비유는 運路 흐름에 나오지 않음');
 
 console.log('7. 감독: 챕터 장면 구성');
 const lib = R.Compose.library(null), cfg = R.Chapters.forProject(null, 'full'), sd0 = sdOf(1990, 5, 17, 14, 'M');
 const rep = R.Compose.build(sd0, lib, cfg, { name: '백진우' });
 ok(rep.meta.warnings.length === 0, '경고 0');
-ok(rep.acts.length === 5 && rep.acts.map(a => a.title).join() === 'WHO AM I,THE WORLD,THE CONFLICT,TIME,CHOICE', '5막 구조: ' + rep.acts.map(a => a.title));
-ok(rep.chapters.every(c => c.scenes[0].kind === 'opener' && c.scenes[0].hook && /^CHAPTER \d\d · /.test(c.scenes[0].hook.label)), '모든 챕터가 검은 화면 + 질문 오프닝으로 시작');
-ok(rep.chapters.slice(0, -1).every(c => c.scenes.some(s => s.sceneType === 'chapterEnding' && s.nextHook && s.nextHook.line)), '챕터 끝에 다음 장면 예고(NEXT HOOK)');
+ok(rep.acts.length === 5 && rep.acts.map(a => a.title).join() === '命 · 性 · 勢,財 · 業 · 緣,壁 · 機,運 · 時,路', '5막 구조: ' + rep.acts.map(a => a.title));
+ok(rep.chapters.every(c => c.scenes[0].kind === 'opener' && c.scenes[0].hook && /^(序章 · 運路|終章|第.{1,2}章 · .)/.test(c.scenes[0].hook.label)), '모든 챕터가 검은 화면 + 질문 오프닝으로 시작');
+ok(rep.chapters.slice(0, -1).every(c => c.scenes.some(s => s.sceneType === 'chapterEnding' && s.nextHook && s.nextHook.line)), '챕터 끝에 다음 길 예고(NEXT HOOK)');
+ok(rep.chapters.every(c => !T.BAD_VOICE.test(c.scenes[0].hook.line)) && rep.chapters.find(c => c.base === 'c01').scenes[0].cinema.segments[0].text.startsWith('백진우는'), '챕터 첫머리에 이름 사용(조사 처리), 금지 호칭 없음');
+ok(rep.chapters.find(c => c.base === 'c15').scenes.some(s => s.sceneId === 'c15_life2' || /life_dw/.test(s.sceneId) || s.kind === 'title') && rep.chapters.find(c => c.base === 'c17').scenes.some(s => s.kind === 'title' && s.sub), '대운(大運)·세운(歲運) 장면이 해당 챕터에 삽입');
 ok(['c03', 'c05', 'c08'].every(k => { const c = rep.chapters.find(x => x.base === k); return c.scenes.some(s => s.kind === 'script'); }), '성향·약점·돈 챕터에 현실 장면(DAILY_LIFE) 삽입');
 rep.chapters.forEach(c => { const three = c.scenes.filter(s => K.resolve(s, [s.cinemaAuto]).motionIntensity === 3).length; ok(three <= 2, c.id + ' 강도 3 이 챕터당 2회 이하'); });
 ok(rep.chapters.reduce((n, c) => n + c.scenes.filter(s => K.resolve(s, [s.cinemaAuto]).motionIntensity >= 4).length, 0) <= 1, '강도 4 는 전체 1회 이하');
@@ -95,7 +107,7 @@ ok(JSON.stringify(R.Compose.mediaPayload(rep, lib)).length > 2 && R.Compose.aiPa
 
 console.log('8. 렌더 HTML · 접근성');
 const sc0 = T.prologue(sd0, '백진우', {})[0], h = R.CinemaRender.html(sc0, { reduce: false }), hr = R.CinemaRender.html(sc0, { reduce: true });
-ok(/class="cn-scene/.test(h) && /data-cn-type="INTRO"/.test(h) && /--cn-dur:\d+ms/.test(h) && /data-e="impact"/.test(h) && /style="--at:\d+ms/.test(h), '장면 HTML: 타입·시간·강조 속성');
+ok(/class="cn-scene/.test(h) && /data-cn-type="NATURE"/.test(h) && /--cn-dur:\d+ms/.test(h) && /data-e="impact"/.test(h) && /style="--at:\d+ms/.test(h), '장면 HTML: 타입·시간·강조 속성');
 ok(!/cn-cam-on/.test(hr) && /data-motion="none"/.test(hr), 'reduced-motion: 카메라 정지');
 const hz = R.CinemaRender.html({ cinema: { preset: 'CINEMATIC_INTRO', segments: [{ text: '느리게 타자', emphasis: 'normal', animation: 'typewriter', block: 0 }, { text: '한 단어씩 나타난다', emphasis: 'normal', animation: 'word-reveal', block: 0 }, { text: '큰 이동', emphasis: 'normal', animation: 'slide-left', block: 0 }] }, bg: 'black' }, { reduce: true });
 ok(!/class="cn-c"|class="cn-w"/.test(hz) && !/data-a="(typewriter|slide-left|word-reveal)"/.test(hz) && /느리게 타자/.test(hz) && /큰 이동/.test(hz), 'reduced-motion: typewriter·word·slide 를 페이드로 단순화(문장은 그대로)');
@@ -115,6 +127,13 @@ import(url.pathToFileURL(tmp).href).then(S => {
   ok(S.SCENE_TYPES.join() === K.SCENE_TYPES.join() && S.PRESETS.join() === K.PRESET_NAMES.join(), '허용 목록 동기화(sceneType·preset)');
   const evil = S.cleanCinema({ sceneType: 'X', pacing: 'Y', motionIntensity: 'abc', evil: '<script>' }); ok(Object.keys(evil).length === 0, '서버: 허용 밖 값 모두 제거');
   const d = S.cleanCinemaDefaults({ WARNING: { motionIntensity: 0, imageMotion: 'none' }, NOPE: { pacing: 'FAST' } }); ok(d.WARNING && !d.NOPE, '기본 연출: 알 수 없는 sceneType 제거');
+  // 문장·이름 편집(sceneCopy): 서버 검증 + 적용
+  const sc = S.cleanSceneCopy({ pro_6: { segments: [{ text: '{hero}.', name: true, emphasis: 'impact' }, { text: '{evil}' }, { text: '<b>x' }], nameEmphasis: 'TITLE', sub: '{hero}의 때' }, 'a b': { nameEmphasis: 'TITLE' }, x1: { nameEmphasis: 'NOPE' } });
+  ok(Object.keys(sc).join() === 'pro_6' && sc.pro_6.segments.length === 1 && sc.pro_6.segments[0].name === true && sc.pro_6.nameEmphasis === 'TITLE', '서버: sceneCopy — 허용 밖 자리표시자·태그·id 제거');
+  const sdc = sdOf(1990, 5, 17, 14, 'M'), vc = R.Narrator.heroVars(sdc, '백진우'), baseP = T.prologue(sdc, '백진우', vc);
+  const cp = T.applyCopy(baseP, { pro_6: { segments: [{ text: '{hero}.', name: true, emphasis: 'impact', animation: 'fade' }], nameEmphasis: 'STRONG' } }, vc);
+  ok(cp.find(s => s.sceneId === 'pro_6').cinema.segments[0].text === '백진우.' && cp.find(s => s.sceneId === 'pro_6').cinema.nameEmphasis === 'STRONG' && baseP.find(s => s.sceneId === 'pro_6').cinema.nameEmphasis === 'TITLE', '문구 override 적용(이름 채움, 원본 불변)');
+  ok(T.prologue(sdc, 'x', R.Narrator.heroVars(sdc, 'x', true)).find(s => s.sceneId === 'pro_6').cinema.segments[0].text === '{hero}', '편집용 원본은 {hero} 자리표시자 상태');
   console.log(fails.length ? '\n실패 ' + fails.length + '건\n' + fails.map(f => ' ✗ ' + f).join('\n') : '\n시네마 레이어 검증 모두 통과');
   process.exit(fails.length ? 1 : 0);
 });

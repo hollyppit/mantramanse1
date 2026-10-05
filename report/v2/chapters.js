@@ -2,13 +2,14 @@
 // 챕터를 추가·삭제·순서변경해도 코드가 아니라 이 배열(또는 관리자 저장본)만 바꾸면 된다.
 //   kind: 챕터를 그리는 방식 (module = 해석 모듈 선택, daewoon/current/sewoon/monthly = 운 흐름 전용, remedy = 개운법, summary = 종합)
 (function (root) {
-  // 영화식 5막(MY LIFE AS A MOVIE). 제목은 막의 이름, line 은 막이 시작될 때 화면에 나오는 한 줄이다.
+  // 運路 5막. 命·性·勢(타고난 것) → 財·業·緣(살아가는 자리) → 壁·機(반복과 기회) → 運·時(흐르는 때) → 路(선택할 길). 제목은 막의 이름, line 은 막이 시작될 때 화면에 나오는 한 줄이다.
+  // 챕터별 第N章 한자 분류(命性勢財業緣壁機運時路)는 translator.js 의 HOOK/UNYEON 이 맡는다(챕터가 20개 이상이어도 상위 분류 11개로 묶는다).
   var ACTS = [
-    { id: 1, title: 'WHO AM I', roman: 'ACT I', line: '이 이야기의 주인공.', pdfDone: '주인공의 캐릭터 분석이 리포트에 기록되었습니다.' },
-    { id: 2, title: 'THE WORLD', roman: 'ACT II', line: '주인공이 살아가는 방식.', pdfDone: '직업·재물·관계 분석이 추가되었습니다.' },
-    { id: 3, title: 'THE CONFLICT', roman: 'ACT III', line: '반복되는 장면.', pdfDone: '반복되는 장면의 뿌리가 추가되었습니다.' },
-    { id: 4, title: 'TIME', roman: 'ACT IV', line: '그리고 이제,\n시간이 움직이기 시작한다.', pdfDone: '시간축 분석(대운·세운)이 추가되었습니다.' },
-    { id: 5, title: 'CHOICE', roman: 'ACT V', line: '그래서 다음 장면을\n어떻게 만들 것인가.', pdfDone: '다음 장면을 위한 사용설명서가 완성되었습니다.' },
+    { id: 1, title: '命 · 性 · 勢', roman: 'ACT I', line: '타고난 것.', pdfDone: '타고난 명(命)과 기질, 힘의 방향이 리포트에 기록되었습니다.' },
+    { id: 2, title: '財 · 業 · 緣', roman: 'ACT II', line: '살아가는 자리.', pdfDone: '재물·업·인연 분석이 추가되었습니다.' },
+    { id: 3, title: '壁 · 機', roman: 'ACT III', line: '반복되는 벽,\n그리고 찾아오는 기회.', pdfDone: '반복되는 문제의 뿌리가 추가되었습니다.' },
+    { id: 4, title: '運 · 時', roman: 'ACT IV', line: '그리고 이제,\n시간이 움직이기 시작한다.', pdfDone: '시간축 분석(대운·세운)이 추가되었습니다.' },
+    { id: 5, title: '路', roman: 'ACT V', line: '이제,\n선택할 길.', pdfDone: '움직일 때와 준비할 때를 가르는 사용설명서가 완성되었습니다.' },
   ];
 
   function C(no, act, title, subtitle, kind, cats, extra) {
@@ -19,8 +20,8 @@
   }
 
   var CHAPTERS = [
-    C(0, 1, '이 이야기의 주인공', '가장 큰 동력과 아직 쓰이지 않은 부분', 'verdict', [], { maxModules: 0 }),
-    C(1, 1, '나의 일주', '내가 타고난 한 글자의 이야기', 'module', ['identity'], { maxModules: 2 }),
+    C(0, 1, '運路 · 序章', '타고난 가장 큰 동력과 아직 쓰이지 않은 부분', 'verdict', [], { maxModules: 0 }),
+    C(1, 1, '나의 일주', '내가 타고난 한 글자', 'module', ['identity'], { maxModules: 2 }),
     C(2, 1, '내 안의 다섯 기운', '목·화·토·금·수의 균형', 'module', ['elements']),
     C(3, 1, '타고난 성격과 기질', '나를 움직이는 기본 성향', 'module', ['personality'], { maxModules: 4 }),
     C(4, 1, '숨겨진 재능', '아직 다 쓰지 않은 힘', 'module', ['talent']),
@@ -33,14 +34,14 @@
     C(11, 2, '대인관계 설명서', '사람을 대하는 나의 방식', 'module', ['relationship']),
     C(12, 2, '나와 잘 맞는 사람', '관계 유형으로 보는 궁합', 'module', ['compatibility'], { maxModules: 5, cta: { label: '궁합 볼 사람 추가하기', action: 'compat:add' } }),
     C(13, 2, '가족과 뿌리', '내가 자라온 자리의 영향', 'module', ['family']),
-    C(14, 3, '이야기의 오래된 뿌리', '사주가 한 편의 회상 장면(전생 이야기)이라면?', 'module', ['pastLife'], { maxModules: 1,
+    C(14, 3, '오래된 뿌리', '사주를 한 편의 회상으로 읽는다면(상징 콘텐츠)', 'module', ['pastLife'], { maxModules: 1,
       disclaimer: '사주 요소를 바탕으로 구성한 상징적 스토리 콘텐츠입니다.' }),
     C(15, 4, '인생 전체의 계절', '10년 단위 대운의 흐름', 'daewoon', ['daewoon']),
     C(16, 4, '지금 나는 어느 계절인가', '현재 대운 집중 해설', 'current', ['currentCycle'], { maxModules: 1 }),
     C(17, 4, '올해의 흐름', '세운으로 보는 올해', 'sewoon', ['sewoon'], { maxModules: 1 }),
     C(18, 4, '앞으로 12개월', '달마다 달라지는 흐름', 'monthly', ['monthly']),
-    C(19, 5, '다음 장면을 바꾸는 방법', '행동(운동 포함)·성장·사람·공간·환경·타이밍', 'remedy', ['remedy'], { maxModules: 1 }),
-    C(20, 5, '엔딩 · 인생 사용설명서', '모든 장면을 하나의 실행 계획으로', 'summary', ['actionPlan'], { maxModules: 1 }),
+    C(19, 5, '다음 길을 여는 방법', '행동(운동 포함)·성장·사람·공간·환경·타이밍', 'remedy', ['remedy'], { maxModules: 1 }),
+    C(20, 5, '終章 · 운로 사용설명서', '모든 흐름을 하나의 실행 계획으로', 'summary', ['actionPlan'], { maxModules: 1 }),
   ];
 
   /* ── 챕터 소유 구조 ─────────────────────────────────────────────────────────

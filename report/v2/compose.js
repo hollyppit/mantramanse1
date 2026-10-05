@@ -51,7 +51,8 @@
   function build(sd, lib, cfg, opts) {
     opts = opts || {}; var Rules = R.Rules, Remedy = R.Remedy, Media = R.Media;
     var pj = (cfg.project && cfg.project.id) || 'full', facts = Rules.flatten(sd, { project: pj }), v = vars(sd, facts, opts.name), vMask = vars(sd, facts, '', true), warnings = [];
-    var heroVars = R.Narrator.heroVars(sd, opts.name); // 이름은 이 기기 안에서만 쓴다(서버 전송 금지). AI 에는 vMask 로 만든 {hero…} 자리표시자 문장이 나간다.
+    var heroVars = R.Narrator.heroVars(sd, opts.name, !!opts.maskHero); // maskHero: 관리자 문구 편집용 — {hero…} 자리표시자를 그대로 둔다
+     // 이름은 이 기기 안에서만 쓴다(서버 전송 금지). AI 에는 vMask 로 만든 {hero…} 자리표시자 문장이 나간다.
     var nd = Remedy.needs(sd, (cfg.project && cfg.project.needTags) || []); facts.needTag = nd.tags;
     var rec = Remedy.recommend(sd, facts, lib.remedies, nd, { action: 5, growth: 3, people: 3, place: 3, environment: 3, timing: 1 });
     var plan = Remedy.actionPlan(sd, nd, rec);
@@ -113,7 +114,7 @@
       chapters.push(out);
     });
 
-    if (R.Director) R.Director.linkNext(chapters); // 챕터 끝에 다음 챕터의 질문(NEXT HOOK)
+    if (R.Director) R.Director.linkNext(chapters, heroVars); // 챕터 끝에 다음 챕터의 질문(NEXT HOOK)
 
     // 20장 최종 종합 요약(PDF 요약·마지막 화면). 구조화 필드만 모은다.
     var byId = {}; chapters.forEach(function (c) { byId[c.base || c.id] = c; });
@@ -206,7 +207,7 @@
   // 서버 저장본 한 번에 적용: content = /api/report-content 의 content, media = /api/media 의 media
   function fromSaved(content, media, projectId) {
     content = content || {}; if (content.scoring) R.Scenes.configure(content.scoring);
-    return { lib: library({ modules: content.modules, remedies: content.remedies, media: media, version: content.version }), cfg: R.Chapters.forProject(content, projectId || 'full'), scoring: content.scoring || {}, cinemaDefaults: content.cinemaDefaults || {}, bgm: content.bgm || {}, textStyles: content.textStyles || { all: {}, chapters: {} }, flow: R.Moving ? R.Moving.clean(content.flow) : null };
+    return { lib: library({ modules: content.modules, remedies: content.remedies, media: media, version: content.version }), cfg: R.Chapters.forProject(content, projectId || 'full'), scoring: content.scoring || {}, cinemaDefaults: content.cinemaDefaults || {}, bgm: content.bgm || {}, textStyles: content.textStyles || { all: {}, chapters: {} }, sceneCopy: content.sceneCopy || {}, flow: R.Moving ? R.Moving.clean(content.flow) : null };
   }
 
   // 서버(/api/compose) 응답 한 번에 적용. 어떤 부분이 이상해도 원본이 유지된다.

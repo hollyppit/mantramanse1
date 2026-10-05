@@ -1,10 +1,10 @@
 // 리포트 v2 콘텐츠 저장본: 해석 모듈·개운법 라이브러리·챕터 설정·미디어 점수 가중치
 // GET /api/report-content — 공개. { content: { modules, remedies, chapters, scoring, flow, version } | null }  (null 이면 코드의 기본 시드 report/v2/*.js 를 쓴다)
-// PUT /api/report-content — 관리자. { modules?, remedies?, chapters?, projects?, textStyles?, scoring?, flow?, cinemaDefaults? } 보낸 항목만 교체. 저장할 때마다 version 이 바뀌어 캐시 키가 갱신된다.
+// PUT /api/report-content — 관리자. { modules?, remedies?, chapters?, projects?, textStyles?, scoring?, flow?, cinemaDefaults?, sceneCopy? } 보낸 항목만 교체. 저장할 때마다 version 이 바뀌어 캐시 키가 갱신된다.
 // 저장: GLOSSARY_KV 'v2:content'.  모듈/개운법은 id 기준으로 코드 기본값 위에 덮어쓰기·추가되고, enabled:false 로 기본 항목을 끌 수 있다.
 import { json, isAdmin, configError } from '../_lib.js';
 import { cleanTextStyles } from '../_textstyle.js';
-import { cleanCinemaDefaults } from '../_cinema.js';
+import { cleanCinemaDefaults, cleanSceneCopy } from '../_cinema.js';
 
 const KEY = 'v2:content', MAX_BYTES = 3 * 1024 * 1024;
 const MOD_CATS = ['identity', 'elements', 'personality', 'talent', 'shadow', 'career', 'success', 'wealth', 'love', 'marriage', 'relationship', 'compatibility', 'family', 'pastLife', 'daewoon', 'currentCycle', 'sewoon', 'monthly', 'remedy', 'actionPlan'];
@@ -91,6 +91,7 @@ export async function onRequestPut({ request, env }) {
   if (b.flow) next.flow = cleanFlow(b.flow);
   if (b.bgm) next.bgm = cleanBgm(b.bgm); // 분위기별 배경 음악
   if (b.cinemaDefaults) next.cinemaDefaults = cleanCinemaDefaults(b.cinemaDefaults); // 장면 종류별 기본 연출(없으면 프리셋·내장 기본값)
+  if (b.sceneCopy) next.sceneCopy = cleanSceneCopy(b.sceneCopy); // 프롤로그·엔딩·챕터 연출 장면의 문장·이름 강조 override
   next.version = 'c' + Date.now().toString(36); // 콘텐츠가 바뀌면 리포트 캐시 키가 바뀐다
   const text = JSON.stringify(next);
   if (text.length > MAX_BYTES) return json({ error: '콘텐츠가 너무 큽니다' }, 413);

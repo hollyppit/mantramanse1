@@ -1,4 +1,4 @@
-// Cinema — "MY LIFE AS A MOVIE" 시네마틱 장면 스키마 · 연출 프리셋 · 텍스트 자동 분절 · 모션 시퀀스.
+// Cinema — 運路(운로) 시네마틱 장면 스키마 · 연출 프리셋 · 텍스트 자동 분절 · 모션 시퀀스.
 // 순수 함수(브라우저·Node 공용). 명리 계산을 하지 않는다: 이미 나온 factualBasis·문장을 받아 "어떻게 보여 줄지"만 정한다.
 //
 // 장면(scene.cinema) 필드 우선순위:  scene.cinema(감독/관리자 지정) > 클립 개별 연출(asset.cinema) > 기본 연출(cinemaDefaults[sceneType]) > 프리셋 > 내장 기본값
@@ -6,7 +6,8 @@
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
 
-  var SCENE_TYPES = ['INTRO', 'CHARACTER', 'QUESTION', 'MEMORY', 'DAILY_LIFE', 'EXPLANATION', 'CONFLICT', 'COMPARISON', 'REVEAL', 'TURNING_POINT', 'TIMELINE', 'WARNING', 'OPPORTUNITY', 'ACTION', 'CLIMAX', 'ENDING'];
+  var SCENE_TYPES = ['INTRO', 'CHARACTER', 'QUESTION', 'MEMORY', 'DAILY_LIFE', 'EXPLANATION', 'CONFLICT', 'COMPARISON', 'REVEAL', 'TURNING_POINT', 'TIMELINE', 'WARNING', 'OPPORTUNITY', 'ACTION', 'CLIMAX', 'ENDING', 'NAME_REVEAL', 'NATURE', 'REALITY', 'DATA', 'REFLECTION'];
+  var NAME_EMPH = ['NONE', 'SOFT', 'NORMAL', 'STRONG', 'TITLE'];
   var TEXT_ANIMS = ['fade', 'fade-up', 'fade-down', 'slide-left', 'slide-right', 'zoom-in', 'zoom-out', 'blur-in', 'focus-in', 'word-reveal', 'line-reveal', 'typewriter', 'cinematic-title', 'impact', 'whisper', 'float', 'parallax-text'];
   var IMAGE_MOTIONS = ['none', 'slow-zoom-in', 'slow-zoom-out', 'pan-left', 'pan-right', 'pan-up', 'pan-down', 'parallax', 'drift', 'focus-pull'];
   var TRANSITIONS = ['fade', 'crossfade', 'dip-black', 'dip-white', 'blur', 'push-left', 'push-right', 'zoom', 'hard-cut', 'light-leak'];
@@ -40,18 +41,37 @@
     EMOTIONAL: { sceneType: 'MEMORY', pacing: 'SLOW', motionIntensity: 1, imageMotion: 'slow-zoom-in', transition: 'crossfade', textAnimation: 'whisper', textPosition: 'lower-third', textSize: 'M', overlayStrength: 0.55, bgmMood: 'emotional', mood: 'lonely', pauseAfter: 700 },
     CLIMAX: { sceneType: 'CLIMAX', pacing: 'PAUSE', motionIntensity: 4, imageMotion: 'slow-zoom-in', transition: 'dip-white', textAnimation: 'impact', textPosition: 'center', textSize: 'XL', overlayStrength: 0.5, bgmMood: 'emotional', mood: 'powerful', pauseAfter: 1200 },
     ENDING: { sceneType: 'ENDING', pacing: 'SLOW', motionIntensity: 1, imageMotion: 'slow-zoom-out', transition: 'dip-black', textAnimation: 'fade-up', textPosition: 'center', textSize: 'L', overlayStrength: 0.6, bgmMood: 'reflective', mood: 'reflective', pauseAfter: 900 },
+    // ── 運路 영상 연출용 프리셋 15종: 사주 결과가 아니라 "어떻게 보여 줄지"만 정한다(명리 → 현실 해석 → 시각 은유 순서로 쓰인 뒤 고른다). mediaTags 는 클립 보관함 태그 ──
+    NAME_REVEAL: { sceneType: 'NAME_REVEAL', pacing: 'PAUSE', motionIntensity: 0, imageMotion: 'none', transition: 'dip-black', textAnimation: 'cinematic-title', textPosition: 'center', textSize: 'XL', overlayStrength: 1, bgmMood: 'cinematic', mood: 'awe', pauseAfter: 1800, nameEmphasis: 'TITLE' },
+    DATA_VIEW: { sceneType: 'DATA', pacing: 'MEDIUM', motionIntensity: 0, imageMotion: 'none', transition: 'crossfade', textAnimation: 'fade', textPosition: 'top', textSize: 'M', overlayStrength: 0.6, bgmMood: 'minimal', mood: 'calm', pauseAfter: 300 },
+    DAWN: { sceneType: 'NATURE', pacing: 'SLOW', motionIntensity: 1, imageMotion: 'slow-zoom-in', transition: 'crossfade', textAnimation: 'fade-up', textPosition: 'center', textSize: 'L', overlayStrength: 0.5, bgmMood: 'ambient', mood: 'hopeful', pauseAfter: 600, mediaTags: ['sunrise', 'field', 'mist'] },
+    MIST: { sceneType: 'NATURE', pacing: 'SLOW', motionIntensity: 1, imageMotion: 'drift', transition: 'crossfade', textAnimation: 'fade', textPosition: 'center', textSize: 'L', overlayStrength: 0.55, bgmMood: 'ambient', mood: 'calm', pauseAfter: 500, mediaTags: ['mist', 'cloud', 'mountain'] },
+    MOUNTAIN: { sceneType: 'NATURE', pacing: 'SLOW', motionIntensity: 1, imageMotion: 'pan-right', transition: 'crossfade', textAnimation: 'fade-up', textPosition: 'lower-third', textSize: 'L', overlayStrength: 0.45, bgmMood: 'cinematic', mood: 'awe', pauseAfter: 500, mediaTags: ['mountain', 'road', 'cloud'] },
+    WIND: { sceneType: 'NATURE', pacing: 'MEDIUM', motionIntensity: 1, imageMotion: 'drift', transition: 'crossfade', textAnimation: 'float', textPosition: 'center', textSize: 'L', overlayStrength: 0.5, bgmMood: 'ambient', mood: 'calm', pauseAfter: 400, mediaTags: ['field', 'meadow', 'windyForest'] },
+    RAIN: { sceneType: 'NATURE', pacing: 'SLOW', motionIntensity: 1, imageMotion: 'slow-zoom-in', transition: 'crossfade', textAnimation: 'whisper', textPosition: 'center', textSize: 'L', overlayStrength: 0.6, bgmMood: 'reflective', mood: 'reflective', pauseAfter: 600, mediaTags: ['rain', 'rainWindow', 'road'] },
+    MOON: { sceneType: 'NATURE', pacing: 'SLOW', motionIntensity: 0, imageMotion: 'none', transition: 'crossfade', textAnimation: 'whisper', textPosition: 'center', textSize: 'L', overlayStrength: 0.65, bgmMood: 'reflective', mood: 'lonely', pauseAfter: 600, mediaTags: ['stars', 'lake', 'nightCity'] },
+    FIRE: { sceneType: 'NATURE', pacing: 'MEDIUM', motionIntensity: 2, imageMotion: 'slow-zoom-in', transition: 'crossfade', textAnimation: 'focus-in', textPosition: 'center', textSize: 'L', overlayStrength: 0.55, bgmMood: 'emotional', mood: 'powerful', pauseAfter: 400, mediaTags: ['temple', 'nightCity'] },
+    RIVER: { sceneType: 'NATURE', pacing: 'SLOW', motionIntensity: 1, imageMotion: 'pan-left', transition: 'crossfade', textAnimation: 'fade-up', textPosition: 'lower-third', textSize: 'L', overlayStrength: 0.5, bgmMood: 'ambient', mood: 'reflective', pauseAfter: 500, mediaTags: ['river', 'lake', 'sea'] },
+    CROSSROAD: { sceneType: 'NATURE', pacing: 'MEDIUM', motionIntensity: 1, imageMotion: 'slow-zoom-in', transition: 'crossfade', textAnimation: 'fade-up', textPosition: 'bottom', textSize: 'L', overlayStrength: 0.5, bgmMood: 'reflective', mood: 'reflective', pauseAfter: 500, mediaTags: ['crossroads', 'road', 'walkingAlone'] },
+    BLADE: { sceneType: 'NATURE', pacing: 'MEDIUM', motionIntensity: 2, imageMotion: 'focus-pull', transition: 'crossfade', textAnimation: 'impact', textPosition: 'center', textSize: 'L', overlayStrength: 0.6, bgmMood: 'tension', mood: 'powerful', pauseAfter: 600, mediaTags: ['mountain', 'mist'] },
+    GATE: { sceneType: 'NATURE', pacing: 'SLOW', motionIntensity: 1, imageMotion: 'slow-zoom-in', transition: 'crossfade', textAnimation: 'fade-up', textPosition: 'bottom', textSize: 'L', overlayStrength: 0.5, bgmMood: 'cinematic', mood: 'awe', pauseAfter: 600, mediaTags: ['openDoor', 'stairs', 'tunnelLight', 'temple'] },
+    SEASON_CHANGE: { sceneType: 'NATURE', pacing: 'MEDIUM', motionIntensity: 1, imageMotion: 'pan-right', transition: 'crossfade', textAnimation: 'slide-left', textPosition: 'top', textSize: 'M', overlayStrength: 0.5, bgmMood: 'ambient', mood: 'reflective', pauseAfter: 300, mediaTags: ['meadow', 'field', 'snow', 'rain'] },
+    STORM: { sceneType: 'NATURE', pacing: 'FAST', motionIntensity: 3, imageMotion: 'pan-left', transition: 'hard-cut', textAnimation: 'blur-in', textPosition: 'bottom', textSize: 'L', overlayStrength: 0.5, bgmMood: 'tension', mood: 'tense', pauseAfter: 300, mediaTags: ['rain', 'windyForest', 'cloud'] },
+    SUNRISE: { sceneType: 'NATURE', pacing: 'SLOW', motionIntensity: 2, imageMotion: 'slow-zoom-in', transition: 'crossfade', textAnimation: 'fade-up', textPosition: 'center', textSize: 'L', overlayStrength: 0.4, bgmMood: 'cinematic', mood: 'hopeful', pauseAfter: 700, mediaTags: ['sunrise', 'mountain', 'cloud'] },
+    SILENCE: { sceneType: 'REFLECTION', pacing: 'PAUSE', motionIntensity: 0, imageMotion: 'none', transition: 'crossfade', textAnimation: 'whisper', textPosition: 'center', textSize: 'L', overlayStrength: 1, bgmMood: 'minimal', mood: 'calm', pauseAfter: 900 },
   };
   var PRESET_NAMES = Object.keys(PRESETS);
   // 프리셋이 따로 정해지지 않은 sceneType 의 기본 프리셋
   var TYPE_PRESET = { INTRO: 'CINEMATIC_INTRO', CHARACTER: 'CHARACTER_REVEAL', QUESTION: 'QUIET_REFLECTION', MEMORY: 'EMOTIONAL', DAILY_LIFE: 'DAILY_REALITY', EXPLANATION: 'REALITY_CHECK', CONFLICT: 'TENSION', COMPARISON: 'REALITY_CHECK',
-    REVEAL: 'DISCOVERY', TURNING_POINT: 'TURNING_POINT', TIMELINE: 'TIMELINE', WARNING: 'WARNING', OPPORTUNITY: 'OPPORTUNITY', ACTION: 'OPPORTUNITY', CLIMAX: 'CLIMAX', ENDING: 'ENDING' };
+    REVEAL: 'DISCOVERY', TURNING_POINT: 'TURNING_POINT', TIMELINE: 'TIMELINE', WARNING: 'WARNING', OPPORTUNITY: 'OPPORTUNITY', ACTION: 'OPPORTUNITY', CLIMAX: 'CLIMAX', ENDING: 'ENDING',
+    NAME_REVEAL: 'NAME_REVEAL', NATURE: 'MOUNTAIN', REALITY: 'REALITY_CHECK', DATA: 'DATA_VIEW', REFLECTION: 'SILENCE' };
 
   // 기존(v2) 장면 종류 → 시네마틱 sceneType. 새 필드가 없는 기존 장면의 fallback 은 EXPLANATION.
   var LEGACY = { chapterIntro: 'QUESTION', insight: 'EXPLANATION', explanation: 'EXPLANATION', chart: 'EXPLANATION', dataVisualization: 'TIMELINE', timeline: 'TIMELINE', recommendation: 'OPPORTUNITY', warning: 'WARNING', action: 'ACTION',
     chapterEnding: 'QUESTION', transition: 'TURNING_POINT', verdictFind: 'REVEAL', verdictBlock: 'CONFLICT', verdictEvidence: 'MEMORY', verdictAdvice: 'ACTION', visualMetaphor: 'MEMORY', cinema: 'DAILY_LIFE' };
 
   var BUILTIN = { sceneType: 'EXPLANATION', pacing: 'MEDIUM', motionIntensity: 1, imageMotion: 'none', transition: 'crossfade', textAnimation: 'fade-up', textPosition: 'bottom', textSize: 'M', textEmphasis: 'normal', overlayStrength: 0.45,
-    focalPoint: { x: 0.5, y: 0.5 }, pauseAfter: 0, bgmMood: 'minimal', mood: 'calm' };
+    focalPoint: { x: 0.5, y: 0.5 }, pauseAfter: 0, bgmMood: 'minimal', mood: 'calm', nameEmphasis: 'NONE' };
 
   var has = function (list, v) { return list.indexOf(v) >= 0; };
   var num = function (v, lo, hi, d) { v = v === '' || v == null ? NaN : +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
@@ -74,6 +94,8 @@
     var pa = num(c.pauseAfter, 0, 5000, undefined); if (pa !== undefined) o.pauseAfter = Math.round(pa);
     if (has(BGM, c.bgmMood)) o.bgmMood = c.bgmMood;
     if (has(MOODS, c.mood)) o.mood = c.mood;
+    if (has(NAME_EMPH, c.nameEmphasis)) o.nameEmphasis = c.nameEmphasis;
+    if (typeof c.visualMetaphor === 'string') o.visualMetaphor = c.visualMetaphor.slice(0, 160);
     if (typeof c.narrativePurpose === 'string') o.narrativePurpose = c.narrativePurpose.slice(0, 160);
     if (typeof c.visualConcept === 'string') o.visualConcept = c.visualConcept.slice(0, 160);
     if (Array.isArray(c.mediaTags)) o.mediaTags = c.mediaTags.slice(0, 12).map(function (t) { return String(t).slice(0, 30); }).filter(Boolean);
@@ -85,7 +107,7 @@
   function cleanSegments(list) {
     return list.slice(0, 24).map(function (s, i) {
       if (!s || typeof s.text !== 'string' || !s.text.trim()) return null;
-      return { text: s.text.slice(0, 120), emphasis: has(EMPHASIS, s.emphasis) ? s.emphasis : 'normal', animation: has(TEXT_ANIMS, s.animation) ? s.animation : 'fade-up', block: Math.round(num(s.block, 0, 40, 0)) };
+      return { text: s.text.slice(0, 120), emphasis: has(EMPHASIS, s.emphasis) ? s.emphasis : 'normal', animation: has(TEXT_ANIMS, s.animation) ? s.animation : 'fade-up', block: Math.round(num(s.block, 0, 40, 0)), name: s.name === true ? true : undefined };
     }).filter(Boolean);
   }
   function cleanSequence(list) {
@@ -178,6 +200,7 @@
       at.push(cur);
       var hold = Math.max(p.hold * 0.6, len(s.text) * p.read * (s.emphasis === 'soft' ? 0.8 : 1));
       if (s.emphasis === 'pause') hold += p.gap;
+      if (s.name && c.nameEmphasis === 'TITLE') hold += 2000; else if (s.name && c.nameEmphasis === 'STRONG') hold += 1200; // 이름이 나오면 숨을 둔다(TITLE: 2초 hold)
       if (s.emphasis === 'impact') hold += p.gap * 1.6;                          // impact 직후 정적
       var next = segs[i + 1]; if (next && next.block !== s.block) hold += p.gap * 0.6; // 문장 사이 호흡
       cur += Math.round(hold);
@@ -234,7 +257,7 @@
     return p;
   }
 
-  R.Cinema = { SCENE_TYPES: SCENE_TYPES, TEXT_ANIMS: TEXT_ANIMS, IMAGE_MOTIONS: IMAGE_MOTIONS, TRANSITIONS: TRANSITIONS, SPECIAL_TRANSITIONS: SPECIAL_TRANSITIONS, PACING: PACING, EMPHASIS: EMPHASIS, POSITIONS: POSITIONS, SIZES: SIZES, BGM: BGM, MOODS: MOODS,
+  R.Cinema = { SCENE_TYPES: SCENE_TYPES, TEXT_ANIMS: TEXT_ANIMS, IMAGE_MOTIONS: IMAGE_MOTIONS, TRANSITIONS: TRANSITIONS, SPECIAL_TRANSITIONS: SPECIAL_TRANSITIONS, PACING: PACING, EMPHASIS: EMPHASIS, POSITIONS: POSITIONS, SIZES: SIZES, BGM: BGM, MOODS: MOODS, NAME_EMPH: NAME_EMPH,
     PRESETS: PRESETS, PRESET_NAMES: PRESET_NAMES, TYPE_PRESET: TYPE_PRESET, LEGACY: LEGACY, BUILTIN: BUILTIN, INTENSITY_SCALE: INTENSITY_SCALE, PACE: PACE, MOTION_ACTIONS: MOTION_ACTIONS,
     clean: clean, resolve: resolve, splitSegments: splitSegments, phrases: phrases, timing: timing, sequence: sequence, build: build, limitIntensity: limitIntensity, limitTransition: limitTransition, validate: validate };
 })(typeof window !== 'undefined' ? window : globalThis);

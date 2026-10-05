@@ -19,7 +19,7 @@
     warning: { preset: 'WARNING', purpose: '같은 자리에서 반복되는 위험 신호를 조용히 짚는다', concept: '멈춰 선 인물', mood: 'tense' },
     action: { preset: 'OPPORTUNITY', purpose: '지금 할 수 있는 행동을 장면으로 정리한다', concept: '첫 걸음', mood: 'hopeful' },
     chapterEnding: { preset: 'QUIET_REFLECTION', purpose: '다음 장면이 궁금해지게 닫는다', concept: '여운', mood: 'reflective', pacing: 'SLOW' },
-    verdictFind: { preset: 'DISCOVERY', purpose: '주인공의 가장 큰 동력을 알아본다', concept: '발견', mood: 'awe' },
+    verdictFind: { preset: 'DISCOVERY', purpose: '타고난 가장 큰 동력을 알아본다', concept: '발견', mood: 'awe' },
     verdictBlock: { preset: 'TENSION', purpose: '그 동력이 다 쓰이지 못하는 이유를 짚는다', concept: '막힌 길', mood: 'tense' },
     verdictEvidence: { preset: 'EMOTIONAL', purpose: '시간축 위의 한 지점에 비춰 본다', concept: '회상', mood: 'lonely' },
     verdictAdvice: { preset: 'OPPORTUNITY', purpose: '다음 장면을 위한 두 걸음', concept: '길 위의 첫 발', mood: 'hopeful' },
@@ -27,7 +27,7 @@
   // 챕터(base)별 특별 규칙
   var BY_CHAPTER = {
     c14: { insight: { preset: 'EMOTIONAL', purpose: '회상 장면처럼 오래된 뿌리를 비춘다', mood: 'lonely' } },
-    c16: { insight: { preset: 'TURNING_POINT', purpose: '지금이 이야기의 어느 지점인지 알려 준다', mood: 'powerful' } },
+    c16: { insight: { preset: 'TURNING_POINT', purpose: '지금이 운의 어느 지점인지 알려 준다', mood: 'powerful' } },
     c17: { insight: { preset: 'DISCOVERY', purpose: '올해 배경이 어떻게 바뀌는지 보여 준다' } },
     c20: { action: { preset: 'OPPORTUNITY', purpose: '엔딩 전에 지금 할 일을 정리한다' } },
   };
@@ -57,7 +57,7 @@
     o = o || {}; var Kc = K(), T = R.Translator, base = ch.base || ch.id, scenes = ch.scenes || [], out = [], prevD = null, prev2D = null;
     // 1) 현실 장면(DAILY_LIFE) — 설명 뒤에 끼워 넣는다
     var life = T ? T.chapterScenes(base, sd, o.vars) : [];
-    life.forEach(function (l, i) { l.chapterId = ch.id; l.sceneId = ch.id + '_life' + (i + 1); l.media = pickMedia(l, o.media, o.ctx, ch.id); });
+    life.forEach(function (l, i) { l.chapterId = ch.id; l.sceneId = ch.id + '_life' + (i + 1); l.media = l.bg === 'black' || l.kind === 'profile' ? null : pickMedia(l, o.media, o.ctx, ch.id); });
     var inserted = false;
     scenes.forEach(function (s, i) {
       out.push(s);
@@ -67,7 +67,7 @@
     // 2) 챕터 오프닝(검은 화면 + 질문 한 줄) — 맨 앞
     var hook = T && T.chapterHook(base, ch.no);
     if (hook) {
-      var seg = [{ text: hook.line, emphasis: 'impact', animation: 'fade-up', block: 0 }];
+      var N = R.Narrator, hl = String(N ? N.fill(hook.line, o.vars) : hook.line).split('\n'), seg = hl.map(function (t, i) { return { text: t, emphasis: i === hl.length - 1 ? 'impact' : 'normal', animation: 'fade-up', block: i }; });
       out.unshift({ chapterId: ch.id, sceneId: ch.id + '_open', sceneType: 'cinema', kind: 'opener', bg: 'black', hook: hook, media: null, cinema: { preset: 'QUIET_REFLECTION', segments: seg, pacing: 'SLOW', motionIntensity: 0, imageMotion: 'none', overlayStrength: 1, textPosition: 'center', textSize: 'L', pauseAfter: 600 } });
     }
     // 3) 감독
@@ -86,11 +86,11 @@
     ch.scenes = out; return ch;
   }
   // 다음 챕터 예고(NEXT HOOK): 챕터 끝 장면에 다음 질문을 붙인다
-  function linkNext(chapters) {
+  function linkNext(chapters, vars) {
     var T = R.Translator; if (!T) return;
     chapters.forEach(function (c, i) {
       var n = chapters[i + 1], h = n && T.chapterHook(n.base || n.id, n.no); if (!h) return;
-      (c.scenes || []).forEach(function (s) { if (s.sceneType === 'chapterEnding') s.nextHook = { label: h.label, line: h.line }; });
+      (c.scenes || []).forEach(function (s) { if (s.sceneType === 'chapterEnding') s.nextHook = { label: h.label, line: R.Narrator ? R.Narrator.fill(h.line, vars) : h.line }; });
     });
   }
 

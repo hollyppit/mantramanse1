@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>나의 이야기 · 만트라 사주 무빙툰</title>
-<meta name="description" content="사주를 입력하면 내 인생을 소재로 한 짧은 영화 — 20개 챕터의 이야기, 지금 필요한 행동 전략까지 이어집니다.">
+<title>運路 · 만트라 사주 무빙툰</title>
+<meta name="description" content="사주를 입력하면 내 운이 흐르는 길을 한 편의 영화처럼 — 타고난 명(命)부터 10년마다 달라지는 운, 움직일 때와 준비할 때까지 이어집니다.">
 <meta name="theme-color" content="#080A11">
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,8 +20,8 @@
   <!-- 사주 입력 -->
   <section id="v-input" class="view" aria-label="사주 입력">
     <div class="wrapin">
-      <p class="kicker">MANTRA FORTUNE</p>
-      <h1 class="h-xl">당신의 이야기를<br>시작하기 전에</h1>
+      <p class="kicker">MANTRA · 運路</p>
+      <h1 class="h-xl">運路<br>운이 흐르는 길을<br>시작하기 전에</h1>
       <p class="sub">태어난 때를 알려 주세요. 입력한 정보는 이 기기 안에서만 계산되고 서버로 보내지 않습니다.</p>
       <form id="form" novalidate autocomplete="off">
         <label class="f"><span>이름 (선택)</span><input type="text" name="name" maxlength="20" autocomplete="off"></label>
@@ -31,7 +31,7 @@
         <div class="f"><span>태어난 시간</span><div class="inl"><input type="time" name="time" value="12:00"><label class="chk"><input type="checkbox" name="unknown"><i>모릅니다</i></label></div></div>
         <label class="f"><span>태어난 곳</span><select name="city"></select></label>
         <p class="msg" id="msg" role="alert"></p>
-        <button type="submit" class="btn big">내 이야기 시작하기</button>
+        <button type="submit" class="btn big">내 운의 길 시작하기</button>
       </form>
       <p class="fine">사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p>
     </div>
@@ -49,12 +49,12 @@
       <div class="awk-shade" aria-hidden="true"></div>
       <div class="awk-top"><button type="button" id="awkSound" class="chipbtn" hidden aria-pressed="false">🔇 소리 켜기</button><button type="button" id="awkSkip" class="chipbtn">SKIP ›</button></div>
       <div class="awk-cap" id="awkCap"></div>
-      <button type="button" id="awkStart" class="btn big gold" hidden>이야기를 시작한다</button>
+      <button type="button" id="awkStart" class="btn big gold" hidden>운의 길을 시작한다</button>
     </div>
   </section>
 
   <!-- 시네마틱 프롤로그 · 엔딩 -->
-  <section id="v-cinema" class="view" aria-label="영화처럼 보는 나의 이야기" hidden><div id="cnStage"></div></section>
+  <section id="v-cinema" class="view" aria-label="운의 흐름을 영화처럼 보는 장면" hidden><div id="cnStage"></div></section>
 
   <!-- 리포트 -->
   <section id="v-reader" class="view" hidden>
