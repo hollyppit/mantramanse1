@@ -231,7 +231,8 @@
     pos.style.transform = 'translate(-50%,' + ((vert || fx.sub.pos === 'middle') ? '-50%' : '0') + ')' + (fx.sub.rot ? ' rotate(' + fx.sub.rot + 'deg)' : '');
     var v = null;
     if (o.url) { v = document.createElement('video'); v.playsInline = true; v.style.objectFit = fx.video.fit; stage.appendChild(v); }
-    if (!o.url) stage.style.background = 'linear-gradient(160deg,#1c2340,#0a0c14 70%)';
+    if (!o.url && o.image) { var im = document.createElement('img'); im.alt = ''; im.decoding = 'async'; im.style.cssText = 'width:100%;height:100%;display:block;background:#000;object-fit:' + fx.video.fit; im.src = o.image; stage.appendChild(im); stage.style.background = '#000'; } // 이미지·GIF 배경 (영상 대신)
+    else if (!o.url) stage.style.background = 'linear-gradient(160deg,#1c2340,#0a0c14 70%)';
     stage.appendChild(pos); wrap.appendChild(stage); box.innerHTML = ''; box.appendChild(wrap);
     wrap.style.setProperty('--fxd', fx.trans.dur + 's'); stage.style.setProperty('--fxd', fx.trans.dur + 's');
     if (fx.trans['in'] !== 'cut') stage.style.animationName = 'fx-i-' + fx.trans['in'];
@@ -494,7 +495,7 @@
       var go = v.play(); if (go && go.catch) go.catch(function () { v.muted = true; v.play().catch(function () {}); });
       start();
     } else {
-      total = Math.max(contentEnd, 4); start();
+      total = Math.max(contentEnd, o.minSeconds || 4); start();
     }
     return { stop: function () { done = true; clearInterval(raf); timers.forEach(clearTimeout); try { root.speechSynthesis.cancel(); } catch (e) {} audios.forEach(function (a) { a.pause(); }); if (v) v.pause(); } };
   }

@@ -11,8 +11,8 @@
       var url = mobile ? (c.urlMobile || c.url) : (c.url || c.urlMobile);
       if (!c.on || !url) return;
       if (c.once !== 'always') { try { sessionStorage.setItem('mt_intro', '1'); } catch (e) {} }
-      var isImg = /\.(gif|png|jpe?g|webp|avif)(\?.*)?$/i.test(url); // 이미지·GIF 인트로: 정해진 시간 동안 보여 주고 닫는다 (문구 연출은 영상에서만)
-      var cues = (c.fx && c.fx.cues) || [], withText = !isImg && cues.length > 0;
+      var isImg = /\.(gif|png|jpe?g|webp|avif)(\?.*)?$/i.test(url); // 이미지·GIF 인트로: 정해진 시간(문구가 더 길면 문구가 끝날 때까지) 보여 주고 닫는다
+      var cues = (c.fx && c.fx.cues) || [], withText = cues.length > 0;
       var box = document.createElement('div'); box.id = 'intro'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', '입장 영상');
       var v = document.createElement(isImg ? 'img' : 'video'); if (isImg) { v.alt = ''; v.decoding = 'async'; v.src = url; } else v.playsInline = true; v.setAttribute('playsinline', ''); if (!isImg) { v.preload = 'auto'; v.muted = true; v.src = url; }
       var stage = null, player = null;
@@ -34,10 +34,10 @@
           // 공통 연출 위에 이 기기(모바일/웹)용 값을 덮어쓴다 — 글자 크기는 화면 폭에 비례하므로 기기별로 따로 맞춘다
           var ov = (mobile ? c.fxMobile : c.fxPc) || {}, fx = { cues: c.fx.cues, video: { loop: 'freeze', hold: 0.3 } };
           ['sub', 'trans'].forEach(function (g) { var o = Object.assign({}, c.fx[g], ov[g]); if (Object.keys(o).length) fx[g] = o; });
-          player = window.MovingFx.play(stage, { refW: mobile ? 390 : 1280, clip: { fx: fx }, url: url, muteVideo: true, silent: true, defaults: {}, onend: close, onerror: close });
+          player = window.MovingFx.play(stage, { refW: mobile ? 390 : 1280, clip: { fx: fx }, url: isImg ? '' : url, image: isImg ? url : '', minSeconds: Math.max(0.5, +c.imageSeconds || 4), muteVideo: true, silent: true, defaults: {}, onend: close, onerror: close });
         };
         js.onerror = close; document.head.appendChild(js);
-        setTimeout(function () { var pv = stage.querySelector('video'); if (!done && pv && pv.currentTime === 0) close(); }, 6000); // 재생이 시작되지 않으면 생략
+        if (!isImg) setTimeout(function () { var pv = stage.querySelector('video'); if (!done && pv && pv.currentTime === 0) close(); }, 6000); // 재생이 시작되지 않으면 생략
       } else {
         box.appendChild(v); box.appendChild(skip);
         var pr = isImg ? null : v.play();
