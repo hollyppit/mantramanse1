@@ -199,7 +199,7 @@
   window.addEventListener('message', function (e) {
     if (e.origin !== location.origin || !e.data) return;
     PVS = PVS.filter(function (p) { return document.body.contains(p.frame); });
-    PVS.forEach(function (p) { if (e.source === p.frame.contentWindow) { if (e.data.type === 'mt-v2-ready') { p.ready = true; if (p.pending) p.send(p.pending); } else if (e.data.type === 'mt-v2-chapter' && p.onChapter) p.onChapter(e.data.id); else if (e.data.type === 'mt-v2-tx' && p.onTx) p.onTx(e.data); else if (e.data.type === 'mt-v2-txlist' && p.onList) p.onList(e.data); else if (e.data.type === 'mt-v2-txmove' && p.onMove) p.onMove(e.data); } });
+    PVS.forEach(function (p) { if (e.source === p.frame.contentWindow) { if (e.data.type === 'mt-v2-ready') { p.ready = true; if (p.pending) p.send(p.pending); if (p.paused) p.send({ type: 'mt-v2-pause', on: true }); } else if (e.data.type === 'mt-v2-chapter' && p.onChapter) p.onChapter(e.data.id); else if (e.data.type === 'mt-v2-tx' && p.onTx) p.onTx(e.data); else if (e.data.type === 'mt-v2-txlist' && p.onList) p.onList(e.data); else if (e.data.type === 'mt-v2-txmove' && p.onMove) p.onMove(e.data); } });
   });
   var awkMemo = null;
   function awakeningFor(sd) { // 이 사주의 각성 영상(없으면 fallback) — 뷰어가 받는 모양 {video, fallback}
@@ -210,7 +210,7 @@
   // el 안에 [모바일|PC] 전환 + 미리보기 틀을 만든다. 반환: { show(chapterId|'awakening', projectId), refresh() }
   function PreviewPane(el, opt) {
     opt = opt || {}; var dev = 'm', P = { ready: false, pending: null, last: null };
-    el.innerHTML = '<div class="pvbar"><button type="button" data-d="m" class="on">모바일</button><button type="button" data-d="d">PC</button><button type="button" data-r title="새로 그리기">⟳</button><span class="muted pvmsg"></span></div><div class="pvwrap"><div class="pvbox"><iframe title="리포트 미리보기" src="/report/v2/?preview=1"></iframe></div></div>';
+    el.innerHTML = '<div class="pvbar"><button type="button" data-d="m" class="on">모바일</button><button type="button" data-d="d">PC</button><button type="button" data-r title="새로 그리기">⟳</button><button type="button" data-pause title="미리보기 영상·애니메이션 멈춤/재생">⏸ 멈춤</button><span class="muted pvmsg"></span></div><div class="pvwrap"><div class="pvbox"><iframe title="리포트 미리보기" src="/report/v2/?preview=1"></iframe></div></div>';
     var frame = $('iframe', el), box = $('.pvbox', el), wrap = $('.pvwrap', el), msg = $('.pvmsg', el);
     P.frame = frame; P.onChapter = opt.onChapter; P.onTx = opt.onTx; P.onList = opt.onList; P.onMove = opt.onMove;
     P.sendTs = function (replay) { if (P.ready) P.send({ type: 'mt-v2-textstyle', ts: tsWork(), replay: !!replay }); };
@@ -229,7 +229,7 @@
       }).catch(function (e) { msg.textContent = e.message; });
     };
     P.refresh = function () { if (P.last) { P.last.content = content(); P.last.media = ST.media; if (P.ready) P.send(P.last); } };
-    el.onclick = function (e) { var b = e.target.closest('button'); if (!b) return; if (b.dataset.d) { dev = b.dataset.d; $$('.pvbar [data-d]', el).forEach(function (x) { x.classList.toggle('on', x === b); }); fit(); } else if (b.hasAttribute('data-r')) { P.ready = false; P.pending = P.last; frame.src = '/report/v2/?preview=1&_=' + Date.now(); } };
+    el.onclick = function (e) { var b = e.target.closest('button'); if (!b) return; if (b.dataset.d) { dev = b.dataset.d; $$('.pvbar [data-d]', el).forEach(function (x) { x.classList.toggle('on', x === b); }); fit(); } else if (b.hasAttribute('data-pause')) { P.paused = !P.paused; b.textContent = P.paused ? '▶ 재생' : '⏸ 멈춤'; b.classList.toggle('on', P.paused); if (P.ready) P.send({ type: 'mt-v2-pause', on: P.paused }); } else if (b.hasAttribute('data-r')) { P.ready = false; P.pending = P.last; frame.src = '/report/v2/?preview=1&_=' + Date.now(); } };
     PVS.push(P); fit(); window.addEventListener('resize', fit); return P;
   }
 

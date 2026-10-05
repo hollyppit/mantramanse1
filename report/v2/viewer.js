@@ -457,6 +457,13 @@
         S.idx = i; var c = S.rep.chapters[i]; S.visited[c.id] = 1; render(c, i, true); window.scrollTo(0, 0);
       } catch (err) { $('#loadText').textContent = '미리보기를 만들지 못했습니다: ' + (err && err.message); view('load'); }
     });
+    // 관리자 미리보기 "멈춤": 영상·소리를 멈추고 CSS 애니메이션을 정지한다(다시 누르면 재생). 새로 그려진 영상도 멈춘 채로 둔다.
+    var paused = false, pst = document.createElement('style'); pst.textContent = 'html.pv-paused *,html.pv-paused *::before,html.pv-paused *::after{animation-play-state:paused!important}';
+    document.head.appendChild(pst);
+    function applyPause() { [].forEach.call(document.querySelectorAll('video,audio'), function (v) { try { if (paused) v.pause(); else if (v.autoplay || v.loop) v.play().catch(function () { }); } catch (x) { } }); }
+    new MutationObserver(function () { if (paused) applyPause(); }).observe(document.body, { childList: true, subtree: true });
+    document.addEventListener('play', function (e) { if (paused && e.target && e.target.pause) e.target.pause(); }, true);
+    window.addEventListener('message', function (e) { var m = e.data; if (e.origin !== location.origin || !m || m.type !== 'mt-v2-pause') return; paused = !!m.on; document.documentElement.classList.toggle('pv-paused', paused); applyPause(); });
     if (window.parent !== window) window.parent.postMessage({ type: 'mt-v2-ready' }, location.origin);
   }
 
