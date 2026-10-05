@@ -84,6 +84,8 @@
   }
   var BLOCKS = {
     headline: function (b) {
+      // 인트로 커버가 켜져 있으면 첫 화면의 '둘러보기'가 자동 스크롤을 시작하므로, 저장본에 남아 있는 첫 문장의 시작 버튼·스크롤 안내는 그리지 않는다
+      if (b.id === 'hero' && !(C.settings && C.settings.cover && C.settings.cover.show === false)) b = Object.assign({}, b, { startButton: '', scrollHint: false });
       var size = /^(xl|l|m)$/.test(b.size) ? b.size : 'l';
       return (b.kicker ? '<p class="kicker">' + fmt(pick(b.kicker)) + '</p>' : '') +
         '<h2 class="hl hl-' + size + '">' + lines(fmt(pick(b.title)), b.anim) + '</h2>' +
