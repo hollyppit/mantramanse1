@@ -22,6 +22,12 @@
     '.stat{display:flex;gap:14px;flex-wrap:wrap;font-size:.84rem;color:var(--ink2);margin:6px 0}.stat b{color:var(--gold)}.fld{display:grid;gap:3px;font-size:.8rem;color:var(--ink2);margin:8px 0}.g2c{display:grid;grid-template-columns:1fr 1fr;gap:10px}' +
     '.pick{display:grid;grid-template-columns:24px 40px 1fr 70px 62px;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:.84rem}.pick input[type=checkbox]{width:auto}.pick select{padding:3px 6px}' +
     '.pvh{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:10px}.pvh label{display:grid;gap:3px;font-size:.78rem;color:var(--ink2)}.thm{width:38px;height:48px;border-radius:5px;background:#000 center/cover;border:1px solid var(--line);flex:none}';
+  css.textContent += '.tbar select{width:auto;min-width:170px}.tbar{display:grid;gap:8px}.tsum{font-size:.95rem}.chk2{display:flex;gap:6px;align-items:center;font-size:.84rem;color:var(--ink2)}.tform{border-top:1px solid var(--line);padding-top:10px}' +
+    '.t3{display:grid;grid-template-columns:230px minmax(0,1fr) 320px;gap:12px;margin-top:12px;align-items:start}@media(max-width:1200px){.t3{grid-template-columns:200px minmax(0,1fr)}.tinsp{grid-column:1/-1}}@media(max-width:760px){.t3{grid-template-columns:1fr}}' +
+    '.trail{display:grid;gap:3px;max-height:78vh;overflow:auto}.ract{margin:8px 0 2px;font-size:.7rem;letter-spacing:.14em;color:var(--gold)}.ri{display:flex;align-items:center;gap:8px;text-align:left;width:100%;padding:7px 9px;border-radius:8px;font-size:.84rem}.ri.on{border-color:var(--gold);background:#1c1a12}.ri span{color:var(--ink3);min-width:20px}.ri b{font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ri i{font-style:normal}' +
+    '.pvbar{display:flex;gap:6px;align-items:center;margin-bottom:8px}.pvbar button{padding:4px 12px;border-radius:999px;font-size:.8rem}.pvbar button.on{border-color:var(--gold);color:var(--gold)}.pvwrap{display:flex;justify-content:center;background:#05060b;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:hidden}.pvbox{position:relative}.pvbox iframe{border:0;transform-origin:0 0;background:#070913;border-radius:18px;position:absolute;left:0;top:0}' +
+    '.tinsp{max-height:80vh;overflow:auto;font-size:.86rem}.cap2{margin:12px 0 4px;font-size:.72rem;letter-spacing:.14em;color:var(--gold)}.mrow{display:flex;gap:8px;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--line)}.mrow small{display:block;color:var(--ink3)}.mrow button{padding:2px 10px;font-size:.78rem;flex:none}' +
+    '.why{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;font-size:.72rem}.why span{padding:0 6px;border-radius:4px;background:#0c0f1a;border:1px solid var(--line)}.hit{color:#7FE0BC}.miss{color:#FF9C8C}.srow{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--line)}';
   document.head.appendChild(css);
 
   function subnav(el, items, active, cb) {
@@ -62,29 +68,6 @@
     });
   }
   function thumb(m) { var u = m && (m.posterUrl || (/video|transition/i.test(m.type) ? '' : m.url)); return u ? '<span class="thm" style="background-image:url(\'' + esc(u) + '\')"></span>' : ''; }
-  // 챕터 한 개의 결과(DEBUG: 왜 이 모듈/미디어가 선택됐는지)
-  function chapterHtml(c, dbg, editable) {
-    var fb = c.modules[0] && /_fallback$/.test(c.modules[0]);
-    var h = '<details class="card" style="margin:6px 0;background:var(--bg)" data-ch="' + esc(c.id) + '"><summary><b>' + String(c.no).padStart(2, '0') + ' ' + esc(c.title) + '</b> · ' + esc(c.headline) + (fb ? ' <span class="pill w">기본 안내만</span>' : '') + '</summary>' +
-      '<div class="muted" style="margin:6px 0">FACT · ' + esc(c.fact) + '</div><div>' + esc(c.interpretation) + '</div>' + (c.meaning ? '<div class="muted" style="margin-top:4px">' + esc(c.meaning) + '</div>' : '') + (c.action && c.action.length ? '<div style="margin-top:4px">ACTION · ' + esc(c.action.join(' / ')) + '</div>' : '');
-    if (dbg) h += '<div class="dbgbox" style="background:#0c0f1a;border:1px solid var(--line);border-radius:6px;padding:8px;margin-top:6px;font-size:.76rem;color:var(--ink2)"><b>선택된 모듈</b> ' + esc(c.modules.join(', ')) + (c.lead && c.lead.why.length ? '<br>' + c.lead.why.map(function (w) { return '<span style="color:' + (/✓/.test(w) ? '#7FE0BC' : '#FF9C8C') + '">' + esc(w) + '</span>'; }).join(' · ') : '<br>조건 없음(폴백 또는 무조건 모듈)') + '</div>';
-    h += '<div style="margin-top:6px">' + c.scenes.map(function (s) {
-      return '<div style="display:flex;gap:8px;align-items:flex-start;background:#0c0f1a;border:1px solid var(--line);border-radius:6px;padding:8px;margin-top:4px;font-size:.78rem;color:var(--ink2)">' + thumb(s.media) + '<div><b>' + esc(s.sceneId) + ' · ' + esc(s.sceneType) + '</b> ' + esc(s.headline || '') + ' <span class="muted">효과 ' + esc(s.effect.type) + '</span>' +
-        (s.media ? '<br>🎞 ' + esc(s.media.assetId) + ' (' + esc(s.media.type) + ') 점수 ' + s.media.score + (dbg ? ' — ' + s.media.why.map(function (w) { return esc(w.label) + (w.v > 0 ? '+' : '') + w.v; }).join(' ') : '') : (s.candidates && !s.candidates.length && R.Scenes.SCENE_RULES[s.sceneType].media ? '<br><span style="color:#FFC080">미디어 후보 없음 → 자리표시 장면</span>' : '')) +
-        (dbg && s.intent && s.candidates && s.candidates.length ? '<br><span class="muted">Intent: 오행 ' + esc((s.intent.desiredElements || []).join(',')) + ' · 상태 ' + esc((s.intent.desiredStates || []).join(',')) + ' · 주제 ' + esc((s.intent.desiredThemes || []).join(',')) + ' · 후보 ' + s.candidates.length + '개</span>' : '') + '</div></div>';
-    }).join('') + '</div>' + (editable ? '<div class="row" style="margin-top:8px"><button type="button" data-edit="' + esc(c.id) + '">이 챕터 편집 →</button></div>' : '') + '</details>';
-    return h;
-  }
-  function testForm(prefix, withProject, onGo) {
-    var projs = R.Chapters.projects(content()).filter(function (p) { return p.enabled !== false; });
-    var h = '<div class="pvh"><label>양력 생년월일<input type="date" id="' + prefix + 'D" value="' + TS.date + '"></label><label>시각<input type="time" id="' + prefix + 'T" value="' + TS.time + '"></label><label>성별<select id="' + prefix + 'G"><option value="M"' + (TS.gender === 'M' ? ' selected' : '') + '>남</option><option value="F"' + (TS.gender === 'F' ? ' selected' : '') + '>여</option></select></label><label>기준일<input type="date" id="' + prefix + 'N" value="' + TS.now + '"></label>' +
-      (withProject ? '<label>프로젝트<select id="' + prefix + 'P">' + projs.map(function (p) { return '<option value="' + esc(p.id) + '"' + (TS.project === p.id ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('') + '</select></label>' : '') + '<label style="display:flex;gap:6px;align-items:center;grid-auto-flow:column"><input type="checkbox" id="' + prefix + 'B"' + (TS.dbg ? ' checked' : '') + '>DEBUG</label><button class="pri" id="' + prefix + 'Go" type="button">' + (onGo || '조합하기') + '</button></div>';
-    return h;
-  }
-  function readTestForm(root, prefix) {
-    TS.date = $('#' + prefix + 'D', root).value || TS.date; TS.time = $('#' + prefix + 'T', root).value || TS.time; TS.gender = $('#' + prefix + 'G', root).value; TS.now = $('#' + prefix + 'N', root).value || TS.now; TS.dbg = $('#' + prefix + 'B', root).checked;
-    var p = $('#' + prefix + 'P', root); if (p) TS.project = p.value; saveTS();
-  }
   var coverageOf = function (c) { // 이 챕터를 채우는 "조건 있는" 모듈 수 (정적 점검)
     var mods = R.Compose.library({ modules: content().modules, remedies: content().remedies }).modules;
     return mods.filter(function (m) { return m.enabled !== false && (c.moduleCategories || []).indexOf(m.category) >= 0 && !/_fallback$/.test(m.id); }).length;
@@ -158,38 +141,119 @@
     } else if (CH.tab === 'mod' || CH.tab === 'rem') {
       var cfg = CH.tab === 'mod' ? C.modCfg() : C.remCfg(), key = CH.tab === 'mod' ? 'modules' : 'remedies';
       b.innerHTML = '<p class="muted">' + (CH.tab === 'mod' ? '이 챕터에서 선택되는 해석 모듈(' + (c.moduleCategories || []).map(function (k) { return C.CAT_KO[k]; }).join('·') + ')입니다. 수정하면 "미리보기" 탭에 바로 반영됩니다.' : '개운법·행동 추천 라이브러리입니다(필요 행동 태그와 겹칠수록 추천).') + '</p><div id="chItems"></div>';
-      cfg.onChange = function (list, saved) { W[key] = list; W['d_' + key] = !saved; }; cfg.initial = W[key] || null; cfg.initialDirty = !!W['d_' + key]; if (CH.tab === 'mod') cfg.lockCats = c.moduleCategories && c.moduleCategories.length ? c.moduleCategories : null;
+      cfg.onChange = function (list, saved) { W[key] = list; W['d_' + key] = !saved; if (TST.pane) TST.pane.refresh(); if (CH.pane) CH.pane.refresh(); }; cfg.initial = W[key] || null; cfg.initialDirty = !!W['d_' + key]; if (CH.tab === 'mod') cfg.lockCats = c.moduleCategories && c.moduleCategories.length ? c.moduleCategories : null;
       C.itemAdmin($('#chItems', b), cfg);
+      if (CH.pendingModule) { var li = $('#chItems .v2li[data-id="' + CH.pendingModule + '"]'); if (li) li.click(); CH.pendingModule = null; }
     } else {
-      b.innerHTML = testForm('pv', false, '다시 계산') + '<div id="pvOut"><p class="muted">계산 중…</p></div>';
-      var run = function () { readTestForm(b, 'pv'); var out = $('#pvOut', b); out.innerHTML = '<p class="muted">계산 중…</p>';
-        report('full', c.id).then(function (r) { var cc = r.rep.chapters.filter(function (x) { return x.id === c.id; })[0]; out.innerHTML = '<div class="muted" style="margin-bottom:6px">' + esc(r.sd.dayPillar.ko) + '일주 · ' + esc(r.sd.strength.zone) + ' · 현재 대운 ' + esc(r.sd.currentDaewoon ? SEA[r.sd.currentDaewoon.season] || '-' : '-') + ' · 올해 ' + esc(r.sd.sewoon ? SEA[r.sd.sewoon.season] || '-' : '-') + '</div>' + (cc ? chapterHtml(cc, TS.dbg, false).replace('<details', '<details open') : '<p class="muted">이 챕터는 비활성입니다.</p>'); })
-          .catch(function (e) { out.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); };
-      $('#pvGo', b).onclick = run; run();
+      b.innerHTML = '<div class="row" style="align-items:center;margin-bottom:8px"><span class="muted" id="pvSum"></span><span style="flex:1"></span><button type="button" id="pvEdit">테스트 사주 바꾸기 (조합 테스트)</button></div><div id="pvHost"></div>';
+      var pane = PreviewPane($('#pvHost', b), { onChapter: function () { } }); CH.pane = pane;
+      computeSd().then(function (sd) { $('#pvSum', b).textContent = TS.date + ' ' + TS.time + ' ' + (TS.gender === 'M' ? '남' : '여') + ' · ' + sd.dayPillar.ko + '일주'; });
+      pane.show(c.id, 'full'); $('#pvEdit', b).onclick = function () { gotoTab('v2test'); };
     }
   }
 
+  /* ═════ 미리보기 부품: 실제 뷰어(/report/v2/?preview=1)를 iframe 으로 띄워 저장 전 내용을 그대로 보여 준다 ═════ */
+  var PVS = []; // 살아 있는 미리보기들
+  window.addEventListener('message', function (e) {
+    if (e.origin !== location.origin || !e.data) return;
+    PVS = PVS.filter(function (p) { return document.body.contains(p.frame); });
+    PVS.forEach(function (p) { if (e.source === p.frame.contentWindow) { if (e.data.type === 'mt-v2-ready') { p.ready = true; if (p.pending) p.send(p.pending); } else if (e.data.type === 'mt-v2-chapter' && p.onChapter) p.onChapter(e.data.id); } });
+  });
+  var awkMemo = null;
+  function awakeningFor(sd) { // 이 사주의 각성 영상(없으면 fallback) — 뷰어가 받는 모양 {video, fallback}
+    return (awkMemo ? Promise.resolve(awkMemo) : fetch('/api/awakening?all=1', { headers: { authorization: 'Bearer ' + PW } }).then(function (r) { return r.json(); }).catch(function () { return {}; }).then(function (d) { awkMemo = d; return d; })).then(function (d) {
+      var pk = R.Media.pickAwakening(d.videos || [], sd.dayPillar.ko, sd.gender, d.fallback); return { pick: pk, awk: pk.fallback ? { video: null, fallback: pk.clip } : { video: pk.clip } };
+    });
+  }
+  // el 안에 [모바일|PC] 전환 + 미리보기 틀을 만든다. 반환: { show(chapterId|'awakening', projectId), refresh() }
+  function PreviewPane(el, opt) {
+    opt = opt || {}; var dev = 'm', P = { ready: false, pending: null, last: null };
+    el.innerHTML = '<div class="pvbar"><button type="button" data-d="m" class="on">모바일</button><button type="button" data-d="d">PC</button><button type="button" data-r title="새로 그리기">⟳</button><span class="muted pvmsg"></span></div><div class="pvwrap"><div class="pvbox"><iframe title="리포트 미리보기" src="/report/v2/?preview=1"></iframe></div></div>';
+    var frame = $('iframe', el), box = $('.pvbox', el), wrap = $('.pvwrap', el), msg = $('.pvmsg', el);
+    P.frame = frame; P.onChapter = opt.onChapter;
+    function fit() { var w = dev === 'm' ? 390 : 1100, h = dev === 'm' ? 760 : 700, avail = Math.max(240, wrap.clientWidth || 380), s = Math.min(1, avail / w); frame.style.width = w + 'px'; frame.style.height = h + 'px'; frame.style.transform = 'scale(' + s + ')'; box.style.width = Math.round(w * s) + 'px'; box.style.height = Math.round(h * s) + 'px'; }
+    P.send = function (m) { frame.contentWindow.postMessage(m, location.origin); };
+    P.show = function (chapterId, projectId) {
+      msg.textContent = '계산 중…';
+      return Promise.all([C.load(), computeSd()]).then(function (a) {
+        var sd = a[1]; return awakeningFor(sd).then(function (aw) {
+          var d = TS.date.split('-').map(Number), t = (TS.time || '12:00').split(':').map(Number);
+          var m = { type: 'mt-v2-preview', chapter: chapterId, project: projectId || 'full', content: content(), media: ST.media, awk: aw.awk, now: new Date(TS.now + 'T12:00:00+09:00').getTime(),
+            input: { year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: TS.gender, lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' } };
+          P.last = m; if (P.ready) P.send(m); else P.pending = m; msg.textContent = '';
+        });
+      }).catch(function (e) { msg.textContent = e.message; });
+    };
+    P.refresh = function () { if (P.last) { P.last.content = content(); P.last.media = ST.media; if (P.ready) P.send(P.last); } };
+    el.onclick = function (e) { var b = e.target.closest('button'); if (!b) return; if (b.dataset.d) { dev = b.dataset.d; $$('.pvbar [data-d]', el).forEach(function (x) { x.classList.toggle('on', x === b); }); fit(); } else if (b.hasAttribute('data-r')) { P.ready = false; P.pending = P.last; frame.src = '/report/v2/?preview=1&_=' + Date.now(); } };
+    PVS.push(P); fit(); window.addEventListener('resize', fit); return P;
+  }
+
   /* ═════ ③ 조합 테스트 ═════ */
+  var PRESETS = [['1990-05-15', '14:30', 'M', '경진 · 신강'], ['1985-11-23', '07:10', 'F', '1985 여'], ['2000-02-29', '22:40', 'M', '2000 남'], ['1978-08-08', '03:00', 'F', '1978 여']];
+  var TST = { sel: 'awakening', rep: null, sd: null, pane: null, busy: 0 };
   function testOpen() {
     var root = $('#t-v2test');
-    if (!built.test) { built.test = 1; root.innerHTML = '<div class="card"><b style="color:var(--gold)">조합 테스트</b> <span class="muted">테스트 사주로 프로젝트 전체를 돌려 봅니다. 저장 전 수정한 모듈·챕터도 반영됩니다. 문제가 있는 챕터는 "이 챕터 편집"으로 바로 이동하세요.</span><div style="margin-top:10px" id="tForm"></div><div id="tRes"></div></div><div class="card" style="margin-top:12px"><b>콘텐츠 커버리지</b> <span class="muted">조건 있는 모듈이 사주 구조를 얼마나 덮는지 · 빈 챕터 가능성</span><div id="tCov" style="margin-top:8px"></div></div>'; }
-    C.load().then(function () {
-      $('#tForm', root).innerHTML = testForm('t', true); $('#tGo', root).onclick = function () { readTestForm(root, 't'); run(); };
-      C.covOpen($('#tCov', root));
-    });
-    function run() {
-      var out = $('#tRes', root); out.innerHTML = '<p class="muted">계산 중…</p>';
-      Promise.all([report(TS.project), fetch('/api/awakening?all=1', { headers: { authorization: 'Bearer ' + PW } }).then(function (r) { return r.json(); }).catch(function () { return {}; })]).then(function (a) {
-        var r = a[0], awk = a[1], sd = r.sd, rep = r.rep, pick = R.Media.pickAwakening(awk.videos || [], sd.dayPillar.ko, sd.gender, awk.fallback), h = '';
-        h += '<div class="card" style="background:var(--bg);margin-top:12px"><b>1. 계산 (Structured Saju Data)</b><div class="muted">' + esc(sd.dayPillar.ko) + '일주 · 일간 ' + esc(sd.dayMaster.stem + '(' + sd.dayMaster.el + ')') + ' · ' + esc(sd.strength.zone) + ' · 용신 ' + esc(sd.usefulElements ? sd.usefulElements.yong : '없음') + ' · 우세 십성군 ' + esc(sd.dominantGroup) + '<br>현재 대운 ' + esc(sd.currentDaewoon ? sd.currentDaewoon.ganzhi + ' ' + (SEA[sd.currentDaewoon.season] || '') : '-') + ' · 올해 ' + esc(sd.sewoon ? sd.sewoon.ganzhi + ' ' + (SEA[sd.sewoon.season] || '') : '-') + (sd.unavailable.length ? ' · <span style="color:#FF9C8C">계산 불가: ' + esc(sd.unavailable.join(',')) + '</span>' : '') + '</div></div>' +
-          '<div class="card" style="background:var(--bg);margin-top:8px"><b>2. 각성 영상</b><div class="muted">' + (pick.fallback ? '<span style="color:#FF9C8C">' + esc(pick.key) + ' 영상 미등록 → ' + (pick.clip ? 'fallback 사용' : 'fallback 도 없음(문구·정지 화면으로 진행)') + '</span>' : '<span style="color:#7FE0BC">' + esc(pick.key) + ' 일치: ' + esc(pick.clip.title || '') + '</span>') + '</div></div>' +
-          '<div class="card" style="background:var(--bg);margin-top:8px"><b>3. 프로젝트 · 캐시 키</b> <span class="muted">' + esc(r.pack.cfg.project.name) + ' · ' + rep.chapters.length + '챕터 · 콘텐츠 ' + esc(rep.meta.contentVersion) + ' · ' + esc(rep.meta.key) + '</span></div><div style="margin-top:10px"><b>4. 최종 챕터</b></div>';
-        rep.chapters.forEach(function (c) { if (c.actTransition) h += '<div class="card" style="margin:10px 0 4px;text-align:center;color:var(--gold)">— ' + esc(c.actTransition.kicker) + ' · ' + esc(c.actTransition.headline) + ' —<div class="muted">' + esc(c.actTransition.body).replace(/\n/g, ' ') + '</div></div>'; h += chapterHtml(c, TS.dbg, true); });
-        var p = rep.plan; h += '<div class="card" style="margin-top:10px"><b>5. 개운법 · Action Plan</b><div class="muted">전략: ' + esc(p.strategy.map(function (s) { return s.label; }).join(' → ')) + '<br>체크리스트: ' + esc(p.checklist.join(' / ') || '-') + '<br>피할 것: ' + esc(p.avoid.join(' / ') || '-') + '</div></div>' + (rep.meta.warnings.length ? '<p style="color:#FF9C8C">경고: ' + esc(rep.meta.warnings.join(' / ')) + '</p>' : '');
-        out.innerHTML = h;
-        out.onclick = function (e) { var b = e.target.closest('[data-edit]'); if (b) { CH.pending = b.dataset.edit; if (built.chap) { CH.sel = CH.pending; CH.tab = 'set'; CH.pending = null; } else CH.sel = null; gotoTab('v2chap'); if (built.chap) chapDraw(); } };
-      }).catch(function (e) { out.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
+    if (!built.test) {
+      built.test = 1;
+      root.innerHTML = '<div class="card tbar"><div class="tsum" id="tSum"></div><div class="row" style="align-items:center"><select id="tProj" aria-label="프로젝트"></select><button type="button" id="tEditBtn">테스트 사주 바꾸기</button><label class="chk2"><input type="checkbox" id="tDbg"' + (TS.dbg ? ' checked' : '') + '>선택 근거 보기</label><button type="button" class="pri" id="tGo">다시 조합</button></div>' +
+        '<div class="tform hide" id="tForm"></div></div>' +
+        '<div class="t3"><div class="card"><div class="muted" style="margin-bottom:6px">챕터 <span id="tIssues"></span></div><div class="trail" id="tRail"></div></div><div class="card"><div id="tPv"></div></div><div class="card tinsp" id="tInsp"><p class="muted">챕터를 고르면 선택 근거가 보입니다.</p></div></div>' +
+        '<details class="card" id="tCovBox" style="margin-top:12px"><summary><b>콘텐츠 커버리지 점검</b> <span class="muted">조건 있는 모듈이 사주 구조를 얼마나 덮는지 · 눌러서 열기</span></summary><div id="tCov" style="margin-top:8px"></div></details>';
+      TST.pane = PreviewPane($('#tPv', root), { onChapter: function (id) { if (TST.sel !== id) { TST.sel = id; markRail(); inspect(); } } });
+      $('#tGo', root).onclick = function () { run(); }; $('#tDbg', root).onchange = function (e) { TS.dbg = e.target.checked; saveTS(); inspect(); };
+      $('#tProj', root).onchange = function (e) { TS.project = e.target.value; saveTS(); run(); };
+      $('#tEditBtn', root).onclick = function () { $('#tForm', root).classList.toggle('hide'); };
+      $('#tCovBox', root).ontoggle = function () { if (this.open && !this.dataset.done) { this.dataset.done = 1; C.covOpen($('#tCov', root)); } };
+      $('#tRail', root).onclick = function (e) { var b = e.target.closest('[data-c]'); if (!b) return; TST.sel = b.dataset.c; markRail(); inspect(); TST.pane.show(TST.sel, TS.project); };
+      $('#tInsp', root).onclick = function (e) { var b = e.target.closest('[data-edit]'); if (!b) return; CH.pending = b.dataset.edit; CH.pendingModule = b.dataset.mod || null; if (built.chap) { CH.sel = CH.pending; CH.tab = b.dataset.mod ? 'mod' : 'set'; CH.pending = null; } else CH.sel = null; gotoTab('v2chap'); if (built.chap) chapDraw(); };
     }
+    C.load().then(function () { drawForm(); drawProj(); run(); });
+  }
+  function drawProj() { var projs = R.Chapters.projects(content()).filter(function (p) { return p.enabled !== false; }); $('#tProj').innerHTML = projs.map(function (p) { return '<option value="' + esc(p.id) + '"' + (TS.project === p.id ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join(''); if (!projs.some(function (p) { return p.id === TS.project; })) TS.project = projs[0].id; }
+  function drawForm() {
+    var f = $('#tForm'); f.innerHTML = '<div class="pvh"><label>양력 생년월일<input type="date" id="fD" value="' + TS.date + '"></label><label>시각<input type="time" id="fT" value="' + TS.time + '"></label><label>성별<select id="fG"><option value="M"' + (TS.gender === 'M' ? ' selected' : '') + '>남</option><option value="F"' + (TS.gender === 'F' ? ' selected' : '') + '>여</option></select></label><label>기준일(올해·이달 계산)<input type="date" id="fN" value="' + TS.now + '"></label><button type="button" class="pri" id="fOk">적용</button></div>' +
+      '<div class="row" style="align-items:center"><span class="muted">자주 쓰는 사주</span>' + PRESETS.map(function (p, i) { return '<button type="button" data-pre="' + i + '">' + esc(p[3]) + '</button>'; }).join('') + '</div>';
+    f.onclick = function (e) {
+      var pre = e.target.closest('[data-pre]'); if (pre) { var p = PRESETS[+pre.dataset.pre]; $('#fD', f).value = p[0]; $('#fT', f).value = p[1]; $('#fG', f).value = p[2]; }
+      if (pre || e.target.id === 'fOk') { TS.date = $('#fD', f).value || TS.date; TS.time = $('#fT', f).value || TS.time; TS.gender = $('#fG', f).value; TS.now = $('#fN', f).value || TS.now; saveTS(); f.classList.add('hide'); run(); }
+    };
+  }
+  function markRail() { $$('#tRail [data-c]').forEach(function (b) { b.classList.toggle('on', b.dataset.c === TST.sel); }); }
+  function run() {
+    var rail = $('#tRail'); rail.innerHTML = '<p class="muted">계산 중…</p>'; var my = ++TST.busy;
+    report(TS.project).then(function (r) {
+      if (my !== TST.busy) return; TST.rep = r.rep; TST.sd = r.sd; var rep = r.rep, sd = r.sd;
+      var sn = function (s) { return s ? SEA[s] : '-'; };
+      $('#tSum').innerHTML = '<b>' + esc(TS.date) + ' ' + esc(TS.time) + ' ' + (TS.gender === 'M' ? '남' : '여') + '</b> → <b style="color:var(--gold)">' + esc(sd.dayPillar.ko) + '일주</b> · ' + esc(sd.strength.zone) + ' · 용신 ' + esc(sd.usefulElements ? sd.usefulElements.yong : '없음') + ' · 대운 ' + esc(sd.currentDaewoon ? sn(sd.currentDaewoon.season) : '-') + ' · 올해 ' + esc(sd.sewoon ? sn(sd.sewoon.season) : '-') + ' <span class="muted">(' + esc(r.pack.cfg.project.name) + ' · ' + rep.chapters.length + '챕터)</span>';
+      var issues = 0, h = '<button type="button" data-c="awakening" class="ri' + (TST.sel === 'awakening' ? ' on' : '') + '"><span>🎬</span><b>일주 각성 영상</b></button>', act = 0;
+      rep.chapters.forEach(function (c) {
+        if (c.act !== act) { act = c.act; var a = rep.acts.filter(function (x) { return x.id === act; })[0] || {}; h += '<div class="ract">' + esc(a.roman || '') + ' · ' + esc(a.title || '') + '</div>'; }
+        var fb = c.modules[0] && /_fallback$/.test(c.modules[0]), nm = c.scenes.filter(function (s) { return !s.media && R.Scenes.SCENE_RULES[s.sceneType].media; }).length; if (fb) issues++;
+        h += '<button type="button" data-c="' + esc(c.id) + '" class="ri' + (c.id === TST.sel ? ' on' : '') + '"><span>' + String(c.no).padStart(2, '0') + '</span><b>' + esc(c.title) + '</b>' + (fb ? '<i class="pill w" title="조건 있는 모듈이 없어 기본 안내만 나옵니다">기본안내</i>' : '') + (nm ? '<i class="pill" title="미디어가 없어 자리표시 장면이 나오는 장면 수">미디어 ' + nm + '</i>' : '') + '</button>';
+      });
+      rail.innerHTML = h; $('#tIssues').innerHTML = issues ? '<span class="pill w">기본 안내만 ' + issues + '개</span>' : '<span class="pill">모두 정상</span>';
+      if (!rep.chapters.some(function (c) { return c.id === TST.sel; }) && TST.sel !== 'awakening') TST.sel = rep.chapters[0].id;
+      inspect(); TST.pane.show(TST.sel, TS.project);
+    }).catch(function (e) { rail.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
+  }
+  // 오른쪽 "선택 근거" 패널
+  function inspect() {
+    var box = $('#tInsp'), rep = TST.rep, sd = TST.sd; if (!rep) return;
+    if (TST.sel === 'awakening') {
+      awakeningFor(sd).then(function (a) { var pk = a.pick; box.innerHTML = '<b>일주 각성 영상</b><p class="muted">' + (pk.fallback ? '<span style="color:#FF9C8C">' + esc(pk.key) + ' 영상이 아직 없습니다 → ' + (pk.clip ? 'fallback 영상으로 진행' : 'fallback 도 없어 문구·정지 화면으로 진행') + '</span>' : '<span style="color:#7FE0BC">' + esc(pk.key) + ' 영상이 연결되어 있습니다.</span> ' + esc(pk.clip.title || '')) + '</p><div class="row"><button type="button" id="goAwk">각성 영상 등록하러 가기</button></div>'; $('#goAwk', box).onclick = function () { gotoTab('v2clip'); var b = $('#clNav button[data-k=awk]'); if (b) b.click(); }; });
+      return;
+    }
+    var c = rep.chapters.filter(function (x) { return x.id === TST.sel; })[0]; if (!c) { box.innerHTML = ''; return; }
+    var fb = c.modules[0] && /_fallback$/.test(c.modules[0]);
+    var h = '<b>' + String(c.no).padStart(2, '0') + ' ' + esc(c.title) + '</b><p class="muted" style="margin:4px 0 8px">FACT · ' + esc(c.fact) + '</p>' + (fb ? '<p class="pill w" style="display:inline-block;margin:0 0 8px">조건 있는 모듈이 없어 기본 안내만 표시됩니다</p>' : '');
+    h += '<div class="cap2">선택된 모듈</div>' + ((c.lead && c.lead.id) ? [c.lead].concat(c.details || []).map(function (m) { return '<div class="mrow"><div><b>' + esc(m.headline || m.id) + '</b><small>' + esc(m.id) + '</small>' + (TS.dbg && m.why && m.why.length ? '<div class="why">' + m.why.map(function (w) { return '<span class="' + (/✓/.test(w) ? 'hit' : 'miss') + '">' + esc(w) + '</span>'; }).join('') + '</div>' : (TS.dbg ? '<div class="why muted">조건 없음(항상 후보)</div>' : '')) + '</div><button type="button" data-edit="' + esc(c.id) + '" data-mod="' + esc(m.id) + '">수정</button></div>'; }).join('') : '<p class="muted">없음</p>');
+    h += '<div class="cap2">장면 · 미디어</div>' + c.scenes.map(function (s) {
+      var need = R.Scenes.SCENE_RULES[s.sceneType].media;
+      return '<div class="srow">' + (s.media ? thumb(s.media) : '<span class="thm" style="display:grid;place-items:center;color:var(--ink3);font-size:.7rem">' + (need ? '없음' : 'CSS') + '</span>') + '<div><b>' + esc(s.sceneType) + '</b> <span class="muted">' + esc(s.effect.type) + '</span>' + (s.media ? '<div class="muted">' + esc(s.media.assetId) + ' · ' + esc(s.media.type) + ' · 점수 ' + s.media.score + '</div>' + (TS.dbg ? '<div class="why">' + s.media.why.map(function (w) { return '<span class="hit">' + esc(w.label) + (w.v > 0 ? '+' : '') + w.v + '</span>'; }).join('') + '</div>' : '') : need ? '<div style="color:#FFC080;font-size:.78rem">후보 없음 → 자리표시 장면</div>' : '<div class="muted" style="font-size:.78rem">데이터 장면(미디어 없이 표시)</div>') + '</div></div>';
+    }).join('');
+    h += '<div class="row" style="margin-top:10px"><button type="button" data-edit="' + esc(c.id) + '">이 챕터 편집 →</button></div>';
+    box.innerHTML = h;
   }
 
   /* ═════ ④ 프로젝트 ═════ */

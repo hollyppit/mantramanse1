@@ -2,7 +2,7 @@
    모든 장면(Scene)은 ReportV2.Compose.build 가 만든 데이터를 그리기만 한다. 입력한 생년월일은 서버로 보내지 않는다. */
 (function () {
   'use strict';
-  var R = window.ReportV2, T = R.Analytics.trackEvent, SEA = R.SajuData.SEASONS;
+  var R = window.ReportV2, T0 = R.Analytics.trackEvent, T = function (n, p) { if (!/[?&]preview=1/.test(location.search)) T0(n, p); }, SEA = R.SajuData.SEASONS;
   var $ = function (s, e) { return (e || document).querySelector(s); }, $$ = function (s, e) { return [].slice.call((e || document).querySelectorAll(s)); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -11,6 +11,7 @@
   var EL_COLOR = { wood: '#5E9E78', fire: '#D0634A', earth: '#BC9C62', metal: '#AEB9C6', water: '#4A7AB5' };
   var SEA_ICON = { opportunity: '◆', expansion: '▲', harvest: '●', accumulation: '■', transition: '◇', defense: '▽' }; // 색만으로 상태를 구분하지 않도록 글자·기호를 함께 쓴다
   var STAGES = ['사주 원국을 읽고 있습니다', '타고난 기질을 분석하고 있습니다', '인생 흐름을 연결하고 있습니다', '당신에게 맞는 행동 전략을 찾고 있습니다', '당신의 이야기를 구성하고 있습니다'];
+  var PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
   var S = { sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
   var view = function (v) { $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
   function toast(msg, ms) { var t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, ms || 3200); }
@@ -314,6 +315,22 @@
     var raw = sg('mt_v2_input'); if (!raw || !window.Manse) return; try { sessionStorage.removeItem('mt_v2_input'); } catch (e) { }
     try { var h = JSON.parse(raw), ch = window.Manse.compute(h.inp); S.name = String(h.name || '').slice(0, 20); S.interest = h.interest || ''; setTimeout(function () { start(ch, h.inp.gender); }, 0); } catch (e) { /* 입력이 올바르지 않으면 폼을 그대로 보여 준다 */ }
   })();
+
+  /* ── 관리자 미리보기(?preview=1): 저장 전 콘텐츠를 postMessage 로 받아 같은 화면 그대로 그린다. 추적·localStorage·AI 호출은 하지 않는다. ── */
+  if (PREVIEW) {
+    document.documentElement.classList.add('pv'); view('load'); $('#loadText').textContent = '미리보기를 기다리는 중…';
+    window.addEventListener('message', function (e) {
+      var m = e.data; if (e.origin !== location.origin || !m || m.type !== 'mt-v2-preview') return;
+      try {
+        var ch = window.Manse.compute(m.input); S.sd = R.SajuData.build(ch, { now: m.now || Date.now() }); S.name = m.name || ''; S.media = m.media || [];
+        S.pack = R.Compose.fromSaved(m.content, S.media, m.project || 'full'); S.rep = R.Compose.build(S.sd, S.pack.lib, S.pack.cfg); S.awk = m.awk || {}; S.visited = {}; S.ended = {};
+        if (m.chapter === 'awakening') { awakening(); return; }
+        var i = Math.max(0, S.rep.chapters.map(function (c) { return c.id; }).indexOf(m.chapter)); view('reader'); $('#barTot').textContent = S.rep.chapters.length;
+        S.idx = i; var c = S.rep.chapters[i]; S.visited[c.id] = 1; render(c, i, true); window.scrollTo(0, 0);
+      } catch (err) { $('#loadText').textContent = '미리보기를 만들지 못했습니다: ' + (err && err.message); view('load'); }
+    });
+    if (window.parent !== window) window.parent.postMessage({ type: 'mt-v2-ready' }, location.origin);
+  }
 
   window.MantraV2 = { state: S, go: go, T: T };
 })();
