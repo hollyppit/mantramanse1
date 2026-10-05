@@ -2,7 +2,7 @@
 const http = require('http'), fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json' };
-let story = null, intro = { on: false, src: null, srcMobile: null, skipAfter: 0, once: 'session' }, clips = [], defaults = {}, chapters = null, folders = [], files = {};
+let rc = null, mediaList = [], awk = [], story = null, intro = { on: false, src: null, srcMobile: null, skipAfter: 0, once: 'session' }, clips = [], defaults = {}, chapters = null, folders = [], files = {};
 const send = (r, code, obj) => { r.statusCode = code; r.setHeader('content-type', 'application/json; charset=utf-8'); r.end(JSON.stringify(obj)); };
 const authed = q => (q.headers.authorization || '') === 'Bearer test';
 const body = q => new Promise(res => { const b = []; q.on('data', c => b.push(c)); q.on('end', () => res(Buffer.concat(b))); });
@@ -33,6 +33,22 @@ http.createServer(async (q, r) => {
     const b = JSON.parse((await body(q)).toString()); if (!(b.provider === 'openai' ? b.voice : b.voiceId)) return send(r, 400, { error: '목소리를 선택하세요' });
     const n = 1.2 * 8000, buf = Buffer.alloc(44 + n); buf.write('RIFF', 0); buf.writeUInt32LE(36 + n, 4); buf.write('WAVEfmt ', 8); buf.writeUInt32LE(16, 16); buf.writeUInt16LE(1, 20); buf.writeUInt16LE(1, 22); buf.writeUInt32LE(8000, 24); buf.writeUInt32LE(8000, 28); buf.writeUInt16LE(1, 32); buf.writeUInt16LE(8, 34); buf.write('data', 36); buf.writeUInt32LE(n, 40); buf.fill(128, 44);
     const key = 'tts-mock' + Date.now().toString(36) + '.mp3'; files[key] = buf; return send(r, 200, { ok: true, key, cached: false });
+  }
+  if (p === '/api/report-content') {
+    if (q.method === 'GET') return send(r, 200, { content: rc });
+    if (!authed(q)) return send(r, 401, { error: '관리자 인증이 필요합니다' });
+    if (q.method === 'PUT') { rc = { ...(rc || {}), ...JSON.parse((await body(q)).toString()), version: 'c' + Date.now().toString(36) }; return send(r, 200, { ok: true, version: rc.version }); }
+  }
+  if (p === '/api/media') { // 모의: 메모리 저장. AI 태그 추천은 고정 응답
+    if (q.method === 'GET') return send(r, 200, { media: authed(q) && u.searchParams.get('all') ? mediaList : mediaList.filter(m => m.enabled && m.tagsApproved) });
+    if (!authed(q)) return send(r, 401, { error: '관리자 인증이 필요합니다' });
+    if (q.method === 'PUT') { mediaList = JSON.parse((await body(q)).toString()).media; return send(r, 200, { ok: true, count: mediaList.length }); }
+    if (q.method === 'POST') { await body(q); return send(r, 200, { ok: true, suggestion: { elementTags: ['wood'], stateTags: ['growth', 'recovery'], emotionTags: ['calm', 'hopeful'], sceneTags: ['forest', 'mist'], themeTags: ['personality'], actionTags: [], visualRole: ['hero'], chapterTags: ['personality'], description: '(모의) 안개 낀 숲. 성장과 회복의 표현에 어울립니다.' } }); }
+  }
+  if (p === '/api/awakening') {
+    if (q.method === 'GET') { if (u.searchParams.get('all')) return authed(q) ? send(r, 200, { videos: awk, fallback: null }) : send(r, 401, { error: '관리자 인증이 필요합니다' }); return send(r, 200, { video: awk.find(v => v.dayPillar === u.searchParams.get('pillar') && v.gender === u.searchParams.get('gender')) || null, fallback: null }); }
+    if (!authed(q)) return send(r, 401, { error: '관리자 인증이 필요합니다' });
+    if (q.method === 'PUT') { awk = JSON.parse((await body(q)).toString()).videos; return send(r, 200, { ok: true, count: awk.length }); }
   }
   if (p === '/api/story') {
     if (q.method === 'GET') return send(r, 200, { story });

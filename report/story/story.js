@@ -249,6 +249,11 @@
           try { ch = M().compute(inp); } catch (err) { msg.textContent = (err && err.message) || '입력을 확인해 주세요.'; return; }
           S.chart = ch; S.name = String(f.name.value || '').trim().slice(0, 20);
           track('saju_analysis_completed', { interest: S.interest || '', hour_known: hasT }); // 생년월일 등 개인정보는 보내지 않는다
+          // 새 20챕터 리포트(/report/v2/)로 이어가기: 입력값은 이 탭의 sessionStorage 로만 넘기고(서버 전송 없음) 이동한다. 설정이 꺼져 있거나 ?v2=0 이면 기존 화면을 그대로 쓴다.
+          var v2 = C.settings && C.settings.v2;
+          if (v2 && v2.handoff && !/[?&]v2=0\b/.test(location.search) && !PREVIEW && /^\/[\w\-./]*$/.test(v2.url || '/report/v2/')) {
+            try { sessionStorage.setItem('mt_v2_input', JSON.stringify({ inp: inp, name: S.name, interest: S.interest || '' })); location.href = v2.url || '/report/v2/'; return; } catch (e) { /* 저장 불가면 기존 화면으로 */ }
+          }
           loadClips().then(function () { paint('FreeResult'); });
           paint('FreeResult'); paint('FlowPreview'); paint('LockedContent'); paint('Paywall');
           gate(); scrollToId('freeResult'); Auto.continueAt('freeResult');

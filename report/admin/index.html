@@ -158,6 +158,13 @@ summary { cursor:pointer; padding:4px 0; }
       <button data-t="cov">커버리지</button>
       <button data-t="intro">입장 인트로</button>
       <button data-t="home">스토리 페이지</button>
+      <button data-t="media">미디어 라이브러리</button>
+      <button data-t="awk">각성 영상 (120)</button>
+      <button data-t="mod">해석 모듈</button>
+      <button data-t="rem">개운법</button>
+      <button data-t="chap">챕터·PDF 설정</button>
+      <button data-t="v2test">v2 조합 테스트</button>
+      <button data-t="v2cov">v2 커버리지</button>
     </div>
 
     <!-- 라이브러리 -->
@@ -228,6 +235,9 @@ summary { cursor:pointer; padding:4px 0; }
     </div>
 
     <!-- 커버리지 -->
+    <div id="t-media" class="hide"></div>
+    <div id="t-awk" class="hide"></div>
+    <div id="t-mod" class="hide"></div><div id="t-rem" class="hide"></div><div id="t-chap" class="hide"></div><div id="t-v2test" class="hide"></div><div id="t-v2cov" class="hide"></div>
     <div id="t-cov" class="hide">
       <div class="card"><p class="muted" style="margin:0">일주 60개 × 9개 장에서 어느 칸이 비어 있는지 봅니다. <span class="chip">초록</span> 해당 일주를 직접 지정한 클립이 있음 · <span class="chip">파랑</span> 조건 없는 공통 클립으로 채워짐 · 회색 0은 비어 있음.</p></div>
       <div class="cov" style="margin-top:12px"><table id="covT"></table></div>
@@ -475,6 +485,16 @@ summary { cursor:pointer; padding:4px 0; }
 <script src="../story/schema.js"></script>
 <script src="../assemble.js"></script>
 <script src="../fx.js"></script>
+<script src="../v2/media.js"></script>
+<script src="../v2/scenes.js"></script>
+<script src="../v2/chapters.js"></script>
+<script src="../v2/saju-data.js"></script>
+<script src="../v2/rules.js"></script>
+<script src="../v2/content.js"></script>
+<script src="../v2/remedy.js"></script>
+<script src="../v2/compose.js"></script>
+<script src="v2-admin.js"></script>
+<script src="v2-content.js"></script>
 <script>
 (function () {
   var A = window.Assemble, F = window.MovingFx, $ = function (id) { return document.getElementById(id); };
@@ -995,7 +1015,9 @@ summary { cursor:pointer; padding:4px 0; }
   document.querySelectorAll('.tabs button').forEach(function (b) {
     b.onclick = function () {
       document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
-      ['lib', 'test', 'cov', 'intro', 'home'].forEach(function (t) { $('t-' + t).classList.toggle('hide', t !== b.dataset.t); });
+      ['lib', 'test', 'cov', 'intro', 'home', 'media', 'awk', 'mod', 'rem', 'chap', 'v2test', 'v2cov'].forEach(function (t) { $('t-' + t).classList.toggle('hide', t !== b.dataset.t); });
+      if (b.dataset.t === 'media' || b.dataset.t === 'awk') window.V2Admin.open(b.dataset.t, S.pw);
+      if (/^(mod|rem|chap|v2test|v2cov)$/.test(b.dataset.t)) window.V2Content.open(b.dataset.t, S.pw);
       if (b.dataset.t === 'cov') renderCov();
       if (b.dataset.t === 'intro') introLoad();
       document.querySelector('body > .wrap').style.maxWidth = b.dataset.t === 'home' ? '1700px' : '';
