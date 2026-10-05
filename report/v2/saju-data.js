@@ -64,6 +64,8 @@
     sd.twelveStages = {}; ['year', 'month', 'day', 'hour'].forEach(function (k) { var c = ch.cells && ch.cells[k]; if (c && P[k]) sd.twelveStages[k] = c.unseong; });
     var stars = {}; ['year', 'month', 'day', 'hour'].forEach(function (k) { ((ch.sinsal && ch.sinsal[k]) || []).forEach(function (s) { stars[s.name] = { name: s.name, good: !!s.good, pillar: k }; }); });
     sd.specialStars = Object.keys(stars).map(function (k) { return stars[k]; });
+    // 12신살(역마살·연살=도화·화개살 …)은 기둥(궁)별로 따로 전한다 — 현실 장면(reality.js)이 "어느 시기의 일인지" 읽는 데 쓴다.
+    sd.sinsal12 = {}; ['year', 'month', 'day', 'hour'].forEach(function (k) { var c = ch.cells && ch.cells[k]; if (c && P[k] && c.sinsal12) sd.sinsal12[k] = c.sinsal12; });
     sd.patterns = ((ch.patterns && ch.patterns.list) || []).map(function (p) { return { name: p.name, level: p.level }; });
 
     // 운 흐름: 대운 10개 + 현재 대운 + 올해 세운 + 앞으로 12개월

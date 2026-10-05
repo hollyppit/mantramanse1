@@ -199,8 +199,15 @@
   }
 
   // 챕터(base id)별로 끼워 넣을 현실·흐름 장면
-  var INSERT = { c03: ['strong'], c05: ['weak'], c08: ['money'], c15: ['daewoon'], c17: ['sewoon'], c18: ['month'] };
+  // 현실 장면(reality.js): 사주 사실값 → "그럴 가능성이 있는 일" 구체 장면. 챕터 주제에 맞는 것만 끼운다.
+  function realityScenes(kind, sd, vars) {
+    var K = R.Reality, out = []; if (!K) return out;
+    K.make(kind, sd).forEach(function (p, i) { var s = sc('rl_' + kind + '_' + (i + 1), p.preset, p.over || {}, p.blocks, p.extra || {}); if (p.basisNote) s.basisNote = true; out.push(s); });
+    return fill(out, vars);
+  }
+  var INSERT = { c03: ['strong'], c05: ['weak', 'r_shadow'], c06: ['r_work'], c08: ['money', 'r_money'], c09: ['r_love'], c10: ['r_spouse'], c11: ['r_people'], c13: ['r_child'], c15: ['daewoon', 'r_past'], c16: ['r_now'], c17: ['sewoon', 'r_year'], c18: ['month'] };
   var MAKE = { strong: strongScene, weak: weakScene, money: moneyScene, daewoon: daewoonScenes, sewoon: sewoonScenes, month: monthScenes };
+  ['child', 'love', 'spouse', 'work', 'money', 'people', 'shadow', 'past', 'now', 'year'].forEach(function (k) { MAKE['r_' + k] = function (sd, vars) { return realityScenes(k, sd, vars); }; });
   function chapterScenes(base, sd, vars) {
     var out = []; (INSERT[base] || []).forEach(function (k) { out = out.concat(MAKE[k](sd, vars)); });
     return out;

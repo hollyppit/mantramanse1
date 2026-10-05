@@ -21,7 +21,7 @@
   var level = function () { return ducked ? 0.05 : VOL; }; // 영상 소리를 켜면 배경음악을 낮춘다
   function duck(on) { ducked = !!on; if (cur) fade(cur, level(), 400); }
   function play(mood) {
-    want = mood || want; var url = map[want] || map['default'] || map.minimal || map.ambient || ''; // 그 분위기 음원 → 기본 음원 → 미니멀 → 앰비언트 if (!root.Audio || !url || muted) { return; }
+    want = mood || want; var url = map[want] || map['default'] || map.minimal || map.ambient || ''; /* 그 분위기 음원 → 기본 음원 → 미니멀 → 앰비언트 */ if (!root.Audio || !url || muted) { return; }
     if (cur && curMood === url) { if (cur.paused) { var pr = cur.play(); if (pr && pr.catch) pr.catch(function () { }); } return; }
     var next = new Audio(url); next.loop = true; next.volume = 0; next.preload = 'auto'; var old = cur; cur = next; curMood = url;
     var p = next.play(); if (p && p.catch) p.catch(function () { /* 자동재생 차단: ♪ 버튼으로 켠다 */ });
