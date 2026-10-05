@@ -21,6 +21,42 @@
   add('action', 'action_reflect', '선택 기준을 글로 적어 보세요', '전환의 시기에는 무엇을 남기고 버릴지 기준을 적어 두면 흔들림이 줄어듭니다.', ['reflection', 'choice', 'transition'], {}, 70, { check: '남길 것·버릴 것 3가지씩 적기' });
   add('action', 'action_restraint', '결정 전에 한 번 더 들어 보세요', '주도하는 힘이 큰 구조일수록 의견을 구하고 결정하면 실수가 줄어듭니다.', ['listening', 'restraint'], { strength: ['신강'] }, 55, { check: '중요한 결정 전 한 사람에게 의견 묻기' });
   add('action', 'action_support', '도움을 청하고 곁을 고르세요', '혼자 해결하려 하기보다 도움을 주는 사람·환경을 먼저 갖추는 것이 힘이 됩니다.', ['support', 'connection'], { strength: ['신약'] }, 55, { check: '도움을 청할 사람 1명에게 연락하기' });
+  // 챕터 주제 전용 행동: extra.chapters 에 적힌 챕터에서만 보인다(챕터마다 서로 다른 행동이 나오게 하는 풀). 일반 행동은 한 리포트에서 한 번만 쓰인다(compose.js).
+  add('action', 'ch_c01_name', "내 일주의 장점을 한 줄로 적어 두세요", "남이 알아봐 준 나의 장점을 한 문장으로 적어 두면, 흔들릴 때 기준점이 됩니다.", ["reflection","foundation"], {}, 72, { chapters: ['c01'], check: "나의 장점 한 문장 적기" });
+  add('action', 'ch_c01_ask', "가까운 두 사람에게 나의 첫인상을 물어보세요", "내가 모르는 나의 결을 아는 가장 빠른 방법입니다. 들은 말은 반박하지 말고 그대로 적어 보세요.", ["connection","listening"], {}, 72, { chapters: ['c01'], check: "가까운 사람 2명에게 첫인상 묻기" });
+  add('action', 'ch_c02_balance', "적은 기운을 채우는 습관 하나를 정하세요", "내 오행에서 적은 기운과 어울리는 색·활동·장소 중 하나를 일상에 한 가지만 넣어 보세요.", ["foundation","organize"], {}, 72, { chapters: ['c02'], check: "일상에 넣을 습관 1가지 정하기" });
+  add('action', 'ch_c02_excess', "넘치는 기운은 쓰는 통로를 정해 주세요", "많은 기운은 쏠리면 피로가 됩니다. 운동·글쓰기·대화처럼 내보내는 시간을 주 2회 정해 두세요.", ["recovery","restraint"], {}, 72, { chapters: ['c02'], check: "주 2회 에너지 쓰는 시간 정하기" });
+  add('action', 'ch_c03_trigger', "내가 발끈하는 상황 세 가지를 적어 보세요", "반응이 큰 순간을 알아 두면 같은 자리에서 덜 넘어집니다.", ["reflection"], {}, 72, { chapters: ['c03'], check: "발끈했던 상황 3가지 적기" });
+  add('action', 'ch_c03_pause', "반응하기 전 숨 한 번, 하루 한 번 연습하세요", "타고난 성향은 바꾸기 어렵지만 반응 속도는 조절할 수 있습니다. 답장·결정 직전에 한 번 멈추는 연습입니다.", ["restraint","reflection"], {}, 72, { chapters: ['c03'], check: "오늘 답장 전 숨 한 번 쉬기" });
+  add('action', 'ch_c04_small', "쓰지 않은 재능을 작게 한 번 시험해 보세요", "큰 결심 대신 이번 달 안에 보여 줄 수 있는 결과물 하나로 시작해 보세요.", ["output","execution"], {}, 72, { chapters: ['c04'], check: "이번 달 결과물 하나 만들기" });
+  add('action', 'ch_c04_praise', "칭찬받은 일을 기록해 모아 보세요", "내가 쉽게 하는데 남은 어려워하는 일에 재능이 숨어 있는 경우가 많습니다.", ["reflection","learning"], {}, 72, { chapters: ['c04'], check: "최근 칭찬받은 일 3가지 적기" });
+  add('action', 'ch_c05_guard', "반복되는 실수에 안전장치 하나를 만드세요", "의지 대신 장치가 막아 줍니다. 알림·체크리스트·확인할 사람 중 하나면 충분합니다.", ["protect","organize"], {}, 72, { chapters: ['c05'], check: "반복 실수 1가지에 장치 붙이기" });
+  add('action', 'ch_c05_tell', "약점을 아는 사람 한 명에게 먼저 말해 두세요", "약점을 숨길수록 크게 터집니다. 믿는 사람에게 미리 말해 두면 부딪힐 일이 줄어듭니다.", ["support","connection"], {}, 72, { chapters: ['c05'], check: "약점을 알려 줄 사람 1명 정하기" });
+  add('action', 'ch_c06_role', "힘이 나는 일과 빠지는 일을 나눠 적어 보세요", "지금 하는 일을 쪼개 어떤 부분에서 힘이 나고 어디서 빠지는지 표시하면 방향이 보입니다.", ["organize","reflection"], {}, 72, { chapters: ['c06'], check: "일을 힘나는 것·빠지는 것으로 나누기" });
+  add('action', 'ch_c06_probe', "관심 직무의 사람 한 명을 만나 보세요", "상상 대신 하루 일과를 직접 물어보면 맞는지 아닌지 빨리 알 수 있습니다.", ["connection","learning"], {}, 72, { chapters: ['c06'], check: "관심 분야 사람 1명에게 연락하기" });
+  add('action', 'ch_c07_pattern', "잘됐던 일의 공통점 세 가지를 찾아보세요", "성공을 새로 만들기보다 이미 성공한 방식을 찾아 반복하는 편이 빠릅니다.", ["reflection","execution"], {}, 72, { chapters: ['c07'], check: "잘된 일 3개의 공통점 적기" });
+  add('action', 'ch_c07_time', "성과가 나는 시간대에 중요한 일을 두세요", "집중이 잘되는 시간을 알아내 가장 어려운 일을 그때 배치해 보세요.", ["execution","organize"], {}, 72, { chapters: ['c07'], check: "가장 집중되는 시간대 찾기" });
+  add('action', 'ch_c08_leak', "새는 돈 한 가지를 찾아 막으세요", "큰 절약보다 자동 결제·충동 구매 같은 새는 곳 하나를 막는 것이 오래 갑니다.", ["protect","organize"], {}, 72, { chapters: ['c08'], check: "이번 달 새는 돈 1가지 찾기" });
+  add('action', 'ch_c08_fixed', "수입이 들어오는 날 먼저 떼어 둘 금액을 정하세요", "남는 돈을 모으려 하면 남지 않습니다. 들어오는 날 먼저 나눠 두는 규칙이 필요합니다.", ["accumulate","protect"], {}, 72, { chapters: ['c08'], check: "먼저 떼어 둘 금액 정하기" });
+  add('action', 'ch_c09_pattern', "지난 연애에서 반복된 장면 하나를 적어 보세요", "매번 비슷한 이유로 어긋났다면 상대가 아니라 나의 패턴일 수 있습니다.", ["reflection"], {}, 72, { chapters: ['c09'], check: "반복된 다툼·이별 이유 한 줄 적기" });
+  add('action', 'ch_c09_first', "부담 적은 한 문장을 먼저 건네 보세요", "큰 고백 대신 안부나 칭찬 한 문장이 문을 여는 데 더 낫습니다.", ["connection","output"], {}, 72, { chapters: ['c09'], check: "관심 가는 사람에게 가벼운 한 문장 보내기" });
+  add('action', 'ch_c10_must', "양보할 수 없는 것과 양보할 수 있는 것을 적으세요", "오래 가는 관계에서는 기준을 서로 모르는 것이 가장 큰 마찰이 됩니다. 각각 세 가지씩 적어 보세요.", ["choice","reflection"], {}, 72, { chapters: ['c10'], check: "양보 불가 3가지·가능 3가지 적기" });
+  add('action', 'ch_c10_talk', "돈·살림·가족 같은 현실 주제를 미리 꺼내 보세요", "분위기가 좋을 때 가볍게 한 번 꺼내 두면 나중에 큰 싸움이 줄어듭니다.", ["listening","connection"], {}, 72, { chapters: ['c10'], check: "현실 주제 하나 가볍게 이야기해 보기" });
+  add('action', 'ch_c11_circle', "연락하는 사람을 힘나는 쪽·빠지는 쪽으로 나눠 보세요", "모든 관계에 같은 에너지를 쓸 수는 없습니다. 시간 배분을 정하면 덜 지칩니다.", ["organize","protect"], {}, 72, { chapters: ['c11'], check: "자주 보는 사람 5명 분류해 보기" });
+  add('action', 'ch_c11_no', "거절 문장 하나를 미리 준비해 두세요", "그 자리에서 말이 안 나오는 사람일수록 미리 정한 한 문장이 도움이 됩니다.", ["restraint","protect"], {}, 72, { chapters: ['c11'], check: "나만의 거절 문장 정해 두기" });
+  add('action', 'ch_c12_style', "서로의 속도를 비교해 말해 보세요", "결정·연락·휴식의 속도가 다르다는 것을 말로 확인하면 오해가 줄어듭니다.", ["listening","connection"], {}, 72, { chapters: ['c12'], check: "가까운 사람과 연락·휴식 방식 비교하기" });
+  add('action', 'ch_c12_repair', "다툰 뒤 먼저 쓸 화해 문장을 정해 두세요", "자존심이 앞설 때를 대비해 미리 정해 둔 한 문장이 관계를 살립니다.", ["restraint","connection"], {}, 72, { chapters: ['c12'], check: "화해 첫 문장 정해 두기" });
+  add('action', 'ch_c13_story', "가족에게 어린 시절 이야기 하나를 물어보세요", "내가 기억하지 못하는 시절을 들으면 지금의 습관이 어디서 왔는지 보입니다.", ["connection","listening"], {}, 72, { chapters: ['c13'], check: "가족에게 어릴 적 이야기 묻기" });
+  add('action', 'ch_c13_keep', "물려받은 습관 중 이어 갈 것과 내려놓을 것을 정하세요", "뿌리에서 온 것을 모두 지고 갈 필요는 없습니다. 하나씩만 골라 보세요.", ["reflection","choice"], {}, 72, { chapters: ['c13'], check: "이어 갈 것 1개·내려놓을 것 1개 적기" });
+  add('action', 'ch_c14_theme', "반복해서 끌리는 이야기·장소·일을 적어 보세요", "이유 없이 끌리는 것은 내가 오래 가진 주제일 수 있습니다. 목록으로 모아 보세요.", ["reflection"], {}, 72, { chapters: ['c14'], check: "계속 끌리는 것 3가지 적기" });
+  add('action', 'ch_c15_timeline', "지난 10년마다 큰 일을 한 줄씩 적어 보세요", "지나온 대운과 실제 기억을 나란히 놓으면 내 흐름의 결이 보입니다.", ["reflection","learning"], {}, 72, { chapters: ['c15'], check: "10년 단위 사건 한 줄씩 적기" });
+  add('action', 'ch_c15_next', "다음 10년에 쌓고 싶은 것 하나를 정하세요", "대운은 10년 단위입니다. 하나만 정해도 방향이 잡힙니다.", ["foundation","accumulate"], {}, 72, { chapters: ['c15'], check: "다음 10년 키워드 한 단어 정하기" });
+  add('action', 'ch_c16_stop', "지금 멈출 것 하나, 시작할 것 하나를 정하세요", "현재의 계절에서는 더하기보다 바꾸기가 먼저입니다.", ["organize","transition"], {}, 72, { chapters: ['c16'], check: "멈출 것 1개·시작할 것 1개 정하기" });
+  add('action', 'ch_c16_decide', "큰 결정은 한 주 미루고 기준부터 적으세요", "흐름이 바뀌는 때일수록 결정보다 기준을 먼저 적는 것이 안전합니다.", ["restraint","choice"], {}, 72, { chapters: ['c16'], check: "결정 기준 3가지 적기" });
+  add('action', 'ch_c17_word', "올해의 한 단어를 정해 눈에 보이는 곳에 두세요", "올해 흐름을 한 단어로 줄이면 선택이 쉬워집니다.", ["choice","organize"], {}, 72, { chapters: ['c17'], check: "올해 한 단어 정해 붙여 두기" });
+  add('action', 'ch_c17_quarter', "분기마다 점검 날짜를 미리 잡으세요", "해가 반쯤 지나면 흐름이 달라집니다. 점검일을 먼저 달력에 넣으세요.", ["reflection","organize"], {}, 72, { chapters: ['c17'], check: "분기 점검일 3개 달력에 넣기" });
+  add('action', 'ch_c18_peak', "좋은 달과 조심할 달에 할 일을 미리 적어 두세요", "좋은 달에는 시작할 일을, 조심할 달에는 쉴 일과 줄일 일을 미리 정해 둡니다.", ["organize","choice"], {}, 72, { chapters: ['c18'], check: "좋은 달·조심할 달 할 일 한 줄씩 적기" });
+  add('action', 'ch_c18_month', "이번 달 한 줄 목표를 적으세요", "열두 달을 한꺼번에 다루지 말고, 이번 달 한 가지에만 집중해 보세요.", ["execution","organize"], {}, 72, { chapters: ['c18'], check: "이번 달 한 줄 목표 적기" });
 
   /* 행동 개운법 중 "운동·활동" 종류 (extra.kind='exercise'): 건강 처방이 아니라 활동 추천 */
   var EX = [

@@ -102,12 +102,13 @@
     return { term: key, hanja: t.hanja, here: here, plain: t.plain, analogy: t.analogy || '' };
   }
   // out: 챕터 결과(headline·interpretation·meaning·details·topics). 반환: 최대 n 개
-  function forChapter(out, sd, n) {
+  // seen: 리포트 전체에서 이미 풀이한 용어 모음. 한 번 설명한 용어는 다시 설명하지 않고, 새로 풀이한 용어는 seen 에 기록한다.
+  function forChapter(out, sd, n, seen) {
     n = n || 3; var base = out.base || out.id, text = [out.headline, out.interpretation, out.meaning].concat((out.details || []).map(function (d) { return [d.headline, d.summary, d.detail].join(' '); }), (out.topics || []).map(function (c) { return [c.headline, c.summary].join(' '); })).join(' ');
     var found = KEYS.filter(function (k) { return k.length >= 2 && text.indexOf(k) >= 0; }), keys = [];
-    var push = function (k) { k = resolve(k, sd); if (k && T[k] && keys.indexOf(k) < 0) keys.push(k); };
+    var push = function (k) { k = resolve(k, sd); if (k && T[k] && keys.indexOf(k) < 0 && !(seen && seen[k])) keys.push(k); };
     found.forEach(push); (DEFAULT[base] || []).forEach(push);
-    return keys.slice(0, n).map(function (k) { return explain(k, sd); }).filter(function (x) { return x && (x.here || x.plain); });
+    return keys.slice(0, n).map(function (k) { return explain(k, sd); }).filter(function (x) { return x && (x.here || x.plain); }).map(function (x) { if (seen) seen[x.term] = 1; return x; });
   }
   R.Terms = { KEYS: KEYS, DEFAULT: DEFAULT, explain: explain, forChapter: forChapter, ELN: ELN };
 })(typeof window !== 'undefined' ? window : globalThis);

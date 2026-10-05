@@ -62,6 +62,7 @@
       var c5 = Rules.pick(lib.modules, facts, 1, { categories: ['shadow'] })[0];
       vparts = { blocked: vc, c05: c5 ? view(c5, v) : null, plan: plan };
     }
+    var actLib = (lib.remedies || []).filter(function (it) { return it.type === 'action' && it.enabled !== false && !Remedy.isExercise(it) && Rules.evaluate(it, facts).match; }), usedAct = {}, seenTerms = {};
     var ctx = { usedIds: [], prevChapter: [] }, chapters = [], media = lib.media || lib.media || [], lastAct = 0, dirState = { four: 0 };
 
     cfg.chapters.forEach(function (ch) {
@@ -98,14 +99,15 @@
         out.needs = nd;
         out.action = (rec.action || []).map(function (c) { return c.item.title; });
       } else {
-        var ai = (picks[0] && picks[0].mod.actionTags || []).length ? actionItems(picks[0].mod.actionTags, rec) : [];
+        var ai = actionItems(ch.base || ch.id, (picks[0] && picks[0].mod.actionTags) || [], actLib, nd, usedAct, rec);
         out.action = ai.map(function (x) { return x.title; }); out.actionNotes = ai.map(function (x) { return x.summary || ''; });
+        out.actionPool = out.action.slice();
       }
       if (ch.kind === 'summary') out.plan = plan;
 
       // 챕터별 주제 카드(흥미 카테고리)와 쉬운 용어 풀이 — 계산 결과(facts)로 고른 모듈 문장 + 용어 사전(terms.js)
       out.topics = R.Topics ? R.Topics.pick(lib.modules, facts, out.base, function (p) { return view(p, v); }) : [];
-      out.terms = R.Terms && ch.kind !== 'verdict' ? R.Terms.forChapter(out, sd, 3) : [];
+      out.terms = R.Terms && ch.kind !== 'verdict' ? R.Terms.forChapter(out, sd, 3, seenTerms) : [];
 
       // Scene 시퀀스: Scene Intent → 미디어 후보 검색/점수 → 선택. 미디어가 없어도 scene 은 텍스트만으로 완성된다(UI 가 자리표시 장면).
       out.scenes = R.Scenes.buildChapterScenes(out, sd, media, ctx);
@@ -133,9 +135,17 @@
       acts: cfg.acts, chapters: chapters, remedies: rec, plan: plan, summary: summary, needs: nd, facts: facts };
   }
 
-  function actionItems(tags, rec) { // 태그가 겹치는 행동을 먼저, 모자라면 상위 추천으로 채워 항상 3개 이상(가능하면 4개)
-    var all = (rec.action || []).map(function (c) { return c.item; }), out = all.filter(function (it) { return (it.tags || []).some(function (t) { return tags.indexOf(t) >= 0; }); }).slice(0, 4);
-    all.forEach(function (it) { if (out.length < 4 && out.indexOf(it) < 0) out.push(it); });
+  // 챕터 주제에 맞는 행동만 고른다. ① 이 챕터 전용(extra.chapters) 행동을 우선 ② 그 챕터 모듈의 actionTags 와 겹치는 일반 행동은 한 리포트에서 한 번만.
+  // 모자라면 채우지 않는다 — 다른 챕터와 같은 행동이 반복되는 것보다 적게 보이는 편이 낫다. used 는 리포트 전체에서 공유한다.
+  function actionItems(base, tags, pool, nd, used, rec) {
+    var keep = {}; ((rec && rec.action) || []).forEach(function (c) { keep[c.item.id] = 1; }); // 개운법 장(c19)에서 쓰는 행동은 다른 챕터가 가져가지 않는다
+    var w = (nd && nd.weights) || {}, sc = function (it) { var s = 0; (it.tags || []).forEach(function (g) { s += (w[g] || 0) + (tags.indexOf(g) >= 0 ? 2 : 0); }); return s * 10 + (+it.priority || 0) / 100; };
+    var by = function (a, b) { return sc(b) - sc(a) || (a.id < b.id ? -1 : 1); };
+    var out = pool.filter(function (it) { return it.extra && it.extra.chapters && it.extra.chapters.indexOf(base) >= 0 && !used[it.id]; }).sort(by).slice(0, 2);
+    if (out.length < 3) {
+      pool.filter(function (it) { return !(it.extra && it.extra.chapters) && !used[it.id] && !keep[it.id] && (it.tags || []).some(function (g) { return tags.indexOf(g) >= 0; }); }).sort(by).slice(0, 3 - out.length).forEach(function (it) { out.push(it); });
+    }
+    out.forEach(function (it) { used[it.id] = 1; });
     return out;
   }
   function actionsForTags(tags, rec) { // 모듈 actionTags 와 추천 행동의 태그가 겹치는 행동 제목 (없으면 상위 추천 1개)

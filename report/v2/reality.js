@@ -124,7 +124,9 @@
       var tail = past ? '이성과 가까워져 연애나 결혼 같은 변화를 겪었을 가능성이 있다.' : cur ? '이성과 가까워지기 쉬운 흐름 한가운데에 있을 수 있다.' : '이성과 가까워질 기회가 열릴 수 있다.';
       res.push({ at: y1, text: from + '~' + to + '세 무렵(' + y1 + '~' + y2 + '년)에는 ' + tail, past: past });
     });
-    return res.sort(function (x, y) { return (y.past - x.past) || (x.past ? y.at - x.at : x.at - y.at); }).map(function (x) { return x.text; });
+    // 가장 최근에 지난 시기 1개 + 지금 + 다가오는 첫 시기만 말한다(먼 미래까지 늘어놓지 않는다)
+    var pa = res.filter(function (x) { return x.past; }).sort(function (x, y) { return y.at - x.at; }).slice(0, 1), rest = res.filter(function (x) { return !x.past; }).sort(function (x, y) { return x.at - y.at; }).slice(0, 2);
+    return pa.concat(rest).map(function (x) { return x.text; });
   }
 
   /* ── 3. 배우자 자리 (일지) ── */
