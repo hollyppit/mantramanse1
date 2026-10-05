@@ -62,7 +62,7 @@ function cleanFlow(f) {
     auto: f.auto !== false, speed: n(f.speed, 10, 400, 55), startDelay: n(f.startDelay, 0, 10, 1.5), stopAtChoice: f.stopAtChoice !== false, resumeAfter: n(f.resumeAfter, 0, 60, 0), btnShow: f.btnShow !== false, btnPos: ['right', 'center', 'left'].includes(f.btnPos) ? f.btnPos : 'right' };
 }
 // 배경 음악: 분위기별 음원 주소(내 R2 업로드 또는 https). 7종 밖의 키·허용 밖 주소는 버린다.
-const BGM_MOODS = ['cinematic', 'minimal', 'ambient', 'emotional', 'tension', 'hopeful', 'reflective'];
+const BGM_MOODS = ['default', 'cinematic', 'minimal', 'ambient', 'emotional', 'tension', 'hopeful', 'reflective'];
 function cleanBgm(b) { const o = {}; if (!b || typeof b !== 'object') return o; for (const k of BGM_MOODS) if (MEDIA_OK.test(b[k] || '')) o[k] = b[k]; return o; }
 function cleanScoring(s) {
   const o = {}; if (!s || typeof s !== 'object') return o;
