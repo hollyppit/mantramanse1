@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var preview = /[?&]preview=1\b/.test(location.search); // 관리자 미리보기 창에서는 인트로를 건너뛴다
+  var preview = /[?&]preview=1\b/.test(location.search) || (/[?&]g=[^&]+/.test(location.search) && /[?&]s=[MF]\b/.test(location.search)); // 관리자 미리보기·공유 링크로 들어온 경우에는 인트로를 건너뛴다
   {
     if (reduce || preview) return;
     try { if (sessionStorage.getItem('mt_intro') === '1') return; } catch (e) {}

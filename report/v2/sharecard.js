@@ -51,10 +51,11 @@
           if (!b) return rej(new Error('카드를 만들지 못했습니다.'));
           var url = URL.createObjectURL(b), file = new File([b], 'mantra-card.png', { type: 'image/png' }), dlg = document.createElement('dialog');
           dlg.style.cssText = 'border:1px solid #9A8250;border-radius:16px;background:#0D1120;color:#EDE8DC;padding:16px;max-width:92vw;width:380px';
-          dlg.innerHTML = '<img src="' + url + '" alt="공유 카드 미리보기" style="width:100%;border-radius:10px;display:block"><div style="display:grid;gap:8px;margin-top:12px"><button type="button" id="scShare" class="btn gold big">공유하기</button><button type="button" id="scSave" class="btn big">이미지 저장</button><button type="button" id="scClose" class="btn">닫기</button></div><p style="font-size:.74rem;color:#8A8678;margin:10px 0 0;text-align:center">생년월일·이름은 카드에 들어가지 않습니다.</p>';
+          dlg.innerHTML = '<img src="' + url + '" alt="공유 카드 미리보기" style="width:100%;border-radius:10px;display:block"><div style="display:grid;gap:8px;margin-top:12px"><button type="button" id="scShare" class="btn gold big">공유하기</button><button type="button" id="scSave" class="btn big">이미지 저장</button><button type="button" id="scLink" class="btn big">공유 링크 복사</button><button type="button" id="scClose" class="btn">닫기</button></div><p style="font-size:.74rem;color:#8A8678;margin:10px 0 0;text-align:center">생년월일·이름은 카드에 들어가지 않습니다.</p>';
           document.body.appendChild(dlg); dlg.showModal();
           var close = function () { dlg.close(); dlg.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 30000); };
           dlg.querySelector('#scClose').onclick = close;
+          dlg.querySelector('#scLink').onclick = function () { var u = R.Free ? R.Free.shareUrl(sd, location.origin) : ''; (R.Free ? R.Free.copy(u) : Promise.reject()).then(function () { dlg.querySelector('#scLink').textContent = '링크를 복사했습니다'; if (R.Analytics) R.Analytics.trackEvent('guardian_shared', { from: 'card' }); }).catch(function () { dlg.querySelector('#scLink').textContent = u || '복사하지 못했습니다'; }); }; // 링크에는 일주·성별만 들어간다
           dlg.querySelector('#scSave').onclick = function () { var a = document.createElement('a'); a.href = url; a.download = file.name; document.body.appendChild(a); a.click(); a.remove(); };
           dlg.querySelector('#scShare').onclick = function () { if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: '나의 사주 무빙툰' }).catch(function () { }); else dlg.querySelector('#scSave').click(); };
           res();

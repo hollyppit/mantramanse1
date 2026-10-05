@@ -303,6 +303,7 @@
           try { ch = M().compute(inp); } catch (err) { msg.textContent = (err && err.message) || '입력을 확인해 주세요.'; return; }
           S.chart = ch; S.name = String(f.name.value || '').trim().slice(0, 20);
           track('saju_analysis_completed', { interest: S.interest || '', hour_known: hasT }); // 생년월일 등 개인정보는 보내지 않는다
+          if (S.shared) track('shared_link_converted', { gender: inp.gender }, true); // 공유 링크로 들어온 사람이 입력을 마침
           // 새 20챕터 리포트(/report/v2/)로 이어가기: 입력값은 이 탭의 sessionStorage 로만 넘기고(서버 전송 없음) 이동한다. 설정이 꺼져 있거나 ?v2=0 이면 기존 화면을 그대로 쓴다.
           var v2 = C.settings && C.settings.v2;
           if (v2 && v2.handoff && !/[?&]v2=0\b/.test(location.search) && !PREVIEW && /^\/[\w\-./]*$/.test(v2.url || '/report/v2/')) {
@@ -870,9 +871,44 @@
   }
   var bound = false;
   function bind0(host) { if (!bound) { bound = true; bind(host); } }
+  // 공유 링크(/report/?g=갑자&s=M): 입력 폼보다 먼저 그 수호신의 각성 영상(없으면 이미지·한자)을 보여 주고, 끝에 '나의 수호신 찾기'로 사주 입력에 보낸다. 링크에는 일주·성별만 있다.
+  function parseShared() {
+    if (!DOC) return null; var q = new URLSearchParams(location.search), g = q.get('g'), s = q.get('s');
+    if (!g || !/^[갑을병정무기경신임계][자축인묘진사오미신유술해]$/.test(g) || !/^[MF]$/.test(s || '')) return null;
+    if ('갑을병정무기경신임계'.indexOf(g[0]) % 2 !== '자축인묘진사오미신유술해'.indexOf(g[1]) % 2) return null; // 60갑자만
+    return { g: g, s: s };
+  }
+  function maybeShared() {
+    var sh = parseShared(); if (!sh || S.shared || PREVIEW) return; S.shared = sh;
+    track('shared_link_opened', { gender: sh.s }, true); // 일주는 보내지 않는다
+    var si = '갑을병정무기경신임계'.indexOf(sh.g[0]), hanja = '甲乙丙丁戊己庚辛壬癸'[si] + '子丑寅卯辰巳午未申酉戌亥'[ '자축인묘진사오미신유술해'.indexOf(sh.g[1]) ], col = EL_COLORS[si >> 1];
+    var box = document.createElement('div'); box.id = 'shared'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', '수호신'); box.style.setProperty('--gc', col);
+    box.innerHTML = '<div class="sh-media" id="shMedia"></div><div class="sh-shade" aria-hidden="true"></div><button type="button" class="sh-skip" id="shSkip">SKIP ›</button><div class="sh-cap"><div class="t" id="shT">' + esc(sh.g) + '일주</div></div><button type="button" class="btn big" id="shGo" hidden>나의 수호신 찾기</button>';
+    document.body.appendChild(box); document.documentElement.style.overflow = 'hidden';
+    var m = box.querySelector('#shMedia'), go = box.querySelector('#shGo'), sk = box.querySelector('#shSkip'), done = false;
+    function ready() { if (done) return; done = true; sk.hidden = true; go.hidden = false; try { go.focus({ preventScroll: true }); } catch (e) { } }
+    function fallbackFig(u) { // 이미지(실루엣→밝아짐) 또는 오행 색 그라데이션 + 한자
+      if (u) { var im = new Image(); im.className = 'sh-img'; im.alt = sh.g + '일주 수호신'; im.onload = function () { m.innerHTML = ''; m.appendChild(im); void im.offsetWidth; setTimeout(function () { im.classList.add('on'); }, 60); setTimeout(ready, REDUCE ? 400 : 2600); }; im.onerror = function () { fallbackFig(''); }; im.src = u; return; }
+      m.innerHTML = '<div class="sh-fb" role="img" aria-label="' + esc(sh.g) + '일주"><span>' + esc(hanja) + '</span></div>'; setTimeout(ready, 1500);
+    }
+    sk.onclick = function () { var v = m.querySelector('video'); if (v) v.pause(); ready(); };
+    go.onclick = function () { box.remove(); document.documentElement.style.overflow = ''; scrollToId('sajuInput'); };
+    fetch('/api/awakening?pillar=' + encodeURIComponent(sh.g) + '&gender=' + sh.s).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      var v = d && d.video, cap = box.querySelector('#shT'), R0 = C.result || {};
+      if (v && v.title && cap) cap.textContent = String(R0.guardianTitle || '{pillar}일주 · {title}').replace('{pillar}', sh.g).replace('{title}', v.title);
+      var vu = v && (media(v.videoUrl) || media(v.videoWebm)), img = media(v && (v.guardianImageUrl || v.posterUrl));
+      if (!vu || saveDataOn()) { fallbackFig(img); return; }
+      var el = document.createElement('video'); el.muted = true; el.defaultMuted = true; el.playsInline = true; el.setAttribute('playsinline', ''); el.autoplay = true; el.preload = 'auto'; if (media(v.posterUrl)) el.poster = media(v.posterUrl); el.setAttribute('aria-label', sh.g + '일주 수호신 영상');
+      if (media(v.videoWebm) && el.canPlayType && el.canPlayType('video/webm')) { var s1 = document.createElement('source'); s1.src = media(v.videoWebm); s1.type = 'video/webm'; el.appendChild(s1); }
+      if (media(v.videoUrl)) { var s2 = document.createElement('source'); s2.src = media(v.videoUrl); s2.type = /\.webm(\?|$)/.test(v.videoUrl) ? 'video/webm' : 'video/mp4'; el.appendChild(s2); }
+      m.innerHTML = ''; m.appendChild(el); el.addEventListener('ended', ready); el.addEventListener('error', function () { if (!done) { el.remove(); fallbackFig(img); } }, true);
+      var p = el.play(); if (p && p.catch) p.catch(function () { if (!done) { el.remove(); fallbackFig(img); } });
+    }).catch(function () { fallbackFig(''); });
+  }
+  function saveDataOn() { return !!(root.navigator && navigator.connection && navigator.connection.saveData); }
   function start() {
     if (started) return; started = true;
-    render(); chrome(); Auto.init();
+    render(); chrome(); Auto.init(); if (!PREVIEW) maybeShared();
     document.documentElement.classList.add('ready');
     var problems = validate(); if (DEV && problems.length && root.console) console.warn('[story] 콘텐츠 점검:\n' + problems.join('\n'));
     if (!PREVIEW) track('onboarding_started', { dev: DEV ? 1 : 0 }, true);
@@ -902,6 +938,6 @@
       .catch(function () { clearTimeout(timer); start(); });
   }
 
-  root.Story = { potential: potential, potentialLine: potentialLine, POTENTIAL: POTENTIAL, validate: validate, track: track, pick: pick, media: media, fmt: fmt, BLOCKS: BLOCKS, COMPONENTS: COMPONENTS, state: S };
+  root.Story = { parseShared: parseShared, potential: potential, potentialLine: potentialLine, POTENTIAL: POTENTIAL, validate: validate, track: track, pick: pick, media: media, fmt: fmt, BLOCKS: BLOCKS, COMPONENTS: COMPONENTS, state: S };
   if (DOC) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot(); }
 })(typeof window !== 'undefined' ? window : globalThis);

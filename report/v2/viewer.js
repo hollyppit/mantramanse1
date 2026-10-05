@@ -47,12 +47,13 @@
     var sd; try { sd = R.SajuData.build(ch, { now: Date.now() }); } catch (e) { clearInterval(tick); view('input'); $('#msg').textContent = '계산 결과를 정리하지 못했습니다.'; return; }
     S.sd = sd; var t0 = Date.now();
     // 서버 저장본(콘텐츠·미디어·각성 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
-    Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender)]).then(function (a) {
+    Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story')]).then(function (a) {
       var wait = Math.max(0, 2600 - (Date.now() - t0));
       return new Promise(function (ok) { setTimeout(function () { ok(a); }, wait); });
     }).then(function (a) {
       S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
       S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg); S.awk = a[2] || {};
+      S.story = R.Free.mergeStory(window.OnboardingContent, a[3] && a[3].story); // 무료 결과 문구·잠금 목록·결제 버튼은 온보딩 설정과 같은 값을 쓴다
       return aiCompose().then(function () { return a; });
     }).then(function () {
       clearInterval(tick);
@@ -84,12 +85,13 @@
     function finish(kind) {
       if (done) return; done = true; skip.hidden = true; snd.hidden = true;
       if (kind === 'completed') T(ev + '_video_completed', { fallback: fb }); else if (kind === 'skipped') T(ev + '_video_skipped', { fallback: fb });
-      if (cfg.auto) { cfg.onDone(kind); return; } // 일간 소개: 끝나면 바로 일주 각성으로
+      if (cfg.auto || cfg.free) { cfg.onDone(kind); return; } // 일간 소개: 바로 일주 각성으로 · 무료 사용자: '시작' 버튼 대신 무료 결과 화면으로
       start.hidden = false; start.focus({ preventScroll: true });
     }
     function still() { // 영상이 없거나 재생이 막힌 경우: (일주 각성) poster/수호신 이미지 + 문구로 진행, (일간 소개) 건너뜀
       if (cfg.auto) { done = true; cfg.onDone('missing'); return; }
-      var img = cfg.guardian || poster; box.innerHTML = img ? '<img src="' + esc(img) + '" alt="' + esc(title) + '">' : '<div class="ph" style="--pc:' + EL_COLOR[elKey(sd.dayMaster.el)] + '"></div>';
+      var img = cfg.guardian || poster; box.innerHTML = img ? '<img class="sil" src="' + esc(img) + '" alt="' + esc(title) + '">' : '<div class="ph" style="--pc:' + EL_COLOR[elKey(sd.dayMaster.el)] + '"></div>';
+      var si = box.querySelector('img.sil'); if (si) { var lit = function () { void si.offsetWidth; setTimeout(function () { si.classList.add('on'); }, 60); }; if (reduce || (si.complete && si.naturalWidth)) { si.classList.add('on'); } else { si.addEventListener('load', lit); si.addEventListener('error', function () { si.classList.add('on'); }); } } // 실루엣 → 1.2초 밝아짐
       setTimeout(function () { finish('completed'); }, 2600);
     }
     txApply(cap, '_', true); // 자막 스타일(영상 단계)
@@ -117,9 +119,22 @@
   }
   function ijuStage() { // 일주 각성 단계
     var v = S.awk && S.awk.video, sd = S.sd;
-    playStage({ kind: 'awakening', clip: v || (S.awk && S.awk.fallback), fb: !v, title: (v && v.title) || (sd.dayPillar.ko + '일주'), sub: v && v.subtitle, kw: v && v.keywords, guardian: v && v.guardianImageUrl, onDone: beginReader });
+    var free = gateOn(); // 결제 완료 사용자만 리포트로, 그 외에는 영상 뒤에 무료 결과 화면
+    playStage({ kind: 'awakening', clip: v || (S.awk && S.awk.fallback), fb: !v, free: free, title: (v && v.title) || (sd.dayPillar.ko + '일주'), sub: v && v.subtitle, kw: v && v.keywords, guardian: v && v.guardianImageUrl, onDone: free ? showFree : beginReader });
   }
   function awakening() { ilganStage(ijuStage); }
+
+  /* ── 3b. 무료 결과(수호신 각성 직후) ─────────────────────────────────────────
+     결제 확인: 지금 온보딩 Paywall 에는 결제 완료 상태가 없다(링크 이동 또는 출시 알림 신청). 그래서 '결제 완료'는 기기에 저장된 mt_paid=1 로만 인정하고,
+     설정(story settings.v2.gate)을 끄면 예전처럼 모두 리포트로 들어간다. 관리자 미리보기·?qa= 는 항상 통과한다. 결제 연결 시 서버 검증으로 바꿔야 한다. */
+  function isPaid() { try { return localStorage.getItem('mt_paid') === '1'; } catch (e) { return false; } }
+  function gateOn() { var v2 = S.story && S.story.settings && S.story.settings.v2; return !PREVIEW && !qa && !isPaid() && !(v2 && v2.gate === false); }
+  function showFree() {
+    var sd = S.sd, v = S.awk && S.awk.video, st = S.story || R.Free.mergeStory(window.OnboardingContent, null);
+    var info = { guardianUrl: (v && (v.guardianImageUrl || v.posterUrl)) || '', title: (v && v.title) || '' };
+    view('free'); var box = $('#v-free'); box.innerHTML = R.Free.html(sd, info, st); T('free_result_viewed', {});
+    R.Free.mount(box, { settings: st.settings, done: st.purchase && st.purchase.done, hanja: sd.dayPillar.hanja, track: T, toast: toast, shareLink: R.Free.shareUrl(sd, location.origin), onCard: function () { var C = R.ShareCard; if (C && C.create) C.create(S.rep, sd, S.awk).catch(function (e) { toast(e.message || '카드를 만들지 못했습니다.'); }); } });
+  }
   var elKey = function (k) { return { '목': 'wood', '화': 'fire', '토': 'earth', '금': 'metal', '수': 'water' }[k] || 'water'; };
 
   /* ── 4. 리포트(챕터·Scene) ──────────────────────────────────────────────── */

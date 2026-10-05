@@ -29,6 +29,21 @@ export function cleanMedia(m) {
   return o;
 }
 
+// 공개 영상 기본 주소(R2 공개 커스텀 도메인). https 주소만, 끝의 / 는 제거. 비우면 기존처럼 /api/clipfile 을 거친다.
+export function cleanPublicBase(v) {
+  const s = String(v || '').trim().replace(/\/+$/, '');
+  return s.length <= 200 && /^https:\/\/[A-Za-z0-9.-]+(:\d+)?(\/[\w.-]+)*$/.test(s) ? s : '';
+}
+// 저장된 /api/clipfile?k=<키> 주소를 공개 주소(<기본주소>/<키>)로 바꾼다. 업로드 키는 그대로 쓴다. 다른 주소는 건드리지 않는다.
+export function publicUrl(base, u) {
+  return base && typeof u === 'string' ? u.replace(/^\/api\/clipfile\?k=([\w.-]{1,120})$/, (m, k) => base + '/' + k) : u;
+}
+export function publicizeClip(base, c) {
+  if (!base || !c || typeof c !== 'object') return c;
+  const o = { ...c }; for (const f of ['videoUrl', 'videoWebm', 'posterUrl', 'guardianImageUrl', 'captionsUrl']) if (o[f]) o[f] = publicUrl(base, o[f]);
+  return o;
+}
+
 export function cleanAwakening(v) {
   if (!v || typeof v !== 'object') return null;
   const ST = '갑을병정무기경신임계', BR = '자축인묘진사오미신유술해', H1 = '甲乙丙丁戊己庚辛壬癸', H2 = '子丑寅卯辰巳午未申酉戌亥';

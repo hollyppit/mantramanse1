@@ -4,7 +4,7 @@
 // PUT  /api/awakening                      — 관리자. { videos: [...], ilgan?: [...], fallback?: {...} } 전체 저장
 // 저장: GLOSSARY_KV 'awakening:index' → { videos, ilgan, fallback }   (ilgan = 일간 소개 10일간 × 성별 = 20)
 import { json, isAdmin, configError } from '../_lib.js';
-import { cleanAwakening, cleanIlgan, normStem, MEDIA_OK } from '../_media.js';
+import { cleanAwakening, cleanIlgan, normStem, MEDIA_OK, cleanPublicBase, publicizeClip } from '../_media.js';
 
 const KEY = 'awakening:index';
 const ok = v => (MEDIA_OK.test(v || '') ? v : '');
@@ -17,7 +17,8 @@ export async function onRequestGet({ request, env }) {
   const c = cleanAwakening({ dayPillar: q.get('pillar'), gender: q.get('gender') });
   const v = c && d.videos.find(x => x.dayPillar === c.dayPillar && x.gender === c.gender && x.enabled && (x.videoUrl || x.videoWebm || x.posterUrl));
   const stem = c ? c.dayPillar[0] : normStem(q.get('pillar')), ig = stem && (d.ilgan || []).find(x => x.stem === stem && x.gender === (c ? c.gender : null) && x.enabled && (x.videoUrl || x.videoWebm));
-  return json({ video: v || null, ilgan: ig || null, fallback: d.fallback || null });
+  const base = cleanPublicBase(d.publicBase); // 설정돼 있으면 영상·이미지 주소를 R2 공개 도메인으로 바로 내보낸다(함수 호출 없이 재생)
+  return json({ video: publicizeClip(base, v) || null, ilgan: publicizeClip(base, ig) || null, fallback: publicizeClip(base, d.fallback) || null });
 }
 
 export async function onRequestPut({ request, env }) {
@@ -27,6 +28,8 @@ export async function onRequestPut({ request, env }) {
   if (!Array.isArray(b.videos) || b.videos.length > 240) return json({ error: 'videos 는 240개 이하 배열이어야 합니다' }, 400);
   const map = new Map(); for (const v of b.videos) { const c = cleanAwakening(v); if (c) map.set(c.dayPillar + c.gender, c); }
   const im = new Map(); for (const v of Array.isArray(b.ilgan) ? b.ilgan.slice(0, 40) : []) { const c = cleanIlgan(v); if (c) im.set(c.stem + c.gender, c); }
-  await env.GLOSSARY_KV.put(KEY, JSON.stringify({ videos: [...map.values()], ilgan: [...im.values()], fallback: cleanFb(b.fallback) }));
+  const prev = await env.GLOSSARY_KV.get(KEY, 'json'); // 공개 주소를 안 보낸 저장 요청은 기존 값을 유지한다
+  const publicBase = 'publicBase' in b ? cleanPublicBase(b.publicBase) : cleanPublicBase(prev && prev.publicBase);
+  await env.GLOSSARY_KV.put(KEY, JSON.stringify({ videos: [...map.values()], ilgan: [...im.values()], fallback: cleanFb(b.fallback), publicBase }));
   return json({ ok: true, count: map.size, ilgan: im.size });
 }

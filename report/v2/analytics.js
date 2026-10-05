@@ -3,7 +3,7 @@
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
   var EVENTS = ['report_started', 'ilgan_video_started', 'ilgan_video_completed', 'ilgan_video_skipped', 'awakening_video_started', 'awakening_video_completed', 'awakening_video_skipped', 'chapter_viewed', 'chapter_completed', 'detail_expanded', 'act_completed', 'report_completed',
-    'pdf_unlocked', 'pdf_downloaded', 'share_card_created', 'share_clicked', 'compatibility_cta_clicked', 'remedy_viewed', 'action_plan_viewed'];
+    'pdf_unlocked', 'pdf_downloaded', 'share_card_created', 'share_clicked', 'compatibility_cta_clicked', 'remedy_viewed', 'action_plan_viewed', 'free_result_viewed', 'purchase_clicked', 'guardian_shared'];
   var BLOCK = /^(name|birth|year|month|day|hour|minute|gender|input|dayPillar)$/i; // 개인 식별/생년월일 키는 버린다
   var session = { events: [], chapters: {}, details: 0, skipped: false, startedAt: 0 };
 
