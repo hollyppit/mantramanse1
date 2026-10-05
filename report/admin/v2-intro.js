@@ -42,19 +42,26 @@
       I.fb = d.fallback || { videoUrl: '', videoWebm: '', posterUrl: '', title: '' }; I.base = d.publicBase || ''; I.textOnly = !!d.textOnly; I.loaded = true; I.dirty = false; I.undo = null;
     });
   }
+  function normalizeDefaults() {
+    [['ilgan', I.ilgan], ['iju', I.iju]].forEach(function (p) { p[1].forEach(function (v) {
+      var r = { kind: p[0], id: p[0] === 'ilgan' ? v.stem : v.dayPillar, g: v.gender }; if (!r.id) return;
+      if (String(v.subtitle || '').trim() === defLines(r).join(String.fromCharCode(10)).trim()) v.subtitle = ''; if ((v.title || '').trim() === defTitle(r)) v.title = '';
+    }); });
+  }
   function prune(L) { return L.filter(function (v) { return hasVideo(v) || v.posterUrl || hasText(v) || v.captionsUrl; }).map(function (v) { var o = Object.assign({}, v); delete o._new; return o; }); }
   function save() {
     var b = $('[data-ivsave]', I.root); if (b) { b.disabled = true; b.textContent = '저장 중…'; }
+    normalizeDefaults();
     return C.api('/api/awakening', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ videos: prune(I.iju), ilgan: prune(I.ilgan), fallback: I.fb, publicBase: I.base, textOnly: I.textOnly }) })
       .then(function (d) { I.dirty = false; C.toast('저장했습니다 (일주 ' + d.count + '개 · 일간 ' + d.ilgan + '개)'); }).catch(function (e) { C.toast(e.message, true); dirty(true); }).then(function () { if (b) b.textContent = '저장'; draw(true); });
   }
 
   // ───────── 화면 ─────────
   var STYLE = '.iv .ivbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}.iv table.ivt{width:100%;border-collapse:collapse;font-size:.84rem}.iv .ivt th{position:sticky;top:0;background:var(--panel,#16181f);text-align:left;padding:6px;font-weight:500;color:var(--ink2,#aaa);z-index:1}' +
-    '.iv .ivt td{padding:4px 6px;border-top:1px solid var(--line,#2a2d38);vertical-align:top}.iv .ivt input[type=text],.iv .ivt textarea{width:100%;box-sizing:border-box;font:inherit;padding:4px 6px}.iv .ivt textarea{min-height:58px;resize:vertical}' +
+    '.iv .ivt td{padding:4px 6px;border-top:1px solid var(--line,#2a2d38);vertical-align:top}.iv .ivt input[type=text],.iv .ivt textarea{width:100%;box-sizing:border-box;font:inherit;padding:4px 6px}.iv .ivt textarea{min-height:92px;resize:vertical}' +
     '.iv .ivt tr.off td{opacity:.45}.iv .chip{display:inline-block;padding:0 7px;border:1px solid var(--line,#444);border-radius:999px;font-size:.7rem;margin:1px;white-space:nowrap}.iv .chip.ok{color:#7FE0BC;border-color:#2e6e57}.iv .chip.no{color:#8a8d98}' +
     '.iv .bulk{position:sticky;top:0;z-index:3;border:1px solid var(--gold,#c9a86a);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--bg,#0f1115)}.iv .bulk textarea,.iv .bulk input[type=text]{width:100%;box-sizing:border-box;font:inherit;padding:4px 6px}.iv .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}' +
-    '.iv .vl{font-size:.74rem;color:var(--ink3,#888)}.iv .stat span{margin-right:14px}';
+    '.iv .isdef{color:var(--ink3,#8a8d98)}.iv .vl{font-size:.74rem;color:var(--ink3,#888)}.iv .stat span{margin-right:14px}';
   function mount(root, pw, opts) {
     opts = opts || {}; I.root = root; I.pw = pw || I.pw; if (opts.mode) I.mode = opts.mode;
     if (!document.getElementById('ivstyle')) { var st = document.createElement('style'); st.id = 'ivstyle'; st.textContent = STYLE; document.head.appendChild(st); }
@@ -72,7 +79,7 @@
     });
     var all = rows, nv = all.filter(function (r) { return hasVideo(recOf(r)); }).length, nt = all.filter(function (r) { return hasText(recOf(r)); }).length, ns = Object.keys(I.sel).filter(function (k) { return I.sel[k] && k.split('|')[0] === I.mode; }).length;
     var opt = function (arr, v, lbl) { return '<option value="">' + lbl + '</option>' + arr.map(function (x) { return '<option' + (v === x ? ' selected' : '') + '>' + x + '</option>'; }).join(''); };
-    var h = '<div class="iv"><div class="card"><div class="ivbar"><b style="color:var(--gold)">일간·일주 소개</b><span class="muted">일간별 20개 · 일주별 120개의 영상과 문구를 한 곳에서. 비워 둔 문구는 기본 문구가 나옵니다.</span><span style="flex:1"></span>' +
+    var h = '<div class="iv"><div class="card"><div class="ivbar"><b style="color:var(--gold)">일간·일주 소개</b><span class="muted">일간별 20개 · 일주별 120개의 영상과 문구를 한 곳에서. 회색 글자는 기본 문구예요 — 그대로 고쳐 쓰면 되고, 모두 지우면 기본 문구로 돌아갑니다.</span><span style="flex:1"></span>' +
       '<button type="button" data-ivundo' + (I.undo ? '' : ' disabled') + '>되돌리기</button><button type="button" class="pri" data-ivsave' + (I.dirty ? '' : ' disabled') + '>저장</button></div>' +
       '<div class="ivbar"><div class="sub2" data-ivmode><button type="button" data-m="ilgan" class="' + (I.mode === 'ilgan' ? 'on' : '') + '">일간 소개 (10×2 = 20)</button><button type="button" data-m="iju" class="' + (I.mode === 'iju' ? 'on' : '') + '">일주 소개 (60×2 = 120)</button></div>' +
       '<span class="stat muted"><span>영상 <b>' + nv + ' / ' + all.length + '</b></span><span>문구 <b>' + nt + ' / ' + all.length + '</b></span></span><span style="flex:1"></span>' +
@@ -93,8 +100,8 @@
     list.forEach(function (r) {
       var v = recOf(r) || {}, k = keyOf(r.kind, r.id, r.g), dl = defLines(r).join('\n');
       h += '<tr data-k="' + esc(k) + '"' + (v.enabled === false ? ' class="off"' : '') + '><td><input type="checkbox" data-sel' + (I.sel[k] ? ' checked' : '') + '></td><td><b>' + esc(r.id) + (r.kind === 'ilgan' ? ELN[r.id] : '') + '</b> <span class="vl">' + GK[r.g] + '</span></td>' +
-        '<td data-vc>' + chips(v) + '</td><td><input type="text" data-fld="title" value="' + esc(v.title || '') + '" placeholder="' + esc(defTitle(r)) + '" maxlength="60"></td>' +
-        '<td><textarea data-fld="subtitle" maxlength="200" placeholder="' + esc(dl) + '">' + esc(v.subtitle || '') + '</textarea></td><td><input type="text" data-fld="keywords" value="' + esc((v.keywords || []).join(', ')) + '"></td>' +
+        '<td data-vc>' + chips(v) + '</td><td><input type="text" data-fld="title" class="' + (v.title ? '' : 'isdef') + '" value="' + esc(v.title || defTitle(r)) + '" placeholder="' + esc(defTitle(r)) + '" maxlength="60"></td>' +
+        '<td><textarea data-fld="subtitle" class="' + (v.subtitle ? '' : 'isdef') + '" maxlength="400" rows="4" placeholder="' + esc(dl) + '">' + esc(v.subtitle || dl) + '</textarea></td><td><input type="text" data-fld="keywords" value="' + esc((v.keywords || []).join(', ')) + '"></td>' +
         '<td><input type="checkbox" data-en' + (v.enabled !== false ? ' checked' : '') + '></td><td><label class="navbtn" style="cursor:pointer;font-size:.74rem">파일 선택<input type="file" data-up accept="video/mp4,video/webm,image/*" hidden></label></td></tr>';
     });
     root.innerHTML = h + '</table></div></div>';
@@ -141,7 +148,7 @@
     };
     root.oninput = function (e) {
       var t = e.target, tr = t.closest('tr[data-k]'); if (!tr || !t.matches('[data-fld]')) return; var r = rowOfKey(tr.dataset.k), v = ensure(r), k = t.dataset.fld;
-      if (k === 'keywords') v.keywords = t.value.split(',').map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 8); else v[k] = t.value; dirty(true);
+      t.classList.remove('isdef'); if (k === 'keywords') v.keywords = t.value.split(',').map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 8); else v[k] = t.value; dirty(true);
     };
   }
   function rowOfKey(k) { var p = k.split('|'); return rowsOf(p[0]).filter(function (r) { return r.id === p[1] && r.g === p[2]; })[0]; }
