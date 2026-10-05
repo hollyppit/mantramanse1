@@ -919,7 +919,7 @@ summary { cursor:pointer; padding:4px 0; }
     // 3) 문구 설정 묶음
     root.appendChild(mk('div', 'hmsec', '문구 설정 (사주 입력·결과·구매 화면 등)'));
     SCH.GROUPS.forEach(function (g) {
-      var det = mk('details', 'hmg'); if (HM.openGrp === g[0]) det.open = true;
+      var det = mk('details', 'hmg'); if (HM.openGrp === g[0] || (HM.openGrp == null && g[0] === 'cover')) det.open = true;
       det.appendChild(mk('summary', '', g[1])); det.addEventListener('toggle', function () { if (det.open) HM.openGrp = g[0]; });
       var holder = mk('div'); holder.style.padding = '2px 6px 8px';
       if (g[0] === 'interest') holder.appendChild(hmList(st, 'interests', '선택 카드', SCH.INTEREST_FIELDS));
