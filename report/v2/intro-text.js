@@ -42,5 +42,9 @@
   }
   function all60() { var o = []; STEMS.split('').forEach(function (s, i) { BR.split('').forEach(function (b, j) { if (i % 2 === j % 2) o.push(s + b); }); }); return o; }
 
-  R.IntroText = { ilgan: ilgan, iju: iju, all60: all60, STEMS: STEMS };
+  // 일간 소개 기본 제목: "기토 · 己土". 영상에 관리자가 쓴 제목이 없을 때만 쓴다.
+  var HJ = '甲乙丙丁戊己庚辛壬癸', ELH = { 목: '木', 화: '火', 토: '土', 금: '金', 수: '水' };
+  function ilganTitle(stem) { var i = STEMS.indexOf(String(stem || '')[0]), s = S[STEMS[i]]; return s ? s.name + ' · ' + HJ[i] + ELH[s.name[1]] : ''; }
+
+  R.IntroText = { ilgan: ilgan, ilganTitle: ilganTitle, iju: iju, all60: all60, STEMS: STEMS };
 })(typeof window !== 'undefined' ? window : globalThis);

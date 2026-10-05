@@ -116,14 +116,19 @@
     var ig = S.awk && S.awk.ilgan, sd = S.sd;
     var tOnly = !!(S.awk && S.awk.textOnly);
     if (!ig || !(ig.videoUrl || ig.videoWebm || (tOnly && (ig.title || ig.subtitle)))) { next(); return; }
-    playStage({ textOnly: tOnly, clip: ig, title: ig.title || (sd.dayMaster.stem + sd.dayMaster.el + '의 기질을 타고났다'), sub: ig.subtitle || introLines('ilgan'), kw: ig.keywords, onDone: next });
+    // 클립에 저장된 제목·부제가 다른 일간(예: 기토 영상에 경금 문구)을 말하면 쓰지 않고 이 사람의 일간 기본 문구로 바꾼다
+    var wrong = (ig.stem && ig.stem !== sd.dayMaster.stem) || R.Media.ilganTextMismatch(sd.dayMaster.stem, (ig.title || '') + ' ' + (ig.subtitle || '') + ' ' + (ig.keywords || []).join(' '));
+    if (wrong) T('ilgan_text_mismatch', { stem: sd.dayMaster.stem, found: typeof wrong === 'string' ? wrong : ig.stem });
+    playStage({ textOnly: tOnly, clip: ig, title: (!wrong && ig.title) || (R.IntroText && R.IntroText.ilganTitle(sd.dayMaster.stem)) || sd.dayMaster.stem + sd.dayMaster.el, sub: (!wrong && ig.subtitle) || introLines('ilgan'), kw: wrong ? [] : ig.keywords, onDone: next });
   }
   /* ── 3b. 프롤로그 → 리포트. 사용자가 곧 이야기의 주인공이다. 결제·무료 결과 화면은 두지 않는다. ── */
   function ijuStage(next) { // 일주 캐릭터 영상(60일주×성별). 없으면 기본 영상, 그것도 없으면 이 단계는 건너뛴다
     var v = S.awk && S.awk.video, fb = S.awk && S.awk.fallback, sd = S.sd, clip = v || fb;
     var tOnly = !!(S.awk && S.awk.textOnly), tx = v && (v.title || v.subtitle);
     if (!clip || !(clip.videoUrl || clip.videoWebm || (tOnly && tx))) { next(); return; }
-    playStage({ textOnly: tOnly, kind: 'iju', clip: clip, title: (v && v.title) || (sd.dayPillar.ko + '일주'), sub: (v && v.subtitle) || introLines('iju'), kw: v && v.keywords, onDone: next });
+    var wrongJ = v && R.Media.ijuTextMismatch(sd.dayPillar.ko, (v.title || '') + ' ' + (v.subtitle || ''));
+    if (wrongJ) T('iju_text_mismatch', { pillar: sd.dayPillar.ko, found: wrongJ });
+    playStage({ textOnly: tOnly, kind: 'iju', clip: clip, title: (!wrongJ && v && v.title) || (sd.dayPillar.ko + '일주'), sub: (!wrongJ && v && v.subtitle) || introLines('iju'), kw: !wrongJ && v ? v.keywords : [], onDone: next });
   }
   var withCopy = function (scenes) { return R.Translator.applyCopy(scenes, S.pack && S.pack.sceneCopy, R.Narrator.heroVars(S.sd, S.name)); }; // 관리자가 고친 문구·이름 강조(content.sceneCopy)
   // 탭해서 시작: 배경음악이 있으면 일간 소개 직전에 한 번 터치를 받는다(터치가 있어야 소리를 낼 수 있다). 음악이 없거나 꺼 둔 경우·미리보기에서는 바로 시작한다.

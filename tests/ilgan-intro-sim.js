@@ -46,6 +46,21 @@ import(url.pathToFileURL(tmp).href).then(async X => {
   await put({ videos: [{ dayPillar: '을축', gender: 'F', videoUrl: '/api/clipfile?k=zz.mp4' }, { dayPillar: '경축', gender: 'F', videoUrl: '/api/clipfile?k=bad.mp4' }], ilgan: [] });
   ok(doc.videos.length === 1 && doc.videos[0].dayPillar === '을축', '잘못된 일주(경축)는 저장에서 거부');
 
+  console.log('N. 일간·일주 문구 검사(기토 영상에 경금 문구가 붙은 경우)');
+  {
+    const vm = require('vm'); globalThis.window = globalThis; ['media', 'intro-text'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
+    const M = globalThis.ReportV2.Media, IT = globalThis.ReportV2.IntroText;
+    ok(M.ilganTextMismatch('기', '당신은 경금, 단단하게 벼려진 바위와 강철입니다.') === '경금', '기토 항목에 경금 문구 → 어긋남');
+    ok(M.ilganTextMismatch('기', '당신은 기토, 무엇이든 키워 내는 논밭의 흙입니다.') === '', '자기 일간 문구는 통과');
+    ok(M.ilganTextMismatch('기', '庚金의 기운') === '경금' && M.ilganTextMismatch('기', '己土의 기운') === '', '한자 표기도 검사');
+    ok(M.ilganTextMismatch('기', '마음을 정화하는 시간') === '', '정화(淨化) 같은 일반 단어는 일간으로 보지 않는다');
+    ok(M.ilganTextMismatch('기', '기토와 경금이 만나면') === '', '자기 일간이 함께 나오면 비교 문장으로 보고 통과');
+    ok(M.ilganTextMismatch('기', '') === '' && M.ilganTextMismatch('기', '제목 없음') === '', '일간 이름이 없는 문구는 통과');
+    ok(M.ijuTextMismatch('기사', '초여름 햇살 곁의 논밭, 경진일주입니다') === '경진일주' && M.ijuTextMismatch('기사', '기사일주입니다') === '', '일주 문구 검사');
+    ok(IT.ilganTitle('기') === '기토 · 己土' && IT.ilganTitle('경') === '경금 · 庚金' && IT.ilganTitle('계') === '계수 · 癸水', '기본 제목: 이름 · 한자');
+    '갑을병정무기경신임계'.split('').forEach(s => { const t = IT.ilganTitle(s) + ' ' + IT.ilgan(s).join(' '); ok(M.ilganTextMismatch(s, t) === '', '기본 문구는 자기 일간으로 통과: ' + s); });
+  }
+
   console.log(fails.length ? '\n실패 ' + fails.length + '건\n' + fails.map(f => ' ✗ ' + f).join('\n') : '\n모두 통과');
   process.exit(fails.length ? 1 : 0);
 });

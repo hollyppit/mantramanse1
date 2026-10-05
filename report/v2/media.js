@@ -78,5 +78,22 @@
     theme: ['career', 'wealth', 'love', 'marriage', 'relationship', 'family', 'study', 'creation', 'leadership', 'travel'],
   };
 
-  R.Media = { ILJU: ILJU, normPillar: normPillar, normGender: normGender, pickAwakening: pickAwakening, awakeningCoverage: awakeningCoverage, pickIlgan: pickIlgan, ilganCoverage: ilganCoverage, normStem: normStem, STEMS: STEMS, pickImage: pickImage, TAG_GROUPS: TAG_GROUPS };
+  // 일간 소개·일주 영상의 제목·부제가 "다른 일간"을 말하고 있는지 검사한다(관리자 입력 오류 방지: 기토 영상에 경금 문구를 붙여 넣은 경우 등).
+  //   본문에 자기 일간 이름이 없고 다른 일간 이름(경금·庚金 …)만 있으면 어긋난 문구로 본다. 반환: 어긋난 문구가 가리키는 이름 또는 ''.
+  var STEM_NAME = { 갑: '갑목', 을: '을목', 병: '병화', 정: '정화', 무: '무토', 기: '기토', 경: '경금', 신: '신금', 임: '임수', 계: '계수' }, EL_H = { 목: '木', 화: '火', 토: '土', 금: '金', 수: '水' };
+  function stemsIn(text) { // 문장에 나온 일간들(한글 이름은 앞뒤가 한글 단어가 아닐 때만: '정화하다' 같은 말은 일간이 아니다)
+    var t = String(text || ''), out = [];
+    STEMS.forEach(function (s, i) {
+      var nm = STEM_NAME[s], hj = STEM_H[i] + EL_H[nm[1]];
+      if (t.indexOf(hj) >= 0 || new RegExp('(^|[^가-힣])' + nm + '(?=$|[^가-힣]|[은는이가을를의과와도만로])').test(t)) out.push(s);
+    });
+    return out;
+  }
+  function ilganTextMismatch(stem, text) { var s = normStem(stem), f = stemsIn(text); return s && f.length && f.indexOf(s) < 0 ? STEM_NAME[f[0]] : ''; }
+  function ijuTextMismatch(pillar, text) { // 'XX일주' 로 다른 일주를 말하면 어긋난 문구
+    var p = String(pillar || '').slice(0, 2), m = String(text || '').match(/[갑을병정무기경신임계][자축인묘진사오미신유술해](?=일주)/g) || [];
+    return m.length && m.indexOf(p) < 0 ? m[0] + '일주' : '';
+  }
+
+  R.Media = { ilganTextMismatch: ilganTextMismatch, ijuTextMismatch: ijuTextMismatch, ILJU: ILJU, normPillar: normPillar, normGender: normGender, pickAwakening: pickAwakening, awakeningCoverage: awakeningCoverage, pickIlgan: pickIlgan, ilganCoverage: ilganCoverage, normStem: normStem, STEMS: STEMS, pickImage: pickImage, TAG_GROUPS: TAG_GROUPS };
 })(typeof window !== 'undefined' ? window : globalThis);
