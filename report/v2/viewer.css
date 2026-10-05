@@ -172,6 +172,7 @@ dialog#drawer { border: 0; padding: 0; background: transparent; color: var(--ink
 /* 글자(자막) 스타일: 등장·사라짐 효과, 지속 효과, 미리보기 선택 표시 (값은 관리자 "글자 편집"에서 정한다) */
 .tx-i { display: block; }
 .fact .tx-i { display: inline; }
+.tx-box > .tx-i { display: inline-block; max-width: 100%; box-sizing: border-box; }
 .tx-pend > .tx-i { opacity: 0; }
 .tx-go.tx-in-fade > .tx-i { animation: txFade var(--tx-id, .9s) ease var(--tx-il, 0s) both; }
 .tx-go.tx-in-rise > .tx-i { animation: txRise var(--tx-id, .9s) cubic-bezier(.2, .7, .2, 1) var(--tx-il, 0s) both; }
@@ -232,3 +233,13 @@ dialog#drawer { border: 0; padding: 0; background: transparent; color: var(--ink
   .s-intro { max-width: 560px; margin: 0 auto; }
   .s-intro .bg video, .s-intro .bg img { object-fit: contain; background: #000; }
 }
+
+/* 챕터 전환: 등불이 떠오르는 짧은 화면 */
+.lanx { position: fixed; inset: 0; z-index: 60; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: var(--bg, #0b0d14); opacity: 0; }
+.lanx.on { display: flex; animation: lanIn .35s ease forwards; }
+.lanx.out { animation: lanOut .5s ease forwards; }
+.lanx img { width: 120px; height: 120px; object-fit: contain; filter: drop-shadow(0 0 28px rgba(240, 190, 110, .45)); animation: orb 3.6s ease-in-out infinite; }
+.lanx p { margin: 0; font-family: var(--f-serif); font-size: 1rem; color: var(--ink2); letter-spacing: .06em; }
+@keyframes lanIn { to { opacity: 1; } }
+@keyframes lanOut { from { opacity: 1; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .lanx { display: none !important; } }

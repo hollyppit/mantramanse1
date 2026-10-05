@@ -36,6 +36,14 @@
     if (s.out && has(OUT, s.out)) o.out = s.out; if ((n = num(s.outSpeed, 0.2, 6)) !== undefined) o.outSpeed = n;
     if (s.loop && has(LOOP, s.loop)) o.loop = s.loop; if ((n = num(s.loopSpeed, 1, 30)) !== undefined) o.loopSpeed = n;
     if (typeof s.text === 'string') { var t = s.text.replace(/\r/g, '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '').slice(0, 600); if (t.trim()) o.text = t; }
+    // 테두리(글자 외곽선)·그림자·빛번짐·배경 상자·상자 테두리·투명도
+    var cs = function (k) { if (typeof s[k] === 'string' && HEX.test(s[k])) o[k] = s[k]; };
+    if ((n = num(s.strokeW, 0, 12)) !== undefined && n > 0) o.strokeW = n; cs('strokeC');
+    if ((n = num(s.shX, -40, 40)) !== undefined) o.shX = n; if ((n = num(s.shY, -40, 40)) !== undefined) o.shY = n; if ((n = num(s.shB, 0, 80)) !== undefined) o.shB = n; cs('shC');
+    if ((n = num(s.glowB, 0, 100)) !== undefined && n > 0) o.glowB = n; cs('glowC');
+    cs('bgC'); if ((n = num(s.bgA, 0, 1)) !== undefined) o.bgA = n; if ((n = num(s.padX, 0, 80)) !== undefined) o.padX = n; if ((n = num(s.padY, 0, 80)) !== undefined) o.padY = n; if ((n = num(s.radius, 0, 80)) !== undefined) o.radius = n;
+    if ((n = num(s.bdW, 0, 12)) !== undefined && n > 0) o.bdW = n; cs('bdC'); if (['solid', 'dashed', 'dotted', 'double'].indexOf(s.bdS) >= 0) o.bdS = s.bdS;
+    if ((n = num(s.opacity, 0.1, 1)) !== undefined && n < 1) o.opacity = n;
     if (s.seq === true) o.seq = true; if ((n = num(s.seqGap, 0.2, 10)) !== undefined) o.seqGap = n;
     return o;
   }

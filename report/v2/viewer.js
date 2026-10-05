@@ -226,7 +226,14 @@
     if (!first && i > prev && pc.act !== c.act) { T('act_completed', { act: pc.act }); var a = rep.acts.filter(function (x) { return x.id === pc.act; })[0]; if (a && a.pdfDone) toast(a.pdfDone, 3800); }
     S.idx = i; var firstVisit = !S.visited[c.id]; S.visited[c.id] = 1;
     var enter = function () { render(c, i, firstVisit); };
-    if (c.actTransition && firstVisit && !reduce) actTransition(c.actTransition, enter); else enter();
+    if (c.actTransition && firstVisit && !reduce) actTransition(c.actTransition, enter); else if (!first && !reduce && !PREVIEW) lanternTransition(c, enter); else enter();
+  }
+  function lanternTransition(c, then) { // 챕터 사이: 등불이 떠오르는 짧은 전환(약 1초). 탭하면 바로 넘어간다.
+    var el = $('#lanx'); if (!el) { el = document.createElement('div'); el.id = 'lanx'; el.className = 'lanx'; el.setAttribute('aria-hidden', 'true'); document.body.appendChild(el); }
+    el.innerHTML = '<img src="/report/v2/lantern.webp" alt="" width="120" height="120"><p>' + String(c.no).padStart(2, '0') + ' · ' + esc(c.title) + '</p>';
+    el.classList.remove('out'); void el.offsetWidth; el.classList.add('on');
+    var done = false, end = function () { if (done) return; done = true; then(); el.classList.add('out'); setTimeout(function () { el.classList.remove('on', 'out'); }, 500); };
+    el.onclick = end; setTimeout(end, 1100);
   }
   function actTransition(t, then) {
     var el = $('#actx'); el.className = 'actx'; el.hidden = false;
@@ -356,7 +363,23 @@
   function txPlain(el) { // 지금 화면에 쓰인 원래 문장(관리자 편집창의 "현재 문장 가져오기"용)
     var d = document.createElement('div'); d.innerHTML = (el._orig != null ? el._orig : el.innerHTML).replace(/<br\s*\/?>/gi, '\n').replace(/<\/span>\s*<span/gi, '</span> <span'); return d.textContent.trim();
   }
-  var TX_PROPS = ['fontFamily', 'fontSize', 'color', 'fontWeight', 'textAlign', 'letterSpacing', 'lineHeight', 'position', 'left', 'top'];
+  function rgba(hex, a) { var n = parseInt(hex.slice(1), 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; }
+  function txDeco(el, inner, st) { // 글자 테두리·그림자·빛번짐·배경 상자·상자 테두리·투명도
+    inner.style.cssText = ''; el.classList.remove('tx-box'); var hx = function (v, d) { return typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v : d; }; // 입력 중인 불완전한 색은 기본색으로
+    st = Object.assign({}, st, { strokeC: hx(st.strokeC, '#000000'), shC: hx(st.shC, '#000000'), glowC: hx(st.glowC, '#FFD27A'), bgC: hx(st.bgC, ''), bdC: hx(st.bdC, '#CDB27A') });
+    if (st.strokeW) { el.style.webkitTextStroke = st.strokeW + 'px ' + st.strokeC; el.style.paintOrder = 'stroke fill'; }
+    var sh = []; if (st.shX || st.shY || st.shB) sh.push((st.shX || 0) + 'px ' + (st.shY || 0) + 'px ' + (st.shB || 0) + 'px ' + st.shC);
+    if (st.glowB) { var g = st.glowC; sh.push('0 0 ' + st.glowB + 'px ' + g, '0 0 ' + Math.round(st.glowB * 2) + 'px ' + g); }
+    if (sh.length) el.style.textShadow = sh.join(', ');
+    if (st.opacity) el.style.opacity = st.opacity;
+    var box = st.bgC && (st.bgA == null || st.bgA > 0) || st.bdW; // 배경색이 있거나 상자 테두리가 있으면 상자를 만든다
+    if (box) {
+      el.classList.add('tx-box'); if (st.bgC) inner.style.background = rgba(st.bgC, st.bgA == null ? 0.6 : st.bgA);
+      inner.style.padding = (st.padY != null ? st.padY : 8) + 'px ' + (st.padX != null ? st.padX : 16) + 'px'; if (st.radius) inner.style.borderRadius = st.radius + 'px';
+      if (st.bdW) inner.style.border = st.bdW + 'px ' + (st.bdS || 'solid') + ' ' + st.bdC;
+    }
+  }
+  var TX_PROPS = ['fontFamily', 'fontSize', 'color', 'fontWeight', 'textAlign', 'letterSpacing', 'lineHeight', 'position', 'left', 'top', 'webkitTextStroke', 'paintOrder', 'textShadow', 'opacity'];
   function txStyle(el, st, immediate) {
     var inner = el.querySelector(':scope > .tx-i');
     if (!inner) { el._orig = el.innerHTML; inner = document.createElement('span'); inner.className = 'tx-i'; inner.innerHTML = el._orig; el.innerHTML = ''; el.appendChild(inner); }
@@ -370,6 +393,7 @@
     if (st.color) el.style.color = st.color; if (st.weight) el.style.fontWeight = st.weight; if (st.align) el.style.textAlign = st.align;
     if (st.spacing != null) el.style.letterSpacing = st.spacing + 'px'; if (st.line) el.style.lineHeight = st.line;
     if (st.x || st.y) { el.style.position = 'relative'; el.style.left = (st.x || 0) + 'vw'; el.style.top = (st.y || 0) + 'svh'; }
+    txDeco(el, inner, st);
     if (st.loop) { el.classList.add('tx-an-' + st.loop); el.style.setProperty('--tx-ls', (st.loopSpeed || 6) + 's'); el.style.setProperty('--tx-sh', getComputedStyle(el).color); }
     if (st.text) inner.innerHTML = esc(st.text).replace(/\n/g, '<br>'); // 관리자가 직접 쓴 문장(줄바꿈 유지)
     var seqN = st.seq ? splitSeqTx(inner) : 0, gap = +st.seqGap || 1;

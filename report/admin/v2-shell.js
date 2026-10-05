@@ -249,6 +249,16 @@
     }
     function field(label, inner, wide) { return '<div class="fld' + (wide ? '' : '') + '" style="' + (wide ? 'grid-column:1/-1' : '') + '"><label>' + label + '</label>' + inner + '</div>'; }
     function nf(k, min, max, step, ph) { var v = effective()[k]; return '<div style="display:flex;gap:6px;align-items:center"><input type="range" data-k="' + k + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + (v != null ? v : (ph != null ? ph : min)) + '" style="flex:1;padding:0"><input type="number" data-k="' + k + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + (v != null ? v : '') + '" placeholder="' + (ph != null ? ph : '') + '" style="width:72px"></div>'; }
+    function cf(k, def) { var v = effective()[k]; return '<div style="display:flex;gap:6px"><input type="color" data-ck="' + k + '" value="' + (v || def) + '" style="width:38px;height:30px;padding:0"><input type="text" data-k="' + k + '" value="' + esc(v || '') + '" placeholder="' + def + '"></div>'; }
+    function decoBlock() { // 테두리·그림자·빛번짐·배경 상자
+      var BD = [['', '실선'], ['dashed', '점선(긴)'], ['dotted', '점선(짧은)'], ['double', '이중선']];
+      return '<div class="cap2">글자 테두리 (외곽선)</div><div class="g2c">' + field('굵기 (px, 0=없음)', nf('strokeW', 0, 12, 0.5, 0)) + field('색', cf('strokeC', '#000000')) + '</div>' +
+        '<div class="cap2">그림자</div><div class="g2c">' + field('가로 (px)', nf('shX', -40, 40, 1, 0)) + field('세로 (px)', nf('shY', -40, 40, 1, 0)) + field('번짐 (px)', nf('shB', 0, 80, 1, 0)) + field('색', cf('shC', '#000000')) + '</div>' +
+        '<div class="cap2">빛번짐 (글로우)</div><div class="g2c">' + field('세기 (px, 0=없음)', nf('glowB', 0, 100, 1, 0)) + field('색', cf('glowC', '#FFD27A')) + '</div>' +
+        '<div class="cap2">배경 상자</div><div class="g2c">' + field('배경색', cf('bgC', '#000000')) + field('배경 진하기 (0~1)', nf('bgA', 0, 1, 0.05, 0.6)) + field('좌우 여백 (px)', nf('padX', 0, 80, 1, 16)) + field('위아래 여백 (px)', nf('padY', 0, 80, 1, 8)) + field('모서리 둥글기 (px)', nf('radius', 0, 80, 1, 0)) + '</div>' +
+        '<div class="cap2">상자 테두리</div><div class="g2c">' + field('굵기 (px, 0=없음)', nf('bdW', 0, 12, 0.5, 0)) + field('색', cf('bdC', '#CDB27A')) + field('모양', sel('bdS', BD)) + '</div>' +
+        '<div class="g2c">' + field('전체 투명도 (0.1~1)', nf('opacity', 0.1, 1, 0.05, 1)) + '</div>';
+    }
     function sel(k, opts, wide) { var v = effective()[k] || ''; return '<select data-k="' + k + '">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(v) === String(o[0]) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; }
     // 사주마다 달라지는 문장은 통째로 바꾸면 모두 같은 문장이 되므로 직접 입력을 막는다(해석 모듈 탭에서 고친다)
     var FIXED_ROLES = ['insight.fact', 'insight.lead', 'explain.lead', 'ilgan.kw', 'awk.kw'], DYN_ROLES = ['intro.headline', 'end.quote', 'ilgan.title', 'ilgan.sub', 'awk.title', 'awk.sub'];
@@ -265,7 +275,7 @@
     }
     /* 일괄 적용: 지금 글자의 설정 중 고른 묶음(글씨체·크기·위치·효과)을 선택한 다른 글자들에 복사한다. 문장 내용은 복사하지 않는다.
        영상 단계 자막은 전체 적용, 그 외는 위에서 고른 적용 범위(이 챕터만/모든 챕터)를 따른다. */
-    var BULK = [['font', '글씨체·굵기·색·정렬·자간·줄간격', ['font', 'weight', 'color', 'align', 'spacing', 'line']], ['size', '크기', ['size', 'sizeM']], ['pos', '위치', ['x', 'y']], ['in', '나타나기(차례 등장 포함)', ['in', 'inSpeed', 'inDelay', 'seq', 'seqGap']], ['out', '사라지기', ['hold', 'out', 'outSpeed']], ['loop', '계속 움직이는 효과', ['loop', 'loopSpeed']]];
+    var BULK = [['font', '글씨체·굵기·색·정렬·자간·줄간격', ['font', 'weight', 'color', 'align', 'spacing', 'line']], ['size', '크기', ['size', 'sizeM']], ['pos', '위치', ['x', 'y']], ['in', '나타나기(차례 등장 포함)', ['in', 'inSpeed', 'inDelay', 'seq', 'seqGap']], ['out', '사라지기', ['hold', 'out', 'outSpeed']], ['loop', '계속 움직이는 효과', ['loop', 'loopSpeed']], ['deco', '테두리·그림자·글로우·배경 상자·투명도', ['strokeW', 'strokeC', 'shX', 'shY', 'shB', 'shC', 'glowB', 'glowC', 'bgC', 'bgA', 'padX', 'padY', 'radius', 'bdW', 'bdC', 'bdS', 'opacity']]];
     function bulkBlock() {
       var roles = Object.keys(T.ROLES).filter(function (r) { return r !== P.role; });
       return '<div class="cap2">여러 글자에 한꺼번에 적용</div><p class="muted" style="font-size:.76rem;margin:0 0 4px">지금 글자의 설정을 복사합니다. 복사할 항목과 받을 글자를 고르세요.</p>' +
@@ -308,6 +318,7 @@
         '<div class="g2c">' + field('색', '<div style="display:flex;gap:6px"><input type="color" data-color value="' + (e.color || '#EDE8DC') + '" style="width:38px;height:30px;padding:0"><input type="text" data-k="color" value="' + esc(e.color || '') + '" placeholder="기본 색"></div>') + field('정렬', '<div class="sub2" style="margin:0">' + [['left', '왼쪽'], ['center', '가운데'], ['right', '오른쪽']].map(function (a) { return '<button type="button" data-al="' + a[0] + '" class="' + (e.align === a[0] ? 'on' : '') + '">' + a[1] + '</button>'; }).join('') + '</div>') + '</div>' +
         '<div class="g2c">' + field('자간 (px)', nf('spacing', -3, 30, 0.5, 0)) + field('줄 간격 (배)', nf('line', 0.8, 3, 0.05, 1.6)) + '</div>' +
         '<div class="g2c">' + field('가로 이동 (화면 %, 음수=왼쪽)', nf('x', -80, 80, 0.5, 0)) + field('세로 이동 (화면 %, 음수=위)', nf('y', -80, 80, 0.5, 0)) + '</div>' +
+        decoBlock(e) +
         '<div class="cap2">나타나기</div><div class="g2c">' + field('등장 효과', sel('in', T.IN)) + field('등장 속도 (초)', nf('inSpeed', 0.2, 6, 0.1, 0.9)) + field('나타나는 시기 (초 · 장면에 들어온 뒤 몇 초 후)', nf('inDelay', 0, 30, 0.1, 0), true) + '</div>' +
         '<div class="cap2">사라지기</div><div class="g2c">' + field('사라지는 시기 (초 · 다 나타난 뒤 몇 초 후, 0=사라지지 않음)', nf('hold', 0, 60, 0.5, 0), true) + field('사라지는 효과', sel('out', T.OUT)) + field('사라지는 속도 (초)', nf('outSpeed', 0.2, 6, 0.1, 0.8)) + '</div>' +
         '<div class="cap2">계속 움직이는 효과</div><div class="g2c">' + field('효과', sel('loop', T.LOOP)) + field('주기 (초 · 클수록 느림)', nf('loopSpeed', 1, 30, 0.5, 6)) + '</div>' +
@@ -329,6 +340,7 @@
       };
       el.oninput = el.onchange = function (e) {
         var t = e.target, k = t.getAttribute && t.getAttribute('data-k');
+        if (t.hasAttribute && t.hasAttribute('data-ck')) { var ck = t.getAttribute('data-ck'); put(ck, t.value); var tt = el.querySelector('input[type=text][data-k="' + ck + '"]'); if (tt) tt.value = t.value; return; }
         if (t.hasAttribute && t.hasAttribute('data-color')) { put('color', t.value); var ti = el.querySelector('input[type=text][data-k=color]'); if (ti) ti.value = t.value; return; }
         if (!k) return; if (k === 'seq') { put('seq', t.checked ? true : ''); return; }
         if (k === 'text') { clearTimeout(P.tt); var tv = t.value; P.tt = setTimeout(function () { put('text', tv); }, 350); return; }
