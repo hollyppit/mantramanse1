@@ -8,17 +8,6 @@
 <meta property="og:title" content="내 이야기의 시작 · 만트라 사주 무빙툰">
 <meta property="og:description" content="사람마다 잘되는 시기가 다릅니다. 나의 기질과 올해의 흐름을 확인해 보세요.">
 <meta name="theme-color" content="#080A11">
-<script>
-/* 입장 인트로(내장 GIF)를 미리 받아 둔다: 처음 들어온 탭에서만, 기기에 맞는 한 장만 */
-(function () {
-  try {
-    if (/[?&]preview=1\b/.test(location.search) || sessionStorage.getItem('mt_intro') === '1' || localStorage.getItem('mt_intro_custom') === '1') return;
-    var l = document.createElement('link'); l.rel = 'preload'; l.as = 'image';
-    l.href = '/report/story/img/intro-' + (matchMedia('(max-width: 768px)').matches ? 'mobile' : 'pc') + '.gif';
-    document.head.appendChild(l);
-  } catch (e) {}
-})();
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">

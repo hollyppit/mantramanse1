@@ -1,7 +1,6 @@
 // 판매 페이지(/report/) 인트로 영상 설정
 // GET /api/intro — 공개. { on, src, srcMobile, fx, fxPc, fxMobile, url, urlMobile, skipAfter, imageSeconds, once } — fx는 공통(문구 포함), fxPc·fxMobile은 그 기기에서 덮어쓸 글자 연출 (꺼져 있거나 영상이 없으면 on=false)
 // PUT /api/intro — 관리자 전용. 같은 형식으로 저장
-// DELETE /api/intro — 관리자 전용. 저장본을 지워 내장 기본 인트로로 되돌린다 (저장된 적이 없으면 GET 이 { on:false, unset:true } 를 준다)
 // 저장 위치: GLOSSARY_KV의 'intro:config' 키. 영상·이미지·GIF 파일은 /api/clipfile(R2)에 올린다.
 import { json, isAdmin, configError } from '../_lib.js';
 import { cleanFx } from '../_fx.js';
@@ -27,11 +26,9 @@ const urlOf = (src) => !src ? '' : src.type === 'r2' ? '/api/clipfile?k=' + enco
 const out = (c) => ({ ...c, url: urlOf(c.src), urlMobile: urlOf(c.srcMobile) });
 
 export async function onRequestGet({ request, env }) {
-  if (!env.GLOSSARY_KV) return json({ on: false, unset: true });
+  if (!env.GLOSSARY_KV) return json({ on: false });
   const c = (await env.GLOSSARY_KV.get(KEY, 'json')) || {};
   const admin = isAdmin(request, env);
-  // 관리자가 한 번도 저장하지 않았으면 unset — 화면은 사이트에 내장된 기본 인트로(report/story/img/intro-*.gif)를 쓴다
-  if (!admin && !Object.keys(c).length) return json({ on: false, unset: true });
   // 공개 응답에는 꺼진 상태에서 영상 주소를 내보내지 않는다. 관리자는 항상 전체 설정을 받는다.
   if (!admin && (!c.on || !(c.src || c.srcMobile))) return json({ on: false });
   return json(out(clean(c)));
@@ -47,13 +44,4 @@ export async function onRequestPut({ request, env }) {
   if (c.on && !c.src && !c.srcMobile) return json({ error: '웹용 또는 모바일용 영상을 올리거나 주소를 입력한 뒤 켜세요' }, 400);
   await env.GLOSSARY_KV.put(KEY, JSON.stringify({ ...c, at: new Date().toISOString() }));
   return json({ ok: true, ...out(c) });
-}
-
-// 저장된 설정을 지워 내장 기본 인트로로 되돌린다
-export async function onRequestDelete({ request, env }) {
-  const err = configError(env);
-  if (err) return json({ error: err }, 500);
-  if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
-  await env.GLOSSARY_KV.delete(KEY);
-  return json({ ok: true });
 }

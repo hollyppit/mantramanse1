@@ -250,10 +250,9 @@ summary { cursor:pointer; padding:4px 0; }
     <!-- 입장 인트로 -->
     <div id="t-intro" class="hide">
       <div class="card" style="max-width:640px">
-        <p class="muted" style="margin:0 0 12px">스토리 페이지(/report/)에 들어올 때 전체 화면으로 먼저 보이는 영상·이미지·GIF입니다. 여기서 저장한 적이 없으면 사이트에 내장된 기본 인트로(GIF)가 나오고, 저장하면 그 내용으로 바뀝니다. 이 탭의 저장은 클립 저장과 별개로 바로 반영됩니다.</p>
+        <p class="muted" style="margin:0 0 12px">스토리 페이지(/report/)에 들어올 때 전체 화면으로 먼저 음소거로 재생되는 영상입니다. 이 탭의 저장은 클립 저장과 별개로 바로 반영됩니다.</p>
         <div class="row" style="align-items:center;gap:16px">
           <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="inOn" style="width:auto"> <b>인트로 켜기</b></label>
-          <button type="button" id="inDefault" title="저장된 인트로 설정을 지우고 사이트에 내장된 기본 인트로(GIF)로 되돌립니다">기본 인트로로 되돌리기</button>
         </div>
         <div class="row" style="margin-top:12px">
           <label>건너뛰기 버튼 표시<select id="inSkip"><option value="0">처음부터</option><option value="2">2초 후</option><option value="4">4초 후</option></select></label>
@@ -669,10 +668,6 @@ summary { cursor:pointer; padding:4px 0; }
       });
     };
   });
-  $('inDefault').onclick = function () {
-    if (!confirm('저장된 인트로 설정을 지우고 내장된 기본 인트로로 되돌립니다. 계속할까요?')) return;
-    api('/api/intro', { method: 'DELETE' }).then(function () { $('inState').innerHTML = '<span class="ok">기본 인트로로 되돌렸습니다</span>'; introLoad(); }).catch(function (e) { $('inState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
-  };
   $('inSave').onclick = function () {
     $('inState').textContent = '저장 중…';
     api('/api/intro', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: $('inOn').checked, src: IN.pc, srcMobile: IN.mo, fx: inFxRead(), fxPc: inGroups($('inFxOw')), fxMobile: inGroups($('inFxOm')), skipAfter: +$('inSkip').value, imageSeconds: +$('inImgSec').value || 4, once: $('inOnce').value }) })
