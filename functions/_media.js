@@ -46,6 +46,17 @@ export function publicizeClip(base, c) {
   return o;
 }
 
+export function cleanAwakening(v) {
+  if (!v || typeof v !== 'object') return null;
+  const ST = '갑을병정무기경신임계', BR = '자축인묘진사오미신유술해', H1 = '甲乙丙丁戊己庚辛壬癸', H2 = '子丑寅卯辰巳午未申酉戌亥';
+  const s = String(v.dayPillar || '').trim(), a = H1.indexOf(s[0]), b = H2.indexOf(s[1]);
+  const k = a >= 0 && b >= 0 ? ST[a] + BR[b] : s.slice(0, 2), ia = ST.indexOf(k[0]), ib = BR.indexOf(k[1]);
+  if (ia < 0 || ib < 0 || (ia % 2) !== (ib % 2)) return null; // 60갑자는 천간·지지의 음양이 같아야 한다
+  const g = /^(m|male|남)/i.test(v.gender || '') ? 'M' : /^(f|female|여)/i.test(v.gender || '') ? 'F' : null; if (!g) return null;
+  return { dayPillar: k, gender: g, videoUrl: url(v.videoUrl), videoWebm: url(v.videoWebm), posterUrl: url(v.posterUrl), captionsUrl: url(v.captionsUrl),
+    title: txt(v.title, 60), subtitle: txt(v.subtitle, 200), keywords: Array.isArray(v.keywords) ? v.keywords.slice(0, 8).map(x => txt(x, 20)).filter(Boolean) : [], enabled: v.enabled !== false };
+}
+
 // 일간 소개 영상(10일간 × 성별 = 20): 프롤로그 앞에 나오는 "이 이야기의 주인공" 캐릭터 소개
 export const STEMS_K = '갑을병정무기경신임계', STEMS_H = '甲乙丙丁戊己庚辛壬癸';
 export function normStem(v) {

@@ -37,7 +37,7 @@ vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')); glob
   ok(g1 && g1.stem === '경' && g1.gender === 'M' && g1.enabled, '일간 소개 정리: 한자·한글, 성별');
   ok(MD.cleanIlgan({ stem: '자', gender: 'M' }) === null && MD.cleanIlgan({ stem: '경', gender: 'x' }) === null, '잘못된 일간·성별 거부');
   ok(MD.cleanIlgan({ stem: '경', gender: 'M', videoUrl: 'javascript:alert(1)' }).videoUrl === '', '비정상 영상 주소 제거');
-  ok(typeof MD.cleanAwakening === 'undefined', '일주 단위(수호신) 영상 검증 제거');
+  ok(MD.cleanAwakening({ dayPillar: '경오', gender: 'F' }).dayPillar === '경오' && MD.cleanAwakening({ dayPillar: '경축', gender: 'F' }) === null, '일주 검증 유지');
   // 글자 스타일 서버 검증
   const tp = path.join(os.tmpdir(), 'ts-test.mjs'); fs.writeFileSync(tp, fs.readFileSync(path.join(root, 'functions/_textstyle.js'), 'utf8'));
   const TSV = await import(require('url').pathToFileURL(tp).href);

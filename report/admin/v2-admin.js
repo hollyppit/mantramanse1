@@ -1,5 +1,5 @@
-/* 관리자 v2: 미디어 라이브러리 · 캐릭터 소개(일간 소개 영상 20) 탭.  admin/index.html 의 탭 핸들러가 V2Admin.open('media'|'awk', 비밀번호) 를 부른다.
-   API: /api/media (목록·저장·AI 태그 추천) · /api/awakening (일간 소개 영상; 예전 수호신 영상 120은 DEPRECATED_GUARDIAN 으로 서버에 보존만 하고 여기서는 숨김) · /api/clipfile (R2 파일). 새 명리 계산은 없다. */
+/* 관리자 v2: 미디어 라이브러리 · 일주 캐릭터 영상(120) 탭.  admin/index.html 의 탭 핸들러가 V2Admin.open('media'|'awk', 비밀번호) 를 부른다.
+   API: /api/media (목록·저장·AI 태그 추천) · /api/awakening (영상 매핑) · /api/clipfile (R2 파일). 새 명리 계산은 없다. */
 (function () {
   'use strict';
   var R = window.ReportV2, TAX = R.Scenes.TAX, PW = '', $ = function (s, e) { return (e || document).querySelector(s); };
@@ -273,49 +273,84 @@
     };
   }
 
-  /* ═════════════ 캐릭터 소개 영상 (일간 10 × 남·여 = 20) ═════════════ */
-  var A = { ilgan: [], loaded: false, root: null, dirty: false, base: '' };
-  var STEMS = '갑을병정무기경신임계'.split('');
+  /* ═════════════ 일주 캐릭터 영상 120 ═════════════ */
+  var A = { videos: [], fallback: { videoUrl: '', videoWebm: '', posterUrl: '', title: '' }, loaded: false, root: null, sel: null, f: { stem: '', branch: '', gender: '', status: '' }, dirty: false };
+  var STEMS = '갑을병정무기경신임계'.split(''), BRS = '자축인묘진사오미신유술해'.split('');
   function awkOpen(root) {
     A.root = root;
     if (!root.dataset.built) {
       root.dataset.built = 1;
-      root.innerHTML = '<div class="card"><div class="v2bar"><b style="color:var(--gold)">캐릭터 소개 영상 (10일간 × 남·여 = 20)</b><span style="flex:1"></span><label class="navbtn" style="cursor:pointer">파일 한꺼번에 올리기<input type="file" id="aFile" multiple accept="video/mp4,video/webm,image/*" hidden></label><button class="pri" id="aSave" disabled>변경사항 저장</button></div>' +
-        '<p class="muted">프롤로그 앞에 나오는 "이 이야기의 주인공" 소개 영상입니다. 없는 일간은 이 단계를 건너뜁니다. 파일명 규칙: <code>경금_남.mp4</code> · <code>경_여.webm</code> · <code>경금_남_poster.webp</code> (한자 <code>庚_M</code> 가능)</p>' +
-        '<div class="v2bar" style="margin:8px 0"><label for="aBase" style="white-space:nowrap">공개 영상 기본 주소</label><input id="aBase" type="url" placeholder="https://video.내도메인.com  (비우면 /api/clipfile 경유)" style="flex:1;min-width:220px"><span class="muted">R2 공개 커스텀 도메인. 설정하면 영상이 함수를 거치지 않고 바로 재생됩니다. 기존 업로드 키는 그대로 씁니다.</span></div><div class="v2q" id="aQ"></div></div><div class="card" id="aIlg" style="margin-top:12px"></div><p class="muted" id="aDep" style="margin-top:10px"></p>';
-      $('#aFile', root).onchange = function (e) { awkBulk(e.target.files); e.target.value = ''; }; $('#aSave', root).onclick = awkSave;
+      root.innerHTML = '<div class="card"><div class="v2bar"><b style="color:var(--gold)">일주 캐릭터 영상 (60일주 × 남·여 = 120)</b><span style="flex:1"></span><label class="navbtn" style="cursor:pointer">파일 한꺼번에 올리기<input type="file" id="aFile" multiple accept="video/mp4,video/webm,image/*" hidden></label><button id="aFb">기본(fallback) 영상</button><button class="pri" id="aSave" disabled>변경사항 저장</button></div>' +
+        '<p class="muted">파일명 규칙으로 자동 배정: <code>갑자_남.mp4</code> · <code>갑자_여.webm</code> · <code>갑자_남_poster.webp</code> (한자 <code>甲子</code>, <code>M/F</code>도 가능)</p>' +
+        '<div class="v2bar" style="margin:8px 0"><label for="aBase" style="white-space:nowrap">공개 영상 기본 주소</label><input id="aBase" type="url" placeholder="https://video.내도메인.com  (비우면 /api/clipfile 경유)" style="flex:1;min-width:220px"><span class="muted">R2 공개 커스텀 도메인. 설정하면 일주·일간 영상이 함수를 거치지 않고 바로 재생됩니다. 기존 업로드 키는 그대로 씁니다.</span></div><div class="v2q" id="aQ"></div><div class="v2stat" id="aStat"></div><div class="v2bar" id="aFilters" style="margin-top:12px"></div><div style="overflow:auto"><table class="mx" id="aMx"></table></div><div id="aMiss" class="muted" style="margin-top:10px"></div></div><div class="card" id="aEd" style="margin-top:12px" hidden></div><div class="card" id="aIlg" style="margin-top:12px"></div>';
+      $('#aFile', root).onchange = function (e) { awkBulk(e.target.files); e.target.value = ''; }; $('#aSave', root).onclick = awkSave; $('#aFb', root).onclick = fbDlg;
+      $('#aFilters', root).innerHTML = '<select data-f="stem"><option value="">일간 전체</option>' + STEMS.map(function (s) { return '<option>' + s + '</option>'; }).join('') + '</select><select data-f="branch"><option value="">일지 전체</option>' + BRS.map(function (s) { return '<option>' + s + '</option>'; }).join('') + '</select><select data-f="gender"><option value="">성별 전체</option><option value="M">남</option><option value="F">여</option></select><select data-f="status"><option value="">상태 전체</option><option value="ok">완료</option><option value="missing">누락</option><option value="disabled">비활성</option><option value="error">오류</option><option value="poster-only">포스터만</option></select>';
+      [].forEach.call($('#aFilters', root).querySelectorAll('select'), function (s) { s.onchange = function () { A.f[s.dataset.f] = s.value; awkRender(); }; });
     }
-    if (!A.loaded) api('/api/awakening?all=1').then(function (d) { A.ilgan = d.ilgan || []; A.base = d.publicBase || ''; A.dep = d.deprecatedGuardian || 0; var bi = $('#aBase', root); if (bi) { bi.value = A.base; bi.oninput = function () { A.base = bi.value.trim(); A.dirty = true; $('#aSave', root).disabled = false; }; } A.loaded = true; awkRender(); }).catch(function (e) { toast(e.message, true); }); else awkRender();
+    if (!A.loaded) api('/api/awakening?all=1').then(function (d) { A.videos = d.videos || []; A.ilgan = d.ilgan || []; A.fallback = d.fallback || A.fallback; A.base = d.publicBase || ''; var bi = $('#aBase', root); if (bi) { bi.value = A.base; bi.oninput = function () { A.base = bi.value.trim(); A.dirty = true; $('#aSave', root).disabled = false; }; } A.loaded = true; awkRender(); }).catch(function (e) { toast(e.message, true); }); else awkRender();
   }
+  var vget = function (p, g) { return A.videos.filter(function (v) { return v.dayPillar === p && v.gender === g; })[0]; };
   function awkRender() {
+    var cov = R.Media.awakeningCoverage(A.videos), st = {}; cov.cells.forEach(function (c) { st[c.dayPillar + c.gender] = c.status; });
+    $('#aStat', A.root).innerHTML = '<span>남성 <b>' + cov.male + ' / 60</b></span><span>여성 <b>' + cov.female + ' / 60</b></span><span>전체 <b>' + cov.total + ' / 120</b></span>' + (cov.invalid ? '<span class="err">해석 불가 ' + cov.invalid + '개</span>' : '');
     $('#aSave', A.root).disabled = !A.dirty;
-    var dep = $('#aDep', A.root); if (dep) dep.textContent = A.dep ? '보존 중인 예전 수호신 영상 ' + A.dep + '개(DEPRECATED_GUARDIAN)는 새 무빙툰에서 쓰지 않으며 이 화면에 표시하지 않습니다. 최종 확인 후 별도로 삭제하세요.' : '';
+    // 행 = 일간 10, 열 = 일지 12 중 같은 음양 6개. 각 칸은 남|여 반쪽 두 개.
+    var t = '<tr><th></th>' + BRS.map(function (b) { return '<th>' + b + '</th>'; }).join('') + '</tr>';
+    STEMS.forEach(function (s, si) {
+      if (A.f.stem && A.f.stem !== s) return;
+      t += '<tr><th>' + s + '</th>' + BRS.map(function (b, bi) {
+        if (si % 2 !== bi % 2) return '<td></td>'; if (A.f.branch && A.f.branch !== b) return '<td></td>'; var p = s + b;
+        var half = function (g) { var status = st[p + g] || 'missing'; if (A.f.gender && A.f.gender !== g) return ''; if (A.f.status && A.f.status !== status) return '<button disabled style="opacity:.2">' + (g === 'M' ? '남' : '여') + '</button>';
+          return '<button class="' + status + (A.sel && A.sel.p === p && A.sel.g === g ? ' sel' : '') + '" data-p="' + p + '" data-g="' + g + '" title="' + p + ' ' + (g === 'M' ? '남' : '여') + ' · ' + status + '"><em>' + p + '</em>' + (g === 'M' ? '남' : '여') + '</button>'; };
+        return '<td><div class="cellx">' + half('M') + half('F') + '</div></td>';
+      }).join('') + '</tr>';
+    });
+    var mx = $('#aMx', A.root); mx.innerHTML = t; mx.onclick = function (e) { var b = e.target.closest('button[data-p]'); if (b) { A.sel = { p: b.dataset.p, g: b.dataset.g }; awkRender(); awkEdit(); } };
+    $('#aMiss', A.root).innerHTML = cov.missing.length ? '<b>누락 ' + cov.missing.length + '개:</b> ' + cov.missing.slice(0, 40).map(function (k) { var p = k.split('|'); return p[0] + (p[1] === 'M' ? '(남)' : '(여)'); }).join(' · ') + (cov.missing.length > 40 ? ' …' : '') : '<span class="ok">120개가 모두 등록되었습니다.</span>';
     ilgRender();
+    if (A.sel) awkEdit();
   }
-  // 파일명 → 일간·성별·종류.  일간 소개: 경금_남.mp4 / 경_여.webm / 庚_M_poster.webp
+  function awkEdit() {
+    var s = A.sel, box = $('#aEd', A.root), v = vget(s.p, s.g) || { dayPillar: s.p, gender: s.g, videoUrl: '', videoWebm: '', posterUrl: '', captionsUrl: '', title: s.p + '일주', subtitle: '', keywords: [], enabled: true, _new: true };
+    box.hidden = false;
+    var f = function (id, lbl, key, ph) { return '<div class="v2f"><label>' + lbl + '</label><div class="row" style="flex-wrap:nowrap"><input type="text" id="' + id + '" value="' + esc(v[key] || '') + '" placeholder="' + (ph || '') + '"><label class="navbtn" style="cursor:pointer;white-space:nowrap">올리기<input type="file" data-up="' + id + '" hidden></label></div></div>'; };
+    box.innerHTML = '<h3>' + s.p + '일주 · ' + (s.g === 'M' ? '남성' : '여성') + '</h3><div class="v2f two"><div>' + f('aMp4', 'MP4 영상', 'videoUrl') + f('aWebm', 'WebM 영상 (선택)', 'videoWebm') + '</div><div>' + f('aPo', '포스터 이미지', 'posterUrl') + '' + '</div></div>' +
+      '<div class="v2f two"><div><label>제목</label><input type="text" id="aT" value="' + esc(v.title) + '"></div><div><label>키워드 (쉼표)</label><input type="text" id="aK" value="' + esc((v.keywords || []).join(', ')) + '"></div></div><div class="v2f"><label>부제</label><input type="text" id="aS" value="' + esc(v.subtitle) + '"></div>' +
+      f('aCap', '자막 파일(VTT, 선택)', 'captionsUrl') + '<div class="row"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="aEn"' + (v.enabled !== false ? ' checked' : '') + '>사용</label><span style="flex:1"></span>' + (v._new ? '' : '<button class="danger" id="aRm">이 영상 등록 삭제</button>') + '<button class="pri" id="aOk">적용</button></div><span class="muted" id="aUp"></span>';
+    [].forEach.call(box.querySelectorAll('input[data-up]'), function (i) { i.onchange = function () { var file = i.files[0]; if (!file) return; $('#aUp', box).textContent = '올리는 중…'; (/^image\//.test(file.type) ? shrinkImage(file) : Promise.resolve(file)).then(function (ff) { return upload(ff, ff.name); }).then(function (u) { box.querySelector('#' + i.dataset.up).value = u; $('#aUp', box).textContent = '올렸습니다'; }).catch(function (e) { $('#aUp', box).textContent = e.message; }); }; });
+    $('#aOk', box).onclick = function () {
+      var n = { dayPillar: s.p, gender: s.g, videoUrl: $('#aMp4', box).value.trim(), videoWebm: $('#aWebm', box).value.trim(), posterUrl: $('#aPo', box).value.trim(), captionsUrl: $('#aCap', box).value.trim(), title: $('#aT', box).value.trim(), subtitle: $('#aS', box).value.trim(), keywords: $('#aK', box).value.split(',').map(function (x) { return x.trim(); }).filter(Boolean), enabled: $('#aEn', box).checked };
+      A.videos = A.videos.filter(function (x) { return !(x.dayPillar === s.p && x.gender === s.g); }); A.videos.push(n); A.dirty = true; awkRender();
+    };
+    var rm = $('#aRm', box); if (rm) rm.onclick = function () { A.videos = A.videos.filter(function (x) { return !(x.dayPillar === s.p && x.gender === s.g); }); A.sel = null; box.hidden = true; A.dirty = true; awkRender(); };
+  }
+  // 파일명 → 일주(또는 일간)·성별·종류. 예) 갑자_남.mp4 / 甲子_F_poster.webp / 을축_여_poster.webp  ·  일간 소개: 경금_남.mp4 / 경_여.webm / 庚_M_poster.webp
   function fileKind(n) {
     var ext = (n.split('.').pop() || '').toLowerCase(), low = n.toLowerCase();
     return /poster|포스터/.test(low) ? 'posterUrl' : /[.]vtt$/.test(low) ? 'captionsUrl' : ext === 'webm' ? 'videoWebm' : /^(mp4|mov|m4v)$/.test(ext) ? 'videoUrl' : /^(jpg|jpeg|png|webp|avif|gif)$/.test(ext) ? 'posterUrl' : null;
   }
+  var RE_PILLAR = /^([갑을병정무기경신임계甲乙丙丁戊己庚辛壬癸][자축인묘진사오미신유술해子丑寅卯辰巳午未申酉戌亥])[\s_.-]*(남성|여성|남|여|male|female|m|f)/i;
   var RE_ILGAN = new RegExp('^([갑을병정무기경신임계甲乙丙丁戊己庚辛壬癸])(목|화|토|금|수|木|火|土|金|水)?[ _.-]*(남성|여성|남|여|male|female|m|f)', 'i');
   function parseName(n) {
     var kind = fileKind(n); if (!kind) return null;
+    var m = RE_PILLAR.exec(n);
+    if (m) { var p = R.Media.normPillar(m[1]); return p ? { p: p, g: R.Media.normGender(m[2]), kind: kind } : null; }
     var mi = RE_ILGAN.exec(n); if (!mi) return null;
     var stem = R.Media.normStem(mi[1]), g = R.Media.normGender(mi[3]); return stem && g ? { ilgan: true, stem: stem, g: g, kind: kind } : null;
   }
 
-  /* ── 캐릭터 소개 영상 (일간 10 × 남·여 = 20): 프롤로그 앞에 나온다 ─────────── */
+  /* ── 일간 소개 영상 (일간 10 × 남·여 = 20): 일주 캐릭터 영상 앞에 나온다 ─────────── */
   var ELN = { '갑': '목', '을': '목', '병': '화', '정': '화', '무': '토', '기': '토', '경': '금', '신': '금', '임': '수', '계': '수' };
   var IL = { sel: null };
   var ilget = function (s, g) { return (A.ilgan || []).filter(function (v) { return v.stem === s && v.gender === g; })[0]; };
   function ilgSet(pn, url, st) { // 일괄 업로드에서 호출
     var v = ilget(pn.stem, pn.g); if (!v) { v = { stem: pn.stem, gender: pn.g, videoUrl: '', videoWebm: '', posterUrl: '', captionsUrl: '', title: '', subtitle: '', keywords: [], enabled: true }; (A.ilgan = A.ilgan || []).push(v); }
-    v[pn.kind] = url; A.dirty = true; if (st) { st.textContent = '캐릭터 소개 ' + pn.stem + (pn.g === 'M' ? ' 남' : ' 여') + ' → ' + pn.kind; st.className = 'st ok'; } awkRender();
+    v[pn.kind] = url; A.dirty = true; if (st) { st.textContent = '일간 소개 ' + pn.stem + (pn.g === 'M' ? ' 남' : ' 여') + ' → ' + pn.kind; st.className = 'st ok'; } awkRender();
   }
   function ilgRender() {
     var box = $('#aIlg', A.root); if (!box) return; var cov = R.Media.ilganCoverage(A.ilgan || []), st = {}; cov.cells.forEach(function (c) { st[c.stem + c.gender] = c.status; });
-    var h = '<div class="v2bar"><b style="color:var(--gold)">캐릭터 소개 영상 (10일간 × 남·여 = 20)</b><span class="muted">프롤로그 <u>앞</u>에 나옵니다. 없는 일간은 이 단계를 건너뜁니다.</span></div><div class="v2stat">남성 <b>' + cov.male + ' / 10</b> 여성 <b>' + cov.female + ' / 10</b> 전체 <b>' + cov.total + ' / 20</b></div>' +
-      '<table class="mx"><tr><th></th><th>남</th><th>여</th></tr>';
+    var h = '<div class="v2bar"><b style="color:var(--gold)">일간 소개 영상 (10일간 × 남·여 = 20)</b><span class="muted">일주 캐릭터 영상 <u>앞</u>에 나옵니다. 없는 일간은 이 단계를 건너뜁니다.</span></div><div class="v2stat">남성 <b>' + cov.male + ' / 10</b> 여성 <b>' + cov.female + ' / 10</b> 전체 <b>' + cov.total + ' / 20</b></div>' +
+      '<p class="muted">위의 "파일 한꺼번에 올리기"로도 올릴 수 있습니다: <code>경금_남.mp4</code> · <code>경_여.webm</code> · <code>경금_남_poster.webp</code> (한자 <code>庚_M</code> 가능)</p><table class="mx"><tr><th></th><th>남</th><th>여</th></tr>';
     R.Media.STEMS.forEach(function (s) {
       h += '<tr><th>' + s + ELN[s] + '</th>' + ['M', 'F'].map(function (g) { var x = st[s + g] || 'missing'; return '<td><div class="cellx"><button type="button" class="' + x + (IL.sel && IL.sel.s === s && IL.sel.g === g ? ' sel' : '') + '" data-is="' + s + '" data-ig="' + g + '" style="min-width:90px;padding:8px"><em>' + s + ELN[s] + '</em>' + (g === 'M' ? '남' : '여') + '</button></div></td>'; }).join('') + '</tr>';
     });
@@ -342,23 +377,30 @@
     var f = aq.shift(), q = $('#aQ', A.root); if (!f) { A.busy = false; return; } A.busy = true;
     var row = document.createElement('div'); row.className = 'it'; row.innerHTML = '<span style="min-width:180px;text-align:left">' + esc(f.name) + '</span><progress max="1" value="0"></progress><span class="st">준비</span>'; q.appendChild(row);
     var pn = parseName(f.name), st = row.querySelector('.st'), pr = row.querySelector('progress');
-    if (!pn) { st.textContent = '파일명을 해석할 수 없습니다 (예: 경금_남.mp4)'; st.className = 'st err'; return setTimeout(awkRun, 30); }
+    if (!pn) { st.textContent = '파일명을 해석할 수 없습니다 (예: 갑자_남.mp4)'; st.className = 'st err'; return setTimeout(awkRun, 30); }
     (/^image\//.test(f.type) ? shrinkImage(f) : Promise.resolve(f)).then(function (ff) { return upload(ff, ff.name, function (p) { pr.value = p; }); }).then(function (u) {
-      ilgSet(pn, u, st);
+      if (pn.ilgan) { ilgSet(pn, u, st); return; }
+      var v = vget(pn.p, pn.g); if (!v) { v = { dayPillar: pn.p, gender: pn.g, videoUrl: '', videoWebm: '', posterUrl: '', captionsUrl: '', title: pn.p + '일주', subtitle: '', keywords: [], enabled: true }; A.videos.push(v); }
+      v[pn.kind] = u; A.dirty = true; st.textContent = pn.p + (pn.g === 'M' ? ' 남' : ' 여') + ' → ' + pn.kind; st.className = 'st ok'; awkRender();
     }).catch(function (e) { st.textContent = e.message; st.className = 'st err'; }).then(function () { setTimeout(awkRun, 30); });
   }
   function awkSave() {
     var b = $('#aSave', A.root); b.disabled = true; b.textContent = '저장 중…';
-    api('/api/awakening', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ilgan: A.ilgan || [], publicBase: A.base || '' }) }).then(function (d) { A.dirty = false; toast('저장했습니다 (캐릭터 소개 ' + (d.ilgan || 0) + '개)'); }).catch(function (e) { toast(e.message, true); }).then(function () { b.textContent = '변경사항 저장'; awkRender(); });
+    api('/api/awakening', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ videos: A.videos, ilgan: A.ilgan || [], fallback: A.fallback, publicBase: A.base || '' }) }).then(function (d) { A.dirty = false; toast('저장했습니다 (일주 각성 ' + d.count + '개 · 일간 소개 ' + (d.ilgan || 0) + '개)'); }).catch(function (e) { toast(e.message, true); }).then(function () { b.textContent = '변경사항 저장'; awkRender(); });
   }
+  function fbDlg() {
+    var fb = A.fallback || {}, d = dlg('<h3>기본(fallback) 일주 영상</h3><p class="muted">해당 일주·성별 영상이 없을 때 대신 재생합니다.</p><div class="v2f"><label>MP4</label><input type="text" id="fV" value="' + esc(fb.videoUrl || '') + '"></div><div class="v2f"><label>WebM</label><input type="text" id="fW" value="' + esc(fb.videoWebm || '') + '"></div><div class="v2f"><label>포스터</label><input type="text" id="fP" value="' + esc(fb.posterUrl || '') + '"></div><div class="row" style="justify-content:flex-end"><button id="fC">취소</button><button class="pri" id="fO">적용</button></div>');
+    d.querySelector('#fC').onclick = function () { d.close(); }; d.querySelector('#fO').onclick = function () { A.fallback = { videoUrl: d.querySelector('#fV').value.trim(), videoWebm: d.querySelector('#fW').value.trim(), posterUrl: d.querySelector('#fP').value.trim(), title: fb.title || '' }; A.dirty = true; d.close(); awkRender(); };
+  }
+
   /* ── 기존 클립(구 9장 방식) → 새 라이브러리로 가져오기 ─────────────────────────────
-     일간+성별이 정해진 클립은 "캐릭터 소개"로, 나머지는 "장면 미디어(영상)"로 복사한다(일주+성별 클립은 예전 수호신 영상이므로 건너뛴다)(원본 클립은 지우지 않는다). 태그는 일간 오행만 확실한 것만 붙인다. */
+     일주+성별이 정해진 클립은 "일주 캐릭터 영상"으로, 나머지는 "장면 미디어(영상)"로 복사한다(원본 클립은 지우지 않는다). 태그는 일간 오행만 확실한 것만 붙인다. */
   var STEM_EL = { '갑': 'wood', '을': 'wood', '병': 'fire', '정': 'fire', '무': 'earth', '기': 'earth', '경': 'metal', '신': 'metal', '임': 'water', '계': 'water' };
   function importLegacy(done) {
-    Promise.all([api('/api/clips'), M.loaded ? Promise.resolve({ media: M.list }) : api('/api/media?all=1'), A.loaded ? Promise.resolve({ ilgan: A.ilgan }) : api('/api/awakening?all=1')]).then(function (r) {
-      var clips = r[0].clips || [], mlist = r[1].media || []; if (!A.loaded) A.ilgan = r[2].ilgan || [];
+    Promise.all([api('/api/clips'), M.loaded ? Promise.resolve({ media: M.list }) : api('/api/media?all=1'), A.loaded ? Promise.resolve({ videos: A.videos, ilgan: A.ilgan, fallback: A.fallback }) : api('/api/awakening?all=1')]).then(function (r) {
+      var clips = r[0].clips || [], mlist = r[1].media || [], vids = r[2].videos || [], fb = r[2].fallback || A.fallback; if (!A.loaded) A.ilgan = r[2].ilgan || [];
       var srcUrl = function (x) { return !x ? '' : x.type === 'r2' ? mediaUrl(x.value) : x.value; };
-      var nMed = 0, nIlg = 0, skip = 0, haveMedia = {}; mlist.forEach(function (m) { haveMedia['legacy_' + m.id] = 1; if (m.legacyId) haveMedia[m.legacyId] = 1; });
+      var nAwk = 0, nMed = 0, nIlg = 0, skip = 0, haveMedia = {}; mlist.forEach(function (m) { haveMedia['legacy_' + m.id] = 1; if (m.legacyId) haveMedia[m.legacyId] = 1; });
       clips.forEach(function (c) {
         var url = srcUrl(c.src); if (!url) { skip++; return; }
         var cd = c.cond || {}, ilju = (cd.ilju || []).length === 1 ? cd.ilju[0] : '', g = (cd.gender || []).length === 1 ? cd.gender[0] : '';
@@ -370,21 +412,26 @@
           if (!ex2) { ex2 = { stem: is, gender: ig2, videoUrl: '', videoWebm: '', posterUrl: '', captionsUrl: '', title: '', subtitle: '', keywords: [], enabled: true }; A.ilgan.push(ex2); }
           ex2.videoUrl = url; nIlg++; return;
         }
-        if (ilju && g) { skip++; return; // 일주+성별 클립 = 예전 수호신 영상(DEPRECATED_GUARDIAN): 새 무빙툰에서 쓰지 않는다
+        if (ilju && g) { // 일주 캐릭터 영상
+          var p = R.Media.normPillar(ilju), gg = R.Media.normGender(g); if (!p || !gg) { skip++; return; }
+          var ex = vids.filter(function (v) { return v.dayPillar === p && v.gender === gg; })[0];
+          if (ex && (ex.videoUrl || ex.videoWebm)) { skip++; return; }
+          if (!ex) { ex = { dayPillar: p, gender: gg, videoUrl: '', videoWebm: '', posterUrl: '', captionsUrl: '', title: p + '일주', subtitle: '', keywords: [], enabled: true }; vids.push(ex); }
+          ex.videoUrl = url; ex.title = ex.title || c.title || ''; nAwk++;
         } else { // 장면 미디어
           var lid = 'legacy_' + c.id; if (haveMedia[lid]) { skip++; return; }
           var els = (cd.ilgan || []).map(function (s) { return STEM_EL[s]; }).filter(function (v, i, a) { return v && a.indexOf(v) === i; });
           mlist.unshift({ id: lid, legacyId: c.id, type: 'video', url: url, webmUrl: '', thumbnailUrl: '', posterUrl: '', title: c.title || lid, description: '기존 클립에서 가져옴', elementTags: els.length === 1 ? els : [], stateTags: [], emotionTags: [], sceneTags: [], themeTags: [], chapterTags: [], actionTags: [], visualRole: [], orientation: 'portrait', duration: 0, loopable: false, hasAudio: true, priority: 40, enabled: true, tagsApproved: true, bytes: 0, uploadedAt: Date.now() }); nMed++;
         }
       });
-      M.list = mlist; M.loaded = true; M.dirty = M.dirty || nMed > 0; A.loaded = true; A.dirty = A.dirty || nIlg > 0;
-      done && done({ ilgan: nIlg, media: nMed, skipped: skip, total: clips.length });
+      M.list = mlist; M.loaded = true; M.dirty = M.dirty || nMed > 0; A.videos = vids; A.fallback = fb; A.loaded = true; A.dirty = A.dirty || nAwk > 0 || nIlg > 0;
+      done && done({ awakening: nAwk, ilgan: nIlg, media: nMed, skipped: skip, total: clips.length });
     }).catch(function (e) { toast(e.message, true); done && done(null); });
   }
 
   /* ── 조합 테스트 미리보기에서 바로 올리기 ──────────────────────────────────────
      quickAdd: 파일 하나를 올려 미디어 라이브러리에 등록(장면 의도에서 뽑은 태그 포함)하고 저장까지 한다 → 등록된 asset 을 돌려준다.
-     quickAwakening: 캐릭터 소개(일간) 영상 칸에 파일(영상 또는 포스터)을 바로 연결한다. */
+     quickAwakening: 일간 소개/일주 캐릭터 영상 칸에 파일(영상 또는 포스터)을 바로 연결한다. */
   function quickAdd(file, preset, onProg) {
     preset = preset || {};
     return (M.loaded ? Promise.resolve() : api('/api/media?all=1').then(function (d) { M.list = d.media || []; M.loaded = true; })).then(function () {
@@ -402,7 +449,7 @@
       }).then(function () { M.list.unshift(a); return api('/api/media', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ media: M.list }) }); }).then(function () { M.dirty = false; return a; });
     });
   }
-  function quickAwakening(kind, key, file, onProg) { // kind: 'ilgan' {stem, gender}
+  function quickAwakening(kind, key, file, onProg) { // kind: 'ilgan' {stem, gender} · 'iju' {pillar, gender}
     var isVid = /^video\//.test(file.type) || /\.(mp4|webm|mov|m4v)$/i.test(file.name);
     var step = isVid ? probeVideo(file) : shrinkImage(file).then(function (s) { file = s; return {}; });
     return step.then(function (info) {
@@ -412,12 +459,11 @@
       });
     }).then(function (r) {
       return api('/api/awakening?all=1').then(function (d) {
-        if (kind !== 'ilgan') throw new Error('일주 단위 영상은 더 이상 쓰지 않습니다');
-        var list = d.ilgan || (d.ilgan = []);
-        var ex = list.filter(function (v) { return v.stem === key.stem && v.gender === key.gender; })[0];
-        if (!ex) { ex = { stem: key.stem, gender: key.gender, videoUrl: '', videoWebm: '', posterUrl: '', captionsUrl: '', title: '', subtitle: '', keywords: [], enabled: true }; list.push(ex); }
+        var list = kind === 'ilgan' ? (d.ilgan || (d.ilgan = [])) : (d.videos || (d.videos = []));
+        var ex = list.filter(function (v) { return kind === 'ilgan' ? (v.stem === key.stem && v.gender === key.gender) : (v.dayPillar === key.pillar && v.gender === key.gender); })[0];
+        if (!ex) { ex = kind === 'ilgan' ? { stem: key.stem, gender: key.gender, videoUrl: '', videoWebm: '', posterUrl: '', captionsUrl: '', title: '', subtitle: '', keywords: [], enabled: true } : { dayPillar: key.pillar, gender: key.gender, videoUrl: '', videoWebm: '', posterUrl: '', captionsUrl: '', title: key.pillar + '일주', subtitle: '', keywords: [], enabled: true }; list.push(ex); }
         if (isVid) { if (/\.webm$/i.test(file.name)) ex.videoWebm = r.u; else ex.videoUrl = r.u; if (r.pu && !ex.posterUrl) ex.posterUrl = r.pu; } else ex.posterUrl = r.u;
-        return api('/api/awakening', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ilgan: d.ilgan || [] }) });
+        return api('/api/awakening', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ videos: d.videos || [], ilgan: d.ilgan || [], fallback: d.fallback || null }) });
       });
     }).then(function () { A.loaded = false; });
   }

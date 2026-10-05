@@ -1,4 +1,4 @@
-// 캐릭터 소개(일간 소개) 영상 API · 수호신 영상 보존(DEPRECATED_GUARDIAN) · 공개 영상 주소 검증:  node tests/ilgan-intro-sim.js
+// 일주 캐릭터 영상 120 · 일간 소개 영상 20 API · 공개 영상 주소 검증 · 수호신 문구 부재 검증:  node tests/ilgan-intro-sim.js
 const fs = require('fs'), path = require('path'), os = require('os'), url = require('url');
 const root = path.join(__dirname, '..');
 const fails = [], ok = (c, m) => { if (!c) fails.push(m); };
@@ -19,7 +19,7 @@ import(url.pathToFileURL(tmp).href).then(async X => {
   ok(X.publicUrl('https://v.example.com', '/api/clipfile?k=ab12cd.mp4') === 'https://v.example.com/ab12cd.mp4', '/api/clipfile?k= → 공개 주소');
   const c = X.publicizeClip('https://v.example.com', { videoUrl: '/api/clipfile?k=a1.mp4', posterUrl: '/api/clipfile?k=p1.webp', guardianImageUrl: '/api/clipfile?k=g.png', title: 't' });
   ok(c.videoUrl === 'https://v.example.com/a1.mp4' && c.posterUrl === 'https://v.example.com/p1.webp' && c.title === 't', '클립 필드 일괄 변환');
-  ok(typeof X.cleanAwakening === 'undefined', '일주 각성(수호신) 검증 함수 제거');
+  ok(X.cleanAwakening({ dayPillar: '경오', gender: 'F' }).dayPillar === '경오' && X.cleanAwakening({ dayPillar: '경축', gender: 'F' }) === null && !('guardianImageUrl' in X.cleanAwakening({ dayPillar: '경오', gender: 'F', guardianImageUrl: '/api/clipfile?k=g.png' })), '일주 검증(60갑자) 유지 · 수호신 이미지 필드 없음');
 
   const awk = fs.readFileSync(path.join(root, 'functions/api/awakening.js'), 'utf8').replace("from '../_lib.js'", "from './_lib_stub.mjs'").replace("from '../_media.js'", "from './_media_real.mjs'");
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'awk-')); fs.writeFileSync(path.join(dir, 'a.mjs'), awk); fs.writeFileSync(path.join(dir, '_media_real.mjs'), fs.readFileSync(tmp, 'utf8')); fs.writeFileSync(path.join(dir, '_cinema.js'), fs.readFileSync(path.join(root, 'functions/_cinema.js'), 'utf8'));
@@ -33,22 +33,18 @@ import(url.pathToFileURL(tmp).href).then(async X => {
   const put = async b => { globalThis.__admin = true; return (await A.onRequestPut({ request: new Request('https://x.dev/api/awakening', { method: 'PUT', body: JSON.stringify(b) }), env })).json(); };
 
   let d = await get('?pillar=갑자&gender=M');
-  ok(d.ilgan && d.ilgan.videoUrl === '/api/clipfile?k=ig1.mp4', '공개: 그 일간 소개 영상');
-  ok(!('video' in d) && !('fallback' in d), '공개: 수호신 영상(video)·fallback 은 절대 내려가지 않음');
-  d = await get('?pillar=갑오&gender=M'); ok(d.ilgan && d.ilgan.stem === '갑', '일주(갑오)로 물어도 일간(갑)으로 매칭');
-  d = await get('?pillar=을축&gender=F'); ok(d.ilgan === null, '영상 없는 일간은 null (캐릭터 소개 단계 건너뜀)');
+  ok(d.video && d.video.videoUrl === '/api/clipfile?k=aa11.mp4' && d.video.title === '숲의 왕' && !('guardianImageUrl' in d.video), '공개: 그 일주·성별의 캐릭터 영상');
+  ok(d.ilgan && d.ilgan.videoUrl === '/api/clipfile?k=ig1.mp4', '공개: 그 일간의 소개 영상');
+  d = await get('?pillar=을축&gender=F'); ok(d.video === null && d.fallback && d.fallback.videoUrl === '/api/clipfile?k=fb.mp4', '일주 영상이 없으면 기본(fallback) 영상');
   d = await get('?all=1', false); ok(d.error, '관리자 목록은 인증 필요');
-  d = await get('?all=1'); ok(Array.isArray(d.ilgan) && !('videos' in d) && d.deprecatedGuardian === 1, '관리자 목록: 수호신 영상 숨김 + 보존 개수만 표시');
-  d = await get('?all=1&deprecated=1'); ok(d.state === 'DEPRECATED_GUARDIAN' && d.videos.length === 1, '명시적으로 요청할 때만 보존본 열람');
-
-  await put({ ilgan: doc.ilgan, publicBase: 'https://video.example.com/' });
-  ok(doc.publicBase === 'https://video.example.com', '공개 주소 저장');
-  ok(doc.videos.length === 1 && doc.videos[0].guardianImageUrl === '/api/clipfile?k=gg11.png' && doc.fallback, '저장해도 보존 중인 수호신 영상은 그대로(롤백 가능)');
-  d = await get('?pillar=갑자&gender=M'); ok(d.ilgan.videoUrl === 'https://video.example.com/ig1.mp4' && d.ilgan.posterUrl === 'https://video.example.com/ip1.webp', '공개 조회: R2 공개 주소로 변환');
-  await put({ ilgan: doc.ilgan }); ok(doc.publicBase === 'https://video.example.com', '주소를 안 보낸 저장은 기존 값 유지');
-  await put({ ilgan: doc.ilgan, publicBase: 'http://insecure.com' }); ok(doc.publicBase === '', 'https 가 아니면 저장 안 됨');
-  await put({ videos: [{ dayPillar: '을축', gender: 'F', videoUrl: '/api/clipfile?k=zz.mp4' }], ilgan: [] });
-  ok(doc.videos.length === 1 && doc.videos[0].dayPillar === '갑자', '요청에 videos 를 실어 보내도 보존본을 덮어쓰지 않음');
+  d = await get('?all=1'); ok(d.videos.length === 1 && d.ilgan.length === 1, '관리자 목록: 120개 영상 + 일간 소개');
+  await put({ videos: doc.videos, ilgan: doc.ilgan, fallback: doc.fallback, publicBase: 'https://video.example.com/' });
+  ok(doc.publicBase === 'https://video.example.com' && doc.videos.length === 1 && doc.videos[0].dayPillar === '갑자', '저장: 공개 주소 + 일주 영상 유지');
+  d = await get('?pillar=갑자&gender=M'); ok(d.video.videoUrl === 'https://video.example.com/aa11.mp4' && d.video.posterUrl === 'https://video.example.com/pp11.webp' && d.ilgan.videoUrl === 'https://video.example.com/ig1.mp4', '공개 조회: R2 공개 주소로 변환');
+  await put({ videos: doc.videos, ilgan: doc.ilgan }); ok(doc.publicBase === 'https://video.example.com', '주소를 안 보낸 저장은 기존 값 유지');
+  await put({ videos: doc.videos, ilgan: doc.ilgan, publicBase: 'http://insecure.com' }); ok(doc.publicBase === '', 'https 가 아니면 저장 안 됨');
+  await put({ videos: [{ dayPillar: '을축', gender: 'F', videoUrl: '/api/clipfile?k=zz.mp4' }, { dayPillar: '경축', gender: 'F', videoUrl: '/api/clipfile?k=bad.mp4' }], ilgan: [] });
+  ok(doc.videos.length === 1 && doc.videos[0].dayPillar === '을축', '잘못된 일주(경축)는 저장에서 거부');
 
   console.log(fails.length ? '\n실패 ' + fails.length + '건\n' + fails.map(f => ' ✗ ' + f).join('\n') : '\n모두 통과');
   process.exit(fails.length ? 1 : 0);

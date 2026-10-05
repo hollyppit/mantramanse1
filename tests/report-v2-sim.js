@@ -88,7 +88,9 @@ ok(V.pickIlgan(igs, '갑', 'M').videoUrl === 'https://e.com/a.mp4', '甲/갑 정
 ok(V.pickIlgan(igs, '甲', '여').gender === 'F', '성별 한글 정규화');
 ok(V.pickIlgan(igs, '병', 'M') === null && V.pickIlgan(igs, '을', 'M') === null, '영상이 없으면 null(단계 건너뜀)');
 const cov = V.ilganCoverage(igs); ok(cov.of === 20 && cov.male === 1 && cov.female === 1, '커버리지 계산');
-ok(typeof V.pickAwakening === 'undefined' && typeof V.awakeningCoverage === 'undefined', '수호신 영상 매핑 제거');
+const vids = [{ dayPillar: '甲子', gender: 'M', videoUrl: 'https://e.com/a.mp4', enabled: true }, { dayPillar: '갑자', gender: 'F', videoUrl: '/api/clipfile?k=x', enabled: true }];
+ok(V.pickAwakening(vids, '갑자', 'M').clip.videoUrl === 'https://e.com/a.mp4' && V.pickAwakening(vids, '병인', 'M', { videoUrl: 'https://e.com/fb.mp4' }).fallback === true, '일주 영상 매핑(甲子/갑자 정규화) · 없으면 fallback');
+const cov120 = V.awakeningCoverage(vids); ok(cov120.of === 120 && cov120.male === 1 && cov120.female === 1 && cov120.missing.length === 118, '일주 영상 커버리지 120');
 console.log('   커버리지 남', cov.male + '/10 여', cov.female + '/10 전체', cov.total + '/20');
 ok(V.pickImage([{ id: 'a', url: '/a.webp', tags: ['wood', 'growth'] }], ['wood', 'forest']).image.id === 'a' && V.pickImage([], ['wood']) === null, '이미지 태그 선택·없을 때 null');
 
