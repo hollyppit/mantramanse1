@@ -473,6 +473,7 @@ summary { cursor:pointer; padding:4px 0; }
   </form>
 </dialog>
 
+<script src="../story/fonts.js"></script>
 <script src="../story/content.js"></script>
 <script src="../story/schema.js"></script>
 <script src="../assemble.js"></script>
@@ -487,6 +488,7 @@ summary { cursor:pointer; padding:4px 0; }
 <script src="../v2/compose.js"></script>
 <script src="v2-admin.js"></script>
 <script src="v2-content.js"></script>
+<script src="v2-cover.js"></script>
 <script src="v2-shell.js"></script>
 <script>
 (function () {
@@ -721,14 +723,16 @@ summary { cursor:pointer; padding:4px 0; }
     var W = HM.mode === 'pc' ? 1280 : 390, k = Math.min(1, bw / W);
     f.style.width = W + 'px'; f.style.height = (bh / k) + 'px'; f.style.transform = 'scale(' + k + ')'; f.style.left = Math.max(0, (bw - W * k) / 2) + 'px';
   }
-  function hmMode(m) { HM.mode = m; $('hmPc').classList.toggle('pri', m === 'pc'); $('hmMo').classList.toggle('pri', m === 'mo'); hmFit(); }
+  function hmMode(m) { HM.mode = m; if (window.CoverBar) setTimeout(window.CoverBar.refresh, 0); $('hmPc').classList.toggle('pri', m === 'pc'); $('hmMo').classList.toggle('pri', m === 'mo'); hmFit(); }
   $('hmPc').onclick = function () { hmMode('pc'); };
   $('hmMo').onclick = function () { hmMode('mo'); };
   window.addEventListener('resize', function () { if (!$('t-home').classList.contains('hide')) hmFit(); });
   $('hmFrame').addEventListener('load', function () { HM.frameOn = true; hmFit(); hmPush(); if (HM.openIdx >= 0) hmSend({ t: 'st-sel', i: HM.openIdx }); });
   window.addEventListener('beforeunload', function (e) { if (HM.dirty) { e.preventDefault(); e.returnValue = ''; } });
+  window.AdminHM = { get story() { return HM.story; }, get mode() { return HM.mode; }, changed: hmChanged, send: hmSend };
   window.addEventListener('message', function (e) {
     if (e.origin !== location.origin) return; var d = e.data || {};
+    if (d.t === 'st-tsel' && window.CoverBar) { window.CoverBar.select(d.n); return; }
     if (d.t === 'st-ready') { HM.frameOn = true; hmFit(); hmPush(); }
     else if (d.t === 'st-char' && HM.story) { // 미리보기에서 캐릭터를 끌었다: 값을 목록에 반영 (열려 있던 항목은 그대로 유지)
       var cv = (HM.story.settings || {}).cover, ch = cv && cv.chars && cv.chars[d.i];
@@ -743,7 +747,7 @@ summary { cursor:pointer; padding:4px 0; }
     else if (d.t === 'st-text' && HM.story) { // 미리보기에서 브랜드명·서브 카피·버튼을 끌었다
       var cv2 = (HM.story.settings || {}).cover; if (cv2 && /^(title|sub|button)$/.test(d.n)) {
         var sx = d.m ? 'M' : ''; cv2[d.n + 'X' + sx] = d.x; cv2[d.n + 'Y' + sx] = d.y;
-        HM.openGrp = 'cover'; hmChanged(); hmBuild();
+        HM.openGrp = 'cover'; hmChanged(); hmBuild(); if (window.CoverBar) window.CoverBar.refresh();
       }
     }
     else if (d.t === 'st-pick' && HM.story && d.i >= 0 && d.i < HM.story.blocks.length) { HM.openIdx = d.i; hmBuild(); var c = document.querySelector('#hmForm details[data-i="' + d.i + '"]'); if (c) c.scrollIntoView({ block: 'nearest' }); }

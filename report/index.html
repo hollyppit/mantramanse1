@@ -281,6 +281,32 @@ em { font-style: normal; background: linear-gradient(180deg, var(--gold-l), var(
 .cv-btn { margin-top: 30px; font: inherit; font-family: var(--cv-bf); font-size: var(--cv-bs, 15px); letter-spacing: .3em; padding: 13px 34px 13px 38px; min-height: 48px; color: var(--gold); background: rgba(8, 10, 17, .55); border: 1px solid rgba(205, 178, 122, .45); border-radius: 2px; cursor: pointer; transition: color .3s, border-color .3s, background .3s, box-shadow .3s; }
 .cv-btn:hover { color: var(--gold-l); border-color: var(--gold-l); background: rgba(205, 178, 122, .07); box-shadow: 0 0 26px -8px rgba(235, 217, 170, .45); }
 .cv-arr { margin-top: 14px; font-size: .8rem; color: var(--ink-3); opacity: .5; }
+/* 커버 글자 세부 설정(관리자 미리보기 툴바에서 조절): 굵기·자간·줄간격·색, 등장 효과(.in-*)와 지속 효과(.an-*) */
+.cv-t { line-height: var(--cv-th, 1.45); --sh: var(--cv-tc, #E9E4D8); }
+.cv-s { font-weight: var(--cv-sw, 400); letter-spacing: var(--cv-sl, .6px); line-height: var(--cv-sh, 1.8); --sh: var(--cv-sc, #7C786C); }
+.cv-btn { font-weight: var(--cv-bwt, 400); letter-spacing: var(--cv-bl, 4.5px); color: var(--cv-bc, var(--gold)); }
+.cv-ti { display: block; }
+.in-fade { animation: ciFade var(--ci-d, 1s) ease var(--ci-l, .2s) both; }
+.in-rise { animation: ciRise var(--ci-d, 1s) cubic-bezier(.2, .7, .2, 1) var(--ci-l, .2s) both; }
+.in-drop { animation: ciDrop var(--ci-d, 1s) cubic-bezier(.2, .7, .2, 1) var(--ci-l, .2s) both; }
+.in-blur { animation: ciBlur var(--ci-d, 1s) ease var(--ci-l, .2s) both; }
+.in-zoom { animation: ciZoom var(--ci-d, 1s) cubic-bezier(.2, .7, .2, 1) var(--ci-l, .2s) both; }
+.in-wipe { animation: ciWipe var(--ci-d, 1s) ease var(--ci-l, .2s) both; }
+.in-letters .w { display: inline-block; white-space: nowrap; }
+.in-letters .lt { display: inline-block; animation: ciRise calc(var(--ci-d, 1s) * .7) cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--ci-l, .2s) + var(--i, 0) * 70ms); }
+@keyframes ciFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ciRise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes ciDrop { from { opacity: 0; transform: translateY(-22px); } to { opacity: 1; transform: none; } }
+@keyframes ciBlur { from { opacity: 0; filter: blur(14px); } to { opacity: 1; filter: blur(0); } }
+@keyframes ciZoom { from { opacity: 0; transform: scale(.86); } to { opacity: 1; transform: none; } }
+@keyframes ciWipe { from { opacity: .2; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
+.an-pulse { animation: cvTp var(--cv-as, 6s) ease-in-out infinite; }
+.an-sway { animation: cvTw var(--cv-as, 6s) ease-in-out infinite; }
+.an-shimmer .cv-ti { background-image: linear-gradient(110deg, var(--sh) 35%, #fff 50%, var(--sh) 65%); background-size: 260% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: cvTs var(--cv-as, 6s) linear infinite; }
+@keyframes cvTp { 0%, 100% { scale: 1; } 50% { scale: 1.045; } }
+@keyframes cvTw { 0%, 100% { translate: -5px 0; } 50% { translate: 5px 0; } }
+@keyframes cvTs { from { background-position: 130% 0; } to { background-position: -130% 0; } }
+
 @media (max-width: 700px) { #cover { padding: calc(56px + var(--cv-pt, 0svh)) 0 calc(28px + var(--cv-pb, 0svh)); } .cv-lamp { width: min(78vw, 340px); height: min(46svh, 340px); } .cv-t { margin-top: 20px; } }
 .preview #cover { min-height: 70svh; }
 
@@ -325,6 +351,7 @@ footer { padding: 70px 0 60px; color: var(--ink-3); font-size: .76rem; text-alig
 <footer><p>© 만트라 포춘 · 사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></footer>
 <script src="/engine.js"></script>
 <script src="assemble.js"></script>
+<script src="story/fonts.js"></script>
 <script src="story/content.js"></script>
 <script src="story/story.js"></script>
 <script src="story/ambient.js"></script>

@@ -576,12 +576,17 @@
   var CVN = { title: 't', sub: 's', button: 'b' }, ALIGN3 = { left: 'flex-start', center: 'center', right: 'flex-end' };
   function pv(cv, k) { var m = cv[k + 'M']; return fxMob() && m != null && m !== '' ? m : cv[k]; }
   function coverStyle(cv) {
-    function fnt(k) { return k === 'sans' ? 'var(--f-sans)' : k === 'serif' ? 'var(--f-serif)' : ''; }
+    var SF = root.StoryFonts;
+    function fnt(k) { if (k === 'sans') return 'var(--f-sans)'; if (k === 'serif') return 'var(--f-serif)'; var f = SF && SF.css(k); if (f) { SF.ensure(k); return f; } return ''; }
     function hex(v, d) { return /^#[0-9a-f]{3,8}$/i.test(String(v || '').trim()) ? String(v).trim() : d; }
     function px(v, d) { v = +v; return (isFinite(v) && v > 0 ? v : d) + 'px'; }
+    function wt(v, d) { return /^[1-9]00$/.test(String(v)) ? String(v) : d; }
+    function nm(v, d, lo, hi) { v = v === '' || v == null ? NaN : +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; }
     function al(n) { var v = pv(cv, n + 'Align'); return ALIGN3[v] ? v : 'center'; }
-    var o = ['--cv-tf:' + (fnt(cv.titleFont) || 'var(--f-serif)'), '--cv-tw:' + (/^[1-9]00$/.test(cv.titleWeight) ? cv.titleWeight : 400), '--cv-ts:' + px(pv(cv, 'titleSize'), 17), '--cv-tl:' + (isFinite(+cv.titleSpacing) && cv.titleSpacing !== '' ? +cv.titleSpacing : 4) + 'px',
-      '--cv-tc:' + hex(cv.titleColor, '#E9E4D8'), '--cv-sc:' + hex(cv.subColor, '#7C786C'), '--cv-as:' + (isFinite(+cv.textAnimSpeed) && +cv.textAnimSpeed >= 1 ? +cv.textAnimSpeed : 6) + 's', '--cv-sf:' + (fnt(cv.subFont) || 'var(--f-sans)'), '--cv-ss:' + px(pv(cv, 'subSize'), 14), '--cv-bf:' + (fnt(cv.buttonFont) || 'var(--f-sans)'), '--cv-bs:' + px(pv(cv, 'buttonSize'), 15),
+    var o = ['--cv-tf:' + (fnt(cv.titleFont) || 'var(--f-serif)'), '--cv-tw:' + wt(cv.titleWeight, '400'), '--cv-ts:' + px(pv(cv, 'titleSize'), 17), '--cv-tl:' + nm(cv.titleSpacing, 4, -5, 40) + 'px', '--cv-th:' + nm(cv.titleLine, 1.45, 0.8, 3),
+      '--cv-tc:' + hex(cv.titleColor, '#E9E4D8'), '--cv-sc:' + hex(cv.subColor, '#7C786C'), '--cv-as:' + nm(cv.textAnimSpeed, 6, 1, 30) + 's',
+      '--cv-sf:' + (fnt(cv.subFont) || 'var(--f-sans)'), '--cv-ss:' + px(pv(cv, 'subSize'), 14), '--cv-sw:' + wt(cv.subWeight, '400'), '--cv-sl:' + nm(cv.subSpacing, 0.6, -5, 40) + 'px', '--cv-sh:' + nm(cv.subLine, 1.8, 0.8, 3),
+      '--cv-bf:' + (fnt(cv.buttonFont) || 'var(--f-sans)'), '--cv-bs:' + px(pv(cv, 'buttonSize'), 15), '--cv-bwt:' + wt(cv.buttonWeight, '400'), '--cv-bl:' + nm(cv.buttonSpacing, 4.5, -5, 40) + 'px', '--cv-bc:' + hex(cv.buttonColor, '#CDB27A'),
       '--cv-pt:' + Math.max(0, num(pv(cv, 'coverTop'), 0)) + 'svh', '--cv-pb:' + Math.max(0, num(pv(cv, 'coverBottom'), 0)) + 'svh'];
     Object.keys(CVN).forEach(function (n) { var c = CVN[n], a = al(n); o.push('--cv-' + c + 'x:' + num(pv(cv, n + 'X'), 0) + 'vw', '--cv-' + c + 'y:' + num(pv(cv, n + 'Y'), 0) + 'svh', '--cv-' + c + 'a:' + ALIGN3[a], '--cv-' + c + 'tx:' + a); });
     return o.join(';');
@@ -590,11 +595,11 @@
     if (el._edit) return; el._edit = true; var st = null;
     el.addEventListener('pointerdown', function (e) {
       var t = e.target.closest && e.target.closest('.cv-t, .cv-s, .cv-bw'); el.querySelectorAll('.cv-sel').forEach(function (x) { x.classList.remove('cv-sel'); });
-      if (!t) return; t.classList.add('cv-sel');
+      if (!t) { try { parent.postMessage({ t: 'st-tsel', n: null }, location.origin); } catch (er) { } return; } t.classList.add('cv-sel');
       var n = t.classList.contains('cv-t') ? 'title' : t.classList.contains('cv-s') ? 'sub' : 'button', cv = C.settings.cover, m = fxMob(), sx = m ? 'M' : '';
       if (m) ['X', 'Y'].forEach(function (k) { if (cv[n + k + 'M'] == null || cv[n + k + 'M'] === '') cv[n + k + 'M'] = num(cv[n + k], 0); });
       st = { n: n, m: m, kx: n + 'X' + sx, ky: n + 'Y' + sx, x: e.clientX, y: e.clientY, cx: num(cv[n + 'X' + sx], 0), cy: num(cv[n + 'Y' + sx], 0), cv: cv };
-      try { t.setPointerCapture(e.pointerId); } catch (er) { } e.preventDefault();
+      try { parent.postMessage({ t: 'st-tsel', n: n, m: m }, location.origin); } catch (er) { } try { t.setPointerCapture(e.pointerId); } catch (er) { } e.preventDefault();
     });
     el.addEventListener('pointermove', function (e) {
       if (!st) return; st.cv[st.kx] = Math.round((st.cx + (e.clientX - st.x) / root.innerWidth * 100) * 10) / 10; st.cv[st.ky] = Math.round((st.cy + (e.clientY - st.y) / root.innerHeight * 100) * 10) / 10;
@@ -603,6 +608,22 @@
     function end() { if (!st) return; var s = st; st = null; try { parent.postMessage({ t: 'st-text', n: s.n, m: s.m, x: s.cv[s.kx], y: s.cv[s.ky] }, location.origin); } catch (er) { } }
     el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
   }
+  // 글자를 "단어(줄바꿈 안 되는 묶음) > 글자" span 으로 나눠 하나씩 나타나게 한다. <br>·<em> 같은 태그 구조는 유지한다.
+  function splitLetters(box) {
+    var idx = 0, w = document.createTreeWalker(box, NodeFilter.SHOW_TEXT), nodes = [], n;
+    while ((n = w.nextNode())) nodes.push(n);
+    nodes.forEach(function (t) {
+      var frag = document.createDocumentFragment();
+      String(t.nodeValue).split(/(\s+)/).forEach(function (part) {
+        if (!part) return;
+        if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+        var word = document.createElement('span'); word.className = 'w';
+        part.split('').forEach(function (ch) { var s = document.createElement('span'); s.className = 'lt'; s.style.setProperty('--i', idx++); s.textContent = ch; word.appendChild(s); });
+        frag.appendChild(word);
+      });
+      t.parentNode.replaceChild(frag, t);
+    });
+  }
   function cover() {
     var el = document.getElementById('cover'); if (!el) return;
     var cv = (C.settings && C.settings.cover) || {};
@@ -610,12 +631,19 @@
     if (!cv || cv.show === false) { el.hidden = true; el.innerHTML = ''; return; }
     var url = media(cv.src), alt = pick(cv.alt) || '';
     var img = url ? '<img class="cv-img" src="' + esc(url) + '" alt="' + esc(alt) + '" decoding="async" fetchpriority="high">' : '<div class="cv-glow" role="img" aria-label="' + esc(alt) + '"></div>';
-    function an(v) { return /^(float|glow|both)$/.test(v) ? ' an-' + v : ''; }
+    function an(v) { return /^(float|glow|both|pulse|sway|shimmer)$/.test(v) ? ' an-' + v : ''; }
+    // 등장 효과: 안쪽 span(.cv-ti)에 걸어 바깥의 지속 효과(float·glow 등)와 겹치지 않게 한다
+    function inner(n, html) {
+      var k = cv[n + 'In'], ok = /^(fade|rise|drop|blur|zoom|wipe|letters)$/.test(k);
+      var d = Math.min(6, Math.max(0.2, num(cv[n + 'InSpeed'], 0.9))), l = Math.min(10, Math.max(0, num(cv[n + 'InDelay'], n === 'title' ? 0.2 : n === 'sub' ? 0.5 : 0.8)));
+      return '<span class="cv-ti' + (ok ? ' in-' + k : '') + '" style="--ci-d:' + d + 's;--ci-l:' + l + 's">' + html + '</span>';
+    }
     el.setAttribute('style', coverStyle(cv));
     el.hidden = false;
     el.innerHTML = '<div class="cv-in"><div class="cv-lamp">' + img + '</div>' +
-      (cv.title ? '<h1 class="cv-t' + an(cv.titleAnim) + '">' + fmt(pick(cv.title)) + '</h1>' : '') + (cv.sub ? '<p class="cv-s' + an(cv.subAnim) + '">' + fmt(pick(cv.sub)) + '</p>' : '') +
-      (cv.button ? '<div class="cv-bw"><button type="button" class="cv-btn" data-cover="go">' + esc(pick(cv.button)) + '</button><span class="cv-arr" aria-hidden="true">↓</span></div>' : '') + '</div>';
+      (cv.title ? '<h1 class="cv-t' + an(cv.titleAnim) + '">' + inner('title', fmt(pick(cv.title))) + '</h1>' : '') + (cv.sub ? '<p class="cv-s' + an(cv.subAnim) + '">' + inner('sub', fmt(pick(cv.sub))) + '</p>' : '') +
+      (cv.button ? '<div class="cv-bw"><button type="button" class="cv-btn" data-cover="go">' + inner('button', esc(pick(cv.button))) + '</button><span class="cv-arr" aria-hidden="true">↓</span></div>' : '') + '</div>';
+    el.querySelectorAll('.cv-ti.in-letters').forEach(splitLetters);
     var i2 = el.querySelector('.cv-img'); if (i2) i2.onerror = function () { i2.outerHTML = '<div class="cv-glow"></div>'; };
     var go = el.querySelector('[data-cover]');
     if (go) go.onclick = function () {
@@ -629,7 +657,7 @@
   function meta() { // 이름·탭 제목·공유 설명
     var S1 = C.settings || {}, skip = document.getElementById('skipLink'), bn = document.getElementById('brandName');
     cover();
-    if (bn) bn.textContent = S1.brandName || '';
+    if (bn) bn.innerHTML = esc(S1.brandName || '').split(String.fromCharCode(10)).join('<br>');
     if (root.Ambient) root.Ambient.apply(S1.ambient);
     if (skip) { var sl = S1.skipLink || {}; skip.textContent = sl.text || ''; skip.hidden = !sl.text; skip.onclick = function () { scrollToId(sl.target || 'sajuInput'); }; }
     if (S1.pageTitle) { document.title = S1.pageTitle; var t = document.querySelector('meta[property="og:title"]'); if (t) t.setAttribute('content', S1.pageTitle); }
@@ -785,6 +813,7 @@
       root.addEventListener('message', function (e) {
         if (e.origin !== location.origin) return; var d = e.data || {};
         if (d.t === 'st-content' && d.story) { applyStory(d.story); if (started) render(); else start(); mark(); }
+        else if (d.t === 'st-tsel-set') { var cvEl = document.getElementById('cover'); if (cvEl) { cvEl.querySelectorAll('.cv-sel').forEach(function (x) { x.classList.remove('cv-sel'); }); var tt = cvEl.querySelector(d.n === 'title' ? '.cv-t' : d.n === 'sub' ? '.cv-s' : '.cv-bw'); if (tt) { tt.classList.add('cv-sel'); tt.scrollIntoView({ block: 'center' }); } } }
         else if (d.t === 'st-sel') { sel = +d.i; var el = mark(); if (el && d.scroll) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
       });
       document.addEventListener('click', function (e) {
