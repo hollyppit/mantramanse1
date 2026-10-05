@@ -43,7 +43,10 @@ ok(rep.chapters.find(c => c.id === 'c15').items.length === 10, '대운 10개');
 ok(rep.chapters.find(c => c.id === 'c18').items.length === 12, '12개월');
 ok(rep.chapters.find(c => c.id === 'c14').disclaimer, '전생 안내 문구');
 ok(rep.plan.strategy.length === 4 && rep.plan.checklist.length > 0, 'Action Plan');
-ok(Object.values(rep.chapters.find(c => c.id === 'c19').remedy).every(a => a.length >= 1), '개운법 7영역 모두 추천 존재');
+ok(Object.values(rep.chapters.find(c => c.id === 'c19').remedy).every(a => a.length >= 1) && !('exercise' in rep.chapters.find(c => c.id === 'c19').remedy), '개운법 영역(행동·성장·사람·공간·환경·타이밍)별 추천 존재, 운동은 별도 영역이 아님');
+ok(rep.remedies.action.some(c => R.Remedy.isExercise(c.item)) && rep.remedies.action.length >= 3, '행동 개운법 안에 운동·활동이 포함됨');
+ok(R.Remedy.normalize({ id: 'x', type: 'exercise', extra: { a: 1 } }).type === 'action' && R.Remedy.normalize({ id: 'x', type: 'exercise' }).extra.kind === 'exercise', '예전 exercise 유형을 행동의 운동 종류로 이전');
+ok(!R.Remedy.LIBRARY.some(x => x.type === 'exercise') && R.Remedy.TYPES.indexOf('exercise') < 0, '운동 유형이 따로 없음');
 ok(rep.meta.warnings.length === 0, '단정 표현 없음: ' + rep.meta.warnings.join(','));
 ok(/^[0-9a-f]{8}$/.test(rep.meta.key), '캐시 키');
 ok(R.Compose.build(sd, Object.assign({}, lib, { version: 'x' }), cfg).meta.key !== rep.meta.key, '콘텐츠 버전이 바뀌면 캐시 키 변경');
@@ -56,6 +59,15 @@ console.log('   샘플:', rep.chapters[0].headline, '|', rep.plan.strategy.map(s
 console.log('   개운:', Object.entries(rep.remedies).map(([t, a]) => t + ':' + a.map(x => x.item.title).join('/')).join('  '));
 
 for (const pid of ['love', 'wealth', 'newyear']) { const pk = R.Compose.fromSaved({}, [], pid), r3 = R.Compose.build(sd, pk.lib, pk.cfg); ok(r3.chapters.length === pk.cfg.chapters.length && r3.chapters.every(c => c.headline && c.scenes.length >= 3) && r3.plan.strategy.length === 4, pid + ' 리포트 생성'); }
+console.log('2b. 프로젝트별 개운법');
+const remOf = pid => { const pk = R.Compose.fromSaved({}, [], pid), r = R.Compose.build(sd, pk.lib, pk.cfg); return { ids: Object.values(r.remedies).flat().map(x => x.item.id), intro: r.chapters.find(c => c.base === 'c19'), plan: r.plan }; };
+const rF = remOf('full'), rL = remOf('love'), rW = remOf('wealth'), rN = remOf('newyear');
+ok(rL.ids.filter(i => /^love_/.test(i)).length >= 4 && !rL.ids.some(i => /^wealth_|^ny_/.test(i)), '애정운: 애정 전용 개운법 우선, 다른 상품 전용 항목 없음 ' + rL.ids.filter(i => /^love_/.test(i)).length + '개');
+ok(rW.ids.filter(i => /^wealth_/.test(i)).length >= 4 && !rW.ids.some(i => /^love_|^ny_/.test(i)), '재물운: 재물 전용 개운법 우선 ' + rW.ids.filter(i => /^wealth_/.test(i)).length + '개');
+ok(rN.ids.filter(i => /^ny_/.test(i)).length >= 2 && !rN.ids.some(i => /^love_|^wealth_/.test(i)), '신년운세: 신년 전용 개운법');
+ok(!rF.ids.some(i => /^(love|wealth|ny)_/.test(i)), '종합: 상품 전용 항목은 쓰지 않음(공통만)');
+ok(rL.intro.headline === '사랑을 쓰는 개운법' && rW.intro.headline === '재물을 다루는 개운법' && rN.intro.headline === '올해를 쓰는 개운법' && rF.intro.headline !== rL.intro.headline, '개운법 장 첫 문장이 상품별로 다름');
+console.log('   애정:', rL.ids.slice(0, 5).join(', '), '| 재물:', rW.ids.slice(0, 5).join(', '));
 console.log('3. 커버리지 (무작위 사주 600개)');
 let seed = 7; const rnd = n => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) % n;
 const empties = {}, seasons = {}, unav = {}; let thin = 0, groupsSeen = {};

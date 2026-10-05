@@ -218,6 +218,13 @@
     add('remedy', 'remedy_intro_' + k, { seunSeason: [k] }, 40, '지금의 개운 방향: ' + SE[k].rec, '개운법은 원국·신강약·통근·오행·십성·용신 계산에 현재 대운·세운·월운 흐름을 겹쳐서 지금 필요한 행동 방향을 고릅니다.', '', { actionTags: [k] });
   });
 
+  // 상품(프로젝트)별 개운 소개: 같은 사주라도 상품 주제에 맞춰 개운법 장의 첫 문장이 달라진다
+  [['love', '사랑을 쓰는 개운법', '관계에서 지금 필요한 행동을 계산 결과와 현재의 흐름에 맞춰 골랐습니다. 마음을 표현하고, 듣고, 거리를 조절하는 일에 초점을 둡니다.'],
+   ['wealth', '재물을 다루는 개운법', '돈을 대하는 나의 행동 성향과 지금의 흐름에 맞춰 습관과 환경을 골랐습니다. 수익을 예측하는 것이 아니라 기록·점검·재투자 같은 행동에 초점을 둡니다.'],
+   ['newyear', '올해를 쓰는 개운법', '올해의 흐름과 달마다의 계절에 맞춰 이번 해에 어떻게 움직일지 골랐습니다. 목표를 줄이고 매달 점검하는 설계에 초점을 둡니다.']].forEach(function (p) {
+    add('remedy', 'remedy_intro_proj_' + p[0], { project: [p[0]] }, 95, p[1], p[2], '', { actionTags: ['organize'] });
+  });
+
   root.ReportV2 = root.ReportV2 || {};
   root.ReportV2.Content = { version: '2026.10.1', modules: MODS, SEASONS: SE };
 })(typeof window !== 'undefined' ? window : globalThis);

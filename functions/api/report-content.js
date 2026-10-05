@@ -7,9 +7,9 @@ import { cleanTextStyles } from '../_textstyle.js';
 
 const KEY = 'v2:content', MAX_BYTES = 3 * 1024 * 1024;
 const MOD_CATS = ['identity', 'elements', 'personality', 'talent', 'shadow', 'career', 'success', 'wealth', 'love', 'marriage', 'relationship', 'compatibility', 'family', 'pastLife', 'daewoon', 'currentCycle', 'sewoon', 'monthly', 'remedy', 'actionPlan'];
-const REM_TYPES = ['action', 'exercise', 'growth', 'people', 'place', 'environment', 'timing'];
+const REM_TYPES = ['action', 'exercise', 'growth', 'people', 'place', 'environment', 'timing']; // exercise 는 예전 저장본 호환(저장 시 action 의 운동 종류로 바꾼다)
 // 조건 키는 report/v2/rules.js 의 FIELDS 와 같다
-const COND_KEYS = ['dayPillar', 'dayMasterStem', 'dayMasterEl', 'gender', 'dominantEl', 'lackEl', 'yongEl', 'dominantGroup', 'weakestGroup', 'strength', 'hasRoot', 'pattern', 'star', 'career', 'daewoonSeason', 'seunSeason', 'monthSeason', 'needTag'];
+const COND_KEYS = ['dayPillar', 'dayMasterStem', 'dayMasterEl', 'gender', 'dominantEl', 'lackEl', 'yongEl', 'dominantGroup', 'weakestGroup', 'strength', 'hasRoot', 'pattern', 'star', 'career', 'daewoonSeason', 'seunSeason', 'monthSeason', 'needTag', 'project'];
 const ID_RE = /^[\w.\-가-힣]{1,80}$/; // 기본 모듈 id 에 한글(예: identity_el_금)이 있다
 const str = (v, n) => (typeof v === 'string' ? v.slice(0, n) : '');
 const strs = (v, n = 20, len = 40) => (Array.isArray(v) ? v.slice(0, n).map(x => str(x, len)).filter(Boolean) : []);
@@ -34,8 +34,9 @@ function cleanModule(m) {
 }
 function cleanRemedy(r) {
   if (!r || !ID_RE.test(r.id || '') || !REM_TYPES.includes(r.type)) return null;
-  return { id: r.id, type: r.type, title: str(r.title, 100), summary: str(r.summary, 500), detail: str(r.detail, 1500), tags: strs(r.tags, 20), conditions: cleanCond(r.conditions), priority: Math.max(0, Math.min(100, Math.round(+r.priority || 0))),
-    imageUrl: MEDIA_OK.test(r.imageUrl || '') ? r.imageUrl : '', enabled: r.enabled !== false, extra: cleanExtra(r.extra) };
+  const legacyEx = r.type === 'exercise';
+  return { id: r.id, type: legacyEx ? 'action' : r.type, title: str(r.title, 100), summary: str(r.summary, 500), detail: str(r.detail, 1500), tags: strs(r.tags, 20), conditions: cleanCond(r.conditions), priority: Math.max(0, Math.min(100, Math.round(+r.priority || 0))),
+    imageUrl: MEDIA_OK.test(r.imageUrl || '') ? r.imageUrl : '', enabled: r.enabled !== false, extra: legacyEx ? Object.assign({}, cleanExtra(r.extra) || {}, { kind: 'exercise' }) : cleanExtra(r.extra) };
 }
 function cleanChapter(c) {
   if (!c || !ID_RE.test(c.id || '')) return null;
@@ -49,7 +50,7 @@ function cleanProject(p) {
   if (!p || !ID_RE.test(p.id || '')) return null;
   const chapters = Array.isArray(p.chapters) ? p.chapters.slice(0, 60).filter(x => x && ID_RE.test(x.id || '')).map(x => ({ id: x.id, act: Math.max(1, Math.min(9, Math.round(+x.act) || 1)) })) : null;
   return { id: p.id, name: str(p.name, 40), desc: str(p.desc, 200), enabled: p.enabled !== false, accessLevel: p.accessLevel === 'premium' ? 'premium' : 'free',
-    requiredCompletionRate: typeof p.requiredCompletionRate === 'number' ? Math.max(0, Math.min(1, p.requiredCompletionRate)) : null,
+    needTags: strs(p.needTags, 12, 24), requiredCompletionRate: typeof p.requiredCompletionRate === 'number' ? Math.max(0, Math.min(1, p.requiredCompletionRate)) : null,
     acts: Array.isArray(p.acts) ? p.acts.slice(0, 9).map(a => ({ title: str(a && a.title, 40), line: str(a && a.line, 160), pdfDone: str(a && a.pdfDone, 120) })) : null, chapters };
 }
 function cleanScoring(s) {

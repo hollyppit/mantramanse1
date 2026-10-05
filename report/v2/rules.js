@@ -7,7 +7,7 @@
     dominantEl: ['가장 강한 오행', 2], lackEl: ['부족한 오행', 3], yongEl: ['용신 오행', 3],
     dominantGroup: ['가장 강한 십성군', 3], weakestGroup: ['가장 약한 십성군', 2], strength: ['신강약', 3], hasRoot: ['원국 통근', 1],
     pattern: ['격국·구조', 3], star: ['신살', 2], career: ['직업 분야', 3],
-    daewoonSeason: ['현재 대운 계절', 3], seunSeason: ['올해 계절', 3], monthSeason: ['이달 계절', 3], needTag: ['필요 행동', 2],
+    daewoonSeason: ['현재 대운 계절', 3], project: ['프로젝트(상품)', 4], seunSeason: ['올해 계절', 3], monthSeason: ['이달 계절', 3], needTag: ['필요 행동', 2],
   };
   var ARRAY_FACTS = { pattern: 1, star: 1, career: 1, needTag: 1 };
 

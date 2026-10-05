@@ -189,10 +189,10 @@
       var ch = (c.timing && c.timing.chain) || [];
       h += '<div class="cap">TIMING</div><div class="chain">' + ch.map(function (x, i) { return (i ? '<div class="ar" aria-hidden="true">↓</div>' : '') + '<div class="st"><small style="color:var(--ink3)">' + esc(x.level) + ' · ' + esc(x.ganzhi) + '</small><br>' + seaChip(x.season) + '</div>'; }).join('') + '<div class="ar" aria-hidden="true">↓</div></div>' +
         '<div class="strategy" aria-label="현재 전략">' + ((c.timing && c.timing.strategy) || []).map(function (x, i) { return (i ? '<i aria-hidden="true">→</i>' : '') + '<b>' + esc(x.label) + '</b>'; }).join('') + '</div><div class="cards">';
-      var KO = { action: '행동', exercise: '운동', growth: '성장 · 학습', people: '사람', place: '공간', environment: '환경', timing: '타이밍' };
-      ['action', 'exercise', 'growth', 'people', 'place', 'environment'].forEach(function (k) {
+      var KO = { action: '행동', growth: '성장 · 학습', people: '사람', place: '공간', environment: '환경', timing: '타이밍' };
+      ['action', 'growth', 'people', 'place', 'environment'].forEach(function (k) {
         var a = (c.remedy && c.remedy[k]) || []; if (!a.length) return;
-        h += '<div class="card"><h3>' + KO[k] + '</h3>' + a.map(function (x) { return '<p style="margin-bottom:8px"><b style="font-weight:500">' + esc(x.title) + '</b><br><span style="color:var(--ink2);font-size:.9rem">' + esc(x.summary) + '</span></p>'; }).join('') + '</div>';
+        h += '<div class="card"><h3>' + KO[k] + '</h3>' + a.map(function (x) { return '<p style="margin-bottom:8px"><b style="font-weight:500">' + esc(x.title) + '</b>' + (x.kind === 'exercise' ? ' <span class="sea" style="padding:0 8px;font-size:.7rem">운동·활동</span>' : '') + '<br><span style="color:var(--ink2);font-size:.9rem">' + esc(x.summary) + '</span></p>'; }).join('') + '</div>';
       });
       h += '</div>';
     } else {

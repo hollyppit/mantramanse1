@@ -46,9 +46,9 @@
   // lib: { modules, remedies, images, version }
   function build(sd, lib, cfg, opts) {
     opts = opts || {}; var Rules = R.Rules, Remedy = R.Remedy, Media = R.Media;
-    var facts = Rules.flatten(sd), v = vars(sd, facts), warnings = [];
-    var nd = Remedy.needs(sd); facts.needTag = nd.tags;
-    var rec = Remedy.recommend(sd, facts, lib.remedies, nd, { action: 3, exercise: 2, growth: 2, people: 2, place: 2, environment: 2, timing: 1 });
+    var pj = (cfg.project && cfg.project.id) || 'full', facts = Rules.flatten(sd, { project: pj }), v = vars(sd, facts), warnings = [];
+    var nd = Remedy.needs(sd, (cfg.project && cfg.project.needTags) || []); facts.needTag = nd.tags;
+    var rec = Remedy.recommend(sd, facts, lib.remedies, nd, { action: 4, growth: 2, people: 2, place: 2, environment: 2, timing: 1 });
     var plan = Remedy.actionPlan(sd, nd, rec);
     var ctx = { usedIds: [], prevChapter: [] }, chapters = [], media = lib.media || lib.media || [], lastAct = 0;
 
@@ -72,7 +72,7 @@
         });
       }
       if (ch.kind === 'remedy') {
-        out.remedy = {}; Remedy.TYPES.forEach(function (t) { out.remedy[t] = (rec[t] || []).map(function (c) { return { id: c.item.id, title: c.item.title, summary: c.item.summary, extra: c.item.extra, matched: c.matchedTags }; }); });
+        out.remedy = {}; Remedy.TYPES.forEach(function (t) { out.remedy[t] = (rec[t] || []).map(function (c) { return { id: c.item.id, title: c.item.title, summary: c.item.summary, extra: c.item.extra, kind: c.item.extra && c.item.extra.kind || '', matched: c.matchedTags }; }); });
         out.timing = { chain: [
           sd.currentDaewoon ? { level: '대운', ganzhi: sd.currentDaewoon.ganzhi, season: sd.currentDaewoon.season } : null,
           sd.sewoon ? { level: '세운', ganzhi: sd.sewoon.year + ' ' + sd.sewoon.ganzhi, season: sd.sewoon.season } : null,
@@ -100,7 +100,7 @@
     var summary = {
       core: byId.c01 && byId.c01.headline, strengths: byId.c04 && byId.c04.headline, weaknesses: byId.c05 && byId.c05.headline, work: byId.c06 && byId.c06.headline,
       money: byId.c08 && byId.c08.headline, people: byId.c11 && byId.c11.headline, love: byId.c09 && byId.c09.headline, growth: (rec.growth[0] && rec.growth[0].item.title) || '',
-      body: (rec.exercise[0] && rec.exercise[0].item.title) || '', place: (rec.place[0] && rec.place[0].item.title) || '',
+      body: ((rec.action || []).filter(function (c) { return Remedy.isExercise(c.item); })[0] || { item: {} }).item.title || '', place: (rec.place[0] && rec.place[0].item.title) || '',
       daewoon: byId.c16 && byId.c16.headline, thisYear: byId.c17 && byId.c17.headline, months: sd.monthlyLuck.map(function (m) { return m.month + '월 ' + (m.season ? R.SajuData.SEASONS[m.season] : ''); }),
       todo: plan.checklist, avoid: plan.avoid, strategy: plan.strategy.map(function (s) { return s.label; }),
     };
@@ -140,7 +140,7 @@
   function library(saved) {
     saved = saved || {};
     var mix = function (base, extra) { var m = {}, out = []; (base || []).forEach(function (x) { m[x.id] = x; }); (extra || []).forEach(function (x) { if (x && x.id) m[x.id] = Object.assign({}, m[x.id] || {}, x); }); Object.keys(m).forEach(function (k) { out.push(m[k]); }); return out; };
-    return { modules: mix(R.Content.modules, saved.modules), remedies: mix(R.Remedy.LIBRARY, saved.remedies), media: saved.media || saved.images || [], version: (saved.version ? saved.version + '+' : '') + R.Content.version };
+    return { modules: mix(R.Content.modules, saved.modules), remedies: mix(R.Remedy.LIBRARY, (saved.remedies || []).map(R.Remedy.normalize)), media: saved.media || saved.images || [], version: (saved.version ? saved.version + '+' : '') + R.Content.version };
   }
 
   // AI 미디어 선택: 서버가 만든 후보(assetId·점수·태그)만 AI 에 주고, 응답 assetId 가 그 scene 의 후보 목록에 있을 때만 교체한다.

@@ -103,7 +103,11 @@
       if (!built.chap) { built.chap = 1; CH.sel = (ownedBy('full')[0] || chaptersAll()[0]).id; chapDraw(); } else if (CH.pending) { CH.sel = CH.pending; CH.pending = null; CH.tab = 'set'; chapDraw(); }
     });
   }
-  function projList() { if (!PJ.list) PJ.list = R.Chapters.projects(ST.saved).map(function (p) { var q = clone(p); q.chapters = null; return q; }); return PJ.list; }
+  function projList() {
+    if (!PJ.list) PJ.list = R.Chapters.projects(ST.saved).map(function (p) { var q = clone(p); q.chapters = null; return q; });
+    C.COND.project[1] = PJ.list.map(function (p) { return p.id; }); PJ.list.forEach(function (p) { C.LABELS[p.id] = p.name; }); // 조건 편집기의 "프로젝트" 선택지
+    return PJ.list;
+  }
   function projectById(id) { return projList().filter(function (p) { return p.id === id; })[0]; }
   function actCount(pid) { var p = projectById(pid); return Math.max(1, (p && p.acts && p.acts.length) || 1); }
   function ownedBy(pid) { return chaptersAll().filter(function (c) { return c.project === pid; }).sort(function (a, b) { return ((a.act || 1) - (b.act || 1)) || ((a.order || 0) - (b.order || 0)); }); }
@@ -366,7 +370,7 @@
     $('.cols > .card', root).onclick = function (e) { var c = e.target.closest('.pjc'); if (c) { PJ.sel = c.dataset.id; projDraw(); } };
     $('#pjAdd', root).onclick = function () {
       var id = prompt('새 프로젝트 id (영문 소문자·숫자, 예: career)'); if (!id) return; id = id.trim().toLowerCase(); if (!/^[a-z0-9_-]{1,30}$/.test(id) || L.some(function (x) { return x.id === id; })) return toast('쓸 수 없거나 이미 있는 id 입니다', true);
-      L.push({ id: id, name: '새 프로젝트', desc: '', enabled: true, accessLevel: 'free', requiredCompletionRate: null, chapters: null, acts: [{ title: '시작', line: '', pdfDone: '' }] }); PJ.sel = id; PJ.dirty = true; projDraw();
+      L.push({ id: id, name: '새 프로젝트', desc: '', enabled: true, accessLevel: 'free', requiredCompletionRate: null, chapters: null, needTags: [], acts: [{ title: '시작', line: '', pdfDone: '' }] }); PJ.sel = id; PJ.dirty = true; projDraw();
     };
     $('#pjSave', root).onclick = function () { this.disabled = true; saveStructure().then(function () { projDraw(); toast('저장했습니다'); }).catch(function (e) { toast(e.message, true); projDraw(); }); };
     projEditor(p);
@@ -378,7 +382,7 @@
     var h = '<div class="card"><div class="stat"><span>챕터 <b>' + st.n + '</b></span><span>ACT <b>' + p.acts.length + '</b></span><span>주소 <b>' + esc(url) + '</b></span>' + (st.empty.length ? '<span class="pill w">비어 있을 수 있음: ' + esc(st.empty.map(function (c) { return c.title; }).join(', ')) + '</span>' : '') + '</div>' +
       '<div class="row"><button type="button" id="pjTest">조합 테스트로 보기</button><button type="button" id="pjOpen">뷰어 열기 ↗</button><button type="button" id="pjCopy">주소 복사</button></div>' +
       '<div class="g2c"><div class="fld"><label>이름</label><input type="text" data-p="name" value="' + esc(p.name) + '"></div><div class="fld"><label>접근 (accessLevel)</label><select data-p="accessLevel"><option value="free"' + (p.accessLevel !== 'premium' ? ' selected' : '') + '>free</option><option value="premium"' + (p.accessLevel === 'premium' ? ' selected' : '') + '>premium</option></select></div></div>' +
-      '<div class="fld"><label>설명</label><input type="text" data-p="desc" value="' + esc(p.desc || '') + '"></div><div class="g2c"><div class="fld"><label>PDF 해금 완독률 (0~1 · 비우면 마지막 챕터 도달)</label><input type="number" min="0" max="1" step="0.05" data-p="requiredCompletionRate" value="' + (p.requiredCompletionRate == null ? '' : p.requiredCompletionRate) + '"></div><label style="display:flex;gap:8px;align-items:center;margin-top:18px"><input type="checkbox" data-p="enabled"' + (p.enabled !== false ? ' checked' : '') + '>공개</label></div></div>' +
+      '<div class="fld"><label>설명</label><input type="text" data-p="desc" value="' + esc(p.desc || '') + '"></div><div class="fld"><label>개운법 우선 방향 태그 (쉼표) — 이 상품에서 먼저 추천할 행동 성향. 예: connection, listening, organize, reinvest, protect, learning, output</label><input type="text" data-p="needTags" value="' + esc((p.needTags || []).join(', ')) + '"></div><p class="muted" style="margin:0 0 8px;font-size:.76rem">이 상품 전용 개운법·해석 문구는 "챕터 관리 → 개운법/해석 모듈"에서 선택 조건 <b>프로젝트</b>를 이 상품으로 지정해 만듭니다. 조건이 없는 항목은 모든 상품이 같이 씁니다.</p><div class="g2c"><div class="fld"><label>PDF 해금 완독률 (0~1 · 비우면 마지막 챕터 도달)</label><input type="number" min="0" max="1" step="0.05" data-p="requiredCompletionRate" value="' + (p.requiredCompletionRate == null ? '' : p.requiredCompletionRate) + '"></div><label style="display:flex;gap:8px;align-items:center;margin-top:18px"><input type="checkbox" data-p="enabled"' + (p.enabled !== false ? ' checked' : '') + '>공개</label></div></div>' +
       '<div class="acts" style="margin-top:12px">' + p.acts.map(function (a, k) {
         var rows = mine.filter(function (c) { return (c.act || 1) === k + 1; });
         return '<div class="card actc" data-act="' + k + '"><div class="acth"><b>ACT ' + (k + 1) + '</b><input type="text" data-a="title" value="' + esc(a.title) + '" placeholder="ACT 제목"><button type="button" data-adel title="이 ACT 삭제"' + (p.acts.length <= 1 || rows.length ? ' disabled' : '') + '>삭제</button></div>' +
@@ -390,7 +394,7 @@
     var dirty = function () { PJ.dirty = true; var b = $('#pjSave'); if (b) b.disabled = false; };
     box.oninput = box.onchange = function (e) {
       var t = e.target, k = t.dataset && t.dataset.p, ar = t.closest('[data-act]');
-      if (k) { p[k] = t.type === 'checkbox' ? t.checked : k === 'requiredCompletionRate' ? (t.value === '' ? null : +t.value) : t.value; dirty(); return; }
+      if (k) { p[k] = t.type === 'checkbox' ? t.checked : k === 'requiredCompletionRate' ? (t.value === '' ? null : +t.value) : k === 'needTags' ? C.csv(t.value) : t.value; dirty(); return; }
       if (ar && t.dataset.a) { p.acts[+ar.dataset.act][t.dataset.a] = t.value; dirty(); return; }
       var row = t.closest('[data-c]'); if (row && t.matches('[data-move]')) { var c = chapterById(row.dataset.c); c.act = +t.value; c.order = 9999; renumber(p.id); dirty(); projDraw(); }
     };

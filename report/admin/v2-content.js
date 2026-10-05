@@ -7,7 +7,7 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var CATS = ['identity', 'elements', 'personality', 'talent', 'shadow', 'career', 'success', 'wealth', 'love', 'marriage', 'relationship', 'compatibility', 'family', 'pastLife', 'daewoon', 'currentCycle', 'sewoon', 'monthly', 'remedy', 'actionPlan'];
   var CAT_KO = { identity: '일주', elements: '오행', personality: '성격', talent: '재능', shadow: '그림자', career: '직업', success: '성공 방식', wealth: '재물', love: '연애', marriage: '결혼', relationship: '대인관계', compatibility: '궁합 유형', family: '가족', pastLife: '전생', daewoon: '대운', currentCycle: '현재 대운', sewoon: '세운', monthly: '월운', remedy: '개운 소개', actionPlan: 'Action Plan' };
-  var REM_TYPES = ['action', 'exercise', 'growth', 'people', 'place', 'environment', 'timing'], REM_KO = { action: '행동', exercise: '운동', growth: '성장/학습', people: '사람', place: '공간', environment: '환경', timing: '타이밍' };
+  var REM_TYPES = ['action', 'growth', 'people', 'place', 'environment', 'timing'], REM_KO = { action: '행동', growth: '성장/학습', people: '사람', place: '공간', environment: '환경', timing: '타이밍' };
   var SEASONS = ['opportunity', 'expansion', 'harvest', 'accumulation', 'transition', 'defense'];
   var SEASON_KO = R.SajuData.SEASONS;
   var COND = { // 조건 키 → [이름, 선택지 | null(직접 입력)]
@@ -15,8 +15,9 @@
     dominantEl: ['가장 강한 오행', ['목', '화', '토', '금', '수']], lackEl: ['부족한 오행', ['목', '화', '토', '금', '수']], yongEl: ['용신 오행', ['목', '화', '토', '금', '수']],
     dominantGroup: ['가장 강한 십성군', ['비겁', '식상', '재성', '관성', '인성']], weakestGroup: ['가장 약한 십성군', ['비겁', '식상', '재성', '관성', '인성']], strength: ['신강약', ['신강', '중화', '신약']], hasRoot: ['원국 통근', ['있음', '없음']],
     pattern: ['격국·구조 (쉼표, 예: 관살혼잡)', null], star: ['신살 (쉼표, 예: 역마살)', null], career: ['직업 분야', ['creative', 'planning', 'research', 'education', 'business', 'sales', 'management', 'organization', 'technical', 'communication', 'asset', 'public']],
-    daewoonSeason: ['현재 대운 계절', SEASONS], seunSeason: ['올해 계절', SEASONS], monthSeason: ['이달 계절', SEASONS], needTag: ['필요 행동 태그 (쉼표)', null],
+    project: ['프로젝트(상품)', ['full', 'love', 'wealth', 'newyear']], daewoonSeason: ['현재 대운 계절', SEASONS], seunSeason: ['올해 계절', SEASONS], monthSeason: ['이달 계절', SEASONS], needTag: ['필요 행동 태그 (쉼표)', null],
   };
+  var LABELS = { full: '종합 운세', love: '애정운', wealth: '재물운', newyear: '신년운세' }; // 프로젝트 id → 이름(관리자 셸이 갱신)
   var ST = { key: 'v2:content', saved: null, loaded: false, eng: null, media: null };
 
   function api(path, opt) {
@@ -42,7 +43,7 @@
   function load() {
     if (ST.loaded) return Promise.resolve();
     return Promise.all([fetch('/api/report-content').then(function (r) { return r.json(); }).catch(function () { return {}; }), fetch('/api/media?all=1', { headers: { authorization: 'Bearer ' + PW } }).then(function (r) { return r.json(); }).catch(function () { return {}; })])
-      .then(function (a) { ST.saved = a[0].content || {}; ST.media = a[1].media || []; ST.loaded = true; });
+      .then(function (a) { ST.saved = a[0].content || {}; if (ST.saved.remedies) ST.saved.remedies = ST.saved.remedies.map(R.Remedy.normalize); ST.media = a[1].media || []; ST.loaded = true; });
   }
   function engine() {
     if (window.Manse) return Promise.resolve(window.Manse);
@@ -61,7 +62,7 @@
     return Object.keys(COND).map(function (k) {
       var def = COND[k], cur = c[k] || [];
       if (!def[1]) return '<div class="fx"><label>' + def[0] + '</label><input type="text" data-c="' + k + '" value="' + esc(cur.join(',')) + '"></div>';
-      return '<div class="fx"><label>' + def[0] + '</label><div class="cg" data-cg="' + k + '">' + def[1].map(function (o) { return '<label><input type="checkbox" value="' + o + '"' + (cur.indexOf(o) >= 0 ? ' checked' : '') + '><span>' + (SEASON_KO[o] || o) + '</span></label>'; }).join('') + '</div></div>';
+      return '<div class="fx"><label>' + def[0] + '</label><div class="cg" data-cg="' + k + '">' + def[1].map(function (o) { return '<label><input type="checkbox" value="' + o + '"' + (cur.indexOf(o) >= 0 ? ' checked' : '') + '><span>' + (SEASON_KO[o] || LABELS[o] || o) + '</span></label>'; }).join('') + '</div></div>';
     }).join('');
   }
   function condRead(root) {
@@ -70,7 +71,7 @@
     $$('.cg[data-cg]', root).forEach(function (g) { var v = $$('input:checked', g).map(function (i) { return i.value; }); if (v.length) o[g.dataset.cg] = v; });
     return o;
   }
-  var condText = function (c) { return Object.keys(c || {}).map(function (k) { return (COND[k] ? COND[k][0].split(' ')[0] : k) + '=' + c[k].map(function (x) { return SEASON_KO[x] || x; }).join('/'); }).join(' · ') || '조건 없음(폴백)'; };
+  var condText = function (c) { return Object.keys(c || {}).map(function (k) { return (COND[k] ? COND[k][0].split(' ')[0] : k) + '=' + c[k].map(function (x) { return SEASON_KO[x] || LABELS[x] || x; }).join('/'); }).join(' · ') || '조건 없음(폴백)'; };
 
   /* ═══ 공통 아이템 관리자 (해석 모듈 / 개운법) ═══ */
   function itemAdmin(root, o) { // o: {title, base[], key('modules'|'remedies'), cats, catLabel, fields(html builder), read(fn), blank(fn), summary(fn)}
@@ -138,9 +139,11 @@
   function remCfg() {
     return { title: '개운법 라이브러리', base: R.Remedy.LIBRARY, key: 'remedies', catKey: 'type', cats: REM_TYPES.map(function (c) { return [c, REM_KO[c]]; }), catLabel: '유형', title2: function (x) { return x.title; }, catName: function (x) { return REM_KO[x.type] || x.type; },
       blank: function (t) { return { id: 'rem_' + Date.now().toString(36), type: t, title: '', summary: '', detail: '', tags: [], conditions: {}, priority: 50, enabled: true, extra: null, imageUrl: '' }; },
-      fields: function (x) { return '<div class="fx"><label>유형</label><select id="eType">' + REM_TYPES.map(function (c) { return '<option value="' + c + '"' + (x.type === c ? ' selected' : '') + '>' + REM_KO[c] + ' (' + c + ')</option>'; }).join('') + '</select></div>' + tf('eT', '제목', x.title) + tf('eS', '요약', x.summary, 1) + tf('eD', '상세', x.detail, 1) + tf('eTg', '태그 (쉼표) — 필요 행동 태그와 겹칠수록 추천됩니다 (output, learning, recovery, connection …)', (x.tags || []).join(', ')) + tf('eImg', '이미지 주소 (선택)', x.imageUrl || '') +
-        '<div class="fx"><label>extra (JSON, 선택) — 체크리스트 check, 주의 avoid, 운동 energyTags/intensity 등</label><textarea id="eX" class="mono">' + esc(x.extra ? JSON.stringify(x.extra, null, 1) : '') + '</textarea></div>'; },
-      read: function (b, n) { n.type = $('#eType', b).value; n.title = $('#eT', b).value; n.summary = $('#eS', b).value; n.detail = $('#eD', b).value; n.tags = csv($('#eTg', b).value); n.imageUrl = $('#eImg', b).value.trim(); var x = $('#eX', b).value.trim(); try { n.extra = x ? JSON.parse(x) : null; } catch (e) { toast('extra JSON 형식 오류 — 비웠습니다', true); n.extra = null; } return n; } };
+      fields: function (x) { return '<div class="g2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="fx"><label>유형</label><select id="eType">' + REM_TYPES.map(function (c) { return '<option value="' + c + '"' + (x.type === c ? ' selected' : '') + '>' + REM_KO[c] + ' (' + c + ')</option>'; }).join('') + '</select></div><div class="fx"><label>행동의 종류 (유형이 "행동"일 때)</label><select id="eKind"><option value=""' + (!(x.extra && x.extra.kind === 'exercise') ? ' selected' : '') + '>일반 행동</option><option value="exercise"' + (x.extra && x.extra.kind === 'exercise' ? ' selected' : '') + '>운동·활동 (건강 처방이 아닌 활동 추천)</option></select></div></div>' + tf('eT', '제목', x.title) + tf('eS', '요약', x.summary, 1) + tf('eD', '상세', x.detail, 1) + tf('eTg', '태그 (쉼표) — 필요 행동 태그와 겹칠수록 추천됩니다 (output, learning, recovery, connection …)', (x.tags || []).join(', ')) + tf('eImg', '이미지 주소 (선택)', x.imageUrl || '') +
+        '<div class="fx"><label>extra (JSON, 선택) — 체크리스트 check, 주의 avoid, 운동·활동은 kind:"exercise" + energyTags/intensity 등</label><textarea id="eX" class="mono">' + esc(x.extra ? JSON.stringify(x.extra, null, 1) : '') + '</textarea></div>'; },
+      read: function (b, n) { n.type = $('#eType', b).value; n.title = $('#eT', b).value; n.summary = $('#eS', b).value; n.detail = $('#eD', b).value; n.tags = csv($('#eTg', b).value); n.imageUrl = $('#eImg', b).value.trim(); var x = $('#eX', b).value.trim(); try { n.extra = x ? JSON.parse(x) : null; } catch (e) { toast('extra JSON 형식 오류 — 비웠습니다', true); n.extra = null; }
+        var kd = $('#eKind', b) ? $('#eKind', b).value : ''; if (kd === 'exercise' && n.type === 'action') { n.extra = n.extra || {}; n.extra.kind = 'exercise'; } else if (n.extra && n.extra.kind) { delete n.extra.kind; if (!Object.keys(n.extra).length) n.extra = null; }
+        return n; } };
   }
 
   /* ═══ 커버리지 (콘텐츠) ═══ */
@@ -174,6 +177,6 @@
   }
 
   // 새 관리자 셸(v2-shell.js)이 쓰는 공용 부품
-  window.V2Content = { CATS: CATS, CAT_KO: CAT_KO, REM_TYPES: REM_TYPES, REM_KO: REM_KO, COND: COND, SEASONS: SEASONS, ST: ST, api: api, toast: toast, load: load, engine: engine, save: save, mix: mix, clone: clone, csv: csv, esc: esc, setPw: function (p) { PW = p; },
+  window.V2Content = { LABELS: LABELS, CATS: CATS, CAT_KO: CAT_KO, REM_TYPES: REM_TYPES, REM_KO: REM_KO, COND: COND, SEASONS: SEASONS, ST: ST, api: api, toast: toast, load: load, engine: engine, save: save, mix: mix, clone: clone, csv: csv, esc: esc, setPw: function (p) { PW = p; },
     itemAdmin: itemAdmin, modCfg: modCfg, remCfg: remCfg, covOpen: covOpen, condText: condText };
 })();

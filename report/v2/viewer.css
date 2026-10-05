@@ -212,3 +212,15 @@ dialog#drawer { border: 0; padding: 0; background: transparent; color: var(--ink
 @keyframes txShim { from { background-position: 130% 0; } to { background-position: -130% 0; } }
 .tx-sel { outline: 1px dashed var(--gold); outline-offset: 4px; }
 .pv [data-tx] { cursor: move; user-select: none; -webkit-user-select: none; touch-action: none; }
+
+/* 웹(PC) 화면: 영상을 확대(잘라내기)하지 않고 전체가 보이게 한다.
+   각성 영상·일간 소개는 9:16 세로 영상이므로, 가로가 넓은 화면에서는 화면 높이에 맞춘 세로 프레임을 가운데에 두고 그 안에 영상 전체를 보여 준다(양옆은 검은 배경).
+   자막·SKIP·소리 버튼도 이 프레임 안에 놓인다. 휴대폰(700px 이하)은 기존처럼 화면을 꽉 채운다. */
+@media (min-width: 700px) {
+  .awk { max-width: calc(100svh * 9 / 16); margin: 0 auto; }
+  .awk-media video, .awk-media img { object-fit: contain; background: #000; }
+  /* 챕터 안의 영상·이미지도 PC에서는 잘라내지 않는다 */
+  .media video, .media img { object-fit: contain; background: #000; }
+  .s-intro { max-width: 560px; margin: 0 auto; }
+  .s-intro .bg video, .s-intro .bg img { object-fit: contain; background: #000; }
+}
