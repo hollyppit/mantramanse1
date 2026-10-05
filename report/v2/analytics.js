@@ -2,7 +2,7 @@
 // 생년월일·이름 등 개인정보는 properties 에 넣지 않는다(호출하는 쪽 규칙 + 아래 필터). 나중에 sendBeacon 등을 이 한 곳에 붙이면 된다.
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
-  var EVENTS = ['report_started', 'awakening_video_started', 'awakening_video_completed', 'awakening_video_skipped', 'chapter_viewed', 'chapter_completed', 'detail_expanded', 'act_completed', 'report_completed',
+  var EVENTS = ['report_started', 'ilgan_video_started', 'ilgan_video_completed', 'ilgan_video_skipped', 'awakening_video_started', 'awakening_video_completed', 'awakening_video_skipped', 'chapter_viewed', 'chapter_completed', 'detail_expanded', 'act_completed', 'report_completed',
     'pdf_unlocked', 'pdf_downloaded', 'share_card_created', 'share_clicked', 'compatibility_cta_clicked', 'remedy_viewed', 'action_plan_viewed'];
   var BLOCK = /^(name|birth|year|month|day|hour|minute|gender|input|dayPillar)$/i; // 개인 식별/생년월일 키는 버린다
   var session = { events: [], chapters: {}, details: 0, skipped: false, startedAt: 0 };

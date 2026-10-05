@@ -30,6 +30,14 @@ vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')); glob
   ok((await C.runCompose(body, { ...deps, kvGet: null, kvPut: null, llm: async () => 'JSON 아님' })).error === 'bad-answer', '형식 불량 응답 거부');
   ok((await C.runCompose({ payload: { chapters: 'x' } }, deps)).error === 'bad-payload' && (await C.runCompose(null, deps)).error === 'bad-payload', '잘못된 요청 거부');
   const huge = JSON.parse(JSON.stringify(body)); for (let i = 0; i < 30; i++) huge.payload.chapters.push({ id: 'x' + i, fact: 'ㄱ'.repeat(800), headline: 'ㄱ'.repeat(800), interpretation: 'ㄱ'.repeat(800), meaning: 'ㄱ'.repeat(800) }); ok((await C.runCompose(huge, deps)).error === 'bad-payload', '과대 payload 거부');
+  // 일간 소개/각성 영상 서버 검증(_media.js)
+  const mt = path.join(os.tmpdir(), 'media-test.mjs'); fs.writeFileSync(mt, fs.readFileSync(path.join(root, 'functions/_media.js'), 'utf8'));
+  const MD = await import(require('url').pathToFileURL(mt).href);
+  const g1 = MD.cleanIlgan({ stem: '庚', gender: '남', videoUrl: 'https://e.com/a.mp4', keywords: ['a', 'b'] });
+  ok(g1 && g1.stem === '경' && g1.gender === 'M' && g1.enabled, '일간 소개 정리: 한자·한글, 성별');
+  ok(MD.cleanIlgan({ stem: '자', gender: 'M' }) === null && MD.cleanIlgan({ stem: '경', gender: 'x' }) === null, '잘못된 일간·성별 거부');
+  ok(MD.cleanIlgan({ stem: '경', gender: 'M', videoUrl: 'javascript:alert(1)' }).videoUrl === '', '비정상 영상 주소 제거');
+  ok(MD.cleanAwakening({ dayPillar: '경오', gender: 'F' }).dayPillar === '경오' && MD.cleanAwakening({ dayPillar: '경축', gender: 'F' }) === null, '일주 검증 유지');
   // 클라이언트 적용
   const before = rep.chapters[0].headline; R.Compose.applyResult(rep, r1.result, lib);
   ok(rep.chapters[0].headline === '단단하게 결을 세우는 사람입니다' && rep.chapters[0].scenes[0].body === rep.chapters[0].headline, '적용 후 장면 문구도 갱신');

@@ -2,7 +2,7 @@
 const http = require('http'), fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json' };
-let rc = null, mediaList = [], awk = [], story = null, intro = { on: false, src: null, srcMobile: null, skipAfter: 0, once: 'session' }, clips = [], defaults = {}, chapters = null, folders = [], files = {};
+let rc = null, mediaList = [], awk = [], ilg = [], story = null, intro = { on: false, src: null, srcMobile: null, skipAfter: 0, once: 'session' }, clips = [], defaults = {}, chapters = null, folders = [], files = {};
 const send = (r, code, obj) => { r.statusCode = code; r.setHeader('content-type', 'application/json; charset=utf-8'); r.end(JSON.stringify(obj)); };
 const authed = q => (q.headers.authorization || '') === 'Bearer test';
 const body = q => new Promise(res => { const b = []; q.on('data', c => b.push(c)); q.on('end', () => res(Buffer.concat(b))); });
@@ -46,9 +46,9 @@ http.createServer(async (q, r) => {
     if (q.method === 'POST') { await body(q); return send(r, 200, { ok: true, suggestion: { elementTags: ['wood'], stateTags: ['growth', 'recovery'], emotionTags: ['calm', 'hopeful'], sceneTags: ['forest', 'mist'], themeTags: ['personality'], actionTags: [], visualRole: ['hero'], chapterTags: ['personality'], description: '(모의) 안개 낀 숲. 성장과 회복의 표현에 어울립니다.' } }); }
   }
   if (p === '/api/awakening') {
-    if (q.method === 'GET') { if (u.searchParams.get('all')) return authed(q) ? send(r, 200, { videos: awk, fallback: null }) : send(r, 401, { error: '관리자 인증이 필요합니다' }); return send(r, 200, { video: awk.find(v => v.dayPillar === u.searchParams.get('pillar') && v.gender === u.searchParams.get('gender')) || null, fallback: null }); }
+    if (q.method === 'GET') { if (u.searchParams.get('all')) return authed(q) ? send(r, 200, { videos: awk, ilgan: ilg, fallback: null }) : send(r, 401, { error: '관리자 인증이 필요합니다' }); const pl = u.searchParams.get('pillar') || '', gd = u.searchParams.get('gender'); return send(r, 200, { video: awk.find(v => v.dayPillar === pl && v.gender === gd) || null, ilgan: ilg.find(v => v.stem === pl[0] && v.gender === gd) || null, fallback: null }); }
     if (!authed(q)) return send(r, 401, { error: '관리자 인증이 필요합니다' });
-    if (q.method === 'PUT') { awk = JSON.parse((await body(q)).toString()).videos; return send(r, 200, { ok: true, count: awk.length }); }
+    if (q.method === 'PUT') { const b = JSON.parse((await body(q)).toString()); awk = b.videos; ilg = b.ilgan || []; return send(r, 200, { ok: true, count: awk.length, ilgan: ilg.length }); }
   }
   if (p === '/api/story') {
     if (q.method === 'GET') return send(r, 200, { story });

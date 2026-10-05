@@ -39,3 +39,16 @@ export function cleanAwakening(v) {
   return { dayPillar: k, gender: g, videoUrl: url(v.videoUrl), videoWebm: url(v.videoWebm), posterUrl: url(v.posterUrl), guardianImageUrl: url(v.guardianImageUrl), captionsUrl: url(v.captionsUrl),
     title: txt(v.title, 60), subtitle: txt(v.subtitle, 200), keywords: Array.isArray(v.keywords) ? v.keywords.slice(0, 8).map(x => txt(x, 20)).filter(Boolean) : [], enabled: v.enabled !== false };
 }
+
+// 일간 소개 영상(10일간 × 성별 = 20): "당신은 경금입니다" 처럼 일주 각성 영상 앞에 나오는 소개
+export const STEMS_K = '갑을병정무기경신임계', STEMS_H = '甲乙丙丁戊己庚辛壬癸';
+export function normStem(v) {
+  const s = String(v || '').trim(), c = s[0] || '', i = STEMS_K.indexOf(c) >= 0 ? STEMS_K.indexOf(c) : STEMS_H.indexOf(c);
+  return i >= 0 ? STEMS_K[i] : null;
+}
+export function cleanIlgan(v) {
+  if (!v || typeof v !== 'object') return null;
+  const stem = normStem(v.stem), g = /^(m|male|남)/i.test(v.gender || '') ? 'M' : /^(f|female|여)/i.test(v.gender || '') ? 'F' : null; if (!stem || !g) return null;
+  return { stem, gender: g, videoUrl: url(v.videoUrl), videoWebm: url(v.videoWebm), posterUrl: url(v.posterUrl), captionsUrl: url(v.captionsUrl), title: txt(v.title, 60), subtitle: txt(v.subtitle, 200),
+    keywords: Array.isArray(v.keywords) ? v.keywords.slice(0, 8).map(x => txt(x, 20)).filter(Boolean) : [], enabled: v.enabled !== false };
+}

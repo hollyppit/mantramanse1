@@ -72,31 +72,33 @@
       .catch(function () { }).then(function () { clearTimeout(timer); });
   }
 
-  /* ── 3. 일주 각성 영상 ──────────────────────────────────────────────────── */
-  function awakening() {
-    view('awk'); var box = $('#awkMedia'), clip = S.awk.video || S.awk.fallback || null, fb = !S.awk.video, sd = S.sd, done = false;
+  /* ── 3. 영상 단계: ① 일간 소개(10일간×성별 20, "당신은 경금입니다") → ② 일주 각성(60일주×성별 120, "경오일주입니다") ──
+     같은 플레이어(음소거 자동재생·SKIP·소리 켜기·poster/문구 대체)를 쓴다. 일간 소개 영상이 없으면 그 단계는 건너뛰고, 영상이 끝나면 자동으로 다음 단계로 넘어간다. */
+  function playStage(cfg) {
+    view('awk'); var box = $('#awkMedia'), clip = cfg.clip || null, done = false, sd = S.sd, fb = !!cfg.fb;
     var cap = $('#awkCap'), start = $('#awkStart'), snd = $('#awkSound'), skip = $('#awkSkip');
-    start.hidden = true; snd.hidden = true; skip.hidden = false;
-    var title = (S.awk.video && S.awk.video.title) || (sd.dayPillar.ko + '일주'), sub = (S.awk.video && S.awk.video.subtitle) || '', kw = (S.awk.video && S.awk.video.keywords) || [];
+    start.hidden = true; snd.hidden = true; skip.hidden = false; start.textContent = cfg.startLabel || '당신의 이야기를 시작합니다';
+    var title = cfg.title, sub = cfg.sub || '', kw = cfg.kw || [], poster = clip && clip.posterUrl || cfg.guardian || '', ev = cfg.kind === 'ilgan' ? 'ilgan' : 'awakening';
     cap.innerHTML = '<div class="t">' + esc(title) + '</div>' + (sub ? '<div class="s">' + esc(sub) + '</div>' : '') + (kw.length ? '<div class="k">' + kw.map(function (k) { return '<span>' + esc(k) + '</span>'; }).join('') + '</div>' : '');
-    var poster = clip && (clip.posterUrl || (S.awk.video && S.awk.video.guardianImageUrl)) || '';
-    var guardian = S.awk.video && S.awk.video.guardianImageUrl;
     function finish(kind) {
-      if (done) return; done = true; skip.hidden = true; snd.hidden = true; start.hidden = false; start.focus({ preventScroll: true });
-      if (kind === 'completed') T('awakening_video_completed', { fallback: fb }); else if (kind === 'skipped') T('awakening_video_skipped', { fallback: fb });
+      if (done) return; done = true; skip.hidden = true; snd.hidden = true;
+      if (kind === 'completed') T(ev + '_video_completed', { fallback: fb }); else if (kind === 'skipped') T(ev + '_video_skipped', { fallback: fb });
+      if (cfg.auto) { cfg.onDone(kind); return; } // 일간 소개: 끝나면 바로 일주 각성으로
+      start.hidden = false; start.focus({ preventScroll: true });
     }
-    function still() { // 영상이 없거나 재생이 막힌 경우: poster/수호신 이미지 + 문구로 진행한다
-      var img = guardian || poster; box.innerHTML = img ? '<img src="' + esc(img) + '" alt="' + esc(title) + '">' : '<div class="ph" style="--pc:' + EL_COLOR[elKey(sd.dayMaster.el)] + '"></div>';
+    function still() { // 영상이 없거나 재생이 막힌 경우: (일주 각성) poster/수호신 이미지 + 문구로 진행, (일간 소개) 건너뜀
+      if (cfg.auto) { done = true; cfg.onDone('missing'); return; }
+      var img = cfg.guardian || poster; box.innerHTML = img ? '<img src="' + esc(img) + '" alt="' + esc(title) + '">' : '<div class="ph" style="--pc:' + EL_COLOR[elKey(sd.dayMaster.el)] + '"></div>';
       setTimeout(function () { finish('completed'); }, 2600);
     }
     var url = clip && (clip.videoUrl || clip.videoWebm);
     if (!url || saveData && !poster) { still(); }
     else {
-      var v = document.createElement('video'); v.muted = true; v.defaultMuted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); v.autoplay = true; v.preload = 'auto'; v.setAttribute('aria-label', title + ' 각성 영상'); if (poster) v.poster = poster;
+      var v = document.createElement('video'); v.muted = true; v.defaultMuted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); v.autoplay = true; v.preload = 'auto'; v.setAttribute('aria-label', title + ' 영상'); if (poster) v.poster = poster;
       if (clip.videoWebm && v.canPlayType && v.canPlayType('video/webm')) { var s1 = document.createElement('source'); s1.src = clip.videoWebm; s1.type = 'video/webm'; v.appendChild(s1); }
       if (clip.videoUrl) { var s2 = document.createElement('source'); s2.src = clip.videoUrl; s2.type = /\.webm(\?|$)/.test(clip.videoUrl) ? 'video/webm' : 'video/mp4'; v.appendChild(s2); }
       box.innerHTML = ''; box.appendChild(v);
-      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); T('awakening_video_started', { fallback: fb }); snd.hidden = false; });
+      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); T(ev + '_video_started', { fallback: fb }); snd.hidden = false; });
       v.addEventListener('ended', function () { finish('completed'); });
       v.addEventListener('error', function () { if (!done) { v.remove(); still(); } }, true);
       var p = v.play(); if (p && p.catch) p.catch(function () { v.controls = false; if (poster) v.load(); setTimeout(function () { if (v.paused && !done) { v.remove(); still(); } }, 1200); });
@@ -104,8 +106,18 @@
       skip.onclick = function () { v.pause(); finish('skipped'); };
     }
     if (!url || (saveData && !poster)) skip.onclick = function () { finish('skipped'); };
-    start.onclick = function () { beginReader(); };
+    start.onclick = function () { cfg.onDone('start'); };
   }
+  function ilganStage(next) { // 일간 소개 단계(영상이 있을 때만)
+    var ig = S.awk && S.awk.ilgan, sd = S.sd;
+    if (!ig || !(ig.videoUrl || ig.videoWebm)) { next(); return; }
+    playStage({ kind: 'ilgan', clip: ig, fb: false, title: ig.title || ('당신은 ' + sd.dayMaster.stem + sd.dayMaster.el + '입니다'), sub: ig.subtitle, kw: ig.keywords, auto: true, onDone: next });
+  }
+  function ijuStage() { // 일주 각성 단계
+    var v = S.awk && S.awk.video, sd = S.sd;
+    playStage({ kind: 'awakening', clip: v || (S.awk && S.awk.fallback), fb: !v, title: (v && v.title) || (sd.dayPillar.ko + '일주'), sub: v && v.subtitle, kw: v && v.keywords, guardian: v && v.guardianImageUrl, onDone: beginReader });
+  }
+  function awakening() { ilganStage(ijuStage); }
   var elKey = function (k) { return { '목': 'wood', '화': 'fire', '토': 'earth', '금': 'metal', '수': 'water' }[k] || 'water'; };
 
   /* ── 4. 리포트(챕터·Scene) ──────────────────────────────────────────────── */
@@ -324,7 +336,7 @@
       try {
         var ch = window.Manse.compute(m.input); S.sd = R.SajuData.build(ch, { now: m.now || Date.now() }); S.name = m.name || ''; S.media = m.media || [];
         S.pack = R.Compose.fromSaved(m.content, S.media, m.project || 'full'); S.rep = R.Compose.build(S.sd, S.pack.lib, S.pack.cfg); S.awk = m.awk || {}; S.visited = {}; S.ended = {};
-        if (m.chapter === 'awakening') { awakening(); return; }
+        if (m.chapter === 'ilgan') { ilganStage(ijuStage); return; } if (m.chapter === 'awakening') { ijuStage(); return; }
         var i = Math.max(0, S.rep.chapters.map(function (c) { return c.id; }).indexOf(m.chapter)); view('reader'); $('#barTot').textContent = S.rep.chapters.length;
         S.idx = i; var c = S.rep.chapters[i]; S.visited[c.id] = 1; render(c, i, true); window.scrollTo(0, 0);
       } catch (err) { $('#loadText').textContent = '미리보기를 만들지 못했습니다: ' + (err && err.message); view('load'); }
@@ -332,5 +344,5 @@
     if (window.parent !== window) window.parent.postMessage({ type: 'mt-v2-ready' }, location.origin);
   }
 
-  window.MantraV2 = { state: S, go: go, T: T };
+  window.MantraV2 = { state: S, go: go, T: T, awakening: awakening };
 })();

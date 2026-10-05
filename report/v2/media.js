@@ -42,6 +42,23 @@
     return { male: n.M, female: n.F, total: n.M + n.F, of: 120, cells: cells, missing: missing, invalid: bad.length };
   }
 
+  // 일간 소개 영상(일간 10 × 성별 2 = 20). 일주 각성 영상 앞에 나온다. 없으면 null → 이 단계는 건너뛴다.
+  function normStem(s) { s = String(s || '').trim()[0] || ''; var i = STEMS.indexOf(s); if (i < 0) i = STEM_H.indexOf(s); return i >= 0 ? STEMS[i] : null; }
+  function pickIlgan(list, stem, gender) {
+    var s = normStem(stem), g = normGender(gender), f = null;
+    (list || []).forEach(function (v) { if (v && v.enabled !== false && normStem(v.stem) === s && normGender(v.gender) === g && (v.videoUrl || v.videoWebm)) f = v; });
+    return f;
+  }
+  function ilganCoverage(list) {
+    var cells = [], n = { M: 0, F: 0 };
+    STEMS.forEach(function (s) { ['M', 'F'].forEach(function (g) {
+      var v = (list || []).filter(function (x) { return normStem(x.stem) === s && normGender(x.gender) === g; })[0], st = 'missing';
+      if (v) st = v.enabled === false ? 'disabled' : (v.videoUrl || v.videoWebm) ? (/^(\/|https:\/\/)/.test(v.videoUrl || v.videoWebm) ? 'ok' : 'error') : (v.posterUrl ? 'poster-only' : 'missing');
+      if (st === 'ok') n[g]++; cells.push({ stem: s, gender: g, status: st });
+    }); });
+    return { male: n.M, female: n.F, total: n.M + n.F, of: 20, cells: cells };
+  }
+
   // 이미지 라이브러리: [{id,url,tags,priority,chapters?,enabled}]. 점수 = 겹치는 태그 수(가중) + priority/100. 같은 이미지는 usedIds 로 중복 회피.
   function pickImage(images, wantTags, o) {
     o = o || {}; var used = o.usedIds || [], best = null, bestS = 0;
@@ -61,5 +78,5 @@
     theme: ['career', 'wealth', 'love', 'marriage', 'relationship', 'family', 'study', 'creation', 'leadership', 'travel'],
   };
 
-  R.Media = { ILJU: ILJU, normPillar: normPillar, normGender: normGender, pickAwakening: pickAwakening, awakeningCoverage: awakeningCoverage, pickImage: pickImage, TAG_GROUPS: TAG_GROUPS };
+  R.Media = { ILJU: ILJU, normPillar: normPillar, normGender: normGender, pickAwakening: pickAwakening, pickIlgan: pickIlgan, ilganCoverage: ilganCoverage, normStem: normStem, STEMS: STEMS, awakeningCoverage: awakeningCoverage, pickImage: pickImage, TAG_GROUPS: TAG_GROUPS };
 })(typeof window !== 'undefined' ? window : globalThis);

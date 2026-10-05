@@ -112,6 +112,11 @@ ok(sc.keywords.length === 3 && sc.pillar === '경진일주' && !/1990|0515|1430|
 let bad = 0; for (let i = 0; i < 60; i++) { const c = mk(1950 + rnd(60), 1 + rnd(12), 1 + rnd(28), rnd(2) ? rnd(24) : null, rnd(2) ? 'M' : 'F'), s2 = R.SajuData.build(c, { now }), r2 = R.Compose.build(s2, lib, cfg); try { R.Pdf.pages(r2, s2, {}); R.ShareCard.content(r2, s2, null); } catch (e) { bad++; } }
 ok(bad === 0, '무작위 사주 60개 PDF/카드 생성 오류 ' + bad);
 
+console.log('4d. 일간 소개 영상');
+const il = [{ stem: '경', gender: 'M', videoUrl: 'https://e.com/g.mp4', enabled: true }, { stem: '庚', gender: 'F', videoWebm: 'https://e.com/g.webm' }, { stem: '갑', gender: 'M', videoUrl: '/api/clipfile?k=a.mp4', enabled: false }];
+ok(R.Media.pickIlgan(il, '경', 'M').videoUrl === 'https://e.com/g.mp4' && R.Media.pickIlgan(il, '경금', '여') && R.Media.pickIlgan(il, '경', 'F').videoWebm, '일간·성별로 선택(한자·두 글자 허용)');
+ok(R.Media.pickIlgan(il, '갑', 'M') === null && R.Media.pickIlgan(il, '임', 'M') === null, '비활성·미등록은 null → 단계 건너뜀');
+const ic = R.Media.ilganCoverage(il); ok(ic.of === 20 && ic.male === 1 && ic.female === 1, '일간 소개 커버리지 x/20');
 console.log('5. 기존 엔진 회귀');
 const snap = fs.existsSync(path.join(root, 'tests/regression-snapshot.js'));
 ok(snap, '기존 회귀 스냅샷 테스트 존재(별도 실행)');
