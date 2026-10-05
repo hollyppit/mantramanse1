@@ -21,7 +21,7 @@
     var M = root.Manse, now = (opts && opts.now) || Date.now(), un = [];
     if (!M || !ch) throw new Error('Manse 엔진 또는 계산 결과가 없습니다');
     var P = ch.pillars, d = P.day, dEl = M.stemEl(d.s);
-    var sd = { version: 1, birth: { solarY: ch.solar && ch.solar.y, hourKnown: !!ch.hourKnown }, gender: ch.gender === 'F' ? 'F' : 'M' };
+    var sd = { version: 1, birth: { solarY: ch.solar && ch.solar.y, solarM: ch.solar && ch.solar.m, solarD: ch.solar && ch.solar.d, hour: ch.hourKnown && ch.solar ? ch.solar.h : null, minute: ch.hourKnown && ch.solar ? ch.solar.mi : null, hourKnown: !!ch.hourKnown }, gender: ch.gender === 'F' ? 'F' : 'M' };
 
     var pill = function (k) {
       var p = P[k], c = ch.cells && ch.cells[k]; if (!p) return null;

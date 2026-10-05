@@ -85,7 +85,9 @@
   // ── 5. 프롤로그 (運路) ──
   // 흐름: 갈대밭 → 산맥 → 눈 내리는 산사 → 암전 → 해 → 이름 → "나에게 맞는 때" → 타이틀 → 命(타고난 것).  이름이 없으면 이름 장면은 건너뛴다.
   var titleSub = function (nm) { return nm ? '{hero}에게는,\n{hero}의 때가 있다.' : '모든 사람에게는,\n각자의 때가 있다.'; };
-  function prologue(sd, name, vars) {
+  function prologue(sd, name, vars, o) {
+    o = o || {}; var K = R.EpicIntro;
+    if (K && o.style === 'EPIC_WUXIA_PARODY') return K.build(sd, name, vars, o.birth, o).concat([K.bridge(name, vars)]); // INTRO 전용 연출(본편과 분리) + 본편으로 넘어가는 다리
     var nm = String(name || '').trim(), b = basis(sd), d = DOM[b.dominant] || DOM.비겁, out = [];
     out.push(sc('pro_1', 'DAWN', { pacing: 'SLOW', visualMetaphor: '해 뜨기 직전, 바람에 흔들리는 갈대밭' }, [['사람마다', '!때가 다르다.']], { chapterId: 'c00', mediaIntent: { scenes: ['field', 'sunrise', 'mist'], emotions: ['calm', 'hopeful'] } }));
     out.push(sc('pro_2', 'MOUNTAIN', { visualMetaphor: '넓은 산맥 사이로 이어지는 길' }, [['누군가는', '!일찍 움직이고.']], { chapterId: 'c00', mediaIntent: { scenes: ['mountain', 'road', 'cloud'], emotions: ['powerful'] } }));
@@ -102,7 +104,9 @@
     out.push(sc('pro_fixed', 'SILENCE', { pacing: 'SLOW' }, [['운은 계속 변한다.'], ['~하지만 변하지 않는 것도 있다.']], { bg: 'black' }));
     out.push(sc('pro_myeong', 'CHARACTER_REVEAL', { pacing: 'SLOW', textAnimation: 'line-reveal', nameEmphasis: 'SOFT', mediaTags: ['mountain', 'mist'] }, [['!命'], [nm ? '{hero이가} 처음부터' : '처음부터', '가지고 있던 것.']], { chapterId: 'c00', mediaIntent: { scenes: ['mountain', 'mist'], emotions: ['powerful'] } }));
     out.push(sc('pro_hero', 'CHARACTER_REVEAL', { pacing: 'SLOW', mediaTags: ['walkingAlone', 'road'], visualMetaphor: '길 위에 선 한 사람' }, [d.oneLine, ['!' + d.flip]], { chapterId: 'c00', mediaIntent: { scenes: ['road', 'walkingAlone'], emotions: ['contemplative'], actions: ['walking'] } }));
-    return fill(out, vars);
+    out = fill(out, vars);
+    if (o.style === 'MINIMAL') out = out.filter(function (s) { return /^(pro_6|pro_title)$/.test(s.sceneId); }); // 이름 → 타이틀만
+    return out;
   }
 
   // ── 6. 현실 해석 → 데이터 → 일상 → 통찰 (METAPHOR → DATA → REALITY → INSIGHT) ──

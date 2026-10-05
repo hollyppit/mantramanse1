@@ -112,7 +112,9 @@ ok(!/cn-cam-on/.test(hr) && /data-motion="none"/.test(hr), 'reduced-motion: 카�
 const hz = R.CinemaRender.html({ cinema: { preset: 'CINEMATIC_INTRO', segments: [{ text: '느리게 타자', emphasis: 'normal', animation: 'typewriter', block: 0 }, { text: '한 단어씩 나타난다', emphasis: 'normal', animation: 'word-reveal', block: 0 }, { text: '큰 이동', emphasis: 'normal', animation: 'slide-left', block: 0 }] }, bg: 'black' }, { reduce: true });
 ok(!/class="cn-c"|class="cn-w"/.test(hz) && !/data-a="(typewriter|slide-left|word-reveal)"/.test(hz) && /느리게 타자/.test(hz) && /큰 이동/.test(hz), 'reduced-motion: typewriter·word·slide 를 페이드로 단순화(문장은 그대로)');
 const ht = R.CinemaRender.html({ cinema: { segments: [{ text: '타자', emphasis: 'normal', animation: 'typewriter', block: 0 }] } }, {});
-ok(/aria-hidden="true"><i class="cn-c"/.test(ht) && /class="cn-sr">타자</.test(ht), 'typewriter: 글자 span 은 aria-hidden, 읽기용 텍스트 별도 제공');
+ok(!/class="cn-c"|class="cn-w"/.test(ht) && /data-a="fade-up"/.test(ht) && /타자/.test(ht), '글자 등장 애니메이션 통일: 장면이 typewriter 를 지정해도 fade-up 하나로 그려진다');
+const hu = R.CinemaRender.html({ cinema: { segments: [{ text: 'a', animation: 'zoom-in', emphasis: 'impact', block: 0 }, { text: 'b', animation: 'blur-in', block: 1 }, { text: 'c', animation: 'slide-left', block: 2, name: true }] } }, {});
+ok((hu.match(/data-a="([^"]+)"/g) || []).every(x => x === 'data-a="fade-up"'), '모든 문장이 같은 애니메이션(fade-up)');
 ok(/<video[^>]*preload="metadata"/.test(R.CinemaRender.html({ cinema: {} , sceneType: 'insight', text: '가' }, { media: { type: 'video', url: '/a.mp4', posterUrl: '/p.webp' } })), '영상은 metadata 만 preload(다음 장면 이외는 지연 로드)');
 ok(!/transition:\s*(width|height|top|left)/.test(fs.readFileSync(path.join(root, 'report/v2/cinema.css'), 'utf8')), '레이아웃을 흔드는 transition 없음(transform/opacity 위주)');
 ok(/@media \(prefers-reduced-motion: reduce\)/.test(fs.readFileSync(path.join(root, 'report/v2/cinema.css'), 'utf8')), 'CSS reduced-motion 분기');

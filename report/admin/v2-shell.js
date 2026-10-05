@@ -617,6 +617,19 @@
   }
   // 시네마 기본 연출: 장면 종류(16)마다 기본 연출을 정한다. 비워 둔 칸은 프리셋·내장 기본값을 따른다. 저장하면 /api/report-content 의 cinemaDefaults.
   var CINE_SEL = 'EXPLANATION';
+  // 인트로 연출: 무협 패러디(기본) · 시네마틱 · 최소. 본편(해석·AI 문장)에는 영향을 주지 않는다.
+  function introEpicCard(box) {
+    var K = R.EpicIntro; if (!K) return; var cur = Object.assign({}, K.DEFAULTS, ST.saved.introEpic || {}), sel = function (id, list, v) { return '<select id="' + id + '">' + list.map(function (x) { return '<option value="' + x[0] + '"' + (String(v) === String(x[0]) ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>'; };
+    var d = document.createElement('div'); d.className = 'card'; d.style.marginTop = '12px';
+    d.innerHTML = '<b style="color:var(--gold)">인트로 연출</b> <span class="muted">사주를 입력한 직후 나오는 20~30초 인트로입니다. <b>무협 패러디</b>는 한 사람이 태어난 일을 천하의 대사건처럼, 끝까지 진지하게 읽습니다(간지·출생일시·이름은 실제 만세력 값 그대로). 운로 타이틀이 끝나면 패러디도 끝나고 본편은 평소 문체로 진행됩니다.</span>' +
+      '<div class="row" style="margin:10px 0;gap:12px;flex-wrap:wrap"><label>스타일 ' + sel('ieStyle', [['EPIC_WUXIA_PARODY', '무협 패러디 (권장)'], ['CINEMATIC', '시네마틱 (기존)'], ['MINIMAL', '최소 (이름·타이틀만)']], cur.style) + '</label>' +
+      '<label>유머 ' + sel('ieHumor', [['PARODY', 'PARODY — 펀치라인 1~2개'], ['SUBTLE', 'SUBTLE — 거창한 문장만'], ['OFF', 'OFF — 진지하게만']], cur.humor) + '</label>' +
+      '<label>에픽 레벨 ' + sel('ieLevel', [[1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5 (최대)']], cur.epicLevel) + '</label></div>' +
+      '<div class="muted">에픽 레벨이 높을수록 정적·이름 연출·북 소리·글자 크기가 커집니다. 길이는 늘어나지 않습니다(최대 30초). 음성 해설은 없고, 북·바람 소리와 배경음악만 쓰입니다.</div>' +
+      '<div class="row" style="margin-top:10px"><button class="pri" id="ieSave" type="button">인트로 설정 저장</button></div>';
+    box.appendChild(d);
+    d.querySelector('#ieSave').onclick = function () { var v = { style: d.querySelector('#ieStyle').value, humor: d.querySelector('#ieHumor').value, epicLevel: +d.querySelector('#ieLevel').value }; C.save({ introEpic: v }).then(function () { ST.saved.introEpic = v; toast('인트로 설정을 저장했습니다'); }).catch(function (e) { toast(e.message, true); }); };
+  }
   function cineOpen() {
     var box = $('#stCine'), K = R.Cinema; C.load().then(function () {
       var defs = ST.saved.cinemaDefaults || {}, KO = V2Cinema.KO;
@@ -629,6 +642,7 @@
       $('#cnSave', box).onclick = function () { var v = V2Cinema.read($('#cnForm', box)), nx = Object.assign({}, defs); if (Object.keys(v).length) nx[CINE_SEL] = v; else delete nx[CINE_SEL]; C.save({ cinemaDefaults: nx }).then(function () { ST.saved.cinemaDefaults = nx; toast('저장했습니다'); cineOpen(); }).catch(function (e) { toast(e.message, true); }); };
       $('#cnClear', box).onclick = function () { var nx = Object.assign({}, defs); delete nx[CINE_SEL]; C.save({ cinemaDefaults: nx }).then(function () { ST.saved.cinemaDefaults = nx; toast('지웠습니다'); cineOpen(); }).catch(function (e) { toast(e.message, true); }); };
       $('#cnTest', box).onclick = function () { gotoTab('v2test'); };
+      introEpicCard(box);
       $$('[data-bgmup]', box).forEach(function (i) { i.onchange = function () { var file = i.files[0]; if (!file) return; $('#bgmMsg', box).textContent = '올리는 중…'; V2Admin.upload(file, file.name, PW).then(function (u) { box.querySelector('[data-bgm="' + i.dataset.bgmup + '"]').value = u; $('#bgmMsg', box).textContent = '올렸습니다. BGM 저장을 눌러 적용하세요'; }).catch(function (e) { $('#bgmMsg', box).textContent = e.message; }); }; });
       $('#bgmSave', box).onclick = function () { var o = {}; $$('[data-bgm]', box).forEach(function (i) { if (i.value.trim()) o[i.dataset.bgm] = i.value.trim(); }); C.save({ bgm: o }).then(function () { ST.saved.bgm = o; toast('BGM을 저장했습니다'); }).catch(function (e) { toast(e.message, true); }); };
     });

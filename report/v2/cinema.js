@@ -7,7 +7,8 @@
   var R = root.ReportV2 = root.ReportV2 || {};
 
   var SCENE_TYPES = ['INTRO', 'CHARACTER', 'QUESTION', 'MEMORY', 'DAILY_LIFE', 'EXPLANATION', 'CONFLICT', 'COMPARISON', 'REVEAL', 'TURNING_POINT', 'TIMELINE', 'WARNING', 'OPPORTUNITY', 'ACTION', 'CLIMAX', 'ENDING', 'NAME_REVEAL', 'NATURE', 'REALITY', 'DATA', 'REFLECTION'];
-  var NAME_EMPH = ['NONE', 'SOFT', 'NORMAL', 'STRONG', 'TITLE'];
+  var NAME_EMPH = ['NONE', 'SOFT', 'NORMAL', 'STRONG', 'TITLE', 'MAXIMUM'];
+  var CUES = ['drum', 'deepDrum', 'bgmCut', 'bgmUp', 'bgmDrone']; // 문장이 나올 때 함께 일어나는 소리 신호(북·배경음악 끊기/올리기). INTRO 연출 전용
   var TEXT_ANIMS = ['fade', 'fade-up', 'fade-down', 'slide-left', 'slide-right', 'zoom-in', 'zoom-out', 'blur-in', 'focus-in', 'word-reveal', 'line-reveal', 'typewriter', 'cinematic-title', 'impact', 'whisper', 'float', 'parallax-text'];
   var IMAGE_MOTIONS = ['none', 'slow-zoom-in', 'slow-zoom-out', 'pan-left', 'pan-right', 'pan-up', 'pan-down', 'parallax', 'drift', 'focus-pull'];
   var TRANSITIONS = ['fade', 'crossfade', 'dip-black', 'dip-white', 'blur', 'push-left', 'push-right', 'zoom', 'hard-cut', 'light-leak'];
@@ -99,6 +100,8 @@
     if (typeof c.narrativePurpose === 'string') o.narrativePurpose = c.narrativePurpose.slice(0, 160);
     if (typeof c.visualConcept === 'string') o.visualConcept = c.visualConcept.slice(0, 160);
     if (Array.isArray(c.mediaTags)) o.mediaTags = c.mediaTags.slice(0, 12).map(function (t) { return String(t).slice(0, 30); }).filter(Boolean);
+    var ld = num(c.lead, 0, 2500, undefined); if (ld !== undefined) o.lead = Math.round(ld);   // 첫 문장이 나오기 전 정적(ms)
+    var tl = num(c.tail, 0, 3000, undefined); if (tl !== undefined) o.tail = Math.round(tl);   // 마지막 문장 뒤 정적(ms)
     var du = num(c.duration, 1000, 60000, undefined); if (du !== undefined) o.duration = Math.round(du);
     if (Array.isArray(c.segments)) o.segments = cleanSegments(c.segments);
     if (Array.isArray(c.motionSequence)) o.motionSequence = cleanSequence(c.motionSequence);
@@ -107,7 +110,9 @@
   function cleanSegments(list) {
     return list.slice(0, 24).map(function (s, i) {
       if (!s || typeof s.text !== 'string' || !s.text.trim()) return null;
-      return { text: s.text.slice(0, 120), emphasis: has(EMPHASIS, s.emphasis) ? s.emphasis : 'normal', animation: has(TEXT_ANIMS, s.animation) ? s.animation : 'fade-up', block: Math.round(num(s.block, 0, 40, 0)), name: s.name === true ? true : undefined };
+      return { text: s.text.slice(0, 120), emphasis: has(EMPHASIS, s.emphasis) ? s.emphasis : 'normal', animation: has(TEXT_ANIMS, s.animation) ? s.animation : 'fade-up', block: Math.round(num(s.block, 0, 40, 0)), name: s.name === true ? true : undefined,
+        hold: s.hold == null || s.hold === '' ? undefined : Math.round(num(s.hold, 0, 8000, 0)),                       // 이 문장이 머무는 시간(ms) 직접 지정
+        cue: has(CUES, s.cue) ? s.cue : undefined, big: s.big === true ? true : undefined };
     }).filter(Boolean);
   }
   function cleanSequence(list) {
@@ -194,18 +199,19 @@
   var LEAD_IN = 700;
   // 세그먼트별 등장 시각(ms) 계산. 반환: { at: [..], end, total }
   function timing(segs, c) {
-    var p = PACE[c.pacing] || PACE.MEDIUM, cur = LEAD_IN, at = [];
+    var p = PACE[c.pacing] || PACE.MEDIUM, cur = c.lead != null ? c.lead : LEAD_IN, at = [];
     segs.forEach(function (s, i) {
-      if (s.emphasis === 'impact') cur += Math.round(p.gap * 0.8);               // impact 직전 정적
+      if (s.emphasis === 'impact' && s.hold == null) cur += Math.round(p.gap * 0.8); // impact 직전 정적(문장 길이를 직접 정한 경우엔 앞 문장의 hold 가 그 역할)
       at.push(cur);
       var hold = Math.max(p.hold * 0.6, len(s.text) * p.read * (s.emphasis === 'soft' ? 0.8 : 1));
       if (s.emphasis === 'pause') hold += p.gap;
       if (s.name && c.nameEmphasis === 'TITLE') hold += 2000; else if (s.name && c.nameEmphasis === 'STRONG') hold += 1200; // 이름이 나오면 숨을 둔다(TITLE: 2초 hold)
       if (s.emphasis === 'impact') hold += p.gap * 1.6;                          // impact 직후 정적
       var next = segs[i + 1]; if (next && next.block !== s.block) hold += p.gap * 0.6; // 문장 사이 호흡
+      if (s.hold != null) hold = s.hold;                                         // 직접 지정한 시간이 우선
       cur += Math.round(hold);
     });
-    var total = cur + (c.pauseAfter || 0) + 600;
+    var total = cur + (c.pauseAfter || 0) + (c.tail != null ? c.tail : 600);
     return { at: at, end: cur, total: c.duration || total };
   }
   // 카메라 동작 이름(image motion → motionSequence action)
@@ -257,7 +263,7 @@
     return p;
   }
 
-  R.Cinema = { SCENE_TYPES: SCENE_TYPES, TEXT_ANIMS: TEXT_ANIMS, IMAGE_MOTIONS: IMAGE_MOTIONS, TRANSITIONS: TRANSITIONS, SPECIAL_TRANSITIONS: SPECIAL_TRANSITIONS, PACING: PACING, EMPHASIS: EMPHASIS, POSITIONS: POSITIONS, SIZES: SIZES, BGM: BGM, MOODS: MOODS, NAME_EMPH: NAME_EMPH,
+  R.Cinema = { CUES: CUES, SCENE_TYPES: SCENE_TYPES, TEXT_ANIMS: TEXT_ANIMS, IMAGE_MOTIONS: IMAGE_MOTIONS, TRANSITIONS: TRANSITIONS, SPECIAL_TRANSITIONS: SPECIAL_TRANSITIONS, PACING: PACING, EMPHASIS: EMPHASIS, POSITIONS: POSITIONS, SIZES: SIZES, BGM: BGM, MOODS: MOODS, NAME_EMPH: NAME_EMPH,
     PRESETS: PRESETS, PRESET_NAMES: PRESET_NAMES, TYPE_PRESET: TYPE_PRESET, LEGACY: LEGACY, BUILTIN: BUILTIN, INTENSITY_SCALE: INTENSITY_SCALE, PACE: PACE, MOTION_ACTIONS: MOTION_ACTIONS,
     clean: clean, resolve: resolve, splitSegments: splitSegments, phrases: phrases, timing: timing, sequence: sequence, build: build, limitIntensity: limitIntensity, limitTransition: limitTransition, validate: validate };
 })(typeof window !== 'undefined' ? window : globalThis);

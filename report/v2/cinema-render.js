@@ -43,8 +43,8 @@
       txt += '<div class="cn-blk"' + (nextBlockAt != null ? ' style="--out:' + (nextBlockAt - 150) + 'ms"' : '') + '>';
       idxs.forEach(function (i, k) {
         var s = segs[i], nx = k < idxs.length - 1 ? tm.at[idxs[k + 1]] : null;
-        var anim = reduce && /^(slide|parallax|typewriter|word|zoom|blur|focus|impact)/.test(s.animation) ? 'fade' : s.animation;
-        txt += '<p class="cn-seg" data-e="' + s.emphasis + '"' + (s.name ? ' data-nm="1"' : '') + ' data-a="' + esc(anim) + '" style="--at:' + tm.at[i] + 'ms;' + (nx != null ? '--nx:' + nx + 'ms;' : '') + '">' + splitInner(s.text, anim, reduce) + '</p>';
+        var anim = reduce ? 'fade' : 'fade-up'; // 글자 등장 애니메이션은 모든 장면·문장에서 하나로 통일한다(장면별 s.animation 값은 쓰지 않는다)
+        txt += '<p class="cn-seg" data-e="' + s.emphasis + '"' + (s.name ? ' data-nm="1"' : '') + (s.big ? ' data-big="1"' : '') + ' data-a="' + esc(anim) + '" style="--at:' + tm.at[i] + 'ms;' + (nx != null ? '--nx:' + nx + 'ms;' : '') + '">' + splitInner(s.text, anim, reduce) + '</p>';
       });
       txt += '</div>';
     });
@@ -53,13 +53,15 @@
       prof = '<dl class="cn-prof">' + scene.profile.map(function (r, i) { return '<div class="cn-row" style="--at:' + (tm.at[Math.min(i, tm.at.length - 1)] || 0) + 'ms"><dt>' + esc(r.label) + '</dt><dd>' + esc(r.value) + '</dd></div>'; }).join('') + '</dl>';
       txt = ''; // 프로필 카드는 카드 자체가 텍스트
     }
+    var pil = '';
+    if (scene.pillars && scene.pillars.length) pil = '<div class="cn-pil" style="--at:' + (tm.at[0] || 0) + 'ms">' + scene.pillars.map(function (p, i) { return '<div class="cn-pc" style="--i:' + (scene.pillars.length - 1 - i) + '"><i>' + esc(p.label) + '</i>' + (p.hj ? '<b>' + esc(p.hj.charAt(0)) + '</b><b>' + esc(p.hj.charAt(1)) + '</b><em>' + esc(p.ko) + '</em>' : '<b>—</b>') + '</div>'; }).join('') + '</div>'; // 명식: 時 日 月 年 (년주부터 차례로)
     var sub = scene.sub ? '<p class="cn-sub" style="--at:' + (tm.end + 200) + 'ms">' + esc(scene.sub).replace(/\n/g, '<br>') + '</p>' : '';
     var firstImpact = -1; segs.forEach(function (s, i) { if (firstImpact < 0 && s.emphasis === 'impact') firstImpact = i; });
     var dimAt = firstImpact >= 0 ? Math.max(0, tm.at[firstImpact] - 350) : -1;
     var style = '--cn-ov:' + c.overlayStrength + ';--cn-fx:' + Math.round(c.focalPoint.x * 100) + '%;--cn-fy:' + Math.round(c.focalPoint.y * 100) + '%;--cn-dur:' + tm.total + 'ms;--cn-amp:' + cv.amp + ';--cn-pan:' + cv.pan + '%;--pc:' + pc + ';' + (dimAt >= 0 ? '--dim-at:' + dimAt + 'ms;' : '');
     var cls = 'cn-scene' + (cv.on ? ' cn-cam-on' : '') + (dimAt >= 0 ? ' cn-has-impact' : '') + (reduce ? ' cn-reduce' : '') + (scene.kind === 'profile' ? ' cn-k-profile' : '') + (scene.kind === 'title' ? ' cn-k-title' : '');
     return '<section class="' + cls + '" data-sc="' + esc(scene.sceneId || '') + '" data-cn-type="' + c.sceneType + '" data-cn-preset="' + (c.preset || '') + '" data-pos="' + c.textPosition + '" data-size="' + c.textSize + '" data-mi="' + c.motionIntensity + '" data-pace="' + c.pacing + '" data-motion="' + (cv.on ? c.imageMotion : 'none') + '" data-tr="' + trans + '" data-bgm="' + c.bgmMood + '" data-nm-e="' + c.nameEmphasis + '" style="' + style + '">' +
-      '<div class="cn-bg"><div class="cn-cam">' + bg + '</div></div><div class="cn-dim" aria-hidden="true"></div><div class="cn-txt">' + (o.kicker ? '<div class="cn-kick">' + esc(o.kicker) + '</div>' : '') + txt + prof + sub + '</div></section>';
+      '<div class="cn-bg"><div class="cn-cam">' + bg + '</div></div><div class="cn-dim" aria-hidden="true"></div>' + pil + '<div class="cn-txt">' + (o.kicker ? '<div class="cn-kick">' + esc(o.kicker) + '</div>' : '') + txt + prof + sub + '</div></section>';
   }
 
   // ── DOM 쪽 ──
@@ -74,7 +76,7 @@
   // stage 안에서 scenes 를 차례로 재생한다.
   //  o: { reduce, mediaFor(scene) → asset, onScene(scene, c), onEnd(kind), skippable, label }  반환: { pause, resume, skip, destroy }
   function play(stage, scenes, o) {
-    o = o || {}; var K = C(), idx = -1, cur = null, timer = 0, paused = false, t0 = 0, left = 0, dead = false, started = 0, doc = root.document;
+    o = o || {}; var K = C(), idx = -1, cur = null, timer = 0, paused = false, t0 = 0, left = 0, dead = false, started = 0, doc = root.document, cues = [], cueClock = 0, cuePoll = 0, cuePausedAt = 0;
     stage.classList.add('cn-stage'); stage.innerHTML = '';
     var ui = doc.createElement('div'); ui.className = 'cn-ui';
     ui.innerHTML = '<button type="button" class="cn-skip">' + esc(o.skipLabel || '건너뛰기 ›') + '</button><div class="cn-pause" aria-hidden="true">❚❚</div><div class="cn-prog" aria-hidden="true"><i></i></div>';
@@ -88,6 +90,15 @@
       return tmp.firstChild;
     }
     function setProg() { var done = idx >= 0 ? idx : 0, total = items.length; progEl.style.transform = 'scaleX(' + Math.min(1, (done + 1) / total) + ')'; }
+    function stopCues() { clearInterval(cuePoll); cuePoll = 0; cues = []; }
+    function startCues(it, seq, delay) { // 문장 등장 시각(at)에 맞춰 소리 신호를 낸다. 일시정지하면 시계도 멈춘다
+      stopCues(); if (!o.onCue) return; var s = it.s;
+      if (s.sfx) cues.push({ at: 0, c: { cue: 'sfx:' + s.sfx, scene: s } }); if (s.bgmCue) cues.push({ at: 0, c: { cue: s.bgmCue, scene: s } });
+      (seq.segments || []).forEach(function (g, i) { if (g.cue) cues.push({ at: seq.timing.at[i], c: { cue: g.cue, text: g.text, scene: s } }); });
+      if (!cues.length) return; cueClock = Date.now() + (delay || 0);
+      cuePoll = setInterval(function () { if (paused) return; var e = Date.now() - cueClock; cues.forEach(function (q) { if (!q.done && q.at <= e) { q.done = true; try { o.onCue(q.c); } catch (er) { } } }); }, 40);
+    }
+    function advance(n) { if (dead) return; go(n + 1); }
     function go(n) {
       if (dead) return; clearTimeout(timer);
       if (n >= items.length) { end('completed'); return; }
@@ -98,15 +109,17 @@
       if (prev) { prev.classList.add('cn-leave', 'cn-tr-' + (o.reduce ? 'fade' : tr)); setTimeout(function () { if (prev.parentNode) prev.remove(); }, dur + 60); }
       var seq = it.s._built || (it.s._built = K.build(it.s, o.layers)); // 시간 계산은 html() 과 같은 규칙
       var total = seq.timing.total + (it.s.cinema && it.s.cinema.pauseAfter || 0) * 0;
-      if (dur && (tr === 'dip-black' || tr === 'dip-white') && prev) setTimeout(run, dur * 0.6); else run();
+      var runDelay = dur && (tr === 'dip-black' || tr === 'dip-white') && prev ? dur * 0.6 : 0;
+      if (runDelay) setTimeout(run, runDelay); else run();
+      startCues(it, seq, runDelay);
       if (o.onScene) try { o.onScene(it.s, seq.c, el); } catch (e) { }
       if (items[n + 1]) preload(items[n + 1].media); // 다음 장면만 미리 불러온다(그 뒤는 지연 로드)
-      left = total; t0 = Date.now(); if (!paused) timer = setTimeout(function () { go(n + 1); }, left);
+      left = total; t0 = Date.now(); if (!paused) timer = setTimeout(function () { advance(n); }, left);
     }
-    function pause() { if (paused || dead) return; paused = true; clearTimeout(timer); left = Math.max(200, left - (Date.now() - t0)); if (cur) cur.classList.add('cn-paused'); pauseEl.classList.add('on'); [].forEach.call(stage.querySelectorAll('video'), function (v) { try { v.pause(); } catch (e) { } }); }
-    function resume() { if (!paused || dead) return; paused = false; if (cur) { cur.classList.remove('cn-paused'); loadMedia(cur); } pauseEl.classList.remove('on'); t0 = Date.now(); var n = idx; timer = setTimeout(function () { go(n + 1); }, left); }
+    function pause() { if (paused || dead) return; paused = true; cuePausedAt = Date.now(); clearTimeout(timer); left = Math.max(200, left - (Date.now() - t0)); if (cur) cur.classList.add('cn-paused'); pauseEl.classList.add('on'); [].forEach.call(stage.querySelectorAll('video'), function (v) { try { v.pause(); } catch (e) { } }); }
+    function resume() { if (!paused || dead) return; paused = false; if (cuePausedAt) cueClock += Date.now() - cuePausedAt; cuePausedAt = 0; if (cur) { cur.classList.remove('cn-paused'); loadMedia(cur); } pauseEl.classList.remove('on'); t0 = Date.now(); var n = idx; timer = setTimeout(function () { advance(n); }, left); }
     function end(kind) { if (dead) return; destroy(); if (o.onEnd) o.onEnd(kind); }
-    function destroy() { dead = true; clearTimeout(timer); doc.removeEventListener('keydown', key); stage.removeEventListener('click', tap); stage.innerHTML = ''; stage.classList.remove('cn-stage'); }
+    function destroy() { dead = true; clearTimeout(timer); stopCues(); doc.removeEventListener('keydown', key); stage.removeEventListener('click', tap); stage.innerHTML = ''; stage.classList.remove('cn-stage'); }
     function tap(e) { if (e.target.closest('.cn-skip')) return; if (paused) resume(); else pause(); }
     function key(e) { if (e.key === ' ') { e.preventDefault(); paused ? resume() : pause(); } else if (e.key === 'Escape') end('skipped'); else if (e.key === 'ArrowRight' || e.key === 'Enter') go(idx + 1); }
     stage.addEventListener('click', tap); doc.addEventListener('keydown', key); skipBtn.onclick = function (e) { e.stopPropagation(); end('skipped'); }; skipBtn.hidden = o.skippable === false;

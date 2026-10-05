@@ -1,6 +1,6 @@
 // 리포트 v2 콘텐츠 저장본: 해석 모듈·개운법 라이브러리·챕터 설정·미디어 점수 가중치
 // GET /api/report-content — 공개. { content: { modules, remedies, chapters, scoring, flow, version } | null }  (null 이면 코드의 기본 시드 report/v2/*.js 를 쓴다)
-// PUT /api/report-content — 관리자. { modules?, remedies?, chapters?, projects?, textStyles?, scoring?, flow?, cinemaDefaults?, sceneCopy? } 보낸 항목만 교체. 저장할 때마다 version 이 바뀌어 캐시 키가 갱신된다.
+// PUT /api/report-content — 관리자. { modules?, remedies?, chapters?, projects?, textStyles?, scoring?, flow?, cinemaDefaults?, sceneCopy?, introEpic? } 보낸 항목만 교체. 저장할 때마다 version 이 바뀌어 캐시 키가 갱신된다.
 // 저장: GLOSSARY_KV 'v2:content'.  모듈/개운법은 id 기준으로 코드 기본값 위에 덮어쓰기·추가되고, enabled:false 로 기본 항목을 끌 수 있다.
 import { json, isAdmin, configError } from '../_lib.js';
 import { cleanTextStyles } from '../_textstyle.js';
@@ -63,6 +63,14 @@ function cleanFlow(f) {
 }
 // 배경 음악: 분위기별 음원 주소(내 R2 업로드 또는 https). 7종 밖의 키·허용 밖 주소는 버린다.
 const BGM_MOODS = ['default', 'cinematic', 'minimal', 'ambient', 'emotional', 'tension', 'hopeful', 'reflective'];
+// 인트로 연출 설정(report/v2/epic-intro.js 와 같은 값 범위). style: 무협 패러디/시네마틱/최소 · humor: 펀치라인 정도 · epicLevel: 1~5
+const INTRO_STYLES = ['EPIC_WUXIA_PARODY', 'CINEMATIC', 'MINIMAL'], INTRO_HUMORS = ['OFF', 'SUBTLE', 'PARODY'];
+function cleanIntroEpic(b) {
+  const o = {}; if (!b || typeof b !== 'object') return o;
+  if (INTRO_STYLES.includes(b.style)) o.style = b.style; if (INTRO_HUMORS.includes(b.humor)) o.humor = b.humor;
+  const L = Math.round(+b.epicLevel); if (L >= 1 && L <= 5) o.epicLevel = L;
+  return o;
+}
 function cleanBgm(b) { const o = {}; if (!b || typeof b !== 'object') return o; for (const k of BGM_MOODS) if (MEDIA_OK.test(b[k] || '')) o[k] = b[k]; return o; }
 function cleanScoring(s) {
   const o = {}; if (!s || typeof s !== 'object') return o;
@@ -91,6 +99,7 @@ export async function onRequestPut({ request, env }) {
   if (b.scoring) next.scoring = cleanScoring(b.scoring);
   if (b.flow) next.flow = cleanFlow(b.flow);
   if (b.bgm) next.bgm = cleanBgm(b.bgm); // 분위기별 배경 음악
+  if (b.introEpic) next.introEpic = cleanIntroEpic(b.introEpic); // 인트로 연출(스타일·유머·에픽 레벨·해설 음성)
   if (b.cinemaDefaults) next.cinemaDefaults = cleanCinemaDefaults(b.cinemaDefaults); // 장면 종류별 기본 연출(없으면 프리셋·내장 기본값)
   if (b.sceneCopy) next.sceneCopy = cleanSceneCopy(b.sceneCopy); // 프롤로그·엔딩·챕터 연출 장면의 문장·이름 강조 override
   next.version = 'c' + Date.now().toString(36); // 콘텐츠가 바뀌면 리포트 캐시 키가 바뀐다
