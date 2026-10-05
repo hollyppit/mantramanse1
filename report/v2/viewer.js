@@ -40,12 +40,16 @@
   // ?project=love 처럼 프로젝트(상품)를 고른다. 없거나 모르는 값이면 종합(full)
   function projectId() { var m = /[?&]project=([\w.-]{1,40})/.exec(location.search); return m ? m[1] : 'full'; }
   function getJson(u) { return fetch(u).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }); }
+  function birthOf(ch) { // 만세력이 정한 양력 출생일시(시 모름이면 시각 없음) + 입력한 출생지 이름
+    var s = ch.solar || {}, lon = ch.input && ch.input.lon, c = CITIES.filter(function (x) { return x[1] === lon; })[0];
+    return { y: s.y, m: s.m, d: s.d, hour: ch.hourKnown ? s.h : null, minute: ch.hourKnown ? s.mi : 0, hourKnown: !!ch.hourKnown, place: c ? c[0] : '' };
+  }
   function start(ch, gender) {
     view('load'); var tx = $('#loadText'), i = 0, tick;
     function show() { tx.style.opacity = 0; setTimeout(function () { tx.textContent = STAGES[Math.min(i, STAGES.length - 1)]; tx.style.opacity = 1; i++; }, 250); }
     show(); tick = setInterval(show, 1100);
     var sd; try { sd = R.SajuData.build(ch, { now: Date.now() }); } catch (e) { clearInterval(tick); view('input'); $('#msg').textContent = '계산 결과를 정리하지 못했습니다.'; return; }
-    S.sd = sd; var t0 = Date.now();
+    S.sd = sd; S.birth = birthOf(ch); var t0 = Date.now();
     // 서버 저장본(콘텐츠·미디어·일간 소개 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
     Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story')]).then(function (a) {
       var wait = Math.max(0, 2600 - (Date.now() - t0));
@@ -58,7 +62,7 @@
       clearInterval(tick);
       try { localStorage.setItem('mt_v2_seen', '1'); } catch (e) { }
       T('report_started', { hourKnown: sd.birth.hourKnown, chapters: S.rep.chapters.length });
-      intro();
+      startGate();
     }).catch(function () { clearInterval(tick); view('input'); $('#msg').textContent = '리포트를 구성하지 못했습니다. 잠시 후 다시 시도해 주세요.'; });
   }
 
@@ -122,17 +126,34 @@
     playStage({ textOnly: tOnly, kind: 'iju', clip: clip, title: (v && v.title) || (sd.dayPillar.ko + '일주'), sub: (v && v.subtitle) || introLines('iju'), kw: v && v.keywords, onDone: next });
   }
   var withCopy = function (scenes) { return R.Translator.applyCopy(scenes, S.pack && S.pack.sceneCopy, R.Narrator.heroVars(S.sd, S.name)); }; // 관리자가 고친 문구·이름 강조(content.sceneCopy)
+  // 탭해서 시작: 배경음악이 있으면 일간 소개 직전에 한 번 터치를 받는다(터치가 있어야 소리를 낼 수 있다). 음악이 없거나 꺼 둔 경우·미리보기에서는 바로 시작한다.
+  function startGate() {
+    if (PREVIEW || !R.Bgm || !R.Bgm.has() || R.Bgm.isMuted()) { intro(); return; }
+    var nm = S.name; view('gate'); $('#gateName').innerHTML = nm ? esc(nm) + '에게는,<br>' + esc(nm) + '의 때가 있다.' : '모든 사람에게는,<br>각자의 때가 있다.';
+    var b = $('#gateBtn'); b.onclick = function () { b.onclick = null; T('gate_tapped', {}); intro(); }; try { b.focus({ preventScroll: true }); } catch (e) { }
+  }
   function intro() { if (R.Bgm) R.Bgm.play('cinematic'); ilganStage(function () { ijuStage(prologue); }); } // 배경음악은 일간 인트로(첫 화면)부터 흐른다(입력 제출 = 사용자의 첫 터치)
   function cinemaMediaFor(used) { return function (sc) { if (sc.bg === 'black') return null; return R.Director.pickMedia(sc, (S.pack && S.pack.lib && S.pack.lib.media) || S.media, { usedIds: used }, sc.chapterId || 'c00'); }; }
+  // INTRO 소리 신호: 북·바람 효과음, 배경음악 끊기/올리기(음성 해설은 없다). 신호가 없는 장면에는 아무 일도 일어나지 않는다.
+  function introCue(c) {
+    var k = c.cue || '', B = R.Bgm && R.Bgm.mix ? R.Bgm : null;
+    if (k === 'drum' && R.Sfx) R.Sfx.drum(); else if (k === 'deepDrum' && R.Sfx) R.Sfx.deepDrum(); else if (k === 'sfx:wind' && R.Sfx) R.Sfx.wind(2.2);
+    else if (k === 'bgmCut' && B) B.mix(0, 350); else if (k === 'bgmUp' && B) B.mix(1, 2400); else if (k === 'full' && B) B.mix(1.6, 1500); else if (k === 'bgmDrone' && B) B.mix(0.45, 800);
+  }
   function playCinema(scenes, onEnd, label, skipLabel) {
     if (!R.CinemaRender || !scenes || !scenes.length) { onEnd('missing'); return; }
     view('cinema'); var stage = $('#cnStage'), used = [];
-    S.cn = R.CinemaRender.play(stage, scenes, { reduce: reduce, saveData: saveData, mediaFor: cinemaMediaFor(used), layers: [], label: label, skipLabel: skipLabel, onScene: function (sc, c) { if (R.Bgm) R.Bgm.play(c.bgmMood); }, onEnd: function (kind) { S.cn = null; onEnd(kind); } });
+    S.cn = R.CinemaRender.play(stage, scenes, { reduce: reduce, saveData: saveData, mediaFor: cinemaMediaFor(used), layers: [], label: label, skipLabel: skipLabel, onScene: function (sc, c) { if (R.Bgm) R.Bgm.play(c.bgmMood); },
+      onCue: introCue,
+      onEnd: function (kind) { if (R.Bgm && R.Bgm.mix) R.Bgm.mix(1, 900); S.cn = null; onEnd(kind); } });
   }
   /* 프롤로그: "모든 사람에게는 각자의 이야기가 있다" → 주인공 이름 → 타이틀 → 캐릭터 프로필 → 영화로 비유하면 → CHAPTER 01 */
+  function introOverride() { var m = /[?&]intro=(epic|cinematic|minimal)(&|$)/.exec(location.search); return m ? { style: { epic: 'EPIC_WUXIA_PARODY', cinematic: 'CINEMATIC', minimal: 'MINIMAL' }[m[1]] } : {}; } // 확인용: ?intro=cinematic
   function prologue() {
     var sd = S.sd; T('prologue_started', {});
-    playCinema(withCopy(R.Translator.prologue(sd, S.name, R.Narrator.heroVars(sd, S.name))), function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', {}); beginReader(); }, '프롤로그');
+    var E = Object.assign({}, R.EpicIntro && R.EpicIntro.DEFAULTS, (S.pack && S.pack.introEpic) || {}, introOverride()), epic = E.style === 'EPIC_WUXIA_PARODY';
+    if (epic && R.Bgm && R.Bgm.mix) R.Bgm.mix(0.45, 300);
+    playCinema(withCopy(R.Translator.prologue(sd, S.name, R.Narrator.heroVars(sd, S.name), { style: E.style, humor: E.humor, epicLevel: E.epicLevel, birth: S.birth, nowYear: sd.nowYear })), function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', {}); beginReader(); }, '프롤로그');
   }
   /* 엔딩: 사주는 결말을 적어 놓은 대본이 아니다 … 다음 장면을 만드는 사람은 결국 당신이다 */
   function endingCinema(then) {

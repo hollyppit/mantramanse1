@@ -42,6 +42,9 @@
     <div class="loadbox"><img class="orb" src="/report/v2/lantern.webp" alt="" aria-hidden="true" width="120" height="120" decoding="async"><p id="loadText" class="loadtext"></p></div>
   </section>
 
+  <!-- 탭해서 시작: 배경음악이 있을 때만. 사용자의 터치가 있어야 소리를 낼 수 있어서 일간 소개 직전에 한 번 받는다 -->
+  <section id="v-gate" class="view" aria-label="시작" hidden><button type="button" id="gateBtn" class="gate"><span class="g-h" aria-hidden="true">運路</span><span class="g-n" id="gateName"></span><span class="g-t">화면을 탭해서 시작</span><span class="g-s">♪ 소리와 함께 보면 더 좋아요</span></button></section>
+
   <!-- 캐릭터 소개 영상 (있을 때만) -->
   <section id="v-awk" class="view" aria-label="캐릭터 영상" hidden>
     <div class="awk">
@@ -85,6 +88,8 @@
 <script src="narrator.js"></script>
 <script src="cinema.js"></script>
 <script src="reality.js"></script>
+<script src="epic-intro.js"></script>
+<script src="intro-audio.js"></script>
 <script src="translator.js"></script>
 <script src="moving.js"></script>
 <script src="content.js"></script>

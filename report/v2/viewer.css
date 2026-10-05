@@ -283,3 +283,13 @@ dialog#drawer { border: 0; padding: 0; background: transparent; color: var(--ink
 .tm p { margin: 4px 0 0; font-size: .9rem; line-height: 1.7; color: var(--ink2); word-break: keep-all; }
 .tm .tmhere { color: var(--ink); font-weight: 600; }
 .tm .tmeg { font-size: .84rem; color: var(--ink3, var(--ink2)); }
+
+/* 탭해서 시작 */
+#v-gate { background: #000; display: grid; }
+.gate { display: grid; place-content: center; justify-items: center; gap: 18px; width: 100%; min-height: 100svh; background: radial-gradient(90% 60% at 50% 70%, rgba(213, 185, 127, .12), transparent 70%), #000; color: var(--ink); border: 0; cursor: pointer; font: inherit; text-align: center; padding: 24px; }
+.gate .g-h { font-family: serif; font-size: 3.4rem; letter-spacing: .5em; text-indent: .5em; color: #FFF6DC; text-shadow: 0 0 36px rgba(240, 215, 160, .45); }
+.gate .g-n { font-family: var(--f-serif); font-size: 1.05rem; line-height: 1.9; letter-spacing: .12em; color: var(--ink2); }
+.gate .g-t { margin-top: 26px; padding: 10px 22px; border: 1px solid var(--gold); border-radius: 999px; color: var(--gold); letter-spacing: .2em; font-size: .9rem; animation: gate-pulse 2s ease-in-out infinite; }
+.gate .g-s { font-size: .78rem; color: var(--ink3, var(--ink2)); letter-spacing: .08em; }
+@keyframes gate-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(213, 185, 127, 0); } 50% { box-shadow: 0 0 0 8px rgba(213, 185, 127, .18); } }
+@media (prefers-reduced-motion: reduce) { .gate .g-t { animation: none; } }
