@@ -249,8 +249,12 @@ em { font-style: normal; background: linear-gradient(180deg, var(--gold-l), var(
 /* 인트로 커버 */
 #coverFx { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .fx-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
-.fx-ch { position: absolute; width: auto; max-width: none; transform: translateX(-50%); }
-#coverFx.edit .fx-ch { pointer-events: auto; cursor: move; touch-action: none; user-select: none; }
+#coverFxF { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.fx-ch { position: absolute; width: auto; max-width: none; transform: translateX(-50%) scaleX(var(--fl, 1)); }
+.fx-ch.fl { animation: cvFl var(--fs, 7s) ease-in-out infinite; }
+.fx-ch.fl.sel { animation-play-state: paused; }
+@keyframes cvFl { 0%, 100% { translate: 0 calc(var(--fa, 12px) * .5); rotate: calc(var(--ft, 0deg) * -1); } 50% { translate: 0 calc(var(--fa, 12px) * -.5); rotate: var(--ft, 0deg); } }
+.edit .fx-ch { pointer-events: auto; cursor: move; touch-action: none; user-select: none; }
 .fx-ch.sel { outline: 1px dashed var(--gold); outline-offset: 2px; }
 .fx-hd { position: fixed; width: 14px; height: 14px; background: var(--gold); border: 1px solid #14100A; border-radius: 2px; cursor: nesw-resize; pointer-events: auto; touch-action: none; }
 .preview #cover, .preview .cv-in { pointer-events: none; }
