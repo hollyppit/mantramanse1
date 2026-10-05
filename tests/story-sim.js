@@ -49,14 +49,10 @@ ok(/class="fc-col now/.test(fp) && /fc-now/.test(fp), '지금 달 표시 없음'
 ok(/fc-bar/.test(fp) && /fc-detail/.test(fp), '막대·상세 영역 없음');
 ok(/(기회|확장|수확|축적)/.test(fp) && /(순풍|보통|주의)/.test(fp), '기존 운 흐름 분류(주 흐름·적합 상태)를 쓰지 않음');
 ok(!/undefined|NaN/.test(fr + fp + lk + pw), '화면에 undefined/NaN 이 보임');
-ok(/이 힘이 아직 막혀 있는 이유/.test(lk) && /수호신이 짚은 당신의 과거 한 시점/.test(lk) && /올해 달마다 들어오는 흐름/.test(lk) && /20개 챕터 전체/.test(lk) && (lk.match(/class="lk"/g) || []).length === 4, '잠금 목록 기본 4개 문구');
-ok(/class="gd"/.test(fr) && /data-pillar="경진"/.test(fr) && /class="gd-fb"/.test(fr) && /庚辰/.test(fr) && (fr.match(/class="eb"/g) || []).length === 5 && /class="gd-pot"/.test(fr), '수호신 등장: 이미지 없을 때 한자 그라데이션 + 오행 막대 5개 + 잠재력 문장');
-ok(/<div class="gd-fig"[^>]*><div class="gd-fb"/.test(fr), '이미지 없으면 대체 표시');
-// 수호신 이미지 띠
-const gsH = St.BLOCKS.guardianStrip({ type: 'guardianStrip', title: '수호신들', images: [{ src: 'g/a.webp', alt: 'A' }, { src: 'g/b.webp', alt: 'B' }], speed: 2 });
-ok(/class="gs"/.test(gsH) && /--gs-d:/.test(gsH) && (gsH.match(/<img/g) || []).length >= 12 && /aria-hidden="true"/.test(gsH) && /alt="A"/.test(gsH), '수호신 띠: 두 벌 이어 붙인 무한 루프');
-ok(!/<img/.test(St.BLOCKS.guardianStrip({ type: 'guardianStrip', images: [] })) && /class="ph"/.test(St.BLOCKS.guardianStrip({ type: 'guardianStrip', images: [] })), '수호신 띠: 이미지 없으면 자리표시');
-ok(St.validate({ blocks: [{ type: 'guardianStrip', images: [{ src: 'a.webp' }] }] }).some(x => /alt 없음/.test(x)), '수호신 띠: alt 점검');
+ok(/이 힘이 아직 막혀 있는 이유/.test(lk) && /이 이야기에서 가장 크게 흔들린 한 장면/.test(lk) && /올해 달마다 들어오는 흐름/.test(lk) && /20개 챕터 전체/.test(lk) && (lk.match(/class="lk"/g) || []).length === 4, '잠금 목록 기본 4개 문구');
+ok((fr.match(/class="eb"/g) || []).length === 5 && /class="gd-pot"/.test(fr), '오행 막대 5개 + 동력 문장');
+ok(!/class="gd"|gd-fig|수호/.test(fr), '무료 결과에 수호신 그림·문구 없음');
+ok(typeof St.BLOCKS.guardianStrip === 'undefined' && typeof St.parseShared === 'undefined', '수호신 이미지 띠·공유 링크 제거');
 // 잠재력 문장 (우세 십성군 매핑만)
 console.log('4. 잠재력 문장');
 [[1990, 5, 17, 14, 'M'], [1984, 2, 10, 6, 'F'], [1974, 9, 3, 23, 'M'], [2000, 12, 25, 12, 'F'], [1964, 1, 15, 11, 'M']].forEach(b => {

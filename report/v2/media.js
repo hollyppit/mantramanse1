@@ -1,4 +1,4 @@
-// 미디어: ① 120개 일주 각성 영상 매핑·커버리지 ② 태그 기반 이미지 선택. 사용자별 AI 이미지 생성은 하지 않는다(사전 제작 라이브러리 조합).
+// 미디어: ① 일간 소개(캐릭터 소개) 영상 매핑·커버리지 ② 태그 기반 이미지 선택. 사용자별 AI 이미지 생성은 하지 않는다(사전 제작 라이브러리 조합).
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
   var STEMS = '갑을병정무기경신임계'.split(''), BRS = '자축인묘진사오미신유술해'.split('');
@@ -15,34 +15,7 @@
   function normGender(g) { return /^(m|male|남|남성)$/i.test(g) ? 'M' : /^(f|female|여|여성)$/i.test(g) ? 'F' : null; }
   var keyOf = function (p, g) { return p + '|' + g; };
 
-  // videos: [{dayPillar, gender, videoUrl, videoWebm, posterUrl, guardianImageUrl, title, subtitle, keywords, enabled}]
-  // 반환: 해당 일주·성별 영상, 없으면 fallback(공용), 그것도 없으면 null → UI는 poster/수호신 이미지/문구만으로 진행한다.
-  function pickAwakening(videos, dayPillar, gender, fallback) {
-    var p = normPillar(dayPillar), g = normGender(gender), found = null;
-    (videos || []).forEach(function (v) { if (v && v.enabled !== false && normPillar(v.dayPillar) === p && normGender(v.gender) === g && (v.videoUrl || v.videoWebm || v.posterUrl)) found = v; });
-    if (found) return { clip: found, fallback: false, key: keyOf(p, g) };
-    return { clip: fallback || null, fallback: true, key: keyOf(p, g) };
-  }
-  // 관리자 Matrix / 커버리지. status: ok 완료 · missing 누락 · disabled 비활성 · error(주소 형식 오류)
-  function awakeningCoverage(videos) {
-    var map = {}, bad = [];
-    (videos || []).forEach(function (v) {
-      var p = normPillar(v.dayPillar), g = normGender(v.gender);
-      if (!p || !g) { bad.push(v); return; } map[keyOf(p, g)] = v;
-    });
-    var cells = [], n = { M: 0, F: 0 }, missing = [];
-    ILJU.forEach(function (p) {
-      ['M', 'F'].forEach(function (g) {
-        var v = map[keyOf(p, g)], st = 'missing';
-        if (v) { var has = !!(v.videoUrl || v.videoWebm); st = v.enabled === false ? 'disabled' : (has && !/^(\/|https:\/\/)/.test(v.videoUrl || v.videoWebm) ? 'error' : has ? 'ok' : (v.posterUrl ? 'poster-only' : 'missing')); }
-        if (st === 'ok') n[g]++; else if (st === 'missing') missing.push(keyOf(p, g));
-        cells.push({ dayPillar: p, gender: g, status: st });
-      });
-    });
-    return { male: n.M, female: n.F, total: n.M + n.F, of: 120, cells: cells, missing: missing, invalid: bad.length };
-  }
-
-  // 일간 소개 영상(일간 10 × 성별 2 = 20). 일주 각성 영상 앞에 나온다. 없으면 null → 이 단계는 건너뛴다.
+  // 일간 소개 영상(일간 10 × 성별 2 = 20). 프롤로그 앞에 나오는 캐릭터 소개. 없으면 null → 이 단계는 건너뛴다.
   function normStem(s) { s = String(s || '').trim()[0] || ''; var i = STEMS.indexOf(s); if (i < 0) i = STEM_H.indexOf(s); return i >= 0 ? STEMS[i] : null; }
   function pickIlgan(list, stem, gender) {
     var s = normStem(stem), g = normGender(gender), f = null;
@@ -78,5 +51,5 @@
     theme: ['career', 'wealth', 'love', 'marriage', 'relationship', 'family', 'study', 'creation', 'leadership', 'travel'],
   };
 
-  R.Media = { ILJU: ILJU, normPillar: normPillar, normGender: normGender, pickAwakening: pickAwakening, pickIlgan: pickIlgan, ilganCoverage: ilganCoverage, normStem: normStem, STEMS: STEMS, awakeningCoverage: awakeningCoverage, pickImage: pickImage, TAG_GROUPS: TAG_GROUPS };
+  R.Media = { ILJU: ILJU, normPillar: normPillar, normGender: normGender, pickIlgan: pickIlgan, ilganCoverage: ilganCoverage, normStem: normStem, STEMS: STEMS, pickImage: pickImage, TAG_GROUPS: TAG_GROUPS };
 })(typeof window !== 'undefined' ? window : globalThis);

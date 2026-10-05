@@ -1,4 +1,4 @@
-/* 만트라 사주 무빙툰 v2 뷰어: 입력 → 계산(기존 Manse 엔진) → 단계형 로딩 → 일주 각성 영상 → ACT/챕터 스크롤 리포트 → 최종 화면.
+/* 만트라 사주 무빙툰 v2 뷰어: 입력 → 계산(기존 Manse 엔진) → 단계형 로딩 → 캐릭터 소개 영상(있을 때) → 프롤로그 → ACT/챕터 스크롤 리포트 → 최종 화면.
    모든 장면(Scene)은 ReportV2.Compose.build 가 만든 데이터를 그리기만 한다. 입력한 생년월일은 서버로 보내지 않는다. */
 (function () {
   'use strict';
@@ -10,7 +10,7 @@
   var CITIES = [['서울', 126.98], ['부산', 129.08], ['대구', 128.60], ['인천', 126.70], ['광주', 126.85], ['대전', 127.38], ['울산', 129.31], ['세종', 127.29], ['수원', 127.03], ['고양', 126.83], ['성남', 127.14], ['용인', 127.18], ['청주', 127.49], ['천안', 127.15], ['전주', 127.15], ['목포', 126.39], ['여수', 127.66], ['포항', 129.36], ['경주', 129.22], ['안동', 128.73], ['창원', 128.68], ['진주', 128.11], ['춘천', 127.73], ['강릉', 128.90], ['제주', 126.53]];
   var EL_COLOR = { wood: '#5E9E78', fire: '#D0634A', earth: '#BC9C62', metal: '#AEB9C6', water: '#4A7AB5' };
   var SEA_ICON = { opportunity: '◆', expansion: '▲', harvest: '●', accumulation: '■', transition: '◇', defense: '▽' }; // 색만으로 상태를 구분하지 않도록 글자·기호를 함께 쓴다
-  var STAGES = ['사주 원국을 읽고 있습니다', '타고난 기질을 분석하고 있습니다', '인생 흐름을 연결하고 있습니다', '당신에게 맞는 행동 전략을 찾고 있습니다', '당신의 이야기를 구성하고 있습니다'];
+  var STAGES = ['주인공의 설정을 읽고 있습니다', '타고난 캐릭터를 그려 내고 있습니다', '시간의 흐름을 이어 붙이고 있습니다', '다음 장면을 위한 선택지를 찾고 있습니다', '한 편의 이야기로 구성하고 있습니다'];
   var PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
   var S = { sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
   var view = function (v) { if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
@@ -46,20 +46,19 @@
     show(); tick = setInterval(show, 1100);
     var sd; try { sd = R.SajuData.build(ch, { now: Date.now() }); } catch (e) { clearInterval(tick); view('input'); $('#msg').textContent = '계산 결과를 정리하지 못했습니다.'; return; }
     S.sd = sd; var t0 = Date.now();
-    // 서버 저장본(콘텐츠·미디어·각성 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
+    // 서버 저장본(콘텐츠·미디어·일간 소개 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
     Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story')]).then(function (a) {
       var wait = Math.max(0, 2600 - (Date.now() - t0));
       return new Promise(function (ok) { setTimeout(function () { ok(a); }, wait); });
     }).then(function (a) {
       S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
-      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = a[2] || {};
-      S.story = R.Free.mergeStory(window.OnboardingContent, a[3] && a[3].story); // 무료 결과 문구·잠금 목록·결제 버튼은 온보딩 설정과 같은 값을 쓴다
+      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = { ilgan: (a[2] && a[2].ilgan) || null }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
       return aiCompose().then(function () { return a; });
     }).then(function () {
       clearInterval(tick);
       try { localStorage.setItem('mt_v2_seen', '1'); } catch (e) { }
       T('report_started', { hourKnown: sd.birth.hourKnown, chapters: S.rep.chapters.length });
-      awakening();
+      intro();
     }).catch(function () { clearInterval(tick); view('input'); $('#msg').textContent = '리포트를 구성하지 못했습니다. 잠시 후 다시 시도해 주세요.'; });
   }
 
@@ -73,27 +72,20 @@
       .catch(function () { }).then(function () { clearTimeout(timer); });
   }
 
-  /* ── 3. 영상 단계: ① 일간 소개(10일간×성별 20, "당신은 경금입니다") → ② 일주 각성(60일주×성별 120, "경오일주입니다") ──
-     같은 플레이어(음소거 자동재생·SKIP·소리 켜기·poster/문구 대체)를 쓴다. 일간 소개 영상이 없으면 그 단계는 건너뛰고, 영상이 끝나면 자동으로 다음 단계로 넘어간다. */
+  /* ── 3. 캐릭터 소개(영상이 있을 때만): 일간 소개 영상(10일간×성별 20)을 "이 이야기의 주인공" 소개로 쓴다. ──
+     음소거 자동재생·SKIP·소리 켜기·poster 대체. 영상이 없으면 이 단계는 건너뛰고, 끝나면 자동으로 프롤로그로 넘어간다. */
   function playStage(cfg) {
-    view('awk'); var box = $('#awkMedia'), clip = cfg.clip || null, done = false, sd = S.sd, fb = !!cfg.fb;
+    view('awk'); var box = $('#awkMedia'), clip = cfg.clip || null, done = false;
     var cap = $('#awkCap'), start = $('#awkStart'), snd = $('#awkSound'), skip = $('#awkSkip');
-    start.hidden = true; snd.hidden = true; skip.hidden = false; start.textContent = cfg.startLabel || '당신의 이야기를 시작합니다';
-    var title = cfg.title, sub = cfg.sub || '', kw = cfg.kw || [], poster = clip && clip.posterUrl || cfg.guardian || '', ev = cfg.kind === 'ilgan' ? 'ilgan' : 'awakening';
-    var rp = cfg.kind === 'ilgan' ? 'ilgan' : 'awk';
-    cap.innerHTML = '<div class="t" data-tx="' + rp + '.title">' + esc(title) + '</div>' + (sub ? '<div class="s" data-tx="' + rp + '.sub">' + esc(sub).replace(/\n/g, '<br>') + '</div>' : '') + (kw.length ? '<div class="k" data-tx="' + rp + '.kw">' + kw.map(function (k) { return '<span>' + esc(k) + '</span>'; }).join('') + '</div>' : '');
+    start.hidden = true; snd.hidden = true; skip.hidden = false;
+    var title = cfg.title, sub = cfg.sub || '', kw = cfg.kw || [], poster = clip && clip.posterUrl || '';
+    cap.innerHTML = '<div class="t" data-tx="ilgan.title">' + esc(title) + '</div>' + (sub ? '<div class="s" data-tx="ilgan.sub">' + esc(sub).replace(/\n/g, '<br>') + '</div>' : '') + (kw.length ? '<div class="k" data-tx="ilgan.kw">' + kw.map(function (k) { return '<span>' + esc(k) + '</span>'; }).join('') + '</div>' : '');
     function finish(kind) {
       if (done) return; done = true; skip.hidden = true; snd.hidden = true;
-      if (kind === 'completed') T(ev + '_video_completed', { fallback: fb }); else if (kind === 'skipped') T(ev + '_video_skipped', { fallback: fb });
-      if (cfg.auto || cfg.free) { cfg.onDone(kind); return; } // 일간 소개: 바로 일주 각성으로 · 무료 사용자: '시작' 버튼 대신 무료 결과 화면으로
-      start.hidden = false; start.focus({ preventScroll: true });
+      if (kind === 'completed') T('ilgan_video_completed', {}); else if (kind === 'skipped') T('ilgan_video_skipped', {});
+      cfg.onDone(kind);
     }
-    function still() { // 영상이 없거나 재생이 막힌 경우: (일주 각성) poster/수호신 이미지 + 문구로 진행, (일간 소개) 건너뜀
-      if (cfg.auto) { done = true; cfg.onDone('missing'); return; }
-      var img = cfg.guardian || poster; box.innerHTML = img ? '<img class="sil" src="' + esc(img) + '" alt="' + esc(title) + '">' : '<div class="ph" style="--pc:' + EL_COLOR[elKey(sd.dayMaster.el)] + '"></div>';
-      var si = box.querySelector('img.sil'); if (si) { var lit = function () { void si.offsetWidth; setTimeout(function () { si.classList.add('on'); }, 60); }; if (reduce || (si.complete && si.naturalWidth)) { si.classList.add('on'); } else { si.addEventListener('load', lit); si.addEventListener('error', function () { si.classList.add('on'); }); } } // 실루엣 → 1.2초 밝아짐
-      setTimeout(function () { finish('completed'); }, 2600);
-    }
+    function still() { if (done) return; done = true; cfg.onDone('missing'); } // 영상이 없거나 재생이 막힌 경우: 건너뜀
     txApply(cap, '_', true); // 자막 스타일(영상 단계)
     var url = clip && (clip.videoUrl || clip.videoWebm);
     if (!url || saveData && !poster) { still(); }
@@ -102,40 +94,38 @@
       if (clip.videoWebm && v.canPlayType && v.canPlayType('video/webm')) { var s1 = document.createElement('source'); s1.src = clip.videoWebm; s1.type = 'video/webm'; v.appendChild(s1); }
       if (clip.videoUrl) { var s2 = document.createElement('source'); s2.src = clip.videoUrl; s2.type = /\.webm(\?|$)/.test(clip.videoUrl) ? 'video/webm' : 'video/mp4'; v.appendChild(s2); }
       box.innerHTML = ''; box.appendChild(v);
-      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); T(ev + '_video_started', { fallback: fb }); snd.hidden = false; });
+      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); T('ilgan_video_started', {}); snd.hidden = false; });
       v.addEventListener('ended', function () { finish('completed'); });
       v.addEventListener('error', function () { if (!done) { v.remove(); still(); } }, true);
       var p = v.play(); if (p && p.catch) p.catch(function () { v.controls = false; if (poster) v.load(); setTimeout(function () { if (v.paused && !done) { v.remove(); still(); } }, 1200); });
       snd.onclick = function () { v.muted = !v.muted; snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; };
       skip.onclick = function () { v.pause(); finish('skipped'); };
     }
-    if (!url || (saveData && !poster)) skip.onclick = function () { finish('skipped'); };
-    start.onclick = function () { cfg.onDone('start'); };
   }
   // 영상에 관리자가 쓴 부제가 없으면 기본 설명(일간 4줄·일주 4줄)을 보여 준다
   function introLines(kind) { var T = R.IntroText, sd = S.sd; if (!T || !sd) return ''; return (kind === 'ilgan' ? T.ilgan(sd.dayMaster.stem) : T.iju(sd.dayPillar.ko)).join('\n'); }
   function ilganStage(next) { // 일간 소개 단계(영상이 있을 때만)
     var ig = S.awk && S.awk.ilgan, sd = S.sd;
     if (!ig || !(ig.videoUrl || ig.videoWebm)) { next(); return; }
-    playStage({ kind: 'ilgan', clip: ig, fb: false, title: ig.title || ('당신은 ' + sd.dayMaster.stem + sd.dayMaster.el + '입니다'), sub: ig.subtitle || introLines('ilgan'), kw: ig.keywords, auto: true, onDone: next });
+    playStage({ clip: ig, title: ig.title || ('이 이야기의 주인공은 ' + sd.dayMaster.stem + sd.dayMaster.el + '의 기질을 타고났다'), sub: ig.subtitle || introLines('ilgan'), kw: ig.keywords, onDone: next });
   }
-  function ijuStage() { // 일주 각성 단계
-    var v = S.awk && S.awk.video, sd = S.sd;
-    var free = gateOn(); // 결제 완료 사용자만 리포트로, 그 외에는 영상 뒤에 무료 결과 화면
-    playStage({ kind: 'awakening', clip: v || (S.awk && S.awk.fallback), fb: !v, free: free, title: (v && v.title) || (sd.dayPillar.ko + '일주'), sub: (v && v.subtitle) || introLines('iju'), kw: v && v.keywords, guardian: v && v.guardianImageUrl, onDone: free ? showFree : beginReader });
+  /* ── 3b. 프롤로그 → 리포트. 사용자가 곧 이야기의 주인공이다. 결제·무료 결과 화면은 두지 않는다. ── */
+  function intro() { ilganStage(prologue); }
+  function cinemaMediaFor(used) { return function (sc) { if (sc.bg === 'black') return null; return R.Director.pickMedia(sc, (S.pack && S.pack.lib && S.pack.lib.media) || S.media, { usedIds: used }, sc.chapterId || 'c00'); }; }
+  function playCinema(scenes, onEnd, label, skipLabel) {
+    if (!R.CinemaRender || !scenes || !scenes.length) { onEnd('missing'); return; }
+    view('cinema'); var stage = $('#cnStage'), used = [];
+    S.cn = R.CinemaRender.play(stage, scenes, { reduce: reduce, saveData: saveData, mediaFor: cinemaMediaFor(used), layers: [], label: label, skipLabel: skipLabel, onScene: function (sc, c) { if (R.Bgm) R.Bgm.play(c.bgmMood); }, onEnd: function (kind) { S.cn = null; onEnd(kind); } });
   }
-  function awakening() { ilganStage(ijuStage); }
-
-  /* ── 3b. 무료 결과(수호신 각성 직후) ─────────────────────────────────────────
-     결제 확인: 지금 온보딩 Paywall 에는 결제 완료 상태가 없다(링크 이동 또는 출시 알림 신청). 그래서 '결제 완료'는 기기에 저장된 mt_paid=1 로만 인정하고,
-     설정(story settings.v2.gate)을 끄면 예전처럼 모두 리포트로 들어간다. 관리자 미리보기·?qa= 는 항상 통과한다. 결제 연결 시 서버 검증으로 바꿔야 한다. */
-  function isPaid() { try { return localStorage.getItem('mt_paid') === '1'; } catch (e) { return false; } }
-  function gateOn() { var v2 = S.story && S.story.settings && S.story.settings.v2; return !PREVIEW && !qa && !isPaid() && !(v2 && v2.gate === false); }
-  function showFree() {
-    var sd = S.sd, v = S.awk && S.awk.video, st = S.story || R.Free.mergeStory(window.OnboardingContent, null);
-    var info = { guardianUrl: (v && (v.guardianImageUrl || v.posterUrl)) || '', title: (v && v.title) || '' };
-    view('free'); var box = $('#v-free'); box.innerHTML = R.Free.html(sd, info, st); T('free_result_viewed', {});
-    R.Free.mount(box, { settings: st.settings, done: st.purchase && st.purchase.done, hanja: sd.dayPillar.hanja, track: T, toast: toast, shareLink: R.Free.shareUrl(sd, location.origin), onCard: function () { var C = R.ShareCard; if (C && C.create) C.create(S.rep, sd, S.awk).catch(function (e) { toast(e.message || '카드를 만들지 못했습니다.'); }); } });
+  /* 프롤로그: "모든 사람에게는 각자의 이야기가 있다" → 주인공 이름 → 타이틀 → 캐릭터 프로필 → 영화로 비유하면 → CHAPTER 01 */
+  function prologue() {
+    var sd = S.sd; T('prologue_started', {});
+    playCinema(R.Translator.prologue(sd, S.name, R.Narrator.heroVars(sd, S.name)), function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', {}); beginReader(); }, '프롤로그');
+  }
+  /* 엔딩: 사주는 결말을 적어 놓은 대본이 아니다 … 다음 장면을 만드는 사람은 결국 당신이다 */
+  function endingCinema(then) {
+    var sd = S.sd; S.scroll[S.rep.chapters[S.idx].id] = window.scrollY; T('ending_started', {});
+    playCinema(R.Translator.ending(sd, S.name, R.Narrator.heroVars(sd, S.name)), function () { then(); }, '엔딩');
   }
   var elKey = function (k) { return { '목': 'wood', '화': 'fire', '토': 'earth', '금': 'metal', '수': 'water' }[k] || 'water'; };
 
@@ -148,26 +138,44 @@
     if (vid) return '<video muted playsinline preload="none" ' + (m.loop ? 'loop ' : '') + 'poster="' + esc(m.posterUrl || '') + '" data-w="' + esc(m.webmUrl || '') + '" data-m="' + esc(m.url || '') + '" aria-label="' + esc(alt) + '"></video>';
     var src = m.posterUrl && /video|transition/i.test(m.type) ? m.posterUrl : (m.url || m.posterUrl); return src ? '<img src="' + esc(src) + '" loading="lazy" decoding="async" alt="' + esc(alt) + '">' : '';
   };
-  var fxCls = function (s) { return reduce ? '' : ' fx-' + ((s.effect && s.effect.type) || 'fade'); };
+  var fxCls = function (s) { return reduce || s.cinemaAuto ? '' : ' fx-' + ((s.effect && s.effect.type) || 'fade'); }; // 감독(cinemaAuto)이 있으면 움직임은 시네마 카메라가 맡는다
   function media(s, cls) { // 장면 미디어 박스. 미디어가 없거나 로딩에 실패하면 자리표시 장면(원소 색 그라데이션)
     var pc = EL_COLOR[(s.intent && s.intent.desiredElements && s.intent.desiredElements[0]) || 'water'], m = s.media, inner = m ? mediaEl(m, s.headline || '') : '';
     var parts = '';
-    if (!reduce && s.effect && s.effect.particle) { for (var i = 0; i < 7; i++) parts += '<span style="left:' + ((i * 14 + (s.sceneId.length * 7)) % 96) + '%;animation-delay:' + (i * 1.3) + 's;--dx:' + (i % 2 ? 24 : -24) + 'px"></span>'; }
+    if (!reduce && !s.cinemaAuto && s.effect && s.effect.particle) { for (var i = 0; i < 7; i++) parts += '<span style="left:' + ((i * 14 + (s.sceneId.length * 7)) % 96) + '%;animation-delay:' + (i * 1.3) + 's;--dx:' + (i % 2 ? 24 : -24) + 'px"></span>'; }
     return '<div class="' + (cls || 'media') + fxCls(s) + '" style="--pc:' + pc + '">' + (inner || '<div class="ph" aria-hidden="true"></div>') + (parts ? '<div class="pt" aria-hidden="true">' + parts + '</div>' : '') + '</div>';
   }
   var seaChip = function (k, name) { return k ? '<span class="sea s-' + k + '"><b aria-hidden="true">' + SEA_ICON[k] + '</b>' + esc(name || SEA[k]) + '</span>' : ''; };
   var list = function (a) { return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
   var lines = function (t) { return esc(t).replace(/\n/g, '<br>'); };
 
+  /* ── 시네마틱 장면: 챕터 오프닝·현실 장면(리더 안에서 화면에 들어오면 재생) ── */
+  function layersOf(s) { return R.Director ? R.Director.layersFor(s, S.pack && S.pack.cinemaDefaults) : []; }
+  function cinemaHtml(c, s) {
+    var inner = R.CinemaRender.html(s, { media: s.media, reduce: reduce, layers: layersOf(s), saveData: saveData, kicker: s.kind === 'opener' && s.hook ? s.hook.label : '' });
+    var hold = Math.round((R.Cinema.build(s, layersOf(s)).timing.total) * 0.9);
+    return '<section class="scene s-cinema' + (s.kind === 'opener' ? ' cn-opener' : '') + '" data-sc="' + esc(s.sceneId) + '" data-hold="' + hold + '"><div class="cn-inline">' + inner + '</div></section>';
+  }
+  // 일반 장면에 카메라(이미지 모션) 속성을 붙인다: 설명=정적에 가깝게, 감정=slow zoom … (감독 결정 + 관리자 기본/클립 연출)
+  function decorate(htmlStr, s) {
+    if (!s.cinemaAuto || s.kind || !R.CinemaRender || !htmlStr) return htmlStr;
+    var c = R.Cinema.resolve(s, layersOf(s)), cv = R.CinemaRender.camVars(c, reduce), m = /^<section ([^>]*)>/.exec(htmlStr); if (!m) return htmlStr;
+    var dur = c.motionIntensity >= 3 ? 9000 : c.motionIntensity === 2 ? 13000 : 18000, vars = '--cn-amp:' + cv.amp + ';--cn-pan:' + cv.pan + '%;--cn-dur:' + dur + 'ms;--cn-fx:' + Math.round(c.focalPoint.x * 100) + '%;--cn-fy:' + Math.round(c.focalPoint.y * 100) + '%;';
+    var attrs = m[1].replace(/class="/, 'class="' + (cv.on ? 'cn-cam-on ' : '')).replace(/style="/, 'style="' + vars);
+    if (!/style="/.test(attrs)) attrs += ' style="' + vars + '"';
+    return '<section data-cn-type="' + c.sceneType + '" data-motion="' + (cv.on ? c.imageMotion : 'none') + '" ' + attrs + '>' + htmlStr.slice(m[0].length);
+  }
+
   function sceneHtml(c, s, i) {
     var t = s.sceneType, id = 'data-sc="' + esc(s.sceneId) + '"';
+    if (t === 'cinema') return cinemaHtml(c, s);
     if (t === 'chapterIntro') {
       var act = S.rep.acts.filter(function (a) { return a.id === c.act; })[0] || {};
       return '<section class="scene s-intro' + fxCls(s) + '" ' + id + ' style="--pc:' + EL_COLOR[(s.intent.desiredElements || ['water'])[0]] + '"><div class="bg">' + (s.media ? mediaEl(s.media, c.title) : '') + (s.media ? '' : '<div class="ph" aria-hidden="true"></div>') + '</div><div class="shade"></div><div class="txt">' +
         '<div class="no" data-tx="intro.no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="down" aria-hidden="true">SCROLL ↓</div></div></section>';
     }
     if (t === 'insight') return '<section class="scene rv" ' + id + '><div class="cap">풀이</div><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead' + (c.lead && /_fallback$/.test(c.lead.id || '') ? ' faint' : '') + '" data-tx="insight.lead">' + lines(s.body) + '</p>' + (c.choice ? '<p class="lead choice" data-tx="choice.line">' + lines(c.choice) + '</p>' : '') + (s.media ? media(s) : '') + '</section>';
-    if (t === 'verdictFind') { var av = S.awk && S.awk.video, gi = (av && (av.guardianImageUrl || av.posterUrl)) || (S.awk && S.awk.fallback && S.awk.fallback.posterUrl) || ''; return '<section class="scene rv s-verdict" ' + id + '>' + (gi ? '<img class="guardian" src="' + esc(gi) + '" alt="' + esc(((s.verdict || {}).pillar || '') + '일주의 수호신') + '" loading="lazy" decoding="async">' : '') + '<div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p></section>'; }
+    if (t === 'verdictFind') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p></section>';
     if (t === 'verdictBlock') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div>' + (s.sub ? '<p class="lead" style="font-size:1.05rem">' + esc(s.sub) + '</p>' : '') + '<p style="color:var(--ink2)">' + lines(s.body) + '</p></section>';
     if (t === 'verdictEvidence') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p><div class="vd" role="group" aria-label="맞는지 알려 주세요"><button type="button" class="btn" data-vd="yes">맞습니다</button><button type="button" class="btn" data-vd="no">아닙니다</button></div><p class="vd-reply faint" aria-live="polite" data-yes="' + esc((s.evidence || {}).yes) + '" data-no="' + esc((s.evidence || {}).no) + '"></p></section>';
     if (t === 'verdictAdvice') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead" style="font-size:1.05rem">' + lines(s.body) + '</p><div class="cards"><div class="card">' + list(((s.bullets || [])[0] || {}).items || []) + '</div></div></section>';
@@ -186,7 +194,7 @@
     if (t === 'chapterEnding') {
       var last = S.idx >= S.rep.chapters.length - 1;
       return '<section class="scene s-end rv" ' + id + '>' + (c.disclaimer ? '<p class="disc" style="margin:0 0 26px">' + esc(c.disclaimer) + '</p>' : '') + (c.cta ? '<button type="button" class="btn" data-cta="' + esc(c.cta.action) + '" style="margin-bottom:26px">' + esc(c.cta.label) + '</button>' : '') +
-        '<p class="q" data-tx="end.quote">' + lines(c.headline) + '</p><button type="button" class="btn gold big" id="nextBtn" disabled>' + (last ? '나의 이야기 마무리하기' : '다음 챕터 →') + '</button><p class="hint" id="nextHint">끝까지 읽으면 열립니다</p></section>';
+        '<p class="q" data-tx="end.quote">' + lines(c.headline) + '</p>' + (s.nextHook ? '<p class="nexthook"><small>NEXT SCENE · ' + esc(s.nextHook.label) + '</small>' + esc(s.nextHook.line) + '</p>' : '') + '<button type="button" class="btn gold big" id="nextBtn" disabled>' + (last ? '나의 이야기 마무리하기' : '다음 챕터 →') + '</button><p class="hint" id="nextHint">끝까지 읽으면 열립니다</p></section>';
     }
     return '';
   }
@@ -260,7 +268,7 @@
   }
   function actTransition(t, then) {
     var el = $('#actx'); el.className = 'actx'; el.hidden = false;
-    el.innerHTML = '<div class="glow" aria-hidden="true"></div><div><div class="roman">' + esc(t.kicker) + '</div><div class="ln" aria-hidden="true"></div><div class="at">' + esc(t.headline) + '</div><div class="al">' + esc(t.body) + '</div></div>';
+    el.innerHTML = '<div class="glow" aria-hidden="true"></div><div><div class="roman">' + esc(t.kicker) + '</div><div class="ln" aria-hidden="true"></div><div class="at">' + esc(t.headline) + '</div><div class="al">' + lines(t.body) + '</div></div>';
     var done = false, end = function () { if (done) return; done = true; el.classList.add('out'); setTimeout(function () { el.hidden = true; }, 800); then(); };
     el.onclick = end; setTimeout(end, 3300); // 약 3초, 탭하면 건너뜀
   }
@@ -268,8 +276,10 @@
     var rep = S.rep, n = rep.chapters.length, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {};
     $('#barAct').textContent = act.roman || ''; $('#barTitle').textContent = act.title ? act.title + ' · ' + c.title : c.title; $('#barNo').textContent = String(c.no).padStart(2, '0'); $('#barTot').textContent = n;
     var pct = Math.round((Object.keys(S.visited).length / n) * 100); $('#progFill').style.width = ((i + 1) / n * 100) + '%'; $('#prog').setAttribute('aria-valuenow', String(Math.round((i + 1) / n * 100)));
-    $('#chapter').innerHTML = c.scenes.map(function (s, k) { return sceneHtml(c, s, k); }).join('');
+    $('#chapter').innerHTML = c.scenes.map(function (s, k) { return decorate(sceneHtml(c, s, k), s); }).join('');
+    if (R.CinemaRender) R.CinemaRender.revealify($('#chapter'), { reduce: reduce }); // 긴 문장은 호흡 단위로 나누어 차례로 나타낸다(텍스트는 그대로 보존)
     document.title = c.title + ' · 만트라 사주 무빙툰';
+    if (R.Bgm && R.Bgm.has()) { var mo = c.scenes.filter(function (s) { return s.sceneType === 'insight' || s.sceneType === 'chapterIntro'; })[0]; R.Bgm.play(mo ? R.Cinema.resolve(mo, layersOf(mo)).bgmMood : 'minimal'); } // 챕터 분위기에 맞는 BGM
     mount(c); txApply($('#chapter'), c.id, false); T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if ((c.base || c.id) === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {});
     window.scrollTo(0, S.scroll[c.id] || 0);
     prefetch(i + 1); checkUnlock(); ss('mt_v2_idx', String(i));
@@ -285,6 +295,7 @@
     // 영상: 화면에 들어왔을 때만 재생, 나가면 pause. 로딩 실패 시 poster 이미지로 대체
     var vio = new IntersectionObserver(function (es) { es.forEach(function (e) { var v = e.target; if (e.isIntersecting) { if (!v.dataset.ready) { v.dataset.ready = 1; if (v.dataset.w && v.canPlayType('video/webm')) { var a = document.createElement('source'); a.src = v.dataset.w; a.type = 'video/webm'; v.appendChild(a); } if (v.dataset.m) { var b = document.createElement('source'); b.src = v.dataset.m; b.type = 'video/mp4'; v.appendChild(b); } v.addEventListener('error', function () { var p = v.getAttribute('poster'); if (p) { var im = new Image(); im.src = p; im.alt = ''; v.replaceWith(im); } }, true); v.load(); } var pr = v.play(); if (pr && pr.catch) pr.catch(function () { }); } else if (v.dataset.ready) v.pause(); }); }, { threshold: .5 });
     if (!reduce) $$('video', root).forEach(function (v) { vio.observe(v); });
+    if (R.CinemaRender) R.CinemaRender.watch(root, { reduce: reduce }); // 카메라 모션·시네마 장면·문장 분절은 화면에 들어올 때 시작
     var cur = (c.items || []).findIndex(function (x) { return x.isNow; }); if (c.kind === 'monthly') moDetail(c, Math.max(0, cur));
     // 챕터 끝 도달 → 다음 버튼 활성화 + chapter_completed
     var end = $('#nextBtn'), eio = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting && end) { enableNext(c); eio.disconnect(); } }); }, { threshold: .6 });
@@ -310,7 +321,7 @@
   }
   var scrollT; window.addEventListener('scroll', function () { clearTimeout(scrollT); scrollT = setTimeout(checkEnd, 80); }, { passive: true });
   function enableNext(c) { var b = $('#nextBtn'); if (!b) return; b.disabled = false; $('#nextHint').textContent = ''; if (!S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); } checkUnlock(); }
-  function next() { var n = S.rep.chapters.length; if (S.idx >= n - 1) finalView(); else go(S.idx + 1); }
+  function next() { var n = S.rep.chapters.length; if (S.idx >= n - 1) endingCinema(finalView); else go(S.idx + 1); }
   function prefetch(i) { var c = S.rep.chapters[i]; if (!c) return; var s = c.scenes.filter(function (x) { return x.media; })[0]; if (s) { var im = new Image(); im.src = s.media.posterUrl || (/video/i.test(s.media.type) ? '' : s.media.url); } }
 
   // PDF 해금: 관리자 requiredCompletionRate(챕터 방문 비율) 또는 기본값(최종 챕터 도달)
@@ -324,8 +335,8 @@
   function finalView() {
     S.scroll[S.rep.chapters[S.idx].id] = window.scrollY; view('final'); T('report_completed', { viewed: Object.keys(S.visited).length }); checkUnlock();
     var rep = S.rep, a4 = rep.acts[rep.acts.length - 1], steps = rep.plan.strategy;
-    $('#v-final').innerHTML = '<div class="fin"><p class="kicker">COMPLETE</p><h2>당신의 이야기가<br>완성되었습니다</h2><p>' + rep.chapters.length + '개의 챕터를 통해<br>타고난 기질부터 현재의 운,<br>앞으로의 행동 전략까지 살펴봤습니다.</p>' +
-      '<div class="cap" style="margin-top:28px">현재 전략</div><div class="strategy">' + steps.map(function (x, i) { return (i ? '<i aria-hidden="true">→</i>' : '') + '<b>' + esc(x.label) + '</b>'; }).join('') + '</div>' +
+    $('#v-final').innerHTML = '<div class="fin"><p class="kicker">END</p><h2>이 이야기의 다음 장면은<br>아직 쓰이지 않았다</h2><p>' + rep.chapters.length + '개의 챕터를 지나왔다.<br>타고난 캐릭터부터 시간의 흐름,<br>다음 장면을 위한 행동 전략까지.</p>' +
+      '<div class="cap" style="margin-top:28px">다음 장면의 전략</div><div class="strategy">' + steps.map(function (x, i) { return (i ? '<i aria-hidden="true">→</i>' : '') + '<b>' + esc(x.label) + '</b>'; }).join('') + '</div>' +
       '<div class="btns"><button type="button" class="btn gold big" id="fPdf"' + (S.pdfUnlocked ? '' : ' disabled') + '>나의 종합 리포트 PDF 받기</button><button type="button" class="btn big" id="fShare">공유 카드 만들기</button><button type="button" class="btn" id="fCompat">궁합 볼 사람 추가하기</button><button type="button" class="btn" id="fBack">리포트 다시 보기</button></div>' + (S.pdfUnlocked ? '' : '<p class="lock">더 많은 챕터를 읽으면 PDF가 열립니다.</p>') + '<p class="fine">사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></div>';
     $('#fBack').onclick = function () { view('reader'); go(S.rep.chapters.length - 1); };
     $('#fCompat').onclick = function () { T('compatibility_cta_clicked', { chapter: 'final' }); toast('두 사람의 궁합은 곧 열립니다.'); };
@@ -476,8 +487,10 @@
       var m = e.data; if (e.origin !== location.origin || !m || m.type !== 'mt-v2-preview') return;
       try {
         var ch = window.Manse.compute(m.input); S.sd = R.SajuData.build(ch, { now: m.now || Date.now() }); S.name = m.name || ''; S.media = m.media || [];
-        S.pack = R.Compose.fromSaved(m.content, S.media, m.project || 'full'); S.ts = S.pack.textStyles; S.rep = R.Compose.build(S.sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = m.awk || {}; S.visited = {}; S.ended = {};
-        if (m.chapter === 'ilgan') { ilganStage(ijuStage); return; } if (m.chapter === 'awakening') { ijuStage(); return; }
+        S.pack = R.Compose.fromSaved(m.content, S.media, m.project || 'full'); S.ts = S.pack.textStyles; S.rep = R.Compose.build(S.sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = { ilgan: (m.awk && m.awk.ilgan) || null }; S.visited = {}; S.ended = {};
+        if (m.chapter === 'ilgan') { ilganStage(function () { }); return; }
+        if (m.chapter === 'prologue') { playCinema(R.Translator.prologue(S.sd, S.name, R.Narrator.heroVars(S.sd, S.name)), function () { }, '프롤로그'); return; }
+        if (m.chapter === 'ending') { playCinema(R.Translator.ending(S.sd, S.name, R.Narrator.heroVars(S.sd, S.name)), function () { }, '엔딩'); return; }
         var i = Math.max(0, S.rep.chapters.map(function (c) { return c.id; }).indexOf(m.chapter)); view('reader'); $('#barTot').textContent = S.rep.chapters.length;
         S.idx = i; var c = S.rep.chapters[i]; S.visited[c.id] = 1; render(c, i, true); window.scrollTo(0, 0);
       } catch (err) { $('#loadText').textContent = '미리보기를 만들지 못했습니다: ' + (err && err.message); view('load'); }
@@ -492,5 +505,5 @@
     if (window.parent !== window) window.parent.postMessage({ type: 'mt-v2-ready' }, location.origin);
   }
 
-  window.MantraV2 = { state: S, go: go, T: T, awakening: awakening };
+  window.MantraV2 = { state: S, go: go, T: T, intro: intro, prologue: prologue };
 })();

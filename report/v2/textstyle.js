@@ -5,14 +5,13 @@
 //   inDelay = 장면(또는 영상 단계)에 들어온 뒤 나타나기까지 초 · hold = 다 나타난 뒤 사라지기까지 초(0=사라지지 않음)
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
-  // 글자 역할 → 표시 이름. stage=true 는 영상 단계(일간 소개·일주 각성)의 자막으로 챕터와 무관(전체 적용만)
+  // 글자 역할 → 표시 이름. stage=true 는 영상 단계(캐릭터 소개)의 자막으로 챕터와 무관(전체 적용만)
   var ROLES = {
     'intro.no': ['챕터 번호'], 'intro.title': ['챕터 제목'], 'intro.headline': ['핵심 결론 문장'], 'intro.note': ['소개 문장'],
     'insight.fact': ['FACT 줄'], 'explain.lead': ['의미 문장'], 'end.quote': ['챕터 끝 문장'],
     // 서술 역할(소설체 ~다, 전지적 관찰자 시점) — 위의 UI 역할(합쇼체)과 따로 스타일을 정한다
     'scene.caption': ['서술 · 장면 자막'], 'insight.lead': ['서술 · 해석 문장'], 'choice.line': ['서술 · 선택 문장'],
-    'ilgan.title': ['일간 소개 · 제목', 1], 'ilgan.sub': ['일간 소개 · 부제', 1], 'ilgan.kw': ['일간 소개 · 키워드', 1],
-    'awk.title': ['일주 각성 · 제목', 1], 'awk.sub': ['일주 각성 · 부제', 1], 'awk.kw': ['일주 각성 · 키워드', 1],
+    'ilgan.title': ['캐릭터 소개 · 제목', 1], 'ilgan.sub': ['캐릭터 소개 · 부제', 1], 'ilgan.kw': ['캐릭터 소개 · 키워드', 1],
   };
   var NARR = ['scene.caption', 'insight.lead', 'choice.line']; // 서술 역할(관리자에서 UI 역할과 구분해 보여 준다)
   var IN = [['', '없음'], ['fade', '서서히 나타나기'], ['rise', '아래에서 떠오르기'], ['drop', '위에서 내려오기'], ['blur', '흐릿하다가 선명해지기'], ['zoom', '살짝 커지며 나타나기'], ['wipe', '왼쪽에서 펼쳐지기'], ['letters', '글자가 하나씩 나타나기']];

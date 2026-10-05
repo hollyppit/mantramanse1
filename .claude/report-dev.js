@@ -46,9 +46,9 @@ http.createServer(async (q, r) => {
     if (q.method === 'POST') { await body(q); return send(r, 200, { ok: true, suggestion: { elementTags: ['wood'], stateTags: ['growth', 'recovery'], emotionTags: ['calm', 'hopeful'], sceneTags: ['forest', 'mist'], themeTags: ['personality'], actionTags: [], visualRole: ['hero'], chapterTags: ['personality'], description: '(모의) 안개 낀 숲. 성장과 회복의 표현에 어울립니다.' } }); }
   }
   if (p === '/api/awakening') {
-    if (q.method === 'GET') { if (u.searchParams.get('all')) return authed(q) ? send(r, 200, { videos: awk, ilgan: ilg, fallback: null }) : send(r, 401, { error: '관리자 인증이 필요합니다' }); const pl = u.searchParams.get('pillar') || '', gd = u.searchParams.get('gender'); return send(r, 200, { video: awk.find(v => v.dayPillar === pl && v.gender === gd) || null, ilgan: ilg.find(v => v.stem === pl[0] && v.gender === gd) || null, fallback: null }); }
+    if (q.method === 'GET') { if (u.searchParams.get('all')) return authed(q) ? send(r, 200, { ilgan: ilg, deprecatedGuardian: awk.length }) : send(r, 401, { error: '관리자 인증이 필요합니다' }); const pl = u.searchParams.get('pillar') || '', gd = u.searchParams.get('gender'); return send(r, 200, { ilgan: ilg.find(v => v.stem === pl[0] && v.gender === gd) || null }); }
     if (!authed(q)) return send(r, 401, { error: '관리자 인증이 필요합니다' });
-    if (q.method === 'PUT') { const b = JSON.parse((await body(q)).toString()); awk = b.videos; ilg = b.ilgan || []; return send(r, 200, { ok: true, count: awk.length, ilgan: ilg.length }); }
+    if (q.method === 'PUT') { const b = JSON.parse((await body(q)).toString()); ilg = b.ilgan || []; return send(r, 200, { ok: true, ilgan: ilg.length }); }
   }
   if (p === '/api/story') {
     if (q.method === 'GET') return send(r, 200, { story });

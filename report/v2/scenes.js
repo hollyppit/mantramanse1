@@ -7,7 +7,7 @@
     element: ['wood', 'fire', 'earth', 'metal', 'water'],
     state: ['growth', 'opportunity', 'expansion', 'harvest', 'accumulation', 'transition', 'defense', 'recovery', 'conflict', 'isolation', 'connection', 'stability'],
     emotion: ['calm', 'mysterious', 'powerful', 'hopeful', 'lonely', 'tense', 'warm', 'cold', 'romantic', 'energetic', 'contemplative'],
-    scene: ['forest', 'mountain', 'ocean', 'river', 'lake', 'field', 'road', 'city', 'nightCity', 'library', 'bookstore', 'museum', 'gallery', 'workspace', 'temple', 'sunrise', 'sunset', 'rain', 'snow', 'mist', 'cloud', 'stars'],
+    scene: ['forest', 'mountain', 'ocean', 'river', 'lake', 'field', 'road', 'city', 'nightCity', 'library', 'bookstore', 'museum', 'gallery', 'workspace', 'temple', 'sunrise', 'sunset', 'rain', 'snow', 'mist', 'cloud', 'stars', 'dawnCity', 'emptyOffice', 'commute', 'walkingAlone', 'meetingRoom', 'studio', 'desk', 'laptop', 'paymentAlert', 'card', 'trainStation', 'airport', 'crossroads', 'rainWindow', 'meadow', 'openDoor', 'stairs', 'tunnelLight', 'windyForest', 'sea', 'trip', 'exercise', 'gathering', 'farewell', 'newStart'],
     theme: ['identity', 'personality', 'talent', 'shadow', 'career', 'success', 'wealth', 'love', 'marriage', 'relationship', 'family', 'pastLife', 'daewoon', 'sewoon', 'monthly', 'remedy', 'action'],
     action: ['walking', 'running', 'working', 'studying', 'creating', 'thinking', 'meeting', 'traveling', 'climbing', 'fighting', 'resting', 'meditating', 'lookingForward', 'lookingBack'],
     role: ['hero', 'background', 'support', 'transition', 'divider', 'atmosphere', 'ending'],
@@ -19,7 +19,7 @@
   var CONFIG = { w: { element: 20, state: 25, theme: 25, emotion: 10, action: 10, chapter: 10, scene: 6, role: 5, typePref: 8, chapterOnly: 15 }, priorityDiv: 10,
     sameTypeRun: -14, // 직전 장면과 같은 미디어 타입이면 감점(media diversity)
     repeatInReport: -1000, // 같은 리포트 안 재사용은 사실상 제외(후보가 그것뿐이면 마지막 수단으로 허용)
-    adjacentChapter: -25, sameChapter: -2000, candidates: 20, exempt: ['guardian', 'brand', 'ui'] };
+    adjacentChapter: -25, sameChapter: -2000, candidates: 20, exempt: ['brand', 'ui'] };
 
   // 레거시/임의 태그 → taxonomy 분류 (기존 imageTags: 'wood','growth','forest' 같은 단어 호환)
   var ALIAS = { wealth_: 'wealth', study: 'theme:identity', leadership: 'theme:success', balance: 'state:stability', creation: 'action:creating', travel: 'action:traveling', harvest_: 'harvest' };
@@ -38,7 +38,7 @@
     return { id: a.id, type: a.type || 'image', url: a.url || '', webmUrl: a.webmUrl || '', thumbnailUrl: a.thumbnailUrl || '', posterUrl: a.posterUrl || '', title: a.title || '', description: a.description || '',
       elements: g('element', 'elementTags'), states: g('state', 'stateTags'), emotions: g('emotion', 'emotionTags'), scenes: g('scene', 'sceneTags'), themes: g('theme', 'themeTags'),
       chapters: (a.chapterTags || []).slice(), actions: g('action', 'actionTags'), roles: g('role', 'visualRoles').concat(a.visualRole && a.visualRole.length ? [].concat(a.visualRole) : []),
-      orientation: a.orientation || 'portrait', duration: a.duration || 0, loopable: !!a.loopable, priority: +a.priority || 0, enabled: a.enabled !== false, tagsApproved: a.tagsApproved !== false, chapterIds: (a.chapterIds || []).slice() };
+      orientation: a.orientation || 'portrait', duration: a.duration || 0, loopable: !!a.loopable, priority: +a.priority || 0, enabled: a.enabled !== false, tagsApproved: a.tagsApproved !== false, chapterIds: (a.chapterIds || []).slice(), cinema: a.cinema || null };
   }
   var inter = function (a, b) { return (a || []).filter(function (x) { return (b || []).indexOf(x) >= 0; }); };
 
@@ -176,10 +176,10 @@
       }
       else if (st === 'action') { sc.headline = '지금 할 수 있는 행동'; sc.bullets = [{ label: 'ACTION', items: c.action || [], notes: c.actionNotes || [] }]; }
       else if (st === 'chapterEnding') { sc.headline = c.headline; sc.body = ''; }
-      else if (st === 'verdictFind') { sc.headline = '수호신이 발견한 힘'; sc.body = c.verdict.discover; sc.verdict = c.verdict.potential; sc.guardian = true; }
+      else if (st === 'verdictFind') { sc.headline = '주인공의 동력'; sc.body = c.verdict.discover; sc.verdict = c.verdict.potential; }
       else if (st === 'verdictBlock') { sc.headline = c.verdict.blocked.label; sc.body = c.verdict.blocked.text; sc.sub = c.verdict.blocked.headline; }
-      else if (st === 'verdictEvidence') { sc.headline = '수호신이 짚은 시기'; sc.body = c.verdict.evidence.text; sc.evidence = { yes: c.verdict.evidence.yes, no: c.verdict.evidence.no }; }
-      else if (st === 'verdictAdvice') { sc.headline = '수호신의 조언'; sc.body = c.verdict.advice.lead; sc.bullets = [{ label: 'ADVICE', items: c.verdict.advice.items }]; }
+      else if (st === 'verdictEvidence') { sc.headline = '시간축 위의 한 지점'; sc.body = c.verdict.evidence.text; sc.evidence = { yes: c.verdict.evidence.yes, no: c.verdict.evidence.no }; }
+      else if (st === 'verdictAdvice') { sc.headline = '다음 장면을 위한 두 걸음'; sc.body = c.verdict.advice.lead; sc.bullets = [{ label: 'ADVICE', items: c.verdict.advice.items }]; }
       else if (st === 'chart') { sc.headline = c.title; sc.chart = chartKind(c); sc.chartBase = c.base || c.id; }
       else if (st === 'dataVisualization' || st === 'timeline') { sc.headline = c.title; sc.data = c.items; }
       // 같은 종류가 연속되지 않게: 직전 장면과 같은 media type 이면 다른 타입을 우선
@@ -190,7 +190,7 @@
         sc.candidates = cands.map(function (x) { return { assetId: x.asset.id, score: x.score, breakdown: x.breakdown }; });
         var pickd = choose(cands, null);
         if (pickd) {
-          var a = pickd.asset; sc.media = { assetId: a.id, type: a.type, url: a.url, webmUrl: a.webmUrl, posterUrl: a.posterUrl || a.thumbnailUrl, loop: a.loopable || a.type === 'videoLoop', muted: true, score: pickd.score, why: pickd.breakdown };
+          var a = pickd.asset; sc.media = { assetId: a.id, type: a.type, url: a.url, webmUrl: a.webmUrl, posterUrl: a.posterUrl || a.thumbnailUrl, loop: a.loopable || a.type === 'videoLoop', muted: true, score: pickd.score, why: pickd.breakdown, cinema: a.cinema || null };
           ctx.usedIds.push(a.id); sameCh.push(a.id); lastMedia = a.type;
         } else lastMedia = null;
       }

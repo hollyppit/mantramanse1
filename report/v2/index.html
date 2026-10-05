@@ -4,13 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>나의 이야기 · 만트라 사주 무빙툰</title>
-<meta name="description" content="사주를 입력하면 나의 일주 영상과 20개 챕터의 이야기, 지금 필요한 행동 전략까지 이어집니다.">
+<meta name="description" content="사주를 입력하면 내 인생을 소재로 한 짧은 영화 — 20개 챕터의 이야기, 지금 필요한 행동 전략까지 이어집니다.">
 <meta name="theme-color" content="#080A11">
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="viewer.css">
+<link rel="stylesheet" href="cinema.css">
 </head>
 <body>
 <noscript><p style="padding:30vh 20px;color:#E9E4D8">이 페이지는 자바스크립트가 필요합니다.</p></noscript>
@@ -41,19 +42,19 @@
     <div class="loadbox"><img class="orb" src="/report/v2/lantern.webp" alt="" aria-hidden="true" width="120" height="120" decoding="async"><p id="loadText" class="loadtext"></p></div>
   </section>
 
-  <!-- 일주 각성 영상 -->
-  <section id="v-awk" class="view" aria-label="일주 각성" hidden>
+  <!-- 캐릭터 소개 영상 (있을 때만) -->
+  <section id="v-awk" class="view" aria-label="캐릭터 소개" hidden>
     <div class="awk">
       <div class="awk-media" id="awkMedia"></div>
       <div class="awk-shade" aria-hidden="true"></div>
       <div class="awk-top"><button type="button" id="awkSound" class="chipbtn" hidden aria-pressed="false">🔇 소리 켜기</button><button type="button" id="awkSkip" class="chipbtn">SKIP ›</button></div>
       <div class="awk-cap" id="awkCap"></div>
-      <button type="button" id="awkStart" class="btn big gold" hidden>당신의 이야기를 시작합니다</button>
+      <button type="button" id="awkStart" class="btn big gold" hidden>이야기를 시작한다</button>
     </div>
   </section>
 
-  <!-- 무료 결과(수호신 각성 직후) -->
-  <section id="v-free" class="view" aria-label="수호신 무료 결과" hidden></section>
+  <!-- 시네마틱 프롤로그 · 엔딩 -->
+  <section id="v-cinema" class="view" aria-label="영화처럼 보는 나의 이야기" hidden><div id="cnStage"></div></section>
 
   <!-- 리포트 -->
   <section id="v-reader" class="view" hidden>
@@ -82,6 +83,8 @@
 <script src="saju-data.js"></script>
 <script src="rules.js"></script>
 <script src="narrator.js"></script>
+<script src="cinema.js"></script>
+<script src="translator.js"></script>
 <script src="moving.js"></script>
 <script src="content.js"></script>
 <script src="content-pro.js"></script>
@@ -90,8 +93,8 @@
 <script src="remedy.js"></script>
 <script src="media.js"></script>
 <script src="scenes.js"></script>
+<script src="director.js"></script>
 <script src="compose.js"></script>
-<script src="free.js"></script>
 <script src="intro-text.js"></script>
 <script src="charts.js"></script>
 <script src="../story/content.js"></script>
@@ -100,6 +103,8 @@
 <script src="analytics.js"></script>
 <script src="pdf.js"></script>
 <script src="sharecard.js"></script>
+<script src="bgm.js"></script>
+<script src="cinema-render.js"></script>
 <script src="viewer.js"></script>
 <script>
 // 재방문자는 공용 인트로를 생략한다 (첫 방문에만 /api/intro 영상 재생). 인트로 영상은 관리자 "입장 인트로" 탭에서 설정.

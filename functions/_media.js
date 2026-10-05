@@ -1,9 +1,10 @@
-// 미디어 라이브러리·각성 영상 공용 검증 (파일명이 _로 시작해 라우트로 노출되지 않음). 태그 taxonomy 는 report/v2/scenes.js 의 TAX 와 같아야 한다.
+// 미디어 라이브러리·일간 소개 영상 공용 검증 (파일명이 _로 시작해 라우트로 노출되지 않음). 태그 taxonomy 는 report/v2/scenes.js 의 TAX 와 같아야 한다.
+import { cleanCinema } from './_cinema.js';
 export const TAX = {
   element: ['wood', 'fire', 'earth', 'metal', 'water'],
   state: ['growth', 'opportunity', 'expansion', 'harvest', 'accumulation', 'transition', 'defense', 'recovery', 'conflict', 'isolation', 'connection', 'stability'],
   emotion: ['calm', 'mysterious', 'powerful', 'hopeful', 'lonely', 'tense', 'warm', 'cold', 'romantic', 'energetic', 'contemplative'],
-  scene: ['forest', 'mountain', 'ocean', 'river', 'lake', 'field', 'road', 'city', 'nightCity', 'library', 'bookstore', 'museum', 'gallery', 'workspace', 'temple', 'sunrise', 'sunset', 'rain', 'snow', 'mist', 'cloud', 'stars'],
+  scene: ['forest', 'mountain', 'ocean', 'river', 'lake', 'field', 'road', 'city', 'nightCity', 'library', 'bookstore', 'museum', 'gallery', 'workspace', 'temple', 'sunrise', 'sunset', 'rain', 'snow', 'mist', 'cloud', 'stars', 'dawnCity', 'emptyOffice', 'commute', 'walkingAlone', 'meetingRoom', 'studio', 'desk', 'laptop', 'paymentAlert', 'card', 'trainStation', 'airport', 'crossroads', 'rainWindow', 'meadow', 'openDoor', 'stairs', 'tunnelLight', 'windyForest', 'sea', 'trip', 'exercise', 'gathering', 'farewell', 'newStart'],
   theme: ['identity', 'personality', 'talent', 'shadow', 'career', 'success', 'wealth', 'love', 'marriage', 'relationship', 'family', 'pastLife', 'daewoon', 'sewoon', 'monthly', 'remedy', 'action'],
   action: ['walking', 'running', 'working', 'studying', 'creating', 'thinking', 'meeting', 'traveling', 'climbing', 'fighting', 'resting', 'meditating', 'lookingForward', 'lookingBack'],
   role: ['hero', 'background', 'support', 'transition', 'divider', 'atmosphere', 'ending'],
@@ -26,6 +27,7 @@ export function cleanMedia(m) {
   o.tags = [...new Set([...o.elementTags, ...o.stateTags, ...o.emotionTags, ...o.sceneTags, ...o.themeTags, ...o.actionTags])];
   // AI가 추천만 한 태그: 관리자가 승인하기 전에는 조합에 쓰이지 않는다
   o.pending = m.pending && typeof m.pending === 'object' ? { tags: Object.fromEntries(Object.keys(FIELD).map(f => [f, tags((m.pending.tags || {})[f], TAX[FIELD[f]])])), description: txt(m.pending.description, 400) } : null;
+  const cin = cleanCinema(m.cinema); if (Object.keys(cin).length) o.cinema = cin; // 클립 개별 연출(sceneType·preset·pacing·motionIntensity·imageMotion·transition·textAnimation·textPosition·textSize·overlayStrength·focalPoint·pauseAfter·bgmMood)
   return o;
 }
 
@@ -40,22 +42,11 @@ export function publicUrl(base, u) {
 }
 export function publicizeClip(base, c) {
   if (!base || !c || typeof c !== 'object') return c;
-  const o = { ...c }; for (const f of ['videoUrl', 'videoWebm', 'posterUrl', 'guardianImageUrl', 'captionsUrl']) if (o[f]) o[f] = publicUrl(base, o[f]);
+  const o = { ...c }; for (const f of ['videoUrl', 'videoWebm', 'posterUrl', 'captionsUrl']) if (o[f]) o[f] = publicUrl(base, o[f]);
   return o;
 }
 
-export function cleanAwakening(v) {
-  if (!v || typeof v !== 'object') return null;
-  const ST = '갑을병정무기경신임계', BR = '자축인묘진사오미신유술해', H1 = '甲乙丙丁戊己庚辛壬癸', H2 = '子丑寅卯辰巳午未申酉戌亥';
-  const s = String(v.dayPillar || '').trim(), a = H1.indexOf(s[0]), b = H2.indexOf(s[1]);
-  const k = a >= 0 && b >= 0 ? ST[a] + BR[b] : s.slice(0, 2), ia = ST.indexOf(k[0]), ib = BR.indexOf(k[1]);
-  if (ia < 0 || ib < 0 || (ia % 2) !== (ib % 2)) return null; // 60갑자는 천간·지지의 음양이 같아야 한다
-  const g = /^(m|male|남)/i.test(v.gender || '') ? 'M' : /^(f|female|여)/i.test(v.gender || '') ? 'F' : null; if (!g) return null;
-  return { dayPillar: k, gender: g, videoUrl: url(v.videoUrl), videoWebm: url(v.videoWebm), posterUrl: url(v.posterUrl), guardianImageUrl: url(v.guardianImageUrl), captionsUrl: url(v.captionsUrl),
-    title: txt(v.title, 60), subtitle: txt(v.subtitle, 200), keywords: Array.isArray(v.keywords) ? v.keywords.slice(0, 8).map(x => txt(x, 20)).filter(Boolean) : [], enabled: v.enabled !== false };
-}
-
-// 일간 소개 영상(10일간 × 성별 = 20): "당신은 경금입니다" 처럼 일주 각성 영상 앞에 나오는 소개
+// 일간 소개 영상(10일간 × 성별 = 20): 프롤로그 앞에 나오는 "이 이야기의 주인공" 캐릭터 소개
 export const STEMS_K = '갑을병정무기경신임계', STEMS_H = '甲乙丙丁戊己庚辛壬癸';
 export function normStem(v) {
   const s = String(v || '').trim(), c = s[0] || '', i = STEMS_K.indexOf(c) >= 0 ? STEMS_K.indexOf(c) : STEMS_H.indexOf(c);

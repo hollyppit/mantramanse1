@@ -1,5 +1,5 @@
 // SNS 공유 카드(9:16, 1080×1920). 개인정보 최소화: 생년월일·이름·시각·성별은 넣지 않는다.
-// 포함: 수호신 이미지(있으면), 일주, 한 줄 정의, 키워드 3개, 현재 운 키워드, MANTRA 브랜딩.
+// 포함: 일주, 한 줄 정의, 키워드 3개, 현재 운 키워드, MANTRA 브랜딩.
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
   var W = 1080, H = 1920;
@@ -7,10 +7,10 @@
 
   // 카드에 들어갈 내용(순수 함수, 테스트 가능). 생년월일 등은 절대 포함하지 않는다.
   function content(rep, sd, awk) {
-    var S = R.SajuData.SEASONS, v = awk && awk.video, c1 = (rep.chapters[0] || {});
+    var S = R.SajuData.SEASONS, v = awk && awk.ilgan, c1 = (rep.chapters[0] || {});
     var kw = (v && v.keywords && v.keywords.length ? v.keywords : [sd.dayMaster.el + ' 기운', sd.dominantGroup + ' 중심', sd.strength.band]).slice(0, 3);
     var now = [sd.currentDaewoon && sd.currentDaewoon.season ? '대운 ' + S[sd.currentDaewoon.season] : '', sd.sewoon && sd.sewoon.season ? '올해 ' + S[sd.sewoon.season] : ''].filter(Boolean);
-    return { pillar: sd.dayPillar.ko + '일주', hanja: sd.dayPillar.hanja, line: (c1.headline || '').replace(/\n/g, ' '), keywords: kw, now: now, el: sd.dayMaster.el, guardian: v && v.guardianImageUrl || '' };
+    return { pillar: sd.dayPillar.ko + '일주', hanja: sd.dayPillar.hanja, line: (c1.headline || '').replace(/\n/g, ' '), keywords: kw, now: now, el: sd.dayMaster.el, poster: v && v.posterUrl || '' };
   }
   function wrap(ctx, text, maxW) { // 한글은 어절 단위로, 어절이 너무 길면 글자 단위로 줄바꿈
     var words = String(text).split(/\s+/), lines = [], cur = '';
@@ -44,7 +44,7 @@
   // 브라우저: 미리보기 대화상자(저장·공유). 반환 Promise 는 카드가 만들어지면 resolve.
   function create(rep, sd, awk) {
     var d = content(rep, sd, awk), fonts = document.fonts && document.fonts.load ? Promise.all(['600 100px "Noto Serif KR"', '500 30px "Noto Sans KR"'].map(function (f) { return document.fonts.load(f, '가나다 MANTRA'); })).catch(function () { }) : Promise.resolve();
-    return Promise.all([loadImg(d.guardian), fonts]).then(function (a) {
+    return Promise.all([loadImg(d.poster), fonts]).then(function (a) {
       var cv = document.createElement('canvas'); draw(cv, d, a[0]);
       return new Promise(function (res, rej) {
         cv.toBlob(function (b) {
@@ -55,7 +55,7 @@
           document.body.appendChild(dlg); dlg.showModal();
           var close = function () { dlg.close(); dlg.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 30000); };
           dlg.querySelector('#scClose').onclick = close;
-          dlg.querySelector('#scLink').onclick = function () { var u = R.Free ? R.Free.shareUrl(sd, location.origin) : ''; (R.Free ? R.Free.copy(u) : Promise.reject()).then(function () { dlg.querySelector('#scLink').textContent = '링크를 복사했습니다'; if (R.Analytics) R.Analytics.trackEvent('guardian_shared', { from: 'card' }); }).catch(function () { dlg.querySelector('#scLink').textContent = u || '복사하지 못했습니다'; }); }; // 링크에는 일주·성별만 들어간다
+          dlg.querySelector('#scLink').onclick = function () { var u = location.origin + '/report/'; var ok = function () { dlg.querySelector('#scLink').textContent = '링크를 복사했습니다'; }, no = function () { dlg.querySelector('#scLink').textContent = u; }; try { navigator.clipboard.writeText(u).then(ok, no); } catch (e) { no(); } }; // 링크에는 개인 정보가 들어가지 않는다
           dlg.querySelector('#scSave').onclick = function () { var a = document.createElement('a'); a.href = url; a.download = file.name; document.body.appendChild(a); a.click(); a.remove(); };
           dlg.querySelector('#scShare').onclick = function () { if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: '나의 사주 무빙툰' }).catch(function () { }); else dlg.querySelector('#scSave').click(); };
           res();

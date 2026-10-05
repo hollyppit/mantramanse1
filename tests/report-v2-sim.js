@@ -14,8 +14,8 @@ const now = Date.UTC(2026, 9, 5);
 const mk = (y, m, d, h, g) => M.compute({ year: y, month: m, day: d, hour: h, minute: 0, calendar: 'solar', leap: false, gender: g, city: '서울' });
 
 console.log('1. 챕터 구조');
-ok(cfg.chapters.length === 21 && cfg.acts.length === 4, '20챕터·4ACT');
-ok(cfg.chapters.every(c => c.act >= 1 && c.act <= 4), 'ACT 지정');
+ok(cfg.chapters.length === 21 && cfg.acts.length === 5, '20챕터·5막');
+ok(cfg.chapters.every(c => c.act >= 1 && c.act <= 5), '막 지정');
 
 const cc = R.Chapters.forProject({ chapters: { chapters: [{ id: 'c05', enabled: false }, { id: 'c99', project: 'full', order: 99, act: 4, title: '추가', kind: 'module', moduleCategories: ['identity'], maxModules: 1 }] } }, 'full');
 ok(cc.chapters.length === 21 && !cc.chapters.some(c => c.id === 'c05') && cc.chapters.some(c => c.id === 'c99'), '관리자 저장본으로 챕터 비활성/추가');
@@ -27,7 +27,7 @@ ok(lib0.filter(c => c.project === 'love').every(c => c.id === 'love_' + c.base),
 const mg = R.Chapters.libraryOf({ projects: [{ id: 'mine', chapters: [{ id: 'c01', act: 1 }, { id: 'c02', act: 2 }] }] });
 ok(mg.filter(c => c.project === 'mine').map(c => c.id).join() === 'mine_c01,mine_c02' && mg.find(c => c.id === 'c01').project === 'full', '예전 공유 목록 저장본 → 소유 구조로 이전(원본은 종합에 그대로)');
 const PJ = R.Chapters.projects(null); ok(PJ.length === 4 && PJ.map(p => p.id).join() === 'full,love,wealth,newyear', '기본 프로젝트 4종');
-const fl = R.Chapters.forProject(null, 'full'); ok(fl.chapters.length === 21 && fl.acts.length === 4, 'full = 20챕터');
+const fl = R.Chapters.forProject(null, 'full'); ok(fl.chapters.length === 21 && fl.acts.length === 5, 'full = 20챕터·5막');
 for (const p of ['love', 'wealth', 'newyear']) { const x = R.Chapters.forProject(null, p); ok(x.chapters.every((c, i) => c.no === i + 1) && x.acts.every((a, i) => a.id === i + 1 && a.roman) && x.chapters.every(c => c.act >= 1 && c.act <= x.acts.length), p + ' 번호·ACT 재부여'); console.log('   ' + p + ': ' + x.chapters.length + '챕터 ' + x.acts.length + 'ACT'); }
 ok(R.Chapters.forProject(null, 'nope').project.id === 'full', '없는 프로젝트는 full');
 ok(R.Chapters.forProject({ projects: [{ id: 'love', enabled: false }] }, 'love').project.id === 'full', '비활성 프로젝트는 full');
@@ -82,13 +82,14 @@ console.log('   빈 챕터:', JSON.stringify(empties), '· 폴백 모듈만 쓴 
 console.log('   계절 분포:', JSON.stringify(seasons));
 ok(Object.keys(empties).length === 0, '어떤 사주에서도 챕터가 비지 않음');
 
-console.log('4. 각성 영상 매핑');
-const V = R.Media, vids = [{ dayPillar: '甲子', gender: 'M', videoUrl: 'https://e.com/a.mp4', enabled: true }, { dayPillar: '갑자', gender: 'F', videoUrl: '/api/clipfile?k=x', enabled: true }, { dayPillar: '乙丑', gender: 'M', posterUrl: 'https://e.com/p.webp' }];
-ok(V.pickAwakening(vids, '갑자', 'M').clip.videoUrl === 'https://e.com/a.mp4', '甲子/갑자 정규화');
-ok(V.pickAwakening(vids, '甲子', '여').fallback === false, '성별 한글 정규화');
-ok(V.pickAwakening(vids, '병인', 'M', { videoUrl: 'https://e.com/fb.mp4' }).fallback === true, '없으면 fallback');
-const cov = V.awakeningCoverage(vids); ok(cov.of === 120 && cov.male === 1 && cov.female === 1 && cov.missing.length === 117, '커버리지 계산');
-console.log('   커버리지 남', cov.male + '/60 여', cov.female + '/60 전체', cov.total + '/120');
+console.log('4. 캐릭터 소개(일간 소개) 영상 매핑');
+const V = R.Media, igs = [{ stem: '甲', gender: 'M', videoUrl: 'https://e.com/a.mp4', enabled: true }, { stem: '갑', gender: 'F', videoUrl: '/api/clipfile?k=x', enabled: true }, { stem: '을', gender: 'M', posterUrl: 'https://e.com/p.webp' }];
+ok(V.pickIlgan(igs, '갑', 'M').videoUrl === 'https://e.com/a.mp4', '甲/갑 정규화');
+ok(V.pickIlgan(igs, '甲', '여').gender === 'F', '성별 한글 정규화');
+ok(V.pickIlgan(igs, '병', 'M') === null && V.pickIlgan(igs, '을', 'M') === null, '영상이 없으면 null(단계 건너뜀)');
+const cov = V.ilganCoverage(igs); ok(cov.of === 20 && cov.male === 1 && cov.female === 1, '커버리지 계산');
+ok(typeof V.pickAwakening === 'undefined' && typeof V.awakeningCoverage === 'undefined', '수호신 영상 매핑 제거');
+console.log('   커버리지 남', cov.male + '/10 여', cov.female + '/10 전체', cov.total + '/20');
 ok(V.pickImage([{ id: 'a', url: '/a.webp', tags: ['wood', 'growth'] }], ['wood', 'forest']).image.id === 'a' && V.pickImage([], ['wood']) === null, '이미지 태그 선택·없을 때 null');
 
 console.log('4a. 서버 저장 검증과 기본 id');
@@ -109,7 +110,7 @@ ok(new Set(ids).size === ids.length, '리포트 안 동일 미디어 반복 없�
 ok(!ids.includes('unapproved') && !ids.includes('off'), '미승인 태그·비활성 미디어 제외');
 ok(allScenes.filter(s => s.sceneType === 'dataVisualization' || s.sceneType === 'timeline').every(s => !s.media), '데이터 장면은 미디어 없이 HTML/CSS');
 ok(allScenes.filter(s => s.media).every(s => s.media.why.length && s.media.muted), '선택 이유(DEBUG)·muted');
-ok(rp.chapters.filter(c => c.actTransition).length === 4, 'ACT 전환 4개');
+ok(rp.chapters.filter(c => c.actTransition).length === 5, '막 전환 5개');
 let run = 0, maxRun = 0, prev = null; allScenes.forEach(s => { const t = s.media && s.media.type; run = t && t === prev ? run + 1 : 1; prev = t; maxRun = Math.max(maxRun, run); });
 ok(maxRun <= 2, '같은 미디어 타입 3연속 금지(최대 ' + maxRun + ')');
 const noMedia = R.Compose.build(sd, lib, cfg); ok(noMedia.chapters.every(c => c.scenes.length >= 3 && c.scenes.every(s => !s.media)), '미디어 0개여도 Scene 정상(텍스트 only)');

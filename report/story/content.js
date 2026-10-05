@@ -98,7 +98,7 @@
     pageDesc: '요즘 이런 생각 해본 적 있나요? 스크롤하며 내 사주의 이야기를 따라가 보세요.',
     skipLink: { text: '바로 분석하기', target: 'sajuInput' },
     // 사주를 입력하면 새 20챕터 무빙툰 리포트(/report/v2/)로 이어갑니다. false 로 끄면 기존 무료 결과 화면을 씁니다. (주소 뒤에 ?v2=0 을 붙여도 임시로 꺼집니다)
-    v2: { handoff: true, url: '/report/v2/', gate: true }, // gate: 수호신 각성 뒤 무료 결과를 거치고, 결제 완료자만 리포트로
+    v2: { handoff: true, url: '/report/v2/', gate: true }, // gate: (사용 안 함 — 무빙툰 v2 는 무료 결과 화면 없이 프롤로그로 바로 이어진다)
   };
 
   /* ── "지금 가장 궁금한 것" 선택지 ─────────────────────────────────────── */
@@ -135,9 +135,8 @@
     // 선택한 관심사가 있을 때 결과 아래에 붙는 문장. {interest} 가 선택지의 text 로 바뀝니다.
     interestLine: '"{interest}", 궁금하다고 하셨죠. 그 이야기는 다음 장면에서 이어집니다.',
     flowHint: '같은 사람도 시기마다 다른 얼굴로 살아갑니다.',
-    // 수호신 등장(무료 결과 맨 위). 잠재력 이름은 우세 십성군 매핑으로만 만들고 AI 는 쓰지 않습니다.
-    guardianTitle: '{pillar}일주 · {title}', guardianTitleNoVideo: '{pillar}일주',
-    potentialLine: "당신의 수호신이 발견한 힘은 '{potential}'입니다. {group} 기운 {n}%, 평균의 {times}배입니다.",
+    // 주인공의 가장 큰 동력 한 줄(무료 결과). 이름은 우세 십성군 매핑으로만 만들고 AI 는 쓰지 않습니다.
+    potentialLine: "이 이야기의 주인공을 움직이는 가장 큰 동력은 '{potential}'이다. {group} 기운 {n}%, 평균의 {times}배다.",
   };
 
   var FLOW = {
@@ -157,7 +156,7 @@
     // 항목 사이에 설명/이미지를 끼우고 싶으면 note 에 한 줄 설명을, image 에 { src, alt } 를 적으세요.
     locked: [
       { label: '이 힘이 아직 막혀 있는 이유' },
-      { label: '수호신이 짚은 당신의 과거 한 시점' },
+      { label: '이 이야기에서 가장 크게 흔들린 한 장면' },
       { label: '올해 달마다 들어오는 흐름' },
       { label: '20개 챕터 전체' },
     ],

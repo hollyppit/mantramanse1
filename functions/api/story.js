@@ -6,7 +6,7 @@
 import { json, isAdmin, configError } from '../_lib.js';
 
 const KEY = 'story:config';
-const BLOCK_TYPES = ['headline', 'text', 'quote', 'image', 'imageText', 'fullImage', 'gallery', 'guardianStrip', 'video', 'chain', 'compare', 'stickySteps', 'interest', 'spacer', 'divider', 'cta', 'component'];
+const BLOCK_TYPES = ['headline', 'text', 'quote', 'image', 'imageText', 'fullImage', 'gallery', 'video', 'chain', 'compare', 'stickySteps', 'interest', 'spacer', 'divider', 'cta', 'component'];
 const OBJ_KEYS = ['settings', 'result', 'flow', 'locked', 'purchase'];
 const MAX_BLOCKS = 200, MAX_BYTES = 400 * 1024;
 

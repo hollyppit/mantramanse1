@@ -56,10 +56,10 @@
     if (DEV && root.console) console.log('[track]', name, props);
   }
 
-  // ───────── 수호신 잠재력: 우세 십성군 → 이름 (매핑만, AI 없음) ─────────
+  // ───────── 주인공의 가장 큰 동력: 우세 십성군 → 이름 (매핑만, AI 없음) ─────────
   var GROUPS5 = ['비겁', '식상', '재성', '관성', '인성'];
   var POTENTIAL = { 비겁: '스스로 길을 여는 힘', 식상: '생각을 형태로 만드는 힘', 재성: '기회를 알아보는 힘', 관성: '사람들이 믿고 따르게 만드는 힘', 인성: '깊이 이해하고 꿰뚫는 힘' };
-  var POTENTIAL_LINE = "당신의 수호신이 발견한 힘은 '{potential}'입니다. {group} 기운 {n}%, 평균의 {times}배입니다.";
+  var POTENTIAL_LINE = "이 이야기의 주인공을 움직이는 가장 큰 동력은 '{potential}'이다. {group} 기운 {n}%, 평균의 {times}배다.";
   var EL_COLORS = ['#5E9E78', '#D0634A', '#BC9C62', '#AEB9C6', '#4A7AB5'];
   function potential(ch) { // 엔진이 이미 계산한 십성군 비중(ch.weights.groups, 일간 기준 비겁·식상·재성·관성·인성)만 읽는다
     var g = ch && ch.weights && ch.weights.groups; if (!g || g.length < 5) return null;
@@ -135,16 +135,6 @@
       return '<div class="gal c' + cols + '">' + items.map(function (it) {
         return '<figure class="fig">' + pic(it, { ar: b.aspectRatio || '4/5' }) + (it.caption ? '<figcaption>' + fmt(pick(it.caption)) + '</figcaption>' : '') + '</figure>';
       }).join('') + '</div>';
-    },
-    // 수호신 이미지 띠: 가로로 천천히 무한 루프(CSS). prefers-reduced-motion 이면 흐르지 않고 손으로 밀어서 본다.
-    guardianStrip: function (b) {
-      var imgs = (b.images || []).map(function (it) { return typeof it === 'string' ? { src: it, alt: '' } : (it || {}); }).filter(function (it) { return media(it.src); });
-      var head = b.title ? '<h3 class="tt big gs-t">' + lines(fmt(pick(b.title)), b.anim) + '</h3>' : '';
-      if (!imgs.length) return head + placeholder(b.todo, '수호신 이미지 준비 중', 'min-height:140px');
-      var n = imgs.length, list = []; while (list.length < Math.max(6, n)) imgs.forEach(function (it, i) { list.push({ it: it, hide: list.length >= n }); });
-      var sp = Math.min(4, Math.max(0.25, num(b.speed, 1))), dur = Math.max(14, list.length * 5 / sp);
-      var tag = function (x, hide) { return '<img src="' + esc(media(x.src)) + '" alt="' + (hide ? '' : esc(pick(x.alt))) + '"' + (hide ? ' aria-hidden="true"' : '') + ' loading="lazy" decoding="async" draggable="false">'; };
-      return head + '<div class="gs" style="--gs-d:' + dur + 's"><div class="gs-track"><div class="gs-set">' + list.map(function (x) { return tag(x.it, x.hide); }).join('') + '</div><div class="gs-set" aria-hidden="true">' + list.map(function (x) { return tag(x.it, true); }).join('') + '</div></div></div>';
     },
     video: function (b) {
       var url = media(b.src), ar = ratio(b.aspectRatio, '9/16'), st = 'aspect-ratio:' + ar;
@@ -234,32 +224,6 @@
     return R.image ? '<figure class="fig w-narrow">' + pic(R.image, { ar: '1/1' }) + '</figure>' : '';
   }
 
-  // 수호신 이미지: /api/awakening?pillar=&gender= 의 guardianImageUrl → posterUrl. 없으면 일간 오행 색 그라데이션 + 일주 한자.
-  var guardianCache = {};
-  function guardianFig(g, ko, hanja) {
-    if (g && g.url) return '<img class="gd-img on" src="' + esc(g.url) + '" alt="' + esc(ko + '일주 수호신') + '" decoding="async">';
-    return '<div class="gd-fb" role="img" aria-label="' + esc(ko + '일주') + '"><span>' + esc(hanja) + '</span></div>';
-  }
-  function mountGuardian(el) {
-    var f = el.querySelector('.gd'); if (!f || !DOC || !root.fetch) return;
-    var ko = f.getAttribute('data-pillar'), g = f.getAttribute('data-g'), key = ko + g; if (guardianCache[key]) return; // 한 번 받으면 다시 그릴 때 연출을 반복하지 않는다
-    guardianCache[key] = { url: '', title: '' };
-    fetch('/api/awakening?pillar=' + encodeURIComponent(ko) + '&gender=' + g).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-      var v = d && d.video, u = media(v && (v.guardianImageUrl || v.posterUrl)); if (!u) return;
-      var im = new Image(); im.decoding = 'async';
-      im.onload = function () {
-        guardianCache[key] = { url: u, title: String((v && v.title) || '').slice(0, 40) };
-        var cur = document.querySelector('.gd[data-pillar="' + ko + '"][data-g="' + g + '"]') || f; // 응답 전에 다시 그려졌어도 지금 화면의 요소에 적용
-        var fig = cur.querySelector('.gd-fig'), cap = cur.querySelector('.gd-cap'), R = C.result || {}; if (!fig) return;
-        im.className = 'gd-img'; im.alt = ko + '일주 수호신'; fig.innerHTML = ''; fig.appendChild(im);
-        if (cap && guardianCache[key].title) cap.textContent = String(R.guardianTitle || '{pillar}일주 · {title}').replace('{pillar}', ko).replace('{title}', guardianCache[key].title);
-        if (REDUCE) { im.classList.add('on'); return; }
-        void im.offsetWidth; setTimeout(function () { im.classList.add('on'); }, 60); // 실루엣 → 1.2초 동안 밝아짐
-      };
-      im.onerror = function () { /* 이미지를 못 받으면 그라데이션 대체 유지 */ };
-      im.src = u;
-    }).catch(function () { });
-  }
 
   var FlowPreview; // COMPONENTS.FlowPreview (렌더·클릭 처리에서 서로 참조)
   var COMPONENTS = {
@@ -327,21 +291,17 @@
         var yong = ch.yong && ch.yong.applicable !== false && ch.yong.yong != null ? m.EL_K[ch.yong.yong] : '';
         var summary = esc(nm ? String(R.subject || '{name}님은').replace('{name}', nm) : (R.subjectNoName || '당신은')) + ' ' + esc(R.elementTrait && R.elementTrait[el] || '') + '입니다. ' + esc(R.zoneTrait && R.zoneTrait[zt] || '') + (yong ? ' 균형을 도와주는 기운은 <em>' + esc(yong) + '</em>입니다.' : '');
         var il = withInterest(R.interestLine);
-        var ko = m.gzNameK(d), gdr = guardianCache[ko + ch.gender], pl = potentialLine(ch, R.potentialLine), col = EL_COLORS[m.stemEl(d.s)];
-        var capT = gdr && gdr.title ? String(R.guardianTitle || '{pillar}일주 · {title}').replace('{pillar}', ko).replace('{title}', gdr.title) : String(R.guardianTitleNoVideo || '{pillar}일주').replace('{pillar}', ko);
+        var pl = potentialLine(ch, R.potentialLine);
         var pct = (ch.weights && ch.weights.pct) || [], bars = m.EL_K.map(function (e, i) { var v = Math.round(pct[i] || 0); return '<div class="eb"><span>' + esc(e) + '</span><div class="eb-t"><i style="width:' + Math.max(2, Math.min(100, v * 2)) + '%;background:' + EL_COLORS[i] + '"></i></div><b>' + v + '%</b></div>'; }).join('');
-        var guardian = '<figure class="gd" data-pillar="' + esc(ko) + '" data-g="' + esc(ch.gender === 'F' ? 'F' : 'M') + '"><div class="gd-fig" style="--gc:' + col + '">' + guardianFig(gdr, ko, m.gzName(d)) + '</div><figcaption class="gd-cap" aria-live="polite">' + esc(capT) + '</figcaption></figure>' +
-          '<div class="eb-wrap" role="group" aria-label="오행 분포">' + bars + '</div>' + (pl ? '<p class="gd-pot">' + esc(pl) + '</p>' : '');
-        return '<p class="kicker">FREE</p><h2 class="hl hl-l">' + esc(nm ? String(R.title || '{name}님의 기본 기질').replace('{name}', nm) : (R.titleNoName || '당신의 기본 기질')) + '</h2>' + guardian +
+        var balance = '<div class="eb-wrap" role="group" aria-label="오행 분포">' + bars + '</div>' + (pl ? '<p class="gd-pot">' + esc(pl) + '</p>' : '');
+        return '<p class="kicker">FREE</p><h2 class="hl hl-l">' + esc(nm ? String(R.title || '{name}님의 기본 기질').replace('{name}', nm) : (R.titleNoName || '당신의 기본 기질')) + '</h2>' + balance +
           '<div class="pillars" aria-label="사주 네 기둥">' + cell('hour', '시주') + cell('day', '일주') + cell('month', '월주') + cell('year', '연주') + '</div>' +
           '<p class="me-line">나를 뜻하는 글자는 <b>' + esc(m.STEM_K[d.s]) + '(' + esc(m.STEM[d.s]) + ') · ' + esc(el) + '</b></p>' +
           '<p class="sum">' + summary + '</p>' + resultMedia(R, ch) +
           (il ? '<p class="note ctr">' + esc(il) + '</p>' : '') + (R.flowHint ? '<p class="body emph">' + fmt(R.flowHint) + '</p>' : '');
       },
-      mount: mountGuardian,
     },
 
-    // (FreeResult 수호신 등장은 위 render 와 아래 mount 가 짝)
     // 운 흐름 미리보기: 만세력 앱 "월운 흐름" 그래프와 같은 계산(Manse.wolun)·같은 읽는 법.
     //   막대 높이 = 흐름 적합도(위로 길수록 유리, 아래로 내려가면 조심) · 색 = 주 흐름(기회·확장·수확·축적) · 변/방 = 변동·방어 신호
     FlowPreview: {
@@ -751,7 +711,6 @@
       if ((/^(image|fullImage)$/.test(b.type) || (b.type === 'imageText' && b.mediaType !== 'video') || (b.type === 'compare' && b.src)) && !b.alt) out.push(w + 'alt 없음');
       if (b.type === 'video' && b.src && !b.poster) out.push(w + 'poster 없음(권장)');
       if (b.type === 'gallery') { var n = (b.items || []).length; if (n < 2 || n > 4) out.push(w + '이미지는 2~4장'); (b.items || []).forEach(function (it, j) { if (!it.alt) out.push(w + 'items[' + j + '] alt 없음'); }); }
-      if (b.type === 'guardianStrip') (b.images || []).forEach(function (it, j) { if (it && !(typeof it === 'string') && it.src && !it.alt) out.push(w + 'images[' + j + '] alt 없음'); });
       if (b.type === 'stickySteps') (b.steps || []).forEach(function (s, j) { if (!s.alt) out.push(w + 'steps[' + j + '] alt 없음'); });
       if (b.type === 'component' && !COMPONENTS[b.name]) out.push(w + '알 수 없는 component "' + b.name + '"');
       if (b.type === 'cta') {
@@ -871,44 +830,10 @@
   }
   var bound = false;
   function bind0(host) { if (!bound) { bound = true; bind(host); } }
-  // 공유 링크(/report/?g=갑자&s=M): 입력 폼보다 먼저 그 수호신의 각성 영상(없으면 이미지·한자)을 보여 주고, 끝에 '나의 수호신 찾기'로 사주 입력에 보낸다. 링크에는 일주·성별만 있다.
-  function parseShared() {
-    if (!DOC) return null; var q = new URLSearchParams(location.search), g = q.get('g'), s = q.get('s');
-    if (!g || !/^[갑을병정무기경신임계][자축인묘진사오미신유술해]$/.test(g) || !/^[MF]$/.test(s || '')) return null;
-    if ('갑을병정무기경신임계'.indexOf(g[0]) % 2 !== '자축인묘진사오미신유술해'.indexOf(g[1]) % 2) return null; // 60갑자만
-    return { g: g, s: s };
-  }
-  function maybeShared() {
-    var sh = parseShared(); if (!sh || S.shared || PREVIEW) return; S.shared = sh;
-    track('shared_link_opened', { gender: sh.s }, true); // 일주는 보내지 않는다
-    var si = '갑을병정무기경신임계'.indexOf(sh.g[0]), hanja = '甲乙丙丁戊己庚辛壬癸'[si] + '子丑寅卯辰巳午未申酉戌亥'[ '자축인묘진사오미신유술해'.indexOf(sh.g[1]) ], col = EL_COLORS[si >> 1];
-    var box = document.createElement('div'); box.id = 'shared'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', '수호신'); box.style.setProperty('--gc', col);
-    box.innerHTML = '<div class="sh-media" id="shMedia"></div><div class="sh-shade" aria-hidden="true"></div><button type="button" class="sh-skip" id="shSkip">SKIP ›</button><div class="sh-cap"><div class="t" id="shT">' + esc(sh.g) + '일주</div></div><button type="button" class="btn big" id="shGo" hidden>나의 수호신 찾기</button>';
-    document.body.appendChild(box); document.documentElement.style.overflow = 'hidden';
-    var m = box.querySelector('#shMedia'), go = box.querySelector('#shGo'), sk = box.querySelector('#shSkip'), done = false;
-    function ready() { if (done) return; done = true; sk.hidden = true; go.hidden = false; try { go.focus({ preventScroll: true }); } catch (e) { } }
-    function fallbackFig(u) { // 이미지(실루엣→밝아짐) 또는 오행 색 그라데이션 + 한자
-      if (u) { var im = new Image(); im.className = 'sh-img'; im.alt = sh.g + '일주 수호신'; im.onload = function () { m.innerHTML = ''; m.appendChild(im); void im.offsetWidth; setTimeout(function () { im.classList.add('on'); }, 60); setTimeout(ready, REDUCE ? 400 : 2600); }; im.onerror = function () { fallbackFig(''); }; im.src = u; return; }
-      m.innerHTML = '<div class="sh-fb" role="img" aria-label="' + esc(sh.g) + '일주"><span>' + esc(hanja) + '</span></div>'; setTimeout(ready, 1500);
-    }
-    sk.onclick = function () { var v = m.querySelector('video'); if (v) v.pause(); ready(); };
-    go.onclick = function () { box.remove(); document.documentElement.style.overflow = ''; scrollToId('sajuInput'); };
-    fetch('/api/awakening?pillar=' + encodeURIComponent(sh.g) + '&gender=' + sh.s).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-      var v = d && d.video, cap = box.querySelector('#shT'), R0 = C.result || {};
-      if (v && v.title && cap) cap.textContent = String(R0.guardianTitle || '{pillar}일주 · {title}').replace('{pillar}', sh.g).replace('{title}', v.title);
-      var vu = v && (media(v.videoUrl) || media(v.videoWebm)), img = media(v && (v.guardianImageUrl || v.posterUrl));
-      if (!vu || saveDataOn()) { fallbackFig(img); return; }
-      var el = document.createElement('video'); el.muted = true; el.defaultMuted = true; el.playsInline = true; el.setAttribute('playsinline', ''); el.autoplay = true; el.preload = 'auto'; if (media(v.posterUrl)) el.poster = media(v.posterUrl); el.setAttribute('aria-label', sh.g + '일주 수호신 영상');
-      if (media(v.videoWebm) && el.canPlayType && el.canPlayType('video/webm')) { var s1 = document.createElement('source'); s1.src = media(v.videoWebm); s1.type = 'video/webm'; el.appendChild(s1); }
-      if (media(v.videoUrl)) { var s2 = document.createElement('source'); s2.src = media(v.videoUrl); s2.type = /\.webm(\?|$)/.test(v.videoUrl) ? 'video/webm' : 'video/mp4'; el.appendChild(s2); }
-      m.innerHTML = ''; m.appendChild(el); el.addEventListener('ended', ready); el.addEventListener('error', function () { if (!done) { el.remove(); fallbackFig(img); } }, true);
-      var p = el.play(); if (p && p.catch) p.catch(function () { if (!done) { el.remove(); fallbackFig(img); } });
-    }).catch(function () { fallbackFig(''); });
-  }
   function saveDataOn() { return !!(root.navigator && navigator.connection && navigator.connection.saveData); }
   function start() {
     if (started) return; started = true;
-    render(); chrome(); Auto.init(); if (!PREVIEW) maybeShared();
+    render(); chrome(); Auto.init();
     document.documentElement.classList.add('ready');
     var problems = validate(); if (DEV && problems.length && root.console) console.warn('[story] 콘텐츠 점검:\n' + problems.join('\n'));
     if (!PREVIEW) track('onboarding_started', { dev: DEV ? 1 : 0 }, true);
@@ -938,6 +863,6 @@
       .catch(function () { clearTimeout(timer); start(); });
   }
 
-  root.Story = { parseShared: parseShared, potential: potential, potentialLine: potentialLine, POTENTIAL: POTENTIAL, validate: validate, track: track, pick: pick, media: media, fmt: fmt, BLOCKS: BLOCKS, COMPONENTS: COMPONENTS, state: S };
+  root.Story = { potential: potential, potentialLine: potentialLine, POTENTIAL: POTENTIAL, validate: validate, track: track, pick: pick, media: media, fmt: fmt, BLOCKS: BLOCKS, COMPONENTS: COMPONENTS, state: S };
   if (DOC) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot(); }
 })(typeof window !== 'undefined' ? window : globalThis);

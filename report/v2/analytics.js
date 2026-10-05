@@ -2,8 +2,8 @@
 // 생년월일·이름 등 개인정보는 properties 에 넣지 않는다(호출하는 쪽 규칙 + 아래 필터). 나중에 sendBeacon 등을 이 한 곳에 붙이면 된다.
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
-  var EVENTS = ['report_started', 'ilgan_video_started', 'ilgan_video_completed', 'ilgan_video_skipped', 'awakening_video_started', 'awakening_video_completed', 'awakening_video_skipped', 'chapter_viewed', 'chapter_completed', 'detail_expanded', 'act_completed', 'report_completed',
-    'pdf_unlocked', 'pdf_downloaded', 'share_card_created', 'share_clicked', 'compatibility_cta_clicked', 'remedy_viewed', 'action_plan_viewed', 'free_result_viewed', 'purchase_clicked', 'guardian_shared'];
+  var EVENTS = ['report_started', 'ilgan_video_started', 'ilgan_video_completed', 'ilgan_video_skipped', 'chapter_viewed', 'chapter_completed', 'detail_expanded', 'act_completed', 'report_completed',
+    'pdf_unlocked', 'pdf_downloaded', 'share_card_created', 'share_clicked', 'compatibility_cta_clicked', 'remedy_viewed', 'action_plan_viewed', 'purchase_clicked'];
   var BLOCK = /^(name|birth|year|month|day|hour|minute|gender|input|dayPillar)$/i; // 개인 식별/생년월일 키는 버린다
   var session = { events: [], chapters: {}, details: 0, skipped: false, startedAt: 0 };
 
@@ -14,7 +14,7 @@
     if (name === 'report_started') session.startedAt = e.t;
     if (name === 'chapter_viewed') session.chapters[p.chapter] = (session.chapters[p.chapter] || 0) + 1;
     if (name === 'detail_expanded') session.details++;
-    if (name === 'awakening_video_skipped') session.skipped = true;
+    if (name === 'ilgan_video_skipped') session.skipped = true;
     try { root.dispatchEvent(new CustomEvent('mt:track', { detail: e })); } catch (x) { }
     try { if (root.dataLayer && root.dataLayer.push) root.dataLayer.push({ event: 'mt_' + name, ...p }); } catch (x) { }
     if (root.location && /[?&]debug=1\b/.test(root.location.search) && root.console) console.log('[track]', name, p);

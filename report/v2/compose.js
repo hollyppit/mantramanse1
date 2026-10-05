@@ -11,7 +11,7 @@
     var d = sd.dayMaster, k = ch.kind, S = R.SajuData;
     var sn = function (s) { return s ? S.SEASONS[s] : '확인 불가'; };
     switch (ch.base || ch.id) {
-      case 'c00': return sd.dayPillar.ko + '일주의 수호신 · ' + sd.dominantGroup + ' ' + Math.round(sd.groups[sd.dominantGroup]) + '% (평균 20%)';
+      case 'c00': return sd.dayPillar.ko + '일주의 가장 큰 동력 · ' + sd.dominantGroup + ' ' + Math.round(sd.groups[sd.dominantGroup]) + '% (평균 20%)';
       case 'c01': return sd.dayPillar.ko + '일주 · 일간 ' + d.stem + '(' + d.hanja + ', ' + d.el + ')';
       case 'c02': return S.ELK.map(function (e) { return e + ' ' + Math.round(el(sd, e)) + '%'; }).join(' · ');
       case 'c03': return '신강약 ' + sd.strength.zone + ' · 가장 큰 십성군 ' + sd.dominantGroup + ' ' + Math.round(sd.groups[sd.dominantGroup]) + '%';
@@ -61,7 +61,7 @@
       var c5 = Rules.pick(lib.modules, facts, 1, { categories: ['shadow'] })[0];
       vparts = { blocked: vc, c05: c5 ? view(c5, v) : null, plan: plan };
     }
-    var ctx = { usedIds: [], prevChapter: [] }, chapters = [], media = lib.media || lib.media || [], lastAct = 0;
+    var ctx = { usedIds: [], prevChapter: [] }, chapters = [], media = lib.media || lib.media || [], lastAct = 0, dirState = { four: 0 };
 
     cfg.chapters.forEach(function (ch) {
       var picks = Rules.pick(lib.modules, facts, ch.maxModules || 1, { categories: ch.moduleCategories });
@@ -71,7 +71,7 @@
       var out = { id: ch.id, base: ch.base || ch.id, project: ch.project || 'full', no: ch.no, act: ch.act, title: ch.title, subtitle: ch.subtitle, kind: ch.kind, accessLevel: ch.accessLevel || 'free', introText: ch.introText || '',
         aiEnabled: ch.aiEnabled !== false, actionPool: (rec.action || []).slice(0, 4).map(function (x) { return x.item.title; }), fact: factOf(ch, sd), headline: lead.headline, interpretation: lead.summary, meaning: lead.detail, choice: lead.choice || '', tpl: maskLead ? { headline: maskLead.headline, interpretation: maskLead.summary, meaning: maskLead.detail } : null, details: views.slice(1), lead: lead, extra: lead.extra, modules: views.map(function (x) { return x.id; }), disclaimer: ch.disclaimer || null, cta: ch.cta || null, items: null };
 
-      if (ch.kind === 'verdict' && vparts) { // 총평: 고정 첫 문장 + 수호신 재료(모듈이 아니라 sd·규칙 문장에서 조립)
+      if (ch.kind === 'verdict' && vparts) { // 총평: 고정 첫 문장 + 동력 재료(모듈이 아니라 sd·규칙 문장에서 조립)
         out.verdict = R.Verdict.material(sd, vparts); out.headline = R.Verdict.FIRST; out.interpretation = out.verdict.discover; out.meaning = ''; out.details = []; out.modules = []; out.action = [];
         out.lead = { id: 'verdict', category: 'verdict', headline: out.headline, summary: out.interpretation, detail: '', keywords: [], imageTags: ['mist', 'stars'], extra: null, why: [], specificity: 0 }; out.extra = null;
       }
@@ -104,6 +104,7 @@
 
       // Scene 시퀀스: Scene Intent → 미디어 후보 검색/점수 → 선택. 미디어가 없어도 scene 은 텍스트만으로 완성된다(UI 가 자리표시 장면).
       out.scenes = R.Scenes.buildChapterScenes(out, sd, media, ctx);
+      if (R.Director) R.Director.apply(out, sd, { media: media, ctx: ctx, vars: heroVars, state: dirState }); // 장면 감독: 오프닝·현실 장면 삽입, 연출값(cinemaAuto) 부여, 강도 제한
       var hero = out.scenes.filter(function (s) { return s.media; })[0];
       out.image = hero ? { id: hero.media.assetId, url: hero.media.posterUrl || hero.media.url } : null;
       if (ch.act !== lastAct) { out.actTransition = R.Scenes.actTransition(cfg.acts.filter(function (a) { return a.id === ch.act; })[0] || { id: ch.act, roman: 'ACT', title: '', line: '' }, sd, media, ctx); lastAct = ch.act; }
@@ -111,6 +112,8 @@
       [out.headline, out.interpretation, out.meaning].forEach(function (t) { if (BANNED.test(t || '')) warnings.push(ch.id + ': 단정 표현 포함 "' + (t.match(BANNED) || [])[0] + '"'); });
       chapters.push(out);
     });
+
+    if (R.Director) R.Director.linkNext(chapters); // 챕터 끝에 다음 챕터의 질문(NEXT HOOK)
 
     // 20장 최종 종합 요약(PDF 요약·마지막 화면). 구조화 필드만 모은다.
     var byId = {}; chapters.forEach(function (c) { byId[c.base || c.id] = c; });
@@ -203,7 +206,7 @@
   // 서버 저장본 한 번에 적용: content = /api/report-content 의 content, media = /api/media 의 media
   function fromSaved(content, media, projectId) {
     content = content || {}; if (content.scoring) R.Scenes.configure(content.scoring);
-    return { lib: library({ modules: content.modules, remedies: content.remedies, media: media, version: content.version }), cfg: R.Chapters.forProject(content, projectId || 'full'), scoring: content.scoring || {}, textStyles: content.textStyles || { all: {}, chapters: {} }, flow: R.Moving ? R.Moving.clean(content.flow) : null };
+    return { lib: library({ modules: content.modules, remedies: content.remedies, media: media, version: content.version }), cfg: R.Chapters.forProject(content, projectId || 'full'), scoring: content.scoring || {}, cinemaDefaults: content.cinemaDefaults || {}, bgm: content.bgm || {}, textStyles: content.textStyles || { all: {}, chapters: {} }, flow: R.Moving ? R.Moving.clean(content.flow) : null };
   }
 
   // 서버(/api/compose) 응답 한 번에 적용. 어떤 부분이 이상해도 원본이 유지된다.

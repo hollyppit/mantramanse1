@@ -48,7 +48,7 @@
     items.forEach(function (w) { io.observe(w); });
 
     // ── 자동 스크롤 ──
-    var btn = null, running = false, raf = 0, last = 0, y = 0, resumeT = 0, startT = 0;
+    var btn = null, running = false, raf = 0, last = 0, y = 0, resumeT = 0, startT = 0, holdT = 0;
     function ui() {
       if (!btn) return; btn.textContent = running ? '⏸ 멈추기' : '▶ 이어서 보기'; btn.setAttribute('aria-pressed', String(running)); btn.setAttribute('aria-label', running ? '자동 스크롤 멈추기' : '자동 스크롤 이어서 보기');
     }
@@ -58,11 +58,17 @@
       for (var i = 0; i < sc.length; i++) { var s = sc[i]; if (s.dataset.mvStopped || !s.querySelector('.vd, [data-stop]')) continue; if (s.getBoundingClientRect().top <= win.innerHeight * 0.3) return s; }
       return null;
     }
+    function holdAhead() { // 시네마 장면(data-hold=ms): 화면 위쪽에 닿으면 그 시간만큼 멈췄다가 이어서 내려간다
+      var sc = host.querySelectorAll('.scene[data-hold]');
+      for (var i = 0; i < sc.length; i++) { var s = sc[i]; if (s.dataset.mvHeld) continue; var r = s.getBoundingClientRect(); if (r.top <= win.innerHeight * 0.2 && r.bottom > win.innerHeight * 0.5) return s; }
+      return null;
+    }
     function tick(t) {
       if (!running || dead) return; var dt = Math.min(0.1, (t - last) / 1000); last = t;
       if (Math.abs(win.scrollY - y) > 2) y = win.scrollY; // 바깥에서 위치가 바뀌었으면 거기서부터
       y += f.speed * dt; win.scrollTo(0, y);
       var s = choiceAhead(); if (s) { s.dataset.mvStopped = '1'; pause(false); return; }
+      var hd = holdAhead(); if (hd) { hd.dataset.mvHeld = '1'; pause(false); holdT = setTimeout(function () { if (!dead && st.wanted !== false) resume(); }, Math.min(15000, +hd.dataset.hold || 4000)); return; }
       if (atBottom()) { pause(false); return; }
       raf = win.requestAnimationFrame(tick);
     }
@@ -85,7 +91,7 @@
       if (st.wanted !== false) startT = setTimeout(function () { resume(); }, f.startDelay * 1000);
     }
     function destroy() {
-      dead = true; running = false; win.cancelAnimationFrame(raf); clearTimeout(startT); clearTimeout(resumeT); io.disconnect();
+      dead = true; running = false; win.cancelAnimationFrame(raf); clearTimeout(startT); clearTimeout(resumeT); clearTimeout(holdT); io.disconnect();
       ['wheel', 'touchstart', 'pointerdown'].forEach(function (ev) { doc.removeEventListener(ev, press, { capture: true }); }); doc.removeEventListener('keydown', key); doc.removeEventListener('visibilitychange', vis);
       if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
     }

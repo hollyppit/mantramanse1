@@ -13,6 +13,8 @@ const LANG_MODELS = ['eleven_flash_v2_5', 'eleven_turbo_v2_5']; // language_code
 const OA_MODELS = ['gpt-4o-mini-tts', 'tts-1', 'tts-1-hd'];
 const OA_VOICES = ['alloy', 'ash', 'ballad', 'coral', 'echo', 'fable', 'nova', 'onyx', 'sage', 'shimmer', 'verse', 'marin', 'cedar'];
 const OA_NEW_ONLY = ['ballad', 'marin', 'cedar']; // tts-1 / tts-1-hd 에서는 쓸 수 없는 목소리
+// 영화 속 인물의 삶을 관찰하는 내레이터 말투(기본값). 신령·무당·예언자·다큐 과장·광고 낭독은 피한다.
+const NARRATOR_TONE = '영화 속 인물의 삶을 차분하게 관찰하는 내레이터. 낮고 조용하게, 지나치게 무겁지 않게. 신비로운 신령, 무당, 예언자, 과장된 다큐멘터리, 광고 낭독 톤은 쓰지 않는다. 문장 사이를 충분히 쉬고, 핵심 문장 앞뒤에는 숨을 둔다.';
 const ID_RE = /^[A-Za-z0-9]{10,40}$/;
 const MAX_TEXT = 500;
 const clamp = (v, lo, hi, d) => { const n = +v; return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; };
@@ -63,7 +65,7 @@ export async function onRequestPost({ request, env }) {
   if (openai) return speakOpenAI(env, b, text);
   if (!ID_RE.test(String(b.voiceId || ''))) return json({ error: '목소리를 선택하세요' }, 400);
   const voiceId = String(b.voiceId), model = MODELS.includes(b.model) ? b.model : MODELS[0];
-  const stability = clamp(b.stability, 0, 1, 0.5), similarity = clamp(b.similarity, 0, 1, 0.75), style = clamp(b.style, 0, 1, 0), speed = clamp(b.speed, 0.7, 1.2, 1);
+  const stability = clamp(b.stability, 0, 1, 0.6), similarity = clamp(b.similarity, 0, 1, 0.75), style = clamp(b.style, 0, 1, 0.05), speed = clamp(b.speed, 0.7, 1.2, 0.95); // 기본값 = 차분한 관찰자 톤
 
   // 파일 키: 추측할 수 없도록 관리자 비밀번호를 섞어 해시한다 (재생 주소는 공개이므로)
   const nonce = b.force ? hex(crypto.getRandomValues(new Uint8Array(4))) : '';
@@ -87,7 +89,7 @@ async function speakOpenAI(env, b, text) {
   const voice = String(b.voice || ''), model = OA_MODELS.includes(b.model) ? b.model : OA_MODELS[0];
   if (!OA_VOICES.includes(voice)) return json({ error: '목소리를 선택하세요' }, 400);
   if (model !== 'gpt-4o-mini-tts' && OA_NEW_ONLY.includes(voice)) return json({ error: `“${voice}” 목소리는 gpt-4o-mini-tts 모델에서만 쓸 수 있습니다` }, 400);
-  const instructions = model === 'gpt-4o-mini-tts' ? String(b.instructions || '').trim().slice(0, 400) : '', speed = clamp(b.speed, 0.5, 2, 1);
+  const instructions = model === 'gpt-4o-mini-tts' ? (String(b.instructions || '').trim() || NARRATOR_TONE).slice(0, 400) : '', speed = clamp(b.speed, 0.5, 2, 1);
   const nonce = b.force ? hex(crypto.getRandomValues(new Uint8Array(4))) : '';
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(['openai', env.ADMIN_PASSWORD, text, voice, model, instructions, speed, nonce].join('|')));
   const key = 'tts-' + hex(digest).slice(0, 32) + '.mp3';

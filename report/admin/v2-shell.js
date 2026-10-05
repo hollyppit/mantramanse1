@@ -1,10 +1,10 @@
 /* 관리자 셸 — 위쪽 5개 화면으로 단순화:
-   ① 클립 라이브러리(장면 미디어 · 각성 영상 120 · 커버리지, AI가 고르는 모든 클립이 한 곳)
+   ① 클립 라이브러리(장면 미디어 · 캐릭터 소개 영상 20 · 커버리지, AI가 고르는 모든 클립이 한 곳)
    ② 챕터 관리(챕터 설정 · 해석 모듈 · 개운법 · 미리보기를 한 화면에서)
    ③ 조합 테스트(테스트 사주로 프로젝트 전체를 돌려 보고, 문제 챕터로 바로 이동)
    ④ 프로젝트(종합·애정운·재물운·신년운세 … 챕터를 묶어 상품으로 만들기, 현황)
    ⑤ 설정(입장 인트로 · 온보딩 페이지 · 미디어 점수 · 기존 클립(구)).
-   저장은 /api/report-content (챕터·모듈·개운법·프로젝트·점수), /api/media, /api/awakening. */
+   저장은 /api/report-content (챕터·모듈·개운법·프로젝트·점수), /api/media, /api/awakening(일간 소개 영상만). */
 (function () {
   'use strict';
   var R = window.ReportV2, C = window.V2Content, A = window.V2Admin, ST = C.ST, PW = '';
@@ -84,11 +84,11 @@
         ['media', 'awk', 'cov'].forEach(function (x) { $('#cl-' + x).classList.toggle('hide', x !== k); });
         if (k === 'media') A.open('media', PW, $('#cl-media')); else if (k === 'awk') A.open('awk', PW, $('#cl-awk')); else A.coverage($('#cl-cov'), PW);
       };
-      subnav($('#clNav', root), [['media', '장면 미디어'], ['awk', '각성 영상 (일주×성별 120)'], ['cov', '커버리지·선택 테스트']], 'media', go);
+      subnav($('#clNav', root), [['media', '장면 미디어'], ['awk', '캐릭터 소개 영상 (일간×성별 20)'], ['cov', '커버리지·선택 테스트']], 'media', go);
       var imp = document.createElement('button'); imp.type = 'button'; imp.textContent = '기존 클립 가져오기'; imp.title = '구버전 "클립 라이브러리"의 클립을 새 라이브러리로 복사합니다(원본은 그대로)'; imp.style.marginLeft = 'auto';
       imp.onclick = function () {
-        if (!confirm('기존(구버전) 클립을 새 라이브러리로 복사할까요?\n· 일간+성별만 정해진 클립 → 일간 소개 영상\n· 일주+성별이 정해진 클립 → 일주 각성 영상\n· 그 외 → 장면 미디어(영상)\n원본 클립은 그대로 남고, 가져온 뒤 각 탭에서 "변경사항 저장"을 눌러야 반영됩니다.')) return;
-        imp.disabled = true; A.importLegacy(PW, function (r) { imp.disabled = false; if (r) { toast('가져왔습니다 — 일간 소개 ' + r.ilgan + '개 · 일주 각성 ' + r.awakening + '개 · 장면 미디어 ' + r.media + '개 (건너뜀 ' + r.skipped + '). 각 탭에서 저장하세요.'); var on = $('#clNav .on', root); if (on) on.click(); } });
+        if (!confirm('기존(구버전) 클립을 새 라이브러리로 복사할까요?\n· 일간+성별만 정해진 클립 → 캐릭터 소개 영상\n· 일주+성별이 정해진 클립 → 예전 수호신 영상이므로 건너뜀\n· 그 외 → 장면 미디어(영상)\n원본 클립은 그대로 남고, 가져온 뒤 각 탭에서 "변경사항 저장"을 눌러야 반영됩니다.')) return;
+        imp.disabled = true; A.importLegacy(PW, function (r) { imp.disabled = false; if (r) { toast('가져왔습니다 — 캐릭터 소개 ' + r.ilgan + '개 · 장면 미디어 ' + r.media + '개 (건너뜀 ' + r.skipped + '). 각 탭에서 저장하세요.'); var on = $('#clNav .on', root); if (on) on.click(); } });
       };
       $('#clNav', root).appendChild(imp);
       go('media');
@@ -202,12 +202,12 @@
     PVS.forEach(function (p) { if (e.source === p.frame.contentWindow) { if (e.data.type === 'mt-v2-ready') { p.ready = true; if (p.pending) p.send(p.pending); if (p.paused) p.send({ type: 'mt-v2-pause', on: true }); } else if (e.data.type === 'mt-v2-chapter' && p.onChapter) p.onChapter(e.data.id); else if (e.data.type === 'mt-v2-tx' && p.onTx) p.onTx(e.data); else if (e.data.type === 'mt-v2-txlist' && p.onList) p.onList(e.data); else if (e.data.type === 'mt-v2-txmove' && p.onMove) p.onMove(e.data); } });
   });
   var awkMemo = null;
-  function awakeningFor(sd) { // 이 사주의 각성 영상(없으면 fallback) — 뷰어가 받는 모양 {video, fallback}
+  function awakeningFor(sd) { // 이 사주의 캐릭터 소개(일간 소개) 영상 — 뷰어가 받는 모양 { ilgan }
     return (awkMemo ? Promise.resolve(awkMemo) : fetch('/api/awakening?all=1', { headers: { authorization: 'Bearer ' + PW } }).then(function (r) { return r.json(); }).catch(function () { return {}; }).then(function (d) { awkMemo = d; return d; })).then(function (d) {
-      var pk = R.Media.pickAwakening(d.videos || [], sd.dayPillar.ko, sd.gender, d.fallback), ig = R.Media.pickIlgan(d.ilgan || [], sd.dayMaster.stem, sd.gender); return { pick: pk, ilgan: ig, awk: Object.assign(pk.fallback ? { video: null, fallback: pk.clip } : { video: pk.clip }, { ilgan: ig }) };
+      var ig = R.Media.pickIlgan(d.ilgan || [], sd.dayMaster.stem, sd.gender); return { ilgan: ig, awk: { ilgan: ig } };
     });
   }
-  // el 안에 [모바일|PC] 전환 + 미리보기 틀을 만든다. 반환: { show(chapterId|'awakening', projectId), refresh() }
+  // el 안에 [모바일|PC] 전환 + 미리보기 틀을 만든다. 반환: { show(chapterId|'ilgan', projectId), refresh() }
   function PreviewPane(el, opt) {
     opt = opt || {}; var dev = 'm', P = { ready: false, pending: null, last: null };
     el.innerHTML = '<div class="pvbar"><button type="button" data-d="m" class="on">모바일</button><button type="button" data-d="d">PC</button><button type="button" data-r title="새로 그리기">⟳</button><button type="button" data-pause title="미리보기 영상·애니메이션 멈춤/재생">⏸ 멈춤</button><span class="muted pvmsg"></span></div><div class="pvwrap"><div class="pvbox"><iframe title="리포트 미리보기" src="/report/v2/?preview=1"></iframe></div></div>';
@@ -261,7 +261,7 @@
     }
     function sel(k, opts, wide) { var v = effective()[k] || ''; return '<select data-k="' + k + '">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(v) === String(o[0]) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; }
     // 사주마다 달라지는 문장은 통째로 바꾸면 모두 같은 문장이 되므로 직접 입력을 막는다(해석 모듈 탭에서 고친다)
-    var FIXED_ROLES = ['insight.fact', 'insight.lead', 'choice.line', 'scene.caption', 'explain.lead', 'ilgan.kw', 'awk.kw'], DYN_ROLES = ['intro.headline', 'end.quote', 'ilgan.title', 'ilgan.sub', 'awk.title', 'awk.sub'];
+    var FIXED_ROLES = ['insight.fact', 'insight.lead', 'choice.line', 'scene.caption', 'explain.lead', 'ilgan.kw'], DYN_ROLES = ['intro.headline', 'end.quote', 'ilgan.title', 'ilgan.sub'];
     function textBlock(e) {
       var seq = '<label class="chk2" style="display:flex;gap:6px;align-items:center;margin:8px 0 2px"><input type="checkbox" data-k="seq"' + (e.seq ? ' checked' : '') + ' style="width:auto"> 줄마다 차례로 나타나기 (줄바꿈 기준)</label>' +
         '<div class="g2c">' + field('줄 사이 간격 (초)', nf('seqGap', 0.2, 10, 0.1, 1)) + '</div>';
@@ -391,7 +391,7 @@
   }
   function allSourcesDialog() { // 프로젝트 전체에서 비어 있는 클립 자리 목록
     var rep = TST.rep, d = document.createElement('dialog'); d.className = 'v2dlg'; d.style.width = 'min(900px,96vw)';
-    var h = '<h3>필요한 클립 소스 — ' + esc(rep.chapters.length ? (TS.project) : '') + ' 전체</h3><p class="muted">비어 있는 장면입니다. 파일을 올리면 <b>클립 보관함</b>에 저장되고, 그 챕터 안에서 자동으로 골라 씁니다. 일간 소개·일주 각성 영상은 사주마다 달라서 <b>클립 라이브러리 → 각성 영상</b>에서 일괄 등록하세요.</p>';
+    var h = '<h3>필요한 클립 소스 — ' + esc(rep.chapters.length ? (TS.project) : '') + ' 전체</h3><p class="muted">비어 있는 장면입니다. 파일을 올리면 <b>클립 보관함</b>에 저장되고, 그 챕터 안에서 자동으로 골라 씁니다. 캐릭터 소개 영상은 일간마다 달라서 <b>클립 라이브러리 → 캐릭터 소개 영상</b>에서 일괄 등록하세요.</p>';
     rep.chapters.forEach(function (c) { var rows = c.scenes.filter(function (s) { return needsMedia(s) && !s.media; }); if (rows.length) h += '<div class="cap2">' + String(c.no).padStart(2, '0') + ' ' + esc(c.title) + ' — ' + rows.length + '개</div>' + rows.map(function (s) { return sourceRow(c, s); }).join(''); });
     if (!missingCount(rep)) h += '<p style="color:#7FE0BC">모든 장면에 클립이 있습니다.</p>';
     d.innerHTML = h + '<div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" id="dx">닫기</button></div>'; document.body.appendChild(d); d.showModal(); d.addEventListener('close', function () { d.remove(); });
@@ -401,7 +401,7 @@
 
   /* ═════ ③ 조합 테스트 ═════ */
   var PRESETS = [['1990-05-15', '14:30', 'M', '경진 · 신강'], ['1985-11-23', '07:10', 'F', '1985 여'], ['2000-02-29', '22:40', 'M', '2000 남'], ['1978-08-08', '03:00', 'F', '1978 여']];
-  var TST = { sel: 'awakening', rep: null, sd: null, pane: null, busy: 0 };
+  var TST = { sel: 'ilgan', rep: null, sd: null, pane: null, busy: 0 };
   function testOpen() {
     var root = $('#t-v2test');
     if (!built.test) {
@@ -411,14 +411,14 @@
         '<div class="t3"><div class="card"><div class="muted" style="margin-bottom:6px">챕터 <span id="tIssues"></span></div><div class="trail" id="tRail"></div></div><div class="card"><div id="tPv"></div></div><div><div class="card" id="tTx"></div><div class="card tinsp" id="tInsp" style="margin-top:12px"><p class="muted">챕터를 고르면 선택 근거가 보입니다.</p></div></div></div>' +
         '<details class="card" id="tCovBox" style="margin-top:12px"><summary><b>콘텐츠 커버리지 점검</b> <span class="muted">조건 있는 모듈이 사주 구조를 얼마나 덮는지 · 눌러서 열기</span></summary><div id="tCov" style="margin-top:8px"></div></details>';
       var txp = {}; TST.pane = PreviewPane($('#tPv', root), { onChapter: function (id) { if (TST.sel !== id) { TST.sel = id; markRail(); inspect(); } }, onTx: function (m) { txp.p.onTx(m); }, onList: function (m) { txp.p.onList(m); }, onMove: function (m) { txp.p.onMove(m); } });
-      txp.p = TxPanel($('#tTx', root), TST.pane, function () { return TST.sel === 'ilgan' || TST.sel === 'awakening' ? '_' : TST.sel; });
+      txp.p = TxPanel($('#tTx', root), TST.pane, function () { return TST.sel === 'ilgan' || TST.sel === 'prologue' || TST.sel === 'ending' ? '_' : TST.sel; });
       $('#tGo', root).onclick = function () { run(); }; $('#tDbg', root).onchange = function (e) { TS.dbg = e.target.checked; saveTS(); inspect(); };
       $('#tProj', root).onchange = function (e) { TS.project = e.target.value; saveTS(); run(); };
       $('#tEditBtn', root).onclick = function () { $('#tForm', root).classList.toggle('hide'); };
       $('#tCovBox', root).ontoggle = function () { if (this.open && !this.dataset.done) { this.dataset.done = 1; C.covOpen($('#tCov', root)); } };
       $('#tRail', root).onclick = function (e) { var b = e.target.closest('[data-c]'); if (!b) return; TST.sel = b.dataset.c; markRail(); inspect(); TST.pane.show(TST.sel, TS.project); };
-      $('#tInsp', root).addEventListener('change', function (e) { // 일간 소개·일주 각성 영상 바로 올리기
-        var inp = e.target.closest('[data-awup]'); if (!inp || !TST.sd) return; var f = inp.files[0]; if (!f) return; var msg = $('[data-awmsg]', $('#tInsp', root)), sd = TST.sd, kind = inp.dataset.awup, key = kind === 'ilgan' ? { stem: sd.dayMaster.stem, gender: sd.gender } : { pillar: sd.dayPillar.ko, gender: sd.gender };
+      $('#tInsp', root).addEventListener('change', function (e) { // 캐릭터 소개(일간) 영상 바로 올리기
+        var inp = e.target.closest('[data-awup]'); if (!inp || !TST.sd) return; var f = inp.files[0]; if (!f) return; var msg = $('[data-awmsg]', $('#tInsp', root)), sd = TST.sd, kind = 'ilgan', key = { stem: sd.dayMaster.stem, gender: sd.gender };
         if (msg) msg.textContent = '올리는 중…'; A.quickAwakening(kind, key, f, PW, function (p) { if (msg) msg.textContent = '올리는 중 ' + Math.round(p * 100) + '%'; }).then(function () { awkMemo = null; toast('영상을 연결했습니다'); run(); }).catch(function (er) { if (msg) msg.textContent = er.message; toast(er.message, true); });
       });
       bindSources($('#tInsp', root)); $('#tInsp', root).addEventListener('click', function (e) { if (e.target.closest('[data-allsrc]') && TST.rep) allSourcesDialog(); });
@@ -442,14 +442,15 @@
       if (my !== TST.busy) return; TST.rep = r.rep; TST.sd = r.sd; var rep = r.rep, sd = r.sd;
       var sn = function (s) { return s ? SEA[s] : '-'; };
       $('#tSum').innerHTML = '<b>' + esc(TS.date) + ' ' + esc(TS.time) + ' ' + (TS.gender === 'M' ? '남' : '여') + '</b> → <b style="color:var(--gold)">' + esc(sd.dayPillar.ko) + '일주</b> · ' + esc(sd.strength.zone) + ' · 용신 ' + esc(sd.usefulElements ? sd.usefulElements.yong : '없음') + ' · 대운 ' + esc(sd.currentDaewoon ? sn(sd.currentDaewoon.season) : '-') + ' · 올해 ' + esc(sd.sewoon ? sn(sd.sewoon.season) : '-') + ' <span class="muted">(' + esc(r.pack.cfg.project.name) + ' · ' + rep.chapters.length + '챕터)</span>';
-      var issues = 0, h = '<button type="button" data-c="ilgan" class="ri' + (TST.sel === 'ilgan' ? ' on' : '') + '"><span>🎬</span><b>일간 소개 영상</b></button><button type="button" data-c="awakening" class="ri' + (TST.sel === 'awakening' ? ' on' : '') + '"><span>🎬</span><b>일주 각성 영상</b></button>', act = 0;
+      var issues = 0, h = '<button type="button" data-c="ilgan" class="ri' + (TST.sel === 'ilgan' ? ' on' : '') + '"><span>🎬</span><b>캐릭터 소개 영상</b></button><button type="button" data-c="prologue" class="ri' + (TST.sel === 'prologue' ? ' on' : '') + '"><span>🎞</span><b>프롤로그 (MY STORY)</b></button>', act = 0;
       rep.chapters.forEach(function (c) {
         if (c.act !== act) { act = c.act; var a = rep.acts.filter(function (x) { return x.id === act; })[0] || {}; h += '<div class="ract">' + esc(a.roman || '') + ' · ' + esc(a.title || '') + '</div>'; }
         var fb = c.modules[0] && /_fallback$/.test(c.modules[0]), nm = c.scenes.filter(function (s) { return !s.media && R.Scenes.SCENE_RULES[s.sceneType].media; }).length; if (fb) issues++;
         h += '<button type="button" data-c="' + esc(c.id) + '" class="ri' + (c.id === TST.sel ? ' on' : '') + '"><span>' + String(c.no).padStart(2, '0') + '</span><b>' + esc(c.title) + '</b>' + (fb ? '<i class="pill w" title="조건 있는 모듈이 없어 기본 안내만 나옵니다">기본안내</i>' : '') + (nm ? '<i class="pill" title="미디어가 없어 자리표시 장면이 나오는 장면 수">미디어 ' + nm + '</i>' : '') + '</button>';
       });
+      h += '<button type="button" data-c="ending" class="ri' + (TST.sel === 'ending' ? ' on' : '') + '"><span>🎞</span><b>엔딩</b></button>';
       rail.innerHTML = h; $('#tIssues').innerHTML = issues ? '<span class="pill w">기본 안내만 ' + issues + '개</span>' : '<span class="pill">모두 정상</span>';
-      if (!rep.chapters.some(function (c) { return c.id === TST.sel; }) && TST.sel !== 'awakening' && TST.sel !== 'ilgan') TST.sel = rep.chapters[0].id;
+      if (!rep.chapters.some(function (c) { return c.id === TST.sel; }) && TST.sel !== 'ilgan' && TST.sel !== 'prologue' && TST.sel !== 'ending') TST.sel = rep.chapters[0].id;
       inspect(); TST.pane.show(TST.sel, TS.project);
     }).catch(function (e) { rail.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
@@ -457,13 +458,10 @@
   function inspect() {
     var box = $('#tInsp'), rep = TST.rep, sd = TST.sd; if (!rep) return;
     if (TST.sel === 'ilgan') {
-      awakeningFor(sd).then(function (a) { box.innerHTML = '<b>일간 소개 영상</b><p class="muted">일주 각성 영상 <u>앞</u>에 나옵니다 ("당신은 ' + esc(sd.dayMaster.stem + sd.dayMaster.el) + '입니다").<br>' + (a.ilgan ? '<span style="color:#7FE0BC">' + esc(sd.dayMaster.stem) + ' · ' + (sd.gender === 'M' ? '남' : '여') + ' 영상이 연결되어 있습니다.</span>' : '<span style="color:#FF9C8C">' + esc(sd.dayMaster.stem) + ' · ' + (sd.gender === 'M' ? '남' : '여') + ' 영상이 아직 없어 이 단계는 건너뜁니다.</span>') + '</p><div class="row"><button type="button" id="goIlg">일간 소개 영상 등록하러 가기</button><label class="navbtn" style="cursor:pointer;margin-left:6px">이 일간·성별 영상 바로 올리기<input type="file" data-awup="ilgan" accept="video/mp4,video/webm,video/quicktime,image/*" hidden></label><span class="muted" data-awmsg></span></div>'; $('#goIlg', box).onclick = function () { gotoTab('v2clip'); var b = $('#clNav button[data-k=awk]'); if (b) b.click(); }; });
+      awakeningFor(sd).then(function (a) { box.innerHTML = '<b>캐릭터 소개 영상</b><p class="muted">프롤로그 <u>앞</u>에 나오는 "이 이야기의 주인공" 소개입니다.<br>' + (a.ilgan ? '<span style="color:#7FE0BC">' + esc(sd.dayMaster.stem) + ' · ' + (sd.gender === 'M' ? '남' : '여') + ' 영상이 연결되어 있습니다.</span>' : '<span style="color:#FF9C8C">' + esc(sd.dayMaster.stem) + ' · ' + (sd.gender === 'M' ? '남' : '여') + ' 영상이 아직 없어 이 단계는 건너뜁니다.</span>') + '</p><div class="row"><button type="button" id="goIlg">캐릭터 소개 영상 등록하러 가기</button><label class="navbtn" style="cursor:pointer;margin-left:6px">이 일간·성별 영상 바로 올리기<input type="file" data-awup="ilgan" accept="video/mp4,video/webm,video/quicktime,image/*" hidden></label><span class="muted" data-awmsg></span></div>'; $('#goIlg', box).onclick = function () { gotoTab('v2clip'); var b = $('#clNav button[data-k=awk]'); if (b) b.click(); }; });
       return;
     }
-    if (TST.sel === 'awakening') {
-      awakeningFor(sd).then(function (a) { var pk = a.pick; box.innerHTML = '<b>일주 각성 영상</b><p class="muted">' + (pk.fallback ? '<span style="color:#FF9C8C">' + esc(pk.key) + ' 영상이 아직 없습니다 → ' + (pk.clip ? 'fallback 영상으로 진행' : 'fallback 도 없어 문구·정지 화면으로 진행') + '</span>' : '<span style="color:#7FE0BC">' + esc(pk.key) + ' 영상이 연결되어 있습니다.</span> ' + esc(pk.clip.title || '')) + '</p><div class="row"><button type="button" id="goAwk">각성 영상 등록하러 가기</button><label class="navbtn" style="cursor:pointer;margin-left:6px">이 일주·성별 영상 바로 올리기<input type="file" data-awup="iju" accept="video/mp4,video/webm,video/quicktime,image/*" hidden></label><span class="muted" data-awmsg></span></div>'; $('#goAwk', box).onclick = function () { gotoTab('v2clip'); var b = $('#clNav button[data-k=awk]'); if (b) b.click(); }; });
-      return;
-    }
+    if (TST.sel === 'prologue' || TST.sel === 'ending') { box.innerHTML = '<b>' + (TST.sel === 'prologue' ? '프롤로그' : '엔딩') + '</b><p class="muted">' + (TST.sel === 'prologue' ? '“모든 사람에게는 각자의 이야기가 있다” → 주인공 이름 → 타이틀 → 캐릭터 프로필 → 영화로 비유하면. 문장은 사주 사실(factualBasis)을 번역해 동적으로 만들어집니다.' : '“사주는 결말을 적어놓은 대본이 아니다” → “다음 장면을 만드는 사람은 결국 당신이다”.') + '</p><p class="muted">탭하면 멈추고, 건너뛰기로 넘어갑니다.</p>'; return; }
     var c = rep.chapters.filter(function (x) { return x.id === TST.sel; })[0]; if (!c) { box.innerHTML = ''; return; }
     var fb = c.modules[0] && /_fallback$/.test(c.modules[0]);
     var h = '<b>' + String(c.no).padStart(2, '0') + ' ' + esc(c.title) + '</b><p class="muted" style="margin:4px 0 8px">FACT · ' + esc(c.fact) + '</p>' + (fb ? '<p class="pill w" style="display:inline-block;margin:0 0 8px">조건 있는 모듈이 없어 기본 안내만 표시됩니다</p>' : '');
@@ -536,11 +534,12 @@
   function setOpen(also) {
     var root = $('#t-v2set'); if (root.parentNode && $('#t-lib') && root.nextSibling !== $('#t-lib') && !built.setMoved) { built.setMoved = 1; $('#t-lib').parentNode.insertBefore(root, $('#t-lib')); }
     if (!built.set) {
-      built.set = 1; root.innerHTML = '<div class="sub2" id="stNav"></div><div id="stScore" class="hide"></div><div id="stMove" class="hide"></div>';
-      subnav($('#stNav', root), [['intro', '입장 인트로'], ['home', '온보딩 페이지'], ['move', '무빙 연출'], ['score', '미디어 점수·AI'], ['lib', '기존 클립 (구버전)']], also || 'intro', function (k) { gotoTab('v2set', k); });
+      built.set = 1; root.innerHTML = '<div class="sub2" id="stNav"></div><div id="stScore" class="hide"></div><div id="stMove" class="hide"></div><div id="stCine" class="hide"></div>';
+      subnav($('#stNav', root), [['intro', '입장 인트로'], ['home', '온보딩 페이지'], ['move', '무빙 연출'], ['cine', '시네마 기본 연출'], ['score', '미디어 점수·AI'], ['lib', '기존 클립 (구버전)']], also || 'intro', function (k) { gotoTab('v2set', k); });
     }
     $('#stScore', root).classList.toggle('hide', also !== 'score'); if (also === 'score') scoreOpen();
     $('#stMove', root).classList.toggle('hide', also !== 'move'); if (also === 'move') moveOpen();
+    $('#stCine', root).classList.toggle('hide', also !== 'cine'); if (also === 'cine') cineOpen();
     if (!also) { $$('#stNav button', root).forEach(function (b) { b.classList.toggle('on', b.dataset.k === 'intro'); }); setTimeout(function () { window.AdminShowTab('v2set', 'intro'); }, 0); }
   }
   // 무빙 연출: 장면 안 요소가 차례로 나타나는 효과 + 자동 스크롤(누르면 멈춤). 저장하면 /api/report-content 의 flow 로 올라가고 viewer 가 같은 값을 쓴다.
@@ -559,6 +558,24 @@
       $('#mvSave', box).onclick = function () { var v = read(); C.save({ flow: v }).then(function () { ST.saved.flow = v; toast('저장했습니다'); moveOpen(); }).catch(function (e) { toast(e.message, true); }); };
       $('#mvDef', box).onclick = function () { ST.saved.flow = M.clean({}); moveOpen(); toast('기본값을 불러왔습니다. 저장을 눌러야 적용됩니다'); };
       $('#mvTest', box).onclick = function () { gotoTab('v2test'); };
+    });
+  }
+  // 시네마 기본 연출: 장면 종류(16)마다 기본 연출을 정한다. 비워 둔 칸은 프리셋·내장 기본값을 따른다. 저장하면 /api/report-content 의 cinemaDefaults.
+  var CINE_SEL = 'EXPLANATION';
+  function cineOpen() {
+    var box = $('#stCine'), K = R.Cinema; C.load().then(function () {
+      var defs = ST.saved.cinemaDefaults || {}, KO = V2Cinema.KO;
+      var opts = K.SCENE_TYPES.map(function (t) { return '<option value="' + t + '"' + (CINE_SEL === t ? ' selected' : '') + '>' + t + ' · ' + KO.sceneType[t] + (defs[t] ? ' ●' : '') + '</option>'; }).join('');
+      box.innerHTML = '<div class="card"><b style="color:var(--gold)">시네마 기본 연출</b> <span class="muted">MY LIFE AS A MOVIE — 장면 종류별로 연출의 기본값을 정합니다. 개별 클립의 연출이 있으면 그 값이 먼저 쓰입니다. (● = 저장된 값이 있는 종류)</span>' +
+        '<div class="row" style="margin:10px 0"><label>장면 종류 <select id="cnType">' + opts + '</select></label><button type="button" id="cnClear">이 종류 기본값 지우기</button></div><div id="cnForm">' + V2Cinema.fields(defs[CINE_SEL]) + '</div>' +
+        '<div class="row" style="margin-top:12px"><button class="pri" id="cnSave" type="button">저장</button><button type="button" id="cnTest">조합 테스트에서 확인</button></div></div>' +
+        '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">배경 음악 (BGM)</b> <span class="muted">분위기별로 음원 한 곡씩. 시네마틱·미니멀·앰비언트·감성·긴장·희망·성찰 중심으로 고르고, 동양 판타지·무협·신선 세계 같은 분위기가 중심이 되지 않게 합니다(동양적 질감은 아주 약하게만). 비워 두면 소리가 나지 않습니다.</span>' + R.Bgm.MOODS.map(function (m) { return '<div class="v2f"><label>' + m + ' · ' + esc(V2Cinema.KO.bgmMood[m]) + '</label><div class="row" style="flex-wrap:nowrap"><input type="text" data-bgm="' + m + '" value="' + esc((ST.saved.bgm || {})[m] || '') + '" placeholder="/api/clipfile?k=… 또는 https://…"><label class="navbtn" style="cursor:pointer;white-space:nowrap">올리기<input type="file" accept="audio/*" data-bgmup="' + m + '" hidden></label></div></div>'; }).join('') + '<div class="row" style="margin-top:10px"><button class="pri" id="bgmSave" type="button">BGM 저장</button><span class="muted" id="bgmMsg"></span></div></div>';
+      $('#cnType', box).onchange = function (e) { CINE_SEL = e.target.value; cineOpen(); };
+      $('#cnSave', box).onclick = function () { var v = V2Cinema.read($('#cnForm', box)), nx = Object.assign({}, defs); if (Object.keys(v).length) nx[CINE_SEL] = v; else delete nx[CINE_SEL]; C.save({ cinemaDefaults: nx }).then(function () { ST.saved.cinemaDefaults = nx; toast('저장했습니다'); cineOpen(); }).catch(function (e) { toast(e.message, true); }); };
+      $('#cnClear', box).onclick = function () { var nx = Object.assign({}, defs); delete nx[CINE_SEL]; C.save({ cinemaDefaults: nx }).then(function () { ST.saved.cinemaDefaults = nx; toast('지웠습니다'); cineOpen(); }).catch(function (e) { toast(e.message, true); }); };
+      $('#cnTest', box).onclick = function () { gotoTab('v2test'); };
+      $$('[data-bgmup]', box).forEach(function (i) { i.onchange = function () { var file = i.files[0]; if (!file) return; $('#bgmMsg', box).textContent = '올리는 중…'; V2Admin.upload(file, file.name, PW).then(function (u) { box.querySelector('[data-bgm="' + i.dataset.bgmup + '"]').value = u; $('#bgmMsg', box).textContent = '올렸습니다. BGM 저장을 눌러 적용하세요'; }).catch(function (e) { $('#bgmMsg', box).textContent = e.message; }); }; });
+      $('#bgmSave', box).onclick = function () { var o = {}; $$('[data-bgm]', box).forEach(function (i) { if (i.value.trim()) o[i.dataset.bgm] = i.value.trim(); }); C.save({ bgm: o }).then(function () { ST.saved.bgm = o; toast('BGM을 저장했습니다'); }).catch(function (e) { toast(e.message, true); }); };
     });
   }
   function scoreOpen() {
