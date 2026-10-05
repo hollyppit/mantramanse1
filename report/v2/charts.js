@@ -19,33 +19,44 @@
       '<figcaption style="font-size:11px;letter-spacing:.2em;color:' + t.sub + ';margin-bottom:10px">' + esc(title) + '</figcaption>' + body + '</figure>';
   }
   // 가로 막대 한 줄: [이름][막대 + 20% 평균 점선][숫자·라벨]. scale = 막대 100% 폭에 해당하는 값
-  function row(t, name, value, color, scale, label, sub) {
+  function row(t, name, value, color, scale, label, sub, fo) {
     var w = Math.max(value > 0 ? 2 : 0, Math.min(100, value / scale * 100)), avg = 20 / scale * 100;
-    return '<div style="display:flex;align-items:center;gap:8px;margin:7px 0">' +
-      '<div style="flex:0 0 3.1em;font-weight:600">' + esc(name) + (sub ? '<div style="font-weight:400;font-size:10.5px;color:' + t.sub + '">' + esc(sub) + '</div>' : '') + '</div>' +
+    return '<div style="display:flex;align-items:center;gap:8px;margin:7px 0;' + (fo ? 'background:' + t.badgeBg + ';border-radius:8px;padding:3px 6px;margin-left:-6px;margin-right:-6px' : '') + '">' +
+      '<div style="flex:0 0 3.1em;font-weight:600">' + (fo ? '<span aria-hidden="true" style="color:' + t.line + '">★</span>' : '') + esc(name) + (sub ? '<div style="font-weight:400;font-size:10.5px;color:' + t.sub + '">' + esc(sub) + '</div>' : '') + '</div>' +
       '<div style="flex:1 1 0;min-width:0;position:relative;height:14px;border-radius:7px;background:' + t.track + '"><i style="position:absolute;left:0;top:0;bottom:0;width:' + w + '%;border-radius:7px;background:' + color + '"></i>' +
       '<i style="position:absolute;left:' + avg + '%;top:-3px;bottom:-3px;border-left:2px dashed ' + t.line + '"></i></div>' +
       '<div style="flex:0 0 4.6em;text-align:right"><b>' + Math.round(value) + '%</b>' + (label ? '<br>' + badge(t, label) : '') + '</div></div>';
   }
-  var legend = function (t) { return '<div style="font-size:11px;color:' + t.sub + ';margin-top:6px"><span style="display:inline-block;width:14px;border-top:2px dashed ' + t.line + ';vertical-align:middle;margin-right:6px"></span>점선 = 균등 분포(20%)</div>'; };
+  var foot = function (t, text) { return text ? '<p style="margin:10px 0 0;font-size:12.5px;line-height:1.6;color:' + t.sub + '"><b style="color:' + t.ink + ';font-weight:600">읽는 포인트</b> · ' + esc(text) + '</p>' : ''; };
+  var legend = function (t, fo) { return '<div style="font-size:11px;color:' + t.sub + ';margin-top:6px">' + (fo ? '<span aria-hidden="true" style="color:' + t.line + '">★</span> = 이 장과 관련된 값 &nbsp;·&nbsp; ' : '') + '<span style="display:inline-block;width:14px;border-top:2px dashed ' + t.line + ';vertical-align:middle;margin-right:6px"></span>점선 = 균등 분포(20%)</div>'; };
+  var legendOld = function (t) { return '<div style="font-size:11px;color:' + t.sub + ';margin-top:6px"><span style="display:inline-block;width:14px;border-top:2px dashed ' + t.line + ';vertical-align:middle;margin-right:6px"></span>점선 = 균등 분포(20%)</div>'; };
 
-  function elements(sd, t) {
-    var v = sd.fiveElements, mx = Math.max(40, Math.max.apply(null, ELK.map(function (e) { return v[e]; }))), sum = [];
+  var has = function (a, x) { return (a || []).indexOf(x) >= 0; };
+  // 장(챕터)별로 "이 장과 관련된 값"에 별표를 붙인다(해석 규칙이 아니라 보여 줄 위치만 정한다)
+  function focusOf(kind, sd, base) {
+    if (kind === 'elements') return base === 'c02' ? [sd.dominantEl, sd.weakestEl] : [];
+    if (kind === 'groups') return base === 'c04' ? [sd.dominantGroup] : base === 'c05' ? [sd.weakestGroup] : base === 'c08' ? ['재성', '식상'] : base === 'c11' ? ['비겁', '관성'] : [];
+    if (kind === 'pillars') return base === 'c13' ? ['year', 'month'] : ['day'];
+    return [];
+  }
+  function elements(sd, t, o) {
+    var fo = focusOf('elements', sd, o.chapter), v = sd.fiveElements, mx = Math.max(40, Math.max.apply(null, ELK.map(function (e) { return v[e]; }))), sum = [];
     var body = ELK.map(function (e) {
       var lb = v[e] >= HIGH_E ? '과다' : v[e] < LOW_E ? '부족' : '';
       sum.push(e + ' ' + Math.round(v[e]) + '%' + (lb ? '(' + lb + ')' : ''));
-      return row(t, e, v[e], t.el[e], mx, lb);
+      return row(t, e, v[e], t.el[e], mx, lb, '', has(fo, e));
     }).join('');
-    return wrap(t, 'FIVE ELEMENTS · 오행 분포', body + legend(t), '오행 분포: ' + sum.join(', '));
+    var big = ELK.slice().sort(function (a, b) { return v[b] - v[a]; });
+    return wrap(t, 'FIVE ELEMENTS · 오행 분포', body + legend(t, fo.length) + foot(t, '가장 큰 기운은 ' + big[0] + '(' + Math.round(v[big[0]]) + '%), 가장 작은 기운은 ' + big[4] + '(' + Math.round(v[big[4]]) + '%)입니다.'), '오행 분포: ' + sum.join(', '));
   }
-  function groups(sd, t) {
-    var v = sd.groups, mx = Math.max(40, Math.max.apply(null, GROUPS.map(function (g) { return v[g]; }))), sum = [];
+  function groups(sd, t, o) {
+    var fo = focusOf('groups', sd, o.chapter), v = sd.groups, mx = Math.max(40, Math.max.apply(null, GROUPS.map(function (g) { return v[g]; }))), sum = [];
     var body = GROUPS.map(function (g) {
       var lb = v[g] >= HIGH_G ? '과다' : v[g] < ZERO_G ? '거의 없음' : '';
       sum.push(g + ' ' + Math.round(v[g]) + '%' + (lb ? '(' + lb + ')' : ''));
-      return row(t, g, v[g], t.el[sd.groupEl[g]] || t.line, mx, lb, sd.groupEl[g]);
+      return row(t, g, v[g], t.el[sd.groupEl[g]] || t.line, mx, lb, sd.groupEl[g], has(fo, g));
     }).join('');
-    return wrap(t, 'TEN GODS · 십성군 분포', body + legend(t), '십성군 분포: ' + sum.join(', '));
+    return wrap(t, 'TEN GODS · 십성군 분포', body + legend(t, fo.length) + foot(t, '가장 큰 십성군은 ' + sd.dominantGroup + '(' + Math.round(v[sd.dominantGroup]) + '%), 가장 약한 십성군은 ' + sd.weakestGroup + '(' + Math.round(v[sd.weakestGroup]) + '%)입니다.'), '십성군 분포: ' + sum.join(', '));
   }
   function strength(sd, t) {
     var s = sd.strength, bands = ['신약', '중화', '신강'], at = Math.max(0, bands.indexOf(s.band)), pos = at * 33.333 + 16.667;
@@ -55,18 +66,50 @@
     var chk = [['득령', s.deukryeong, '월지의 도움'], ['득지', s.deukji, '일지의 도움'], ['득세', s.deukse, '주변 기운의 도움']].map(function (x) {
       return '<div style="flex:1 1 0;min-width:0;text-align:center;padding:8px 4px;border:1px solid ' + (x[1] ? t.badgeBd : t.track) + ';border-radius:8px"><div style="font-size:18px;line-height:1.2;color:' + (x[1] ? t.on : t.off) + '" aria-hidden="true">' + (x[1] ? '✓' : '✗') + '</div><b style="font-size:13px">' + x[0] + '</b><div style="font-size:10.5px;color:' + t.sub + '">' + (x[1] ? '있음' : '없음') + ' · ' + x[2] + '</div></div>';
     }).join('');
-    return wrap(t, 'STRENGTH · 신강약', gauge + '<div style="display:flex;gap:6px;margin-top:12px">' + chk + '</div>',
+    var n3 = [s.deukryeong, s.deukji, s.deukse].filter(Boolean).length;
+    return wrap(t, 'STRENGTH · 신강약', gauge + '<div style="display:flex;gap:6px;margin-top:12px">' + chk + '</div>' + foot(t, '득령·득지·득세 3가지 중 ' + n3 + '가지를 얻어 \'' + s.zone + '\'으로 읽힙니다.'),
       '신강약: ' + (s.zone === s.band ? s.zone : s.zone + '(' + s.band + ')') + '. 득령 ' + (s.deukryeong ? '있음' : '없음') + ', 득지 ' + (s.deukji ? '있음' : '없음') + ', 득세 ' + (s.deukse ? '있음' : '없음'));
   }
 
+  // 원국 표(네 기둥·십성·12운성). focus 기둥은 별표·배경으로 강조
+  function pillars(sd, t, o, spouse) {
+    var P = sd.pillars, fo = focusOf('pillars', sd, o.chapter), cols = [['hour', '시주'], ['day', '일주(나)'], ['month', '월주'], ['year', '연주']];
+    var td = function (s) { return 'padding:6px 3px;border-bottom:1px solid ' + t.track + ';text-align:center;' + s; };
+    var cell = function (k) { var p = P[k], f = has(fo, k); return '<td style="' + td(f ? 'background:' + t.badgeBg : '') + '">' + (p ? '<div style="font-size:22px;line-height:1.2;font-family:serif">' + esc(p.hanja) + '</div><div style="font-size:11px;color:' + t.sub + '">' + esc(p.ko) + '</div>' : '<span style="font-size:11px;color:' + t.sub + '">시간 모름</span>') + '</td>'; };
+    var line = function (label, f) { return '<tr><th style="' + td('font-weight:400;font-size:11px;color:' + t.sub + ';text-align:left;white-space:nowrap') + '">' + label + '</th>' + cols.map(function (c) { var p = P[c[0]]; return '<td style="' + td('font-size:12px;' + (has(fo, c[0]) ? 'background:' + t.badgeBg : '')) + '">' + esc(p ? f(p) : '-') + '</td>'; }).join('') + '</tr>'; };
+    var head = '<tr><th></th>' + cols.map(function (c) { return '<th style="' + td('font-weight:600;font-size:12px;') + '">' + (has(fo, c[0]) ? '<span aria-hidden="true" style="color:' + t.line + '">★</span>' : '') + c[1] + '</th>'; }).join('') + '</tr>';
+    var table = '<table style="width:100%;border-collapse:collapse;table-layout:fixed">' + head + '<tr><th style="' + td('font-weight:400;font-size:11px;color:' + t.sub + ';text-align:left') + '">간지</th>' + cols.map(function (c) { return cell(c[0]); }).join('') + '</tr>' + line('십성', function (p) { return (p.stemTG || '-') + '/' + (p.branchTG || '-'); }) + line('12운성', function (p) { return p.unseong || '-'; }) + '</table>';
+    var d = P.day, card = spouse && d ? '<div style="display:flex;gap:8px;margin-bottom:12px"><div style="flex:1;border:1px solid ' + t.badgeBd + ';border-radius:10px;padding:8px 10px;text-align:center"><small style="color:' + t.sub + '">일지(가까운 관계의 자리)</small><div style="font-size:22px;font-family:serif">' + esc(d.hanja[1]) + '<span style="font-size:13px;margin-left:6px">' + esc(d.ko[1]) + '</span></div></div><div style="flex:1;border:1px solid ' + t.badgeBd + ';border-radius:10px;padding:8px 10px;text-align:center"><small style="color:' + t.sub + '">일지 십성 · 12운성</small><div style="font-size:15px;font-weight:600;margin-top:6px">' + esc((d.branchTG || '-') + ' · ' + (d.unseong || '-')) + '</div></div></div>' : '';
+    var f1 = fo.map(function (k) { return (cols.filter(function (c) { return c[0] === k; })[0] || [0, ''])[1]; }).join('·');
+    return wrap(t, spouse ? 'DAY BRANCH · 배우자 자리' : 'FOUR PILLARS · 사주 원국', card + table + '<div style="font-size:11px;color:' + t.sub + ';margin-top:6px"><span aria-hidden="true" style="color:' + t.line + '">★</span> = 이 장과 관련된 기둥</div>' + foot(t, '나를 뜻하는 일간은 ' + sd.dayMaster.stem + '(' + sd.dayMaster.hanja + ', ' + sd.dayMaster.el + '), 태어난 달의 지지는 ' + (P.month ? P.month.ko[1] : '-') + '입니다' + (f1 ? ' · 이 장은 ' + f1 + '를 중심으로 읽습니다' : '') + '.'), '사주 원국: ' + cols.map(function (c) { var p = P[c[0]]; return c[1] + ' ' + (p ? p.ko : '시간 모름'); }).join(', '));
+  }
+  // 직업: 엔진이 계산한 상위 분야(점수는 엔진 값 그대로, 막대는 1위 대비 상대 길이)
+  function career(sd, t) {
+    var top = (sd.career && sd.career.top || []).slice(0, 5); if (!top.length) return '';
+    var mx = Math.max.apply(null, top.map(function (c) { return c.score; })) || 1, body = top.map(function (c, i) {
+      return '<div style="display:flex;align-items:center;gap:8px;margin:7px 0"><div style="flex:0 0 1.4em;font-weight:600">' + (i + 1) + '</div><div style="flex:0 0 6.2em;font-size:13px;overflow-wrap:anywhere">' + esc(c.name || c.category) + '</div><div style="flex:1 1 0;min-width:0;height:14px;border-radius:7px;background:' + t.track + '"><i style="display:block;height:100%;width:' + Math.max(4, Math.round(c.score / mx * 100)) + '%;border-radius:7px;background:' + t.line + '"></i></div><b style="flex:0 0 2.6em;text-align:right;font-size:12px">' + Math.round(c.score) + '</b></div>';
+    }).join('');
+    return wrap(t, 'CAREER · 엔진이 계산한 상위 분야', body + '<div style="font-size:11px;color:' + t.sub + '">막대 = 1위 대비 상대 길이 · 숫자 = 엔진 점수</div>' + foot(t, '엔진 상위 분야 1위는 ' + (top[0].name || top[0].category) + '입니다.'), '직업 적성 상위 분야: ' + top.map(function (c, i) { return (i + 1) + '위 ' + (c.name || c.category); }).join(', '));
+  }
+  // 용신·희신: 다섯 기운이 맡는 역할(엔진 값). 용신이 없으면 그리지 않는다
+  function yong(sd, t) {
+    var u = sd.usefulElements; if (!u) return '';
+    var body = '<div style="display:flex;gap:6px">' + ELK.map(function (e) { var r = u.roles && u.roles[e], main = e === u.yong; return '<div style="flex:1 1 0;min-width:0;text-align:center;padding:8px 2px;border:' + (main ? '2px' : '1px') + ' solid ' + (main ? t.line : t.track) + ';border-radius:10px"><div style="font-weight:700;font-size:16px;color:' + t.el[e] + '">' + e + '</div><div style="font-size:11.5px;color:' + t.ink + ';margin-top:2px">' + esc(main ? '용신 ★' : (e === u.hee ? '희신' : (r || '-'))) + '</div></div>'; }).join('') + '</div>';
+    return wrap(t, 'USEFUL ELEMENT · 용신', body + foot(t, '균형을 돕는 용신은 ' + u.yong + (u.hee ? ', 희신은 ' + u.hee : '') + '입니다.'), '용신 ' + u.yong + (u.hee ? ', 희신 ' + u.hee : ''));
+  }
+
   function html(kind, sd, opts) {
-    var t = THEME[(opts && opts.theme) === 'light' ? 'light' : 'dark'];
+    opts = opts || {}; var t = THEME[opts.theme === 'light' ? 'light' : 'dark'];
     if (!sd) return '';
-    if (kind === 'elements') return elements(sd, t);
-    if (kind === 'groups') return groups(sd, t);
+    if (kind === 'elements') return elements(sd, t, opts);
+    if (kind === 'groups') return groups(sd, t, opts);
     if (kind === 'strength') return strength(sd, t);
+    if (kind === 'pillars') return pillars(sd, t, opts, false);
+    if (kind === 'spouse') return pillars(sd, t, Object.assign({}, opts, { chapter: 'c09' }), true);
+    if (kind === 'career') return career(sd, t);
+    if (kind === 'yong') return yong(sd, t);
     return '';
   }
 
-  R.Charts = { html: html, KINDS: ['elements', 'groups', 'strength'] };
+  R.Charts = { html: html, KINDS: ['elements', 'groups', 'strength', 'pillars', 'spouse', 'career', 'yong'] };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -131,13 +131,14 @@
   }
 
   // 챕터 구조 → Scene 배열. 장면 종류 순서가 단조롭지 않게(연속 같은 media 타입 방지) 구성한다.
-  var CHART_OF = { c02: 'elements', c03: 'strength', c04: 'groups', c05: 'groups' };
+  // 챕터마다 "만세력이 읽은 값"을 그림으로 먼저 보여 주고, 그 값을 근거로 풀이한다
+  var CHART_OF = { c01: 'pillars', c02: 'elements', c03: 'strength', c04: 'groups', c05: 'groups', c06: 'career', c07: 'yong', c08: 'groups', c09: 'spouse', c10: 'spouse', c11: 'groups', c12: 'yong', c13: 'pillars' };
   function chartKind(c) { return CHART_OF[c.base || c.id] || null; }
   function planScenes(c) {
     if (c.verdict) return ['chapterIntro', 'verdictFind', 'verdictBlock'].concat(c.verdict.evidence ? ['verdictEvidence'] : [], ['verdictAdvice', 'chapterEnding']); // 총평: 발견 → 막힘 → 증거 → 조언
     var p = ['chapterIntro'];
-    if (c.interpretation) p.push('insight');
-    if (chartKind(c)) p.push('chart'); // 계산된 분포를 그림으로(오행·신강약·십성군)
+    if (chartKind(c)) p.push('chart'); // 근거: 계산된 값을 그림으로(원국·오행·십성군·신강약·용신·직업 분야)
+    if (c.interpretation) p.push('insight'); // 풀이
     if (c.items && c.kind === 'daewoon') p.push('timeline'); else if (c.items) p.push('dataVisualization');
     if (c.meaning || (c.details && c.details.length)) p.push('explanation');
     if (c.kind === 'remedy') p.push('recommendation');
@@ -179,7 +180,7 @@
       else if (st === 'verdictBlock') { sc.headline = c.verdict.blocked.label; sc.body = c.verdict.blocked.text; sc.sub = c.verdict.blocked.headline; }
       else if (st === 'verdictEvidence') { sc.headline = '수호신이 짚은 시기'; sc.body = c.verdict.evidence.text; sc.evidence = { yes: c.verdict.evidence.yes, no: c.verdict.evidence.no }; }
       else if (st === 'verdictAdvice') { sc.headline = '수호신의 조언'; sc.body = c.verdict.advice.lead; sc.bullets = [{ label: 'ADVICE', items: c.verdict.advice.items }]; }
-      else if (st === 'chart') { sc.headline = c.title; sc.chart = chartKind(c); }
+      else if (st === 'chart') { sc.headline = c.title; sc.chart = chartKind(c); sc.chartBase = c.base || c.id; }
       else if (st === 'dataVisualization' || st === 'timeline') { sc.headline = c.title; sc.data = c.items; }
       // 같은 종류가 연속되지 않게: 직전 장면과 같은 media type 이면 다른 타입을 우선
       if (rule.media && !(st === 'chapterEnding' && !c.interpretation)) {

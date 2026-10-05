@@ -81,7 +81,7 @@
     start.hidden = true; snd.hidden = true; skip.hidden = false; start.textContent = cfg.startLabel || '당신의 이야기를 시작합니다';
     var title = cfg.title, sub = cfg.sub || '', kw = cfg.kw || [], poster = clip && clip.posterUrl || cfg.guardian || '', ev = cfg.kind === 'ilgan' ? 'ilgan' : 'awakening';
     var rp = cfg.kind === 'ilgan' ? 'ilgan' : 'awk';
-    cap.innerHTML = '<div class="t" data-tx="' + rp + '.title">' + esc(title) + '</div>' + (sub ? '<div class="s" data-tx="' + rp + '.sub">' + esc(sub) + '</div>' : '') + (kw.length ? '<div class="k" data-tx="' + rp + '.kw">' + kw.map(function (k) { return '<span>' + esc(k) + '</span>'; }).join('') + '</div>' : '');
+    cap.innerHTML = '<div class="t" data-tx="' + rp + '.title">' + esc(title) + '</div>' + (sub ? '<div class="s" data-tx="' + rp + '.sub">' + esc(sub).replace(/\n/g, '<br>') + '</div>' : '') + (kw.length ? '<div class="k" data-tx="' + rp + '.kw">' + kw.map(function (k) { return '<span>' + esc(k) + '</span>'; }).join('') + '</div>' : '');
     function finish(kind) {
       if (done) return; done = true; skip.hidden = true; snd.hidden = true;
       if (kind === 'completed') T(ev + '_video_completed', { fallback: fb }); else if (kind === 'skipped') T(ev + '_video_skipped', { fallback: fb });
@@ -112,15 +112,17 @@
     if (!url || (saveData && !poster)) skip.onclick = function () { finish('skipped'); };
     start.onclick = function () { cfg.onDone('start'); };
   }
+  // 영상에 관리자가 쓴 부제가 없으면 기본 설명(일간 4줄·일주 4줄)을 보여 준다
+  function introLines(kind) { var T = R.IntroText, sd = S.sd; if (!T || !sd) return ''; return (kind === 'ilgan' ? T.ilgan(sd.dayMaster.stem) : T.iju(sd.dayPillar.ko)).join('\n'); }
   function ilganStage(next) { // 일간 소개 단계(영상이 있을 때만)
     var ig = S.awk && S.awk.ilgan, sd = S.sd;
     if (!ig || !(ig.videoUrl || ig.videoWebm)) { next(); return; }
-    playStage({ kind: 'ilgan', clip: ig, fb: false, title: ig.title || ('당신은 ' + sd.dayMaster.stem + sd.dayMaster.el + '입니다'), sub: ig.subtitle, kw: ig.keywords, auto: true, onDone: next });
+    playStage({ kind: 'ilgan', clip: ig, fb: false, title: ig.title || ('당신은 ' + sd.dayMaster.stem + sd.dayMaster.el + '입니다'), sub: ig.subtitle || introLines('ilgan'), kw: ig.keywords, auto: true, onDone: next });
   }
   function ijuStage() { // 일주 각성 단계
     var v = S.awk && S.awk.video, sd = S.sd;
     var free = gateOn(); // 결제 완료 사용자만 리포트로, 그 외에는 영상 뒤에 무료 결과 화면
-    playStage({ kind: 'awakening', clip: v || (S.awk && S.awk.fallback), fb: !v, free: free, title: (v && v.title) || (sd.dayPillar.ko + '일주'), sub: v && v.subtitle, kw: v && v.keywords, guardian: v && v.guardianImageUrl, onDone: free ? showFree : beginReader });
+    playStage({ kind: 'awakening', clip: v || (S.awk && S.awk.fallback), fb: !v, free: free, title: (v && v.title) || (sd.dayPillar.ko + '일주'), sub: (v && v.subtitle) || introLines('iju'), kw: v && v.keywords, guardian: v && v.guardianImageUrl, onDone: free ? showFree : beginReader });
   }
   function awakening() { ilganStage(ijuStage); }
 
@@ -164,17 +166,17 @@
       return '<section class="scene s-intro' + fxCls(s) + '" ' + id + ' style="--pc:' + EL_COLOR[(s.intent.desiredElements || ['water'])[0]] + '"><div class="bg">' + (s.media ? mediaEl(s.media, c.title) : '') + (s.media ? '' : '<div class="ph" aria-hidden="true"></div>') + '</div><div class="shade"></div><div class="txt">' +
         '<div class="no" data-tx="intro.no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="down" aria-hidden="true">SCROLL ↓</div></div></section>';
     }
-    if (t === 'insight') return '<section class="scene rv" ' + id + '><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead' + (c.lead && /_fallback$/.test(c.lead.id || '') ? ' faint' : '') + '" data-tx="insight.lead">' + lines(s.body) + '</p>' + (s.media ? media(s) : '') + '</section>';
+    if (t === 'insight') return '<section class="scene rv" ' + id + '><div class="cap">풀이</div><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead' + (c.lead && /_fallback$/.test(c.lead.id || '') ? ' faint' : '') + '" data-tx="insight.lead">' + lines(s.body) + '</p>' + (s.media ? media(s) : '') + '</section>';
     if (t === 'verdictFind') { var av = S.awk && S.awk.video, gi = (av && (av.guardianImageUrl || av.posterUrl)) || (S.awk && S.awk.fallback && S.awk.fallback.posterUrl) || ''; return '<section class="scene rv s-verdict" ' + id + '>' + (gi ? '<img class="guardian" src="' + esc(gi) + '" alt="' + esc(((s.verdict || {}).pillar || '') + '일주의 수호신') + '" loading="lazy" decoding="async">' : '') + '<div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p></section>'; }
     if (t === 'verdictBlock') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div>' + (s.sub ? '<p class="lead" style="font-size:1.05rem">' + esc(s.sub) + '</p>' : '') + '<p style="color:var(--ink2)">' + lines(s.body) + '</p></section>';
     if (t === 'verdictEvidence') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p><div class="vd" role="group" aria-label="맞는지 알려 주세요"><button type="button" class="btn" data-vd="yes">맞습니다</button><button type="button" class="btn" data-vd="no">아닙니다</button></div><p class="vd-reply faint" aria-live="polite" data-yes="' + esc((s.evidence || {}).yes) + '" data-no="' + esc((s.evidence || {}).no) + '"></p></section>';
     if (t === 'verdictAdvice') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead" style="font-size:1.05rem">' + lines(s.body) + '</p><div class="cards"><div class="card">' + list(((s.bullets || [])[0] || {}).items || []) + '</div></div></section>';
-    if (t === 'chart') return '<section class="scene rv" ' + id + '>' + R.Charts.html(s.chart, S.sd) + '</section>';
+    if (t === 'chart') { var ch = R.Charts.html(s.chart, S.sd, { chapter: s.chartBase }); return ch ? '<section class="scene rv" ' + id + '><div class="cap">만세력이 읽은 값</div>' + ch + '<p class="faint">이 값이 이어지는 풀이의 근거입니다.</p></section>' : ''; }
     if (t === 'explanation') {
       var det = (c.details || []).map(function (d) { return /_fallback$/.test(d.id || '') ? '<p class="faint">' + esc(d.summary) + '</p>' : '<div class="item"><b>' + esc(d.headline) + '</b><span>' + esc(d.summary) + '</span>' + (d.detail ? '<em class="tip">' + esc(d.detail) + '</em>' : '') + '</div>'; }).join('');
       var mt = String(c.meaning || ''), cut = mt.search(/[.!?]\s/), first = cut > 0 ? mt.slice(0, cut + 1) : mt, rest = cut > 0 ? mt.slice(cut + 1).trim() : '';
       var more = rest || det ? '<div class="more open"><div class="body"><div>' + (rest ? '<p>' + lines(rest) + '</p>' : '') + det + '</div></div></div>' : '';
-      return '<section class="scene rv" ' + id + '>' + (s.media ? media(s) : '') + '<div class="cap">MEANING</div><p class="lead" data-tx="explain.lead">' + lines(first) + '</p>' + more + '</section>';
+      return '<section class="scene rv" ' + id + '>' + (s.media ? media(s) : '') + '<div class="cap">풀이 · 더 깊이</div><p class="lead" data-tx="explain.lead">' + lines(first) + '</p>' + more + '</section>';
     }
     if (t === 'dataVisualization') return monthsHtml(c, s);
     if (t === 'timeline') return timelineHtml(c, s);
