@@ -3,14 +3,14 @@ const fs = require('fs'), path = require('path'), os = require('os'), vm = requi
 const root = path.join(__dirname, '..'), tmp = path.join(os.tmpdir(), 'compose-test.mjs');
 fs.writeFileSync(tmp, fs.readFileSync(path.join(root, 'functions/_compose.js'), 'utf8'));
 vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')); globalThis.window = globalThis;
-['chapters', 'saju-data', 'rules', 'content', 'remedy', 'media', 'scenes', 'compose'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8')));
+['chapters', 'saju-data', 'rules', 'content', 'verdict', 'remedy', 'media', 'scenes', 'compose'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8')));
 (async () => {
   const C = await import(require('url').pathToFileURL(tmp).href), R = globalThis.ReportV2, M = globalThis.Manse;
   const fails = [], ok = (c, m) => { if (!c) fails.push(m); };
   const cfg = R.Chapters.forProject({ chapters: { chapters: [{ id: 'c20', aiEnabled: false }] } }, 'full'), lib = R.Compose.library({ media: [{ id: 'mA', type: 'image', url: 'https://t/a.webp', tags: ['metal', 'growth', 'expansion'], priority: 50 }, { id: 'mB', type: 'image', url: 'https://t/b.webp', tags: ['metal', 'growth', 'expansion'], priority: 40 }] });
   const sd = R.SajuData.build(M.compute({ year: 1990, month: 5, day: 15, hour: 14, minute: 30, calendar: 'solar', leap: false, gender: 'M', city: '서울' }), { now: Date.UTC(2026, 9, 5) });
   const rep = R.Compose.build(sd, lib, cfg), body = { payload: R.Compose.aiPayload(rep), media: R.Compose.mediaPayload(rep, lib) };
-  ok(body.payload.chapters.length === 19 && !body.payload.chapters.some(c => c.id === 'c20'), 'aiEnabled:false 챕터는 AI 로 보내지 않음');
+  ok(body.payload.chapters.length === 20 && !body.payload.chapters.some(c => c.id === 'c20'), 'aiEnabled:false 챕터는 AI 로 보내지 않음');
   ok(!/1990|0515|14:30/.test(JSON.stringify(body)), '요청 본문에 생년월일 없음');
   const sc = body.media.scenes.find(s => s.candidates.length > 1) || body.media.scenes[0]; ok(!!sc, '미디어 후보 payload 존재');
   const c1 = body.payload.chapters[0];
@@ -47,8 +47,8 @@ vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')); glob
   ok(cts.chapters.c05['insight.lead'].x === 80 && cts.chapters.c05['insight.lead'].color === '#112233', '서버: 범위 보정');
   ok(JSON.stringify(TSV.cleanTextStyles(null)) === '{"all":{},"chapters":{}}', '서버: 빈 입력');
   // 클라이언트 적용
-  const before = rep.chapters[0].headline; R.Compose.applyResult(rep, r1.result, lib);
-  ok(rep.chapters[0].headline === '단단하게 결을 세우는 사람입니다' && rep.chapters[0].scenes[0].body === rep.chapters[0].headline, '적용 후 장면 문구도 갱신');
+  const before = rep.chapters.find(c => c.id === 'c01').headline; R.Compose.applyResult(rep, r1.result, lib);
+  ok(rep.chapters.find(c => c.id === 'c01').headline === '단단하게 결을 세우는 사람입니다' && rep.chapters.find(c => c.id === 'c01').scenes[0].body === rep.chapters.find(c => c.id === 'c01').headline, '적용 후 장면 문구도 갱신');
   ok(rep.meta.aiApplied, 'aiApplied 표시'); R.Compose.applyResult(rep, null, lib);
   const ids = rep.chapters.flatMap(c => c.scenes).filter(s => s.media).map(s => s.media.assetId); ok(new Set(ids).size === ids.length, 'AI 미디어 교체 후에도 중복 없음');
   if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log(' ✗ ' + f)); process.exit(1); }

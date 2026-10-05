@@ -17,6 +17,7 @@
   }
 
   var CHAPTERS = [
+    C(0, 1, '수호신이 발견한 당신의 힘', '아직 다 쓰지 않은 잠재력', 'verdict', [], { maxModules: 0 }),
     C(1, 1, '나의 일주', '내가 타고난 한 글자의 이야기', 'module', ['identity'], { maxModules: 2 }),
     C(2, 1, '내 안의 다섯 기운', '목·화·토·금·수의 균형', 'module', ['elements']),
     C(3, 1, '타고난 성격과 기질', '나를 움직이는 기본 성향', 'module', ['personality'], { maxModules: 4 }),

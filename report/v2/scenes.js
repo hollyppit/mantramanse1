@@ -95,6 +95,10 @@
     visualMetaphor: { media: true, types: ['image', 'videoLoop', 'symbol'], role: 'atmosphere', effect: ['mist', 'low'] },
     dataVisualization: { media: false, types: [], role: 'support', effect: ['fade', 'low'] },
     chart: { media: false, types: [], role: 'support', effect: ['fade', 'low'] },
+    verdictFind: { media: false, types: [], role: 'support', effect: ['fade', 'low'] },
+    verdictBlock: { media: false, types: [], role: 'support', effect: ['fade', 'low'] },
+    verdictEvidence: { media: false, types: [], role: 'support', effect: ['fade', 'low'] },
+    verdictAdvice: { media: false, types: [], role: 'support', effect: ['glow', 'low'] },
     timeline: { media: false, types: [], role: 'support', effect: ['fade', 'low'] },
     recommendation: { media: true, types: ['image', 'symbol'], role: 'support', effect: ['fade', 'low'] },
     warning: { media: true, types: ['image', 'videoLoop'], role: 'atmosphere', effect: ['mist', 'low'] },
@@ -105,7 +109,7 @@
   var SEASON_STATE = { opportunity: ['opportunity', 'expansion'], expansion: ['expansion', 'growth'], harvest: ['harvest', 'stability'], accumulation: ['accumulation', 'growth'], transition: ['transition', 'isolation'], defense: ['defense', 'recovery'] };
   var SEASON_EMO = { opportunity: ['hopeful', 'energetic'], expansion: ['powerful', 'hopeful'], harvest: ['warm', 'calm'], accumulation: ['calm', 'contemplative'], transition: ['mysterious', 'contemplative'], defense: ['calm', 'cold'] };
   var SEASON_ACT = { opportunity: ['meeting', 'lookingForward'], expansion: ['working', 'walking'], harvest: ['resting', 'lookingBack'], accumulation: ['studying', 'thinking'], transition: ['thinking', 'lookingForward'], defense: ['resting', 'meditating'] };
-  var KIND_THEME = { c01: 'identity', c02: 'identity', c03: 'personality', c04: 'talent', c05: 'shadow', c06: 'career', c07: 'success', c08: 'wealth', c09: 'love', c10: 'marriage', c11: 'relationship', c12: 'relationship', c13: 'family', c14: 'pastLife', c15: 'daewoon', c16: 'daewoon', c17: 'sewoon', c18: 'monthly', c19: 'remedy', c20: 'action' };
+  var KIND_THEME = { c00: 'identity', c01: 'identity', c02: 'identity', c03: 'personality', c04: 'talent', c05: 'shadow', c06: 'career', c07: 'success', c08: 'wealth', c09: 'love', c10: 'marriage', c11: 'relationship', c12: 'relationship', c13: 'family', c14: 'pastLife', c15: 'daewoon', c16: 'daewoon', c17: 'sewoon', c18: 'monthly', c19: 'remedy', c20: 'action' };
 
   // Scene Intent: 챕터 핵심 메시지 + 사주 사실 → "원하는 장면"의 의미 구조.
   function intent(ch, sd, lead, sceneType, season) {
@@ -130,6 +134,7 @@
   var CHART_OF = { c02: 'elements', c03: 'strength', c04: 'groups', c05: 'groups' };
   function chartKind(c) { return CHART_OF[c.base || c.id] || null; }
   function planScenes(c) {
+    if (c.verdict) return ['chapterIntro', 'verdictFind', 'verdictBlock'].concat(c.verdict.evidence ? ['verdictEvidence'] : [], ['verdictAdvice', 'chapterEnding']); // 총평: 발견 → 막힘 → 증거 → 조언
     var p = ['chapterIntro'];
     if (c.interpretation) p.push('insight');
     if (chartKind(c)) p.push('chart'); // 계산된 분포를 그림으로(오행·신강약·십성군)
@@ -163,9 +168,17 @@
       else if (st === 'insight') { sc.headline = c.headline; sc.body = c.interpretation; sc.fact = c.fact; }
       else if (st === 'explanation') { sc.headline = '의미'; sc.body = c.meaning; sc.detail = (c.details || []).map(function (d) { return d.headline + ' — ' + d.summary; }).join('\n'); }
       else if (st === 'recommendation') { sc.headline = c.kind === 'remedy' ? '추천 개운법' : '구체적으로는'; sc.bullets = c.kind === 'remedy' ? null : bullets(c); }
-      else if (st === 'warning') { sc.headline = '조심할 점'; sc.body = (c.extra && c.extra.caution && c.extra.caution[0]) || c.meaning; }
-      else if (st === 'action') { sc.headline = '지금 할 수 있는 행동'; sc.bullets = [{ label: 'ACTION', items: c.action || [] }]; }
+      else if (st === 'warning') { // 조심할 점: 근거 있는 주의 목록 + 이렇게 대응해 보세요(모듈 팁·추천 행동, 3개 이상 목표)
+        var caut = (c.extra && c.extra.caution) || [], det = (c.details || []).filter(function (d) { return !/_fallback$/.test(d.id || ''); }), shadow = caut.length ? caut : det.map(function (d) { return d.headline + (d.summary ? ' — ' + d.summary : ''); });
+        var tips = [c.meaning].concat(det.map(function (d) { return d.detail; })).concat(c.action || []).concat(c.actionPool || []).filter(function (t, i, a) { return t && a.indexOf(t) === i; }).slice(0, 5);
+        sc.headline = '조심할 점'; sc.body = c.meaning; sc.bullets = [{ label: '조심할 점', items: shadow.length ? shadow : [c.interpretation].filter(Boolean) }, { label: '이렇게 대응해 보세요', items: tips }];
+      }
+      else if (st === 'action') { sc.headline = '지금 할 수 있는 행동'; sc.bullets = [{ label: 'ACTION', items: c.action || [], notes: c.actionNotes || [] }]; }
       else if (st === 'chapterEnding') { sc.headline = c.headline; sc.body = ''; }
+      else if (st === 'verdictFind') { sc.headline = '수호신이 발견한 힘'; sc.body = c.verdict.discover; sc.verdict = c.verdict.potential; sc.guardian = true; }
+      else if (st === 'verdictBlock') { sc.headline = c.verdict.blocked.label; sc.body = c.verdict.blocked.text; sc.sub = c.verdict.blocked.headline; }
+      else if (st === 'verdictEvidence') { sc.headline = '수호신이 짚은 시기'; sc.body = c.verdict.evidence.text; sc.evidence = { yes: c.verdict.evidence.yes, no: c.verdict.evidence.no }; }
+      else if (st === 'verdictAdvice') { sc.headline = '수호신의 조언'; sc.body = c.verdict.advice.lead; sc.bullets = [{ label: 'ADVICE', items: c.verdict.advice.items }]; }
       else if (st === 'chart') { sc.headline = c.title; sc.chart = chartKind(c); }
       else if (st === 'dataVisualization' || st === 'timeline') { sc.headline = c.title; sc.data = c.items; }
       // 같은 종류가 연속되지 않게: 직전 장면과 같은 media type 이면 다른 타입을 우선

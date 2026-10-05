@@ -149,18 +149,22 @@
       return '<section class="scene s-intro' + fxCls(s) + '" ' + id + ' style="--pc:' + EL_COLOR[(s.intent.desiredElements || ['water'])[0]] + '"><div class="bg">' + (s.media ? mediaEl(s.media, c.title) : '') + (s.media ? '' : '<div class="ph" aria-hidden="true"></div>') + '</div><div class="shade"></div><div class="txt">' +
         '<div class="no" data-tx="intro.no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="down" aria-hidden="true">SCROLL ↓</div></div></section>';
     }
-    if (t === 'insight') return '<section class="scene rv" ' + id + '><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead" data-tx="insight.lead">' + lines(s.body) + '</p>' + (s.media ? media(s) : '') + '</section>';
+    if (t === 'insight') return '<section class="scene rv" ' + id + '><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead' + (c.lead && /_fallback$/.test(c.lead.id || '') ? ' faint' : '') + '" data-tx="insight.lead">' + lines(s.body) + '</p>' + (s.media ? media(s) : '') + '</section>';
+    if (t === 'verdictFind') { var av = S.awk && S.awk.video, gi = (av && (av.guardianImageUrl || av.posterUrl)) || (S.awk && S.awk.fallback && S.awk.fallback.posterUrl) || ''; return '<section class="scene rv s-verdict" ' + id + '>' + (gi ? '<img class="guardian" src="' + esc(gi) + '" alt="' + esc(((s.verdict || {}).pillar || '') + '일주의 수호신') + '" loading="lazy" decoding="async">' : '') + '<div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p></section>'; }
+    if (t === 'verdictBlock') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div>' + (s.sub ? '<p class="lead" style="font-size:1.05rem">' + esc(s.sub) + '</p>' : '') + '<p style="color:var(--ink2)">' + lines(s.body) + '</p></section>';
+    if (t === 'verdictEvidence') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p><div class="vd" role="group" aria-label="맞는지 알려 주세요"><button type="button" class="btn" data-vd="yes">맞습니다</button><button type="button" class="btn" data-vd="no">아닙니다</button></div><p class="vd-reply faint" aria-live="polite" data-yes="' + esc((s.evidence || {}).yes) + '" data-no="' + esc((s.evidence || {}).no) + '"></p></section>';
+    if (t === 'verdictAdvice') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead" style="font-size:1.05rem">' + lines(s.body) + '</p><div class="cards"><div class="card">' + list(((s.bullets || [])[0] || {}).items || []) + '</div></div></section>';
     if (t === 'chart') return '<section class="scene rv" ' + id + '>' + R.Charts.html(s.chart, S.sd) + '</section>';
     if (t === 'explanation') {
-      var det = (c.details || []).map(function (d) { return '<div class="item"><b>' + esc(d.headline) + '</b><span>' + esc(d.summary) + '</span></div>'; }).join('');
+      var det = (c.details || []).map(function (d) { return /_fallback$/.test(d.id || '') ? '<p class="faint">' + esc(d.summary) + '</p>' : '<div class="item"><b>' + esc(d.headline) + '</b><span>' + esc(d.summary) + '</span>' + (d.detail ? '<em class="tip">' + esc(d.detail) + '</em>' : '') + '</div>'; }).join('');
       var mt = String(c.meaning || ''), cut = mt.search(/[.!?]\s/), first = cut > 0 ? mt.slice(0, cut + 1) : mt, rest = cut > 0 ? mt.slice(cut + 1).trim() : '';
-      var more = rest || det ? '<div class="more"><button type="button" aria-expanded="false" data-more>자세히 보기</button><div class="body"><div>' + (rest ? '<p>' + lines(rest) + '</p>' : '') + det + '</div></div></div>' : '';
+      var more = rest || det ? '<div class="more open"><div class="body"><div>' + (rest ? '<p>' + lines(rest) + '</p>' : '') + det + '</div></div></div>' : '';
       return '<section class="scene rv" ' + id + '>' + (s.media ? media(s) : '') + '<div class="cap">MEANING</div><p class="lead" data-tx="explain.lead">' + lines(first) + '</p>' + more + '</section>';
     }
     if (t === 'dataVisualization') return monthsHtml(c, s);
     if (t === 'timeline') return timelineHtml(c, s);
     if (t === 'recommendation') return recoHtml(c, s);
-    if (t === 'warning') return '<section class="scene rv" ' + id + '>' + (s.media ? media(s) : '') + '<div class="card warn"><h3>조심할 점</h3><p style="color:var(--ink2)">' + lines(s.body) + '</p></div></section>';
+    if (t === 'warning') return '<section class="scene rv" ' + id + '>' + (s.media ? media(s) : '') + '<div class="cards">' + (s.bullets || []).map(function (b, i) { return '<div class="card' + (i ? '' : ' warn') + '"><h3>' + esc(b.label) + '</h3>' + list(b.items) + '</div>'; }).join('') + '</div></section>';
     if (t === 'action') return actionHtml(c, s);
     if (t === 'chapterEnding') {
       var last = S.idx >= S.rep.chapters.length - 1;
@@ -213,7 +217,8 @@
         (p.avoid.length ? '<div class="card warn" style="margin-top:14px"><h3>피해야 할 것</h3>' + list(p.avoid) + '</div>' : '');
     } else {
       var items = ((s.bullets || [])[0] || {}).items || [];
-      h += '<div class="cap">ACTION</div><div class="cards"><div class="card">' + list(items) + '</div></div>';
+      var notes = ((s.bullets || [])[0] || {}).notes || [];
+      h += '<div class="cap">ACTION</div><div class="cards"><div class="card"><ul>' + items.map(function (x, i) { return '<li>' + esc(x) + (notes[i] ? '<br><span class="faint" style="font-size:.8rem">' + esc(notes[i]) + '</span>' : '') + '</li>'; }).join('') + '</ul></div></div>';
     }
     return h + '</section>';
   }
@@ -273,6 +278,7 @@
       var c = S.rep.chapters[S.idx];
       var m = e.target.closest('[data-more]'); if (m) { var box = m.closest('.more'), open = box.classList.toggle('open'); m.setAttribute('aria-expanded', String(open)); m.textContent = open ? '접기' : '자세히 보기'; if (open) T('detail_expanded', { chapter: c.id }); return; }
       var mo = e.target.closest('[data-mo]'); if (mo) { $$('.mo.sel', root).forEach(function (x) { x.classList.remove('sel'); x.style.borderColor = ''; }); mo.style.borderColor = 'var(--gold)'; moDetail(c, +mo.dataset.mo); return; }
+      var vd = e.target.closest('[data-vd]'); if (vd) { var rp = vd.closest('.scene').querySelector('.vd-reply'); $$('[data-vd]', vd.parentNode).forEach(function (x) { x.setAttribute('aria-pressed', String(x === vd)); x.style.borderColor = x === vd ? 'var(--gold)' : ''; }); if (rp) rp.textContent = rp.getAttribute('data-' + vd.dataset.vd) || ''; T('verdict_answer', { chapter: c.id, answer: vd.dataset.vd }); return; }
       var cta = e.target.closest('[data-cta]'); if (cta) { T('compatibility_cta_clicked', { chapter: c.id }); toast('두 사람의 궁합은 곧 열립니다. 조금만 기다려 주세요.'); }
       if (e.target.id === 'nextBtn') next();
     });

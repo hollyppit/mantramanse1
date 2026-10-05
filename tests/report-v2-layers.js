@@ -3,7 +3,7 @@ const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.join(__dirname, '..');
 vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8'), { filename: 'engine.js' });
 globalThis.window = globalThis;
-const files = ['chapters', 'saju-data', 'rules', 'content', 'content-pro', 'remedy', 'media', 'scenes', 'compose', 'charts', 'pdf'];
+const files = ['chapters', 'saju-data', 'rules', 'content', 'content-pro', 'content-pro2', 'verdict', 'remedy', 'media', 'scenes', 'compose', 'charts', 'pdf'];
 files.forEach(f => { const p = path.join(root, 'report/v2', f + '.js'); if (fs.existsSync(p)) vm.runInThisContext(fs.readFileSync(p, 'utf8'), { filename: f + '.js' }); else console.log('(없음: ' + f + '.js)'); });
 const M = globalThis.Manse, R = globalThis.ReportV2, now = Date.UTC(2026, 9, 5);
 const cfg = R.Chapters.forProject(null, 'full'), lib = R.Compose.library(null);

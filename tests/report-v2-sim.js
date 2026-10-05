@@ -5,7 +5,7 @@ const root = path.join(__dirname, '..');
 const eng = fs.readFileSync(path.join(root, 'engine.js'), 'utf8');
 vm.runInThisContext(eng, { filename: 'engine.js' });
 globalThis.window = globalThis;
-['chapters', 'saju-data', 'rules', 'content', 'content-pro', 'remedy', 'media', 'scenes', 'compose', 'charts', 'pdf', 'sharecard', 'textstyle'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
+['chapters', 'saju-data', 'rules', 'content', 'content-pro', 'content-pro2', 'verdict', 'remedy', 'media', 'scenes', 'compose', 'charts', 'pdf', 'sharecard', 'textstyle'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
 const M = globalThis.Manse, R = globalThis.ReportV2;
 const fails = []; const ok = (c, m) => { if (!c) fails.push(m); };
 
@@ -14,20 +14,20 @@ const now = Date.UTC(2026, 9, 5);
 const mk = (y, m, d, h, g) => M.compute({ year: y, month: m, day: d, hour: h, minute: 0, calendar: 'solar', leap: false, gender: g, city: '서울' });
 
 console.log('1. 챕터 구조');
-ok(cfg.chapters.length === 20 && cfg.acts.length === 4, '20챕터·4ACT');
+ok(cfg.chapters.length === 21 && cfg.acts.length === 4, '20챕터·4ACT');
 ok(cfg.chapters.every(c => c.act >= 1 && c.act <= 4), 'ACT 지정');
 
 const cc = R.Chapters.forProject({ chapters: { chapters: [{ id: 'c05', enabled: false }, { id: 'c99', project: 'full', order: 99, act: 4, title: '추가', kind: 'module', moduleCategories: ['identity'], maxModules: 1 }] } }, 'full');
-ok(cc.chapters.length === 20 && !cc.chapters.some(c => c.id === 'c05') && cc.chapters.some(c => c.id === 'c99'), '관리자 저장본으로 챕터 비활성/추가');
+ok(cc.chapters.length === 21 && !cc.chapters.some(c => c.id === 'c05') && cc.chapters.some(c => c.id === 'c99'), '관리자 저장본으로 챕터 비활성/추가');
 console.log('1b. 프로젝트(챕터는 한 프로젝트에만 속함)');
 const lib0 = R.Chapters.libraryOf(null), ids0 = lib0.map(c => c.id);
 ok(new Set(ids0).size === ids0.length && lib0.every(c => typeof c.project === 'string' && c.base), '챕터 id 유일 · 소속 프로젝트 1개 · base 있음');
-const per = {}; lib0.forEach(c => { per[c.project] = (per[c.project] || 0) + 1; }); ok(per.full === 20 && per.love === 12 && per.wealth === 11 && per.newyear === 6, '프로젝트별 챕터 수 ' + JSON.stringify(per));
+const per = {}; lib0.forEach(c => { per[c.project] = (per[c.project] || 0) + 1; }); ok(per.full === 21 && per.love === 12 && per.wealth === 11 && per.newyear === 6, '프로젝트별 챕터 수 ' + JSON.stringify(per));
 ok(lib0.filter(c => c.project === 'love').every(c => c.id === 'love_' + c.base), '다른 상품 챕터는 독립된 복제본');
 const mg = R.Chapters.libraryOf({ projects: [{ id: 'mine', chapters: [{ id: 'c01', act: 1 }, { id: 'c02', act: 2 }] }] });
 ok(mg.filter(c => c.project === 'mine').map(c => c.id).join() === 'mine_c01,mine_c02' && mg.find(c => c.id === 'c01').project === 'full', '예전 공유 목록 저장본 → 소유 구조로 이전(원본은 종합에 그대로)');
 const PJ = R.Chapters.projects(null); ok(PJ.length === 4 && PJ.map(p => p.id).join() === 'full,love,wealth,newyear', '기본 프로젝트 4종');
-const fl = R.Chapters.forProject(null, 'full'); ok(fl.chapters.length === 20 && fl.acts.length === 4, 'full = 20챕터');
+const fl = R.Chapters.forProject(null, 'full'); ok(fl.chapters.length === 21 && fl.acts.length === 4, 'full = 20챕터');
 for (const p of ['love', 'wealth', 'newyear']) { const x = R.Chapters.forProject(null, p); ok(x.chapters.every((c, i) => c.no === i + 1) && x.acts.every((a, i) => a.id === i + 1 && a.roman) && x.chapters.every(c => c.act >= 1 && c.act <= x.acts.length), p + ' 번호·ACT 재부여'); console.log('   ' + p + ': ' + x.chapters.length + '챕터 ' + x.acts.length + 'ACT'); }
 ok(R.Chapters.forProject(null, 'nope').project.id === 'full', '없는 프로젝트는 full');
 ok(R.Chapters.forProject({ projects: [{ id: 'love', enabled: false }] }, 'love').project.id === 'full', '비활성 프로젝트는 full');
@@ -36,7 +36,7 @@ console.log('2. 샘플 사주 리포트');
 const ch = mk(1990, 5, 15, 14, 'M'), sd = R.SajuData.build(ch, { now });
 console.log('   일주', sd.dayPillar.ko, '· 신강약', sd.strength.zone, '· 용신', sd.usefulElements && sd.usefulElements.yong, '· 현재 대운', sd.currentDaewoon && sd.currentDaewoon.ganzhi, R.SajuData.SEASONS[sd.currentDaewoon.season], '· 올해', R.SajuData.SEASONS[sd.sewoon.season], '· unavailable', sd.unavailable.join(',') || '-');
 const rep = R.Compose.build(sd, lib, cfg), rep2 = R.Compose.build(sd, lib, cfg);
-ok(rep.chapters.length === 20, '리포트 20챕터');
+ok(rep.chapters.length === 21, '리포트 21챕터(총평 + 20챕터)');
 ok(JSON.stringify(rep) === JSON.stringify(rep2), '같은 입력 → 같은 결과');
 ok(rep.chapters.every(c => c.headline && c.fact), '모든 챕터에 headline·fact');
 ok(rep.chapters.find(c => c.id === 'c15').items.length === 10, '대운 10개');
@@ -54,7 +54,7 @@ ok(R.Compose.build(sd, Object.assign({}, lib, { version: 'x' }), cfg).meta.key !
 const before = rep.chapters[0].headline;
 R.Compose.applyAi(rep, { chapters: [{ id: 'c01', headline: '반드시 성공하는 사람', lead: 'x' }] });
 ok(rep.chapters[0].headline === before && !rep.meta.aiApplied, '단정 표현 AI 응답 거부');
-ok(R.Compose.aiPayload(rep).chapters.length === 20, 'AI payload');
+ok(R.Compose.aiPayload(rep).chapters.length === 21, 'AI payload');
 console.log('   샘플:', rep.chapters[0].headline, '|', rep.plan.strategy.map(s => s.label).join('→'));
 console.log('   개운:', Object.entries(rep.remedies).map(([t, a]) => t + ':' + a.map(x => x.item.title).join('/')).join('  '));
 
@@ -121,7 +121,7 @@ ok(R.Compose.mediaPayload(rp, lib2).scenes.length > 5, 'AI 미디어 payload');
 
 console.log('4c. PDF·공유 카드');
 const pg = R.Pdf.pages(rep, sd, { name: '테스트' });
-ok(pg.length === 23, 'PDF 페이지 수 ' + pg.length);
+ok(pg.length === 24, 'PDF 페이지 수 ' + pg.length);
 ok(pg.every(p => p.startsWith('<div class="pg"') && p.endsWith('</div>')), '페이지 HTML 형식');
 ok(/테스트님의/.test(pg[0]) && /경진일주/.test(pg[0]), '표지에 이름·일주');
 ok(!pg.join('').includes('<script') && R.Pdf.pages(rep, sd, { name: '<img src=x onerror=1>' })[0].indexOf('<img') < 0, 'PDF HTML 이스케이프');

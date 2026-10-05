@@ -136,6 +136,10 @@ form { margin-top: 24px; display: grid; gap: 16px; }
 .chain { display: grid; gap: 4px; justify-items: center; margin: 18px 0; text-align: center; } .chain .st { width: 100%; background: var(--panel); border: 1px solid var(--line2); border-radius: 12px; padding: 10px; } .chain .ar { color: var(--gold); line-height: 1; }
 .strategy { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; margin: 16px 0; } .strategy b { font-family: var(--f-serif); font-weight: 600; padding: 8px 14px; border: 1px solid var(--gold-d); border-radius: 999px; color: var(--gold-l); } .strategy i { font-style: normal; color: var(--gold); }
 .check { display: grid; gap: 8px; margin-top: 12px; } .check label { display: flex; gap: 10px; align-items: flex-start; background: var(--panel); border: 1px solid var(--line2); border-radius: 10px; padding: 12px; font-size: .94rem; min-height: 48px; } .check input { width: 20px; height: 20px; accent-color: #D5B97F; flex: none; margin-top: 3px; }
+.faint { color: var(--ink3) !important; font-size: .74rem !important; opacity: .75; line-height: 1.6; margin-top: 12px; }
+.more .item .tip { display: block; font-style: normal; color: var(--ink3); font-size: .82rem; margin-top: 6px; }
+.s-verdict .guardian { display: block; width: min(72%, 260px); aspect-ratio: 3/4; object-fit: cover; margin: 0 auto 22px; border-radius: 14px; border: 1px solid var(--line); box-shadow: 0 0 40px rgba(213, 185, 127, .18); }
+.s-verdict .vd { display: flex; gap: 10px; margin-top: 18px; } .s-verdict .vd .btn { flex: 1; }
 .disc { color: var(--ink3); font-size: .78rem; margin-top: 18px; padding-top: 12px; border-top: 1px dashed var(--line2); }
 .cta { margin-top: 18px; }
 
