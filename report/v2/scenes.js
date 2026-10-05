@@ -16,7 +16,7 @@
   var VIDEO_TYPES = ['video', 'videoLoop', 'backgroundVideo', 'transition'];
 
   // 점수 가중치(요구서 기준값). 관리자 저장본으로 덮어쓸 수 있다.
-  var CONFIG = { w: { element: 20, state: 25, theme: 25, emotion: 10, action: 10, chapter: 10, scene: 6, role: 5, typePref: 8 }, priorityDiv: 10,
+  var CONFIG = { w: { element: 20, state: 25, theme: 25, emotion: 10, action: 10, chapter: 10, scene: 6, role: 5, typePref: 8, chapterOnly: 15 }, priorityDiv: 10,
     sameTypeRun: -14, // 직전 장면과 같은 미디어 타입이면 감점(media diversity)
     repeatInReport: -1000, // 같은 리포트 안 재사용은 사실상 제외(후보가 그것뿐이면 마지막 수단으로 허용)
     adjacentChapter: -25, sameChapter: -2000, candidates: 20, exempt: ['guardian', 'brand', 'ui'] };
@@ -38,7 +38,7 @@
     return { id: a.id, type: a.type || 'image', url: a.url || '', webmUrl: a.webmUrl || '', thumbnailUrl: a.thumbnailUrl || '', posterUrl: a.posterUrl || '', title: a.title || '', description: a.description || '',
       elements: g('element', 'elementTags'), states: g('state', 'stateTags'), emotions: g('emotion', 'emotionTags'), scenes: g('scene', 'sceneTags'), themes: g('theme', 'themeTags'),
       chapters: (a.chapterTags || []).slice(), actions: g('action', 'actionTags'), roles: g('role', 'visualRoles').concat(a.visualRole && a.visualRole.length ? [].concat(a.visualRole) : []),
-      orientation: a.orientation || 'portrait', duration: a.duration || 0, loopable: !!a.loopable, priority: +a.priority || 0, enabled: a.enabled !== false, tagsApproved: a.tagsApproved !== false };
+      orientation: a.orientation || 'portrait', duration: a.duration || 0, loopable: !!a.loopable, priority: +a.priority || 0, enabled: a.enabled !== false, tagsApproved: a.tagsApproved !== false, chapterIds: (a.chapterIds || []).slice() };
   }
   var inter = function (a, b) { return (a || []).filter(function (x) { return (b || []).indexOf(x) >= 0; }); };
 
@@ -53,6 +53,7 @@
     if (inter(a.actions, intent.desiredActions).length) add('action', w.action);
     if (inter(a.scenes, intent.desiredScenes).length) add('scene', w.scene);
     if (a.chapters.length && a.chapters.indexOf(intent.chapterKey) >= 0) add('chapter', w.chapter);
+    if (a.chapterIds && a.chapterIds.length && a.chapterIds.indexOf(intent.chapter) >= 0) add('이 챕터 전용', w.chapterOnly); // 보관함에서 "이 챕터 전용"으로 올린 클립은 그 챕터에서 먼저 후보가 된다
     if (intent.visualRole && a.roles.indexOf(intent.visualRole) >= 0) add('role', w.role);
     if (intent.preferredMediaType && intent.preferredMediaType.indexOf(a.type) >= 0) add('type', w.typePref - 2 * intent.preferredMediaType.indexOf(a.type));
     if (!b.length) return null; // 어떤 의미도 겹치지 않으면 후보가 아님
@@ -72,6 +73,7 @@
     (assets || []).forEach(function (x) {
       var a = x.elements ? x : normalize(x);
       if (!a.enabled || !a.tagsApproved || !a.url && !a.posterUrl) return; // 승인 안 된 AI 추천 태그는 조합에 쓰지 않는다
+      if (a.chapterIds && a.chapterIds.length && a.chapterIds.indexOf(intent.chapter) < 0) return; // 챕터 전용 클립은 다른 챕터의 후보가 아니다
       var r = score(a, intent, ctx, cfg); if (r) out.push(r);
     });
     out.sort(function (p, q) { return q.score - p.score || (p.asset.id < q.asset.id ? -1 : 1); });

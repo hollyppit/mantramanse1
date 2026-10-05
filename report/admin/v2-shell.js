@@ -22,7 +22,7 @@
     '.stat{display:flex;gap:14px;flex-wrap:wrap;font-size:.84rem;color:var(--ink2);margin:6px 0}.stat b{color:var(--gold)}.fld{display:grid;gap:3px;font-size:.8rem;color:var(--ink2);margin:8px 0}.g2c{display:grid;grid-template-columns:1fr 1fr;gap:10px}' +
     '.pick{display:grid;grid-template-columns:24px 40px 1fr 70px 62px;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:.84rem}.pick input[type=checkbox]{width:auto}.pick select{padding:3px 6px}' +
     '.pvh{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:10px}.pvh label{display:grid;gap:3px;font-size:.78rem;color:var(--ink2)}.thm{width:38px;height:48px;border-radius:5px;background:#000 center/cover;border:1px solid var(--line);flex:none}';
-  css.textContent += '.board{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:12px;margin-top:12px;align-items:start}@media(max-width:900px){.board{grid-template-columns:1fr}}.acts{display:grid;gap:10px}.actc{padding:10px 12px}.acth{display:flex;gap:8px;align-items:center;margin-bottom:6px}.acth b{color:var(--gold);white-space:nowrap}.acth input{flex:1}.brow{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:.86rem}.brow .bn{color:var(--ink3);min-width:22px}.brow .bt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.brow select{width:auto;padding:3px 6px}.brow button{padding:2px 8px;font-size:.78rem}.pool .brow{flex-wrap:wrap}.tbar select{width:auto;min-width:170px}.tbar{display:grid;gap:8px}.tsum{font-size:.95rem}.chk2{display:flex;gap:6px;align-items:center;font-size:.84rem;color:var(--ink2)}.tform{border-top:1px solid var(--line);padding-top:10px}' +
+  css.textContent += '.srow2{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);font-size:.82rem}.srow2 select{width:100%}.board{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:12px;margin-top:12px;align-items:start}@media(max-width:900px){.board{grid-template-columns:1fr}}.acts{display:grid;gap:10px}.actc{padding:10px 12px}.acth{display:flex;gap:8px;align-items:center;margin-bottom:6px}.acth b{color:var(--gold);white-space:nowrap}.acth input{flex:1}.brow{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:.86rem}.brow .bn{color:var(--ink3);min-width:22px}.brow .bt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.brow select{width:auto;padding:3px 6px}.brow button{padding:2px 8px;font-size:.78rem}.pool .brow{flex-wrap:wrap}.tbar select{width:auto;min-width:170px}.tbar{display:grid;gap:8px}.tsum{font-size:.95rem}.chk2{display:flex;gap:6px;align-items:center;font-size:.84rem;color:var(--ink2)}.tform{border-top:1px solid var(--line);padding-top:10px}' +
     '.t3{display:grid;grid-template-columns:230px minmax(0,1fr) 320px;gap:12px;margin-top:12px;align-items:start}@media(max-width:1200px){.t3{grid-template-columns:200px minmax(0,1fr)}.tinsp{grid-column:1/-1}}@media(max-width:760px){.t3{grid-template-columns:1fr}}' +
     '.trail{display:grid;gap:3px;max-height:78vh;overflow:auto}.ract{margin:8px 0 2px;font-size:.7rem;letter-spacing:.14em;color:var(--gold)}.ri{display:flex;align-items:center;gap:8px;text-align:left;width:100%;padding:7px 9px;border-radius:8px;font-size:.84rem}.ri.on{border-color:var(--gold);background:#1c1a12}.ri span{color:var(--ink3);min-width:20px}.ri b{font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ri i{font-style:normal}' +
     '.pvbar{display:flex;gap:6px;align-items:center;margin-bottom:8px}.pvbar button{padding:4px 12px;border-radius:999px;font-size:.8rem}.pvbar button.on{border-color:var(--gold);color:var(--gold)}.pvwrap{display:flex;justify-content:center;background:#05060b;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:hidden}.pvbox{position:relative}.pvbox iframe{border:0;transform-origin:0 0;background:#070913;border-radius:18px;position:absolute;left:0;top:0}' +
@@ -283,6 +283,51 @@
     render(); return P;
   }
 
+  /* ═════ 필요한 클립 소스 + 바로 올리기 (조합 테스트) ═════
+     장면마다 "어떤 클립이 필요한지"(장면 의도에서 나온 태그·타입)와 지금 후보가 몇 개인지 보여 주고, 그 자리에 파일을 바로 올린다.
+     올린 파일은 "클립 보관함(미디어 라이브러리)"에 저장된다: 장면 의도에서 뽑은 태그가 붙고, 이 챕터 전용으로 지정되어 이 챕터 안에서만 후보가 된다.
+     어느 장면에 어떤 클립을 쓸지는 고정하지 않고 선택 로직(태그 점수 + AI)이 챕터 안에서 고른다. */
+  var SCENE_KO = { chapterIntro: '챕터 첫 화면 (대표 이미지·영상)', insight: '핵심 해석', explanation: '의미 설명', visualMetaphor: '상징 장면', recommendation: '추천 카드', warning: '조심할 점', action: '행동', chapterEnding: '챕터 끝', transition: '전환' };
+  var MTYPE_KO = { video: '영상', image: '이미지', videoLoop: '짧은 반복 영상', backgroundVideo: '배경 영상', character: '캐릭터 컷', symbol: '상징 이미지', chapterCover: '챕터 커버', transition: '전환 영상' };
+  var INTENT_KO = { element: '오행', state: '상태', theme: '주제', emotion: '감정', scene: '장면', role: '역할' };
+  var needsMedia = function (s) { return R.Scenes.SCENE_RULES[s.sceneType] && R.Scenes.SCENE_RULES[s.sceneType].media; };
+  function intentTags(s) { // 장면 의도 → 분류별 태그(허용 목록에 있는 것만)
+    var T = R.Scenes.TAX, it = s.intent || {}, f = function (arr, k) { return (arr || []).filter(function (x, i, a) { return T[k].indexOf(x) >= 0 && a.indexOf(x) === i; }); };
+    return { element: f(it.desiredElements, 'element'), state: f(it.desiredStates, 'state'), emotion: f(it.desiredEmotion, 'emotion'), scene: f(it.desiredScenes, 'scene'), theme: f(it.desiredThemes, 'theme'), role: f([it.visualRole], 'role') };
+  }
+  function sourceRow(c, s) {
+    var tg = intentTags(s), m = s.media, pre = (s.intent && s.intent.preferredMediaType) || [], by = {}; (ST.media || []).forEach(function (a) { by[a.id] = a; });
+    var cands = (s.candidates || []).filter(function (x) { return x.score > 0; }), own = cands.filter(function (x) { var a = by[x.assetId]; return a && a.chapterIds && a.chapterIds.indexOf(c.id) >= 0; }).length;
+    var chips = ['element', 'state', 'theme', 'emotion', 'scene', 'role'].map(function (k) { return tg[k].length ? '<span class="pill">' + INTENT_KO[k] + ' ' + esc(tg[k].join('·')) + '</span>' : ''; }).join('');
+    var status = m ? '<span class="pill" style="color:#7FE0BC;border-color:#2e6e57">선택됨 · ' + esc(m.assetId) + '</span>' : '<span class="pill w">클립 필요</span>';
+    return '<div class="srow2" data-cid="' + esc(c.id) + '" data-st="' + esc(s.sceneType) + '">' + (m ? thumb(m) : '<span class="thm" style="display:grid;place-items:center;color:var(--ink3);font-size:.68rem">없음</span>') + '<div style="flex:1;min-width:0"><b>' + esc(SCENE_KO[s.sceneType] || s.sceneType) + '</b> ' + status +
+      '<div class="muted" style="font-size:.76rem;margin:2px 0">필요한 클립: ' + esc(pre.map(function (t) { return MTYPE_KO[t] || t; }).join(' › ')) + ' · 이 챕터에서 쓸 수 있는 후보 ' + cands.length + '개' + (own ? ' (이 챕터 전용 ' + own + '개)' : '') + '</div><div style="display:flex;flex-wrap:wrap;gap:2px">' + chips + '</div>' +
+      '<div class="row" style="margin-top:6px;gap:6px"><label class="navbtn" style="cursor:pointer;padding:3px 10px;font-size:.78rem">파일 올리기 → 보관함<input type="file" data-up accept="image/*,video/mp4,video/webm,video/quicktime" hidden></label><span class="muted" data-upmsg></span></div></div></div>';
+  }
+  function missingCount(rep) { var n = 0; rep.chapters.forEach(function (c) { c.scenes.forEach(function (s) { if (needsMedia(s) && !s.media) n++; }); }); return n; }
+  function afterSourceChange() { var p = TST.pane; if (p) p.refresh(); run(); }
+  // root 안의 .srow2 들에 업로드를 연결한다(조합 테스트 오른쪽 패널·전체 보기 창 공용)
+  function bindSources(root) {
+    root.addEventListener('change', function (e) {
+      if (!e.target.matches('[data-up]')) return; var row = e.target.closest('.srow2'); if (!row) return;
+      var c = TST.rep.chapters.filter(function (x) { return x.id === row.dataset.cid; })[0], s = c && c.scenes.filter(function (x) { return x.sceneType === row.dataset.st; })[0], msg = row.querySelector('[data-upmsg]');
+      var file = e.target.files[0]; if (!file || !s) return; var tg = intentTags(s), pre = (s.intent.preferredMediaType || []);
+      msg.textContent = '올리는 중…';
+      A.quickAdd(file, { type: pre.filter(function (t) { return /^video|transition|image|character|symbol|chapterCover/.test(t); })[0], title: c.title + ' · ' + (SCENE_KO[s.sceneType] || s.sceneType), elementTags: tg.element, stateTags: tg.state, emotionTags: tg.emotion, sceneTags: tg.scene, themeTags: tg.theme, chapterTags: tg.theme.slice(0, 1), visualRole: tg.role, chapterIds: [c.id] }, PW, function (p) { msg.textContent = '올리는 중 ' + Math.round(p * 100) + '%'; })
+        .then(function (a) { ST.media = [a].concat(ST.media || []); toast('클립 보관함에 저장했습니다 · 이 챕터에서 자동으로 골라 씁니다'); afterSourceChange(); })
+        .catch(function (er) { msg.textContent = er.message; toast(er.message, true); });
+    });
+  }
+  function allSourcesDialog() { // 프로젝트 전체에서 비어 있는 클립 자리 목록
+    var rep = TST.rep, d = document.createElement('dialog'); d.className = 'v2dlg'; d.style.width = 'min(900px,96vw)';
+    var h = '<h3>필요한 클립 소스 — ' + esc(rep.chapters.length ? (TS.project) : '') + ' 전체</h3><p class="muted">비어 있는 장면입니다. 파일을 올리면 <b>클립 보관함</b>에 저장되고, 그 챕터 안에서 자동으로 골라 씁니다. 일간 소개·일주 각성 영상은 사주마다 달라서 <b>클립 라이브러리 → 각성 영상</b>에서 일괄 등록하세요.</p>';
+    rep.chapters.forEach(function (c) { var rows = c.scenes.filter(function (s) { return needsMedia(s) && !s.media; }); if (rows.length) h += '<div class="cap2">' + String(c.no).padStart(2, '0') + ' ' + esc(c.title) + ' — ' + rows.length + '개</div>' + rows.map(function (s) { return sourceRow(c, s); }).join(''); });
+    if (!missingCount(rep)) h += '<p style="color:#7FE0BC">모든 장면에 클립이 있습니다.</p>';
+    d.innerHTML = h + '<div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" id="dx">닫기</button></div>'; document.body.appendChild(d); d.showModal(); d.addEventListener('close', function () { d.remove(); });
+    d.querySelector('#dx').onclick = function () { d.close(); }; bindSources(d);
+    d.addEventListener('change', function () { setTimeout(function () { d.close(); }, 1500); });
+  }
+
   /* ═════ ③ 조합 테스트 ═════ */
   var PRESETS = [['1990-05-15', '14:30', 'M', '경진 · 신강'], ['1985-11-23', '07:10', 'F', '1985 여'], ['2000-02-29', '22:40', 'M', '2000 남'], ['1978-08-08', '03:00', 'F', '1978 여']];
   var TST = { sel: 'awakening', rep: null, sd: null, pane: null, busy: 0 };
@@ -301,6 +346,11 @@
       $('#tEditBtn', root).onclick = function () { $('#tForm', root).classList.toggle('hide'); };
       $('#tCovBox', root).ontoggle = function () { if (this.open && !this.dataset.done) { this.dataset.done = 1; C.covOpen($('#tCov', root)); } };
       $('#tRail', root).onclick = function (e) { var b = e.target.closest('[data-c]'); if (!b) return; TST.sel = b.dataset.c; markRail(); inspect(); TST.pane.show(TST.sel, TS.project); };
+      $('#tInsp', root).addEventListener('change', function (e) { // 일간 소개·일주 각성 영상 바로 올리기
+        var inp = e.target.closest('[data-awup]'); if (!inp || !TST.sd) return; var f = inp.files[0]; if (!f) return; var msg = $('[data-awmsg]', $('#tInsp', root)), sd = TST.sd, kind = inp.dataset.awup, key = kind === 'ilgan' ? { stem: sd.dayMaster.stem, gender: sd.gender } : { pillar: sd.dayPillar.ko, gender: sd.gender };
+        if (msg) msg.textContent = '올리는 중…'; A.quickAwakening(kind, key, f, PW, function (p) { if (msg) msg.textContent = '올리는 중 ' + Math.round(p * 100) + '%'; }).then(function () { awkMemo = null; toast('영상을 연결했습니다'); run(); }).catch(function (er) { if (msg) msg.textContent = er.message; toast(er.message, true); });
+      });
+      bindSources($('#tInsp', root)); $('#tInsp', root).addEventListener('click', function (e) { if (e.target.closest('[data-allsrc]') && TST.rep) allSourcesDialog(); });
       $('#tInsp', root).onclick = function (e) { var b = e.target.closest('[data-edit]'); if (!b) return; CH.pending = b.dataset.edit; CH.pendingModule = b.dataset.mod || null; if (built.chap) { CH.sel = CH.pending; CH.tab = b.dataset.mod ? 'mod' : 'set'; CH.pending = null; } else CH.sel = null; gotoTab('v2chap'); if (built.chap) chapDraw(); };
     }
     C.load().then(function () { drawForm(); drawProj(); run(); });
@@ -336,21 +386,19 @@
   function inspect() {
     var box = $('#tInsp'), rep = TST.rep, sd = TST.sd; if (!rep) return;
     if (TST.sel === 'ilgan') {
-      awakeningFor(sd).then(function (a) { box.innerHTML = '<b>일간 소개 영상</b><p class="muted">일주 각성 영상 <u>앞</u>에 나옵니다 ("당신은 ' + esc(sd.dayMaster.stem + sd.dayMaster.el) + '입니다").<br>' + (a.ilgan ? '<span style="color:#7FE0BC">' + esc(sd.dayMaster.stem) + ' · ' + (sd.gender === 'M' ? '남' : '여') + ' 영상이 연결되어 있습니다.</span>' : '<span style="color:#FF9C8C">' + esc(sd.dayMaster.stem) + ' · ' + (sd.gender === 'M' ? '남' : '여') + ' 영상이 아직 없어 이 단계는 건너뜁니다.</span>') + '</p><div class="row"><button type="button" id="goIlg">일간 소개 영상 등록하러 가기</button></div>'; $('#goIlg', box).onclick = function () { gotoTab('v2clip'); var b = $('#clNav button[data-k=awk]'); if (b) b.click(); }; });
+      awakeningFor(sd).then(function (a) { box.innerHTML = '<b>일간 소개 영상</b><p class="muted">일주 각성 영상 <u>앞</u>에 나옵니다 ("당신은 ' + esc(sd.dayMaster.stem + sd.dayMaster.el) + '입니다").<br>' + (a.ilgan ? '<span style="color:#7FE0BC">' + esc(sd.dayMaster.stem) + ' · ' + (sd.gender === 'M' ? '남' : '여') + ' 영상이 연결되어 있습니다.</span>' : '<span style="color:#FF9C8C">' + esc(sd.dayMaster.stem) + ' · ' + (sd.gender === 'M' ? '남' : '여') + ' 영상이 아직 없어 이 단계는 건너뜁니다.</span>') + '</p><div class="row"><button type="button" id="goIlg">일간 소개 영상 등록하러 가기</button><label class="navbtn" style="cursor:pointer;margin-left:6px">이 일간·성별 영상 바로 올리기<input type="file" data-awup="ilgan" accept="video/mp4,video/webm,video/quicktime,image/*" hidden></label><span class="muted" data-awmsg></span></div>'; $('#goIlg', box).onclick = function () { gotoTab('v2clip'); var b = $('#clNav button[data-k=awk]'); if (b) b.click(); }; });
       return;
     }
     if (TST.sel === 'awakening') {
-      awakeningFor(sd).then(function (a) { var pk = a.pick; box.innerHTML = '<b>일주 각성 영상</b><p class="muted">' + (pk.fallback ? '<span style="color:#FF9C8C">' + esc(pk.key) + ' 영상이 아직 없습니다 → ' + (pk.clip ? 'fallback 영상으로 진행' : 'fallback 도 없어 문구·정지 화면으로 진행') + '</span>' : '<span style="color:#7FE0BC">' + esc(pk.key) + ' 영상이 연결되어 있습니다.</span> ' + esc(pk.clip.title || '')) + '</p><div class="row"><button type="button" id="goAwk">각성 영상 등록하러 가기</button></div>'; $('#goAwk', box).onclick = function () { gotoTab('v2clip'); var b = $('#clNav button[data-k=awk]'); if (b) b.click(); }; });
+      awakeningFor(sd).then(function (a) { var pk = a.pick; box.innerHTML = '<b>일주 각성 영상</b><p class="muted">' + (pk.fallback ? '<span style="color:#FF9C8C">' + esc(pk.key) + ' 영상이 아직 없습니다 → ' + (pk.clip ? 'fallback 영상으로 진행' : 'fallback 도 없어 문구·정지 화면으로 진행') + '</span>' : '<span style="color:#7FE0BC">' + esc(pk.key) + ' 영상이 연결되어 있습니다.</span> ' + esc(pk.clip.title || '')) + '</p><div class="row"><button type="button" id="goAwk">각성 영상 등록하러 가기</button><label class="navbtn" style="cursor:pointer;margin-left:6px">이 일주·성별 영상 바로 올리기<input type="file" data-awup="iju" accept="video/mp4,video/webm,video/quicktime,image/*" hidden></label><span class="muted" data-awmsg></span></div>'; $('#goAwk', box).onclick = function () { gotoTab('v2clip'); var b = $('#clNav button[data-k=awk]'); if (b) b.click(); }; });
       return;
     }
     var c = rep.chapters.filter(function (x) { return x.id === TST.sel; })[0]; if (!c) { box.innerHTML = ''; return; }
     var fb = c.modules[0] && /_fallback$/.test(c.modules[0]);
     var h = '<b>' + String(c.no).padStart(2, '0') + ' ' + esc(c.title) + '</b><p class="muted" style="margin:4px 0 8px">FACT · ' + esc(c.fact) + '</p>' + (fb ? '<p class="pill w" style="display:inline-block;margin:0 0 8px">조건 있는 모듈이 없어 기본 안내만 표시됩니다</p>' : '');
     h += '<div class="cap2">선택된 모듈</div>' + ((c.lead && c.lead.id) ? [c.lead].concat(c.details || []).map(function (m) { return '<div class="mrow"><div><b>' + esc(m.headline || m.id) + '</b><small>' + esc(m.id) + '</small>' + (TS.dbg && m.why && m.why.length ? '<div class="why">' + m.why.map(function (w) { return '<span class="' + (/✓/.test(w) ? 'hit' : 'miss') + '">' + esc(w) + '</span>'; }).join('') + '</div>' : (TS.dbg ? '<div class="why muted">조건 없음(항상 후보)</div>' : '')) + '</div><button type="button" data-edit="' + esc(c.id) + '" data-mod="' + esc(m.id) + '">수정</button></div>'; }).join('') : '<p class="muted">없음</p>');
-    h += '<div class="cap2">장면 · 미디어</div>' + c.scenes.map(function (s) {
-      var need = R.Scenes.SCENE_RULES[s.sceneType].media;
-      return '<div class="srow">' + (s.media ? thumb(s.media) : '<span class="thm" style="display:grid;place-items:center;color:var(--ink3);font-size:.7rem">' + (need ? '없음' : 'CSS') + '</span>') + '<div><b>' + esc(s.sceneType) + '</b> <span class="muted">' + esc(s.effect.type) + '</span>' + (s.media ? '<div class="muted">' + esc(s.media.assetId) + ' · ' + esc(s.media.type) + ' · 점수 ' + s.media.score + '</div>' + (TS.dbg ? '<div class="why">' + s.media.why.map(function (w) { return '<span class="hit">' + esc(w.label) + (w.v > 0 ? '+' : '') + w.v + '</span>'; }).join('') + '</div>' : '') : need ? '<div style="color:#FFC080;font-size:.78rem">후보 없음 → 자리표시 장면</div>' : '<div class="muted" style="font-size:.78rem">데이터 장면(미디어 없이 표시)</div>') + '</div></div>';
-    }).join('');
+    var miss1 = c.scenes.filter(function (x) { return needsMedia(x) && !x.media; }).length, missAll = missingCount(rep);
+    h += '<div class="cap2">필요한 클립 소스</div><p class="muted" style="margin:0 0 4px">이 챕터 <b style="color:' + (miss1 ? '#FFC080' : '#7FE0BC') + '">' + (miss1 ? miss1 + '개 비어 있음' : '모두 있음') + '</b> · 프로젝트 전체 ' + missAll + '개 비어 있음 <button type="button" data-allsrc style="padding:2px 10px;font-size:.76rem">전체 보기</button></p>' + c.scenes.filter(needsMedia).map(function (s) { return sourceRow(c, s); }).join('') + '<p class="muted" style="font-size:.76rem;margin:6px 0 0">데이터 장면(월별·대운 표 등)은 클립 없이 화면 자체로 표시됩니다.</p>' + (TS.dbg ? '<div class="cap2">점수 근거</div>' + c.scenes.filter(function (x) { return x.media; }).map(function (x) { return '<div class="muted" style="font-size:.74rem">' + esc(x.sceneType) + ': ' + x.media.why.map(function (w) { return esc(w.label) + (w.v > 0 ? '+' : '') + w.v; }).join(' ') + '</div>'; }).join('') : '');
     h += '<div class="row" style="margin-top:10px"><button type="button" data-edit="' + esc(c.id) + '">이 챕터 편집 →</button></div>';
     box.innerHTML = h;
   }

@@ -150,7 +150,7 @@
     g.innerHTML = list.map(function (a) {
       var th = a.thumbnailUrl || a.posterUrl || (a.type.indexOf('video') < 0 && a.type !== 'transition' ? a.url : '');
       return '<div class="v2card' + (a.enabled === false ? ' off' : '') + '" data-id="' + esc(a.id) + '"><div class="th" style="' + (th ? 'background-image:url(\'' + esc(th) + '\')' : '') + '">' + (th ? '' : '미리보기 없음') +
-        '<div class="bd"><span>' + esc(TYPE_KO[a.type] || a.type) + (a.duration ? ' · ' + a.duration + '초' : '') + '</span>' + (hasPending(a) ? '<span class="pend">AI 추천 대기</span>' : '') + (a.enabled === false ? '<span>비활성</span>' : '') + '</div></div>' +
+        '<div class="bd"><span>' + esc(TYPE_KO[a.type] || a.type) + (a.duration ? ' · ' + a.duration + '초' : '') + '</span>' + (hasPending(a) ? '<span class="pend">AI 추천 대기</span>' : '') + ((a.chapterIds || []).length ? '<span class="pend" style="background:#124a3a;color:#9fe8cf">챕터 전용 ' + a.chapterIds.length + '</span>' : '') + (a.enabled === false ? '<span>비활성</span>' : '') + '</div></div>' +
         '<div class="bd2"><b>' + esc(a.title || '(제목 없음)') + '</b><div>' + (tagsOf(a).slice(0, 7).map(function (t) { return '<span class="chip">' + esc(t) + '</span>'; }).join('') || '<span class="chip gray">태그 없음</span>') + '</div><span class="dbg">우선순위 ' + (a.priority || 0) + '</span></div>' +
         '<div class="acts"><button data-a="pv">미리보기</button><button data-a="ed">수정</button><button data-a="cp">복제</button><button data-a="tg">' + (a.enabled === false ? '활성' : '비활성') + '</button><button class="danger" data-a="rm">삭제</button></div></div>';
     }).join('') || '<p class="muted">조건에 맞는 미디어가 없습니다.</p>';
@@ -205,7 +205,9 @@
       '<div class="v2f two"><div><label>우선순위 (0~100)</label><input type="number" id="ePr" min="0" max="100" value="' + (a.priority || 0) + '"></div><div><label>길이(초) / 방향</label><div class="row"><input type="number" id="eDur" value="' + (a.duration || 0) + '" style="width:90px"><select id="eOr" style="width:auto">' + ['portrait', 'landscape', 'square'].map(function (o) { return '<option' + (a.orientation === o ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select></div></div></div>' +
       '<div class="row"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="eLoop"' + (a.loopable ? ' checked' : '') + '>루프 가능</label><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="eAud"' + (a.hasAudio ? ' checked' : '') + '>소리 있음</label><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="eEn"' + (a.enabled !== false ? ' checked' : '') + '>사용</label></div>';
     Object.keys(TAX).filter(function (k) { return k !== 'type'; }).forEach(function (k) { html += '<div class="muted" style="margin-top:8px">' + LBL[k] + '</div>' + tagPicker(k, a[FIELD[k]] || [], false, k); });
-    html += '<div class="muted" style="margin-top:6px">챕터 연결 (THEME 중 이 미디어가 특히 어울리는 챕터)</div>' + tagPicker('theme', a.chapterTags || [], false, 'chapter');
+    html += '<div class="muted" style="margin-top:6px">챕터 연결 (THEME 중 이 미디어가 특히 어울리는 주제)</div>' + tagPicker('theme', a.chapterTags || [], false, 'chapter');
+    var chs = (window.ReportV2 && window.V2Content) ? ReportV2.Chapters.libraryOf(V2Content.ST.saved || {}) : [], prj = {}; ((window.V2Content && ReportV2.Chapters.projects(V2Content.ST.saved || {})) || []).forEach(function (p) { prj[p.id] = p.name; });
+    html += '<div class="muted" style="margin-top:8px">이 챕터에서만 쓰기 (체크하면 선택한 챕터의 후보로만 쓰입니다 · 비우면 모든 챕터가 후보로 씁니다)</div><div class="tg" data-kind="chapterIds">' + chs.map(function (c) { return '<label><input type="checkbox" value="' + esc(c.id) + '"' + ((a.chapterIds || []).indexOf(c.id) >= 0 ? ' checked' : '') + '><span>' + esc((prj[c.project] || c.project) + ' · ' + c.title) + '</span></label>'; }).join('') + '</div>';
     html += '<div class="card" style="margin-top:12px"><div class="row" style="justify-content:space-between"><b>AI 태그 추천</b><button id="eAi">AI로 태그 추천</button></div><div id="eAiBox">' + pendingHtml(p) + '</div></div>' +
       '<div class="row" style="justify-content:flex-end;margin-top:14px"><button id="eCancel">취소</button><button class="pri" id="eOk">적용</button></div>';
     var d = dlg(html, true);
@@ -246,7 +248,7 @@
       a.title = d.querySelector('#eT').value.trim(); a.type = d.querySelector('#eType').value; a.description = d.querySelector('#eD').value; a.url = d.querySelector('#eU').value.trim(); a.webmUrl = d.querySelector('#eW').value.trim();
       a.posterUrl = d.querySelector('#eP').value.trim(); a.thumbnailUrl = d.querySelector('#eTh').value.trim(); a.priority = +d.querySelector('#ePr').value || 0; a.duration = +d.querySelector('#eDur').value || 0; a.orientation = d.querySelector('#eOr').value;
       a.loopable = d.querySelector('#eLoop').checked; a.hasAudio = d.querySelector('#eAud').checked; a.enabled = d.querySelector('#eEn').checked;
-      Object.keys(TAX).filter(function (k) { return k !== 'type'; }).forEach(function (k) { a[FIELD[k]] = checked(d, k); }); a.chapterTags = checked(d, 'chapter');
+      Object.keys(TAX).filter(function (k) { return k !== 'type'; }).forEach(function (k) { a[FIELD[k]] = checked(d, k); }); a.chapterTags = checked(d, 'chapter'); a.chapterIds = checked(d, 'chapterIds');
       a.pending = hasPending({ pending: p }) ? p : null; M.dirty = true; d.close(); mediaRender();
     };
   }
@@ -424,7 +426,48 @@
     }).catch(function (e) { toast(e.message, true); done && done(null); });
   }
 
+  /* ── 조합 테스트 미리보기에서 바로 올리기 ──────────────────────────────────────
+     quickAdd: 파일 하나를 올려 미디어 라이브러리에 등록(장면 의도에서 뽑은 태그 포함)하고 저장까지 한다 → 등록된 asset 을 돌려준다.
+     quickAwakening: 일간 소개/일주 각성 영상 칸에 파일(영상 또는 포스터)을 바로 연결한다. */
+  function quickAdd(file, preset, onProg) {
+    preset = preset || {};
+    return (M.loaded ? Promise.resolve() : api('/api/media?all=1').then(function (d) { M.list = d.media || []; M.loaded = true; })).then(function () {
+      var isVid = /^video\//.test(file.type) || /\.(mp4|webm|mov|m4v)$/i.test(file.name), VIDEOISH = ['video', 'videoLoop', 'backgroundVideo', 'transition'], IMAGEISH = ['image', 'character', 'symbol', 'chapterCover'];
+      var type = isVid ? (VIDEOISH.indexOf(preset.type) >= 0 ? preset.type : 'video') : (IMAGEISH.indexOf(preset.type) >= 0 ? preset.type : 'image');
+      var a = { id: rid(), type: type, url: '', webmUrl: '', thumbnailUrl: '', posterUrl: '', title: preset.title || file.name.replace(/\.\w+$/, ''), description: preset.description || '', elementTags: preset.elementTags || [], stateTags: preset.stateTags || [], emotionTags: preset.emotionTags || [], sceneTags: preset.sceneTags || [],
+        themeTags: preset.themeTags || [], chapterTags: preset.chapterTags || [], chapterIds: preset.chapterIds || [], actionTags: [], visualRole: preset.visualRole || [], orientation: 'portrait', duration: 0, loopable: type === 'videoLoop', hasAudio: false, priority: 60, enabled: true, tagsApproved: true, bytes: file.size, uploadedAt: Date.now() };
+      var step = isVid ? probeVideo(file) : shrinkImage(file).then(function (s) { file = s; return {}; });
+      return step.then(function (info) {
+        if (isVid) { a.duration = info.duration || 0; a.orientation = info.orientation || 'portrait'; }
+        return upload(file, file.name, onProg).then(function (u) {
+          a.url = u; if (/\.webm$/i.test(file.name)) a.webmUrl = u;
+          if (isVid && info.poster) return upload(info.poster, a.title + '-poster.webp').then(function (pu) { a.posterUrl = pu; a.thumbnailUrl = pu; });
+        });
+      }).then(function () { M.list.unshift(a); return api('/api/media', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ media: M.list }) }); }).then(function () { M.dirty = false; return a; });
+    });
+  }
+  function quickAwakening(kind, key, file, onProg) { // kind: 'ilgan' {stem, gender} · 'iju' {pillar, gender}
+    var isVid = /^video\//.test(file.type) || /\.(mp4|webm|mov|m4v)$/i.test(file.name);
+    var step = isVid ? probeVideo(file) : shrinkImage(file).then(function (s) { file = s; return {}; });
+    return step.then(function (info) {
+      return upload(file, file.name, onProg).then(function (u) {
+        var poster = isVid && info.poster ? upload(info.poster, 'poster-' + file.name + '.webp') : Promise.resolve('');
+        return poster.then(function (pu) { return { u: u, pu: pu }; });
+      });
+    }).then(function (r) {
+      return api('/api/awakening?all=1').then(function (d) {
+        var list = kind === 'ilgan' ? (d.ilgan || (d.ilgan = [])) : (d.videos || (d.videos = []));
+        var ex = list.filter(function (v) { return kind === 'ilgan' ? (v.stem === key.stem && v.gender === key.gender) : (v.dayPillar === key.pillar && v.gender === key.gender); })[0];
+        if (!ex) { ex = kind === 'ilgan' ? { stem: key.stem, gender: key.gender, videoUrl: '', videoWebm: '', posterUrl: '', captionsUrl: '', title: '', subtitle: '', keywords: [], enabled: true } : { dayPillar: key.pillar, gender: key.gender, videoUrl: '', videoWebm: '', posterUrl: '', guardianImageUrl: '', captionsUrl: '', title: key.pillar + '일주', subtitle: '', keywords: [], enabled: true }; list.push(ex); }
+        if (isVid) { if (/\.webm$/i.test(file.name)) ex.videoWebm = r.u; else ex.videoUrl = r.u; if (r.pu && !ex.posterUrl) ex.posterUrl = r.pu; } else ex.posterUrl = r.u;
+        return api('/api/awakening', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ videos: d.videos || [], ilgan: d.ilgan || [], fallback: d.fallback || null }) });
+      });
+    }).then(function () { A.loaded = false; });
+  }
+
   window.V2Admin = {
+    quickAdd: function (file, preset, pw, onProg) { PW = pw; return quickAdd(file, preset, onProg); },
+    quickAwakening: function (kind, key, file, pw, onProg) { PW = pw; return quickAwakening(kind, key, file, onProg); },
     // root 를 주면 그 안에 그린다(클립 라이브러리의 하위 탭). 없으면 t-<tab> 컨테이너.
     coverage: function (root, pw) { PW = pw; var go = function () { coverageDlg(root); }; if (M.loaded) go(); else api('/api/media?all=1').then(function (d) { M.list = d.media || []; M.loaded = true; go(); }).catch(function (e) { toast(e.message, true); }); },
     importLegacy: function (pw, done) { PW = pw; importLegacy(done); },

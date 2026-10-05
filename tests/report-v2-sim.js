@@ -142,6 +142,15 @@ const dirty = TSX.clean({ size: 9999, color: 'red', in: 'hack', hold: -4, x: 'ab
 ok(dirty.size === 160 && !dirty.color && !dirty.in && !dirty.hold && dirty.x === undefined && dirty.align === 'left' && dirty.weight === '700' && dirty.loop === 'glow', '허용 밖 값 제거·범위 보정');
 ok(Object.keys(TSX.ROLES).every(k => /^[a-z]+[.][a-z]+$/.test(k)), '역할 이름 형식');
 const pk = R.Compose.fromSaved({ textStyles: ts0 }, [], 'full'); ok(pk.textStyles.all['intro.title'].size === 30, '저장본 textStyles 가 팩에 전달됨');
+console.log('4f. 챕터 전용 클립(보관함) — 고정이 아니라 그 챕터 안에서 선택 로직이 고름');
+const scoped = fx.concat([{ id: 'only_c01', type: 'image', url: 'https://t/only.webp', tags: ['metal', 'identity'], chapterIds: ['c01'], priority: 10 }, { id: 'only_c02', type: 'image', url: 'https://t/only2.webp', tags: ['metal', 'identity'], chapterIds: ['c02'], priority: 99 }]);
+const sl = R.Compose.library({ media: scoped }), sr = R.Compose.build(sd, sl, cfg);
+const used = ch => sr.chapters.find(c => c.id === ch).scenes.map(s => s.media && s.media.assetId);
+ok(!sr.chapters.filter(c => c.id !== 'c01').some(c => c.scenes.some(s => s.media && s.media.assetId === 'only_c01')), 'c01 전용 클립은 다른 챕터의 후보가 아님');
+ok(!used('c01').includes('only_c02') && !sr.chapters.filter(c => c.id !== 'c02').some(c => c.scenes.some(s => s.media && s.media.assetId === 'only_c02')), 'c02 전용 클립은 c02 밖에서 안 쓰임');
+ok(used('c01').includes('only_c01'), '전용 클립은 그 챕터 안에서 선택 로직(점수)으로 뽑힘(고정 아님)');
+const sc1 = sr.chapters.find(c => c.id === 'c01').scenes.find(s => s.media && s.media.assetId === 'only_c01'); ok(sc1.media.why.some(w => w.label === '이 챕터 전용'), '선택 이유에 "이 챕터 전용" 표시');
+ok(!JSON.stringify(R.Compose.fromSaved({ sceneMedia: { c01: { insight: 'x' } } }, fx, 'full').lib).includes('pins'), '고정(pin) 개념 없음');
 console.log('5. 기존 엔진 회귀');
 const snap = fs.existsSync(path.join(root, 'tests/regression-snapshot.js'));
 ok(snap, '기존 회귀 스냅샷 테스트 존재(별도 실행)');

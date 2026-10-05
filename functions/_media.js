@@ -21,7 +21,7 @@ export function cleanMedia(m) {
   const o = { id: m.id, type: TAX.type.includes(m.type) ? m.type : 'image', url: url(m.url), webmUrl: url(m.webmUrl), thumbnailUrl: url(m.thumbnailUrl), posterUrl: url(m.posterUrl),
     title: txt(m.title, 80), description: txt(m.description, 400), orientation: ['portrait', 'landscape', 'square'].includes(m.orientation) ? m.orientation : 'portrait',
     duration: Math.max(0, Math.min(600, +m.duration || 0)), loopable: !!m.loopable, hasAudio: !!m.hasAudio, priority: Math.max(0, Math.min(100, Math.round(+m.priority || 0))),
-    enabled: m.enabled !== false, tagsApproved: m.tagsApproved !== false, bytes: Math.max(0, +m.bytes || 0), uploadedAt: +m.uploadedAt || 0 };
+    chapterIds: Array.isArray(m.chapterIds) ? [...new Set(m.chapterIds.filter(x => typeof x === 'string' && /^[\w.\-가-힣]{1,80}$/.test(x)))].slice(0, 30) : [], enabled: m.enabled !== false, tagsApproved: m.tagsApproved !== false, bytes: Math.max(0, +m.bytes || 0), uploadedAt: +m.uploadedAt || 0 };
   for (const [f, k] of Object.entries(FIELD)) o[f] = tags(m[f], TAX[k]);
   o.tags = [...new Set([...o.elementTags, ...o.stateTags, ...o.emotionTags, ...o.sceneTags, ...o.themeTags, ...o.actionTags])];
   // AI가 추천만 한 태그: 관리자가 승인하기 전에는 조합에 쓰이지 않는다
