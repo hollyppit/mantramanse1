@@ -35,22 +35,23 @@
     }
   }
 
-  function vars(sd, facts) {
+  function vars(sd, facts, name, mask) {
     var pct = {}, elPct = {};
     Object.keys(sd.groups || {}).forEach(function (g) { pct[g] = Math.round(sd.groups[g]); });
     Object.keys(sd.fiveElements || {}).forEach(function (e) { elPct[e] = Math.round(sd.fiveElements[e]); });
-    return Object.assign({}, facts, { el: sd.groupEl, groupEl: sd.groupEl, yongEl: facts.yongEl || sd.dominantEl, lackEl: facts.lackEl || '', pct: pct, elPct: elPct, strengthZone: sd.strength.zone });
+    return Object.assign({}, facts, R.Narrator.heroVars(sd, name, mask), { el: sd.groupEl, groupEl: sd.groupEl, yongEl: facts.yongEl || sd.dominantEl, lackEl: facts.lackEl || '', pct: pct, elPct: elPct, strengthZone: sd.strength.zone });
   }
   function view(c, v) { // 선택된 모듈 → 화면용(템플릿 치환 포함)
     var T = R.Rules.tpl, m = c.mod;
-    return { id: m.id, category: m.category, headline: T(m.headline, v), summary: T(m.summary, v), detail: T(m.detail, v), keywords: m.keywords || [], imageTags: m.imageTags || [], extra: m.extra || null,
+    return { id: m.id, category: m.category, headline: T(m.headline, v), summary: T(m.summary, v), detail: T(m.detail, v), choice: m.choice ? T(m.choice, v) : '', keywords: m.keywords || [], imageTags: m.imageTags || [], extra: m.extra || null,
       why: c.rows.map(function (r) { return r.label + ' = ' + (Array.isArray(r.have) ? r.have.join(',') : r.have) + (r.hit ? ' ✓' : ' ✗'); }), specificity: c.specificity };
   }
 
   // lib: { modules, remedies, images, version }
   function build(sd, lib, cfg, opts) {
     opts = opts || {}; var Rules = R.Rules, Remedy = R.Remedy, Media = R.Media;
-    var pj = (cfg.project && cfg.project.id) || 'full', facts = Rules.flatten(sd, { project: pj }), v = vars(sd, facts), warnings = [];
+    var pj = (cfg.project && cfg.project.id) || 'full', facts = Rules.flatten(sd, { project: pj }), v = vars(sd, facts, opts.name), vMask = vars(sd, facts, '', true), warnings = [];
+    var heroVars = R.Narrator.heroVars(sd, opts.name); // 이름은 이 기기 안에서만 쓴다(서버 전송 금지). AI 에는 vMask 로 만든 {hero…} 자리표시자 문장이 나간다.
     var nd = Remedy.needs(sd, (cfg.project && cfg.project.needTags) || []); facts.needTag = nd.tags;
     var rec = Remedy.recommend(sd, facts, lib.remedies, nd, { action: 5, growth: 3, people: 3, place: 3, environment: 3, timing: 1 });
     var plan = Remedy.actionPlan(sd, nd, rec);
@@ -65,9 +66,10 @@
     cfg.chapters.forEach(function (ch) {
       var picks = Rules.pick(lib.modules, facts, ch.maxModules || 1, { categories: ch.moduleCategories });
       var views = picks.map(function (p) { return view(p, v); });
+      var maskLead = picks[0] ? view(picks[0], vMask) : null; // AI 전송용(이름 대신 {hero…})
       var lead = views[0] || { headline: ch.title, summary: '', detail: '', keywords: [], imageTags: [], extra: null, why: [] };
       var out = { id: ch.id, base: ch.base || ch.id, project: ch.project || 'full', no: ch.no, act: ch.act, title: ch.title, subtitle: ch.subtitle, kind: ch.kind, accessLevel: ch.accessLevel || 'free', introText: ch.introText || '',
-        aiEnabled: ch.aiEnabled !== false, actionPool: (rec.action || []).slice(0, 4).map(function (x) { return x.item.title; }), fact: factOf(ch, sd), headline: lead.headline, interpretation: lead.summary, meaning: lead.detail, details: views.slice(1), lead: lead, extra: lead.extra, modules: views.map(function (x) { return x.id; }), disclaimer: ch.disclaimer || null, cta: ch.cta || null, items: null };
+        aiEnabled: ch.aiEnabled !== false, actionPool: (rec.action || []).slice(0, 4).map(function (x) { return x.item.title; }), fact: factOf(ch, sd), headline: lead.headline, interpretation: lead.summary, meaning: lead.detail, choice: lead.choice || '', tpl: maskLead ? { headline: maskLead.headline, interpretation: maskLead.summary, meaning: maskLead.detail } : null, details: views.slice(1), lead: lead, extra: lead.extra, modules: views.map(function (x) { return x.id; }), disclaimer: ch.disclaimer || null, cta: ch.cta || null, items: null };
 
       if (ch.kind === 'verdict' && vparts) { // 총평: 고정 첫 문장 + 수호신 재료(모듈이 아니라 sd·규칙 문장에서 조립)
         out.verdict = R.Verdict.material(sd, vparts); out.headline = R.Verdict.FIRST; out.interpretation = out.verdict.discover; out.meaning = ''; out.details = []; out.modules = []; out.action = [];
@@ -119,7 +121,7 @@
       daewoon: byId.c16 && byId.c16.headline, thisYear: byId.c17 && byId.c17.headline, months: sd.monthlyLuck.map(function (m) { return m.month + '월 ' + (m.season ? R.SajuData.SEASONS[m.season] : ''); }),
       todo: plan.checklist, avoid: plan.avoid, strategy: plan.strategy.map(function (s) { return s.label; }),
     };
-    return { meta: { contentVersion: lib.version, promptVersion: PROMPT_VERSION, key: Rules.hash({ facts: facts, c: lib.version, p: PROMPT_VERSION, chapters: cfg.chapters.map(function (c) { return [c.id, c.order, c.maxModules, c.moduleCategories]; }) }), unavailable: sd.unavailable, aiApplied: false, warnings: warnings },
+    return { meta: { contentVersion: lib.version, promptVersion: PROMPT_VERSION, key: Rules.hash({ facts: facts, c: lib.version, p: PROMPT_VERSION, chapters: cfg.chapters.map(function (c) { return [c.id, c.order, c.maxModules, c.moduleCategories]; }) }), unavailable: sd.unavailable, aiApplied: false, warnings: warnings, heroVars: heroVars },
       acts: cfg.acts, chapters: chapters, remedies: rec, plan: plan, summary: summary, needs: nd, facts: facts };
   }
 
@@ -139,8 +141,9 @@
      AI 에는 "이미 선택된 모듈 문장 + 계산 근거"만 보낸다. 새 명리 규칙을 만들 수 없도록 프롬프트가 제한한다.
      AI 응답은 챕터별 headline/lead(2문장 이내)만 받아들이고, 길이·단정 표현을 검사해 어긋나면 그 챕터는 원본 모듈 문장을 유지한다. */
   function aiPayload(report) {
-    return { promptVersion: PROMPT_VERSION, rules: ['제공된 문장과 근거만 사용한다', '새로운 명리 규칙·수치·직업·행동을 만들지 않는다', '중복 제거와 문체 통일만 한다', '단정 표현(반드시·무조건·확정)을 쓰지 않는다', '건강·투자수익·질병·임신·법률은 예측하지 않는다'],
-      chapters: report.chapters.filter(function (c) { return c.aiEnabled !== false; }).map(function (c) { var o = { id: c.id, title: c.title, fact: c.fact, headline: c.headline, interpretation: c.interpretation, meaning: c.meaning, action: c.action }; if (c.verdict) o.verdict = { discover: c.verdict.discover, blocked: c.verdict.blocked.text, evidence: c.verdict.evidence ? c.verdict.evidence.text : '' }; return o; }) };
+    return { promptVersion: PROMPT_VERSION, rules: ['서술은 전지적 관찰자 시점의 소설체(~다) 3인칭이며 "당신"·"~습니다"·"~하세요"를 쓰지 않는다', '{hero}·{hero은는}·{hero이가}·{hero을를}·{hero의} 자리표시자는 그대로 둔다', '제공된 문장과 근거만 사용한다', '새로운 명리 규칙·수치·직업·행동을 만들지 않는다', '중복 제거와 문체 통일만 한다', '단정 표현(반드시·무조건·확정)을 쓰지 않는다', '건강·투자수익·질병·임신·법률은 예측하지 않는다'],
+      chapters: report.chapters.filter(function (c) { return c.aiEnabled !== false; }).map(function (c) { var t = c.tpl || c; // 이름이 들어간 문장 대신 {hero…} 자리표시자 문장을 보낸다
+        var o = { id: c.id, title: c.title, fact: c.fact, headline: t.headline, interpretation: t.interpretation, meaning: t.meaning, action: c.action }; if (c.verdict) o.verdict = { discover: c.verdict.discover, blocked: c.verdict.blocked.text, evidence: c.verdict.evidence ? c.verdict.evidence.text : '' }; return o; }) };
   }
   function applyAi(report, ai) {
     var ok = 0, byId = {}; ((ai && ai.chapters) || []).forEach(function (x) { if (x && x.id) byId[x.id] = x; });
@@ -152,9 +155,11 @@
         (c.scenes || []).forEach(function (s) { if (s.sceneType === 'verdictFind') s.body = c.verdict.discover; else if (s.sceneType === 'verdictBlock') s.body = c.verdict.blocked.text; else if (s.sceneType === 'verdictEvidence' && c.verdict.evidence) s.body = c.verdict.evidence.text; });
         return;
       }
+      var N = R.Narrator, hv = report.meta.heroVars, narr = function (t) { return N.isNarrative(t) && N.placeholdersOk(t); }; // 서술 파트에 '당신'·합쇼체·명령형이 있으면 그 챕터는 template 유지
+      if (!narr(x.headline) || !narr(x.lead)) return;
       var okH = typeof x.headline === 'string' && x.headline.length >= 4 && x.headline.length <= 80 && !BANNED.test(x.headline);
       var okL = typeof x.lead === 'string' && x.lead.length <= 300 && !BANNED.test(x.lead);
-      if (okH) { c.headline = x.headline; ok++; } if (okL && x.lead) c.interpretation = x.lead;
+      if (okH) { c.headline = N.fill(x.headline, hv); ok++; } if (okL && x.lead) c.interpretation = N.fill(x.lead, hv);
       (c.scenes || []).forEach(function (s) { // 장면 문구도 같이 갱신
         if (s.sceneType === 'chapterIntro') s.body = c.headline; else if (s.sceneType === 'insight') s.body = c.interpretation; else if (s.sceneType === 'chapterEnding') s.headline = c.headline;
       });
@@ -198,7 +203,7 @@
   // 서버 저장본 한 번에 적용: content = /api/report-content 의 content, media = /api/media 의 media
   function fromSaved(content, media, projectId) {
     content = content || {}; if (content.scoring) R.Scenes.configure(content.scoring);
-    return { lib: library({ modules: content.modules, remedies: content.remedies, media: media, version: content.version }), cfg: R.Chapters.forProject(content, projectId || 'full'), scoring: content.scoring || {}, textStyles: content.textStyles || { all: {}, chapters: {} } };
+    return { lib: library({ modules: content.modules, remedies: content.remedies, media: media, version: content.version }), cfg: R.Chapters.forProject(content, projectId || 'full'), scoring: content.scoring || {}, textStyles: content.textStyles || { all: {}, chapters: {} }, flow: R.Moving ? R.Moving.clean(content.flow) : null };
   }
 
   // 서버(/api/compose) 응답 한 번에 적용. 어떤 부분이 이상해도 원본이 유지된다.

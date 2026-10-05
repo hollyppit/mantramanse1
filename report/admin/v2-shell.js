@@ -261,7 +261,7 @@
     }
     function sel(k, opts, wide) { var v = effective()[k] || ''; return '<select data-k="' + k + '">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(v) === String(o[0]) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; }
     // 사주마다 달라지는 문장은 통째로 바꾸면 모두 같은 문장이 되므로 직접 입력을 막는다(해석 모듈 탭에서 고친다)
-    var FIXED_ROLES = ['insight.fact', 'insight.lead', 'explain.lead', 'ilgan.kw', 'awk.kw'], DYN_ROLES = ['intro.headline', 'end.quote', 'ilgan.title', 'ilgan.sub', 'awk.title', 'awk.sub'];
+    var FIXED_ROLES = ['insight.fact', 'insight.lead', 'choice.line', 'scene.caption', 'explain.lead', 'ilgan.kw', 'awk.kw'], DYN_ROLES = ['intro.headline', 'end.quote', 'ilgan.title', 'ilgan.sub', 'awk.title', 'awk.sub'];
     function textBlock(e) {
       var seq = '<label class="chk2" style="display:flex;gap:6px;align-items:center;margin:8px 0 2px"><input type="checkbox" data-k="seq"' + (e.seq ? ' checked' : '') + ' style="width:auto"> 줄마다 차례로 나타나기 (줄바꿈 기준)</label>' +
         '<div class="g2c">' + field('줄 사이 간격 (초)', nf('seqGap', 0.2, 10, 0.1, 1)) + '</div>';
@@ -536,11 +536,30 @@
   function setOpen(also) {
     var root = $('#t-v2set'); if (root.parentNode && $('#t-lib') && root.nextSibling !== $('#t-lib') && !built.setMoved) { built.setMoved = 1; $('#t-lib').parentNode.insertBefore(root, $('#t-lib')); }
     if (!built.set) {
-      built.set = 1; root.innerHTML = '<div class="sub2" id="stNav"></div><div id="stScore" class="hide"></div>';
-      subnav($('#stNav', root), [['intro', '입장 인트로'], ['home', '온보딩 페이지'], ['score', '미디어 점수·AI'], ['lib', '기존 클립 (구버전)']], also || 'intro', function (k) { gotoTab('v2set', k); });
+      built.set = 1; root.innerHTML = '<div class="sub2" id="stNav"></div><div id="stScore" class="hide"></div><div id="stMove" class="hide"></div>';
+      subnav($('#stNav', root), [['intro', '입장 인트로'], ['home', '온보딩 페이지'], ['move', '무빙 연출'], ['score', '미디어 점수·AI'], ['lib', '기존 클립 (구버전)']], also || 'intro', function (k) { gotoTab('v2set', k); });
     }
     $('#stScore', root).classList.toggle('hide', also !== 'score'); if (also === 'score') scoreOpen();
+    $('#stMove', root).classList.toggle('hide', also !== 'move'); if (also === 'move') moveOpen();
     if (!also) { $$('#stNav button', root).forEach(function (b) { b.classList.toggle('on', b.dataset.k === 'intro'); }); setTimeout(function () { window.AdminShowTab('v2set', 'intro'); }, 0); }
+  }
+  // 무빙 연출: 장면 안 요소가 차례로 나타나는 효과 + 자동 스크롤(누르면 멈춤). 저장하면 /api/report-content 의 flow 로 올라가고 viewer 가 같은 값을 쓴다.
+  function moveOpen() {
+    var box = $('#stMove'), M = R.Moving; C.load().then(function () {
+      var f = M.clean(ST.saved.flow), esc2 = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); };
+      var num = function (k, label, min, max, step, hint) { return '<label style="display:block;margin:8px 0">' + label + ' <input type="number" data-f="' + k + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + f[k] + '" style="width:90px"> <span class="muted" style="font-size:.76rem">' + hint + '</span></label>'; };
+      var chk = function (k, label) { return '<label style="display:block;margin:8px 0"><input type="checkbox" data-f="' + k + '"' + (f[k] ? ' checked' : '') + ' style="width:auto"> ' + label + '</label>'; };
+      var sel = function (k, label, list) { return '<label style="display:block;margin:8px 0">' + label + ' <select data-f="' + k + '">' + list.map(function (x) { return '<option value="' + x[0] + '"' + (f[k] === x[0] ? ' selected' : '') + '>' + esc2(x[1]) + '</option>'; }).join('') + '</select></label>'; };
+      box.innerHTML = '<div class="card"><b style="color:var(--gold)">차례로 나타나기</b> <span class="muted">장면 안의 풀이 박스·글·이미지가 위에서부터 하나씩 나타납니다.</span>' +
+        chk('enabled', '차례로 나타나는 효과 사용') + sel('anim', '효과', M.ANIMS) + num('duration', '나타나는 시간', 0.1, 4, 0.1, '초') + num('distance', '움직이는 거리', 0, 120, 2, 'px (떠오르기·펼쳐지기·내려오기)') + num('stagger', '요소 사이 간격', 0, 2, 0.05, '초 (0이면 한꺼번에)') + num('trigger', '나타나는 위치', 40, 100, 1, '% (화면 위에서 이 지점에 닿으면 · 100=맨 아래, 50=가운데)') +
+        '</div><div class="card"><b style="color:var(--gold)">자동 스크롤</b> <span class="muted">챕터를 열면 저절로 내려가고, 화면을 누르거나 건드리면 멈춥니다. 버튼으로 이어서 볼 수 있습니다.</span>' +
+        chk('auto', '자동 스크롤 사용') + num('speed', '속도', 10, 400, 5, 'px/초 (기본 55, 느리게 30 · 빠르게 100)') + num('startDelay', '시작까지', 0, 10, 0.5, '초') + chk('stopAtChoice', '질문·선택이 있는 장면에서 멈추기') + num('resumeAfter', '멈춘 뒤 자동 재개', 0, 60, 1, '초 (0이면 버튼을 누를 때까지 멈춤)') + chk('btnShow', '멈추기/이어서 보기 버튼 보이기') + sel('btnPos', '버튼 위치', M.POS) +
+        '</div><div class="row" style="margin-top:12px"><button class="pri" id="mvSave" type="button">저장</button> <button type="button" id="mvDef">기본값으로</button> <button type="button" id="mvTest">조합 테스트에서 확인</button></div><p class="muted" style="margin-top:10px">저장한 뒤 조합 테스트의 미리보기에서 챕터를 열면 이 값이 적용됩니다. 손님 기기에서 "동작 줄이기"를 켠 경우에는 효과와 자동 스크롤이 꺼집니다.</p>';
+      var read = function () { var o = {}; $$('[data-f]', box).forEach(function (i) { o[i.dataset.f] = i.type === 'checkbox' ? i.checked : i.type === 'number' ? +i.value : i.value; }); return M.clean(o); };
+      $('#mvSave', box).onclick = function () { var v = read(); C.save({ flow: v }).then(function () { ST.saved.flow = v; toast('저장했습니다'); moveOpen(); }).catch(function (e) { toast(e.message, true); }); };
+      $('#mvDef', box).onclick = function () { ST.saved.flow = M.clean({}); moveOpen(); toast('기본값을 불러왔습니다. 저장을 눌러야 적용됩니다'); };
+      $('#mvTest', box).onclick = function () { gotoTab('v2test'); };
+    });
   }
   function scoreOpen() {
     var box = $('#stScore'); C.load().then(function () {

@@ -13,7 +13,7 @@
   var STAGES = ['사주 원국을 읽고 있습니다', '타고난 기질을 분석하고 있습니다', '인생 흐름을 연결하고 있습니다', '당신에게 맞는 행동 전략을 찾고 있습니다', '당신의 이야기를 구성하고 있습니다'];
   var PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
   var S = { sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
-  var view = function (v) { $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
+  var view = function (v) { if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
   function toast(msg, ms) { var t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, ms || 3200); }
   var sg = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, ss = function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { } };
 
@@ -52,7 +52,7 @@
       return new Promise(function (ok) { setTimeout(function () { ok(a); }, wait); });
     }).then(function (a) {
       S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
-      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg); S.awk = a[2] || {};
+      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = a[2] || {};
       S.story = R.Free.mergeStory(window.OnboardingContent, a[3] && a[3].story); // 무료 결과 문구·잠금 목록·결제 버튼은 온보딩 설정과 같은 값을 쓴다
       return aiCompose().then(function () { return a; });
     }).then(function () {
@@ -166,7 +166,7 @@
       return '<section class="scene s-intro' + fxCls(s) + '" ' + id + ' style="--pc:' + EL_COLOR[(s.intent.desiredElements || ['water'])[0]] + '"><div class="bg">' + (s.media ? mediaEl(s.media, c.title) : '') + (s.media ? '' : '<div class="ph" aria-hidden="true"></div>') + '</div><div class="shade"></div><div class="txt">' +
         '<div class="no" data-tx="intro.no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="down" aria-hidden="true">SCROLL ↓</div></div></section>';
     }
-    if (t === 'insight') return '<section class="scene rv" ' + id + '><div class="cap">풀이</div><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead' + (c.lead && /_fallback$/.test(c.lead.id || '') ? ' faint' : '') + '" data-tx="insight.lead">' + lines(s.body) + '</p>' + (s.media ? media(s) : '') + '</section>';
+    if (t === 'insight') return '<section class="scene rv" ' + id + '><div class="cap">풀이</div><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead' + (c.lead && /_fallback$/.test(c.lead.id || '') ? ' faint' : '') + '" data-tx="insight.lead">' + lines(s.body) + '</p>' + (c.choice ? '<p class="lead choice" data-tx="choice.line">' + lines(c.choice) + '</p>' : '') + (s.media ? media(s) : '') + '</section>';
     if (t === 'verdictFind') { var av = S.awk && S.awk.video, gi = (av && (av.guardianImageUrl || av.posterUrl)) || (S.awk && S.awk.fallback && S.awk.fallback.posterUrl) || ''; return '<section class="scene rv s-verdict" ' + id + '>' + (gi ? '<img class="guardian" src="' + esc(gi) + '" alt="' + esc(((s.verdict || {}).pillar || '') + '일주의 수호신') + '" loading="lazy" decoding="async">' : '') + '<div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p></section>'; }
     if (t === 'verdictBlock') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div>' + (s.sub ? '<p class="lead" style="font-size:1.05rem">' + esc(s.sub) + '</p>' : '') + '<p style="color:var(--ink2)">' + lines(s.body) + '</p></section>';
     if (t === 'verdictEvidence') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p><div class="vd" role="group" aria-label="맞는지 알려 주세요"><button type="button" class="btn" data-vd="yes">맞습니다</button><button type="button" class="btn" data-vd="no">아닙니다</button></div><p class="vd-reply faint" aria-live="polite" data-yes="' + esc((s.evidence || {}).yes) + '" data-no="' + esc((s.evidence || {}).no) + '"></p></section>';
@@ -277,9 +277,11 @@
   }
   function mount(c) {
     var root = $('#chapter');
-    // 등장 연출
+    // 등장 연출: 무빙 연출(순차 등장 + 자동 스크롤)을 우선 쓰고, 꺼져 있으면 기존 방식
+    if (S.mv) { S.mv.destroy(); S.mv = null; }
+    S.mvState = S.mvState || { wanted: true }; S.mv = R.Moving && R.Moving.mount(root, S.pack && S.pack.flow, { reduce: reduce, state: S.mvState });
     var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .12 });
-    $$('.rv', root).forEach(function (e) { if (reduce) e.classList.add('in'); else io.observe(e); });
+    $$('.rv', root).forEach(function (e) { if (reduce || S.mv) e.classList.add('in'); else io.observe(e); });
     // 영상: 화면에 들어왔을 때만 재생, 나가면 pause. 로딩 실패 시 poster 이미지로 대체
     var vio = new IntersectionObserver(function (es) { es.forEach(function (e) { var v = e.target; if (e.isIntersecting) { if (!v.dataset.ready) { v.dataset.ready = 1; if (v.dataset.w && v.canPlayType('video/webm')) { var a = document.createElement('source'); a.src = v.dataset.w; a.type = 'video/webm'; v.appendChild(a); } if (v.dataset.m) { var b = document.createElement('source'); b.src = v.dataset.m; b.type = 'video/mp4'; v.appendChild(b); } v.addEventListener('error', function () { var p = v.getAttribute('poster'); if (p) { var im = new Image(); im.src = p; im.alt = ''; v.replaceWith(im); } }, true); v.load(); } var pr = v.play(); if (pr && pr.catch) pr.catch(function () { }); } else if (v.dataset.ready) v.pause(); }); }, { threshold: .5 });
     if (!reduce) $$('video', root).forEach(function (v) { vio.observe(v); });
@@ -474,7 +476,7 @@
       var m = e.data; if (e.origin !== location.origin || !m || m.type !== 'mt-v2-preview') return;
       try {
         var ch = window.Manse.compute(m.input); S.sd = R.SajuData.build(ch, { now: m.now || Date.now() }); S.name = m.name || ''; S.media = m.media || [];
-        S.pack = R.Compose.fromSaved(m.content, S.media, m.project || 'full'); S.ts = S.pack.textStyles; S.rep = R.Compose.build(S.sd, S.pack.lib, S.pack.cfg); S.awk = m.awk || {}; S.visited = {}; S.ended = {};
+        S.pack = R.Compose.fromSaved(m.content, S.media, m.project || 'full'); S.ts = S.pack.textStyles; S.rep = R.Compose.build(S.sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = m.awk || {}; S.visited = {}; S.ended = {};
         if (m.chapter === 'ilgan') { ilganStage(ijuStage); return; } if (m.chapter === 'awakening') { ijuStage(); return; }
         var i = Math.max(0, S.rep.chapters.map(function (c) { return c.id; }).indexOf(m.chapter)); view('reader'); $('#barTot').textContent = S.rep.chapters.length;
         S.idx = i; var c = S.rep.chapters[i]; S.visited[c.id] = 1; render(c, i, true); window.scrollTo(0, 0);

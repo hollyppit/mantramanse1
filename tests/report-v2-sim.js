@@ -5,7 +5,7 @@ const root = path.join(__dirname, '..');
 const eng = fs.readFileSync(path.join(root, 'engine.js'), 'utf8');
 vm.runInThisContext(eng, { filename: 'engine.js' });
 globalThis.window = globalThis;
-['chapters', 'saju-data', 'rules', 'content', 'content-pro', 'content-pro2', 'verdict', 'remedy', 'media', 'scenes', 'compose', 'charts', 'pdf', 'sharecard', 'textstyle'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
+['chapters', 'saju-data', 'rules', 'narrator', 'content', 'content-pro', 'content-pro2', 'verdict', 'remedy', 'media', 'scenes', 'compose', 'charts', 'pdf', 'sharecard', 'textstyle'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
 const M = globalThis.Manse, R = globalThis.ReportV2;
 const fails = []; const ok = (c, m) => { if (!c) fails.push(m); };
 

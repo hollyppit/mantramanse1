@@ -3,7 +3,7 @@ const fs = require('fs'), path = require('path'), vm = require('vm'), os = requi
 const root = path.join(__dirname, '..');
 vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8'), { filename: 'engine.js' });
 globalThis.window = globalThis;
-['chapters', 'saju-data', 'rules', 'content', 'verdict', 'remedy', 'media', 'scenes', 'compose', 'charts', 'free'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
+['chapters', 'saju-data', 'rules', 'narrator', 'content', 'verdict', 'remedy', 'media', 'scenes', 'compose', 'charts', 'free'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
 vm.runInThisContext(fs.readFileSync(path.join(root, 'report/story/content.js'), 'utf8'), { filename: 'story-content.js' });
 const M = globalThis.Manse, R = globalThis.ReportV2, fails = [];
 const ok = (c, m) => { if (!c) fails.push(m); };

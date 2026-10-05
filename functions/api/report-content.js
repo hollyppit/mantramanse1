@@ -1,5 +1,5 @@
 // 리포트 v2 콘텐츠 저장본: 해석 모듈·개운법 라이브러리·챕터 설정·미디어 점수 가중치
-// GET /api/report-content — 공개. { content: { modules, remedies, chapters, scoring, version } | null }  (null 이면 코드의 기본 시드 report/v2/*.js 를 쓴다)
+// GET /api/report-content — 공개. { content: { modules, remedies, chapters, scoring, flow, version } | null }  (null 이면 코드의 기본 시드 report/v2/*.js 를 쓴다)
 // PUT /api/report-content — 관리자. { modules?, remedies?, chapters?, projects?, textStyles?, scoring? } 보낸 항목만 교체. 저장할 때마다 version 이 바뀌어 캐시 키가 갱신된다.
 // 저장: GLOSSARY_KV 'v2:content'.  모듈/개운법은 id 기준으로 코드 기본값 위에 덮어쓰기·추가되고, enabled:false 로 기본 항목을 끌 수 있다.
 import { json, isAdmin, configError } from '../_lib.js';
@@ -53,6 +53,12 @@ function cleanProject(p) {
     needTags: strs(p.needTags, 12, 24), requiredCompletionRate: typeof p.requiredCompletionRate === 'number' ? Math.max(0, Math.min(1, p.requiredCompletionRate)) : null,
     acts: Array.isArray(p.acts) ? p.acts.slice(0, 9).map(a => ({ title: str(a && a.title, 40), line: str(a && a.line, 160), pdfDone: str(a && a.pdfDone, 120) })) : null, chapters };
 }
+// 무빙 연출 설정(순차 등장·자동 스크롤). 범위는 report/v2/moving.js 의 clean() 과 같다.
+function cleanFlow(f) {
+  f = f && typeof f === 'object' ? f : {}; const n = (v, lo, hi, d) => { v = v === '' || v == null ? NaN : +v; return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
+  return { enabled: f.enabled !== false, anim: ['rise', 'fade', 'zoom', 'blur', 'wipe', 'drop'].includes(f.anim) ? f.anim : 'rise', duration: n(f.duration, 0.1, 4, 0.8), distance: n(f.distance, 0, 120, 28), stagger: n(f.stagger, 0, 2, 0.35), trigger: n(f.trigger, 40, 100, 88),
+    auto: f.auto !== false, speed: n(f.speed, 10, 400, 55), startDelay: n(f.startDelay, 0, 10, 1.5), stopAtChoice: f.stopAtChoice !== false, resumeAfter: n(f.resumeAfter, 0, 60, 0), btnShow: f.btnShow !== false, btnPos: ['right', 'center', 'left'].includes(f.btnPos) ? f.btnPos : 'right' };
+}
 function cleanScoring(s) {
   const o = {}; if (!s || typeof s !== 'object') return o;
   if (s.w && typeof s.w === 'object') { o.w = {}; for (const k of ['element', 'state', 'theme', 'emotion', 'action', 'chapter', 'scene', 'role', 'typePref']) if (Number.isFinite(+s.w[k])) o.w[k] = Math.max(0, Math.min(100, +s.w[k])); }
@@ -78,6 +84,7 @@ export async function onRequestPut({ request, env }) {
   if (Array.isArray(b.projects)) next.projects = uniq(b.projects.slice(0, 40), cleanProject);
   if (b.textStyles) next.textStyles = cleanTextStyles(b.textStyles);
   if (b.scoring) next.scoring = cleanScoring(b.scoring);
+  if (b.flow) next.flow = cleanFlow(b.flow);
   next.version = 'c' + Date.now().toString(36); // 콘텐츠가 바뀌면 리포트 캐시 키가 바뀐다
   const text = JSON.stringify(next);
   if (text.length > MAX_BYTES) return json({ error: '콘텐츠가 너무 큽니다' }, 413);

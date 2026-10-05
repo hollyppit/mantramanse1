@@ -3,7 +3,7 @@ const fs = require('fs'), path = require('path'), os = require('os'), vm = requi
 const root = path.join(__dirname, '..'), tmp = path.join(os.tmpdir(), 'compose-test.mjs');
 fs.writeFileSync(tmp, fs.readFileSync(path.join(root, 'functions/_compose.js'), 'utf8'));
 vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')); globalThis.window = globalThis;
-['chapters', 'saju-data', 'rules', 'content', 'verdict', 'remedy', 'media', 'scenes', 'compose'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8')));
+['chapters', 'saju-data', 'rules', 'narrator', 'content', 'verdict', 'remedy', 'media', 'scenes', 'compose'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8')));
 (async () => {
   const C = await import(require('url').pathToFileURL(tmp).href), R = globalThis.ReportV2, M = globalThis.Manse;
   const fails = [], ok = (c, m) => { if (!c) fails.push(m); };
@@ -15,7 +15,7 @@ vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')); glob
   const sc = body.media.scenes.find(s => s.candidates.length > 1) || body.media.scenes[0]; ok(!!sc, '미디어 후보 payload 존재');
   const c1 = body.payload.chapters[0];
   let calls = 0, store = {};
-  const good = JSON.stringify({ chapters: [{ id: 'c01', headline: '단단하게 결을 세우는 사람입니다', lead: '기준이 분명하고 완성도를 중시하는 경향이 있습니다.' }, { id: 'c02', headline: '반드시 성공하는 사람', lead: '문제 없는 문장입니다. 3000개의 비밀' }, { id: 'zz', headline: '없는 챕터입니다 정말로' }], media: { [sc.sceneId]: sc.candidates[sc.candidates.length - 1][0], other: 'FAKE' } });
+  const good = JSON.stringify({ chapters: [{ id: 'c01', headline: '단단하게 결을 세우는 사람이다', lead: '기준이 분명하고 완성도를 중시하는 경향이 있다.' }, { id: 'c02', headline: '반드시 성공하는 사람', lead: '문제 없는 문장입니다. 3000개의 비밀' }, { id: 'zz', headline: '없는 챕터입니다 정말로' }], media: { [sc.sceneId]: sc.candidates[sc.candidates.length - 1][0], other: 'FAKE' } });
   const deps = { kvGet: async k => store[k], kvPut: async (k, v) => { store[k] = v; }, llm: async () => { calls++; return '설명 ' + good + ' 끝'; } };
   const r1 = await C.runCompose(body, deps);
   if (!r1.ok) console.log('r1', JSON.stringify(r1)); ok(r1.ok && !r1.cached, '1차 호출 성공');
@@ -48,7 +48,7 @@ vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')); glob
   ok(JSON.stringify(TSV.cleanTextStyles(null)) === '{"all":{},"chapters":{}}', '서버: 빈 입력');
   // 클라이언트 적용
   const before = rep.chapters.find(c => c.id === 'c01').headline; R.Compose.applyResult(rep, r1.result, lib);
-  ok(rep.chapters.find(c => c.id === 'c01').headline === '단단하게 결을 세우는 사람입니다' && rep.chapters.find(c => c.id === 'c01').scenes[0].body === rep.chapters.find(c => c.id === 'c01').headline, '적용 후 장면 문구도 갱신');
+  ok(rep.chapters.find(c => c.id === 'c01').headline === '단단하게 결을 세우는 사람이다' && rep.chapters.find(c => c.id === 'c01').scenes[0].body === rep.chapters.find(c => c.id === 'c01').headline, '적용 후 장면 문구도 갱신');
   ok(rep.meta.aiApplied, 'aiApplied 표시'); R.Compose.applyResult(rep, null, lib);
   const ids = rep.chapters.flatMap(c => c.scenes).filter(s => s.media).map(s => s.media.assetId); ok(new Set(ids).size === ids.length, 'AI 미디어 교체 후에도 중복 없음');
   if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log(' ✗ ' + f)); process.exit(1); }

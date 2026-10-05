@@ -10,7 +10,7 @@ export const SYSTEM = `너는 사주 스토리 리포트의 "편집자"다. 입�
 할 일: 챕터마다 (1) 핵심 문장 headline 1개(40자 안팎, 1문장), (2) 이어 읽기 좋은 lead 1~2문장(120자 안팎)을 다듬어 쓴다. 장면 미디어는 주어진 후보 assetId 중에서만 고른다.
 엄격한 규칙:
 - 입력 문장에 없는 새로운 명리 규칙·용어·수치·직업·행동·시기를 만들지 마라. 의미를 바꾸지 말고 표현만 매끄럽게 하라.
-- 챕터 사이 중복 표현을 줄이고 문체를 "~합니다/~할 수 있습니다" 하나로 통일하라.
+- 서술(headline·lead)은 전지적 관찰자 시점의 소설체(~다) 3인칭으로 쓴다. 주인공은 {hero}·{hero은는}·{hero이가}·{hero을를}·{hero의} 자리표시자로 부르고 이 토큰을 그대로 둔다(이름을 짐작해 쓰지 마라). "당신"·"~습니다"·"~하세요"는 쓰지 않는다. 챕터 사이 중복 표현을 줄이고 문체를 하나로 통일하라.
 - "반드시·무조건·확정" 같은 단정, 건강·사망·질병·투자수익·임신·법률 예측을 쓰지 마라. 전생은 상징적 이야기로만 다뤄라.
 - 미디어는 candidates 에 있는 assetId 만 쓴다. 새 URL/ID를 만들지 마라. 마땅한 것이 없으면 그 scene 은 생략한다.
 총평(c00)은 verdict 의 discover(발견)·blocked(막힘)·evidence(증거) 문장만 다듬는다. 첫 문장(headline)과 advice 는 고정이라 건드리지 않는다.
@@ -18,6 +18,10 @@ export const SYSTEM = `너는 사주 스토리 리포트의 "편집자"다. 입�
 JSON 한 덩어리로만 답하라(총평은 {"id":"c00","verdict":{"discover":"...","blocked":"...","evidence":"..."}} 형태): {"chapters":[{"id":"c01","headline":"...","lead":"..."}],"media":{"<sceneId>":"<assetId>"}}`;
 
 const isStr = v => typeof v === 'string';
+// 서술 파트 문체: '당신'·합쇼체·명령형이 있거나 허용 밖 {자리표시자}가 있으면 그 챕터는 원본(template) 유지 (클라이언트 narrator.js 와 같은 규칙)
+export const NARR_BAD = /당신|니다(?=[.!?…s"'”’)]|$)|세요/;
+const HERO_KEYS = ['hero', 'hero은는', 'hero이가', 'hero을를', 'hero의'];
+export const narrativeOk = v => !NARR_BAD.test(String(v || '')) && (String(v || '').match(/{[^{}]*}/g) || []).every(t => HERO_KEYS.includes(t.slice(1, -1)));
 const cut = (v, n) => (isStr(v) ? v.slice(0, n) : '');
 
 // 클라이언트가 보낸 payload 를 검증·정리한다. 모양이 이상하면 null.
@@ -64,6 +68,7 @@ export function sanitize(text, clean) {
       if (Object.keys(vi).length) out.chapters.push({ id: c.id, verdict: vi });
       continue;
     }
+    if ((c.headline != null && !narrativeOk(c.headline)) || (c.lead != null && !narrativeOk(c.lead))) continue;
     if (good(c.headline, 4, 80)) item.headline = c.headline.trim();
     if (good(c.lead, 8, 300)) item.lead = c.lead.trim();
     if (item.headline || item.lead) out.chapters.push(item);
