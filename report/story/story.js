@@ -559,9 +559,10 @@
     var url = media(cv.src), alt = pick(cv.alt) || '';
     var img = url ? '<img class="cv-img" src="' + esc(url) + '" alt="' + esc(alt) + '" decoding="async" fetchpriority="high">' : '<div class="cv-glow" role="img" aria-label="' + esc(alt) + '"></div>';
     function fnt(k) { return k === 'sans' ? 'var(--f-sans)' : k === 'serif' ? 'var(--f-serif)' : ''; }
+    function hex(v, d) { return /^#[0-9a-f]{3,8}$/i.test(String(v || '').trim()) ? String(v).trim() : d; }
     function px(v, d) { v = +v; return (isFinite(v) && v > 0 ? v : d) + 'px'; }
     var st = ['--cv-tf:' + (fnt(cv.titleFont) || 'var(--f-serif)'), '--cv-tw:' + (/^[1-9]00$/.test(cv.titleWeight) ? cv.titleWeight : 400), '--cv-ts:' + px(cv.titleSize, 17), '--cv-tl:' + (isFinite(+cv.titleSpacing) && cv.titleSpacing !== '' ? +cv.titleSpacing : 4) + 'px',
-      '--cv-sf:' + (fnt(cv.subFont) || 'var(--f-sans)'), '--cv-ss:' + px(cv.subSize, 14), '--cv-bf:' + (fnt(cv.buttonFont) || 'var(--f-sans)'), '--cv-bs:' + px(cv.buttonSize, 15)].join(';');
+      '--cv-tc:' + hex(cv.titleColor, '#E9E4D8'), '--cv-sc:' + hex(cv.subColor, '#7C786C'), '--cv-sf:' + (fnt(cv.subFont) || 'var(--f-sans)'), '--cv-ss:' + px(cv.subSize, 14), '--cv-bf:' + (fnt(cv.buttonFont) || 'var(--f-sans)'), '--cv-bs:' + px(cv.buttonSize, 15)].join(';');
     el.setAttribute('style', st);
     el.hidden = false;
     el.innerHTML = '<div class="cv-in"><div class="cv-lamp">' + img + '</div>' +
