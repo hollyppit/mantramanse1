@@ -49,7 +49,24 @@ ok(/class="fc-col now/.test(fp) && /fc-now/.test(fp), '지금 달 표시 없음'
 ok(/fc-bar/.test(fp) && /fc-detail/.test(fp), '막대·상세 영역 없음');
 ok(/(기회|확장|수확|축적)/.test(fp) && /(순풍|보통|주의)/.test(fp), '기존 운 흐름 분류(주 흐름·적합 상태)를 쓰지 않음');
 ok(!/undefined|NaN/.test(fr + fp + lk + pw), '화면에 undefined/NaN 이 보임');
-ok(/돈과 재물의 흐름/.test(lk) && (lk.match(/class="lk"/g) || []).length === 7 && /궁금하다고 한 이야기/.test(lk), '잠금 목록 7개/관심사 표시');
+ok(/이 힘이 아직 막혀 있는 이유/.test(lk) && /수호신이 짚은 당신의 과거 한 시점/.test(lk) && /올해 달마다 들어오는 흐름/.test(lk) && /20개 챕터 전체/.test(lk) && (lk.match(/class="lk"/g) || []).length === 4, '잠금 목록 기본 4개 문구');
+ok(/class="gd"/.test(fr) && /data-pillar="경진"/.test(fr) && /class="gd-fb"/.test(fr) && /庚辰/.test(fr) && (fr.match(/class="eb"/g) || []).length === 5 && /class="gd-pot"/.test(fr), '수호신 등장: 이미지 없을 때 한자 그라데이션 + 오행 막대 5개 + 잠재력 문장');
+ok(/<div class="gd-fig"[^>]*><div class="gd-fb"/.test(fr), '이미지 없으면 대체 표시');
+// 수호신 이미지 띠
+const gsH = St.BLOCKS.guardianStrip({ type: 'guardianStrip', title: '수호신들', images: [{ src: 'g/a.webp', alt: 'A' }, { src: 'g/b.webp', alt: 'B' }], speed: 2 });
+ok(/class="gs"/.test(gsH) && /--gs-d:/.test(gsH) && (gsH.match(/<img/g) || []).length >= 12 && /aria-hidden="true"/.test(gsH) && /alt="A"/.test(gsH), '수호신 띠: 두 벌 이어 붙인 무한 루프');
+ok(!/<img/.test(St.BLOCKS.guardianStrip({ type: 'guardianStrip', images: [] })) && /class="ph"/.test(St.BLOCKS.guardianStrip({ type: 'guardianStrip', images: [] })), '수호신 띠: 이미지 없으면 자리표시');
+ok(St.validate({ blocks: [{ type: 'guardianStrip', images: [{ src: 'a.webp' }] }] }).some(x => /alt 없음/.test(x)), '수호신 띠: alt 점검');
+// 잠재력 문장 (우세 십성군 매핑만)
+console.log('4. 잠재력 문장');
+[[1990, 5, 17, 14, 'M'], [1984, 2, 10, 6, 'F'], [1974, 9, 3, 23, 'M'], [2000, 12, 25, 12, 'F'], [1964, 1, 15, 11, 'M']].forEach(b => {
+  const c = M.compute({ year: b[0], month: b[1], day: b[2], hour: b[3], minute: 0, calendar: 'solar', gender: b[4], lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' });
+  const line = St.potentialLine(c), pot = St.potential(c);
+  console.log('   ' + b.join('-') + ' ' + M.gzNameK(c.pillars.day) + ' → ' + line);
+  ok(pot && St.POTENTIAL[pot.group] === pot.name && line.includes("'" + pot.name + "'") && line.includes(pot.group + ' 기운 ' + pot.n + '%') && line.includes('평균의 ' + pot.times + '배'), '잠재력 문장 형식 ' + b);
+  ok(Math.abs(pot.times - pot.pct / 20) < 0.06, '배수 계산');
+});
+ok(St.potentialLine(M.compute({ year: 1990, month: 5, day: 17, hour: 14, minute: 0, calendar: 'solar', gender: 'M', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' }), '{group}={potential}/{n}/{times}').split('/').length === 3, '문장 틀 치환(관리자 수정)');
 ok(/돈과 재물의 흐름/.test(fr) && /돈과 재물의 흐름/.test(pw), '관심사가 결과·구매 문구에 반영되지 않음');
 // 시간 모름, 음력 입력도 렌더링되는지
 S.chart = M.compute({ year: 1985, month: 11, day: 3, hour: null, minute: 0, calendar: 'lunar', leap: false, gender: 'M', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' });

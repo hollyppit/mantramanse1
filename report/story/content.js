@@ -135,6 +135,9 @@
     // 선택한 관심사가 있을 때 결과 아래에 붙는 문장. {interest} 가 선택지의 text 로 바뀝니다.
     interestLine: '"{interest}", 궁금하다고 하셨죠. 그 이야기는 다음 장면에서 이어집니다.',
     flowHint: '같은 사람도 시기마다 다른 얼굴로 살아갑니다.',
+    // 수호신 등장(무료 결과 맨 위). 잠재력 이름은 우세 십성군 매핑으로만 만들고 AI 는 쓰지 않습니다.
+    guardianTitle: '{pillar}일주 · {title}', guardianTitleNoVideo: '{pillar}일주',
+    potentialLine: "당신의 수호신이 발견한 힘은 '{potential}'입니다. {group} 기운 {n}%, 평균의 {times}배입니다.",
   };
 
   var FLOW = {
@@ -153,13 +156,10 @@
     free: [{ label: '나의 기본 기질', note: '방금 확인했어요' }],
     // 항목 사이에 설명/이미지를 끼우고 싶으면 note 에 한 줄 설명을, image 에 { src, alt } 를 적으세요.
     locked: [
-      { label: '돈과 재물의 흐름', key: 'money' },
-      { label: '직업과 사업', key: 'career' },
-      { label: '연애와 인연', key: 'love' },
-      { label: '기회가 강해지는 시기' },
-      { label: '조심해야 할 시기' },
-      { label: '장기적인 대운 흐름', key: 'life' },
-      { label: '나의 사주 무빙툰' },
+      { label: '이 힘이 아직 막혀 있는 이유' },
+      { label: '수호신이 짚은 당신의 과거 한 시점' },
+      { label: '올해 달마다 들어오는 흐름' },
+      { label: '20개 챕터 전체' },
     ],
     // 선택한 관심사와 key가 같은 항목에 붙는 말
     pickedBadge: '궁금하다고 한 이야기',

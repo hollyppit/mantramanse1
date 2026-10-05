@@ -43,6 +43,7 @@
   // 여기가 유일한 연결 지점: GA4(gtag)·dataLayer·사용자 이벤트(mantra:track)로 한꺼번에 내보낸다.
   // 이미 사이트에 분석 도구가 있으면 그대로 쓰고, 없으면 아무 일도 일어나지 않는다(개발 화면에서는 콘솔에 표시).
   //   onboarding_started · problem_section_viewed · movingtoon_preview_viewed · interest_selected · saju_input_started
+  //   onboarding_block_viewed {index, type} (블록이 화면에 들어올 때 1회 — 이탈 지점 분석용, 개인정보 없음)
   //   saju_analysis_completed · free_result_viewed · flow_preview_viewed · paywall_viewed · purchase_clicked · purchase_completed(결제 연결 시)
   var sent = {};
   function track(name, props, once) {
@@ -53,6 +54,22 @@
     try { if (root.dataLayer && root.dataLayer.push) root.dataLayer.push(Object.assign({ event: name }, props)); } catch (e) { }
     try { if (DOC) root.dispatchEvent(new CustomEvent('mantra:track', { detail: { name: name, props: props } })); } catch (e) { }
     if (DEV && root.console) console.log('[track]', name, props);
+  }
+
+  // ───────── 수호신 잠재력: 우세 십성군 → 이름 (매핑만, AI 없음) ─────────
+  var GROUPS5 = ['비겁', '식상', '재성', '관성', '인성'];
+  var POTENTIAL = { 비겁: '스스로 길을 여는 힘', 식상: '생각을 형태로 만드는 힘', 재성: '기회를 알아보는 힘', 관성: '사람들이 믿고 따르게 만드는 힘', 인성: '깊이 이해하고 꿰뚫는 힘' };
+  var POTENTIAL_LINE = "당신의 수호신이 발견한 힘은 '{potential}'입니다. {group} 기운 {n}%, 평균의 {times}배입니다.";
+  var EL_COLORS = ['#5E9E78', '#D0634A', '#BC9C62', '#AEB9C6', '#4A7AB5'];
+  function potential(ch) { // 엔진이 이미 계산한 십성군 비중(ch.weights.groups, 일간 기준 비겁·식상·재성·관성·인성)만 읽는다
+    var g = ch && ch.weights && ch.weights.groups; if (!g || g.length < 5) return null;
+    var v = {}; GROUPS5.forEach(function (k, i) { v[k] = Math.round(g[i] * 10) / 10; });
+    var dom = GROUPS5.slice().sort(function (a, b) { return v[b] - v[a]; })[0];
+    return { group: dom, name: POTENTIAL[dom], pct: v[dom], n: Math.round(v[dom]), times: Math.round(v[dom] / 20 * 10) / 10 };
+  }
+  function potentialLine(ch, tpl) {
+    var p = potential(ch); if (!p) return '';
+    return String(tpl || POTENTIAL_LINE).replace(/\{potential\}/g, p.name).replace(/\{group\}/g, p.group).replace(/\{n\}/g, p.n).replace(/\{times\}/g, p.times);
   }
 
   // ───────── 상태 (마케팅 문구와 분리된 사용자 상태) ─────────
@@ -118,6 +135,16 @@
       return '<div class="gal c' + cols + '">' + items.map(function (it) {
         return '<figure class="fig">' + pic(it, { ar: b.aspectRatio || '4/5' }) + (it.caption ? '<figcaption>' + fmt(pick(it.caption)) + '</figcaption>' : '') + '</figure>';
       }).join('') + '</div>';
+    },
+    // 수호신 이미지 띠: 가로로 천천히 무한 루프(CSS). prefers-reduced-motion 이면 흐르지 않고 손으로 밀어서 본다.
+    guardianStrip: function (b) {
+      var imgs = (b.images || []).map(function (it) { return typeof it === 'string' ? { src: it, alt: '' } : (it || {}); }).filter(function (it) { return media(it.src); });
+      var head = b.title ? '<h3 class="tt big gs-t">' + lines(fmt(pick(b.title)), b.anim) + '</h3>' : '';
+      if (!imgs.length) return head + placeholder(b.todo, '수호신 이미지 준비 중', 'min-height:140px');
+      var n = imgs.length, list = []; while (list.length < Math.max(6, n)) imgs.forEach(function (it, i) { list.push({ it: it, hide: list.length >= n }); });
+      var sp = Math.min(4, Math.max(0.25, num(b.speed, 1))), dur = Math.max(14, list.length * 5 / sp);
+      var tag = function (x, hide) { return '<img src="' + esc(media(x.src)) + '" alt="' + (hide ? '' : esc(pick(x.alt))) + '"' + (hide ? ' aria-hidden="true"' : '') + ' loading="lazy" decoding="async" draggable="false">'; };
+      return head + '<div class="gs" style="--gs-d:' + dur + 's"><div class="gs-track"><div class="gs-set">' + list.map(function (x) { return tag(x.it, x.hide); }).join('') + '</div><div class="gs-set" aria-hidden="true">' + list.map(function (x) { return tag(x.it, true); }).join('') + '</div></div></div>';
     },
     video: function (b) {
       var url = media(b.src), ar = ratio(b.aspectRatio, '9/16'), st = 'aspect-ratio:' + ar;
@@ -207,6 +234,33 @@
     return R.image ? '<figure class="fig w-narrow">' + pic(R.image, { ar: '1/1' }) + '</figure>' : '';
   }
 
+  // 수호신 이미지: /api/awakening?pillar=&gender= 의 guardianImageUrl → posterUrl. 없으면 일간 오행 색 그라데이션 + 일주 한자.
+  var guardianCache = {};
+  function guardianFig(g, ko, hanja) {
+    if (g && g.url) return '<img class="gd-img on" src="' + esc(g.url) + '" alt="' + esc(ko + '일주 수호신') + '" decoding="async">';
+    return '<div class="gd-fb" role="img" aria-label="' + esc(ko + '일주') + '"><span>' + esc(hanja) + '</span></div>';
+  }
+  function mountGuardian(el) {
+    var f = el.querySelector('.gd'); if (!f || !DOC || !root.fetch) return;
+    var ko = f.getAttribute('data-pillar'), g = f.getAttribute('data-g'), key = ko + g; if (guardianCache[key]) return; // 한 번 받으면 다시 그릴 때 연출을 반복하지 않는다
+    guardianCache[key] = { url: '', title: '' };
+    fetch('/api/awakening?pillar=' + encodeURIComponent(ko) + '&gender=' + g).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      var v = d && d.video, u = media(v && (v.guardianImageUrl || v.posterUrl)); if (!u) return;
+      var im = new Image(); im.decoding = 'async';
+      im.onload = function () {
+        guardianCache[key] = { url: u, title: String((v && v.title) || '').slice(0, 40) };
+        var cur = document.querySelector('.gd[data-pillar="' + ko + '"][data-g="' + g + '"]') || f; // 응답 전에 다시 그려졌어도 지금 화면의 요소에 적용
+        var fig = cur.querySelector('.gd-fig'), cap = cur.querySelector('.gd-cap'), R = C.result || {}; if (!fig) return;
+        im.className = 'gd-img'; im.alt = ko + '일주 수호신'; fig.innerHTML = ''; fig.appendChild(im);
+        if (cap && guardianCache[key].title) cap.textContent = String(R.guardianTitle || '{pillar}일주 · {title}').replace('{pillar}', ko).replace('{title}', guardianCache[key].title);
+        if (REDUCE) { im.classList.add('on'); return; }
+        void im.offsetWidth; setTimeout(function () { im.classList.add('on'); }, 60); // 실루엣 → 1.2초 동안 밝아짐
+      };
+      im.onerror = function () { /* 이미지를 못 받으면 그라데이션 대체 유지 */ };
+      im.src = u;
+    }).catch(function () { });
+  }
+
   var FlowPreview; // COMPONENTS.FlowPreview (렌더·클릭 처리에서 서로 참조)
   var COMPONENTS = {
     // 사주 입력: 만세력 앱과 같은 입력값·같은 계산(Manse.compute)을 쓴다. 계산 로직은 건드리지 않는다.
@@ -272,14 +326,21 @@
         var yong = ch.yong && ch.yong.applicable !== false && ch.yong.yong != null ? m.EL_K[ch.yong.yong] : '';
         var summary = esc(nm ? String(R.subject || '{name}님은').replace('{name}', nm) : (R.subjectNoName || '당신은')) + ' ' + esc(R.elementTrait && R.elementTrait[el] || '') + '입니다. ' + esc(R.zoneTrait && R.zoneTrait[zt] || '') + (yong ? ' 균형을 도와주는 기운은 <em>' + esc(yong) + '</em>입니다.' : '');
         var il = withInterest(R.interestLine);
-        return '<p class="kicker">FREE</p><h2 class="hl hl-l">' + esc(nm ? String(R.title || '{name}님의 기본 기질').replace('{name}', nm) : (R.titleNoName || '당신의 기본 기질')) + '</h2>' +
+        var ko = m.gzNameK(d), gdr = guardianCache[ko + ch.gender], pl = potentialLine(ch, R.potentialLine), col = EL_COLORS[m.stemEl(d.s)];
+        var capT = gdr && gdr.title ? String(R.guardianTitle || '{pillar}일주 · {title}').replace('{pillar}', ko).replace('{title}', gdr.title) : String(R.guardianTitleNoVideo || '{pillar}일주').replace('{pillar}', ko);
+        var pct = (ch.weights && ch.weights.pct) || [], bars = m.EL_K.map(function (e, i) { var v = Math.round(pct[i] || 0); return '<div class="eb"><span>' + esc(e) + '</span><div class="eb-t"><i style="width:' + Math.max(2, Math.min(100, v * 2)) + '%;background:' + EL_COLORS[i] + '"></i></div><b>' + v + '%</b></div>'; }).join('');
+        var guardian = '<figure class="gd" data-pillar="' + esc(ko) + '" data-g="' + esc(ch.gender === 'F' ? 'F' : 'M') + '"><div class="gd-fig" style="--gc:' + col + '">' + guardianFig(gdr, ko, m.gzName(d)) + '</div><figcaption class="gd-cap" aria-live="polite">' + esc(capT) + '</figcaption></figure>' +
+          '<div class="eb-wrap" role="group" aria-label="오행 분포">' + bars + '</div>' + (pl ? '<p class="gd-pot">' + esc(pl) + '</p>' : '');
+        return '<p class="kicker">FREE</p><h2 class="hl hl-l">' + esc(nm ? String(R.title || '{name}님의 기본 기질').replace('{name}', nm) : (R.titleNoName || '당신의 기본 기질')) + '</h2>' + guardian +
           '<div class="pillars" aria-label="사주 네 기둥">' + cell('hour', '시주') + cell('day', '일주') + cell('month', '월주') + cell('year', '연주') + '</div>' +
           '<p class="me-line">나를 뜻하는 글자는 <b>' + esc(m.STEM_K[d.s]) + '(' + esc(m.STEM[d.s]) + ') · ' + esc(el) + '</b></p>' +
           '<p class="sum">' + summary + '</p>' + resultMedia(R, ch) +
           (il ? '<p class="note ctr">' + esc(il) + '</p>' : '') + (R.flowHint ? '<p class="body emph">' + fmt(R.flowHint) + '</p>' : '');
       },
+      mount: mountGuardian,
     },
 
+    // (FreeResult 수호신 등장은 위 render 와 아래 mount 가 짝)
     // 운 흐름 미리보기: 만세력 앱 "월운 흐름" 그래프와 같은 계산(Manse.wolun)·같은 읽는 법.
     //   막대 높이 = 흐름 적합도(위로 길수록 유리, 아래로 내려가면 조심) · 색 = 주 흐름(기회·확장·수확·축적) · 변/방 = 변동·방어 신호
     FlowPreview: {
@@ -452,13 +513,14 @@
   }
 
   // ───────── 스크롤 관찰 (등장 효과 · 영상 지연 로딩 · 고정 이미지 단계 · 조회 이벤트) ─────────
-  var io, vio, sio;
+  var io, vio, sio, bio, seenBlk = {};
   function observeAll(scope) {
     scope = scope || document;
     if (!io) return;
     scope.querySelectorAll('.blk:not(.in)').forEach(function (el) { io.observe(el); });
     (scope.matches && scope.matches('.blk:not(.in)') ? [scope] : []).forEach(function (el) { io.observe(el); });
     scope.querySelectorAll('video[data-src]').forEach(function (v) { vio.observe(v); });
+    if (bio) { scope.querySelectorAll('.blk').forEach(function (el) { bio.observe(el); }); if (scope.matches && scope.matches('.blk')) bio.observe(scope); }
     scope.querySelectorAll('.ss-s').forEach(function (s) { sio.observe(s); });
   }
   function setupObservers() {
@@ -471,6 +533,16 @@
         var t = e.target.getAttribute('data-track'); if (t) track(t, null, true);
       });
     }, { threshold: 0.18, rootMargin: '0px 0px -6% 0px' });
+    bio = new IntersectionObserver(function (es) { // 블록이 화면에 들어올 때마다 1회: 어느 블록에서 이탈하는지 본다(index·type 만, 개인정보 없음)
+      es.forEach(function (e) {
+        var el = e.target, i = el.getAttribute('data-i'); if (!e.isIntersecting || seenBlk[i]) return;
+        if (e.intersectionRatio < 0.35 && e.intersectionRect.height < root.innerHeight * 0.4) return; // 아주 긴 블록은 화면의 40% 이상 보일 때
+        seenBlk[i] = 1; bio.unobserve(el);
+        var m = /(?:^|\s)t-(\w+)/.exec(el.className), type = m ? m[1] : ''; if (type === 'spacer' || type === 'divider') return;
+        if (type === 'component') type = 'component:' + (el.getAttribute('data-comp') || '');
+        if (!PREVIEW) track('onboarding_block_viewed', { index: +i, type: type });
+      });
+    }, { threshold: [0.1, 0.35, 0.6] });
     vio = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         var v = e.target;
@@ -678,6 +750,7 @@
       if ((/^(image|fullImage)$/.test(b.type) || (b.type === 'imageText' && b.mediaType !== 'video') || (b.type === 'compare' && b.src)) && !b.alt) out.push(w + 'alt 없음');
       if (b.type === 'video' && b.src && !b.poster) out.push(w + 'poster 없음(권장)');
       if (b.type === 'gallery') { var n = (b.items || []).length; if (n < 2 || n > 4) out.push(w + '이미지는 2~4장'); (b.items || []).forEach(function (it, j) { if (!it.alt) out.push(w + 'items[' + j + '] alt 없음'); }); }
+      if (b.type === 'guardianStrip') (b.images || []).forEach(function (it, j) { if (it && !(typeof it === 'string') && it.src && !it.alt) out.push(w + 'images[' + j + '] alt 없음'); });
       if (b.type === 'stickySteps') (b.steps || []).forEach(function (s, j) { if (!s.alt) out.push(w + 'steps[' + j + '] alt 없음'); });
       if (b.type === 'component' && !COMPONENTS[b.name]) out.push(w + '알 수 없는 component "' + b.name + '"');
       if (b.type === 'cta') {
@@ -829,6 +902,6 @@
       .catch(function () { clearTimeout(timer); start(); });
   }
 
-  root.Story = { validate: validate, track: track, pick: pick, media: media, fmt: fmt, BLOCKS: BLOCKS, COMPONENTS: COMPONENTS, state: S };
+  root.Story = { potential: potential, potentialLine: potentialLine, POTENTIAL: POTENTIAL, validate: validate, track: track, pick: pick, media: media, fmt: fmt, BLOCKS: BLOCKS, COMPONENTS: COMPONENTS, state: S };
   if (DOC) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot(); }
 })(typeof window !== 'undefined' ? window : globalThis);
