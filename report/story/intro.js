@@ -1,12 +1,16 @@
 // 입장 인트로: 관리자(입장 인트로 탭)에서 켠 경우에만 첫 화면 위에 영상을 음소거로 재생하고, 끝나거나 건너뛰면 아래 스토리 페이지가 이어진다.
 (function () {
   'use strict';
+  // 사이트에 내장된 기본 인트로 (관리자가 아무것도 저장하지 않았을 때, 또는 저장본을 지웠을 때)
+  var DEFAULT = { on: true, url: '/report/story/img/intro-pc.gif', urlMobile: '/report/story/img/intro-mobile.gif', imageSeconds: 5, once: 'session', fx: {} };
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var preview = /[?&]preview=1\b/.test(location.search); // 관리자 미리보기 창에서는 인트로를 건너뛴다
   {
     if (reduce || preview) return;
     try { if (sessionStorage.getItem('mt_intro') === '1') return; } catch (e) {}
     fetch('/api/intro').then(function (r) { return r.ok ? r.json() : { on: false }; }).then(function (c) {
+      try { localStorage.setItem('mt_intro_custom', c && c.unset ? '0' : '1'); } catch (e) {} // 다음 방문에서 내장 GIF 미리 받기를 할지 정하는 표시
+      if (c && c.unset) c = DEFAULT;
       var mobile = window.matchMedia('(max-width: 768px)').matches;
       var url = mobile ? (c.urlMobile || c.url) : (c.url || c.urlMobile);
       if (!c.on || !url) return;
