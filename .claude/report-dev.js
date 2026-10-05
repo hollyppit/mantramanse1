@@ -21,8 +21,8 @@ http.createServer(async (q, r) => {
   if (p === '/api/ai') {
     if (!authed(q)) return send(r, 401, { error: '관리자 인증이 필요합니다' });
     const b = JSON.parse((await body(q)).toString());
-    if ((b.task === 'split' || b.task === 'draft') && !b.text) return send(r, 400, { error: '나눌 문장이 비어 있습니다' });
-    const lines = b.task === 'polish' ? (b.lines || []).map(l => l + ' (다듬음)') : (b.task === 'split' || b.task === 'draft') ? String(b.text).split(/[.!?]\s*/).filter(Boolean) : ['(모의) ' + (b.title || '제목') + ' — ' + Object.entries(b.cond || {}).map(([k, v]) => k + ' ' + v).join(', '), '고요한 숲 한가운데 서 있는 나무처럼', '당신은 쉽게 흔들리지 않는 사람이에요', '그런데 왜 가끔은 홀로 서 있는 기분일까요?'].slice(0, b.n || 4);
+    if ((b.task === 'split' || b.task === 'draft' || b.task === 'expand') && !b.text) return send(r, 400, { error: '나눌 문장이 비어 있습니다' });
+    const lines = b.task === 'polish' ? (b.lines || []).map(l => l + ' (다듬음)') : (b.task === 'split' || b.task === 'draft' || b.task === 'expand') ? String(b.text).split(/[.!?]\s*/).filter(Boolean) : ['(모의) ' + (b.title || '제목') + ' — ' + Object.entries(b.cond || {}).map(([k, v]) => k + ' ' + v).join(', '), '고요한 숲 한가운데 서 있는 나무처럼', '당신은 쉽게 흔들리지 않는 사람이에요', '그런데 왜 가끔은 홀로 서 있는 기분일까요?'].slice(0, b.n || 4);
     const fb = /폴백/.test(b.tone || '');
     return send(r, 200, { ok: true, provider: fb ? 'openai' : 'anthropic', model: fb ? 'gpt-6.1-sol' : 'claude-sonnet-5-5', lines, attempts: fb ? [{ provider: 'anthropic', ok: false, error: 'anthropic 오류 529: Overloaded' }, { provider: 'openai', ok: true }] : [{ provider: 'anthropic', ok: true }] });
   }

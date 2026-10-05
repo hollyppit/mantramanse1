@@ -1,6 +1,7 @@
 // 리포트 글자(자막) 스타일 — 장면 안의 글자마다 글씨체·크기·색·정렬·위치·등장/사라짐 효과·나타나는 시기·사라지는 시기를 덮어쓴다.
 // 저장 모양: { all: { '역할': 스타일 }, chapters: { c05: { '역할': 스타일 } } }  (챕터별 값이 전체 값 위에 덮어쓴다)
 // 스타일: { font, size, sizeM, weight, color, align, spacing, line, x, y, in, inSpeed, inDelay, hold, out, outSpeed, loop, loopSpeed }
+//   text = 문장 직접 입력(줄바꿈 가능, 비우면 원래 문장) · seq = 줄마다 차례로 나타나기 · seqGap = 줄 사이 간격(초)
 //   inDelay = 장면(또는 영상 단계)에 들어온 뒤 나타나기까지 초 · hold = 다 나타난 뒤 사라지기까지 초(0=사라지지 않음)
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
@@ -34,6 +35,8 @@
     if ((n = num(s.hold, 0, 120)) !== undefined && n > 0) o.hold = n;
     if (s.out && has(OUT, s.out)) o.out = s.out; if ((n = num(s.outSpeed, 0.2, 6)) !== undefined) o.outSpeed = n;
     if (s.loop && has(LOOP, s.loop)) o.loop = s.loop; if ((n = num(s.loopSpeed, 1, 30)) !== undefined) o.loopSpeed = n;
+    if (typeof s.text === 'string') { var t = s.text.replace(/\r/g, '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '').slice(0, 600); if (t.trim()) o.text = t; }
+    if (s.seq === true) o.seq = true; if ((n = num(s.seqGap, 0.2, 10)) !== undefined) o.seqGap = n;
     return o;
   }
   // 역할의 최종 스타일 = 전체 값 위에 챕터 값

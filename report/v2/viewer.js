@@ -348,6 +348,14 @@
       t.parentNode.replaceChild(frag, t);
     });
   }
+  function splitSeqTx(box) { // 줄바꿈(<br>)마다 한 줄씩 .sq 로 감싼다 → 줄이 차례로 나타난다. 줄이 하나뿐이면 0
+    var parts = box.innerHTML.split(/<br\s*\/?>/i).filter(function (p) { return p.replace(/<[^>]*>|&nbsp;/g, '').trim(); });
+    if (parts.length < 2) return 0;
+    box.innerHTML = parts.map(function (p, i) { return '<span class="sq" style="--sq:' + i + '">' + p + '</span>'; }).join(''); return parts.length;
+  }
+  function txPlain(el) { // 지금 화면에 쓰인 원래 문장(관리자 편집창의 "현재 문장 가져오기"용)
+    var d = document.createElement('div'); d.innerHTML = (el._orig != null ? el._orig : el.innerHTML).replace(/<br\s*\/?>/gi, '\n').replace(/<\/span>\s*<span/gi, '</span> <span'); return d.textContent.trim();
+  }
   var TX_PROPS = ['fontFamily', 'fontSize', 'color', 'fontWeight', 'textAlign', 'letterSpacing', 'lineHeight', 'position', 'left', 'top'];
   function txStyle(el, st, immediate) {
     var inner = el.querySelector(':scope > .tx-i');
@@ -363,7 +371,10 @@
     if (st.spacing != null) el.style.letterSpacing = st.spacing + 'px'; if (st.line) el.style.lineHeight = st.line;
     if (st.x || st.y) { el.style.position = 'relative'; el.style.left = (st.x || 0) + 'vw'; el.style.top = (st.y || 0) + 'svh'; }
     if (st.loop) { el.classList.add('tx-an-' + st.loop); el.style.setProperty('--tx-ls', (st.loopSpeed || 6) + 's'); el.style.setProperty('--tx-sh', getComputedStyle(el).color); }
-    var inFx = st.in || (+st.inDelay > 0 ? 'fade' : ''), delay = +st.inDelay || 0, dur = st.inSpeed || (st.in ? 0.9 : 0.4), hold = +st.hold || 0;
+    if (st.text) inner.innerHTML = esc(st.text).replace(/\n/g, '<br>'); // 관리자가 직접 쓴 문장(줄바꿈 유지)
+    var seqN = st.seq ? splitSeqTx(inner) : 0, gap = +st.seqGap || 1;
+    if (seqN) { el.classList.add('tx-seq'); el.style.setProperty('--tx-gap', gap + 's'); }
+    var inFx = seqN ? (st.in === 'letters' ? 'rise' : (st.in || 'fade')) : (st.in || (+st.inDelay > 0 ? 'fade' : '')), delay = +st.inDelay || 0, dur = st.inSpeed || (st.in ? 0.9 : 0.4), hold = +st.hold || 0, extra = seqN ? (seqN - 1) * gap : 0;
     el.style.setProperty('--tx-id', dur + 's'); el.style.setProperty('--tx-il', delay + 's'); el.style.setProperty('--tx-od', (st.outSpeed || 0.8) + 's');
     if (!inFx && !hold) return; // 효과·시기 설정이 없으면 그대로 보인다
     if (inFx) el.classList.add('tx-in-' + inFx); if (inFx === 'letters') splitLettersTx(inner);
@@ -371,7 +382,7 @@
     el._txGo = function () { // 들어왔을 때 재생: 지연 → 나타남 → (hold 초 뒤) 사라짐
       el.classList.remove('tx-pend', 'tx-out'); [].slice.call(el.classList).forEach(function (c) { if (c.indexOf('tx-ot-') === 0) el.classList.remove(c); });
       void el.offsetWidth; el.classList.add('tx-go');
-      if (hold > 0) txTimers.push(setTimeout(function () { el.classList.add('tx-out', 'tx-ot-' + (st.out || 'fade')); }, (delay + dur + hold) * 1000));
+      if (hold > 0) txTimers.push(setTimeout(function () { el.classList.add('tx-out', 'tx-ot-' + (st.out || 'fade')); }, (delay + extra + dur + hold) * 1000));
     };
     if (immediate) txTimers.push(setTimeout(function () { el._txGo(); }, 30));
   }
@@ -389,7 +400,7 @@
   if (PREVIEW) { // 관리자 미리보기: 글자를 누르면 선택·끌어서 위치 이동, 관리자에서 값이 바뀌면 바로 반영
     var txDrag = null, txSel = null;
     var txPost = function (o) { if (window.parent !== window) window.parent.postMessage(o, location.origin); };
-    var txSelect = function (el) { if (txSel) txSel.classList.remove('tx-sel'); txSel = el; if (el) { el.classList.add('tx-sel'); txPost({ type: 'mt-v2-tx', role: el.getAttribute('data-tx'), cid: $('#app').dataset.view === 'awk' ? '_' : txCid() }); } else txPost({ type: 'mt-v2-tx', role: null }); };
+    var txSelect = function (el) { if (txSel) txSel.classList.remove('tx-sel'); txSel = el; if (el) { el.classList.add('tx-sel'); txPost({ type: 'mt-v2-tx', orig: txPlain(el), role: el.getAttribute('data-tx'), cid: $('#app').dataset.view === 'awk' ? '_' : txCid() }); } else txPost({ type: 'mt-v2-tx', role: null }); };
     document.addEventListener('pointerdown', function (e) {
       var el = e.target.closest && e.target.closest('[data-tx]');
       if (!el) { if (!(e.target.closest && e.target.closest('#bar, #drawer, button'))) txSelect(null); return; }

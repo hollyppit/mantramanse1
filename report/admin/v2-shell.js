@@ -134,7 +134,7 @@
     }).join('');
     var orphan = chaptersAll().filter(function (c) { return !known[c.project]; });
     if (orphan.length) groups += '<div class="pgrp"><div class="pgh"><b>(프로젝트 없음)</b></div>' + orphan.map(row).join('') + '</div>';
-    root.innerHTML = '<div class="cols"><div class="card"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px"><b style="color:var(--gold)">챕터 총괄</b><span style="flex:1"></span><button class="pri" type="button" id="chSave"' + (CH.dirty || PJ.dirty ? '' : ' disabled') + '>저장</button></div>' +
+    root.innerHTML = '<div class="cols"><div class="card"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px"><b style="color:var(--gold)">챕터 총괄</b><span style="flex:1"></span><button type="button" id="chAddProj" title="새 프로젝트(상품) 만들기">+ 프로젝트</button><button class="pri" type="button" id="chSave"' + (CH.dirty || PJ.dirty ? '' : ' disabled') + '>저장</button></div>' +
       '<p class="muted" style="margin:0 0 8px;font-size:.76rem">챕터는 하나의 프로젝트에만 속합니다. 같은 내용을 다른 상품에서도 쓰려면 챕터를 "복제"하세요. 영상·해석 모듈·개운법은 같이 씁니다.</p><div class="chl">' + groups + '</div></div><div id="chEd"></div></div>';
     $('.chl', root).onclick = function (e) {
       var add = e.target.closest('[data-addch]'); if (add) { var nc = addChapterTo(add.dataset.addch); CH.sel = nc.id; CH.tab = 'set'; chapDraw(); return; }
@@ -146,6 +146,13 @@
         if (j >= 0 && j < same.length) { var t = same[j].order; same[j].order = c.order; c.order = t; renumber(c.project); CH.dirty = true; chapDraw(); } return;
       }
       CH.sel = id; CH.tab = 'set'; chapDraw();
+    };
+    $('#chAddProj', root).onclick = function () {
+      var name = prompt('새 프로젝트(상품) 이름', '새 프로젝트'); if (!name || !name.trim()) return;
+      var id = 'p' + Date.now().toString(36).slice(-6);
+      projs.push({ id: id, name: name.trim(), desc: '', enabled: true, accessLevel: 'free', requiredCompletionRate: null, chapters: null, needTags: [], acts: [{ title: '시작', line: '', pdfDone: '' }] });
+      PJ.sel = id; PJ.dirty = true; CH.collapsed[id] = false;
+      var nc = addChapterTo(id); CH.sel = nc.id; CH.tab = 'set'; chapDraw(); toast('프로젝트를 만들었습니다 — 저장을 눌러 반영하세요');
     };
     $('#chSave', root).onclick = function () { this.disabled = true; saveStructure().then(function () { chapDraw(); toast('저장했습니다'); }).catch(function (e) { toast(e.message, true); chapDraw(); }); };
     chapEditor();
@@ -243,6 +250,51 @@
     function field(label, inner, wide) { return '<div class="fld' + (wide ? '' : '') + '" style="' + (wide ? 'grid-column:1/-1' : '') + '"><label>' + label + '</label>' + inner + '</div>'; }
     function nf(k, min, max, step, ph) { var v = effective()[k]; return '<div style="display:flex;gap:6px;align-items:center"><input type="range" data-k="' + k + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + (v != null ? v : (ph != null ? ph : min)) + '" style="flex:1;padding:0"><input type="number" data-k="' + k + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + (v != null ? v : '') + '" placeholder="' + (ph != null ? ph : '') + '" style="width:72px"></div>'; }
     function sel(k, opts, wide) { var v = effective()[k] || ''; return '<select data-k="' + k + '">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(v) === String(o[0]) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; }
+    // 사주마다 달라지는 문장은 통째로 바꾸면 모두 같은 문장이 되므로 직접 입력을 막는다(해석 모듈 탭에서 고친다)
+    var FIXED_ROLES = ['insight.fact', 'insight.lead', 'explain.lead', 'ilgan.kw', 'awk.kw'], DYN_ROLES = ['intro.headline', 'end.quote', 'ilgan.title', 'ilgan.sub', 'awk.title', 'awk.sub'];
+    function textBlock(e) {
+      var seq = '<label class="chk2" style="display:flex;gap:6px;align-items:center;margin:8px 0 2px"><input type="checkbox" data-k="seq"' + (e.seq ? ' checked' : '') + ' style="width:auto"> 줄마다 차례로 나타나기 (줄바꿈 기준)</label>' +
+        '<div class="g2c">' + field('줄 사이 간격 (초)', nf('seqGap', 0.2, 10, 0.1, 1)) + '</div>';
+      if (FIXED_ROLES.indexOf(P.role) >= 0) return '<div class="cap2">문장</div><p class="muted" style="font-size:.76rem;margin:0">이 문장은 사주마다 달라서 여기서 직접 쓸 수 없어요. 문장 내용은 <b>해석 모듈</b>에서 고치고, 줄바꿈 단위로 차례 등장만 여기서 정합니다.</p>' + seq;
+      var warn = DYN_ROLES.indexOf(P.role) >= 0 ? '<p class="muted" style="font-size:.76rem;margin:0 0 4px;color:#FFC080">주의: 직접 쓰면 모든 사주에 이 문장이 똑같이 나옵니다. 비워 두면 원래 문장입니다.</p>' : '';
+      return '<div class="cap2">문장 (Enter 로 줄바꿈 · 비우면 원래 문장)</div>' + warn +
+        '<textarea data-k="text" rows="4" style="width:100%;resize:vertical" placeholder="' + esc(P.orig || '') + '">' + esc(e.text || '') + '</textarea>' +
+        '<div class="row" style="margin-top:6px"><button type="button" data-fetch title="미리보기에 지금 나오는 문장을 불러옵니다">현재 문장 가져오기</button></div>' +
+        '<div class="cap2">AI로 다듬기</div><div class="row" style="align-items:center;gap:6px;flex-wrap:wrap"><input type="text" data-aitone placeholder="말투·방향 (예: 더 부드럽게, 짧게)" style="flex:1;min-width:140px"><button type="button" data-ai="draft" title="쓴 초안의 뜻은 살리고 매끄럽게">다듬기</button><button type="button" data-ai="expand" title="초안에 살을 붙여 풍성하게">보충하기</button><button type="button" data-ai="split" title="뜻은 그대로 한 호흡씩 줄바꿈">줄 나누기</button></div>' +
+        '<div class="muted" data-aimsg style="font-size:.76rem;margin-top:4px"></div>' + seq;
+    }
+    /* 일괄 적용: 지금 글자의 설정 중 고른 묶음(글씨체·크기·위치·효과)을 선택한 다른 글자들에 복사한다. 문장 내용은 복사하지 않는다.
+       영상 단계 자막은 전체 적용, 그 외는 위에서 고른 적용 범위(이 챕터만/모든 챕터)를 따른다. */
+    var BULK = [['font', '글씨체·굵기·색·정렬·자간·줄간격', ['font', 'weight', 'color', 'align', 'spacing', 'line']], ['size', '크기', ['size', 'sizeM']], ['pos', '위치', ['x', 'y']], ['in', '나타나기(차례 등장 포함)', ['in', 'inSpeed', 'inDelay', 'seq', 'seqGap']], ['out', '사라지기', ['hold', 'out', 'outSpeed']], ['loop', '계속 움직이는 효과', ['loop', 'loopSpeed']]];
+    function bulkBlock() {
+      var roles = Object.keys(T.ROLES).filter(function (r) { return r !== P.role; });
+      return '<div class="cap2">여러 글자에 한꺼번에 적용</div><p class="muted" style="font-size:.76rem;margin:0 0 4px">지금 글자의 설정을 복사합니다. 복사할 항목과 받을 글자를 고르세요.</p>' +
+        '<div class="sub2" style="margin:0 0 6px">' + BULK.map(function (b) { return '<label class="chk2" style="display:flex;gap:4px;align-items:center;font-size:.8rem"><input type="checkbox" data-bk="' + b[0] + '" style="width:auto"' + (b[0] === 'font' ? ' checked' : '') + '>' + b[1] + '</label>'; }).join('') + '</div>' +
+        '<div class="sub2" style="margin:0 0 6px"><button type="button" data-bkall>전체 선택</button>' + roles.map(function (r) { return '<label class="chk2" style="display:flex;gap:4px;align-items:center;font-size:.8rem"><input type="checkbox" data-br="' + r + '" style="width:auto">' + esc(T.ROLES[r][0]) + '</label>'; }).join('') + '</div>' +
+        '<div class="row"><button type="button" class="pri" data-bulk>선택한 글자에 적용</button></div>';
+    }
+    function bulkApply() {
+      var keys = []; BULK.forEach(function (b) { if (el.querySelector('[data-bk="' + b[0] + '"]').checked) keys = keys.concat(b[2]); });
+      var targets = [].slice.call(el.querySelectorAll('[data-br]')).filter(function (c) { return c.checked; }).map(function (c) { return c.dataset.br; });
+      if (!keys.length || !targets.length) return toast('복사할 항목과 받을 글자를 고르세요', true);
+      var src = effective(), ts = tsWork();
+      targets.forEach(function (r) {
+        var map = isStage(r) || P.scope === 'all' ? ts.all : (ts.chapters[P.cid] = ts.chapters[P.cid] || {}), t = map[r] = map[r] || {};
+        keys.forEach(function (k) { if (src[k] == null || src[k] === '') delete t[k]; else t[k] = src[k]; });
+        if (!Object.keys(t).length) delete map[r];
+      });
+      TX.dirty = true; pane.sendTs(true); render(); toast(targets.length + '개 글자에 적용했습니다 — 글자 설정 저장을 눌러 반영하세요');
+    }
+    function aiRun(task, btn) {
+      var ta = el.querySelector('textarea[data-k="text"]'), msg = el.querySelector('[data-aimsg]'), text = (ta.value || P.orig || '').trim();
+      if (!text) { msg.textContent = '먼저 초안을 쓰거나 "현재 문장 가져오기"를 누르세요'; return; }
+      var btns = [].slice.call(el.querySelectorAll('[data-ai]')); btns.forEach(function (b) { b.disabled = true; }); msg.textContent = 'AI가 쓰는 중… (최대 40초)';
+      fetch('/api/ai', { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + PW }, body: JSON.stringify({ task: task, text: text, tone: (el.querySelector('[data-aitone]') || {}).value || '', chapter: (T.ROLES[P.role] || [P.role])[0] }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(d.error || ('오류 ' + r.status)); return d; }); })
+        .then(function (d) { ta.value = d.lines.join('\n'); put('text', ta.value); msg.textContent = (d.provider === 'anthropic' ? 'Claude' : 'GPT') + '가 ' + d.lines.length + '줄로 썼습니다. 마음에 안 들면 다시 누르거나 직접 고치세요.'; })
+        .catch(function (er) { msg.textContent = er.message; })
+        .then(function () { btns.forEach(function (b) { b.disabled = false; }); });
+    }
     function render() {
       var list = P.roles.map(function (r) { return '<button type="button" data-role="' + r + '" class="' + (r === P.role ? 'on' : '') + '">' + esc((T.ROLES[r] || [r])[0]) + '</button>'; }).join('');
       var h = '<div class="row" style="align-items:center;margin-bottom:6px"><b style="color:var(--gold)">글자 편집</b><span class="muted" style="font-size:.76rem">미리보기에서 글자를 누르면 선택돼요 · 끌면 위치 이동</span><span style="flex:1"></span><button type="button" class="pri" data-txsave' + (TX.dirty ? '' : ' disabled') + '>글자 설정 저장</button></div>' +
@@ -250,6 +302,7 @@
       if (!P.role) { el.innerHTML = h; bind(); return; }
       var e = effective(), stage = isStage(P.role);
       h += '<div class="fld"><label>적용 범위</label>' + (stage ? '<div class="muted">영상 단계 자막은 모든 사주에 같이 적용됩니다</div>' : '<div class="sub2" style="margin:0"><button type="button" data-scope="chapter" class="' + (P.scope === 'chapter' ? 'on' : '') + '">이 챕터만</button><button type="button" data-scope="all" class="' + (P.scope === 'all' ? 'on' : '') + '">모든 챕터</button></div>') + '</div>' +
+        textBlock(e) +
         '<div class="g2c">' + field('글씨체', sel('font', [['', '(기본)']].concat(window.StoryFonts.list))) + field('굵기', sel('weight', [['', '(기본)']].concat(T.WEIGHTS))) + '</div>' +
         '<div class="g2c">' + field('크기 · PC (px)', nf('size', 8, 120, 1, 16)) + field('크기 · 모바일 (px, 비우면 PC와 같게)', nf('sizeM', 8, 120, 1, 16)) + '</div>' +
         '<div class="g2c">' + field('색', '<div style="display:flex;gap:6px"><input type="color" data-color value="' + (e.color || '#EDE8DC') + '" style="width:38px;height:30px;padding:0"><input type="text" data-k="color" value="' + esc(e.color || '') + '" placeholder="기본 색"></div>') + field('정렬', '<div class="sub2" style="margin:0">' + [['left', '왼쪽'], ['center', '가운데'], ['right', '오른쪽']].map(function (a) { return '<button type="button" data-al="' + a[0] + '" class="' + (e.align === a[0] ? 'on' : '') + '">' + a[1] + '</button>'; }).join('') + '</div>') + '</div>' +
@@ -258,7 +311,7 @@
         '<div class="cap2">나타나기</div><div class="g2c">' + field('등장 효과', sel('in', T.IN)) + field('등장 속도 (초)', nf('inSpeed', 0.2, 6, 0.1, 0.9)) + field('나타나는 시기 (초 · 장면에 들어온 뒤 몇 초 후)', nf('inDelay', 0, 30, 0.1, 0), true) + '</div>' +
         '<div class="cap2">사라지기</div><div class="g2c">' + field('사라지는 시기 (초 · 다 나타난 뒤 몇 초 후, 0=사라지지 않음)', nf('hold', 0, 60, 0.5, 0), true) + field('사라지는 효과', sel('out', T.OUT)) + field('사라지는 속도 (초)', nf('outSpeed', 0.2, 6, 0.1, 0.8)) + '</div>' +
         '<div class="cap2">계속 움직이는 효과</div><div class="g2c">' + field('효과', sel('loop', T.LOOP)) + field('주기 (초 · 클수록 느림)', nf('loopSpeed', 1, 30, 0.5, 6)) + '</div>' +
-        '<div class="row" style="margin-top:10px"><button type="button" data-play>▶ 다시 재생</button><button type="button" data-reset>이 글자 설정 되돌리기</button></div>';
+        '<div class="row" style="margin-top:10px"><button type="button" data-play>▶ 다시 재생</button><button type="button" data-reset>이 글자 설정 되돌리기</button></div>' + bulkBlock();
       el.innerHTML = h; bind();
     }
     function bind() {
@@ -267,17 +320,23 @@
         var sc = e.target.closest('[data-scope]'); if (sc) { P.scope = sc.dataset.scope; render(); return; }
         var al = e.target.closest('[data-al]'); if (al) { put('align', al.dataset.al); render(); return; }
         if (e.target.closest('[data-play]')) { pane.sendTs(true); return; }
+        if (e.target.closest('[data-bulk]')) { bulkApply(); return; }
+        if (e.target.closest('[data-bkall]')) { var rs = [].slice.call(el.querySelectorAll('[data-br]')), on = rs.some(function (c) { return !c.checked; }); rs.forEach(function (c) { c.checked = on; }); return; }
+        var ai = e.target.closest('[data-ai]'); if (ai) { aiRun(ai.dataset.ai, ai); return; }
+        if (e.target.closest('[data-fetch]')) { var ta = el.querySelector('textarea[data-k="text"]'); if (ta && P.orig) { ta.value = P.orig; put('text', P.orig); } return; }
         if (e.target.closest('[data-reset]')) { var t = target(false); if (t) { Object.keys(t).forEach(function (k) { delete t[k]; }); var ts = tsWork(); [ts.all, ts.chapters[P.cid]].forEach(function (m) { if (m && m[P.role] && !Object.keys(m[P.role]).length) delete m[P.role]; }); } TX.dirty = true; pane.sendTs(true); render(); return; }
         if (e.target.closest('[data-txsave]')) { var b = e.target.closest('[data-txsave]'); b.disabled = true; C.save({ textStyles: tsWork() }).then(function () { ST.saved.textStyles = clone(tsWork()); TX.dirty = false; render(); toast('글자 설정을 저장했습니다'); }).catch(function (er) { toast(er.message, true); b.disabled = false; }); }
       };
       el.oninput = el.onchange = function (e) {
         var t = e.target, k = t.getAttribute && t.getAttribute('data-k');
         if (t.hasAttribute && t.hasAttribute('data-color')) { put('color', t.value); var ti = el.querySelector('input[type=text][data-k=color]'); if (ti) ti.value = t.value; return; }
-        if (!k) return; var v = t.type === 'number' || t.type === 'range' ? (t.value === '' ? '' : +t.value) : t.value; put(k, v);
+        if (!k) return; if (k === 'seq') { put('seq', t.checked ? true : ''); return; }
+        if (k === 'text') { clearTimeout(P.tt); var tv = t.value; P.tt = setTimeout(function () { put('text', tv); }, 350); return; }
+        var v = t.type === 'number' || t.type === 'range' ? (t.value === '' ? '' : +t.value) : t.value; put(k, v);
         if (t.type === 'range' || t.type === 'number') el.querySelectorAll('[data-k="' + k + '"]').forEach(function (o) { if (o !== t && (o.type === 'number' || o.type === 'range')) o.value = t.value; });
       };
     }
-    P.onTx = function (m) { P.role = m.role || null; P.cid = m.cid || curCid(); if (P.role && isStage(P.role)) P.scope = 'all'; render(); };
+    P.onTx = function (m) { P.role = m.role || null; P.orig = m.orig || ''; P.cid = m.cid || curCid(); if (P.role && isStage(P.role)) P.scope = 'all'; render(); };
     P.onList = function (m) { P.roles = m.roles || []; P.cid = m.cid || P.cid; if (P.role && P.roles.indexOf(P.role) < 0) P.role = null; render(); };
     P.onMove = function (m) { P.role = m.role; P.cid = m.cid || P.cid; if (isStage(P.role)) P.scope = 'all'; var t = target(true); t.x = m.x; t.y = m.y; TX.dirty = true; pane.sendTs(false); render(); };
     render(); return P;

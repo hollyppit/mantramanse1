@@ -18,6 +18,8 @@ export function cleanStyle(s) {
   if ((n = num(s.hold, 0, 120)) !== undefined && n > 0) o.hold = n;
   if (OUT.includes(s.out)) o.out = s.out; if ((n = num(s.outSpeed, 0.2, 6)) !== undefined) o.outSpeed = n;
   if (LOOP.includes(s.loop)) o.loop = s.loop; if ((n = num(s.loopSpeed, 1, 30)) !== undefined) o.loopSpeed = n;
+  if (typeof s.text === 'string') { const t = s.text.replace(/\r/g, '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '').slice(0, 600); if (t.trim()) o.text = t; }
+  if (s.seq === true) o.seq = true; if ((n = num(s.seqGap, 0.2, 10)) !== undefined) o.seqGap = n;
   return o;
 }
 const cleanMap = (m, maxRoles) => { const o = {}; if (m && typeof m === 'object') for (const r of Object.keys(m).slice(0, maxRoles)) if (ROLE_RE.test(r)) { const c = cleanStyle(m[r]); if (Object.keys(c).length) o[r] = c; } return o; };

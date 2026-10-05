@@ -5,6 +5,7 @@
 // POST /api/ai  { task, n?, tone?, ...작업별 값 } → { ok, provider, model, lines: [...], attempts: [...] }
 //   task "script": 클립 조건에 맞는 자막 새로 쓰기   { chapter, title, cond: {항목: "값,값"}, existing? }
 //   task "draft" : 대충 쓴 자막 초안을 자막 규칙에 맞게 다듬기 { text, n?(비우면 자동), chapter?, title?, cond? }
+//   task "expand": 짧은 초안에 살을 붙여 보충하기 { text, tone?, chapter? }
 //   task "split" : 전체 문장을 자막 줄로 나누기      { text }
 //   task "polish": 이미 쓴 자막 다듬기              { lines: [...] }  (tone = 다듬는 방향)
 //
@@ -90,6 +91,10 @@ function buildPrompt(b) {
     const cond = b.cond && typeof b.cond === 'object' ? Object.entries(b.cond).slice(0, 10).map(([k, v]) => `- ${clip(k, 20)}: ${clip(v, 80)}`).join('\n') : '';
     const ctx = (b.chapter || b.title || cond) ? `\n\n참고 정보(내용을 새로 지어내는 데 쓰지 말고 어조·소재를 맞추는 데만 써라):\n장(章): ${clip(b.chapter, 60) || '미정'} / 클립 제목: ${clip(b.title, 80) || '미정'}\n사주 조건:\n${cond || '- (조건 없음)'}` : '';
     return `아래는 작가가 대충 써 둔 자막 초안이다. 뜻과 핵심 표현은 살리면서 자막 규칙에 맞게 매끄럽게 다듬어라. 초안에 없는 새로운 사실이나 주장은 덧붙이지 마라. ${fixed ? `줄 수는 정확히 ${fixed}줄로 맞춰라.` : `줄 수는 호흡 단위에 맞게 알아서 정하라(최대 ${MAX_LINES}줄).`}\n\n초안:\n${text}${ctx}` + toneLine;
+  }
+  if (b.task === 'expand') {
+    const text = clip(b.text, 1500).trim(); if (!text) return { error: '보충할 초안이 비어 있습니다' };
+    return `아래는 작가가 써 둔 짧은 초안이다. 초안의 뜻과 어조를 유지하면서 비유·감정·한 호흡의 설명을 보태 조금 더 풍성하게 보충해라. 초안에 없는 구체적 사실(수치·사건·예언)은 지어내지 마라. 줄 수는 호흡 단위에 맞게 알아서 정하라(최대 ${MAX_LINES}줄).${clip(b.chapter, 60) ? `\n자막 위치: ${clip(b.chapter, 60)}` : ''}\n\n초안:\n${text}` + toneLine;
   }
   if (b.task === 'split') {
     const text = clip(b.text, 1500).trim(); if (!text) return { error: '나눌 문장이 비어 있습니다' };
