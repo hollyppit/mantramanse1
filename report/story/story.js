@@ -497,9 +497,29 @@
     }, { passive: true });
   }
   // 인트로 커버 (스토리 맨 앞 한 화면). 관리자 settings.cover 로 이미지·문구·표시 여부를 바꾼다.
+  // 배경·캐릭터: 화면에 고정된 층. 맨 처음에만 보이고 스크롤하면 서서히 사라진다.
+  var fxEl = null, fxOn = false;
+  function coverFx(cv) {
+    var on = !!(cv && cv.show !== false && (media(cv.bgSrc) || media(cv.charSrc)));
+    if (!on) { if (fxEl) fxEl.hidden = true; fxOn = false; return; }
+    if (!fxEl) { fxEl = document.createElement('div'); fxEl.id = 'coverFx'; fxEl.setAttribute('aria-hidden', 'true'); document.body.insertBefore(fxEl, document.body.firstChild); }
+    var al = /^(left|center|right)$/.test(cv.charAlign) ? cv.charAlign : 'right', x = num(cv.charX, 0), base = al === 'left' ? 4 : al === 'right' ? 96 : 50;
+    var bg = media(cv.bgSrc), ch = media(cv.charSrc);
+    fxEl.hidden = false;
+    fxEl.innerHTML = (bg ? '<div class="fx-bg" style="background-image:url(&quot;' + esc(bg) + '&quot;);opacity:' + Math.min(1, Math.max(0, num(cv.bgOpacity, 0.6))) + '"></div>' : '') +
+      (ch ? '<img class="fx-ch" src="' + esc(ch) + '" alt="" decoding="async" style="height:' + Math.min(100, Math.max(10, num(cv.charSize, 70))) + 'svh;left:' + (base + x) + '%;transform:translateX(' + (al === 'left' ? '0' : al === 'right' ? '-100%' : '-50%') + ');opacity:' + Math.min(1, Math.max(0, num(cv.charOpacity, 1))) + '">' : '');
+    fxOn = true; fxScroll();
+    if (!coverFx.bound) { coverFx.bound = true; root.addEventListener('scroll', fxScroll, { passive: true }); root.addEventListener('resize', fxScroll); }
+  }
+  function fxScroll() {
+    if (!fxEl || !fxOn) return;
+    var o = Math.max(0, 1 - root.scrollY / (root.innerHeight * 0.75));
+    fxEl.style.opacity = o; fxEl.style.visibility = o <= 0 ? 'hidden' : 'visible';
+  }
   function cover() {
     var el = document.getElementById('cover'); if (!el) return;
     var cv = (C.settings && C.settings.cover) || {};
+    coverFx(cv);
     if (!cv || cv.show === false) { el.hidden = true; el.innerHTML = ''; return; }
     var url = media(cv.src), alt = pick(cv.alt) || '';
     var img = url ? '<img class="cv-img" src="' + esc(url) + '" alt="' + esc(alt) + '" decoding="async" fetchpriority="high">' : '<div class="cv-glow" role="img" aria-label="' + esc(alt) + '"></div>';
