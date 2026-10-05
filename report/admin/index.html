@@ -659,7 +659,7 @@ summary { cursor:pointer; padding:4px 0; }
         x.upload.onprogress = function (e) { if (e.lengthComputable) bar.firstChild.style.width = (e.loaded / e.total * 100) + '%'; };
         x.onload = function () {
           $('inUp_' + k).disabled = false; var d = {}; try { d = JSON.parse(x.responseText); } catch (e) {}
-          if (x.status >= 200 && x.status < 300 && d.key) { IN[k] = { type: 'r2', value: d.key }; $('inUrl_' + k).value = ''; introShow(k); $('inState').textContent = '업로드됨' + note + ' — 저장을 눌러 반영하세요'; }
+          if (x.status >= 200 && x.status < 300 && d.key) { IN[k] = { type: 'r2', value: d.key }; $('inUrl_' + k).value = ''; introShow(k); $('inOn').checked = true; $('inState').textContent = '업로드됨' + note + ' — 인트로 켜기를 체크해 두었습니다. 저장을 눌러 반영하세요'; }
           else $('inState').innerHTML = '<span class="err">' + esc(d.error || ('업로드 실패 (' + x.status + ')')) + '</span>';
         };
         x.onerror = function () { $('inUp_' + k).disabled = false; $('inState').innerHTML = '<span class="err">네트워크 오류</span>'; };
@@ -670,7 +670,7 @@ summary { cursor:pointer; padding:4px 0; }
   $('inSave').onclick = function () {
     $('inState').textContent = '저장 중…';
     api('/api/intro', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: $('inOn').checked, src: IN.pc, srcMobile: IN.mo, fx: inFxRead(), fxPc: inGroups($('inFxOw')), fxMobile: inGroups($('inFxOm')), skipAfter: +$('inSkip').value, imageSeconds: +$('inImgSec').value || 4, once: $('inOnce').value }) })
-      .then(function () { $('inState').innerHTML = '<span class="ok">저장됨 — ' + ($('inOn').checked ? '켜짐' : '꺼짐') + '</span>'; })
+      .then(function () { $('inState').innerHTML = '<span class="ok">저장됨 — ' + ($('inOn').checked ? '켜짐' : '꺼짐 (사이트에 나오려면 위의 "인트로 켜기"를 체크하고 다시 저장하세요)') + '</span>'; })
       .catch(function (e) { $('inState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };
 

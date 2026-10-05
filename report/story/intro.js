@@ -34,7 +34,9 @@
           // 공통 연출 위에 이 기기(모바일/웹)용 값을 덮어쓴다 — 글자 크기는 화면 폭에 비례하므로 기기별로 따로 맞춘다
           var ov = (mobile ? c.fxMobile : c.fxPc) || {}, fx = { cues: c.fx.cues, video: { loop: 'freeze', hold: 0.3 } };
           ['sub', 'trans'].forEach(function (g) { var o = Object.assign({}, c.fx[g], ov[g]); if (Object.keys(o).length) fx[g] = o; });
-          player = window.MovingFx.play(stage, { refW: mobile ? 390 : 1280, clip: { fx: fx }, url: isImg ? '' : url, image: isImg ? url : '', minSeconds: Math.max(0.5, +c.imageSeconds || 4), muteVideo: true, silent: true, defaults: {}, onend: close, onerror: close });
+          // 웹(PC)은 글자 크기를 1280px 화면 기준 px 로 고정한다: 화면이 넓어져도 글자가 커지지 않는다. (모바일은 390px 기준 비례)
+          if (!mobile) { var S0 = Object.assign({}, fx.sub); if (!(S0.fpx > 0)) { var pct = S0.fs > 0 ? S0.fs : ({ S: 4, M: 5, L: 6.5 }[S0.size] || 5); S0.fpx = Math.round(pct * 1280 / 100); } fx.sub = S0; }
+          player = window.MovingFx.play(stage, { refW: mobile ? 390 : Math.max(window.innerWidth, 1280), clip: { fx: fx }, url: isImg ? '' : url, image: isImg ? url : '', minSeconds: Math.max(0.5, +c.imageSeconds || 4), muteVideo: true, silent: true, defaults: {}, onend: close, onerror: close });
         };
         js.onerror = close; document.head.appendChild(js);
         if (!isImg) setTimeout(function () { var pv = stage.querySelector('video'); if (!done && pv && pv.currentTime === 0) close(); }, 6000); // 재생이 시작되지 않으면 생략
