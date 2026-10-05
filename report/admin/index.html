@@ -236,7 +236,7 @@ summary { cursor:pointer; padding:4px 0; }
     <div id="t-home" class="hide">
       <div class="hmgrid">
         <div class="hmleft">
-          <div class="row" style="align-items:center;margin-bottom:8px"><button class="pri" id="hmSave">저장</button><button class="danger" id="hmReset" title="저장된 스토리 내용을 지우고 처음 기본 내용으로 되돌립니다">기본 내용으로 되돌리기</button><span class="muted" id="hmState"></span></div>
+          <div class="row" style="align-items:center;margin-bottom:8px"><button class="pri" id="hmSave">저장</button><button id="hmUndo" title="이전 값으로 되돌리기 (Ctrl+Z)" disabled>↶ 되돌리기</button><button id="hmRedo" title="다시 적용 (Ctrl+Shift+Z / Ctrl+Y)" disabled>↷ 다시</button><button class="danger" id="hmReset" title="저장된 스토리 내용을 지우고 처음 기본 내용으로 되돌립니다">기본 내용으로 되돌리기</button><span class="muted" id="hmState"></span></div>
           <p class="muted" style="margin:0 0 6px;font-size:.78rem">블록을 <b>눌러 열면</b> 오른쪽 미리보기가 그 자리로 움직이고, 미리보기에서 블록을 눌러도 여기서 열려요. <b>≡ 손잡이를 끌어</b> 순서를 바꿉니다. 맨 아래 "문구 설정"에서 사주 입력·결과·구매 화면의 문구를 고칠 수 있어요.</p>
           <div class="hmed" id="hmForm"></div>
         </div>
@@ -677,7 +677,28 @@ summary { cursor:pointer; padding:4px 0; }
   function hmSend(msg) { try { $('hmFrame').contentWindow.postMessage(msg, location.origin); } catch (e) {} }
   function hmPush() { if (HM.story && HM.frameOn) hmSend({ t: 'st-content', story: HM.story }); }
   var hmTimer;
-  function hmChanged() { HM.dirty = true; $('hmState').textContent = '저장하지 않은 변경'; clearTimeout(hmTimer); hmTimer = setTimeout(hmPush, 120); }
+  // 되돌리기(Ctrl+Z) / 다시(Ctrl+Shift+Z, Ctrl+Y): 변경할 때마다 스토리 전체를 기록한다. 빠르게 이어지는 입력·끌기는 한 단계로 묶는다.
+  var HIST = { list: [], i: -1, timer: 0, busy: false };
+  function histBtns() { $('hmUndo').disabled = HIST.i <= 0 && !HIST.timer; $('hmRedo').disabled = HIST.i >= HIST.list.length - 1; }
+  function histReset() { clearTimeout(HIST.timer); HIST.timer = 0; HIST.list = HM.story ? [JSON.stringify(HM.story)] : []; HIST.i = HIST.list.length - 1; histBtns(); }
+  function histFlush() {
+    if (HIST.timer) { clearTimeout(HIST.timer); HIST.timer = 0; }
+    if (!HM.story || HIST.busy) return histBtns();
+    var cur = JSON.stringify(HM.story); if (cur === HIST.list[HIST.i]) return histBtns();
+    HIST.list.length = HIST.i + 1; HIST.list.push(cur); if (HIST.list.length > 100) HIST.list.shift(); HIST.i = HIST.list.length - 1; histBtns();
+  }
+  function histGo(d) {
+    histFlush(); var n = HIST.i + d; if (n < 0 || n >= HIST.list.length) return;
+    HIST.i = n; HM.story = JSON.parse(HIST.list[n]); HM.openIdx = Math.min(HM.openIdx, HM.story.blocks.length - 1);
+    HM.dirty = true; $('hmState').textContent = '저장하지 않은 변경'; hmBuild(); hmPush(); histBtns();
+  }
+  function hmChanged() { HM.dirty = true; $('hmState').textContent = '저장하지 않은 변경'; clearTimeout(hmTimer); hmTimer = setTimeout(hmPush, 120); clearTimeout(HIST.timer); HIST.timer = setTimeout(histFlush, 500); histBtns(); }
+  document.addEventListener('keydown', function (e) {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey || !HM.loaded || $('t-home').classList.contains('hide')) return;
+    var k = e.key.toLowerCase(), t = e.target, tag = t && t.tagName;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) && !(tag === 'INPUT' && /^(checkbox|radio|file|color|range)$/.test(t.type))) return; // 글자 입력 중에는 입력칸 자체의 되돌리기를 쓴다
+    if (k === 'z' && !e.shiftKey) { e.preventDefault(); histGo(-1); } else if ((k === 'z' && e.shiftKey) || k === 'y') { e.preventDefault(); histGo(1); }
+  });
   function hmFit() {
     var box = $('hmBox'), f = $('hmFrame'), bw = box.clientWidth, bh = box.clientHeight; if (!bw) return;
     var W = HM.mode === 'pc' ? 1280 : 390, k = Math.min(1, bw / W);
@@ -944,9 +965,10 @@ summary { cursor:pointer; padding:4px 0; }
     hmFit();
     if (HM.loaded) return;
     api('/api/story').then(function (d) {
-      HM.story = mergeSaved(d.story); HM.loaded = true; hmBuild(); hmPush();
+      HM.story = mergeSaved(d.story); HM.loaded = true; histReset(); hmBuild(); hmPush();
     }).catch(function (e) { $('hmState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   }
+  $('hmUndo').onclick = function () { histGo(-1); }; $('hmRedo').onclick = function () { histGo(1); };
   $('hmSave').onclick = function () {
     if (!HM.story) return; $('hmState').textContent = '저장 중…';
     api('/api/story', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ story: HM.story }) })
@@ -955,7 +977,7 @@ summary { cursor:pointer; padding:4px 0; }
   };
   $('hmReset').onclick = function () {
     if (!confirm('저장된 스토리 내용을 지우고 처음 기본 내용으로 되돌립니다. 계속할까요?')) return;
-    api('/api/story', { method: 'DELETE' }).then(function () { HM.story = defaultStory(); HM.dirty = false; HM.openIdx = -1; hmBuild(); hmPush(); $('hmState').innerHTML = '<span class="ok">기본 내용으로 되돌렸습니다</span>'; })
+    api('/api/story', { method: 'DELETE' }).then(function () { HM.story = defaultStory(); histReset(); HM.dirty = false; HM.openIdx = -1; hmBuild(); hmPush(); $('hmState').innerHTML = '<span class="ok">기본 내용으로 되돌렸습니다</span>'; })
       .catch(function (e) { $('hmState').innerHTML = '<span class="err">' + esc(e.message) + '</span>'; });
   };
 
