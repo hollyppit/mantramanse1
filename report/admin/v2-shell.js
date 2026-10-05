@@ -11,7 +11,7 @@
   var $ = function (s, e) { return (e || document).querySelector(s); }, $$ = function (s, e) { return [].slice.call((e || document).querySelectorAll(s)); };
   var esc = C.esc, clone = C.clone, toast = C.toast;
   var SEA = R.SajuData.SEASONS;
-  var built = {}, W = { modules: null, remedies: null, chapters: null }; // W = 저장 전 작업본(미리보기에 바로 반영)
+  var built = {}, W = { modules: null, remedies: null, chapters: null, ts: null }; // W = 저장 전 작업본(미리보기에 바로 반영)
 
   var css = document.createElement('style');
   css.textContent = '.sub2{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px;align-items:center}.sub2 button{border-radius:999px;padding:6px 14px;font-size:.84rem;color:var(--ink2)}.sub2 button.on{border-color:var(--gold);color:var(--gold);background:#1c1a12}' +
@@ -22,7 +22,7 @@
     '.stat{display:flex;gap:14px;flex-wrap:wrap;font-size:.84rem;color:var(--ink2);margin:6px 0}.stat b{color:var(--gold)}.fld{display:grid;gap:3px;font-size:.8rem;color:var(--ink2);margin:8px 0}.g2c{display:grid;grid-template-columns:1fr 1fr;gap:10px}' +
     '.pick{display:grid;grid-template-columns:24px 40px 1fr 70px 62px;gap:6px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:.84rem}.pick input[type=checkbox]{width:auto}.pick select{padding:3px 6px}' +
     '.pvh{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:10px}.pvh label{display:grid;gap:3px;font-size:.78rem;color:var(--ink2)}.thm{width:38px;height:48px;border-radius:5px;background:#000 center/cover;border:1px solid var(--line);flex:none}';
-  css.textContent += '.tbar select{width:auto;min-width:170px}.tbar{display:grid;gap:8px}.tsum{font-size:.95rem}.chk2{display:flex;gap:6px;align-items:center;font-size:.84rem;color:var(--ink2)}.tform{border-top:1px solid var(--line);padding-top:10px}' +
+  css.textContent += '.board{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:12px;margin-top:12px;align-items:start}@media(max-width:900px){.board{grid-template-columns:1fr}}.acts{display:grid;gap:10px}.actc{padding:10px 12px}.acth{display:flex;gap:8px;align-items:center;margin-bottom:6px}.acth b{color:var(--gold);white-space:nowrap}.acth input{flex:1}.brow{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:.86rem}.brow .bn{color:var(--ink3);min-width:22px}.brow .bt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.brow select{width:auto;padding:3px 6px}.brow button{padding:2px 8px;font-size:.78rem}.pool .brow{flex-wrap:wrap}.tbar select{width:auto;min-width:170px}.tbar{display:grid;gap:8px}.tsum{font-size:.95rem}.chk2{display:flex;gap:6px;align-items:center;font-size:.84rem;color:var(--ink2)}.tform{border-top:1px solid var(--line);padding-top:10px}' +
     '.t3{display:grid;grid-template-columns:230px minmax(0,1fr) 320px;gap:12px;margin-top:12px;align-items:start}@media(max-width:1200px){.t3{grid-template-columns:200px minmax(0,1fr)}.tinsp{grid-column:1/-1}}@media(max-width:760px){.t3{grid-template-columns:1fr}}' +
     '.trail{display:grid;gap:3px;max-height:78vh;overflow:auto}.ract{margin:8px 0 2px;font-size:.7rem;letter-spacing:.14em;color:var(--gold)}.ri{display:flex;align-items:center;gap:8px;text-align:left;width:100%;padding:7px 9px;border-radius:8px;font-size:.84rem}.ri.on{border-color:var(--gold);background:#1c1a12}.ri span{color:var(--ink3);min-width:20px}.ri b{font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ri i{font-style:normal}' +
     '.pvbar{display:flex;gap:6px;align-items:center;margin-bottom:8px}.pvbar button{padding:4px 12px;border-radius:999px;font-size:.8rem}.pvbar button.on{border-color:var(--gold);color:var(--gold)}.pvwrap{display:flex;justify-content:center;background:#05060b;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:hidden}.pvbox{position:relative}.pvbox iframe{border:0;transform-origin:0 0;background:#070913;border-radius:18px;position:absolute;left:0;top:0}' +
@@ -39,15 +39,16 @@
   /* ═════ 공용: 챕터·테스트 사주 상태 ═════ */
   var TS = (function () { var d = { date: '1990-05-15', time: '14:30', gender: 'M', now: new Date().toISOString().slice(0, 10), project: 'full', dbg: true }; try { Object.assign(d, JSON.parse(localStorage.getItem('mt_v2_ts') || '{}'), { now: new Date().toISOString().slice(0, 10) }); } catch (e) { } return d; })();
   var saveTS = function () { try { localStorage.setItem('mt_v2_ts', JSON.stringify(TS)); } catch (e) { } };
-  function chaptersAll() { // 작업본(저장 전 포함) 챕터 목록
-    if (!W.chapters) { var sv = ST.saved.chapters; W.chapters = C.mix(R.Chapters.CHAPTERS, sv && sv.chapters).sort(function (a, b) { return (a.order || 0) - (b.order || 0); }); }
+  function chaptersAll() { // 작업본(저장 전 포함) 챕터 라이브러리 — 소속 프로젝트·ACT·순서 포함(예전 저장본은 여기서 소유 구조로 이전)
+    if (!W.chapters) W.chapters = R.Chapters.libraryOf(ST.saved);
     return W.chapters;
   }
   var chapterById = function (id) { return chaptersAll().filter(function (c) { return c.id === id; })[0]; };
   function content() { // 저장본 위에 작업본을 얹은 콘텐츠(미리보기·테스트용)
     var c = Object.assign({}, ST.saved); if (W.modules) c.modules = W.modules; if (W.remedies) c.remedies = W.remedies;
-    c.chapters = { chapters: chaptersAll(), acts: (ST.saved.chapters && ST.saved.chapters.acts) || [] };
-    if (W.projects) c.projects = W.projects; return c;
+    c.chapters = { chapters: chaptersAll(), acts: [] };
+    c.projects = (PJ.list || R.Chapters.projects(ST.saved)).map(function (p) { return Object.assign({}, p, { chapters: null }); }); // 챕터 소속은 chapters 쪽에 있으므로 예전 목록은 쓰지 않는다
+    c.textStyles = tsWork(); return c;
   }
 
   var memo = {};
@@ -94,30 +95,55 @@
     }
   }
 
-  /* ═════ ② 챕터 관리 ═════ */
-  var CH = { sel: null, tab: 'set', dirty: false, dbg: true };
+  /* ═════ ② 챕터 관리 (총괄) ═════
+     모든 챕터를 한 곳에서 본다. 챕터는 각자 하나의 프로젝트(상품)에 속하고, 프로젝트끼리 챕터를 공유하지 않는다(필요하면 "복제"). 영상·해석 모듈·개운법은 공유 자료다. */
+  var CH = { sel: null, tab: 'set', dirty: false, dbg: true, collapsed: {} };
   function chapOpen() {
-    var root = $('#t-v2chap'); C.load().then(function () {
-      if (!built.chap) { built.chap = 1; CH.sel = chaptersAll()[0].id; chapDraw(); } else if (CH.pending) { CH.sel = CH.pending; CH.pending = null; CH.tab = 'set'; chapDraw(); }
+    C.load().then(function () {
+      if (!built.chap) { built.chap = 1; CH.sel = (ownedBy('full')[0] || chaptersAll()[0]).id; chapDraw(); } else if (CH.pending) { CH.sel = CH.pending; CH.pending = null; CH.tab = 'set'; chapDraw(); }
     });
   }
-  function projectsOf(id) { return R.Chapters.projects(content()).filter(function (p) { return !p.chapters || p.chapters.some(function (x) { return x.id === id; }); }); }
+  function projList() { if (!PJ.list) PJ.list = R.Chapters.projects(ST.saved).map(function (p) { var q = clone(p); q.chapters = null; return q; }); return PJ.list; }
+  function projectById(id) { return projList().filter(function (p) { return p.id === id; })[0]; }
+  function actCount(pid) { var p = projectById(pid); return Math.max(1, (p && p.acts && p.acts.length) || 1); }
+  function ownedBy(pid) { return chaptersAll().filter(function (c) { return c.project === pid; }).sort(function (a, b) { return ((a.act || 1) - (b.act || 1)) || ((a.order || 0) - (b.order || 0)); }); }
+  function renumber(pid) { ownedBy(pid).forEach(function (c, i) { c.order = i + 1; }); }
+  var isDefaultId = function (id) { return R.Chapters.CHAPTERS.some(function (x) { return x.id === id; }); };
+  function uniqueId(base) { var id = base, n = 2; while (chapterById(id)) id = base + '_' + n++; return id; }
+  function addChapterTo(pid, src) { // 새 챕터(src 가 있으면 복제)를 pid 프로젝트 마지막 ACT 끝에 만든다
+    var base = src ? (src.base || src.id) : 'cx', c = src ? clone(src) : { enabled: true, title: '새 챕터', subtitle: '', kind: 'module', moduleCategories: ['identity'], maxModules: 1, aiEnabled: true, accessLevel: 'free', coverImage: '', introText: '' };
+    c.id = uniqueId(src ? pid + '_' + base : 'cx' + Date.now().toString(36).slice(-5)); c.project = pid; c.base = src ? base : c.id; c.act = actCount(pid); c.order = ownedBy(pid).length + 1; chaptersAll().push(c); CH.dirty = true; return c;
+  }
+  // 챕터·프로젝트를 함께 저장(챕터 소속·ACT·순서와 프로젝트 ACT 문구는 한 묶음)
+  function saveStructure() {
+    var part = { chapters: { chapters: chaptersAll().map(clone), acts: [] }, projects: projList().map(function (p) { var q = clone(p); q.chapters = null; return q; }) };
+    return C.save(part).then(function () { ST.saved.chapters = part.chapters; ST.saved.projects = part.projects; CH.dirty = false; PJ.dirty = false; });
+  }
   function chapDraw() {
-    var root = $('#t-v2chap'), all = chaptersAll();
-    root.innerHTML = '<div class="cols"><div class="card"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px"><b style="color:var(--gold)">챕터</b><span style="flex:1"></span><button type="button" id="chAdd">+ 추가</button><button class="pri" type="button" id="chSave"' + (CH.dirty ? '' : ' disabled') + '>저장</button></div><div class="chl">' +
-      all.map(function (c, i) { var n = coverageOf(c), pj = projectsOf(c.id).filter(function (p) { return p.id !== 'full'; });
-        return '<div class="chi' + (c.id === CH.sel ? ' on' : '') + (c.enabled === false ? ' off' : '') + '" data-id="' + esc(c.id) + '"><input type="checkbox" data-en aria-label="사용"' + (c.enabled !== false ? ' checked' : '') + '><div><b>' + String(i + 1).padStart(2, '0') + ' ' + esc(c.title) + '</b><small>' + esc(c.kind) + ' · 모듈 ' + n + (n === 0 && c.kind !== 'remedy' && c.kind !== 'summary' ? ' <span class="pill w">비어 있음</span>' : '') + pj.map(function (p) { return '<span class="pill">' + esc(p.name.slice(0, 4)) + '</span>'; }).join('') + '</small></div><span><button type="button" data-mv="-1" aria-label="위로">▲</button><button type="button" data-mv="1" aria-label="아래로">▼</button></span></div>'; }).join('') + '</div><p class="muted" style="margin:8px 0 0;font-size:.76rem">순서는 "종합 운세"의 기본 순서입니다. 프로젝트별 순서는 프로젝트에서 따로 정합니다.</p></div><div id="chEd"></div></div>';
+    var root = $('#t-v2chap'), projs = projList();
+    var row = function (c, i) { var n = coverageOf(c);
+      return '<div class="chi' + (c.id === CH.sel ? ' on' : '') + (c.enabled === false ? ' off' : '') + '" data-id="' + esc(c.id) + '"><input type="checkbox" data-en aria-label="사용"' + (c.enabled !== false ? ' checked' : '') + '><div><b>' + String(i + 1).padStart(2, '0') + ' ' + esc(c.title) + '</b><small>ACT ' + (c.act || 1) + ' · ' + esc(c.kind) + ' · 모듈 ' + n + (n === 0 && c.kind !== 'remedy' && c.kind !== 'summary' ? ' <span class="pill w">비어 있음</span>' : '') + '</small></div><span><button type="button" data-mv="-1" aria-label="위로">▲</button><button type="button" data-mv="1" aria-label="아래로">▼</button></span></div>'; };
+    var known = {}; projs.forEach(function (p) { known[p.id] = 1; });
+    var groups = projs.map(function (p) {
+      var list = ownedBy(p.id), open = !CH.collapsed[p.id];
+      return '<div class="pgrp"><div class="pgh" data-pg="' + esc(p.id) + '"><b>' + (open ? '▾' : '▸') + ' ' + esc(p.name) + '</b><span class="muted">' + list.length + '개' + (p.enabled === false ? ' · 비공개' : '') + '</span><span style="flex:1"></span><button type="button" data-addch="' + esc(p.id) + '" title="이 프로젝트에 새 챕터 추가">+ 챕터</button></div>' + (open ? list.map(row).join('') : '') + '</div>';
+    }).join('');
+    var orphan = chaptersAll().filter(function (c) { return !known[c.project]; });
+    if (orphan.length) groups += '<div class="pgrp"><div class="pgh"><b>(프로젝트 없음)</b></div>' + orphan.map(row).join('') + '</div>';
+    root.innerHTML = '<div class="cols"><div class="card"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px"><b style="color:var(--gold)">챕터 총괄</b><span style="flex:1"></span><button class="pri" type="button" id="chSave"' + (CH.dirty || PJ.dirty ? '' : ' disabled') + '>저장</button></div>' +
+      '<p class="muted" style="margin:0 0 8px;font-size:.76rem">챕터는 하나의 프로젝트에만 속합니다. 같은 내용을 다른 상품에서도 쓰려면 챕터를 "복제"하세요. 영상·해석 모듈·개운법은 같이 씁니다.</p><div class="chl">' + groups + '</div></div><div id="chEd"></div></div>';
     $('.chl', root).onclick = function (e) {
-      var row = e.target.closest('.chi'); if (!row) return; var id = row.dataset.id, c = chapterById(id);
+      var add = e.target.closest('[data-addch]'); if (add) { var nc = addChapterTo(add.dataset.addch); CH.sel = nc.id; CH.tab = 'set'; chapDraw(); return; }
+      var pg = e.target.closest('.pgh'); if (pg && !e.target.closest('button')) { CH.collapsed[pg.dataset.pg] = !CH.collapsed[pg.dataset.pg]; chapDraw(); return; }
+      var rw = e.target.closest('.chi'); if (!rw) return; var id = rw.dataset.id, c = chapterById(id);
       if (e.target.matches('[data-en]')) { c.enabled = e.target.checked; CH.dirty = true; chapDraw(); return; }
-      var mv = e.target.closest('[data-mv]'); if (mv) { var i = all.indexOf(c), j = i + +mv.dataset.mv; if (j >= 0 && j < all.length) { all[i] = all[j]; all[j] = c; all.forEach(function (x, k) { x.order = k + 1; }); CH.dirty = true; chapDraw(); } return; }
+      var mv = e.target.closest('[data-mv]'); if (mv) { // 같은 ACT 안에서만 순서 교환 (ACT 이동은 프로젝트 탭)
+        var same = ownedBy(c.project).filter(function (x) { return (x.act || 1) === (c.act || 1); }), i = same.indexOf(c), j = i + +mv.dataset.mv;
+        if (j >= 0 && j < same.length) { var t = same[j].order; same[j].order = c.order; c.order = t; renumber(c.project); CH.dirty = true; chapDraw(); } return;
+      }
       CH.sel = id; CH.tab = 'set'; chapDraw();
     };
-    $('#chAdd', root).onclick = function () { var n = all.length + 1, id = 'cx' + Date.now().toString(36).slice(-5); all.push({ id: id, no: n, order: n, act: 4, enabled: true, title: '새 챕터', subtitle: '', kind: 'module', moduleCategories: ['identity'], maxModules: 1, aiEnabled: true, accessLevel: 'free', coverImage: '', introText: '' }); CH.sel = id; CH.dirty = true; chapDraw(); };
-    $('#chSave', root).onclick = function () {
-      this.disabled = true; var acts = (ST.saved.chapters && ST.saved.chapters.acts) || [], part = { chapters: { chapters: all.map(function (c, i) { c.order = i + 1; return c; }), acts: acts } };
-      C.save(part).then(function () { ST.saved.chapters = part.chapters; CH.dirty = false; chapDraw(); }).catch(function (e) { toast(e.message, true); chapDraw(); });
-    };
+    $('#chSave', root).onclick = function () { this.disabled = true; saveStructure().then(function () { chapDraw(); toast('저장했습니다'); }).catch(function (e) { toast(e.message, true); chapDraw(); }); };
     chapEditor();
   }
   function chapEditor() {
@@ -134,9 +160,14 @@
         '<div class="fld"><label>이 챕터가 쓰는 해석 모듈 카테고리</label><div class="cg" data-cats>' + C.CATS.map(function (k) { return '<label><input type="checkbox" value="' + k + '"' + ((c.moduleCategories || []).indexOf(k) >= 0 ? ' checked' : '') + '><span>' + C.CAT_KO[k] + '</span></label>'; }).join('') + '</div></div>' +
         '<div class="g2c"><div class="fld"><label>최대 모듈 수</label><input type="number" data-k="maxModules" min="1" max="8" value="' + (c.maxModules || 1) + '"></div><div class="fld"><label>접근</label><select data-k="accessLevel"><option value="free"' + (c.accessLevel !== 'premium' ? ' selected' : '') + '>free</option><option value="premium"' + (c.accessLevel === 'premium' ? ' selected' : '') + '>premium</option></select></div></div>' +
         '<label style="display:flex;gap:8px;align-items:center;margin:6px 0"><input type="checkbox" data-k="aiEnabled"' + (c.aiEnabled !== false ? ' checked' : '') + '>AI 연결 사용 (끄면 사람이 쓴 모듈 문장 그대로)</label>' + (c.disclaimer != null && c.disclaimer !== '' ? '<div class="fld"><label>하단 안내 문구</label><input type="text" data-k="disclaimer" value="' + esc(c.disclaimer) + '"></div>' : '') +
-        '<p class="muted">id ' + esc(c.id) + ' · 종류 ' + esc(c.kind) + ' · 포함된 프로젝트: ' + (projectsOf(c.id).map(function (p) { return esc(p.name); }).join(', ') || '없음') + '</p><div class="row"><button type="button" id="chDel" class="danger"' + (R.Chapters.CHAPTERS.some(function (x) { return x.id === c.id; }) ? ' disabled title="기본 챕터는 삭제할 수 없고 끌 수 있습니다"' : '') + '>삭제</button></div>';
-      var upd = function (e) { var t = e.target, k = t.dataset && t.dataset.k; if (t.closest('[data-cats]')) c.moduleCategories = $$('[data-cats] input:checked', b).map(function (i) { return i.value; }); else if (k) c[k] = t.type === 'checkbox' ? t.checked : t.type === 'number' ? +t.value : t.value; else return; CH.dirty = true; $('#chSave').disabled = false; if (k === 'title') $('.chi.on b').textContent = $('.chi.on b').textContent.slice(0, 3) + t.value; };
+        '<div class="g2c"><div class="fld"><label>소속 프로젝트 (챕터는 한 프로젝트에만 속합니다)</label><select data-proj>' + projList().map(function (p) { return '<option value="' + esc(p.id) + '"' + (c.project === p.id ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('') + '</select></div><div class="fld"><label>ACT</label><select data-actsel>' + Array.apply(null, Array(actCount(c.project))).map(function (_, k) { return '<option value="' + (k + 1) + '"' + ((c.act || 1) === k + 1 ? ' selected' : '') + '>ACT ' + (k + 1) + ((projectById(c.project) && projectById(c.project).acts && projectById(c.project).acts[k] && projectById(c.project).acts[k].title) ? ' · ' + esc(projectById(c.project).acts[k].title) : '') + '</option>'; }).join('') + '</select></div></div>' +
+        '<div class="row" style="align-items:end"><label style="display:grid;gap:3px;font-size:.8rem;color:var(--ink2)">다른 프로젝트로 복제 (독립된 사본)<select data-dupproj>' + projList().filter(function (p) { return p.id !== c.project; }).map(function (p) { return '<option value="' + esc(p.id) + '">' + esc(p.name) + '</option>'; }).join('') + '</select></label><button type="button" data-dupgo>복제</button></div>' +
+        '<p class="muted">id ' + esc(c.id) + ' · 종류 ' + esc(c.kind) + ' · 기본 챕터 ' + esc(c.base || c.id) + '<br>이 챕터는 <b>' + esc((projectById(c.project) || { name: c.project }).name) + '</b> 상품에서만 쓰입니다. 순서·ACT 묶음은 <b>프로젝트</b> 탭에서도 정할 수 있고, 챕터 내용은 여기서만 고칩니다.</p>' + '<div class="row"><button type="button" id="chDel" class="danger"' + (R.Chapters.CHAPTERS.some(function (x) { return x.id === c.id; }) ? ' disabled title="기본 챕터는 삭제할 수 없고 끌 수 있습니다"' : '') + '>삭제</button></div>';
+      var upd = function (e) { var t = e.target, k = t.dataset && t.dataset.k;
+        if (t.matches && t.matches('[data-proj]')) { var old = c.project; c.project = t.value; c.act = actCount(c.project); c.order = 9999; renumber(c.project); renumber(old); CH.dirty = true; chapDraw(); return; }
+        if (t.matches && t.matches('[data-actsel]')) { c.act = +t.value; c.order = 9999; renumber(c.project); CH.dirty = true; chapDraw(); return; } if (t.closest('[data-cats]')) c.moduleCategories = $$('[data-cats] input:checked', b).map(function (i) { return i.value; }); else if (k) c[k] = t.type === 'checkbox' ? t.checked : t.type === 'number' ? +t.value : t.value; else return; CH.dirty = true; $('#chSave').disabled = false; if (k === 'title') $('.chi.on b').textContent = $('.chi.on b').textContent.slice(0, 3) + t.value; };
       b.oninput = upd; b.onchange = upd;
+      var dg = $('[data-dupgo]', b); if (dg) dg.onclick = function () { var tp = $('[data-dupproj]', b).value; if (!tp) return; var nc = addChapterTo(tp, c); toast('복제했습니다 → ' + projectById(tp).name); CH.sel = nc.id; CH.tab = 'set'; chapDraw(); };
       $('#chDel', b).onclick = function () { if (confirm('이 챕터를 삭제할까요? (프로젝트에서도 빠집니다)')) { W.chapters = W.chapters.filter(function (x) { return x !== c; }); CH.sel = W.chapters[0].id; CH.dirty = true; chapDraw(); } };
     } else if (CH.tab === 'mod' || CH.tab === 'rem') {
       var cfg = CH.tab === 'mod' ? C.modCfg() : C.remCfg(), key = CH.tab === 'mod' ? 'modules' : 'remedies';
@@ -145,8 +176,8 @@
       C.itemAdmin($('#chItems', b), cfg);
       if (CH.pendingModule) { var li = $('#chItems .v2li[data-id="' + CH.pendingModule + '"]'); if (li) li.click(); CH.pendingModule = null; }
     } else {
-      b.innerHTML = '<div class="row" style="align-items:center;margin-bottom:8px"><span class="muted" id="pvSum"></span><span style="flex:1"></span><button type="button" id="pvEdit">테스트 사주 바꾸기 (조합 테스트)</button></div><div id="pvHost"></div>';
-      var pane = PreviewPane($('#pvHost', b), { onChapter: function () { } }); CH.pane = pane;
+      b.innerHTML = '<div class="row" style="align-items:center;margin-bottom:8px"><span class="muted" id="pvSum"></span><span style="flex:1"></span><button type="button" id="pvEdit">테스트 사주 바꾸기 (조합 테스트)</button></div><div id="pvHost"></div><div class="card" id="pvTx" style="margin-top:10px"></div>';
+      var ptx = {}, pane = PreviewPane($('#pvHost', b), { onChapter: function () { }, onTx: function (m) { ptx.p.onTx(m); }, onList: function (m) { ptx.p.onList(m); }, onMove: function (m) { ptx.p.onMove(m); } }); CH.pane = pane; ptx.p = TxPanel($('#pvTx', b), pane, function () { return c.id; });
       computeSd().then(function (sd) { $('#pvSum', b).textContent = TS.date + ' ' + TS.time + ' ' + (TS.gender === 'M' ? '남' : '여') + ' · ' + sd.dayPillar.ko + '일주'; });
       pane.show(c.id, 'full'); $('#pvEdit', b).onclick = function () { gotoTab('v2test'); };
     }
@@ -157,7 +188,7 @@
   window.addEventListener('message', function (e) {
     if (e.origin !== location.origin || !e.data) return;
     PVS = PVS.filter(function (p) { return document.body.contains(p.frame); });
-    PVS.forEach(function (p) { if (e.source === p.frame.contentWindow) { if (e.data.type === 'mt-v2-ready') { p.ready = true; if (p.pending) p.send(p.pending); } else if (e.data.type === 'mt-v2-chapter' && p.onChapter) p.onChapter(e.data.id); } });
+    PVS.forEach(function (p) { if (e.source === p.frame.contentWindow) { if (e.data.type === 'mt-v2-ready') { p.ready = true; if (p.pending) p.send(p.pending); } else if (e.data.type === 'mt-v2-chapter' && p.onChapter) p.onChapter(e.data.id); else if (e.data.type === 'mt-v2-tx' && p.onTx) p.onTx(e.data); else if (e.data.type === 'mt-v2-txlist' && p.onList) p.onList(e.data); else if (e.data.type === 'mt-v2-txmove' && p.onMove) p.onMove(e.data); } });
   });
   var awkMemo = null;
   function awakeningFor(sd) { // 이 사주의 각성 영상(없으면 fallback) — 뷰어가 받는 모양 {video, fallback}
@@ -170,7 +201,9 @@
     opt = opt || {}; var dev = 'm', P = { ready: false, pending: null, last: null };
     el.innerHTML = '<div class="pvbar"><button type="button" data-d="m" class="on">모바일</button><button type="button" data-d="d">PC</button><button type="button" data-r title="새로 그리기">⟳</button><span class="muted pvmsg"></span></div><div class="pvwrap"><div class="pvbox"><iframe title="리포트 미리보기" src="/report/v2/?preview=1"></iframe></div></div>';
     var frame = $('iframe', el), box = $('.pvbox', el), wrap = $('.pvwrap', el), msg = $('.pvmsg', el);
-    P.frame = frame; P.onChapter = opt.onChapter;
+    P.frame = frame; P.onChapter = opt.onChapter; P.onTx = opt.onTx; P.onList = opt.onList; P.onMove = opt.onMove;
+    P.sendTs = function (replay) { if (P.ready) P.send({ type: 'mt-v2-textstyle', ts: tsWork(), replay: !!replay }); };
+    P.selectRole = function (role) { if (P.ready) P.send({ type: 'mt-v2-txselect', role: role }); };
     function fit() { var w = dev === 'm' ? 390 : 1100, h = dev === 'm' ? 760 : 700, avail = Math.max(240, wrap.clientWidth || 380), s = Math.min(1, avail / w); frame.style.width = w + 'px'; frame.style.height = h + 'px'; frame.style.transform = 'scale(' + s + ')'; box.style.width = Math.round(w * s) + 'px'; box.style.height = Math.round(h * s) + 'px'; }
     P.send = function (m) { frame.contentWindow.postMessage(m, location.origin); };
     P.show = function (chapterId, projectId) {
@@ -189,6 +222,63 @@
     PVS.push(P); fit(); window.addEventListener('resize', fit); return P;
   }
 
+  /* ═════ 글자(자막) 편집 패널: 미리보기에서 글자를 누르거나 목록에서 골라 글씨체·크기·색·정렬·위치·등장/사라짐 효과·나타나는/사라지는 시기를 고친다 ═════ */
+  var TX = { dirty: false };
+  function tsWork() { if (!W.ts) { var s = clone(ST.saved.textStyles || {}); s.all = s.all || {}; s.chapters = s.chapters || {}; W.ts = s; } return W.ts; }
+  var TXR = function () { return R.TextStyle; };
+  function TxPanel(el, pane, curCid) { // curCid(): 지금 보고 있는 챕터 id (영상 단계면 '_')
+    var T = TXR(), P = { role: null, cid: null, roles: [], scope: 'chapter' };
+    var isStage = function (r) { return !!(T.ROLES[r] && T.ROLES[r][1]); };
+    var target = function (create) { var ts = tsWork(), st = isStage(P.role) || P.scope === 'all' ? ts.all : ((ts.chapters[P.cid] = ts.chapters[P.cid] || {})); if (create && !st[P.role]) st[P.role] = {}; return st[P.role]; };
+    var effective = function () { return T.resolve(tsWork(), P.cid, P.role); };
+    function put(k, v) {
+      var t = target(true); if (v === '' || v == null || (typeof v === 'number' && !isFinite(v))) delete t[k]; else t[k] = v;
+      var ts = tsWork(); [ts.all, ts.chapters[P.cid]].forEach(function (m) { if (m && m[P.role] && !Object.keys(m[P.role]).length) delete m[P.role]; });
+      TX.dirty = true; $('[data-txsave]', el) && ($('[data-txsave]', el).disabled = false); pane.sendTs(false);
+    }
+    function field(label, inner, wide) { return '<div class="fld' + (wide ? '' : '') + '" style="' + (wide ? 'grid-column:1/-1' : '') + '"><label>' + label + '</label>' + inner + '</div>'; }
+    function nf(k, min, max, step, ph) { var v = effective()[k]; return '<div style="display:flex;gap:6px;align-items:center"><input type="range" data-k="' + k + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + (v != null ? v : (ph != null ? ph : min)) + '" style="flex:1;padding:0"><input type="number" data-k="' + k + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + (v != null ? v : '') + '" placeholder="' + (ph != null ? ph : '') + '" style="width:72px"></div>'; }
+    function sel(k, opts, wide) { var v = effective()[k] || ''; return '<select data-k="' + k + '">' + opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(v) === String(o[0]) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; }
+    function render() {
+      var list = P.roles.map(function (r) { return '<button type="button" data-role="' + r + '" class="' + (r === P.role ? 'on' : '') + '">' + esc((T.ROLES[r] || [r])[0]) + '</button>'; }).join('');
+      var h = '<div class="row" style="align-items:center;margin-bottom:6px"><b style="color:var(--gold)">글자 편집</b><span class="muted" style="font-size:.76rem">미리보기에서 글자를 누르면 선택돼요 · 끌면 위치 이동</span><span style="flex:1"></span><button type="button" class="pri" data-txsave' + (TX.dirty ? '' : ' disabled') + '>글자 설정 저장</button></div>' +
+        '<div class="sub2" style="margin:0 0 8px">' + (list || '<span class="muted">이 화면에 편집할 글자가 없습니다</span>') + '</div>';
+      if (!P.role) { el.innerHTML = h; bind(); return; }
+      var e = effective(), stage = isStage(P.role);
+      h += '<div class="fld"><label>적용 범위</label>' + (stage ? '<div class="muted">영상 단계 자막은 모든 사주에 같이 적용됩니다</div>' : '<div class="sub2" style="margin:0"><button type="button" data-scope="chapter" class="' + (P.scope === 'chapter' ? 'on' : '') + '">이 챕터만</button><button type="button" data-scope="all" class="' + (P.scope === 'all' ? 'on' : '') + '">모든 챕터</button></div>') + '</div>' +
+        '<div class="g2c">' + field('글씨체', sel('font', [['', '(기본)']].concat(window.StoryFonts.list))) + field('굵기', sel('weight', [['', '(기본)']].concat(T.WEIGHTS))) + '</div>' +
+        '<div class="g2c">' + field('크기 · PC (px)', nf('size', 8, 120, 1, 16)) + field('크기 · 모바일 (px, 비우면 PC와 같게)', nf('sizeM', 8, 120, 1, 16)) + '</div>' +
+        '<div class="g2c">' + field('색', '<div style="display:flex;gap:6px"><input type="color" data-color value="' + (e.color || '#EDE8DC') + '" style="width:38px;height:30px;padding:0"><input type="text" data-k="color" value="' + esc(e.color || '') + '" placeholder="기본 색"></div>') + field('정렬', '<div class="sub2" style="margin:0">' + [['left', '왼쪽'], ['center', '가운데'], ['right', '오른쪽']].map(function (a) { return '<button type="button" data-al="' + a[0] + '" class="' + (e.align === a[0] ? 'on' : '') + '">' + a[1] + '</button>'; }).join('') + '</div>') + '</div>' +
+        '<div class="g2c">' + field('자간 (px)', nf('spacing', -3, 30, 0.5, 0)) + field('줄 간격 (배)', nf('line', 0.8, 3, 0.05, 1.6)) + '</div>' +
+        '<div class="g2c">' + field('가로 이동 (화면 %, 음수=왼쪽)', nf('x', -80, 80, 0.5, 0)) + field('세로 이동 (화면 %, 음수=위)', nf('y', -80, 80, 0.5, 0)) + '</div>' +
+        '<div class="cap2">나타나기</div><div class="g2c">' + field('등장 효과', sel('in', T.IN)) + field('등장 속도 (초)', nf('inSpeed', 0.2, 6, 0.1, 0.9)) + field('나타나는 시기 (초 · 장면에 들어온 뒤 몇 초 후)', nf('inDelay', 0, 30, 0.1, 0), true) + '</div>' +
+        '<div class="cap2">사라지기</div><div class="g2c">' + field('사라지는 시기 (초 · 다 나타난 뒤 몇 초 후, 0=사라지지 않음)', nf('hold', 0, 60, 0.5, 0), true) + field('사라지는 효과', sel('out', T.OUT)) + field('사라지는 속도 (초)', nf('outSpeed', 0.2, 6, 0.1, 0.8)) + '</div>' +
+        '<div class="cap2">계속 움직이는 효과</div><div class="g2c">' + field('효과', sel('loop', T.LOOP)) + field('주기 (초 · 클수록 느림)', nf('loopSpeed', 1, 30, 0.5, 6)) + '</div>' +
+        '<div class="row" style="margin-top:10px"><button type="button" data-play>▶ 다시 재생</button><button type="button" data-reset>이 글자 설정 되돌리기</button></div>';
+      el.innerHTML = h; bind();
+    }
+    function bind() {
+      el.onclick = function (e) {
+        var r = e.target.closest('[data-role]'); if (r) { P.role = r.dataset.role; if (!P.cid) P.cid = curCid(); pane.selectRole(P.role); render(); return; }
+        var sc = e.target.closest('[data-scope]'); if (sc) { P.scope = sc.dataset.scope; render(); return; }
+        var al = e.target.closest('[data-al]'); if (al) { put('align', al.dataset.al); render(); return; }
+        if (e.target.closest('[data-play]')) { pane.sendTs(true); return; }
+        if (e.target.closest('[data-reset]')) { var t = target(false); if (t) { Object.keys(t).forEach(function (k) { delete t[k]; }); var ts = tsWork(); [ts.all, ts.chapters[P.cid]].forEach(function (m) { if (m && m[P.role] && !Object.keys(m[P.role]).length) delete m[P.role]; }); } TX.dirty = true; pane.sendTs(true); render(); return; }
+        if (e.target.closest('[data-txsave]')) { var b = e.target.closest('[data-txsave]'); b.disabled = true; C.save({ textStyles: tsWork() }).then(function () { ST.saved.textStyles = clone(tsWork()); TX.dirty = false; render(); toast('글자 설정을 저장했습니다'); }).catch(function (er) { toast(er.message, true); b.disabled = false; }); }
+      };
+      el.oninput = el.onchange = function (e) {
+        var t = e.target, k = t.getAttribute && t.getAttribute('data-k');
+        if (t.hasAttribute && t.hasAttribute('data-color')) { put('color', t.value); var ti = el.querySelector('input[type=text][data-k=color]'); if (ti) ti.value = t.value; return; }
+        if (!k) return; var v = t.type === 'number' || t.type === 'range' ? (t.value === '' ? '' : +t.value) : t.value; put(k, v);
+        if (t.type === 'range' || t.type === 'number') el.querySelectorAll('[data-k="' + k + '"]').forEach(function (o) { if (o !== t && (o.type === 'number' || o.type === 'range')) o.value = t.value; });
+      };
+    }
+    P.onTx = function (m) { P.role = m.role || null; P.cid = m.cid || curCid(); if (P.role && isStage(P.role)) P.scope = 'all'; render(); };
+    P.onList = function (m) { P.roles = m.roles || []; P.cid = m.cid || P.cid; if (P.role && P.roles.indexOf(P.role) < 0) P.role = null; render(); };
+    P.onMove = function (m) { P.role = m.role; P.cid = m.cid || P.cid; if (isStage(P.role)) P.scope = 'all'; var t = target(true); t.x = m.x; t.y = m.y; TX.dirty = true; pane.sendTs(false); render(); };
+    render(); return P;
+  }
+
   /* ═════ ③ 조합 테스트 ═════ */
   var PRESETS = [['1990-05-15', '14:30', 'M', '경진 · 신강'], ['1985-11-23', '07:10', 'F', '1985 여'], ['2000-02-29', '22:40', 'M', '2000 남'], ['1978-08-08', '03:00', 'F', '1978 여']];
   var TST = { sel: 'awakening', rep: null, sd: null, pane: null, busy: 0 };
@@ -198,9 +288,10 @@
       built.test = 1;
       root.innerHTML = '<div class="card tbar"><div class="tsum" id="tSum"></div><div class="row" style="align-items:center"><select id="tProj" aria-label="프로젝트"></select><button type="button" id="tEditBtn">테스트 사주 바꾸기</button><label class="chk2"><input type="checkbox" id="tDbg"' + (TS.dbg ? ' checked' : '') + '>선택 근거 보기</label><button type="button" class="pri" id="tGo">다시 조합</button></div>' +
         '<div class="tform hide" id="tForm"></div></div>' +
-        '<div class="t3"><div class="card"><div class="muted" style="margin-bottom:6px">챕터 <span id="tIssues"></span></div><div class="trail" id="tRail"></div></div><div class="card"><div id="tPv"></div></div><div class="card tinsp" id="tInsp"><p class="muted">챕터를 고르면 선택 근거가 보입니다.</p></div></div>' +
+        '<div class="t3"><div class="card"><div class="muted" style="margin-bottom:6px">챕터 <span id="tIssues"></span></div><div class="trail" id="tRail"></div></div><div class="card"><div id="tPv"></div></div><div><div class="card" id="tTx"></div><div class="card tinsp" id="tInsp" style="margin-top:12px"><p class="muted">챕터를 고르면 선택 근거가 보입니다.</p></div></div></div>' +
         '<details class="card" id="tCovBox" style="margin-top:12px"><summary><b>콘텐츠 커버리지 점검</b> <span class="muted">조건 있는 모듈이 사주 구조를 얼마나 덮는지 · 눌러서 열기</span></summary><div id="tCov" style="margin-top:8px"></div></details>';
-      TST.pane = PreviewPane($('#tPv', root), { onChapter: function (id) { if (TST.sel !== id) { TST.sel = id; markRail(); inspect(); } } });
+      var txp = {}; TST.pane = PreviewPane($('#tPv', root), { onChapter: function (id) { if (TST.sel !== id) { TST.sel = id; markRail(); inspect(); } }, onTx: function (m) { txp.p.onTx(m); }, onList: function (m) { txp.p.onList(m); }, onMove: function (m) { txp.p.onMove(m); } });
+      txp.p = TxPanel($('#tTx', root), TST.pane, function () { return TST.sel === 'ilgan' || TST.sel === 'awakening' ? '_' : TST.sel; });
       $('#tGo', root).onclick = function () { run(); }; $('#tDbg', root).onchange = function (e) { TS.dbg = e.target.checked; saveTS(); inspect(); };
       $('#tProj', root).onchange = function (e) { TS.project = e.target.value; saveTS(); run(); };
       $('#tEditBtn', root).onclick = function () { $('#tForm', root).classList.toggle('hide'); };
@@ -260,56 +351,60 @@
     box.innerHTML = h;
   }
 
-  /* ═════ ④ 프로젝트 ═════ */
+  /* ═════ ④ 프로젝트(상품) ═════
+     프로젝트는 자기 챕터만 가진다(챕터는 하나의 프로젝트에만 속함). 여기서는 ACT 구성·순서·문구와 상품 설정을 정한다. 챕터 내용 편집은 "챕터 관리"에서만. */
   var PJ = { list: null, sel: 'full', dirty: false };
-  function projOpen() {
-    var root = $('#t-v2proj'); C.load().then(function () { if (!PJ.list) PJ.list = R.Chapters.projects(ST.saved); projDraw(); });
-  }
+  function projOpen() { C.load().then(function () { projList(); projDraw(); }); }
   function projStatus(p) {
-    var chs = p.chapters ? p.chapters.map(function (x) { return chapterById(x.id); }).filter(Boolean) : chaptersAll().filter(function (c) { return c.enabled !== false; });
-    var empty = chs.filter(function (c) { return c.kind !== 'remedy' && c.kind !== 'summary' && coverageOf(c) === 0; });
-    return { n: chs.length, empty: empty };
+    var chs = ownedBy(p.id).filter(function (c) { return c.enabled !== false; });
+    return { n: chs.length, empty: chs.filter(function (c) { return c.kind !== 'remedy' && c.kind !== 'summary' && coverageOf(c) === 0; }) };
   }
   function projDraw() {
-    var root = $('#t-v2proj'), L = PJ.list, p = L.filter(function (x) { return x.id === PJ.sel; })[0] || L[0]; PJ.sel = p.id;
-    root.innerHTML = '<div class="cols"><div class="card"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px"><b style="color:var(--gold)">프로젝트</b><span style="flex:1"></span><button type="button" id="pjAdd">+ 새 프로젝트</button><button class="pri" type="button" id="pjSave"' + (PJ.dirty ? '' : ' disabled') + '>저장</button></div>' +
-      L.map(function (x) { var s = projStatus(x); return '<div class="pjc' + (x.id === p.id ? ' on' : '') + (x.enabled === false ? ' off' : '') + '" data-id="' + esc(x.id) + '"><b>' + esc(x.name) + '</b>' + (x.enabled === false ? ' <span class="pill">비활성</span>' : '') + '<small>' + esc(x.desc || '') + '</small><div class="stat"><span>챕터 <b>' + s.n + '</b></span><span>ACT <b>' + (x.acts ? x.acts.length : 4) + '</b></span>' + (s.empty.length ? '<span class="pill w">비어 있을 수 있음 ' + s.empty.length + '</span>' : '<span class="pill">이상 없음</span>') + '</div></div>'; }).join('') + '</div><div id="pjEd"></div></div>';
+    var root = $('#t-v2proj'), L = projList(), p = L.filter(function (x) { return x.id === PJ.sel; })[0] || L[0]; PJ.sel = p.id;
+    root.innerHTML = '<div class="cols"><div class="card"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px"><b style="color:var(--gold)">프로젝트</b><span style="flex:1"></span><button type="button" id="pjAdd">+ 새 프로젝트</button><button class="pri" type="button" id="pjSave"' + (PJ.dirty || CH.dirty ? '' : ' disabled') + '>저장</button></div>' +
+      L.map(function (x) { var s = projStatus(x); return '<div class="pjc' + (x.id === p.id ? ' on' : '') + (x.enabled === false ? ' off' : '') + '" data-id="' + esc(x.id) + '"><b>' + esc(x.name) + '</b>' + (x.enabled === false ? ' <span class="pill">비공개</span>' : '') + '<small>' + esc(x.desc || '') + '</small><div class="stat"><span>챕터 <b>' + s.n + '</b></span><span>ACT <b>' + actCount(x.id) + '</b></span>' + (s.empty.length ? '<span class="pill w">비어 있을 수 있음 ' + s.empty.length + '</span>' : '<span class="pill">이상 없음</span>') + '</div></div>'; }).join('') + '<p class="muted" style="margin:8px 0 0;font-size:.76rem">챕터는 프로젝트마다 따로 가집니다(공유하지 않음).</p></div><div id="pjEd"></div></div>';
     $('.cols > .card', root).onclick = function (e) { var c = e.target.closest('.pjc'); if (c) { PJ.sel = c.dataset.id; projDraw(); } };
-    $('#pjAdd', root).onclick = function () { var id = prompt('새 프로젝트 id (영문 소문자·숫자, 예: career)'); if (!id) return; id = id.trim().toLowerCase(); if (!/^[a-z0-9_-]{1,30}$/.test(id) || L.some(function (x) { return x.id === id; })) return toast('쓸 수 없거나 이미 있는 id 입니다', true);
-      L.push({ id: id, name: '새 프로젝트', desc: '', enabled: true, accessLevel: 'free', requiredCompletionRate: null, acts: clone(R.Chapters.ACTS).map(function (a) { return { title: a.title, line: a.line, pdfDone: a.pdfDone }; }), chapters: chaptersAll().filter(function (c) { return c.enabled !== false; }).map(function (c) { return { id: c.id, act: c.act }; }) }); PJ.sel = id; PJ.dirty = true; projDraw(); };
-    $('#pjSave', root).onclick = function () { this.disabled = true; var part = { projects: L }; C.save(part).then(function () { ST.saved.projects = clone(L); W.projects = null; PJ.dirty = false; projDraw(); }).catch(function (e) { toast(e.message, true); projDraw(); }); };
+    $('#pjAdd', root).onclick = function () {
+      var id = prompt('새 프로젝트 id (영문 소문자·숫자, 예: career)'); if (!id) return; id = id.trim().toLowerCase(); if (!/^[a-z0-9_-]{1,30}$/.test(id) || L.some(function (x) { return x.id === id; })) return toast('쓸 수 없거나 이미 있는 id 입니다', true);
+      L.push({ id: id, name: '새 프로젝트', desc: '', enabled: true, accessLevel: 'free', requiredCompletionRate: null, chapters: null, acts: [{ title: '시작', line: '', pdfDone: '' }] }); PJ.sel = id; PJ.dirty = true; projDraw();
+    };
+    $('#pjSave', root).onclick = function () { this.disabled = true; saveStructure().then(function () { projDraw(); toast('저장했습니다'); }).catch(function (e) { toast(e.message, true); projDraw(); }); };
     projEditor(p);
   }
   function projEditor(p) {
-    var box = $('#pjEd'), isFull = p.id === 'full', custom = !!p.chapters, acts = p.acts || (isFull ? clone(R.Chapters.ACTS).map(function (a) { return { title: a.title, line: a.line, pdfDone: a.pdfDone }; }) : []), url = '/report/v2/?project=' + encodeURIComponent(p.id), st = projStatus(p);
-    if (!p.acts && isFull) p.acts = acts;
-    var sel = {}; (p.chapters || []).forEach(function (x, i) { sel[x.id] = { act: x.act, i: i }; });
-    var order = custom ? p.chapters.map(function (x) { return chapterById(x.id); }).filter(Boolean).concat(chaptersAll().filter(function (c) { return !sel[c.id]; })) : chaptersAll();
-    box.innerHTML = '<div class="card"><div class="stat"><span>챕터 <b>' + st.n + '</b></span><span>주소 <b>' + esc(url) + '</b></span>' + (st.empty.length ? '<span class="pill w">비어 있을 수 있음: ' + esc(st.empty.map(function (c) { return c.title; }).join(', ')) + '</span>' : '') + '</div>' +
+    var box = $('#pjEd'), url = '/report/v2/?project=' + encodeURIComponent(p.id), st = projStatus(p); p.acts = p.acts && p.acts.length ? p.acts : [{ title: '시작', line: '', pdfDone: '' }];
+    var mine = ownedBy(p.id), n = 0, optsAct = function (sel) { return p.acts.map(function (a, k) { return '<option value="' + (k + 1) + '"' + (sel === k + 1 ? ' selected' : '') + '>ACT ' + (k + 1) + '</option>'; }).join(''); };
+    var others = R.Chapters.libraryOf(content()).filter(function (c) { return c.project !== p.id; }), grp = {}; others.forEach(function (c) { (grp[c.project] = grp[c.project] || []).push(c); });
+    var h = '<div class="card"><div class="stat"><span>챕터 <b>' + st.n + '</b></span><span>ACT <b>' + p.acts.length + '</b></span><span>주소 <b>' + esc(url) + '</b></span>' + (st.empty.length ? '<span class="pill w">비어 있을 수 있음: ' + esc(st.empty.map(function (c) { return c.title; }).join(', ')) + '</span>' : '') + '</div>' +
       '<div class="row"><button type="button" id="pjTest">조합 테스트로 보기</button><button type="button" id="pjOpen">뷰어 열기 ↗</button><button type="button" id="pjCopy">주소 복사</button></div>' +
       '<div class="g2c"><div class="fld"><label>이름</label><input type="text" data-p="name" value="' + esc(p.name) + '"></div><div class="fld"><label>접근 (accessLevel)</label><select data-p="accessLevel"><option value="free"' + (p.accessLevel !== 'premium' ? ' selected' : '') + '>free</option><option value="premium"' + (p.accessLevel === 'premium' ? ' selected' : '') + '>premium</option></select></div></div>' +
-      '<div class="fld"><label>설명</label><input type="text" data-p="desc" value="' + esc(p.desc || '') + '"></div><div class="g2c"><div class="fld"><label>PDF 해금 완독률 (0~1, 챕터 방문 기준 · 비우면 마지막 챕터 도달)</label><input type="number" min="0" max="1" step="0.05" data-p="requiredCompletionRate" value="' + (p.requiredCompletionRate == null ? '' : p.requiredCompletionRate) + '"></div><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-p="enabled"' + (p.enabled !== false ? ' checked' : '') + '>사용(공개)</label></div>' +
-      '<h4 style="margin:14px 0 4px;color:var(--gold)">ACT 구성</h4>' + (isFull && !custom ? '<p class="muted">종합 운세는 챕터 관리의 ACT 번호를 따릅니다. 아래는 ACT 전환 화면 문구입니다.</p>' : '') + acts.map(function (a, i) { return '<div class="g2c" data-act="' + i + '" style="margin-bottom:6px"><div class="fld"><label>ACT ' + (i + 1) + ' 제목</label><input type="text" data-a="title" value="' + esc(a.title) + '"></div><div class="fld"><label>전환 문구</label><textarea data-a="line" style="min-height:42px">' + esc(a.line) + '</textarea></div><div class="fld" style="grid-column:1/-1"><label>완료 시 PDF 진행 안내</label><input type="text" data-a="pdfDone" value="' + esc(a.pdfDone) + '"></div></div>'; }).join('') + (isFull && !custom ? '' : '<div class="row"><button type="button" id="aAdd">+ ACT 추가</button><button type="button" id="aDel"' + (acts.length <= 1 ? ' disabled' : '') + '>마지막 ACT 삭제</button></div>') +
-      '<h4 style="margin:14px 0 4px;color:var(--gold)">챕터 구성</h4>' + (isFull ? '<label style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><input type="checkbox" id="pjAll"' + (custom ? '' : ' checked') + '>켜져 있는 챕터를 모두 사용 (기본)</label>' : '') +
-      (custom || !isFull ? '<div>' + order.map(function (c, i) { var on = !!sel[c.id]; return '<div class="pick" data-c="' + esc(c.id) + '"><input type="checkbox" data-sel' + (on ? ' checked' : '') + ' aria-label="포함"><span>' + (on ? sel[c.id].i + 1 : '·') + '</span><span>' + esc(c.title) + (c.enabled === false ? ' <span class="pill">꺼짐</span>' : '') + '</span><select data-act' + (on ? '' : ' disabled') + '>' + acts.map(function (a, k) { return '<option value="' + (k + 1) + '"' + ((on ? sel[c.id].act : 1) === k + 1 ? ' selected' : '') + '>ACT ' + (k + 1) + '</option>'; }).join('') + '</select><span><button type="button" data-mv="-1" aria-label="위로">▲</button><button type="button" data-mv="1" aria-label="아래로">▼</button></span></div>'; }).join('') + '</div>' : '') +
-      (!isFull ? '<div class="row" style="margin-top:12px"><button type="button" class="danger" id="pjDel"' + (R.Chapters.PROJECTS.some(function (x) { return x.id === p.id; }) ? ' disabled title="기본 프로젝트는 삭제할 수 없고 끌 수 있습니다"' : '') + '>프로젝트 삭제</button></div>' : '') + '</div>';
-    var dirty = function () { PJ.dirty = true; W.projects = PJ.list; $('#pjSave').disabled = false; };
+      '<div class="fld"><label>설명</label><input type="text" data-p="desc" value="' + esc(p.desc || '') + '"></div><div class="g2c"><div class="fld"><label>PDF 해금 완독률 (0~1 · 비우면 마지막 챕터 도달)</label><input type="number" min="0" max="1" step="0.05" data-p="requiredCompletionRate" value="' + (p.requiredCompletionRate == null ? '' : p.requiredCompletionRate) + '"></div><label style="display:flex;gap:8px;align-items:center;margin-top:18px"><input type="checkbox" data-p="enabled"' + (p.enabled !== false ? ' checked' : '') + '>공개</label></div></div>' +
+      '<div class="acts" style="margin-top:12px">' + p.acts.map(function (a, k) {
+        var rows = mine.filter(function (c) { return (c.act || 1) === k + 1; });
+        return '<div class="card actc" data-act="' + k + '"><div class="acth"><b>ACT ' + (k + 1) + '</b><input type="text" data-a="title" value="' + esc(a.title) + '" placeholder="ACT 제목"><button type="button" data-adel title="이 ACT 삭제"' + (p.acts.length <= 1 || rows.length ? ' disabled' : '') + '>삭제</button></div>' +
+          '<details><summary class="muted">전환 화면 문구 · PDF 안내</summary><div class="fld"><label>전환 문구 (줄바꿈 가능)</label><textarea data-a="line" style="min-height:42px">' + esc(a.line) + '</textarea></div><div class="fld"><label>완료 시 PDF 진행 안내</label><input type="text" data-a="pdfDone" value="' + esc(a.pdfDone) + '"></div></details>' +
+          (rows.length ? rows.map(function (c, ri) { n++; return '<div class="brow' + (c.enabled === false ? ' off' : '') + '" data-c="' + esc(c.id) + '"><span class="bn">' + String(n).padStart(2, '0') + '</span><span class="bt">' + esc(c.title) + (c.enabled === false ? ' <i class="pill">숨김</i>' : '') + '</span><select data-move aria-label="ACT 이동">' + optsAct(c.act || 1) + '</select><span><button type="button" data-mv="-1" aria-label="위로"' + (ri === 0 ? ' disabled' : '') + '>▲</button><button type="button" data-mv="1" aria-label="아래로"' + (ri === rows.length - 1 ? ' disabled' : '') + '>▼</button><button type="button" data-edit="' + esc(c.id) + '">편집</button><button type="button" data-hide>' + (c.enabled === false ? '켜기' : isDefaultId(c.id) ? '숨김' : '삭제') + '</button></span></div>'; }).join('') : '<p class="muted" style="margin:8px 0">비어 있는 ACT는 리포트에서 건너뜁니다.</p>') + '</div>'; }).join('') +
+      '<div class="card"><div class="row"><button type="button" id="aAdd">+ ACT 추가</button><button type="button" id="cNew">+ 새 챕터</button></div><div class="row" style="margin-top:8px;align-items:end"><label style="flex:1;min-width:200px;display:grid;gap:3px;font-size:.8rem;color:var(--ink2)">다른 프로젝트의 챕터를 <b>복제</b>해서 가져오기 (원본은 그대로, 이 프로젝트만의 독립된 챕터가 됩니다)<select id="cDupSel"><option value="">챕터 선택…</option>' + Object.keys(grp).map(function (pid) { var pj = projectById(pid); return '<optgroup label="' + esc(pj ? pj.name : pid) + '">' + grp[pid].map(function (c) { return '<option value="' + esc(c.id) + '">' + esc(c.title) + '</option>'; }).join('') + '</optgroup>'; }).join('') + '</select></label><select id="cDupAct" style="width:auto">' + optsAct(p.acts.length) + '</select><button type="button" id="cDup">복제해서 추가</button></div></div></div>' +
+      (['full', 'love', 'wealth', 'newyear'].indexOf(p.id) < 0 ? '<div class="row" style="margin-top:12px"><button type="button" class="danger" id="pjDel">프로젝트 삭제 (이 프로젝트의 챕터도 함께)</button></div>' : '');
+    box.innerHTML = h;
+    var dirty = function () { PJ.dirty = true; var b = $('#pjSave'); if (b) b.disabled = false; };
     box.oninput = box.onchange = function (e) {
       var t = e.target, k = t.dataset && t.dataset.p, ar = t.closest('[data-act]');
       if (k) { p[k] = t.type === 'checkbox' ? t.checked : k === 'requiredCompletionRate' ? (t.value === '' ? null : +t.value) : t.value; dirty(); return; }
       if (ar && t.dataset.a) { p.acts[+ar.dataset.act][t.dataset.a] = t.value; dirty(); return; }
-      if (t.id === 'pjAll') { if (t.checked) p.chapters = null; else p.chapters = chaptersAll().filter(function (c) { return c.enabled !== false; }).map(function (c) { return { id: c.id, act: c.act }; }); dirty(); projDraw(); return; }
-      var row = t.closest('.pick'); if (!row) return; var id = row.dataset.c;
-      if (t.matches('[data-sel]')) { if (t.checked) p.chapters.push({ id: id, act: 1 }); else p.chapters = p.chapters.filter(function (x) { return x.id !== id; }); dirty(); projDraw(); }
-      else if (t.matches('select[data-act]')) { p.chapters.filter(function (x) { return x.id === id; })[0].act = +t.value; dirty(); }
+      var row = t.closest('[data-c]'); if (row && t.matches('[data-move]')) { var c = chapterById(row.dataset.c); c.act = +t.value; c.order = 9999; renumber(p.id); dirty(); projDraw(); }
     };
     box.onclick = function (e) {
-      var mv = e.target.closest('[data-mv]'); if (mv) { var id = mv.closest('.pick').dataset.c, i = p.chapters.findIndex(function (x) { return x.id === id; }), j = i + +mv.dataset.mv; if (i >= 0 && j >= 0 && j < p.chapters.length) { var t = p.chapters[i]; p.chapters[i] = p.chapters[j]; p.chapters[j] = t; dirty(); projDraw(); } return; }
-      if (e.target.id === 'aAdd') { p.acts = p.acts || acts; p.acts.push({ title: '새 ACT', line: '', pdfDone: '' }); dirty(); projDraw(); }
-      if (e.target.id === 'aDel') { p.acts.pop(); (p.chapters || []).forEach(function (x) { if (x.act > p.acts.length) x.act = p.acts.length; }); dirty(); projDraw(); }
-      if (e.target.id === 'pjDel' && confirm('프로젝트를 삭제할까요?')) { PJ.list = PJ.list.filter(function (x) { return x !== p; }); PJ.sel = 'full'; dirty(); projDraw(); }
+      var ed = e.target.closest('[data-edit]'); if (ed) { CH.pending = ed.dataset.edit; if (built.chap) { CH.sel = CH.pending; CH.tab = 'set'; CH.pending = null; } else CH.sel = null; gotoTab('v2chap'); if (built.chap) chapDraw(); return; }
+      var mv = e.target.closest('[data-mv]'); if (mv) { var c = chapterById(mv.closest('[data-c]').dataset.c), same = ownedBy(p.id).filter(function (x) { return (x.act || 1) === (c.act || 1); }), i = same.indexOf(c), j = i + +mv.dataset.mv; if (j >= 0 && j < same.length) { var t = same[j].order; same[j].order = c.order; c.order = t; renumber(p.id); dirty(); projDraw(); } return; }
+      var hd = e.target.closest('[data-hide]'); if (hd) { var c2 = chapterById(hd.closest('[data-c]').dataset.c); if (c2.enabled === false) c2.enabled = true; else if (isDefaultId(c2.id)) c2.enabled = false; else if (confirm('이 챕터를 삭제할까요?')) W.chapters = chaptersAll().filter(function (x) { return x !== c2; }); else return; renumber(p.id); dirty(); projDraw(); return; }
+      if (e.target.id === 'aAdd') { p.acts.push({ title: '새 ACT', line: '', pdfDone: '' }); dirty(); projDraw(); return; }
+      if (e.target.id === 'cNew') { var nc = addChapterTo(p.id); dirty(); CH.sel = nc.id; CH.tab = 'set'; projDraw(); return; }
+      if (e.target.id === 'cDup') { var sid = $('#cDupSel', box).value; if (!sid) return toast('복제할 챕터를 고르세요', true); var src = chapterById(sid), nc2 = addChapterTo(p.id, src); nc2.act = +$('#cDupAct', box).value; nc2.order = 9999; renumber(p.id); dirty(); toast('복제했습니다: ' + nc2.title); projDraw(); return; }
+      var ad = e.target.closest('[data-adel]'); if (ad) { var k = +ad.closest('[data-act]').dataset.act + 1; if (ownedBy(p.id).some(function (x) { return (x.act || 1) === k; })) return; ownedBy(p.id).forEach(function (x) { if ((x.act || 1) > k) x.act--; }); p.acts.splice(k - 1, 1); dirty(); projDraw(); return; }
+      if (e.target.id === 'pjDel' && confirm('프로젝트와 그 챕터를 모두 삭제할까요?')) { W.chapters = chaptersAll().filter(function (x) { return x.project !== p.id; }); PJ.list = PJ.list.filter(function (x) { return x !== p; }); PJ.sel = 'full'; PJ.dirty = true; CH.dirty = true; projDraw(); }
     };
-    $('#pjTest', box).onclick = function () { TS.project = p.id; saveTS(); built.test = built.test; gotoTab('v2test'); setTimeout(function () { var s = $('#tP'); if (s) s.value = p.id; }, 50); };
+    $('#pjTest', box).onclick = function () { TS.project = p.id; saveTS(); gotoTab('v2test'); setTimeout(function () { var s = $('#tProj'); if (s) { s.value = p.id; s.dispatchEvent(new Event('change')); } }, 80); };
     $('#pjOpen', box).onclick = function () { window.open(url, '_blank'); };
     $('#pjCopy', box).onclick = function () { var full = location.origin + url; (navigator.clipboard ? navigator.clipboard.writeText(full) : Promise.reject()).then(function () { toast('주소를 복사했습니다'); }).catch(function () { prompt('주소', full); }); };
   }

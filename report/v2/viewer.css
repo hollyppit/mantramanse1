@@ -168,3 +168,47 @@ dialog#drawer { border: 0; padding: 0; background: transparent; color: var(--ink
 /* 월 카드 안의 상태 칩: 좁은 폭에서도 글자가 세로로 깨지지 않게 아이콘 위·이름 아래로 쌓는다 */
 .mo .sea { flex-direction: column; gap: 0; width: 100%; padding: 4px 2px; border-radius: 10px; white-space: nowrap; font-size: .72rem; line-height: 1.35; }
 .mo .sea b { font-size: .7rem; }
+
+/* 글자(자막) 스타일: 등장·사라짐 효과, 지속 효과, 미리보기 선택 표시 (값은 관리자 "글자 편집"에서 정한다) */
+.tx-i { display: block; }
+.fact .tx-i { display: inline; }
+.tx-pend > .tx-i { opacity: 0; }
+.tx-go.tx-in-fade > .tx-i { animation: txFade var(--tx-id, .9s) ease var(--tx-il, 0s) both; }
+.tx-go.tx-in-rise > .tx-i { animation: txRise var(--tx-id, .9s) cubic-bezier(.2, .7, .2, 1) var(--tx-il, 0s) both; }
+.tx-go.tx-in-drop > .tx-i { animation: txDrop var(--tx-id, .9s) cubic-bezier(.2, .7, .2, 1) var(--tx-il, 0s) both; }
+.tx-go.tx-in-blur > .tx-i { animation: txBlur var(--tx-id, .9s) ease var(--tx-il, 0s) both; }
+.tx-go.tx-in-zoom > .tx-i { animation: txZoom var(--tx-id, .9s) cubic-bezier(.2, .7, .2, 1) var(--tx-il, 0s) both; }
+.tx-go.tx-in-wipe > .tx-i { animation: txWipe var(--tx-id, .9s) ease var(--tx-il, 0s) both; }
+.tx-in-letters .w { display: inline-block; white-space: nowrap; }
+.tx-in-letters .lt { display: inline-block; opacity: 0; }
+.tx-go.tx-in-letters .lt { animation: txRise calc(var(--tx-id, .9s) * .7) cubic-bezier(.2, .7, .2, 1) both; animation-delay: calc(var(--tx-il, 0s) + var(--i, 0) * 70ms); }
+.tx-out.tx-ot-fade > .tx-i { animation: txOutFade var(--tx-od, .8s) ease both; }
+.tx-out.tx-ot-rise > .tx-i { animation: txOutRise var(--tx-od, .8s) ease both; }
+.tx-out.tx-ot-drop > .tx-i { animation: txOutDrop var(--tx-od, .8s) ease both; }
+.tx-out.tx-ot-blur > .tx-i { animation: txOutBlur var(--tx-od, .8s) ease both; }
+.tx-out.tx-ot-zoom > .tx-i { animation: txOutZoom var(--tx-od, .8s) ease both; }
+.tx-out.tx-ot-wipe > .tx-i { animation: txOutWipe var(--tx-od, .8s) ease both; }
+@keyframes txFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes txRise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes txDrop { from { opacity: 0; transform: translateY(-22px); } to { opacity: 1; transform: none; } }
+@keyframes txBlur { from { opacity: 0; filter: blur(14px); } to { opacity: 1; filter: blur(0); } }
+@keyframes txZoom { from { opacity: 0; transform: scale(.86); } to { opacity: 1; transform: none; } }
+@keyframes txWipe { from { opacity: .2; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
+@keyframes txOutFade { to { opacity: 0; } }
+@keyframes txOutRise { to { opacity: 0; transform: translateY(-22px); } }
+@keyframes txOutDrop { to { opacity: 0; transform: translateY(22px); } }
+@keyframes txOutBlur { to { opacity: 0; filter: blur(14px); } }
+@keyframes txOutZoom { to { opacity: 0; transform: scale(.86); } }
+@keyframes txOutWipe { from { clip-path: inset(0 0 0 0); } to { opacity: 0; clip-path: inset(0 0 0 100%); } }
+.tx-an-float { animation: txFloat var(--tx-ls, 6s) ease-in-out infinite; }
+.tx-an-glow { animation: txGlow var(--tx-ls, 6s) ease-in-out infinite; }
+.tx-an-pulse { animation: txPulse var(--tx-ls, 6s) ease-in-out infinite; }
+.tx-an-sway { animation: txSway var(--tx-ls, 6s) ease-in-out infinite; }
+.tx-an-shimmer > .tx-i { background-image: linear-gradient(110deg, var(--tx-sh, #fff) 35%, #fff 50%, var(--tx-sh, #fff) 65%); background-size: 260% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: txShim var(--tx-ls, 6s) linear infinite; }
+@keyframes txFloat { 0%, 100% { translate: 0 3px; } 50% { translate: 0 -5px; } }
+@keyframes txGlow { 0%, 100% { text-shadow: 0 0 0 rgba(235, 217, 170, 0); } 50% { text-shadow: 0 0 10px rgba(235, 217, 170, .6), 0 0 26px rgba(205, 178, 122, .3); } }
+@keyframes txPulse { 0%, 100% { scale: 1; } 50% { scale: 1.045; } }
+@keyframes txSway { 0%, 100% { translate: -5px 0; } 50% { translate: 5px 0; } }
+@keyframes txShim { from { background-position: 130% 0; } to { background-position: -130% 0; } }
+.tx-sel { outline: 1px dashed var(--gold); outline-offset: 4px; }
+.pv [data-tx] { cursor: move; user-select: none; -webkit-user-select: none; touch-action: none; }

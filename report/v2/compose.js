@@ -10,7 +10,7 @@
   function factOf(ch, sd) {
     var d = sd.dayMaster, k = ch.kind, S = R.SajuData;
     var sn = function (s) { return s ? S.SEASONS[s] : '확인 불가'; };
-    switch (ch.id) {
+    switch (ch.base || ch.id) {
       case 'c01': return sd.dayPillar.ko + '일주 · 일간 ' + d.stem + '(' + d.hanja + ', ' + d.el + ')';
       case 'c02': return S.ELK.map(function (e) { return e + ' ' + Math.round(el(sd, e)) + '%'; }).join(' · ');
       case 'c03': return '신강약 ' + sd.strength.zone + ' · 가장 큰 십성군 ' + sd.dominantGroup + ' ' + Math.round(sd.groups[sd.dominantGroup]) + '%';
@@ -56,7 +56,7 @@
       var picks = Rules.pick(lib.modules, facts, ch.maxModules || 1, { categories: ch.moduleCategories });
       var views = picks.map(function (p) { return view(p, v); });
       var lead = views[0] || { headline: ch.title, summary: '', detail: '', keywords: [], imageTags: [], extra: null, why: [] };
-      var out = { id: ch.id, no: ch.no, act: ch.act, title: ch.title, subtitle: ch.subtitle, kind: ch.kind, accessLevel: ch.accessLevel || 'free', introText: ch.introText || '',
+      var out = { id: ch.id, base: ch.base || ch.id, project: ch.project || 'full', no: ch.no, act: ch.act, title: ch.title, subtitle: ch.subtitle, kind: ch.kind, accessLevel: ch.accessLevel || 'free', introText: ch.introText || '',
         aiEnabled: ch.aiEnabled !== false, fact: factOf(ch, sd), headline: lead.headline, interpretation: lead.summary, meaning: lead.detail, details: views.slice(1), lead: lead, extra: lead.extra, modules: views.map(function (x) { return x.id; }), disclaimer: ch.disclaimer || null, cta: ch.cta || null, items: null };
 
       if (ch.kind === 'daewoon') { // 대운 10개 각각을 같은 모듈 DB에서 계절별로 선택
@@ -96,7 +96,7 @@
     });
 
     // 20장 최종 종합 요약(PDF 요약·마지막 화면). 구조화 필드만 모은다.
-    var byId = {}; chapters.forEach(function (c) { byId[c.id] = c; });
+    var byId = {}; chapters.forEach(function (c) { byId[c.base || c.id] = c; });
     var summary = {
       core: byId.c01 && byId.c01.headline, strengths: byId.c04 && byId.c04.headline, weaknesses: byId.c05 && byId.c05.headline, work: byId.c06 && byId.c06.headline,
       money: byId.c08 && byId.c08.headline, people: byId.c11 && byId.c11.headline, love: byId.c09 && byId.c09.headline, growth: (rec.growth[0] && rec.growth[0].item.title) || '',
@@ -172,7 +172,7 @@
   // 서버 저장본 한 번에 적용: content = /api/report-content 의 content, media = /api/media 의 media
   function fromSaved(content, media, projectId) {
     content = content || {}; if (content.scoring) R.Scenes.configure(content.scoring);
-    return { lib: library({ modules: content.modules, remedies: content.remedies, media: media, version: content.version }), cfg: R.Chapters.forProject(content, projectId || 'full'), scoring: content.scoring || {} };
+    return { lib: library({ modules: content.modules, remedies: content.remedies, media: media, version: content.version }), cfg: R.Chapters.forProject(content, projectId || 'full'), scoring: content.scoring || {}, textStyles: content.textStyles || { all: {}, chapters: {} } };
   }
 
   // 서버(/api/compose) 응답 한 번에 적용. 어떤 부분이 이상해도 원본이 유지된다.

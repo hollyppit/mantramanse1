@@ -5,21 +5,27 @@ const root = path.join(__dirname, '..');
 const eng = fs.readFileSync(path.join(root, 'engine.js'), 'utf8');
 vm.runInThisContext(eng, { filename: 'engine.js' });
 globalThis.window = globalThis;
-['chapters', 'saju-data', 'rules', 'content', 'remedy', 'media', 'scenes', 'compose', 'pdf', 'sharecard'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
+['chapters', 'saju-data', 'rules', 'content', 'remedy', 'media', 'scenes', 'compose', 'pdf', 'sharecard', 'textstyle'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
 const M = globalThis.Manse, R = globalThis.ReportV2;
 const fails = []; const ok = (c, m) => { if (!c) fails.push(m); };
 
-const cfg = R.Chapters.merge(null), lib = R.Compose.library(null);
+const cfg = R.Chapters.forProject(null, 'full'), lib = R.Compose.library(null);
 const now = Date.UTC(2026, 9, 5);
 const mk = (y, m, d, h, g) => M.compute({ year: y, month: m, day: d, hour: h, minute: 0, calendar: 'solar', leap: false, gender: g, city: '서울' });
 
 console.log('1. 챕터 구조');
 ok(cfg.chapters.length === 20 && cfg.acts.length === 4, '20챕터·4ACT');
 ok(cfg.chapters.every(c => c.act >= 1 && c.act <= 4), 'ACT 지정');
-const cc = R.Chapters.merge({ chapters: [{ id: 'c05', enabled: false }, { id: 'c99', order: 99, act: 4, title: '추가', kind: 'module', moduleCategories: ['identity'], maxModules: 1 }] });
-ok(cc.chapters.length === 20 && !cc.chapters.some(c => c.id === 'c05') && cc.chapters.some(c => c.id === 'c99'), '관리자 저장본으로 챕터 비활성/추가');
 
-console.log('1b. 프로젝트');
+const cc = R.Chapters.forProject({ chapters: { chapters: [{ id: 'c05', enabled: false }, { id: 'c99', project: 'full', order: 99, act: 4, title: '추가', kind: 'module', moduleCategories: ['identity'], maxModules: 1 }] } }, 'full');
+ok(cc.chapters.length === 20 && !cc.chapters.some(c => c.id === 'c05') && cc.chapters.some(c => c.id === 'c99'), '관리자 저장본으로 챕터 비활성/추가');
+console.log('1b. 프로젝트(챕터는 한 프로젝트에만 속함)');
+const lib0 = R.Chapters.libraryOf(null), ids0 = lib0.map(c => c.id);
+ok(new Set(ids0).size === ids0.length && lib0.every(c => typeof c.project === 'string' && c.base), '챕터 id 유일 · 소속 프로젝트 1개 · base 있음');
+const per = {}; lib0.forEach(c => { per[c.project] = (per[c.project] || 0) + 1; }); ok(per.full === 20 && per.love === 12 && per.wealth === 11 && per.newyear === 6, '프로젝트별 챕터 수 ' + JSON.stringify(per));
+ok(lib0.filter(c => c.project === 'love').every(c => c.id === 'love_' + c.base), '다른 상품 챕터는 독립된 복제본');
+const mg = R.Chapters.libraryOf({ projects: [{ id: 'mine', chapters: [{ id: 'c01', act: 1 }, { id: 'c02', act: 2 }] }] });
+ok(mg.filter(c => c.project === 'mine').map(c => c.id).join() === 'mine_c01,mine_c02' && mg.find(c => c.id === 'c01').project === 'full', '예전 공유 목록 저장본 → 소유 구조로 이전(원본은 종합에 그대로)');
 const PJ = R.Chapters.projects(null); ok(PJ.length === 4 && PJ.map(p => p.id).join() === 'full,love,wealth,newyear', '기본 프로젝트 4종');
 const fl = R.Chapters.forProject(null, 'full'); ok(fl.chapters.length === 20 && fl.acts.length === 4, 'full = 20챕터');
 for (const p of ['love', 'wealth', 'newyear']) { const x = R.Chapters.forProject(null, p); ok(x.chapters.every((c, i) => c.no === i + 1) && x.acts.every((a, i) => a.id === i + 1 && a.roman) && x.chapters.every(c => c.act >= 1 && c.act <= x.acts.length), p + ' 번호·ACT 재부여'); console.log('   ' + p + ': ' + x.chapters.length + '챕터 ' + x.acts.length + 'ACT'); }
@@ -117,6 +123,13 @@ const il = [{ stem: '경', gender: 'M', videoUrl: 'https://e.com/g.mp4', enabled
 ok(R.Media.pickIlgan(il, '경', 'M').videoUrl === 'https://e.com/g.mp4' && R.Media.pickIlgan(il, '경금', '여') && R.Media.pickIlgan(il, '경', 'F').videoWebm, '일간·성별로 선택(한자·두 글자 허용)');
 ok(R.Media.pickIlgan(il, '갑', 'M') === null && R.Media.pickIlgan(il, '임', 'M') === null, '비활성·미등록은 null → 단계 건너뜀');
 const ic = R.Media.ilganCoverage(il); ok(ic.of === 20 && ic.male === 1 && ic.female === 1, '일간 소개 커버리지 x/20');
+console.log('4e. 글자 스타일');
+const TSX = R.TextStyle, ts0 = { all: { 'intro.title': { size: 30, color: '#ffffff', in: 'rise' } }, chapters: { c05: { 'intro.title': { size: 40, hold: 3, out: 'fade' } } } };
+ok(TSX.resolve(ts0, 'c05', 'intro.title').size === 40 && TSX.resolve(ts0, 'c05', 'intro.title').color === '#ffffff' && TSX.resolve(ts0, 'c06', 'intro.title').size === 30, '챕터 값이 전체 값 위에 덮어씀');
+const dirty = TSX.clean({ size: 9999, color: 'red', in: 'hack', hold: -4, x: 'abc', align: 'left', weight: '700', loop: 'glow' });
+ok(dirty.size === 160 && !dirty.color && !dirty.in && !dirty.hold && dirty.x === undefined && dirty.align === 'left' && dirty.weight === '700' && dirty.loop === 'glow', '허용 밖 값 제거·범위 보정');
+ok(Object.keys(TSX.ROLES).every(k => /^[a-z]+[.][a-z]+$/.test(k)), '역할 이름 형식');
+const pk = R.Compose.fromSaved({ textStyles: ts0 }, [], 'full'); ok(pk.textStyles.all['intro.title'].size === 30, '저장본 textStyles 가 팩에 전달됨');
 console.log('5. 기존 엔진 회귀');
 const snap = fs.existsSync(path.join(root, 'tests/regression-snapshot.js'));
 ok(snap, '기존 회귀 스냅샷 테스트 존재(별도 실행)');

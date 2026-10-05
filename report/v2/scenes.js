@@ -111,9 +111,9 @@
     var elements = cl.element.length ? cl.element : [elMap[el]];
     if (sd.usefulElements && /remedy|summary/.test(ch.kind)) elements = [elMap[sd.usefulElements.yong]].concat(elements);
     var s = season || (sd.sewoon && sd.sewoon.season) || 'accumulation';
-    return { chapter: ch.id, chapterKey: KIND_THEME[ch.id] || ch.id, sceneType: sceneType,
+    return { chapter: ch.id, chapterKey: KIND_THEME[ch.base || ch.id] || ch.id, sceneType: sceneType,
       message: lead && (lead.headline || ''), desiredElements: elements.slice(0, 2), desiredStates: cl.state.concat(SEASON_STATE[s] || []).slice(0, 4),
-      desiredThemes: [KIND_THEME[ch.id]].filter(Boolean).concat(cl.theme), desiredEmotion: SEASON_EMO[s] || [], desiredActions: SEASON_ACT[s] || [], desiredScenes: cl.scene,
+      desiredThemes: [KIND_THEME[ch.base || ch.id]].filter(Boolean).concat(cl.theme), desiredEmotion: SEASON_EMO[s] || [], desiredActions: SEASON_ACT[s] || [], desiredScenes: cl.scene,
       preferredMediaType: rule.types, visualRole: rule.role };
   }
 
@@ -131,7 +131,7 @@
     if (c.meaning || (c.details && c.details.length)) p.push('explanation');
     if (c.kind === 'remedy') p.push('recommendation');
     else if (c.extra && (c.extra.fields || c.extra.earn || c.extra.attract || c.extra.expect || c.extra.style || c.extra.steps)) p.push('recommendation');
-    if (c.id === 'c05' || (c.extra && c.extra.caution)) p.push('warning');
+    if ((c.base || c.id) === 'c05' || (c.extra && c.extra.caution)) p.push('warning');
     if (c.action && c.action.length || c.plan) p.push('action');
     p.push('chapterEnding');
     return p;

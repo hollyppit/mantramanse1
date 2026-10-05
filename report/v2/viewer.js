@@ -51,7 +51,7 @@
       var wait = Math.max(0, 2600 - (Date.now() - t0));
       return new Promise(function (ok) { setTimeout(function () { ok(a); }, wait); });
     }).then(function (a) {
-      S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId());
+      S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
       S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg); S.awk = a[2] || {};
       return aiCompose().then(function () { return a; });
     }).then(function () {
@@ -79,7 +79,8 @@
     var cap = $('#awkCap'), start = $('#awkStart'), snd = $('#awkSound'), skip = $('#awkSkip');
     start.hidden = true; snd.hidden = true; skip.hidden = false; start.textContent = cfg.startLabel || '당신의 이야기를 시작합니다';
     var title = cfg.title, sub = cfg.sub || '', kw = cfg.kw || [], poster = clip && clip.posterUrl || cfg.guardian || '', ev = cfg.kind === 'ilgan' ? 'ilgan' : 'awakening';
-    cap.innerHTML = '<div class="t">' + esc(title) + '</div>' + (sub ? '<div class="s">' + esc(sub) + '</div>' : '') + (kw.length ? '<div class="k">' + kw.map(function (k) { return '<span>' + esc(k) + '</span>'; }).join('') + '</div>' : '');
+    var rp = cfg.kind === 'ilgan' ? 'ilgan' : 'awk';
+    cap.innerHTML = '<div class="t" data-tx="' + rp + '.title">' + esc(title) + '</div>' + (sub ? '<div class="s" data-tx="' + rp + '.sub">' + esc(sub) + '</div>' : '') + (kw.length ? '<div class="k" data-tx="' + rp + '.kw">' + kw.map(function (k) { return '<span>' + esc(k) + '</span>'; }).join('') + '</div>' : '');
     function finish(kind) {
       if (done) return; done = true; skip.hidden = true; snd.hidden = true;
       if (kind === 'completed') T(ev + '_video_completed', { fallback: fb }); else if (kind === 'skipped') T(ev + '_video_skipped', { fallback: fb });
@@ -91,6 +92,7 @@
       var img = cfg.guardian || poster; box.innerHTML = img ? '<img src="' + esc(img) + '" alt="' + esc(title) + '">' : '<div class="ph" style="--pc:' + EL_COLOR[elKey(sd.dayMaster.el)] + '"></div>';
       setTimeout(function () { finish('completed'); }, 2600);
     }
+    txApply(cap, '_', true); // 자막 스타일(영상 단계)
     var url = clip && (clip.videoUrl || clip.videoWebm);
     if (!url || saveData && !poster) { still(); }
     else {
@@ -145,14 +147,14 @@
     if (t === 'chapterIntro') {
       var act = S.rep.acts.filter(function (a) { return a.id === c.act; })[0] || {};
       return '<section class="scene s-intro' + fxCls(s) + '" ' + id + ' style="--pc:' + EL_COLOR[(s.intent.desiredElements || ['water'])[0]] + '"><div class="bg">' + (s.media ? mediaEl(s.media, c.title) : '') + (s.media ? '' : '<div class="ph" aria-hidden="true"></div>') + '</div><div class="shade"></div><div class="txt">' +
-        '<div class="no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2>' + esc(c.title) + '</h2><p class="hl">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="down" aria-hidden="true">SCROLL ↓</div></div></section>';
+        '<div class="no" data-tx="intro.no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="down" aria-hidden="true">SCROLL ↓</div></div></section>';
     }
-    if (t === 'insight') return '<section class="scene rv" ' + id + '><span class="fact">' + esc(s.fact || c.fact) + '</span><p class="lead">' + lines(s.body) + '</p>' + (s.media ? media(s) : '') + '</section>';
+    if (t === 'insight') return '<section class="scene rv" ' + id + '><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead" data-tx="insight.lead">' + lines(s.body) + '</p>' + (s.media ? media(s) : '') + '</section>';
     if (t === 'explanation') {
       var det = (c.details || []).map(function (d) { return '<div class="item"><b>' + esc(d.headline) + '</b><span>' + esc(d.summary) + '</span></div>'; }).join('');
-      var mt = String(c.meaning || ''), cut = mt.search(/[.!?]s/), first = cut > 0 ? mt.slice(0, cut + 1) : mt, rest = cut > 0 ? mt.slice(cut + 1).trim() : '';
+      var mt = String(c.meaning || ''), cut = mt.search(/[.!?]\s/), first = cut > 0 ? mt.slice(0, cut + 1) : mt, rest = cut > 0 ? mt.slice(cut + 1).trim() : '';
       var more = rest || det ? '<div class="more"><button type="button" aria-expanded="false" data-more>자세히 보기</button><div class="body"><div>' + (rest ? '<p>' + lines(rest) + '</p>' : '') + det + '</div></div></div>' : '';
-      return '<section class="scene rv" ' + id + '>' + (s.media ? media(s) : '') + '<div class="cap">MEANING</div><p class="lead">' + lines(first) + '</p>' + more + '</section>';
+      return '<section class="scene rv" ' + id + '>' + (s.media ? media(s) : '') + '<div class="cap">MEANING</div><p class="lead" data-tx="explain.lead">' + lines(first) + '</p>' + more + '</section>';
     }
     if (t === 'dataVisualization') return monthsHtml(c, s);
     if (t === 'timeline') return timelineHtml(c, s);
@@ -162,7 +164,7 @@
     if (t === 'chapterEnding') {
       var last = S.idx >= S.rep.chapters.length - 1;
       return '<section class="scene s-end rv" ' + id + '>' + (c.disclaimer ? '<p class="disc" style="margin:0 0 26px">' + esc(c.disclaimer) + '</p>' : '') + (c.cta ? '<button type="button" class="btn" data-cta="' + esc(c.cta.action) + '" style="margin-bottom:26px">' + esc(c.cta.label) + '</button>' : '') +
-        '<p class="q">' + lines(c.headline) + '</p><button type="button" class="btn gold big" id="nextBtn" disabled>' + (last ? '나의 이야기 마무리하기' : '다음 챕터 →') + '</button><p class="hint" id="nextHint">끝까지 읽으면 열립니다</p></section>';
+        '<p class="q" data-tx="end.quote">' + lines(c.headline) + '</p><button type="button" class="btn gold big" id="nextBtn" disabled>' + (last ? '나의 이야기 마무리하기' : '다음 챕터 →') + '</button><p class="hint" id="nextHint">끝까지 읽으면 열립니다</p></section>';
     }
     return '';
   }
@@ -238,7 +240,7 @@
     var pct = Math.round((Object.keys(S.visited).length / n) * 100); $('#progFill').style.width = ((i + 1) / n * 100) + '%'; $('#prog').setAttribute('aria-valuenow', String(Math.round((i + 1) / n * 100)));
     $('#chapter').innerHTML = c.scenes.map(function (s, k) { return sceneHtml(c, s, k); }).join('');
     document.title = c.title + ' · 만트라 사주 무빙툰';
-    mount(c); T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if (c.id === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {});
+    mount(c); txApply($('#chapter'), c.id, false); T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if ((c.base || c.id) === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {});
     window.scrollTo(0, S.scroll[c.id] || 0);
     prefetch(i + 1); checkUnlock(); ss('mt_v2_idx', String(i));
     var h = $('#chapter'); h.focus({ preventScroll: true });
@@ -328,6 +330,84 @@
     try { var h = JSON.parse(raw), ch = window.Manse.compute(h.inp); S.name = String(h.name || '').slice(0, 20); S.interest = h.interest || ''; setTimeout(function () { start(ch, h.inp.gender); }, 0); } catch (e) { /* 입력이 올바르지 않으면 폼을 그대로 보여 준다 */ }
   })();
 
+  /* ── 글자(자막) 스타일: [data-tx="역할"] 글자마다 글씨체·크기·색·정렬·위치·등장/사라짐 효과·나타나는/사라지는 시기를 적용한다 ──
+     값은 관리자(조합 테스트 → 글자 편집)에서 정하고 content.textStyles 로 저장된다. 챕터별 값이 전체 값 위에 덮어쓴다. */
+  var TSX = R.TextStyle, txTimers = [], txObs = null;
+  S.ts = { all: {}, chapters: {} };
+  function txClear() { txTimers.forEach(clearTimeout); txTimers = []; if (txObs) { txObs.disconnect(); txObs = null; } }
+  function splitLettersTx(box) { // 글자를 단어(.w) > 글자(.lt) span 으로 쪼갠다(태그 구조 유지)
+    var idx = 0, w = document.createTreeWalker(box, NodeFilter.SHOW_TEXT), nodes = [], n; while ((n = w.nextNode())) nodes.push(n);
+    nodes.forEach(function (t) {
+      var frag = document.createDocumentFragment();
+      String(t.nodeValue).split(/(\s+)/).forEach(function (part) {
+        if (!part) return; if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+        var word = document.createElement('span'); word.className = 'w';
+        part.split('').forEach(function (ch) { var s = document.createElement('span'); s.className = 'lt'; s.style.setProperty('--i', idx++); s.textContent = ch; word.appendChild(s); });
+        frag.appendChild(word);
+      });
+      t.parentNode.replaceChild(frag, t);
+    });
+  }
+  var TX_PROPS = ['fontFamily', 'fontSize', 'color', 'fontWeight', 'textAlign', 'letterSpacing', 'lineHeight', 'position', 'left', 'top'];
+  function txStyle(el, st, immediate) {
+    var inner = el.querySelector(':scope > .tx-i');
+    if (!inner) { el._orig = el.innerHTML; inner = document.createElement('span'); inner.className = 'tx-i'; inner.innerHTML = el._orig; el.innerHTML = ''; el.appendChild(inner); }
+    else { inner.innerHTML = el._orig; inner.className = 'tx-i'; }
+    el.className = el.className.split(/\s+/).filter(function (c) { return c.indexOf('tx-') !== 0 || c === 'tx-sel'; }).join(' ');
+    TX_PROPS.forEach(function (p) { el.style[p] = ''; }); ['--tx-id', '--tx-il', '--tx-od', '--tx-ls', '--tx-sh'].forEach(function (v) { el.style.removeProperty(v); });
+    el._txGo = null;
+    st = st || {}; var SF = window.StoryFonts;
+    if (st.font) { var ff = st.font === 'sans' ? 'var(--f-sans)' : st.font === 'serif' ? 'var(--f-serif)' : (SF && SF.css(st.font)); if (ff) { if (SF) SF.ensure(st.font); el.style.fontFamily = ff; } }
+    var size = window.innerWidth <= 700 && st.sizeM ? st.sizeM : st.size; if (size) el.style.fontSize = size + 'px';
+    if (st.color) el.style.color = st.color; if (st.weight) el.style.fontWeight = st.weight; if (st.align) el.style.textAlign = st.align;
+    if (st.spacing != null) el.style.letterSpacing = st.spacing + 'px'; if (st.line) el.style.lineHeight = st.line;
+    if (st.x || st.y) { el.style.position = 'relative'; el.style.left = (st.x || 0) + 'vw'; el.style.top = (st.y || 0) + 'svh'; }
+    if (st.loop) { el.classList.add('tx-an-' + st.loop); el.style.setProperty('--tx-ls', (st.loopSpeed || 6) + 's'); el.style.setProperty('--tx-sh', getComputedStyle(el).color); }
+    var inFx = st.in || (+st.inDelay > 0 ? 'fade' : ''), delay = +st.inDelay || 0, dur = st.inSpeed || (st.in ? 0.9 : 0.4), hold = +st.hold || 0;
+    el.style.setProperty('--tx-id', dur + 's'); el.style.setProperty('--tx-il', delay + 's'); el.style.setProperty('--tx-od', (st.outSpeed || 0.8) + 's');
+    if (!inFx && !hold) return; // 효과·시기 설정이 없으면 그대로 보인다
+    if (inFx) el.classList.add('tx-in-' + inFx); if (inFx === 'letters') splitLettersTx(inner);
+    el.classList.add('tx-pend');
+    el._txGo = function () { // 들어왔을 때 재생: 지연 → 나타남 → (hold 초 뒤) 사라짐
+      el.classList.remove('tx-pend', 'tx-out'); [].slice.call(el.classList).forEach(function (c) { if (c.indexOf('tx-ot-') === 0) el.classList.remove(c); });
+      void el.offsetWidth; el.classList.add('tx-go');
+      if (hold > 0) txTimers.push(setTimeout(function () { el.classList.add('tx-out', 'tx-ot-' + (st.out || 'fade')); }, (delay + dur + hold) * 1000));
+    };
+    if (immediate) txTimers.push(setTimeout(function () { el._txGo(); }, 30));
+  }
+  function txApply(scope, cid, immediate) {
+    txClear(); var els = [].slice.call((scope || document).querySelectorAll('[data-tx]')), roles = [];
+    els.forEach(function (el) { roles.push(el.getAttribute('data-tx')); txStyle(el, TSX.resolve(S.ts, cid, el.getAttribute('data-tx')), immediate); });
+    if (!immediate) { // 화면에 들어오면 재생
+      var pend = els.filter(function (e) { return e._txGo; });
+      if (pend.length) { txObs = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting && e.target._txGo && !e.target.classList.contains('tx-go')) e.target._txGo(); }); }, { threshold: 0.3 }); pend.forEach(function (e) { txObs.observe(e); }); setTimeout(function () { pend.forEach(function (e) { var r = e.getBoundingClientRect(); if (r.top < innerHeight && r.bottom > 0 && !e.classList.contains('tx-go') && e._txGo) e._txGo(); }); }, 120); }
+    }
+    if (PREVIEW && window.parent !== window) window.parent.postMessage({ type: 'mt-v2-txlist', cid: cid, roles: roles }, location.origin);
+  }
+  var txCid = function () { return S.rep && S.rep.chapters[S.idx] ? S.rep.chapters[S.idx].id : '_'; };
+  function txReapply() { if ($('#app').dataset.view === 'awk') txApply($('#awkCap'), '_', true); else txApply($('#chapter'), txCid(), false); }
+  if (PREVIEW) { // 관리자 미리보기: 글자를 누르면 선택·끌어서 위치 이동, 관리자에서 값이 바뀌면 바로 반영
+    var txDrag = null, txSel = null;
+    var txPost = function (o) { if (window.parent !== window) window.parent.postMessage(o, location.origin); };
+    var txSelect = function (el) { if (txSel) txSel.classList.remove('tx-sel'); txSel = el; if (el) { el.classList.add('tx-sel'); txPost({ type: 'mt-v2-tx', role: el.getAttribute('data-tx'), cid: $('#app').dataset.view === 'awk' ? '_' : txCid() }); } else txPost({ type: 'mt-v2-tx', role: null }); };
+    document.addEventListener('pointerdown', function (e) {
+      var el = e.target.closest && e.target.closest('[data-tx]');
+      if (!el) { if (!(e.target.closest && e.target.closest('#bar, #drawer, button'))) txSelect(null); return; }
+      txSelect(el); var cs = TSX.resolve(S.ts, $('#app').dataset.view === 'awk' ? '_' : txCid(), el.getAttribute('data-tx')); txDrag = { el: el, x: e.clientX, y: e.clientY, sx: cs.x || 0, sy: cs.y || 0, moved: false }; e.preventDefault();
+    }, true);
+    document.addEventListener('pointermove', function (e) {
+      if (!txDrag) return; var dx = e.clientX - txDrag.x, dy = e.clientY - txDrag.y; if (!txDrag.moved && Math.abs(dx) + Math.abs(dy) < 5) return; txDrag.moved = true;
+      txDrag.cx = Math.round((txDrag.sx + dx / innerWidth * 100) * 10) / 10; txDrag.cy = Math.round((txDrag.sy + dy / innerHeight * 100) * 10) / 10;
+      txDrag.el.style.position = 'relative'; txDrag.el.style.left = txDrag.cx + 'vw'; txDrag.el.style.top = txDrag.cy + 'svh';
+    }, true);
+    document.addEventListener('pointerup', function () { if (txDrag && txDrag.moved) txPost({ type: 'mt-v2-txmove', role: txDrag.el.getAttribute('data-tx'), cid: $('#app').dataset.view === 'awk' ? '_' : txCid(), x: txDrag.cx, y: txDrag.cy }); txDrag = null; }, true);
+    window.addEventListener('message', function (e) {
+      var m = e.data; if (e.origin !== location.origin || !m) return;
+      if (m.type === 'mt-v2-textstyle') { S.ts = m.ts || { all: {}, chapters: {} }; if (S.rep || $('#app').dataset.view === 'awk') { txReapply(); if (m.replay) $$('[data-tx]').forEach(function (el) { if (el._txGo) { el.classList.remove('tx-go', 'tx-out'); el.classList.add('tx-pend'); setTimeout(function () { el._txGo && el._txGo(); }, 60); } }); } }
+      else if (m.type === 'mt-v2-txselect') { var el = document.querySelector('[data-tx="' + m.role + '"]'); if (el) { txSelect(el); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }
+    });
+  }
+
   /* ── 관리자 미리보기(?preview=1): 저장 전 콘텐츠를 postMessage 로 받아 같은 화면 그대로 그린다. 추적·localStorage·AI 호출은 하지 않는다. ── */
   if (PREVIEW) {
     document.documentElement.classList.add('pv'); view('load'); $('#loadText').textContent = '미리보기를 기다리는 중…';
@@ -335,7 +415,7 @@
       var m = e.data; if (e.origin !== location.origin || !m || m.type !== 'mt-v2-preview') return;
       try {
         var ch = window.Manse.compute(m.input); S.sd = R.SajuData.build(ch, { now: m.now || Date.now() }); S.name = m.name || ''; S.media = m.media || [];
-        S.pack = R.Compose.fromSaved(m.content, S.media, m.project || 'full'); S.rep = R.Compose.build(S.sd, S.pack.lib, S.pack.cfg); S.awk = m.awk || {}; S.visited = {}; S.ended = {};
+        S.pack = R.Compose.fromSaved(m.content, S.media, m.project || 'full'); S.ts = S.pack.textStyles; S.rep = R.Compose.build(S.sd, S.pack.lib, S.pack.cfg); S.awk = m.awk || {}; S.visited = {}; S.ended = {};
         if (m.chapter === 'ilgan') { ilganStage(ijuStage); return; } if (m.chapter === 'awakening') { ijuStage(); return; }
         var i = Math.max(0, S.rep.chapters.map(function (c) { return c.id; }).indexOf(m.chapter)); view('reader'); $('#barTot').textContent = S.rep.chapters.length;
         S.idx = i; var c = S.rep.chapters[i]; S.visited[c.id] = 1; render(c, i, true); window.scrollTo(0, 0);

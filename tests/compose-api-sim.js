@@ -7,7 +7,7 @@ vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')); glob
 (async () => {
   const C = await import(require('url').pathToFileURL(tmp).href), R = globalThis.ReportV2, M = globalThis.Manse;
   const fails = [], ok = (c, m) => { if (!c) fails.push(m); };
-  const cfg = R.Chapters.merge({ chapters: [{ id: 'c20', aiEnabled: false }] }), lib = R.Compose.library({ media: [{ id: 'mA', type: 'image', url: 'https://t/a.webp', tags: ['metal', 'growth', 'expansion'], priority: 50 }, { id: 'mB', type: 'image', url: 'https://t/b.webp', tags: ['metal', 'growth', 'expansion'], priority: 40 }] });
+  const cfg = R.Chapters.forProject({ chapters: { chapters: [{ id: 'c20', aiEnabled: false }] } }, 'full'), lib = R.Compose.library({ media: [{ id: 'mA', type: 'image', url: 'https://t/a.webp', tags: ['metal', 'growth', 'expansion'], priority: 50 }, { id: 'mB', type: 'image', url: 'https://t/b.webp', tags: ['metal', 'growth', 'expansion'], priority: 40 }] });
   const sd = R.SajuData.build(M.compute({ year: 1990, month: 5, day: 15, hour: 14, minute: 30, calendar: 'solar', leap: false, gender: 'M', city: '서울' }), { now: Date.UTC(2026, 9, 5) });
   const rep = R.Compose.build(sd, lib, cfg), body = { payload: R.Compose.aiPayload(rep), media: R.Compose.mediaPayload(rep, lib) };
   ok(body.payload.chapters.length === 19 && !body.payload.chapters.some(c => c.id === 'c20'), 'aiEnabled:false 챕터는 AI 로 보내지 않음');
@@ -38,6 +38,14 @@ vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')); glob
   ok(MD.cleanIlgan({ stem: '자', gender: 'M' }) === null && MD.cleanIlgan({ stem: '경', gender: 'x' }) === null, '잘못된 일간·성별 거부');
   ok(MD.cleanIlgan({ stem: '경', gender: 'M', videoUrl: 'javascript:alert(1)' }).videoUrl === '', '비정상 영상 주소 제거');
   ok(MD.cleanAwakening({ dayPillar: '경오', gender: 'F' }).dayPillar === '경오' && MD.cleanAwakening({ dayPillar: '경축', gender: 'F' }) === null, '일주 검증 유지');
+  // 글자 스타일 서버 검증
+  const tp = path.join(os.tmpdir(), 'ts-test.mjs'); fs.writeFileSync(tp, fs.readFileSync(path.join(root, 'functions/_textstyle.js'), 'utf8'));
+  const TSV = await import(require('url').pathToFileURL(tp).href);
+  const cts = TSV.cleanTextStyles({ all: { 'intro.title': { size: 30, font: 'nanummj', in: 'letters', hold: 4, out: 'blur', evil: 1 }, 'bad role': { size: 9 } }, chapters: { c05: { 'insight.lead': { color: '#112233', x: 500 } }, '../x': { 'a.b': { size: 1 } } } });
+  ok(cts.all['intro.title'].font === 'nanummj' && cts.all['intro.title'].in === 'letters' && cts.all['intro.title'].hold === 4 && !('evil' in cts.all['intro.title']), '서버: 허용 값만 유지');
+  ok(!cts.all['bad role'] && !cts.chapters['../x'], '서버: 잘못된 역할·챕터 키 제거');
+  ok(cts.chapters.c05['insight.lead'].x === 80 && cts.chapters.c05['insight.lead'].color === '#112233', '서버: 범위 보정');
+  ok(JSON.stringify(TSV.cleanTextStyles(null)) === '{"all":{},"chapters":{}}', '서버: 빈 입력');
   // 클라이언트 적용
   const before = rep.chapters[0].headline; R.Compose.applyResult(rep, r1.result, lib);
   ok(rep.chapters[0].headline === '단단하게 결을 세우는 사람입니다' && rep.chapters[0].scenes[0].body === rep.chapters[0].headline, '적용 후 장면 문구도 갱신');

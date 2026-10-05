@@ -1,8 +1,9 @@
 // 리포트 v2 콘텐츠 저장본: 해석 모듈·개운법 라이브러리·챕터 설정·미디어 점수 가중치
 // GET /api/report-content — 공개. { content: { modules, remedies, chapters, scoring, version } | null }  (null 이면 코드의 기본 시드 report/v2/*.js 를 쓴다)
-// PUT /api/report-content — 관리자. { modules?, remedies?, chapters?, projects?, scoring? } 보낸 항목만 교체. 저장할 때마다 version 이 바뀌어 캐시 키가 갱신된다.
+// PUT /api/report-content — 관리자. { modules?, remedies?, chapters?, projects?, textStyles?, scoring? } 보낸 항목만 교체. 저장할 때마다 version 이 바뀌어 캐시 키가 갱신된다.
 // 저장: GLOSSARY_KV 'v2:content'.  모듈/개운법은 id 기준으로 코드 기본값 위에 덮어쓰기·추가되고, enabled:false 로 기본 항목을 끌 수 있다.
 import { json, isAdmin, configError } from '../_lib.js';
+import { cleanTextStyles } from '../_textstyle.js';
 
 const KEY = 'v2:content', MAX_BYTES = 3 * 1024 * 1024;
 const MOD_CATS = ['identity', 'elements', 'personality', 'talent', 'shadow', 'career', 'success', 'wealth', 'love', 'marriage', 'relationship', 'compatibility', 'family', 'pastLife', 'daewoon', 'currentCycle', 'sewoon', 'monthly', 'remedy', 'actionPlan'];
@@ -38,12 +39,12 @@ function cleanRemedy(r) {
 }
 function cleanChapter(c) {
   if (!c || !ID_RE.test(c.id || '')) return null;
-  return { id: c.id, no: Math.round(+c.no) || 0, order: Math.round(+c.order) || 0, act: Math.max(1, Math.min(9, Math.round(+c.act) || 1)), enabled: c.enabled !== false, title: str(c.title, 60), subtitle: str(c.subtitle, 120), kind: ['module', 'daewoon', 'current', 'sewoon', 'monthly', 'remedy', 'summary'].includes(c.kind) ? c.kind : 'module',
+  return { id: c.id, project: ID_RE.test(c.project || '') ? c.project : 'full', base: ID_RE.test(c.base || '') ? c.base : c.id, no: Math.round(+c.no) || 0, order: Math.round(+c.order) || 0, act: Math.max(1, Math.min(9, Math.round(+c.act) || 1)), enabled: c.enabled !== false, title: str(c.title, 60), subtitle: str(c.subtitle, 120), kind: ['module', 'daewoon', 'current', 'sewoon', 'monthly', 'remedy', 'summary'].includes(c.kind) ? c.kind : 'module',
     moduleCategories: strs(c.moduleCategories, 10, 30).filter(x => MOD_CATS.includes(x)), maxModules: Math.max(1, Math.min(8, Math.round(+c.maxModules) || 1)), aiEnabled: c.aiEnabled !== false, accessLevel: c.accessLevel === 'premium' ? 'premium' : 'free',
     coverImage: MEDIA_OK.test(c.coverImage || '') ? c.coverImage : '', introText: str(c.introText, 300), disclaimer: str(c.disclaimer, 200) };
 }
 const cleanAct = a => (a && Number.isInteger(a.id) ? { id: a.id, title: str(a.title, 40), roman: str(a.roman, 12), line: str(a.line, 160), pdfDone: str(a.pdfDone, 120) } : null);
-// 프로젝트: 챕터 라이브러리를 묶은 상품. chapters 가 null 이면 켜진 챕터 전체. acts 는 그 프로젝트의 ACT 문구
+// 프로젝트: 상품. 챕터는 각자 하나의 프로젝트에 속하므로(chapter.project) 여기에는 ACT 문구만 둔다. chapters 는 예전 저장 방식(공유 목록) 호환용이고 새 저장에서는 null
 function cleanProject(p) {
   if (!p || !ID_RE.test(p.id || '')) return null;
   const chapters = Array.isArray(p.chapters) ? p.chapters.slice(0, 60).filter(x => x && ID_RE.test(x.id || '')).map(x => ({ id: x.id, act: Math.max(1, Math.min(9, Math.round(+x.act) || 1)) })) : null;
@@ -72,8 +73,9 @@ export async function onRequestPut({ request, env }) {
   const uniq = (arr, f) => { const seen = new Set(), out = []; for (const x of arr || []) { const c = f(x); if (c && !seen.has(c.id)) { seen.add(c.id); out.push(c); } } return out; };
   if (Array.isArray(b.modules)) next.modules = uniq(b.modules.slice(0, 3000), cleanModule);
   if (Array.isArray(b.remedies)) next.remedies = uniq(b.remedies.slice(0, 1500), cleanRemedy);
-  if (b.chapters && typeof b.chapters === 'object') next.chapters = { chapters: uniq((b.chapters.chapters || []).slice(0, 60), cleanChapter), acts: (b.chapters.acts || []).slice(0, 9).map(cleanAct).filter(Boolean) };
+  if (b.chapters && typeof b.chapters === 'object') next.chapters = { chapters: uniq((b.chapters.chapters || []).slice(0, 200), cleanChapter), acts: (b.chapters.acts || []).slice(0, 9).map(cleanAct).filter(Boolean) };
   if (Array.isArray(b.projects)) next.projects = uniq(b.projects.slice(0, 40), cleanProject);
+  if (b.textStyles) next.textStyles = cleanTextStyles(b.textStyles);
   if (b.scoring) next.scoring = cleanScoring(b.scoring);
   next.version = 'c' + Date.now().toString(36); // 콘텐츠가 바뀌면 리포트 캐시 키가 바뀐다
   const text = JSON.stringify(next);
