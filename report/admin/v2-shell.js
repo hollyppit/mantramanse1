@@ -333,10 +333,8 @@
         '<div class="g2c">' + field('자간 (px)', nf('spacing', -3, 30, 0.5, 0)) + field('줄 간격 (배)', nf('line', 0.8, 3, 0.05, 1.6)) + '</div>' +
         '<div class="g2c">' + field('가로 이동 (화면 %, 음수=왼쪽)', nf('x', -80, 80, 0.5, 0)) + field('세로 이동 (화면 %, 음수=위)', nf('y', -80, 80, 0.5, 0)) + '</div>' +
         decoBlock(e) +
-        '<div class="cap2">나타나기</div><div class="g2c">' + field('등장 효과', sel('in', T.IN)) + field('등장 속도 (초)', nf('inSpeed', 0.2, 6, 0.1, 0.9)) + field('나타나는 시기 (초 · 장면에 들어온 뒤 몇 초 후)', nf('inDelay', 0, 30, 0.1, 0), true) + '</div>' +
-        '<div class="cap2">사라지기</div><div class="g2c">' + field('사라지는 시기 (초 · 다 나타난 뒤 몇 초 후, 0=사라지지 않음)', nf('hold', 0, 60, 0.5, 0), true) + field('사라지는 효과', sel('out', T.OUT)) + field('사라지는 속도 (초)', nf('outSpeed', 0.2, 6, 0.1, 0.8)) + '</div>' +
-        '<div class="cap2">계속 움직이는 효과</div><div class="g2c">' + field('효과', sel('loop', T.LOOP)) + field('주기 (초 · 클수록 느림)', nf('loopSpeed', 1, 30, 0.5, 6)) + '</div>' +
-        '<div class="row" style="margin-top:10px"><button type="button" data-play>▶ 다시 재생</button><button type="button" data-reset>이 글자 설정 되돌리기</button></div>' + bulkBlock();
+        '<p class="muted" style="font-size:.78rem;margin:12px 0 0">글자는 움직이지 않습니다 — 나타나기·사라지기·계속 움직이는 효과는 읽기 모드에서 쓰지 않아 숨겼습니다(저장된 값은 그대로 보존). 강조는 글씨체·크기·굵기·색·여백으로 합니다.</p>' +
+        '<div class="row" style="margin-top:10px"><button type="button" data-reset>이 글자 설정 되돌리기</button></div>' + bulkBlock();
       el.innerHTML = h; bind();
     }
     function bind() {
@@ -600,16 +598,15 @@
   // 무빙 연출: 장면 안 요소가 차례로 나타나는 효과 + 자동 스크롤(누르면 멈춤). 저장하면 /api/report-content 의 flow 로 올라가고 viewer 가 같은 값을 쓴다.
   function moveOpen() {
     var box = $('#stMove'), M = R.Moving; C.load().then(function () {
-      var f = M.clean(ST.saved.flow), esc2 = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); };
+      var f = M.clean(ST.saved.flow); f.bgMotion = String(f.bgMotion); var esc2 = function (s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); };
       var num = function (k, label, min, max, step, hint) { return '<label style="display:block;margin:8px 0">' + label + ' <input type="number" data-f="' + k + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + f[k] + '" style="width:90px"> <span class="muted" style="font-size:.76rem">' + hint + '</span></label>'; };
       var chk = function (k, label) { return '<label style="display:block;margin:8px 0"><input type="checkbox" data-f="' + k + '"' + (f[k] ? ' checked' : '') + ' style="width:auto"> ' + label + '</label>'; };
       var sel = function (k, label, list) { return '<label style="display:block;margin:8px 0">' + label + ' <select data-f="' + k + '">' + list.map(function (x) { return '<option value="' + x[0] + '"' + (f[k] === x[0] ? ' selected' : '') + '>' + esc2(x[1]) + '</option>'; }).join('') + '</select></label>'; };
-      box.innerHTML = '<div class="card"><b style="color:var(--gold)">차례로 나타나기</b> <span class="muted">장면 안의 풀이 박스·글·이미지가 위에서부터 하나씩 나타납니다.</span>' +
-        chk('enabled', '차례로 나타나는 효과 사용') + sel('anim', '효과', M.ANIMS) + num('duration', '나타나는 시간', 0.1, 4, 0.1, '초') + num('distance', '움직이는 거리', 0, 120, 2, 'px (떠오르기·펼쳐지기·내려오기)') + num('stagger', '요소 사이 간격', 0, 2, 0.05, '초 (0이면 한꺼번에)') + num('trigger', '나타나는 위치', 40, 100, 1, '% (화면 위에서 이 지점에 닿으면 · 100=맨 아래, 50=가운데)') +
-        '</div><div class="card"><b style="color:var(--gold)">자동 스크롤</b> <span class="muted">챕터를 열면 저절로 내려가고, 화면을 누르거나 건드리면 멈춥니다. 버튼으로 이어서 볼 수 있습니다.</span>' +
-        chk('auto', '자동 스크롤 사용') + num('speed', '속도', 10, 400, 5, 'px/초 (기본 55, 느리게 30 · 빠르게 100)') + num('startDelay', '시작까지', 0, 10, 0.5, '초') + chk('stopAtChoice', '질문·선택이 있는 장면에서 멈추기') + num('resumeAfter', '멈춘 뒤 자동 재개', 0, 60, 1, '초 (0이면 버튼을 누를 때까지 멈춤)') + chk('btnShow', '멈추기/이어서 보기 버튼 보이기') + sel('btnPos', '버튼 위치', M.POS) +
-        '</div><div class="row" style="margin-top:12px"><button class="pri" id="mvSave" type="button">저장</button> <button type="button" id="mvDef">기본값으로</button> <button type="button" id="mvTest">조합 테스트에서 확인</button></div><p class="muted" style="margin-top:10px">저장한 뒤 조합 테스트의 미리보기에서 챕터를 열면 이 값이 적용됩니다. 손님 기기에서 "동작 줄이기"를 켠 경우에는 효과와 자동 스크롤이 꺼집니다.</p>';
-      var read = function () { var o = {}; $$('[data-f]', box).forEach(function (i) { o[i.dataset.f] = i.type === 'checkbox' ? i.checked : i.type === 'number' ? +i.value : i.value; }); return M.clean(o); };
+      box.innerHTML = '<div class="card"><b style="color:var(--gold)">읽기 모드 · 자동 스크롤</b> <span class="muted">글자는 움직이지 않고, 읽는 속도에 맞춰 화면이 한 덩어리씩 넘어갑니다(이동 → 머묾 → 이동). 화면을 직접 건드리면 바로 멈춥니다.</span>' +
+        chk('auto', '리포트를 열면 자동으로 읽어 주기') + num('startDelay', '시작까지', 0, 10, 0.5, '초') + num('readSpeed', '읽는 속도(섹션 길이)', 3, 12, 0.5, '초당 글자 수 (기본 6.5 · 천천히 5 · 빠르게 8) — 글이 길수록 한 화면에 오래 머뭅니다') + chk('stopAtChoice', '질문·선택이 있는 곳에서 멈추기') +
+        sel('bgMotion', '배경 움직임', [['0', '없음'], ['1', '아주 느리게 (기본)'], ['2', '느리게']]) +
+        '</div><div class="row" style="margin-top:12px"><button class="pri" id="mvSave" type="button">저장</button> <button type="button" id="mvDef">기본값으로</button> <button type="button" id="mvTest">조합 테스트에서 확인</button></div><p class="muted" style="margin-top:10px">손님 화면 하단의 컨트롤러에서 자동 스크롤·TTS·BGM을 켜고 끌 수 있습니다. "동작 줄이기"를 켠 기기에서는 배경 움직임이 꺼지고 화면 이동이 즉시 이루어집니다. 예전 "차례로 나타나기" 효과 설정은 쓰지 않으며 저장된 값은 그대로 보존됩니다.</p>';
+      var read = function () { var o = {}; $$('[data-f]', box).forEach(function (i) { o[i.dataset.f] = i.type === 'checkbox' ? i.checked : i.type === 'number' ? +i.value : i.value; }); return M.clean(Object.assign({}, ST.saved.flow, o)); }; // 예전 연출 값은 지우지 않고 그대로 둔다
       $('#mvSave', box).onclick = function () { var v = read(); C.save({ flow: v }).then(function () { ST.saved.flow = v; toast('저장했습니다'); moveOpen(); }).catch(function (e) { toast(e.message, true); }); };
       $('#mvDef', box).onclick = function () { ST.saved.flow = M.clean({}); moveOpen(); toast('기본값을 불러왔습니다. 저장을 눌러야 적용됩니다'); };
       $('#mvTest', box).onclick = function () { gotoTab('v2test'); };

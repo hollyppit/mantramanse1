@@ -12,7 +12,7 @@
   var SEA_ICON = { opportunity: '◆', expansion: '▲', harvest: '●', accumulation: '■', transition: '◇', defense: '▽' }; // 색만으로 상태를 구분하지 않도록 글자·기호를 함께 쓴다
   var STAGES = ['타고난 명(命)을 읽고 있습니다', '기질과 힘의 방향을 가늠하고 있습니다', '10년마다 달라지는 운의 길을 이어 붙이고 있습니다', '움직일 때와 준비할 때를 가리고 있습니다', '한 편의 運路로 구성하고 있습니다'];
   var PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
-  var S = { sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
+  var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
   var view = function (v) { if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
   function toast(msg, ms) { var t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, ms || 3200); }
   var sg = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, ss = function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { } };
@@ -162,59 +162,52 @@
   }
   /* 엔딩: 사주는 결말을 적어 놓은 대본이 아니다 … 다음 장면을 만드는 사람은 결국 당신이다 */
   function endingCinema(then) {
-    var sd = S.sd; S.scroll[S.rep.chapters[S.idx].id] = window.scrollY; T('ending_started', {});
+    var sd = S.sd; S.scroll.doc = window.scrollY; T('ending_started', {});
     playCinema(withCopy(R.Translator.ending(sd, S.name, R.Narrator.heroVars(sd, S.name))), function () { then(); }, '엔딩');
   }
   var elKey = function (k) { return { '목': 'wood', '화': 'fire', '토': 'earth', '금': 'metal', '수': 'water' }[k] || 'water'; };
 
   /* ── 4. 리포트(챕터·Scene) ──────────────────────────────────────────────── */
-  function beginReader() { view('reader'); $('#barTot').textContent = S.rep.chapters.length; go(0, true); }
+  function beginReader() { view('reader'); openDoc(0, { autoStart: !PREVIEW }); }
 
-  var mediaEl = function (m, alt) {
-    if (!m) return '';
-    var vid = /video|transition/i.test(m.type) && (m.url || m.webmUrl) && !saveData;
-    if (vid) return '<video muted playsinline preload="none" ' + (m.loop ? 'loop ' : '') + 'poster="' + esc(m.posterUrl || '') + '" data-w="' + esc(m.webmUrl || '') + '" data-m="' + esc(m.url || '') + '" aria-label="' + esc(alt) + '"></video>';
-    var src = m.posterUrl && /video|transition/i.test(m.type) ? m.posterUrl : (m.url || m.posterUrl); return src ? '<img src="' + esc(src) + '" loading="lazy" decoding="async" alt="' + esc(alt) + '">' : '';
-  };
-  var fxCls = function (s) { return reduce || s.cinemaAuto ? '' : ' fx-' + ((s.effect && s.effect.type) || 'fade'); }; // 감독(cinemaAuto)이 있으면 움직임은 시네마 카메라가 맡는다
-  function media(s, cls) { // 장면 미디어 박스. 미디어가 없거나 로딩에 실패하면 자리표시 장면(원소 색 그라데이션)
-    var pc = EL_COLOR[(s.intent && s.intent.desiredElements && s.intent.desiredElements[0]) || 'water'], m = s.media, inner = m ? mediaEl(m, s.headline || '') : '';
-    var parts = '';
-    if (!reduce && !s.cinemaAuto && s.effect && s.effect.particle) { for (var i = 0; i < 7; i++) parts += '<span style="left:' + ((i * 14 + (s.sceneId.length * 7)) % 96) + '%;animation-delay:' + (i * 1.3) + 's;--dx:' + (i % 2 ? 24 : -24) + 'px"></span>'; }
-    return '<div class="' + (cls || 'media') + fxCls(s) + '" style="--pc:' + pc + '">' + (inner || '<div class="ph" aria-hidden="true"></div>') + (parts ? '<div class="pt" aria-hidden="true">' + parts + '</div>' : '') + '</div>';
-  }
   var seaChip = function (k, name) { var hj = R.Translator && R.Translator.SEASON[k]; return k ? '<span class="sea s-' + k + '"><b aria-hidden="true">' + SEA_ICON[k] + '</b>' + (hj ? '<i class="hj" aria-hidden="true">' + hj.h + '</i> ' : '') + esc(name || SEA[k]) + '</span>' : ''; };
   var list = function (a) { a = Array.isArray(a) ? a : (a ? [a] : []); return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
   var lines = function (t) { return esc(t).replace(/\n/g, '<br>'); };
 
   /* ── 시네마틱 장면: 챕터 오프닝·현실 장면(리더 안에서 화면에 들어오면 재생) ── */
   function layersOf(s) { return R.Director ? R.Director.layersFor(s, S.pack && S.pack.cinemaDefaults) : []; }
+  // 시네마 장면(챕터 오프닝·현실 장면)은 문서 안의 정적 섹션이다. 문장 분절·강조는 그대로 쓰되 글자는 움직이지 않는다. 배경 미디어는 고정 배경이 맡는다.
   function cinemaHtml(c, s) {
     s = withCopy([s])[0];
-    var inner = R.CinemaRender.html(s, { media: s.media, reduce: reduce, layers: layersOf(s), saveData: saveData, kicker: s.kind === 'opener' && s.hook ? s.hook.label : '' });
-    var hold = Math.round((R.Cinema.build(s, layersOf(s)).timing.total) * 0.9);
-    return '<section class="scene s-cinema' + (s.kind === 'opener' ? ' cn-opener' : '') + '" data-sc="' + esc(s.sceneId) + '" data-hold="' + hold + '"><div class="cn-inline">' + inner + '</div></section>';
+    var b = R.Cinema.build(s, layersOf(s)), blocks = {}, nm = b.c.nameEmphasis !== 'NONE';
+    b.segments.forEach(function (g) { (blocks[g.block] = blocks[g.block] || []).push(g); });
+    var body = Object.keys(blocks).map(Number).sort(function (x, y) { return x - y; }).map(function (k) {
+      return '<p class="rd-line" data-tx="scene.caption">' + blocks[k].map(function (g) { return '<span data-e="' + g.emphasis + '"' + (g.name && nm ? ' data-nm="1"' : '') + '>' + esc(g.text) + '</span>'; }).join(' ') + '</p>';
+    }).join('');
+    var kick = s.kind === 'opener' && s.hook ? '<div class="rd-kick">' + esc(s.hook.label) + '</div>' : '';
+    return '<section class="scene rd-cin' + (s.kind === 'opener' ? ' rd-open' : '') + '" data-sc="' + esc(s.sceneId) + '">' + kick + body + '</section>';
   }
-  // 일반 장면에 카메라(이미지 모션) 속성을 붙인다: 설명=정적에 가깝게, 감정=slow zoom … (감독 결정 + 관리자 기본/클립 연출)
-  function decorate(htmlStr, s) {
-    if (!s.cinemaAuto || s.kind || !R.CinemaRender || !htmlStr) return htmlStr;
-    var c = R.Cinema.resolve(s, layersOf(s)), cv = R.CinemaRender.camVars(c, reduce), m = /^<section ([^>]*)>/.exec(htmlStr); if (!m) return htmlStr;
-    var dur = c.motionIntensity >= 3 ? 9000 : c.motionIntensity === 2 ? 13000 : 18000, vars = '--cn-amp:' + cv.amp + ';--cn-pan:' + cv.pan + '%;--cn-dur:' + dur + 'ms;--cn-fx:' + Math.round(c.focalPoint.x * 100) + '%;--cn-fy:' + Math.round(c.focalPoint.y * 100) + '%;';
-    var attrs = m[1].replace(/class="/, 'class="' + (cv.on ? 'cn-cam-on ' : '')).replace(/style="/, 'style="' + vars);
-    if (!/style="/.test(attrs)) attrs += ' style="' + vars + '"';
-    return '<section data-cn-type="' + c.sceneType + '" data-motion="' + (cv.on ? c.imageMotion : 'none') + '" ' + attrs + '>' + htmlStr.slice(m[0].length);
+  var BG_BLACK = '-1', BG_PH = '-2';
+  // 장면 → 읽기 섹션: rd-sec 클래스 · 소속 챕터 · 고정 배경(미디어 번호)을 붙인다. 배경이 없는 섹션은 앞 배경을 그대로 이어 쓴다.
+  function secWrap(h, s, c, ci) {
+    var m = h && /^<section ([^>]*)>/.exec(h); if (!m) return h;
+    var attrs = m[1].replace(/\brv\b/g, '').replace(/class="/, 'class="rd-sec ').replace(/\s+/g, ' ') + ' data-ch="' + ci + '" data-layout="' + layoutOf(s) + '"';
+    var bgv = s.bg === 'black' ? BG_BLACK : s.media ? String(S.bg.push(s.media) - 1) : (s.sceneType === 'chapterIntro' ? BG_PH : null);
+    if (bgv != null) attrs += ' data-bg="' + bgv + '" data-pc="' + EL_COLOR[((s.intent && s.intent.desiredElements) || ['water'])[0]] + '"' + (s.sceneType === 'chapterIntro' && c.actTransition ? ' data-dip="1"' : '');
+    return '<section ' + attrs + '>' + h.slice(m[0].length);
   }
+  // 레이아웃 종류의 기준값(자동): TEXT · TEXT_MEDIA · HIGHLIGHT · DATA · TIMELINE · QUOTE · CHAPTER_HEADER
+  function layoutOf(s) { var t = s.sceneType; return t === 'chapterIntro' ? 'CHAPTER_HEADER' : t === 'chart' || t === 'dataVisualization' ? 'DATA' : t === 'timeline' ? 'TIMELINE' : t === 'chapterEnding' ? 'QUOTE' : /^verdict/.test(t) ? 'HIGHLIGHT' : s.media ? 'TEXT_MEDIA' : 'TEXT'; }
 
   function sceneHtml(c, s, i) {
     var t = s.sceneType, id = 'data-sc="' + esc(s.sceneId) + '"';
     if (t === 'cinema') return cinemaHtml(c, s);
     if (t === 'chapterIntro') {
       var act = S.rep.acts.filter(function (a) { return a.id === c.act; })[0] || {};
-      return '<section class="scene s-intro' + fxCls(s) + '" ' + id + ' style="--pc:' + EL_COLOR[(s.intent.desiredElements || ['water'])[0]] + '"><div class="bg">' + (s.media ? mediaEl(s.media, c.title) : '') + (s.media ? '' : '<div class="ph" aria-hidden="true"></div>') + '</div><div class="shade"></div><div class="txt">' +
-        '<div class="no" data-tx="intro.no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="down" aria-hidden="true">SCROLL ↓</div></div></section>';
+      return '<section class="scene rd-head rd-chead" ' + id + '><div class="rd-rule" aria-hidden="true"></div><div class="no" data-tx="intro.no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="rd-rule" aria-hidden="true"></div></section>';
     }
-    if (t === 'insight') return '<section class="scene rv" ' + id + '><div class="cap">풀이</div><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead' + (c.lead && /_fallback$/.test(c.lead.id || '') ? ' faint' : '') + '" data-tx="insight.lead">' + lines(s.body) + '</p>' + (c.choice ? '<p class="lead choice" data-tx="choice.line">' + lines(c.choice) + '</p>' : '') + (s.media ? media(s) : '') + '</section>';
-    if (t === 'verdictFind') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p></section>';
+    if (t === 'insight') return '<section class="scene rv" ' + id + '><div class="cap">풀이</div><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead' + (c.lead && /_fallback$/.test(c.lead.id || '') ? ' faint' : '') + '" data-tx="insight.lead">' + lines(s.body) + '</p>' + (c.choice ? '<p class="lead choice rd-hl" data-tx="choice.line">' + lines(c.choice) + '</p>' : '') + '' + '</section>';
+    if (t === 'verdictFind') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead rd-hl">' + lines(s.body) + '</p></section>';
     if (t === 'verdictBlock') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div>' + (s.sub ? '<p class="lead" style="font-size:1.05rem">' + esc(s.sub) + '</p>' : '') + '<p style="color:var(--ink2)">' + lines(s.body) + '</p></section>';
     if (t === 'verdictEvidence') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p><div class="vd" role="group" aria-label="맞는지 알려 주세요"><button type="button" class="btn" data-vd="yes">맞습니다</button><button type="button" class="btn" data-vd="no">아닙니다</button></div><p class="vd-reply faint" aria-live="polite" data-yes="' + esc((s.evidence || {}).yes) + '" data-no="' + esc((s.evidence || {}).no) + '"></p></section>';
     if (t === 'verdictAdvice') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead" style="font-size:1.05rem">' + lines(s.body) + '</p><div class="cards"><div class="card">' + list(((s.bullets || [])[0] || {}).items || []) + '</div></div></section>';
@@ -227,17 +220,17 @@
       var det = (c.details || []).map(function (d) { return /_fallback$/.test(d.id || '') ? '<p class="faint">' + esc(d.summary) + '</p>' : '<div class="item"><b>' + esc(d.headline) + '</b><span>' + esc(d.summary) + '</span>' + (d.detail ? '<em class="tip">' + esc(d.detail) + '</em>' : '') + '</div>'; }).join('');
       var mt = String(c.meaning || ''), cut = mt.search(/[.!?]\s/), first = cut > 0 ? mt.slice(0, cut + 1) : mt, rest = cut > 0 ? mt.slice(cut + 1).trim() : '';
       var more = rest || det ? '<div class="more open"><div class="body"><div>' + (rest ? '<p>' + lines(rest) + '</p>' : '') + det + '</div></div></div>' : '';
-      return '<section class="scene rv" ' + id + '>' + (s.media ? media(s) : '') + '<div class="cap">풀이 · 더 깊이</div><p class="lead" data-tx="explain.lead">' + lines(first) + '</p>' + more + '</section>';
+      return '<section class="scene rv" ' + id + '>' + '' + '<div class="cap">풀이 · 더 깊이</div><p class="lead" data-tx="explain.lead">' + lines(first) + '</p>' + more + '</section>';
     }
     if (t === 'dataVisualization') return monthsHtml(c, s);
     if (t === 'timeline') return timelineHtml(c, s);
     if (t === 'recommendation') return recoHtml(c, s);
-    if (t === 'warning') return '<section class="scene rv" ' + id + '>' + (s.media ? media(s) : '') + '<div class="cards">' + (s.bullets || []).map(function (b, i) { return '<div class="card' + (i ? '' : ' warn') + '"><h3>' + esc(b.label) + '</h3>' + list(b.items) + '</div>'; }).join('') + '</div></section>';
+    if (t === 'warning') return '<section class="scene rv" ' + id + '>' + '' + '<div class="cards">' + (s.bullets || []).map(function (b, i) { return '<div class="card' + (i ? '' : ' warn') + '"><h3>' + esc(b.label) + '</h3>' + list(b.items) + '</div>'; }).join('') + '</div></section>';
     if (t === 'action') return actionHtml(c, s);
     if (t === 'chapterEnding') {
-      var last = S.idx >= S.rep.chapters.length - 1;
+      var last = c === S.rep.chapters[S.rep.chapters.length - 1];
       return '<section class="scene s-end rv" ' + id + '>' + (c.disclaimer ? '<p class="disc" style="margin:0 0 26px">' + esc(c.disclaimer) + '</p>' : '') + (c.cta ? '<button type="button" class="btn" data-cta="' + esc(c.cta.action) + '" style="margin-bottom:26px">' + esc(c.cta.label) + '</button>' : '') +
-        '<p class="q" data-tx="end.quote">' + lines(c.headline) + '</p>' + (s.nextHook ? '<p class="nexthook"><small>다음 길 · ' + esc(s.nextHook.label) + '</small>' + lines(s.nextHook.line) + '</p>' : '') + '<button type="button" class="btn gold big" id="nextBtn" disabled>' + (last ? '나의 이야기 마무리하기' : '다음 챕터 →') + '</button><p class="hint" id="nextHint">끝까지 읽으면 열립니다</p></section>';
+        '<p class="q rd-hl" data-tx="end.quote">' + lines(c.headline) + '</p>' + (s.nextHook ? '<p class="nexthook"><small>다음 길 · ' + esc(s.nextHook.label) + '</small>' + lines(s.nextHook.line) + '</p>' : '') + (last ? '<button type="button" class="btn gold big" id="finishBtn">나의 이야기 마무리하기</button>' : '') + '</section>';
     }
     return '';
   }
@@ -291,81 +284,59 @@
     return h + '</section>';
   }
 
-  /* 챕터 이동 */
-  var swipeLock = false;
-  function go(i, first) {
-    var rep = S.rep, n = rep.chapters.length; if (i < 0 || i >= n) return;
-    var prev = S.idx, pc = rep.chapters[prev], c = rep.chapters[i];
-    if (!first) S.scroll[pc.id] = window.scrollY;
-    if (!first && i > prev && pc.act !== c.act) { T('act_completed', { act: pc.act }); var a = rep.acts.filter(function (x) { return x.id === pc.act; })[0]; if (a && a.pdfDone) toast(a.pdfDone, 3800); }
-    S.idx = i; var firstVisit = !S.visited[c.id]; S.visited[c.id] = 1;
-    var enter = function () { render(c, i, firstVisit); };
-    if (c.actTransition && firstVisit && !reduce) actTransition(c.actTransition, enter); else if (!first && !reduce && !PREVIEW) lanternTransition(c, enter); else enter();
+  /* ── 문서(Reading Flow): 모든 챕터를 하나의 긴 문서로 이어 붙인다. 지나간 내용은 사라지지 않고, 챕터 사이에는 버튼 대신 넓은 여백과 헤더가 있다. ── */
+  function actHeadHtml(c, ci) {
+    var t = c.actTransition;
+    return '<section class="scene rd-sec rd-head rd-act" data-ch="' + ci + '" data-layout="CHAPTER_HEADER" data-bg="' + BG_BLACK + '" data-dip="1"><div class="rd-rule" aria-hidden="true"></div><div class="no">' + esc(t.kicker) + '</div><h2>' + esc(t.headline) + '</h2><p class="hl">' + lines(t.body) + '</p><div class="rd-rule" aria-hidden="true"></div></section>';
   }
-  function lanternTransition(c, then) { // 챕터 사이: 등불이 떠오르는 짧은 전환(약 1초). 탭하면 바로 넘어간다.
-    var el = $('#lanx'); if (!el) { el = document.createElement('div'); el.id = 'lanx'; el.className = 'lanx'; el.setAttribute('aria-hidden', 'true'); document.body.appendChild(el); }
-    el.innerHTML = '<img src="/report/v2/lantern.webp" alt="" width="120" height="120"><p>' + String(c.no).padStart(2, '0') + ' · ' + esc(c.title) + '</p>';
-    el.classList.remove('out'); void el.offsetWidth; el.classList.add('on');
-    var done = false, end = function () { if (done) return; done = true; then(); el.classList.add('out'); setTimeout(function () { el.classList.remove('on', 'out'); }, 500); };
-    el.onclick = end; setTimeout(end, 1100);
+  function buildDoc() {
+    var rep = S.rep, h = ''; S.bg = [];
+    rep.chapters.forEach(function (c, ci) {
+      if (c.actTransition) h += actHeadHtml(c, ci);
+      h += '<article class="chap" id="ch-' + esc(c.id) + '" data-ch="' + ci + '" aria-label="' + esc(c.title) + '">' + c.scenes.map(function (s, k) { return secWrap(sceneHtml(c, s, k), s, c, ci); }).join('') + '</article>';
+    });
+    $('#chapter').innerHTML = h;
+    rep.chapters.forEach(function (c) { if (c.kind === 'monthly') { var cur = (c.items || []).findIndex(function (x) { return x.isNow; }); moDetail(c, Math.max(0, cur)); } });
   }
-  function actTransition(t, then) {
-    var el = $('#actx'); el.className = 'actx'; el.hidden = false;
-    el.innerHTML = '<div class="glow" aria-hidden="true"></div><div><div class="roman">' + esc(t.kicker) + '</div><div class="ln" aria-hidden="true"></div><div class="at">' + esc(t.headline) + '</div><div class="al">' + lines(t.body) + '</div></div>';
-    var done = false, end = function () { if (done) return; done = true; el.classList.add('out'); setTimeout(function () { el.hidden = true; }, 800); then(); };
-    el.onclick = end; setTimeout(end, 3300); // 약 3초, 탭하면 건너뜀
+  function openDoc(start, o) {
+    o = o || {}; if (S.mv) { S.mv.destroy(); S.mv = null; } if (S.watch) { S.watch.destroy(); S.watch = null; }
+    $('#barTot').textContent = S.rep.chapters.length; S.idx = start || 0; S.cur = false; buildDoc(); txApplyDoc(); document.title = '運路 · 만트라 사주 무빙툰';
+    if (R.CinemaRender) S.watch = R.CinemaRender.watch($('#chapter'), { reduce: reduce }); // 그래프 막대가 처음 한 번만 짧게 자란다
+    window.scrollTo(0, 0); mountReading(o.autoStart !== false); if (start > 0) gotoChapter(start, true);
   }
-  function render(c, i, first) {
-    var rep = S.rep, n = rep.chapters.length, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {};
+  function mountReading(auto) {
+    S.mv = R.Reading.mount($('#chapter'), { flow: S.pack && S.pack.flow, reduce: reduce, saveData: saveData, bgList: S.bg, autoStart: auto, bgm: R.Bgm && R.Bgm.has() ? R.Bgm : null, onSection: onSection, onEnd: onDocEnd,
+      onProgress: function (fr) { $('#progFill').style.width = Math.round(fr * 1000) / 10 + '%'; $('#prog').setAttribute('aria-valuenow', String(Math.round(fr * 100))); } });
+  }
+  function resumeReader() { view('reader'); mountReading(false); window.scrollTo(0, S.scroll.doc || 0); if (S.mv) S.mv.measure(); }
+  function gotoChapter(i, instant, resume) {
+    var el = $('#chapter .chap[data-ch="' + i + '"]'); if (!el || !S.mv) return; var p = el.previousElementSibling; if (p && p.classList.contains('rd-act')) el = p; S.mv.gotoEl(el, instant, resume);
+  }
+  function onSection(sec) { // 현재 읽고 있는 섹션이 바뀔 때(자동 진행·직접 스크롤 모두)
+    var ci = +sec.dataset.ch, c = S.rep.chapters[ci]; if (!c) return;
+    if (ci !== S.idx || !S.cur) enterChapter(c, ci);
+    if (sec.classList.contains('s-end') && !S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); }
+  }
+  function enterChapter(c, ci) {
+    var rep = S.rep, n = rep.chapters.length, prev = S.cur ? rep.chapters[S.idx] : null, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}; S.idx = ci; S.cur = true;
     $('#barAct').textContent = act.roman || ''; $('#barTitle').textContent = act.title ? act.title + ' · ' + c.title : c.title; $('#barNo').textContent = String(c.no).padStart(2, '0'); $('#barTot').textContent = n;
-    var pct = Math.round((Object.keys(S.visited).length / n) * 100); $('#progFill').style.width = ((i + 1) / n * 100) + '%'; $('#prog').setAttribute('aria-valuenow', String(Math.round((i + 1) / n * 100)));
-    $('#chapter').innerHTML = c.scenes.map(function (s, k) { return decorate(sceneHtml(c, s, k), s); }).join('');
-    if (R.CinemaRender) R.CinemaRender.revealify($('#chapter'), { reduce: reduce }); // 긴 문장은 호흡 단위로 나누어 차례로 나타낸다(텍스트는 그대로 보존)
-    document.title = c.title + ' · 만트라 사주 무빙툰';
+    if (prev && prev.act !== c.act && !S.visited[c.id]) { T('act_completed', { act: prev.act }); var a = rep.acts.filter(function (x) { return x.id === prev.act; })[0]; if (a && a.pdfDone) toast(a.pdfDone, 3800); }
+    if (!S.visited[c.id]) { S.visited[c.id] = 1; T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if ((c.base || c.id) === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {}); }
     if (R.Bgm && R.Bgm.has()) { var mo = c.scenes.filter(function (s) { return s.sceneType === 'insight' || s.sceneType === 'chapterIntro'; })[0]; R.Bgm.play(mo ? R.Cinema.resolve(mo, layersOf(mo)).bgmMood : 'minimal'); } // 챕터 분위기에 맞는 BGM
-    mount(c); txApply($('#chapter'), c.id, false); T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if ((c.base || c.id) === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {});
-    window.scrollTo(0, S.scroll[c.id] || 0);
-    prefetch(i + 1); checkUnlock(); ss('mt_v2_idx', String(i));
-    var h = $('#chapter'); h.focus({ preventScroll: true });
+    checkUnlock(); ss('mt_v2_idx', String(ci));
   }
-  function mount(c) {
-    var root = $('#chapter');
-    // 등장 연출: 무빙 연출(순차 등장 + 자동 스크롤)을 우선 쓰고, 꺼져 있으면 기존 방식
-    if (S.mv) { S.mv.destroy(); S.mv = null; }
-    S.mvState = S.mvState || { wanted: true }; S.mv = R.Moving && R.Moving.mount(root, S.pack && S.pack.flow, { reduce: reduce, state: S.mvState });
-    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .12 });
-    $$('.rv', root).forEach(function (e) { if (reduce || S.mv) e.classList.add('in'); else io.observe(e); });
-    // 영상: 화면에 들어왔을 때만 재생, 나가면 pause. 로딩 실패 시 poster 이미지로 대체
-    var vio = new IntersectionObserver(function (es) { es.forEach(function (e) { var v = e.target; if (e.isIntersecting) { if (!v.dataset.ready) { v.dataset.ready = 1; if (v.dataset.w && v.canPlayType('video/webm')) { var a = document.createElement('source'); a.src = v.dataset.w; a.type = 'video/webm'; v.appendChild(a); } if (v.dataset.m) { var b = document.createElement('source'); b.src = v.dataset.m; b.type = 'video/mp4'; v.appendChild(b); } v.addEventListener('error', function () { var p = v.getAttribute('poster'); if (p) { var im = new Image(); im.src = p; im.alt = ''; v.replaceWith(im); } }, true); v.load(); } var pr = v.play(); if (pr && pr.catch) pr.catch(function () { }); } else if (v.dataset.ready) v.pause(); }); }, { threshold: .5 });
-    if (!reduce) $$('video', root).forEach(function (v) { vio.observe(v); });
-    if (R.CinemaRender) R.CinemaRender.watch(root, { reduce: reduce }); // 카메라 모션·시네마 장면·문장 분절은 화면에 들어올 때 시작
-    var cur = (c.items || []).findIndex(function (x) { return x.isNow; }); if (c.kind === 'monthly') moDetail(c, Math.max(0, cur));
-    // 챕터 끝 도달 → 다음 버튼 활성화 + chapter_completed
-    var end = $('#nextBtn'), eio = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting && end) { enableNext(c); eio.disconnect(); } }); }, { threshold: .6 });
-    if (end) eio.observe(end.closest('.scene'));
-    setTimeout(checkEnd, 600); // IntersectionObserver 가 느린/숨은 화면에서도 끝 도달을 놓치지 않도록 스크롤 검사를 함께 쓴다
-  }
-  // 챕터 안 클릭·체크 처리(한 번만 등록, 현재 챕터는 S 에서 읽는다)
-  (function () { var root = $('#chapter');
+  function onDocEnd() { if (!PREVIEW) endingCinema(finalView); } // 끝까지 읽어 주면 엔딩 장면으로 이어진다
+  // 문서 안 클릭·체크 처리(한 번만 등록). 어느 챕터의 것인지는 가장 가까운 .chap 에서 읽는다.
+  (function () { var root = $('#chapter'), chOf = function (el) { var a = el.closest('.chap'); return S.rep.chapters[a ? +a.dataset.ch : S.idx]; };
     root.addEventListener('click', function (e) {
-      var c = S.rep.chapters[S.idx];
-      var m = e.target.closest('[data-more]'); if (m) { var box = m.closest('.more'), open = box.classList.toggle('open'); m.setAttribute('aria-expanded', String(open)); m.textContent = open ? '접기' : '자세히 보기'; if (open) T('detail_expanded', { chapter: c.id }); return; }
+      var c = chOf(e.target);
       var mo = e.target.closest('[data-mo]'); if (mo) { $$('.mo.sel', root).forEach(function (x) { x.classList.remove('sel'); x.style.borderColor = ''; }); mo.style.borderColor = 'var(--gold)'; moDetail(c, +mo.dataset.mo); return; }
-      var vd = e.target.closest('[data-vd]'); if (vd) { var rp = vd.closest('.scene').querySelector('.vd-reply'); $$('[data-vd]', vd.parentNode).forEach(function (x) { x.setAttribute('aria-pressed', String(x === vd)); x.style.borderColor = x === vd ? 'var(--gold)' : ''; }); if (rp) rp.textContent = rp.getAttribute('data-' + vd.dataset.vd) || ''; T('verdict_answer', { chapter: c.id, answer: vd.dataset.vd }); return; }
+      var vd = e.target.closest('[data-vd]'); if (vd) { var rp = vd.closest('.scene').querySelector('.vd-reply'); $$('[data-vd]', vd.parentNode).forEach(function (x) { x.setAttribute('aria-pressed', String(x === vd)); x.style.borderColor = x === vd ? 'var(--gold)' : ''; }); if (rp) rp.textContent = rp.getAttribute('data-' + vd.dataset.vd) || ''; T('verdict_answer', { chapter: c.id, answer: vd.dataset.vd }); if (S.mv) S.mv.choiceMade(); return; }
       var cta = e.target.closest('[data-cta]'); if (cta) { T('compatibility_cta_clicked', { chapter: c.id }); toast('두 사람의 궁합은 곧 열립니다. 조금만 기다려 주세요.'); }
-      if (e.target.id === 'nextBtn') next();
+      if (e.target.id === 'finishBtn') { if (S.mv) S.mv.pause(); endingCinema(finalView); }
     });
     root.addEventListener('change', function (e) { var k = e.target.getAttribute && e.target.getAttribute('data-chk'); if (k) ss(k, e.target.checked ? '1' : '0'); });
   })();
-
-  function checkEnd() {
-    if ($('#app').dataset.view !== 'reader') return; var b = $('#nextBtn'); if (!b || !b.disabled) return;
-    if (b.getBoundingClientRect().top < window.innerHeight - 20) enableNext(S.rep.chapters[S.idx]);
-  }
-  var scrollT; window.addEventListener('scroll', function () { clearTimeout(scrollT); scrollT = setTimeout(checkEnd, 80); }, { passive: true });
-  function enableNext(c) { var b = $('#nextBtn'); if (!b) return; b.disabled = false; $('#nextHint').textContent = ''; if (!S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); } checkUnlock(); }
-  function next() { var n = S.rep.chapters.length; if (S.idx >= n - 1) endingCinema(finalView); else go(S.idx + 1); }
-  function prefetch(i) { var c = S.rep.chapters[i]; if (!c) return; var s = c.scenes.filter(function (x) { return x.media; })[0]; if (s) { var im = new Image(); im.src = s.media.posterUrl || (/video/i.test(s.media.type) ? '' : s.media.url); } }
 
   // PDF 해금: 관리자 requiredCompletionRate(챕터 방문 비율) 또는 기본값(최종 챕터 도달)
   function checkUnlock() {
@@ -376,36 +347,29 @@
 
   /* ── 5. 최종 화면 ──────────────────────────────────────────────────────── */
   function finalView() {
-    S.scroll[S.rep.chapters[S.idx].id] = window.scrollY; view('final'); T('report_completed', { viewed: Object.keys(S.visited).length }); checkUnlock();
+    view('final'); T('report_completed', { viewed: Object.keys(S.visited).length }); checkUnlock();
     var rep = S.rep, a4 = rep.acts[rep.acts.length - 1], steps = rep.plan.strategy;
     $('#v-final').innerHTML = '<div class="fin"><p class="kicker">運路</p><h2>' + (S.name ? esc(S.name) + '에게는,<br>' + esc(S.name) + '의 때가 있다.' : '모든 사람에게는,<br>각자의 때가 있다.') + '</h2><p>' + rep.chapters.length + '개의 챕터를 지나왔다.<br>타고난 명부터 운의 흐름,<br>움직일 때를 위한 행동 전략까지.</p>' +
       '<div class="cap" style="margin-top:28px">다음 장면의 전략</div><div class="strategy">' + steps.map(function (x, i) { return (i ? '<i aria-hidden="true">→</i>' : '') + '<b>' + esc(x.label) + '</b>'; }).join('') + '</div>' +
       '<div class="btns"><button type="button" class="btn gold big" id="fPdf"' + (S.pdfUnlocked ? '' : ' disabled') + '>나의 종합 리포트 PDF 받기</button><button type="button" class="btn big" id="fShare">공유 카드 만들기</button><button type="button" class="btn" id="fCompat">궁합 볼 사람 추가하기</button><button type="button" class="btn" id="fBack">리포트 다시 보기</button></div>' + (S.pdfUnlocked ? '' : '<p class="lock">더 많은 챕터를 읽으면 PDF가 열립니다.</p>') + '<p class="fine">사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></div>';
-    $('#fBack').onclick = function () { view('reader'); go(S.rep.chapters.length - 1); };
+    $('#fBack').onclick = function () { resumeReader(); };
     $('#fCompat').onclick = function () { T('compatibility_cta_clicked', { chapter: 'final' }); toast('두 사람의 궁합은 곧 열립니다.'); };
     $('#fPdf').onclick = function () { var P = R.Pdf; if (P && P.generate) (toast('PDF를 만들고 있습니다…', 60000), P.generate(S.rep, S.sd, { name: S.name, onProgress: function (i, n) { toast('PDF를 만들고 있습니다 (' + i + ' / ' + n + '쪽)', 60000); } }).then(function () { T('pdf_downloaded', {}); toast('PDF가 준비되었습니다.'); })).catch(function (e) { toast(e.message || 'PDF를 만들지 못했습니다.'); }); else toast('PDF 생성은 곧 제공됩니다.'); };
     $('#fShare').onclick = function () { var C = R.ShareCard; if (C && C.create) { T('share_clicked', {}); C.create(S.rep, S.sd, S.awk).then(function () { T('share_card_created', {}); }).catch(function (e) { toast(e.message || '카드를 만들지 못했습니다.'); }); } else toast('공유 카드는 곧 제공됩니다.'); };
   }
 
   /* ── 6. 상단 바·챕터 목록·스와이프·키보드 ────────────────────────────────── */
-  var dr = $('#drawer');
+  var dr = $('#drawer'), drPick = false;
   $('#barBtn').onclick = function () {
-    var rep = S.rep, h = '', act = 0;
+    var rep = S.rep, h = '', act = 0; drPick = false; S.drWas = !!(S.mv && S.mv.state() === 'PLAYING'); if (S.drWas) S.mv.pause();
     rep.chapters.forEach(function (c, i) { if (c.act !== act) { act = c.act; var a = rep.acts.filter(function (x) { return x.id === act; })[0] || {}; h += '<li class="act">' + esc(a.roman || '') + ' · ' + esc(a.title || '') + '</li>'; }
-      var ok = S.visited[c.id] || i === S.idx; h += '<li><button type="button" data-go="' + i + '"' + (ok ? '' : ' disabled') + (i === S.idx ? ' class="cur" aria-current="true"' : '') + '><span>' + String(c.no).padStart(2, '0') + ' ' + esc(c.title) + '</span><small>' + (S.ended[c.id] ? '읽음' : ok ? '' : '잠김') + '</small></button></li>'; });
+      h += '<li><button type="button" data-go="' + i + '"' + (i === S.idx ? ' class="cur" aria-current="true"' : '') + '><span>' + String(c.no).padStart(2, '0') + ' ' + esc(c.title) + '</span><small>' + (S.ended[c.id] ? '읽음' : '') + '</small></button></li>'; });
     $('#drList').innerHTML = h; dr.showModal();
   };
-  $('#drList').onclick = function (e) { var b = e.target.closest('[data-go]'); if (!b || b.disabled) return; dr.close(); go(+b.dataset.go); };
+  $('#drList').onclick = function (e) { var b = e.target.closest('[data-go]'); if (!b) return; drPick = true; dr.close(); gotoChapter(+b.dataset.go, false, S.drWas); }; // 어느 챕터든 바로 갈 수 있다(모두 하나의 문서)
   $('#drClose').onclick = function () { dr.close(); };
   dr.addEventListener('click', function (e) { if (e.target === dr) dr.close(); });
-  // 가로 스와이프: 챕터 끝(맨 아래)에서만 다음 챕터로
-  var tx = 0, ty = 0;
-  document.addEventListener('touchstart', function (e) { if (e.touches.length === 1) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; } }, { passive: true });
-  document.addEventListener('touchend', function (e) {
-    if ($('#app').dataset.view !== 'reader' || !e.changedTouches.length) return; var dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
-    var bottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 8, b = $('#nextBtn');
-    if (dx < -80 && Math.abs(dy) < 50 && bottom && b && !b.disabled) next();
-  }, { passive: true });
+  dr.addEventListener('close', function () { if (!drPick && S.drWas && S.mv) S.mv.play(); });
 
   /* QA 편의: ?qa=1990-05-15,14:30,M 로 입력 없이 바로 시작(개인정보를 서버로 보내지 않는다) */
   var qa = /[?&]qa=([^&]+)/.exec(location.search);
@@ -459,6 +423,9 @@
       if (st.bdW) inner.style.border = st.bdW + 'px ' + (st.bdS || 'solid') + ' ' + st.bdC;
     }
   }
+  // 글자는 움직이지 않는다(저장된 in·out·loop·seq·hold 값은 지우지 않고 그리기에서만 무시한다)
+  var MOTION_KEYS = ['in', 'inSpeed', 'inDelay', 'hold', 'out', 'outSpeed', 'loop', 'loopSpeed', 'seq', 'seqGap'];
+  function still(st) { var o = Object.assign({}, st || {}); MOTION_KEYS.forEach(function (k) { delete o[k]; }); return o; }
   var TX_PROPS = ['fontFamily', 'fontSize', 'color', 'fontWeight', 'textAlign', 'letterSpacing', 'lineHeight', 'position', 'left', 'top', 'webkitTextStroke', 'paintOrder', 'textShadow', 'opacity'];
   function txStyle(el, st, immediate) {
     var inner = el.querySelector(':scope > .tx-i');
@@ -467,7 +434,7 @@
     el.className = el.className.split(/\s+/).filter(function (c) { return c.indexOf('tx-') !== 0 || c === 'tx-sel'; }).join(' ');
     TX_PROPS.forEach(function (p) { el.style[p] = ''; }); ['--tx-id', '--tx-il', '--tx-od', '--tx-ls', '--tx-sh'].forEach(function (v) { el.style.removeProperty(v); });
     el._txGo = null;
-    st = st || {}; var SF = window.StoryFonts;
+    st = still(st); var SF = window.StoryFonts;
     if (st.font) { var ff = st.font === 'sans' ? 'var(--f-sans)' : st.font === 'serif' ? 'var(--f-serif)' : (SF && SF.css(st.font)); if (ff) { if (SF) SF.ensure(st.font); el.style.fontFamily = ff; } }
     var size = window.innerWidth <= 700 && st.sizeM ? st.sizeM : st.size; if (size) el.style.fontSize = size + 'px';
     if (st.color) el.style.color = st.color; if (st.weight) el.style.fontWeight = st.weight; if (st.align) el.style.textAlign = st.align;
@@ -499,8 +466,16 @@
     }
     if (PREVIEW && window.parent !== window) window.parent.postMessage({ type: 'mt-v2-txlist', cid: cid, roles: roles }, location.origin);
   }
+  function txApplyDoc() { // 문서 전체: 챕터마다 그 챕터의 글자 스타일을 적용한다
+    txClear(); var roles = {};
+    $$('#chapter .chap').forEach(function (art) {
+      var c = S.rep.chapters[+art.dataset.ch]; roles[c.id] = [];
+      $$('[data-tx]', art).forEach(function (el) { var r = el.getAttribute('data-tx'); roles[c.id].push(r); txStyle(el, TSX.resolve(S.ts, c.id, r), true); });
+    });
+    if (PREVIEW && window.parent !== window) { var cid = txCid(); window.parent.postMessage({ type: 'mt-v2-txlist', cid: cid, roles: roles[cid] || [] }, location.origin); }
+  }
   var txCid = function () { return S.rep && S.rep.chapters[S.idx] ? S.rep.chapters[S.idx].id : '_'; };
-  function txReapply() { if ($('#app').dataset.view === 'awk') txApply($('#awkCap'), '_', true); else txApply($('#chapter'), txCid(), false); }
+  function txReapply() { if ($('#app').dataset.view === 'awk') txApply($('#awkCap'), '_', true); else txApplyDoc(); }
   if (PREVIEW) { // 관리자 미리보기: 글자를 누르면 선택·끌어서 위치 이동, 관리자에서 값이 바뀌면 바로 반영
     var txDrag = null, txSel = null;
     var txPost = function (o) { if (window.parent !== window) window.parent.postMessage(o, location.origin); };
@@ -535,8 +510,8 @@
         if (m.chapter === 'awakening') { ijuStage(function () { }); return; }
         if (m.chapter === 'prologue') { playCinema(withCopy(R.Translator.prologue(S.sd, S.name, R.Narrator.heroVars(S.sd, S.name))), function () { }, '프롤로그'); return; }
         if (m.chapter === 'ending') { playCinema(withCopy(R.Translator.ending(S.sd, S.name, R.Narrator.heroVars(S.sd, S.name))), function () { }, '엔딩'); return; }
-        var i = Math.max(0, S.rep.chapters.map(function (c) { return c.id; }).indexOf(m.chapter)); view('reader'); $('#barTot').textContent = S.rep.chapters.length;
-        S.idx = i; var c = S.rep.chapters[i]; S.visited[c.id] = 1; render(c, i, true); window.scrollTo(0, 0);
+        var i = Math.max(0, S.rep.chapters.map(function (c) { return c.id; }).indexOf(m.chapter)); view('reader');
+        openDoc(i, { autoStart: false });
       } catch (err) { $('#loadText').textContent = '미리보기를 만들지 못했습니다: ' + (err && err.message); view('load'); }
     });
     // 관리자 미리보기 "멈춤": 영상·소리를 멈추고 CSS 애니메이션을 정지한다(다시 누르면 재생). 새로 그려진 영상도 멈춘 채로 둔다.
@@ -549,5 +524,5 @@
     if (window.parent !== window) window.parent.postMessage({ type: 'mt-v2-ready' }, location.origin);
   }
 
-  window.MantraV2 = { state: S, go: go, T: T, intro: intro, prologue: prologue };
+  window.MantraV2 = { state: S, gotoChapter: gotoChapter, T: T, intro: intro, prologue: prologue };
 })();

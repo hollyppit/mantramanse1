@@ -1,6 +1,7 @@
 // CinemaRender — 시네마틱 장면 렌더러.  html(): 순수 함수(문자열) · play(): 풀스크린 순차 재생 · mount(): 리더 안에서 화면에 들어오면 재생.
-// 모든 움직임은 transform / opacity 기반 CSS 애니메이션(가능한 한 filter 는 blur-in·focus-pull 에만). 시각 값은 CSS 변수로 넘기고 JS 는 타이밍만 정한다.
-// prefers-reduced-motion: 카메라 움직임·parallax·큰 slide 제거, typewriter 는 단순 페이드로. 정보(문장)는 그대로 나온다.
+// 읽기 원칙: 글자는 움직이지 않는다. 문장은 모두 같은 단순 페이드(opacity)로 나오고, 예외는 이름({{userName}})과 運路 의 opacity + 아주 미세한 scale 뿐이다.
+// 움직임은 배경이 맡는다: 느린 카메라(강도 2 이하), 전환은 crossfade · dip-black 두 가지뿐. 저장된 textAnimation·segments.animation 값은 지우지 않고 여기서 무시한다.
+// prefers-reduced-motion: 카메라 움직임 제거. 정보(문장)는 그대로 나온다.
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
   var C = function () { return R.Cinema; };
@@ -9,7 +10,7 @@
 
   // 카메라 폭(강도별 확대 비율) · 패닝 거리(%)
   function camVars(c, reduce) {
-    var amp = C().INTENSITY_SCALE[Math.max(0, Math.min(4, c.motionIntensity | 0))] || 0;
+    var amp = C().INTENSITY_SCALE[Math.max(0, Math.min(2, c.motionIntensity | 0))] || 0; // 배경 움직임은 약하게(강도 2 상한)
     if (reduce || c.imageMotion === 'none' || !amp) return { amp: 1, pan: 0, on: false };
     return { amp: 1 + amp, pan: Math.round(amp * 60 * 10) / 10, on: true };
   }
@@ -25,7 +26,8 @@
   // scene → 장면 HTML. o: { media: asset|null, reduce, color, layers, actChange }
   function html(scene, o) {
     o = o || {}; var K = C(), b = K.build(scene, o.layers), c = b.c, segs = b.segments, tm = b.timing, reduce = !!o.reduce;
-    var cv = camVars(c, reduce), trans = K.limitTransition(c, !!o.actChange);
+    var cv = camVars(c, reduce), trans = K.limitTransition(c, !!o.actChange); trans = trans === 'dip-black' ? 'dip-black' : 'crossfade'; // 전환은 CROSSFADE · DIP_BLACK 두 가지만
+    var motion = c.imageMotion === 'focus-pull' ? 'slow-zoom-in' : c.imageMotion; // 글자가 아닌 배경에도 흐림(blur) 효과는 쓰지 않는다
     var m = o.media, pc = o.color || EL_COLOR[(scene.mediaIntent && scene.mediaIntent.elements && scene.mediaIntent.elements[0]) || 'water'];
     var bg = '';
     if (scene.bg !== 'black' && m) {
@@ -43,8 +45,8 @@
       txt += '<div class="cn-blk"' + (nextBlockAt != null ? ' style="--out:' + (nextBlockAt - 150) + 'ms"' : '') + '>';
       idxs.forEach(function (i, k) {
         var s = segs[i], nx = k < idxs.length - 1 ? tm.at[idxs[k + 1]] : null;
-        var anim = reduce ? 'fade' : 'fade-up'; // 글자 등장 애니메이션은 모든 장면·문장에서 하나로 통일한다(장면별 s.animation 값은 쓰지 않는다)
-        txt += '<p class="cn-seg" data-e="' + s.emphasis + '"' + (s.name ? ' data-nm="1"' : '') + (s.big ? ' data-big="1"' : '') + ' data-a="' + esc(anim) + '" style="--at:' + tm.at[i] + 'ms;' + (nx != null ? '--nx:' + nx + 'ms;' : '') + '">' + splitInner(s.text, anim, reduce) + '</p>';
+        var anim = 'fade'; // 글자 등장은 모든 문장에서 단순 페이드 하나(장면별 s.animation 값은 무시한다)
+        txt += '<p class="cn-seg" data-e="' + s.emphasis + '"' + (s.name ? ' data-nm="1"' : '') + (s.big ? ' data-big="1"' : '') + (s.name || /^運路[.!]?$/.test(String(s.text).trim()) ? ' data-pop="1"' : '') + ' data-a="' + esc(anim) + '" style="--at:' + tm.at[i] + 'ms;' + (nx != null ? '--nx:' + nx + 'ms;' : '') + '">' + splitInner(s.text, anim, reduce) + '</p>';
       });
       txt += '</div>';
     });
@@ -60,7 +62,7 @@
     var dimAt = firstImpact >= 0 ? Math.max(0, tm.at[firstImpact] - 350) : -1;
     var style = '--cn-ov:' + c.overlayStrength + ';--cn-fx:' + Math.round(c.focalPoint.x * 100) + '%;--cn-fy:' + Math.round(c.focalPoint.y * 100) + '%;--cn-dur:' + tm.total + 'ms;--cn-amp:' + cv.amp + ';--cn-pan:' + cv.pan + '%;--pc:' + pc + ';' + (dimAt >= 0 ? '--dim-at:' + dimAt + 'ms;' : '');
     var cls = 'cn-scene' + (cv.on ? ' cn-cam-on' : '') + (dimAt >= 0 ? ' cn-has-impact' : '') + (reduce ? ' cn-reduce' : '') + (scene.kind === 'profile' ? ' cn-k-profile' : '') + (scene.kind === 'title' ? ' cn-k-title' : '');
-    return '<section class="' + cls + '" data-sc="' + esc(scene.sceneId || '') + '" data-cn-type="' + c.sceneType + '" data-cn-preset="' + (c.preset || '') + '" data-pos="' + c.textPosition + '" data-size="' + c.textSize + '" data-mi="' + c.motionIntensity + '" data-pace="' + c.pacing + '" data-motion="' + (cv.on ? c.imageMotion : 'none') + '" data-tr="' + trans + '" data-bgm="' + c.bgmMood + '" data-nm-e="' + c.nameEmphasis + '" style="' + style + '">' +
+    return '<section class="' + cls + '" data-sc="' + esc(scene.sceneId || '') + '" data-cn-type="' + c.sceneType + '" data-cn-preset="' + (c.preset || '') + '" data-pos="' + c.textPosition + '" data-size="' + c.textSize + '" data-mi="' + c.motionIntensity + '" data-pace="' + c.pacing + '" data-motion="' + (cv.on ? motion : 'none') + '" data-tr="' + trans + '" data-bgm="' + c.bgmMood + '" data-nm-e="' + c.nameEmphasis + '" style="' + style + '">' +
       '<div class="cn-bg"><div class="cn-cam">' + bg + '</div></div><div class="cn-dim" aria-hidden="true"></div>' + pil + '<div class="cn-txt">' + (o.kicker ? '<div class="cn-kick">' + esc(o.kicker) + '</div>' : '') + txt + prof + sub + '</div></section>';
   }
 
@@ -140,7 +142,7 @@
   }
 
   // 리더(스크롤 화면) 안의 연출 시작 장치:
-  //  ① .cn-cam-on 장면의 이미지에 카메라 모션  ② .s-cinema 단발 시네마 장면  ③ .rs 문장 분절 reveal
+  //  데이터 그래프의 막대가 처음 한 번 짧게 자란다(그 밖의 장면 연출은 읽기 문서에서 쓰지 않는다)
   function watch(rootEl, o) {
     o = o || {}; var doc = root.document; if (!rootEl || !root.IntersectionObserver) return null;
     [].forEach.call(rootEl.querySelectorAll('.cn-cam-on'), function (sc) { [].forEach.call(sc.querySelectorAll('.media img, .media video, .media .ph, .bg img, .bg video, .bg .ph'), function (e) { e.classList.add('cn-cam'); }); });
@@ -155,34 +157,10 @@
         if (el.classList.contains('cn-data-fig')) { if (e.isIntersecting) { el.classList.add('cn-go'); io.unobserve(el); } }
         else if (el.classList.contains('cn-cam-on')) { if (e.isIntersecting) el.classList.add('cn-run'); else el.classList.remove('cn-run'); }
         else if (el.classList.contains('s-cinema')) { var sc = el.querySelector('.cn-scene'); if (!sc) return; if (e.isIntersecting) { if (!sc.classList.contains('cn-run')) { void sc.offsetWidth; sc.classList.add('cn-run'); loadMedia(sc); } } else if (sc.classList.contains('cn-run')) sc.classList.remove('cn-run'); }
-        else if (el.classList.contains('rs-host')) { if (e.isIntersecting) { el.classList.add('rs-go'); io.unobserve(el); } }
       });
     }, { threshold: 0.4 });
-    [].forEach.call(rootEl.querySelectorAll('.cn-cam-on, .s-cinema, .rs-host, .cn-data-fig'), function (e) { io.observe(e); });
+    [].forEach.call(rootEl.querySelectorAll('.cn-cam-on, .s-cinema, .cn-data-fig'), function (e) { io.observe(e); });
     return { destroy: function () { io.disconnect(); } };
   }
-  // 긴 문장을 호흡 단위(.rs)로 나눠 차례로 나타낸다. 텍스트는 그대로(공백으로 이어 읽힘). reduced-motion 이면 건드리지 않는다.
-  var REVEAL_ROLES = '[data-tx="insight.lead"],[data-tx="explain.lead"],[data-tx="choice.line"],[data-tx="end.quote"]';
-  function revealify(rootEl, o) {
-    o = o || {}; if (o.reduce || !rootEl || !C()) return;
-    [].forEach.call(rootEl.querySelectorAll(REVEAL_ROLES), function (el) {
-      if (el.classList.contains('rs-host') || el.querySelector('.rs')) return;
-      var t = el.cloneNode(true); [].forEach.call(t.querySelectorAll('br'), function (br) { br.replaceWith('\n'); });
-      var text = t.textContent.trim(); if (!text || text.length > 700) return;
-      var lines = text.split(/\n/), idx = 0, all = [];
-      var per = lines.map(function (ln) { var sg = C().splitSegments(ln, { impact: false }); all = all.concat(sg); return sg; });
-      if (all.length < 2) return;
-      var step = Math.min(260, 3000 / all.length), htmlOut = [];
-      per.forEach(function (sg, li) {
-        sg.forEach(function (s, k) {
-          var last = li === per.length - 1 && k === sg.length - 1, e = last && all.length > 2 ? 'impact' : s.emphasis === 'impact' ? 'normal' : s.emphasis;
-          htmlOut.push('<span class="rs" data-e="' + e + '" style="--d:' + Math.round(idx * step + (e === 'pause' ? 0 : 0)) + 'ms">' + esc(s.text) + '</span>'); idx += e === 'pause' || e === 'impact' ? 1.6 : 1;
-        });
-        if (li < per.length - 1) htmlOut.push('<br>');
-      });
-      el.innerHTML = htmlOut.join(' '); el.classList.add('rs-host');
-    });
-  }
-
-  R.CinemaRender = { watch: watch, revealify: revealify, html: html, play: play, mount: mount, camVars: camVars, splitInner: splitInner, EL_COLOR: EL_COLOR };
+  R.CinemaRender = { watch: watch, html: html, play: play, mount: mount, camVars: camVars, splitInner: splitInner, EL_COLOR: EL_COLOR };
 })(typeof window !== 'undefined' ? window : globalThis);

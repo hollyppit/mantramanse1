@@ -25,7 +25,7 @@
   function sel(prefix, k, v) {
     var o = '<option value="">(기본값 따름)</option>';
     Object.keys(KO[k]).forEach(function (x) { o += '<option value="' + esc(x) + '"' + (String(v) === String(x) ? ' selected' : '') + '>' + esc(KO[k][x]) + '</option>'; });
-    return '<label>' + LABEL[k] + '<select data-cn="' + k + '">' + o + '</select></label>';
+    return '<label' + (k === 'textAnimation' ? ' hidden' : '') + '>' + LABEL[k] + '<select data-cn="' + k + '">' + o + '</select></label>'; // 글자 애니메이션은 읽기 모드에서 쓰지 않아 숨긴다(값은 보존)
   }
   // 폼 HTML. val: 저장된 연출 객체(없으면 빈 칸)
   function fields(val) {
@@ -69,7 +69,7 @@
     g = g || { text: '', emphasis: 'normal', animation: 'fade-up', block: 0 };
     return '<div class="sgrow" style="display:grid;grid-template-columns:minmax(120px,1fr) 88px 104px 52px 52px 26px;gap:4px;margin:3px 0;align-items:center">' +
       '<input type="text" data-sg="text" maxlength="120" value="' + esc(g.text) + '" placeholder="문장 조각 (한 호흡)">' +
-      '<select data-sg="emphasis" title="강조">' + opt(EMK, g.emphasis) + '</select><select data-sg="animation" title="글자 애니메이션">' + opt(ANK, g.animation) + '</select>' +
+      '<select data-sg="emphasis" title="강조">' + opt(EMK, g.emphasis) + '</select><select data-sg="animation" title="글자 애니메이션" hidden>' + opt(ANK, g.animation) + '</select>' +
       '<label title="사용자 이름이 나오는 조각입니다. 천천히 나타나고 길게 머뭅니다(이름 강조 설정에 따라)"><input type="checkbox" data-sg="name"' + (g.name ? ' checked' : '') + '> 이름</label>' +
       '<input type="number" data-sg="block" min="0" max="40" value="' + (g.block || 0) + '" title="같은 번호는 한 화면에 함께 나오고, 번호가 바뀌면 이전 문장이 사라진 뒤 나옵니다">' +
       '<button type="button" data-sgdel title="이 조각 지우기" style="padding:0">✕</button></div>';
