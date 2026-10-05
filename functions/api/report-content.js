@@ -7,6 +7,7 @@ import { cleanTextStyles } from '../_textstyle.js';
 import { cleanCinemaDefaults, cleanSceneCopy } from '../_cinema.js';
 
 const KEY = 'v2:content', MAX_BYTES = 3 * 1024 * 1024;
+const TOPIC_CAT = /^t_c\d{2}_[a-z0-9]{2,20}$/; // 챕터별 주제 카드(report/v2/topics.js)
 const MOD_CATS = ['identity', 'elements', 'personality', 'talent', 'shadow', 'career', 'success', 'wealth', 'love', 'marriage', 'relationship', 'compatibility', 'family', 'pastLife', 'daewoon', 'currentCycle', 'sewoon', 'monthly', 'remedy', 'actionPlan'];
 const REM_TYPES = ['action', 'exercise', 'growth', 'people', 'place', 'environment', 'timing']; // exercise 는 예전 저장본 호환(저장 시 action 의 운동 종류로 바꾼다)
 // 조건 키는 report/v2/rules.js 의 FIELDS 와 같다
@@ -29,7 +30,7 @@ function cleanExtra(e, d = 0) {
   return o;
 }
 function cleanModule(m) {
-  if (!m || !ID_RE.test(m.id || '') || !MOD_CATS.includes(m.category)) return null;
+  if (!m || !ID_RE.test(m.id || '') || !(MOD_CATS.includes(m.category) || TOPIC_CAT.test(m.category))) return null;
   return { id: m.id, category: m.category, conditions: cleanCond(m.conditions), priority: Math.max(0, Math.min(100, Math.round(+m.priority || 0))), headline: str(m.headline, 120), summary: str(m.summary, 600), detail: str(m.detail, 2000),
     keywords: strs(m.keywords, 12), imageTags: strs(m.imageTags, 12), actionTags: strs(m.actionTags, 12), extra: cleanExtra(m.extra), enabled: m.enabled !== false };
 }

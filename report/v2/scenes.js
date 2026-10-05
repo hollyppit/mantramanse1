@@ -100,6 +100,8 @@
     verdictEvidence: { media: false, types: [], role: 'support', effect: ['fade', 'low'] },
     verdictAdvice: { media: false, types: [], role: 'support', effect: ['glow', 'low'] },
     timeline: { media: false, types: [], role: 'support', effect: ['fade', 'low'] },
+    topics: { media: false, types: [], role: 'support', effect: ['fade', 'low'] },
+    terms: { media: false, types: [], role: 'support', effect: ['fade', 'low'] },
     recommendation: { media: true, types: ['image', 'symbol'], role: 'support', effect: ['fade', 'low'] },
     warning: { media: true, types: ['image', 'videoLoop'], role: 'atmosphere', effect: ['mist', 'low'] },
     action: { media: true, types: ['videoLoop', 'image'], role: 'support', effect: ['glow', 'low'] },
@@ -140,7 +142,9 @@
     if (chartKind(c)) p.push('chart'); // 근거: 계산된 값을 그림으로(원국·오행·십성군·신강약·용신·직업 분야)
     if (c.interpretation) p.push('insight'); // 풀이
     if (c.items && c.kind === 'daewoon') p.push('timeline'); else if (c.items) p.push('dataVisualization');
+    if (c.topics && c.topics.length) p.push('topics'); // 흥미 카테고리 카드
     if (c.meaning || (c.details && c.details.length)) p.push('explanation');
+    if (c.terms && c.terms.length) p.push('terms'); // 현실 공감 → 의미 → 명리 용어 쉬운 풀이
     if (c.kind === 'remedy') p.push('recommendation');
     else if (c.extra && (c.extra.fields || c.extra.earn || c.extra.attract || c.extra.expect || c.extra.style || c.extra.steps)) p.push('recommendation');
     if ((c.base || c.id) === 'c05' || (c.extra && c.extra.caution)) p.push('warning');
@@ -180,6 +184,8 @@
       else if (st === 'verdictBlock') { sc.headline = c.verdict.blocked.label; sc.body = c.verdict.blocked.text; sc.sub = c.verdict.blocked.headline; }
       else if (st === 'verdictEvidence') { sc.headline = '시간축 위의 한 지점'; sc.body = c.verdict.evidence.text; sc.evidence = { yes: c.verdict.evidence.yes, no: c.verdict.evidence.no }; }
       else if (st === 'verdictAdvice') { sc.headline = '다음 장면을 위한 두 걸음'; sc.body = c.verdict.advice.lead; sc.bullets = [{ label: 'ADVICE', items: c.verdict.advice.items }]; }
+      else if (st === 'topics') { sc.headline = '더 알아보기'; sc.cards = c.topics; }
+      else if (st === 'terms') { sc.headline = '쉬운 용어 풀이'; sc.terms = c.terms; }
       else if (st === 'chart') { sc.headline = c.title; sc.chart = chartKind(c); sc.chartBase = c.base || c.id; }
       else if (st === 'dataVisualization' || st === 'timeline') { sc.headline = c.title; sc.data = c.items; }
       // 같은 종류가 연속되지 않게: 직전 장면과 같은 media type 이면 다른 타입을 우선

@@ -11,6 +11,8 @@
   var BY_LEGACY = {
     chapterIntro: { preset: 'QUIET_REFLECTION', purpose: '이 챕터가 묻는 질문을 먼저 던진다', concept: '질문 앞에 선 인물', mood: 'reflective' },
     insight: { preset: 'REALITY_CHECK', purpose: '계산된 사실을 현실의 한 문장으로 번역한다', concept: '일상 속 인물의 한 순간', mood: 'calm', pacing: 'MEDIUM', motionIntensity: 1, imageMotion: 'slow-zoom-in' },
+    topics: { preset: 'REALITY_CHECK', purpose: '흥미로운 주제별로 나눠 한 장씩 읽게 한다', concept: '카드', mood: 'calm', motionIntensity: 0, imageMotion: 'none' },
+    terms: { preset: 'REALITY_CHECK', purpose: '명리 용어를 내 사주의 값으로 쉽게 풀어 준다', concept: '용어 카드', mood: 'calm', motionIntensity: 0, imageMotion: 'none' },
     explanation: { preset: 'REALITY_CHECK', purpose: '의미를 풀어 설명한다(핵심은 하나)', concept: '조용한 배경', mood: 'calm' },
     chart: { preset: 'REALITY_CHECK', purpose: '만세력이 읽은 값을 데이터로 보여 준다', concept: '데이터 모션 그래픽', mood: 'calm', motionIntensity: 0, imageMotion: 'none' },
     dataVisualization: { preset: 'TIMELINE', purpose: '달마다 달라지는 흐름을 보여 준다', concept: '12개월 타임라인', mood: 'reflective' },

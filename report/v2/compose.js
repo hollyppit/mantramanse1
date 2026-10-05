@@ -103,6 +103,10 @@
       }
       if (ch.kind === 'summary') out.plan = plan;
 
+      // 챕터별 주제 카드(흥미 카테고리)와 쉬운 용어 풀이 — 계산 결과(facts)로 고른 모듈 문장 + 용어 사전(terms.js)
+      out.topics = R.Topics ? R.Topics.pick(lib.modules, facts, out.base, function (p) { return view(p, v); }) : [];
+      out.terms = R.Terms && ch.kind !== 'verdict' ? R.Terms.forChapter(out, sd, 3) : [];
+
       // Scene 시퀀스: Scene Intent → 미디어 후보 검색/점수 → 선택. 미디어가 없어도 scene 은 텍스트만으로 완성된다(UI 가 자리표시 장면).
       out.scenes = R.Scenes.buildChapterScenes(out, sd, media, ctx);
       if (R.Director) R.Director.apply(out, sd, { media: media, ctx: ctx, vars: heroVars, state: dirState }); // 장면 감독: 오프닝·현실 장면 삽입, 연출값(cinemaAuto) 부여, 강도 제한

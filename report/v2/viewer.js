@@ -52,7 +52,7 @@
       return new Promise(function (ok) { setTimeout(function () { ok(a); }, wait); });
     }).then(function (a) {
       S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
-      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
+      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null, textOnly: !!(a[2] && a[2].textOnly) }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
       return aiCompose().then(function () { return a; });
     }).then(function () {
       clearInterval(tick);
@@ -88,7 +88,11 @@
     function still() { if (done) return; done = true; cfg.onDone('missing'); } // 영상이 없거나 재생이 막힌 경우: 건너뜀
     txApply(cap, '_', true); // 자막 스타일(영상 단계)
     var url = clip && (clip.videoUrl || clip.videoWebm);
-    if (!url || saveData && !poster) { still(); }
+    if (!url && cfg.textOnly && (title || sub)) { // 영상이 없어도 문구 화면(설정 "영상 없어도 문구만 보여 주기"): 포스터가 있으면 배경으로, 몇 초 뒤 자동으로 넘어간다
+      box.innerHTML = poster ? '<img alt="" src="' + esc(poster) + '" style="width:100%;height:100%;object-fit:cover">' : ''; var tm = setTimeout(function () { finish('completed'); }, 7000);
+      skip.onclick = function () { clearTimeout(tm); finish('skipped'); };
+    }
+    else if (!url || saveData && !poster) { still(); }
     else {
       var v = document.createElement('video'); v.muted = true; v.defaultMuted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); v.autoplay = true; v.preload = 'auto'; v.setAttribute('aria-label', title + ' 영상'); if (poster) v.poster = poster;
       if (clip.videoWebm && v.canPlayType && v.canPlayType('video/webm')) { var s1 = document.createElement('source'); s1.src = clip.videoWebm; s1.type = 'video/webm'; v.appendChild(s1); }
@@ -106,14 +110,16 @@
   function introLines(kind) { var T = R.IntroText, sd = S.sd; if (!T || !sd) return ''; return (kind === 'ilgan' ? T.ilgan(sd.dayMaster.stem) : T.iju(sd.dayPillar.ko)).join('\n'); }
   function ilganStage(next) { // 일간 소개 단계(영상이 있을 때만)
     var ig = S.awk && S.awk.ilgan, sd = S.sd;
-    if (!ig || !(ig.videoUrl || ig.videoWebm)) { next(); return; }
-    playStage({ clip: ig, title: ig.title || (sd.dayMaster.stem + sd.dayMaster.el + '의 기질을 타고났다'), sub: ig.subtitle || introLines('ilgan'), kw: ig.keywords, onDone: next });
+    var tOnly = !!(S.awk && S.awk.textOnly);
+    if (!ig || !(ig.videoUrl || ig.videoWebm || (tOnly && (ig.title || ig.subtitle)))) { next(); return; }
+    playStage({ textOnly: tOnly, clip: ig, title: ig.title || (sd.dayMaster.stem + sd.dayMaster.el + '의 기질을 타고났다'), sub: ig.subtitle || introLines('ilgan'), kw: ig.keywords, onDone: next });
   }
   /* ── 3b. 프롤로그 → 리포트. 사용자가 곧 이야기의 주인공이다. 결제·무료 결과 화면은 두지 않는다. ── */
   function ijuStage(next) { // 일주 캐릭터 영상(60일주×성별). 없으면 기본 영상, 그것도 없으면 이 단계는 건너뛴다
     var v = S.awk && S.awk.video, fb = S.awk && S.awk.fallback, sd = S.sd, clip = v || fb;
-    if (!clip || !(clip.videoUrl || clip.videoWebm)) { next(); return; }
-    playStage({ kind: 'iju', clip: clip, title: (v && v.title) || (sd.dayPillar.ko + '일주'), sub: (v && v.subtitle) || introLines('iju'), kw: v && v.keywords, onDone: next });
+    var tOnly = !!(S.awk && S.awk.textOnly), tx = v && (v.title || v.subtitle);
+    if (!clip || !(clip.videoUrl || clip.videoWebm || (tOnly && tx))) { next(); return; }
+    playStage({ textOnly: tOnly, kind: 'iju', clip: clip, title: (v && v.title) || (sd.dayPillar.ko + '일주'), sub: (v && v.subtitle) || introLines('iju'), kw: v && v.keywords, onDone: next });
   }
   var withCopy = function (scenes) { return R.Translator.applyCopy(scenes, S.pack && S.pack.sceneCopy, R.Narrator.heroVars(S.sd, S.name)); }; // 관리자가 고친 문구·이름 강조(content.sceneCopy)
   function intro() { ilganStage(function () { ijuStage(prologue); }); }
@@ -187,6 +193,10 @@
     if (t === 'verdictEvidence') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p><div class="vd" role="group" aria-label="맞는지 알려 주세요"><button type="button" class="btn" data-vd="yes">맞습니다</button><button type="button" class="btn" data-vd="no">아닙니다</button></div><p class="vd-reply faint" aria-live="polite" data-yes="' + esc((s.evidence || {}).yes) + '" data-no="' + esc((s.evidence || {}).no) + '"></p></section>';
     if (t === 'verdictAdvice') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead" style="font-size:1.05rem">' + lines(s.body) + '</p><div class="cards"><div class="card">' + list(((s.bullets || [])[0] || {}).items || []) + '</div></div></section>';
     if (t === 'chart') { var ch = R.Charts.html(s.chart, S.sd, { chapter: s.chartBase }); return ch ? '<section class="scene rv" ' + id + '><div class="cap">만세력이 읽은 값</div>' + ch + '<p class="faint">이 값이 이어지는 풀이의 근거입니다.</p></section>' : ''; }
+    if (t === 'topics') return '<section class="scene rv" ' + id + '><div class="cap">더 알아보기</div><div class="tps">' + (s.cards || []).map(function (k) {
+      return '<article class="tp"><small>' + (k.hanja ? '<i class="hj" aria-hidden="true">' + esc(k.hanja) + '</i> ' : '') + esc(k.title) + '</small><h3>' + esc(k.headline) + '</h3><p>' + esc(k.summary) + '</p></article>'; }).join('') + '</div></section>';
+    if (t === 'terms') return '<section class="scene rv" ' + id + '><div class="cap">쉬운 용어 풀이</div><div class="tms">' + (s.terms || []).map(function (k) {
+      return '<article class="tm"><div class="tmh"><b>' + esc(k.term) + '</b>' + (k.hanja ? '<i aria-hidden="true">' + esc(k.hanja) + '</i>' : '') + '</div>' + (k.here ? '<p class="tmhere">' + esc(k.here) + '</p>' : '') + '<p>' + esc(k.plain) + '</p>' + (k.analogy ? '<p class="tmeg">' + esc(k.analogy) + '</p>' : '') + '</article>'; }).join('') + '</div></section>';
     if (t === 'explanation') {
       var det = (c.details || []).map(function (d) { return /_fallback$/.test(d.id || '') ? '<p class="faint">' + esc(d.summary) + '</p>' : '<div class="item"><b>' + esc(d.headline) + '</b><span>' + esc(d.summary) + '</span>' + (d.detail ? '<em class="tip">' + esc(d.detail) + '</em>' : '') + '</div>'; }).join('');
       var mt = String(c.meaning || ''), cut = mt.search(/[.!?]\s/), first = cut > 0 ? mt.slice(0, cut + 1) : mt, rest = cut > 0 ? mt.slice(cut + 1).trim() : '';
@@ -494,7 +504,7 @@
       var m = e.data; if (e.origin !== location.origin || !m || m.type !== 'mt-v2-preview') return;
       try {
         var ch = window.Manse.compute(m.input); S.sd = R.SajuData.build(ch, { now: m.now || Date.now() }); S.name = m.name || ''; S.media = m.media || [];
-        S.pack = R.Compose.fromSaved(m.content, S.media, m.project || 'full'); S.ts = S.pack.textStyles; S.rep = R.Compose.build(S.sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = { video: (m.awk && m.awk.video) || null, ilgan: (m.awk && m.awk.ilgan) || null, fallback: (m.awk && m.awk.fallback) || null }; S.visited = {}; S.ended = {};
+        S.pack = R.Compose.fromSaved(m.content, S.media, m.project || 'full'); S.ts = S.pack.textStyles; S.rep = R.Compose.build(S.sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = { video: (m.awk && m.awk.video) || null, ilgan: (m.awk && m.awk.ilgan) || null, fallback: (m.awk && m.awk.fallback) || null, textOnly: !!(m.awk && m.awk.textOnly) }; S.visited = {}; S.ended = {};
         if (m.chapter === 'ilgan') { ilganStage(function () { }); return; }
         if (m.chapter === 'awakening') { ijuStage(function () { }); return; }
         if (m.chapter === 'prologue') { playCinema(withCopy(R.Translator.prologue(S.sd, S.name, R.Narrator.heroVars(S.sd, S.name))), function () { }, '프롤로그'); return; }

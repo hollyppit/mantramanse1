@@ -268,3 +268,18 @@ dialog#drawer { border: 0; padding: 0; background: transparent; color: var(--ink
 }
 @keyframes ink-draw { to { stroke-dashoffset: 0; } }
 @keyframes ink-fill { to { opacity: 1; } }
+
+/* 運路: 더 알아보기(주제 카드) · 쉬운 용어 풀이 */
+.tps { display: grid; gap: 10px; }
+.tp { background: var(--panel); border: 1px solid var(--line2); border-radius: 12px; padding: 14px 16px; }
+.tp small { display: block; font-size: .74rem; letter-spacing: .12em; color: var(--gold); margin-bottom: 6px; font-family: var(--f-sans); }
+.tp small .hj, .tmh i { font-style: normal; font-family: serif; letter-spacing: .04em; }
+.tp h3 { font-size: 1.02rem; line-height: 1.5; margin: 0 0 6px; font-weight: 600; }
+.tp p { margin: 0; color: var(--ink2); font-size: .92rem; line-height: 1.75; word-break: keep-all; }
+@media (min-width: 700px) { .tps { grid-template-columns: 1fr 1fr; } }
+.tms { display: grid; gap: 10px; }
+.tm { border: 1px dashed var(--gold-d, var(--line2)); border-radius: 12px; padding: 12px 16px; background: color-mix(in srgb, var(--gold) 6%, transparent); }
+.tmh { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; } .tmh b { font-size: 1rem; } .tmh i { color: var(--gold); font-size: .95rem; }
+.tm p { margin: 4px 0 0; font-size: .9rem; line-height: 1.7; color: var(--ink2); word-break: keep-all; }
+.tm .tmhere { color: var(--ink); font-weight: 600; }
+.tm .tmeg { font-size: .84rem; color: var(--ink3, var(--ink2)); }

@@ -148,7 +148,7 @@
       { title: 'DAEWOON · 大運 — 10년마다 달라지는 길', aria: '대운 흐름', note: cd && SEA_H[cd.season] ? '지금은 ' + cd.startYear + '년에 시작된 ' + SEA_H[cd.season][0] + '(' + SEA_H[cd.season][1] + ') 구간에 서 있다.' : '' });
   }
   function months(sd, t) {
-    return ridge((sd.monthlyLuck || []).map(function (m, i) { return { label: m.month + '월', season: m.season, now: !!m.isNow || i === 0 }; }), t, { title: 'MONTHLY · 月運 — 앞으로 열두 달', aria: '월운 흐름', note: '' });
+    return ridge((sd.monthlyLuck || []).map(function (m, i) { return { label: m.month + '월', season: m.season, now: !!m.isNow || i === 0 }; }), t, { title: 'MONTHLY · 月運 — 앞으로 열두 달', aria: '월운 흐름', note: (sd.monthlyLuck && sd.monthlyLuck[0] && SEA_H[sd.monthlyLuck[0].season]) ? '이번 달은 ' + SEA_H[sd.monthlyLuck[0].season][0] + '(' + SEA_H[sd.monthlyLuck[0].season][1] + ') 쪽에 서 있다.' : '달마다 계절의 결이 조금씩 달라진다.' });
   }
 
   function html(kind, sd, opts) {

@@ -68,7 +68,7 @@
 
   // 기존(v2) 장면 종류 → 시네마틱 sceneType. 새 필드가 없는 기존 장면의 fallback 은 EXPLANATION.
   var LEGACY = { chapterIntro: 'QUESTION', insight: 'EXPLANATION', explanation: 'EXPLANATION', chart: 'EXPLANATION', dataVisualization: 'TIMELINE', timeline: 'TIMELINE', recommendation: 'OPPORTUNITY', warning: 'WARNING', action: 'ACTION',
-    chapterEnding: 'QUESTION', transition: 'TURNING_POINT', verdictFind: 'REVEAL', verdictBlock: 'CONFLICT', verdictEvidence: 'MEMORY', verdictAdvice: 'ACTION', visualMetaphor: 'MEMORY', cinema: 'DAILY_LIFE' };
+    chapterEnding: 'QUESTION', transition: 'TURNING_POINT', verdictFind: 'REVEAL', verdictBlock: 'CONFLICT', verdictEvidence: 'MEMORY', verdictAdvice: 'ACTION', visualMetaphor: 'MEMORY', cinema: 'DAILY_LIFE', topics: 'REALITY', terms: 'EXPLANATION' };
 
   var BUILTIN = { sceneType: 'EXPLANATION', pacing: 'MEDIUM', motionIntensity: 1, imageMotion: 'none', transition: 'crossfade', textAnimation: 'fade-up', textPosition: 'bottom', textSize: 'M', textEmphasis: 'normal', overlayStrength: 0.45,
     focalPoint: { x: 0.5, y: 0.5 }, pauseAfter: 0, bgmMood: 'minimal', mood: 'calm', nameEmphasis: 'NONE' };

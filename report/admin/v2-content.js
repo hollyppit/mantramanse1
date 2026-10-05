@@ -5,8 +5,9 @@
   'use strict';
   var R = window.ReportV2, PW = '', $ = function (s, e) { return (e || document).querySelector(s); }, $$ = function (s, e) { return [].slice.call((e || document).querySelectorAll(s)); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-  var CATS = ['identity', 'elements', 'personality', 'talent', 'shadow', 'career', 'success', 'wealth', 'love', 'marriage', 'relationship', 'compatibility', 'family', 'pastLife', 'daewoon', 'currentCycle', 'sewoon', 'monthly', 'remedy', 'actionPlan'];
-  var CAT_KO = { identity: '일주', elements: '오행', personality: '성격', talent: '재능', shadow: '그림자', career: '직업', success: '성공 방식', wealth: '재물', love: '연애', marriage: '결혼', relationship: '대인관계', compatibility: '궁합 유형', family: '가족', pastLife: '전생', daewoon: '대운', currentCycle: '현재 대운', sewoon: '세운', monthly: '월운', remedy: '개운 소개', actionPlan: 'Action Plan' };
+  var CATS_BASE = ['identity', 'elements', 'personality', 'talent', 'shadow', 'career', 'success', 'wealth', 'love', 'marriage', 'relationship', 'compatibility', 'family', 'pastLife', 'daewoon', 'currentCycle', 'sewoon', 'monthly', 'remedy', 'actionPlan'];
+  var CATS = CATS_BASE.concat(window.ReportV2 && ReportV2.Topics ? ReportV2.Topics.CATS : []);
+  var CAT_KO = Object.assign((window.ReportV2 && ReportV2.Topics ? ReportV2.Topics.CAT_NAME : {}), { identity: '일주', elements: '오행', personality: '성격', talent: '재능', shadow: '그림자', career: '직업', success: '성공 방식', wealth: '재물', love: '연애', marriage: '결혼', relationship: '대인관계', compatibility: '궁합 유형', family: '가족', pastLife: '전생', daewoon: '대운', currentCycle: '현재 대운', sewoon: '세운', monthly: '월운', remedy: '개운 소개', actionPlan: 'Action Plan' });
   var REM_TYPES = ['action', 'growth', 'people', 'place', 'environment', 'timing'], REM_KO = { action: '행동', growth: '성장/학습', people: '사람', place: '공간', environment: '환경', timing: '타이밍' };
   var SEASONS = ['opportunity', 'expansion', 'harvest', 'accumulation', 'transition', 'defense'];
   var SEASON_KO = R.SajuData.SEASONS;

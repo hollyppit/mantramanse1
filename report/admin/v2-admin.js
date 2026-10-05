@@ -476,6 +476,8 @@
     coverage: function (root, pw) { PW = pw; var go = function () { coverageDlg(root); }; if (M.loaded) go(); else api('/api/media?all=1').then(function (d) { M.list = d.media || []; M.loaded = true; go(); }).catch(function (e) { toast(e.message, true); }); },
     importLegacy: function (pw, done) { PW = pw; importLegacy(done); },
     open: function (tab, pw, rootEl) { PW = pw; var root = rootEl || document.getElementById('t-' + tab); if (tab === 'media') mediaOpen(root); else if (tab === 'awk') awkOpen(root); },
-    parseName: parseName,
+    parseName: parseName, shrinkImage: shrinkImage,
+    // 기존 클립 가져오기 뒤 일간·일주 소개 상태(A)를 바로 서버에 저장한다(새 "일간·일주 소개" 화면은 서버에서 다시 읽는다)
+    saveAwakening: function (pw) { PW = pw; return api('/api/awakening', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ videos: A.videos, ilgan: A.ilgan || [], fallback: A.fallback }) }).then(function (d) { A.dirty = false; return d; }); },
   };
 })();

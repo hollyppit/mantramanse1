@@ -1,7 +1,7 @@
 // 일주 캐릭터 영상 120개 (60일주 × 성별) + 일간 소개 영상 20개(10일간 × 성별). 일반 미디어 라이브러리와 분리해 정확한 일주·성별로만 매칭한다.
 // GET  /api/awakening?pillar=갑자&gender=M — 공개. 해당 일주 캐릭터 영상 1개 + 그 일간의 소개 영상 1개(+ 기본 영상 fallback). 전체를 한 번에 내려보내지 않는다.
 // GET  /api/awakening?all=1               — 관리자. 전체 목록
-// PUT  /api/awakening                      — 관리자. { videos: [...], ilgan?: [...], fallback?: {...} } 전체 저장
+// PUT  /api/awakening                      — 관리자. { videos: [...], ilgan?: [...], fallback?: {...}, publicBase?, textOnly? } 전체 저장 (textOnly: 영상 없어도 문구만 보여 주기)
 // 저장: GLOSSARY_KV 'awakening:index' → { videos, ilgan, fallback }
 import { json, isAdmin, configError } from '../_lib.js';
 import { cleanAwakening, cleanIlgan, normStem, MEDIA_OK, cleanPublicBase, publicizeClip } from '../_media.js';
@@ -15,11 +15,12 @@ export async function onRequestGet({ request, env }) {
   const q = new URL(request.url).searchParams, d = (await env.GLOSSARY_KV.get(KEY, 'json')) || { videos: [], ilgan: [], fallback: null };
   if (q.get('all')) return isAdmin(request, env) ? json(d) : json({ error: '관리자 인증이 필요합니다' }, 401);
   const c = cleanAwakening({ dayPillar: q.get('pillar'), gender: q.get('gender') });
-  const v = c && d.videos.find(x => x.dayPillar === c.dayPillar && x.gender === c.gender && x.enabled && (x.videoUrl || x.videoWebm || x.posterUrl));
-  const stem = c ? c.dayPillar[0] : normStem(q.get('pillar')), ig = stem && (d.ilgan || []).find(x => x.stem === stem && x.gender === (c ? c.gender : null) && x.enabled && (x.videoUrl || x.videoWebm));
+  const txt = x => !!(d.textOnly && (x.title || x.subtitle)); // 영상이 없어도 문구만 보여 주기 설정
+  const v = c && d.videos.find(x => x.dayPillar === c.dayPillar && x.gender === c.gender && x.enabled && (x.videoUrl || x.videoWebm || x.posterUrl || txt(x)));
+  const stem = c ? c.dayPillar[0] : normStem(q.get('pillar')), ig = stem && (d.ilgan || []).find(x => x.stem === stem && x.gender === (c ? c.gender : null) && x.enabled && (x.videoUrl || x.videoWebm || txt(x)));
   const base = cleanPublicBase(d.publicBase); // 설정돼 있으면 영상·이미지 주소를 R2 공개 도메인으로 바로 내보낸다(함수 호출 없이 재생)
   const pub = c => { const o = publicizeClip(base, c); if (o && typeof o === 'object') { const { guardianImageUrl, ...rest } = o; return rest; } return o || null; }; // 예전에 저장된 수호신 이미지 필드는 내보내지 않는다
-  return json({ video: pub(v), ilgan: pub(ig), fallback: pub(d.fallback) });
+  return json({ video: pub(v), ilgan: pub(ig), fallback: pub(d.fallback), textOnly: !!d.textOnly });
 }
 
 export async function onRequestPut({ request, env }) {
@@ -31,6 +32,7 @@ export async function onRequestPut({ request, env }) {
   const im = new Map(); for (const v of Array.isArray(b.ilgan) ? b.ilgan.slice(0, 40) : []) { const c = cleanIlgan(v); if (c) im.set(c.stem + c.gender, c); }
   const prev = await env.GLOSSARY_KV.get(KEY, 'json'); // 공개 주소를 안 보낸 저장 요청은 기존 값을 유지한다
   const publicBase = 'publicBase' in b ? cleanPublicBase(b.publicBase) : cleanPublicBase(prev && prev.publicBase);
-  await env.GLOSSARY_KV.put(KEY, JSON.stringify({ videos: [...map.values()], ilgan: [...im.values()], fallback: cleanFb(b.fallback), publicBase }));
+  const textOnly = 'textOnly' in b ? b.textOnly === true : !!(prev && prev.textOnly);
+  await env.GLOSSARY_KV.put(KEY, JSON.stringify({ videos: [...map.values()], ilgan: [...im.values()], fallback: cleanFb(b.fallback), publicBase, textOnly }));
   return json({ ok: true, count: map.size, ilgan: im.size });
 }
