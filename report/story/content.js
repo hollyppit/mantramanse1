@@ -89,7 +89,9 @@
     // 배경 분위기 효과(글 뒤에서 은은하게 움직임). 관리자에서 켜고 끄고 세기를 조절합니다.
     //   embers 불씨 · light 빛무리 · smoke 연기 / amount 양(0=없음, 1=기본, 2=많이) / speed 속도 / opacity 진하기(0~1) / color 불씨·빛 색
     ambient: { embers: true, light: true, smoke: true, amount: 1, speed: 1, opacity: 0.8, color: '#E8B26A' },
-    autoSpeed: 1,                                   // 자동 스크롤 속도 (1=기본, 2=두 배 빠르게, 0.5=절반 속도)
+    // 인트로 커버: 스토리 맨 앞 한 화면. src 는 이미지(비우면 은은한 빛무리), show:false 면 숨김
+    cover: { show: true, src: '', alt: '신비한 등불', title: '만트라 사주팔자 무빙툰', sub: '당신의 기질과 흐름을 이야기로 만나다.', button: '둘러보기' },
+    autoSpeed: 1,                                  // 자동 스크롤 속도 (1=기본, 2=두 배 빠르게, 0.5=절반 속도)
     brandName: '만트라 포춘',                       // 위쪽 가운데 이름
     pageTitle: '내 이야기의 시작 · 만트라 사주 무빙툰',  // 브라우저 탭 제목
     pageDesc: '요즘 이런 생각 해본 적 있나요? 스크롤하며 내 사주의 이야기를 따라가 보세요.',
@@ -175,7 +177,7 @@
   var BLOCKS = [
 
     /* ===== 01 PROBLEM : "이거 내 얘기인데?" ===== */
-    { type: 'headline', id: 'hero', track: 'problem_section_viewed', kicker: '만트라 사주 무빙툰', title: COPY.heroHeadline, size: 'xl', fullscreen: true, scrollHint: true, startButton: '스크롤하기', anim: 'lines' },
+    { type: 'headline', id: 'hero', track: 'problem_section_viewed', kicker: '만트라 사주 무빙툰', title: COPY.heroHeadline, size: 'xl', fullscreen: true, anim: 'lines' },
     { type: 'imageText', title: COPY.problemQuestion, imagePosition: 'top', src: 'problem/problem-01.webp', alt: '노력하지만 결과가 나오지 않아 고민하는 사람', aspectRatio: '4/5', anim: 'lines',
       todo: '노력하지만 결과가 나오지 않아 고민하는 인물 이미지 또는 웹툰 컷 삽입' },
     { type: 'imageText', title: '지금 밀어붙여야 할까,\n기다려야 할까?', imagePosition: 'top', src: 'problem/problem-02.webp', alt: '두 갈래 길 앞에 선 사람', aspectRatio: '4/5', anim: 'lines',

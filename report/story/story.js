@@ -494,8 +494,28 @@
       requestAnimationFrame(function () { var h = document.documentElement.scrollHeight - innerHeight; bar.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, scrollY / h) : 0) + ')'; tick = false; });
     }, { passive: true });
   }
+  // 인트로 커버 (스토리 맨 앞 한 화면). 관리자 settings.cover 로 이미지·문구·표시 여부를 바꾼다.
+  function cover() {
+    var el = document.getElementById('cover'); if (!el) return;
+    var cv = (C.settings && C.settings.cover) || {};
+    if (!cv || cv.show === false) { el.hidden = true; el.innerHTML = ''; return; }
+    var url = media(cv.src), alt = pick(cv.alt) || '';
+    var img = url ? '<img class="cv-img" src="' + esc(url) + '" alt="' + esc(alt) + '" decoding="async" fetchpriority="high">' : '<div class="cv-glow" role="img" aria-label="' + esc(alt) + '"></div>';
+    el.hidden = false;
+    el.innerHTML = '<div class="cv-in"><div class="cv-lamp">' + img + '</div>' +
+      (cv.title ? '<h1 class="cv-t">' + fmt(pick(cv.title)) + '</h1>' : '') + (cv.sub ? '<p class="cv-s">' + fmt(pick(cv.sub)) + '</p>' : '') +
+      (cv.button ? '<button type="button" class="cv-btn" data-cover="go">' + esc(pick(cv.button)) + '</button><span class="cv-arr" aria-hidden="true">↓</span>' : '') + '</div>';
+    var i2 = el.querySelector('.cv-img'); if (i2) i2.onerror = function () { i2.outerHTML = '<div class="cv-glow"></div>'; };
+    var go = el.querySelector('[data-cover]');
+    if (go) go.onclick = function () {
+      track('cover_enter', null, true);
+      if (PREVIEW) { var t = document.querySelector('#story > .blk'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+      Auto.begin(); // 첫 스토리 블록부터 자동으로 내려간다 (이미 시작했다면 이어서)
+    };
+  }
   function meta() { // 이름·탭 제목·공유 설명
     var S1 = C.settings || {}, skip = document.getElementById('skipLink'), bn = document.getElementById('brandName');
+    cover();
     if (bn) bn.textContent = S1.brandName || '';
     if (root.Ambient) root.Ambient.apply(S1.ambient);
     if (skip) { var sl = S1.skipLink || {}; skip.textContent = sl.text || ''; skip.hidden = !sl.text; skip.onclick = function () { scrollToId(sl.target || 'sajuInput'); }; }
@@ -587,7 +607,8 @@
     }
     function interrupt() { if (!running) return; token++; running = false; if (cancelAnim) cancelAnim(); ui(); track('auto_interrupted'); }
     function begin() {
-      if (started) return; started = true; wanted = true;
+      if (started) { if (!running) { wanted = true; run(); } return; }
+      started = true; wanted = true;
       document.querySelectorAll('.start').forEach(function (b) { b.hidden = true; });
       track('auto_started'); run();
     }
