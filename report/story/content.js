@@ -96,7 +96,10 @@
     brandName: '만트라 포춘',                       // 위쪽 가운데 이름
     pageTitle: '내 이야기의 시작 · 만트라 사주 무빙툰',  // 브라우저 탭 제목
     pageDesc: '요즘 이런 생각 해본 적 있나요? 스크롤하며 내 사주의 이야기를 따라가 보세요.',
-    skipLink: { text: '바로 분석하기', target: 'sajuInput' },
+    skipLink: { text: '바로 사주 분석하기', target: 'sajuInput' },
+    // 무료 콘텐츠 허브(/report/hub/): "둘러보기"는 긴 스토리 대신 허브(타로·오늘의 운세·일주 각성·인생 흐름)로, 위쪽 "바로 사주 분석하기"는 허브의 사주 입력으로 보냅니다.
+    // enabled:false 로 끄면 예전처럼 이 페이지의 스토리가 자동으로 내려갑니다. (주소 뒤에 ?story=1 을 붙여도 임시로 예전 방식이 됩니다)
+    hub: { enabled: true, url: '/report/hub/' },
     // 사주를 입력하면 새 20챕터 무빙툰 리포트(/report/v2/)로 이어갑니다. false 로 끄면 기존 무료 결과 화면을 씁니다. (주소 뒤에 ?v2=0 을 붙여도 임시로 꺼집니다)
     v2: { handoff: true, url: '/report/v2/', gate: true }, // gate: (사용 안 함 — 무빙툰 v2 는 무료 결과 화면 없이 프롤로그로 바로 이어진다)
   };

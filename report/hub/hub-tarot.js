@@ -1,0 +1,93 @@
+// 무료 타로 화면. 카드 데이터·정/역방향·점수·해석 틀은 전부 /shared-core.js(MantraCore.Tarot)에서 온다 — 만세력 앱의 타로와 같은 데이터이며, 생성형 AI 는 쓰지 않는다.
+// 흐름: 종류 선택 → (1) 질문 떠올리기 → (2) 카드 뒷면 5장 → (3) 한 장 선택 → (4) 뒤집기 → (5) 카드·정/역방향 → (6) 순차 공개되는 풀이 → 사주로 이어지는 다리.
+// 진행 상태는 sessionStorage('tarot')에 둬서 새로고침·뒤로가기를 해도 같은 결과가 그대로 보인다.
+(function (root) {
+  'use strict';
+  var H = root.Hub, Tarot = root.MantraCore.Tarot, esc = H.esc;
+  var KEY = 'tarot';
+  var ICON = { today: '日', love: '緣', money: '財', work: '業', yesno: '?' };
+  var SUB = { today: '오늘 나에게 필요한 메시지', love: '마음에 둔 관계의 흐름', money: '돈의 들고 남', work: '일과 사업의 방향', yesno: '예 · 아니오로 답하기' };
+  var ROMAN = ['0', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX', 'XXI'];
+  var RANKS = ['', 'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'P', 'Kn', 'Q', 'K'];
+
+  function fresh(m) { return { m: m, cards: Tarot.draw(5), pick: null, step: 'ask' }; }
+
+  // 카드 앞면: 자리표시를 바닥에 깔고 그 위에 이미지를 얹는다. 이미지가 없거나 실패하면 이미지 요소를 지워 자리표시가 그대로 보인다(깨진 아이콘 없음).
+  function face(card, rev) {
+    var no = card.suit === 'M' ? ROMAN[card.number] : RANKS[card.rank];
+    return '<div class="tf"><span class="no">' + no + '</span><span class="nm">' + esc(card.nameKo) + '</span><span class="en">' + esc(card.nameEn) + '</span>' + (card.suit === 'M' ? '' : '<span class="su">' + Tarot.suitKo[card.suit] + '</span>') + '</div>' +
+      '<img class="tcimg" src="' + esc(card.imageUrl) + '" alt="' + esc(card.nameKo) + '" loading="lazy" decoding="async">';
+  }
+
+  /* ── 종류 선택 ───────────────────────────────────────────── */
+  H.route('tarot', function () {
+    var h = '<section class="hero" style="text-align:left;padding-bottom:6px"><p class="kick">FREE TAROT</p><h1 class="h1">마음속 질문 하나를<br>떠올려보세요.</h1><p class="sub">AI가 아닌, 준비된 카드 해석으로 바로 읽어드려요. 생년월일은 필요 없습니다.</p></section><div class="tmodes">';
+    Object.keys(Tarot.modes).forEach(function (k) { h += '<button type="button" class="tm" data-m="' + k + '"><span class="ic" aria-hidden="true">' + ICON[k] + '</span><span><b>' + esc(Tarot.modes[k].name) + '</b><small>' + SUB[k] + '</small></span><span class="ar" aria-hidden="true">›</span></button>'; });
+    var el = H.view(h + '</div>');
+    el.onclick = function (e) { var b = e.target.closest('[data-m]'); if (!b) return; var m = b.dataset.m; H.track('tarot_category_select', { mode: m }); H.ss(KEY, fresh(m)); H.go('#/tarot/play?m=' + m); };
+    H.track('tarot_view');
+  });
+
+  /* ── 진행 ───────────────────────────────────────────────── */
+  H.route('tarot/play', function (q, ctx) {
+    var m = Tarot.modes[q.m] ? q.m : 'today', st = H.ss(KEY);
+    if (!st || st.m !== m || !st.cards || st.cards.length !== 5) { st = fresh(m); H.ss(KEY, st); } // 주소로 바로 들어온 경우
+    if (st.pick != null) return result(st, ctx, false);
+    if (st.step === 'spread') return spread(st, ctx);
+    ask(st, ctx);
+  });
+
+  function ask(st, ctx) { // STEP 1
+    var mode = Tarot.modes[st.m];
+    var el = H.view('<div class="tstage"><p class="kick">' + esc(mode.name).toUpperCase() + '</p><div class="pulse" aria-hidden="true"></div><h1 class="ask">마음속으로<br>질문 하나를 떠올려보세요.</h1><p class="sub">' + esc(mode.ask) + '<br>떠올렸다면 준비가 된 거예요.</p><button type="button" class="btn" id="go">카드 고르러 가기</button><p class="note">질문은 입력하지 않아도 됩니다. 마음속으로만 정해 주세요.</p></div>');
+    H.$('#go', el).onclick = function () { st.step = 'spread'; H.ss(KEY, st); spread(st, ctx); };
+  }
+
+  function spread(st, ctx) { // STEP 2~3
+    var mode = Tarot.modes[st.m], h = '<div class="tstage"><p class="kick">' + esc(mode.name).toUpperCase() + '</p><h1 class="ask">가장 먼저 눈이 가는<br>카드 한 장을 선택하세요.</h1><p class="sub">옆으로 넘겨 볼 수 있어요.</p></div><div class="fan" id="fan" role="group" aria-label="카드 5장">';
+    for (var i = 0; i < 5; i++) h += '<button type="button" class="tc" style="--i:' + i + '" data-i="' + i + '" aria-label="카드 ' + (i + 1) + '번 뽑기"><div class="back"></div></button>';
+    var el = H.view(h + '</div><p class="note" style="text-align:center">직감이 가리키는 카드를 눌러 주세요.</p>');
+    var fan = H.$('#fan', el); if (fan.scrollWidth <= fan.clientWidth + 4) fan.classList.add('few');
+    else fan.scrollLeft = (fan.scrollWidth - fan.clientWidth) / 2; // 가운데부터 보이게
+    var busy = false;
+    fan.onclick = function (e) {
+      var b = e.target.closest('.tc'); if (!b || busy) return; busy = true;
+      var i = +b.dataset.i, c = st.cards[i], card = Tarot.byId[c.id];
+      H.$$('.tc', fan).forEach(function (x) { x.disabled = true; x.classList.add(x === b ? 'pick' : 'dim'); });
+      b.insertAdjacentHTML('beforeend', '<div class="face' + (c.rev ? ' rev' : '') + '">' + face(card, c.rev) + '</div>');
+      void b.offsetWidth; setTimeout(function () { b.classList.add('flip'); }, H.reduce ? 0 : 350);
+      H.track('tarot_card_select', { mode: st.m });
+      setTimeout(function () { if (!H.alive(ctx)) return; st.pick = i; H.ss(KEY, st); result(st, ctx, true); }, H.reduce ? 200 : 1500);
+    };
+  }
+
+  function result(st, ctx, animate) { // STEP 4~6
+    var c = st.cards[st.pick], r = Tarot.read(c.id, c.rev, st.m), card = r.card, mode = Tarot.modes[st.m];
+    var t = animate && !H.reduce ? 0 : -1; // 새로 뽑았을 때만 순차 공개(새로고침·뒤로가기는 바로 전부 보여 준다)
+    var d = function (n) { return t < 0 ? '' : ' style="--d:' + (n).toFixed(1) + 's"'; }, rv = t < 0 ? '' : ' rv';
+    var next = P2();
+    var h = '<div class="rcap"><p class="kick">' + esc(mode.name).toUpperCase() + '</p></div>' +
+      '<div class="result-card"><div class="tc' + (animate ? '' : ' flip') + (c.rev ? ' rev' : '') + '" id="rc"><div class="back"></div><div class="face' + (c.rev ? ' rev' : '') + '">' + face(card, c.rev) + '</div></div></div>' +
+      '<div class="rcap' + rv + '"' + d(0.9) + '><div class="en">' + esc(card.nameEn).toUpperCase() + '</div><div class="ko">' + esc(card.nameKo) + ' · ' + (c.rev ? '역방향' : '정방향') + '</div></div>' +
+      (r.verdict ? '<div class="verdict ' + r.verdict + rv + '"' + d(1.2) + '>' + r.verdict + '</div><p class="vlabel' + rv + '"' + d(1.4) + '>' + esc(r.verdictLabel.split(' · ')[1]) + '</p>' : '') +
+      '<p class="rhead' + rv + '"' + d(1.4) + '>' + esc(r.headline) + '</p>';
+    r.sections.forEach(function (s, i) { h += '<div class="rsec' + rv + '"' + d(2.2 + i * 0.9) + '><h4>' + esc(s[0]) + '</h4><p>' + esc(s[1]) + '</p></div>'; });
+    h += '<div class="rsec one' + rv + '"' + d(5.0) + '><h4>한 줄 조언</h4><p>' + esc(r.oneLine) + '</p></div>' +
+      '<div class="bridge' + rv + '"' + d(5.9) + '><p class="q">카드는 지금의 질문에 답했습니다.<br>그렇다면 당신이 타고난<br>운의 흐름은 어떨까요?</p><p class="sub">생년월일을 통해 당신의 사주팔자와<br>현재 운의 흐름을 확인해보세요.</p>' +
+      '<div class="stack"><button type="button" class="btn" id="toSaju">내 운명 이야기 시작하기</button><button type="button" class="btn ghost sm" id="toToday">오늘의 사주 보기</button></div></div>' +
+      '<p class="dis' + rv + '"' + d(6.2) + '><button type="button" class="linkbtn" id="again">같은 종류로 다시 뽑기</button> · <button type="button" class="linkbtn" id="menu">다른 타로 보기</button></p>' +
+      '<p class="dis">타로는 지금의 마음과 흐름을 비추는 거울입니다. 결과는 정해진 미래가 아니라 선택에 따라 달라질 수 있는 가능성으로 읽어 주세요.</p>';
+    var el = H.view(h);
+    if (animate && !H.reduce) { var rc = H.$('#rc', el); setTimeout(function () { rc.classList.add('flip'); }, 250); }
+    H.$('#toSaju', el).onclick = function () { H.track('tarot_to_saju_click', { mode: st.m, to: 'story' }); H.go(next.story); };
+    H.$('#toToday', el).onclick = function () { H.track('tarot_to_saju_click', { mode: st.m, to: 'today' }); H.go(next.today); };
+    H.$('#again', el).onclick = function () { H.ss(KEY, fresh(st.m)); H.go('#/tarot/play?m=' + st.m); };
+    H.$('#menu', el).onclick = function () { H.ss(KEY, null); H.go('#/tarot'); };
+    H.track('tarot_result_view', { mode: st.m, rev: c.rev ? 1 : 0, card: card.id });
+  }
+  // 타로 결과에서 사주로 가는 길: 정보가 없으면 입력 → (첫 방문이면 일주 각성) → MY 운명. 이미 있으면 바로 개인화 콘텐츠.
+  function P2() {
+    var has = H.profile.has();
+    return { story: has ? (H.profile.awakened() ? '#/my' : '#/awaken') : '#/input?next=awaken', today: has ? '#/today' : '#/input?next=today' };
+  }
+})(window);

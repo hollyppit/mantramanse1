@@ -657,6 +657,11 @@
       t.parentNode.replaceChild(frag, t);
     });
   }
+  // 무료 콘텐츠 허브 주소. 설정(settings.hub.enabled)으로 끄거나 ?story=1 이면 빈 문자열(= 예전 스토리 방식)
+  function hubUrl() {
+    var h = (C.settings && C.settings.hub) || {}; if (h.enabled === false || /[?&]story=1\b/.test(location.search)) return '';
+    return /^\/[\w\-./]*$/.test(h.url || '/report/hub/') ? (h.url || '/report/hub/') : '/report/hub/';
+  }
   function cover() {
     var el = document.getElementById('cover'); if (!el) return;
     var cv = (C.settings && C.settings.cover) || {};
@@ -682,7 +687,8 @@
     if (go) go.onclick = function () {
       if (PREVIEW) return; // 미리보기에서는 끌어서 옮기는 용도
       track('cover_enter', null, true);
-      Auto.begin(); // 첫 스토리 블록부터 자동으로 내려간다 (이미 시작했다면 이어서)
+      var hu = hubUrl(); if (hu) { track('explore_click', null, true); location.href = hu; return; } // 둘러보기 → 무료 콘텐츠 허브
+      Auto.begin(); // (허브를 끈 경우) 첫 스토리 블록부터 자동으로 내려간다 (이미 시작했다면 이어서)
     };
     if (PREVIEW) coverEdit(el);
     if (!cover.bound) { cover.bound = true; root.addEventListener('resize', function () { var c = (C.settings && C.settings.cover) || {}; if (!el.hidden) el.setAttribute('style', coverStyle(c)); }); }
@@ -692,7 +698,7 @@
     cover();
     if (bn) bn.innerHTML = esc(S1.brandName || '').split(String.fromCharCode(10)).join('<br>');
     if (root.Ambient) root.Ambient.apply(S1.ambient);
-    if (skip) { var sl = S1.skipLink || {}; skip.textContent = sl.text || ''; skip.hidden = !sl.text; skip.onclick = function () { scrollToId(sl.target || 'sajuInput'); }; }
+    if (skip) { var sl = S1.skipLink || {}; skip.textContent = sl.text || ''; skip.hidden = !sl.text; skip.onclick = function () { var hu = hubUrl(); if (hu && !PREVIEW) { track('quick_analyze_click', null, true); location.href = hu + '#/input?next=my'; return; } scrollToId(sl.target || 'sajuInput'); }; }
     if (S1.pageTitle) { document.title = S1.pageTitle; var t = document.querySelector('meta[property="og:title"]'); if (t) t.setAttribute('content', S1.pageTitle); }
     if (S1.pageDesc) { ['meta[name=description]', 'meta[property="og:description"]'].forEach(function (q) { var m = document.querySelector(q); if (m) m.setAttribute('content', S1.pageDesc); }); }
   }
@@ -836,7 +842,7 @@
     render(); chrome(); Auto.init();
     document.documentElement.classList.add('ready');
     var problems = validate(); if (DEV && problems.length && root.console) console.warn('[story] 콘텐츠 점검:\n' + problems.join('\n'));
-    if (!PREVIEW) track('onboarding_started', { dev: DEV ? 1 : 0 }, true);
+    if (!PREVIEW) { track('onboarding_started', { dev: DEV ? 1 : 0 }, true); track('landing_view', null, true); }
   }
   function boot() {
     host0 = document.getElementById('story'); if (!host0) return;
