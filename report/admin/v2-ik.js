@@ -171,6 +171,7 @@
       '<select id="ikFo"><option value="">공개 여부 전체</option><option value="public"' + (f.open === 'public' ? ' selected' : '') + '>공개 중</option><option value="private"' + (f.open === 'private' ? ' selected' : '') + '>비공개</option></select>' +
       '<select id="ikFr"><option value="">검수 여부 전체</option><option value="true"' + (f.reviewed === 'true' ? ' selected' : '') + '>검수 완료</option><option value="false"' + (f.reviewed === 'false' ? ' selected' : '') + '>검수 필요</option></select>' +
       '<select id="ikFc"><option value="">신뢰도 전체</option>' + Object.keys(CONF_KO).map(function (s) { return '<option value="' + s + '"' + (f.conf === s ? ' selected' : '') + '>신뢰도 ' + CONF_KO[s] + '</option>'; }).join('') + '</select></div><div id="ikRows"></div></div>';
+    if (window.V2Src && window.V2Src.mountBanner) window.V2Src.mountBanner(box, 'ikknow');
     $$('[data-cov]', box).forEach(function (r) { r.onclick = function () { G.covOpen = G.covOpen === r.dataset.cov ? '' : r.dataset.cov; drawList(); }; });
     $$('[data-new]', box).forEach(function (b) { b.onclick = function (e) { e.stopPropagation(); var p = b.dataset.new.split('|'); startNew(p[0], p[1]); }; });
     $('#ikNew', box).onclick = function () { startNew(G.f.domain || 'MONEY', ''); }; $('#ikAI', box).onclick = aiDraftDialog; $('#ikImp', box).onclick = importLegacy;
@@ -349,6 +350,7 @@
     }
     list();
     $('#dzAdd', box).onclick = function () { var t = prompt('새 분석 항목의 이름 (예: 부수입, 사업 확장 시기)'); if (!t) return; var id = 'x' + Date.now().toString(36); dz.sections.push({ id: id, title: t, enabled: true, required: false }); list(); toast('항목을 추가했습니다 — 저장한 뒤 풀이 지식의 “세부 항목”에서 이 항목을 고르면 연결됩니다'); };
+    if (window.V2Src && window.V2Src.mountBanner) window.V2Src.mountBanner(box, 'ikdesign');
     $('#dzReset', box).onclick = function () { if (!confirm(dko(d) + ' 구성을 기본값으로 되돌릴까요? (저장 전까지는 화면에서만 바뀝니다)')) return; G.design[d] = clone(G.meta.defaultDesign[d]); drawDesign(); };
     $('#dzSave', box).onclick = function () { post('design', { design: G.design }).then(function (r) { G.design = clone(r.design); G.meta.meta = r.meta; toast('풀이 구성을 저장했습니다'); return loadItems().then(drawDesign); }).catch(function (e) { toast(e.message, true); }); };
   }
