@@ -84,11 +84,11 @@
     start.hidden = true; snd.hidden = true; skip.hidden = false;
     var title = cfg.title, sub = cfg.sub || '', kw = cfg.kw || [], poster = clip && clip.posterUrl || '', rp = cfg.kind === 'iju' ? 'awk' : 'ilgan', ev = cfg.kind === 'iju' ? 'iju' : 'ilgan';
     cap.innerHTML = '<div class="t" data-tx="' + rp + '.title">' + esc(title) + '</div>' + (sub ? '<div class="s" data-tx="' + rp + '.sub">' + esc(sub).replace(/\n/g, '<br>') + '</div>' : '') + (kw.length ? '<div class="k" data-tx="' + rp + '.kw">' + kw.map(function (k) { return '<span>' + esc(k) + '</span>'; }).join('') + '</div>' : '');
-    if (cfg.noCap) cap.innerHTML = ''; cap.style.opacity = ''; cap.classList.remove('card'); var capT = cfg.capMs ? setTimeout(function () { cap.style.transition = 'opacity .6s'; cap.style.opacity = 0; }, cfg.capMs) : 0; // 소개 문구는 capMs 뒤에 사라진다(영상은 계속)
+    if (cfg.capHtml) cap.innerHTML = cfg.capHtml; if (cfg.noCap) cap.innerHTML = ''; cap.style.opacity = ''; cap.classList.remove('mcard'); var capT = cfg.capMs ? setTimeout(function () { cap.style.transition = 'opacity .6s'; cap.style.opacity = 0; }, cfg.capMs) : 0; // 소개 문구는 capMs 뒤에 사라진다(영상은 계속)
     function endCard(kind) { // 영상이 끝난 뒤 보여 주는 짧은 카드(일주 소개). 건너뛰기 하면 카드도 건너뛴다
       clearTimeout(capT); var cd = cfg.card; if (!cd || kind === 'skipped') { cfg.onDone(kind); return; }
-      cap.style.transition = 'none'; cap.style.opacity = 1; cap.classList.add('card'); cap.innerHTML = cd.html; skip.hidden = false;
-      var t = setTimeout(function () { cap.classList.remove('card'); cfg.onDone(kind); }, cd.ms); skip.onclick = function () { clearTimeout(t); cap.classList.remove('card'); cfg.onDone('skipped'); };
+      cap.style.transition = 'none'; cap.style.opacity = 1; cap.classList.add('mcard'); cap.innerHTML = cd.html; skip.hidden = false;
+      var t = setTimeout(function () { cap.classList.remove('mcard'); cfg.onDone(kind); }, cd.ms); skip.onclick = function () { clearTimeout(t); cap.classList.remove('mcard'); cfg.onDone('skipped'); };
     }
     function finish(kind) {
       if (done) return; done = true; clearTimeout(capT); skip.hidden = true; snd.hidden = true; if (R.Bgm) R.Bgm.duck(false);
@@ -122,8 +122,9 @@
   function ilganStage(next) { // 일간 소개: 3~5초 이내의 짧은 카드(庚金 · 경금 + 한 문장). 영상은 그대로 재생하고 문구만 4.5초 뒤 사라진다
     var ig = S.awk && S.awk.ilgan, sd = S.sd, tOnly = !!(S.awk && S.awk.textOnly);
     if (!ig || !(ig.videoUrl || ig.videoWebm || tOnly)) { next(); return; }
-    var c = R.IntroText.ilganCard(sd.dayMaster.stem); if (!c) { next(); return; }
-    playStage({ textOnly: tOnly, clip: ig, title: c.title, sub: c.line, kw: [], capMs: 4500, onDone: next });
+    var c = R.IntroText.ilganCard(sd.dayMaster.stem, S.name); if (!c) { next(); return; }
+    var hh = function (t) { return esc(t).replace(/\n/g, '<br>'); };
+    playStage({ textOnly: tOnly, clip: ig, title: c.title, sub: c.line, kw: [], capMs: 4500, capHtml: (c.name ? '<div class="ic-name">' + hh(c.name) + '</div>' : '') + '<div class="ic-film">' + hh(c.line) + '</div><div class="ic-ttl">' + esc(c.title) + '</div>', onDone: next });
   }
   /* ── 3b. 프롤로그 → 리포트. 사용자가 곧 이야기의 주인공이다. 결제·무료 결과 화면은 두지 않는다. ── */
   function ijuStage(next) { // 일주: 기존 변신(캐릭터) 영상은 설명 없이 재생 → 끝나면 주인공 소개 카드(이름 · 한 문장 · 庚午 · 경오일주 · 장점 1 + 약점 1) 약 7초

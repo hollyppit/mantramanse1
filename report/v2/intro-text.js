@@ -56,7 +56,7 @@
     정재: '안정을 지키려다 변화를 놓치기도 합니다.', 편관: '스스로를 몰아붙여 지치기도 합니다.', 정관: '규칙에 얽매여 속마음을 숨기기도 합니다.', 편인: '생각이 길어져 행동이 늦어지기도 합니다.', 정인: '남의 도움을 기다리다 때를 놓치기도 합니다.' };
   var HJB = '子丑寅卯辰巳午未申酉戌亥';
   // 일간 카드: { title: '庚金 · 경금', line: 한 문장(2줄) }
-  function ilganCard(stem) { var i = STEMS.indexOf(String(stem || '')[0]), s = S[STEMS[i]]; return s ? { title: HJ[i] + ELH[s.name[1]] + ' · ' + s.name, line: ILGAN_LINE[STEMS[i]] } : null; }
+  function ilganCard(stem, name) { var i = STEMS.indexOf(String(stem || '')[0]), s = S[STEMS[i]]; var nm = String(name || '').trim(); return s ? { name: nm ? nm + '.' : '', title: HJ[i] + ELH[s.name[1]] + ' · ' + s.name, line: ILGAN_LINE[STEMS[i]] } : null; }
   // 일주 카드: 이름 · 영화적 한 문장 · 한자 일주 · 장점 1 + 이면의 약점 1. gender: 'M'|'F'
   function ijuCard(pillar, name, gender) {
     var p = String(pillar || ''), si = STEMS.indexOf(p[0]), bi = BR.indexOf(p[1]), s = S[p[0]], b = B[p[1]]; if (!s || !b || si % 2 !== bi % 2) return null;
