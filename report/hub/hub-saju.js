@@ -159,14 +159,9 @@
         '<section class="grp"><h2>나라는 사람</h2><div class="tiles">' +
         '<button type="button" class="tile wide" id="meBtn" data-track="fortune_content_click" data-p="me_profile"><b>오행 · 십성 · 강점과 주의할 성향</b><small>내 안의 다섯 기운과 가장 큰 동력</small></button>' + me +
         tile('일간 · 일주 다시 보기', '일주 각성 연출', '#/awaken?replay=1', 'ilju_replay', 'wide') + '</div></section>' +
-        '<section class="grp"><h2>인생의 흐름</h2><div class="tiles">' + tile('인생 그래프', '대운 · 인생의 계절', '#/go?to=life', 'life_graph') + tile('올해와 12개월', '세운 · 월운', '#/go?to=future', 'life_year') + '</div></section>' +
-        '<section class="grp"><h2>돈과 일</h2><div class="tiles">' + tile('돈 이야기', '재물 구조 · 들어오는 길 · 새는 길', '#/go?to=money', 'money') + tile('일과 성공', '직업 적성 · 사업/직장 성향', '#/go?to=career', 'career') + '</div></section>' +
-        '<section class="grp"><h2>사람과 사랑</h2><div class="tiles">' + tile('연애 · 인연', '연애 성향과 인연의 때', '#/go?to=love', 'love') + tile('배우자 · 결혼', '어떤 사람과 오래 갈까', '#/go?to=marriage', 'marriage') + tile('인간관계', '편한 사람과 힘든 사람', '#/go?to=relation', 'relation') +
-        '<button type="button" class="tile" id="compat" data-track="fortune_content_click" data-p="compat"><b>궁합</b><small>준비 중이에요</small></button></div></section>' +
-        '<section class="grp"><h2>심층 콘텐츠</h2><div class="tiles"><a class="tile wide" href="#/go?to=deep" data-track="premium_cta_click" data-p="deep_movingtoon"><b>심층 무빙툰 · 종합 리포트</b><small>20챕터로 읽는 나의 운로 전체</small></a></div></section>' +
+        '<section class="grp"><h2>심층 콘텐츠</h2><div class="tiles"><a class="tile wide" href="#/go?to=life" data-track="premium_cta_click" data-p="deep_movingtoon"><b>심층 무빙툰, 종합 리포트</b><small>인생 지도부터 연애·재물·직장, 개운 가이드까지 한 편으로 읽는 나의 운로</small></a></div></section>' +
         '<p class="dis">사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p>');
       $('#meBtn', el).onclick = function () { var b = $('#meBody', el); b.hidden = !b.hidden; };
-      $('#compat', el).onclick = function () { H.toast('궁합은 곧 열립니다.'); };
       H.track('fortune_home_view', { awakened: 1 });
     });
   });
