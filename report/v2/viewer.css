@@ -199,3 +199,9 @@ dialog#drawer { border: 0; padding: 0; background: transparent; color: var(--ink
 .gate .g-s { font-size: .78rem; color: var(--ink3, var(--ink2)); letter-spacing: .08em; }
 @keyframes gate-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(213, 185, 127, 0); } 50% { box-shadow: 0 0 0 8px rgba(213, 185, 127, .18); } }
 @media (prefers-reduced-motion: reduce) { .gate .g-t { animation: none; } }
+
+/* 오프닝 시퀀스: 일주 소개 카드 · 본편 연결 문구 */
+.awk-cap.card { bottom: auto; top: 50%; transform: translateY(-50%); } .awk-cap.card .ic-name { font: 600 1.7rem var(--f-serif); margin-bottom: 14px; } .awk-cap.card .ic-film { font-size: 1.02rem; line-height: 1.75; margin-bottom: 16px; }
+.awk-cap.card .ic-ttl { font: 600 1.25rem var(--f-serif); color: var(--gold-l); letter-spacing: .06em; margin-bottom: 14px; } .awk-cap.card .ic-trait { font-size: .92rem; line-height: 1.75; color: #E4DFD2; }
+.awk-cap.card { background: rgba(0,0,0,.55); border-radius: 14px; padding: 22px 18px; }
+.awk-cap.awk-mid { bottom: auto; top: 50%; transform: translateY(-50%); } .awk-cap.awk-mid .s.bs { font: 500 1.25rem/1.9 var(--f-serif); color: var(--ink); margin: 0; }

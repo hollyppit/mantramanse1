@@ -37,7 +37,7 @@ for (const [y, m, d, h, g] of cases) {
     ok(s3.some(x => x.text === P.month.hanja + '月') && s3.some(x => x.text === P.day.hanja + '日'), `${tag} 월일 간지`);
     ok(s3.some(x => x.text === (P.hour && P.hour.hanja) + '時') === !!(b.hourKnown && P.hour), `${tag} 시주는 시각을 알 때만`);
     ok(s3.some(x => x.text.indexOf(b.m + '월 ' + b.d + '일') === 0), `${tag} 양력 출생일`);
-    ok(s3.some(x => x.text === '서울'), `${tag} 출생지`);
+    ok(!s3.some(x => x.text === '서울'), `${tag} 출생지는 인트로에서 말하지 않는다`);
     const pil = sc.find(s => s.sceneId === 'ep_06').pillars;
     ok(pil.length === 4 && pil[0].label === '時' && pil[3].hj === P.year.hanja && pil[2].hj === P.month.hanja && pil[1].hj === P.day.hanja && (b.hourKnown ? pil[0].hj === P.hour.hanja : pil[0].hj === ''), `${tag} 명식 표`);
     // 성별: 이름으로 추측하지 않고 만세력 입력의 성별만

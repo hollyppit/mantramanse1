@@ -622,7 +622,7 @@
     var K = R.EpicIntro; if (!K) return; var cur = Object.assign({}, K.DEFAULTS, ST.saved.introEpic || {}), sel = function (id, list, v) { return '<select id="' + id + '">' + list.map(function (x) { return '<option value="' + x[0] + '"' + (String(v) === String(x[0]) ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>'; };
     var d = document.createElement('div'); d.className = 'card'; d.style.marginTop = '12px';
     d.innerHTML = '<b style="color:var(--gold)">인트로 연출</b> <span class="muted">사주를 입력한 직후 나오는 인트로입니다. <b>무협 출정</b>은 정통 무협 영화의 오프닝처럼, 命 → 運 → 길 → 四柱八字(지도) → 運路 → "이제, 출발한다"로 이어지는 약 1~2분 여정입니다(전투 없음 · 음성·효과음 없음 · 글자 애니메이션은 이 인트로에서만, 네 가지로 고정). 옛 <b>무협 패러디</b>는 한 사람이 태어난 일을 천하의 대사건처럼, 끝까지 진지하게 읽습니다(간지·출생일시·이름은 실제 만세력 값 그대로). 운로 타이틀이 끝나면 패러디도 끝나고 본편은 평소 문체로 진행됩니다.</span>' +
-      '<div class="row" style="margin:10px 0;gap:12px;flex-wrap:wrap"><label>스타일 ' + sel('ieStyle', [['EPIC_WUXIA_JOURNEY', '무협 출정 — 모험·길 (권장)'], ['EPIC_WUXIA_PARODY', '무협 패러디 (예전)'], ['CINEMATIC', '시네마틱 (기존)'], ['MINIMAL', '최소 (이름·타이틀만)']], cur.style) + '</label>' +
+      '<div class="row" style="margin:10px 0;gap:12px;flex-wrap:wrap"><label>스타일 ' + sel('ieStyle', [['EPIC_WUXIA_JOURNEY_SHORT', '무협 출정 20초판 (기본)'], ['EPIC_WUXIA_JOURNEY', '무협 출정 — 모험·길 (긴 버전, 약 1.5분)'], ['EPIC_WUXIA_PARODY', '무협 패러디 (예전)'], ['CINEMATIC', '시네마틱 (기존)'], ['MINIMAL', '최소 (이름·타이틀만)']], cur.style) + '</label>' +
       '<label>유머 ' + sel('ieHumor', [['PARODY', 'PARODY — 펀치라인 1~2개'], ['SUBTLE', 'SUBTLE — 거창한 문장만'], ['OFF', 'OFF — 진지하게만']], cur.humor) + '</label>' +
       '<label>에픽 레벨 ' + sel('ieLevel', [[1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5 (최대)']], cur.epicLevel) + '</label></div>' +
       '<div class="muted">유머·에픽 레벨은 옛 무협 패러디에만 쓰입니다. 음성 해설과 효과음은 없고 배경음악만 흐릅니다.</div>' +
@@ -657,6 +657,6 @@
 
   window.V2Shell = { open: function (tab, pw, also) {
     PW = pw; C.setPw(pw);
-    if (tab === 'v2clip') clipOpen(); else if (tab === 'v2chap') chapOpen(); else if (tab === 'v2test') testOpen(); else if (tab === 'v2proj') projOpen(); else if (tab === 'v2set') setOpen(also); else if (tab === 'v2intro') V2Intro.mount(document.getElementById('t-v2intro'), pw, {});
+    if (tab === 'v2clip') clipOpen(); else if (tab === 'v2chap') chapOpen(); else if (tab === 'v2test') testOpen(); else if (tab === 'v2proj') projOpen(); else if (tab === 'v2set') setOpen(also); else if (tab === 'v2story') window.V2Story && window.V2Story.open(); else if (tab === 'v2intro') V2Intro.mount(document.getElementById('t-v2intro'), pw, {});
   } };
 })();

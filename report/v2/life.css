@@ -1,0 +1,44 @@
+/* 인생 지도 흐름(life.js) — viewer.css 의 변수를 그대로 쓴다. 모바일 우선, 색만으로 구분하지 않는다(기호·글자 병기). */
+.lf { background: radial-gradient(120% 70% at 50% 0, #101733 0, var(--bg) 62%); }
+.lf-wrap { max-width: 520px; margin: 0 auto; padding: 44px 20px calc(48px + var(--safe-b)); }
+.lf-open .lf-wrap { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; }
+.lf-kick { font-size: .72rem; letter-spacing: .3em; color: var(--gold); margin-bottom: 14px; }
+.lf-q { font: 600 clamp(1.45rem, 6.4vw, 1.9rem)/1.6 var(--f-serif); margin: 8px 0 38px; min-height: 8.6em; transition: opacity .35s; text-wrap: balance; }
+.lf-q.sm { font-size: 1.2rem; min-height: 0; margin-bottom: 14px; color: var(--ink2); }
+.lf-h { font-size: clamp(1.4rem, 6vw, 1.8rem); margin: 4px 0 8px; }
+.lf-h em { color: var(--gold-l); }
+.lf-sub { color: var(--ink2); font-size: .9rem; margin-bottom: 14px; }
+.lf-lead { font: 500 1.08rem/1.8 var(--f-serif); margin: 12px 0; }
+.lf-p { color: var(--ink2); margin: 8px 0; } .lf-p.dim, .lf-fine { color: var(--ink3); font-size: .8rem; }
+.lf-fine { margin: 12px 0; text-align: center; }
+.lf-note { color: var(--ink2); font-size: .85rem; border: 1px dashed var(--line); border-radius: 10px; padding: 12px 14px; margin: 14px 0; }
+.lf-skip { display: block; margin: 16px auto 0; background: none; border: 0; color: var(--ink3); font-size: .85rem; padding: 10px; }
+.lf .btn { margin-top: 18px; }
+.lf-two { display: flex; gap: 10px; } .lf-two .btn { flex: 1; }
+.lf-crumb { font-size: .8rem; color: var(--ink3); margin: 6px 0 12px; } .lf-crumb button { background: none; border: 0; color: var(--gold); padding: 6px 2px; text-decoration: underline; text-underline-offset: 3px; }
+.lf-tabs { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 12px; scrollbar-width: none; }
+.lf-tab { flex: 0 0 auto; border: 1px solid var(--line); background: transparent; color: var(--ink2); border-radius: 999px; padding: 8px 16px; min-height: 40px; font-size: .88rem; }
+.lf-tab.on { background: rgba(213, 185, 127, .18); color: var(--gold-l); border-color: var(--gold); font-weight: 600; } .lf-tab.off { opacity: .45; }
+.lf-chart { border: 1px solid var(--line2); border-radius: 14px; padding: 8px 6px 2px; background: rgba(18, 23, 41, .6); }
+.lf-svg { width: 100%; height: auto; display: block; }
+.lf-area { fill: rgba(213, 185, 127, .13); stroke: none; } .lf-line { fill: none; stroke: var(--gold); stroke-width: 2; stroke-linecap: round; }
+.lf-dot { fill: var(--gold-d); } .lf-dot.cur { fill: var(--gold-l); stroke: #fff; stroke-width: 1.5; } .lf-nodata { fill: var(--ink3); } .lf-hereline { stroke: var(--gold-l); stroke-width: 1; stroke-dasharray: 3 3; }
+.lf-hit { cursor: pointer; }
+.lf-rows { list-style: none; margin: 14px 0 6px; display: grid; gap: 8px; }
+.lf-row { width: 100%; display: grid; grid-template-columns: 5.6em 6.4em 1fr auto; gap: 8px; align-items: center; text-align: left; border: 1px solid var(--line2); border-radius: 12px; background: var(--panel); padding: 11px 12px; min-height: 48px; font-size: .86rem; }
+.lf-row.cur { border-color: var(--gold); background: rgba(213, 185, 127, .1); } .lf-row:disabled { opacity: .55; cursor: default; }
+.lf-age { font-weight: 600; } .lf-desc { color: var(--ink2); font-size: .8rem; line-height: 1.45; } .lf-now { font-size: .68rem; color: #1A1308; background: var(--gold); border-radius: 999px; padding: 1px 8px; }
+.lf-sea { font-size: .78rem; color: var(--ink2); } .lf-sea.s-opportunity b, .lf-sea.s-expansion b { color: var(--wood); } .lf-sea.s-harvest b { color: var(--earth); } .lf-sea.s-accumulation b { color: var(--water); } .lf-sea.s-transition b { color: var(--fire); } .lf-sea.s-defense b { color: var(--metal); }
+.lf-hereb { display: flex; align-items: baseline; justify-content: center; gap: 10px; margin: 10px 0 22px; } .lf-hereb b { font: 700 1.5rem var(--f-serif); color: var(--gold-l); } .lf-hereb span { font-size: .7rem; letter-spacing: .3em; color: var(--gold); } .lf-hereb i { font-style: normal; color: var(--ink3); font-size: .85rem; }
+.lf-dt { display: grid; gap: 10px; margin: 16px 0; } .lf-dt > div { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--panel); } .lf-dt .warn { border-color: rgba(217, 105, 79, .45); } .lf-dt small, .lf-fu small, .lf-col small { display: block; font-size: .7rem; letter-spacing: .2em; color: var(--gold); margin-bottom: 4px; }
+.lf-fcards { display: grid; gap: 8px; margin: 12px 0; } .lf-fcard { display: grid; grid-template-columns: 2.4em 1fr; gap: 8px; font-size: .86rem; color: var(--ink2); } .lf-fcard b { color: var(--gold-l); }
+.lf-why { margin: 14px 0; border: 1px solid var(--line2); border-radius: 12px; padding: 4px 14px; } .lf-why summary { cursor: pointer; padding: 12px 0; color: var(--gold-l); font-size: .9rem; min-height: 44px; } .lf-why dl { margin: 0 0 8px; font-size: .84rem; } .lf-why dt { color: var(--gold); margin-top: 10px; font-size: .74rem; letter-spacing: .1em; } .lf-why dd { margin: 2px 0 0; color: var(--ink2); }
+.lf-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0; } .lf-card { text-align: left; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 14px; display: grid; gap: 4px; min-height: 122px; align-content: start; } .lf-card i { font: normal 1.5rem var(--f-serif); color: var(--gold); } .lf-card b { font-size: 1.05rem; } .lf-card span { color: var(--ink2); font-size: .78rem; line-height: 1.5; } .lf-card:active { border-color: var(--gold); }
+.lf-steps { list-style: none; display: grid; gap: 8px; margin: 14px 0; } .lf-step { width: 100%; display: grid; grid-template-columns: 2.2em 1fr auto; gap: 10px; align-items: center; text-align: left; border: 1px solid var(--line2); border-radius: 12px; background: var(--panel); padding: 12px; min-height: 56px; }
+.lf-step .no { font: 600 .85rem var(--f-serif); color: var(--gold); } .lf-step .tt b { display: block; font-weight: 500; } .lf-step .tt small { color: var(--ink3); font-size: .72rem; } .lf-step.lock { opacity: .55; } .lf-step.done { border-color: var(--gold-d); }
+.lf-lockbox { text-align: center; border: 1px dashed var(--gold-d); border-radius: 14px; padding: 18px; margin: 16px 0; color: var(--ink2); }
+.lf-bars { display: flex; gap: 4px; align-items: flex-end; height: 150px; margin: 16px 0 6px; } .lf-bar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 2px; font-size: .62rem; color: var(--ink3); text-align: center; } .lf-bar i { width: 100%; background: rgba(213, 185, 127, .28); border-radius: 4px 4px 0 0; display: block; } .lf-bar.on i { background: var(--gold); } .lf-bar.on b { color: var(--gold-l); } .lf-bar small { font-size: .56rem; line-height: 1.2; }
+.lf-fu { border-left: 3px solid var(--gold-d); padding: 6px 12px; margin: 10px 0; background: rgba(18, 23, 41, .6); border-radius: 0 10px 10px 0; font-size: .9rem; } .lf-fu b { color: var(--gold-l); }
+.lf-yrs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 14px 0; } .lf-yr { border: 1px solid var(--line2); border-radius: 10px; padding: 8px 10px; font-size: .82rem; display: flex; justify-content: space-between; } .lf-yr.now { border-color: var(--gold); }
+.lf-col { border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin: 12px 0; background: var(--panel); } .lf-col ul { margin: 0; padding-left: 1.1em; } .lf-col li { margin: 4px 0; } .lf-col.drop { border-color: rgba(217, 105, 79, .45); } .lf-col.keep { border-color: rgba(94, 158, 120, .5); } .lf-col.start { border-color: rgba(213, 185, 127, .6); }
+#lifeBack { position: fixed; z-index: 40; left: 12px; top: calc(var(--bar-h) + 8px); }

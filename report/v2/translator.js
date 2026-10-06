@@ -87,6 +87,7 @@
   var titleSub = function (nm) { return nm ? '{hero}에게는,\n{hero}의 때가 있다.' : '모든 사람에게는,\n각자의 때가 있다.'; };
   function prologue(sd, name, vars, o) {
     o = o || {}; var K = R.EpicIntro;
+    if (K && o.style === 'EPIC_WUXIA_JOURNEY_SHORT') return K.journeyShort(sd, name, vars, o.birth, o).concat([K.bridge(name, vars)]); // 20초 INTRO(기본)
     if (K && o.style === 'EPIC_WUXIA_JOURNEY') return K.journey(sd, name, vars, o.birth, o).concat([K.bridge(name, vars)]); // 정통 무협 출정 INTRO(기본)
     if (K && o.style === 'EPIC_WUXIA_PARODY') return K.build(sd, name, vars, o.birth, o).concat([K.bridge(name, vars)]); // INTRO 전용 연출(본편과 분리) + 본편으로 넘어가는 다리
     var nm = String(name || '').trim(), b = basis(sd), d = DOM[b.dominant] || DOM.비겁, out = [];

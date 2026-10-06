@@ -65,7 +65,7 @@ function cleanFlow(f) {
 // 배경 음악: 분위기별 음원 주소(내 R2 업로드 또는 https). 7종 밖의 키·허용 밖 주소는 버린다.
 const BGM_MOODS = ['default', 'cinematic', 'minimal', 'ambient', 'emotional', 'tension', 'hopeful', 'reflective'];
 // 인트로 연출 설정(report/v2/epic-intro.js 와 같은 값 범위). style: 무협 출정(JOURNEY·기본)/무협 패러디/시네마틱/최소 · humor: 펀치라인 정도 · epicLevel: 1~5
-const INTRO_STYLES = ['EPIC_WUXIA_JOURNEY', 'EPIC_WUXIA_PARODY', 'CINEMATIC', 'MINIMAL'], INTRO_HUMORS = ['OFF', 'SUBTLE', 'PARODY'];
+const INTRO_STYLES = ['EPIC_WUXIA_JOURNEY_SHORT', 'EPIC_WUXIA_JOURNEY', 'EPIC_WUXIA_PARODY', 'CINEMATIC', 'MINIMAL'], INTRO_HUMORS = ['OFF', 'SUBTLE', 'PARODY'];
 function cleanIntroEpic(b) {
   const o = {}; if (!b || typeof b !== 'object') return o;
   if (INTRO_STYLES.includes(b.style)) o.style = b.style; if (INTRO_HUMORS.includes(b.humor)) o.humor = b.humor;

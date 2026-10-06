@@ -46,5 +46,23 @@
   var HJ = '甲乙丙丁戊己庚辛壬癸', ELH = { 목: '木', 화: '火', 토: '土', 금: '金', 수: '水' };
   function ilganTitle(stem) { var i = STEMS.indexOf(String(stem || '')[0]), s = S[STEMS[i]]; return s ? s.name + ' · ' + HJ[i] + ELH[s.name[1]] : ''; }
 
-  R.IntroText = { ilgan: ilgan, ilganTitle: ilganTitle, iju: iju, all60: all60, STEMS: STEMS };
+  /* ── 오프닝 시퀀스용 짧은 카드(일간 3~5초 · 일주 5~8초). 구조만 고정하고 문장은 일간·일지(십성)에 따라 조립한다. 새 계산 없음. ── */
+  var ILGAN_LINE = { 갑: '큰 나무처럼\n방향을 세우고 곧게 뻗는 힘.', 을: '풀과 덩굴처럼\n휘어도 끝내 길을 찾는 힘.', 병: '태양처럼\n숨김없이 밝히고 사람을 모으는 힘.', 정: '촛불처럼\n조용히, 오래, 깊게 타는 힘.', 무: '큰 산처럼\n묵직하게 중심을 잡는 힘.',
+    기: '논밭의 흙처럼\n사람과 일을 길러 내는 힘.', 경: '단단한 쇠처럼\n결단하고 밀고 나가는 힘.', 신: '다듬어진 보석처럼\n섬세하게 가치를 알아보는 힘.', 임: '큰 강처럼\n막힘없이 흐름을 타는 힘.', 계: '봄비처럼\n조용히 스며들어 마음을 읽는 힘.' };
+  var VERB = { 갑: '자라난', 을: '자라난', 병: '빛나는', 정: '타오르는', 무: '자리 잡은', 기: '길러진', 경: '단련된', 신: '다듬어진', 임: '흐르는', 계: '스며드는' };
+  var PRO = { 갑: '방향을 정하면 곧게 밀고 나가지만', 을: '유연하게 사람 사이를 잇지만', 병: '밝고 사람을 끌어모으지만', 정: '한 곳에 깊이 몰입하지만', 무: '묵직하게 중심을 잡아 주지만', 기: '사람과 일을 세심하게 키워 내지만',
+    경: '결단이 빠르고 추진력이 강하지만', 신: '섬세하고 안목이 높지만', 임: '큰 흐름을 읽고 자유롭게 움직이지만', 계: '마음의 결을 잘 읽지만' };
+  var CON = { 비견: '때로는 고집을 꺾지 않아 부딪히기도 합니다.', 겁재: '가까운 사람과 괜히 경쟁하게 되기도 합니다.', 식신: '편안함에 머물러 시작이 늦어지기도 합니다.', 상관: '말이 앞서 날카롭게 들리기도 합니다.', 편재: '벌여 놓은 일이 많아 힘이 흩어지기도 합니다.',
+    정재: '안정을 지키려다 변화를 놓치기도 합니다.', 편관: '스스로를 몰아붙여 지치기도 합니다.', 정관: '규칙에 얽매여 속마음을 숨기기도 합니다.', 편인: '생각이 길어져 행동이 늦어지기도 합니다.', 정인: '남의 도움을 기다리다 때를 놓치기도 합니다.' };
+  var HJB = '子丑寅卯辰巳午未申酉戌亥';
+  // 일간 카드: { title: '庚金 · 경금', line: 한 문장(2줄) }
+  function ilganCard(stem) { var i = STEMS.indexOf(String(stem || '')[0]), s = S[STEMS[i]]; return s ? { title: HJ[i] + ELH[s.name[1]] + ' · ' + s.name, line: ILGAN_LINE[STEMS[i]] } : null; }
+  // 일주 카드: 이름 · 영화적 한 문장 · 한자 일주 · 장점 1 + 이면의 약점 1. gender: 'M'|'F'
+  function ijuCard(pillar, name, gender) {
+    var p = String(pillar || ''), si = STEMS.indexOf(p[0]), bi = BR.indexOf(p[1]), s = S[p[0]], b = B[p[1]]; if (!s || !b || si % 2 !== bi % 2) return null;
+    var nm = String(name || '').trim(), tg = tenGod(p[0], b[0]);
+    return { name: nm ? nm + '.' : '오늘 이야기의 주인공.', film: b[1] + ' 곁에서 ' + VERB[p[0]] + ' ' + s.short + ' 같은 기질을 타고난 ' + (gender === 'F' ? '여자' : '남자') + '.', title: HJ[si] + HJB[bi] + ' · ' + p + '일주', trait: PRO[p[0]] + ', ' + CON[tg] };
+  }
+
+  R.IntroText = { ilganCard: ilganCard, ijuCard: ijuCard, ilgan: ilgan, ilganTitle: ilganTitle, iju: iju, all60: all60, STEMS: STEMS };
 })(typeof window !== 'undefined' ? window : globalThis);

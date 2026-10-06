@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="viewer.css">
 <link rel="stylesheet" href="cinema.css">
 <link rel="stylesheet" href="reader.css">
+<link rel="stylesheet" href="life.css">
 </head>
 <body>
 <noscript><p style="padding:30vh 20px;color:#E9E4D8">이 페이지는 자바스크립트가 필요합니다.</p></noscript>
@@ -72,12 +73,16 @@
     <main id="chapter" tabindex="-1"></main>
   </section>
 
+  <!-- 인생 지도 흐름(?flow=life) -->
+  <section id="v-life" class="view lf" aria-label="인생 지도" hidden></section>
+
   <!-- 최종 화면 -->
   <section id="v-final" class="view" hidden></section>
 </div>
 
 <!-- 챕터 목록 -->
 <dialog id="drawer" aria-label="챕터 목록"><div class="dr"><div class="drh"><b>전체 챕터</b><button type="button" id="drClose" class="chipbtn" aria-label="닫기">닫기</button></div><ol id="drList"></ol></div></dialog>
+<button type="button" id="lifeBack" class="chipbtn" hidden>‹ 내 이야기 목록</button>
 <div id="toast" class="toast" role="status" hidden></div>
 
 <script src="/engine.js"></script>
@@ -109,6 +114,8 @@
 <script src="pdf.js"></script>
 <script src="sharecard.js"></script>
 <script src="bgm.js"></script>
+<script src="story-director.js"></script>
+<script src="life.js"></script>
 <script src="reader.js"></script>
 <script src="cinema-render.js"></script>
 <script src="viewer.js"></script>

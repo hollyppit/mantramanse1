@@ -8,8 +8,8 @@
 // style: EPIC_WUXIA_JOURNEY(기본 · 정통 무협 오프닝, 모험·출정·路) · EPIC_WUXIA_PARODY(예전 패러디) · CINEMATIC · MINIMAL
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
-  var STYLES = ['EPIC_WUXIA_JOURNEY', 'EPIC_WUXIA_PARODY', 'CINEMATIC', 'MINIMAL'], HUMORS = ['OFF', 'SUBTLE', 'PARODY'];
-  var DEFAULTS = { style: 'EPIC_WUXIA_JOURNEY', humor: 'PARODY', epicLevel: 5 };
+  var STYLES = ['EPIC_WUXIA_JOURNEY_SHORT', 'EPIC_WUXIA_JOURNEY', 'EPIC_WUXIA_PARODY', 'CINEMATIC', 'MINIMAL'], HUMORS = ['OFF', 'SUBTLE', 'PARODY'];
+  var DEFAULTS = { style: 'EPIC_WUXIA_JOURNEY_SHORT', humor: 'PARODY', epicLevel: 5 };
   var CAP_MS = 30000; // INTRO 최대 길이(운로 타이틀까지). 20~25초가 목표, 30초는 넘기지 않는다.
 
   // 사실로 입증할 수 없는 주장(INTRO 에서도 쓰지 않는다). 테스트가 검사한다.
@@ -103,7 +103,6 @@
     if (ph) d3.push(S(ph.hanja + '時', 900, { big: true, a: 'fade', together: !!(pm || pd), min: 450 }));
     if (bm && bd) d3.push(S(bm + '월 ' + bd + '일', tw ? 500 : 1000, { a: 'fade', e: 'soft' }));
     if (tw) d3.push(S(tw.disp, 1300, { a: 'fade', e: 'soft', together: !!(bm && bd), min: 800 }));
-    if (birth.place) d3.push(S(birth.place, 900, { a: 'fade', together: !!(bm && bd) || !!tw, min: 500 }));
     out.push(scene('ep_03', 'MOON', C1({ pacing: 'SLOW', motionIntensity: 1, bgmMood: 'ambient', overlayStrength: 0.5, textPosition: 'center', textSize: 'L', mediaTags: ['stars', 'mist', 'field'] }), build(d3), { mediaIntent: { scenes: ['stars', 'mist', 'field', 'temple'], emotions: ['mysterious', 'contemplative'] } }));
     // 04 탄생 — 먹구름·바람·대숲(연출일 뿐 사실 주장 아님). 한 사내가 태어났다.
     var born = [S('그날.', Math.round(700 * rate), { e: 'pause', cue: cue('drum'), min: 450 })];
@@ -193,7 +192,6 @@
 
     // 02 탄생 — 새벽 산맥, 운해, 갈대
     var s2 = [T('어느 새벽.', 1700, { min: 1000 })];
-    if (birth.place) s2.push(T(birth.place + '.', 1500, { min: 800 }));
     s2.push(T('한 사람이\n세상에 첫발을\n내디뎠다.', 2800, { min: 1800 }), T(hero + ' 태어났으니—', 2400, { min: 1500, e: 'pause' }));
     out.push(sc('ep_j02', 'DAWN', Object.assign({ sceneType: 'INTRO', imageMotion: 'slow-zoom-in', overlayStrength: 0.4, bgmMood: 'ambient', textPosition: 'center', textSize: 'L' }, tags(['mountain', 'mist', 'field', 'sunrise'])), s2,
       { mediaIntent: { scenes: ['mountain', 'mist', 'field', 'sunrise'], emotions: ['awe', 'calm'] } }));
@@ -267,6 +265,33 @@
     return out;
   }
 
+  /* EPIC_WUXIA_JOURNEY_SHORT — 같은 여정(命→運→四柱八字→運路)을 7장면으로 압축한 기본 INTRO. 본편 다리(bridge)까지 합쳐 20초 안에 끝난다. 글자 연출 어휘는 JOURNEY 와 같다. */
+  var SHORT_CAP_MS = 20000, SHORT_BODY_MS = 15200; // 본편 다리 장면(약 3.4초)을 더해도 20초 이내
+  function journeyShort(sd, name, vars, birth, opts) {
+    opts = Object.assign({}, DEFAULTS, opts || {}); birth = birth || {};
+    var N = R.Narrator, nm = String(name || '').trim(), P = sd.pillars || {}, py = P.year, pm = P.month, ph = birth.hourKnown === false || !P.hour ? null : P.hour, by = birth.y || (sd.birth && sd.birth.solarY);
+    var T = function (t, ms, o) { return S(t, ms, Object.assign({ a: ANIM.normal }, o)); }, Im = function (t, ms, o) { return S(t, ms, Object.assign({ a: ANIM.important, e: 'impact' }, o)); }, Hj = function (t, ms, o) { return S(t, ms, Object.assign({ a: ANIM.hanja, e: 'impact', big: true }, o)); };
+    var base = { lead: 150, tail: 0, pauseAfter: 0, motionIntensity: 2, transition: 'crossfade', pacing: 'MEDIUM' }, C1 = function (o) { return Object.assign({}, base, o); }, out = [];
+    var sc = function (id, preset, cin, segs, extra) { return scene(id, preset, C1(cin), build(segs), extra); }, mt = function (arr) { return { mediaTags: arr }; };
+    var s1 = [T('때는,', 800, { min: 500 })]; if (by) s1.push(Im(by + '년.', 900, { min: 600 })); if (py) { s1.push(Hj(py.hanja + '年', 700, { min: 500 })); } if (pm) s1.push(Hj(pm.hanja + '月', 800, { min: 500 }));
+    out.push(sc('ep_s01', 'SILENCE', { sceneType: 'INTRO', lead: 300, bgmMood: 'ambient', pacing: 'PAUSE', textSize: 'XL' }, s1, { bg: 'black', bgmCue: 'bgmDrone' }));
+    if (nm) out.push(sc('ep_s02', 'NAME_REVEAL', { sceneType: 'INTRO', lead: 300, pacing: 'PAUSE', nameEmphasis: 'MAXIMUM', bgmMood: 'minimal', transition: 'dip-black', textSize: 'XL' }, [S('{hero}', 2400, { name: true, big: true, e: 'impact', a: ANIM.cine, min: 1600 })], { bg: 'black' }));
+    out.push(sc('ep_s03', 'MOUNTAIN', Object.assign({ sceneType: 'INTRO', imageMotion: 'slow-zoom-in', overlayStrength: 0.42, bgmMood: 'cinematic', textPosition: 'center' }, mt(['mountain', 'cloud', 'mist', 'sunrise'])), [T('태어나며 주어진 것.', 1400, { min: 900 }), Hj('命', 1300, { min: 900 })],
+      { mediaIntent: { scenes: ['mountain', 'cloud', 'mist'], emotions: ['awe', 'powerful'] } }));
+    out.push(sc('ep_s04', 'RIVER', Object.assign({ sceneType: 'INTRO', imageMotion: 'pan-left', overlayStrength: 0.45, bgmMood: 'ambient', textPosition: 'center' }, mt(['river', 'road', 'mist'])), [T('그러나 시간이 흐르면\n운도 흐른다.', 2000, { min: 1300 }), Hj('運', 1300, { min: 900 })],
+      { mediaIntent: { scenes: ['river', 'road', 'mist'], emotions: ['reflective', 'calm'] } }));
+    var pil = ['hour', 'day', 'month', 'year'].map(function (k, i) { var p = P[k]; return { label: '時日月年'[i], hj: k === 'hour' && !ph ? '' : (p ? p.hanja : ''), ko: k === 'hour' && !ph ? '' : (p ? p.ko : '') }; });
+    out.push(sc('ep_s05', 'REALITY_CHECK', { sceneType: 'INTRO', motionIntensity: 0, imageMotion: 'none', overlayStrength: 0.7, bgmMood: 'cinematic', textPosition: 'top', textSize: 'L' },
+      [T('길을 찾기 위해, 네 개의 기둥.', 1500, { min: 1000 }), S('四柱八字', 1700, { big: true, e: 'impact', a: ANIM.cine, title: true, min: 1200 }), Im('하나의 지도다.', 1700, { min: 1100 })], { phTone: 'map', pillars: pil, pillarsAt: 1 }));
+    out.push(scene('ep_s06', 'CINEMATIC_INTRO', C1({ sceneType: 'INTRO', pacing: 'PAUSE', transition: 'dip-white', motionIntensity: 2, imageMotion: 'slow-zoom-in', overlayStrength: 0.38, bgmMood: 'cinematic', lead: 200, tail: 900, nameEmphasis: nm ? 'TITLE' : 'NONE' }),
+      build([S('運路', 1800, { big: true, e: 'impact', a: ANIM.cine, title: true, min: 1400 })]),
+      { kind: 'title', sub: nm ? '{hero}에게는,\n{hero}의 때가 있다.' : '모든 사람에게는,\n각자의 때가 있다.', bgmCue: 'full', mediaIntent: { scenes: ['sunrise', 'mountain', 'cloud', 'road'], emotions: ['powerful', 'hopeful'] } }));
+    out = fit(out, SHORT_BODY_MS);
+    if (N && vars) out.forEach(function (s) { (s.cinema.segments || []).forEach(function (g) { g.text = N.fill(g.text, vars); }); if (s.sub) s.sub = N.fill(s.sub, vars); });
+    out.forEach(function (s) { if (s.pillars) { var segs = s.cinema.segments || [], at = -1; segs.forEach(function (g, i) { if (/四柱八字/.test(g.text)) at = i; }); if (at >= 0) s.pillarsAt = at; } });
+    return out;
+  }
+
   // 본편으로 넘어가는 다리: 패러디는 여기서 끝난다. 문체는 본편과 같은 담백한 현대어.
   function bridge() {
     var segs = build([S('CHAPTER 01', 900, { a: 'fade', e: 'soft' }), S('나의 기본 사주', 2200, { a: 'fade', e: 'impact' })]);
@@ -287,5 +312,5 @@
     return scenes;
   }
 
-  R.EpicIntro = { journey: journey, ANIM: ANIM, JOURNEY_CAP_MS: JOURNEY_CAP_MS, build: intro, bridge: bridge, totalMs: totalMs, fit: fit, timeWords: timeWords, pickPunch: pickPunch, PUNCH: PUNCH, STYLES: STYLES, HUMORS: HUMORS, DEFAULTS: DEFAULTS, CAP_MS: CAP_MS, FORBIDDEN: FORBIDDEN, BODY_BAN: BODY_BAN };
+  R.EpicIntro = { journey: journey, journeyShort: journeyShort, SHORT_CAP_MS: SHORT_CAP_MS, ANIM: ANIM, JOURNEY_CAP_MS: JOURNEY_CAP_MS, build: intro, bridge: bridge, totalMs: totalMs, fit: fit, timeWords: timeWords, pickPunch: pickPunch, PUNCH: PUNCH, STYLES: STYLES, HUMORS: HUMORS, DEFAULTS: DEFAULTS, CAP_MS: CAP_MS, FORBIDDEN: FORBIDDEN, BODY_BAN: BODY_BAN };
 })(typeof window !== 'undefined' ? window : globalThis);
