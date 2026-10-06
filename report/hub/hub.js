@@ -76,16 +76,22 @@
   H.go = function (hash) { if (location.hash === hash) H.render(); else location.hash = hash; };
   H.replace = function (hash) { history.replaceState(null, '', location.pathname + location.search + hash); H.render(); };
   function parse() { var h = location.hash.replace(/^#\/?/, ''), i = h.indexOf('?'), path = i < 0 ? h : h.slice(0, i), q = {}; (i < 0 ? '' : h.slice(i + 1)).split('&').forEach(function (kv) { if (!kv) return; var p = kv.split('='); try { q[decodeURIComponent(p[0])] = decodeURIComponent(p[1] || ''); } catch (e) { } }); return { path: path.replace(/\/$/, ''), q: q }; }
+  // 랜딩(/report/)에 끼워 넣은 모드(#hub[data-embed]): 화면을 바꿀 때 페이지 맨 위가 아니라 허브 영역 맨 위로 간다. 첫 그리기는 스크롤하지 않는다(사용자가 내려와야 보인다).
+  H.embed = !!H.$('#hub[data-embed]'); var first = true;
+  function toTop() { if (!H.embed) { root.scrollTo(0, 0); return; } if (first) return; var hb = H.$('#hub'); root.scrollTo(0, Math.max(0, hb.getBoundingClientRect().top + root.scrollY - 8)); }
+  // 스크롤해서 화면에 들어올 때 자연스럽게 나타난다(IntersectionObserver). 지원하지 않으면 바로 보인다.
+  var io = root.IntersectionObserver ? new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' }) : null;
+  function reveal(el) { H.$$('.hero, .cards > *, .more, .grp, .todaycard, .myhead', el).forEach(function (n) { n.classList.add('rvl'); if (io) io.observe(n); else n.classList.add('in'); }); }
   H.view = function (html, o) { // 화면 교체: 위로 스크롤 + 부드러운 등장
-    var el = H.$('#screen'); el.className = ''; el.innerHTML = html; void el.offsetWidth; el.className = 'fx'; if (!(o && o.keepScroll)) root.scrollTo(0, 0); return el;
+    var el = H.$('#screen'); el.className = ''; el.innerHTML = html; void el.offsetWidth; el.className = 'fx'; if (!(o && o.keepScroll)) toTop(); reveal(el); return el;
   };
   H.render = function () {
     var r = parse(), fn = H.routes[r.path]; H.ctx = { token: (H.ctx.token || 0) + 1, q: r.q, path: r.path };
     var aw = H.$('#awk'); if (aw) aw.remove(); // 각성 연출 중 뒤로가기
     if (H.cleanup) { try { H.cleanup(); } catch (e) { } H.cleanup = null; }
-    H.$('#tbBack').style.visibility = r.path ? 'visible' : 'hidden';
+    var tb = H.$('#tbBack'); if (tb) tb.style.visibility = r.path ? 'visible' : 'hidden';
     if (!fn) { H.replace('#/'); return; }
-    fn(r.q, H.ctx);
+    fn(r.q, H.ctx); first = false;
   };
   H.alive = function (ctx) { return ctx.token === H.ctx.token; }; // 비동기 작업이 끝났을 때 아직 같은 화면인지
   H.start = function () {
@@ -95,8 +101,8 @@
     DOC.addEventListener('click', function (e) { // data-track="이벤트" data-p="값": 링크·버튼 클릭 측정
       var a = e.target.closest && e.target.closest('[data-track]'); if (a) H.track(a.getAttribute('data-track'), a.getAttribute('data-p') ? { content: a.getAttribute('data-p') } : null);
     });
-    H.$('#tbBack').onclick = function () { if (history.length > 1) history.back(); else H.go('#/'); }; // 브라우저 뒤로가기와 같다 — 화면 상태는 sessionStorage 에 있어 그대로 돌아온다
-    root.addEventListener('hashchange', H.render); H.render();
+    if (H.$('#tbBack')) H.$('#tbBack').onclick = function () { if (history.length > 1) history.back(); else H.go('#/'); }; // 브라우저 뒤로가기와 같다 — 화면 상태는 sessionStorage 에 있어 그대로 돌아온다
+    first = !location.hash || location.hash === '#/'; root.addEventListener('hashchange', H.render); H.render(); first = false; if (H.embed && !first && location.hash.length > 2) { var hb = H.$('#hub'); root.scrollTo(0, hb.getBoundingClientRect().top + root.scrollY - 8); } // 새로고침했을 때 허브 하위 화면이면 그 자리로
   };
 
   /* ── 허브 홈 ───────────────────────────────────────────────── */

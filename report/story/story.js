@@ -662,6 +662,14 @@
     var h = (C.settings && C.settings.hub) || {}; if (h.enabled === false || /[?&]story=1\b/.test(location.search)) return '';
     return /^\/[\w\-./]*$/.test(h.url || '/report/hub/') ? (h.url || '/report/hub/') : '/report/hub/';
   }
+  // 허브를 이 페이지 안에 끼워 넣는다: 스타일·스크립트를 불러오고 Hub.start(). 허브가 켜져 있으면 긴 스토리(#story)는 숨긴다.
+  function hubScroll() { var el = document.getElementById('hub'); if (el) el.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'start' }); }
+  function hubMount() {
+    var el = document.getElementById('hub'); if (!el || !hubUrl() || PREVIEW) return;
+    var base = hubUrl(); document.documentElement.classList.add('hub-on'); el.hidden = false;
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base + 'hub.css'; document.head.appendChild(l);
+    [['/shared-core.js'], [base + 'hub.js'], [base + 'hub-tarot.js'], [base + 'hub-saju.js']].reduce(function (p, s) { return p.then(function () { return new Promise(function (ok, no) { var sc = document.createElement('script'); sc.src = s[0]; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); }); }); }, Promise.resolve()).then(function () { root.Hub.start(); }).catch(function () { el.hidden = true; document.documentElement.classList.remove('hub-on'); });
+  }
   function cover() {
     var el = document.getElementById('cover'); if (!el) return;
     var cv = (C.settings && C.settings.cover) || {};
@@ -687,7 +695,7 @@
     if (go) go.onclick = function () {
       if (PREVIEW) return; // 미리보기에서는 끌어서 옮기는 용도
       track('cover_enter', null, true);
-      var hu = hubUrl(); if (hu) { track('explore_click', null, true); location.href = hu; return; } // 둘러보기 → 무료 콘텐츠 허브
+      if (hubUrl()) { track('explore_click', null, true); hubScroll(); return; } // 둘러보기 → 아래로 스크롤해 무료 콘텐츠 허브로(페이지 이동 없음)
       Auto.begin(); // (허브를 끈 경우) 첫 스토리 블록부터 자동으로 내려간다 (이미 시작했다면 이어서)
     };
     if (PREVIEW) coverEdit(el);
@@ -698,7 +706,7 @@
     cover();
     if (bn) bn.innerHTML = esc(S1.brandName || '').split(String.fromCharCode(10)).join('<br>');
     if (root.Ambient) root.Ambient.apply(S1.ambient);
-    if (skip) { var sl = S1.skipLink || {}; skip.textContent = sl.text || ''; skip.hidden = !sl.text; skip.onclick = function () { var hu = hubUrl(); if (hu && !PREVIEW) { track('quick_analyze_click', null, true); location.href = hu + '#/input?next=my'; return; } scrollToId(sl.target || 'sajuInput'); }; }
+    if (skip) { var sl = S1.skipLink || {}; skip.textContent = sl.text || ''; skip.hidden = !sl.text; skip.onclick = function () { if (hubUrl() && !PREVIEW) { track('quick_analyze_click', null, true); location.hash = '#/input?next=my'; hubScroll(); return; } scrollToId(sl.target || 'sajuInput'); }; }
     if (S1.pageTitle) { document.title = S1.pageTitle; var t = document.querySelector('meta[property="og:title"]'); if (t) t.setAttribute('content', S1.pageTitle); }
     if (S1.pageDesc) { ['meta[name=description]', 'meta[property="og:description"]'].forEach(function (q) { var m = document.querySelector(q); if (m) m.setAttribute('content', S1.pageDesc); }); }
   }
@@ -839,7 +847,7 @@
   function saveDataOn() { return !!(root.navigator && navigator.connection && navigator.connection.saveData); }
   function start() {
     if (started) return; started = true;
-    render(); chrome(); Auto.init();
+    render(); chrome(); Auto.init(); hubMount();
     document.documentElement.classList.add('ready');
     var problems = validate(); if (DEV && problems.length && root.console) console.warn('[story] 콘텐츠 점검:\n' + problems.join('\n'));
     if (!PREVIEW) { track('onboarding_started', { dev: DEV ? 1 : 0 }, true); track('landing_view', null, true); }

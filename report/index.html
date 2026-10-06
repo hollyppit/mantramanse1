@@ -34,6 +34,7 @@ em { font-style: normal; background: linear-gradient(180deg, var(--gold-l), var(
 /* 배경 분위기 효과 (불씨·빛·연기) */
 #amb { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 #story, footer { position: relative; z-index: 1; }
+html.hub-on #story { display: none; }
 
 /* 상단 */
 #prog { position: fixed; top: 0; left: 0; right: 0; height: 2px; background: var(--gold); transform: scaleX(0); transform-origin: 0 50%; z-index: 30; }
@@ -369,6 +370,8 @@ footer { padding: 70px 0 60px; color: var(--ink-3); font-size: .76rem; text-alig
 <button type="button" id="autoBtn" hidden>⏸ 멈추기</button>
 
 <section id="cover" aria-label="인트로" hidden></section>
+<!-- 무료 콘텐츠 허브(타로·오늘의 운세·일주 각성·인생 흐름): 첫 화면 아래로 스크롤하면 이어서 나타난다. story.js 의 hubMount() 가 켠다 -->
+<section id="hub" data-embed hidden aria-label="무료 운세 콘텐츠"><main id="screen" tabindex="-1" aria-live="polite"></main><div id="toast" class="toast" role="status" hidden></div></section>
 <main id="story" aria-live="polite"><noscript><p class="body" style="padding:30vh 0">이 페이지는 자바스크립트가 필요합니다.</p></noscript></main>
 <footer><p>© 만트라 포춘 · 사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></footer>
 <script src="/engine.js"></script>
