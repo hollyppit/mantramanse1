@@ -56,7 +56,7 @@
       if (String(v.subtitle || '').trim() === defLines(r).join(String.fromCharCode(10)).trim()) v.subtitle = ''; if ((v.title || '').trim() === defTitle(r)) v.title = '';
     }); });
   }
-  function prune(L) { return L.filter(function (v) { return hasVideo(v) || v.posterUrl || hasText(v) || v.captionsUrl; }).map(function (v) { var o = Object.assign({}, v); delete o._new; return o; }); }
+  function prune(L) { return L.filter(function (v) { return hasVideo(v) || v.posterUrl || v.captionsUrl; }).map(function (v) { var o = Object.assign({}, v); delete o._new; o.title = ''; o.subtitle = ''; o.keywords = []; return o; }); } // 자막은 자동 생성이라 예전에 저장한 문구는 저장할 때 모두 지운다
   function save() {
     var b = $('[data-ivsave]', I.root); if (b) { b.disabled = true; b.textContent = '저장 중…'; }
     normalizeDefaults();
@@ -87,29 +87,28 @@
     });
     var all = rows, nv = all.filter(function (r) { return hasVideo(recOf(r)); }).length, nt = all.filter(function (r) { return hasText(recOf(r)); }).length, ns = Object.keys(I.sel).filter(function (k) { return I.sel[k] && k.split('|')[0] === I.mode; }).length;
     var opt = function (arr, v, lbl) { return '<option value="">' + lbl + '</option>' + arr.map(function (x) { return '<option' + (v === x ? ' selected' : '') + '>' + x + '</option>'; }).join(''); };
-    var h = '<div class="iv"><div class="card"><div class="ivbar"><b style="color:var(--gold)">일간·일주 소개</b><span class="muted">일간별 20개 · 일주별 120개의 영상과 문구를 한 곳에서. 회색 글자는 기본 문구예요 — 그대로 고쳐 쓰면 되고, 모두 지우면 기본 문구로 돌아갑니다.</span><span style="flex:1"></span>' +
-      '<button type="button" data-ivfix title="제목·부제·키워드가 다른 일간(일주)을 말하는 칸을 비워 기본 문구로 되돌립니다">어긋난 문구 고치기 (' + (rowsOf('ilgan').concat(rowsOf('iju')).filter(function (r) { return badOf(r); }).length) + ')</button><button type="button" data-ivundo' + (I.undo ? '' : ' disabled') + '>되돌리기</button><button type="button" class="pri" data-ivsave' + (I.dirty ? '' : ' disabled') + '>저장</button></div>' +
+    var h = '<div class="iv"><div class="card"><div class="ivbar"><b style="color:var(--gold)">일간·일주 영상</b><span class="muted">일간별 20개 · 일주별 120개의 변신 영상을 한 곳에서. 자막은 사용자 이름과 사주에 맞춰 자동으로 만들어져서 따로 관리하지 않습니다.</span><span style="flex:1"></span>' +
+      '<button type="button" data-ivundo' + (I.undo ? '' : ' disabled') + '>되돌리기</button><button type="button" class="pri" data-ivsave' + (I.dirty ? '' : ' disabled') + '>저장</button></div>' +
       '<div class="ivbar"><div class="sub2" data-ivmode><button type="button" data-m="ilgan" class="' + (I.mode === 'ilgan' ? 'on' : '') + '">일간 소개 (10×2 = 20)</button><button type="button" data-m="iju" class="' + (I.mode === 'iju' ? 'on' : '') + '">일주 소개 (60×2 = 120)</button></div>' +
-      '<span class="stat muted"><span>영상 <b>' + nv + ' / ' + all.length + '</b></span><span>문구 <b>' + nt + ' / ' + all.length + '</b></span></span><span style="flex:1"></span>' +
+      '<span class="stat muted"><span>영상 <b>' + nv + ' / ' + all.length + '</b></span></span><span style="flex:1"></span>' +
       '<label class="navbtn" style="cursor:pointer">영상·포스터 한꺼번에 올리기<input type="file" data-ivfiles multiple accept="video/mp4,video/webm,image/*,.vtt" hidden></label><button type="button" data-ivcsvout>CSV 내려받기</button><label class="navbtn" style="cursor:pointer">CSV 올리기<input type="file" data-ivcsvin accept=".csv,text/csv" hidden></label></div>' +
       '<p class="muted" style="margin:0 0 6px;font-size:.78rem">파일명 규칙: 일간 <code>경금_남.mp4</code> · <code>경_여_poster.webp</code> / 일주 <code>경오_남.mp4</code> · <code>庚午_F.webm</code> (한자·M/F 가능). 업로드한 파일은 이름에 맞는 항목에 자동 연결됩니다.</p>' +
       '<div id="ivq"></div>' +
       '<details data-ivset style="margin:6px 0"><summary class="muted" style="cursor:pointer">공통 설정 · 기본 영상 · 공개 주소</summary><div class="grid3" style="margin-top:8px">' +
-      '<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-ivtextonly' + (I.textOnly ? ' checked' : '') + '> 영상이 없어도 문구만 보여 주기 (영상이 없는 항목은 문구 화면이 몇 초 나옵니다)</label>' +
+      '<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-ivtextonly' + (I.textOnly ? ' checked' : '') + '> 영상이 없어도 소개 카드만 보여 주기 (영상이 없는 일간은 이름·소개 문구만 몇 초 나옵니다)</label>' +
       '<label>공개 영상 기본 주소 (R2 도메인)<input type="text" data-ivbase value="' + esc(I.base) + '" placeholder="https://video.내도메인.com"></label>' +
       '<label>기본(fallback) 일주 영상 MP4<input type="text" data-ivfb="videoUrl" value="' + esc((I.fb || {}).videoUrl || '') + '"></label><label>fallback WebM<input type="text" data-ivfb="videoWebm" value="' + esc((I.fb || {}).videoWebm || '') + '"></label><label>fallback 포스터<input type="text" data-ivfb="posterUrl" value="' + esc((I.fb || {}).posterUrl || '') + '"></label></div></details>' +
       '<div class="ivbar"><select data-f="stem">' + opt(STEMS, f.stem, '일간 전체') + '</select>' + (I.mode === 'iju' ? '<select data-f="branch">' + opt(BRS, f.branch, '일지 전체') + '</select>' : '') +
       '<select data-f="gender"><option value="">남·여</option><option value="M"' + (f.gender === 'M' ? ' selected' : '') + '>남</option><option value="F"' + (f.gender === 'F' ? ' selected' : '') + '>여</option></select>' +
-      '<select data-f="status"><option value="">상태 전체</option><option value="novideo"' + (f.status === 'novideo' ? ' selected' : '') + '>영상 없음</option><option value="bad"' + (f.status === 'bad' ? ' selected' : '') + '>문구가 다른 일간을 말함</option><option value="notext"' + (f.status === 'notext' ? ' selected' : '') + '>문구 없음(기본 문구)</option><option value="done"' + (f.status === 'done' ? ' selected' : '') + '>영상+문구 완료</option><option value="off"' + (f.status === 'off' ? ' selected' : '') + '>사용 안 함</option></select>' +
+      '<select data-f="status"><option value="">상태 전체</option><option value="novideo"' + (f.status === 'novideo' ? ' selected' : '') + '>영상 없음</option><option value="done"' + (f.status === 'done' ? ' selected' : '') + '>영상 있음</option><option value="off"' + (f.status === 'off' ? ' selected' : '') + '>사용 안 함</option></select>' +
       '<input type="text" data-f="q" value="' + esc(f.q) + '" placeholder="문구·키 검색" style="width:150px"><span style="flex:1"></span><span class="muted">보이는 ' + list.length + '개</span>' +
       '<button type="button" data-ivsel="vis">보이는 것 모두 선택</button><button type="button" data-ivsel="m">남성만</button><button type="button" data-ivsel="f">여성만</button><button type="button" data-ivsel="none">선택 해제</button></div></div>';
     h += ns ? bulkHtml(ns) : '';
-    h += '<div class="card" style="margin-top:10px;overflow:auto;max-height:70vh"><table class="ivt"><tr><th style="width:26px"></th><th style="width:84px">대상</th><th style="width:130px">영상</th><th style="min-width:150px">제목</th><th style="min-width:260px">부제(문구 · 줄바꿈 가능)</th><th style="min-width:120px">키워드(쉼표)</th><th style="width:46px">사용</th><th style="width:96px">영상 올리기</th></tr>';
+    h += '<div class="card" style="margin-top:10px;overflow:auto;max-height:70vh"><table class="ivt"><tr><th style="width:26px"></th><th style="width:84px">대상</th><th style="width:130px">영상</th><th style="width:46px">사용</th><th style="width:96px">영상 올리기</th></tr>';
     list.forEach(function (r) {
       var v = recOf(r) || {}, k = keyOf(r.kind, r.id, r.g), dl = defLines(r).join('\n');
-      h += '<tr data-k="' + esc(k) + '"' + (v.enabled === false ? ' class="off"' : '') + '><td><input type="checkbox" data-sel' + (I.sel[k] ? ' checked' : '') + '></td><td><b>' + esc(r.id) + (r.kind === 'ilgan' ? ELN[r.id] : '') + '</b> <span class="vl">' + GK[r.g] + '</span>' + (badOf(r) ? '<div style="color:#f0b8a8;font-size:.72rem">⚠ ' + esc(badOf(r)) + ' 문구</div>' : '') + '</td>' +
-        '<td data-vc>' + chips(v) + '</td><td><input type="text" data-fld="title" class="' + (v.title ? '' : 'isdef') + '" value="' + esc(v.title || defTitle(r)) + '" placeholder="' + esc(defTitle(r)) + '" maxlength="60"></td>' +
-        '<td><textarea data-fld="subtitle" class="' + (v.subtitle ? '' : 'isdef') + '" maxlength="400" rows="4" placeholder="' + esc(dl) + '">' + esc(v.subtitle || dl) + '</textarea></td><td><input type="text" data-fld="keywords" value="' + esc((v.keywords || []).join(', ')) + '"></td>' +
+      h += '<tr data-k="' + esc(k) + '"' + (v.enabled === false ? ' class="off"' : '') + '><td><input type="checkbox" data-sel' + (I.sel[k] ? ' checked' : '') + '></td><td><b>' + esc(r.id) + (r.kind === 'ilgan' ? ELN[r.id] : '') + '</b> <span class="vl">' + GK[r.g] + '</span>' + '</td>' +
+        '<td data-vc>' + chips(v) + '</td>' +
         '<td><input type="checkbox" data-en' + (v.enabled !== false ? ' checked' : '') + '></td><td><label class="navbtn" style="cursor:pointer;font-size:.74rem">파일 선택<input type="file" data-up accept="video/mp4,video/webm,image/*" hidden></label></td></tr>';
     });
     root.innerHTML = h + '</table></div></div>';
@@ -119,12 +118,8 @@
   function chips(v) { var c = function (ok, t) { return '<span class="chip ' + (ok ? 'ok' : 'no') + '">' + t + (ok ? ' ✓' : '') + '</span>'; }; return c(!!(v && v.videoUrl), 'MP4') + c(!!(v && v.videoWebm), 'WebM') + c(!!(v && v.posterUrl), '포스터'); }
 
   function bulkHtml(n) {
-    return '<div class="bulk"><b>선택한 ' + n + '개에 한꺼번에 적용</b> <span class="muted">비워 둔 칸은 건드리지 않습니다 · 변수: {일간} {일간명} {오행} {일주} {성별} {줄1}~{줄4}(기본 문구)</span>' +
-      '<div class="grid3" style="margin-top:8px"><label>제목 템플릿<input type="text" data-b="title" placeholder="{일간명}의 기질을 타고났다"></label><label>키워드 템플릿 (쉼표)<input type="text" data-b="keywords" placeholder="{오행}, 결단"></label>' +
-      '<label style="grid-column:1/-1">부제 템플릿 (줄바꿈 가능)<textarea data-b="subtitle" rows="3" placeholder="{줄2}&#10;{줄3}"></textarea></label></div>' +
-      '<div class="ivbar"><button type="button" class="pri" data-bact="apply">문구 적용</button><button type="button" data-bact="defaults">기본 문구로 채우기</button><label style="display:flex;gap:4px;align-items:center"><input type="checkbox" data-b="over"> 이미 쓴 문구도 덮어쓰기</label><span style="flex:1"></span>' +
-      '<button type="button" data-bact="m2f">남 → 여 문구 복사</button><button type="button" data-bact="f2m">여 → 남 문구 복사</button></div>' +
-      '<div class="ivbar"><button type="button" data-bact="on">사용</button><button type="button" data-bact="off">사용 안 함</button><button type="button" data-bact="cleartext">문구 지우기</button><button type="button" class="danger" data-bact="clearvideo">영상 연결 지우기</button><span style="flex:1"></span>' +
+    return '<div class="bulk"><b>선택한 ' + n + '개에 한꺼번에 적용</b>' +
+      '<div class="ivbar"><button type="button" data-bact="on">사용</button><button type="button" data-bact="off">사용 안 함</button><button type="button" class="danger" data-bact="clearvideo">영상 연결 지우기</button><span style="flex:1"></span>' +
       '<label class="navbtn" style="cursor:pointer">파일 하나를 선택 항목 전부에 연결<input type="file" data-bfile accept="video/mp4,video/webm,image/*" hidden></label></div></div>';
   }
 
@@ -135,7 +130,7 @@
       var t = e.target;
       var m = t.closest('[data-ivmode] button'); if (m) { I.mode = m.dataset.m; I.f.stem = I.f.branch = ''; draw(); return; }
       if (t.closest('[data-ivsave]')) { save(); return; }
-      if (t.closest('[data-ivfix]')) { fixBad(); return; }
+
       if (t.closest('[data-ivundo]')) { if (I.undo) { var u = JSON.parse(I.undo); I.ilgan = u.ilgan; I.iju = u.iju; I.undo = null; dirty(true); draw(true); C.toast('되돌렸습니다'); } return; }
       var s = t.closest('[data-ivsel]'); if (s) { selectBy(s.dataset.ivsel, list); return; }
       if (t.closest('[data-ivcsvout]')) { csvOut(); return; }
@@ -179,12 +174,12 @@
     snapshot(); var n = 0, skip = 0;
     rs.forEach(function (r) {
       var v = ensure(r), M = recOf({ kind: r.kind, id: r.id, g: 'M' }), F = recOf({ kind: r.kind, id: r.id, g: 'F' });
-      if (act === 'apply') { var T = g('title'), S = g('subtitle'), K = g('keywords'), ov = g('over'); if (T) { var ft = fill(T, r).trim(); if (ft && mmText(r, ft)) skip++; else if (ft && (ov || !v.title)) { v.title = ft.slice(0, 60); n++; } } if (S) { var fs = fill(S, r); if (fs.trim() && mmText(r, fs)) skip++; else if (fs.trim() && (ov || !v.subtitle)) { v.subtitle = fs.trim().slice(0, 200); n++; } } if (K) { if (ov || !(v.keywords || []).length) { v.keywords = fill(K, r).split(',').map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 8); n++; } } }
-      else if (act === 'defaults') { if (g('over') || !v.subtitle) { v.subtitle = defLines(r).join('\n').slice(0, 200); n++; } }
-      else if (act === 'on' || act === 'off') { v.enabled = act === 'on'; n++; }
-      else if (act === 'cleartext') { v.title = ''; v.subtitle = ''; v.keywords = []; n++; }
+
+
+      if (act === 'on' || act === 'off') { v.enabled = act === 'on'; n++; }
+
       else if (act === 'clearvideo') { v.videoUrl = v.videoWebm = v.posterUrl = v.captionsUrl = ''; n++; }
-      else if ((act === 'm2f' && r.g === 'M') || (act === 'f2m' && r.g === 'F')) { var o = ensure({ kind: r.kind, id: r.id, g: r.g === 'M' ? 'F' : 'M' }); o.title = v.title; o.subtitle = v.subtitle; o.keywords = (v.keywords || []).slice(); n++; }
+
     });
     dirty(true); draw(true); if (skip) C.toast(skip + '칸은 다른 일간·일주를 말하는 문구라 건너뛰었습니다. 문구에 {일간명}·{줄1}~{줄4} 같은 변수를 쓰면 항목마다 알맞게 채워집니다.', true); else C.toast(n ? n + '개 항목에 적용했습니다 — 저장을 눌러 반영하세요' : '바꿀 내용이 없습니다 (이미 쓴 문구는 "덮어쓰기"를 켜야 바뀝니다)');
   }

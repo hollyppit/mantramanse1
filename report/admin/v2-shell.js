@@ -84,7 +84,7 @@
         ['media', 'awk', 'cov'].forEach(function (x) { $('#cl-' + x).classList.toggle('hide', x !== k); });
         if (k === 'media') A.open('media', PW, $('#cl-media')); else if (k === 'awk') V2Intro.mount($('#cl-awk'), PW, {}); else A.coverage($('#cl-cov'), PW);
       };
-      subnav($('#clNav', root), [['media', '장면 미디어'], ['awk', '일간·일주 소개 (영상·문구 일괄 편집)'], ['cov', '커버리지·선택 테스트']], 'media', go);
+      subnav($('#clNav', root), [['media', '장면 미디어'], ['awk', '일간·일주 영상'], ['cov', '커버리지·선택 테스트']], 'media', go);
       var imp = document.createElement('button'); imp.type = 'button'; imp.textContent = '기존 클립 가져오기'; imp.title = '구버전 "클립 라이브러리"의 클립을 새 라이브러리로 복사합니다(원본은 그대로)'; imp.style.marginLeft = 'auto';
       imp.onclick = function () {
         if (!confirm('기존(구버전) 클립을 새 라이브러리로 복사할까요?\n· 일간+성별만 정해진 클립 → 일간 소개 영상\n· 일주+성별이 정해진 클립 → 일주 캐릭터 영상\n· 그 외 → 장면 미디어(영상)\n원본 클립은 그대로 남고, 가져온 뒤 각 탭에서 "변경사항 저장"을 눌러야 반영됩니다.')) return;

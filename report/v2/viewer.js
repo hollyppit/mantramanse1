@@ -85,10 +85,14 @@
     var title = cfg.title, sub = cfg.sub || '', kw = cfg.kw || [], poster = clip && clip.posterUrl || '', rp = cfg.kind === 'iju' ? 'awk' : 'ilgan', ev = cfg.kind === 'iju' ? 'iju' : 'ilgan';
     cap.innerHTML = '<div class="t" data-tx="' + rp + '.title">' + esc(title) + '</div>' + (sub ? '<div class="s" data-tx="' + rp + '.sub">' + esc(sub).replace(/\n/g, '<br>') + '</div>' : '') + (kw.length ? '<div class="k" data-tx="' + rp + '.kw">' + kw.map(function (k) { return '<span>' + esc(k) + '</span>'; }).join('') + '</div>' : '');
     if (cfg.capHtml) cap.innerHTML = cfg.capHtml; if (cfg.noCap) cap.innerHTML = ''; cap.style.opacity = ''; cap.classList.remove('mcard'); var capT = cfg.capMs ? setTimeout(function () { cap.style.transition = 'opacity .6s'; cap.style.opacity = 0; }, cfg.capMs) : 0; // 소개 문구는 capMs 뒤에 사라진다(영상은 계속)
-    function endCard(kind) { // 영상이 끝난 뒤 보여 주는 짧은 카드(일주 소개). 건너뛰기 하면 카드도 건너뛴다
-      clearTimeout(capT); var cd = cfg.card; if (!cd || kind === 'skipped') { cfg.onDone(kind); return; }
-      cap.style.transition = 'none'; cap.style.opacity = 1; cap.classList.add('mcard'); cap.innerHTML = cd.html; skip.hidden = false;
-      var t = setTimeout(function () { cap.classList.remove('mcard'); cfg.onDone(kind); }, cd.ms); skip.onclick = function () { clearTimeout(t); cap.classList.remove('mcard'); cfg.onDone('skipped'); };
+    var cardT = 0, cardAt = 0;
+    function showCard() { // 일주 소개 카드: 투명에서 서서히 나타난다(영상 위, 배경 상자 없음)
+      var cd = cfg.card; if (!cd || cardAt) return; cardAt = Date.now(); clearTimeout(capT); cap.style.transition = 'none'; cap.style.opacity = 0; cap.classList.add('mcard'); cap.innerHTML = cd.html; void cap.offsetWidth; cap.style.transition = 'opacity 1.2s ease'; cap.style.opacity = 1;
+    }
+    function endCard(kind) { // 영상이 끝나면 카드가 최소 cd.hold 만큼은 읽히게 남겨 둔다. 건너뛰기 하면 카드도 건너뛴다
+      clearTimeout(capT); clearTimeout(cardT); var cd = cfg.card; if (!cd || kind === 'skipped') { cfg.onDone(kind); return; }
+      showCard(); skip.hidden = false; var left = Math.max(600, cd.hold - (Date.now() - cardAt));
+      var t = setTimeout(function () { cap.classList.remove('mcard'); cfg.onDone(kind); }, left); skip.onclick = function () { clearTimeout(t); cap.classList.remove('mcard'); cfg.onDone('skipped'); };
     }
     function finish(kind) {
       if (done) return; done = true; clearTimeout(capT); skip.hidden = true; snd.hidden = true; if (R.Bgm) R.Bgm.duck(false);
@@ -109,7 +113,7 @@
       if (clip.videoWebm && v.canPlayType && v.canPlayType('video/webm')) { var s1 = document.createElement('source'); s1.src = clip.videoWebm; s1.type = 'video/webm'; v.appendChild(s1); }
       if (clip.videoUrl) { var s2 = document.createElement('source'); s2.src = clip.videoUrl; s2.type = /\.webm(\?|$)/.test(clip.videoUrl) ? 'video/webm' : 'video/mp4'; v.appendChild(s2); }
       box.innerHTML = ''; box.appendChild(v);
-      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); T(ev + '_video_started', {}); snd.hidden = false; });
+      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); if (cfg.card) cardT = setTimeout(showCard, cfg.cardAt != null ? cfg.cardAt : 3000); T(ev + '_video_started', {}); snd.hidden = false; });
       v.addEventListener('ended', function () { finish('completed'); });
       v.addEventListener('error', function () { if (!done) { v.remove(); still(); } }, true);
       var p = v.play(); if (p && p.catch) p.catch(function () { v.controls = false; if (poster) v.load(); setTimeout(function () { if (v.paused && !done) { v.remove(); still(); } }, 1200); });
@@ -130,9 +134,9 @@
   function ijuStage(next) { // 일주: 기존 변신(캐릭터) 영상은 설명 없이 재생 → 끝나면 주인공 소개 카드(이름 · 한 문장 · 庚午 · 경오일주 · 장점 1 + 약점 1) 약 7초
     var v = S.awk && S.awk.video, fb = S.awk && S.awk.fallback, sd = S.sd, clip = v || fb, hasClip = !!(clip && (clip.videoUrl || clip.videoWebm));
     var c = R.IntroText.ijuCard(sd.dayPillar.ko, S.name, sd.gender), br = function (t) { return esc(t).replace(/\n/g, '<br>'); };
-    var card = c ? { ms: 7000, html: '<div class="ic-name">' + br(c.name) + '</div><div class="ic-film">' + br(c.film) + '</div><div class="ic-ttl">' + esc(c.title) + '</div><div class="ic-trait">' + br(c.trait) + '</div>' } : null;
+    var card = c ? { hold: 5000, html: '<div class="ic-name">' + br(c.name) + '</div><div class="ic-film">' + br(c.film) + '</div><div class="ic-ttl">' + esc(c.title) + '</div><div class="ic-trait">' + br(c.trait) + '</div>' } : null;
     if (!hasClip && !card) { next(); return; }
-    playStage({ kind: 'iju', clip: hasClip ? clip : null, noCap: true, cardOnly: !hasClip, card: card, onDone: next });
+    playStage({ kind: 'iju', clip: hasClip ? clip : null, noCap: true, cardOnly: !hasClip, card: card, cardAt: 3000, onDone: next });
   }
   // 본편 연결: 일주 소개 직후 두 문장(약 6초) → 본편 인트로 또는 인생 지도
   function bridgeStage(next) {
