@@ -82,8 +82,11 @@
   // 스크롤해서 화면에 들어올 때 자연스럽게 나타난다(IntersectionObserver). 지원하지 않으면 바로 보인다.
   var io = root.IntersectionObserver ? new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' }) : null;
   function reveal(el) { H.$$('.hero, .cards > *, .more, .grp, .todaycard, .myhead', el).forEach(function (n) { n.classList.add('rvl'); if (io) io.observe(n); else n.classList.add('in'); }); }
+  // 허브 홈이 아닌 모든 화면에 "홈화면으로 가기"를 둔다(위쪽 링크 + 결과·운세·MY 화면은 아래쪽 버튼도). 랜딩에 끼워 넣은 모드에는 위쪽 막대가 없어 꼭 필요하다.
+  var HOME_BOTTOM = { 'tarot/play': 1, today: 1, my: 1 };
+  function withHome(html) { var p = H.ctx.path; if (!p) return html; return '<a class="homebar" href="#/" data-track="hub_home_click">‹ 홈화면으로 가기</a>' + html + (HOME_BOTTOM[p] ? '<a class="btn ghost sm homebtn" href="#/" data-track="hub_home_click">홈화면으로 가기</a>' : ''); }
   H.view = function (html, o) { // 화면 교체: 위로 스크롤 + 부드러운 등장
-    var el = H.$('#screen'); el.className = ''; el.innerHTML = html; void el.offsetWidth; el.className = 'fx'; if (!(o && o.keepScroll)) toTop(); reveal(el); return el;
+    var el = H.$('#screen'); el.className = ''; el.innerHTML = withHome(html); void el.offsetWidth; el.className = 'fx'; if (!(o && o.keepScroll)) toTop(); reveal(el); return el;
   };
   H.render = function () {
     var r = parse(), fn = H.routes[r.path]; H.ctx = { token: (H.ctx.token || 0) + 1, q: r.q, path: r.path };
