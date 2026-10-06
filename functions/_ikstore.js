@@ -35,5 +35,14 @@ export async function llm(env, system, user, maxTokens = 6000, timeoutMs = TIMEO
       const d = await r.json(); return { text: typeof d.output_text === 'string' ? d.output_text : (d.output || []).flatMap(o => o.content || []).map(c => c.text || '').join(''), provider: 'openai' };
     } catch (e) { errs.push(e.message); }
   }
+  if (env.GEMINI_API_KEY) {
+    try {
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + (env.GEMINI_MODEL || 'gemini-2.5-flash') + ':generateContent', { method: 'POST', signal: AbortSignal.timeout(timeoutMs), headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+        body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: 'user', parts: [{ text: user }] }], generationConfig: { maxOutputTokens: maxTokens } }) });
+      if (!r.ok) throw new Error('gemini ' + r.status + await errDetail(r));
+      const d = await r.json(), c = (d.candidates || [])[0] || {};
+      return { text: ((c.content && c.content.parts) || []).map(p => p.text || '').join(''), provider: 'gemini', stop: c.finishReason === 'MAX_TOKENS' ? 'max_tokens' : (c.finishReason || '') };
+    } catch (e) { errs.push(e.message); }
+  }
   throw new Error(errs.join(' / ') || 'AI 키가 없습니다');
 }

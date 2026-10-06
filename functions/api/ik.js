@@ -39,7 +39,7 @@ export async function onRequest({ request, env }) {
     return json({ ok: true, imported: n, skipped, unsupported: bad, meta: n ? await bump(kv, 'k') : await meta(kv) }); }
   if (a === 'draft' && post) { // AI 로 풀이 지식 초안 만들기. 항상 임시저장·AI 초안·검수 전 — 게시는 관리자가 검수한 뒤에만 가능
     const text = String(b.text || '').trim().slice(0, 8000); if (text.length < 30) return json({ error: '전문 자료를 30자 이상 붙여 넣어 주세요' }, 400);
-    if (!env.ANTHROPIC_API_KEY && !env.OPENAI_API_KEY) return json({ error: 'AI 키가 설정되어 있지 않습니다(ANTHROPIC_API_KEY 또는 OPENAI_API_KEY)' }, 501);
+    if (!env.ANTHROPIC_API_KEY && !env.OPENAI_API_KEY && !env.GEMINI_API_KEY) return json({ error: 'AI 키가 설정되어 있지 않습니다(ANTHROPIC_API_KEY · OPENAI_API_KEY · GEMINI_API_KEY 중 하나)' }, 501);
     let r; try { r = await llm(env, IK.draftSystem(), '아래 자료를 풀이 지식 초안 하나로 구조화하라.\n\n' + text, 3000); } catch (e) { return json({ error: 'AI 호출 실패: ' + e.message }, 502); }
     const all = await loadAll(kv), probe = IK.sanitizeDraft(r.text, 'DRAFT-0000'); if (!probe) return json({ error: 'AI 답이 풀이 지식 형식이 아닙니다. 자료를 나눠서 다시 시도해 보세요' }, 502);
     let mx = 0; const re = new RegExp('^' + probe.domain + '-(\\d+)$'); for (const x of all) { const m = re.exec(x.id); if (m) mx = Math.max(mx, +m[1]); }

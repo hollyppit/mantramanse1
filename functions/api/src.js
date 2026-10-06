@@ -104,7 +104,7 @@ export async function onRequest({ request, env }) {
   if (a === 'analyze' && post) {
     const idx = await loadIdx(kv), d = idx.find(x => x.id === id); if (!d) return json({ error: '없는 자료' }, 404);
     if (d.policy && d.policy.extract === false) return json({ error: '이 자료는 “AI 학습 후보 추출”이 꺼져 있습니다' }, 403);
-    if (!env.ANTHROPIC_API_KEY && !env.OPENAI_API_KEY) return json({ error: 'AI 키가 설정되어 있지 않습니다(ANTHROPIC_API_KEY 또는 OPENAI_API_KEY)' }, 501);
+    if (!env.ANTHROPIC_API_KEY && !env.OPENAI_API_KEY && !env.GEMINI_API_KEY) return json({ error: 'AI 키가 설정되어 있지 않습니다(ANTHROPIC_API_KEY · OPENAI_API_KEY · GEMINI_API_KEY 중 하나)' }, 501);
     const chunks = await loadChunks(kv, id), cands = await loadCands(kv, id), items = await loadAll(kv), want = Math.max(1, Math.min(4, Math.round(+b.limit) || 2));
     if (b.retryFailed) chunks.forEach(c => { if (c.status === 'failed') { c.status = 'pending'; c.error = ''; } }); // 실패한 구간만 다시 대기로(이미 분석된 구간은 건드리지 않는다)
     const todo = chunks.filter(c => c.status === 'pending').slice(0, want); let added = 0, failed = 0, provider = '';
