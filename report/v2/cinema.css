@@ -48,11 +48,22 @@
 .cn-seg[data-e="impact"] { font-size: 1.22em; font-weight: 600; color: #FFF8E6; letter-spacing: .02em; text-shadow: 0 0 28px rgba(240, 215, 160, .38), 0 2px 20px rgba(0, 0, 0, .8); }
 .cn-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* 글자: 모든 문장이 같은 단순 페이드. 예외는 이름·運路(data-pop) — opacity + 아주 미세한 scale(0.98 → 1, 0.7초). 움직이는 글자는 없다. */
-.cn-run .cn-seg { animation: cn-fade 350ms var(--at, 0ms) ease both; }
-.cn-run .cn-seg[data-pop] { animation: cn-pop 700ms var(--at, 0ms) ease both; }
+/* 글자 애니메이션 어휘(INTRO 전용, 의미별 고정). 본편·엔딩은 data-a="fade" 만 쓴다. 길이는 배속으로 줄어도 최소 340ms.
+   FADE_IN(fade) 일반 · SLOW_SCALE_IN 중요 · INK_REVEAL 한자 · CINEMATIC_REVEAL 이름·運路(+title) · BLUR_TO_FOCUS 보조. transform·opacity 중심(INK 만 mask 위치). */
+.cn-run .cn-seg { animation-name: cn-fade; animation-duration: max(calc(var(--cn-d, 600ms) / var(--rate, 1)), 340ms); animation-delay: var(--at, 0ms); animation-timing-function: ease; animation-fill-mode: both; }
+.cn-seg[data-a="fade"] { --cn-d: 600ms; }
+.cn-seg[data-a="slow-scale-in"] { --cn-d: 800ms; } .cn-run .cn-seg[data-a="slow-scale-in"] { animation-name: cn-scalein; }
+.cn-seg[data-a="ink-reveal"] { --cn-d: 900ms; -webkit-mask-image: linear-gradient(100deg, #000 45%, transparent 55%); mask-image: linear-gradient(100deg, #000 45%, transparent 55%); -webkit-mask-size: 260% 100%; mask-size: 260% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.cn-run .cn-seg[data-a="ink-reveal"] { animation-name: cn-ink; }
+.cn-seg[data-a="cinematic-reveal"] { --cn-d: 1000ms; --cn-s: .98; -webkit-mask-image: linear-gradient(100deg, #000 45%, transparent 55%); mask-image: linear-gradient(100deg, #000 45%, transparent 55%); -webkit-mask-size: 260% 100%; mask-size: 260% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.cn-seg[data-a="cinematic-reveal"][data-title] { --cn-d: 1200ms; --cn-s: .97; }
+.cn-run .cn-seg[data-a="cinematic-reveal"] { animation-name: cn-cine; }
+.cn-seg[data-a="blur-to-focus"] { --cn-d: 900ms; } .cn-run .cn-seg[data-a="blur-to-focus"] { animation-name: cn-blurfocus; }
 @keyframes cn-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes cn-pop { from { opacity: 0; transform: scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes cn-scalein { from { opacity: 0; transform: scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes cn-ink { from { opacity: 0; -webkit-mask-position: 100% 0; mask-position: 100% 0; } 25% { opacity: 1; } to { opacity: 1; -webkit-mask-position: 0 0; mask-position: 0 0; } }
+@keyframes cn-cine { from { opacity: 0; transform: scale(var(--cn-s, .98)); -webkit-mask-position: 100% 0; mask-position: 100% 0; } 25% { opacity: 1; } to { opacity: 1; transform: none; -webkit-mask-position: 0 0; mask-position: 0 0; } }
+@keyframes cn-blurfocus { from { opacity: 0; filter: blur(8px); } to { opacity: 1; filter: blur(0); } }
 .cn-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* 캐릭터 프로필 카드 */
@@ -104,7 +115,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .cn-cam { animation: none !important; transform: none !important; }
-  .cn-seg, .cn-row, .cn-sub { animation-name: cn-fade !important; animation-duration: 300ms !important; transform: none !important; filter: none !important; }
+  .cn-seg, .cn-row, .cn-sub { animation-name: cn-fade !important; animation-duration: 300ms !important; transform: none !important; filter: none !important; -webkit-mask-image: none !important; mask-image: none !important; }
   .cn-scene.cn-has-impact.cn-run .cn-dim { animation: none; }
   .cn-scene[class*="cn-tr-"] { animation-name: cn-fade !important; }
   .cn-scene.cn-leave { animation-duration: 300ms !important; }
@@ -138,6 +149,9 @@
 .cn-scene[data-cn-preset="GATE"] .cn-ph { background: radial-gradient(26% 40% at 50% 60%, #e9cf98 0%, rgba(233, 207, 152, .15) 60%, transparent 100%), linear-gradient(180deg, #0f1114 0%, #26282c 100%); }
 .cn-scene[data-cn-preset="SEASON_CHANGE"] .cn-ph { background: linear-gradient(90deg, #5b7f5c 0%, #b5a45f 34%, #8a4f35 62%, #cfd8de 100%); filter: saturate(.7) brightness(.55); }
 .cn-scene[data-cn-preset="STORM"] .cn-ph { background: linear-gradient(180deg, #06090d 0%, #25303a 55%, #0d1217 100%); }
+/* 사주팔자 장면: 고풍스러운 지도·두루마리·먹(이미지 자산 없이 CSS 로) */
+.cn-scene[data-ph="map"] .cn-ph { background: radial-gradient(60% 40% at 50% 46%, rgba(214, 190, 140, .16), transparent 70%), repeating-linear-gradient(0deg, transparent 0 46px, rgba(205, 178, 122, .05) 46px 47px), repeating-linear-gradient(90deg, transparent 0 46px, rgba(205, 178, 122, .04) 46px 47px), radial-gradient(130% 80% at 50% 120%, rgba(20, 16, 10, .9), transparent 60%), #17130d; }
+.cn-scene[data-ph="map"] .cn-ph::before { content: ""; position: absolute; inset: 0; background: radial-gradient(18% 5% at 22% 74%, rgba(8, 6, 4, .55), transparent 70%), radial-gradient(26% 6% at 68% 66%, rgba(8, 6, 4, .5), transparent 70%), radial-gradient(14% 4% at 46% 84%, rgba(8, 6, 4, .5), transparent 70%); }
 .cn-scene[data-cn-preset="SILENCE"] .cn-ph, .cn-scene[data-cn-preset="NAME_REVEAL"] .cn-ph { background: #000; }
 @media (prefers-reduced-motion: no-preference) { .cn-scene[data-cn-preset="MIST"].cn-run .cn-ph, .cn-scene[data-cn-preset="DAWN"].cn-run .cn-ph { animation: cn-phdrift 14s ease-in-out infinite alternate; } }
 @keyframes cn-phdrift { from { transform: scale(1); } to { transform: scale(1.06); } }
@@ -147,11 +161,11 @@
 
 /* ── INTRO(EPIC_WUXIA_PARODY): 큰 한자 · 이름 최대 강조 · 명식(글자는 움직이지 않는다) ── */
 .cn-seg[data-big] { font-size: 3.1rem; font-weight: 500; letter-spacing: .12em; text-indent: .12em; color: #FFF6DC; line-height: 1.25; text-shadow: 0 0 34px rgba(240, 215, 160, .42), 0 2px 22px rgba(0, 0, 0, .85); }
-.cn-scene[data-nm-e="MAXIMUM"] .cn-seg[data-nm] { font-size: 3.4rem; font-weight: 600; letter-spacing: .34em; text-indent: .34em; color: #FFF8E6; text-shadow: 0 0 46px rgba(240, 215, 160, .6), 0 3px 26px rgba(0, 0, 0, .9); }
+.cn-scene[data-nm-e="MAXIMUM"] .cn-seg[data-nm] { font-size: clamp(2.1rem, 17vw, 3.4rem); font-weight: 600; letter-spacing: .24em; text-indent: .24em; white-space: nowrap; color: #FFF8E6; text-shadow: 0 0 46px rgba(240, 215, 160, .6), 0 3px 26px rgba(0, 0, 0, .9); }
 
 .cn-pil { position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 14px 12svh; pointer-events: none; }
 .cn-pc { display: grid; justify-items: center; gap: 4px; min-width: 62px; padding: 14px 6px 12px; border: 1px solid rgba(240, 215, 160, .28); background: rgba(10, 8, 6, .55); opacity: 0; }
-.cn-run .cn-pc, .cn-pil .cn-pc { animation: cn-fade 800ms calc(var(--at, 0ms) + var(--i) * 460ms) ease both; }
+.cn-run .cn-pc, .cn-pil .cn-pc { animation: cn-fade max(calc(800ms / var(--rate, 1)), 340ms) calc(var(--at, 0ms) + var(--i) * 460ms / var(--rate, 1)) ease both; }
 .cn-pc i { font-style: normal; font-size: .72rem; letter-spacing: .2em; color: rgba(243, 238, 226, .6); }
 .cn-pc b { font-weight: 500; font-size: 2.5rem; line-height: 1.12; color: #FFF1CC; text-shadow: 0 0 22px rgba(240, 215, 160, .35); }
 .cn-pc em { font-style: normal; font-size: .76rem; color: rgba(243, 238, 226, .68); margin-top: 2px; }

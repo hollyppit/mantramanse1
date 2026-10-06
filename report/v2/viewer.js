@@ -138,27 +138,35 @@
     var b = $('#gateBtn'); b.onclick = function () { b.onclick = null; T('gate_tapped', {}); intro(); }; try { b.focus({ preventScroll: true }); } catch (e) { }
   }
   function intro() { if (R.Bgm) R.Bgm.play('cinematic'); ilganStage(function () { ijuStage(prologue); }); } // 배경음악은 일간 인트로(첫 화면)부터 흐른다(입력 제출 = 사용자의 첫 터치)
-  function cinemaMediaFor(used) { return function (sc) { if (sc.bg === 'black') return null; return R.Director.pickMedia(sc, (S.pack && S.pack.lib && S.pack.lib.media) || S.media, { usedIds: used }, sc.chapterId || 'c00'); }; }
-  // INTRO 소리 신호: 북·바람 효과음, 배경음악 끊기/올리기(음성 해설은 없다). 신호가 없는 장면에는 아무 일도 일어나지 않는다.
+  function cinemaMediaFor(used) { return function (sc) { if (sc.bg === 'black' || sc.phTone) return null; return R.Director.pickMedia(sc, (S.pack && S.pack.lib && S.pack.lib.media) || S.media, { usedIds: used }, sc.chapterId || 'c00'); }; }
+  /* 재생 속도(관리자 설정 flow.playbackRate · 확인용 ?rate=3): INTRO 타임라인·본문 머묾·이동에 적용한다. 허용: 0.5 · 0.75 · 1 · 1.25 · 1.5 · 2 · 3 */
+  var RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
+  function playbackRate() { var m = /[?&]rate=([\d.]+)/.exec(location.search), v = m ? +m[1] : +(S.pack && S.pack.flow && S.pack.flow.playbackRate); return RATES.indexOf(v) >= 0 ? v : 1; }
+  // 저사양·동작 줄이기·데이터 절약: INTRO 의 ink/scale 연출을 fade 로 대신한다
+  var lowFx = reduce || saveData || (navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2;
+  // INTRO 는 배경음악 신호(끊기·올리기)만 쓴다. 효과음(SFX)·음성(TTS)은 없다 — 북·바람 신호(drum·deepDrum·sfx)는 데이터로만 남아 있고 재생하지 않는다.
   function introCue(c) {
-    var k = c.cue || '', B = R.Bgm && R.Bgm.mix ? R.Bgm : null;
-    if (k === 'drum' && R.Sfx) R.Sfx.drum(); else if (k === 'deepDrum' && R.Sfx) R.Sfx.deepDrum(); else if (k === 'sfx:wind' && R.Sfx) R.Sfx.wind(2.2);
-    else if (k === 'bgmCut' && B) B.mix(0, 350); else if (k === 'bgmUp' && B) B.mix(1, 2400); else if (k === 'full' && B) B.mix(1.6, 1500); else if (k === 'bgmDrone' && B) B.mix(0.45, 800);
+    var k = c.cue || '', B = R.Bgm && R.Bgm.mix ? R.Bgm : null; if (!B) return;
+    if (k === 'bgmCut') B.mix(0, 350); else if (k === 'bgmUp') B.mix(1, 2400); else if (k === 'full') B.mix(1.6, 1500); else if (k === 'bgmDrone') B.mix(0.45, 800);
   }
+  // 글자 애니메이션은 INTRO(프롤로그)에서만 허용한다(allowTextAnimation). 엔딩·본문은 단순 fade 만.
   function playCinema(scenes, onEnd, label, skipLabel) {
     if (!R.CinemaRender || !scenes || !scenes.length) { onEnd('missing'); return; }
-    view('cinema'); var stage = $('#cnStage'), used = [];
-    S.cn = R.CinemaRender.play(stage, scenes, { reduce: reduce, saveData: saveData, mediaFor: cinemaMediaFor(used), layers: [], label: label, skipLabel: skipLabel, onScene: function (sc, c) { if (R.Bgm) R.Bgm.play(c.bgmMood); },
+    view('cinema'); var stage = $('#cnStage'), used = [], introMode = label === '프롤로그';
+    S.cn = R.CinemaRender.play(stage, scenes, { reduce: reduce, saveData: saveData, intro: introMode, lowFx: lowFx, rate: playbackRate(), mediaFor: cinemaMediaFor(used), layers: [], label: label, skipLabel: skipLabel, onScene: function (sc, c) { if (R.Bgm) R.Bgm.play(c.bgmMood); },
       onCue: introCue,
       onEnd: function (kind) { if (R.Bgm && R.Bgm.mix) R.Bgm.mix(1, 900); S.cn = null; onEnd(kind); } });
   }
   /* 프롤로그: "모든 사람에게는 각자의 이야기가 있다" → 주인공 이름 → 타이틀 → 캐릭터 프로필 → 영화로 비유하면 → CHAPTER 01 */
-  function introOverride() { var m = /[?&]intro=(epic|cinematic|minimal)(&|$)/.exec(location.search); return m ? { style: { epic: 'EPIC_WUXIA_PARODY', cinematic: 'CINEMATIC', minimal: 'MINIMAL' }[m[1]] } : {}; } // 확인용: ?intro=cinematic
+  function introOverride() { var m = /[?&]intro=(journey|epic|cinematic|minimal)(&|$)/.exec(location.search); return m ? { style: { journey: 'EPIC_WUXIA_JOURNEY', epic: 'EPIC_WUXIA_PARODY', cinematic: 'CINEMATIC', minimal: 'MINIMAL' }[m[1]] } : {}; } // 확인용: ?intro=journey
+  function prologueScenes() { // 실제 재생과 관리자 미리보기가 같은 장면을 만든다
+    var sd = S.sd, E = Object.assign({}, R.EpicIntro && R.EpicIntro.DEFAULTS, (S.pack && S.pack.introEpic) || {}, introOverride());
+    return { E: E, scenes: withCopy(R.Translator.prologue(sd, S.name, R.Narrator.heroVars(sd, S.name), { style: E.style, humor: E.humor, epicLevel: E.epicLevel, birth: S.birth, nowYear: sd.nowYear })) };
+  }
   function prologue() {
-    var sd = S.sd; T('prologue_started', {});
-    var E = Object.assign({}, R.EpicIntro && R.EpicIntro.DEFAULTS, (S.pack && S.pack.introEpic) || {}, introOverride()), epic = E.style === 'EPIC_WUXIA_PARODY';
-    if (epic && R.Bgm && R.Bgm.mix) R.Bgm.mix(0.45, 300);
-    playCinema(withCopy(R.Translator.prologue(sd, S.name, R.Narrator.heroVars(sd, S.name), { style: E.style, humor: E.humor, epicLevel: E.epicLevel, birth: S.birth, nowYear: sd.nowYear })), function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', {}); beginReader(); }, '프롤로그');
+    T('prologue_started', {}); var p = prologueScenes();
+    if (/^EPIC_WUXIA_/.test(p.E.style) && R.Bgm && R.Bgm.mix) R.Bgm.mix(0.45, 300);
+    playCinema(p.scenes, function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', {}); beginReader(); }, '프롤로그');
   }
   /* 엔딩: 사주는 결말을 적어 놓은 대본이 아니다 … 다음 장면을 만드는 사람은 결국 당신이다 */
   function endingCinema(then) {
@@ -305,7 +313,7 @@
     window.scrollTo(0, 0); mountReading(o.autoStart !== false); if (start > 0) gotoChapter(start, true);
   }
   function mountReading(auto) {
-    S.mv = R.Reading.mount($('#chapter'), { flow: S.pack && S.pack.flow, reduce: reduce, saveData: saveData, bgList: S.bg, autoStart: auto, bgm: R.Bgm && R.Bgm.has() ? R.Bgm : null, onSection: onSection, onEnd: onDocEnd,
+    S.mv = R.Reading.mount($('#chapter'), { flow: Object.assign({}, S.pack && S.pack.flow, { playbackRate: playbackRate() }), reduce: reduce, saveData: saveData, bgList: S.bg, autoStart: auto, bgm: R.Bgm && R.Bgm.has() ? R.Bgm : null, onSection: onSection, onEnd: onDocEnd,
       onProgress: function (fr) { $('#progFill').style.width = Math.round(fr * 1000) / 10 + '%'; $('#prog').setAttribute('aria-valuenow', String(Math.round(fr * 100))); } });
   }
   function resumeReader() { view('reader'); mountReading(false); window.scrollTo(0, S.scroll.doc || 0); if (S.mv) S.mv.measure(); }
@@ -508,7 +516,7 @@
         S.pack = R.Compose.fromSaved(m.content, S.media, m.project || 'full'); S.ts = S.pack.textStyles; S.rep = R.Compose.build(S.sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = { video: (m.awk && m.awk.video) || null, ilgan: (m.awk && m.awk.ilgan) || null, fallback: (m.awk && m.awk.fallback) || null, textOnly: !!(m.awk && m.awk.textOnly) }; S.visited = {}; S.ended = {};
         if (m.chapter === 'ilgan') { ilganStage(function () { }); return; }
         if (m.chapter === 'awakening') { ijuStage(function () { }); return; }
-        if (m.chapter === 'prologue') { playCinema(withCopy(R.Translator.prologue(S.sd, S.name, R.Narrator.heroVars(S.sd, S.name))), function () { }, '프롤로그'); return; }
+        if (m.chapter === 'prologue') { S.birth = birthOf(ch); playCinema(prologueScenes().scenes, function () { }, '프롤로그'); return; }
         if (m.chapter === 'ending') { playCinema(withCopy(R.Translator.ending(S.sd, S.name, R.Narrator.heroVars(S.sd, S.name))), function () { }, '엔딩'); return; }
         var i = Math.max(0, S.rep.chapters.map(function (c) { return c.id; }).indexOf(m.chapter)); view('reader');
         openDoc(i, { autoStart: false });

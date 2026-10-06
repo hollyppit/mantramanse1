@@ -9,7 +9,8 @@
   var SCENE_TYPES = ['INTRO', 'CHARACTER', 'QUESTION', 'MEMORY', 'DAILY_LIFE', 'EXPLANATION', 'CONFLICT', 'COMPARISON', 'REVEAL', 'TURNING_POINT', 'TIMELINE', 'WARNING', 'OPPORTUNITY', 'ACTION', 'CLIMAX', 'ENDING', 'NAME_REVEAL', 'NATURE', 'REALITY', 'DATA', 'REFLECTION'];
   var NAME_EMPH = ['NONE', 'SOFT', 'NORMAL', 'STRONG', 'TITLE', 'MAXIMUM'];
   var CUES = ['drum', 'deepDrum', 'bgmCut', 'bgmUp', 'bgmDrone']; // 문장이 나올 때 함께 일어나는 소리 신호(북·배경음악 끊기/올리기). INTRO 연출 전용
-  var TEXT_ANIMS = ['fade', 'fade-up', 'fade-down', 'slide-left', 'slide-right', 'zoom-in', 'zoom-out', 'blur-in', 'focus-in', 'word-reveal', 'line-reveal', 'typewriter', 'cinematic-title', 'impact', 'whisper', 'float', 'parallax-text'];
+  var TEXT_ANIMS = ['fade', 'fade-up', 'fade-down', 'slide-left', 'slide-right', 'zoom-in', 'zoom-out', 'blur-in', 'focus-in', 'word-reveal', 'line-reveal', 'typewriter', 'cinematic-title', 'impact', 'whisper', 'float', 'parallax-text',
+    'slow-scale-in', 'ink-reveal', 'cinematic-reveal', 'blur-to-focus']; // 뒤의 4개는 INTRO 전용 어휘(FADE_IN=fade · SLOW_SCALE_IN · INK_REVEAL · CINEMATIC_REVEAL · BLUR_TO_FOCUS). 본편(BODY)은 어떤 값이 있어도 무시한다
   var IMAGE_MOTIONS = ['none', 'slow-zoom-in', 'slow-zoom-out', 'pan-left', 'pan-right', 'pan-up', 'pan-down', 'parallax', 'drift', 'focus-pull'];
   var TRANSITIONS = ['fade', 'crossfade', 'dip-black', 'dip-white', 'blur', 'push-left', 'push-right', 'zoom', 'hard-cut', 'light-leak'];
   var SPECIAL_TRANSITIONS = ['dip-black', 'dip-white', 'blur', 'push-left', 'push-right', 'zoom', 'light-leak']; // ACT 전환·turning point 에서만
@@ -233,7 +234,7 @@
   function build(scene, layers) {
     var c = resolve(scene, layers), cin = clean(scene && scene.cinema);
     var segs = cin.segments && cin.segments.length ? cin.segments : splitSegments((scene && (scene.text || scene.body)) || '', { animation: c.textAnimation === 'cinematic-title' || c.textAnimation === 'impact' ? undefined : c.textAnimation });
-    if (c.textAnimation === 'cinematic-title') segs.forEach(function (s) { if (s.emphasis === 'impact') s.animation = 'cinematic-title'; });
+    if (c.textAnimation === 'cinematic-title' && !(cin.segments && cin.segments.length)) segs.forEach(function (s) { if (s.emphasis === 'impact') s.animation = 'cinematic-title'; }); // 문장별 애니메이션을 직접 정한 장면(INTRO 여정)은 그대로 둔다
     var tm = timing(segs, c);
     return { c: c, segments: segs, timing: tm, sequence: cin.motionSequence && cin.motionSequence.length ? cin.motionSequence : sequence(segs, c, tm) };
   }

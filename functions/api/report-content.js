@@ -60,12 +60,12 @@ function cleanFlow(f) {
   f = f && typeof f === 'object' ? f : {}; const n = (v, lo, hi, d) => { v = v === '' || v == null ? NaN : +v; return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
   return { enabled: f.enabled !== false, anim: ['rise', 'fade', 'zoom', 'blur', 'wipe', 'drop'].includes(f.anim) ? f.anim : 'rise', duration: n(f.duration, 0.1, 4, 0.8), distance: n(f.distance, 0, 120, 28), stagger: n(f.stagger, 0, 2, 0.35), trigger: n(f.trigger, 40, 100, 88),
     auto: f.auto !== false, speed: n(f.speed, 10, 400, 55), startDelay: n(f.startDelay, 0, 10, 1.5), stopAtChoice: f.stopAtChoice !== false, resumeAfter: n(f.resumeAfter, 0, 60, 0), btnShow: f.btnShow !== false, btnPos: ['right', 'center', 'left'].includes(f.btnPos) ? f.btnPos : 'right',
-    readSpeed: n(f.readSpeed, 3, 12, 6.5), bgMotion: Math.round(n(f.bgMotion, 0, 2, 1)) }; // 읽기 모드(report/v2/reader.js). 위의 예전 연출 값은 보존만 하고 화면은 쓰지 않는다
+    readSpeed: n(f.readSpeed, 3, 12, 6.5), bgMotion: Math.round(n(f.bgMotion, 0, 2, 1)), playbackRate: [0.5, 0.75, 1, 1.25, 1.5, 2, 3].includes(+f.playbackRate) ? +f.playbackRate : 1 }; // 읽기 모드(report/v2/reader.js). 위의 예전 연출 값은 보존만 하고 화면은 쓰지 않는다
 }
 // 배경 음악: 분위기별 음원 주소(내 R2 업로드 또는 https). 7종 밖의 키·허용 밖 주소는 버린다.
 const BGM_MOODS = ['default', 'cinematic', 'minimal', 'ambient', 'emotional', 'tension', 'hopeful', 'reflective'];
-// 인트로 연출 설정(report/v2/epic-intro.js 와 같은 값 범위). style: 무협 패러디/시네마틱/최소 · humor: 펀치라인 정도 · epicLevel: 1~5
-const INTRO_STYLES = ['EPIC_WUXIA_PARODY', 'CINEMATIC', 'MINIMAL'], INTRO_HUMORS = ['OFF', 'SUBTLE', 'PARODY'];
+// 인트로 연출 설정(report/v2/epic-intro.js 와 같은 값 범위). style: 무협 출정(JOURNEY·기본)/무협 패러디/시네마틱/최소 · humor: 펀치라인 정도 · epicLevel: 1~5
+const INTRO_STYLES = ['EPIC_WUXIA_JOURNEY', 'EPIC_WUXIA_PARODY', 'CINEMATIC', 'MINIMAL'], INTRO_HUMORS = ['OFF', 'SUBTLE', 'PARODY'];
 function cleanIntroEpic(b) {
   const o = {}; if (!b || typeof b !== 'object') return o;
   if (INTRO_STYLES.includes(b.style)) o.style = b.style; if (INTRO_HUMORS.includes(b.humor)) o.humor = b.humor;
