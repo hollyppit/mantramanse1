@@ -8,7 +8,7 @@ import { validate, SYSTEM, buildUser, sanitize, cacheKey } from '../_lifeai.js';
 const TIMEOUT_MS = 30000;
 async function claude(env, system, user) {
   const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 3500, temperature: 0.2, system, messages: [{ role: 'user', content: user }] }) });
+    body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 3500, system, messages: [{ role: 'user', content: user }] }) });
   if (!r.ok) throw new Error('anthropic ' + r.status);
   const d = await r.json(); return (d.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
 }
