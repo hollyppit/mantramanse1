@@ -143,7 +143,7 @@ export function validateCandidate(cand, ctx) {
   const nc = Object.keys(s.conditions).length;
   add('cond', '적용 조건', cand.unclearConditions ? 'WARNING' : cand.dropped.length ? 'WARNING' : 'PASS', cand.unclearConditions ? '조건이 불명확합니다(조건 없이 등록하면 모든 사주에 쓰이는 일반 풀이가 됩니다)' : cand.dropped.length ? '지원되지 않는 조건을 뺐습니다: ' + cand.dropped.join(', ') : nc ? nc + '개 조건' : '조건 없음(일반 풀이)');
   const user = [s.interpretation, s.principle, ...s.strengths, ...s.risks, ...s.behaviorPatterns, ...s.actions, ...Object.values(s.realWorldExamples), ...s.modifiers.map(m => m.text)].join('\n');
-  add('safe', '확정적 표현', BANNED_RE.test(user) ? 'FAIL' : 'PASS', BANNED_RE.test(user) ? '사용자 풀이에 쓸 수 없는 확정 표현: ' + (user.match(BANNED_RE) || [])[0] : '없음');
+  add('safe', '확정적 표현', BANNED_RE.test(user) ? 'WARNING' : 'PASS', BANNED_RE.test(user) ? '확정 표현이 들어 있습니다(자료 등록은 가능하지만 공개 전에 경향·가능성 표현으로 고쳐야 합니다): ' + (user.match(BANNED_RE) || [])[0] : '없음');
   const un = ctx.chunk ? unsupportedTerms(user, ctx.chunk.text) : []; add('extra', '원문에 없는 내용', un.length ? 'WARNING' : 'PASS', un.length ? 'AI 정리에 있으나 원문에는 없는 명리 용어: ' + un.join(', ') : '확인되지 않음');
   if (cand.compare) { const c = cand.compare; add('dup', '기존 풀이와 중복', c.status === 'identical' ? 'WARNING' : c.status === 'similar' ? 'WARNING' : 'PASS', c.status === 'new' ? '새로운 풀이' : COMPARE_KO[c.status] + ' ' + c.matches.filter(m => m.kind).length + '건'); add('conflict', '기존 풀이와 해석 차이', c.conflict ? 'WARNING' : 'PASS', c.conflict ? '반대 방향의 기존 풀이 ' + c.conflicts.length + '건' : '없음'); }
   const status = checks.some(c => c.level === 'FAIL') ? 'FAIL' : checks.some(c => c.level === 'WARNING') ? 'WARNING' : 'PASS';
