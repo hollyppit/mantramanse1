@@ -207,6 +207,12 @@
     function bridge(id, text, act) { var prev = out[out.length - 1]; if (prev) prev.scenes = prev.scenes.concat([lineScene(text, 'normal')]); } // 이야기를 잇는 한두 줄: 이전 챕터 끝에 붙인다
     function topic(cardId, bases, act, after) { // 새 카드 → 기존 챕터(제목 없이 이어서) → 시간축 카드
       var m = D.byId[cardId]; made('life_' + cardId, m.title, m.sub, cards(cardId, H), act); bases.forEach(function (b, i) { real(b, act, { noHeader: i === 0 }); }); (after || []).forEach(function (f) { f(); }); }
+    // 관리자가 게시·검수한 풀이 지식으로 만든 "더 깊이 보기"(R.IKDeep). 없으면 아무것도 추가하지 않는다.
+    var ikd = function (dom, act) {
+      var d = H.ik && H.ik[dom]; if (!d || !d.sections || !d.sections.length) return;
+      var sc = []; d.sections.forEach(function (s) { for (var i = 0; i < s.paras.length; i += 3) sc.push(prose(i ? '' : s.title, s.paras.slice(i, i + 3).map(esc))); });
+      made('life_ik_' + dom, d.title + ' · 더 깊이', '검수된 풀이로 더 자세히', sc, act);
+    };
     var gen = function (gid, act) { return function () { var m = D.byId[gid]; made('life_' + gid, m.title, m.sub, timing(m.gen, m.title, m.sub, H), act); }; };
     // PROLOGUE: 전체 인생 풀이
     made('life_prologue', '나의 인생 지도', '대운 10개로 본 인생의 계절', prologue(H), 1);
@@ -214,7 +220,7 @@
     real('c00', 1);
     // ACT I: 타고난 오행
     bridge('life_b1', '이제 이 지도를 만든 재료를 하나씩 열어 볼게요.\n먼저, ' + nm + '이 타고난 다섯 기운이에요.', 2);
-    topic('self_who', ['c01'], 2); real('c02', 2);
+    topic('self_who', ['c01'], 2); real('c02', 2); ikd('SELF', 2);
     // ACT II: 십성과 신살
     bridge('life_b2', '다섯 기운이 사람 안에서 움직이는 방식,\n십성이라는 눈으로 볼게요.', 3);
     made('life_tengods', '십성 · 내 안의 다섯 힘', '비겁 · 식상 · 재성 · 관성 · 인성', tenGods(H), 3); real('c03', 3, { noHeader: true }); real('c04', 3); real('c05', 3);
@@ -222,16 +228,17 @@
     // ACT III: 세부 이야기(관심 분야가 먼저)
     blockOrder(H.interest).forEach(function (k, i) {
       bridge('life_bb_' + k, i === 0 ? BRIDGE[k] : '다음은 ' + ({ love: '사랑', money: '돈', career: '일', relation: '사람' }[k]) + ' 이야기예요.', 4);
-      if (k === 'love') { topic('love_style', ['c09'], 4, [gen('love_timing', 4)]); topic('marriage_who', ['c10'], 4, [gen('marriage_timing', 4)]); real('c12', 4, { title: '끌리는 사람, 맞는 사람', sub: '궁합 · 일주 상성' }); }
-      if (k === 'money') topic('money_nature', ['c08'], 4, [gen('money_timing', 4)]);
-      if (k === 'career') { topic('career_style', ['c06'], 4, [gen('career_timing', 4)]); real('c07', 4, { title: '나에게 맞는 성공 방식', sub: '억부 · 용신' }); }
-      if (k === 'relation') { topic('relation_style', ['c11'], 4, [gen('relation_timing', 4)]); real('c13', 4, { title: '내가 자라온 자리', sub: '년주 · 월주' }); }
+      if (k === 'love') { topic('love_style', ['c09'], 4, [gen('love_timing', 4)]); topic('marriage_who', ['c10'], 4, [gen('marriage_timing', 4)]); real('c12', 4, { title: '끌리는 사람, 맞는 사람', sub: '궁합 · 일주 상성' }); ikd('LOVE', 4); ikd('MARRIAGE', 4); }
+      if (k === 'money') { topic('money_nature', ['c08'], 4, [gen('money_timing', 4)]); ikd('MONEY', 4); }
+      if (k === 'career') { topic('career_style', ['c06'], 4, [gen('career_timing', 4)]); real('c07', 4, { title: '나에게 맞는 성공 방식', sub: '억부 · 용신' }); ikd('CAREER', 4); }
+      if (k === 'relation') { topic('relation_style', ['c11'], 4, [gen('relation_timing', 4)]); real('c13', 4, { title: '내가 자라온 자리', sub: '년주 · 월주' }); ikd('RELATIONSHIP', 4); }
     });
     real('c14', 4);
     // ACT IV: 앞으로의 흐름
     bridge('life_b4', '이야기가 많이 쌓였네요.\n이제 시간을 앞으로 돌려 볼게요.', 5);
-    made('life_future', '앞으로 10년의 구간', '세운 10개', future(H), 5); real('c17', 5); real('c18', 5);
+    made('life_future', '앞으로 10년의 구간', '세운 10개', future(H), 5); real('c17', 5); real('c18', 5); ikd('TIMING', 5);
     // FINAL: 개운 가이드(행동은 여기로 몰아서)
+    ikd('ACTION', 6);
     made('life_actions', '지금 해 볼 것', '분야별 한 줄 정리', actionsAll(H), 6); made('life_action', '버릴 것 · 지킬 것 · 시작할 것', H.pos.seasonName + '의 흐름에 맞춰서', action(H), 6);
     real('c19', 6, { title: '다음 길을 여는 개운 가이드', sub: '행동 · 성장 · 사람 · 공간 · 환경 · 타이밍' }); real('c20', 6, { title: '운로 사용설명서', sub: '모든 흐름을 하나의 실행 계획으로' });
     out.forEach(function (c, i) { c.no = i + 1; });

@@ -64,6 +64,15 @@ samples.forEach((ch, i) => ['', 'money', 'love', 'career', 'life', 'self'].forEa
 // 관리자 순서 미리보기(rep 없이)
 const o = L.outline({ M, ch: samples[0], sd: R.SajuData.build(samples[0], { now }), now, name: '', interest: 'money', soc: D.social(M, samples[0], R.SajuData.build(samples[0], { now }), now) });
 ok(o.length >= 20 && o[0].no === 1 && o[0].act === 'PROLOGUE', '관리자 순서 미리보기');
+// 풀이 지식(IK) 연결: H.ik 가 있으면 해당 분야 뒤에 "더 깊이" 챕터가 붙고, 없으면 기존 구성이 그대로다
+{ const chx = samples[0], sdx = R.SajuData.build(chx, { now }), repx = R.Compose.build(sdx, lib, cfg, { name: '백진우' }), socx = D.social(M, chx, sdx, now), base = { M, ch: chx, sd: sdx, now, name: '백진우', interest: 'money', rep: repx, soc: socx, plan: (repx.chapters.find(c => c.plan) || {}).plan };
+  const plain = L.build(base), ik = { MONEY: { title: '재물', sections: [{ id: 'a', title: '돈 버는 방식', paras: ['첫 문단 <b>입니다</b>.', '둘째 문단.', '셋째 문단.', '넷째 문단.'] }] }, SELF: { title: '나 자신', sections: [{ id: 'p', title: '성격', paras: ['성격 풀이입니다.'] }] }, LOVE: { title: '연애', sections: [] } };
+  const deep = L.build(Object.assign({}, base, { ik }));
+  ok(!plain.chapters.some(c => /^life_ik_/.test(c.id)), 'IK 없으면 기존 구성 그대로');
+  const ids = deep.chapters.map(c => c.id); ok(ids.includes('life_ik_MONEY') && ids.includes('life_ik_SELF') && !ids.includes('life_ik_LOVE'), 'IK 있는 분야만 추가: ' + ids.filter(x => /ik/.test(x)));
+  ok(ids.indexOf('life_ik_MONEY') > ids.indexOf('c08') && ids.indexOf('life_ik_SELF') > ids.indexOf('c02') && ids.indexOf('life_ik_SELF') < ids.indexOf('life_tengods'), 'IK 챕터 위치(해당 분야 뒤)');
+  ok(deep.chapters.length === plain.chapters.length + 2 && deep.chapters.every((c, k) => c.no === k + 1), '번호 재정렬·기존 챕터 보존');
+  const mc = deep.chapters.find(c => c.id === 'life_ik_MONEY'), html = mc.scenes.map(x => x.html || '').join(''); ok(/돈 버는 방식/.test(html) && !/<b>입니다/.test(html) && mc.scenes.filter(x => /rd-prose/.test(x.html || '')).length === 2, 'IK 문단은 이스케이프되고 3문단씩 장면으로 묶임'); }
 console.log(`문서 ${n}개 조립 (4명 × 6관심)`);
 console.log(o.map(x => `  ${String(x.no).padStart(2, '0')} ${x.act.padEnd(9)} ${x.title}  [${x.kind}]`).join('\n'));
 if (fails.length) { console.log('\n실패 ' + fails.length + '건'); [...new Set(fails)].slice(0, 25).forEach(f => console.log(' ✗ ' + f)); process.exit(1); }

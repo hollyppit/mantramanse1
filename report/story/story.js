@@ -668,7 +668,7 @@
     var el = document.getElementById('hub'); if (!el || !hubUrl() || PREVIEW) return;
     var base = hubUrl(); document.documentElement.classList.add('hub-on'); el.hidden = false;
     var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base + 'hub.css'; document.head.appendChild(l);
-    [['/shared-core.js'], [base + 'hub.js'], [base + 'hub-tarot.js'], [base + 'hub-saju.js']].reduce(function (p, s) { return p.then(function () { return new Promise(function (ok, no) { var sc = document.createElement('script'); sc.src = s[0]; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); }); }); }, Promise.resolve()).then(function () { root.Hub.start(); }).catch(function () { el.hidden = true; document.documentElement.classList.remove('hub-on'); });
+    [['/shared-core.js'], [base + 'free-core.js'], [base + 'hub.js'], [base + 'hub-tarot.js'], [base + 'hub-saju.js']].reduce(function (p, s) { return p.then(function () { return new Promise(function (ok, no) { var sc = document.createElement('script'); sc.src = s[0]; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); }); }); }, Promise.resolve()).then(function () { root.Hub.start(); }).catch(function () { el.hidden = true; document.documentElement.classList.remove('hub-on'); });
   }
   function cover() {
     var el = document.getElementById('cover'); if (!el) return;

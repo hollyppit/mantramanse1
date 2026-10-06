@@ -228,3 +228,35 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 #hub .homebar{ display: inline-flex; align-items: center; min-height: 44px; margin: 2px 0 0 -4px; padding: 0 4px; color: var(--ink-2); text-decoration: none; font-size: .9rem; }
 #hub .homebar:hover{ color: var(--gold-l); }
 #hub .homebtn{ margin-top: 22px; }
+
+/* ── 무료 콘텐츠 깊이 개편: 오늘의 운세 상세 · 타로 미니 리딩 (기존 토큰 그대로) ── */
+#hub .todaybar .why{ display: block; font-style: normal; font-size: .78rem; color: var(--gold); margin-top: 3px; }
+#hub .dhead{ margin-top: 10px; font-family: var(--f-serif); font-size: 1.15rem; line-height: 1.55; color: var(--gold-l); }
+#hub a.dc{ display: block; text-decoration: none; color: inherit; }
+#hub .dsec{ margin-top: 22px; } #hub .dsec h3{ font-size: 1.05rem; margin-bottom: 8px; } #hub .dsec p{ color: var(--ink-2); font-size: .96rem; line-height: 1.75; } #hub .dsec p + p{ margin-top: 8px; }
+#hub .dsec .dsub{ font-size: .82rem; color: var(--ink-3); margin: -2px 0 10px; }
+#hub details.dd{ margin-top: 8px; border: 1px solid var(--line-2); border-radius: 14px; background: var(--panel); }
+#hub details.dd > summary{ display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; cursor: pointer; list-style: none; }
+#hub details.dd > summary::-webkit-details-marker{ display: none; }
+#hub details.dd > summary small{ display: block; color: var(--ink-3); font-size: .7rem; letter-spacing: .14em; }
+#hub details.dd > summary b{ font-family: var(--f-serif); font-size: 1.05rem; font-weight: 600; }
+#hub details.dd > summary em{ display: block; font-style: normal; color: var(--ink-2); font-size: .84rem; line-height: 1.5; margin-top: 3px; }
+#hub details.dd .chev{ flex: none; width: 8px; height: 8px; border-right: 2px solid var(--gold); border-bottom: 2px solid var(--gold); transform: rotate(45deg); transition: transform .2s; }
+#hub details.dd[open] .chev{ transform: rotate(-135deg); }
+#hub .ddb{ padding: 0 16px 16px; } #hub .ddb p{ font-size: .95rem; line-height: 1.75; color: var(--ink); margin-top: 8px; }
+#hub .ddb h5, #hub .actcard h5{ font-size: .72rem; letter-spacing: .16em; color: var(--gold); font-weight: 500; margin: 14px 0 6px; }
+#hub .gc{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } @media (max-width: 380px){ #hub .gc{ grid-template-columns: 1fr; } }
+#hub ul.dl{ list-style: none; padding: 0; margin: 0; } #hub ul.dl li{ position: relative; padding-left: 14px; font-size: .9rem; line-height: 1.6; color: var(--ink-2); margin-top: 4px; }
+#hub ul.dl li::before{ content: ''; position: absolute; left: 2px; top: .7em; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+#hub .gc .c li::before{ background: var(--red); }
+#hub .chips.ex i{ color: var(--gold-l); }
+#hub .actcard{ margin-top: 22px; padding: 18px; border-radius: 16px; background: var(--panel); border: 1px solid rgba(205, 178, 122, .35); } #hub .actcard h3{ font-size: 1.05rem; }
+#hub .chips.tg i{ color: var(--gold-l); border-color: rgba(205, 178, 122, .45); } #hub .chips.tg.avoid i{ color: var(--ink-2); border-color: var(--line); }
+#hub .actcard .one{ margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line-2); text-align: center; } #hub .actcard .one small{ color: var(--ink-3); font-size: .72rem; letter-spacing: .14em; } #hub .actcard .one p{ font-family: var(--f-serif); color: var(--gold-l); font-size: 1.05rem; line-height: 1.7; margin-top: 4px; }
+#hub .ev{ margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(236, 231, 219, .04); } #hub .ev h5{ margin: 0 0 2px; } #hub .ev p{ margin: 0; font-size: .9rem; color: var(--ink-2); }
+#hub details.pro{ margin-top: 12px; } #hub details.pro > summary{ cursor: pointer; font-size: .84rem; color: var(--gold); padding: 6px 0; } #hub details.pro ul.dl li{ font-size: .82rem; color: var(--ink-3); }
+#hub .nextc{ margin-top: 24px; padding: 20px 16px; border-radius: 16px; text-align: center; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(205, 178, 122, .08), rgba(205, 178, 122, .02)); display: grid; gap: 10px; justify-items: center; } #hub .nextc .q{ font-family: var(--f-serif); font-size: 1.1rem; line-height: 1.6; }
+#hub .rsum{ text-align: center; color: var(--ink-2); font-size: .95rem; line-height: 1.7; margin: 8px 6px 0; }
+#hub .rsec p + p{ margin-top: 8px; } #hub .rsec.good{ border-color: rgba(98, 194, 174, .35); } #hub .rsec.warn{ border-color: rgba(255, 138, 120, .3); }
+#hub .others{ margin-top: 22px; text-align: center; } #hub .others .chips{ justify-content: center; margin-top: 8px; }
+#hub .chipbtn{ font: inherit; font-size: .84rem; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: none; color: var(--ink); cursor: pointer; } #hub .chipbtn:hover{ border-color: var(--gold); }

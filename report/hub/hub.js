@@ -63,6 +63,12 @@
     return H.engine().then(function (M) { var sg = P.sig(); if (chartCache.sig !== sg) chartCache = { sig: sg, ch: M.compute(P.toInput(s)) }; return chartCache.ch; });
   };
   H.afterInput = function () { chartCache = { sig: '', ch: null }; };
+  // 관리자가 고친 무료 콘텐츠 문장(/api/free-content). 실패하거나 느리면 기본 문구로 간다(최대 1.5초만 기다림). 한 번만 불러온다.
+  var freeP = null;
+  H.freeContent = function () {
+    if (!freeP) freeP = new Promise(function (ok) { var done = false, fin = function (v) { if (!done) { done = true; ok(v); } }; setTimeout(function () { fin(null); }, 1500); try { fetch('/api/free-content').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { fin(d && d.content || null); }).catch(function () { fin(null); }); } catch (e) { fin(null); } });
+    return freeP;
+  };
 
   /* ── 기존 무빙툰 뷰어로 이어 가기 (입력값은 이 탭의 sessionStorage 로만 넘기고 서버로 보내지 않는다) ── */
   H.toV2 = function (o) {
@@ -113,7 +119,7 @@
     var has = P.has(), nm = P.name(), need = function (next, to) { return has ? to : '#/input?next=' + next; };
     var el = H.view(
       '<section class="hero"><p class="kick">MANTRA FORTUNE</p><h1 class="h1">잠시, 운명의 이야기를<br>들여다볼까요?</h1><p class="sub">가볍게 오늘의 운세를 확인하거나,<br>당신이 타고난 이야기를 시작해보세요.</p></section>' +
-      (has ? '<a class="todaybar" id="tbar" href="#/today" data-track="fortune_content_click" data-p="today_bar"><b>·</b><div><span>' + (nm ? esc(nm) + '님의 ' : '') + '오늘의 흐름</span><p id="tbarT">불러오는 중…</p></div></a>' : '') +
+      (has ? '<a class="todaybar" id="tbar" href="#/today" data-track="fortune_content_click" data-p="today_bar"><b>·</b><div><span>' + (nm ? esc(nm) + '님의 ' : '') + '오늘의 흐름</span><p id="tbarT">불러오는 중…</p><em class="why" id="tbarW"></em></div></a>' : '') +
       '<div class="cards">' +
       '<a class="cc main" href="#/tarot" data-track="fortune_content_click" data-p="tarot"><i class="glyph" aria-hidden="true">運</i><small>FREE TAROT</small><h3>무료 타로</h3><p>마음속 질문 하나를 떠올려보세요.</p><div class="chips"><i>오늘의 카드</i><i>연애운</i><i>재물운</i><i>일·사업운</i><i>YES / NO</i></div><span class="go">카드 한 장 뽑기 →</span></a>' +
       '<a class="cc" href="' + need('today', '#/today') + '" data-track="fortune_content_click" data-p="today"><small>TODAY</small><h3>오늘의 운세</h3><p>오늘 나에게 들어온 흐름은?</p><span class="go">' + (has ? '지금 확인하기 →' : '생년월일로 확인하기 →') + '</span></a>' +
@@ -124,8 +130,8 @@
       '<a href="#/my" data-track="fortune_content_click" data-p="my_home">MY 운명 홈 <small>내 사주 콘텐츠 모아보기</small></a>' +
       '<a href="/index.html" data-track="fortune_content_click" data-p="manse_app">만세력 원국 보기 <small>합충·신살·대운 전체</small></a>' +
       '<a href="/report/v2/?flow=classic" data-track="fortune_content_click" data-p="movingtoon_classic">심층 무빙툰 20챕터 <small>종합 리포트</small></a></details>');
-    if (has) H.sajuKit().then(function () { return H.chart(); }).then(function (ch) { if (!H.alive(ctx)) return; var t = H.Saju && H.Saju.todayData(ch); if (t) { H.$('#tbar b', el).textContent = t.score; H.$('#tbarT', el).textContent = t.flowLabel + ' · ' + t.line; } }).catch(function () { var b = H.$('#tbar', el); if (b) b.hidden = true; });
-    H.track('hub_view', { profile: has ? 1 : 0 }, true);
+    if (has) H.sajuKit().then(function () { return H.chart(); }).then(function (ch) { if (!H.alive(ctx)) return; var t = H.Saju && H.Saju.todayData(ch); if (t) { H.$('#tbar b', el).textContent = t.score; H.$('#tbarT', el).textContent = t.flowLabel + ' · ' + t.line; H.$('#tbarW', el).textContent = '왜 ' + t.score + '점일까요? →'; } }).catch(function () { var b = H.$('#tbar', el); if (b) b.hidden = true; });
+    H.track('hub_view', { profile: has ? 1 : 0 }, true); H.track('free_home_view', { profile: has ? 1 : 0 }, true);
   });
   H.route('go', function (q) { // 저장된 정보가 있어야 하는 심층 콘텐츠로의 관문
     if (!P.has()) return H.replace('#/input?next=' + encodeURIComponent(q.to || 'my'));

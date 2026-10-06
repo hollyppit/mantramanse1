@@ -5,7 +5,7 @@ export const IK_VERSION = 'ik1';
 export const COMPOSER_VERSION = 'cmp1';
 
 export const DOMAINS = {
-  SELF: '성격', MONEY: '재물', CAREER: '직업', LOVE: '연애', MARRIAGE: '결혼', RELATIONSHIP: '관계', TIMING: '시기', ACTION: '행동/개운',
+  SELF: '나 자신', MONEY: '재물', CAREER: '직업·사업', LOVE: '연애', MARRIAGE: '결혼', RELATIONSHIP: '인간관계', TIMING: '운의 흐름', ACTION: '행동/개운',
 };
 export const STATUSES = ['draft', 'review', 'approved', 'published', 'archived'];
 export const STATUS_KO = { draft: '임시저장', review: '검수 대기', approved: '검수 완료', published: '게시', archived: '보관' };
@@ -75,14 +75,16 @@ export function cleanItem(b, prev) {
   let status = STATUSES.includes(b.status) ? b.status : 'draft', reviewed = !!b.reviewed;
   if (sourceType === 'AI_DRAFT' && !reviewed && (status === 'approved' || status === 'published')) status = 'draft'; // AI 초안은 검수 없이 게시 불가
   if (status === 'published' && !reviewed) status = 'review'; // 게시는 검수 완료가 전제
-  return {
+  const out = {
     id: b.id, title: str(b.title, 120), domain: b.domain, subDomain: str(b.subDomain, 40), status, priority: Math.max(0, Math.min(100, Math.round(+b.priority || 0))), stance: STANCES.includes(b.stance) ? b.stance : 'neutral',
-    conditions: cleanConds(b.conditions), modifiers: (Array.isArray(b.modifiers) ? b.modifiers.slice(0, 20) : []).map(cleanModifier).filter(Boolean), exclusions: cleanConds(b.exclusions),
+    conditions: cleanConds(b.conditions), alsoWhen: (Array.isArray(b.alsoWhen) ? b.alsoWhen.slice(0, 5) : []).map(cleanConds).filter(g => Object.keys(g).length), modifiers: (Array.isArray(b.modifiers) ? b.modifiers.slice(0, 20) : []).map(cleanModifier).filter(Boolean), exclusions: cleanConds(b.exclusions),
     principle: str(b.principle, 2000), interpretation: str(b.interpretation, 2000), strengths: strs(b.strengths, 12, 300), risks: strs(b.risks, 12, 300), behaviorPatterns: strs(b.behaviorPatterns, 12, 300), actions: strs(b.actions, 12, 300),
     realWorldExamples: { worker: str(ex.worker, 600), business: str(ex.business, 600), freelance: str(ex.freelance, 600), love: str(ex.love, 600) },
     sourceType, sourceReference: str(b.sourceReference, 200), sourceMemo: str(b.sourceMemo, 1000), confidence: conf, reviewed, reviewedAt: reviewed ? (str(b.reviewedAt, 40) || now) : '',
     tags: strs(b.tags, 20, 30), version: (prev && prev.version ? prev.version : 0), createdAt: (prev && prev.createdAt) || str(b.createdAt, 40) || now, updatedAt: now,
   };
+  if (out.status === 'published' && unknownVars(out).length) { out.status = 'review'; out.blockedBy = 'placeholder'; } // 채울 수 없는 {…} 가 문장에 남아 있으면 공개하지 않는다
+  return out;
 }
 
 // ───────────── 사실(facts) 추출: sd → 조건 평가용 평평한 값 ─────────────
@@ -109,6 +111,20 @@ export function deriveFacts(sd, ext) {
   return f;
 }
 
+// ───────────── 문장 속 자리표시자 ─────────────
+// 기존 해석 모듈의 {monthBranch} {dayMasterEl} {pct.재성} 같은 변수를 그대로 쓸 수 있다. 값은 sd(엔진 계산 결과)에서 온다.
+export const KNOWN_VAR = /\{(monthBranch|dayMasterEl|dayMasterStem|dominantGroup|weakestGroup|dominantEl|lackEl|yongEl|pct\.(비겁|식상|재성|관성|인성)|el\.(비겁|식상|재성|관성|인성)|elPct\.(목|화|토|금|수))\}/g;
+const ANY_VAR = /\{[^{}]{1,24}\}/g;
+export function tplVars(sd) {
+  const r = x => Math.round(x), pct = {}, elPct = {}; GROUPS.forEach(g => { if (sd.groups && sd.groups[g] != null) pct[g] = r(sd.groups[g]); }); ELEMENTS.forEach(e => { if (sd.fiveElements && sd.fiveElements[e] != null) elPct[e] = r(sd.fiveElements[e]); });
+  return { monthBranch: sd.pillars && sd.pillars.month && sd.pillars.month.ko && sd.pillars.month.ko[1], dayMasterStem: sd.dayMaster.stem, dayMasterEl: sd.dayMaster.el, dominantEl: sd.dominantEl, lackEl: sd.lackEl || '', dominantGroup: sd.dominantGroup, weakestGroup: sd.weakestGroup, yongEl: sd.usefulElements && sd.usefulElements.yong, pct, elPct, el: sd.groupEl || {} };
+}
+export function tplFill(str, vars) { return String(str == null ? '' : str).replace(/\{([\w.가-힣]+)\}/g, (m, k) => { let v = vars; k.split('.').forEach(p => { v = v == null ? v : v[p]; }); return v == null || typeof v === 'object' ? m : v; }); }
+const TEXT_KEYS = ['title', 'principle', 'interpretation', 'sourceMemo'];
+const textsOf = it => [...TEXT_KEYS.map(k => it[k]), ...(it.strengths || []), ...(it.risks || []), ...(it.behaviorPatterns || []), ...(it.actions || []), ...Object.values(it.realWorldExamples || {}), ...(it.modifiers || []).map(m => m.text)].filter(Boolean).join('\n');
+export const unknownVars = it => (textsOf(it).replace(KNOWN_VAR, '').match(ANY_VAR) || []);
+function fillItem(it, V) { const f = x => tplFill(x, V), o = { ...it }; ['principle', 'interpretation'].forEach(k => { o[k] = f(o[k]); }); ['strengths', 'risks', 'behaviorPatterns', 'actions'].forEach(k => { o[k] = (o[k] || []).map(f); }); o.realWorldExamples = Object.fromEntries(Object.entries(o.realWorldExamples || {}).map(([k, v]) => [k, f(v)])); o.modifiers = (o.modifiers || []).map(m => ({ ...m, text: f(m.text) })); return o; }
+
 // ───────────── 조건 평가 ─────────────
 // 반환: { match, spec, rows, missing }  rows: 조건별 { key, label, want, have, hit }  missing: facts 에 값이 없어 판정 못 한 필드
 export function evalConds(conds, facts) {
@@ -131,6 +147,14 @@ export function evalConds(conds, facts) {
   }
   return { match, spec, rows, missing };
 }
+// 풀이 하나가 사주에 맞는가: 기본 조건(모두 맞아야 함) 또는 "또는 이런 경우도" 대안 묶음 중 하나. 가장 구체적으로 맞은 쪽의 점수를 쓴다.
+export function evalItem(it, facts) {
+  const baseKeys = Object.keys(it.conditions || {}).length, alts = it.alsoWhen || [], base = evalConds(it.conditions, facts);
+  if (!alts.length) return { ...base, general: !baseKeys };
+  let best = baseKeys ? (base.match ? base : null) : null, rows = base.rows, missing = base.missing.slice();
+  for (const g of alts) { const e = evalConds(g, facts); if (e.match && (!best || e.spec > best.spec)) best = { ...e, rows: e.rows.map(r => ({ ...r, label: '또는 · ' + r.label })) }; else if (!best) { rows = rows.concat(e.rows); e.missing.forEach(m => missing.push(m)); } }
+  return best ? { match: true, spec: best.spec, rows: best.rows, missing: [], general: false } : { match: false, spec: 0, rows, missing, general: false };
+}
 const anyHit = (conds, facts) => { const e = evalConds(conds, facts); return Object.keys(conds || {}).length > 0 && e.rows.some(r => r.hit) && e.match; };
 
 // ───────────── 검색(Structured Retrieval) ─────────────
@@ -143,8 +167,8 @@ export function retrieve(items, facts, opts) {
     if (opts.domain && it.domain !== opts.domain) continue;
     if (it.status === 'archived') continue;
     if (!opts.includeDraft && !isProduction(it)) continue;
-    const ev = evalConds(it.conditions, facts), cn = Object.keys(it.conditions || {}).length;
-    const rec = { id: it.id, title: it.title, domain: it.domain, subDomain: it.subDomain, stance: it.stance, confidence: it.confidence, status: it.status, rows: ev.rows, spec: ev.spec, missing: ev.missing, general: cn === 0 };
+    const ev = evalItem(it, facts);
+    const rec = { id: it.id, title: it.title, domain: it.domain, subDomain: it.subDomain, stance: it.stance, confidence: it.confidence, status: it.status, rows: ev.rows, spec: ev.spec, missing: ev.missing, general: !!ev.general };
     if (!ev.match) { if (ev.rows.some(r => r.hit) && !ev.missing.length) excluded.push({ ...rec, reason: 'unmatched' }); else if (ev.missing.length) excluded.push({ ...rec, reason: 'unsupported' }); continue; }
     if (Object.keys(it.exclusions || {}).length && anyHit(it.exclusions, facts)) { excluded.push({ ...rec, reason: 'excluded' }); continue; }
     used.push({ ...rec, score: ev.spec * 100 + (+it.priority || 0) * 1 + CONF_W[it.confidence] * 0.5, item: it });
@@ -193,12 +217,14 @@ export const DEFAULT_DESIGN = {
   ACTION: { required: ['용신', '신강/신약'], optional: [], sections: [S('strategy', '행동 전략'), S('riskManagement', '리스크 관리'), S('environment', '환경'), S('lifestyle', '생활 방식'), S('remedy', '개운 전략')] },
 };
 export const DEFAULT_RULES = {
-  tone: 'easy', depth: 'standard', examples: 1, jargon: 'min', balance: true, actions: true,
+  tone: 'easy', depth: 'standard', examples: 1, jargon: 'min', balance: true, actions: true, showEvidence: true, serviceEnabled: true, extraPrompt: '',
   domainOverrides: { MONEY: '재물 풀이에서는 반드시 수입과 자산 축적을 구분한다. 사업 매출과 개인 자산을 동일하게 해석하지 않는다. 수입 증가와 돈이 남는 것을 구분한다.' },
   banned: [], // 추가 금지 표현
 };
 export const TONE_KO = { easy: '쉬운 현실형', pro: '전문형', story: '스토리형' };
-export const DEPTH_KO = { brief: '간략', standard: '표준', detailed: '상세', max: '매우 상세' };
+export const DEPTH_KO = { brief: '간단', standard: '기본', detailed: '상세', max: '매우 상세' };
+// 풀이 깊이: 근거가 있는 Section 을 몇 개까지 / Section 당 풀이 지식을 몇 개까지 / 현실 사례를 몇 개까지 쓰는가. 필수 항목이 먼저 채워진다.
+export const DEPTH_CAP = { brief: { sections: 7, items: 1 }, standard: { sections: 12, items: 2 }, detailed: { sections: 18, items: 4 }, max: { sections: 999, items: 6 } };
 export const JARGON_KO = { min: '최소', normal: '보통', rich: '상세' };
 
 export function cleanDesign(b) {
@@ -213,7 +239,7 @@ export function cleanDesign(b) {
 }
 export function cleanRules(b) {
   if (!b || typeof b !== 'object') return JSON.parse(JSON.stringify(DEFAULT_RULES));
-  const o = { tone: TONE_KO[b.tone] ? b.tone : 'easy', depth: DEPTH_KO[b.depth] ? b.depth : 'standard', examples: Math.max(0, Math.min(3, Math.round(+b.examples) || 0)), jargon: JARGON_KO[b.jargon] ? b.jargon : 'min', balance: b.balance !== false, actions: b.actions !== false, domainOverrides: {}, banned: strs(b.banned, 30, 30) };
+  const o = { tone: TONE_KO[b.tone] ? b.tone : 'easy', depth: DEPTH_KO[b.depth] ? b.depth : 'standard', examples: Math.max(0, Math.min(3, Math.round(+b.examples) || 0)), jargon: JARGON_KO[b.jargon] ? b.jargon : 'min', balance: b.balance !== false, actions: b.actions !== false, showEvidence: b.showEvidence !== false, serviceEnabled: b.serviceEnabled !== false, extraPrompt: str(b.extraPrompt, 2000), domainOverrides: {}, banned: strs(b.banned, 30, 30) };
   for (const d of Object.keys(DOMAINS)) if (b.domainOverrides && typeof b.domainOverrides[d] === 'string' && b.domainOverrides[d].trim()) o.domainOverrides[d] = b.domainOverrides[d].trim().slice(0, 1200);
   return o;
 }
@@ -224,7 +250,7 @@ export const designFor = (design, domain) => (design && design[domain] && design
 // 근거가 없는 Section 은 status:'insufficient' 로 두고 AI 가 억지로 채우지 않는다.
 export function buildPackage(sd, ext, items, design, rules, opts) {
   opts = opts || {}; const domain = opts.domain; if (!DOMAINS[domain]) throw new Error('알 수 없는 분야');
-  const facts = deriveFacts(sd, ext), dz = designFor(design, domain), rl = rules || DEFAULT_RULES;
+  const facts = deriveFacts(sd, ext), dz = designFor(design, domain), rl = rules || DEFAULT_RULES, V = tplVars(sd);
   const { used, excluded } = retrieve(items, facts, { domain, includeDraft: !!opts.includeDraft });
   const conflicts = detectConflicts(used), loserIds = new Set(conflicts.filter(c => c.resolved).map(c => c.loser));
   const modifiers = [], appliedRules = [], sections = {}, order = [];
@@ -233,19 +259,28 @@ export function buildPackage(sd, ext, items, design, rules, opts) {
     if (sec.enabled === false) continue; order.push(sec.id);
     const here = used.filter(u => u.subDomain === sec.id && !loserIds.has(u.id));
     if (!here.length) { sections[sec.id] = { id: sec.id, title: sec.title, required: sec.required, status: 'insufficient', items: [], reason: '이 분야·사주에 맞는 검수된 풀이 지식이 없습니다' }; continue; }
-    const max = ({ brief: 1, standard: 2, detailed: 4, max: 6 })[rl.depth] || 2, pick = here.slice(0, max);
-    sections[sec.id] = { id: sec.id, title: sec.title, required: sec.required, status: 'ok', items: pick.map(u => {
-      const a = applied.get(u.id), it = u.item;
+    const max = (DEPTH_CAP[rl.depth] || DEPTH_CAP.standard).items, pick = here.slice(0, max);
+    sections[sec.id] = { id: sec.id, title: sec.title, required: sec.required, status: 'ok', supporting: here.length, items: pick.map(u => {
+      const a = applied.get(u.id), it = fillItem(u.item, V); a.interpretation = tplFill(a.interpretation, V); a.hits.forEach(h => { h.text = tplFill(h.text, V); });
       return { id: u.id, title: it.title, stance: it.stance, confidence: it.confidence, spec: u.spec, interpretation: a.interpretation, replaced: a.replaced, principle: it.principle, strengths: it.strengths, risks: it.risks, behaviorPatterns: it.behaviorPatterns, actions: it.actions, realWorldExamples: it.realWorldExamples,
         modifiers: a.hits.map(h => ({ id: h.id, effect: h.effect, text: h.text })), why: u.rows.filter(r => r.hit).map(r => r.label + ' = ' + (Array.isArray(r.have) ? r.have.join(',') : r.have)) };
     }) };
     pick.forEach(u => appliedRules.push({ rule: 'section:' + sec.id, knowledge: u.id, specificity: u.spec }));
   }
+  const capN = (DEPTH_CAP[rl.depth] || DEPTH_CAP.standard).sections, okIds = order.filter(id => sections[id].status === 'ok'), skippedByDepth = [];
+  if (okIds.length > capN) { const keep = new Set([...okIds.filter(id => sections[id].required), ...okIds.filter(id => !sections[id].required)].slice(0, capN)); okIds.filter(id => !keep.has(id)).forEach(id => { sections[id] = { ...sections[id], status: 'skipped', items: [], reason: '풀이 깊이 설정(' + DEPTH_KO[rl.depth] + ')으로 이번에는 생략' }; skippedByDepth.push(id); }); appliedRules.splice(0, appliedRules.length, ...appliedRules.filter(r => !skippedByDepth.includes(r.rule.slice(8)))); }
   const insufficient = order.filter(id => sections[id].status === 'insufficient');
   const pkg = { v: IK_VERSION, domain, domainName: DOMAINS[domain], order, facts: factSummary(facts), matchedKnowledge: used.map(u => ({ id: u.id, title: u.title, subDomain: u.subDomain, stance: u.stance, confidence: u.confidence, score: Math.round(u.score * 10) / 10, spec: u.spec, general: u.general, used: !!order.length && order.some(id => sections[id].items.some(i => i.id === u.id)), rows: u.rows })),
-    excludedKnowledge: excluded.map(e => ({ id: e.id, title: e.title, subDomain: e.subDomain, reason: e.reason, missing: e.missing, rows: e.rows })), appliedRules, modifiers, conflicts, sections, insufficient, unsupported: UNSUPPORTED.map(u => u[0]) };
+    suggest: suggestConds(facts), skippedByDepth, excludedKnowledge: excluded.map(e => ({ id: e.id, title: e.title, subDomain: e.subDomain, reason: e.reason, missing: e.missing, rows: e.rows })), appliedRules, modifiers, conflicts, sections, insufficient, unsupported: UNSUPPORTED.map(u => u[0]) };
   pkg.confidence = packageConfidence(pkg);
   return pkg;
+}
+// 이 사주에서 두드러진 값으로 새 풀이의 기본 조건을 제안한다(관리자가 고친다)
+export function suggestConds(f) {
+  const c = {}; if (f.dayMaster) c.dayMaster = [f.dayMaster]; if (f.strength) c.strength = [f.strength];
+  const g = Object.keys(f.group || {}).sort((a, b) => Math.abs(f.group[b].pct - 20) - Math.abs(f.group[a].pct - 20))[0];
+  if (g && f.group[g].level !== 'mid') c.group = { [g]: f.group[g].level };
+  return c;
 }
 function factSummary(f) {
   const lv = o => Object.keys(o || {}).map(k => k + ' ' + Math.round(o[k].pct) + '%(' + LEVEL_KO[o[k].level] + ')').join(' · ');
@@ -271,9 +306,11 @@ export function qualityCheck(pkg, composed, rules) {
   const seen = new Map();
   for (const id of pkg.order) {
     const sec = pkg.sections[id], paras = (composed && composed[id]) || [], text = paras.map(p => p.text).join(' ');
-    if (sec.status === 'insufficient') { if (text) add('FAIL', id, '근거 없는 Section 에 내용이 생성됨'); else if (sec.required) add('WARNING', id, '필수 Section 이 근거 부족으로 비어 있음'); continue; }
-    if (!text.trim()) { add('FAIL', id, '빈 Section'); continue; }
-    if (text.length < 60) add('WARNING', id, '지나치게 짧은 Section(' + text.length + '자)');
+    if (sec.status === 'skipped') continue;
+    if (sec.status === 'insufficient') { if (text) add('FAIL', id, '근거 없는 항목에 내용이 생성됨'); else if (sec.required) add('WARNING', id, '필수 항목이 근거 부족으로 비어 있음'); continue; }
+    if (!text.trim()) { add('FAIL', id, '빈 항목'); continue; }
+    if (text.length < 60) add('WARNING', id, '지나치게 짧은 항목(' + text.length + '자)');
+    if (ANY_VAR.test(text)) { ANY_VAR.lastIndex = 0; add('FAIL', id, '채워지지 않은 자리표시자 ' + (text.match(ANY_VAR) || [])[0]); } ANY_VAR.lastIndex = 0;
     if (BANNED_RE.test(text)) add('FAIL', id, '확정적·위험 표현: ' + (text.match(BANNED_RE) || [])[0]);
     if (EVENT_RE.test(text)) add('FAIL', id, '특정 연도 사건 확정 표현');
     for (const w of extraBanned) if (w && text.includes(w)) add('FAIL', id, '금지어: ' + w);
@@ -281,7 +318,7 @@ export function qualityCheck(pkg, composed, rules) {
     for (const p of paras) {
       if (!p.refs || !p.refs.length) add('WARNING', id, '근거(refs)가 없는 문단');
       else for (const r of p.refs) if (!known.has(r)) add('FAIL', id, '검색되지 않은 지식 인용: ' + r);
-      const key = p.text.replace(/\s+/g, '').slice(0, 30); if (key.length >= 20) { if (seen.has(key)) add('WARNING', id, '다른 Section 과 같은 내용 반복(' + seen.get(key) + ')'); else seen.set(key, id); }
+      const key = p.text.replace(/\s+/g, '').slice(0, 30); if (key.length >= 20) { if (seen.has(key)) add('WARNING', id, '다른 항목과 같은 내용 반복(' + seen.get(key) + ')'); else seen.set(key, id); }
     }
     const nums = (text.match(/\d+(\.\d+)?/g) || []), base = JSON.stringify(pkg.facts) + JSON.stringify(pkg.sections[id]);
     for (const n of nums) if (!base.includes(n)) { add('WARNING', id, '패키지에 없는 숫자: ' + n); break; }
@@ -327,6 +364,7 @@ export function composerSystem(rules, domain) {
 - conflicts 가 해결되었으면 winner 쪽만 쓴다. 해결되지 않은 충돌은 단정하지 말고 양면을 조건부로 쓴다.
 문체: ${TONE_KO[rl.tone]}. 설명 깊이: ${DEPTH_KO[rl.depth]}. 현실 사례는 Section 당 최대 ${rl.examples}개. 전문용어: ${JARGON_KO[rl.jargon]}(${rl.jargon === 'min' ? '비겁·식상·재성·관성·인성 같은 용어는 풀어서 쓴다' : '필요할 때 용어를 설명과 함께 쓴다'}). ${rl.balance !== false ? '장점과 리스크를 균형 있게 쓴다.' : ''} ${rl.actions !== false ? '행동 제안을 포함한다.' : '행동 제안은 쓰지 않는다.'}
 ${ov ? '이 분야의 추가 규칙: ' + ov : ''}
+${rl.extraPrompt ? '관리자 추가 지시(위 절대 규칙보다 우선하지 않는다): ' + rl.extraPrompt : ''}
 JSON 한 덩어리로만 답하라: {"sections":{"<sectionId>":[{"text":"문단","refs":["knowledgeId"]}]}}`;
 }
 export function composerUser(pkg) {
@@ -351,4 +389,95 @@ export function stable(o) { if (Array.isArray(o)) return '[' + o.map(stable).joi
 export async function cacheKey(parts) {
   const data = new TextEncoder().encode(stable(parts)), h = await crypto.subtle.digest('SHA-256', data);
   return 'ik:pkg:' + [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+}
+
+// ───────────── 풀이 품질 진단 — 측정 가능한 값만 ─────────────
+// 별점은 감상이 아니라 비율·개수로 계산한다. 의미 유사도 같은 측정할 수 없는 지표는 내지 않는다(중복은 "같은 문장"만 센다).
+const starsBy = (v, cuts) => (v == null ? null : cuts.filter(c => v >= c).length + 1); // cuts 오름차순 4개 → 1~5
+export function diagnose(pkg, composed) {
+  const ids = pkg.order, oks = ids.filter(id => pkg.sections[id].status === 'ok'), active = ids.filter(id => pkg.sections[id].status !== 'skipped');
+  const depthPct = active.length ? oks.length / active.length : 0;
+  const avgSup = oks.length ? oks.reduce((a, id) => a + (pkg.sections[id].supporting || 0), 0) / oks.length : null;
+  const realN = oks.filter(id => pkg.sections[id].items.some(i => i.behaviorPatterns.length || Object.values(i.realWorldExamples || {}).some(Boolean))).length, realPct = oks.length ? realN / oks.length : null;
+  const seen = new Map(); let dup = 0;
+  for (const id of oks) for (const p of (composed && composed[id]) || []) { const k = p.text.replace(/\s+/g, '').slice(0, 40); if (k.length < 12) continue; if (seen.has(k)) dup++; else seen.set(k, id); }
+  const lackReq = ids.filter(id => pkg.sections[id].status === 'insufficient' && pkg.sections[id].required).length, lackOpt = ids.filter(id => pkg.sections[id].status === 'insufficient' && !pkg.sections[id].required).length;
+  return {
+    depth: { done: oks.length, total: active.length, pct: Math.round(depthPct * 100), stars: starsBy(depthPct, [0.3, 0.5, 0.7, 0.9]), note: '근거가 있어 완성된 항목 / 켜 둔 항목' },
+    evidence: { avg: avgSup == null ? null : Math.round(avgSup * 10) / 10, stars: starsBy(avgSup, [1, 1.5, 2, 3]), note: '완성된 항목 하나당 맞은 풀이 지식 수(평균)' },
+    reality: { pct: realPct == null ? null : Math.round(realPct * 100), stars: starsBy(realPct, [0.2, 0.4, 0.6, 0.8]), note: '현실 행동·사례가 들어 있는 항목 비율' },
+    duplicates: { count: dup, level: dup === 0 ? '없음' : dup <= 2 ? '낮음' : dup <= 5 ? '보통' : '높음', note: '다른 항목과 같은 문장이 반복된 횟수' },
+    conflicts: { count: pkg.conflicts.length, unresolved: pkg.conflicts.filter(c => !c.resolved).length },
+    lacking: { required: lackReq, optional: lackOpt },
+  };
+}
+
+// ───────────── 풀이 지식 커버리지 — 계산식을 정의해서 쓴다 ─────────────
+// 분야별 커버리지 = (켜 둔 항목 중 "게시+검수 완료" 풀이 지식이 1개 이상 있는 항목 수) / (켜 둔 항목 수). 항목 = 풀이 구성의 Section.
+// 80% 이상 충분 · 50% 이상 보강 필요 · 그 미만 부족. 풀이 지식이 서로 얼마나 정교한지(조건 수)는 이 수치에 반영되지 않는다.
+export function coverageStats(items, design) {
+  const out = {};
+  for (const d of Object.keys(DOMAINS)) {
+    const dz = designFor(design, d), rows = dz.sections.filter(sec => sec.enabled !== false).map(sec => {
+      const mine = items.filter(x => x.domain === d && x.subDomain === sec.id && x.status !== 'archived');
+      return { id: sec.id, title: sec.title, required: sec.required !== false, published: mine.filter(isProduction).length, pending: mine.filter(x => !isProduction(x)).length };
+    });
+    const covered = rows.filter(r => r.published > 0).length, pct = rows.length ? Math.round(covered / rows.length * 100) : 0;
+    out[d] = { name: DOMAINS[d], sections: rows, covered, total: rows.length, pct, label: pct >= 80 ? '충분' : pct >= 50 ? '보강 필요' : '부족', unassigned: items.filter(x => x.domain === d && !x.subDomain && x.status !== 'archived').length, count: items.filter(x => x.domain === d && x.status !== 'archived').length };
+  }
+  return out;
+}
+
+// ───────────── 기존 해석 모듈(report/v2 content*.js) → 풀이 지식 초안 ─────────────
+// 기존 모듈은 조건이 1~2개뿐인 단일 문장이라 그대로 게시하지 않는다. "검수 필요" 상태의 초안으로만 가져오고, 관리자가 조건·장점·주의점을 보강해 게시한다.
+const LEG_DOM = { identity: ['SELF', 'personality'], personality: ['SELF', 'personality'], talent: ['SELF', 'strength'], shadow: ['SELF', 'weakness'], elements: ['SELF', 'temperament'], career: ['CAREER', 'aptitude'], success: ['CAREER', 'successStyle'], wealth: ['MONEY', 'earningStyle'], love: ['LOVE', 'pattern'], marriage: ['MARRIAGE', 'spouse'], relationship: ['RELATIONSHIP', 'social'], compatibility: ['RELATIONSHIP', 'social'], family: ['RELATIONSHIP', 'family'], daewoon: ['TIMING', 'daewoon'], currentCycle: ['TIMING', 'daewoon'], sewoon: ['TIMING', 'seun'], monthly: ['TIMING', 'wolun'], remedy: ['ACTION', 'remedy'], actionPlan: ['ACTION', 'strategy'] };
+const SEA_EN = { opportunity: '기회기', expansion: '확장기', harvest: '수확기', accumulation: '축적기', transition: '전환기', defense: '방어기' };
+export function fromLegacyModule(m, n) {
+  const map = LEG_DOM[m.category]; if (!map || !m) return null;
+  const c = m.conditions || {}, base = {}, alts = [], dropped = [];
+  const put = (obj, k, v) => { obj[k] = v; };
+  for (const k of Object.keys(c)) {
+    const vals = Array.isArray(c[k]) ? c[k] : []; if (!vals.length) continue;
+    if (k === 'dayMasterStem') put(base, 'dayMaster', vals); else if (k === 'dayPillar' || k === 'monthBranch' || k === 'dayBranch' || k === 'strength' || k === 'yongEl' || k === 'pattern' || k === 'star') put(base, k, vals);
+    else if (k === 'hasRoot') put(base, 'hasRoot', vals);
+    else if (k === 'daewoonSeason' || k === 'seunSeason' || k === 'monthSeason') put(base, k, vals.map(v => SEA_EN[v] || v));
+    else if (k === 'dominantGroup' || k === 'groupHigh' || k === 'weakestGroup' || k === 'groupZero') {
+      const lv = (k === 'dominantGroup' || k === 'groupHigh') ? 'strong' : 'weak'; base.group = base.group || {}; // 여러 값이면 "또는" 대안으로 나눈다
+      if (!base.group._pending) { base.group[vals[0]] = lv; vals.slice(1).forEach(v => alts.push({ k: 'group', key: v, lv })); } else dropped.push(k);
+    }
+    else if (k === 'dominantEl' || k === 'lackEl') { base.el = base.el || {}; base.el[vals[0]] = k === 'dominantEl' ? 'strong' : 'weak'; vals.slice(1).forEach(v => alts.push({ k: 'el', key: v, lv: k === 'dominantEl' ? 'strong' : 'weak' })); }
+    else dropped.push(k);
+  }
+  const first = cleanConds(base), also = alts.map(a => { const g = JSON.parse(JSON.stringify(first)); const tgt = g[a.k] = g[a.k] || {}; Object.keys(tgt).forEach(x => { if (tgt[x] === a.lv) delete tgt[x]; }); tgt[a.key] = a.lv; return g; });
+  const dom = map[0], id = dom + '-L' + ('0000' + n).slice(-4);
+  return cleanItem({ id, title: m.headline || m.id, domain: dom, subDomain: map[1], status: 'review', reviewed: false, priority: m.priority || 0, stance: 'neutral', conditions: first, alsoWhen: also, interpretation: [m.summary, m.detail].filter(Boolean).join(' '), tags: [...(m.keywords || []), 'legacy'], sourceType: 'internal', sourceReference: 'legacy:' + m.id, sourceMemo: '기존 해석 모듈에서 가져온 초안입니다. 조건·장점·주의점을 보강한 뒤 검수 완료 처리하세요.' + (dropped.length ? ' (옮기지 못한 조건: ' + dropped.join(', ') + ')' : ''), confidence: 'mid' });
+}
+
+// ───────────── AI 풀이 지식 초안 ─────────────
+export function draftSystem() {
+  const secs = Object.keys(DEFAULT_DESIGN).map(d => d + ': ' + DEFAULT_DESIGN[d].sections.map(x => x.id).join(', ')).join('\n');
+  return `너는 사주 풀이 지식 편집자다. 관리자가 붙여 넣은 명리 자료를 "풀이 지식 초안" 하나로 구조화한다.
+엄격한 규칙:
+- 자료에 없는 내용을 지어내지 마라. 자료에서 읽히는 원리·해석·장단점만 옮긴다. 사건 확정, 질병·사망·투자수익 단정은 쓰지 않는다.
+- conditions 는 아래 허용된 형식만 쓴다(그 밖의 키는 버려진다). 자료에서 조건이 분명하지 않으면 비워 둔다.
+  dayMaster:["경"] (갑을병정무기경신임계) · strength:["신강"|"신약"|"중화"] · hasRoot:["있음"|"없음"] · monthBranch:["자"…"해"] · season:["봄"|"여름"|"가을"|"겨울"] · yongEl:["목"|"화"|"토"|"금"|"수"]
+  el:{"목":"weak|mid|strong"} (목화토금수) · group:{"관성":"strong"} (비겁 식상 재성 관성 인성) · daewoonSeason/seunSeason/monthSeason:["기회기"|"확장기"|"수확기"|"축적기"|"전환기"|"방어기"]
+- domain 은 SELF MONEY CAREER LOVE MARRIAGE RELATIONSHIP TIMING ACTION 중 하나. subDomain 은 그 분야의 아래 Section id 중 가장 맞는 것:
+${secs}
+- stance: positive(유리·확장) / caution(주의·조심) / neutral.
+- modifiers: [{"when":{조건},"effect":"strengthen|soften|replace|exception","text":"..."}] — 자료에 "이런 경우 더 강해진다/완화된다"가 있을 때만.
+- 쉬운 현실 언어로: interpretation(핵심 풀이 2~3문장), behaviorPatterns(현실 장면), strengths, risks, actions 는 짧은 문장 배열. principle 은 명리 원리 한두 문장.
+JSON 한 덩어리로만 답하라: {"title":"","domain":"","subDomain":"","stance":"","conditions":{},"exclusions":{},"modifiers":[],"principle":"","interpretation":"","behaviorPatterns":[],"strengths":[],"risks":[],"actions":[],"realWorldExamples":{"worker":"","business":"","freelance":"","love":""},"tags":[],"confidence":"low|mid|high"}`;
+}
+// AI 응답 → 초안 항목. 항상 draft · AI_DRAFT · 검수 전. 형식이 틀리면 null.
+export function sanitizeDraft(text, id) {
+  const a = String(text || '').indexOf('{'), z = String(text || '').lastIndexOf('}'); let d; try { d = JSON.parse(text.slice(a, z + 1)); } catch { return null; }
+  if (!d || typeof d !== 'object' || !DOMAINS[d.domain]) return null;
+  const ok = cleanItem({ ...d, id, status: 'draft', reviewed: false, sourceType: 'AI_DRAFT', sourceReference: 'AI 초안', sourceMemo: '관리자가 붙여 넣은 자료를 AI 가 구조화한 초안입니다. 반드시 검수한 뒤 게시하세요.', confidence: CONFIDENCE.includes(d.confidence) ? d.confidence : 'low' });
+  return ok && ok.title ? ok : null;
+}
+
+// ───────────── 서비스(무빙툰·상세 리포트)에 싣는 요약본 — 개발용 ID 는 빼고 문단만 ─────────────
+export function deepView(pkg, composed) {
+  return { title: pkg.domainName, sections: pkg.order.filter(id => pkg.sections[id].status === 'ok' && (composed[id] || []).length).map(id => ({ id, title: pkg.sections[id].title, paras: composed[id].map(p => p.text) })) };
 }

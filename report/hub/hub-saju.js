@@ -12,28 +12,26 @@
   var POTENTIAL = { 비겁: '스스로 길을 여는 힘', 식상: '생각을 형태로 만드는 힘', 재성: '기회를 알아보는 힘', 관성: '사람들이 믿고 따르게 만드는 힘', 인성: '깊이 이해하고 꿰뚫는 힘' };
   var clamp = function (v) { return Math.max(0, Math.min(100, Math.round(v))); };
   var DOW = ['일', '월', '화', '수', '목', '금', '토'];
-
   /* ───────── 오늘의 흐름 (엔진 값 읽기) ───────── */
-  // 주 흐름(기회·확장·수확·축적)별 한 문장. 틀은 엔진의 FLOW_DESC / 일진 행동모드(DAYMODE) 뜻과 같다.
-  var FLOW_LINE = { opportunity: '오늘은 기회를 발견하고 움직일 수 있는 날입니다.', expansion: '이미 하고 있는 일을 키우기 좋은 날입니다.', harvest: '쌓아 온 결과를 거두기 좋은 날입니다.', accumulation: '밖으로 나서기보다 안을 채우기 좋은 날입니다.' };
+  // 계산은 FreeCore.todayData(= 기존 엔진 값 읽기, 점수·단계 산식은 그대로)가 하고, 문장·행동·근거·다음 콘텐츠는 FreeCore.buildDaily 가 한 객체(DailyFortuneResult)로 묶는다.
+  // 홈의 점수 줄과 #/today 가 이 객체 하나를 같이 쓴다. 같은 사람·같은 날은 localStorage 에 저장해 다시 열어도 같은 결과가 나온다.
+  var FC = root.FreeCore;
   var cache = { ch: null, v: null };
   Saju.todayData = function (ch) {
     if (cache.ch === ch && cache.v) return cache.v;
-    var M = root.Manse, now = Date.now(), k = new Date(now + 9 * 3600e3), y = k.getUTCFullYear(), mo = k.getUTCMonth() + 1, d = k.getUTCDate();
-    var il = M.ilun(ch, y, mo)[d - 1], ev = il.ev, f = ev.flow, key = f.primaryFlow, cond = f.condition.name;
-    var dm = M.evaluateDomainLuck(ch, il, 'ilun', { ms: Date.UTC(y, mo - 1, d, 3) }), career = null;
-    try { var top = (M.careerProfile(ch).top || []).slice(0, 3).map(function (c) { return c.category; }), a = M.careerLuckActivation(ch, il); if (top.length) career = clamp(top.reduce(function (s, c) { return s + (a[c] || 0); }, 0) / top.length); } catch (e) { }
-    var note = [];
-    if (cond === '주의' || cond === '부담') note.push('다만 무리한 확장은 피하세요.');
-    if (f.overlays.volatility.active) note.push('변동 신호가 있어 일정에 여유를 두세요.');
-    if (f.overlays.defense.active) note.push('부담이 커질 수 있어 컨디션을 먼저 챙기세요.');
-    var mode = DAYMODE[ev.phase] || [];
-    var v = {
-      y: y, mo: mo, d: d, dow: DOW[k.getUTCDay()], gz: M.gzName(il), score: clamp((ev.fitScore + 100) / 2), flowKey: key, phase: ev.phase, flowLabel: M.flowLabel(ev, { overlay: 'top' }), cond: cond,
-      line: FLOW_LINE[key] || '', notes: note, todo: mode[2] || '', meaning: mode[1] || '',
-      fields: { money: { s: dm.wealth.score, b: dm.wealth.band }, work: career == null ? null : { s: career, b: career >= 70 ? '높음' : career >= 55 ? '무난' : career >= 40 ? '다소 낮음' : '낮음' }, love: { s: dm.love.score, b: dm.love.band }, health: { s: dm.health.score, b: dm.health.band } },
-    };
-    cache = { ch: ch, v: v }; return v;
+    var v = FC.todayData(root.Manse, ch, Date.now(), DAYMODE); cache = { ch: ch, v: v }; return v;
+  };
+  var dailyMem = null;
+  Saju.daily = function (ch) { // → Promise<DailyFortuneResult>
+    var t = Saju.todayData(ch), day = t.y + '-' + t.mo + '-' + t.d, sig = P.sig(), key = 'mt_daily_v1';
+    return H.freeContent().then(function (ov) {
+      var ver = (ov && ov.version) || '', id = day + '|' + sig + '|' + ver;
+      if (dailyMem && dailyMem.id === id) return dailyMem.r;
+      try { var s = JSON.parse(localStorage.getItem(key) || 'null'); if (s && s.id === id) { dailyMem = s; return s.r; } } catch (e) { }
+      var r = FC.buildDaily(t, { seed: sig, name: P.name(), overrides: ov }); r.line = t.line; r.todo = t.todo; r.meaning = t.meaning;
+      dailyMem = { id: id, r: r }; try { localStorage.setItem(key, JSON.stringify(dailyMem)); } catch (e) { }
+      return r;
+    });
   };
 
   /* ───────── 입력 ───────── */
@@ -84,17 +82,37 @@
 
   /* ───────── 오늘의 운세 ───────── */
   var FLD = [['money', '재물운', 'MONEY'], ['work', '일·사업운', 'WORK'], ['love', '연애운', 'LOVE'], ['health', '컨디션', 'BODY']];
+  var tags = function (a) { return a.map(function (x) { return '<i>#' + esc(String(x).replace(/\s+/g, '')) + '</i>'; }).join(''); };
+  var lis = function (a) { return '<ul class="dl">' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
   H.route('today', function (q, ctx) {
     needSaju(ctx, 'today', function (ch) {
-      var t = Saju.todayData(ch), nm = P.name();
-      var cards = FLD.filter(function (f) { return t.fields[f[0]]; }).map(function (f) { var v = t.fields[f[0]]; return '<div class="dc' + (q.f === f[0] ? ' hl' : '') + '" id="d-' + f[0] + '"><small>' + f[2] + '</small><b>' + f[1] + '</b><span>' + esc(v.b) + '</span><div class="bar"><i style="width:' + clamp(v.s) + '%"></i></div></div>'; }).join('');
-      var el = H.view('<section class="tscore"><p class="kick">' + t.mo + '월 ' + t.d + '일 ' + t.dow + '요일 · ' + esc(t.gz) + '日</p><div class="ring" style="--p:' + t.score + '"><b>' + t.score + '</b></div><div class="tflow">' + esc(t.phase) + ' · ' + esc(t.cond) + '</div><p class="sub" style="margin-top:6px">' + (nm ? esc(nm) + '님, ' : '') + esc(t.line) + '</p>' + (t.notes.length ? '<p class="note">' + esc(t.notes.join(' ')) + '</p>' : '') + '</section>' +
-        '<div class="dgrid">' + cards + '</div>' +
-        '<div class="actbox" id="d-action"' + (q.f === 'action' ? ' style="border-color:var(--gold)"' : '') + '><h3>오늘의 행동 가이드</h3><p>오늘의 주 흐름은 <em>' + esc(t.phase) + '</em>입니다 — ' + esc(t.meaning) + '.</p><p>이런 일에 활용해 보세요: ' + esc(t.todo) + '.</p></div>' +
-        '<p class="dis">점수는 오늘의 일진이 내 사주에 필요한 기운인지를 따진 값입니다. 사건을 확정하지 않는 참고용 흐름입니다.</p>' +
-        '<div class="next2"><a class="btn" href="#/go?to=money" data-track="fortune_content_click" data-p="from_today_money">10년 재물 흐름 보기</a><a class="btn ghost" href="#/my" data-track="fortune_content_click" data-p="from_today_my">MY 운명으로</a></div>');
-      H.track('fortune_content_view', { content: 'today', flow: t.flowKey });
-      if (q.f) { var tg = $('#d-' + q.f, el); if (tg && tg.scrollIntoView) setTimeout(function () { tg.scrollIntoView({ block: 'center', behavior: H.reduce ? 'auto' : 'smooth' }); }, 120); }
+      Saju.daily(ch).then(function (d) {
+        if (!H.alive(ctx)) return; var nm = P.name();
+        var meta = function (k) { return FLD.filter(function (x) { return x[0] === k; })[0]; };
+        var cards = d.order.map(function (k) { var v = d.fields[k], f = meta(k); return '<a class="dc' + (q.f === k ? ' hl' : '') + '" id="d-' + k + '" href="#dd-' + k + '" data-jump="' + k + '"><small>' + f[2] + '</small><b>' + f[1] + '</b><span>' + esc(v.band) + '</span><div class="bar"><i style="width:' + clamp(v.score) + '%"></i></div></a>'; }).join('');
+        var detail = d.order.map(function (k) {
+          var v = d.fields[k], f = meta(k);
+          return '<details class="dd" id="dd-' + k + '" data-f="' + k + '"' + (q.f === k ? ' open' : '') + '><summary><span><small>' + f[2] + '</small><b>' + f[1] + ' · ' + esc(v.band) + '</b><em>' + esc(v.summary) + '</em></span><i class="chev" aria-hidden="true"></i></summary><div class="ddb">' +
+            v.detail.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') + (v.examples ? '<div class="chips ex">' + v.examples.map(function (x) { return '<i>' + esc(x.trim()) + '</i>'; }).join('') + '</div>' : '') +
+            '<div class="gc"><div class="g"><h5>좋은 행동</h5>' + lis(v.goodActions) + '</div><div class="c"><h5>주의할 행동</h5>' + lis(v.cautions) + '</div></div></div></details>';
+        }).join('');
+        var ev = d.evidence, why = '<details class="dd why" id="d-why"><summary><span><b>왜 이런 결과가 나왔나요?</b></span><i class="chev" aria-hidden="true"></i></summary><div class="ddb"><p>' + esc(ev.intro) + '</p>' +
+          ev.plain.map(function (x) { return '<div class="ev"><h5>' + esc(x.title) + '</h5><p>' + esc(x.body) + '</p></div>'; }).join('') +
+          '<details class="pro"><summary>전문 해석 보기</summary>' + lis(ev.pro) + '</details></div></details>';
+        var el = H.view('<section class="tscore"><p class="kick">' + +d.date.slice(5, 7) + '월 ' + +d.date.slice(8) + '일 ' + d.dow + '요일 · ' + esc(d.gz) + '日</p><div class="ring" style="--p:' + d.overallScore + '"><b>' + d.overallScore + '</b></div><div class="tflow">' + esc(d.phase) + ' · ' + esc(d.cond) + '</div><p class="sub" style="margin-top:6px">' + (nm ? esc(nm) + '님, ' : '') + esc(d.line) + '</p>' +
+          '<p class="dhead">“' + esc(d.headline) + '”</p>' + (d.notes.length ? '<p class="note">' + esc(d.notes.join(' ')) + '</p>' : '') + '</section>' +
+          '<div class="dgrid">' + cards + '</div>' +
+          '<section class="dsec"><h3>오늘의 핵심</h3><p>' + esc(d.summary) + '</p><p>' + esc(d.summary2) + '</p></section>' +
+          '<section class="dsec"><h3>분야별로 자세히 보기</h3><p class="dsub">궁금한 분야를 눌러 펼쳐 보세요.</p>' + detail + '</section>' +
+          '<section class="actcard" id="d-action"><h3>오늘의 행동 처방</h3><h5>오늘 하면 좋은 것</h5><div class="chips tg">' + tags(d.todayActions) + '</div><h5>오늘 미루면 좋은 것</h5><div class="chips tg avoid">' + tags(d.avoidActions) + '</div><div class="one"><small>오늘의 한 문장</small><p>“' + esc(d.closingMessage) + '”</p></div></section>' +
+          '<section class="dsec">' + why + '</section>' +
+          '<p class="dis">점수는 오늘의 일진이 내 사주에 필요한 기운인지를 따진 값입니다. 사건을 확정하지 않는 참고용 흐름이며, 컨디션은 의학적 진단이 아닌 생활 리듬의 참고입니다.</p>' +
+          '<section class="nextc"><p class="q">' + esc(d.next.q) + '</p><a class="btn" href="' + esc(d.next.to) + '" data-track="today_cta_click" data-p="' + esc(d.next.track) + '">' + esc(d.next.btn) + '</a><a class="btn ghost sm" href="#/my" data-track="fortune_content_click" data-p="from_today_my">MY 운명으로</a></section>');
+        H.track('fortune_content_view', { content: 'today', flow: d.flowKey }); H.track('today_open', { flow: d.flowKey, cta: d.next.key }, true);
+        H.$$('details.dd', el).forEach(function (x) { x.addEventListener('toggle', function () { if (x.open) H.track(x.id === 'd-why' ? 'today_evidence_expand' : 'today_detail_expand', { field: x.dataset.f || 'why' }); }); });
+        H.$$('[data-jump]', el).forEach(function (a) { a.onclick = function (e) { e.preventDefault(); var t = H.$('#dd-' + a.dataset.jump, el); if (t) { t.open = true; t.scrollIntoView({ block: 'center', behavior: H.reduce ? 'auto' : 'smooth' }); } }; });
+        if (q.f) { var tg = $('#dd-' + q.f, el) || $('#d-' + q.f, el); if (tg && tg.scrollIntoView) setTimeout(function () { tg.scrollIntoView({ block: 'center', behavior: H.reduce ? 'auto' : 'smooth' }); }, 120); }
+      });
     });
   });
 

@@ -45,6 +45,7 @@ vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8'), { fil
 globalThis.window = globalThis; globalThis.document = { createElement() { return {}; }, addEventListener() { }, querySelector() { return null; }, head: { appendChild() { } } };
 globalThis.location = { hostname: 'x', search: '', hash: '' };
 globalThis.MantraCore = Core;
+vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'hub', 'free-core.js'), 'utf8'), { filename: 'free-core.js' });
 for (const f of ['hub', 'hub-tarot', 'hub-saju']) vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'hub', f + '.js'), 'utf8'), { filename: f + '.js' });
 const M = globalThis.Manse, H = globalThis.Hub;
 ['', 'tarot', 'tarot/play', 'input', 'today', 'awaken', 'my', 'go'].forEach(r => ok(typeof H.routes[r] === 'function', '라우트 ' + r));

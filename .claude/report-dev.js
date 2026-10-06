@@ -10,6 +10,11 @@ const body = q => new Promise(res => { const b = []; q.on('data', c => b.push(c)
 
 http.createServer(async (q, r) => {
   const u = new URL(q.url, 'http://x'), p = u.pathname;
+  if (p === '/api/free-content') { // 실제 functions/api/free-content.js 를 메모리 KV 로 실행
+    const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/free-content.js')).href), buf = q.method === 'PUT' ? await body(q) : undefined;
+    const res = await (q.method === 'PUT' ? mod.onRequestPut : mod.onRequestGet)({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': 'application/json' }, body: buf }) });
+    r.statusCode = res.status; r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(await res.text());
+  }
   if (p === '/api/ik') { // 실제 functions/api/ik.js 를 메모리 KV 로 실행 (AI 키 없음 → 규칙 기반 합성)
     const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/ik.js')).href), buf = q.method === 'POST' ? await body(q) : undefined;
     const res = await mod.onRequest({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': 'application/json' }, body: buf }) });
