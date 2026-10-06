@@ -77,7 +77,7 @@ export function extractSystem() {
 4. sourceClaim 은 원문에서 그대로 옮긴 문장(80~400자)이다. 요약·번역하지 말고 글자 그대로 복사하라(원문에 없는 문장은 금지).
 5. interpretation·behaviorPatterns·strengths·risks·actions·realWorldExamples 는 "AI 정리"다. 사용자 친화적 현실 언어로 쓰되 원문이 말한 범위를 넘지 마라. 현실 사례는 원문의 주장이 아니라 AI 설명이다.
 6. 사망·중병·사고·범죄·파산·임신·이혼·결혼·합격·투자수익을 확정하는 표현은 AI 정리에 쓰지 마라(경향·가능성으로 바꿔 쓰고, 원문이 단정했다면 ambiguity 에 "원문이 단정적 표현을 씀"을 적어라).
-7. 독립적으로 쓸 수 있는 해석 단위만 후보로 뽑아라(한 번에 최대 8개). 해석 단위가 없는 글(머리말·목차·일반 서술)은 빈 배열을 돌려라.
+7. 독립적으로 쓸 수 있는 해석 단위만 후보로 뽑아라(한 번에 최대 4개, 가장 뚜렷한 것부터). 모든 필드는 간결하게 쓴다: principle·interpretation 은 각 200자 안팎, 배열 항목은 짧은 한 문장, realWorldExamples 는 해당 없으면 빈 문자열. 해석 단위가 없는 글(머리말·목차·일반 서술)은 빈 배열을 돌려라.
 conditions 는 아래 형식만 쓴다(그 밖의 키는 버려진다):
   dayMaster:["경"] (갑을병정무기경신임계) · strength:["신강"|"신약"|"중화"] · hasRoot:["있음"|"없음"] · monthBranch:["자"…"해"] · season:["봄"|"여름"|"가을"|"겨울"] · yongEl:["목"|"화"|"토"|"금"|"수"] · pattern:["격국·구조 이름"] · star:["신살 이름"] · relation:["합"|"충"|"형"|"파"|"해"…]
   el:{"목":"weak|mid|strong"} (목화토금수) · group:{"관성":"strong"} (비겁 식상 재성 관성 인성) · tenGod:{"편관":"strong"} · daewoonSeason/seunSeason/monthSeason:["기회기"|"확장기"|"수확기"|"축적기"|"전환기"|"방어기"]

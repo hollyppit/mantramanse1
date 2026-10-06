@@ -110,7 +110,7 @@ export async function onRequest({ request, env }) {
     const todo = chunks.filter(c => c.status === 'pending').slice(0, want); let added = 0, failed = 0, provider = '';
     for (const c of todo) {
       try {
-        const r = await llm(env, S.extractSystem(), S.extractUser(d, c), 4000); provider = r.provider; const got = S.parseCandidates(r.text, c); if (!got) { const t = String(r.text || '').replace(/\s+/g, ' '); throw new Error('AI 답이 후보 형식이 아닙니다 (중단: ' + (r.stop || '?') + ', ' + t.length + '자) ' + t.slice(0, 60) + ' … ' + t.slice(-60)); }
+        const r = await llm(env, S.extractSystem(), S.extractUser(d, c), 8000, 100000); provider = r.provider; const got = S.parseCandidates(r.text, c); if (!got) { const t = String(r.text || '').replace(/\s+/g, ' '); throw new Error('AI 답이 후보 형식이 아닙니다 (중단: ' + (r.stop || '?') + ', ' + t.length + '자) ' + t.slice(0, 60) + ' … ' + t.slice(-60)); }
         for (const x of got) { d.candSeq = (d.candSeq || 0) + 1; const cand = { id: 'k' + d.candSeq, chunkId: c.id, location: { pageStart: c.pageStart, pageEnd: c.pageEnd, heading: c.heading, lineStart: c.lineStart, lineEnd: c.lineEnd }, status: 'new', createdAt: new Date().toISOString(), ...x }; cand.compare = S.compareCandidate(cand, items); cand.validation = S.validateCandidate(cand, { doc: d, chunk: c, items }); cands.push(cand); added++; }
         c.status = 'done'; c.cands = got.length; c.error = '';
       } catch (e) { c.status = 'failed'; c.error = String(e.message || e).slice(0, 200); failed++; }
