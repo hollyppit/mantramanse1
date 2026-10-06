@@ -202,7 +202,12 @@
       { id: 4, roman: 'ACT III', title: '세부 이야기', line: '' }, { id: 5, roman: 'ACT IV', title: '앞으로의 흐름', line: '' }, { id: 6, roman: 'FINAL', title: '개운 가이드', line: '' }].map(function (a) { a.pdfDone = ''; return a; });
     var byBase = {}; (H.rep ? H.rep.chapters : R.Chapters.BASE.map(function (c) { return { id: c.id, base: c.id, title: c.title, scenes: [] }; })).forEach(function (c) { byBase[c.base || c.id] = c; }); // rep 이 없으면(관리자 순서 미리보기) 기본 챕터 목록으로 순서만 만든다
     var out = [], used = {};
-    function real(base, act, o) { var c = byBase[base]; if (!c || used[base]) return; used[base] = 1; o = o || {}; var x = trim(c, { header: !o.noHeader, last: base === 'c20' }); x.act = act; if (o.title) { x.title = o.title; x.introText = o.sub || ''; x.subtitle = o.sub || ''; var ci = x.scenes.filter(function (s) { return s.sceneType === 'chapterIntro'; })[0]; if (ci) ci.subtitle = o.sub || ''; } out.push(x); }
+    // 본문 대체(관리자 rules.serviceBody): DB 풀이가 충분한 분야는 기존 "모듈 문장" 챕터를 빼고 그 자리에 DB 풀이를 본문으로 둔다. 카드(계산) 챕터와 DB 가 부족한 분야는 그대로.
+    var LEG = { SELF: ['c01', 'c02'], LOVE: ['c09', 'c12'], MARRIAGE: ['c10'], MONEY: ['c08'], CAREER: ['c06', 'c07'], RELATIONSHIP: ['c11', 'c13'], TIMING: ['c17', 'c18'] }, MIN_SEC = 2, replaced = {};
+    var bodyMode = !!(H.ik && H.ik.__mode === 'replace');
+    var covered = function (dom) { var d = H.ik && H.ik[dom]; return !!(bodyMode && d && d.sections && d.sections.length >= MIN_SEC); };
+    var skip = {}; Object.keys(LEG).forEach(function (dom) { if (covered(dom)) { replaced[dom] = 1; LEG[dom].forEach(function (b) { skip[b] = 1; }); } });
+    function real(base, act, o) { var c = byBase[base]; if (!c || used[base] || skip[base]) return; used[base] = 1; o = o || {}; var x = trim(c, { header: !o.noHeader, last: base === 'c20' }); x.act = act; if (o.title) { x.title = o.title; x.introText = o.sub || ''; x.subtitle = o.sub || ''; var ci = x.scenes.filter(function (s) { return s.sceneType === 'chapterIntro'; })[0]; if (ci) ci.subtitle = o.sub || ''; } out.push(x); }
     function made(id, title, sub, scenes, act) { var c = pseudo(id, title, sub, [{ sceneId: id + '_in', sceneType: 'chapterIntro', subtitle: sub, compact: true }].concat(scenes)); c.act = act; out.push(c); }
     function bridge(id, text, act) { var prev = out[out.length - 1]; if (prev) prev.scenes = prev.scenes.concat([lineScene(text, 'normal')]); } // 이야기를 잇는 한두 줄: 이전 챕터 끝에 붙인다
     function topic(cardId, bases, act, after) { // 새 카드 → 기존 챕터(제목 없이 이어서) → 시간축 카드
@@ -211,7 +216,7 @@
     var ikd = function (dom, act) {
       var d = H.ik && H.ik[dom]; if (!d || !d.sections || !d.sections.length) return;
       var sc = []; d.sections.forEach(function (s) { for (var i = 0; i < s.paras.length; i += 3) sc.push(prose(i ? '' : s.title, s.paras.slice(i, i + 3).map(esc))); });
-      made('life_ik_' + dom, d.title + ' · 더 깊이', '검수된 풀이로 더 자세히', sc, act);
+      if (replaced[dom]) made('life_ik_' + dom, d.title + ' · 풀이', '검수된 풀이로 읽는 ' + d.title, sc, act); else made('life_ik_' + dom, d.title + ' · 더 깊이', '검수된 풀이로 더 자세히', sc, act);
     };
     var gen = function (gid, act) { return function () { var m = D.byId[gid]; made('life_' + gid, m.title, m.sub, timing(m.gen, m.title, m.sub, H), act); }; };
     // PROLOGUE: 전체 인생 풀이

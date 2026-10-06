@@ -157,7 +157,7 @@ async function deepForService(request, env, waitUntil) {
   await kv.put(hk, String(used + 1), { expirationTtl: 7200 });
   try {
     const [design, rules] = await Promise.all([kv.get('ik:design', 'json'), kv.get('ik:rules', 'json')]), rl = rules || IK.DEFAULT_RULES;
-    if (rl.serviceEnabled === false) return json({ ok: true, enabled: false, domains: {} });
+    if (rl.serviceEnabled === false) return json({ ok: true, enabled: false, body: false, domains: {} });
     const out = {}, blocked = await blockedDocs(kv), m = await meta(kv), ver = { knowledge: m.k, design: m.d, rules: m.r, composer: IK.COMPOSER_VERSION }, sd = scrub(b.sd), res = {}, jobs = [];
     const useAi = rl.serviceAi === true && !!(env.ANTHROPIC_API_KEY || env.OPENAI_API_KEY || env.GEMINI_API_KEY);
     for (const d of doms) {
@@ -167,6 +167,6 @@ async function deepForService(request, env, waitUntil) {
     }
     if (jobs.length) { const all = Promise.all(jobs); await Promise.race([all, new Promise(r => setTimeout(r, +env.IK_DEEP_AI_WAIT_MS || 12000))]); if (waitUntil) waitUntil(all); } // 늦은 것은 뒤에서 마저 만들어 저장 → 다음 방문부터 사용
     for (const d of doms) { const v = IK.deepView(res[d].pkg, res[d].composed); if (v.sections.length) out[d] = v; }
-    return json({ ok: true, enabled: true, domains: out, v: (await meta(kv)).k });
+    return json({ ok: true, enabled: true, body: rl.serviceBody === true, domains: out, v: m.k });
   } catch (e) { return json({ ok: false, error: 'bad-input' }, 400); }
 }

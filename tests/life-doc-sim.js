@@ -73,6 +73,20 @@ ok(o.length >= 20 && o[0].no === 1 && o[0].act === 'PROLOGUE', '관리자 순서
   ok(ids.indexOf('life_ik_MONEY') > ids.indexOf('c08') && ids.indexOf('life_ik_SELF') > ids.indexOf('c02') && ids.indexOf('life_ik_SELF') < ids.indexOf('life_tengods'), 'IK 챕터 위치(해당 분야 뒤)');
   ok(deep.chapters.length === plain.chapters.length + 2 && deep.chapters.every((c, k) => c.no === k + 1), '번호 재정렬·기존 챕터 보존');
   const mc = deep.chapters.find(c => c.id === 'life_ik_MONEY'), html = mc.scenes.map(x => x.html || '').join(''); ok(/돈 버는 방식/.test(html) && !/<b>입니다/.test(html) && mc.scenes.filter(x => /rd-prose/.test(x.html || '')).length === 2, 'IK 문단은 이스케이프되고 3문단씩 장면으로 묶임'); }
+// 본문 대체(A안): rules.serviceBody → ik.__mode === 'replace'. DB 가 충분한 분야(섹션 2개 이상)만 기존 모듈 문장 챕터를 빼고 DB 풀이를 본문으로 둔다
+{ const chx = samples[0], sdx = R.SajuData.build(chx, { now }), repx = R.Compose.build(sdx, lib, cfg, { name: '백진우' }), socx = D.social(M, chx, sdx, now), base = { M, ch: chx, sd: sdx, now, name: '백진우', interest: 'money', rep: repx, soc: socx, plan: (repx.chapters.find(c => c.plan) || {}).plan };
+  const ik = { MONEY: { title: '재물', sections: [{ id: 'a', title: '돈 버는 방식', paras: ['첫 문단.', '둘째 문단.'] }, { id: 'b', title: '돈이 새는 패턴', paras: ['새는 문단.'] }] }, SELF: { title: '나 자신', sections: [{ id: 'p', title: '성격', paras: ['성격 풀이입니다.'] }] } };
+  const app = L.build(Object.assign({}, base, { ik })), rep = L.build(Object.assign({}, base, { ik: Object.assign({ __mode: 'replace' }, ik) }));
+  const aid = app.chapters.map(c => c.id), rid = rep.chapters.map(c => c.id);
+  ok(aid.includes('c08') && aid.includes('c02'), '대체 모드가 아니면 기존 모듈 챕터(c08·c02)가 그대로');
+  ok(!rid.includes('c08') && rid.includes('life_ik_MONEY'), '대체 모드: DB 가 충분한 분야(재물)는 기존 c08 이 빠지고 DB 풀이가 본문');
+  ok(rid.includes('c02') && rid.includes('life_ik_SELF'), '대체 모드: DB 가 부족한 분야(나 자신, 섹션 1개)는 기존 c02 를 유지하고 DB 는 덧붙임');
+  const mt = rep.chapters.find(c => c.id === 'life_ik_MONEY'), st = app.chapters.find(c => c.id === 'life_ik_MONEY');
+  ok(/풀이/.test(mt.title) && !/더 깊이/.test(mt.title) && /더 깊이/.test(st.title), '제목: 대체 모드는 "재물 · 풀이", 덧붙임은 "· 더 깊이"');
+  ok(rep.chapters.every((c, k) => c.no === k + 1) && rep.chapters.some(c => c.id === 'life_money_nature' || /money/.test(c.id)), '번호 재정렬 · 계산 기반 카드 챕터는 유지');
+  const none = L.build(Object.assign({}, base, { ik: { __mode: 'replace' } })), plain2 = L.build(base);
+  ok(none.chapters.length === plain2.chapters.length, 'DB 가 하나도 없으면 대체 모드여도 기존 구성 그대로(' + none.chapters.length + '개)');
+}
 console.log(`문서 ${n}개 조립 (4명 × 6관심)`);
 console.log(o.map(x => `  ${String(x.no).padStart(2, '0')} ${x.act.padEnd(9)} ${x.title}  [${x.kind}]`).join('\n'));
 if (fails.length) { console.log('\n실패 ' + fails.length + '건'); [...new Set(fails)].slice(0, 25).forEach(f => console.log(' ✗ ' + f)); process.exit(1); }

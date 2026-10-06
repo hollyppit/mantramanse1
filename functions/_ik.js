@@ -229,7 +229,7 @@ export const DEFAULT_DESIGN = {
   ACTION: { required: ['용신', '신강/신약'], optional: [], sections: [S('strategy', '행동 전략'), S('riskManagement', '리스크 관리'), S('environment', '환경'), S('lifestyle', '생활 방식'), S('remedy', '개운 전략')] },
 };
 export const DEFAULT_RULES = {
-  tone: 'easy', depth: 'standard', examples: 1, jargon: 'min', balance: true, actions: true, showEvidence: true, serviceEnabled: true, serviceAi: false, extraPrompt: '',
+  tone: 'easy', depth: 'standard', examples: 1, jargon: 'min', balance: true, actions: true, showEvidence: true, serviceEnabled: true, serviceAi: false, serviceBody: false, extraPrompt: '',
   domainOverrides: { MONEY: '재물 풀이에서는 반드시 수입과 자산 축적을 구분한다. 사업 매출과 개인 자산을 동일하게 해석하지 않는다. 수입 증가와 돈이 남는 것을 구분한다.' },
   banned: [], // 추가 금지 표현
 };
@@ -251,7 +251,7 @@ export function cleanDesign(b) {
 }
 export function cleanRules(b) {
   if (!b || typeof b !== 'object') return JSON.parse(JSON.stringify(DEFAULT_RULES));
-  const o = { tone: TONE_KO[b.tone] ? b.tone : 'easy', depth: DEPTH_KO[b.depth] ? b.depth : 'standard', examples: Math.max(0, Math.min(3, Math.round(+b.examples) || 0)), jargon: JARGON_KO[b.jargon] ? b.jargon : 'min', balance: b.balance !== false, actions: b.actions !== false, showEvidence: b.showEvidence !== false, serviceEnabled: b.serviceEnabled !== false, serviceAi: b.serviceAi === true, extraPrompt: str(b.extraPrompt, 2000), domainOverrides: {}, banned: strs(b.banned, 30, 30) };
+  const o = { tone: TONE_KO[b.tone] ? b.tone : 'easy', depth: DEPTH_KO[b.depth] ? b.depth : 'standard', examples: Math.max(0, Math.min(3, Math.round(+b.examples) || 0)), jargon: JARGON_KO[b.jargon] ? b.jargon : 'min', balance: b.balance !== false, actions: b.actions !== false, showEvidence: b.showEvidence !== false, serviceEnabled: b.serviceEnabled !== false, serviceAi: b.serviceAi === true, serviceBody: b.serviceBody === true, extraPrompt: str(b.extraPrompt, 2000), domainOverrides: {}, banned: strs(b.banned, 30, 30) };
   for (const d of Object.keys(DOMAINS)) if (b.domainOverrides && typeof b.domainOverrides[d] === 'string' && b.domainOverrides[d].trim()) o.domainOverrides[d] = b.domainOverrides[d].trim().slice(0, 1200);
   return o;
 }
