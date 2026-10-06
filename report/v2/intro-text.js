@@ -64,5 +64,5 @@
     return { name: nm ? nm + '.' : '오늘 이야기의 주인공.', film: b[1] + ' 곁에서 ' + VERB[p[0]] + ' ' + s.short + ' 같은 기질을 타고난 ' + (gender === 'F' ? '여자' : '남자') + '.', title: HJ[si] + HJB[bi] + ' · ' + p + '일주', trait: PRO[p[0]] + ', ' + CON[tg] };
   }
 
-  R.IntroText = { ilganCard: ilganCard, ijuCard: ijuCard, ilgan: ilgan, ilganTitle: ilganTitle, iju: iju, all60: all60, STEMS: STEMS };
+  R.IntroText = { DATA: { S: S, B: B, TG: TG, PRO: PRO, CON: CON, VERB: VERB, tenGod: tenGod, STEMS: STEMS, BR: BR }, ilganCard: ilganCard, ijuCard: ijuCard, ilgan: ilgan, ilganTitle: ilganTitle, iju: iju, all60: all60, STEMS: STEMS };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -16,7 +16,7 @@
     try { ch = M.compute({ year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: TS.gender, city: '서울' }); sd = R.SajuData.build(ch, { now: now }); } catch (e) { err = (e && e.message) || '계산 실패'; }
     var form = '<div class="pvh" style="margin-bottom:12px"><label>생년월일<input type="date" id="stD" value="' + esc(TS.date) + '"></label><label>시각<input type="time" id="stT" value="' + esc(TS.time) + '"></label><label>성별<select id="stG"><option value="M"' + (TS.gender === 'M' ? ' selected' : '') + '>남</option><option value="F"' + (TS.gender === 'F' ? ' selected' : '') + '>여</option></select></label>' +
       '<label>관심 분야<select id="stI">' + D.INTERESTS.map(function (i) { return '<option value="' + i.id + '"' + (TS.interest === i.id ? ' selected' : '') + '>' + esc(i.name) + '</option>'; }).join('') + '</select></label><a class="btn" style="padding:8px 14px" target="_blank" id="stOpen">뷰어에서 보기 ↗</a></div>';
-    var h = '<div class="card"><b style="color:var(--gold)">스토리 플로우 미리보기</b><p class="muted" style="margin:6px 0 12px">같은 사주라도 관심 분야에 따라 <b>순서·강조</b>만 달라지고, 원국·대운·세운·점수는 그대로입니다. 뷰어는 <code>/report/v2/?flow=life</code> 로 엽니다(결제 잠금 시험은 <code>&amp;gate=1</code>).</p>' + form;
+    var h = '<div class="card"><b style="color:var(--gold)">스토리 플로우 미리보기</b><p class="muted" style="margin:6px 0 12px">같은 사주라도 관심 분야에 따라 <b>순서·강조</b>만 달라지고, 원국·대운·세운·점수는 그대로입니다. 뷰어 <code>/report/v2/</code> 가 이 흐름이 기본입니다(예전 20챕터 순서는 <code>?flow=classic</code>, 결제 잠금 시험은 <code>&amp;gate=1</code>).</p>' + form;
     if (err) { box.innerHTML = h + '<p class="muted">' + esc(err) + '</p></div>'; bind(box, M); return; }
     var it = D.INTERESTS.filter(function (x) { return x.id === TS.interest; })[0], pr = D.profile(M, ch, sd, { now: now, interest: TS.interest });
     h += '<div class="cap2">GENERATED STORY FLOW · ' + esc(it.name) + '</div>' + table(['#', '이야기', '질문(내부)', '출처', '열람'], D.preview(TS.interest, pr.position).map(function (s) {
@@ -39,7 +39,7 @@
   function bind(box, M) {
     var go = function () { TS.date = $('#stD', box).value || TS.date; TS.time = $('#stT', box).value || TS.time; TS.gender = $('#stG', box).value; TS.interest = $('#stI', box).value; try { localStorage.setItem(KEY, JSON.stringify(TS)); } catch (e) { } draw(box, M); };
     ['#stD', '#stT', '#stG', '#stI'].forEach(function (s) { var e = $(s, box); if (e) e.onchange = go; });
-    var o = $('#stOpen', box); if (o) o.href = '/report/v2/?flow=life&qa=' + encodeURIComponent(TS.date + ',' + TS.time + ',' + TS.gender);
+    var o = $('#stOpen', box); if (o) o.href = '/report/v2/?qa=' + encodeURIComponent(TS.date + ',' + TS.time + ',' + TS.gender);
   }
   window.V2Story = { open: function () { var box = document.getElementById('t-v2story'); if (!box) return; box.innerHTML = '<p class="muted">엔진을 불러오는 중…</p>'; C.engine().then(function (M) { draw(box, M); }).catch(function (e) { box.innerHTML = '<p class="muted">' + esc(e.message) + '</p>'; }); } };
 })();

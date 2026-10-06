@@ -153,7 +153,7 @@
     var nm = S.name; view('gate'); $('#gateName').innerHTML = nm ? esc(nm) + '에게는,<br>' + esc(nm) + '의 때가 있다.' : '모든 사람에게는,<br>각자의 때가 있다.';
     var b = $('#gateBtn'); b.onclick = function () { b.onclick = null; T('gate_tapped', {}); intro(); }; try { b.focus({ preventScroll: true }); } catch (e) { }
   }
-  function intro() { if (R.Bgm) R.Bgm.play('cinematic'); ilganStage(function () { ijuStage(function () { bridgeStage(LIFE ? lifeBegin : prologue); }); }); } // 배경음악은 일간 인트로(첫 화면)부터 흐른다(입력 제출 = 사용자의 첫 터치)
+  function intro() { if (R.Bgm) R.Bgm.play('cinematic'); ilganStage(function () { ijuStage(function () { bridgeStage(prologue); }); }); } // 배경음악은 일간 인트로(첫 화면)부터 흐른다(입력 제출 = 사용자의 첫 터치)
   function cinemaMediaFor(used) { return function (sc) { if (sc.bg === 'black' || sc.phTone) return null; return R.Director.pickMedia(sc, (S.pack && S.pack.lib && S.pack.lib.media) || S.media, { usedIds: used }, sc.chapterId || 'c00'); }; }
   /* 재생 속도(관리자 설정 flow.playbackRate · 확인용 ?rate=3): INTRO 타임라인·본문 머묾·이동에 적용한다. 허용: 0.5 · 0.75 · 1 · 1.25 · 1.5 · 2 · 3 */
   var RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
@@ -182,7 +182,7 @@
   function prologue() {
     T('prologue_started', {}); var p = prologueScenes();
     if (/^EPIC_WUXIA_/.test(p.E.style) && R.Bgm && R.Bgm.mix) R.Bgm.mix(0.45, 300);
-    playCinema(p.scenes, function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', {}); beginReader(); }, '프롤로그');
+    playCinema(p.scenes, function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', {}); if (LIFE) lifeBegin(); else beginReader(); }, '프롤로그');
   }
   /* 엔딩: 사주는 결말을 적어 놓은 대본이 아니다 … 다음 장면을 만드는 사람은 결국 당신이다 */
   function endingCinema(then) {
@@ -193,7 +193,7 @@
 
   /* ── 4. 리포트(챕터·Scene) ──────────────────────────────────────────────── */
   /* ── 4a. 인생 지도 흐름(?flow=life): 기존 챕터는 그대로 두고, 이야기 순서만 StoryDirector 가 정한다 ── */
-  var LIFE = /[?&]flow=life(&|$)/.test(location.search);
+  var LIFE = !PREVIEW && !/[?&]flow=(classic|old)(&|$)/.test(location.search); // 인생 지도 흐름이 기본. ?flow=classic 으로 예전 20챕터 순서 흐름, 관리자 미리보기(?preview=1)는 예전 흐름
   function lifeChapters(bases) { var all = S.repAll.chapters, out = []; bases.forEach(function (b) { all.forEach(function (c) { if ((c.base || c.id) === b && out.indexOf(c) < 0) out.push(c); }); }); return out; }
   function lifePlay(bases, o) {
     var chs = lifeChapters(bases); if (!chs.length) { toast('이 이야기는 아직 준비 중입니다.'); if (o.onBack) o.onBack(); return; }
