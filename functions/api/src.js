@@ -110,7 +110,17 @@ export async function onRequest({ request, env }) {
     const todo = chunks.filter(c => c.status === 'pending').slice(0, want); let added = 0, failed = 0, provider = '';
     for (const c of todo) {
       try {
-        const r = await llm(env, S.extractSystem(), S.extractUser(d, c), 8000, 100000); provider = r.provider; const got = S.parseCandidates(r.text, c); if (!got) { const t = String(r.text || '').replace(/\s+/g, ' '); throw new Error('AI 답이 후보 형식이 아닙니다 (중단: ' + (r.stop || '?') + ', ' + t.length + '자) ' + t.slice(0, 60) + ' … ' + t.slice(-60)); }
+        // 응답이 길어 잘리면(max_tokens) 이미 뽑은 후보를 빼고 이어서 다시 요청한다(구간당 최대 4회)
+        const got = [];
+        for (let round = 0; round < 4; round++) {
+          let r, part;
+          try { r = await llm(env, S.extractSystem(), S.extractUser(d, c, got.map(x => x.suggested.title || x.sourceClaim.slice(0, 40))), 8000, 100000); provider = r.provider; part = S.parseCandidates(r.text, c); }
+          catch (e) { if (got.length) break; throw e; } // 이어받기에서 실패해도 앞서 얻은 후보는 살린다
+          if (!part) { if (got.length) break; const t = String(r.text || '').replace(/s+/g, ' '); throw new Error('AI 답이 후보 형식이 아닙니다 (중단: ' + (r.stop || '?') + ', ' + t.length + '자) ' + t.slice(0, 60) + ' … ' + t.slice(-60)); }
+          const seen = new Set(got.map(x => S.fold(x.sourceClaim))), fresh = part.filter(x => !seen.has(S.fold(x.sourceClaim)));
+          got.push(...fresh);
+          if (r.stop !== 'max_tokens' || !fresh.length) break;
+        }
         for (const x of got) { d.candSeq = (d.candSeq || 0) + 1; const cand = { id: 'k' + d.candSeq, chunkId: c.id, location: { pageStart: c.pageStart, pageEnd: c.pageEnd, heading: c.heading, lineStart: c.lineStart, lineEnd: c.lineEnd }, status: 'new', createdAt: new Date().toISOString(), ...x }; cand.compare = S.compareCandidate(cand, items); cand.validation = S.validateCandidate(cand, { doc: d, chunk: c, items }); cands.push(cand); added++; }
         c.status = 'done'; c.cands = got.length; c.error = '';
       } catch (e) { c.status = 'failed'; c.error = String(e.message || e).slice(0, 200); failed++; }
