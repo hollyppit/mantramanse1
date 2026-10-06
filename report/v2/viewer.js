@@ -135,7 +135,7 @@
   function ijuStage(next) { // 일주: 기존 변신(캐릭터) 영상은 설명 없이 재생 → 끝나면 주인공 소개 카드(이름 · 한 문장 · 庚午 · 경오일주 · 장점 1 + 약점 1) 약 7초
     var v = S.awk && S.awk.video, fb = S.awk && S.awk.fallback, sd = S.sd, clip = v || fb, hasClip = !!(clip && (clip.videoUrl || clip.videoWebm));
     var c = R.IntroText.ijuCard(sd.dayPillar.ko, S.name, sd.gender), br = function (t) { return esc(t).replace(/\n/g, '<br>'); };
-    var card = c ? { hold: 5000, html: '<div class="ic-name">' + br(c.name) + '</div><div class="ic-film">' + br(c.film) + '</div><div class="ic-ttl">' + esc(c.title) + '</div><div class="ic-trait">' + br(c.trait) + '</div>' } : null;
+    var card = c ? { hold: 5000, html: '<div class="ic-ttl">' + esc(c.title) + '</div><div class="ic-trait">' + br(c.trait) + '</div>' } : null;
     if (!hasClip && !card) { next(); return; }
     playStage({ kind: 'iju', clip: hasClip ? clip : null, noCap: true, cardOnly: !hasClip, card: card, cardAt: 3000, onDone: next });
   }
