@@ -4,12 +4,27 @@ const root = path.join(__dirname, '..');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json' };
 let awkExtra = { fallback: null, publicBase: '', textOnly: false }, rc = null, mediaList = [], awk = [], ilg = [], story = null, intro = { on: false, src: null, srcMobile: null, skipAfter: 0, once: 'session' }, clips = [], defaults = {}, chapters = null, folders = [], files = {};
 const ikMem = new Map(), ikEnv = { ADMIN_PASSWORD: 'test', GLOSSARY_KV: { get: async (k, t) => { const v = ikMem.get(k); return v == null ? null : t === 'json' ? JSON.parse(v) : v; }, put: async (k, v) => { ikMem.set(k, v); } } };
+// 로컬 확인용 가짜 AI(Anthropic): 구간의 첫 긴 문장을 원문 인용으로 삼아 키워드로 조건을 읽어 후보 1개를 돌려준다
+const r2mem = new Map(); ikEnv.ANTHROPIC_API_KEY = 'mock'; ikEnv.CLIPS_R2 = { put: async (k, v) => { r2mem.set(k, Buffer.from(v)); }, get: async k => (r2mem.has(k) ? { body: r2mem.get(k), httpMetadata: { contentType: 'application/pdf' } } : null), delete: async k => { r2mem.delete(k); } };
+const realFetch = global.fetch;
+global.fetch = async (u, o) => {
+  if (!String(u).includes('api.anthropic.com')) return realFetch(u, o);
+  const msg = JSON.parse(o.body).messages[0].content, body = (msg.split('[원문]\n')[1] || '').split('[원문 끝]')[0], sents = body.replace(/^#.*$/gm, '').split(/(?<=[.다])\s+/).map(x => x.trim()).filter(x => x.length >= 20 && !/^\[\d+쪽\]/.test(x) && !/^#/.test(x)), claim = sents[0];
+  const cands = []; if (claim && /경금|庚|신약|身弱|관살|官殺|재성|비겁|인성/.test(claim)) { const c = {}; if (/경금|庚/.test(claim)) c.dayMaster = ['경']; if (/신약|身弱/.test(claim)) c.strength = ['신약']; else if (/신강|身強/.test(claim)) c.strength = ['신강']; const g = {}; if (/관살|官殺|관성/.test(claim)) g['관성'] = 'strong'; if (/재성.*약|재성이 약/.test(claim)) g['재성'] = 'weak'; if (Object.keys(g).length) c.group = g;
+    cands.push({ sourceClaim: claim.slice(0, 380), title: (c.dayMaster ? '경금 ' : '') + (c.strength ? c.strength[0] + ' ' : '') + (g['관성'] ? '관성 강' : g['재성'] ? '재성 약' : '해석'), domains: g['재성'] ? ['MONEY'] : ['CAREER', 'SELF'], subDomain: g['재성'] ? 'moneyStructure' : 'aptitude', stance: 'caution', conditions: c, principle: '원문의 핵심 주장을 요약한 원리입니다.', interpretation: '자신의 여유보다 외부 요구나 책임이 크게 느껴질 수 있는 구조로 읽을 수 있습니다.', behaviorPatterns: ['업무량이 늘 때 쉬는 시간이 줄어드는 장면이 반복될 수 있습니다.'], strengths: ['책임을 끝까지 지려는 힘이 있습니다.'], risks: ['피로가 쌓이기 쉽습니다.'], actions: ['맡은 일의 범위를 먼저 정리해 보세요.'], realWorldExamples: { worker: '성과 압박이 큰 팀에서 특히 크게 느껴질 수 있습니다.' }, modifiers: /인성/.test(body) ? [{ when: { group: { 인성: 'strong' } }, effect: 'soften', text: '인성이 받쳐 주면 부담이 완화됩니다.' }] : [], theoryTags: ['억부'], extractionConfidence: 'HIGH', ambiguity: [] }); }
+  return new Response(JSON.stringify({ content: [{ type: 'text', text: JSON.stringify({ candidates: cands }) }], model: 'mock' }), { status: 200 });
+};
 const send = (r, code, obj) => { r.statusCode = code; r.setHeader('content-type', 'application/json; charset=utf-8'); r.end(JSON.stringify(obj)); };
 const authed = q => (q.headers.authorization || '') === 'Bearer test';
 const body = q => new Promise(res => { const b = []; q.on('data', c => b.push(c)); q.on('end', () => res(Buffer.concat(b))); });
 
 http.createServer(async (q, r) => {
   const u = new URL(q.url, 'http://x'), p = u.pathname;
+  if (p === '/api/src') { // 실제 functions/api/src.js 를 메모리 KV 로 실행(AI 는 위의 가짜)
+    const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/src.js')).href), buf = q.method === 'POST' ? await body(q) : undefined;
+    const res = await mod.onRequest({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': q.headers['content-type'] || 'application/json' }, body: buf }) });
+    r.statusCode = res.status; const ct = res.headers.get('content-type') || 'application/json'; r.setHeader('content-type', ct); return r.end(Buffer.from(await res.arrayBuffer()));
+  }
   if (p === '/api/free-content') { // 실제 functions/api/free-content.js 를 메모리 KV 로 실행
     const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/free-content.js')).href), buf = q.method === 'PUT' ? await body(q) : undefined;
     const res = await (q.method === 'PUT' ? mod.onRequestPut : mod.onRequestGet)({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': 'application/json' }, body: buf }) });

@@ -6,33 +6,7 @@
 import { json, isAdmin, configError } from '../_lib.js';
 import * as IK from '../_ik.js';
 
-const MAX_PER_DOMAIN = 2000, MAX_BYTES = 20 * 1024 * 1024, TIMEOUT_MS = 40000;
-const dkey = d => 'ik:d:' + d;
-const loadDomain = async (kv, d) => (await kv.get(dkey(d), 'json')) || [];
-async function loadAll(kv, domains) { const ds = domains || Object.keys(IK.DOMAINS); return (await Promise.all(ds.map(d => loadDomain(kv, d)))).flat(); }
-async function meta(kv) { return (await kv.get('ik:meta', 'json')) || { k: 'k0', d: 'd0', r: 'r0' }; }
-async function bump(kv, which) { const m = await meta(kv); m[which] = which + Date.now().toString(36); await kv.put('ik:meta', JSON.stringify(m)); return m; }
-const scrub = sd => { if (!sd || typeof sd !== 'object') return sd; const c = { ...sd }; delete c.birth; return c; }; // 생년월일·출생시는 풀이 계층에 필요 없다
-
-async function llm(env, system, user, maxTokens = 6000) {
-  const errs = [];
-  if (env.ANTHROPIC_API_KEY) {
-    try {
-      const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: maxTokens, temperature: 0.3, system, messages: [{ role: 'user', content: user }] }) });
-      if (!r.ok) throw new Error('anthropic ' + r.status);
-      const d = await r.json(); return { text: (d.content || []).filter(b => b.type === 'text').map(b => b.text).join(''), provider: 'anthropic' };
-    } catch (e) { errs.push(e.message); }
-  }
-  if (env.OPENAI_API_KEY) {
-    try {
-      const r = await fetch('https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: system, input: user }) });
-      if (!r.ok) throw new Error('openai ' + r.status);
-      const d = await r.json(); return { text: typeof d.output_text === 'string' ? d.output_text : (d.output || []).flatMap(o => o.content || []).map(c => c.text || '').join(''), provider: 'openai' };
-    } catch (e) { errs.push(e.message); }
-  }
-  throw new Error(errs.join(' / ') || 'AI 키가 없습니다');
-}
+import { MAX_PER_DOMAIN, MAX_BYTES, dkey, loadDomain, loadAll, meta, bump, scrub, llm, blockedDocs } from '../_ikstore.js';
 
 export async function onRequest({ request, env }) {
   const url = new URL(request.url), a = url.searchParams.get('a') || '', post = request.method === 'POST';
@@ -112,7 +86,7 @@ export async function onRequest({ request, env }) {
     try {
       const [items, design, rules, m] = await Promise.all([loadAll(kv, [b.domain]), kv.get('ik:design', 'json'), kv.get('ik:rules', 'json'), meta(kv)]);
       const rl0 = rules || IK.DEFAULT_RULES, rl = IK.DEPTH_CAP[b.depth] ? { ...rl0, depth: b.depth } : rl0, fi = b.focus ? IK.cleanItem({ ...b.focus, status: 'published', reviewed: true }) : null; // 편집 중(저장 전) 풀이를 이번 실행에만 포함
-      const pool = fi ? items.filter(x => x.id !== fi.id).concat(fi) : items, pkg = IK.buildPackage(scrub(b.sd), b.ext, pool, design, rl, { domain: b.domain, includeDraft: !!b.includeDraft });
+      const pool = fi ? items.filter(x => x.id !== fi.id).concat(fi) : items, pkg = IK.buildPackage(scrub(b.sd), b.ext, pool, design, rl, { domain: b.domain, includeDraft: !!b.includeDraft, blockedDocs: b.includeDraft ? null : await blockedDocs(kv) });
       pkg.versions = { knowledge: m.k, design: m.d, rules: m.r, composer: IK.COMPOSER_VERSION };
       let composed = IK.composePlain(pkg, rl), mode = 'plain', provider = null, cached = false, aiError = null;
       if (b.compose === 'ai') {
@@ -124,8 +98,8 @@ export async function onRequest({ request, env }) {
           catch (e) { aiError = e.message; }
         }
       }
-      const allItems = b.scan ? await loadAll(kv) : null, pool2 = fi && allItems ? allItems.filter(x => x.id !== fi.id).concat(fi) : allItems, scan = [];
-      if (b.scan) for (const d of Object.keys(IK.DOMAINS)) { const p = IK.buildPackage(scrub(b.sd), b.ext, pool2, design, rl, { domain: d, includeDraft: !!b.includeDraft }), ids = p.order, ok = ids.filter(i => p.sections[i].status === 'ok'), lack = ids.filter(i => p.sections[i].status === 'insufficient'); scan.push({ domain: d, name: IK.DOMAINS[d], ok: ok.length, lacking: lack.length, lackingRequired: lack.filter(i => p.sections[i].required).length, lackSections: lack.map(i => ({ id: i, title: p.sections[i].title, required: p.sections[i].required })) }); }
+      const blocked = b.scan && !b.includeDraft ? await blockedDocs(kv) : null, allItems = b.scan ? await loadAll(kv) : null, pool2 = fi && allItems ? allItems.filter(x => x.id !== fi.id).concat(fi) : allItems, scan = [];
+      if (b.scan) for (const d of Object.keys(IK.DOMAINS)) { const p = IK.buildPackage(scrub(b.sd), b.ext, pool2, design, rl, { domain: d, includeDraft: !!b.includeDraft, blockedDocs: b.includeDraft ? null : blocked }), ids = p.order, ok = ids.filter(i => p.sections[i].status === 'ok'), lack = ids.filter(i => p.sections[i].status === 'insufficient'); scan.push({ domain: d, name: IK.DOMAINS[d], ok: ok.length, lacking: lack.length, lackingRequired: lack.filter(i => p.sections[i].required).length, lackSections: lack.map(i => ({ id: i, title: p.sections[i].title, required: p.sections[i].required })) }); }
       return json({ ok: true, package: pkg, composed, mode, provider, cached, aiError, quality: IK.qualityCheck(pkg, composed, rl), diagnosis: IK.diagnose(pkg, composed), scan: b.scan ? scan : null, depth: rl.depth });
     } catch (e) { return json({ error: e.message || '실패' }, 400); }
   }
@@ -138,7 +112,7 @@ async function publicPackage(request, env) {
   if (!IK.DOMAINS[b.domain]) return json({ ok: false, error: 'bad-domain' }, 400);
   try {
     const [items, design, rules, m] = await Promise.all([loadAll(kv, [b.domain]), kv.get('ik:design', 'json'), kv.get('ik:rules', 'json'), meta(kv)]);
-    const pkg = IK.buildPackage(scrub(b.sd), b.ext, items, design, rules || IK.DEFAULT_RULES, { domain: b.domain, includeDraft: false });
+    const pkg = IK.buildPackage(scrub(b.sd), b.ext, items, design, rules || IK.DEFAULT_RULES, { domain: b.domain, includeDraft: false, blockedDocs: await blockedDocs(kv) });
     pkg.versions = { knowledge: m.k, design: m.d, rules: m.r, composer: IK.COMPOSER_VERSION };
     return json({ ok: true, package: pkg });
   } catch (e) { return json({ ok: false, error: 'bad-input' }, 400); }
@@ -155,8 +129,8 @@ async function deepForService(request, env) {
   try {
     const [design, rules] = await Promise.all([kv.get('ik:design', 'json'), kv.get('ik:rules', 'json')]), rl = rules || IK.DEFAULT_RULES;
     if (rl.serviceEnabled === false) return json({ ok: true, enabled: false, domains: {} });
-    const out = {};
-    for (const d of doms) { const items = await loadDomain(kv, d), pkg = IK.buildPackage(scrub(b.sd), b.ext, items, design, rl, { domain: d, includeDraft: false }), v = IK.deepView(pkg, IK.composePlain(pkg, rl)); if (v.sections.length) out[d] = v; }
+    const out = {}, blocked = await blockedDocs(kv);
+    for (const d of doms) { const items = await loadDomain(kv, d), pkg = IK.buildPackage(scrub(b.sd), b.ext, items, design, rl, { domain: d, includeDraft: false, blockedDocs: blocked }), v = IK.deepView(pkg, IK.composePlain(pkg, rl)); if (v.sections.length) out[d] = v; }
     return json({ ok: true, enabled: true, domains: out, v: (await meta(kv)).k });
   } catch (e) { return json({ ok: false, error: 'bad-input' }, 400); }
 }

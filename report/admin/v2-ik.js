@@ -192,6 +192,11 @@
   }
   function startNew(domain, sub, conds) { var host = document.getElementById('t-ikknow'); PANE = host; (G.meta ? Promise.resolve() : loadMeta()).then(function () { return G.items ? 0 : loadItems(); }).then(function () { wizard(host, blank(domain, sub, conds), true); }); }
 
+  /* ───────── 근거 자료(원문 추적) ───────── */
+  var evLoc = function (e) { return (e.pageStart ? (e.pageEnd && e.pageEnd !== e.pageStart ? e.pageStart + '~' + e.pageEnd + '쪽' : e.pageStart + '쪽') : '') + (e.heading ? (e.pageStart ? ' · ' : '') + e.heading : ''); };
+  function evList(a) { return (a || []).map(function (e) { return '<div class="ik-k" style="display:flex;gap:8px;align-items:center;justify-content:space-between"><span><b>' + esc(e.title || '자료') + '</b> <span class="muted">' + esc(evLoc(e)) + '</span>' + (e.quote ? '<div class="why">“' + esc(e.quote.slice(0, 90)) + (e.quote.length > 90 ? '…' : '') + '”</div>' : '') + '</span><button type="button" data-ev="' + esc(e.docId) + '|' + esc(e.chunkId) + '|' + esc((e.quote || '').slice(0, 60)) + '">원문 보기</button></div>'; }).join(''); }
+  function bindEv(root) { [].slice.call(root.querySelectorAll('[data-ev]')).forEach(function (b) { b.onclick = function () { var p = b.dataset.ev.split('|'); if (window.V2Src) window.V2Src.viewChunk(p[0], p[1], p[2]); else toast('풀이 자료 화면이 불러와지지 않았습니다', true); }; }); }
+
   /* ───────── 상세(읽기) 화면 ───────── */
   function detailView(host, it) {
     var ul = function (a) { return a && a.length ? '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '<p class="muted">없음</p>'; }, ex = it.realWorldExamples || {}, exs = [['직장인', ex.worker], ['사업자', ex.business], ['프리랜서', ex.freelance], ['연애/관계', ex.love]].filter(function (x) { return x[1]; });
@@ -201,9 +206,9 @@
       '<h4>핵심 풀이</h4><blockquote>' + esc(it.interpretation || '(아직 작성 전)') + '</blockquote>' + '<h4>현실에서는</h4>' + ul(it.behaviorPatterns) + (exs.length ? exs.map(function (x) { return '<p><b>' + x[0] + '</b> ' + esc(x[1]) + '</p>'; }).join('') : '') +
       '<div class="ik-g2"><div><h4>장점</h4>' + ul(it.strengths) + '</div><div><h4>주의할 점</h4>' + ul(it.risks) + '</div></div>' + (it.actions.length ? '<h4>해볼 것</h4>' + ul(it.actions) : '') +
       '<h4>이 풀이가 달라지는 경우</h4>' + (it.modifiers.length ? '<ul>' + it.modifiers.map(function (m) { return '<li><b>' + esc(sentence(m.when)) + '</b> → ' + EFFECT[m.effect] + (m.text ? ': ' + esc(m.text) : '') + '</li>'; }).join('') + '</ul>' : '<p class="muted">없음</p>') +
-      '<h4>적용하지 않는 경우</h4>' + (isEmpty(it.exclusions) ? '<p class="muted">없음</p>' : '<p>' + esc(sentence(it.exclusions)) + '</p>') + (it.principle ? '<details style="margin-top:12px"><summary class="muted">명리학적 근거 펼쳐보기</summary><p>' + esc(it.principle) + '</p></details>' : '') + (it.sourceReference ? '<p class="muted" style="font-size:.78rem;margin-top:10px">출처: ' + esc(it.sourceReference) + (it.sourceMemo ? ' · ' + esc(it.sourceMemo) : '') + '</p>' : '') + '</div>' +
+      '<h4>적용하지 않는 경우</h4>' + (isEmpty(it.exclusions) ? '<p class="muted">없음</p>' : '<p>' + esc(sentence(it.exclusions)) + '</p>') + (it.principle ? '<details style="margin-top:12px"><summary class="muted">명리학적 근거 펼쳐보기</summary><p>' + esc(it.principle) + '</p></details>' : '') + (it.evidence && it.evidence.length ? '<h4>근거 자료 ' + it.evidence.length + '개</h4>' + evList(it.evidence) : '') + (it.sourceReference ? '<p class="muted" style="font-size:.78rem;margin-top:10px">출처: ' + esc(it.sourceReference) + (it.sourceMemo ? ' · ' + esc(it.sourceMemo) : '') + '</p>' : '') + '</div>' +
       '<div class="ik-foot"><button id="dTest">테스트</button><button id="dEdit" class="pri">수정</button><button id="dDup">복제</button><button id="dPub">' + (it.status === 'published' ? '비공개로 전환' : '게시') + '</button><button id="dHist">변경 이력</button></div>';
-    $('#dBack', host).onclick = knowOpen; $('#dEdit', host).onclick = function () { wizard(host, clone(it), false); };
+    bindEv(host); $('#dBack', host).onclick = knowOpen; $('#dEdit', host).onclick = function () { wizard(host, clone(it), false); };
     $('#dTest', host).onclick = function () { G.focus = { item: clone(it) }; window.AdminShowTab('iklab'); };
     $('#dDup', host).onclick = function () { var c = clone(it); c.id = nextId(c.domain); c.title += ' (복사)'; c.status = 'draft'; c.reviewed = false; c.reviewedAt = ''; c.version = 0; if (c.sourceType === 'AI_DRAFT') c.sourceType = 'internal'; wizard(host, c, true); toast('복제했습니다 — 저장하면 새 풀이가 됩니다'); };
     $('#dPub', host).onclick = function () {
@@ -216,8 +221,8 @@
   function histDialog(it, pick) {
     api('/api/ik?a=hist&id=' + encodeURIComponent(it.id)).then(function (d) {
       var h = d.history, dlg = document.createElement('dialog'); dlg.className = 'ik-dlg'; dlg.innerHTML = '<h3>변경 이력</h3>' + (h.length ? h.map(function (x, i) { return '<div class="ik-k"><b>' + date(x.at) + '</b> · 이전 버전' + (x.deleted ? ' · 삭제됨' : '') + '<div class="why">' + esc(x.item.title) + ' — ' + esc((x.item.interpretation || '').slice(0, 80)) + '</div><button type="button" data-r="' + i + '" style="margin-top:4px">이 내용으로 되돌려 수정</button></div>'; }).join('') : '<p class="muted">이전 버전이 없습니다.</p>') + '<div class="ik-bar"><button data-close>닫기</button></div>';
-      document.body.appendChild(dlg); dlg.showModal(); dlg.onclose = function () { dlg.remove(); }; $('[data-close]', dlg).onclick = function () { dlg.close(); };
-      $$('[data-r]', dlg).forEach(function (b) { b.onclick = function () { var old = clone(h[+b.dataset.r].item); old.version = it.version; dlg.close(); pick(old); toast('이전 내용을 불러왔습니다 — 저장하면 새 버전이 됩니다'); }; });
+      document.body.appendChild(dlg); dlg.showModal(); dlg.onclose = function () { dlg.remove(); }; $('[data-close]', dlg).onclick = function () { (dlg.close(), dlg.remove()); };
+      $$('[data-r]', dlg).forEach(function (b) { b.onclick = function () { var old = clone(h[+b.dataset.r].item); old.version = it.version; (dlg.close(), dlg.remove()); pick(old); toast('이전 내용을 불러왔습니다 — 저장하면 새 버전이 됩니다'); }; });
     }).catch(function (e) { toast(e.message, true); });
   }
 
@@ -225,6 +230,7 @@
   var STEPS = ['① 무엇에 대한 풀이인가', '② 언제 사용하나', '③ 어떤 내용인가', '④ 달라지는 경우 · 검수'];
   function sectionList(domain) { var dz = (G.design[domain] && G.design[domain].sections && G.design[domain].sections.length) ? G.design[domain] : G.meta.defaultDesign[domain]; return dz.sections; }
   function wizard(host, it, isNew, done) {
+    var base = blank(it.domain || 'MONEY', ''); Object.keys(base).forEach(function (k) { if (it[k] === undefined || it[k] === null) it[k] = base[k]; }); it.realWorldExamples = Object.assign({}, base.realWorldExamples, it.realWorldExamples); // 다른 화면(풀이 자료 검수 등)에서 온 초안에 빠진 칸을 채운다
     var step = 0, seen = {}, inModal = !!done;
     function draw() {
       host.innerHTML = (inModal ? '' : '<div class="ik-bar"><button id="wBack">← ' + (isNew ? '목록' : '상세') + '</button><b style="color:var(--gold)">' + (isNew ? '새 풀이 추가' : '풀이 수정') + '</b>' + (it.sourceType === 'AI_DRAFT' && !it.reviewed ? ' <span class="ik-st ik-ai">AI 초안 — 검수 전</span>' : '') + '</div>') +
@@ -302,10 +308,10 @@
   function aiDraftDialog() {
     var dlg = document.createElement('dialog'); dlg.className = 'ik-dlg';
     dlg.innerHTML = '<h3>AI로 풀이 초안 만들기</h3><p class="muted" style="font-size:.84rem">명리 자료를 붙여 넣으면 AI가 분야·적용 조건·핵심 풀이·장점·주의점·달라지는 경우를 정리해 <b>“AI 초안”</b>으로 저장합니다. 자료에 없는 내용은 만들지 않게 지시하지만, 반드시 직접 검수하세요. 검수 완료 전에는 서비스에 쓰이지 않고 자동 공개되지 않습니다.</p><textarea id="aiT" rows="10" placeholder="여기에 전문 자료를 붙여 넣으세요"></textarea><div class="ik-bar"><button class="pri" id="aiGo">초안 만들기</button><button id="aiX">닫기</button><span class="muted" id="aiM"></span></div>';
-    document.body.appendChild(dlg); dlg.showModal(); dlg.onclose = function () { dlg.remove(); }; $('#aiX', dlg).onclick = function () { dlg.close(); };
+    document.body.appendChild(dlg); dlg.showModal(); dlg.onclose = function () { dlg.remove(); }; $('#aiX', dlg).onclick = function () { (dlg.close(), dlg.remove()); };
     $('#aiGo', dlg).onclick = function () {
       var t = $('#aiT', dlg).value; if (t.trim().length < 30) return toast('자료를 30자 이상 붙여 넣어 주세요', true); $('#aiGo', dlg).disabled = true; $('#aiM', dlg).textContent = 'AI가 정리하는 중… (10~30초)';
-      post('draft', { text: t }).then(function (d) { dlg.close(); toast('AI 초안을 만들었습니다 — 내용을 검수하세요'); PANE = document.getElementById('t-ikknow'); return loadItems().then(function () { detailView(document.getElementById('t-ikknow'), d.item); }); }).catch(function (e) { $('#aiGo', dlg).disabled = false; $('#aiM', dlg).textContent = ''; toast(e.message, true); });
+      post('draft', { text: t }).then(function (d) { (dlg.close(), dlg.remove()); toast('AI 초안을 만들었습니다 — 내용을 검수하세요'); PANE = document.getElementById('t-ikknow'); return loadItems().then(function () { detailView(document.getElementById('t-ikknow'), d.item); }); }).catch(function (e) { $('#aiGo', dlg).disabled = false; $('#aiM', dlg).textContent = ''; toast(e.message, true); });
     };
   }
   function importLegacy() {
@@ -430,12 +436,15 @@
     var s = r.package.sections[secId]; toast('“' + s.title + '” 풀이를 만듭니다 — 조건은 이 사주의 값으로 미리 채웠으니 고쳐서 쓰세요');
     goKnow(function () { startNew(r.package.domain, secId, r.package.suggest); });
   }
-  function openEditModal(id, domain) { // 풀이 테스트 안에서 바로 수정 → 저장하면 다시 분석
-    api('/api/ik?a=get&domain=' + domain + '&id=' + encodeURIComponent(id)).then(function (d) {
-      var dlg = document.createElement('dialog'); dlg.className = 'ik-dlg'; dlg.innerHTML = '<div class="ik-bar" style="margin-top:0"><b style="color:var(--gold)">풀이 수정</b><span style="flex:1"></span><button data-close>닫기</button></div><div id="mHost"></div>';
-      document.body.appendChild(dlg); dlg.showModal(); var saved = PANE; dlg.onclose = function () { PANE = saved; dlg.remove(); }; dlg.querySelector('[data-close]').onclick = function () { dlg.close(); };
-      PANE = dlg; wizard(dlg.querySelector('#mHost'), d.item, false, function () { dlg.close(); toast('저장했습니다 — 다시 분석합니다'); G.focus = null; run(); });
+  function wizardModal(item, isNew, done) { // 풀이 지식 편집기를 대화창으로 연다(풀이 테스트·풀이 자료 검수에서 공용). 저장하면 done(저장된 항목)
+    (G.meta ? Promise.resolve() : loadMeta()).then(function () { return G.items ? 0 : loadItems(); }).then(function () {
+      var dlg = document.createElement('dialog'); dlg.className = 'ik-dlg'; dlg.innerHTML = '<div class="ik-bar" style="margin-top:0"><b style="color:var(--gold)">' + (isNew ? '풀이 지식 확인·수정' : '풀이 수정') + '</b><span style="flex:1"></span><button data-close>닫기</button></div><div id="mHost"></div>';
+      document.body.appendChild(dlg); dlg.showModal(); var saved = PANE, shut = function () { PANE = saved; try { (dlg.close(), dlg.remove()); } catch (e) { } dlg.remove(); }; dlg.onclose = function () { PANE = saved; dlg.remove(); }; dlg.querySelector('[data-close]').onclick = shut;
+      PANE = dlg; wizard(dlg.querySelector('#mHost'), item, isNew, function (it) { shut(); done(it); });
     }).catch(function (e) { toast(e.message, true); });
+  }
+  function openEditModal(id, domain) { // 풀이 테스트 안에서 바로 수정 → 저장하면 다시 분석
+    api('/api/ik?a=get&domain=' + domain + '&id=' + encodeURIComponent(id)).then(function (d) { wizardModal(d.item, false, function () { toast('저장했습니다 — 다시 분석합니다'); G.focus = null; run(); }); }).catch(function (e) { toast(e.message, true); });
   }
   function tabUsed(b, r) {
     var p = r.package, ok = p.matchedKnowledge, ex = p.excludedKnowledge, h = '';
@@ -457,12 +466,12 @@
       var s = p.sections[id]; if (s.status !== 'ok') return;
       h += '<details class="card" style="padding:8px 14px;margin:8px 0"><summary><b>' + esc(s.title) + '</b> <span class="muted" style="font-size:.8rem">· 풀이 지식 ' + s.items.length + '개 사용</span></summary>' + whyHtml(p, s) + '</details>';
     });
-    b.innerHTML = h; $('#lTech', b).onchange = function () { tech = this.checked; tabWhy(b, r); };
+    b.innerHTML = h; bindEv(b); $('#lTech', b).onchange = function () { tech = this.checked; tabWhy(b, r); };
   }
   function whyHtml(p, s) {
     var facts = []; s.items.forEach(function (i) { i.why.forEach(function (w) { if (facts.indexOf(w) < 0) facts.push(w); }); });
     var h = '<h4 style="margin:8px 0 2px;color:var(--gold);font-size:.82rem">사주에서 확인된 특징</h4>' + (facts.length ? facts.map(function (x) { return '<div>✓ ' + esc(x) + '</div>'; }).join('') : '<div class="muted">조건 없는 일반 풀이입니다</div>');
-    h += '<h4 style="margin:10px 0 2px;color:var(--gold);font-size:.82rem">사용된 풀이 지식</h4>' + s.items.map(function (i) { return '<div>✓ ' + esc(i.title) + (tech ? ' <small class="muted">[' + esc(i.id) + ' · 구체성 ' + i.spec + ']</small>' : '') + '</div>'; }).join('');
+    h += '<h4 style="margin:10px 0 2px;color:var(--gold);font-size:.82rem">사용된 풀이 지식</h4>' + s.items.map(function (i) { return '<div>✓ ' + esc(i.title) + (tech ? ' <small class="muted">[' + esc(i.id) + ' · 구체성 ' + i.spec + ']</small>' : '') + '</div>' + (i.evidence && i.evidence.length ? '<div style="margin:2px 0 6px 14px">' + evList(i.evidence) + '</div>' : ''); }).join('');
     var mods = []; s.items.forEach(function (i) { i.modifiers.forEach(function (m) { mods.push(m); }); });
     h += '<h4 style="margin:10px 0 2px;color:var(--gold);font-size:.82rem">해석을 바꾼 조건</h4>' + (mods.length ? mods.map(function (m) { return '<div>✓ ' + EFFECT[m.effect] + ' — ' + esc(m.text || '') + '</div>'; }).join('') : '<div class="muted">없음</div>');
     var conf = s.items.reduce(function (a, i) { return a + ({ high: 3, mid: 2, low: 1 })[i.confidence]; }, 0) / (s.items.length || 1);
@@ -474,7 +483,7 @@
     dr.innerHTML = '<div class="ik-bar" style="margin-top:0"><b style="color:var(--gold)">왜 이렇게 해석했나요?</b><span style="flex:1"></span><button id="drX">닫기</button></div><div class="ik-sh" style="margin-top:6px"><b>' + esc(s.title) + '</b></div>' + whyHtml(p, s) +
       '<h4>관련 풀이 지식 열기</h4>' + s.items.map(function (i) { return '<div class="ik-k"><b>' + esc(i.title) + '</b><div class="ik-bar" style="margin:4px 0 0"><button type="button" data-edit="' + esc(i.id) + '">수정</button><button type="button" data-open="' + esc(i.id) + '">풀이 열기</button></div></div>'; }).join('') +
       '<label style="display:flex;gap:6px;align-items:center;font-size:.8rem;margin-top:12px"><input type="checkbox" id="drT" style="width:auto"' + (tech ? ' checked' : '') + '> 기술 정보 보기</label>';
-    document.body.appendChild(dr); dr.querySelector('#drX').onclick = function () { dr.remove(); };
+    document.body.appendChild(dr); bindEv(dr); dr.querySelector('#drX').onclick = function () { dr.remove(); };
     dr.querySelector('#drT').onchange = function () { tech = this.checked; evidence(r, secId); };
     [].slice.call(dr.querySelectorAll('[data-edit]')).forEach(function (a) { a.onclick = function () { dr.remove(); openEditModal(a.dataset.edit, p.domain); }; });
     [].slice.call(dr.querySelectorAll('[data-open]')).forEach(function (a) { a.onclick = function () { dr.remove(); goKnow(function () { openDetail(a.dataset.open); }); }; });
@@ -489,5 +498,5 @@
     C.setPw(pw); PANE = document.getElementById('t-' + tab);
     if (tab === 'ikknow') knowOpen(); else if (tab === 'ikdesign') designOpen(); else if (tab === 'ikrules') rulesOpen(); else if (tab === 'iklab') labOpen();
     if (tab !== 'iklab') G.focus = null;
-  }, _state: G, _sentence: sentence };
+  }, _state: G, _sentence: sentence, wizardModal: wizardModal, testItem: function (it) { G.focus = { item: clone(it) }; window.AdminShowTab('iklab'); }, newFor: function (d, sub, conds) { goKnow(function () { startNew(d, sub, conds); }); }, openDetail: function (id) { goKnow(function () { openDetail(id); }); }, evList: evList };
 })();

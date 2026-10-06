@@ -161,6 +161,7 @@ summary { cursor:pointer; padding:4px 0; }
       <button data-t="v2story">스토리 플로우</button>
       <button data-t="v2proj">프로젝트</button>
       <button data-t="v2set">설정</button>
+      <button data-t="ikdoc">풀이 자료</button>
       <button data-t="ikknow">풀이 지식</button>
       <button data-t="ikdesign">풀이 구성</button>
       <button data-t="ikrules">AI 작성 설정</button>
@@ -236,7 +237,7 @@ summary { cursor:pointer; padding:4px 0; }
     </div>
 
     <!-- 커버리지 -->
-    <div id="t-v2clip"></div><div id="t-v2chap" class="hide"></div><div id="t-v2intro" class="hide"></div><div id="t-v2test" class="hide"></div><div id="t-v2story" class="hide"></div><div id="t-v2proj" class="hide"></div><div id="t-v2set" class="hide"></div><div id="t-ikknow" class="hide"></div><div id="t-ikdesign" class="hide"></div><div id="t-ikrules" class="hide"></div><div id="t-iklab" class="hide"></div><div id="t-freec" class="hide"></div>
+    <div id="t-v2clip"></div><div id="t-v2chap" class="hide"></div><div id="t-v2intro" class="hide"></div><div id="t-v2test" class="hide"></div><div id="t-v2story" class="hide"></div><div id="t-v2proj" class="hide"></div><div id="t-v2set" class="hide"></div><div id="t-ikdoc" class="hide"></div><div id="t-ikknow" class="hide"></div><div id="t-ikdesign" class="hide"></div><div id="t-ikrules" class="hide"></div><div id="t-iklab" class="hide"></div><div id="t-freec" class="hide"></div>
     <div id="t-cov" class="hide">
       <div class="card"><p class="muted" style="margin:0">일주 60개 × 9개 장에서 어느 칸이 비어 있는지 봅니다. <span class="chip">초록</span> 해당 일주를 직접 지정한 클립이 있음 · <span class="chip">파랑</span> 조건 없는 공통 클립으로 채워짐 · 회색 0은 비어 있음.</p></div>
       <div class="cov" style="margin-top:12px"><table id="covT"></table></div>
@@ -521,6 +522,7 @@ summary { cursor:pointer; padding:4px 0; }
 <script src="v2-shell.js"></script>
 <script src="v2-story.js"></script>
 <script src="v2-ik.js"></script>
+<script src="v2-src.js"></script>
 <script src="/shared-core.js"></script>
 <script src="../hub/free-core.js"></script>
 <script src="v2-free.js"></script>
@@ -1043,13 +1045,14 @@ summary { cursor:pointer; padding:4px 0; }
   };
 
   // ── 탭: 위쪽 5개(클립 라이브러리·챕터 관리·조합 테스트·프로젝트·설정). 설정 안의 하위 화면(입장 인트로·온보딩 페이지·기존 클립)은 also 로 함께 보여 준다.
-  var PANES = ['lib', 'test', 'cov', 'intro', 'home', 'v2clip', 'v2chap', 'v2intro', 'v2test', 'v2story', 'v2proj', 'v2set', 'ikknow', 'ikdesign', 'ikrules', 'iklab', 'freec'];
+  var PANES = ['lib', 'test', 'cov', 'intro', 'home', 'v2clip', 'v2chap', 'v2intro', 'v2test', 'v2story', 'v2proj', 'v2set', 'ikdoc', 'ikknow', 'ikdesign', 'ikrules', 'iklab', 'freec'];
   function showTab(t, also) {
     document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); });
     PANES.forEach(function (p) { var e = $('t-' + p); if (e) e.classList.toggle('hide', !(p === t || p === also)); });
     var cur = also || t; document.body.dataset.pane = cur;
     if (/^v2/.test(t) && window.V2Shell) window.V2Shell.open(t, S.pw, also);
-    if (/^ik/.test(t) && window.V2IK) window.V2IK.open(t, S.pw);
+    if (t === 'ikdoc' && window.V2Src) window.V2Src.open(t, S.pw);
+    else if (/^ik/.test(t) && window.V2IK) window.V2IK.open(t, S.pw);
     if (t === 'freec' && window.V2Free) window.V2Free.open(t, S.pw);
     if (cur === 'cov') renderCov();
     if (cur === 'intro') introLoad();

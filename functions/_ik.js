@@ -61,7 +61,17 @@ export function cleanConds(c) {
 }
 export const MOD_EFFECTS = ['strengthen', 'soften', 'replace', 'exception'];
 export const EFFECT_KO = { strengthen: '강화', soften: '완화', replace: '대체', exception: '예외' };
-function cleanModifier(m, i) {
+// 근거 자료(SourceEvidence): 풀이 지식 하나에 여러 자료의 원문 위치를 연결한다(1:N).
+export function cleanEvidence(a) {
+  const seen = new Set(), out = [];
+  for (const e of Array.isArray(a) ? a.slice(0, 40) : []) {
+    if (!e || typeof e !== 'object' || !/^[\w.-]{1,40}$/.test(e.docId || '')) continue; const k = e.docId + '|' + (e.chunkId || '') + '|' + (e.quote || '').slice(0, 20); if (seen.has(k)) continue; seen.add(k);
+    out.push({ docId: e.docId, title: str(e.title, 120), chunkId: /^[\w.-]{1,40}$/.test(e.chunkId || '') ? e.chunkId : '', pageStart: Math.max(0, Math.round(+e.pageStart) || 0), pageEnd: Math.max(0, Math.round(+e.pageEnd) || 0), heading: str(e.heading, 120), quote: str(e.quote, 500), addedAt: str(e.addedAt, 40) });
+    if (out.length >= 20) break;
+  }
+  return out;
+}
+export function cleanModifier(m, i) {
   if (!m || typeof m !== 'object') return null;
   const when = cleanConds(m.when); if (!Object.keys(when).length) return null;
   return { id: isId(m.id) ? m.id : 'm' + (i + 1), when, effect: MOD_EFFECTS.includes(m.effect) ? m.effect : 'strengthen', text: str(m.text, 600) };
@@ -81,6 +91,7 @@ export function cleanItem(b, prev) {
     principle: str(b.principle, 2000), interpretation: str(b.interpretation, 2000), strengths: strs(b.strengths, 12, 300), risks: strs(b.risks, 12, 300), behaviorPatterns: strs(b.behaviorPatterns, 12, 300), actions: strs(b.actions, 12, 300),
     realWorldExamples: { worker: str(ex.worker, 600), business: str(ex.business, 600), freelance: str(ex.freelance, 600), love: str(ex.love, 600) },
     sourceType, sourceReference: str(b.sourceReference, 200), sourceMemo: str(b.sourceMemo, 1000), confidence: conf, reviewed, reviewedAt: reviewed ? (str(b.reviewedAt, 40) || now) : '',
+    evidence: cleanEvidence(b.evidence !== undefined ? b.evidence : prev && prev.evidence), theory: strs(b.theory, 10, 20),
     tags: strs(b.tags, 20, 30), version: (prev && prev.version ? prev.version : 0), createdAt: (prev && prev.createdAt) || str(b.createdAt, 40) || now, updatedAt: now,
   };
   if (out.status === 'published' && unknownVars(out).length) { out.status = 'review'; out.blockedBy = 'placeholder'; } // 채울 수 없는 {…} 가 문장에 남아 있으면 공개하지 않는다
@@ -167,6 +178,7 @@ export function retrieve(items, facts, opts) {
     if (opts.domain && it.domain !== opts.domain) continue;
     if (it.status === 'archived') continue;
     if (!opts.includeDraft && !isProduction(it)) continue;
+    if (opts.blockedDocs && it.evidence && it.evidence.length && it.evidence.every(e => opts.blockedDocs.has(e.docId))) continue; // 근거 자료가 모두 비활성이거나 "Production 사용 OFF"
     const ev = evalItem(it, facts);
     const rec = { id: it.id, title: it.title, domain: it.domain, subDomain: it.subDomain, stance: it.stance, confidence: it.confidence, status: it.status, rows: ev.rows, spec: ev.spec, missing: ev.missing, general: !!ev.general };
     if (!ev.match) { if (ev.rows.some(r => r.hit) && !ev.missing.length) excluded.push({ ...rec, reason: 'unmatched' }); else if (ev.missing.length) excluded.push({ ...rec, reason: 'unsupported' }); continue; }
@@ -251,7 +263,7 @@ export const designFor = (design, domain) => (design && design[domain] && design
 export function buildPackage(sd, ext, items, design, rules, opts) {
   opts = opts || {}; const domain = opts.domain; if (!DOMAINS[domain]) throw new Error('알 수 없는 분야');
   const facts = deriveFacts(sd, ext), dz = designFor(design, domain), rl = rules || DEFAULT_RULES, V = tplVars(sd);
-  const { used, excluded } = retrieve(items, facts, { domain, includeDraft: !!opts.includeDraft });
+  const { used, excluded } = retrieve(items, facts, { domain, includeDraft: !!opts.includeDraft, blockedDocs: opts.blockedDocs });
   const conflicts = detectConflicts(used), loserIds = new Set(conflicts.filter(c => c.resolved).map(c => c.loser));
   const modifiers = [], appliedRules = [], sections = {}, order = [];
   const applied = new Map(); for (const u of used) { const m = applyModifiers(u, facts); applied.set(u.id, m); m.hits.forEach(h => modifiers.push(h)); }
@@ -262,7 +274,7 @@ export function buildPackage(sd, ext, items, design, rules, opts) {
     const max = (DEPTH_CAP[rl.depth] || DEPTH_CAP.standard).items, pick = here.slice(0, max);
     sections[sec.id] = { id: sec.id, title: sec.title, required: sec.required, status: 'ok', supporting: here.length, items: pick.map(u => {
       const a = applied.get(u.id), it = fillItem(u.item, V); a.interpretation = tplFill(a.interpretation, V); a.hits.forEach(h => { h.text = tplFill(h.text, V); });
-      return { id: u.id, title: it.title, stance: it.stance, confidence: it.confidence, spec: u.spec, interpretation: a.interpretation, replaced: a.replaced, principle: it.principle, strengths: it.strengths, risks: it.risks, behaviorPatterns: it.behaviorPatterns, actions: it.actions, realWorldExamples: it.realWorldExamples,
+      return { id: u.id, title: it.title, evidence: (it.evidence || []).map(e => ({ docId: e.docId, title: e.title, chunkId: e.chunkId, pageStart: e.pageStart, pageEnd: e.pageEnd, heading: e.heading })), stance: it.stance, confidence: it.confidence, spec: u.spec, interpretation: a.interpretation, replaced: a.replaced, principle: it.principle, strengths: it.strengths, risks: it.risks, behaviorPatterns: it.behaviorPatterns, actions: it.actions, realWorldExamples: it.realWorldExamples,
         modifiers: a.hits.map(h => ({ id: h.id, effect: h.effect, text: h.text })), why: u.rows.filter(r => r.hit).map(r => r.label + ' = ' + (Array.isArray(r.have) ? r.have.join(',') : r.have)) };
     }) };
     pick.forEach(u => appliedRules.push({ rule: 'section:' + sec.id, knowledge: u.id, specificity: u.spec }));
