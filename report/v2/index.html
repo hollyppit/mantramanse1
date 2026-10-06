@@ -74,7 +74,6 @@
   </section>
 
   <!-- 인생 지도 흐름(?flow=life) -->
-  <section id="v-life" class="view lf" aria-label="인생 지도" hidden></section>
 
   <!-- 최종 화면 -->
   <section id="v-final" class="view" hidden></section>
@@ -82,7 +81,7 @@
 
 <!-- 챕터 목록 -->
 <dialog id="drawer" aria-label="챕터 목록"><div class="dr"><div class="drh"><b>전체 챕터</b><button type="button" id="drClose" class="chipbtn" aria-label="닫기">닫기</button></div><ol id="drList"></ol></div></dialog>
-<button type="button" id="lifeBack" class="chipbtn" hidden>‹ 내 이야기 목록</button>
+<a id="hubBack" class="chipbtn" href="/report/hub/#/my" hidden>‹ MY 운명</a>
 <div id="toast" class="toast" role="status" hidden></div>
 
 <script src="/engine.js"></script>
@@ -117,7 +116,7 @@
 <script src="story-director.js"></script>
 <script src="story-composer.js"></script>
 <script src="content-v3.js"></script>
-<script src="life.js"></script>
+<script src="life-doc.js"></script>
 <script src="reader.js"></script>
 <script src="cinema-render.js"></script>
 <script src="viewer.js"></script>

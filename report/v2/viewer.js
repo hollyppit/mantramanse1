@@ -12,6 +12,7 @@
   var SEA_ICON = { opportunity: '◆', expansion: '▲', harvest: '●', accumulation: '■', transition: '◇', defense: '▽' }; // 색만으로 상태를 구분하지 않도록 글자·기호를 함께 쓴다
   var STAGES = ['타고난 명(命)을 읽고 있습니다', '기질과 힘의 방향을 가늠하고 있습니다', '10년마다 달라지는 운의 길을 이어 붙이고 있습니다', '움직일 때와 준비할 때를 가리고 있습니다', '한 편의 運路로 구성하고 있습니다'];
   var PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
+  var HUB = !PREVIEW && /[?&]from=hub(&|$)/.test(location.search); // /report/hub/ 에서 넘어온 경우: 일간·일주 영상·프롤로그는 허브가 이미 보여 줬으므로 건너뛰고 바로 인생 지도로 간다
   var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
   var view = function (v) { if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
   function toast(msg, ms) { var t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, ms || 3200); }
@@ -52,12 +53,12 @@
     S.sd = sd; S.birth = birthOf(ch); var t0 = Date.now();
     // 서버 저장본(콘텐츠·미디어·일간 소개 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
     Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story')]).then(function (a) {
-      var wait = Math.max(0, 2600 - (Date.now() - t0));
+      var wait = Math.max(0, (HUB ? 500 : 2600) - (Date.now() - t0));
       return new Promise(function (ok) { setTimeout(function () { ok(a); }, wait); });
     }).then(function (a) {
       S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
       S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null, textOnly: !!(a[2] && a[2].textOnly) }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
-      return aiCompose().then(function () { return a; });
+      return aiCompose().then(function () { if (LIFE && S.ch && R.LifeDoc) S.socP = R.LifeDoc.loadSocial({ M: window.Manse, ch: S.ch, sd: sd, now: Date.now() }); return a; });
     }).then(function () {
       clearInterval(tick);
       try { localStorage.setItem('mt_v2_seen', '1'); } catch (e) { }
@@ -148,7 +149,11 @@
   }
   var withCopy = function (scenes) { return R.Translator.applyCopy(scenes, S.pack && S.pack.sceneCopy, R.Narrator.heroVars(S.sd, S.name)); }; // 관리자가 고친 문구·이름 강조(content.sceneCopy)
   // 탭해서 시작: 배경음악이 있으면 일간 소개 직전에 한 번 터치를 받는다(터치가 있어야 소리를 낼 수 있다). 음악이 없거나 꺼 둔 경우·미리보기에서는 바로 시작한다.
+  // 허브 퍼널 이벤트: 허브(/report/hub/)와 같은 이름 그대로(gtag · dataLayer · 'mantra:track')로 내보낸다. v2 자체 이벤트(T)와는 따로 센다.
+  function funnel(n, p) { if (!HUB) return; p = Object.assign({ src: 'v2', from: 'hub' }, p || {}); try { if (typeof window.gtag === 'function') window.gtag('event', n, p); } catch (e) { } try { if (window.dataLayer && window.dataLayer.push) window.dataLayer.push(Object.assign({ event: n }, p)); } catch (e) { } try { window.dispatchEvent(new CustomEvent('mantra:track', { detail: { name: n, props: p } })); } catch (e) { } }
+  function hubStart() { funnel('movingtoon_start'); $('#hubBack').hidden = false; if (LIFE) lifeBegin(); else beginReader(); }
   function startGate() {
+    if (HUB) { hubStart(); return; }
     if (PREVIEW || !R.Bgm || !R.Bgm.has() || R.Bgm.isMuted()) { intro(); return; }
     var nm = S.name; view('gate'); $('#gateName').innerHTML = nm ? esc(nm) + '에게는,<br>' + esc(nm) + '의 때가 있다.' : '모든 사람에게는,<br>각자의 때가 있다.';
     var b = $('#gateBtn'); b.onclick = function () { b.onclick = null; T('gate_tapped', {}); intro(); }; try { b.focus({ preventScroll: true }); } catch (e) { }
@@ -194,17 +199,17 @@
   /* ── 4. 리포트(챕터·Scene) ──────────────────────────────────────────────── */
   /* ── 4a. 인생 지도 흐름(?flow=life): 기존 챕터는 그대로 두고, 이야기 순서만 StoryDirector 가 정한다 ── */
   var LIFE = !PREVIEW && !/[?&]flow=(classic|old)(&|$)/.test(location.search); // 인생 지도 흐름이 기본. ?flow=classic 으로 예전 20챕터 순서 흐름, 관리자 미리보기(?preview=1)는 예전 흐름
-  function lifeChapters(bases) { var all = S.repAll.chapters, out = []; bases.forEach(function (b) { all.forEach(function (c) { if ((c.base || c.id) === b && out.indexOf(c) < 0) out.push(c); }); }); return out; }
-  function lifePlay(bases, o) {
-    var chs = lifeChapters(bases); if (!chs.length) { toast('이 이야기는 아직 준비 중입니다.'); if (o.onBack) o.onBack(); return; }
-    S.rep = Object.assign({}, S.repAll, { acts: [{ id: 1, roman: o.kicker || 'DEEP DIVE', title: o.title || '', line: '', pdfDone: '' }], chapters: chs.map(function (c, i) { var x = Object.assign({}, c); x.act = 1; x.no = i + 1; x.actTransition = null; var rn = o.rename && o.rename[i]; if (rn) { x.title = rn.title || x.title; x.subtitle = rn.sub || x.subtitle; } return x; }) }); // rename: 전문용어 대신 사용자 질문을 제목으로, 명리 용어는 부제로
-    S.lifeBack = function () { $('#lifeBack').hidden = true; if (S.mv) { S.mv.destroy(); S.mv = null; } o.onBack && o.onBack(); };
-    S.visited = {}; S.ended = {}; view('reader'); $('#lifeBack').hidden = false; openDoc(0, { autoStart: !PREVIEW });
-  }
+  // 인생 지도 흐름도 기존과 같은 "자동 스크롤 읽기 문서"다. 선택·탭 없이 하나의 긴 문서로 이어지고(R.LifeDoc), 관심 분야(온보딩에서 고른 값)가 있으면 그 이야기가 먼저 나온다.
   function lifeBegin() {
-    S.repAll = S.rep; var plan = (S.repAll.chapters.filter(function (c) { return c.plan; })[0] || {}).plan || null;
-    $('#lifeBack').onclick = function () { if (S.lifeBack) S.lifeBack(); };
-    R.Life.begin({ M: window.Manse, ch: S.ch, sd: S.sd, now: Date.now(), name: S.name, interest: S.interest || '', plan: plan, gate: /[?&]gate=1(&|$)/.test(location.search), show: function () { view('life'); }, track: T, toast: toast, playChapters: lifePlay });
+    var rep0 = S.rep, plan = (rep0.chapters.filter(function (c) { return c.plan; })[0] || {}).plan || null; S.repPdf = rep0; // PDF·공유카드는 기존 20챕터 구성으로 만든다
+    var wait = new Promise(function (ok) { setTimeout(function () { ok(null); }, 4000); }); // 관계·결혼 AI 추정이 늦으면 규칙 추정으로 먼저 진행한다
+    Promise.race([S.socP || Promise.resolve(null), wait]).then(function (soc) {
+      var H = { M: window.Manse, ch: S.ch, sd: S.sd, now: Date.now(), name: S.name, interest: S.interest || '', rep: rep0, soc: soc, plan: plan };
+      if (!H.soc) { try { H.soc = R.StoryDirector.social(H.M, H.ch, H.sd, H.now); } catch (e) { H.soc = null; } }
+      var doc = null; try { doc = R.LifeDoc.build(H); } catch (e) { doc = null; }
+      if (doc && doc.chapters.length) { S.rep = Object.assign({}, rep0, { acts: doc.acts, chapters: doc.chapters }); S.visited = {}; S.ended = {}; T('life_doc_built', { chapters: doc.chapters.length }); }
+      beginReader();
+    });
   }
   function beginReader() { view('reader'); openDoc(0, { autoStart: !PREVIEW }); }
 
@@ -239,6 +244,7 @@
 
   function sceneHtml(c, s, i) {
     var t = s.sceneType, id = 'data-sc="' + esc(s.sceneId) + '"';
+    if (t === 'life') return s.html; // 인생 지도 문서의 새 구성 조각(R.LifeDoc 가 만든 HTML)
     if (t === 'cinema') return cinemaHtml(c, s);
     if (t === 'chapterIntro') {
       var act = S.rep.acts.filter(function (a) { return a.id === c.act; })[0] || {};
@@ -363,7 +369,7 @@
     if (R.Bgm && R.Bgm.has()) { var mo = c.scenes.filter(function (s) { return s.sceneType === 'insight' || s.sceneType === 'chapterIntro'; })[0]; R.Bgm.play(mo ? R.Cinema.resolve(mo, layersOf(mo)).bgmMood : 'minimal'); } // 챕터 분위기에 맞는 BGM
     checkUnlock(); ss('mt_v2_idx', String(ci));
   }
-  function onDocEnd() { if (S.lifeBack) { var b = S.lifeBack; S.lifeBack = null; b(); return; } if (!PREVIEW) endingCinema(finalView); } // 끝까지 읽어 주면 엔딩 장면으로 이어진다
+  function onDocEnd() { if (!PREVIEW) endingCinema(finalView); } // 끝까지 읽어 주면 엔딩 장면으로 이어진다
   // 문서 안 클릭·체크 처리(한 번만 등록). 어느 챕터의 것인지는 가장 가까운 .chap 에서 읽는다.
   (function () { var root = $('#chapter'), chOf = function (el) { var a = el.closest('.chap'); return S.rep.chapters[a ? +a.dataset.ch : S.idx]; };
     root.addEventListener('click', function (e) {
@@ -371,7 +377,7 @@
       var mo = e.target.closest('[data-mo]'); if (mo) { $$('.mo.sel', root).forEach(function (x) { x.classList.remove('sel'); x.style.borderColor = ''; }); mo.style.borderColor = 'var(--gold)'; moDetail(c, +mo.dataset.mo); return; }
       var vd = e.target.closest('[data-vd]'); if (vd) { var rp = vd.closest('.scene').querySelector('.vd-reply'); $$('[data-vd]', vd.parentNode).forEach(function (x) { x.setAttribute('aria-pressed', String(x === vd)); x.style.borderColor = x === vd ? 'var(--gold)' : ''; }); if (rp) rp.textContent = rp.getAttribute('data-' + vd.dataset.vd) || ''; T('verdict_answer', { chapter: c.id, answer: vd.dataset.vd }); if (S.mv) S.mv.choiceMade(); return; }
       var cta = e.target.closest('[data-cta]'); if (cta) { T('compatibility_cta_clicked', { chapter: c.id }); toast('두 사람의 궁합은 곧 열립니다. 조금만 기다려 주세요.'); }
-      if (e.target.id === 'finishBtn') { if (S.mv) S.mv.pause(); if (S.lifeBack) { onDocEnd(); return; } endingCinema(finalView); }
+      if (e.target.id === 'finishBtn') { if (S.mv) S.mv.pause(); endingCinema(finalView); }
     });
     root.addEventListener('change', function (e) { var k = e.target.getAttribute && e.target.getAttribute('data-chk'); if (k) ss(k, e.target.checked ? '1' : '0'); });
   })();
@@ -385,15 +391,15 @@
 
   /* ── 5. 최종 화면 ──────────────────────────────────────────────────────── */
   function finalView() {
-    view('final'); T('report_completed', { viewed: Object.keys(S.visited).length }); checkUnlock();
+    view('final'); funnel('movingtoon_complete'); T('report_completed', { viewed: Object.keys(S.visited).length }); checkUnlock();
     var rep = S.rep, a4 = rep.acts[rep.acts.length - 1], steps = rep.plan.strategy;
     $('#v-final').innerHTML = '<div class="fin"><p class="kicker">運路</p><h2>' + (S.name ? esc(S.name) + '에게는,<br>' + esc(S.name) + '의 때가 있다.' : '모든 사람에게는,<br>각자의 때가 있다.') + '</h2><p>' + rep.chapters.length + '개의 챕터를 지나왔다.<br>타고난 명부터 운의 흐름,<br>움직일 때를 위한 행동 전략까지.</p>' +
       '<div class="cap" style="margin-top:28px">다음 장면의 전략</div><div class="strategy">' + steps.map(function (x, i) { return (i ? '<i aria-hidden="true">→</i>' : '') + '<b>' + esc(x.label) + '</b>'; }).join('') + '</div>' +
       '<div class="btns"><button type="button" class="btn gold big" id="fPdf"' + (S.pdfUnlocked ? '' : ' disabled') + '>나의 종합 리포트 PDF 받기</button><button type="button" class="btn big" id="fShare">공유 카드 만들기</button><button type="button" class="btn" id="fCompat">궁합 볼 사람 추가하기</button><button type="button" class="btn" id="fBack">리포트 다시 보기</button></div>' + (S.pdfUnlocked ? '' : '<p class="lock">더 많은 챕터를 읽으면 PDF가 열립니다.</p>') + '<p class="fine">사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></div>';
     $('#fBack').onclick = function () { resumeReader(); };
     $('#fCompat').onclick = function () { T('compatibility_cta_clicked', { chapter: 'final' }); toast('두 사람의 궁합은 곧 열립니다.'); };
-    $('#fPdf').onclick = function () { var P = R.Pdf; if (P && P.generate) (toast('PDF를 만들고 있습니다…', 60000), P.generate(S.rep, S.sd, { name: S.name, onProgress: function (i, n) { toast('PDF를 만들고 있습니다 (' + i + ' / ' + n + '쪽)', 60000); } }).then(function () { T('pdf_downloaded', {}); toast('PDF가 준비되었습니다.'); })).catch(function (e) { toast(e.message || 'PDF를 만들지 못했습니다.'); }); else toast('PDF 생성은 곧 제공됩니다.'); };
-    $('#fShare').onclick = function () { var C = R.ShareCard; if (C && C.create) { T('share_clicked', {}); C.create(S.rep, S.sd, S.awk).then(function () { T('share_card_created', {}); }).catch(function (e) { toast(e.message || '카드를 만들지 못했습니다.'); }); } else toast('공유 카드는 곧 제공됩니다.'); };
+    $('#fPdf').onclick = function () { var P = R.Pdf; if (P && P.generate) (toast('PDF를 만들고 있습니다…', 60000), P.generate(S.repPdf || S.rep, S.sd, { name: S.name, onProgress: function (i, n) { toast('PDF를 만들고 있습니다 (' + i + ' / ' + n + '쪽)', 60000); } }).then(function () { T('pdf_downloaded', {}); toast('PDF가 준비되었습니다.'); })).catch(function (e) { toast(e.message || 'PDF를 만들지 못했습니다.'); }); else toast('PDF 생성은 곧 제공됩니다.'); };
+    $('#fShare').onclick = function () { var C = R.ShareCard; if (C && C.create) { T('share_clicked', {}); C.create(S.repPdf || S.rep, S.sd, S.awk).then(function () { T('share_card_created', {}); }).catch(function (e) { toast(e.message || '카드를 만들지 못했습니다.'); }); } else toast('공유 카드는 곧 제공됩니다.'); };
   }
 
   /* ── 6. 상단 바·챕터 목록·스와이프·키보드 ────────────────────────────────── */

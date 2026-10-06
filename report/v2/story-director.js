@@ -64,7 +64,7 @@
     // 결혼
     M('marriage_who', 'marriage', '어떤 배우자와 비교적 잘 맞는가? 갈등이 생기기 쉬운 부분은?', '오래 가는 관계에서 바라는 것', '배우자궁 · 합충', ['c10'], { premium: false, priority: 1 }),
     M('marriage_timing', 'marriage', '인연/결혼 관련 움직임이 커질 수 있는 시기는?', '인연과 결혼 이야기가 커지는 때', '배우자성·배우자궁 활성(AI·규칙 추정)', [], { gen: 'social:marriage', when: true, requiredData: ['daeun', 'seun', 'luckRelations'], priority: 2, ai: true, note: '엔진에 결혼 전용 모델이 없어 AI 가 추정(실패 시 배우자성·일지 합충 규칙 추정). 사건은 확정하지 않음.' }),
-    M('relation_timing', 'relation', '인간관계의 변화가 커지는 시기는?', '사람 사이의 변화가 커지는 때', '비겁·관성·인성 + 합충(AI·규칙 추정)', [], { gen: 'social:relation', when: true, requiredData: ['daeun', 'seun', 'luckRelations'], priority: 4, ai: true }),
+    M('relation_timing', 'relation', '인간관계의 변화가 커지는 시기는?', '사람 사이의 변화가 커지는 때', '비겁·관성·인성 + 합충(AI·규칙 추정)', [], { gen: 'social:relation', when: true, requiredData: ['daeun', 'seun', 'luckRelations'], priority: 3, ai: true }),
     // 미래
     M('future_cycle', 'future', '인생 전체의 계절은?', '인생 전체의 계절', '대운 10개', ['c15'], { priority: 1 }),
     M('future_now', 'future', '지금 나는 어느 계절인가?', '지금 서 있는 계절', '현재 대운', ['c16'], { premium: false, priority: 1 }),
