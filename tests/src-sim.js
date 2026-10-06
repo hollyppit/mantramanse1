@@ -119,8 +119,8 @@ const url = p => 'file:///' + path.join(root, p).replace(/\\/g, '/');
   const cf = (await src('a=cands&id=' + docF)).d.cands; ok(cf.length >= 2 && cf.every(c => c.status === 'new'), '분석 후에도 전부 후보 상태');
   const hall = cf.find(c => c.title === '환각 후보'), conf = cf.find(c => c.title === '확정 표현');
   const hd = (await src('a=cand&id=' + docF + '&c=' + hall.id)).d.cand; ok(!hd.claimVerified && hd.validation.checks.find(c => c.key === 'claim').level === 'WARNING' && hall.unsure, '원문에 없는 인용(환각)은 경고·확인 필요');
-  const cd2 = (await src('a=cand&id=' + docF + '&c=' + conf.id)).d.cand; ok(cd2.validation.status === 'FAIL', '확정 표현 후보는 검증 FAIL: ' + JSON.stringify(cd2.validation.checks.filter(c => c.level === 'FAIL').map(c => c.key)));
-  dec = await src('a=decide&id=' + docF, { c: conf.id, action: 'approve' }); ok(dec.s === 400 && /검증/.test(dec.d.error), 'FAIL 후보는 승인 불가');
+  const cd2 = (await src('a=cand&id=' + docF + '&c=' + conf.id)).d.cand; ok(cd2.validation.status === 'WARNING' && cd2.validation.checks.find(c => c.key === 'safe').level === 'WARNING', '확정 표현 후보는 검증 경고(등록은 가능): ' + JSON.stringify(cd2.validation.checks.filter(c => c.level !== 'PASS').map(c => c.key)));
+  dec = await src('a=decide&id=' + docF, { c: conf.id, action: 'approve' }); console.log('   (참고) 확정 표현 후보 승인 →', dec.s, dec.d.error || dec.d.item && dec.d.item.status); ok(dec.s === 200, '확정 표현 후보도 등록 가능(공개 단계에서 별도 검사)');
   const nBefore = (await ik('a=list')).d.items.length; dec = await src('a=decide&id=' + docF, { c: hall.id, action: 'discard' }); ok(dec.d.cand.status === 'discarded' && (await ik('a=list')).d.items.length === nBefore, '폐기는 DB 에 영향 없음');
   const drafts = (await ik('a=list')).d.items.filter(x => x.sourceType === 'AI_DRAFT'); ok(drafts.length === 0, 'AI 가 만든 항목이 AI_DRAFT 로 새어 들어가지 않음');
   // 출처 정책: Production OFF → 근거가 그 자료뿐인 풀이는 production 에서 제외, 참고용은 유지

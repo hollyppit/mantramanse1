@@ -23,8 +23,17 @@ function cleanMeta(b) {
 }
 const cleanPolicy = p => ({ production: !p || p.production !== false, extract: !p || p.extract !== false, reference: !p || p.reference !== false });
 
-export async function onRequest({ request, env }) {
-  const url = new URL(request.url), a = url.searchParams.get('a') || '', post = request.method === 'POST', kv = env.GLOSSARY_KV, id = url.searchParams.get('id') || '';
+// KV 는 같은 키를 초당 1회까지만 쓸 수 있다 — 후보를 연달아 처리하면 429 가 나므로 쓰기만 기다렸다 다시 시도한다
+function retryKv(raw) {
+  if (!raw) return raw;
+  return { get: (...a) => raw.get(...a), delete: (...a) => raw.delete(...a), list: (...a) => raw.list(...a),
+    async put(...a) { for (let i = 0; ; i++) { try { return await raw.put(...a); } catch (e) { if (i >= 3 || !/429|too many|rate/i.test(String(e && e.message))) throw e; await new Promise(r => setTimeout(r, 1100)); } } } };
+}
+export async function onRequest(ctx) {
+  try { return await handle(ctx); } catch (e) { return json({ error: '서버 오류: ' + String((e && e.message) || e).slice(0, 300) }, 500); }
+}
+async function handle({ request, env }) {
+  const url = new URL(request.url), a = url.searchParams.get('a') || '', post = request.method === 'POST', kv = retryKv(env.GLOSSARY_KV), id = url.searchParams.get('id') || '';
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
   if (id && !ID.test(id)) return json({ error: '잘못된 자료 id' }, 400);
