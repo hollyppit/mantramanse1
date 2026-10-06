@@ -14,7 +14,7 @@
     { id: 'money', name: '돈', source: '엔진 evaluateDomainLuck.wealth (재정 활동성·적합도·안정성)', available: true },
     { id: 'career', name: '직업', source: '엔진 careerLuckActivation × 원국 상위 직업 분야 3개의 평균 활성도', available: true, note: '운이 일을 "활성화"하는 정도만 반영(분야 적합도는 원국 고정값이라 시간축에서 제외)' },
     { id: 'love', name: '사랑', source: '엔진 evaluateDomainLuck.love (관계 활성도·적합도·안정성)', available: true },
-    { id: 'relation', name: '관계', source: '(없음)', available: false, note: '인간관계 전용 시간축 점수 모델이 엔진에 없습니다. 가짜 점수를 만들지 않고 비활성으로 둡니다. TODO: 비겁·관성·인성의 시기별 활성/충돌 모델 설계 필요.' },
+    { id: 'relation', name: '관계', source: 'AI 추정(엔진 십성·합충 근거) · 실패 시 규칙 추정', available: true, ai: true, note: '엔진에 인간관계 전용 모델이 없어 AI 가 대운·세운의 십성·합충으로 추정합니다. 월 단위는 제공하지 않습니다.' },
   ];
   var levelWord = function (v) { return v >= 85 ? '매우 높음' : v >= 70 ? '높음' : v >= 55 ? '무난' : v >= 40 ? '다소 낮음' : '낮음'; };
 
@@ -63,7 +63,8 @@
     M('love_timing', 'love', '인연의 움직임이 커질 수 있는 시기는?', '인연의 움직임이 커지는 때', '관계 활성도(대운·세운)', [], { gen: 'timing:love', when: true, requiredData: ['daeun', 'seun', 'domain.love'], priority: 2 }),
     // 결혼
     M('marriage_who', 'marriage', '어떤 배우자와 비교적 잘 맞는가? 갈등이 생기기 쉬운 부분은?', '오래 가는 관계에서 바라는 것', '배우자궁 · 합충', ['c10'], { premium: false, priority: 1 }),
-    M('marriage_timing', 'marriage', '인연/결혼 관련 움직임이 커질 수 있는 시기는?', '인연과 결혼 이야기가 커지는 때', '관계 활성도(대운·세운) — 결혼 전용 점수 아님', [], { gen: 'timing:love', when: true, requiredData: ['daeun', 'seun', 'domain.love'], priority: 2, proxy: true, note: '결혼 전용 시간축 모델이 엔진에 없어 연애 지수를 대용. 문구는 "인연·관계의 변화"로 제한. TODO: 배우자성·배우자궁 활성 모델' }),
+    M('marriage_timing', 'marriage', '인연/결혼 관련 움직임이 커질 수 있는 시기는?', '인연과 결혼 이야기가 커지는 때', '배우자성·배우자궁 활성(AI·규칙 추정)', [], { gen: 'social:marriage', when: true, requiredData: ['daeun', 'seun', 'luckRelations'], priority: 2, ai: true, note: '엔진에 결혼 전용 모델이 없어 AI 가 추정(실패 시 배우자성·일지 합충 규칙 추정). 사건은 확정하지 않음.' }),
+    M('relation_timing', 'relation', '인간관계의 변화가 커지는 시기는?', '사람 사이의 변화가 커지는 때', '비겁·관성·인성 + 합충(AI·규칙 추정)', [], { gen: 'social:relation', when: true, requiredData: ['daeun', 'seun', 'luckRelations'], priority: 4, ai: true }),
     // 미래
     M('future_cycle', 'future', '인생 전체의 계절은?', '인생 전체의 계절', '대운 10개', ['c15'], { priority: 1 }),
     M('future_now', 'future', '지금 나는 어느 계절인가?', '지금 서 있는 계절', '현재 대운', ['c16'], { premium: false, priority: 1 }),
@@ -99,7 +100,7 @@
     love: ['life', 'here', 'love_style', 'love_match', 'love_timing', 'marriage_who', 'relation_style', 'future_year', 'future_months', 'act_remedy'],
     marriage: ['life', 'here', 'marriage_who', 'marriage_timing', 'love_style', 'relation_family', 'future_3_5_10', 'act_remedy'],
     future: ['life', 'here', 'future_cycle', 'future_now', 'future_3_5_10', 'future_year', 'future_months', 'act_remedy'],
-    relation: ['life', 'here', 'relation_style', 'relation_match', 'relation_family', 'self_shadow', 'future_year', 'act_remedy'],
+    relation: ['life', 'here', 'relation_style', 'relation_timing', 'relation_match', 'relation_family', 'self_shadow', 'future_year', 'act_remedy'],
     self: ['life', 'here', 'self_who', 'self_force', 'self_talent', 'self_shadow', 'self_root', 'future_year', 'act_remedy'],
   };
   var INTRO_STEPS = { life: { id: 'life', title: '내 인생 전체의 지도', sub: '대운 10개 · 인생의 계절', premium: false }, here: { id: 'here', title: '지금 내가 서 있는 곳', sub: '대운 + 세운 + 원국', premium: false } };
@@ -114,6 +115,52 @@
     return out;
   }
   var ageOf = function (ch, Y) { return Y - ch.solar.y; }; // 연 나이(엔진 seunRange 와 같은 기준)
+
+  /* ── 인간관계 · 결혼(인연) 시기: 엔진에 전용 모델이 없어 AI 가 추정한다(사용자 결정). ─────────────────────────
+     ① social() = 즉시 쓰는 규칙 추정(rule-estimate: 엔진이 계산한 십성·합충만 사용) ② aiPayload() → /api/life-ai (생년월일 없이 간지·십성·합충만) → mergeSocial() 로 AI 값 우선.
+     화면에는 항상 "AI 추정"/"규칙 추정" 출처를 표시한다. 사건을 확정하지 않는다. */
+  var clamp = function (v) { return Math.max(0, Math.min(100, Math.round(v))); };
+  var REL_STARS = ['비견', '겁재', '정관', '편관', '정인', '편인'];
+  function socialScore(Mn, ch, p, kind) {
+    var rels = Mn.luckRelations(ch, p).rels, s = p.stemTG, b = p.branchTG, v = 40, SS = ch.gender === 'F' ? ['정관', '편관'] : ['정재', '편재'];
+    if (kind === 'marriage') { // 배우자성이 들어오는 해 + 일지(배우자궁)와의 합·충
+      if (SS.indexOf(s) >= 0) v += s.charAt(0) === '정' ? 16 : 12; if (SS.indexOf(b) >= 0) v += 12;
+      rels.forEach(function (r) { if (r.members.indexOf('day') < 0) return; v += /합/.test(r.type) ? 14 : 8; });
+    } else { // 비겁·관성·인성(동료·조직·조력자) + 월지·년지·일지와의 합충
+      if (REL_STARS.indexOf(s) >= 0) v += 10; if (REL_STARS.indexOf(b) >= 0) v += 8; var a = 0; rels.forEach(function (r) { a += /합/.test(r.type) ? 5 : 6; }); v += Math.min(18, a);
+    }
+    return clamp(v);
+  }
+  function windowsOf(years, th, fromY, toY) { // years: [{y, v}] → 연속한 해를 구간으로
+    var w = []; years.filter(function (x) { return x.y >= fromY && x.y <= toY && x.v >= th; }).forEach(function (x) { var l = w[w.length - 1]; if (l && x.y === l.to + 1) l.to = x.y; else w.push({ from: x.y, to: x.y, note: '' }); }); return w;
+  }
+  function social(Mn, ch, sd, now) {
+    var by = ch.solar.y, Y = sd.nowYear, out = { source: 'rule-estimate', relation: { decades: {}, years: {}, note: '' }, marriage: { decades: {}, years: {}, windows: [], note: '' } };
+    ch.daeun.list.forEach(function (x, i) { out.relation.decades[i] = socialScore(Mn, ch, x, 'relation'); out.marriage.decades[i] = socialScore(Mn, ch, x, 'marriage'); });
+    Mn.seunRange(ch, by + 1, by + 90).forEach(function (it) { out.relation.years[it.year] = socialScore(Mn, ch, it, 'relation'); if (it.year - by >= 18) out.marriage.years[it.year] = socialScore(Mn, ch, it, 'marriage'); });
+    var ys = Object.keys(out.marriage.years).map(function (y) { return { y: +y, v: out.marriage.years[y] }; }), nx = ys.filter(function (x) { return x.y >= Y && x.y <= Y + 14; }).map(function (x) { return x.v; }).sort(function (a, b) { return a - b; });
+    var th = Math.max(58, nx.length ? nx[Math.floor(nx.length * 0.75)] : 58); out.marriage.windows = windowsOf(ys, th, Y, Y + 14).slice(0, 3).map(function (w) { w.note = '인연과 관계의 변화가 커질 수 있는 시기'; return w; });
+    return out;
+  }
+  function aiPayload(Mn, ch, sd) { // 서버로 보내는 값: 간지·십성·합충 요약만(생년월일·이름 없음)
+    var by = ch.solar.y, rl = function (p) { return Mn.luckRelations(ch, p).rels.slice(0, 6).map(function (r) { return r.type + r.name.replace(/[^가-힣一-鿿]/g, '') + '(' + r.members.filter(function (m) { return m !== 'luck'; }).join('+') + ')'; }); };
+    var P = sd.pillars, pil = ['year', 'month', 'day', 'hour'].map(function (k) { return P[k] ? P[k].ko : ''; }).filter(Boolean);
+    return { gender: sd.gender, natal: { pillars: pil, strength: sd.strength.band, dayBranchTG: P.day && P.day.branchTG || '' },
+      decades: ch.daeun.list.map(function (x) { return { a: x.startYear - by, g: Mn.gzNameK(x), s: x.stemTG, b: x.branchTG, r: rl(x) }; }),
+      years: Mn.seunRange(ch, by + 1, by + 90).map(function (it) { return { y: it.year, a: it.year - by, g: Mn.gzNameK(it), s: it.stemTG, b: it.branchTG, r: rl(it) }; }) };
+  }
+  function mergeSocial(rule, ai) { // AI 값이 있는 칸은 AI, 없는 칸은 규칙 추정
+    if (!ai) return rule; var o = JSON.parse(JSON.stringify(rule)); o.source = 'ai';
+    ['relation', 'marriage'].forEach(function (k) { var a = ai[k] || {}; ['decades', 'years'].forEach(function (m) { Object.keys(a[m] || {}).forEach(function (key) { o[k][m][key] = a[m][key]; }); }); if (a.note) o[k].note = a.note; });
+    if (ai.marriage && ai.marriage.windows && ai.marriage.windows.length) o.marriage.windows = ai.marriage.windows;
+    return o;
+  }
+  /** 지도 항목(대운 lifeMap·연도 yearsOf)에 관계 값을 붙인다. soc 가 없으면 그대로 둔다. */
+  function attachSocial(items, soc, level) {
+    if (!soc) return items;
+    items.forEach(function (it) { var s = level === 'decade' ? soc.relation.decades[it.idx] : soc.relation.years[it.year]; if (s != null && !it.pre) { it.fields = it.fields || {}; it.fields.relation = { score: s, band: levelWord(s), source: soc.source }; } });
+    return items;
+  }
 
   /** 인생 전체 지도: 대운 10개를 "계절"로. 출생~첫 대운 전은 데이터 없음(pre)으로 둔다. */
   function lifeMap(Mn, ch, now) {
@@ -183,7 +230,8 @@
       caution: '구간은 시기의 성격을 말할 뿐, 특정한 사건이 일어난다는 뜻이 아닙니다.' };
   }
   /** "언제 움직임이 커지나": 분야 점수가 높은 해를 구간으로. 두드러진 해가 없으면 없다고 말한다. */
-  function timing(Mn, ch, sd, now, field) {
+  function timing(Mn, ch, sd, now, field, soc) {
+    if (field === 'marriage' || field === 'relation') return socialTiming(sd, soc, field);
     var Y = sd.nowYear, ys = yearsOf(Mn, ch, Y, Y + 9, now).filter(function (y) { return y.fields[field]; }), sc = ys.map(function (y) { return y.fields[field].score; }).sort(function (a, b) { return a - b; });
     if (!ys.length) return { field: field, available: false, windows: [], line: '이 분야의 시기 계산 값을 불러오지 못했습니다.' };
     var q75 = sc[Math.floor(sc.length * 0.75)], th = Math.max(55, q75), hit = ys.filter(function (y) { return y.fields[field].score >= th; });
@@ -192,6 +240,18 @@
     wins.forEach(function (w) { w.range = w.fromYear === w.toYear ? w.fromYear + '년' : w.fromYear + '~' + w.toYear + '년'; });
     return { field: field, available: true, windows: wins, years: ys.map(function (y) { return { year: y.year, age: y.age, score: y.fields[field].score, band: y.fields[field].band }; }), threshold: th,
       line: wins.length ? '앞으로 10년 중 ' + words[0] + ' 해는 ' + wins.map(function (w) { return w.range; }).join(', ') + '입니다.' : words[1], caution: '사건을 예언하는 것이 아니라 "살펴볼 만한 시기"를 가리킵니다.' };
+  }
+
+  function socialTiming(sd, soc, field) { // 관계·결혼: AI(또는 규칙) 추정. 출처를 함께 돌려준다
+    if (!soc) return { field: field, available: false, windows: [], line: '이 분야의 시기 추정값을 불러오지 못했습니다.' };
+    var Y = sd.nowYear, d = soc[field], src = soc.source, ys = Object.keys(d.years).map(Number).filter(function (y) { return y >= Y && y <= Y + 9; }).sort(function (a, b) { return a - b; }).map(function (y) { return { year: y, score: d.years[y], band: levelWord(d.years[y]) }; });
+    var q = ys.map(function (x) { return x.score; }).sort(function (a, b) { return a - b; }), th = Math.max(58, q[Math.floor(q.length * 0.75)] || 58);
+    var wins = field === 'marriage' ? d.windows : windowsOf(ys.map(function (x) { return { y: x.year, v: x.score }; }), th, Y, Y + 9);
+    wins.forEach(function (w) { w.range = w.from === w.to ? w.from + '년' : w.from + '~' + w.to + '년'; w.fromYear = w.from; w.toYear = w.to; });
+    var nm = field === 'marriage' ? '인연과 관계의 변화가 커질 수 있는' : '사람 사이의 변화가 커질 수 있는';
+    return { field: field, available: ys.length > 0, source: src, windows: wins, years: ys, threshold: th, note: d.note || '',
+      line: wins.length ? (field === 'marriage' ? '앞으로 15년 안에서 ' : '앞으로 10년 중 ') + nm + ' 구간은 ' + wins.map(function (w) { return w.range; }).join(', ') + '입니다.' : nm + ' 구간이 두드러지게 나타나지 않습니다. 지금 관계를 돌보는 시기로 보세요.',
+      caution: (src === 'ai' ? 'AI 가 엔진이 계산한 대운·세운의 십성과 합충을 근거로 추정한 값입니다. ' : '엔진이 계산한 십성·합충을 단순 규칙으로 센 추정값입니다. ') + '사건을 예언하는 것이 아니라 살펴볼 만한 시기를 가리킵니다.' };
   }
 
   /* ── 7. FINAL — 버릴 것 · 지킬 것 · 시작할 것 ─────────────────────────────────── */
@@ -214,30 +274,40 @@
 
   /* ── 8. 스토리 구성: 관심 분야 → 이야기 순서 ─────────────────────────────────── */
   /** profile 없이도 순서만 만들 수 있다. 무료/잠금은 모듈 premium 과 (선택 분야의 첫 모듈 체험) 규칙으로 정한다. */
+  /** 현재 시기(pos.seasonKey)에 따라 이야기 순서를 사람마다 다르게 조정한다. 계산 결과는 바꾸지 않고 '앞으로 가져오기'만 한다. */
+  function personalize(ids, pos) {
+    var notes = {}, at = -1, k = pos && pos.seasonKey; ids.forEach(function (id, i) { if (at < 0 && !INTRO_STEPS[id]) at = i; }); if (at < 0 || !k) return { ids: ids, notes: notes };
+    var movers = /^(defense|transition)$/.test(k) ? ['future_year', 'future_months', 'future_3_5_10'] : /^(opportunity|expansion|harvest)$/.test(k) ? ids.filter(function (id) { return BY_ID[id] && BY_ID[id].when; }) : [];
+    var why = /^(defense|transition)$/.test(k) ? '지금 지키고 정리하는 시기라서 올해·앞날 이야기를 앞에 두었습니다' : '지금 움직임이 커지기 쉬운 시기라서 "언제" 이야기를 앞에 두었습니다';
+    var pick = ids.filter(function (id) { return movers.indexOf(id) >= 0; }).slice(0, 2), rest = ids.filter(function (id) { return pick.indexOf(id) < 0; });
+    if (!pick.length) return { ids: ids, notes: notes };
+    var head = rest.slice(0, at + 1), tail = rest.slice(at + 1); pick.forEach(function (id) { notes[id] = why; });
+    return { ids: head.concat(pick, tail), notes: notes };
+  }
   function flow(interestId, o) {
-    o = o || {}; var ids = FLOWS[interestId] || FLOWS.future, seen = {}, firstDeep = null, steps = [];
+    o = o || {}; var ids = FLOWS[interestId] || FLOWS.future, seen = {}, firstDeep = null, steps = [], pz = personalize(ids, o.pos); ids = pz.ids;
     ids.forEach(function (id) {
       if (seen[id]) return; seen[id] = 1;
       var m = INTRO_STEPS[id] || BY_ID[id]; if (!m) return;
       var isIntro = !!INTRO_STEPS[id], free = isIntro || m.premium === false;
       if (!isIntro && free && firstDeep == null) firstDeep = id;
       // 선택 분야 일부 체험: 첫 심화 모듈만 무료. 그 외 premium:false(공통 필수)인 행동 전략은 마지막에 요약만 열린다
-      steps.push({ id: id, kind: isIntro ? id : (m.gen && !m.chapters.length ? 'gen' : 'chapters'), title: m.title, sub: m.sub || '', question: m.question || '', chapters: (m.chapters || []).slice(), gen: m.gen || null, when: !!m.when, free: free, premium: !free, proxy: !!m.proxy });
+      steps.push({ note: pz.notes[id] || '', id: id, kind: isIntro ? id : (m.gen && !m.chapters.length ? 'gen' : 'chapters'), title: m.title, sub: m.sub || '', question: m.question || '', chapters: (m.chapters || []).slice(), gen: m.gen || null, when: !!m.when, free: free, premium: !free, proxy: !!m.proxy });
     });
     // 무료 체험은 "도입 2 + 분야 첫 모듈 1 + 행동 전략 요약"으로 제한한다
     var firstFound = false; steps.forEach(function (s) { if (s.kind === 'life' || s.kind === 'here') return; if (s.id === 'act_remedy') { s.free = true; s.premium = false; return; } if (!firstFound && s.free) { firstFound = true; } else { s.free = false; s.premium = true; } });
     return { interest: interestId, steps: steps, order: steps.map(function (s) { return s.id; }) };
   }
   /** 관리자 "생성된 이야기 순서" — 번호·제목·열림 여부. */
-  function preview(interestId) { return flow(interestId).steps.map(function (s, i) { return { no: i + 1, id: s.id, title: s.title, sub: s.sub, free: s.free, source: s.chapters.length ? '챕터 ' + s.chapters.join('+') : s.gen ? '엔진 시간축(' + s.gen + ')' : '내장 화면' }; }); }
+  function preview(interestId, pos) { return flow(interestId, { pos: pos }).steps.map(function (s, i) { return { no: i + 1, note: s.note, id: s.id, title: s.title, sub: s.sub, free: s.free, source: s.chapters.length ? '챕터 ' + s.chapters.join('+') : s.gen ? '엔진 시간축(' + s.gen + ')' : '내장 화면' }; }); }
 
   /** StoryProfile — 명세 §32 형태. 계산은 이미 끝난 값(sd)·엔진(Mn, ch)에서 읽는다. */
   function profile(Mn, ch, sd, o) {
-    o = o || {}; var now = o.now || Date.now(), interest = o.interest || 'future', pos = position(Mn, ch, sd, now), fl = flow(interest);
+    o = o || {}; var now = o.now || Date.now(), interest = o.interest || 'future', pos = position(Mn, ch, sd, now), fl = flow(interest, { pos: pos });
     return { birthData: sd.birth, gender: sd.gender, currentYear: sd.nowYear, currentAge: pos.age, primaryInterest: interest, lifePhase: { key: pos.seasonKey, name: pos.seasonName, headline: pos.headline },
       storyModules: fl.steps, insights: { decadeCount: ch.daeun.list.length, topCareer: sd.career && sd.career.top }, actions: action(sd, o.plan, pos.seasonKey), position: pos };
   }
 
-  R.StoryDirector = { FIELDS: FIELDS, SEASON: SEASON, INTERESTS: INTERESTS, MODULES: MODULES, FLOWS: FLOWS, byId: BY_ID, chapterMap: chapterMap, lifeMap: lifeMap, yearsOf: yearsOf, monthsOf: monthsOf, position: position, evidence: evidence,
+  R.StoryDirector = { personalize: personalize, social: social, aiPayload: aiPayload, mergeSocial: mergeSocial, attachSocial: attachSocial, FIELDS: FIELDS, SEASON: SEASON, INTERESTS: INTERESTS, MODULES: MODULES, FLOWS: FLOWS, byId: BY_ID, chapterMap: chapterMap, lifeMap: lifeMap, yearsOf: yearsOf, monthsOf: monthsOf, position: position, evidence: evidence,
     future: future, timing: timing, action: action, flow: flow, preview: preview, profile: profile, levelWord: levelWord, FIELD_NOW: FIELD_NOW };
 })(typeof window !== 'undefined' ? window : globalThis);

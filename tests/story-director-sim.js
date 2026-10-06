@@ -47,7 +47,33 @@ samples.forEach((ch, i) => {
   const a = text(D.lifeMap(M, ch, now)), b = (D.profile(M, ch, sd, { now, interest: 'love' }), text(D.lifeMap(M, ch, now))); ok(a === b, tag + ' 관심 분야가 계산에 영향');
   const all = text([lm, pos, fu, D.timing(M, ch, sd, now, 'money'), ac, D.SEASON]); const hit = BANNED.exec(all); ok(!hit, tag + ' 금지어: ' + (hit && hit[0]));
 });
-ok(D.FIELDS.find(f => f.id === 'relation').available === false, '관계 탭은 점수 모델이 없어 비활성');
+ok(D.FIELDS.find(f => f.id === 'relation').ai === true, '관계 탭은 AI 추정(출처 표시)');
+console.log('2b. 관계·결혼 시기(AI 추정 + 규칙 추정)');
+const ch1 = samples[0], sd1 = R.SajuData.build(ch1, { now }), soc = D.social(M, ch1, sd1, now);
+ok(soc.source === 'rule-estimate' && Object.keys(soc.relation.decades).length === 10 && Object.keys(soc.relation.years).length === 90, '규칙 추정 범위');
+ok(Object.values(soc.relation.years).concat(Object.values(soc.marriage.years)).every(v => v >= 0 && v <= 100), '점수 0~100');
+ok(Object.keys(soc.marriage.years).every(y => +y - ch1.solar.y >= 18), '결혼 점수는 18세 이상만');
+ok(text(soc.relation.years) !== text(soc.marriage.years), '관계와 결혼 점수가 서로 다름');
+const pl = D.aiPayload(M, ch1, sd1), pj = JSON.stringify(pl);
+ok(pl.decades.length === 10 && pl.years.length === 90 && !/1992|0623|0623|birth/.test(JSON.stringify(Object.assign({}, pl, { years: [], decades: [] }))), 'AI 입력에 생년월일 없음(원국 간지만)');
+const tl = D.timing(M, ch1, sd1, now, 'marriage', soc), tr = D.timing(M, ch1, sd1, now, 'relation', soc);
+ok(tl.available && tl.source === 'rule-estimate' && tl.caution.includes('예언') && !BANNED.test(text([tl, tr])), '결혼·관계 timing 출처·금지어');
+const mg = D.mergeSocial(soc, { relation: { decades: { 0: 77 }, years: { 2030: 88 }, note: '메모' }, marriage: { windows: [{ from: 2030, to: 2031, note: '인연의 변화가 커질 수 있는 시기' }], decades: {}, years: {} } });
+ok(mg.source === 'ai' && mg.relation.years[2030] === 88 && mg.marriage.windows[0].from === 2030 && mg.relation.years[2031] === soc.relation.years[2031], 'AI 병합: AI 값 우선, 나머지는 규칙 추정');
+const items = D.attachSocial(D.lifeMap(M, ch1, now), mg, 'decade'); ok(items.filter(x => !x.pre).every(x => x.fields.relation && x.fields.relation.source === 'ai'), '지도에 관계 값 부착');
+// 서버 순수 로직(functions/_lifeai.js)
+const fs2 = require('fs'), os = require('os'), url = require('url'), tmp = path.join(os.tmpdir(), '_lifeai_test.mjs'); fs2.writeFileSync(tmp, fs2.readFileSync(path.join(root, 'functions/_lifeai.js'), 'utf8'));
+import(url.pathToFileURL(tmp).href).then(X => {
+  const clean = X.validate(Object.assign({}, pl, { natal: pl.natal }));
+  ok(clean && clean.decades.length === 10 && clean.years.length === 90, '서버 검증 통과'); ok(X.validate({ decades: [], years: [] }) === null && X.validate(null) === null, '이상한 입력 거부');
+  const good = JSON.stringify({ relation: { decades: { 0: 55, 1: 999, 99: 10 }, years: { 2030: 70, 1500: 5 }, note: '사람 사이의 변화가 커질 수 있는 시기' }, marriage: { decades: { 2: 66 }, years: { 2030: 74, [ch1.solar.y + 5]: 90 }, windows: [{ from: 2030, to: 2031, note: '인연과 관계의 변화가 커질 수 있는 시기' }, { from: 2030, to: 2031, note: '2030년에 결혼합니다' }], note: '반드시 결혼' } });
+  const sn = X.sanitize('```json\n' + good + '\n```', clean, 2026);
+  ok(sn && sn.relation.decades[1] === 100 && sn.relation.decades[99] === undefined && sn.relation.years[1500] === undefined, '서버 정리: 범위·허용 키');
+  ok(sn && sn.marriage.windows.length === 1 && sn.marriage.note === '' && sn.marriage.years[ch1.solar.y + 5] === undefined, '서버 정리: 금지어·미성년 해 제거');
+  ok(X.sanitize('쓸 수 없는 응답', clean, 2026) === null, '서버 정리: 깨진 응답은 null');
+  return X.cacheKey(clean).then(k => ok(/^lifeai:[0-9a-f]{40}$/.test(k), '캐시 키'));
+}).then(() => finish());
+function finish() {
 console.log('3. 시연(1992-06-23 01:30 남, 관심: 돈)');
 console.log(D.preview('money').map(s => `   ${String(s.no).padStart(2, '0')} ${s.free ? '무료' : '잠김'} ${s.title}  [${s.source}]`).join('\n'));
 const ch0 = samples[0], lm0 = D.lifeMap(M, ch0, now);
@@ -55,3 +81,5 @@ console.log(lm0.map(x => x.pre ? `   ${x.startAge}~${x.endAge}세 (대운 전)` 
 console.log(D.timing(M, ch0, R.SajuData.build(ch0, { now }), now, 'money').line);
 if (fails.length) { console.log('\n실패 ' + fails.length + '건'); fails.slice(0, 30).forEach(f => console.log(' ✗ ' + f)); process.exit(1); }
 console.log('\n모두 통과');
+
+}

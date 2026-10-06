@@ -12,6 +12,8 @@
   function begin(host) {
     H = host; box = $('#v-life'); st = { field: 'all', zoom: 'life', decade: null, year: null, interest: H.interest || null, flow: null, done: {}, map: null, cache: {} };
     st.map = D.lifeMap(H.M, H.ch, H.now).filter(function (x) { return x.startAge <= MAX_AGE; });
+    try { st.rule = D.social(H.M, H.ch, H.sd, H.now); st.soc = st.rule; } catch (e) { st.soc = null; } // 즉시 쓰는 규칙 추정. AI 추정이 도착하면 바꿔 끼운다
+    loadAi();
     H.show(); H.track('life_started', {}); opening();
   }
 
@@ -45,10 +47,10 @@
       return '<li><button type="button" class="lf-row' + (it.isCurrent ? ' cur' : '') + '" data-i="' + i + '"' + (it.pre ? ' disabled' : '') + '><span class="lf-age">' + esc(it.label) + '</span><span class="lf-sea' + (sea ? ' s-' + sea : '') + '">' + (sea ? '<b aria-hidden="true">' + ICON[sea] + '</b> ' + esc(it.seasonName) : '—') + '</span><span class="lf-desc">' + esc(it.pre ? it.tag : (st.field === 'all' ? (it.tag || it.label2 || '') : (band ? '이 분야 · ' + band : ''))) + '</span>' + (it.isCurrent ? '<span class="lf-now">지금</span>' : '') + '</button></li>'; }).join('') + '</ol>';
   }
   function itemsFor() {
-    if (st.zoom === 'life') return st.map.map(function (x) { return Object.assign({}, x, { label: x.pre ? '0~' + x.endAge + '세' : x.startAge + '~' + x.endAge + '세' }); });
-    var key = st.zoom + ':' + (st.zoom === 'years' ? st.decade : st.year); if (st.cache[key]) return st.cache[key];
+    if (st.zoom === 'life') return D.attachSocial(st.map.map(function (x) { return Object.assign({}, x, { label: x.pre ? '0~' + x.endAge + '세' : x.startAge + '~' + x.endAge + '세' }); }), st.soc, 'decade');
+    var key = st.zoom + ':' + (st.zoom === 'years' ? st.decade : st.year) + ':' + (st.soc && st.soc.source); if (st.cache[key]) return st.cache[key];
     var out;
-    if (st.zoom === 'years') { var d = st.map[st.decade]; out = D.yearsOf(H.M, H.ch, d.startYear, d.endYear, H.now).map(function (y) { return Object.assign({}, y, { label: y.year + '년 · ' + y.age + '세', isCurrent: y.isNow }); }); }
+    if (st.zoom === 'years') { var d = st.map[st.decade]; out = D.yearsOf(H.M, H.ch, d.startYear, d.endYear, H.now).map(function (y) { return Object.assign({}, y, { label: y.year + '년 · ' + y.age + '세', isCurrent: y.isNow }); }); D.attachSocial(out, st.soc, 'year'); }
     else out = D.monthsOf(H.M, H.ch, st.year, H.now).map(function (m) { return Object.assign({}, m, { label: m.month + '월', isCurrent: m.isNow }); });
     return (st.cache[key] = out);
   }
@@ -62,9 +64,9 @@
     box.className = 'view lf'; var items = itemsFor(), fld = D.FIELDS.filter(function (f) { return f.id === st.field; })[0];
     var title = st.zoom === 'life' ? '당신의 인생 지도' : st.zoom === 'years' ? st.map[st.decade].startAge + '~' + st.map[st.decade].endAge + '세, 해마다' : st.year + '년, 달마다';
     var hint = st.zoom === 'life' ? '구간을 눌러 10년씩 확대해 보세요.' : st.zoom === 'years' ? '해를 눌러 12개월로 더 확대해 보세요.' : '달마다 어울리는 움직임이 다릅니다.';
-    var note = !fld.available ? '<p class="lf-note">이 분야의 시기별 흐름은 아직 계산 모델이 없어 보여 드리지 않습니다.</p>' : '';
+    var srcName = st.soc && st.soc.source === 'ai' ? 'AI 추정' : '규칙 추정', note = !fld.available ? '<p class="lf-note">이 분야의 시기별 흐름은 아직 계산 모델이 없어 보여 드리지 않습니다.</p>' : (fld.ai ? '<p class="lf-note"><b>' + srcName + '</b> · ' + (st.zoom === 'months' ? '관계 흐름은 월 단위로 제공하지 않습니다. 한 단계 넓게 보세요.' : '엔진에 인간관계 전용 모델이 없어 대운·세운의 십성·합충을 근거로 추정한 값입니다.') + '</p>' : '');
     box.innerHTML = '<div class="lf-wrap"><p class="lf-kick">PROLOGUE · 전체 인생</p><h2 class="lf-h">' + esc(title) + '</h2><p class="lf-sub">' + esc(hint) + '</p>' + crumbs() +
-      '<div class="lf-tabs" role="tablist" aria-label="분야 보기">' + FIELDTAB() + '</div>' + note + (fld.available ? '<div class="lf-chart">' + curve(items, { aria: title }) + '</div>' + rows(items, {}) : '') +
+      '<div class="lf-tabs" role="tablist" aria-label="분야 보기">' + FIELDTAB() + '</div>' + note + (fld.available && !(fld.ai && st.zoom === 'months') ? '<div class="lf-chart">' + curve(items, { aria: title }) + '</div>' + rows(items, {}) : '') +
       '<p class="lf-fine">시기의 성격을 보여 줄 뿐, 특정한 사건을 예언하지 않습니다.</p>' +
       (st.zoom === 'life' ? '<button type="button" class="btn big gold" id="lfHere">지금 내가 서 있는 곳 보기</button>' : '<button type="button" class="btn big" id="lfUp">‹ 한 단계 넓게 보기</button>') + '</div>';
     box.onclick = function (e) {
@@ -102,9 +104,9 @@
 
   /* ── 4. 이야기 순서(Story Flow): 이 사용자에게 실제로 생성된 순서. 무료·잠금 표시 ───── */
   function steps() {
-    var fl = st.flow = D.flow(st.interest), it = D.INTERESTS.filter(function (x) { return x.id === st.interest; })[0]; box.className = 'view lf';
+    var fl = st.flow = D.flow(st.interest, { pos: st.pos || D.position(H.M, H.ch, H.sd, H.now) }), it = D.INTERESTS.filter(function (x) { return x.id === st.interest; })[0]; box.className = 'view lf';
     var gate = !!H.gate, rowsH = fl.steps.map(function (s, i) { var lock = gate && s.premium, done = st.done[s.id];
-      return '<li><button type="button" class="lf-step' + (lock ? ' lock' : '') + (done ? ' done' : '') + '" data-s="' + i + '"><span class="no">' + String(i + 1).padStart(2, '0') + '</span><span class="tt"><b>' + esc(s.title) + '</b><small>' + esc(s.sub) + '</small></span><span class="st">' + (lock ? '🔒' : done ? '✓' : '›') + '</span></button></li>'; }).join('');
+      return '<li><button type="button" class="lf-step' + (lock ? ' lock' : '') + (done ? ' done' : '') + '" data-s="' + i + '"><span class="no">' + String(i + 1).padStart(2, '0') + '</span><span class="tt"><b>' + esc(s.title) + '</b><small>' + esc(s.sub) + (s.note ? ' · ' + esc(s.note) : '') + '</small></span><span class="st">' + (lock ? '🔒' : done ? '✓' : '›') + '</span></button></li>'; }).join('');
     box.innerHTML = '<div class="lf-wrap"><p class="lf-kick">ACT 3 · ' + esc(it.name) + '</p><h2 class="lf-h">' + esc(it.name) + ' 이야기,<br>이 순서로 펼쳐 봅니다.</h2><p class="lf-sub">' + (gate ? '앞부분은 바로 열려 있고, 나머지는 “내 이야기 전체 열기”로 볼 수 있습니다.' : '위에서부터 차례로 읽으면 한 편의 이야기가 됩니다.') + '</p><ol class="lf-steps">' + rowsH + '</ol>' +
       (gate ? '<div class="lf-lockbox"><p>당신의 인생에는<br>아직 열어보지 않은 이야기가 있습니다.</p><button type="button" class="btn big gold" id="lfOpenAll">내 이야기 전체 열기</button></div>' : '') +
       '<div class="lf-two"><button type="button" class="btn" id="lfOther">다른 분야 고르기</button><button type="button" class="btn" id="lfMapB">인생 지도</button></div></div>';
@@ -121,13 +123,18 @@
     if (s.kind === 'here') { here(); st.done.here = 1; return; }
     if (s.id === 'act_remedy') return final();
     if (s.gen && !s.chapters.length) return genScreen(s, done);
-    H.playChapters(s.chapters, { kicker: 'DEEP DIVE', title: s.title, onBack: done });
+    if (R.StoryComposer && R.StoryComposer.has(s.id)) return composeScreen(s, done);
+    deep(s, done);
   }
 
   /* ── 5. 시간축 카드(엔진 실데이터): "언제?" · 앞으로 10년 ───────────────────────── */
   function genScreen(s, done) {
     var h = '<div class="lf-wrap"><p class="lf-kick">' + esc(s.sub) + '</p><h2 class="lf-h">' + esc(s.title) + '</h2>';
-    if (/^timing:/.test(s.gen)) {
+    if (/^social:/.test(s.gen)) {
+      var sf = s.gen.split(':')[1], sn = sf === 'marriage' ? '인연' : '사람 사이', t2 = D.timing(H.M, H.ch, H.sd, H.now, sf, st.soc);
+      h += '<p class="lf-lead">' + esc(t2.line) + '</p><p class="lf-note"><b>' + (t2.source === 'ai' ? 'AI 추정' : '규칙 추정') + '</b> · ' + esc(t2.caution || '') + '</p>' + (t2.note ? '<p class="lf-p">' + esc(t2.note) + '</p>' : '') + (t2.windows || []).map(function (w) { return '<div class="lf-fu exp"><small>' + sn + '의 움직임이 커질 수 있는 구간</small><b>' + esc(w.range) + '</b> ' + esc(w.note || '') + '</div>'; }).join('');
+      if (t2.years) h += '<div class="lf-bars" role="img" aria-label="앞으로 10년 ' + sn + ' 흐름">' + t2.years.map(function (y) { var on = (t2.windows || []).some(function (w) { return y.year >= w.fromYear && y.year <= w.toYear; }); return '<div class="lf-bar' + (on ? ' on' : '') + '"><i style="height:' + Math.max(8, y.score) + '%"></i><b>' + String(y.year).slice(2) + '</b><small>' + esc(y.band) + '</small></div>'; }).join('') + '</div>';
+    } else if (/^timing:/.test(s.gen)) {
       var f = s.gen.split(':')[1], t = D.timing(H.M, H.ch, H.sd, H.now, f), nm = { money: '돈', career: '일', love: '인연' }[f];
       h += '<p class="lf-lead">' + esc(t.line) + '</p>' + (s.proxy ? '<p class="lf-note">결혼 전용 계산이 아니라 인연·관계의 활성도를 기준으로 한 참고 흐름입니다.</p>' : '');
       if (t.years) h += '<div class="lf-bars" role="img" aria-label="앞으로 10년 ' + nm + ' 흐름">' + t.years.map(function (y) { var on = t.windows.some(function (w) { return y.year >= w.fromYear && y.year <= w.toYear; }); return '<div class="lf-bar' + (on ? ' on' : '') + '"><i style="height:' + Math.max(8, y.score) + '%"></i><b>' + String(y.year).slice(2) + '</b><small>' + esc(y.band) + '</small></div>'; }).join('') + '</div><p class="lf-fine">막대가 진한 해가 상대적으로 ' + nm + ' 이야기가 두드러지는 해입니다.</p>';
@@ -138,6 +145,36 @@
         '<div class="lf-yrs">' + fu.years.map(function (y) { return '<div class="lf-yr' + (y.isNow ? ' now' : '') + '"><b>' + y.year + '</b><span class="lf-sea s-' + y.season + '"><b aria-hidden="true">' + (ICON[y.season] || '') + '</b> ' + esc(y.seasonName) + '</span></div>'; }).join('') + '</div><p class="lf-fine">' + esc(fu.caution) + '</p>';
     }
     box.className = 'view lf'; box.innerHTML = h + '<button type="button" class="btn big" id="lfDone">이야기 목록으로</button></div>'; $('#lfDone', box).onclick = done; box.onclick = null; window.scrollTo(0, 0);
+  }
+
+  /* ── 관계·결혼 AI 추정 로딩: 기기 캐시 → 서버(/api/life-ai, 생년월일 없음). 실패하면 규칙 추정을 그대로 쓴다. ── */
+  function loadAi() {
+    var pl; try { pl = D.aiPayload(H.M, H.ch, H.sd); } catch (e) { return; }
+    var key = 'mt_life_ai_' + hash(JSON.stringify(pl)), got; try { got = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { }
+    function apply(ai) { if (!ai) return; st.soc = D.mergeSocial(st.rule, ai); st.cache = {}; if (st.field === 'relation' && box.querySelector('.lf-tabs')) mapScreen(); }
+    if (got) { apply(got); return; }
+    var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
+    fetch('/api/life-ai', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(pl), signal: ctl && ctl.signal }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { if (d && d.ok && d.result) { try { localStorage.setItem(key, JSON.stringify(d.result)); } catch (e) { } apply(d.result); H.track('life_ai_ok', { cached: !!d.cached }); } else H.track('life_ai_fail', { err: d && d.error || '' }); }).catch(function () { H.track('life_ai_fail', {}); }).then(function () { clearTimeout(tm); });
+  }
+  function hash(s) { var h = 5381; for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+
+  /* ── 새 문체 카드: 한 장면에 하나의 주장(결론 → 현실 → 예시 → 장점 → 함정 → 행동 → 근거). 끝에서 기존 챕터로 더 깊이 읽을 수 있다. ── */
+  function deep(s, done) {
+    var rn = s.chapters.map(function (b, i) { return i === 0 ? { title: s.title, sub: (s.id === 'self_who' ? H.sd.dayPillar.ko + '일주 · ' + H.sd.dayPillar.hanja + ' — ' : '') + s.sub } : null; });
+    H.playChapters(s.chapters, { kicker: 'DEEP DIVE', title: s.title, rename: rn, onBack: done });
+  }
+  function composeScreen(s, done) {
+    var C = R.StoryComposer, sc = C.scenes(s.id, H.sd), i = 0; if (!sc.length) return deep(s, done); box.className = 'view lf lf-scene';
+    function draw() {
+      var x = sc[i], last = i === sc.length - 1;
+      box.innerHTML = '<div class="lf-wrap lf-sc"><p class="lf-kick">' + esc(s.title) + ' · ' + (i + 1) + ' / ' + sc.length + '</p><div class="lf-prog"><i style="width:' + Math.round((i + 1) / sc.length * 100) + '%"></i></div><div class="lf-sbody k-' + x.kind + '"><small>' + esc(x.cap) + '</small><p>' + esc(x.text) + '</p></div>' +
+        (last ? '<details class="lf-why"><summary>왜 이렇게 나오나요?</summary><dl>' + C.evidence(s.id, H.sd).map(function (e) { return '<dt>' + esc(e.k) + '</dt><dd>' + esc(e.v) + '</dd>'; }).join('') + '</dl><p class="lf-fine">' + esc(s.sub) + ' 분석에서 나온 값입니다.</p></details>' : '') +
+        '<div class="lf-two">' + (i ? '<button type="button" class="btn" id="lfPrev">이전</button>' : '') + (last ? '<button type="button" class="btn gold" id="lfMore">더 깊이 읽기</button>' : '<button type="button" class="btn gold" id="lfNx">다음</button>') + '</div>' + (last ? '<button type="button" class="lf-skip" id="lfDone2">이야기 목록으로</button>' : '') + '</div>';
+      window.scrollTo(0, 0);
+    }
+    box.onclick = function (e) { var id = e.target.id; if (id === 'lfNx') { i++; draw(); } else if (id === 'lfPrev') { i--; draw(); } else if (id === 'lfMore') deep(s, done); else if (id === 'lfDone2') done(); };
+    draw(); H.track('life_scene_card', { step: s.id });
   }
 
   /* ── 6. FINAL — 그래서 지금 무엇을 해야 하는가 ──────────────────────────────── */

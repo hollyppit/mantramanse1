@@ -193,7 +193,7 @@
   function lifeChapters(bases) { var all = S.repAll.chapters, out = []; bases.forEach(function (b) { all.forEach(function (c) { if ((c.base || c.id) === b && out.indexOf(c) < 0) out.push(c); }); }); return out; }
   function lifePlay(bases, o) {
     var chs = lifeChapters(bases); if (!chs.length) { toast('이 이야기는 아직 준비 중입니다.'); if (o.onBack) o.onBack(); return; }
-    S.rep = Object.assign({}, S.repAll, { acts: [{ id: 1, roman: o.kicker || 'DEEP DIVE', title: o.title || '', line: '', pdfDone: '' }], chapters: chs.map(function (c, i) { var x = Object.assign({}, c); x.act = 1; x.no = i + 1; x.actTransition = null; return x; }) });
+    S.rep = Object.assign({}, S.repAll, { acts: [{ id: 1, roman: o.kicker || 'DEEP DIVE', title: o.title || '', line: '', pdfDone: '' }], chapters: chs.map(function (c, i) { var x = Object.assign({}, c); x.act = 1; x.no = i + 1; x.actTransition = null; var rn = o.rename && o.rename[i]; if (rn) { x.title = rn.title || x.title; x.subtitle = rn.sub || x.subtitle; } return x; }) }); // rename: 전문용어 대신 사용자 질문을 제목으로, 명리 용어는 부제로
     S.lifeBack = function () { $('#lifeBack').hidden = true; if (S.mv) { S.mv.destroy(); S.mv = null; } o.onBack && o.onBack(); };
     S.visited = {}; S.ended = {}; view('reader'); $('#lifeBack').hidden = false; openDoc(0, { autoStart: !PREVIEW });
   }

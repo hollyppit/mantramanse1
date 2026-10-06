@@ -19,13 +19,15 @@
     var h = '<div class="card"><b style="color:var(--gold)">스토리 플로우 미리보기</b><p class="muted" style="margin:6px 0 12px">같은 사주라도 관심 분야에 따라 <b>순서·강조</b>만 달라지고, 원국·대운·세운·점수는 그대로입니다. 뷰어는 <code>/report/v2/?flow=life</code> 로 엽니다(결제 잠금 시험은 <code>&amp;gate=1</code>).</p>' + form;
     if (err) { box.innerHTML = h + '<p class="muted">' + esc(err) + '</p></div>'; bind(box, M); return; }
     var it = D.INTERESTS.filter(function (x) { return x.id === TS.interest; })[0], pr = D.profile(M, ch, sd, { now: now, interest: TS.interest });
-    h += '<div class="cap2">GENERATED STORY FLOW · ' + esc(it.name) + '</div>' + table(['#', '이야기', '질문(내부)', '출처', '열람'], D.preview(TS.interest).map(function (s) {
-      var m = D.byId[s.id]; return [String(s.no).padStart(2, '0'), '<b>' + esc(s.title) + '</b><div class="muted" style="font-size:.74rem">' + esc(s.sub) + '</div>', esc(m ? m.question : ''), esc(s.source), s.free ? '무료' : '🔒 잠김']; }));
+    h += '<div class="cap2">GENERATED STORY FLOW · ' + esc(it.name) + '</div>' + table(['#', '이야기', '질문(내부)', '출처', '열람'], D.preview(TS.interest, pr.position).map(function (s) {
+      var m = D.byId[s.id]; return [String(s.no).padStart(2, '0'), '<b>' + esc(s.title) + '</b><div class="muted" style="font-size:.74rem">' + esc(s.sub) + '</div>' + (s.note ? '<div style="font-size:.74rem;color:var(--gold)">↑ ' + esc(s.note) + '</div>' : ''), esc(m ? m.question : ''), esc(s.source), s.free ? '무료' : '🔒 잠김']; }));
     var lm = D.lifeMap(M, ch, now);
-    h += '<div class="cap2">PROLOGUE · 인생 지도 (엔진 값)</div>' + table(['나이', '대운', '계절', '돈', '직업', '사랑', ''], lm.map(function (x) {
-      if (x.pre) return [x.startAge + '~' + x.endAge + '세', '—', '대운 전(데이터 없음)', '', '', '', ''];
+    var soc = D.social(M, ch, sd, now); D.attachSocial(lm, soc, 'decade');
+    h += '<div class="cap2">PROLOGUE · 인생 지도 (엔진 값 · 관계는 규칙 추정, 실제 화면에서는 AI 추정으로 대체)</div>' + table(['나이', '대운', '계절', '돈', '직업', '사랑', '관계(추정)', ''], lm.map(function (x) {
+      if (x.pre) return [x.startAge + '~' + x.endAge + '세', '—', '대운 전(데이터 없음)', '', '', '', '', ''];
       var f = function (k) { return x.fields[k] ? x.fields[k].score + ' <span class="muted">' + esc(x.fields[k].band) + '</span>' : '-'; };
-      return [x.startAge + '~' + x.endAge + '세', esc(x.ganzhi), esc(x.seasonName), f('money'), f('career'), f('love'), x.isCurrent ? '◀ 지금' : '']; }));
+      return [x.startAge + '~' + x.endAge + '세', esc(x.ganzhi), esc(x.seasonName), f('money'), f('career'), f('love'), f('relation'), x.isCurrent ? '◀ 지금' : '']; }));
+    var tm = D.timing(M, ch, sd, now, 'marriage', soc); h += '<div class="cap2">결혼(인연) 시기 · ' + (soc.source === 'ai' ? 'AI' : '규칙') + ' 추정</div><p class="muted" style="margin:4px 0">' + esc(tm.line) + '</p>';
     h += '<div class="cap2">ACT 1 · YOU ARE HERE</div><p style="margin:4px 0"><b>' + esc(pr.position.seasonName) + '</b> — ' + esc(pr.position.headline) + '</p><details><summary class="muted">왜 이렇게 나오나요? (근거 ' + pr.position.evidence.length + '항목)</summary>' + table(['항목', '값'], pr.position.evidence.map(function (e) { return [esc(e.k), esc(e.v)]; })) + '</details>';
     h += '<div class="cap2">FINAL · 버릴 것 / 지킬 것 / 시작할 것(예시)</div><p class="muted" style="margin:4px 0">버릴 것: ' + esc(pr.actions.drop.join(' / ')) + '<br>지킬 것: ' + esc(pr.actions.keep.join(' / ')) + '<br>시작할 것: ' + esc(pr.actions.start.join(' / ')) + '</p></div>';
     var cm = D.chapterMap();
