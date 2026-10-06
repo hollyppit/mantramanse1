@@ -1,0 +1,33 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "manse-static",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "-e",
+        "require('http').createServer((q,r)=>{r.setHeader('Content-Type','text/html; charset=utf-8');r.end(require('fs').readFileSync('index.html'))}).listen(8765)"
+      ],
+      "port": 8765
+    },
+    {
+      "name": "report-static",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        ".claude/report-dev.js"
+      ],
+      "port": 8766
+    },
+    {
+      "name": "ik-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        ".claude/report-dev.js"
+      ],
+      "port": 8791,
+      "env": {
+        "PORT": "8791"
+      }
+    }
+  ]
+}

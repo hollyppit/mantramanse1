@@ -3,12 +3,18 @@ const http = require('http'), fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json' };
 let awkExtra = { fallback: null, publicBase: '', textOnly: false }, rc = null, mediaList = [], awk = [], ilg = [], story = null, intro = { on: false, src: null, srcMobile: null, skipAfter: 0, once: 'session' }, clips = [], defaults = {}, chapters = null, folders = [], files = {};
+const ikMem = new Map(), ikEnv = { ADMIN_PASSWORD: 'test', GLOSSARY_KV: { get: async (k, t) => { const v = ikMem.get(k); return v == null ? null : t === 'json' ? JSON.parse(v) : v; }, put: async (k, v) => { ikMem.set(k, v); } } };
 const send = (r, code, obj) => { r.statusCode = code; r.setHeader('content-type', 'application/json; charset=utf-8'); r.end(JSON.stringify(obj)); };
 const authed = q => (q.headers.authorization || '') === 'Bearer test';
 const body = q => new Promise(res => { const b = []; q.on('data', c => b.push(c)); q.on('end', () => res(Buffer.concat(b))); });
 
 http.createServer(async (q, r) => {
   const u = new URL(q.url, 'http://x'), p = u.pathname;
+  if (p === '/api/ik') { // 실제 functions/api/ik.js 를 메모리 KV 로 실행 (AI 키 없음 → 규칙 기반 합성)
+    const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/ik.js')).href), buf = q.method === 'POST' ? await body(q) : undefined;
+    const res = await mod.onRequest({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': 'application/json' }, body: buf }) });
+    r.statusCode = res.status; r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(await res.text());
+  }
   if (p === '/api/waitlist' && q.method === 'POST') { await body(q); return send(r, 200, { ok: true }); }
   if (p === '/api/admin') return authed(q) ? send(r, 200, { ok: true }) : send(r, 401, { error: '비밀번호가 맞지 않습니다' });
   if (p === '/api/clips') {
