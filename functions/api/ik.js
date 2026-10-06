@@ -9,10 +9,10 @@ import { kvOf, storeCheck } from '../_store.js';
 
 import { MAX_PER_DOMAIN, MAX_BYTES, dkey, loadDomain, loadAll, meta, bump, scrub, llm, blockedDocs } from '../_ikstore.js';
 
-export async function onRequest({ request, env }) {
+export async function onRequest({ request, env, waitUntil }) {
   const url = new URL(request.url), a = url.searchParams.get('a') || '', post = request.method === 'POST';
   const kv = kvOf(env);
-  if (a === 'deep' && post) return deepForService(request, env);
+  if (a === 'deep' && post) return deepForService(request, env, waitUntil);
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   if (a === 'store') return json(await storeCheck(env)); // 어느 저장소(Supabase/KV)를 쓰는지 · 쓰기/읽기 시간
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
@@ -136,7 +136,19 @@ async function publicPackage(request, env) {
 }
 
 // 서비스(무빙툰·상세 리포트)가 부르는 공개 엔드포인트. 게시+검수 완료 지식만 쓰고 AI 를 부르지 않는다. 관리자가 "AI 작성 설정"에서 서비스 연결을 끄면 빈 결과.
-async function deepForService(request, env) {
+// 서비스 심화 풀이를 AI 가 이 사주에 맞게 엮는다(관리자가 rules.serviceAi 를 켠 경우만). 결과는 사주·지식 버전별로 30일 저장한다.
+// AI 는 근거 풀이 지식 id 안의 내용만 쓰고(sanitizeComposed), 단정·위험 표현이 있으면 버리고 DB 문장 그대로 쓴다. 하루 호출 상한 IK_DEEP_AI_DAILY(기본 300).
+async function aiForDomain(env, kv, pkg, rl, domain, sd, ext) {
+  const key = await IK.cacheKey({ sd, ext, domain, d: false, v: pkg.versions, rl, y: pkg.facts.nowYear }), hit = await kv.get(key, 'json');
+  if (hit && hit.composed) return hit.composed;
+  const ck = 'rl:ikdeepai:' + new Date().toISOString().slice(0, 10), used = +(await kv.get(ck)) || 0; if (used >= (+env.IK_DEEP_AI_DAILY || 300)) return null;
+  await kv.put(ck, String(used + 1), { expirationTtl: 172800 });
+  const r = await llm(env, IK.composerSystem(rl, domain), IK.composerUser(pkg), 6000, 30000), c = IK.sanitizeComposed(r.text, pkg); if (!c) return null;
+  if (Object.values(c).some(ps => ps.some(p => IK.BANNED_RE.test(p.text)))) return null;
+  await kv.put(key, JSON.stringify({ composed: c, provider: r.provider }), { expirationTtl: 60 * 60 * 24 * 30 });
+  return c;
+}
+async function deepForService(request, env, waitUntil) {
   const kv = kvOf(env, { cache: true }); if (!kv) return json({ ok: false, error: 'no-kv' });
   let b; try { if (+request.headers.get('content-length') > 200 * 1024) return json({ ok: false, error: 'too-large' }, 413); b = await request.json(); } catch { return json({ ok: false, error: 'bad-json' }, 400); }
   const doms = (Array.isArray(b.domains) ? b.domains : []).filter(d => IK.DOMAINS[d]).slice(0, 8); if (!doms.length) return json({ ok: false, error: 'bad-domain' }, 400);
@@ -146,8 +158,15 @@ async function deepForService(request, env) {
   try {
     const [design, rules] = await Promise.all([kv.get('ik:design', 'json'), kv.get('ik:rules', 'json')]), rl = rules || IK.DEFAULT_RULES;
     if (rl.serviceEnabled === false) return json({ ok: true, enabled: false, domains: {} });
-    const out = {}, blocked = await blockedDocs(kv);
-    for (const d of doms) { const items = await loadDomain(kv, d), pkg = IK.buildPackage(scrub(b.sd), b.ext, items, design, rl, { domain: d, includeDraft: false, blockedDocs: blocked }), v = IK.deepView(pkg, IK.composePlain(pkg, rl)); if (v.sections.length) out[d] = v; }
+    const out = {}, blocked = await blockedDocs(kv), m = await meta(kv), ver = { knowledge: m.k, design: m.d, rules: m.r, composer: IK.COMPOSER_VERSION }, sd = scrub(b.sd), res = {}, jobs = [];
+    const useAi = rl.serviceAi === true && !!(env.ANTHROPIC_API_KEY || env.OPENAI_API_KEY || env.GEMINI_API_KEY);
+    for (const d of doms) {
+      const items = await loadDomain(kv, d), pkg = IK.buildPackage(sd, b.ext, items, design, rl, { domain: d, includeDraft: false, blockedDocs: blocked }); pkg.versions = ver;
+      const plain = IK.composePlain(pkg, rl); res[d] = { pkg, composed: plain };
+      if (useAi && Object.keys(plain).length) jobs.push(aiForDomain(env, kv, pkg, rl, d, sd, b.ext).then(c => { if (c) res[d].composed = c; }).catch(() => { /* 실패하면 DB 문장 그대로 */ }));
+    }
+    if (jobs.length) { const all = Promise.all(jobs); await Promise.race([all, new Promise(r => setTimeout(r, +env.IK_DEEP_AI_WAIT_MS || 12000))]); if (waitUntil) waitUntil(all); } // 늦은 것은 뒤에서 마저 만들어 저장 → 다음 방문부터 사용
+    for (const d of doms) { const v = IK.deepView(res[d].pkg, res[d].composed); if (v.sections.length) out[d] = v; }
     return json({ ok: true, enabled: true, domains: out, v: (await meta(kv)).k });
   } catch (e) { return json({ ok: false, error: 'bad-input' }, 400); }
 }

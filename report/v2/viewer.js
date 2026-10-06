@@ -58,7 +58,8 @@
     }).then(function (a) {
       S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
       S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null, textOnly: !!(a[2] && a[2].textOnly) }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
-      return aiCompose().then(function () { if (LIFE && S.ch && R.LifeDoc) S.socP = R.LifeDoc.loadSocial({ M: window.Manse, ch: S.ch, sd: sd, now: Date.now() }); if (LIFE && S.ch && R.IKDeep) S.ikP = R.IKDeep.load(window.Manse, S.ch, sd); return a; });
+      if (LIFE && S.ch && R.IKDeep) S.ikP = R.IKDeep.load(window.Manse, S.ch, sd, 16000); // AI 합성과 나란히 먼저 시작
+      return aiCompose().then(function () { if (LIFE && S.ch && R.LifeDoc) S.socP = R.LifeDoc.loadSocial({ M: window.Manse, ch: S.ch, sd: sd, now: Date.now() }); return a; });
     }).then(function () {
       clearInterval(tick);
       try { localStorage.setItem('mt_v2_seen', '1'); } catch (e) { }
@@ -203,7 +204,7 @@
   function lifeBegin() {
     var rep0 = S.rep, plan = (rep0.chapters.filter(function (c) { return c.plan; })[0] || {}).plan || null; S.repPdf = rep0; // PDF·공유카드는 기존 20챕터 구성으로 만든다
     var wait = new Promise(function (ok) { setTimeout(function () { ok(null); }, 4000); }); // 관계·결혼 AI 추정이 늦으면 규칙 추정으로 먼저 진행한다
-    var waitIk = new Promise(function (ok) { setTimeout(function () { ok(null); }, 4000); }); // 검수된 풀이 지식(더 깊이 보기)이 늦으면 기존 구성으로 진행
+    var waitIk = new Promise(function (ok) { setTimeout(function () { ok(null); }, 16000); }); // 검수된 풀이 지식(더 깊이 보기)이 늦으면 기존 구성으로 진행
     Promise.all([Promise.race([S.socP || Promise.resolve(null), wait]), Promise.race([S.ikP || Promise.resolve(null), waitIk])]).then(function (got) {
       var soc = got[0], H = { M: window.Manse, ch: S.ch, sd: S.sd, now: Date.now(), name: S.name, interest: S.interest || '', rep: rep0, soc: soc, plan: plan, ik: got[1] };
       if (!H.soc) { try { H.soc = R.StoryDirector.social(H.M, H.ch, H.sd, H.now); } catch (e) { H.soc = null; } }
