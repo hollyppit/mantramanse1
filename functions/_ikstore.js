@@ -13,20 +13,25 @@ export function nextId(items, domain) { const re = new RegExp('^' + domain + '-(
 // 풀이 자료 정책에 따라 production 에서 빼야 하는 자료 id (비활성 또는 "Production 풀이 사용" OFF)
 export async function blockedDocs(kv) { const idx = (await kv.get('src:idx', 'json')) || []; return new Set(idx.filter(d => d.active === false || (d.policy && d.policy.production === false)).map(d => d.id)); }
 
+// 실패 응답의 error.message 를 짧게 덧붙인다 (400 의 실제 원인을 관리자 화면에서 볼 수 있게)
+async function errDetail(r) {
+  try { const j = await r.json(); const m = (j && j.error && (j.error.message || j.error)) || ''; return m ? ': ' + String(m).slice(0, 200) : ''; } catch { return ''; }
+}
+
 export async function llm(env, system, user, maxTokens = 6000) {
   const errs = [];
   if (env.ANTHROPIC_API_KEY) {
     try {
       const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
         body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: maxTokens, temperature: 0.2, system, messages: [{ role: 'user', content: user }] }) });
-      if (!r.ok) throw new Error('anthropic ' + r.status);
+      if (!r.ok) throw new Error('anthropic ' + r.status + await errDetail(r));
       const d = await r.json(); return { text: (d.content || []).filter(b => b.type === 'text').map(b => b.text).join(''), provider: 'anthropic' };
     } catch (e) { errs.push(e.message); }
   }
   if (env.OPENAI_API_KEY) {
     try {
       const r = await fetch('https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: system, input: user }) });
-      if (!r.ok) throw new Error('openai ' + r.status);
+      if (!r.ok) throw new Error('openai ' + r.status + await errDetail(r));
       const d = await r.json(); return { text: typeof d.output_text === 'string' ? d.output_text : (d.output || []).flatMap(o => o.content || []).map(c => c.text || '').join(''), provider: 'openai' };
     } catch (e) { errs.push(e.message); }
   }
