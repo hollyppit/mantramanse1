@@ -59,5 +59,9 @@ const text = r => JSON.stringify(r.d.domains || {});
   console.log('7. 스위치를 다시 끄면');
   env.IK_DEEP_AI_DAILY = '300'; await call('a=rules', { rules: { serviceAi: false } }, true); const E = sdOf(1962, 2, 2), b2 = aiCalls; r = await call('a=deep', body(E), false, '8.8.8.8'); ok(aiCalls === b2, 'AI 호출 없음');
 
+  console.log('8. 본문 대체 스위치(serviceBody)가 응답에 실림');
+  r = await call('a=deep', body(A), false, '9.9.9.1'); ok(r.d.body === false, '기본: body=false (더 깊이 덧붙임)');
+  await call('a=rules', { rules: { serviceBody: true } }, true); r = await call('a=deep', body(A), false, '9.9.9.2'); ok(r.d.body === true, '켜면 body=true (클라이언트가 본문 대체 모드로 조립)');
+
   console.log('\n' + (fails ? '실패 ' + fails + '건' : '전부 통과')); process.exit(fails ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });
