@@ -5,6 +5,7 @@
 import { json, isAdmin, configError } from '../_lib.js';
 import * as IK from '../_ik.js';
 import * as S from '../_src.js';
+import { kvOf } from '../_store.js';
 import { MAX_PER_DOMAIN, dkey, loadDomain, loadAll, meta, bump, nextId, llm } from '../_ikstore.js';
 
 const IDX = 'src:idx', ck = id => 'src:chunks:' + id, ak = id => 'src:cand:' + id, ID = /^d[a-z0-9]{3,24}$/, CID = /^[\w.-]{1,40}$/;
@@ -33,7 +34,7 @@ export async function onRequest(ctx) {
   try { return await handle(ctx); } catch (e) { return json({ error: '서버 오류: ' + String((e && e.message) || e).slice(0, 300) }, 500); }
 }
 async function handle({ request, env }) {
-  const url = new URL(request.url), a = url.searchParams.get('a') || '', post = request.method === 'POST', kv = retryKv(env.GLOSSARY_KV), id = url.searchParams.get('id') || '';
+  const url = new URL(request.url), a = url.searchParams.get('a') || '', post = request.method === 'POST', kv = retryKv(kvOf(env)), id = url.searchParams.get('id') || '';
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
   if (id && !ID.test(id)) return json({ error: '잘못된 자료 id' }, 400);

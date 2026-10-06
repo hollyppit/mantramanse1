@@ -3,6 +3,7 @@
 // PUT /api/free-content — 관리자. { tarot?, daily? } 보낸 쪽만 교체. 저장할 때마다 version 이 바뀐다.
 // 저장: GLOSSARY_KV 'free:content'.  tarot.cards[카드id][up|rev][분야][슬롯] = [문장…]  /  daily = free-core.js DAILY_DEFAULTS 와 같은 경로의 문자열 배열(cta 는 {q,btn,to})
 import { json, isAdmin, configError } from '../_lib.js';
+import { kvOf } from '../_store.js';
 
 const KEY = 'free:content', MAX_BYTES = 1024 * 1024;
 const CARD_ID = /^(M\d{1,2}|[WCSP]\d{1,2})$/, CATS = ['today', 'love', 'money', 'work', 'yesno'], SLOTS = ['headline', 'summary', 'detail', 'currentFlow', 'opportunity', 'caution', 'action', 'closingMessage', 'yesNoResult'];
@@ -36,18 +37,18 @@ function cleanDaily(d, depth = 0, inCta = false) {
 
 export async function onRequestGet({ env }) {
   if (!env.GLOSSARY_KV) return json({ content: null });
-  return json({ content: (await env.GLOSSARY_KV.get(KEY, 'json')) || null });
+  return json({ content: (await kvOf(env, { cache: true }).get(KEY, 'json')) || null });
 }
 
 export async function onRequestPut({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
   let b; try { b = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); }
-  const next = { ...((await env.GLOSSARY_KV.get(KEY, 'json')) || {}) };
+  const kv = kvOf(env), next = { ...((await kv.get(KEY, 'json')) || {}) };
   if (b.tarot) next.tarot = cleanTarot(b.tarot);
   if (b.daily) next.daily = cleanDaily(b.daily);
   next.version = 'f' + Date.now().toString(36);
   const text = JSON.stringify(next); if (text.length > MAX_BYTES) return json({ error: '콘텐츠가 너무 큽니다' }, 413);
-  await env.GLOSSARY_KV.put(KEY, text);
+  await kv.put(KEY, text);
   return json({ ok: true, version: next.version });
 }

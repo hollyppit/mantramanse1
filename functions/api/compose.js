@@ -4,6 +4,7 @@
 // 같은 입력은 KV 에 캐시되어(30일) 같은 결과가 나온다. 남용 방지: IP 당 시간당 호출 수 + 하루 전체 한도.
 // 필요한 설정: Secret ANTHROPIC_API_KEY(메인) / OPENAI_API_KEY(폴백), KV GLOSSARY_KV. 선택: ANTHROPIC_MODEL, OPENAI_MODEL, COMPOSE_HOURLY_LIMIT(기본 12), COMPOSE_DAILY_LIMIT(기본 3000)
 import { json } from '../_lib.js';
+import { kvOf } from '../_store.js';
 import { runCompose } from '../_compose.js';
 
 const TIMEOUT_MS = 30000;
@@ -23,16 +24,16 @@ async function overLimit(env, request) {
   if (!env.GLOSSARY_KV) return false;
   const ip = request.headers.get('cf-connecting-ip') || 'x', hour = new Date().toISOString().slice(0, 13), day = hour.slice(0, 10);
   const hk = 'rl:compose:' + ip + ':' + hour, dk = 'rl:compose:day:' + day;
-  const [h, d] = await Promise.all([env.GLOSSARY_KV.get(hk), env.GLOSSARY_KV.get(dk)]);
+  const kv = kvOf(env), [h, d] = await Promise.all([kv.get(hk), kv.get(dk)]);
   if ((+h || 0) >= (+env.COMPOSE_HOURLY_LIMIT || 12) || (+d || 0) >= (+env.COMPOSE_DAILY_LIMIT || 3000)) return true;
-  await Promise.all([env.GLOSSARY_KV.put(hk, String((+h || 0) + 1), { expirationTtl: 7200 }), env.GLOSSARY_KV.put(dk, String((+d || 0) + 1), { expirationTtl: 172800 })]);
+  await Promise.all([kv.put(hk, String((+h || 0) + 1), { expirationTtl: 7200 }), kv.put(dk, String((+d || 0) + 1), { expirationTtl: 172800 })]);
   return false;
 }
 
 export async function onRequestPost({ request, env }) {
   if (!env.ANTHROPIC_API_KEY && !env.OPENAI_API_KEY) return json({ ok: false, error: 'no-ai' });
   let body; try { if (+request.headers.get('content-length') > 40 * 1024) return json({ ok: false, error: 'too-large' }, 413); body = await request.json(); } catch { return json({ ok: false, error: 'bad-json' }, 400); }
-  const kv = env.GLOSSARY_KV, ttl = { expirationTtl: 60 * 60 * 24 * 30 };
+  const kv = kvOf(env), ttl = { expirationTtl: 60 * 60 * 24 * 30 };
   const llm = async (system, user) => {
     if (await overLimit(env, request)) throw new Error('rate-limited'); // 캐시 적중은 한도에 포함하지 않는다(llm 호출 직전에만 센다)
     const errs = [];

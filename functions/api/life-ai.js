@@ -3,6 +3,7 @@
 // 보내는 데이터에는 생년월일·이름이 없다(간지·십성·합충 요약만). 같은 입력은 KV 에 30일 캐시. 실패하면 { ok:false } — 클라이언트가 규칙 추정을 그대로 쓴다.
 // 설정: Secret ANTHROPIC_API_KEY(메인) / OPENAI_API_KEY(폴백), KV GLOSSARY_KV. 선택: ANTHROPIC_MODEL, OPENAI_MODEL, LIFEAI_HOURLY_LIMIT(기본 6), LIFEAI_DAILY_LIMIT(기본 2000)
 import { json } from '../_lib.js';
+import { kvOf } from '../_store.js';
 import { validate, SYSTEM, buildUser, sanitize, cacheKey } from '../_lifeai.js';
 
 const TIMEOUT_MS = 30000;
@@ -21,9 +22,9 @@ async function openai(env, system, user) {
 async function overLimit(env, request) {
   if (!env.GLOSSARY_KV) return false;
   const ip = request.headers.get('cf-connecting-ip') || 'x', hour = new Date().toISOString().slice(0, 13), day = hour.slice(0, 10), hk = 'rl:lifeai:' + ip + ':' + hour, dk = 'rl:lifeai:day:' + day;
-  const [h, d] = await Promise.all([env.GLOSSARY_KV.get(hk), env.GLOSSARY_KV.get(dk)]);
+  const kv = kvOf(env), [h, d] = await Promise.all([kv.get(hk), kv.get(dk)]);
   if ((+h || 0) >= (+env.LIFEAI_HOURLY_LIMIT || 6) || (+d || 0) >= (+env.LIFEAI_DAILY_LIMIT || 2000)) return true;
-  await Promise.all([env.GLOSSARY_KV.put(hk, String((+h || 0) + 1), { expirationTtl: 7200 }), env.GLOSSARY_KV.put(dk, String((+d || 0) + 1), { expirationTtl: 172800 })]);
+  await Promise.all([kv.put(hk, String((+h || 0) + 1), { expirationTtl: 7200 }), kv.put(dk, String((+d || 0) + 1), { expirationTtl: 172800 })]);
   return false;
 }
 
@@ -31,7 +32,7 @@ export async function onRequestPost({ request, env }) {
   if (!env.ANTHROPIC_API_KEY && !env.OPENAI_API_KEY) return json({ ok: false, error: 'no-ai' });
   let body; try { if (+request.headers.get('content-length') > 40 * 1024) return json({ ok: false, error: 'too-large' }, 413); body = await request.json(); } catch { return json({ ok: false, error: 'bad-json' }, 400); }
   const clean = validate(body); if (!clean) return json({ ok: false, error: 'bad-payload' }, 400);
-  const kv = env.GLOSSARY_KV, key = await cacheKey(clean), nowYear = new Date().getUTCFullYear();
+  const kv = kvOf(env), key = await cacheKey(clean), nowYear = new Date().getUTCFullYear();
   if (kv) { const hit = await kv.get(key, 'json'); if (hit) return json({ ok: true, result: hit, cached: true, source: 'ai' }); }
   if (await overLimit(env, request)) return json({ ok: false, error: 'rate-limited' });
   const user = buildUser(clean, nowYear), errs = []; let result = null;

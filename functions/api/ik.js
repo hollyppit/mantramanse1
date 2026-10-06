@@ -5,14 +5,16 @@
 // 관리자: POST ?a=package { sd, ext, domain } → 게시+검수된 지식만으로 만든 Interpretation Package (AI 호출 없음, 생년월일은 서버에서 버린다)
 import { json, isAdmin, configError } from '../_lib.js';
 import * as IK from '../_ik.js';
+import { kvOf, storeCheck } from '../_store.js';
 
 import { MAX_PER_DOMAIN, MAX_BYTES, dkey, loadDomain, loadAll, meta, bump, scrub, llm, blockedDocs } from '../_ikstore.js';
 
 export async function onRequest({ request, env }) {
   const url = new URL(request.url), a = url.searchParams.get('a') || '', post = request.method === 'POST';
-  const kv = env.GLOSSARY_KV;
+  const kv = kvOf(env);
   if (a === 'deep' && post) return deepForService(request, env);
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
+  if (a === 'store') return json(await storeCheck(env)); // 어느 저장소(Supabase/KV)를 쓰는지 · 쓰기/읽기 시간
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
   if (a === 'package' && post) return publicPackage(request, env); // P0: 관리자 전용. 서비스(무빙툰·리포트·PDF) 연결 시 서버 간 호출로 쓴다
   let b = {}; if (post) { try { b = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); } }
@@ -122,7 +124,7 @@ export async function onRequest({ request, env }) {
 }
 
 async function publicPackage(request, env) {
-  const kv = env.GLOSSARY_KV; if (!kv) return json({ ok: false, error: 'no-kv' });
+  const kv = kvOf(env); if (!kv) return json({ ok: false, error: 'no-kv' });
   let b; try { if (+request.headers.get('content-length') > 200 * 1024) return json({ ok: false, error: 'too-large' }, 413); b = await request.json(); } catch { return json({ ok: false, error: 'bad-json' }, 400); }
   if (!IK.DOMAINS[b.domain]) return json({ ok: false, error: 'bad-domain' }, 400);
   try {
@@ -135,7 +137,7 @@ async function publicPackage(request, env) {
 
 // 서비스(무빙툰·상세 리포트)가 부르는 공개 엔드포인트. 게시+검수 완료 지식만 쓰고 AI 를 부르지 않는다. 관리자가 "AI 작성 설정"에서 서비스 연결을 끄면 빈 결과.
 async function deepForService(request, env) {
-  const kv = env.GLOSSARY_KV; if (!kv) return json({ ok: false, error: 'no-kv' });
+  const kv = kvOf(env, { cache: true }); if (!kv) return json({ ok: false, error: 'no-kv' });
   let b; try { if (+request.headers.get('content-length') > 200 * 1024) return json({ ok: false, error: 'too-large' }, 413); b = await request.json(); } catch { return json({ ok: false, error: 'bad-json' }, 400); }
   const doms = (Array.isArray(b.domains) ? b.domains : []).filter(d => IK.DOMAINS[d]).slice(0, 8); if (!doms.length) return json({ ok: false, error: 'bad-domain' }, 400);
   const ip = request.headers.get('cf-connecting-ip') || 'x', hk = 'rl:ikdeep:' + ip + ':' + new Date().toISOString().slice(0, 13), used = +(await kv.get(hk)) || 0;

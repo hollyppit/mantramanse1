@@ -2,6 +2,7 @@
 // GET  /api/waitlist — 신청 목록 (관리자 전용)
 // 저장 위치: GLOSSARY_KV의 'waitlist:<이메일>' 키. 용어 수정 데이터(overrides)와 키가 겹치지 않는다.
 import { json, isAdmin, configError } from '../_lib.js';
+import { kvOf } from '../_store.js';
 
 const PREFIX = 'waitlist:';
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
@@ -19,8 +20,9 @@ export async function onRequestPost({ request, env }) {
   if (addr.length > 254 || !EMAIL_RE.test(addr)) return json({ error: '이메일 형식을 확인해 주세요' }, 400);
 
   const key = PREFIX + addr;
-  if (!(await env.GLOSSARY_KV.get(key))) {
-    await env.GLOSSARY_KV.put(key, JSON.stringify({ at: new Date().toISOString() }));
+  const kv = kvOf(env);
+  if (!(await kv.get(key))) {
+    await kv.put(key, JSON.stringify({ at: new Date().toISOString() }));
   }
   return json({ ok: true }); // 이미 신청한 주소도 같은 응답 (가입 여부 노출 방지)
 }
@@ -33,7 +35,7 @@ export async function onRequestGet({ request, env }) {
   const list = [];
   let cursor;
   do {
-    const page = await env.GLOSSARY_KV.list({ prefix: PREFIX, cursor });
+    const page = await kvOf(env).list({ prefix: PREFIX, cursor });
     for (const k of page.keys) list.push(k.name.slice(PREFIX.length));
     cursor = page.list_complete ? undefined : page.cursor;
   } while (cursor);

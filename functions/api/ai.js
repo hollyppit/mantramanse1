@@ -12,6 +12,7 @@
 // 폴백 규칙: 시간 초과·네트워크 오류·429·5xx(과부하 529 포함)·형식이 맞지 않는 답이면 다음 서비스로 넘어간다.
 // 400/401/403/404 같은 설정·요청 오류는 폴백으로 덮지 않고 그대로 알린다(키·모델 이름 실수를 놓치지 않도록).
 import { json, isAdmin } from '../_lib.js';
+import { kvOf } from '../_store.js';
 
 const DEFAULT_MODEL = { anthropic: 'claude-sonnet-5-5', openai: 'gpt-6.1-sol' };
 const TIMEOUT_MS = 40000;
@@ -111,9 +112,9 @@ function buildPrompt(b) {
 // 하루 호출 한도 (KV가 있을 때만). 남용·키 노출 시 요금이 새는 것을 막는다.
 async function overLimit(env) {
   if (!env.GLOSSARY_KV) return false;
-  const key = 'ai:usage:' + new Date().toISOString().slice(0, 10), used = +(await env.GLOSSARY_KV.get(key)) || 0, limit = +env.AI_DAILY_LIMIT || 300;
+  const kv = kvOf(env), key = 'ai:usage:' + new Date().toISOString().slice(0, 10), used = +(await kv.get(key)) || 0, limit = +env.AI_DAILY_LIMIT || 300;
   if (used >= limit) return true;
-  await env.GLOSSARY_KV.put(key, String(used + 1), { expirationTtl: 172800 });
+  await kv.put(key, String(used + 1), { expirationTtl: 172800 });
   return false;
 }
 
