@@ -86,13 +86,14 @@
     out.push(scene(sec('rv', '<details class="lf-why"><summary>왜 이렇게 나오나요?</summary><dl>' + pos.evidence.map(function (e) { return '<dt>' + esc(e.k) + '</dt><dd>' + esc(e.v) + '</dd>'; }).join('') + '</dl><p class="faint">이 화면의 결론을 만든 실제 계산 값입니다.</p></details>')));
     return out;
   }
-  /* ── 새 문체 카드 / 시간축 카드 ── */
-  function cards(id, H) {
-    var sc = SC.scenes(id, H.sd), by = function (k) { return sc.filter(function (x) { return x.kind === k; }).map(function (x) { return x.text; }); }, topic = SC.TOPICS[SC.MOD[id]].title, ex = by('ex'), out = [];
-    out.push(prose(topic + ' 이야기', [E(who(H)) + '의 ' + E(topic) + ' 이야기를 풀어 볼게요.', '<strong>' + E(by('concl')[0]) + '</strong>', E(by('real').join(' '))]));
+  /* ── 새 문체 카드(문단형 풀이) / 시간축 카드 ── */
+  var HOOK = { money: '은 돈을 어떻게 버는 사람일까요?', career: '은 어떤 일에서 힘이 나는 사람일까요?', love: '은 사랑에 빠지면 어떤 사람이 될까요?', marriage: '은 오래 갈 관계에서 무엇을 바랄까요?', relation: '은 사람들 사이에서 어떤 모습일까요?', self: '은 왜 이렇게 행동하는 사람일까요?' };
+  function cards(id, H) { // 질문 → 결론 → 반응 → 현실·예시 → 장점과 함정 → 근거. 행동 가이드는 여기서 하지 않고 마지막 개운 가이드로 모은다.
+    var sc = SC.scenes(id, H.sd), by = function (k) { return sc.filter(function (x) { return x.kind === k; }).map(function (x) { return x.text; }); }, key = SC.MOD[id], topic = SC.TOPICS[key].title, ex = by('ex'), out = [];
+    out.push(prose(topic + ' 이야기', [E(who(H)) + E(HOOK[key] || '의 이야기예요.'), '<strong>' + E(by('concl')[0]) + '</strong>', E(by('real').join(' '))]));
+    out.push(scene(sec('rv rd-react', '<p class="lead" style="font-size:.98rem;color:var(--ink2)">여기까지, 나와 비슷한가요?</p><div class="vd" role="group" aria-label="맞는지 알려 주세요"><button type="button" class="btn" data-vd="yes">맞아요</button><button type="button" class="btn" data-vd="no">글쎄요</button></div><p class="vd-reply faint" aria-live="polite" data-yes="' + E('그렇다면 이어지는 이야기가 더 와닿을 거예요.') + '" data-no="' + E('그럴 수 있어요. 겉으로 보이는 모습과 타고난 결은 다르기도 해요. 이어서 이유를 보여 드릴게요.') + '"></p>')));
     if (ex.length) out.push(prose('', ['예를 들면 이런 모습이에요.<br>' + ex.map(E).join('<br>')]));
     out.push(prose('', [E(by('pro')[0]) + ' 다만, ' + E(by('trap')[0])]));
-    out.push(scene(sec('rv', '<div class="lf-dt"><div><small>지금 해 볼 것</small>' + E(by('act')[0]) + '</div></div>')));
     out.push(scene(sec('rv', '<details class="lf-why"><summary>왜 이렇게 나오나요?</summary><dl>' + SC.evidence(id, H.sd).map(function (e) { return '<dt>' + esc(e.k) + '</dt><dd>' + esc(e.v) + '</dd>'; }).join('') + '</dl></details>'))); return out;
   }
   function bars(t, nm) {
@@ -109,60 +110,135 @@
   }
   function future(H) {
     var fu = D.future(H.M, H.ch, H.sd, H.now, 10), blk = function (t, g, cls) { return g.length ? '<div class="lf-fu ' + cls + '"><small>' + t + '</small>' + g.map(function (x) { return '<b>' + x.range + '</b> ' + (x.fromAge === x.toAge ? x.fromAge + '세' : x.fromAge + '~' + x.toAge + '세'); }).join(' · ') + '</div>' : ''; };
-    return [lineScene('앞으로 3년은\n' + fu.years.slice(0, 3).map(function (y) { return y.seasonName; }).join(' → ') + ' 순으로 흘러갑니다.', 'impact', '앞으로의 10년'),
+    return [lineScene('앞으로 3년은\n' + fu.years.slice(0, 3).map(function (y) { return y.seasonName; }).join(' → ') + ' 순으로 흘러가요.', 'impact', '앞으로의 10년'),
       scene(sec('rv', blk('가장 큰 전환 구간', fu.change, 'chg') + blk('확장하기 좋은 구간', fu.expand, 'exp') + blk('성과를 굳히는 구간', fu.harvest, 'hv') + blk('지키는 것이 중요한 구간', fu.protect, 'pr') + blk('준비해야 하는 구간', fu.prepare, 'pp') +
         '<div class="lf-yrs">' + fu.years.map(function (y) { return '<div class="lf-yr' + (y.isNow ? ' now' : '') + '"><b>' + y.year + '</b><span class="lf-sea s-' + y.season + '"><b aria-hidden="true">' + (ICON[y.season] || '') + '</b> ' + esc(y.seasonName) + '</span></div>'; }).join('') + '</div><p class="faint">' + esc(fu.caution) + '</p>'), { layout: 'DATA' })];
   }
+
+  /* ── 십성과 신살: 용어 풀이 카드가 아니라 "내 사주에서 실제로 보이는 값"을 쉬운 말로 이야기한다 ── */
+  var GRP = { 비겁: ['나와 같은 힘', '자존심·독립심·동료'], 식상: ['내보내는 힘', '표현·재능·아이디어'], 재성: ['현실을 다루는 힘', '돈·성과·실속'], 관성: ['나를 단련하는 힘', '책임·규칙·직장'], 인성: ['나를 채우는 힘', '배움·보호·이해'] };
+  var WEAK = { 비겁: '버티는 힘과 내 몫을 주장하는 힘', 식상: '마음을 밖으로 꺼내는 출구', 재성: '돈과 현실을 챙기는 감각', 관성: '규칙과 책임의 압박을 견디는 힘', 인성: '쉬어 가고 기대는 힘' };
+  var PILLAR = { year: '어린 시절과 집안', month: '사회생활과 직업', day: '나 자신과 가까운 관계', hour: '말년과 자녀, 내면' };
+  // 신살: [좋은 별 여부, 쉬운 설명]. 좋고 나쁨의 도장이 아니라 성향의 양념으로 읽는다. 사건을 단정하지 않는다.
+  var STAR = {
+    천을귀인: [1, '위기 때 도와주는 사람이 나타나기 쉬운 별이에요.'], 문창귀인: [1, '글, 공부, 아이디어에 재능이 붙는 별이에요.'], 학당귀인: [1, '배우고 익히는 일이 오래 힘이 되는 별이에요.'], 태극귀인: [1, '큰 흐름에서 방향을 잃지 않게 붙잡아 주는 별이에요.'],
+    천덕귀인: [1, '어려운 일을 덜 힘들게 넘기는 힘이 있는 별이에요.'], 월덕귀인: [1, '사람 사이에서 덕을 쌓기 쉬운 별이에요.'], 금여록: [1, '품위와 대접받는 자리가 따르기 쉬운 별이에요.'], 건록: [1, '스스로 서는 힘이 든든한 별이에요.'],
+    암록: [1, '드러나지 않는 곳에서 도움이 오는 별이에요.'], 천주귀인: [1, '먹고사는 일이 비교적 안정되기 쉬운 별이에요.'], 천관귀인: [1, '조직에서 인정받는 자리와 연결되기 쉬운 별이에요.'], 천복귀인: [1, '복이 쌓이는 방향으로 흐르기 쉬운 별이에요.'],
+    복성귀인: [1, '큰 굴곡 없이 평탄하게 풀리는 복이 있는 별이에요.'], 천문성: [1, '직관과 통찰, 정신세계에 감각이 열리는 별이에요.'], 천의성: [1, '사람을 돌보고 치유하는 데 재능이 붙는 별이에요.'], 삼기귀인: [1, '드물게 비범한 재능이 있다고 보는 별이에요.'],
+    공망: [0, '그 자리의 기운이 비어 있어서, 기대와 현실이 어긋나기 쉬운 곳이에요.'], 백호대살: [0, '강한 기운이 급하게 터질 수 있어서 속도 조절이 필요한 별이에요.'], 괴강살: [0, '카리스마와 고집이 함께 강한 별이에요.'], 양인살: [0, '밀어붙이는 힘이 세서 날이 서기 쉬운 별이에요.'],
+    홍염살: [0, '이성에게 매력이 두드러지는 별이에요.'], 현침살: [0, '말과 시선이 날카로워지기 쉬운 별이에요.'], 천라지망: [0, '답답하게 막힌 느낌이 들 때가 있는 별이에요.'], 과숙살: [0, '혼자 있는 시간이 필요한 마음이 큰 별이에요.'],
+    고란살: [0, '관계에서 외로움을 타기 쉬운 별이에요.'], 고신살: [0, '혼자 감당하려는 마음이 커지기 쉬운 별이에요.'], 탕화살: [0, '감정이 확 달아올랐다 식기 쉬운 별이에요.'], 낙정관살: [0, '예상 밖의 걸림돌을 만나기 쉬운 별이에요.'],
+    조객살: [0, '마음이 가라앉는 시기가 올 수 있는 별이에요.'], 급각살: [0, '서두르다 삐끗하기 쉬운 별이에요.'], 상문살: [0, '감정이 깊어지고 무거워지기 쉬운 별이에요.'], 효신살: [0, '자기 생각 속에 오래 머물기 쉬운 별이에요.'],
+    음양차착살: [0, '관계에서 속도와 온도가 엇갈리기 쉬운 별이에요.'], 금신살: [0, '말과 행동이 단호하고 강해지기 쉬운 별이에요.'], 십악대패일: [0, '재물과 체면을 지키는 일에 신경이 쓰이는 별이에요.'],
+  };
+  var S12 = { 역마살: '움직이고 옮겨 다니는 기운이 있어요. 이동·변화·출장이 잦을 수 있어요.', 연살: '사람을 끄는 매력(흔히 도화)이 있어요. 인기와 설렘이 따라붙기 쉬워요.', 화개살: '혼자 몰입하는 시간과 예술·정신세계에 끌리는 기운이 있어요.', 장성살: '중심에서 이끄는 리더십 기운이 있어요.',
+    반안살: '자리를 잡고 안정을 만드는 기운이 있어요.', 지살: '새로운 곳에서 시작하는 기운이 있어요.', 망신살: '드러나고 노출되는 일이 잦은 기운이 있어요. 말과 행동을 한 번 더 살피면 좋아요.', 겁살: '빼앗기거나 부딪히는 일이 생길 수 있어 방어가 필요한 기운이 있어요.',
+    재살: '예기치 않은 변수가 끼어들기 쉬운 기운이 있어요.', 천살: '내 뜻대로 되지 않는 일이 있어 겸손이 필요한 기운이 있어요.', 월살: '의욕이 막히고 지치기 쉬운 기운이 있어요.', 육해살: '가까운 사람 사이에서 오해가 생기기 쉬운 기운이 있어요.' };
+  function tenGods(H) {
+    var sd = H.sd, g = sd.groups, order = Object.keys(g).sort(function (a, b) { return g[b] - g[a]; }), top = order[0], low = order[order.length - 1], T = SC.TOPICS.self[top], nm = who(H), charts = R.Charts && R.Charts.html ? R.Charts.html('groups', sd, { chapter: 'c04' }) : '';
+    var out = [lineScene(nm + '의 힘은 다섯 갈래로 나뉘어요.\n내가 세상과 맺는 방식이에요.', 'normal'),
+      scene(sec('rv', '<div class="lf-grp">' + Object.keys(GRP).map(function (k) { return '<div class="lf-g' + (k === top ? ' top' : '') + '"><b>' + k + '</b><span>' + esc(GRP[k][0]) + '</span><small>' + esc(GRP[k][1]) + '</small><i>' + Math.round(g[k]) + '%</i></div>'; }).join('') + '</div>' + charts), { layout: 'DATA' }),
+      prose('', ['가장 큰 힘은 <strong>' + E(top) + '(' + E(GRP[top][0]) + ')</strong>이에요. ' + E(T[0]), E(T[1][0] + ' ' + T[1][1])]),
+      prose('', ['반대로 <strong>' + E(low) + '</strong> 쪽은 상대적으로 약해요. ' + E(WEAK[low]) + '이 필요한 순간에는 조금 애를 써야 할 수 있어요.'])]; return out;
+  }
+  function stars(H) {
+    var sd = H.sd, nm = who(H), have = (sd.specialStars || []).filter(function (s) { return STAR[s.name]; }), good = have.filter(function (s) { return STAR[s.name][0]; }).slice(0, 4), bad = have.filter(function (s) { return !STAR[s.name][0]; }).slice(0, 3);
+    var card = function (s) { return '<div class="lf-star ' + (STAR[s.name][0] ? 'g' : 'n') + '"><b>' + esc(s.name) + '</b><small>' + esc(PILLAR[s.pillar] || '') + '</small><span>' + esc(STAR[s.name][1]) + '</span></div>'; };
+    var out = [lineScene('사주에는 별처럼 붙는 기운도 있어요.\n좋고 나쁨을 가르는 도장이 아니라,\n성향의 양념 정도로 읽어 주세요.', 'normal')];
+    if (good.length) out.push(scene(sec('rv', '<div class="cap">' + esc(nm) + '에게 붙은 든든한 별</div><div class="lf-stars">' + good.map(card).join('') + '</div>')));
+    if (bad.length) out.push(scene(sec('rv', '<div class="cap">알아 두면 좋은 결</div><div class="lf-stars">' + bad.map(card).join('') + '</div><p class="faint">이 별들은 사건을 예언하는 것이 아니라 성향의 결을 보여 줍니다.</p>')));
+    var d12 = sd.sinsal12 && sd.sinsal12.day, m12 = sd.sinsal12 && sd.sinsal12.month, l = [d12 && S12[d12] && ['나 자신과 가까운 자리', d12, S12[d12]], m12 && S12[m12] && ['사회생활의 자리', m12, S12[m12]]].filter(Boolean);
+    if (l.length) out.push(prose('', l.map(function (x) { return '<strong>' + E(x[0]) + '</strong>에는 <strong>' + E(x[1]) + '</strong>이 있어요. ' + E(x[2]); })));
+    if (!good.length && !bad.length && !l.length) out.push(prose('', ['특별히 두드러지는 별은 없어요. 그만큼 타고난 결이 한쪽으로 치우치지 않았다는 뜻이에요.']));
+    return out;
+  }
+  /* ── FINAL: 행동 가이드는 여기로 몰아서 ── */
+  function actionsAll(H) { // 분야별 "지금 해 볼 것"(문서 중간에서 뺀 것을 한곳에 모은다)
+    var rows = [['money_nature', '돈'], ['career_style', '일'], ['love_style', '사랑'], ['marriage_who', '결혼'], ['relation_style', '사람 사이'], ['self_who', '나 자신']].map(function (x) { var a = SC.scenes(x[0], H.sd).filter(function (s) { return s.kind === 'act'; })[0]; return a ? '<div class="lf-fcard"><b>' + x[1] + '</b><span>' + esc(a.text) + '</span></div>' : ''; }).join('');
+    return [lineScene('이제, 이 모든 이야기를\n어떻게 쓸지 정리해 볼게요.', 'impact', 'FINAL'), scene(sec('rv', '<div class="cap">분야별로 지금 해 볼 것</div><div class="lf-fcards">' + rows + '</div>'))];
+  }
   function action(H) {
     var a = D.action(H.sd, H.plan, H.pos.seasonKey), col = function (t, cls, arr) { return '<div class="lf-col ' + cls + '"><small>' + t + '</small><ul>' + arr.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>'; };
-    return [lineScene('그래서 지금,\n무엇을 해야 할까요?', 'impact', 'FINAL'), lineScene(H.pos.seasonName + '의 흐름에 맞춘 세 가지입니다.', 'soft'), scene(sec('rv', col('버릴 것', 'drop', a.drop) + col('지킬 것', 'keep', a.keep) + col('시작할 것', 'start', a.start)))];
+    return [lineScene(H.pos.seasonName + '의 흐름에 맞춘 세 가지예요.', 'soft'), scene(sec('rv', col('버릴 것', 'drop', a.drop) + col('지킬 것', 'keep', a.keep) + col('시작할 것', 'start', a.start)))];
   }
 
-  /* ── 문서 조립 ── */
-  var INTEREST_ORDER = ['money', 'career', 'love', 'marriage', 'relation', 'self'], FUTURE_IDS = { future_cycle: 1, future_now: 1, future_3_5_10: 1, future_year: 1, future_months: 1 };
-  var MAP_INTEREST = { money: ['money'], career: ['career'], love: ['love', 'marriage'], self: ['self'], life: [] };
-  function interestOrder(want) { var first = MAP_INTEREST[want] || [], rest = INTEREST_ORDER.filter(function (k) { return first.indexOf(k) < 0; }); return first.concat(rest); }
+  /* ── 기존 챕터를 "바로 본론"으로: 서두·시기 설명·명리 해설·용어 풀이·중간 행동 가이드를 걷어낸다 ── */
+  var TIME_BASE = /^c1[5-8]$/, TIMING_TALK = /대운|세운|세\s*무렵|[0-9]+~[0-9]+세|[0-9]{4}년/, KEEP_ACTIONS = /^c(19|20)$/;
+  var ADVICE = /(하세요|보세요|두세요|마세요|주세요|세요|개운|추천|권합니다|해 볼 것)/;
+  function noAdvice(t) { // 문장 단위로 조언·행동 문장을 뺀다("조심할 점"처럼 성향을 말하는 문장은 남긴다)
+    var parts = String(t || '').replace(/\s*지금 해 볼 것:.*$/, '').split(/(?<=[.!?])\s+/); return parts.filter(function (p) { return p && !ADVICE.test(p) && !/좋(습니다|아요)[.!]?$/.test(p); }).join(' ').trim();
+  }
+  function trim(c, o) {
+    o = o || {}; var base = c.base || c.id, tm = TIME_BASE.test(base), keepAct = KEEP_ACTIONS.test(base), x = Object.assign({}, c), keep = [], tail = [], intro = null, ending = null;
+    (c.scenes || []).forEach(function (s) {
+      var txt = s.cinema ? (s.cinema.segments || []).map(function (g) { return g.text; }).join(' ') : '';
+      if (s.kind === 'opener') return;
+      if (s.sceneType === 'chapterIntro') { intro = Object.assign({}, s, { compact: true }); return; }
+      if (s.sceneType === 'chapterEnding') { ending = s; return; }
+      if (s.sceneType === 'terms') return; // 용어 풀이는 쓰지 않는다
+      if (!keepAct && /^(action|recommendation|warning)$/.test(s.sceneType)) return; // 중간 행동 가이드는 마지막 개운 가이드로 몰아서
+      if (s.sceneType === 'cinema' && (s.kind === 'title' || s.kind === 'profile')) return;
+      if (s.sceneType === 'cinema' && s.kind === 'script') { if (/명리에서는/.test(txt)) return; if (tm ? !/현실로 옮겨/.test(txt) : TIMING_TALK.test(txt)) return; }
+      if (s.sceneType === 'chart' || s.sceneType === 'timeline') { tail.push(s); return; }
+      keep.push(s);
+    });
+    if (!keepAct) {
+      x.meaning = noAdvice(c.meaning); x.details = (c.details || []).map(function (d) { return Object.assign({}, d, { detail: noAdvice(d.detail) }); });
+      if (!x.meaning && !x.details.length) keep = keep.filter(function (s) { return s.sceneType !== 'explanation'; });
+    }
+    x.scenes = (o.header !== false && intro ? [intro] : []).concat(keep, tail, o.last && ending ? [ending] : []); x.compact = true; x.actTransition = null; return x;
+  }
   function pseudo(id, title, sub, scenes) { return { id: id, base: 'life', project: 'full', kind: 'life', title: title, subtitle: sub, headline: sub || '', introText: '', moduleCategories: [], scenes: scenes, enabled: true }; }
 
+  /* ── 문서 조립: 전체 인생 → 오행 → 십성·신살 → 세부 이야기(연애·재물·직장…) → 앞으로의 흐름 → 개운 가이드 ── */
+  var BLOCK_ORDER = ['love', 'money', 'career', 'relation'], MAP_BLOCK = { love: 'love', money: 'money', career: 'career', self: '', life: '' };
+  var BRIDGE = { love: '이제 구체적인 이야기로 들어가 볼까요?\n마음이 가장 쓰이는 곳, 사랑부터요.', money: '이번에는 현실 이야기예요.\n돈은 어떻게 들어오고 나갈까요?', career: '돈을 만들어 내는 곳, 일 이야기예요.\n어디서 힘이 나는 사람일까요?', relation: '마지막으로,\n나를 둘러싼 사람들 이야기예요.' };
+  function blockOrder(want) { var f = MAP_BLOCK[want]; return f ? [f].concat(BLOCK_ORDER.filter(function (k) { return k !== f; })) : BLOCK_ORDER.slice(); }
+  function interestOrder(want) { return blockOrder(want); }
+
   function build(H) {
-    seq = 0; H.pos = D.position(H.M, H.ch, H.sd, H.now);
-    var acts = [{ id: 1, roman: 'PROLOGUE', title: '내 인생 전체', line: '90년짜리 지도를 펼칩니다.', pdfDone: '' }, { id: 2, roman: 'ACT I', title: '지금 서 있는 곳', line: '긴 인생에서 지금의 자리를 확인합니다.', pdfDone: '' },
-      { id: 3, roman: 'ACT II', title: '궁금한 이야기들', line: '돈, 일, 사랑, 관계를 하나씩 확대해서 봅니다.', pdfDone: '' }, { id: 4, roman: 'ACT III', title: '앞으로의 흐름', line: '이제 시간이 움직이기 시작합니다.', pdfDone: '' }, { id: 5, roman: 'FINAL', title: '그래서 지금', line: '이 모든 이야기가 가리키는 행동입니다.', pdfDone: '' }];
+    seq = 0; H.pos = D.position(H.M, H.ch, H.sd, H.now); var nm = who(H);
+    var acts = [{ id: 1, roman: 'PROLOGUE', title: '전체 인생 풀이', line: '' }, { id: 2, roman: 'ACT I', title: '타고난 오행', line: '' }, { id: 3, roman: 'ACT II', title: '십성과 신살', line: '' },
+      { id: 4, roman: 'ACT III', title: '세부 이야기', line: '' }, { id: 5, roman: 'ACT IV', title: '앞으로의 흐름', line: '' }, { id: 6, roman: 'FINAL', title: '개운 가이드', line: '' }].map(function (a) { a.pdfDone = ''; return a; });
     var byBase = {}; (H.rep ? H.rep.chapters : R.Chapters.BASE.map(function (c) { return { id: c.id, base: c.id, title: c.title, scenes: [] }; })).forEach(function (c) { byBase[c.base || c.id] = c; }); // rep 이 없으면(관리자 순서 미리보기) 기본 챕터 목록으로 순서만 만든다
-    var out = [], used = {}, usedMod = {};
-    function addReal(base, rename, act) { var c = byBase[base]; if (!c || used[base]) return; used[base] = 1; var x = Object.assign({}, c); x.act = act; x.actTransition = null; if (rename) { x.title = rename.title; x.introText = rename.sub; x.subtitle = rename.sub; } out.push(x); }
-    function addPseudo(id, title, sub, scenes, act) { var c = pseudo(id, title, sub, [{ sceneId: id + '_in', sceneType: 'chapterIntro', subtitle: sub }].concat(scenes)); c.act = act; out.push(c); }
-    // PROLOGUE · ACT I
-    addPseudo('life_prologue', '나의 인생 지도', '대운 10개로 본 인생의 계절', prologue(H), 1);
-    addPseudo('life_here', '지금 내가 서 있는 곳', '대운 + 세운 + 원국', here(H), 2);
-    // ACT II: 관심 분야가 먼저, 나머지가 이어진다(모듈은 한 번씩만)
-    var pos = H.pos; addReal('c00', null, 3); // 타고난 가장 큰 동력 — 궁금한 이야기들을 시작하기 전의 한 장
-    var primary = (MAP_INTEREST[H.interest] && MAP_INTEREST[H.interest].length) ? MAP_INTEREST[H.interest] : ['money']; // 고른 관심 분야(없으면 돈)는 깊게, 나머지는 핵심만 — 문서가 너무 길어지지 않게
-    interestOrder(H.interest).forEach(function (it) {
-      var deep = primary.indexOf(it) >= 0;
-      D.flow(it, { pos: pos }).steps.forEach(function (s) {
-        if (s.kind === 'life' || s.kind === 'here' || s.id === 'act_remedy' || FUTURE_IDS[s.id] || usedMod[s.id]) return; usedMod[s.id] = 1;
-        if (!deep && (D.byId[s.id].priority || 5) > 3) return; // 곁가지 이야기는 관심 분야에서만
-        var title = s.title, sub = s.sub, ch = s.chapters.filter(function (b) { return byBase[b] && !used[b]; }); if (!deep) ch = ch.slice(0, 1);
-        if (SC.has(s.id)) addPseudo('life_' + s.id, title, sub, cards(s.id, H), 3);
-        else if (s.gen && !s.chapters.length) addPseudo('life_' + s.id, title, sub, timing(s.gen, title, sub, H), 3);
-        ch.forEach(function (b, i) { addReal(b, i === 0 && !SC.has(s.id) ? { title: title, sub: sub } : null, 3); });
-        if (SC.has(s.id)) { /* 새 카드 뒤에 기존 챕터가 이어진다(위에서 추가) */ }
-      });
+    var out = [], used = {};
+    function real(base, act, o) { var c = byBase[base]; if (!c || used[base]) return; used[base] = 1; o = o || {}; var x = trim(c, { header: !o.noHeader, last: base === 'c20' }); x.act = act; if (o.title) { x.title = o.title; x.introText = o.sub || ''; x.subtitle = o.sub || ''; var ci = x.scenes.filter(function (s) { return s.sceneType === 'chapterIntro'; })[0]; if (ci) ci.subtitle = o.sub || ''; } out.push(x); }
+    function made(id, title, sub, scenes, act) { var c = pseudo(id, title, sub, [{ sceneId: id + '_in', sceneType: 'chapterIntro', subtitle: sub, compact: true }].concat(scenes)); c.act = act; out.push(c); }
+    function bridge(id, text, act) { var prev = out[out.length - 1]; if (prev) prev.scenes = prev.scenes.concat([lineScene(text, 'normal')]); } // 이야기를 잇는 한두 줄: 이전 챕터 끝에 붙인다
+    function topic(cardId, bases, act, after) { // 새 카드 → 기존 챕터(제목 없이 이어서) → 시간축 카드
+      var m = D.byId[cardId]; made('life_' + cardId, m.title, m.sub, cards(cardId, H), act); bases.forEach(function (b, i) { real(b, act, { noHeader: i === 0 }); }); (after || []).forEach(function (f) { f(); }); }
+    var gen = function (gid, act) { return function () { var m = D.byId[gid]; made('life_' + gid, m.title, m.sub, timing(m.gen, m.title, m.sub, H), act); }; };
+    // PROLOGUE: 전체 인생 풀이
+    made('life_prologue', '나의 인생 지도', '대운 10개로 본 인생의 계절', prologue(H), 1);
+    made('life_here', '지금 내가 서 있는 곳', '대운 + 세운 + 원국', here(H), 1);
+    real('c00', 1);
+    // ACT I: 타고난 오행
+    bridge('life_b1', '이제 이 지도를 만든 재료를 하나씩 열어 볼게요.\n먼저, ' + nm + '이 타고난 다섯 기운이에요.', 2);
+    topic('self_who', ['c01'], 2); real('c02', 2);
+    // ACT II: 십성과 신살
+    bridge('life_b2', '다섯 기운이 사람 안에서 움직이는 방식,\n십성이라는 눈으로 볼게요.', 3);
+    made('life_tengods', '십성 · 내 안의 다섯 힘', '비겁 · 식상 · 재성 · 관성 · 인성', tenGods(H), 3); real('c03', 3, { noHeader: true }); real('c04', 3); real('c05', 3);
+    made('life_stars', '신살 · 사주에 붙은 별', '귀인 · 12신살', stars(H), 3);
+    // ACT III: 세부 이야기(관심 분야가 먼저)
+    blockOrder(H.interest).forEach(function (k, i) {
+      bridge('life_bb_' + k, i === 0 ? BRIDGE[k] : '다음은 ' + ({ love: '사랑', money: '돈', career: '일', relation: '사람' }[k]) + ' 이야기예요.', 4);
+      if (k === 'love') { topic('love_style', ['c09'], 4, [gen('love_timing', 4)]); topic('marriage_who', ['c10'], 4, [gen('marriage_timing', 4)]); real('c12', 4, { title: '끌리는 사람, 맞는 사람', sub: '궁합 · 일주 상성' }); }
+      if (k === 'money') topic('money_nature', ['c08'], 4, [gen('money_timing', 4)]);
+      if (k === 'career') { topic('career_style', ['c06'], 4, [gen('career_timing', 4)]); real('c07', 4, { title: '나에게 맞는 성공 방식', sub: '억부 · 용신' }); }
+      if (k === 'relation') { topic('relation_style', ['c11'], 4, [gen('relation_timing', 4)]); real('c13', 4, { title: '내가 자라온 자리', sub: '년주 · 월주' }); }
     });
-    // ACT III: 앞으로의 흐름(미래 모듈은 기존 챕터와 시간축 카드)
-    [['future_cycle'], ['future_now'], ['future_3_5_10'], ['future_year'], ['future_months']].forEach(function (x) {
-      var m = D.byId[x[0]]; if (x[0] === 'future_3_5_10') addPseudo('life_future', m.title, m.sub, future(H), 4); else m.chapters.forEach(function (b) { addReal(b, { title: m.title, sub: m.sub }, 4); });
-    });
-    // FINAL
-    addPseudo('life_action', '그래서 지금 무엇을 해야 할까?', '버릴 것 · 지킬 것 · 시작할 것', action(H), 5);
-    ['c19', 'c20'].forEach(function (b, i) { addReal(b, i === 0 ? { title: '다음 길을 여는 방법', sub: '행동 · 성장 · 사람 · 공간 · 환경 · 타이밍' } : { title: '운로 사용설명서', sub: '모든 흐름을 하나의 실행 계획으로' }, 5); });
-    // 번호 · ACT 첫 챕터에 ACT 전환 화면
-    var last = 0; out.forEach(function (c, i) { c.no = i + 1; if (c.act !== last) { var a = acts.filter(function (x) { return x.id === c.act; })[0]; c.actTransition = { kicker: a.roman, headline: a.title, body: a.line }; last = c.act; } });
+    real('c14', 4);
+    // ACT IV: 앞으로의 흐름
+    bridge('life_b4', '이야기가 많이 쌓였네요.\n이제 시간을 앞으로 돌려 볼게요.', 5);
+    made('life_future', '앞으로 10년의 구간', '세운 10개', future(H), 5); real('c17', 5); real('c18', 5);
+    // FINAL: 개운 가이드(행동은 여기로 몰아서)
+    made('life_actions', '지금 해 볼 것', '분야별 한 줄 정리', actionsAll(H), 6); made('life_action', '버릴 것 · 지킬 것 · 시작할 것', H.pos.seasonName + '의 흐름에 맞춰서', action(H), 6);
+    real('c19', 6, { title: '다음 길을 여는 개운 가이드', sub: '행동 · 성장 · 사람 · 공간 · 환경 · 타이밍' }); real('c20', 6, { title: '운로 사용설명서', sub: '모든 흐름을 하나의 실행 계획으로' });
+    out.forEach(function (c, i) { c.no = i + 1; });
     return { acts: acts.filter(function (a) { return out.some(function (c) { return c.act === a.id; }); }), chapters: out };
   }
   // 관리자 미리보기: 문서에 실제로 들어가는 순서(번호 · ACT · 제목 · 출처)
-  function outline(H) { var d = build(H); return d.chapters.map(function (c) { return { no: c.no, act: (d.acts.filter(function (a) { return a.id === c.act; })[0] || {}).roman, title: c.title, id: c.id, kind: c.kind === 'life' ? '새 구성(엔진 시간축·현실 문체)' : '기존 챕터 ' + (c.base || c.id), scenes: (c.scenes || []).length }; }); }
+  function outline(H) { var d = build(H); return d.chapters.map(function (c, i) { return { no: i + 1, act: (d.acts.filter(function (a) { return a.id === c.act; })[0] || {}).roman, title: c.title, id: c.id, kind: c.kind === 'life' ? '새 구성(엔진 값·현실 문체)' : '기존 챕터 ' + (c.base || c.id), scenes: (c.scenes || []).length }; }); }
 
   R.LifeDoc = { build: build, outline: outline, loadSocial: loadSocial, interestOrder: interestOrder };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -248,6 +248,7 @@
     if (t === 'cinema') return cinemaHtml(c, s);
     if (t === 'chapterIntro') {
       var act = S.rep.acts.filter(function (a) { return a.id === c.act; })[0] || {};
+      if (s.compact) return '<section class="scene rv rd-mini" ' + id + '><div class="no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2>' + esc(c.title) + '</h2>' + (c.introText || s.subtitle ? '<p class="sub">' + esc(c.introText || s.subtitle) + '</p>' : '') + '</section>'; // 종합 풀이 안에서 순서대로 이어지는 작은 제목(서두 없이 바로 본론)
       return '<section class="scene rd-head rd-chead" ' + id + '><div class="rd-rule" aria-hidden="true"></div><div class="no" data-tx="intro.no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="rd-rule" aria-hidden="true"></div></section>';
     }
     if (t === 'insight') return '<section class="scene rv" ' + id + '><div class="cap">풀이</div><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead' + (c.lead && /_fallback$/.test(c.lead.id || '') ? ' faint' : '') + '" data-tx="insight.lead">' + lines(s.body) + '</p>' + (c.choice ? '<p class="lead choice rd-hl" data-tx="choice.line">' + lines(c.choice) + '</p>' : '') + '' + '</section>';
