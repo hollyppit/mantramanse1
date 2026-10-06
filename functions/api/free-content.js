@@ -6,11 +6,13 @@ import { json, isAdmin, configError } from '../_lib.js';
 
 const KEY = 'free:content', MAX_BYTES = 1024 * 1024;
 const CARD_ID = /^(M\d{1,2}|[WCSP]\d{1,2})$/, CATS = ['today', 'love', 'money', 'work', 'yesno'], SLOTS = ['headline', 'summary', 'detail', 'currentFlow', 'opportunity', 'caution', 'action', 'closingMessage', 'yesNoResult'];
-const KEY_OK = /^[A-Za-z0-9가-힣_]{1,24}$/, TO_OK = /^#\/(go\?to=(money|career|love|life|marriage|future|relation|self)|my|today|awaken|tarot)$/;
+const IMG_OK = /^\/api\/clipfile\?k=[\w.-]{1,120}$/, KEY_OK = /^[A-Za-z0-9가-힣_]{1,24}$/, TO_OK = /^#\/(go\?to=(money|career|love|life|marriage|future|relation|self)|my|today|awaken|tarot)$/;
 const sa = (v, n = 12, len = 400) => (Array.isArray(v) ? v.slice(0, n).map(x => (typeof x === 'string' ? x.trim().slice(0, len) : '')).filter(Boolean) : []);
 
 function cleanTarot(t) {
-  const out = { cards: {} }; if (!t || typeof t !== 'object' || !t.cards) return out;
+  const out = { cards: {} }; if (!t || typeof t !== 'object') return out;
+  if (t.images && typeof t.images === 'object') { const im = {}; for (const id of Object.keys(t.images).slice(0, 78)) if (CARD_ID.test(id) && typeof t.images[id] === 'string' && IMG_OK.test(t.images[id])) im[id] = t.images[id]; if (Object.keys(im).length) out.images = im; } // 카드 이미지: 관리자가 올린 R2 파일(/api/clipfile?k=…)만 허용
+  if (!t.cards) return out;
   for (const id of Object.keys(t.cards).slice(0, 78)) {
     if (!CARD_ID.test(id)) continue; const c = t.cards[id], o = {};
     for (const ori of ['up', 'rev']) { const p = c && c[ori]; if (!p) continue; const po = {};

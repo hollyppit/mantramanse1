@@ -10,13 +10,17 @@
   var ROMAN = ['0', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX', 'XXI'];
   var RANKS = ['', 'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'P', 'Kn', 'Q', 'K'];
 
+  var IMGS = {}; // 관리자가 올린 카드 이미지(/api/free-content 의 tarot.images). 불러오기 전·실패 시에는 기본 파일명을 쓴다
+  function applyImgs(ov) { IMGS = (ov && ov.tarot && ov.tarot.images) || {}; }
+  if (H.freeContent) H.freeContent().then(applyImgs);
+
   function fresh(m) { return { m: m, cards: Tarot.draw(5), pick: null, step: 'ask', seed: Math.random().toString(36).slice(2, 10) }; } // seed: 같은 결과를 다시 열어도 문장이 바뀌지 않게 한다(FreeCore.composeTarot)
 
   // 카드 앞면: 자리표시를 바닥에 깔고 그 위에 이미지를 얹는다. 이미지가 없거나 실패하면 이미지 요소를 지워 자리표시가 그대로 보인다(깨진 아이콘 없음).
   function face(card, rev) {
     var no = card.suit === 'M' ? ROMAN[card.number] : RANKS[card.rank];
     return '<div class="tf"><span class="no">' + no + '</span><span class="nm">' + esc(card.nameKo) + '</span><span class="en">' + esc(card.nameEn) + '</span>' + (card.suit === 'M' ? '' : '<span class="su">' + Tarot.suitKo[card.suit] + '</span>') + '</div>' +
-      '<img class="tcimg" src="' + esc(card.imageUrl) + '" alt="' + esc(card.nameKo) + '" loading="lazy" decoding="async">';
+      '<img class="tcimg" src="' + esc(IMGS[card.id] || card.imageUrl) + '" alt="' + esc(card.nameKo) + '" loading="lazy" decoding="async">';
   }
 
   /* ── 종류 선택 ───────────────────────────────────────────── */

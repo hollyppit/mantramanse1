@@ -36,6 +36,30 @@
   function auth(id, ori, cat, create) { var c = G.W.tarot.cards; if (!c[id]) { if (!create) return null; c[id] = {}; } if (!c[id][ori]) { if (!create) return null; c[id][ori] = {}; } if (!c[id][ori][cat]) { if (!create) return null; c[id][ori][cat] = {}; } return c[id][ori][cat]; }
   function comp(id) { return FC.tarotCompleteness({ tarot: G.W.tarot }, id); }
   var statusOf = function (p) { return p >= 90 ? ['완료', 'ok'] : p > 0 ? ['부족', 'mid'] : ['미작성', '']; };
+  // ───── 카드 이미지: 올린 파일은 R2(/api/clipfile)에 두고, 카드별 주소만 tarot.images 에 저장한다(없으면 기본 /report/hub/tarot/파일명) ─────
+  var imgOf = function (c) { return (G.W.tarot.images && G.W.tarot.images[c.id]) || c.imageUrl; };
+  var stem = function (n) { return String(n || '').toLowerCase().replace(/[.][a-z0-9]+$/, ''); };
+  function putImage(file) { // → Promise<'/api/clipfile?k=…'>
+    if (!/^image[/](webp|png|jpeg|jpg|avif|gif)$/.test(file.type) && !/[.](webp|png|jpe?g|avif|gif)$/i.test(file.name)) return Promise.reject(new Error('이미지 파일(webp·png·jpg)만 올릴 수 있습니다'));
+    if (file.size > 15 * 1024 * 1024) return Promise.reject(new Error('15MB 이하만 올릴 수 있습니다'));
+    return C.api('/api/clipfile?name=' + encodeURIComponent('tarot-' + file.name), { method: 'POST', headers: { 'content-type': file.type || 'application/octet-stream' }, body: file }).then(function (d) { if (!d.key) throw new Error('업로드 응답에 key 가 없습니다'); return '/api/clipfile?k=' + encodeURIComponent(d.key); });
+  }
+  function saveAll(msg) { return C.api('/api/free-content', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ tarot: G.W.tarot, daily: G.W.daily }) }).then(function (d) { G.version = d.version; toast(msg + ' · 버전 ' + d.version); }); }
+  // 파일명(확장자 제외)이 카드의 기본 파일명과 같으면 그 카드에 연결한다. 못 찾은 파일은 알려 준다.
+  function uploadMany(files, out) {
+    files = [].slice.call(files); var byStem = {}; T.cards.forEach(function (c) { byStem[stem(c.file)] = c; });
+    var jobs = [], miss = []; files.forEach(function (f) { var c = byStem[stem(f.name).replace(/^tarot-/, '')]; if (c) jobs.push([c, f]); else miss.push(f.name); });
+    if (!jobs.length) { out.textContent = '맞는 카드를 찾지 못했습니다. 파일 이름이 00-fool.webp 처럼 기본 이름이어야 자동 연결됩니다. 카드 한 장씩은 카드를 눌러 올릴 수 있습니다.'; return Promise.resolve(); }
+    var ok = 0, fail = [], i = 0; G.W.tarot.images = G.W.tarot.images || {};
+    function next() {
+      if (i >= jobs.length) return Promise.resolve();
+      var j = jobs[i++]; out.textContent = '올리는 중… ' + i + '/' + jobs.length + ' · ' + j[0].nameKo;
+      return putImage(j[1]).then(function (u) { G.W.tarot.images[j[0].id] = u; ok++; }).catch(function (e) { fail.push(j[1].name + '(' + e.message + ')'); }).then(next);
+    }
+    return next().then(function () { return ok ? saveAll('카드 이미지 ' + ok + '장 저장') : null; }).then(function () {
+      var note = ok + '장 올림' + (fail.length ? ' · 실패 ' + fail.length + ': ' + fail.slice(0, 3).join(', ') : '') + (miss.length ? ' · 이름이 안 맞아 건너뜀 ' + miss.length + ': ' + miss.slice(0, 4).join(', ') + (miss.length > 4 ? ' …' : '') : '');; tarotView(); var m2 = $('#fcUpMsg'); if (m2) m2.textContent = note;
+    }).catch(function (e) { out.textContent = '저장 실패: ' + e.message + ' (이미지는 올라갔지만 연결 저장이 안 됐습니다. 다시 시도하세요)'; });
+  }
   function tarotView() {
     var body = $('#fcBody');
     if (G.sel) return tarotEdit(body);
@@ -43,12 +67,17 @@
     var done = T.cards.filter(function (c) { return comp(c.id).total >= 90; }).length;
     body.innerHTML = '<div class="card"><p class="muted" style="margin:0 0 6px">카드 78장의 분야별 문장을 직접 쓸 수 있습니다. 쓰지 않은 칸은 기본 문구(카드 점수·키워드 기반)로 자동 완성되어 사용자 화면은 항상 채워집니다. 직접 쓴 카드가 늘수록 같은 카드의 풀이가 더 정교해집니다. <b style="color:var(--gold)">작성 완료 ' + done + ' / 78</b></p>' +
       '<div class="fc-bar">' + Object.keys(ARC).map(function (k) { return '<button class="fc-chip' + (G.filter === k ? ' on' : '') + '" data-f="' + k + '">' + ARC[k] + '</button>'; }).join('') + '<input type="text" id="fcQ" placeholder="카드 검색" value="' + esc(G.q) + '"></div>' +
+      '<div class="fc-bar" id="fcDrop" style="border:1px dashed var(--gold);border-radius:12px;padding:12px 14px;margin:10px 0;flex-wrap:wrap"><label style="cursor:pointer;background:var(--gold);color:#1a1405;font-weight:800;padding:10px 16px;border-radius:10px">🖼 카드 이미지 올리기<input type="file" id="fcFiles" accept="image/*" multiple style="display:none"></label><span class="muted" style="font-size:.82rem;flex:1 1 260px">여러 장을 한꺼번에 선택하거나 여기로 끌어다 놓으세요. 파일 이름이 <b>00-fool.webp</b>, <b>wands-01.webp</b> 처럼 기본 이름이면 카드에 자동 연결됩니다. 현재 업로드된 카드 <b>' + Object.keys(G.W.tarot.images || {}).length + '</b>/78장 · 역방향은 같은 이미지를 뒤집어 보여 줍니다.</span><span id="fcUpMsg" class="muted" style="flex-basis:100%;font-size:.82rem"></span></div>' +
       '<div class="fc-row h"><span>번호</span><span>이미지</span><span>이름</span><span>Arcana</span><span>완성도</span><span>상태</span></div><div id="fcRows"></div></div>' + previewBox('tarot');
     $$('[data-f]', body).forEach(function (b) { b.onclick = function () { G.filter = b.dataset.f; tarotView(); }; });
+    var fi = $('#fcFiles', body), um = $('#fcUpMsg', body), dz = $('#fcDrop', body);
+    fi.onchange = function () { if (fi.files.length) uploadMany(fi.files, um); };
+    dz.ondragover = function (e) { e.preventDefault(); dz.style.background = '#1c1a12'; }; dz.ondragleave = function () { dz.style.background = ''; };
+    dz.ondrop = function (e) { e.preventDefault(); dz.style.background = ''; if (e.dataTransfer.files.length) uploadMany(e.dataTransfer.files, um); };
     $('#fcQ', body).oninput = function () { G.q = this.value; rows(); }; rows();
     function rows() {
       var l = T.cards.filter(function (c) { return (G.filter === 'all' || c.suit === G.filter) && (!G.q || (c.nameKo + ' ' + c.nameEn).toLowerCase().indexOf(G.q.toLowerCase()) >= 0); });
-      $('#fcRows', body).innerHTML = l.map(function (c) { var p = comp(c.id).total, st = statusOf(p); return '<div class="fc-row" data-id="' + c.id + '"><span>' + (c.number != null ? c.number : c.rank) + '</span><span><div class="fc-th" style="background-image:url(\'' + esc(c.imageUrl) + '\')"></div></span><span><b>' + esc(c.nameKo) + '</b><small>' + esc(c.nameEn) + '</small></span><span>' + ARC[c.suit] + '</span><span>' + p + '%</span><span><i class="fc-st ' + st[1] + '">' + st[0] + '</i></span></div>'; }).join('');
+      $('#fcRows', body).innerHTML = l.map(function (c) { var p = comp(c.id).total, st = statusOf(p); return '<div class="fc-row" data-id="' + c.id + '"><span>' + (c.number != null ? c.number : c.rank) + '</span><span><div class="fc-th" style="background-image:url(\'' + esc(imgOf(c)) + '\')"></div></span><span><b>' + esc(c.nameKo) + '</b><small>' + esc(c.nameEn) + '</small></span><span>' + ARC[c.suit] + '</span><span>' + p + '%</span><span><i class="fc-st ' + st[1] + '">' + st[0] + '</i></span></div>'; }).join('');
       $$('.fc-row[data-id]', body).forEach(function (r) { r.onclick = function () { G.sel = r.dataset.id; G.ori = 'up'; G.cat = 'today'; tarotView(); }; });
     }
     previewBind(body, 'tarot'); void list;
@@ -58,12 +87,14 @@
     var c = T.byId[G.sel], p = comp(c.id), cur = auth(c.id, G.ori, G.cat, false) || {}, rev = G.ori === 'rev';
     var tone = FC.composeTarot(T, c.id, rev, G.cat, 'x', null).tone, def = FC.tarotDefaults(G.cat, tone);
     body.innerHTML = '<div class="fc-bar"><button id="fcBack">← 카드 목록</button><b style="color:var(--gold)">' + esc(c.nameEn) + ' · ' + esc(c.nameKo) + '</b><span class="muted">' + ARC[c.suit] + ' · 전체 ' + p.total + '%</span></div>' +
-      '<div class="card"><div class="fc-bar" style="margin-top:0"><div class="fc-th" style="width:48px;height:76px;background-image:url(\'' + esc(c.imageUrl) + '\')"></div><div class="muted" style="font-size:.82rem">정방향 키워드: ' + esc(c.upright) + '<br>역방향 키워드: ' + esc(c.reversed) + '<br>카드 이미지: ' + esc(c.imageUrl) + ' <small>(카드 이름·키워드·이미지는 공용 카드 DB(shared-core.js)에 있어 여기서는 읽기 전용입니다)</small></div></div>' +
+      '<div class="card"><div class="fc-bar" style="margin-top:0"><div class="fc-th" style="width:48px;height:76px;background-image:url(\'' + esc(imgOf(c)) + '\')"></div><div class="muted" style="font-size:.82rem">정방향 키워드: ' + esc(c.upright) + '<br>역방향 키워드: ' + esc(c.reversed) + '<br>카드 이미지: ' + esc(imgOf(c)) + ' <label style="cursor:pointer;color:var(--gold);text-decoration:underline">이 카드 이미지 올리기<input type="file" id="fcOne" accept="image/*" style="display:none"></label>' + ((G.W.tarot.images || {})[c.id] ? ' <a href="#" id="fcOneDel" style="color:var(--ink3)">기본으로 되돌리기</a>' : '') + ' <small>(카드 이름·키워드·이미지는 공용 카드 DB(shared-core.js)에 있어 여기서는 읽기 전용입니다)</small></div></div>' +
       '<div class="fc-bar"><button class="fc-chip' + (G.ori === 'up' ? ' on' : '') + '" data-o="up">정방향</button><button class="fc-chip' + (G.ori === 'rev' ? ' on' : '') + '" data-o="rev">역방향</button><span class="muted" style="font-size:.8rem">' + Object.keys(CATS).map(function (k) { return CATS[k] + ' ' + p[G.ori][k] + '%'; }).join(' · ') + '</span></div>' +
       '<div class="fc-bar">' + Object.keys(CATS).map(function (k) { return '<button class="fc-chip' + (G.cat === k ? ' on' : '') + '" data-c="' + k + '">' + CATS[k] + ' ' + p[G.ori][k] + '%</button>'; }).join('') + '</div>' +
       '<p class="muted" style="font-size:.8rem;margin:4px 0">한 줄에 문장 하나씩 씁니다. 비워 두면 기본 문구 ' + (tone === 'up' ? '(밝은 톤)' : tone === 'mix' ? '(조율 톤)' : '(신중 톤)') + '가 쓰입니다. 같은 칸에 여러 문장을 쓰면 열 때마다 그중에서 골라 보여 줍니다. <b>{kw}</b> 는 카드 키워드로, <b>{nm}</b> 은 카드 이름으로 바뀝니다.</p>' +
       FC.TAROT_SLOTS.map(function (s) { var v = (cur[s] || []).join('\n'); return '<label class="fc-sl"><b>' + FC.TAROT_SLOT_KO[s] + '</b><small>' + SLOT_HINT[s] + ' · 현재 ' + (cur[s] && cur[s].length ? '직접 작성 ' + cur[s].length + '개' : '기본 문구 ' + ((def[s] || []).length) + '개 사용 중') + '</small><textarea data-s="' + s + '" rows="3" placeholder="' + esc((def[s] || [])[0] || '') + '">' + esc(v) + '</textarea></label>'; }).join('') + '</div>' + previewBox('tarot', c.id);
     $('#fcBack', body).onclick = function () { G.sel = null; tarotView(); };
+    var one = $('#fcOne', body); if (one) one.onchange = function () { if (!one.files[0]) return; putImage(one.files[0]).then(function (u) { G.W.tarot.images = G.W.tarot.images || {}; G.W.tarot.images[c.id] = u; return saveAll(c.nameKo + ' 이미지 저장'); }).then(tarotView).catch(function (e) { toast(e.message, true); }); };
+    var od = $('#fcOneDel', body); if (od) od.onclick = function (e) { e.preventDefault(); delete G.W.tarot.images[c.id]; saveAll(c.nameKo + ' 이미지를 기본으로 되돌림').then(tarotView).catch(function (er) { toast(er.message, true); }); };
     $$('[data-o]', body).forEach(function (b) { b.onclick = function () { G.ori = b.dataset.o; tarotView(); }; }); $$('[data-c]', body).forEach(function (b) { b.onclick = function () { G.cat = b.dataset.c; tarotView(); }; });
     $$('textarea[data-s]', body).forEach(function (t) { t.oninput = function () { var lines = t.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean), o = auth(c.id, G.ori, G.cat, lines.length > 0); if (!o) return; if (lines.length) o[t.dataset.s] = lines; else { delete o[t.dataset.s]; } }; });
     previewBind(body, 'tarot', c.id);
