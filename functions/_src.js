@@ -1,7 +1,7 @@
 // 풀이 자료(Source) 학습 — 순수 로직(외부 import 는 _ik.js 뿐 → Node 테스트 가능). 파일명이 _로 시작해 라우트로 노출되지 않는다.
 // 흐름: 자료 등록 → 원문 보존 → 구조 단위 분할(chunk) → AI 후보 추출 → 기존 풀이 지식과 중복·충돌 검사 → 검증 → 관리자 승인 → 풀이 지식 + 근거 자료(SourceEvidence).
 // AI 는 "이 이론이 참인가"를 판정하지 않는다. 원문의 주장·조건·해석을 구조화할 뿐이며, 원문(sourceClaim)과 AI 정리(suggested)는 따로 저장한다.
-import { DOMAINS, COND_FIELDS, cleanConds, cleanModifier, BANNED_RE, STANCES, isProduction } from './_ik.js';
+import { DOMAINS, COND_FIELDS, cleanConds, cleanModifier, BANNED_RE, STANCES, isProduction, sectionGuide, sectionMap } from './_ik.js';
 
 export const THEORY = ['억부', '조후', '격국', '십성', '일주론', '신살', '궁성론', '대운', '세운', '기타'];
 export const GRADES = ['A', 'B', 'C', '미평가'];
@@ -68,7 +68,7 @@ export function chunkSource({ text, pages, fileType }) {
 export const locLabel = c => (c.pageStart ? (c.pageEnd && c.pageEnd !== c.pageStart ? c.pageStart + '~' + c.pageEnd + '쪽' : c.pageStart + '쪽') : (c.lineStart ? c.lineStart + '~' + c.lineEnd + '줄' : '')) + (c.heading ? (c.pageStart || c.lineStart ? ' · ' : '') + c.heading : '');
 
 // ───────────── AI 후보 추출 ─────────────
-export function extractSystem() {
+export function extractSystem(design) {
   return `너는 명리학 자료를 "풀이 지식 후보"로 구조화하는 편집 보조자다. 이 명리 이론이 참인지 판정하지 않는다. 원문이 무엇을 말하는지 정확히 옮기는 것이 전부다.
 원칙(반드시 지킨다):
 1. 원문에 없는 명리 이론·조건·결과를 추가하지 마라.
@@ -81,7 +81,9 @@ export function extractSystem() {
 conditions 는 아래 형식만 쓴다(그 밖의 키는 버려진다):
   dayMaster:["경"] (갑을병정무기경신임계) · strength:["신강"|"신약"|"중화"] · hasRoot:["있음"|"없음"] · monthBranch:["자"…"해"] · season:["봄"|"여름"|"가을"|"겨울"] · yongEl:["목"|"화"|"토"|"금"|"수"] · pattern:["격국·구조 이름"] · star:["신살 이름"] · relation:["합"|"충"|"형"|"파"|"해"…]
   el:{"목":"weak|mid|strong"} (목화토금수) · group:{"관성":"strong"} (비겁 식상 재성 관성 인성) · tenGod:{"편관":"strong"} · daewoonSeason/seunSeason/monthSeason:["기회기"|"확장기"|"수확기"|"축적기"|"전환기"|"방어기"]
-domains 는 SELF MONEY CAREER LOVE MARRIAGE RELATIONSHIP TIMING ACTION 중 해당하는 것(첫 번째가 주 분야). stance: positive(유리) / caution(주의) / neutral. extractionConfidence: HIGH|MID|LOW — "원문 의미를 정확히 구조화했는가"에 대한 네 판단이며 이론의 진위가 아니다. theoryTags 는 억부 조후 격국 십성 일주론 신살 궁성론 대운 세운 기타 중에서.
+domains 는 SELF MONEY CAREER LOVE MARRIAGE RELATIONSHIP TIMING ACTION 중 해당하는 것(첫 번째가 주 분야). subDomain 은 주 분야의 아래 구성 항목 id 중 가장 맞는 하나를 그대로 쓴다(목록에 없는 말을 지어내지 말고, 맞는 게 없으면 빈 문자열):
+${sectionGuide(design)}
+ stance: positive(유리) / caution(주의) / neutral. extractionConfidence: HIGH|MID|LOW — "원문 의미를 정확히 구조화했는가"에 대한 네 판단이며 이론의 진위가 아니다. theoryTags 는 억부 조후 격국 십성 일주론 신살 궁성론 대운 세운 기타 중에서.
 modifiers: 원문에 "이런 경우 강해진다/완화된다/예외"가 있을 때만 [{"when":{조건},"effect":"strengthen|soften|replace|exception","text":"..."}]. exclusions: 원문에 "이 경우는 해당하지 않는다"가 있을 때만.
 JSON 한 덩어리로만 답하라: {"candidates":[{"sourceClaim":"","title":"","domains":[],"subDomain":"","stance":"","conditions":{},"unclearConditions":false,"principle":"","interpretation":"","behaviorPatterns":[],"strengths":[],"risks":[],"actions":[],"realWorldExamples":{"worker":"","business":"","freelance":"","love":""},"modifiers":[],"exclusions":{},"theoryTags":[],"extractionConfidence":"","ambiguity":[]}]}`;
 }
@@ -102,10 +104,10 @@ function salvageCandidates(text) {
   }
   return out.length ? out : null;
 }
-export function parseCandidates(text, chunk) {
+export function parseCandidates(text, chunk, design) {
   text = String(text || ''); const a = text.indexOf('{'), z = text.lastIndexOf('}'); let d; try { d = JSON.parse(text.slice(a, z + 1)); } catch { d = null; }
   const list = d && Array.isArray(d.candidates) ? d.candidates : salvageCandidates(text); if (!list) return null;
-  const hay = fold(chunk.text), out = [];
+  const hay = fold(chunk.text), out = [], secs = sectionMap(design);
   for (const x of list.slice(0, 12)) {
     if (!x || typeof x !== 'object') continue; const claim = str(x.sourceClaim, 600); if (claim.length < 8) continue;
     const domains = (Array.isArray(x.domains) ? x.domains : []).filter(k => DOMAINS[k]).filter((k, i, a2) => a2.indexOf(k) === i).slice(0, 4);
@@ -113,7 +115,7 @@ export function parseCandidates(text, chunk) {
     const mods = (Array.isArray(x.modifiers) ? x.modifiers.slice(0, 10) : []).map(cleanModifier).filter(Boolean), ex = x.realWorldExamples && typeof x.realWorldExamples === 'object' ? x.realWorldExamples : {};
     out.push({
       sourceClaim: claim, claimVerified: fold(claim).length >= 6 && hay.includes(fold(claim)),
-      suggested: { title: str(x.title, 120), domains, subDomain: str(x.subDomain, 40), stance: STANCES.includes(x.stance) ? x.stance : 'neutral', conditions: conds, exclusions: cleanConds(x.exclusions), modifiers: mods,
+      suggested: { title: str(x.title, 120), domains, subDomain: (secs[domains[0]] && secs[domains[0]][str(x.subDomain, 40)] !== undefined) ? str(x.subDomain, 40) : '', stance: STANCES.includes(x.stance) ? x.stance : 'neutral', conditions: conds, exclusions: cleanConds(x.exclusions), modifiers: mods,
         principle: str(x.principle, 2000), interpretation: str(x.interpretation, 2000), behaviorPatterns: strs(x.behaviorPatterns), strengths: strs(x.strengths), risks: strs(x.risks), actions: strs(x.actions),
         realWorldExamples: { worker: str(ex.worker, 600), business: str(ex.business, 600), freelance: str(ex.freelance, 600), love: str(ex.love, 600) }, theoryTags: strs(x.theoryTags, 10, 20).filter(t => THEORY.includes(t)) },
       extractionConfidence: CONF[String(x.extractionConfidence).toUpperCase()] || 'low', ambiguity: strs(x.ambiguity, 8, 200), unclearConditions: x.unclearConditions === true || (!Object.keys(conds).length && rawKeys.length > 0), dropped,

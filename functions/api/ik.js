@@ -31,6 +31,21 @@ export async function onRequest({ request, env }) {
   }
   if (a === 'stats' && !post) { const [items, design] = await Promise.all([loadAll(kv), kv.get('ik:design', 'json')]); const total = items.length, prod = items.filter(IK.isProduction).length;
     return json({ total, published: items.filter(x => x.status === 'published').length, reviewed: items.filter(x => x.reviewed).length, needReview: items.filter(x => x.status !== 'archived' && !x.reviewed).length, aiDraft: items.filter(x => x.sourceType === 'AI_DRAFT' && !x.reviewed).length, production: prod, coverage: IK.coverageStats(items, design) }); }
+  if (a === 'classify' && post) { // 구성 항목(subDomain)이 비었거나 목록에 없는 풀이 지식을 AI 가 가장 맞는 항목에 배정한다. 이미 맞는 값은 건드리지 않는다. 한 번에 최대 40개 — remaining 이 0 이 될 때까지 offset 을 (tried - assigned)씩 늘려 반복 호출.
+    const dom = b.domain; if (!IK.DOMAINS[dom]) return json({ error: '분야가 필요합니다' }, 400);
+    try {
+      const design = await kv.get('ik:design', 'json'), secs = IK.sectionMap(design)[dom], ids = Object.keys(secs), list = await loadDomain(kv, dom);
+      const todo = list.filter(x => x.status !== 'archived' && secs[x.subDomain] === undefined), off = Math.max(0, +b.offset || 0), batch = todo.slice(off, off + 40);
+      if (!batch.length) return json({ ok: true, domain: dom, assigned: 0, tried: 0, remaining: 0 });
+      const sys = '너는 사주 풀이 지식을 분류하는 편집자다. 각 풀이를 아래 구성 항목 id 중 내용에 가장 맞는 하나에 배정한다. 목록에 없는 id 를 만들지 말고, 정말 맞는 것이 없으면 빈 문자열로 둔다.\n구성 항목: ' + ids.map(i => i + '(' + secs[i] + ')').join(', ') + '\nJSON 한 덩어리로만 답하라: {"<풀이 id>":"<구성 항목 id 또는 빈 문자열>", …}';
+      const usr = batch.map(x => x.id + ' | ' + x.title + ' | ' + String(x.interpretation || x.principle || '').replace(/\s+/g, ' ').slice(0, 140)).join('\n');
+      const r = await llm(env, sys, usr, 4000, 90000), t = r.text, s0 = t.indexOf('{'), z = t.lastIndexOf('}'); let map; try { map = JSON.parse(t.slice(s0, z + 1)); } catch { return json({ error: 'AI 답이 형식에 맞지 않습니다(중단: ' + (r.stop || '?') + ')' }, 502); }
+      let n = 0; const now = new Date().toISOString(), byId = new Map(list.map(x => [x.id, x]));
+      for (const x of batch) { const v = map && map[x.id]; if (typeof v === 'string' && secs[v] !== undefined) { byId.get(x.id).subDomain = v; byId.get(x.id).updatedAt = now; n++; } else if (!x.subDomain) { /* 못 정하면 그대로 둔다 */ } else { byId.get(x.id).subDomain = ''; byId.get(x.id).updatedAt = now; } }
+      if (n || batch.some(x => byId.get(x.id).subDomain !== x.subDomain)) { await kv.put(dkey(dom), JSON.stringify(list)); await bump(kv, 'k'); }
+      return json({ ok: true, domain: dom, assigned: n, tried: batch.length, remaining: Math.max(0, todo.length - off - batch.length), provider: r.provider });
+    } catch (e) { return json({ error: e.message || '실패' }, 400); }
+  }
   if (a === 'import' && post) { // 기존 해석 모듈 → "검수 필요" 초안. 이미 가져온 것(sourceReference)은 건너뛴다. 게시는 하지 않는다.
     const mods = Array.isArray(b.modules) ? b.modules.slice(0, 1500) : [], all = await loadAll(kv), have = new Set(all.map(x => x.sourceReference)), cnt = {}, add = {}; let skipped = 0, bad = 0;
     for (const x of all) { const m = /-L(\d+)$/.exec(x.id); if (m) cnt[x.domain] = Math.max(cnt[x.domain] || 0, +m[1]); }

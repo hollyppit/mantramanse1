@@ -231,10 +231,28 @@
       var rows = d.gaps.sort(function (a, b) { return (b.required - a.required) || (b.candidates - a.candidates); });
       PANE.innerHTML = nav() + '<div class="card"><h3 style="margin:0 0 4px;font-size:1.05rem;color:var(--gold)">부족한 지식</h3><p class="muted" style="margin:0 0 8px">풀이 구성에서 켜 둔 항목 중 “공개 + 검수 완료”된 풀이 지식이 없는 항목입니다. 관련 후보가 이미 자료에서 나와 있으면 바로 검수하세요(실제 데이터 기준).</p>' +
         '<div class="sr-bar">' + Object.keys(d.coverage).map(function (k) { return chip(d.coverage[k].pct >= 80 ? 'good' : d.coverage[k].pct >= 50 ? 'warn' : 'bad', d.coverage[k].name + ' ' + d.coverage[k].pct + '% ' + d.coverage[k].label); }).join(' ') + '</div>' +
+        '<div style="margin:10px 0"><button id="srClassify" class="gold">풀이 지식을 구성 항목에 자동 배정(AI)</button> <span id="srClsMsg" class="muted">항목이 비었거나 구성 항목과 맞지 않는 풀이 지식을 AI가 가장 맞는 항목에 배정합니다. 이미 맞게 배정된 것은 그대로 둡니다.</span></div>' +
         (rows.length ? '<table><thead><tr><th>분야</th><th>항목</th><th>관련 후보</th><th></th></tr></thead><tbody>' + rows.slice(0, 120).map(function (g, i) { return '<tr><td>' + esc(g.name) + '</td><td>' + esc(g.title) + (g.required ? '' : ' <span class="muted">(선택)</span>') + '</td><td>' + (g.candidates ? '<b style="color:var(--gold)">' + g.candidates + '개</b> <span class="muted">(자료 ' + g.docs + '건)</span>' : '<span class="muted">없음 — 새 자료가 필요합니다</span>') + '</td><td>' + (g.candidates ? '<button data-c="' + i + '">후보에서 검수</button> ' : '') + '<button data-n="' + i + '">직접 작성</button></td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">모든 항목에 풀이 지식이 있습니다.</p>') + '</div>';
+      var cb = document.getElementById('srClassify'); if (cb) cb.onclick = function () { classifyAll(cb); };
       bindNav(); $$('[data-c]').forEach(function (b) { b.onclick = function () { var g = rows[+b.dataset.c]; G.gapFilter = g; G.view = 'inbox'; G.cf = 'all'; G.docSel = ''; refresh().then(draw); }; });
       $$('[data-n]').forEach(function (b) { b.onclick = function () { var g = rows[+b.dataset.n]; window.V2IK.newFor(g.domain, g.section); }; });
     }).catch(function (e) { PANE.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
+  }
+
+  // 구성 항목(subDomain) 자동 배정: 분야마다 40개씩 반복 호출한다(배정 못 한 것은 offset 으로 건너뛴다)
+  function classifyAll(btn) {
+    var DOMS = ['SELF', 'MONEY', 'CAREER', 'LOVE', 'MARRIAGE', 'RELATIONSHIP', 'TIMING', 'ACTION'], msg = document.getElementById('srClsMsg'), total = 0, left = 0, i = 0;
+    btn.disabled = true;
+    function one(d, off) {
+      return fetch('/api/ik?a=classify', { method: 'POST', headers: { authorization: 'Bearer ' + PW, 'content-type': 'application/json' }, body: JSON.stringify({ domain: d, offset: off }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || ('오류 ' + r.status)); return j; }); });
+    }
+    function next(off) {
+      if (i >= DOMS.length) { btn.disabled = false; msg.textContent = '완료 — ' + total + '개를 배정했습니다' + (left ? ' (AI가 배정하지 못한 ' + left + '개는 비워 둠)' : '') + '. 화면을 새로 불러옵니다.'; return refresh().then(draw); }
+      msg.textContent = '배정 중… ' + (i + 1) + '/' + DOMS.length + ' · ' + DOMS[i] + ' (지금까지 ' + total + '개)';
+      return one(DOMS[i], off).then(function (j) { total += j.assigned || 0; if (j.remaining > 0) return next(off + (j.tried - j.assigned)); left += (j.tried - j.assigned) + off; i++; return next(0); });
+    }
+    next(0).catch(function (e) { btn.disabled = false; msg.textContent = '중단됨: ' + e.message + ' — 다시 누르면 이어서 진행합니다'; });
   }
 
   window.V2Src = { open: open, viewChunk: viewChunk };

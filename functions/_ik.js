@@ -427,6 +427,9 @@ export function diagnose(pkg, composed) {
 // ───────────── 풀이 지식 커버리지 — 계산식을 정의해서 쓴다 ─────────────
 // 분야별 커버리지 = (켜 둔 항목 중 "게시+검수 완료" 풀이 지식이 1개 이상 있는 항목 수) / (켜 둔 항목 수). 항목 = 풀이 구성의 Section.
 // 80% 이상 충분 · 50% 이상 보강 필요 · 그 미만 부족. 풀이 지식이 서로 얼마나 정교한지(조건 수)는 이 수치에 반영되지 않는다.
+// 분야별 구성 항목(Section) id → 제목. 자료 추출·자동 배정이 "허용된 subDomain" 을 알려 줄 때 쓴다.
+export function sectionMap(design) { const out = {}; for (const d of Object.keys(DOMAINS)) out[d] = Object.fromEntries(designFor(design, d).sections.filter(x => x.enabled !== false).map(x => [x.id, x.title])); return out; }
+export function sectionGuide(design) { const m = sectionMap(design); return Object.keys(m).map(d => '  ' + d + ' — ' + Object.keys(m[d]).map(id => id + '(' + m[d][id] + ')').join(', ')).join('\n'); }
 export function coverageStats(items, design) {
   const out = {};
   for (const d of Object.keys(DOMAINS)) {
