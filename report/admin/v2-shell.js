@@ -387,7 +387,7 @@
     var label = cin ? '영화 장면 · ' + esc(((((s.cinema || {}).segments || [])[0]) || {}).text || s.sceneId).slice(0, 18) + ' <small class="muted">' + esc(s.sceneId) + '</small>' : esc(SCENE_KO[s.sceneType] || s.sceneType);
     return '<div class="srow2" data-cid="' + esc(c.id) + '" data-sid="' + esc(s.sceneId) + '" data-st="' + esc(s.sceneType) + '">' + (m ? thumb(m) : '<span class="thm" style="display:grid;place-items:center;color:var(--ink3);font-size:.68rem">없음</span>') + '<div style="flex:1;min-width:0"><b>' + label + '</b> ' + status +
       '<div class="muted" style="font-size:.76rem;margin:2px 0">필요한 클립: ' + esc(pre.map(function (t) { return MTYPE_KO[t] || t; }).join(' › ')) + (cin ? ' · 태그 점수로 자동 선택(이 챕터 전용 우선)' : ' · 이 챕터에서 쓸 수 있는 후보 ' + cands.length + '개' + (own ? ' (이 챕터 전용 ' + own + '개)' : '')) + '</div><div style="display:flex;flex-wrap:wrap;gap:2px">' + chips + '</div>' +
-      '<div class="row" style="margin-top:6px;gap:6px"><label class="navbtn" style="cursor:pointer;padding:3px 10px;font-size:.78rem">파일 올리기 → 보관함<input type="file" data-up accept="image/*,video/mp4,video/webm,video/quicktime" hidden></label><span class="muted" data-upmsg></span></div></div></div>';
+      '<div class="row" style="margin-top:6px;gap:6px"><label class="navbtn" style="cursor:pointer;padding:3px 10px;font-size:.78rem">파일 올리기 → 보관함<input type="file" data-up accept="image/*,video/mp4,video/webm,video/quicktime" hidden></label><button type="button" class="navbtn" data-ai style="padding:3px 10px;font-size:.78rem">AI로 만들기</button><span class="muted" data-upmsg></span></div></div></div>';
   }
   /* ═════ 문장 · 이름 편집 (content.sceneCopy) ═════
      프롤로그·엔딩·챕터 오프닝·현실 장면의 문장 조각, 이름 조각(name), 이름 강조(nameEmphasis), 부제를 고친다. 원본은 {hero} 자리표시자 상태로 보여 주고, 이름은 사용자 기기에서만 채워진다. */
@@ -417,7 +417,14 @@
   function missingCount(rep) { var n = 0; rep.chapters.forEach(function (c) { c.scenes.forEach(function (s) { if (needsMedia(s) && !s.media) n++; }); }); return n; }
   function afterSourceChange() { var p = TST.pane; if (p) p.refresh(); run(); }
   // root 안의 .srow2 들에 업로드를 연결한다(조합 테스트 오른쪽 패널·전체 보기 창 공용)
+  function aiMake(row) { // 이 칸의 태그로 이미지 한 장 → 보관함(이 챕터 전용). 반환 Promise<boolean>
+    var c = TST.rep.chapters.filter(function (x) { return x.id === row.dataset.cid; })[0] || (TST.extra || {})[row.dataset.cid], s = c && c.scenes.filter(function (x) { return x.sceneId === row.dataset.sid; })[0], msg = row.querySelector('[data-upmsg]'); if (!s) return Promise.resolve(false);
+    var tg = intentTags(s); msg.textContent = 'AI가 그리는 중… (20~60초)';
+    return C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ slot: { chapterId: (TST.extra || {})[c.id] ? '' : c.id, title: c.title + ' · ' + (SCENE_KO[s.sceneType] || s.sceneId), tags: tg } }) })
+      .then(function (r) { ST.media = [r.media].concat(ST.media || []); msg.textContent = '✓ ' + r.provider; return true; }).catch(function (er) { msg.textContent = er.message; return false; });
+  }
   function bindSources(root) {
+    root.addEventListener('click', function (e) { var b = e.target.closest('[data-ai]'); if (!b) return; var row = b.closest('.srow2'); b.disabled = true; aiMake(row).then(function (ok) { b.disabled = false; if (ok) { toast('AI 이미지를 보관함에 저장했습니다'); afterSourceChange(); } else toast('AI 이미지 생성에 실패했습니다', true); }); });
     root.addEventListener('change', function (e) {
       if (!e.target.matches('[data-up]')) return; var row = e.target.closest('.srow2'); if (!row) return;
       var c = TST.rep.chapters.filter(function (x) { return x.id === row.dataset.cid; })[0] || (TST.extra || {})[row.dataset.cid], s = c && c.scenes.filter(function (x) { return x.sceneId === row.dataset.sid; })[0], msg = row.querySelector('[data-upmsg]');
@@ -433,9 +440,12 @@
     var h = '<h3>필요한 클립 소스 — ' + esc(rep.chapters.length ? (TS.project) : '') + ' 전체</h3><p class="muted">비어 있는 장면입니다. 파일을 올리면 <b>클립 보관함</b>에 저장되고, 그 챕터 안에서 자동으로 골라 씁니다. 일간 소개·일주 캐릭터 영상은 사주마다 달라서 <b>클립 라이브러리 → 일주 캐릭터 영상</b>에서 일괄 등록하세요.</p>';
     rep.chapters.forEach(function (c) { var rows = c.scenes.filter(function (s) { return needsMedia(s) && !s.media; }); if (rows.length) h += '<div class="cap2">' + String(c.no).padStart(2, '0') + ' ' + esc(c.title) + ' — ' + rows.length + '개</div>' + rows.map(function (s) { return sourceRow(c, s); }).join(''); });
     if (!missingCount(rep)) h += '<p style="color:#7FE0BC">모든 장면에 클립이 있습니다.</p>';
-    d.innerHTML = h + '<div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" id="dx">닫기</button></div>'; document.body.appendChild(d); d.showModal(); d.addEventListener('close', function () { d.remove(); });
+    d.innerHTML = h + '<div class="row" style="justify-content:flex-end;margin-top:12px;gap:8px"><span class="muted" id="aiAllMsg"></span>' + (missingCount(rep) ? '<button type="button" class="btn" id="aiAll">빈 칸 모두 AI로 만들기</button>' : '') + '<button type="button" id="dx">닫기</button></div>'; document.body.appendChild(d); d.showModal(); d.addEventListener('close', function () { d.remove(); });
     d.querySelector('#dx').onclick = function () { d.close(); }; bindSources(d);
     d.addEventListener('change', function () { setTimeout(function () { d.close(); }, 1500); });
+    var all = d.querySelector('#aiAll'); if (all) all.onclick = function () { // 빈 칸을 차례로(한 장씩). 연속 3번 실패하면 멈춘다
+      var rows = [].slice.call(d.querySelectorAll('.srow2')), msg = d.querySelector('#aiAllMsg'); if (!confirm('빈 칸 ' + rows.length + '개를 AI 이미지로 차례로 채웁니다. 이미지 비용이 장당 발생하고 시간이 오래 걸립니다. 계속할까요?')) return; all.disabled = true; var fails = 0, done = 0, stop = false; d.addEventListener('close', function () { stop = true; });
+      (function next(i) { if (stop || i >= rows.length || fails >= 3) { msg.textContent = (fails >= 3 ? '연속 실패로 멈춤 · ' : '') + done + '장 완료'; all.disabled = false; if (done) afterSourceChange(); return; } msg.textContent = (i + 1) + ' / ' + rows.length + ' 만드는 중…'; aiMake(rows[i]).then(function (ok) { if (ok) { done++; fails = 0; } else fails++; next(i + 1); }); })(0); }; 
   }
 
   /* ═════ ③ 조합 테스트 ═════ */

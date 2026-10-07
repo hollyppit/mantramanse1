@@ -49,6 +49,20 @@ export function mediaItem(el, th, url, bytes, provider) {
     visualRole: ['hero'], enabled: true, tagsApproved: true, bytes, uploadedAt: Date.now() });
 }
 
+// 클립 소스 칸(장면 의도 태그) 하나에 맞는 이미지. 태그는 TAX 안의 값만 받는다(cleanMedia 가 거른다).
+const arr = v => (Array.isArray(v) ? v.filter(x => typeof x === 'string' && /^[A-Za-z]{2,24}$/.test(x)).slice(0, 6) : []);
+export function slotPrompt(t, title) {
+  t = t || {}; const el = ELEMENTS[arr(t.element)[0]], line = (k, label) => (arr(t[k]).length ? label + ': ' + arr(t[k]).join(', ') + '.\n' : '');
+  return STYLE + '\n' + (title ? '이 컷이 쓰이는 곳: ' + String(title).slice(0, 80) + '.\n' : '') + line('scene', '장소·장면(영어 태그)') + line('theme', '이야기 주제(영어 태그)') + line('state', '상태') + line('emotion', '감정·분위기') + line('action', '인물의 행동') +
+    (el ? '색과 빛: ' + el.palette + '.\n' : '') + '위 태그가 한눈에 읽히는 하나의 장면으로 그린다.';
+}
+export function slotItem(chapterId, title, t, url, bytes, provider) {
+  t = t || {}; const rnd = Array.from(crypto.getRandomValues(new Uint8Array(3)), x => x.toString(16).padStart(2, '0')).join('');
+  return cleanMedia({ id: 'ai-' + String(chapterId || 'all').replace(/[^w.-]/g, '').slice(0, 30) + '-' + rnd, type: 'image', url, posterUrl: url, title: String(title || 'AI 컷').slice(0, 80), description: 'AI 생성 컷(' + provider + ')', orientation: 'portrait', priority: 50,
+    elementTags: arr(t.element), stateTags: arr(t.state), emotionTags: arr(t.emotion), sceneTags: arr(t.scene), themeTags: arr(t.theme), actionTags: arr(t.action), chapterTags: arr(t.theme).slice(0, 1), visualRole: ['hero'],
+    chapterIds: chapterId ? [chapterId] : [], enabled: true, tagsApproved: true, bytes, uploadedAt: Date.now() });
+}
+
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 async function errDetail(r) { try { return ' ' + (await r.text()).slice(0, 200); } catch { return ''; } }
 
