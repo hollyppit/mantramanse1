@@ -26,6 +26,17 @@ const path = require('path'), fails = [], ok = (c, m) => { if (!c) fails.push(m)
   const k3 = (await post({ ...base, preview: true })).d.preview; r = await post({ discard: k3 }); ok(r.s === 200 && !r2.has(k3), '버리면 임시 파일 삭제');
   r = await post({ discard: 'panel-wood-love-aaaa.webp' }); ok(r.s === 400, '확정된 컷은 discard 로 지울 수 없다');
   r = await post({ ...base, accept: '../x' }); ok(r.s === 400, '잘못된 키는 거부');
+  // 비주얼 디렉션
+  const P = await import(require('url').pathToFileURL(path.join(__dirname, '../functions/_panelart.js')).href);
+  const put = async b => { const r = await A.onRequestPut({ request: new Request('http://x/api/panel-art', { method: 'PUT', headers: { authorization: 'Bearer x', 'content-type': 'application/json' }, body: JSON.stringify(b) }), env }); return { s: r.status, d: await r.json() }; };
+  const get = async () => (await A.onRequestGet({ request: new Request('http://x/api/panel-art', { headers: { authorization: 'Bearer x' } }), env })).json();
+  ok(/웹툰/.test((await get()).presets[0].defaultPrompt), '기본 디렉션은 기존 웹툰+동양화 감성');
+  r = await put({ direction: { look: 'film', world: 'modern', mood: 'lonely', people: 'none', extra: '비 오는 밤 위주', bogus: 1 } });
+  ok(r.s === 200 && r.d.direction.look === 'film' && r.d.direction.world === 'modern', '디렉션 저장');
+  const g2 = await get(); ok(/실사 시네마틱/.test(g2.presets[0].defaultPrompt) && /현대 한국/.test(g2.presets[0].defaultPrompt) && /비 오는 밤 위주/.test(g2.presets[0].defaultPrompt) && !/웹툰/.test(g2.presets[0].defaultPrompt), '프롬프트에 화풍·세계관·추가 방향이 반영');
+  ok(/글자·숫자/.test(g2.presets[0].defaultPrompt), '디렉션을 바꿔도 글자 금지는 유지');
+  r = await put({ direction: { look: 'zzz', world: 'eastFantasy' } }); ok(r.d.direction.look === 'ink' && r.d.direction.world === 'eastFantasy', '모르는 값은 기본으로');
+  ok(/동양 판타지/.test(P.slotPrompt({ scene: ['mist'] }, 't', r.d.direction)), '클립 소스 칸 프롬프트에도 적용');
   if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log(' ✗ ' + f)); process.exit(1); }
   console.log('패널 세부 수정 검증 모두 통과');
 })();

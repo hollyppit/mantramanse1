@@ -6,6 +6,42 @@ import { cleanMedia } from './_media.js';
 export const STYLE = '한 편의 한국 웹툰 같은 시네마틱 일러스트. 먹물 번짐과 수채 질감이 섞인 동양화풍 위에 영화 같은 조명. 인물은 뒷모습이나 멀리 보이는 실루엣으로만 그리고 얼굴 클로즈업은 하지 않는다. ' +
   '화면 안에 글자·숫자·간판·로고·워터마크는 절대 넣지 않는다. 세로 구도, 아래쪽 30%는 비교적 어둡고 단순하게 비워 둔다(글자가 올라갈 자리).';
 
+// ── 비주얼 디렉션: 화풍(look) · 세계관(world) · 분위기(mood) · 인물(people) + 자유 문장. 관리자에서 고르고 모든 프롬프트에 들어간다. 값은 id 만 저장.
+export const DIRECTION_OPTIONS = {
+  look: { label: '감성·화풍', default: 'ink', items: {
+    ink: ['웹툰 + 동양화', '한국 웹툰 같은 시네마틱 일러스트. 먹물 번짐과 수채 질감이 섞인 동양화풍 위에 영화 같은 조명.'],
+    film: ['영화 스틸 (실사 시네마틱)', '실제 영화의 한 장면처럼 보이는 실사 시네마틱 스틸. 35mm 필름 질감, 얕은 심도, 자연스러운 필름 그레인과 영화적인 색보정.'],
+    photo: ['다큐 사진', '자연광으로 찍은 듯한 담백한 다큐멘터리 사진. 과장 없는 색, 현실적인 질감.'],
+    anime: ['애니메이션 배경 미술', '극장판 애니메이션 배경 미술처럼 섬세하고 서정적인 일러스트. 맑은 색감과 부드러운 빛 번짐.'],
+    painting: ['유화 일러스트', '붓 자국이 보이는 서정적인 유화 일러스트. 두꺼운 물감 질감과 깊은 색.'],
+    noir: ['흑백 느와르', '대비가 강한 흑백 영화 스틸. 깊은 그림자와 한 줄기 빛, 고요한 긴장감.'] } },
+  world: { label: '세계관·배경', default: 'asis', items: {
+    asis: ['장면 그대로', ''],
+    modern: ['현실 · 현대 한국', '배경은 현대 한국의 실제 장소(도시·골목·사무실·집·카페·지하철 등)로 현실감 있게 그린다. 판타지 요소는 넣지 않는다.'],
+    eastFantasy: ['동양 판타지', '배경은 동양 판타지 세계로 바꿔 그린다. 한옥·누각·기와지붕·서원·돌다리·등불·안개 낀 산수, 한복풍 의복. 장면의 장소·소품은 이 세계관에 맞게 번역한다(사무실→서원, 도시→성곽 마을).'],
+    joseon: ['조선 시대 사극', '배경은 조선 시대 사극 세트처럼 고증된 한옥 마을·저잣거리·서당·궁궐 풍경으로 그린다. 장면의 현대적 소품은 시대에 맞게 바꾼다.'],
+    wuxia: ['무협 강호', '배경은 무협의 강호 세계(대나무 숲·절벽 위 객잔·강나루·폭포·고성)로 그린다. 장면의 현대적 소품은 시대에 맞게 바꾼다.'],
+    abstract: ['추상 · 상징', '구체적인 장소 대신 상징적이고 초현실적인 공간(떠다니는 빛, 거대한 문, 물 위의 길)으로 표현한다.'] } },
+  mood: { label: '분위기', default: 'auto', items: {
+    auto: ['오행에 맡김', ''], warm: ['따뜻하고 포근하게', '전체적으로 따뜻하고 포근한 분위기.'], lonely: ['쓸쓸하고 고요하게', '쓸쓸하고 고요한 분위기, 여백이 많다.'],
+    hopeful: ['희망차고 맑게', '희망이 느껴지는 맑고 밝은 분위기.'], tense: ['긴장감 있게', '긴장감이 감도는 묵직한 분위기, 강한 명암 대비.'], dreamy: ['몽환적으로', '꿈속 같은 몽환적인 분위기, 부드러운 안개와 빛 번짐.'] } },
+  people: { label: '인물', default: 'back', items: {
+    back: ['뒷모습·실루엣만', '인물은 뒷모습이나 멀리 보이는 실루엣으로만 그리고 얼굴 클로즈업은 하지 않는다.'], none: ['사람 없이 풍경만', '사람은 그리지 않고 풍경과 사물만으로 표현한다.'],
+    face: ['얼굴이 보이는 인물', '인물의 얼굴과 표정이 보여도 좋다(특정 실존 인물을 닮게 그리지 않는다).'] } },
+};
+export const DEFAULT_DIRECTION = { look: 'ink', world: 'asis', mood: 'auto', people: 'back', extra: '' };
+export function cleanDirection(v) {
+  v = v && typeof v === 'object' ? v : {}; const o = { ...DEFAULT_DIRECTION };
+  for (const k of Object.keys(DIRECTION_OPTIONS)) if (typeof v[k] === 'string' && DIRECTION_OPTIONS[k].items[v[k]]) o[k] = v[k];
+  o.extra = typeof v.extra === 'string' ? v.extra.trim().slice(0, 300) : ''; return o;
+}
+// 공통 화풍 문장(글자 금지·글자 자리 비우기는 항상 붙는다)
+export function styleOf(dir) {
+  const d = cleanDirection(dir), O = DIRECTION_OPTIONS, part = k => O[k].items[d[k]][1];
+  return [part('look'), part('world'), part('mood'), part('people'), d.extra && '추가 방향: ' + d.extra + '.'].filter(Boolean).join(' ') +
+    ' 화면 안에 글자·숫자·간판·로고·워터마크는 절대 넣지 않는다. 세로 구도, 아래쪽 30%는 비교적 어둡고 단순하게 비워 둔다(글자가 올라갈 자리).';
+}
+
 export const ELEMENTS = {
   wood: { name: '木', palette: '이른 새벽의 청록·연두 빛, 안개 낀 숲, 막 돋는 새싹', mood: 'hopeful', state: 'growth' },
   fire: { name: '火', palette: '노을의 주황·붉은 금빛, 등불과 불꽃의 따뜻한 열기', mood: 'energetic', state: 'expansion' },
@@ -37,9 +73,9 @@ export function presets() {
   for (const el of Object.keys(ELEMENTS)) for (const th of Object.keys(THEMES)) out.push({ id: presetId(el, th), element: el, theme: th, title: `${ELEMENTS[el].name} · ${THEMES[th].name}` });
   return out;
 }
-export function promptFor(el, th) {
+export function promptFor(el, th, dir) {
   const E = ELEMENTS[el], T = THEMES[th]; if (!E || !T) return '';
-  return `${STYLE}\n장면: ${T.scene}.\n색과 빛: ${E.palette}.\n오행 ${E.name}의 기운이 풍경 전체의 계절감과 분위기로 드러나게 한다.`;
+  return `${styleOf(dir)}\n장면: ${T.scene}.\n색과 빛: ${E.palette}.\n오행 ${E.name}의 기운이 풍경 전체의 계절감과 분위기로 드러나게 한다.`;
 }
 // 생성된 파일 → 미디어 라이브러리 항목(태그는 승인 상태라 조합에 바로 쓰인다). cleanMedia 가 TAX 밖 태그를 걸러낸다.
 export function mediaItem(el, th, url, bytes, provider) {
@@ -51,9 +87,9 @@ export function mediaItem(el, th, url, bytes, provider) {
 
 // 클립 소스 칸(장면 의도 태그) 하나에 맞는 이미지. 태그는 TAX 안의 값만 받는다(cleanMedia 가 거른다).
 const arr = v => (Array.isArray(v) ? v.filter(x => typeof x === 'string' && /^[A-Za-z]{2,24}$/.test(x)).slice(0, 6) : []);
-export function slotPrompt(t, title) {
+export function slotPrompt(t, title, dir) {
   t = t || {}; const el = ELEMENTS[arr(t.element)[0]], line = (k, label) => (arr(t[k]).length ? label + ': ' + arr(t[k]).join(', ') + '.\n' : '');
-  return STYLE + '\n' + (title ? '이 컷이 쓰이는 곳: ' + String(title).slice(0, 80) + '.\n' : '') + line('scene', '장소·장면(영어 태그)') + line('theme', '이야기 주제(영어 태그)') + line('state', '상태') + line('emotion', '감정·분위기') + line('action', '인물의 행동') +
+  return styleOf(dir) + '\n' + (title ? '이 컷이 쓰이는 곳: ' + String(title).slice(0, 80) + '.\n' : '') + line('scene', '장소·장면(영어 태그)') + line('theme', '이야기 주제(영어 태그)') + line('state', '상태') + line('emotion', '감정·분위기') + line('action', '인물의 행동') +
     (el ? '색과 빛: ' + el.palette + '.\n' : '') + '위 태그가 한눈에 읽히는 하나의 장면으로 그린다.';
 }
 export function slotItem(chapterId, title, t, url, bytes, provider) {

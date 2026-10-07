@@ -24,11 +24,12 @@
         return '<div class="pa-c' + (p.url ? ' has' : '') + '" data-id="' + p.id + '" data-e="' + e + '" data-t="' + t + '" title="' + esc(p.title) + ' — 눌러서 ' + (p.url ? '다시 만들기' : '만들기') + '"' + (p.url ? ' style="background-image:url(\'' + esc(p.url) + '\')"' : '') + '>' + (p.url ? '' : '<b>비어 있음</b>') + '</div>';
       }).join('');
     });
-    PANE.innerHTML = '<div class="card"><b style="color:var(--gold)">패널 이미지 · ' + have + ' / ' + d.presets.length + '장</b><p class="muted" style="margin:6px 0 10px">무빙툰의 각 컷(이미지 + 글)에 들어가는 삽화입니다. 오행(5) × 이야기 주제(10)별로 한 장씩 만들고, 뷰어가 사용자의 오행과 이야기 주제에 맞는 컷을 자동으로 고릅니다. 칸을 누르면 그 컷을 <b>세부 수정</b>(프롬프트 편집 · 추가 요청 · 현재 이미지를 바탕으로 수정)하고 미리 본 뒤 교체할 수 있습니다.</p>' +
+    PANE.innerHTML = dirCard(d) + '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">패널 이미지 · ' + have + ' / ' + d.presets.length + '장</b><p class="muted" style="margin:6px 0 10px">무빙툰의 각 컷(이미지 + 글)에 들어가는 삽화입니다. 오행(5) × 이야기 주제(10)별로 한 장씩 만들고, 뷰어가 사용자의 오행과 이야기 주제에 맞는 컷을 자동으로 고릅니다. 칸을 누르면 그 컷을 <b>세부 수정</b>(프롬프트 편집 · 추가 요청 · 현재 이미지를 바탕으로 수정)하고 미리 본 뒤 교체할 수 있습니다.</p>' +
       '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><label class="muted">모델 <select id="paProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (G.provider === 'openai' ? ' selected' : '') + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(d.models.openai) + (pv.openai ? '' : ' (키 없음)') + '</option><option value="gemini"' + (G.provider === 'gemini' ? ' selected' : '') + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(d.models.gemini) + (pv.gemini ? '' : ' (키 없음)') + '</option></select></label>' +
       '<button class="btn" id="paMissing"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button id="paStop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
       (!d.r2 ? '<p class="err">R2(CLIPS_R2)가 연결되지 않아 저장할 수 없습니다.</p>' : '') + (!pv.openai && !pv.gemini ? '<p class="err">OPENAI_API_KEY 또는 GEMINI_API_KEY 가 없습니다. Cloudflare 환경 변수에 추가하세요.</p>' : '') +
       '<div class="pa-grid">' + cells + '</div><div class="pa-log"></div></div>';
+    bindDir();
     $('#paProv').onchange = function () { G.provider = this.value; };
     $('#paMissing').onclick = runMissing; $('#paStop').onclick = function () { G.stop = true; log('중지 요청 — 진행 중인 한 장이 끝나면 멈춥니다'); };
     [].forEach.call(PANE.querySelectorAll('.pa-c'), function (c) { c.onclick = function () { if (G.busy) return; editor(c.dataset.e, c.dataset.t); }; });
@@ -66,6 +67,19 @@
         .catch(function (er) { toast(er.message, true); }).then(function () { busy = false; });
     };
     q('#peClose').onclick = function () { d.close(); }; d.addEventListener('close', finish); show(cur, cur ? '현재 이미지' : '');
+  }
+  /* 비주얼 디렉션: 감성(화풍) · 배경(세계관) · 분위기 · 인물 + 한 줄 추가. 저장하면 이후 새로 만드는 모든 이미지의 프롬프트에 들어간다(이미 만든 이미지·칸별로 직접 고친 프롬프트는 그대로). */
+  function dirCard(d) {
+    var O = d.directionOptions, v = d.direction, h = '<div class="card"><b style="color:var(--gold)">비주얼 디렉션</b><p class="muted" style="margin:6px 0 10px">모든 컷에 공통으로 적용되는 감성·배경 설정입니다. 저장한 뒤 새로 만들거나 다시 만드는 이미지부터 반영됩니다.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">';
+    Object.keys(O).forEach(function (k) { h += '<label class="muted">' + esc(O[k].label) + '<select data-dir="' + k + '">' + Object.keys(O[k].items).map(function (i) { return '<option value="' + i + '"' + (v[k] === i ? ' selected' : '') + '>' + esc(O[k].items[i]) + '</option>'; }).join('') + '</select></label>'; });
+    return h + '</div><label class="muted" style="display:block;margin-top:10px">추가 방향 <small>(예: 비 오는 밤 위주로, 보라색 계열 조명, 80년대 필름 느낌)</small><input data-dir="extra" value="' + esc(v.extra || '') + '" maxlength="300" style="width:100%"></label><div class="row" style="margin-top:10px;gap:8px;align-items:center"><button class="btn" id="paDirSave">디렉션 저장</button><span class="muted" id="paDirMsg"></span></div></div>';
+  }
+  function bindDir() {
+    $('#paDirSave').onclick = function () {
+      var v = {}; [].forEach.call(PANE.querySelectorAll('[data-dir]'), function (e) { v[e.dataset.dir] = e.value; }); $('#paDirSave').disabled = true;
+      C.api('/api/panel-art', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ direction: v }) }).then(function (r) { G.d.direction = r.direction; $('#paDirMsg').textContent = '저장했습니다 — 지금부터 새로 만드는 이미지에 적용됩니다'; toast('비주얼 디렉션을 저장했습니다'); return load(); })
+        .catch(function (e) { toast(e.message, true); }).then(function () { var b = $('#paDirSave'); if (b) b.disabled = false; });
+    };
   }
   function one(e, t, redraw) {
     var cell = PANE.querySelector('.pa-c[data-e="' + e + '"][data-t="' + t + '"]'); if (cell) cell.classList.add('run'); G.busy = true; log(EL[e] + ' · ' + TH[t] + ' 만드는 중… (보통 20~60초)');
