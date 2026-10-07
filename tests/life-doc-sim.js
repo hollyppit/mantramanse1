@@ -36,6 +36,7 @@ samples.forEach((ch, i) => ['', 'money', 'love', 'career', 'life', 'self'].forEa
   ok((html.match(/<section/g) || []).length === (html.match(/<\/section>/g) || []).length, tag + ' section 짝');
   ok(!/undefined|NaN|\[object/.test(html), tag + ' 빈 값');
   ok(!BANNED.test(html.replace(/<[^>]*>/g, ' ')), tag + ' 금지 문구');
+  ok((html.match(/좋은 시기 후보/g) || []).length >= 3 && (html.match(/안 좋은 시기 후보/g) || []).length >= 3 && /달 기준/.test(html), tag + ' 분야별 시기 카드에 좋은/안 좋은 시기 후보(해·달)');
   ok(html.includes('백진우님은') && /<p class="lead">/.test(html), tag + ' 이름을 부르는 문단형 풀이');
   // 바로 본론: 기존 챕터에서 서두·시기 설명이 빠졌다
   const real = cs.filter(c => c.kind !== 'life');

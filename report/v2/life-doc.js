@@ -100,10 +100,31 @@
     return '<div class="lf-bars" role="img" aria-label="앞으로 10년 ' + nm + ' 흐름">' + t.years.map(function (y) { var on = (t.windows || []).some(function (w) { return y.year >= w.fromYear && y.year <= w.toYear; });
       return '<div class="lf-bar' + (on ? ' on' : '') + '"><i style="height:' + Math.max(8, y.score) + '%"></i><b>' + String(y.year).slice(2) + '</b><small>' + esc(y.band) + '</small></div>'; }).join('') + '</div>';
   }
+  /* 분야별 시기 후보: 좋은 시기 · 안 좋은 시기를 연도(앞으로 10년)와 달(앞으로 12개월)로 각각 3개씩, 점수·이유·할 일과 함께 보여 준다. 값은 엔진의 분야 점수(fieldScores)이고, 관계·결혼은 AI/규칙 추정 연도 점수를 쓴다. */
+  var TM = {
+    money: { n: '돈', good: '돈이 움직이고 들어오는 흐름이 활발한', bad: '돈이 새거나 막히기 쉬운', doGood: '수입원을 넓히거나 협상·투자 검토를 시작해 보세요', doBad: '큰 지출·보증·충동적 투자를 피하고 고정비부터 줄이세요' },
+    career: { n: '일', good: '일의 활동성이 커지는', bad: '일이 막히거나 흔들리기 쉬운', doGood: '이직·승진 요청·독립·새 프로젝트를 시도해 보세요', doBad: '큰 이직·퇴사 결정을 서두르지 말고 지금 자리를 방어하세요' },
+    love: { n: '연애', good: '인연의 활동이 활발한', bad: '관계가 어긋나거나 마음고생이 생기기 쉬운', doGood: '새로운 만남·마음 표현·관계 진전을 먼저 시도하세요', doBad: '감정적인 고백·이별 통보·무리한 결정은 미루세요' },
+    marriage: { n: '결혼', good: '인연이 깊어지고 약속이 오가기 쉬운', bad: '관계의 속도 차이로 흔들리기 쉬운', doGood: '결혼·동거 같은 큰 약속은 이 시기에 논의해 보세요', doBad: '결혼과 관련된 큰 결정은 보류하고 대화를 늘리세요' },
+    relation: { n: '사람 사이', good: '사람과의 교류가 늘고 도움이 오가기 쉬운', bad: '오해와 마찰이 커지기 쉬운', doGood: '새 모임·협업·부탁을 먼저 시도해 보세요', doBad: '중요한 말은 글로 정리해 전하고 감정적인 대화는 미루세요' } };
+  var mScore = function (m, f) { var x = m.fields && m.fields[f === 'marriage' ? 'love' : f]; return x ? x.score : (m.fields && m.fields.all ? Math.max(5, Math.min(95, Math.round(50 + m.fields.all.fit * 1.1))) : 50); };
+  function candidates(f, t, H) {
+    var T = TM[f]; if (!T) return null; var yrs = (t.years || []).slice(); if (!yrs.length) return null;
+    var best = yrs.slice().sort(function (a, b) { return b.score - a.score; }).slice(0, 3), worst = yrs.slice().sort(function (a, b) { return a.score - b.score; }).slice(0, 3), mo = [];
+    try { var Y = H.sd.nowYear, all = D.monthsOf(H.M, H.ch, Y, H.now).concat(D.monthsOf(H.M, H.ch, Y + 1, H.now)), ci = 0; all.forEach(function (m, i) { if (m.isNow) ci = i; }); mo = all.slice(ci, ci + 12).map(function (m) { return { label: m.month + '월 ' + m.ganzhi, s: mScore(m, f), season: m.seasonName }; }); } catch (e) { mo = []; }
+    var mbest = mo.slice().sort(function (a, b) { return b.s - a.s; }).slice(0, 3), mworst = mo.slice().sort(function (a, b) { return a.s - b.s; }).slice(0, 3);
+    var row = function (label, sc, sub, good) { return '<li><span><b>' + esc(label) + '</b> <small>' + esc(sub || '') + '</small></span>' + '<i class="dp-bar dp-slim' + (good ? '' : ' dp-warnbar') + '"><span class="dp-bt"><i style="width:' + Math.round(Math.max(4, Math.min(100, sc))) + '%"></i></span><b>' + Math.round(sc) + '</b></i></li>'; };
+    var yrow = function (y, good) { var ag = y.age != null ? y.age : (H.ch.solar ? y.year - H.ch.solar.y : null); return row(y.year + '년' + (ag != null ? ' (' + ag + '세)' : ''), y.score, y.band, good); };
+    var mrow = function (m, good) { return row(m.label, m.s, m.season, good); };
+    return sec('rv dp', '<div class="cap">' + esc(T.n) + ' · 좋은 시기와 안 좋은 시기 후보</div><p class="dp-lead2">앞으로 10년(해)과 12개월(달)에서 ' + esc(T.n) + ' 흐름이 두드러지게 좋은 때와 조심할 때를 각각 골랐어요. 점수는 엔진이 계산한 ' + esc(T.n) + ' 지수(0~100)입니다.</p>' +
+      '<div class="dp-pc"><div class="dp-pro"><h4>좋은 시기 후보</h4><p class="dp-pl" style="margin:0 0 6px">' + esc(T.good) + ' 때 — ' + esc(T.doGood) + '.</p><ul class="dp-tl-list"><li class="dp-sub">해 기준</li>' + best.map(function (y) { return yrow(y, true); }).join('') + (mbest.length ? '<li class="dp-sub">달 기준 (앞으로 12개월)</li>' + mbest.map(function (m) { return mrow(m, true); }).join('') : '') + '</ul></div>' +
+      '<div class="dp-con"><h4>안 좋은 시기 후보</h4><p class="dp-mi" style="margin:0 0 6px">' + esc(T.bad) + ' 때 — ' + esc(T.doBad) + '.</p><ul class="dp-tl-list"><li class="dp-sub">해 기준</li>' + worst.map(function (y) { return yrow(y, false); }).join('') + (mworst.length ? '<li class="dp-sub">달 기준 (앞으로 12개월)</li>' + mworst.map(function (m) { return mrow(m, false); }).join('') : '') + '</ul></div></div><p class="faint">시기의 성격을 보여 줄 뿐 특정한 사건을 예언하지 않습니다. 좋은 시기에도 준비가 없으면 지나가고, 안 좋은 시기에도 방어하면 피해를 줄일 수 있어요.</p>');
+  }
   function timing(gen, title, sub, H) {
     var out = [], f = gen.split(':')[1], nm = { money: '돈', career: '일', love: '인연', marriage: '인연', relation: '사람 사이' }[f] || '', t = D.timing(H.M, H.ch, H.sd, H.now, f, H.soc);
     out.push(lineScene(t.line, 'impact', title));
     if (t.years) out.push(scene(sec('rv', '<div class="cap">' + esc(sub) + '</div>' + bars(t, nm) + '<p class="faint">막대가 진한 해가 상대적으로 ' + nm + ' 이야기가 두드러지는 해입니다.</p>'), { layout: 'DATA' }));
+    try { var cd = candidates(f, t, H); if (cd) out.push(scene(cd, { layout: 'DATA' })); } catch (e) { }
     var src = t.source ? '<b>' + (t.source === 'ai' ? 'AI 추정' : '규칙 추정') + '</b> · ' : '';
     out.push(scene(sec('rv', '<p class="faint">' + src + esc(t.caution || '') + '</p>')));
     return out;

@@ -309,5 +309,5 @@
   }
 
   R.StoryDirector = { personalize: personalize, social: social, aiPayload: aiPayload, mergeSocial: mergeSocial, attachSocial: attachSocial, FIELDS: FIELDS, SEASON: SEASON, INTERESTS: INTERESTS, MODULES: MODULES, FLOWS: FLOWS, byId: BY_ID, chapterMap: chapterMap, lifeMap: lifeMap, yearsOf: yearsOf, monthsOf: monthsOf, position: position, evidence: evidence,
-    future: future, timing: timing, action: action, flow: flow, preview: preview, profile: profile, levelWord: levelWord, FIELD_NOW: FIELD_NOW };
+    future: future, timing: timing, yearsOf: yearsOf, monthsOf: monthsOf, action: action, flow: flow, preview: preview, profile: profile, levelWord: levelWord, FIELD_NOW: FIELD_NOW };
 })(typeof window !== 'undefined' ? window : globalThis);
