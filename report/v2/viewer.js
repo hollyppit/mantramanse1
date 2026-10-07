@@ -58,7 +58,8 @@
     }).then(function (a) {
       S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
       S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.assets = (a[4] && a[4].assets) || {};
-      if (R.Deep && S.ch && !PREVIEW) { try { R.Deep.augment(S.rep, { M: window.Manse, ch: S.ch, sd: sd, now: Date.now(), name: S.name, assets: S.assets }); } catch (e) { /* 깊이 풀이가 실패해도 기본 리포트는 그대로 */ } S.repPdf = plainRep(S.rep); } // 자동차 비유·장단점·12운성·직업·배우자·일주·전생·대운/세운/월운·개운 근거·명소 챕터를 끼운다 S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null, textOnly: !!(a[2] && a[2].textOnly) }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
+      if (R.Deep && S.ch && !PREVIEW) { try { R.Deep.augment(S.rep, { M: window.Manse, ch: S.ch, sd: sd, now: Date.now(), name: S.name, assets: S.assets }); } catch (e) { /* 깊이 풀이가 실패해도 기본 리포트는 그대로 */ } S.repPdf = plainRep(S.rep); } // 자동차 비유·장단점·12운성·직업·배우자·일주·전생·대운/세운/월운·개운 근거·명소 챕터를 끼운다
+      S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null, textOnly: !!(a[2] && a[2].textOnly) }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
       if (LIFE && S.ch && R.IKDeep) S.ikP = R.IKDeep.load(window.Manse, S.ch, sd, 16000); // AI 합성과 나란히 먼저 시작
       return aiCompose().then(function () { if (LIFE && S.ch && R.LifeDoc) S.socP = R.LifeDoc.loadSocial({ M: window.Manse, ch: S.ch, sd: sd, now: Date.now() }); return a; });
     }).then(function () {
