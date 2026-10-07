@@ -7,7 +7,7 @@
   var R = root.ReportV2 = root.ReportV2 || {}, D = R.StoryDirector, SC = R.StoryComposer;
   var ICON = { opportunity: '◆', expansion: '▲', harvest: '●', accumulation: '■', transition: '◇', defense: '▽' };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-  var br = function (s) { return esc(s).replace(/\n/g, '<br>'); };
+  var br = function (s) { return esc(s).replace(/조심할 점:\s*([^.!?\n<]*[.!?]?)/g, '<mark class="wn"><i aria-hidden="true">⚠</i><b>조심할 점</b>$1</mark>').replace(/\n/g, '<br>'); };
   var MAX_AGE = 90, FIELD_NAME = { all: '종합', money: '돈', career: '직업', love: '사랑', relation: '관계' };
 
   /* ── 관계·결혼 AI 추정(기기 캐시 → 서버). 생년월일은 보내지 않는다. 늦으면 규칙 추정으로 진행한다. ── */
@@ -228,24 +228,24 @@
     topic('self_who', ['c01'], 2); real('c02', 2); ikd('SELF', 2);
     // ACT II: 십성과 신살
     bridge('life_b2', '다섯 기운이 사람 안에서 움직이는 방식,\n십성이라는 눈으로 볼게요.', 3);
-    made('life_tengods', '십성 · 내 안의 다섯 힘', '비겁 · 식상 · 재성 · 관성 · 인성', tenGods(H), 3); real('c03', 3, { noHeader: true }); real('c04', 3); real('c05', 3);
-    made('life_stars', '신살 · 사주에 붙은 별', '귀인 · 12신살', stars(H), 3);
+    made('life_tengods', '십성 · 내 안의 다섯 힘', '비겁 · 식상 · 재성 · 관성 · 인성', tenGods(H), 3); real('c03', 3, { noHeader: true }); real('deep_car', 3); real('c04', 3); real('c05', 3); real('deep_proscons', 3);
+    made('life_stars', '신살 · 사주에 붙은 별', '귀인 · 12신살', stars(H), 3); real('deep_stages', 3);
     // ACT III: 세부 이야기(관심 분야가 먼저)
     blockOrder(H.interest).forEach(function (k, i) {
       bridge('life_bb_' + k, i === 0 ? BRIDGE[k] : '다음은 ' + ({ love: '사랑', money: '돈', career: '일', relation: '사람' }[k]) + ' 이야기예요.', 4);
-      if (k === 'love') { topic('love_style', ['c09'], 4, [gen('love_timing', 4)]); topic('marriage_who', ['c10'], 4, [gen('marriage_timing', 4)]); real('c12', 4, { title: '끌리는 사람, 맞는 사람', sub: '궁합 · 일주 상성' }); ikd('LOVE', 4); ikd('MARRIAGE', 4); }
+      if (k === 'love') { topic('love_style', ['c09'], 4, [gen('love_timing', 4)]); topic('marriage_who', ['c10'], 4, [gen('marriage_timing', 4)]); real('deep_spouse', 4); real('c12', 4, { title: '끌리는 사람, 맞는 사람', sub: '궁합 · 일주 상성' }); real('deep_ilju', 4); ikd('LOVE', 4); ikd('MARRIAGE', 4); }
       if (k === 'money') { topic('money_nature', ['c08'], 4, [gen('money_timing', 4)]); ikd('MONEY', 4); }
-      if (k === 'career') { topic('career_style', ['c06'], 4, [gen('career_timing', 4)]); real('c07', 4, { title: '나에게 맞는 성공 방식', sub: '억부 · 용신' }); ikd('CAREER', 4); }
+      if (k === 'career') { topic('career_style', ['c06'], 4, [gen('career_timing', 4)]); real('deep_jobs', 4); real('c07', 4, { title: '나에게 맞는 성공 방식', sub: '억부 · 용신' }); ikd('CAREER', 4); }
       if (k === 'relation') { topic('relation_style', ['c11'], 4, [gen('relation_timing', 4)]); real('c13', 4, { title: '내가 자라온 자리', sub: '년주 · 월주' }); ikd('RELATIONSHIP', 4); }
     });
-    real('c14', 4);
+    real('c14', 4); real('deep_past', 4);
     // ACT IV: 앞으로의 흐름
     bridge('life_b4', '이야기가 많이 쌓였네요.\n이제 시간을 앞으로 돌려 볼게요.', 5);
-    made('life_future', '앞으로 10년의 구간', '세운 10개', future(H), 5); real('c17', 5); real('c18', 5); ikd('TIMING', 5);
+    real('deep_daewoon', 5); made('life_future', '앞으로 10년의 구간', '세운 10개', future(H), 5); real('c17', 5); real('deep_seun', 5); real('c18', 5); real('deep_wolun', 5); ikd('TIMING', 5);
     // FINAL: 개운 가이드(행동은 여기로 몰아서)
     ikd('ACTION', 6);
     made('life_actions', '지금 해 볼 것', '분야별 한 줄 정리', actionsAll(H), 6); made('life_action', '버릴 것 · 지킬 것 · 시작할 것', H.pos.seasonName + '의 흐름에 맞춰서', action(H), 6);
-    real('c19', 6, { title: '다음 길을 여는 개운 가이드', sub: '행동 · 성장 · 사람 · 공간 · 환경 · 타이밍' }); real('c20', 6, { title: '운로 사용설명서', sub: '모든 흐름을 하나의 실행 계획으로' });
+    real('c19', 6, { title: '다음 길을 여는 개운 가이드', sub: '행동 · 성장 · 사람 · 공간 · 환경 · 타이밍' }); real('deep_remedy', 6); real('deep_places', 6); real('c20', 6, { title: '운로 사용설명서', sub: '모든 흐름을 하나의 실행 계획으로' });
     out.forEach(function (c, i) { c.no = i + 1; });
     return { acts: acts.filter(function (a) { return out.some(function (c) { return c.act === a.id; }); }), chapters: out };
   }

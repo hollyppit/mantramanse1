@@ -83,3 +83,17 @@ body.rd-on .bgm-btn { display: none; } /* BGM 켜기/끄기는 컨트롤러에 �
 
 /* 동작 줄이기: 배경 움직임 제거, 전환은 최소화 */
 @media (prefers-reduced-motion: reduce) { .rd-bgl { transition-duration: .2s !important; } .rd-bgl img, .rd-bgl video, .rd-bgl .ph { animation: none !important; } }
+
+/* ── 읽기 쉬운 문서 꾸밈 ── */
+/* 소제목(분류 이름): 더 크고 또렷하게, 왼쪽에 금색 막대 */
+.rd-sec .cap { font-size: .95rem; letter-spacing: .12em; font-weight: 700; color: var(--gold-l); margin: 0 0 14px; padding: 2px 0 2px 12px; border-left: 3px solid var(--gold); text-transform: none; }
+/* 풀이 박스: 테두리와 약간 밝은 바탕으로 본문이 한눈에 */
+.rd-sec.rd-box { border: 1px solid var(--gold-d); border-radius: 16px; background: rgba(14, 18, 34, .72); box-shadow: 0 6px 28px rgba(0, 0, 0, .35); margin: 22px auto; width: calc(100% - 28px); padding: 24px 22px; }
+.rd-sec.rd-box .lead { font-size: 1.12rem; line-height: 1.85; color: #F6F1E4; }
+@media (min-width: 700px) { .rd-sec.rd-box { padding: 30px 30px; width: calc(100% - 40px); } }
+/* 조심할 점: 주황색 + 경고 아이콘 */
+mark.wn { display: block; margin: 12px 0 4px; padding: 10px 14px; border: 1px solid rgba(255, 150, 60, .55); border-left: 4px solid #FF9A3C; border-radius: 10px; background: rgba(255, 150, 60, .12); color: #FFC48A; font-weight: 500; line-height: 1.7; }
+mark.wn i { font-style: normal; margin-right: 6px; } mark.wn b { color: #FF9A3C; font-weight: 700; margin-right: 8px; }
+.card.warn { border-color: rgba(255, 150, 60, .55); background: rgba(255, 150, 60, .1); } .card.warn h3 { color: #FF9A3C; } .card.warn h3::before { content: "⚠ "; } .card.warn li, .card.warn li::before { color: #FFC48A; }
+/* 쉬운 용어 풀이: 작게 */
+.tms { gap: 6px; } .tm { padding: 8px 12px; border-radius: 10px; } .tm .tmh b { font-size: .86rem; } .tm .tmh i { font-size: .8rem; } .tm p { font-size: .78rem; line-height: 1.6; margin-top: 2px; } .tm .tmeg { font-size: .74rem; } .tm .tmhere { font-size: .8rem; }

@@ -8,6 +8,11 @@ const ikMem = new Map(), ikEnv = { ADMIN_PASSWORD: 'test', GLOSSARY_KV: { get: a
 const r2mem = new Map(); ikEnv.ANTHROPIC_API_KEY = 'mock'; ikEnv.CLIPS_R2 = { put: async (k, v) => { r2mem.set(k, Buffer.from(v)); }, get: async k => (r2mem.has(k) ? { body: r2mem.get(k), httpMetadata: { contentType: 'application/pdf' } } : null), delete: async k => { r2mem.delete(k); } };
 const realFetch = global.fetch;
 global.fetch = async (u, o) => {
+  if (String(u).includes('api.openai.com/v1/images')) { // 로컬 확인용 가짜 이미지 생성: 색만 다른 작은 PNG
+    const c = [[120, 90, 60], [60, 110, 140], [140, 70, 90], [70, 130, 90]][Math.floor(Math.random() * 4)], zlib = require('zlib'), W = 64, Hh = 96, raw = Buffer.alloc((W * 3 + 1) * Hh); for (let y = 0; y < Hh; y++) { raw[y * (W * 3 + 1)] = 0; for (let x = 0; x < W; x++) { const k = y * (W * 3 + 1) + 1 + x * 3, f = 0.4 + 0.6 * y / Hh; raw[k] = c[0] * f; raw[k + 1] = c[1] * f; raw[k + 2] = c[2] * f; } }
+    const crc = b => { let t = ~0; for (const x of b) { t ^= x; for (let i = 0; i < 8; i++) t = (t >>> 1) ^ (0xEDB88320 & -(t & 1)); } return ~t >>> 0; }, chunk = (t, d) => { const l = Buffer.alloc(4); l.writeUInt32BE(d.length); const td = Buffer.concat([Buffer.from(t), d]), cc = Buffer.alloc(4); cc.writeUInt32BE(crc(td)); return Buffer.concat([l, td, cc]); }, ih = Buffer.alloc(13); ih.writeUInt32BE(W, 0); ih.writeUInt32BE(Hh, 4); ih[8] = 8; ih[9] = 2;
+    const png = Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ih), chunk('IDAT', zlib.deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]); return new Response(JSON.stringify({ data: [{ b64_json: png.toString('base64') }] }), { status: 200 });
+  }
   if (!String(u).includes('api.anthropic.com')) return realFetch(u, o);
   const msg = JSON.parse(o.body).messages[0].content, body = (msg.split('[원문]\n')[1] || '').split('[원문 끝]')[0], sents = body.replace(/^#.*$/gm, '').split(/(?<=[.다])\s+/).map(x => x.trim()).filter(x => x.length >= 20 && !/^\[\d+쪽\]/.test(x) && !/^#/.test(x)), claim = sents[0];
   const cands = []; if (claim && /경금|庚|신약|身弱|관살|官殺|재성|비겁|인성/.test(claim)) { const c = {}; if (/경금|庚/.test(claim)) c.dayMaster = ['경']; if (/신약|身弱/.test(claim)) c.strength = ['신약']; else if (/신강|身強/.test(claim)) c.strength = ['신강']; const g = {}; if (/관살|官殺|관성/.test(claim)) g['관성'] = 'strong'; if (/재성.*약|재성이 약/.test(claim)) g['재성'] = 'weak'; if (Object.keys(g).length) c.group = g;
@@ -24,6 +29,12 @@ http.createServer(async (q, r) => {
     const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/src.js')).href), buf = q.method === 'POST' ? await body(q) : undefined;
     const res = await mod.onRequest({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': q.headers['content-type'] || 'application/json' }, body: buf }) });
     r.statusCode = res.status; const ct = res.headers.get('content-type') || 'application/json'; r.setHeader('content-type', ct); return r.end(Buffer.from(await res.arrayBuffer()));
+  }
+  const IMG = { '/api/assets': 'assets', '/api/asset-art': 'asset-art', '/api/panel-art': 'panel-art', '/api/tarot-art': 'tarot-art' };
+  if (IMG[p]) { // 이미지 생성 API 4종을 메모리 KV·R2 로 실행(가짜 이미지 모델)
+    ikEnv.OPENAI_API_KEY = 'mock'; const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/' + IMG[p] + '.js')).href), fn = mod['onRequest' + q.method[0] + q.method.slice(1).toLowerCase()], buf = /^(POST|PUT)$/.test(q.method) ? await body(q) : undefined;
+    if (!fn) return send(r, 405, { error: 'method' }); const res = await fn({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': 'application/json' }, body: buf }) });
+    r.statusCode = res.status; r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(await res.text());
   }
   if (p === '/api/free-content') { // 실제 functions/api/free-content.js 를 메모리 KV 로 실행
     const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/free-content.js')).href), buf = q.method === 'PUT' ? await body(q) : undefined;
@@ -94,7 +105,7 @@ http.createServer(async (q, r) => {
       const key = 'm' + Date.now().toString(36) + '.' + (u.searchParams.get('name') || 'x.mp4').split('.').pop();
       files[key] = await body(q); return send(r, 200, { ok: true, key });
     }
-    const f = files[u.searchParams.get('k')]; if (!f) { r.statusCode = 404; return r.end('nf'); }
+    const f = files[u.searchParams.get('k')] || r2mem.get(u.searchParams.get('k')); if (!f) { r.statusCode = 404; return r.end('nf'); }
     const kk = u.searchParams.get('k') || ''; if (/.(wav|mp3|ogg|m4a)$/.test(kk)) { r.setHeader('content-type', kk.endsWith('.wav') ? 'audio/wav' : 'audio/mpeg'); return r.end(f); }
     r.setHeader('content-type', /.(webp|png|jpe?g|gif)$/.test(u.searchParams.get('k')||'') ? 'image/' + (u.searchParams.get('k').split('.').pop().replace('jpg','jpeg')) : 'video/mp4'); return r.end(f);
   }

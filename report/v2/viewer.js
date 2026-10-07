@@ -52,12 +52,13 @@
     var sd; try { sd = R.SajuData.build(ch, { now: Date.now() }); } catch (e) { clearInterval(tick); view('input'); $('#msg').textContent = '계산 결과를 정리하지 못했습니다.'; return; }
     S.sd = sd; S.birth = birthOf(ch); var t0 = Date.now();
     // 서버 저장본(콘텐츠·미디어·일간 소개 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
-    Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story')]).then(function (a) {
+    Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story'), getJson('/api/assets')]).then(function (a) {
       var wait = Math.max(0, (HUB ? 500 : 2600) - (Date.now() - t0));
       return new Promise(function (ok) { setTimeout(function () { ok(a); }, wait); });
     }).then(function (a) {
       S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
-      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null, textOnly: !!(a[2] && a[2].textOnly) }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
+      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.assets = (a[4] && a[4].assets) || {};
+      if (R.Deep && S.ch && !PREVIEW) { try { R.Deep.augment(S.rep, { M: window.Manse, ch: S.ch, sd: sd, now: Date.now(), name: S.name, assets: S.assets }); } catch (e) { /* 깊이 풀이가 실패해도 기본 리포트는 그대로 */ } S.repPdf = plainRep(S.rep); } // 자동차 비유·장단점·12운성·직업·배우자·일주·전생·대운/세운/월운·개운 근거·명소 챕터를 끼운다 S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null, textOnly: !!(a[2] && a[2].textOnly) }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
       if (LIFE && S.ch && R.IKDeep) S.ikP = R.IKDeep.load(window.Manse, S.ch, sd, 16000); // AI 합성과 나란히 먼저 시작
       return aiCompose().then(function () { if (LIFE && S.ch && R.LifeDoc) S.socP = R.LifeDoc.loadSocial({ M: window.Manse, ch: S.ch, sd: sd, now: Date.now() }); return a; });
     }).then(function () {
@@ -201,8 +202,9 @@
   /* ── 4a. 인생 지도 흐름(?flow=life): 기존 챕터는 그대로 두고, 이야기 순서만 StoryDirector 가 정한다 ── */
   var LIFE = !PREVIEW && !/[?&]flow=(classic|old)(&|$)/.test(location.search); // 인생 지도 흐름이 기본. ?flow=classic 으로 예전 20챕터 순서 흐름, 관리자 미리보기(?preview=1)는 예전 흐름
   // 인생 지도 흐름도 기존과 같은 "자동 스크롤 읽기 문서"다. 선택·탭 없이 하나의 긴 문서로 이어지고(R.LifeDoc), 관심 분야(온보딩에서 고른 값)가 있으면 그 이야기가 먼저 나온다.
+  function plainRep(rep) { return Object.assign({}, rep, { chapters: rep.chapters.filter(function (c) { return !c.deep; }) }); }
   function lifeBegin() {
-    var rep0 = S.rep, plan = (rep0.chapters.filter(function (c) { return c.plan; })[0] || {}).plan || null; S.repPdf = rep0; // PDF·공유카드는 기존 20챕터 구성으로 만든다
+    var rep0 = S.rep, plan = (rep0.chapters.filter(function (c) { return c.plan; })[0] || {}).plan || null; S.repPdf = plainRep(rep0); // PDF·공유카드는 기존 20챕터 구성으로 만든다(깊이 풀이 챕터는 뺀다)
     var wait = new Promise(function (ok) { setTimeout(function () { ok(null); }, 4000); }); // 관계·결혼 AI 추정이 늦으면 규칙 추정으로 먼저 진행한다
     var waitIk = new Promise(function (ok) { setTimeout(function () { ok(null); }, 16000); }); // 검수된 풀이 지식(더 깊이 보기)이 늦으면 기존 구성으로 진행
     Promise.all([Promise.race([S.socP || Promise.resolve(null), wait]), Promise.race([S.ikP || Promise.resolve(null), waitIk])]).then(function (got) {
@@ -217,7 +219,8 @@
 
   var seaChip = function (k, name) { var hj = R.Translator && R.Translator.SEASON[k]; return k ? '<span class="sea s-' + k + '"><b aria-hidden="true">' + SEA_ICON[k] + '</b>' + (hj ? '<i class="hj" aria-hidden="true">' + hj.h + '</i> ' : '') + esc(name || SEA[k]) + '</span>' : ''; };
   var list = function (a) { a = Array.isArray(a) ? a : (a ? [a] : []); return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
-  var lines = function (t) { return esc(t).replace(/\n/g, '<br>'); };
+  var warnify = function (h) { return String(h).replace(/조심할 점:\s*([^.!?\n<]*[.!?]?)/g, '<mark class="wn"><i aria-hidden="true">⚠</i><b>조심할 점</b>$1</mark>'); }; // 주황색 경고 강조(아이콘 포함)
+  var lines = function (t) { return warnify(esc(t).replace(/\n/g, '<br>')); };
 
   /* ── 시네마틱 장면: 챕터 오프닝·현실 장면(리더 안에서 화면에 들어오면 재생) ── */
   function layersOf(s) { return R.Director ? R.Director.layersFor(s, S.pack && S.pack.cinemaDefaults) : []; }
@@ -260,7 +263,7 @@
       if (s.compact) return '<section class="scene rv rd-mini" ' + id + '><div class="no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2>' + esc(c.title) + '</h2>' + (c.introText || s.subtitle ? '<p class="sub">' + esc(c.introText || s.subtitle) + '</p>' : '') + '</section>'; // 종합 풀이 안에서 순서대로 이어지는 작은 제목(서두 없이 바로 본론)
       return '<section class="scene rd-head rd-chead" ' + id + '><div class="rd-rule" aria-hidden="true"></div><div class="no" data-tx="intro.no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="rd-rule" aria-hidden="true"></div></section>';
     }
-    if (t === 'insight') return '<section class="scene rv" ' + id + '><div class="cap">풀이</div><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead' + (c.lead && /_fallback$/.test(c.lead.id || '') ? ' faint' : '') + '" data-tx="insight.lead">' + lines(s.body) + '</p>' + (c.choice ? '<p class="lead choice rd-hl" data-tx="choice.line">' + lines(c.choice) + '</p>' : '') + '' + '</section>';
+    if (t === 'insight') return '<section class="scene rv rd-box" ' + id + '><div class="cap">풀이</div><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead' + (c.lead && /_fallback$/.test(c.lead.id || '') ? ' faint' : '') + '" data-tx="insight.lead">' + lines(s.body) + '</p>' + (c.choice ? '<p class="lead choice rd-hl" data-tx="choice.line">' + lines(c.choice) + '</p>' : '') + '' + '</section>';
     if (t === 'verdictFind') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead rd-hl">' + lines(s.body) + '</p></section>';
     if (t === 'verdictBlock') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div>' + (s.sub ? '<p class="lead" style="font-size:1.05rem">' + esc(s.sub) + '</p>' : '') + '<p style="color:var(--ink2)">' + lines(s.body) + '</p></section>';
     if (t === 'verdictEvidence') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p><div class="vd" role="group" aria-label="맞는지 알려 주세요"><button type="button" class="btn" data-vd="yes">맞습니다</button><button type="button" class="btn" data-vd="no">아닙니다</button></div><p class="vd-reply faint" aria-live="polite" data-yes="' + esc((s.evidence || {}).yes) + '" data-no="' + esc((s.evidence || {}).no) + '"></p></section>';
@@ -274,7 +277,7 @@
       var det = (c.details || []).map(function (d) { return /_fallback$/.test(d.id || '') ? '<p class="faint">' + esc(d.summary) + '</p>' : '<div class="item"><b>' + esc(d.headline) + '</b><span>' + esc(d.summary) + '</span>' + (d.detail ? '<em class="tip">' + esc(d.detail) + '</em>' : '') + '</div>'; }).join('');
       var mt = String(c.meaning || ''), cut = mt.search(/[.!?]\s/), first = cut > 0 ? mt.slice(0, cut + 1) : mt, rest = cut > 0 ? mt.slice(cut + 1).trim() : '';
       var more = rest || det ? '<div class="more open"><div class="body"><div>' + (rest ? '<p>' + lines(rest) + '</p>' : '') + det + '</div></div></div>' : '';
-      return '<section class="scene rv" ' + id + '>' + '' + '<div class="cap">풀이 · 더 깊이</div><p class="lead" data-tx="explain.lead">' + lines(first) + '</p>' + more + '</section>';
+      return '<section class="scene rv rd-box" ' + id + '>' + '' + '<div class="cap">풀이 · 더 깊이</div><p class="lead" data-tx="explain.lead">' + lines(first) + '</p>' + more + '</section>';
     }
     if (t === 'dataVisualization') return monthsHtml(c, s);
     if (t === 'timeline') return timelineHtml(c, s);
@@ -331,6 +334,7 @@
         '<div class="cap">지금 해야 할 것</div><div class="check">' + p.checklist.map(function (x, i) { var k = chkKey(x), on = sg(k) === '1'; return '<label><input type="checkbox" data-chk="' + esc(k) + '"' + (on ? ' checked' : '') + '><span>' + esc(x) + '</span></label>'; }).join('') + '</div>' +
         (p.avoid.length ? '<div class="card warn" style="margin-top:14px"><h3>피해야 할 것</h3>' + list(p.avoid) + '</div>' : '');
     } else {
+      return ''; // 챕터 중간의 ACTION 카드는 쓰지 않는다(행동은 마지막 개운 가이드·종합에서 한 번에)
       var items = ((s.bullets || [])[0] || {}).items || [];
       var notes = ((s.bullets || [])[0] || {}).notes || [];
       h += '<div class="cap">ACTION</div><div class="cards"><div class="card"><ul>' + items.map(function (x, i) { return '<li>' + esc(x) + (notes[i] ? '<br><span class="faint" style="font-size:.8rem">' + esc(notes[i]) + '</span>' : '') + '</li>'; }).join('') + '</ul></div></div>';
