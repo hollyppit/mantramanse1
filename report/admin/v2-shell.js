@@ -126,7 +126,7 @@
   // 챕터 관리 맨 위 "도입" 그룹: 일간 소개(20)·일주 소개(120)의 영상·문구를 일괄 편집한다(상단 "일간·일주 소개" 탭과 같은 화면)
   function introGroup() {
     var it = function (id, name, sub) { return '<div class="chi' + (CH.sel === id ? ' on' : '') + '" data-id="' + id + '"><span aria-hidden="true">🎬</span><div><b>' + name + '</b><br><small class="muted">' + sub + '</small></div></div>'; };
-    return '<div class="pgrp"><div class="pgh"><b>도입 · 챕터 전에 나오는 소개</b></div>' + it('intro:ilgan', '일간 소개', '10일간 × 남·여 = 20') + it('intro:iju', '일주 소개', '60일주 × 남·여 = 120') + '</div>';
+    return '<div class="pgrp"><div class="pgh"><b>도입 · 챕터 전에 나오는 소개</b></div>' + it('intro:prologue', '프롤로그 영상', '남·여 각 1개 · 무빙툰 시작 전') + it('intro:ilgan', '일간 소개', '10일간 × 남·여 = 20') + it('intro:iju', '일주 소개', '60일주 × 남·여 = 120') + '</div>';
   }
   function chapDraw() {
     var root = $('#t-v2chap'), projs = projList();
@@ -165,7 +165,7 @@
     chapEditor();
   }
   function chapEditor() {
-    var box = $('#chEd'); if (/^intro:/.test(CH.sel || '')) { V2Intro.mount(box, PW, { mode: CH.sel.slice(6) }); return; }
+    var box = $('#chEd'); if (CH.sel === 'intro:prologue') { V2Prologue.mount(box); return; } if (/^intro:/.test(CH.sel || '')) { V2Intro.mount(box, PW, { mode: CH.sel.slice(6) }); return; }
     var c = chapterById(CH.sel); if (!c) { box.innerHTML = ''; return; }
     var tabs = [['set', '기본 설정'], ['mod', '해석 모듈'], ['pv', '미리보기']]; if (c.kind === 'remedy' || c.kind === 'summary') tabs.splice(2, 0, ['rem', '개운법 라이브러리']);
     box.innerHTML = '<div class="card"><div class="sub2" id="chTabs"></div><div id="chBody"></div></div>';

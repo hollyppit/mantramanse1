@@ -52,12 +52,12 @@
     var sd; try { sd = R.SajuData.build(ch, { now: Date.now() }); } catch (e) { clearInterval(tick); view('input'); $('#msg').textContent = '계산 결과를 정리하지 못했습니다.'; return; }
     S.sd = sd; S.birth = birthOf(ch); var t0 = Date.now();
     // 서버 저장본(콘텐츠·미디어·일간 소개 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
-    Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story'), getJson('/api/assets')]).then(function (a) {
+    Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story'), getJson('/api/assets'), getJson('/api/prologue')]).then(function (a) {
       var wait = Math.max(0, (HUB ? 500 : 2600) - (Date.now() - t0));
       return new Promise(function (ok) { setTimeout(function () { ok(a); }, wait); });
     }).then(function (a) {
       S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
-      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.assets = (a[4] && a[4].assets) || {};
+      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.assets = (a[4] && a[4].assets) || {}; S.proVid = a[5] && a[5].on !== false ? (a[5][sd.gender === 'F' ? 'F' : 'M'] || '') : '';
       if (R.Deep && S.ch && !PREVIEW) { try { R.Deep.augment(S.rep, { M: window.Manse, ch: S.ch, sd: sd, now: Date.now(), name: S.name, assets: S.assets }); } catch (e) { /* 깊이 풀이가 실패해도 기본 리포트는 그대로 */ } S.repPdf = plainRep(S.rep); } // 자동차 비유·장단점·12운성·직업·배우자·일주·전생·대운/세운/월운·개운 근거·명소 챕터를 끼운다
       S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null, textOnly: !!(a[2] && a[2].textOnly) }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
       if (LIFE && S.ch && R.IKDeep) S.ikP = R.IKDeep.load(window.Manse, S.ch, sd, 16000); // AI 합성과 나란히 먼저 시작
@@ -86,7 +86,7 @@
     view('awk'); var box = $('#awkMedia'), clip = cfg.clip || null, done = false;
     var cap = $('#awkCap'), start = $('#awkStart'), snd = $('#awkSound'), skip = $('#awkSkip');
     start.hidden = true; snd.hidden = true; skip.hidden = false;
-    var title = cfg.title, sub = cfg.sub || '', kw = cfg.kw || [], poster = clip && clip.posterUrl || '', rp = cfg.kind === 'iju' ? 'awk' : 'ilgan', ev = cfg.kind === 'iju' ? 'iju' : 'ilgan';
+    var title = cfg.title, sub = cfg.sub || '', kw = cfg.kw || [], poster = clip && clip.posterUrl || '', rp = cfg.kind === 'iju' ? 'awk' : 'ilgan', ev = cfg.kind === 'iju' ? 'iju' : cfg.kind === 'prologue' ? 'prologue' : 'ilgan';
     cap.innerHTML = '<div class="t" data-tx="' + rp + '.title">' + esc(title) + '</div>' + (sub ? '<div class="s" data-tx="' + rp + '.sub">' + esc(sub).replace(/\n/g, '<br>') + '</div>' : '') + (kw.length ? '<div class="k" data-tx="' + rp + '.kw">' + kw.map(function (k) { return '<span>' + esc(k) + '</span>'; }).join('') + '</div>' : '');
     if (cfg.capHtml) cap.innerHTML = cfg.capHtml; if (cfg.noCap) cap.innerHTML = ''; cap.style.opacity = ''; cap.classList.remove('mcard'); var capT = cfg.capMs ? setTimeout(function () { cap.style.transition = 'opacity .6s'; cap.style.opacity = 0; }, cfg.capMs) : 0; // 소개 문구는 capMs 뒤에 사라진다(영상은 계속)
     var cardT = 0, cardAt = 0;
@@ -113,14 +113,14 @@
     }
     else if (!url || saveData && !poster) { still(); }
     else {
-      var v = document.createElement('video'); v.muted = true; v.defaultMuted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); v.autoplay = true; v.preload = 'auto'; v.setAttribute('aria-label', title + ' 영상'); if (poster) v.poster = poster;
+      var v = document.createElement('video'), wantSound = cfg.kind === 'prologue'; v.muted = !wantSound; v.defaultMuted = !wantSound; // 프롤로그 영상은 소리가 기본(브라우저가 막으면 소리 없이 시작하고 "소리 켜기"를 보여 준다) v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); v.autoplay = true; v.preload = 'auto'; v.setAttribute('aria-label', title + ' 영상'); if (poster) v.poster = poster;
       if (clip.videoWebm && v.canPlayType && v.canPlayType('video/webm')) { var s1 = document.createElement('source'); s1.src = clip.videoWebm; s1.type = 'video/webm'; v.appendChild(s1); }
       if (clip.videoUrl) { var s2 = document.createElement('source'); s2.src = clip.videoUrl; s2.type = /\.webm(\?|$)/.test(clip.videoUrl) ? 'video/webm' : 'video/mp4'; v.appendChild(s2); }
       box.innerHTML = ''; box.appendChild(v);
-      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); if (cfg.card) cardT = setTimeout(showCard, cfg.cardAt != null ? cfg.cardAt : 3000); T(ev + '_video_started', {}); snd.hidden = false; });
+      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); if (cfg.card) cardT = setTimeout(showCard, cfg.cardAt != null ? cfg.cardAt : 3000); T(ev + '_video_started', {}); snd.hidden = false; snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; if (!v.muted && R.Bgm) R.Bgm.duck(true); });
       v.addEventListener('ended', function () { finish('completed'); });
       v.addEventListener('error', function () { if (!done) { v.remove(); still(); } }, true);
-      var p = v.play(); if (p && p.catch) p.catch(function () { v.controls = false; if (poster) v.load(); setTimeout(function () { if (v.paused && !done) { v.remove(); still(); } }, 1200); });
+      var p = v.play(); if (p && p.catch) p.catch(function () { if (wantSound && !v.muted) { v.muted = true; var p2 = v.play(); if (p2 && p2.catch) p2.catch(function () { v.remove(); still(); }); return; } v.controls = false; if (poster) v.load(); setTimeout(function () { if (v.paused && !done) { v.remove(); still(); } }, 1200); });
       snd.onclick = function () { v.muted = !v.muted; if (R.Bgm) R.Bgm.duck(!v.muted); snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; };
       skip.onclick = function () { v.pause(); finish('skipped'); };
     }
@@ -154,14 +154,19 @@
   // 탭해서 시작: 배경음악이 있으면 일간 소개 직전에 한 번 터치를 받는다(터치가 있어야 소리를 낼 수 있다). 음악이 없거나 꺼 둔 경우·미리보기에서는 바로 시작한다.
   // 허브 퍼널 이벤트: 허브(/report/hub/)와 같은 이름 그대로(gtag · dataLayer · 'mantra:track')로 내보낸다. v2 자체 이벤트(T)와는 따로 센다.
   function funnel(n, p) { if (!HUB) return; p = Object.assign({ src: 'v2', from: 'hub' }, p || {}); try { if (typeof window.gtag === 'function') window.gtag('event', n, p); } catch (e) { } try { if (window.dataLayer && window.dataLayer.push) window.dataLayer.push(Object.assign({ event: n }, p)); } catch (e) { } try { window.dispatchEvent(new CustomEvent('mantra:track', { detail: { name: n, props: p } })); } catch (e) { } }
-  function hubStart() { funnel('movingtoon_start'); $('#hubBack').hidden = false; if (LIFE) lifeBegin(); else beginReader(); }
+  function hubStart() { funnel('movingtoon_start'); $('#hubBack').hidden = false; if (R.Bgm) R.Bgm.play('cinematic'); proVideo(function () { if (LIFE) lifeBegin(); else beginReader(); }); }
+  // 프롤로그 영상(관리자 > 챕터 관리 > 프롤로그 영상): 올려 둔 영상이 있으면 재생하고 끝나면 next(true), 없으면 곧바로 next(false)
+  function proVideo(next) {
+    if (PREVIEW || !S.proVid) { next(false); return; }
+    T('prologue_started', { video: 1 }); playStage({ kind: 'prologue', clip: { videoUrl: S.proVid }, noCap: true, onDone: function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', { video: 1 }); next(true); } });
+  }
   function startGate() {
     if (HUB) { hubStart(); return; }
     if (PREVIEW || !R.Bgm || !R.Bgm.has() || R.Bgm.isMuted()) { intro(); return; }
     var nm = S.name; view('gate'); $('#gateName').innerHTML = nm ? esc(nm) + '에게는,<br>' + esc(nm) + '의 때가 있다.' : '모든 사람에게는,<br>각자의 때가 있다.';
     var b = $('#gateBtn'); b.onclick = function () { b.onclick = null; T('gate_tapped', {}); intro(); }; try { b.focus({ preventScroll: true }); } catch (e) { }
   }
-  function intro() { if (R.Bgm) R.Bgm.play('cinematic'); prologue(); } // 배경음악은 일간 인트로(첫 화면)부터 흐른다(입력 제출 = 사용자의 첫 터치)
+  function intro() { if (R.Bgm) R.Bgm.play('cinematic'); proVideo(function (played) { if (played) { if (LIFE) lifeBegin(); else beginReader(); } else prologue(); }); } // 배경음악은 일간 인트로(첫 화면)부터 흐른다(입력 제출 = 사용자의 첫 터치)
   function cinemaMediaFor(used) { return function (sc) { if (sc.bg === 'black' || sc.phTone) return null; return R.Director.pickMedia(sc, (S.pack && S.pack.lib && S.pack.lib.media) || S.media, { usedIds: used }, sc.chapterId || 'c00'); }; }
   /* 재생 속도(관리자 설정 flow.playbackRate · 확인용 ?rate=3): INTRO 타임라인·본문 머묾·이동에 적용한다. 허용: 0.5 · 0.75 · 1 · 1.25 · 1.5 · 2 · 3 */
   var RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
