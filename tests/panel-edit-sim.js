@@ -31,12 +31,14 @@ const path = require('path'), fails = [], ok = (c, m) => { if (!c) fails.push(m)
   const put = async b => { const r = await A.onRequestPut({ request: new Request('http://x/api/panel-art', { method: 'PUT', headers: { authorization: 'Bearer x', 'content-type': 'application/json' }, body: JSON.stringify(b) }), env }); return { s: r.status, d: await r.json() }; };
   const get = async () => (await A.onRequestGet({ request: new Request('http://x/api/panel-art', { headers: { authorization: 'Bearer x' } }), env })).json();
   ok(/웹툰/.test((await get()).presets[0].defaultPrompt), '기본 디렉션은 기존 웹툰+동양화 감성');
-  r = await put({ direction: { look: 'film', world: 'modern', mood: 'lonely', people: 'none', extra: '비 오는 밤 위주', bogus: 1 } });
-  ok(r.s === 200 && r.d.direction.look === 'film' && r.d.direction.world === 'modern', '디렉션 저장');
-  const g2 = await get(); ok(/실사 시네마틱/.test(g2.presets[0].defaultPrompt) && /현대 한국/.test(g2.presets[0].defaultPrompt) && /비 오는 밤 위주/.test(g2.presets[0].defaultPrompt) && !/웹툰/.test(g2.presets[0].defaultPrompt), '프롬프트에 화풍·세계관·추가 방향이 반영');
+  r = await put({ direction: { art: 'webtoon', feel: 'cinematic', world: 'modern', mood: 'lonely', people: 'none', extra: '비 오는 밤 위주', bogus: 1 } });
+  ok(r.s === 200 && r.d.direction.art === 'webtoon' && r.d.direction.feel === 'cinematic' && r.d.direction.world === 'modern', '디렉션 저장');
+  const g2 = await get(); ok(/한국 웹툰 스타일의 일러스트\. 또렷한/.test(g2.presets[0].defaultPrompt) && /영화 같은 감성/.test(g2.presets[0].defaultPrompt) && /현대 한국/.test(g2.presets[0].defaultPrompt) && /비 오는 밤 위주/.test(g2.presets[0].defaultPrompt) && !/동양화풍/.test(g2.presets[0].defaultPrompt), '웹툰 화풍 + 영화 감성이 함께 반영(동양화 문구는 빠짐)');
   ok(/글자·숫자/.test(g2.presets[0].defaultPrompt), '디렉션을 바꿔도 글자 금지는 유지');
-  r = await put({ direction: { look: 'zzz', world: 'eastFantasy' } }); ok(r.d.direction.look === 'ink' && r.d.direction.world === 'eastFantasy', '모르는 값은 기본으로');
+  r = await put({ direction: { art: 'zzz', world: 'eastFantasy' } }); ok(r.d.direction.art === 'webtoonInk' && r.d.direction.world === 'eastFantasy', '모르는 값은 기본으로');
   ok(/동양 판타지/.test(P.slotPrompt({ scene: ['mist'] }, 't', r.d.direction)), '클립 소스 칸 프롬프트에도 적용');
+  r = await put({ direction: { look: 'photo' } }); ok(r.d.direction.art === 'realistic' && r.d.direction.feel === 'documentary', '예전 look 저장값은 화풍·감성으로 변환');
+  r = await put({ direction: { art: 'webtoon', feel: 'noir' } }); ok(/또렷한/.test(P.styleOf(r.d.direction)) && /느와르 감성/.test(P.styleOf(r.d.direction)), '화풍과 감성은 서로 독립적으로 조합');
   if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log(' ✗ ' + f)); process.exit(1); }
   console.log('패널 세부 수정 검증 모두 통과');
 })();

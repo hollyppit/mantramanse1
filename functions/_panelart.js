@@ -8,13 +8,20 @@ export const STYLE = '한 편의 한국 웹툰 같은 시네마틱 일러스트.
 
 // ── 비주얼 디렉션: 화풍(look) · 세계관(world) · 분위기(mood) · 인물(people) + 자유 문장. 관리자에서 고르고 모든 프롬프트에 들어간다. 값은 id 만 저장.
 export const DIRECTION_OPTIONS = {
-  look: { label: '감성·화풍', default: 'ink', items: {
-    ink: ['웹툰 + 동양화', '한국 웹툰 같은 시네마틱 일러스트. 먹물 번짐과 수채 질감이 섞인 동양화풍 위에 영화 같은 조명.'],
-    film: ['영화 스틸 (실사 시네마틱)', '실제 영화의 한 장면처럼 보이는 실사 시네마틱 스틸. 35mm 필름 질감, 얕은 심도, 자연스러운 필름 그레인과 영화적인 색보정.'],
-    photo: ['다큐 사진', '자연광으로 찍은 듯한 담백한 다큐멘터리 사진. 과장 없는 색, 현실적인 질감.'],
-    anime: ['애니메이션 배경 미술', '극장판 애니메이션 배경 미술처럼 섬세하고 서정적인 일러스트. 맑은 색감과 부드러운 빛 번짐.'],
-    painting: ['유화 일러스트', '붓 자국이 보이는 서정적인 유화 일러스트. 두꺼운 물감 질감과 깊은 색.'],
-    noir: ['흑백 느와르', '대비가 강한 흑백 영화 스틸. 깊은 그림자와 한 줄기 빛, 고요한 긴장감.'] } },
+  art: { label: '화풍 (그림체)', default: 'webtoonInk', items: {
+    webtoonInk: ['웹툰 + 동양화', '한국 웹툰 스타일의 일러스트에 먹물 번짐과 수채 질감이 섞인 동양화풍 채색.'],
+    webtoon: ['웹툰', '한국 웹툰 스타일의 일러스트. 또렷한 선화와 깔끔한 채색, 웹툰 특유의 배경 표현.'],
+    ink: ['동양화 · 수묵', '수묵·동양화 스타일. 먹의 번짐과 여백, 붓 선, 절제된 색.'],
+    anime: ['애니메이션 배경 미술', '극장판 애니메이션 배경 미술처럼 섬세한 일러스트. 맑은 색감.'],
+    painting: ['유화 일러스트', '붓 자국이 보이는 유화 일러스트. 두꺼운 물감 질감과 깊은 색.'],
+    realistic: ['실사', '실제 사진처럼 사실적인 화면. 현실적인 질감과 비율.'] } },
+  feel: { label: '감성 · 연출', default: 'cinematic', items: {
+    cinematic: ['영화 감성', '영화 같은 감성: 영화 스틸처럼 의도된 구도(와이드·로우앵글·오버숄더), 극적인 조명과 깊은 명암, 색보정된 톤, 얕은 심도의 느낌.'],
+    documentary: ['담백한 다큐 감성', '담백한 다큐 감성: 꾸밈 없는 자연광과 일상적인 구도, 과장 없는 색.'],
+    noir: ['느와르 감성', '느와르 감성: 강한 명암 대비와 한 줄기 빛, 고요한 긴장감, 색은 절제.'],
+    fairytale: ['동화 감성', '동화 같은 감성: 포근하고 환상적인 분위기, 부드러운 빛.'],
+    lyrical: ['서정적 감성', '서정적인 감성: 조용하고 섬세한 분위기, 여백과 부드러운 빛 번짐.'],
+    none: ['지정 안 함', ''] } },
   world: { label: '세계관·배경', default: 'asis', items: {
     asis: ['장면 그대로', ''],
     modern: ['현실 · 현대 한국', '배경은 현대 한국의 실제 장소(도시·골목·사무실·집·카페·지하철 등)로 현실감 있게 그린다. 판타지 요소는 넣지 않는다.'],
@@ -29,16 +36,18 @@ export const DIRECTION_OPTIONS = {
     back: ['뒷모습·실루엣만', '인물은 뒷모습이나 멀리 보이는 실루엣으로만 그리고 얼굴 클로즈업은 하지 않는다.'], none: ['사람 없이 풍경만', '사람은 그리지 않고 풍경과 사물만으로 표현한다.'],
     face: ['얼굴이 보이는 인물', '인물의 얼굴과 표정이 보여도 좋다(특정 실존 인물을 닮게 그리지 않는다).'] } },
 };
-export const DEFAULT_DIRECTION = { look: 'ink', world: 'asis', mood: 'auto', people: 'back', extra: '' };
+export const DEFAULT_DIRECTION = { art: 'webtoonInk', feel: 'cinematic', world: 'asis', mood: 'auto', people: 'back', extra: '' };
 export function cleanDirection(v) {
-  v = v && typeof v === 'object' ? v : {}; const o = { ...DEFAULT_DIRECTION };
+  v = v && typeof v === 'object' ? { ...v } : {}; const o = { ...DEFAULT_DIRECTION };
+  const OLD = { ink: ['webtoonInk', 'cinematic'], film: ['realistic', 'cinematic'], photo: ['realistic', 'documentary'], anime: ['anime', 'lyrical'], painting: ['painting', 'lyrical'], noir: ['realistic', 'noir'] }; // 예전 저장값(look 하나) 호환
+  if (v.look && OLD[v.look] && !v.art) { v.art = OLD[v.look][0]; v.feel = v.feel || OLD[v.look][1]; }
   for (const k of Object.keys(DIRECTION_OPTIONS)) if (typeof v[k] === 'string' && DIRECTION_OPTIONS[k].items[v[k]]) o[k] = v[k];
   o.extra = typeof v.extra === 'string' ? v.extra.trim().slice(0, 300) : ''; return o;
 }
 // 공통 화풍 문장(글자 금지·글자 자리 비우기는 항상 붙는다)
 export function styleOf(dir) {
   const d = cleanDirection(dir), O = DIRECTION_OPTIONS, part = k => O[k].items[d[k]][1];
-  return [part('look'), part('world'), part('mood'), part('people'), d.extra && '추가 방향: ' + d.extra + '.'].filter(Boolean).join(' ') +
+  return [part('art'), part('feel'), part('world'), part('mood'), part('people'), d.extra && '추가 방향: ' + d.extra + '.'].filter(Boolean).join(' ') +
     ' 화면 안에 글자·숫자·간판·로고·워터마크는 절대 넣지 않는다. 세로 구도, 아래쪽 30%는 비교적 어둡고 단순하게 비워 둔다(글자가 올라갈 자리).';
 }
 
