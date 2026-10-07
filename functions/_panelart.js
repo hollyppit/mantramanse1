@@ -66,18 +66,24 @@ export function slotItem(chapterId, title, t, url, bytes, provider) {
 const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 async function errDetail(r) { try { return ' ' + (await r.text()).slice(0, 200); } catch { return ''; } }
 
-async function viaOpenAI(env, prompt) {
-  const model = env.PANEL_IMAGE_MODEL || 'gpt-image-2';
-  const r = await fetch('https://api.openai.com/v1/images/generations', { method: 'POST', signal: AbortSignal.timeout(110000), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY },
-    body: JSON.stringify({ model, prompt, size: env.PANEL_IMAGE_SIZE || '1024x1536', quality: env.PANEL_IMAGE_QUALITY || 'medium', output_format: 'webp', output_compression: 82, n: 1 }) });
+async function viaOpenAI(env, prompt, ref) {
+  const model = env.PANEL_IMAGE_MODEL || 'gpt-image-2', size = env.PANEL_IMAGE_SIZE || '1024x1536', quality = env.PANEL_IMAGE_QUALITY || 'medium';
+  let r;
+  if (ref) { // 기존 이미지를 바탕으로 수정(images/edits, multipart)
+    const f = new FormData(); f.append('model', model); f.append('prompt', prompt); f.append('size', size); f.append('quality', quality); f.append('output_format', 'webp');
+    f.append('image', new Blob([ref.bytes], { type: ref.mime }), 'ref.' + (/webp/.test(ref.mime) ? 'webp' : /jpe?g/.test(ref.mime) ? 'jpg' : 'png'));
+    r = await fetch('https://api.openai.com/v1/images/edits', { method: 'POST', signal: AbortSignal.timeout(110000), headers: { authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: f });
+  } else r = await fetch('https://api.openai.com/v1/images/generations', { method: 'POST', signal: AbortSignal.timeout(110000), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY },
+    body: JSON.stringify({ model, prompt, size, quality, output_format: 'webp', output_compression: 82, n: 1 }) });
   if (!r.ok) throw new Error(`openai(${model}) ${r.status}` + await errDetail(r));
   const d = await r.json(), x = d.data && d.data[0]; if (!x || !x.b64_json) throw new Error('openai 응답에 이미지가 없습니다');
   return { bytes: b64(x.b64_json), mime: 'image/webp', ext: 'webp', provider: 'openai', model };
 }
-async function viaGemini(env, prompt) {
+const toB64 = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
+async function viaGemini(env, prompt, ref) {
   const model = env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
   const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent', { method: 'POST', signal: AbortSignal.timeout(110000), headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
-    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: '3:4' } } }) });
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }].concat(ref ? [{ inlineData: { mimeType: ref.mime, data: toB64(new Uint8Array(ref.bytes)) } }] : []) }], generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: '3:4' } } }) });
   if (!r.ok) throw new Error(`gemini(${model}) ${r.status}` + await errDetail(r));
   const d = await r.json(), parts = (((d.candidates || [])[0] || {}).content || {}).parts || [], p = parts.find(x => x.inlineData && x.inlineData.data);
   if (!p) throw new Error('gemini 응답에 이미지가 없습니다(안전 필터에 걸렸을 수 있습니다)');
@@ -85,11 +91,11 @@ async function viaGemini(env, prompt) {
   return { bytes: b64(p.inlineData.data), mime, ext: /webp/.test(mime) ? 'webp' : /jpe?g/.test(mime) ? 'jpg' : 'png', provider: 'gemini', model };
 }
 // 키가 있는 모델을 차례로 시도한다. 반환 { bytes, mime, ext, provider, model } · 모두 실패하면 던진다.
-export async function generate(env, prompt, only) {
+export async function generate(env, prompt, only, ref) {
   const errs = [], tries = [];
   if (env.OPENAI_API_KEY && (!only || only === 'openai')) tries.push(viaOpenAI);
   if (env.GEMINI_API_KEY && (!only || only === 'gemini')) tries.push(viaGemini);
   if (!tries.length) throw new Error('이미지 생성 키가 없습니다(OPENAI_API_KEY 또는 GEMINI_API_KEY)');
-  for (const f of tries) { try { return await f(env, prompt); } catch (e) { errs.push((e && e.message) || String(e)); } }
+  for (const f of tries) { try { return await f(env, prompt, ref); } catch (e) { errs.push((e && e.message) || String(e)); } }
   throw new Error(errs.join(' / '));
 }
