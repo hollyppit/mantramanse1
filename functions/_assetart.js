@@ -1,4 +1,4 @@
-// 풀이 화면 이미지 슬롯(자동차 10 · 직업 12 · 배우자 인상 24 · 전생 25 = 71장) — 슬롯 목록·프롬프트. 파일명이 _로 시작해 라우트로 노출되지 않는다.
+// 풀이 화면 이미지 슬롯(자동차 10 · 직업 12 · 배우자 인상 24 · 전생 50 = 96장) — 슬롯 목록·프롬프트. 파일명이 _로 시작해 라우트로 노출되지 않는다.
 // 슬롯 id 는 report/v2/deep*.js 의 fig(H, 슬롯, …) 와 같아야 한다(tests/asset-art-sim.js 가 맞는지 검사). 비주얼 디렉션은 패널 이미지(panel:direction)와 같은 설정을 쓴다.
 import { styleOf, ELEMENTS } from './_panelart.js';
 
@@ -15,13 +15,13 @@ const PAST = { 비겁: { 목: '두레패를 이끌던 마을의 접장', 화: '�
   관성: { 목: '향교에서 일하던 서리', 화: '밤길을 지키던 포도청 관리', 토: '고을을 다스리던 향리·이장', 금: '성을 지키던 무관', 수: '말과 문서를 다루던 역관·밀사' },
   인성: { 목: '서당을 열던 훈장', 화: '사찰의 승려이자 제사를 맡던 사람', 토: '명당을 보던 지관(풍수가)', 금: '법과 율을 가르치던 율사', 수: '병을 보고 길흉을 짚던 의원·점술가' } };
 
-export const GROUPS = { car: '자동차 비유 (일간 10)', career: '직업 후보 (12직군)', spouse: '배우자 인상 (12지지 × 성별)', past: '전생 (십성 5 × 오행 5)' };
+export const GROUPS = { car: '자동차 비유 (일간 10)', career: '직업 후보 (12직군)', spouse: '배우자 인상 (12지지 × 성별)', past: '전생 (십성 5 × 오행 5 × 성별)' };
 export function slots() {
   const out = [];
   for (const k of Object.keys(CAR)) out.push({ id: 'car:' + k, group: 'car', title: `${k} · ${CAR[k][0]}` });
   for (const k of Object.keys(CAREER)) out.push({ id: 'career:' + k, group: 'career', title: CAREER[k][0] });
   for (const b of Object.keys(FACE)) for (const g of ['F', 'M']) out.push({ id: `spouse:${b}:${g}`, group: 'spouse', title: `${b} · ${FACE[b][0]} (${g === 'F' ? '여성' : '남성'})` });
-  for (const g of Object.keys(PAST)) for (const e of Object.keys(PAST[g])) out.push({ id: `past:${g}:${e}`, group: 'past', title: `${g}·${e} · ${PAST[g][e]}` });
+  for (const g of Object.keys(PAST)) for (const e of Object.keys(PAST[g])) for (const s of ['F', 'M']) out.push({ id: `past:${g}:${e}:${s}`, group: 'past', title: `${g}·${e} · ${PAST[g][e]} (${s === 'F' ? '여성' : '남성'})` });
   return out;
 }
 export const SLOT_BY_ID = Object.fromEntries(slots().map(s => [s.id, s]));
@@ -30,12 +30,12 @@ export const keyOf = id => 'asset-' + id.replace(/[^A-Za-z0-9]/g, c => '_' + c.c
 export const SLOT_KEY = /^asset-[\w.-]{1,100}$/;
 
 export function promptOf(id, dir) {
-  const [g, a, b] = id.split(':'), pal = e => (ELEMENTS[e] ? ELEMENTS[e].palette : '');
+  const [g, a, b, c] = id.split(':'), pal = e => (ELEMENTS[e] ? ELEMENTS[e].palette : '');
   if (g === 'car' && CAR[a]) { const [v, scene, el] = CAR[a]; return styleOf({ ...dir, people: 'none' }) + `\n주제: 사람의 성격을 상징하는 자동차 한 대를 멋지게 그린다. 차종: ${v}. 배경: ${scene}. 사람은 그리지 않는다.\n색과 빛: ${pal(el === '목' ? 'wood' : el === '화' ? 'fire' : el === '토' ? 'earth' : el === '금' ? 'metal' : 'water')}.`; }
   if (g === 'career' && CAREER[a]) return styleOf({ ...dir, people: dir.people === 'face' ? 'face' : 'back' }) + `\n주제: '${CAREER[a][0]}' 일의 분위기가 한눈에 보이는 장면. ${CAREER[a][1]}.`;
   if (g === 'spouse' && FACE[a]) { const el = BR_EL[a], woman = b === 'F', E = { 목: 'wood', 화: 'fire', 토: 'earth', 금: 'metal', 수: 'water' }[el];
     return styleOf({ ...dir, people: 'face' }) + `\n주제: ${FACE[a][0]} 인상의 ${woman ? '젊은 여성' : '젊은 남성'} 반신 초상. ${FACE[a][1]} 분위기이며, 동물의 귀·털은 그리지 않고 이목구비와 표정의 닮은 인상만 사람으로 표현한다. 가상의 인물이고 실존 인물을 닮게 그리지 않는다.\n색과 빛: ${pal(E)}.`; }
-  if (g === 'past' && PAST[a] && PAST[a][b]) { const E = { 목: 'wood', 화: 'fire', 토: 'earth', 금: 'metal', 수: 'water' }[b];
-    return styleOf({ ...dir, people: dir.people === 'face' ? 'face' : 'back' }) + `\n주제: 조선 시대 무렵의 한국을 배경으로 '${PAST[a][b]}'의 모습을 상징적으로 그린다. 시대에 맞는 의복과 소품, 그 사람의 일터가 함께 보이게.\n색과 빛: ${pal(E)}.`; }
+  if (g === 'past' && PAST[a] && PAST[a][b] && (c === 'F' || c === 'M')) { const E = { 목: 'wood', 화: 'fire', 토: 'earth', 금: 'metal', 수: 'water' }[b];
+    return styleOf({ ...dir, people: dir.people === 'face' ? 'face' : 'back' }) + `\n주제: 조선 시대 무렵의 한국을 배경으로 '${PAST[a][b]}'의 모습을 상징적으로 그린다. 그 인물은 ${c === 'F' ? '여성' : '남성'}이다. 시대에 맞는 의복과 소품, 그 사람의 일터가 함께 보이게.\n색과 빛: ${pal(E)}.`; }
   return '';
 }

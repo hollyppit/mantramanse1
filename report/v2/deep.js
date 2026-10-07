@@ -22,7 +22,7 @@
   var HJ_PH = { car: '車', spouse: '緣', past: '前', career: '業', place: '地' };
   // 이미지 슬롯: 관리자가 만든 이미지가 있으면 보여 주고, 없으면 같은 자리에 한자 자리표시
   function fig(H, slot, kind, alt, cls) {
-    var u = H.assets && H.assets[slot];
+    var u = H.assets && (H.assets[slot] || H.assets[slot.replace(/^(past:[^:]+:[^:]+):[FM]$/, '$1')]); // 전생은 성별 슬롯이 없으면 예전(성별 없는) 이미지를 대신 쓴다
     return '<figure class="rd-fig dp-fig' + (cls ? ' ' + cls : '') + (u ? '' : ' dp-ph') + '" data-slot="' + esc(slot) + '">' + (u ? '<img src="' + esc(u) + '" alt="' + esc(alt || '') + '" loading="lazy" decoding="async">' : '<span aria-hidden="true">' + (HJ_PH[kind] || '像') + '</span>') + '</figure>';
   }
   var who = function (H) { return H.name ? H.name + '님' : '당신'; };
