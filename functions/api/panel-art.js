@@ -59,6 +59,7 @@ export async function onRequestPost({ request, env }) {
     else if (b.resetPrompt && prompts[id]) { delete prompts[id]; await env.GLOSSARY_KV.put(PKEY, JSON.stringify(prompts)); }
     return json({ ok: true, id, url });
   }
+  if (b.useDefault && prompts[id]) { delete prompts[id]; await env.GLOSSARY_KV.put(PKEY, JSON.stringify(prompts)); } // 칸별로 고친 프롬프트를 버리고 현재 비주얼 디렉션으로
   let prompt = typeof b.prompt === 'string' && b.prompt.trim() ? b.prompt.trim().slice(0, 2000) : (prompts[id] || promptFor(b.element, b.theme, dir));
   let ref = null;
   if (b.fromCurrent) { // 지금 컷을 바탕으로 수정(추가 요청 = 무엇을 바꿀지)

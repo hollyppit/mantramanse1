@@ -26,12 +26,12 @@
     });
     PANE.innerHTML = dirCard(d) + '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">패널 이미지 · ' + have + ' / ' + d.presets.length + '장</b><p class="muted" style="margin:6px 0 10px">무빙툰의 각 컷(이미지 + 글)에 들어가는 삽화입니다. 오행(5) × 이야기 주제(10)별로 한 장씩 만들고, 뷰어가 사용자의 오행과 이야기 주제에 맞는 컷을 자동으로 고릅니다. 칸을 누르면 그 컷을 <b>세부 수정</b>(프롬프트 편집 · 추가 요청 · 현재 이미지를 바탕으로 수정)하고 미리 본 뒤 교체할 수 있습니다.</p>' +
       '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><label class="muted">모델 <select id="paProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (G.provider === 'openai' ? ' selected' : '') + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(d.models.openai) + (pv.openai ? '' : ' (키 없음)') + '</option><option value="gemini"' + (G.provider === 'gemini' ? ' selected' : '') + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(d.models.gemini) + (pv.gemini ? '' : ' (키 없음)') + '</option></select></label>' +
-      '<button class="btn" id="paMissing"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button id="paStop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
+      '<button class="btn" id="paMissing"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button class="btn" id="paAll"' + (G.busy ? ' disabled' : '') + '>모두 다시 만들기</button><button id="paStop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
       (!d.r2 ? '<p class="err">R2(CLIPS_R2)가 연결되지 않아 저장할 수 없습니다.</p>' : '') + (!pv.openai && !pv.gemini ? '<p class="err">OPENAI_API_KEY 또는 GEMINI_API_KEY 가 없습니다. Cloudflare 환경 변수에 추가하세요.</p>' : '') +
       '<div class="pa-grid">' + cells + '</div><div class="pa-log"></div></div>';
     bindDir();
     $('#paProv').onchange = function () { G.provider = this.value; };
-    $('#paMissing').onclick = runMissing; $('#paStop').onclick = function () { G.stop = true; log('중지 요청 — 진행 중인 한 장이 끝나면 멈춥니다'); };
+    $('#paMissing').onclick = runMissing; $('#paAll').onclick = runAll; $('#paStop').onclick = function () { G.stop = true; log('중지 요청 — 진행 중인 한 장이 끝나면 멈춥니다'); };
     [].forEach.call(PANE.querySelectorAll('.pa-c'), function (c) { c.onclick = function () { if (G.busy) return; editor(c.dataset.e, c.dataset.t); }; });
     log('');
   }
@@ -81,20 +81,27 @@
         .catch(function (e) { toast(e.message, true); }).then(function () { var b = $('#paDirSave'); if (b) b.disabled = false; });
     };
   }
-  function one(e, t, redraw) {
+  function one(e, t, redraw, useDefault) {
     var cell = PANE.querySelector('.pa-c[data-e="' + e + '"][data-t="' + t + '"]'); if (cell) cell.classList.add('run'); G.busy = true; log(EL[e] + ' · ' + TH[t] + ' 만드는 중… (보통 20~60초)');
-    return C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ element: e, theme: t, provider: G.provider }) })
+    return C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ element: e, theme: t, provider: G.provider, useDefault: !!useDefault }) })
       .then(function (r) { log('✓ ' + EL[e] + ' · ' + TH[t] + ' — ' + r.provider + ' ' + r.model); if (cell && !redraw) { cell.classList.remove('run'); cell.classList.add('has'); cell.style.backgroundImage = 'url(\'' + r.url + '\')'; cell.innerHTML = ''; } return true; })
       .catch(function (er) { if (cell) cell.classList.remove('run'); log('✗ ' + EL[e] + ' · ' + TH[t] + ' — ' + er.message); toast(er.message, true); return false; })
       .then(function (ok) { G.busy = false; return ok; });
   }
-  function runMissing() {
-    var todo = G.d.presets.filter(function (p) { return !p.url; }); if (!todo.length) { toast('빈 칸이 없습니다'); return; }
-    if (!confirm('빈 칸 ' + todo.length + '장을 차례로 만듭니다. 이미지 비용이 장당 발생합니다. 계속할까요?')) return;
-    G.stop = false; $('#paMissing').disabled = true; $('#paStop').disabled = false; var fails = 0;
+  function runMissing() { runList(G.d.presets.filter(function (p) { return !p.url; }), false); }
+  // 모두 다시 만들기: 이미 있는 컷까지 현재 비주얼 디렉션으로 전부 새로 만든다. 새로 만드는 데 성공한 칸만 교체되고(실패하면 옛 이미지 유지) 옛 파일은 지워진다.
+  function runAll() {
+    var n = G.d.presets.length, custom = G.d.presets.filter(function (p) { return p.custom; }).length; if (!confirm('50장 전체를 현재 비주얼 디렉션(화풍·감성·세계관…)으로 다시 만듭니다.\n이미지 비용이 장당 발생하고 30분 이상 걸릴 수 있으며, 성공한 칸의 기존 이미지는 삭제됩니다. 계속할까요?')) return;
+    var reset = false; if (custom) reset = confirm('칸별로 직접 고쳐 저장한 프롬프트가 ' + custom + '개 있습니다.\n[확인] 그 프롬프트를 버리고 현재 디렉션으로 만듭니다.\n[취소] 고친 프롬프트를 그대로 사용합니다.');
+    runList(G.d.presets.slice(), reset, true);
+  }
+  function runList(todo, useDefault, skipConfirm) {
+    if (!todo.length) { toast('만들 칸이 없습니다'); return; }
+    if (!skipConfirm && !confirm('빈 칸 ' + todo.length + '장을 차례로 만듭니다. 이미지 비용이 장당 발생합니다. 계속할까요?')) return;
+    G.stop = false; $('#paMissing').disabled = true; $('#paAll').disabled = true; $('#paStop').disabled = false; var fails = 0;
     (function next(i) {
       if (G.stop || i >= todo.length || fails >= 3) { log(fails >= 3 ? '연속 실패 3회로 멈춥니다. 위 오류를 확인하세요.' : G.stop ? '중지했습니다.' : '모두 끝났습니다.'); G.busy = false; load().then(draw); return; }
-      one(todo[i].element, todo[i].theme, false).then(function (ok) { fails = ok ? 0 : fails + 1; G.busy = true; next(i + 1); });
+      log((i + 1) + ' / ' + todo.length); one(todo[i].element, todo[i].theme, false, useDefault).then(function (ok) { fails = ok ? 0 : fails + 1; G.busy = true; next(i + 1); });
     })(0);
   }
   window.V2Panel = { open: open };

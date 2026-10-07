@@ -39,6 +39,12 @@ const path = require('path'), fails = [], ok = (c, m) => { if (!c) fails.push(m)
   ok(/동양 판타지/.test(P.slotPrompt({ scene: ['mist'] }, 't', r.d.direction)), '클립 소스 칸 프롬프트에도 적용');
   r = await put({ direction: { look: 'photo' } }); ok(r.d.direction.art === 'realistic' && r.d.direction.feel === 'documentary', '예전 look 저장값은 화풍·감성으로 변환');
   r = await put({ direction: { art: 'webtoon', feel: 'noir' } }); ok(/또렷한/.test(P.styleOf(r.d.direction)) && /느와르 감성/.test(P.styleOf(r.d.direction)), '화풍과 감성은 서로 독립적으로 조합');
+  // 모두 다시 만들기(직접 생성 + 칸별 프롬프트 초기화)
+  await put({ direction: {} }); kv.set('panel:prompts', JSON.stringify({ 'panel-wood-love': '낡은 프롬프트' }));
+  const before = [...r2.keys()].filter(k => /^panel-wood-love-/.test(k));
+  r = await post({ ...base, useDefault: true }); gptDown = false;
+  ok(r.s === 200 && !JSON.parse(kv.get('panel:prompts'))['panel-wood-love'], '모두 다시 만들기: 칸별 프롬프트 초기화');
+  ok(before.every(k => !r2.has(k)) && [...r2.keys()].filter(k => /^panel-wood-love-/.test(k)).length === 1, '다시 만들면 옛 파일은 지워지고 새 파일 하나만 남는다');
   if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log(' ✗ ' + f)); process.exit(1); }
   console.log('패널 세부 수정 검증 모두 통과');
 })();
