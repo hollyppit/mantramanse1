@@ -28,8 +28,8 @@
       '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><label class="muted">모델 <select id="paProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (G.provider === 'openai' ? ' selected' : '') + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(d.models.openai) + (pv.openai ? '' : ' (키 없음)') + '</option><option value="gemini"' + (G.provider === 'gemini' ? ' selected' : '') + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(d.models.gemini) + (pv.gemini ? '' : ' (키 없음)') + '</option></select></label>' +
       '<button class="btn" id="paMissing"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button class="btn" id="paAll"' + (G.busy ? ' disabled' : '') + '>모두 다시 만들기</button><button id="paStop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
       (!d.r2 ? '<p class="err">R2(CLIPS_R2)가 연결되지 않아 저장할 수 없습니다.</p>' : '') + (!pv.openai && !pv.gemini ? '<p class="err">OPENAI_API_KEY 또는 GEMINI_API_KEY 가 없습니다. Cloudflare 환경 변수에 추가하세요.</p>' : '') +
-      '<div class="pa-grid">' + cells + '</div><div class="pa-log"></div></div>';
-    bindDir();
+      '<div class="pa-grid">' + cells + '</div><div class="pa-log"></div></div><div id="taBox"></div>';
+    bindDir(); if (window.V2Tarot) window.V2Tarot.open(PANE.querySelector('#taBox'));
     $('#paProv').onchange = function () { G.provider = this.value; };
     $('#paMissing').onclick = runMissing; $('#paAll').onclick = runAll; $('#paStop').onclick = function () { G.stop = true; log('중지 요청 — 진행 중인 한 장이 끝나면 멈춥니다'); };
     [].forEach.call(PANE.querySelectorAll('.pa-c'), function (c) { c.onclick = function () { if (G.busy) return; editor(c.dataset.e, c.dataset.t); }; });
