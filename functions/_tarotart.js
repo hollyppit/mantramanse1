@@ -51,7 +51,7 @@ export const TAROT_OPTIONS = {
   feel: { label: '감성 · 연출', default: 'cinematic', items: O.feel.items },
   world: { label: '세계관·배경', default: 'asis', items: { asis: ['정통 타로 세계', ''], ...Object.fromEntries(Object.entries(O.world.items).filter(([k]) => k !== 'asis')) } },
   mood: { label: '분위기', default: 'auto', items: O.mood.items },
-  frame: { label: '카드 틀', default: 'bordered', items: { bordered: ['테두리 있는 완성 카드', '카드 한 장 전체가 보이는 세로 타로 카드 디자인. 장식 테두리가 일러스트를 둘러싼다.'], full: ['일러스트만 (테두리 없음)', '테두리 없이 일러스트가 화면 전체를 꽉 채운다.'] } },
+  frame: { label: '카드 틀', default: 'bordered', items: { overlay: ['공통 프레임 사용 (그림만 생성)', '테두리·프레임·장식 틀·글자 없이 장면 일러스트만 화면 가득 그린다. 카드 틀은 나중에 따로 덮어씌우므로 그리지 않는다. 핵심 상징은 화면 중앙 80% 안쪽에 둔다.'], bordered: ['테두리 있는 완성 카드', '카드 한 장 전체가 보이는 세로 타로 카드 디자인. 장식 테두리가 일러스트를 둘러싼다.'], full: ['일러스트만 (테두리 없음)', '테두리 없이 일러스트가 화면 전체를 꽉 채운다.'] } },
   label: { label: '카드 이름 글자', default: 'none', items: { none: ['글자 없음', '화면 안에 글자·숫자·로고는 절대 넣지 않는다.'], ko: ['한글 카드명 넣기', '__KO__'], en: ['영문 카드명 넣기', '__EN__'] } },
 };
 export const REF_USE = { style: ['화풍·색감·틀만 참고 (구도·인물은 새로)', '첨부한 레퍼런스 이미지의 화풍, 색감, 질감, 카드 틀 디자인만 참고한다. 레퍼런스의 인물·구도·소재를 그대로 따라 그리지 않고 아래 카드의 장면을 새로 그린다.'], close: ['구도까지 비슷하게', '첨부한 레퍼런스 이미지의 구도와 분위기를 가깝게 따르되, 아래 카드의 상징과 장면에 맞게 바꿔 그린다.'] };
@@ -66,6 +66,16 @@ export function cleanTarotDir(v) {
 const part = (k, d) => TAROT_OPTIONS[k].items[d[k]][1];
 export function tarotPrompt(card, dir, withRefs) {
   const c = typeof card === 'string' ? CARD_BY_ID[card] : card; if (!c) return ''; const d = cleanTarotDir(dir);
-  const label = d.label === 'ko' ? `카드 하단 띠에 한글로 '${c.nameKo}'만 정확히 적는다. 다른 글자는 넣지 않는다.` : d.label === 'en' ? `카드 하단 띠에 영어로 '${c.nameEn.toUpperCase()}'만 정확히 적는다. 다른 글자는 넣지 않는다.` : part('label', d);
+  const label = d.frame === 'overlay' ? part('label', { label: 'none' }) : d.label === 'ko' ? `카드 하단 띠에 한글로 '${c.nameKo}'만 정확히 적는다. 다른 글자는 넣지 않는다.` : d.label === 'en' ? `카드 하단 띠에 영어로 '${c.nameEn.toUpperCase()}'만 정확히 적는다. 다른 글자는 넣지 않는다.` : part('label', d);
   return [withRefs && REF_USE[d.refUse][1], '타로 카드 한 장의 일러스트: ' + c.nameEn + '(' + c.nameKo + ').', '장면: ' + c.scene + '.', part('art', d), part('feel', d), part('world', d), part('mood', d), part('frame', d), d.extra && '추가 방향: ' + d.extra + '.', label, '세로 2:3 구도, 상징이 한눈에 읽히게 중앙에 둔다.'].filter(Boolean).join('\n');
+}
+
+// 공통 카드 프레임(빈 틀) 프롬프트. 그림 창은 순수 마젠타 단색으로 칠하게 해서 관리자 화면에서 그 부분만 투명하게 뚫는다(크로마키).
+export const FRAME_KEY_COLOR = '#FF00FF';
+export function framePrompt(dir, extra) {
+  const d = cleanTarotDir(dir);
+  return ['타로 카드의 공통 프레임(빈 틀) 디자인 한 장.', '세로 카드 전체가 화면 끝까지 꽉 차게 그린다. 카드 바깥에 여백이나 그림자, 배경은 두지 않는다.',
+    '카드 위쪽 가운데에 큰 직사각형 그림 창(가로 약 80%, 세로 약 74%)을 두고, 그 안은 장식·그라데이션·그림자 없이 완전히 평평한 순수 마젠타색(' + FRAME_KEY_COLOR + ') 한 가지 색으로만 채운다. 마젠타색은 그림 창 외에는 어디에도 쓰지 않는다.',
+    '그림 창 아래에는 카드 이름이 들어갈 비어 있는 명판 띠를 둔다. 글자·숫자·로고·인물·풍경 그림은 절대 넣지 않는다. 테두리, 모서리 장식, 문양, 선 같은 프레임 장식만 그린다.',
+    part('art', d), part('feel', d), part('world', d), part('mood', d), d.extra && '추가 방향: ' + d.extra + '.', extra && '프레임 요청: ' + String(extra).trim().slice(0, 300) + '.'].filter(Boolean).join('\n');
 }

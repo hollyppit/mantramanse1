@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 840" preserveAspectRatio="none">
+  <!-- 기본 공통 타로 카드 프레임. 그림 창(50,50 · 400×620)은 투명하게 뚫려 있고, 아래 띠(명판)에는 화면에서 카드 이름이 얹힌다. 그림 창 좌표는 hub-tarot.js 의 DEFAULT_FRAME.win 과 같다. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b2040"/><stop offset=".55" stop-color="#12162e"/><stop offset="1" stop-color="#0a0d1c"/></linearGradient>
+    <linearGradient id="gd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1dfae"/><stop offset=".5" stop-color="#c9a85f"/><stop offset="1" stop-color="#8f7436"/></linearGradient>
+    <pattern id="lat" width="26" height="26" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0H26M0 0V26" stroke="#cdb27a" stroke-opacity=".09" stroke-width="1"/></pattern>
+    <g id="orn"><path d="M0 0 L26 0 M0 0 L0 26" stroke="url(#gd)" stroke-width="3" fill="none"/><path d="M8 8 L30 8 M8 8 L8 30" stroke="url(#gd)" stroke-width="1.2" fill="none"/><path d="M0 0 L12 0 L0 12Z" fill="url(#gd)"/><circle cx="19" cy="19" r="3.2" fill="url(#gd)"/></g>
+  </defs>
+  <path fill-rule="evenodd" fill="url(#bg)" d="M0 0H500V840H0Z M50 50V670H450V50Z"/>
+  <path fill-rule="evenodd" fill="url(#lat)" d="M0 0H500V840H0Z M50 50V670H450V50Z"/>
+  <rect x="9" y="9" width="482" height="822" rx="14" fill="none" stroke="url(#gd)" stroke-width="2.2"/>
+  <rect x="17" y="17" width="466" height="806" rx="8" fill="none" stroke="#cdb27a" stroke-opacity=".45" stroke-width="1"/>
+  <rect x="50" y="50" width="400" height="620" fill="none" stroke="url(#gd)" stroke-width="3.5"/>
+  <rect x="42" y="42" width="416" height="636" fill="none" stroke="#cdb27a" stroke-opacity=".5" stroke-width="1"/>
+  <g transform="translate(22 22)"><use href="#orn"/></g>
+  <g transform="translate(478 22) scale(-1 1)"><use href="#orn"/></g>
+  <g transform="translate(22 818) scale(1 -1)"><use href="#orn"/></g>
+  <g transform="translate(478 818) scale(-1 -1)"><use href="#orn"/></g>
+  <g fill="url(#gd)"><path d="M250 18 L257 28 L250 38 L243 28Z"/><path d="M250 802 L257 812 L250 822 L243 812Z"/></g>
+  <!-- 명판 -->
+  <rect x="84" y="702" width="332" height="96" rx="6" fill="#0a0d1c" fill-opacity=".72" stroke="url(#gd)" stroke-width="2"/>
+  <rect x="91" y="709" width="318" height="82" rx="3" fill="none" stroke="#cdb27a" stroke-opacity=".5" stroke-width="1"/>
+  <g fill="url(#gd)"><path d="M66 750 L76 740 L86 750 L76 760Z"/><path d="M414 750 L424 740 L434 750 L424 760Z"/><circle cx="250" cy="716" r="2.6"/><circle cx="250" cy="784" r="2.6"/></g>
+  <g stroke="#cdb27a" stroke-opacity=".5" stroke-width="1"><path d="M30 750H60"/><path d="M440 750H470"/></g>
+</svg>

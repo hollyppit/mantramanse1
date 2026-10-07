@@ -20,6 +20,31 @@
   }
   function refStrip(urls, attr) { return urls.map(function (u, i) { return '<span class="rf" style="background-image:url(\'' + esc(u) + '\')"><button type="button" ' + attr + '="' + i + '" title="빼기">✕</button></span>'; }).join(''); }
 
+  /* ── 공통 카드 프레임: AI 가 그린 프레임의 마젠타 그림 창을 이 화면(canvas)에서 투명하게 뚫고, 창 위치(비율)를 구해 둔다 ── */
+  var CARD_W = 800, CARD_H = 1344; // 카드 비율 5:8.4 로 맞춰 저장한다(화면의 카드와 같은 비율)
+  function loadImg(url) { return new Promise(function (ok, no) { var im = new Image(); im.onload = function () { ok(im); }; im.onerror = function () { no(new Error('프레임 이미지를 불러오지 못했습니다')); }; im.src = url; }); }
+  function keyOut(img) {
+    var c = document.createElement('canvas'); c.width = CARD_W; c.height = CARD_H; var x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(img, 0, 0, CARD_W, CARD_H);
+    var id = x.getImageData(0, 0, CARD_W, CARD_H), d = id.data, W = CARD_W, H = CARD_H;
+    var isK = function (i) { var r = d[i], g = d[i + 1], b = d[i + 2]; return r > 140 && b > 120 && g < r * 0.55 && g < b * 0.55 && Math.abs(r - b) < 110; };
+    var seed = -1; for (var yy = Math.floor(H * 0.2); yy < H * 0.6 && seed < 0; yy += 16) for (var xx = Math.floor(W * 0.3); xx < W * 0.7; xx += 16) if (isK((yy * W + xx) * 4)) { seed = yy * W + xx; break; }
+    if (seed < 0) throw new Error('그림 창(마젠타 영역)을 찾지 못했습니다. 다시 만들어 주세요');
+    var vis = new Uint8Array(W * H), st = new Int32Array(W * H), sp = 0; st[sp++] = seed; vis[seed] = 1;
+    while (sp) { var p = st[--sp], px = p % W, py = (p - px) / W, nb = [px > 0 ? p - 1 : -1, px < W - 1 ? p + 1 : -1, py > 0 ? p - W : -1, py < H - 1 ? p + W : -1];
+      for (var k = 0; k < 4; k++) { var q = nb[k]; if (q >= 0 && !vis[q] && isK(q * 4)) { vis[q] = 1; st[sp++] = q; } } }
+    for (var it = 0; it < 2; it++) { var cp = vis.slice(); for (var y = 1; y < H - 1; y++) for (var xq = 1; xq < W - 1; xq++) { var i = y * W + xq; if (!cp[i] && (cp[i - 1] || cp[i + 1] || cp[i - W] || cp[i + W])) vis[i] = 1; } } // 가장자리 마젠타 번짐 제거
+    var x0 = W, y0 = H, x1 = 0, y1 = 0, n = 0;
+    for (var y2 = 0; y2 < H; y2++) for (var x2 = 0; x2 < W; x2++) { var j = y2 * W + x2; if (vis[j]) { d[j * 4 + 3] = 0; n++; if (x2 < x0) x0 = x2; if (x2 > x1) x1 = x2; if (y2 < y0) y0 = y2; if (y2 > y1) y1 = y2; } }
+    if (n < W * H * 0.15) throw new Error('그림 창이 너무 작게 잡혔습니다. 다시 만들어 주세요');
+    x.putImageData(id, 0, 0); var r4 = function (v) { return Math.round(v * 10000) / 10000; };
+    return { canvas: c, win: [r4(x0 / W), r4(y0 / H), r4((x1 - x0 + 1) / W), r4((y1 - y0 + 1) / H)] };
+  }
+  function compose(frameUrl, win, art, w) { // 샘플 카드: 그림 창 위치에 그림을 깔고 프레임을 덮는다
+    var pc = function (v) { return (v * 100).toFixed(2) + '%'; };
+    return '<div style="position:relative;width:' + w + 'px;aspect-ratio:5/8.4;background:#0c0f20;border-radius:8px;overflow:hidden;border:1px solid var(--line)"><div style="position:absolute;left:' + pc(win[0]) + ';top:' + pc(win[1]) + ';width:' + pc(win[2]) + ';height:' + pc(win[3]) + ';background:#000' + (art ? ' url(\'' + esc(art) + '\') center/cover' : '') + '"></div><img src="' + esc(frameUrl) + '" alt="" style="position:absolute;inset:0;width:100%;height:100%"></div>';
+  }
+  function sampleArt() { var c = G.d.cards.filter(function (x) { return x.url; })[0]; return c ? c.url : ''; }
+
   function open(box) { BOX = box; BOX.innerHTML = '<div class="card" style="margin-top:12px"><p class="muted">타로 카드 목록을 불러오는 중…</p></div>'; return C.api('/api/tarot-art').then(function (d) { G.d = d; draw(); }).catch(function (e) { BOX.innerHTML = '<div class="card" style="margin-top:12px"><p class="err">' + esc(e.message) + '</p></div>'; }); }
   function reload() { return C.api('/api/tarot-art').then(function (d) { G.d = d; }); }
 
@@ -31,7 +56,13 @@
       '<label class="muted">참고 방식 <select data-td="refUse">' + Object.keys(d.refUse).map(function (k) { return '<option value="' + k + '"' + (v.refUse === k ? ' selected' : '') + '>' + esc(d.refUse[k]) + '</option>'; }).join('') + '</select></label></div></div>' +
       '<div class="row" style="margin-top:10px;gap:8px;align-items:center"><button class="btn" id="taDirSave">디렉션·레퍼런스 저장</button><span class="muted" id="taDirMsg"></span></div>';
     var grid = ['M', 'W', 'C', 'S', 'P'].map(function (s) { return '<div class="cap2" style="margin-top:12px">' + SUIT[s] + '</div><div class="ta-grid">' + d.cards.filter(function (c) { return c.suit === s; }).map(function (c) { return '<div class="ta-c' + (c.url ? ' has' : '') + '" data-id="' + c.id + '" title="' + esc(c.nameKo + ' · ' + c.nameEn) + ' — 눌러서 세부 수정"' + (c.url ? ' style="background-image:url(\'' + esc(c.url) + '\')"' : '') + '><b>' + esc(c.nameKo) + '</b></div>'; }).join('') + '</div>'; }).join('');
-    BOX.innerHTML = '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">타로 카드 이미지 · ' + have + ' / ' + d.cards.length + '장</b><p class="muted" style="margin:6px 0 10px">타로 78장의 카드 이미지를 AI 로 만듭니다. 확정한 이미지는 무료 콘텐츠의 타로 화면에 바로 쓰입니다. 화풍·감성·세계관은 아래에서 정하고, 레퍼런스 이미지를 올리면 그 화풍을 참고해 그립니다. 카드를 누르면 세부 수정(프롬프트·추가 요청·카드별 레퍼런스·현재 이미지 바탕 수정)을 할 수 있습니다.</p>' + dir +
+    var fr = d.frame, frameBox = '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">공통 카드 프레임</b> <span class="muted">' + (fr ? '· 적용 중 — 카드 그림은 프레임 창 안에 들어가고 카드 이름은 프레임 아래 띠에 글자로 얹힙니다' : '· 아직 적용 안 함 — 지금은 카드마다 각자 그려진 틀 그대로 보입니다') + '</span>' +
+      '<p class="muted" style="margin:6px 0 10px">프레임을 하나 정해 두면 78장이 같은 틀을 씁니다. 카드 그림은 프레임 없이 그림만 새로 만들어야 하므로(적용하면 카드 틀 디렉션이 "그림만 생성"으로 바뀝니다), 이미 만든 카드는 "모두 다시 만들기"로 다시 만들어 주세요. 그림이 없는 카드는 예전처럼 자리표시로 보입니다.</p>' +
+      '<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start"><div><div class="muted" style="margin-bottom:4px">' + (fr ? '현재 프레임' : '미리보기(기본 프레임)') + '</div>' + compose(fr ? fr.url : d.defaultFrame.url, fr ? fr.win : d.defaultFrame.win, sampleArt(), 150) + '</div><div id="tfCand"></div>' +
+      '<div style="flex:1 1 280px;display:grid;gap:8px;align-content:start"><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" id="tfDef">기본 프레임 적용</button><button id="tfNone"' + (fr ? '' : ' disabled') + '>프레임 해제</button></div>' +
+      '<label class="muted">AI 프레임 요청 <small>(예: 은빛 별자리 문양, 붉은 비단 느낌, 두꺼운 금박 테두리) · 위 화풍·감성·세계관·분위기와 레퍼런스도 반영</small><input id="tfExtra" maxlength="300" style="width:100%"></label>' +
+      '<div class="row" style="gap:8px;align-items:center"><button class="btn" id="tfGen">AI로 프레임 만들기</button><span class="muted" id="tfMsg"></span></div></div></div></div>';
+    BOX.innerHTML = frameBox + '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">타로 카드 이미지 · ' + have + ' / ' + d.cards.length + '장</b><p class="muted" style="margin:6px 0 10px">타로 78장의 카드 이미지를 AI 로 만듭니다. 확정한 이미지는 무료 콘텐츠의 타로 화면에 바로 쓰입니다. 화풍·감성·세계관은 아래에서 정하고, 레퍼런스 이미지를 올리면 그 화풍을 참고해 그립니다. 카드를 누르면 세부 수정(프롬프트·추가 요청·카드별 레퍼런스·현재 이미지 바탕 수정)을 할 수 있습니다.</p>' + dir +
       '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap;margin-top:16px"><label class="muted">모델 <select id="taProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (pv.openai ? '' : ' disabled') + (G.provider === 'openai' ? ' selected' : '') + '>OpenAI ' + esc(d.models.openai) + '</option><option value="gemini"' + (pv.gemini ? '' : ' disabled') + (G.provider === 'gemini' ? ' selected' : '') + '>Gemini ' + esc(d.models.gemini) + '</option></select></label>' +
       '<button class="btn" id="taMissing"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button class="btn" id="taAll"' + (G.busy ? ' disabled' : '') + '>모두 다시 만들기</button><button id="taStop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
       (!d.r2 ? '<p class="err">R2(CLIPS_R2)가 연결되지 않아 저장할 수 없습니다.</p>' : '') + grid + '<div class="ta-log"></div></div>';
@@ -40,6 +71,17 @@
   function bind() {
     var v = G.d.direction;
     function readDir() { var o = Object.assign({}, v); [].forEach.call(BOX.querySelectorAll('[data-td]'), function (e) { o[e.dataset.td] = e.value; }); o.refs = v.refs || []; return o; }
+    function setFrame(f, msg, btn) { if (btn) btn.disabled = true; return post({ setFrame: f }).then(function () { toast(msg); return reload(); }).then(draw).catch(function (e) { toast(e.message, true); if (btn) btn.disabled = false; }); }
+    $('#tfDef').onclick = function () { if (confirm('기본 프레임을 모든 타로 카드에 적용합니다.\n카드 틀 디렉션도 "그림만 생성"으로 바뀌며, 이미 만든 카드 그림은 그대로 프레임 창 안에 들어갑니다. 계속할까요?')) setFrame(G.d.defaultFrame, '기본 프레임을 적용했습니다', this); };
+    $('#tfNone').onclick = function () { if (confirm('프레임을 해제합니다. 카드 그림이 원래 모습으로 보입니다. 계속할까요?')) setFrame(null, '프레임을 해제했습니다', this); };
+    $('#tfGen').onclick = function () {
+      var b = this, m = $('#tfMsg'); b.disabled = true; m.textContent = '프레임 만드는 중… (보통 20~60초)';
+      post({ genFrame: true, extra: $('#tfExtra').value, provider: G.provider }).then(function (r) { m.textContent = '그림 창 찾는 중…'; return loadImg(r.url).then(function (img) { post({ discard: r.preview }).catch(function () { }); return keyOut(img); }); })
+        .then(function (k) { G.cand = k; var box = $('#tfCand'); box.innerHTML = '<div class="muted" style="margin-bottom:4px">새 프레임 후보</div>' + compose(k.canvas.toDataURL('image/png'), k.win, sampleArt(), 150) + '<div class="row" style="gap:6px;margin-top:6px"><button class="btn gold" id="tfOk">이 프레임 적용</button></div>';
+          $('#tfOk').onclick = function () { var ok = this; ok.disabled = true; m.textContent = '저장하는 중…'; k.canvas.toBlob(function (bl) { upload(new File([bl], 'tarot-frame.png', { type: 'image/png' })).then(function (u) { return setFrame({ url: u, win: k.win }, '새 프레임을 적용했습니다'); }).catch(function (e) { toast(e.message, true); ok.disabled = false; m.textContent = e.message; }); }, 'image/png'); };
+          m.textContent = '마음에 들면 "이 프레임 적용", 아니면 다시 만들어 보세요'; })
+        .catch(function (e) { m.textContent = '실패: ' + e.message; toast(e.message, true); }).then(function () { b.disabled = false; });
+    };
     $('#taProv').onchange = function () { G.provider = this.value; };
     var up = $('#taRefUp'); if (up) up.onchange = function () { var fs = [].slice.call(up.files).slice(0, 3 - (v.refs || []).length), n = $('#taDirMsg'); if (!fs.length) return; n.textContent = '올리는 중…';
       Promise.all(fs.map(upload)).then(function (us) { v.refs = (v.refs || []).concat(us).slice(0, 3); G.d.direction = readDir(); draw(); $('#taDirMsg').textContent = '올렸습니다 — "저장"을 눌러야 적용됩니다'; }).catch(function (e) { n.textContent = e.message; toast(e.message, true); }); };

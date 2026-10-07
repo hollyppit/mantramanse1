@@ -110,6 +110,14 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 #hub .tc .tcimg{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 10px; opacity: 0; transition: opacity .4s; }
 #hub .tcimg.on{ opacity: 1; }
 #hub .rev .tf, #hub .rev .tcimg{ transform: rotate(180deg); }
+/* 공통 프레임: 그림(.fa)을 창 위치에 깔고 프레임(.ffr)을 덮는다. 역방향은 카드 전체(.fx)를 돌린다 */
+#hub .fx{ position: absolute; inset: 0; border-radius: 10px; overflow: hidden; }
+#hub .fx .tf{ border: 0; }
+#hub .fx .fa{ position: absolute; overflow: hidden; background: #0c0f20; }
+#hub .fx .ffr{ position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#hub .fx .fnm{ position: absolute; display: grid; place-items: center; text-align: center; overflow: hidden; padding: 0 4%; font-family: var(--f-serif); color: #f3e7c6; font-size: .8rem; line-height: 1.25; letter-spacing: .04em; text-shadow: 0 1px 3px #000; }
+#hub .rev .fx{ transform: rotate(180deg); }
+#hub .rev .fx .tf, #hub .rev .fx .tcimg{ transform: none; }
 #hub .result-card{ width: min(56vw, 210px); margin: 4px auto 6px; }
 #hub .result-card .tc{ width: 100%; animation: none; cursor: default; }
 #hub .result-card .tc:hover{ transform: none; }
@@ -207,6 +215,12 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 
 #hub .toast{ position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 90; padding: 12px 20px; border-radius: 999px; background: rgba(20, 24, 40, .96); border: 1px solid var(--line); color: var(--ink); font-size: .9rem; max-width: 90vw; }
 
+#hub .deck{ display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 10px 0 24px; }
+#hub .deck .tc.mini{ width: 100%; border-radius: 6px; }
+#hub .deck .tc.mini .back{ border-radius: 6px; }
+#hub .deck .tc.mini:hover:not(:disabled){ transform: translateY(-3px); }
+#hub .deck .tc.mini.pick{ transform: scale(1.12); }
+@media (min-width: 760px){ #hub .deck{ grid-template-columns: repeat(9, 1fr); } }
 @media (min-width: 760px){ #hub #screen{ max-width: 620px; padding-top: calc(var(--top) + 24px); } #hub .tc{ width: 118px; } #hub .fan{ justify-content: center; } }
 @media (prefers-reduced-motion: reduce){
   #hub *, #hub *::before, #hub *::after{ animation: none !important; transition: none !important; }

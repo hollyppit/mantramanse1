@@ -1,5 +1,5 @@
 // 무료 타로 화면. 카드 데이터·정/역방향·점수·해석 틀은 전부 /shared-core.js(MantraCore.Tarot)에서 온다 — 만세력 앱의 타로와 같은 데이터이며, 생성형 AI 는 쓰지 않는다.
-// 흐름: 종류 선택 → (1) 질문 떠올리기 → (2) 카드 뒷면 5장 → (3) 한 장 선택 → (4) 뒤집기 → (5) 카드·정/역방향 → (6) 순차 공개되는 풀이 → 사주로 이어지는 다리.
+// 흐름: 종류 선택 → (1) 질문 떠올리기 → (2) 카드 뒷면 78장 → (3) 한 장 선택 → (4) 뒤집기 → (5) 카드·정/역방향 → (6) 순차 공개되는 풀이 → 사주로 이어지는 다리.
 // 진행 상태는 sessionStorage('tarot')에 둬서 새로고침·뒤로가기를 해도 같은 결과가 그대로 보인다.
 (function (root) {
   'use strict';
@@ -11,13 +11,20 @@
   var RANKS = ['', 'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'P', 'Kn', 'Q', 'K'];
 
   var IMGS = {}; // 관리자가 올린 카드 이미지(/api/free-content 의 tarot.images). 불러오기 전·실패 시에는 기본 파일명을 쓴다
-  function applyImgs(ov) { IMGS = (ov && ov.tarot && ov.tarot.images) || {}; }
+  var FRAME = null; // 공통 카드 프레임(관리자가 켠 경우만): { url, win:[x,y,w,h] } — win 은 카드 전체 대비 그림 창 비율. 카드 그림은 창 위치에 깔고 프레임 이미지를 그 위에 덮는다
+  function applyImgs(ov) { var t = ov && ov.tarot, f = t && t.frame; IMGS = (t && t.images) || {}; FRAME = f && f.url && f.win && f.win.length === 4 ? f : null; }
   if (H.freeContent) H.freeContent().then(applyImgs);
 
-  function fresh(m) { return { m: m, cards: Tarot.draw(5), pick: null, step: 'ask', seed: Math.random().toString(36).slice(2, 10) }; } // seed: 같은 결과를 다시 열어도 문장이 바뀌지 않게 한다(FreeCore.composeTarot)
+  function fresh(m) { return { m: m, cards: Tarot.draw(Tarot.cards.length), pick: null, step: 'ask', seed: Math.random().toString(36).slice(2, 10) }; } // seed: 같은 결과를 다시 열어도 문장이 바뀌지 않게 한다(FreeCore.composeTarot)
 
   // 카드 앞면: 자리표시를 바닥에 깔고 그 위에 이미지를 얹는다. 이미지가 없거나 실패하면 이미지 요소를 지워 자리표시가 그대로 보인다(깨진 아이콘 없음).
+  function framed(card) { // 프레임 + 그림 창 + 카드 이름(창 아래 띠에 얹는다). 프레임이 있어도 그림이 올라가 있지 않은 카드는 기존 자리표시를 쓴다
+    var w = FRAME.win, pc = function (v) { return (v * 100).toFixed(2) + '%'; }, by = w[1] + w[3];
+    return '<div class="fx"><div class="tf"></div><div class="fa" style="left:' + pc(w[0]) + ';top:' + pc(w[1]) + ';width:' + pc(w[2]) + ';height:' + pc(w[3]) + '"><img class="tcimg" src="' + esc(IMGS[card.id]) + '" alt="' + esc(card.nameKo) + '" loading="lazy" decoding="async"></div>' +
+      '<img class="ffr" src="' + esc(FRAME.url) + '" alt="" decoding="async"><div class="fnm" style="left:' + pc(w[0]) + ';top:' + pc(by) + ';width:' + pc(w[2]) + ';height:' + pc(Math.max(0.04, 1 - by - 0.02)) + '"><span>' + esc(card.nameKo) + '</span></div></div>';
+  }
   function face(card, rev) {
+    if (FRAME && IMGS[card.id]) return framed(card);
     var no = card.suit === 'M' ? ROMAN[card.number] : RANKS[card.rank];
     return '<div class="tf"><span class="no">' + no + '</span><span class="nm">' + esc(card.nameKo) + '</span><span class="en">' + esc(card.nameEn) + '</span>' + (card.suit === 'M' ? '' : '<span class="su">' + Tarot.suitKo[card.suit] + '</span>') + '</div>' +
       '<img class="tcimg" src="' + esc(IMGS[card.id] || card.imageUrl) + '" alt="' + esc(card.nameKo) + '" loading="lazy" decoding="async">';
@@ -35,7 +42,7 @@
   /* ── 진행 ───────────────────────────────────────────────── */
   H.route('tarot/play', function (q, ctx) {
     var m = Tarot.modes[q.m] ? q.m : 'today', st = H.ss(KEY);
-    if (!st || st.m !== m || !st.cards || st.cards.length !== 5) { st = fresh(m); H.ss(KEY, st); } // 주소로 바로 들어온 경우
+    if (!st || st.m !== m || !st.cards || st.cards.length !== Tarot.cards.length) { st = fresh(m); H.ss(KEY, st); } // 주소로 바로 들어온 경우
     if (st.pick != null) return result(st, ctx, false);
     if (st.step === 'spread') return spread(st, ctx);
     ask(st, ctx);
@@ -47,21 +54,17 @@
     H.$('#go', el).onclick = function () { st.step = 'spread'; H.ss(KEY, st); spread(st, ctx); };
   }
 
-  function spread(st, ctx) { // STEP 2~3
-    var mode = Tarot.modes[st.m], h = '<div class="tstage"><p class="kick">' + esc(mode.name).toUpperCase() + '</p><h1 class="ask">가장 먼저 눈이 가는<br>카드 한 장을 선택하세요.</h1><p class="sub">옆으로 넘겨 볼 수 있어요.</p></div><div class="fan" id="fan" role="group" aria-label="카드 5장">';
-    for (var i = 0; i < 5; i++) h += '<button type="button" class="tc" style="--i:' + i + '" data-i="' + i + '" aria-label="카드 ' + (i + 1) + '번 뽑기"><div class="back"></div></button>';
-    var el = H.view(h + '</div><p class="note" style="text-align:center">직감이 가리키는 카드를 눌러 주세요.</p>');
-    var fan = H.$('#fan', el); if (fan.scrollWidth <= fan.clientWidth + 4) fan.classList.add('few');
-    else fan.scrollLeft = (fan.scrollWidth - fan.clientWidth) / 2; // 가운데부터 보이게
-    var busy = false;
+  function spread(st, ctx) { // STEP 2~3: 78장 전부를 뒷면으로 펼쳐 놓고 한 장을 고른다(섞인 순서·정/역방향은 fresh() 에서 이미 정해져 있다)
+    var mode = Tarot.modes[st.m], n = st.cards.length, h = '<div class="tstage"><p class="kick">' + esc(mode.name).toUpperCase() + '</p><h1 class="ask">가장 먼저 눈이 가는<br>카드 한 장을 선택하세요.</h1><p class="sub">타로 ' + n + '장이 모두 섞여 있어요.<br>직감이 가리키는 카드를 눌러 주세요.</p></div><div class="deck" id="fan" role="group" aria-label="카드 ' + n + '장">';
+    for (var i = 0; i < n; i++) h += '<button type="button" class="tc mini" style="--i:' + Math.min(i, 24) + '" data-i="' + i + '" aria-label="카드 ' + (i + 1) + '번 뽑기"><div class="back"></div></button>';
+    var el = H.view(h + '</div>');
+    var fan = H.$('#fan', el), busy = false;
     fan.onclick = function (e) {
       var b = e.target.closest('.tc'); if (!b || busy) return; busy = true;
-      var i = +b.dataset.i, c = st.cards[i], card = Tarot.byId[c.id];
+      var i = +b.dataset.i;
       H.$$('.tc', fan).forEach(function (x) { x.disabled = true; x.classList.add(x === b ? 'pick' : 'dim'); });
-      b.insertAdjacentHTML('beforeend', '<div class="face' + (c.rev ? ' rev' : '') + '">' + face(card, c.rev) + '</div>');
-      void b.offsetWidth; setTimeout(function () { b.classList.add('flip'); }, H.reduce ? 0 : 350);
       H.track('tarot_card_select', { mode: st.m }); H.track('tarot_card_draw', { mode: st.m });
-      setTimeout(function () { if (!H.alive(ctx)) return; st.pick = i; H.ss(KEY, st); result(st, ctx, true); }, H.reduce ? 200 : 1500);
+      setTimeout(function () { if (!H.alive(ctx)) return; st.pick = i; H.ss(KEY, st); result(st, ctx, true); }, H.reduce ? 150 : 650);
     };
   }
 
