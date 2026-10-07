@@ -274,3 +274,28 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 #hub .rsec p + p{ margin-top: 8px; } #hub .rsec.good{ border-color: rgba(98, 194, 174, .35); } #hub .rsec.warn{ border-color: rgba(255, 138, 120, .3); }
 #hub .others{ margin-top: 22px; text-align: center; } #hub .others .chips{ justify-content: center; margin-top: 8px; }
 #hub .chipbtn{ font: inherit; font-size: .84rem; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: none; color: var(--ink); cursor: pointer; } #hub .chipbtn:hover{ border-color: var(--gold); }
+
+/* ───────── 금색 카드 · 일주 각성(영상 전체 노출, 테두리 글씨) ───────── */
+#hub .cc{ border: 1px solid rgba(217, 194, 142, .55); background: linear-gradient(180deg, rgba(217, 194, 142, .10), rgba(179, 154, 99, .04) 60%), var(--panel); box-shadow: inset 0 1px 0 rgba(255, 236, 190, .18), 0 6px 22px -14px rgba(217, 194, 142, .45); }
+#hub .cc:hover{ border-color: #D9C28E; box-shadow: inset 0 1px 0 rgba(255, 236, 190, .28), 0 8px 28px -12px rgba(217, 194, 142, .6); }
+#hub .cc.main{ border-color: #D9C28E; background: radial-gradient(90% 80% at 85% 0%, rgba(217, 194, 142, .22), transparent 65%), linear-gradient(180deg, #1d1a17, #14120f); box-shadow: inset 0 1px 0 rgba(255, 236, 190, .3), 0 10px 40px -18px rgba(217, 194, 142, .55); }
+#hub .cc h3{ color: #F1E2B8; }
+#hub .cc .go{ display: inline-flex; align-items: center; justify-self: start; min-height: 36px; padding: 0 16px; border-radius: 999px; background: linear-gradient(180deg, #D9C28E, #B39A63); color: #17120A; font-weight: 700; }
+#hub .chips i{ border-color: rgba(217, 194, 142, .5); color: #E6D3A2; }
+#hub .more{ border-top-color: rgba(217, 194, 142, .35); }
+#hub .more summary{ color: #E6D3A2; } #hub .more summary::after{ color: #D9C28E; }
+#hub .more a{ border-top-color: rgba(217, 194, 142, .22); }
+
+#awk .vid{ object-fit: contain; }
+#awk .vid.on{ opacity: 1; }
+#awk .shade{ display: none; }
+#awk .stage{ position: absolute; left: 50%; bottom: max(64px, calc(env(safe-area-inset-bottom) + 48px)); transform: translateX(-50%); width: min(92%, 640px); max-width: none; padding: 0; background: none; }
+#awk .stage :is(.a1, .big, .nm, .film, .ttl, .trait){ color: #F6E9C0; -webkit-text-stroke: .1em #0a0805; paint-order: stroke fill; text-shadow: none; }
+#awk .stage .a1{ -webkit-text-stroke-width: 5px; font-weight: 600; }
+#awk .stage .big{ -webkit-text-stroke-width: 8px; font-size: clamp(3rem, 16vw, 5rem); margin: 2px 0; }
+#awk .stage .nm{ -webkit-text-stroke-width: 6px; }
+#awk .stage .film{ -webkit-text-stroke-width: 5px; font-weight: 600; }
+#awk .stage .ttl{ -webkit-text-stroke-width: 4px; color: #D9C28E; font-weight: 700; }
+#awk .stage .trait{ -webkit-text-stroke-width: 4px; font-weight: 600; }
+#awk .skip{ color: #F6E9C0; border-color: #D9C28E; background: rgba(0, 0, 0, .55); }
+#awk .tap{ color: #F6E9C0; -webkit-text-stroke: 3px #0a0805; paint-order: stroke fill; }

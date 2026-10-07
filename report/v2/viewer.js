@@ -160,7 +160,7 @@
     var nm = S.name; view('gate'); $('#gateName').innerHTML = nm ? esc(nm) + '에게는,<br>' + esc(nm) + '의 때가 있다.' : '모든 사람에게는,<br>각자의 때가 있다.';
     var b = $('#gateBtn'); b.onclick = function () { b.onclick = null; T('gate_tapped', {}); intro(); }; try { b.focus({ preventScroll: true }); } catch (e) { }
   }
-  function intro() { if (R.Bgm) R.Bgm.play('cinematic'); ilganStage(function () { ijuStage(function () { bridgeStage(prologue); }); }); } // 배경음악은 일간 인트로(첫 화면)부터 흐른다(입력 제출 = 사용자의 첫 터치)
+  function intro() { if (R.Bgm) R.Bgm.play('cinematic'); prologue(); } // 배경음악은 일간 인트로(첫 화면)부터 흐른다(입력 제출 = 사용자의 첫 터치)
   function cinemaMediaFor(used) { return function (sc) { if (sc.bg === 'black' || sc.phTone) return null; return R.Director.pickMedia(sc, (S.pack && S.pack.lib && S.pack.lib.media) || S.media, { usedIds: used }, sc.chapterId || 'c00'); }; }
   /* 재생 속도(관리자 설정 flow.playbackRate · 확인용 ?rate=3): INTRO 타임라인·본문 머묾·이동에 적용한다. 허용: 0.5 · 0.75 · 1 · 1.25 · 1.5 · 2 · 3 */
   var RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
@@ -215,7 +215,20 @@
       beginReader();
     });
   }
-  function beginReader() { view('reader'); openDoc(0, { autoStart: !PREVIEW }); }
+  function beginReader() { addCharIntro(); view('reader'); openDoc(0, { autoStart: !PREVIEW }); }
+  // 일간 소개·일주 캐릭터 영상은 프롤로그 앞이 아니라 본문의 첫 챕터(영상과 글을 따로)로 둔다
+  function addCharIntro() {
+    var rep = S.rep; if (PREVIEW || !R.CharIntro || !rep || !rep.chapters || rep.chapters.some(function (c) { return c.id === 'c-char'; })) return;
+    var ch = null; try { ch = R.CharIntro.chapter(S.sd, S.name, S.awk, (rep.acts[0] || {}).id); } catch (e) { ch = null; }
+    if (ch) { S.rep = Object.assign({}, rep, { chapters: [ch].concat(rep.chapters) }); S.visited = {}; S.ended = {}; }
+  }
+  // 본문 안의 영상은 화면에 들어오면 재생하고 벗어나면 멈춘다(소리는 꺼진 채, 컨트롤로 켤 수 있다)
+  function watchVideos() {
+    var vs = $$('#chapter video[data-ci-vid]'); if (!vs.length) return; if (S.vio) S.vio.disconnect();
+    if (!window.IntersectionObserver || reduce || saveData) return;
+    S.vio = new IntersectionObserver(function (es) { es.forEach(function (e) { var v = e.target; if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () { }); } else v.pause(); }); }, { threshold: 0.5 });
+    vs.forEach(function (v) { S.vio.observe(v); });
+  }
 
   var seaChip = function (k, name) { var hj = R.Translator && R.Translator.SEASON[k]; return k ? '<span class="sea s-' + k + '"><b aria-hidden="true">' + SEA_ICON[k] + '</b>' + (hj ? '<i class="hj" aria-hidden="true">' + hj.h + '</i> ' : '') + esc(name || SEA[k]) + '</span>' : ''; };
   var list = function (a) { a = Array.isArray(a) ? a : (a ? [a] : []); return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
@@ -376,7 +389,7 @@
   }
   function openDoc(start, o) {
     o = o || {}; if (S.mv) { S.mv.destroy(); S.mv = null; } if (S.watch) { S.watch.destroy(); S.watch = null; }
-    $('#barTot').textContent = S.rep.chapters.length; S.idx = start || 0; S.cur = false; buildDoc(); txApplyDoc(); document.title = '運路 · 만트라 사주 무빙툰';
+    $('#barTot').textContent = S.rep.chapters.length; S.idx = start || 0; S.cur = false; buildDoc(); watchVideos(); txApplyDoc(); document.title = '運路 · 만트라 사주 무빙툰';
     if (R.CinemaRender) S.watch = R.CinemaRender.watch($('#chapter'), { reduce: reduce }); // 그래프 막대가 처음 한 번만 짧게 자란다
     window.scrollTo(0, 0); mountReading(o.autoStart !== false); if (start > 0) gotoChapter(start, true);
   }

@@ -124,12 +124,12 @@
       '<a class="cc main" href="#/tarot" data-track="fortune_content_click" data-p="tarot"><i class="glyph" aria-hidden="true">運</i><small>FREE TAROT</small><h3>무료 타로</h3><p>마음속 질문 하나를 떠올려보세요.</p><div class="chips"><i>오늘의 카드</i><i>연애운</i><i>재물운</i><i>일·사업운</i><i>YES / NO</i></div><span class="go">카드 한 장 뽑기 →</span></a>' +
       '<a class="cc" href="' + need('today', '#/today') + '" data-track="fortune_content_click" data-p="today"><small>TODAY</small><h3>오늘의 운세</h3><p>오늘 나에게 들어온 흐름은?</p><span class="go">' + (has ? '지금 확인하기 →' : '생년월일로 확인하기 →') + '</span></a>' +
       '<a class="cc" href="' + need('awaken', '#/awaken') + '" data-track="fortune_content_click" data-p="ilju"><small>ILJU</small><h3>나의 일주 각성</h3><p>나는 어떤 기질을 타고났을까?</p><span class="go">나의 일주 확인하기 →</span></a>' +
-      '<a class="cc" href="' + need('life', '#/go?to=life') + '" data-track="fortune_content_click" data-p="life"><small>LIFE FLOW</small><h3>내 인생의 흐름</h3><p>언제 움직이고,<br>언제 기다려야 할까?</p><span class="go">인생 지도 펼치기 →</span></a>' +
+      '<a class="cc" href="' + need('deep', '#/go?to=deep') + '" data-track="fortune_content_click" data-p="movingtoon_classic"><small>DEEP MOVINGTOON</small><h3>심층 무빙툰</h3><p>20챕터로 읽는<br>나의 종합 리포트</p><span class="go">심층 무빙툰 보기 →</span></a>' +
       '</div>' +
       '<details class="more"><summary>더 많은 운세 콘텐츠</summary>' +
       '<a href="#/my" data-track="fortune_content_click" data-p="my_home">MY 운명 홈 <small>내 사주 콘텐츠 모아보기</small></a>' +
       '<a href="/index.html" data-track="fortune_content_click" data-p="manse_app">만세력 원국 보기 <small>합충·신살·대운 전체</small></a>' +
-      '<a href="/report/v2/?flow=classic" data-track="fortune_content_click" data-p="movingtoon_classic">심층 무빙툰 20챕터 <small>종합 리포트</small></a></details>');
+      '<a href="#/go?to=life" data-track="fortune_content_click" data-p="life">내 인생의 흐름 <small>인생 지도</small></a></details>');
     if (has) H.sajuKit().then(function () { return H.chart(); }).then(function (ch) { if (!H.alive(ctx)) return; var t = H.Saju && H.Saju.todayData(ch); if (t) { H.$('#tbar b', el).textContent = t.score; H.$('#tbarT', el).textContent = t.flowLabel + ' · ' + t.line; H.$('#tbarW', el).textContent = '왜 ' + t.score + '점일까요? →'; } }).catch(function () { var b = H.$('#tbar', el); if (b) b.hidden = true; });
     H.track('hub_view', { profile: has ? 1 : 0 }, true); H.track('free_home_view', { profile: has ? 1 : 0 }, true);
   });
