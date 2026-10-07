@@ -1,0 +1,54 @@
+/* 관리자 "패널 이미지" — 무빙툰 컷(이미지 + 글)에 쓰는 삽화 50장(오행 5 × 주제 10)을 AI 로 만든다.
+   모델: OpenAI gpt-image-2 → 안 되면 Gemini 이미지 모델(/api/panel-art 가 키 있는 쪽을 차례로 시도). 만들어진 컷은 R2 에 저장되고 미디어 라이브러리에 태그와 함께 등록돼
+   뷰어의 조합 규칙(오행·주제 점수)이 장면마다 알맞은 컷을 고른다. 이 화면은 만들기·다시 만들기만 한다. index.html 의 showTab 이 V2Panel.open('panelart', 비밀번호) 를 부른다. */
+(function () {
+  'use strict';
+  var C = window.V2Content, esc = C.esc, toast = C.toast, PANE = null, G = { d: null, busy: false, stop: false, provider: '', log: [] };
+  var EL = { wood: '木 목', fire: '火 화', earth: '土 토', metal: '金 금', water: '水 수' }, TH = { identity: '나는 누구', talent: '재능', career: '일', wealth: '돈', love: '사랑', relationship: '관계', family: '가족', shadow: '약점', daewoon: '지금 시기', remedy: '회복' };
+  var $ = function (s) { return PANE.querySelector(s); };
+  var css = document.createElement('style');
+  css.textContent = '.pa-grid{display:grid;grid-template-columns:70px repeat(10,minmax(0,1fr));gap:6px;align-items:stretch;margin-top:12px}.pa-h{font-size:.72rem;color:var(--ink3);text-align:center;align-self:end}.pa-r{font-size:.82rem;color:var(--gold);align-self:center}' +
+    '.pa-c{aspect-ratio:3/4;border:1px dashed var(--line);border-radius:8px;background:#000 center/cover;display:flex;align-items:flex-end;justify-content:center;font-size:.7rem;color:var(--ink3);cursor:pointer;position:relative;overflow:hidden}.pa-c.has{border:1px solid var(--line)}.pa-c.run{outline:2px solid var(--gold)}' +
+    '.pa-c b{background:rgba(0,0,0,.6);width:100%;text-align:center;padding:2px 0;font-weight:400}.pa-log{font-size:.8rem;color:var(--ink2);max-height:160px;overflow:auto;margin-top:10px;line-height:1.6}@media(max-width:900px){.pa-grid{grid-template-columns:50px repeat(5,minmax(0,1fr))}}';
+  document.head.appendChild(css);
+
+  function load() { return C.api('/api/panel-art').then(function (d) { G.d = d; }); }
+  function open(tab, pw) { C.setPw(pw); PANE = document.getElementById('t-panelart'); PANE.innerHTML = '<p class="muted">불러오는 중…</p>'; load().then(draw).catch(function (e) { PANE.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
+  function log(t) { G.log.unshift(t); G.log = G.log.slice(0, 40); var b = $('.pa-log'); if (b) b.innerHTML = G.log.map(esc).join('<br>'); }
+  function draw() {
+    var d = G.d, have = d.presets.filter(function (p) { return p.url; }).length, pv = d.providers;
+    var cells = '<span></span>' + Object.keys(TH).map(function (t) { return '<span class="pa-h">' + esc(TH[t]) + '</span>'; }).join('');
+    Object.keys(EL).forEach(function (e) {
+      cells += '<span class="pa-r">' + esc(EL[e]) + '</span>' + Object.keys(TH).map(function (t) {
+        var p = d.presets.filter(function (x) { return x.element === e && x.theme === t; })[0];
+        return '<div class="pa-c' + (p.url ? ' has' : '') + '" data-id="' + p.id + '" data-e="' + e + '" data-t="' + t + '" title="' + esc(p.title) + ' — 눌러서 ' + (p.url ? '다시 만들기' : '만들기') + '"' + (p.url ? ' style="background-image:url(\'' + esc(p.url) + '\')"' : '') + '>' + (p.url ? '' : '<b>비어 있음</b>') + '</div>';
+      }).join('');
+    });
+    PANE.innerHTML = '<div class="card"><b style="color:var(--gold)">패널 이미지 · ' + have + ' / ' + d.presets.length + '장</b><p class="muted" style="margin:6px 0 10px">무빙툰의 각 컷(이미지 + 글)에 들어가는 삽화입니다. 오행(5) × 이야기 주제(10)별로 한 장씩 만들고, 뷰어가 사용자의 오행과 이야기 주제에 맞는 컷을 자동으로 고릅니다. 칸을 누르면 그 한 장만 (다시) 만듭니다.</p>' +
+      '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><label class="muted">모델 <select id="paProv"><option value="">자동 (OpenAI → Gemini)</option><option value="openai"' + (G.provider === 'openai' ? ' selected' : '') + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(d.models.openai) + (pv.openai ? '' : ' (키 없음)') + '</option><option value="gemini"' + (G.provider === 'gemini' ? ' selected' : '') + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(d.models.gemini) + (pv.gemini ? '' : ' (키 없음)') + '</option></select></label>' +
+      '<button class="btn" id="paMissing"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button id="paStop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
+      (!d.r2 ? '<p class="err">R2(CLIPS_R2)가 연결되지 않아 저장할 수 없습니다.</p>' : '') + (!pv.openai && !pv.gemini ? '<p class="err">OPENAI_API_KEY 또는 GEMINI_API_KEY 가 없습니다. Cloudflare 환경 변수에 추가하세요.</p>' : '') +
+      '<div class="pa-grid">' + cells + '</div><div class="pa-log"></div></div>';
+    $('#paProv').onchange = function () { G.provider = this.value; };
+    $('#paMissing').onclick = runMissing; $('#paStop').onclick = function () { G.stop = true; log('중지 요청 — 진행 중인 한 장이 끝나면 멈춥니다'); };
+    [].forEach.call(PANE.querySelectorAll('.pa-c'), function (c) { c.onclick = function () { if (G.busy) return; if (c.classList.contains('has') && !confirm('이 컷을 새로 만들어 교체할까요?')) return; one(c.dataset.e, c.dataset.t, true).then(function () { return load(); }).then(draw); }; });
+    log('');
+  }
+  function one(e, t, redraw) {
+    var cell = PANE.querySelector('.pa-c[data-e="' + e + '"][data-t="' + t + '"]'); if (cell) cell.classList.add('run'); G.busy = true; log(EL[e] + ' · ' + TH[t] + ' 만드는 중… (보통 20~60초)');
+    return C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ element: e, theme: t, provider: G.provider }) })
+      .then(function (r) { log('✓ ' + EL[e] + ' · ' + TH[t] + ' — ' + r.provider + ' ' + r.model); if (cell && !redraw) { cell.classList.remove('run'); cell.classList.add('has'); cell.style.backgroundImage = 'url(\'' + r.url + '\')'; cell.innerHTML = ''; } return true; })
+      .catch(function (er) { if (cell) cell.classList.remove('run'); log('✗ ' + EL[e] + ' · ' + TH[t] + ' — ' + er.message); toast(er.message, true); return false; })
+      .then(function (ok) { G.busy = false; return ok; });
+  }
+  function runMissing() {
+    var todo = G.d.presets.filter(function (p) { return !p.url; }); if (!todo.length) { toast('빈 칸이 없습니다'); return; }
+    if (!confirm('빈 칸 ' + todo.length + '장을 차례로 만듭니다. 이미지 비용이 장당 발생합니다. 계속할까요?')) return;
+    G.stop = false; $('#paMissing').disabled = true; $('#paStop').disabled = false; var fails = 0;
+    (function next(i) {
+      if (G.stop || i >= todo.length || fails >= 3) { log(fails >= 3 ? '연속 실패 3회로 멈춥니다. 위 오류를 확인하세요.' : G.stop ? '중지했습니다.' : '모두 끝났습니다.'); G.busy = false; load().then(draw); return; }
+      one(todo[i].element, todo[i].theme, false).then(function (ok) { fails = ok ? 0 : fails + 1; G.busy = true; next(i + 1); });
+    })(0);
+  }
+  window.V2Panel = { open: open };
+})();

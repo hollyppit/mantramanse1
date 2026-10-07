@@ -34,6 +34,18 @@
 .rd-head .intro { color: var(--ink2); font-size: .94rem; line-height: 1.8; margin-top: 12px; max-width: 30em; }
 .rd-act { min-height: 88svh; } .rd-act h2 { font-size: clamp(2rem, 9vw, 2.8rem); letter-spacing: .08em; } .rd-act .hl { color: var(--ink2); white-space: pre-line; }
 
+/* 패널(무빙툰 한 컷): 이미지가 글 위에 같이 나온다 */
+.rd-fig { margin: 0 0 22px; border-radius: 14px; overflow: hidden; aspect-ratio: 4 / 5; max-height: 72svh; background: #0b0e1c; box-shadow: 0 10px 40px rgba(0, 0, 0, .45); position: relative; }
+.rd-fig::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(7, 9, 19, .72) 100%); pointer-events: none; } /* 아래쪽을 어둡게 해 글자와 이어지게 */
+.rd-fig img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rd-cin .rd-fig { width: 100%; max-width: 440px; margin-left: auto; margin-right: auto; }
+@media (min-width: 700px) { .rd-fig { aspect-ratio: 16 / 11; } }
+
+/* 컷 등장: 이미지·글 모두 같은 하나의 연출(아래에서 살짝 올라오며 나타남) */
+.pn-rv { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; transition-delay: calc(var(--pn-i, 0) * 110ms); }
+.pn-rv.pn-in { opacity: 1; transform: none; }
+@media print { .pn-rv { opacity: 1 !important; transform: none !important; } }
+
 /* 시네마 장면(오프닝·현실 장면)의 정적 문장 */
 .rd-cin { text-align: center; font-family: var(--f-serif); padding-top: 9svh; padding-bottom: 9svh; }
 .rd-open { min-height: 58svh; display: grid; align-content: center; justify-items: center; }

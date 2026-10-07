@@ -237,10 +237,17 @@
   function secWrap(h, s, c, ci) {
     var m = h && /^<section ([^>]*)>/.exec(h); if (!m) return h;
     var attrs = m[1].replace(/\brv\b/g, '').replace(/class="/, 'class="rd-sec ').replace(/\s+/g, ' ') + ' data-ch="' + ci + '" data-layout="' + layoutOf(s) + '"';
-    var bgv = s.bg === 'black' ? BG_BLACK : s.media ? String(S.bg.push(s.media) - 1) : (s.sceneType === 'chapterIntro' ? BG_PH : null);
+    var pan = panelOf(s), bgv = s.bg === 'black' ? BG_BLACK : s.media && !pan ? String(S.bg.push(s.media) - 1) : (s.sceneType === 'chapterIntro' ? BG_PH : null);
     if (bgv != null) attrs += ' data-bg="' + bgv + '" data-pc="' + EL_COLOR[((s.intent && s.intent.desiredElements) || ['water'])[0]] + '"' + (s.sceneType === 'chapterIntro' && c.actTransition ? ' data-dip="1"' : '');
-    return '<section ' + attrs + '>' + h.slice(m[0].length);
+    return '<section ' + attrs + '>' + (pan ? panelHtml(pan) : '') + h.slice(m[0].length);
   }
+  // 패널: 이미지가 글과 함께 나오는 무빙툰 한 컷. 이미지형 미디어(영상은 포스터)가 있는 본문 장면에만 붙고, 배경은 앞 배경을 이어 쓴다. 장·ACT 머리글·그래프·타임라인에는 붙이지 않는다.
+  function panelOf(s) {
+    if (s && s.panel) return s.panel;
+    var m = s && s.media; if (!m || s.sceneType === 'chapterIntro' || s.bg === 'black' || /^(chart|dataVisualization|timeline)$/.test(s.sceneType)) return '';
+    var u = /video|transition/i.test(m.type) ? m.posterUrl : (m.url || m.posterUrl); return /^(\/|https:\/\/)/.test(u || '') ? u : '';
+  }
+  function panelHtml(u) { return '<figure class="rd-fig"><img src="' + esc(u) + '" alt="" loading="lazy" decoding="async"></figure>'; }
   // 레이아웃 종류의 기준값(자동): TEXT · TEXT_MEDIA · HIGHLIGHT · DATA · TIMELINE · QUOTE · CHAPTER_HEADER
   function layoutOf(s) { var t = s.sceneType; return t === 'chapterIntro' ? 'CHAPTER_HEADER' : t === 'chart' || t === 'dataVisualization' ? 'DATA' : t === 'timeline' ? 'TIMELINE' : t === 'chapterEnding' ? 'QUOTE' : /^verdict/.test(t) ? 'HIGHLIGHT' : s.media ? 'TEXT_MEDIA' : 'TEXT'; }
 
@@ -336,8 +343,26 @@
     var t = c.actTransition;
     return '<section class="scene rd-sec rd-head rd-act" data-ch="' + ci + '" data-layout="CHAPTER_HEADER" data-bg="' + BG_BLACK + '" data-dip="1"><div class="rd-rule" aria-hidden="true"></div><div class="no">' + esc(t.kicker) + '</div><h2>' + esc(t.headline) + '</h2><p class="hl">' + lines(t.body) + '</p><div class="rd-rule" aria-hidden="true"></div></section>';
   }
+  // 챕터 → 이야기 주제(패널 이미지 선택용). 챕터 id·제목의 말로 가른다. 못 가르면 identity.
+  var THEME_OF = [[/shadow|weak|약점|그림자|십성|신살/, 'shadow'], [/remedy|action|개운|행동|해 볼|최종|버릴/, 'remedy'], [/money|wealth|돈|재물|재성/, 'wealth'], [/career|work|직업|일의|성공|커리어/, 'career'], [/marriage|love|결혼|연애|사랑|궁합|인연/, 'love'],
+    [/family|가족|부모|자녀/, 'family'], [/relation|사람|관계|대인/, 'relationship'], [/talent|재능|공부|학업/, 'talent'], [/daewoon|sewoon|monthly|future|timing|대운|세운|월운|시기|흐름|앞으로|올해/, 'daewoon']];
+  function themeOf(c) { var t = (c.id || '') + ' ' + (c.base || '') + ' ' + (c.title || ''); for (var i = 0; i < THEME_OF.length; i++) if (THEME_OF[i][0].test(t)) return THEME_OF[i][1]; return 'identity'; }
+  // 본문 장면에 이미지 한 컷을 짝지어 준다(무빙툰 = 이미지 + 글). 챕터마다 첫 본문 장면, 긴 챕터는 중간에 한 컷 더. 라이브러리에 맞는 이미지가 없으면 붙이지 않는다.
+  function planPanels(rep) {
+    var lib = (S.pack && S.pack.lib && S.pack.lib.media) || S.media || [], ctx = { usedIds: [] }, el = (S.sd && S.sd.dayMaster && S.sd.dayMaster.el) || 'water';
+    if (!R.Director || !lib.length) return;
+    var host = function (s) { return !s.media && !s.panel && (s.sceneType === 'insight' || (s.sceneType === 'life' && /rd-prose|rd-cin/.test(s.html || '') && s.layout !== 'DATA')); };
+    rep.chapters.forEach(function (c) {
+      var scs = c.scenes || [], th = themeOf(c), place = function (s, th2) {
+        var intent = { mediaIntent: { elements: [(s.intent && s.intent.desiredElements && s.intent.desiredElements[0]) || el], themes: [th2] } }, m = R.Director.pickMedia(intent, lib, ctx, c.id);
+        if (m && !/video|transition/i.test(m.type) && (m.url || m.posterUrl)) s.panel = m.url || m.posterUrl; return !!s.panel;
+      };
+      var first = scs.filter(host)[0]; if (first && !first.panel) place(first, th);
+      if (scs.length > 9) { var mid = scs.slice(Math.floor(scs.length / 2)).filter(host)[0]; if (mid && mid !== first) place(mid, th); }
+    });
+  }
   function buildDoc() {
-    var rep = S.rep, h = ''; S.bg = [];
+    var rep = S.rep, h = ''; S.bg = []; planPanels(rep);
     rep.chapters.forEach(function (c, ci) {
       if (c.actTransition) h += actHeadHtml(c, ci);
       h += '<article class="chap" id="ch-' + esc(c.id) + '" data-ch="' + ci + '" aria-label="' + esc(c.title) + '">' + c.scenes.map(function (s, k) { return secWrap(sceneHtml(c, s, k), s, c, ci); }).join('') + '</article>';

@@ -80,6 +80,17 @@
   }
   var textOf = function (u) { return (u.textContent || '').replace(/\s+/g, ' ').trim(); };
 
+  /* 컷 등장(무빙툰 공통 연출 하나): 이미지와 글이 같은 방식으로 — 아래에서 살짝 올라오며 나타난다. 한 섹션 안에서는 위에서부터 110ms 간격(최대 5단계).
+     글자 한 줄씩·한 글자씩 움직이지 않고, 종류별로 효과를 달리하지 않는다. 동작 줄이기·IntersectionObserver 가 없으면 아무것도 숨기지 않는다. */
+  function reveal(host, win, reduce) {
+    if (reduce || !win.IntersectionObserver) return function () { };
+    var io = new win.IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('pn-in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -6% 0px', threshold: 0.08 });
+    [].forEach.call(host.querySelectorAll('.rd-sec, .rd-cin'), function (sec) {
+      [].forEach.call(sec.children, function (el, i) { if (el.classList.contains('pn-in')) return; el.classList.add('pn-rv'); el.style.setProperty('--pn-i', Math.min(i, 5)); io.observe(el); });
+    });
+    return function () { io.disconnect(); };
+  }
+
   // host: 문서 컨테이너(#chapter). o: { flow, reduce, saveData, bgList, autoStart, bgm, onSection(sec), onEnd(), label }
   function mount(host, o) {
     o = o || {}; var doc = root.document, win = root, f = clean(o.flow), reduce = !!o.reduce, view = host.closest('.view') || doc.body;
@@ -207,6 +218,7 @@
       ui();
     });
 
+    var stopReveal = reveal(host, win, reduce);
     measure(); secs.forEach(function (s) { io.observe(s); });
     if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(function () { if (!dead) measure(); });
     tick = setInterval(function () { if (state === 'PLAYING') ui(); else if (o.bgm) ui(); }, 500);
@@ -220,7 +232,7 @@
       moveTo(y, instant ? 0 : 600);
     }
     function destroy() {
-      dead = true; clearTimers(); clearInterval(tick); clearTimeout(rt); cancelTween(); io.disconnect(); if (ro) ro.disconnect(); bg.destroy();
+      dead = true; clearTimers(); clearInterval(tick); clearTimeout(rt); cancelTween(); io.disconnect(); stopReveal(); if (ro) ro.disconnect(); bg.destroy();
       win.removeEventListener('wheel', onWheel, true); win.removeEventListener('touchstart', onTStart, true); win.removeEventListener('touchmove', onTMove, true);
       doc.removeEventListener('keydown', onKey, true); doc.removeEventListener('pointerdown', onPtr, true); doc.removeEventListener('visibilitychange', onVis); win.removeEventListener('resize', onResize);
       [ctl, note].forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); }); doc.body.classList.remove('rd-on');
@@ -229,5 +241,5 @@
       choiceMade: function () { if (pausedBy === 'choice' && state === 'PAUSED') setTimeout(function () { if (!dead && pausedBy === 'choice' && state === 'PAUSED') play(); }, 1800); } };
   }
 
-  R.Reading = { RATES: RATES, DEFAULTS: DEFAULTS, clean: clean, estimate: estimate, paginate: paginate, anchorY: anchorY, fmt: fmt, mount: mount };
+  R.Reading = { RATES: RATES, DEFAULTS: DEFAULTS, clean: clean, estimate: estimate, reveal: reveal, paginate: paginate, anchorY: anchorY, fmt: fmt, mount: mount };
 })(typeof window !== 'undefined' ? window : globalThis);
