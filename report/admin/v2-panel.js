@@ -21,7 +21,7 @@
     Object.keys(EL).forEach(function (e) {
       cells += '<span class="pa-r">' + esc(EL[e]) + '</span>' + Object.keys(TH).map(function (t) {
         var p = d.presets.filter(function (x) { return x.element === e && x.theme === t; })[0];
-        return '<div class="pa-c' + (p.url ? ' has' : '') + '" data-id="' + p.id + '" data-e="' + e + '" data-t="' + t + '" title="' + esc(p.title) + ' — 눌러서 ' + (p.url ? '다시 만들기' : '만들기') + '"' + (p.url ? ' style="background-image:url(\'' + esc(p.url) + '\')"' : '') + '>' + (p.url ? '' : '<b>비어 있음</b>') + '</div>';
+        return '<div class="pa-c' + (p.url ? ' has' : '') + '" data-id="' + p.id + '" data-e="' + e + '" data-t="' + t + '" title="' + esc(p.title) + ' — 눌러서 ' + (p.url ? '다시 만들기' : '만들기') + '"' + (p.url ? ' style="background-image:url(\'' + esc(p.url) + '\')"' : '') + '>' + (p.url ? (p.video ? '<b>▶ 영상</b>' : '') : '<b>비어 있음</b>') + '</div>';
       }).join('');
     });
     PANE.innerHTML = dirCard(d) + '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">패널 이미지 · ' + have + ' / ' + d.presets.length + '장</b><p class="muted" style="margin:6px 0 10px">무빙툰의 각 컷(이미지 + 글)에 들어가는 삽화입니다. 오행(5) × 이야기 주제(10)별로 한 장씩 만들고, 뷰어가 사용자의 오행과 이야기 주제에 맞는 컷을 자동으로 고릅니다. 칸을 누르면 그 컷을 <b>세부 수정</b>(프롬프트 편집 · 추가 요청 · 현재 이미지를 바탕으로 수정)하고 미리 본 뒤 교체할 수 있습니다.</p>' +
@@ -45,6 +45,7 @@
       '<label class="muted">방식 <select id="peMode"><option value="new">처음부터 다시 그리기 (프롬프트 + 추가 요청)</option><option value="edit"' + (cur ? '' : ' disabled') + '>지금 이미지를 바탕으로 수정 (추가 요청만 반영, 구도 유지)</option></select></label>' +
       '<label class="muted">모델 <select id="peProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(G.d.models.openai) + '</option><option value="gemini"' + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(G.d.models.gemini) + '</option></select></label>' +
       '<details><summary class="muted" style="cursor:pointer">프롬프트 전체 보기·편집' + (p.custom ? ' <b style="color:var(--gold)">(수정됨)</b>' : '') + '</summary><textarea id="pePrompt" rows="9" style="width:100%;margin-top:6px"></textarea><div class="row" style="gap:6px;margin-top:4px"><button type="button" id="peReset">기본 프롬프트로 되돌리기</button><label class="muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="peSave"> 확정할 때 이 프롬프트를 이 칸의 기본으로 저장</label></div></details>' +
+      '<div class="card" style="padding:10px"><b style="color:var(--gold)">영상으로 교체 (업로드)</b><p class="muted" style="margin:4px 0 8px;font-size:.8rem">mp4·webm 파일을 올리면 이 칸이 영상 컷이 됩니다. 정지 이미지(포스터)는 영상의 첫 장면으로 자동 만들거나, 아래에서 직접 올릴 수 있습니다. 소리는 꺼진 채 화면에 들어오면 재생됩니다.</p><input type="file" id="peVid" accept="video/mp4,video/webm,video/quicktime"> <label class="muted" style="display:block;margin-top:6px">포스터 이미지(선택) <input type="file" id="pePoster" accept="image/*"></label><div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><button type="button" class="btn" id="peUp">영상 올리고 교체</button><button type="button" id="peUnvid"' + (p.video ? '' : ' disabled') + '>영상 빼고 이미지로 되돌리기</button></div><p class="muted" id="peUpMsg" style="margin-top:6px;font-size:.8rem">' + (p.video ? '현재 이 칸은 영상입니다.' : '') + '</p></div>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="peGo">미리 만들기</button><button type="button" class="btn gold" id="peOk" disabled>이 이미지로 교체</button><button type="button" id="peClose">닫기</button></div></div></div>';
     document.body.appendChild(d); d.showModal();
     var q = function (s) { return d.querySelector(s); }; q('#pePrompt').value = p.prompt;
@@ -66,6 +67,21 @@
         .then(function (r) { x.used = true; cur = r.url; previews = previews.filter(function (v) { return v !== x; }); toast('교체했습니다'); show(cur, '교체 완료 — 현재 이미지'); })
         .catch(function (er) { toast(er.message, true); }).then(function () { busy = false; });
     };
+    function upFile(file, name) { return C.api('/api/clipfile?name=' + encodeURIComponent(name), { method: 'POST', headers: { 'content-type': file.type || 'application/octet-stream' }, body: file }).then(function (r) { if (!r.key) throw new Error('업로드 응답에 키가 없습니다'); return r.key; }); }
+    function frameOf(file) { // 영상의 첫 장면을 webp 이미지로 뽑는다
+      return new Promise(function (ok, no) { var v = document.createElement('video'), u = URL.createObjectURL(file); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = u; var bye = function () { URL.revokeObjectURL(u); };
+        v.onerror = function () { bye(); no(new Error('영상에서 첫 장면을 뽑지 못했습니다. 포스터 이미지를 직접 올려 주세요')); };
+        v.onloadeddata = function () { try { v.currentTime = Math.min(0.2, (v.duration || 1) / 2); } catch (e) { } }; v.onseeked = function () { try { var c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight; c.getContext('2d').drawImage(v, 0, 0); c.toBlob(function (b) { bye(); b ? ok(b) : no(new Error('첫 장면 변환 실패')); }, 'image/webp', 0.9); } catch (e) { bye(); no(e); } }; });
+    }
+    q('#peUp').onclick = function () {
+      var f = q('#peVid').files[0], pf = q('#pePoster').files[0], msg = q('#peUpMsg'); if (!f || busy) { msg.textContent = '영상 파일을 먼저 고르세요'; return; }
+      if (cur && !confirm('이 칸을 올린 영상으로 교체합니다. 계속할까요?')) return; busy = true; q('#peUp').disabled = true; msg.textContent = '영상 올리는 중… (파일이 크면 시간이 걸립니다)';
+      var vk; upFile(f, 'panel-' + e + '-' + t + '-' + f.name).then(function (k) { vk = k; msg.textContent = '포스터 준비 중…'; if (pf) return upFile(pf, 'panel-poster-' + pf.name); if (cur) return ''; return frameOf(f).then(function (b) { return upFile(b, 'panel-poster.webp'); }); })
+        .then(function (pk) { return C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ element: e, theme: t, uploadVideo: vk, uploadPoster: pk || '' }) }); })
+        .then(function (r) { cur = r.url; p.video = r.video; msg.textContent = '교체했습니다 — 이 칸은 이제 영상입니다.'; q('#peUnvid').disabled = false; toast('영상으로 교체했습니다'); show(cur, '현재 이미지(영상의 포스터)'); })
+        .catch(function (er) { msg.textContent = '실패: ' + er.message; toast(er.message, true); }).then(function () { busy = false; q('#peUp').disabled = false; });
+    };
+    q('#peUnvid').onclick = function () { if (busy || !confirm('영상을 빼고 정지 이미지로 되돌립니다. 영상 파일은 삭제됩니다. 계속할까요?')) return; busy = true; C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ element: e, theme: t, clearVideo: true }) }).then(function () { p.video = ''; q('#peUnvid').disabled = true; q('#peUpMsg').textContent = '이미지로 되돌렸습니다.'; toast('이미지로 되돌렸습니다'); }).catch(function (er) { toast(er.message, true); }).then(function () { busy = false; }); };
     q('#peClose').onclick = function () { d.close(); }; d.addEventListener('close', finish); show(cur, cur ? '현재 이미지' : '');
   }
   /* 비주얼 디렉션: 감성(화풍) · 배경(세계관) · 분위기 · 인물 + 한 줄 추가. 저장하면 이후 새로 만드는 모든 이미지의 프롬프트에 들어간다(이미 만든 이미지·칸별로 직접 고친 프롬프트는 그대로). */

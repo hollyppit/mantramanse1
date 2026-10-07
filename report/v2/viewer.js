@@ -264,7 +264,7 @@
     var m = s && s.media; if (!m || s.sceneType === 'chapterIntro' || s.bg === 'black' || /^(chart|dataVisualization|timeline)$/.test(s.sceneType)) return '';
     var u = /video|transition/i.test(m.type) ? m.posterUrl : (m.url || m.posterUrl); return /^(\/|https:\/\/)/.test(u || '') ? u : '';
   }
-  function panelHtml(u) { return '<figure class="rd-fig"><img src="' + esc(u) + '" alt="" loading="lazy" decoding="async"></figure>'; }
+  function panelHtml(u) { var pv = S.pv && S.pv[u]; if (pv) return '<figure class="rd-fig rd-vid"><video muted playsinline loop controls preload="metadata" data-ci-vid="1" poster="' + esc(u) + '" src="' + esc(pv) + '"></video></figure>'; return '<figure class="rd-fig"><img src="' + esc(u) + '" alt="" loading="lazy" decoding="async"></figure>'; }
   // 레이아웃 종류의 기준값(자동): TEXT · TEXT_MEDIA · HIGHLIGHT · DATA · TIMELINE · QUOTE · CHAPTER_HEADER
   function layoutOf(s) { var t = s.sceneType; return t === 'chapterIntro' ? 'CHAPTER_HEADER' : t === 'chart' || t === 'dataVisualization' ? 'DATA' : t === 'timeline' ? 'TIMELINE' : t === 'chapterEnding' ? 'QUOTE' : /^verdict/.test(t) ? 'HIGHLIGHT' : s.media ? 'TEXT_MEDIA' : 'TEXT'; }
 
@@ -368,7 +368,7 @@
   // 본문 장면에 이미지 한 컷을 짝지어 준다(무빙툰 = 이미지 + 글). 챕터마다 첫 본문 장면, 긴 챕터는 중간에 한 컷 더. 라이브러리에 맞는 이미지가 없으면 붙이지 않는다.
   function planPanels(rep) {
     var lib = (S.pack && S.pack.lib && S.pack.lib.media) || S.media || [], ctx = { usedIds: [] }, el = (S.sd && S.sd.dayMaster && S.sd.dayMaster.el) || 'water';
-    if (!R.Director || !lib.length) return;
+    S.pv = {}; (S.media || []).concat(lib).forEach(function (m) { if (m && m.panelVideo && m.url) S.pv[m.url] = m.panelVideo; }); S.pv = {}; (S.media || []).concat(lib).forEach(function (m) { if (m && m.panelVideo && m.url) S.pv[m.url] = m.panelVideo; }); if (!R.Director || !lib.length) return;
     var host = function (s) { return !s.media && !s.panel && (s.sceneType === 'insight' || (s.sceneType === 'life' && /rd-prose|rd-cin/.test(s.html || '') && s.layout !== 'DATA')); };
     rep.chapters.forEach(function (c) {
       var scs = c.scenes || [], th = themeOf(c), place = function (s, th2) {

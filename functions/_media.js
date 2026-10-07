@@ -19,7 +19,7 @@ export const FIELD = { elementTags: 'element', stateTags: 'state', emotionTags: 
 
 export function cleanMedia(m) {
   if (!m || typeof m !== 'object' || !/^[\w.-]{1,80}$/.test(m.id || '')) return null;
-  const o = { id: m.id, type: TAX.type.includes(m.type) ? m.type : 'image', url: url(m.url), webmUrl: url(m.webmUrl), thumbnailUrl: url(m.thumbnailUrl), posterUrl: url(m.posterUrl),
+  const o = { id: m.id, type: TAX.type.includes(m.type) ? m.type : 'image', url: url(m.url), webmUrl: url(m.webmUrl), thumbnailUrl: url(m.thumbnailUrl), posterUrl: url(m.posterUrl), panelVideo: url(m.panelVideo),
     title: txt(m.title, 80), description: txt(m.description, 400), orientation: ['portrait', 'landscape', 'square'].includes(m.orientation) ? m.orientation : 'portrait',
     duration: Math.max(0, Math.min(600, +m.duration || 0)), loopable: !!m.loopable, hasAudio: !!m.hasAudio, priority: Math.max(0, Math.min(100, Math.round(+m.priority || 0))),
     chapterIds: Array.isArray(m.chapterIds) ? [...new Set(m.chapterIds.filter(x => typeof x === 'string' && /^[\w.\-가-힣]{1,80}$/.test(x)))].slice(0, 30) : [], enabled: m.enabled !== false, tagsApproved: m.tagsApproved !== false, bytes: Math.max(0, +m.bytes || 0), uploadedAt: +m.uploadedAt || 0 };

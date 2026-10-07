@@ -87,11 +87,11 @@ export function promptFor(el, th, dir) {
   return `${styleOf(dir)}\n장면: ${T.scene}.\n색과 빛: ${E.palette}.\n오행 ${E.name}의 기운이 풍경 전체의 계절감과 분위기로 드러나게 한다.`;
 }
 // 생성된 파일 → 미디어 라이브러리 항목(태그는 승인 상태라 조합에 바로 쓰인다). cleanMedia 가 TAX 밖 태그를 걸러낸다.
-export function mediaItem(el, th, url, bytes, provider) {
+export function mediaItem(el, th, url, bytes, provider, panelVideo) {
   const E = ELEMENTS[el], T = THEMES[th];
   return cleanMedia({ id: presetId(el, th), type: 'image', url, posterUrl: url, title: `${E.name} · ${T.name} 패널`, description: `AI 생성 패널(${provider}) — ${T.scene}`, orientation: 'portrait', priority: 60,
     elementTags: [el], stateTags: [E.state], emotionTags: [E.mood], themeTags: [th], sceneTags: SCENE_BY_EL[el].concat(T.tags.filter(t => !ACTIONS.test(t))), actionTags: T.tags.filter(t => ACTIONS.test(t)),
-    visualRole: ['hero'], enabled: true, tagsApproved: true, bytes, uploadedAt: Date.now() });
+    visualRole: ['hero'], enabled: true, tagsApproved: true, bytes, uploadedAt: Date.now(), panelVideo: panelVideo || '' });
 }
 
 // 클립 소스 칸(장면 의도 태그) 하나에 맞는 이미지. 태그는 TAX 안의 값만 받는다(cleanMedia 가 거른다).

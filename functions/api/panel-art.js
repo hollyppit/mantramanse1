@@ -16,7 +16,7 @@ export async function onRequestGet({ request, env }) {
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
   const list = (await env.GLOSSARY_KV.get(KEY, 'json')) || [], by = new Map(list.map(m => [m.id, m]));
   const saved = (await env.GLOSSARY_KV.get(PKEY, 'json')) || {}, dir = await loadDir(env);
-  return json({ presets: presets().map(p => ({ ...p, url: (by.get(p.id) || {}).url || '', prompt: saved[p.id] || promptFor(p.element, p.theme, dir), custom: !!saved[p.id], defaultPrompt: promptFor(p.element, p.theme, dir) })), direction: dir, directionOptions: Object.fromEntries(Object.entries(DIRECTION_OPTIONS).map(([k, v]) => [k, { label: v.label, items: Object.fromEntries(Object.entries(v.items).map(([i, x]) => [i, x[0]])) }])), providers: { openai: !!env.OPENAI_API_KEY, gemini: !!env.GEMINI_API_KEY }, r2: !!env.CLIPS_R2,
+  return json({ presets: presets().map(p => ({ ...p, url: (by.get(p.id) || {}).url || '', video: (by.get(p.id) || {}).panelVideo || '', prompt: saved[p.id] || promptFor(p.element, p.theme, dir), custom: !!saved[p.id], defaultPrompt: promptFor(p.element, p.theme, dir) })), direction: dir, directionOptions: Object.fromEntries(Object.entries(DIRECTION_OPTIONS).map(([k, v]) => [k, { label: v.label, items: Object.fromEntries(Object.entries(v.items).map(([i, x]) => [i, x[0]])) }])), providers: { openai: !!env.OPENAI_API_KEY, gemini: !!env.GEMINI_API_KEY }, r2: !!env.CLIPS_R2,
     models: { openai: env.PANEL_IMAGE_MODEL || 'gpt-image-2', gemini: env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image' } });
 }
 
@@ -42,6 +42,20 @@ export async function onRequestPost({ request, env }) {
     const list = (await env.GLOSSARY_KV.get(KEY, 'json')) || [];
     await env.GLOSSARY_KV.put(KEY, JSON.stringify(list.concat(item)));
     return json({ ok: true, media: item, provider: g.provider, model: g.model });
+  }
+  if (b.uploadVideo || b.clearVideo) { // 올려 둔 영상(또는 영상 제거)으로 이 칸을 교체: 정지 이미지(포스터)는 그대로 두거나 함께 올린 것으로 바꾼다
+    if (!ELEMENTS[b.element] || !THEMES[b.theme]) return json({ error: '오행·주제 값이 올바르지 않습니다' }, 400);
+    const pid = presetId(b.element, b.theme), list = (await env.GLOSSARY_KV.get(KEY, 'json')) || [], old = list.find(m => m.id === pid), fileKey = u => { const m = KEY_OK.exec(u || ''); return m ? m[1] : ''; };
+    const FK = /^[w.-]{1,120}$/, delFile = async k => { if (k) { try { await env.CLIPS_R2.delete(k); } catch { /* 무시 */ } } };
+    if (b.clearVideo) { if (!old || !old.panelVideo) return json({ ok: true, id: pid, url: (old && old.url) || '', video: '' }); const item = { ...old, panelVideo: '' }; await env.GLOSSARY_KV.put(KEY, JSON.stringify(list.map(m => (m.id === pid ? item : m)))); await delFile(fileKey(old.panelVideo)); return json({ ok: true, id: pid, url: item.url, video: '' }); }
+    if (!FK.test(b.uploadVideo) || (b.uploadPoster && !FK.test(b.uploadPoster))) return json({ error: '키가 올바르지 않습니다' }, 400);
+    const vh = await env.CLIPS_R2.head(b.uploadVideo); if (!vh) return json({ error: '올린 영상을 찾을 수 없습니다. 다시 올려 주세요' }, 410);
+    let posterUrl = b.uploadPoster ? '/api/clipfile?k=' + b.uploadPoster : (old && old.url) || '';
+    if (!posterUrl) return json({ error: '정지 이미지(포스터)가 필요합니다. 이 칸에 이미지를 먼저 만들거나 포스터를 함께 올려 주세요' }, 400);
+    const item = mediaItem(b.element, b.theme, posterUrl, vh.size, '영상 업로드', '/api/clipfile?k=' + b.uploadVideo);
+    await env.GLOSSARY_KV.put(KEY, JSON.stringify(list.filter(m => m.id !== pid).concat(item)));
+    if (old) { await delFile(fileKey(old.panelVideo)); if (b.uploadPoster && old.url !== posterUrl) await delFile(fileKey(old.url)); }
+    return json({ ok: true, id: pid, url: posterUrl, video: item.panelVideo });
   }
   if (b.discard) { if (!PREV_KEY.test(b.discard)) return json({ error: '키가 올바르지 않습니다' }, 400); try { await env.CLIPS_R2.delete(b.discard); } catch { /* 이미 없음 */ } return json({ ok: true }); }
   if (!ELEMENTS[b.element] || !THEMES[b.theme]) return json({ error: '오행·주제 값이 올바르지 않습니다' }, 400);
