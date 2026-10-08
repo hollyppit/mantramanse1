@@ -103,6 +103,9 @@ mark.wn i { font-style: normal; margin-right: 6px; } mark.wn b { color: #FF9A3C;
 .rd-fig.rd-vid::after { display: none; }
 .rd-fig.rd-vid video::-webkit-media-controls, .rd-fig.rd-vid video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
 .rd-fig.rd-vid video { pointer-events: none; -webkit-user-select: none; user-select: none; width: 100%; height: auto; max-height: 72svh; object-fit: contain; display: block; }
+/* 풀이와 함께 나오는 패널 클립: 이미지 컷과 같은 액자에 꽉 채우고(잘려도 됨) 컨트롤은 없다. 일간·일주 영상(.rd-vid)은 그대로 전체가 보인다 */
+.rd-fig.rd-pv video::-webkit-media-controls, .rd-fig.rd-pv video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
+.rd-fig.rd-pv video { pointer-events: none; -webkit-user-select: none; user-select: none; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; display: block; }
 .rd-vsec { padding-top: 8px; padding-bottom: 8px; }
 .ci-lb { display: block; color: var(--gold); font: 600 .78rem/1 var(--f-sans); letter-spacing: .14em; margin-bottom: 6px; }
 .ci-ul { margin: 6px 0 0; padding: 0 0 0 1.2em; } .ci-ul li { margin-bottom: .7em; line-height: 1.75; }

@@ -269,7 +269,7 @@
     var m = s && s.media; if (!m || s.sceneType === 'chapterIntro' || s.bg === 'black' || /^(chart|dataVisualization|timeline)$/.test(s.sceneType)) return '';
     var u = /video|transition/i.test(m.type) ? m.posterUrl : (m.url || m.posterUrl); return /^(\/|https:\/\/)/.test(u || '') ? u : '';
   }
-  function panelHtml(u) { var pv = S.pv && S.pv[u]; if (pv) return '<figure class="rd-fig rd-vid"><video muted playsinline loop autoplay disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback" tabindex="-1" aria-hidden="true" preload="metadata" data-ci-vid="1" poster="' + esc(u) + '" src="' + esc(pv) + '"></video></figure>'; return '<figure class="rd-fig"><img src="' + esc(u) + '" alt="" loading="lazy" decoding="async"></figure>'; }
+  function panelHtml(u) { var pv = S.pv && S.pv[u]; if (pv) return '<figure class="rd-fig rd-pv"><video muted playsinline loop autoplay disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback" tabindex="-1" aria-hidden="true" preload="metadata" data-ci-vid="1" poster="' + esc(u) + '" src="' + esc(pv) + '"></video></figure>'; return '<figure class="rd-fig"><img src="' + esc(u) + '" alt="" loading="lazy" decoding="async"></figure>'; }
   // 레이아웃 종류의 기준값(자동): TEXT · TEXT_MEDIA · HIGHLIGHT · DATA · TIMELINE · QUOTE · CHAPTER_HEADER
   function layoutOf(s) { var t = s.sceneType; return t === 'chapterIntro' ? 'CHAPTER_HEADER' : t === 'chart' || t === 'dataVisualization' ? 'DATA' : t === 'timeline' ? 'TIMELINE' : t === 'chapterEnding' ? 'QUOTE' : /^verdict/.test(t) ? 'HIGHLIGHT' : s.media ? 'TEXT_MEDIA' : 'TEXT'; }
 
