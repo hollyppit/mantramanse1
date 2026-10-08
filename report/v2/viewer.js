@@ -85,7 +85,7 @@
   function playStage(cfg) {
     view('awk'); var box = $('#awkMedia'), clip = cfg.clip || null, done = false;
     var cap = $('#awkCap'), start = $('#awkStart'), snd = $('#awkSound'), skip = $('#awkSkip');
-    start.hidden = true; snd.hidden = true; skip.hidden = false;
+    var startTxt = start.textContent; start.hidden = true; snd.hidden = true; skip.hidden = false;
     var title = cfg.title, sub = cfg.sub || '', kw = cfg.kw || [], poster = clip && clip.posterUrl || '', rp = cfg.kind === 'iju' ? 'awk' : 'ilgan', ev = cfg.kind === 'iju' ? 'iju' : cfg.kind === 'prologue' ? 'prologue' : 'ilgan';
     cap.innerHTML = '<div class="t" data-tx="' + rp + '.title">' + esc(title) + '</div>' + (sub ? '<div class="s" data-tx="' + rp + '.sub">' + esc(sub).replace(/\n/g, '<br>') + '</div>' : '') + (kw.length ? '<div class="k" data-tx="' + rp + '.kw">' + kw.map(function (k) { return '<span>' + esc(k) + '</span>'; }).join('') + '</div>' : '');
     if (cfg.capHtml) cap.innerHTML = cfg.capHtml; if (cfg.noCap) cap.innerHTML = ''; cap.style.opacity = ''; cap.classList.remove('mcard'); var capT = cfg.capMs ? setTimeout(function () { cap.style.transition = 'opacity .6s'; cap.style.opacity = 0; }, cfg.capMs) : 0; // 소개 문구는 capMs 뒤에 사라진다(영상은 계속)
@@ -99,7 +99,7 @@
       var t = setTimeout(function () { cap.classList.remove('mcard'); cfg.onDone(kind); }, left); skip.onclick = function () { clearTimeout(t); cap.classList.remove('mcard'); cfg.onDone('skipped'); };
     }
     function finish(kind) {
-      if (done) return; done = true; clearTimeout(capT); skip.hidden = true; snd.hidden = true; if (R.Bgm) R.Bgm.duck(false);
+      if (done) return; done = true; clearTimeout(capT); skip.hidden = true; snd.hidden = true; start.hidden = true; start.textContent = startTxt; if (R.Bgm) R.Bgm.duck(false);
       if (kind === 'completed') T(ev + '_video_completed', {}); else if (kind === 'skipped') T(ev + '_video_skipped', {});
       endCard(kind);
     }
@@ -118,10 +118,14 @@
       if (clip.videoWebm && v.canPlayType && v.canPlayType('video/webm')) { var s1 = document.createElement('source'); s1.src = clip.videoWebm; s1.type = 'video/webm'; v.appendChild(s1); }
       if (clip.videoUrl) { var s2 = document.createElement('source'); s2.src = clip.videoUrl; s2.type = /\.webm(\?|$)/.test(clip.videoUrl) ? 'video/webm' : 'video/mp4'; v.appendChild(s2); }
       box.innerHTML = ''; box.appendChild(v);
-      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); if (cfg.card) cardT = setTimeout(showCard, cfg.cardAt != null ? cfg.cardAt : 3000); T(ev + '_video_started', {}); snd.hidden = false; snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; if (!v.muted && R.Bgm) R.Bgm.duck(true); });
+      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); start.hidden = true; if (cfg.card) cardT = setTimeout(showCard, cfg.cardAt != null ? cfg.cardAt : 3000); T(ev + '_video_started', {}); snd.hidden = false; snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; if (!v.muted && R.Bgm) R.Bgm.duck(true); });
       v.addEventListener('ended', function () { finish('completed'); });
       v.addEventListener('error', function () { if (!done) { v.remove(); still(); } }, true);
-      var p = v.play(); if (p && p.catch) p.catch(function () { if (wantSound && !v.muted) { v.muted = true; var p2 = v.play(); if (p2 && p2.catch) p2.catch(function () { v.remove(); still(); }); return; } v.controls = false; if (poster) v.load(); setTimeout(function () { if (v.paused && !done) { v.remove(); still(); } }, 1200); });
+      function tapToPlay() { // 자동 재생이 막힌 기기(iOS 저전력 모드·데이터 절약 등): 영상을 건너뛰지 않고 탭 한 번으로 재생한다(탭은 사용자 동작이라 소리도 가능)
+        if (done) return; start.textContent = '▶ 탭해서 영상 보기'; start.hidden = false;
+        start.onclick = function () { start.hidden = true; v.muted = !wantSound; var q = v.play(); if (q && q.catch) q.catch(function () { v.muted = true; var q2 = v.play(); if (q2 && q2.catch) q2.catch(function () { if (!done) { v.remove(); still(); } }); }); };
+      }
+      var p = v.play(); if (p && p.catch) p.catch(function () { if (wantSound && !v.muted) { v.muted = true; var p2 = v.play(); if (p2 && p2.catch) p2.catch(tapToPlay); return; } tapToPlay(); });
       snd.onclick = function () { v.muted = !v.muted; if (R.Bgm) R.Bgm.duck(!v.muted); snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; };
       skip.onclick = function () { v.pause(); finish('skipped'); };
     }
@@ -237,8 +241,15 @@
   // 본문 안의 영상은 화면에 들어오면 재생하고 벗어나면 멈춘다(소리는 꺼진 채, 컨트롤 없이 액자처럼 무한 루프)
   function watchVideos() {
     var vs = $$('#chapter video[data-ci-vid]'); if (!vs.length) return; if (S.vio) S.vio.disconnect();
+    vs.forEach(function (v) { v.muted = true; v.defaultMuted = true; v.playsInline = true; }); // innerHTML 로 만든 video 는 모바일 Safari 에서 muted 속성만으로는 자동재생이 안 되는 경우가 있어 프로퍼티로도 지정
     if (!window.IntersectionObserver || reduce || saveData) return;
-    S.vio = new IntersectionObserver(function (es) { es.forEach(function (e) { var v = e.target; if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () { }); } else v.pause(); }); }, { threshold: 0.5 });
+    var tapArmed = false; // 자동 재생이 막힌 기기(iOS 저전력 모드 등): 다음 터치·스크롤 입력에서 화면에 보이는 영상을 재생한다
+    function armTap() {
+      if (tapArmed) return; tapArmed = true; var ev = ['pointerdown', 'touchstart', 'click', 'keydown'];
+      var go = function () { tapArmed = false; ev.forEach(function (n) { document.removeEventListener(n, go, true); }); vs.forEach(function (v) { var r = v.getBoundingClientRect(); if (r.bottom > 0 && r.top < window.innerHeight) { var q = v.play(); if (q && q.catch) q.catch(function () { }); } }); };
+      ev.forEach(function (n) { document.addEventListener(n, go, true); });
+    }
+    S.vio = new IntersectionObserver(function (es) { es.forEach(function (e) { var v = e.target; if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(armTap); } else v.pause(); }); }, { threshold: 0.5 });
     vs.forEach(function (v) { S.vio.observe(v); });
   }
 
