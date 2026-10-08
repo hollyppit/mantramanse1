@@ -80,6 +80,12 @@
   }
   var sec = function (id, cls, inner) { return { sceneId: id, sceneType: 'life', html: '<section class="scene rd-sec ' + cls + '" data-sc="' + id + '">' + inner + '</section>' }; };
 
+  // 같은 일주를 가진 유명인(ilju-data.js). 데이터가 없으면 빈 문자열.
+  function famousP(pil) {
+    var I = R.IljuInfo, f = I && I.famous(pil); if (!f) return '';
+    return P('같은 일주의 유명인', f + ' 등이 같은 ' + pil + '일주입니다. 이분들의 분위기를 떠올려 보면 이 일주의 결이 한결 쉽게 그려집니다. (생일 기준이고 사주 전체는 사람마다 다릅니다.)');
+  }
+
   // sd: 사주 데이터, name: 이름, awk: { video, ilgan, fallback }, gender: 'M'|'F'. 반환: 챕터(없으면 null)
   function chapter(sd, name, awk, actId) {
     var st = sd && sd.dayMaster && String(sd.dayMaster.stem || '')[0], pil = sd && sd.dayPillar && String(sd.dayPillar.ko || ''); if (!st || !D[st] || !pil) return null;
@@ -92,7 +98,7 @@
     scenes.push(sec('ci-t2', 'rd-box', '<div class="cap">일간으로 보는 생활</div>' + P('사람 사이', d.people) + P('연애', x.love) + P('일하는 방식', d.work) + P('돈', x.money)));
     scenes.push(sec('ci-t2b', 'rd-box', '<div class="cap">힘들 때와 맞는 환경</div>' + P('힘들 때의 모습', x.stress) + P('잘 맞는 환경', x.fit + '에서 힘이 납니다.') + P('소모되는 환경', x.drain + '에서는 빨리 지칩니다.') + P('한마디', d.tip)));
     var clip = (awk && (awk.video || awk.fallback)) || null, v2 = videoSec('ci-v2', clip, '일주 캐릭터 영상'); if (v2) scenes.push(v2);
-    scenes.push(sec('ci-t3', 'rd-box', '<div class="cap">일주 · ' + HJ[si] + HJB[bi] + ' ' + esc(pil) + '일주</div><p class="lead rd-hl">' + esc(b[0]) + ' 곁에서 자란 ' + esc(NAME[st]) + ' 같은 기질을 타고난 ' + g + '입니다.</p>' + P('일주의 자리', '일지 ' + bz + '(' + HJB[bi] + ')는 ' + b[0] + '의 이미지로, ' + b[1] + '입니다. 일주는 나의 중심(' + NAME[st] + ')이 앉은 자리라서, 가까운 사람과 있을 때의 모습과 마음이 놓이는 환경을 보여 줍니다.') + P('일지의 기운', '일지의 본기 ' + BRB[bz] + '은(는) ' + NAME[st] + '에게 ' + tg + '에 해당합니다. 이 기운이 ' + esc(who) + '의 속마음과 가까운 관계의 모습에 얹힙니다.')));
+    scenes.push(sec('ci-t3', 'rd-box', '<div class="cap">일주 · ' + HJ[si] + HJB[bi] + ' ' + esc(pil) + '일주</div><p class="lead rd-hl">' + esc(b[0]) + ' 곁에서 자란 ' + esc(NAME[st]) + ' 같은 기질을 타고난 ' + g + '입니다.</p>' + P('일주의 자리', '일지 ' + bz + '(' + HJB[bi] + ')는 ' + b[0] + '의 이미지로, ' + b[1] + '입니다. 일주는 나의 중심(' + NAME[st] + ')이 앉은 자리라서, 가까운 사람과 있을 때의 모습과 마음이 놓이는 환경을 보여 줍니다.') + P('일지의 기운', '일지의 본기 ' + BRB[bz] + '은(는) ' + NAME[st] + '에게 ' + tg + '에 해당합니다. 이 기운이 ' + esc(who) + '의 속마음과 가까운 관계의 모습에 얹힙니다.') + famousP(pil)));
     scenes.push(sec('ci-t4', 'rd-box', '<div class="cap">일주로 보는 나</div>' + P('가까운 관계', t.rel) + P('일하는 습관', t.act) + P('이 자리의 장점', xt.pro) + P('이 자리의 단점', xt.con)));
     scenes.push(sec('ci-end', 'rd-line-end', '<p class="lead rd-hl" style="text-align:center">이런 기질을 타고난 사람은,<br>어떤 인생을 살아가게 될까요?<br><br>이제 ' + esc(who) + '의 인생 전체를 펼쳐보겠습니다.</p>'));
     return { id: 'c-char', base: 'c-char', kind: 'char', title: '나의 일간과 일주', no: 0, act: actId, headline: '', scenes: scenes, modules: [], items: [] };

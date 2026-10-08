@@ -27,7 +27,7 @@
       rows.map(function (r, i) { return '<circle cx="' + xs[i].toFixed(1) + '" cy="' + ys[i].toFixed(1) + '" r="' + (i === cur ? 5 : 3) + '" class="' + (i === cur ? 'dp-dot cur' : 'dp-dot') + (r.pct >= 62 ? ' up' : r.pct <= 40 ? ' dn' : '') + '"/><text x="' + xs[i].toFixed(1) + '" y="' + (Hh - 8) + '" text-anchor="middle" class="dp-xl">' + esc(labels[i]) + '</text>'; }).join('') + '</svg><p class="dp-chartnote">선이 높을수록 나아가기 좋은 때, 낮을수록 쌓고 지키는 때예요(점수가 아니라 계절의 흐름).</p></div>';
   }
   function card(r, big, sub, isNow) { // 기간 카드
-    return '<div class="dp-tl' + (isNow ? ' now' : '') + (r.pct >= 62 ? ' up' : r.pct <= 40 ? ' dn' : '') + '"><div class="dp-tl1"><b>' + esc(big) + '</b><small>' + esc(sub) + '</small></div><div class="dp-tl2"><div class="dp-tlh">' + esc(r.label) + (isNow ? ' <span class="dp-now">지금</span>' : '') + '</div><div class="dp-tlt">' + esc(r.title) + '</div>' + bar('', r.pct, { cls: 'dp-slim', color: r.pct >= 62 ? '#5FBF9A' : r.pct <= 40 ? '#FF9A3C' : '#D5B97F', text: SEA[r.season] || r.cond || '' }) +
+    return '<div class="dp-tl' + (isNow ? ' now' : '') + (r.pct >= 62 ? ' up' : r.pct <= 40 ? ' dn' : '') + '"><div class="dp-tl1"><b>' + esc(big) + '</b><small>' + esc(sub) + '</small></div><div class="dp-tl2"><div class="dp-tlh">' + esc(r.label) + (isNow ? ' <span class="dp-now">지금</span>' : '') + '</div><div class="dp-tlt">' + esc(r.title) + '</div>' + (r.blunt ? '<p class="dp-tlb">' + esc(r.blunt) + '</p>' : '') + bar('', r.pct, { cls: 'dp-slim', color: r.pct >= 62 ? '#5FBF9A' : r.pct <= 40 ? '#FF9A3C' : '#D5B97F', text: SEA[r.season] || r.cond || '' }) +
       '<div class="dp-tags">' + (r.cond ? chip(r.cond, /주의/.test(r.cond) ? 'warn' : '') : '') + chip(r.x.stemTG + '·' + r.x.branchTG) + (r.unseong ? chip('운성 ' + r.unseong) : '') + (r.sinsal ? chip(r.sinsal) : '') + (r.volatile ? chip('변동 큼', 'warn') : '') + '</div></div></div>';
   }
   function cands(rows, nameOf, unit) { // 기회 후보 / 방어 후보
@@ -36,9 +36,31 @@
     return '<div class="dp-pc"><div class="dp-pro"><h4>기회를 잡을 ' + unit + ' 후보</h4><ul>' + (open.length ? open.map(function (r, i) { return li(r, i, whyOpen); }).join('') : '<li><span>뚜렷한 기회 구간은 없어요 — 꾸준히 쌓는 시기입니다</span></li>') + '</ul></div><div class="dp-con"><h4>방어해야 할 ' + unit + ' 후보</h4><ul>' + (guard.length ? guard.map(function (r, i) { return li(r, i, whyGuard); }).join('') : '<li><span>크게 조심할 구간은 없어요</span></li>') + '</ul></div></div>';
   }
 
+  // ───────── 대운 · 나이대별 솔직한 한마디 ─────────
+  // 구성: 나이대의 현실 + 십성이 그 나이에 만드는 모습(어린 시기/한창/노년 3종) + 흐름 적합도 한 줄. 좋은 말만 하지 않는다.
+  var AGE_REAL = [
+    '아직은 부모와 환경이 선택을 대신하는 나이입니다. 이 시기의 문제는 대부분 본인보다 환경에서 오고, 공부 습관과 집안 분위기에 따라 결과가 갈립니다.',
+    '입시·진로·첫 사회 경험이 한꺼번에 오는 나이입니다. 운 탓하며 미루면 출발선만 뒤로 밀리고, 남과의 비교에 가장 흔들리는 때이기도 합니다.',
+    '취업·연애·결혼·돈 문제가 몰려와 비교가 가장 심한 나이입니다. 여기서 정한 방향을 40대에 바꾸면 값이 몇 배로 듭니다.',
+    '책임은 최대인데 체력은 내리막이 시작되는 나이입니다. 새 판을 벌일 마지막 큰 기회이자, 실수하면 만회할 시간이 짧아지는 시기입니다.',
+    '지금까지 선택의 결과가 통장·건강·관계에 그대로 찍히는 나이입니다. 만회하려는 큰 베팅이 가장 위험합니다.',
+    '일의 정점이 지나 수입이 줄기 시작하는 때에 건강·자녀·노후 문제가 겹칩니다. 운이 좋아도 체력 관리 없이는 누릴 수 없습니다.',
+    '돈 버는 힘보다 지키는 힘이 중요해지는 나이입니다. 보증·투자·큰 결정은 혼자 하지 마세요.',
+    '운보다 건강과 곁에 남은 사람이 삶의 질을 좌우합니다. 무리한 일정과 큰 결정은 가족과 함께 하세요.'];
+  var TG_BLUNT = {
+    young: { 비견: '또래와 대등하게 부딪히는 시기라 자존심 싸움이 잦습니다. 고집만 세우면 혼자가 됩니다.', 겁재: '친구와의 비교·경쟁이 심해 질투와 충동적인 소비·유행에 휩쓸리기 쉽습니다.', 식신: '재주는 있는데 편한 쪽으로만 흐르면 노는 데 시간을 다 씁니다. 하나를 끝까지 해 본 경험이 필요합니다.', 상관: '말과 태도가 날카로워 어른·교사와 마찰이 잦습니다. 재능이 있어도 태도 때문에 평가가 깎입니다.', 편재: '용돈·사람·유행에 관심이 쏠려 공부가 뒷전이 되기 쉽습니다. 집중할 한 가지를 정해야 합니다.', 정재: '성실하면 성과가 나오지만 안전한 길만 고르다 도전을 피하기 쉽습니다.', 편관: '엄한 환경·압박·경쟁 속에 놓이기 쉽습니다. 견디면 단단해지지만 마음이 먼저 다칠 수 있어 어른의 살핌이 필요합니다.', 정관: '모범생으로 인정받지만 눈치와 체면 때문에 하고 싶은 말을 속으로 쌓기 쉽습니다.', 편인: '생각은 깊은데 시작이 늦고 혼자 있는 시간이 늘어납니다. 외톨이가 되지 않게 신경 써야 합니다.', 정인: '어른의 도움을 받기 좋은 때지만 기대기만 하면 스스로 하는 힘이 자라지 않습니다.' },
+    adult: { 비견: '내 방식대로 밀고 가는 힘은 있지만 협업이 안 되면 혼자 지치고 비용만 늘어납니다. 동업·공동 투자는 문서로 정리하세요.', 겁재: '돈과 사람이 크게 드나들고, 방심하면 경쟁·보증·충동 지출로 새어 나갑니다. 번 만큼 남기는 구조가 먼저입니다.', 식신: '일은 편한데 안주하면 남는 게 없습니다. 재주를 수입·결과물로 바꾸지 않으면 그냥 좋은 시절로 끝납니다.', 상관: '재능은 튀지만 말이 화근입니다. 상사·조직과 부딪히면 손해는 본인 몫이니 퇴사·이직은 감정이 식은 뒤에 결정하세요.', 편재: '큰돈과 기회가 보여도 내 것이 되는 건 일부입니다. 벌이는 만큼 잃는 속도도 빠르니 투기성 투자는 한도를 정하세요.', 정재: '안정적이지만 안전만 찾다 기회를 놓치기 쉽습니다. 모으는 돈과 묶여 버린 돈을 구분하세요.', 편관: '압박과 책임이 몰려오는 운입니다. 버티면 단단해지지만 몰아붙이면 몸과 가까운 관계부터 상합니다. 쉬는 시간을 일정에 넣으세요.', 정관: '직책·평판은 따라오지만 체면과 규칙 때문에 하고 싶은 걸 못 하기 쉽습니다. 인정받는 만큼 책임도 같이 커집니다.', 편인: '생각과 공부는 깊어지는데 실행이 늦습니다. 방향이 틀리면 돌고 돌아 시간만 갑니다. 작게라도 먼저 시도하세요.', 정인: '도움받기 좋은 운이지만 기대기만 하면 실력이 안 쌓입니다. 자격·실력으로 바꿔 놓지 않으면 도움도 지나갑니다.' },
+    later: { 비견: '내 고집을 꺾지 않으면 주변과 멀어지기 쉽습니다. 동료·형제와 돈 문제는 분명히 해 두세요.', 겁재: '친구·가족에게 돈이 새기 쉽습니다. 빌려주는 돈은 못 받는 돈으로 생각하고 보증은 서지 마세요.', 식신: '여유와 즐거움이 생기지만 건강과 식습관이 느슨해지기 쉽습니다. 즐기는 만큼 몸을 챙기세요.', 상관: '말이 앞서 자녀·가까운 사람과 다투기 쉽습니다. 맞는 말도 상대가 멀어지면 소용없습니다.', 편재: '큰돈을 한 번에 만회하려는 마음이 가장 위험합니다. 노후 자금으로는 모험을 하지 마세요.', 정재: '안정적으로 지키는 운이지만 지나친 절약이 외로움으로 이어지기 쉽습니다. 쓸 때는 쓰세요.', 편관: '몸과 마음에 부담이 오기 쉬운 운입니다. 무리한 활동보다 검진과 휴식이 먼저입니다.', 정관: '명예와 체면에 매이기 쉽습니다. 내려놓는 연습이 오히려 평판을 지킵니다.', 편인: '혼자 있는 시간이 길어지고 생각이 비관으로 흐르기 쉽습니다. 사람을 만나는 약속을 일부러 만드세요.', 정인: '돌봄을 받기 좋은 운이지만 의존이 지나치면 가족이 지칩니다. 할 수 있는 건 직접 하세요.' } };
+  var COND_BLUNT = { 순풍: '흐름은 도와주는 편이니, 이때 안 움직이면 운 탓을 할 수 없습니다.', 주의: '다만 내게 맞지 않는 기운이 섞여 있어 평소보다 실수의 대가가 큽니다.', 부담: '내게 맞지 않는 기운이 강해 무리하면 대가가 큽니다. 새로 벌이기보다 지키는 쪽이 낫습니다.' };
+  function bluntOf(r) { // 대운 한 칸의 솔직한 한마디
+    var mid = r.a1 + 5, b = mid < 13 ? 0 : mid < 23 ? 1 : mid < 33 ? 2 : mid < 43 ? 3 : mid < 53 ? 4 : mid < 63 ? 5 : mid < 73 ? 6 : 7;
+    var g = b <= 1 ? 'young' : b <= 5 ? 'adult' : 'later', t = (TG_BLUNT[g] || {})[r.x.stemTG] || '';
+    return [AGE_REAL[b], t, COND_BLUNT[r.cond] || '', r.volatile ? '변동이 큰 구간이라 큰 결정은 한 번 더 점검하세요.' : ''].filter(Boolean).join(' ');
+  }
+
   // ───────── 대운 ─────────
   S.deep_daewoon = function (H) {
-    var M = H.M, sd = H.sd, list = H.ch.daeun.list, cur = -1, rows = list.map(function (x, i) { var r = row(H, x, M.gzNameK(x) + ' 대운', '운'); r.a1 = x.startAge; r.a2 = x.startAge + 9; r.y1 = x.startYear; if (sd.currentDaewoon && sd.currentDaewoon.startYear === x.startYear) cur = i; return r; });
+    var M = H.M, sd = H.sd, list = H.ch.daeun.list, cur = -1, rows = list.map(function (x, i) { var r = row(H, x, M.gzNameK(x) + ' 대운', '운'); r.a1 = x.startAge; r.a2 = x.startAge + 9; r.y1 = x.startYear; r.blunt = bluntOf(r); if (sd.currentDaewoon && sd.currentDaewoon.startYear === x.startYear) cur = i; return r; });
     var dec = function (r) { return r.a1 < 10 ? '유년' : Math.floor((r.a1 + 4) / 10) * 10 + '대'; };
     var out = [scene(sec('', cap('대운 지도 · 10년마다 바뀌는 인생의 길') + '<p class="lead">대운은 <b>10년 단위로 바뀌는 큰 도로</b>예요. ' + esc(who(H)) + '은(는) 지금 <b>' + esc(cur >= 0 ? rows[cur].gz + ' 대운(' + rows[cur].a1 + '~' + rows[cur].a2 + '세)' : '대운이 시작되기 전') + '</b>을 지나고 있어요. 대운 이름(예: 신해·병오)과 나이대, "이 시기에 어떤 일을 하게 되는지"를 한눈에 모았습니다.</p>' + line(rows, rows.map(function (r) { return r.gz; }), cur))),
       scene(sec('', cap('10년씩 보는 나의 대운') + rows.map(function (r, i) { return card(r, dec(r), r.a1 + '~' + r.a2 + '세 · ' + D.ageSpan(r.a1, r.a2), i === cur); }).join('')))];
@@ -49,7 +71,7 @@
   // ───────── 세운 ─────────
   S.deep_seun = function (H) {
     var M = H.M, sd = H.sd, Y = sd.nowYear, list = M.seunRange(H.ch, Y, Y + 9), rows = list.map(function (x, i) { var r = row(H, x, x.year + '년 ' + M.gzNameK(x), '해'); var d; try { d = M.evaluateDomainLuck(H.ch, x, 'seun'); } catch (e) { } r.love = d && d.love && d.love.score; r.wealth = d && d.wealth && d.wealth.score; r.year = x.year; return r; });
-    var out = [scene(sec('', cap('세운 지도 · 앞으로 10년, 해마다') + '<p class="lead">세운은 <b>해마다 바뀌는 날씨</b>예요. 대운이라는 큰 도로 위에서 올해부터 10년을 한 해씩 봅니다. 해마다 "무엇을 하게 될 해인지"를 제목으로 붙였어요.</p>' + line(rows, rows.map(function (r) { return String(r.year).slice(2); }), 0))),
+    var out = [scene(sec('', cap('세운 지도 · 앞으로 10년, 해마다') + '<p class="lead">세운은 <b>해마다 바뀌는 날씨</b>예요. 대운이라는 큰 도로 위에서 올해부터 10년을 한 해씩 봅니다. 해마다 "무엇을 하게 될 해인지"를 제목으로 붙였어요.</p>' + line(rows, rows.map(function (r) { return String(r.year); }), 0))),
       scene(sec('', cap('해마다 하게 될 일') + rows.map(function (r, i) { var c = card(r, String(r.year), r.gz.replace(/^\d+년 /, '') + ' · ' + (Y + i - sd.nowYear === 0 ? '올해' : (i) + '년 뒤'), i === 0); return c.replace('<div class="dp-tags">', '<div class="dp-tags">' + (r.love != null ? chip('연애 ' + r.love) : '') + (r.wealth != null ? chip('재물 ' + r.wealth) : '')); }).join(''))),
       scene(sec('', cap('세운으로 보는 기회의 해 · 방어의 해') + cands(rows, function (r) { return r.year + '년 ' + r.gz.replace(/^\d+년 /, ''); }, '해')))];
     return { title: '세운 지도', sub: '앞으로 10년, 해마다 하게 될 일', scenes: out, rows: rows };

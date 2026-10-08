@@ -100,7 +100,7 @@
         var ev = d.evidence, why = '<details class="dd why" id="d-why"><summary><span><b>왜 이런 결과가 나왔나요?</b></span><i class="chev" aria-hidden="true"></i></summary><div class="ddb"><p>' + esc(ev.intro) + '</p>' +
           ev.plain.map(function (x) { return '<div class="ev"><h5>' + esc(x.title) + '</h5><p>' + esc(x.body) + '</p></div>'; }).join('') +
           '<details class="pro"><summary>전문 해석 보기</summary>' + lis(ev.pro) + '</details></div></details>';
-        var el = H.view('<section class="tscore"><p class="kick">' + +d.date.slice(5, 7) + '월 ' + +d.date.slice(8) + '일 ' + d.dow + '요일 · ' + esc(d.gz) + '日</p><div class="ring" style="--p:' + d.overallScore + '"><b>' + d.overallScore + '</b></div><div class="tflow">' + esc(d.phase) + ' · ' + esc(d.cond) + '</div><p class="sub" style="margin-top:6px">' + (nm ? esc(nm) + '님, ' : '') + esc(d.line) + '</p>' +
+        var el = H.view('<section class="tscore"><p class="kick">' + +d.date.slice(5, 7) + '월 ' + +d.date.slice(8) + '일 ' + d.dow + '요일 · ' + esc(d.gz) + '日</p><div class="ring" style="--p:' + d.overallScore + '"><b>' + d.overallScore + '</b></div><div class="tflow">' + esc(String(d.phase).replace(/기$/, '운')) + ' · ' + esc(d.cond) + '</div><p class="sub" style="margin-top:6px">' + (nm ? esc(nm) + '님, ' : '') + esc(d.line) + '</p>' +
           '<p class="dhead">“' + esc(d.headline) + '”</p>' + (d.notes.length ? '<p class="note">' + esc(d.notes.join(' ')) + '</p>' : '') + '</section>' +
           '<div class="dgrid">' + cards + '</div>' +
           '<section class="dsec"><h3>오늘의 핵심</h3><p>' + esc(d.summary) + '</p><p>' + esc(d.summary2) + '</p></section>' +
@@ -172,7 +172,7 @@
         '<div class="sw">' + (S.strength ? '<div><small>나의 강점</small>' + esc(S.strength) + '</div>' : '') + (jc ? '<div><small>주의할 성향</small>' + esc(jc.trait.split(', ').slice(-1)[0] || '') + '</div>' : '') + (S.tip ? '<div><small>이렇게 다뤄 보세요</small>' + esc(S.tip) + '</div>' : '') + '</div></div>';
       var el = H.view(
         '<section class="myhead"><p class="kick">MY 運命</p><h1 class="who">' + (nm ? esc(nm) + '님의 운명' : '나의 운명') + '</h1><div class="ilju"><b>' + esc(M.gzName(day)) + '</b><span>' + esc(M.gzNameK(day)) + '일주</span></div></section>' +
-        '<a class="todaycard" href="#/today" data-track="fortune_content_click" data-p="today_card"><div class="ring" style="--p:' + t.score + '"><b>' + t.score + '</b></div><div><p class="lb">오늘의 흐름 · ' + esc(t.phase) + '</p><h3>' + esc(t.cond) + '의 날</h3><p>' + esc(t.line) + '</p></div></a>' +
+        '<a class="todaycard" href="#/today" data-track="fortune_content_click" data-p="today_card"><div class="ring" style="--p:' + t.score + '"><b>' + t.score + '</b></div><div><p class="lb">오늘의 흐름 · ' + esc(String(t.phase).replace(/기$/, '운')) + '</p><h3>' + esc(t.cond) + '의 날</h3><p>' + esc(t.line) + '</p></div></a>' +
         '<section class="grp"><h2>오늘의 나</h2><div class="tiles">' +
         tile('오늘의 운세', '오늘 들어온 흐름', '#/today', 'today') + tile('재물운', '오늘의 돈 흐름', '#/today?f=money', 'today_money') + tile('일·사업운', '오늘의 일 흐름', '#/today?f=work', 'today_work') + tile('연애운', '오늘의 인연 흐름', '#/today?f=love', 'today_love') + tile('컨디션', '몸과 마음의 균형', '#/today?f=health', 'today_health') + tile('오늘의 행동 가이드', '오늘 하면 좋은 일', '#/today?f=action', 'today_action') + '</div></section>' +
         '<section class="grp"><h2>나라는 사람</h2><div class="tiles">' +

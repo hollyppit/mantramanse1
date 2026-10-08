@@ -4,7 +4,7 @@
 (function (root) {
   var ELK = ['목', '화', '토', '금', '수'];
   var GROUPS = ['비겁', '식상', '재성', '관성', '인성'];
-  var SEASONS = { opportunity: '기회기', expansion: '확장기', harvest: '수확기', accumulation: '축적기', transition: '전환기', defense: '방어기' };
+  var SEASONS = { opportunity: '기회운', expansion: '확장운', harvest: '수확운', accumulation: '축적운', transition: '전환운', defense: '방어운' };
 
   // 운 한 기둥의 평가(ev)를 리포트용 "계절"로 읽는다. 엔진이 이미 낸 flow(주 흐름)·overlays(방어/변동)를 그대로 쓴다.
   //   방어 신호가 켜져 있으면 방어기, 변동 신호가 켜져 있으면 전환기, 아니면 주 흐름(기회·확장·수확·축적).

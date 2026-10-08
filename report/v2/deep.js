@@ -29,7 +29,7 @@
   var nz = function (H) { return H.name ? H.name + '님은' : '당신은'; };
   function pct10(x) { return clamp(Math.round(50 + x * 1.1), 4, 98); } // 엔진 운 점수(−45~+45 안팎) → 0~100 막대
   function scoreOf(x) { var s = x && x.score; return s && typeof s === 'object' ? s.total : (typeof s === 'number' ? s : (x && x.ev && x.ev.fitScore) || 0); }
-  var SEA = { opportunity: '기회기', expansion: '확장기', harvest: '수확기', accumulation: '축적기', transition: '전환기', defense: '방어기' };
+  var SEA = { opportunity: '기회운', expansion: '확장운', harvest: '수확운', accumulation: '축적운', transition: '전환운', defense: '방어운' };
 
   /* ── 나이 표현: 대운 10년 구간 → "20대 후반 ~ 30대 초반" ── */
   function ageWord(a) { if (a < 10) return '유년기'; var d = Math.floor(a / 10) * 10, r = a % 10; return d + '대 ' + (r <= 2 ? '초반' : r <= 6 ? '중반' : '후반'); }

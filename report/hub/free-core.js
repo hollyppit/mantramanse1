@@ -219,7 +219,7 @@
     var e = td.ev || {}, f = e.flows || {}, parts = [], plain = [], pro = [];
     var flowTxt = Object.keys(PHASE_KO).filter(function (k) { return f[k] != null; }).sort(function (a, b) { return f[b] - f[a]; }).map(function (k) { return PHASE_KO[k] + ' ' + Math.round(f[k]); }).join(' · ');
     var main = { title: '오늘의 주요 작용', body: td.gz + '日의 기운이 ' + (TG_PLAIN[e.stemTG] ? '내 사주의 "' + TG_PLAIN[e.stemTG] + '"' : '내 사주') + (TG_PLAIN[e.branchTG] ? '과(와) "' + TG_PLAIN[e.branchTG] + '"' : '') + '을(를) 건드리는 날입니다.' };
-    var flow = { title: '현재 흐름', body: '오늘은 ' + td.phase + ' 쪽의 신호가 가장 강하고 (' + flowTxt + '), 나에게 필요한 기운과의 조화는 "' + td.cond + '" 상태입니다.' + (e.volatile ? ' 변동 신호가 켜져 있습니다.' : '') + (e.defense ? ' 부담을 살피라는 신호가 있습니다.' : '') };
+    var flow = { title: '현재 흐름', body: '오늘은 ' + String(td.phase).replace(/기$/, '운') + ' 쪽의 신호가 가장 강하고 (' + flowTxt + '), 나에게 필요한 기운과의 조화는 "' + td.cond + '" 상태입니다.' + (e.volatile ? ' 변동 신호가 켜져 있습니다.' : '') + (e.defense ? ' 부담을 살피라는 신호가 있습니다.' : '') };
     var rels = relGroups(e.relations), relat = { title: '원국과의 관계', body: rels.length ? rels.slice(0, 3).join(' ') : '오늘의 일진과 내 원국 사이에 두드러진 충돌·합 신호는 확인되지 않았습니다.' };
     plain.push(main, flow, relat);
     pro.push('일진 ' + td.gz + ' · 천간 십성 ' + (e.stemTG || '-') + ' · 지지 십성 ' + (e.branchTG || '-')); (e.reasons || []).forEach(function (r) { pro.push(r); }); (e.relations || []).forEach(function (r) { pro.push(r); });

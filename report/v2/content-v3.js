@@ -106,7 +106,7 @@
 
   /* ── 6. 시간의 계절(대운·현재·세운·월운) · 행동 계획 · 개운 소개 ── */
   Object.keys(SEA).forEach(function (k) {
-    var P = SEA[k], nm = { opportunity: '기회기', expansion: '확장기', harvest: '수확기', accumulation: '축적기', transition: '전환기', defense: '방어기' }[k], act = '지금 해 볼 것: ' + P.now.doThis, trap = '조심할 점: ' + P.now.trap;
+    var P = SEA[k], nm = { opportunity: '기회운', expansion: '확장운', harvest: '수확운', accumulation: '축적운', transition: '전환운', defense: '방어운' }[k], act = '지금 해 볼 것: ' + P.now.doThis, trap = '조심할 점: ' + P.now.trap;
     set('daewoon_' + k, '10년의 큰 흐름은 ' + P.tag + '입니다', P.now.body[0] + ' 이 흐름은 한두 해가 아니라 10년 단위로 깔리는 배경입니다.', trap + ' ' + act);
     set('current_' + k, '지금 서 있는 계절은 ' + nm + '입니다', P.now.headline + ' ' + P.now.body[0], trap + ' ' + act);
     set('sewoon_' + k, '올해의 흐름: ' + P.tag, P.now.headline + ' ' + P.now.body[1], trap + ' ' + act);

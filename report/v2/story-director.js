@@ -6,7 +6,7 @@
 // 순수 함수: 브라우저·node(vm) 어디서나 같은 결과. 시각(now)은 인자로 받는다.
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
-  var SEA = { opportunity: '기회기', expansion: '확장기', harvest: '수확기', accumulation: '축적기', transition: '전환기', defense: '방어기' };
+  var SEA = { opportunity: '기회운', expansion: '확장운', harvest: '수확운', accumulation: '축적운', transition: '전환운', defense: '방어운' };
 
   /* ── 1. 분야(필터 탭) ─ 점수의 출처를 분명히 적는다 ─────────────────────────── */
   var FIELDS = [
