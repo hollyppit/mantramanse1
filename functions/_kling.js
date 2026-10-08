@@ -3,7 +3,7 @@
 //
 // ① 신형(Kling 3.0 계열, kling.ai 글로벌 개발자 콘솔의 "API Key") — 환경 변수 KLING_API_KEY 가 있으면 이 방식
 //    인증  Authorization: Bearer <API_KEY>
-//    제출  POST {base}/image-to-video/{모델}  (모델 기본 kling-3.0-turbo, env KLING_MODEL)
+//    제출  POST {base}/image-to-video/{모델}  (모델 기본 kling-3.0, env KLING_MODEL)
 //          body { contents:[{type:'prompt',text},{type:'first_frame',url(이미지 URL 또는 base64)}], settings:{resolution:'720p'|'1080p', duration:5}, options:{external_task_id} }
 //    조회  GET {base}/tasks?external_task_ids=<우리가 정한 id>  → data[0].status(submitted|processing|succeeded|failed), data[0].outputs[{type:'video',url}]
 //    ※ 이 문서에는 negative_prompt 필드가 없어 프롬프트 끝에 "Avoid: …"로 붙인다.
@@ -37,15 +37,15 @@ const rid = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), x => x.t
 
 // 제출: opts { imageUrl?(공개 https 주소), b64?: async () => base64(접두사 없이), prompt, negative, mode('std'|'pro'), duration(5|10) } → 작업 핸들(조회에 쓰는 id)
 export async function klingSubmit(env, opts) {
-  const dur = [5, 10].includes(Number(opts.duration)) ? Number(opts.duration) : 5, prompt = String(opts.prompt || '').trim(), neg = String(opts.negative || '').trim();
+  const dur = Number.isInteger(Number(opts.duration)) && opts.duration >= 3 && opts.duration <= 15 ? Number(opts.duration) : 5, prompt = String(opts.prompt || '').trim(), neg = String(opts.negative || '').trim();
   if (isNew(env)) {
     const ext = 'mt' + Date.now().toString(36) + rid(), model = String(env.KLING_MODEL || 'kling-3.0-turbo').replace(/[^\w.-]/g, '');
     const text = (neg ? prompt + ' Avoid: ' + neg + '.' : prompt).slice(0, 2500), url = opts.imageUrl || (opts.b64 ? await opts.b64() : '');
     if (!url) throw new Error('시작 프레임 이미지가 없습니다');
-    const d = await call(env, 'POST', '/image-to-video/' + model, { contents: [{ type: 'prompt', text }, { type: 'first_frame', url }], settings: { resolution: opts.mode === 'pro' ? '1080p' : '720p', duration: dur }, options: { external_task_id: ext } });
+    const d = await call(env, 'POST', '/image-to-video/' + model, { contents: [{ type: 'prompt', text }, { type: 'first_frame', url }], settings: { resolution: opts.mode === '4k' ? '4k' : opts.mode === 'pro' ? '1080p' : '720p', duration: dur }, options: { external_task_id: ext } });
     if (!d || !d.id) throw new Error('kling 응답에 작업 id 가 없습니다'); return ext;
   }
-  const d = await call(env, 'POST', '/v1/videos/image2video', { model_name: env.KLING_MODEL || 'kling-v1-6', image: opts.b64 ? await opts.b64() : '', prompt: prompt.slice(0, 2500), negative_prompt: neg.slice(0, 2500), cfg_scale: 0.5, mode: opts.mode === 'pro' ? 'pro' : 'std', duration: String(dur) });
+  const d = await call(env, 'POST', '/v1/videos/image2video', { model_name: env.KLING_MODEL || 'kling-v1-6', image: opts.b64 ? await opts.b64() : '', prompt: prompt.slice(0, 2500), negative_prompt: neg.slice(0, 2500), cfg_scale: 0.5, mode: opts.mode === 'std' ? 'std' : 'pro', duration: String(dur) });
   if (!d || !d.task_id) throw new Error('kling 응답에 task_id 가 없습니다'); return d.task_id;
 }
 // 조회: { status: 'processing' | 'done' | 'failed', url?, msg? }
