@@ -104,10 +104,11 @@
     // 본문 컷은 성별 칸(panel-오행-주제-F/M)과 공용 칸(panel-오행-주제)이 있다: 사용자 성별과 같은 칸을 쓰고, 그 칸이 없는 오행·주제만 공용 칸으로, 반대 성별 칸은 쓰지 않는다.
     if (ctx.pool === 'panel' && pooled.length) {
       var pk = function (a) { var m = /^panel-([a-z]+-[a-z]+)(-([FM]))?$/.exec(a.id || ''); return m ? { key: m[1], g: m[3] || '' } : null; }, has = {};
-      pooled.forEach(function (a) { var p = pk(a); if (p && p.g && p.g === ctx.gender) has[p.key] = 1; });
-      pooled = pooled.filter(function (a) { var p = pk(a); return !p || (p.g ? p.g === ctx.gender : !has[p.key]); });
+      var mine = 0; pooled.forEach(function (a) { var p = pk(a); if (p && p.g && p.g === ctx.gender) { has[p.key] = 1; mine++; } });
+      // 내 성별 컷이 하나라도 있으면 공용 컷(남녀 주인공이 섞여 있다)은 쓰지 않는다: 남자 사주엔 남자, 여자 사주엔 여자 주인공만. 없을 때만 공용 칸.
+      pooled = pooled.filter(function (a) { var p = pk(a); return !p || (p.g ? p.g === ctx.gender : !mine && !has[p.key]); });
     }
-    if (!pooled.length) pooled = ctx.pool === 'panel' ? assets.filter(function (a) { return !isB(a); }) : assets; assets = pooled;
+    if (!pooled.length) pooled = ctx.pool === 'panel' ? assets.filter(function (a) { var m = /^panel-[a-z]+-[a-z]+-([FM])$/.exec(a.id || ''); return !isB(a) && !(m && m[1] !== ctx.gender); }) : assets; assets = pooled;
     var mi = scene.mediaIntent || {}, tags = (scene.cinema && scene.cinema.mediaTags) || [], cl = S.classify ? S.classify(tags) : { scene: [] };
     var it = { chapter: chapterId || '', chapterKey: '', sceneType: 'insight', desiredElements: mi.elements || [], desiredStates: mi.states || [], desiredThemes: mi.themes || [], desiredEmotion: mi.emotions || [], desiredActions: mi.actions || [],
       desiredScenes: (mi.scenes || []).concat(cl.scene || []), preferredMediaType: ['image', 'videoLoop', 'video', 'backgroundVideo'], visualRole: 'hero' };
