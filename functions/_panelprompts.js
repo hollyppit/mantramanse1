@@ -56,9 +56,9 @@ export function leonardo(el, th, dir, kind) {
 // Kling 이미지→영상 프롬프트(시작 프레임 = 위에서 만든 이미지). 움직임은 작고 잔잔하게, 인물의 얼굴·정체성이 변하지 않게.
 const MOT_EL = {
   wood: 'soft morning mist drifts slowly, leaves and plants sway gently, fresh light shifts across the scene',
-  fire: 'warm light flickers softly, lamp and city lights pulse gently, a faint warm glow breathes in the air',
+  fire: 'warm light flickers softly, lamp and city lights pulse gently, a faint warm glow pulses in the air',
   earth: 'golden dust motes drift in the light, grass and curtains sway slightly in a slow breeze, distant clouds move slowly',
-  metal: 'moonlight glints and slowly shifts, a thin cool breath of mist passes, small distant lights twinkle',
+  metal: 'moonlight glints and slowly shifts, a thin cool veil of mist passes, small distant lights twinkle',
   water: 'rain falls softly, ripples spread and reflections shimmer slowly' };
 const MOT_TH = {
   identity: 'the character\'s hair and clothes sway in the breeze, they blink naturally, and the camera pushes in very slowly',
