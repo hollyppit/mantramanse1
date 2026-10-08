@@ -5,9 +5,9 @@
 // 확정한 주소는 KV 'assets:map' 에 저장되고 공개 GET /api/assets 로 뷰어에 전달된다. 이미지는 R2(CLIPS_R2).
 import { json, isAdmin, configError } from '../_lib.js';
 import { generate, cleanDirection } from '../_panelart.js';
-import { GROUPS, slots, SLOT_BY_ID, keyOf, SLOT_KEY, promptOf } from '../_assetart.js';
+import { GROUPS, slots, SLOT_BY_ID, keyOf, SLOT_KEY, promptOf, klingOf } from '../_assetart.js';
 
-const MKEY = 'assets:map', PKEY = 'assets:prompts', DKEY = 'panel:direction', PREV = /^assetprev-[\w.-]{1,100}$/, TYPE_OF = { webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg' };
+const VKEY = 'assets:video', FK = /^[\w.-]{1,120}$/, fileOf = u => { const m = /^\/api\/clipfile\?k=([\w.-]{1,120})$/.exec(u || ''); return m ? m[1] : ''; }, MKEY = 'assets:map', PKEY = 'assets:prompts', DKEY = 'panel:direction', PREV = /^assetprev-[\w.-]{1,100}$/, TYPE_OF = { webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg' };
 const rnd = n => Array.from(crypto.getRandomValues(new Uint8Array(n)), x => x.toString(16).padStart(2, '0')).join('');
 const loadDir = async env => cleanDirection(await env.GLOSSARY_KV.get(DKEY, 'json'));
 const refOf = async (env, url) => { const m = /^\/api\/clipfile\?k=([\w.-]{1,120})$/.exec(url || ''), o = m && await env.CLIPS_R2.get(m[1]); return o ? { bytes: await o.arrayBuffer(), mime: (o.httpMetadata && o.httpMetadata.contentType) || 'image/webp' } : null; };
@@ -15,8 +15,8 @@ const refOf = async (env, url) => { const m = /^\/api\/clipfile\?k=([\w.-]{1,120
 export async function onRequestGet({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
-  const map = (await env.GLOSSARY_KV.get(MKEY, 'json')) || {}, saved = (await env.GLOSSARY_KV.get(PKEY, 'json')) || {}, dir = await loadDir(env);
-  return json({ groups: GROUPS, slots: slots().map(s => ({ ...s, url: map[s.id] || '', prompt: saved[s.id] || promptOf(s.id, dir), custom: !!saved[s.id], defaultPrompt: promptOf(s.id, dir) })),
+  const vids = (await env.GLOSSARY_KV.get(VKEY, 'json')) || {}, map = (await env.GLOSSARY_KV.get(MKEY, 'json')) || {}, saved = (await env.GLOSSARY_KV.get(PKEY, 'json')) || {}, dir = await loadDir(env);
+  return json({ groups: GROUPS, slots: slots().map(s => ({ ...s, url: map[s.id] || '', video: vids[s.id] || '', tools: klingOf(s.id), prompt: saved[s.id] || promptOf(s.id, dir), custom: !!saved[s.id], defaultPrompt: promptOf(s.id, dir) })),
     providers: { openai: !!env.OPENAI_API_KEY, gemini: !!env.GEMINI_API_KEY }, r2: !!env.CLIPS_R2, models: { openai: env.PANEL_IMAGE_MODEL || 'gpt-image-2', gemini: env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image' } });
 }
 
@@ -30,6 +30,16 @@ export async function onRequestPost({ request, env }) {
   const id = slot.id, only = b.provider === 'openai' || b.provider === 'gemini' ? b.provider : '', dir = await loadDir(env), map = (await env.GLOSSARY_KV.get(MKEY, 'json')) || {}, prompts = (await env.GLOSSARY_KV.get(PKEY, 'json')) || {};
   const delOld = async () => { const m = /^\/api\/clipfile\?k=(asset-[\w.-]+)$/.exec(map[id] || ''); if (m) { try { await env.CLIPS_R2.delete(m[1]); } catch { /* 무시 */ } } };
   const setUrl = async url => { map[id] = url; await env.GLOSSARY_KV.put(MKEY, JSON.stringify(map)); };
+  if (b.uploadVideo || b.clearVideo) { // 올려 둔(또는 Kling 으로 만든) 영상으로 이 슬롯을 교체 / 영상 제거 — 정지 이미지는 그대로(포스터)
+    const vids = (await env.GLOSSARY_KV.get(VKEY, 'json')) || {}, old = fileOf(vids[id]);
+    if (b.clearVideo) { delete vids[id]; await env.GLOSSARY_KV.put(VKEY, JSON.stringify(vids)); if (old) { try { await env.CLIPS_R2.delete(old); } catch { /* 무시 */ } } return json({ ok: true, id, video: '' }); }
+    if (!map[id]) return json({ error: '이 슬롯에 이미지가 먼저 있어야 합니다' }, 400);
+    if (!FK.test(b.uploadVideo)) return json({ error: '키가 올바르지 않습니다' }, 400);
+    if (!(await env.CLIPS_R2.head(b.uploadVideo))) return json({ error: '올린 영상을 찾을 수 없습니다. 다시 올려 주세요' }, 410);
+    vids[id] = '/api/clipfile?k=' + b.uploadVideo; await env.GLOSSARY_KV.put(VKEY, JSON.stringify(vids));
+    if (old && old !== b.uploadVideo) { try { await env.CLIPS_R2.delete(old); } catch { /* 무시 */ } }
+    return json({ ok: true, id, url: map[id], video: vids[id] });
+  }
   if (b.accept) {
     if (!PREV.test(b.accept)) return json({ error: '키가 올바르지 않습니다' }, 400);
     const o = await env.CLIPS_R2.get(b.accept); if (!o) return json({ error: '미리보기 파일이 만료되었습니다. 다시 만들어 주세요' }, 410);

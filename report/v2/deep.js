@@ -22,7 +22,9 @@
   var HJ_PH = { car: '車', spouse: '緣', past: '前', career: '業', place: '處', wealth: '器', style: '裝' };
   // 이미지 슬롯: 관리자가 만든 이미지가 있으면 보여 주고, 없으면 같은 자리에 한자 자리표시
   function fig(H, slot, kind, alt, cls) {
-    var u = H.assets && (H.assets[slot] || H.assets[slot.replace(/^(past:[^:]+:[^:]+):[FM]$/, '$1')]); // 전생은 성별 슬롯이 없으면 예전(성별 없는) 이미지를 대신 쓴다
+    var base = slot.replace(/^(past:[^:]+:[^:]+):[FM]$/, '$1'), u = H.assets && (H.assets[slot] || H.assets[base]), v = u && H.videos && (H.videos[slot] || (H.assets[slot] ? '' : H.videos[base])); // 영상은 이미지와 같은 슬롯에서 온 것만(전생 대체 슬롯 포함)
+    if (u && v) return '<figure class="rd-fig dp-fig' + (cls ? ' ' + cls : '') + '" data-slot="' + esc(slot) + '"><video data-asv="1" src="' + esc(v) + '" poster="' + esc(u) + '" muted loop playsinline autoplay preload="metadata" aria-label="' + esc(alt || '') + '"></video></figure>';
+    var _u = u;  // 전생은 성별 슬롯이 없으면 예전(성별 없는) 이미지를 대신 쓴다
     return '<figure class="rd-fig dp-fig' + (cls ? ' ' + cls : '') + (u ? '' : ' dp-ph') + '" data-slot="' + esc(slot) + '">' + (u ? '<img src="' + esc(u) + '" alt="' + esc(alt || '') + '" loading="lazy" decoding="async">' : '<span aria-hidden="true">' + (HJ_PH[kind] || '像') + '</span>') + '</figure>';
   }
   var who = function (H) { return H.name ? H.name + '님' : '당신'; };
@@ -165,6 +167,15 @@
     return { title: '12운성과 12신살', sub: '내 에너지의 리듬과 별의 성격', scenes: out };
   };
   var STAR_TXT = { 천을귀인: '위기에 도움을 주는 귀인이 나타나기 쉽습니다.', 천복귀인: '하늘의 복, 의식주의 안정이 따르는 별입니다.', 복성귀인: '복이 따르는 별로 평탄한 길을 돕습니다.', 월덕귀인: '해로운 일을 풀어 주는 덕의 별입니다.', 현침살: '날카로운 말·손재주의 별. 말이 칼이 되지 않게 조심하세요.', 탕화살: '화(火)와 급한 성질을 조심하라는 별입니다.', 조객살: '슬픔과 이별, 우울감을 조심하라는 별입니다.', 낙정관살: '구설과 함정을 조심하라는 별입니다.', 홍염살: '이성에게 끌리는 강한 매력의 별입니다.', 도화살: '이성 인연과 매력의 별입니다.', 백호살: '급한 사고·다툼을 조심하라는 별입니다.', 괴강살: '강한 기질과 극단적인 면의 별입니다.', 원진살: '서로 묘하게 어긋나고 미워하기 쉬운 관계의 별입니다.' };
+
+  // 풀이 이미지가 영상인 경우(video[data-asv]): 화면에 보일 때만 재생하고 벗어나면 멈춘다(여러 개가 동시에 돌지 않게)
+  (function () {
+    if (typeof document === 'undefined' || typeof IntersectionObserver === 'undefined') return;
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { var v = e.target; if (e.isIntersecting) { var p = v.play && v.play(); if (p && p.catch) p.catch(function () { }); } else if (v.pause) v.pause(); }); }, { threshold: 0.25 });
+    function scan() { [].forEach.call(document.querySelectorAll('video[data-asv]:not([data-asw])'), function (v) { v.setAttribute('data-asw', '1'); io.observe(v); }); }
+    if (typeof MutationObserver !== 'undefined') new MutationObserver(scan).observe(document.documentElement, { childList: true, subtree: true });
+    scan();
+  })();
 
   R.Deep = R.Deep || {};
   Object.assign(R.Deep, { SECTIONS: SECTIONS, esc: esc, br: br, clamp: clamp, scene: scene, sec: sec, cap: cap, chip: chip, bar: bar, fig: fig, who: who, nz: nz, pct10: pct10, scoreOf: scoreOf, ageSpan: ageSpan, ageWord: ageWord, eventTitle: eventTitle, SEA: SEA, EL_HJ: EL_HJ, EL_COLOR: EL_COLOR, STEMS: STEMS, STEM_EL: STEM_EL, sid: sid, TG_DO: TG_DO, SEA_MOOD: SEA_MOOD });

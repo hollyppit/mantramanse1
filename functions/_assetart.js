@@ -76,3 +76,18 @@ export function promptOf(id, dir) {
     return styleOf({ ...dir, people: dir.people === 'face' ? 'face' : 'back' }) + `\n주제: 조선 시대 무렵의 한국을 배경으로 '${PAST[a][b]}'의 모습을 상징적으로 그린다. 그 인물은 ${c === 'F' ? '여성' : '남성'}이다. 시대에 맞는 의복과 소품, 그 사람의 일터가 함께 보이게.\n색과 빛: ${pal(E)}.`; }
   return '';
 }
+
+// Kling 이미지→영상 프롬프트(시작 프레임 = 슬롯의 현재 이미지). 그룹별로 잔잔한 움직임만 주고 인물·사물의 모양은 바꾸지 않는다.
+const KLING_MOTION = {
+  car: 'light shifts slowly across the car body, dust and leaves drift gently, the background foliage and clouds move softly; the car stays parked and does not drive away',
+  career: 'ambient motion only: light and shadows shift softly, dust floats in the light, small background activity moves slowly',
+  spouse: 'a soft breeze stirs the hair, the light glimmers gently, a very slow natural blink and a subtle soft expression',
+  past: 'wind moves the clothes and hair, dust and embers drift, distant lantern or sunlight flickers softly',
+  place: 'light and shadows shift softly, distant silhouettes move slowly, mist or lights shimmer gently',
+  style: 'a soft breeze stirs the hair and clothing, the studio light glimmers gently, a very slow natural blink and a subtle soft expression',
+  wealth: 'light glints softly on the object, dust motes and mist drift slowly, background light flickers gently; the object itself stays still' };
+export const KLING_NEG = 'text, subtitles, watermark, logo, face distortion, face morphing, changing identity, extra limbs, sudden camera cut, fast motion, flicker, jitter';
+export function klingOf(id) {
+  const s = SLOT_BY_ID[id]; if (!s) return null;
+  return { prompt: `Gentle, cinematic motion on the first-frame image. ${KLING_MOTION[s.group][0].toUpperCase() + KLING_MOTION[s.group].slice(1)}. The camera does a very slow push-in. Keep the subject, composition, colors and the illustration style exactly as in the image; smooth, loop-friendly movement; no text appears.`, negative: KLING_NEG };
+}
