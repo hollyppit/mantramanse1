@@ -63,7 +63,8 @@
       vparts = { blocked: vc, c05: c5 ? view(c5, v) : null, plan: plan };
     }
     var actLib = (lib.remedies || []).filter(function (it) { return it.type === 'action' && it.enabled !== false && !Remedy.isExercise(it) && Rules.evaluate(it, facts).match; }), usedAct = {}, seenTerms = {};
-    var ctx = { usedIds: [], prevChapter: [] }, chapters = [], media = lib.media || lib.media || [], lastAct = 0, dirState = { four: 0 };
+    // 반대 성별 주인공 컷(panel-…-F/M)은 장면 배치에서도 쓰지 않는다
+    var ctx = { usedIds: [], prevChapter: [] }, chapters = [], media = (lib.media || []).filter(function (m) { var g = /^panel-[a-z]+-[a-z]+-([FM])$/.exec((m && m.id) || ''); return !(g && sd.gender && g[1] !== sd.gender); }), lastAct = 0, dirState = { four: 0 };
 
     cfg.chapters.forEach(function (ch) {
       var picks = Rules.pick(lib.modules, facts, ch.maxModules || 1, { categories: ch.moduleCategories });
