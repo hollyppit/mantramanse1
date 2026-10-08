@@ -19,6 +19,13 @@
   var KIND = {
     panel: { title: '패널 이미지 · 본문 컷', desc: '무빙툰 본문에서 <b>글과 함께 나오는 삽화</b>(이미지 + 글 한 컷)입니다. 오행(5) × 이야기 주제(10)별로 한 장씩 만들고, 뷰어가 사용자의 오행과 챕터 주제에 맞는 컷을 골라 글 옆에 보여 줍니다. 칸을 누르면 <b>세부 수정</b>(프롬프트 편집 · 추가 요청 · 현재 이미지를 바탕으로 수정)이나 <b>영상 업로드</b>로 교체할 수 있습니다.' },
     bg: { title: '배경 이미지 · 무빙툰 배경', desc: '무빙툰 화면 <b>전체 뒤에 깔리는 배경</b>입니다. 글이 올라가도 읽히도록 어둡고 차분하게, 뚜렷한 초점 없이 만듭니다. 오행(5) × 이야기 주제(10)별로 한 장씩 만들면 뷰어가 장면에 맞는 배경을 고르고, 이 칸이 비어 있으면 기존 클립 라이브러리의 배경을 씁니다. 칸을 누르면 세부 수정이나 <b>반복 재생 배경 영상</b> 업로드로 교체할 수 있습니다. (본문 컷과 서로 섞이지 않습니다.)' } };
+  // 본문 컷은 여성·남성 주인공 칸으로 나눠 만든다(공용 = 성별 무관 예전 칸). 뷰어는 사용자의 성별에 맞는 칸을 쓰고, 비어 있으면 공용 칸을 쓴다.
+  var GEN = { panelF: '여성 주인공', panelM: '남성 주인공', panel: '공용(성별 무관)' }, LBL = { bg: '[배경] ', panelF: '[본문·여성] ', panelM: '[본문·남성] ', panel: '[본문·공용] ' };
+  ['panelF', 'panelM'].forEach(function (k) { KIND[k] = { title: '패널 이미지 · 본문 컷 · ' + GEN[k], desc: KIND.panel.desc + ' <b>' + GEN[k] + '</b> 칸입니다: 뷰어가 사용자의 성별에 맞는 칸을 쓰고, 이 칸이 비어 있으면 공용 칸으로 대신합니다.' }; });
+  KIND.panel = { title: '패널 이미지 · 본문 컷 · 공용(성별 무관)', desc: KIND.panel.desc + ' 성별 칸이 비어 있을 때 대신 쓰는 <b>공용</b> 칸입니다(예전에 만든 50장).' };
+  function tabsOf(cur) {
+    return '<div class="row" style="gap:6px;margin:0 0 10px;flex-wrap:wrap">' + ['panelF', 'panelM', 'panel'].map(function (k) { var l = G.d.presets.filter(function (p) { return p.kind === k; }), h = l.filter(function (p) { return p.url; }).length; return '<button type="button" class="pa-tab btn' + (k === cur ? ' gold' : '') + '" data-pg="' + k + '">' + GEN[k] + ' · ' + h + '/' + l.length + '</button>'; }).join('') + '</div>';
+  }
   function cardOf(kind) {
     var d = G.d, pv = d.providers, list = d.presets.filter(function (p) { return p.kind === kind; }), have = list.filter(function (p) { return p.url; }).length, I = KIND[kind];
     var cells = '<span></span>' + Object.keys(TH).map(function (t) { return '<span class="pa-h">' + esc(TH[t]) + '</span>'; }).join('');
@@ -28,17 +35,18 @@
         return '<div class="pa-c' + (p.url ? ' has' : '') + '" data-id="' + p.id + '" data-k="' + kind + '" data-e="' + e + '" data-t="' + t + '" title="' + esc(p.title) + ' — 눌러서 ' + (p.url ? '다시 만들기' : '만들기') + '"' + (p.url ? ' style="background-image:url(\'' + esc(p.url) + '\')"' : '') + '>' + (p.url ? (p.video ? '<b>▶ 영상</b>' : '') : '<b>비어 있음</b>') + '</div>';
       }).join('');
     });
-    return '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">' + I.title + ' · ' + have + ' / ' + list.length + '장</b><p class="muted" style="margin:6px 0 10px">' + I.desc + '</p>' +
+    return '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">' + I.title + ' · ' + have + ' / ' + list.length + '장</b><p class="muted" style="margin:6px 0 10px">' + I.desc + '</p>' + (kind !== 'bg' ? tabsOf(kind) : '') +
       '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><label class="muted">모델 <select class="paProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (G.provider === 'openai' ? ' selected' : '') + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(d.models.openai) + (pv.openai ? '' : ' (키 없음)') + '</option><option value="gemini"' + (G.provider === 'gemini' ? ' selected' : '') + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(d.models.gemini) + (pv.gemini ? '' : ' (키 없음)') + '</option></select></label>' +
       '<button class="btn pa-run" data-run="missing" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button class="btn pa-run" data-run="all" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>모두 다시 만들기</button><button class="pa-stop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
-      (kind === 'panel' && !d.r2 ? '<p class="err">R2(CLIPS_R2)가 연결되지 않아 저장할 수 없습니다.</p>' : '') + (kind === 'panel' && !pv.openai && !pv.gemini ? '<p class="err">OPENAI_API_KEY 또는 GEMINI_API_KEY 가 없습니다. Cloudflare 환경 변수에 추가하세요.</p>' : '') +
+      (kind !== 'bg' && !d.r2 ?'<p class="err">R2(CLIPS_R2)가 연결되지 않아 저장할 수 없습니다.</p>' : '') + (kind !== 'bg' && !pv.openai && !pv.gemini ?'<p class="err">OPENAI_API_KEY 또는 GEMINI_API_KEY 가 없습니다. Cloudflare 환경 변수에 추가하세요.</p>' : '') +
       '<div class="pa-grid">' + cells + '</div></div>';
   }
   function draw() {
-    PANE.innerHTML = dirCard(G.d) + cardOf('panel') + cardOf('bg') + '<div class="card" style="margin-top:12px"><div class="pa-log"></div></div><div id="taBox"></div><div id="asBox"></div>';
+    PANE.innerHTML = dirCard(G.d) + cardOf(G.pg || 'panelF') + cardOf('bg') + '<div class="card" style="margin-top:12px"><div class="pa-log"></div></div><div id="taBox"></div><div id="asBox"></div>';
     bindDir(); if (window.V2Tarot) window.V2Tarot.open(PANE.querySelector('#taBox')); if (window.V2Assets) window.V2Assets.open(PANE.querySelector('#asBox'));
     [].forEach.call(PANE.querySelectorAll('.paProv'), function (sel) { sel.onchange = function () { G.provider = this.value; [].forEach.call(PANE.querySelectorAll('.paProv'), function (o) { o.value = G.provider; }); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-run'), function (b) { b.onclick = function () { (b.dataset.run === 'all' ? runAll : runMissing)(b.dataset.k); }; });
+    [].forEach.call(PANE.querySelectorAll('.pa-tab'), function (b) { b.onclick = function () { if (G.busy) return; G.pg = b.dataset.pg; draw(); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-stop'), function (b) { b.onclick = function () { G.stop = true; log('중지 요청 — 진행 중인 한 장이 끝나면 멈춥니다'); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-c'), function (c) { c.onclick = function () { if (G.busy) return; editor(c.dataset.e, c.dataset.t, c.dataset.k); }; });
     log('');
@@ -117,7 +125,7 @@
     };
   }
   function one(kind, e, t, redraw, useDefault) {
-    var cell = PANE.querySelector('.pa-c[data-k="' + kind + '"][data-e="' + e + '"][data-t="' + t + '"]'); if (cell) cell.classList.add('run'); G.busy = true; log((kind === 'bg' ? '[배경] ' : '[본문] ') + EL[e] + ' · ' + TH[t] + ' 만드는 중… (보통 20~60초)');
+    var cell = PANE.querySelector('.pa-c[data-k="' + kind + '"][data-e="' + e + '"][data-t="' + t + '"]'); if (cell) cell.classList.add('run'); G.busy = true; log((LBL[kind] || '') + EL[e] + ' · ' + TH[t] + ' 만드는 중… (보통 20~60초)');
     return C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, element: e, theme: t, provider: G.provider, useDefault: !!useDefault }) })
       .then(function (r) { log('✓ ' + EL[e] + ' · ' + TH[t] + ' — ' + r.provider + ' ' + r.model); if (cell && !redraw) { cell.classList.remove('run'); cell.classList.add('has'); cell.style.backgroundImage = 'url(\'' + r.url + '\')'; cell.innerHTML = ''; } return true; })
       .catch(function (er) { if (cell) cell.classList.remove('run'); log('✗ ' + EL[e] + ' · ' + TH[t] + ' — ' + er.message); toast(er.message, true); return false; })
@@ -126,7 +134,7 @@
   function runMissing(kind) { runList(G.d.presets.filter(function (p) { return p.kind === kind && !p.url; }), false); }
   // 모두 다시 만들기: 이미 있는 컷까지 현재 비주얼 디렉션으로 전부 새로 만든다. 새로 만드는 데 성공한 칸만 교체되고(실패하면 옛 이미지 유지) 옛 파일은 지워진다.
   function runAll(kind) {
-    var all = G.d.presets.filter(function (p) { return p.kind === kind; }), n = all.length, custom = all.filter(function (p) { return p.custom; }).length; if (!confirm((kind === 'bg' ? '배경 ' : '본문 컷 ') + '50장 전체를 현재 비주얼 디렉션(화풍·감성·세계관…)으로 다시 만듭니다.\n이미지 비용이 장당 발생하고 30분 이상 걸릴 수 있으며, 성공한 칸의 기존 이미지는 삭제됩니다. 계속할까요?')) return;
+    var all = G.d.presets.filter(function (p) { return p.kind === kind; }), n = all.length, custom = all.filter(function (p) { return p.custom; }).length; if (!confirm((LBL[kind] || '').replace(/[\[\]]/g, '') + ' 50장 전체를 현재 비주얼 디렉션(화풍·감성·세계관…)으로 다시 만듭니다.\n이미지 비용이 장당 발생하고 30분 이상 걸릴 수 있으며, 성공한 칸의 기존 이미지는 삭제됩니다. 계속할까요?')) return;
     var reset = false; if (custom) reset = confirm('칸별로 직접 고쳐 저장한 프롬프트가 ' + custom + '개 있습니다.\n[확인] 그 프롬프트를 버리고 현재 디렉션으로 만듭니다.\n[취소] 고친 프롬프트를 그대로 사용합니다.');
     runList(all, reset, true);
   }

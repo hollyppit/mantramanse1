@@ -35,7 +35,7 @@ const path = require('path'), fails = [], ok = (c, m) => { if (!c) fails.push(m)
   ok(r.s === 200 && r.d.direction.art === 'webtoon' && r.d.direction.feel === 'cinematic' && r.d.direction.world === 'modern', '디렉션 저장');
   const g2 = await get(); ok(/한국 웹툰 스타일의 일러스트\. 또렷한/.test(g2.presets[0].defaultPrompt) && /영화 같은 감성/.test(g2.presets[0].defaultPrompt) && /현대 한국/.test(g2.presets[0].defaultPrompt) && /비 오는 밤 위주/.test(g2.presets[0].defaultPrompt) && !/동양화풍/.test(g2.presets[0].defaultPrompt), '웹툰 화풍 + 영화 감성이 함께 반영(동양화 문구는 빠짐)');
   ok(/글자·숫자/.test(g2.presets[0].defaultPrompt), '디렉션을 바꿔도 글자 금지는 유지');
-  r = await put({ direction: { art: 'zzz', world: 'eastFantasy' } }); ok(r.d.direction.art === 'webtoonInk' && r.d.direction.world === 'eastFantasy', '모르는 값은 기본으로');
+  r = await put({ direction: { art: 'zzz', world: 'eastFantasy' } }); ok(r.d.direction.art === 'webtoon' && r.d.direction.world === 'eastFantasy', '모르는 값은 기본으로');
   ok(/동양 판타지/.test(P.slotPrompt({ scene: ['mist'] }, 't', r.d.direction)), '클립 소스 칸 프롬프트에도 적용');
   r = await put({ direction: { look: 'photo' } }); ok(r.d.direction.art === 'realistic' && r.d.direction.feel === 'documentary', '예전 look 저장값은 화풍·감성으로 변환');
   r = await put({ direction: { art: 'webtoon', feel: 'noir' } }); ok(/또렷한/.test(P.styleOf(r.d.direction)) && /느와르 감성/.test(P.styleOf(r.d.direction)), '화풍과 감성은 서로 독립적으로 조합');
@@ -57,6 +57,14 @@ const path = require('path'), fails = [], ok = (c, m) => { if (!c) fails.push(m)
   idx = JSON.parse(kv.get('media:index')); ok(r.s === 200 && idx.find(m => m.id === 'panel-fire-career').panelVideo === '/api/clipfile?k=0f1e2d3c4b5a69788.mp4' && !r2.has('a1b2c3d4e5f6a7b8c9.png'), '영상이 있는 칸에 이미지를 올리면 영상은 유지되고 옛 이미지 파일만 지워진다');
   r = await post({ element: 'fire', theme: 'career', uploadImage: '0f1e2d3c4b5a69788.mp4' }); ok(r.s === 400, '이미지가 아닌 파일은 거부');
   r = await post({ element: 'fire', theme: 'career', uploadImage: '../etc/x' }); ok(r.s === 400, '잘못된 키는 거부');
+  // 본문 컷 성별 칸 — 생성·업로드·목록
+  r = await post({ element: 'wood', theme: 'love', kind: 'panelF' });
+  ok(r.s === 200 && r.d.id === 'panel-wood-love-F', '여성 칸 생성: id panel-wood-love-F');
+  r = await post({ element: 'wood', theme: 'love', kind: 'panelM', preview: true, extra: '더 따뜻하게' });
+  ok(r.s === 200 && /^panelprev-/.test(r.d.preview), '남성 칸 미리 만들기');
+  r2.set('d4d4d4d4d4d4d4d4d4.png', Buffer.from('imgM')); r = await post({ element: 'wood', theme: 'love', kind: 'panelM', uploadImage: 'd4d4d4d4d4d4d4d4d4.png' });
+  idx = JSON.parse(kv.get('media:index')); ok(r.s === 200 && r.d.id === 'panel-wood-love-M' && idx.some(m => m.id === 'panel-wood-love-F') && idx.some(m => m.id === 'panel-wood-love-M'), '남성 칸 업로드: 여성 칸·공용 칸과 서로 별개 항목');
+  { const gl = await get(); ok(gl.presets.length === 200 && ['panel', 'panelF', 'panelM', 'bg'].every(k => gl.presets.filter(p => p.kind === k).length === 50), '관리자 목록: 공용·여성·남성·배경 각 50칸'); const c = gl.presets.find(p => p.id === 'panel-wood-love-F'); ok(c && c.url && /한국인 여성/.test(c.defaultPrompt) && /young Korean woman/.test(c.tools.leo), '여성 칸: 이미지 있음 · 성별 프롬프트와 외부 도구 프롬프트 제공'); }
   if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log(' ✗ ' + f)); process.exit(1); }
   console.log('패널 세부 수정 검증 모두 통과');
 })();

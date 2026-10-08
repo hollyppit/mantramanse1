@@ -8,7 +8,7 @@ export const STYLE = '한 편의 한국 웹툰 같은 시네마틱 일러스트.
 
 // ── 비주얼 디렉션: 화풍(look) · 세계관(world) · 분위기(mood) · 인물(people) + 자유 문장. 관리자에서 고르고 모든 프롬프트에 들어간다. 값은 id 만 저장.
 export const DIRECTION_OPTIONS = {
-  art: { label: '화풍 (그림체)', default: 'webtoonInk', items: {
+  art: { label: '화풍 (그림체)', default: 'webtoon', items: {
     webtoonInk: ['웹툰 + 동양화', '한국 웹툰 스타일의 일러스트에 먹물 번짐과 수채 질감이 섞인 동양화풍 채색.'],
     webtoon: ['웹툰', '한국 웹툰 스타일의 일러스트. 또렷한 선화와 깔끔한 채색, 웹툰 특유의 배경 표현.'],
     ink: ['동양화 · 수묵', '수묵·동양화 스타일. 먹의 번짐과 여백, 붓 선, 절제된 색.'],
@@ -22,7 +22,7 @@ export const DIRECTION_OPTIONS = {
     fairytale: ['동화 감성', '동화 같은 감성: 포근하고 환상적인 분위기, 부드러운 빛.'],
     lyrical: ['서정적 감성', '서정적인 감성: 조용하고 섬세한 분위기, 여백과 부드러운 빛 번짐.'],
     none: ['지정 안 함', ''] } },
-  world: { label: '세계관·배경', default: 'asis', items: {
+  world: { label: '세계관·배경', default: 'modern', items: {
     asis: ['장면 그대로', ''],
     modern: ['현실 · 현대 한국', '배경은 현대 한국의 실제 장소(도시·골목·사무실·집·카페·지하철 등)로 현실감 있게 그린다. 판타지 요소는 넣지 않는다.'],
     eastFantasy: ['동양 판타지', '배경은 동양 판타지 세계로 바꿔 그린다. 한옥·누각·기와지붕·서원·돌다리·등불·안개 낀 산수, 한복풍 의복. 장면의 장소·소품은 이 세계관에 맞게 번역한다(사무실→서원, 도시→성곽 마을).'],
@@ -32,11 +32,11 @@ export const DIRECTION_OPTIONS = {
   mood: { label: '분위기', default: 'auto', items: {
     auto: ['오행에 맡김', ''], warm: ['따뜻하고 포근하게', '전체적으로 따뜻하고 포근한 분위기.'], lonely: ['쓸쓸하고 고요하게', '쓸쓸하고 고요한 분위기, 여백이 많다.'],
     hopeful: ['희망차고 맑게', '희망이 느껴지는 맑고 밝은 분위기.'], tense: ['긴장감 있게', '긴장감이 감도는 묵직한 분위기, 강한 명암 대비.'], dreamy: ['몽환적으로', '꿈속 같은 몽환적인 분위기, 부드러운 안개와 빛 번짐.'] } },
-  people: { label: '인물', default: 'back', items: {
+  people: { label: '인물', default: 'face', items: {
     back: ['뒷모습·실루엣만', '인물은 뒷모습이나 멀리 보이는 실루엣으로만 그리고 얼굴 클로즈업은 하지 않는다.'], none: ['사람 없이 풍경만', '사람은 그리지 않고 풍경과 사물만으로 표현한다.'],
     face: ['얼굴이 보이는 인물', '인물의 얼굴과 표정이 보여도 좋다(특정 실존 인물을 닮게 그리지 않는다).'] } },
 };
-export const DEFAULT_DIRECTION = { art: 'webtoonInk', feel: 'cinematic', world: 'asis', mood: 'auto', people: 'back', extra: '' };
+export const DEFAULT_DIRECTION = { art: 'webtoon', feel: 'cinematic', world: 'modern', mood: 'auto', people: 'face', extra: '' };
 export function cleanDirection(v) {
   v = v && typeof v === 'object' ? { ...v } : {}; const o = { ...DEFAULT_DIRECTION };
   const OLD = { ink: ['webtoonInk', 'cinematic'], film: ['realistic', 'cinematic'], photo: ['realistic', 'documentary'], anime: ['anime', 'lyrical'], painting: ['painting', 'lyrical'], noir: ['realistic', 'noir'] }; // 예전 저장값(look 하나) 호환
@@ -76,15 +76,38 @@ export const THEMES = {
 const SCENE_BY_EL = { wood: ['forest', 'sunrise'], fire: ['sunset'], earth: ['field', 'mountain'], metal: ['nightCity', 'stars'], water: ['rain', 'sea'] };
 const ACTIONS = /^(walking|studying|working|meeting|thinking|resting|lookingBack|lookingForward)$/;
 
-// 용도(kind): 'panel' = 본문 컷(글과 함께 나오는 삽화, id panel-…) · 'bg' = 무빙툰 배경(글 뒤에 깔리는 화면, id panelbg-…). 뷰어는 id 접두사로 두 풀을 가른다.
-export const KINDS = { panel: '본문 컷', bg: '배경' };
-export const kindOf = k => (k === 'bg' ? 'bg' : 'panel');
-export const presetId = (el, th, kind) => (kindOf(kind) === 'bg' ? `panelbg-${el}-${th}` : `panel-${el}-${th}`);
+// 용도(kind): 'panel' = 본문 컷 공용(성별 무관, 예전 50장) · 'panelF' · 'panelM' = 본문 컷 여성·남성 주인공(id panel-…-F / -M) · 'bg' = 무빙툰 배경(id panelbg-…).
+// 뷰어는 id 로 풀을 가른다: 본문 컷은 panel-…(사용자 성별과 같은 칸 → 없으면 공용), 배경은 panelbg-… 와 기존 클립.
+export const KINDS = { panel: '본문 컷 · 공용', panelF: '본문 컷 · 여성', panelM: '본문 컷 · 남성', bg: '배경' };
+export const kindOf = k => (k === 'bg' || k === 'panelF' || k === 'panelM' ? k : 'panel');
+export const genderOfKind = k => (k === 'panelF' ? 'F' : k === 'panelM' ? 'M' : '');
+export const presetId = (el, th, kind) => { const k = kindOf(kind); return k === 'bg' ? `panelbg-${el}-${th}` : `panel-${el}-${th}${genderOfKind(k) ? '-' + genderOfKind(k) : ''}`; };
+const KIND_SUFFIX = { panel: '', panelF: ' · 여성', panelM: ' · 남성', bg: ' (배경)' };
 export function presets(kind) {
   const out = [], k = kindOf(kind);
-  for (const el of Object.keys(ELEMENTS)) for (const th of Object.keys(THEMES)) out.push({ id: presetId(el, th, k), kind: k, element: el, theme: th, title: `${ELEMENTS[el].name} · ${THEMES[th].name}${k === 'bg' ? ' (배경)' : ''}` });
+  for (const el of Object.keys(ELEMENTS)) for (const th of Object.keys(THEMES)) out.push({ id: presetId(el, th, k), kind: k, gender: genderOfKind(k), element: el, theme: th, title: `${ELEMENTS[el].name} · ${THEMES[th].name}${KIND_SUFFIX[k]}` });
   return out;
 }
+// 본문 컷 장면(한국어): 본문 내용에 맞춘 현대 한국 일상 + 표정이 보이는 주인공. {P} = 주인공(성별에 따라 한국인 여성·남성·청년).
+const PLOT = {
+  identity: '{P}이 긴 강변 산책로의 시작점에 서서, 멀리 도시 스카이라인이 펼쳐진 앞쪽을 바라본다. 차분하고 단단한 표정',
+  talent: '{P}이 조용한 도서관(또는 북카페)에서 책에 깊이 몰입해 있다. 펼친 책 위로 한 줄기 빛이 떨어지고 집중한 옆얼굴이 보인다',
+  career: '{P}이 새벽 도시가 내려다보이는 큰 창가의 업무 책상에 앉아 있다. 켜진 노트북과 식은 커피, 피곤하지만 집중한 표정',
+  wealth: '{P}이 저녁 불빛이 켜진 재래시장 골목을 걷는다(간판 글자는 읽히지 않게). 작은 장바구니를 들고 생각에 잠긴 표정',
+  love: '{P}이 비 오는 밤 도심 거리에서 연인(이성)과 우산 하나를 함께 쓰고 있다. 두 사람의 얼굴이 서로를 향하고 은은한 미소가 보인다',
+  relationship: '{P}이 따뜻한 조명의 식당 긴 테이블에서 친구들과 둘러앉아 웃으며 이야기한다. 얼굴들이 또렷이 보인다',
+  family: '{P}이 해 질 녘 불이 켜진 가족의 집(아파트 단지 또는 시골집) 창문을 올려다본다. 그리움이 섞인 따뜻한 표정',
+  shadow: '{P}이 지하철 통로 또는 사무실 복도처럼 긴 복도 한가운데 서 있고, 끝에서 밀려오는 빛에 뒤로 긴 그림자가 늘어진다. 조용히 고민하는 표정',
+  daewoon: '{P}이 도시 공원의 갈림길에 서 있다. 한쪽 길은 눈이 덮이고 다른 쪽은 꽃이 피어 있으며, 두 길을 생각에 잠겨 바라본다',
+  remedy: '{P}이 아침 안개가 낀 공원의 큰 나무 아래 벤치에서 가방을 내려놓고 쉰다. 눈을 감고 편안하게 미소 짓는다' };
+// 배경용 장소(사람 없이 풍경만)
+const PLACE = {
+  identity: '긴 강변 산책로와 멀리 보이는 도시 스카이라인', talent: '조용한 도서관, 책장 사이로 들어오는 빛', career: '새벽 도시가 내려다보이는 큰 창가의 빈 책상', wealth: '저녁 재래시장 골목에 켜진 불빛(간판 글자는 읽히지 않게)',
+  love: '비 오는 밤 도심 거리, 젖은 길에 번지는 불빛', relationship: '따뜻한 조명이 켜진 빈 식당의 긴 테이블', family: '해 질 녘 불이 켜진 집들의 창문', shadow: '긴 복도와 끝에서 들어오는 빛',
+  daewoon: '눈 덮인 길과 꽃핀 길로 갈라지는 공원 갈림길', remedy: '아침 안개가 낀 큰 나무와 빈 벤치' };
+// 본문 컷·배경 프롬프트용 빛·색(장소와 무관한 조명 분위기). 풀이 화면 이미지(자동차·직업…)는 ELEMENTS.palette 를 그대로 쓴다.
+const PAL = { wood: '이른 새벽의 청록·연두 빛, 옅은 아침 안개, 싱그러운 초록 포인트', fire: '노을의 주황·붉은 금빛, 따뜻한 조명의 열기', earth: '황토·호박색 황금빛, 고요하고 묵직한 저녁 빛', metal: '달빛 은색과 쇳빛 청회색, 서늘하고 또렷한 밤공기', water: '깊은 남색·검푸른 빛, 비와 물에 비친 반사, 잔잔한 밤 분위기' };
+const WHO_KO = { F: '20대 후반의 한국인 여성', M: '20대 후반의 한국인 남성', '': '20대 후반의 한국인 청년' };
 // 배경용 공통 문장: 본문 컷과 같은 화풍·감성이되, 글 아래 30%만 비우는 대신 화면 전체가 글 뒤에서 은은하게 깔리도록 한다.
 export function bgStyleOf(dir) {
   const d = cleanDirection(dir), O = DIRECTION_OPTIONS, part = k => O[k].items[d[k]][1];
@@ -93,13 +116,15 @@ export function bgStyleOf(dir) {
 }
 export function promptFor(el, th, dir, kind) {
   const E = ELEMENTS[el], T = THEMES[th]; if (!E || !T) return '';
-  if (kindOf(kind) === 'bg') return `${bgStyleOf(dir)}\n배경 분위기: ${T.scene}. 이 장면을 멀리서 본 넓고 고요한 풍경으로 그린다.\n색과 빛: ${E.palette}.\n오행 ${E.name}의 기운이 풍경 전체의 계절감과 분위기로 드러나게 한다.`;
-  return `${styleOf(dir)}\n장면: ${T.scene}.\n색과 빛: ${E.palette}.\n오행 ${E.name}의 기운이 풍경 전체의 계절감과 분위기로 드러나게 한다.`;
+  const k = kindOf(kind);
+  if (k === 'bg') return `${bgStyleOf(dir)}\n배경 분위기: ${PLACE[th]}. 이 장면을 멀리서 본 넓고 고요한 풍경으로 그린다.\n색과 빛: ${PAL[el]}.\n오행 ${E.name}의 기운이 풍경 전체의 계절감과 분위기로 드러나게 한다.`;
+  const face = cleanDirection(dir).people === 'face' ? '\n인물: 주인공의 얼굴과 표정이 또렷하게 보이는 중간 거리(허리 위~무릎 위) 구도. 실존 인물을 닮지 않은 가상의 인물이고, 같은 시리즈의 인물처럼 일관된 이목구비와 헤어스타일로 그린다.' : '';
+  return `${styleOf(dir)}\n장면: ${PLOT[th].replace('{P}', WHO_KO[genderOfKind(k)])}.${face}\n색과 빛: ${PAL[el]}.\n오행 ${E.name}의 기운이 장면 전체의 빛과 분위기로 드러나게 한다.`;
 }
 // 생성된 파일 → 미디어 라이브러리 항목(태그는 승인 상태라 조합에 바로 쓰인다). cleanMedia 가 TAX 밖 태그를 걸러낸다.
 export function mediaItem(el, th, url, bytes, provider, panelVideo, kind) {
-  const E = ELEMENTS[el], T = THEMES[th], bg = kindOf(kind) === 'bg';
-  return cleanMedia({ id: presetId(el, th, kind), type: 'image', url, posterUrl: url, title: `${E.name} · ${T.name} ${bg ? '배경' : '패널'}`, description: `AI 생성 ${bg ? '배경' : '패널'}(${provider}) — ${T.scene}`, orientation: 'portrait', priority: bg ? 55 : 60,
+  const E = ELEMENTS[el], T = THEMES[th], k = kindOf(kind), bg = k === 'bg', g = genderOfKind(k);
+  return cleanMedia({ id: presetId(el, th, k), type: 'image', url, posterUrl: url, title: `${E.name} · ${T.name} ${bg ? '배경' : '패널'}${g ? (g === 'F' ? ' 여성' : ' 남성') : ''}`, description: `AI 생성 ${bg ? '배경' : '패널'}(${provider}) — ${bg ? PLACE[th] : PLOT[th].replace('{P}', WHO_KO[g])}`, orientation: 'portrait', priority: bg ? 55 : g ? 62 : 60,
     elementTags: [el], stateTags: [E.state], emotionTags: [E.mood], themeTags: [th], sceneTags: SCENE_BY_EL[el].concat(T.tags.filter(t => !ACTIONS.test(t))), actionTags: T.tags.filter(t => ACTIONS.test(t)),
     visualRole: bg ? ['background', 'hero'] : ['hero'], loopable: bg && !!panelVideo, enabled: true, tagsApproved: true, bytes, uploadedAt: Date.now(), panelVideo: panelVideo || '' });
 }

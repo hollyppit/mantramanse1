@@ -101,6 +101,12 @@
     var S = R.Scenes; if (!S || !assets || !assets.length) return null; ctx = ctx || { usedIds: [] };
     // 용도별 풀: ctx.pool 'panel' = 본문 컷(id panel-…), 그 외 = 배경(본문 컷 panel-… 제외, 배경 전용 panelbg-… 포함). 해당 풀이 비어 있으면 예전처럼 전체에서 고른다.
     var isP = function (a) { return /^panel-/.test(a.id || ''); }, isB = function (a) { return /^panelbg-/.test(a.id || ''); }, pooled = ctx.pool === 'panel' ? assets.filter(isP) : assets.filter(function (a) { return !isP(a); });
+    // 본문 컷은 성별 칸(panel-오행-주제-F/M)과 공용 칸(panel-오행-주제)이 있다: 사용자 성별과 같은 칸을 쓰고, 그 칸이 없는 오행·주제만 공용 칸으로, 반대 성별 칸은 쓰지 않는다.
+    if (ctx.pool === 'panel' && pooled.length) {
+      var pk = function (a) { var m = /^panel-([a-z]+-[a-z]+)(-([FM]))?$/.exec(a.id || ''); return m ? { key: m[1], g: m[3] || '' } : null; }, has = {};
+      pooled.forEach(function (a) { var p = pk(a); if (p && p.g && p.g === ctx.gender) has[p.key] = 1; });
+      pooled = pooled.filter(function (a) { var p = pk(a); return !p || (p.g ? p.g === ctx.gender : !has[p.key]); });
+    }
     if (!pooled.length) pooled = ctx.pool === 'panel' ? assets.filter(function (a) { return !isB(a); }) : assets; assets = pooled;
     var mi = scene.mediaIntent || {}, tags = (scene.cinema && scene.cinema.mediaTags) || [], cl = S.classify ? S.classify(tags) : { scene: [] };
     var it = { chapter: chapterId || '', chapterKey: '', sceneType: 'insight', desiredElements: mi.elements || [], desiredStates: mi.states || [], desiredThemes: mi.themes || [], desiredEmotion: mi.emotions || [], desiredActions: mi.actions || [],
