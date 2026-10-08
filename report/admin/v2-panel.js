@@ -12,7 +12,18 @@
     '.pa-c b{background:rgba(0,0,0,.6);width:100%;text-align:center;padding:2px 0;font-weight:400}.pa-log{font-size:.8rem;color:var(--ink2);max-height:160px;overflow:auto;margin-top:10px;line-height:1.6}@media(max-width:900px){.pa-grid{grid-template-columns:50px repeat(5,minmax(0,1fr))}}';
   document.head.appendChild(css);
 
-  function load() { return C.api('/api/panel-art').then(function (d) { G.d = d; }); }
+  // 패널 목록 + Kling 영상 생성 상태(키 설정 여부 · 진행 중 작업). Kling 쪽이 실패해도 목록은 그대로 보여 준다.
+  function load() { return Promise.all([C.api('/api/panel-art'), C.api('/api/panel-video').catch(function () { return { enabled: false, tasks: [] }; })]).then(function (a) { G.d = a[0]; G.vid = a[1]; }); }
+  function jpegOf(url) { // 현재 이미지를 JPEG 로 바꾼다(Kling 은 JPG·PNG 만 받는다. 같은 출처 이미지라 캔버스가 막히지 않는다)
+    return new Promise(function (ok, no) { var im = new Image(); im.onload = function () { var c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; c.getContext('2d').drawImage(im, 0, 0); c.toBlob(function (b) { b ? ok(b) : no(new Error('이미지를 JPEG 로 바꾸지 못했습니다')); }, 'image/jpeg', 0.95); }; im.onerror = function () { no(new Error('현재 이미지를 불러오지 못했습니다')); }; im.src = url; });
+  }
+  function klingCard(p, cur) {
+    var h = '<div class="card" style="padding:10px"><b style="color:var(--gold)">Kling 으로 영상 만들기 (이 칸의 현재 이미지 → 영상)</b>';
+    if (!G.vid || !G.vid.enabled) return h + '<p class="muted" style="margin:4px 0 0;font-size:.8rem">Cloudflare 환경 변수 <b>KLING_ACCESS_KEY</b> 와 <b>KLING_SECRET_KEY</b> 를 설정하면 여기서 바로 영상을 만들 수 있습니다(Kling 개발자 콘솔에서 발급).</p></div>';
+    return h + '<p class="muted" style="margin:4px 0 8px;font-size:.8rem">이 칸의 이미지를 시작 프레임으로 5초 영상을 만들어 이 칸의 영상으로 바꿉니다. Kling 크레딧이 사용되고 보통 1~5분 걸립니다. 정지 이미지는 포스터로 그대로 남습니다.</p>' +
+      '<label class="muted" style="display:block">영상 프롬프트 (영어, 고쳐 쓸 수 있어요)<textarea id="peKP" rows="5" style="width:100%">' + esc(p.tools ? p.tools.kling : '') + '</textarea></label>' +
+      '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><label class="muted">품질 <select id="peKM"><option value="std">표준 (720p)</option><option value="pro">고화질 (1080p · 크레딧 더 사용)</option></select></label><button type="button" class="btn" id="peKGo"' + (cur ? '' : ' disabled') + '>Kling 으로 영상 만들기</button></div><p class="muted" id="peKMsg" style="margin-top:6px;font-size:.8rem">' + (cur ? '' : '이 칸에 이미지가 먼저 있어야 합니다.') + '</p></div>';
+  }
   function open(tab, pw) { C.setPw(pw); PANE = document.getElementById('t-panelart'); PANE.innerHTML = '<p class="muted">불러오는 중…</p>'; load().then(draw).catch(function (e) { PANE.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
   function log(t) { G.log.unshift(t); G.log = G.log.slice(0, 40); var b = $('.pa-log'); if (b) b.innerHTML = G.log.map(esc).join('<br>'); }
   /* 용도 둘: 본문 컷(글과 함께 나오는 삽화) · 배경(화면 전체 뒤에 깔리는 장면). 각각 오행 5 × 주제 10 = 50칸. 서버는 id 접두사(panel- / panelbg-)로 구분한다. */
@@ -64,7 +75,7 @@
       '<label class="muted">모델 <select id="peProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(G.d.models.openai) + '</option><option value="gemini"' + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(G.d.models.gemini) + '</option></select></label>' +
       '<details><summary class="muted" style="cursor:pointer">프롬프트 전체 보기·편집' + (p.custom ? ' <b style="color:var(--gold)">(수정됨)</b>' : '') + '</summary><textarea id="pePrompt" rows="9" style="width:100%;margin-top:6px"></textarea><div class="row" style="gap:6px;margin-top:4px"><button type="button" id="peReset">기본 프롬프트로 되돌리기</button><label class="muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="peSave"> 확정할 때 이 프롬프트를 이 칸의 기본으로 저장</label></div></details>' +
       '<div class="card" style="padding:10px"><b style="color:var(--gold)">직접 만든 이미지로 교체 (Leonardo 등)</b><p class="muted" style="margin:4px 0 8px;font-size:.8rem">아래 프롬프트를 복사해 Leonardo 에서 이미지를 만든 뒤 올리면 이 칸이 그 이미지로 바뀝니다(jpg·png·webp, 15MB 이하). 칸에 영상이 있으면 영상은 그대로 두고 정지 이미지만 바뀝니다.</p>' + (p.tools ? toolBox('Leonardo 이미지 프롬프트 (영어)', p.tools.leo, 'peT1') + toolBox('네거티브 프롬프트', p.tools.leoNeg, 'peT2') + '<p class="muted" style="font-size:.78rem;margin:4px 0">권장 크기 ' + esc(p.tools.leoSize) + '</p>' : '') + '<input type="file" id="peImgUp" accept="image/jpeg,image/png,image/webp"> <button type="button" class="btn" id="peImgGo">이미지 올려 교체</button><p class="muted" id="peImgMsg" style="margin-top:6px;font-size:.8rem"></p></div>' +
-      '<div class="card" style="padding:10px"><b style="color:var(--gold)">영상으로 교체 (업로드)</b>' + (p.tools ? '<p class="muted" style="margin:4px 0 0;font-size:.8rem">Kling 이미지→영상: 위 이미지를 시작 프레임으로 넣고 아래 프롬프트를 쓰세요. ' + esc(p.tools.klingSet) + '</p>' + toolBox('Kling 영상 프롬프트 (영어)', p.tools.kling, 'peT3') + toolBox('Kling 네거티브 프롬프트', p.tools.klingNeg, 'peT4') : '') + '<p class="muted" style="margin:4px 0 8px;font-size:.8rem">' + (kind === 'bg' ? 'mp4·webm 파일을 올리면 이 칸이 <b>반복 재생되는 배경 영상</b>이 됩니다(소리 없이 무한 반복). 글이 올라가도 읽히도록 어둡고 움직임이 잔잔한 영상이 좋습니다. 정지 이미지(포스터)는 영상의 첫 장면으로 자동 만들거나 직접 올릴 수 있습니다.' : 'mp4·webm 파일을 올리면 이 칸이 영상 컷이 됩니다. 정지 이미지(포스터)는 영상의 첫 장면으로 자동 만들거나, 아래에서 직접 올릴 수 있습니다. 소리는 꺼진 채 화면에 들어오면 재생됩니다.') + '</p><input type="file" id="peVid" accept="video/mp4,video/webm,video/quicktime"> <label class="muted" style="display:block;margin-top:6px">포스터 이미지(선택) <input type="file" id="pePoster" accept="image/*"></label><div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><button type="button" class="btn" id="peUp">영상 올리고 교체</button><button type="button" id="peUnvid"' + (p.video ? '' : ' disabled') + '>영상 빼고 이미지로 되돌리기</button></div><p class="muted" id="peUpMsg" style="margin-top:6px;font-size:.8rem">' + (p.video ? '현재 이 칸은 영상입니다.' : '') + '</p></div>' +
+      klingCard(p, cur) + '<div class="card" style="padding:10px"><b style="color:var(--gold)">영상으로 교체 (업로드)</b>' + (p.tools ? '<p class="muted" style="margin:4px 0 0;font-size:.8rem">Kling 이미지→영상: 위 이미지를 시작 프레임으로 넣고 아래 프롬프트를 쓰세요. ' + esc(p.tools.klingSet) + '</p>' + toolBox('Kling 영상 프롬프트 (영어)', p.tools.kling, 'peT3') + toolBox('Kling 네거티브 프롬프트', p.tools.klingNeg, 'peT4') : '') + '<p class="muted" style="margin:4px 0 8px;font-size:.8rem">' + (kind === 'bg' ? 'mp4·webm 파일을 올리면 이 칸이 <b>반복 재생되는 배경 영상</b>이 됩니다(소리 없이 무한 반복). 글이 올라가도 읽히도록 어둡고 움직임이 잔잔한 영상이 좋습니다. 정지 이미지(포스터)는 영상의 첫 장면으로 자동 만들거나 직접 올릴 수 있습니다.' : 'mp4·webm 파일을 올리면 이 칸이 영상 컷이 됩니다. 정지 이미지(포스터)는 영상의 첫 장면으로 자동 만들거나, 아래에서 직접 올릴 수 있습니다. 소리는 꺼진 채 화면에 들어오면 재생됩니다.') + '</p><input type="file" id="peVid" accept="video/mp4,video/webm,video/quicktime"> <label class="muted" style="display:block;margin-top:6px">포스터 이미지(선택) <input type="file" id="pePoster" accept="image/*"></label><div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><button type="button" class="btn" id="peUp">영상 올리고 교체</button><button type="button" id="peUnvid"' + (p.video ? '' : ' disabled') + '>영상 빼고 이미지로 되돌리기</button></div><p class="muted" id="peUpMsg" style="margin-top:6px;font-size:.8rem">' + (p.video ? '현재 이 칸은 영상입니다.' : '') + '</p></div>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="peGo">미리 만들기</button><button type="button" class="btn gold" id="peOk" disabled>이 이미지로 교체</button><button type="button" id="peClose">닫기</button></div></div></div>';
     document.body.appendChild(d); d.showModal();
     var q = function (s) { return d.querySelector(s); }; q('#pePrompt').value = p.prompt;
@@ -109,6 +120,32 @@
         .then(function (r) { cur = r.url; p.video = r.video; msg.textContent = '교체했습니다.'; toast('이미지로 교체했습니다'); show(cur, '교체 완료 — 현재 이미지'); })
         .catch(function (er) { msg.textContent = '실패: ' + er.message; toast(er.message, true); }).then(function () { busy = false; q('#peImgGo').disabled = false; });
     };
+    // Kling 영상 만들기: 현재 이미지 → JPEG 시작 프레임 업로드 → 서버가 Kling 에 제출 → 8초마다 상태 확인(창을 닫아도 서버에 작업이 남아 다시 열면 이어서 확인)
+    var kb = false;
+    function kPoll() {
+      var msg = q('#peKMsg'), n = 0; kb = true; q('#peKGo').disabled = true;
+      (function tick() {
+        if (!d.isConnected) return;
+        C.api('/api/panel-video?id=' + encodeURIComponent(p.id)).then(function (r) {
+          if (r.status === 'processing') { n++; msg.textContent = 'Kling 이 영상을 만드는 중… ' + (n * 8) + '초 경과 (보통 1~5분)'; if (n > 110) { msg.textContent = '아직 처리 중입니다. 창을 닫았다가 나중에 이 칸을 다시 열면 이어서 확인합니다.'; kb = false; q('#peKGo').disabled = false; return; } setTimeout(tick, 8000); return; }
+          kb = false; q('#peKGo').disabled = false; G.vid.tasks = (G.vid.tasks || []).filter(function (x) { return x.id !== p.id; });
+          if (r.status === 'done') { p.video = r.video; msg.textContent = '영상이 만들어져 이 칸에 적용됐습니다.'; q('#peUnvid').disabled = false; toast('Kling 영상을 적용했습니다'); show(cur, '현재 이미지(영상의 포스터)'); }
+          else { msg.textContent = '실패: ' + (r.error || '알 수 없는 오류'); toast(r.error || 'Kling 영상 생성에 실패했습니다', true); }
+        }).catch(function (er) { kb = false; q('#peKGo').disabled = false; msg.textContent = '확인 실패: ' + er.message; });
+      })();
+    }
+    if (q('#peKGo')) {
+      if ((G.vid.tasks || []).some(function (x) { return x.id === p.id; })) { q('#peKMsg').textContent = 'Kling 이 이 칸의 영상을 만드는 중입니다…'; kPoll(); }
+      q('#peKGo').onclick = function () {
+        if (kb || busy) return; var msg = q('#peKMsg'); if (!cur) { msg.textContent = '이 칸에 이미지가 먼저 있어야 합니다'; return; }
+        if (!confirm('이 칸의 현재 이미지로 Kling 영상을 만듭니다.\nKling 크레딧이 사용되고(고화질은 더 많이) 1~5분 걸립니다. 계속할까요?')) return;
+        kb = true; q('#peKGo').disabled = true; msg.textContent = '시작 프레임 준비 중…';
+        jpegOf(cur).then(function (b) { return upFile(b, 'panel-start-' + e + '-' + t + '.jpg'); })
+          .then(function (k) { msg.textContent = 'Kling 에 제출하는 중…'; return C.api('/api/panel-video', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, element: e, theme: t, startKey: k, prompt: q('#peKP').value, mode: q('#peKM').value }) }); })
+          .then(function () { G.vid.tasks = (G.vid.tasks || []).concat({ id: p.id }); kb = false; kPoll(); })
+          .catch(function (er) { kb = false; q('#peKGo').disabled = false; msg.textContent = '실패: ' + er.message; toast(er.message, true); });
+      };
+    }
     q('#peClose').onclick = function () { d.close(); }; d.addEventListener('close', finish); show(cur, cur ? '현재 이미지' : '');
   }
   /* 비주얼 디렉션: 감성(화풍) · 배경(세계관) · 분위기 · 인물 + 한 줄 추가. 저장하면 이후 새로 만드는 모든 이미지의 프롬프트에 들어간다(이미 만든 이미지·칸별로 직접 고친 프롬프트는 그대로). */
