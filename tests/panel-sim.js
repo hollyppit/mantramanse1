@@ -20,6 +20,12 @@ const root = path.join(__dirname, '..'), fails = [], ok = (c, m) => { if (!c) fa
     ok(it && it.id === p.id && it.visualRole.includes('background') && it.panelVideo && it.loopable, p.id + ' 배경 항목: 역할 background · 영상 반복');
     ok(P.promptFor(p.element, p.theme, null, 'bg').includes('배경') && P.promptFor(p.element, p.theme, null, 'bg') !== P.promptFor(p.element, p.theme, null, 'panel'), p.id + ' 배경 프롬프트는 본문 컷과 다르다');
   }
+  console.log('1c. 외부 도구용 프롬프트(Leonardo · Kling)');
+  const PP = await import(require('url').pathToFileURL(path.join(root, 'functions/_panelprompts.js')).href), hangul = /[가-힣]/;
+  const allT = ps.map(p => PP.toolsFor(p.element, p.theme, null, 'panel')); ok(allT.every(Boolean) && new Set(allT.map(t => t.leo)).size === 50 && new Set(allT.map(t => t.kling)).size === 50, '50칸 모두 서로 다른 이미지·영상 프롬프트');
+  ok(allT.every(t => !hangul.test(t.leo) && !hangul.test(t.kling) && /No text/.test(t.leo) && /Vertical 2:3/.test(t.leo)), '프롬프트는 영어, 글자 금지·세로 2:3 포함(추가 방향을 안 쓴 기본값)');
+  ok(/dark, calm and low-contrast/.test(PP.toolsFor('wood', 'love', null, 'bg').leo) && !/Vertical 2:3/.test(PP.toolsFor('wood', 'love', null, 'bg').leo), '배경 용도는 어둡고 초점 없는 프롬프트');
+  ok(/Fire/.test(PP.toolsFor('fire', 'love', null, 'panel').leo) && /push-in/.test(PP.toolsFor('fire', 'love', null, 'panel').kling) && PP.toolsFor('zzz', 'love') === null, '오행 영어 이름·카메라 지시 포함, 잘못된 칸은 null');
   console.log('2. 모델 선택(모의 fetch)');
   const calls = []; const png = Buffer.from('abc').toString('base64');
   globalThis.fetch = async (u, o) => { calls.push(u); if (/openai/.test(u)) return env.openaiFail ? new Response('no', { status: 400 }) : new Response(JSON.stringify({ data: [{ b64_json: png }] })); return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ inlineData: { mimeType: 'image/png', data: png } }] } }] })); };

@@ -7,7 +7,7 @@ const path = require('path'), fails = [], ok = (c, m) => { if (!c) fails.push(m)
   globalThis.fetch = async (u, o) => { seen.push(String(u) + (o && o.body instanceof FormData ? ' [multipart]' : '')); if (/openai/.test(u)) return gptDown ? new Response('x', { status: 500 }) : new Response(JSON.stringify({ data: [{ b64_json: png }] })); return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ inlineData: { mimeType: 'image/png', data: png } }] } }] })); };
   const kv = new Map(), r2 = new Map(), env = { ADMIN_PASSWORD: 'x', OPENAI_API_KEY: 'k', GEMINI_API_KEY: 'g',
     GLOSSARY_KV: { get: async k => (kv.has(k) ? JSON.parse(kv.get(k)) : null), put: async (k, v) => { kv.set(k, v); } },
-    CLIPS_R2: { put: async (k, v) => { r2.set(k, Buffer.from(v)); }, delete: async k => { r2.delete(k); }, get: async k => (r2.has(k) ? { arrayBuffer: async () => r2.get(k).buffer.slice(0), httpMetadata: { contentType: 'image/webp' } } : null) } };
+    CLIPS_R2: { head: async k => (r2.has(k) ? { size: r2.get(k).length, httpMetadata: { contentType: /[.](mp4|webm)$/.test(k) ? 'video/mp4' : 'image/png' } } : null), put: async (k, v) => { r2.set(k, Buffer.from(v)); }, delete: async k => { r2.delete(k); }, get: async k => (r2.has(k) ? { arrayBuffer: async () => r2.get(k).buffer.slice(0), httpMetadata: { contentType: 'image/webp' } } : null) } };
   const post = async b => { const r = await A.onRequestPost({ request: new Request('http://x/api/panel-art', { method: 'POST', headers: { authorization: 'Bearer x', 'content-type': 'application/json' }, body: JSON.stringify(b) }), env }); return { s: r.status, d: await r.json() }; };
   const base = { element: 'wood', theme: 'love' };
   let r = await post({ ...base, preview: true, prompt: '내 프롬프트', extra: '달을 크게' });
@@ -45,6 +45,18 @@ const path = require('path'), fails = [], ok = (c, m) => { if (!c) fails.push(m)
   r = await post({ ...base, useDefault: true }); gptDown = false;
   ok(r.s === 200 && !JSON.parse(kv.get('panel:prompts'))['panel-wood-love'], '모두 다시 만들기: 칸별 프롬프트 초기화');
   ok(before.every(k => !r2.has(k)) && [...r2.keys()].filter(k => /^panel-wood-love-/.test(k)).length === 1, '다시 만들면 옛 파일은 지워지고 새 파일 하나만 남는다');
+  // 직접 올린 이미지·영상으로 칸 교체(Leonardo · Kling) — 본문 컷과 배경은 서로 다른 칸
+  r2.set('a1b2c3d4e5f6a7b8c9.png', Buffer.from('img1')); r2.set('0f1e2d3c4b5a69788.mp4', Buffer.from('vid1')); r2.set('b2b2b2b2b2b2b2b2b2.png', Buffer.from('img2'));
+  r = await post({ element: 'fire', theme: 'career', uploadImage: 'a1b2c3d4e5f6a7b8c9.png' });
+  let idx = JSON.parse(kv.get('media:index')); ok(r.s === 200 && r.d.url === '/api/clipfile?k=a1b2c3d4e5f6a7b8c9.png' && idx.some(m => m.id === 'panel-fire-career' && m.url === r.d.url), '내 이미지 업로드: 본문 컷 칸(panel-)이 올린 이미지로 교체');
+  r = await post({ element: 'fire', theme: 'career', kind: 'bg', uploadImage: 'b2b2b2b2b2b2b2b2b2.png' });
+  idx = JSON.parse(kv.get('media:index')); ok(r.s === 200 && idx.some(m => m.id === 'panelbg-fire-career') && idx.some(m => m.id === 'panel-fire-career' && /a1b2c3/.test(m.url)), '배경 칸(panelbg-)에 올려도 본문 컷 칸은 그대로');
+  r = await post({ element: 'fire', theme: 'career', uploadVideo: '0f1e2d3c4b5a69788.mp4' });
+  ok(r.s === 200 && r.d.video === '/api/clipfile?k=0f1e2d3c4b5a69788.mp4', '영상 업로드가 통과한다(영상 키 검사 정규식 수정 확인)');
+  r2.set('c3c3c3c3c3c3c3c3c3.png', Buffer.from('img3')); r = await post({ element: 'fire', theme: 'career', uploadImage: 'c3c3c3c3c3c3c3c3c3.png' });
+  idx = JSON.parse(kv.get('media:index')); ok(r.s === 200 && idx.find(m => m.id === 'panel-fire-career').panelVideo === '/api/clipfile?k=0f1e2d3c4b5a69788.mp4' && !r2.has('a1b2c3d4e5f6a7b8c9.png'), '영상이 있는 칸에 이미지를 올리면 영상은 유지되고 옛 이미지 파일만 지워진다');
+  r = await post({ element: 'fire', theme: 'career', uploadImage: '0f1e2d3c4b5a69788.mp4' }); ok(r.s === 400, '이미지가 아닌 파일은 거부');
+  r = await post({ element: 'fire', theme: 'career', uploadImage: '../etc/x' }); ok(r.s === 400, '잘못된 키는 거부');
   if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log(' ✗ ' + f)); process.exit(1); }
   console.log('패널 세부 수정 검증 모두 통과');
 })();
