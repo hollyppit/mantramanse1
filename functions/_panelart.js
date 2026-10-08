@@ -76,22 +76,32 @@ export const THEMES = {
 const SCENE_BY_EL = { wood: ['forest', 'sunrise'], fire: ['sunset'], earth: ['field', 'mountain'], metal: ['nightCity', 'stars'], water: ['rain', 'sea'] };
 const ACTIONS = /^(walking|studying|working|meeting|thinking|resting|lookingBack|lookingForward)$/;
 
-export const presetId = (el, th) => `panel-${el}-${th}`;
-export function presets() {
-  const out = [];
-  for (const el of Object.keys(ELEMENTS)) for (const th of Object.keys(THEMES)) out.push({ id: presetId(el, th), element: el, theme: th, title: `${ELEMENTS[el].name} · ${THEMES[th].name}` });
+// 용도(kind): 'panel' = 본문 컷(글과 함께 나오는 삽화, id panel-…) · 'bg' = 무빙툰 배경(글 뒤에 깔리는 화면, id panelbg-…). 뷰어는 id 접두사로 두 풀을 가른다.
+export const KINDS = { panel: '본문 컷', bg: '배경' };
+export const kindOf = k => (k === 'bg' ? 'bg' : 'panel');
+export const presetId = (el, th, kind) => (kindOf(kind) === 'bg' ? `panelbg-${el}-${th}` : `panel-${el}-${th}`);
+export function presets(kind) {
+  const out = [], k = kindOf(kind);
+  for (const el of Object.keys(ELEMENTS)) for (const th of Object.keys(THEMES)) out.push({ id: presetId(el, th, k), kind: k, element: el, theme: th, title: `${ELEMENTS[el].name} · ${THEMES[th].name}${k === 'bg' ? ' (배경)' : ''}` });
   return out;
 }
-export function promptFor(el, th, dir) {
+// 배경용 공통 문장: 본문 컷과 같은 화풍·감성이되, 글 아래 30%만 비우는 대신 화면 전체가 글 뒤에서 은은하게 깔리도록 한다.
+export function bgStyleOf(dir) {
+  const d = cleanDirection(dir), O = DIRECTION_OPTIONS, part = k => O[k].items[d[k]][1];
+  return [part('art'), part('feel'), part('world'), part('mood'), d.extra && '추가 방향: ' + d.extra + '.'].filter(Boolean).join(' ') +
+    ' 이 그림은 글 뒤에 깔리는 전체 화면 배경이다. 세로 구도 전체가 비교적 어둡고 차분하며 대비는 낮게, 시선을 끄는 뚜렷한 초점·밝은 광원·인물 클로즈업은 두지 않는다. 인물은 아주 작은 실루엣이거나 없어도 된다. 화면 위에 흰 글자가 올라가도 읽히도록 어둡게 정리한다. 화면 안에 글자·숫자·간판·로고·워터마크는 절대 넣지 않는다.';
+}
+export function promptFor(el, th, dir, kind) {
   const E = ELEMENTS[el], T = THEMES[th]; if (!E || !T) return '';
+  if (kindOf(kind) === 'bg') return `${bgStyleOf(dir)}\n배경 분위기: ${T.scene}. 이 장면을 멀리서 본 넓고 고요한 풍경으로 그린다.\n색과 빛: ${E.palette}.\n오행 ${E.name}의 기운이 풍경 전체의 계절감과 분위기로 드러나게 한다.`;
   return `${styleOf(dir)}\n장면: ${T.scene}.\n색과 빛: ${E.palette}.\n오행 ${E.name}의 기운이 풍경 전체의 계절감과 분위기로 드러나게 한다.`;
 }
 // 생성된 파일 → 미디어 라이브러리 항목(태그는 승인 상태라 조합에 바로 쓰인다). cleanMedia 가 TAX 밖 태그를 걸러낸다.
-export function mediaItem(el, th, url, bytes, provider, panelVideo) {
-  const E = ELEMENTS[el], T = THEMES[th];
-  return cleanMedia({ id: presetId(el, th), type: 'image', url, posterUrl: url, title: `${E.name} · ${T.name} 패널`, description: `AI 생성 패널(${provider}) — ${T.scene}`, orientation: 'portrait', priority: 60,
+export function mediaItem(el, th, url, bytes, provider, panelVideo, kind) {
+  const E = ELEMENTS[el], T = THEMES[th], bg = kindOf(kind) === 'bg';
+  return cleanMedia({ id: presetId(el, th, kind), type: 'image', url, posterUrl: url, title: `${E.name} · ${T.name} ${bg ? '배경' : '패널'}`, description: `AI 생성 ${bg ? '배경' : '패널'}(${provider}) — ${T.scene}`, orientation: 'portrait', priority: bg ? 55 : 60,
     elementTags: [el], stateTags: [E.state], emotionTags: [E.mood], themeTags: [th], sceneTags: SCENE_BY_EL[el].concat(T.tags.filter(t => !ACTIONS.test(t))), actionTags: T.tags.filter(t => ACTIONS.test(t)),
-    visualRole: ['hero'], enabled: true, tagsApproved: true, bytes, uploadedAt: Date.now(), panelVideo: panelVideo || '' });
+    visualRole: bg ? ['background', 'hero'] : ['hero'], loopable: bg && !!panelVideo, enabled: true, tagsApproved: true, bytes, uploadedAt: Date.now(), panelVideo: panelVideo || '' });
 }
 
 // 클립 소스 칸(장면 의도 태그) 하나에 맞는 이미지. 태그는 TAX 안의 값만 받는다(cleanMedia 가 거른다).

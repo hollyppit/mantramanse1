@@ -15,9 +15,38 @@ const PAST = { 비겁: { 목: '두레패를 이끌던 마을의 접장', 화: '�
   관성: { 목: '향교에서 일하던 서리', 화: '밤길을 지키던 포도청 관리', 토: '고을을 다스리던 향리·이장', 금: '성을 지키던 무관', 수: '말과 문서를 다루던 역관·밀사' },
   인성: { 목: '서당을 열던 훈장', 화: '사찰의 승려이자 제사를 맡던 사람', 토: '명당을 보던 지관(풍수가)', 금: '법과 율을 가르치던 율사', 수: '병을 보고 길흉을 짚던 의원·점술가' } };
 
-export const GROUPS = { car: '자동차 비유 (일간 10)', career: '직업 후보 (12직군)', spouse: '배우자 인상 (12지지 × 성별)', past: '전생 (십성 5 × 오행 5 × 성별)' };
+// 재물 그릇 9종 — report/v2/deep-wealth.js 의 VESSELS 키와 같아야 한다. 사물이 화면 중심에 또렷이 보이는 정물 그림(사람 없음).
+const WEALTH = { pool: ['수영장', '햇살이 비치는 맑고 넓은 야외 수영장을 낮은 시선으로, 잔잔한 물결과 타일·사다리가 보이는 고요한 풍경', '수'],
+  heavyTank: ['물이 가득 찬 대형 물탱크', '물이 가득 차 넘치려 하는 거대한 금속 물탱크, 그 곁에 사람이 들기엔 너무 커 보이는 크기감, 해 질 녘 공장 마당', '토'],
+  dam: ['수문이 열린 댐', '거대한 댐의 수문이 열려 물이 힘차게 쏟아져 나가는 웅장한 장면, 물보라와 무지개', '수'],
+  sieve: ['구멍 난 체·바가지', '구멍이 숭숭 뚫린 낡은 나무 바가지에서 맑은 물이 가느다란 줄기로 새어 떨어지는 클로즈업', '목'],
+  spring: ['마르지 않는 샘', '바위 틈에서 맑은 물이 끊임없이 솟는 샘과 그 아래 놓인 수도꼭지 달린 물통, 이끼 낀 숲속 아침 빛', '목'],
+  safe: ['스테인리스 보온통·금고', '뚜껑이 단단히 닫힌 반짝이는 스테인리스 통과 묵직한 금고가 나란히 놓인 차분한 조명의 정물', '금'],
+  granary: ['묵직한 쌀독(곳간)', '전통 한옥 곳간 안에 쌀이 가득 찬 큰 쌀독과 항아리들이 줄지어 놓인 따뜻한 빛', '토'],
+  basin: ['세숫대야', '아침 햇살이 드는 소박한 방, 맑은 물이 담긴 세숫대야와 수건이 놓인 생활감 있는 정물', '수'],
+  lunchbox: ['도시락통', '단정하게 싸 둔 스테인리스 도시락통 한 단이 책상 위에 놓인 이른 아침의 정물', '금'] };
+
+// 연애 챕터: 만날 확률이 높은 장소 10 · 오행별 패션·그루밍 룩북 10(오행 5 × 성별) — report/v2/deep-love.js 의 PLACES·STYLE 과 같은 키.
+const PLACE = { class: ['배움의 자리(클래스·강연·독서모임)', '조용한 강연장과 클래스 룸, 책과 노트를 펼친 사람들의 뒷모습, 따뜻한 스탠드 조명', '목'],
+  nature: ['자연·야외(공원·등산·러닝·캠핑)', '이른 아침 숲길과 호숫가 산책로, 러닝하는 사람들의 실루엣, 안개와 맑은 햇살', '목'],
+  intro: ['지인 소개·소규모 모임', '아늑한 카페 테이블에 둘러앉은 서너 명의 뒷모습, 따뜻한 조명과 커피 잔', '토'],
+  event: ['공연·전시·축제', '저녁 공연장 입구와 전시장 조명, 환하게 모여든 사람들의 실루엣, 따뜻한 불빛', '화'],
+  online: ['온라인·SNS·모임 앱', '어두운 방에서 스마트폰과 노트북 불빛이 얼굴 없이 은은하게 번지는 장면, 창밖 야경', '수'],
+  work: ['직장·거래처·업무 네트워크', '해 질 녘 사무 빌딩 로비와 회의실 유리창, 서류를 든 사람들의 실루엣', '토'],
+  local: ['동네·단골 가게·지역 동호회', '동네 골목의 단골 식당과 작은 가게 간판 불빛(글자 없음), 퇴근길 사람들', '토'],
+  gym: ['운동·자기계발 모임(헬스·크루·스터디)', '새벽 한강변 러닝 크루와 체육관 유리창 너머 운동하는 실루엣, 서늘한 푸른 빛', '금'],
+  trip: ['여행·이동 중(기차·공항·게스트하우스)', '새벽 기차역 플랫폼과 공항 창가, 캐리어를 든 여행자의 뒷모습, 넓은 하늘', '수'],
+  bar: ['밤의 바·재즈바·야경 명소', '조명이 낮은 재즈바 카운터와 도시 야경 전망대, 잔에 비치는 불빛, 사람은 실루엣만', '화'] };
+const STYLE = { 목: ['초록·카키·연두 계열, 린넨·면·니트, 여유 있고 자연스러운 실루엣', '자연스러운 레이어드 헤어, 맑은 피부 표현', 'wood'], 화: ['코랄·붉은 벽돌·버건디 계열, 실크·새틴·니트, 선명하고 허리선이 살아 있는 실루엣', '또렷한 눈매와 밝은 안색, 선명한 립 포인트', 'fire'],
+  토: ['베이지·카멜·브라운 계열, 코튼·울·스웨이드, 편안하고 단정한 실루엣', '단정하게 정돈된 헤어, 매끈한 손과 따뜻한 인상', 'earth'], 금: ['화이트·아이보리·실버·그레이 계열, 울·셔츠 원단·메탈 액세서리, 각이 잡힌 깔끔한 실루엣', '정돈된 이마와 헤어, 깨끗한 손톱과 구두', 'metal'],
+  수: ['네이비·블랙·딥블루 계열, 새틴·저지·유광 소재, 길고 흐르는 실루엣', '촉촉한 윤기 피부와 젖은 듯한 헤어 광택', 'water'] };
+
+export const GROUPS = { place: '연애 · 만날 장소 (10)', style: '연애 · 패션·그루밍 (오행 5 × 성별)', car: '자동차 비유 (일간 10)', career: '직업 후보 (12직군)', spouse: '배우자 인상 (12지지 × 성별)', past: '전생 (십성 5 × 오행 5 × 성별)', wealth: '재물 그릇 (9종)' };
 export function slots() {
   const out = [];
+  for (const k of Object.keys(WEALTH)) out.push({ id: 'wealth:' + k, group: 'wealth', title: WEALTH[k][0] });
+  for (const k of Object.keys(PLACE)) out.push({ id: 'place:' + k, group: 'place', title: PLACE[k][0] });
+  for (const e of Object.keys(STYLE)) for (const g of ['F', 'M']) out.push({ id: `style:${e}:${g}`, group: 'style', title: `${e} 계열 룩 (${g === 'F' ? '여성' : '남성'})` });
   for (const k of Object.keys(CAR)) out.push({ id: 'car:' + k, group: 'car', title: `${k} · ${CAR[k][0]}` });
   for (const k of Object.keys(CAREER)) out.push({ id: 'career:' + k, group: 'career', title: CAREER[k][0] });
   for (const b of Object.keys(FACE)) for (const g of ['F', 'M']) out.push({ id: `spouse:${b}:${g}`, group: 'spouse', title: `${b} · ${FACE[b][0]} (${g === 'F' ? '여성' : '남성'})` });
@@ -32,6 +61,13 @@ export const SLOT_KEY = /^asset-[\w.-]{1,100}$/;
 export function promptOf(id, dir) {
   const [g, a, b, c] = id.split(':'), pal = e => (ELEMENTS[e] ? ELEMENTS[e].palette : '');
   if (g === 'car' && CAR[a]) { const [v, scene, el] = CAR[a]; return styleOf({ ...dir, people: 'none' }) + `\n주제: 사람의 성격을 상징하는 자동차 한 대를 멋지게 그린다. 차종: ${v}. 배경: ${scene}. 사람은 그리지 않는다.\n색과 빛: ${pal(el === '목' ? 'wood' : el === '화' ? 'fire' : el === '토' ? 'earth' : el === '금' ? 'metal' : 'water')}.`; }
+  if (g === 'place' && PLACE[a]) { const [v, scene, el] = PLACE[a], E = { 목: 'wood', 화: 'fire', 토: 'earth', 금: 'metal', 수: 'water' }[el]; return styleOf({ ...dir, people: dir.people === 'face' ? 'face' : 'back' }) + `
+주제: 새로운 인연을 만나기 좋은 장소 '${v}'의 분위기가 한눈에 보이는 장면. ${scene}.
+색과 빛: ${pal(E)}.`; }
+  if (g === 'style' && STYLE[a] && (b === 'F' || b === 'M')) { const [look, groom, E] = STYLE[a]; return styleOf({ ...dir, people: 'face' }) + `
+주제: ${a}(五行) 기운의 ${b === 'F' ? '여성' : '남성'} 패션·그루밍 룩북 화보, 허리 위 반신 또는 전신. 스타일: ${look}. 그루밍: ${groom}. 가상의 인물이며 실존 인물을 닮게 그리지 않는다. 배경은 단순한 스튜디오 톤.
+색과 빛: ${pal(E)}.`; }
+  if (g === 'wealth' && WEALTH[a]) { const [v, scene, el] = WEALTH[a], E = { 목: 'wood', 화: 'fire', 토: 'earth', 금: 'metal', 수: 'water' }[el]; return styleOf({ ...dir, people: 'none' }) + `\n주제: 사람의 '재물 그릇'을 상징하는 사물 그림. 그릇: ${v}. 장면: ${scene}. 그릇이 화면 중심에 크고 또렷하게 보이게 하고 사람은 그리지 않는다.\n색과 빛: ${pal(E)}.`; }
   if (g === 'career' && CAREER[a]) return styleOf({ ...dir, people: dir.people === 'face' ? 'face' : 'back' }) + `\n주제: '${CAREER[a][0]}' 일의 분위기가 한눈에 보이는 장면. ${CAREER[a][1]}.`;
   if (g === 'spouse' && FACE[a]) { const el = BR_EL[a], woman = b === 'F', E = { 목: 'wood', 화: 'fire', 토: 'earth', 금: 'metal', 수: 'water' }[el];
     return styleOf({ ...dir, people: 'face' }) + `\n주제: ${FACE[a][0]} 인상의 ${woman ? '젊은 여성' : '젊은 남성'} 반신 초상. ${FACE[a][1]} 분위기이며, 동물의 귀·털은 그리지 않고 이목구비와 표정의 닮은 인상만 사람으로 표현한다. 가상의 인물이고 실존 인물을 닮게 그리지 않는다.\n색과 빛: ${pal(E)}.`; }

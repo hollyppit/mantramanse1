@@ -99,12 +99,17 @@
   // 미디어 선택: Scenes.search(규칙 점수) — 장면의 mediaIntent / cinema.mediaTags 로 의도를 만든다. 반환: scene.media 모양 또는 null
   function pickMedia(scene, assets, ctx, chapterId) {
     var S = R.Scenes; if (!S || !assets || !assets.length) return null; ctx = ctx || { usedIds: [] };
+    // 용도별 풀: ctx.pool 'panel' = 본문 컷(id panel-…), 그 외 = 배경(본문 컷 panel-… 제외, 배경 전용 panelbg-… 포함). 해당 풀이 비어 있으면 예전처럼 전체에서 고른다.
+    var isP = function (a) { return /^panel-/.test(a.id || ''); }, isB = function (a) { return /^panelbg-/.test(a.id || ''); }, pooled = ctx.pool === 'panel' ? assets.filter(isP) : assets.filter(function (a) { return !isP(a); });
+    if (!pooled.length) pooled = ctx.pool === 'panel' ? assets.filter(function (a) { return !isB(a); }) : assets; assets = pooled;
     var mi = scene.mediaIntent || {}, tags = (scene.cinema && scene.cinema.mediaTags) || [], cl = S.classify ? S.classify(tags) : { scene: [] };
     var it = { chapter: chapterId || '', chapterKey: '', sceneType: 'insight', desiredElements: mi.elements || [], desiredStates: mi.states || [], desiredThemes: mi.themes || [], desiredEmotion: mi.emotions || [], desiredActions: mi.actions || [],
       desiredScenes: (mi.scenes || []).concat(cl.scene || []), preferredMediaType: ['image', 'videoLoop', 'video', 'backgroundVideo'], visualRole: 'hero' };
     var found = S.search(assets, it, { usedIds: ctx.usedIds || [], prevChapter: ctx.prevChapter, sameChapter: [] });
     var top = found.filter(function (c) { return c.score > 0; })[0]; if (!top) return null;
     var a = top.asset; if (ctx.usedIds) ctx.usedIds.push(a.id);
+    var src = assets.filter(function (x) { return x.id === a.id; })[0] || {}; // normalize 가 panelVideo 를 버리므로 원본에서 읽는다
+    if (isB(a) && src.panelVideo && ctx.pool !== 'panel') return { assetId: a.id, type: 'backgroundVideo', url: src.panelVideo, webmUrl: '', posterUrl: a.posterUrl || a.url, loop: true, muted: true, score: top.score, cinema: a.cinema || null }; // 배경 영상: 소리 없이 반복
     return { assetId: a.id, type: a.type, url: a.url, webmUrl: a.webmUrl, posterUrl: a.posterUrl || a.thumbnailUrl, loop: a.loopable || a.type === 'videoLoop', muted: true, score: top.score, cinema: a.cinema || null };
   }
   // 렌더에 쓸 층 배열 [감독, 기본 연출, 클립 연출]  (장면 자체 cinema 는 resolve 가 맨 위로 얹는다)

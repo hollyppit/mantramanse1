@@ -254,8 +254,8 @@
     // ACT III: 세부 이야기(관심 분야가 먼저)
     blockOrder(H.interest).forEach(function (k, i) {
       bridge('life_bb_' + k, i === 0 ? BRIDGE[k] : '다음은 ' + ({ love: '사랑', money: '돈', career: '일', relation: '사람' }[k]) + ' 이야기예요.', 4);
-      if (k === 'love') { topic('love_style', ['c09'], 4, [gen('love_timing', 4)]); topic('marriage_who', ['c10'], 4, [gen('marriage_timing', 4)]); real('deep_spouse', 4); real('c12', 4, { title: '끌리는 사람, 맞는 사람', sub: '궁합 · 일주 상성' }); real('deep_ilju', 4); ikd('LOVE', 4); ikd('MARRIAGE', 4); }
-      if (k === 'money') { topic('money_nature', ['c08'], 4, [gen('money_timing', 4)]); ikd('MONEY', 4); }
+      if (k === 'love') { topic('love_style', ['c09'], 4, [gen('love_timing', 4)]); real('deep_love', 4); topic('marriage_who', ['c10'], 4, [gen('marriage_timing', 4)]); real('deep_spouse', 4); real('deep_marriage', 4); real('c12', 4, { title: '끌리는 사람, 맞는 사람', sub: '궁합 · 일주 상성' }); real('deep_ilju', 4); ikd('LOVE', 4); ikd('MARRIAGE', 4); }
+      if (k === 'money') { topic('money_nature', ['c08'], 4, [gen('money_timing', 4)]); real('deep_wealth', 4); ikd('MONEY', 4); }
       if (k === 'career') { topic('career_style', ['c06'], 4, [gen('career_timing', 4)]); real('deep_jobs', 4); real('c07', 4, { title: '나에게 맞는 성공 방식', sub: '억부 · 용신' }); ikd('CAREER', 4); }
       if (k === 'relation') { topic('relation_style', ['c11'], 4, [gen('relation_timing', 4)]); real('c13', 4, { title: '내가 자라온 자리', sub: '년주 · 월주' }); ikd('RELATIONSHIP', 4); }
     });

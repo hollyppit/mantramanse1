@@ -15,29 +15,37 @@
   function load() { return C.api('/api/panel-art').then(function (d) { G.d = d; }); }
   function open(tab, pw) { C.setPw(pw); PANE = document.getElementById('t-panelart'); PANE.innerHTML = '<p class="muted">불러오는 중…</p>'; load().then(draw).catch(function (e) { PANE.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
   function log(t) { G.log.unshift(t); G.log = G.log.slice(0, 40); var b = $('.pa-log'); if (b) b.innerHTML = G.log.map(esc).join('<br>'); }
-  function draw() {
-    var d = G.d, have = d.presets.filter(function (p) { return p.url; }).length, pv = d.providers;
+  /* 용도 둘: 본문 컷(글과 함께 나오는 삽화) · 배경(화면 전체 뒤에 깔리는 장면). 각각 오행 5 × 주제 10 = 50칸. 서버는 id 접두사(panel- / panelbg-)로 구분한다. */
+  var KIND = {
+    panel: { title: '패널 이미지 · 본문 컷', desc: '무빙툰 본문에서 <b>글과 함께 나오는 삽화</b>(이미지 + 글 한 컷)입니다. 오행(5) × 이야기 주제(10)별로 한 장씩 만들고, 뷰어가 사용자의 오행과 챕터 주제에 맞는 컷을 골라 글 옆에 보여 줍니다. 칸을 누르면 <b>세부 수정</b>(프롬프트 편집 · 추가 요청 · 현재 이미지를 바탕으로 수정)이나 <b>영상 업로드</b>로 교체할 수 있습니다.' },
+    bg: { title: '배경 이미지 · 무빙툰 배경', desc: '무빙툰 화면 <b>전체 뒤에 깔리는 배경</b>입니다. 글이 올라가도 읽히도록 어둡고 차분하게, 뚜렷한 초점 없이 만듭니다. 오행(5) × 이야기 주제(10)별로 한 장씩 만들면 뷰어가 장면에 맞는 배경을 고르고, 이 칸이 비어 있으면 기존 클립 라이브러리의 배경을 씁니다. 칸을 누르면 세부 수정이나 <b>반복 재생 배경 영상</b> 업로드로 교체할 수 있습니다. (본문 컷과 서로 섞이지 않습니다.)' } };
+  function cardOf(kind) {
+    var d = G.d, pv = d.providers, list = d.presets.filter(function (p) { return p.kind === kind; }), have = list.filter(function (p) { return p.url; }).length, I = KIND[kind];
     var cells = '<span></span>' + Object.keys(TH).map(function (t) { return '<span class="pa-h">' + esc(TH[t]) + '</span>'; }).join('');
     Object.keys(EL).forEach(function (e) {
       cells += '<span class="pa-r">' + esc(EL[e]) + '</span>' + Object.keys(TH).map(function (t) {
-        var p = d.presets.filter(function (x) { return x.element === e && x.theme === t; })[0];
-        return '<div class="pa-c' + (p.url ? ' has' : '') + '" data-id="' + p.id + '" data-e="' + e + '" data-t="' + t + '" title="' + esc(p.title) + ' — 눌러서 ' + (p.url ? '다시 만들기' : '만들기') + '"' + (p.url ? ' style="background-image:url(\'' + esc(p.url) + '\')"' : '') + '>' + (p.url ? (p.video ? '<b>▶ 영상</b>' : '') : '<b>비어 있음</b>') + '</div>';
+        var p = list.filter(function (x) { return x.element === e && x.theme === t; })[0];
+        return '<div class="pa-c' + (p.url ? ' has' : '') + '" data-id="' + p.id + '" data-k="' + kind + '" data-e="' + e + '" data-t="' + t + '" title="' + esc(p.title) + ' — 눌러서 ' + (p.url ? '다시 만들기' : '만들기') + '"' + (p.url ? ' style="background-image:url(\'' + esc(p.url) + '\')"' : '') + '>' + (p.url ? (p.video ? '<b>▶ 영상</b>' : '') : '<b>비어 있음</b>') + '</div>';
       }).join('');
     });
-    PANE.innerHTML = dirCard(d) + '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">패널 이미지 · ' + have + ' / ' + d.presets.length + '장</b><p class="muted" style="margin:6px 0 10px">무빙툰의 각 컷(이미지 + 글)에 들어가는 삽화입니다. 오행(5) × 이야기 주제(10)별로 한 장씩 만들고, 뷰어가 사용자의 오행과 이야기 주제에 맞는 컷을 자동으로 고릅니다. 칸을 누르면 그 컷을 <b>세부 수정</b>(프롬프트 편집 · 추가 요청 · 현재 이미지를 바탕으로 수정)하고 미리 본 뒤 교체할 수 있습니다.</p>' +
-      '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><label class="muted">모델 <select id="paProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (G.provider === 'openai' ? ' selected' : '') + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(d.models.openai) + (pv.openai ? '' : ' (키 없음)') + '</option><option value="gemini"' + (G.provider === 'gemini' ? ' selected' : '') + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(d.models.gemini) + (pv.gemini ? '' : ' (키 없음)') + '</option></select></label>' +
-      '<button class="btn" id="paMissing"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button class="btn" id="paAll"' + (G.busy ? ' disabled' : '') + '>모두 다시 만들기</button><button id="paStop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
-      (!d.r2 ? '<p class="err">R2(CLIPS_R2)가 연결되지 않아 저장할 수 없습니다.</p>' : '') + (!pv.openai && !pv.gemini ? '<p class="err">OPENAI_API_KEY 또는 GEMINI_API_KEY 가 없습니다. Cloudflare 환경 변수에 추가하세요.</p>' : '') +
-      '<div class="pa-grid">' + cells + '</div><div class="pa-log"></div></div><div id="taBox"></div><div id="asBox"></div>';
+    return '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">' + I.title + ' · ' + have + ' / ' + list.length + '장</b><p class="muted" style="margin:6px 0 10px">' + I.desc + '</p>' +
+      '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><label class="muted">모델 <select class="paProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (G.provider === 'openai' ? ' selected' : '') + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(d.models.openai) + (pv.openai ? '' : ' (키 없음)') + '</option><option value="gemini"' + (G.provider === 'gemini' ? ' selected' : '') + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(d.models.gemini) + (pv.gemini ? '' : ' (키 없음)') + '</option></select></label>' +
+      '<button class="btn pa-run" data-run="missing" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button class="btn pa-run" data-run="all" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>모두 다시 만들기</button><button class="pa-stop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
+      (kind === 'panel' && !d.r2 ? '<p class="err">R2(CLIPS_R2)가 연결되지 않아 저장할 수 없습니다.</p>' : '') + (kind === 'panel' && !pv.openai && !pv.gemini ? '<p class="err">OPENAI_API_KEY 또는 GEMINI_API_KEY 가 없습니다. Cloudflare 환경 변수에 추가하세요.</p>' : '') +
+      '<div class="pa-grid">' + cells + '</div></div>';
+  }
+  function draw() {
+    PANE.innerHTML = dirCard(G.d) + cardOf('panel') + cardOf('bg') + '<div class="card" style="margin-top:12px"><div class="pa-log"></div></div><div id="taBox"></div><div id="asBox"></div>';
     bindDir(); if (window.V2Tarot) window.V2Tarot.open(PANE.querySelector('#taBox')); if (window.V2Assets) window.V2Assets.open(PANE.querySelector('#asBox'));
-    $('#paProv').onchange = function () { G.provider = this.value; };
-    $('#paMissing').onclick = runMissing; $('#paAll').onclick = runAll; $('#paStop').onclick = function () { G.stop = true; log('중지 요청 — 진행 중인 한 장이 끝나면 멈춥니다'); };
-    [].forEach.call(PANE.querySelectorAll('.pa-c'), function (c) { c.onclick = function () { if (G.busy) return; editor(c.dataset.e, c.dataset.t); }; });
+    [].forEach.call(PANE.querySelectorAll('.paProv'), function (sel) { sel.onchange = function () { G.provider = this.value; [].forEach.call(PANE.querySelectorAll('.paProv'), function (o) { o.value = G.provider; }); }; });
+    [].forEach.call(PANE.querySelectorAll('.pa-run'), function (b) { b.onclick = function () { (b.dataset.run === 'all' ? runAll : runMissing)(b.dataset.k); }; });
+    [].forEach.call(PANE.querySelectorAll('.pa-stop'), function (b) { b.onclick = function () { G.stop = true; log('중지 요청 — 진행 중인 한 장이 끝나면 멈춥니다'); }; });
+    [].forEach.call(PANE.querySelectorAll('.pa-c'), function (c) { c.onclick = function () { if (G.busy) return; editor(c.dataset.e, c.dataset.t, c.dataset.k); }; });
     log('');
   }
   /* 컷 하나 세부 수정: 프롬프트·추가 요청으로 여러 번 미리 만들어 보고, 마음에 드는 결과만 이 칸에 확정한다(안 고른 결과는 닫을 때 지운다). */
-  function editor(e, t) {
-    var p = G.d.presets.filter(function (x) { return x.element === e && x.theme === t; })[0], pv = G.d.providers, cur = p.url, previews = [], shown = cur, busy = false;
+  function editor(e, t, kind) {
+    var p = G.d.presets.filter(function (x) { return x.kind === kind && x.element === e && x.theme === t; })[0], pv = G.d.providers, cur = p.url, previews = [], shown = cur, busy = false;
     var d = document.createElement('dialog'); d.className = 'v2dlg'; d.style.width = 'min(920px,96vw)';
     d.innerHTML = '<h3>' + esc(p.title) + ' <small class="muted">' + esc(p.id) + '</small></h3><div style="display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:16px" class="pe-grid">' +
       '<div><div id="peImg" style="aspect-ratio:2/3;background:#000 center/cover;border:1px solid var(--line);border-radius:10px;display:grid;place-items:center;color:var(--ink3);font-size:.82rem"></div><div id="peTh" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div><p class="muted" id="peMsg" style="margin-top:8px;font-size:.8rem"></p></div>' +
@@ -45,7 +53,7 @@
       '<label class="muted">방식 <select id="peMode"><option value="new">처음부터 다시 그리기 (프롬프트 + 추가 요청)</option><option value="edit"' + (cur ? '' : ' disabled') + '>지금 이미지를 바탕으로 수정 (추가 요청만 반영, 구도 유지)</option></select></label>' +
       '<label class="muted">모델 <select id="peProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(G.d.models.openai) + '</option><option value="gemini"' + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(G.d.models.gemini) + '</option></select></label>' +
       '<details><summary class="muted" style="cursor:pointer">프롬프트 전체 보기·편집' + (p.custom ? ' <b style="color:var(--gold)">(수정됨)</b>' : '') + '</summary><textarea id="pePrompt" rows="9" style="width:100%;margin-top:6px"></textarea><div class="row" style="gap:6px;margin-top:4px"><button type="button" id="peReset">기본 프롬프트로 되돌리기</button><label class="muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="peSave"> 확정할 때 이 프롬프트를 이 칸의 기본으로 저장</label></div></details>' +
-      '<div class="card" style="padding:10px"><b style="color:var(--gold)">영상으로 교체 (업로드)</b><p class="muted" style="margin:4px 0 8px;font-size:.8rem">mp4·webm 파일을 올리면 이 칸이 영상 컷이 됩니다. 정지 이미지(포스터)는 영상의 첫 장면으로 자동 만들거나, 아래에서 직접 올릴 수 있습니다. 소리는 꺼진 채 화면에 들어오면 재생됩니다.</p><input type="file" id="peVid" accept="video/mp4,video/webm,video/quicktime"> <label class="muted" style="display:block;margin-top:6px">포스터 이미지(선택) <input type="file" id="pePoster" accept="image/*"></label><div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><button type="button" class="btn" id="peUp">영상 올리고 교체</button><button type="button" id="peUnvid"' + (p.video ? '' : ' disabled') + '>영상 빼고 이미지로 되돌리기</button></div><p class="muted" id="peUpMsg" style="margin-top:6px;font-size:.8rem">' + (p.video ? '현재 이 칸은 영상입니다.' : '') + '</p></div>' +
+      '<div class="card" style="padding:10px"><b style="color:var(--gold)">영상으로 교체 (업로드)</b><p class="muted" style="margin:4px 0 8px;font-size:.8rem">' + (kind === 'bg' ? 'mp4·webm 파일을 올리면 이 칸이 <b>반복 재생되는 배경 영상</b>이 됩니다(소리 없이 무한 반복). 글이 올라가도 읽히도록 어둡고 움직임이 잔잔한 영상이 좋습니다. 정지 이미지(포스터)는 영상의 첫 장면으로 자동 만들거나 직접 올릴 수 있습니다.' : 'mp4·webm 파일을 올리면 이 칸이 영상 컷이 됩니다. 정지 이미지(포스터)는 영상의 첫 장면으로 자동 만들거나, 아래에서 직접 올릴 수 있습니다. 소리는 꺼진 채 화면에 들어오면 재생됩니다.') + '</p><input type="file" id="peVid" accept="video/mp4,video/webm,video/quicktime"> <label class="muted" style="display:block;margin-top:6px">포스터 이미지(선택) <input type="file" id="pePoster" accept="image/*"></label><div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap"><button type="button" class="btn" id="peUp">영상 올리고 교체</button><button type="button" id="peUnvid"' + (p.video ? '' : ' disabled') + '>영상 빼고 이미지로 되돌리기</button></div><p class="muted" id="peUpMsg" style="margin-top:6px;font-size:.8rem">' + (p.video ? '현재 이 칸은 영상입니다.' : '') + '</p></div>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="peGo">미리 만들기</button><button type="button" class="btn gold" id="peOk" disabled>이 이미지로 교체</button><button type="button" id="peClose">닫기</button></div></div></div>';
     document.body.appendChild(d); d.showModal();
     var q = function (s) { return d.querySelector(s); }; q('#pePrompt').value = p.prompt;
@@ -57,13 +65,13 @@
     q('#peReset').onclick = function () { q('#pePrompt').value = p.defaultPrompt; };
     q('#peGo').onclick = function () {
       if (busy) return; busy = true; q('#peGo').disabled = true; q('#peMsg').textContent = '만드는 중… (보통 20~60초)'; var edit = q('#peMode').value === 'edit';
-      C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ element: e, theme: t, preview: true, prompt: q('#pePrompt').value, extra: q('#peExtra').value, fromCurrent: edit, provider: q('#peProv').value }) })
+      C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, element: e, theme: t, preview: true, prompt: q('#pePrompt').value, extra: q('#peExtra').value, fromCurrent: edit, provider: q('#peProv').value }) })
         .then(function (r) { previews.push({ key: r.preview, url: r.url, provider: r.provider + ' ' + r.model }); show(r.url, '새 결과 · ' + r.provider + ' ' + r.model + ' — 마음에 들면 "이 이미지로 교체"'); })
         .catch(function (er) { q('#peMsg').textContent = '실패: ' + er.message; toast(er.message, true); }).then(function () { busy = false; q('#peGo').disabled = false; });
     };
     q('#peOk').onclick = function () {
       var x = previews.filter(function (v) { return v.url === shown; })[0]; if (!x || busy) return; if (cur && !confirm('현재 이미지를 이 결과로 교체합니다. 이전 이미지는 삭제됩니다. 계속할까요?')) return; busy = true;
-      C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ element: e, theme: t, accept: x.key, by: x.provider, prompt: q('#peSave').checked ? q('#pePrompt').value : '' }) })
+      C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, element: e, theme: t, accept: x.key, by: x.provider, prompt: q('#peSave').checked ? q('#pePrompt').value : '' }) })
         .then(function (r) { x.used = true; cur = r.url; previews = previews.filter(function (v) { return v !== x; }); toast('교체했습니다'); show(cur, '교체 완료 — 현재 이미지'); })
         .catch(function (er) { toast(er.message, true); }).then(function () { busy = false; });
     };
@@ -76,12 +84,12 @@
     q('#peUp').onclick = function () {
       var f = q('#peVid').files[0], pf = q('#pePoster').files[0], msg = q('#peUpMsg'); if (!f || busy) { msg.textContent = '영상 파일을 먼저 고르세요'; return; }
       if (cur && !confirm('이 칸을 올린 영상으로 교체합니다. 계속할까요?')) return; busy = true; q('#peUp').disabled = true; msg.textContent = '영상 올리는 중… (파일이 크면 시간이 걸립니다)';
-      var vk; upFile(f, 'panel-' + e + '-' + t + '-' + f.name).then(function (k) { vk = k; msg.textContent = '포스터 준비 중…'; if (pf) return upFile(pf, 'panel-poster-' + pf.name); if (cur) return ''; return frameOf(f).then(function (b) { return upFile(b, 'panel-poster.webp'); }); })
-        .then(function (pk) { return C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ element: e, theme: t, uploadVideo: vk, uploadPoster: pk || '' }) }); })
+      var vk; upFile(f, (kind === 'bg' ? 'panelbg-' : 'panel-') + e + '-' + t + '-' + f.name).then(function (k) { vk = k; msg.textContent = '포스터 준비 중…'; if (pf) return upFile(pf, 'panel-poster-' + pf.name); if (cur) return ''; return frameOf(f).then(function (b) { return upFile(b, 'panel-poster.webp'); }); })
+        .then(function (pk) { return C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, element: e, theme: t, uploadVideo: vk, uploadPoster: pk || '' }) }); })
         .then(function (r) { cur = r.url; p.video = r.video; msg.textContent = '교체했습니다 — 이 칸은 이제 영상입니다.'; q('#peUnvid').disabled = false; toast('영상으로 교체했습니다'); show(cur, '현재 이미지(영상의 포스터)'); })
         .catch(function (er) { msg.textContent = '실패: ' + er.message; toast(er.message, true); }).then(function () { busy = false; q('#peUp').disabled = false; });
     };
-    q('#peUnvid').onclick = function () { if (busy || !confirm('영상을 빼고 정지 이미지로 되돌립니다. 영상 파일은 삭제됩니다. 계속할까요?')) return; busy = true; C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ element: e, theme: t, clearVideo: true }) }).then(function () { p.video = ''; q('#peUnvid').disabled = true; q('#peUpMsg').textContent = '이미지로 되돌렸습니다.'; toast('이미지로 되돌렸습니다'); }).catch(function (er) { toast(er.message, true); }).then(function () { busy = false; }); };
+    q('#peUnvid').onclick = function () { if (busy || !confirm('영상을 빼고 정지 이미지로 되돌립니다. 영상 파일은 삭제됩니다. 계속할까요?')) return; busy = true; C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, element: e, theme: t, clearVideo: true }) }).then(function () { p.video = ''; q('#peUnvid').disabled = true; q('#peUpMsg').textContent = '이미지로 되돌렸습니다.'; toast('이미지로 되돌렸습니다'); }).catch(function (er) { toast(er.message, true); }).then(function () { busy = false; }); };
     q('#peClose').onclick = function () { d.close(); }; d.addEventListener('close', finish); show(cur, cur ? '현재 이미지' : '');
   }
   /* 비주얼 디렉션: 감성(화풍) · 배경(세계관) · 분위기 · 인물 + 한 줄 추가. 저장하면 이후 새로 만드는 모든 이미지의 프롬프트에 들어간다(이미 만든 이미지·칸별로 직접 고친 프롬프트는 그대로). */
@@ -97,27 +105,27 @@
         .catch(function (e) { toast(e.message, true); }).then(function () { var b = $('#paDirSave'); if (b) b.disabled = false; });
     };
   }
-  function one(e, t, redraw, useDefault) {
-    var cell = PANE.querySelector('.pa-c[data-e="' + e + '"][data-t="' + t + '"]'); if (cell) cell.classList.add('run'); G.busy = true; log(EL[e] + ' · ' + TH[t] + ' 만드는 중… (보통 20~60초)');
-    return C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ element: e, theme: t, provider: G.provider, useDefault: !!useDefault }) })
+  function one(kind, e, t, redraw, useDefault) {
+    var cell = PANE.querySelector('.pa-c[data-k="' + kind + '"][data-e="' + e + '"][data-t="' + t + '"]'); if (cell) cell.classList.add('run'); G.busy = true; log((kind === 'bg' ? '[배경] ' : '[본문] ') + EL[e] + ' · ' + TH[t] + ' 만드는 중… (보통 20~60초)');
+    return C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, element: e, theme: t, provider: G.provider, useDefault: !!useDefault }) })
       .then(function (r) { log('✓ ' + EL[e] + ' · ' + TH[t] + ' — ' + r.provider + ' ' + r.model); if (cell && !redraw) { cell.classList.remove('run'); cell.classList.add('has'); cell.style.backgroundImage = 'url(\'' + r.url + '\')'; cell.innerHTML = ''; } return true; })
       .catch(function (er) { if (cell) cell.classList.remove('run'); log('✗ ' + EL[e] + ' · ' + TH[t] + ' — ' + er.message); toast(er.message, true); return false; })
       .then(function (ok) { G.busy = false; return ok; });
   }
-  function runMissing() { runList(G.d.presets.filter(function (p) { return !p.url; }), false); }
+  function runMissing(kind) { runList(G.d.presets.filter(function (p) { return p.kind === kind && !p.url; }), false); }
   // 모두 다시 만들기: 이미 있는 컷까지 현재 비주얼 디렉션으로 전부 새로 만든다. 새로 만드는 데 성공한 칸만 교체되고(실패하면 옛 이미지 유지) 옛 파일은 지워진다.
-  function runAll() {
-    var n = G.d.presets.length, custom = G.d.presets.filter(function (p) { return p.custom; }).length; if (!confirm('50장 전체를 현재 비주얼 디렉션(화풍·감성·세계관…)으로 다시 만듭니다.\n이미지 비용이 장당 발생하고 30분 이상 걸릴 수 있으며, 성공한 칸의 기존 이미지는 삭제됩니다. 계속할까요?')) return;
+  function runAll(kind) {
+    var all = G.d.presets.filter(function (p) { return p.kind === kind; }), n = all.length, custom = all.filter(function (p) { return p.custom; }).length; if (!confirm((kind === 'bg' ? '배경 ' : '본문 컷 ') + '50장 전체를 현재 비주얼 디렉션(화풍·감성·세계관…)으로 다시 만듭니다.\n이미지 비용이 장당 발생하고 30분 이상 걸릴 수 있으며, 성공한 칸의 기존 이미지는 삭제됩니다. 계속할까요?')) return;
     var reset = false; if (custom) reset = confirm('칸별로 직접 고쳐 저장한 프롬프트가 ' + custom + '개 있습니다.\n[확인] 그 프롬프트를 버리고 현재 디렉션으로 만듭니다.\n[취소] 고친 프롬프트를 그대로 사용합니다.');
-    runList(G.d.presets.slice(), reset, true);
+    runList(all, reset, true);
   }
   function runList(todo, useDefault, skipConfirm) {
     if (!todo.length) { toast('만들 칸이 없습니다'); return; }
     if (!skipConfirm && !confirm('빈 칸 ' + todo.length + '장을 차례로 만듭니다. 이미지 비용이 장당 발생합니다. 계속할까요?')) return;
-    G.stop = false; $('#paMissing').disabled = true; $('#paAll').disabled = true; $('#paStop').disabled = false; var fails = 0;
+    G.stop = false; [].forEach.call(PANE.querySelectorAll('.pa-run'), function (b) { b.disabled = true; }); [].forEach.call(PANE.querySelectorAll('.pa-stop'), function (b) { b.disabled = false; }); var fails = 0;
     (function next(i) {
       if (G.stop || i >= todo.length || fails >= 3) { log(fails >= 3 ? '연속 실패 3회로 멈춥니다. 위 오류를 확인하세요.' : G.stop ? '중지했습니다.' : '모두 끝났습니다.'); G.busy = false; load().then(draw); return; }
-      log((i + 1) + ' / ' + todo.length); one(todo[i].element, todo[i].theme, false, useDefault).then(function (ok) { fails = ok ? 0 : fails + 1; G.busy = true; next(i + 1); });
+      log((i + 1) + ' / ' + todo.length); one(todo[i].kind, todo[i].element, todo[i].theme, false, useDefault).then(function (ok) { fails = ok ? 0 : fails + 1; G.busy = true; next(i + 1); });
     })(0);
   }
   window.V2Panel = { open: open };

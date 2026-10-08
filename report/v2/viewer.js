@@ -372,7 +372,7 @@
   function themeOf(c) { var t = (c.id || '') + ' ' + (c.base || '') + ' ' + (c.title || ''); for (var i = 0; i < THEME_OF.length; i++) if (THEME_OF[i][0].test(t)) return THEME_OF[i][1]; return 'identity'; }
   // 본문 장면에 이미지 한 컷을 짝지어 준다(무빙툰 = 이미지 + 글). 챕터마다 첫 본문 장면, 긴 챕터는 중간에 한 컷 더. 라이브러리에 맞는 이미지가 없으면 붙이지 않는다.
   function planPanels(rep) {
-    var lib = (S.pack && S.pack.lib && S.pack.lib.media) || S.media || [], ctx = { usedIds: [] }, el = (S.sd && S.sd.dayMaster && S.sd.dayMaster.el) || 'water';
+    var lib = (S.pack && S.pack.lib && S.pack.lib.media) || S.media || [], ctx = { usedIds: [], pool: 'panel' }, el = (S.sd && S.sd.dayMaster && S.sd.dayMaster.el) || 'water';
     S.pv = {}; (S.media || []).concat(lib).forEach(function (m) { if (m && m.panelVideo && m.url) S.pv[m.url] = m.panelVideo; }); S.pv = {}; (S.media || []).concat(lib).forEach(function (m) { if (m && m.panelVideo && m.url) S.pv[m.url] = m.panelVideo; }); if (!R.Director || !lib.length) return;
     var host = function (s) { return !s.media && !s.panel && (s.sceneType === 'insight' || (s.sceneType === 'life' && /rd-prose|rd-cin/.test(s.html || '') && s.layout !== 'DATA')); };
     rep.chapters.forEach(function (c) {

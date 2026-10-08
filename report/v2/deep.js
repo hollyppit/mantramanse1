@@ -19,7 +19,7 @@
   function bar(label, val, o) { // 가로 막대. val 0~100
     o = o || {}; var v = Math.round(clamp(val, 0, 100)); return '<div class="dp-bar' + (o.cls ? ' ' + o.cls : '') + '"><span class="dp-bl">' + esc(label) + '</span><span class="dp-bt"><i style="width:' + v + '%' + (o.color ? ';background:' + o.color : '') + '"></i></span><b>' + esc(o.text != null ? o.text : v) + '</b></div>';
   }
-  var HJ_PH = { car: '車', spouse: '緣', past: '前', career: '業', place: '地' };
+  var HJ_PH = { car: '車', spouse: '緣', past: '前', career: '業', place: '處', wealth: '器', style: '裝' };
   // 이미지 슬롯: 관리자가 만든 이미지가 있으면 보여 주고, 없으면 같은 자리에 한자 자리표시
   function fig(H, slot, kind, alt, cls) {
     var u = H.assets && (H.assets[slot] || H.assets[slot.replace(/^(past:[^:]+:[^:]+):[FM]$/, '$1')]); // 전생은 성별 슬롯이 없으면 예전(성별 없는) 이미지를 대신 쓴다

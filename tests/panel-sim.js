@@ -12,6 +12,14 @@ const root = path.join(__dirname, '..'), fails = [], ok = (c, m) => { if (!c) fa
     ok(it.elementTags[0] === p.element && it.themeTags[0] === p.theme && it.sceneTags.length >= 2 && it.visualRole.includes('hero'), p.id + ' 태그가 TAX 안에서 모두 살아 있음(걸러지지 않음)');
     ok(!/글자·숫자/.test('') && P.promptFor(p.element, p.theme).includes('글자·숫자'), p.id + ' 프롬프트에 글자 금지');
   }
+  console.log('1b. 용도 구분(본문 컷 panel- / 배경 panelbg-)');
+  const bgs = P.presets('bg'); ok(bgs.length === 50 && new Set(bgs.map(p => p.id)).size === 50 && bgs.every(p => /^panelbg-/.test(p.id) && p.kind === 'bg'), '배경 프리셋 50개, id 는 panelbg- 접두사');
+  ok(!ps.some(p => bgs.some(b => b.id === p.id)) && ps.every(p => /^panel-/.test(p.id)), '본문 컷과 배경 id 가 겹치지 않는다');
+  for (const p of bgs) {
+    const it = P.mediaItem(p.element, p.theme, '/api/clipfile?k=x.webp', 10, 't', '/api/clipfile?k=v.mp4', 'bg');
+    ok(it && it.id === p.id && it.visualRole.includes('background') && it.panelVideo && it.loopable, p.id + ' 배경 항목: 역할 background · 영상 반복');
+    ok(P.promptFor(p.element, p.theme, null, 'bg').includes('배경') && P.promptFor(p.element, p.theme, null, 'bg') !== P.promptFor(p.element, p.theme, null, 'panel'), p.id + ' 배경 프롬프트는 본문 컷과 다르다');
+  }
   console.log('2. 모델 선택(모의 fetch)');
   const calls = []; const png = Buffer.from('abc').toString('base64');
   globalThis.fetch = async (u, o) => { calls.push(u); if (/openai/.test(u)) return env.openaiFail ? new Response('no', { status: 400 }) : new Response(JSON.stringify({ data: [{ b64_json: png }] })); return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ inlineData: { mimeType: 'image/png', data: png } }] } }] })); };
