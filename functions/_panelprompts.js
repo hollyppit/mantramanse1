@@ -37,7 +37,7 @@ const HAIR = { woman: 'natural dark hair in a soft everyday style', man: 'short 
 const characterEN = c => `Main character design (keep consistent across the series): a young Korean ${c} in ${{ woman: "her", man: "his", adult: "their" }[c]} late 20s to early 30s, ${HAIR[c]}, everyday modern clothing, a gentle and expressive face.`;
 
 export const NEGATIVE_IMAGE = 'text, letters, numbers, captions, signage, logo, watermark, distorted face, asymmetrical or cross-eyes, extra fingers, deformed hands, distorted anatomy, extra people, hanbok, fantasy costume, blurry, low quality, oversaturated';
-export const NEGATIVE_VIDEO = 'text, subtitles, watermark, logo, face distortion, face morphing, changing identity, extra limbs, sudden camera cut, fast motion, flicker, jitter';
+export const NEGATIVE_VIDEO = 'text, subtitles, watermark, logo, face distortion, face morphing, changing identity, extra limbs, sudden camera cut, fast motion, speed-up, time-lapse, flicker, jitter';
 
 function styleEN(dir, kind) {
   const d = cleanDirection(dir), part = [ART_EN[d.art], FEEL_EN[d.feel], WORLD_EN[d.world], MOOD_EN[d.mood], PEOPLE_EN[d.people]].filter(Boolean);
@@ -74,7 +74,7 @@ const MOT_TH = {
 const up = s => s[0].toUpperCase() + s.slice(1);
 export function kling(el, th, kind) {
   if (!ELEMENTS[el] || !THEMES[th]) return null;
-  return { prompt: `Gentle, cinematic motion on the first-frame image. The character stands still and composed with a relaxed closed mouth and still shoulders, with only a soft natural blink. ${up(MOT_TH[th])}. ${up(MOT_EL[el])}. The camera does a very slow push-in. Keep the character's face, identity, composition, colors and the webtoon illustration style exactly as in the image; smooth, loop-friendly movement; no text appears.`,
+  return { prompt: `Cinematic slow motion on the first-frame image, as if filmed at a high frame rate: every movement is smooth, graceful and slowed down. The character moves naturally in slow motion (breathing, a gentle shift of weight, hair and clothes drifting with a slight delay) with a relaxed closed mouth and a soft natural blink. ${up(MOT_TH[th])}. ${up(MOT_EL[el])}. The camera does a very slow push-in with a shallow depth of field and a gentle drifting handheld feel. Keep the character's face, identity, composition, colors and the webtoon illustration style exactly as in the image; smooth, loop-friendly movement; no text appears.`,
     negative: NEGATIVE_VIDEO, settings: '이미지→영상 · 길이 5초 · 시작 프레임 = 위에서 만든 이미지 · 창의성(관련도) 낮음~중간(얼굴이 변하면 더 낮추기) · 카메라 움직임은 프롬프트에 맡김' };
 }
 export function toolsFor(el, th, dir, kind) { const l = leonardo(el, th, dir, kind), k = kling(el, th, kind); return l && k ? { leo: l.prompt, leoNeg: l.negative, leoSize: l.size, kling: k.prompt, klingNeg: k.negative, klingSet: k.settings } : null; }
