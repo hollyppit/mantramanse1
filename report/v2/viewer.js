@@ -243,11 +243,12 @@
   var list = function (a) { a = Array.isArray(a) ? a : (a ? [a] : []); return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
   var warnify = function (h) { return String(h).replace(/조심할 점:\s*([^.!?\n<]*[.!?]?)/g, '<mark class="wn"><i aria-hidden="true">⚠</i><b>조심할 점</b>$1</mark>'); }; // 주황색 경고 강조(아이콘 포함)
   var lines = function (t) { return warnify(esc(t).replace(/\n/g, '<br>')); };
-  /* 본문 읽기 쉽게: 렌더된 문서의 글자 노드에서 핵심 문구를 색으로 구분한다(글 내용은 그대로, 감싸기만 한다).
-     조심할 점(주황 상자) · 지금 해 볼 것(초록 상자) · "따옴표 문구"(금색) · 숫자+단위(하늘색) · 사주 용어(금색 점선) · 긍정어(초록) · 주의어(살구색).
-     같은 말은 한 문단에 한 번만, 숫자는 문단당 3개까지 — 색이 너무 많아져 다시 산만해지지 않게 한다. */
+  /* 본문 읽기 쉽게: 렌더된 문서의 글자 노드에서 핵심 문구만 은은하게 색으로 구분한다(글 내용은 그대로, 감싸기만 한다).
+     조심할 점(주황) · 지금 해 볼 것(초록) · "따옴표 문구"(금색) · 숫자+단위(하늘색) · 사주 용어(금색). 문맥을 모르는 낱말 색칠(긍정·부정어)은 하지 않는다.
+     용어·숫자는 앞뒤가 한글로 이어지면 건너뛴다('일주일'의 '일주' 같은 오탐 방지). 같은 용어는 한 장면에 한 번만, 숫자는 문단당 3개까지. */
   var EMPH_SKIP = 'mark,b,strong,em,h1,h2,h3,h4,button,a,figure,script,style,.cap,.rd-cin,.rd-head,.tm,.tms,.k';
-  var EMPH_RE = /(조심할 점:\s*[^.!?\n]*[.!?]?)|(지금 해 볼 것:\s*[^.!?\n]*[.!?]?)|([“"][^“”"\n]{2,28}[”"])|(\d[\d,.]{0,5}\s?(?:%|퍼센트|년|세|개월|살|배|원|번)(?![가-힣]))|(신강|신약|대운|세운|월운|용신|희신|기신|비견|겁재|식신|상관|편재|정재|편관|정관|편인|정인|비겁|식상|재성|관성|인성|일간|일주|오행)|(기회|성장|안정|재물|결실|회복|확장|인연|강점|장점|행운|도약|수확)|(갈등|손실|지출|충돌|번아웃|고집|예민|불안|위험|과로|오해|단점|약점|소모)/g;
+  var HAN = /[가-힣]/;
+  var EMPH_RE = /(조심할 점:\s*[^.!?\n]*[.!?]?)|(지금 해 볼 것:\s*[^.!?\n]*[.!?]?)|([“"][^“”"\n]{2,28}[”"])|(\d[\d,.]{0,5}\s?(?:%|퍼센트|(?:년|세|개월|살|배|원|번)(?=$|[^가-힣]|[은는이가을를의과와도만로에서])))|(신강|신약|대운|세운|월운|용신|희신|비견|겁재|식신|편재|정재|편관|정관|편인|정인|비겁|식상|재성|관성|인성)(?=$|[^가-힣]|[은는이가을를의과와도만로에서])/g;
   function emphMark(cls, txt) {
     var e, ix;
     if (cls === 'wn' || cls === 'ac') {
@@ -262,12 +263,13 @@
     var tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), nodes = [], n, seen = new WeakMap();
     while ((n = tw.nextNode())) { if (n.nodeValue.length > 3 && n.parentElement && !n.parentElement.closest(EMPH_SKIP)) nodes.push(n); }
     nodes.forEach(function (t) {
-      var s = t.nodeValue, re = new RegExp(EMPH_RE.source, 'g'), m, last = 0, frag = null, blk = t.parentElement.closest('p,li,.lead,.body,section') || t.parentElement, set = seen.get(blk);
-      if (!set) { set = {}; seen.set(blk, set); }
+      var s = t.nodeValue, re = new RegExp(EMPH_RE.source, 'g'), m, last = 0, frag = null, blk = t.parentElement.closest('p,li,.lead,.body,section') || t.parentElement, set = seen.get(blk), sec = t.parentElement.closest('section') || blk, tset = seen.get(sec);
+      if (!set) { set = {}; seen.set(blk, set); } if (!tset) { tset = {}; seen.set(sec, tset); }
       while ((m = re.exec(s))) {
-        var cls = m[1] ? 'wn' : m[2] ? 'ac' : m[3] ? 'kq' : m[4] ? 'kn' : m[5] ? 'kt' : m[6] ? 'kp' : 'kw', term = cls === 'kt' || cls === 'kp' || cls === 'kw';
-        if (term && set[m[0]]) continue; if (cls === 'kn' && (set.n = (set.n || 0) + 1) > 3) continue;
-        if (term) set[m[0]] = 1;
+        var cls = m[1] ? 'wn' : m[2] ? 'ac' : m[3] ? 'kq' : m[4] ? 'kn' : 'kt', term = cls === 'kt', pv = m.index ? s.charAt(m.index - 1) : '';
+        if ((term && HAN.test(pv)) || (cls === 'kn' && /[\d.]/.test(pv))) continue; // 앞이 한글·숫자로 이어지면 다른 낱말의 일부
+        if (term && tset[m[0]]) continue; if (cls === 'kn' && (set.n = (set.n || 0) + 1) > 3) continue;
+        if (term) tset[m[0]] = 1;
         if (!frag) frag = document.createDocumentFragment();
         frag.appendChild(document.createTextNode(s.slice(last, m.index))); frag.appendChild(emphMark(cls, m[0])); last = m.index + m[0].length;
       }

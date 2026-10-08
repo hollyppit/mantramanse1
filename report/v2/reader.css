@@ -98,16 +98,15 @@ mark.wn i { font-style: normal; margin-right: 6px; } mark.wn b { color: #FF9A3C;
 /* 지금 해 볼 것: 초록색 + 체크 아이콘(조심할 점과 짝) */
 mark.ac { display: block; margin: 12px 0 4px; padding: 10px 14px; border: 1px solid rgba(79, 208, 143, .5); border-left: 4px solid #4FD08F; border-radius: 10px; background: rgba(79, 208, 143, .1); color: #BDEFD6; font-weight: 500; line-height: 1.7; }
 mark.ac i { font-style: normal; margin-right: 6px; } mark.ac b { color: #4FD08F; font-weight: 700; margin-right: 8px; }
-/* 목록 안에서는 상자 대신 한 줄 안에서 색만(불릿이 홀로 남지 않게) */
-li mark.wn, li mark.ac { display: inline; margin: 0; padding: 0; border: 0; background: none; border-radius: 0; font-weight: 600; }
-li mark.wn { color: #FFC48A; } li mark.ac { color: #BDEFD6; }
-/* 본문 핵심 문구 색 구분(viewer.js emphasize): 따옴표 문구 · 숫자 · 사주 용어 · 긍정어 · 주의어 */
-.k { font-weight: 600; }
-.k.kq { color: var(--gold-l); }
-.k.kn { color: #8CC8FF; font-variant-numeric: tabular-nums; }
-.k.kt { color: var(--gold); border-bottom: 1px dotted var(--gold-d); }
-.k.kp { color: #8FE3B5; }
-.k.kw { color: #FFA48F; }
+/* 목록 안에서는 상자 대신 한 줄 안에서 라벨만 색으로(불릿이 홀로 남지 않게, 이미 상자 안이면 문장은 평소 굵기로) */
+li mark.wn, li mark.ac { display: inline; margin: 0; padding: 0; border: 0; background: none; border-radius: 0; color: inherit; font-weight: inherit; }
+li mark.wn i, li mark.ac i { display: none; }
+li mark.wn b, li mark.ac b { margin-right: 6px; font-weight: 700; }
+li mark.wn b { color: #FFB066; } li mark.ac b { color: #6FDDA8; }
+/* 본문 핵심 문구 색 구분(viewer.js emphasize): 따옴표 문구 · 숫자 · 사주 용어. 은은하게 — 굵기는 살짝만, 밑줄 없음 */
+.k.kq { color: var(--gold-l); font-weight: 600; }
+.k.kn { color: #8CC8FF; font-weight: 600; font-variant-numeric: tabular-nums; }
+.k.kt { color: var(--gold); font-weight: 500; }
 /* 쉬운 용어 풀이: 작게 */
 .tms { gap: 6px; } .tm { padding: 8px 12px; border-radius: 10px; } .tm .tmh b { font-size: .86rem; } .tm .tmh i { font-size: .8rem; } .tm p { font-size: .78rem; line-height: 1.6; margin-top: 2px; } .tm .tmeg { font-size: .74rem; } .tm .tmhere { font-size: .8rem; }
 
