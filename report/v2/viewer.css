@@ -64,7 +64,7 @@ form { margin-top: 24px; display: grid; gap: 16px; }
 .awk-media { position: absolute; inset: 0; } .awk-media video, .awk-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .awk-media .ph { position: absolute; inset: 0; }
 .awk-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.45) 0%, transparent 28%, transparent 55%, rgba(0,0,0,.78) 100%); pointer-events: none; }
-.awk-top { position: absolute; top: calc(14px + env(safe-area-inset-top, 0px)); left: 14px; right: 14px; display: flex; justify-content: space-between; z-index: 3; }
+.awk-top { position: absolute; top: calc(58px + env(safe-area-inset-top, 0px)); left: 14px; right: 14px; display: flex; justify-content: space-between; z-index: 3; }
 .awk-cap { position: absolute; left: 22px; right: 22px; bottom: calc(110px + var(--safe-b)); z-index: 2; text-align: center; text-shadow: 0 2px 14px rgba(0,0,0,.7); }
 .awk-cap .t { font-family: var(--f-serif); font-size: 1.7rem; } .awk-cap .s { color: #E4DFD2; margin-top: 8px; font-size: .9rem; line-height: 1.75; } .awk-cap .k { margin-top: 10px; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
 .awk-cap .k span { font-size: .78rem; padding: 2px 10px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; }

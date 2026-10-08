@@ -154,7 +154,9 @@
   // 탭해서 시작: 배경음악이 있으면 일간 소개 직전에 한 번 터치를 받는다(터치가 있어야 소리를 낼 수 있다). 음악이 없거나 꺼 둔 경우·미리보기에서는 바로 시작한다.
   // 허브 퍼널 이벤트: 허브(/report/hub/)와 같은 이름 그대로(gtag · dataLayer · 'mantra:track')로 내보낸다. v2 자체 이벤트(T)와는 따로 센다.
   function funnel(n, p) { if (!HUB) return; p = Object.assign({ src: 'v2', from: 'hub' }, p || {}); try { if (typeof window.gtag === 'function') window.gtag('event', n, p); } catch (e) { } try { if (window.dataLayer && window.dataLayer.push) window.dataLayer.push(Object.assign({ event: n }, p)); } catch (e) { } try { window.dispatchEvent(new CustomEvent('mantra:track', { detail: { name: n, props: p } })); } catch (e) { } }
-  function hubStart() { funnel('movingtoon_start'); $('#hubBack').hidden = false; if (R.Bgm) R.Bgm.play('cinematic'); proVideo(function () { if (LIFE) lifeBegin(); else beginReader(); }); }
+  // 홈으로 가는 버튼은 어느 단계에서든(입력·로딩·영상·본문) 항상 보인다: 허브에서 왔으면 MY 운명, 아니면 허브 첫 화면. 관리자 미리보기에서는 숨긴다
+  (function () { var hb = $('#hubBack'); if (!hb) return; if (PREVIEW) { hb.hidden = true; return; } if (HUB) { hb.href = '/report/#/my'; hb.textContent = '‹ MY 운명'; } })();
+  function hubStart() { funnel('movingtoon_start'); if (R.Bgm) R.Bgm.play('cinematic'); proVideo(function () { if (LIFE) lifeBegin(); else beginReader(); }); }
   // 프롤로그 영상(관리자 > 챕터 관리 > 프롤로그 영상): 올려 둔 영상이 있으면 재생하고 끝나면 next(true), 없으면 곧바로 next(false)
   function proVideo(next) {
     if (PREVIEW || !S.proVid) { next(false); return; }

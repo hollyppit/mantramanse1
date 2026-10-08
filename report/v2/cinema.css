@@ -90,7 +90,7 @@
 
 /* 컨트롤 */
 .cn-ui { position: absolute; inset: 0; z-index: 9; pointer-events: none; }
-.cn-skip { pointer-events: auto; position: absolute; top: calc(env(safe-area-inset-top, 0px) + 14px); right: 14px; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .28); background: rgba(0, 0, 0, .35); color: #EDE8DC; font-size: .82rem; letter-spacing: .06em; }
+.cn-skip { pointer-events: auto; position: absolute; top: calc(env(safe-area-inset-top, 0px) + 58px); right: 14px; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .28); background: rgba(0, 0, 0, .35); color: #EDE8DC; font-size: .82rem; letter-spacing: .06em; }
 .cn-pause { position: absolute; left: 50%; top: 50%; translate: -50% -50%; font-size: 1.6rem; color: rgba(255, 255, 255, .8); opacity: 0; transition: opacity .25s; padding: 18px; border-radius: 50%; background: rgba(0, 0, 0, .35); }
 .cn-pause.on { opacity: 1; }
 .cn-prog { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgba(255, 255, 255, .12); } .cn-prog i { display: block; height: 100%; background: rgba(213, 185, 127, .8); transform-origin: left; transform: scaleX(0); transition: transform .6s ease; }
