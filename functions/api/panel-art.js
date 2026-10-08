@@ -5,19 +5,26 @@
 // 필요: GLOSSARY_KV · CLIPS_R2 · ADMIN_PASSWORD · OPENAI_API_KEY(gpt-image-2) 및/또는 GEMINI_API_KEY. 한 번에 한 장씩 부른다(화면이 "빈 것만 모두 만들기"로 반복 호출).
 import { json, isAdmin, configError } from '../_lib.js';
 import { toolsFor } from '../_panelprompts.js';
-import { ELEMENTS, THEMES, presets, promptFor, presetId, mediaItem, slotPrompt, slotItem, generate, DIRECTION_OPTIONS, cleanDirection, kindOf } from '../_panelart.js';
+import { ELEMENTS, THEMES, presets, promptFor, presetId, mediaItem, slotPrompt, slotItem, generate, DIRECTION_OPTIONS, cleanDirection, kindOf, REF_USE, REF_OK, cleanRefs } from '../_panelart.js';
 
 const KEY = 'media:index', PKEY = 'panel:prompts', DKEY = 'panel:direction';
 const loadDir = async env => cleanDirection(await env.GLOSSARY_KV.get(DKEY, 'json'));
 const PREV_KEY = /^panelprev-[\w.-]{1,100}$/, TYPE_OF = { webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg' };
 const KEY_OK = /^\/api\/clipfile\?k=([\w.-]{1,120})$/;
+async function r2Ref(env, url) { // /api/clipfile?k=… → { bytes, mime } (없으면 null)
+  const m = REF_OK.exec(url || ''); if (!m) return null; const o = await env.CLIPS_R2.get(m[1]); if (!o) return null;
+  const ext = (m[1].split('.').pop() || '').toLowerCase(); return { bytes: await o.arrayBuffer(), mime: (o.httpMetadata && o.httpMetadata.contentType) || TYPE_OF[ext] || 'image/png' };
+}
+// 비주얼 디렉션의 레퍼런스(+ 이번 요청 전용 레퍼런스) → 첨부 이미지 배열(최대 4장). 있으면 프롬프트 앞에 "그림체를 맞춰라" 지시를 붙인다.
+async function refsFor(env, dir, b) { const urls = [...new Set([...(b && b.useGlobalRefs === false ? [] : dir.refs), ...cleanRefs(b && b.refs)])].slice(0, 4), out = []; for (const u of urls) { const r = await r2Ref(env, u); if (r) out.push(r); } return out; }
+const withRefs = (prompt, refs, dir) => (refs.length ? REF_USE[dir.refUse][1] + '\n' : '') + prompt;
 
 export async function onRequestGet({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
   const list = (await env.GLOSSARY_KV.get(KEY, 'json')) || [], by = new Map(list.map(m => [m.id, m]));
   const saved = (await env.GLOSSARY_KV.get(PKEY, 'json')) || {}, dir = await loadDir(env);
-  return json({ presets: presets('panel').concat(presets('panelF'), presets('panelM'), presets('bg')).map(p => ({ ...p, url: (by.get(p.id) || {}).url || '', video: (by.get(p.id) || {}).panelVideo || '', prompt: saved[p.id] || promptFor(p.element, p.theme, dir, p.kind), custom: !!saved[p.id], defaultPrompt: promptFor(p.element, p.theme, dir, p.kind), tools: toolsFor(p.element, p.theme, dir, p.kind) })), direction: dir, directionOptions: Object.fromEntries(Object.entries(DIRECTION_OPTIONS).map(([k, v]) => [k, { label: v.label, items: Object.fromEntries(Object.entries(v.items).map(([i, x]) => [i, x[0]])) }])), providers: { openai: !!env.OPENAI_API_KEY, gemini: !!env.GEMINI_API_KEY }, r2: !!env.CLIPS_R2,
+  return json({ presets: presets('panel').concat(presets('panelF'), presets('panelM'), presets('bg')).map(p => ({ ...p, url: (by.get(p.id) || {}).url || '', video: (by.get(p.id) || {}).panelVideo || '', prompt: saved[p.id] || promptFor(p.element, p.theme, dir, p.kind), custom: !!saved[p.id], defaultPrompt: promptFor(p.element, p.theme, dir, p.kind), tools: toolsFor(p.element, p.theme, dir, p.kind) })), direction: dir, directionOptions: Object.fromEntries(Object.entries(DIRECTION_OPTIONS).map(([k, v]) => [k, { label: v.label, items: Object.fromEntries(Object.entries(v.items).map(([i, x]) => [i, x[0]])) }])), refUse: Object.fromEntries(Object.entries(REF_USE).map(([k, v]) => [k, v[0]])), providers: { openai: !!env.OPENAI_API_KEY, gemini: !!env.GEMINI_API_KEY }, r2: !!env.CLIPS_R2,
     models: { openai: env.PANEL_IMAGE_MODEL || 'gpt-image-2', gemini: env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image' } });
 }
 
@@ -36,7 +43,7 @@ export async function onRequestPost({ request, env }) {
   let b; try { b = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); }
   const only0 = b.provider === 'openai' || b.provider === 'gemini' ? b.provider : '';
   if (b.slot && typeof b.slot === 'object') {
-    const sl = b.slot; let g; try { g = await generate(env, slotPrompt(sl.tags, sl.title, await loadDir(env)), only0); } catch (e) { return json({ error: e.message }, 502); }
+    const sl = b.slot, dirS = await loadDir(env), refsS = await refsFor(env, dirS, b); let g; try { g = await generate(env, withRefs(slotPrompt(sl.tags, sl.title, dirS), refsS, dirS), only0, refsS.length ? refsS : null); } catch (e) { return json({ error: e.message }, 502); }
     const key = 'ai-' + Array.from(crypto.getRandomValues(new Uint8Array(8)), x => x.toString(16).padStart(2, '0')).join('') + '.' + g.ext;
     await env.CLIPS_R2.put(key, g.bytes, { httpMetadata: { contentType: g.mime } });
     const url = '/api/clipfile?k=' + key, item = slotItem(sl.chapterId, sl.title, sl.tags, url, g.bytes.length, g.provider + ':' + g.model);
@@ -95,11 +102,12 @@ export async function onRequestPost({ request, env }) {
     ref = { bytes: await o.arrayBuffer(), mime: (o.httpMetadata && o.httpMetadata.contentType) || 'image/webp' };
     prompt = '첨부한 이미지를 바탕으로, 같은 구도와 그림체를 유지하면서 아래 요청만 반영해 다시 그린다. 화면 안에 글자·숫자·로고는 넣지 않는다.\n수정 요청: ' + (String(b.extra || '').trim().slice(0, 500) || '전체적으로 조금 더 선명하게');
   } else if (typeof b.extra === 'string' && b.extra.trim()) prompt += '\n추가 요청: ' + b.extra.trim().slice(0, 500);
-  let g; try { g = await generate(env, prompt, only, ref); } catch (e) { return json({ error: e.message }, 502); }
+  let refs = ref ? [ref] : []; if (!b.fromCurrent) { refs = await refsFor(env, dir, b); prompt = withRefs(prompt, refs, dir); } // 새로 그릴 때만 그림체 레퍼런스를 붙인다(현재 컷 수정은 그 컷이 바탕)
+  let g; try { g = await generate(env, prompt, only, refs.length ? refs : null); } catch (e) { return json({ error: e.message }, 502); }
   if (b.preview) { // 미리보기: 칸을 바꾸지 않고 임시 파일로 돌려준다(확정은 accept)
     const pk = 'panelprev-' + Array.from(crypto.getRandomValues(new Uint8Array(8)), x => x.toString(16).padStart(2, '0')).join('') + '.' + g.ext;
     await env.CLIPS_R2.put(pk, g.bytes, { httpMetadata: { contentType: g.mime } });
-    return json({ ok: true, preview: pk, url: '/api/clipfile?k=' + pk, provider: g.provider, model: g.model });
+    return json({ ok: true, preview: pk, url: '/api/clipfile?k=' + pk, provider: g.provider, model: g.model, refs: refs.length });
   }
   const key = id + '-' + Array.from(crypto.getRandomValues(new Uint8Array(4)), x => x.toString(16).padStart(2, '0')).join('') + '.' + g.ext;
   await env.CLIPS_R2.put(key, g.bytes, { httpMetadata: { contentType: g.mime } });
@@ -107,5 +115,5 @@ export async function onRequestPost({ request, env }) {
   const list = (await env.GLOSSARY_KV.get(KEY, 'json')) || [], old = list.find(m => m.id === item.id);
   await env.GLOSSARY_KV.put(KEY, JSON.stringify(list.filter(m => m.id !== item.id).concat(item)));
   const mm = old && KEY_OK.exec(old.url || ''); if (mm) { try { await env.CLIPS_R2.delete(mm[1]); } catch { /* 옛 파일 정리 실패는 무시 */ } }
-  return json({ ok: true, id: item.id, url, provider: g.provider, model: g.model });
+  return json({ ok: true, id: item.id, url, provider: g.provider, model: g.model, refs: refs.length });
 }

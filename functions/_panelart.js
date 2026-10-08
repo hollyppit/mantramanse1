@@ -36,13 +36,17 @@ export const DIRECTION_OPTIONS = {
     back: ['뒷모습·실루엣만', '인물은 뒷모습이나 멀리 보이는 실루엣으로만 그리고 얼굴 클로즈업은 하지 않는다.'], none: ['사람 없이 풍경만', '사람은 그리지 않고 풍경과 사물만으로 표현한다.'],
     face: ['얼굴이 보이는 인물', '인물의 얼굴과 표정이 보여도 좋다(특정 실존 인물을 닮게 그리지 않는다).'] } },
 };
-export const DEFAULT_DIRECTION = { art: 'webtoon', feel: 'cinematic', world: 'modern', mood: 'auto', people: 'face', extra: '' };
+// 그림체 통일용 레퍼런스(최대 3장): 모든 컷을 만들 때 함께 첨부한다. style = 그림체·채색·질감만 따르고 구도·인물·소재는 새로, close = 구도·분위기까지 가깝게.
+export const REF_USE = { style: ['그림체·채색·질감만 참고 (구도·인물은 새로)', '첨부한 레퍼런스 이미지와 완전히 같은 그림체로 그린다: 선화의 굵기와 질감, 채색·명암 방식, 색감과 보정 톤, 얼굴·눈·인체 비율과 표현, 배경 묘사의 밀도를 그대로 따른다. 다만 레퍼런스의 인물·구도·소재·배경은 따라 그리지 않고 아래 장면을 새로 그린다. 같은 작가가 그린 연작처럼 보여야 한다.'], close: ['구도·분위기까지 가깝게', '첨부한 레퍼런스 이미지와 같은 그림체로, 구도와 분위기도 가깝게 따르되 아래 장면에 맞게 바꿔 그린다. 같은 작가가 그린 연작처럼 보여야 한다.'] };
+export const REF_OK = /^\/api\/clipfile\?k=([\w.-]{1,120})$/;
+export const cleanRefs = v => (Array.isArray(v) ? [...new Set(v.filter(x => typeof x === 'string' && REF_OK.test(x)))].slice(0, 3) : []);
+export const DEFAULT_DIRECTION = { art: 'webtoon', feel: 'cinematic', world: 'modern', mood: 'auto', people: 'face', extra: '', refs: [], refUse: 'style' };
 export function cleanDirection(v) {
   v = v && typeof v === 'object' ? { ...v } : {}; const o = { ...DEFAULT_DIRECTION };
   const OLD = { ink: ['webtoonInk', 'cinematic'], film: ['realistic', 'cinematic'], photo: ['realistic', 'documentary'], anime: ['anime', 'lyrical'], painting: ['painting', 'lyrical'], noir: ['realistic', 'noir'] }; // 예전 저장값(look 하나) 호환
   if (v.look && OLD[v.look] && !v.art) { v.art = OLD[v.look][0]; v.feel = v.feel || OLD[v.look][1]; }
   for (const k of Object.keys(DIRECTION_OPTIONS)) if (typeof v[k] === 'string' && DIRECTION_OPTIONS[k].items[v[k]]) o[k] = v[k];
-  o.extra = typeof v.extra === 'string' ? v.extra.trim().slice(0, 300) : ''; return o;
+  o.extra = typeof v.extra === 'string' ? v.extra.trim().slice(0, 300) : ''; o.refs = cleanRefs(v.refs); o.refUse = REF_USE[v.refUse] ? v.refUse : 'style'; return o;
 }
 // 공통 화풍 문장(글자 금지·글자 자리 비우기는 항상 붙는다)
 export function styleOf(dir) {

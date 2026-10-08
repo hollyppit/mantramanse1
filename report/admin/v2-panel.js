@@ -10,6 +10,7 @@
   css.textContent = '.pa-grid{display:grid;grid-template-columns:70px repeat(10,minmax(0,1fr));gap:6px;align-items:stretch;margin-top:12px}.pa-h{font-size:.72rem;color:var(--ink3);text-align:center;align-self:end}.pa-r{font-size:.82rem;color:var(--gold);align-self:center}' +
     '.pa-c{aspect-ratio:3/4;border:1px dashed var(--line);border-radius:8px;background:#000 center/cover;display:flex;align-items:flex-end;justify-content:center;font-size:.7rem;color:var(--ink3);cursor:pointer;position:relative;overflow:hidden}.pa-c.has{border:1px solid var(--line)}.pa-c.run{outline:2px solid var(--gold)}' +
     '.pa-c b{background:rgba(0,0,0,.6);width:100%;text-align:center;padding:2px 0;font-weight:400}.pa-log{font-size:.8rem;color:var(--ink2);max-height:160px;overflow:auto;margin-top:10px;line-height:1.6}@media(max-width:900px){.pa-grid{grid-template-columns:50px repeat(5,minmax(0,1fr))}}';
+  css.textContent += '.pa-rf{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}.pa-rf .rf{width:64px;height:96px;border-radius:6px;border:1px solid var(--line);background:#000 center/cover;position:relative}.pa-rf .rf button{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;padding:0;line-height:1;font-size:.7rem}';
   document.head.appendChild(css);
 
   // 패널 목록 + Kling 영상 생성 상태(키 설정 여부 · 진행 중 작업). Kling 쪽이 실패해도 목록은 그대로 보여 준다.
@@ -172,11 +173,33 @@
   function dirCard(d) {
     var O = d.directionOptions, v = d.direction, h = '<div class="card"><b style="color:var(--gold)">비주얼 디렉션</b><p class="muted" style="margin:6px 0 10px">모든 컷에 공통으로 적용되는 감성·배경 설정입니다. 저장한 뒤 새로 만들거나 다시 만드는 이미지부터 반영됩니다.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">';
     Object.keys(O).forEach(function (k) { h += '<label class="muted">' + esc(O[k].label) + '<select data-dir="' + k + '">' + Object.keys(O[k].items).map(function (i) { return '<option value="' + i + '"' + (v[k] === i ? ' selected' : '') + '>' + esc(O[k].items[i]) + '</option>'; }).join('') + '</select></label>'; });
-    return h + '</div><label class="muted" style="display:block;margin-top:10px">추가 방향 <small>(예: 비 오는 밤 위주로, 보라색 계열 조명, 80년대 필름 느낌)</small><input data-dir="extra" value="' + esc(v.extra || '') + '" maxlength="300" style="width:100%"></label><div class="row" style="margin-top:10px;gap:8px;align-items:center"><button class="btn" id="paDirSave">디렉션 저장</button><span class="muted" id="paDirMsg"></span></div></div>';
+    h += '</div>'; var ru = d.refUse || {};
+    h += '<div style="margin-top:12px"><b class="muted">그림체 레퍼런스 (최대 3장)</b> <small class="muted">마음에 드는 컷을 올리면 새로 만드는 모든 컷(본문 컷·배경)이 그 그림체를 따라 통일됩니다. 올리거나 빼면 바로 저장됩니다.</small><div class="pa-rf" id="paRefs"></div><label class="muted" style="display:inline-block;margin-top:8px">참고 방식 <select data-dir="refUse">' + Object.keys(ru).map(function (k) { return '<option value="' + k + '"' + ((v.refUse || 'style') === k ? ' selected' : '') + '>' + esc(ru[k]) + '</option>'; }).join('') + '</select></label></div>';
+    return h + '<label class="muted" style="display:block;margin-top:10px">추가 방향 <small>(예: 비 오는 밤 위주로, 보라색 계열 조명, 80년대 필름 느낌)</small><input data-dir="extra" value="' + esc(v.extra || '') + '" maxlength="300" style="width:100%"></label><div class="row" style="margin-top:10px;gap:8px;align-items:center"><button class="btn" id="paDirSave">디렉션 저장</button><span class="muted" id="paDirMsg"></span></div></div>';
+  }
+  // 그림체 레퍼런스 이미지 업로드(/api/clipfile, 관리자 전용 R2) → '/api/clipfile?k=키'
+  function refUpload(file) {
+    if (!/^image[/](webp|png|jpeg|jpg)$/.test(file.type) && !/[.](webp|png|jpe?g)$/i.test(file.name)) return Promise.reject(new Error('이미지 파일(webp·png·jpg)만 올릴 수 있습니다'));
+    var ext = ((file.name.match(/[.](webp|png|jpe?g)$/i) || [])[1] || file.type.split('/')[1] || 'png').toLowerCase().replace('jpeg', 'jpg');
+    return C.api('/api/clipfile?name=' + encodeURIComponent('panel-ref.' + ext), { method: 'POST', headers: { 'content-type': file.type || 'image/png' }, body: file }).then(function (d) { if (!d.key) throw new Error('업로드 응답에 key 가 없습니다'); return '/api/clipfile?k=' + encodeURIComponent(d.key); });
+  }
+  function readDir() { var v = {}; [].forEach.call(PANE.querySelectorAll('[data-dir]'), function (e) { v[e.dataset.dir] = e.value; }); v.refs = (G.d.direction.refs || []).slice(); return v; }
+  function saveDir(v, msg) {
+    return C.api('/api/panel-art', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ direction: v }) }).then(function (r) { G.d.direction = r.direction; var m = $('#paDirMsg'); if (m) m.textContent = msg; paintRefs(); });
+  }
+  function paintRefs() {
+    var box = $('#paRefs'); if (!box) return; var refs = G.d.direction.refs || [];
+    box.innerHTML = refs.map(function (u, i) { return '<span class="rf" style="background-image:url(\'' + esc(u) + '\')"><button type="button" data-rmref="' + i + '" title="빼기">✕</button></span>'; }).join('') + (refs.length < 3 ? '<label class="navbtn" style="cursor:pointer;padding:6px 12px;font-size:.8rem">+ 레퍼런스 올리기<input type="file" id="paRefUp" accept="image/png,image/jpeg,image/webp" multiple hidden></label>' : '');
+    [].forEach.call(box.querySelectorAll('[data-rmref]'), function (b) { b.onclick = function () { var v = readDir(); v.refs = refs.filter(function (_, i) { return i !== +b.dataset.rmref; }); saveDir(v, '레퍼런스를 뺐습니다 — 지금부터 새로 만드는 이미지에 적용됩니다').catch(function (e) { toast(e.message, true); }); }; });
+    var up = $('#paRefUp'); if (up) up.onchange = function () {
+      var fs = [].slice.call(up.files).slice(0, 3 - refs.length), n = $('#paDirMsg'); if (!fs.length) return; n.textContent = '올리는 중…';
+      Promise.all(fs.map(refUpload)).then(function (us) { var v = readDir(); v.refs = refs.concat(us).slice(0, 3); return saveDir(v, '레퍼런스를 저장했습니다 — 지금부터 새로 만드는 이미지가 이 그림체를 따릅니다'); }).catch(function (e) { n.textContent = e.message; toast(e.message, true); });
+    };
   }
   function bindDir() {
+    paintRefs();
     $('#paDirSave').onclick = function () {
-      var v = {}; [].forEach.call(PANE.querySelectorAll('[data-dir]'), function (e) { v[e.dataset.dir] = e.value; }); $('#paDirSave').disabled = true;
+      var v = readDir(); $('#paDirSave').disabled = true;
       C.api('/api/panel-art', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ direction: v }) }).then(function (r) { G.d.direction = r.direction; $('#paDirMsg').textContent = '저장했습니다 — 지금부터 새로 만드는 이미지에 적용됩니다'; toast('비주얼 디렉션을 저장했습니다'); return load(); })
         .catch(function (e) { toast(e.message, true); }).then(function () { var b = $('#paDirSave'); if (b) b.disabled = false; });
     };
