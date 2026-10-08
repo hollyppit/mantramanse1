@@ -116,7 +116,7 @@
     var d = document.createElement('dialog'); d.className = 'v2dlg'; d.style.width = 'min(940px,96vw)';
     d.innerHTML = '<h3>' + esc(c.nameKo) + ' <small class="muted">' + esc(c.nameEn) + ' · ' + esc(c.id) + '</small></h3><div style="display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr);gap:16px">' +
       '<div><div id="teImg" style="aspect-ratio:2/3;background:#000 center/cover;border:1px solid var(--line);border-radius:10px;display:grid;place-items:center;color:var(--ink3);font-size:.82rem"></div><div id="teTh" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div><p class="muted" id="teMsg" style="margin-top:8px;font-size:.8rem"></p></div>' +
-      '<div style="display:grid;gap:10px;align-content:start"><label class="muted">추가 요청 <small>(예: 배경을 더 어둡게, 별을 크게, 인물을 작게)</small><textarea id="teExtra" rows="2"></textarea></label>' +
+      '<div style="display:grid;gap:10px;align-content:start"><label class="muted">추가 요청 <small>(예: 배경을 더 어둡게, 별을 크게, 인물을 작게)</small><textarea id="teExtra" rows="2"></textarea></label>' + '<label class="muted">피할 것 (네거티브) <small>(예: 글자·로고 넣지 말 것, 손가락 왜곡 없이, 밝은 조명 금지)</small><textarea id="teAvoid" rows="2" placeholder="이미지에 들어가면 안 되는 것"></textarea></label>' + '' +
       '<label class="muted">방식 <select id="teMode"><option value="new">처음부터 다시 그리기 (프롬프트 + 추가 요청 + 레퍼런스)</option><option value="edit"' + (cur ? '' : ' disabled') + '>지금 이미지를 바탕으로 수정 (추가 요청만 반영, 구도 유지)</option></select></label>' +
       '<div><span class="muted">이 카드 전용 레퍼런스 <small>(이번에 만들 때만 사용 · 최대 3장)</small></span><div class="ta-rf" id="teRefs"></div>' + (gl.length ? '<label class="muted" style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="teGlobal" checked> 전체 레퍼런스 ' + gl.length + '장도 함께 사용</label>' : '') + '</div>' +
       '<label class="muted">모델 <select id="teProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(G.d.models.openai) + '</option><option value="gemini"' + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(G.d.models.gemini) + '</option></select></label>' +
@@ -135,7 +135,7 @@
     q('#teReset').onclick = function () { q('#tePrompt').value = c.defaultPrompt; };
     q('#teGo').onclick = function () {
       if (busy) return; busy = true; q('#teGo').disabled = true; q('#teMsg').textContent = '만드는 중… (보통 20~60초)'; var g = q('#teGlobal');
-      post({ card: id, preview: true, prompt: q('#tePrompt').value, extra: q('#teExtra').value, fromCurrent: q('#teMode').value === 'edit', refs: refs, useGlobalRefs: g ? g.checked : false, provider: q('#teProv').value })
+      post({ card: id, preview: true, prompt: q('#tePrompt').value, extra: q('#teExtra').value, avoid: q('#teAvoid').value, fromCurrent: q('#teMode').value === 'edit', refs: refs, useGlobalRefs: g ? g.checked : false, provider: q('#teProv').value })
         .then(function (r) { previews.push({ key: r.preview, url: r.url }); show(r.url, '새 결과 · ' + r.provider + ' ' + r.model + (r.refs ? ' · 레퍼런스 ' + r.refs + '장 참고' : '') + ' — 마음에 들면 "이 이미지로 교체"'); })
         .catch(function (e) { q('#teMsg').textContent = '실패: ' + e.message; toast(e.message, true); }).then(function () { busy = false; q('#teGo').disabled = false; });
     };

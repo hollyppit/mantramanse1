@@ -33,7 +33,7 @@
       '<label class="muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="bvNo" checked> 영상 없는 칸만 보기</label>' +
       '<button type="button" id="bvAll">보이는 칸 모두 선택</button><button type="button" id="bvNone">선택 해제</button></div>' +
       '<label class="muted" style="display:block;margin-top:6px">추가 요청 (선택 · 영어 · 모든 영상에 덧붙음)<input id="bvX" maxlength="300" style="width:100%" placeholder="예: slower camera movement"></label>' +
-      '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn" id="bvGo">선택한 칸 영상 만들기</button><button type="button" id="bvStop" disabled>새로 보내기 중지</button><button type="button" class="btn gold" id="bvApplyAll" disabled>완료된 영상 모두 적용</button><span class="muted" id="bvSum" style="font-size:.82rem"></span></div>' +
+      '<label class="muted" style="display:block;margin-top:6px">피할 것 (네거티브 · 영어 · 기본 네거티브에 덧붙음)<input id="bvN" maxlength="300" style="width:100%" placeholder="예: no camera shake, no extra people, no sudden lighting change"></label><div class="row" style="gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn" id="bvGo">선택한 칸 영상 만들기</button><button type="button" id="bvStop" disabled>새로 보내기 중지</button><button type="button" class="btn gold" id="bvApplyAll" disabled>완료된 영상 모두 적용</button><span class="muted" id="bvSum" style="font-size:.82rem"></span></div>' +
       '<div class="bv-bar"><i id="bvBar"></i></div><div id="bvList" class="bv-grid"></div>' +
       '<div class="row" style="gap:8px;margin-top:8px"><button type="button" id="bvClose">닫기</button></div>';
     document.body.appendChild(d); d.showModal();
@@ -70,7 +70,7 @@
       c.st = 'sending'; c.msg = ''; render();
       var ex = (C.motionText(q('#bvA').value) + ' ' + q('#bvX').value.trim()).trim();
       jpegOf(c.imageUrl).then(function (b) { return upFile(b, 'bstart-' + Date.now() + '-' + Math.floor(Math.random() * 1e6) + '.jpg'); })
-        .then(function (k) { var b = Object.assign({}, c.body, { startKey: k, mode: q('#bvQ').value, duration: Number(q('#bvD').value) }); if (ex) b.extra = ex; return post('/api/panel-video', b); })
+        .then(function (k) { var b = Object.assign({}, c.body, { startKey: k, mode: q('#bvQ').value, duration: Number(q('#bvD').value) }); if (ex) b.extra = ex; if (q('#bvN').value.trim()) b.negativeExtra = q('#bvN').value.trim(); return post('/api/panel-video', b); })
         .then(function () { c.st = 'processing'; c.n = 0; render(); })
         .catch(function (e) { if (RETRY.test(e.message || '') && !stopped) { c.st = 'queued'; c.msg = '— 동시 한도라 잠시 후 다시 보냅니다'; queue.push(c); retryAt = Date.now() + 15000; } else { c.st = 'failed'; c.msg = '— ' + e.message; } render(); });
     }
