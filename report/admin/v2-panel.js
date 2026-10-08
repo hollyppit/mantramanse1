@@ -20,9 +20,9 @@
   function klingCard(p, cur) {
     var h = '<div class="card" style="padding:10px"><b style="color:var(--gold)">Kling 으로 영상 만들기 (이 칸의 현재 이미지 → 영상)</b>';
     var off = !G.vid || !G.vid.enabled; if (off) h += '<p class="err" style="margin:4px 0 0;font-size:.8rem">아직 사용할 수 없습니다 — Cloudflare 환경 변수 <b>KLING_API_KEY</b> 를 설정하면 여기서 바로 영상을 만들 수 있습니다(Kling 개발자 콘솔 → API Key 에서 발급. 구형 Access/Secret Key 방식이면 KLING_ACCESS_KEY · KLING_SECRET_KEY).</p>';
-    return h + '<p class="muted" style="margin:4px 0 8px;font-size:.8rem">이 칸의 이미지를 시작 프레임으로 5초 영상을 만들어 이 칸의 영상으로 바꿉니다. Kling 크레딧이 사용되고 보통 1~5분 걸립니다. 정지 이미지는 포스터로 그대로 남습니다.</p>' +
+    return h + '<p class="muted" style="margin:4px 0 8px;font-size:.8rem">이 칸의 이미지를 시작 프레임으로 영상을 만들어 이 칸의 영상으로 바꿉니다. 위 "추가 요청"에 쓴 내용이 영상 프롬프트에 함께 반영됩니다. 마음에 안 들면 몇 번이든 다시 만들 수 있습니다. Kling 크레딧이 사용되고 보통 1~5분 걸립니다. 정지 이미지는 포스터로 그대로 남습니다.</p>' +
       '<label class="muted" style="display:block">영상 프롬프트 (영어, 고쳐 쓸 수 있어요)<textarea id="peKP" rows="5" style="width:100%">' + esc(p.tools ? p.tools.kling : '') + '</textarea></label>' +
-      '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><label class="muted">품질 <select id="peKM"><option value="std">표준 (720p)</option><option value="pro">고화질 (1080p · 크레딧 더 사용)</option></select></label><button type="button" class="btn" id="peKGo"' + (cur ? '' : ' disabled') + '>Kling 으로 영상 만들기</button></div><p class="muted" id="peKMsg" style="margin-top:6px;font-size:.8rem">' + (cur ? '' : '이 칸에 이미지가 먼저 있어야 합니다.') + '</p></div>';
+      '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><label class="muted">품질 <select id="peKM"><option value="std">표준 (720p)</option><option value="pro">고화질 (1080p · 크레딧 더 사용)</option></select></label><label class="muted">길이 <select id="peKD"><option value="5">5초</option><option value="10">10초 (크레딧 약 2배)</option></select></label><button type="button" class="btn" id="peKGo"' + (cur ? '' : ' disabled') + '>' + (p.video ? 'Kling 으로 영상 다시 만들기' : 'Kling 으로 영상 만들기') + '</button></div><p class="muted" id="peKMsg" style="margin-top:6px;font-size:.8rem">' + (cur ? '' : '이 칸에 이미지가 먼저 있어야 합니다.') + '</p></div>';
   }
   function open(tab, pw) { C.setPw(pw); PANE = document.getElementById('t-panelart'); PANE.innerHTML = '<p class="muted">불러오는 중…</p>'; load().then(draw).catch(function (e) { PANE.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
   function log(t) { G.log.unshift(t); G.log = G.log.slice(0, 40); var b = $('.pa-log'); if (b) b.innerHTML = G.log.map(esc).join('<br>'); }
@@ -129,7 +129,7 @@
         C.api('/api/panel-video?id=' + encodeURIComponent(p.id)).then(function (r) {
           if (r.status === 'processing') { n++; msg.textContent = 'Kling 이 영상을 만드는 중… ' + (n * 8) + '초 경과 (보통 1~5분)'; if (n > 110) { msg.textContent = '아직 처리 중입니다. 창을 닫았다가 나중에 이 칸을 다시 열면 이어서 확인합니다.'; kb = false; q('#peKGo').disabled = false; return; } setTimeout(tick, 8000); return; }
           kb = false; q('#peKGo').disabled = false; G.vid.tasks = (G.vid.tasks || []).filter(function (x) { return x.id !== p.id; });
-          if (r.status === 'done') { p.video = r.video; msg.textContent = '영상이 만들어져 이 칸에 적용됐습니다.'; q('#peUnvid').disabled = false; toast('Kling 영상을 적용했습니다'); show(cur, '현재 이미지(영상의 포스터)'); }
+          if (r.status === 'done') { p.video = r.video; msg.textContent = '영상이 만들어져 이 칸에 적용됐습니다. 마음에 안 들면 다시 만들 수 있습니다.'; q('#peKGo').textContent = 'Kling 으로 영상 다시 만들기'; q('#peUnvid').disabled = false; toast('Kling 영상을 적용했습니다'); show(cur, '현재 이미지(영상의 포스터)'); }
           else { msg.textContent = '실패: ' + (r.error || '알 수 없는 오류'); toast(r.error || 'Kling 영상 생성에 실패했습니다', true); }
         }).catch(function (er) { kb = false; q('#peKGo').disabled = false; msg.textContent = '확인 실패: ' + er.message; });
       })();
@@ -141,7 +141,7 @@
         if (!confirm('이 칸의 현재 이미지로 Kling 영상을 만듭니다.\nKling 크레딧이 사용되고(고화질은 더 많이) 1~5분 걸립니다. 계속할까요?')) return;
         kb = true; q('#peKGo').disabled = true; msg.textContent = '시작 프레임 준비 중…';
         jpegOf(cur).then(function (b) { return upFile(b, 'panel-start-' + e + '-' + t + '.jpg'); })
-          .then(function (k) { msg.textContent = 'Kling 에 제출하는 중…'; return C.api('/api/panel-video', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, element: e, theme: t, startKey: k, prompt: q('#peKP').value, mode: q('#peKM').value }) }); })
+          .then(function (k) { msg.textContent = 'Kling 에 제출하는 중…'; return C.api('/api/panel-video', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, element: e, theme: t, startKey: k, prompt: q('#peKP').value + (q('#peExtra').value.trim() ? ' Additional direction: ' + q('#peExtra').value.trim() : ''), mode: q('#peKM').value, duration: Number(q('#peKD').value) }) }); })
           .then(function () { G.vid.tasks = (G.vid.tasks || []).concat({ id: p.id }); kb = false; kPoll(); })
           .catch(function (er) { kb = false; q('#peKGo').disabled = false; msg.textContent = '실패: ' + er.message; toast(er.message, true); });
       };
