@@ -47,9 +47,11 @@
     토: { color: '카멜·버터 화이트·브라운', mat: '울·스웨이드·니트·코튼', fit: '편안하고 넉넉한 실루엣', trend: '따뜻한 뉴트럴 톤과 부드러운 질감으로 맞추는 톤온톤', item: { F: ['카멜·베이지 아우터', '버터 화이트 니트·상의', '브라운 스트레이트 팬츠 + 스웨이드 백'], M: ['베이지 스웨이드·코튼 재킷', '크림 니트·상의', '브라운 와이드 슬랙스 + 로퍼'] }, groom: ['단정하게 정돈된 헤어', '매끈한 손·손톱 관리', '따뜻한 머스크·바닐라 계열 향'], vibe: '믿음직하고 포근한 첫인상' },
     금: { color: '아이보리·그레이·화이트·실버', mat: '울·셔츠 원단·심플 메탈', fit: '어깨선이 선 깔끔한 상의 + 와이드 팬츠', trend: '군더더기 없는 미니멀 테일러링', item: { F: ['아이보리 재킷', '그레이 니트 + 화이트 와이드 팬츠', '심플한 실버 액세서리 + 로퍼'], M: ['라이트 그레이 재킷', '화이트 셔츠 + 와이드 슬랙스', '심플한 메탈 시계'] }, groom: ['이마·앞머리 정돈', '깨끗한 손톱과 구두 관리', '비누·크리스프 계열 향'], vibe: '단정하고 세련된 첫인상' },
     수: { color: '네이비·블랙·딥 퍼플 포인트', mat: '니트·부드러운 울·코트 소재', fit: '길게 떨어지는 실루엣에 깔끔한 이너', trend: '짙은 컬러를 스카프·니트로 한 점만 더하는 방식', item: { F: ['네이비 아우터', '네이비 니트 + 블랙 슬랙스', '딥 퍼플 계열 스카프 + 앵클부츠'], M: ['네이비 하프코트·재킷', '블랙 터틀넥·니트', '다크 스트레이트 데님 + 더비 슈즈'] }, groom: ['촉촉한 윤기 피부', '자연스러운 헤어 광택', '아쿠아·머스크 계열 향'], vibe: '차분하고 깊이 있는 첫인상' } };
-  // 사주에서 연애 매력에 보태 줄 오행: 용신 → 부족한 오행 → 일간 오행 순서
+  // 사주에서 연애 매력에 보태 줄 오행: 용신 → 희신 → 부족한 오행 → 일간 오행 순서
   function styleEl(sd) {
-    var y = sd.usefulElements && sd.usefulElements.yong; if (y) return { el: y, why: '내게 가장 필요한 기운인 용신이 ' + y + '(' + EL_HJ[y] + ')이라, 이 오행의 색·소재를 몸에 두면 기운이 보완돼 호감이 올라가요.' };
+    var ue = sd.usefulElements || {}, y = ue.yong, h = ue.hee && ue.hee !== y ? ue.hee : null;
+    if (y) return { el: y, sub: h, why: '내게 가장 필요한 기운인 용신이 ' + y + '(' + EL_HJ[y] + ')이라, 이 오행의 색·소재를 몸에 두면 기운이 보완돼 호감이 올라가요.' + (h ? ' 용신을 돕는 희신 ' + h + '(' + EL_HJ[h] + ')의 색은 포인트로 곁들이면 좋아요.' : '') };
+    if (h) return { el: h, why: '용신을 돕는 희신이 ' + h + '(' + EL_HJ[h] + ')이라, 이 오행의 색·소재를 곁에 두면 기운이 받쳐져 호감이 올라가요.' };
     if (sd.lackEl) return { el: sd.lackEl, why: '사주에서 ' + sd.lackEl + '(' + EL_HJ[sd.lackEl] + ') 기운이 부족해, 이 오행으로 균형을 채우면 인상이 한결 편안해져요.' };
     return { el: sd.dayMaster.el, why: '내 일간의 오행(' + sd.dayMaster.el + ')을 살리는 스타일이 가장 자연스럽고 호감을 주는 방향이에요.' };
   }
@@ -112,7 +114,7 @@
     // ② 추천 패션과 그루밍 — 이미지 + 근거
     var se = styleEl(sd), ST = STYLE[se.el] || STYLE.토;
     out.push(scene(sec('dp-hero', cap('추천 패션 · 그루밍') + fig(H, 'style:' + se.el + ':' + g, 'style', ST.vibe, '') + '<h3 class="dp-h">' + esc(se.el + '(' + EL_HJ[se.el] + ') 기운 · ' + ST.vibe) + '</h3><p class="lead">' + esc(se.why) + '</p>')));
-    out.push(scene(sec('', cap('이렇게 입고 가꿔 보세요') + '<div class="dp-grid2"><div class="dp-card"><h4>패션</h4><ul class="dp-ul">' + li('색감 · ' + ST.color) + li('소재 · ' + ST.mat) + li('실루엣 · ' + ST.fit) + li('요즘 스타일링 · ' + ST.trend) + ST.item[g].map(function (t) { return li('아이템 · ' + t); }).join('') + '</ul></div>' +
+    out.push(scene(sec('', cap('이렇게 입고 가꿔 보세요') + '<div class="dp-grid2"><div class="dp-card"><h4>패션</h4><ul class="dp-ul">' + li('색감 · ' + ST.color) + li('소재 · ' + ST.mat) + li('실루엣 · ' + ST.fit) + li('요즘 스타일링 · ' + ST.trend) + (se.sub && STYLE[se.sub] ? li('포인트 컬러 · 희신 ' + se.sub + ' 기운의 ' + STYLE[se.sub].color + ' 중 한 점') : '') + ST.item[g].map(function (t) { return li('아이템 · ' + t); }).join('') + '</ul></div>' +
       '<div class="dp-card"><h4>그루밍</h4><ul class="dp-ul">' + ST.groom.map(li).join('') + '</ul></div></div><p class="dp-note">오행의 색과 소재를 바탕으로 요즘 스타일링 흐름을 더해 고른 <b>재미로 읽는 추천</b>이에요. 실제로는 내 체형과 취향에 편한 것이 가장 우선입니다.</p>')));
     // ③ 추천 행동 — 일지 십성 + 신강약 + 배우자성
     var A = ACT_TG[tg] || ACT_TG.식신, acts = [[A[0], A[1], '근거 · 배우자궁(일지)이 ' + tg + ' 자리']];
