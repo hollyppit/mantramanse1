@@ -50,9 +50,9 @@ const imp = f => import(require('url').pathToFileURL(path.join(__dirname, '..', 
   console.log('4. 조회 · 완료');
   state = 'processing'; r = await GET('?id=panel-wood-love-F'); ok(r.s === 200 && r.d.status === 'processing', '처리 중');
   state = 'succeed'; r = await GET('?id=panel-wood-love-F');
-  const idx = JSON.parse(kv.get('media:index')), it = idx.find(m => m.id === 'panel-wood-love-F'), vk = it && /k=([\w.-]+)$/.exec(it.panelVideo || '');
-  ok(r.s === 200 && r.d.status === 'done' && vk && r2.has(vk[1]) && r2.get(vk[1]).data.toString() === 'FAKE-MP4-BYTES' && r2.get(vk[1]).type === 'video/mp4', '완료: 영상을 R2 에 저장하고 칸의 영상으로 교체');
-  ok(it.url === '/api/clipfile?k=cell.webp' && !r2.has('oldvid.mp4') && !r2.has('start1.jpg'), '정지 이미지는 포스터로 그대로, 옛 영상·임시 시작 프레임은 삭제');
+  const idx = JSON.parse(kv.get('media:index')), it = idx.find(m => m.id === 'panel-wood-love-F'), vk = r.d.preview ? [0, r.d.preview] : null;
+  ok(r.s === 200 && r.d.status === 'done' && vk && r2.has(vk[1]) && r2.get(vk[1]).data.toString() === 'FAKE-MP4-BYTES' && r2.get(vk[1]).type === 'video/mp4' && it.panelVideo === '/api/clipfile?k=oldvid.mp4', '완료: 영상을 R2 에 미리보기로만 저장(칸은 그대로)');
+  ok(it.url === '/api/clipfile?k=cell.webp' && r2.has('oldvid.mp4') && !r2.has('start1.jpg'), '칸의 이미지·옛 영상은 그대로, 임시 시작 프레임은 삭제');
   ok(!(await GET()).d.tasks.length && (await GET('?id=panel-wood-love-F')).s === 404, '완료된 작업 기록은 지워진다');
 
   console.log('5. 실패 · 취소');
@@ -82,7 +82,7 @@ const imp = f => import(require('url').pathToFileURL(path.join(__dirname, '..', 
     st = 'processing'; rr = await G2('?id=panel-fire-career-M'); const qc = nc.filter(c => /\/tasks\?/.test(c.u)).at(-1);
     ok(rr.d.status === 'processing' && qc.u === 'https://api-singapore.klingai.com/tasks?external_task_ids=' + bd.options.external_task_id && qc.o.headers.authorization === 'Bearer NEWKEY', '조회: GET /tasks?external_task_ids=<id>');
     st = 'succeeded'; rr = await G2('?id=panel-fire-career-M'); const it2 = JSON.parse(kv.get('media:index')).find(m => m.id === 'panel-fire-career-M');
-    ok(rr.d.status === 'done' && it2 && /k=panel-fire-career-M-k-/.test(it2.panelVideo) && r2.get(it2.panelVideo.split('k=')[1]).data.toString() === 'NEW-MP4', 'succeeded: 영상을 R2 에 저장하고 칸의 영상으로 교체');
+    ok(rr.d.status === 'done' && /^panel-fire-career-M-k-/.test(rr.d.preview) && r2.get(rr.d.preview).data.toString() === 'NEW-MP4' && !(it2 && it2.panelVideo && it2.panelVideo.indexOf(rr.d.preview) >= 0), 'succeeded: 영상을 R2 에 미리보기로만 저장(칸은 그대로)');
     r2.set('startN2.jpg', { data: Buffer.from('JPG'), type: 'image/jpeg' }); st = 'processing'; await P2({ element: 'fire', theme: 'career', kind: 'panelM', startKey: 'startN2.jpg' });
     st = 'failed'; rr = await G2('?id=panel-fire-career-M'); ok(rr.d.status === 'failed' && /nope/.test(rr.d.error), 'failed: Kling 메시지 전달');
     globalThis.fetch = prevFetch; }

@@ -1,7 +1,7 @@
 // 무빙툰 컷 영상 생성(Kling 이미지 → 영상) — 칸에 있는 이미지를 시작 프레임으로 영상을 만들어 그 칸의 영상으로 저장한다 (관리자 전용)
 // GET    /api/panel-video             — { enabled(Kling 키 설정 여부), tasks:[진행 중 작업] }
 // POST   /api/panel-video { kind, element, theme, startKey, prompt?, negative?, mode? } — 시작 프레임(관리자 화면이 JPEG 로 변환해 /api/clipfile 로 올린 키)으로 Kling 작업 제출
-// GET    /api/panel-video?id=<칸 id> — 작업 조회: processing | failed | done(영상을 R2 에 저장하고 칸의 panelVideo 로 교체)
+// GET    /api/panel-video?id=<칸 id> — 작업 조회: processing | failed | done(영상을 R2 에 저장해 미리보기 키만 돌려줌 — 칸은 관리자가 확정할 때 바뀐다)
 // DELETE /api/panel-video?id=<칸 id> — 진행 중 기록 지우기(Kling 쪽 작업은 계속되며 크레딧은 이미 쓰였다)
 // 필요: GLOSSARY_KV · CLIPS_R2 · ADMIN_PASSWORD · KLING_ACCESS_KEY · KLING_SECRET_KEY
 import { json, isAdmin, configError } from '../_lib.js';
@@ -27,18 +27,16 @@ export async function onRequestGet({ request, env }) {
   if (q.status === 'processing') return json({ status: 'processing' });
   const finish = async () => { delete tasks[id]; await saveTasks(env, tasks); await delFile(env, t.startKey); };
   if (q.status === 'failed') { await finish(); return json({ status: 'failed', error: q.msg }); }
-  // 완료: 영상을 내려받아 R2 에 저장하고 칸의 영상으로 교체(정지 이미지는 포스터로 그대로)
+  // 완료: 영상을 내려받아 R2 에 저장(미리보기)
   if (!/^https:\/\//.test(q.url)) return json({ error: '영상 주소가 올바르지 않습니다' }, 502);
   let buf; try { const vr = await fetch(q.url, { signal: AbortSignal.timeout(110000) }); if (!vr.ok) return json({ error: '영상을 내려받지 못했습니다(' + vr.status + '). 잠시 뒤 다시 확인해 주세요' }, 502); buf = await vr.arrayBuffer(); } catch (e) { return json({ error: '영상을 내려받지 못했습니다: ' + e.message }, 502); }
   if (!buf.byteLength || buf.byteLength > MAX_VIDEO) return json({ error: '영상 크기가 올바르지 않습니다' }, 502);
+  // 칸은 바꾸지 않는다: 관리자가 미리보기로 확인하고 '이 영상으로 교체' 를 누를 때 /api/panel-art 의 uploadVideo 로 적용한다.
   const list = (await env.GLOSSARY_KV.get(KEY, 'json')) || [], old = list.find(m => m.id === id);
   if (!old || !old.url) { await finish(); return json({ status: 'failed', error: '그 사이 칸의 이미지가 없어져 영상을 붙이지 못했습니다' }); }
   const key = id + '-k-' + Array.from(crypto.getRandomValues(new Uint8Array(4)), x => x.toString(16).padStart(2, '0')).join('') + '.mp4';
-  await env.CLIPS_R2.put(key, buf, { httpMetadata: { contentType: 'video/mp4' } });
-  const item = mediaItem(t.element, t.theme, old.url, buf.byteLength, 'Kling', '/api/clipfile?k=' + key, t.kind);
-  await env.GLOSSARY_KV.put(KEY, JSON.stringify(list.filter(m => m.id !== id).concat(item)));
-  await delFile(env, fileKey(old.panelVideo)); await finish();
-  return json({ status: 'done', id, url: old.url, video: item.panelVideo });
+  await env.CLIPS_R2.put(key, buf, { httpMetadata: { contentType: 'video/mp4' } }); await finish();
+  return json({ status: 'done', id, preview: key, video: '/api/clipfile?k=' + key });
 }
 
 export async function onRequestPost({ request, env }) {

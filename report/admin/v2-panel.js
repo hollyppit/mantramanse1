@@ -79,11 +79,25 @@
     document.body.appendChild(d); d.showModal();
     var q = function (s) { return d.querySelector(s); }; q('#pePrompt').value = p.prompt;
     function show(url, label) { shown = url; var im = q('#peImg'); im.style.backgroundImage = url ? 'url(\'' + url + '\')' : 'none'; im.textContent = url ? '' : '아직 이미지가 없습니다'; q('#peMsg').textContent = label || ''; q('#peOk').disabled = !previews.some(function (x) { return x.url === url; }); thumbs(); }
-    function vidBox() { var b = q('#peVidBox'); if (!b) return; if (!p.video) { b.innerHTML = ''; return; } b.innerHTML = '<b style="color:var(--gold);font-size:.82rem">현재 영상 미리보기</b><video controls loop muted playsinline preload="metadata" poster="' + esc(cur || '') + '" src="' + esc(p.video) + '' + (p.video.indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now() + '" style="width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;background:#000"></video>'; }
+    var pend = null; // Kling 으로 만든 뒤 아직 확정하지 않은 영상 { key, url }
+    function vtag(u, poster) { return '<video controls loop muted playsinline preload="metadata" poster="' + esc(poster || '') + '" src="' + esc(u) + '" style="width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;background:#000"></video>'; }
+    function discardPend() { if (pend) { C.api('/api/clipfile?k=' + encodeURIComponent(pend.key), { method: 'DELETE' }).catch(function () { }); pend = null; } }
+    function vidBox() { var b = q('#peVidBox'); if (!b) return; var h = '';
+      if (pend) h += '<b style="color:var(--gold);font-size:.82rem">새로 만든 영상 (미리보기)</b>' + vtag(pend.url, cur) + '<div class="row" style="gap:8px;margin-top:6px;flex-wrap:wrap"><button type="button" class="btn gold" id="peVOk">이 영상으로 교체</button><button type="button" id="peVNo">버리고 다시 만들기</button></div>';
+      if (p.video) h += '<div style="margin-top:10px"><b style="color:var(--gold);font-size:.82rem">현재 영상</b>' + vtag(p.video, cur) + '</div>';
+      b.innerHTML = h;
+      if (q('#peVOk')) q('#peVOk').onclick = function () {
+        if (busy || !pend) return; if (p.video && !confirm('이 칸의 현재 영상을 새 영상으로 교체합니다. 이전 영상은 삭제됩니다. 계속할까요?')) return; busy = true; q('#peVOk').disabled = true;
+        C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, element: e, theme: t, uploadVideo: pend.key, uploadPoster: '' }) })
+          .then(function (r) { cur = r.url; p.video = r.video; pend = null; q('#peKMsg').textContent = '교체했습니다.'; q('#peKGo').textContent = 'Kling 으로 영상 다시 만들기'; q('#peUnvid').disabled = false; toast('영상으로 교체했습니다'); vidBox(); })
+          .catch(function (er) { toast(er.message, true); q('#peVOk') && (q('#peVOk').disabled = false); }).then(function () { busy = false; });
+      };
+      if (q('#peVNo')) q('#peVNo').onclick = function () { discardPend(); q('#peKMsg').textContent = '버렸습니다. 프롬프트를 고쳐 다시 만들 수 있습니다.'; vidBox(); };
+    }
     function thumbs() { vidBox(); var h = cur ? '<button type="button" data-u="' + esc(cur) + '" title="현재 이미지" style="width:46px;height:68px;padding:0;border:2px solid ' + (shown === cur ? 'var(--gold)' : 'var(--line)') + ';border-radius:6px;background:#000 url(\'' + esc(cur) + '\') center/cover"></button>' : '';
       previews.forEach(function (x, i) { h += '<button type="button" data-u="' + esc(x.url) + '" title="새 결과 ' + (i + 1) + '" style="width:46px;height:68px;padding:0;border:2px solid ' + (shown === x.url ? 'var(--gold)' : 'var(--line)') + ';border-radius:6px;background:#000 url(\'' + esc(x.url) + '\') center/cover"></button>'; });
       q('#peTh').innerHTML = h; [].forEach.call(q('#peTh').querySelectorAll('button'), function (b) { b.onclick = function () { show(b.dataset.u, b.dataset.u === cur ? '현재 이미지' : '새 결과'); }; }); }
-    function finish() { previews.forEach(function (x) { if (!x.used) C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ discard: x.key }) }).catch(function () { }); }); d.remove(); load().then(draw); }
+    function finish() { discardPend(); previews.forEach(function (x) { if (!x.used) C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ discard: x.key }) }).catch(function () { }); }); d.remove(); load().then(draw); }
     q('#peReset').onclick = function () { q('#pePrompt').value = p.defaultPrompt; };
     q('#peGo').onclick = function () {
       if (busy) return; busy = true; q('#peGo').disabled = true; q('#peMsg').textContent = '만드는 중… (보통 20~60초)'; var edit = q('#peMode').value === 'edit';
@@ -129,7 +143,7 @@
         C.api('/api/panel-video?id=' + encodeURIComponent(p.id)).then(function (r) {
           if (r.status === 'processing') { n++; msg.textContent = 'Kling 이 영상을 만드는 중… ' + (n * 8) + '초 경과 (보통 1~5분)'; if (n > 110) { msg.textContent = '아직 처리 중입니다. 창을 닫았다가 나중에 이 칸을 다시 열면 이어서 확인합니다.'; kb = false; q('#peKGo').disabled = false; return; } setTimeout(tick, 8000); return; }
           kb = false; q('#peKGo').disabled = false; G.vid.tasks = (G.vid.tasks || []).filter(function (x) { return x.id !== p.id; });
-          if (r.status === 'done') { p.video = r.video; msg.textContent = '영상이 만들어져 이 칸에 적용됐습니다. 마음에 안 들면 다시 만들 수 있습니다.'; q('#peKGo').textContent = 'Kling 으로 영상 다시 만들기'; q('#peUnvid').disabled = false; toast('Kling 영상을 적용했습니다'); show(cur, '현재 이미지(영상의 포스터)'); }
+          if (r.status === 'done') { if (pend) discardPend(); pend = { key: r.preview, url: r.video }; msg.textContent = '영상이 만들어졌습니다. 왼쪽 미리보기로 확인하고, 마음에 들면 "이 영상으로 교체"를 누르세요. 아니면 "버리고 다시 만들기".'; toast('영상이 만들어졌습니다 — 미리보기를 확인하세요'); vidBox(); }
           else { msg.textContent = '실패: ' + (r.error || '알 수 없는 오류'); toast(r.error || 'Kling 영상 생성에 실패했습니다', true); }
         }).catch(function (er) { kb = false; q('#peKGo').disabled = false; msg.textContent = '확인 실패: ' + er.message; });
       })();
