@@ -1,6 +1,6 @@
 // 무빙툰 컷 영상 생성(Kling 이미지 → 영상) — 칸에 있는 이미지를 시작 프레임으로 영상을 만들어 그 칸의 영상으로 저장한다 (관리자 전용)
 // GET    /api/panel-video             — { enabled(Kling 키 설정 여부), tasks:[진행 중 작업] }
-// POST   /api/panel-video { kind, element, theme, startKey, prompt?, negative?, mode? } — 시작 프레임(관리자 화면이 JPEG 로 변환해 /api/clipfile 로 올린 키)으로 Kling 작업 제출
+// POST   /api/panel-video { kind, element, theme | slot, startKey, prompt?, extra?, negative?, mode?, duration? } — 시작 프레임(관리자 화면이 JPEG 로 변환해 /api/clipfile 로 올린 키)으로 Kling 작업 제출
 // GET    /api/panel-video?id=<칸 id> — 작업 조회: processing | failed | done(영상을 R2 에 저장해 미리보기 키만 돌려줌 — 칸은 관리자가 확정할 때 바뀐다)
 // DELETE /api/panel-video?id=<칸 id> — 진행 중 기록 지우기(Kling 쪽 작업은 계속되며 크레딧은 이미 쓰였다)
 // 필요: GLOSSARY_KV · CLIPS_R2 · ADMIN_PASSWORD · KLING_ACCESS_KEY · KLING_SECRET_KEY
@@ -10,23 +10,27 @@ import { kling as klingPrompt } from '../_panelprompts.js';
 import { SLOT_BY_ID, keyOf, klingOf } from '../_assetart.js';
 import { klingEnabled, KLING_ENV_HELP, klingSubmit, klingQuery, toB64 } from '../_kling.js';
 
-const AKEY = 'assets:map', KEY = 'media:index', TKEY = 'panel:vtasks', FK = /^[\w.-]{1,120}$/, ID_OK = /^panel(bg)?-[a-z]+-[a-z]+(-[FM])?$/, KEY_OK = /^\/api\/clipfile\?k=([\w.-]{1,120})$/;
+const AKEY = 'assets:map', KEY = 'media:index', TP = 'panel:vt:', FK = /^[\w.-]{1,120}$/, ID_OK = /^panel(bg)?-[a-z]+-[a-z]+(-[FM])?$/, KEY_OK = /^\/api\/clipfile\?k=([\w.-]{1,120})$/;
 const MAX_START = 10 * 1024 * 1024, MAX_VIDEO = 80 * 1024 * 1024, MAX_AGE = 3 * 3600 * 1000;
 const fileKey = u => { const m = KEY_OK.exec(u || ''); return m ? m[1] : ''; };
-const loadTasks = async env => { const t = (await env.GLOSSARY_KV.get(TKEY, 'json')) || {}, now = Date.now(); for (const k of Object.keys(t)) if (now - (t[k].createdAt || 0) > MAX_AGE) delete t[k]; return t; }; // 3시간 넘은 기록은 버린다
-const saveTasks = (env, t) => env.GLOSSARY_KV.put(TKEY, JSON.stringify(t));
+// 진행 중 작업은 칸마다 KV 키 하나(panel:vt:<칸 id>) — 한 키에 몰아 두면 동시에 제출한 작업의 기록이 서로 덮어써질 수 있다.
+const getTask = async (env, id) => { const t = await env.GLOSSARY_KV.get(TP + id, 'json'); if (t && Date.now() - (t.createdAt || 0) > MAX_AGE) { await env.GLOSSARY_KV.delete(TP + id); return null; } return t || null; }; // 3시간 넘은 기록은 버린다
+const putTask = (env, id, t) => env.GLOSSARY_KV.put(TP + id, JSON.stringify(t), { expirationTtl: 86400 });
+const delTask = (env, id) => env.GLOSSARY_KV.delete(TP + id);
+const listTasks = async env => { const out = {}, l = await env.GLOSSARY_KV.list({ prefix: TP }); for (const k of (l && l.keys) || []) { const id = k.name.slice(TP.length), t = await getTask(env, id); if (t) out[id] = t; } return out; };
 const delFile = async (env, k) => { if (k) { try { await env.CLIPS_R2.delete(k); } catch { /* 정리 실패 무시 */ } } };
 
 export async function onRequestGet({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
-  const id = new URL(request.url).searchParams.get('id') || '', tasks = await loadTasks(env);
-  if (!id) return json({ enabled: klingEnabled(env), tasks: Object.keys(tasks).map(k => ({ id: k, kind: tasks[k].kind, element: tasks[k].element, theme: tasks[k].theme, createdAt: tasks[k].createdAt })) });
+  const id = new URL(request.url).searchParams.get('id') || '';
+  if (!id) { const tasks = await listTasks(env); return json({ enabled: klingEnabled(env), tasks: Object.keys(tasks).map(k => ({ id: k, kind: tasks[k].kind, element: tasks[k].element, theme: tasks[k].theme, createdAt: tasks[k].createdAt })) }); }
+  const t = await getTask(env, id);
   if (!klingEnabled(env)) return json({ error: KLING_ENV_HELP }, 501);
-  if (!(ID_OK.test(id) || SLOT_BY_ID[id]) || !tasks[id]) return json({ error: '진행 중인 영상 작업이 없습니다(이미 끝났거나 오래되어 지워졌습니다)' }, 404);
-  const t = tasks[id]; let q; try { q = await klingQuery(env, t.taskId); } catch (e) { return json({ error: e.message }, 502); }
+  if (!(ID_OK.test(id) || SLOT_BY_ID[id]) || !t) return json({ error: '진행 중인 영상 작업이 없습니다(이미 끝났거나 오래되어 지워졌습니다)' }, 404);
+  let q; try { q = await klingQuery(env, t.taskId); } catch (e) { return json({ error: e.message }, 502); }
   if (q.status === 'processing') return json({ status: 'processing' });
-  const finish = async () => { delete tasks[id]; await saveTasks(env, tasks); await delFile(env, t.startKey); };
+  const finish = async () => { await delTask(env, id); await delFile(env, t.startKey); };
   if (q.status === 'failed') { await finish(); return json({ status: 'failed', error: q.msg }); }
   // 완료: 영상을 내려받아 R2 에 저장(미리보기)
   if (!/^https:\/\//.test(q.url)) return json({ error: '영상 주소가 올바르지 않습니다' }, 502);
@@ -55,26 +59,26 @@ export async function onRequestPost({ request, env }) {
   const asset = !!b.slot;
   if (asset ? !SLOT_BY_ID[b.slot] : (!ELEMENTS[b.element] || !THEMES[b.theme])) return json({ error: asset ? '슬롯 id 가 올바르지 않습니다' : '오행·주제 값이 올바르지 않습니다' }, 400);
   if (!FK.test(b.startKey || '')) return json({ error: '시작 프레임 키가 올바르지 않습니다' }, 400);
-  const kind = asset ? 'asset' : kindOf(b.kind), id = asset ? b.slot : presetId(b.element, b.theme, kind), tasks = await loadTasks(env);
-  if (tasks[id]) return json({ error: '이 칸은 이미 영상을 만드는 중입니다' }, 409);
+  const kind = asset ? 'asset' : kindOf(b.kind), id = asset ? b.slot : presetId(b.element, b.theme, kind);
+  if (await getTask(env, id)) return json({ error: '이 칸은 이미 영상을 만드는 중입니다' }, 409);
   if (asset) { const amap = (await env.GLOSSARY_KV.get(AKEY, 'json')) || {}; if (!amap[id]) return json({ error: '이 슬롯에 이미지가 없습니다. 먼저 이미지를 만들어 주세요' }, 400); }
   else { const list = (await env.GLOSSARY_KV.get(KEY, 'json')) || [], cell = list.find(m => m.id === id); if (!cell || !cell.url) return json({ error: '이 칸에 이미지가 없습니다. 먼저 이미지를 만들거나 올려 주세요' }, 400); }
   const h = await env.CLIPS_R2.head(b.startKey); if (!h) return json({ error: '시작 프레임 파일을 찾을 수 없습니다. 다시 시도해 주세요' }, 410);
   if (!/^image\/(jpeg|png)$/.test((h.httpMetadata && h.httpMetadata.contentType) || '')) return json({ error: '시작 프레임은 JPG 또는 PNG 여야 합니다' }, 400);
   if (h.size > MAX_START) return json({ error: '시작 프레임이 10MB 를 넘습니다' }, 400);
   const obj = await env.CLIPS_R2.get(b.startKey); if (!obj) return json({ error: '시작 프레임 파일을 읽지 못했습니다' }, 410);
-  const dflt = asset ? klingOf(id) : klingPrompt(b.element, b.theme, kind), prompt = typeof b.prompt === 'string' && b.prompt.trim() ? b.prompt.trim() : dflt.prompt, negative = typeof b.negative === 'string' && b.negative.trim() ? b.negative.trim() : dflt.negative;
+  const dflt = asset ? klingOf(id) : klingPrompt(b.element, b.theme, kind), prompt = (typeof b.prompt === 'string' && b.prompt.trim() ? b.prompt.trim() : dflt.prompt) + (typeof b.extra === 'string' && b.extra.trim() ? ' Additional direction: ' + b.extra.trim().slice(0, 300) : ''), negative = typeof b.negative === 'string' && b.negative.trim() ? b.negative.trim() : dflt.negative;
   // 신형 API 는 이미지 URL 을 받는다(시작 프레임은 /api/clipfile 로 공개돼 있고 키는 추측 불가). https 가 아니면(로컬 등) base64 로 보낸다.
   const here = new URL(request.url), imageUrl = here.protocol === 'https:' ? here.origin + '/api/clipfile?k=' + encodeURIComponent(b.startKey) : '';
   let taskId; try { taskId = await klingSubmit(env, { imageUrl, b64: async () => toB64(new Uint8Array(await obj.arrayBuffer())), prompt, negative, mode: b.mode, duration: b.duration }); } catch (e) { await delFile(env, b.startKey); return json({ error: e.message }, 502); }
-  tasks[id] = { taskId, startKey: b.startKey, kind, asset, element: b.element, theme: b.theme, createdAt: Date.now() }; await saveTasks(env, tasks);
+  await putTask(env, id, { taskId, startKey: b.startKey, kind, asset, element: b.element, theme: b.theme, createdAt: Date.now() });
   return json({ ok: true, id, taskId });
 }
 
 export async function onRequestDelete({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
-  const id = new URL(request.url).searchParams.get('id') || '', tasks = await loadTasks(env);
-  if ((ID_OK.test(id) || SLOT_BY_ID[id]) && tasks[id]) { const t = tasks[id]; delete tasks[id]; await saveTasks(env, tasks); await delFile(env, t.startKey); }
+  const id = new URL(request.url).searchParams.get('id') || '';
+  const t = (ID_OK.test(id) || SLOT_BY_ID[id]) ? await getTask(env, id) : null; if (t) { await delTask(env, id); await delFile(env, t.startKey); }
   return json({ ok: true });
 }

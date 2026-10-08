@@ -47,7 +47,7 @@
     });
     return '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">' + I.title + ' · ' + have + ' / ' + list.length + '장</b><p class="muted" style="margin:6px 0 10px">' + I.desc + '</p>' + (kind !== 'bg' ? tabsOf(kind) : '') +
       '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><label class="muted">모델 <select class="paProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (G.provider === 'openai' ? ' selected' : '') + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(d.models.openai) + (pv.openai ? '' : ' (키 없음)') + '</option><option value="gemini"' + (G.provider === 'gemini' ? ' selected' : '') + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(d.models.gemini) + (pv.gemini ? '' : ' (키 없음)') + '</option></select></label>' +
-      '<button class="btn pa-run" data-run="missing" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button class="btn pa-run" data-run="all" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>모두 다시 만들기</button><button class="pa-stop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
+      '<button class="btn pa-run" data-run="missing" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button class="btn pa-run" data-run="all" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>모두 다시 만들기</button><button class="btn pa-bv" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>영상 일괄 만들기</button><button class="pa-stop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
       (kind !== 'bg' && !d.r2 ?'<p class="err">R2(CLIPS_R2)가 연결되지 않아 저장할 수 없습니다.</p>' : '') + (kind !== 'bg' && !pv.openai && !pv.gemini ?'<p class="err">OPENAI_API_KEY 또는 GEMINI_API_KEY 가 없습니다. Cloudflare 환경 변수에 추가하세요.</p>' : '') +
       '<div class="pa-grid">' + cells + '</div></div>';
   }
@@ -56,6 +56,12 @@
     bindDir(); if (window.V2Tarot) window.V2Tarot.open(PANE.querySelector('#taBox')); if (window.V2Assets) window.V2Assets.open(PANE.querySelector('#asBox'));
     [].forEach.call(PANE.querySelectorAll('.paProv'), function (sel) { sel.onchange = function () { G.provider = this.value; [].forEach.call(PANE.querySelectorAll('.paProv'), function (o) { o.value = G.provider; }); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-run'), function (b) { b.onclick = function () { (b.dataset.run === 'all' ? runAll : runMissing)(b.dataset.k); }; });
+    [].forEach.call(PANE.querySelectorAll('.pa-bv'), function (b) { b.onclick = function () {
+      if (G.busy) return; var kind = b.dataset.k;
+      var cells = G.d.presets.filter(function (p) { return p.kind === kind && p.url; }).map(function (p) { return { id: p.id, label: TH[p.theme] + ' · ' + EL[p.element], imageUrl: p.url, hasVideo: !!p.video, body: { kind: kind, element: p.element, theme: p.theme },
+        apply: function (key) { return C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, element: p.element, theme: p.theme, uploadVideo: key, uploadPoster: '' }) }).then(function (r) { p.video = r.video; return r; }); } }; });
+      if (!cells.length) { toast('이미지가 있는 칸이 없습니다'); return; }
+      window.V2Batch.open({ title: '영상 일괄 만들기 · ' + (KIND[kind] ? KIND[kind].title : kind), cells: cells, onClose: function () { load().then(draw); } }); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-tab'), function (b) { b.onclick = function () { if (G.busy) return; G.pg = b.dataset.pg; draw(); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-stop'), function (b) { b.onclick = function () { G.stop = true; log('중지 요청 — 진행 중인 한 장이 끝나면 멈춥니다'); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-c'), function (c) { c.onclick = function () { if (G.busy) return; editor(c.dataset.e, c.dataset.t, c.dataset.k); }; });

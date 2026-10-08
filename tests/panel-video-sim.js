@@ -6,7 +6,7 @@ const imp = f => import(require('url').pathToFileURL(path.join(__dirname, '..', 
   const V = await imp('functions/api/panel-video.js'), K = await imp('functions/_kling.js');
   const kv = new Map(), r2 = new Map(), calls = [];
   const env = { ADMIN_PASSWORD: 'x', KLING_ACCESS_KEY: 'AK123', KLING_SECRET_KEY: 'SK456',
-    GLOSSARY_KV: { get: async k => (kv.has(k) ? JSON.parse(kv.get(k)) : null), put: async (k, v) => { kv.set(k, v); } },
+    GLOSSARY_KV: { get: async k => (kv.has(k) ? JSON.parse(kv.get(k)) : null), put: async (k, v) => { kv.set(k, v); }, delete: async k => { kv.delete(k); }, list: async o => ({ keys: [...kv.keys()].filter(k => k.startsWith((o && o.prefix) || '')).map(name => ({ name })) }) },
     CLIPS_R2: { head: async k => (r2.has(k) ? { size: r2.get(k).data.length, httpMetadata: { contentType: r2.get(k).type } } : null), get: async k => (r2.has(k) ? { arrayBuffer: async () => r2.get(k).data.buffer.slice(r2.get(k).data.byteOffset, r2.get(k).data.byteOffset + r2.get(k).data.length) } : null), put: async (k, v, o) => { r2.set(k, { data: Buffer.from(v), type: (o && o.httpMetadata && o.httpMetadata.contentType) || '' }); }, delete: async k => { r2.delete(k); } } };
   let state = 'processing', failMsg = 'boom', submitCode = 0;
   globalThis.fetch = async (u, o) => {
