@@ -28,7 +28,7 @@
     d.innerHTML = '<h3>' + esc(cfg.title || '영상 일괄 만들기') + '</h3>' +
       '<p class="muted" style="margin:4px 0 8px;font-size:.82rem">칸의 현재 이미지를 시작 프레임으로 Kling 영상을 여러 개 동시에 만듭니다. 프롬프트는 칸마다 기본 프롬프트를 쓰고, 아래 "추가 요청"은 모두에 덧붙습니다. 완료된 영상은 <b>미리보기</b>로 모이고, 마음에 드는 것만 "적용"하세요(적용하지 않은 영상은 창을 닫을 때 삭제됩니다). 진행 확인은 이 창이 열려 있는 동안만 합니다.</p>' +
       '<div class="row" style="gap:10px;align-items:center;flex-wrap:wrap"><label class="muted">품질 <select id="bvQ"><option value="std">표준 (720p)</option><option value="pro">고화질 (1080p)</option><option value="4k">초고화질 (4K)</option></select></label>' +
-      '<label class="muted">길이 <select id="bvD"><option value="5">5초</option><option value="10">10초</option><option value="15">15초</option></select></label>' +
+      '<label class="muted">동작·감정 <select id="bvA">' + C.motionOptions() + '</select></label><label class="muted">길이 <select id="bvD"><option value="5">5초</option><option value="10">10초</option><option value="15">15초</option></select></label>' +
       '<label class="muted">동시 <select id="bvC"><option>1</option><option>2</option><option>3</option><option selected>4</option><option>5</option></select>개</label>' +
       '<label class="muted" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="bvNo" checked> 영상 없는 칸만 보기</label>' +
       '<button type="button" id="bvAll">보이는 칸 모두 선택</button><button type="button" id="bvNone">선택 해제</button></div>' +
@@ -68,7 +68,7 @@
     // ── 보내기 · 확인
     function submit(c) {
       c.st = 'sending'; c.msg = ''; render();
-      var ex = q('#bvX').value.trim();
+      var ex = (C.motionText(q('#bvA').value) + ' ' + q('#bvX').value.trim()).trim();
       jpegOf(c.imageUrl).then(function (b) { return upFile(b, 'bstart-' + Date.now() + '-' + Math.floor(Math.random() * 1e6) + '.jpg'); })
         .then(function (k) { var b = Object.assign({}, c.body, { startKey: k, mode: q('#bvQ').value, duration: Number(q('#bvD').value) }); if (ex) b.extra = ex; return post('/api/panel-video', b); })
         .then(function () { c.st = 'processing'; c.n = 0; render(); })

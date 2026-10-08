@@ -178,6 +178,10 @@
   }
 
   // 새 관리자 셸(v2-shell.js)이 쓰는 공용 부품
-  window.V2Content = { LABELS: LABELS, CATS: CATS, CAT_KO: CAT_KO, REM_TYPES: REM_TYPES, REM_KO: REM_KO, COND: COND, SEASONS: SEASONS, ST: ST, api: api, toast: toast, load: load, engine: engine, save: save, mix: mix, clone: clone, csv: csv, esc: esc, setPw: function (p) { PW = p; },
+  // 영상 동작·감정 선택(Kling 프롬프트 뒤에 덧붙는 한 문장). 기본 프롬프트의 "가만히 서 있는" 지시보다 우선하도록 명시한다.
+  var MOTIONS = [['', '기본 (잔잔하게 가만히)', ''], ['smile', '살짝 미소', 'a gentle warm smile slowly forming on the face'], ['laugh', '소리 내어 웃음', 'laughing joyfully, mouth open, shoulders shaking lightly'], ['cry', '조용히 눈물', 'quietly tearing up, a tear rolling down the cheek, eyes glistening'], ['sad', '쓸쓸한 표정', 'a wistful, melancholic expression, gaze lowered, slow sigh'], ['surprise', '깜짝 놀람', 'eyes widening in surprise, a small gasp, slight lean back'], ['angry', '화난 표정', 'a tense angry expression, furrowed brows, jaw clenched'], ['talk', '이야기하며 손짓', 'talking naturally, lips moving, expressive hand gestures'], ['nod', '고개 끄덕임', 'nodding slowly in agreement, a soft smile'], ['look', '천천히 돌아봄', 'slowly turning the head to look toward the camera'], ['walk', '천천히 걸어감', 'walking slowly forward with a natural gait, clothes and hair swaying'], ['wind', '바람에 머리카락·옷자락', 'hair and clothes flowing softly in the wind, the character otherwise calm'], ['hug', '포옹 · 서로 기댐', 'leaning in close and embracing warmly']];
+  function motionOptions() { return MOTIONS.map(function (m) { return '<option value="' + m[0] + '">' + m[1] + '</option>'; }).join(''); }
+  function motionText(v) { var m = MOTIONS.filter(function (x) { return x[0] === v; })[0]; return m && m[2] ? 'Motion and emotion (takes priority over any instruction above to stay still or keep the mouth closed): ' + m[2] + '.' : ''; }
+  window.V2Content = { motionOptions: motionOptions, motionText: motionText, LABELS: LABELS, CATS: CATS, CAT_KO: CAT_KO, REM_TYPES: REM_TYPES, REM_KO: REM_KO, COND: COND, SEASONS: SEASONS, ST: ST, api: api, toast: toast, load: load, engine: engine, save: save, mix: mix, clone: clone, csv: csv, esc: esc, setPw: function (p) { PW = p; },
     itemAdmin: itemAdmin, modCfg: modCfg, remCfg: remCfg, covOpen: covOpen, condText: condText };
 })();
