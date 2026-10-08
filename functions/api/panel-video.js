@@ -58,7 +58,9 @@ export async function onRequestPost({ request, env }) {
   if (h.size > MAX_START) return json({ error: '시작 프레임이 10MB 를 넘습니다' }, 400);
   const obj = await env.CLIPS_R2.get(b.startKey); if (!obj) return json({ error: '시작 프레임 파일을 읽지 못했습니다' }, 410);
   const dflt = klingPrompt(b.element, b.theme, kind), prompt = typeof b.prompt === 'string' && b.prompt.trim() ? b.prompt.trim() : dflt.prompt, negative = typeof b.negative === 'string' && b.negative.trim() ? b.negative.trim() : dflt.negative;
-  let taskId; try { taskId = await klingSubmit(env, { imageB64: toB64(new Uint8Array(await obj.arrayBuffer())), prompt, negative, mode: b.mode }); } catch (e) { await delFile(env, b.startKey); return json({ error: e.message }, 502); }
+  // 신형 API 는 이미지 URL 을 받는다(시작 프레임은 /api/clipfile 로 공개돼 있고 키는 추측 불가). https 가 아니면(로컬 등) base64 로 보낸다.
+  const here = new URL(request.url), imageUrl = here.protocol === 'https:' ? here.origin + '/api/clipfile?k=' + encodeURIComponent(b.startKey) : '';
+  let taskId; try { taskId = await klingSubmit(env, { imageUrl, b64: async () => toB64(new Uint8Array(await obj.arrayBuffer())), prompt, negative, mode: b.mode }); } catch (e) { await delFile(env, b.startKey); return json({ error: e.message }, 502); }
   tasks[id] = { taskId, startKey: b.startKey, kind, element: b.element, theme: b.theme, createdAt: Date.now() }; await saveTasks(env, tasks);
   return json({ ok: true, id, taskId });
 }

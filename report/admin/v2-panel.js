@@ -19,7 +19,7 @@
   }
   function klingCard(p, cur) {
     var h = '<div class="card" style="padding:10px"><b style="color:var(--gold)">Kling 으로 영상 만들기 (이 칸의 현재 이미지 → 영상)</b>';
-    if (!G.vid || !G.vid.enabled) return h + '<p class="muted" style="margin:4px 0 0;font-size:.8rem">Cloudflare 환경 변수 <b>KLING_ACCESS_KEY</b> 와 <b>KLING_SECRET_KEY</b> 를 설정하면 여기서 바로 영상을 만들 수 있습니다(Kling 개발자 콘솔에서 발급).</p></div>';
+    if (!G.vid || !G.vid.enabled) return h + '<p class="muted" style="margin:4px 0 0;font-size:.8rem">Cloudflare 환경 변수 <b>KLING_API_KEY</b> 를 설정하면 여기서 바로 영상을 만들 수 있습니다(Kling 개발자 콘솔 → API Key 에서 발급. 구형 Access/Secret Key 방식이면 KLING_ACCESS_KEY · KLING_SECRET_KEY).</p></div>';
     return h + '<p class="muted" style="margin:4px 0 8px;font-size:.8rem">이 칸의 이미지를 시작 프레임으로 5초 영상을 만들어 이 칸의 영상으로 바꿉니다. Kling 크레딧이 사용되고 보통 1~5분 걸립니다. 정지 이미지는 포스터로 그대로 남습니다.</p>' +
       '<label class="muted" style="display:block">영상 프롬프트 (영어, 고쳐 쓸 수 있어요)<textarea id="peKP" rows="5" style="width:100%">' + esc(p.tools ? p.tools.kling : '') + '</textarea></label>' +
       '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><label class="muted">품질 <select id="peKM"><option value="std">표준 (720p)</option><option value="pro">고화질 (1080p · 크레딧 더 사용)</option></select></label><button type="button" class="btn" id="peKGo"' + (cur ? '' : ' disabled') + '>Kling 으로 영상 만들기</button></div><p class="muted" id="peKMsg" style="margin-top:6px;font-size:.8rem">' + (cur ? '' : '이 칸에 이미지가 먼저 있어야 합니다.') + '</p></div>';

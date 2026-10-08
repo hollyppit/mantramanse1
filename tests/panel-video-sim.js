@@ -41,7 +41,7 @@ const imp = f => import(require('url').pathToFileURL(path.join(__dirname, '..', 
   r2.set('start1.jpg', { data: Buffer.from('JPEGBYTES'), type: 'image/jpeg' });
   r = await POST({ element: 'wood', theme: 'love', kind: 'panelF', startKey: 'start1.jpg', prompt: '내가 쓴 프롬프트', mode: 'pro' });
   const sub = calls.filter(c => /image2video$/.test(c.u)).at(-1), body = JSON.parse(sub.o.body);
-  ok(r.s === 200 && r.d.id === 'panel-wood-love-F' && /^https:\/\/api\.klingai\.com\/v1\/videos\/image2video$/.test(sub.u), '제출: POST /v1/videos/image2video');
+  ok(r.s === 200 && r.d.id === 'panel-wood-love-F' && /^https:\/\/api-singapore\.klingai\.com\/v1\/videos\/image2video$/.test(sub.u), '구형 제출: POST /v1/videos/image2video (기본 주소 api-singapore)');
   ok(/^Bearer [\w-]+\.[\w-]+\.[\w-]+$/.test(sub.o.headers.authorization), 'Authorization: Bearer <JWT>');
   ok(body.image === Buffer.from('JPEGBYTES').toString('base64') && !/^data:/.test(body.image) && body.mode === 'pro' && body.duration === '5' && body.model_name === 'kling-v1-6' && body.prompt === '내가 쓴 프롬프트' && /face morphing/.test(body.negative_prompt) && body.cfg_scale === 0.5, '본문: base64 이미지(접두사 없음) · mode pro · 5초 · 프롬프트/네거티브');
   r = await POST({ element: 'wood', theme: 'love', kind: 'panelF', startKey: 'start1.jpg' }); ok(r.s === 409, '같은 칸을 두 번 제출하면 거부');
@@ -62,6 +62,30 @@ const imp = f => import(require('url').pathToFileURL(path.join(__dirname, '..', 
   state = 'processing'; r2.set('start4.jpg', { data: Buffer.from('J'), type: 'image/jpeg' }); await POST({ element: 'wood', theme: 'love', kind: 'panelF', startKey: 'start4.jpg' });
   r = await V.onRequestDelete({ request: req('DELETE', '?id=panel-wood-love-F'), env }); ok(r.status === 200 && !(await GET()).d.tasks.length && !r2.has('start4.jpg'), '진행 중 기록 지우기(취소)');
 
+  console.log('6. 신형 API (KLING_API_KEY · Kling 3.0 Turbo)');
+  { const env2 = { ...env, KLING_ACCESS_KEY: '', KLING_SECRET_KEY: '', KLING_API_KEY: 'NEWKEY' }, nc = []; let st = 'processing';
+    const prevFetch = globalThis.fetch;
+    globalThis.fetch = async (u, o) => { u = String(u); nc.push({ u, o });
+      if (/\/image-to-video\/kling-3\.0-turbo$/.test(u) && o.method === 'POST') return new Response(JSON.stringify({ code: 0, data: { id: '9001', status: 'submitted' } }));
+      if (/\/tasks\?external_task_ids=/.test(u)) return new Response(JSON.stringify({ code: 0, data: [{ id: '9001', status: st, message: 'nope', outputs: st === 'succeeded' ? [{ type: 'video', url: 'https://cdn.example.com/new.mp4' }] : [] }] }));
+      if (u === 'https://cdn.example.com/new.mp4') return new Response(Buffer.from('NEW-MP4'), { status: 200 });
+      return new Response('no', { status: 404 }); };
+    const P2 = async b => { const r = await V.onRequestPost({ request: new Request('https://site.example/api/panel-video', { method: 'POST', headers: { authorization: 'Bearer x', 'content-type': 'application/json' }, body: JSON.stringify(b) }), env: env2 }); return { s: r.status, d: await r.json() }; };
+    const G2 = async q => { const r = await V.onRequestGet({ request: new Request('https://site.example/api/panel-video' + q, { headers: { authorization: 'Bearer x' } }), env: env2 }); return { s: r.status, d: await r.json() }; };
+    kv.set('panel:vtasks', '{}'); kv.set('media:index', JSON.stringify([{ id: 'panel-fire-career-M', url: '/api/clipfile?k=cellM.webp', type: 'image' }])); r2.set('cellM.webp', { data: Buffer.from('i'), type: 'image/webp' }); r2.set('startN.jpg', { data: Buffer.from('JPG'), type: 'image/jpeg' });
+    ok((await G2('')).d.enabled === true, 'API Key 만 있어도 enabled');
+    let rr = await P2({ element: 'fire', theme: 'career', kind: 'panelM', startKey: 'startN.jpg', mode: 'pro', prompt: 'Gentle motion', negative: 'text, watermark' });
+    const sc = nc.find(c => /image-to-video/.test(c.u)), bd = JSON.parse(sc.o.body);
+    ok(rr.s === 200 && sc.u === 'https://api-singapore.klingai.com/image-to-video/kling-3.0-turbo' && sc.o.headers.authorization === 'Bearer NEWKEY', '신형 제출: POST /image-to-video/kling-3.0-turbo, Authorization: Bearer <API Key>(JWT 아님)');
+    ok(bd.contents[0].type === 'prompt' && /^Gentle motion Avoid: text, watermark\.$/.test(bd.contents[0].text) && bd.contents[1].type === 'first_frame' && bd.contents[1].url === 'https://site.example/api/clipfile?k=startN.jpg', '본문: contents(prompt + first_frame 이미지 URL) · 네거티브는 "Avoid:"로 프롬프트에 포함');
+    ok(bd.settings.resolution === '1080p' && bd.settings.duration === 5 && /^mt[\w]+$/.test(bd.options.external_task_id), 'settings: pro → 1080p · 5초 · 우리가 정한 external_task_id');
+    st = 'processing'; rr = await G2('?id=panel-fire-career-M'); const qc = nc.filter(c => /\/tasks\?/.test(c.u)).at(-1);
+    ok(rr.d.status === 'processing' && qc.u === 'https://api-singapore.klingai.com/tasks?external_task_ids=' + bd.options.external_task_id && qc.o.headers.authorization === 'Bearer NEWKEY', '조회: GET /tasks?external_task_ids=<id>');
+    st = 'succeeded'; rr = await G2('?id=panel-fire-career-M'); const it2 = JSON.parse(kv.get('media:index')).find(m => m.id === 'panel-fire-career-M');
+    ok(rr.d.status === 'done' && it2 && /k=panel-fire-career-M-k-/.test(it2.panelVideo) && r2.get(it2.panelVideo.split('k=')[1]).data.toString() === 'NEW-MP4', 'succeeded: 영상을 R2 에 저장하고 칸의 영상으로 교체');
+    r2.set('startN2.jpg', { data: Buffer.from('JPG'), type: 'image/jpeg' }); st = 'processing'; await P2({ element: 'fire', theme: 'career', kind: 'panelM', startKey: 'startN2.jpg' });
+    st = 'failed'; rr = await G2('?id=panel-fire-career-M'); ok(rr.d.status === 'failed' && /nope/.test(rr.d.error), 'failed: Kling 메시지 전달');
+    globalThis.fetch = prevFetch; }
   if (fails.length) { console.log('\n실패 ' + fails.length + '건'); fails.forEach(f => console.log(' ✗ ' + f)); process.exit(1); }
   console.log('\n컷 영상 생성(Kling) 검증 모두 통과');
 })();
