@@ -25,7 +25,7 @@ const root = path.join(__dirname, '..'), fails = [], ok = (c, m) => { if (!c) fa
   const allT = ps.map(p => PP.toolsFor(p.element, p.theme, null, 'panel')); ok(allT.every(Boolean) && new Set(allT.map(t => t.leo)).size === 50 && new Set(allT.map(t => t.kling)).size === 50, '50칸 모두 서로 다른 이미지·영상 프롬프트');
   ok(allT.every(t => !hangul.test(t.leo) && !hangul.test(t.kling) && /No text/.test(t.leo) && /Vertical 2:3/.test(t.leo)), '프롬프트는 영어, 글자 금지·세로 2:3 포함(추가 방향을 안 쓴 기본값)');
   ok(allT.every(t => /webtoon-style/.test(t.leo) && /cinematic mood/.test(t.leo) && /present-day Korea/.test(t.leo) && /face and expression are clearly visible/.test(t.leo) && /Main character design/.test(t.leo) && !/ink-wash|hanbok-inspired/.test(t.leo)), '기본 방향 = 웹툰풍 + 영화 감성 + 현대 한국 + 얼굴이 보이는 인물');
-  ok(allT.every(t => /face, identity/.test(t.kling) && /blinking/.test(t.kling)) && /face morphing/.test(allT[0].klingNeg), '영상 프롬프트는 얼굴·정체성 유지와 자연스러운 깜빡임');
+  ok(allT.every(t => /face, identity/.test(t.kling) && /natural blink/.test(t.kling)) && /face morphing/.test(allT[0].klingNeg), '영상 프롬프트는 얼굴·정체성 유지와 자연스러운 깜빡임');
   ok(/dark, calm and low-contrast/.test(PP.toolsFor('wood', 'love', null, 'bg').leo) && !/Vertical 2:3/.test(PP.toolsFor('wood', 'love', null, 'bg').leo), '배경 용도는 어둡고 초점 없는 프롬프트');
   ok(/Fire/.test(PP.toolsFor('fire', 'love', null, 'panel').leo) && /push-in/.test(PP.toolsFor('fire', 'love', null, 'panel').kling) && PP.toolsFor('zzz', 'love') === null, '오행 영어 이름·카메라 지시 포함, 잘못된 칸은 null');
   console.log('1d. 본문 컷 성별 칸(panelF · panelM)');

@@ -37,7 +37,7 @@ const HAIR = { woman: 'natural dark hair in a soft everyday style', man: 'short 
 const characterEN = c => `Main character design (keep consistent across the series): a young Korean ${c} in ${{ woman: "her", man: "his", adult: "their" }[c]} late 20s to early 30s, ${HAIR[c]}, everyday modern clothing, a gentle and expressive face.`;
 
 export const NEGATIVE_IMAGE = 'text, letters, numbers, captions, signage, logo, watermark, distorted face, asymmetrical or cross-eyes, extra fingers, deformed hands, distorted anatomy, extra people, hanbok, fantasy costume, blurry, low quality, oversaturated';
-export const NEGATIVE_VIDEO = 'text, subtitles, watermark, logo, face distortion, face morphing, changing identity, extra limbs, sudden camera cut, fast motion, flicker, jitter, sighing, exhaling, gasping, heavy breathing, shoulders heaving, mouth opening';
+export const NEGATIVE_VIDEO = 'text, subtitles, watermark, logo, face distortion, face morphing, changing identity, extra limbs, sudden camera cut, fast motion, flicker, jitter';
 
 function styleEN(dir, kind) {
   const d = cleanDirection(dir), part = [ART_EN[d.art], FEEL_EN[d.feel], WORLD_EN[d.world], MOOD_EN[d.mood], PEOPLE_EN[d.people]].filter(Boolean);
@@ -61,20 +61,20 @@ const MOT_EL = {
   metal: 'moonlight glints and slowly shifts, a thin cool veil of mist passes, small distant lights twinkle',
   water: 'rain falls softly, ripples spread and reflections shimmer slowly' };
 const MOT_TH = {
-  identity: 'the character\'s hair and clothes sway in the breeze, they blink naturally, and the camera pushes in very slowly',
+  identity: 'the character\'s hair and clothes sway in the breeze',
   talent: 'the reader turns a page slowly, dust floats inside the shaft of light, their eyes move slightly along the lines',
-  career: 'the screen glow flickers softly, steam curls up from the cup, the city lights below twinkle, the character blinks and looks down slightly',
+  career: 'the screen glow flickers softly, steam curls up from the cup, the city lights below twinkle, the character looks down slightly',
   wealth: 'blurred shoppers pass in the background, the market lights flicker, the character glances around and shifts the bag slightly',
   love: 'the couple walks slowly under the umbrella, raindrops fall and ripple on the street, they exchange a soft glance, street lights glimmer',
   relationship: 'friends laugh and gesture softly, glasses clink, the warm light wavers, steam rises from the dishes',
   family: 'the lit windows flicker warmly, the character stands quietly in the cool air, their hair stirs in the breeze',
   shadow: 'the long shadow slowly lengthens, the light at the corridor end pulses softly, the character slowly lifts their gaze',
-  daewoon: 'snow and blossom petals drift across the frame, the character blinks and turns their eyes between the two paths, the camera pushes in slightly',
+  daewoon: 'snow and blossom petals drift across the frame, the character turns their eyes between the two paths',
   remedy: 'mist moves slowly under the tree, a few leaves fall, the character stands calmly with a small, soft smile' };
 const up = s => s[0].toUpperCase() + s.slice(1);
 export function kling(el, th, kind) {
   if (!ELEMENTS[el] || !THEMES[th]) return null;
-  return { prompt: `Gentle, cinematic motion on the first-frame image. ${up(MOT_TH[th])}. ${up(MOT_EL[el])}. The camera does a very slow push-in or stays locked. Keep the character's face, identity, composition, colors and the webtoon illustration style exactly as in the image; natural blinking and subtle facial expression only; the character does NOT sigh, exhale, gasp or heave, the mouth stays closed and the shoulders and chest stay still; smooth, loop-friendly movement; no text appears.`,
+  return { prompt: `Gentle, cinematic motion on the first-frame image. The character stands still and composed with a relaxed closed mouth and still shoulders, with only a soft natural blink. ${up(MOT_TH[th])}. ${up(MOT_EL[el])}. The camera does a very slow push-in. Keep the character's face, identity, composition, colors and the webtoon illustration style exactly as in the image; smooth, loop-friendly movement; no text appears.`,
     negative: NEGATIVE_VIDEO, settings: '이미지→영상 · 길이 5초 · 시작 프레임 = 위에서 만든 이미지 · 창의성(관련도) 낮음~중간(얼굴이 변하면 더 낮추기) · 카메라 움직임은 프롬프트에 맡김' };
 }
 export function toolsFor(el, th, dir, kind) { const l = leonardo(el, th, dir, kind), k = kling(el, th, kind); return l && k ? { leo: l.prompt, leoNeg: l.negative, leoSize: l.size, kling: k.prompt, klingNeg: k.negative, klingSet: k.settings } : null; }
