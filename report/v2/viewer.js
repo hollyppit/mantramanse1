@@ -113,7 +113,8 @@
     }
     else if (!url || saveData && !poster) { still(); }
     else {
-      var v = document.createElement('video'), wantSound = cfg.kind === 'prologue'; v.muted = !wantSound; v.defaultMuted = !wantSound; // 프롤로그 영상은 소리가 기본(브라우저가 막으면 소리 없이 시작하고 "소리 켜기"를 보여 준다) v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); v.autoplay = true; v.preload = 'auto'; v.setAttribute('aria-label', title + ' 영상'); if (poster) v.poster = poster;
+      var v = document.createElement('video'), wantSound = cfg.kind === 'prologue'; v.muted = !wantSound; v.defaultMuted = !wantSound; // 프롤로그 영상은 소리가 기본(브라우저가 막으면 소리 없이 시작하고 "소리 켜기"를 보여 준다)
+      v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); v.autoplay = true; v.preload = 'auto'; v.setAttribute('aria-label', title + ' 영상'); if (poster) v.poster = poster;
       if (clip.videoWebm && v.canPlayType && v.canPlayType('video/webm')) { var s1 = document.createElement('source'); s1.src = clip.videoWebm; s1.type = 'video/webm'; v.appendChild(s1); }
       if (clip.videoUrl) { var s2 = document.createElement('source'); s2.src = clip.videoUrl; s2.type = /\.webm(\?|$)/.test(clip.videoUrl) ? 'video/webm' : 'video/mp4'; v.appendChild(s2); }
       box.innerHTML = ''; box.appendChild(v);
