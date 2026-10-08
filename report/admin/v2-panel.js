@@ -3,13 +3,14 @@
    뷰어의 조합 규칙(오행·주제 점수)이 장면마다 알맞은 컷을 고른다. 이 화면은 만들기·다시 만들기만 한다. index.html 의 showTab 이 V2Panel.open('panelart', 비밀번호) 를 부른다. */
 (function () {
   'use strict';
-  var C = window.V2Content, esc = C.esc, toast = C.toast, PANE = null, G = { d: null, busy: false, stop: false, provider: '', log: [] };
+  var C = window.V2Content, esc = C.esc, toast = C.toast, PANE = null, G = { d: null, busy: false, stop: false, provider: '', log: [], sel: {}, selK: '' };
   var EL = { wood: '木 목', fire: '火 화', earth: '土 토', metal: '金 금', water: '水 수' }, TH = { identity: '나는 누구', talent: '재능', career: '일', wealth: '돈', love: '사랑', relationship: '관계', family: '가족', shadow: '약점', daewoon: '지금 시기', remedy: '회복' };
   var $ = function (s) { return PANE.querySelector(s); };
   var css = document.createElement('style');
   css.textContent = '.pa-grid{display:grid;grid-template-columns:70px repeat(10,minmax(0,1fr));gap:6px;align-items:stretch;margin-top:12px}.pa-h{font-size:.72rem;color:var(--ink3);text-align:center;align-self:end}.pa-r{font-size:.82rem;color:var(--gold);align-self:center}' +
     '.pa-c{aspect-ratio:3/4;border:1px dashed var(--line);border-radius:8px;background:#000 center/cover;display:flex;align-items:flex-end;justify-content:center;font-size:.7rem;color:var(--ink3);cursor:pointer;position:relative;overflow:hidden}.pa-c.has{border:1px solid var(--line)}.pa-c.run{outline:2px solid var(--gold)}' +
     '.pa-c b{background:rgba(0,0,0,.6);width:100%;text-align:center;padding:2px 0;font-weight:400}.pa-log{font-size:.8rem;color:var(--ink2);max-height:160px;overflow:auto;margin-top:10px;line-height:1.6}@media(max-width:900px){.pa-grid{grid-template-columns:50px repeat(5,minmax(0,1fr))}}';
+  css.textContent += '.pa-c.sel{outline:3px solid var(--gold);outline-offset:-3px}.pa-c.sel::after{content:"✓";position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#000;font-size:.8rem;font-weight:700;display:grid;place-items:center}.pa-selmode .pa-h,.pa-selmode .pa-r{cursor:pointer;text-decoration:underline dotted}.pa-selbar{gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;padding:8px 10px;border:1px solid var(--gold);border-radius:8px}';
   css.textContent += '.pa-rf{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}.pa-rf .rf{width:64px;height:96px;border-radius:6px;border:1px solid var(--line);background:#000 center/cover;position:relative}.pa-rf .rf button{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;padding:0;line-height:1;font-size:.7rem}';
   document.head.appendChild(css);
 
@@ -39,18 +40,35 @@
   }
   function cardOf(kind) {
     var d = G.d, pv = d.providers, list = d.presets.filter(function (p) { return p.kind === kind; }), have = list.filter(function (p) { return p.url; }).length, I = KIND[kind];
-    var cells = '<span></span>' + Object.keys(TH).map(function (t) { return '<span class="pa-h">' + esc(TH[t]) + '</span>'; }).join('');
+    var sm = G.selK === kind, nsel = list.filter(function (p) { return G.sel[p.id]; }).length;
+    var cells = '<span></span>' + Object.keys(TH).map(function (t) { return '<span class="pa-h"' + (sm ? ' data-selcol="' + t + '" title="이 주제 열 전체 선택/해제"' : '') + '>' + esc(TH[t]) + '</span>'; }).join('');
     Object.keys(EL).forEach(function (e) {
-      cells += '<span class="pa-r">' + esc(EL[e]) + '</span>' + Object.keys(TH).map(function (t) {
+      cells += '<span class="pa-r"' + (sm ? ' data-selrow="' + e + '" title="이 오행 줄 전체 선택/해제"' : '') + '>' + esc(EL[e]) + '</span>' + Object.keys(TH).map(function (t) {
         var p = list.filter(function (x) { return x.element === e && x.theme === t; })[0];
-        return '<div class="pa-c' + (p.url ? ' has' : '') + '" data-id="' + p.id + '" data-k="' + kind + '" data-e="' + e + '" data-t="' + t + '" title="' + esc(p.title) + ' — 눌러서 ' + (p.url ? '다시 만들기' : '만들기') + '"' + (p.url ? ' style="background-image:url(\'' + esc(p.url) + '\')"' : '') + '>' + (p.url ? (p.video ? '<b>▶ 영상</b>' : '') : '<b>비어 있음</b>') + '</div>';
+        return '<div class="pa-c' + (p.url ? ' has' : '') + (sm && G.sel[p.id] ? ' sel' : '') + '" data-id="' + p.id + '" data-k="' + kind + '" data-e="' + e + '" data-t="' + t + '" title="' + esc(p.title) + ' — 눌러서 ' + (p.url ? '다시 만들기' : '만들기') + '"' + (p.url ? ' style="background-image:url(\'' + esc(p.url) + '\')"' : '') + '>' + (p.url ? (p.video ? '<b>▶ 영상</b>' : '') : '<b>비어 있음</b>') + '</div>';
       }).join('');
     });
     return '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">' + I.title + ' · ' + have + ' / ' + list.length + '장</b><p class="muted" style="margin:6px 0 10px">' + I.desc + '</p>' + (kind !== 'bg' ? tabsOf(kind) : '') +
       '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><label class="muted">모델 <select class="paProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (G.provider === 'openai' ? ' selected' : '') + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(d.models.openai) + (pv.openai ? '' : ' (키 없음)') + '</option><option value="gemini"' + (G.provider === 'gemini' ? ' selected' : '') + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(d.models.gemini) + (pv.gemini ? '' : ' (키 없음)') + '</option></select></label>' +
-      '<button class="btn pa-run" data-run="missing" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button class="btn pa-run" data-run="all" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>모두 다시 만들기</button><button class="btn pa-bv" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>영상 일괄 만들기</button><button class="pa-stop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
+      '<button class="btn pa-run" data-run="missing" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button class="btn pa-run" data-run="all" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>모두 다시 만들기</button><button class="btn pa-bv" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>영상 일괄 만들기</button><button class="btn pa-sel' + (sm ? ' gold' : '') + '" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>' + (sm ? '선택 끝내기' : '선택해서 다시 만들기') + '</button><button class="pa-stop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
+      (sm ? '<div class="row pa-selbar" data-k="' + kind + '"><span class="muted">다시 만들 칸을 누르세요(오행·주제 이름을 누르면 줄/열 전체). <b class="pa-selcnt" style="color:var(--gold)">' + nsel + '</b>장 선택</span><button type="button" class="pa-selall" data-k="' + kind + '">전체 선택</button><button type="button" class="pa-selnone" data-k="' + kind + '">선택 해제</button><button type="button" class="btn gold pa-runsel" data-k="' + kind + '"' + (G.busy || !nsel ? ' disabled' : '') + '>선택한 ' + nsel + '장 다시 만들기</button></div>' : '') +
       (kind !== 'bg' && !d.r2 ?'<p class="err">R2(CLIPS_R2)가 연결되지 않아 저장할 수 없습니다.</p>' : '') + (kind !== 'bg' && !pv.openai && !pv.gemini ?'<p class="err">OPENAI_API_KEY 또는 GEMINI_API_KEY 가 없습니다. Cloudflare 환경 변수에 추가하세요.</p>' : '') +
-      '<div class="pa-grid">' + cells + '</div></div>';
+      '<div class="pa-grid' + (sm ? ' pa-selmode' : '') + '">' + cells + '</div></div>';
+  }
+  // 선택해서 다시 만들기: 칸을 여러 개 골라 한 번에 새로 만든다(runList 와 같은 방식 — 성공한 칸만 교체, 연속 실패 3회면 멈춤).
+  function cardEl(kind) { var g = PANE.querySelector('.pa-grid .pa-c[data-k="' + kind + '"]'); return g ? g.closest('.card') : null; }
+  function syncSel(kind) {
+    var card = cardEl(kind); if (!card) return; var n = 0;
+    [].forEach.call(card.querySelectorAll('.pa-c'), function (c) { var on = !!G.sel[c.dataset.id]; c.classList.toggle('sel', on); if (on) n++; });
+    var cnt = card.querySelector('.pa-selcnt'), go = card.querySelector('.pa-runsel'); if (cnt) cnt.textContent = n; if (go) { go.textContent = '선택한 ' + n + '장 다시 만들기'; go.disabled = G.busy || !n; }
+  }
+  function selWhere(kind, fn, on) { G.d.presets.forEach(function (p) { if (p.kind === kind && fn(p)) { if (on) G.sel[p.id] = true; else delete G.sel[p.id]; } }); syncSel(kind); }
+  function runSel(kind) {
+    var todo = G.d.presets.filter(function (p) { return p.kind === kind && G.sel[p.id]; }); if (!todo.length) { toast('선택한 칸이 없습니다'); return; }
+    if (!confirm((LBL[kind] || '').replace(/[\[\]]/g, '') + ' 선택한 ' + todo.length + '장을 현재 비주얼 디렉션으로 다시 만듭니다.\n이미지 비용이 장당 발생하고, 성공한 칸의 기존 이미지는 삭제됩니다. 계속할까요?')) return;
+    var custom = todo.filter(function (p) { return p.custom; }).length, reset = false;
+    if (custom) reset = confirm('선택한 칸 중 직접 고쳐 저장한 프롬프트가 ' + custom + '개 있습니다.\n[확인] 그 프롬프트를 버리고 현재 디렉션으로 만듭니다.\n[취소] 고친 프롬프트를 그대로 사용합니다.');
+    G.sel = {}; runList(todo, reset, true);
   }
   function draw() {
     PANE.innerHTML = dirCard(G.d) + cardOf(G.pg || 'panelF') + cardOf('bg') + '<div class="card" style="margin-top:12px"><div class="pa-log"></div></div><div id="taBox"></div><div id="asBox"></div>';
@@ -65,7 +83,16 @@
       window.V2Batch.open({ title: '영상 일괄 만들기 · ' + (KIND[kind] ? KIND[kind].title : kind), cells: cells, onClose: function () { load().then(draw); } }); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-tab'), function (b) { b.onclick = function () { if (G.busy) return; G.pg = b.dataset.pg; draw(); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-stop'), function (b) { b.onclick = function () { G.stop = true; log('중지 요청 — 진행 중인 한 장이 끝나면 멈춥니다'); }; });
-    [].forEach.call(PANE.querySelectorAll('.pa-c'), function (c) { c.onclick = function () { if (G.busy) return; editor(c.dataset.e, c.dataset.t, c.dataset.k); }; });
+    [].forEach.call(PANE.querySelectorAll('.pa-c'), function (c) { c.onclick = function () {
+      if (G.busy) return; if (G.selK === c.dataset.k) { if (G.sel[c.dataset.id]) delete G.sel[c.dataset.id]; else G.sel[c.dataset.id] = true; syncSel(c.dataset.k); return; }
+      editor(c.dataset.e, c.dataset.t, c.dataset.k); }; });
+    [].forEach.call(PANE.querySelectorAll('.pa-sel'), function (b) { b.onclick = function () { if (G.busy) return; var k = b.dataset.k; G.selK = G.selK === k ? '' : k; G.sel = {}; draw(); }; });
+    [].forEach.call(PANE.querySelectorAll('.pa-selall'), function (b) { b.onclick = function () { selWhere(b.dataset.k, function () { return true; }, true); }; });
+    [].forEach.call(PANE.querySelectorAll('.pa-selnone'), function (b) { b.onclick = function () { selWhere(b.dataset.k, function () { return true; }, false); }; });
+    [].forEach.call(PANE.querySelectorAll('.pa-runsel'), function (b) { b.onclick = function () { if (!G.busy) runSel(b.dataset.k); }; });
+    [].forEach.call(PANE.querySelectorAll('[data-selrow],[data-selcol]'), function (h) { h.onclick = function () {
+      var k = G.selK, row = h.dataset.selrow, col = h.dataset.selcol, f = function (p) { return row ? p.element === row : p.theme === col; };
+      var all = G.d.presets.filter(function (p) { return p.kind === k && f(p); }).every(function (p) { return G.sel[p.id]; }); selWhere(k, f, !all); }; });
     log('');
   }
   /* 컷 하나 세부 수정: 프롬프트·추가 요청으로 여러 번 미리 만들어 보고, 마음에 드는 결과만 이 칸에 확정한다(안 고른 결과는 닫을 때 지운다). */
