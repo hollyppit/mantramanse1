@@ -157,11 +157,14 @@
   function funnel(n, p) { if (!HUB) return; p = Object.assign({ src: 'v2', from: 'hub' }, p || {}); try { if (typeof window.gtag === 'function') window.gtag('event', n, p); } catch (e) { } try { if (window.dataLayer && window.dataLayer.push) window.dataLayer.push(Object.assign({ event: n }, p)); } catch (e) { } try { window.dispatchEvent(new CustomEvent('mantra:track', { detail: { name: n, props: p } })); } catch (e) { } }
   // 홈으로 가는 버튼은 어느 단계에서든(입력·로딩·영상·본문) 항상 보인다: 허브에서 왔으면 MY 운명, 아니면 허브 첫 화면. 관리자 미리보기에서는 숨긴다
   (function () { var hb = $('#hubBack'); if (!hb) return; if (PREVIEW) { hb.hidden = true; return; } if (HUB) { hb.href = '/report/#/my'; hb.textContent = '‹ MY 운명'; } })();
-  function hubStart() { funnel('movingtoon_start'); if (R.Bgm) R.Bgm.play('cinematic'); proVideo(function () { if (LIFE) lifeBegin(); else beginReader(); }); }
+  function hubStart() { funnel('movingtoon_start'); if (R.Bgm && !hasProVideo()) R.Bgm.play('cinematic'); proVideo(function () { if (LIFE) lifeBegin(); else beginReader(); }); }
   // 프롤로그 영상(관리자 > 챕터 관리 > 프롤로그 영상): 올려 둔 영상이 있으면 재생하고 끝나면 next(true), 없으면 곧바로 next(false)
+  // 프롤로그 영상이 있으면 그 동안은 영상 원래 소리만 들리고, 배경음악은 영상이 끝난(또는 건너뛴) 뒤 무빙툰 시작(일간)부터 흐른다
+  function hasProVideo() { return !PREVIEW && !!S.proVid; }
   function proVideo(next) {
-    if (PREVIEW || !S.proVid) { next(false); return; }
-    T('prologue_started', { video: 1 }); playStage({ kind: 'prologue', clip: { videoUrl: S.proVid }, noCap: true, onDone: function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', { video: 1 }); next(true); } });
+    if (!hasProVideo()) { next(false); return; }
+    var bb = $('#bgmBtn'); if (bb) bb.hidden = true; // 영상 동안은 ♪ 버튼도 숨겨 배경음악이 끼어들지 않게
+    T('prologue_started', { video: 1 }); playStage({ kind: 'prologue', clip: { videoUrl: S.proVid }, noCap: true, onDone: function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', { video: 1 }); if (bb && R.Bgm && R.Bgm.has()) bb.hidden = false; if (R.Bgm) R.Bgm.play('cinematic'); next(true); } });
   }
   function startGate() {
     if (HUB) { hubStart(); return; }
@@ -169,7 +172,7 @@
     var nm = S.name; view('gate'); $('#gateName').innerHTML = nm ? esc(nm) + '에게는,<br>' + esc(nm) + '의 때가 있다.' : '모든 사람에게는,<br>각자의 때가 있다.';
     var b = $('#gateBtn'); b.onclick = function () { b.onclick = null; T('gate_tapped', {}); intro(); }; try { b.focus({ preventScroll: true }); } catch (e) { }
   }
-  function intro() { if (R.Bgm) R.Bgm.play('cinematic'); proVideo(function (played) { if (played) { if (LIFE) lifeBegin(); else beginReader(); } else prologue(); }); } // 배경음악은 일간 인트로(첫 화면)부터 흐른다(입력 제출 = 사용자의 첫 터치)
+  function intro() { if (R.Bgm && !hasProVideo()) R.Bgm.play('cinematic'); proVideo(function (played) { if (played) { if (LIFE) lifeBegin(); else beginReader(); } else prologue(); }); } // 배경음악은 일간 인트로(첫 화면)부터 흐른다(입력 제출 = 사용자의 첫 터치)
   function cinemaMediaFor(used) { return function (sc) { if (sc.bg === 'black' || sc.phTone) return null; return R.Director.pickMedia(sc, (S.pack && S.pack.lib && S.pack.lib.media) || S.media, { usedIds: used }, sc.chapterId || 'c00'); }; }
   /* 재생 속도(관리자 설정 flow.playbackRate · 확인용 ?rate=3): INTRO 타임라인·본문 머묾·이동에 적용한다. 허용: 0.5 · 0.75 · 1 · 1.25 · 1.5 · 2 · 3 */
   var RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
