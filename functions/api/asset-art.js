@@ -55,7 +55,6 @@ export async function onRequestPost({ request, env }) {
   if (b.fromCurrent) { ref = await refOf(env, map[id]); if (!ref) return json({ error: '바탕으로 쓸 현재 이미지가 없습니다' }, 400);
     prompt = '첨부한 이미지를 바탕으로, 같은 구도와 그림체를 유지하면서 아래 요청만 반영해 다시 그린다. 화면 안에 글자·숫자·로고는 넣지 않는다.\n수정 요청: ' + (String(b.extra || '').trim().slice(0, 500) || '전체적으로 조금 더 선명하게'); }
   else if (typeof b.extra === 'string' && b.extra.trim()) prompt += '\n추가 요청: ' + b.extra.trim().slice(0, 500);
-반드시 피할 것(화면에 넣지 말 것): ' + av; }
   let g; try { g = await generate(env, prompt, only, ref); } catch (e) { return json({ error: e.message }, 502); }
   if (b.preview) { const pk = 'assetprev-' + rnd(8) + '.' + g.ext; await env.CLIPS_R2.put(pk, g.bytes, { httpMetadata: { contentType: g.mime } }); return json({ ok: true, preview: pk, url: '/api/clipfile?k=' + pk, provider: g.provider, model: g.model }); }
   const key = keyOf(id) + '-' + rnd(4) + '.' + g.ext; await env.CLIPS_R2.put(key, g.bytes, { httpMetadata: { contentType: g.mime } });
