@@ -89,7 +89,6 @@ export async function onRequestPost({ request, env }) {
   } else {
     prompt = (refs.length ? REF_USE[dir.refUse][1] + '\n' : '') + base + (typeof b.extra === 'string' && b.extra.trim() ? '\n추가 요청: ' + b.extra.trim().slice(0, 500) : '');
   }
-  { const av = typeof b.avoid === 'string' ? b.avoid.trim().slice(0, 400) : ''; if (av) prompt += '
 반드시 피할 것(화면에 넣지 말 것): ' + av; }
   let g; try { g = await generate(env, prompt, only, refs.length ? refs : null, OPTS); } catch (e) { return json({ error: e.message }, 502); }
   if (b.preview) {
