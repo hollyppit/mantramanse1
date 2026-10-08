@@ -44,7 +44,7 @@ export async function onRequestGet({ request, env }) {
 export async function onRequestPost({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
-  if (!klingEnabled(env)) return json({ error: KLING_ENV_HELP }, 501);
+  if (!klingEnabled(env)) return json({ error: KLING_ENV_HELP + ' (이 배포가 인식한 KLING 변수: ' + (Object.keys(env).filter(k => /KLING/i.test(k)).join(', ') || '없음') + ')' }, 501);
   if (!env.CLIPS_R2) return json({ error: 'R2 바인딩(CLIPS_R2)이 없어 영상을 저장할 수 없습니다' }, 501);
   let b; try { b = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); }
   if (!ELEMENTS[b.element] || !THEMES[b.theme]) return json({ error: '오행·주제 값이 올바르지 않습니다' }, 400);
