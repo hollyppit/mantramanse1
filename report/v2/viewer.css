@@ -82,7 +82,7 @@ form { margin-top: 24px; display: grid; gap: 16px; }
 /* 장면 공통 */
 .scene { position: relative; padding: 36px 22px; max-width: 560px; margin: 0 auto; }
 .scene .media { position: relative; border-radius: 14px; overflow: hidden; background: var(--bg2); aspect-ratio: 4/5; margin: 18px 0; }
-.media img, .media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.media img, .media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; display: block; }
 .ph { background: radial-gradient(80% 60% at 30% 25%, color-mix(in srgb, var(--pc, #4A5A8A) 65%, transparent), transparent 70%), radial-gradient(70% 60% at 75% 80%, color-mix(in srgb, var(--pc, #4A5A8A) 35%, #0a0d18), transparent 70%), #0B0F1D; }
 .ph::after { content: ""; position: absolute; inset: -20%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.07), transparent 40%); animation: drift 14s ease-in-out infinite alternate; }
 @keyframes drift { to { transform: translate(8%, -6%) scale(1.15); } }

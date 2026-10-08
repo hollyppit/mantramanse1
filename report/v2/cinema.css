@@ -7,7 +7,7 @@
 .cn-scene.cn-in { opacity: 1; }
 .cn-scene .cn-bg, .cn-scene .cn-cam { position: absolute; inset: 0; }
 .cn-cam { transform-origin: var(--cn-fx, 50%) var(--cn-fy, 50%); will-change: transform; }
-.cn-media, .cn-ph { position: absolute; inset: -2%; width: 104%; height: 104%; object-fit: cover; object-position: var(--cn-fx, 50%) var(--cn-fy, 50%); }
+.cn-media, .cn-ph { position: absolute; inset: -2%; width: 104%; height: 104%; object-fit: cover; object-position: var(--cn-fx, 50%) calc(var(--cn-fy, 50%) * 0.3); } /* 프레임에 맞추다 잘릴 때 위쪽(얼굴·상단)이 보이도록 세로 기준을 위쪽으로 */
 .cn-ph { background: radial-gradient(120% 80% at 50% 30%, color-mix(in srgb, var(--pc, #4A7AB5) 38%, #05070d) 0%, #05070d 70%); }
 .cn-dim { position: absolute; inset: 0; background: #000; opacity: var(--cn-ov, .45); pointer-events: none; }
 .cn-scene.cn-has-impact.cn-run .cn-dim { animation: cn-dimup 700ms var(--dim-at, 0ms) ease both; }
