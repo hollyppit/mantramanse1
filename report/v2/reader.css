@@ -101,7 +101,8 @@ mark.wn i { font-style: normal; margin-right: 6px; } mark.wn b { color: #FF9A3C;
 /* 본문 맨 앞 일간·일주 소개: 영상은 잘리지 않게 전체를 보이고, 글은 따로 읽는다 */
 .rd-fig.rd-vid { aspect-ratio: auto; max-height: none; background: #000; width: 100%; max-width: 440px; margin-left: auto; margin-right: auto; }
 .rd-fig.rd-vid::after { display: none; }
-.rd-fig.rd-vid video { width: 100%; height: auto; max-height: 72svh; object-fit: contain; display: block; }
+.rd-fig.rd-vid video::-webkit-media-controls, .rd-fig.rd-vid video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
+.rd-fig.rd-vid video { pointer-events: none; -webkit-user-select: none; user-select: none; width: 100%; height: auto; max-height: 72svh; object-fit: contain; display: block; }
 .rd-vsec { padding-top: 8px; padding-bottom: 8px; }
 .ci-lb { display: block; color: var(--gold); font: 600 .78rem/1 var(--f-sans); letter-spacing: .14em; margin-bottom: 6px; }
 .ci-ul { margin: 6px 0 0; padding: 0 0 0 1.2em; } .ci-ul li { margin-bottom: .7em; line-height: 1.75; }

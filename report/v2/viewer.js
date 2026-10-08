@@ -228,7 +228,7 @@
     var ch = null; try { ch = R.CharIntro.chapter(S.sd, S.name, S.awk, (rep.acts[0] || {}).id); } catch (e) { ch = null; }
     if (ch) { S.rep = Object.assign({}, rep, { chapters: [ch].concat(rep.chapters) }); S.visited = {}; S.ended = {}; }
   }
-  // 본문 안의 영상은 화면에 들어오면 재생하고 벗어나면 멈춘다(소리는 꺼진 채, 컨트롤로 켤 수 있다)
+  // 본문 안의 영상은 화면에 들어오면 재생하고 벗어나면 멈춘다(소리는 꺼진 채, 컨트롤 없이 액자처럼 무한 루프)
   function watchVideos() {
     var vs = $$('#chapter video[data-ci-vid]'); if (!vs.length) return; if (S.vio) S.vio.disconnect();
     if (!window.IntersectionObserver || reduce || saveData) return;
@@ -269,7 +269,7 @@
     var m = s && s.media; if (!m || s.sceneType === 'chapterIntro' || s.bg === 'black' || /^(chart|dataVisualization|timeline)$/.test(s.sceneType)) return '';
     var u = /video|transition/i.test(m.type) ? m.posterUrl : (m.url || m.posterUrl); return /^(\/|https:\/\/)/.test(u || '') ? u : '';
   }
-  function panelHtml(u) { var pv = S.pv && S.pv[u]; if (pv) return '<figure class="rd-fig rd-vid"><video muted playsinline loop controls preload="metadata" data-ci-vid="1" poster="' + esc(u) + '" src="' + esc(pv) + '"></video></figure>'; return '<figure class="rd-fig"><img src="' + esc(u) + '" alt="" loading="lazy" decoding="async"></figure>'; }
+  function panelHtml(u) { var pv = S.pv && S.pv[u]; if (pv) return '<figure class="rd-fig rd-vid"><video muted playsinline loop autoplay disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback" tabindex="-1" aria-hidden="true" preload="metadata" data-ci-vid="1" poster="' + esc(u) + '" src="' + esc(pv) + '"></video></figure>'; return '<figure class="rd-fig"><img src="' + esc(u) + '" alt="" loading="lazy" decoding="async"></figure>'; }
   // 레이아웃 종류의 기준값(자동): TEXT · TEXT_MEDIA · HIGHLIGHT · DATA · TIMELINE · QUOTE · CHAPTER_HEADER
   function layoutOf(s) { var t = s.sceneType; return t === 'chapterIntro' ? 'CHAPTER_HEADER' : t === 'chart' || t === 'dataVisualization' ? 'DATA' : t === 'timeline' ? 'TIMELINE' : t === 'chapterEnding' ? 'QUOTE' : /^verdict/.test(t) ? 'HIGHLIGHT' : s.media ? 'TEXT_MEDIA' : 'TEXT'; }
 

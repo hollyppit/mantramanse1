@@ -76,7 +76,7 @@
     var u = url(clip); if (!u) return null;
     var poster = clip.posterUrl ? ' poster="' + esc(clip.posterUrl) + '"' : '';
     var src = (clip.videoWebm ? '<source src="' + esc(clip.videoWebm) + '" type="video/webm">' : '') + (clip.videoUrl ? '<source src="' + esc(clip.videoUrl) + '" type="' + (/\.webm(\?|$)/.test(clip.videoUrl) ? 'video/webm' : 'video/mp4') + '">' : '');
-    return { sceneId: id, sceneType: 'life', html: '<section class="scene rd-sec rd-vsec" data-sc="' + id + '"><figure class="rd-fig rd-vid"><video muted playsinline loop controls preload="metadata" data-ci-vid="1"' + poster + ' aria-label="' + esc(label) + '">' + src + '</video></figure></section>' };
+    return { sceneId: id, sceneType: 'life', html: '<section class="scene rd-sec rd-vsec" data-sc="' + id + '"><figure class="rd-fig rd-vid"><video muted playsinline loop autoplay disablepictureinpicture disableremoteplayback controlslist="nodownload nofullscreen noremoteplayback" tabindex="-1" preload="metadata" data-ci-vid="1"' + poster + ' aria-label="' + esc(label) + '">' + src + '</video></figure></section>' };
   }
   var sec = function (id, cls, inner) { return { sceneId: id, sceneType: 'life', html: '<section class="scene rd-sec ' + cls + '" data-sc="' + id + '">' + inner + '</section>' }; };
 
