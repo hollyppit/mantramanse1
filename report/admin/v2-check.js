@@ -21,6 +21,18 @@
       ['용신', (sd.usefulElements && sd.usefulElements.yong || '-') + ' (억부 ' + (M.eokbu && M.eokbu.yong || '-') + ' / 조후 ' + (M.johu && M.johu.yong || '-') + ')']];
   }
 
+  // 챕터가 쓴 풀이 모듈(DB 항목)과 그 적용 조건·참조한 원국 필드. 문장 단위 id 는 기록되지 않아 챕터 단위로 추적한다.
+  var LIBM = null;
+  function moduleRows(c, sd) {
+    var ids = (c.modules || []).filter(function (x) { return typeof x === 'string'; }); if (!ids.length) return '';
+    try { LIBM = LIBM || R.Compose.library(null).modules; } catch (e) { return ''; }
+    var facts = R.Rules.flatten(sd, { project: 'full' });
+    return ids.map(function (id) {
+      var m = LIBM.filter(function (x) { return x.id === id; })[0]; if (!m) return '<div>' + esc(id) + ' <small class="muted">(라이브러리에서 찾지 못함)</small></div>';
+      var ev = R.Rules.evaluate(m, facts);
+      return '<div style="margin:4px 0"><b>' + esc(id) + '</b> <small class="muted">' + esc(m.category || '') + ' · ' + (ev.match ? '조건 충족' : '조건 불일치') + '</small>' + (ev.rows.length ? '<br><small>' + ev.rows.map(function (r) { return esc(r.label) + ' = ' + esc(Array.isArray(r.have) ? r.have.join(',') : String(r.have)) + ' (' + (r.hit ? '✓' : '✗') + ' 기준 ' + esc(r.want.join('/')) + ')'; }).join('<br>') + '</small>' : '<br><small class="muted">조건 없음(항상 적용)</small>') + '</div>';
+    }).join('');
+  }
   function run(M) {
     var d = TS.date.split('-').map(Number), t = (TS.time || '12:00').split(':').map(Number), now = Date.now();
     var ch = M.compute({ year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: TS.gender, city: '서울' }), sd = R.SajuData.build(ch, { now: now }), H = { M: M, ch: ch, sd: sd, now: now, name: '테스트', assets: {} };
@@ -51,6 +63,7 @@
     h += '<h4 style="margin:14px 0 6px;color:var(--gold)">챕터별 현황</h4>' + res.rows.map(function (r, i) {
       var ok = !r.viol.length; return '<details data-i="' + i + '" style="border-bottom:1px solid var(--line);padding:6px 0"><summary style="cursor:pointer"><span style="color:' + (ok ? '#7fd8a8' : '#ffb070') + '">' + (ok ? '✓ 통과' : '⚠ 실패 ' + r.viol.length) + '</span> · <b>' + esc(r.c.title || r.c.id) + '</b> <small class="muted">' + esc(r.c.id) + ' · 문장 ' + r.n + '개</small></summary><div class="ckb" style="padding:8px 0 4px"></div></details>'; }).join('');
     if (dupN) h += '<h4 style="margin:14px 0 6px;color:var(--gold)">챕터 간 중복 문장</h4><ul class="muted" style="margin:0 0 0 18px;line-height:1.6;font-size:.84rem">' + Object.keys(res.dup).slice(0, 30).map(function (k) { return '<li>' + esc(k.slice(0, 80)) + ' <small>(' + esc(res.dup[k].join(', ')) + ')</small></li>'; }).join('') + '</ul>';
+    h += '<h4 style="margin:14px 0 6px;color:var(--gold)">AI 응답 문장 검증 (붙여넣기)</h4><p class="muted" style="margin:0 0 6px;font-size:.84rem">AI가 쓴 문단을 붙여넣으면 위 사주의 계산값과 같은 규칙으로 대조합니다(서버가 응답을 버리는 기준과 동일).</p><textarea id="ckAi" rows="4" style="width:100%" placeholder="예) 겨울 문턱의 큰 물 곁에서 자란 신금 같은 기질을 타고난 사람입니다."></textarea><div><button type="button" id="ckAiBtn">검증</button></div><div id="ckAiOut" style="margin-top:6px;font-size:.86rem"></div>';
     h += '<div id="ckPanel" class="card" style="position:sticky;bottom:8px;margin-top:12px;display:none"></div></div>';
     box.innerHTML = h; bind(box, M);
     $('[id=ckRun]', box); box.querySelectorAll('details[data-i]').forEach(function (dt) { dt.addEventListener('toggle', function () { if (dt.open) fill(dt, box); }, { once: true }); });
@@ -72,7 +85,8 @@
         ['나온 곳', esc((r.c.title || r.c.id) + ' · 챕터 ' + r.c.id + (x.scene ? ' · 장면 ' + x.scene : ''))],
         ['생성 방식', 'AI 미사용 — 규칙·풀이 DB 문장(이 화면은 AI를 호출하지 않습니다). 실제 서비스에서 AI가 다시 쓴 문단은 서버가 같은 규칙으로 검증하고, 어긋나면 버립니다.'],
         ['대조한 계산값', calcValues(sd).map(function (v) { return esc(v[0] + ': ' + v[1]); }).join('<br>')],
-        ['풀이 DB 항목', '풀이 지식(ik) 문장은 "풀이 지식" 탭의 항목 id로 추적합니다. 이 문장의 DB 항목 id는 콘텐츠 모듈에 기록되어 있지 않으면 표시되지 않습니다.']].map(function (row) { return '<tr><td style="padding:4px 8px;border-bottom:1px solid var(--line);color:var(--ink2);white-space:nowrap;vertical-align:top">' + row[0] + '</td><td style="padding:4px 8px;border-bottom:1px solid var(--line)">' + row[1] + '</td></tr>'; }).join('') + '</table>';
+        ['풀이 DB 항목(챕터 단위)', (moduleRows(r.c, sd) || '이 챕터는 풀이 모듈 없이 계산값·엔진 문장으로 만들어졌거나, 풀이 지식(ik) 문장입니다. ik 문장은 "풀이 지식" 탭의 항목 id로 추적합니다.') + '<div style="margin-top:6px"><button type="button" data-go="v2test">문구·적용 조건 수정하러 가기 →</button> <button type="button" data-go="ikknow">풀이 지식(변경 이력·롤백) →</button></div>']].map(function (row) { return '<tr><td style="padding:4px 8px;border-bottom:1px solid var(--line);color:var(--ink2);white-space:nowrap;vertical-align:top">' + row[0] + '</td><td style="padding:4px 8px;border-bottom:1px solid var(--line)">' + row[1] + '</td></tr>'; }).join('') + '</table>';
+    p.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { if (window.AdminShowTab) window.AdminShowTab(b.dataset.go); }; });
   }
   function report() {
     if (!LAST) return; var sd = LAST.sd, L = ['# 풀이 정합성 리포트', '', '- 입력: ' + TS.date + ' ' + TS.time + ' · ' + (TS.gender === 'M' ? '남' : '여'), '- 생성: ' + new Date().toISOString().slice(0, 16).replace('T', ' ') + ' (UTC)', '', '## 계산값'].concat(calcValues(sd).map(function (r) { return '- ' + r[0] + ': ' + r[1]; }), ['', '## 챕터별 결과', '', '| 챕터 | 결과 | 위반 |', '|---|---|---|']);
@@ -82,7 +96,8 @@
   }
   function bind(box, M) {
     var go = function () { TS.date = $('#ckD', box).value || TS.date; TS.time = $('#ckT', box).value || TS.time; TS.gender = $('#ckG', box).value; try { localStorage.setItem(KEY, JSON.stringify(TS)); } catch (e) { } draw(box, M); };
+    var ab = $('#ckAiBtn', box); if (ab) ab.onclick = function () { var t = $('#ckAi', box).value, v = LAST ? CS.checkAll(LAST.sd, t) : [], o = $('#ckAiOut', box); o.innerHTML = !t.trim() ? '' : v.length ? '<span style="color:#ffb070">⚠ 서버에서 거부될 문장 — ' + v.map(function (x) { return esc(RULE_KO[x.rule] || x.rule) + ' (문장: ' + esc(x.claimed || '-') + ' / 계산값: ' + esc(x.actual) + ')'; }).join(' · ') + '</span>' : '<span style="color:#7fd8a8">✓ 계산값과 어긋나는 곳을 찾지 못했습니다(규칙으로 확인 가능한 범위).</span>'; };
     var b = $('#ckRun', box); if (b) b.onclick = go; var d = $('#ckDl', box); if (d) d.onclick = report;
   }
-  window.V2Check = { open: function () { var box = document.getElementById('t-check'); if (!box) return; box.innerHTML = '<p class="muted">엔진을 불러오는 중…</p>'; C.engine().then(function (M) { draw(box, M); }).catch(function (e) { box.innerHTML = '<p class="muted">' + esc((e && e.message) || '') + '</p>'; }); } };
+  window.V2Check = { _t: { run: run, moduleRows: moduleRows }, open: function () { var box = document.getElementById('t-check'); if (!box) return; box.innerHTML = '<p class="muted">엔진을 불러오는 중…</p>'; C.engine().then(function (M) { draw(box, M); }).catch(function (e) { box.innerHTML = '<p class="muted">' + esc((e && e.message) || '') + '</p>'; }); } };
 })();
