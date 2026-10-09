@@ -40,15 +40,16 @@ export const DIRECTION_OPTIONS = {
 };
 // 그림체 통일용 레퍼런스(최대 3장): 모든 컷을 만들 때 함께 첨부한다. style = 그림체·채색·질감만 따르고 구도·인물·소재는 새로, close = 구도·분위기까지 가깝게.
 export const REF_USE = { style: ['그림체·채색·질감만 참고 (구도·인물은 새로)', '첨부한 레퍼런스 이미지에서는 오직 그림체(선화의 굵기와 질감, 채색·명암 방식, 색감과 보정 톤, 배경 묘사의 밀도)만 가져온다. 레퍼런스에 나온 인물은 화풍 견본일 뿐이므로 그 인물의 얼굴·이목구비·눈매·얼굴형·헤어스타일·옷·체형·포즈·카메라 거리·구도(얼굴 중심의 클로즈업 구도 포함)·배경은 절대 따라 그리지 않는다. 구도와 동작은 아래 장면과 연출 지시만 따른다. 같은 얼굴이나 같은 포즈가 나오면 실패다. 인물은 아래 장면에 적힌 외형 지시대로, 레퍼런스와 전혀 다른 사람으로 새로 그린다. 같은 작가가 그린 연작처럼 보이되 인물은 컷마다 다른 사람이어야 한다.'], close: ['구도·분위기까지 가깝게', '첨부한 레퍼런스 이미지와 같은 그림체로, 구도와 분위기도 가깝게 따르되 인물의 얼굴·헤어스타일은 따라 그리지 않고 아래 외형 지시대로 새로 그린다. 같은 작가가 그린 연작처럼 보여야 한다.'] };
-export const REF_OK = /^\/api\/clipfile\?k=([\w.-]{1,120})$/;
+REF_USE.character = ['그림체 + 인물 외형 통일 (헤어·생김새 닮게)', '첨부한 레퍼런스 이미지의 그림체(선화의 굵기와 질감, 채색·명암 방식, 색감과 보정 톤, 배경 묘사의 밀도)를 따른다. 더해서, 인물이 그려지는 컷에서는 레퍼런스 인물을 이 연작의 주인공으로 삼아 헤어스타일(길이·결·가르마·머리색)과 얼굴 생김새(눈매·눈썹·코·입매·얼굴형·피부 톤)를 그대로 닮게 그린다. 연작 전체에서 한 사람(또는 같은 가족)처럼 보여야 한다. 성별·나이는 아래 장면 지시를 따르되 그 안에서 최대한 같은 인상과 같은 헤어스타일 계열로 맞춘다. 옷·포즈·카메라 거리·구도·배경은 레퍼런스를 따라 하지 않고 아래 장면과 연출 지시대로 새로 그린다.'];
+export const REF_OK =/^\/api\/clipfile\?k=([\w.-]{1,120})$/;
 export const cleanRefs = v => (Array.isArray(v) ? [...new Set(v.filter(x => typeof x === 'string' && REF_OK.test(x)))].slice(0, 3) : []);
-export const DEFAULT_DIRECTION = { art: 'webtoon', feel: 'cinematic', world: 'modern', mood: 'auto', people: 'face', extra: '', refs: [], refUse: 'style' };
+export const DEFAULT_DIRECTION = { art: 'webtoon', feel: 'cinematic', world: 'modern', mood: 'auto', people: 'face', extra: '', refs: [], refUse: 'character' };
 export function cleanDirection(v) {
   v = v && typeof v === 'object' ? { ...v } : {}; const o = { ...DEFAULT_DIRECTION };
   const OLD = { ink: ['webtoonInk', 'cinematic'], film: ['realistic', 'cinematic'], photo: ['realistic', 'documentary'], anime: ['anime', 'lyrical'], painting: ['painting', 'lyrical'], noir: ['realistic', 'noir'] }; // 예전 저장값(look 하나) 호환
   if (v.look && OLD[v.look] && !v.art) { v.art = OLD[v.look][0]; v.feel = v.feel || OLD[v.look][1]; }
   for (const k of Object.keys(DIRECTION_OPTIONS)) if (typeof v[k] === 'string' && DIRECTION_OPTIONS[k].items[v[k]]) o[k] = v[k];
-  o.extra = typeof v.extra === 'string' ? v.extra.trim().slice(0, 300) : ''; o.refs = cleanRefs(v.refs); o.refUse = REF_USE[v.refUse] ? v.refUse : 'style'; return o;
+  o.extra = typeof v.extra === 'string' ? v.extra.trim().slice(0, 300) : ''; o.refs = cleanRefs(v.refs); o.refUse = REF_USE[v.refUse] ? v.refUse : 'character'; return o;
 }
 // 공통 화풍 문장(글자 금지·글자 자리 비우기는 항상 붙는다)
 export function styleOf(dir) {
@@ -177,7 +178,10 @@ export function promptFor(el, th, dir, kind) {
   const E = ELEMENTS[el], T = THEMES[th]; if (!E || !T) return '';
   const k = kindOf(kind);
   if (k === 'bg') return `${bgStyleOf(dir)}\n배경 분위기: ${PLACE[th]}. 이 장면을 멀리서 본 넓고 고요한 풍경으로 그린다.\n색과 빛: ${PAL[el]}.\n오행 ${E.name}의 기운이 풍경 전체의 계절감과 분위기로 드러나게 한다.`;
-  const people = cleanDirection(dir).people, face = people === 'none' ? '' : '\n' + (th === 'wealth' ? WEALTH[el].shot + '.' : shotOf(el, th, k === 'panel')) + (people === 'face' ? ' 실존 인물을 닮지 않은 가상의 인물이며 이 컷만의 고유한 외형이다 — ' + lookOf(el, th, k) + ' 다른 컷의 인물, 레퍼런스의 인물과 얼굴이 겹치지 않게 한다.' : '') +
+  const cd = cleanDirection(dir), people = cd.people, sameLook = cd.refUse === 'character' && cd.refs.length > 0; // 레퍼런스 인물 외형 통일 모드: 컷마다 다른 얼굴 대신 레퍼런스의 헤어·생김새를 따른다
+  const looks = sameLook ? ' 실존 인물이 아닌 가상의 인물이다. 첨부한 레퍼런스 인물과 같은 헤어스타일·얼굴 생김새로 그려 모든 컷에서 통일감이 있게 한다. 얼굴이 가려지는 구도여도 헤어스타일은 레퍼런스와 같게 보여야 하고, 옆얼굴·3/4 각도에서는 얼굴 생김새가 알아볼 만큼 드러나게 한다(옷만 이 컷에 맞게 — ' + LOOK_CLOTHES[(Object.keys(THEMES).indexOf(th) * 3 + Object.keys(ELEMENTS).indexOf(el)) % LOOK_CLOTHES.length] + ' 차림).'
+    : ' 실존 인물을 닮지 않은 가상의 인물이며 이 컷만의 고유한 외형이다 — ' + lookOf(el, th, k) + ' 다른 컷의 인물, 레퍼런스의 인물과 얼굴이 겹치지 않게 한다.';
+  const face = people === 'none' ? '' : '\n' + (th === 'wealth' ? WEALTH[el].shot + '.' : shotOf(el, th, k === 'panel')) + (people === 'face' ? looks : '') +
     '\n위 연출(카메라 거리·각도·몸짓)이 장면 문장의 인물 묘사보다 우선한다. 증명사진처럼 가만히 서서 정면을 보는 포즈, 얼굴만 가득 찬 구도는 피하고 장면 속에서 무언가 하고 있는 동작으로 그린다.' + (k === 'panel' && th !== 'wealth' && !FOCUSED_SHOTS[th] ? ' 정지된 사진 같은 느낌 대신 움직임과 속도감, 과장된 원근, 극적인 빛으로 영화의 한 장면처럼 다이나믹하게 그린다.' : '');
   return `${styleOf(dir)}\n장면: ${(th === 'wealth' ? WEALTH[el].ko : PLOT[th]).replace('{P}', WHO_KO[genderOfKind(k)])}.${face}${th === 'wealth' ? '\n' + WEALTH_GUARD_KO : ''}\n색과 빛: ${PAL[el]}.\n오행 ${E.name}의 기운이 장면 전체의 빛과 분위기로 드러나게 한다.`;
 }
