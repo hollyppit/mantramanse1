@@ -105,7 +105,7 @@ li mark.wn b, li mark.ac b { margin-right: 6px; font-weight: 700; }
 li mark.wn b { color: #FFB066; } li mark.ac b { color: #6FDDA8; }
 /* 본문 핵심 문구 색 구분(viewer.js emphasize): 따옴표 문구 · 숫자 · 사주 용어. 은은하게 — 굵기는 살짝만, 밑줄 없음 */
 .k.kq { color: var(--gold-l); font-weight: 600; }
-.k.kn { color: #8CC8FF; font-weight: 600; font-variant-numeric: tabular-nums; }
+.k.kn { font-weight: 600; font-variant-numeric: tabular-nums; }
 .k.kt { color: var(--gold); font-weight: 500; }
 /* 쉬운 용어 풀이: 작게 */
 .tms { gap: 6px; } .tm { padding: 8px 12px; border-radius: 10px; } .tm .tmh b { font-size: .86rem; } .tm .tmh i { font-size: .8rem; } .tm p { font-size: .78rem; line-height: 1.6; margin-top: 2px; } .tm .tmeg { font-size: .74rem; } .tm .tmhere { font-size: .8rem; }

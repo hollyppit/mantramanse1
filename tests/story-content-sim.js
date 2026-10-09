@@ -54,14 +54,15 @@ R.Deep.augment(rep, H);
 const doc = R.LifeDoc.build({ ...H, rep, soc: R.StoryDirector.social(M, ch, sd, now), plan: (rep.chapters.find(c => c.plan) || {}).plan });
 for (const c of doc.chapters) {
   const episodes = c.scenes.filter(s => s.episode);
+  if (!R.LifeDoc.keepEpisode(c)) { assert.equal(episodes.length, 0, c.id); continue; } // 전생·인연 챕터에만 '풀이 속 한 장면'
   assert.equal(episodes.length, 1, c.id);
   assert.equal(episodes[0].episodeSource.chapterId, c.id);
   assert.equal((episodes[0].html.match(/<p class="lead">/g) || []).length, 3);
   assert(!/undefined|NaN|\{[^}]+\}|창작한 이야기|상징적 창작/.test(episodes[0].html), c.id);
 }
 R.LifeDoc.attachEpisodes(doc.chapters, H);
-assert(doc.chapters.every(c => c.scenes.filter(s => s.episode).length === 1));
-assert(doc.chapters.find(c => c.id === 'deep_children').scenes.find(s => s.episode).html.includes('아이'));
+assert(doc.chapters.every(c => c.scenes.filter(s => s.episode).length === (R.LifeDoc.keepEpisode(c) ? 1 : 0)));
+assert(doc.chapters.some(c => c.id === 'deep_past' && c.scenes.some(s => s.episode)));
 (async () => {
   const K = await import(pathToFileURL(path.join(root,'functions/_ik.js')).href), F = await import(pathToFileURL(path.join(root,'functions/_movingtoon-reading.js')).href);
   assert.deepEqual(K.deriveFacts(sd).usefulElementMethods, sd.usefulElementMethods);
@@ -70,7 +71,7 @@ assert(doc.chapters.find(c => c.id === 'deep_children').scenes.find(s => s.episo
   assert.equal(F.validate(payload).chapter.paragraphs[0].kind, 'episode');
   assert(F.SYSTEM.includes('독립적으로 판단'));
   assert(F.SYSTEM.includes('kind=episode'));
-  console.log('서사 검증 통과: 자녀상 10종 · 전생 드라마 5장면 · 모든 챕터 에피소드 · 억부/조후 충돌 재현 · AI 근거/종류 전달');
+  console.log('서사 검증 통과: 자녀상 10종 · 전생 드라마 5장면 · 전생·인연 챕터만 에피소드 · 억부/조후 충돌 재현 · AI 근거/종류 전달');
   if (process.argv.includes('--preview')) {
     const http = require('http'), css = ['viewer.css','reader.css','deep.css'].map(f=>fs.readFileSync(path.join(root,'report/v2',f),'utf8')).join('\n');
     const selected = ['deep_children','deep_past','deep_remedy'].map(id=>doc.chapters.find(c=>c.id===id));

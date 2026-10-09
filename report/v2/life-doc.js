@@ -279,9 +279,15 @@
     관성: ['정해진 기준과 책임부터 확인하고, 누가 어떤 역할을 맡을지 물었다.', '놓치기 쉬운 기준을 확인해 맡은 일이 끝까지 이어지도록 도왔다.', '작은 어긋남도 바로잡아야 할 일처럼 보여 말이 단단해지고 있었다.'],
     인성: ['앞서 했던 일을 떠올리고, 아직 확인하지 못한 부분을 더 살피려 했다.', '흩어진 정보를 모아 다른 사람이 이해할 수 있게 차근차근 설명했다.', '아직 모르는 것이 있다는 이유로 이미 할 수 있는 선택까지 뒤로 미루고 있었다.']
   };
-  function episode(c, H) {
+  function episodeKeyOf(c) {
     var id = c.id || c.base, key = EPISODE_KEYS[id] || EPISODE_KEYS[c.base];
     if (!key) key = /timing|future|TIMING/.test(id) ? 'timing' : /money|MONEY/.test(id) ? 'money' : /marriage|MARRIAGE/.test(id) ? 'marriage' : /love|LOVE/.test(id) ? 'love' : /career|CAREER/.test(id) ? 'career' : /relation|RELATIONSHIP/.test(id) ? 'compatibility' : /ACTION/.test(id) ? 'action' : 'knowledge';
+    return key;
+  }
+  // "풀이 속 한 장면"은 전생(past)과 인연(궁합·관계: compatibility) 챕터에만 둔다.
+  var EPISODE_KEEP = { past: 1, compatibility: 1 };
+  function episode(c, H) {
+    var id = c.id || c.base, key = episodeKeyOf(c);
     var sd = H.sd, actor = H.name || '그 사람', chars = actor.charCodeAt(actor.length - 1), topic = actor + (chars >= 0xAC00 && chars <= 0xD7A3 && (chars - 0xAC00) % 28 ? '은' : '는');
     var motif = EPISODE_GROUP[sd.dominantGroup] || EPISODE_GROUP.인성, paras = (EPISODES[key] || EPISODES.knowledge).slice(), source = c.subtitle || c.headline || c.title;
     if (key === 'children') {
@@ -305,7 +311,7 @@
   }
   function attachEpisodes(chapters, H) {
     chapters.forEach(function (c) {
-      if ((c.scenes || []).some(function (s) { return s.episode; })) return;
+      if (!EPISODE_KEEP[episodeKeyOf(c)] || (c.scenes || []).some(function (s) { return s.episode; })) return;
       var ep = episode(c, H), at = c.scenes.length;
       if (at && (c.scenes[at - 1].sceneType === 'chapterEnding' || /rd-cin/.test(c.scenes[at - 1].html || ''))) at--;
       c.scenes.splice(at, 0, ep);
@@ -367,5 +373,5 @@
   // 관리자 미리보기: 문서에 실제로 들어가는 순서(번호 · ACT · 제목 · 출처)
   function outline(H) { var d = build(H); return d.chapters.map(function (c, i) { return { no: i + 1, act: (d.acts.filter(function (a) { return a.id === c.act; })[0] || {}).roman, title: c.title, id: c.id, kind: c.kind === 'life' ? '새 구성(엔진 값·현실 문체)' : '기존 챕터 ' + (c.base || c.id), scenes: (c.scenes || []).length }; }); }
 
-  R.LifeDoc = { build: build, outline: outline, loadSocial: loadSocial, interestOrder: interestOrder, uniqueText: uniqueText, episode: episode, attachEpisodes: attachEpisodes };
+  R.LifeDoc = { build: build, outline: outline, loadSocial: loadSocial, interestOrder: interestOrder, uniqueText: uniqueText, episode: episode, episodeKeyOf: episodeKeyOf, keepEpisode: function (c) { return !!EPISODE_KEEP[episodeKeyOf(c)]; }, attachEpisodes: attachEpisodes };
 })(typeof window !== 'undefined' ? window : globalThis);
