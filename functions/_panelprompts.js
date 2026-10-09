@@ -36,7 +36,7 @@ const WORLD_EN = { asis: '', modern: 'set in real, present-day Korea (city stree
   joseon: 'Joseon-dynasty period drama set: historically grounded hanok village, marketplace, village school, palace', wuxia: 'wuxia martial-arts world: bamboo forest, cliffside inn, river ferry, waterfall, old fortress', abstract: 'symbolic surreal space: floating light, a huge door, a path over water' };
 const MOOD_EN = { auto: '', warm: 'overall warm and cozy atmosphere', lonely: 'lonely, quiet atmosphere with lots of empty space', hopeful: 'hopeful, clear and bright atmosphere', tense: 'tense heavy atmosphere with strong contrast', dreamy: 'dreamlike atmosphere with soft fog and glowing haze' };
 const PEOPLE_EN = { back: 'people only as back views or distant silhouettes, no face close-ups', none: 'no people, only scenery and objects',
-  face: 'the main character\'s face and expression are clearly visible (a fictional person who does not resemble any real person); medium shot or three-quarter view, natural proportions, delicate eyes and a believable emotion' };
+  face: 'the main character\'s face and expression are clearly visible (a fictional person who does not resemble any real person); medium shot or three-quarter view, natural proportions, delicate eyes and a believable emotion', any: '' };
 // 얼굴이 보이는 인물일 때: 시리즈 전체에서 같은 인물 느낌을 유지하도록 공통 캐릭터 설정을 붙인다.
 const cOf = kind => ({ F: 'woman', M: 'man' }[genderOfKind(kindOf(kind))] || 'adult');
 const HAIR = { woman: 'natural dark hair in a soft everyday style', man: 'short neat dark hair', adult: 'natural dark hair' };
@@ -45,18 +45,21 @@ const characterEN = c => `Main character design (keep consistent across the seri
 export const NEGATIVE_IMAGE = 'text, letters, numbers, captions, signage, logo, watermark, distorted face, asymmetrical or cross-eyes, extra fingers, deformed hands, distorted anatomy, extra people, hanbok, fantasy costume, blurry, low quality, oversaturated';
 export const NEGATIVE_VIDEO = 'text, subtitles, watermark, logo, face distortion, face morphing, changing identity, extra limbs, sudden camera cut, fast motion, flicker, jitter';
 
+// 공용 칸(kind 'panel')은 1인칭 POV: 카메라가 주인공의 눈이라 주인공 얼굴은 나오지 않고 손·소매만 보인다(_panelart.js POV_RULE 과 같은 규칙). '사람 없이 풍경만'이면 적용하지 않는다.
+const povOf = (d, kind) => kindOf(kind) === 'panel' && d.people !== 'none';
+const POV_EN = 'First-person point-of-view (POV) shot: the camera is the protagonist\'s eyes. The protagonist\'s face and upper body never appear in the frame; only their hands, forearms and sleeves (and, if needed, knees, toes or a shadow) show at the bottom or edges of the frame. No reflection of their face in mirrors, glass or water. Other people in the scene may show their faces, but ignore every description of the protagonist\'s own face, expression or gaze in the scene text. Show the protagonist\'s hands doing something, and vary camera distance and angle from cut to cut.';
 function styleEN(dir, kind) {
-  const d = cleanDirection(dir), part = [ART_EN[d.art], FEEL_EN[d.feel], WORLD_EN[d.world], MOOD_EN[d.mood], PEOPLE_EN[d.people]].filter(Boolean);
+  const d = cleanDirection(dir), pov = povOf(d, kind), part = [ART_EN[d.art], FEEL_EN[d.feel], WORLD_EN[d.world], MOOD_EN[d.mood], pov ? '' : PEOPLE_EN[d.people]].filter(Boolean);
   if (d.extra) part.push('extra direction (original Korean): ' + d.extra);
   const bg = kindOf(kind) === 'bg';
   const tail = bg ? 'This is a full-screen background behind text: keep the whole frame dark, calm and low-contrast with no strong focal point, no bright light source and no face close-ups, so white text stays readable.'
     : 'Vertical 2:3 composition. Keep the lower 30% of the frame comparatively dark and simple, empty space reserved for overlaid text.';
-  return part.join('. ') + '. ' + (!bg && d.people === 'face' ? characterEN(cOf(kind)) + ' ' : '') + tail;
+  return part.join('. ') + '. ' + (!bg && !pov && d.people === 'face' ? characterEN(cOf(kind)) + ' ' : '') + tail;
 }
 // Leonardo.ai 이미지 프롬프트 + 권장 설정
 export function leonardo(el, th, dir, kind) {
   if (!ELEMENTS[el] || !THEMES[th]) return null;
-  return { prompt: `${styleEN(dir, kind)}\nScene: ${(th === 'wealth' ? WEALTH[el].en : TH_EN[th]).split("{c}").join(cOf(kind)).split(" (the main character is the adult, the partner is of the opposite sex)").join("")}.\nColor and light: ${EL_EN[el]}.${th === 'wealth' ? '\n' + WEALTH_GUARD_EN : ''}\nThe five-element energy of ${NAME_EN[el]} should show through the light, color and mood of the whole scene. No text, numbers or logos anywhere in the image.`,
+  return { prompt: `${styleEN(dir, kind)}\nScene: ${(th === 'wealth' ? WEALTH[el].en : TH_EN[th]).split("{c}").join(cOf(kind)).split(" (the main character is the adult, the partner is of the opposite sex)").join("")}.${povOf(cleanDirection(dir), kind) ? '\n' + POV_EN : ''}\nColor and light: ${EL_EN[el]}.${th === 'wealth' ? '\n' + WEALTH_GUARD_EN : ''}\nThe five-element energy of ${NAME_EN[el]} should show through the light, color and mood of the whole scene. No text, numbers or logos anywhere in the image.`,
     negative: NEGATIVE_IMAGE, size: '832 × 1248 (2:3 세로)' };
 }
 // Kling 이미지→영상 프롬프트(시작 프레임 = 위에서 만든 이미지). 움직임은 작고 잔잔하게, 인물의 얼굴·정체성이 변하지 않게.
@@ -85,7 +88,8 @@ const MOT_TH = {
 const up = s => s[0].toUpperCase() + s.slice(1);
 export function kling(el, th, kind) {
   if (!ELEMENTS[el] || !THEMES[th]) return null;
-  return { prompt: `Gentle, cinematic motion on the first-frame image. The character remains composed with a relaxed closed mouth and still shoulders, with only a soft natural blink. ${up(th === 'wealth' ? WEALTH[el].motion : MOT_TH[th])}. ${up(MOT_EL[el])}. The camera does a very slow push-in. Keep the character's face, identity, composition, colors and the webtoon illustration style exactly as in the image; smooth, loop-friendly movement; no text appears.`,
+  const pov = kindOf(kind) === 'panel';
+  return { prompt: `Gentle, cinematic motion on the first-frame image. ${pov ? 'This is a first-person POV shot: the protagonist\'s face never appears, only their hands and sleeves at the frame edge move slightly and naturally.' : 'The character remains composed with a relaxed closed mouth and still shoulders, with only a soft natural blink.'} ${up(th === 'wealth' ? WEALTH[el].motion : MOT_TH[th])}. ${up(MOT_EL[el])}. The camera does a very slow push-in. Keep the character's face, identity, composition, colors and the webtoon illustration style exactly as in the image; smooth, loop-friendly movement; no text appears.`,
     negative: NEGATIVE_VIDEO, settings: '이미지→영상 · 길이 5초 · 시작 프레임 = 위에서 만든 이미지 · 창의성(관련도) 낮음~중간(얼굴이 변하면 더 낮추기) · 카메라 움직임은 프롬프트에 맡김' };
 }
 export function toolsFor(el, th, dir, kind) { const l = leonardo(el, th, dir, kind), k = kling(el, th, kind); return l && k ? { leo: l.prompt, leoNeg: l.negative, leoSize: l.size, kling: k.prompt, klingNeg: k.negative, klingSet: k.settings } : null; }
