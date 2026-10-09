@@ -1,7 +1,7 @@
 // 인생 지도 AI 추정(공개 엔드포인트): 인간관계 · 결혼(인연) 시기 활성도. 엔진에 전용 모델이 없는 두 분야만 AI 가 추정한다.
 // POST /api/life-ai  { gender, natal:{pillars,strength,dayBranchTG}, decades:[{a,g,s,b,r}], years:[{y,a,g,s,b,r}] } → { ok, result:{relation,marriage}, cached, source:'ai' }
 // 보내는 데이터에는 생년월일·이름이 없다(간지·십성·합충 요약만). 같은 입력은 KV 에 30일 캐시. 실패하면 { ok:false } — 클라이언트가 규칙 추정을 그대로 쓴다.
-// 설정: Secret ANTHROPIC_API_KEY(메인) / OPENAI_API_KEY(폴백), KV GLOSSARY_KV. 선택: ANTHROPIC_MODEL, OPENAI_MODEL, LIFEAI_HOURLY_LIMIT(기본 6), LIFEAI_DAILY_LIMIT(기본 2000)
+// 설정: Secret OPENAI_API_KEY(메인) / ANTHROPIC_API_KEY(폴백), KV GLOSSARY_KV. 선택: ANTHROPIC_MODEL, OPENAI_MODEL, LIFEAI_HOURLY_LIMIT(기본 6), LIFEAI_DAILY_LIMIT(기본 2000)
 import { json } from '../_lib.js';
 import { kvOf } from '../_store.js';
 import { validate, SYSTEM, buildUser, sanitize, cacheKey } from '../_lifeai.js';
@@ -36,7 +36,7 @@ export async function onRequestPost({ request, env }) {
   if (kv) { const hit = await kv.get(key, 'json'); if (hit) return json({ ok: true, result: hit, cached: true, source: 'ai' }); }
   if (await overLimit(env, request)) return json({ ok: false, error: 'rate-limited' });
   const user = buildUser(clean, nowYear), errs = []; let result = null;
-  for (const [name, fn] of [['anthropic', claude], ['openai', openai]]) {
+  for (const [name, fn] of [['openai', openai], ['anthropic', claude]]) {
     if (!env[name === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY']) continue;
     try { result = sanitize(await fn(env, SYSTEM, user), clean, nowYear); if (result) break; errs.push(name + ' bad-output'); } catch (e) { errs.push(e.message); }
   }

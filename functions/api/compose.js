@@ -2,7 +2,7 @@
 // POST /api/compose  { payload: ReportV2.Compose.aiPayload(rep), media: ReportV2.Compose.mediaPayload(rep, lib) } → { ok, result:{chapters:[{id,headline?,lead?}], media:{sceneId:assetId}}, cached }
 // 보내는 데이터에는 생년월일·이름이 없다(해석 문장과 계산 근거 요약만).
 // 같은 입력은 KV 에 캐시되어(30일) 같은 결과가 나온다. 남용 방지: IP 당 시간당 호출 수 + 하루 전체 한도.
-// 필요한 설정: Secret ANTHROPIC_API_KEY(메인) / OPENAI_API_KEY(폴백), KV GLOSSARY_KV. 선택: ANTHROPIC_MODEL, OPENAI_MODEL, COMPOSE_HOURLY_LIMIT(기본 12), COMPOSE_DAILY_LIMIT(기본 3000)
+// 필요한 설정: Secret OPENAI_API_KEY(메인) / ANTHROPIC_API_KEY(폴백), KV GLOSSARY_KV. 선택: ANTHROPIC_MODEL, OPENAI_MODEL, COMPOSE_HOURLY_LIMIT(기본 12), COMPOSE_DAILY_LIMIT(기본 3000)
 import { json } from '../_lib.js';
 import { kvOf } from '../_store.js';
 import { runCompose } from '../_compose.js';
@@ -37,7 +37,7 @@ export async function onRequestPost({ request, env }) {
   const llm = async (system, user) => {
     if (await overLimit(env, request)) throw new Error('rate-limited'); // 캐시 적중은 한도에 포함하지 않는다(llm 호출 직전에만 센다)
     const errs = [];
-    for (const [name, fn] of [['anthropic', claude], ['openai', openai]]) { if (!env[name === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY']) continue; try { return await fn(env, system, user); } catch (e) { errs.push(e.message); } }
+    for (const [name, fn] of [['openai', openai], ['anthropic', claude]]) { if (!env[name === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY']) continue; try { return await fn(env, system, user); } catch (e) { errs.push(e.message); } }
     throw new Error(errs.join(' / ') || 'no-provider');
   };
   const r = await runCompose(body, { kvGet: kv ? k => kv.get(k, 'json') : null, kvPut: kv ? (k, v) => kv.put(k, JSON.stringify(v), ttl) : null, llm });

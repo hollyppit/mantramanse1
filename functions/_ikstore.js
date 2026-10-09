@@ -20,19 +20,19 @@ async function errDetail(r) {
 
 export async function llm(env, system, user, maxTokens = 6000, timeoutMs = TIMEOUT_MS) {
   const errs = [];
+  if (env.OPENAI_API_KEY) {
+    try {
+      const r = await fetch('https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(timeoutMs), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: system, input: user }) });
+      if (!r.ok) throw new Error('openai ' + r.status + await errDetail(r));
+      const d = await r.json(); return { text: typeof d.output_text === 'string' ? d.output_text : (d.output || []).flatMap(o => o.content || []).map(c => c.text || '').join(''), provider: 'openai' };
+    } catch (e) { errs.push(e.message); }
+  }
   if (env.ANTHROPIC_API_KEY) {
     try {
       const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(timeoutMs), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
         body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] }) });
       if (!r.ok) throw new Error('anthropic ' + r.status + await errDetail(r));
       const d = await r.json(); return { text: (d.content || []).filter(b => b.type === 'text').map(b => b.text).join(''), provider: 'anthropic', stop: d.stop_reason || '' };
-    } catch (e) { errs.push(e.message); }
-  }
-  if (env.OPENAI_API_KEY) {
-    try {
-      const r = await fetch('https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(timeoutMs), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: system, input: user }) });
-      if (!r.ok) throw new Error('openai ' + r.status + await errDetail(r));
-      const d = await r.json(); return { text: typeof d.output_text === 'string' ? d.output_text : (d.output || []).flatMap(o => o.content || []).map(c => c.text || '').join(''), provider: 'openai' };
     } catch (e) { errs.push(e.message); }
   }
   if (env.GEMINI_API_KEY) {

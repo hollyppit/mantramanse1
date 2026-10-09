@@ -1,4 +1,4 @@
-// 무빙툰 자막 작성 AI (관리자 전용). Claude가 메인, 실패하면 GPT(OpenAI)로 한 번 더 시도한다.
+// 무빙툰 자막 작성 AI (관리자 전용). OpenAI가 메인, 실패하면 Claude로 한 번 더 시도한다.
 // 필요한 설정: Secret ANTHROPIC_API_KEY, OPENAI_API_KEY (둘 중 있는 것만 써도 됨), ADMIN_PASSWORD
 // 선택 변수: ANTHROPIC_MODEL (기본 claude-sonnet-5-5), OPENAI_MODEL (기본 gpt-6.1-sol), AI_DAILY_LIMIT (하루 호출 한도, 기본 300)
 //
@@ -125,9 +125,9 @@ export async function onRequestPost({ request, env }) {
   if (typeof prompt !== 'string') return json({ error: prompt.error }, 400);
 
   const order = [];
-  if (env.ANTHROPIC_API_KEY) order.push(['anthropic', callClaude]);
   if (env.OPENAI_API_KEY) order.push(['openai', callOpenAI]);
-  if (!order.length) return json({ error: 'AI 키가 없습니다. ANTHROPIC_API_KEY(메인) 또는 OPENAI_API_KEY(폴백)를 Secret으로 추가한 뒤 다시 배포하세요' }, 501);
+  if (env.ANTHROPIC_API_KEY) order.push(['anthropic', callClaude]);
+  if (!order.length) return json({ error: 'AI 키가 없습니다. OPENAI_API_KEY(메인) 또는 ANTHROPIC_API_KEY(폴백)를 Secret으로 추가한 뒤 다시 배포하세요' }, 501);
   if (await overLimit(env)) return json({ error: `오늘 AI 호출 한도(${+env.AI_DAILY_LIMIT || 300}회)를 넘었습니다. 내일 다시 시도하거나 AI_DAILY_LIMIT을 올리세요` }, 429);
 
   const attempts = [];
