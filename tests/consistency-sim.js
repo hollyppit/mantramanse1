@@ -12,7 +12,7 @@ const run = (x, label) => {
   const card = R.IntroText.ijuCard(x.sd.dayPillar.ko, '테스트', x.sd.gender), intro = R.CharIntro.chapter(x.sd, '테스트', {}, 1);
   const lib = R.Compose.library(null), cfg = R.Chapters.forProject(null, 'full'), rep = R.Compose.build(x.sd, lib, cfg, { name: H.name }); R.Deep.augment(rep, H);
   const doc = R.LifeDoc.build({ ...H, rep, soc: R.StoryDirector.social(M, x.ch, x.sd, now), plan: (rep.chapters.find(c => c.plan) || {}).plan });
-  const all = [intro].concat(doc.chapters), v = C.checkDoc(x.sd, all).concat(C.check(x.sd, card.film));
+  const all = [intro].concat(doc.chapters), v = C.checkDoc(x.sd, all).concat(C.checkAll(x.sd, card.film));
   ok(v.length === 0, label + ' 위반: ' + JSON.stringify(v.slice(0, 3)));
   return { card, intro, bs: C.birthSeason(x.sd), chapters: all.length };
 };
@@ -42,4 +42,33 @@ ok(C.birthSeason(ib.sd).group === '겨울' && C.birthSeason(ia.sd).group === '�
 [[1993, 3, 14, 5], [2001, 10, 2, 22], [1985, 12, 30, 3]].forEach(([y, m, d, h]) => { const x = mk(y, m, d, h, 'M'); run(x, y + '-' + m + '-' + d); });
 // 5) 일반 문장 오탐 없음
 ok(C.check(jul ? jul.sd : mk(1992, 7, 20, 12).sd, '한여름에 태어난 사람은 열기가 강합니다. 겨울 문턱의 큰 물은 일지의 상징입니다.').length === 0, '월령과 맞는 문장·상징 설명은 통과');
-console.log(fails.length ? '\n실패 ' + fails.length + '건\n' + fails.map(f => ' ✗ ' + f).join('\n') : '\n정합성 검사 모두 통과'); process.exit(fails.length ? 1 : 0);
+// 6) 사실 대조 규칙: 어긋난 문장은 잡고, 맞는 문장·표 라벨·상대방 문장은 통과(결정론적 규칙)
+{ const x = mk(1993, 3, 14, 5, 'M'), sd = x.sd, F = t => C.facts(sd, t).map(v => v.rule); // 목 50% · 화 22% · 토 6% · 금 11% · 수 11% · 비겁 최다 · 신강 · 일간 갑
+  ok(sd.dominantEl === '목' && sd.dominantGroup === '비겁' && sd.strength.band === '신강' && sd.dayMaster.stem === '갑', '기준 원국 값 확인');
+  ok(F('이 사주에서 화(火) 기운이 없어 열정이 약합니다.').includes('element-absent'), '있는 오행(화 22%)을 없다고 하면 위반');
+  ok(F('토 기운이 없습니다.').length === 0 || sd.fiveElements['토'] < 8, '토 6%는 없다고 해도 위반 아님(8% 미만)');
+  ok(F('이 사주에서 금 기운이 가장 강합니다.').includes('element-dominant') && F('이 사주에서 목 기운이 가장 강합니다.').length === 0, '최다 오행 대조');
+  ok(F('관성이 가장 강해 책임감이 큽니다.').includes('group-dominant') && F('비겁이 가장 강해 자기 힘이 큽니다.').length === 0, '최다 십성군 대조');
+  ok(F('인성이 없어서 배움이 약합니다.').includes('group-absent'), '있는 십성군을 없다고 하면 위반');
+  ok(F('당신은 신약한 사주라 도움이 필요합니다.').includes('strength') && F('당신은 신강한 사주라 힘이 있습니다.').length === 0, '신강·신약 대조');
+  ok(F('일간은 을목이라 유연합니다.').includes('day-master') && F('일간은 갑목이라 곧습니다.').length === 0, '일간 대조');
+  ok(F('나의 신해일주는 총명합니다.').includes('day-pillar') && F('나의 갑오일주는 밝습니다.').length === 0, '일주 대조');
+  ok(F('세운은 10년마다 바뀌는 흐름입니다.').includes('luck-scope') && F('세운은 해마다 바뀌는 날씨입니다.').length === 0, '대운·세운 적용 범위');
+  ok(F('상대의 일간은 을목이고 관성이 없습니다.').length === 0, '상대방을 말하는 문장은 건너뜀');
+  ok(F('일간(나)의 힘 · 신강·신약 신강 (득령 ○)').length === 0 && F('통근·신강약 판정').length === 0, '표 라벨은 오탐하지 않음');
+}
+// 7) 여러 원국 전체 문서 스윕(월·시·성별 다양): 모든 챕터 위반 0건
+[[1976, 1, 5, 23, 'M'], [1988, 5, 20, 11, 'F'], [1999, 8, 8, 8, 'M'], [2005, 11, 17, 15, 'F'], [1981, 9, 30, 1, 'F'], [1970, 6, 6, 18, 'M']].forEach(([y, m, d, h, g]) => run(mk(y, m, d, h, g), '스윕 ' + y + '-' + m + '-' + d));
+// 8) 서버 가드: AI 응답 문단이 계산값과 어긋나면 sanitize 가 통째로 버리고, 맞으면 통과한다
+(async () => {
+  const { pathToFileURL } = require('url'), G = await import(pathToFileURL(path.join(root, 'functions/_guard.js')).href), F = await import(pathToFileURL(path.join(root, 'functions/_movingtoon-reading.js')).href);
+  ok(G.GUARD_PROMPT.includes('월령') && F.SYSTEM.includes('사실 고정 규칙'), 'AI 프롬프트에 사실 고정 규칙이 붙음');
+  const x = jul || mk(1994, 7, 24, 12), sd = x.sd, text = '이 사주는 신해일주로 일지의 상징은 물가의 이미지입니다. 태어난 달은 늦여름이라 열기가 있는 시기이며, 월령의 기운을 함께 살펴야 균형이 보입니다.';
+  const clean = { sd, chapter: { id: 'c1', title: '테스트', paragraphs: [{ id: '0', text: '초안 문단입니다. 초안 문단입니다. 초안 문단입니다.' }] } }, src = { knowledge: [] };
+  const mkOut = t => JSON.stringify({ paragraphs: [{ id: '0', text: t, refs: ['natal'] }] });
+  ok(F.sanitize(mkOut(text), clean, src), '월령과 맞는 AI 문단은 통과');
+  const bad = '겨울 문턱의 큰 물 곁에서 자란 신금 같은 기질을 타고난 사람입니다. 물가의 기운이 몸에 배어 있습니다.';
+  ok(F.sanitize(mkOut(bad), clean, src) === null, '출생 계절을 잘못 단정한 AI 문단은 거부');
+  ok(F.sanitize(mkOut(text.replace('늦여름이라', '늦여름이고 일간은 을목이라')), clean, src) === null, '일간을 잘못 말한 AI 문단은 거부');
+  console.log(fails.length ? '\n실패 ' + fails.length + '건\n' + fails.map(f => ' ✗ ' + f).join('\n') : '\n정합성 검사 모두 통과'); process.exit(fails.length ? 1 : 0);
+})();

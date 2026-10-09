@@ -1,5 +1,6 @@
 // 선택형 추가 풀이의 입력·프롬프트·응답 검증. 출생정보와 이름은 받지 않는다.
-export const VERSION = 'answer1';
+import { GUARD_PROMPT } from './_guard.js';
+export const VERSION = 'answer2';
 export const TOPICS = { self: '나 자신', money: '돈과 관리', career: '일과 성과', love: '연애와 감정 표현', marriage: '결혼 생활과 역할', relation: '인간관계와 경계' };
 export const CHOICES = { resonates: '설명과 비슷한 경험이 있다. 이 성향을 더 잘 쓰는 방법을 알고 싶다.', different: '설명이 실제 경험과 다르다. 적용되지 않을 조건과 해석의 한계를 알고 싶다.', risk: '설명에 나온 약점이 반복된다. 그 원인과 조정 방법을 더 구체적으로 알고 싶다.', action: '보완 방향은 이해했다. 실제로 시작할 순서와 점검 방법을 알고 싶다.' };
 const GROUPS = ['비겁', '식상', '재성', '관성', '인성'], ELEMENTS = ['목', '화', '토', '금', '수'];
@@ -23,7 +24,7 @@ export const SYSTEM = `너는 한국어 사주 풀이를 설명하는 역술가�
 선택별 원칙: resonates는 강점을 쓰되 과해지는 경계를 설명한다. risk는 반복되는 습관의 조건과 대응에 집중한다. action은 순서와 확인 기준에 집중한다. different는 실제 경험을 우선하고, 어떤 조건에서 이 풀이가 적용되지 않을 수 있는지 말한다. 숨은 성향·아직 운이 안 옴·본인이 모름 같은 말로 틀린 풀이를 합리화하지 않는다. 반대 성향을 새로 단정하지 않으며 근거가 부족한 부분은 부족하다고 말한다.
 생년월일·이름·연락처를 요구하지 않는다. 앞서 본 해석을 불필요하게 반복하지 않는다. 사건·건강·혼인·투자 결과에 대한 예언은 쓰지 않는다.
 JSON 한 덩어리만 답한다. 각 문단은 30~220자로 쓴다. basis는 실제로 참고한 입력 항목 이름만 쓴다:
-{"meaning":"선택에 대한 해석","tradeoff":"강점과 주의점","solution":"명리적 보완 방향","action":"실천과 점검","basis":["dominantGroup","strength","yong","source"]}`;
+{"meaning":"선택에 대한 해석","tradeoff":"강점과 주의점","solution":"명리적 보완 방향","action":"실천과 점검","basis":["dominantGroup","strength","yong","source"]}` + GUARD_PROMPT;
 export const buildUser = clean => JSON.stringify({ topic: TOPICS[clean.topic], selected: CHOICES[clean.choice], facts: clean.facts, source: clean.source });
 const BANNED = /반드시|무조건|확정|100%|틀림없|호구|독불장군|사망|죽음|암에|질병에 걸|수익률|수익을 보장|임신|소송|범죄|이혼한다|파산|(?:19|20)\d{2}년|\d+세|https?:\/\/|<[^>]*>/;
 const CASUAL = /(?:해요|이에요|예요|있어요|없어요|거든요|잖아요)(?=[.!?\s]|$)/;

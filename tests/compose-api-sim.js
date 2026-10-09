@@ -2,6 +2,7 @@
 const fs = require('fs'), path = require('path'), os = require('os'), vm = require('vm');
 const root = path.join(__dirname, '..'), tmp = path.join(os.tmpdir(), 'compose-test.mjs');
 fs.writeFileSync(tmp, fs.readFileSync(path.join(root, 'functions/_compose.js'), 'utf8'));
+fs.writeFileSync(path.join(os.tmpdir(), '_guard.js'), fs.readFileSync(path.join(root, 'functions/_guard.js'), 'utf8').replace('../report/v2/consistency.js', './consistency.js')); fs.writeFileSync(path.join(os.tmpdir(), 'consistency.js'), fs.readFileSync(path.join(root, 'report/v2/consistency.js'), 'utf8'));
 vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')); globalThis.window = globalThis;
 ['chapters', 'saju-data', 'rules', 'narrator', 'content', 'verdict', 'remedy', 'media', 'scenes', 'compose'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8')));
 (async () => {
