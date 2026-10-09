@@ -267,7 +267,7 @@
   /** plan: Remedy.actionPlan 결과({checklist, avoid}) — 있으면 개인화에 쓴다. 항목마다 최대 3개. */
   function action(sd, plan, seasonKey) {
     var s = SEASON_ACT[seasonKey] || SEASON_ACT.accumulation, uniq = function (a) { var o = []; a.forEach(function (x) { if (x && o.indexOf(x) < 0) o.push(x); }); return o.slice(0, 3); };
-    var drop = uniq(s.drop.concat((plan && plan.avoid) || [])), keep = uniq([KEEP[sd.dominantGroup] ? KEEP[sd.dominantGroup] + '을(를) 지키세요' : '', sd.usefulElements ? '내게 힘이 되는 ' + sd.usefulElements.yong + ' 기운의 습관(전통 오행 기준, 참고용)' : '']);
+    var drop = uniq(s.drop.concat((plan && plan.avoid) || [])), keep = uniq([KEEP[sd.dominantGroup] ? KEEP[sd.dominantGroup] + ' 유지하기' : '', sd.usefulElements ? '내게 힘이 되는 ' + sd.usefulElements.yong + ' 기운의 습관(전통 오행 기준, 참고용)' : '']);
     var start = uniq(s.start.concat((plan && plan.checklist) || []));
     return { drop: drop, keep: keep, start: start, seasonKey: seasonKey };
   }

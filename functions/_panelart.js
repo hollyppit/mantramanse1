@@ -1,7 +1,9 @@
 // 무빙툰 패널 이미지(장면 삽화) 생성 — 프리셋 + 이미지 모델 호출. 파일명이 _로 시작해 라우트로 노출되지 않는다.
-// 사용자별 실시간 생성은 하지 않는다: 오행 5 × 이야기 주제 10 = 50장을 관리자가 미리 만들어 미디어 라이브러리에 태그와 함께 저장 → 조합 규칙(Director.pickMedia)이 장면에 맞는 컷을 고른다.
+// 사용자별 실시간 생성은 하지 않는다: 오행 5 × 이야기 주제 14 = 70장을 관리자가 미리 만들어 미디어 라이브러리에 태그와 함께 저장 → 조합 규칙(Director.pickMedia)이 장면에 맞는 컷을 고른다.
 // 모델: ① OpenAI gpt-image-2(env PANEL_IMAGE_MODEL 로 교체 가능) → 실패·키 없음이면 ② Gemini 이미지 모델(env GEMINI_IMAGE_MODEL, 기본 gemini-2.5-flash-image)
 import { cleanMedia } from './_media.js';
+import { WEALTH, WEALTH_GUARD_KO } from './_panel-wealth.js';
+export { WEALTH_GUARD_KO } from './_panel-wealth.js';
 
 export const STYLE = '한 편의 한국 웹툰 같은 시네마틱 일러스트. 먹물 번짐과 수채 질감이 섞인 동양화풍 위에 영화 같은 조명. 인물은 뒷모습이나 멀리 보이는 실루엣으로만 그리고 얼굴 클로즈업은 하지 않는다. ' +
   '화면 안에 글자·숫자·간판·로고·워터마크는 절대 넣지 않는다. 세로 구도, 아래쪽 30%는 비교적 어둡고 단순하게 비워 둔다(글자가 올라갈 자리).';
@@ -68,13 +70,18 @@ export const THEMES = {
   identity: { name: '나는 어떤 사람인가', scene: '긴 길의 시작점에 선 한 사람의 뒷모습, 앞에 펼쳐진 풍경', tags: ['road', 'lookingForward'] },
   talent: { name: '숨은 재능', scene: '서가가 높이 솟은 고요한 서재에서 책 한 권을 펼친 사람, 빛줄기가 책 위로 떨어진다', tags: ['library', 'studying'] },
   career: { name: '일과 직업', scene: '새벽 도시가 내려다보이는 큰 창가의 작업 책상, 불 켜진 노트와 식은 찻잔', tags: ['workspace', 'working'] },
-  wealth: { name: '돈과 재물', scene: '등불이 켜진 저녁 골목 시장, 작은 주머니를 손에 쥔 사람의 뒷모습', tags: ['city', 'walking'] },
+  wealth: { name: '돈 · 재테크와 재물', scene: '동전·예산 봉투·자산 차트를 정리하는 재무 관리 테이블', tags: ['desk', 'card', 'thinking'] },
   love: { name: '사랑과 인연', scene: '비 오는 거리에서 우산 하나를 함께 쓰고 걸어가는 두 사람의 실루엣', tags: ['rain', 'walking'] },
   relationship: { name: '사람과 관계', scene: '여러 사람이 둘러앉은 긴 식탁, 따뜻한 조명, 서로를 향한 몸짓', tags: ['gathering', 'meeting'] },
   family: { name: '가족', scene: '저녁 들판 끝 집 한 채, 창문마다 켜진 따뜻한 불빛과 굴뚝 연기', tags: ['field', 'lookingBack'] },
   shadow: { name: '그림자와 약점', scene: '긴 복도 끝에서 밀려오는 빛 속에 사람의 긴 그림자가 뒤로 늘어진다', tags: ['tunnelLight', 'thinking'] },
   daewoon: { name: '지금 지나는 시기', scene: '계절이 바뀌는 갈림길, 한쪽은 눈 덮인 길 다른 쪽은 꽃핀 길, 그 사이에 선 한 사람', tags: ['crossroads', 'lookingForward'] },
   remedy: { name: '쉬어 가기와 회복', scene: '큰 나무 아래 안개 낀 아침, 짐을 내려놓고 앉아 쉬는 사람', tags: ['mist', 'resting'] },
+  children: { name: '자식운 · 자녀와 관계', scene: '보호자와 아이가 그림책과 활동을 함께 고르며 대화하는 일상', tags: ['desk', 'meeting'] },
+  marriage: { name: '결혼 · 동반자', scene: '두 사람이 함께 생활 계획을 논의하는 집의 테이블', tags: ['desk', 'meeting'] },
+  sewoon: { name: '올해의 흐름', scene: '일 년의 계획을 펼쳐 놓고 방향을 살피는 창가', tags: ['desk', 'lookingForward'] },
+  monthly: { name: '월별 흐름', scene: '이번 달 일정을 점검하는 글자 없는 월간 계획 보드', tags: ['desk', 'thinking'] },
+  action: { name: '실천 · 변화', scene: '계획을 한 단계 실행하며 정돈하는 작업 공간', tags: ['workspace', 'working'] },
 };
 // 오행은 풍경의 계절·빛을 정한다(장면 태그에도 더해진다).
 const SCENE_BY_EL = { wood: ['forest', 'sunrise'], fire: ['sunset'], earth: ['field', 'mountain'], metal: ['nightCity', 'stars'], water: ['rain', 'sea'] };
@@ -97,17 +104,23 @@ const PLOT = {
   identity: '{P}이 긴 강변 산책로의 시작점에 서서, 멀리 도시 스카이라인이 펼쳐진 앞쪽을 바라본다. 차분하고 단단한 표정',
   talent: '{P}이 조용한 도서관(또는 북카페)에서 책에 깊이 몰입해 있다. 펼친 책 위로 한 줄기 빛이 떨어지고 집중한 옆얼굴이 보인다',
   career: '{P}이 새벽 도시가 내려다보이는 큰 창가의 업무 책상에 앉아 있다. 켜진 노트북과 식은 커피, 피곤하지만 집중한 표정',
-  wealth: '{P}이 저녁 불빛이 켜진 재래시장 골목을 걷는다(간판 글자는 읽히지 않게). 작은 장바구니를 들고 생각에 잠긴 표정',
+  wealth: '{P}이 재무 관리 테이블에서 예산·자산·현금 흐름을 점검한다. 금융 소품과 정리하는 손이 주인공',
   love: '{P}이 비 오는 밤 도심 거리에서 연인(이성)과 우산 하나를 함께 쓰고 있다. 두 사람의 얼굴이 서로를 향하고 은은한 미소가 보인다',
   relationship: '{P}이 따뜻한 조명의 식당 긴 테이블에서 친구들과 둘러앉아 웃으며 이야기한다. 얼굴들이 또렷이 보인다',
   family: '{P}이 해 질 녘 불이 켜진 가족의 집(아파트 단지 또는 시골집) 창문을 올려다본다. 그리움이 섞인 따뜻한 표정',
   shadow: '{P}이 지하철 통로 또는 사무실 복도처럼 긴 복도 한가운데 서 있고, 끝에서 밀려오는 빛에 뒤로 긴 그림자가 늘어진다. 조용히 고민하는 표정',
   daewoon: '{P}이 도시 공원의 갈림길에 서 있다. 한쪽 길은 눈이 덮이고 다른 쪽은 꽃이 피어 있으며, 두 길을 생각에 잠겨 바라본다',
+  children: '{P}이 학령기 아이와 나란히 앉아 그림책과 작은 활동 소품을 함께 고른다. 아이의 선택을 듣는 손짓, 두 사람의 공간을 존중하는 구도. 임신·출산·병원 장면과 미래 아이의 외모 예측은 피한다',
+  marriage: '{P}이 동반자와 집의 테이블에 나란히 앉아 생활 계획을 논의한다. 열쇠 한 쌍, 두 개의 머그잔, 글자 없는 계획 카드와 나누어 둔 생활 용품, 서로 의견을 듣는 손짓. 결혼식 대신 함께 사는 일상과 역할 합의를 보여 준다',
+  sewoon: '{P}이 창가에서 일 년의 계획을 검토한다. 네 계절을 상징하는 작은 그림 카드와 글자 없는 연간 계획판, 중요한 계획 카드를 옮기는 손. 봄·여름·가을·겨울의 변화가 배경에 은은하게 이어진다',
+  monthly: '{P}이 책상 앞에서 이번 달 일정을 조절한다. 글자나 숫자 없는 월간 격자 보드, 작은 일정 카드, 아날로그 시계와 무지 노트. 한 칸의 카드를 다른 칸으로 옮기며 가까운 일정에 집중한다',
+  action: '{P}이 작업 공간에서 작은 실천 하나를 시작한다. 쌓인 물건을 분류함에 나누고 무지 계획 카드 한 장을 완료 칸으로 옮긴다. 시작과 마무리가 보이는 구체적인 손동작, 휴식이나 산책 장면은 피한다',
   remedy: '{P}이 아침 안개가 낀 공원의 큰 나무 아래 벤치에서 가방을 내려놓고 쉰다. 눈을 감고 편안하게 미소 짓는다' };
 // 배경용 장소(사람 없이 풍경만)
 const PLACE = {
-  identity: '긴 강변 산책로와 멀리 보이는 도시 스카이라인', talent: '조용한 도서관, 책장 사이로 들어오는 빛', career: '새벽 도시가 내려다보이는 큰 창가의 빈 책상', wealth: '저녁 재래시장 골목에 켜진 불빛(간판 글자는 읽히지 않게)',
+  identity: '긴 강변 산책로와 멀리 보이는 도시 스카이라인', talent: '조용한 도서관, 책장 사이로 들어오는 빛', career: '새벽 도시가 내려다보이는 큰 창가의 빈 책상', wealth: '예산 봉투·동전·글자 없는 금융 차트가 놓인 재무 관리 테이블',
   love: '비 오는 밤 도심 거리, 젖은 길에 번지는 불빛', relationship: '따뜻한 조명이 켜진 빈 식당의 긴 테이블', family: '해 질 녘 불이 켜진 집들의 창문', shadow: '긴 복도와 끝에서 들어오는 빛',
+  children: '크기가 다른 신발 한 쌍, 그림책과 작은 활동 소품이 놓인 따뜻한 생활 공간', marriage: '열쇠 한 쌍과 머그잔 두 개, 글자 없는 공동 생활 계획 카드가 놓인 집의 테이블', sewoon: '네 계절 그림 카드와 글자 없는 연간 계획판이 있는 창가', monthly: '글자·숫자 없는 월간 격자 보드와 일정 카드가 놓인 책상', action: '분류함과 완료 칸으로 옮긴 무지 계획 카드가 있는 정돈된 작업 공간',
   daewoon: '눈 덮인 길과 꽃핀 길로 갈라지는 공원 갈림길', remedy: '아침 안개가 낀 큰 나무와 빈 벤치' };
 // 본문 컷·배경 프롬프트용 빛·색(장소와 무관한 조명 분위기). 풀이 화면 이미지(자동차·직업…)는 ELEMENTS.palette 를 그대로 쓴다.
 const PAL = { wood: '이른 새벽의 청록·연두 빛, 옅은 아침 안개, 싱그러운 초록 포인트', fire: '노을의 주황·붉은 금빛, 따뜻한 조명의 열기', earth: '황토·호박색 황금빛, 고요하고 묵직한 저녁 빛', metal: '달빛 은색과 쇳빛 청회색, 서늘하고 또렷한 밤공기', water: '깊은 남색·검푸른 빛, 비와 물에 비친 반사, 잔잔한 밤 분위기' };
@@ -152,19 +165,26 @@ const SHOTS_DYN = [
   '연출: 오버헤드 쇼트나 문틀·창문·난간 같은 앞쪽 사물 너머로 훔쳐보듯 잡은 프레이밍. 인물은 프레임 안의 프레임 속에서 몸을 돌리거나 손을 뻗는다.',
   '연출: 몸을 크게 쓰는 동작 컷. 팔을 뻗거나 몸을 젖히고 돌아서거나 웅크렸다 일어서는 전신 동작이 중심이고, 시선은 화면 밖 먼 곳을 향한다. 정면 얼굴은 보이지 않는다.',
   '연출: 낮은 시점에서 인물의 뒷모습과 앞에 펼쳐진 광대한 풍경을 함께 잡은 대형 풍경 컷. 바람이 몸을 스치고 인물은 풍경에 비해 작지만 자세에 힘이 있다.'];
-const shotOf = (el, th, dyn) => { const L = dyn ? SHOTS_DYN : SHOTS; return L[(Object.keys(THEMES).indexOf(th) + Object.keys(ELEMENTS).indexOf(el) * 3) % L.length]; };
+// 생활 계획 장면에서는 큰 전신 동작 대신 주제에 맞는 손동작과 소품을 보여 준다.
+const FOCUSED_SHOTS = { children: ['그림책과 서로 듣는 손짓이 보이는 테이블 높이의 미디엄샷', '보호자 어깨 너머로 아이가 선택한 활동 소품을 함께 보는 구도', '두 사람의 거리와 작은 활동 소품이 보이는 측면 미디엄샷'],
+ marriage: ['두 사람을 함께 담는 테이블 높이의 3/4 미디엄샷. 생활 계획 카드와 열쇠, 서로 듣는 손짓이 보인다', '테이블 위를 비스듬히 내려다보는 하이앵글. 두 사람의 손과 나누어 둔 생활 용품이 중심이다', '한 사람의 어깨 너머로 동반자와 공동 계획 카드를 함께 보는 오버숄더 구도'],
+ sewoon: ['연간 계획판과 네 계절 카드가 함께 보이는 오버숄더 구도. 우선순위 카드를 옮기는 손이 중심이다', '창가의 인물과 네 계절 카드를 담는 측면 미디엄샷', '네 계절 카드와 계획판을 내려다보는 하이앵글. 계획을 고르는 손을 선명하게 담는다'],
+ monthly: ['월간 격자 보드와 일정 카드를 담는 오버숄더 구도', '책상과 월간 보드를 함께 담는 측면 미디엄샷. 가까운 일정을 점검하는 손짓', '한 달 계획 보드 위의 카드를 옮기는 손 클로즈업'],
+ action: ['분류함에 물건을 놓는 손과 주변 공간을 함께 담는 측면 미디엄샷', '무지 계획 카드를 완료 칸으로 옮기는 손의 클로즈업', '정돈 전후의 작은 작업 구역과 실천하는 손을 담는 하이앵글']
+};
+const shotOf = (el, th, dyn) => { if (FOCUSED_SHOTS[th]) return '연출: ' + FOCUSED_SHOTS[th][Object.keys(ELEMENTS).indexOf(el) % 3] + '.'; const L = dyn ? SHOTS_DYN : SHOTS; return L[(Object.keys(THEMES).indexOf(th) + Object.keys(ELEMENTS).indexOf(el) * 3) % L.length]; };
 export function promptFor(el, th, dir, kind) {
   const E = ELEMENTS[el], T = THEMES[th]; if (!E || !T) return '';
   const k = kindOf(kind);
   if (k === 'bg') return `${bgStyleOf(dir)}\n배경 분위기: ${PLACE[th]}. 이 장면을 멀리서 본 넓고 고요한 풍경으로 그린다.\n색과 빛: ${PAL[el]}.\n오행 ${E.name}의 기운이 풍경 전체의 계절감과 분위기로 드러나게 한다.`;
-  const people = cleanDirection(dir).people, face = people === 'none' ? '' : '\n' + shotOf(el, th, k === 'panel') + (people === 'face' ? ' 실존 인물을 닮지 않은 가상의 인물이며 이 컷만의 고유한 외형이다 — ' + lookOf(el, th, k) + ' 다른 컷의 인물, 레퍼런스의 인물과 얼굴이 겹치지 않게 한다.' : '') +
-    '\n위 연출(카메라 거리·각도·몸짓)이 장면 문장의 인물 묘사보다 우선한다. 증명사진처럼 가만히 서서 정면을 보는 포즈, 얼굴만 가득 찬 구도는 피하고 장면 속에서 무언가 하고 있는 동작으로 그린다.' + (k === 'panel' ? ' 정지된 사진 같은 느낌 대신 움직임과 속도감, 과장된 원근, 극적인 빛으로 영화의 한 장면처럼 다이나믹하게 그린다.' : '');
-  return `${styleOf(dir)}\n장면: ${PLOT[th].replace('{P}', WHO_KO[genderOfKind(k)])}.${face}\n색과 빛: ${PAL[el]}.\n오행 ${E.name}의 기운이 장면 전체의 빛과 분위기로 드러나게 한다.`;
+  const people = cleanDirection(dir).people, face = people === 'none' ? '' : '\n' + (th === 'wealth' ? WEALTH[el].shot + '.' : shotOf(el, th, k === 'panel')) + (people === 'face' ? ' 실존 인물을 닮지 않은 가상의 인물이며 이 컷만의 고유한 외형이다 — ' + lookOf(el, th, k) + ' 다른 컷의 인물, 레퍼런스의 인물과 얼굴이 겹치지 않게 한다.' : '') +
+    '\n위 연출(카메라 거리·각도·몸짓)이 장면 문장의 인물 묘사보다 우선한다. 증명사진처럼 가만히 서서 정면을 보는 포즈, 얼굴만 가득 찬 구도는 피하고 장면 속에서 무언가 하고 있는 동작으로 그린다.' + (k === 'panel' && th !== 'wealth' && !FOCUSED_SHOTS[th] ? ' 정지된 사진 같은 느낌 대신 움직임과 속도감, 과장된 원근, 극적인 빛으로 영화의 한 장면처럼 다이나믹하게 그린다.' : '');
+  return `${styleOf(dir)}\n장면: ${(th === 'wealth' ? WEALTH[el].ko : PLOT[th]).replace('{P}', WHO_KO[genderOfKind(k)])}.${face}${th === 'wealth' ? '\n' + WEALTH_GUARD_KO : ''}\n색과 빛: ${PAL[el]}.\n오행 ${E.name}의 기운이 장면 전체의 빛과 분위기로 드러나게 한다.`;
 }
 // 생성된 파일 → 미디어 라이브러리 항목(태그는 승인 상태라 조합에 바로 쓰인다). cleanMedia 가 TAX 밖 태그를 걸러낸다.
 export function mediaItem(el, th, url, bytes, provider, panelVideo, kind) {
   const E = ELEMENTS[el], T = THEMES[th], k = kindOf(kind), bg = k === 'bg', g = genderOfKind(k);
-  return cleanMedia({ id: presetId(el, th, k), type: 'image', url, posterUrl: url, title: `${E.name} · ${T.name} ${bg ? '배경' : '패널'}${g ? (g === 'F' ? ' 여성' : ' 남성') : ''}`, description: `AI 생성 ${bg ? '배경' : '패널'}(${provider}) — ${bg ? PLACE[th] : PLOT[th].replace('{P}', WHO_KO[g])}`, orientation: 'portrait', priority: bg ? 55 : g ? 62 : 60,
+  return cleanMedia({ id: presetId(el, th, k), type: 'image', url, posterUrl: url, title: `${E.name} · ${T.name} ${bg ? '배경' : '패널'}${g ? (g === 'F' ? ' 여성' : ' 남성') : ''}`, description: `AI 생성 ${bg ? '배경' : '패널'}(${provider}) — ${bg ? PLACE[th] : (th === 'wealth' ? WEALTH[el].ko : PLOT[th]).replace('{P}', WHO_KO[g])}`, orientation: 'portrait', priority: bg ? 55 : g ? 62 : 60,
     elementTags: [el], stateTags: [E.state], emotionTags: [E.mood], themeTags: [th], sceneTags: SCENE_BY_EL[el].concat(T.tags.filter(t => !ACTIONS.test(t))), actionTags: T.tags.filter(t => ACTIONS.test(t)),
     visualRole: bg ? ['background', 'hero'] : ['hero'], loopable: bg && !!panelVideo, enabled: true, tagsApproved: true, bytes, uploadedAt: Date.now(), panelVideo: panelVideo || '' });
 }
@@ -174,7 +194,7 @@ const arr = v => (Array.isArray(v) ? v.filter(x => typeof x === 'string' && /^[A
 export function slotPrompt(t, title, dir) {
   t = t || {}; const el = ELEMENTS[arr(t.element)[0]], line = (k, label) => (arr(t[k]).length ? label + ': ' + arr(t[k]).join(', ') + '.\n' : '');
   return styleOf(dir) + '\n' + (title ? '이 컷이 쓰이는 곳: ' + String(title).slice(0, 80) + '.\n' : '') + line('scene', '장소·장면(영어 태그)') + line('theme', '이야기 주제(영어 태그)') + line('state', '상태') + line('emotion', '감정·분위기') + line('action', '인물의 행동') +
-    (el ? '색과 빛: ' + el.palette + '.\n' : '') + '위 태그가 한눈에 읽히는 하나의 장면으로 그린다.';
+    (el ? '색과 빛: ' + el.palette + '.\n' : '') + '위 태그가 한눈에 읽히는 하나의 장면으로 그린다.' + (arr(t.theme).includes('wealth') ? '\n' + WEALTH_GUARD_KO : '');
 }
 export function slotItem(chapterId, title, t, url, bytes, provider) {
   t = t || {}; const rnd = Array.from(crypto.getRandomValues(new Uint8Array(3)), x => x.toString(16).padStart(2, '0')).join('');

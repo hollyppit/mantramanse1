@@ -4,7 +4,7 @@ const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.join(__dirname, '..');
 vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8'), { filename: 'engine.js' });
 globalThis.window = globalThis;
-['chapters', 'saju-data', 'rules', 'narrator', 'content', 'content-pro', 'content-pro2', 'topics', 'intro-text', 'story-director', 'story-composer', 'content-v3', 'verdict', 'remedy', 'media', 'scenes', 'compose', 'life-doc'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
+['chapters', 'saju-data', 'rules', 'narrator', 'content', 'content-pro', 'content-pro2', 'topics', 'intro-text', 'story-director', 'story-composer', 'content-v3', 'verdict', 'remedy', 'media', 'scenes', 'compose', 'reading-answer', 'life-doc'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
 const R = globalThis.ReportV2, M = globalThis.Manse, D = R.StoryDirector, L = R.LifeDoc;
 const fails = []; const ok = (c, m) => { if (!c) fails.push(m); };
 const now = Date.UTC(2026, 9, 6), cfg = R.Chapters.forProject(null, 'full'), lib = R.Compose.library(null);
@@ -31,8 +31,8 @@ samples.forEach((ch, i) => ['', 'money', 'love', 'career', 'life', 'self'].forEa
   ok(cs.every(c => !c.actTransition), tag + ' 큰 ACT 전환 화면은 없다(서두 없이 순서대로)');
   // 선택형 UI 가 없다: 새로 만든 조각에 버튼·입력·링크가 없다
   const html = cs.filter(c => c.kind === 'life').flatMap(c => c.scenes.filter(s => s.html).map(s => s.html)).join('');
-  ok(!/<input|<select|<a /i.test(html) && (html.match(/<button/g) || []).every(() => true) && !/<button(?![^>]*data-vd)/i.test(html), tag + ' 선택형 요소 남음(맞아요/글쎄요 반응 버튼만 허용)');
-  ok((html.match(/data-vd="yes"/g) || []).length === 6, tag + ' 주제마다 반응 한 번(6개): ' + (html.match(/data-vd="yes"/g) || []).length);
+  ok(!/<input|<select|<a /i.test(html) && (html.match(/<button/g) || []).every(() => true) && !/<button(?![^>]*data-answer-)/i.test(html), tag + ' 선택형 요소 남음(상황 선택·재요청·이어 읽기 버튼만 허용)');
+  ok((html.match(/data-answer-topic=/g) || []).length === 6, tag + ' 주제마다 상세 선택지 한 묶음(6개): ' + (html.match(/data-answer-topic=/g) || []).length);
   ok((html.match(/<section/g) || []).length === (html.match(/<\/section>/g) || []).length, tag + ' section 짝');
   ok(!/undefined|NaN|\[object/.test(html), tag + ' 빈 값');
   ok(!BANNED.test(html.replace(/<[^>]*>/g, ' ')), tag + ' 금지 문구');
@@ -55,7 +55,7 @@ samples.forEach((ch, i) => ['', 'money', 'love', 'career', 'life', 'self'].forEa
   ok(mid.every(c => c.scenes.every(x => !/^(terms|action|recommendation|warning)$/.test(x.sceneType))), tag + ' 용어 풀이/중간 행동 가이드 남음');
   ok(!/지금 해 볼 것<\/small>/.test(cs.filter(c => /^life_(?!actions)/.test(c.id)).flatMap(c => c.scenes.map(x => x.html || '')).join('')), tag + ' 새 카드에 중간 행동 가이드 남음');
   ok(mid.every(c => !/지금 해 볼 것|하세요|보세요/.test((c.details || []).map(d => d.detail).join(' ') + (c.meaning || ''))), tag + ' 기존 챕터 풀이에 조언 문장 남음');
-  ok(cs.find(c => c.id === 'life_actions').scenes.some(x => /분야별로 지금 해 볼 것/.test(x.html || '')), tag + ' 마지막에 행동 모음');
+  ok(cs.find(c => c.id === 'life_actions').scenes.some(x => /실천 뒤 확인할 변화/.test(x.html || '')), tag + ' 마지막에 실천 점검 모음');
   ok(cs.find(c => c.id === 'life_stars').scenes.length >= 2 && cs.find(c => c.id === 'life_tengods').scenes.length >= 4, tag + ' 십성·신살 내용');
   // 기존 챕터는 그대로: 장면이 남아 있다
   ok(cs.filter(c => c.kind !== 'life').every(c => c.scenes && c.scenes.length), tag + ' 기존 챕터 장면');

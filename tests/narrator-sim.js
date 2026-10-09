@@ -38,7 +38,7 @@ const r1 = R.Compose.build(sdM, lib, cfg, { name: '지수' }); R.Compose.applyAi
 ok(r1.chapters[1].headline === '지수는 오래 마음에 담아 둔 사람이다' && r1.chapters[1].interpretation === '지수가 먼저 입을 열지 못했던 이유가 있었다.', '응답의 {hero…} 를 로컬에서 치환');
 const r1b = R.Compose.build(sdM, lib, cfg); R.Compose.applyAi(r1b, goodAi);
 ok(r1b.chapters[1].headline === '그는 오래 마음에 담아 둔 사람이다', '이름 없으면 그는');
-for (const [label, bad] of [['당신', { headline: '당신은 오래 마음에 담아 둔 사람입니다', lead: '좋은 흐름이다.' }], ['~습니다', { headline: '{hero은는} 조용한 사람이다', lead: '먼저 말하지 못했습니다.' }], ['~하세요', { headline: '{hero은는} 조용한 사람이다', lead: '오늘은 쉬어 가세요.' }], ['엉뚱한 자리표시자', { headline: '{name}은 조용한 사람이다', lead: '좋은 흐름이다.' }]]) {
+for (const [label, bad] of [['당신', { headline: '당신은 오래 마음에 담아 둔 사람입니다', lead: '좋은 흐름이다.' }], ['해요체', { headline: '{hero은는} 조용한 사람입니다', lead: '표현을 어려워해요.' }], ['~하세요', { headline: '{hero은는} 조용한 사람이다', lead: '오늘은 쉬어 가세요.' }], ['엉뚱한 자리표시자', { headline: '{name}은 조용한 사람이다', lead: '좋은 흐름이다.' }]]) {
   const r = R.Compose.build(sdM, lib, cfg, { name: '지수' }), before = r.chapters[1].headline + '|' + r.chapters[1].interpretation; R.Compose.applyAi(r, { chapters: [Object.assign({ id: idc }, bad)] });
   ok(r.chapters[1].headline + '|' + r.chapters[1].interpretation === before, label + ' 포함 응답은 template 유지');
 }

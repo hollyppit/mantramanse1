@@ -1,11 +1,11 @@
 // 무빙툰 패널 이미지 생성 (관리자 전용)
-// GET  /api/panel-art                       — 프리셋 50개(오행 5 × 주제 10) + 이미 만들어진 것 + 사용 가능한 모델
+// GET  /api/panel-art                       — 프리셋 70개(오행 5 × 주제 14) + 이미 만들어진 것 + 사용 가능한 모델
 // POST /api/panel-art { element, theme, provider? } — 한 장 생성 → R2 저장 → 미디어 라이브러리(media:index)에 태그와 함께 등록(같은 프리셋이면 교체)
 // POST /api/panel-art { slot:{ chapterId, title, tags:{element,state,emotion,scene,theme,action} }, provider? } — 조합 테스트의 "필요한 클립 소스" 칸 하나에 맞는 이미지를 만들어 그 챕터 전용으로 등록
 // 필요: GLOSSARY_KV · CLIPS_R2 · ADMIN_PASSWORD · OPENAI_API_KEY(gpt-image-2) 및/또는 GEMINI_API_KEY. 한 번에 한 장씩 부른다(화면이 "빈 것만 모두 만들기"로 반복 호출).
 import { json, isAdmin, configError } from '../_lib.js';
 import { toolsFor } from '../_panelprompts.js';
-import { ELEMENTS, THEMES, presets, promptFor, presetId, mediaItem, slotPrompt, slotItem, generate, DIRECTION_OPTIONS, cleanDirection, kindOf, REF_USE, REF_OK, cleanRefs } from '../_panelart.js';
+import { ELEMENTS, THEMES, presets, promptFor, presetId, mediaItem, slotPrompt, slotItem, generate, DIRECTION_OPTIONS, cleanDirection, kindOf, WEALTH_GUARD_KO, REF_USE, REF_OK, cleanRefs } from '../_panelart.js';
 
 const KEY = 'media:index', PKEY = 'panel:prompts', DKEY = 'panel:direction';
 const loadDir = async env => cleanDirection(await env.GLOSSARY_KV.get(DKEY, 'json'));
@@ -24,7 +24,7 @@ export async function onRequestGet({ request, env }) {
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
   const list = (await env.GLOSSARY_KV.get(KEY, 'json')) || [], by = new Map(list.map(m => [m.id, m]));
   const saved = (await env.GLOSSARY_KV.get(PKEY, 'json')) || {}, dir = await loadDir(env);
-  return json({ presets: presets('panel').concat(presets('panelF'), presets('panelM'), presets('bg')).map(p => ({ ...p, url: (by.get(p.id) || {}).url || '', video: (by.get(p.id) || {}).panelVideo || '', prompt: saved[p.id] || promptFor(p.element, p.theme, dir, p.kind), custom: !!saved[p.id], defaultPrompt: promptFor(p.element, p.theme, dir, p.kind), tools: toolsFor(p.element, p.theme, dir, p.kind) })), direction: dir, directionOptions: Object.fromEntries(Object.entries(DIRECTION_OPTIONS).map(([k, v]) => [k, { label: v.label, items: Object.fromEntries(Object.entries(v.items).map(([i, x]) => [i, x[0]])) }])), refUse: Object.fromEntries(Object.entries(REF_USE).map(([k, v]) => [k, v[0]])), providers: { openai: !!env.OPENAI_API_KEY, gemini: !!env.GEMINI_API_KEY }, r2: !!env.CLIPS_R2,
+  return json({ presets: presets('panel').concat(presets('panelF'), presets('panelM'), presets('bg')).map(p => ({ ...p, url: (by.get(p.id) || {}).url || '', video: (by.get(p.id) || {}).panelVideo || '', prompt: saved[p.id] ? saved[p.id] + (p.theme === 'wealth' ? '\n' + WEALTH_GUARD_KO : '') : promptFor(p.element, p.theme, dir, p.kind), custom: !!saved[p.id], defaultPrompt: promptFor(p.element, p.theme, dir, p.kind), tools: toolsFor(p.element, p.theme, dir, p.kind) })), direction: dir, directionOptions: Object.fromEntries(Object.entries(DIRECTION_OPTIONS).map(([k, v]) => [k, { label: v.label, items: Object.fromEntries(Object.entries(v.items).map(([i, x]) => [i, x[0]])) }])), refUse: Object.fromEntries(Object.entries(REF_USE).map(([k, v]) => [k, v[0]])), providers: { openai: !!env.OPENAI_API_KEY, gemini: !!env.GEMINI_API_KEY }, r2: !!env.CLIPS_R2,
     models: { openai: env.PANEL_IMAGE_MODEL || 'gpt-image-2', gemini: env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image' } });
 }
 
@@ -102,6 +102,7 @@ export async function onRequestPost({ request, env }) {
     ref = { bytes: await o.arrayBuffer(), mime: (o.httpMetadata && o.httpMetadata.contentType) || 'image/webp' };
     prompt = '첨부한 이미지를 바탕으로, 같은 구도와 그림체를 유지하면서 아래 요청만 반영해 다시 그린다. 화면 안에 글자·숫자·로고는 넣지 않는다.\n수정 요청: ' + (String(b.extra || '').trim().slice(0, 500) || '전체적으로 조금 더 선명하게');
   } else if (typeof b.extra === 'string' && b.extra.trim()) prompt += '\n추가 요청: ' + b.extra.trim().slice(0, 500);
+  if (b.theme === 'wealth') prompt += '\n' + WEALTH_GUARD_KO; // 저장 프롬프트·현재 이미지 수정에도 재물 소재를 유지
   let refs = ref ? [ref] : []; if (!b.fromCurrent) { refs = await refsFor(env, dir, b); prompt = withRefs(prompt, refs, dir); } // 새로 그릴 때만 그림체 레퍼런스를 붙인다(현재 컷 수정은 그 컷이 바탕)
   let g; try { g = await generate(env, prompt, only, refs.length ? refs : null); } catch (e) { return json({ error: e.message }, 502); }
   if (b.preview) { // 미리보기: 칸을 바꾸지 않고 임시 파일로 돌려준다(확정은 accept)

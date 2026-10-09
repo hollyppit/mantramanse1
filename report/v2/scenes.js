@@ -8,7 +8,7 @@
     state: ['growth', 'opportunity', 'expansion', 'harvest', 'accumulation', 'transition', 'defense', 'recovery', 'conflict', 'isolation', 'connection', 'stability'],
     emotion: ['calm', 'mysterious', 'powerful', 'hopeful', 'lonely', 'tense', 'warm', 'cold', 'romantic', 'energetic', 'contemplative'],
     scene: ['forest', 'mountain', 'ocean', 'river', 'lake', 'field', 'road', 'city', 'nightCity', 'library', 'bookstore', 'museum', 'gallery', 'workspace', 'temple', 'sunrise', 'sunset', 'rain', 'snow', 'mist', 'cloud', 'stars', 'dawnCity', 'emptyOffice', 'commute', 'walkingAlone', 'meetingRoom', 'studio', 'desk', 'laptop', 'paymentAlert', 'card', 'trainStation', 'airport', 'crossroads', 'rainWindow', 'meadow', 'openDoor', 'stairs', 'tunnelLight', 'windyForest', 'sea', 'trip', 'exercise', 'gathering', 'farewell', 'newStart'],
-    theme: ['identity', 'personality', 'talent', 'shadow', 'career', 'success', 'wealth', 'love', 'marriage', 'relationship', 'family', 'pastLife', 'daewoon', 'sewoon', 'monthly', 'remedy', 'action'],
+    theme: ['identity', 'personality', 'talent', 'shadow', 'career', 'success', 'wealth', 'love', 'marriage', 'children', 'relationship', 'family', 'pastLife', 'daewoon', 'sewoon', 'monthly', 'remedy', 'action'],
     action: ['walking', 'running', 'working', 'studying', 'creating', 'thinking', 'meeting', 'traveling', 'climbing', 'fighting', 'resting', 'meditating', 'lookingForward', 'lookingBack'],
     role: ['hero', 'background', 'support', 'transition', 'divider', 'atmosphere', 'ending'],
     type: ['image', 'video', 'videoLoop', 'backgroundVideo', 'character', 'symbol', 'transition', 'chapterCover'],
@@ -230,6 +230,26 @@
   // 관리자 저장 가중치 적용(없는 값은 기본 유지)
   function configure(sc) { if (!sc) return CONFIG; if (sc.w) for (var k in sc.w) CONFIG.w[k] = +sc.w[k]; ['priorityDiv', 'adjacentChapter', 'sameTypeRun'].forEach(function (k) { if (typeof sc[k] === 'number') CONFIG[k] = sc[k]; }); return CONFIG; }
 
-  R.Scenes = { configure: configure, TAX: TAX, CONFIG: CONFIG, SCENE_RULES: SCENE_RULES, VIDEO_TYPES: VIDEO_TYPES, classify: classify, normalize: normalize, search: search, choose: choose, intent: intent, planScenes: planScenes, chartKind: chartKind,
+  // 실제 챕터별 본문 패널 주제와 기존 이미지 대체 순서.
+  function panelThemes(c) {
+    c = c || {}; var base = c.base || c.id || '', t = (c.id || '') + ' ' + base + ' ' + (c.title || '');
+    if (/children|자식운|자녀와/.test(t)) return ['children', 'family'];
+    if (/past|전생|오래된 뿌리/.test(t) || base === 'c14') return ['pastLife'];
+    if (/monthly|wolun|월운|월별|12개월/.test(t) || base === 'c18') return ['monthly', 'daewoon'];
+    if (/sewoon|seun|세운|올해/.test(t) || base === 'c17') return ['sewoon', 'daewoon'];
+    if (/marriage|spouse|결혼|배우자|동반자/.test(t) || base === 'c10') return ['marriage', 'love'];
+    if (/life_actions|life_action$|manual|실천|버릴 것|사용설명서/.test(t) || base === 'c20') return ['action', 'remedy'];
+    if (/remedy|개운|회복|쉼/.test(t) || base === 'c19') return ['remedy'];
+    if (/money|wealth|돈|재물|재성/.test(t) || base === 'c08') return ['wealth'];
+    if (/career|work|직업|일의|성공|커리어/.test(t) || base === 'c06' || base === 'c07') return ['career'];
+    if (/love|ilju|연애|사랑|궁합|인연/.test(t) || base === 'c09' || base === 'c12') return ['love'];
+    if (/family|가족|부모|자녀|자라온/.test(t) || base === 'c13') return ['family'];
+    if (/relation|관계|대인|사람 사이|사람을 대/.test(t) || base === 'c11') return ['relationship'];
+    if (/talent|재능|공부|학업/.test(t) || base === 'c04') return ['talent'];
+    if (/shadow|weak|약점|그림자|장단점|십성|신살/.test(t) || base === 'c05') return ['shadow'];
+    if (/daewoon|future|timing|대운|시기|흐름|앞으로/.test(t)) return ['daewoon'];
+    return ['identity'];
+  }
+  R.Scenes = { panelThemes: panelThemes, configure: configure, TAX: TAX, CONFIG: CONFIG, SCENE_RULES: SCENE_RULES, VIDEO_TYPES: VIDEO_TYPES, classify: classify, normalize: normalize, search: search, choose: choose, intent: intent, planScenes: planScenes, chartKind: chartKind,
     buildChapterScenes: buildChapterScenes, actTransition: actTransition, coverage: coverage };
 })(typeof window !== 'undefined' ? window : globalThis);

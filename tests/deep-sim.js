@@ -7,12 +7,12 @@ globalThis.window = globalThis;
 ['saju-data', 'deep', 'deep-life', 'deep-time'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
 const M = globalThis.Manse, R = globalThis.ReportV2, D = R.Deep, fails = [], ok = (c, m) => { if (!c) fails.push(m); };
 const now = Date.UTC(2026, 9, 8), strip = h => h.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-const births = [[1992, 6, 23, 1, 'M'], [1988, 11, 2, 14, 'F'], [1975, 3, 9, 7, 'M'], [2001, 8, 30, 22, 'F'], [1964, 12, 25, 0, 'F'], [1999, 1, 1, 12, 'M']];
+const births = [[1992, 6, 23, 1, 'M'], [1988, 11, 2, 14, 'F'], [1975, 3, 9, 7, 'M'], [2001, 8, 30, 22, 'F'], [1964, 12, 25, 0, 'F'], [1999, 1, 1, 12, 'M'], [1999, 1, 1, null, 'F']];
 const mk = (y, m, d, h, g) => M.compute({ year: y, month: m, day: d, hour: h, minute: 0, calendar: 'solar', leap: false, gender: g, city: '서울' });
 
 console.log('1. 모든 섹션 생성');
 const ids = Object.keys(D.SECTIONS);
-ok(ids.length === 12 && D.PLACEMENT.length === 12, '섹션 12개 · 배치 12곳: ' + ids.length);
+ok(ids.length === 13 && D.PLACEMENT.length === 13, '섹션 13개 · 배치 13곳: ' + ids.length);
 births.forEach(b => {
   const ch = mk(...b), sd = R.SajuData.build(ch, { now }), H = { M, ch, sd, now, name: '홍길동', assets: { 'car:경': '/x/car.webp' } }, tag = b.join('-');
   ids.forEach(id => {
@@ -51,7 +51,8 @@ console.log('3. 챕터 끼워 넣기');
   const rep = { meta: {}, chapters: ['c01', 'c02', 'c03', 'c04', 'c05', 'c06', 'c10', 'c12', 'c14', 'c15', 'c17', 'c18', 'c19', 'c20'].map((b, i) => ({ id: b, base: b, no: i + 1, act: 1 + (i > 8 ? 3 : 0), project: 'full', scenes: [] })) };
   R.Deep.augment(rep, H); const bases = rep.chapters.map(c => c.base);
   ok(bases[bases.indexOf('c03') + 1] === 'deep_car', '자동차 챕터는 타고난 성격(c03) 바로 뒤');
-  ok(rep.chapters.length === 14 + 12 && rep.chapters.every((c, i) => c.no === i + 1), '12개 챕터가 끼고 번호가 다시 매겨짐');
+  ok(rep.chapters.length === 14 + 13 - 1 && rep.chapters.every((c, i) => c.no === i + 1), '상세 전생이 이전 요약을 대체하고 번호가 다시 매겨짐');
+  ok(!bases.includes('c14') && bases.filter(b => b === 'deep_past').length === 1, '전생 이야기는 상세 챕터 하나만 남음');
   ok(bases.indexOf('deep_places') === bases.indexOf('deep_remedy') + 1 && bases.indexOf('deep_remedy') === bases.indexOf('c19') + 1, '개운법 근거·명소가 개운 챕터 뒤');
   const n = rep.chapters.length; R.Deep.augment(rep, H); ok(rep.chapters.length === n, '두 번 불러도 중복되지 않는다');
   const small = { chapters: [{ id: 'c20', base: 'c20', no: 1, act: 5, scenes: [] }] }; R.Deep.augment(small, H); ok(small.chapters.length === 1, '앵커가 없으면 아무것도 끼우지 않는다');

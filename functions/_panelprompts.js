@@ -3,6 +3,7 @@
 // 장면은 현대 한국 일상 + 표정이 보이는 인물로 쓴 영어 문장이고, 오행은 빛·색 분위기만 정한다(같은 장면이 오행에 따라 새벽·노을·황금빛·달빛·비 내리는 밤으로 달라진다).
 // kind: 'panel'(본문 컷, 글 아래 30%를 비움) · 'bg'(배경, 초점 없이 어둡고 차분하게).
 import { cleanDirection, ELEMENTS, THEMES, kindOf, genderOfKind } from './_panelart.js';
+import { WEALTH, WEALTH_GUARD_EN } from './_panel-wealth.js';
 
 const NAME_EN = { wood: 'Wood', fire: 'Fire', earth: 'Earth', metal: 'Metal', water: 'Water' };
 const EL_EN = {
@@ -15,12 +16,17 @@ const TH_EN = {
   identity: 'a young Korean {c} standing at the start of a long riverside path with the city skyline far ahead, facing slightly toward the viewer with a calm, determined expression',
   talent: 'a young Korean {c} absorbed in reading in a quiet modern library or book cafe, a shaft of light falling on the open book, face visible in three-quarter view with a focused expression',
   career: 'a young Korean {c} working at a desk by a large window above a city skyline, laptop and notebook glowing, a cooling coffee cup, a tired but focused face',
-  wealth: 'a young Korean {c} walking through a lively evening street-market alley in Korea, glowing shop lights with no readable signs, holding a small shopping bag, a thoughtful expression',
+  wealth: 'a young Korean {c} reviewing savings and financial planning at a table with coins, blank envelopes and unlabeled charts',
   love: 'a young Korean couple (the main character is the {c}, the partner is of the opposite sex) sharing one umbrella on a rainy city street at night, their faces softly lit and turned toward each other with gentle smiles',
   relationship: 'a group of young Korean friends including the main character (a young Korean {c}) sitting around a long table in a cozy restaurant, warm lighting, laughing and talking, faces visible',
   family: 'a young Korean {c} looking up at the warmly lit windows of a family home (an apartment complex or a countryside house) at dusk, a nostalgic, tender expression',
   shadow: 'a young Korean {c} in a long empty corridor (a subway passage or an office hallway) with light flooding in from the far end, a long shadow stretching behind, a quiet, troubled expression',
   daewoon: 'a young Korean {c} standing at a crossroads in a modern city park, one path covered in snow and the other in blossoms, looking thoughtfully toward the viewer',
+  children: 'a young Korean {c} sitting beside a school age child, listening while they choose a picture book and simple activity props, respectful personal space, a fictional everyday caregiving scene, no pregnancy or childbirth',
+  marriage: 'a young Korean {c} and their partner calmly discussing shared home life at a table, two mugs, a pair of house keys and blank planning cards, attentive gestures, an everyday partnership rather than a wedding',
+  sewoon: 'a young Korean {c} reviewing an annual plan by a window, four small cards depicting the seasons and an unmarked year planning board, moving one priority card while seasonal colors subtly shift behind',
+  monthly: 'a young Korean {c} adjusting a near-term schedule at a desk, a monthly grid board with no letters or numbers, small blank event cards and an analog clock, moving a single card to a different cell',
+  action: 'a young Korean {c} taking one small practical step in a workspace, sorting objects into organizers and moving a blank task card to a completed compartment, clearly visible hands performing the task rather than resting',
   remedy: 'a young Korean {c} resting on a park bench under a big tree in the morning mist, bag set down beside them, eyes closed with a relaxed, small smile' };
 const ART_EN = { webtoonInk: 'Korean webtoon-style illustration blended with ink-wash bleeding and watercolor texture', webtoon: 'Korean webtoon-style illustration with clean line art, tidy coloring and expressive character faces', ink: 'East Asian ink-wash painting with soft ink bleeding, empty space and brush lines, restrained color',
   anime: 'cinematic anime background art, delicate and clear color', painting: 'oil painting illustration with visible brush strokes, thick paint texture and deep color', realistic: 'photorealistic image with realistic texture and proportions' };
@@ -37,7 +43,7 @@ const HAIR = { woman: 'natural dark hair in a soft everyday style', man: 'short 
 const characterEN = c => `Main character design (keep consistent across the series): a young Korean ${c} in ${{ woman: "her", man: "his", adult: "their" }[c]} late 20s to early 30s, ${HAIR[c]}, everyday modern clothing, a gentle and expressive face.`;
 
 export const NEGATIVE_IMAGE = 'text, letters, numbers, captions, signage, logo, watermark, distorted face, asymmetrical or cross-eyes, extra fingers, deformed hands, distorted anatomy, extra people, hanbok, fantasy costume, blurry, low quality, oversaturated';
-export const NEGATIVE_VIDEO = 'text, subtitles, watermark, logo, face distortion, face morphing, changing identity, extra limbs, sudden camera cut, fast motion, speed-up, time-lapse, flicker, jitter';
+export const NEGATIVE_VIDEO = 'text, subtitles, watermark, logo, face distortion, face morphing, changing identity, extra limbs, sudden camera cut, fast motion, flicker, jitter';
 
 function styleEN(dir, kind) {
   const d = cleanDirection(dir), part = [ART_EN[d.art], FEEL_EN[d.feel], WORLD_EN[d.world], MOOD_EN[d.mood], PEOPLE_EN[d.people]].filter(Boolean);
@@ -50,7 +56,7 @@ function styleEN(dir, kind) {
 // Leonardo.ai 이미지 프롬프트 + 권장 설정
 export function leonardo(el, th, dir, kind) {
   if (!ELEMENTS[el] || !THEMES[th]) return null;
-  return { prompt: `${styleEN(dir, kind)}\nScene: ${TH_EN[th].split("{c}").join(cOf(kind)).split(" (the main character is the adult, the partner is of the opposite sex)").join("")}.\nColor and light: ${EL_EN[el]}.\nThe five-element energy of ${NAME_EN[el]} should show through the light, color and mood of the whole scene. No text, numbers or logos anywhere in the image.`,
+  return { prompt: `${styleEN(dir, kind)}\nScene: ${(th === 'wealth' ? WEALTH[el].en : TH_EN[th]).split("{c}").join(cOf(kind)).split(" (the main character is the adult, the partner is of the opposite sex)").join("")}.\nColor and light: ${EL_EN[el]}.${th === 'wealth' ? '\n' + WEALTH_GUARD_EN : ''}\nThe five-element energy of ${NAME_EN[el]} should show through the light, color and mood of the whole scene. No text, numbers or logos anywhere in the image.`,
     negative: NEGATIVE_IMAGE, size: '832 × 1248 (2:3 세로)' };
 }
 // Kling 이미지→영상 프롬프트(시작 프레임 = 위에서 만든 이미지). 움직임은 작고 잔잔하게, 인물의 얼굴·정체성이 변하지 않게.
@@ -64,17 +70,22 @@ const MOT_TH = {
   identity: 'the character\'s hair and clothes sway in the breeze',
   talent: 'the reader turns a page slowly, dust floats inside the shaft of light, their eyes move slightly along the lines',
   career: 'the screen glow flickers softly, steam curls up from the cup, the city lights below twinkle, the character looks down slightly',
-  wealth: 'blurred shoppers pass in the background, the market lights flicker, the character glances around and shifts the bag slightly',
+  wealth: 'the character makes one small allocation gesture at the financial planning table',
   love: 'the couple walks slowly under the umbrella, raindrops fall and ripple on the street, they exchange a soft glance, street lights glimmer',
   relationship: 'friends laugh and gesture softly, glasses clink, the warm light wavers, steam rises from the dishes',
   family: 'the lit windows flicker warmly, the character stands quietly in the cool air, their hair stirs in the breeze',
   shadow: 'the long shadow slowly lengthens, the light at the corridor end pulses softly, the character slowly lifts their gaze',
   daewoon: 'snow and blossom petals drift across the frame, the character turns their eyes between the two paths',
+  children: 'a small gentle hand gesture near the book, stable adult and child identities, no new figures',
+  marriage: 'one partner gently moves a planning card while the other listens, with only small natural hand gestures',
+  sewoon: 'one seasonal planning card slides slightly under the hand and the window light slowly shifts',
+  monthly: 'one small event card moves to a neighboring cell while all grid shapes remain fixed',
+  action: 'one hand places an object into an organizer, then pauses; task cards remain blank and stable',
   remedy: 'mist moves slowly under the tree, a few leaves fall, the character stands calmly with a small, soft smile' };
 const up = s => s[0].toUpperCase() + s.slice(1);
 export function kling(el, th, kind) {
   if (!ELEMENTS[el] || !THEMES[th]) return null;
-  return { prompt: `Cinematic slow motion on the first-frame image, as if filmed at a high frame rate: every movement is smooth, graceful and slowed down. The character moves naturally in slow motion (breathing, a gentle shift of weight, hair and clothes drifting with a slight delay) with a relaxed closed mouth and a soft natural blink. ${up(MOT_TH[th])}. ${up(MOT_EL[el])}. The camera does a very slow push-in with a shallow depth of field and a gentle drifting handheld feel. Keep the character's face, identity, composition, colors and the webtoon illustration style exactly as in the image; smooth, loop-friendly movement; no text appears.`,
+  return { prompt: `Gentle, cinematic motion on the first-frame image. The character remains composed with a relaxed closed mouth and still shoulders, with only a soft natural blink. ${up(th === 'wealth' ? WEALTH[el].motion : MOT_TH[th])}. ${up(MOT_EL[el])}. The camera does a very slow push-in. Keep the character's face, identity, composition, colors and the webtoon illustration style exactly as in the image; smooth, loop-friendly movement; no text appears.`,
     negative: NEGATIVE_VIDEO, settings: '이미지→영상 · 길이 5초 · 시작 프레임 = 위에서 만든 이미지 · 창의성(관련도) 낮음~중간(얼굴이 변하면 더 낮추기) · 카메라 움직임은 프롬프트에 맡김' };
 }
 export function toolsFor(el, th, dir, kind) { const l = leonardo(el, th, dir, kind), k = kling(el, th, kind); return l && k ? { leo: l.prompt, leoNeg: l.negative, leoSize: l.size, kling: k.prompt, klingNeg: k.negative, klingSet: k.settings } : null; }

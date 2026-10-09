@@ -2,7 +2,7 @@
 // 계층: 계산(sd) → deriveFacts → retrieve(구조화 필터) → modifiers → conflicts → buildPackage → composePlain/AI Composer → qualityCheck
 // 원칙: 새 명리 계산은 하지 않는다. sd(ReportV2.SajuData.build 결과)에 있는 값만 조건으로 쓴다. 없는 값은 UNSUPPORTED 로 표시하고 매칭에서 제외한다.
 export const IK_VERSION = 'ik1';
-export const COMPOSER_VERSION = 'cmp1';
+export const COMPOSER_VERSION = 'cmp3';
 
 export const DOMAINS = {
   SELF: '나 자신', MONEY: '재물', CAREER: '직업·사업', LOVE: '연애', MARRIAGE: '결혼', RELATIONSHIP: '인간관계', TIMING: '운의 흐름', ACTION: '행동/개운',
@@ -107,6 +107,13 @@ export function deriveFacts(sd, ext) {
   if (sd.roots) f.hasRoot = sd.roots.hasRoot ? '있음' : '없음'; f.rootLevel = sd.roots && sd.roots.level;
   const mb = sd.pillars && sd.pillars.month && sd.pillars.month.ko && sd.pillars.month.ko[1]; if (mb) { f.monthBranch = mb; f.season = BRANCH_SEASON[mb]; }
   f.dayBranch = sd.dayPillar.ko[1];
+  // 원국의 위치와 배합을 보존해 비중이 같은 서로 다른 원국을 구분한다.
+  f.natal = Object.fromEntries(['year', 'month', 'day', 'hour'].map(k => {
+    const p = sd.pillars && sd.pillars[k];
+    return [k, p ? { ko: p.ko, stemTG: p.stemTG, branchTG: p.branchTG, unseong: p.unseong, hidden: p.hidden || [] } : null];
+  }));
+  f.natalRelations = [...(sd.combinations || []), ...(sd.clashes || [])].map(r => ({ type: r.type, name: r.name, members: r.members || [] }));
+  f.usefulElements = sd.usefulElements || null;
   if (sd.usefulElements) f.yongEl = sd.usefulElements.yong;
   f.pattern = (sd.patterns || []).map(p => p.name); f.star = (sd.specialStars || []).map(s => s.name);
   const rel = new Set(); [...(sd.combinations || []), ...(sd.clashes || [])].forEach(r => { if (r.type) rel.add(r.type); if (r.name) rel.add(r.name); }); f.relation = [...rel];
@@ -296,7 +303,7 @@ export function suggestConds(f) {
 }
 function factSummary(f) {
   const lv = o => Object.keys(o || {}).map(k => k + ' ' + Math.round(o[k].pct) + '%(' + LEVEL_KO[o[k].level] + ')').join(' · ');
-  return { dayPillar: f.dayPillar, dayMaster: f.dayMaster, strength: f.strength, hasRoot: f.hasRoot, rootLevel: f.rootLevel, monthBranch: f.monthBranch, season: f.season, yongEl: f.yongEl, elements: lv(f.el), groups: lv(f.group), patterns: f.pattern, stars: f.star, relations: f.relation,
+  return { dayPillar: f.dayPillar, dayMaster: f.dayMaster, strength: f.strength, hasRoot: f.hasRoot, rootLevel: f.rootLevel, monthBranch: f.monthBranch, season: f.season, yongEl: f.yongEl, elements: lv(f.el), groups: lv(f.group), patterns: f.pattern, stars: f.star, relations: f.relation, natal: f.natal, natalRelations: f.natalRelations, usefulElements: f.usefulElements, tenGods: lv(f.tenGod),
     daewoonSeason: f.daewoonSeason, seunSeason: f.seunSeason, monthSeason: f.monthSeason, future: f.futureYears || null, nowYear: f.nowYear };
 }
 function packageConfidence(p) {
@@ -371,7 +378,14 @@ export function composerSystem(rules, domain) {
 - Section 의 status 가 "insufficient" 이면 그 Section 은 쓰지 말고 빈 배열로 둔다. 억지로 채우지 마라.
 - 모든 문단은 근거가 된 knowledge id 를 refs 로 단다. Package 의 items[].id 만 쓸 수 있다.
 - 사망·질병·사고·파산·범죄·임신·이혼·결혼·합격·투자수익을 확정하지 마라. "~할 수 있는 흐름", "~가능성이 상대적으로 커질 수 있다"처럼 경향으로 쓴다. "반드시·무조건·확정" 금지.
-- 순서: 사실 → 해석 → 현실 번역 → 사례 → 리스크 → 행동.
+- 원국 전체를 먼저 검토한다. 일간과 월령, 통근과 신강약, 오행·십성의 비중 및 각 기둥의 위치, 지장간, 합충의 참여 기둥, 용신·희신을 함께 읽는다. 하나의 시주·일주·십성만으로 성격이나 운을 결론 내리지 않는다. 단일 단서와 전체 구조가 다르면 차이를 설명하고 전체 구조를 우선한다. 자료가 없는 요소는 있다고 가정하지 않는다.
+- 자식운에서도 시주는 자녀궁이라는 국소 근거다. 원국 전체에서 자녀성의 배치와 세력, 일간의 감당과 지원 구조, 자녀궁과 다른 기둥의 관계를 종합한다. 시주를 모르면 나머지 원국에서 읽을 수 있는 내용은 쓰되 시주 관련 결론을 보류한다.
+- 구체적 행동 장면은 입력 근거에서 도출한 경향으로 쓴다. 확인하지 않은 과거 경험·가족 상황을 맞힌 것처럼 꾸미지 않는다. 서로 다른 근거가 어떤 상황에서 강점과 반복되는 부담으로 갈리는지 설명한다.
+- 순서: 핵심 해석 → 현실에서 쓰이는 강점 → 같은 힘이 지나치거나 받쳐 주지 못할 때의 약점 → 명리적 보완 방향 → 구체적인 실천 → 필요한 근거. Package에 있는 사실·principle·interpretation·risks·actions만 연결하고, 근거가 없는 장단점이나 처방은 억지로 채우지 않는다.
+- 말투는 차분하고 솔직한 상담체(~습니다·~입니다)로 통일한다. 신비로운 수사, 반말, 해요체, 빈 칭찬, 모욕적인 낙인은 쓰지 않는다. 불편한 약점도 왜 문제가 되는지와 조정할 조건을 함께 설명한다.
+- 신강·신약을 체력·의지·성공 능력의 등급으로 해석하지 않는다. 재성의 비중을 실제 재산으로, 십성의 부재를 해당 능력의 부재로 단정하지 않는다. 부족한 오행과 용신을 같게 취급하지 않는다. 솔루션은 입력의 신강약·용신·원칙과 맞는 것만 쓰고, 색·물건·방향만으로 운이 바뀐다고 하지 않는다.
+- 각 Section은 그 주제에 필요한 새 내용만 쓴다. 같은 성향·사례·조언을 다른 Section에서 반복하지 않는다. 같은 원인을 다시 인용할 때에는 적용되는 상황이나 대응이 어떻게 달라지는지 설명한다.
+- 상반된 특징은 어떤 조건에서 각각 나타나는지 밝혀 연결한다. 모든 문장에 가능성을 반복하기보다 해석의 범위를 처음에 밝히고, 장단점은 구체적인 행동으로 짚는다.
 - modifiers 의 effect 가 strengthen 이면 강화, soften 이면 완화, exception 이면 예외로 반영하고 replace 는 이미 interpretation 에 반영되어 있다.
 - conflicts 가 해결되었으면 winner 쪽만 쓴다. 해결되지 않은 충돌은 단정하지 말고 양면을 조건부로 쓴다.
 문체: ${TONE_KO[rl.tone]}. 설명 깊이: ${DEPTH_KO[rl.depth]}. 현실 사례는 Section 당 최대 ${rl.examples}개. 전문용어: ${JARGON_KO[rl.jargon]}(${rl.jargon === 'min' ? '비겁·식상·재성·관성·인성 같은 용어는 풀어서 쓴다' : '필요할 때 용어를 설명과 함께 쓴다'}). ${rl.balance !== false ? '장점과 리스크를 균형 있게 쓴다.' : ''} ${rl.actions !== false ? '행동 제안을 포함한다.' : '행동 제안은 쓰지 않는다.'}

@@ -8,7 +8,7 @@ const M = globalThis.Manse, R = globalThis.ReportV2, fails = [];
 const ok = (c, m) => { if (!c) fails.push(m); };
 const cfg = R.Chapters.forProject(null, 'full'), lib = R.Compose.library(null), now = Date.UTC(2026, 9, 5);
 const sdOf = (y, m, d, h, g) => R.SajuData.build(M.compute({ year: y, month: m, day: d, hour: h, minute: 0, calendar: 'solar', leap: false, gender: g, city: '서울' }), { now });
-const FIRST = '타고난 명(命)에는 한 가지 큰 동력이 있다.', BAN = /(반드시|무조건|확정|100%|틀림없)/;
+const FIRST = '타고난 명(命)에서 두드러지는 동력을 먼저 살펴봅니다.', BAN = /(반드시|무조건|확정|100%|틀림없)/;
 const cases = [[1990, 5, 17, 14, 'M'], [1984, 2, 10, 6, 'F'], [1974, 9, 3, 23, 'M'], [2000, 12, 25, 12, 'F'], [1964, 1, 15, 11, 'M'], [1992, 6, 23, 1, 'M']];
 const srcs = {};
 cases.forEach(c => {
@@ -17,13 +17,13 @@ cases.forEach(c => {
   ok(ch.headline === FIRST, '첫 문장 고정');
   ok(ch.scenes.map(s => s.sceneType).join('>') === 'chapterIntro>verdictFind>verdictBlock>verdictEvidence>verdictAdvice>chapterEnding', '장면 순서 ' + ch.scenes.map(s => s.sceneType));
   ok(v.potential.name === R.Verdict.POTENTIAL[sd.dominantGroup] && v.potential.pct === Math.round(sd.groups[sd.dominantGroup]), '잠재력 이름·%');
-  ok(v.discover.includes(v.potential.pct + '%') && /평균\(20%\)/.test(v.discover), '평균 대비 문장');
+  ok(v.discover.includes(v.potential.pct + '%') && /(?:균등 기준|다섯 군을 고르게 나눈 기준)\(20%\)/.test(v.discover), '평균 대비 문장');
   ok(v.blocked.text.length > 20 && v.blocked.id, '막힘 문장 1개 필수');
   ok(v.evidence && v.evidence.startYear === sd.currentDaewoon.startYear && v.evidence.text.includes(String(sd.currentDaewoon.startYear)), '증거: 대운 시작 연도');
   ok(JSON.stringify(v.advice.items) === JSON.stringify(rep.plan.checklist.slice(0, 2)) && v.advice.items.length === 2, '조언 = checklist 상위 2개 그대로');
   ok(!/\{[\w.가-힣]+\}/.test(v.discover + v.blocked.text + v.evidence.text), '미치환 템플릿 없음');
   ok(![v.discover, v.blocked.text, v.evidence.text, v.advice.lead].some(t => BAN.test(t)), '단정어 없음');
-  ok(!/(해요|이에요|예요|습니다|십시오)/.test(v.discover + v.evidence.text + v.advice.lead) && !/수호/.test(v.discover + v.evidence.text + v.evidence.yes + v.evidence.no + v.advice.lead), '서술체·수호신 없음');
+  ok(!/(해요|이에요|예요)/.test(v.discover + v.evidence.text + v.advice.lead) && !/수호/.test(v.discover + v.evidence.text + v.evidence.yes + v.evidence.no + v.advice.lead), '상담체·수호신 없음');
   ok(rep.meta.warnings.length === 0, '경고 0');
   console.log('■ ' + sd.dayPillar.ko + ' | ' + v.potential.name + ' ' + v.potential.pct + '% (' + v.potential.times + '배) | 막힘 ← ' + v.blocked.source + ':' + v.blocked.id + ' | 증거 ' + v.evidence.startYear + ' | 조언 ' + v.advice.items.length);
   srcs[v.blocked.source] = (srcs[v.blocked.source] || 0) + 1;

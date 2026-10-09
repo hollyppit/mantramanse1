@@ -19,7 +19,7 @@
   function bar(label, val, o) { // 가로 막대. val 0~100
     o = o || {}; var v = Math.round(clamp(val, 0, 100)); return '<div class="dp-bar' + (o.cls ? ' ' + o.cls : '') + '"><span class="dp-bl">' + esc(label) + '</span><span class="dp-bt"><i style="width:' + v + '%' + (o.color ? ';background:' + o.color : '') + '"></i></span><b>' + esc(o.text != null ? o.text : v) + '</b></div>';
   }
-  var HJ_PH = { car: '車', spouse: '緣', past: '前', career: '業', place: '處', wealth: '器', style: '裝' };
+  var HJ_PH = { car: '車', spouse: '緣', past: '前', career: '業', place: '處', wealth: '器', style: '裝', children: '育' };
   // 이미지 슬롯: 관리자가 만든 이미지가 있으면 보여 주고, 없으면 같은 자리에 한자 자리표시
   function fig(H, slot, kind, alt, cls) {
     var base = slot.replace(/^(past:[^:]+:[^:]+):[FM]$/, '$1'), u = H.assets && (H.assets[slot] || H.assets[base]), v = u && H.videos && (H.videos[slot] || (H.assets[slot] ? '' : H.videos[base])); // 영상은 이미지와 같은 슬롯에서 온 것만(전생 대체 슬롯 포함)
@@ -69,12 +69,12 @@
   SECTIONS.deep_car = function (H) {
     var sd = H.sd, st = sd.dayMaster.stem, car = CAR[st] || CAR.갑, g = sd.groups, strong = sd.strength.band, el = sd.dayMaster.el, yong = sd.usefulElements && sd.usefulElements.yong;
     var out = [], lv = function (v) { return v >= 25 ? '높음' : v >= 12 ? '보통' : '낮음'; };
-    out.push(scene(sec('dp-hero', cap('MY CAR · 내 사주를 자동차에 비유하면') + fig(H, 'car:' + st, 'car', car[0], '') + '<h3 class="dp-h">' + esc(nz(H) + ' ' + car[0] + '예요') + '</h3><p class="lead">' + esc(car[1]) + '</p>' +
-      '<p class="dp-note">타고난 일간 <b>' + esc(st + '(' + (sd.dayMaster.hanja || '') + EL_HJ[el] + ')') + '</b>의 성질을 자동차로 옮긴 비유예요. 좋고 나쁨이 아니라 "어떤 차인지"를 알면 운전이 쉬워집니다.</p>')));
-    var pb = PARTS.map(function (p) { var v = g[p[0]] || 0; return '<div class="dp-part"><div class="dp-ph1"><b>' + esc(p[1]) + '</b><small>' + esc(p[0] + ' · ' + p[2]) + '</small></div>' + bar(lv(v), v * 2, { text: Math.round(v) + '%', color: v >= 25 ? '#D9694F' : v < 12 ? '#6B7A99' : '' }) + '<p>' + esc(v >= 25 ? p[3] : v < 12 ? p[4] : '무난하게 균형이 맞아 큰 문제는 없습니다.') + '</p></div>'; }).join('');
-    out.push(scene(sec('', cap('차량 사양 · 부품별 점검') + '<p class="dp-lead2">같은 차종이라도 부품 상태는 사람마다 달라요. 아래 막대가 길수록 그 부품이 <b>강하게</b> 달려 있다는 뜻입니다.</p><div class="dp-parts">' + pb + '</div>')));
-    var eng = strong === '신강' ? '배기량이 큰 차예요. 힘은 넘치지만 연료(에너지)를 쓸 곳이 없으면 과열됩니다.' : strong === '신약' ? '배기량이 작고 효율형인 차예요. 가볍게 잘 달리지만 큰 짐과 긴 오르막에서는 쉽게 지칩니다.' : '배기량이 적당한 균형형 차예요. 어떤 도로에서도 무난하게 달립니다.';
-    out.push(scene(sec('', cap('엔진 · 연료 · 정비') + '<div class="dp-grid2"><div class="dp-card"><h4>엔진 (일간의 힘)</h4><p>' + esc(eng) + '</p></div><div class="dp-card"><h4>잘 맞는 연료</h4><p>' + (yong ? '이 차는 <b>' + esc(yong + '(' + EL_HJ[yong] + ')') + '</b> 기운을 넣을 때 가장 잘 달립니다. 고급 연료를 넣어도 맞지 않는 연료(기신)를 많이 넣으면 노킹이 생겨요.' : '용신을 정할 수 없어 균형 잡힌 일반 연료가 무난합니다.') + '</p></div></div>' +
+    out.push(scene(sec('dp-hero', cap('MY CAR · 내 사주를 자동차에 비유하면') + fig(H, 'car:' + st, 'car', car[0], '') + '<h3 class="dp-h">' + esc(nz(H) + ' ' + car[0] + '입니다') + '</h3><p class="lead">' + esc(car[1]) + '</p>' +
+      '<p class="dp-note">타고난 일간 <b>' + esc(st + '(' + (sd.dayMaster.hanja || '') + EL_HJ[el] + ')') + '</b>의 성질을 자동차로 옮긴 비유입니다. 좋고 나쁨이 아니라 "어떤 차인지"를 알면 운전이 쉬워집니다.</p>')));
+    var pb = PARTS.map(function (p) { var v = g[p[0]] || 0; return '<div class="dp-part"><div class="dp-ph1"><b>' + esc(p[1]) + '</b><small>' + esc(p[0] + ' · ' + p[2]) + '</small></div>' + bar(lv(v), v * 2, { text: Math.round(v) + '%', color: v >= 25 ? '#D9694F' : v < 12 ? '#6B7A99' : '' }) + '<p>' + esc(v >= 25 ? p[3] : v < 12 ? p[4] : '비중만으로는 특별한 장점이나 문제를 단정하기 어렵습니다.') + '</p></div>'; }).join('');
+    out.push(scene(sec('', cap('차량 사양 · 부품별 점검') + '<p class="dp-lead2">같은 차종이라도 부품 상태는 사람마다 다릅니다. 아래 막대가 길수록 그 부품이 <b>강하게</b> 달려 있다는 뜻입니다.</p><div class="dp-parts">' + pb + '</div>')));
+    var eng = strong === '신강' ? '일간을 돕는 기운이 우세한 구조입니다. 운전의 비유로는 내 힘을 어디에 쓸지 정하는 일이 중요하며, 체력이나 성공 능력이 크다는 뜻은 아닙니다.' : strong === '신약' ? '일간을 돕는 기운보다 밖으로 쓰거나 감당할 기운이 우세한 구조입니다. 지원과 책임의 배분을 먼저 살피며, 체력이나 의지가 약하다는 뜻은 아닙니다.' : '일간을 돕는 힘과 밖으로 쓰는 힘의 쏠림이 크지 않은 구조입니다. 실제로 감당할 일의 양은 상황과 준비에 따라 달라집니다.';
+    out.push(scene(sec('', cap('엔진 · 연료 · 정비') + '<div class="dp-grid2"><div class="dp-card"><h4>엔진 (일간의 힘)</h4><p>' + esc(eng) + '</p></div><div class="dp-card"><h4>잘 맞는 연료</h4><p>' + (yong ? '이 차는 <b>' + esc(yong + '(' + EL_HJ[yong] + ')') + '</b> 기운을 균형의 보완 방향으로 읽습니다. 색이나 물건을 더하는 것보다, 그 기운이 맡는 역할을 생활에서 어떻게 쓸지 살피는 비유입니다.' : '용신을 특정할 근거가 부족하므로, 한 기운을 더하거나 줄이는 처방은 하지 않습니다.') + '</p></div></div>' +
       '<div class="dp-pc"><div class="dp-pro"><h4>장점</h4><ul>' + carPros(H, car).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div><div class="dp-con"><h4>단점 · 정비 포인트</h4><ul>' + carCons(H, car).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div></div>')));
     var road = sd.currentDaewoon, se = sd.sewoon, mo = sd.monthlyLuck && sd.monthlyLuck[0];
     out.push(scene(sec('', cap('지금 달리는 도로 · 날씨') + '<div class="dp-road">' +
@@ -85,17 +85,17 @@
   };
   function carPros(H, car) {
     var sd = H.sd, a = [], g = sd.groups; a.push(car[1].split('. ')[0].replace(/[.]$/, '') + '.');
-    if (sd.strength.band === '신강') a.push('엔진 힘이 좋아 밀어붙이는 추진력이 있습니다.'); if (sd.strength.band === '신약') a.push('가볍고 눈치가 빨라 변화하는 도로에 잘 적응합니다.');
+    if (sd.strength.band === '신강') a.push('스스로 판단하는 힘을 목표와 역할이 분명한 일에 집중할 수 있습니다.'); if (sd.strength.band === '신약') a.push('필요한 지원을 확보하고 책임을 나누는 전략을 살필 수 있습니다.');
     if (g.식상 >= 20) a.push('핸들링이 좋아 아이디어와 표현으로 길을 만듭니다.'); if (g.관성 >= 20) a.push('브레이크와 안전장치가 잘 갖춰져 책임감 있게 운전합니다.'); if (g.인성 >= 20) a.push('내비게이션이 좋아 길을 잃어도 방향을 잘 찾습니다.'); if (g.재성 >= 20) a.push('트렁크가 커서 성과와 현실적인 이득을 챙기는 데 능합니다.'); if (g.비겁 >= 20) a.push('동승자(동료)와 함께 갈 때 힘이 배가됩니다.');
     return a.slice(0, 4);
   }
   function carCons(H, car) {
     var sd = H.sd, a = [], g = sd.groups, rest = car[1].split('. ').slice(1).join('. ');
     if (rest) a.push(rest.replace(/[.]$/, '') + '.');
-    if (g.관성 >= 30) a.push('브레이크가 지나치게 세서 늘 눌려 있는 느낌, 스트레스가 쌓이기 쉽습니다.'); if (g.비겁 >= 30) a.push('엔진 과열(고집·경쟁심) 때문에 주변과 부딪히기 쉽습니다.'); if (g.식상 >= 30) a.push('말과 행동이 앞서 실수를 만들 수 있어요.');
-    if (g.재성 < 10) a.push('트렁크가 작아 돈과 성과를 쌓아 두기 어렵습니다. 관리 습관이 필요해요.'); if (g.인성 < 10) a.push('내비게이션이 약해 혼자 결정하다 길을 헤맬 수 있습니다.');
+    if (g.관성 >= 30) a.push('브레이크가 지나치게 세서 늘 눌려 있는 느낌, 스트레스가 쌓이기 쉽습니다.'); if (g.비겁 >= 30) a.push('엔진 과열(고집·경쟁심) 때문에 주변과 부딪히기 쉽습니다.'); if (g.식상 >= 30) a.push('말과 행동이 앞서 실수를 만들 수 있습니다.');
+    if (g.재성 < 10) a.push('트렁크가 작아 돈과 성과를 쌓아 두기 어렵습니다. 관리 습관이 필요합니다.'); if (g.인성 < 10) a.push('내비게이션이 약해 혼자 결정하다 길을 헤맬 수 있습니다.');
     if ((sd.clashes || []).length >= 3) a.push('원국 안의 충·형(' + sd.clashes.length + '개)이 차체를 덜컹이게 해, 변화와 마음 흔들림이 잦습니다.');
-    if (sd.strength.band === '신약') a.push('엔진 힘이 작아 오래 달리면 쉽게 지치므로 중간 휴식이 필수입니다.');
+    if (sd.strength.band === '신약') a.push('감당할 역할과 확보한 지원을 함께 점검하며, 책임이 한쪽으로 몰리지 않게 해야 합니다.');
     return a.slice(0, 4);
   }
 
@@ -125,14 +125,14 @@
     var hi = order[0], lo = order[4], hip = GRP_PC[hi], lop = GRP_PC[lo];
     if (hip) { pros.push([hip[0][0], hi + ' ' + Math.round(g[hi]) + '%로 가장 강함']); cons.push([hip[0][1], hi + ' ' + Math.round(g[hi]) + '%로 과하면']); }
     if (lop) { pros.push([lop[1][0], lo + ' ' + Math.round(g[lo]) + '%로 가장 약함']); cons.push([lop[1][1], lo + ' ' + Math.round(g[lo]) + '%로 가장 약함']); }
-    if (sd.strength.band === '신강') { pros.push(['자기 힘이 있어 쉽게 무너지지 않습니다', '신강(내 편 기운이 많음)']); cons.push(['내 방식이 옳다고 믿어 조언을 흘려듣습니다', '신강(내 편 기운이 많음)']); }
-    if (sd.strength.band === '신약') { pros.push(['환경과 사람을 읽는 눈이 좋습니다', '신약(내 편 기운이 적음)']); cons.push(['에너지가 쉽게 소진되고 큰 책임 앞에서 위축됩니다', '신약(내 편 기운이 적음)']); }
+    if (sd.strength.band === '신강') { pros.push(['일간을 돕는 힘을 자기 기준을 유지하는 방향으로 활용할 수 있습니다', '신강(내 편 기운이 많음)']); cons.push(['내 판단을 고수하다 필요한 지원과 조언을 놓칠 수 있습니다', '신강(내 편 기운이 많음)']); }
+    if (sd.strength.band === '신약') { pros.push(['지원과 협업으로 맡은 부담을 나누는 방향을 살필 수 있습니다', '신약(내 편 기운이 적음)']); cons.push(['지원 없이 책임을 계속 늘리면 부담이 커질 수 있습니다', '신약(내 편 기운이 적음)']); }
     var cl = sd.clashes || []; if (cl.length >= 2) cons.push(['원국 안에서 서로 부딪히는 글자가 ' + cl.length + '개라 마음이 자주 흔들리고 변화가 많습니다', cl.slice(0, 2).map(function (c) { return c.name; }).join('·') + ' 등']);
     var cm = sd.combinations || []; if (cm.length) pros.push(['서로 끌어당기는 합(' + cm.slice(0, 2).map(function (c) { return c.name; }).join('·') + ')이 있어 인연과 협력의 실마리가 있습니다', '원국의 합']);
     var bad = (sd.specialStars || []).filter(function (x) { return !x.good; }).slice(0, 2), good = (sd.specialStars || []).filter(function (x) { return x.good; }).slice(0, 2);
     good.forEach(function (x) { pros.push([x.name + '의 도움이 따르는 사주입니다', '신살']); }); bad.forEach(function (x) { cons.push([x.name + '의 기운이 있어 그 영역에서 조심이 필요합니다', '신살']); });
     var li = function (a) { return '<li><span>' + esc(a[0]) + '</span><em>근거 · ' + esc(a[1]) + '</em></li>'; };
-    var out = [scene(sec('', cap('솔직한 장단점') + '<p class="lead">좋은 말만 들려 드리면 도움이 안 되니까, ' + esc(who(H)) + '의 사주에서 읽히는 <b>장점과 단점을 같은 무게로</b> 적어 봅니다. 단점은 "고쳐야 할 결함"이 아니라 "알고 쓰면 덜 아픈 부분"이에요.</p>')),
+    var out = [scene(sec('', cap('솔직한 장단점') + '<p class="lead">좋은 말만 들려 드리면 도움이 안 되니까, ' + esc(who(H)) + '의 사주에서 읽히는 <b>장점과 단점을 같은 무게로</b> 적어 봅니다. 단점은 "고쳐야 할 결함"이 아니라 "알고 쓰면 덜 아픈 부분"입니다.</p>')),
       scene(sec('', '<div class="dp-pc"><div class="dp-pro"><h4>장점</h4><ul>' + pros.slice(0, 7).map(li).join('') + '</ul></div><div class="dp-con"><h4>단점</h4><ul>' + cons.slice(0, 7).map(li).join('') + '</ul></div></div>'))];
     var line = (sd.strength.band === '신강' ? '힘은 충분하니 "쓰는 방향"이 숙제' : sd.strength.band === '신약' ? '재능은 있으니 "지치지 않는 구조"가 숙제' : '균형은 좋으니 "한 가지에 집중하는 용기"가 숙제') + '인 사주입니다.';
     out.push(scene(sec('', cap('한 줄 총평') + '<p class="lead rd-hl">' + esc(line) + '</p>')));
@@ -153,12 +153,12 @@
     역마살: ['끊임없이 움직이는 이동의 기운', '이동·출장·해외·변화 속에서 기회를 만납니다', '정착이 어렵고 마음이 늘 바쁩니다'], 육해살: ['소모되고 피로해지는 기운', '남을 돌보는 헌신적인 면이 있습니다', '잔병·관계 피로·에너지 누수를 조심하세요'], 화개살: ['예술·종교·고독의 기운', '예술성과 정신세계, 깊은 사색이 있습니다', '혼자 있고 싶어 하고 외로움을 탈 수 있습니다'] };
   SECTIONS.deep_stages = function (H) {
     var sd = H.sd, out = [], ts = sd.twelveStages || {}, s12 = sd.sinsal12 || {};
-    out.push(scene(sec('', cap('12운성 · 내 에너지의 단계') + '<p class="lead">12운성은 우리가 태어나서 자라고 시들고 다시 태어나는 <b>12단계의 에너지 리듬</b>이에요. 사주의 네 자리(년·월·일·시)마다 어느 단계에 있는지로 그 자리의 성질을 읽습니다.</p>')));
+    out.push(scene(sec('', cap('12운성 · 내 에너지의 단계') + '<p class="lead">12운성은 우리가 태어나서 자라고 시들고 다시 태어나는 <b>12단계의 에너지 리듬</b>입니다. 사주의 네 자리(년·월·일·시)마다 어느 단계에 있는지로 그 자리의 성질을 읽습니다.</p>')));
     var cards = ['year', 'month', 'day', 'hour'].filter(function (k) { return ts[k] && UNSEONG[ts[k]]; }).map(function (k) { var n = ts[k], u = UNSEONG[n], P = PILLAR[k], pil = sd.pillars[k];
       return '<div class="dp-card dp-us"><div class="dp-us1"><b>' + esc(P[0]) + '</b><span>' + esc(pil.ko + ' (' + pil.hanja + ')') + '</span></div><div class="dp-us2">' + esc(n) + '</div><small>' + esc(P[1]) + '</small><p><em>' + esc(u[0]) + '</em></p><p class="dp-pl">＋ ' + esc(u[1]) + '</p><p class="dp-mi">－ ' + esc(u[2]) + '</p></div>'; });
     out.push(scene(sec('', '<div class="dp-grid2">' + cards.join('') + '</div>')));
-    var dn = ts.day && UNSEONG[ts.day]; if (dn) out.push(scene(sec('', cap('나의 일주 운성 ' + ts.day) + '<p class="lead">' + esc(nz(H) + ' 태어난 날의 자리(일지)가 "' + ts.day + '" 단계예요. ' + dn[0] + '입니다. ' + dn[1] + '. 다만 ' + dn[2] + '.') + '</p>')));
-    out.push(scene(sec('', cap('12신살 · 사주에 붙은 성격표') + '<p class="lead">12신살은 년지(태어난 해의 띠)를 기준으로 각 자리에 붙는 <b>열두 가지 성질표</b>예요. 이름이 무서워도 "나쁜 운명"이 아니라 그 자리의 에너지가 이런 모양으로 쓰이기 쉽다는 뜻입니다.</p>')));
+    var dn = ts.day && UNSEONG[ts.day]; if (dn) out.push(scene(sec('', cap('나의 일주 운성 ' + ts.day) + '<p class="lead">' + esc(nz(H) + ' 태어난 날의 자리(일지)가 "' + ts.day + '" 단계입니다. ' + dn[0] + '입니다. ' + dn[1] + '. 다만 ' + dn[2] + '.') + '</p>')));
+    out.push(scene(sec('', cap('12신살 · 사주에 붙은 성격표') + '<p class="lead">12신살은 년지(태어난 해의 띠)를 기준으로 각 자리에 붙는 <b>열두 가지 성질표</b>입니다. 이름이 무서워도 "나쁜 운명"이 아니라 그 자리의 에너지가 이런 모양으로 쓰이기 쉽다는 뜻입니다.</p>')));
     var seen = {}, rows = ['year', 'month', 'day', 'hour'].filter(function (k) { return s12[k] && SINSAL[s12[k]]; }).map(function (k) { var n = s12[k], x = SINSAL[n], P = PILLAR[k], nm = n === '연살' ? '연살(도화살)' : n; seen[n] = 1;
       return '<div class="dp-sin"><div class="dp-sin1"><b>' + esc(nm) + '</b><small>' + esc(P[0] + ' · ' + P[1]) + '</small></div><p>' + esc(nz(H) + ' ' + P[0] + '에 ' + nm + '을 타고났으니, ' + x[1] + '. 다만 ' + x[2] + '.') + '</p></div>'; });
     out.push(scene(sec('', rows.join(''))));

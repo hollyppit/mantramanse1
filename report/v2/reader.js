@@ -146,7 +146,7 @@
       pages.forEach(function (p) {
         offs.push(total); total += p.dur; p.y = anchorY(p, vh, maxY); p.choice = false;
       });
-      secs.forEach(function (sec) { if (sec.querySelector('.vd,[data-stop]')) { for (var i = pages.length - 1; i >= 0; i--) if (pages[i].sec === sec || pages[i].items.some(function (x) { return x.sec === sec; })) { pages[i].choice = true; break; } } });
+      secs.forEach(function (sec) { var answer = sec.querySelector('.rd-answer'); if (answer && answer.dataset.completed === '1') return; if (sec.querySelector('.vd,[data-stop]')) { for (var i = pages.length - 1; i >= 0; i--) if (pages[i].sec === sec || pages[i].items.some(function (x) { return x.sec === sec; })) { pages[i].choice = true; break; } } });
       if (keep) for (var i = 0; i < pages.length; i++) if (pages[i].items.some(function (x) { return x.el === keep; })) { if (i !== pi) { pi = i; if (state !== 'PLAYING') remain = pages[i].dur * 1000 / rate; } break; }
       if (!remain && pages[pi]) remain = pages[pi].dur * 1000 / rate; ui();
     }
@@ -175,7 +175,7 @@
       if (dead) return; clearTimers(); if (i >= pages.length) { finish(); return; } pi = Math.max(0, i); var p = pages[pi]; userMoved = false;
       if (scrollOn) moveTo(p.y, Math.max(260, Math.min(900, Math.max(420, Math.abs(p.y - win.scrollY) * 0.7)) / Math.max(1, rate * 0.6))); // MOVE (0.4~0.9초) 뒤에는 움직이지 않는다 = HOLD
       setCur(p.sec); remain = pageMs(p);
-      if (f.stopAtChoice && p.choice && !p.choiceDone) { p.choiceDone = true; state = 'PAUSED'; pausedBy = 'choice'; ui(); showNote('선택하면 이어집니다'); return; }
+      if (f.stopAtChoice && p.choice && !p.choiceDone) { p.choiceDone = true; state = 'PAUSED'; pausedBy = 'choice'; ui(); showNote('상황을 선택해 더 읽거나, 선택 없이 이어갈 수 있습니다'); return; }
       ui(); begin();
     }
     function finish() { clearTimers(); state = 'ENDED'; pi = Math.max(0, pages.length - 1); remain = 0; ui(); if (o.onEnd) o.onEnd(); }

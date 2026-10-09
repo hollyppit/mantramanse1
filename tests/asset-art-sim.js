@@ -8,9 +8,9 @@ vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8'), { fil
 (async () => {
   const A = await imp('functions/_assetart.js'), API = await imp('functions/api/asset-art.js'), PUB = await imp('functions/api/assets.js'), M = globalThis.Manse, R = globalThis.ReportV2, now = Date.UTC(2026, 9, 8);
   console.log('1. 슬롯 목록');
-  const sl = A.slots(); ok(sl.length === 128 && new Set(sl.map(s => s.id)).size === 128, '슬롯 128개(자동차10·직업12·배우자24·전생50·재물그릇12·장소10·스타일10): ' + sl.length);
+  const sl = A.slots(); ok(sl.length === 138 && new Set(sl.map(s => s.id)).size === 138, '슬롯 138개(자동차10·직업12·배우자24·전생50·재물그릇12·장소10·스타일10·자식운10): ' + sl.length);
   ok(sl.every(s => A.promptOf(s.id, {}).length > 80 && /글자·숫자/.test(A.promptOf(s.id, {}))), '모든 슬롯에 프롬프트(글자 금지 포함)');
-  ok(sl.every(s => /^[\w.-]+$/.test(A.keyOf(s.id))) && new Set(sl.map(s => A.keyOf(s.id))).size === 128, 'R2 키는 영문·숫자만, 슬롯마다 유일');
+  ok(sl.every(s => /^[\w.-]+$/.test(A.keyOf(s.id))) && new Set(sl.map(s => A.keyOf(s.id))).size === 138, 'R2 키는 영문·숫자만, 슬롯마다 유일');
   console.log('2. 뷰어 슬롯이 서버 목록에 있다');
   const ids = new Set(sl.map(s => s.id)), used = new Set(); let n = 0;
   for (let y = 1950; y <= 2005; y += 3) for (const g of ['M', 'F']) { n++; const ch = M.compute({ year: y, month: 1 + (y % 12), day: 1 + (y % 27), hour: y % 24, minute: 0, calendar: 'solar', leap: false, gender: g, city: '서울' }), sd = R.SajuData.build(ch, { now }), H = { M, ch, sd, now, name: '', assets: {} };
@@ -33,7 +33,7 @@ vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8'), { fil
   const old = r.d.url.split('k=')[1]; r = await post({ slot: 'car:경' }); ok(r.s === 200 && !r2.has(old), '바로 생성(전체 만들기용): 옛 파일은 삭제되고 새 주소로 교체');
   r = await post({ slot: 'spouse:오:F', fromCurrent: true }); ok(r.s === 400, '현재 이미지가 없으면 바탕 수정은 거부');
   r = await post({ slot: 'zzz:1' }); ok(r.s === 400, '없는 슬롯 거부'); r = await post({ discard: 'asset-car_x.webp' }); ok(r.s === 400, '확정된 파일은 discard 로 못 지운다');
-  const lst = await (await API.onRequestGet({ request: new Request('http://x/a', { headers: H }), env })).json(); ok(lst.slots.length === 128 && lst.slots.find(s => s.id === 'car:경').url && lst.groups.car, '관리자 GET: 슬롯 목록·현재 이미지');
+  const lst = await (await API.onRequestGet({ request: new Request('http://x/a', { headers: H }), env })).json(); ok(lst.slots.length === 138 && lst.slots.find(s => s.id === 'car:경').url && lst.groups.car, '관리자 GET: 슬롯 목록·현재 이미지');
   if (fails.length) { console.log('\n실패 ' + fails.length + '건'); fails.forEach(f => console.log(' ✗ ' + f)); process.exit(1); }
   console.log('\n풀이 이미지 슬롯 검증 모두 통과');
 })();

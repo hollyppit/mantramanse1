@@ -39,11 +39,14 @@
   // 서술 파트 문체 검사: '당신'·합쇼체(~습니다/~합니다/~입니다)·명령형(~하세요/~세요)이 있으면 서술체가 아니다.
   var NARR_BAD = /당신|니다(?=[.!?…\s"'”’)]|$)|세요/;
   function isNarrative(text) { return !NARR_BAD.test(String(text || '')); }
+  // 풀이 본문은 차분한 상담체(~습니다). 시네마의 짧은 서술체 검사는 isNarrative로 유지한다.
+  var READING_BAD = /당신|(?:이에요|예요|해요|있어요|없어요|거든요|잖아요|볼게요|세요)(?=[.!?…\s"'”’)]|$)/;
+  function isReading(text) { return !READING_BAD.test(String(text || '')); }
   // 허용되는 자리표시자만 남았는지(AI 가 {hero} 를 지어내거나 깨뜨리지 않았는지)
   function placeholdersOk(text) {
     var m = String(text || '').match(/\{[^{}]*\}/g) || [];
     return m.every(function (t) { return KEYS.indexOf(t.slice(1, -1)) >= 0; });
   }
 
-  R.Narrator = { hero: hero, josa: josa, attach: attach, batchim: batchim, heroVars: heroVars, fill: fill, isNarrative: isNarrative, placeholdersOk: placeholdersOk, KEYS: KEYS, NARR_BAD: NARR_BAD };
+  R.Narrator = { hero: hero, josa: josa, attach: attach, batchim: batchim, heroVars: heroVars, fill: fill, isNarrative: isNarrative, isReading: isReading, READING_BAD: READING_BAD, placeholdersOk: placeholdersOk, KEYS: KEYS, NARR_BAD: NARR_BAD };
 })(typeof window !== 'undefined' ? window : globalThis);

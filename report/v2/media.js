@@ -75,7 +75,7 @@
     element: ['wood', 'fire', 'earth', 'metal', 'water'],
     state: ['growth', 'expansion', 'accumulation', 'transition', 'defense', 'recovery', 'conflict', 'opportunity', 'isolation', 'connection'],
     scene: ['forest', 'ocean', 'river', 'mountain', 'city', 'library', 'road', 'night', 'sunrise', 'sunset', 'rain', 'mist'],
-    theme: ['career', 'wealth', 'love', 'marriage', 'relationship', 'family', 'study', 'creation', 'leadership', 'travel'],
+    theme: ['career', 'wealth', 'love', 'marriage', 'children', 'relationship', 'family', 'study', 'creation', 'leadership', 'travel'],
   };
 
   // 일간 소개·일주 영상의 제목·부제가 "다른 일간"을 말하고 있는지 검사한다(관리자 입력 오류 방지: 기토 영상에 경금 문구를 붙여 넣은 경우 등).

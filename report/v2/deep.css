@@ -69,3 +69,12 @@
 .dp-tl-list .dp-bar { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
 
 .dp-fig video { width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; display: block; }
+
+/* 일주명은 제목, 같은 일주 유명인은 보조 정보로 읽힌다. */
+.dp-ilju .dp-iname b { color: var(--gold-l); font-family: var(--f-serif); font-size: 1.12rem; line-height: 1.5; }
+.dp-ilju .dp-ifam { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 5px 12px; margin-top: 3px; padding: 8px 0; border-top: 1px solid var(--line2); font-weight: 400; line-height: 1.75; }
+.dp-ifam-label { color: #A9BBC7; font-size: .72rem; font-weight: 400; letter-spacing: .01em; }
+.dp-ifam-names { color: var(--ink2); font-size: .84rem; font-weight: 400; }
+.dp-ifam-person { display: inline-block; }
+.dp-ifam-sep { color: var(--ink3); }
+@media (max-width: 420px) { .dp-ilju .dp-ifam { grid-template-columns: 1fr; gap: 2px; } }

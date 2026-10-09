@@ -33,7 +33,7 @@
   function cands(rows, nameOf, unit) { // 기회 후보 / 방어 후보
     var open = rows.filter(function (r) { return OPEN[r.season] || r.pct >= 60; }).sort(function (a, b) { return b.pct - a.pct; }).slice(0, 3), guard = rows.filter(function (r) { return r.season === 'defense' || r.volatile || r.pct <= 42; }).sort(function (a, b) { return a.pct - b.pct; }).slice(0, 3);
     var li = function (r, i, why) { return '<li><span>' + (i + 1) + '순위 · <b>' + esc(nameOf(r)) + '</b> <small>' + esc(SEA[r.season] || '') + '</small></span><em>' + esc(why(r)) + '</em></li>'; };
-    return '<div class="dp-pc"><div class="dp-pro"><h4>기회를 잡을 ' + unit + ' 후보</h4><ul>' + (open.length ? open.map(function (r, i) { return li(r, i, whyOpen); }).join('') : '<li><span>뚜렷한 기회 구간은 없어요 — 꾸준히 쌓는 시기입니다</span></li>') + '</ul></div><div class="dp-con"><h4>방어해야 할 ' + unit + ' 후보</h4><ul>' + (guard.length ? guard.map(function (r, i) { return li(r, i, whyGuard); }).join('') : '<li><span>크게 조심할 구간은 없어요</span></li>') + '</ul></div></div>';
+    return '<div class="dp-pc"><div class="dp-pro"><h4>기회를 잡을 ' + unit + ' 후보</h4><ul>' + (open.length ? open.map(function (r, i) { return li(r, i, whyOpen); }).join('') : '<li><span>뚜렷한 기회 구간은 없습니다 — 꾸준히 쌓는 시기입니다</span></li>') + '</ul></div><div class="dp-con"><h4>방어해야 할 ' + unit + ' 후보</h4><ul>' + (guard.length ? guard.map(function (r, i) { return li(r, i, whyGuard); }).join('') : '<li><span>크게 조심할 구간은 없습니다</span></li>') + '</ul></div></div>';
   }
 
   // ───────── 대운 · 나이대별 솔직한 한마디 ─────────
@@ -62,7 +62,7 @@
   S.deep_daewoon = function (H) {
     var M = H.M, sd = H.sd, list = H.ch.daeun.list, cur = -1, rows = list.map(function (x, i) { var r = row(H, x, M.gzNameK(x) + ' 대운', '운'); r.a1 = x.startAge; r.a2 = x.startAge + 9; r.y1 = x.startYear; r.blunt = bluntOf(r); if (sd.currentDaewoon && sd.currentDaewoon.startYear === x.startYear) cur = i; return r; });
     var dec = function (r) { return r.a1 < 10 ? '유년' : Math.floor((r.a1 + 4) / 10) * 10 + '대'; };
-    var out = [scene(sec('', cap('대운 지도 · 10년마다 바뀌는 인생의 길') + '<p class="lead">대운은 <b>10년 단위로 바뀌는 큰 도로</b>예요. ' + esc(who(H)) + '은(는) 지금 <b>' + esc(cur >= 0 ? rows[cur].gz + ' 대운(' + rows[cur].a1 + '~' + rows[cur].a2 + '세)' : '대운이 시작되기 전') + '</b>을 지나고 있어요. 대운 이름(예: 신해·병오)과 나이대, "이 시기에 어떤 일을 하게 되는지"를 한눈에 모았습니다.</p>' + line(rows, rows.map(function (r) { return r.gz; }), cur))),
+    var out = [scene(sec('', cap('대운 지도 · 10년마다 바뀌는 인생의 길') + '<p class="lead">대운은 <b>10년 단위로 바뀌는 큰 도로</b>입니다. ' + esc(who(H)) + '은(는) 지금 <b>' + esc(cur >= 0 ? rows[cur].gz + ' 대운(' + rows[cur].a1 + '~' + rows[cur].a2 + '세)' : '대운이 시작되기 전') + '</b>을 지나고 있습니다. 대운 이름(예: 신해·병오)과 나이대, "이 시기에 어떤 일을 하게 되는지"를 한눈에 모았습니다.</p>' + line(rows, rows.map(function (r) { return r.gz; }), cur))),
       scene(sec('', cap('10년씩 보는 나의 대운') + rows.map(function (r, i) { return card(r, dec(r), r.a1 + '~' + r.a2 + '세 · ' + D.ageSpan(r.a1, r.a2), i === cur); }).join('')))];
     out.push(scene(sec('', cap('대운으로 보는 기회와 방어') + cands(rows, function (r) { return r.gz + ' 대운 (' + r.a1 + '~' + r.a2 + '세)'; }, '대운'))));
     return { title: '대운 지도', sub: '10년마다 바뀌는 인생의 길 · 시기별로 하게 될 일', scenes: out, rows: rows };
@@ -71,7 +71,7 @@
   // ───────── 세운 ─────────
   S.deep_seun = function (H) {
     var M = H.M, sd = H.sd, Y = sd.nowYear, list = M.seunRange(H.ch, Y, Y + 9), rows = list.map(function (x, i) { var r = row(H, x, x.year + '년 ' + M.gzNameK(x), '해'); var d; try { d = M.evaluateDomainLuck(H.ch, x, 'seun'); } catch (e) { } r.love = d && d.love && d.love.score; r.wealth = d && d.wealth && d.wealth.score; r.year = x.year; return r; });
-    var out = [scene(sec('', cap('세운 지도 · 앞으로 10년, 해마다') + '<p class="lead">세운은 <b>해마다 바뀌는 날씨</b>예요. 대운이라는 큰 도로 위에서 올해부터 10년을 한 해씩 봅니다. 해마다 "무엇을 하게 될 해인지"를 제목으로 붙였어요.</p>' + line(rows, rows.map(function (r) { return String(r.year); }), 0))),
+    var out = [scene(sec('', cap('세운 지도 · 앞으로 10년, 해마다') + '<p class="lead">세운은 <b>해마다 바뀌는 날씨</b>입니다. 대운이라는 큰 도로 위에서 올해부터 10년을 한 해씩 봅니다. 해마다 "무엇을 하게 될 해인지"를 제목으로 붙였습니다.</p>' + line(rows, rows.map(function (r) { return String(r.year); }), 0))),
       scene(sec('', cap('해마다 하게 될 일') + rows.map(function (r, i) { var c = card(r, String(r.year), r.gz.replace(/^\d+년 /, '') + ' · ' + (Y + i - sd.nowYear === 0 ? '올해' : (i) + '년 뒤'), i === 0); return c.replace('<div class="dp-tags">', '<div class="dp-tags">' + (r.love != null ? chip('연애 ' + r.love) : '') + (r.wealth != null ? chip('재물 ' + r.wealth) : '')); }).join(''))),
       scene(sec('', cap('세운으로 보는 기회의 해 · 방어의 해') + cands(rows, function (r) { return r.year + '년 ' + r.gz.replace(/^\d+년 /, ''); }, '해')))];
     return { title: '세운 지도', sub: '앞으로 10년, 해마다 하게 될 일', scenes: out, rows: rows };
@@ -82,7 +82,7 @@
     var M = H.M, sd = H.sd, Y = sd.nowYear, all = M.wolun(H.ch, Y).concat(M.wolun(H.ch, Y + 1)), now = H.now || Date.now(), ci = 0; all.forEach(function (x, i) { if (x.startMs <= now) ci = i; });
     var rows = all.slice(ci, ci + 12).map(function (x, i) { var r = row(H, x, '', '달'); r.m = new Date(x.startMs + 9 * 3600e3).getUTCMonth() + 1; r.term = x.termName; r.label = r.m + '월 ' + M.gzNameK(x); return r; });
     var dw = sd.currentDaewoon, se = sd.sewoon, chain = [dw && dw.ganzhi + ' 대운(' + (SEA[dw.season] || '') + ')', se && se.year + '년 ' + se.ganzhi + '(' + (SEA[se.season] || '') + ')', rows[0] && rows[0].m + '월 ' + M.gzNameK(all[ci]) + '(' + (SEA[rows[0].season] || '') + ')'].filter(Boolean);
-    var out = [scene(sec('', cap('월운 지도 · 앞으로 12개월') + '<p class="lead">월운은 <b>달마다 바뀌는 교통 상황</b>이에요. 큰 도로(대운) → 오늘의 날씨(세운) → 이번 달 교통 상황(월운) 순서로 겹쳐서 읽습니다.</p><p class="dp-chain">' + chain.map(esc).join('  →  ') + '</p>' + line(rows, rows.map(function (r) { return r.m + '월'; }), 0))),
+    var out = [scene(sec('', cap('월운 지도 · 앞으로 12개월') + '<p class="lead">월운은 <b>달마다 바뀌는 교통 상황</b>입니다. 큰 도로(대운) → 오늘의 날씨(세운) → 이번 달 교통 상황(월운) 순서로 겹쳐서 읽습니다.</p><p class="dp-chain">' + chain.map(esc).join('  →  ') + '</p>' + line(rows, rows.map(function (r) { return r.m + '월'; }), 0))),
       scene(sec('', cap('달마다 하게 될 일') + rows.map(function (r, i) { return card(Object.assign({}, r, { label: r.label }), r.m + '월', r.term + ' 절기 시작', i === 0); }).join(''))),
       scene(sec('', cap('월운으로 보는 기회의 달 · 방어의 달') + cands(rows, function (r) { return r.m + '월 ' + r.label.replace(/^\d+월 /, ''); }, '달')))];
     return { title: '월운 지도', sub: '앞으로 12개월, 달마다 하게 될 일', scenes: out, rows: rows };
@@ -97,16 +97,17 @@
   var ELKEY = ['목', '화', '토', '금', '수'];
   S.deep_remedy = function (H) {
     var sd = H.sd, u = sd.usefulElements, out = [], ch = H.ch, temp = ch.climate && ch.climate.temp, hum = ch.climate && ch.climate.hum;
+    if (!u || u.fallback || !EL[u.yong]) return { title: '개운법의 근거', sub: '생활에서 확인할 보완 방향', scenes: [scene(sec('', cap('생활에서 확인할 보완 방향') + '<p class="lead">현재 계산만으로 특정 오행을 용신으로 정하기 어렵습니다. 부족한 오행만 보고 색·방향을 처방하기보다, 앞서 살펴본 장점과 반복되는 부담을 기준으로 실천 한 가지를 정하고 결과를 확인합니다.</p>'))] };
     var need = u ? [u.yong, u.hee].filter(Boolean) : [sd.weakestEl], avoid = u ? ELKEY.filter(function (e) { return /기신/.test(u.roles[e] || ''); }) : [], less = u ? ELKEY.filter(function (e) { return /구신/.test(u.roles[e] || ''); }) : [];
     var cl = temp > 0.4 ? '원국이 덥고 ' + (hum < -0.3 ? '건조해서' : '습기가 적어서') + ' 식혀 주는 기운(수·금)이 도움이 됩니다.' : temp < -0.4 ? '원국이 차가워서 데워 주는 기운(화·목)이 도움이 됩니다.' : '원국의 온도는 크게 치우치지 않았습니다.';
-    out.push(scene(sec('', cap('개운법의 근거 · 왜 이 기운이 필요한가') + '<p class="lead">개운법은 "좋다더라"가 아니라 사주에서 <b>무엇이 모자라고 무엇이 넘치는지</b>를 보고 정합니다. ' + esc(who(H)) + '의 근거는 이렇습니다.</p>' +
-      '<div class="dp-why"><div><small>① 일간의 힘</small><b>' + esc(sd.strength.band) + '</b><span>' + esc(sd.strength.band === '신강' ? '내 편 기운이 많아, 힘을 빼 주고 쓸 곳을 만들어 주는 기운이 필요해요' : sd.strength.band === '신약' ? '내 편 기운이 적어, 나를 받쳐 주는 기운이 필요해요' : '힘의 균형이 맞아, 치우침만 다듬으면 돼요') + '</span></div>' +
-      '<div><small>② 기후(조후)</small><b>' + (temp > 0.4 ? '더운 편' : temp < -0.4 ? '찬 편' : '고른 편') + '</b><span>' + esc(cl) + '</span></div><div><small>③ 오행의 부족·과잉</small><b>' + esc((sd.lackEl ? sd.lackEl + ' 부족' : '큰 부족 없음') + ' · ' + sd.dominantEl + ' 과다') + '</b><span>부족한 기운은 채우고 넘치는 기운은 덜 쓰는 쪽으로 균형을 맞춥니다.</span></div></div>' +
+    out.push(scene(sec('', cap('개운법의 근거 · 왜 이 기운이 필요한가') + '<p class="lead">명리적 보완은 <b>일간의 힘·조후·오행의 관계</b>를 함께 살펴 정합니다. 오행의 양이 적다는 이유만으로 용신이 되는 것은 아닙니다. ' + esc(who(H)) + '의 근거는 이렇습니다.</p>' +
+      '<div class="dp-why"><div><small>① 일간의 힘</small><b>' + esc(sd.strength.band) + '</b><span>' + esc(sd.strength.band === '신강' ? '내 편 기운이 많아, 힘을 빼 주고 쓸 곳을 만들어 주는 기운이 필요합니다' : sd.strength.band === '신약' ? '내 편 기운이 적어, 나를 받쳐 주는 기운이 필요합니다' : '힘의 균형이 맞아, 치우침만 다듬으면 됩니다') + '</span></div>' +
+      '<div><small>② 기후(조후)</small><b>' + (temp > 0.4 ? '더운 편' : temp < -0.4 ? '찬 편' : '고른 편') + '</b><span>' + esc(cl) + '</span></div><div><small>③ 오행의 부족·과잉</small><b>' + esc((sd.lackEl ? sd.lackEl + ' 부족' : '큰 부족 없음') + ' · ' + sd.dominantEl + ' 과다') + '</b><span>비율은 구성의 참고값입니다. 실제 보완 방향은 신강약과 조후, 생극 관계를 함께 보고 판단합니다.</span></div></div>' +
       '<p class="lead rd-hl">필요한 기운: <b>' + need.map(function (e) { return e + '(' + EL_HJ[e] + ')'; }).join(' · ') + '</b>' + (avoid.length ? '<br><span style="font-size:.9em">줄일 기운: ' + avoid.map(function (e) { return e + '(' + EL_HJ[e] + ')'; }).join(' · ') + (less.length ? ' (조금 덜어낼 기운: ' + less.join('·') + ')' : '') + '</span>' : '') + '</p>')));
     var it = function (e, label, key, why) { var d = EL[e]; return '<div class="dp-rem"><div class="dp-rem1"><b>' + esc(label) + '</b><span>' + esc(d[key]) + '</span></div><p><em>명리 근거</em> ' + esc(why) + '</p></div>'; };
     var e1 = need[0] || sd.weakestEl, e2 = need[1] || e1, nm = function (e) { return e + '(' + EL_HJ[e] + ')'; };
-    out.push(scene(sec('', cap('생활 속 개운법') + it(e1, '입는 색', 'color', nm(e1) + '이 가장 필요한 기운이라, 색으로 그 기운을 가까이 두면 마음이 안정됩니다.') + it(e1, '머물면 좋은 방향', 'dir', nm(e1) + '은 ' + EL[e1].dir + '에 해당해, 책상·침대 머리 방향을 맞추면 기운을 받기 좋다고 봅니다.') + it(e1, '좋은 시간대', 'time', nm(e1) + ' 기운이 강한 시간에 중요한 일을 두면 힘이 덜 듭니다.') + it(e2, '곁에 둘 것', 'mat', nm(e2) + '(희신)은 용신을 도와주는 기운이라 소재로 보완합니다.') + it(e2, '행동으로 옮기기', 'act', nm(e2) + ' 성질의 활동이 부족한 기운을 몸으로 채워 줍니다.') + it(e1, '맞는 일의 환경', 'env', nm(e1) + '을 키우는 환경에서 일할 때 사주의 균형이 맞습니다.') +
-      (avoid[0] ? '<div class="dp-rem warn"><div class="dp-rem1"><b>줄이면 좋은 것</b><span>' + esc(EL[avoid[0]].color + ' 위주의 과한 사용 · ' + EL[avoid[0]].time + ' 과로') + '</span></div><p><em>명리 근거</em> ' + esc(nm(avoid[0]) + '은 기신이라 많아질수록 부담이 커집니다. 끊으라는 뜻이 아니라 비중을 줄이라는 뜻이에요.') + '</p></div>' : ''))));
+    out.push(scene(sec('', cap('생활 속 개운법') + it(e1, '입는 색', 'color', nm(e1) + '을 떠올리는 전통 상징색입니다. 실천할 태도를 기억하는 취향의 도구로 활용합니다.') + it(e1, '머물면 좋은 방향', 'dir', nm(e1) + '은 ' + EL[e1].dir + '에 대응하는 전통 방위입니다. 생활 공간은 이 상징보다 빛·소음·동선을 먼저 확인합니다.') + it(e1, '좋은 시간대', 'time', nm(e1) + '에 대응하는 전통 시간대입니다. 중요한 일은 실제 집중력과 생활 일정에 맞춰 정합니다.') + it(e2, '곁에 둘 것', 'mat', nm(e2) + '에 대응하는 소재입니다. 정리와 실천을 떠올리는 표시로 활용할 수 있습니다.') + it(e2, '행동으로 옮기기', 'act', nm(e2) + '의 상징을 생활 행동으로 옮긴 예시입니다. 가능한 활동 하나를 골라 부담과 생활 리듬의 변화를 확인합니다.') + it(e1, '맞는 일의 환경', 'env', nm(e1) + '의 역할을 직업 환경에 대응한 예시입니다. 실제 선택은 능력·경험·업무 조건을 함께 살펴 정합니다.') +
+      (avoid[0] ? '<div class="dp-rem warn"><div class="dp-rem1"><b>줄이면 좋은 것</b><span>' + esc('과한 일정 · 확인 없이 떠안은 책임') + '</span></div><p><em>명리 근거</em> ' + esc(nm(avoid[0]) + '에 해당하는 역할이 과해질 때의 부담을 살핍니다. 색이나 시간을 피하기보다 반복되는 무리한 행동을 조절합니다.') + '</p></div>' : ''))));
     return { title: '개운법의 근거', sub: '무엇이 모자라고 넘치는지로 정한 생활 개운', scenes: out };
   };
 
@@ -123,13 +124,13 @@
     var sd = H.sd, u = sd.usefulElements, list = [];
     ELKEY.forEach(function (e) { var role = u ? (u.roles[e] || '한신') : '한신'; PLACES[e].forEach(function (p, i) { var sc = (ROLE_BASE[role] || 60) - i * 2 + (e === sd.lackEl ? 4 : 0) + (u ? 0 : (e === sd.weakestEl ? 12 : 0)); list.push({ p: p, el: e, role: role, score: clamp(sc, 20, 98) }); }); });
     list.sort(function (a, b) { return b.score - a.score; }); var top = list.slice(0, 7);
-    var out = [scene(sec('', cap('나에게 맞는 명산대천 · 풍수 명당') + '<p class="lead">' + esc(who(H)) + '에게 필요한 기운(' + esc(u ? u.yong + '(' + EL_HJ[u.yong] + ') 용신' + (u.hee ? ' · ' + u.hee + '(' + EL_HJ[u.hee] + ') 희신' : '') : '부족한 오행') + ')을 오행 방위·산세·물길로 풀어 <b>실제로 갈 수 있는 곳</b>을 점수 순으로 골랐어요. 전통적으로 알려진 기운의 해석이며, 여행 겸 기분 전환으로 가볍게 활용해 주세요.</p>')),
+    var out = [scene(sec('', cap('나에게 맞는 명산대천 · 풍수 명당') + '<p class="lead">' + esc(who(H)) + '에게 필요한 기운(' + esc(u ? u.yong + '(' + EL_HJ[u.yong] + ') 용신' + (u.hee ? ' · ' + u.hee + '(' + EL_HJ[u.hee] + ') 희신' : '') : '부족한 오행') + ')을 오행 방위·산세·물길로 풀어 <b>실제로 갈 수 있는 곳</b>을 점수 순으로 골랐습니다. 전통적으로 알려진 기운의 해석이며, 여행 겸 기분 전환으로 가볍게 활용해 주세요.</p>')),
       scene(sec('', top.map(function (x, i) { return '<div class="dp-place"><div class="dp-rank">' + (i + 1) + '</div><div class="dp-pl1"><b>' + esc(x.p[0]) + '</b><small>' + esc(x.p[1] + ' · ' + x.p[2]) + '</small>' + bar('', x.score, { cls: 'dp-slim', color: D.EL_COLOR[x.el], text: x.score + '점' }) + '<p>' + esc('나에게 ' + x.role + '인 ' + x.el + '(' + EL_HJ[x.el] + ') 기운 — ' + x.p[3]) + '</p></div></div>'; }).join('')))];
     return { title: '나에게 맞는 명소', sub: '명산대천 · 풍수 명당 · 해돋이 순위', scenes: out };
   };
 
   /* ═════ 챕터 끼워 넣기 ═════ */
-  var PLACEMENT = [['c03', 'deep_car'], ['c05', 'deep_proscons'], ['deep_proscons', 'deep_stages'], ['c06', 'deep_jobs'], ['c10', 'deep_spouse'], ['c12', 'deep_ilju'], ['c14', 'deep_past'], ['c15', 'deep_daewoon'], ['c17', 'deep_seun'], ['c18', 'deep_wolun'], ['c19', 'deep_remedy'], ['deep_remedy', 'deep_places']];
+  var PLACEMENT = [['c03', 'deep_car'], ['c05', 'deep_proscons'], ['deep_proscons', 'deep_stages'], ['c06', 'deep_jobs'], ['c10', 'deep_spouse'], ['deep_spouse', 'deep_children'], ['c12', 'deep_ilju'], ['c14', 'deep_past'], ['c15', 'deep_daewoon'], ['c17', 'deep_seun'], ['c18', 'deep_wolun'], ['c19', 'deep_remedy'], ['deep_remedy', 'deep_places']];
   function chapter(id, o, scenes, anchor) {
     var intro = { sceneId: id + '_in', sceneType: 'chapterIntro', subtitle: o.sub || '', compact: true };
     return { id: id, base: id, project: anchor.project || 'full', kind: 'life', accessLevel: anchor.accessLevel || 'free', title: o.title, subtitle: o.sub || '', headline: o.sub || '', introText: '', moduleCategories: [], scenes: [intro].concat(scenes), enabled: true, act: anchor.act, deep: true, aiEnabled: false, items: o.rows || null };
@@ -142,6 +143,8 @@
       if (i < 0 || rep.chapters.some(function (c) { return c.id === pl[1]; })) return;
       try { var o = S[pl[1]](H); if (!o || !o.scenes || !o.scenes.length) return; rep.chapters.splice(i + 1, 0, chapter(pl[1], o, o.scenes, rep.chapters[i])); done++; } catch (e) { if (root.console && console.warn) console.warn('deep ' + pl[1], e && e.message); }
     });
+    // 상세 전생 이야기가 있으면 이전 전생 요약 챕터를 대체한다.
+    if (rep.chapters.some(function (c) { return c.id === 'deep_past'; })) rep.chapters = rep.chapters.filter(function (c) { return (c.base || c.id) !== 'c14'; });
     rep.chapters.forEach(function (c, k) { c.no = k + 1; });
     rep.meta = rep.meta || {}; rep.meta.deep = done; return rep;
   }

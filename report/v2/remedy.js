@@ -87,7 +87,7 @@
     ['organize', '정리하기', ['포트폴리오 정리', '지식 정리', '목표 재설정'], ['organize', 'reflection', 'transition']],
   ];
   GR.forEach(function (g) {
-    add('growth', 'growth_' + g[0], g[1] + '에 집중하세요', '지금은 "' + g[1] + '"이(가) 가장 필요한 성장 방식입니다. 예: ' + g[2].join(' · ') + '.', g[3], {}, 50, { mode: g[1], examples: g[2] });
+    add('growth', 'growth_' + g[0], g[1] + '에 집중하세요', '이번에는 "' + g[1] + '" 방식으로 성장의 기반을 다져 봅니다. 예: ' + g[2].join(' · ') + '.', g[3], {}, 50, { mode: g[1], examples: g[2] });
   });
 
   /* PEOPLE: 단순 띠 궁합이 아니라 필요한 관계 유형 */

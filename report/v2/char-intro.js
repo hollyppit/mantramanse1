@@ -91,7 +91,7 @@
     var st = sd && sd.dayMaster && String(sd.dayMaster.stem || '')[0], pil = sd && sd.dayPillar && String(sd.dayPillar.ko || ''); if (!st || !D[st] || !pil) return null;
     var d = D[st], bz = pil[1], si = STEMS.indexOf(st), bi = BR.indexOf(bz), nm = String(name || '').trim(), who = nm || '당신', ok = bi >= 0 && si % 2 === bi % 2; if (!ok) return null;
     var x = X[st], tg = tenGod(st, BRB[bz]), t = TG[tg], xt = XT[tg], b = BRI[bz], g = sd.gender === 'F' ? '여자' : '남자', scenes = [];
-    scenes.push(sec('ci-head', 'rd-head', '<div class="rd-rule" aria-hidden="true"></div><div class="no">CHARACTER</div><h2>' + esc(who) + '는 어떤 사람일까</h2><p class="hl">먼저, 타고난 기질을 만나 봅니다.<br>일간은 나의 중심이고, 일주는 그 중심이 앉은 자리입니다.</p><div class="rd-rule" aria-hidden="true"></div>'));
+    scenes.push(sec('ci-head', 'rd-head', '<div class="rd-rule" aria-hidden="true"></div><div class="no">CHARACTER</div><h2>' + esc(who) + '의 타고난 성격과 기질</h2><p class="hl">먼저, 타고난 기질을 만나 봅니다.<br>일간은 나의 중심이고, 일주는 그 중심이 앉은 자리입니다.</p><div class="rd-rule" aria-hidden="true"></div>'));
     var v1 = videoSec('ci-v1', awk && awk.ilgan, '일간 소개 영상'); if (v1) scenes.push(v1);
     scenes.push(sec('ci-t1', 'rd-box', '<div class="cap">일간 · ' + HJ[si] + ELH[NAME[st][1]] + ' ' + esc(NAME[st]) + '</div><p class="lead rd-hl">' + esc(who) + '의 중심은 ' + esc(NAME[st]) + ', ' + esc(IMG[st]) + '입니다.</p>' + P('타고난 기질', d.trait) + P('강점', d.strong) + P('그림자', d.shadow)));
     scenes.push(sec('ci-pc', 'rd-box', '<div class="cap">솔직하게 보는 장점</div>' + UL(x.pros) + '<div class="cap" style="margin-top:20px">솔직하게 보는 단점</div>' + UL(x.cons)));

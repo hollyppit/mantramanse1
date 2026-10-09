@@ -2,7 +2,7 @@
 // AI 없이도 항상 완성된 리포트가 나온다(AI는 enhancement). 같은 입력·같은 콘텐츠 버전이면 결과가 같다.
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
-  var PROMPT_VERSION = 'p2';
+  var PROMPT_VERSION = 'p4';
   var BANNED = /(반드시|무조건|확정|100%|틀림없)/; // 단정 표현 방어선: 모듈 문구에서 발견되면 점검 목록에 올린다
 
   function el(sd, name) { return sd.fiveElements[name]; }
@@ -174,7 +174,7 @@
         (c.scenes || []).forEach(function (s) { if (s.sceneType === 'verdictFind') s.body = c.verdict.discover; else if (s.sceneType === 'verdictBlock') s.body = c.verdict.blocked.text; else if (s.sceneType === 'verdictEvidence' && c.verdict.evidence) s.body = c.verdict.evidence.text; });
         return;
       }
-      var N = R.Narrator, hv = report.meta.heroVars, narr = function (t) { return N.isNarrative(t) && N.placeholdersOk(t); }; // 서술 파트에 '당신'·합쇼체·명령형이 있으면 그 챕터는 template 유지
+      var N = R.Narrator, hv = report.meta.heroVars, narr = function (t) { return N.isReading(t) && N.placeholdersOk(t); }; // 풀이 본문에 반말·해요체·새 명령형이 섞이면 원문을 유지한다
       if (!narr(x.headline) || !narr(x.lead)) return;
       var okH = typeof x.headline === 'string' && x.headline.length >= 4 && x.headline.length <= 80 && !BANNED.test(x.headline);
       var okL = typeof x.lead === 'string' && x.lead.length <= 300 && !BANNED.test(x.lead);

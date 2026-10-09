@@ -150,7 +150,7 @@
   /* ── 관계·결혼 AI 추정 로딩: 기기 캐시 → 서버(/api/life-ai, 생년월일 없음). 실패하면 규칙 추정을 그대로 쓴다. ── */
   function loadAi() {
     var pl; try { pl = D.aiPayload(H.M, H.ch, H.sd); } catch (e) { return; }
-    var key = 'mt_life_ai_' + hash(JSON.stringify(pl)), got; try { got = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { }
+    var key = 'mt_life_ai_l2_' + hash(JSON.stringify(pl)), got; try { got = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { }
     function apply(ai) { if (!ai) return; st.soc = D.mergeSocial(st.rule, ai); st.cache = {}; if (st.field === 'relation' && box.querySelector('.lf-tabs')) mapScreen(); }
     if (got) { apply(got); return; }
     var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);

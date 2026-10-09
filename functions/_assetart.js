@@ -53,7 +53,8 @@ export function seasonNow(now) {
   return y + '년 ' + m + '월(' + (m >= 3 && m <= 5 ? '봄' : m >= 6 && m <= 8 ? '여름' : m >= 9 && m <= 11 ? '가을' : '겨울') + ')';
 }
 
-export const GROUPS = { place: '연애 · 만날 장소 (10)', style: '연애 · 패션·그루밍 (오행 5 × 성별)', car: '자동차 비유 (일간 10)', career: '직업 후보 (12직군)', spouse: '배우자 인상 (12지지 × 성별)', past: '전생 (십성 5 × 오행 5 × 성별)', wealth: '재물 그릇 (힘 5 × 성질 2 + 무재 2 = 12종)' };
+const CHILDREN = { 비겁: ['자율과 함께 하는 경험', '보호자가 아이가 선택한 블록 활동을 곁에서 지켜보며 공간을 존중한다'], 식상: ['일상과 대화', '보호자와 아이가 작은 식탁에서 간식과 그림책을 나누며 서로의 이야기를 듣는다'], 재성: ['생활 기반과 지원', '보호자와 아이가 책과 준비물을 함께 정리하며 생활 계획 카드를 고른다'], 관성: ['안전과 공정한 기준', '보호자가 아이와 나란히 앉아 글자 없는 약속 카드를 함께 정한다'], 인성: ['정서와 배움의 지지', '보호자가 아이의 그림을 관심 있게 바라보고 아이가 자기 생각을 설명한다'] };
+export const GROUPS = { children: '자식운 · 관계 방식 (십성군 5 × 보호자 성별)', place: '연애 · 만날 장소 (10)', style: '연애 · 패션·그루밍 (오행 5 × 성별)', car: '자동차 비유 (일간 10)', career: '직업 후보 (12직군)', spouse: '배우자 인상 (12지지 × 성별)', past: '전생 (십성 5 × 오행 5 × 성별)', wealth: '재물 그릇 (힘 5 × 성질 2 + 무재 2 = 12종)' };
 export function slots() {
   const out = [];
   for (const k of Object.keys(WEALTH)) out.push({ id: 'wealth:' + k, group: 'wealth', title: WEALTH[k][0] });
@@ -63,6 +64,7 @@ export function slots() {
   for (const k of Object.keys(CAREER)) out.push({ id: 'career:' + k, group: 'career', title: CAREER[k][0] });
   for (const b of Object.keys(FACE)) for (const g of ['F', 'M']) out.push({ id: `spouse:${b}:${g}`, group: 'spouse', title: `${b} · ${FACE[b][0]} (${g === 'F' ? '여성' : '남성'})` });
   for (const g of Object.keys(PAST)) for (const e of Object.keys(PAST[g])) for (const s of ['F', 'M']) out.push({ id: `past:${g}:${e}:${s}`, group: 'past', title: `${g}·${e} · ${PAST[g][e]} (${s === 'F' ? '여성' : '남성'})` });
+  for (const k of Object.keys(CHILDREN)) for (const g of ['F', 'M']) out.push({ id: 'children:' + k + ':' + g, group: 'children', title: k + ' · ' + (g === 'F' ? '여성 보호자' : '남성 보호자') + ' — ' + CHILDREN[k][0] });
   return out;
 }
 export const SLOT_BY_ID = Object.fromEntries(slots().map(s => [s.id, s]));
@@ -80,6 +82,7 @@ export function promptOf(id, dir, trend) {
 주제: ${a}(五行) 기운의 ${b === 'F' ? '여성' : '남성'} 데이트·소개팅 코디 화보, 무릎 위 반신 또는 전신. 한국의 20~30대가 실제로 입는 현실적인 일상 코디로, 실제로 구매해 입을 수 있는 옷만 그린다(패션쇼 의상·코스튬·과장된 디자인·한복풍은 피한다).\n시점: 지금은 ${seasonNow()}이다. 이 시점 한국 20~30대 사이에서 유행하는 최신 패션 트렌드(실루엣·소재·컬러·아이템)를 반영하고, 지금 계절에 맞는 옷차림으로 그린다.${trend ? ' 이번 시즌 트렌드 메모: ' + trend + '.' : ''}\n오행 색 방향: ${look}. 그루밍: ${groom}. 가상의 인물이며 실존 인물을 닮게 그리지 않는다. 배경은 단순하고 깔끔한 스튜디오 톤.
 색과 빛: ${pal(E)}.`; }
   if (g === 'wealth' && WEALTH[a + ':' + b]) { const [v, scene, el] = WEALTH[a + ':' + b], E = { 목: 'wood', 화: 'fire', 토: 'earth', 금: 'metal', 수: 'water' }[el]; return styleOf({ ...dir, people: 'none' }) + `\n주제: 사람의 '재물 그릇'을 상징하는 사물 그림. 그릇: ${v}. 장면: ${scene}. 그릇이 화면 중심에 크고 또렷하게 보이게 하고 사람은 그리지 않는다.\n색과 빛: ${pal(E)}.`; }
+  if (g === 'children' && CHILDREN[a] && ['F', 'M'].includes(b)) return styleOf({ ...dir, people: dir.people === 'none' ? 'none' : 'back' }) + '\n주제: 자녀와 맺는 관계를 상징하는 현대 한국의 일상 장면. ' + (dir.people === 'none' ? '사람 대신 크기가 다른 신발 한 쌍과 그림책·활동 소품으로 관계를 표현한다.' : (b === 'F' ? '여성' : '남성') + ' 성인 보호자 한 명과 학령기 아이 한 명. ' + CHILDREN[a][1] + '.') + ' 보호자 성별이며 아이의 성별이나 미래 외모를 예측하는 그림이 아니다. 임신·출산·병원 장면은 피한다. 가상의 인물, 따뜻하되 과장되지 않는 돌봄, 아이의 공간을 존중하는 손짓과 활동 소품이 보이는 중거리 구도. 글자·숫자는 넣지 않는다.';
   if (g === 'career' && CAREER[a]) return styleOf({ ...dir, people: dir.people === 'face' ? 'face' : 'back' }) + `\n주제: '${CAREER[a][0]}' 일의 분위기가 한눈에 보이는 장면. ${CAREER[a][1]}.`;
   if (g === 'spouse' && FACE[a]) { const el = BR_EL[a], woman = b === 'F', E = { 목: 'wood', 화: 'fire', 토: 'earth', 금: 'metal', 수: 'water' }[el];
     return styleOf({ ...dir, people: 'face' }) + `\n주제: ${FACE[a][0]} 인상의 ${woman ? '젊은 여성' : '젊은 남성'} 반신 초상. ${FACE[a][1]} 분위기이며, 동물의 귀·털은 그리지 않고 이목구비와 표정의 닮은 인상만 사람으로 표현한다. 가상의 인물이고 실존 인물을 닮게 그리지 않는다.\n색과 빛: ${pal(E)}.`; }
@@ -89,7 +92,7 @@ export function promptOf(id, dir, trend) {
 }
 
 // Kling 이미지→영상 프롬프트(시작 프레임 = 슬롯의 현재 이미지). 그룹별로 잔잔한 움직임만 주고 인물·사물의 모양은 바꾸지 않는다.
-const KLING_MOTION = {
+const KLING_MOTION = { children: 'a small natural hand gesture near the book or activity props, soft window light shifts; keep both figures and their identities stable, no new people appear',
   car: 'light shifts slowly across the car body, dust and leaves drift gently, the background foliage and clouds move softly; the car stays parked and does not drive away',
   career: 'ambient motion only: light and shadows shift softly, dust floats in the light, small background activity moves slowly',
   spouse: 'a soft breeze stirs the hair, the light glimmers gently, a very slow natural blink and a subtle soft expression',

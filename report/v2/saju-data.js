@@ -25,7 +25,7 @@
 
     var pill = function (k) {
       var p = P[k], c = ch.cells && ch.cells[k]; if (!p) return null;
-      return { hanja: M.gzName(p), ko: M.gzNameK(p), stemTG: c && c.stemTG, branchTG: c && c.branchTG, unseong: c && c.unseong };
+      return { hanja: M.gzName(p), ko: M.gzNameK(p), stemTG: c && c.stemTG, branchTG: c && c.branchTG, unseong: c && c.unseong, hidden: c && c.hidden ? c.hidden.map(function (h) { return { stem: M.STEM_K[h.s], tg: h.tg, label: h.label }; }) : [] };
     };
     sd.pillars = { year: pill('year'), month: pill('month'), day: pill('day'), hour: pill('hour') };
     sd.dayMaster = { stem: M.STEM_K[d.s], hanja: M.STEM[d.s], el: ELK[dEl], elIdx: dEl, yang: M.yang(d.s) };
