@@ -173,7 +173,20 @@ const FOCUSED_SHOTS = { children: ['그림책과 서로 듣는 손짓이 보이�
  monthly: ['월간 격자 보드와 일정 카드를 담는 오버숄더 구도', '책상과 월간 보드를 함께 담는 측면 미디엄샷. 가까운 일정을 점검하는 손짓', '한 달 계획 보드 위의 카드를 옮기는 손 클로즈업'],
  action: ['분류함에 물건을 놓는 손과 주변 공간을 함께 담는 측면 미디엄샷', '무지 계획 카드를 완료 칸으로 옮기는 손의 클로즈업', '정돈 전후의 작은 작업 구역과 실천하는 손을 담는 하이앵글']
 };
-const shotOf = (el, th, dyn) => { if (FOCUSED_SHOTS[th]) return '연출: ' + FOCUSED_SHOTS[th][Object.keys(ELEMENTS).indexOf(el) % 3] + '.'; const L = dyn ? SHOTS_DYN : SHOTS; return L[(Object.keys(THEMES).indexOf(th) + Object.keys(ELEMENTS).indexOf(el) * 3) % L.length]; };
+// 공용 칸은 전부 1인칭 POV: 카메라가 주인공의 눈이라 주인공의 얼굴·몸은 나오지 않고 손·팔·소매·그림자만 비친다. 구도·거리·동작은 컷마다 다르게 한다.
+const POV_RULE = '1인칭 주인공 시점(POV): 카메라가 곧 주인공의 눈이다. 주인공의 얼굴과 상반신은 화면에 나오지 않고, 프레임 아래쪽이나 가장자리에 주인공의 손·팔·소매(필요하면 무릎·발끝·그림자)만 보인다. 거울·유리·물에 비친 얼굴도 그리지 않는다. 장면 속 다른 사람은 얼굴이 보여도 되지만 주인공 본인의 얼굴·표정 묘사는 모두 무시한다.';
+const SHOTS_POV = [
+  '연출: 눈높이에서 걸으며 앞을 보는 시점. 길게 뻗은 길이 소실점으로 이어지고 화면 아래에 흔들리는 두 손과 소매가 살짝 걸린다.',
+  '연출: 손이 사물(책, 컵, 휴대폰, 열쇠, 우산 손잡이 등)을 막 잡는 순간을 가까이서 본 시점. 손끝이 화면 하단 중앙을 차지하고 뒤 배경은 얕은 심도로 흐리다.',
+  '연출: 고개를 숙여 내려다보는 시점. 무릎 위나 책상 위의 두 손과 그 안의 사물이 중심이고, 바닥·테이블의 질감과 따뜻한 빛이 보인다.',
+  '연출: 한 손을 앞으로 뻗어 문·난간·창틀·상대의 손을 향하는 시점. 팔이 화면을 대각선으로 가르고 손 너머로 공간이 펼쳐진다.',
+  '연출: 올려다보는 시점. 손으로 눈앞의 빛을 가리거나 우산·가방끈을 쥔 채, 하늘·건물·나무가 화면을 채운다. 손은 화면 한쪽에만 걸린다.',
+  '연출: 마주 앉은 상대를 바라보는 시점. 상대는 화면 중앙에서 또렷하고, 주인공의 두 손이 화면 아래에서 컵이나 소품을 쥐고 있다.',
+  '연출: 계단·복도·횡단보도를 내려다보며 나아가는 시점. 발끝과 한 손의 일부가 프레임에 걸리고 선과 그림자가 구도를 이끈다.',
+  '연출: 창가·난간 앞에 선 시점. 두 손이 창틀이나 난간을 짚고 있고 창밖의 풍경과 빛이 화면 대부분을 채운다.',
+  '연출: 손에 든 사물(사진, 종이, 카드, 휴대폰 화면 없는 뒷면 등)을 들어 올려 그 너머 풍경과 겹쳐 보는 시점. 손과 사물이 앞쪽에 선명하다.',
+  '연출: 몸을 낮추거나 앉아서 보는 낮은 시점. 한 손이 바닥·벤치·잔디를 짚고 있고 눈앞에 장면의 중심 사물이 크게 놓인다.'];
+const shotOf = (el, th, dyn, pov) => { if (FOCUSED_SHOTS[th]) return '연출: ' + FOCUSED_SHOTS[th][Object.keys(ELEMENTS).indexOf(el) % 3] + '.'; if (pov) return SHOTS_POV[(Object.keys(THEMES).indexOf(th) + Object.keys(ELEMENTS).indexOf(el) * 3) % SHOTS_POV.length]; const L = dyn ? SHOTS_DYN : SHOTS; return L[(Object.keys(THEMES).indexOf(th) + Object.keys(ELEMENTS).indexOf(el) * 3) % L.length]; };
 export function promptFor(el, th, dir, kind) {
   const E = ELEMENTS[el], T = THEMES[th]; if (!E || !T) return '';
   const k = kindOf(kind);
@@ -181,9 +194,12 @@ export function promptFor(el, th, dir, kind) {
   const cd = cleanDirection(dir), people = cd.people, sameLook = cd.refUse === 'character' && cd.refs.length > 0; // 레퍼런스 인물 외형 통일 모드: 컷마다 다른 얼굴 대신 레퍼런스의 헤어·생김새를 따른다
   const looks = sameLook ? ' 실존 인물이 아닌 가상의 인물이다. 첨부한 레퍼런스 인물과 같은 헤어스타일·얼굴 생김새로 그려 모든 컷에서 통일감이 있게 한다. 얼굴이 가려지는 구도여도 헤어스타일은 레퍼런스와 같게 보여야 하고, 옆얼굴·3/4 각도에서는 얼굴 생김새가 알아볼 만큼 드러나게 한다(옷만 이 컷에 맞게 — ' + LOOK_CLOTHES[(Object.keys(THEMES).indexOf(th) * 3 + Object.keys(ELEMENTS).indexOf(el)) % LOOK_CLOTHES.length] + ' 차림).'
     : ' 실존 인물을 닮지 않은 가상의 인물이며 이 컷만의 고유한 외형이다 — ' + lookOf(el, th, k) + ' 다른 컷의 인물, 레퍼런스의 인물과 얼굴이 겹치지 않게 한다.';
-  const face = people === 'none' ? '' : '\n' + (th === 'wealth' ? WEALTH[el].shot + '.' : shotOf(el, th, k === 'panel')) + (people === 'face' ? looks : '') +
-    '\n위 연출(카메라 거리·각도·몸짓)이 장면 문장의 인물 묘사보다 우선한다. 증명사진처럼 가만히 서서 정면을 보는 포즈, 얼굴만 가득 찬 구도는 피하고 장면 속에서 무언가 하고 있는 동작으로 그린다.' + (k === 'panel' && th !== 'wealth' && !FOCUSED_SHOTS[th] ? ' 정지된 사진 같은 느낌 대신 움직임과 속도감, 과장된 원근, 극적인 빛으로 영화의 한 장면처럼 다이나믹하게 그린다.' : '');
-  return `${styleOf(dir)}\n장면: ${(th === 'wealth' ? WEALTH[el].ko : PLOT[th]).replace('{P}', WHO_KO[genderOfKind(k)])}.${face}${th === 'wealth' ? '\n' + WEALTH_GUARD_KO : ''}\n색과 빛: ${PAL[el]}.\n오행 ${E.name}의 기운이 장면 전체의 빛과 분위기로 드러나게 한다.`;
+  const pov = k === 'panel' && people !== 'none'; // 공용 칸: 1인칭 POV(얼굴 없이 손만) — 외형·표정 지정은 쓰지 않는다
+  const face = people === 'none' ? '' : '\n' + (th === 'wealth' ? WEALTH[el].shot + '.' : shotOf(el, th, k === 'panel', pov)) + (people === 'face' && !pov ? looks : '') +
+    (pov ? '\n' + POV_RULE + '\n위 연출(카메라 거리·각도·손동작)이 장면 문장의 인물·표정 묘사보다 우선한다. 손으로 무언가 하고 있는 동작이 보이게 그리고, 컷마다 구도와 상황을 다르게 한다.' :
+      '\n위 연출(카메라 거리·각도·몸짓)이 장면 문장의 인물 묘사보다 우선한다. 증명사진처럼 가만히 서서 정면을 보는 포즈, 얼굴만 가득 찬 구도는 피하고 장면 속에서 무언가 하고 있는 동작으로 그린다.');
+  const scene = (th === 'wealth' ? WEALTH[el].ko : PLOT[th]).replace('{P}', pov ? '1인칭 시점의 주인공' : WHO_KO[genderOfKind(k)]), style = styleOf(dir);
+  return `${pov ? style.replace('인물의 얼굴과 표정이 보여도 좋다(특정 실존 인물을 닮게 그리지 않는다).', '주인공의 얼굴은 나오지 않고 손만 보인다.') : style}\n장면: ${pov ? scene.replace(/[,.] ?[^,.]*(표정|옆얼굴)[^,.]*/g, '') : scene}.${face}${th === 'wealth' ? '\n' + WEALTH_GUARD_KO : ''}\n색과 빛: ${PAL[el]}.\n오행 ${E.name}의 기운이 장면 전체의 빛과 분위기로 드러나게 한다.`;
 }
 // 생성된 파일 → 미디어 라이브러리 항목(태그는 승인 상태라 조합에 바로 쓰인다). cleanMedia 가 TAX 밖 태그를 걸러낸다.
 export function mediaItem(el, th, url, bytes, provider, panelVideo, kind) {
