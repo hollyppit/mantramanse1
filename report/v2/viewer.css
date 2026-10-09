@@ -56,6 +56,13 @@ form { margin-top: 24px; display: grid; gap: 16px; }
 @keyframes orb { 0%, 100% { transform: translateY(6px) scale(1); opacity: .88; } 50% { transform: translateY(-8px) scale(1.06); opacity: 1; } }
 .loadtext { font-family: var(--f-serif); font-size: 1.05rem; color: var(--ink2); min-height: 3em; transition: opacity .5s; }
 
+/* 프롤로그 뒤 본문 준비가 길어질 때의 안내(등불 + 로딩 중) */
+.wait-note { position: fixed; inset: 0; z-index: 9000; display: grid; place-content: center; justify-items: center; gap: 22px; background: var(--bg); text-align: center; padding: 20px; transition: opacity .4s; }
+.wait-note.off { opacity: 0; pointer-events: none; }
+.wait-note .loadtext small { display: block; margin-top: 8px; font-size: .82rem; opacity: .8; }
+.wait-dots::after { content: ''; animation: waitdots 1.4s steps(4, end) infinite; } @keyframes waitdots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75%, 100% { content: '...'; } }
+@media (prefers-reduced-motion: reduce) { .wait-note .orb { animation: none; } .wait-dots::after { animation: none; content: '...'; } }
+
 /* 캐릭터 소개 영상 (9:16) */
 #v-awk { background: #000; }
 .awk-media img.sil { filter: brightness(0); transition: filter 1.2s ease; } .awk-media img.sil.on { filter: none; }

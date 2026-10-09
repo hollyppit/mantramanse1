@@ -93,7 +93,7 @@
       if ((si - bi + 12) % 2) return; // 간지는 음양이 같은 짝만 존재(60개)
       var name = s + b; if (PILLAR_DONE[name]) return;
       var S = STEM[s], B = BRANCH[b], tg = tenGod(s, B.main);
-      add('identity', 'pro2_iju_' + name, { dayPillar: [name] }, 80, name + '일주 · ' + B.img + ' 곁의 ' + S.short,
+      add('identity', 'pro2_iju_' + name, { dayPillar: [name] }, 80, name + '일주 · 일지 ' + b + '(' + B.img + ') 위의 ' + S.short,
         S.name + josa(S.el) + ' ' + S.image + '입니다. ' + S.core + '. 일지(가까운 관계의 자리)에는 ' + b + '(' + B.img + ')가 있어 ' + tg + '의 기운이 깔립니다. ' + TG_SPOUSE[tg],
         '일주는 사주 여덟 글자 중 두 글자입니다. 같은 일주라도 월지·오행 분포에 따라 모습이 크게 달라지므로, 이어지는 챕터에서 나머지 구조를 함께 읽어 주세요.',
         { keywords: [name], imageTags: TAGS[S.el], layer: 'pillar' });

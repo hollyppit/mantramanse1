@@ -38,7 +38,7 @@
   function iju(pillar) {
     var p = String(pillar || ''), s = S[p[0]], b = B[p[1]]; if (!s || !b || STEMS.indexOf(p[0]) % 2 !== BR.indexOf(p[1]) % 2) return [];
     var tg = tenGod(p[0], b[0]);
-    return [b[1] + ' 곁의 ' + s.short + ', ' + p + '일주입니다.', s.core, '일지 ' + p[1] + '의 ' + tg + ' 기운이 더해져, ' + TG[tg], s.tip];
+    return ['일지 ' + p[1] + '의 "' + b[1] + '" 기운 위에 앉은 ' + s.short + ', ' + p + '일주입니다.', s.core, '일지 ' + p[1] + '의 ' + tg + ' 기운이 더해져, ' + TG[tg], s.tip];
   }
   function all60() { var o = []; STEMS.split('').forEach(function (s, i) { BR.split('').forEach(function (b, j) { if (i % 2 === j % 2) o.push(s + b); }); }); return o; }
 
@@ -61,7 +61,7 @@
   function ijuCard(pillar, name, gender) {
     var p = String(pillar || ''), si = STEMS.indexOf(p[0]), bi = BR.indexOf(p[1]), s = S[p[0]], b = B[p[1]]; if (!s || !b || si % 2 !== bi % 2) return null;
     var nm = String(name || '').trim(), tg = tenGod(p[0], b[0]);
-    return { name: nm ? nm + '.' : '오늘 이야기의 주인공.', film: b[1] + ' 곁에서 ' + VERB[p[0]] + ' ' + s.short + ' 같은 기질을 타고난 ' + (gender === 'F' ? '여자' : '남자') + '.', title: HJ[si] + HJB[bi] + ' · ' + p + '일주', trait: PRO[p[0]] + ', ' + CON[tg] };
+    return { name: nm ? nm + '.' : '오늘 이야기의 주인공.', film: '일지 ' + p[1] + '의 "' + b[1] + '" 기운 위에 앉은 ' + s.short + ' 같은 기질을 타고난 ' + (gender === 'F' ? '여자' : '남자') + '.', title: HJ[si] + HJB[bi] + ' · ' + p + '일주', trait: PRO[p[0]] + ', ' + CON[tg] };
   }
 
   R.IntroText = { DATA: { S: S, B: B, TG: TG, PRO: PRO, CON: CON, VERB: VERB, tenGod: tenGod, STEMS: STEMS, BR: BR }, ilganCard: ilganCard, ijuCard: ijuCard, ilgan: ilgan, ilganTitle: ilganTitle, iju: iju, all60: all60, STEMS: STEMS };

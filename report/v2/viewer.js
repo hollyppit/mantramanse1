@@ -219,7 +219,19 @@
   var LIFE = !PREVIEW && !/[?&]flow=(classic|old)(&|$)/.test(location.search); // 인생 지도 흐름이 기본. ?flow=classic 으로 예전 20챕터 순서 흐름, 관리자 미리보기(?preview=1)는 예전 흐름
   // 인생 지도 흐름도 기존과 같은 "자동 스크롤 읽기 문서"다. 선택·탭 없이 하나의 긴 문서로 이어지고(R.LifeDoc), 관심 분야(온보딩에서 고른 값)가 있으면 그 이야기가 먼저 나온다.
   function plainRep(rep) { return Object.assign({}, rep, { chapters: rep.chapters.filter(function (c) { return !c.deep; }) }); }
+  /* 프롤로그가 끝난 뒤 본문이 준비되기까지(AI 풀이·검수 지식 대기) 길어지면 등불 아이콘과 '로딩 중' 안내를 띄운다. 1.2초 안에 끝나면 아무것도 보이지 않는다. */
+  function waitNotice() {
+    var t = null, el = null, done = false;
+    t = setTimeout(function () {
+      if (done) return;
+      el = document.createElement('div'); el.className = 'wait-note'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
+      el.innerHTML = '<img class="orb" src="/report/v2/lantern-wait.webp" alt="" aria-hidden="true" width="120" height="120" decoding="async"><p class="loadtext">로딩 중입니다<span class="wait-dots" aria-hidden="true"></span><br><small>이야기를 준비하고 있어요. 잠시만 기다려 주세요.</small></p>';
+      document.body.appendChild(el);
+    }, 1200);
+    return function () { done = true; clearTimeout(t); if (el && el.parentNode) { var e = el; e.classList.add('off'); setTimeout(function () { if (e.parentNode) e.parentNode.removeChild(e); }, 400); } };
+  }
   function lifeBegin() {
+    S.stopWait = waitNotice();
     var rep0 = S.rep, plan = (rep0.chapters.filter(function (c) { return c.plan; })[0] || {}).plan || null; S.repPdf = plainRep(rep0); // PDF·공유카드는 기존 20챕터 구성으로 만든다(깊이 풀이 챕터는 뺀다)
     var wait = new Promise(function (ok) { setTimeout(function () { ok(null); }, 4000); }); // 관계·결혼 AI 추정이 늦으면 규칙 추정으로 먼저 진행한다
     var waitIk = new Promise(function (ok) { setTimeout(function () { ok(null); }, 16000); }); // 검수된 풀이 지식(더 깊이 보기)이 늦으면 기존 구성으로 진행
@@ -251,7 +263,8 @@
       if (S.mv) S.mv.measure();
     }) : null;
     var ready = reading ? Promise.race([reading.first, new Promise(function (ok) { setTimeout(ok, 18000); })]) : Promise.resolve();
-    ready.then(function () { view('reader'); openDoc(0, { autoStart: !PREVIEW }); });
+    if (!S.stopWait && !PREVIEW) S.stopWait = waitNotice();
+    ready.then(function () { if (S.stopWait) { S.stopWait(); S.stopWait = null; } view('reader'); openDoc(0, { autoStart: !PREVIEW }); });
   }
   // 일간 소개·일주 캐릭터 영상은 프롤로그 앞이 아니라 본문의 첫 챕터(영상과 글을 따로)로 둔다
   function addCharIntro() {
