@@ -8,7 +8,7 @@
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
   var DEFAULTS = { auto: true, startDelay: 1.5, stopAtChoice: true, readSpeed: 6.5, bgMotion: 1, playbackRate: 1 };
-  var RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
+  var RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5];
   var num = function (v, lo, hi, d) { v = v === '' || v == null ? NaN : +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
   // 관리자 "읽기 모드" 설정(= 저장된 flow). 예전 연출 필드(anim·duration…)는 읽지 않고 그대로 둔다(스키마 삭제 없음).
   function clean(f) {

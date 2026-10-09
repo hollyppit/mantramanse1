@@ -7,7 +7,7 @@
   var POS = [['right', '오른쪽 아래'], ['center', '가운데 아래'], ['left', '왼쪽 아래']];
   var DEFAULTS = { enabled: true, anim: 'rise', duration: 0.8, distance: 28, stagger: 0.35, trigger: 88, auto: true, speed: 55, startDelay: 1.5, stopAtChoice: true, resumeAfter: 0, btnShow: true, btnPos: 'right',
     readSpeed: 6.5, bgMotion: 1, playbackRate: 1 }; // 아래 세 값이 읽기 모드 설정(초당 글자 수 · 배경 움직임 0/1/2 · 재생 속도)
-  var RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
+  var RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5];
   var num = function (v, lo, hi, d) { v = v === '' || v == null ? NaN : +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
   var has = function (list, v) { return list.some(function (x) { return x[0] === v; }); };
   function clean(f) {

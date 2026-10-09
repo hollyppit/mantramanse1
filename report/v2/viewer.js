@@ -178,8 +178,8 @@
   }
   function intro() { if (R.Bgm && !hasProVideo()) R.Bgm.play('cinematic'); proVideo(function (played) { if (played) { if (LIFE) lifeBegin(); else beginReader(); } else prologue(); }); } // 배경음악은 일간 인트로(첫 화면)부터 흐른다(입력 제출 = 사용자의 첫 터치)
   function cinemaMediaFor(used) { return function (sc) { if (sc.bg === 'black' || sc.phTone) return null; return R.Director.pickMedia(sc, (S.pack && S.pack.lib && S.pack.lib.media) || S.media, { usedIds: used }, sc.chapterId || 'c00'); }; }
-  /* 재생 속도(관리자 설정 flow.playbackRate · 확인용 ?rate=3): INTRO 타임라인·본문 머묾·이동에 적용한다. 허용: 0.5 · 0.75 · 1 · 1.25 · 1.5 · 2 · 3 */
-  var RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
+  /* 재생 속도(관리자 설정 flow.playbackRate · 확인용 ?rate=3): INTRO 타임라인·본문 머묾·이동에 적용한다. 허용: 0.5 · 0.75 · 1 · 1.25 · 1.5 · 2 · 3 · 4 · 5 */
+  var RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5];
   function playbackRate() { var m = /[?&]rate=([\d.]+)/.exec(location.search), v = m ? +m[1] : +(S.pack && S.pack.flow && S.pack.flow.playbackRate); return RATES.indexOf(v) >= 0 ? v : 1; }
   // 저사양·동작 줄이기·데이터 절약: INTRO 의 ink/scale 연출을 fade 로 대신한다
   var lowFx = reduce || saveData || (navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2;

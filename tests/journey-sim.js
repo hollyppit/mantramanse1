@@ -74,8 +74,8 @@ console.log('5. 길이 · 배속');
   ok(ms >= 60000 && ms <= K.JOURNEY_CAP_MS, `INTRO 길이 ${Math.round(ms / 1000)}초는 1~2.5분 범위`);
   ok(sc.slice(0, -1).every(s => (s.cinema.segments || []).every(g => g.text.length <= 22)), '한 조각은 22자 이하(모바일 줄 길이)');
   const rt = R.Reading.clean({ playbackRate: 3 }), bad = R.Reading.clean({ playbackRate: 7 }), mv = R.Moving.clean({ playbackRate: 0.75 });
-  ok(rt.playbackRate === 3 && bad.playbackRate === 1 && mv.playbackRate === 0.75 && R.Reading.RATES.join() === '0.5,0.75,1,1.25,1.5,2,3', '배속 값: 0.5·0.75·1·1.25·1.5·2·3 만 허용(그 밖은 1x)');
-  const srv = fs.readFileSync(path.join(root, 'functions/api/report-content.js'), 'utf8'); ok(/\[0\.5, 0\.75, 1, 1\.25, 1\.5, 2, 3\]\.includes\(\+f\.playbackRate\)/.test(srv) && /EPIC_WUXIA_JOURNEY/.test(srv), '서버 검증이 같은 배속 목록·새 스타일을 받는다');
+  ok(rt.playbackRate === 3 && bad.playbackRate === 1 && mv.playbackRate === 0.75 && R.Reading.RATES.join() === '0.5,0.75,1,1.25,1.5,2,3,4,5', '배속 값: 0.5·0.75·1·1.25·1.5·2·3·4·5 만 허용(그 밖은 1x)');
+  const srv = fs.readFileSync(path.join(root, 'functions/api/report-content.js'), 'utf8'); ok(/\[0\.5, 0\.75, 1, 1\.25, 1\.5, 2, 3, 4, 5\]\.includes\(\+f\.playbackRate\)/.test(srv) && /EPIC_WUXIA_JOURNEY/.test(srv), '서버 검증이 같은 배속 목록·새 스타일을 받는다');
   const rd = fs.readFileSync(path.join(root, 'report/v2/reader.js'), 'utf8'); ok(/pageMs = function \(p\) \{ return p\.dur \* 1000 \/ rate/.test(rd) && /Math\.max\(260,/.test(rd), '본문 머묾은 배속으로 나누고, 이동은 최소 260ms 를 지킨다(3x 에서도 건너뛰지 않음)');
 }
 
