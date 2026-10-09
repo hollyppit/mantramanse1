@@ -43,11 +43,31 @@
   var RE_DM = /일간(?:은|이|는)?\s*([갑을병정무기경신임계])(?:목|화|토|금|수|\()/g;
   var RE_IJ = /(?:당신의|나의|내)\s*([갑을병정무기경신임계][자축인묘진사오미신유술해])일주/g;
   var RE_LUCK = /(세운[^.。!?]{0,6}?(?:10년마다|10년 단위|십 년마다)|대운[^.。!?]{0,8}?(?:올해의|올해 운|해마다 바뀌)|월운[^.。!?]{0,8}?(?:10년마다|해마다 바뀌))/g;
+  // 용신·통근: 억부/조후는 학파마다 용신이 다를 수 있으므로 '어느 기준의 용신인지'가 밝혀진 문장은 그 기준의 값과, 밝혀지지 않은 문장은 어느 한 기준과라도 맞아야 한다.
+  var RE_YONG_M = /(억부|조후)(?:상|로|론으로|상으로|기준(?:으로)?)?\s*용신(?:은|이|는|으로)?\s*(목|화|토|금|수)/g;
+  var RE_YONG = /(?<!희신|기신|구신|한신)용신(?:은|이|는|인)\s*(목|화|토|금|수)/g;
+  var RE_ROOT_NO = /(?:통근(?:이|은|도)|뿌리(?:가|는))\s*(?:전혀\s*|하나도\s*)?(?:없|약하지 않)/g;
+  var RE_ROOT_YES = /통근(?:이|은)\s*(?:아주\s*)?(?:강하|튼튼|잘 되어)/g;
+  function yongRule(sd, t, push) {
+    var U = sd.usefulElements, M = sd.usefulElementMethods || {}, m, ok = {};
+    if (U && U.yong) ok[U.yong] = 1; Object.keys(M).forEach(function (k) { if (M[k] && M[k].yong) ok[M[k].yong] = 1; });
+    if (!Object.keys(ok).length) return;
+    RE_YONG_M.lastIndex = 0; while ((m = RE_YONG_M.exec(t))) { var key = m[1] === '억부' ? 'eokbu' : 'johu', y = M[key] && M[key].yong; if (y && m[2] !== y) push('yong-method', m[1] + ' 용신 ' + m[2], m[1] + ' 용신 ' + y); }
+    var scoped = t.replace(RE_YONG_M, ' ');
+    RE_YONG.lastIndex = 0; while ((m = RE_YONG.exec(scoped))) { if (!ok[m[1]]) push('yong', '용신 ' + m[1], '용신 ' + Object.keys(ok).join('/')); }
+  }
+  function rootRule(sd, t, push) {
+    var r = sd.roots; if (!r || r.hasRoot == null) return;
+    RE_ROOT_NO.lastIndex = 0; RE_ROOT_YES.lastIndex = 0;
+    if (r.hasRoot && RE_ROOT_NO.test(t)) push('root', '통근 없음', '통근 있음(' + r.score + '점)');
+    if (!r.hasRoot && RE_ROOT_YES.test(t)) push('root', '통근 강함', '통근 없음');
+    RE_ROOT_NO.lastIndex = 0; RE_ROOT_YES.lastIndex = 0;
+  }
   function facts(sd, text) {
     var out = [], sents = String(text || '').replace(/<[^>]*>/g, ' ').split(/(?<=[.!?。])\s+|\n+/), fe = (sd && sd.fiveElements) || {}, gr = (sd && sd.groups) || {};
     sents.forEach(function (t) {
       if (!t || OTHER.test(t)) return;
-      var self = /(사주|원국|당신|나의|내 |오행 분포)/.test(t);
+      var self = /(사주|원국|당신|나의|내 |오행 분포)/.test(t), selfY = self || /나에게/.test(t);
       var m, push = function (rule, claimed, actual) { out.push({ rule: rule, claimed: claimed, actual: actual, snippet: t.trim().slice(0, 60) }); };
       RE_EL_ABS.lastIndex = 0; while ((m = RE_EL_ABS.exec(t))) { var e = elOf(m); if (self && fe[e] != null && fe[e] >= 8) push('element-absent', e + ' 없음', e + ' ' + fe[e] + '%'); }
       RE_EL_TOP.lastIndex = 0; while ((m = RE_EL_TOP.exec(t))) { var e2 = elOf(m); if (self && sd.dominantEl && e2 !== sd.dominantEl) push('element-dominant', e2 + ' 최다', '최다 ' + sd.dominantEl); }
@@ -56,6 +76,7 @@
       RE_STR.lastIndex = 0; while ((m = RE_STR.exec(t))) { var band = sd.strength && sd.strength.band; if (band && band !== '중화' && m[1] !== band) push('strength', m[1], band); }
       RE_DM.lastIndex = 0; while ((m = RE_DM.exec(t))) { if (sd.dayMaster && m[1] !== sd.dayMaster.stem) push('day-master', m[1], sd.dayMaster.stem); }
       RE_IJ.lastIndex = 0; while ((m = RE_IJ.exec(t))) { if (sd.dayPillar && m[1] !== sd.dayPillar.ko) push('day-pillar', m[1], sd.dayPillar.ko); }
+      if (selfY) yongRule(sd, t, push); if (self) rootRule(sd, t, push);
       RE_LUCK.lastIndex = 0; while ((m = RE_LUCK.exec(t))) push('luck-scope', m[1].slice(0, 20), '대운=10년 · 세운=해마다 · 월운=달마다');
     });
     return out;

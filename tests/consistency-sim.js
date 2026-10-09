@@ -57,6 +57,13 @@ ok(C.check(jul ? jul.sd : mk(1992, 7, 20, 12).sd, '한여름에 태어난 사람
   ok(F('상대의 일간은 을목이고 관성이 없습니다.').length === 0, '상대방을 말하는 문장은 건너뜀');
   ok(F('일간(나)의 힘 · 신강·신약 신강 (득령 ○)').length === 0 && F('통근·신강약 판정').length === 0, '표 라벨은 오탐하지 않음');
 }
+{ const x = mk(1992, 6, 23, 1, 'M'), sd = x.sd, F = t => C.facts(sd, t).map(v => v.rule), M2 = sd.usefulElementMethods, ey = M2.eokbu.yong, jy = M2.johu.yong, other = ['목', '화', '토', '금', '수'].find(e => e !== ey && e !== jy && e !== sd.usefulElements.yong);
+  ok(F('나에게 용신인 ' + other + ' 기운이 필요합니다.').includes('yong') && F('나에게 용신인 ' + sd.usefulElements.yong + ' 기운이 필요합니다.').length === 0, '용신 대조(어느 기준의 값과도 다르면 위반)');
+  ok(F('내 사주는 억부 용신 ' + other + '입니다.').includes('yong-method') && F('내 사주는 억부 용신 ' + ey + '입니다.').length === 0, '억부 용신은 억부 기준 값과 대조');
+  ok(F('내 사주는 조후 용신 ' + other + '입니다.').includes('yong-method') && F('내 사주는 조후 용신 ' + jy + '입니다.').length === 0, '조후 용신은 조후 기준 값과 대조(억부와 섞지 않음)');
+  const sdRoot = { ...sd, roots: { ...sd.roots, hasRoot: true } }, sdNo = { ...sd, roots: { ...sd.roots, hasRoot: false } };
+  ok(C.facts(sdRoot, '내 원국은 통근이 없어 뿌리가 약합니다.').some(v => v.rule === 'root') && C.facts(sdNo, '내 원국은 통근이 강하고 튼튼합니다.').some(v => v.rule === 'root') && C.facts(sdRoot, '내 원국은 통근이 강한 편입니다.').length === 0, '통근 유무 대조');
+}
 // 7) 여러 원국 전체 문서 스윕(월·시·성별 다양): 모든 챕터 위반 0건
 [[1976, 1, 5, 23, 'M'], [1988, 5, 20, 11, 'F'], [1999, 8, 8, 8, 'M'], [2005, 11, 17, 15, 'F'], [1981, 9, 30, 1, 'F'], [1970, 6, 6, 18, 'M']].forEach(([y, m, d, h, g]) => run(mk(y, m, d, h, g), '스윕 ' + y + '-' + m + '-' + d));
 // 8) 서버 가드: AI 응답 문단이 계산값과 어긋나면 sanitize 가 통째로 버리고, 맞으면 통과한다
