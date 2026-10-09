@@ -114,6 +114,11 @@ export function deriveFacts(sd, ext) {
   }));
   f.natalRelations = [...(sd.combinations || []), ...(sd.clashes || [])].map(r => ({ type: r.type, name: r.name, members: r.members || [] }));
   f.usefulElements = sd.usefulElements || null;
+  f.usefulElementMethods = sd.usefulElementMethods || null;
+  f.usefulElementAdvice = sd.usefulElementAdvice || null;
+  f.climate = sd.climate || null;
+  f.rootEvidence = sd.roots || null;
+  f.currentRoots = sd.currentRoots || null;
   if (sd.usefulElements) f.yongEl = sd.usefulElements.yong;
   f.pattern = (sd.patterns || []).map(p => p.name); f.star = (sd.specialStars || []).map(s => s.name);
   const rel = new Set(); [...(sd.combinations || []), ...(sd.clashes || [])].forEach(r => { if (r.type) rel.add(r.type); if (r.name) rel.add(r.name); }); f.relation = [...rel];
@@ -303,7 +308,7 @@ export function suggestConds(f) {
 }
 function factSummary(f) {
   const lv = o => Object.keys(o || {}).map(k => k + ' ' + Math.round(o[k].pct) + '%(' + LEVEL_KO[o[k].level] + ')').join(' · ');
-  return { dayPillar: f.dayPillar, dayMaster: f.dayMaster, strength: f.strength, hasRoot: f.hasRoot, rootLevel: f.rootLevel, monthBranch: f.monthBranch, season: f.season, yongEl: f.yongEl, elements: lv(f.el), groups: lv(f.group), patterns: f.pattern, stars: f.star, relations: f.relation, natal: f.natal, natalRelations: f.natalRelations, usefulElements: f.usefulElements, tenGods: lv(f.tenGod),
+  return { dayPillar: f.dayPillar, dayMaster: f.dayMaster, strength: f.strength, hasRoot: f.hasRoot, rootLevel: f.rootLevel, monthBranch: f.monthBranch, season: f.season, yongEl: f.yongEl, elements: lv(f.el), groups: lv(f.group), patterns: f.pattern, stars: f.star, relations: f.relation, natal: f.natal, natalRelations: f.natalRelations, usefulElements: f.usefulElements, usefulElementMethods: f.usefulElementMethods, usefulElementAdvice: f.usefulElementAdvice, climate: f.climate, rootEvidence: f.rootEvidence, currentRoots: f.currentRoots, tenGods: lv(f.tenGod),
     daewoonSeason: f.daewoonSeason, seunSeason: f.seunSeason, monthSeason: f.monthSeason, future: f.futureYears || null, nowYear: f.nowYear };
 }
 function packageConfidence(p) {

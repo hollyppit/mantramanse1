@@ -3,19 +3,22 @@
   var R = root.ReportV2 = root.ReportV2 || {}, active = null;
   function collect(chapter, name) {
     var paragraphs = [], targets = [];
-    function push(text, set) {
+    // 생활 점검 지표와 예방 안내는 검증된 고정 문구로 유지한다.
+    if (chapter.id === 'deep_health' || chapter.base === 'deep_health') return { chapter: { id: chapter.id || chapter.base, title: chapter.title || '', paragraphs: [] }, targets: [] };
+    function push(text, set, kind) {
       if (!text || text.trim().length < 30) return;
       var id = String(targets.length);
-      paragraphs.push({ id: id, text: name ? text.split(name).join('본인') : text }); targets.push(set);
+      paragraphs.push({ id: id, text: name ? text.split(name).join('본인') : text, kind: kind || 'reading' }); targets.push(set);
     }
     ['meaning', 'choice'].forEach(function (k) { if (typeof chapter[k] === 'string') push(chapter[k], function (text) { chapter[k] = text; }); });
     (chapter.details || []).forEach(function (d) { ['summary', 'detail'].forEach(function (k) { if (typeof d[k] === 'string') push(d[k], function (text) { d[k] = text; }); }); });
     (chapter.scenes || []).forEach(function (scene) {
+      // 예시 장면은 episode 종류로 전달해 설명체로 바뀌지 않게 한다.
       if (scene.html) {
         var box = root.document.createElement('div'); box.innerHTML = scene.html;
         [].forEach.call(box.querySelectorAll('p'), function (p) {
           if (p.closest('.rd-answer,.vd,.dp-note,.faint,[data-answer-topic]')) return;
-          push(p.textContent, function (text) { p.textContent = text; scene.html = box.innerHTML; });
+          push(p.textContent, function (text) { p.textContent = text; scene.html = box.innerHTML; }, scene.episode ? 'episode' : 'reading');
         });
       }
       ['body', 'narration', 'text'].forEach(function (k) { if (typeof scene[k] === 'string') push(scene[k], function (text) { scene[k] = text; }); });

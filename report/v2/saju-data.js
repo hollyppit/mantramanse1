@@ -47,7 +47,7 @@
     sd.strength = { zone: ch.strength.zone, band: bandOfZone(ch.strength.zone), help: ch.strength.help, deukryeong: !!ch.strength.deukryeong, deukji: !!ch.strength.deukji, deukse: !!ch.strength.deukse };
     try {
       var nr = M.analyzeNatalRoot(ch);
-      sd.roots = { hasRoot: !!nr.hasNatalRoot, score: nr.natalRootScore, level: nr.natalRootLevel };
+      sd.roots = { hasRoot: !!nr.hasNatalRoot, score: nr.natalRootScore, level: nr.natalRootLevel, details: nr.roots.map(function (r) { return { pillar: r.pillar, branch: r.branch, hiddenStem: r.hiddenStem, depth: r.depthK, rootType: r.rootType, contribution: r.contribution, reason: r.reason }; }), reasons: nr.reasons.slice(), seasonalSupport: Object.assign({}, nr.seasonalSupport) };
     } catch (e) { sd.roots = null; un.push('roots'); }
 
     sd.combinations = []; sd.clashes = [];
@@ -61,6 +61,15 @@
       sd.usefulElements = { yong: ELK[ch.yong.yong], hee: ch.yong.hee != null ? ELK[ch.yong.hee] : null, roles: roles, school: ch.yong.school, fallback: !!ch.yongFallback };
     } else { sd.usefulElements = null; un.push('usefulElements'); }
 
+    // AI가 선택된 학파 하나뿐 아니라 서로 다른 기준과 충돌 이유를 함께 검토한다.
+    sd.usefulElementMethods = {};
+    Object.keys(ch.yongAll || {}).forEach(function (key) {
+      var method = ch.yongAll[key], roleMap = {};
+      ELK.forEach(function (el, i) { roleMap[el] = method.roles && method.roles[i] || null; });
+      sd.usefulElementMethods[key] = { school: key, applicable: method.applicable !== false, yong: method.yong != null ? ELK[method.yong] : null, hee: method.hee != null ? ELK[method.hee] : null, roles: roleMap, reasons: (method.log || []).slice() };
+    });
+    try { var advice = M.methodAdvice(ch); sd.usefulElementAdvice = { verdict: advice.verdict, why: advice.why, agree: advice.agree, climateSkew: advice.clim, strengthSkew: advice.skew, eokYong: ELK[advice.eokYong], joYong: advice.joYong != null ? ELK[advice.joYong] : null }; } catch (e) { sd.usefulElementAdvice = null; }
+    sd.climate = ch.climate ? { temp: ch.climate.temp, hum: ch.climate.hum } : null;
     sd.twelveStages = {}; ['year', 'month', 'day', 'hour'].forEach(function (k) { var c = ch.cells && ch.cells[k]; if (c && P[k]) sd.twelveStages[k] = c.unseong; });
     var stars = {}; ['year', 'month', 'day', 'hour'].forEach(function (k) { ((ch.sinsal && ch.sinsal[k]) || []).forEach(function (s) { stars[s.name] = { name: s.name, good: !!s.good, pillar: k }; }); });
     sd.specialStars = Object.keys(stars).map(function (k) { return stars[k]; });
@@ -94,6 +103,20 @@
       });
     } catch (e) { sd.monthlyLuck = []; un.push('monthlyLuck'); }
 
+    // 만트라 만세력 rootNowCtx와 같은 KST 현재 대운·세운·월운·일진을 사용한다.
+    // 현재 운의 보강은 원국 통근·신강약 고정 판정을 바꾸지 않는다.
+    try {
+      var kstDate = new Date(now + 9 * 3600e3), rootMonths = M.wolun(ch, Y), rootMonth = rootMonths[0];
+      rootMonths.forEach(function (m) { if (m.startMs <= now) rootMonth = m; });
+      var rootDay = M.ilun(ch, kstDate.getUTCFullYear(), kstDate.getUTCMonth() + 1)[kstDate.getUTCDate() - 1];
+      var rs = M.evaluateCurrentRootState(ch, M.daeunAt(ch, now), M.yearPillarOf(Y), rootMonth, rootDay);
+      sd.currentRoots = { asOfDate: kstDate.toISOString().slice(0, 10), natalScore: rs.natal.natalRootScore, natalLevel: rs.natal.natalRootLevel,
+        currentSupport: rs.currentRootSupport, supportChange: rs.rootSupportChange, changeLabel: rs.changeLabel,
+        stability: rs.rootStability, stabilityLabel: rs.rootStabilityLabel, status: rs.status, summary: M.rootSummary(rs),
+        changes: rs.changes.map(function (r) { return Object.assign({}, r); }), stabilitySignals: rs.stabilitySignals.map(function (r) { return Object.assign({}, r); }),
+        fit: Object.assign({}, rs.fit), reasons: rs.reasons.slice(), layers: rs.layers.map(function (r) { return Object.assign({}, r); }),
+        supportByPeriod: { daeun: rs.daeun, seun: rs.seun, wolun: rs.wolun, iljin: rs.iljin } };
+    } catch (e) { sd.currentRoots = null; un.push('currentRoots'); }
     // 직업: 엔진 careerProfile 의 상위 분야만 전달 (직업명은 콘텐츠 DB가 관리)
     try {
       var cp = M.careerProfile(ch);

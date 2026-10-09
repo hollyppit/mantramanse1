@@ -12,7 +12,7 @@ const mk = (y, m, d, h, g) => M.compute({ year: y, month: m, day: d, hour: h, mi
 
 console.log('1. 모든 섹션 생성');
 const ids = Object.keys(D.SECTIONS);
-ok(ids.length === 13 && D.PLACEMENT.length === 13, '섹션 13개 · 배치 13곳: ' + ids.length);
+ok(ids.length === 14 && D.PLACEMENT.length === 14, '섹션 14개 · 배치 14곳: ' + ids.length);
 births.forEach(b => {
   const ch = mk(...b), sd = R.SajuData.build(ch, { now }), H = { M, ch, sd, now, name: '홍길동', assets: { 'car:경': '/x/car.webp' } }, tag = b.join('-');
   ids.forEach(id => {
@@ -34,7 +34,7 @@ console.log('2. 내용 점검(1992-06-23 01시 남)');
   ok(/창작|기술|교육/.test(T('deep_jobs')) && /적합도/.test(T('deep_jobs')) && /부담/.test(T('deep_jobs')), '직업 후보: 적합도·부담도');
   ok(/상|호랑이|토끼|사슴|강아지|여우|곰|공룡|수달|고양이|늑대|판다|다람쥐/.test(T('deep_spouse')) && /직업/.test(T('deep_spouse')) && /만날 가능성/.test(T('deep_spouse')) && /인연이 움직이는 시기/.test(T('deep_spouse')), '배우자: 동물상·직업·만날 곳·시기');
   const ij = T('deep_ilju'); ok(/TOP 5/.test(ij) && (ij.match(/점/g) || []).length >= 15 && /서로 끌리는/.test(ij) && /부딪히/.test(ij), '일주 궁합: 잘 맞는·끌리는·부딪히는 후보와 점수');
-  ok(/전생/.test(T('deep_past')) && /결말/.test(T('deep_past')) && /상징적/.test(T('deep_past')), '전생: 이야기·결말');
+  ok(/전생/.test(T('deep_past')) && /결말/.test(T('deep_past')) && /드라마/.test(T('deep_past')), '전생: 이야기·결말');
   const dw = D.SECTIONS.deep_daewoon(H), dwt = strip(dw.scenes.map(s => s.html).join(' ')); ok(dw.rows.length === 10 && /대운/.test(dwt) && /20대|30대/.test(dwt) && /기회를 잡을 대운 후보/.test(dwt) && /방어해야 할 대운 후보/.test(dwt) && /<svg/.test(dw.scenes[0].html), '대운: 10개 · 나이대 · 기회/방어 후보 · 그래프');
   ok(/시기|운/.test(dw.rows[0].title) && dw.rows.every(r => r.title.length > 10), '대운 제목이 문장으로 붙는다: ' + dw.rows[2].title);
   const sw = D.SECTIONS.deep_seun(H); ok(sw.rows.length === 10 && sw.rows[0].year === 2026 && /기회의 해/.test(strip(sw.scenes[2].html)) && /방어의 해/.test(strip(sw.scenes[2].html)), '세운: 앞으로 10년');
@@ -51,7 +51,7 @@ console.log('3. 챕터 끼워 넣기');
   const rep = { meta: {}, chapters: ['c01', 'c02', 'c03', 'c04', 'c05', 'c06', 'c10', 'c12', 'c14', 'c15', 'c17', 'c18', 'c19', 'c20'].map((b, i) => ({ id: b, base: b, no: i + 1, act: 1 + (i > 8 ? 3 : 0), project: 'full', scenes: [] })) };
   R.Deep.augment(rep, H); const bases = rep.chapters.map(c => c.base);
   ok(bases[bases.indexOf('c03') + 1] === 'deep_car', '자동차 챕터는 타고난 성격(c03) 바로 뒤');
-  ok(rep.chapters.length === 14 + 13 - 1 && rep.chapters.every((c, i) => c.no === i + 1), '상세 전생이 이전 요약을 대체하고 번호가 다시 매겨짐');
+  ok(rep.chapters.length === 14 + 14 - 1 && rep.chapters.every((c, i) => c.no === i + 1), '상세 전생이 이전 요약을 대체하고 번호가 다시 매겨짐');
   ok(!bases.includes('c14') && bases.filter(b => b === 'deep_past').length === 1, '전생 이야기는 상세 챕터 하나만 남음');
   ok(bases.indexOf('deep_places') === bases.indexOf('deep_remedy') + 1 && bases.indexOf('deep_remedy') === bases.indexOf('c19') + 1, '개운법 근거·명소가 개운 챕터 뒤');
   const n = rep.chapters.length; R.Deep.augment(rep, H); ok(rep.chapters.length === n, '두 번 불러도 중복되지 않는다');

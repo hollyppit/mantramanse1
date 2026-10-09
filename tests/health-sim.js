@@ -1,0 +1,57 @@
+// Health chapter: period alignment, upper-luck context, fallbacks and actual document assembly.
+const fs = require('fs'), path = require('path'), vm = require('vm'), assert = require('assert');
+const root = path.join(__dirname, '..');
+globalThis.window = globalThis;
+vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8'));
+['chapters', 'saju-data', 'rules', 'narrator', 'content', 'content-pro', 'content-pro2', 'topics', 'intro-text', 'story-director', 'story-composer', 'content-v3', 'verdict', 'remedy', 'media', 'scenes', 'compose', 'reading-answer', 'deep', 'deep-life', 'deep-time', 'life-doc', 'full-reading'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
+const R = ReportV2, M = Manse;
+const now = Date.UTC(2026, 9, 9), ch = M.compute({ year: 1992, month: 6, day: 23, hour: 1, minute: 0, calendar: 'solar', gender: 'M', city: '서울' });
+const sd = R.SajuData.build(ch, { now }), H = { M, ch, sd, now, name: '<사용자>', assets: {} };
+const build = h => R.Deep.SECTIONS.deep_health(h), html = c => c.scenes.map(s => s.html).join('');
+const chapter = build(H), monthly = R.Deep.SECTIONS.deep_wolun(H);
+assert.equal(chapter.scenes.length, 5);
+assert.equal(chapter.rows.length, 12);
+assert.deepEqual(chapter.rows.map(r => r.startMs), monthly.rows.map(r => r.x.startMs));
+chapter.rows.forEach((r, i) => {
+  const x = monthly.rows[i].x, d = M.evaluateDomainLuck(ch, x, 'wolun', { ms: x.startMs + 1 });
+  assert.equal(r.load, Math.round(d.health.components.load));
+  assert.equal(r.caution, Math.round(d.accident.cautionIndex));
+  assert(r.endMs > r.startMs);
+  if (i < 11) assert.equal(r.endMs, chapter.rows[i + 1].startMs);
+});
+assert.equal((html(chapter).match(/<svg/g) || []).length, 2);
+assert(!/undefined|NaN|교통사고가 난다|질병에 걸린다/.test(html(chapter)));
+assert.equal(R.FullReading.collect({ ...chapter, id: 'deep_health' }, '').targets.length, 0);
+const rep = R.Compose.build(sd, R.Compose.library(null), R.Chapters.forProject(null, 'full'), {});
+R.Deep.augment(rep, H);
+R.Deep.augment(rep, H);
+assert.equal(rep.chapters.filter(c => c.id === 'deep_health').length, 1);
+const doc = R.LifeDoc.build({ ...H, rep, soc: R.StoryDirector.social(M, ch, sd, now), plan: (rep.chapters.find(c => c.plan) || {}).plan });
+const ids = doc.chapters.map(c => c.id);
+assert.equal(ids.indexOf('deep_health'), ids.indexOf('deep_wolun') + 1);
+assert(ids.indexOf('deep_health') < ids.indexOf('c19'));
+assert.equal(doc.chapters.find(c => c.id === 'deep_health').scenes.filter(s => s.html && !s.episode).length, 5);
+const fake = (load, caution) => ({ ...M, evaluateDomainLuck: () => ({ health: { components: { load, recovery: 50 }, reasons: ['부담 근거'] }, accident: { cautionIndex: caution, reasons: ['주의 근거'] } }) });
+const low = build({ ...H, M: fake(10, 10) });
+assert(html(low).includes('두드러진 추가 점검 구간은 없습니다'));
+const high = build({ ...H, M: fake(90, 95) });
+assert.equal((high.scenes[2].html.match(/class="dp-rem"/g) || []).length, 3);
+assert(high.scenes[2].html.includes('주의 근거'));
+assert(!high.scenes[2].html.includes('부담 근거'));
+let calls = 0;
+const missing = build({ ...H, M: { ...M, evaluateDomainLuck: () => { throw Error('missing'); } } });
+assert(missing.rows.every(r => r.load === null && r.caution === null));
+assert(html(missing).includes('자료가 부족해 주의 시기를 고르지 않았습니다'));
+assert(!/NaN|undefined/.test(html(missing)));
+const partial = build({ ...H, M: { ...fake(90, 90), evaluateDomainLuck: (...args) => ++calls % 2 ? M.evaluateDomainLuck(...args) : null } });
+assert.equal(partial.rows.filter(r => r.load === null).length, 6);
+assert(html(partial).includes('자료가 없는 구간은 비교와 시기 선택에서 제외'));
+const unknown = M.compute({ year: 1999, month: 1, day: 1, hour: null, minute: 0, calendar: 'solar', gender: 'F', city: '서울' });
+assert(html(build({ ...H, ch: unknown, sd: R.SajuData.build(unknown, { now }) })).includes('출생 시각이 없어'));
+console.log('건강 챕터 검증 통과: 12개월 엔진 일치 · 실제 문서 순서 · 5장면 보존 · 중복 방지 · 낮음/높음/누락/시간 미상');
+if (process.argv.includes('--preview')) {
+  const http = require('http');
+  const css = ['viewer.css', 'reader.css', 'deep.css'].map(f => fs.readFileSync(path.join(root, 'report/v2', f), 'utf8')).join('\n');
+  const page = '<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>건강 및 사고수 미리보기</title><style>' + css + 'body{overflow:auto!important}.scene{min-height:auto!important;padding:32px 22px!important;max-width:720px;margin:auto}details{margin:12px 0}summary{cursor:pointer;padding:8px 0}</style><body>' + html(chapter) + '</body></html>';
+  http.createServer((req, res) => { res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); res.end(page); }).listen(8766, '127.0.0.1', () => console.log('Preview: http://127.0.0.1:8766'));
+}

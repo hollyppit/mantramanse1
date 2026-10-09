@@ -88,6 +88,54 @@
     return { title: '월운 지도', sub: '앞으로 12개월, 달마다 하게 될 일', scenes: out, rows: rows };
   };
 
+  // 건강 및 사고수: 엔진 지표를 생활 점검으로 번역한다. 의료·사건 예측은 하지 않는다.
+  var CARE_NOTE = '명리 모델의 참고 지표이며 실제 건강 상태·질병·사고 확률이 아닙니다. 낮은 값도 안전을 보장하지 않습니다.';
+  var CARE_ACTIONS = [
+    { title: '휴식과 생활 리듬', text: '일정이 빽빽하다면 쉬는 시간을 먼저 확보하고, 잠과 식사 시간을 점검하세요.' },
+    { title: '운전·장거리 이동을 한다면', text: '이동 시간을 여유 있게 잡고, 운전 중 휴대전화 사용을 피하며 모든 좌석의 안전벨트를 확인하세요.' },
+    { title: '운동·도구 작업을 한다면', text: '보호장비와 주변 환경을 확인하고, 피로하거나 집중하기 어려울 때는 강도와 작업량을 줄이세요.' },
+    { title: '몸에 불편함이 있다면', text: '운의 시기와 관계없이 의료진에게 상담하세요. 사주로 원인이나 치료 방법을 정하지 않습니다.' }
+  ];
+  function careBand(v) { return v >= 70 ? '집중 점검' : v >= 40 ? '추가 점검' : '기본 점검'; }
+  function careDate(ms) { return new Date(ms + 9 * 3600e3).toISOString().slice(0, 10); }
+  function careCards(actions) { return actions.map(function (a) { return '<div class="dp-rem"><div class="dp-rem1"><b>' + esc(a.title) + '</b></div><p>' + esc(a.text) + '</p></div>'; }).join(''); }
+  function careChart(rows, key, title) {
+    var W = 360, bottom = 110, xs = rows.map(function (_, i) { return 25 + i * 310 / Math.max(1, rows.length - 1); });
+    var points = rows.map(function (r, i) { return r[key] == null ? null : [xs[i], bottom - r[key] * .8]; });
+    var paths = '', active = false;
+    points.forEach(function (p) { if (!p) { active = false; return; } paths += (active ? ' L' : ' M') + p[0].toFixed(1) + ',' + p[1].toFixed(1); active = true; });
+    return '<div class="dp-chart">' + cap(title) + '<svg viewBox="0 0 360 145" role="img" aria-label="' + esc(title + '。높을수록 점검 신호가 많습니다. 월별 상세 값은 아래 표에 있습니다.') + '">' + [40, 70].map(function (v) { return '<line x1="25" x2="335" y1="' + (bottom - v * .8) + '" y2="' + (bottom - v * .8) + '" stroke="currentColor" opacity=".2" stroke-dasharray="3 4"/>'; }).join('') + '<path d="' + paths + '" fill="none" stroke="#D7AA70" stroke-width="2.5"/>' + rows.map(function (r, i) { var p = points[i]; return (p ? '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + (i === 0 ? 5 : 3) + '" fill="#D7AA70"/>' : '') + '<text x="' + xs[i].toFixed(1) + '" y="132" text-anchor="middle" fill="currentColor" font-size="9">' + esc(r.month + '월') + '</text>'; }).join('') + '</svg><p class="dp-chartnote">높을수록 점검할 신호가 많습니다 · 첫 점은 현재 절기 구간 · 빈 구간은 계산 자료 없음</p></div>';
+  }
+  S.deep_health = function (H) {
+    var M = H.M, now = H.now || Date.now(), Y = H.sd.nowYear;
+    var all = M.wolun(H.ch, Y).concat(M.wolun(H.ch, Y + 1)), ci = 0;
+    all.forEach(function (x, i) { if (x.startMs <= now) ci = i; });
+    var rows = all.slice(ci, ci + 12).map(function (x, i) {
+      var next = all[ci + i + 1], domain = null;
+      try { domain = M.evaluateDomainLuck(H.ch, x, 'wolun', { ms: x.startMs + 1 }); } catch (e) { }
+      var h = domain && domain.health, a = domain && domain.accident;
+      var load = h && h.components && h.components.load, caution = a && a.cautionIndex;
+      return { startMs: x.startMs, endMs: next ? next.startMs : null, start: careDate(x.startMs), end: next ? careDate(next.startMs) : null,
+        month: new Date(x.startMs + 9 * 3600e3).getUTCMonth() + 1, term: x.termName,
+        load: typeof load === 'number' && isFinite(load) ? Math.round(load) : null,
+        caution: typeof caution === 'number' && isFinite(caution) ? Math.round(caution) : null,
+        recovery: h && h.components ? h.components.recovery : null,
+        healthReasons: h && h.reasons || [], cautionReasons: a && a.reasons || [], chainNote: domain && domain.chainNote || '' };
+    });
+    var valid = rows.filter(function (r) { return r.load != null && r.caution != null; });
+    var candidates = valid.filter(function (r) { return r.load >= 40 || r.caution >= 40; }).sort(function (a, b) { return Math.max(b.load, b.caution) - Math.max(a.load, a.caution) || a.startMs - b.startMs; }).slice(0, 3).sort(function (a, b) { return a.startMs - b.startMs; });
+    var current = rows[0], out = [];
+    var intro = current && current.load != null && current.caution != null ? '현재 절기 구간의 생활 부담은 ' + careBand(current.load) + ', 변동·충돌 주의 신호는 ' + careBand(current.caution) + '입니다. ' + (current.load >= 40 ? '휴식과 일정 여유를 먼저 점검합니다.' : '평소의 생활 리듬을 점검합니다.') + (current.caution >= 40 ? ' 이동이나 작업이 있다면 확인 절차를 한 번 더 챙깁니다.' : '') : '현재 구간의 점검 지표를 계산할 자료가 부족합니다. 일반적인 생활 점검을 참고하세요.';
+    out.push(scene(sec('', cap('건강 및 사고수 · 내 몸과 일상을 챙길 타이밍') + '<p class="lead">' + esc(intro) + '</p><p class="dp-note">' + esc(CARE_NOTE) + '</p>' + (H.ch.hourKnown ? '' : '<p class="dp-note">출생 시각이 없어 시주를 제외한 계산입니다.</p>'))));
+    out.push(scene(sec('', cap('앞으로 12개월 · 생활 점검 지도') + careChart(rows, 'load', '생활 부담 신호') + careChart(rows, 'caution', '변동·충돌 주의 신호') + '<p class="dp-note">일반 달력의 1일이 아니라 절기 시작을 기준으로 읽습니다. 40 미만 기본 점검, 40 이상 추가 점검, 70 이상 집중 점검은 화면 안내 기준입니다.</p><details><summary>절기 구간과 지표 자세히 보기</summary>' + rows.map(function (r) { return '<p>' + esc(r.start + ' ~ ' + (r.end || '다음 절기') + ' (종료일의 절기 시작 전까지) · ' + r.term + ' · 생활 부담 ' + (r.load == null ? '자료 없음' : r.load + '/100') + ' · 주의 신호 ' + (r.caution == null ? '자료 없음' : r.caution + '/100')) + '</p>'; }).join('') + '</details><p class="dp-note">' + esc(CARE_NOTE) + '</p>')));
+    out.push(scene(sec('', cap('눈여겨볼 시기 · 최대 3개 구간') + (candidates.length ? candidates.map(function (r) {
+      var reasons = (r.load >= r.caution ? r.healthReasons : r.cautionReasons).slice(0, 2).map(function (v) { return typeof v === 'string' ? v : v.text || v.reason || ''; }).filter(Boolean);
+      return '<div class="dp-rem"><div class="dp-rem1"><b>' + esc(r.start + ' ~ ' + (r.end || '다음 절기')) + '</b><span>' + esc(careBand(Math.max(r.load, r.caution))) + '</span></div><p>' + esc(r.load >= r.caution ? '생활 부담 신호가 두드러져, 빽빽한 일정이 있다면 휴식 시간을 확보할 구간입니다.' : '변동·충돌 신호가 두드러져, 운전·이동·작업이 있다면 준비와 확인을 챙길 구간입니다.') + '</p><details><summary>계산 근거</summary><p>' + esc(reasons.join(' · ') || '엔진의 부담·변동·충돌 성분을 참고했습니다.') + '</p><p>' + esc(r.chainNote) + '</p></details></div>';
+    }).join('') : '<p class="lead">' + (valid.length ? '현재 계산에서 두드러진 추가 점검 구간은 없습니다. 평소의 안전 습관은 계속 챙깁니다.' : '계산 자료가 부족해 주의 시기를 고르지 않았습니다.') + '</p>') + (valid.length !== rows.length ? '<p class="dp-note">자료가 없는 구간은 비교와 시기 선택에서 제외했습니다.</p>' : ''))));
+    out.push(scene(sec('', cap('내 생활에 해당하는 예방 행동') + '<p class="lead">실제 생활 정보가 없어 활동별로 제안합니다. 자신에게 해당하는 상황의 행동을 선택하세요. 명리 지표는 질병이나 사고 종류를 정하지 않습니다.</p>' + careCards(CARE_ACTIONS) + '<p class="dp-note">교통안전 행동의 근거: <a href="https://www.who.int/news-room/fact-sheets/detail/road-traffic-injuries" target="_blank" rel="noopener noreferrer">WHO 교통안전 자료</a>. 명리 계산과 별개의 일반 안전 안내입니다.</p>')));
+    out.push(scene(sec('', cap('개운법으로 이어지는 한 가지 실천') + '<p class="lead">' + esc(current && current.load >= 40 ? '이번 주 일정에 휴식 시간을 하나 먼저 넣어 보세요.' : current && current.caution >= 40 ? '다음 이동이나 작업 전에 확인할 항목 하나를 정해 보세요.' : '이번 주에 지킬 생활 습관 하나를 정해 보세요.') + ' 다음 개운법 챕터에서 자신의 생활에 맞는 실천으로 이어갑니다.</p><p class="dp-note">불편한 증상이나 실제 위험 상황은 그래프보다 먼저 확인합니다.</p>')));
+    return { title: '건강 및 사고수', sub: '내 몸과 일상을 챙길 타이밍', scenes: out, rows: rows };
+  };
   // ───────── 개운법: 명리 근거 ─────────
   var EL = { 목: { color: '초록·청록', dir: '동쪽', num: '3·8', season: '봄', taste: '신맛(식초·과일)', time: '오전 3~9시', mat: '나무·식물·종이·면', act: '숲 산책, 식물 키우기, 새로운 공부 시작', env: '교육·기획·성장하는 분야' },
     화: { color: '붉은색·주황·보라', dir: '남쪽', num: '2·7', season: '여름', taste: '쓴맛(커피·쌉싸름한 채소)', time: '오전 9시~오후 3시', mat: '조명·전기·실크', act: '햇볕 쬐기, 사람 만나는 모임, 열정을 쓰는 운동', env: '방송·표현·사람을 상대하는 분야' },
@@ -99,15 +147,25 @@
     var sd = H.sd, u = sd.usefulElements, out = [], ch = H.ch, temp = ch.climate && ch.climate.temp, hum = ch.climate && ch.climate.hum;
     if (!u || u.fallback || !EL[u.yong]) return { title: '개운법의 근거', sub: '생활에서 확인할 보완 방향', scenes: [scene(sec('', cap('생활에서 확인할 보완 방향') + '<p class="lead">현재 계산만으로 특정 오행을 용신으로 정하기 어렵습니다. 부족한 오행만 보고 색·방향을 처방하기보다, 앞서 살펴본 장점과 반복되는 부담을 기준으로 실천 한 가지를 정하고 결과를 확인합니다.</p>'))] };
     var need = u ? [u.yong, u.hee].filter(Boolean) : [sd.weakestEl], avoid = u ? ELKEY.filter(function (e) { return /기신/.test(u.roles[e] || ''); }) : [], less = u ? ELKEY.filter(function (e) { return /구신/.test(u.roles[e] || ''); }) : [];
-    var cl = temp > 0.4 ? '원국이 덥고 ' + (hum < -0.3 ? '건조해서' : '습기가 적어서') + ' 식혀 주는 기운(수·금)이 도움이 됩니다.' : temp < -0.4 ? '원국이 차가워서 데워 주는 기운(화·목)이 도움이 됩니다.' : '원국의 온도는 크게 치우치지 않았습니다.';
-    out.push(scene(sec('', cap('개운법의 근거 · 왜 이 기운이 필요한가') + '<p class="lead">명리적 보완은 <b>일간의 힘·조후·오행의 관계</b>를 함께 살펴 정합니다. 오행의 양이 적다는 이유만으로 용신이 되는 것은 아닙니다. ' + esc(who(H)) + '의 근거는 이렇습니다.</p>' +
+    var schoolName = { eokbu: '억부 · 강약 조절', johu: '조후 · 한난조습', tonggwan: '통관 · 대립 중재' }[u.school] || '선택한 해석 기준';
+    var cl = (temp > .4 ? '한난 지표는 더운 편' : temp < -.4 ? '한난 지표는 찬 편' : '한난 지표는 고른 편') + (hum < -.3 ? ', 조습 지표는 건조한 편입니다.' : hum > .3 ? ', 조습 지표는 습한 편입니다.' : ', 조습 지표는 고른 편입니다.') + ' 오행 비중이나 강약 기준의 역할과는 따로 확인합니다.';
+    var johu = ch.yongAll && ch.yongAll.johu;
+    var conflicts = johu && johu.applicable && u.school !== 'johu' ? ELKEY.filter(function (e, i) { return /기신|구신/.test(u.roles[e] || '') && /용신|희신/.test(johu.roles[i] || ''); }) : [];
+    var roleReason = avoid.length ? avoid[0] + ' 기운은 ' + u.yong + ' 기운을 극하는 관계라 이 모델에서 기신으로, ' + (less[0] || '기신을 돕는 오행') + ' 기운은 기신을 생하는 관계라 구신으로 분류합니다. 오행의 양이 적다는 뜻과 보완 역할은 다르므로, 부족한 오행도 이 기준에서 부담 역할이 될 수 있습니다.' : '';
+    var clashNote = conflicts.length ? '기준별 판단이 다릅니다: ' + conflicts.map(function (e) { return e + ' 기운은 ' + schoolName + '에서 ' + u.roles[e] + '이지만, 조후에서는 ' + johu.roles[ELKEY.indexOf(e)] + '입니다'; }).join(' · ') + '. 이 경우 해당 오행을 무조건 줄이라고 권하지 않고, 두 기준의 보완 방향을 나누어 봅니다.' : '';
+    out.push(scene(sec('', cap('개운법의 근거 · 양과 역할을 나누어 봅니다') + '<p class="lead">명리적 보완은 <b>일간의 힘·조후·오행의 관계</b>를 함께 살펴 정합니다. 오행의 양이 적다는 이유만으로 용신이 되는 것은 아닙니다. ' + esc(who(H)) + '의 근거는 이렇습니다.</p>' +
       '<div class="dp-why"><div><small>① 일간의 힘</small><b>' + esc(sd.strength.band) + '</b><span>' + esc(sd.strength.band === '신강' ? '내 편 기운이 많아, 힘을 빼 주고 쓸 곳을 만들어 주는 기운이 필요합니다' : sd.strength.band === '신약' ? '내 편 기운이 적어, 나를 받쳐 주는 기운이 필요합니다' : '힘의 균형이 맞아, 치우침만 다듬으면 됩니다') + '</span></div>' +
-      '<div><small>② 기후(조후)</small><b>' + (temp > 0.4 ? '더운 편' : temp < -0.4 ? '찬 편' : '고른 편') + '</b><span>' + esc(cl) + '</span></div><div><small>③ 오행의 부족·과잉</small><b>' + esc((sd.lackEl ? sd.lackEl + ' 부족' : '큰 부족 없음') + ' · ' + sd.dominantEl + ' 과다') + '</b><span>비율은 구성의 참고값입니다. 실제 보완 방향은 신강약과 조후, 생극 관계를 함께 보고 판단합니다.</span></div></div>' +
-      '<p class="lead rd-hl">필요한 기운: <b>' + need.map(function (e) { return e + '(' + EL_HJ[e] + ')'; }).join(' · ') + '</b>' + (avoid.length ? '<br><span style="font-size:.9em">줄일 기운: ' + avoid.map(function (e) { return e + '(' + EL_HJ[e] + ')'; }).join(' · ') + (less.length ? ' (조금 덜어낼 기운: ' + less.join('·') + ')' : '') + '</span>' : '') + '</p>')));
+      '<div><small>② 기후(조후)</small><b>' + (temp > 0.4 ? '더운 편' : temp < -0.4 ? '찬 편' : '고른 편') + '</b><span>' + esc(cl) + '</span></div><div><small>③ 오행의 부족·과잉</small><b>' + esc((sd.lackEl ? sd.lackEl + ' 비중 낮음' : '큰 부족 없음') + ' · ' + sd.dominantEl + ' 비중 가장 큼') + '</b><span>비율은 구성의 참고값입니다. 실제 보완 방향은 신강약과 조후, 생극 관계를 함께 보고 판단합니다.</span></div></div>' +
+      '<p class="lead rd-hl">' + esc(schoolName) + ' 기준의 보완 기운: <b>' + need.map(function (e) { return e + '(' + EL_HJ[e] + ')'; }).join(' · ') + '</b>' + (avoid.length ? '<br><span style="font-size:.9em">이 기준에서 부담 역할: ' + avoid.map(function (e) { return e + '(' + EL_HJ[e] + ')'; }).join(' · ') + (less.length ? ' (보조 부담 역할: ' + less.join('·') + ')' : '') + '</span>' : '') + '</p><p class="dp-note">' + esc(roleReason) + '</p>' + (clashNote ? '<p class="lead">' + esc(clashNote) + '</p>' : '') + '<details><summary>선택한 기준의 계산 근거</summary><p class="dp-note">' + esc((ch.yong && ch.yong.log || []).join(' ')) + '</p></details>')));
+    var advice = sd.usefulElementAdvice, methods = sd.usefulElementMethods || {}, comparison = [];
+    ['eokbu', 'johu', 'tonggwan'].forEach(function (key) { var m = methods[key]; if (!m) return; comparison.push('<p class="dp-note">' + esc(({ eokbu: '강약 균형', johu: '한난조습', tonggwan: '대립 중재' }[key]) + ': ' + (m.applicable ? '용신 ' + m.yong + ' · 희신 ' + m.hee : '뚜렷한 적용 조건 없음')) + '</p>'); });
+    if (advice) out.push(scene(sec('', cap('여러 기준을 종합하면') + '<p class="lead">' + esc(advice.verdict === '병행' && !advice.agree ? '강약을 보완하는 ' + advice.eokYong + ' 기운과 한난조습을 보완하는 ' + advice.joYong + '의 역할을 함께 봅니다. 한 기준에서 부담이라고 분류된 오행도 다른 기준에서는 도움이 될 수 있으므로, 어느 하나를 무조건 줄이는 생활 지침으로 바꾸지 않습니다.' : advice.why) + '</p>' + comparison.join('') + '<p class="dp-note">표와 역할은 각 기준의 엔진 계산입니다. 종합 풀이는 원국 전체와 기준별 근거를 함께 읽습니다.</p>')));
+    var currentRoot = sd.currentRoots;
+    if (currentRoot) out.push(scene(sec('', cap('일간의 뿌리 · 원국과 현재 운을 나누어 봅니다') + '<p class="lead">' + esc(currentRoot.summary) + '</p>' + bar('원국 통근', currentRoot.natalScore, { text: currentRoot.natalScore + '점 · ' + currentRoot.natalLevel }) + bar('현재 통근 환경', currentRoot.currentSupport, { text: currentRoot.currentSupport + '점' }) + (currentRoot.stability == null ? '<p class="dp-note">현재 근 안정성: 해당 없음</p>' : bar('현재 근 안정성', currentRoot.stability, { text: currentRoot.stability + '점 · ' + currentRoot.stabilityLabel })) + '<p class="dp-note">' + esc(currentRoot.changes.map(function (c) { return c.text; }).join(' · ') || '추가 보강 신호 없음') + '</p><p class="lead">' + esc(currentRoot.fit.note) + '</p><p class="dp-note">' + esc('억부 적합도 ' + currentRoot.fit.eokbuLabel + ' (' + currentRoot.fit.eokbuFit + ') · 조후 적합도 ' + currentRoot.fit.johuLabel + ' (' + currentRoot.fit.johuFit + ')') + '</p><p class="dp-note">' + esc(currentRoot.asOfDate + ' 기준입니다. 통근 점수는 일간 힘의 퍼센트가 아니며, 현재 운의 보강이 원국의 신강약·통근 판정을 바꾸지는 않습니다.') + '</p>')));
     var it = function (e, label, key, why) { var d = EL[e]; return '<div class="dp-rem"><div class="dp-rem1"><b>' + esc(label) + '</b><span>' + esc(d[key]) + '</span></div><p><em>명리 근거</em> ' + esc(why) + '</p></div>'; };
     var e1 = need[0] || sd.weakestEl, e2 = need[1] || e1, nm = function (e) { return e + '(' + EL_HJ[e] + ')'; };
     out.push(scene(sec('', cap('생활 속 개운법') + it(e1, '입는 색', 'color', nm(e1) + '을 떠올리는 전통 상징색입니다. 실천할 태도를 기억하는 취향의 도구로 활용합니다.') + it(e1, '머물면 좋은 방향', 'dir', nm(e1) + '은 ' + EL[e1].dir + '에 대응하는 전통 방위입니다. 생활 공간은 이 상징보다 빛·소음·동선을 먼저 확인합니다.') + it(e1, '좋은 시간대', 'time', nm(e1) + '에 대응하는 전통 시간대입니다. 중요한 일은 실제 집중력과 생활 일정에 맞춰 정합니다.') + it(e2, '곁에 둘 것', 'mat', nm(e2) + '에 대응하는 소재입니다. 정리와 실천을 떠올리는 표시로 활용할 수 있습니다.') + it(e2, '행동으로 옮기기', 'act', nm(e2) + '의 상징을 생활 행동으로 옮긴 예시입니다. 가능한 활동 하나를 골라 부담과 생활 리듬의 변화를 확인합니다.') + it(e1, '맞는 일의 환경', 'env', nm(e1) + '의 역할을 직업 환경에 대응한 예시입니다. 실제 선택은 능력·경험·업무 조건을 함께 살펴 정합니다.') +
-      (avoid[0] ? '<div class="dp-rem warn"><div class="dp-rem1"><b>줄이면 좋은 것</b><span>' + esc('과한 일정 · 확인 없이 떠안은 책임') + '</span></div><p><em>명리 근거</em> ' + esc(nm(avoid[0]) + '에 해당하는 역할이 과해질 때의 부담을 살핍니다. 색이나 시간을 피하기보다 반복되는 무리한 행동을 조절합니다.') + '</p></div>' : ''))));
+      (avoid[0] ? '<div class="dp-rem warn"><div class="dp-rem1"><b>부담을 줄이는 실천</b><span>' + esc('과한 일정 · 확인 없이 떠안은 책임') + '</span></div><p><em>명리 근거</em> ' + esc(nm(avoid[0]) + '에 해당하는 역할이 과해질 때의 부담을 살핍니다. 색이나 시간을 피하기보다 반복되는 무리한 행동을 조절합니다.') + '</p></div>' : ''))));
     return { title: '개운법의 근거', sub: '무엇이 모자라고 넘치는지로 정한 생활 개운', scenes: out };
   };
 
@@ -130,7 +188,7 @@
   };
 
   /* ═════ 챕터 끼워 넣기 ═════ */
-  var PLACEMENT = [['c03', 'deep_car'], ['c05', 'deep_proscons'], ['deep_proscons', 'deep_stages'], ['c06', 'deep_jobs'], ['c10', 'deep_spouse'], ['deep_spouse', 'deep_children'], ['c12', 'deep_ilju'], ['c14', 'deep_past'], ['c15', 'deep_daewoon'], ['c17', 'deep_seun'], ['c18', 'deep_wolun'], ['c19', 'deep_remedy'], ['deep_remedy', 'deep_places']];
+  var PLACEMENT = [['c03', 'deep_car'], ['c05', 'deep_proscons'], ['deep_proscons', 'deep_stages'], ['c06', 'deep_jobs'], ['c10', 'deep_spouse'], ['deep_spouse', 'deep_children'], ['c12', 'deep_ilju'], ['c14', 'deep_past'], ['c15', 'deep_daewoon'], ['c17', 'deep_seun'], ['c18', 'deep_wolun'], ['deep_wolun', 'deep_health'], ['c19', 'deep_remedy'], ['deep_remedy', 'deep_places']];
   function chapter(id, o, scenes, anchor) {
     var intro = { sceneId: id + '_in', sceneType: 'chapterIntro', subtitle: o.sub || '', compact: true };
     return { id: id, base: id, project: anchor.project || 'full', kind: 'life', accessLevel: anchor.accessLevel || 'free', title: o.title, subtitle: o.sub || '', headline: o.sub || '', introText: '', moduleCategories: [], scenes: [intro].concat(scenes), enabled: true, act: anchor.act, deep: true, aiEnabled: false, items: o.rows || null };
