@@ -36,7 +36,7 @@
   ['panelF', 'panelM'].forEach(function (k) { KIND[k] = { title: '패널 이미지 · 본문 컷 · ' + GEN[k], desc: KIND.panel.desc + ' <b>' + GEN[k] + '</b> 칸입니다: 뷰어가 사용자의 성별에 맞는 칸을 쓰고, 이 칸이 비어 있으면 공용 칸으로 대신합니다.' }; });
   KIND.panel = { title: '패널 이미지 · 본문 컷 · 공용(성별 무관)', desc: KIND.panel.desc + ' 성별 칸이 비어 있을 때 대신 쓰는 <b>공용</b> 칸입니다. 기존 50장은 유지되며 새 주제는 빈 칸으로 추가됩니다.' };
   function tabsOf(cur) {
-    return '<div class="row" style="gap:6px;margin:0 0 10px;flex-wrap:wrap">' + ['panelF', 'panelM', 'panel'].map(function (k) { var l = G.d.presets.filter(function (p) { return p.kind === k; }), h = l.filter(function (p) { return p.url; }).length; return '<button type="button" class="pa-tab btn' + (k === cur ? ' gold' : '') + '" data-pg="' + k + '">' + GEN[k] + ' · ' + h + '/' + l.length + '</button>'; }).join('') + '</div>';
+    return '<div class="row" style="gap:6px;margin:0 0 10px;flex-wrap:wrap">' + ['panelF', 'panelM'].map(function (k) { var l = G.d.presets.filter(function (p) { return p.kind === k; }), h = l.filter(function (p) { return p.url; }).length; return '<button type="button" class="pa-tab btn' + (k === cur ? ' gold' : '') + '" data-pg="' + k + '">' + GEN[k] + ' · ' + h + '/' + l.length + '</button>'; }).join('') + (G.d.commonCount ? '<button type="button" class="btn pa-delcommon"' + (G.busy ? ' disabled' : '') + '>공용 컷 ' + G.d.commonCount + '장 삭제</button>' : '') + '</div>';
   }
   function cardOf(kind) {
     var d = G.d, pv = d.providers, list = d.presets.filter(function (p) { return p.kind === kind; }), have = list.filter(function (p) { return p.url; }).length, I = KIND[kind];
@@ -81,6 +81,7 @@
         apply: function (key) { return C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, element: p.element, theme: p.theme, uploadVideo: key, uploadPoster: '' }) }).then(function (r) { p.video = r.video; return r; }); } }; });
       if (!cells.length) { toast('이미지가 있는 칸이 없습니다'); return; }
       window.V2Batch.open({ title: '영상 일괄 만들기 · ' + (KIND[kind] ? KIND[kind].title : kind), cells: cells, onClose: function () { load().then(draw); } }); }; });
+    [].forEach.call(PANE.querySelectorAll('.pa-delcommon'), function (b) { b.onclick = function () { if (G.busy || !confirm('공용(성별 무관) 본문 컷 ' + G.d.commonCount + '장을 이미지·영상 파일까지 모두 삭제합니다. 되돌릴 수 없습니다. 계속할까요?')) return; C.api('/api/panel-art?kind=panel', { method: 'DELETE' }).then(function (r) { toast('공용 컷 ' + r.removed + '장을 삭제했습니다'); return load().then(draw); }).catch(function (e) { toast(e.message); }); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-tab'), function (b) { b.onclick = function () { if (G.busy) return; G.pg = b.dataset.pg; draw(); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-stop'), function (b) { b.onclick = function () { G.stop = true; log('중지 요청 — 진행 중인 한 장이 끝나면 멈춥니다'); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-c'), function (c) { c.onclick = function () {

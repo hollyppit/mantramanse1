@@ -24,7 +24,7 @@ export async function onRequestGet({ request, env }) {
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
   const list = (await env.GLOSSARY_KV.get(KEY, 'json')) || [], by = new Map(list.map(m => [m.id, m]));
   const saved = (await env.GLOSSARY_KV.get(PKEY, 'json')) || {}, dir = await loadDir(env);
-  return json({ presets: presets('panel').concat(presets('panelF'), presets('panelM'), presets('bg')).map(p => ({ ...p, url: (by.get(p.id) || {}).url || '', video: (by.get(p.id) || {}).panelVideo || '', prompt: saved[p.id] ? saved[p.id] + (p.theme === 'wealth' ? '\n' + WEALTH_GUARD_KO : '') : promptFor(p.element, p.theme, dir, p.kind), custom: !!saved[p.id], defaultPrompt: promptFor(p.element, p.theme, dir, p.kind), tools: toolsFor(p.element, p.theme, dir, p.kind) })), direction: dir, directionOptions: Object.fromEntries(Object.entries(DIRECTION_OPTIONS).map(([k, v]) => [k, { label: v.label, items: Object.fromEntries(Object.entries(v.items).map(([i, x]) => [i, x[0]])) }])), refUse: Object.fromEntries(Object.entries(REF_USE).map(([k, v]) => [k, v[0]])), providers: { openai: !!env.OPENAI_API_KEY, gemini: !!env.GEMINI_API_KEY }, r2: !!env.CLIPS_R2,
+  return json({ commonCount: list.filter(m => /^panel-[a-z]+-[a-z]+$/.test(m.id || '')).length, presets: presets('panelF').concat(presets('panelM'), presets('bg')).map(p => ({ ...p, url: (by.get(p.id) || {}).url || '', video: (by.get(p.id) || {}).panelVideo || '', prompt: saved[p.id] ? saved[p.id] + (p.theme === 'wealth' ? '\n' + WEALTH_GUARD_KO : '') : promptFor(p.element, p.theme, dir, p.kind), custom: !!saved[p.id], defaultPrompt: promptFor(p.element, p.theme, dir, p.kind), tools: toolsFor(p.element, p.theme, dir, p.kind) })), direction: dir, directionOptions: Object.fromEntries(Object.entries(DIRECTION_OPTIONS).map(([k, v]) => [k, { label: v.label, items: Object.fromEntries(Object.entries(v.items).map(([i, x]) => [i, x[0]])) }])), refUse: Object.fromEntries(Object.entries(REF_USE).map(([k, v]) => [k, v[0]])), providers: { openai: !!env.OPENAI_API_KEY, gemini: !!env.GEMINI_API_KEY }, r2: !!env.CLIPS_R2,
     models: { openai: env.PANEL_IMAGE_MODEL || 'gpt-image-2', gemini: env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image' } });
 }
 
@@ -117,4 +117,17 @@ export async function onRequestPost({ request, env }) {
   await env.GLOSSARY_KV.put(KEY, JSON.stringify(list.filter(m => m.id !== item.id).concat(item)));
   const mm = old && KEY_OK.exec(old.url || ''); if (mm) { try { await env.CLIPS_R2.delete(mm[1]); } catch { /* 옛 파일 정리 실패는 무시 */ } }
   return json({ ok: true, id: item.id, url, provider: g.provider, model: g.model, refs: refs.length });
+}
+
+// DELETE /api/panel-art?kind=panel — 공용(성별 무관) 본문 컷(id panel-오행-주제)을 전부 삭제한다: 미디어 라이브러리 항목 + R2 이미지·영상 파일 + 저장해 둔 프롬프트. 여성·남성·배경 칸은 건드리지 않는다.
+export async function onRequestDelete({ request, env }) {
+  if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
+  const ce = configError(env); if (ce) return json({ error: ce }, 501);
+  if (new URL(request.url).searchParams.get('kind') !== 'panel') return json({ error: 'kind=panel 만 지원합니다' }, 400);
+  const COMMON = /^panel-[a-z]+-[a-z]+$/, list = (await env.GLOSSARY_KV.get(KEY, 'json')) || [], gone = list.filter(m => COMMON.test(m.id || ''));
+  for (const m of gone) for (const u of [m.url, m.posterUrl, m.panelVideo]) { const k = KEY_OK.exec(u || ''); if (k && env.CLIPS_R2) { try { await env.CLIPS_R2.delete(k[1]); } catch { /* 파일 정리 실패는 무시 */ } } }
+  await env.GLOSSARY_KV.put(KEY, JSON.stringify(list.filter(m => !COMMON.test(m.id || ''))));
+  const prompts = (await env.GLOSSARY_KV.get(PKEY, 'json')) || {}; for (const id of Object.keys(prompts)) if (COMMON.test(id)) delete prompts[id];
+  await env.GLOSSARY_KV.put(PKEY, JSON.stringify(prompts));
+  return json({ ok: true, removed: gone.length });
 }
