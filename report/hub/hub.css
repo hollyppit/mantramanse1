@@ -299,6 +299,72 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 #awk .stage .trait{ -webkit-text-stroke-width: 4px; font-weight: 600; }
 #awk .skip{ color: #F6E9C0; border-color: #D9C28E; background: rgba(0, 0, 0, .55); }
 #awk .tap{ color: #F6E9C0; -webkit-text-stroke: 3px #0a0805; paint-order: stroke fill; }
-/* Monthly flow, date selection and purpose-specific election */
-.fortune-panel{margin:24px 0;padding:22px 18px;border:1px solid #b5a16b55;border-radius:18px;background:#151824}.fortune-panel .h1{font-size:26px}.fortune-panel h2,.tscore h2{font-size:20px}.mc-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0}.mc-nav button,.mc-controls button{border:1px solid #b5a16b66;background:#242838;color:#ddcc98;border-radius:9px;padding:8px 14px;cursor:pointer}.mc-chart{display:flex;gap:8px;height:185px;overflow-x:auto;padding:12px 0 30px;align-items:stretch}.mc-bar{position:relative;flex:1;min-width:34px;background:transparent;border:0;border-bottom:1px solid #b5a16b55;color:#cfc8b5;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0;cursor:pointer}.mc-bar i{width:70%;max-width:32px;min-height:2px;border-radius:5px 5px 0 0;opacity:.8;flex-shrink:0}.mc-bar b{font-size:11px;font-weight:normal}.mc-bar span,.mc-bar small{position:absolute;top:100%;font-size:11px;white-space:nowrap}.mc-bar small{top:calc(100% + 15px);font-size:10px;color:#9e9aaa}.mc-bar.active i{outline:2px solid #dfcd92;outline-offset:2px}.flow-opportunity{background:#426c50}.flow-expansion{background:#365e69}.flow-harvest{background:#59477c}.flow-accumulation{background:#414f88}.mc-legend{display:flex;gap:15px;flex-wrap:wrap;font-size:12px;margin:10px 0}.mc-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px}.mc-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:18px 0}.mc-controls label{font-size:12px;color:#bbb5a3;display:flex;flex-direction:column;gap:5px}.mc-controls select{max-width:100%;background:#242838;border:1px solid #b5a16b66;color:#eee1b5;padding:9px 7px;border-radius:8px}.mc-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.mc-week{text-align:center;font-size:12px;padding:6px;color:#bcb6aa}.mc-day{position:relative;min-height:100px;border:2px solid transparent;color:#eee9dd;border-radius:9px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;min-width:0}.mc-day b{align-self:flex-start;margin-left:4px;font-size:13px}.mc-day small{font-size:12px}.mc-day span,.mc-day em{font-size:11px;white-space:nowrap;font-style:normal}.mc-day em{color:#e5d9b6}.mc-day.selected{border-color:#e6cf8f}.mc-day.is-today:after{content:'';position:absolute;top:7px;right:5px;background:#edce79;width:6px;height:6px;border-radius:50%}.mc-pick{display:flex;flex-direction:column;gap:6px;text-align:left;width:100%;background:#222638;border:1px solid #b5a16b55;color:#ddd4b9;border-radius:10px;padding:14px;margin:10px 0;cursor:pointer}.mc-pick span,.mc-pick small{font-size:12px;line-height:1.6}.mc-pick small{color:#d6ac97}.mc-day:focus-visible,.mc-bar:focus-visible,.mc-pick:focus-visible{outline:3px solid #ead699;outline-offset:2px}@media(max-width:420px){.fortune-panel{padding:18px 10px}.fortune-panel .h1{font-size:23px}.mc-grid{gap:3px}.mc-day{min-height:94px}.mc-day small{font-size:11px}.mc-day span,.mc-day em{font-size:10px}.mc-controls{gap:7px}.mc-controls select{font-size:12px}.mc-nav h2{font-size:17px}}
-.mc-lists{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}.mc-shortlist{border-radius:14px;padding:14px;border:1px solid #76978555;background:#1b2925}.mc-shortlist.caution{background:#2b2124;border-color:#bc827455}.mc-shortlist h3{margin:0 0 7px;font-size:17px;color:#b9e0c7}.mc-shortlist.caution h3{color:#efb5a5}.mc-shortlist .mc-pick{background:#ffffff07;border-color:#ffffff15;margin:8px 0;padding:11px}.mc-empty{font-size:13px;color:#c1bbaa}.mc-day.favorable{box-shadow:inset 0 -4px #8bd2ab}.mc-day.caution{box-shadow:inset 0 -4px #e4a28f}.mc-day.selected{border-color:#e6cf8f}.mc-son{position:absolute;right:3px;top:23px;background:#d5b873;color:#241b0c;border-radius:50%;width:16px;height:16px;line-height:16px;text-align:center;font-size:10px;font-style:normal;font-weight:bold}.mc-key{display:inline-block;border-radius:5px;padding:1px 5px;font-size:11px;background:#284236;color:#c3ead2}.mc-key.caution{background:#54332f;color:#f3c2b1}.mc-key.son{background:#d5b873;color:#241b0c}.mc-month-note{padding:15px 18px;border-left:3px solid #bda970;border-radius:6px;background:#171c29;font-size:14px;line-height:1.8}@media(max-width:480px){.mc-lists{grid-template-columns:1fr;gap:10px}.mc-shortlist{padding:13px}.mc-day small{padding-right:8px}.mc-son{width:14px;height:14px;line-height:14px;font-size:9px;right:1px}}
+/* Fortune dashboard: quiet surfaces, vivid data and clear interaction states. */
+.fortune-panel {
+  --opportunity: #73d8ae;
+  --expansion: #78cddb;
+  --harvest: #b09aef;
+  --accumulation: #8da8f3;
+  margin: 24px 0; padding: 28px 24px;
+  border: 1px solid #ffffff12; border-radius: 24px;
+  background: radial-gradient(ellipse at top right,#29324355,transparent 65%),#11151f;
+  box-shadow: 0 18px 55px #00000025;
+  font-family: system-ui,-apple-system,'Segoe UI',sans-serif;
+  color: #e9edf5;
+}
+.fortune-panel .h1 { font-family: inherit; font-size: 27px; font-weight: 750; letter-spacing: -.8px; color: #f3f1e9; line-height: 1.4; }
+.fortune-panel .kick { color: #c6b383; font-size: 10px; letter-spacing: 2.4px; }
+.fortune-panel .sub,.fortune-panel .dsub { color: #a6afc0; line-height: 1.75; }
+.fortune-panel .sub { font-size: 14px; }
+.fortune-panel .dsub { font-size: 12px; }
+.fortune-panel h2,.tscore h2 { font-size: 19px; font-weight: 650; letter-spacing: -.5px; }
+.mc-nav { display:flex;align-items:center;justify-content:space-between;gap:12px;margin:24px 0; }
+.mc-nav button,.mc-controls button { border:1px solid #ffffff15;background:#ffffff07;color:#e4d3a5;border-radius:12px;padding:9px 14px;cursor:pointer;min-height:40px; }
+.mc-chart { display:flex;gap:9px;height:215px;overflow-x:auto;padding:22px 0 36px;align-items:stretch;background:repeating-linear-gradient(to top,transparent 0,transparent calc(25% - 1px),#ffffff08 calc(25% - 1px),#ffffff08 25%);background-clip:content-box;scrollbar-width:thin;scrollbar-color:#434957 transparent; }
+.mc-bar { position:relative;flex:1;min-width:34px;background:transparent;border:0;border-bottom:1px solid #ffffff20;color:#c4ccdc;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0;cursor:pointer; }
+.mc-bar i { width:76%;max-width:34px;min-height:2px;border-radius:8px 8px 3px 3px;flex-shrink:0;background:linear-gradient(to top,color-mix(in srgb,var(--flow) 40%,#152131),var(--flow));opacity:.85; }
+.mc-bar b { font-size:11px;font-weight:600;margin-bottom:6px;font-variant-numeric:tabular-nums; }
+.mc-bar span,.mc-bar small { position:absolute;top:calc(100% + 8px);font-size:11px;white-space:nowrap; }
+.mc-bar small { top:calc(100% + 24px);font-size:9px;color:#7f899e; }
+.mc-bar.active i { outline:2px solid #e5cea0;outline-offset:4px;opacity:1;box-shadow:0 0 22px #e5cea01a; }
+.flow-opportunity { --flow:#73d8ae; }.flow-expansion { --flow:#78cddb; }.flow-harvest { --flow:#b09aef; }.flow-accumulation { --flow:#8da8f3; }
+.mc-legend { display:flex;gap:16px;flex-wrap:wrap;font-size:11px;margin:16px 0;color:#b7c1d2; }
+.mc-legend i { display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;background:var(--flow); }
+.mc-controls { display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:20px 0;padding:14px;background:#ffffff04;border:1px solid #ffffff08;border-radius:16px; }
+.mc-controls label { font-size:10px;color:#99a4b8;display:flex;flex-direction:column;gap:7px; }
+.mc-controls select { max-width:100%;background:#1c2230;border:1px solid #ffffff15;color:#e6ebf4;padding:10px;border-radius:10px;font-size:13px;min-height:40px; }
+.mc-grid { display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px; }
+.mc-week { text-align:center;font-size:11px;padding:8px;color:#8590a7; }
+.mc-week:first-child { color:#d79791; }.mc-week:nth-child(7) { color:#8fa9de; }
+.mc-day { position:relative;min-height:114px;border:1px solid color-mix(in srgb,var(--flow) 15%,transparent);background:linear-gradient(155deg,color-mix(in srgb,var(--flow) 15%,#121723),color-mix(in srgb,var(--flow) 6%,#121723));color:#e9edf5;border-radius:13px;padding:8px 3px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;min-width:0; }
+.mc-day b { align-self:flex-start;margin-left:5px;font-size:14px;font-weight:650;font-variant-numeric:tabular-nums; }
+.mc-day small { font-size:11px;color:#a8b2c6; }
+.mc-day .mc-metric { display:flex;flex-direction:column;gap:2px;align-items:center; }
+.mc-day .mc-metric strong { font-size:19px;font-weight:650;line-height:1.15;color:var(--flow);font-variant-numeric:tabular-nums;letter-spacing:-.6px; }
+.mc-day .mc-metric span { font-size:9px;color:#9faac1; }
+.mc-day em { font-size:9px;white-space:nowrap;font-style:normal;color:#a5afc2;padding:2px 5px;border-radius:5px; }
+.mc-day.favorable em { color:#9be6bf;background:#73d8ae16; }.mc-day.caution em { color:#efb29e;background:#efb29e16; }
+.mc-day.favorable { border-bottom:2px solid #73d8ae; }.mc-day.caution { border-bottom:2px solid #df9b86; }
+.mc-day.selected { border:1px solid #e2c991;outline:2px solid #e2c99135;outline-offset:2px;background:linear-gradient(145deg,#ddc89818,#19202f); }
+.mc-day.is-today:after { content:'';position:absolute;top:10px;right:6px;background:#e5cea0;width:5px;height:5px;border-radius:50%; }
+.mc-son { position:absolute;right:3px;top:29px;background:#cdb17a20;color:#e8cf99;border:1px solid #cdb17a55;border-radius:5px;width:15px;height:15px;line-height:13px;text-align:center;font-size:9px;font-style:normal;font-weight:600; }
+.mc-key { display:inline-block;border-radius:5px;padding:1px 5px;font-size:10px;background:#73d8ae16;color:#9be6bf; }.mc-key.caution { background:#efb29e16;color:#efb29e; }.mc-key.son { background:#cdb17a20;color:#e8cf99; }
+.mc-lists { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0; }
+.mc-shortlist { border-radius:18px;padding:16px;border:1px solid #73d8ae22;background:linear-gradient(135deg,#73d8ae0a,transparent); }
+.mc-shortlist.caution { background:linear-gradient(135deg,#efb29e0a,transparent);border-color:#efb29e22; }
+.mc-shortlist h3 { margin:0 0 6px;font-size:16px;color:#a0e8c2;letter-spacing:-.4px; }.mc-shortlist.caution h3 { color:#eeb7a4; }
+.mc-pick { display:flex;flex-direction:column;gap:7px;text-align:left;width:100%;background:#ffffff04;border:1px solid #ffffff0b;color:#dce4f0;border-radius:12px;padding:12px;margin:10px 0;cursor:pointer; }
+.mc-pick b { font-size:13px;font-weight:650; }.mc-pick span,.mc-pick small { font-size:11px;line-height:1.7;color:#a3afc2; }
+.mc-empty { font-size:12px;color:#a3afc2;line-height:1.7; }
+.mc-month-note { padding:16px 20px;border-left:2px solid #baa576;border-radius:0 12px 12px 0;background:#171c28;font-size:13px;line-height:1.8;color:#c6cedd; }
+.mc-day:focus-visible,.mc-bar:focus-visible,.mc-pick:focus-visible,.mc-controls select:focus-visible,.mc-nav button:focus-visible { outline:2px solid #f0dba8;outline-offset:3px; }
+@media(hover:hover) { .mc-day:hover { border-color:var(--flow);transform:translateY(-2px); }.mc-pick:hover,.mc-nav button:hover { background:#ffffff0a;border-color:#ffffff30; }.mc-bar:hover i { opacity:1; } }
+@media(prefers-reduced-motion:no-preference) { .mc-day,.mc-pick,.mc-bar i { transition:background .18s,border-color .18s,transform .18s,opacity .18s; } }
+@media(max-width:480px) {
+  .fortune-panel { padding:22px 12px;border-radius:20px; }.fortune-panel .h1 { font-size:23px; }
+  .mc-nav { gap:8px;margin:18px 0; }.mc-nav h2 { font-size:17px; }.mc-nav button { padding:8px 12px; }
+  .mc-chart { gap:7px;height:195px; }.mc-controls { padding:10px;gap:8px; }.mc-controls select { font-size:12px; }
+  .mc-grid { gap:4px; }.mc-day { min-height:110px;border-radius:10px;padding:7px 2px; }.mc-day b { font-size:12px;margin-left:3px; }.mc-day small { font-size:10px;padding-right:7px; }.mc-day .mc-metric strong { font-size:17px; }.mc-day em { padding:2px 3px;font-size:9px; }
+  .mc-son { right:1px;top:27px;width:13px;height:13px;line-height:11px;font-size:8px; }
+  .mc-lists { grid-template-columns:1fr;gap:12px; }.mc-shortlist { padding:15px; }
+}
