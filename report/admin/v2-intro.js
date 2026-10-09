@@ -236,5 +236,5 @@
     }; rd.readAsText(file, 'utf-8');
   }
 
-  window.V2Intro = { mount: mount, reload: function () { I.loaded = false; }, isDirty: function () { return I.dirty; }, state: I };
+(window.AdminDirty = window.AdminDirty || {})['일간·일주 소개'] = function () { return I.dirty; }; window.V2Intro = { mount: mount, reload: function () { I.loaded = false; }, isDirty: function () { return I.dirty; }, state: I };
 })();

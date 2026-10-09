@@ -27,6 +27,7 @@ textarea { resize:vertical; min-height:60px; }
 body:not([data-pane="lib"]) #saveBtn, body:not([data-pane="lib"]) #saveState { display:none; }
 .tabs { display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:16px; flex-wrap:wrap; }
 .tabs button { border:0; border-bottom:2px solid transparent; border-radius:0; background:none; color:var(--ink2); padding:10px 16px; }
+.tabs .tg { align-self:center; font-size:.68rem; letter-spacing:.12em; color:var(--ink3); padding:0 6px 0 14px; border-left:1px solid var(--line); margin-left:6px; }
 .tabs button.on { color:var(--gold); border-color:var(--gold); }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; }
 .row { display:flex; gap:10px; flex-wrap:wrap; align-items:end; }
@@ -148,25 +149,26 @@ summary { cursor:pointer; padding:4px 0; }
     <header>
       <div class="row" style="align-items:center;gap:14px"><h1>사주 무빙툰 · 관리자</h1><a class="navbtn" href="/" target="_blank" rel="noopener" title="만트라 만세력(사주 계산 앱)을 새 탭으로 엽니다">만트라 만세력 ↗</a><a class="navbtn" href="/report/" target="_blank" rel="noopener" title="방문자가 보는 온보딩 페이지를 새 탭으로 엽니다">온보딩 페이지 ↗</a></div>
       <div class="row">
-        <span class="muted" id="saveState"></span>
+        <span class="muted" id="dirtyBadge" role="status" style="color:var(--gold);cursor:help"></span><span class="muted" id="saveState"></span>
         <button class="pri" id="saveBtn" disabled>변경사항 저장</button>
         <button id="logoutBtn">로그아웃</button>
       </div>
     </header>
     <div class="tabs" role="tablist">
-      <button data-t="v2clip" class="on">클립 라이브러리</button>
+      <button data-t="dash" class="on">현황</button><span class="tg">무빙툰 제작</span>
+      <button data-t="v2clip">클립 라이브러리</button>
       <button data-t="v2chap">챕터 관리</button>
       <button data-t="v2intro">일간·일주 영상</button>
       <button data-t="v2test">조합 테스트</button>
       <button data-t="v2story">스토리 플로우</button>
       <button data-t="v2proj">프로젝트</button>
       <button data-t="v2set">설정</button>
-      <button data-t="ikdoc">풀이 자료</button>
+      <span class="tg">AI 풀이</span><button data-t="ikdoc">풀이 자료</button>
       <button data-t="ikknow">풀이 지식</button>
       <button data-t="ikdesign">풀이 구성</button>
       <button data-t="ikrules">AI 작성 설정</button>
       <button data-t="iklab">풀이 테스트</button>
-      <button data-t="freec">무료 콘텐츠</button>
+      <span class="tg">콘텐츠</span><button data-t="freec">무료 콘텐츠</button>
       <button data-t="panelart">패널 이미지</button>
     </div>
 
@@ -238,7 +240,7 @@ summary { cursor:pointer; padding:4px 0; }
     </div>
 
     <!-- 커버리지 -->
-    <div id="t-v2clip"></div><div id="t-v2chap" class="hide"></div><div id="t-v2intro" class="hide"></div><div id="t-v2test" class="hide"></div><div id="t-v2story" class="hide"></div><div id="t-v2proj" class="hide"></div><div id="t-v2set" class="hide"></div><div id="t-ikdoc" class="hide"></div><div id="t-ikknow" class="hide"></div><div id="t-ikdesign" class="hide"></div><div id="t-ikrules" class="hide"></div><div id="t-iklab" class="hide"></div><div id="t-freec" class="hide"></div><div id="t-panelart" class="hide"></div>
+    <div id="t-dash" class="hide"></div><div id="t-v2clip"></div><div id="t-v2chap" class="hide"></div><div id="t-v2intro" class="hide"></div><div id="t-v2test" class="hide"></div><div id="t-v2story" class="hide"></div><div id="t-v2proj" class="hide"></div><div id="t-v2set" class="hide"></div><div id="t-ikdoc" class="hide"></div><div id="t-ikknow" class="hide"></div><div id="t-ikdesign" class="hide"></div><div id="t-ikrules" class="hide"></div><div id="t-iklab" class="hide"></div><div id="t-freec" class="hide"></div><div id="t-panelart" class="hide"></div>
     <div id="t-cov" class="hide">
       <div class="card"><p class="muted" style="margin:0">일주 60개 × 9개 장에서 어느 칸이 비어 있는지 봅니다. <span class="chip">초록</span> 해당 일주를 직접 지정한 클립이 있음 · <span class="chip">파랑</span> 조건 없는 공통 클립으로 채워짐 · 회색 0은 비어 있음.</p></div>
       <div class="cov" style="margin-top:12px"><table id="covT"></table></div>
@@ -533,6 +535,7 @@ summary { cursor:pointer; padding:4px 0; }
 <script src="v2-panel.js"></script>
 <script src="v2-tarot.js"></script>
 <script src="v2-assets.js"></script>
+<script src="v2-dash.js"></script>
 <script>
 (function () {
   var A = window.Assemble, F = window.MovingFx, $ = function (id) { return document.getElementById(id); };
@@ -579,7 +582,7 @@ summary { cursor:pointer; padding:4px 0; }
   function newId(p) { return p + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
 
   // ── 로그인
-  function enter() { $('loginBox').classList.add('hide'); $('app').classList.remove('hide'); load(); showTab('v2clip'); }
+  function enter() { $('loginBox').classList.add('hide'); $('app').classList.remove('hide'); load(); var t = sg('mt_tab'); showTab(t && document.querySelector('.tabs button[data-t="' + t + '"]') ? t : 'dash'); }
   function login() {
     var pw = $('pw').value; if (!pw) return;
     $('loginMsg').textContent = '';
@@ -589,8 +592,54 @@ summary { cursor:pointer; padding:4px 0; }
     }).catch(function (e) { $('loginMsg').textContent = e.message; });
   }
   $('loginBtn').onclick = login; $('pw').onkeydown = function (e) { if (e.key === 'Enter') login(); };
-  $('logoutBtn').onclick = function () { if (S.dirty && !confirm('저장하지 않은 변경사항이 있습니다. 나갈까요?')) return; ss('mt_pw'); location.reload(); };
-  window.addEventListener('beforeunload', function (e) { if (S.dirty) { e.preventDefault(); e.returnValue = ''; } });
+  // 저장 안 된 변경: 각 화면이 window.AdminDirty[이름]=함수 로 등록하고, 여기서 한꺼번에 본다(탭을 옮겨 다녀도 놓치지 않도록 머리글에 표시)
+  var DR = (window.AdminDirty = window.AdminDirty || {});
+  DR['클립 라이브러리(구)'] = function () { return S.dirty; }; DR['온보딩 페이지'] = function () { return HM.dirty; };
+  function dirtyList() { return Object.keys(DR).filter(function (k) { try { return DR[k](); } catch (e) { return false; } }); }
+  function dirtyShow() { var l = dirtyList(), b = $('dirtyBadge'); b.textContent = l.length ? '● 저장 안 됨 ' + l.length + '곳' : ''; b.title = l.join(', '); }
+  setInterval(dirtyShow, 1000);
+  $('logoutBtn').onclick = function () { var l = dirtyList(); if (l.length && !confirm('저장하지 않은 변경사항이 있습니다: ' + l.join(', ') + '. 나갈까요?')) return; ss('mt_pw'); ss('mt_tab'); location.reload(); };
+  window.addEventListener('beforeunload', function (e) { if (dirtyList().length) { e.preventDefault(); e.returnValue = ''; } });
+  // Ctrl+K: 탭 빠른 이동(이름 일부를 치고 Enter, ↑↓로 고르기, Esc로 닫기)
+  (function () {
+    var ov = null, sel = 0, items = [];
+    function close() { if (ov) { ov.remove(); ov = null; } }
+    function draw(q) {
+      var all = [].slice.call(document.querySelectorAll('.tabs button[data-t]'));
+      items = all.filter(function (b) { return !q || b.textContent.replace(/\s/g, '').toLowerCase().indexOf(q.replace(/\s/g, '').toLowerCase()) >= 0; });
+      sel = Math.min(sel, Math.max(0, items.length - 1));
+      var list = ov.querySelector('.kl'); list.innerHTML = '';
+      items.forEach(function (b, i) { var d = document.createElement('div'); d.textContent = b.textContent; d.style.cssText = 'padding:7px 12px;cursor:pointer;border-radius:6px;' + (i === sel ? 'background:#1c1a12;color:var(--gold)' : ''); d.onclick = function () { go(b); }; list.appendChild(d); });
+      if (!items.length) list.innerHTML = '<div class="muted" style="padding:7px 12px">일치하는 탭이 없습니다</div>';
+    }
+    function go(b) { close(); showTab(b.dataset.t); }
+    document.addEventListener('keydown', function (e) {
+      if ($('app').classList.contains('hide')) return;
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && String(e.key).toLowerCase() === 'k') {
+        e.preventDefault(); if (ov) return close();
+        ov = document.createElement('div'); ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99;display:flex;justify-content:center;padding-top:14vh';
+        ov.innerHTML = '<div style="width:min(420px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;align-self:flex-start"><input type="text" placeholder="이동할 탭 이름…" aria-label="탭 검색" style="width:100%"><div class="kl" style="margin-top:8px;max-height:50vh;overflow:auto"></div></div>';
+        ov.onclick = function (ev) { if (ev.target === ov) close(); };
+        document.body.appendChild(ov); sel = 0; draw(''); var inp = ov.querySelector('input'); inp.focus();
+        inp.oninput = function () { sel = 0; draw(inp.value); };
+        return;
+      }
+      if (!ov) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(0, Math.min(items.length - 1, sel + (e.key === 'ArrowDown' ? 1 : -1))); draw(ov.querySelector('input').value); }
+      else if (e.key === 'Enter' && items[sel]) { e.preventDefault(); go(items[sel]); }
+    });
+  })();
+  // Ctrl+S: 지금 보이는 화면의 저장 버튼 누르기(없거나 꺼져 있으면 안내만)
+  document.addEventListener('keydown', function (e) {
+    if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey || String(e.key).toLowerCase() !== 's' || $('app').classList.contains('hide')) return;
+    e.preventDefault();
+    var pane = document.getElementById('t-' + (document.body.dataset.pane || '')), q = '#saveBtn,#mSave,#aSave,#iSave,#pjSave,#inSave,#hmSave,[data-ivsave],[data-txsave]';
+    var btns = [].slice.call(document.querySelectorAll(q)).filter(function (b) { return !b.disabled && b.offsetParent !== null && (b.id === 'saveBtn' || (pane && pane.contains(b))); });
+    var b = btns.filter(function (x) { return x.id !== 'saveBtn'; })[0] || btns[0];
+    if (b) b.click(); else $('saveState').textContent = '이 화면에 저장할 변경이 없습니다';
+  });
+  
 
   // ── 불러오기·저장
   function load() {
@@ -1052,14 +1101,15 @@ summary { cursor:pointer; padding:4px 0; }
   };
 
   // ── 탭: 위쪽 5개(클립 라이브러리·챕터 관리·조합 테스트·프로젝트·설정). 설정 안의 하위 화면(입장 인트로·온보딩 페이지·기존 클립)은 also 로 함께 보여 준다.
-  var PANES = ['lib', 'test', 'cov', 'intro', 'home', 'v2clip', 'v2chap', 'v2intro', 'v2test', 'v2story', 'v2proj', 'v2set', 'ikdoc', 'ikknow', 'ikdesign', 'ikrules', 'iklab', 'freec', 'panelart'];
+  var PANES = ['dash', 'lib', 'test', 'cov', 'intro', 'home', 'v2clip', 'v2chap', 'v2intro', 'v2test', 'v2story', 'v2proj', 'v2set', 'ikdoc', 'ikknow', 'ikdesign', 'ikrules', 'iklab', 'freec', 'panelart'];
   function showTab(t, also) {
     document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); });
     PANES.forEach(function (p) { var e = $('t-' + p); if (e) e.classList.toggle('hide', !(p === t || p === also)); });
-    var cur = also || t; document.body.dataset.pane = cur;
+    var cur = also || t; document.body.dataset.pane = cur; if (document.querySelector('.tabs button[data-t="' + t + '"]')) ss('mt_tab', t);
     if (/^v2/.test(t) && window.V2Shell) window.V2Shell.open(t, S.pw, also);
     if (t === 'ikdoc' && window.V2Src) window.V2Src.open(t, S.pw);
     else if (/^ik/.test(t) && window.V2IK) window.V2IK.open(t, S.pw);
+    if (t === 'dash' && window.V2Dash) window.V2Dash.open(S.pw);
     if (t === 'freec' && window.V2Free) window.V2Free.open(t, S.pw);
     if (t === 'panelart' && window.V2Panel) window.V2Panel.open(t, S.pw);
     if (cur === 'cov') renderCov();

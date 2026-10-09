@@ -474,7 +474,7 @@
     }).then(function () { A.loaded = false; });
   }
 
-  window.V2Admin = {
+(window.AdminDirty = window.AdminDirty || {})['장면 미디어'] = function () { return M.dirty; }; (window.AdminDirty = window.AdminDirty || {})['일간·일주 영상(구)'] = function () { return A.dirty; }; window.V2Admin = {
     quickAdd: function (file, preset, pw, onProg) { PW = pw; return quickAdd(file, preset, onProg); },
     upload: function (file, name, pw, onProg) { PW = pw; return upload(file, name, onProg); },
     quickAwakening: function (kind, key, file, pw, onProg) { PW = pw; return quickAwakening(kind, key, file, onProg); },
