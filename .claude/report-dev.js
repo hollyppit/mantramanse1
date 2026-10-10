@@ -25,6 +25,14 @@ const body = q => new Promise(res => { const b = []; q.on('data', c => b.push(c)
 
 http.createServer(async (q, r) => {
   const u = new URL(q.url, 'http://x'), p = u.pathname;
+  // PROXY_PROD=1: 운영의 영상·이미지·프롤로그 설정을 읽기 전용(GET)으로 가져와 로컬 화면에서 확인한다. 쓰기(POST/PUT)는 보내지 않는다.
+  if (process.env.PROXY_PROD && q.method === 'GET' && /^\/api\/(prologue|awakening|assets|clipfile|media|report-content|story|intro|clips)$/.test(p)) {
+    try {
+      const h = {}; if (q.headers.range) h.range = q.headers.range;
+      const up = await realFetch('https://mantramanse.pages.dev' + p + u.search, { headers: h }), buf = Buffer.from(await up.arrayBuffer());
+      r.statusCode = up.status; ['content-type', 'content-range', 'accept-ranges', 'cache-control'].forEach(k => { const x = up.headers.get(k); if (x) r.setHeader(k, x); }); r.setHeader('content-length', buf.length); return r.end(buf);
+    } catch (e) { return send(r, 502, { error: '운영 데이터를 가져오지 못했습니다: ' + e.message }); }
+  }
   if (p === '/api/src') { // 실제 functions/api/src.js 를 메모리 KV 로 실행(AI 는 위의 가짜)
     const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/src.js')).href), buf = q.method === 'POST' ? await body(q) : undefined;
     const res = await mod.onRequest({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': q.headers['content-type'] || 'application/json' }, body: buf }) });
