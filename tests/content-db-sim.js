@@ -1,0 +1,264 @@
+// 풀이 DB 계층화 비교 테스트(report/v2/CONTENT_DB_DESIGN.md §8):
+//   node tests/content-db-sim.js            → 기준선(tests/content-db-baseline.txt)과 비교, 서버 정리 규칙·병합 규칙 검사
+//   node tests/content-db-sim.js --update   → 기준선 갱신(문장·조건을 일부러 바꾼 뒤에만)
+// 조립 결과(모듈 id·문장·주제 카드)가 사주 120개 × 프로젝트 4종에서 바이트 단위로 같은지 확인한다.
+const fs = require('fs'), path = require('path'), vm = require('vm');
+const root = path.join(__dirname, '..'), base = path.join(__dirname, 'content-db-baseline.txt');
+vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8'), { filename: 'engine.js' });
+globalThis.window = globalThis;
+['chapters', 'saju-data', 'rules', 'narrator', 'content', 'content-pro', 'content-pro2', 'topics', 'intro-text', 'story-director', 'story-composer', 'content-v3', 'verdict', 'remedy', 'media', 'scenes', 'compose']
+  .forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'v2', f + '.js'), 'utf8'), { filename: f + '.js' }));
+const R = globalThis.ReportV2, M = globalThis.Manse, Rules = R.Rules;
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); };
+// 단계 2: content-meta.js 를 올리기 전의 모듈을 스냅샷으로 잡고, 올린 뒤 기존 12개 필드가 그대로인지 확인한다.
+const FIELDS12 = ['id', 'category', 'conditions', 'priority', 'headline', 'summary', 'detail', 'keywords', 'imageTags', 'actionTags', 'extra', 'enabled'];
+const pick12 = m => Rules.stable(FIELDS12.map(k => m[k]).concat([m.layer, m.choice, !!m.v3]));
+const beforeMeta = R.Content.modules.map(m => [m.id, pick12(m)]), beforeKeys = R.Content.modules.map(m => Object.keys(m).sort().join());
+vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'v2', 'content-meta.js'), 'utf8'), { filename: 'content-meta.js' });
+const NOW = Date.UTC(2026, 9, 6), PROJECTS = R.Chapters.PROJECTS.map(p => p.id);
+const NEW_KEYS = /"(evidence|status|narrative|rule)":/; // 신규 계층 필드는 조립 결과에 나오면 안 된다(§8.1)
+
+/* ── 1. 조립 결과 기준선 ───────────────────────────────────────────── */
+function charts(n) {
+  let seed = 20261006; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296, out = [];
+  while (out.length < n) {
+    const i = out.length, hour = i % 10 === 9 ? null : Math.floor(rnd() * 24); // 10번째마다 시간 모름
+    try { out.push(M.compute({ year: 1940 + Math.floor(rnd() * 70), month: 1 + Math.floor(rnd() * 12), day: 1 + Math.floor(rnd() * 28), hour: hour == null ? '' : hour, minute: 0, gender: i % 2 ? 'F' : 'M', calendar: 'solar', leap: false, city: '서울' })); } catch (e) { /* 없는 날짜 */ }
+  }
+  return out;
+}
+function snapshot(lib) {
+  const lines = [], set = charts(120), leak = [];
+  const proj = PROJECTS.map(id => ({ id, cfg: R.Chapters.forProject(null, id) }));
+  set.forEach((ch, i) => {
+    const sd = R.SajuData.build(ch, { now: NOW }), parts = [];
+    proj.forEach(p => {
+      const rep = R.Compose.build(sd, lib, p.cfg, { name: '백진우' });
+      const body = rep.chapters.map(c => [c.id, c.headline, c.interpretation, c.meaning, c.modules, (c.details || []).map(d => [d.id, d.headline, d.summary, d.detail]), c.topics]);
+      const s = Rules.stable(body); if (NEW_KEYS.test(s)) leak.push(p.id + '#' + i);
+      parts.push(p.id + ':' + Rules.hash(body) + ':' + rep.chapters.length);
+    });
+    lines.push(String(i).padStart(3, '0') + ' ' + sd.dayPillar.ko + ' ' + parts.join(' '));
+  });
+  return { text: lines.join('\n') + '\n', leak };
+}
+const lib = R.Compose.library(null);
+const cur = snapshot(lib);
+ok(cur.leak.length === 0, '조립 결과에 신규 계층 필드 노출: ' + cur.leak.slice(0, 3).join(','));
+if (process.argv.includes('--update')) { fs.writeFileSync(base, cur.text); console.log('기준선 갱신: ' + cur.text.split('\n').length + '줄'); process.exit(fails.length ? 1 : 0); }
+const old = fs.existsSync(base) ? fs.readFileSync(base, 'utf8').replace(/\r\n/g, '\n') : null;
+if (old == null) fails.push('기준선 파일이 없습니다: --update 로 먼저 만드세요');
+else if (old !== cur.text) {
+  const o = old.split('\n'), c = cur.text.split('\n'); let n = 0;
+  c.forEach((l, i) => { if (l !== o[i] && n++ < 5) fails.push('조립 결과 다름\n   기준 ' + o[i] + '\n   현재 ' + l); });
+}
+console.log('조립 기준선: 사주 120 × 프로젝트 ' + PROJECTS.length + '종' + (old === cur.text ? ' 일치' : ' 불일치'));
+
+/* ── 2. 저장본 병합(Compose.library) — 시드 위 덮어쓰기·추가·비활성 규칙 ───────────── */
+{
+  const seedMods = R.Content.modules, target = seedMods.find(m => m.category === 'personality' && m.layer), off = seedMods.find(m => m.id !== target.id && m.category === 'career');
+  const saved = { modules: [{ id: target.id, headline: '수정된 결론' }, { id: off.id, enabled: false }, { id: 'mod_added_test', category: 'career', conditions: {}, priority: 99, headline: 'A', summary: 'B', detail: 'C', enabled: true }] };
+  const L = R.Compose.library(saved), by = {}; L.modules.forEach(m => { by[m.id] = m; });
+  ok(by[target.id].headline === '수정된 결론' && by[target.id].summary === target.summary && by[target.id].layer === target.layer, '저장본은 필드 단위로 시드 위에 병합');
+  ok(by[off.id].enabled === false, '저장본 enabled:false 반영');
+  ok(!!by.mod_added_test && L.modules.length === seedMods.length + 1, '새 id 는 추가');
+  ok(R.Compose.library(null).modules.length === seedMods.length, '저장본 없으면 시드 그대로');
+}
+
+/* ── 2-b. 계층 메타(content-meta.js) ────────────────────────────────── */
+{
+  const mods = R.Content.modules, meta = R.Content.meta;
+  ok(mods.length === beforeMeta.length && mods.every((m, i) => m.id === beforeMeta[i][0]), '모듈 id 집합·순서 불변');
+  ok(mods.every((m, i) => pick12(m) === beforeMeta[i][1]), '기존 필드(문장·조건·우선순위·extra·layer·v3) 불변');
+  ok(mods.every(m => m.status === 'legacy'), '전 모듈 status=legacy');
+  const ed = mods.filter(m => m.evidence && m.evidence.basis === 'editorial'), lg = mods.filter(m => m.evidence && m.evidence.basis === 'legacy');
+  ok(ed.length === R.Content.v3Count && ed.every(m => m.v3), 'v3 모듈만 editorial: ' + ed.length);
+  ok(ed.length + lg.length === mods.length, '모든 모듈에 evidence 부여');
+  ok(mods.every(m => Array.isArray(m.evidence.refs) && m.evidence.refs.length === 0 && m.evidence.rev === 0 && !m.evidence.checkedBy), '근거 문헌·승인자를 만들어 넣지 않음');
+  ok(meta && meta.labeled === mods.length && meta.editorial === ed.length, '메타 집계 값: ' + JSON.stringify(meta));
+  const snap = Rules.stable(mods.map(m => [m.status, m.evidence]));
+  vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'v2', 'content-meta.js'), 'utf8'), { filename: 'content-meta.js' });
+  ok(Rules.stable(mods.map(m => [m.status, m.evidence])) === snap, 'content-meta 재실행해도 같음(멱등)');
+  // 선택 게이트: 정책이 아직 없으므로 status 가 선택에 영향을 주지 않는다(§7 단계 3 이전)
+  const f = Rules.flatten(R.SajuData.build(charts(1)[0], { now: NOW }), {}), r1 = Rules.rank(mods, f).map(x => x.mod.id).join();
+  const stripped = mods.map(m => { const c = Object.assign({}, m); delete c.status; delete c.evidence; return c; });
+  ok(Rules.rank(stripped, f).map(x => x.mod.id).join() === r1, 'status·evidence 유무가 선택 순서에 영향 없음');
+}
+
+/* ── 2-c. 근거 정책(Rules.gate · Compose.library 의 정책 필터) ───────────────────── */
+{
+  const G = Rules.gate, P = Rules.POLICIES;
+  ok(P.join() === 'off,warn,hide_unverified,strict', '정책 모드 목록');
+  const t = (st, pol) => G({ status: st }, pol);
+  ok(P.every(pol => t('draft', pol) === 'draft' && t('retired', pol) === 'retired'), 'draft·retired 는 모든 모드에서 막힘');
+  ok(['off', 'warn'].every(pol => !t('legacy', pol) && !t('needs_evidence', pol) && !t('approved', pol)), 'off·warn 은 draft·retired 외 안 막음');
+  ok(!t('legacy', 'hide_unverified') && t('needs_evidence', 'hide_unverified') === 'needs_evidence' && !t('approved', 'hide_unverified'), 'hide_unverified: needs_evidence 만 막음');
+  ok(t('legacy', 'strict') === 'legacy' && t('needs_evidence', 'strict') && !t('approved', 'strict'), 'strict: approved 만 통과');
+  ok(!G({}, 'hide_unverified') && G({}, 'strict') === 'legacy', 'status 없음 = legacy');
+
+  const seed = R.Content.modules, mkSaved = (pol, mods) => ({ modules: mods || [], evidencePolicy: pol });
+  const tgt = seed.find(m => m.category === 'career' && Object.keys(m.conditions || {}).length), bareCareer = seed.find(m => m.category === 'career' && !Object.keys(m.conditions || {}).length);
+  const L0 = R.Compose.library(null);
+  ok(L0.policy === 'off' && L0.hidden.length === 0 && L0.modules.length === seed.length && L0.restored.length === 0, '저장본 없으면 정책 off·숨김 0');
+  ok(R.Compose.library(mkSaved('엉뚱한값')).policy === 'off', '알 수 없는 정책은 off');
+  // draft: off 에서도 숨김, 다른 모듈은 그대로
+  const Ld = R.Compose.library(mkSaved('off', [{ id: tgt.id, status: 'draft' }]));
+  ok(Ld.modules.length === seed.length - 1 && Ld.hidden.length === 1 && Ld.hidden[0].id === tgt.id && Ld.hidden[0].reason === 'draft', 'draft 는 off 에서도 숨김');
+  // needs_evidence
+  const ne = [{ id: tgt.id, status: 'needs_evidence' }];
+  ok(R.Compose.library(mkSaved('warn', ne)).modules.length === seed.length, 'warn 은 노출 유지');
+  ok(R.Compose.library(mkSaved('hide_unverified', ne)).modules.length === seed.length - 1, 'hide_unverified 는 needs_evidence 숨김');
+  // 폴백 보장: strict 에서는 approved 가 없으므로 전부 막히지만 조건 없는 모듈은 카테고리마다 남아야 한다
+  const Ls = R.Compose.library(mkSaved('strict'));
+  const cats = [...new Set(seed.map(m => m.category))];
+  ok(cats.every(c => Ls.modules.some(m => m.category === c && !Object.keys(m.conditions || {}).length)), 'strict 에서도 카테고리마다 조건 없는 모듈 유지');
+  ok(Ls.restored.length >= cats.length && Ls.modules.length === Ls.restored.length, 'strict 복원 목록: ' + Ls.restored.length);
+  // approved 가 있으면 그것이 남고, 조건 없는 모듈이 이미 있으면 복원 없음
+  const Lc = R.Compose.library(mkSaved('strict', [{ id: bareCareer.id, status: 'approved' }, { id: tgt.id, status: 'approved' }]));
+  ok(Lc.modules.some(m => m.id === tgt.id) && !Lc.restored.some(id => seed.find(m => m.id === id).category === 'career'), 'approved 모듈 노출·조건 없는 approved 가 있으면 복원 안 함');
+  // draft 조건 없는 모듈은 복원 대상이 아니다 → 카테고리 후보가 줄 수 있음(의도): 사유 draft 유지
+  const Ldr = R.Compose.library(mkSaved('strict', [{ id: bareCareer.id, status: 'draft' }]));
+  ok(Ldr.hidden.some(h => h.id === bareCareer.id && h.reason === 'draft') && !Ldr.restored.includes(bareCareer.id), 'draft 는 복원하지 않음');
+  // strict 에서도 20+챕터가 비지 않고 신규 필드가 새지 않는다
+  const sd = R.SajuData.build(charts(1)[0], { now: NOW }); let emptyCh = 0;
+  ['full', 'love', 'wealth', 'newyear'].forEach(id => {
+    const rep = R.Compose.build(sd, Ls, R.Chapters.forProject(null, id), { name: '백진우' });
+    rep.chapters.forEach(c => { if (!String(c.headline || '').trim()) emptyCh++; });
+    ok(!NEW_KEYS.test(Rules.stable(rep.chapters.map(c => [c.headline, c.details, c.topics]))), id + ': 정책 적용 결과에도 신규 필드 누출 없음');
+  });
+  ok(emptyCh === 0, 'strict 조립에서 빈 챕터: ' + emptyCh);
+}
+
+/* ── 2-d. 근거 상태 점검 · 관리자 편집 검토(report/v2/quality.js) ─────────────────── */
+{
+  vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'v2', 'quality.js'), 'utf8'), { filename: 'quality.js' });
+  const Q = R.Quality, seed = R.Content.modules;
+  const e0 = Q.evidence(R.Compose.library(null).all, { policy: 'off' });
+  ok(e0.total === seed.length && e0.status.legacy === seed.length && e0.status.approved === 0, '시드 근거 상태: 전부 legacy');
+  ok(e0.basis.editorial === R.Content.v3Count && e0.basis.legacy === seed.length - R.Content.v3Count && e0.basis.none === 0, '근거 종류 집계(editorial=v3)');
+  ok(e0.wouldHide.hide_unverified === 0 && e0.wouldHide.strict === seed.length, '정책별 숨김 예상 수');
+  ok(e0.mismatch.length === 0 && e0.unknownCond.length === 0 && e0.staleText.length === 0, '시드는 점검 항목 0');
+  ok(e0.categories.length === new Set(seed.map(m => m.category)).size && e0.categories.every(c => c.ratio === 0), '카테고리 집계');
+  // 합성 문제: 사용 중인데 draft, 승인인데 근거 없음, 알 수 없는 조건 키, 승인 후 문장 변경
+  const m1 = Object.assign({}, seed[0], { status: 'draft' }), m2 = Object.assign({}, seed[1], { status: 'approved', evidence: { basis: 'legacy', refs: [], rev: 0 } });
+  const m3 = Object.assign({}, seed[2], { conditions: { 없는키: ['x'] } }), m4 = Object.assign({}, seed[3], { status: 'approved', evidence: { basis: 'editorial', refs: [], rev: 1, textHash: 'deadbeef' } });
+  const e1 = Q.evidence([m1, m2, m3, m4], { policy: 'strict', hidden: 1 });
+  ok(e1.mismatch.length === 2 && e1.unknownCond.length === 1 && e1.staleText.join() === m4.id, '합성 문제 탐지: ' + JSON.stringify([e1.mismatch.length, e1.unknownCond.length, e1.staleText]));
+
+  const base = Object.assign({}, seed[5]), edit = (patch, from) => { const o = Object.assign({}, base, from || {}), n = JSON.parse(JSON.stringify(Object.assign({}, o, patch))); return { o, n, r: Q.reviewEdit(o, n) }; };
+  // 근거 없이 승인 → 거절하고 이전 상태로
+  let t = edit({ status: 'approved', evidence: { basis: 'legacy', refs: [], rev: 0 } });
+  ok(t.n.status === 'legacy' && t.r.errors.length === 1, 'legacy 근거로는 승인 불가');
+  t = edit({ status: 'approved', evidence: { basis: 'tradition', refs: [], rev: 0 } });
+  ok(t.n.status === 'legacy' && t.r.errors.length === 1, 'tradition 은 출처 없이 승인 불가');
+  // 정상 승인 → textHash 기록
+  t = edit({ status: 'approved', evidence: { basis: 'tradition', refs: [{ id: 'src_1', kind: 'classic', title: 't', locator: 'l' }], rev: 0 } });
+  ok(t.n.status === 'approved' && t.n.evidence.textHash === Q.textHash(t.n) && !t.r.errors.length, '정상 승인은 문장 해시 기록');
+  // 승인된 모듈의 문장을 고치면 needs_evidence 로 내려가고 rev 증가
+  const approved = Object.assign({}, base, { status: 'approved', evidence: { basis: 'editorial', refs: [], rev: 2, textHash: Q.textHash(base) } });
+  t = edit({ headline: '고친 결론 문장' }, approved);
+  ok(t.n.status === 'needs_evidence' && t.n.evidence.rev === 3 && !('textHash' in t.n.evidence) && t.r.notes.length === 1, '승인 문장 수정 → needs_evidence·rev+1');
+  // 승인 상태 그대로 문장 안 바뀌면 유지
+  t = edit({}, approved);
+  ok(t.n.status === 'approved' && t.n.evidence.textHash === Q.textHash(approved) && !t.r.notes.length, '변경 없으면 승인 유지');
+  // 승인 아닌 모듈(evidence editorial)은 문장이 바뀌면 rev 만 증가, legacy 근거는 그대로
+  t = edit({ headline: '다른 문장', evidence: { basis: 'editorial', refs: [], rev: 0 } });
+  ok(t.n.status === undefined || t.n.status === 'legacy', '상태 유지');
+  ok(t.n.evidence.rev === 1, 'editorial 문장 수정 시 rev+1');
+  t = edit({ headline: '다른 문장', evidence: { basis: 'legacy', refs: [], rev: 0 } });
+  ok(t.n.evidence.rev === 0, 'legacy 근거는 rev 유지');
+}
+
+/* ── 2-e. 제외 조건(rule.except) — 규칙 엔진 ───────────────────────────────────── */
+{
+  const mk = (cond, except) => ({ id: 't', category: 'career', conditions: cond, priority: 50, headline: 'h', summary: 's', detail: 'd', enabled: true, rule: except ? { except } : undefined });
+  const f = { dayMasterEl: '목', strength: '신강', dominantGroup: '재성', star: ['도화', '역마'], groupHigh: [] };
+  const ev = (m) => Rules.evaluate(m, f);
+  ok(ev(mk({ dayMasterEl: ['목'] })).match && ev(mk({ dayMasterEl: ['목'] })).specificity === Rules.FIELDS.dayMasterEl[1], 'except 없음: 기존과 같음');
+  ok(ev(mk({ dayMasterEl: ['목'] }, {})).match && ev(mk({ dayMasterEl: ['목'] }, { strength: [] })).match, '빈 except 는 영향 없음');
+  ok(ev(mk({ dayMasterEl: ['목'] }, { strength: ['신약'] })).match, '걸리지 않는 except 는 통과');
+  const x = ev(mk({ dayMasterEl: ['목'] }, { strength: ['신강', '중화'] }));
+  ok(!x.match && x.specificity === 0 && x.rows.some(r => r.except && r.key === 'strength' && !r.hit), '값이 걸리면 제외');
+  ok(!ev(mk({}, { star: ['역마'] })).match, '배열 사실(star)도 하나라도 걸리면 제외');
+  ok(ev(mk({}, { monthSeason: ['defense'] })).match, '사실에 없는 키는 제외 조건이 걸리지 않음');
+  // 같은 사실에서 점수는 except 가 있어도 변하지 않는다(통과한 경우)
+  ok(ev(mk({ dayMasterEl: ['목'], strength: ['신강'] }, { dominantGroup: ['인성'] })).specificity === ev(mk({ dayMasterEl: ['목'], strength: ['신강'] })).specificity, '통과한 except 는 구체성 점수에 영향 없음');
+  // rank/pick 에서 제외된 모듈이 빠지고 다음 후보가 올라온다
+  const a = Object.assign(mk({ dayMasterEl: ['목'] }, { strength: ['신강'] }), { id: 'a', priority: 90 }), b = Object.assign(mk({ dayMasterEl: ['목'] }), { id: 'b', priority: 10, headline: 'hb' });
+  ok(Rules.pick([a, b], f, 1)[0].mod.id === 'b', '제외된 모듈 대신 다음 후보가 선택됨');
+  // 점검: 선택 조건이 제외 조건에 모두 들어 있으면 충돌
+  const Qx = R.Quality || (vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'v2', 'quality.js'), 'utf8'), { filename: 'quality.js' }), R.Quality);
+  const e = Qx.evidence([mk({ strength: ['신강'] }, { strength: ['신강', '중화'] }), mk({ strength: ['신강', '신약'] }, { strength: ['신강'] }), mk({ dayMasterEl: ['목'] }, { strength: ['신강'] })], {});
+  ok(e.ruleConflict.length === 1 && e.ruleConflict[0].keys.join() === 'strength', '선택·제외 조건 충돌 탐지: ' + JSON.stringify(e.ruleConflict));
+  // 시드·기준선: 어떤 시드 모듈도 rule.except 를 갖지 않는다(조립 결과가 바뀌지 않는 이유)
+  ok(R.Content.modules.every(m => !(m.rule && m.rule.except)), '시드 모듈에는 except 없음');
+}
+
+/* ── 2-f. 출처 ↔ 풀이 자료 연결(parseRefs·formatRefs·refFromSource·refCheck) ───────── */
+{
+  const Q = R.Quality;
+  const text = 'dabc123 | classic | 적천수 | 3편 | c12\ninternal_note | internal | 내부 메모 |\n\n | classic | 아이디 없음\nd9z9z9 | 엉뚱한종류 | 제목 | 위치 | 잘못된 구간!';
+  const r = Q.parseRefs(text);
+  ok(r.length === 3 && r[0].id === 'dabc123' && r[0].kind === 'classic' && r[0].chunkId === 'c12' && r[0].locator === '3편', '출처 줄 해석');
+  ok(r[1].id === 'internal_note' && !('chunkId' in r[1]) && r[2].kind === 'internal' && !('chunkId' in r[2]), '빈 id 줄 무시·알 수 없는 종류는 internal·잘못된 구간 id 는 버림');
+  ok(Q.parseRefs(Array.from({ length: 9 }, (_, i) => 'x' + i).join('\n')).length === 5, '출처는 최대 5개');
+  const back = Q.parseRefs(Q.formatRefs(r)); ok(JSON.stringify(back) === JSON.stringify(r), '줄 변환 왕복 동일');
+  const rf = Q.refFromSource({ id: 'dabc123', title: '적천수', sourceKind: 'book' }, { docId: 'dabc123', chunkId: 'c7', label: '12~13쪽' });
+  ok(rf.id === 'dabc123' && rf.kind === 'classic' && rf.chunkId === 'c7' && rf.locator === '12~13쪽', '자료+구간 → 출처');
+  ok(Q.refFromSource({ id: 'dx1', title: '메모', sourceKind: 'internal' }, null).kind === 'internal', '자료 종류 → 출처 종류(내부)');
+  ok(Q.refFromSource({ id: 'dx2', title: '논문', sourceKind: 'research' }).kind === 'modern', '연구 → modern');
+  const docs = [{ id: 'dgood1', grade: 'A' }, { id: 'dlow01', grade: 'C' }, { id: 'dnoref', grade: 'A', policy: { reference: false } }];
+  const mk = (id, status, refs) => ({ id, status, evidence: { basis: 'tradition', refs } });
+  const rc = Q.refCheck([mk('m1', 'approved', [{ id: 'dgood1' }, { id: 'dlow01' }]), mk('m2', 'legacy', [{ id: 'dnoref' }, { id: 'dmiss1' }, { id: 'free_text' }]), { id: 'm3' }], docs);
+  ok(rc.linked === 3 && rc.free === 1 && rc.dangling.length === 1 && rc.dangling[0].doc === 'dmiss1', '자료 대조: 연결·자유 입력·없는 자료');
+  ok(rc.lowGrade.length === 1 && rc.lowGrade[0].id === 'm1' && rc.lowGrade[0].doc === 'dlow01', '승인 모듈의 낮은 등급 자료');
+  ok(rc.noReference.length === 1 && rc.noReference[0].doc === 'dnoref', '참고 안 함 자료를 출처로 씀');
+  const rn = Q.refCheck([mk('m4', 'approved', [{ id: 'dmiss1' }])], null);
+  ok(rn.dangling.length === 0 && rn.free === 1, '자료 목록을 못 불러오면 없는 자료로 단정하지 않음');
+}
+
+/* ── 3. 서버 정리 규칙(functions/api/report-content.js cleanModule) ────────────────── */
+{
+  const src = fs.readFileSync(path.join(root, 'functions/api/report-content.js'), 'utf8').split(/export async function onRequestGet/)[0]
+    .replace(/^import .*$/mg, '');
+  let clean;
+  try { clean = new Function(src + '\nreturn { cleanModule, COND_KEYS, cleanPolicy, EVIDENCE_POLICIES };')(); } catch (e) { fails.push('서버 정리 함수를 불러오지 못함: ' + e.message); }
+  if (clean) {
+    const cm = clean.cleanModule, plain = { id: 'x_1', category: 'career', conditions: { dayMasterEl: ['목'] }, priority: 60, headline: 'h', summary: 's', detail: 'd', keywords: ['k'], imageTags: [], actionTags: [], extra: null, enabled: true };
+    // (a) 기존 모듈: 정리 결과에 신규 키가 생기지 않는다(예전과 같은 모양)
+    const o = cm(plain);
+    ok(JSON.stringify(Object.keys(o)) === JSON.stringify(['id', 'category', 'conditions', 'priority', 'headline', 'summary', 'detail', 'keywords', 'imageTags', 'actionTags', 'extra', 'enabled']), '기존 모듈 정리 결과의 키 목록 불변: ' + Object.keys(o).join(','));
+    // (b) 시드 678개 전부: 기존 12개 필드는 정리 후에도 동일, 조건 키가 지워지지 않는다
+    const lost = [], condLost = [], layerLost = [];
+    R.Content.modules.forEach(m => {
+      const c = cm(m); if (!c) { lost.push(m.id); return; }
+      if (Rules.stable(m.conditions) !== Rules.stable(c.conditions)) condLost.push(m.id);
+      if ((m.layer || '') !== (c.layer || '')) layerLost.push(m.id);
+    });
+    ok(lost.length === 0, '시드 모듈이 정리에서 탈락: ' + lost.slice(0, 5).join(','));
+    ok(condLost.length === 0, '시드 조건이 저장 때 변형: ' + condLost.slice(0, 5).join(','));
+    ok(layerLost.length === 0, 'layer 가 저장 때 사라짐: ' + layerLost.slice(0, 5).join(','));
+    // (c) 서버 허용 조건 키 ⊇ 규칙 엔진 조건 키(gender·hasRoot 는 저장 허용 목록에 이미 있음)
+    const missing = Object.keys(Rules.FIELDS).filter(k => !clean.COND_KEYS.includes(k));
+    ok(missing.length === 0, '규칙 엔진 조건 키 중 서버가 버리는 키: ' + missing.join(','));
+    // (d) 신규 필드: 허용 값은 보존, 범위 밖 값은 버림
+    const n = cm(Object.assign({}, plain, { status: 'approved', layer: 'groupHigh', choice: '선택', rule: { note: '메모', when: { dayMasterEl: ['금'] }, except: { strength: ['신강'], 없는키: ['x'] } },
+      evidence: { basis: 'tradition', refs: [{ id: 'src_1', kind: 'classic', title: 't', locator: 'l', note: 'n' }, { id: '잘못 된 id!', kind: 'classic' }], checkedBy: '편집자', checkedAt: '2026-10-11', rev: 3 }, narrative: { voice: 'haeyo', hook: '도입', extra: 'x' } }));
+    ok(n.status === 'approved' && n.layer === 'groupHigh' && n.choice === '선택', '신규 필드 보존(status·layer·choice)');
+    ok(n.rule && n.rule.note === '메모' && !('when' in n.rule) && JSON.stringify(n.rule.except) === '{"strength":["신강"]}', 'rule: note·except 보존, when 은 받지 않음, except 의 알 수 없는 키는 버림');
+    ok(n.evidence && n.evidence.basis === 'tradition' && n.evidence.refs.length === 1 && n.evidence.refs[0].id === 'src_1' && n.evidence.checkedAt === '2026-10-11' && n.evidence.rev === 3, 'evidence 보존·잘못된 ref 제거');
+    ok(n.narrative && n.narrative.voice === 'haeyo' && n.narrative.hook === '도입' && !('extra' in n.narrative), 'narrative 허용 필드만');
+    const bad = cm(Object.assign({}, plain, { status: 'whatever', layer: '한글!', evidence: { basis: 'magic' }, narrative: { voice: 'x' }, rule: { note: 5 } }));
+    ok(!('status' in bad) && !('layer' in bad) && !('evidence' in bad) && !('narrative' in bad) && !('rule' in bad), '범위 밖 값은 버림');
+    const evh = cm(Object.assign({}, plain, { evidence: { basis: 'editorial', refs: [], textHash: 'a1b2c3d4' } })), evb = cm(Object.assign({}, plain, { evidence: { basis: 'editorial', refs: [], textHash: 'XYZ' } }));
+    ok(evh.evidence.textHash === 'a1b2c3d4' && !('textHash' in evb.evidence), 'evidence.textHash 는 8자리 16진수만 보존');
+    const refKeep = cm(Object.assign({}, plain, { evidence: { basis: 'tradition', refs: [{ id: 'dabc123', kind: 'classic', title: 't', locator: '12쪽', chunkId: 'c12' }, { id: 'dxyz789', chunkId: '잘못 된!' }] } }));
+    ok(refKeep.evidence.refs[0].chunkId === 'c12' && !('chunkId' in refKeep.evidence.refs[1]), 'refs[].chunkId 는 구간 id 형식만 보존');
+    ok(clean.EVIDENCE_POLICIES.join() === Rules.POLICIES.join(), '서버 정책 목록 = 규칙 엔진 정책 목록');
+    ok(clean.cleanPolicy('strict') === 'strict' && clean.cleanPolicy('x') === null && clean.cleanPolicy(undefined) === null, '서버 정책 값 검증');
+    ok(cm(null) === null && cm({ id: 'bad id', category: 'career' }) === null, '잘못된 모듈은 null');
+  }
+}
+
+if (fails.length) { console.log('\n실패 ' + fails.length + '건'); fails.slice(0, 20).forEach(f => console.log(' ✗ ' + f)); process.exit(1); }
+console.log('모두 통과');

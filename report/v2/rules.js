@@ -50,6 +50,14 @@
       rows.push({ key: k, label: (FIELDS[k] || [k])[0], want: want, have: have == null ? null : have, hit: hit, weight: w });
       if (hit) spec += w; else ok = false;
     });
+    // 제외 조건(rule.except): 같은 모양 { 키: [값…] }. 하나라도 걸리면 이 모듈은 선택되지 않는다. 없으면 기존과 같다(구체성 점수에도 영향 없음).
+    var ex = mod.rule && mod.rule.except;
+    if (ex && typeof ex === 'object') Object.keys(ex).forEach(function (k) {
+      var no = ex[k]; if (!no || !no.length) return;
+      var have = facts[k]; if (have == null) return;
+      var hit = Array.isArray(have) ? have.some(function (v) { return no.indexOf(v) >= 0; }) : no.indexOf(have) >= 0;
+      if (hit) { ok = false; rows.push({ key: k, label: (FIELDS[k] || [k])[0] + ' (제외 조건)', want: no, have: have, hit: false, weight: 0, except: true }); }
+    });
     return { match: ok, specificity: ok ? spec : 0, rows: rows };
   }
 
@@ -99,6 +107,18 @@
     return ('00000000' + h.toString(16)).slice(-8);
   }
 
+  // 근거 정책(풀이 DB 계층화 §7): 모듈 status 와 정책 모드로 노출 여부를 정한다. 노출이면 '', 막히면 사유(status)를 돌려준다.
+  //  · draft·retired 는 어떤 모드에서도 노출하지 않는다(초안·폐기가 사용자에게 나가는 일 방지).
+  //  · status 가 없으면 legacy 로 본다. off·warn 은 그 밖에 아무것도 막지 않는다.
+  var POLICIES = ['off', 'warn', 'hide_unverified', 'strict'];
+  function gate(mod, policy) {
+    var s = (mod && mod.status) || 'legacy';
+    if (s === 'draft' || s === 'retired') return s;
+    if (policy === 'hide_unverified' && s === 'needs_evidence') return s;
+    if (policy === 'strict' && s !== 'approved') return s;
+    return '';
+  }
+
   root.ReportV2 = root.ReportV2 || {};
-  root.ReportV2.Rules = { FIELDS: FIELDS, flatten: flatten, HIGH: HIGH, ZERO: ZERO, evaluate: evaluate, rank: rank, pick: pick, tpl: tpl, hash: hash, stable: stable };
+  root.ReportV2.Rules = { POLICIES: POLICIES, gate: gate, FIELDS: FIELDS, flatten: flatten, HIGH: HIGH, ZERO: ZERO, evaluate: evaluate, rank: rank, pick: pick, tpl: tpl, hash: hash, stable: stable };
 })(typeof window !== 'undefined' ? window : globalThis);

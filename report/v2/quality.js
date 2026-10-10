@@ -57,5 +57,78 @@
       summary: { chapters: cts.length, missing: ms.length, absolute: ab.length, assetMissing: as ? as.missing.length : null, worldFallback: ws ? ws.fallback.length : null, worldEmpty: ws ? ws.empty.length : null } };
   }
 
-  R.Quality = { MIN_LEN: MIN_LEN, textOf: textOf, chapterTexts: chapterTexts, missing: missing, absolute: absolute, assets: assets, worlds: worlds, audit: audit };
+  /* ── 풀이 DB 근거 상태(CONTENT_DB_DESIGN §7): 모듈 목록만 읽는 순수 점검. mods = Compose.library().all(정책 적용 전 전체) ── */
+  var STATUSES = ['approved', 'legacy', 'draft', 'needs_evidence', 'retired'], BASES = ['engine', 'tradition', 'editorial', 'legacy'];
+  function textHash(m) { return R.Rules.hash([m.headline || '', m.summary || '', m.detail || '']); }
+  function evidence(mods, o) {
+    o = o || {}; var Ru = R.Rules, known = {}; Object.keys(Ru.FIELDS).forEach(function (k) { known[k] = 1; });
+    var out = { total: mods.length, status: {}, basis: { none: 0 }, categories: [], mismatch: [], unknownCond: [], staleText: [], ruleConflict: [], policy: o.policy || 'off', hidden: o.hidden || 0, restored: o.restored || 0, wouldHide: { hide_unverified: 0, strict: 0 } };
+    STATUSES.forEach(function (s) { out.status[s] = 0; }); BASES.forEach(function (b) { out.basis[b] = 0; });
+    var cats = {};
+    mods.forEach(function (m) {
+      var st = m.status || 'legacy', ev = m.evidence, c = cats[m.category] || (cats[m.category] = { category: m.category, total: 0, approved: 0, legacy: 0, other: 0 });
+      out.status[STATUSES.indexOf(st) >= 0 ? st : 'legacy']++; if (ev && BASES.indexOf(ev.basis) >= 0) out.basis[ev.basis]++; else out.basis.none++;
+      c.total++; if (st === 'approved') c.approved++; else if (st === 'legacy') c.legacy++; else c.other++;
+      if (Ru.gate(m, 'hide_unverified')) out.wouldHide.hide_unverified++; if (Ru.gate(m, 'strict')) out.wouldHide.strict++;
+      if (m.enabled !== false && (st === 'draft' || st === 'retired')) out.mismatch.push({ id: m.id, reason: '사용 중(enabled)인데 상태가 ' + st + ' 라 숨겨집니다' });
+      if (m.enabled === false && st === 'approved') out.mismatch.push({ id: m.id, reason: '승인(approved)인데 사용 안 함(enabled=false)입니다' });
+      if (st === 'approved' && (!ev || ev.basis === 'legacy' || (ev.basis === 'tradition' && !(ev.refs || []).length))) out.mismatch.push({ id: m.id, reason: '승인 상태인데 근거가 비어 있습니다' });
+      var bad = Object.keys(m.conditions || {}).filter(function (k) { return !known[k]; }); if (bad.length) out.unknownCond.push({ id: m.id, keys: bad });
+      if (ev && ev.textHash && ev.textHash !== textHash(m)) out.staleText.push(m.id);
+      var ex = m.rule && m.rule.except, c = m.conditions || {}; // 선택 조건 값이 전부 제외 조건에 들어 있으면 이 모듈은 어떤 사주에서도 선택되지 않는다
+      if (ex) { var dead = Object.keys(ex).filter(function (k) { return c[k] && c[k].length && c[k].every(function (v) { return (ex[k] || []).indexOf(v) >= 0; }); }); if (dead.length) out.ruleConflict.push({ id: m.id, keys: dead }); }
+    });
+    out.categories = Object.keys(cats).map(function (k) { var c = cats[k]; c.ratio = c.total ? Math.round(c.approved / c.total * 100) : 0; return c; }).sort(function (a, b) { return a.ratio - b.ratio || (a.category < b.category ? -1 : 1); });
+    return out;
+  }
+  // 관리자 편집 검토: 원본(orig)과 편집본(n)을 받아 status·evidence 를 규칙에 맞게 정리한다. n 을 제자리에서 고치고 { errors, notes } 를 돌려준다.
+  //  · 승인(approved)은 근거(basis ≠ legacy, tradition 이면 출처 1개 이상)가 있어야 한다 → 아니면 이전 상태로 되돌리고 오류.
+  //  · 승인 상태인 모듈의 문장을 고치면(상태를 일부러 바꾸지 않은 경우) needs_evidence 로 내리고 rev 를 올린다.
+  //  · 승인으로 저장하는 순간의 문장 해시를 evidence.textHash 에 남긴다.
+  function reviewEdit(orig, n) {
+    var errors = [], notes = [], was = (orig && orig.status) || 'legacy', now = n.status || 'legacy';
+    var changed = !!orig && textHash(orig) !== textHash(n), ev = n.evidence || null;
+    if (now === 'approved') {
+      var weak = !ev || ev.basis === 'legacy' || (ev.basis === 'tradition' && !(ev.refs || []).length);
+      if (weak) { errors.push('승인하려면 근거 종류(legacy 가 아님)가 필요하고, 전통 문헌 근거는 출처가 1개 이상 있어야 합니다. 이전 상태(' + was + ')로 되돌렸습니다.'); n.status = was; }
+      else if (was === 'approved' && changed) { n.status = 'needs_evidence'; ev.rev = (+ev.rev || 0) + 1; delete ev.textHash; notes.push('승인된 문장을 고쳐서 상태를 needs_evidence 로 내렸습니다. 근거를 다시 확인한 뒤 승인하세요.'); }
+      else { ev.textHash = textHash(n); }
+    } else if (ev && ev.basis !== 'legacy' && changed) { ev.rev = (+ev.rev || 0) + 1; }
+    return { errors: errors, notes: notes };
+  }
+
+  /* ── 출처(refs) 입력 줄 ↔ 객체: "id | 종류 | 제목 | 위치 | 구간id" (구간id 는 풀이 자료의 청크, 선택) ── */
+  var REF_KINDS = ['classic', 'modern', 'internal'], KIND_OF_SOURCE = { book: 'classic', expert: 'modern', research: 'modern', internal: 'internal' };
+  function parseRefs(text) {
+    return String(text || '').split('\n').map(function (l) {
+      var p = l.split('|').map(function (s) { return s.trim(); }); if (!p[0]) return null;
+      var r = { id: p[0], kind: REF_KINDS.indexOf(p[1]) >= 0 ? p[1] : 'internal', title: p[2] || '', locator: p[3] || '' };
+      if (/^[\w.-]{1,40}$/.test(p[4] || '')) r.chunkId = p[4]; return r;
+    }).filter(Boolean).slice(0, 5);
+  }
+  function formatRefs(refs) { return (refs || []).map(function (r) { return [r.id, r.kind, r.title || '', r.locator || '', r.chunkId || ''].join(' | ').replace(/( \| )+$/, ''); }).join('\n'); }
+  // 풀이 자료 한 건(+선택 청크) → 출처 객체. 자료의 종류(서적·전문가·내부·연구)로 refs 종류를 정한다.
+  function refFromSource(doc, hit) {
+    return { id: doc.id || hit.docId, kind: KIND_OF_SOURCE[doc.sourceKind] || 'internal', title: String(doc.title || hit.docTitle || '').slice(0, 120), locator: String((hit && hit.label) || '').slice(0, 120), chunkId: hit && hit.chunkId ? hit.chunkId : undefined };
+  }
+  // 모듈 출처가 실제 풀이 자료를 가리키는지 점검. docs = /api/src?a=list 의 docs. 자료 id 가 아닌 출처(손으로 쓴 id)는 dangling 이 아니라 "자유 입력"으로 센다.
+  function refCheck(mods, docs) {
+    var by = {}; (docs || []).forEach(function (d) { by[d.id] = d; });
+    var out = { linked: 0, free: 0, dangling: [], lowGrade: [], noReference: [] };
+    mods.forEach(function (m) {
+      var ev = m.evidence; if (!ev || !ev.refs || !ev.refs.length) return;
+      ev.refs.forEach(function (r) {
+        var looksDoc = /^d[a-z0-9]{3,24}$/.test(r.id), d = by[r.id];
+        if (d) {
+          out.linked++;
+          if (m.status === 'approved' && (d.grade === 'C' || d.grade === '미평가' || !d.grade)) out.lowGrade.push({ id: m.id, doc: r.id, grade: d.grade || '미평가' });
+          if (d.policy && d.policy.reference === false) out.noReference.push({ id: m.id, doc: r.id });
+        } else if (looksDoc && docs) out.dangling.push({ id: m.id, doc: r.id });
+        else out.free++;
+      });
+    });
+    return out;
+  }
+
+  R.Quality = { parseRefs: parseRefs, formatRefs: formatRefs, refFromSource: refFromSource, refCheck: refCheck, STATUSES: STATUSES, evidence: evidence, reviewEdit: reviewEdit, textHash: textHash, MIN_LEN: MIN_LEN, textOf: textOf, chapterTexts: chapterTexts, missing: missing, absolute: absolute, assets: assets, worlds: worlds, audit: audit };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -13,6 +13,24 @@
   function section(title, count, body, okText) { return '<div class="card"><b style="color:var(--gold)">' + title + '</b> ' + badge(count, okText) + '<div style="margin-top:8px">' + body + '</div></div>'; }
   function list(items, fn) { return items.length ? '<ul style="margin:0;padding-left:18px;display:grid;gap:4px;font-size:.84rem">' + items.map(function (x) { return '<li>' + fn(x) + '</li>'; }).join('') + '</ul>' : ''; }
 
+  // 풀이 DB 근거 상태(저장된 모듈 + 시드 기준). 정책이 off 면 노출은 그대로이고 이 표시만 나온다.
+  function evidenceSection(e) {
+    var s = e.status, rc = e.refs, flagged = e.mismatch.length + e.unknownCond.length + e.staleText.length + e.ruleConflict.length + (rc ? rc.dangling.length + rc.lowGrade.length + rc.noReference.length : 0);
+    var cats = e.categories.slice(0, 12).map(function (c) { return '<tr><td>' + esc(c.category) + '</td><td>' + c.total + '</td><td>' + c.approved + '</td><td>' + c.legacy + '</td><td>' + c.other + '</td><td>' + c.ratio + '%</td></tr>'; }).join('');
+    return section('풀이 DB 근거 상태 · 정책 ' + esc(e.policy), flagged,
+      '<p style="margin:0 0 8px;font-size:.84rem">모듈 ' + e.total + '개 — 승인 ' + s.approved + ' · 미검증(legacy) ' + s.legacy + ' · 근거 부족 ' + s.needs_evidence + ' · 초안 ' + s.draft + ' · 폐기 ' + s.retired + '<br>근거 종류: 계산 ' + e.basis.engine + ' · 전통 문헌 ' + e.basis.tradition + ' · 편집 원칙 ' + e.basis.editorial + ' · 미검증 ' + e.basis.legacy + (e.basis.none ? ' · 없음 ' + e.basis.none : '') +
+      '<br>지금 정책에서 숨겨진 모듈 ' + e.hidden + '개' + (e.restored ? ' (폴백 복원 ' + e.restored + '개)' : '') + ' · 정책을 바꾸면 hide_unverified ' + e.wouldHide.hide_unverified + '개 / strict ' + e.wouldHide.strict + '개가 숨겨집니다(폴백 복원 전 수치).</p>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:8px"><thead><tr><th style="text-align:left">카테고리(승인 비율 낮은 순 12)</th><th style="text-align:left">전체</th><th style="text-align:left">승인</th><th style="text-align:left">legacy</th><th style="text-align:left">기타</th><th style="text-align:left">승인율</th></tr></thead><tbody>' + cats + '</tbody></table>' +
+      list(e.mismatch, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — ' + esc(x.reason); }) +
+      list(e.unknownCond, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 알 수 없는 조건 키: ' + esc(x.keys.join(', ')); }) +
+      (rc ? '<p class="muted" style="font-size:.8rem;margin:6px 0">출처 연결: 풀이 자료 ' + e.refDocs + '건 · 자료와 연결된 출처 ' + rc.linked + ' · 자유 입력 출처 ' + rc.free + '</p>' +
+        list(rc.dangling, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 풀이 자료에 없는 출처 id: ' + esc(x.doc); }) +
+        list(rc.lowGrade, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 승인 모듈의 출처 자료 등급이 낮음(' + esc(x.grade) + '): ' + esc(x.doc); }) +
+        list(rc.noReference, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — "참고 안 함" 정책인 자료를 출처로 씀: ' + esc(x.doc); }) : '<p class="muted" style="font-size:.8rem;margin:6px 0">출처 연결: 풀이 자료 목록을 불러오지 못해 확인 못함</p>') +
+      list(e.ruleConflict, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 선택 조건이 제외 조건에 모두 들어 있어 선택되지 않습니다: ' + esc(x.keys.join(', ')); }) +
+      list(e.staleText.map(function (id) { return { id: id }; }), function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 승인 당시와 문장이 달라졌습니다(근거 재확인 필요)'; }), '문제 없음');
+  }
+
   function render(box, st) {
     var a = st.audit, h = '';
     h += '<div class="card"><b style="color:var(--gold)">서비스 점검</b><p class="muted" style="margin:6px 0 10px">테스트 사주로 실제 무빙툰 문서를 만들어 아래 네 가지를 점검합니다. 읽기 전용이며 아무것도 바꾸지 않습니다. 계산값과 문장의 불일치·문장 중복은 <b>정합성 검사</b> 탭에서 보세요.</p>' +
@@ -22,6 +40,7 @@
     if (!a) return h + '<div class="card"><p class="muted">"점검 실행"을 누르면 결과가 나옵니다.</p></div>';
     var s = a.summary;
     h += '<div class="card"><b>요약</b> · 챕터 ' + a.chapters + '개 · 풀이 누락 의심 ' + s.missing + ' · 단정 표현 검토 ' + s.absolute + ' · 에셋 누락 ' + (s.assetMissing == null ? '확인 못함' : s.assetMissing) + ' · 세계 매핑 대체 ' + (s.worldFallback == null ? '-' : s.worldFallback) + ' · 빈 세계 ' + (s.worldEmpty == null ? '-' : s.worldEmpty) + '</div>';
+    if (st.evidence) h += evidenceSection(st.evidence);
     h += section('풀이 누락 의심 (글자 수 ' + Q.MIN_LEN + '자 미만)', a.missing.length, list(a.missing, function (x) { return '<b>' + esc(x.title || x.id) + '</b> <span class="muted mono">' + esc(x.id) + ' · ' + x.len + '자</span>'; }));
     h += section('단정 표현 검토', a.absolute.length, list(a.absolute, function (x) { return '<b>' + esc(x.title || x.id) + '</b> — “' + esc(x.snippet) + '” <span class="muted">(' + esc(x.word) + ')</span>'; }) +
       (a.absolute.length ? '<p class="muted" style="font-size:.76rem;margin-top:6px">"~하지 않습니다" 같은 부정문·면책 문구도 걸릴 수 있습니다. 맥락을 보고 판단하세요.</p>' : ''));
@@ -41,10 +60,11 @@
     return h + '<div class="card"><button type="button" id="qaMd">결과를 마크다운으로 내려받기</button></div>';
   }
 
-  function md(a) {
+  function md(a, st) {
     var L = ['# 서비스 점검 결과', '', '- 챕터 ' + a.chapters + '개 · 풀이 누락 의심 ' + a.summary.missing + ' · 단정 표현 검토 ' + a.summary.absolute + ' · 에셋 누락 ' + a.summary.assetMissing + ' · 세계 매핑 대체 ' + a.summary.worldFallback, ''];
     L.push('## 풀이 누락 의심'); a.missing.forEach(function (x) { L.push('- ' + (x.title || x.id) + ' (' + x.id + ', ' + x.len + '자)'); }); if (!a.missing.length) L.push('- 없음');
     L.push('', '## 단정 표현 검토'); a.absolute.forEach(function (x) { L.push('- ' + (x.title || x.id) + ': “' + x.snippet + '” (' + x.word + ')'); }); if (!a.absolute.length) L.push('- 없음');
+    if (st && st.evidence) { var e = st.evidence; L.push('', '## 풀이 DB 근거 상태 (정책 ' + e.policy + ')', '- 모듈 ' + e.total + ' · 승인 ' + e.status.approved + ' · legacy ' + e.status.legacy + ' · 근거 부족 ' + e.status.needs_evidence + ' · 초안 ' + e.status.draft + ' · 폐기 ' + e.status.retired, '- 숨김 ' + e.hidden + ' · hide_unverified 시 ' + e.wouldHide.hide_unverified + ' · strict 시 ' + e.wouldHide.strict); e.mismatch.forEach(function (x) { L.push('- 불일치: ' + x.id + ' — ' + x.reason); }); e.unknownCond.forEach(function (x) { L.push('- 알 수 없는 조건 키: ' + x.id + ' (' + x.keys.join(', ') + ')'); }); e.ruleConflict.forEach(function (x) { L.push('- 선택 조건과 제외 조건 충돌: ' + x.id + ' (' + x.keys.join(', ') + ')'); }); e.staleText.forEach(function (id) { L.push('- 승인 후 문장 변경: ' + id); }); }
     if (a.assets) { L.push('', '## 에셋 누락 (' + a.assets.image + '/' + a.assets.total + ')'); a.assets.missing.forEach(function (x) { L.push('- ' + x.title + ' (' + x.id + ')'); }); if (!a.assets.missing.length) L.push('- 없음'); }
     if (a.worlds) { L.push('', '## 세계 매핑'); a.worlds.list.forEach(function (w) { L.push('- ' + w.name + ': ' + w.count + '개' + (w.enabled ? '' : ' (사용 안 함)')); }); a.worlds.fallback.forEach(function (x) { L.push('- 대체 세계: ' + x.title + ' (' + x.id + ' → ' + x.world + ')'); }); }
     return L.join('\n');
@@ -57,7 +77,7 @@
       run(M, st).then(function () { draw(box, st, M); });
     };
     var mdb = $('#qaMd', box); if (mdb) mdb.onclick = function () {
-      var blob = new Blob([md(st.audit)], { type: 'text/markdown;charset=utf-8' }), u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = 'service-quality.md'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 1000);
+      var blob = new Blob([md(st.audit, st)], { type: 'text/markdown;charset=utf-8' }), u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = 'service-quality.md'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 1000);
     };
   }
   function draw(box, st, M) { box.innerHTML = render(box, st); bind(box, st, M); }
@@ -67,10 +87,14 @@
     return Promise.all([
       C.api('/api/asset-art').then(function (r) { return r.slots || []; }).catch(function (e) { st.assetErr = e.message; return null; }),
       C.api('/api/worlds').then(function (r) { return r.worlds || []; }).catch(function () { return []; }),
+      C.load().then(function () { return C.ST.saved || {}; }).catch(function () { return {}; }),
+      C.api('/api/src?a=list').then(function (r) { return r.docs || []; }).catch(function () { return null; }),
     ]).then(function (got) {
       try {
         var ch = M.compute({ year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: TS.gender, city: '서울' });
-        var sd = R.SajuData.build(ch, { now: now }), cfg = R.Chapters.forProject(null, 'full'), lib = R.Compose.library(null), rep = R.Compose.build(sd, lib, cfg, { name: '테스트' });
+        var sd = R.SajuData.build(ch, { now: now }), cfg = R.Chapters.forProject(null, 'full'), saved = got[2] || {}, lib = R.Compose.library({ modules: saved.modules, remedies: saved.remedies, evidencePolicy: saved.evidencePolicy }), rep = R.Compose.build(sd, lib, cfg, { name: '테스트' });
+        st.evidence = Q.evidence(lib.all, { policy: lib.policy, hidden: lib.hidden.length, restored: lib.restored.length });
+        st.evidence.refs = got[3] ? Q.refCheck(lib.all, got[3]) : null; st.evidence.refDocs = got[3] ? got[3].length : null;
         var doc = R.LifeDoc.build({ M: M, ch: ch, sd: sd, now: now, name: '테스트', interest: TS.interest, rep: rep, soc: R.StoryDirector.social(M, ch, sd, now), plan: (rep.chapters.find(function (c) { return c.plan; }) || {}).plan });
         var worlds = R.Explore ? R.Explore.mergeWorlds(got[1]) : null;
         st.audit = Q.audit({ doc: doc, worlds: worlds, slots: got[0] });
