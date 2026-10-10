@@ -169,6 +169,31 @@ console.log('조립 기준선: 사주 120 × 프로젝트 ' + PROJECTS.length + 
   ok(t.n.evidence.rev === 0, 'legacy 근거는 rev 유지');
 }
 
+/* ── 2-e. 제외 조건(rule.except) — 규칙 엔진 ───────────────────────────────────── */
+{
+  const mk = (cond, except) => ({ id: 't', category: 'career', conditions: cond, priority: 50, headline: 'h', summary: 's', detail: 'd', enabled: true, rule: except ? { except } : undefined });
+  const f = { dayMasterEl: '목', strength: '신강', dominantGroup: '재성', star: ['도화', '역마'], groupHigh: [] };
+  const ev = (m) => Rules.evaluate(m, f);
+  ok(ev(mk({ dayMasterEl: ['목'] })).match && ev(mk({ dayMasterEl: ['목'] })).specificity === Rules.FIELDS.dayMasterEl[1], 'except 없음: 기존과 같음');
+  ok(ev(mk({ dayMasterEl: ['목'] }, {})).match && ev(mk({ dayMasterEl: ['목'] }, { strength: [] })).match, '빈 except 는 영향 없음');
+  ok(ev(mk({ dayMasterEl: ['목'] }, { strength: ['신약'] })).match, '걸리지 않는 except 는 통과');
+  const x = ev(mk({ dayMasterEl: ['목'] }, { strength: ['신강', '중화'] }));
+  ok(!x.match && x.specificity === 0 && x.rows.some(r => r.except && r.key === 'strength' && !r.hit), '값이 걸리면 제외');
+  ok(!ev(mk({}, { star: ['역마'] })).match, '배열 사실(star)도 하나라도 걸리면 제외');
+  ok(ev(mk({}, { monthSeason: ['defense'] })).match, '사실에 없는 키는 제외 조건이 걸리지 않음');
+  // 같은 사실에서 점수는 except 가 있어도 변하지 않는다(통과한 경우)
+  ok(ev(mk({ dayMasterEl: ['목'], strength: ['신강'] }, { dominantGroup: ['인성'] })).specificity === ev(mk({ dayMasterEl: ['목'], strength: ['신강'] })).specificity, '통과한 except 는 구체성 점수에 영향 없음');
+  // rank/pick 에서 제외된 모듈이 빠지고 다음 후보가 올라온다
+  const a = Object.assign(mk({ dayMasterEl: ['목'] }, { strength: ['신강'] }), { id: 'a', priority: 90 }), b = Object.assign(mk({ dayMasterEl: ['목'] }), { id: 'b', priority: 10, headline: 'hb' });
+  ok(Rules.pick([a, b], f, 1)[0].mod.id === 'b', '제외된 모듈 대신 다음 후보가 선택됨');
+  // 점검: 선택 조건이 제외 조건에 모두 들어 있으면 충돌
+  const Qx = R.Quality || (vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'v2', 'quality.js'), 'utf8'), { filename: 'quality.js' }), R.Quality);
+  const e = Qx.evidence([mk({ strength: ['신강'] }, { strength: ['신강', '중화'] }), mk({ strength: ['신강', '신약'] }, { strength: ['신강'] }), mk({ dayMasterEl: ['목'] }, { strength: ['신강'] })], {});
+  ok(e.ruleConflict.length === 1 && e.ruleConflict[0].keys.join() === 'strength', '선택·제외 조건 충돌 탐지: ' + JSON.stringify(e.ruleConflict));
+  // 시드·기준선: 어떤 시드 모듈도 rule.except 를 갖지 않는다(조립 결과가 바뀌지 않는 이유)
+  ok(R.Content.modules.every(m => !(m.rule && m.rule.except)), '시드 모듈에는 except 없음');
+}
+
 /* ── 3. 서버 정리 규칙(functions/api/report-content.js cleanModule) ────────────────── */
 {
   const src = fs.readFileSync(path.join(root, 'functions/api/report-content.js'), 'utf8').split(/export async function onRequestGet/)[0]
@@ -194,10 +219,10 @@ console.log('조립 기준선: 사주 120 × 프로젝트 ' + PROJECTS.length + 
     const missing = Object.keys(Rules.FIELDS).filter(k => !clean.COND_KEYS.includes(k));
     ok(missing.length === 0, '규칙 엔진 조건 키 중 서버가 버리는 키: ' + missing.join(','));
     // (d) 신규 필드: 허용 값은 보존, 범위 밖 값은 버림
-    const n = cm(Object.assign({}, plain, { status: 'approved', layer: 'groupHigh', choice: '선택', rule: { note: '메모', when: { dayMasterEl: ['금'] }, except: { strength: ['신강'] } },
+    const n = cm(Object.assign({}, plain, { status: 'approved', layer: 'groupHigh', choice: '선택', rule: { note: '메모', when: { dayMasterEl: ['금'] }, except: { strength: ['신강'], 없는키: ['x'] } },
       evidence: { basis: 'tradition', refs: [{ id: 'src_1', kind: 'classic', title: 't', locator: 'l', note: 'n' }, { id: '잘못 된 id!', kind: 'classic' }], checkedBy: '편집자', checkedAt: '2026-10-11', rev: 3 }, narrative: { voice: 'haeyo', hook: '도입', extra: 'x' } }));
     ok(n.status === 'approved' && n.layer === 'groupHigh' && n.choice === '선택', '신규 필드 보존(status·layer·choice)');
-    ok(n.rule && n.rule.note === '메모' && !('when' in n.rule) && !('except' in n.rule), 'rule 은 1단계에서 note 만');
+    ok(n.rule && n.rule.note === '메모' && !('when' in n.rule) && JSON.stringify(n.rule.except) === '{"strength":["신강"]}', 'rule: note·except 보존, when 은 받지 않음, except 의 알 수 없는 키는 버림');
     ok(n.evidence && n.evidence.basis === 'tradition' && n.evidence.refs.length === 1 && n.evidence.refs[0].id === 'src_1' && n.evidence.checkedAt === '2026-10-11' && n.evidence.rev === 3, 'evidence 보존·잘못된 ref 제거');
     ok(n.narrative && n.narrative.voice === 'haeyo' && n.narrative.hook === '도입' && !('extra' in n.narrative), 'narrative 허용 필드만');
     const bad = cm(Object.assign({}, plain, { status: 'whatever', layer: '한글!', evidence: { basis: 'magic' }, narrative: { voice: 'x' }, rule: { note: 5 } }));

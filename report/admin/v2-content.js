@@ -144,7 +144,8 @@
       '<div class="fx"><label>출처 (한 줄에 하나: id | classic·modern·internal | 제목 | 위치)</label><textarea id="eEvR" class="mono" placeholder="src_example | classic | 문헌 이름 | 편·장">' + esc(refs) + '</textarea></div>' +
       '<div class="fx2">' + tf('eEvBy', '확인한 사람 (표시 이름)', ev.checkedBy || '') + '<div class="fx"><label>확인 날짜</label><input type="date" id="eEvAt" value="' + esc(ev.checkedAt || '') + '"></div></div>' +
       '<p class="muted" style="font-size:.76rem">근거 개정 번호 ' + (ev.rev == null ? '-' : ev.rev) + (ev.textHash ? ' · 승인 당시 문장 해시 ' + esc(ev.textHash) : '') + ' — 승인(approved)은 근거 종류가 legacy 가 아니어야 하고, 전통 문헌(tradition)은 출처가 1개 이상 있어야 합니다. 승인된 문장을 고치면 자동으로 needs_evidence 로 내려갑니다.</p>' +
-      '<div class="fx2"><div class="fx"><label>서사 말투 (narrative.voice)</label>' + sel('eNV', VOICE_KO, nr.voice || '') + '</div>' + tf('eNH', '도입 한 문장 (narrative.hook)', nr.hook || '') + '</div>' + tf('eNM', '비유 한 문장 (narrative.metaphor)', nr.metaphor || '') + tf('eRN', '규칙 메모 (rule.note — 선택 조건에는 영향 없음)', (x.rule && x.rule.note) || '') + '</details>';
+      '<div class="fx2"><div class="fx"><label>서사 말투 (narrative.voice)</label>' + sel('eNV', VOICE_KO, nr.voice || '') + '</div>' + tf('eNH', '도입 한 문장 (narrative.hook)', nr.hook || '') + '</div>' + tf('eNM', '비유 한 문장 (narrative.metaphor)', nr.metaphor || '') + tf('eRN', '규칙 메모 (rule.note — 선택 조건에는 영향 없음)', (x.rule && x.rule.note) || '') +
+      '<div class="fx" style="margin-top:6px"><label>제외 조건 (rule.except) — 아래 값 중 하나라도 해당하면 이 모듈은 선택되지 않습니다</label><div id="eExc">' + condHtml(x.rule && x.rule.except) + '</div></div></details>';
   }
   function layerRead(b, n, orig) {
     var g = function (id) { var e = $('#' + id, b); return e ? e.value : ''; };
@@ -155,7 +156,8 @@
     } else delete n.evidence;
     var nr = {}; if (g('eNV')) nr.voice = g('eNV'); if (g('eNH').trim()) nr.hook = g('eNH').trim(); if (g('eNM').trim()) nr.metaphor = g('eNM').trim();
     if (Object.keys(nr).length) n.narrative = nr; else delete n.narrative;
-    if (g('eRN').trim()) n.rule = { note: g('eRN').trim() }; else delete n.rule;
+    var rl = {}; if (g('eRN').trim()) rl.note = g('eRN').trim(); var exc = $('#eExc', b) ? condRead($('#eExc', b)) : {}; if (Object.keys(exc).length) rl.except = exc;
+    if (Object.keys(rl).length) n.rule = rl; else delete n.rule;
     var rv = R.Quality && R.Quality.reviewEdit ? R.Quality.reviewEdit(orig, n) : { errors: [], notes: [] };
     rv.errors.concat(rv.notes).forEach(function (m, i) { toast(m, i < rv.errors.length); });
     return n;
