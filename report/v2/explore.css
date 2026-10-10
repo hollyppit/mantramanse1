@@ -259,5 +259,6 @@
 #wstrip .ws-m { color: var(--gold-l); border-color: var(--gold-d); }
 #wstrip .ws-t { color: var(--wa, var(--gold-l)); border-color: color-mix(in srgb, var(--wa, #D5B97F) 55%, transparent); }
 #wstrip .ws-c.dn::after { content: ' ✓'; color: #7ED69A; }
-#wstrip button.on { color: #1A1308; background: var(--wa, var(--gold)); border-color: var(--wa, var(--gold)); font-weight: 700; }
+/* 지금 읽는 탭은 세계 색과 상관없이 항상 주황색 */
+#wstrip button.on { color: #1F1100; background: #FF9A3C; border-color: #FFB366; font-weight: 700; box-shadow: 0 0 0 2px rgba(255, 154, 60, .25); }
 .xp.xp-wv { padding-top: calc(112px + env(safe-area-inset-top, 0px)); }
