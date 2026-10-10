@@ -243,6 +243,161 @@
       beginReader();
     });
   }
+  /* ── 운명 탐험 홈(ACT 01 각성 이후 챕터를 골라 읽는다). ?explore=0 이면 예전처럼 처음부터 한 문서로 읽는다. 읽은 챕터·이어 읽을 위치는 이 기기에만 저장한다. ── */
+  var EXPLORE = LIFE && !PREVIEW && !!R.Explore && !/[?&]explore=0(&|$)/.test(location.search);
+  function xpSave() { if (!S.xp || !S.xpKey) return; S.xp.ended = S.ended; S.xp.last = S.cur ? S.idx : S.xp.last; R.Explore.save(S.xpKey, S.xp); }
+  function exploreEntry() {
+    S.xpKey = (S.rep.meta && S.rep.meta.key) || 'default'; S.xp = R.Explore.load(S.xpKey); S.xpWorlds = R.Explore.mergeWorlds(null);
+    Object.keys(S.xp.ended).forEach(function (id) { S.ended[id] = 1; S.visited[id] = 1; });
+    var first = S.rep.chapters[0], awaken = !!(first && first.id === 'c-char' && !S.ended['c-char']); // 각성 연출(일간 소개·일주 영상)은 먼저 본다
+    openDoc(0, { autoStart: awaken }); if (!awaken) showHome();
+    // 관리자가 저장한 세계 정의(이름·색·연결 챕터·순서·활성화)가 있으면 기본값 위에 덮어 쓴다. 실패하면 기본 6개 세계 그대로.
+    var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 4000);
+    fetch('/api/worlds', { signal: ctl && ctl.signal }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      clearTimeout(tm); if (d && d.worlds && d.worlds.length) { S.xpWorlds = R.Explore.mergeWorlds(d.worlds); if (S.view === 'home') showHome(S.xpWorld); }
+    }).catch(function () { clearTimeout(tm); });
+  }
+  /* 세계 첫 입장 연출: 3.5초 안팎의 짧은 전환(영상·이미지가 없으면 색과 이름만). 탭하면 바로 건너뛰고, 두 번째 입장부터는 보이지 않는다. */
+  function worldIntro(g, done) {
+    var w = g.world; if (S.xp.seen[w.id] || reduce) { S.xp.seen[w.id] = 1; xpSave(); done(); return; }
+    S.xp.seen[w.id] = 1; xpSave();
+    var el = document.createElement('div'); el.className = 'xp-intro'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', w.name + ' 입장');
+    el.style.cssText = '--wc:' + w.color + ';--wa:' + w.accent + (w.introImage || w.bgImage ? ';background-image:url(' + (w.introImage || w.bgImage) + ')' : '');
+    el.innerHTML = (w.introVideo && !saveData ? '<video src="' + esc(w.introVideo) + '" autoplay muted playsinline preload="metadata"></video>' : '') + '<div class="xi-t"><p>' + esc(w.line) + '</p><h3>' + esc(w.icon || '') + ' ' + esc(w.name) + '</h3></div><span class="xi-s">탭하면 건너뜁니다</span>';
+    var fin = false, go = function () { if (fin) return; fin = true; clearTimeout(t); el.classList.add('off'); setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 300); done(); }, t = setTimeout(go, 3500);
+    el.addEventListener('click', go); document.body.appendChild(el); T('world_intro', { world: w.id });
+  }
+  function showHome(worldId) {
+    var rep = S.rep, st = S.xp; if (!st) return;
+    S.scroll.doc = window.scrollY; xpSave();
+    var worlds = R.Explore.worldsModel(rep.chapters, S.xpWorlds || R.Explore.mergeWorlds(null), S.ended, S.cur ? S.idx : st.last), cur = null;
+    if (worldId) cur = worlds.filter(function (g) { return g.world.id === worldId; })[0] || null;
+    S.xpWorld = cur ? cur.world.id : null;
+    var widget = cur && cur.world.id === 'w4' ? worldTimelineHtml() : cur && cur.world.id === 'w1' ? worldLibraryHtml() : cur && cur.world.id === 'w2' ? worldCastleHtml() : cur && cur.world.id === 'w3' ? worldGardenHtml() : cur && cur.world.id === 'w6' ? worldSanctuaryHtml() : cur && cur.world.id === 'w5' ? worldSamsaraHtml() : '';
+    var m = { mode: cur ? 'world' : 'map', widget: widget, name: S.name, progress: R.Explore.progress(rep.chapters, S.ended), resume: R.Explore.resumeIndex(rep.chapters, { ended: S.ended, last: S.cur ? S.idx : st.last }), auto: st.auto, rate: playbackRate(),
+      worlds: worlds, current: cur, ended: S.ended, last: S.cur ? S.idx : st.last };
+    $('#v-home').innerHTML = R.Explore.html(m, esc); view('home'); S.view = 'home'; T('explore_home_viewed', { done: m.progress.done, world: S.xpWorld || '' });
+  }
+  /* 윤회의 문 인터랙션: 개인화된 전생 서사를 컷 단위 무빙툰으로 감상(R.Samsara). 이미 만들어진 전생 챕터의 문장을 그대로 쓰고, 에셋이 없으면 색 바탕으로 대신한다. */
+  function worldSamsaraHtml() {
+    if (!R.Samsara || !S.rep) return '';
+    try { return R.Samsara.card(R.Samsara.extract(S.rep), S.assets || {}, esc); } catch (e) { return ''; }
+  }
+  $('#v-home').addEventListener('click', function (e) {
+    if (!e.target.closest('[data-smopen]')) return; var model = null;
+    try { model = R.Samsara.extract(S.rep); } catch (err) { model = null; } if (!model) { toast('전생 이야기를 준비하지 못했습니다.'); return; }
+    T('samsara_open', { frames: model.frames.length, image: !!R.Samsara.imageOf(model, S.assets || {}) });
+    R.Samsara.open(model, S.assets || {}, S.assetVideos || {}, { reduce: reduce, saveData: saveData, rate: playbackRate(),
+      onDone: function () { S.ended[model.id] = 1; S.visited[model.id] = 1; xpSave(); T('samsara_completed', {}); toast('윤회의 문 탐험을 마쳤습니다. 운명 세계 지도로 돌아갑니다.', 3200); showHome(); } });
+  });
+  /* 개운의 성역 인터랙션: 개운법 · 명소 · 실천 계획 · 종합 리포트(R.Sanctuary). 체크리스트는 기기에만 저장한다. */
+  function sanctuaryModel() { return R.Sanctuary.model(S.rep, S.sd); }
+  function worldSanctuaryHtml() {
+    if (!R.Sanctuary || !S.rep || !S.sd) return '';
+    try {
+      var N0 = S.sn = S.sn || { tab: 'remedy', type: '' }, rep = S.rep, done = rep.chapters.filter(function (c) { return S.ended[c.id]; }).length;
+      return R.Sanctuary.html(sanctuaryModel(), N0, { checks: (S.xp && S.xp.checks) || {}, readDone: done, readTotal: rep.chapters.length, unlocked: !!S.pdfUnlocked }, esc);
+    } catch (e) { return ''; }
+  }
+  $('#v-home').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-snt],[data-snk],[data-snpdf],[data-snshare]'); if (!b) return; var N0 = S.sn = S.sn || { tab: 'remedy', type: '' };
+    if (b.dataset.snpdf != null) {
+      var P = R.Pdf; if (P && P.generate) { toast('PDF를 만들고 있습니다…', 60000); P.generate(S.repPdf || S.rep, S.sd, { name: S.name, onProgress: function (i, n) { toast('PDF를 만들고 있습니다 (' + i + ' / ' + n + '쪽)', 60000); } }).then(function () { T('pdf_downloaded', { from: 'sanctuary' }); toast('PDF가 준비되었습니다.'); }).catch(function (err) { toast(err.message || 'PDF를 만들지 못했습니다.'); }); } else toast('PDF 생성은 곧 제공됩니다.');
+      return;
+    }
+    if (b.dataset.snshare != null) { var C = R.ShareCard; if (C && C.create) { T('share_clicked', { from: 'sanctuary' }); C.create(S.repPdf || S.rep, S.sd, S.awk).then(function () { T('share_card_created', {}); }).catch(function (err) { toast(err.message || '카드를 만들지 못했습니다.'); }); } else toast('공유 카드는 곧 제공됩니다.'); return; }
+    if (b.dataset.snt) N0.tab = b.dataset.snt; else N0.type = b.dataset.snk;
+    var y = window.scrollY; showHome('w6'); window.scrollTo(0, y); T('sanctuary_select', { tab: N0.tab });
+  });
+  $('#v-home').addEventListener('change', function (e) {
+    var i = e.target.getAttribute && e.target.getAttribute('data-snc'); if (i == null || !S.xp) return;
+    var text = ((S.rep.plan && S.rep.plan.checklist) || [])[+i]; if (!text) return;
+    S.xp.checks = S.xp.checks || {}; if (e.target.checked) S.xp.checks[text] = 1; else delete S.xp.checks[text]; xpSave();
+    var y = window.scrollY; showHome('w6'); window.scrollTo(0, y); T('plan_checked', { done: Object.keys(S.xp.checks).length });
+  });
+  /* 인연의 정원 인터랙션: 궁합 일주 탐색 · 사랑의 흐름(R.Garden). 상대 일주 입력은 기기 밖으로 나가지 않는다. */
+  function worldGardenHtml() {
+    if (!R.Garden || !window.Manse || !S.ch) return '';
+    try { var G0 = S.gd = S.gd || { tab: 'pair', type: '', sort: 'score', pick: null, ps: null, pb: null, year: null, topic: '', partner: 'opposite' };
+      return R.Garden.html(R.Garden.model(window.Manse, S.ch, S.sd, Date.now(), G0.partner), G0, esc); } catch (e) { return ''; }
+  }
+  $('#v-home').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-gdt],[data-gdp],[data-gdy],[data-gds],[data-gdk],[data-gdps],[data-gdpb],[data-gdy2],[data-gdo]'); if (!b) return;
+    var G0 = S.gd = S.gd || { tab: 'pair', type: '', sort: 'score', pick: null, ps: null, pb: null, year: null, topic: '', partner: 'opposite' }, d = b.dataset;
+    if (d.gdt != null) G0.tab = d.gdt; else if (d.gdp != null) G0.partner = d.gdp; else if (d.gdy != null) G0.type = d.gdy; else if (d.gds != null) G0.sort = d.gds;
+    else if (d.gdk != null) { G0.pick = +d.gdk; G0.ps = null; G0.pb = null; } else if (d.gdps != null) { G0.ps = G0.ps === +d.gdps ? null : +d.gdps; G0.pick = null; } else if (d.gdpb != null) { G0.pb = G0.pb === +d.gdpb ? null : +d.gdpb; G0.pick = null; }
+    else if (d.gdy2 != null) G0.year = +d.gdy2; else if (d.gdo != null) G0.topic = d.gdo;
+    var y = window.scrollY; showHome('w3'); window.scrollTo(0, y); T('garden_select', { tab: G0.tab });
+  });
+  /* 황금의 성채 인터랙션: 직업 분야 비교 · 사업·독립 성향 · 10년 재물 지수(R.Castle). 선택 상태만 기기 메모리에 둔다. */
+  function worldCastleHtml() {
+    if (!R.Castle || !window.Manse || !S.ch) return '';
+    try { var C0 = S.cs = S.cs || { tab: 'job', jobs: [], year: null }; return R.Castle.html(R.Castle.model(window.Manse, S.ch, Date.now()), C0, esc); } catch (e) { return ''; }
+  }
+  $('#v-home').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-cst],[data-csj],[data-csy]'); if (!b) return; var C0 = S.cs = S.cs || { tab: 'job', jobs: [], year: null };
+    if (b.dataset.cst) C0.tab = b.dataset.cst;
+    else if (b.dataset.csy) C0.year = +b.dataset.csy;
+    else {
+      var k = b.dataset.csj; if (b.dataset.csgo) C0.tab = b.dataset.csgo;
+      if (!C0.jobs.length) { try { var mm = R.Castle.model(window.Manse, S.ch, Date.now()); C0.jobs = [mm.jobs[0].key, mm.jobs[1].key]; } catch (err) { C0.jobs = []; } }
+      var at = C0.jobs.indexOf(k); if (at >= 0) { if (C0.jobs.length > 1) C0.jobs.splice(at, 1); } else { C0.jobs.push(k); if (C0.jobs.length > 2) C0.jobs.shift(); }
+    }
+    var y = window.scrollY; showHome('w2'); window.scrollTo(0, y); T('castle_select', { tab: C0.tab });
+  });
+  /* 천명의 서고 인터랙션: 사주 네 기둥·십성군을 눌러 해석을 확인(R.Library). 선택 상태만 기기 메모리에 둔다. */
+  function worldLibraryHtml() {
+    if (!R.Library || !window.Manse || !S.ch) return '';
+    try { var L0 = S.lb = S.lb || { p: null, g: null }; return R.Library.html(R.Library.model(window.Manse, S.ch, S.sd), L0, esc); } catch (e) { return ''; }
+  }
+  $('#v-home').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-lbp],[data-lbg]'); if (!b) return; var L0 = S.lb = S.lb || { p: null, g: null };
+    if (b.dataset.lbp) L0.p = L0.p === b.dataset.lbp ? null : b.dataset.lbp; else L0.g = L0.g === b.dataset.lbg ? null : b.dataset.lbg;
+    var y = window.scrollY; showHome('w1'); window.scrollTo(0, y); T('library_select', { kind: b.dataset.lbp ? 'pillar' : 'group' });
+  });
+  /* 시간의 회랑 인터랙션: 대운 → 연도 → 월. 모두 엔진 계산값(R.Timeline)이며 선택 상태만 기기 메모리에 둔다. */
+  function worldTimelineHtml() {
+    if (!R.Timeline || !window.Manse || !S.ch) return '';
+    try {
+      var T0 = S.tl = S.tl || { d: null, y: null, m: null }, now = Date.now(), M = window.Manse;
+      var st = { daeun: R.Timeline.daeun(M, S.ch, now), years: null, months: null, d: T0.d, y: T0.y, m: T0.m };
+      if (st.d == null) { var cur = st.daeun.filter(function (x) { return x.isCurrent && !x.pre; })[0]; if (cur) st.d = T0.d = cur.idx; }
+      var dd = st.d != null ? st.daeun.filter(function (x) { return x.idx === st.d; })[0] : null;
+      if (dd) st.years = R.Timeline.years(M, S.ch, dd.startYear, now);
+      if (st.y != null && st.years && st.years.some(function (y) { return y.year === st.y; })) st.months = R.Timeline.months(M, S.ch, st.y, now); else { st.y = T0.y = null; st.m = T0.m = null; }
+      return R.Timeline.html(st, esc);
+    } catch (e) { return ''; }
+  }
+  /* 근거 확인 팝업: 현재 선택한 대운/세운/월운의 계산 근거를 원국·대운·세운·월운으로 나눠 보여 준다 */
+  function openEvidence(level) {
+    var T0 = S.tl || {}, M = window.Manse, now = Date.now(), item = null;
+    try {
+      var ds = R.Timeline.daeun(M, S.ch, now), d = ds.filter(function (x) { return x.idx === T0.d; })[0];
+      if (level === 'daeun') item = d; else if (d) { var ys = R.Timeline.years(M, S.ch, d.startYear, now), y = ys.filter(function (x) { return x.year === T0.y; })[0]; if (level === 'seun') item = y; else if (y) item = R.Timeline.months(M, S.ch, y.year, now).filter(function (x) { return x.month === T0.m; })[0]; }
+    } catch (err) { item = null; }
+    if (!item) return; var dlg = document.getElementById('evDlg');
+    if (!dlg) { dlg = document.createElement('dialog'); dlg.id = 'evDlg'; dlg.className = 'ev-dlg'; dlg.setAttribute('aria-label', '근거 확인'); dlg.innerHTML = '<div class="ev-bar"><b>근거 확인</b><button type="button" class="chipbtn" data-evx>닫기</button></div><div class="ev-body"></div>';
+      dlg.addEventListener('click', function (e) { if (e.target === dlg || e.target.closest('[data-evx]')) dlg.close(); }); document.body.appendChild(dlg); }
+    dlg.querySelector('.ev-body').innerHTML = R.Timeline.evidenceHtml(R.Timeline.evidence(M, S.ch, item)); dlg.showModal(); T('evidence_opened', { level: level });
+  }
+  $('#v-home').addEventListener('click', function (e) {
+    var ev = e.target.closest('[data-tle]'); if (ev) { openEvidence(ev.dataset.tle); return; }
+    var b = e.target.closest('[data-tld],[data-tly],[data-tlm]'); if (!b) return; var T0 = S.tl = S.tl || { d: null, y: null, m: null };
+    if (b.dataset.tld != null) { T0.d = +b.dataset.tld; T0.y = null; T0.m = null; } else if (b.dataset.tly != null) { T0.y = +b.dataset.tly; T0.m = null; } else { T0.m = +b.dataset.tlm; }
+    var y = window.scrollY; showHome('w4'); window.scrollTo(0, y); T('timeline_select', { level: b.dataset.tld != null ? 'daeun' : b.dataset.tly != null ? 'year' : 'month' });
+  });
+  function enterFromHome(idx) {
+    S.view = 'reader'; view('reader'); mountReading(S.xp ? S.xp.auto : true); window.scrollTo(0, 0); if (idx > 0) gotoChapter(idx, true); T('explore_chapter_picked', { index: idx });
+  }
+  $('#v-home').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-xgo]'); if (b) { enterFromHome(+b.dataset.xgo); return; }
+    if (e.target.closest('[data-xmap]')) { showHome(); return; }
+    var w = e.target.closest('[data-xw]'); if (w) {
+      var g = R.Explore.worldsModel(S.rep.chapters, S.xpWorlds || R.Explore.mergeWorlds(null), S.ended, S.idx).filter(function (x) { return x.world.id === w.dataset.xw; })[0];
+      if (g) worldIntro(g, function () { showHome(g.world.id); });
+    }
+  });
+  $('#v-home').addEventListener('change', function (e) { if (e.target.id === 'xAuto' && S.xp) { S.xp.auto = e.target.checked; xpSave(); } });
   function beginReader() {
     addCharIntro();
     var reading = !PREVIEW && R.FullReading ? R.FullReading.prepare(S.rep, S.sd, S.name, function (c, job, result) {
@@ -264,7 +419,7 @@
     }) : null;
     var ready = reading ? Promise.race([reading.first, new Promise(function (ok) { setTimeout(ok, 18000); })]) : Promise.resolve();
     if (!S.stopWait && !PREVIEW) S.stopWait = waitNotice();
-    ready.then(function () { if (S.stopWait) { S.stopWait(); S.stopWait = null; } view('reader'); openDoc(0, { autoStart: !PREVIEW }); });
+    ready.then(function () { if (S.stopWait) { S.stopWait(); S.stopWait = null; } view('reader'); if (EXPLORE) exploreEntry(); else openDoc(0, { autoStart: !PREVIEW }); });
   }
   // 일간 소개·일주 캐릭터 영상은 프롤로그 앞이 아니라 본문의 첫 챕터(영상과 글을 따로)로 둔다
   function addCharIntro() {
@@ -517,7 +672,7 @@
   function onSection(sec) { // 현재 읽고 있는 섹션이 바뀔 때(자동 진행·직접 스크롤 모두)
     var ci = +sec.dataset.ch, c = S.rep.chapters[ci]; if (!c) return;
     if (ci !== S.idx || !S.cur) enterChapter(c, ci);
-    if (sec.classList.contains('s-end') && !S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); }
+    if (sec.classList.contains('s-end') && !S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); if (EXPLORE) { xpSave(); if (c.id === 'c-char' && !S.homeShown) { S.homeShown = 1; setTimeout(function () { if (S.mv) S.mv.pause(); showHome(); }, 900); } } }
   }
   function enterChapter(c, ci) {
     var rep = S.rep, n = rep.chapters.length, prev = S.cur ? rep.chapters[S.idx] : null, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}; S.idx = ci; S.cur = true;
@@ -525,7 +680,7 @@
     if (prev && prev.act !== c.act && !S.visited[c.id]) { T('act_completed', { act: prev.act }); var a = rep.acts.filter(function (x) { return x.id === prev.act; })[0]; if (a && a.pdfDone) toast(a.pdfDone, 3800); }
     if (!S.visited[c.id]) { S.visited[c.id] = 1; T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if ((c.base || c.id) === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {}); }
     if (R.Bgm && R.Bgm.has()) { var mo = c.scenes.filter(function (s) { return s.sceneType === 'insight' || s.sceneType === 'chapterIntro'; })[0]; R.Bgm.play(mo ? R.Cinema.resolve(mo, layersOf(mo)).bgmMood : 'minimal'); } // 챕터 분위기에 맞는 BGM
-    checkUnlock(); ss('mt_v2_idx', String(ci));
+    checkUnlock(); ss('mt_v2_idx', String(ci)); if (EXPLORE) xpSave();
   }
   function onDocEnd() { if (!PREVIEW) endingCinema(finalView); } // 끝까지 읽어 주면 엔딩 장면으로 이어진다
   // 문서 안 클릭·체크 처리(한 번만 등록). 어느 챕터의 것인지는 가장 가까운 .chap 에서 읽는다.
@@ -567,10 +722,11 @@
     var rep = S.rep, h = '', act = 0; drPick = false; S.drWas = !!(S.mv && S.mv.state() === 'PLAYING'); if (S.drWas) S.mv.pause();
     rep.chapters.forEach(function (c, i) { if (c.act !== act) { act = c.act; var a = rep.acts.filter(function (x) { return x.id === act; })[0] || {}; h += '<li class="act">' + esc(a.roman || '') + ' · ' + esc(a.title || '') + '</li>'; }
       h += '<li><button type="button" data-go="' + i + '"' + (i === S.idx ? ' class="cur" aria-current="true"' : '') + '><span>' + String(c.no).padStart(2, '0') + ' ' + esc(c.title) + '</span><small>' + (S.ended[c.id] ? '읽음' : '') + '</small></button></li>'; });
-    $('#drList').innerHTML = h; dr.showModal();
+    $('#drHome').hidden = !EXPLORE; $('#drList').innerHTML = h; dr.showModal();
   };
   $('#drList').onclick = function (e) { var b = e.target.closest('[data-go]'); if (!b) return; drPick = true; dr.close(); gotoChapter(+b.dataset.go, false, S.drWas); }; // 어느 챕터든 바로 갈 수 있다(모두 하나의 문서)
   $('#drClose').onclick = function () { dr.close(); };
+  $('#drHome').onclick = function () { drPick = true; dr.close(); if (S.mv) S.mv.pause(); showHome(); };
   dr.addEventListener('click', function (e) { if (e.target === dr) dr.close(); });
   dr.addEventListener('close', function () { if (!drPick && S.drWas && S.mv) S.mv.play(); });
 

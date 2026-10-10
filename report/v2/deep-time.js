@@ -178,10 +178,14 @@
     수: [['양평 두물머리', '경기 양평', '풍수 명당(합수)', '두 강이 만나는 합수 자리, 수(水) 기운과 인연·소통'], ['춘천 소양강·의암호', '강원 춘천', '호반', '북쪽의 맑은 물, 수 기운의 차분함'], ['울릉도·독도', '경북', '섬', '동해 한가운데 크게 흐르는 수 기운'], ['제주 정방폭포·서귀포 바다', '제주', '폭포·바다', '물이 바다로 곧장 떨어지는 폭포, 수 기운의 정화'], ['동해 묵호·추암 촛대바위 새벽', '강원 동해', '새벽 바다', '북동쪽 새벽 바다, 수 기운과 지혜']],
   };
   var ROLE_BASE = { 용신: 92, 희신: 83, 한신: 64, 구신: 50, 기신: 38 };
-  S.deep_places = function (H) {
-    var sd = H.sd, u = sd.usefulElements, list = [];
+  // 명소 점수(챕터 본문과 개운의 성역이 같은 값을 쓴다): 용신·희신 오행에 맞춘 상위 7곳
+  function placeList(sd) {
+    var u = sd.usefulElements, list = [];
     ELKEY.forEach(function (e) { var role = u ? (u.roles[e] || '한신') : '한신'; PLACES[e].forEach(function (p, i) { var sc = (ROLE_BASE[role] || 60) - i * 2 + (e === sd.lackEl ? 4 : 0) + (u ? 0 : (e === sd.weakestEl ? 12 : 0)); list.push({ p: p, el: e, role: role, score: clamp(sc, 20, 98) }); }); });
-    list.sort(function (a, b) { return b.score - a.score; }); var top = list.slice(0, 7);
+    list.sort(function (a, b) { return b.score - a.score; });     return list.slice(0, 7);
+  }
+  S.deep_places = function (H) {
+    var sd = H.sd, u = sd.usefulElements, top = placeList(sd);
     var out = [scene(sec('', cap('나에게 맞는 명산대천 · 풍수 명당') + '<p class="lead">' + esc(who(H)) + '에게 필요한 기운(' + esc(u ? u.yong + '(' + EL_HJ[u.yong] + ') 용신' + (u.hee ? ' · ' + u.hee + '(' + EL_HJ[u.hee] + ') 희신' : '') : '부족한 오행') + ')을 오행 방위·산세·물길로 풀어 <b>실제로 갈 수 있는 곳</b>을 점수 순으로 골랐습니다. 전통적으로 알려진 기운의 해석이며, 여행 겸 기분 전환으로 가볍게 활용해 주세요.</p>')),
       scene(sec('', top.map(function (x, i) { return '<div class="dp-place"><div class="dp-rank">' + (i + 1) + '</div><div class="dp-pl1"><b>' + esc(x.p[0]) + '</b><small>' + esc(x.p[1] + ' · ' + x.p[2]) + '</small>' + bar('', x.score, { cls: 'dp-slim', color: D.EL_COLOR[x.el], text: x.score + '점' }) + '<p>' + esc('나에게 ' + x.role + '인 ' + x.el + '(' + EL_HJ[x.el] + ') 기운 — ' + x.p[3]) + '</p></div></div>'; }).join('')))];
     return { title: '나에게 맞는 명소', sub: '명산대천 · 풍수 명당 · 해돋이 순위', scenes: out };
@@ -206,5 +210,5 @@
     rep.chapters.forEach(function (c, k) { c.no = k + 1; });
     rep.meta = rep.meta || {}; rep.meta.deep = done; return rep;
   }
-  Object.assign(R.Deep, { augment: augment, PLACEMENT: PLACEMENT, PLACES: PLACES, line: line });
+  Object.assign(R.Deep, { augment: augment, PLACEMENT: PLACEMENT, PLACES: PLACES, placeList: placeList, line: line });
 })(typeof window !== 'undefined' ? window : globalThis);
