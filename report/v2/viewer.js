@@ -672,6 +672,11 @@
   function onSection(sec) { // 현재 읽고 있는 섹션이 바뀔 때(자동 진행·직접 스크롤 모두)
     var ci = +sec.dataset.ch, c = S.rep.chapters[ci]; if (!c) return;
     if (ci !== S.idx || !S.cur) enterChapter(c, ci);
+    if (EXPLORE && c.id === 'c-char' && !S.homeShown) { // 각성 연출의 마지막 장면에 닿으면(자동·수동 모두) 잠시 읽을 시간을 주고 세계 지도로 보낸다
+      var art = sec.parentNode, lastSec = art && art.lastElementChild === sec;
+      if (lastSec) { S.homeShown = 1; S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); xpSave();
+        setTimeout(function () { if (S.view !== 'home' && S.cur && S.rep.chapters[S.idx] && S.rep.chapters[S.idx].id === 'c-char') { if (S.mv) S.mv.pause(); showHome(); } }, Math.round(4500 / (playbackRate() || 1))); }
+    }
     if (sec.classList.contains('s-end') && !S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); if (EXPLORE) { xpSave(); if (c.id === 'c-char' && !S.homeShown) { S.homeShown = 1; setTimeout(function () { if (S.mv) S.mv.pause(); showHome(); }, 900); } } }
   }
   function enterChapter(c, ci) {
@@ -710,6 +715,7 @@
     $('#v-final').innerHTML = '<div class="fin"><p class="kicker">運路</p><h2>' + (S.name ? esc(S.name) + '에게는,<br>' + esc(S.name) + '의 때가 있다.' : '모든 사람에게는,<br>각자의 때가 있다.') + '</h2><p>' + rep.chapters.length + '개의 챕터를 지나왔다.<br>타고난 명부터 운의 흐름,<br>움직일 때를 위한 행동 전략까지.</p>' +
       '<div class="cap" style="margin-top:28px">다음 장면의 전략</div><div class="strategy">' + steps.map(function (x, i) { return (i ? '<i aria-hidden="true">→</i>' : '') + '<b>' + esc(x.label) + '</b>'; }).join('') + '</div>' +
       '<div class="btns"><button type="button" class="btn gold big" id="fPdf"' + (S.pdfUnlocked ? '' : ' disabled') + '>나의 종합 리포트 PDF 받기</button><button type="button" class="btn big" id="fShare">공유 카드 만들기</button><button type="button" class="btn" id="fCompat">궁합 볼 사람 추가하기</button><button type="button" class="btn" id="fBack">리포트 다시 보기</button></div>' + (S.pdfUnlocked ? '' : '<p class="lock">더 많은 챕터를 읽으면 PDF가 열립니다.</p>') + '<p class="fine">사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></div>';
+    if (EXPLORE) { var bk = $('#fBack'), mp = document.createElement('button'); mp.type = 'button'; mp.className = 'btn big'; mp.id = 'fMap'; mp.textContent = '운명 세계 지도로 가기'; bk.parentNode.insertBefore(mp, bk); mp.onclick = function () { showHome(); }; }
     $('#fBack').onclick = function () { resumeReader(); };
     $('#fCompat').onclick = function () { T('compatibility_cta_clicked', { chapter: 'final' }); toast('두 사람의 궁합은 곧 열립니다.'); };
     $('#fPdf').onclick = function () { var P = R.Pdf; if (P && P.generate) (toast('PDF를 만들고 있습니다…', 60000), P.generate(S.repPdf || S.rep, S.sd, { name: S.name, onProgress: function (i, n) { toast('PDF를 만들고 있습니다 (' + i + ' / ' + n + '쪽)', 60000); } }).then(function () { T('pdf_downloaded', {}); toast('PDF가 준비되었습니다.'); })).catch(function (e) { toast(e.message || 'PDF를 만들지 못했습니다.'); }); else toast('PDF 생성은 곧 제공됩니다.'); };
