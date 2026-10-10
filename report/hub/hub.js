@@ -124,7 +124,7 @@
       '<a class="cc main" href="#/tarot" data-track="fortune_content_click" data-p="tarot"><i class="glyph" aria-hidden="true">運</i><small>FREE TAROT</small><h3>무료 타로</h3><p>마음속 질문 하나를 떠올려보세요.</p><div class="chips"><i>오늘의 카드</i><i>연애운</i><i>재물운</i><i>일·사업운</i><i>YES / NO</i></div><span class="go">카드 한 장 뽑기 →</span></a>' +
       '<a class="cc" href="' + need('today', '#/today') + '" data-track="fortune_content_click" data-p="today"><small>FORTUNE CALENDAR</small><h3>월운 그래프 · 일진 캘린더</h3><p>달의 흐름을 보고, 내 일정에 맞는 날을 골라보세요.</p><span class="go">' + (has ? '내 운 캘린더 보기 →' : '생년월일로 확인하기 →') + '</span></a>' +
       '<a class="cc" href="' + need('awaken', '#/awaken') + '" data-track="fortune_content_click" data-p="ilju"><small>ILJU</small><h3>나의 일주 각성</h3><p>나는 어떤 기질을 타고났을까?</p><span class="go">나의 일주 확인하기 →</span></a>' +
-      '<a class="cc" href="' + need('deep', '#/go?to=deep') + '" data-track="fortune_content_click" data-p="movingtoon_classic"><small>DEEP MOVINGTOON</small><h3>심층 무빙툰</h3><p>20챕터로 읽는<br>나의 종합 리포트</p><span class="go">심층 무빙툰 보기 →</span></a>' +
+      '<a class="cc" href="' + need('deep', '#/go?to=deep') + '" data-track="fortune_content_click" data-p="movingtoon_classic"><small>DEEP MOVINGTOON</small><h3>심층 무빙툰</h3><p>세계를 골라 탐험하는<br>나의 종합 리포트</p><span class="go">심층 무빙툰 보기 →</span></a>' +
       '</div>' +
       '<details class="more"><summary>더 많은 운세 콘텐츠</summary>' +
       '<a href="#/my" data-track="fortune_content_click" data-p="my_home">MY 운명 홈 <small>내 사주 콘텐츠 모아보기</small></a>' +

@@ -227,7 +227,7 @@
     ui();
 
     function gotoEl(el, instant, resume) { // 챕터 목록 등에서 특정 위치로: 재생 중이면 그 페이지부터 이어서 읽는다
-      var y = Math.max(0, el.getBoundingClientRect().top + win.scrollY - 72);
+      var off = (parseFloat(win.getComputedStyle(doc.documentElement).getPropertyValue('--bar-h')) || 62) + 10, y = Math.max(0, el.getBoundingClientRect().top + win.scrollY - off); // 상단 바(+챕터 탭 줄) 높이만큼 띄운다
       for (var i = 0; i < pages.length; i++) if (pages[i].items.some(function (x) { return x.sec === el || el.contains(x.el); })) { if (state === 'PLAYING') { startPage(i); return; } pi = i; remain = pages[i].dur * 1000 / rate; userMoved = false; break; }
       moveTo(y, instant ? 0 : 600);
     }

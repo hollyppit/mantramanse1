@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="reader.css">
 <link rel="stylesheet" href="life.css">
 <link rel="stylesheet" href="deep.css">
+<link rel="stylesheet" href="explore.css">
 </head>
 <body>
 <noscript><p style="padding:30vh 20px;color:#E9E4D8">이 페이지는 자바스크립트가 필요합니다.</p></noscript>
@@ -74,14 +75,15 @@
     <main id="chapter" tabindex="-1"></main>
   </section>
 
-  <!-- 인생 지도 흐름(?flow=life) -->
+  <!-- 운명 세계 지도: 각성(ACT 01) 이후 세계를 골라 탐험하는 화면 -->
+  <section id="v-home" class="view" aria-label="운명 세계 지도" hidden></section>
 
   <!-- 최종 화면 -->
   <section id="v-final" class="view" hidden></section>
 </div>
 
 <!-- 챕터 목록 -->
-<dialog id="drawer" aria-label="챕터 목록"><div class="dr"><div class="drh"><b>전체 챕터</b><button type="button" id="drClose" class="chipbtn" aria-label="닫기">닫기</button></div><ol id="drList"></ol></div></dialog>
+<dialog id="drawer" aria-label="챕터 목록"><div class="dr"><div class="drh"><b>전체 챕터</b><button type="button" id="drHome" class="chipbtn" hidden>탐험 홈</button><button type="button" id="drClose" class="chipbtn" aria-label="닫기">닫기</button></div><ol id="drList"></ol></div></dialog>
 <a id="hubBack" class="chipbtn" href="/report/">‹ 홈</a>
 <div id="toast" class="toast" role="status" hidden></div>
 
@@ -129,6 +131,14 @@
 <script src="reading-answer.js"></script>
 <script src="full-reading.js"></script>
 <script src="life-doc.js"></script>
+<script src="luck6.js"></script>
+<script src="timeline.js"></script>
+<script src="library.js"></script>
+<script src="castle.js"></script>
+<script src="garden.js"></script>
+<script src="sanctuary.js"></script>
+<script src="samsara.js"></script>
+<script src="explore.js"></script>
 <script src="reader.js"></script>
 <script src="cinema-render.js"></script>
 <script src="viewer.js"></script>

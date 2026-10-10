@@ -372,5 +372,5 @@
   // 관리자 미리보기: 문서에 실제로 들어가는 순서(번호 · ACT · 제목 · 출처)
   function outline(H) { var d = build(H); return d.chapters.map(function (c, i) { return { no: i + 1, act: (d.acts.filter(function (a) { return a.id === c.act; })[0] || {}).roman, title: c.title, id: c.id, kind: c.kind === 'life' ? '새 구성(엔진 값·현실 문체)' : '기존 챕터 ' + (c.base || c.id), scenes: (c.scenes || []).length }; }); }
 
-  R.LifeDoc = { build: build, outline: outline, loadSocial: loadSocial, interestOrder: interestOrder, uniqueText: uniqueText, episode: episode, episodeKeyOf: episodeKeyOf, keepEpisode: function (c) { return !!EPISODE_KEEP[episodeKeyOf(c)]; }, attachEpisodes: attachEpisodes };
+  R.LifeDoc = { GRP: GRP, WEAK: WEAK, PILLAR: PILLAR, build: build, outline: outline, loadSocial: loadSocial, interestOrder: interestOrder, uniqueText: uniqueText, episode: episode, episodeKeyOf: episodeKeyOf, keepEpisode: function (c) { return !!EPISODE_KEEP[episodeKeyOf(c)]; }, attachEpisodes: attachEpisodes };
 })(typeof window !== 'undefined' ? window : globalThis);

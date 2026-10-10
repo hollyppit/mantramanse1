@@ -93,6 +93,10 @@ button { font: inherit; color: inherit; }
 .tab { flex: 1 0 auto; background: none; border: 0; padding: 8px 14px; cursor: pointer; font-weight: 700; font-size: 0.9rem; color: var(--ink-3); border-radius: 999px; transition: background .15s, color .15s; }
 .tab:hover { color: var(--ink); }
 .tab[aria-selected="true"] { color: #fff; background: var(--ink); }
+.tab-link { text-decoration: none; color: var(--seal); display: inline-flex; align-items: center; white-space: nowrap; }
+.tab-link:hover { color: var(--seal); background: rgba(0, 0, 0, .05); }
+.mt-cta { text-decoration: none; background: var(--seal); border-color: var(--seal); color: #fff; font-weight: 700; display: inline-flex; align-items: center; white-space: nowrap; }
+.mt-cta:hover { filter: brightness(1.06); }
 
 /* 카드 */
 .card { background: var(--surface); border: 1px solid color-mix(in srgb, var(--line) 60%, transparent); border-radius: var(--r); padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; box-shadow: var(--shadow); }
@@ -1312,9 +1316,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="who">${whoLine()}</div>
       ${adminPw ? `<span class="admin-badge">관리자</span><button class="btn" data-act="admin-out">로그아웃</button>` : ''}
       <span class="seg xp" role="group" aria-label="내보내기"><button type="button" data-export="pdf" title="현재 탭을 A4 PDF로 저장">PDF</button><button type="button" data-export="png" title="현재 탭을 A4 이미지(PNG)로 저장">이미지</button><button type="button" data-export="card" title="공유용 사주 카드 이미지로 저장">카드</button></span>
+      <a class="btn mt-cta" href="/report/">무빙툰 보기 ›</a>
       <button class="btn${S.editing ? '' : ' primary'}" data-act="edit">${S.editing ? '입력 닫기' : '사주 입력'}</button>
     </div>
-    <nav class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="tab" role="tab" data-tab="${k}" aria-selected="${S.tab === k}">${l}</button>`).join('')}</nav></header>`;
+    <nav class="tabs" role="tablist"><a class="tab tab-link" href="/report/" title="내 사주를 영화처럼 보는 무빙툰으로 이동">무빙툰 ›</a>${tabs.map(([k, l]) => `<button class="tab" role="tab" data-tab="${k}" aria-selected="${S.tab === k}">${l}</button>`).join('')}</nav></header>`;
   }
 
   function renderAdminLogin() {

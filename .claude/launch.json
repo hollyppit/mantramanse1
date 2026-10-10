@@ -28,6 +28,18 @@
       "env": {
         "PORT": "8791"
       }
+    },
+    {
+      "name": "prod-readonly",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        ".claude/report-dev.js"
+      ],
+      "port": 8792,
+      "env": {
+        "PORT": "8792",
+        "PROXY_PROD": "1"
+      }
     }
   ]
 }
