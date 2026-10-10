@@ -249,7 +249,7 @@
     }).catch(function (e) { if (window.console) console.error('lifeBegin', e); try { beginReader(); } catch (e2) { toast('화면을 여는 중 문제가 생겼습니다. 새로고침해 주세요.'); } });
   }
   /* ── 운명 탐험 홈(ACT 01 각성 이후 챕터를 골라 읽는다). ?explore=0 이면 예전처럼 처음부터 한 문서로 읽는다. 읽은 챕터·이어 읽을 위치는 이 기기에만 저장한다. ── */
-  var EXPLORE = LIFE && !PREVIEW && !!R.Explore && !/[?&]explore=0(&|$)/.test(location.search);
+  var EXPLORE = !PREVIEW && !!R.Explore && !/[?&]explore=0(&|$)/.test(location.search);
   function xpSave() { if (!S.xp || !S.xpKey) return; S.xp.ended = S.ended; S.xp.last = S.cur ? S.idx : S.xp.last; R.Explore.save(S.xpKey, S.xp); }
   function exploreEntry() {
     if (!document.getElementById('mapBtn')) { var mb = document.createElement('button'); mb.type = 'button'; mb.id = 'mapBtn'; mb.className = 'chipbtn'; mb.hidden = $('#app').dataset.view !== 'reader'; mb.textContent = '세계 지도'; mb.onclick = function () { if (S.mv) S.mv.pause(); showHome(); }; document.body.appendChild(mb); }
