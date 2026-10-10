@@ -34,6 +34,19 @@
   /* ── 근거: 원국(바탕) · 대운 · 세운 · 월운의 영향을 나눠서 보여 준다. 값은 모두 엔진(evaluateLuck·evaluateDomainLuck)에서 읽는다. ── */
   var COMP = { eokbu: '억부(강약 균형)', johu: '조후(차고 더움)', relation: '합충·관계', structure: '십성 구조', tonggwan: '통관' };
   var EL = ['목', '화', '토', '금', '수'], LEVEL_KO = { daeun: '대운', seun: '세운', wolun: '월운' };
+  // 관계 한 줄이 계산에서 어떻게 쓰였는지 나눈다(엔진 값만 읽음, 새 계산 없음):
+  //  score — 흐름 점수의 "합충·관계" 성분에 점수로 들어간 관계(충·합·천간충/합 일부). parts 라벨이 "관계이름 — …" 로 남는다.
+  //  volat — 점수에는 안 들어갔지만 변동 신호(변동성) 계산에 쓰인 관계(형·파·해 등).
+  //  ref   — 점수·변동성 어디에도 쓰이지 않은 참고 관계(원진·귀문 등).
+  function relInfo(ev) {
+    var left = {}; (ev.parts || []).forEach(function (p) { var i = String(p.label || '').indexOf(' — '); if (i > 0) { var k = p.label.slice(0, i); left[k] = (left[k] || 0) + 1; } });
+    var vol = {}; (ev.volatilitySignals || []).forEach(function (g) { vol[g.text] = (vol[g.text] || 0) + 1; });
+    return (ev.relations || []).map(function (s) {
+      var name = String(s).split(' ').pop(), use = 'ref';
+      if (left[name] > 0) { left[name]--; use = 'score'; } else if (vol[s] > 0) { vol[s]--; use = 'volat'; }
+      return { text: s, use: use };
+    });
+  }
   function evidence(M, ch, item) {
     var r = item && item._ref; if (!r) return null; var ev = r.p.ev, chain = [], note = '';
     try { var d = M.evaluateDomainLuck(ch, r.p, r.level, r.ctx); chain = d.chain.map(function (c) { return { level: c.level, name: LEVEL_KO[c.level] || c.level, ganzhi: c.ganzhi, weight: Math.round(c.weight * 100) }; }); note = d.chainNote || ''; } catch (e) { chain = [{ level: r.level, name: LEVEL_KO[r.level], ganzhi: item.ganzhi, weight: 100 }]; }
@@ -44,7 +57,7 @@
       yong: y.applicable && y.yong != null ? EL[y.yong] : '', hee: y.applicable && y.hee != null ? EL[y.hee] : '', school: y.school, log: (y.log || []).slice(0, 2),
     };
     return { title: item.ganzhi + ' ' + (LEVEL_KO[r.level] || ''), natal: natal, chain: chain, note: note, own: Math.round(ev.ownFit), fit: Math.round(ev.fitScore), comps: comps, parts: (ev.parts || []).slice(0, 6).map(function (p) { return { label: p.label, v: Math.round(p.v * 10) / 10 }; }),
-      relations: (ev.relations || []).slice(0, 8), triggers: (ev.triggers || []).slice(0, 5), six: item.six, rule: item.rule, meaning: item.meaning, scores: item.scores };
+      relInfo: relInfo(ev).slice(0, 8), relations: (ev.relations || []).slice(0, 8), triggers: (ev.triggers || []).slice(0, 5), six: item.six, rule: item.rule, meaning: item.meaning, scores: item.scores };
   }
   function evidenceHtml(e) {
     if (!e) return '';
@@ -56,7 +69,16 @@
     h += '<section><h4>③ 흐름 점수를 이루는 성분</h4><table class="ev-t"><thead><tr><th>성분</th><th>점수(-100~100)</th><th>반영 비중</th><th>기여</th></tr></thead><tbody>' +
       e.comps.map(function (c) { return '<tr><td>' + E(c.name) + '</td><td>' + c.score + '</td><td>' + c.weight + '%</td><td>' + (c.contrib > 0 ? '+' : '') + c.contrib + '</td></tr>'; }).join('') + '</tbody></table>' +
       (e.parts.length ? '<ul class="ev-l">' + e.parts.map(function (p) { return '<li>' + E(p.label) + ' <i>' + (p.v > 0 ? '+' : '') + p.v + '</i></li>'; }).join('') + '</ul>' : '') + '</section>';
-    if (e.relations.length || e.triggers.length) h += '<section><h4>④ 합·충 등 관계</h4><ul class="ev-l">' + e.relations.map(function (x) { return '<li>' + E(x) + '</li>'; }).join('') + e.triggers.map(function (x) { return '<li>변화 신호 · ' + E(x) + '</li>'; }).join('') + '</ul></section>';
+    if (e.relations.length || e.triggers.length) {
+      var G = { score: [], volat: [], ref: [] }; (e.relInfo || e.relations.map(function (x) { return { text: x, use: 'ref' }; })).forEach(function (r) { G[r.use].push(r.text); });
+      var ul = function (a) { return '<ul class="ev-l">' + a.map(function (x) { return '<li>' + E(x) + '</li>'; }).join('') + '</ul>'; };
+      h += '<section><h4>④ 합·충 등 관계</h4>';
+      if (G.score.length) h += '<p class="ev-s"><b>점수에 반영된 관계</b> — ③의 "합충·관계" 성분을 이루는 것들이에요.</p>' + ul(G.score);
+      if (G.volat.length) h += '<p class="ev-s"><b>변동 신호에만 쓰인 관계</b> — 점수에는 직접 들어가지 않고, 변화가 생기기 쉬운지를 보는 데 쓰였어요.</p>' + ul(G.volat);
+      if (G.ref.length) h += '<p class="ev-s"><b>참고로만 보는 관계</b> — 이 계산에서는 점수·변동 신호에 쓰이지 않았어요. 그래서 "합충·관계" 점수가 0이어도 이런 관계는 나올 수 있어요.</p>' + ul(G.ref);
+      if (e.triggers.length) h += '<p class="ev-s"><b>변화 신호</b></p>' + ul(e.triggers);
+      h += '</section>';
+    }
     if (e.natal.log.length) h += '<section><h4>⑤ 원국 기준(용신 판단)</h4><ul class="ev-l">' + e.natal.log.map(function (x) { return '<li>' + E(x) + '</li>'; }).join('') + '</ul></section>';
     return h + '<p class="ev-n">이 근거는 명리 규칙에 따른 계산 과정이며, 실제 사건을 예측하거나 보장하지 않습니다.</p></div>';
   }
