@@ -11,7 +11,7 @@ const TOPIC_CAT = /^t_c\d{2}_[a-z0-9]{2,20}$/; // 챕터별 주제 카드(report
 const MOD_CATS = ['identity', 'elements', 'personality', 'talent', 'shadow', 'career', 'success', 'wealth', 'love', 'marriage', 'relationship', 'compatibility', 'family', 'pastLife', 'daewoon', 'currentCycle', 'sewoon', 'monthly', 'remedy', 'actionPlan'];
 const REM_TYPES = ['action', 'exercise', 'growth', 'people', 'place', 'environment', 'timing']; // exercise 는 예전 저장본 호환(저장 시 action 의 운동 종류로 바꾼다)
 // 조건 키는 report/v2/rules.js 의 FIELDS 와 같다
-const COND_KEYS = ['dayPillar', 'dayMasterStem', 'dayMasterEl', 'gender', 'dominantEl', 'lackEl', 'yongEl', 'dominantGroup', 'weakestGroup', 'strength', 'hasRoot', 'pattern', 'star', 'career', 'daewoonSeason', 'seunSeason', 'monthSeason', 'needTag', 'project'];
+const COND_KEYS = ['dayPillar', 'dayMasterStem', 'dayMasterEl', 'gender', 'dominantEl', 'lackEl', 'yongEl', 'dominantGroup', 'weakestGroup', 'strength', 'hasRoot', 'pattern', 'star', 'career', 'daewoonSeason', 'seunSeason', 'monthSeason', 'needTag', 'project', 'monthBranch', 'dayBranch', 'groupHigh', 'groupZero'];
 const ID_RE = /^[\w.\-가-힣]{1,80}$/; // 기본 모듈 id 에 한글(예: identity_el_금)이 있다
 const str = (v, n) => (typeof v === 'string' ? v.slice(0, n) : '');
 const strs = (v, n = 20, len = 40) => (Array.isArray(v) ? v.slice(0, n).map(x => str(x, len)).filter(Boolean) : []);
@@ -29,7 +29,37 @@ function cleanExtra(e, d = 0) {
     if (typeof v === 'string') o[k] = v.slice(0, 400); else if (Array.isArray(v)) o[k] = strs(v, 20, 120); else if (v && typeof v === 'object') o[k] = cleanExtra(v, d + 1); }
   return o;
 }
+// 풀이 DB 계층화(report/v2/CONTENT_DB_DESIGN.md §6) 선택 필드. 값이 있을 때만 출력에 넣어서, 이 필드가 없는 기존 모듈은 정리 결과가 예전과 같다.
+const MOD_STATUS = ['approved', 'legacy', 'draft', 'needs_evidence', 'retired'];
+const EV_BASIS = ['engine', 'tradition', 'editorial', 'legacy'], EV_KIND = ['classic', 'modern', 'internal'], NARR_VOICE = ['haeyo', 'hapsyo', 'novel'];
+const LAYER_RE = /^[A-Za-z]{1,20}$/, DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+function cleanEvidence(e) {
+  if (!e || typeof e !== 'object' || !EV_BASIS.includes(e.basis)) return null;
+  const refs = (Array.isArray(e.refs) ? e.refs : []).slice(0, 5).filter(r => r && ID_RE.test(r.id || '')).map(r => ({ id: r.id, kind: EV_KIND.includes(r.kind) ? r.kind : 'internal', title: str(r.title, 120), locator: str(r.locator, 120), note: str(r.note, 200) }));
+  const o = { basis: e.basis, refs };
+  if (typeof e.checkedBy === 'string' && e.checkedBy) o.checkedBy = str(e.checkedBy, 40);
+  if (DATE_RE.test(e.checkedAt || '')) o.checkedAt = e.checkedAt;
+  if (Number.isFinite(+e.rev)) o.rev = Math.max(0, Math.min(9999, Math.round(+e.rev)));
+  return o;
+}
+function cleanNarrative(n) {
+  if (!n || typeof n !== 'object') return null; const o = {};
+  if (NARR_VOICE.includes(n.voice)) o.voice = n.voice;
+  if (typeof n.hook === 'string' && n.hook) o.hook = str(n.hook, 200);
+  if (typeof n.metaphor === 'string' && n.metaphor) o.metaphor = str(n.metaphor, 200);
+  return Object.keys(o).length ? o : null;
+}
 function cleanModule(m) {
+  const o = cleanModuleBase(m); if (!o) return null;
+  if (LAYER_RE.test(m.layer || '')) o.layer = m.layer;
+  if (typeof m.choice === 'string' && m.choice) o.choice = str(m.choice, 300);
+  if (MOD_STATUS.includes(m.status)) o.status = m.status;
+  const ev = cleanEvidence(m.evidence); if (ev) o.evidence = ev;
+  const nr = cleanNarrative(m.narrative); if (nr) o.narrative = nr;
+  if (m.rule && typeof m.rule === 'object' && typeof m.rule.note === 'string' && m.rule.note) o.rule = { note: str(m.rule.note, 300) }; // 1단계: 메모만. when·except 는 받지 않는다(조건은 conditions 가 유일한 원천)
+  return o;
+}
+function cleanModuleBase(m) {
   if (!m || !ID_RE.test(m.id || '') || !(MOD_CATS.includes(m.category) || TOPIC_CAT.test(m.category))) return null;
   return { id: m.id, category: m.category, conditions: cleanCond(m.conditions), priority: Math.max(0, Math.min(100, Math.round(+m.priority || 0))), headline: str(m.headline, 120), summary: str(m.summary, 600), detail: str(m.detail, 2000),
     keywords: strs(m.keywords, 12), imageTags: strs(m.imageTags, 12), actionTags: strs(m.actionTags, 12), extra: cleanExtra(m.extra), enabled: m.enabled !== false };
