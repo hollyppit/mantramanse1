@@ -129,6 +129,46 @@ console.log('조립 기준선: 사주 120 × 프로젝트 ' + PROJECTS.length + 
   ok(emptyCh === 0, 'strict 조립에서 빈 챕터: ' + emptyCh);
 }
 
+/* ── 2-d. 근거 상태 점검 · 관리자 편집 검토(report/v2/quality.js) ─────────────────── */
+{
+  vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'v2', 'quality.js'), 'utf8'), { filename: 'quality.js' });
+  const Q = R.Quality, seed = R.Content.modules;
+  const e0 = Q.evidence(R.Compose.library(null).all, { policy: 'off' });
+  ok(e0.total === seed.length && e0.status.legacy === seed.length && e0.status.approved === 0, '시드 근거 상태: 전부 legacy');
+  ok(e0.basis.editorial === R.Content.v3Count && e0.basis.legacy === seed.length - R.Content.v3Count && e0.basis.none === 0, '근거 종류 집계(editorial=v3)');
+  ok(e0.wouldHide.hide_unverified === 0 && e0.wouldHide.strict === seed.length, '정책별 숨김 예상 수');
+  ok(e0.mismatch.length === 0 && e0.unknownCond.length === 0 && e0.staleText.length === 0, '시드는 점검 항목 0');
+  ok(e0.categories.length === new Set(seed.map(m => m.category)).size && e0.categories.every(c => c.ratio === 0), '카테고리 집계');
+  // 합성 문제: 사용 중인데 draft, 승인인데 근거 없음, 알 수 없는 조건 키, 승인 후 문장 변경
+  const m1 = Object.assign({}, seed[0], { status: 'draft' }), m2 = Object.assign({}, seed[1], { status: 'approved', evidence: { basis: 'legacy', refs: [], rev: 0 } });
+  const m3 = Object.assign({}, seed[2], { conditions: { 없는키: ['x'] } }), m4 = Object.assign({}, seed[3], { status: 'approved', evidence: { basis: 'editorial', refs: [], rev: 1, textHash: 'deadbeef' } });
+  const e1 = Q.evidence([m1, m2, m3, m4], { policy: 'strict', hidden: 1 });
+  ok(e1.mismatch.length === 2 && e1.unknownCond.length === 1 && e1.staleText.join() === m4.id, '합성 문제 탐지: ' + JSON.stringify([e1.mismatch.length, e1.unknownCond.length, e1.staleText]));
+
+  const base = Object.assign({}, seed[5]), edit = (patch, from) => { const o = Object.assign({}, base, from || {}), n = JSON.parse(JSON.stringify(Object.assign({}, o, patch))); return { o, n, r: Q.reviewEdit(o, n) }; };
+  // 근거 없이 승인 → 거절하고 이전 상태로
+  let t = edit({ status: 'approved', evidence: { basis: 'legacy', refs: [], rev: 0 } });
+  ok(t.n.status === 'legacy' && t.r.errors.length === 1, 'legacy 근거로는 승인 불가');
+  t = edit({ status: 'approved', evidence: { basis: 'tradition', refs: [], rev: 0 } });
+  ok(t.n.status === 'legacy' && t.r.errors.length === 1, 'tradition 은 출처 없이 승인 불가');
+  // 정상 승인 → textHash 기록
+  t = edit({ status: 'approved', evidence: { basis: 'tradition', refs: [{ id: 'src_1', kind: 'classic', title: 't', locator: 'l' }], rev: 0 } });
+  ok(t.n.status === 'approved' && t.n.evidence.textHash === Q.textHash(t.n) && !t.r.errors.length, '정상 승인은 문장 해시 기록');
+  // 승인된 모듈의 문장을 고치면 needs_evidence 로 내려가고 rev 증가
+  const approved = Object.assign({}, base, { status: 'approved', evidence: { basis: 'editorial', refs: [], rev: 2, textHash: Q.textHash(base) } });
+  t = edit({ headline: '고친 결론 문장' }, approved);
+  ok(t.n.status === 'needs_evidence' && t.n.evidence.rev === 3 && !('textHash' in t.n.evidence) && t.r.notes.length === 1, '승인 문장 수정 → needs_evidence·rev+1');
+  // 승인 상태 그대로 문장 안 바뀌면 유지
+  t = edit({}, approved);
+  ok(t.n.status === 'approved' && t.n.evidence.textHash === Q.textHash(approved) && !t.r.notes.length, '변경 없으면 승인 유지');
+  // 승인 아닌 모듈(evidence editorial)은 문장이 바뀌면 rev 만 증가, legacy 근거는 그대로
+  t = edit({ headline: '다른 문장', evidence: { basis: 'editorial', refs: [], rev: 0 } });
+  ok(t.n.status === undefined || t.n.status === 'legacy', '상태 유지');
+  ok(t.n.evidence.rev === 1, 'editorial 문장 수정 시 rev+1');
+  t = edit({ headline: '다른 문장', evidence: { basis: 'legacy', refs: [], rev: 0 } });
+  ok(t.n.evidence.rev === 0, 'legacy 근거는 rev 유지');
+}
+
 /* ── 3. 서버 정리 규칙(functions/api/report-content.js cleanModule) ────────────────── */
 {
   const src = fs.readFileSync(path.join(root, 'functions/api/report-content.js'), 'utf8').split(/export async function onRequestGet/)[0]
@@ -162,6 +202,8 @@ console.log('조립 기준선: 사주 120 × 프로젝트 ' + PROJECTS.length + 
     ok(n.narrative && n.narrative.voice === 'haeyo' && n.narrative.hook === '도입' && !('extra' in n.narrative), 'narrative 허용 필드만');
     const bad = cm(Object.assign({}, plain, { status: 'whatever', layer: '한글!', evidence: { basis: 'magic' }, narrative: { voice: 'x' }, rule: { note: 5 } }));
     ok(!('status' in bad) && !('layer' in bad) && !('evidence' in bad) && !('narrative' in bad) && !('rule' in bad), '범위 밖 값은 버림');
+    const evh = cm(Object.assign({}, plain, { evidence: { basis: 'editorial', refs: [], textHash: 'a1b2c3d4' } })), evb = cm(Object.assign({}, plain, { evidence: { basis: 'editorial', refs: [], textHash: 'XYZ' } }));
+    ok(evh.evidence.textHash === 'a1b2c3d4' && !('textHash' in evb.evidence), 'evidence.textHash 는 8자리 16진수만 보존');
     ok(clean.EVIDENCE_POLICIES.join() === Rules.POLICIES.join(), '서버 정책 목록 = 규칙 엔진 정책 목록');
     ok(clean.cleanPolicy('strict') === 'strict' && clean.cleanPolicy('x') === null && clean.cleanPolicy(undefined) === null, '서버 정책 값 검증');
     ok(cm(null) === null && cm({ id: 'bad id', category: 'career' }) === null, '잘못된 모듈은 null');

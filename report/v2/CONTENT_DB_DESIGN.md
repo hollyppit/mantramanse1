@@ -329,3 +329,12 @@ sentenceRef = { moduleId, field: 'headline'|'summary'|'detail', rev }
 - **검증**(`tests/content-db-sim.js` 확장): 정책×status 진리표, draft 는 off 에서도 숨김, hide_unverified·strict 동작, strict 에서 58개 카테고리 모두 조건 없는 모듈 유지·4개 프로젝트 조립에서 빈 챕터 0·신규 필드 누출 0, 서버·규칙 엔진 정책 목록 일치, 기존 조립 기준선(120사주×4프로젝트) 바이트 일치. 전체 `*-sim` 60개 통과(실패 4개는 작업 전과 같음).
 - **알려진 점**: 관리자 화면 중 `Compose.library(...)` 를 정책 없이 호출하는 곳(`v2-ik.js`·`v2-shell.js` 통계·`v2-check.js`·`v2-quality.js`)은 정책 off 로 동작한다(draft·retired 만 빠짐). 정책을 쓰는 점검 화면은 단계 4 에서 `content.evidencePolicy` 를 넘기도록 바꾼다.
 - **미착수**: 관리자에서 정책·status·evidence 를 바꾸는 화면(단계 4). 현재 정책을 바꾸는 방법은 PUT API 뿐이고, 운영에 값이 없으면 off 다.
+
+### 단계 4 — 완료 (관리자 입력란 · 서비스 점검 항목)
+- **관리자 모듈 편집기**(`report/admin/v2-content.js`): "풀이 DB 계층" 접이식 영역 — 상태(status), 근거 종류(evidence.basis), 출처(한 줄에 `id | 종류 | 제목 | 위치`, 최대 5), 확인한 사람·날짜, 서사(말투·도입·비유), 규칙 메모. 비워 두면 기존과 같다.
+- **편집 검토 규칙**(`R.Quality.reviewEdit`, 순수 함수·Node 테스트 대상): ① 근거 종류가 legacy 이거나 tradition 인데 출처가 없으면 승인 불가(이전 상태로 되돌림) ② 승인된 모듈의 문장을 고치면(상태를 일부러 바꾸지 않은 경우) `needs_evidence` 로 내리고 `evidence.rev`+1 ③ 승인 저장 시 문장 해시를 `evidence.textHash` 에 기록. 서버 `cleanEvidence` 가 8자리 16진수 해시만 보존한다.
+- **근거 정책 패널**: 해석 모듈 편집 화면 상단. 정책 선택 시 "저장된 모듈 기준 숨김 N개(폴백 복원 M개)"를 미리 보여 주고, hide_unverified·strict 저장 전에는 확인창을 띄운다. `evidencePolicy` 저장.
+- **서비스 점검 탭**(`report/admin/v2-quality.js`, `report/v2/quality.js` `evidence()`): 상태별·근거 종류별 개수, 카테고리별 승인 비율(낮은 순), 정책별 숨김 예상 수, 점검 항목 3종 — 사용 중인데 draft·retired / 승인인데 근거 비어 있음 / 알 수 없는 조건 키 / 승인 후 문장이 바뀐 모듈. 마크다운 내보내기에도 포함. 점검용 문서는 이제 저장된 모듈·정책이 반영된 라이브러리로 만든다(이전: 시드만). `Compose.library()` 가 정책 적용 전 전체 목록 `all` 을 추가로 돌려준다.
+- **검증**: `tests/content-db-sim.js` 확장(근거 집계·합성 문제 탐지·reviewEdit 7개 시나리오·textHash 보존), 조립 기준선 일치, 전체 `*-sim` 60개 통과(실패 4개는 작업 전과 같음), 엔진 기준선 일치. **브라우저 확인**(로컬 개발 서버, 시험용 비밀번호): 모듈 편집기에 계층 영역·정책 패널 표시, legacy 근거 승인 거절, editorial 근거 승인 시 해시 기록, 승인 문장 수정 시 needs_evidence·rev 1, 서비스 점검 탭에 근거 상태 표시, 콘솔 오류 없음. 저장 동작(PUT)은 눌러 보지 않았다.
+- **알려진 점**: 정책 패널은 챕터별 "해석 모듈" 탭마다 한 줄로 나타난다(저장 값은 하나). 출처 목록(`v2:sources`)은 만들지 않았고 `refs[].id` 는 자유 입력이다(D2 결정 후). "표본에서 한 번도 안 뽑힌 모듈" 점검은 비용(400 사주 조립)이 커서 넣지 않았다.
+- **다음**: 단계 5(승인 작업이 쌓인 카테고리부터 hide_unverified 시험 적용)는 D2(근거 문헌 기준·승인자)·D4(시점·카테고리)가 정해져야 한다. 단계 6(`except`)은 `Rules.evaluate` 변경이라 별도 비교 테스트가 선행된다.

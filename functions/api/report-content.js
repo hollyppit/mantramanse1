@@ -42,6 +42,7 @@ function cleanEvidence(e) {
   const o = { basis: e.basis, refs };
   if (typeof e.checkedBy === 'string' && e.checkedBy) o.checkedBy = str(e.checkedBy, 40);
   if (DATE_RE.test(e.checkedAt || '')) o.checkedAt = e.checkedAt;
+  if (/^[0-9a-f]{8}$/.test(e.textHash || '')) o.textHash = e.textHash; // 승인 당시 문장 해시(문장이 바뀌었는지 점검용)
   if (Number.isFinite(+e.rev)) o.rev = Math.max(0, Math.min(9999, Math.round(+e.rev)));
   return o;
 }
