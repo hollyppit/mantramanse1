@@ -12,6 +12,7 @@
   var SEA_ICON = { opportunity: '◆', expansion: '▲', harvest: '●', accumulation: '■', transition: '◇', defense: '▽' }; // 색만으로 상태를 구분하지 않도록 글자·기호를 함께 쓴다
   var STAGES = ['타고난 명(命)을 읽고 있습니다', '기질과 힘의 방향을 가늠하고 있습니다', '10년마다 달라지는 운의 길을 이어 붙이고 있습니다', '움직일 때와 준비할 때를 가리고 있습니다', '한 편의 運路로 구성하고 있습니다'];
   var PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
+  var MAPQ = !PREVIEW && /[?&]map=[^&]+/.test(location.search); // ?map=생년월일,시각,성별 — 프롤로그를 건너뛰고 곧바로 세계 지도(확인용)
   var HUB = !PREVIEW && /[?&]from=hub(&|$)/.test(location.search); // /report/hub/ 에서 넘어온 경우: 일간·일주 영상·프롤로그는 허브가 이미 보여 줬으므로 건너뛰고 바로 인생 지도로 간다
   var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
   var view = function (v) { var mb0 = document.getElementById('mapBtn'); if (mb0) mb0.hidden = v !== 'reader'; if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
@@ -171,6 +172,7 @@
     T('prologue_started', { video: 1 }); playStage({ kind: 'prologue', clip: { videoUrl: S.proVid }, noCap: true, onDone: function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', { video: 1 }); if (bb && R.Bgm && R.Bgm.has()) bb.hidden = false; if (R.Bgm) R.Bgm.play('cinematic'); next(true); } });
   }
   function startGate() {
+    if (MAPQ) { if (LIFE) lifeBegin(); else beginReader(); return; }
     if (HUB) { hubStart(); return; }
     if (PREVIEW || !R.Bgm || !R.Bgm.has() || R.Bgm.isMuted()) { intro(); return; }
     var nm = S.name; view('gate'); $('#gateName').innerHTML = nm ? esc(nm) + '에게는,<br>' + esc(nm) + '의 때가 있다.' : '모든 사람에게는,<br>각자의 때가 있다.';
@@ -743,7 +745,7 @@
   dr.addEventListener('close', function () { if (!drPick && S.drWas && S.mv) S.mv.play(); });
 
   /* QA 편의: ?qa=1990-05-15,14:30,M 로 입력 없이 바로 시작(개인정보를 서버로 보내지 않는다) */
-  var qa = /[?&]qa=([^&]+)/.exec(location.search);
+  var qa = /[?&](?:qa|map)=([^&]+)/.exec(location.search);
   if (qa) { var p = decodeURIComponent(qa[1]).split(','), d = (p[0] || '').split('-'); if (d.length === 3 && window.Manse) { F.year.value = +d[0]; F.month.value = +d[1]; F.day.value = +d[2]; if (p[1]) F.time.value = p[1]; F.gender.value = p[2] === 'F' ? 'F' : 'M'; setTimeout(function () { F.requestSubmit(); }, 50); } }
 
   /* /report/ 스토리 페이지에서 넘어온 입력(sessionStorage, 서버 전송 없음): 폼을 건너뛰고 바로 시작한다. 한 번 쓰면 지운다. */
