@@ -64,7 +64,7 @@ const path = require('path'), fails = [], ok = (c, m) => { if (!c) fails.push(m)
   ok(r.s === 200 && /^panelprev-/.test(r.d.preview), '남성 칸 미리 만들기');
   r2.set('d4d4d4d4d4d4d4d4d4.png', Buffer.from('imgM')); r = await post({ element: 'wood', theme: 'love', kind: 'panelM', uploadImage: 'd4d4d4d4d4d4d4d4d4.png' });
   idx = JSON.parse(kv.get('media:index')); ok(r.s === 200 && r.d.id === 'panel-wood-love-M' && idx.some(m => m.id === 'panel-wood-love-F') && idx.some(m => m.id === 'panel-wood-love-M'), '남성 칸 업로드: 여성 칸·공용 칸과 서로 별개 항목');
-  { const gl = await get(); ok(gl.presets.length === 300 && ['panel', 'panelF', 'panelM', 'bg'].every(k => gl.presets.filter(p => p.kind === k).length === 75), '관리자 목록: 공용·여성·남성·배경 각 75칸'); const c = gl.presets.find(p => p.id === 'panel-wood-love-F'); ok(c && c.url && /한국인 여성/.test(c.defaultPrompt) && /young Korean woman/.test(c.tools.leo), '여성 칸: 이미지 있음 · 성별 프롬프트와 외부 도구 프롬프트 제공'); }
+  { const gl = await get(); ok(gl.presets.length === 225 && ['panelF', 'panelM', 'bg'].every(k => gl.presets.filter(p => p.kind === k).length === 75) && !gl.presets.some(p => p.kind === 'panel'), '관리자 목록: 여성·남성·배경 각 75칸(공용 칸은 목록에서 제외 — bdb00b2)'); const c = gl.presets.find(p => p.id === 'panel-wood-love-F'); ok(c && c.url && /한국인 여성/.test(c.defaultPrompt) && /young Korean woman/.test(c.tools.leo), '여성 칸: 이미지 있음 · 성별 프롬프트와 외부 도구 프롬프트 제공'); }
 
   // 고친 돈 프롬프트와 기존 저장 프롬프트·현재 이미지 수정에도 재물 방향 적용.
   gptDown = false;
@@ -72,8 +72,8 @@ const path = require('path'), fails = [], ok = (c, m) => { if (!c) fails.push(m)
     r = await post({element: 'wood', theme: 'wealth', kind, preview: true, prompt: '옛 시장 장면'});
     ok(r.s === 200 && /재테크·재물 관리/.test(sentPrompts.at(-1)), kind + ' 개별 프롬프트에도 재테크 방향 적용');
   }
-  kv.set('panel:prompts', JSON.stringify({'panel-wood-wealth': '옛 시장 장면'}));
-  const moneyPreset = (await get()).presets.find(p => p.id === 'panel-wood-wealth');
+  kv.set('panel:prompts', JSON.stringify({'panel-wood-wealth-F': '옛 시장 장면'})); // 공용(성별 무관) 칸은 관리자 목록에서 빠졌다(bdb00b2) — 성별 칸 id 로 확인
+  const moneyPreset = (await get()).presets.find(p => p.id === 'panel-wood-wealth-F');
   ok(moneyPreset.custom && /재테크·재물 관리/.test(moneyPreset.prompt), '관리자에 표시되는 저장 프롬프트에도 재물 방향 포함');
   r = await post({element: 'wood', theme: 'wealth', preview: true});
   ok(r.s === 200 && /재테크·재물 관리/.test(sentPrompts.at(-1)), '기존 저장 프롬프트로 생성할 때도 재물 방향 적용');

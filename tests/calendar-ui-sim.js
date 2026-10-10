@@ -1,5 +1,5 @@
 // Run with a local HTTP server on 8768 and Playwright installed.
-const {chromium}=require('playwright');
+let chromium; try { ({ chromium } = require('playwright')); } catch (e) { console.log('SKIP: playwright 가 설치되어 있지 않아 실행하지 않았습니다(달력 UI 브라우저 테스트). 설치: npm i -D playwright, 로컬 서버 8768 필요'); process.exit(0); }
 (async()=>{const browser=await chromium.launch({headless:true,channel:process.env.TEST_BROWSER || "msedge"});const page=await browser.newPage({viewport:{width:390,height:844}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
 await page.addInitScript(()=>{Date.now=()=>Date.UTC(2026,9,9,3);localStorage.setItem('mantra-manse-v1',JSON.stringify({name:'검증',year:1992,month:6,day:23,hour:1,minute:30,gender:'M',lon:127.15}));});
 await page.goto((process.env.CALENDAR_TEST_URL || 'http://127.0.0.1:8768') + '/report/hub/#/today');
