@@ -250,8 +250,8 @@
     if (!document.getElementById('mapBtn')) { var mb = document.createElement('button'); mb.type = 'button'; mb.id = 'mapBtn'; mb.className = 'chipbtn'; mb.hidden = $('#app').dataset.view !== 'reader'; mb.textContent = '세계 지도'; mb.onclick = function () { if (S.mv) S.mv.pause(); showHome(); }; document.body.appendChild(mb); }
     S.xpKey = (S.rep.meta && S.rep.meta.key) || 'default'; S.xp = R.Explore.load(S.xpKey); S.xpWorlds = R.Explore.mergeWorlds(null);
     Object.keys(S.xp.ended).forEach(function (id) { S.ended[id] = 1; S.visited[id] = 1; });
-    var first = S.rep.chapters[0], awaken = !!(first && first.id === 'c-char' && !S.ended['c-char']); // 각성 연출(일간 소개·일주 영상)은 먼저 본다
-    openDoc(0, { autoStart: awaken }); if (!awaken) showHome();
+    // 프롤로그(영상 또는 텍스트)가 끝나면 곧바로 세계 지도. 일간·일주 소개와 일주 영상은 지도에서 '천명의 서고'로 들어가 볼 수 있다.
+    openDoc(0, { autoStart: false }); showHome();
     // 관리자가 저장한 세계 정의(이름·색·연결 챕터·순서·활성화)가 있으면 기본값 위에 덮어 쓴다. 실패하면 기본 6개 세계 그대로.
     var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 4000);
     fetch('/api/worlds', { signal: ctl && ctl.signal }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
@@ -683,11 +683,6 @@
   function onSection(sec) { // 현재 읽고 있는 섹션이 바뀔 때(자동 진행·직접 스크롤 모두)
     var ci = +sec.dataset.ch, c = S.rep.chapters[ci]; if (!c) return;
     if (ci !== S.idx || !S.cur) enterChapter(c, ci);
-    if (EXPLORE && c.id === 'c-char' && !S.homeShown) { // 각성 연출의 마지막 장면에 닿으면(자동·수동 모두) 잠시 읽을 시간을 주고 세계 지도로 보낸다
-      var art = sec.parentNode, hasT3 = !!(art && art.querySelector('[data-sc="ci-t3"]')), hit = !!(art && art.lastElementChild === sec); // 일간 소개 → 일주 영상 → 일주 소개까지가 각성 연출
-      if (hit) { S.homeShown = 1; S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); xpSave();
-        setTimeout(function () { if (S.view !== 'home' && S.cur && S.rep.chapters[S.idx] && S.rep.chapters[S.idx].id === 'c-char') { if (S.mv) S.mv.pause(); showHome(); } }, Math.round(5000 / (playbackRate() || 1))); }
-    }
     if (sec.classList.contains('s-end') && !S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); if (EXPLORE) { xpSave(); if (c.id === 'c-char' && !S.homeShown) { S.homeShown = 1; setTimeout(function () { if (S.mv) S.mv.pause(); showHome(); }, 900); } } }
   }
   function enterChapter(c, ci) {
