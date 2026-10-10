@@ -347,3 +347,50 @@ sentenceRef = { moduleId, field: 'headline'|'summary'|'detail', rev }
 - **점검**: 선택 조건 값이 전부 제외 조건에 들어 있어 어떤 사주에서도 선택되지 않는 모듈을 "충돌"로 표시(점검 탭·마크다운).
 - **검증**: `tests/content-db-sim.js` 에 except 시나리오 9건(없음/빈 값/불통과/통과 시 점수 불변/제외/배열 사실/없는 키/pick 에서 다음 후보 승격/충돌 탐지) + 서버 정리. 시드 모듈에 except 가 하나도 없음을 확인해 조립 기준선(120사주×4프로젝트)이 그대로 일치. 전체 `*-sim` 60개 통과(실패 4개는 작업 전과 같음), 엔진 기준선 일치. 브라우저(개발 서버): 제외 조건 체크 후 적용 시 값 유지 확인. 저장은 눌러 보지 않았다.
 - **주의**: 이 단계부터는 관리자가 except 를 쓰는 순간 선택 결과가 바뀔 수 있다(의도). 운영 반영 전, except 를 쓴 모듈은 "조합 테스트"로 영향 범위를 확인하는 것이 좋다.
+
+## 14. 정정·발견: 풀이 지식(IK) 시스템과 자료 학습 파이프라인은 이미 있다 (5-B 착수 전 조사)
+
+NEXT_PLAN 5-B(자료 업로드 분석·승인)를 설계하려고 `functions/` 를 조사하다가, 이 문서 §2 가 **다섯 번째 문장 저장소를 빠뜨렸고**, 5-B 의 대부분이 이미 구현돼 있음을 확인했다.
+
+### 14.1 §2 정정 — 문장 저장소는 5곳
+| 저장소 | 위치 | 상태 모델 | 서비스 연결 |
+|---|---|---|---|
+| (추가) **풀이 지식 IK** | KV `ik:d:<DOMAIN>`(8개 분야), `functions/_ik.js`·`_ikstore.js`·`api/ik.js`, 관리자 "풀이 지식" | `draft→review→approved→published→archived` + `reviewed`(검수 완료) 플래그, `sourceType`, `confidence`, `evidence[]`, `modifiers[]`(강화·완화·대체·예외), `exclusions`, `alsoWhen`, 충돌 감지 | `POST /api/ik?a=deep`: 게시+검수 완료 항목만으로 "더 깊이 보기" 풀이 생성(AI 호출 없음). 클라이언트 `report/v2/ik-deep.js` 가 6초 제한으로 호출, 실패·꺼짐이면 `null` 이라 기존 리포트가 그대로 진행 |
+| 자료 `src:*` | KV `src:idx`·`src:chunks:<id>`·`src:cand:<id>`, R2 `src/<id>`, `functions/_src.js`·`api/src.js`, 관리자 "풀이 자료" | 자료 상태 `need→analyzed→review→done`, 후보 결정 `approve·approveEdited·hold·discard·addEvidence·merge` | IK 항목의 근거(evidence)로만 연결 |
+
+해석 모듈 DB(이 문서의 대상)는 챕터·PDF·주제 카드를 먹이고, IK 는 심화 풀이를 먹인다. 두 DB 는 **서로 다른 경로로 사용자에게 간다**.
+
+### 14.2 NEXT_PLAN 5-B 요구와 현재 구현
+| 5-B 요구 | 현재 | 근거 |
+|---|---|---|
+| MD/PDF/TXT 업로드 | **있음** — `FILE_TYPES = pdf·md·txt·text`, 텍스트 3MB·업로드 40MB·청크 1500개 한도 | `_src.js`, `api/src.js` MAX_UPLOAD |
+| AI 가 분석해 기존 DB 와 비교(신규·중복·충돌) | **있음(IK 항목 대상)** — `compareCandidate` 결과 `new·similar·identical·reinforce…`, 충돌·원문 불일치 검증(`validateCandidate`), 원문 주장과 AI 정리를 따로 저장 | `_src.js` |
+| 승인 전에는 서비스 DB 에 반영하지 않음 | **있음** — 후보는 `src:cand:*` 에만 저장, production 검색에 쓰이지 않음. AI 초안은 검수 없이 게시 불가(`cleanItem`) | `api/src.js` 머리 주석, `_ik.js` `cleanItem` |
+| 초안 영역 분리 | **있음** — 후보 / IK `draft·review` / `published` 3단계 | 위와 같음 |
+| 승인 시 근거 연결 | **있음** — 승인하면 IK 항목 + `evidence[{docId, chunkId, pageStart, quote…}]` | `candidateToItem`, `cleanEvidence` |
+| 일괄 처리·영향 확인 | 있음 — `batch`, `impact`, `gaps` | `api/src.js` |
+| 테스트 | `tests/src-sim.js`, `tests/ik-sim.js` — 이 브랜치에서 실행해 **둘 다 통과** | 실행 확인 |
+
+→ **5-B 를 새로 만들 필요는 없다.** 남은 갭은 아래 §14.4 이다.
+
+### 14.3 이번 작업(단계 1~6)과의 관계
+| 이 문서의 개념 | IK 의 대응 개념 | 비고 |
+|---|---|---|
+| 모듈 `status`(legacy·approved·needs_evidence·draft·retired) | IK `status` + `reviewed` | 이름·단계가 다르다. 두 모델이 따로 존재 |
+| 모듈 `evidence.refs[{id,kind,title,locator}]` | IK `evidence[{docId,chunkId,pageStart,pageEnd,heading,quote}]` | 모듈 쪽 `refs[].id` 에 자료 `docId` 를 쓰면 호환 가능(ID 형식 `d[a-z0-9]{3,24}` 이 모듈 쪽 허용 문자 안에 들어감) |
+| 모듈 `rule.except`(단계 6) | IK `exclusions`·`modifiers[effect:'exception']` | 개념 중복. 모듈 DB 의 선택 경로(`Rules.evaluate`)에서 필요해 별도 구현했지만, 두 DB 를 일원화하면 이관 대상 |
+| 근거 정책 `off·warn·hide_unverified·strict` | IK 는 `published && reviewed` 만 서비스 노출(항상 strict) | 정책이 다르다 |
+| D2 "근거 문헌 기준·승인자" | 자료 등록 시 `sourceKind`(서적·전문가·내부·연구)·`grade`(A/B/C)·`theoryTags`·`publisher` 입력 이미 있음 | **D2 의 문헌 기준 절반은 이미 데이터 모델이 있다** — 어떤 자료에 어떤 등급을 줄지가 남은 결정 |
+| 모듈 → IK 이관 | `fromLegacyModule`·`?a=import`: 모듈 → "검수 필요" IK 초안(이미 가져온 것은 건너뜀). 조건 이름·시즌 표기를 변환 | 단방향. 승인된 IK 가 모듈 DB 로 돌아오는 경로는 없음 |
+
+### 14.4 남은 갭 (확인된 것만)
+1. **모듈 DB ↔ 자료 연결 없음**: 모듈 편집기의 출처 입력(`refs`)은 자유 입력이라 `src:idx` 의 자료·청크와 연결되지 않는다. 자료 선택기(자료 목록 `a=list` → docId 채우기)와 원문 위치 보기가 없다.
+2. **업로드 분석의 비교 대상이 IK 항목뿐**: 해석 모듈 678개는 `import` 로 IK 초안이 된 뒤에야 비교 대상이 된다. 모듈을 먼저 import 하지 않았다면 업로드 자료가 "새로운 풀이"로 보일 수 있다 — **운영에서 import 가 어디까지 되어 있는지는 확인 못함**.
+3. **두 DB 의 일원화 방향이 정해지지 않음**: 모듈이 정본인지, IK 가 정본인지, 병행인지. 지금은 병행이며 상태·근거 모델이 이중이다.
+4. **IK → 서비스 연결의 실제 켜짐 여부**: `a=deep` 의 `enabled` 값(서비스 연결 ON/OFF)과 운영 IK 항목 수·게시 수는 로컬에 없어 **확인 못함**.
+
+### 14.5 선택지 (사용자 결정 필요)
+- **A. 연결만 보강(권장 후보, 소규모)**: 모듈 편집기에 "자료에서 고르기"(src 자료 목록·청크 검색)를 추가해 `evidence.refs` 가 실제 자료·청크를 가리키게 한다. 상태·정책 모델은 그대로. 새 저장 구조 없음.
+- **B. 일원화**: IK 를 정본으로 삼아 모듈을 점진 이관(`import` 는 이미 있음)하고 모듈 DB 는 폴백으로 축소. 효과는 크지만 사용자 화면(챕터·PDF) 변화와 `rule.except`·정책 모델 폐기가 따른다 — 별도 설계·비교 테스트가 필요하고 위험이 크다.
+- **C. 현상 유지**: 이중 구조를 문서화만 하고 각각 운영.
+- 어느 쪽이든 먼저 **운영 데이터 확인**이 필요하다: IK 항목 수와 상태 분포, 자료 수와 등급 분포, `import` 완료 범위, 서비스 연결(`deep`) ON/OFF. 관리자 화면의 "풀이 지식"·"풀이 자료" 통계에서 읽기 전용으로 확인할 수 있다.
