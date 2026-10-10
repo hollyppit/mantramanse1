@@ -30,6 +30,19 @@
       '<small class="muted" data-msg="' + k + i + '"></small></div>';
   }
 
+  // 연결 챕터 선택기: 실제 문서 구성(관심 분야별 목차의 합집합)에서 챕터를 체크로 고른다. 목록에 없는 ID 는 아래 직접 입력란으로 넣는다.
+  function chapPicker(i, w) {
+    var sel = w.chapters || [];
+    if (!W.chap) return '<p class="muted" style="font-size:.78rem;margin:4px 0">챕터 목록을 불러오는 중…</p>';
+    if (!W.chap.length) return '<p class="muted" style="font-size:.78rem;margin:4px 0">챕터 목록을 불러오지 못했습니다. 아래 직접 입력란을 사용하세요.</p>';
+    var known = {}; W.chap.forEach(function (c) { known[c.id] = 1; });
+    var unknown = sel.filter(function (id) { return !known[id]; });
+    return '<details class="chp" data-chp="' + i + '"' + (sel.length ? ' open' : '') + '><summary><b>챕터 목록에서 고르기</b> <span class="muted" data-chpn="' + i + '">' + sel.length + '개 선택' + (sel.length ? '' : ' · 비우면 기본 규칙') + '</span></summary>' +
+      '<div class="cg" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px;margin:6px 0">' + W.chap.map(function (c) {
+        return '<label style="display:flex;gap:6px;align-items:flex-start"><input type="checkbox" data-ch="' + i + '" value="' + esc(c.id) + '"' + (sel.indexOf(c.id) >= 0 ? ' checked' : '') + '><span>' + esc(c.title) + ' <small class="muted mono">' + esc(c.id) + '</small></span></label>';
+      }).join('') + '</div>' + (unknown.length ? '<p class="muted" style="font-size:.76rem;margin:0">목록에 없는 ID(직접 입력): <span class="mono">' + esc(unknown.join(', ')) + '</span></p>' : '') + '</details>';
+  }
+
   function card(w, i, n) {
     var c = hex(w.color, '#1B2347'), a = hex(w.accent, '#D5B97F');
     return '<div class="card wd" data-w="' + i + '" style="border-left:4px solid ' + c + '"><div class="row" style="gap:8px;align-items:center;flex-wrap:wrap">' +
@@ -46,7 +59,8 @@
       '<label class="fx"><span>이용 권한</span><select data-f="access" data-i="' + i + '"><option value="free"' + (w.access !== 'paid' ? ' selected' : '') + '>무료</option><option value="paid"' + (w.access === 'paid' ? ' selected' : '') + '>유료 표시</option></select></label></div>' +
       '<p class="muted" style="font-size:.76rem;margin:2px 0 6px">유료 표시는 지도에 "유료" 배지만 붙입니다. 결제·서버 권한 검증은 아직 연결되지 않았습니다.</p>' +
       mediaRow(i, 'bgImage', '배경 이미지', 'image') + mediaRow(i, 'introImage', '입장 연출 이미지 (영상이 없을 때 사용)', 'image') + mediaRow(i, 'introVideo', '입장 연출 영상 (3~5초 권장, 소리 없음)', 'video') +
-      '<label class="fx"><span>연결 챕터 ID (쉼표로 구분 · 비우면 기본 규칙 사용)</span><textarea data-f="chapters" data-i="' + i + '" rows="2" class="mono" placeholder="예: c19, c20, life_actions">' + esc((w.chapters || []).join(', ')) + '</textarea></label>' +
+      chapPicker(i, w) +
+      '<label class="fx"><span>연결 챕터 ID 직접 입력 (쉼표로 구분 · 목록과 같은 값입니다 · 비우면 기본 규칙 사용)</span><textarea data-f="chapters" data-i="' + i + '" rows="2" class="mono" placeholder="예: c19, c20, life_actions">' + esc((w.chapters || []).join(', ')) + '</textarea></label>' +
       '<p class="muted" style="font-size:.76rem;margin:0">기본 규칙: ' + (w.match && w.match.length ? '<span class="mono">' + esc(w.match.join('  ')) + '</span>' : '없음(직접 연결만)') + '</p></div>';
   }
 
@@ -67,7 +81,22 @@
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button type="button" id="wdSave" class="gold"' + (W.dirty ? '' : ' disabled') + '>저장</button><button type="button" id="wdAdd"' + (n >= 12 ? ' disabled' : '') + '>세계 추가</button><button type="button" id="wdReset"' + (W.saved ? '' : ' disabled') + '>기본값으로 되돌리기</button><a class="btn" href="/report/v2/?map=1992-06-23,01:30,M" target="_blank" rel="noopener" style="text-decoration:none">사용자 화면에서 세계 지도 열기 ↗</a><span class="muted" id="wdState">' + (W.saved ? '저장된 설정을 쓰는 중' : '코드 기본값을 쓰는 중') + '</span></div></div>' +
       W.list.map(function (w, i) { return card(w, i, n); }).join('') +
       '<div class="card"><b style="color:var(--gold)">미리보기</b><div class="pvh" style="margin:8px 0"><label>생년월일<input type="date" id="wdD" value="' + esc(TS.date) + '"></label><label>시각<input type="time" id="wdT" value="' + esc(TS.time) + '"></label><label>성별<select id="wdG"><option value="M"' + (TS.gender === 'M' ? ' selected' : '') + '>남</option><option value="F"' + (TS.gender === 'F' ? ' selected' : '') + '>여</option></select></label><button type="button" id="wdPrev">미리보기 만들기</button></div><div id="wdPv">' + previewHtml() + '</div><p class="muted" style="font-size:.76rem;margin-top:8px">저장 전 변경도 이 미리보기에는 반영됩니다. 세계가 비어 있으면 사용자 지도에서 숨겨집니다.</p></div>';
-    bind(box);
+    bind(box); ensureChapters(box);
+  }
+
+  // 관심 분야마다 달라질 수 있는 목차의 합집합(같은 id 는 처음 본 제목 사용). 엔진·테스트 사주가 필요해서 한 번만 비동기로 만든다.
+  function ensureChapters(box) {
+    if (W.chap || W.chapBusy) return; W.chapBusy = true;
+    C.engine().then(function (M) {
+      var d = TS.date.split('-').map(Number), t = (TS.time || '12:00').split(':').map(Number), now = Date.now(), seen = {}, out = [];
+      var ch = M.compute({ year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: TS.gender, city: '서울' });
+      var sd = R.SajuData.build(ch, { now: now }), soc = R.StoryDirector.social(M, ch, sd, now);
+      var ints = ['']; (R.StoryDirector.INTERESTS || []).forEach(function (x) { if (x && x.id) ints.push(x.id); });
+      ints.forEach(function (it) {
+        try { R.LifeDoc.outline({ M: M, ch: ch, sd: sd, now: now, name: '', interest: it, soc: soc, plan: null }).forEach(function (o) { if (o.id && !seen[o.id]) { seen[o.id] = 1; out.push({ id: o.id, title: o.title || o.id }); } }); } catch (e) { /* 분야 하나가 실패해도 나머지는 쓴다 */ }
+      });
+      W.chap = out;
+    }).catch(function () { W.chap = []; }).then(function () { W.chapBusy = false; if (document.body.contains(box) && $('#wdSave', box)) draw(box); });
   }
 
   function bind(box) {
@@ -75,12 +104,24 @@
       var h = function () {
         var w = W.list[+el.dataset.i], k = el.dataset.f;
         if (k === 'enabled') { w.enabled = el.checked; draw(box); dirty(); return; }
-        if (k === 'chapters') w.chapters = el.value.split(/[\s,]+/).filter(function (x) { return /^[\w-]{1,60}$/.test(x); });
+        if (k === 'chapters') { w.chapters = el.value.split(/[\s,]+/).filter(function (x) { return /^[\w-]{1,60}$/.test(x); }); $$('input[data-ch="' + el.dataset.i + '"]', box).forEach(function (cb) { cb.checked = w.chapters.indexOf(cb.value) >= 0; }); var cn = $('[data-chpn="' + el.dataset.i + '"]', box); if (cn) cn.textContent = w.chapters.length + '개 선택' + (w.chapters.length ? '' : ' · 비우면 기본 규칙'); }
         else w[k] = el.value;
         dirty();
       };
       el.addEventListener(el.tagName === 'SELECT' || el.type === 'color' || el.type === 'checkbox' ? 'change' : 'input', h);
       if (el.dataset.f === 'name') el.addEventListener('change', function () { draw(box); });
+    });
+    $$('input[data-ch]', box).forEach(function (cb) {
+      cb.addEventListener('change', function () {
+        var i = +cb.dataset.ch, w = W.list[i], cur = (w.chapters || []).filter(function (id) { return id !== cb.value; });
+        if (cb.checked) cur.push(cb.value);
+        var order = {}; (W.chap || []).forEach(function (c, k) { order[c.id] = k; }); // 목차 순서로 정렬, 목록 밖 ID 는 뒤에 그대로
+        cur.sort(function (a, b) { return (order[a] == null ? 1e6 : order[a]) - (order[b] == null ? 1e6 : order[b]); });
+        w.chapters = cur;
+        var ta = $('[data-f="chapters"][data-i="' + i + '"]', box); if (ta) ta.value = cur.join(', ');
+        var n = $('[data-chpn="' + i + '"]', box); if (n) n.textContent = cur.length + '개 선택' + (cur.length ? '' : ' · 비우면 기본 규칙');
+        dirty();
+      });
     });
     $$('[data-mv]', box).forEach(function (b) { b.onclick = function () { var i = +b.dataset.i, j = i + +b.dataset.mv; if (j < 0 || j >= W.list.length) return; var t = W.list[i]; W.list[i] = W.list[j]; W.list[j] = t; draw(box); dirty(); }; });
     $$('[data-clr]', box).forEach(function (b) { b.onclick = function () { W.list[+b.dataset.i][b.dataset.clr] = ''; draw(box); dirty(); }; });
