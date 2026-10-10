@@ -262,3 +262,5 @@
 /* 지금 읽는 탭은 세계 색과 상관없이 항상 주황색 */
 #wstrip button.on { color: #1F1100; background: #FF9A3C; border-color: #FFB366; font-weight: 700; box-shadow: 0 0 0 2px rgba(255, 154, 60, .25); }
 .xp.xp-wv { padding-top: calc(112px + env(safe-area-inset-top, 0px)); }
+
+.sm-nt.sm-lb { background: rgba(10, 6, 18, .45); border-color: rgba(255, 255, 255, .15); }

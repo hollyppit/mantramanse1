@@ -28,6 +28,40 @@
     return { id: c.id, title: c.title || '전생의 모습', sub: c.subtitle || hero, hero: hero, slot: slot, frames: frames, notice: NOTICE };
   }
 
+  /* 일반 챕터: 화면에 그려진 챕터 HTML(<article> 안)에서 컷을 만든다. 섹션마다 제목(.cap·h2·h3)과 문단(p·li)을 읽고, 섹션 안 이미지가 있으면 그 컷의 배경으로 쓴다
+     (없으면 앞 컷의 배경을 이어 쓴다). 버튼·입력·선택지·그래프 설명은 제외. 문장을 새로 만들거나 바꾸지 않는다. */
+  var TAGS = function (s) { return UN(String(s).replace(/<(script|style|button|select|textarea|svg)[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()); };
+  function splitSentences(t) { return String(t).split(/(?<=[.!?。])\s+/).map(function (x) { return x.trim(); }).filter(Boolean); }
+  function fromHtml(html, meta) {
+    meta = meta || {}; var secs = String(html || '').split(/<section\b/i).slice(1), frames = [], lastImg = '', seen = {};
+    secs.forEach(function (s) {
+      var body = '<section' + s, img = (/<img[^>]+src="([^"]+)"/i.exec(body) || /<video[^>]+poster="([^"]+)"/i.exec(body) || [])[1] || '', cap = TAGS((/<(?:div|h2|h3|p|span)[^>]*class="[^"]*\b(?:cap|no|eyebrow)\b[^"]*"[^>]*>([\s\S]*?)<\/(?:div|h2|h3|p|span)>/i.exec(body) || /<h[23][^>]*>([\s\S]*?)<\/h[23]>/i.exec(body) || [])[1] || ''), paras = [], re = /<(p|li)\b[^>]*>([\s\S]*?)<\/\1>/gi, m;
+      if (img) img = UN(img);
+      while ((m = re.exec(body))) { if (/class="[^"]*\b(?:cap|no|disc|ctl|cta)\b/.test(m[0].slice(0, 120))) continue; var t = TAGS(m[2]); if (t.length >= 8 && !seen[t]) { seen[t] = 1; paras.push(t); } }
+      if (img) lastImg = img; if (!paras.length) return;
+      var sents = []; paras.forEach(function (p) { splitSentences(p).forEach(function (x) { sents.push(x); }); });
+      for (var i = 0; i < sents.length;) { var chunk = [sents[i++]]; while (i < sents.length && chunk.length < 2 && chunk.join(' ').length + sents[i].length <= 150) chunk.push(sents[i++]); frames.push({ cap: cap, paras: [chunk.join(' ')], img: img || lastImg }); }
+    });
+    if (frames.length < (meta.min || 2)) return null;
+    return { id: meta.id || '', title: meta.title || '', hero: meta.title || '', slot: '', frames: frames.slice(0, 60), notice: meta.notice || '', label: meta.label || meta.title || '' };
+  }
+  /* 세계 무빙툰: 세계에 속한 챕터들의 핵심(앞쪽 컷 몇 개씩)을 이어 한 편으로 만든다. list: [{ title, html }], meta: { id, title, label, bg, per, max } */
+  function fromChapters(list, meta) {
+    meta = meta || {}; var per = meta.per || 3, max = meta.max || 36, frames = [];
+    (list || []).forEach(function (c) {
+      var m = fromHtml(c.html, { id: c.id, title: c.title, min: 1 }); if (!m) return;
+      m.frames.slice(0, per).forEach(function (f) { frames.push({ cap: (c.title ? c.title + (f.cap && f.cap !== c.title ? ' · ' + f.cap : '') : f.cap), paras: f.paras, img: f.img || meta.bg || '' }); });
+    });
+    if (frames.length < 2) return null;
+    return { id: meta.id || '', title: meta.title || '', hero: meta.title || '', slot: '', frames: frames.slice(0, max), notice: '', label: meta.label || meta.title || '' };
+  }
+  function toonCard(info) {
+    var E2 = E, n = info.frames || 0, thumb = info.thumb || '';
+    return '<div class="cs-card sm-card"><div class="sm-th' + (thumb ? '' : ' none') + '"' + (thumb ? ' style="background-image:url(' + E2(thumb) + ')"' : '') + '>' + (thumb ? '' : '<span aria-hidden="true">' + E2(info.icon || '像') + '</span>') + '</div><div><p class="cs-ct">' + E2(info.name || '') + ' · 무빙툰</p><h4>챕터별 핵심 장면으로 보는 ' + E2(info.name || '이 세계') + '</h4>' +
+      '<p class="cs-sum">' + n + '개의 컷 · 챕터마다 앞부분의 핵심 문장을 이미지와 함께 이어서 봅니다. 자동 재생·이전/다음·건너뛰기를 고를 수 있습니다.</p><button type="button" class="btn gold big" data-wtoon="' + E2(info.wid || '') + '">무빙툰으로 감상하기</button></div></div>';
+  }
+  function fromDom(article, meta) { return article ? fromHtml(article.innerHTML, meta) : null; }
+
   function imageOf(model, assets) {
     if (!model || !model.slot) return '';
     var base = model.slot.replace(/^(past:[^:]+:[^:]+):[FM]$/, '$1');
@@ -49,19 +83,21 @@
   /** 전체 화면 감상 창. opts: { reduce, saveData, rate, onDone(), onClose() } */
   function open(model, assets, videos, opts) {
     opts = opts || {}; var doc = root.document; if (!doc || !model) return null;
-    var img = imageOf(model, assets), vid = !opts.saveData && !opts.reduce ? videoOf(model, assets, videos) : '';
+    var img = imageOf(model, assets) || ((model.frames.filter(function (f) { return f.img; })[0] || {}).img) || '', vid = !opts.saveData && !opts.reduce ? videoOf(model, assets, videos) : '';
     var dlg = doc.createElement('dialog'); dlg.className = 'sm'; dlg.setAttribute('aria-label', '윤회의 문 · ' + model.title);
     dlg.innerHTML = '<div class="sm-bg' + (img ? '' : ' none') + '"' + (img ? ' style="background-image:url(' + E(img) + ')"' : '') + '>' + (vid ? '<video src="' + E(vid) + '" poster="' + E(img) + '" muted loop playsinline autoplay preload="metadata"></video>' : '') + (img ? '' : '<span aria-hidden="true">前</span>') + '</div>' +
-      '<div class="sm-sh" aria-hidden="true"></div><div class="sm-top"><span class="sm-nt">' + E(model.notice) + '</span><button type="button" class="chipbtn" data-smx>닫기</button></div>' +
+      '<div class="sm-sh" aria-hidden="true"></div><div class="sm-top"><span class="sm-nt' + (model.notice ? '' : ' sm-lb') + '">' + E(model.notice || model.label || '') + '</span><button type="button" class="chipbtn" data-smx>닫기</button></div>' +
       '<div class="sm-tx" role="region" aria-live="polite"></div><div class="sm-bar"><button type="button" class="chipbtn" data-smp aria-label="이전 컷">‹</button><div class="sm-dots" role="progressbar" aria-valuemin="1" aria-valuemax="' + model.frames.length + '"></div>' +
       '<button type="button" class="chipbtn" data-sma aria-pressed="false">자동 ▶</button><button type="button" class="chipbtn" data-smn aria-label="다음 컷">›</button></div>';
     doc.body.appendChild(dlg);
-    var i = 0, auto = !opts.reduce, timer = 0, tx = dlg.querySelector('.sm-tx'), bg = dlg.querySelector('.sm-bg'), dots = dlg.querySelector('.sm-dots'), btnA = dlg.querySelector('[data-sma]'), dead = false;
+    var cur = '', shown = img, i = 0, auto = !opts.reduce, timer = 0, tx = dlg.querySelector('.sm-tx'), bg = dlg.querySelector('.sm-bg'), dots = dlg.querySelector('.sm-dots'), btnA = dlg.querySelector('[data-sma]'), dead = false;
     function clear() { clearTimeout(timer); timer = 0; }
     function schedule() { clear(); if (!auto || dead) return; timer = setTimeout(function () { next(true); }, dwell(model.frames[i], opts.rate)); }
     function show() {
       tx.classList.remove('in'); tx.innerHTML = frameHtml(model, i); void tx.offsetWidth; tx.classList.add('in');
-      bg.className = 'sm-bg' + (img ? '' : ' none') + (opts.reduce ? '' : ' mv-' + MOVES[i % MOVES.length]);
+      var fi = model.frames[i].img || cur || img; if (model.frames[i].img) cur = model.frames[i].img;
+      if (fi && fi !== shown) { bg.style.backgroundImage = 'url(' + fi + ')'; shown = fi; }
+      bg.className = 'sm-bg' + (fi ? '' : ' none') + (opts.reduce ? '' : ' mv-' + MOVES[i % MOVES.length]);
       dots.setAttribute('aria-valuenow', String(i + 1)); dots.innerHTML = model.frames.map(function (_, k) { return '<i class="' + (k === i ? 'on' : k < i ? 'dn' : '') + '"></i>'; }).join('');
       btnA.setAttribute('aria-pressed', String(auto)); btnA.textContent = auto ? '자동 ❚❚' : '자동 ▶'; schedule();
     }
@@ -86,5 +122,5 @@
       '<p class="cs-sum">' + model.frames.length + '개의 컷 · 컷마다 이어서 읽기, 자동 재생, 건너뛰기를 고를 수 있습니다.</p><button type="button" class="btn gold big" data-smopen>무빙툰으로 감상하기</button></div></div>';
   }
 
-  R.Samsara = { extract: extract, open: open, card: card, imageOf: imageOf, videoOf: videoOf, dwell: dwell, NOTICE: NOTICE };
+  R.Samsara = { fromChapters: fromChapters, toonCard: toonCard, fromHtml: fromHtml, fromDom: fromDom, extract: extract, open: open, card: card, imageOf: imageOf, videoOf: videoOf, dwell: dwell, NOTICE: NOTICE };
 })(typeof window !== 'undefined' ? window : globalThis);

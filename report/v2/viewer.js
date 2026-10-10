@@ -14,7 +14,7 @@
   var PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
   var MAPQ = !PREVIEW && /[?&]map=[^&]+/.test(location.search); // ?map=생년월일,시각,성별 — 프롤로그를 건너뛰고 곧바로 세계 지도(확인용)
   var HUB = !PREVIEW && /[?&]from=hub(&|$)/.test(location.search); // /report/hub/ 에서 넘어온 경우: 일간·일주 영상·프롤로그는 허브가 이미 보여 줬으므로 건너뛰고 바로 인생 지도로 간다
-  var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
+  var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] }; R.__state = S; // 확인용(콘솔에서 ReportV2.__state 로 현재 상태를 볼 수 있다)
   var view = function (v) { var ws0 = document.getElementById('wstrip'); if (ws0 && v !== 'reader' && v !== 'home') { ws0.hidden = true; document.documentElement.style.removeProperty('--bar-h'); } if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
   function toast(msg, ms) { var t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, ms || 3200); }
   var sg = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, ss = function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { } };
@@ -289,6 +289,22 @@
     document.documentElement.style.setProperty('--bar-h', vw === 'reader' ? '110px' : '62px');
     var on = n.querySelector('.on'); if (on) n.scrollLeft = Math.max(0, on.offsetLeft - 90);
   }
+  /* 세계 무빙툰: 세계의 챕터들이 화면에 그려진 내용에서 앞부분 핵심 컷을 뽑아 한 편으로 감상한다(문장은 원문 그대로). */
+  function worldToonModel(w) {
+    var idxs = (S.wmap && S.wmap.by[w.id]) || [], list = idxs.map(function (i) { var c = S.rep.chapters[i], a = document.getElementById('ch-' + c.id); return a ? { id: c.id, title: c.title, html: a.innerHTML } : null; }).filter(Boolean);
+    return R.Samsara.fromChapters(list, { id: 'world:' + w.id, title: w.name, label: (w.icon || '') + ' ' + w.name, bg: w.bgImage || '', per: 3, max: 36 });
+  }
+  function worldToonCard(w) {
+    if (!R.Samsara || !R.Samsara.fromChapters) return '';
+    try { var m = worldToonModel(w); if (!m) return ''; var th = (m.frames.filter(function (f) { return f.img; })[0] || {}).img || w.bgImage || '';
+      return R.Samsara.toonCard({ wid: w.id, name: w.name, icon: w.icon, thumb: th, frames: m.frames.length }); } catch (e) { return ''; }
+  }
+  $('#v-home').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-wtoon]'); if (!b) return; var wid = b.dataset.wtoon, w = ((S.wmap && S.wmap.list) || []).filter(function (x) { return x.id === wid; })[0]; if (!w) return;
+    var model = null; try { model = worldToonModel(w); } catch (err) { model = null; } if (!model) { toast('이 세계는 컷으로 나눌 글이 적어 글로 읽어 주세요.'); return; }
+    T('world_toon_open', { world: wid, frames: model.frames.length });
+    R.Samsara.open(model, S.assets || {}, S.assetVideos || {}, { reduce: reduce, saveData: saveData, rate: playbackRate(), onDone: function () { S.xp.seen['toon:' + wid] = 1; xpSave(); T('world_toon_done', { world: wid }); showHome(wid); } });
+  });
   function enterWorld(wid) {
     var idxs = (S.wmap && S.wmap.by[wid]) || []; if (!idxs.length) { showHome(wid); return; }
     var pick = idxs.filter(function (i) { return !S.ended[S.rep.chapters[i].id]; })[0]; if (pick == null) pick = idxs[0]; enterFromHome(pick);
@@ -310,6 +326,7 @@
     if (worldId) cur = worlds.filter(function (g) { return g.world.id === worldId; })[0] || null;
     S.xpWorld = cur ? cur.world.id : null;
     var widget = cur && cur.world.id === 'w4' ? worldTimelineHtml() : cur && cur.world.id === 'w1' ? worldLibraryHtml() : cur && cur.world.id === 'w2' ? worldCastleHtml() : cur && cur.world.id === 'w3' ? worldGardenHtml() : cur && cur.world.id === 'w6' ? worldSanctuaryHtml() : cur && cur.world.id === 'w5' ? worldSamsaraHtml() : '';
+    if (cur && cur.world.id !== 'w5') widget = worldToonCard(cur.world) + widget;
     var m = { mode: cur ? 'world' : 'map', widget: widget, name: S.name, progress: R.Explore.progress(rep.chapters, S.ended), resume: R.Explore.resumeIndex(rep.chapters, { ended: S.ended, last: S.cur ? S.idx : st.last }), auto: st.auto, rate: playbackRate(),
       worlds: worlds, current: cur, ended: S.ended, last: S.cur ? S.idx : st.last };
     $('#v-home').innerHTML = R.Explore.html(m, esc); view('home'); S.view = 'home'; renderStrip(); T('explore_home_viewed', { done: m.progress.done, world: S.xpWorld || '' });

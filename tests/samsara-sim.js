@@ -44,6 +44,21 @@ const slots = new Set(), titles = new Set();
 ok(slots.size >= 4, '서로 다른 사주는 서로 다른 전생 에셋 슬롯: ' + slots.size);
 ok(titles.size >= 4, '서로 다른 전생 이야기: ' + titles.size);
 ok(S.extract({ chapters: [] }) === null && S.card(null, {}, null).indexOf('만들지 못했습니다') > 0, '전생 챕터가 없을 때 안전하게 처리');
+// 일반 챕터·세계 무빙툰(렌더된 HTML 에서 컷 추출)
+{
+  const html = '<section class="scene rd-sec"><div class="cap">일간 · 庚金</div><p class="lead">나의 중심은 경금입니다. 단단하고 결단이 빠릅니다. 쉽게 흔들리지 않습니다.</p><img src="/a.webp"><button>누르세요</button></section>' +
+    '<section class="scene rd-sec"><div class="cap">장단점</div><ul><li>맺고 끊음이 분명해 일을 빨리 정리합니다.</li><li>날이 서면 주변이 다칩니다.</li></ul></section>' +
+    '<section class="scene rd-sec"><div class="cap">그래프</div><svg><text>가나다라마바사</text></svg></section>';
+  const m = S.fromHtml(html, { id: 'x', title: '테스트' });
+  ok(m && m.frames.length >= 3 && m.frames.every(f => f.paras.length === 1 && f.paras[0].length >= 8), '일반 챕터 컷 추출: ' + (m && m.frames.length));
+  ok(m.frames[0].img === '/a.webp' && m.frames[m.frames.length - 1].img === '/a.webp', '이미지 이어 쓰기');
+  ok(!m.frames.some(f => /누르세요|가나다라마바사/.test(f.paras[0] + f.cap)), '버튼·그래프 텍스트 제외');
+  ok(m.frames.every(f => f.paras[0].split(/(?<=[.!?])s+/).length <= 2), '컷당 두 문장 이하');
+  ok(S.fromHtml('<section><p class="lead">짧</p></section>', {}) === null, '컷이 부족하면 null');
+  const w = S.fromChapters([{ id: 'a', title: '챕터A', html }, { id: 'b', title: '챕터B', html }], { id: 'world:w1', title: '세계', bg: '/bg.webp', per: 2, max: 3 });
+  ok(w && w.frames.length === 3 && /^챕터A/.test(w.frames[0].cap) && w.frames.every(f => f.img), '세계 무빙툰: 챕터별 앞 컷·상한·이미지');
+  ok(/data-wtoon="w1"/.test(S.toonCard({ wid: 'w1', name: '세계', frames: 3 })), '세계 카드 버튼');
+}
 console.log('윤회의 문 검증 완료');
 if (fails.length) { console.log('실패 ' + fails.length + '건\n' + fails.slice(0, 20).map(f => ' ✗ ' + f).join('\n')); process.exit(1); }
 console.log('모두 통과');
