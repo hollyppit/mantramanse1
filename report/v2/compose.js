@@ -190,7 +190,19 @@
   function library(saved) {
     saved = saved || {};
     var mix = function (base, extra) { var m = {}, out = []; (base || []).forEach(function (x) { m[x.id] = x; }); (extra || []).forEach(function (x) { if (x && x.id) m[x.id] = Object.assign({}, m[x.id] || {}, x); }); Object.keys(m).forEach(function (k) { out.push(m[k]); }); return out; };
-    return { modules: mix(R.Content.modules, saved.modules), remedies: mix(R.Remedy.LIBRARY, (saved.remedies || []).map(R.Remedy.normalize)), media: saved.media || saved.images || [], version: (saved.version ? saved.version + '+' : '') + R.Content.version };
+    var all = mix(R.Content.modules, saved.modules), policy = R.Rules.POLICIES.indexOf(saved.evidencePolicy) >= 0 ? saved.evidencePolicy : 'off';
+    var why = {}, hidden = [], restored = [];
+    all.forEach(function (m) { var r = R.Rules.gate(m, policy); if (r) why[m.id] = r; });
+    // 폴백 보장: 정책 때문에 조건 없는 모듈이 하나도 안 남는 카테고리는, 정책으로 막힌 조건 없는 모듈(draft·retired 제외)을 다시 허용한다.
+    var cats = {}; all.forEach(function (m) { (cats[m.category] = cats[m.category] || []).push(m); });
+    var bare = function (m) { return m.enabled !== false && !Object.keys(m.conditions || {}).length; };
+    Object.keys(cats).forEach(function (c) {
+      var list = cats[c], blocked = list.filter(function (m) { return why[m.id]; });
+      if (!blocked.length || list.some(function (m) { return bare(m) && !why[m.id]; })) return;
+      blocked.forEach(function (m) { if (bare(m) && why[m.id] !== 'draft' && why[m.id] !== 'retired') { delete why[m.id]; restored.push(m.id); } });
+    });
+    var mods = all.filter(function (m) { if (!why[m.id]) return true; hidden.push({ id: m.id, category: m.category, reason: why[m.id] }); return false; });
+    return { modules: mods, policy: policy, hidden: hidden, restored: restored, remedies: mix(R.Remedy.LIBRARY, (saved.remedies || []).map(R.Remedy.normalize)), media: saved.media || saved.images || [], version: (saved.version ? saved.version + '+' : '') + R.Content.version };
   }
 
   // AI 미디어 선택: 서버가 만든 후보(assetId·점수·태그)만 AI 에 주고, 응답 assetId 가 그 scene 의 후보 목록에 있을 때만 교체한다.
@@ -222,7 +234,7 @@
   // 서버 저장본 한 번에 적용: content = /api/report-content 의 content, media = /api/media 의 media
   function fromSaved(content, media, projectId) {
     content = content || {}; if (content.scoring) R.Scenes.configure(content.scoring);
-    return { lib: library({ modules: content.modules, remedies: content.remedies, media: media, version: content.version }), cfg: R.Chapters.forProject(content, projectId || 'full'), scoring: content.scoring || {}, introEpic: content.introEpic || null, cinemaDefaults: content.cinemaDefaults || {}, bgm: content.bgm || {}, textStyles: content.textStyles || { all: {}, chapters: {} }, sceneCopy: content.sceneCopy || {}, flow: R.Moving ? R.Moving.clean(content.flow) : null };
+    return { lib: library({ modules: content.modules, remedies: content.remedies, media: media, version: content.version, evidencePolicy: content.evidencePolicy }), cfg: R.Chapters.forProject(content, projectId || 'full'), scoring: content.scoring || {}, introEpic: content.introEpic || null, cinemaDefaults: content.cinemaDefaults || {}, bgm: content.bgm || {}, textStyles: content.textStyles || { all: {}, chapters: {} }, sceneCopy: content.sceneCopy || {}, flow: R.Moving ? R.Moving.clean(content.flow) : null };
   }
 
   // 서버(/api/compose) 응답 한 번에 적용. 어떤 부분이 이상해도 원본이 유지된다.
