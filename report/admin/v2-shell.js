@@ -667,6 +667,6 @@
 
 (window.AdminDirty = window.AdminDirty || {})['챕터·프로젝트'] = function () { return CH.dirty || PJ.dirty; }; (window.AdminDirty = window.AdminDirty || {})['글자 설정'] = function () { return TX.dirty; }; window.V2Shell = { open: function (tab, pw, also) {
     PW = pw; C.setPw(pw);
-    if (tab === 'v2clip') clipOpen(); else if (tab === 'v2chap') chapOpen(); else if (tab === 'v2test') testOpen(); else if (tab === 'v2proj') projOpen(); else if (tab === 'v2set') setOpen(also); else if (tab === 'v2story') window.V2Story && window.V2Story.open(); else if (tab === 'v2world') window.V2World && window.V2World.open(); else if (tab === 'v2intro') V2Intro.mount(document.getElementById('t-v2intro'), pw, {});
+    if (tab === 'v2clip') clipOpen(); else if (tab === 'v2chap') chapOpen(); else if (tab === 'v2test') testOpen(); else if (tab === 'v2proj') projOpen(); else if (tab === 'v2set') setOpen(also); else if (tab === 'v2story') window.V2Story && window.V2Story.open(); else if (tab === 'v2world') window.V2World && window.V2World.open(); else if (tab === 'v2quality') window.V2Quality && window.V2Quality.open(); else if (tab === 'v2intro') V2Intro.mount(document.getElementById('t-v2intro'), pw, {});
   } };
 })();
