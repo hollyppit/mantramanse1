@@ -194,6 +194,29 @@ console.log('조립 기준선: 사주 120 × 프로젝트 ' + PROJECTS.length + 
   ok(R.Content.modules.every(m => !(m.rule && m.rule.except)), '시드 모듈에는 except 없음');
 }
 
+/* ── 2-f. 출처 ↔ 풀이 자료 연결(parseRefs·formatRefs·refFromSource·refCheck) ───────── */
+{
+  const Q = R.Quality;
+  const text = 'dabc123 | classic | 적천수 | 3편 | c12\ninternal_note | internal | 내부 메모 |\n\n | classic | 아이디 없음\nd9z9z9 | 엉뚱한종류 | 제목 | 위치 | 잘못된 구간!';
+  const r = Q.parseRefs(text);
+  ok(r.length === 3 && r[0].id === 'dabc123' && r[0].kind === 'classic' && r[0].chunkId === 'c12' && r[0].locator === '3편', '출처 줄 해석');
+  ok(r[1].id === 'internal_note' && !('chunkId' in r[1]) && r[2].kind === 'internal' && !('chunkId' in r[2]), '빈 id 줄 무시·알 수 없는 종류는 internal·잘못된 구간 id 는 버림');
+  ok(Q.parseRefs(Array.from({ length: 9 }, (_, i) => 'x' + i).join('\n')).length === 5, '출처는 최대 5개');
+  const back = Q.parseRefs(Q.formatRefs(r)); ok(JSON.stringify(back) === JSON.stringify(r), '줄 변환 왕복 동일');
+  const rf = Q.refFromSource({ id: 'dabc123', title: '적천수', sourceKind: 'book' }, { docId: 'dabc123', chunkId: 'c7', label: '12~13쪽' });
+  ok(rf.id === 'dabc123' && rf.kind === 'classic' && rf.chunkId === 'c7' && rf.locator === '12~13쪽', '자료+구간 → 출처');
+  ok(Q.refFromSource({ id: 'dx1', title: '메모', sourceKind: 'internal' }, null).kind === 'internal', '자료 종류 → 출처 종류(내부)');
+  ok(Q.refFromSource({ id: 'dx2', title: '논문', sourceKind: 'research' }).kind === 'modern', '연구 → modern');
+  const docs = [{ id: 'dgood1', grade: 'A' }, { id: 'dlow01', grade: 'C' }, { id: 'dnoref', grade: 'A', policy: { reference: false } }];
+  const mk = (id, status, refs) => ({ id, status, evidence: { basis: 'tradition', refs } });
+  const rc = Q.refCheck([mk('m1', 'approved', [{ id: 'dgood1' }, { id: 'dlow01' }]), mk('m2', 'legacy', [{ id: 'dnoref' }, { id: 'dmiss1' }, { id: 'free_text' }]), { id: 'm3' }], docs);
+  ok(rc.linked === 3 && rc.free === 1 && rc.dangling.length === 1 && rc.dangling[0].doc === 'dmiss1', '자료 대조: 연결·자유 입력·없는 자료');
+  ok(rc.lowGrade.length === 1 && rc.lowGrade[0].id === 'm1' && rc.lowGrade[0].doc === 'dlow01', '승인 모듈의 낮은 등급 자료');
+  ok(rc.noReference.length === 1 && rc.noReference[0].doc === 'dnoref', '참고 안 함 자료를 출처로 씀');
+  const rn = Q.refCheck([mk('m4', 'approved', [{ id: 'dmiss1' }])], null);
+  ok(rn.dangling.length === 0 && rn.free === 1, '자료 목록을 못 불러오면 없는 자료로 단정하지 않음');
+}
+
 /* ── 3. 서버 정리 규칙(functions/api/report-content.js cleanModule) ────────────────── */
 {
   const src = fs.readFileSync(path.join(root, 'functions/api/report-content.js'), 'utf8').split(/export async function onRequestGet/)[0]
@@ -229,6 +252,8 @@ console.log('조립 기준선: 사주 120 × 프로젝트 ' + PROJECTS.length + 
     ok(!('status' in bad) && !('layer' in bad) && !('evidence' in bad) && !('narrative' in bad) && !('rule' in bad), '범위 밖 값은 버림');
     const evh = cm(Object.assign({}, plain, { evidence: { basis: 'editorial', refs: [], textHash: 'a1b2c3d4' } })), evb = cm(Object.assign({}, plain, { evidence: { basis: 'editorial', refs: [], textHash: 'XYZ' } }));
     ok(evh.evidence.textHash === 'a1b2c3d4' && !('textHash' in evb.evidence), 'evidence.textHash 는 8자리 16진수만 보존');
+    const refKeep = cm(Object.assign({}, plain, { evidence: { basis: 'tradition', refs: [{ id: 'dabc123', kind: 'classic', title: 't', locator: '12쪽', chunkId: 'c12' }, { id: 'dxyz789', chunkId: '잘못 된!' }] } }));
+    ok(refKeep.evidence.refs[0].chunkId === 'c12' && !('chunkId' in refKeep.evidence.refs[1]), 'refs[].chunkId 는 구간 id 형식만 보존');
     ok(clean.EVIDENCE_POLICIES.join() === Rules.POLICIES.join(), '서버 정책 목록 = 규칙 엔진 정책 목록');
     ok(clean.cleanPolicy('strict') === 'strict' && clean.cleanPolicy('x') === null && clean.cleanPolicy(undefined) === null, '서버 정책 값 검증');
     ok(cm(null) === null && cm({ id: 'bad id', category: 'career' }) === null, '잘못된 모듈은 null');

@@ -15,7 +15,7 @@
 
   // 풀이 DB 근거 상태(저장된 모듈 + 시드 기준). 정책이 off 면 노출은 그대로이고 이 표시만 나온다.
   function evidenceSection(e) {
-    var s = e.status, flagged = e.mismatch.length + e.unknownCond.length + e.staleText.length + e.ruleConflict.length;
+    var s = e.status, rc = e.refs, flagged = e.mismatch.length + e.unknownCond.length + e.staleText.length + e.ruleConflict.length + (rc ? rc.dangling.length + rc.lowGrade.length + rc.noReference.length : 0);
     var cats = e.categories.slice(0, 12).map(function (c) { return '<tr><td>' + esc(c.category) + '</td><td>' + c.total + '</td><td>' + c.approved + '</td><td>' + c.legacy + '</td><td>' + c.other + '</td><td>' + c.ratio + '%</td></tr>'; }).join('');
     return section('풀이 DB 근거 상태 · 정책 ' + esc(e.policy), flagged,
       '<p style="margin:0 0 8px;font-size:.84rem">모듈 ' + e.total + '개 — 승인 ' + s.approved + ' · 미검증(legacy) ' + s.legacy + ' · 근거 부족 ' + s.needs_evidence + ' · 초안 ' + s.draft + ' · 폐기 ' + s.retired + '<br>근거 종류: 계산 ' + e.basis.engine + ' · 전통 문헌 ' + e.basis.tradition + ' · 편집 원칙 ' + e.basis.editorial + ' · 미검증 ' + e.basis.legacy + (e.basis.none ? ' · 없음 ' + e.basis.none : '') +
@@ -23,6 +23,10 @@
       '<table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:8px"><thead><tr><th style="text-align:left">카테고리(승인 비율 낮은 순 12)</th><th style="text-align:left">전체</th><th style="text-align:left">승인</th><th style="text-align:left">legacy</th><th style="text-align:left">기타</th><th style="text-align:left">승인율</th></tr></thead><tbody>' + cats + '</tbody></table>' +
       list(e.mismatch, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — ' + esc(x.reason); }) +
       list(e.unknownCond, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 알 수 없는 조건 키: ' + esc(x.keys.join(', ')); }) +
+      (rc ? '<p class="muted" style="font-size:.8rem;margin:6px 0">출처 연결: 풀이 자료 ' + e.refDocs + '건 · 자료와 연결된 출처 ' + rc.linked + ' · 자유 입력 출처 ' + rc.free + '</p>' +
+        list(rc.dangling, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 풀이 자료에 없는 출처 id: ' + esc(x.doc); }) +
+        list(rc.lowGrade, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 승인 모듈의 출처 자료 등급이 낮음(' + esc(x.grade) + '): ' + esc(x.doc); }) +
+        list(rc.noReference, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — "참고 안 함" 정책인 자료를 출처로 씀: ' + esc(x.doc); }) : '<p class="muted" style="font-size:.8rem;margin:6px 0">출처 연결: 풀이 자료 목록을 불러오지 못해 확인 못함</p>') +
       list(e.ruleConflict, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 선택 조건이 제외 조건에 모두 들어 있어 선택되지 않습니다: ' + esc(x.keys.join(', ')); }) +
       list(e.staleText.map(function (id) { return { id: id }; }), function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 승인 당시와 문장이 달라졌습니다(근거 재확인 필요)'; }), '문제 없음');
   }
@@ -84,11 +88,13 @@
       C.api('/api/asset-art').then(function (r) { return r.slots || []; }).catch(function (e) { st.assetErr = e.message; return null; }),
       C.api('/api/worlds').then(function (r) { return r.worlds || []; }).catch(function () { return []; }),
       C.load().then(function () { return C.ST.saved || {}; }).catch(function () { return {}; }),
+      C.api('/api/src?a=list').then(function (r) { return r.docs || []; }).catch(function () { return null; }),
     ]).then(function (got) {
       try {
         var ch = M.compute({ year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: TS.gender, city: '서울' });
         var sd = R.SajuData.build(ch, { now: now }), cfg = R.Chapters.forProject(null, 'full'), saved = got[2] || {}, lib = R.Compose.library({ modules: saved.modules, remedies: saved.remedies, evidencePolicy: saved.evidencePolicy }), rep = R.Compose.build(sd, lib, cfg, { name: '테스트' });
         st.evidence = Q.evidence(lib.all, { policy: lib.policy, hidden: lib.hidden.length, restored: lib.restored.length });
+        st.evidence.refs = got[3] ? Q.refCheck(lib.all, got[3]) : null; st.evidence.refDocs = got[3] ? got[3].length : null;
         var doc = R.LifeDoc.build({ M: M, ch: ch, sd: sd, now: now, name: '테스트', interest: TS.interest, rep: rep, soc: R.StoryDirector.social(M, ch, sd, now), plan: (rep.chapters.find(function (c) { return c.plan; }) || {}).plan });
         var worlds = R.Explore ? R.Explore.mergeWorlds(got[1]) : null;
         st.audit = Q.audit({ doc: doc, worlds: worlds, slots: got[0] });

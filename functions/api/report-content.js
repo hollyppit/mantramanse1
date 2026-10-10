@@ -38,7 +38,7 @@ const EV_BASIS = ['engine', 'tradition', 'editorial', 'legacy'], EV_KIND = ['cla
 const LAYER_RE = /^[A-Za-z]{1,20}$/, DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 function cleanEvidence(e) {
   if (!e || typeof e !== 'object' || !EV_BASIS.includes(e.basis)) return null;
-  const refs = (Array.isArray(e.refs) ? e.refs : []).slice(0, 5).filter(r => r && ID_RE.test(r.id || '')).map(r => ({ id: r.id, kind: EV_KIND.includes(r.kind) ? r.kind : 'internal', title: str(r.title, 120), locator: str(r.locator, 120), note: str(r.note, 200) }));
+  const refs = (Array.isArray(e.refs) ? e.refs : []).slice(0, 5).filter(r => r && ID_RE.test(r.id || '')).map(r => ({ id: r.id, kind: EV_KIND.includes(r.kind) ? r.kind : 'internal', title: str(r.title, 120), locator: str(r.locator, 120), note: str(r.note, 200), ...(/^[\w.-]{1,40}$/.test(r.chunkId || '') ? { chunkId: r.chunkId } : {}) })); // chunkId: 풀이 자료(src:*) 구간 id
   const o = { basis: e.basis, refs };
   if (typeof e.checkedBy === 'string' && e.checkedBy) o.checkedBy = str(e.checkedBy, 40);
   if (DATE_RE.test(e.checkedAt || '')) o.checkedAt = e.checkedAt;

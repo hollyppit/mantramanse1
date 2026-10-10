@@ -97,5 +97,38 @@
     return { errors: errors, notes: notes };
   }
 
-  R.Quality = { STATUSES: STATUSES, evidence: evidence, reviewEdit: reviewEdit, textHash: textHash, MIN_LEN: MIN_LEN, textOf: textOf, chapterTexts: chapterTexts, missing: missing, absolute: absolute, assets: assets, worlds: worlds, audit: audit };
+  /* ── 출처(refs) 입력 줄 ↔ 객체: "id | 종류 | 제목 | 위치 | 구간id" (구간id 는 풀이 자료의 청크, 선택) ── */
+  var REF_KINDS = ['classic', 'modern', 'internal'], KIND_OF_SOURCE = { book: 'classic', expert: 'modern', research: 'modern', internal: 'internal' };
+  function parseRefs(text) {
+    return String(text || '').split('\n').map(function (l) {
+      var p = l.split('|').map(function (s) { return s.trim(); }); if (!p[0]) return null;
+      var r = { id: p[0], kind: REF_KINDS.indexOf(p[1]) >= 0 ? p[1] : 'internal', title: p[2] || '', locator: p[3] || '' };
+      if (/^[\w.-]{1,40}$/.test(p[4] || '')) r.chunkId = p[4]; return r;
+    }).filter(Boolean).slice(0, 5);
+  }
+  function formatRefs(refs) { return (refs || []).map(function (r) { return [r.id, r.kind, r.title || '', r.locator || '', r.chunkId || ''].join(' | ').replace(/( \| )+$/, ''); }).join('\n'); }
+  // 풀이 자료 한 건(+선택 청크) → 출처 객체. 자료의 종류(서적·전문가·내부·연구)로 refs 종류를 정한다.
+  function refFromSource(doc, hit) {
+    return { id: doc.id || hit.docId, kind: KIND_OF_SOURCE[doc.sourceKind] || 'internal', title: String(doc.title || hit.docTitle || '').slice(0, 120), locator: String((hit && hit.label) || '').slice(0, 120), chunkId: hit && hit.chunkId ? hit.chunkId : undefined };
+  }
+  // 모듈 출처가 실제 풀이 자료를 가리키는지 점검. docs = /api/src?a=list 의 docs. 자료 id 가 아닌 출처(손으로 쓴 id)는 dangling 이 아니라 "자유 입력"으로 센다.
+  function refCheck(mods, docs) {
+    var by = {}; (docs || []).forEach(function (d) { by[d.id] = d; });
+    var out = { linked: 0, free: 0, dangling: [], lowGrade: [], noReference: [] };
+    mods.forEach(function (m) {
+      var ev = m.evidence; if (!ev || !ev.refs || !ev.refs.length) return;
+      ev.refs.forEach(function (r) {
+        var looksDoc = /^d[a-z0-9]{3,24}$/.test(r.id), d = by[r.id];
+        if (d) {
+          out.linked++;
+          if (m.status === 'approved' && (d.grade === 'C' || d.grade === '미평가' || !d.grade)) out.lowGrade.push({ id: m.id, doc: r.id, grade: d.grade || '미평가' });
+          if (d.policy && d.policy.reference === false) out.noReference.push({ id: m.id, doc: r.id });
+        } else if (looksDoc && docs) out.dangling.push({ id: m.id, doc: r.id });
+        else out.free++;
+      });
+    });
+    return out;
+  }
+
+  R.Quality = { parseRefs: parseRefs, formatRefs: formatRefs, refFromSource: refFromSource, refCheck: refCheck, STATUSES: STATUSES, evidence: evidence, reviewEdit: reviewEdit, textHash: textHash, MIN_LEN: MIN_LEN, textOf: textOf, chapterTexts: chapterTexts, missing: missing, absolute: absolute, assets: assets, worlds: worlds, audit: audit };
 })(typeof window !== 'undefined' ? window : globalThis);
