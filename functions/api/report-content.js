@@ -60,7 +60,11 @@ function cleanModule(m) {
   if (MOD_STATUS.includes(m.status)) o.status = m.status;
   const ev = cleanEvidence(m.evidence); if (ev) o.evidence = ev;
   const nr = cleanNarrative(m.narrative); if (nr) o.narrative = nr;
-  if (m.rule && typeof m.rule === 'object' && typeof m.rule.note === 'string' && m.rule.note) o.rule = { note: str(m.rule.note, 300) }; // 1단계: 메모만. when·except 는 받지 않는다(조건은 conditions 가 유일한 원천)
+  if (m.rule && typeof m.rule === 'object') { // when 은 받지 않는다(선택 조건은 conditions 가 유일한 원천). except 는 같은 조건 키·값 규칙으로 정리한다
+    const r = {}; if (typeof m.rule.note === 'string' && m.rule.note) r.note = str(m.rule.note, 300);
+    const ex = cleanCond(m.rule.except); if (Object.keys(ex).length) r.except = ex;
+    if (Object.keys(r).length) o.rule = r;
+  }
   return o;
 }
 function cleanModuleBase(m) {

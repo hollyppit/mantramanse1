@@ -50,6 +50,14 @@
       rows.push({ key: k, label: (FIELDS[k] || [k])[0], want: want, have: have == null ? null : have, hit: hit, weight: w });
       if (hit) spec += w; else ok = false;
     });
+    // 제외 조건(rule.except): 같은 모양 { 키: [값…] }. 하나라도 걸리면 이 모듈은 선택되지 않는다. 없으면 기존과 같다(구체성 점수에도 영향 없음).
+    var ex = mod.rule && mod.rule.except;
+    if (ex && typeof ex === 'object') Object.keys(ex).forEach(function (k) {
+      var no = ex[k]; if (!no || !no.length) return;
+      var have = facts[k]; if (have == null) return;
+      var hit = Array.isArray(have) ? have.some(function (v) { return no.indexOf(v) >= 0; }) : no.indexOf(have) >= 0;
+      if (hit) { ok = false; rows.push({ key: k, label: (FIELDS[k] || [k])[0] + ' (제외 조건)', want: no, have: have, hit: false, weight: 0, except: true }); }
+    });
     return { match: ok, specificity: ok ? spec : 0, rows: rows };
   }
 

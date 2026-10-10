@@ -62,7 +62,7 @@
   function textHash(m) { return R.Rules.hash([m.headline || '', m.summary || '', m.detail || '']); }
   function evidence(mods, o) {
     o = o || {}; var Ru = R.Rules, known = {}; Object.keys(Ru.FIELDS).forEach(function (k) { known[k] = 1; });
-    var out = { total: mods.length, status: {}, basis: { none: 0 }, categories: [], mismatch: [], unknownCond: [], staleText: [], policy: o.policy || 'off', hidden: o.hidden || 0, restored: o.restored || 0, wouldHide: { hide_unverified: 0, strict: 0 } };
+    var out = { total: mods.length, status: {}, basis: { none: 0 }, categories: [], mismatch: [], unknownCond: [], staleText: [], ruleConflict: [], policy: o.policy || 'off', hidden: o.hidden || 0, restored: o.restored || 0, wouldHide: { hide_unverified: 0, strict: 0 } };
     STATUSES.forEach(function (s) { out.status[s] = 0; }); BASES.forEach(function (b) { out.basis[b] = 0; });
     var cats = {};
     mods.forEach(function (m) {
@@ -75,6 +75,8 @@
       if (st === 'approved' && (!ev || ev.basis === 'legacy' || (ev.basis === 'tradition' && !(ev.refs || []).length))) out.mismatch.push({ id: m.id, reason: '승인 상태인데 근거가 비어 있습니다' });
       var bad = Object.keys(m.conditions || {}).filter(function (k) { return !known[k]; }); if (bad.length) out.unknownCond.push({ id: m.id, keys: bad });
       if (ev && ev.textHash && ev.textHash !== textHash(m)) out.staleText.push(m.id);
+      var ex = m.rule && m.rule.except, c = m.conditions || {}; // 선택 조건 값이 전부 제외 조건에 들어 있으면 이 모듈은 어떤 사주에서도 선택되지 않는다
+      if (ex) { var dead = Object.keys(ex).filter(function (k) { return c[k] && c[k].length && c[k].every(function (v) { return (ex[k] || []).indexOf(v) >= 0; }); }); if (dead.length) out.ruleConflict.push({ id: m.id, keys: dead }); }
     });
     out.categories = Object.keys(cats).map(function (k) { var c = cats[k]; c.ratio = c.total ? Math.round(c.approved / c.total * 100) : 0; return c; }).sort(function (a, b) { return a.ratio - b.ratio || (a.category < b.category ? -1 : 1); });
     return out;

@@ -15,7 +15,7 @@
 
   // 풀이 DB 근거 상태(저장된 모듈 + 시드 기준). 정책이 off 면 노출은 그대로이고 이 표시만 나온다.
   function evidenceSection(e) {
-    var s = e.status, flagged = e.mismatch.length + e.unknownCond.length + e.staleText.length;
+    var s = e.status, flagged = e.mismatch.length + e.unknownCond.length + e.staleText.length + e.ruleConflict.length;
     var cats = e.categories.slice(0, 12).map(function (c) { return '<tr><td>' + esc(c.category) + '</td><td>' + c.total + '</td><td>' + c.approved + '</td><td>' + c.legacy + '</td><td>' + c.other + '</td><td>' + c.ratio + '%</td></tr>'; }).join('');
     return section('풀이 DB 근거 상태 · 정책 ' + esc(e.policy), flagged,
       '<p style="margin:0 0 8px;font-size:.84rem">모듈 ' + e.total + '개 — 승인 ' + s.approved + ' · 미검증(legacy) ' + s.legacy + ' · 근거 부족 ' + s.needs_evidence + ' · 초안 ' + s.draft + ' · 폐기 ' + s.retired + '<br>근거 종류: 계산 ' + e.basis.engine + ' · 전통 문헌 ' + e.basis.tradition + ' · 편집 원칙 ' + e.basis.editorial + ' · 미검증 ' + e.basis.legacy + (e.basis.none ? ' · 없음 ' + e.basis.none : '') +
@@ -23,6 +23,7 @@
       '<table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:8px"><thead><tr><th style="text-align:left">카테고리(승인 비율 낮은 순 12)</th><th style="text-align:left">전체</th><th style="text-align:left">승인</th><th style="text-align:left">legacy</th><th style="text-align:left">기타</th><th style="text-align:left">승인율</th></tr></thead><tbody>' + cats + '</tbody></table>' +
       list(e.mismatch, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — ' + esc(x.reason); }) +
       list(e.unknownCond, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 알 수 없는 조건 키: ' + esc(x.keys.join(', ')); }) +
+      list(e.ruleConflict, function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 선택 조건이 제외 조건에 모두 들어 있어 선택되지 않습니다: ' + esc(x.keys.join(', ')); }) +
       list(e.staleText.map(function (id) { return { id: id }; }), function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 승인 당시와 문장이 달라졌습니다(근거 재확인 필요)'; }), '문제 없음');
   }
 
@@ -59,7 +60,7 @@
     var L = ['# 서비스 점검 결과', '', '- 챕터 ' + a.chapters + '개 · 풀이 누락 의심 ' + a.summary.missing + ' · 단정 표현 검토 ' + a.summary.absolute + ' · 에셋 누락 ' + a.summary.assetMissing + ' · 세계 매핑 대체 ' + a.summary.worldFallback, ''];
     L.push('## 풀이 누락 의심'); a.missing.forEach(function (x) { L.push('- ' + (x.title || x.id) + ' (' + x.id + ', ' + x.len + '자)'); }); if (!a.missing.length) L.push('- 없음');
     L.push('', '## 단정 표현 검토'); a.absolute.forEach(function (x) { L.push('- ' + (x.title || x.id) + ': “' + x.snippet + '” (' + x.word + ')'); }); if (!a.absolute.length) L.push('- 없음');
-    if (st && st.evidence) { var e = st.evidence; L.push('', '## 풀이 DB 근거 상태 (정책 ' + e.policy + ')', '- 모듈 ' + e.total + ' · 승인 ' + e.status.approved + ' · legacy ' + e.status.legacy + ' · 근거 부족 ' + e.status.needs_evidence + ' · 초안 ' + e.status.draft + ' · 폐기 ' + e.status.retired, '- 숨김 ' + e.hidden + ' · hide_unverified 시 ' + e.wouldHide.hide_unverified + ' · strict 시 ' + e.wouldHide.strict); e.mismatch.forEach(function (x) { L.push('- 불일치: ' + x.id + ' — ' + x.reason); }); e.unknownCond.forEach(function (x) { L.push('- 알 수 없는 조건 키: ' + x.id + ' (' + x.keys.join(', ') + ')'); }); e.staleText.forEach(function (id) { L.push('- 승인 후 문장 변경: ' + id); }); }
+    if (st && st.evidence) { var e = st.evidence; L.push('', '## 풀이 DB 근거 상태 (정책 ' + e.policy + ')', '- 모듈 ' + e.total + ' · 승인 ' + e.status.approved + ' · legacy ' + e.status.legacy + ' · 근거 부족 ' + e.status.needs_evidence + ' · 초안 ' + e.status.draft + ' · 폐기 ' + e.status.retired, '- 숨김 ' + e.hidden + ' · hide_unverified 시 ' + e.wouldHide.hide_unverified + ' · strict 시 ' + e.wouldHide.strict); e.mismatch.forEach(function (x) { L.push('- 불일치: ' + x.id + ' — ' + x.reason); }); e.unknownCond.forEach(function (x) { L.push('- 알 수 없는 조건 키: ' + x.id + ' (' + x.keys.join(', ') + ')'); }); e.ruleConflict.forEach(function (x) { L.push('- 선택 조건과 제외 조건 충돌: ' + x.id + ' (' + x.keys.join(', ') + ')'); }); e.staleText.forEach(function (id) { L.push('- 승인 후 문장 변경: ' + id); }); }
     if (a.assets) { L.push('', '## 에셋 누락 (' + a.assets.image + '/' + a.assets.total + ')'); a.assets.missing.forEach(function (x) { L.push('- ' + x.title + ' (' + x.id + ')'); }); if (!a.assets.missing.length) L.push('- 없음'); }
     if (a.worlds) { L.push('', '## 세계 매핑'); a.worlds.list.forEach(function (w) { L.push('- ' + w.name + ': ' + w.count + '개' + (w.enabled ? '' : ' (사용 안 함)')); }); a.worlds.fallback.forEach(function (x) { L.push('- 대체 세계: ' + x.title + ' (' + x.id + ' → ' + x.world + ')'); }); }
     return L.join('\n');
