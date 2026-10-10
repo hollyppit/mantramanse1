@@ -1,6 +1,6 @@
 // 리포트 v2 콘텐츠 저장본: 해석 모듈·개운법 라이브러리·챕터 설정·미디어 점수 가중치
 // GET /api/report-content — 공개. { content: { modules, remedies, chapters, scoring, flow, version } | null }  (null 이면 코드의 기본 시드 report/v2/*.js 를 쓴다)
-// PUT /api/report-content — 관리자. { modules?, remedies?, chapters?, projects?, textStyles?, scoring?, flow?, cinemaDefaults?, sceneCopy?, introEpic? } 보낸 항목만 교체. 저장할 때마다 version 이 바뀌어 캐시 키가 갱신된다.
+// PUT /api/report-content — 관리자. { modules?, remedies?, chapters?, projects?, textStyles?, scoring?, flow?, cinemaDefaults?, sceneCopy?, introEpic?, evidencePolicy? } 보낸 항목만 교체. 저장할 때마다 version 이 바뀌어 캐시 키가 갱신된다.
 // 저장: GLOSSARY_KV 'v2:content'.  모듈/개운법은 id 기준으로 코드 기본값 위에 덮어쓰기·추가되고, enabled:false 로 기본 항목을 끌 수 있다.
 import { json, isAdmin, configError } from '../_lib.js';
 import { cleanTextStyles } from '../_textstyle.js';
@@ -30,6 +30,9 @@ function cleanExtra(e, d = 0) {
   return o;
 }
 // 풀이 DB 계층화(report/v2/CONTENT_DB_DESIGN.md §6) 선택 필드. 값이 있을 때만 출력에 넣어서, 이 필드가 없는 기존 모듈은 정리 결과가 예전과 같다.
+// 근거 정책(report/v2/rules.js POLICIES 와 같다): off 기본 · warn 점검만 · hide_unverified 근거 부족 숨김 · strict 승인본만
+const EVIDENCE_POLICIES = ['off', 'warn', 'hide_unverified', 'strict'];
+const cleanPolicy = v => (EVIDENCE_POLICIES.includes(v) ? v : null);
 const MOD_STATUS = ['approved', 'legacy', 'draft', 'needs_evidence', 'retired'];
 const EV_BASIS = ['engine', 'tradition', 'editorial', 'legacy'], EV_KIND = ['classic', 'modern', 'internal'], NARR_VOICE = ['haeyo', 'hapsyo', 'novel'];
 const LAYER_RE = /^[A-Za-z]{1,20}$/, DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -126,6 +129,7 @@ export async function onRequestPut({ request, env }) {
   if (Array.isArray(b.remedies)) next.remedies = uniq(b.remedies.slice(0, 1500), cleanRemedy);
   if (b.chapters && typeof b.chapters === 'object') next.chapters = { chapters: uniq((b.chapters.chapters || []).slice(0, 200), cleanChapter), acts: (b.chapters.acts || []).slice(0, 9).map(cleanAct).filter(Boolean) };
   if (Array.isArray(b.projects)) next.projects = uniq(b.projects.slice(0, 40), cleanProject);
+  if (b.evidencePolicy !== undefined) { const p = cleanPolicy(b.evidencePolicy); if (!p) return json({ error: '알 수 없는 근거 정책입니다' }, 400); next.evidencePolicy = p; }
   if (b.textStyles) next.textStyles = cleanTextStyles(b.textStyles);
   if (b.scoring) next.scoring = cleanScoring(b.scoring);
   if (b.flow) next.flow = cleanFlow(b.flow);

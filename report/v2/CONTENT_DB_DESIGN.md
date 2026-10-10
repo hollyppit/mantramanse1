@@ -318,3 +318,14 @@ sentenceRef = { moduleId, field: 'headline'|'summary'|'detail', rev }
 - `report/admin/v2-content.js`: 저장 시 시드와 값이 같은 `status`·`evidence`·`narrative`·`rule` 은 저장본에 복사하지 않는다. 복사하면 나중에 시드 메타(예: `approved`)가 바뀌어도 오래된 저장본이 덮어쓰기 때문이다(위험 R3 대응).
 - 검증(`tests/content-db-sim.js` 확장): id 집합·순서 불변, 기존 필드(문장·조건·우선순위·extra·layer·v3) 불변, 전 모듈 legacy, editorial = v3 312개만, 재실행 동일, status·evidence 유무가 `Rules.rank` 순서에 영향 없음, 조립 기준선(120사주×4프로젝트) 바이트 일치. 전체 `*-sim` 60개 통과, 실패 4개는 작업 전과 같은 `calendar-ui`·`free`·`panel`·`panel-edit`.
 - 아직 안 한 것: 선택 게이트(`Rules.rank` 의 status 필터, 정책 `off` 기본)는 단계 3. 관리자 화면의 status·evidence 입력란은 단계 4. 브라우저 실화면·관리자 저장 동작은 확인하지 않았다(변경이 화면 출력에 영향을 주지 않도록 한 구조이고 테스트는 Node 에서만 돌렸다).
+
+### 단계 3 — 완료 (선택 게이트, 정책 기본 off)
+- **게이트 위치 수정**: §4.2 는 `Rules.rank` 한 줄을 제안했지만, `rank` 는 정책(라이브러리 단위 값)을 알 수 없고 호출처가 6곳이다. 그래서 `Rules.gate(mod, policy)`(순수 함수)를 `rules.js` 에 두고, **`Compose.library()` 가 라이브러리를 만들 때 한 번 적용**한다. 호출처 6곳은 `lib.modules` 를 그대로 쓰므로 변경 없다. `rank`·`pick` 은 수정하지 않았다.
+- **동작**(`report/v2/rules.js`, `report/v2/compose.js`):
+  - `draft`·`retired` 는 **모든 모드(off 포함)에서 숨김**. §7 표의 "off = 필터 없음"을 이 한 가지만 예외로 바로잡는다 — 초안이 사용자에게 나가는 일을 막기 위한 것이며 현재 시드에는 draft 가 0개라 출력이 바뀌지 않는다.
+  - `off`·`warn`: 그 밖에는 안 막음. `hide_unverified`: `needs_evidence` 숨김. `strict`: `approved` 만 노출. `status` 없음은 `legacy`.
+  - **폴백 보장**: 정책 때문에 조건 없는 모듈이 하나도 안 남는 카테고리는, 막힌 조건 없는 모듈(draft·retired 제외)을 다시 허용한다. 반환값에 `policy`·`hidden[{id,category,reason}]`·`restored[]` 를 실어 점검 탭이 쓸 수 있게 했다.
+- **정책 저장**: `functions/api/report-content.js` PUT 이 `evidencePolicy`(`off|warn|hide_unverified|strict`)를 받는다. 잘못된 값은 400. `Compose.fromSaved` 가 `content.evidencePolicy` 를 라이브러리에 전달한다. 저장 때 `version` 이 바뀌므로 캐시 키도 갱신된다.
+- **검증**(`tests/content-db-sim.js` 확장): 정책×status 진리표, draft 는 off 에서도 숨김, hide_unverified·strict 동작, strict 에서 58개 카테고리 모두 조건 없는 모듈 유지·4개 프로젝트 조립에서 빈 챕터 0·신규 필드 누출 0, 서버·규칙 엔진 정책 목록 일치, 기존 조립 기준선(120사주×4프로젝트) 바이트 일치. 전체 `*-sim` 60개 통과(실패 4개는 작업 전과 같음).
+- **알려진 점**: 관리자 화면 중 `Compose.library(...)` 를 정책 없이 호출하는 곳(`v2-ik.js`·`v2-shell.js` 통계·`v2-check.js`·`v2-quality.js`)은 정책 off 로 동작한다(draft·retired 만 빠짐). 정책을 쓰는 점검 화면은 단계 4 에서 `content.evidencePolicy` 를 넘기도록 바꾼다.
+- **미착수**: 관리자에서 정책·status·evidence 를 바꾸는 화면(단계 4). 현재 정책을 바꾸는 방법은 PUT API 뿐이고, 운영에 값이 없으면 off 다.

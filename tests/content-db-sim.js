@@ -85,12 +85,56 @@ console.log('조립 기준선: 사주 120 × 프로젝트 ' + PROJECTS.length + 
   ok(Rules.rank(stripped, f).map(x => x.mod.id).join() === r1, 'status·evidence 유무가 선택 순서에 영향 없음');
 }
 
+/* ── 2-c. 근거 정책(Rules.gate · Compose.library 의 정책 필터) ───────────────────── */
+{
+  const G = Rules.gate, P = Rules.POLICIES;
+  ok(P.join() === 'off,warn,hide_unverified,strict', '정책 모드 목록');
+  const t = (st, pol) => G({ status: st }, pol);
+  ok(P.every(pol => t('draft', pol) === 'draft' && t('retired', pol) === 'retired'), 'draft·retired 는 모든 모드에서 막힘');
+  ok(['off', 'warn'].every(pol => !t('legacy', pol) && !t('needs_evidence', pol) && !t('approved', pol)), 'off·warn 은 draft·retired 외 안 막음');
+  ok(!t('legacy', 'hide_unverified') && t('needs_evidence', 'hide_unverified') === 'needs_evidence' && !t('approved', 'hide_unverified'), 'hide_unverified: needs_evidence 만 막음');
+  ok(t('legacy', 'strict') === 'legacy' && t('needs_evidence', 'strict') && !t('approved', 'strict'), 'strict: approved 만 통과');
+  ok(!G({}, 'hide_unverified') && G({}, 'strict') === 'legacy', 'status 없음 = legacy');
+
+  const seed = R.Content.modules, mkSaved = (pol, mods) => ({ modules: mods || [], evidencePolicy: pol });
+  const tgt = seed.find(m => m.category === 'career' && Object.keys(m.conditions || {}).length), bareCareer = seed.find(m => m.category === 'career' && !Object.keys(m.conditions || {}).length);
+  const L0 = R.Compose.library(null);
+  ok(L0.policy === 'off' && L0.hidden.length === 0 && L0.modules.length === seed.length && L0.restored.length === 0, '저장본 없으면 정책 off·숨김 0');
+  ok(R.Compose.library(mkSaved('엉뚱한값')).policy === 'off', '알 수 없는 정책은 off');
+  // draft: off 에서도 숨김, 다른 모듈은 그대로
+  const Ld = R.Compose.library(mkSaved('off', [{ id: tgt.id, status: 'draft' }]));
+  ok(Ld.modules.length === seed.length - 1 && Ld.hidden.length === 1 && Ld.hidden[0].id === tgt.id && Ld.hidden[0].reason === 'draft', 'draft 는 off 에서도 숨김');
+  // needs_evidence
+  const ne = [{ id: tgt.id, status: 'needs_evidence' }];
+  ok(R.Compose.library(mkSaved('warn', ne)).modules.length === seed.length, 'warn 은 노출 유지');
+  ok(R.Compose.library(mkSaved('hide_unverified', ne)).modules.length === seed.length - 1, 'hide_unverified 는 needs_evidence 숨김');
+  // 폴백 보장: strict 에서는 approved 가 없으므로 전부 막히지만 조건 없는 모듈은 카테고리마다 남아야 한다
+  const Ls = R.Compose.library(mkSaved('strict'));
+  const cats = [...new Set(seed.map(m => m.category))];
+  ok(cats.every(c => Ls.modules.some(m => m.category === c && !Object.keys(m.conditions || {}).length)), 'strict 에서도 카테고리마다 조건 없는 모듈 유지');
+  ok(Ls.restored.length >= cats.length && Ls.modules.length === Ls.restored.length, 'strict 복원 목록: ' + Ls.restored.length);
+  // approved 가 있으면 그것이 남고, 조건 없는 모듈이 이미 있으면 복원 없음
+  const Lc = R.Compose.library(mkSaved('strict', [{ id: bareCareer.id, status: 'approved' }, { id: tgt.id, status: 'approved' }]));
+  ok(Lc.modules.some(m => m.id === tgt.id) && !Lc.restored.some(id => seed.find(m => m.id === id).category === 'career'), 'approved 모듈 노출·조건 없는 approved 가 있으면 복원 안 함');
+  // draft 조건 없는 모듈은 복원 대상이 아니다 → 카테고리 후보가 줄 수 있음(의도): 사유 draft 유지
+  const Ldr = R.Compose.library(mkSaved('strict', [{ id: bareCareer.id, status: 'draft' }]));
+  ok(Ldr.hidden.some(h => h.id === bareCareer.id && h.reason === 'draft') && !Ldr.restored.includes(bareCareer.id), 'draft 는 복원하지 않음');
+  // strict 에서도 20+챕터가 비지 않고 신규 필드가 새지 않는다
+  const sd = R.SajuData.build(charts(1)[0], { now: NOW }); let emptyCh = 0;
+  ['full', 'love', 'wealth', 'newyear'].forEach(id => {
+    const rep = R.Compose.build(sd, Ls, R.Chapters.forProject(null, id), { name: '백진우' });
+    rep.chapters.forEach(c => { if (!String(c.headline || '').trim()) emptyCh++; });
+    ok(!NEW_KEYS.test(Rules.stable(rep.chapters.map(c => [c.headline, c.details, c.topics]))), id + ': 정책 적용 결과에도 신규 필드 누출 없음');
+  });
+  ok(emptyCh === 0, 'strict 조립에서 빈 챕터: ' + emptyCh);
+}
+
 /* ── 3. 서버 정리 규칙(functions/api/report-content.js cleanModule) ────────────────── */
 {
   const src = fs.readFileSync(path.join(root, 'functions/api/report-content.js'), 'utf8').split(/export async function onRequestGet/)[0]
     .replace(/^import .*$/mg, '');
   let clean;
-  try { clean = new Function(src + '\nreturn { cleanModule, COND_KEYS };')(); } catch (e) { fails.push('서버 정리 함수를 불러오지 못함: ' + e.message); }
+  try { clean = new Function(src + '\nreturn { cleanModule, COND_KEYS, cleanPolicy, EVIDENCE_POLICIES };')(); } catch (e) { fails.push('서버 정리 함수를 불러오지 못함: ' + e.message); }
   if (clean) {
     const cm = clean.cleanModule, plain = { id: 'x_1', category: 'career', conditions: { dayMasterEl: ['목'] }, priority: 60, headline: 'h', summary: 's', detail: 'd', keywords: ['k'], imageTags: [], actionTags: [], extra: null, enabled: true };
     // (a) 기존 모듈: 정리 결과에 신규 키가 생기지 않는다(예전과 같은 모양)
@@ -118,6 +162,8 @@ console.log('조립 기준선: 사주 120 × 프로젝트 ' + PROJECTS.length + 
     ok(n.narrative && n.narrative.voice === 'haeyo' && n.narrative.hook === '도입' && !('extra' in n.narrative), 'narrative 허용 필드만');
     const bad = cm(Object.assign({}, plain, { status: 'whatever', layer: '한글!', evidence: { basis: 'magic' }, narrative: { voice: 'x' }, rule: { note: 5 } }));
     ok(!('status' in bad) && !('layer' in bad) && !('evidence' in bad) && !('narrative' in bad) && !('rule' in bad), '범위 밖 값은 버림');
+    ok(clean.EVIDENCE_POLICIES.join() === Rules.POLICIES.join(), '서버 정책 목록 = 규칙 엔진 정책 목록');
+    ok(clean.cleanPolicy('strict') === 'strict' && clean.cleanPolicy('x') === null && clean.cleanPolicy(undefined) === null, '서버 정책 값 검증');
     ok(cm(null) === null && cm({ id: 'bad id', category: 'career' }) === null, '잘못된 모듈은 null');
   }
 }
