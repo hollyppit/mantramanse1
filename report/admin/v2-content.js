@@ -108,7 +108,9 @@
     }
     S.edited = function (x) { return JSON.stringify(x) !== JSON.stringify(defs[x.id]); };
     $('#iSave', root).onclick = function () {
-      var out = S.list.filter(function (x) { return !defs[x.id] || S.edited(x); }); var part = {}; part[o.key] = out;
+      var out = S.list.filter(function (x) { return !defs[x.id] || S.edited(x); }).map(function (x) { // 시드와 같은 계층 메타(status·evidence 등)는 저장본에 복사하지 않는다 — 시드 쪽 메타가 바뀌어도 오래된 값이 덮어쓰지 않게
+        var d = defs[x.id]; if (!d) return x; var c = clone(x); ['status', 'evidence', 'narrative', 'rule'].forEach(function (k) { if (JSON.stringify(c[k]) === JSON.stringify(d[k])) delete c[k]; }); return c;
+      }); var part = {}; part[o.key] = out;
       this.disabled = true; save(part).then(function () { ST.saved[o.key] = out; S.dirty = false; renderList(); o.onChange && o.onChange(S.list, true); }).catch(function (e) { toast(e.message, true); renderList(); });
     };
     renderList(); renderEd();
