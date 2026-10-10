@@ -318,3 +318,88 @@ sentenceRef = { moduleId, field: 'headline'|'summary'|'detail', rev }
 - `report/admin/v2-content.js`: 저장 시 시드와 값이 같은 `status`·`evidence`·`narrative`·`rule` 은 저장본에 복사하지 않는다. 복사하면 나중에 시드 메타(예: `approved`)가 바뀌어도 오래된 저장본이 덮어쓰기 때문이다(위험 R3 대응).
 - 검증(`tests/content-db-sim.js` 확장): id 집합·순서 불변, 기존 필드(문장·조건·우선순위·extra·layer·v3) 불변, 전 모듈 legacy, editorial = v3 312개만, 재실행 동일, status·evidence 유무가 `Rules.rank` 순서에 영향 없음, 조립 기준선(120사주×4프로젝트) 바이트 일치. 전체 `*-sim` 60개 통과, 실패 4개는 작업 전과 같은 `calendar-ui`·`free`·`panel`·`panel-edit`.
 - 아직 안 한 것: 선택 게이트(`Rules.rank` 의 status 필터, 정책 `off` 기본)는 단계 3. 관리자 화면의 status·evidence 입력란은 단계 4. 브라우저 실화면·관리자 저장 동작은 확인하지 않았다(변경이 화면 출력에 영향을 주지 않도록 한 구조이고 테스트는 Node 에서만 돌렸다).
+
+### 단계 3 — 완료 (선택 게이트, 정책 기본 off)
+- **게이트 위치 수정**: §4.2 는 `Rules.rank` 한 줄을 제안했지만, `rank` 는 정책(라이브러리 단위 값)을 알 수 없고 호출처가 6곳이다. 그래서 `Rules.gate(mod, policy)`(순수 함수)를 `rules.js` 에 두고, **`Compose.library()` 가 라이브러리를 만들 때 한 번 적용**한다. 호출처 6곳은 `lib.modules` 를 그대로 쓰므로 변경 없다. `rank`·`pick` 은 수정하지 않았다.
+- **동작**(`report/v2/rules.js`, `report/v2/compose.js`):
+  - `draft`·`retired` 는 **모든 모드(off 포함)에서 숨김**. §7 표의 "off = 필터 없음"을 이 한 가지만 예외로 바로잡는다 — 초안이 사용자에게 나가는 일을 막기 위한 것이며 현재 시드에는 draft 가 0개라 출력이 바뀌지 않는다.
+  - `off`·`warn`: 그 밖에는 안 막음. `hide_unverified`: `needs_evidence` 숨김. `strict`: `approved` 만 노출. `status` 없음은 `legacy`.
+  - **폴백 보장**: 정책 때문에 조건 없는 모듈이 하나도 안 남는 카테고리는, 막힌 조건 없는 모듈(draft·retired 제외)을 다시 허용한다. 반환값에 `policy`·`hidden[{id,category,reason}]`·`restored[]` 를 실어 점검 탭이 쓸 수 있게 했다.
+- **정책 저장**: `functions/api/report-content.js` PUT 이 `evidencePolicy`(`off|warn|hide_unverified|strict`)를 받는다. 잘못된 값은 400. `Compose.fromSaved` 가 `content.evidencePolicy` 를 라이브러리에 전달한다. 저장 때 `version` 이 바뀌므로 캐시 키도 갱신된다.
+- **검증**(`tests/content-db-sim.js` 확장): 정책×status 진리표, draft 는 off 에서도 숨김, hide_unverified·strict 동작, strict 에서 58개 카테고리 모두 조건 없는 모듈 유지·4개 프로젝트 조립에서 빈 챕터 0·신규 필드 누출 0, 서버·규칙 엔진 정책 목록 일치, 기존 조립 기준선(120사주×4프로젝트) 바이트 일치. 전체 `*-sim` 60개 통과(실패 4개는 작업 전과 같음).
+- **알려진 점**: 관리자 화면 중 `Compose.library(...)` 를 정책 없이 호출하는 곳(`v2-ik.js`·`v2-shell.js` 통계·`v2-check.js`·`v2-quality.js`)은 정책 off 로 동작한다(draft·retired 만 빠짐). 정책을 쓰는 점검 화면은 단계 4 에서 `content.evidencePolicy` 를 넘기도록 바꾼다.
+- **미착수**: 관리자에서 정책·status·evidence 를 바꾸는 화면(단계 4). 현재 정책을 바꾸는 방법은 PUT API 뿐이고, 운영에 값이 없으면 off 다.
+
+### 단계 4 — 완료 (관리자 입력란 · 서비스 점검 항목)
+- **관리자 모듈 편집기**(`report/admin/v2-content.js`): "풀이 DB 계층" 접이식 영역 — 상태(status), 근거 종류(evidence.basis), 출처(한 줄에 `id | 종류 | 제목 | 위치`, 최대 5), 확인한 사람·날짜, 서사(말투·도입·비유), 규칙 메모. 비워 두면 기존과 같다.
+- **편집 검토 규칙**(`R.Quality.reviewEdit`, 순수 함수·Node 테스트 대상): ① 근거 종류가 legacy 이거나 tradition 인데 출처가 없으면 승인 불가(이전 상태로 되돌림) ② 승인된 모듈의 문장을 고치면(상태를 일부러 바꾸지 않은 경우) `needs_evidence` 로 내리고 `evidence.rev`+1 ③ 승인 저장 시 문장 해시를 `evidence.textHash` 에 기록. 서버 `cleanEvidence` 가 8자리 16진수 해시만 보존한다.
+- **근거 정책 패널**: 해석 모듈 편집 화면 상단. 정책 선택 시 "저장된 모듈 기준 숨김 N개(폴백 복원 M개)"를 미리 보여 주고, hide_unverified·strict 저장 전에는 확인창을 띄운다. `evidencePolicy` 저장.
+- **서비스 점검 탭**(`report/admin/v2-quality.js`, `report/v2/quality.js` `evidence()`): 상태별·근거 종류별 개수, 카테고리별 승인 비율(낮은 순), 정책별 숨김 예상 수, 점검 항목 3종 — 사용 중인데 draft·retired / 승인인데 근거 비어 있음 / 알 수 없는 조건 키 / 승인 후 문장이 바뀐 모듈. 마크다운 내보내기에도 포함. 점검용 문서는 이제 저장된 모듈·정책이 반영된 라이브러리로 만든다(이전: 시드만). `Compose.library()` 가 정책 적용 전 전체 목록 `all` 을 추가로 돌려준다.
+- **검증**: `tests/content-db-sim.js` 확장(근거 집계·합성 문제 탐지·reviewEdit 7개 시나리오·textHash 보존), 조립 기준선 일치, 전체 `*-sim` 60개 통과(실패 4개는 작업 전과 같음), 엔진 기준선 일치. **브라우저 확인**(로컬 개발 서버, 시험용 비밀번호): 모듈 편집기에 계층 영역·정책 패널 표시, legacy 근거 승인 거절, editorial 근거 승인 시 해시 기록, 승인 문장 수정 시 needs_evidence·rev 1, 서비스 점검 탭에 근거 상태 표시, 콘솔 오류 없음. 저장 동작(PUT)은 눌러 보지 않았다.
+- **알려진 점**: 정책 패널은 챕터별 "해석 모듈" 탭마다 한 줄로 나타난다(저장 값은 하나). 출처 목록(`v2:sources`)은 만들지 않았고 `refs[].id` 는 자유 입력이다(D2 결정 후). "표본에서 한 번도 안 뽑힌 모듈" 점검은 비용(400 사주 조립)이 커서 넣지 않았다.
+- **다음**: 단계 5(승인 작업이 쌓인 카테고리부터 hide_unverified 시험 적용)는 D2(근거 문헌 기준·승인자)·D4(시점·카테고리)가 정해져야 한다. 단계 6(`except`)은 `Rules.evaluate` 변경이라 별도 비교 테스트가 선행된다.
+
+### 단계 6 — 완료 (제외 조건 `rule.except`)
+단계 5(정책 시험 적용)는 D2(근거 문헌 기준·승인자)·D4(시점·카테고리)가 미결이라 보류하고, 막히지 않은 단계 6 을 먼저 진행했다.
+- **규칙 엔진**(`report/v2/rules.js` `evaluate`): 모듈에 `rule.except = { 조건키: [값…] }` 가 있고 사실(facts)이 그 값 중 하나라도 맞으면 매칭 실패(배열 사실은 하나라도 겹치면 제외). 통과한 경우 구체성 점수·순위에는 영향이 없다. 사실에 없는 키는 걸리지 않는다. 제외된 모듈은 `rows` 에 `except:true` 행(제외 사유)을 남겨 관리자 "조합 테스트"에서 이유가 보인다.
+- **서버**(`cleanModule`): `rule = { note?, except? }`. `except` 는 선택 조건과 같은 키·값 검증을 거친다. `rule.when` 은 여전히 받지 않는다(선택 조건은 `conditions` 가 유일한 원천).
+- **관리자**: 계층 영역에 "제외 조건" 체크박스 묶음(선택 조건과 같은 입력 컴포넌트).
+- **점검**: 선택 조건 값이 전부 제외 조건에 들어 있어 어떤 사주에서도 선택되지 않는 모듈을 "충돌"로 표시(점검 탭·마크다운).
+- **검증**: `tests/content-db-sim.js` 에 except 시나리오 9건(없음/빈 값/불통과/통과 시 점수 불변/제외/배열 사실/없는 키/pick 에서 다음 후보 승격/충돌 탐지) + 서버 정리. 시드 모듈에 except 가 하나도 없음을 확인해 조립 기준선(120사주×4프로젝트)이 그대로 일치. 전체 `*-sim` 60개 통과(실패 4개는 작업 전과 같음), 엔진 기준선 일치. 브라우저(개발 서버): 제외 조건 체크 후 적용 시 값 유지 확인. 저장은 눌러 보지 않았다.
+- **주의**: 이 단계부터는 관리자가 except 를 쓰는 순간 선택 결과가 바뀔 수 있다(의도). 운영 반영 전, except 를 쓴 모듈은 "조합 테스트"로 영향 범위를 확인하는 것이 좋다.
+
+## 14. 정정·발견: 풀이 지식(IK) 시스템과 자료 학습 파이프라인은 이미 있다 (5-B 착수 전 조사)
+
+NEXT_PLAN 5-B(자료 업로드 분석·승인)를 설계하려고 `functions/` 를 조사하다가, 이 문서 §2 가 **다섯 번째 문장 저장소를 빠뜨렸고**, 5-B 의 대부분이 이미 구현돼 있음을 확인했다.
+
+### 14.1 §2 정정 — 문장 저장소는 5곳
+| 저장소 | 위치 | 상태 모델 | 서비스 연결 |
+|---|---|---|---|
+| (추가) **풀이 지식 IK** | KV `ik:d:<DOMAIN>`(8개 분야), `functions/_ik.js`·`_ikstore.js`·`api/ik.js`, 관리자 "풀이 지식" | `draft→review→approved→published→archived` + `reviewed`(검수 완료) 플래그, `sourceType`, `confidence`, `evidence[]`, `modifiers[]`(강화·완화·대체·예외), `exclusions`, `alsoWhen`, 충돌 감지 | `POST /api/ik?a=deep`: 게시+검수 완료 항목만으로 "더 깊이 보기" 풀이 생성(AI 호출 없음). 클라이언트 `report/v2/ik-deep.js` 가 6초 제한으로 호출, 실패·꺼짐이면 `null` 이라 기존 리포트가 그대로 진행 |
+| 자료 `src:*` | KV `src:idx`·`src:chunks:<id>`·`src:cand:<id>`, R2 `src/<id>`, `functions/_src.js`·`api/src.js`, 관리자 "풀이 자료" | 자료 상태 `need→analyzed→review→done`, 후보 결정 `approve·approveEdited·hold·discard·addEvidence·merge` | IK 항목의 근거(evidence)로만 연결 |
+
+해석 모듈 DB(이 문서의 대상)는 챕터·PDF·주제 카드를 먹이고, IK 는 심화 풀이를 먹인다. 두 DB 는 **서로 다른 경로로 사용자에게 간다**.
+
+### 14.2 NEXT_PLAN 5-B 요구와 현재 구현
+| 5-B 요구 | 현재 | 근거 |
+|---|---|---|
+| MD/PDF/TXT 업로드 | **있음** — `FILE_TYPES = pdf·md·txt·text`, 텍스트 3MB·업로드 40MB·청크 1500개 한도 | `_src.js`, `api/src.js` MAX_UPLOAD |
+| AI 가 분석해 기존 DB 와 비교(신규·중복·충돌) | **있음(IK 항목 대상)** — `compareCandidate` 결과 `new·similar·identical·reinforce…`, 충돌·원문 불일치 검증(`validateCandidate`), 원문 주장과 AI 정리를 따로 저장 | `_src.js` |
+| 승인 전에는 서비스 DB 에 반영하지 않음 | **있음** — 후보는 `src:cand:*` 에만 저장, production 검색에 쓰이지 않음. AI 초안은 검수 없이 게시 불가(`cleanItem`) | `api/src.js` 머리 주석, `_ik.js` `cleanItem` |
+| 초안 영역 분리 | **있음** — 후보 / IK `draft·review` / `published` 3단계 | 위와 같음 |
+| 승인 시 근거 연결 | **있음** — 승인하면 IK 항목 + `evidence[{docId, chunkId, pageStart, quote…}]` | `candidateToItem`, `cleanEvidence` |
+| 일괄 처리·영향 확인 | 있음 — `batch`, `impact`, `gaps` | `api/src.js` |
+| 테스트 | `tests/src-sim.js`, `tests/ik-sim.js` — 이 브랜치에서 실행해 **둘 다 통과** | 실행 확인 |
+
+→ **5-B 를 새로 만들 필요는 없다.** 남은 갭은 아래 §14.4 이다.
+
+### 14.3 이번 작업(단계 1~6)과의 관계
+| 이 문서의 개념 | IK 의 대응 개념 | 비고 |
+|---|---|---|
+| 모듈 `status`(legacy·approved·needs_evidence·draft·retired) | IK `status` + `reviewed` | 이름·단계가 다르다. 두 모델이 따로 존재 |
+| 모듈 `evidence.refs[{id,kind,title,locator}]` | IK `evidence[{docId,chunkId,pageStart,pageEnd,heading,quote}]` | 모듈 쪽 `refs[].id` 에 자료 `docId` 를 쓰면 호환 가능(ID 형식 `d[a-z0-9]{3,24}` 이 모듈 쪽 허용 문자 안에 들어감) |
+| 모듈 `rule.except`(단계 6) | IK `exclusions`·`modifiers[effect:'exception']` | 개념 중복. 모듈 DB 의 선택 경로(`Rules.evaluate`)에서 필요해 별도 구현했지만, 두 DB 를 일원화하면 이관 대상 |
+| 근거 정책 `off·warn·hide_unverified·strict` | IK 는 `published && reviewed` 만 서비스 노출(항상 strict) | 정책이 다르다 |
+| D2 "근거 문헌 기준·승인자" | 자료 등록 시 `sourceKind`(서적·전문가·내부·연구)·`grade`(A/B/C)·`theoryTags`·`publisher` 입력 이미 있음 | **D2 의 문헌 기준 절반은 이미 데이터 모델이 있다** — 어떤 자료에 어떤 등급을 줄지가 남은 결정 |
+| 모듈 → IK 이관 | `fromLegacyModule`·`?a=import`: 모듈 → "검수 필요" IK 초안(이미 가져온 것은 건너뜀). 조건 이름·시즌 표기를 변환 | 단방향. 승인된 IK 가 모듈 DB 로 돌아오는 경로는 없음 |
+
+### 14.4 남은 갭 (확인된 것만)
+1. **모듈 DB ↔ 자료 연결 없음**: 모듈 편집기의 출처 입력(`refs`)은 자유 입력이라 `src:idx` 의 자료·청크와 연결되지 않는다. 자료 선택기(자료 목록 `a=list` → docId 채우기)와 원문 위치 보기가 없다.
+2. **업로드 분석의 비교 대상이 IK 항목뿐**: 해석 모듈 678개는 `import` 로 IK 초안이 된 뒤에야 비교 대상이 된다. 모듈을 먼저 import 하지 않았다면 업로드 자료가 "새로운 풀이"로 보일 수 있다 — **운영에서 import 가 어디까지 되어 있는지는 확인 못함**.
+3. **두 DB 의 일원화 방향이 정해지지 않음**: 모듈이 정본인지, IK 가 정본인지, 병행인지. 지금은 병행이며 상태·근거 모델이 이중이다.
+4. **IK → 서비스 연결의 실제 켜짐 여부**: `a=deep` 의 `enabled` 값(서비스 연결 ON/OFF)과 운영 IK 항목 수·게시 수는 로컬에 없어 **확인 못함**.
+
+### 14.5 선택지 (사용자 결정 필요)
+- **A. 연결만 보강(권장 후보, 소규모)**: 모듈 편집기에 "자료에서 고르기"(src 자료 목록·청크 검색)를 추가해 `evidence.refs` 가 실제 자료·청크를 가리키게 한다. 상태·정책 모델은 그대로. 새 저장 구조 없음.
+- **B. 일원화**: IK 를 정본으로 삼아 모듈을 점진 이관(`import` 는 이미 있음)하고 모듈 DB 는 폴백으로 축소. 효과는 크지만 사용자 화면(챕터·PDF) 변화와 `rule.except`·정책 모델 폐기가 따른다 — 별도 설계·비교 테스트가 필요하고 위험이 크다.
+- **C. 현상 유지**: 이중 구조를 문서화만 하고 각각 운영.
+- 어느 쪽이든 먼저 **운영 데이터 확인**이 필요하다: IK 항목 수와 상태 분포, 자료 수와 등급 분포, `import` 완료 범위, 서비스 연결(`deep`) ON/OFF. 관리자 화면의 "풀이 지식"·"풀이 자료" 통계에서 읽기 전용으로 확인할 수 있다.
+
+### 선택지 A 적용 — 모듈 출처를 풀이 자료(src)와 연결 (완료)
+§14.5 의 A(연결만 보강)를 진행했다. 상태·정책 모델·사용자 화면은 그대로이고, 새 저장 구조도 없다. 기존 `/api/src`(읽기 전용 조회만 사용)를 모듈 편집기와 점검 탭에서 부른다.
+- **서버**: `evidence.refs[].chunkId`(풀이 자료 구간 id 형식 `[\w.-]{1,40}`)를 보존한다. 다른 값은 버린다. 출처 `id` 에는 자료 `docId` 를 그대로 쓴다.
+- **모듈 편집기**: 출처 줄 형식을 `id | 종류 | 제목 | 위치 | 구간id` 로 확장(기존 4칸 줄도 그대로 읽힌다). "자료에서 고르기"(원문 검색 → 결과의 "출처로 추가"/"원문 보기"), "자료 목록"(자료 전체를 출처로 추가), 저장된 출처의 구간 "원문 보기" 버튼. 자료 종류(서적·전문가·연구·내부) → refs 종류(classic·modern·internal) 자동 매핑, 자료 등급(A/B/C/미평가) 표시. 최대 5개 한도·중복 방지.
+- **서비스 점검**: "출처 연결" — 풀이 자료 수, 자료와 연결된 출처 / 자유 입력 출처 수, 풀이 자료에 없는 출처 id(`d…` 형식인데 목록에 없음), 승인(approved) 모듈이 등급 C·미평가 자료만 근거로 삼은 경우, 정책상 "참고 안 함"인 자료를 출처로 쓴 경우. 자료 목록을 못 불러오면 "확인 못함"으로 표시하고 없는 자료로 단정하지 않는다.
+- **순수 함수**(`report/v2/quality.js`): `parseRefs`·`formatRefs`·`refFromSource`·`refCheck` — Node 테스트 대상.
+- **검증**: `tests/content-db-sim.js` 에 줄 해석·왕복·자료→출처 변환·자료 대조·서버 chunkId 보존 추가. 조립 기준선 일치, 전체 `*-sim` 60개 통과(실패 4개는 작업 전과 같음), 엔진 기준선 일치. 브라우저(로컬 개발 서버의 실제 `src.js`): 자료 등록 → 검색 → "출처로 추가" → 적용 후 `docId | classic | 제목 | 위치 | 구간id` 유지 → "원문 보기" 로 구간 원문 표시 → 점검 탭에 "풀이 자료 1건" 표시. 저장(PUT)은 눌러 보지 않았다. 시험용 자료 1건은 개발 서버 메모리에만 있다.
+- **남은 점**: 자료에서 고르는 흐름은 여전히 사람이 수행한다(AI 자동 연결 없음). 모듈 DB 와 IK 의 일원화(B)는 하지 않았다. 운영의 자료·IK 현황은 **확인 못함**.

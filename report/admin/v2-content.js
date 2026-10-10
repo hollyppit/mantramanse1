@@ -80,7 +80,8 @@
     S.list = o.initial ? o.initial : mix(o.base, ST.saved[o.key]); S.dirty = !!o.initialDirty;
     var defs = defIds(o.base); (window.AdminDirty = window.AdminDirty || {})['해석 모듈·개운법 · '+o.key] = function () { return S.dirty; };
     root.innerHTML = '<div class="card"><div class="row" style="justify-content:space-between;align-items:center"><b style="color:var(--gold)">' + o.title + '</b><span class="muted">기본 시드 위에 덮어쓰기됩니다 · 비활성/삭제 가능</span><span style="flex:1"></span><button id="iNew">+ 새로 만들기</button><button class="pri" id="iSave" disabled>변경사항 저장</button></div>' +
-      '<div class="v2split" style="margin-top:12px"><div><div class="row" style="margin-bottom:8px"><input type="text" id="iQ" placeholder="검색(제목·id·키워드)" style="flex:1">' + (o.lockCats ? '' : '<select id="iCat" style="width:auto"><option value="">' + o.catLabel + ' 전체</option>' + o.cats.map(function (c) { return '<option value="' + c[0] + '">' + c[1] + '</option>'; }).join('') + '</select>') + '</div><div class="muted" id="iCnt"></div><div class="v2list" id="iList"></div></div><div id="iEd"></div></div></div>';
+      (o.panel ? o.panel() : '') + '<div class="v2split" style="margin-top:12px"><div><div class="row" style="margin-bottom:8px"><input type="text" id="iQ" placeholder="검색(제목·id·키워드)" style="flex:1">' + (o.lockCats ? '' : '<select id="iCat" style="width:auto"><option value="">' + o.catLabel + ' 전체</option>' + o.cats.map(function (c) { return '<option value="' + c[0] + '">' + c[1] + '</option>'; }).join('') + '</select>') + '</div><div class="muted" id="iCnt"></div><div class="v2list" id="iList"></div></div><div id="iEd"></div></div></div>';
+    if (o.bindPanel) o.bindPanel(root);
     function filt() { var q = S.q.toLowerCase(); return S.list.filter(function (x) { return (!S.cat || x[o.catKey] === S.cat) && (!o.lockCats || o.lockCats.indexOf(x[o.catKey]) >= 0) && (!q || (o.title2(x) + ' ' + x.id + ' ' + (x.keywords || x.tags || []).join(' ')).toLowerCase().indexOf(q) >= 0); }); }
     function renderList() {
       var l = filt(); $('#iCnt', root).textContent = '전체 ' + S.list.length + ' · 표시 ' + l.length + (S.dirty ? ' · 저장 안 된 변경 있음' : '');
@@ -130,14 +131,104 @@
   }
 
   var tf = function (id, lbl, v, big) { return '<div class="fx"><label>' + lbl + '</label>' + (big ? '<textarea id="' + id + '">' + esc(v) + '</textarea>' : '<input type="text" id="' + id + '" value="' + esc(v) + '">') + '</div>'; };
+  /* ── 풀이 DB 계층(상태·근거·서사·규칙 메모) 입력 — report/v2/CONTENT_DB_DESIGN.md §6 ── */
+  var ST_KO = [['legacy', 'legacy — 이관 기본값(근거 미검증, 노출됨)'], ['approved', 'approved — 근거 확인·승인'], ['needs_evidence', 'needs_evidence — 근거 부족'], ['draft', 'draft — 초안(노출 안 됨)'], ['retired', 'retired — 폐기(노출 안 됨)']];
+  var BASIS_KO = [['', '(없음)'], ['engine', 'engine — 계산 값을 서술'], ['tradition', 'tradition — 전통 이론 문헌'], ['editorial', 'editorial — 서비스 편집 원칙'], ['legacy', 'legacy — 미검증']];
+  var KIND_KO = ['classic', 'modern', 'internal'], VOICE_KO = [['', '(미지정)'], ['haeyo', '해요체'], ['hapsyo', '합쇼체'], ['novel', '소설체(~다)']];
+  var POLICY_KO = [['off', 'off — 필터 없음(기본)'], ['warn', 'warn — 노출 유지, 점검 탭에만 표시'], ['hide_unverified', 'hide_unverified — 근거 부족(needs_evidence) 숨김'], ['strict', 'strict — 승인(approved)만 노출']];
+  var sel = function (id, opts, v) { return '<select id="' + id + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === v ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; };
+  function layerFields(x) {
+    var ev = x.evidence || {}, nr = x.narrative || {}, refs = R.Quality.formatRefs(ev.refs);
+    return '<details style="margin-top:8px"><summary><b>풀이 DB 계층</b> <span class="muted">상태 · 근거 · 서사 · 규칙 메모 — 비워 두면 기존과 같습니다</span></summary>' +
+      '<div class="fx2"><div class="fx"><label>상태 (status)</label>' + sel('eSt', ST_KO, x.status || 'legacy') + '</div><div class="fx"><label>근거 종류 (evidence.basis)</label>' + sel('eEvB', BASIS_KO, ev.basis || '') + '</div></div>' +
+      '<div class="fx"><label>출처 (한 줄에 하나: id | classic·modern·internal | 제목 | 위치 | 구간id)</label><textarea id="eEvR" class="mono" placeholder="자료id | classic | 자료 제목 | 쪽·장 | 구간id — 아래 \'자료에서 고르기\'로 채울 수 있습니다">' + esc(refs) + '</textarea>' +
+        '<div class="row" style="margin-top:6px;gap:6px;flex-wrap:wrap"><input type="text" id="srcQ" placeholder="풀이 자료 원문 검색어" style="flex:1;min-width:140px"><button type="button" id="srcFind">자료에서 고르기</button><button type="button" id="srcList">자료 목록</button></div><div id="srcRes" class="muted" style="margin-top:6px;font-size:.8rem"></div><div id="srcView" style="display:none;margin-top:6px;padding:8px;border:1px solid var(--line,#444);border-radius:6px;font-size:.8rem;white-space:pre-wrap;max-height:220px;overflow:auto"></div>' +
+        ((ev.refs || []).some(function (r) { return r.chunkId; }) ? '<div class="row" style="margin-top:6px;gap:6px;flex-wrap:wrap">' + ev.refs.filter(function (r) { return r.chunkId; }).map(function (r) { return '<button type="button" class="srcView" data-doc="' + esc(r.id) + '" data-chunk="' + esc(r.chunkId) + '">원문 보기 · ' + esc((r.title || r.id).slice(0, 18)) + '</button>'; }).join('') + '</div>' : '') + '</div>' +
+      '<div class="fx2">' + tf('eEvBy', '확인한 사람 (표시 이름)', ev.checkedBy || '') + '<div class="fx"><label>확인 날짜</label><input type="date" id="eEvAt" value="' + esc(ev.checkedAt || '') + '"></div></div>' +
+      '<p class="muted" style="font-size:.76rem">근거 개정 번호 ' + (ev.rev == null ? '-' : ev.rev) + (ev.textHash ? ' · 승인 당시 문장 해시 ' + esc(ev.textHash) : '') + ' — 승인(approved)은 근거 종류가 legacy 가 아니어야 하고, 전통 문헌(tradition)은 출처가 1개 이상 있어야 합니다. 승인된 문장을 고치면 자동으로 needs_evidence 로 내려갑니다.</p>' +
+      '<div class="fx2"><div class="fx"><label>서사 말투 (narrative.voice)</label>' + sel('eNV', VOICE_KO, nr.voice || '') + '</div>' + tf('eNH', '도입 한 문장 (narrative.hook)', nr.hook || '') + '</div>' + tf('eNM', '비유 한 문장 (narrative.metaphor)', nr.metaphor || '') + tf('eRN', '규칙 메모 (rule.note — 선택 조건에는 영향 없음)', (x.rule && x.rule.note) || '') +
+      '<div class="fx" style="margin-top:6px"><label>제외 조건 (rule.except) — 아래 값 중 하나라도 해당하면 이 모듈은 선택되지 않습니다</label><div id="eExc">' + condHtml(x.rule && x.rule.except) + '</div></div></details>';
+  }
+  function layerRead(b, n, orig) {
+    var g = function (id) { var e = $('#' + id, b); return e ? e.value : ''; };
+    var basis = g('eEvB'); n.status = g('eSt') || 'legacy'; if (n.status === 'legacy' && !(orig && orig.status)) delete n.status;
+    if (basis) {
+      var old = n.evidence || {}, refs = R.Quality.parseRefs(g('eEvR'));
+      n.evidence = { basis: basis, refs: refs, rev: old.rev || 0 }; if (g('eEvBy').trim()) n.evidence.checkedBy = g('eEvBy').trim(); if (g('eEvAt')) n.evidence.checkedAt = g('eEvAt'); if (old.textHash) n.evidence.textHash = old.textHash;
+    } else delete n.evidence;
+    var nr = {}; if (g('eNV')) nr.voice = g('eNV'); if (g('eNH').trim()) nr.hook = g('eNH').trim(); if (g('eNM').trim()) nr.metaphor = g('eNM').trim();
+    if (Object.keys(nr).length) n.narrative = nr; else delete n.narrative;
+    var rl = {}; if (g('eRN').trim()) rl.note = g('eRN').trim(); var exc = $('#eExc', b) ? condRead($('#eExc', b)) : {}; if (Object.keys(exc).length) rl.except = exc;
+    if (Object.keys(rl).length) n.rule = rl; else delete n.rule;
+    var rv = R.Quality && R.Quality.reviewEdit ? R.Quality.reviewEdit(orig, n) : { errors: [], notes: [] };
+    rv.errors.concat(rv.notes).forEach(function (m, i) { toast(m, i < rv.errors.length); });
+    return n;
+  }
+  // 근거 정책 패널: 정책 변경 전에 "몇 개가 숨겨지는지"를 저장된 모듈 기준으로 미리 보여 준다.
+  function policyPanel() {
+    return '<div class="row" style="margin-top:10px;align-items:center;gap:8px;flex-wrap:wrap"><b>근거 정책</b>' + sel('pPol', POLICY_KO, ST.saved.evidencePolicy || 'off') + '<button id="pSave">정책 저장</button><span class="muted" id="pInfo"></span></div>';
+  }
+  function policyBind(root) {
+    var s = $('#pPol', root), info = $('#pInfo', root); if (!s) return;
+    function preview() {
+      var lib = R.Compose.library({ modules: ST.saved.modules, evidencePolicy: s.value }), ev = R.Quality.evidence(lib.all, { policy: s.value });
+      info.textContent = '저장된 모듈 기준 · 숨김 ' + lib.hidden.length + '개' + (lib.restored.length ? ' (폴백 복원 ' + lib.restored.length + '개)' : '') + ' · 승인 ' + ev.status.approved + ' / 미검증(legacy) ' + ev.status.legacy + ' / 근거 부족 ' + ev.status.needs_evidence + ' / 초안 ' + ev.status.draft + ' / 폐기 ' + ev.status.retired;
+    }
+    // 풀이 자료 선택기: 검색 → 결과의 "추가" → 출처 줄 추가, "원문" → 구간 원문 보기. 자료 목록·검색은 관리자 전용 /api/src (읽기 전용)
+    var PK = { docs: null, hits: [] };
+    var docsP = function () { return PK.docs ? Promise.resolve(PK.docs) : api('/api/src?a=list').then(function (d) { PK.docs = d.docs || []; return PK.docs; }); };
+    var docOf = function (id) { return (PK.docs || []).filter(function (d) { return d.id === id; })[0] || { id: id }; };
+    var addRef = function (r) {
+      var ta = $('#eEvR', root); if (!ta) return; var cur = R.Quality.parseRefs(ta.value);
+      if (cur.some(function (c) { return c.id === r.id && (c.chunkId || '') === (r.chunkId || ''); })) { toast('이미 추가된 출처입니다', true); return; }
+      if (cur.length >= 5) { toast('출처는 최대 5개입니다', true); return; }
+      cur.push(r); ta.value = R.Quality.formatRefs(cur); toast('출처를 추가했습니다 — "적용"을 눌러야 반영됩니다');
+    };
+    var grade = function (d) { return d.grade || '미평가'; };
+    var showChunk = function (docId, chunkId) {
+      var v = $('#srcView', root); if (!v) return; v.style.display = ''; v.textContent = '불러오는 중…';
+      api('/api/src?a=chunk&id=' + encodeURIComponent(docId) + '&c=' + encodeURIComponent(chunkId)).then(function (d) { v.textContent = (d.doc ? d.doc.title + ' · ' : '') + (d.chunk.label || '') + '\n\n' + (d.chunk.text || ''); }).catch(function (e) { v.textContent = e.message; });
+    };
+    root.addEventListener('click', function (e) {
+      var t = e.target, res = $('#srcRes', root);
+      if (t.id === 'srcFind') {
+        var q = ($('#srcQ', root).value || '').trim(); if (!q) { toast('검색어를 입력하세요', true); return; }
+        res.textContent = '검색 중…';
+        Promise.all([api('/api/src?a=search&q=' + encodeURIComponent(q)), docsP()]).then(function (got) {
+          PK.hits = got[0].hits || [];
+          res.innerHTML = PK.hits.length ? PK.hits.map(function (h, i) { var d = docOf(h.docId); return '<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)"><b>' + esc(h.docTitle) + '</b> <span class="chip">' + esc(grade(d)) + '</span> <span class="muted">' + esc(h.label || '') + '</span><br>' + esc(h.snippet) + '<br><button type="button" class="srcAdd" data-i="' + i + '">출처로 추가</button> <button type="button" class="srcPeek" data-i="' + i + '">원문 보기</button></div>'; }).join('') : '검색 결과가 없습니다(자료는 "풀이 자료" 탭에서 등록·분석합니다).';
+        }).catch(function (er) { res.textContent = er.message; });
+      } else if (t.id === 'srcList') {
+        res.textContent = '불러오는 중…';
+        PK.docs = null; docsP().then(function (docs) {
+          PK.hits = docs.map(function (d) { return { docId: d.id, docTitle: d.title, chunkId: '', label: '' }; });
+          res.innerHTML = docs.length ? docs.map(function (d, i) { return '<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)"><b>' + esc(d.title) + '</b> <span class="chip">' + esc(grade(d)) + '</span> <span class="muted">' + esc(d.sourceKind || '') + (d.policy && d.policy.reference === false ? ' · 참고 안 함' : '') + '</span> <button type="button" class="srcAdd" data-i="' + i + '">자료 전체를 출처로 추가</button></div>'; }).join('') : '등록된 풀이 자료가 없습니다.';
+        }).catch(function (er) { res.textContent = er.message; });
+      } else if (t.classList && t.classList.contains('srcAdd')) {
+        var h = PK.hits[+t.dataset.i]; if (h) addRef(R.Quality.refFromSource(docOf(h.docId), h));
+      } else if (t.classList && t.classList.contains('srcPeek')) {
+        var h2 = PK.hits[+t.dataset.i]; if (h2 && h2.chunkId) showChunk(h2.docId, h2.chunkId);
+      } else if (t.classList && t.classList.contains('srcView')) {
+        showChunk(t.dataset.doc, t.dataset.chunk);
+      }
+    });
+    s.onchange = preview; preview();
+    $('#pSave', root).onclick = function () {
+      var v = s.value, lib = R.Compose.library({ modules: ST.saved.modules, evidencePolicy: v });
+      if ((v === 'hide_unverified' || v === 'strict') && !confirm('사용자 화면에서 해석 모듈 ' + lib.hidden.length + '개가 숨겨집니다(폴백 복원 ' + lib.restored.length + '개). 적용할까요?')) return;
+      this.disabled = true; var btn = this;
+      save({ evidencePolicy: v }).then(function () { ST.saved.evidencePolicy = v; btn.disabled = false; preview(); }).catch(function (e) { btn.disabled = false; toast(e.message, true); });
+    };
+  }
+
   function modCfg() {
-    return { title: '해석 모듈', base: R.Content.modules, key: 'modules', catKey: 'category', cats: CATS.map(function (c) { return [c, CAT_KO[c]]; }), catLabel: '카테고리', title2: function (x) { return x.headline; }, catName: function (x) { return CAT_KO[x.category] || x.category; },
+    return { panel: policyPanel, bindPanel: policyBind, title: '해석 모듈', base: R.Content.modules, key: 'modules', catKey: 'category', cats: CATS.map(function (c) { return [c, CAT_KO[c]]; }), catLabel: '카테고리', title2: function (x) { return x.headline; }, catName: function (x) { return CAT_KO[x.category] || x.category; },
       blank: function (cat) { return { id: 'mod_' + Date.now().toString(36), category: cat, conditions: {}, priority: 50, headline: '', summary: '', detail: '', keywords: [], imageTags: [], actionTags: [], extra: null, enabled: true }; },
       fields: function (x) { return '<div class="fx"><label>카테고리</label><select id="eCat">' + CATS.map(function (c) { return '<option value="' + c + '"' + (x.category === c ? ' selected' : '') + '>' + CAT_KO[c] + ' (' + c + ')</option>'; }).join('') + '</select></div>' + tf('eH', '핵심 문장 (headline, 1~2문장)', x.headline) + tf('eS', '짧은 설명 (summary)', x.summary, 1) + tf('eD', '상세 풀이 (detail, "자세히 보기"에 펼침)', x.detail, 1) +
         '<div class="fx2">' + tf('eK', '키워드 (쉼표)', (x.keywords || []).join(', ')) + tf('eI', '이미지 태그 imageTags (쉼표, 예: wood,growth,forest)', (x.imageTags || []).join(', ')) + '</div>' + tf('eA', '행동 태그 actionTags (쉼표)', (x.actionTags || []).join(', ')) +
-        '<div class="fx"><label>구조화 보조 항목 extra (JSON, 선택) — 직업 환경·재물 항목 등</label><textarea id="eX" class="mono">' + esc(x.extra ? JSON.stringify(x.extra, null, 1) : '') + '</textarea></div><p class="muted">문장 속 {dayMasterEl} {yongEl} {el.인성} 같은 자리는 개인 사실로 치환됩니다. "반드시·무조건·확정" 표현은 쓰지 마세요.</p>'; },
-      read: function (b, n) { n.category = $('#eCat', b).value; n.headline = $('#eH', b).value; n.summary = $('#eS', b).value; n.detail = $('#eD', b).value; n.keywords = csv($('#eK', b).value); n.imageTags = csv($('#eI', b).value); n.actionTags = csv($('#eA', b).value);
-        var x = $('#eX', b).value.trim(); try { n.extra = x ? JSON.parse(x) : null; } catch (e) { toast('extra JSON 형식이 올바르지 않아 비웠습니다', true); n.extra = null; } if (/(반드시|무조건|확정)/.test(n.headline + n.summary + n.detail)) toast('단정 표현이 포함되어 있습니다. 문구를 확인하세요', true); return n; } };
+        '<div class="fx"><label>구조화 보조 항목 extra (JSON, 선택) — 직업 환경·재물 항목 등</label><textarea id="eX" class="mono">' + esc(x.extra ? JSON.stringify(x.extra, null, 1) : '') + '</textarea></div><p class="muted">문장 속 {dayMasterEl} {yongEl} {el.인성} 같은 자리는 개인 사실로 치환됩니다. "반드시·무조건·확정" 표현은 쓰지 마세요.</p>' + layerFields(x); },
+      read: function (b, n) { var orig = clone(n); n.category = $('#eCat', b).value; n.headline = $('#eH', b).value; n.summary = $('#eS', b).value; n.detail = $('#eD', b).value; n.keywords = csv($('#eK', b).value); n.imageTags = csv($('#eI', b).value); n.actionTags = csv($('#eA', b).value);
+        var x = $('#eX', b).value.trim(); try { n.extra = x ? JSON.parse(x) : null; } catch (e) { toast('extra JSON 형식이 올바르지 않아 비웠습니다', true); n.extra = null; } if (/(반드시|무조건|확정)/.test(n.headline + n.summary + n.detail)) toast('단정 표현이 포함되어 있습니다. 문구를 확인하세요', true); return layerRead(b, n, orig); } };
   }
   function remCfg() {
     return { title: '개운법 라이브러리', base: R.Remedy.LIBRARY, key: 'remedies', catKey: 'type', cats: REM_TYPES.map(function (c) { return [c, REM_KO[c]]; }), catLabel: '유형', title2: function (x) { return x.title; }, catName: function (x) { return REM_KO[x.type] || x.type; },
