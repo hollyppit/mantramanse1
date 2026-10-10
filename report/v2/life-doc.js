@@ -284,8 +284,8 @@
     if (!key) key = /timing|future|TIMING/.test(id) ? 'timing' : /money|MONEY/.test(id) ? 'money' : /marriage|MARRIAGE/.test(id) ? 'marriage' : /love|LOVE/.test(id) ? 'love' : /career|CAREER/.test(id) ? 'career' : /relation|RELATIONSHIP/.test(id) ? 'compatibility' : /ACTION/.test(id) ? 'action' : 'knowledge';
     return key;
   }
-  // "풀이 속 한 장면"은 전생(past)과 인연(궁합·관계: compatibility) 챕터에만 둔다.
-  var EPISODE_KEEP = { past: 1, compatibility: 1 };
+  // "풀이 속 한 장면"은 인연(궁합·관계: compatibility) 챕터에만 둔다. 전생 챕터는 이야기 자체가 결말까지 있어 후일담을 따로 붙이지 않는다.
+  var EPISODE_KEEP = { compatibility: 1 };
   function episode(c, H) {
     var id = c.id || c.base, key = episodeKeyOf(c);
     var sd = H.sd, actor = H.name || '그 사람', chars = actor.charCodeAt(actor.length - 1), topic = actor + (chars >= 0xAC00 && chars <= 0xD7A3 && (chars - 0xAC00) % 28 ? '은' : '는');
@@ -297,7 +297,6 @@
         paras = ['저녁 무렵, {주인공}은 아이 곁에 앉았다. 아이는 ' + activity + '. 평소 같으면 부모의 기준부터 말했을 장면이었다.', '이번에는 말을 조금 늦추고 아이가 하려던 이야기를 끝까지 들었다. “네가 생각한 방법을 먼저 보여 줄래?” 아이는 자기 마음을 말할 작은 틈을 얻었다.', '당장 모든 일이 잘 풀리지는 않았다. 둘은 함께 지킬 약속 하나를 정하고 나머지는 아이가 해 보도록 남겨 두었다. ' + portrait[0] + '의 모습을 이해하는 대화는 그렇게 일상 안에서 시작될 수 있었다.']; source = portrait[0];
       } else paras = ['아이와 이야기를 나누던 {주인공}은 자신이 아이의 답을 먼저 정하고 있다는 것을 알아차렸다.', '이번에는 “너는 어떤 게 재미있었어?”라고 물었다. 처음 듣는 관심사가 나왔고, 함께 보냈던 하루가 아이에게는 다른 모습으로 남아 있었다.', '아이의 성향을 미리 맞히기보다 오늘 들은 말을 기억하기로 했다. 실제 모습을 알아가는 대화가 관계를 살필 첫 단서가 되었다.'];
     }
-    if (key === 'past') paras = ['드라마의 마지막 장면 뒤, 그 사람은 평소처럼 문을 열고 밖으로 나섰다. 지나가던 이웃이 멈추어 도움을 청했다. 큰 선택이 끝난 뒤에도 삶은 이렇게 작은 질문으로 이어졌다.', '예전의 습관대로 답하려다 잠시 멈췄다. 혼자 맡아도 되는 일인지, 상대가 정말 필요로 하는 것이 무엇인지 먼저 물었다. 익숙한 말 대신 새로 배운 태도가 작은 대화 속에 남았다.', '특별한 박수는 없었다. 둘은 할 일을 나누고 각자의 길로 걸어갔다. 이야기가 남긴 변화는 대단한 운명보다 그 평범한 다음 장면에서 더 잘 보였다.'];
     var rows = c.items || [], notable = rows.filter(function (r) { return r.title; })[0];
     if (key === 'timing' && notable) source = notable.title;
     var season = sd.sewoon && sd.sewoon.season, defensive = /defense|transition/.test(season || '');

@@ -57,5 +57,19 @@ const rj = fs.readFileSync(path.join(root, 'report/v2/reader.js'), 'utf8');
 ok(!/requestAnimationFrame\(tick|setInterval\([^)]*scrollTo/.test(rj) && /cancelTween/.test(rj), '일정 속도로 흐르는 스크롤이 없다(MOVE 때만 짧은 tween)');
 ok(['wheel', 'touchmove', 'keydown', 'pointerdown'].every(ev => rj.indexOf("'" + ev + "'") > 0 || rj.indexOf('"' + ev + '"') > 0), '직접 스크롤(wheel·touch·키보드·스크롤바)을 감지한다');
 
+console.log('6. 긴 풀이 문단 나누기(viewer.js chunk)');
+const cs = viewer.indexOf('function chunk(text, max) {'), em = /\r?\n  \}\r?\n/.exec(viewer.slice(cs)), cm = cs >= 0 && em ? [viewer.slice(cs, cs + em.index + em[0].length)] : null;
+ok(!!cm, 'viewer.js 에 chunk() 가 있다');
+if (cm) {
+  const chunk = new Function(cm[0] + 'return chunk;')(), cnt = x => (x.match(/[.!?](\s|$)/g) || []).length;
+  const long = '첫째 문장은 이렇게 쓰입니다. 둘째 문장도 비슷한 길이로 이어집니다. 셋째 문장은 또 다른 이야기를 합니다. 넷째 문장이 마지막을 맺습니다. 조심할 점: 서두르다 놓치는 것입니다. 다섯째 문장입니다.';
+  const parts = chunk(long);
+  ok(parts.length >= 3, '긴 글은 여러 덩어리로 나뉜다: ' + parts.length);
+  ok(parts.join(' ') === long, '나눈 덩어리를 이어 붙이면 원문과 같다(글자를 잃지 않는다)');
+  ok(parts.every(x => cnt(x) <= 2), '한 덩어리는 문장 2개 이내');
+  ok(parts.some(x => /^조심할 점:/.test(x) && cnt(x) === 1), '조심할 점 문장은 홀로 놓인다');
+  ok(chunk('짧은 글입니다.').length === 1 && chunk('').length === 0 && chunk('가나다. 라마바.\n사아자. 차카타. 파하갸.').length === 1, '짧은 글·빈 글·줄바꿈 글은 그대로');
+}
+
 if (fails.length) { console.log('\n실패 ' + fails.length + '건'); fails.forEach(f => console.log(' ✗ ' + f)); process.exit(1); }
 console.log('\n읽기 문서 로직 검증 모두 통과');

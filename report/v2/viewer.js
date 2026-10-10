@@ -291,6 +291,28 @@
   var list = function (a) { a = Array.isArray(a) ? a : (a ? [a] : []); return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
   var warnify = function (h) { return String(h).replace(/조심할 점:\s*([^.!?\n<]*[.!?]?)/g, '<mark class="wn"><i aria-hidden="true">⚠</i><b>조심할 점</b>$1</mark>'); }; // 주황색 경고 강조(아이콘 포함)
   var lines = function (t) { return warnify(esc(t).replace(/\n/g, '<br>')); };
+  /* 긴 풀이 문단 나누기: 문장 경계에서만 자르고, 한 덩어리는 문장 2개·약 110자 안쪽으로 둔다. "조심할 점:" 문장은 홀로 둔다(줄바꿈이 든 글은 그대로). */
+  function chunk(text, max) {
+    var t = String(text == null ? '' : text).trim(); max = max || 110;
+    if (!t) return []; if (t.length <= max || /\n/.test(t)) return [t];
+    var out = [], cur = '', n = 0;
+    t.split(/(?<=[.!?])\s+/).forEach(function (s) {
+      var warn = /^조심할 점:/.test(s);
+      if (cur && (warn || n >= 2 || cur.length + s.length + 1 > max)) { out.push(cur); cur = ''; n = 0; }
+      cur = cur ? cur + ' ' + s : s; n++;
+      if (warn) { out.push(cur); cur = ''; n = 0; }
+    });
+    if (cur) out.push(cur); return out;
+  }
+  // 문서 안의 일반 문단(<p class="lead">글자만</p>)이 길면 덩어리로 나눈다. 글자 스타일 역할(data-tx)이나 태그가 든 문단은 건드리지 않는다.
+  function splitLeads(h) {
+    return String(h).replace(/<p class="lead">([^<]{111,})<\/p>/g, function (m, t) { var parts = chunk(t); return parts.length > 1 ? parts.map(function (x) { return '<p class="lead">' + x + '</p>'; }).join('') : m; });
+  }
+  // 글자 스타일 역할이 붙은 문단: 관리자가 문장을 직접 지정했으면 나누지 않고, 아니면 덩어리마다 같은 역할을 붙인다.
+  function leadPs(c, role, text, cls) {
+    var st = TSX && TSX.resolve(S.ts, c.id, role), parts = st && st.text ? [String(text || '')] : chunk(text); if (!parts.length) parts = [''];
+    return parts.map(function (p) { return '<p class="lead' + (cls ? ' ' + cls : '') + '" data-tx="' + role + '">' + lines(p) + '</p>'; }).join('');
+  }
   /* 본문 읽기 쉽게: 렌더된 문서의 글자 노드에서 핵심 문구만 은은하게 색으로 구분한다(글 내용은 그대로, 감싸기만 한다).
      조심할 점(주황) · 지금 해 볼 것(초록) · "따옴표 문구"(금색) · 숫자+단위(하늘색) · 사주 용어(금색). 문맥을 모르는 낱말 색칠(긍정·부정어)은 하지 않는다.
      용어·숫자는 앞뒤가 한글로 이어지면 건너뛴다('일주일'의 '일주' 같은 오탐 방지). 같은 용어는 한 장면에 한 번만, 숫자는 문단당 3개까지. */
@@ -359,14 +381,14 @@
 
   function sceneHtml(c, s, i) {
     var t = s.sceneType, id = 'data-sc="' + esc(s.sceneId) + '"';
-    if (t === 'life') return s.html; // 인생 지도 문서의 새 구성 조각(R.LifeDoc 가 만든 HTML)
+    if (t === 'life') return s.episode ? s.html : splitLeads(s.html); // 인생 지도 문서의 새 구성 조각(R.LifeDoc 가 만든 HTML). 긴 문단은 읽기 좋게 나눈다
     if (t === 'cinema') return cinemaHtml(c, s);
     if (t === 'chapterIntro') {
       var act = S.rep.acts.filter(function (a) { return a.id === c.act; })[0] || {};
       if (s.compact) return '<section class="scene rv rd-mini" ' + id + '><div class="no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2>' + esc(c.title) + '</h2>' + (c.introText || s.subtitle ? '<p class="sub">' + esc(c.introText || s.subtitle) + '</p>' : '') + '</section>'; // 종합 풀이 안에서 순서대로 이어지는 작은 제목(서두 없이 바로 본론)
       return '<section class="scene rd-head rd-chead" ' + id + '><div class="rd-rule" aria-hidden="true"></div><div class="no" data-tx="intro.no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="rd-rule" aria-hidden="true"></div></section>';
     }
-    if (t === 'insight') return '<section class="scene rv rd-box" ' + id + '><div class="cap">풀이</div><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span><p class="lead' + (c.lead && /_fallback$/.test(c.lead.id || '') ? ' faint' : '') + '" data-tx="insight.lead">' + lines(s.body) + '</p>' + (c.choice ? '<p class="lead choice rd-hl" data-tx="choice.line">' + lines(c.choice) + '</p>' : '') + '' + '</section>';
+    if (t === 'insight') return '<section class="scene rv rd-box" ' + id + '><div class="cap">풀이</div><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span>' + leadPs(c, 'insight.lead', s.body, c.lead && /_fallback$/.test(c.lead.id || '') ? 'faint' : '') + (c.choice ? '<p class="lead choice rd-hl" data-tx="choice.line">' + lines(c.choice) + '</p>' : '') + '' + '</section>';
     if (t === 'verdictFind') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead rd-hl">' + lines(s.body) + '</p></section>';
     if (t === 'verdictBlock') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div>' + (s.sub ? '<p class="lead" style="font-size:1.05rem">' + esc(s.sub) + '</p>' : '') + '<p style="color:var(--ink2)">' + lines(s.body) + '</p></section>';
     if (t === 'verdictEvidence') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead">' + lines(s.body) + '</p>' + (R.ReadingAnswer ? R.ReadingAnswer.card('self') : '') + '</section>';
@@ -377,10 +399,10 @@
     if (t === 'terms') return '<section class="scene rv" ' + id + '><div class="cap">쉬운 용어 풀이</div><div class="tms">' + (s.terms || []).map(function (k) {
       return '<article class="tm"><div class="tmh"><b>' + esc(k.term) + '</b>' + (k.hanja ? '<i aria-hidden="true">' + esc(k.hanja) + '</i>' : '') + '</div>' + (k.here ? '<p class="tmhere">' + esc(k.here) + '</p>' : '') + '<p>' + esc(k.plain) + '</p>' + (k.analogy ? '<p class="tmeg">' + esc(k.analogy) + '</p>' : '') + '</article>'; }).join('') + '</div></section>';
     if (t === 'explanation') {
-      var det = (c.details || []).map(function (d) { return /_fallback$/.test(d.id || '') ? '<p class="faint">' + esc(d.summary) + '</p>' : '<div class="item"><b>' + esc(d.headline) + '</b><span>' + esc(d.summary) + '</span>' + (d.detail ? '<em class="tip">' + esc(d.detail) + '</em>' : '') + '</div>'; }).join('');
+      var det = (c.details || []).map(function (d) { return /_fallback$/.test(d.id || '') ? '<p class="faint">' + esc(d.summary) + '</p>' : '<div class="item"><b>' + esc(d.headline) + '</b><span>' + esc(d.summary) + '</span>' + chunk(d.detail, 80).map(function (x) { return '<em class="tip">' + esc(x) + '</em>'; }).join('') + '</div>'; }).join('');
       var mt = String(c.meaning || ''), cut = mt.search(/[.!?]\s/), first = cut > 0 ? mt.slice(0, cut + 1) : mt, rest = cut > 0 ? mt.slice(cut + 1).trim() : '';
-      var more = rest || det ? '<div class="more open"><div class="body"><div>' + (rest ? '<p>' + lines(rest) + '</p>' : '') + det + '</div></div></div>' : '';
-      return '<section class="scene rv rd-box" ' + id + '>' + '' + '<div class="cap">풀이 · 더 깊이</div><p class="lead" data-tx="explain.lead">' + lines(first) + '</p>' + more + '</section>';
+      var more = rest || det ? '<div class="more open"><div class="body"><div>' + chunk(rest).map(function (x) { return '<p>' + lines(x) + '</p>'; }).join('') + det + '</div></div></div>' : '';
+      return '<section class="scene rv rd-box" ' + id + '>' + '' + '<div class="cap">풀이 · 더 깊이</div>' + leadPs(c, 'explain.lead', first) + more + '</section>';
     }
     if (t === 'dataVisualization') return monthsHtml(c, s);
     if (t === 'timeline') return timelineHtml(c, s);
