@@ -202,7 +202,7 @@
       blocked.forEach(function (m) { if (bare(m) && why[m.id] !== 'draft' && why[m.id] !== 'retired') { delete why[m.id]; restored.push(m.id); } });
     });
     var mods = all.filter(function (m) { if (!why[m.id]) return true; hidden.push({ id: m.id, category: m.category, reason: why[m.id] }); return false; });
-    return { modules: mods, policy: policy, hidden: hidden, restored: restored, remedies: mix(R.Remedy.LIBRARY, (saved.remedies || []).map(R.Remedy.normalize)), media: saved.media || saved.images || [], version: (saved.version ? saved.version + '+' : '') + R.Content.version };
+    return { modules: mods, all: all, policy: policy, hidden: hidden, restored: restored, remedies: mix(R.Remedy.LIBRARY, (saved.remedies || []).map(R.Remedy.normalize)), media: saved.media || saved.images || [], version: (saved.version ? saved.version + '+' : '') + R.Content.version };
   }
 
   // AI 미디어 선택: 서버가 만든 후보(assetId·점수·태그)만 AI 에 주고, 응답 assetId 가 그 scene 의 후보 목록에 있을 때만 교체한다.
