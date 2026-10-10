@@ -121,6 +121,9 @@
       box.innerHTML = ''; box.appendChild(v);
       v.addEventListener('playing', function once() { v.removeEventListener('playing', once); start.hidden = true; if (cfg.card) cardT = setTimeout(showCard, cfg.cardAt != null ? cfg.cardAt : 3000); T(ev + '_video_started', {}); snd.hidden = false; snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; if (!v.muted && R.Bgm) R.Bgm.duck(true); });
       v.addEventListener('ended', function () { finish('completed'); });
+      var endGuard = 0, nearEnd = function () { return isFinite(v.duration) && v.duration > 1 && v.currentTime >= v.duration - 0.35; };
+      var armEnd = function () { if (done || endGuard || !nearEnd()) return; endGuard = setTimeout(function () { endGuard = 0; if (!done && nearEnd()) finish('completed'); }, 1200); }; // 'ended' 가 먼저 오면 그쪽이 처리한다
+      v.addEventListener('timeupdate', armEnd); v.addEventListener('pause', armEnd); v.addEventListener('waiting', armEnd);
       v.addEventListener('error', function () { if (!done) { v.remove(); still(); } }, true);
       function tapToPlay() { // 자동 재생이 막힌 기기(iOS 저전력 모드·데이터 절약 등): 영상을 건너뛰지 않고 탭 한 번으로 재생한다(탭은 사용자 동작이라 소리도 가능)
         if (done) return; start.textContent = '▶ 탭해서 영상 보기'; start.hidden = false;
@@ -169,7 +172,7 @@
   function proVideo(next) {
     if (!hasProVideo()) { next(false); return; }
     var bb = $('#bgmBtn'); if (bb) bb.hidden = true; // 영상 동안은 ♪ 버튼도 숨겨 배경음악이 끼어들지 않게
-    T('prologue_started', { video: 1 }); playStage({ kind: 'prologue', clip: { videoUrl: S.proVid }, noCap: true, onDone: function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', { video: 1 }); if (bb && R.Bgm && R.Bgm.has()) bb.hidden = false; if (R.Bgm) R.Bgm.play('cinematic'); next(true); } });
+    T('prologue_started', { video: 1 }); playStage({ kind: 'prologue', clip: { videoUrl: S.proVid }, noCap: true, onDone: function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', { video: 1 }); if (bb && R.Bgm && R.Bgm.has()) bb.hidden = false; try { if (R.Bgm) R.Bgm.play('cinematic'); } catch (e) { } try { next(true); } catch (e) { if (window.console) console.error('prologue→next', e); try { beginReader(); } catch (e2) { toast('화면을 여는 중 문제가 생겼습니다. 새로고침해 주세요.'); } } } });
   }
   function startGate() {
     if (MAPQ) { if (LIFE) lifeBegin(); else beginReader(); return; }
@@ -243,7 +246,7 @@
       var doc = null; try { doc = R.LifeDoc.build(H); } catch (e) { doc = null; }
       if (doc && doc.chapters.length) { S.rep = Object.assign({}, rep0, { acts: doc.acts, chapters: doc.chapters }); S.visited = {}; S.ended = {}; T('life_doc_built', { chapters: doc.chapters.length }); }
       beginReader();
-    });
+    }).catch(function (e) { if (window.console) console.error('lifeBegin', e); try { beginReader(); } catch (e2) { toast('화면을 여는 중 문제가 생겼습니다. 새로고침해 주세요.'); } });
   }
   /* ── 운명 탐험 홈(ACT 01 각성 이후 챕터를 골라 읽는다). ?explore=0 이면 예전처럼 처음부터 한 문서로 읽는다. 읽은 챕터·이어 읽을 위치는 이 기기에만 저장한다. ── */
   var EXPLORE = LIFE && !PREVIEW && !!R.Explore && !/[?&]explore=0(&|$)/.test(location.search);
@@ -422,7 +425,7 @@
     }) : null;
     var ready = reading ? Promise.race([reading.first, new Promise(function (ok) { setTimeout(ok, 18000); })]) : Promise.resolve();
     if (!S.stopWait && !PREVIEW) S.stopWait = waitNotice();
-    ready.then(function () { if (S.stopWait) { S.stopWait(); S.stopWait = null; } view('reader'); if (EXPLORE) exploreEntry(); else openDoc(0, { autoStart: !PREVIEW }); });
+    ready.then(function () { if (S.stopWait) { S.stopWait(); S.stopWait = null; } view('reader'); if (EXPLORE) { try { exploreEntry(); } catch (e) { if (window.console) console.error('exploreEntry', e); openDoc(0, { autoStart: !PREVIEW }); } } else openDoc(0, { autoStart: !PREVIEW }); });
   }
   // 일간 소개·일주 캐릭터 영상은 프롤로그 앞이 아니라 본문의 첫 챕터(영상과 글을 따로)로 둔다
   function addCharIntro() {
