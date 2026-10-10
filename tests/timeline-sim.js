@@ -33,7 +33,14 @@ const names = new Set(L.NAMES), sig = [];
   ok(e3.chain.map(c => c.name).join() === '대운,세운,월운' && e3.chain.reduce((s, c) => s + c.weight, 0) === 100, tag + ' 월운 근거: 대운+세운+월운 비중 합 100');
   ok(e1.natal.day && e1.natal.zone && e1.comps.length >= 3 && e1.comps.every(c => c.weight > 0), tag + ' 근거: 원국 요약·성분');
   ok(Math.abs(e1.comps.reduce((s, c) => s + c.contrib, 0) - e1.own) <= 3, tag + ' 근거: 성분 기여 합 ≈ 자체 점수 (' + e1.comps.reduce((s, c) => s + c.contrib, 0).toFixed(1) + ' vs ' + e1.own + ')');
+  [e1, e2, e3].forEach((e, n) => { // 관계 분류: 모든 관계가 하나로 분류되고, 점수 반영 수는 관계 유래 parts 수와 같다
+    ok(Array.isArray(e.relInfo) && e.relInfo.length === e.relations.length && e.relInfo.every((r, i) => r.text === e.relations[i] && ['score', 'volat', 'ref'].includes(r.use)), tag + ' 관계 분류 구조 #' + n);
+    const names = new Set(e.relations.map(s => s.split(' ').pop())); // parts 는 상위 6개만 오므로, 그 안에 있는 관계 유래 항목이 모두 "점수 반영"인지만 확인한다
+    const parts = new Set(e.relInfo.filter(r => r.use === 'score').map(r => r.text.split(' ').pop()));
+    e.parts.forEach(p => { const k = p.label.split(' — ')[0]; if (names.has(k)) ok(parts.has(k), tag + ' parts 에 있는 관계는 점수 반영으로 분류: ' + k); });
+  });
   const eh = T.evidenceHtml(e3);
+  ok(!/undefined|NaN/.test(T.evidenceHtml(e1)) && (e1.relations.length === 0 || /점수에 반영된 관계|변동 신호에만 쓰인 관계|참고로만 보는 관계/.test(T.evidenceHtml(e1))), tag + ' 관계 묶음 문구');
   ok(/원국/.test(eh) && /대운/.test(eh) && /세운/.test(eh) && /월운/.test(eh) && /보장하지 않습니다/.test(eh) && !/undefined|NaN/.test(eh), tag + ' 근거 화면: 층 구분·면책·깨진 값 없음');
   const html = T.html({ daeun: dl, years: ys, months: ms, d: cur.idx, y: y0.year, m: ms[0].month });
   ok(/실제 사건이 일어날 확률이 아닙니다/.test(html) && /읽는 법/.test(html) && /이렇게 판정했어요/.test(html) && /근거 보기/.test(html), tag + ' 화면: 면책·기준·근거 표시');
