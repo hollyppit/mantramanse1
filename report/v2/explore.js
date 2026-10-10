@@ -22,7 +22,7 @@
   /* ── 세계 기본 정의. match: 챕터 base/id 를 검사하는 정규식 문자열(첫 번째로 맞는 세계). chapters: 관리자가 직접 연결한 챕터 ID(우선). ── */
   var DEFAULT_WORLDS = [
     { id: 'w1', order: 1, name: '천명의 서고', line: '나의 본질과 타고난 기질', desc: '사주 원국, 일간·일주, 오행과 십성, 강약과 뿌리, 강점과 그림자를 읽습니다.', color: '#1B2347', accent: '#8FA6E8', icon: '📜',
-      match: ['^c-char$', '^c0[1-5]$', '^life_(self_who|tengods|stars)$', '^deep_(car|proscons|stages)$', '^life_ik_SELF'] },
+      match: ['^c-char', '^c0[1-5]$', '^life_(self_who|tengods|stars)$', '^deep_(car|proscons|stages)$', '^life_ik_SELF'] },
     { id: 'w2', order: 2, name: '황금의 성채', line: '직업 · 재물 · 성공', desc: '직업 적성, 유리한 업종과 불리한 업종, 사업과 독립, 재물 흐름을 읽습니다.', color: '#3A2C0E', accent: '#E3B341', icon: '🏯',
       match: ['^c0[678]$', '^life_(career_style|money_nature|career_timing|money_timing)$', '^deep_(jobs|wealth)$', '^life_ik_(MONEY|CAREER)'] },
     { id: 'w3', order: 3, name: '인연의 정원', line: '사랑과 인간관계', desc: '연애 성향, 결혼과 배우자, 대인관계, 가족과 자녀, 궁합을 읽습니다.', color: '#3A1B2A', accent: '#E58AA8', icon: '🌸',

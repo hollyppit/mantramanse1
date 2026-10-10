@@ -14,7 +14,7 @@
   var PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
   var HUB = !PREVIEW && /[?&]from=hub(&|$)/.test(location.search); // /report/hub/ 에서 넘어온 경우: 일간·일주 영상·프롤로그는 허브가 이미 보여 줬으므로 건너뛰고 바로 인생 지도로 간다
   var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
-  var view = function (v) { if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
+  var view = function (v) { var mb0 = document.getElementById('mapBtn'); if (mb0) mb0.hidden = v !== 'reader'; if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
   function toast(msg, ms) { var t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, ms || 3200); }
   var sg = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, ss = function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { } };
 
@@ -247,6 +247,7 @@
   var EXPLORE = LIFE && !PREVIEW && !!R.Explore && !/[?&]explore=0(&|$)/.test(location.search);
   function xpSave() { if (!S.xp || !S.xpKey) return; S.xp.ended = S.ended; S.xp.last = S.cur ? S.idx : S.xp.last; R.Explore.save(S.xpKey, S.xp); }
   function exploreEntry() {
+    if (!document.getElementById('mapBtn')) { var mb = document.createElement('button'); mb.type = 'button'; mb.id = 'mapBtn'; mb.className = 'chipbtn'; mb.hidden = $('#app').dataset.view !== 'reader'; mb.textContent = '세계 지도'; mb.onclick = function () { if (S.mv) S.mv.pause(); showHome(); }; document.body.appendChild(mb); }
     S.xpKey = (S.rep.meta && S.rep.meta.key) || 'default'; S.xp = R.Explore.load(S.xpKey); S.xpWorlds = R.Explore.mergeWorlds(null);
     Object.keys(S.xp.ended).forEach(function (id) { S.ended[id] = 1; S.visited[id] = 1; });
     var first = S.rep.chapters[0], awaken = !!(first && first.id === 'c-char' && !S.ended['c-char']); // 각성 연출(일간 소개·일주 영상)은 먼저 본다
@@ -425,6 +426,16 @@
   function addCharIntro() {
     var rep = S.rep; if (PREVIEW || !R.CharIntro || !rep || !rep.chapters || rep.chapters.some(function (c) { return c.id === 'c-char'; })) return;
     var ch = null; try { ch = R.CharIntro.chapter(S.sd, S.name, S.awk, (rep.acts[0] || {}).id); } catch (e) { ch = null; }
+    if (ch && EXPLORE) { // 각성 연출(일간 소개 → 일주 영상 → 일주 소개 → 맺음)만 앞에 두고, 길게 읽는 해설은 해독 구간(타고난 오행 앞)으로 옮긴다
+      var KEEP = { 'ci-head': 1, 'ci-v1': 1, 'ci-t1': 1, 'ci-v2': 1, 'ci-t3': 1, 'ci-end': 1 }, main = [], more = [];
+      ch.scenes.forEach(function (s) { (KEEP[s.sceneId] ? main : more).push(s); });
+      if (more.length && main.length) {
+        var mainCh = Object.assign({}, ch, { scenes: main }), moreCh = Object.assign({}, ch, { id: 'c-char-more', base: 'c-char-more', title: '일간·일주 더 깊이 읽기', scenes: [{ sceneId: 'ci-more-head', sceneType: 'life', html: '<section class="scene rd-sec rd-head" data-sc="ci-more-head"><div class="no">CHARACTER</div><h2>일간과 일주, 조금 더 깊이</h2></section>' }].concat(more) });
+        var list = rep.chapters.slice(), at = -1; list.forEach(function (c, i) { if (c.id === 'life_here') at = i; });
+        list.splice(at >= 0 ? at + 1 : 0, 0, moreCh);
+        S.rep = Object.assign({}, rep, { chapters: [mainCh].concat(list) }); S.visited = {}; S.ended = {}; return;
+      }
+    }
     if (ch) { S.rep = Object.assign({}, rep, { chapters: [ch].concat(rep.chapters) }); S.visited = {}; S.ended = {}; }
   }
   // 본문 안의 영상은 화면에 들어오면 재생하고 벗어나면 멈춘다(소리는 꺼진 채, 컨트롤 없이 액자처럼 무한 루프)
@@ -673,9 +684,9 @@
     var ci = +sec.dataset.ch, c = S.rep.chapters[ci]; if (!c) return;
     if (ci !== S.idx || !S.cur) enterChapter(c, ci);
     if (EXPLORE && c.id === 'c-char' && !S.homeShown) { // 각성 연출의 마지막 장면에 닿으면(자동·수동 모두) 잠시 읽을 시간을 주고 세계 지도로 보낸다
-      var art = sec.parentNode, lastSec = art && art.lastElementChild === sec;
-      if (lastSec) { S.homeShown = 1; S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); xpSave();
-        setTimeout(function () { if (S.view !== 'home' && S.cur && S.rep.chapters[S.idx] && S.rep.chapters[S.idx].id === 'c-char') { if (S.mv) S.mv.pause(); showHome(); } }, Math.round(4500 / (playbackRate() || 1))); }
+      var art = sec.parentNode, hasT3 = !!(art && art.querySelector('[data-sc="ci-t3"]')), hit = !!(art && art.lastElementChild === sec); // 일간 소개 → 일주 영상 → 일주 소개까지가 각성 연출
+      if (hit) { S.homeShown = 1; S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); xpSave();
+        setTimeout(function () { if (S.view !== 'home' && S.cur && S.rep.chapters[S.idx] && S.rep.chapters[S.idx].id === 'c-char') { if (S.mv) S.mv.pause(); showHome(); } }, Math.round(5000 / (playbackRate() || 1))); }
     }
     if (sec.classList.contains('s-end') && !S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); if (EXPLORE) { xpSave(); if (c.id === 'c-char' && !S.homeShown) { S.homeShown = 1; setTimeout(function () { if (S.mv) S.mv.pause(); showHome(); }, 900); } } }
   }

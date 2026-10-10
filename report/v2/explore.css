@@ -243,3 +243,7 @@
 .sm .chipbtn { min-width: 44px; }
 @media (prefers-reduced-motion: reduce) { .sm-bg { animation: none !important; } .sm-tx { transition: none; } }
 .sm-top .chipbtn { flex: none; white-space: nowrap; }
+
+/* 읽는 중 세계 지도로 가는 버튼(상단 바 아래, 홈 버튼 밑) */
+#mapBtn { position: fixed; z-index: 100; right: 12px; top: calc(64px + env(safe-area-inset-top, 0px)); background: rgba(8, 10, 18, .7); border-color: var(--gold-d); color: var(--gold-l); }
+#mapBtn[hidden] { display: none; }
