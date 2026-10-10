@@ -12,7 +12,7 @@
     { id: 4, roman: 'ACT 04', title: '선택', line: '내 인생의 주요 질문' },
     { id: 5, roman: 'ACT 05', title: '여정', line: '앞으로의 나침반' },
   ];
-  // 기존 문서의 막(life-doc act id) → ACT. 일주 각성 영상(c-char)은 ACT 01.
+  // 기존 문서의 막(life-doc act id) → ACT. 일주 캐릭터 영상(c-char)은 ACT 01.
   var LIFE_ACT = { 1: 3, 2: 2, 3: 2, 4: 4, 5: 3, 6: 5 }, CLASSIC_ACT = { 1: 2, 2: 4, 3: 4, 4: 3, 5: 5 };
   function actOf(c, flow) {
     if (c && c.id === 'c-char') return 1;

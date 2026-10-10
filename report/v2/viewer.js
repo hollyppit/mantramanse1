@@ -14,7 +14,7 @@
   var PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
   var MAPQ = !PREVIEW && /[?&]map=[^&]+/.test(location.search); // ?map=생년월일,시각,성별 — 프롤로그를 건너뛰고 곧바로 세계 지도(확인용)
   var HUB = !PREVIEW && /[?&]from=hub(&|$)/.test(location.search); // /report/hub/ 에서 넘어온 경우: 일간·일주 영상·프롤로그는 허브가 이미 보여 줬으므로 건너뛰고 바로 인생 지도로 간다
-  var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] }; R.__state = S; // 확인용(콘솔에서 ReportV2.__state 로 현재 상태를 볼 수 있다)
+  var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
   var view = function (v) { var ws0 = document.getElementById('wstrip'); if (ws0 && v !== 'reader' && v !== 'home') { ws0.hidden = true; document.documentElement.style.removeProperty('--bar-h'); } if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
   function toast(msg, ms) { var t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, ms || 3200); }
   var sg = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, ss = function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { } };
