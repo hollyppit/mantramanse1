@@ -15,7 +15,7 @@
   var MAPQ = !PREVIEW && /[?&]map=[^&]+/.test(location.search); // ?map=생년월일,시각,성별 — 프롤로그를 건너뛰고 곧바로 세계 지도(확인용)
   var HUB = !PREVIEW && /[?&]from=hub(&|$)/.test(location.search); // /report/hub/ 에서 넘어온 경우: 일간·일주 영상·프롤로그는 허브가 이미 보여 줬으므로 건너뛰고 바로 인생 지도로 간다
   var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
-  var view = function (v) { var mb0 = document.getElementById('mapBtn'); if (mb0) mb0.hidden = v !== 'reader'; if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
+  var view = function (v) { var ws0 = document.getElementById('wstrip'); if (ws0 && v !== 'reader' && v !== 'home') { ws0.hidden = true; document.documentElement.style.removeProperty('--bar-h'); } if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
   function toast(msg, ms) { var t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, ms || 3200); }
   var sg = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, ss = function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { } };
 
@@ -252,16 +252,46 @@
   var EXPLORE = !PREVIEW && !!R.Explore && !/[?&]explore=0(&|$)/.test(location.search);
   function xpSave() { if (!S.xp || !S.xpKey) return; S.xp.ended = S.ended; S.xp.last = S.cur ? S.idx : S.xp.last; R.Explore.save(S.xpKey, S.xp); }
   function exploreEntry() {
-    if (!document.getElementById('mapBtn')) { var mb = document.createElement('button'); mb.type = 'button'; mb.id = 'mapBtn'; mb.className = 'chipbtn'; mb.hidden = $('#app').dataset.view !== 'reader'; mb.textContent = '세계 지도'; mb.onclick = function () { if (S.mv) S.mv.pause(); showHome(); }; document.body.appendChild(mb); }
-    S.xpKey = (S.rep.meta && S.rep.meta.key) || 'default'; S.xp = R.Explore.load(S.xpKey); S.xpWorlds = R.Explore.mergeWorlds(null);
+    ensureStrip();
+    S.xpKey = (S.rep.meta && S.rep.meta.key) || 'default'; S.xp = R.Explore.load(S.xpKey); S.xpWorlds = R.Explore.mergeWorlds(null); buildWmap();
     Object.keys(S.xp.ended).forEach(function (id) { S.ended[id] = 1; S.visited[id] = 1; });
     // 프롤로그(영상 또는 텍스트)가 끝나면 곧바로 세계 지도. 일간·일주 소개와 일주 영상은 지도에서 '천명의 서고'로 들어가 볼 수 있다.
     openDoc(0, { autoStart: false }); showHome();
     // 관리자가 저장한 세계 정의(이름·색·연결 챕터·순서·활성화)가 있으면 기본값 위에 덮어 쓴다. 실패하면 기본 6개 세계 그대로.
     var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 4000);
     fetch('/api/worlds', { signal: ctl && ctl.signal }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-      clearTimeout(tm); if (d && d.worlds && d.worlds.length) { S.xpWorlds = R.Explore.mergeWorlds(d.worlds); if (S.view === 'home') showHome(S.xpWorld); }
+      clearTimeout(tm); if (d && d.worlds && d.worlds.length) { S.xpWorlds = R.Explore.mergeWorlds(d.worlds); buildWmap(); if (S.view === 'home') showHome(S.xpWorld); else renderStrip(); }
     }).catch(function () { clearTimeout(tm); });
+  }
+  /* ── 챕터 탭 줄: 지금 읽는 챕터가 속한 세계의 챕터를 가로로 늘어놓는다. 읽는 중·세계 도구 화면 어디서든 바로 이동. ── */
+  var TOOL_LABEL = { w1: '기둥·십성', w2: '비교 탐색', w3: '궁합 탐색', w4: '타임라인', w5: '전생 무빙툰', w6: '행동 가이드' };
+  var pinTo = function (i) { S.pin = { idx: i, until: Date.now() + 3000 }; }, pinned = function () { return S.pin && Date.now() < S.pin.until ? S.pin.idx : null; };
+  function buildWmap() {
+    if (!S.rep || !R.Explore) return; var list = (S.xpWorlds || R.Explore.mergeWorlds(null)).map(function (w) { return Object.assign({}, w, { enabled: true }); }), idx = [], by = {};
+    S.rep.chapters.forEach(function (c, i) { var id = R.Explore.worldFor(c, list, 'life'); idx[i] = id; (by[id] = by[id] || []).push(i); });
+    S.wmap = { idx: idx, by: by, list: list };
+  }
+  function ensureStrip() {
+    if (document.getElementById('wstrip')) return; var n = document.createElement('nav'); n.id = 'wstrip'; n.setAttribute('aria-label', '챕터 이동'); n.hidden = true; document.body.appendChild(n);
+    n.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-ws]'); if (!b) return; var k = b.dataset.ws, vw = $('#app').dataset.view, wid = S.wmap && (vw === 'reader' ? S.wmap.idx[pinned() != null ? pinned() : S.idx] : S.xpWorld);
+      if (k === 'map') { if (S.mv) S.mv.pause(); showHome(); } else if (k === 'tool') { if (S.mv) S.mv.pause(); showHome(wid); }
+      else if (k === 'go') { var i = +b.dataset.i; if (vw === 'reader') { pinTo(i); renderStrip(); gotoChapter(i, false, !!(S.mv && S.mv.state() === 'PLAYING')); T('strip_go', { index: i }); } else enterFromHome(i); }
+    });
+  }
+  function renderStrip() {
+    var n = document.getElementById('wstrip'); if (!n || !S.wmap || !S.rep) return; var vw = $('#app').dataset.view, cur = pinned() != null ? pinned() : S.idx, wid = vw === 'reader' ? S.wmap.idx[cur] : (vw === 'home' ? S.xpWorld : null);
+    if (!wid) { n.hidden = true; document.documentElement.style.removeProperty('--bar-h'); return; }
+    var w = (S.wmap.list || []).filter(function (x) { return x.id === wid; })[0] || {}, idxs = S.wmap.by[wid] || [], h = '';
+    h += '<button type="button" class="ws-m" data-ws="map">‹ 세계 지도</button><button type="button" class="ws-t' + (vw === 'home' ? ' on' : '') + '" data-ws="tool">' + esc(w.icon || '') + ' ' + esc(TOOL_LABEL[wid] || '살펴보기') + '</button>';
+    idxs.forEach(function (i) { var c = S.rep.chapters[i]; h += '<button type="button" class="ws-c' + (vw === 'reader' && i === cur ? ' on' : '') + (S.ended[c.id] ? ' dn' : '') + '" data-ws="go" data-i="' + i + '">' + esc(c.title) + '</button>'; });
+    n.innerHTML = h; n.className = vw === 'reader' ? 'ws-r' : 'ws-h'; n.style.setProperty('--wa', w.accent || '#D5B97F'); n.hidden = false;
+    document.documentElement.style.setProperty('--bar-h', vw === 'reader' ? '110px' : '62px');
+    var on = n.querySelector('.on'); if (on) n.scrollLeft = Math.max(0, on.offsetLeft - 90);
+  }
+  function enterWorld(wid) {
+    var idxs = (S.wmap && S.wmap.by[wid]) || []; if (!idxs.length) { showHome(wid); return; }
+    var pick = idxs.filter(function (i) { return !S.ended[S.rep.chapters[i].id]; })[0]; if (pick == null) pick = idxs[0]; enterFromHome(pick);
   }
   /* 세계 첫 입장 연출: 3.5초 안팎의 짧은 전환(영상·이미지가 없으면 색과 이름만). 탭하면 바로 건너뛰고, 두 번째 입장부터는 보이지 않는다. */
   function worldIntro(g, done) {
@@ -282,7 +312,7 @@
     var widget = cur && cur.world.id === 'w4' ? worldTimelineHtml() : cur && cur.world.id === 'w1' ? worldLibraryHtml() : cur && cur.world.id === 'w2' ? worldCastleHtml() : cur && cur.world.id === 'w3' ? worldGardenHtml() : cur && cur.world.id === 'w6' ? worldSanctuaryHtml() : cur && cur.world.id === 'w5' ? worldSamsaraHtml() : '';
     var m = { mode: cur ? 'world' : 'map', widget: widget, name: S.name, progress: R.Explore.progress(rep.chapters, S.ended), resume: R.Explore.resumeIndex(rep.chapters, { ended: S.ended, last: S.cur ? S.idx : st.last }), auto: st.auto, rate: playbackRate(),
       worlds: worlds, current: cur, ended: S.ended, last: S.cur ? S.idx : st.last };
-    $('#v-home').innerHTML = R.Explore.html(m, esc); view('home'); S.view = 'home'; T('explore_home_viewed', { done: m.progress.done, world: S.xpWorld || '' });
+    $('#v-home').innerHTML = R.Explore.html(m, esc); view('home'); S.view = 'home'; renderStrip(); T('explore_home_viewed', { done: m.progress.done, world: S.xpWorld || '' });
   }
   /* 윤회의 문 인터랙션: 개인화된 전생 서사를 컷 단위 무빙툰으로 감상(R.Samsara). 이미 만들어진 전생 챕터의 문장을 그대로 쓰고, 에셋이 없으면 색 바탕으로 대신한다. */
   function worldSamsaraHtml() {
@@ -393,14 +423,14 @@
     var y = window.scrollY; showHome('w4'); window.scrollTo(0, y); T('timeline_select', { level: b.dataset.tld != null ? 'daeun' : b.dataset.tly != null ? 'year' : 'month' });
   });
   function enterFromHome(idx) {
-    S.view = 'reader'; view('reader'); mountReading(S.xp ? S.xp.auto : true); window.scrollTo(0, 0); if (idx > 0) gotoChapter(idx, true); T('explore_chapter_picked', { index: idx });
+    S.view = 'reader'; view('reader'); pinTo(idx); renderStrip(); mountReading(S.xp ? S.xp.auto : true); window.scrollTo(0, 0); if (idx > 0) gotoChapter(idx, true); T('explore_chapter_picked', { index: idx });
   }
   $('#v-home').addEventListener('click', function (e) {
     var b = e.target.closest('[data-xgo]'); if (b) { enterFromHome(+b.dataset.xgo); return; }
     if (e.target.closest('[data-xmap]')) { showHome(); return; }
     var w = e.target.closest('[data-xw]'); if (w) {
       var g = R.Explore.worldsModel(S.rep.chapters, S.xpWorlds || R.Explore.mergeWorlds(null), S.ended, S.idx).filter(function (x) { return x.world.id === w.dataset.xw; })[0];
-      if (g) worldIntro(g, function () { showHome(g.world.id); });
+      if (g) worldIntro(g, function () { enterWorld(g.world.id); });
     }
   });
   $('#v-home').addEventListener('change', function (e) { if (e.target.id === 'xAuto' && S.xp) { S.xp.auto = e.target.checked; xpSave(); } });
@@ -681,7 +711,7 @@
     S.mv = R.Reading.mount($('#chapter'), { flow: Object.assign({}, S.pack && S.pack.flow, { playbackRate: playbackRate() }), reduce: reduce, saveData: saveData, bgList: S.bg, autoStart: auto, bgm: R.Bgm && R.Bgm.has() ? R.Bgm : null, onSection: onSection, onEnd: onDocEnd,
       onProgress: function (fr) { $('#progFill').style.width = Math.round(fr * 1000) / 10 + '%'; $('#prog').setAttribute('aria-valuenow', String(Math.round(fr * 100))); } });
   }
-  function resumeReader() { view('reader'); mountReading(false); window.scrollTo(0, S.scroll.doc || 0); if (S.mv) S.mv.measure(); }
+  function resumeReader() { view('reader'); if (EXPLORE) renderStrip(); mountReading(false); window.scrollTo(0, S.scroll.doc || 0); if (S.mv) S.mv.measure(); }
   function gotoChapter(i, instant, resume) {
     var el = $('#chapter .chap[data-ch="' + i + '"]'); if (!el || !S.mv) return; var p = el.previousElementSibling; if (p && p.classList.contains('rd-act')) el = p; S.mv.gotoEl(el, instant, resume);
   }
@@ -691,12 +721,13 @@
     if (sec.classList.contains('s-end') && !S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); if (EXPLORE) { xpSave(); if (c.id === 'c-char' && !S.homeShown) { S.homeShown = 1; setTimeout(function () { if (S.mv) S.mv.pause(); showHome(); }, 900); } } }
   }
   function enterChapter(c, ci) {
+    if (S.pin) { if (Date.now() < S.pin.until && ci < S.pin.idx) return; if (ci >= S.pin.idx) S.pin = null; } // 점프 직후 앞 챕터 신호는 무시
     var rep = S.rep, n = rep.chapters.length, prev = S.cur ? rep.chapters[S.idx] : null, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}; S.idx = ci; S.cur = true;
     $('#barAct').textContent = act.roman || ''; $('#barTitle').textContent = act.title ? act.title + ' · ' + c.title : c.title; $('#barNo').textContent = String(c.no).padStart(2, '0'); $('#barTot').textContent = n;
     if (prev && prev.act !== c.act && !S.visited[c.id]) { T('act_completed', { act: prev.act }); var a = rep.acts.filter(function (x) { return x.id === prev.act; })[0]; if (a && a.pdfDone) toast(a.pdfDone, 3800); }
     if (!S.visited[c.id]) { S.visited[c.id] = 1; T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if ((c.base || c.id) === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {}); }
     if (R.Bgm && R.Bgm.has()) { var mo = c.scenes.filter(function (s) { return s.sceneType === 'insight' || s.sceneType === 'chapterIntro'; })[0]; R.Bgm.play(mo ? R.Cinema.resolve(mo, layersOf(mo)).bgmMood : 'minimal'); } // 챕터 분위기에 맞는 BGM
-    checkUnlock(); ss('mt_v2_idx', String(ci)); if (EXPLORE) xpSave();
+    checkUnlock(); ss('mt_v2_idx', String(ci)); if (EXPLORE) { xpSave(); renderStrip(); }
   }
   function onDocEnd() { if (!PREVIEW) endingCinema(finalView); } // 끝까지 읽어 주면 엔딩 장면으로 이어진다
   // 문서 안 클릭·체크 처리(한 번만 등록). 어느 챕터의 것인지는 가장 가까운 .chap 에서 읽는다.

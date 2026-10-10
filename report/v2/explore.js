@@ -99,17 +99,15 @@
   var wstyle = function (w) { return ' style="--wc:' + E(w.color || '#1B2347') + ';--wa:' + E(w.accent || '#D5B97F') + (w.bgImage ? ';--wbg:url(' + E(w.bgImage) + ')' : '') + '"'; };
 
   function html(m, esc) {
-    esc = esc || E; var p = m.progress, nm = m.name ? esc(m.name) + '님의 운명 세계' : '나의 운명 세계', h = '<div class="xp">';
+    esc = esc || E; var p = m.progress, nm = m.name ? esc(m.name) + '님의 운명 세계' : '나의 운명 세계', h = '<div class="xp' + (m.mode === 'world' ? ' xp-wv' : '') + '">';
     if (m.mode === 'world') {
       var g = m.current, w = g.world;
-      h += '<button type="button" class="xp-back" data-xmap>‹ 운명 세계 지도</button><section class="xp-wd"' + wstyle(w) + '><p class="kicker">WORLD ' + esc(String(w.order || '')) + '</p><h2 class="xp-h">' + esc(w.icon || '') + ' ' + esc(w.name) + '</h2><p class="xp-sum">' + esc(w.line) + '</p>' +
+      h += '<section class="xp-wd"' + wstyle(w) + '><p class="kicker">WORLD ' + esc(String(w.order || '')) + '</p><h2 class="xp-h">' + esc(w.icon || '') + ' ' + esc(w.name) + '</h2><p class="xp-sum">' + esc(w.line) + '</p>' +
         (w.desc ? '<p class="xp-desc">' + esc(w.desc) + '</p>' : '') + (w.notice ? '<p class="xp-note" role="note">' + esc(w.notice) + '</p>' : '') + (m.widget || '') +
-        '<p class="xp-pn">' + g.done + ' / ' + g.total + '개 챕터 읽음</p><ul>';
-      g.items.forEach(function (x) {
-        var st = m.ended[x.id] ? 'done' : (x.index === m.last ? 'cur' : 'new');
-        h += '<li><button type="button" class="xp-ch ' + st + '" data-xgo="' + x.index + '"><span class="xp-t">' + esc(x.title) + (x.sub ? '<small>' + esc(x.sub) + '</small>' : '') + '</span><span class="xp-s">' + (st === 'done' ? '읽음' : st === 'cur' ? '읽는 중' : '') + '</span></button></li>';
-      });
-      return h + '</ul></section></div>';
+        '<p class="xp-pn">' + g.done + ' / ' + g.total + '개 챕터 읽음 · 위쪽 탭에서 챕터를 바로 고를 수 있습니다</p>';
+      var nx = g.items.filter(function (x) { return !m.ended[x.id]; })[0] || g.items[0];
+      if (nx) h += '<div class="xp-cta"><button type="button" class="btn big gold" data-xgo="' + nx.index + '">' + (g.done ? '이어서 읽기' : '읽기 시작하기') + '</button></div>';
+      return h + '</section></div>';
     }
     h += '<p class="kicker">運路 · WORLD MAP</p><h2 class="xp-h">' + nm + '</h2><p class="xp-sum">가고 싶은 세계를 골라 탐험하세요. 순서는 정해져 있지 않습니다.</p>' +
       '<div class="xp-prog" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + p.pct + '" aria-label="전체 탐험 진행률"><i style="width:' + p.pct + '%"></i></div><p class="xp-pn">' + p.done + ' / ' + p.total + '개 챕터 읽음</p>';

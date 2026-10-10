@@ -247,3 +247,17 @@
 /* 읽는 중 세계 지도로 가는 버튼(상단 바 아래, 홈 버튼 밑) */
 #mapBtn { position: fixed; z-index: 100; right: 12px; top: calc(64px + env(safe-area-inset-top, 0px)); background: rgba(8, 10, 18, .7); border-color: var(--gold-d); color: var(--gold-l); }
 #mapBtn[hidden] { display: none; }
+
+/* 챕터 탭 줄: 읽는 중·세계 도구 화면에서 같은 세계의 챕터로 바로 이동 */
+#wstrip { position: fixed; left: 0; right: 0; z-index: 29; height: 48px; display: flex; gap: 6px; align-items: center; overflow-x: auto; padding: 0 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  background: rgba(7, 9, 19, .94); border-bottom: 1px solid var(--line2); backdrop-filter: blur(10px); }
+#wstrip::-webkit-scrollbar { display: none; }
+#wstrip[hidden] { display: none; }
+#wstrip.ws-r { top: calc(62px + env(safe-area-inset-top, 0px)); }
+#wstrip.ws-h { top: calc(52px + env(safe-area-inset-top, 0px)); }
+#wstrip button { flex: none; min-height: 36px; max-width: 12em; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line2); background: rgba(255, 255, 255, .04); color: var(--ink2); font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#wstrip .ws-m { color: var(--gold-l); border-color: var(--gold-d); }
+#wstrip .ws-t { color: var(--wa, var(--gold-l)); border-color: color-mix(in srgb, var(--wa, #D5B97F) 55%, transparent); }
+#wstrip .ws-c.dn::after { content: ' ✓'; color: #7ED69A; }
+#wstrip button.on { color: #1A1308; background: var(--wa, var(--gold)); border-color: var(--wa, var(--gold)); font-weight: 700; }
+.xp.xp-wv { padding-top: calc(112px + env(safe-area-inset-top, 0px)); }
