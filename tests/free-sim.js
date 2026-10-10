@@ -58,7 +58,7 @@ const MODES = Object.keys(T.modes);
       ok(r.evidence.plain.length === 3 && r.evidence.pro.length >= 1 && r.evidence.intro, '근거 구성');
       const all = JSON.stringify(r); ok(!BANNED.test(all), '금지어(오늘): ' + (all.match(BANNED) || [])[0]);
       ok(!/\{\w+\}/.test(all), '자리표시 미치환');
-      ok(/^#\/go\?to=(career|money|love|life)$/.test(r.next.to) && r.next.q && r.next.btn, 'CTA 는 무료 콘텐츠로만: ' + r.next.to);
+      ok(/^#\/go\?to=(career|money|love|life|deep)$/.test(r.next.to) && r.next.q && r.next.btn, 'CTA 는 #/go 로만(결제창 직행 없음): ' + r.next.to); // 일·사업 CTA 는 심층 무빙툰(deep)으로 바뀌었다(8248849)
       ok(JSON.stringify(FC.buildDaily(td, { seed: `${y}-${m}-${d}` })) === JSON.stringify(r), '같은 입력이면 같은 결과');
       ctas[r.next.key] = (ctas[r.next.key] || 0) + 1; phases[r.phase] = 1;
     }
@@ -67,7 +67,7 @@ const MODES = Object.keys(T.modes);
   ok(Object.keys(ctas).length >= 3, 'CTA 가 결과에 따라 달라진다');
   // 근거는 실제 엔진 값(관계 문장 번역 · 임의 창작 없음)
   const chE = mk(1990, 5, 15, 14, 'M'), tdE = FC.todayData(M, chE, Date.UTC(2026, 9, 6, 3), Core.DAYMODE), ev = FC.dailyEvidence(tdE);
-  ok(ev.plain[1].body.includes(tdE.phase) && ev.plain[0].body.includes(tdE.gz), '근거에 실제 일진·단계가 들어감');
+  ok(ev.plain[1].body.includes(String(tdE.phase).replace(/기$/, '운')) && ev.plain[0].body.includes(tdE.gz), '근거에 실제 일진·단계가 들어감(흐름 이름은 ~운으로 표시 — ac2dd8e)');
   ok(ev.pro.some(x => x.includes('일진')) && (tdE.ev.reasons.length === 0 || ev.pro.some(x => tdE.ev.reasons.includes(x))), '전문 해석은 엔진 reasons 그대로');
   // 관리자 override(일일)
   const td0 = FC.todayData(M, chE, Date.UTC(2026, 9, 6, 3), Core.DAYMODE), o2 = FC.buildDaily(td0, { seed: 's', overrides: { daily: { act: { 축적기: ['커스텀 행동 하나', '커스텀 둘', '커스텀 셋'] }, cta: { life: { q: '질문?', btn: '버튼', to: '#/go?to=life' } } } } });
