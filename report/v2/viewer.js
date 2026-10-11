@@ -12,6 +12,7 @@
   var SEA_ICON = { opportunity: '◆', expansion: '▲', harvest: '●', accumulation: '■', transition: '◇', defense: '▽' }; // 색만으로 상태를 구분하지 않도록 글자·기호를 함께 쓴다
   var STAGES = ['타고난 명(命)을 읽고 있습니다', '기질과 힘의 방향을 가늠하고 있습니다', '10년마다 달라지는 운의 길을 이어 붙이고 있습니다', '움직일 때와 준비할 때를 가리고 있습니다', '한 편의 運路로 구성하고 있습니다'];
   var PREVIEW = /[?&]preview=1(&|$)/.test(location.search);
+  var elog = function (kind, where) { try { if (R.ErrLog) R.ErrLog.report(kind, { where: where }); } catch (e) { } }; // 잡아서 넘어가는 오류를 기록만 한다(메시지는 보내지 않음)
   var MAPQ = !PREVIEW && /[?&]map=[^&]+/.test(location.search); // ?map=생년월일,시각,성별 — 프롤로그를 건너뛰고 곧바로 세계 지도(확인용)
   var HUB = !PREVIEW && /[?&]from=hub(&|$)/.test(location.search); // /report/hub/ 에서 넘어온 경우: 일간·일주 영상·프롤로그는 허브가 이미 보여 줬으므로 건너뛰고 바로 인생 지도로 간다
   var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
@@ -50,7 +51,7 @@
     view('load'); var tx = $('#loadText'), i = 0, tick;
     function show() { tx.style.opacity = 0; setTimeout(function () { tx.textContent = STAGES[Math.min(i, STAGES.length - 1)]; tx.style.opacity = 1; i++; }, 250); }
     show(); tick = setInterval(show, 1100);
-    var sd; try { sd = R.SajuData.build(ch, { now: Date.now() }); } catch (e) { clearInterval(tick); view('input'); $('#msg').textContent = '계산 결과를 정리하지 못했습니다.'; return; }
+    var sd; try { sd = R.SajuData.build(ch, { now: Date.now() }); } catch (e) { elog('caught', 'sd.build'); clearInterval(tick); view('input'); $('#msg').textContent = '계산 결과를 정리하지 못했습니다.'; return; }
     S.sd = sd; S.birth = birthOf(ch); var t0 = Date.now();
     // 서버 저장본(콘텐츠·미디어·일간 소개 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
     Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story'), getJson('/api/assets'), getJson('/api/prologue')]).then(function (a) {
@@ -59,7 +60,7 @@
     }).then(function (a) {
       S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
       S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.assets = (a[4] && a[4].assets) || {}; S.assetVideos = (a[4] && a[4].videos) || {}; S.proVid = a[5] && a[5].on !== false ? (a[5][sd.gender === 'F' ? 'F' : 'M'] || '') : '';
-      if (R.Deep && S.ch && !PREVIEW) { try { R.Deep.augment(S.rep, { M: window.Manse, ch: S.ch, sd: sd, now: Date.now(), name: S.name, assets: S.assets, videos: S.assetVideos }); } catch (e) { /* 깊이 풀이가 실패해도 기본 리포트는 그대로 */ } S.repPdf = plainRep(S.rep); } // 자동차 비유·장단점·12운성·직업·배우자·일주·전생·대운/세운/월운·개운 근거·명소 챕터를 끼운다
+      if (R.Deep && S.ch && !PREVIEW) { try { R.Deep.augment(S.rep, { M: window.Manse, ch: S.ch, sd: sd, now: Date.now(), name: S.name, assets: S.assets, videos: S.assetVideos }); } catch (e) { elog('caught', 'deep.augment'); /* 깊이 풀이가 실패해도 기본 리포트는 그대로 */ } S.repPdf = plainRep(S.rep); } // 자동차 비유·장단점·12운성·직업·배우자·일주·전생·대운/세운/월운·개운 근거·명소 챕터를 끼운다
       S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null, textOnly: !!(a[2] && a[2].textOnly) }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
       if (LIFE && S.ch && R.IKDeep) S.ikP = R.IKDeep.load(window.Manse, S.ch, sd, 16000); // AI 합성과 나란히 먼저 시작
       return aiCompose().then(function () { if (LIFE && S.ch && R.LifeDoc) S.socP = R.LifeDoc.loadSocial({ M: window.Manse, ch: S.ch, sd: sd, now: Date.now() }); return a; });
@@ -124,7 +125,7 @@
       var endGuard = 0, nearEnd = function () { return isFinite(v.duration) && v.duration > 1 && v.currentTime >= v.duration - 0.35; };
       var armEnd = function () { if (done || endGuard || !nearEnd()) return; endGuard = setTimeout(function () { endGuard = 0; if (!done && nearEnd()) finish('completed'); }, 1200); }; // 'ended' 가 먼저 오면 그쪽이 처리한다
       v.addEventListener('timeupdate', armEnd); v.addEventListener('pause', armEnd); v.addEventListener('waiting', armEnd);
-      v.addEventListener('error', function () { if (!done) { v.remove(); still(); } }, true);
+      v.addEventListener('error', function () { if (!done) { elog('asset', 'asset.video'); v.remove(); still(); } }, true);
       function tapToPlay() { // 자동 재생이 막힌 기기(iOS 저전력 모드·데이터 절약 등): 영상을 건너뛰지 않고 탭 한 번으로 재생한다(탭은 사용자 동작이라 소리도 가능)
         if (done) return; start.textContent = '▶ 탭해서 영상 보기'; start.hidden = false;
         start.onclick = function () { start.hidden = true; v.muted = !wantSound; var q = v.play(); if (q && q.catch) q.catch(function () { v.muted = true; var q2 = v.play(); if (q2 && q2.catch) q2.catch(function () { if (!done) { v.remove(); still(); } }); }); };
@@ -250,6 +251,11 @@
   }
   /* ── 운명 탐험 홈(ACT 01 각성 이후 챕터를 골라 읽는다). ?explore=0 이면 예전처럼 처음부터 한 문서로 읽는다. 읽은 챕터·이어 읽을 위치는 이 기기에만 저장한다. ── */
   var EXPLORE = !PREVIEW && !!R.Explore && !/[?&]explore=0(&|$)/.test(location.search);
+  // 오류 수집(ERROR_LOG_DESIGN.md): 지금 보던 챕터·세계·흐름·콘텐츠 버전만 알려 준다. 이름·입력값은 읽지 않는다.
+  if (R.ErrLog) R.ErrLog.setContext(function () {
+    var c = S.rep && S.rep.chapters && S.rep.chapters[S.idx];
+    return { ch: c ? c.id : '', world: (S.wmap && S.wmap.idx && S.wmap.idx[S.idx]) || '', flow: PREVIEW ? 'preview' : EXPLORE ? 'explore' : 'classic', v: String((S.pack && S.pack.lib && S.pack.lib.version) || '').slice(0, 40) };
+  });
   function xpSave() { if (!S.xp || !S.xpKey) return; S.xp.ended = S.ended; S.xp.last = S.cur ? S.idx : S.xp.last; R.Explore.save(S.xpKey, S.xp); }
   function exploreEntry() {
     ensureStrip();
@@ -501,7 +507,7 @@
     }) : null;
     var ready = reading ? Promise.race([reading.first, new Promise(function (ok) { setTimeout(ok, 18000); })]) : Promise.resolve();
     if (!S.stopWait && !PREVIEW) S.stopWait = waitNotice();
-    ready.then(function () { if (S.stopWait) { S.stopWait(); S.stopWait = null; } view('reader'); if (EXPLORE) { try { exploreEntry(); } catch (e) { if (window.console) console.error('exploreEntry', e); openDoc(0, { autoStart: !PREVIEW }); } } else openDoc(0, { autoStart: !PREVIEW }); });
+    ready.then(function () { if (S.stopWait) { S.stopWait(); S.stopWait = null; } view('reader'); if (EXPLORE) { try { exploreEntry(); } catch (e) { elog('caught', 'explore.entry'); if (window.console) console.error('exploreEntry', e); openDoc(0, { autoStart: !PREVIEW }); } } else openDoc(0, { autoStart: !PREVIEW }); });
   }
   // 일간 소개·일주 캐릭터 영상은 프롤로그 앞이 아니라 본문의 첫 챕터(영상과 글을 따로)로 둔다
   // 일간 소개 챕터(no 0)·"더 깊이 읽기"(복사본이라 no 0)를 끼운 뒤에도 번호가 문서 순서와 맞도록 1부터 다시 매긴다.

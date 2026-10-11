@@ -38,6 +38,13 @@ http.createServer(async (q, r) => {
     const res = await mod.onRequest({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': q.headers['content-type'] || 'application/json' }, body: buf }) });
     r.statusCode = res.status; const ct = res.headers.get('content-type') || 'application/json'; r.setHeader('content-type', ct); return r.end(Buffer.from(await res.arrayBuffer()));
   }
+  if (p === '/api/errlog') { // 실제 functions/api/errlog.js 를 메모리 KV 로 실행(수집 켜짐). 요청의 Host·Origin 을 그대로 넘긴다.
+    const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/errlog.js')).href), fn = mod['onRequest' + q.method[0] + q.method.slice(1).toLowerCase()], buf = q.method === 'POST' ? await body(q) : undefined;
+    if (!fn) return send(r, 405, { error: 'method' }); ikEnv.ERRLOG_ON = '1';
+    const hd = { authorization: q.headers.authorization || '', 'content-type': 'application/json', origin: q.headers.origin || '', referer: q.headers.referer || '' };
+    const res = await fn({ env: ikEnv, request: new Request('http://' + (q.headers.host || 'x') + q.url, { method: q.method, headers: hd, body: buf }) });
+    r.statusCode = res.status; if (res.headers.get('x-errlog')) r.setHeader('x-errlog', res.headers.get('x-errlog')); r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(Buffer.from(await res.arrayBuffer()));
+  }
   const IMG = { '/api/assets': 'assets', '/api/asset-art': 'asset-art', '/api/panel-art': 'panel-art', '/api/tarot-art': 'tarot-art' };
   if (IMG[p]) { // 이미지 생성 API 4종을 메모리 KV·R2 로 실행(가짜 이미지 모델)
     ikEnv.OPENAI_API_KEY = 'mock'; const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/' + IMG[p] + '.js')).href), fn = mod['onRequest' + q.method[0] + q.method.slice(1).toLowerCase()], buf = /^(POST|PUT)$/.test(q.method) ? await body(q) : undefined;
