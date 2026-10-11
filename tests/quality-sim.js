@@ -42,7 +42,7 @@ const mk = (y, m, d, h, g) => M.compute({ year: y, month: m, day: d, hour: h, mi
   ok(a.missing.every(x => x.len < Q.MIN_LEN), tag + ' 누락 기준');
   console.log(tag, '풀이 누락 의심', a.missing.map(x => x.id + '(' + x.len + ')').join(' ') || '없음', '· 단정 검토', a.absolute.length);
 });
-// 일주 각성 영상 매핑 점검(awakeningAudit): 합성 저장본으로 120칸·20칸 집계, 주소 형식, 확인 대상 URL 수집
+// 일주 캐릭터 영상 매핑 점검(awakeningAudit): 합성 저장본으로 120칸·20칸 집계, 주소 형식, 확인 대상 URL 수집
 {
   const ILJU = R.Media.ILJU, vids = [
     { dayPillar: ILJU[0], gender: 'M', enabled: true, videoUrl: '/api/clipfile?k=a1.mp4', posterUrl: '/api/clipfile?k=a1.webp' },

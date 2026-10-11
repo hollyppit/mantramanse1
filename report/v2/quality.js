@@ -130,7 +130,7 @@
     return out;
   }
 
-  /* ── 일주 각성 영상 매핑 점검: /api/awakening?all=1 의 저장본(videos·ilgan·fallback)만 읽는다(저장·수정 없음).
+  /* ── 일주 캐릭터 영상 매핑 점검: /api/awakening?all=1 의 저장본(videos·ilgan·fallback)만 읽는다(저장·수정 없음).
         일주 60 × 성별 2 = 120칸, 일간 10 × 성별 2 = 20칸. 영상 파일이 실제로 있는지는 probeUrls 를 화면이 따로 확인한다. ── */
   var CLIP_RE = /^\/api\/clipfile\?k=[\w.\-]{1,120}$/;
   function awakeningAudit(awk) {
