@@ -90,7 +90,7 @@
   var REVEAL_LINES = ['대, 대단하옵니다, {귀인}!!', '마침내 {귀인}의 명식이 완성되었사옵니다!', '이제 {귀인}께서 타고난 기질과 운의 흐름을 살펴보시지요!'];
   var FACES = { greet: '반가움', ask: '궁금함', shock: '깜짝', serious: '진지함', proud: '뿌듯함', worry: '걱정' };
 
-  var DEFAULTS = { honorific: DEFAULT_HONORIFIC, weights: { research: 60, celebrity: 40 }, cases: CASES, intro: INTRO, introLast: INTRO_LAST, scenes: SCENES, revealLines: REVEAL_LINES };
+  var DEFAULTS = { forceOnboarding: true, honorific: DEFAULT_HONORIFIC, weights: { research: 60, celebrity: 40 }, cases: CASES, intro: INTRO, introLast: INTRO_LAST, scenes: SCENES, revealLines: REVEAL_LINES };
 
   /* ── 설정 병합 ────────────────────────────────────────────────
      서버 값(관리자 저장본)을 기본값 위에 얹는다. 장면은 id 로 맞춰 문구·이미지만 덮어쓰고, 입력 종류(field)와 계산 연결은 코드가 지킨다
@@ -98,6 +98,7 @@
   var REQUIRED_FIELDS = ['name', 'date', 'time', 'place', 'gender', 'confirm'];
   function merge(base, ov) {
     base = base || DEFAULTS; var out = JSON.parse(JSON.stringify(base)); if (!ov || typeof ov !== 'object') return out;
+    if (typeof ov.forceOnboarding === 'boolean') out.forceOnboarding = ov.forceOnboarding;
     if (typeof ov.honorific === 'string') out.honorific = honorific(ov);
     if (ov.weights && typeof ov.weights === 'object') { var r = +ov.weights.research, c = +ov.weights.celebrity; if (r >= 0 && c >= 0 && r + c > 0) out.weights = { research: r, celebrity: c }; }
     if (Array.isArray(ov.cases)) out.cases = ov.cases.filter(function (x) { return x && x.id && x.title; });
