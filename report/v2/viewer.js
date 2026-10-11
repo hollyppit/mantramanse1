@@ -269,7 +269,26 @@
   function buildWmap() {
     if (!S.rep || !R.Explore) return; var list = (S.xpWorlds || R.Explore.mergeWorlds(null)).map(function (w) { return Object.assign({}, w, { enabled: true }); }), idx = [], by = {};
     S.rep.chapters.forEach(function (c, i) { var id = R.Explore.worldFor(c, list, 'life'); idx[i] = id; (by[id] = by[id] || []).push(i); });
-    S.wmap = { idx: idx, by: by, list: list };
+    S.wmap = { idx: idx, by: by, list: list}; chapterTags();
+  }
+  // 챕터가 속한 세계(세계 지도 흐름에서만). 없으면 null → 예전 막(ACT) 표기를 쓴다.
+  // 표시용 번호: 세계 지도 흐름이면 세계 안에서의 순번과 그 세계의 챕터 수, 아니면 문서 번호와 전체 수.
+  function numOf(ci) {
+    var c = S.rep.chapters[ci], w = worldOf(ci), arr = w && S.wmap.by && S.wmap.by[w.id];
+    return arr && arr.indexOf(ci) >= 0 ? { n: arr.indexOf(ci) + 1, tot: arr.length } : { n: c.no, tot: S.rep.chapters.length };
+  }
+  function worldOf(ci) {
+    if (!EXPLORE || !S.wmap || !S.wmap.idx) return null; var id = S.wmap.idx[ci];
+    var w = (S.wmap.list || []).filter(function (x) { return x.id === id; })[0]; return w && w.name ? w : null;
+  }
+  // 챕터 첫 화면 머리글의 "ACT II · 10" → "🏯 황금의 성채 · 10". 문서는 지도보다 먼저 만들어질 수 있고 세계 이름이 서버에서 바뀔 수도 있어, 만든 뒤 글자만 맞춘다.
+  function chapterTags() {
+    if (!S.rep) return; var root = document.getElementById('chapter'); if (!root) return;
+    S.rep.chapters.forEach(function (c, ci) {
+      var els = root.querySelectorAll('[data-cno="' + c.id + '"]'); if (!els.length) return;
+      var w = worldOf(ci), act = S.rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}, lead = w ? (w.icon ? w.icon + ' ' : '') + w.name : (act.roman || '');
+      for (var k = 0; k < els.length; k++) els[k].textContent = lead + ' · ' + String(numOf(ci).n).padStart(2, '0');
+    });
   }
   function ensureStrip() {
     if (document.getElementById('wstrip')) return; var n = document.createElement('nav'); n.id = 'wstrip'; n.setAttribute('aria-label', '챕터 이동'); n.hidden = true; document.body.appendChild(n);
@@ -283,10 +302,10 @@
   // 막 이름은 옛 20챕터 문서의 분류라 세계 이름과 겹쳐 보였다. 세계 지도가 없는 흐름(?explore=0·미리보기)은 예전 표기 그대로.
   function barLabel(ci) {
     var rep = S.rep, c = rep && rep.chapters[ci]; if (!c) return;
-    var act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}, w = null;
-    if (EXPLORE && S.wmap && S.wmap.idx) { var wid = S.wmap.idx[ci]; w = (S.wmap.list || []).filter(function (x) { return x.id === wid; })[0] || null; }
-    if (w && w.name) { $('#barAct').textContent = (w.icon ? w.icon + ' ' : '') + w.name; $('#barTitle').textContent = c.title; }
+    var act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}, w = worldOf(ci);
+    if (w) { $('#barAct').textContent = (w.icon ? w.icon + ' ' : '') + w.name; $('#barTitle').textContent = c.title; }
     else { $('#barAct').textContent = act.roman || ''; $('#barTitle').textContent = act.title ? act.title + ' · ' + c.title : c.title; }
+    var nm = numOf(ci); $('#barNo').textContent = String(nm.n).padStart(2, '0'); $('#barTot').textContent = nm.tot;
   }
   function renderStrip() {
     var n = document.getElementById('wstrip'); if (!n || !S.wmap || !S.rep) return; var vw = $('#app').dataset.view, cur = pinned() != null ? pinned() : S.idx, wid = vw === 'reader' ? S.wmap.idx[cur] : (vw === 'home' ? S.xpWorld : null);
@@ -485,6 +504,9 @@
     ready.then(function () { if (S.stopWait) { S.stopWait(); S.stopWait = null; } view('reader'); if (EXPLORE) { try { exploreEntry(); } catch (e) { if (window.console) console.error('exploreEntry', e); openDoc(0, { autoStart: !PREVIEW }); } } else openDoc(0, { autoStart: !PREVIEW }); });
   }
   // 일간 소개·일주 캐릭터 영상은 프롤로그 앞이 아니라 본문의 첫 챕터(영상과 글을 따로)로 둔다
+  // 일간 소개 챕터(no 0)·"더 깊이 읽기"(복사본이라 no 0)를 끼운 뒤에도 번호가 문서 순서와 맞도록 1부터 다시 매긴다.
+  // 이 번호는 "N / 전체" 표시에 쓰이므로 겹치거나(00·00) 전체 개수와 어긋나면 안 된다. 다른 곳(PDF 등)이 같은 챕터 객체를 쓸 수 있어 번호가 다른 것만 복사한다.
+  function renumbered(list) { return list.map(function (c, i) { return c.no === i + 1 ? c : Object.assign({}, c, { no: i + 1 }); }); }
   function addCharIntro() {
     var rep = S.rep; if (PREVIEW || !R.CharIntro || !rep || !rep.chapters || rep.chapters.some(function (c) { return c.id === 'c-char'; })) return;
     var ch = null; try { ch = R.CharIntro.chapter(S.sd, S.name, S.awk, (rep.acts[0] || {}).id); } catch (e) { ch = null; }
@@ -495,10 +517,10 @@
         var mainCh = Object.assign({}, ch, { scenes: main }), moreCh = Object.assign({}, ch, { id: 'c-char-more', base: 'c-char-more', title: '일간·일주 더 깊이 읽기', scenes: [{ sceneId: 'ci-more-head', sceneType: 'life', html: '<section class="scene rd-sec rd-head" data-sc="ci-more-head"><div class="no">CHARACTER</div><h2>일간과 일주, 조금 더 깊이</h2></section>' }].concat(more) });
         var list = rep.chapters.slice(), at = -1; list.forEach(function (c, i) { if (c.id === 'life_here') at = i; });
         list.splice(at >= 0 ? at + 1 : 0, 0, moreCh);
-        S.rep = Object.assign({}, rep, { chapters: [mainCh].concat(list) }); S.visited = {}; S.ended = {}; return;
+        S.rep = Object.assign({}, rep, { chapters: renumbered([mainCh].concat(list)) }); S.visited = {}; S.ended = {}; return;
       }
     }
-    if (ch) { S.rep = Object.assign({}, rep, { chapters: [ch].concat(rep.chapters) }); S.visited = {}; S.ended = {}; }
+    if (ch) { S.rep = Object.assign({}, rep, { chapters: renumbered([ch].concat(rep.chapters)) }); S.visited = {}; S.ended = {}; }
   }
   // 본문 안의 영상은 화면에 들어오면 재생하고 벗어나면 멈춘다(소리는 꺼진 채, 컨트롤 없이 액자처럼 무한 루프)
   function watchVideos() {
@@ -613,8 +635,8 @@
     if (t === 'cinema') return cinemaHtml(c, s);
     if (t === 'chapterIntro') {
       var act = S.rep.acts.filter(function (a) { return a.id === c.act; })[0] || {};
-      if (s.compact) return '<section class="scene rv rd-mini" ' + id + '><div class="no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2>' + esc(c.title) + '</h2>' + (c.introText || s.subtitle ? '<p class="sub">' + esc(c.introText || s.subtitle) + '</p>' : '') + '</section>'; // 종합 풀이 안에서 순서대로 이어지는 작은 제목(서두 없이 바로 본론)
-      return '<section class="scene rd-head rd-chead" ' + id + '><div class="rd-rule" aria-hidden="true"></div><div class="no" data-tx="intro.no">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="rd-rule" aria-hidden="true"></div></section>';
+      if (s.compact) return '<section class="scene rv rd-mini" ' + id + '><div class="no" data-cno="' + esc(c.id) + '">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2>' + esc(c.title) + '</h2>' + (c.introText || s.subtitle ? '<p class="sub">' + esc(c.introText || s.subtitle) + '</p>' : '') + '</section>'; // 종합 풀이 안에서 순서대로 이어지는 작은 제목(서두 없이 바로 본론)
+      return '<section class="scene rd-head rd-chead" ' + id + '><div class="rd-rule" aria-hidden="true"></div><div class="no" data-tx="intro.no" data-cno="' + esc(c.id) + '">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="rd-rule" aria-hidden="true"></div></section>';
     }
     if (t === 'insight') return '<section class="scene rv rd-box" ' + id + '><div class="cap">풀이</div><span class="fact" data-tx="insight.fact">' + esc(s.fact || c.fact) + '</span>' + leadPs(c, 'insight.lead', s.body, c.lead && /_fallback$/.test(c.lead.id || '') ? 'faint' : '') + (c.choice ? '<p class="lead choice rd-hl" data-tx="choice.line">' + lines(c.choice) + '</p>' : '') + '' + '</section>';
     if (t === 'verdictFind') return '<section class="scene rv s-verdict" ' + id + '><div class="cap">' + esc(s.headline) + '</div><p class="lead rd-hl">' + lines(s.body) + '</p></section>';
@@ -725,7 +747,7 @@
       if (c.actTransition) h += actHeadHtml(c, ci);
       h += '<article class="chap" id="ch-' + esc(c.id) + '" data-ch="' + ci + '" aria-label="' + esc(c.title) + '">' + c.scenes.map(function (s, k) { return secWrap(sceneHtml(c, s, k), s, c, ci); }).join('') + '</article>';
     });
-    $('#chapter').innerHTML = h; try { emphasize($('#chapter')); } catch (e) { /* 강조가 실패해도 본문은 그대로 */ }
+    $('#chapter').innerHTML = h; chapterTags(); try { emphasize($('#chapter')); } catch (e) { /* 강조가 실패해도 본문은 그대로 */ }
     rep.chapters.forEach(function (c) { if (c.kind === 'monthly') { var cur = (c.items || []).findIndex(function (x) { return x.isNow; }); moDetail(c, Math.max(0, cur)); } });
   }
   function openDoc(start, o) {
@@ -750,7 +772,7 @@
   function enterChapter(c, ci) {
     if (S.pin) { if (Date.now() < S.pin.until && ci < S.pin.idx) return; if (ci >= S.pin.idx) S.pin = null; } // 점프 직후 앞 챕터 신호는 무시
     var rep = S.rep, n = rep.chapters.length, prev = S.cur ? rep.chapters[S.idx] : null, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}; S.idx = ci; S.cur = true;
-    barLabel(ci); $('#barNo').textContent = String(c.no).padStart(2, '0'); $('#barTot').textContent = n;
+    barLabel(ci);
     if (prev && prev.act !== c.act && !S.visited[c.id]) { T('act_completed', { act: prev.act }); var a = rep.acts.filter(function (x) { return x.id === prev.act; })[0]; if (a && a.pdfDone) toast(a.pdfDone, 3800); }
     if (!S.visited[c.id]) { S.visited[c.id] = 1; T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if ((c.base || c.id) === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {}); }
     if (R.Bgm && R.Bgm.has()) { var mo = c.scenes.filter(function (s) { return s.sceneType === 'insight' || s.sceneType === 'chapterIntro'; })[0]; R.Bgm.play(mo ? R.Cinema.resolve(mo, layersOf(mo)).bgmMood : 'minimal'); } // 챕터 분위기에 맞는 BGM
@@ -795,8 +817,11 @@
   var dr = $('#drawer'), drPick = false;
   $('#barBtn').onclick = function () {
     var rep = S.rep, h = '', act = 0; drPick = false; S.drWas = !!(S.mv && S.mv.state() === 'PLAYING'); if (S.drWas) S.mv.pause();
-    rep.chapters.forEach(function (c, i) { if (c.act !== act) { act = c.act; var a = rep.acts.filter(function (x) { return x.id === act; })[0] || {}; h += '<li class="act">' + esc(a.roman || '') + ' · ' + esc(a.title || '') + '</li>'; }
-      h += '<li><button type="button" data-go="' + i + '"' + (i === S.idx ? ' class="cur" aria-current="true"' : '') + '><span>' + String(c.no).padStart(2, '0') + ' ' + esc(c.title) + '</span><small>' + (S.ended[c.id] ? '읽음' : '') + '</small></button></li>'; });
+    var item = function (c, i, no) { return '<li><button type="button" data-go="' + i + '"' + (i === S.idx ? ' class="cur" aria-current="true"' : '') + '><span>' + String(no == null ? c.no : no).padStart(2, '0') + ' ' + esc(c.title) + '</span><small>' + (S.ended[c.id] ? '읽음' : '') + '</small></button></li>'; };
+    if (EXPLORE && S.wmap && S.wmap.by) { // 세계별로 묶는다: 사용자가 길을 찾는 분류와 같게(옛 막 이름은 쓰지 않는다)
+      (S.wmap.list || []).forEach(function (w) { var idxs = S.wmap.by[w.id]; if (!idxs || !idxs.length) return; h += '<li class="act">' + esc((w.icon ? w.icon + ' ' : '') + (w.name || '')) + '</li>'; idxs.forEach(function (i, k) { h += item(rep.chapters[i], i, k + 1); }); });
+    } else rep.chapters.forEach(function (c, i) { if (c.act !== act) { act = c.act; var a = rep.acts.filter(function (x) { return x.id === act; })[0] || {}; h += '<li class="act">' + esc(a.roman || '') + ' · ' + esc(a.title || '') + '</li>'; }
+      h += item(c, i); });
     $('#drHome').hidden = !EXPLORE; $('#drList').innerHTML = h; dr.showModal();
   };
   $('#drList').onclick = function (e) { var b = e.target.closest('[data-go]'); if (!b) return; drPick = true; dr.close(); gotoChapter(+b.dataset.go, false, S.drWas); }; // 어느 챕터든 바로 갈 수 있다(모두 하나의 문서)
