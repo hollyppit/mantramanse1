@@ -50,7 +50,10 @@
     meta = meta || {}; var per = meta.per || 3, max = meta.max || 36, frames = [];
     (list || []).forEach(function (c) {
       var m = fromHtml(c.html, { id: c.id, title: c.title, min: 1 }); if (!m) return;
-      m.frames.slice(0, per).forEach(function (f) { frames.push({ cap: (c.title ? c.title + (f.cap && f.cap !== c.title ? ' · ' + f.cap : '') : f.cap), paras: f.paras, img: f.img || meta.bg || '' }); });
+      // 챕터 앞부분 컷에는 이미지가 아직 나오지 않은 경우가 많다(삽화는 첫 해설 장면부터 붙는다). 그대로 두면 이미지 없는 컷이 전부 세계의 첫 이미지 한 장으로
+      // 채워져 "다 똑같은 이미지"가 된다. 그래서 컷에 이미지가 없으면 그 챕터 안의 서로 다른 이미지를 나오는 순서대로 나눠 쓴다. 챕터에도 없으면 세계 배경.
+      var own = []; m.frames.forEach(function (f) { if (f.img && own.indexOf(f.img) < 0) own.push(f.img); });
+      m.frames.slice(0, per).forEach(function (f, k) { frames.push({ cap: (c.title ? c.title + (f.cap && f.cap !== c.title ? ' · ' + f.cap : '') : f.cap), paras: f.paras, img: f.img || own[Math.min(k, own.length - 1)] || meta.bg || '' }); });
     });
     if (frames.length < 2) return null;
     return { id: meta.id || '', title: meta.title || '', hero: meta.title || '', slot: '', frames: frames.slice(0, max), notice: '', label: meta.label || meta.title || '' };
