@@ -3,7 +3,7 @@
 const path = require('path'), fails = [], ok = (c, m) => { if (!c) fails.push(m); };
 (async () => {
   const A = await import(require('url').pathToFileURL(path.join(__dirname, '../functions/api/ai.js')).href);
-  const kv = new Map(), sent = [];
+  const kv = new Map(), sent = [], calls = [];
   const item = (id, o) => Object.assign({ id, title: id + ' 제목', domain: 'MONEY', subDomain: 'earningStyle', status: 'published', reviewed: true, priority: 50, stance: 'neutral', conditions: {}, principle: id + ' 원리', interpretation: id + ' 풀이 본문', strengths: [], risks: [], behaviorPatterns: [], actions: [], tags: [], sourceType: 'expert' }, o);
   kv.set('ik:d:MONEY', JSON.stringify([
     item('MONEY-0001', { conditions: { dayMaster: ['경'], strength: ['신약'] }, risks: ['돈이 들어오자마자 새는 구조'] }),
@@ -12,9 +12,10 @@ const path = require('path'), fails = [], ok = (c, m) => { if (!c) fails.push(m)
     item('MONEY-0004', { sourceType: 'AI_DRAFT', reviewed: false, status: 'draft' }), // 미검수 AI 초안 → 제외
     item('MONEY-0005', { conditions: {} }), // 조건 없는 일반 항목 → 포함 가능
   ]));
-  const env = { ADMIN_PASSWORD: 'x', OPENAI_API_KEY: 'k', GLOSSARY_KV: { get: async k => (kv.has(k) ? JSON.parse(kv.get(k)) : null), put: async (k, v) => { kv.set(k, v); } } };
+  const env = { ADMIN_PASSWORD: 'x', OPENAI_API_KEY: 'k', ANTHROPIC_API_KEY: 'a', GLOSSARY_KV: { get: async k => (kv.has(k) ? JSON.parse(kv.get(k)) : null), put: async (k, v) => { kv.set(k, v); } } };
   globalThis.fetch = async (u, o) => {
-    const body = JSON.parse(o.body); sent.push(body);
+    const body = JSON.parse(o.body); sent.push(body); calls.push(String(u));
+    if (/anthropic/.test(String(u))) { const user = String(body.messages[0].content); const bad = /반드시/.test(user); return new Response(JSON.stringify({ model: 'c', content: [{ type: 'text', text: JSON.stringify(bad ? { verdict: 'pass', issues: [], revised: null } : { verdict: 'revise', issues: [{ type: 'barnum', quote: '균형', why: '빈말', fix: '구체적 장면으로' }], revised: { headline: '고친 한 줄', summary: '고친 요약', detail: '고친 상세' } }) }] }), { status: 200, headers: { 'content-type': 'application/json' } }); }
     if (!/촌철살인/.test(String(body.instructions))) return new Response(JSON.stringify({ model: 'm', output_text: '{"lines":["다듬은 한 줄"]}' }), { status: 200, headers: { 'content-type': 'application/json' } });
     return new Response(JSON.stringify({ model: 'm', output_text: '```json\n{"headline":"돈은 들어오는 날 이미 반쯤 나가 있다","summary":"요약 문장입니다.","detail":"상세 문장입니다."}\n```' }), { status: 200, headers: { 'content-type': 'application/json' } });
   };
@@ -31,6 +32,16 @@ const path = require('path'), fails = [], ok = (c, m) => { if (!c) fails.push(m)
   ok(!prompt.includes('MONEY-0002') && !prompt.includes('MONEY-0003') && !prompt.includes('MONEY-0004'), '조건이 어긋난 항목·보관·미검수 AI 초안은 근거에서 빠진다');
   ok(/더 독하게/.test(prompt) && /재물운이 좋습니다/.test(prompt), '방향과 현재 글이 프롬프트에 들어간다');
   ok(Array.isArray(r.d.refs) && r.d.refs[0] && r.d.refs[0].id === 'MONEY-0001' && !r.d.refs.some(x => x.id === 'MONEY-0002'), '응답에 참고한 DB 항목 목록(refs)이 온다');
+
+  // 자체 검증: 다른 AI(Claude)가 먼저 점검, 규칙 검사가 AI 통과를 뒤집는다
+  calls.length = 0;
+  r = await post({ task: 'verify', category: 'wealth', conds: { dayMasterStem: ['경'], strength: ['신약'] }, conditions: '재물 / 일간 경 · 신약', headline: '균형 잡힌 재물운', summary: '요약', detail: '상세' });
+  ok(r.s === 200 && r.d.verdict === 'revise' && r.d.issues.some(x => x.type === 'barnum') && r.d.revised && r.d.revised.headline === '고친 한 줄', '검증: 빈말을 지적하고 고친 문장을 제안한다');
+  ok(/anthropic/.test(calls[0]) && String(sent.at(-1).messages[0].content).includes('MONEY-0001'), '검증은 작성과 다른 모델(Claude)을 먼저 쓰고 DB 근거를 함께 준다');
+  r = await post({ task: 'verify', category: 'wealth', conds: {}, headline: '이 사람은 반드시 부자가 됩니다', summary: '{없는변수} 요약', detail: '상세' });
+  ok(r.s === 200 && r.d.verdict === 'fail' && r.d.issues.some(x => x.type === 'overclaim') && r.d.issues.some(x => x.type === 'grounding' && /없는변수/.test(x.quote)) && r.d.revised === null, '규칙 검사: AI 가 통과시켜도 확정 표현·미지원 {…} 자리는 fail');
+  r = await post({ task: 'verify', category: 'wealth', conds: {}, headline: '', summary: '', detail: '' });
+  ok(r.s === 400, '빈 풀이는 검증하지 않는다');
 
   kv.clear();
   r = await post({ task: 'module', category: 'wealth', conds: {}, mode: 'new' });

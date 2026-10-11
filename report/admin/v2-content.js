@@ -235,7 +235,7 @@
   function aiBox() {
     return '<div class="card" style="padding:10px;margin:8px 0;border-color:var(--gold)"><b style="color:var(--gold)">AI로 풀이 쓰기 · 촌철살인</b> <span class="muted">풀이 지식 DB에서 이 모듈의 카테고리·조건에 맞는 자료를 찾아 근거로 쓰고, 두루뭉술한 문장을 구체적 장면과 대가가 있는 문장으로 바꿉니다. 결과는 아래 칸에 채워지며 "적용"과 "변경사항 저장"을 눌러야 반영됩니다.</span>' +
       '<div class="row" style="margin-top:6px;gap:6px;flex-wrap:wrap"><input type="text" id="eAiTone" placeholder="방향 (선택) 예: 더 독하게 · 연애 장면으로 · 짧고 건조하게" style="flex:1;min-width:220px">' +
-      '<button type="button" id="eAiRe">날카롭게 다시 쓰기</button><button type="button" id="eAiNew">조건만 보고 새로 쓰기</button><button type="button" id="eAiUndo" hidden>이전 글로 되돌리기</button></div><div class="muted" id="eAiMsg" style="margin-top:4px"></div></div>';
+      '<button type="button" id="eAiRe">날카롭게 다시 쓰기</button><button type="button" id="eAiNew">조건만 보고 새로 쓰기</button><button type="button" id="eAiVer">AI 검증</button><button type="button" id="eAiUndo" hidden>이전 글로 되돌리기</button></div><div class="muted" id="eAiMsg" style="margin-top:4px"></div><div id="eAiVerOut" style="margin-top:6px"></div></div>';
   }
   function aiBind(box) {
     var msg = $('#eAiMsg', box), prev = null, set = function (id, v) { var e = $(id, box); if (e) e.value = v; };
@@ -251,9 +251,25 @@
         set('#eH', m.headline); set('#eS', m.summary); set('#eD', m.detail);
         $('#eAiUndo', box).hidden = false;
         var rf = d.refs || []; msg.innerHTML = '채웠습니다(' + esc(d.provider) + '). ' + (rf.length ? '참고한 DB 자료 ' + rf.length + '건: ' + rf.map(function (r) { return esc(r.title || r.id) + (r.reviewed ? '' : '(검수 전)'); }).join(' · ') : '<span class="miss">조건에 맞는 DB 자료가 없어 조건과 전통 의미만으로 썼습니다. 풀이 지식 탭에 자료를 채우면 더 정확해집니다.</span>') + '<br>읽어 보고 고친 뒤 "적용" → "변경사항 저장"을 누르세요.';
-        if (/(반드시|무조건|확정)/.test(m.headline + m.summary + m.detail)) toast('단정 표현이 포함되어 있습니다. 문구를 확인하세요', true);
+        return verify(true);
       }).catch(function (e) { msg.textContent = ''; toast(e.message, true); }).then(function () { btns.forEach(function (b) { b.disabled = false; }); });
     }
+    var VT = { grounding: '근거 이탈', overclaim: '단정·위험', barnum: '빈말·바넘', dull: '둔한 문장', tone: '어조', dup: '반복' }, VK = { pass: ['통과', '#62C2AE'], revise: ['고치면 좋음', '#E0B04A'], fail: ['수정 필요', '#FF8A78'] };
+    function verify(after) {
+      var out = $('#eAiVerOut', box), body = { task: 'verify', category: $('#eCat', box).value, conds: condRead($('#eCond', box)), headline: $('#eH', box).value, summary: $('#eS', box).value, detail: $('#eD', box).value };
+      body.conditions = (CAT_KO[body.category] || body.category) + ' / ' + (condText(body.conds) === '조건 없음' ? '' : condText(body.conds));
+      out.innerHTML = '<span class="muted">' + (after ? '쓴 글을 다른 AI가 검증하는 중…' : 'AI가 검증하는 중…') + '</span>';
+      return api('/api/ai', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (d) {
+        var k = VK[d.verdict] || VK.revise, rf = d.refs || [];
+        out.innerHTML = '<div style="border:1px solid ' + k[1] + ';border-radius:8px;padding:8px 10px"><b style="color:' + k[1] + '">AI 검증: ' + k[0] + '</b> <span class="muted">(' + esc(d.provider) + ' · DB 자료 ' + rf.length + '건과 대조 · 사람 검수를 대신하지 않습니다)</span>' +
+          (d.issues && d.issues.length ? '<ul style="margin:6px 0 0 18px">' + d.issues.map(function (i) { return '<li><b>' + esc(VT[i.type] || i.type) + '</b>' + (i.quote ? ' “' + esc(i.quote) + '”' : '') + ' — ' + esc(i.why) + (i.fix ? ' <span class="muted">→ ' + esc(i.fix) + '</span>' : '') + '</li>'; }).join('') + '</ul>' : '<div class="muted" style="margin-top:4px">지적할 문제가 없습니다.</div>') +
+          (d.revised ? '<div class="row" style="margin-top:6px"><button type="button" id="eAiFix">검증이 고친 문장 적용</button></div>' : '') + '</div>';
+        var fx = $('#eAiFix', box); if (fx) fx.onclick = function () {
+          prev = { h: $('#eH', box).value, s: $('#eS', box).value, d: $('#eD', box).value }; set('#eH', d.revised.headline); set('#eS', d.revised.summary); set('#eD', d.revised.detail);
+          $('#eAiUndo', box).hidden = false; out.innerHTML = '<span class="muted">검증이 고친 문장을 채웠습니다. 읽어 보고 "적용" → "변경사항 저장"을 누르세요. (이전 글로 되돌리기 가능)</span>'; };
+      }).catch(function (e) { out.innerHTML = ''; toast(e.message, true); });
+    }
+    $('#eAiVer', box).onclick = function () { var b = this; b.disabled = true; verify(false).then(function () { b.disabled = false; }); };
     $('#eAiRe', box).onclick = function () { run('rewrite'); };
     $('#eAiNew', box).onclick = function () { run('new'); };
     $('#eAiUndo', box).onclick = function () { if (!prev) return; set('#eH', prev.h); set('#eS', prev.s); set('#eD', prev.d); this.hidden = true; prev = null; msg.textContent = '이전 글로 되돌렸습니다.'; };

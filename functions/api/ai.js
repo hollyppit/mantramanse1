@@ -8,6 +8,7 @@
 //   task "expand": 짧은 초안에 살을 붙여 보충하기 { text, tone?, chapter? }
 //   task "split" : 전체 문장을 자막 줄로 나누기      { text }
 //   task "polish": 이미 쓴 자막 다듬기              { lines: [...] }  (tone = 다듬는 방향)
+//   task "verify": 모듈 자체 검증(규칙 + 다른 AI)        { category, conds, conditions, headline, summary, detail } → { verdict: pass|revise|fail, issues[], revised? }
 //   task "module": 해석 모듈 풀이 작성(촌철살인)    { category, conditions(문장), headline?, summary?, detail?, mode?("new"), tone? } → { module: {headline, summary, detail} }
 //
 // 폴백 규칙: 시간 초과·네트워크 오류·429·5xx(과부하 529 포함)·형식이 맞지 않는 답이면 다음 서비스로 넘어간다.
@@ -126,12 +127,47 @@ const refBlock = refs => refs.length ? '\n\n참고 DB 자료(검수·관리 중�
   refs.map((r, i) => (i + 1) + '. [' + r.id + '] ' + r.title + (r.reviewed ? ' (검수 완료)' : ' (검수 전)') + '\n   ' + r.text + (r.strengths.length ? '\n   강점: ' + r.strengths.join(' / ') : '') + (r.risks.length ? '\n   위험·약점: ' + r.risks.join(' / ') : '') +
     (r.behavior.length ? '\n   행동 패턴: ' + r.behavior.join(' / ') : '') + (r.actions.length ? '\n   행동 제안: ' + r.actions.join(' / ') : '')).join('\n') : '\n\n(참고할 DB 자료가 없습니다. 조건과 전통적 의미만으로 쓰되 사실을 지어내지 마라.)';
 
+// ── 모듈 자체 검증: 규칙 검사(확정 표현·남은 {…} 자리) + 다른 AI 의 점검(근거 이탈·바넘 문장·조건 밖 사실·둔한 문장). AI 검증은 "검수 완료"가 아니다 — 사람이 읽고 저장해야 한다.
+const VERIFY_SYSTEM = `너는 사주 풀이 문장의 엄격한 검수자다. 주어진 풀이(headline·summary·detail)를 카테고리·적용 조건·참고 DB 자료와 대조해 점검한다. 작성자를 봐주지 마라.
+점검 항목(type):
+- grounding: DB 자료·적용 조건에 없는 사실·원리·사건을 주장하거나 DB와 모순된다.
+- overclaim: 사건·건강·재산·결혼·이혼 등을 단정하거나 공포를 조장한다. 조건 표현(경향·구조) 없이 "~된다"로 확정한다.
+- barnum: 누구에게나 해당되는 말이다("노력하면", "균형이 중요", "양면이 있다" 등 빈말 포함).
+- dull: 구체적 장면·대가·행동이 없어 두루뭉술하다. 촌철살인이 아니다.
+- tone: 사람을 모욕·비하하거나 합쇼체(~습니다)를 깨뜨린다.
+- dup: 세 칸(headline·summary·detail)이 같은 말을 반복한다.
+판정(verdict): fail = grounding·overclaim 이 하나라도 있다 / revise = 고치면 좋아질 점이 있다(barnum·dull·tone·dup) / pass = 문제가 없다.
+issues 는 최대 6개, 각 항목은 {type, quote(문제 문장 일부 40자 이내), why(한 문장), fix(고치는 방향 한 문장)}.
+revised 는 verdict 가 fail 또는 revise 일 때만, 문제를 고친 {headline, summary, detail} 을 준다(DB 자료 범위 안에서, 촌철살인 문체 유지). pass 면 null.
+출력은 반드시 JSON 한 덩어리만: {"verdict":"pass|revise|fail","issues":[...],"revised":{...}|null}  (설명이나 코드블록 없이)`;
+const VERIFY_TYPES = ['grounding', 'overclaim', 'barnum', 'dull', 'tone', 'dup'];
+function parseVerify(text) {
+  const a = text.indexOf('{'), b = text.lastIndexOf('}'); if (a < 0 || b <= a) return null;
+  let d; try { d = JSON.parse(text.slice(a, b + 1)); } catch { return null; }
+  if (!d || !['pass', 'revise', 'fail'].includes(d.verdict)) return null;
+  const c = (v, n) => String(v == null ? '' : v).trim().slice(0, n);
+  const issues = (Array.isArray(d.issues) ? d.issues : []).slice(0, 6).map(x => ({ type: VERIFY_TYPES.includes(x && x.type) ? x.type : 'dull', quote: c(x && x.quote, 60), why: c(x && x.why, 200), fix: c(x && x.fix, 200) }));
+  const rv = d.revised && typeof d.revised === 'object' && typeof d.revised.headline === 'string' && d.revised.headline.trim() ? { headline: c(d.revised.headline, 160), summary: c(d.revised.summary, 600), detail: c(d.revised.detail, 1500) } : null;
+  return { verdict: d.verdict, issues, revised: d.verdict === 'pass' ? null : rv };
+}
+// 규칙 검사: 확정·위험 표현, 채울 수 없는 {…} 자리. AI 가 놓쳐도 여기서 잡는다.
+function ruleIssues(m) {
+  const out = [], all = [m.headline, m.summary, m.detail].join(' ');
+  const bad = all.match(IK.BANNED_RE); if (bad) out.push({ type: 'overclaim', quote: bad[0], why: '확정적이거나 위험한 표현이 들어 있습니다(규칙 검사).', fix: '"~하기 쉽습니다", "~하는 경향이 있습니다"처럼 조건과 경향으로 바꾸세요.' });
+  const left = all.replace(IK.KNOWN_VAR, '').match(/\{[^{}]{1,24}\}/g); if (left) out.push({ type: 'grounding', quote: left[0], why: '엔진이 채울 수 없는 {…} 자리가 남아 있습니다(규칙 검사).', fix: '지원되는 자리({dayMasterEl}, {yongEl} 등)만 쓰거나 문장으로 바꾸세요.' });
+  return out;
+}
+
 const clip = (v, n) => String(v == null ? '' : v).slice(0, n);
 
 // 작업별 사용자 프롬프트. 입력이 잘못되면 문자열 대신 { error } 를 돌려준다.
 function buildPrompt(b, refs) {
   const n = Math.max(1, Math.min(MAX_LINES, Math.round(+b.n) || 4)), tone = clip(b.tone, 300).trim();
   const toneLine = tone ? `\n추가 지시(말투·방향): ${tone}` : '';
+  if (b.task === 'verify') {
+    const h = clip(b.headline, 300).trim(), sm = clip(b.summary, 800).trim(), dt = clip(b.detail, 1800).trim(); if (!h && !sm && !dt) return { error: '검증할 풀이가 비어 있습니다' };
+    return `다음 사주 해석 모듈을 점검하라.\n카테고리: ${clip(b.category, 60) || '미정'}\n적용 조건: ${clip(b.conditions, 300).trim() || '(조건 없음: 누구에게나 걸리는 폴백)'}\n\n풀이:\n핵심 문장: ${h || '(없음)'}\n짧은 설명: ${sm || '(없음)'}\n상세 풀이: ${dt || '(없음)'}` + refBlock(refs || []);
+  }
   if (b.task === 'module') {
     const cat = clip(b.category, 60) || '미정', cond = clip(b.conditions, 300).trim() || '(조건 없음: 누구에게나 걸리는 폴백)', h = clip(b.headline, 300).trim(), sm = clip(b.summary, 800).trim(), dt = clip(b.detail, 1800).trim();
     const has = h || sm || dt;
@@ -186,22 +222,28 @@ async function overLimit(env) {
 export async function onRequestPost({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   let b; try { b = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); }
-  const refs = b && b.task === 'module' ? await dbRefs(env, b) : [];
+  const refs = b && (b.task === 'module' || b.task === 'verify') ? await dbRefs(env, b) : [];
   const prompt = buildPrompt(b || {}, refs);
   if (typeof prompt !== 'string') return json({ error: prompt.error }, 400);
 
   const order = [];
   if (env.OPENAI_API_KEY) order.push(['openai', callOpenAI]);
   if (env.ANTHROPIC_API_KEY) order.push(['anthropic', callClaude]);
+  if (b && b.task === 'verify') order.reverse(); // 작성(OpenAI 우선)과 다른 모델이 점검하도록 Claude 를 먼저 쓴다
   if (!order.length) return json({ error: 'AI 키가 없습니다. OPENAI_API_KEY(메인) 또는 ANTHROPIC_API_KEY(폴백)를 Secret으로 추가한 뒤 다시 배포하세요' }, 501);
   if (await overLimit(env)) return json({ error: `오늘 AI 호출 한도(${+env.AI_DAILY_LIMIT || 300}회)를 넘었습니다. 내일 다시 시도하거나 AI_DAILY_LIMIT을 올리세요` }, 429);
 
-  const isMod = b.task === 'module', system = isMod ? MODULE_SYSTEM : SYSTEM, attempts = [];
+  const isMod = b.task === 'module', isVer = b.task === 'verify', system = isVer ? VERIFY_SYSTEM : isMod ? MODULE_SYSTEM : SYSTEM, attempts = [];
   for (const [name, fn] of order) {
     try {
-      const r = await fn(env, system, prompt), lines = isMod ? parseModule(r.text) : parseLines(r.text);
-      if (!lines) throw new ProviderError(name, `${name} 답이 요청한 형식(${isMod ? 'JSON headline/summary/detail' : 'JSON lines'})이 아닙니다`, true, 200);
+      const r = await fn(env, system, prompt), lines = isVer ? parseVerify(r.text) : isMod ? parseModule(r.text) : parseLines(r.text);
+      if (!lines) throw new ProviderError(name, `${name} 답이 요청한 형식(${isVer ? 'JSON verdict/issues/revised' : isMod ? 'JSON headline/summary/detail' : 'JSON lines'})이 아닙니다`, true, 200);
       attempts.push({ provider: name, ok: true });
+      if (isVer) { // 규칙 검사 결과를 합친다. 규칙에서 걸리면 AI 가 pass 라도 fail/revise 로 올린다.
+        const ri = ruleIssues({ headline: clip(b.headline, 300), summary: clip(b.summary, 800), detail: clip(b.detail, 1800) }), v = lines;
+        const verdict = ri.some(x => x.type === 'overclaim' || x.type === 'grounding') ? 'fail' : v.verdict;
+        return json({ ok: true, provider: name, model: r.model, verdict, issues: ri.concat(v.issues).slice(0, 8), revised: verdict === 'pass' ? null : v.revised, refs: refs.map(x => ({ id: x.id, title: x.title, reviewed: x.reviewed })), attempts });
+      }
       return json(isMod ? { ok: true, provider: name, model: r.model, module: lines, refs: refs.map(x => ({ id: x.id, title: x.title, reviewed: x.reviewed })), attempts } : { ok: true, provider: name, model: r.model, lines, attempts });
     } catch (e) {
       const err = e instanceof ProviderError ? e : new ProviderError(name, `${name}: ${(e && e.message) || e}`, false, 0);
