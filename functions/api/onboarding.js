@@ -13,6 +13,7 @@
 // 기본 문구는 report/hub/onboard-data.js — 여기엔 덮어쓴 값만 있다. 배포 전 저장본은 그대로 공개본이므로 이전 설정은 사라지지 않는다(초안이 없으면 공개본을 편집 시작점으로 쓴다).
 import { json, isAdmin, configError } from '../_lib.js';
 import { kvOf } from '../_store.js';
+import { cleanStyle } from '../_textstyle.js';
 
 const KEY = 'free:onboard', DRAFT = 'free:onboard:draft', HIST = 'free:onboard:hist', HKEY = 'free:onboard:h:', STAT = 'free:onbstat', MAX_BYTES = 512 * 1024, MAX_HIST = 20;
 const ID = /^[a-z0-9][a-z0-9_-]{1,40}$/, IMG = /^(\/api\/clipfile\?k=[\w.-]{1,120}|\/report\/hub\/quest\/[\w.-]{1,60}\.(webp|png|jpe?g)|https:\/\/[^\s"'<>]{1,500})$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -33,6 +34,13 @@ const EVENTS = ['onboarding_view', 'onboarding_card_impression', 'onboarding_nex
   // 인터랙티브 스토리·운명의 타임라인(출생정보·이름은 보내지 않는다)
   'quest_view', 'quest_resume', 'quest_guide_pick', 'quest_leap_asked', 'timeline_view', 'timeline_topic_click', 'timeline_year_select'];
 
+// 글자 스타일(글씨체·크기·굵기·색): { 역할: { font, size, sizeM, weight, color } }. 알려진 역할·필드만. report/hub/onboard-data.js 의 cleanStyleMap 과 같은 규칙.
+const STY_FIELDS = ['font', 'size', 'sizeM', 'weight', 'color'], STY_SECTION = ['kicker', 'title', 'sub', 'notice', 'bridge', 'cta'], STY_INTRO = ['title', 'body', 'sub'], STY_CARD = ['hook', 'title', 'body', 'caveat', 'source'], STY_STEP = ['head', 'desc', 'say', 'hint', 'button'];
+function cleanSty(m, roles) {
+  const out = {}; if (!m || typeof m !== 'object') return out;
+  for (const r of roles) { const c = cleanStyle(m[r]), o = {}; for (const k of STY_FIELDS) if (c[k] !== undefined) o[k] = k === 'size' || k === 'sizeM' ? Math.min(120, c[k]) : c[k]; if (Object.keys(o).length) out[r] = o; }
+  return out;
+}
 const s = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 const arr = (v, n, len) => (Array.isArray(v) ? v.slice(0, n).map(x => s(x, len)).filter(Boolean) : []);
 const img = v => { v = s(v, 600); return IMG.test(v) ? v : ''; };
@@ -75,7 +83,7 @@ function cleanCase(c, notes) {
     verification: { state, reviewedAt, basis }, visible, status: visible && state === 'verified' ? 'published' : state === 'verified' ? 'verified' : state === 'review' ? 'review' : 'draft',
     weight: Math.max(0.1, Math.min(10, +c.weight || 1)),
     title: s(c.title, 160), hook: s(c.hook, 160), body: arr(c.body, 6, 280), story: arr(c.story, 8, 420), takeaway: s(c.takeaway, 200), caveat: s(c.caveat, 400), who: s(c.who, 160), year: Math.max(0, Math.min(2100, +c.year || 0)),
-    tags: arr(c.tags, 8, 20), source, verifiedNote: s(c.verifiedNote, 300), image: media.image, visual: s(c.visual, 20), study, media, display,
+    tags: arr(c.tags, 8, 20), source, verifiedNote: s(c.verifiedNote, 300), image: media.image, visual: s(c.visual, 20), study, media, display, sty: cleanSty(c.sty, STY_CARD),
   };
   return o.title && (o.body.length || o.story.length) ? o : null;
 }
@@ -96,7 +104,7 @@ function cleanQuest(q) {
     out.steps = q.steps.slice(0, 16).filter(x => x && QUEST_STEPS.includes(x.id) && !seen.has(x.id) && seen.add(x.id)).map(x => ({
       id: x.id, enabled: OPTIONAL_STEPS.includes(x.id) ? x.enabled !== false : true, title: s(x.title, 60), button: s(x.button, 40), hint: s(x.hint, 300), head: s(x.head, 120), desc: s(x.desc, 200),
       asset: ASSET_KEYS.includes(x.asset) ? x.asset : '', bg: img(x.bg), bgMobile: img(x.bgMobile), fx: FX.includes(x.fx) ? x.fx : '',
-      lines: pair(x.lines, 6, 160), unknownLines: pair(x.unknownLines, 6, 160) }));
+      lines: pair(x.lines, 6, 160), unknownLines: pair(x.unknownLines, 6, 160), sty: cleanSty(x.sty, STY_STEP) }));
   }
   if (q.guides && typeof q.guides === 'object') { out.guides = {}; for (const g of ['male', 'female']) { const o = q.guides[g]; if (o && typeof o === 'object') out.guides[g] = { name: s(o.name, 20), tag: s(o.tag, 40), image: img(o.image), imageMobile: img(o.imageMobile) }; } }
   for (const k of ['calcLines', 'errLines']) if (q[k] && typeof q[k] === 'object') out[k] = pair(q[k], 4, 160);
@@ -123,7 +131,7 @@ function clean(b, notes) {
   if (b.weights && typeof b.weights === 'object') { const r = Math.max(0, Math.min(100, +b.weights.research || 0)), c = Math.max(0, Math.min(100, +b.weights.celebrity || 0)); if (r + c > 0) out.weights = { research: r, celebrity: c }; }
   if (Array.isArray(b.cases)) { const seen = new Set(); out.cases = b.cases.slice(0, 100).map(c => cleanCase(c, notes)).filter(c => c && !seen.has(c.id) && seen.add(c.id)); }
   if (Array.isArray(b.removedCases)) out.removedCases = b.removedCases.slice(0, 50).map(x => String(x)).filter(x => ID.test(x));
-  if (Array.isArray(b.intro)) out.intro = b.intro.slice(0, 6).filter(x => x && ID.test(String(x.id || ''))).map(x => ({ id: x.id, title: s(x.title, 160), body: s(x.body, 400), sub: s(x.sub, 200), glyph: s(x.glyph, 2), image: img(x.image), video: img(x.video), enabled: x.enabled !== false }));
+  if (Array.isArray(b.intro)) out.intro = b.intro.slice(0, 6).filter(x => x && ID.test(String(x.id || ''))).map(x => ({ id: x.id, title: s(x.title, 160), body: s(x.body, 400), sub: s(x.sub, 200), glyph: s(x.glyph, 2), image: img(x.image), video: img(x.video), enabled: x.enabled !== false, sty: cleanSty(x.sty, STY_INTRO) }));
   if (b.introLast && typeof b.introLast === 'object') out.introLast = { line: s(b.introLast.line, 160), cta: s(b.introLast.cta, 30) };
   if (Array.isArray(b.scenes)) out.scenes = b.scenes.slice(0, 10).filter(x => x && ID.test(String(x.id || ''))).map(x => ({ id: x.id, title: s(x.title, 60), lines: cleanLines(x.lines), unknownLines: cleanLines(x.unknownLines), hint: s(x.hint, 240), button: s(x.button, 30), face: s(x.face, 12), image: img(x.image), bg: img(x.bg), bubble: ['glass', 'ink'].includes(x.bubble) ? x.bubble : '', enabled: x.enabled !== false }));
   if (typeof b.progressLabel === 'string' && b.progressLabel.trim()) out.progressLabel = s(b.progressLabel, 60);
@@ -135,7 +143,7 @@ function clean(b, notes) {
     const seen = new Set();
     out.sections = b.sections.slice(0, 12).filter(x => x && SECTION_TYPES.includes(x.type) && ID.test(String(x.id || '')) && !seen.has(x.id) && seen.add(x.id)).map(x => ({
       id: x.id, type: x.type, enabled: x.enabled !== false, effect: EFFECTS.includes(x.effect) ? x.effect : 'fade', kicker: s(x.kicker, 60), title: s(x.title, 200), sub: s(x.sub, 400), notice: s(x.notice, 400), bridge: s(x.bridge, 300), topics: x.topics === true,
-      bg: img(x.bg), bgMobile: img(x.bgMobile), art: img(x.art), artVideo: img(x.artVideo), cta: cleanCta(x.cta) }));
+      bg: img(x.bg), bgMobile: img(x.bgMobile), art: img(x.art), artVideo: img(x.artVideo), cta: cleanCta(x.cta), sty: cleanSty(x.sty, STY_SECTION) }));
   }
   if (Array.isArray(b.services)) {
     const seen = new Set();

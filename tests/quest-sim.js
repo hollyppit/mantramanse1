@@ -148,6 +148,25 @@ ok(O.merge(O.DEFAULTS, { sections: [{ id: 'final', type: 'final', cta: { show: t
   ok(/'&world='/.test(hubjs) && /q\.world/.test(hubjs), '허브: #/go?world= → 뷰어 ?world=');
   ok(/R\.Explore\.artOf\(w\)/.test(tj) && /mergeWorlds/.test(tj) && /#\/go\?to=life&world=/.test(tj) && /\/api\/worlds/.test(tj), '타임라인 주제 타일은 세계 데이터·이미지·링크를 쓴다');
 
+  /* ⑪ 글자 스타일(글씨체·크기·굵기·색) */
+  const cs = O.cleanStyle;
+  ok(JSON.stringify(cs({ font: 'blackhan', size: '40', sizeM: 28, weight: 700, color: '#FF0000' })) === JSON.stringify({ font: 'blackhan', size: 40, sizeM: 28, weight: '700', color: '#ff0000' }), '스타일 정리: 정상 값');
+  ok(Object.keys(cs({ font: 'evil', size: 'abc', weight: 123, color: 'red', x: 1 })).length === 0, '스타일 정리: 알 수 없는 글씨체·숫자·색은 버림');
+  ok(cs({ size: 1 }).size === 8 && cs({ size: 999 }).size === 120 && cs({ sizeM: 5000 }).sizeM === 120, '스타일 정리: 크기 범위 8~120');
+  ok(O.FONT_KEYS.join() === 'serif,sans,nanummj,gowunb,hahmlet,songmyung,gowund,blackhan,dohyeon,jua,pen,dokdo,gamja,cinzel,cormorant', '글씨체 키가 서버(_textstyle)·fonts.js 와 같다');
+  const fk = fs.readFileSync(path.join(root, 'report/story/fonts.js'), 'utf8'); ok(O.FONT_KEYS.every(k => new RegExp('\\b' + k + ': \\[').test(fk)), '모든 글씨체 키가 fonts.js 에 있다');
+  const ms = O.merge(O.DEFAULTS, { sections: [{ id: 'research', type: 'research', sty: { title: { color: '#abcdef', size: 33 }, evil: { color: '#fff000' }, notice: { font: 'nope' } } }], intro: [{ id: O.DEFAULTS.intro[0].id, sty: { body: { weight: 600 } } }] });
+  ok(ms.sections.find(s => s.id === 'research').sty.title.color === '#abcdef' && !ms.sections.find(s => s.id === 'research').sty.evil && !ms.sections.find(s => s.id === 'research').sty.notice, '섹션 스타일 병합: 알려진 역할만');
+  ok(ms.intro[0].sty.body.weight === '600', '소개 장면 스타일 병합');
+  const mq = O.merge(O.DEFAULTS, { quest: { steps: [{ id: 'name', sty: { say: { size: 22, color: '#112233' }, bad: { size: 9 } } }] } }); ok(mq.quest.steps.find(s => s.id === 'name').sty.say.size === 22 && !mq.quest.steps.find(s => s.id === 'name').sty.bad, '스토리 장면 스타일 병합');
+  r = await call(mod.onRequestPut, req('PUT', '/api/onboarding', { sections: [{ id: 'research', type: 'research', title: 't', sty: { title: { font: 'jua', size: 500, color: '#00ff00', weight: '700', junk: 1 }, zzz: { size: 10 } } }], quest: { steps: [{ id: 'name', sty: { say: { size: 20, color: 'blue' } } }] } }, true));
+  r = await call(mod.onRequestGet, req('GET', '/api/onboarding?draft=1', null, true)); const ss = r.j.config.sections[0].sty;
+  ok(ss.title.font === 'jua' && ss.title.size === 120 && ss.title.color === '#00ff00' && ss.title.weight === '700' && !('junk' in ss.title) && !ss.zzz, '서버: 스타일 정제(크기 상한·알 수 없는 필드·역할 제거)');
+  ok(r.j.config.quest.steps[0].sty.say && r.j.config.quest.steps[0].sty.say.size === 20 && !('color' in r.j.config.quest.steps[0].sty.say), '서버: 잘못된 색은 버리고 나머지는 유지');
+  const stj = fs.readFileSync(path.join(root, 'report/hub/onboard-style.js'), 'utf8'); ok(/StoryFonts/.test(stj) && /--tsm/.test(stj), '스타일 적용: 구글 폰트 지연 로딩·모바일 크기 변수');
+  ok((qj.match(/A\('/g) || []).length >= 8 && (ob.match(/SA\(/g) || []).length >= 12, '화면 코드에 스타일 적용 지점');
+  const hubhtml = read('index.html'); ok(hubhtml.indexOf('onboard-style.js') > hubhtml.indexOf('onboard-data.js') && hubhtml.indexOf('onboard-style.js') < hubhtml.indexOf('hub-onboard.js') && hubhtml.includes('story/fonts.js'), '허브: 글꼴·스타일 스크립트 로드 순서');
+
   console.log(fails.length ? 'FAIL ' + fails.length + '\n' + fails.map(f => ' - ' + f).join('\n') : 'quest-sim OK');
   if (fails.length) process.exitCode = 1;
 })();
