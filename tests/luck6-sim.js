@@ -12,13 +12,15 @@ const fails = []; const ok = (c, m) => { if (!c) fails.push(m); };
 const ev = o => Object.assign({ fitScore: 0, intensityScore: 0, volatilityScore: 0, primaryFlow: 'harvest', phaseScores: { opportunity: 1, expansion: 2, harvest: 3, accumulation: 4 }, condition: '보통' }, o);
 ok(L.of(ev({})).label === '수확기', '기본은 주 흐름');
 ok(L.of(ev({ primaryFlow: 'opportunity' })).label === '기회기' && L.of(ev({ primaryFlow: 'expansion' })).label === '확장기' && L.of(ev({ primaryFlow: 'accumulation' })).label === '축적기', '주 흐름 4종 이름');
-ok(L.of(ev({ volatilityScore: C.volatility })).label === '변동기', '변동성 경계값(≥55)은 변동기');
+ok(C.volatility === 65, '변동기 기준은 65(옛 55 에서 의도적으로 올림 — VOLATILITY_ANALYSIS.md)');
+ok(L.of(ev({ volatilityScore: C.volatility })).label === '변동기', '변동성 경계값(≥65)은 변동기');
+ok(L.of(ev({ volatilityScore: 55 })).label === '수확기' && L.of(ev({ volatilityScore: 64.9 })).label === '수확기', '55~65 미만은 변동기가 아니라 주 흐름(엔진의 변동 신호 overlay 기준 55 와는 별개)');
 ok(L.of(ev({ volatilityScore: C.volatility - 0.1 })).label === '수확기', '변동성 경계 바로 아래는 주 흐름');
 ok(L.of(ev({ fitScore: -45, intensityScore: 30, volatilityScore: 90 })).label === '방어기', '강한 방어가 변동보다 우선');
 ok(L.of(ev({ fitScore: -20, intensityScore: 50, volatilityScore: 90 })).label === '변동기', '약한 방어는 변동보다 뒤');
 ok(L.of(ev({ fitScore: -20, intensityScore: 50 })).label === '방어기', '약한 방어 경계');
 ok(L.of(ev({ fitScore: -20, intensityScore: 49 })).label === '수확기', '약한 방어 경계 아래');
-ok(/55/.test(L.of(ev({ volatilityScore: 60 })).rule) && L.of(ev({})).meaning, '판정 근거 문장·의미 제공');
+ok(/65/.test(L.of(ev({ volatilityScore: 70 })).rule) && L.of(ev({})).meaning, '판정 근거 문장·의미 제공');
 
 // 2. 실제 엔진: 120개 차트 × 대운·세운·월운
 let seed = 777; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;

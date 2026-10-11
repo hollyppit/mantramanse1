@@ -7,7 +7,8 @@
   var R = root.ReportV2 = root.ReportV2 || {};
   var CONFIG = {
     defenseHard: { fit: -45, intensity: 30 },   // 흐름 점수가 매우 낮고 작용 강도도 있으면 방어기
-    volatility: 55,                             // 변동성 점수가 이 이상이면 변동기
+    volatility: 65,                             // 변동성 점수가 이 이상이면 변동기. 옛 구현은 55 였다 — 55 면 운의 약 33%가 변동기라 65(약 18%)로 올렸다(report/v2/VOLATILITY_ANALYSIS.md).
+                                                // 엔진의 변동 신호 overlay 기준(FLOW_CONFIG.overlay.volatility 55)은 그대로다: "변동 신호" 칩은 55 부터, 6분류 라벨의 변동기는 65 부터.
     defenseSoft: { fit: -20, intensity: 50 },   // 흐름 점수가 낮고 작용 강도가 높으면 방어기
   };
   var NAMES = ['기회기', '확장기', '수확기', '축적기', '변동기', '방어기'];
