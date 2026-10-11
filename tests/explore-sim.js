@@ -56,6 +56,11 @@ ok(/탐험 완료/.test(hh) && /xp-paid/.test(hh), '지도 HTML: 완료 칩과 �
 import(url.pathToFileURL(path.join(root, 'functions/api/worlds.js')).href).then(mod => {
   const c = mod.cleanWorlds([{ id: 'w1', name: 'x'.repeat(99), color: 'red', bgImage: 'javascript:alert(1)', access: 'weird', chapters: ['c01', '../x', 5] }, { id: 'w1' }, null]);
   ok(c.length === 1 && c[0].name.length === 40 && c[0].color === '' && c[0].bgImage === '' && c[0].access === 'free' && c[0].chapters.join() === 'c01', '서버 정리: 길이·색·주소·권한·챕터 ID 검증');
+  // 세계 무빙툰 컷 이미지(cutImages): 챕터 id·주소 형식 검증, 챕터당 3장 상한, 비어 있으면 키 자체를 두지 않음
+  const ci = mod.cleanWorlds([{ id: 'w2', cutImages: { c06: ['/api/clipfile?k=a.webp', 'https://cdn.example.com/b.webp', 'javascript:alert(1)', '/api/clipfile?k=c.webp', '/api/clipfile?k=d.webp'], '../x': ['/api/clipfile?k=z.webp'], c07: 'not-array', c08: ['ftp://bad'], deep_jobs: ['/api/clipfile?k=e.webp'] } }, { id: 'w3', cutImages: {} }, { id: 'w4' }]);
+  ok(ci[0].cutImages && ci[0].cutImages.c06.length === 3 && ci[0].cutImages.c06[0] === '/api/clipfile?k=a.webp' && !ci[0].cutImages.c06.some(u => /javascript/.test(u)), 'cutImages: 잘못된 주소 제거·챕터당 3장 상한');
+  ok(!('../x' in ci[0].cutImages) && !('c07' in ci[0].cutImages) && !('c08' in ci[0].cutImages) && ci[0].cutImages.deep_jobs.length === 1, 'cutImages: 잘못된 챕터 id·배열 아님·주소 전부 무효는 버림');
+  ok(!('cutImages' in ci[1]) && !('cutImages' in ci[2]), 'cutImages: 비어 있으면 키를 두지 않음');
 }).catch(e => ok(false, 'worlds.js 로드 실패: ' + e.message)).then(() => {
   console.log(`세계 지도 검증: 챕터 ${total}건 매핑`);
   if (fails.length) { console.log('실패 ' + fails.length + '건\n' + fails.map(f => ' ✗ ' + f).join('\n')); process.exit(1); }

@@ -57,6 +57,23 @@ ok(S.extract({ chapters: [] }) === null && S.card(null, {}, null).indexOf('만�
   ok(S.fromHtml('<section><p class="lead">짧</p></section>', {}) === null, '컷이 부족하면 null');
   const w = S.fromChapters([{ id: 'a', title: '챕터A', html }, { id: 'b', title: '챕터B', html }], { id: 'world:w1', title: '세계', bg: '/bg.webp', per: 2, max: 3 });
   ok(w && w.frames.length === 3 && /^챕터A/.test(w.frames[0].cap) && w.frames.every(f => f.img), '세계 무빙툰: 챕터별 앞 컷·상한·이미지');
+  // 이미지가 챕터 뒤쪽에서야 나오는 경우(실제 챕터는 첫 3컷에 삽화가 없다): 컷마다 자기 챕터의 이미지를 나눠 받는다
+  const txt = n => '<section class="scene rd-sec"><div class="cap">컷' + n + '</div><p class="lead">이 문장은 충분히 길어서 한 컷으로 읽히는 설명입니다 ' + n + '번째.</p></section>';
+  const withImg = (id, a, b) => txt(1) + txt(2) + txt(3) + '<section class="scene rd-sec"><figure><img src="' + a + '"></figure><div class="cap">삽화</div><p class="lead">삽화가 붙은 장면의 설명 문장입니다 ' + id + '.</p></section><section class="scene rd-sec"><figure><img src="' + b + '"></figure><div class="cap">삽화2</div><p class="lead">두 번째 삽화가 붙은 장면의 설명 문장입니다 ' + id + '.</p></section>';
+  const wv = S.fromChapters([{ id: 'a', title: '챕터A', html: withImg('a', '/a1.webp', '/a2.webp') }, { id: 'b', title: '챕터B', html: withImg('b', '/b1.webp', '/b1.webp') }, { id: 'c', title: '챕터C', html: txt(1) + txt(2) + txt(3) }], { id: 'world:w9', title: '세계', bg: '/bg.webp', per: 3, max: 36 });
+  const imgsOf = id => wv.frames.filter(f => new RegExp('^챕터' + id).test(f.cap)).map(f => f.img);
+  ok(wv && wv.frames.length === 9, '챕터 3개 × 3컷: ' + (wv && wv.frames.length));
+  ok(imgsOf('A').join() === '/a1.webp,/a2.webp,/a2.webp', '챕터A: 자기 이미지를 앞에서부터 나눠 받음: ' + imgsOf('A'));
+  ok(imgsOf('B').every(x => x === '/b1.webp'), '챕터B: 이미지가 하나면 그 이미지');
+  ok(imgsOf('C').every(x => x === '/bg.webp'), '이미지가 없는 챕터는 세계 배경');
+  ok(new Set(wv.frames.map(f => f.img)).size === 4, '세계 전체 이미지가 한 장으로 뭉치지 않음: ' + new Set(wv.frames.map(f => f.img)).size);
+  // 관리자가 지정한 컷 이미지(meta.cut)는 본문 삽화보다 우선하고, 컷 순서대로 쓰며 모자라면 돌려 쓴다
+  const wo = S.fromChapters([{ id: 'a', title: '챕터A', html: withImg('a', '/a1.webp', '/a2.webp') }, { id: 'b', title: '챕터B', html: withImg('b', '/b1.webp', '/b1.webp') }, { id: 'c', title: '챕터C', html: txt(1) + txt(2) + txt(3) }],
+    { id: 'world:w9', title: '세계', bg: '/bg.webp', per: 3, max: 36, cut: { a: ['/o1.webp', '/o2.webp'], c: ['/o3.webp'] } });
+  const ofCh = id => wo.frames.filter(f => new RegExp('^챕터' + id).test(f.cap)).map(f => f.img);
+  ok(ofCh('A').join() === '/o1.webp,/o2.webp,/o1.webp', '지정 이미지가 본문 삽화보다 우선·컷 순서·돌려 쓰기: ' + ofCh('A'));
+  ok(ofCh('B').join() === '/b1.webp,/b1.webp,/b1.webp', '지정하지 않은 챕터는 본문 삽화 그대로');
+  ok(ofCh('C').every(x => x === '/o3.webp'), '삽화가 없는 챕터도 지정 이미지를 쓴다(그래프 챕터 등)');
   ok(/data-wtoon="w1"/.test(S.toonCard({ wid: 'w1', name: '세계', frames: 3 })), '세계 카드 버튼');
 }
 console.log('윤회의 문 검증 완료');

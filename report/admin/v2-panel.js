@@ -71,8 +71,8 @@
     G.sel = {}; runList(todo, reset, true);
   }
   function draw() {
-    PANE.innerHTML = dirCard(G.d) + cardOf(G.pg || 'panelF') + cardOf('bg') + '<div class="card" style="margin-top:12px"><div class="pa-log"></div></div><div id="taBox"></div><div id="asBox"></div>';
-    bindDir(); if (window.V2Tarot) window.V2Tarot.open(PANE.querySelector('#taBox')); if (window.V2Assets) window.V2Assets.open(PANE.querySelector('#asBox'));
+    PANE.innerHTML = dirCard(G.d) + cardOf(G.pg || 'panelF') + cardOf('bg') + '<div class="card" style="margin-top:12px"><div class="pa-log"></div></div><div id="taBox"></div><div id="asBox"></div><div id="tnBox"></div>';
+    bindDir(); if (window.V2Tarot) window.V2Tarot.open(PANE.querySelector('#taBox')); if (window.V2Assets) window.V2Assets.open(PANE.querySelector('#asBox')); if (window.V2Toon) window.V2Toon.open(PANE.querySelector('#tnBox'));
     [].forEach.call(PANE.querySelectorAll('.paProv'), function (sel) { sel.onchange = function () { G.provider = this.value; [].forEach.call(PANE.querySelectorAll('.paProv'), function (o) { o.value = G.provider; }); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-run'), function (b) { b.onclick = function () { (b.dataset.run === 'all' ? runAll : runMissing)(b.dataset.k); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-bv'), function (b) { b.onclick = function () {

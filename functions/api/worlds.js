@@ -9,6 +9,8 @@ const MEDIA = /^(\/api\/clipfile\?k=[\w.-]{1,120}|\/[\w./-]{1,200}|https:\/\/[^\
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 const media = v => (typeof v === 'string' && MEDIA.test(v.trim()) ? v.trim() : '');
 const color = v => (typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v.trim()) ? v.trim() : '');
+// 세계 무빙툰 컷 이미지(관리자 패널 이미지 탭): { 챕터id: [주소 최대 3] }. 주소는 media() 와 같은 규칙, 챕터 id 는 ids() 와 같은 규칙.
+const cuts = v => { const o = {}; if (!v || typeof v !== 'object' || Array.isArray(v)) return o; for (const k of Object.keys(v).slice(0, 80)) { if (!/^[\w-]{1,60}$/.test(k) || !Array.isArray(v[k])) continue; const l = v[k].map(media).filter(Boolean).slice(0, 3); if (l.length) o[k] = l; } return o; };
 const ids = v => (Array.isArray(v) ? v.filter(x => typeof x === 'string' && /^[\w-]{1,60}$/.test(x)).slice(0, 80) : []);
 
 export function cleanWorlds(list) {
@@ -23,6 +25,7 @@ export function cleanWorlds(list) {
       access: w.access === 'paid' ? 'paid' : 'free',
       color: color(w.color), accent: color(w.accent), bgImage: media(w.bgImage), bgVideo: media(w.bgVideo), introImage: media(w.introImage), introVideo: media(w.introVideo),
       chapters: ids(w.chapters), notice: str(w.notice, 120),
+      ...(Object.keys(cuts(w.cutImages)).length ? { cutImages: cuts(w.cutImages) } : {}),
     });
   }
   return out;

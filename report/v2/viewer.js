@@ -327,7 +327,7 @@
   /* 세계 무빙툰: 세계의 챕터들이 화면에 그려진 내용에서 앞부분 핵심 컷을 뽑아 한 편으로 감상한다(문장은 원문 그대로). */
   function worldToonModel(w) {
     var idxs = (S.wmap && S.wmap.by[w.id]) || [], list = idxs.map(function (i) { var c = S.rep.chapters[i], a = document.getElementById('ch-' + c.id); return a ? { id: c.id, title: c.title, html: a.innerHTML } : null; }).filter(Boolean);
-    return R.Samsara.fromChapters(list, { id: 'world:' + w.id, title: w.name, label: (w.icon || '') + ' ' + w.name, bg: w.bgImage || '', per: 3, max: 36 });
+    return R.Samsara.fromChapters(list, { id: 'world:' + w.id, title: w.name, label: (w.icon || '') + ' ' + w.name, bg: w.bgImage || '', cut: w.cutImages || null, per: 3, max: 36 });
   }
   function worldToonCard(w) {
     if (!R.Samsara || !R.Samsara.fromChapters) return '';
