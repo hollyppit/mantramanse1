@@ -117,7 +117,7 @@
         if (pv) pv.onclick = function () { if (step > 0) { step--; render(); } };
         if (sk) sk.onclick = function () { Ob.track('onboarding_skip', { at: idx, case: c && c.id || '' }); step = total - 1; render(); };
       }
-      function go() { Ob.track('onboarding_cta_click', { case: c && c.id || '' }); lset(SEEN, 1); H.go('#/begin'); }
+      function go() { Ob.track('onboarding_cta_click', { case: c && c.id || '' }); lset(SEEN, 1); H.go(q.replay && P.has() ? '#/begin?edit=1' : '#/begin'); } // 다시 보기: 저장된 값이 채워진 채로 슬라이드 툰을 끝까지 볼 수 있다
       function dots(i) { var h = ''; for (var k = 0; k < total; k++) h += '<i' + (k === i ? ' class="on"' : '') + '></i>'; return h; }
       function next() { if (step < total - 1) { step++; render(); } }
       function prev() { if (step > 0) { step--; render(); } }
