@@ -26,14 +26,24 @@
       if (!G.sel && base.cases.length) G.sel = base.cases[0].id;
     });
   }
-  function open(tab, pw) { C.setPw && C.setPw(pw); PANE = document.getElementById('t-onboard'); PANE.innerHTML = '<p class="muted">불러오는 중…</p>'; load().then(draw).catch(function (e) { PANE.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
+  // also === 'home' 이면 기존 랜딩 첫 화면 편집기(t-home)가 이 탭 아래에 함께 보인다. 이때는 다시 불러오지 않는다(입력 중인 값 유지).
+  function open(tab, pw, also) {
+    C.setPw && C.setPw(pw); PANE = document.getElementById('t-onboard');
+    if (also === 'home') { G.sub = 'landing'; if (G.cfg) return draw(); }
+    PANE.innerHTML = '<p class="muted">불러오는 중…</p>'; load().then(draw).catch(function (e) { PANE.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
+  }
 
   function draw() {
-    PANE.innerHTML = '<div class="card"><div class="ob-bar">' + [['cases', '후킹 사례'], ['intro', '명리학 소개'], ['scenes', '슬라이드 툰'], ['basic', '호칭·가중치'], ['stats', '통계']].map(function (s) { return '<button class="ob-chip' + (G.sub === s[0] ? ' on' : '') + '" data-s="' + s[0] + '">' + s[1] + '</button>'; }).join('') +
-      '<span style="flex:1"></span><button id="obSave">저장</button></div><p class="muted" style="margin:0">저장하면 방문자 화면에 바로 반영됩니다. 공개(published) 상태이면서 출처가 있는 사례만 방문자에게 보입니다. <span class="ob-lock">버전 ' + esc(G.version || '기본값') + '</span></p></div><div id="obBody"></div>';
-    $$('[data-s]').forEach(function (b) { b.onclick = function () { collect(); G.sub = b.dataset.s; draw(); }; });
-    $('#obSave').onclick = save;
-    ({ cases: casesView, intro: introView, scenes: scenesView, basic: basicView, stats: statsView })[G.sub]();
+    PANE.innerHTML = '<div class="card"><div class="ob-bar">' + [['cases', '후킹 사례'], ['intro', '명리학 소개'], ['scenes', '슬라이드 툰'], ['basic', '호칭·가중치'], ['stats', '통계'], ['landing', '랜딩 첫 화면']].map(function (s) { return '<button class="ob-chip' + (G.sub === s[0] ? ' on' : '') + '" data-s="' + s[0] + '">' + s[1] + '</button>'; }).join('') +
+      '<span style="flex:1"></span>' + (G.sub === 'landing' ? '' : '<button id="obSave">저장</button>') + '</div><p class="muted" style="margin:0">' + (G.sub === 'landing' ? '아래는 방문자가 처음 만나는 랜딩 페이지(/report/)의 편집기입니다. 저장은 아래 편집기의 저장 버튼을 쓰세요. 사례·슬라이드 툰 같은 온보딩 흐름은 위 탭에서 편집합니다.' : '저장하면 방문자 화면에 바로 반영됩니다. 공개(published) 상태이면서 출처가 있는 사례만 방문자에게 보입니다. <span class="ob-lock">버전 ' + esc(G.version || '기본값') + '</span>') + '</p></div><div id="obBody"></div>';
+    $$('[data-s]').forEach(function (b) { b.onclick = function () {
+      collect(); var from = G.sub; G.sub = b.dataset.s;
+      if (G.sub === 'landing') window.AdminShowTab('onboard', 'home'); // 기존 랜딩 편집기를 이 탭 아래에 함께 보인다
+      else if (from === 'landing') window.AdminShowTab('onboard'); // 랜딩 편집기를 닫고 이 탭만 보인다
+      else draw();
+    }; });
+    if ($('#obSave')) $('#obSave').onclick = save;
+    var view = ({ cases: casesView, intro: introView, scenes: scenesView, basic: basicView, stats: statsView })[G.sub]; if (view) view(); else $('#obBody').innerHTML = '';
   }
   function save() {
     collect();
