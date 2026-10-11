@@ -30,3 +30,25 @@
 - 자미두수 명반은 이번 단계에서 홈에 표시하지 않았다(기존 엔진의 해당 API 확인 필요).
 - 결제·권한 시스템이 코드에 없어(NEXT_PLAN §5-B "유료화") 프리미엄 카드는 기존 `#/go?to=deep` 로 연결만 한다. `purchase_complete` 는 미연결.
 - 수련생 캐릭터는 SVG 임시 그림이다. 관리자에서 장면별 캐릭터·배경 이미지 주소로 교체한다.
+
+## 랜딩·관리자 개편 (2026-10-11, 브랜치 `landing-admin-v2`)
+
+### 방문자 흐름
+첫 화면(커버) → **02 출생 시기 연구 카드** → **03 명리학 소개(장면 3 + 원리 주제 접이식)** → **04 서비스 소개** → **05 최종 CTA**.
+섹션 목록·순서·표시·연출·CTA 는 `config.sections` 한 곳에서 정한다(`onboard-data.js` 의 `SECTIONS`). 예전 "연구→유명인 후킹"은 `story` 섹션으로 남아 있고 **기본 꺼짐**이다(관리자가 켤 수 있음).
+- 연구 카드: `group: 'birth'` + 공개 + 검증 완료인 사례만. 컬럼비아대(Boland 2015, DOI 10.1093/jamia/ocv046)·Coury 2023 메타분석(DOI 10.1016/j.schres.2022.12.016) — Crossref·초록 대조 완료, 수치는 `tests/onboard-sim.js` 가 지킨다.
+- "출생 월·계절과 건강 지표의 연관성은 사주 예측의 근거가 아니다" 문구는 연구 섹션 `notice` 로 항상 표시(관리자가 지울 수 없게 하지는 않았으나 기본값이 들어 있다).
+- 홈 순서: 기질 한 문장 → 지금의 운 흐름 → 일주 → 오늘의 운세 → 무료 타로(+캘린더) → 종합 무빙툰 리포트 → 명식 요약. 용어(일간·일주·대운·일진)는 눌러서 설명(`TERMS`).
+
+### 데이터 모델 (모두 추가형, 옛 저장본 호환)
+- 사례: `kind`(study·experiment·history·celebrity·classic·other) · `verification{state,reviewedAt,basis}` · `visible` · `study{…}` · `media{…}` · `display{…}`. 옛 `status` 는 파생 값으로 계속 내려준다.
+  공개 조건 = 검증 완료 + 검토 근거 + 출처 + 공개 켬. 서버(`cleanCase`)와 클라이언트(`publicCases`)가 같은 규칙을 쓴다.
+- 서버 저장: 공개본 `free:onboard`(기존 키 그대로) · 초안 `free:onboard:draft` · 이력 `free:onboard:hist` + `free:onboard:h:<id>`(최근 20). 초안이 없으면 공개본이 편집 시작점이라 **배포 직후 공개 중인 내용은 그대로**다.
+- 미리보기는 서버를 거치지 않는다: 관리자 iframe(`/report/hub/?preview=1`)에 같은 출처 `postMessage` 로 초안을 보낸다.
+
+### 측정(`/api/onboarding?ev=`)
+`landing_view`(세션당 1회) · `landing_cta_click` · `research_section_view` · `research_detail_open` · `research_source_click` · `myeongri_section_view` · `service_section_view` · `movingtoon_preview_view` · `free_content_click` · `paid_report_view` · `purchase_complete`(결제 시스템 연결 전까지 미발생) + 기존 이벤트. `d=m|d` 로 기기 구분, 섹션은 `case=s-<섹션id>`.
+
+### 한계
+- AI 논문 검토 보조는 연결하지 않았다(규칙 기반 자동 점검 + Crossref DOI 대조만).
+- 랜딩 첫 화면(커버) 편집기는 기존 것을 그대로 쓴다. PC/모바일 개별 값은 캐릭터 이미지 단위로만 지원(기존 기능).

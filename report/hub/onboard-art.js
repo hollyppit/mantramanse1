@@ -11,6 +11,17 @@
   var wrap = function (inner) { return open + defs + inner + '</svg>'; };
 
   var CASE = {
+    // 출생 월·계절 ↔ 집단 통계의 연관(원인을 뜻하지 않는다): 열두 달의 고리와 네 계절
+    season: function () {
+      var out = '', i, cx = 300, cy = 128, r = 78;
+      for (i = 0; i < 12; i++) {
+        var a = (i / 12) * Math.PI * 2 - Math.PI / 2, x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r, hot = i === 0 || i === 11 || i === 1;
+        out += '<circle class="pop" style="--i:' + (i % 6) + '" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (hot ? 9 : 6) + '" fill="' + (hot ? 'url(#gA)' : 'none') + '" stroke="' + G + '" stroke-opacity="' + (hot ? 1 : .55) + '"/>';
+      }
+      out += '<circle class="dr" cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + INK3 + '" stroke-opacity=".35" stroke-dasharray="3 6"/>';
+      out += [['春', 0, -1], ['夏', 1, 0], ['秋', 0, 1], ['冬', -1, 0]].map(function (s) { return '<text x="' + (cx + s[1] * 40) + '" y="' + (cy + s[2] * 40 + 6) + '" text-anchor="middle" font-size="18" fill="' + GL + '" font-family="serif">' + s[0] + '</text>'; }).join('');
+      return wrap(out + t(110, 120, '태어난 달·계절', 'start', G) + t(110, 144, '↔ 집단 통계의 작은 차이', 'start', INK3) + t(490, 128, '원인이 아니라 연관', 'end', JADE));
+    },
     // 재능은 종 모양인데 성과는 소수에게 쏠린다
     bell: function () {
       var dots = ''; for (var i = 0; i < 26; i++) { var x = 60 + i * 9; var h = Math.exp(-Math.pow((x - 170) / 55, 2)) * 120; dots += '<circle cx="' + x + '" cy="' + (205 - h * Math.random() * 0.0 - 2) + '" r="0"/>'; }
@@ -92,5 +103,29 @@
     },
   };
 
-  root.OnboardArt = { forCase: function (k) { return (CASE[k] || CASE.bell)(); }, forIntro: function (k) { return (INTRO[k] || INTRO.end)(); } };
+  // 명리학 원리 주제 그림 — 오행 순환·계절·간지 톱니 등. 이미지·영상이 없을 때 쓰는 기본 도형.
+  var TOPIC = {
+    ohaeng: function () {
+      var N = [['木', 300, 40], ['火', 410, 120], ['土', 368, 220], ['金', 232, 220], ['水', 190, 120]], out = '';
+      N.forEach(function (n, i) { var m = N[(i + 1) % 5]; out += '<path class="dr" style="--i:' + i + '" d="M' + n[1] + ' ' + n[2] + ' L' + m[1] + ' ' + m[2] + '" stroke="' + JADE + '" stroke-opacity=".7" stroke-width="1.5" fill="none"/>'; });
+      N.forEach(function (n, i) { out += '<g class="pop" style="--i:' + i + '"><circle cx="' + n[1] + '" cy="' + n[2] + '" r="26" fill="url(#gG)"/><circle cx="' + n[1] + '" cy="' + n[2] + '" r="22" fill="none" stroke="' + G + '"/><text x="' + n[1] + '" y="' + (n[2] + 8) + '" text-anchor="middle" font-size="24" fill="' + GL + '" font-family="serif">' + n[0] + '</text></g>'; });
+      return wrap(out + t(300, 146, '相生', 'middle', JADE));
+    },
+    jeolgi: function () {
+      var S = [['春', 120, 130], ['夏', 240, 130], ['秋', 360, 130], ['冬', 480, 130]], out = '<line class="dr" x1="70" y1="130" x2="530" y2="130" stroke="' + INK3 + '" stroke-opacity=".6"/>';
+      S.forEach(function (s, i) { out += '<g class="pop" style="--i:' + i + '"><circle cx="' + s[1] + '" cy="130" r="30" fill="url(#gG)"/><circle cx="' + s[1] + '" cy="130" r="20" fill="none" stroke="' + G + '"/><text x="' + s[1] + '" y="138" text-anchor="middle" font-size="22" fill="' + GL + '" font-family="serif">' + s[0] + '</text></g>'; });
+      return wrap(out + t(300, 220, '24절기 — 태양의 위치로 나눈 계절의 마디'));
+    },
+    ganji: function () {
+      var a = '', b = '', i;
+      for (i = 0; i < 10; i++) a += '<rect class="wd" style="--i:' + i + '" x="' + (40 + i * 52) + '" y="70" width="40" height="40" rx="6" fill="none" stroke="' + G + '"/>';
+      for (i = 0; i < 12; i++) b += '<rect class="wd" style="--i:' + (i + 3) + '" x="' + (30 + i * 43) + '" y="150" width="34" height="34" rx="17" fill="none" stroke="' + JADE + '"/>';
+      return wrap(a + b + t(300, 56, '天干 10', 'middle', G) + t(300, 212, '地支 12', 'middle', JADE) + t(300, 242, '10 × 12 → 60가지 조합(육십갑자)'));
+    },
+    history: function () { return INTRO.time(); },
+    saju: function () { return INTRO.pillars(); },
+    luck: function () { return INTRO.pillars(); },
+    limit: function () { return INTRO.two(); },
+  };
+  root.OnboardArt = { forCase: function (k) { return (CASE[k] || CASE.bell)(); }, forIntro: function (k) { return (INTRO[k] || INTRO.end)(); }, forTopic: function (k) { return TOPIC[k] ? TOPIC[k]() : ''; } };
 })(window);

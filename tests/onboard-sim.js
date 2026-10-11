@@ -44,10 +44,11 @@ let rep = 0; const rr = seeded(5); let prev = null;
 for (let i = 0; i < 300; i++) { const c = O.pickCase(cfg, { rnd: rr, recent: prev ? [prev] : [] }); if (prev && c.id === prev) rep++; prev = c.id; }
 ok(rep === 0, '직전 사례가 연속으로 나오지 않는다: ' + rep);
 ok(O.pickCase({ cases: [], weights: cfg.weights }) === null, '공개 사례가 없으면 null(후킹 없이 소개로)');
-ok(O.pickCase({ cases: [cfg.cases[0]], weights: cfg.weights }, { recent: [cfg.cases[0].id] }).id === cfg.cases[0].id, '사례가 하나뿐이면 반복을 허용');
+const story0 = cfg.cases.filter(c => c.group !== 'birth' && O.publicCases([c]).length)[0];
+ok(O.pickCase({ cases: [story0], weights: cfg.weights }, { recent: [story0.id] }).id === story0.id, '사례가 하나뿐이면 반복을 허용');
 // 연구 표현: 예측력 입증처럼 쓰지 않는다
 const BAN = /(사주.*입증|명리.*과학적|예측.*입증|반드시|확정|100%|무조건)/;
-ok(!BAN.test(JSON.stringify(pub)), '공개 사례에 과장·입증 표현 없음');
+ok(!BAN.test(JSON.stringify(pub.filter(c => c.group !== 'birth'))), '공개 사례에 과장·입증 표현 없음(출생 시기 연구 카드는 부정형 문구가 있어 아래 별도 검사)');
 ok(pub.filter(c => c.type === 'research').every(c => c.caveat), '연구 사례에는 한계 문구가 있다');
 ok(pub.filter(c => /^10\./.test(c.source.doi || '')).length >= 4, '연구 사례 DOI 기록');
 
@@ -115,6 +116,10 @@ ok(Array.isArray(ch.daeun.list) && ch.daeun.list.length >= 8 && ch.daeun.list.ev
     scenes: [{ id: 'day', title: '날짜', lines: ['대사'], hint: '안내', image: 'https://cdn.example.com/a.png', field: 'x' }] };
   r = await call(mod.onRequestPut, req('PUT', '/api/onboarding', body, true)); ok(r.s === 200 && r.j.version, '관리자 저장');
   r = await call(mod.onRequestGet, req('GET', '/api/onboarding'));
+  ok(r.j.config === null, '초안 저장만으로는 방문자 화면(공개본)이 바뀌지 않는다');
+  r = await call(mod.onRequestPost, req('POST', '/api/onboarding?action=publish', null, false)); ok(r.s === 401, '게시는 관리자만');
+  r = await call(mod.onRequestPost, req('POST', '/api/onboarding?action=publish', null, true)); ok(r.s === 200 && r.j.version, '게시');
+  r = await call(mod.onRequestGet, req('GET', '/api/onboarding'));
   const pubIds = (r.j.config.cases || []).map(c => c.id).sort().join();
   ok(pubIds === 'a-1', '공개 응답에는 승인(published)+출처 있는 사례만: ' + pubIds);
   ok(r.j.config.honorific === '귀인', '서버도 금지 호칭을 거른다');
@@ -145,7 +150,7 @@ ok(Array.isArray(ch.daeun.list) && ch.daeun.list.length >= 8 && ch.daeun.list.ev
   ok(html.indexOf('onboard-data.js') > html.indexOf('hub-saju.js') && html.indexOf('hub-onboard.js') > html.indexOf('onboard-data.js'), '스크립트 로드 순서');
 
   console.log(fails.length ? 'FAIL ' + fails.length + '\n' + fails.map(f => ' - ' + f).join('\n') : 'onboard-sim OK');
-  process.exit(fails.length ? 1 : 0);
+  if (fails.length) process.exitCode = 1; // (뒤따르는 추가 검사가 끝날 때까지 기다린다)
 })();
 // (추가) 개발 단계 강제 온보딩 기본값 · 스크롤 구성 · 일러스트
 {
@@ -161,16 +166,89 @@ ok(Array.isArray(ch.daeun.list) && ch.daeun.list.length >= 8 && ch.daeun.list.ev
 {
   const O3 = require(path.join(root, 'report', 'hub', 'onboard-data.js')), c3 = O3.merge(O3.DEFAULTS, null);
   const bad = (m) => { console.log('FAIL: ' + m); process.exitCode = 1; };
-  const pubs = O3.publicCases(c3.cases);
+  const pubs = O3.publicCases(c3.cases).filter(c => c.group !== 'birth');
   if (!pubs.every(c => c.story && c.story.length >= 3 && c.takeaway)) bad('공개 사례는 서사(3문단 이상)와 한 줄 결론을 가진다');
   if (!pubs.every(c => c.story.every(p => (p.match(/[.!?]|니다\./g) || []).length <= 3))) bad('문단은 짧게(문장 3개 이하)');
   if (!/반드시|무조건|100%|보장|확정/.test(JSON.stringify(pubs.map(c => [c.story, c.takeaway])) ) === true) { /* 단정 표현 없음 */ } else bad('서사에 단정 표현');
   const r = O3.pickCase(c3, { type: 'research' }), c = O3.pickCase(c3, { type: 'celebrity' });
   if (!r || r.type !== 'research' || !c || c.type !== 'celebrity') bad('유형 지정 선택');
   const src = fs.readFileSync(path.join(root, 'report', 'hub', 'hub-onboard.js'), 'utf8');
-  const iR = src.indexOf("cur.research) h +="), iC = src.indexOf("cur.celebrity) h +="), iI = src.indexOf("h += intro.map");
-  if (!(iR > 0 && iR < iC && iC < iI)) bad('렌더 순서 연구 → 유명인 → 명리학');
+  const iR = src.indexOf("cur.research) h +="), iC = src.indexOf("cur.celebrity) h +=");
+  if (!(iR > 0 && iR < iC)) bad('예전 후킹(story 섹션) 안의 순서 연구 → 유명인');
+  if (O3.DEFAULTS.sections.map(s => s.type).join() !== 'research,myeongri,service,story,final') bad('기본 섹션 순서 연구 → 명리학 → 서비스 → (후킹) → 최종');
   const st = fs.readFileSync(path.join(root, 'report', 'story', 'story.js'), 'utf8');
   if (!/hub-onboard\.js/.test(st) && !/onboard-data\.js/.test(st)) bad('랜딩(story.js)이 온보딩 스크립트를 불러와야 한다');
   if (!/onboard\.css/.test(st)) bad('랜딩이 온보딩 CSS 를 불러와야 한다');
+}
+
+// (추가) 랜딩·관리자 개편: 출생 시기 연구 카드 · 검증/공개 분리 · 섹션·서비스·주제 · 초안/게시/이력
+{
+  const O4 = require(path.join(root, 'report', 'hub', 'onboard-data.js'));
+  const bad = (m) => { console.log('FAIL: ' + m); process.exitCode = 1; };
+  const c4 = O4.merge(O4.DEFAULTS, null), bc = O4.birthCards(c4.cases);
+  if (bc.map(c => c.id).join() !== 'r-boland-2015,r-coury-2023') bad('출생 시기 연구 카드 2건(컬럼비아 2015 → 2023 메타분석): ' + bc.map(c => c.id));
+  bc.forEach(c => {
+    if (!/^10\.\d{4,}\//.test(c.study.doi) || !c.study.limits || !c.study.scope || !c.study.sample) bad('연구 카드 필수 항목(DOI·한계·범위·규모): ' + c.id);
+    if (c.study.relation !== 'birth_correlation') bad('관련성은 출생 시기 연관성 연구로 표시: ' + c.id);
+    if (!c.verification.reviewedAt || !c.verification.basis) bad('검토일·근거 기록: ' + c.id);
+  });
+  const txt = JSON.stringify(bc);
+  if (/(사주.{0,6}(입증|증명|맞)|명리.{0,6}(입증|증명)|반드시|무조건|100%)/.test(txt.replace(/입증하지 않는다/g, ''))) bad('연구 카드에 과장·입증 표현');
+  if (!/1,688/.test(txt) || !/55개/.test(txt) || !/OR 1\.05/.test(txt) || !/440,039/.test(txt)) bad('원문 대조 수치 유지');
+  // 검증/공개 분리
+  const n1 = O4.normalizeCase({ id: 'a', type: 'research', status: 'published', title: 't', body: ['b'], source: { url: 'https://x' }, verifiedNote: '2026-10-11 확인' });
+  if (!(n1.visible && n1.verification.state === 'verified' && n1.verification.reviewedAt === '2026-10-11')) bad('옛 published → 검증 완료 + 공개 + 검토일 마이그레이션');
+  const n2 = O4.normalizeCase({ id: 'b', type: 'celebrity', status: 'review', title: 't', body: ['b'] });
+  if (!(n2.visible === false && n2.verification.state === 'review' && n2.kind === 'celebrity')) bad('옛 review 마이그레이션');
+  const hid = O4.publicCases([{ id: 'c', kind: 'study', verification: { state: 'verified', reviewedAt: '2026-10-11', basis: 'x' }, visible: false, title: 't', body: ['b'], source: { url: 'https://x' } },
+    { id: 'd', kind: 'study', verification: { state: 'hold' }, visible: true, title: 't', body: ['b'], source: { url: 'https://x' } }]);
+  if (hid.length) bad('검증 완료 + 공개 켬 일 때만 방문자 풀에 들어간다');
+  // 섹션·서비스·주제
+  const secs = c4.sections.map(s => s.type);
+  if (secs.join() !== 'research,myeongri,service,story,final') bad('기본 섹션 순서: ' + secs);
+  const m4 = O4.merge(O4.DEFAULTS, { sections: [{ id: 'final', type: 'final' }, { id: 'research', type: 'research', enabled: false }, { id: 'evil', type: 'script' }] });
+  if (m4.sections[0].type !== 'final' || m4.sections.some(s => s.type === 'script') || m4.sections.filter(s => s.type === 'myeongri').length !== 1) bad('섹션 순서 반영·알 수 없는 type 제거·빠진 섹션 보충');
+  if (m4.sections.find(s => s.type === 'research').enabled !== false) bad('섹션 비활성화');
+  if (c4.services.length !== 8 || !c4.services.every(s => s.status === 'live' || s.status === 'soon')) bad('서비스 소개 8종');
+  if (c4.topics.filter(t => t.enabled).length < 5) bad('명리학 주제 5개 이상 기본 노출');
+  if (!c4.topics.some(t => t.nature === 'limit')) bad('명리학의 활용과 한계 주제');
+  const tt = JSON.stringify(c4.topics) + JSON.stringify(c4.sections);
+  if (/(반드시 맞|과학적으로 입증된 명리|100%)/.test(tt)) bad('주제·섹션 문구에 단정 표현');
+  if (!/귀인/.test(O4.fill(c4.sections.find(s => s.type === 'final').title, '', c4))) bad('최종 섹션 호칭 귀인');
+  const css = fs.readFileSync(path.join(root, 'report', 'hub', 'onboard.css'), 'utf8'), src4 = fs.readFileSync(path.join(root, 'report', 'hub', 'hub-onboard.js'), 'utf8');
+  if (/typewriter|typing/i.test(css + src4)) bad('본문 타이핑 효과 금지');
+  if (!/mt-onb-preview/.test(src4) || !/e\.origin !== location\.origin/.test(src4)) bad('미리보기는 같은 출처 postMessage 만');
+  // 모의 KV: 초안 → 게시 → 이력 → 복원 → 공개 중지
+  (async () => {
+    const mod = await import('file:///' + path.join(root, 'functions', 'api', 'onboarding.js').replace(/\\/g, '/'));
+    const store = new Map(), kv = { get: async (k, t) => (store.has(k) ? (t === 'json' ? JSON.parse(store.get(k)) : store.get(k)) : null), put: async (k, v) => { store.set(k, v); }, delete: async k => store.delete(k) };
+    const env = { GLOSSARY_KV: kv, ADMIN_PASSWORD: 'pw' };
+    const req = (method, u, body, admin) => new Request('https://x.test' + u, { method, headers: Object.assign({ 'content-type': 'application/json' }, admin ? { authorization: 'Bearer pw' } : {}), body: body ? JSON.stringify(body) : undefined });
+    const call = async (fn, r) => { const res = await fn({ request: r, env }); return { s: res.status, j: await res.json() }; };
+    store.set('free:onboard', JSON.stringify({ version: 'old', cases: [{ id: 'old-1', type: 'research', status: 'published', title: '기존', body: ['b'], source: { url: 'https://x' } }] }));
+    let r = await call(mod.onRequestGet, req('GET', '/api/onboarding'));
+    if (r.j.config.cases.length !== 1) bad('배포 직후: 기존 공개 사례가 그대로 보인다');
+    r = await call(mod.onRequestGet, req('GET', '/api/onboarding?draft=1', null, true));
+    if (r.j.hasDraft || r.j.config.cases[0].id !== 'old-1') bad('초안이 없으면 공개본이 편집 시작점');
+    r = await call(mod.onRequestPut, req('PUT', '/api/onboarding', { cases: [r.j.config.cases[0], { id: 'new-1', kind: 'study', verification: { state: 'review' }, visible: true, title: '새', body: ['b'], source: { url: 'https://y' } }] }, true));
+    if (!r.j.notes.some(n => /new-1/.test(n))) bad('검증 전 공개 시도는 서버가 비공개로 내리고 알린다');
+    r = await call(mod.onRequestGet, req('GET', '/api/onboarding'));
+    if (r.j.version !== 'old') bad('초안 저장은 공개본을 바꾸지 않는다');
+    r = await call(mod.onRequestPost, req('POST', '/api/onboarding?action=publish', null, true));
+    r = await call(mod.onRequestGet, req('GET', '/api/onboarding?hist=1', null, true));
+    if (r.j.hist.length !== 1) bad('게시하면 직전 공개본이 이력에 남는다');
+    const hid2 = r.j.hist[0].id;
+    r = await call(mod.onRequestPost, req('POST', '/api/onboarding?action=restore&id=' + hid2, null, true));
+    r = await call(mod.onRequestGet, req('GET', '/api/onboarding?draft=1', null, true));
+    if (!r.j.dirty || r.j.config.cases.length !== 1) bad('이력 복원은 초안으로(공개본 즉시 변경 없음)');
+    r = await call(mod.onRequestPost, req('POST', '/api/onboarding?action=unpublish', null, true));
+    r = await call(mod.onRequestGet, req('GET', '/api/onboarding'));
+    if (r.j.config !== null) bad('공개 중지 → 방문자는 기본 문구');
+    await call(mod.onRequestPost, req('POST', '/api/onboarding?ev=landing_view&d=m', { case: 's-final' }));
+    await call(mod.onRequestPost, req('POST', '/api/onboarding?ev=research_source_click&d=d', { case: 'r-boland-2015' }));
+    r = await call(mod.onRequestGet, req('GET', '/api/onboarding?stats=1', null, true));
+    if (!(r.j.stats.byDev.m.landing_view === 1 && r.j.stats.byDev.d.research_source_click === 1)) bad('기기별(모바일·PC) 집계');
+    if (/birth|year|name|gender/i.test(JSON.stringify(r.j.stats))) bad('집계에 출생정보 필드 없음');
+    console.log('onboard-sim(추가): 완료');
+  })();
 }

@@ -112,6 +112,61 @@
     'c-pacino-godfather': { story: ['「대부」 제작사는 마이클 역에 더 이름난 배우를 원했다고 전해집니다.', '감독 프랜시스 포드 코폴라는 알 파치노를 밀어붙였다고 알려져 있습니다.'], takeaway: '아직 아무도 몰랐던 사람을 알아본 한 사람이 있었습니다.' },
   };
   CASES.forEach(function (c) { var x = STORY[c.id]; if (x) { c.story = x.story; c.takeaway = x.takeaway; } });
+
+  /* ── 출생 시기 연구 카드(랜딩 SECTION 02) ─ 원문(Crossref DOI 메타데이터·초록) 대조 2026-10-11 ──
+     여기 적힌 수치는 "연구가 보고한 것"만이다. 사주팔자·명리학의 성격·재물·결혼·미래 예측이 맞다는 근거로 쓰지 않는다(relation 으로 표시). */
+  var BIRTH_CASES = [
+    { id: 'r-boland-2015', type: 'research', kind: 'study', status: 'published', weight: 1, tags: ['출생 월', '건강', '대규모 의료기록'],
+      title: '태어난 달과 일부 질환의 발생 위험 사이에서 통계적 연관성이 관찰되었습니다', hook: '태어난 시기는 우리 몸에 어떤 흔적을 남길까요?',
+      body: ['컬럼비아대학교 의료센터의 환자 기록 약 175만 명을 분석했습니다.', '검토한 1,688개 질환 가운데 55개에서 출생 월과의 통계적 연관성이 확인되었습니다.', '연관의 크기는 대체로 작았고, 원인은 이 연구만으로 알 수 없습니다.'],
+      caveat: '한 의료기관의 진료 기록에 기반한 연관성 분석입니다. 태어난 달이 질병의 원인이라는 증거가 아니며, 한 사람의 건강이나 운명을 예측하지 않습니다.',
+      who: 'Boland 외 · 컬럼비아대학교 의료센터', year: 2015, source: { label: 'Journal of the American Medical Informatics Association 22(5)', doi: '10.1093/jamia/ocv046', url: 'https://doi.org/10.1093/jamia/ocv046' },
+      verifiedNote: '2026-10-11 Crossref(DOI·제목·저자·연도·저널)와 논문 초록으로 대상 수·질환 수·유의 연관 수를 대조', visual: 'bell',
+      study: { name: 'Birth month affects lifetime disease risk: a phenome-wide method', org: '컬럼비아대학교 의료센터', researchers: 'M. R. Boland, Z. Shahn, D. Madigan, G. Hripcsak, N. P. Tatonetti', year: 2015, journal: 'Journal of the American Medical Informatics Association', doi: '10.1093/jamia/ocv046', url: 'https://doi.org/10.1093/jamia/ocv046',
+        subject: '1985~2013년 컬럼비아대학교 의료센터에서 진료받은 환자(1900~2000년생)', sample: '약 175만 명 · 1,688개 질환', method: '전자의무기록을 이용해 출생 월과 질환 진단 사이의 연관성을 질환 전체에 걸쳐 한꺼번에 검정(다중 비교 보정 적용)',
+        result: '1,688개 질환 중 55개에서 출생 월과 통계적으로 유의한 연관성이 관찰되었다.', stats: '검정 질환 1,688 · 유의 연관 55 (다중 비교 보정 후)',
+        limits: '단일 기관의 기록이며 질환 간 독립이 아니고, 의료 이용 기록이라 선택 편향 가능성이 있다. 간접 경로나 출생 시기 외 요인을 배제하지 못하고, 인과관계를 입증하지 않는다.',
+        relation: 'birth_correlation', scope: '출생 월과 일부 질환 발생 사이의 통계적 연관성까지만 다룬다. 성격·재물·결혼·미래 예측이나 사주팔자의 정확성은 검증 범위 밖이다.' } },
+    { id: 'r-coury-2023', type: 'research', kind: 'study', status: 'published', weight: 1, tags: ['출생 계절', '조현병', '메타분석'],
+      title: '겨울에 태어난 사람에서 조현병 위험이 아주 조금 더 높게 관찰되었습니다', hook: '출생 계절과 질환 위험, 그 연관은 얼마나 클까요?',
+      body: ['30개 국가·지역의 43개 연구, 조현병 환자 약 44만 명의 자료를 종합했습니다.', '겨울 출생의 오즈비는 약 1.05로 보고되었습니다. 위험이 5% 안팎 높아졌다는 뜻이며 매우 작은 차이입니다.', '반대로 여름 출생은 약간 낮게(약 0.96) 나타났습니다.'],
+      caveat: '집단 수준의 아주 작은 통계적 연관성입니다. 겨울에 태어났다고 질환이 생긴다는 뜻이 아니며, 원인은 밝혀지지 않았습니다.',
+      who: 'Coury 외 · Schizophrenia Research', year: 2023, source: { label: 'Schizophrenia Research 252, 244–252', doi: '10.1016/j.schres.2022.12.016', url: 'https://doi.org/10.1016/j.schres.2022.12.016' },
+      verifiedNote: '2026-10-11 Crossref(DOI·제목·저자·연도·권호쪽)와 논문 초록으로 연구 수·대상 수·오즈비 대조', visual: 'bell',
+      study: { name: 'Systematic review and meta-analysis: Season of birth and schizophrenia risk', org: 'Schizophrenia Research 게재 메타분석', researchers: 'S. M. Coury, A. Lombroso, V. J. Avila-Quintero 외', year: 2023, journal: 'Schizophrenia Research', doi: '10.1016/j.schres.2022.12.016', url: 'https://doi.org/10.1016/j.schres.2022.12.016',
+        subject: '조현병 환자의 출생 계절을 다룬 기존 연구들', sample: '연구 43편 · 30개 국가·지역 · 환자 440,039명', method: '체계적 문헌고찰과 메타분석(여러 연구의 결과를 통계적으로 종합)',
+        result: '겨울 출생에서 위험이 작게 높아지는 연관(OR 1.05, 95% CI 1.03–1.07), 여름 출생에서 작게 낮아지는 연관(OR 0.96)이 보고되었다.', stats: 'OR 1.05 (95% CI 1.03–1.07) · 여름 OR 0.96 (0.94–0.98)',
+        limits: '효과 크기가 작고 연구마다 방법이 다르다. 원인 기전은 밝혀지지 않았고, 환자 집단 중심의 연관성이라 개인에게 적용할 수 없다.',
+        relation: 'birth_correlation', scope: '출생 계절과 특정 질환 위험의 아주 작은 통계적 연관성까지만 다룬다. 사주팔자·명리학의 예측 정확성을 입증하지 않는다.' } },
+  ];
+  BIRTH_CASES.forEach(function (c) { c.group = 'birth'; c.visual = 'season'; });
+  CASES = BIRTH_CASES.concat(CASES);
+
+  /* ── 사례 필드 정규화 ─────────────────────────────────────────
+     검증 상태(verification.state)와 공개 여부(visible)를 분리한다. 옛 status(draft|review|verified|published)는 호환용으로 유도해서 남긴다. */
+  var KINDS = { study: '실제 학술 연구', experiment: '실제 실험', history: '역사적 사례', celebrity: '유명인 사례', classic: '명리학 전통 문헌', other: '기타' };
+  var VSTATE = { draft: '초안', review: '검토 중', verified: '검증 완료', hold: '보류', rejected: '반려' };
+  var RELATION = { direct: '명리학 자체를 직접 검증한 연구', birth_correlation: '출생 시기와 특정 지표의 연관성 연구', belief: '인간의 믿음과 심리 관련 연구', cultural: '역사·문화적 배경 자료', none: '직접적인 관련성 없음' };
+  var DESIGNS = { plain: '기본', gold: '금빛 테두리', glass: '반투명' };
+  function legacyDate(s) { var m = /\d{4}-\d{2}-\d{2}/.exec(String(s || '')); return m ? m[0] : ''; }
+  function legacyStatus(o) { return o.visible && o.verification.state === 'verified' ? 'published' : o.verification.state === 'verified' ? 'verified' : o.verification.state === 'review' ? 'review' : 'draft'; }
+  function normalizeCase(c) {
+    var o = Object.assign({}, c), st = o.status, v = o.verification && typeof o.verification === 'object' ? Object.assign({}, o.verification) : null;
+    if (!v) { var ok = st === 'published' || st === 'verified'; v = { state: ok ? 'verified' : st === 'review' ? 'review' : 'draft', reviewedAt: ok ? legacyDate(o.verifiedNote) : '', basis: o.verifiedNote || '' }; }
+    v.state = VSTATE[v.state] ? v.state : 'draft'; v.reviewedAt = String(v.reviewedAt || ''); v.basis = String(v.basis || '');
+    o.verification = v;
+    o.visible = typeof o.visible === 'boolean' ? o.visible : st === 'published';
+    o.kind = KINDS[o.kind] ? o.kind : (o.type === 'celebrity' ? 'celebrity' : 'study');
+    o.type = o.kind === 'celebrity' ? 'celebrity' : 'research';
+    o.group = o.group === 'birth' ? 'birth' : 'story';
+    o.status = legacyStatus(o);
+    var s = o.study && typeof o.study === 'object' ? o.study : {}, src = o.source || {};
+    o.study = Object.assign({ name: '', org: '', researchers: '', year: o.year || 0, journal: src.label || '', doi: src.doi || '', url: src.url || '', subject: '', sample: '', method: '', result: '', stats: '', limits: '', relation: 'none', scope: '' }, s);
+    if (!RELATION[o.study.relation]) o.study.relation = 'none';
+    o.media = Object.assign({ image: o.image || '', mobileImage: '', bg: '', video: '', alt: '', credit: '', license: '' }, o.media || {});
+    o.display = Object.assign({ order: 0, featured: false, showTitle: true, showSummary: true, showSource: true, detail: true, mobileLayout: 'stack', design: 'plain' }, o.display || {});
+    return o;
+  }
   // 구간 사이를 잇는 문장: 연구 → 유명인 → 명리학
   var BRIDGE = { toCelebrity: '연구는 “평균”을 말합니다. 그렇다면 한 사람의 인생에서는 이 “때”와 “우연”이 어떻게 나타났을까요?', toIntro: '재능과 노력만으로는 설명되지 않는 “때”. 그렇다면 동양에서는 사람의 인생과 운의 흐름을 어떻게 바라봤을까요?' };
 
@@ -122,6 +177,48 @@
     { id: 'two', enabled: true, title: '하나의 인생, 두 가지 해석의 시선.', body: '만트라는 사주팔자와 자미두수를 결합해 성향, 직업, 재물, 관계, 인생의 시기 등을 서로 다른 전통적 관점에서 살펴봅니다.', sub: '왜 그런 해석이 나왔는지, 현실에서 무엇을 참고할 수 있는지까지.', glyph: '命', image: '', video: '', theme: 'two' },
   ];
   var INTRO_LAST = { line: '그렇다면 지금, 당신은 어떤 운의 흐름에 있을까요?', cta: '나의 운 확인하기' };
+  /* ── 랜딩 섹션 구성(관리자가 순서·표시·문구·연출을 바꾼다) ─ 첫 화면(커버)은 story 쪽이 맡고, 아래는 허브 안에서 이어진다 ──
+     type: research(출생 시기 연구 카드) · myeongri(명리학 소개) · service(서비스 소개) · story(예전 연구→유명인 후킹) · final(최종 CTA)
+     effect: none | fade | rise | parallax | crossfade   (글자 타이핑·스크롤 강제 이동은 제공하지 않는다) */
+  var EFFECTS = { none: '기본 표시', fade: '페이드 인', rise: '아래에서 등장', parallax: '배경 패럴랙스', crossfade: '이미지 크로스페이드' };
+  var SECTIONS = [
+    { id: 'research', type: 'research', enabled: true, effect: 'fade', kicker: '02 · 현대 연구', title: '태어난 시기는 우리의 삶에 어떤 흔적을 남길까?', sub: '현대 연구에서는 출생 시기와 일부 건강 지표 사이의 통계적 연관성이 관찰되었습니다.',
+      notice: '출생 월·계절과 건강 지표의 통계적 연관성은 사주팔자의 성격·재물·결혼·미래 예측이 맞다는 근거가 아닙니다. 두 가지는 서로 다른 이야기입니다.',
+      bridge: '현대 연구가 출생 시기와 환경의 관계를 탐구한다면, 동양에서는 오래전부터 시간과 계절의 흐름으로 인간을 이해하려 했습니다.', cta: { show: false, text: '' } },
+    { id: 'myeongri', type: 'myeongri', enabled: true, effect: 'rise', kicker: '03 · 동양 명리학', title: '수천 년 동안 이어져 온 시간의 해석.', sub: '동양 명리학은 사람이 태어난 연·월·일·시를 천간과 지지로 표현하고, 음양오행의 관계를 통해 개인의 특성과 운의 흐름을 해석하는 전통 체계입니다.',
+      notice: '', bridge: '', cta: { show: true, text: '나의 운 확인하기' } },
+    { id: 'service', type: 'service', enabled: true, effect: 'rise', kicker: '04 · 만트라 만세력', title: '운세를 읽는 시대에서,\n나의 운을 경험하는 시대로.', sub: '복잡한 사주팔자를 나만의 동양 판타지 무빙툰으로 만나보세요.', notice: '', bridge: '', cta: { show: false, text: '' } },
+    { id: 'story', type: 'story', enabled: false, effect: 'fade', kicker: '', title: '', sub: '', notice: '', bridge: '', cta: { show: false, text: '' } },
+    { id: 'final', type: 'final', enabled: true, effect: 'fade', kicker: '', title: '이제, {귀인}의 운을 펼쳐볼 차례입니다.', sub: '{귀인}이 태어난 순간을 알려주십시오. 그 시간에 담긴 사주팔자를 펼쳐 보이겠습니다.', notice: '', bridge: '', cta: { show: true, text: '나의 운 확인하기' } },
+  ];
+
+  /* ── 서비스 소개(SECTION 04) ─ status: live(이용 가능) · soon(준비 중). visible=false 면 노출하지 않는다 ── */
+  var SERVICES = [
+    { id: 'ilju', title: '일주 각성 영상', desc: '태어난 날의 일간·일주에 맞춰 만들어진 나만의 캐릭터 각성 영상.', glyph: '覺', status: 'live', visible: true, image: '', video: '', link: '' },
+    { id: 'trait', title: '성향·강점·주의점 분석', desc: '타고난 기질에서 강점과 조심할 점을 쉬운 말로 풀어 줍니다.', glyph: '性', status: 'live', visible: true, image: '', video: '', link: '' },
+    { id: 'wealth', title: '재물운과 자산 관리 성향', desc: '돈이 들어오고 머무는 방식, 소비와 저축의 성향을 살펴봅니다.', glyph: '財', status: 'live', visible: true, image: '', video: '', link: '' },
+    { id: 'career', title: '직업·적성 분석', desc: '어떤 일에서 힘이 나는지, 어떤 환경이 맞는지 살펴봅니다.', glyph: '職', status: 'live', visible: true, image: '', video: '', link: '' },
+    { id: 'love', title: '연애·결혼과 인간관계', desc: '관계를 맺는 방식과 인연의 흐름을 해석합니다.', glyph: '緣', status: 'live', visible: true, image: '', video: '', link: '' },
+    { id: 'flow', title: '대운·세운·월운 흐름', desc: '10년·1년·한 달 단위의 운의 흐름을 그래프로 봅니다. 기회기·축적기·전환기·방어기 같은 국면도 함께 확인합니다.', glyph: '運', status: 'live', visible: true, image: '', video: '', link: '' },
+    { id: 'toon', title: '개인별 종합 무빙툰 리포트', desc: '내 사주를 한 편의 동양 판타지 무빙툰으로 이어 보는 종합 리포트.', glyph: '卷', status: 'live', visible: true, image: '', video: '', link: '' },
+    { id: 'pdf', title: '종합 풀이 PDF', desc: '리포트를 문서로 보관하는 종합 풀이 PDF.', glyph: '書', status: 'live', visible: true, image: '', video: '', link: '' },
+  ];
+
+  /* ── 명리학 주제(SECTION 03 상세) ─ nature: history(역사적 사실) · tradition(전통 해석) · science(천문·과학적 사실) · limit(한계 안내) ── */
+  var NATURE = { history: '역사적 사실', tradition: '전통 해석', science: '천문·과학적 사실', limit: '한계 안내' };
+  var TOPICS = [
+    { id: 'history', enabled: true, nature: 'history', title: '명리학의 역사', sub: '하늘의 시간을 헤아리던 데서 시작되었습니다.', summary: '간지(干支)로 해와 날을 세는 방식은 고대 중국의 역법에서 비롯되었고, 사주 풀이의 틀은 당·송대를 거치며 정리된 것으로 전해집니다.', detail: '십간과 십이지로 날짜를 세는 방식은 3천 년 넘은 갑골문에서도 확인됩니다. 태어난 연·월·일·시로 사람의 흐름을 살피는 체계는 당나라의 이허중, 송나라의 서자평을 거치며 다듬어진 것으로 알려져 있으며, 구체적인 계보에는 이견이 있습니다.', analogy: '', term: '', termEasy: '', image: '', video: '', image2: '', anim: 'fade', refs: '' },
+    { id: 'saju', enabled: true, nature: 'tradition', title: '사주팔자의 기본 구조', sub: '네 기둥, 여덟 글자.', summary: '태어난 해·달·날·시를 각각 하나의 기둥으로 보고, 기둥마다 천간과 지지 두 글자를 놓아 모두 여덟 글자가 됩니다.', detail: '연주·월주·일주·시주 네 기둥이 사주(四柱)이고, 각 기둥의 두 글자를 합쳐 팔자(八字)라 부릅니다. 이 가운데 태어난 날의 천간(일간)을 나를 나타내는 중심으로 삼아 나머지 글자와의 관계를 해석합니다.', analogy: '네 장의 사진을 겹쳐 한 사람의 시간 지도를 그리는 것과 비슷합니다.', term: '일간', termEasy: '태어난 날의 천간으로, 사주 해석에서 나 자신을 나타내는 중심 글자입니다.', image: '', video: '', image2: '', anim: 'rise', refs: '' },
+    { id: 'ganji', enabled: true, nature: 'tradition', title: '천간과 지지', sub: '열 개의 하늘, 열두 개의 땅.', summary: '천간 10자와 지지 12자를 차례로 짝지어 시간을 표현하는 기호 체계입니다.', detail: '천간은 갑·을·병·정·무·기·경·신·임·계, 지지는 자·축·인·묘·진·사·오·미·신·유·술·해입니다. 둘을 순서대로 짝지으면 60가지 조합(육십갑자)이 되고, 같은 조합은 60년 만에 다시 돌아옵니다. 환갑이 이 주기에서 나온 말입니다.', analogy: '10칸 톱니와 12칸 톱니가 맞물려 돌면 60번째에 처음 자리로 돌아오는 것과 같습니다.', term: '육십갑자', termEasy: '천간 10자와 지지 12자를 짝지어 만든 60가지 시간의 이름표입니다.', image: '', video: '', image2: '', anim: 'rise', refs: '' },
+    { id: 'ohaeng', enabled: true, nature: 'tradition', title: '음양오행', sub: '나무·불·흙·쇠·물의 순환.', summary: '세상의 변화를 음과 양, 그리고 목·화·토·금·수 다섯 가지 기운의 관계로 설명하는 동양의 사고 틀입니다.', detail: '오행은 서로를 살리는 상생(목→화→토→금→수→목)과 서로를 누르는 상극의 관계로 설명됩니다. 이는 자연의 변화를 분류하기 위한 전통적 은유 체계이며, 물질을 이루는 원소에 대한 현대 과학의 이론이 아닙니다.', analogy: '', term: '오행', termEasy: '사람과 자연의 성질을 다섯 가지 기운으로 나누어 보는 전통적 분류입니다.', image: '', video: '', image2: '', anim: 'fade', refs: '' },
+    { id: 'jeolgi', enabled: true, nature: 'science', title: '사계절과 절기', sub: '월주는 달력이 아니라 태양의 위치로 바뀝니다.', summary: '24절기는 태양이 하늘을 도는 위치를 15도씩 나눈 것으로, 사주의 월주는 이 절기를 기준으로 바뀝니다.', detail: '절기는 천문학적으로 계산되는 사실입니다. 사주에서는 매달 1일이 아니라 입춘·경칩 같은 절기가 드는 순간에 월(月)이 바뀌고, 입춘을 한 해의 시작으로 봅니다. 그래서 같은 날 태어나도 절기 시각 전후에 따라 월주가 달라질 수 있습니다.', analogy: '', term: '절기', termEasy: '태양의 위치로 정해지는 24개의 계절 구분점입니다.', image: '', video: '', image2: '', anim: 'crossfade', refs: '' },
+    { id: 'luck', enabled: true, nature: 'tradition', title: '대운과 세운', sub: '긴 흐름과 해마다의 흐름.', summary: '대운은 10년 단위의 장기적인 환경 변화, 세운은 해마다 바뀌는 흐름을 해석하는 개념입니다.', detail: '대운은 출생 월주를 기준으로 성별과 연주의 음양에 따라 순행 또는 역행하며 정해지고, 세운은 그 해의 간지입니다. 시작 시점을 계산하는 방식은 학파마다 조금씩 다를 수 있습니다.', analogy: '대운이 계절이라면 세운은 그 계절 속의 날씨와 같습니다.', term: '대운', termEasy: '명리학에서 인생의 장기적인 환경 변화를 해석할 때 사용하는 10년 단위의 시간 구간입니다.', image: '', video: '', image2: '', anim: 'rise', refs: '' },
+    { id: 'sixty', enabled: false, nature: 'tradition', title: '육십갑자', sub: '', summary: '천간과 지지를 짝지어 만든 60가지 조합으로 해·달·날·시에 이름을 붙입니다.', detail: '', analogy: '', term: '', termEasy: '', image: '', video: '', image2: '', anim: 'fade', refs: '' },
+    { id: 'ilju', enabled: false, nature: 'tradition', title: '일간과 일주', sub: '', summary: '일주는 태어난 날의 간지이고, 그 첫 글자인 일간이 해석의 중심이 됩니다.', detail: '', analogy: '', term: '일주', termEasy: '태어난 날을 나타내는 간지 두 글자입니다.', image: '', video: '', image2: '', anim: 'fade', refs: '' },
+    { id: 'limit', enabled: true, nature: 'limit', title: '명리학의 활용과 한계', sub: '참고하는 도구이지, 정해진 답이 아닙니다.', summary: '명리학은 전통 해석 체계이며, 그 예측력이 현대 과학으로 입증된 것은 아닙니다.', detail: '풀이는 자신을 돌아보고 시기를 가늠해 보는 참고 자료로 읽는 것이 좋습니다. 건강·법률·재무 같은 중요한 결정을 대신할 수 없으며, 같은 사주도 해석하는 사람과 학파에 따라 달라질 수 있습니다.', analogy: '', term: '', termEasy: '', image: '', video: '', image2: '', anim: 'fade', refs: '' },
+  ];
+  // 홈 화면 용어 설명(눌러서 보는 한 줄 풀이). 해석이 아니라 용어의 뜻만 적는다.
+  var TERMS = { '일간': '태어난 날의 천간. 사주 해석에서 나 자신을 나타내는 중심 글자입니다.', '일주': '태어난 날을 나타내는 간지 두 글자(천간+지지)입니다.', '대운': '명리학에서 인생의 장기적인 환경 변화를 해석할 때 쓰는 10년 단위의 시간 구간입니다.', '일진': '그날 자체의 간지입니다. 오늘의 흐름을 살필 때 쓰는 하루 단위의 기운입니다.' };
   var INTRO_NOTICE = '위 연구·사례와 명리학은 서로 다른 성격의 이야기입니다. 명리학은 전통 해석 체계이며, 현대 연구가 그 예측력을 입증한 것은 아닙니다.';
 
   /* ── 무협 슬라이드 툰 '귀인의 천명록' (6장면) ───────────────────
@@ -137,12 +234,13 @@
   var REVEAL_LINES = ['대, 대단하옵니다, {귀인}!!', '마침내 {귀인}의 명식이 완성되었사옵니다!', '이제 {귀인}께서 타고난 기질과 운의 흐름을 살펴보시지요!'];
   var FACES = { greet: '반가움', ask: '궁금함', shock: '깜짝', serious: '진지함', proud: '뿌듯함', worry: '걱정' };
 
-  var DEFAULTS = { bridge: BRIDGE, forceOnboarding: true, honorific: DEFAULT_HONORIFIC, weights: { research: 60, celebrity: 40 }, cases: CASES, intro: INTRO, introLast: INTRO_LAST, scenes: SCENES, revealLines: REVEAL_LINES };
+  var DEFAULTS = { bridge: BRIDGE, forceOnboarding: true, honorific: DEFAULT_HONORIFIC, weights: { research: 60, celebrity: 40 }, cases: CASES, intro: INTRO, introLast: INTRO_LAST, scenes: SCENES, revealLines: REVEAL_LINES, sections: SECTIONS, services: SERVICES, topics: TOPICS, progressLabel: '{n} / {total} · {title}', afterDone: 'reveal' };
 
   /* ── 설정 병합 ────────────────────────────────────────────────
      서버 값(관리자 저장본)을 기본값 위에 얹는다. 장면은 id 로 맞춰 문구·이미지만 덮어쓰고, 입력 종류(field)와 계산 연결은 코드가 지킨다
      (관리자가 필수 입력 필드를 지우거나 바꾸지 못하게). 사례는 서버가 정한 목록·상태를 그대로 따른다(기본 사례 중 서버에 없는 것은 비공개). */
   var REQUIRED_FIELDS = ['name', 'date', 'time', 'place', 'gender', 'confirm'];
+  var SECTION_TYPES = ['research', 'myeongri', 'service', 'story', 'final'];
   function merge(base, ov) {
     base = base || DEFAULTS; var out = JSON.parse(JSON.stringify(base)); if (!ov || typeof ov !== 'object') return out;
     if (ov.bridge && typeof ov.bridge === 'object') out.bridge = Object.assign({}, out.bridge, pick(ov.bridge, ['toCelebrity', 'toIntro']));
@@ -150,8 +248,26 @@
     if (typeof ov.honorific === 'string') out.honorific = honorific(ov);
     if (ov.weights && typeof ov.weights === 'object') { var r = +ov.weights.research, c = +ov.weights.celebrity; if (r >= 0 && c >= 0 && r + c > 0) out.weights = { research: r, celebrity: c }; }
     if (Array.isArray(ov.cases)) out.cases = ov.cases.filter(function (x) { return x && x.id && x.title; });
+    // 기본 제공 출생 시기 연구 카드는 서버 저장본에 없어도(이 기능 배포 전에 저장된 설정) 붙인다. 관리자가 지운 것(removedCases)은 제외.
+    var gone = Array.isArray(ov.removedCases) ? ov.removedCases : [];
+    BIRTH_CASES.slice().reverse().forEach(function (d) { if (!out.cases.some(function (x) { return x.id === d.id; }) && gone.indexOf(d.id) < 0) out.cases.unshift(JSON.parse(JSON.stringify(d))); });
+    out.removedCases = gone.slice();
+    out.cases = out.cases.map(normalizeCase);
+    // 섹션: 서버가 보낸 순서를 따르되 알려진 type 만 받고, 빠진 기본 섹션은 뒤에 붙인다(새 배포로 섹션이 늘어도 사라지지 않게)
+    if (Array.isArray(ov.sections)) {
+      var seenS = {}, list = ov.sections.filter(function (x) { return x && SECTION_TYPES.indexOf(x.type) >= 0 && x.id && !seenS[x.id] && (seenS[x.id] = 1); }).map(function (x) {
+        var d = SECTIONS.filter(function (y) { return y.type === x.type; })[0] || SECTIONS[0];
+        return Object.assign({}, d, pick(x, ['id', 'type', 'enabled', 'effect', 'kicker', 'title', 'sub', 'notice', 'bridge', 'bg', 'bgMobile']), { cta: Object.assign({}, d.cta, x.cta && typeof x.cta === 'object' ? pick(x.cta, ['show', 'text']) : {}) });
+      });
+      out.sections = list;
+      SECTIONS.forEach(function (d) { if (d.type !== 'story' && !list.some(function (x) { return x.type === d.type; })) out.sections.push(JSON.parse(JSON.stringify(d))); });
+    }
+    if (typeof ov.progressLabel === 'string' && ov.progressLabel.trim()) out.progressLabel = ov.progressLabel.trim().slice(0, 60);
+    if (ov.afterDone === 'home' || ov.afterDone === 'reveal') out.afterDone = ov.afterDone;
+    if (Array.isArray(ov.services)) out.services = ov.services.filter(function (x) { return x && x.id && x.title; }).map(function (x) { return Object.assign({ desc: '', glyph: '', status: 'live', visible: true, image: '', video: '', link: '' }, x); });
+    if (Array.isArray(ov.topics)) out.topics = ov.topics.filter(function (x) { return x && x.id && x.title; }).map(function (x) { return Object.assign({ enabled: true, nature: 'tradition', sub: '', summary: '', detail: '', analogy: '', term: '', termEasy: '', image: '', video: '', image2: '', anim: 'fade', refs: '' }, x); });
     if (Array.isArray(ov.intro)) out.intro = out.intro.map(function (d) { var o = ov.intro.filter(function (x) { return x && x.id === d.id; })[0]; return o ? Object.assign({}, d, pick(o, ['title', 'body', 'sub', 'image', 'video', 'enabled', 'glyph'])) : d; });
-    if (Array.isArray(ov.scenes)) out.scenes = out.scenes.map(function (d) { var o = ov.scenes.filter(function (x) { return x && x.id === d.id; })[0]; return o ? Object.assign({}, d, pick(o, ['title', 'lines', 'hint', 'unknownLines', 'button', 'face', 'image', 'bg', 'enabled']), { field: d.field }) : d; });
+    if (Array.isArray(ov.scenes)) out.scenes = out.scenes.map(function (d) { var o = ov.scenes.filter(function (x) { return x && x.id === d.id; })[0]; return o ? Object.assign({}, d, pick(o, ['title', 'lines', 'hint', 'unknownLines', 'button', 'face', 'image', 'bg', 'bubble', 'enabled']), { field: d.field }) : d; });
     // 필수 입력 단계는 끌 수 없다
     out.scenes.forEach(function (s) { if (REQUIRED_FIELDS.indexOf(s.field) >= 0) s.enabled = true; });
     if (ov.introLast && typeof ov.introLast === 'object') out.introLast = Object.assign({}, out.introLast, pick(ov.introLast, ['line', 'cta']));
@@ -163,9 +279,12 @@
   /* ── 사례 고르기 ──────────────────────────────────────────────
      공개(published) 사례만. 유형 가중치(연구 60 : 유명인 40)로 유형을 먼저 정하고, 그 안에서 사례 가중치로 고른다.
      직전에 본 사례는 다른 후보가 있는 한 제외한다. rnd 를 주입하면 재현된다. 해당 유형에 사례가 없으면 다른 유형으로 넘어간다. */
-  function publicCases(cases) { return (cases || []).filter(function (c) { return c && c.status === 'published' && c.title && c.body && c.body.length && c.source && (c.source.doi || c.source.url); }); }
+  // 공개 조건: 검증 완료 + 공개 켬 + 출처. 방문자 풀에는 이것만 들어간다.
+  function publicCases(cases) { return (cases || []).filter(Boolean).map(normalizeCase).filter(function (c) { return c.visible && c.verification.state === 'verified' && c.title && ((c.body && c.body.length) || (c.story && c.story.length)) && c.source && (c.source.doi || c.source.url); }); }
+  // 출생 시기 연구 카드(SECTION 02) — 공개 사례 중 group === 'birth', 표시 순서(display.order → 배열 순)
+  function birthCards(cases) { return publicCases(cases).filter(function (c) { return c.group === 'birth'; }).map(function (c, i) { return { c: c, i: i }; }).sort(function (a, b) { return (a.c.display.order - b.c.display.order) || (a.i - b.i); }).map(function (x) { return x.c; }); }
   function pickCase(cfg, opts) {
-    opts = opts || {}; var rnd = opts.rnd || Math.random, recent = opts.recent || [], pool = publicCases(cfg.cases);
+    opts = opts || {}; var rnd = opts.rnd || Math.random, recent = opts.recent || [], pool = publicCases(cfg.cases).filter(function (c) { return c.group !== 'birth'; });
     if (opts.type) pool = pool.filter(function (c) { return c.type === opts.type; });
     if (!pool.length) return null;
     var fresh = pool.filter(function (c) { return recent.indexOf(c.id) < 0; });
@@ -210,7 +329,7 @@
   // 한국 지역(시·도 대표 도시) — 기존 입력 화면과 같은 경도 값. 엔진은 한국 표준시 기준이라 국내 출생을 기본으로 한다.
   var PLACES = [['서울', 126.98], ['부산', 129.08], ['대구', 128.60], ['인천', 126.70], ['광주', 126.85], ['대전', 127.38], ['울산', 129.31], ['세종', 127.29], ['수원', 127.03], ['고양', 126.83], ['성남', 127.14], ['용인', 127.18], ['청주', 127.49], ['천안', 127.15], ['전주', 127.15], ['목포', 126.39], ['여수', 127.66], ['포항', 129.36], ['경주', 129.22], ['안동', 128.73], ['창원', 128.68], ['진주', 128.11], ['춘천', 127.73], ['강릉', 128.90], ['제주', 126.53]].map(function (p) { return { name: p[0], lon: p[1] }; });
 
-  root.Onboard = { DEFAULTS: DEFAULTS, CASES: CASES, INTRO: INTRO, INTRO_LAST: INTRO_LAST, INTRO_NOTICE: INTRO_NOTICE, SCENES: SCENES, REVEAL_LINES: REVEAL_LINES, FACES: FACES, PLACES: PLACES, REQUIRED_FIELDS: REQUIRED_FIELDS, FORBIDDEN_TITLES: FORBIDDEN_TITLES,
-    honorific: honorific, addr: addr, fill: fill, merge: merge, publicCases: publicCases, pickCase: pickCase, validateDate: validateDate, validateTime: validateTime, toProfile: toProfile };
+  root.Onboard = { TERMS: TERMS, DEFAULTS: DEFAULTS, CASES: CASES, INTRO: INTRO, INTRO_LAST: INTRO_LAST, INTRO_NOTICE: INTRO_NOTICE, SCENES: SCENES, REVEAL_LINES: REVEAL_LINES, FACES: FACES, PLACES: PLACES, REQUIRED_FIELDS: REQUIRED_FIELDS, FORBIDDEN_TITLES: FORBIDDEN_TITLES,
+    honorific: honorific, addr: addr, fill: fill, merge: merge, publicCases: publicCases, birthCards: birthCards, normalizeCase: normalizeCase, KINDS: KINDS, VSTATE: VSTATE, RELATION: RELATION, DESIGNS: DESIGNS, EFFECTS: EFFECTS, NATURE: NATURE, SECTIONS: SECTIONS, SERVICES: SERVICES, TOPICS: TOPICS, SECTION_TYPES: SECTION_TYPES, pickCase: pickCase, validateDate: validateDate, validateTime: validateTime, toProfile: toProfile };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.Onboard;
 })(typeof window !== 'undefined' ? window : globalThis);
