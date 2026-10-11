@@ -8,11 +8,14 @@
 //   task "expand": 짧은 초안에 살을 붙여 보충하기 { text, tone?, chapter? }
 //   task "split" : 전체 문장을 자막 줄로 나누기      { text }
 //   task "polish": 이미 쓴 자막 다듬기              { lines: [...] }  (tone = 다듬는 방향)
+//   task "module": 해석 모듈 풀이 작성(촌철살인)    { category, conditions(문장), headline?, summary?, detail?, mode?("new"), tone? } → { module: {headline, summary, detail} }
 //
 // 폴백 규칙: 시간 초과·네트워크 오류·429·5xx(과부하 529 포함)·형식이 맞지 않는 답이면 다음 서비스로 넘어간다.
 // 400/401/403/404 같은 설정·요청 오류는 폴백으로 덮지 않고 그대로 알린다(키·모델 이름 실수를 놓치지 않도록).
 import { json, isAdmin } from '../_lib.js';
 import { kvOf } from '../_store.js';
+import * as IK from '../_ik.js';
+import { loadDomain } from '../_ikstore.js';
 
 const DEFAULT_MODEL = { anthropic: 'claude-sonnet-5-5', openai: 'gpt-6.1-sol' };
 const TIMEOUT_MS = 40000;
@@ -75,12 +78,73 @@ const SYSTEM = `너는 한국어 사주 콘텐츠 "무빙툰"의 작가다. 무�
 - 같은 말을 반복하지 않는다. 번호·따옴표·이모지·해시태그는 붙이지 않는다.
 출력은 반드시 JSON 한 덩어리만: {"lines":["첫째 줄","둘째 줄"]}  (설명이나 코드블록 없이)`;
 
+// ── 해석 모듈(풀이 문장) 작성: 두루뭉술한 덕담이 아니라 촌철살인으로. 안전 원칙(사건·건강·투자 단정 금지)은 그대로 둔다.
+const MODULE_SYSTEM = `너는 한국어 사주 해석 작가다. 목표는 두루뭉술한 덕담이 아니라, 읽는 사람이 "정곡이다" 하고 찔리거나 무릎을 칠 만한 촌철살인의 풀이다.
+규칙:
+- headline: 한두 문장, 60자 안팎. 한 방이 있어야 한다. 대조·역설·구체적인 행동 묘사로 쓴다. "~한 사람입니다"식의 평범한 요약, 사전 같은 정의는 쓰지 않는다.
+- summary: 2~3문장. 이 구조가 만드는 반복 패턴과 그 대가를 구체적인 장면(회의, 연애, 돈 쓸 때, 혼자 있을 때 등)으로 보여 준다.
+- detail: 4~6문장. ① 강점이 어떻게 약점이 되는지 ② 이 사람이 자주 쓰는 합리화 한 가지 ③ 바로 해 볼 수 있는 행동 한 가지 순서로 쓴다.
+- 쓰지 않는 말: "다양한", "균형", "노력하면", "잠재력", "긍정적", "조화" 같은 빈말, 칭찬으로 분량 채우기, 누구에게나 해당되는 말(바넘 문장).
+- 날카롭되 사람을 모욕하지 않는다. 사람이 아니라 "구조와 경향"을 찌른다. "~하기 쉽습니다", "~하는 쪽으로 기웁니다"처럼 적용 조건은 남기되 문장을 흐리지 않는다.
+- 질병·사망·사고·이혼·파산 같은 사건 단정, 투자 수익·의학·법률 조언, 특정 집단 비하, 공포 조장은 쓰지 않는다. "반드시·무조건·확정"도 쓰지 않는다.
+- 프롬프트에 "참고 DB 자료"가 있으면 그것이 1순위 근거다. 거기 적힌 원리·강점·약점·행동 패턴을 구체적인 장면으로 바꿔 쓰고, DB와 모순되거나 DB에 없는 단정은 하지 않는다.
+- 주어진 조건(일간·오행·신강약·카테고리)과 그 전통적 의미(예: 갑목=큰 나무, 정화=촛불)만 근거로 쓴다. 모르는 용어나 실제 사건·재산·가족사는 지어내지 않는다.
+- 기존 글에 {dayMasterEl} {yongEl} {el.인성} 같은 치환 자리가 있으면 그대로 살려 쓴다. 합쇼체(~습니다)로 통일하고 이모지·번호·따옴표는 붙이지 않는다.
+출력은 반드시 JSON 한 덩어리만: {"headline":"...","summary":"...","detail":"..."}  (설명이나 코드블록 없이)`;
+function parseModule(text) {
+  const a = text.indexOf('{'), b = text.lastIndexOf('}'); if (a < 0 || b <= a) return null;
+  let d; try { d = JSON.parse(text.slice(a, b + 1)); } catch { return null; }
+  if (!d || typeof d.headline !== 'string' || !d.headline.trim()) return null;
+  const c = (v, n) => String(v == null ? '' : v).trim().slice(0, n);
+  return { headline: c(d.headline, 160), summary: c(d.summary, 600), detail: c(d.detail, 1500) };
+}
+
+// ── DB(풀이 지식 IK) 참고 자료: 이 모듈의 카테고리·조건과 맞는 항목을 골라 프롬프트 근거로 넣는다. 못 찾거나 DB 오류면 조용히 건너뛴다.
+const DB_REFS = 6;
+function refScore(it, base, subDomain) {
+  const c = it.conditions || {}; let hit = 0, miss = 0;
+  for (const k of Object.keys(c)) {
+    const a = c[k], b = base[k]; if (!b) continue;
+    if (Array.isArray(a) && Array.isArray(b)) { if (a.some(v => b.indexOf(v) >= 0)) hit += 2; else miss++; }
+    else if (a && b && typeof a === 'object' && typeof b === 'object') { for (const x of Object.keys(a)) { if (b[x] === undefined) continue; if (b[x] === a[x]) hit += 2; else miss++; } }
+  }
+  if (miss) return -1; // 조건이 서로 어긋나는 항목은 근거로 쓰지 않는다
+  return hit + (it.reviewed ? 2 : 0) + (it.status === 'published' ? 1 : 0) + (subDomain && it.subDomain === subDomain ? 1 : 0) + (it.priority || 0) / 100 + (Object.keys(c).length ? 0 : 0.3) - (/legacy/.test((it.tags || []).join()) ? 1.5 : 0);
+}
+async function dbRefs(env, b) {
+  try {
+    if (!env.GLOSSARY_KV) return [];
+    const m = IK.fromLegacyModule({ category: String(b.category || ''), conditions: b.conds && typeof b.conds === 'object' ? b.conds : {}, headline: 'x', priority: 0 }, 0); if (!m) return [];
+    const list = await loadDomain(kvOf(env), m.domain), base = m.conditions || {};
+    return list.filter(it => it && it.status !== 'archived' && !(it.sourceType === 'AI_DRAFT' && !it.reviewed))
+      .map(it => ({ it, sc: refScore(it, base, m.subDomain) })).filter(x => x.sc > 0).sort((a, z) => z.sc - a.sc).slice(0, DB_REFS)
+      .map(({ it }) => ({ id: it.id, title: it.title, reviewed: !!it.reviewed, status: it.status, text: [it.principle, it.interpretation].filter(Boolean).join(' ').replace(/\s+/g, ' ').slice(0, 420),
+        strengths: (it.strengths || []).slice(0, 3), risks: (it.risks || []).slice(0, 3), behavior: (it.behaviorPatterns || []).slice(0, 3), actions: (it.actions || []).slice(0, 2) }));
+  } catch { return []; }
+}
+const refBlock = refs => refs.length ? '\n\n참고 DB 자료(검수·관리 중인 풀이 지식. 이 안의 원리와 주장 범위 안에서만 쓰고, 자료에 없는 내용을 단정하지 마라. 문장을 그대로 베끼지 말고 더 날카롭게 재표현하라. 자료끼리 어긋나면 검수 완료·게시된 쪽을 따른다):\n' +
+  refs.map((r, i) => (i + 1) + '. [' + r.id + '] ' + r.title + (r.reviewed ? ' (검수 완료)' : ' (검수 전)') + '\n   ' + r.text + (r.strengths.length ? '\n   강점: ' + r.strengths.join(' / ') : '') + (r.risks.length ? '\n   위험·약점: ' + r.risks.join(' / ') : '') +
+    (r.behavior.length ? '\n   행동 패턴: ' + r.behavior.join(' / ') : '') + (r.actions.length ? '\n   행동 제안: ' + r.actions.join(' / ') : '')).join('\n') : '\n\n(참고할 DB 자료가 없습니다. 조건과 전통적 의미만으로 쓰되 사실을 지어내지 마라.)';
+
 const clip = (v, n) => String(v == null ? '' : v).slice(0, n);
 
 // 작업별 사용자 프롬프트. 입력이 잘못되면 문자열 대신 { error } 를 돌려준다.
-function buildPrompt(b) {
+function buildPrompt(b, refs) {
   const n = Math.max(1, Math.min(MAX_LINES, Math.round(+b.n) || 4)), tone = clip(b.tone, 300).trim();
   const toneLine = tone ? `\n추가 지시(말투·방향): ${tone}` : '';
+  if (b.task === 'module') {
+    const cat = clip(b.category, 60) || '미정', cond = clip(b.conditions, 300).trim() || '(조건 없음: 누구에게나 걸리는 폴백)', h = clip(b.headline, 300).trim(), sm = clip(b.summary, 800).trim(), dt = clip(b.detail, 1800).trim();
+    const has = h || sm || dt;
+    return `다음 사주 해석 모듈의 풀이를 ${has && b.mode !== 'new' ? '더 날카롭게 다시 써라(뜻과 방향은 살리되 두루뭉술한 표현을 걷어내고 구체적 장면과 대가를 넣어라)' : '새로 써라'}.
+카테고리: ${cat}
+적용 조건: ${cond}` +
+      (has ? `
+
+현재 글:
+핵심 문장: ${h || '(없음)'}
+짧은 설명: ${sm || '(없음)'}
+상세 풀이: ${dt || '(없음)'}` : '') + refBlock(refs || []) + toneLine;
+  }
   if (b.task === 'script') {
     const cond = b.cond && typeof b.cond === 'object' ? Object.entries(b.cond).slice(0, 10).map(([k, v]) => `- ${clip(k, 20)}: ${clip(v, 80)}`).join('\n') : '';
     const existing = clip(b.existing, 600).trim();
@@ -122,7 +186,8 @@ async function overLimit(env) {
 export async function onRequestPost({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   let b; try { b = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); }
-  const prompt = buildPrompt(b || {});
+  const refs = b && b.task === 'module' ? await dbRefs(env, b) : [];
+  const prompt = buildPrompt(b || {}, refs);
   if (typeof prompt !== 'string') return json({ error: prompt.error }, 400);
 
   const order = [];
@@ -131,13 +196,13 @@ export async function onRequestPost({ request, env }) {
   if (!order.length) return json({ error: 'AI 키가 없습니다. OPENAI_API_KEY(메인) 또는 ANTHROPIC_API_KEY(폴백)를 Secret으로 추가한 뒤 다시 배포하세요' }, 501);
   if (await overLimit(env)) return json({ error: `오늘 AI 호출 한도(${+env.AI_DAILY_LIMIT || 300}회)를 넘었습니다. 내일 다시 시도하거나 AI_DAILY_LIMIT을 올리세요` }, 429);
 
-  const attempts = [];
+  const isMod = b.task === 'module', system = isMod ? MODULE_SYSTEM : SYSTEM, attempts = [];
   for (const [name, fn] of order) {
     try {
-      const r = await fn(env, SYSTEM, prompt), lines = parseLines(r.text);
-      if (!lines) throw new ProviderError(name, `${name} 답이 요청한 형식(JSON lines)이 아닙니다`, true, 200);
+      const r = await fn(env, system, prompt), lines = isMod ? parseModule(r.text) : parseLines(r.text);
+      if (!lines) throw new ProviderError(name, `${name} 답이 요청한 형식(${isMod ? 'JSON headline/summary/detail' : 'JSON lines'})이 아닙니다`, true, 200);
       attempts.push({ provider: name, ok: true });
-      return json({ ok: true, provider: name, model: r.model, lines, attempts });
+      return json(isMod ? { ok: true, provider: name, model: r.model, module: lines, refs: refs.map(x => ({ id: x.id, title: x.title, reviewed: x.reviewed })), attempts } : { ok: true, provider: name, model: r.model, lines, attempts });
     } catch (e) {
       const err = e instanceof ProviderError ? e : new ProviderError(name, `${name}: ${(e && e.message) || e}`, false, 0);
       attempts.push({ provider: name, ok: false, error: err.message, status: err.status });

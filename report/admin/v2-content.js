@@ -105,7 +105,7 @@
       };
       var rv = $('#eRevert', box); if (rv) rv.onclick = function () { S.list[S.list.indexOf(x)] = clone(defs[x.id]); S.dirty = true; renderList(); renderEd(); o.onChange && o.onChange(S.list); };
       var dl = $('#eDel', box); if (dl) dl.onclick = function () { if (confirm('삭제할까요?')) { S.list = S.list.filter(function (y) { return y !== x; }); S.sel = null; S.dirty = true; renderList(); renderEd(); } };
-      $('#eTest', box).onclick = function () { condTest(clone(Object.assign({}, x, { conditions: condRead($('#eCond', box)) })), $('#eOut', box), o.key); };
+      $('#eTest', box).onclick = function () { condTest(clone(Object.assign({}, x, { conditions: condRead($('#eCond', box)) })), $('#eOut', box), o.key); }; if (o.afterEd) o.afterEd(box, x);
     }
     S.edited = function (x) { return JSON.stringify(x) !== JSON.stringify(defs[x.id]); };
     $('#iSave', root).onclick = function () {
@@ -224,11 +224,39 @@
   function modCfg() {
     return { panel: policyPanel, bindPanel: policyBind, title: '해석 모듈', base: R.Content.modules, key: 'modules', catKey: 'category', cats: CATS.map(function (c) { return [c, CAT_KO[c]]; }), catLabel: '카테고리', title2: function (x) { return x.headline; }, catName: function (x) { return CAT_KO[x.category] || x.category; },
       blank: function (cat) { return { id: 'mod_' + Date.now().toString(36), category: cat, conditions: {}, priority: 50, headline: '', summary: '', detail: '', keywords: [], imageTags: [], actionTags: [], extra: null, enabled: true }; },
-      fields: function (x) { return '<div class="fx"><label>카테고리</label><select id="eCat">' + CATS.map(function (c) { return '<option value="' + c + '"' + (x.category === c ? ' selected' : '') + '>' + CAT_KO[c] + ' (' + c + ')</option>'; }).join('') + '</select></div>' + tf('eH', '핵심 문장 (headline, 1~2문장)', x.headline) + tf('eS', '짧은 설명 (summary)', x.summary, 1) + tf('eD', '상세 풀이 (detail, "자세히 보기"에 펼침)', x.detail, 1) +
+      fields: function (x) { return '<div class="fx"><label>카테고리</label><select id="eCat">' + CATS.map(function (c) { return '<option value="' + c + '"' + (x.category === c ? ' selected' : '') + '>' + CAT_KO[c] + ' (' + c + ')</option>'; }).join('') + '</select></div>' + aiBox() + tf('eH', '핵심 문장 (headline, 1~2문장)', x.headline) + tf('eS', '짧은 설명 (summary)', x.summary, 1) + tf('eD', '상세 풀이 (detail, "자세히 보기"에 펼침)', x.detail, 1) +
         '<div class="fx2">' + tf('eK', '키워드 (쉼표)', (x.keywords || []).join(', ')) + tf('eI', '이미지 태그 imageTags (쉼표, 예: wood,growth,forest)', (x.imageTags || []).join(', ')) + '</div>' + tf('eA', '행동 태그 actionTags (쉼표)', (x.actionTags || []).join(', ')) +
         '<div class="fx"><label>구조화 보조 항목 extra (JSON, 선택) — 직업 환경·재물 항목 등</label><textarea id="eX" class="mono">' + esc(x.extra ? JSON.stringify(x.extra, null, 1) : '') + '</textarea></div><p class="muted">문장 속 {dayMasterEl} {yongEl} {el.인성} 같은 자리는 개인 사실로 치환됩니다. "반드시·무조건·확정" 표현은 쓰지 마세요.</p>' + layerFields(x); },
+      afterEd: aiBind,
       read: function (b, n) { var orig = clone(n); n.category = $('#eCat', b).value; n.headline = $('#eH', b).value; n.summary = $('#eS', b).value; n.detail = $('#eD', b).value; n.keywords = csv($('#eK', b).value); n.imageTags = csv($('#eI', b).value); n.actionTags = csv($('#eA', b).value);
         var x = $('#eX', b).value.trim(); try { n.extra = x ? JSON.parse(x) : null; } catch (e) { toast('extra JSON 형식이 올바르지 않아 비웠습니다', true); n.extra = null; } if (/(반드시|무조건|확정)/.test(n.headline + n.summary + n.detail)) toast('단정 표현이 포함되어 있습니다. 문구를 확인하세요', true); return layerRead(b, n, orig); } };
+  }
+  /* ── 해석 모듈 AI 작성(촌철살인 + 풀이 지식 DB 참고) — 결과는 폼에만 채우고, "적용" → "변경사항 저장"을 눌러야 반영된다 ── */
+  function aiBox() {
+    return '<div class="card" style="padding:10px;margin:8px 0;border-color:var(--gold)"><b style="color:var(--gold)">AI로 풀이 쓰기 · 촌철살인</b> <span class="muted">풀이 지식 DB에서 이 모듈의 카테고리·조건에 맞는 자료를 찾아 근거로 쓰고, 두루뭉술한 문장을 구체적 장면과 대가가 있는 문장으로 바꿉니다. 결과는 아래 칸에 채워지며 "적용"과 "변경사항 저장"을 눌러야 반영됩니다.</span>' +
+      '<div class="row" style="margin-top:6px;gap:6px;flex-wrap:wrap"><input type="text" id="eAiTone" placeholder="방향 (선택) 예: 더 독하게 · 연애 장면으로 · 짧고 건조하게" style="flex:1;min-width:220px">' +
+      '<button type="button" id="eAiRe">날카롭게 다시 쓰기</button><button type="button" id="eAiNew">조건만 보고 새로 쓰기</button><button type="button" id="eAiUndo" hidden>이전 글로 되돌리기</button></div><div class="muted" id="eAiMsg" style="margin-top:4px"></div></div>';
+  }
+  function aiBind(box) {
+    var msg = $('#eAiMsg', box), prev = null, set = function (id, v) { var e = $(id, box); if (e) e.value = v; };
+    if (!$('#eAiRe', box)) return;
+    function run(mode) {
+      var cond = condRead($('#eCond', box)), cat = $('#eCat', box).value, ct = condText(cond);
+      var body = { task: 'module', mode: mode, category: cat, conds: cond, conditions: (CAT_KO[cat] || cat) + ' / ' + (ct && ct !== '조건 없음' ? ct : ''), tone: $('#eAiTone', box).value.trim(),
+        headline: $('#eH', box).value, summary: $('#eS', box).value, detail: $('#eD', box).value };
+      var btns = [$('#eAiRe', box), $('#eAiNew', box)]; btns.forEach(function (b) { b.disabled = true; }); msg.textContent = 'DB 자료를 찾고 AI가 쓰는 중… (10~30초)';
+      api('/api/ai', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (d) {
+        var m = d.module; if (!m) throw new Error('AI 응답에 풀이가 없습니다');
+        prev = { h: $('#eH', box).value, s: $('#eS', box).value, d: $('#eD', box).value };
+        set('#eH', m.headline); set('#eS', m.summary); set('#eD', m.detail);
+        $('#eAiUndo', box).hidden = false;
+        var rf = d.refs || []; msg.innerHTML = '채웠습니다(' + esc(d.provider) + '). ' + (rf.length ? '참고한 DB 자료 ' + rf.length + '건: ' + rf.map(function (r) { return esc(r.title || r.id) + (r.reviewed ? '' : '(검수 전)'); }).join(' · ') : '<span class="miss">조건에 맞는 DB 자료가 없어 조건과 전통 의미만으로 썼습니다. 풀이 지식 탭에 자료를 채우면 더 정확해집니다.</span>') + '<br>읽어 보고 고친 뒤 "적용" → "변경사항 저장"을 누르세요.';
+        if (/(반드시|무조건|확정)/.test(m.headline + m.summary + m.detail)) toast('단정 표현이 포함되어 있습니다. 문구를 확인하세요', true);
+      }).catch(function (e) { msg.textContent = ''; toast(e.message, true); }).then(function () { btns.forEach(function (b) { b.disabled = false; }); });
+    }
+    $('#eAiRe', box).onclick = function () { run('rewrite'); };
+    $('#eAiNew', box).onclick = function () { run('new'); };
+    $('#eAiUndo', box).onclick = function () { if (!prev) return; set('#eH', prev.h); set('#eS', prev.s); set('#eD', prev.d); this.hidden = true; prev = null; msg.textContent = '이전 글로 되돌렸습니다.'; };
   }
   function remCfg() {
     return { title: '개운법 라이브러리', base: R.Remedy.LIBRARY, key: 'remedies', catKey: 'type', cats: REM_TYPES.map(function (c) { return [c, REM_KO[c]]; }), catLabel: '유형', title2: function (x) { return x.title; }, catName: function (x) { return REM_KO[x.type] || x.type; },
