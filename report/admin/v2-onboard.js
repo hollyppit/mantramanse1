@@ -337,10 +337,11 @@
     $('#obBody').innerHTML = '<div class="card"><h3 style="font-size:1rem;margin:0">원리 주제 <span class="ob-lock">· 역사적 사실 / 전통 해석 / 천문·과학적 사실을 구분해 표시합니다</span></h3><div class="v2split"><div><div class="ob-bar"><button id="obTpAdd">+ 주제 추가</button></div><div class="v2list">' + rows + '</div></div><div>' + (tp ? topicForm(tp) : '<p class="muted">주제를 선택하세요.</p>') + '</div></div></div>' +
       cfg.intro.map(function (s, i) { return '<div class="card"><h3 style="font-size:1rem">소개 장면 ' + (i + 1) + ' · ' + esc(s.id) + '</h3><form id="obI' + i + '" onsubmit="return false">' +
         '<label class="ob-f">제목<input type="text" name="title" value="' + esc(s.title) + '"></label><label class="ob-f">본문<textarea name="body">' + esc(s.body) + '</textarea></label><label class="ob-f">보조 문구<input type="text" name="sub" value="' + esc(s.sub || '') + '"></label>' +
-        '<div class="ob-g2"><label class="ob-f">이미지 주소<input type="text" name="image" value="' + esc(s.image || '') + '"></label><label class="ob-f">영상 주소 (mp4)<input type="text" name="video" value="' + esc(s.video || '') + '"></label></div>' +
+        '<div class="ob-g2"><label class="ob-f">이미지 (주소 입력 또는 파일 올리기)<input type="text" name="image" value="' + esc(s.image || '') + '"><input type="file" data-up="image" accept="image/*"></label><label class="ob-f">영상 (mp4 · 주소 입력 또는 파일 올리기)<input type="text" name="video" value="' + esc(s.video || '') + '"><input type="file" data-up="video" accept="video/*"></label></div>' +
         chk('enabled', s.enabled !== false, '노출') + '</form></div>'; }).join('') +
       '<div class="card"><h3 style="font-size:1rem">예전 마지막 문구·버튼 <span class="ob-lock">(최종 CTA 섹션 문구가 비어 있을 때 사용)</span></h3><form id="obLast" onsubmit="return false"><label class="ob-f">문구<input type="text" name="line" value="' + esc(cfg.introLast.line) + '"></label><label class="ob-f">버튼<input type="text" name="cta" value="' + esc(cfg.introLast.cta) + '"></label></form></div>';
-    $$('[data-tp]').forEach(function (r) { r.onclick = function () { collect(); G.selTopic = r.dataset.tp; introView(); }; });
+    cfg.intro.forEach(function (s, i) { var fi = $('#obI' + i); if (fi) bindUploads(fi, 'onb-intro-'); });
+    $('[data-tp]').forEach(function (r) { r.onclick = function () { collect(); G.selTopic = r.dataset.tp; introView(); }; });
     $('#obTpAdd').onclick = function () { collect(); var id = uid('tp').slice(0, 30).toLowerCase(); cfg.topics.push({ id: id, enabled: false, nature: 'tradition', title: '새 주제', sub: '', summary: '', detail: '', analogy: '', term: '', termEasy: '', image: '', video: '', image2: '', anim: 'fade', refs: '' }); G.selTopic = id; G.dirty = true; introView(); };
     var f = $('#obTopic'); if (f) {
       bindUploads(f, 'onb-topic-');
