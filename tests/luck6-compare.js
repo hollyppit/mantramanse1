@@ -12,9 +12,16 @@ const L = globalThis.ReportV2.Luck6;
 let seed = 777; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
 const inputs = [];
 while (inputs.length < 120) { const inp = { year: 1940 + Math.floor(rnd() * 70), month: 1 + Math.floor(rnd() * 12), day: 1 + Math.floor(rnd() * 28), hour: Math.floor(rnd() * 24), minute: 0, gender: rnd() < .5 ? 'M' : 'F', calendar: 'solar', school: ['eokbu', 'johu', 'tonggwan'][inputs.length % 3] }; try { O.compute(inp); N.compute(inp); inputs.push(inp); } catch (e) { /* 없는 날짜 */ } }
-let n = 0, same = 0, scoreDiff = 0, ovDiff = 0;
+// 변동기 기준은 옛 구현의 55 에서 65 로 의도적으로 올렸다(report/v2/VOLATILITY_ANALYSIS.md). 옛 구현과의 동등성은 기준을 옛 값(55)으로 두고 확인하고,
+// 현재 기준(65)이 바꾸는 것은 따로 센다: "옛 변동기 중 변동성 55 이상 65 미만"만 주 흐름으로 바뀌어야 하고 그 밖의 라벨은 그대로여야 한다.
+const LEGACY_VOL = 55, NOW_VOL = L.CONFIG.volatility;
+const labelAt = (w, v) => { L.CONFIG.volatility = v; const r = L.of(w).label; L.CONFIG.volatility = NOW_VOL; return r; };
+let n = 0, same = 0, scoreDiff = 0, ovDiff = 0, shifted = 0, badShift = 0, legacyVol = 0, nowVol = 0;
 const cmp = (o, w) => {
-  n++; const a = o.phase, b = L.of(w).label; if (a === b) same++;
+  n++; const a = o.phase, b = labelAt(w, LEGACY_VOL), c = L.of(w).label; if (a === b) same++;
+  if (b === '변동기') legacyVol++; if (c === '변동기') nowVol++;
+  if (b !== c) { shifted++; if (!(b === '변동기' && w.volatilityScore >= LEGACY_VOL && w.volatilityScore < NOW_VOL && c !== '변동기')) badShift++; }
+  if (c === '변동기' && b !== '변동기') badShift++; // 기준을 올렸는데 새로 변동기가 되는 항목이 있으면 안 된다
   if (['fitScore', 'intensityScore', 'volatilityScore'].some(k => Math.abs(o[k] - w[k]) > 0.01)) scoreDiff++;
   if ((a === '변동기' || a === '방어기' || b === '변동기' || b === '방어기') && a !== b) ovDiff++;
 };
@@ -25,5 +32,6 @@ for (const inp of inputs) {
   const wo = O.wolun(co, 2026), wn = N.wolun(cn, 2026); wo.forEach((x, i) => cmp(x.ev, wn[i].ev));
 }
 console.log(`비교 ${n}건: 분류 일치 ${same} (${(same / n * 100).toFixed(1)}%) · 점수 불일치 ${scoreDiff} · 변동/방어 불일치 ${ovDiff}`);
-if (scoreDiff || ovDiff || same / n < 0.97) { console.log('기대치와 다름'); process.exit(1); }
+console.log(`현재 기준 ${NOW_VOL} (옛 ${LEGACY_VOL}): 변동기 ${legacyVol}건(${(legacyVol / n * 100).toFixed(1)}%) → ${nowVol}건(${(nowVol / n * 100).toFixed(1)}%) · 바뀐 항목 ${shifted}건 · 예상 밖 변경 ${badShift}건`);
+if (scoreDiff || ovDiff || same / n < 0.97 || badShift || nowVol >= legacyVol) { console.log('기대치와 다름'); process.exit(1); }
 console.log('통과');
