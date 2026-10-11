@@ -94,25 +94,13 @@
     { id: 'now',   enabled: true, title: '지금과 앞으로', sub: '세운 · 월운 · 오늘의 일진' },
     { id: 'themes', enabled: true, title: '인생의 주요 주제', sub: '궁금한 분야를 눌러 자세한 풀이로' },
   ];
-  var TL_TOPICS = [
-    { id: 'self',     enabled: true, title: '본래의 나',     desc: '타고난 성향과 강점·약점', kind: 'interest', interest: 'self',     asset: 'courtyard', access: 'free' },
-    { id: 'money',    enabled: true, title: '재물',           desc: '돈을 버는 방식과 모이는 시기', kind: 'interest', interest: 'money',    asset: 'archive',   access: 'paid' },
-    { id: 'career',   enabled: true, title: '직업과 적성',    desc: '잘 맞는 일과 성과가 나는 때', kind: 'interest', interest: 'career',   asset: 'office',    access: 'paid' },
-    { id: 'love',     enabled: true, title: '연애와 결혼',    desc: '인연의 결과 흐름', kind: 'interest', interest: 'love',     asset: 'mirror',    access: 'paid' },
-    { id: 'relation', enabled: true, title: '대인관계',       desc: '사람 사이의 거리와 인연', kind: 'interest', interest: 'relation', asset: 'reeds',     access: 'paid' },
-    { id: 'health',   enabled: true, title: '건강 · 컨디션',  desc: '생활 리듬의 참고 (의학적 진단 아님)', kind: 'link', link: '#/today?f=health', asset: 'portal', access: 'free' },
-    { id: 'remedy',   enabled: true, title: '개운법',         desc: '지금 흐름에 맞는 행동 전략', kind: 'interest', interest: 'future', asset: 'letter', access: 'free' },
-    { id: 'all',      enabled: true, title: '모든 챕터',      desc: '심층 무빙툰 리포트 전체', kind: 'interest', interest: '',       asset: 'papers',    access: 'paid' },
-  ];
   var TIMELINE = {
     enabled: true,
     sections: TL_SECTIONS,
     graph: { elements: true, ziwei: true, daeun: true, seun: true, wolun: true, today: true },
-    topics: TL_TOPICS,
     texts: { intro: '태어난 순간에서 시작된 운의 흐름을 따라가 봅니다.', notice: '사주는 전통 해석에 바탕한 참고용 콘텐츠이며 미래를 단정하지 않습니다. 그래프의 점수는 명리 모델 안의 상대적 지표입니다.' },
   };
-  var ACCESS = { free: '무료', paid: '프리미엄' };
-  var INTERESTS = ['', 'self', 'money', 'career', 'love', 'marriage', 'relation', 'future'];
+  var ACCESS = { free: '무료', paid: '유료' };
 
   O.DEFAULTS.quest = QUEST; O.DEFAULTS.timeline = TIMELINE;
 
@@ -160,15 +148,6 @@
       out.sections = list;
     }
     if (ov.graph && typeof ov.graph === 'object') Object.keys(out.graph).forEach(function (k) { if (typeof ov.graph[k] === 'boolean') out.graph[k] = ov.graph[k]; });
-    if (Array.isArray(ov.topics)) {
-      var seenT = {}, tl = ov.topics.filter(function (x) { return x && /^[a-z0-9][a-z0-9_-]{1,30}$/.test(String(x.id || '')) && !seenT[x.id] && (seenT[x.id] = 1); }).slice(0, 16).map(function (x) {
-        var d = TL_TOPICS.filter(function (y) { return y.id === x.id; })[0] || {};
-        var link = s(x.link, 200); if (!/^(#\/[\w\-./?=&%]*|\/[\w\-./?=&#%]*|https:\/\/[^\s"'<>]+)$/.test(link)) link = '';
-        var kind = x.kind === 'link' && link ? 'link' : 'interest';
-        return { id: x.id, enabled: x.enabled !== false, title: s(x.title, 40) || d.title || '', desc: s(x.desc, 120), kind: kind, interest: INTERESTS.indexOf(x.interest) >= 0 ? x.interest : (d.interest || ''), link: kind === 'link' ? link : '', asset: ASSET_KEYS.indexOf(x.asset) >= 0 ? x.asset : (d.asset || 'archive'), image: img(x.image), access: x.access === 'free' ? 'free' : 'paid' };
-      }).filter(function (x) { return x.title; });
-      if (tl.length) out.topics = tl;
-    }
     if (ov.texts && typeof ov.texts === 'object') ['intro', 'notice'].forEach(function (k) { var v = s(ov.texts[k], 300); if (v) out.texts[k] = v; });
     return out;
   }
@@ -238,7 +217,7 @@
     return { step: step, d: o, guide: x.guide === 'female' ? 'female' : x.guide === 'male' ? 'male' : '' };
   };
 
-  Q.STEPS = STEPS; Q.ASSETS = ASSETS; Q.ASSET_KEYS = ASSET_KEYS; Q.GUIDES = GUIDES; Q.DEFAULT = QUEST; Q.TIMELINE = TIMELINE; Q.TL_SECTIONS = TL_SECTIONS; Q.TL_TOPICS = TL_TOPICS; Q.ACCESS = ACCESS; Q.FX = FX; Q.INTERESTS = INTERESTS;
+  Q.STEPS = STEPS; Q.ASSETS = ASSETS; Q.ASSET_KEYS = ASSET_KEYS; Q.GUIDES = GUIDES; Q.DEFAULT = QUEST; Q.TIMELINE = TIMELINE; Q.TL_SECTIONS = TL_SECTIONS; Q.ACCESS = ACCESS; Q.FX = FX;
   Q.mergeQuest = mergeQuest; Q.mergeTimeline = mergeTimeline; Q.img = img; Q.focus = focus;
   root.Quest = Q;
   if (typeof module !== 'undefined' && module.exports) module.exports = Q;

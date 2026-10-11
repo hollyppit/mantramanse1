@@ -64,7 +64,7 @@ ok(Q.cleanDraft({ v: 1, step: 'name', d: {} }, ids) === null && Q.cleanDraft(nul
 ok(Q.cleanDraft({ v: 2, step: 'nope', d: {} }, ids).step === 'seal', '모르는 단계는 처음으로');
 
 /* ⑥ 설정 병합 안전성 */
-const m = O.merge(O.DEFAULTS, { quest: { steps: [{ id: 'name', enabled: false, field: 'hacked', required: false, title: '새 제목', lines: { male: ['대사 {귀인}'], female: [] }, asset: 'office', bg: 'javascript:alert(1)' }, { id: 'seal', enabled: false }, { id: 'confirm', enabled: false }], guides: { male: { name: '이름', image: 'http://insecure/x.png' } }, assets: { gate: { pc: '/report/hub/quest/letter.webp', focusPc: '10% 20%' }, evil: { pc: 'x' } }, fx: 'bad' }, timeline: { sections: [{ id: 'now', enabled: false }, { id: 'hack' }], graph: { ziwei: false, evil: true }, topics: [{ id: 'k1', title: '새 주제', kind: 'link', link: 'javascript:x', access: 'free' }] } });
+const m = O.merge(O.DEFAULTS, { quest: { steps: [{ id: 'name', enabled: false, field: 'hacked', required: false, title: '새 제목', lines: { male: ['대사 {귀인}'], female: [] }, asset: 'office', bg: 'javascript:alert(1)' }, { id: 'seal', enabled: false }, { id: 'confirm', enabled: false }], guides: { male: { name: '이름', image: 'http://insecure/x.png' } }, assets: { gate: { pc: '/report/hub/quest/letter.webp', focusPc: '10% 20%' }, evil: { pc: 'x' } }, fx: 'bad' }, timeline: { sections: [{ id: 'now', enabled: false }, { id: 'hack' }], graph: { ziwei: false, evil: true }} });
 const sn = m.quest.steps.find(s => s.id === 'name'), sc = m.quest.steps.find(s => s.id === 'confirm');
 ok(sn.enabled === true && sn.field === 'name' && sn.required === true, '관리자가 필수 단계를 끄거나 입력 종류를 바꿀 수 없다');
 ok(sn.title === '새 제목' && sn.lines.male[0] === '대사 {귀인}' && sn.lines.female.length >= 1 && sn.asset === 'office', '문구·배경 에셋은 바꿀 수 있다(빈 대사는 기본값 유지)');
@@ -74,7 +74,6 @@ ok(m.quest.assets.gate.pc === '/report/hub/quest/letter.webp' && m.quest.assets.
 ok(m.quest.fx === 'fade', '잘못된 전환 효과는 기본값');
 ok(m.timeline.sections.length === 4 && m.timeline.sections[0].id === 'now' && m.timeline.sections[0].enabled === false && !m.timeline.sections.some(s => s.id === 'hack'), '타임라인 영역: 알려진 영역만, 순서·표시 반영');
 ok(m.timeline.graph.ziwei === false && !('evil' in m.timeline.graph), '그래프 설정: 알려진 항목만');
-const nt = m.timeline.topics.find(t => t.id === 'k1'); ok(nt && nt.kind === 'interest' && nt.link === '' && nt.access === 'free', '주제 타일: 안전하지 않은 주소 거부');
 ok(Q.order(m, ['guide']).length === 9, '건너뛰기 목록 반영(켜진 단계만)');
 // 기존 설정(quest·timeline 없음)도 그대로 읽힌다: 기존 온보딩 데이터는 건드리지 않는다
 const old = O.merge(O.DEFAULTS, { honorific: '귀인', sections: [{ id: 'research', type: 'research', title: '연구 제목' }], cases: O.DEFAULTS.cases });
@@ -92,7 +91,7 @@ ok(O.merge(O.DEFAULTS, { sections: [{ id: 'final', type: 'final', cta: { show: t
   let r = await call(mod.onRequestPut, req('PUT', '/api/onboarding', { quest: { enabled: false } }, false)); ok(r.s === 401, '관리자 인증 없이 스토리 설정 저장 불가');
   const body = { quest: { enabled: true, fx: 'rise', steps: [{ id: 'name', enabled: false, title: '이름', lines: { male: ['가', '나'], female: [] }, asset: 'office', bg: 'https://x.test/a.webp', bgMobile: 'javascript:alert(1)' }, { id: 'seal', enabled: false }, { id: 'evil', enabled: true }, { id: 'confirm', enabled: false }],
     guides: { male: { name: '남', image: '/api/clipfile?k=abc.webp' } }, assets: { gate: { pc: '/report/hub/quest/letter.webp', focusPc: '40% 50%', focusMobile: 'bad' }, evil: { pc: 'x' } } },
-    timeline: { sections: [{ id: 'flow', enabled: false, title: '흐름' }, { id: 'hack' }], graph: { daeun: false, evil: 1 }, topics: [{ id: 'a1', title: '가', kind: 'link', link: 'javascript:x', access: 'free' }, { id: 'a2', title: '나', kind: 'link', link: '#/today?f=health', access: 'zzz' }, { id: 'BAD ID', title: 'x' }] } };
+    timeline: { sections: [{ id: 'flow', enabled: false, title: '흐름' }, { id: 'hack' }], graph: { daeun: false, evil: 1 } } };
   r = await call(mod.onRequestPut, req('PUT', '/api/onboarding', body, true)); ok(r.s === 200, '관리자 스토리 설정 저장');
   r = await call(mod.onRequestGet, req('GET', '/api/onboarding?draft=1', null, true)); const q = r.j.config.quest, t = r.j.config.timeline;
   ok(q.steps.length === 3 && !q.steps.some(s => s.id === 'evil'), '서버: 모르는 단계 제거');
@@ -100,7 +99,6 @@ ok(O.merge(O.DEFAULTS, { sections: [{ id: 'final', type: 'final', cta: { show: t
   ok(q.steps.find(s => s.id === 'name').bgMobile === '' && q.steps.find(s => s.id === 'name').bg === 'https://x.test/a.webp', '서버: 안전하지 않은 이미지 주소 제거');
   ok(q.assets.gate.focusMobile === '' && q.assets.gate.focusPc === '40% 50%' && !q.assets.evil && q.guides.male.image === '/api/clipfile?k=abc.webp', '서버: 에셋·초점·안내자 이미지 정제');
   ok(t.sections.length === 1 && t.sections[0].id === 'flow' && t.graph.daeun === false && !('evil' in t.graph), '서버: 타임라인 영역·그래프 정제');
-  ok(t.topics.length === 2 && t.topics[0].kind === 'interest' && t.topics[0].link === '' && t.topics[1].kind === 'link' && t.topics[1].access === 'paid', '서버: 주제 타일 주소·노출 값 정제');
   r = await call(mod.onRequestPost, req('POST', '/api/onboarding?action=publish', null, true)); ok(r.s === 200, '게시');
   r = await call(mod.onRequestGet, req('GET', '/api/onboarding')); ok(r.j.config.quest && r.j.config.quest.fx === 'rise' && r.j.config.timeline, '공개본에 스토리·타임라인 설정 포함');
   r = await call(mod.onRequestPost, req('POST', '/api/onboarding?ev=quest_view', {})); ok(r.j.ok, '스토리 이벤트 집계 허용');
@@ -137,9 +135,18 @@ ok(O.merge(O.DEFAULTS, { sections: [{ id: 'final', type: 'final', cta: { show: t
   const TL = globalThis.ReportV2.Timeline, now = Date.UTC(2026, 9, 11), dl = TL.daeun(M, A.ch, now).filter(x => !x.pre);
   ok(dl.length === A.ch.daeun.list.length && dl.every(x => x.scores.fit === Math.round(A.ch.daeun.list[x.idx].ev.fitScore)), '타임라인 대운 점수 = 엔진 값');
   ok(!/Math\.random|fitScore\s*=|\.fit\s*=/.test(tj), '타임라인 코드는 점수를 만들지 않는다');
-  const topics = Q.TL_TOPICS; ok(topics.every(t => t.kind === 'link' || Q.INTERESTS.includes(t.interest)), '주제 타일은 무빙툰 관심 분야 또는 허브 링크에 연결');
-  const SD = globalThis.ReportV2.StoryDirector; ok(topics.filter(t => t.kind === 'interest' && t.interest).every(t => SD.FLOWS[t.interest] && SD.FLOWS[t.interest].length), '관심 분야마다 기존 풀이 모듈 흐름이 있다');
-  ok(topics.some(t => t.id === 'health') && topics.some(t => t.id === 'remedy') && ['money', 'career', 'love', 'relation'].every(id => topics.some(t => t.id === id)), '재물·직업·연애·대인관계·건강·개운법 주제 포함');
+
+  /* ⑩ 인생의 주요 주제 = 운명 세계(같은 데이터·같은 이름·같은 이미지, 누르면 그 세계로) */
+  vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2/explore.js'), 'utf8'), { filename: 'explore.js' });
+  const EX = globalThis.ReportV2.Explore, defW = EX.mergeWorlds(null), savedW = EX.mergeWorlds([{ id: 'w2', name: '재물운', line: '직업 · 재물 · 성공', access: 'paid' }, { id: 'w5', enabled: false }]);
+  ok(defW.length === 6 && savedW.find(w => w.id === 'w2').name === '재물운', '세계 정의: 관리자 저장본이 기본값 위에 덮어쓴다');
+  ok(defW.every(w => /\.webp$/.test(EX.artOf(w)) && fs.existsSync(path.join(root, EX.artOf(w).replace(/^\//, '')))), '세계 기본 이미지 = 존재하는 기본 에셋');
+  ok(EX.artOf({ id: 'w2', bgImage: '/api/clipfile?k=x.webp' }) === '/api/clipfile?k=x.webp', '세계에 올린 배경이 기본 이미지보다 우선');
+  ok(!('topics' in O.merge(O.DEFAULTS, null).timeline) && !('topics' in Q.TIMELINE), '타임라인 주제 목록을 따로 두지 않는다(운명 세계가 단일 출처)');
+  const rv = fs.readFileSync(path.join(root, 'report/v2/viewer.js'), 'utf8'), hubjs = fs.readFileSync(path.join(root, 'report/hub/hub.js'), 'utf8');
+  ok(/world=\(\[\\w-\]\{1,30\}\)/.test(rv) && /data-xw="' \+ wq/.test(rv), '뷰어: ?world= 로 해당 세계를 바로 연다');
+  ok(/'&world='/.test(hubjs) && /q\.world/.test(hubjs), '허브: #/go?world= → 뷰어 ?world=');
+  ok(/R\.Explore\.artOf\(w\)/.test(tj) && /mergeWorlds/.test(tj) && /#\/go\?to=life&world=/.test(tj) && /\/api\/worlds/.test(tj), '타임라인 주제 타일은 세계 데이터·이미지·링크를 쓴다');
 
   console.log(fails.length ? 'FAIL ' + fails.length + '\n' + fails.map(f => ' - ' + f).join('\n') : 'quest-sim OK');
   if (fails.length) process.exitCode = 1;

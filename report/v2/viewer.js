@@ -267,7 +267,11 @@
     var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 4000);
     fetch('/api/worlds', { signal: ctl && ctl.signal }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
       clearTimeout(tm); if (d && d.worlds && d.worlds.length) { S.xpWorlds = R.Explore.mergeWorlds(d.worlds); buildWmap(); if (S.view === 'home') showHome(S.xpWorld); else renderStrip(); }
-    }).catch(function () { clearTimeout(tm); });
+    }).catch(function () { clearTimeout(tm); }).then(function () {
+      // 허브 운명의 타임라인 주제 타일에서 넘어온 경우(?world=w2): 그 세계를 바로 연다(세계 지도의 카드를 누른 것과 같다). 한 번만.
+      var wq = (/[?&]world=([\w-]{1,30})(&|$)/.exec(location.search) || [])[1]; if (!wq || PREVIEW || S.deepWorld) return; S.deepWorld = 1;
+      var b = document.querySelector('#v-home [data-xw="' + wq + '"]'); if (b) b.click();
+    });
   }
   /* ── 챕터 탭 줄: 지금 읽는 챕터가 속한 세계의 챕터를 가로로 늘어놓는다. 읽는 중·세계 도구 화면 어디서든 바로 이동. ── */
   var TOOL_LABEL = { w1: '기둥·십성', w2: '비교 탐색', w3: '궁합 탐색', w4: '타임라인', w5: '전생 무빙툰', w6: '행동 가이드' };

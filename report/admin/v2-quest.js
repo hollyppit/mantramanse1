@@ -92,7 +92,7 @@
     var u = [], QC = G.cfg.quest; QC.steps.forEach(function (s) { if (s.asset === key && !s.bg) u.push('장면 ' + s.title.replace(/^.*?·\s*/, '')); });
     if (key === 'male' || key === 'female') u.push((key === 'male' ? '남성' : '여성') + ' 안내자 카드·얼굴');
     if (key === 'archive') u.push('타임라인 머리글'); if (key === 'portal') u.push('일주 각성 영상 대체 화면');
-    (G.cfg.timeline.topics || []).forEach(function (t) { if (t.asset === key && !t.image) u.push('타임라인 주제 ' + t.title); });
+    var WA = { w1: 'courtyard', w2: 'archive', w3: 'mirror', w4: 'paths', w5: 'portal', w6: 'letter' }; Object.keys(WA).forEach(function (w) { if (WA[w] === key) u.push('운명 세계 ' + w + ' 기본 이미지(지도·타임라인 주제 타일)'); });
     return u;
   }
   var AW = null;
@@ -157,27 +157,16 @@
         '<div class="ob-g2"><label class="ob-f">제목<input type="text" name="title" maxlength="40" value="' + esc(s.title) + '"></label><label class="ob-f">부제<input type="text" name="sub" maxlength="120" value="' + esc(s.sub || '') + '"></label></div></div>';
     }).join('');
     var graph = '<div class="qa-g3">' + Object.keys(GRAPH_NAME).map(function (k) { return chk('g_' + k, TC.graph[k] !== false, GRAPH_NAME[k]); }).join('') + '</div>';
-    var tp = TC.topics.map(function (t, i) {
-      return '<div class="qa-trow' + (t.enabled === false ? ' off' : '') + '" data-tid="' + esc(t.id) + '"><div class="ob-g2"><label class="ob-f ob-ck"><input type="checkbox" name="en" ' + (t.enabled !== false ? 'checked' : '') + '> <b>' + esc(t.title) + '</b> 표시 <span class="ob-lock">id ' + esc(t.id) + '</span></label><div class="ob-bar"><button type="button" class="ghost" data-tmv="-1"' + (i === 0 ? ' disabled' : '') + '>↑</button><button type="button" class="ghost" data-tmv="1"' + (i === TC.topics.length - 1 ? ' disabled' : '') + '>↓</button><button type="button" class="ghost" data-tdel="1">삭제</button></div></div>' +
-        '<div class="ob-g2"><label class="ob-f">제목<input type="text" name="title" maxlength="40" value="' + esc(t.title) + '"></label><label class="ob-f">설명<input type="text" name="desc" maxlength="120" value="' + esc(t.desc || '') + '"></label></div>' +
-        '<div class="qa-g3"><label class="ob-f">이동 대상<select name="kind">' + sel({ interest: '심층 무빙툰(관심 분야)', link: '허브 내 화면·주소' }, t.kind) + '</select></label><label class="ob-f">관심 분야 (무빙툰 이야기 순서)<select name="interest">' + sel(INTEREST_LABEL, t.interest || '') + '</select></label><label class="ob-f">주소 (예 #/today?f=health)<input type="text" name="link" value="' + esc(t.link || '') + '"></label></div>' +
-        '<div class="qa-g3"><label class="ob-f">노출<select name="access">' + sel(Q.ACCESS, t.access) + '</select></label><label class="ob-f">배경 에셋<select name="asset">' + sel(ASSET_LABEL, t.asset) + '</select></label><label class="ob-f">이미지 직접 지정<input type="text" name="image" value="' + esc(t.image || '') + '"><input type="file" data-up="image" accept="image/*"></label></div>' +
-        '<p class="qa-use" data-conn="' + esc(t.id) + '"></p></div>';
-    }).join('');
     $('#obBody').innerHTML = '<div class="card"><h3 style="font-size:1rem">운명의 타임라인 구성 <span class="ob-lock">· 방문자 화면 #/timeline (홈 상단 카드에서 진입)</span></h3>' + '<form id="tlTexts" onsubmit="return false">' + chk('tlEnabled', TC.enabled !== false, '타임라인 화면 사용 (끄면 홈의 진입 카드도 숨김)') + '<label class="ob-f">소개 문장<input type="text" name="intro" maxlength="300" value="' + esc(TC.texts.intro) + '"></label><label class="ob-f">하단 안내(면책) 문구<textarea name="notice" style="min-height:60px">' + esc(TC.texts.notice) + '</textarea></label></form></div>' +
       '<div class="card"><h3 style="font-size:1rem">영역 구성 · 순서</h3><form id="tlSecs" onsubmit="return false">' + secs + '</form>' + note('모든 영역의 값은 기존 계산 엔진(원국·오행·십성·자미두수·대운·세운·월운·일진)에서 읽습니다. 여기서는 표시 여부·순서·문구만 정합니다.') + '</div>' +
       '<div class="card"><h3 style="font-size:1rem">그래프·표시 항목</h3><form id="tlGraph" onsubmit="return false">' + graph + '</form></div>' +
-      '<div class="card"><h3 style="font-size:1rem">인생의 주요 주제 타일 · 풀이 연결 · 무료/프리미엄 표시</h3><form id="tlTopics" onsubmit="return false">' + tp + '</form><div class="ob-bar"><button type="button" class="ghost" id="tlAdd">+ 주제 추가</button>' + pvBtn('tlConn', '풀이 DB 연결 상태 확인') + pvBtn('tlPv', '타임라인 미리보기') + '</div><div id="tlConnBox"></div>' +
-      note('"무료/프리미엄"은 방문자 화면의 표시 배지입니다. 이 서비스에는 결제·권한 시스템이 아직 없어 실제 접근 제한은 하지 않으며, 클릭하면 기존 무빙툰 뷰어(해당 관심 분야 이야기)로 이동합니다.') + '</div>';
+      '<div class="card"><h3 style="font-size:1rem">인생의 주요 주제 = 운명 세계</h3>' + note('4번째 영역의 타일은 기존 "운명 세계" 지도와 <b>같은 데이터</b>(이름·한 줄 설명·아이콘·이미지·순서·유료 표시·사용 여부)를 씁니다. 따로 관리하지 않으며, "세계관" 탭에서 고치면 세계 지도와 타임라인이 함께 바뀝니다. 타일을 누르면 그 세계가 바로 열립니다. "유료"는 표시 배지이고 결제·권한 시스템은 아직 없습니다.') + '<div class="ob-bar"><button type="button" class="ghost" id="tlWorld">"세계관" 탭으로 이동 (이름·이미지·순서·유료 표시)</button>' + pvBtn('tlConn', '풀이 DB 연결 상태 확인') + pvBtn('tlPv', '타임라인 미리보기') + '</div><div id="tlConnBox"></div></div>';
     bindTl();
   }
   function bindTl() {
     var TC = G.cfg.timeline;
     $$('#tlSecs [data-mv]').forEach(function (b) { b.onclick = function () { collectTl(); var id = b.closest('[data-sid]').dataset.sid, i = TC.sections.map(function (s) { return s.id; }).indexOf(id), j = i + (+b.dataset.mv); if (j < 0 || j >= TC.sections.length) return; var x = TC.sections.splice(i, 1)[0]; TC.sections.splice(j, 0, x); markDirty(); tlView(); }; });
-    $$('#tlTopics [data-tmv]').forEach(function (b) { b.onclick = function () { collectTl(); var id = b.closest('[data-tid]').dataset.tid, i = TC.topics.map(function (s) { return s.id; }).indexOf(id), j = i + (+b.dataset.tmv); if (j < 0 || j >= TC.topics.length) return; var x = TC.topics.splice(i, 1)[0]; TC.topics.splice(j, 0, x); markDirty(); tlView(); }; });
-    $$('#tlTopics [data-tdel]').forEach(function (b) { b.onclick = function () { collectTl(); var id = b.closest('[data-tid]').dataset.tid; if (!confirm('이 주제 타일을 삭제할까요? (초안 저장 전에는 되돌릴 수 있습니다)')) return; TC.topics = TC.topics.filter(function (x) { return x.id !== id; }); markDirty(); tlView(); }; });
-    $$('#tlTopics .qa-trow').forEach(function (r) { addUp(r, 'tl-topic-'); });
-    $('#tlAdd').onclick = function () { collectTl(); var t = prompt('새 주제 타일의 제목', ''); if (!t || !t.trim()) return; TC.topics.push({ id: uid('t').slice(0, 30).toLowerCase(), enabled: true, title: t.trim().slice(0, 40), desc: '', kind: 'interest', interest: '', link: '', asset: 'archive', image: '', access: 'paid' }); markDirty(); tlView(); };
+    $('#tlWorld').onclick = function () { collectTl(); if (window.AdminShowTab) window.AdminShowTab('v2world'); };
     $('#tlPv').onclick = function () { collectTl(); openPrev('#/timeline'); };
     $('#tlConn').onclick = connCheck;
   }
@@ -188,8 +177,6 @@
     f = $('#tlTexts'); if (f) { TC.texts.intro = val(f, 'intro').trim() || TC.texts.intro; TC.texts.notice = val(f, 'notice').trim() || TC.texts.notice; }
     $$('#tlSecs [data-sid]').forEach(function (r) { var s = TC.sections.filter(function (x) { return x.id === r.dataset.sid; })[0]; if (s) { s.enabled = r.querySelector('[name=en]').checked; s.title = r.querySelector('[name=title]').value.trim() || s.title; s.sub = r.querySelector('[name=sub]').value.trim(); } });
     f = $('#tlGraph'); if (f) Object.keys(GRAPH_NAME).forEach(function (k) { if (f.elements['g_' + k]) TC.graph[k] = f.elements['g_' + k].checked; });
-    $$('#tlTopics [data-tid]').forEach(function (r) { var t = TC.topics.filter(function (x) { return x.id === r.dataset.tid; })[0]; if (!t) return; var g = function (n) { return r.querySelector('[name=' + n + ']').value; };
-      t.enabled = r.querySelector('[name=en]').checked; t.title = g('title').trim() || t.title; t.desc = g('desc').trim(); t.kind = g('kind'); t.interest = g('interest'); t.link = g('link').trim(); t.access = g('access'); t.asset = g('asset'); t.image = g('image').trim(); });
   }
   // 풀이 DB 연결 상태: 엔진 계산 → 시간 모듈(대운·세운·월운) → 관심 분야별 연결 모듈 수 → 서버 풀이 DB(report-content) 저장본
   var V2L = ['chapters', 'saju-data', 'rules', 'narrator', 'content', 'content-pro', 'content-pro2', 'topics', 'story-director', 'luck6', 'timeline'];
@@ -204,15 +191,8 @@
       ok(!!ch && !!ch.pillars, '만세력 엔진 (원국·오행·십성·자미두수)', ch ? '사주 원국 · 자미두수 ' + (ch.ziwei ? '명반 생성' : '시각 미상') : '');
       var dl = null, ys = null, ms = null; try { dl = R.Timeline.daeun(M, ch, Date.now()); ys = R.Timeline.years(M, ch, dl.filter(function (x) { return !x.pre; })[0].startYear, Date.now()); ms = R.Timeline.months(M, ch, new Date().getFullYear(), Date.now()); } catch (e) { }
       ok(!!dl, '대운 (엔진 → 6분류)', dl ? dl.filter(function (x) { return !x.pre; }).length + '개 구간' : ''); ok(!!ys && ys.length === 10, '세운', ys ? ys.length + '개 해' : ''); ok(!!ms && ms.length === 12, '월운', ms ? ms.length + '개월' : '');
-      var SD = R && R.StoryDirector; TC().topics.forEach(function (t) {
-        var el = $('[data-conn="' + t.id + '"]'); if (!el) return; var txt;
-        if (t.kind === 'link') txt = '허브 화면 연결: ' + esc(t.link || '(주소 없음)');
-        else { var plan = SD && SD.FLOWS[t.interest || 'future'], n = plan ? plan.filter(function (id) { return SD.byId[id]; }).length : 0; txt = t.interest ? '연결된 풀이 모듈 ' + n + '개' + (n ? '' : ' — 연결 없음') : '전체 인생 지도 문서로 이동'; }
-        el.innerHTML = '연결 상태: ' + txt;
-      });
       return C.api('/api/report-content').then(function (d) { var c = d && d.content; rows.push('<tr><td>서버 풀이 DB (report-content)</td><td><span class="ob-st ' + (c ? 'ok' : 'warn') + '">' + (c ? '저장본 있음' : '저장본 없음') + '</span> ' + esc(c ? '버전 ' + (c.version || '-') + ' · 관리자가 고친 모듈·개운법이 코드 기본 위에 적용됩니다' : '코드의 기본 시드(report/v2/*.js)를 사용합니다') + '</td></tr>'); }).catch(function () { rows.push('<tr><td>서버 풀이 DB</td><td><span class="ob-st warn">확인 못함</span> 네트워크 또는 저장소 설정을 확인하세요</td></tr>'); }).then(function () { box.innerHTML = '<table class="ob-t">' + rows.join('') + '</table>'; });
     }).catch(function (e) { box.innerHTML = '<p class="err">연결 확인 실패: ' + esc(e.message) + '</p>'; });
-    function TC() { return G.cfg.timeline; }
   }
 
   /* ═════════ ④ 운영 ═════════ */
