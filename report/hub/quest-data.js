@@ -125,6 +125,7 @@
       if (typeof o.title === 'string' && o.title.trim()) r.title = s(o.title, 60);
       ['button', 'hint', 'head', 'desc'].forEach(function (k) { if (typeof o[k] === 'string') r[k] = s(o[k], 400); });
       if (ASSET_KEYS.indexOf(o.asset) >= 0) r.asset = o.asset;
+      r.sty = O.cleanStyleMap(o.sty, O.STY_ROLES.step); // 글자 스타일(글씨체·크기·굵기·색)
       r.bg = img(o.bg); r.bgMobile = img(o.bgMobile); r.fx = FX.indexOf(o.fx) >= 0 ? o.fx : '';
       ['lines', 'unknownLines'].forEach(function (k) { if (o[k] && typeof o[k] === 'object' && d[k]) { r[k] = { male: d[k].male, female: d[k].female }; ['male', 'female'].forEach(function (g) { var a = arr(o[k][g], 6, 160); if (a.length || Array.isArray(o[k][g])) r[k][g] = a.length ? a : d[k][g]; }); } });
       r.enabled = d.required ? true : o.enabled !== false;

@@ -7,7 +7,7 @@
   'use strict';
   var OB = window.V2Onboard, Q = window.Quest, O = window.Onboard;
   if (!OB || !OB.register || !Q) return;
-  var T = OB.tools(), G = T.G, C = T.C, esc = T.esc, toast = T.toast, $ = T.$, $$ = T.$$, sel = T.sel, chk = T.chk, lines = T.lines, markDirty = T.markDirty, draw = T.draw, uid = T.uid;
+  var T = OB.tools(), styBox = T.styBox, readSty = T.readSty, G = T.G, C = T.C, esc = T.esc, toast = T.toast, $ = T.$, $$ = T.$$, sel = T.sel, chk = T.chk, lines = T.lines, markDirty = T.markDirty, draw = T.draw, uid = T.uid;
   var FXN = { '': '기본(설정 따름)', fade: '페이드', rise: '아래에서 등장', none: '없음' };
   var FXG = { fade: '페이드', rise: '아래에서 등장', none: '없음' };
   var ASSET_LABEL = {}; Q.ASSET_KEYS.forEach(function (k) { ASSET_LABEL[k] = k + ' · ' + Q.ASSETS[k].label; });
@@ -49,6 +49,7 @@
       '<label class="ob-f">안내 문구 (장면 아래 작은 글씨 · 일반 한국어)<input type="text" name="hint" value="' + esc(st.hint || '') + '"></label><div class="ob-g2"><label class="ob-f">버튼 문구' + (st.kind === 'guide' ? ' (이 장면은 카드 선택이라 버튼 없음)' : '') + '<input type="text" name="button" maxlength="40" value="' + esc(st.button || '') + '"></label><label class="ob-f">화면 전환 효과<select name="fx">' + sel(FXN, st.fx || '') + '</select></label></div>' +
       (st.lines && (st.kind === 'input' || st.kind === 'confirm') ? lineBox('lines', '안내자 대사 ({귀인} {이름귀인} {이름} {year} {month} 사용 · 한 줄이 한 문단', st.lines) : '') + (st.unknownLines ? lineBox('unk', '시각을 모를 때 대사', st.unknownLines) : '') +
       '<div class="ob-g2"><label class="ob-f">배경 에셋<select name="asset">' + sel(ASSET_LABEL, st.asset) + '</select></label><div></div></div><div class="ob-g2"><label class="ob-f">배경 직접 지정 (PC · 에셋보다 우선)<input type="text" name="bg" value="' + esc(st.bg || '') + '"><input type="file" data-up="bg" accept="image/*"></label><label class="ob-f">배경 직접 지정 (모바일)<input type="text" name="bgMobile" value="' + esc(st.bgMobile || '') + '"><input type="file" data-up="bgMobile" accept="image/*"></label></div>' +
+      styBox(['head', 'desc', 'say', 'hint', 'button'].filter(function (r) { return !((r === 'head' || r === 'desc') && st.kind !== 'seal' && !(r === 'head' && (st.kind === 'guide' || st.kind === 'confirm'))); }), st.sty) +
       '<div class="ob-sstage" id="qStage"><div class="ob-sbg"></div><img class="ob-sch" alt=""><div class="ob-sbub"></div><span class="ob-lock ob-sph">장면 미리보기 (남성 안내자 첫 대사)</span></div>' +
       '<div class="ob-bar">' + pvBtn('qPv', '이 장면 실제 화면으로 미리보기') + '<select id="qPvG"><option value="male">남성 안내자</option><option value="female">여성 안내자</option></select></div></form>';
     var misc = '<form id="qMisc" class="ob-box" onsubmit="return false"><h4>공통 문구</h4>' + lineBox('calc', '계산 중 대사', QC.calcLines) + lineBox('err', '계산 오류 안내 대사', QC.errLines) +
@@ -62,7 +63,7 @@
   }
   function bindQuest() {
     var f = $('#qStep'); if (!f) return; var st = stepOf(qSel), QC = G.cfg.quest;
-    addUp(f, 'quest-bg-'); addUp($('#qGuides'), 'quest-guide-');
+    addUp(f, 'quest-bg-'); addUp($('#qGuides'), 'quest-guide-'); if (window.ObStyle) window.ObStyle.bind(f);
     var stage = $('#qStage'), upd = function () {
       var a = val(f, 'asset'), bg = val(f, 'bg').trim() || Q.assetUrl(G.cfg, a, false), ln = (val(f, 'linesM') || (st.lines && st.lines.male || []).join('\n') || val(f, 'head') || '').split('\n').filter(Boolean)[0] || '';
       stage.querySelector('.ob-sbg').style.backgroundImage = bg ? 'url("' + bg.replace(/["\\]/g, '') + '")' : ''; stage.querySelector('.ob-sbg').style.backgroundPosition = Q.assetFocus(G.cfg, a, false);
@@ -78,6 +79,7 @@
     st.title = val(f, 'title').trim() || st.title; st.hint = val(f, 'hint').trim(); st.button = val(f, 'button').trim(); st.fx = val(f, 'fx'); st.asset = val(f, 'asset') || st.asset; st.bg = val(f, 'bg').trim(); st.bgMobile = val(f, 'bgMobile').trim();
     if (f.elements.head && st.head !== undefined) st.head = val(f, 'head').trim(); if (st.desc !== undefined && f.elements.desc) st.desc = val(f, 'desc').trim();
     if (!st.required && f.elements.enabled) st.enabled = f.elements.enabled.checked;
+    st.sty = readSty(f, ['head', 'desc', 'say', 'hint', 'button']);
     if (f.elements.linesM) st.lines = { male: lines(val(f, 'linesM')), female: lines(val(f, 'linesF')) };
     if (f.elements.unkM) st.unknownLines = { male: lines(val(f, 'unkM')), female: lines(val(f, 'unkF')) };
     var gf = $('#qGuides'); if (gf) ['male', 'female'].forEach(function (k) { var o = QC.guides[k]; o.name = val(gf, k + 'Name').trim() || o.name; o.tag = val(gf, k + 'Tag').trim() || o.tag; o.image = val(gf, k + 'Img').trim(); o.imageMobile = val(gf, k + 'ImgM').trim(); });

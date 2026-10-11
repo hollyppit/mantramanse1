@@ -45,6 +45,7 @@
     return cfgP;
   };
   Ob.cfg = function () { return CFG; };
+  var SA = function (map, role) { return root.ObStyle ? root.ObStyle.attr(map && map[role]) : ''; }; // 관리자가 정한 글자 스타일(글씨체·크기·굵기·색) → style 속성
   var A = function (name) { return O.addr(name, CFG); };           // [이름] 귀인
   var F = function (t, name) { return O.fill(t, name, CFG); };      // 대사 치환
 
@@ -146,9 +147,9 @@
         if (!m) return svg || '';
         return fx === 'crossfade' && svg ? '<div class="cn-xf">' + svg + m.replace('class="cn-media"', 'class="cn-media xf"') + '</div>' : m;
       };
-      var cta = function (sec, big) { return sec.cta && sec.cta.show && sec.cta.text ? '<div class="cn-cta-row"><button type="button" class="btn ' + (big ? 'cn-go' : 'cn-go sm') + '" data-go="' + esc(sec.id) + '">' + esc(F(sec.cta.text)) + '</button></div>' : ''; };
+      var cta = function (sec, big) { return sec.cta && sec.cta.show && sec.cta.text ? '<div class="cn-cta-row"><button type="button" class="btn ' + (big ? 'cn-go' : 'cn-go sm') + '" data-go="' + esc(sec.id) + '"' + SA(sec.sty, 'cta') + '>' + esc(F(sec.cta.text)) + '</button></div>' : ''; };
       var head = function (sec) {
-        return (sec.kicker ? '<p class="cn-kick">' + esc(sec.kicker) + '</p>' : '') + (sec.title ? '<h2 class="cn-title">' + nl(F(sec.title)) + '</h2>' : '') + (sec.sub ? '<p class="tx-p cn-rev">' + nl(F(sec.sub)) + '</p>' : '');
+        return (sec.kicker ? '<p class="cn-kick"' + SA(sec.sty, 'kicker') + '>' + esc(sec.kicker) + '</p>' : '') + (sec.title ? '<h2 class="cn-title"' + SA(sec.sty, 'title') + '>' + nl(F(sec.title)) + '</h2>' : '') + (sec.sub ? '<p class="tx-p cn-rev"' + SA(sec.sty, 'sub') + '>' + nl(F(sec.sub)) + '</p>' : '');
       };
       var wrap = function (sec, inner, extra) {
         var st = (sec.bg ? '--sec-bg:url(' + esc(sec.bg) + ');' : '') + (sec.bgMobile ? '--sec-bg-m:url(' + esc(sec.bgMobile) + ');' : '');
@@ -162,16 +163,16 @@
         var full = String(st.limits || c.caveat || ''), k = full.indexOf('. '), cav = k > 0 ? full.slice(0, k + 1) : full; // 한계는 라벨 없이 한 문장으로 자연스럽게
         var foot = [st.org || c.who, st.year || c.year].filter(Boolean).join(', ');
         return '<article class="rc cn-rev" data-case="' + esc(c.id) + '"><div class="rc-art">' + art + '</div>' +
-          (c.hook ? '<p class="tx-q cn-rev">' + esc(c.hook) + '</p>' : '') +
-          (d.showTitle !== false ? '<h3 class="tx-h cn-rev">' + esc(c.title) + '</h3>' : '') +
-          (d.showSummary !== false ? sum.map(function (p) { return '<p class="tx-p cn-rev">' + esc(p) + '</p>'; }).join('') : '') +
-          (cav ? '<p class="tx-soft cn-rev">' + esc(cav) + '</p>' : '') +
-          (d.showSource !== false && foot ? '<p class="tx-src cn-rev">— ' + esc(foot) + '</p>' : '') + '</article>';
+          (c.hook ? '<p class="tx-q cn-rev"' + SA(c.sty, 'hook') + '>' + esc(c.hook) + '</p>' : '') +
+          (d.showTitle !== false ? '<h3 class="tx-h cn-rev"' + SA(c.sty, 'title') + '>' + esc(c.title) + '</h3>' : '') +
+          (d.showSummary !== false ? sum.map(function (p) { return '<p class="tx-p cn-rev"' + SA(c.sty, 'body') + '>' + esc(p) + '</p>'; }).join('') : '') +
+          (cav ? '<p class="tx-soft cn-rev"' + SA(c.sty, 'caveat') + '>' + esc(cav) + '</p>' : '') +
+          (d.showSource !== false && foot ? '<p class="tx-src cn-rev"' + SA(c.sty, 'source') + '>— ' + esc(foot) + '</p>' : '') + '</article>';
       }
       function researchSec(sec) {
         var cards = O.birthCards(CFG.cases); if (!cards.length) return '';
         return wrap(sec, head(sec) + cards.map(researchCard).join('') +
-          (sec.notice ? '<p class="tx-soft cn-rev">' + nl(F(sec.notice)) + '</p>' : '') + (sec.bridge ? '<p class="tx-turn cn-rev">' + nl(F(sec.bridge)) + '</p>' : '') + cta(sec), '');
+          (sec.notice ? '<p class="tx-soft cn-rev"' + SA(sec.sty, 'notice') + '>' + nl(F(sec.notice)) + '</p>' : '') + (sec.bridge ? '<p class="tx-turn cn-rev"' + SA(sec.sty, 'bridge') + '>' + nl(F(sec.bridge)) + '</p>' : '') + cta(sec), '');
       }
 
       /* 명리학: 장면 몇 컷. 원리 나열(주제 목록)은 섹션 설정에서 켠 경우에만 */
@@ -180,10 +181,10 @@
       }
       function myeongriSec(sec) {
         var scenes = intro.map(function (s) {
-          return '<div class="cn-sub-sec" data-intro="' + esc(s.id) + '"><div class="cn-art">' + media(s, Art.forIntro(s.id), sec.effect) + '</div><h3 class="tx-h cn-rev">' + esc(s.title) + '</h3><p class="tx-p cn-rev">' + esc(s.body) + '</p>' + (s.sub ? '<p class="tx-soft cn-rev">' + esc(s.sub) + '</p>' : '') + '</div>';
+          return '<div class="cn-sub-sec" data-intro="' + esc(s.id) + '"><div class="cn-art">' + media(s, Art.forIntro(s.id), sec.effect) + '</div><h3 class="tx-h cn-rev"' + SA(s.sty, 'title') + '>' + esc(s.title) + '</h3><p class="tx-p cn-rev"' + SA(s.sty, 'body') + '>' + esc(s.body) + '</p>' + (s.sub ? '<p class="tx-soft cn-rev"' + SA(s.sty, 'sub') + '>' + esc(s.sub) + '</p>' : '') + '</div>';
         }).join('');
         var tps = sec.topics ? (CFG.topics || []).filter(function (x) { return x.enabled !== false; }) : [];
-        return wrap(sec, head(sec) + scenes + (tps.length ? '<div class="tp-list cn-rev">' + tps.map(topicHtml).join('') + '</div>' : '') + (sec.notice ? '<p class="tx-soft cn-rev">' + nl(F(sec.notice)) + '</p>' : '') + cta(sec), '');
+        return wrap(sec, head(sec) + scenes + (tps.length ? '<div class="tp-list cn-rev">' + tps.map(topicHtml).join('') + '</div>' : '') + (sec.notice ? '<p class="tx-soft cn-rev"' + SA(sec.sty, 'notice') + '>' + nl(F(sec.notice)) + '</p>' : '') + cta(sec), '');
       }
 
       /* 서비스 소개 */
@@ -220,8 +221,8 @@
       /* 최종 CTA */
       function finalSec(sec) {
         var inner = '<div class="cn-art">' + media({ image: sec.art || '', video: sec.artVideo || '' }, Art.forIntro('end')) + '</div>' +
-          '<h2 class="cn-title big">' + nl(F(sec.title || CFG.introLast.line)) + '</h2>' + (sec.sub ? '<p class="cn-body cn-rev">' + nl(F(sec.sub)) + '</p>' : '') +
-          '<button type="button" class="btn cn-go" id="obGo" data-go="' + esc(sec.id) + '">' + esc(F((sec.cta && sec.cta.text) || CFG.introLast.cta)) + '</button>' +
+          '<h2 class="cn-title big"' + SA(sec.sty, 'title') + '>' + nl(F(sec.title || CFG.introLast.line)) + '</h2>' + (sec.sub ? '<p class="cn-body cn-rev"' + SA(sec.sty, 'sub') + '>' + nl(F(sec.sub)) + '</p>' : '') +
+          '<button type="button" class="btn cn-go" id="obGo" data-go="' + esc(sec.id) + '"' + SA(sec.sty, 'cta') + '>' + esc(F((sec.cta && sec.cta.text) || CFG.introLast.cta)) + '</button>' +
           '<div class="cn-links" style="justify-content:center">' + (hasProfile ? '<a class="cn-lnk" href="#/?nogate=1" data-track="onboarding_home_back">내 홈으로 돌아가기</a>' : '<a class="cn-lnk" href="#/?skip=1" data-track="onboarding_browse_click">먼저 무료 타로·캘린더 둘러보기</a>') + '</div>' +
           '<p class="tx-soft" style="text-align:center">' + esc(O.INTRO_NOTICE) + '</p>';
         return wrap(sec, inner, ' cn-last" id="cnLast');

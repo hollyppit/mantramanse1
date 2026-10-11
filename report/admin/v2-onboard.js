@@ -19,7 +19,8 @@
   var chk = function (n, v, label) { return '<label class="ob-f ob-ck"><input type="checkbox" name="' + n + '"' + (v ? ' checked' : '') + '> ' + label + '</label>'; };
 
   var css = document.createElement('style');
-  css.textContent = '.ob-grp{min-width:150px;color:var(--gold);font-size:.84rem}.ob-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}.ob-chip{border-radius:999px;padding:4px 12px;font-size:.82rem}.ob-chip.on{border-color:var(--gold);color:var(--gold)}' +
+  css.textContent = '.ob-sty{margin:6px 0;border:1px dashed var(--line);border-radius:8px;padding:4px 10px}.ob-sty summary{cursor:pointer;font-size:.8rem;color:var(--ink2);padding:4px 0}.ob-sty-on{color:var(--gold);font-weight:500;margin-left:6px}.ob-sty-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:6px 0 8px;align-items:end}.ob-sty-g label{display:grid;gap:3px;font-size:.74rem;color:var(--ink3)}.ob-sty-c span{display:flex;gap:4px}.ob-sty-c input[type=color]{width:42px;padding:0;min-height:34px}' +
+    '.ob-grp{min-width:150px;color:var(--gold);font-size:.84rem}.ob-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}.ob-chip{border-radius:999px;padding:4px 12px;font-size:.82rem}.ob-chip.on{border-color:var(--gold);color:var(--gold)}' +
     '.ob-row{padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin:4px 0;cursor:pointer;font-size:.84rem;display:grid;gap:2px}.ob-row.on{border-color:var(--gold)}.ob-row small{color:var(--ink3)}' +
     '.ob-st{font-size:.7rem;padding:0 8px;border-radius:999px;border:1px solid var(--line);margin-left:6px;white-space:nowrap}.ob-st.ok{border-color:#2f7a52;color:#7FE0BC}.ob-st.warn{color:#e0b36a;border-color:#7a5f2f}.ob-st.bad{color:#FF9C8C;border-color:#7a3a2f}.ob-st.off{color:var(--ink3)}' +
     '.ob-f{display:grid;gap:3px;font-size:.8rem;color:var(--ink2);margin:9px 0}.ob-f textarea{min-height:80px}.ob-g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:700px){.ob-g2{grid-template-columns:1fr}}' +
@@ -32,6 +33,16 @@
     '.ob-bars{display:grid;gap:4px}.ob-bar2{display:grid;grid-template-columns:150px 1fr 90px;gap:8px;align-items:center;font-size:.8rem}.ob-bar2 i{display:block;height:10px;background:var(--gold);border-radius:5px;min-width:1px}.ob-img{max-width:120px;max-height:70px;border-radius:6px;border:1px solid var(--line);margin-top:4px}';
   document.head.appendChild(css);
   window.addEventListener('beforeunload', function (e) { if (G.dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  /* ── 글자 스타일(문구마다 글씨체·크기·굵기·색) — 공통 도구는 report/hub/onboard-style.js ── */
+  var STY_LABEL = { kicker: '위 작은 글씨', title: '제목', sub: '설명', notice: '안내 문구', bridge: '연결 문구', cta: '버튼 글자', body: '본문', hook: '후킹 문구', caveat: '한계 문구', source: '출처 줄', head: '큰 제목', desc: '설명', say: '안내자 대사', hint: '안내 문구(작은 글씨)', button: '버튼 글자' };
+  function styBox(roles, map) {
+    if (!window.ObStyle) return '';
+    return '<div class="ob-box"><h4>글자 스타일 <span class="ob-lock">· 문구마다 글씨체·크기·굵기·색을 정합니다. 비워 두면 기본 디자인입니다. 크기는 PC와 모바일(720px 이하)을 따로 정할 수 있고, 글씨체는 고른 것만 불러옵니다.</span></h4>' + roles.map(function (r) { return window.ObStyle.row(r, STY_LABEL[r] || r, (map || {})[r]); }).join('') + '</div>';
+  }
+  function secRoles(s) { return s.type === 'research' ? ['kicker', 'title', 'sub', 'notice', 'bridge', 'cta'] : s.type === 'myeongri' ? ['kicker', 'title', 'sub', 'notice', 'cta'] : ['kicker', 'title', 'sub', 'cta']; }
+  var CARD_ROLES = ['hook', 'title', 'body', 'caveat', 'source'];
+  var readSty = function (f, roles) { return window.ObStyle && f ? window.ObStyle.readMap(f, roles) : {}; };
 
   /* ── 불러오기·저장·게시 ── */
   function load() {
@@ -168,10 +179,10 @@
       (s.type === 'myeongri' ? chk('topics', s.topics === true, '원리 주제 목록(접이식)도 함께 표시 — 기본은 꺼짐: 장면 몇 컷만 읽히게') : '') + '<div class="ob-g2"><label class="ob-f">섹션 하단 버튼 문구<input type="text" name="cta" maxlength="30" value="' + esc(cta.text || '') + '"></label>' + chk('ctaShow', cta.show, '이 섹션 아래에 "나의 운 확인하기" 버튼 표시') + '</div><label class="ob-f">버튼 연결 경로<select name="ctaTo">' + sel({ story: '인터랙티브 스토리 (부적 오프닝부터)', quick: '일반 입력 화면 (스토리 없이 바로 분석)' }, cta.to === 'quick' ? 'quick' : 'story') + '</select></label>' +
       (s.type === 'final' ? '<div class="ob-g2"><label class="ob-f">대표 이미지 (기본 "運" 도형 대신 표시)<input type="text" name="art" value="' + esc(s.art || '') + '"><input type="file" data-up="art" accept="image/*"></label><label class="ob-f">대표 영상 (mp4 · 있으면 이미지보다 우선)<input type="text" name="artVideo" value="' + esc(s.artVideo || '') + '"><input type="file" data-up="artVideo" accept="video/*"></label></div>' : '<input type="hidden" name="art" value="' + esc(s.art || '') + '"><input type="hidden" name="artVideo" value="' + esc(s.artVideo || '') + '">') +
       '<div class="ob-g2"><label class="ob-f">배경 이미지 (PC)<input type="text" name="bg" value="' + esc(s.bg || '') + '"><input type="file" data-up="bg" accept="image/*"></label><label class="ob-f">배경 이미지 (모바일, 비우면 PC와 같음)<input type="text" name="bgMobile" value="' + esc(s.bgMobile || '') + '"><input type="file" data-up="bgMobile" accept="image/*"></label></div>' +
-      '<div class="ob-bar"><button type="button" class="ghost" id="obSecUp"' + (i === 0 ? ' disabled' : '') + '>↑ 위로</button><button type="button" class="ghost" id="obSecDn"' + (i === c.sections.length - 1 ? ' disabled' : '') + '>↓ 아래로</button><button type="button" class="ghost" id="obSecDup">섹션 복제</button>' +
+      styBox(secRoles(s), s.sty) + '<div class="ob-bar"><button type="button" class="ghost" id="obSecUp"' + (i === 0 ? ' disabled' : '') + '>↑ 위로</button><button type="button" class="ghost" id="obSecDn"' + (i === c.sections.length - 1 ? ' disabled' : '') + '>↓ 아래로</button><button type="button" class="ghost" id="obSecDup">섹션 복제</button>' +
       (s.type !== 'final' ? '<button type="button" class="ghost" id="obSecDel">섹션 삭제</button>' : '') + '</div>' +
       '<p class="ob-lock">연출은 화면에 들어올 때 한 번 나타나는 효과뿐입니다. 글자 타이핑·자동 스크롤은 제공하지 않으며, 시스템의 "동작 줄이기" 설정을 따릅니다. 문구에 {귀인}을 쓰면 호칭 설정이 적용됩니다.</p></form>';
-    var f = $('#obSec');
+    var f = $('#obSec'); if (window.ObStyle) window.ObStyle.bind(f);
     $$('[data-up]', f).forEach(function (u) { u.onchange = function () { upload(u.files[0], 'onb-sec-').then(function (url) { f.elements[u.dataset.up].value = url; markDirty(); toast('올렸습니다 — 초안 저장을 눌러 반영하세요'); }).catch(function (e) { toast(e.message, true); }); }; });
     var mv = function (d) { collect(); var j = i + d; if (j < 0 || j >= c.sections.length) return; c.sections.splice(i, 1); c.sections.splice(j, 0, s); G.dirty = true; draw(); };
     $('#obSecUp').onclick = function () { mv(-1); }; $('#obSecDn').onclick = function () { mv(1); };
@@ -212,7 +223,7 @@
     EXT.forEach(function (x) { if (x.id === G.sub && x.collect) x.collect(); });
     var cfg = G.cfg, v;
     var sf = $('#obSec'); if (sf) { var s = cfg.sections.filter(function (x) { return x.id === G.selSec; })[0]; if (s) { v = function (n) { return sf.elements[n] ? sf.elements[n].value : ''; };
-      s.kicker = v('kicker').trim(); s.effect = v('effect'); s.title = v('title').trim(); s.sub = v('sub').trim(); s.notice = v('notice').trim(); s.bridge = v('bridge').trim(); s.bg = v('bg').trim(); s.bgMobile = v('bgMobile').trim(); s.art = v('art').trim(); s.artVideo = v('artVideo').trim(); s.cta = { show: sf.elements.ctaShow.checked, text: v('cta').trim(), to: v('ctaTo') === 'quick' ? 'quick' : 'story' }; if (sf.elements.topics) s.topics = sf.elements.topics.checked; } }
+      s.kicker = v('kicker').trim(); s.effect = v('effect'); s.title = v('title').trim(); s.sub = v('sub').trim(); s.notice = v('notice').trim(); s.bridge = v('bridge').trim(); s.bg = v('bg').trim(); s.bgMobile = v('bgMobile').trim(); s.art = v('art').trim(); s.artVideo = v('artVideo').trim(); s.cta = { show: sf.elements.ctaShow.checked, text: v('cta').trim(), to: v('ctaTo') === 'quick' ? 'quick' : 'story' }; if (sf.elements.topics) s.topics = sf.elements.topics.checked; s.sty = readSty(sf, secRoles(s)); } }
     if (G.sub === 'cases' && G.sel) {
       var c = cfg.cases.filter(function (x) { return x.id === G.sel; })[0], f = $('#obCase'); if (c && f) {
         v = function (n) { return f.elements[n] ? f.elements[n].value : ''; }; var cb = function (n) { return f.elements[n] ? !!f.elements[n].checked : false; };
@@ -223,11 +234,12 @@
         c.verification = { state: v('vstate'), reviewedAt: v('reviewedAt').trim(), basis: v('basis').trim() }; c.visible = cb('visible');
         if (f.elements.sname) { var st = c.study || {}; ['name:sname', 'org:sorg', 'researchers:sres', 'journal:sjournal', 'subject:ssubject', 'sample:ssample', 'method:smethod', 'result:sresult', 'stats:sstats', 'limits:slimits', 'scope:sscope'].forEach(function (p) { var a = p.split(':'); st[a[0]] = v(a[1]).trim(); }); st.year = +v('syear') || c.year || 0; st.doi = c.source.doi; st.url = c.source.url; st.relation = v('srel'); c.study = st; }
         c.media = { image: v('mimage').trim(), mobileImage: v('mmobile').trim(), bg: v('mbg').trim(), video: v('mvideo').trim(), alt: v('malt').trim(), credit: v('mcredit').trim(), license: v('mlicense').trim() }; c.image = c.media.image;
+        c.sty = readSty(f, CARD_ROLES);
         c.display = { order: +v('dorder') || 0, featured: cb('dfeat'), showTitle: cb('dtitle'), showSummary: cb('dsum'), showSource: cb('dsrc'), detail: cb('ddet'), mobileLayout: v('dmob'), design: v('ddesign') };
       }
     }
     if (G.sub === 'intro') {
-      cfg.intro.forEach(function (s, i) { var f = $('#obI' + i); if (!f) return; var g = function (n) { return f.elements[n].value; }; s.title = g('title').trim(); s.body = g('body').trim(); s.sub = g('sub').trim(); s.image = g('image').trim(); s.video = g('video').trim(); s.enabled = f.elements.enabled.checked; });
+      cfg.intro.forEach(function (s, i) { var f = $('#obI' + i); if (!f) return; var g = function (n) { return f.elements[n].value; }; s.title = g('title').trim(); s.body = g('body').trim(); s.sub = g('sub').trim(); s.image = g('image').trim(); s.video = g('video').trim(); s.enabled = f.elements.enabled.checked; s.sty = readSty(f, ['title', 'body', 'sub']); });
       var l = $('#obLast'); if (l) cfg.introLast = { line: l.elements.line.value.trim(), cta: l.elements.cta.value.trim() };
       var tp = cfg.topics.filter(function (x) { return x.id === G.selTopic; })[0], tf = $('#obTopic'); if (tp && tf) { var g2 = function (n) { return tf.elements[n].value; };
         tp.title = g2('title').trim(); tp.sub = g2('sub').trim(); tp.nature = g2('nature'); tp.summary = g2('summary').trim(); tp.detail = g2('detail').trim(); tp.analogy = g2('analogy').trim(); tp.term = g2('term').trim(); tp.termEasy = g2('termEasy').trim();
@@ -286,7 +298,7 @@
     f.elements.kind.onchange = function () { collect(); casesView(); };
     f.elements.vstate.onchange = function () { collect(); var cc = G.cfg.cases.filter(function (x) { return x.id === G.sel; })[0]; if (cc.verification.state === 'verified' && !cc.verification.reviewedAt) cc.verification.reviewedAt = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); if (cc.verification.state !== 'verified') cc.visible = false; casesView(); };
     f.elements.visible.onchange = function () { collect(); var cc = G.cfg.cases.filter(function (x) { return x.id === G.sel; })[0], why = gateReasons(cc); if (cc.visible && why.length) { cc.visible = false; toast('공개할 수 없습니다: ' + why.join(' / '), true); } casesView(); };
-    bindUploads(f, 'onb-case-');
+    bindUploads(f, 'onb-case-'); if (window.ObStyle) window.ObStyle.bind(f);
     var chkBtn = $('#obDoi'); if (chkBtn) chkBtn.onclick = function () { collect(); crossref(); };
   }
   function precheck(c) {
@@ -350,7 +362,7 @@
       '<div class="ob-box"><h4>카드 노출 설정</h4><div class="ob-g2"><label class="ob-f">노출 순서 (작을수록 먼저, -50~50)<input type="text" name="dorder" inputmode="numeric" value="' + esc(d.order || 0) + '"></label><label class="ob-f">카드 디자인<select name="ddesign">' + sel(DESIGNS, d.design) + '</select></label></div>' +
       '<div class="ob-g2"><label class="ob-f">모바일 레이아웃<select name="dmob">' + sel({ stack: '기본(그림·요약 모두)', compact: '간략(그림·표 숨김)' }, d.mobileLayout) + '</select></label><label class="ob-f">예전 후킹 풀 가중치 (0.1~10)<input type="text" name="weight" inputmode="decimal" value="' + esc(c.weight || 1) + '"></label></div>' +
       chk('dfeat', d.featured, '강조 카드 (PC에서 한 줄 전체)') + chk('dtitle', d.showTitle !== false, '제목 표시') + chk('dsum', d.showSummary !== false, '요약 표시') + chk('dsrc', d.showSource !== false, '출처 링크 표시') + chk('ddet', d.detail !== false, '"연구 자세히 보기" 사용') + '</div>' +
-      '<label class="ob-f">관심사 태그 (쉼표)<input type="text" name="tags" value="' + esc((c.tags || []).join(', ')) + '"></label>' +
+      styBox(CARD_ROLES, c.sty) + '<label class="ob-f">관심사 태그 (쉼표)<input type="text" name="tags" value="' + esc((c.tags || []).join(', ')) + '"></label>' +
       '<p class="ob-lock">id: ' + esc(c.id) + '</p><div class="ob-bar"><button id="obDel" class="ghost">이 사례 삭제</button></div></form>';
   }
 
@@ -362,9 +374,9 @@
       cfg.intro.map(function (s, i) { return '<div class="card"><h3 style="font-size:1rem">소개 장면 ' + (i + 1) + ' · ' + esc(s.id) + '</h3><form id="obI' + i + '" onsubmit="return false">' +
         '<label class="ob-f">제목<input type="text" name="title" value="' + esc(s.title) + '"></label><label class="ob-f">본문<textarea name="body">' + esc(s.body) + '</textarea></label><label class="ob-f">보조 문구<input type="text" name="sub" value="' + esc(s.sub || '') + '"></label>' +
         '<div class="ob-g2"><label class="ob-f">이미지 (주소 입력 또는 파일 올리기)<input type="text" name="image" value="' + esc(s.image || '') + '"><input type="file" data-up="image" accept="image/*"></label><label class="ob-f">영상 (mp4 · 주소 입력 또는 파일 올리기)<input type="text" name="video" value="' + esc(s.video || '') + '"><input type="file" data-up="video" accept="video/*"></label></div>' +
-        chk('enabled', s.enabled !== false, '노출') + '</form></div>'; }).join('') +
+        styBox(['title', 'body', 'sub'], s.sty) + chk('enabled', s.enabled !== false, '노출') + '</form></div>'; }).join('') +
       '<div class="card"><h3 style="font-size:1rem">예전 마지막 문구·버튼 <span class="ob-lock">(최종 CTA 섹션 문구가 비어 있을 때 사용)</span></h3><form id="obLast" onsubmit="return false"><label class="ob-f">문구<input type="text" name="line" value="' + esc(cfg.introLast.line) + '"></label><label class="ob-f">버튼<input type="text" name="cta" value="' + esc(cfg.introLast.cta) + '"></label></form></div>';
-    cfg.intro.forEach(function (s, i) { var fi = $('#obI' + i); if (fi) bindUploads(fi, 'onb-intro-'); });
+    cfg.intro.forEach(function (s, i) { var fi = $('#obI' + i); if (fi) { bindUploads(fi, 'onb-intro-'); if (window.ObStyle) window.ObStyle.bind(fi); } });
     $$('[data-tp]').forEach(function (r) { r.onclick = function () { collect(); G.selTopic = r.dataset.tp; introView(); }; });
     $('#obTpAdd').onclick = function () { collect(); var id = uid('tp').slice(0, 30).toLowerCase(); cfg.topics.push({ id: id, enabled: false, nature: 'tradition', title: '새 주제', sub: '', summary: '', detail: '', analogy: '', term: '', termEasy: '', image: '', video: '', image2: '', anim: 'fade', refs: '' }); G.selTopic = id; G.dirty = true; introView(); };
     var f = $('#obTopic'); if (f) {
@@ -503,5 +515,5 @@
   }
 
   // 확장 모듈이 같은 초안·게시·이력 체계를 그대로 쓰도록 내부 도구를 건네 준다
-  window.V2Onboard = { open: open, register: function (x) { EXT.push(x); }, tools: function () { return { G: G, C: C, esc: esc, toast: toast, $: $, $$: $$, sel: sel, chk: chk, lines: lines, markDirty: markDirty, draw: draw, upload: upload, bindUploads: bindUploads, uid: uid, fmtT: fmtT, putDraft: putDraft }; } };
+  window.V2Onboard = { open: open, register: function (x) { EXT.push(x); }, tools: function () { return { styBox: styBox, readSty: readSty, G: G, C: C, esc: esc, toast: toast, $: $, $$: $$, sel: sel, chk: chk, lines: lines, markDirty: markDirty, draw: draw, upload: upload, bindUploads: bindUploads, uid: uid, fmtT: fmtT, putDraft: putDraft }; } };
 })();

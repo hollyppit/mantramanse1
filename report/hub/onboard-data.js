@@ -257,7 +257,7 @@
     if (Array.isArray(ov.sections)) {
       var seenS = {}, list = ov.sections.filter(function (x) { return x && SECTION_TYPES.indexOf(x.type) >= 0 && x.id && !seenS[x.id] && (seenS[x.id] = 1); }).map(function (x) {
         var d = SECTIONS.filter(function (y) { return y.type === x.type; })[0] || SECTIONS[0];
-        return Object.assign({}, d, pick(x, ['id', 'type', 'enabled', 'effect', 'kicker', 'title', 'sub', 'notice', 'bridge', 'topics', 'bg', 'bgMobile', 'art', 'artVideo']), { cta: Object.assign({}, d.cta, x.cta && typeof x.cta === 'object' ? pick(x.cta, ['show', 'text', 'to']) : {}) });
+        return Object.assign({}, d, pick(x, ['id', 'type', 'enabled', 'effect', 'kicker', 'title', 'sub', 'notice', 'bridge', 'topics', 'bg', 'bgMobile', 'art', 'artVideo']), { sty: cleanStyleMap(x.sty, STY_ROLES.section) }, { cta: Object.assign({}, d.cta, x.cta && typeof x.cta === 'object' ? pick(x.cta, ['show', 'text', 'to']) : {}) });
       });
       out.sections = list;
       SECTIONS.forEach(function (d) { if (d.type !== 'story' && !list.some(function (x) { return x.type === d.type; })) out.sections.push(JSON.parse(JSON.stringify(d))); });
@@ -266,7 +266,7 @@
     if (ov.afterDone === 'home' || ov.afterDone === 'reveal') out.afterDone = ov.afterDone;
     if (Array.isArray(ov.services)) out.services = ov.services.filter(function (x) { return x && x.id && x.title; }).map(function (x) { return Object.assign({ desc: '', glyph: '', status: 'live', visible: true, image: '', video: '', link: '' }, x); });
     if (Array.isArray(ov.topics)) out.topics = ov.topics.filter(function (x) { return x && x.id && x.title; }).map(function (x) { return Object.assign({ enabled: true, nature: 'tradition', sub: '', summary: '', detail: '', analogy: '', term: '', termEasy: '', image: '', video: '', image2: '', anim: 'fade', refs: '' }, x); });
-    if (Array.isArray(ov.intro)) out.intro = out.intro.map(function (d) { var o = ov.intro.filter(function (x) { return x && x.id === d.id; })[0]; return o ? Object.assign({}, d, pick(o, ['title', 'body', 'sub', 'image', 'video', 'enabled', 'glyph'])) : d; });
+    if (Array.isArray(ov.intro)) out.intro = out.intro.map(function (d) { var o = ov.intro.filter(function (x) { return x && x.id === d.id; })[0]; return o ? Object.assign({}, d, pick(o, ['title', 'body', 'sub', 'image', 'video', 'enabled', 'glyph']), { sty: cleanStyleMap(o.sty, STY_ROLES.intro) }) : d; });
     if (Array.isArray(ov.scenes)) out.scenes = out.scenes.map(function (d) { var o = ov.scenes.filter(function (x) { return x && x.id === d.id; })[0]; return o ? Object.assign({}, d, pick(o, ['title', 'lines', 'hint', 'unknownLines', 'button', 'face', 'image', 'bg', 'bubble', 'enabled']), { field: d.field }) : d; });
     // 필수 입력 단계는 끌 수 없다
     out.scenes.forEach(function (s) { if (REQUIRED_FIELDS.indexOf(s.field) >= 0) s.enabled = true; });
@@ -274,6 +274,23 @@
     if (Array.isArray(ov.revealLines) && ov.revealLines.length) out.revealLines = ov.revealLines.map(String).slice(0, 5);
     return out;
   }
+  /* ── 글자 스타일(관리자가 문구마다 정하는 글씨체·크기·굵기·색) ──
+     저장 모양: { font, size, sizeM, weight, color } — 모두 선택 사항(비우면 기본 디자인). 글씨체 키는 report/story/fonts.js 의 FONTS·functions/_textstyle.js 의 FONT_KEYS 와 같다.
+     size = PC 글자 크기(px) · sizeM = 모바일(720px 이하) 글자 크기(px). 서버(functions/api/onboarding.js)도 같은 규칙으로 거른다. */
+  var FONT_KEYS = ['serif', 'sans', 'nanummj', 'gowunb', 'hahmlet', 'songmyung', 'gowund', 'blackhan', 'dohyeon', 'jua', 'pen', 'dokdo', 'gamja', 'cinzel', 'cormorant'], WEIGHTS = ['300', '400', '500', '600', '700', '900'];
+  function cleanStyle(s) {
+    s = s && typeof s === 'object' ? s : {}; var o = {}, n;
+    if (FONT_KEYS.indexOf(s.font) >= 0) o.font = s.font;
+    n = s.size === '' || s.size == null ? NaN : +s.size; if (isFinite(n)) o.size = Math.min(120, Math.max(8, Math.round(n * 10) / 10));
+    n = s.sizeM === '' || s.sizeM == null ? NaN : +s.sizeM; if (isFinite(n)) o.sizeM = Math.min(120, Math.max(8, Math.round(n * 10) / 10));
+    if (WEIGHTS.indexOf(String(s.weight)) >= 0) o.weight = String(s.weight);
+    if (typeof s.color === 'string' && /^#[0-9a-f]{6}$/i.test(s.color.trim())) o.color = s.color.trim().toLowerCase();
+    return o;
+  }
+  // { 역할: 스타일 } → 알려진 역할만, 빈 스타일은 뺀다
+  function cleanStyleMap(map, roles) { var out = {}; if (!map || typeof map !== 'object') return out; (roles || []).forEach(function (r) { var c = cleanStyle(map[r]); if (Object.keys(c).length) out[r] = c; }); return out; }
+  var STY_ROLES = { section: ['kicker', 'title', 'sub', 'notice', 'bridge', 'cta'], intro: ['title', 'body', 'sub'], card: ['hook', 'title', 'body', 'caveat', 'source'], step: ['head', 'desc', 'say', 'hint', 'button'] };
+
   function pick(o, keys) { var r = {}; keys.forEach(function (k) { if (o[k] !== undefined) r[k] = o[k]; }); return r; }
 
   /* ── 사례 고르기 ──────────────────────────────────────────────
@@ -329,7 +346,7 @@
   // 한국 지역(시·도 대표 도시) — 기존 입력 화면과 같은 경도 값. 엔진은 한국 표준시 기준이라 국내 출생을 기본으로 한다.
   var PLACES = [['서울', 126.98], ['부산', 129.08], ['대구', 128.60], ['인천', 126.70], ['광주', 126.85], ['대전', 127.38], ['울산', 129.31], ['세종', 127.29], ['수원', 127.03], ['고양', 126.83], ['성남', 127.14], ['용인', 127.18], ['청주', 127.49], ['천안', 127.15], ['전주', 127.15], ['목포', 126.39], ['여수', 127.66], ['포항', 129.36], ['경주', 129.22], ['안동', 128.73], ['창원', 128.68], ['진주', 128.11], ['춘천', 127.73], ['강릉', 128.90], ['제주', 126.53]].map(function (p) { return { name: p[0], lon: p[1] }; });
 
-  root.Onboard = { TERMS: TERMS, DEFAULTS: DEFAULTS, CASES: CASES, INTRO: INTRO, INTRO_LAST: INTRO_LAST, INTRO_NOTICE: INTRO_NOTICE, SCENES: SCENES, REVEAL_LINES: REVEAL_LINES, FACES: FACES, PLACES: PLACES, REQUIRED_FIELDS: REQUIRED_FIELDS, FORBIDDEN_TITLES: FORBIDDEN_TITLES,
+  root.Onboard = { cleanStyle: cleanStyle, cleanStyleMap: cleanStyleMap, STY_ROLES: STY_ROLES, FONT_KEYS: FONT_KEYS, WEIGHTS: WEIGHTS, TERMS: TERMS, DEFAULTS: DEFAULTS, CASES: CASES, INTRO: INTRO, INTRO_LAST: INTRO_LAST, INTRO_NOTICE: INTRO_NOTICE, SCENES: SCENES, REVEAL_LINES: REVEAL_LINES, FACES: FACES, PLACES: PLACES, REQUIRED_FIELDS: REQUIRED_FIELDS, FORBIDDEN_TITLES: FORBIDDEN_TITLES,
     honorific: honorific, addr: addr, fill: fill, merge: merge, publicCases: publicCases, birthCards: birthCards, normalizeCase: normalizeCase, KINDS: KINDS, VSTATE: VSTATE, RELATION: RELATION, DESIGNS: DESIGNS, EFFECTS: EFFECTS, NATURE: NATURE, SECTIONS: SECTIONS, SERVICES: SERVICES, TOPICS: TOPICS, SECTION_TYPES: SECTION_TYPES, pickCase: pickCase, validateDate: validateDate, validateTime: validateTime, toProfile: toProfile };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.Onboard;
 })(typeof window !== 'undefined' ? window : globalThis);
