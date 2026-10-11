@@ -368,3 +368,7 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
   .mc-son { right:1px;top:27px;width:13px;height:13px;line-height:11px;font-size:8px; }
   .mc-lists { grid-template-columns:1fr;gap:12px; }.mc-shortlist { padding:15px; }
 }
+
+/* 일주 각성: 영상이 없을 때 보이는 대체 이미지와 안내(인터랙티브 스토리의 portal 에셋) */
+#awk .fb{ position: absolute; inset: 0; background: #04050a center / cover no-repeat; opacity: .55; }
+#awk .fbn{ position: absolute; z-index: 3; left: 0; right: 0; top: max(64px, calc(env(safe-area-inset-top) + 56px)); text-align: center; font-size: .74rem; color: var(--ink-3); letter-spacing: .08em; margin: 0; padding: 0 20px; }

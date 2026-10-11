@@ -19,7 +19,7 @@
   var chk = function (n, v, label) { return '<label class="ob-f ob-ck"><input type="checkbox" name="' + n + '"' + (v ? ' checked' : '') + '> ' + label + '</label>'; };
 
   var css = document.createElement('style');
-  css.textContent = '.ob-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}.ob-chip{border-radius:999px;padding:4px 12px;font-size:.82rem}.ob-chip.on{border-color:var(--gold);color:var(--gold)}' +
+  css.textContent = '.ob-grp{min-width:150px;color:var(--gold);font-size:.84rem}.ob-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}.ob-chip{border-radius:999px;padding:4px 12px;font-size:.82rem}.ob-chip.on{border-color:var(--gold);color:var(--gold)}' +
     '.ob-row{padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin:4px 0;cursor:pointer;font-size:.84rem;display:grid;gap:2px}.ob-row.on{border-color:var(--gold)}.ob-row small{color:var(--ink3)}' +
     '.ob-st{font-size:.7rem;padding:0 8px;border-radius:999px;border:1px solid var(--line);margin-left:6px;white-space:nowrap}.ob-st.ok{border-color:#2f7a52;color:#7FE0BC}.ob-st.warn{color:#e0b36a;border-color:#7a5f2f}.ob-st.bad{color:#FF9C8C;border-color:#7a3a2f}.ob-st.off{color:var(--ink3)}' +
     '.ob-f{display:grid;gap:3px;font-size:.8rem;color:var(--ink2);margin:9px 0}.ob-f textarea{min-height:80px}.ob-g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:700px){.ob-g2{grid-template-columns:1fr}}' +
@@ -51,7 +51,7 @@
   function body() {
     var b = G.cfg;
     return { forceOnboarding: b.forceOnboarding, honorific: b.honorific, weights: b.weights, cases: b.cases, removedCases: b.removedCases || [], intro: b.intro, introLast: b.introLast, bridge: b.bridge,
-      sections: b.sections, services: b.services, topics: b.topics, progressLabel: b.progressLabel, afterDone: b.afterDone,
+      sections: b.sections, services: b.services, topics: b.topics, progressLabel: b.progressLabel, afterDone: b.afterDone, quest: b.quest, timeline: b.timeline,
       scenes: b.scenes.map(function (s) { return { id: s.id, title: s.title, lines: s.lines, unknownLines: s.unknownLines || [], hint: s.hint, button: s.button, face: s.face, image: s.image || '', bg: s.bg || '', bubble: s.bubble || '', enabled: s.enabled }; }), revealLines: b.revealLines };
   }
   function putDraft(quiet) {
@@ -80,14 +80,24 @@
   }
 
   /* ── 화면 틀: 상태 줄 + 전체 흐름 + 하위 메뉴 ── */
-  var SUBS = [['landing', '랜딩 첫 화면'], ['cases', '후킹 사례'], ['intro', '명리학 소개'], ['service', '서비스 소개'], ['scenes', '슬라이드 툰'], ['basic', '호칭·가중치'], ['stats', '통계'], ['publish', '미리보기·게시 관리']];
+  var SUBS0 = [['landing', '랜딩 첫 화면'], ['cases', '연구 사례·출처'], ['intro', '명리학 소개'], ['service', '서비스 소개'], ['@ext'], ['scenes', '슬라이드 툰(예전)'], ['basic', '호칭·가중치'], ['stats', '통계'], ['publish', '미리보기·게시 관리']];
+  var EXT = []; // 확장 하위 메뉴(report/admin/v2-quest.js: 인터랙티브 스토리·에셋·타임라인·운영). {id, label, view(), collect(), flow()}
+  function subs() { var o = []; SUBS0.forEach(function (s) { if (s[0] === '@ext') EXT.forEach(function (x) { o.push([x.id, x.label]); }); else o.push(s); }); return o; }
+  // 관리 영역을 둘로 나눈다: A 기존 온보딩(연구·명리학·서비스 소개 → 나의 운 확인하기) / B 인터랙티브 스토리(그 버튼 이후). 두 영역은 설정 키가 서로 독립이다(A: cases·sections·intro·services·topics…, B: quest·timeline·scenes).
+  var GA = ['landing', 'cases', 'intro', 'service', 'basic', 'stats'], GB = ['quest', 'qassets', 'tl', 'qops', 'scenes'];
+  function inA(id) { return GA.indexOf(id) >= 0; }
+  function groupsBar() {
+    var all = subs(), pick = function (ids) { return all.filter(function (s) { return ids.indexOf(s[0]) >= 0; }).sort(function (a, b) { return ids.indexOf(a[0]) - ids.indexOf(b[0]); }); };
+    var row = function (title, hint, list) { return '<div class="ob-bar"><b class="ob-grp">' + title + '</b><span class="ob-lock">' + hint + '</span>' + list.map(function (s) { return '<button class="ob-chip' + (G.sub === s[0] ? ' on' : '') + '" data-s="' + s[0] + '">' + s[1] + '</button>'; }).join('') + '</div>'; };
+    return row('A. 기존 온보딩', '랜딩 → 연구 사례 → 명리학 소개 → 서비스 소개 → "나의 운 확인하기"', pick(GA)) + row('B. 인터랙티브 스토리', '"나의 운 확인하기" 이후: 부적 오프닝 → 안내자 → 입력 → 계산 → 일주 각성 → 운명의 타임라인', pick(GB)) + row('공통', 'A·B 설정을 함께 게시·복원', pick(['publish']));
+  }
   function draw() {
     var changed = G.dirty ? '<span class="ob-dirty">● 저장하지 않은 변경이 있습니다</span>' : (G.srvDirty ? '<span class="ob-st warn">초안 ≠ 공개본 — 게시 필요</span>' : '<span class="ob-st ok">공개본과 같음</span>');
-    PANE.innerHTML = '<div class="card"><div class="ob-bar">' + SUBS.map(function (s) { return '<button class="ob-chip' + (G.sub === s[0] ? ' on' : '') + '" data-s="' + s[0] + '">' + s[1] + '</button>'; }).join('') + '</div>' +
+    PANE.innerHTML = '<div class="card">' + groupsBar() +
       '<div class="ob-bar"><span id="obState">' + changed + '</span><span class="ob-lock">공개본 ' + esc(G.liveVersion || '(기본 문구)') + ' · 마지막 게시 ' + fmtT(G.liveAt) + ' · 초안 마지막 수정 ' + fmtT(G.draftAt) + '</span><span style="flex:1"></span>' +
       (G.sub === 'landing' ? '' : '<button id="obSave">초안 저장</button><button id="obPrev" class="ghost">미리보기</button><button id="obPub">게시</button>') + '</div>' +
       (G.sub === 'landing' ? '<p class="muted" style="margin:0">아래는 방문자가 맨 처음 만나는 첫 화면(/report/ 커버: 등불·안내 캐릭터·문구·버튼)의 편집기입니다. 저장은 아래 편집기의 저장 버튼을 쓰세요. 그 아래로 이어지는 흐름은 위 메뉴에서 편집합니다.</p>' : '<p class="muted" style="margin:0">저장은 "초안"에만 반영됩니다. <b>게시</b>를 눌러야 방문자에게 보입니다. 검증 완료 전 사례는 공개할 수 없습니다.</p>') + '</div>' +
-      (G.sub === 'landing' ? '' : flowHtml()) + '<div id="obPrevBox"></div><div id="obBody"></div>';
+      (G.sub === 'landing' || !inA(G.sub) ? '' : flowHtml()) + '<div id="obPrevBox"></div><div id="obBody"></div>';
     $$('[data-s]').forEach(function (b) { b.onclick = function () {
       collect(); var from = G.sub; G.sub = b.dataset.s;
       if (G.sub === 'landing') window.AdminShowTab('onboard', 'home'); // 기존 랜딩 첫 화면 편집기를 이 탭 아래에 함께 보인다
@@ -96,9 +106,9 @@
     }; });
     if ($('#obSave')) $('#obSave').onclick = save;
     if ($('#obPub')) $('#obPub').onclick = publish;
-    if ($('#obPrev')) $('#obPrev').onclick = function () { collect(); G.prev.on = !G.prev.on; drawPrev(); };
+    if ($('#obPrev')) $('#obPrev').onclick = function () { collect(); G.prev.on = !G.prev.on; if (G.prev.on) G.prev.hash = inA(G.sub) ? '#/welcome' : (G.sub === 'tl' ? '#/timeline' : '#/begin'); drawPrev(); };
     bindFlow(); drawPrev();
-    var view = ({ cases: casesView, intro: introView, service: serviceView, scenes: scenesView, basic: basicView, stats: statsView, publish: publishView })[G.sub]; if (view) view(); else $('#obBody').innerHTML = '';
+    var view = ({ cases: casesView, intro: introView, service: serviceView, scenes: scenesView, basic: basicView, stats: statsView, publish: publishView })[G.sub], ex = EXT.filter(function (x) { return x.id === G.sub; })[0]; if (view) view(); else if (ex) ex.view(); else $('#obBody').innerHTML = '';
     if (!PANE._obDirty) { PANE._obDirty = true; PANE.addEventListener('input', onEdit); PANE.addEventListener('change', onEdit); } // 편집기·흐름 카드·목록 어디서든 입력이 바뀌면 "저장 안 됨" 표시
   }
   function onEdit(e) { if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) && e.target.closest('form, #obReveal')) markDirty(); else if (e.target && e.target.id === 'obReveal') markDirty(); }
@@ -122,7 +132,7 @@
     }).join('<span class="ob-arrow">→</span>');
     return '<div class="card"><h3 style="font-size:.95rem;margin:0">전체 흐름 <span class="ob-lock">· 카드를 끌어서 순서를 바꾸고, 체크로 표시를 켜고 끕니다. 카드를 누르면 아래 편집기에서 문구·연출을 고칩니다.</span></h3>' +
       '<div class="ob-flow"><div class="ob-node fixed"><b>0. 첫 화면</b><span>등불·캐릭터·메인 카피</span><span class="ob-st ok">고정</span><small class="ob-lock">"랜딩 첫 화면" 메뉴</small></div><span class="ob-arrow">→</span>' + nodes +
-      '<span class="ob-arrow">→</span><div class="ob-node fixed"><b>슬라이드 툰</b><span>출생정보 6장면</span><span class="ob-st ok">고정</span></div><span class="ob-arrow">→</span><div class="ob-node fixed"><b>개인화 홈</b><span>기질·흐름·일주</span><span class="ob-st ok">고정</span></div></div>' +
+      '<span class="ob-arrow">→</span><div class="ob-node fixed"><b>슬라이드 툰</b><span>' + (c.quest && c.quest.enabled !== false ? '인터랙티브 스토리' : '출생정보 6장면') + '</span><span class="ob-st ' + (c.quest && c.quest.enabled !== false ? 'ok' : 'warn') + '">' + (c.quest && c.quest.enabled !== false ? '켜짐' : '예전 방식') + '</span></div><span class="ob-arrow">→</span><div class="ob-node fixed"><b>일주 각성</b><span>일간·일주·영상</span><span class="ob-st ok">고정</span></div><span class="ob-arrow">→</span><div class="ob-node fixed"><b>운명의 타임라인</b><span>' + (c.timeline && c.timeline.enabled === false ? '숨김' : '4개 영역') + '</span><span class="ob-st ' + (c.timeline && c.timeline.enabled === false ? 'off' : 'ok') + '">' + (c.timeline && c.timeline.enabled === false ? '꺼짐' : '켜짐') + '</span></div><span class="ob-arrow">→</span><div class="ob-node fixed"><b>개인화 홈</b><span>기질·흐름·일주</span><span class="ob-st ok">고정</span></div></div>' +
       '<div class="ob-bar"><button class="ghost" id="obSecAdd">+ 섹션 추가</button><span class="ob-lock">섹션 상세 편집은 ' + (G.sub === 'cases' || G.sub === 'intro' || G.sub === 'service' ? '아래 "미리보기·게시 관리" 메뉴 또는 이 카드를 눌러 열 수 있습니다' : '카드를 눌러 엽니다') + '</span></div><div id="obSecEd"></div></div>';
   }
   function bindFlow() {
@@ -155,7 +165,7 @@
       '<label class="ob-f">제목 (줄바꿈 가능 · {귀인} 사용)<textarea name="title" style="min-height:56px">' + esc(s.title || '') + '</textarea></label><label class="ob-f">설명<textarea name="sub" style="min-height:70px">' + esc(s.sub || '') + '</textarea></label>' +
       (s.type === 'research' ? '<label class="ob-f">연구와 명리학을 구분하는 안내 문구 (항상 표시)<textarea name="notice" style="min-height:60px">' + esc(s.notice || '') + '</textarea></label>' : '<input type="hidden" name="notice" value="' + esc(s.notice || '') + '">') +
       (s.type === 'research' ? '<label class="ob-f">섹션 마지막 연결 문구<textarea name="bridge" style="min-height:56px">' + esc(s.bridge || '') + '</textarea></label>' : '<input type="hidden" name="bridge" value="' + esc(s.bridge || '') + '">') +
-      (s.type === 'myeongri' ? chk('topics', s.topics === true, '원리 주제 목록(접이식)도 함께 표시 — 기본은 꺼짐: 장면 몇 컷만 읽히게') : '') + '<div class="ob-g2"><label class="ob-f">섹션 하단 버튼 문구<input type="text" name="cta" maxlength="30" value="' + esc(cta.text || '') + '"></label>' + chk('ctaShow', cta.show, '이 섹션 아래에 "나의 운 확인하기" 버튼 표시') + '</div>' +
+      (s.type === 'myeongri' ? chk('topics', s.topics === true, '원리 주제 목록(접이식)도 함께 표시 — 기본은 꺼짐: 장면 몇 컷만 읽히게') : '') + '<div class="ob-g2"><label class="ob-f">섹션 하단 버튼 문구<input type="text" name="cta" maxlength="30" value="' + esc(cta.text || '') + '"></label>' + chk('ctaShow', cta.show, '이 섹션 아래에 "나의 운 확인하기" 버튼 표시') + '</div><label class="ob-f">버튼 연결 경로<select name="ctaTo">' + sel({ story: '인터랙티브 스토리 (부적 오프닝부터)', quick: '일반 입력 화면 (스토리 없이 바로 분석)' }, cta.to === 'quick' ? 'quick' : 'story') + '</select></label>' +
       (s.type === 'final' ? '<div class="ob-g2"><label class="ob-f">대표 이미지 (기본 "運" 도형 대신 표시)<input type="text" name="art" value="' + esc(s.art || '') + '"><input type="file" data-up="art" accept="image/*"></label><label class="ob-f">대표 영상 (mp4 · 있으면 이미지보다 우선)<input type="text" name="artVideo" value="' + esc(s.artVideo || '') + '"><input type="file" data-up="artVideo" accept="video/*"></label></div>' : '<input type="hidden" name="art" value="' + esc(s.art || '') + '"><input type="hidden" name="artVideo" value="' + esc(s.artVideo || '') + '">') +
       '<div class="ob-g2"><label class="ob-f">배경 이미지 (PC)<input type="text" name="bg" value="' + esc(s.bg || '') + '"><input type="file" data-up="bg" accept="image/*"></label><label class="ob-f">배경 이미지 (모바일, 비우면 PC와 같음)<input type="text" name="bgMobile" value="' + esc(s.bgMobile || '') + '"><input type="file" data-up="bgMobile" accept="image/*"></label></div>' +
       '<div class="ob-bar"><button type="button" class="ghost" id="obSecUp"' + (i === 0 ? ' disabled' : '') + '>↑ 위로</button><button type="button" class="ghost" id="obSecDn"' + (i === c.sections.length - 1 ? ' disabled' : '') + '>↓ 아래로</button><button type="button" class="ghost" id="obSecDup">섹션 복제</button>' +
@@ -175,7 +185,7 @@
     var box = $('#obPrevBox'); if (!box) return;
     if (!G.prev.on) { box.innerHTML = ''; return; }
     box.innerHTML = '<div class="ob-prevbox' + (G.prev.dev === 'mob' ? ' mob' : '') + '"><div class="ob-bar" style="justify-content:center"><button class="ob-chip' + (G.prev.dev === 'pc' ? ' on' : '') + '" data-pd="pc">PC</button><button class="ob-chip' + (G.prev.dev === 'mob' ? ' on' : '') + '" data-pd="mob">모바일</button><button class="ghost" id="obPrevRe">현재 편집 내용으로 새로고침</button><button class="ghost" id="obPrevX">닫기</button></div>' +
-      '<iframe id="obPrevFrame" title="랜딩 흐름 미리보기" src="/report/hub/?preview=1#/welcome"></iframe><p class="ob-lock">저장하지 않은 편집 내용까지 반영한 모습입니다. <b>섹션을 누르면 위쪽에 그 섹션의 편집 입력란이 열립니다</b>(점선 테두리가 누를 수 있는 영역). 검증 완료 + 공개로 설정한 사례만 보입니다. 통계에는 집계되지 않습니다.</p></div>';
+      '<iframe id="obPrevFrame" title="랜딩 흐름 미리보기" src="/report/hub/?preview=1' + (G.prev.hash || '#/welcome') + '"></iframe><p class="ob-lock">저장하지 않은 편집 내용까지 반영한 모습입니다. <b>섹션을 누르면 위쪽에 그 섹션의 편집 입력란이 열립니다</b>(점선 테두리가 누를 수 있는 영역). 검증 완료 + 공개로 설정한 사례만 보입니다. 통계에는 집계되지 않습니다.</p></div>';
     var push = function () { collect(); var f = $('#obPrevFrame'); if (f && f.contentWindow) f.contentWindow.postMessage({ t: 'mt-onb-preview', config: body() }, location.origin); };
     if (prevListener) window.removeEventListener('message', prevListener);
     var flash = function (el) { if (!el) return; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.transition = 'box-shadow .3s'; el.style.boxShadow = '0 0 0 2px #e0b36a'; setTimeout(function () { el.style.boxShadow = ''; }, 1600); var f = el.querySelector('input[type=text],textarea'); if (f) { try { f.focus({ preventScroll: true }); } catch (x) { } } };
@@ -199,9 +209,10 @@
   /* ── 현재 화면의 입력값을 G.cfg 로 옮긴다 ── */
   function collect() {
     if (!G.cfg || !$('#obBody')) return;
+    EXT.forEach(function (x) { if (x.id === G.sub && x.collect) x.collect(); });
     var cfg = G.cfg, v;
     var sf = $('#obSec'); if (sf) { var s = cfg.sections.filter(function (x) { return x.id === G.selSec; })[0]; if (s) { v = function (n) { return sf.elements[n] ? sf.elements[n].value : ''; };
-      s.kicker = v('kicker').trim(); s.effect = v('effect'); s.title = v('title').trim(); s.sub = v('sub').trim(); s.notice = v('notice').trim(); s.bridge = v('bridge').trim(); s.bg = v('bg').trim(); s.bgMobile = v('bgMobile').trim(); s.art = v('art').trim(); s.artVideo = v('artVideo').trim(); s.cta = { show: sf.elements.ctaShow.checked, text: v('cta').trim() }; if (sf.elements.topics) s.topics = sf.elements.topics.checked; } }
+      s.kicker = v('kicker').trim(); s.effect = v('effect'); s.title = v('title').trim(); s.sub = v('sub').trim(); s.notice = v('notice').trim(); s.bridge = v('bridge').trim(); s.bg = v('bg').trim(); s.bgMobile = v('bgMobile').trim(); s.art = v('art').trim(); s.artVideo = v('artVideo').trim(); s.cta = { show: sf.elements.ctaShow.checked, text: v('cta').trim(), to: v('ctaTo') === 'quick' ? 'quick' : 'story' }; if (sf.elements.topics) s.topics = sf.elements.topics.checked; } }
     if (G.sub === 'cases' && G.sel) {
       var c = cfg.cases.filter(function (x) { return x.id === G.sel; })[0], f = $('#obCase'); if (c && f) {
         v = function (n) { return f.elements[n] ? f.elements[n].value : ''; }; var cb = function (n) { return f.elements[n] ? !!f.elements[n].checked : false; };
@@ -491,5 +502,6 @@
     }).catch(function (e) { $('#obHist').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
 
-  window.V2Onboard = { open: open };
+  // 확장 모듈이 같은 초안·게시·이력 체계를 그대로 쓰도록 내부 도구를 건네 준다
+  window.V2Onboard = { open: open, register: function (x) { EXT.push(x); }, tools: function () { return { G: G, C: C, esc: esc, toast: toast, $: $, $$: $$, sel: sel, chk: chk, lines: lines, markDirty: markDirty, draw: draw, upload: upload, bindUploads: bindUploads, uid: uid, fmtT: fmtT, putDraft: putDraft }; } };
 })();

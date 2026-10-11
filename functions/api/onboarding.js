@@ -15,7 +15,7 @@ import { json, isAdmin, configError } from '../_lib.js';
 import { kvOf } from '../_store.js';
 
 const KEY = 'free:onboard', DRAFT = 'free:onboard:draft', HIST = 'free:onboard:hist', HKEY = 'free:onboard:h:', STAT = 'free:onbstat', MAX_BYTES = 512 * 1024, MAX_HIST = 20;
-const ID = /^[a-z0-9][a-z0-9_-]{1,40}$/, IMG = /^(\/api\/clipfile\?k=[\w.-]{1,120}|https:\/\/[^\s"'<>]{1,500})$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
+const ID = /^[a-z0-9][a-z0-9_-]{1,40}$/, IMG = /^(\/api\/clipfile\?k=[\w.-]{1,120}|\/report\/hub\/quest\/[\w.-]{1,60}\.(webp|png|jpe?g)|https:\/\/[^\s"'<>]{1,500})$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
 const VSTATE = ['draft', 'review', 'verified', 'hold', 'rejected'];
 const KINDS = ['study', 'experiment', 'history', 'celebrity', 'classic', 'other'];
 const RELATION = ['direct', 'birth_correlation', 'belief', 'cultural', 'none'];
@@ -29,7 +29,9 @@ const EVENTS = ['onboarding_view', 'onboarding_card_impression', 'onboarding_nex
   'movingtoon_preview_start', 'movingtoon_purchase_click',
   // 랜딩 개편 지표
   'landing_view', 'landing_cta_click', 'research_section_view', 'research_detail_open', 'research_source_click', 'myeongri_section_view', 'service_section_view', 'movingtoon_preview_view',
-  'free_content_click', 'paid_report_view', 'purchase_complete'];
+  'free_content_click', 'paid_report_view', 'purchase_complete',
+  // 인터랙티브 스토리·운명의 타임라인(출생정보·이름은 보내지 않는다)
+  'quest_view', 'quest_resume', 'quest_guide_pick', 'quest_leap_asked', 'timeline_view', 'timeline_topic_click', 'timeline_year_select'];
 
 const s = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 const arr = (v, n, len) => (Array.isArray(v) ? v.slice(0, n).map(x => s(x, len)).filter(Boolean) : []);
@@ -77,8 +79,49 @@ function cleanCase(c, notes) {
   };
   return o.title && (o.body.length || o.story.length) ? o : null;
 }
+
+// ── 인터랙티브 스토리(quest)·운명의 타임라인(timeline) 설정 정리: report/hub/quest-data.js 의 mergeQuest·mergeTimeline 과 같은 규칙 ──
+const QUEST_STEPS = ['seal', 'guide', 'name', 'gender', 'calendar', 'year', 'month', 'day', 'time', 'place', 'confirm'];
+const OPTIONAL_STEPS = ['seal', 'guide'];                                       // 연출용 단계만 끌 수 있다(나머지는 계산에 필요한 입력)
+const ASSET_KEYS = ['gate', 'courtyard', 'archive', 'papers', 'reeds', 'mirror', 'paths', 'letter', 'portal', 'office', 'male', 'female'];
+const FX = ['fade', 'rise', 'none'], TL_IDS = ['birth', 'flow', 'now', 'themes'], INTERESTS = ['', 'self', 'money', 'career', 'love', 'marriage', 'relation', 'future'];
+const GRAPH_KEYS = ['elements', 'ziwei', 'daeun', 'seun', 'wolun', 'today'];
+const focus = v => { v = s(v, 12); return /^\d{1,3}% \d{1,3}%$/.test(v) ? v : ''; };
+const pair = (o, n, len) => ({ male: arr(o && o.male, n, len), female: arr(o && o.female, n, len) });
+function cleanQuest(q) {
+  if (!q || typeof q !== 'object') return undefined;
+  const out = { enabled: bool(q.enabled, true), resume: bool(q.resume, true), skipReturning: bool(q.skipReturning, true), fx: FX.includes(q.fx) ? q.fx : 'fade' };
+  if (Array.isArray(q.steps)) {
+    const seen = new Set();
+    out.steps = q.steps.slice(0, 16).filter(x => x && QUEST_STEPS.includes(x.id) && !seen.has(x.id) && seen.add(x.id)).map(x => ({
+      id: x.id, enabled: OPTIONAL_STEPS.includes(x.id) ? x.enabled !== false : true, title: s(x.title, 60), button: s(x.button, 40), hint: s(x.hint, 300), head: s(x.head, 120), desc: s(x.desc, 200),
+      asset: ASSET_KEYS.includes(x.asset) ? x.asset : '', bg: img(x.bg), bgMobile: img(x.bgMobile), fx: FX.includes(x.fx) ? x.fx : '',
+      lines: pair(x.lines, 6, 160), unknownLines: pair(x.unknownLines, 6, 160) }));
+  }
+  if (q.guides && typeof q.guides === 'object') { out.guides = {}; for (const g of ['male', 'female']) { const o = q.guides[g]; if (o && typeof o === 'object') out.guides[g] = { name: s(o.name, 20), tag: s(o.tag, 40), image: img(o.image), imageMobile: img(o.imageMobile) }; } }
+  for (const k of ['calcLines', 'errLines']) if (q[k] && typeof q[k] === 'object') out[k] = pair(q[k], 4, 160);
+  if (q.resumeText && typeof q.resumeText === 'object') out.resumeText = flat(q.resumeText, ['head', 'desc', 'yes', 'no'], 120);
+  if (q.leapText && typeof q.leapText === 'object') out.leapText = flat(q.leapText, ['head', 'body', 'yes', 'no'], 200);
+  if (q.assets && typeof q.assets === 'object') { out.assets = {}; for (const k of ASSET_KEYS) { const o = q.assets[k]; if (o && typeof o === 'object') out.assets[k] = { pc: img(o.pc), mobile: img(o.mobile), focusPc: focus(o.focusPc), focusMobile: focus(o.focusMobile) }; } }
+  return out;
+}
+function cleanTimeline(t) {
+  if (!t || typeof t !== 'object') return undefined;
+  const out = { enabled: bool(t.enabled, true) };
+  if (Array.isArray(t.sections)) { const seen = new Set(); out.sections = t.sections.slice(0, 8).filter(x => x && TL_IDS.includes(x.id) && !seen.has(x.id) && seen.add(x.id)).map(x => ({ id: x.id, enabled: x.enabled !== false, title: s(x.title, 40), sub: s(x.sub, 120) })); }
+  if (t.graph && typeof t.graph === 'object') { out.graph = {}; for (const k of GRAPH_KEYS) if (typeof t.graph[k] === 'boolean') out.graph[k] = t.graph[k]; }
+  if (Array.isArray(t.topics)) {
+    const seen = new Set();
+    out.topics = t.topics.slice(0, 16).filter(x => x && ID.test(String(x.id || '')) && !seen.has(x.id) && seen.add(x.id)).map(x => {
+      const lk = s(x.link, 200), okLink = /^(#\/[\w\-./?=&%]*|\/[\w\-./?=&#%]*|https:\/\/[^\s"'<>]+)$/.test(lk) ? lk : '', kind = x.kind === 'link' && okLink ? 'link' : 'interest';
+      return { id: x.id, enabled: x.enabled !== false, title: s(x.title, 40), desc: s(x.desc, 120), kind, interest: INTERESTS.includes(x.interest) ? x.interest : '', link: kind === 'link' ? okLink : '', asset: ASSET_KEYS.includes(x.asset) ? x.asset : 'archive', image: img(x.image), access: x.access === 'free' ? 'free' : 'paid' };
+    }).filter(x => x.title);
+  }
+  if (t.texts && typeof t.texts === 'object') out.texts = flat(t.texts, ['intro', 'notice'], 300);
+  return out;
+}
 const cleanLines = a => arr(a, 6, 120);
-const cleanCta = c => ({ show: !!(c && c.show), text: s(c && c.text, 30) });
+const cleanCta = c => ({ show: !!(c && c.show), text: s(c && c.text, 30), to: c && c.to === 'quick' ? 'quick' : 'story' }); // to: story(인터랙티브 스토리) | quick(일반 입력)
 function clean(b, notes) {
   const out = {};
   if (typeof b.forceOnboarding === 'boolean') out.forceOnboarding = b.forceOnboarding;
@@ -93,6 +136,7 @@ function clean(b, notes) {
   if (typeof b.progressLabel === 'string' && b.progressLabel.trim()) out.progressLabel = s(b.progressLabel, 60);
   if (b.afterDone === 'home' || b.afterDone === 'reveal') out.afterDone = b.afterDone;
   if (Array.isArray(b.revealLines)) out.revealLines = cleanLines(b.revealLines);
+  { const q = cleanQuest(b.quest), tl = cleanTimeline(b.timeline); if (q) out.quest = q; if (tl) out.timeline = tl; }
   // 랜딩 섹션(순서 = 배열 순서). 종류(type)는 코드가 아는 것만.
   if (Array.isArray(b.sections)) {
     const seen = new Set();
