@@ -598,7 +598,7 @@
     var root = $('#t-v2set'); if (root.parentNode && $('#t-lib') && root.nextSibling !== $('#t-lib') && !built.setMoved) { built.setMoved = 1; $('#t-lib').parentNode.insertBefore(root, $('#t-lib')); }
     if (!built.set) {
       built.set = 1; root.innerHTML = '<div class="sub2" id="stNav"></div><div id="stScore" class="hide"></div><div id="stMove" class="hide"></div><div id="stCine" class="hide"></div>';
-      subnav($('#stNav', root), [['intro', '입장 인트로'], ['home', '온보딩 페이지'], ['move', '무빙 연출'], ['cine', '시네마 기본 연출'], ['score', '미디어 점수·AI'], ['lib', '기존 클립 (구버전)']], also || 'intro', function (k) { gotoTab('v2set', k); });
+      subnav($('#stNav', root), [['intro', '입장 인트로'], ['home', '랜딩 페이지 (온보딩 탭과 같은 화면)'], ['move', '무빙 연출'], ['cine', '시네마 기본 연출'], ['score', '미디어 점수·AI'], ['lib', '기존 클립 (구버전)']], also || 'intro', function (k) { gotoTab('v2set', k); });
     }
     $('#stScore', root).classList.toggle('hide', also !== 'score'); if (also === 'score') scoreOpen();
     $('#stMove', root).classList.toggle('hide', also !== 'move'); if (also === 'move') moveOpen();
