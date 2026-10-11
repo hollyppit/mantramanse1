@@ -9,7 +9,7 @@
     var ext = { future: [] }; try { var Y = sd.nowYear; ext.future = M.seunRange(ch, Y, Y + 4).map(function (x, i) { return { year: Y + i, season: R.SajuData.seasonOf(x.ev) }; }); } catch (e) { }
     var ctl = root.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, waitMs || 6000);
     return fetch('/api/ik?a=deep', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sd: sdx, ext: ext, domains: DOMAINS }), signal: ctl && ctl.signal })
-      .then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (!(d && d.ok && d.enabled && d.domains && Object.keys(d.domains).length)) return null; if (d.body) d.domains.__mode = 'replace'; return d.domains; }).catch(function () { return null; }).then(function (x) { clearTimeout(tm); return x; });
+      .then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (!(d && d.ok && d.enabled && d.domains && Object.keys(d.domains).length)) return null; if (d.body) d.domains.__mode = 'replace'; if (d.style) Object.defineProperty(d.domains, '__style', { value: d.style, enumerable: false }); return d.domains; }).catch(function () { return null; }).then(function (x) { clearTimeout(tm); return x; });
   }
   R.IKDeep = { load: load, DOMAINS: DOMAINS };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -2,7 +2,7 @@
 // AI 는 "편집자"다: 이미 선택된 해석 모듈 문장을 매끄럽게 잇고(핵심 문장·연결 문장), 시스템이 준 후보 중에서만 미디어를 고른다.
 // 명리 규칙·숫자·직업·행동을 새로 만들 수 없고, 응답은 아래 sanitize 를 통과한 것만 쓰인다. 실패하면 호출 쪽이 원본 모듈 문장을 그대로 쓴다.
 import { GUARD_PROMPT } from './_guard.js';
-export const PROMPT_VERSION = 'p5';
+export const PROMPT_VERSION = 'p6';
 const MAX_CH = 40, MAX_FIELD = 420, MAX_BYTES = 32 * 1024;
 // 단정 표현 + 건강·사망·질병·투자수익·임신·법률 단정
 export const BANNED = /(반드시|무조건|확정|100%|틀림없|사망|죽음|암에|질병에 걸|수익률|수익을 보장|임신|소송|범죄|이혼한다|파산)/;
@@ -41,11 +41,15 @@ export function validatePayload(b) {
 }
 
 // 결정적 해시(SHA-256 hex). 캐시 키 = 정리된 payload 내용 + 프롬프트 버전 → 같은 입력은 같은 결과, 남이 다른 내용으로 캐시를 오염시킬 수 없다.
-export async function cacheKey(clean) {
-  const data = new TextEncoder().encode(PROMPT_VERSION + '|' + JSON.stringify(clean)), h = await crypto.subtle.digest('SHA-256', data);
+export async function cacheKey(clean, styleSig) {
+  const data = new TextEncoder().encode(PROMPT_VERSION + '|' + (styleSig || '') + '|' + JSON.stringify(clean)), h = await crypto.subtle.digest('SHA-256', data);
   return 'compose:' + [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 40);
 }
 
+// style: functions/_stylestore.js styleFor 결과. 풀이 문장(headline·lead)에만 적용하고, 사실·수치·근거는 그대로 둔다.
+export function systemFor(style) {
+  return style && style.directive ? SYSTEM + '\n\n' + style.directive + '\n이 문체는 headline·lead 의 표현 강도에만 적용한다. 입력 문장이 이미 분명하면 흐리지 말고, 입력에 없는 단정을 보태지 않는다.' : SYSTEM;
+}
 export function buildUser(clean) {
   return '아래 챕터 문장을 편집하고, media 후보에서 장면 미디어를 골라라.\n' + JSON.stringify({ chapters: clean.chapters.map(c => ({ id: c.id, title: c.title, fact: c.fact, headline: c.headline, interpretation: c.interpretation, meaning: c.meaning, action: c.action, ...(c.verdict ? { verdict: c.verdict } : {}) })), media: clean.media, assets: clean.assets });
 }
@@ -83,11 +87,11 @@ export function sanitize(text, clean) {
 }
 
 // llm: async (system, user) => text. 실패하면 throw. 반환: { ok, result, cached }
-export async function runCompose(body, deps) { // deps: { kvGet, kvPut, llm }
+export async function runCompose(body, deps) { // deps: { kvGet, kvPut, llm, style? }
   const clean = validatePayload(body); if (!clean) return { ok: false, error: 'bad-payload' };
-  const key = await cacheKey(clean);
+  const key = await cacheKey(clean, deps.style && deps.style.sig);
   if (deps.kvGet) { const hit = await deps.kvGet(key); if (hit) return { ok: true, result: hit, cached: true }; }
-  let text; try { text = await deps.llm(SYSTEM, buildUser(clean)); } catch (e) { return { ok: false, error: 'llm-failed', detail: String((e && e.message) || e).slice(0, 160) }; }
+  let text; try { text = await deps.llm(systemFor(deps.style), buildUser(clean)); } catch (e) { return { ok: false, error: 'llm-failed', detail: String((e && e.message) || e).slice(0, 160) }; }
   const result = sanitize(text, clean); if (!result) return { ok: false, error: 'bad-answer' };
   if (deps.kvPut) await deps.kvPut(key, result);
   return { ok: true, result, cached: false };

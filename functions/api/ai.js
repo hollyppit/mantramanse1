@@ -16,6 +16,7 @@
 // 400/401/403/404 같은 설정·요청 오류는 폴백으로 덮지 않고 그대로 알린다(키·모델 이름 실수를 놓치지 않도록).
 import { json, isAdmin } from '../_lib.js';
 import { kvOf } from '../_store.js';
+import { loadStyle, styleFor } from '../_stylestore.js';
 import * as IK from '../_ik.js';
 import { loadDomain } from '../_ikstore.js';
 
@@ -74,7 +75,7 @@ const SYSTEM = `너는 한국어 사주 콘텐츠 "무빙툰"의 작가다. 무�
 규칙:
 - 한 줄은 공백 포함 12~28자를 기본으로 하고 40자를 넘기지 않는다. 한 줄에 한 호흡만 담는다.
 - 차분하고 솔직한 상담체(~습니다·~입니다)로 통일한다. 반말·해요체·신비로운 수사·빈 칭찬을 섞지 않는다. 질문은 내용상 필요한 경우에만 쓴다.
-- 길흉을 단정하는 예언, 공포 조장, 의학·법률·투자 조언, 특정 집단 비하는 쓰지 않는다. "~할 수 있습니다", "~하기 쉬운 구조입니다"처럼 적용 조건을 드러낸다.
+- 사건·길흉을 확정하는 예언, 공포 조장, 의학·법률·투자 조언, 특정 집단 비하는 쓰지 않는다. 근거가 있는 성향·구조 판단은 분명한 문장으로 쓰고, "~할 수 있습니다" 같은 가능성 표현을 줄마다 반복하지 않는다(문체 강도는 아래 [풀이 문체]를 따른다).
 - 주어진 사주 조건(일간·일지·용신 등)의 전통적 의미(예: 갑목=큰 나무, 정화=촛불)를 비유로 활용하되, 모르는 용어를 지어내지 않는다.
 - 사주 조건만으로 실제 재산·체력·가족사·사건을 지어내지 않는다. 가장 약한 오행을 용신으로 간주하지 않는다. 자막을 새로 쓸 때 충분한 줄 수가 있으면 강점 → 그 힘의 부작용 → 주어진 근거와 맞는 보완 방향 → 실천 순으로 잇는다. 근거가 없는 처방은 억지로 채우지 않는다. 다듬기·나누기 작업은 원문 범위만 지킨다.
 - 같은 말을 반복하지 않는다. 번호·따옴표·이모지·해시태그는 붙이지 않는다.
@@ -87,7 +88,7 @@ const MODULE_SYSTEM = `너는 한국어 사주 해석 작가다. 목표는 두�
 - summary: 2~3문장. 이 구조가 만드는 반복 패턴과 그 대가를 구체적인 장면(회의, 연애, 돈 쓸 때, 혼자 있을 때 등)으로 보여 준다.
 - detail: 4~6문장. ① 강점이 어떻게 약점이 되는지 ② 이 사람이 자주 쓰는 합리화 한 가지 ③ 바로 해 볼 수 있는 행동 한 가지 순서로 쓴다.
 - 쓰지 않는 말: "다양한", "균형", "노력하면", "잠재력", "긍정적", "조화" 같은 빈말, 칭찬으로 분량 채우기, 누구에게나 해당되는 말(바넘 문장).
-- 날카롭되 사람을 모욕하지 않는다. 사람이 아니라 "구조와 경향"을 찌른다. "~하기 쉽습니다", "~하는 쪽으로 기웁니다"처럼 적용 조건은 남기되 문장을 흐리지 않는다.
+- 날카롭되 사람을 모욕하지 않는다. 사람이 아니라 "구조와 습관"을 찌른다. 근거가 있는 판단은 분명하게 쓰고, 적용 조건은 실제로 필요한 곳에만 붙여 문장을 흐리지 않는다(강도는 아래 [풀이 문체]를 따른다).
 - 질병·사망·사고·이혼·파산 같은 사건 단정, 투자 수익·의학·법률 조언, 특정 집단 비하, 공포 조장은 쓰지 않는다. "반드시·무조건·확정"도 쓰지 않는다.
 - 프롬프트에 "참고 DB 자료"가 있으면 그것이 1순위 근거다. 거기 적힌 원리·강점·약점·행동 패턴을 구체적인 장면으로 바꿔 쓰고, DB와 모순되거나 DB에 없는 단정은 하지 않는다.
 - 주어진 조건(일간·오행·신강약·카테고리)과 그 전통적 의미(예: 갑목=큰 나무, 정화=촛불)만 근거로 쓴다. 모르는 용어나 실제 사건·재산·가족사는 지어내지 않는다.
@@ -132,7 +133,7 @@ const refBlock = refs => refs.length ? '\n\n참고 DB 자료(검수·관리 중�
 const VERIFY_SYSTEM = `너는 사주 풀이 문장의 엄격한 검수자다. 주어진 풀이(headline·summary·detail)를 카테고리·적용 조건·참고 DB 자료와 대조해 점검한다. 작성자를 봐주지 마라.
 점검 항목(type):
 - grounding: DB 자료·적용 조건에 없는 사실·원리·사건을 주장하거나 DB와 모순된다.
-- overclaim: 사건·건강·재산·결혼·이혼 등을 단정하거나 공포를 조장한다. 조건 표현(경향·구조) 없이 "~된다"로 확정한다.
+- overclaim: 사건·건강·재산·결혼·이혼 등 미래 사건의 발생을 확정하거나 공포를 조장한다. 근거가 있는 성향·강점·약점·구조·시기의 성격을 분명하게 말하는 것은 overclaim 이 아니다.
 - barnum: 누구에게나 해당되는 말이다("노력하면", "균형이 중요", "양면이 있다" 등 빈말 포함).
 - dull: 구체적 장면·대가·행동이 없어 두루뭉술하다. 촌철살인이 아니다.
 - tone: 사람을 모욕·비하하거나 합쇼체(~습니다)를 깨뜨린다.
@@ -155,7 +156,7 @@ const BARNUM_RE = /(다양한|균형(이|을|잡)|노력하면|잠재력|긍정�
 // 규칙 검사: 확정·위험 표현, 채울 수 없는 {…} 자리. AI 가 놓쳐도 여기서 잡는다.
 function ruleIssues(m) {
   const out = [], all = [m.headline, m.summary, m.detail].join(' ');
-  const bad = all.match(IK.BANNED_RE); if (bad) out.push({ type: 'overclaim', quote: bad[0], why: '확정적이거나 위험한 표현이 들어 있습니다(규칙 검사).', fix: '"~하기 쉽습니다", "~하는 경향이 있습니다"처럼 조건과 경향으로 바꾸세요.' });
+  const bad = all.match(IK.BANNED_RE); if (bad) out.push({ type: 'overclaim', quote: bad[0], why: '확정적이거나 위험한 표현이 들어 있습니다(규칙 검사).', fix: '사건이 일어난다고 확정하지 말고 "~하는 시기입니다", "~에 강점이 있습니다"처럼 성향·시기의 성격으로 바꾸세요.' });
   const left = all.replace(IK.KNOWN_VAR, '').match(/\{[^{}]{1,24}\}/g); if (left) out.push({ type: 'grounding', quote: left[0], why: '엔진이 채울 수 없는 {…} 자리가 남아 있습니다(규칙 검사).', fix: '지원되는 자리({dayMasterEl}, {yongEl} 등)만 쓰거나 문장으로 바꾸세요.' });
   return out;
 }
@@ -247,7 +248,10 @@ export async function onRequestPost({ request, env }) {
   if (!order.length) return json({ error: 'AI 키가 없습니다. OPENAI_API_KEY(메인) 또는 ANTHROPIC_API_KEY(폴백)를 Secret으로 추가한 뒤 다시 배포하세요' }, 501);
   if (await overLimit(env)) return json({ error: `오늘 AI 호출 한도(${+env.AI_DAILY_LIMIT || 300}회)를 넘었습니다. 내일 다시 시도하거나 AI_DAILY_LIMIT을 올리세요` }, 429);
 
-  const isMod = b.task === 'module', isVer = b.task === 'verify', system = isVer ? VERIFY_SYSTEM : isMod ? MODULE_SYSTEM : SYSTEM, attempts = [];
+  const isMod = b.task === 'module', isVer = b.task === 'verify', attempts = [];
+  // 관리자가 고른 풀이 문체(기본 단정형)를 작성 프롬프트에 붙인다. 검수(verify)는 문체와 무관하게 같은 기준.
+  const sty = isVer ? null : styleFor(await loadStyle(env.GLOSSARY_KV ? kvOf(env) : null), [clip(b.styleKey, 40), clip(b.category, 40)].filter(Boolean));
+  const system = isVer ? VERIFY_SYSTEM : (isMod ? MODULE_SYSTEM : SYSTEM) + '\n\n' + sty.directive + (isMod ? '' : '\n' + sty.story);
   for (const [name, fn] of order) {
     try {
       const r = await fn(env, system, prompt), lines = isVer ? parseVerify(r.text) : isMod ? parseModule(r.text) : parseLines(r.text);

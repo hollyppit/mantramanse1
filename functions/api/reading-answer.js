@@ -2,15 +2,16 @@
 // Secrets: OPENAI_API_KEY / ANTHROPIC_API_KEY. 기존 모델 변수 사용. 캐시 7일, IP 시간당 기본 12회.
 import { json } from '../_lib.js';
 import { kvOf } from '../_store.js';
-import { validate, SYSTEM, buildUser, sanitize, cacheKey } from '../_reading-answer.js';
+import { validate, systemFor, buildUser, sanitize, cacheKey } from '../_reading-answer.js';
+import { loadStyle, styleFor } from '../_stylestore.js';
 const TIMEOUT_MS = 25000;
-async function openai(env, input) {
-  const r = await fetch('https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: SYSTEM, input, max_output_tokens: 2200 }) });
+async function openai(env, input, system) {
+  const r = await fetch('https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: system, input, max_output_tokens: 2200 }) });
   if (!r.ok) throw new Error('provider-error');
   const d = await r.json(); return typeof d.output_text === 'string' ? d.output_text : (d.output || []).flatMap(o => o.content || []).filter(c => c.type === 'output_text' || c.type === 'text').map(c => c.text || '').join('');
 }
-async function claude(env, input) {
-  const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 2200, system: SYSTEM, messages: [{ role: 'user', content: input }] }) });
+async function claude(env, input, system) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 2200, system: system, messages: [{ role: 'user', content: input }] }) });
   if (!r.ok) throw new Error('provider-error');
   const d = await r.json(); return (d.content || []).filter(c => c.type === 'text').map(c => c.text || '').join('');
 }
@@ -27,9 +28,9 @@ export async function onRequestPost({ request, env }) {
   const clean = validate(b); if (!clean) return json({ ok: false, error: 'bad-payload' }, 400);
   if (!env.OPENAI_API_KEY && !env.ANTHROPIC_API_KEY) return json({ ok: false, error: 'no-ai' }, 503);
   // 저장소 오류가 나면 AI 호출을 중단하고, 클라이언트는 기존 본문을 계속 읽는다.
-  let kv, key;
+  let kv, key, sty;
   try {
-    kv = kvOf(env, { cache: true }); key = await cacheKey(clean);
+    kv = kvOf(env, { cache: true }); sty = styleFor(await loadStyle(kv), ['reading-answer', clean.topic]); key = await cacheKey(clean, sty.sig);
     if (kv) { const hit = await kv.get(key, 'json'); if (hit && sanitize(JSON.stringify(hit.result), clean)) return json({ ok: true, result: hit.result, cached: true, provider: hit.provider }); }
     if (await overLimit(kv, env, request)) return json({ ok: false, error: 'rate-limited' }, 429);
   } catch { return json({ ok: false, error: 'temporarily-unavailable' }, 503); }
@@ -37,7 +38,7 @@ export async function onRequestPost({ request, env }) {
   for (const [provider, fn, secret] of [['openai', openai, 'OPENAI_API_KEY'], ['anthropic', claude, 'ANTHROPIC_API_KEY']]) {
     if (!env[secret]) continue;
     try {
-      const result = sanitize(await fn(env, input), clean); if (!result) continue;
+      const result = sanitize(await fn(env, input, systemFor(sty)), clean); if (!result) continue;
       if (kv) { try { await kv.put(key, JSON.stringify({ result, provider }), { expirationTtl: 604800 }); } catch { /* 답변은 저장 실패와 무관하게 반환 */ } }
       return json({ ok: true, result, cached: false, provider });
     } catch { /* 오류·시간 초과·형식 오류는 다음 공급자로 */ }

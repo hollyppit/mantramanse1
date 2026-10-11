@@ -73,6 +73,11 @@ http.createServer(async (q, r) => {
     const res = await mod.onRequest({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': 'application/json' }, body: buf }) });
     r.statusCode = res.status; r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(await res.text());
   }
+  if (p === '/api/style') { // 실제 functions/api/style.js 를 메모리 KV 로 실행 (풀이 문체 관리자 탭 확인용)
+    const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/style.js')).href), buf = q.method === 'POST' ? await body(q) : undefined;
+    const res = await mod.onRequest({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': 'application/json' }, body: buf }) });
+    r.statusCode = res.status; r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(await res.text());
+  }
   if (p === '/api/waitlist' && q.method === 'POST') { await body(q); return send(r, 200, { ok: true }); }
   if (p === '/api/admin') return authed(q) ? send(r, 200, { ok: true }) : send(r, 401, { error: '비밀번호가 맞지 않습니다' });
   if (p === '/api/clips') {

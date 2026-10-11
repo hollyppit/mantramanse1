@@ -30,8 +30,15 @@
     return scene(sec('rd-cin', (kick ? '<div class="rd-kick">' + esc(kick) + '</div>' : '') + '<p class="rd-line"><span data-e="' + (emph || 'normal') + '">' + br(text) + '</span></p>'));
   }
   var who = function (H) { return H.name ? H.name + '님' : '당신'; };
+  // "왜 이런 풀이가 나왔나요?" — 서버가 준 근거 요약(적용된 구조·보정·근거 자료·갈리는 해석)을 접어서 보여 준다. 개발용 id 는 오지 않는다.
+  function whyHtml(w) {
+    if (!w || !(w.applied && w.applied.length || w.sources && w.sources.length || w.alternatives && w.alternatives.length)) return '';
+    var ul = function (t, a) { return a && a.length ? '<div class="rw-h">' + esc(t) + '</div><ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : ''; };
+    var alts = (w.alternatives || []).map(function (a) { return a.a + ' ↔ ' + a.b + ' — ' + a.note; });
+    return '<details class="rd-why"><summary>왜 이런 풀이가 나왔나요?</summary>' + ul('원국에서 확인된 구조', w.applied) + ul('풀이의 원리', w.principle) + ul('함께 반영된 조건', w.modifiers) + ul('근거 자료', w.sources) + ul('서로 다르게 읽힐 수 있는 부분', alts) + '</details>';
+  }
   function prose(cap, paras, extra) { // 읽기 편한 문단 풀이: 이름을 부르며, 문단마다 2~3문장
-    return scene(sec('rv rd-prose', (cap ? '<div class="cap">' + esc(cap) + '</div>' : '') + paras.filter(Boolean).map(function (p) { return '<p class="lead">' + p + '</p>'; }).join('')), extra);
+    return scene(sec('rv rd-prose', (cap ? '<div class="cap">' + esc(cap) + '</div>' : '') + paras.filter(Boolean).map(function (p) { return p.indexOf('<details') === 0 ? p : '<p class="lead">' + p + '</p>'; }).join('')), extra);
   }
   var E = esc;
   function curve(items, field, aria) { // 인생의 지형: 부드러운 면 + 지금 위치. 숫자 점수는 보이지 않는다
@@ -335,7 +342,10 @@
     // 관리자가 게시·검수한 풀이 지식으로 만든 "더 깊이 보기"(R.IKDeep). 없으면 아무것도 추가하지 않는다.
     var ikd = function (dom, act) {
       var d = H.ik && H.ik[dom]; if (!d || !d.sections || !d.sections.length) return;
-      var sc = []; d.sections.forEach(function (s) { for (var i = 0; i < s.paras.length; i += 3) sc.push(prose(i ? '' : s.title, s.paras.slice(i, i + 3).map(esc))); });
+      var sc = []; d.sections.forEach(function (s) {
+        var why = whyHtml(s.why);
+        for (var i = 0; i < s.paras.length; i += 3) { var chunk = s.paras.slice(i, i + 3).map(esc); if (why && i + 3 >= s.paras.length) chunk.push(why); sc.push(prose(i ? '' : s.title, chunk)); }
+      });
       if (replaced[dom]) made('life_ik_' + dom, d.title + ' · 풀이', '검수된 풀이로 읽는 ' + d.title, sc, act); else made('life_ik_' + dom, d.title + ' · 더 깊이', '검수된 풀이로 더 자세히', sc, act);
     };
     var gen = function (gid, act) { return function () { var m = D.byId[gid]; made('life_' + gid, m.title, m.sub, timing(m.gen, m.title, m.sub, H), act); }; };

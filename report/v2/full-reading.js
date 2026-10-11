@@ -51,7 +51,7 @@
       try {
         var r = await root.fetch('/api/movingtoon-reading', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sd: safe, outline: outline, chapter: job.chapter }), signal: ctl && ctl.signal });
         var d = await r.json(); if (d && ['no-ai', 'storage-unavailable', 'rate-limited'].indexOf(d.error) >= 0) done = jobs.length;
-        if (!session.cancelled && d && d.ok && apply(job, d.result)) { item.c.readingProvider = d.provider; status.completed++; if (onReady) onReady(item.c, job, d.result); } else status.failed++;
+        if (!session.cancelled && d && d.ok && apply(job, d.result)) { item.c.readingProvider = d.provider; if (d.style) { item.c.readingStyle = d.style; rep.readingStyle = rep.readingStyle || d.style; } status.completed++; if (onReady) onReady(item.c, job, d.result); } else status.failed++;
       } catch (e) { status.failed++; } finally { root.clearTimeout(timer); }
     }
     // 첫 챕터를 준비한 뒤 표시하고, 후속 챕터는 미리 준비한다. 현재 DOM은 다시 그리지 않는다.

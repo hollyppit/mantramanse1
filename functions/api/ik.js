@@ -7,6 +7,8 @@ import { json, isAdmin, configError } from '../_lib.js';
 import * as IK from '../_ik.js';
 import { kvOf, storeCheck } from '../_store.js';
 
+import { loadStyle, styleFor } from '../_stylestore.js';
+import { PROHIBITED_RE } from '../_style.js';
 import { MAX_PER_DOMAIN, MAX_BYTES, dkey, loadDomain, loadAll, meta, bump, scrub, llm, blockedDocs } from '../_ikstore.js';
 
 export async function onRequest({ request, env, waitUntil }) {
@@ -105,19 +107,21 @@ export async function onRequest({ request, env, waitUntil }) {
       const rl0 = rules || IK.DEFAULT_RULES, rl = IK.DEPTH_CAP[b.depth] ? { ...rl0, depth: b.depth } : rl0, fi = b.focus ? IK.cleanItem({ ...b.focus, status: 'published', reviewed: true }) : null; // 편집 중(저장 전) 풀이를 이번 실행에만 포함
       const pool = fi ? items.filter(x => x.id !== fi.id).concat(fi) : items, pkg = IK.buildPackage(scrub(b.sd), b.ext, pool, design, rl, { domain: b.domain, includeDraft: !!b.includeDraft, blockedDocs: b.includeDraft ? null : await blockedDocs(kv) });
       pkg.versions = { knowledge: m.k, design: m.d, rules: m.r, composer: IK.COMPOSER_VERSION };
+      const styleCur = await loadStyle(kv), styleCfg = b.style ? { ...styleCur.config, defaultStyle: b.style, chapters: {} } : styleCur.config;
+      const sty = styleFor({ ver: styleCur.ver, config: styleCfg }, [b.domain], { structure: true, soft: IK.hasSoft(pkg) });
       let composed = IK.composePlain(pkg, rl), mode = 'plain', provider = null, cached = false, aiError = null;
       if (b.compose === 'ai') {
-        const key = await IK.cacheKey({ sd: scrub(b.sd), ext: b.ext, domain: b.domain, d: !!b.includeDraft, v: pkg.versions, rl, y: pkg.facts.nowYear });
+        const key = await IK.cacheKey({ sd: scrub(b.sd), ext: b.ext, domain: b.domain, d: !!b.includeDraft, v: pkg.versions, rl, y: pkg.facts.nowYear, st: sty.sig });
         const hit = !b.force && await kv.get(key, 'json');
         if (hit) { composed = hit.composed; mode = 'ai'; provider = hit.provider; cached = true; }
         else {
-          try { const r = await llm(env, IK.composerSystem(rl, b.domain), IK.composerUser(pkg)), c = IK.sanitizeComposed(r.text, pkg); if (!c) throw new Error('AI 답이 형식에 맞지 않습니다'); composed = c; mode = 'ai'; provider = r.provider; await kv.put(key, JSON.stringify({ composed, provider }), { expirationTtl: 60 * 60 * 24 * 30 }); }
+          try { const r = await llm(env, IK.composerSystem(rl, b.domain, sty), IK.composerUser(pkg)), c = IK.sanitizeComposed(r.text, pkg); if (!c) throw new Error('AI 답이 형식에 맞지 않습니다'); composed = c; mode = 'ai'; provider = r.provider; await kv.put(key, JSON.stringify({ composed, provider }), { expirationTtl: 60 * 60 * 24 * 30 }); }
           catch (e) { aiError = e.message; }
         }
       }
       const blocked = b.scan && !b.includeDraft ? await blockedDocs(kv) : null, allItems = b.scan ? await loadAll(kv) : null, pool2 = fi && allItems ? allItems.filter(x => x.id !== fi.id).concat(fi) : allItems, scan = [];
       if (b.scan) for (const d of Object.keys(IK.DOMAINS)) { const p = IK.buildPackage(scrub(b.sd), b.ext, pool2, design, rl, { domain: d, includeDraft: !!b.includeDraft, blockedDocs: b.includeDraft ? null : blocked }), ids = p.order, ok = ids.filter(i => p.sections[i].status === 'ok'), lack = ids.filter(i => p.sections[i].status === 'insufficient'); scan.push({ domain: d, name: IK.DOMAINS[d], ok: ok.length, lacking: lack.length, lackingRequired: lack.filter(i => p.sections[i].required).length, lackSections: lack.map(i => ({ id: i, title: p.sections[i].title, required: p.sections[i].required })) }); }
-      return json({ ok: true, package: pkg, composed, mode, provider, cached, aiError, quality: IK.qualityCheck(pkg, composed, rl), diagnosis: IK.diagnose(pkg, composed), scan: b.scan ? scan : null, depth: rl.depth });
+      return json({ ok: true, package: pkg, composed, mode, provider, cached, aiError, style: sty.meta, quality: IK.qualityCheck(pkg, composed, rl, { id: sty.id, config: styleCfg }), diagnosis: IK.diagnose(pkg, composed), scan: b.scan ? scan : null, depth: rl.depth });
     } catch (e) { return json({ error: e.message || '실패' }, 400); }
   }
   return json({ error: '알 수 없는 요청입니다' }, 404);
@@ -138,13 +142,13 @@ async function publicPackage(request, env) {
 // 서비스(무빙툰·상세 리포트)가 부르는 공개 엔드포인트. 게시+검수 완료 지식만 쓰고 AI 를 부르지 않는다. 관리자가 "AI 작성 설정"에서 서비스 연결을 끄면 빈 결과.
 // 서비스 심화 풀이를 AI 가 이 사주에 맞게 엮는다(관리자가 rules.serviceAi 를 켠 경우만). 결과는 사주·지식 버전별로 30일 저장한다.
 // AI 는 근거 풀이 지식 id 안의 내용만 쓰고(sanitizeComposed), 단정·위험 표현이 있으면 버리고 DB 문장 그대로 쓴다. 하루 호출 상한 IK_DEEP_AI_DAILY(기본 300).
-async function aiForDomain(env, kv, pkg, rl, domain, sd, ext) {
-  const key = await IK.cacheKey({ sd, ext, domain, d: false, v: pkg.versions, rl, y: pkg.facts.nowYear }), hit = await kv.get(key, 'json');
+async function aiForDomain(env, kv, pkg, rl, domain, sd, ext, sty) {
+  const key = await IK.cacheKey({ sd, ext, domain, d: false, v: pkg.versions, rl, y: pkg.facts.nowYear, st: sty.sig }), hit = await kv.get(key, 'json');
   if (hit && hit.composed) return hit.composed;
   const ck = 'rl:ikdeepai:' + new Date().toISOString().slice(0, 10), used = +(await kv.get(ck)) || 0; if (used >= (+env.IK_DEEP_AI_DAILY || 300)) return null;
   await kv.put(ck, String(used + 1), { expirationTtl: 172800 });
-  const r = await llm(env, IK.composerSystem(rl, domain), IK.composerUser(pkg), 6000, 30000), c = IK.sanitizeComposed(r.text, pkg); if (!c) return null;
-  if (Object.values(c).some(ps => ps.some(p => IK.BANNED_RE.test(p.text)))) return null;
+  const r = await llm(env, IK.composerSystem(rl, domain, sty), IK.composerUser(pkg), 6000, 30000), c = IK.sanitizeComposed(r.text, pkg); if (!c) return null;
+  if (Object.values(c).some(ps => ps.some(p => IK.BANNED_RE.test(p.text) || PROHIBITED_RE.test(p.text)))) return null;
   await kv.put(key, JSON.stringify({ composed: c, provider: r.provider }), { expirationTtl: 60 * 60 * 24 * 30 });
   return c;
 }
@@ -156,17 +160,18 @@ async function deepForService(request, env, waitUntil) {
   if (used >= (+env.IK_DEEP_HOURLY_LIMIT || 20)) return json({ ok: false, error: 'rate-limited' }, 429);
   await kv.put(hk, String(used + 1), { expirationTtl: 7200 });
   try {
-    const [design, rules] = await Promise.all([kv.get('ik:design', 'json'), kv.get('ik:rules', 'json')]), rl = rules || IK.DEFAULT_RULES;
+    const [design, rules, styleCur] = await Promise.all([kv.get('ik:design', 'json'), kv.get('ik:rules', 'json'), loadStyle(kv)]), rl = rules || IK.DEFAULT_RULES;
     if (rl.serviceEnabled === false) return json({ ok: true, enabled: false, body: false, domains: {} });
-    const out = {}, blocked = await blockedDocs(kv), m = await meta(kv), ver = { knowledge: m.k, design: m.d, rules: m.r, composer: IK.COMPOSER_VERSION }, sd = scrub(b.sd), res = {}, jobs = [];
+    const out = {}, styles = {}, blocked = await blockedDocs(kv), m = await meta(kv), ver = { knowledge: m.k, design: m.d, rules: m.r, composer: IK.COMPOSER_VERSION }, sd = scrub(b.sd), res = {}, jobs = [];
     const useAi = rl.serviceAi === true && !!(env.ANTHROPIC_API_KEY || env.OPENAI_API_KEY || env.GEMINI_API_KEY);
     for (const d of doms) {
       const items = await loadDomain(kv, d), pkg = IK.buildPackage(sd, b.ext, items, design, rl, { domain: d, includeDraft: false, blockedDocs: blocked }); pkg.versions = ver;
       const plain = IK.composePlain(pkg, rl); res[d] = { pkg, composed: plain };
-      if (useAi && Object.keys(plain).length) jobs.push(aiForDomain(env, kv, pkg, rl, d, sd, b.ext).then(c => { if (c) res[d].composed = c; }).catch(() => { /* 실패하면 DB 문장 그대로 */ }));
+      const sty = styleFor(styleCur, [d], { structure: true, soft: IK.hasSoft(pkg) }); styles[d] = sty.meta;
+      if (useAi && Object.keys(plain).length) jobs.push(aiForDomain(env, kv, pkg, rl, d, sd, b.ext, sty).then(c => { if (c) res[d].composed = c; }).catch(() => { /* 실패하면 DB 문장 그대로 */ }));
     }
     if (jobs.length) { const all = Promise.all(jobs); await Promise.race([all, new Promise(r => setTimeout(r, +env.IK_DEEP_AI_WAIT_MS || 12000))]); if (waitUntil) waitUntil(all); } // 늦은 것은 뒤에서 마저 만들어 저장 → 다음 방문부터 사용
     for (const d of doms) { const v = IK.deepView(res[d].pkg, res[d].composed); if (v.sections.length) out[d] = v; }
-    return json({ ok: true, enabled: true, body: rl.serviceBody === true, domains: out, v: m.k });
+    return json({ ok: true, enabled: true, body: rl.serviceBody === true, domains: out, v: m.k, style: { ver: styleCur.ver, byDomain: styles } });
   } catch (e) { return json({ ok: false, error: 'bad-input' }, 400); }
 }

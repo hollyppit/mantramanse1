@@ -6,6 +6,7 @@
 import { json } from '../_lib.js';
 import { kvOf } from '../_store.js';
 import { runCompose } from '../_compose.js';
+import { loadStyle, styleFor } from '../_stylestore.js';
 
 const TIMEOUT_MS = 30000;
 async function claude(env, system, user) {
@@ -40,6 +41,7 @@ export async function onRequestPost({ request, env }) {
     for (const [name, fn] of [['openai', openai], ['anthropic', claude]]) { if (!env[name === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'OPENAI_API_KEY']) continue; try { return await fn(env, system, user); } catch (e) { errs.push(e.message); } }
     throw new Error(errs.join(' / ') || 'no-provider');
   };
-  const r = await runCompose(body, { kvGet: kv ? k => kv.get(k, 'json') : null, kvPut: kv ? (k, v) => kv.put(k, JSON.stringify(v), ttl) : null, llm });
+  const style = styleFor(await loadStyle(kv), []); // 챕터 단위 키가 없으므로 기본 문체. 챕터별 설정은 무빙툰 본문·IK 심화에서 적용
+  const r = await runCompose(body, { style, kvGet: kv ? k => kv.get(k, 'json') : null, kvPut: kv ? (k, v) => kv.put(k, JSON.stringify(v), ttl) : null, llm });
   return json(r.ok ? r : { ok: false, error: r.error }, 200);
 }

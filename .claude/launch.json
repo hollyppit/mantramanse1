@@ -40,6 +40,17 @@
         "PORT": "8792",
         "PROXY_PROD": "1"
       }
+    },
+    {
+      "name": "style-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        ".claude/report-dev.js"
+      ],
+      "port": 8795,
+      "env": {
+        "PORT": "8795"
+      }
     }
   ]
 }

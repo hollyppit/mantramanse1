@@ -5,6 +5,7 @@ function load(file, fetch) {
   const ctx = vm.createContext({ Response, Request, AbortSignal, fetch, console,
     json: (d, s = 200) => new Response(JSON.stringify(d), { status: s }),
     isAdmin: () => true, kvOf: () => null,
+    loadStyle: async () => ({ ver: 0, config: {} }), styleFor: () => ({ directive: '', story: '', sig: '', meta: {} }), // 문체 설정(import 제거 하네스용 스텁)
     runCompose: async (body, deps) => ({ ok: true, result: JSON.parse(await deps.llm('system', 'user')) }),
     validate: x => x, cacheKey: async () => 'test', buildUser: () => 'user', SYSTEM: 'system',
     sanitize: x => { try { return JSON.parse(x); } catch { return null; } }

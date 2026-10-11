@@ -1,8 +1,9 @@
 // MANTRA INTERPRETATION KNOWLEDGE SYSTEM — 순수 로직(외부 import 없음 → Node 테스트 가능). 파일명이 _로 시작해 라우트로 노출되지 않는다.
 // 계층: 계산(sd) → deriveFacts → retrieve(구조화 필터) → modifiers → conflicts → buildPackage → composePlain/AI Composer → qualityCheck
 // 원칙: 새 명리 계산은 하지 않는다. sd(ReportV2.SajuData.build 결과)에 있는 값만 조건으로 쓴다. 없는 값은 UNSUPPORTED 로 표시하고 매칭에서 제외한다.
+import { DEFAULT_CONFIG as STYLE_DEFAULT, DEFAULT_STYLE, directive as styleDirective, styleCheck, PROHIBITED_RE, KIND_IDS } from './_style.js';
 export const IK_VERSION = 'ik1';
-export const COMPOSER_VERSION = 'cmp3';
+export const COMPOSER_VERSION = 'cmp4';
 
 export const DOMAINS = {
   SELF: '나 자신', MONEY: '재물', CAREER: '직업·사업', LOVE: '연애', MARRIAGE: '결혼', RELATIONSHIP: '인간관계', TIMING: '운의 흐름', ACTION: '행동/개운',
@@ -286,7 +287,7 @@ export function buildPackage(sd, ext, items, design, rules, opts) {
     const max = (DEPTH_CAP[rl.depth] || DEPTH_CAP.standard).items, pick = here.slice(0, max);
     sections[sec.id] = { id: sec.id, title: sec.title, required: sec.required, status: 'ok', supporting: here.length, items: pick.map(u => {
       const a = applied.get(u.id), it = fillItem(u.item, V); a.interpretation = tplFill(a.interpretation, V); a.hits.forEach(h => { h.text = tplFill(h.text, V); });
-      return { id: u.id, title: it.title, evidence: (it.evidence || []).map(e => ({ docId: e.docId, title: e.title, chunkId: e.chunkId, pageStart: e.pageStart, pageEnd: e.pageEnd, heading: e.heading })), stance: it.stance, confidence: it.confidence, spec: u.spec, interpretation: a.interpretation, replaced: a.replaced, principle: it.principle, strengths: it.strengths, risks: it.risks, behaviorPatterns: it.behaviorPatterns, actions: it.actions, realWorldExamples: it.realWorldExamples,
+      return { id: u.id, version: u.item.version || null, title: it.title, evidence: (it.evidence || []).map(e => ({ docId: e.docId, title: e.title, chunkId: e.chunkId, pageStart: e.pageStart, pageEnd: e.pageEnd, heading: e.heading })), stance: it.stance, confidence: it.confidence, spec: u.spec, interpretation: a.interpretation, replaced: a.replaced, principle: it.principle, strengths: it.strengths, risks: it.risks, behaviorPatterns: it.behaviorPatterns, actions: it.actions, realWorldExamples: it.realWorldExamples,
         modifiers: a.hits.map(h => ({ id: h.id, effect: h.effect, text: h.text })), why: u.rows.filter(r => r.hit).map(r => r.label + ' = ' + (Array.isArray(r.have) ? r.have.join(',') : r.have)) };
     }) };
     pick.forEach(u => appliedRules.push({ rule: 'section:' + sec.id, knowledge: u.id, specificity: u.spec }));
@@ -299,6 +300,16 @@ export function buildPackage(sd, ext, items, design, rules, opts) {
   pkg.confidence = packageConfidence(pkg);
   return pkg;
 }
+// 근거가 얇은 항목(채택된 풀이가 모두 신뢰도 낮음 · 해결되지 않은 충돌): 단정형이라도 이 항목만 한 단계 낮춘 표현을 쓴다. 근거를 지어내는 대신 표현 강도를 조정한다.
+export function softSections(pkg) {
+  const out = [];
+  for (const id of pkg.order) {
+    const s = pkg.sections[id]; if (s.status !== 'ok' || !s.items.length) continue;
+    if (s.items.every(i => i.confidence === 'low') || (pkg.conflicts || []).some(c => !c.resolved && c.key.endsWith('/' + id))) out.push(id);
+  }
+  return out;
+}
+export const hasSoft = pkg => softSections(pkg).length > 0;
 // 이 사주에서 두드러진 값으로 새 풀이의 기본 조건을 제안한다(관리자가 고친다)
 export function suggestConds(f) {
   const c = {}; if (f.dayMaster) c.dayMaster = [f.dayMaster]; if (f.strength) c.strength = [f.strength];
@@ -323,7 +334,7 @@ const EVENT_RE = /(20\d\d년[에는\s]*[^.。\n]{0,12}(결혼|이혼|사망|합�
 const JARGON_RE = /(비겁|식상|재성|관성|인성|겁재|비견|식신|상관|편재|정재|편관|정관|편인|정인|신강|신약|통근|용신|격국|월령|지장간|조후)/g;
 
 // text: sections 합성 결과 { sectionId: [ {text, refs:[ids]} ] }
-export function qualityCheck(pkg, composed, rules) {
+export function qualityCheck(pkg, composed, rules, style) {
   const issues = [], add = (level, section, msg) => issues.push({ level, section, msg });
   const known = new Set((pkg.matchedKnowledge || []).map(m => m.id));
   const extraBanned = (rules && rules.banned) || [];
@@ -336,6 +347,8 @@ export function qualityCheck(pkg, composed, rules) {
     if (text.length < 60) add('WARNING', id, '지나치게 짧은 항목(' + text.length + '자)');
     if (ANY_VAR.test(text)) { ANY_VAR.lastIndex = 0; add('FAIL', id, '채워지지 않은 자리표시자 ' + (text.match(ANY_VAR) || [])[0]); } ANY_VAR.lastIndex = 0;
     if (BANNED_RE.test(text)) add('FAIL', id, '확정적·위험 표현: ' + (text.match(BANNED_RE) || [])[0]);
+    else if (PROHIBITED_RE.test(text)) add('FAIL', id, '확정적 사건 예언 표현: ' + (text.match(PROHIBITED_RE) || [])[0]);
+    if (style && style.id && style.id !== 'cautious') { const sc = styleCheck(paras.map(p => p.text), style.id, style.config); sc.issues.filter(i => i.level === 'WARNING').forEach(i => add('WARNING', id, i.msg)); }
     if (EVENT_RE.test(text)) add('FAIL', id, '특정 연도 사건 확정 표현');
     for (const w of extraBanned) if (w && text.includes(w)) add('FAIL', id, '금지어: ' + w);
     const j = (text.match(JARGON_RE) || []).length; if (rules && rules.jargon === 'min' && j > 3) add('WARNING', id, '전문용어 과다(' + j + '회)');
@@ -375,31 +388,34 @@ export function composePlain(pkg, rules) {
 }
 
 // ───────────── 합성: AI Composer ─────────────
-export function composerSystem(rules, domain) {
+// style: { directive } (functions/_stylestore.js styleFor 결과). 없으면 기본 문체(단정형)를 쓴다.
+export function composerSystem(rules, domain, style) {
   const rl = rules || DEFAULT_RULES, ov = rl.domainOverrides && rl.domainOverrides[domain];
+  const sty = style && style.directive ? style.directive : styleDirective(STYLE_DEFAULT, DEFAULT_STYLE, { structure: true });
   return `너는 사주 풀이 "작성자"다. 입력으로 이미 계산되고 검수된 Interpretation Package(JSON)만 주어진다. 너의 일은 그 내용을 쉽고 풍부한 한국어로 옮겨 쓰는 것이다.
 절대 규칙:
 - Package 에 없는 사주 특징·점수·길흉·대운/세운·직업 적합도·사건을 만들지 마라. 숫자도 Package 에 있는 것만 쓴다.
 - Section 의 status 가 "insufficient" 이면 그 Section 은 쓰지 말고 빈 배열로 둔다. 억지로 채우지 마라.
 - 모든 문단은 근거가 된 knowledge id 를 refs 로 단다. Package 의 items[].id 만 쓸 수 있다.
-- 사망·질병·사고·파산·범죄·임신·이혼·결혼·합격·투자수익을 확정하지 마라. "~할 수 있는 흐름", "~가능성이 상대적으로 커질 수 있다"처럼 경향으로 쓴다. "반드시·무조건·확정" 금지.
+- 사망·질병·사고·파산·범죄·임신·이혼·결혼·합격·투자수익 같은 미래 사건의 발생을 확정하지 마라. 시기는 "전환의 기운이 강하게 작용하는 시기"처럼 성격을 분명히 말하되 사건이 일어난다고 단정하지 않는다. "반드시·무조건·확정" 금지.
 - 원국 전체를 먼저 검토한다. 일간과 월령, 통근과 신강약, 오행·십성의 비중 및 각 기둥의 위치, 지장간, 합충의 참여 기둥, 용신·희신을 함께 읽는다. 하나의 시주·일주·십성만으로 성격이나 운을 결론 내리지 않는다. 단일 단서와 전체 구조가 다르면 차이를 설명하고 전체 구조를 우선한다. 자료가 없는 요소는 있다고 가정하지 않는다.
 - 자식운에서도 시주는 자녀궁이라는 국소 근거다. 원국 전체에서 자녀성의 배치와 세력, 일간의 감당과 지원 구조, 자녀궁과 다른 기둥의 관계를 종합한다. 시주를 모르면 나머지 원국에서 읽을 수 있는 내용은 쓰되 시주 관련 결론을 보류한다.
 - 구체적 행동 장면은 입력 근거에서 도출한 경향으로 쓴다. 확인하지 않은 과거 경험·가족 상황을 맞힌 것처럼 꾸미지 않는다. 서로 다른 근거가 어떤 상황에서 강점과 반복되는 부담으로 갈리는지 설명한다.
 - 순서: 핵심 해석 → 현실에서 쓰이는 강점 → 같은 힘이 지나치거나 받쳐 주지 못할 때의 약점 → 명리적 보완 방향 → 구체적인 실천 → 필요한 근거. Package에 있는 사실·principle·interpretation·risks·actions만 연결하고, 근거가 없는 장단점이나 처방은 억지로 채우지 않는다.
-- 말투는 차분하고 솔직한 상담체(~습니다·~입니다)로 통일한다. 신비로운 수사, 반말, 해요체, 빈 칭찬, 모욕적인 낙인은 쓰지 않는다. 불편한 약점도 왜 문제가 되는지와 조정할 조건을 함께 설명한다.
+- 어미는 ~습니다·~입니다로 통일한다(반말·해요체 금지). 단정의 강도는 아래 [풀이 문체]를 따른다. 신비로운 수사, 빈 칭찬, 모욕적인 낙인은 쓰지 않는다. 불편한 약점도 왜 문제가 되는지와 조정할 조건을 함께 설명한다.
 - 신강·신약을 체력·의지·성공 능력의 등급으로 해석하지 않는다. 재성의 비중을 실제 재산으로, 십성의 부재를 해당 능력의 부재로 단정하지 않는다. 부족한 오행과 용신을 같게 취급하지 않는다. 솔루션은 입력의 신강약·용신·원칙과 맞는 것만 쓰고, 색·물건·방향만으로 운이 바뀐다고 하지 않는다.
 - 각 Section은 그 주제에 필요한 새 내용만 쓴다. 같은 성향·사례·조언을 다른 Section에서 반복하지 않는다. 같은 원인을 다시 인용할 때에는 적용되는 상황이나 대응이 어떻게 달라지는지 설명한다.
-- 상반된 특징은 어떤 조건에서 각각 나타나는지 밝혀 연결한다. 모든 문장에 가능성을 반복하기보다 해석의 범위를 처음에 밝히고, 장단점은 구체적인 행동으로 짚는다.
+- 상반된 특징은 어떤 조건에서 각각 나타나는지 밝혀 연결한다. 문장마다 가능성 표현을 반복하지 말고, 근거가 있는 판단은 분명하게 말하며 장단점은 구체적인 행동으로 짚는다.
 - modifiers 의 effect 가 strengthen 이면 강화, soften 이면 완화, exception 이면 예외로 반영하고 replace 는 이미 interpretation 에 반영되어 있다.
 - conflicts 가 해결되었으면 winner 쪽만 쓴다. 해결되지 않은 충돌은 단정하지 말고 양면을 조건부로 쓴다.
-문체: ${TONE_KO[rl.tone]}. 설명 깊이: ${DEPTH_KO[rl.depth]}. 현실 사례는 Section 당 최대 ${rl.examples}개. 전문용어: ${JARGON_KO[rl.jargon]}(${rl.jargon === 'min' ? '비겁·식상·재성·관성·인성 같은 용어는 풀어서 쓴다' : '필요할 때 용어를 설명과 함께 쓴다'}). ${rl.balance !== false ? '장점과 리스크를 균형 있게 쓴다.' : ''} ${rl.actions !== false ? '행동 제안을 포함한다.' : '행동 제안은 쓰지 않는다.'}
+어휘 수준: ${TONE_KO[rl.tone]}. 설명 깊이: ${DEPTH_KO[rl.depth]}. 현실 사례는 Section 당 최대 ${rl.examples}개. 전문용어: ${JARGON_KO[rl.jargon]}(${rl.jargon === 'min' ? '비겁·식상·재성·관성·인성 같은 용어는 풀어서 쓴다' : '필요할 때 용어를 설명과 함께 쓴다'}). ${rl.balance !== false ? '장점과 리스크를 균형 있게 쓴다.' : ''} ${rl.actions !== false ? '행동 제안을 포함한다.' : '행동 제안은 쓰지 않는다.'}
 ${ov ? '이 분야의 추가 규칙: ' + ov : ''}
 ${rl.extraPrompt ? '관리자 추가 지시(위 절대 규칙보다 우선하지 않는다): ' + rl.extraPrompt : ''}
-JSON 한 덩어리로만 답하라: {"sections":{"<sectionId>":[{"text":"문단","refs":["knowledgeId"]}]}}`;
+${sty}
+JSON 한 덩어리로만 답하라: {"sections":{"<sectionId>":[{"kind":"conclusion|basis|reality|strengthWeak|luck|action","text":"문단","refs":["knowledgeId"]}]}}`;
 }
 export function composerUser(pkg) {
-  const slim = { domain: pkg.domainName, facts: pkg.facts, conflicts: pkg.conflicts, sections: pkg.order.map(id => { const s = pkg.sections[id]; return { id, title: s.title, status: s.status, items: s.items }; }) };
+  const slim = { domain: pkg.domainName, facts: pkg.facts, conflicts: pkg.conflicts, sections: pkg.order.map(id => { const s = pkg.sections[id], soft = softSections(pkg).includes(id); return { id, title: s.title, status: s.status, ...(soft ? { expression: 'soft' } : {}), items: s.items }; }) };
   return '아래 Interpretation Package 만 근거로 풀이를 작성하라.\n' + JSON.stringify(slim);
 }
 // AI 응답 검증: 허용된 Section·id 만, 문단 길이·금지 표현 점검. 형식이 틀리면 null.
@@ -409,7 +425,7 @@ export function sanitizeComposed(text, pkg) {
   const out = {};
   for (const id of pkg.order) {
     if (pkg.sections[id].status !== 'ok') continue; const ids = new Set(pkg.sections[id].items.map(i => i.id)), arr = Array.isArray(d.sections[id]) ? d.sections[id] : [];
-    const paras = arr.map(p => p && typeof p.text === 'string' ? { text: p.text.trim().slice(0, 1200), refs: (Array.isArray(p.refs) ? p.refs : []).filter(r => ids.has(r)), kind: 'ai' } : null).filter(p => p && p.text);
+    const paras = arr.map(p => p && typeof p.text === 'string' ? { text: p.text.trim().slice(0, 1200), refs: (Array.isArray(p.refs) ? p.refs : []).filter(r => ids.has(r)), kind: KIND_IDS.includes(p.kind) ? p.kind : 'ai' } : null).filter(p => p && p.text);
     if (paras.length) out[id] = paras;
   }
   return Object.keys(out).length ? out : null;
@@ -512,6 +528,13 @@ export function sanitizeDraft(text, id) {
 }
 
 // ───────────── 서비스(무빙툰·상세 리포트)에 싣는 요약본 — 개발용 ID 는 빼고 문단만 ─────────────
+// why: "왜 이런 풀이가 나왔나요?" — 적용된 명리 요소(조건 일치 행)·보정 요소·근거 자료 제목·갈리는 해석. 개발용 id 는 넣지 않는다.
 export function deepView(pkg, composed) {
-  return { title: pkg.domainName, sections: pkg.order.filter(id => pkg.sections[id].status === 'ok' && (composed[id] || []).length).map(id => ({ id, title: pkg.sections[id].title, paras: composed[id].map(p => p.text) })) };
+  const uniq = a => [...new Set(a.filter(Boolean))];
+  const why = id => {
+    const items = pkg.sections[id].items, titleOf = Object.fromEntries(items.map(i => [i.id, i.title]));
+    const alts = (pkg.conflicts || []).filter(c => c.key.endsWith('/' + id) && titleOf[c.a] && titleOf[c.b]).map(c => ({ a: titleOf[c.a], b: titleOf[c.b], note: c.resolved ? '두 해석이 갈리지만 더 구체적이고 신뢰도가 높은 쪽을 따랐습니다' : '두 해석이 함께 성립해 조건을 나누어 읽어야 합니다' }));
+    return { applied: uniq(items.flatMap(i => i.why || [])).slice(0, 8), modifiers: uniq(items.flatMap(i => i.modifiers.map(m => m.text))).slice(0, 4), sources: uniq(items.flatMap(i => i.evidence.map(e => e.title))).slice(0, 6), principle: uniq(items.map(i => i.principle)).slice(0, 2), alternatives: alts };
+  };
+  return { title: pkg.domainName, sections: pkg.order.filter(id => pkg.sections[id].status === 'ok' && (composed[id] || []).length).map(id => ({ id, title: pkg.sections[id].title, paras: composed[id].map(p => p.text), kinds: composed[id].map(p => p.kind || ''), why: why(id) })) };
 }

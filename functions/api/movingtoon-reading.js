@@ -1,8 +1,9 @@
 import { json } from '../_lib.js';
 import { kvOf } from '../_store.js';
 import { loadAll, blockedDocs, meta } from '../_ikstore.js';
-import { VERSION, SYSTEM, validate, sources, sanitize } from '../_movingtoon-reading.js';
-async function generate(env, provider, input) {
+import { VERSION, validate, sources, sanitize, systemFor, domainsFor } from '../_movingtoon-reading.js';
+import { loadStyle, styleFor } from '../_stylestore.js';
+async function generate(env, provider, input, SYSTEM) {
   const isOpen = provider === 'openai';
   const body = isOpen ? { model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: SYSTEM, input, max_output_tokens: 14000 } : { model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 14000, system: SYSTEM, messages: [{ role: 'user', content: input }] };
   const headers = isOpen ? { authorization: 'Bearer ' + env.OPENAI_API_KEY } : { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' };
@@ -16,12 +17,13 @@ export async function onRequestPost({ request, env }) {
   try { const raw = await request.text(); if (raw.length > 160000) return json({ ok: false, error: 'too-large' }, 413); clean = validate(JSON.parse(raw)); } catch { }
   if (!clean) return json({ ok: false, error: 'bad-payload' }, 400);
   if (!env.OPENAI_API_KEY && !env.ANTHROPIC_API_KEY) return json({ ok: false, error: 'no-ai' }, 503);
-  let kv, key, src;
+  let kv, key, src, sty;
   try {
     kv = kvOf(env, { cache: true });
     const [items, blocked, version] = kv ? await Promise.all([loadAll(kv), blockedDocs(kv), meta(kv)]) : [[], new Set(), {}];
     src = sources(items, clean.sd, blocked, clean.chapter);
-    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ version: VERSION, db: version, clean, models: [env.OPENAI_MODEL, env.ANTHROPIC_MODEL] })));
+    sty = styleFor(await loadStyle(kv), [clean.chapter.id, ...domainsFor(clean.chapter)], { soft: src.knowledge.length < 2 });
+    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ version: VERSION, db: version, style: sty.sig, clean, models: [env.OPENAI_MODEL, env.ANTHROPIC_MODEL] })));
     key = 'ai:movingtoon:' + [...new Uint8Array(hash)].map(x => x.toString(16).padStart(2, '0')).join('');
     if (kv) {
       const hit = await kv.get(key, 'json');
@@ -37,8 +39,8 @@ export async function onRequestPost({ request, env }) {
   for (const [provider, secret] of [['openai', 'OPENAI_API_KEY'], ['anthropic', 'ANTHROPIC_API_KEY']]) {
     if (!env[secret]) continue;
     try {
-      const result = sanitize(await generate(env, provider, input), clean, src); if (!result) continue;
-      const value = { result, provider, knowledgeCount: src.knowledge.length };
+      const result = sanitize(await generate(env, provider, input, systemFor(sty)), clean, src); if (!result) continue;
+      const value = { result, provider, knowledgeCount: src.knowledge.length, style: sty.meta };
       if (kv) { try { await kv.put(key, JSON.stringify(value), { expirationTtl: 604800 }); } catch { } }
       return json({ ok: true, ...value, cached: false });
     } catch { }
