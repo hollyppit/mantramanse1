@@ -51,6 +51,13 @@ http.createServer(async (q, r) => {
     if (!fn) return send(r, 405, { error: 'method' }); const res = await fn({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': 'application/json' }, body: buf }) });
     r.statusCode = res.status; r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(await res.text());
   }
+  if (p === '/api/onboarding') { // 실제 functions/api/onboarding.js 를 메모리 KV 로 실행(랜딩·온보딩 관리자 확인용: 초안/게시/이력/측정 포함)
+    const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/onboarding.js')).href), buf = (q.method === 'PUT' || q.method === 'POST') ? await body(q) : undefined;
+    const fn = { GET: mod.onRequestGet, PUT: mod.onRequestPut, POST: mod.onRequestPost }[q.method];
+    if (!fn) return send(r, 405, { error: 'method' });
+    const res = await fn({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': 'application/json' }, body: buf && buf.length ? buf : undefined }) });
+    r.statusCode = res.status; r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(await res.text());
+  }
   if (p === '/api/worlds') { // 실제 functions/api/worlds.js 를 메모리 KV 로 실행(세계관 관리자 탭 확인용)
     const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/worlds.js')).href), buf = q.method === 'PUT' ? await body(q) : undefined;
     const res = await (q.method === 'PUT' ? mod.onRequestPut : mod.onRequestGet)({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': 'application/json' }, body: buf }) });

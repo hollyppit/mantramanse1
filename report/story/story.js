@@ -689,14 +689,18 @@
     el.hidden = false;
     el.innerHTML = '<div class="cv-in"><div class="cv-lamp">' + img + '</div>' +
       (cv.title ? '<h1 class="cv-t' + an(cv.titleAnim) + '">' + inner('title', fmt(pick(cv.title))) + '</h1>' : '') + (cv.sub ? '<p class="cv-s' + an(cv.subAnim) + '">' + inner('sub', fmt(pick(cv.sub))) + '</p>' : '') +
-      (cv.button ? '<div class="cv-bw"><button type="button" class="cv-btn" data-cover="go">' + inner('button', esc(pick(cv.button))) + '</button><span class="cv-arr" aria-hidden="true">↓</span></div>' : '') + '</div>';
+      (cv.button ? '<div class="cv-bw"><button type="button" class="cv-btn" data-cover="go">' + inner('button', esc(pick(cv.button))) + '</button><span class="cv-arr"' + (cv.hint ? '' : ' aria-hidden="true"') + '>' + (cv.hint ? esc(pick(cv.hint)) + '<br>' : '') + '↓</span></div>' : '') + '</div>';
     el.querySelectorAll('.cv-ti.in-letters').forEach(splitLetters);
     var i2 = el.querySelector('.cv-img'); if (i2) i2.onerror = function () { i2.outerHTML = '<div class="cv-glow"></div>'; };
     var go = el.querySelector('[data-cover]');
     if (go) go.onclick = function () {
       if (PREVIEW) return; // 미리보기에서는 끌어서 옮기는 용도
       track('cover_enter', null, true);
-      if (hubUrl()) { track('explore_click', null, true); hubScroll(); return; } // 둘러보기 → 아래로 스크롤해 무료 콘텐츠 허브로(페이지 이동 없음)
+      if (hubUrl()) { // 버튼 동작: 글자가 "둘러보기"(옛 설정)면 아래로, 그 외엔 곧바로 출생정보 입력(어느 위치에서든 바로 입력할 수 있게)
+        var act = cv.action || (/둘러보기/.test(pick(cv.button) || '') ? 'scroll' : 'input');
+        if (act === 'input') { track('quick_analyze_click', null, true); location.hash = '#/input?next=my'; } else track('explore_click', null, true);
+        hubScroll(); return;
+      } // 둘러보기 → 아래로 스크롤해 무료 콘텐츠 허브로(페이지 이동 없음)
       Auto.begin(); // (허브를 끈 경우) 첫 스토리 블록부터 자동으로 내려간다 (이미 시작했다면 이어서)
     };
     if (PREVIEW) coverEdit(el);

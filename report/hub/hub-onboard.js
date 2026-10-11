@@ -12,11 +12,23 @@
   var lget = function (k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
   var lset = function (k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
 
-  /* ── 설정(관리자 저장본을 기본값 위에 얹는다) ─ 1.5초 안에 못 받으면 기본 문구로 간다 ── */
+  /* ── 설정(관리자 공개본을 기본값 위에 얹는다) ─ 1.5초 안에 못 받으면 기본 문구로 간다 ──
+     ?preview=1 로 관리자 화면 iframe 안에서 열리면 서버 대신 부모 창이 보내는 초안(postMessage)을 쓴다.
+     같은 출처의 부모만 받아들이고 측정은 보내지 않는다 — 일반 방문자는 초안을 볼 수 없다. */
+  var PREVIEW = false; try { PREVIEW = /[?&]preview=1\b/.test(location.search) && root.parent && root.parent !== root && new URL(document.referrer || location.href).origin === location.origin; } catch (e) { }
+  Ob.preview = PREVIEW;
+  var DEV = (root.innerWidth || 1024) < 768 ? 'm' : 'd';
   var cfgP = null, CFG = O.merge(O.DEFAULTS, null), version = '';
+  if (PREVIEW) root.addEventListener('message', function (e) {
+    if (e.origin !== location.origin || e.source !== root.parent || !e.data || e.data.t !== 'mt-onb-preview') return;
+    CFG = O.merge(O.DEFAULTS, e.data.config || null); cfgP = Promise.resolve(CFG);
+    if (e.data.hash) { try { if (location.hash !== e.data.hash) { location.hash = e.data.hash; return; } } catch (x) { } }
+    try { H.render(); } catch (x) { }
+  });
   Ob.config = function () {
     if (!cfgP) cfgP = new Promise(function (ok) {
       var done = false, fin = function (c, v) { if (done) return; done = true; if (c) { CFG = O.merge(O.DEFAULTS, c); version = v || ''; } ok(CFG); };
+      if (PREVIEW) { setTimeout(function () { fin(null); }, 4000); try { root.parent.postMessage({ t: 'mt-onb-ready' }, location.origin); } catch (e) { } return; }
       setTimeout(function () { fin(null); }, 1500);
       try { fetch('/api/onboarding').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { fin(d && d.config, d && d.version); }).catch(function () { fin(null); }); } catch (e) { fin(null); }
     });
@@ -27,10 +39,13 @@
 
   /* ── 측정: 허브 분석 이벤트 + 서버 집계(이름과 사례 id 만. 출생정보·이름은 보내지 않는다) ── */
   Ob.track = function (name, props, once) {
+    if (PREVIEW) return; // 관리자 미리보기는 통계에 섞지 않는다
     H.track(name, props, once);
-    try { fetch('/api/onboarding?ev=' + encodeURIComponent(name), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ case: props && props.case || '' }), keepalive: true }).catch(function () { }); } catch (e) { }
+    try { fetch('/api/onboarding?ev=' + encodeURIComponent(name) + '&d=' + DEV, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ case: props && props.case || '' }), keepalive: true }).catch(function () { }); } catch (e) { }
   };
   var onceSent = {};
+  // 세션(탭을 닫을 때까지)당 한 번: 방문자 수가 아니라 "세션 수" 지표용
+  var sessOnce = function (name, props) { var k = 'mt_onb_s_' + name + '|' + (props && props.case || ''); try { if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, '1'); } catch (e) { if (onceSent[k]) return; onceSent[k] = 1; } Ob.track(name, props); };
   var tOnce = function (name, props) { var k = name + '|' + (props && props.case || ''); if (onceSent[k]) return; onceSent[k] = 1; Ob.track(name, props); };
 
   /* ── 화면 그리기: 온보딩은 허브의 "홈화면으로 가기" 줄 없이 직접 그린다 ── */
@@ -84,67 +99,170 @@
     if (c) { try { sessionStorage.setItem('mt_onb_case_' + type, c.id); } catch (e) { } lset(RECENT, [c.id].concat(recent.filter(function (r) { return r !== c.id; })).slice(0, 6)); }
     return c;
   }
-  // 온보딩 1·2부는 한 페이지를 스크롤하며 읽는다: 사례 → 명리학 3장면 → [나의 운 확인하기]. 장면은 화면에 들어올 때 차례로 나타난다.
+  // 랜딩 아래 이어지는 한 페이지: CFG.sections 순서대로 연구 카드 → 명리학 → 서비스 소개 → 최종 CTA. 장면은 화면에 들어올 때 나타난다(스크롤은 방문자가 쥔다).
+  var nl = function (s) { return esc(s).replace(/\n/g, '<br>'); };
+  var KIND_NUM = { research: '02', myeongri: '03', service: '04' };
   function welcome(q, ctx) {
     Ob.config().then(function () {
       if (!H.alive(ctx)) return;
-      try { sessionStorage.setItem('mt_onb_shown', '1'); } catch (e) { }
-      var Art = root.OnboardArt || { forCase: function () { return ''; }, forIntro: function () { return ''; } };
-      var intro = CFG.intro.filter(function (s) { return s.enabled !== false; }), cur = { research: chooseCase('research', false), celebrity: chooseCase('celebrity', false) };
-      var BR = CFG.bridge || {}, shown = {};
-      var media = function (o, svg) { return o && o.video ? '<video class="cn-media" src="' + esc(o.video) + '" muted playsinline autoplay loop></video>' : o && o.image ? '<img class="cn-media" src="' + esc(o.image) + '" alt="" loading="lazy">' : svg; };
-      function caseHtml(c) {
+      if (!PREVIEW) { try { sessionStorage.setItem('mt_onb_shown', '1'); } catch (e) { } }
+      var Art = root.OnboardArt || { forCase: function () { return ''; }, forIntro: function () { return ''; }, forTopic: function () { return ''; } };
+      var intro = CFG.intro.filter(function (s) { return s.enabled !== false; }), BR = CFG.bridge || {}, seenN = 0, hasProfile = P.has();
+      var secs = (CFG.sections || []).filter(function (s) { return s.enabled !== false; });
+      if (!secs.some(function (s) { return s.type === 'final'; })) secs.push(O.SECTIONS.filter(function (s) { return s.type === 'final'; })[0]); // 최종 CTA 는 끌 수 없다(막다른 길 방지)
+      var cur = { research: null, celebrity: null };
+      var media = function (o, svg, fx) {
+        var m = o && o.video ? '<video class="cn-media" data-lazyvid src="' + esc(o.video) + '" muted playsinline loop preload="metadata"></video>' : o && o.image ? '<img class="cn-media" src="' + esc(o.image) + '" alt="' + esc(o.alt || '') + '" loading="lazy" decoding="async">' : '';
+        if (!m) return svg || '';
+        return fx === 'crossfade' && svg ? '<div class="cn-xf">' + svg + m.replace('class="cn-media"', 'class="cn-media xf"') + '</div>' : m;
+      };
+      var cta = function (sec, big) { return sec.cta && sec.cta.show && sec.cta.text ? '<div class="cn-cta-row"><button type="button" class="btn ' + (big ? 'cn-go' : 'cn-go sm') + '" data-go="' + esc(sec.id) + '">' + esc(F(sec.cta.text)) + '</button></div>' : ''; };
+      var head = function (sec) {
+        return (sec.kicker ? '<p class="cn-kick">' + esc(sec.kicker) + '</p>' : '') + (sec.title ? '<h2 class="cn-title">' + nl(F(sec.title)) + '</h2>' : '') + (sec.sub ? '<p class="cn-body cn-rev">' + nl(F(sec.sub)) + '</p>' : '');
+      };
+      var wrap = function (sec, inner, extra) {
+        var st = (sec.bg ? '--sec-bg:url(' + esc(sec.bg) + ');' : '') + (sec.bgMobile ? '--sec-bg-m:url(' + esc(sec.bgMobile) + ');' : '');
+        return '<section class="cn-sec cn-s-' + sec.type + ' fxe-' + esc(sec.effect || 'fade') + (sec.bg ? ' has-bg' : '') + (extra || '') + '" data-sec="' + esc(sec.id) + '" data-type="' + sec.type + '"' + (st ? ' style="' + st + '"' : '') + '>' + inner + '</section>';
+      };
+
+      /* 연구 카드 */
+      function researchCard(c) {
+        var st = c.study || {}, src = c.source || {}, d = c.display || {}, url = src.url || st.url || '', doi = src.doi || st.doi || '';
+        var org = st.org || c.who || '', rel = O.RELATION[st.relation] || '', year = st.year || c.year || '';
+        var row = function (k, v) { return v ? '<div><dt>' + k + '</dt><dd>' + esc(v) + '</dd></div>' : ''; };
+        var link = url ? '<a class="rc-src" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" data-ob-ev="research_source_click onboarding_source_click" data-case="' + esc(c.id) + '">' + (doi ? '원문 보기 · DOI ' + esc(doi) : '원문 보기') + '</a>' : '';
+        var hasDetail = d.detail !== false && (st.name || st.researchers || st.journal || st.method || st.stats || st.scope || st.limits || c.verification.reviewedAt);
+        var sum = (c.body || []).slice(0, 4);
+        var m = c.media || {};
+        var art = media({ video: m.video, image: m.image, alt: m.alt }, Art.forCase(c.visual), 'fade');
+        return '<article class="rc rc-' + esc(d.design || 'plain') + (d.featured ? ' rc-feat' : '') + (d.mobileLayout === 'compact' ? ' rc-compact' : '') + ' cn-rev" data-case="' + esc(c.id) + '">' +
+          '<div class="rc-tags"><span class="rc-kind">' + esc(O.KINDS[c.kind] || '') + (year ? ' · ' + esc(year) : '') + '</span>' + (rel ? '<span class="rc-rel">' + esc(rel) + '</span>' : '') + '</div>' +
+          '<div class="rc-art">' + art + '</div>' +
+          (c.hook ? '<p class="cn-hook">' + esc(c.hook) + '</p>' : '') + (d.showTitle !== false ? '<h3 class="rc-title">' + esc(c.title) + '</h3>' : '') +
+          (org ? '<p class="rc-org">' + esc(org) + '</p>' : '') +
+          (d.showSummary !== false ? '<ul class="rc-sum">' + sum.map(function (p) { return '<li>' + esc(p) + '</li>'; }).join('') + '</ul>' : '') +
+          '<dl class="rc-facts">' + row('연구 대상', st.subject) + row('규모', st.sample) + row('핵심 결과', st.result) + '</dl>' +
+          (st.limits || c.caveat ? '<p class="rc-lim"><b>연구의 한계</b> ' + esc(st.limits || c.caveat) + '</p>' : '') +
+          '<div class="rc-act">' + (hasDetail ? '<button type="button" class="rc-more" aria-expanded="false" data-detail="' + esc(c.id) + '">연구 자세히 보기</button>' : '') + (d.showSource !== false ? link : '') + '</div>' +
+          (hasDetail ? '<div class="rc-detail" hidden>' +
+            '<dl class="rc-facts">' + row('연구명', st.name) + row('연구자', st.researchers) + row('학술지', st.journal) + row('연구 방법', st.method) + row('통계적 수치', st.stats) + row('이 연구가 다루는 범위', st.scope) + row('명리학과의 관련성', rel) + row('최종 검토일', c.verification.reviewedAt) + '</dl>' +
+            (c.caveat && st.limits ? '<p class="rc-lim"><b>유의</b> ' + esc(c.caveat) + '</p>' : '') + '</div>' : '') +
+          '</article>';
+      }
+      function researchSec(sec) {
+        var cards = O.birthCards(CFG.cases); if (!cards.length) return '';
+        return wrap(sec, head(sec) + '<div class="rc-list">' + cards.map(researchCard).join('') + '</div>' +
+          (sec.notice ? '<p class="rc-notice cn-rev">' + nl(F(sec.notice)) + '</p>' : '') + (sec.bridge ? '<p class="cn-bridge-t cn-rev">' + nl(F(sec.bridge)) + '</p>' : '') + cta(sec), '');
+      }
+
+      /* 명리학: 소개 장면(기존) + 원리 주제 */
+      function topicHtml(tp) {
+        var nat = O.NATURE[tp.nature] || '';
+        return '<details class="tp" data-topic="' + esc(tp.id) + '"><summary><span class="tp-t">' + esc(tp.title) + '</span>' + (tp.sub ? '<span class="tp-s">' + esc(tp.sub) + '</span>' : '') + '</summary>' +
+          '<div class="tp-b fxe-' + esc(tp.anim || 'fade') + '"><div class="cn-art tp-art">' + media(tp, Art.forTopic ? Art.forTopic(tp.id) : '', tp.anim) + (tp.image2 ? '<img class="cn-media tp-img2" src="' + esc(tp.image2) + '" alt="" loading="lazy">' : '') + '</div>' +
+          (nat ? '<span class="tp-nat tp-nat-' + esc(tp.nature) + '">' + esc(nat) + '</span>' : '') +
+          (tp.summary ? '<p class="tp-sum">' + esc(tp.summary) + '</p>' : '') + (tp.detail ? '<p class="tp-det">' + esc(tp.detail) + '</p>' : '') +
+          (tp.analogy ? '<p class="tp-ana"><b>쉬운 비유</b> ' + esc(tp.analogy) + '</p>' : '') + (tp.term && tp.termEasy ? '<p class="tp-term"><b>' + esc(tp.term) + '</b> ' + esc(tp.termEasy) + '</p>' : '') +
+          (tp.refs ? '<p class="tp-ref">참고 · ' + esc(tp.refs) + '</p>' : '') + '</div></details>';
+      }
+      function myeongriSec(sec) {
+        var scenes = intro.map(function (s, i) {
+          return '<div class="cn-sub-sec" data-intro="' + esc(s.id) + '"><div class="cn-art">' + media(s, Art.forIntro(s.id), sec.effect) + '</div><h3 class="cn-title sm">' + esc(s.title) + '</h3><p class="cn-body cn-rev">' + esc(s.body) + '</p>' + (s.sub ? '<p class="cn-sub cn-rev">' + esc(s.sub) + '</p>' : '') + '</div>';
+        }).join('');
+        var tps = (CFG.topics || []).filter(function (x) { return x.enabled !== false; });
+        return wrap(sec, head(sec) + scenes + (tps.length ? '<div class="tp-list cn-rev"><p class="tp-h">명리학 원리, 하나씩 열어 보기</p>' + tps.map(topicHtml).join('') + '</div>' : '') +
+          '<p class="cn-cav cn-rev">' + esc(sec.notice || O.INTRO_NOTICE) + '</p>' + cta(sec), '');
+      }
+
+      /* 서비스 소개 */
+      function serviceSec(sec) {
+        var list = (CFG.services || []).filter(function (x) { return x.visible !== false; });
+        if (!list.length) return '';
+        return wrap(sec, head(sec) + '<ul class="sv-list">' + list.map(function (x) {
+          var soon = x.status === 'soon', body = (x.video || x.image) ? media(x, '', sec.effect) : '<span class="sv-glyph" aria-hidden="true">' + esc(x.glyph || '') + '</span>';
+          return '<li class="sv sv-' + (soon ? 'soon' : 'live') + ' cn-rev"><div class="sv-media">' + body + '</div><div class="sv-t"><h3>' + esc(x.title) + '</h3><p>' + esc(x.desc) + '</p>' +
+            '<span class="sv-badge">' + (soon ? '준비 중' : '이용 가능') + '</span>' + (x.link && !soon ? '<a class="sv-link" href="' + esc(x.link) + '" data-ob-ev="movingtoon_preview_view" data-case="s-' + esc(x.id) + '">미리 보기 →</a>' : '') + '</div></li>';
+        }).join('') + '</ul>' + cta(sec), '');
+      }
+
+      /* 예전 "연구 → 유명인" 후킹(기본 꺼짐, 관리자가 켤 수 있다) */
+      var TYPE_LABEL2 = { research: '실제 연구', celebrity: '실제 인물 이야기' };
+      function storyCase(c) {
         var src = c.source || {}, link = src.url ? '<a href="' + esc(src.url) + '" target="_blank" rel="noopener noreferrer" data-ob-ev="onboarding_source_click" data-case="' + esc(c.id) + '">' + esc(src.doi ? 'DOI ' + src.doi : '원문 보기') + '</a>' : '';
         var paras = (c.story && c.story.length ? c.story : c.body || []).slice(0, 6);
-        return '<p class="cn-kick">' + (c.type === 'research' ? '01 · ' : '02 · ') + esc(TYPE_LABEL[c.type] || '') + (c.year ? ' · ' + c.year : '') + '</p><div class="cn-art">' + media(c, Art.forCase(c.visual)) + '</div>' +
-          '<p class="cn-hook">' + esc(c.hook) + '</p><h2 class="cn-title">' + esc(c.title) + '</h2>' +
-          '<div class="cn-story">' + paras.map(function (p) { return '<p class="cn-rev">' + esc(p) + '</p>'; }).join('') + '</div>' +
-          (c.takeaway ? '<p class="cn-take cn-rev">' + esc(c.takeaway) + '</p>' : '') +
-          (c.caveat ? '<p class="cn-cav">' + esc(c.caveat) + '</p>' : '') +
+        return '<p class="cn-kick">' + esc(O.KINDS[c.kind] || TYPE_LABEL2[c.type] || '') + (c.year ? ' · ' + c.year : '') + '</p><div class="cn-art">' + media(c, Art.forCase(c.visual)) + '</div>' +
+          '<p class="cn-hook">' + esc(c.hook) + '</p><h2 class="cn-title">' + esc(c.title) + '</h2><div class="cn-story">' + paras.map(function (p) { return '<p class="cn-rev">' + esc(p) + '</p>'; }).join('') + '</div>' +
+          (c.takeaway ? '<p class="cn-take cn-rev">' + esc(c.takeaway) + '</p>' : '') + (c.caveat ? '<p class="cn-cav">' + esc(c.caveat) + '</p>' : '') +
           '<details class="cn-src"><summary>출처 확인</summary><p>' + esc(c.who || '') + (c.who && src.label ? ' · ' : '') + esc(src.label || '') + (link ? '<br>' + link : '') + '</p></details>' +
           '<div class="cn-links"><button type="button" data-other="' + esc(c.type) + '">다른 ' + (c.type === 'research' ? '연구' : '인물') + ' 이야기 보기</button></div>';
       }
-      var bridge = function (t) { return t ? '<section class="cn-sec cn-bridge"><p class="cn-bridge-t cn-rev">' + esc(t) + '</p></section>' : ''; };
+      function storySec(sec) {
+        cur.research = chooseCase('research', false); cur.celebrity = chooseCase('celebrity', false);
+        var h = '';
+        if (cur.research) h += '<section class="cn-sec" data-type="research" data-case="' + esc(cur.research.id) + '">' + storyCase(cur.research) + '</section>';
+        if (cur.research && cur.celebrity) h += '<section class="cn-sec cn-bridge"><p class="cn-bridge-t cn-rev">' + esc(BR.toCelebrity || '') + '</p></section>';
+        if (cur.celebrity) h += '<section class="cn-sec" data-type="celebrity" data-case="' + esc(cur.celebrity.id) + '">' + storyCase(cur.celebrity) + '</section>';
+        return h;
+      }
+
+      /* 최종 CTA */
+      function finalSec(sec) {
+        var inner = '<div class="cn-art">' + media({ image: sec.bg ? '' : '' }, Art.forIntro('end')) + '</div>' +
+          '<h2 class="cn-title big">' + nl(F(sec.title || CFG.introLast.line)) + '</h2>' + (sec.sub ? '<p class="cn-body cn-rev">' + nl(F(sec.sub)) + '</p>' : '') +
+          '<button type="button" class="btn cn-go" id="obGo" data-go="' + esc(sec.id) + '">' + esc(F((sec.cta && sec.cta.text) || CFG.introLast.cta)) + '</button>' +
+          '<div class="cn-links" style="justify-content:center">' + (hasProfile ? '<a class="cn-lnk" href="#/?nogate=1" data-track="onboarding_home_back">내 홈으로 돌아가기</a>' : '<a class="cn-lnk" href="#/?skip=1" data-track="onboarding_browse_click">먼저 무료 타로·캘린더 둘러보기</a>') + '</div>' +
+          '<p class="cn-cav">' + esc(O.INTRO_NOTICE) + '</p>';
+        return wrap(sec, inner, ' cn-last" id="cnLast');
+      }
+      var builders = { research: researchSec, myeongri: myeongriSec, service: serviceSec, story: storySec, final: finalSec };
       var h = '<div class="cn-prog" id="cnProg" aria-hidden="true"></div>';
-      if (cur.research) h += '<section class="cn-sec" data-type="research" data-case="' + esc(cur.research.id) + '">' + caseHtml(cur.research) + '</section>';
-      if (cur.research && cur.celebrity) h += bridge(BR.toCelebrity);
-      if (cur.celebrity) h += '<section class="cn-sec" data-type="celebrity" data-case="' + esc(cur.celebrity.id) + '">' + caseHtml(cur.celebrity) + '</section>';
-      if (cur.research || cur.celebrity) h += bridge(BR.toIntro);
-      h += intro.map(function (s, i) {
-        return '<section class="cn-sec" data-intro="' + esc(s.id) + '"><p class="cn-kick">03 · 동양 명리학 · ' + (i + 1) + ' / ' + intro.length + '</p><div class="cn-art">' + media(s, Art.forIntro(s.id)) + '</div>' +
-          '<h2 class="cn-title">' + esc(s.title) + '</h2><p class="cn-body cn-rev">' + esc(s.body) + '</p>' + (s.sub ? '<p class="cn-sub cn-rev">' + esc(s.sub) + '</p>' : '') + '</section>';
-      }).join('');
-      h += '<section class="cn-sec cn-last" id="cnLast"><div class="cn-art">' + Art.forIntro('end') + '</div><h2 class="cn-title big">' + esc(CFG.introLast.line) + '</h2>' +
-        '<button type="button" class="btn cn-go" id="obGo" data-ob-ev="onboarding_cta_click">' + esc(CFG.introLast.cta) + '</button><div class="cn-links" style="justify-content:center"><a class="cn-lnk" href="#/?skip=1" data-track="onboarding_browse_click">먼저 무료 타로·캘린더 둘러보기</a></div><p class="cn-cav">' + esc(O.INTRO_NOTICE) + '</p></section>' +
-        '<button type="button" class="cn-skip" id="obSkip">건너뛰기 ↓</button>';
+      secs.forEach(function (sec) { h += (builders[sec.type] ? builders[sec.type](sec) : ''); });
+      h += '<button type="button" class="cn-skip" id="obSkip">건너뛰기 ↓</button>';
       var el = paint('<div class="cn">' + h + '</div>', 'ob-cine');
-      var secs = $$('.cn-sec', el), skip = $('#obSkip', el), last = $('#cnLast', el), seen = 0;
+      var allSecs = $$('.cn-sec', el), skip = $('#obSkip', el), last = $('#cnLast', el);
       var caseId = function () { return (cur.research && cur.research.id) || (cur.celebrity && cur.celebrity.id) || ''; };
+      var EV = { research: ['research_section_view'], myeongri: ['myeongri_section_view'], service: ['service_section_view', 'movingtoon_preview_view'] };
       function enter(sec) {
-        if (sec.classList.contains('in')) return; sec.classList.add('in'); seen++;
-        var id = sec.getAttribute('data-case'); if (id) tOnce('onboarding_card_impression', { case: id, type: sec.getAttribute('data-type') });
+        if (sec.classList.contains('in')) return; sec.classList.add('in'); seenN++;
+        var type = sec.getAttribute('data-type'), sid = sec.getAttribute('data-sec');
+        (EV[type] || []).forEach(function (ev) { sessOnce(ev, { case: 's-' + sid }); }); // 세션당 1회 — 전환 흐름의 분모(랜딩 진입)와 같은 기준
+        var id = sec.getAttribute('data-case'); if (id) tOnce('onboarding_card_impression', { case: id, type: type });
+        $$('.rc', sec).forEach(function (c) { sessOnce('onboarding_card_impression', { case: c.getAttribute('data-case'), type: 'research' }); });
         if (sec === last) { tOnce('onboarding_intro_complete', { case: caseId() }); skip.hidden = true; }
       }
-      // 화면 위쪽 80% 안으로 들어온 장면·문단을 나타낸다(스크롤·크기 변경·처음 그릴 때). IntersectionObserver 가 멈추는 숨은 탭에서도 동작한다.
-      var prog = $('#cnProg', el), hubEl = H.$('#hub'), tick = function () {
+      var prog = $('#cnProg', el), hubEl = H.$('#hub'), mobile = (root.innerWidth || 1024) < 768;
+      var vids = $$('video[data-lazyvid]', el), vio = null;
+      if (vids.length && 'IntersectionObserver' in root && !H.reduce) { // 영상은 화면에 있을 때만 재생(성능)
+        vio = new IntersectionObserver(function (es) { es.forEach(function (e) { var v = e.target; if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () { }); } else v.pause(); }); }, { threshold: 0.25 });
+        vids.forEach(function (v) { vio.observe(v); });
+      }
+      var tick = function () {
         var d = document.documentElement, m = d.scrollHeight - d.clientHeight, vh = root.innerHeight || d.clientHeight;
-        if (H.embed && hubEl) { var hr = hubEl.getBoundingClientRect(), inHub = hr.top < vh * 0.6 && hr.bottom > vh * 0.3; skip.style.visibility = inHub && !last.classList.contains('in') ? 'visible' : 'hidden'; prog.hidden = true; }
+        if (H.embed && hubEl) { var hr = hubEl.getBoundingClientRect(), inHub = hr.top < vh * 0.6 && hr.bottom > vh * 0.3; skip.style.visibility = inHub && last && !last.classList.contains('in') ? 'visible' : 'hidden'; prog.hidden = true; }
         else prog.style.transform = 'scaleX(' + (m > 0 ? Math.min(1, root.scrollY / m) : 0) + ')';
-        secs.forEach(function (x) { if (!x.classList.contains('in') && x.getBoundingClientRect().top < vh * 0.8) enter(x); });
+        allSecs.forEach(function (x) {
+          var r = x.getBoundingClientRect();
+          if (!x.classList.contains('in') && r.top < vh * 0.8) enter(x);
+          if (!H.reduce && !mobile && x.classList.contains('fxe-parallax') && r.bottom > 0 && r.top < vh) x.style.setProperty('--py', Math.round((r.top / vh) * -28) + 'px'); // 배경만 살짝 느리게(본문은 그대로)
+        });
         $$('.cn-rev:not(.in)', el).forEach(function (x) { if (x.getBoundingClientRect().top < vh * 0.88) x.classList.add('in'); });
       };
       root.addEventListener('scroll', tick, { passive: true }); root.addEventListener('resize', tick);
       var t0 = setTimeout(tick, 60), t1 = setTimeout(tick, 600);
-      onLeave(function () { root.removeEventListener('scroll', tick); root.removeEventListener('resize', tick); clearTimeout(t0); clearTimeout(t1); });
-      skip.onclick = function () { Ob.track('onboarding_skip', { seen: seen, case: caseId() }); last.scrollIntoView({ behavior: H.reduce ? 'auto' : 'smooth', block: 'center' }); };
-      el.addEventListener('click', function (e) { // 다른 연구/인물 이야기 보기: 그 자리에서 같은 유형의 다른 사례로 바꾼다
-        var b = e.target.closest && e.target.closest('[data-other]'); if (!b) return;
+      onLeave(function () { root.removeEventListener('scroll', tick); root.removeEventListener('resize', tick); clearTimeout(t0); clearTimeout(t1); if (vio) vio.disconnect(); });
+      skip.onclick = function () { Ob.track('onboarding_skip', { seen: seenN, case: caseId() }); if (last) last.scrollIntoView({ behavior: H.reduce ? 'auto' : 'smooth', block: 'center' }); };
+      el.addEventListener('click', function (e) {
+        var dt = e.target.closest && e.target.closest('[data-detail]'); // 연구 자세히 보기
+        if (dt) { var box = dt.closest('.rc'), pane = $('.rc-detail', box), open = pane.hidden; pane.hidden = !open; dt.setAttribute('aria-expanded', String(open)); dt.textContent = open ? '자세히 보기 닫기' : '연구 자세히 보기'; if (open) Ob.track('research_detail_open', { case: dt.getAttribute('data-detail') }); return; }
+        var go = e.target.closest && e.target.closest('[data-go]'); // 나의 운 확인하기(섹션 어디서나)
+        if (go) { var sid = go.getAttribute('data-go'); Ob.track('landing_cta_click', { case: 's-' + sid }); Ob.track('onboarding_cta_click', { case: caseId() }); if (PREVIEW) return; lset(SEEN, 1); H.go(q.replay && P.has() ? '#/begin?edit=1' : '#/begin'); return; }
+        var b = e.target.closest && e.target.closest('[data-other]'); if (!b) return; // 다른 연구/인물 이야기 보기(예전 후킹)
         var type = b.getAttribute('data-other'), n = chooseCase(type, true), sec = b.closest('.cn-sec'); if (!n || !sec) return;
         cur[type] = n; Ob.track('onboarding_other_case', { case: n.id });
-        sec.classList.remove('in'); sec.setAttribute('data-case', n.id); sec.innerHTML = caseHtml(n); void sec.offsetWidth; sec.classList.add('in');
+        sec.classList.remove('in'); sec.setAttribute('data-case', n.id); sec.innerHTML = storyCase(n); void sec.offsetWidth; sec.classList.add('in');
         tOnce('onboarding_card_impression', { case: n.id, type: type }); sec.scrollIntoView({ behavior: H.reduce ? 'auto' : 'smooth', block: 'start' }); setTimeout(tick, 80);
       });
-      $('#obGo', el).onclick = function () { Ob.track('onboarding_cta_click', { case: caseId() }); lset(SEEN, 1); H.go(q.replay && P.has() ? '#/begin?edit=1' : '#/begin'); }; // 다시 보기: 저장된 값이 채워진 채로 슬라이드 툰을 끝까지 볼 수 있다
+      sessOnce('landing_view', {});
       Ob.track('onboarding_view', { replay: q.replay ? 1 : 0, case: caseId() }, true);
     });
   }
@@ -194,8 +312,8 @@
       function render() {
         var s = scenes[step], last = step === scenes.length - 1, nm = d.name;
         var lines = (s.field === 'time' && d.hourUnknown && s.unknownLines && s.unknownLines.length ? s.unknownLines : s.lines).map(function (t) { return F(t, nm); });
-        var el = paint('<div class="ob-prog" role="progressbar" aria-valuemin="1" aria-valuemax="' + scenes.length + '" aria-valuenow="' + (step + 1) + '"><i style="width:' + Math.round((step + 1) / scenes.length * 100) + '%"></i><span>' + (step + 1) + ' / ' + scenes.length + ' · ' + esc(s.title) + '</span></div>' +
-          '<div class="ob-stage ' + (BGTHEME[s.theme] || '') + '"' + (s.bg ? ' style="background-image:url(' + esc(s.bg) + ')"' : '') + '>' + avatar(s.face, s.image) + '<div class="ob-bubble" id="obBub" aria-live="polite">' + lines.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div></div>' +
+        var el = paint('<div class="ob-prog" role="progressbar" aria-valuemin="1" aria-valuemax="' + scenes.length + '" aria-valuenow="' + (step + 1) + '"><i style="width:' + Math.round((step + 1) / scenes.length * 100) + '%"></i><span>' + esc(String(CFG.progressLabel || '{n} / {total} · {title}').replace(/{n}/g, step + 1).replace(/{total}/g, scenes.length).replace(/{title}/g, s.title)) + '</span></div>' +
+          '<div class="ob-stage ' + (BGTHEME[s.theme] || '') + '"' + (s.bg ? ' style="background-image:url(' + esc(s.bg) + ')"' : '') + '>' + avatar(s.face, s.image) + '<div class="ob-bubble' + (s.bubble ? ' bub-' + esc(s.bubble) : '') + '" id="obBub" aria-live="polite">' + lines.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div></div>' +
           '<div class="ob-form" id="obForm">' + fieldHtml(s) + '</div>' + (s.hint && s.field !== 'name' ? '<p class="note ob-hint">' + esc(s.hint) + '</p>' : '') +
           '<p class="msg err" id="obMsg" role="alert"></p><div class="ob-nav"><button type="button" class="btn ghost sm" id="obBack"' + (step === 0 ? ' hidden' : '') + '>‹ 이전</button><button type="button" class="btn sm" id="obOk">' + esc(s.button || '다음') + '</button></div>' +
           '<p class="note ob-priv">출생정보는 개인정보입니다. 이 기기 안에서 계산되며 서버로 보내지 않고, 홈 하단에서 언제든 수정·삭제할 수 있습니다.</p>', 'ob-toonpage');
@@ -260,7 +378,7 @@
           H.afterInput(); lset(DRAFT, null);
           Ob.track('birth_input_complete', { hour_known: saved.hourUnknown ? 0 : 1, calendar: saved.calendar });
           Ob.track('calculation_success', {}); Ob.track('saju_input_complete', { next: 'onboarding', hour_known: saved.hourUnknown ? 0 : 1 });
-          H.replace('#/reveal');
+          H.replace(CFG.afterDone === 'home' ? '#/?nogate=1' : '#/reveal');
         }).catch(function () { Ob.track('calculation_failure', { reason: 'engine' }); msg('분석 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.'); if (btn) { btn.disabled = false; btn.textContent = '나의 사주 확인하기'; } });
       }
       render();
@@ -288,6 +406,7 @@
   /* ═════════ 개인화 홈 ═════════ */
   var oldHome = H.routes[''];
   H.route('', function (q, ctx) {
+    if (PREVIEW) return welcome({ preview: 1 }, ctx); // 관리자 미리보기는 항상 랜딩 아래 흐름을 보여 준다
     if (!P.has()) {
       if (q.skip) { try { sessionStorage.setItem('mt_onb_skip', '1'); } catch (e) { } return oldHome(q, ctx); }
       if (H.embed) return welcome({}, ctx);
@@ -311,27 +430,42 @@
       var cur = null; try { (ch.daeun.list || []).forEach(function (x) { if (x.startMs <= now) cur = x; }); } catch (e) { }
       var jc = T.ijuCard(ju, nm, ch.gender), flow = String(t.phase || '').replace(/기$/, '운');
       var daeunTxt = cur ? esc(M.gzNameK(cur)) + ' 대운 <small>(' + cur.startYear + '년~)</small>' : '대운 시작 전';
+      var tip = function (w) { var d = O.TERMS[w]; return d ? '<span class="tip" tabindex="0" role="button" aria-label="' + esc(w + ': ' + d) + '" data-tip="' + esc(d) + '">' + esc(w) + '</span>' : esc(w); };
+      var trait = (jc && jc.trait) || '', flowSub = t.flowLabel && String(t.flowLabel).indexOf(String(t.phase || '').replace(/기$/, '')) < 0 ? t.flowLabel : ''; // 같은 말이 겹치면(축적운 · 축적) 한 번만
+      var flowLine = cur ? '지금은 <b>' + esc(M.gzNameK(cur)) + ' 대운</b>(' + cur.startYear + '년~) 안에 있고, 오늘의 흐름은 <b>' + esc(flow || t.cond) + '</b>' + (flowSub ? ' · ' + esc(flowSub) : '') + '입니다.' : '대운이 시작되기 전의 시기입니다. 오늘의 흐름은 <b>' + esc(flow || t.cond) + '</b>입니다.';
       var el = H.view(
         '<section class="hhome"><div class="hh-top"><p class="kick">MANTRA FORTUNE</p><a class="hh-me" href="#/me" data-track="profile_open">' + esc(A(nm)) + ' ›</a></div>' +
         '<div class="hh-guide"><div class="gav">' + avatar('greet', (CFG.scenes[0] || {}).image) + '</div><p>' + esc(F('{귀인}! 오늘의 일진이 도착했사옵니다!', nm)) + '</p></div>' +
-        '<section class="hh-sum" aria-label="나의 운 요약"><h2>나의 운 요약</h2><div class="gr">' +
-        '<div><small>일간 · 일주</small><b>' + esc(M.STEM_K[day.s]) + '일간 · ' + esc(ju) + '일주</b></div>' +
-        '<div><small>현재 대운</small><b>' + daeunTxt + '</b></div>' +
-        '<div><small>오늘의 일진</small><b>' + esc(t.gz) + '日 <small>' + esc(t.cond) + '</small></b></div>' +
+        // 1·2. 타고난 기질 한 문장 / 지금의 운 흐름 — 용어를 몰라도 읽히도록 쉬운 말을 먼저, 용어는 눌러서 설명
+        '<section class="hh-core" aria-label="나의 기질과 지금의 흐름">' +
+        '<div class="hhc"><small>나의 타고난 기질</small><p>' + esc(trait || t.line || '') + '</p><span class="hhc-sub">' + tip('일간') + ' ' + esc(M.STEM_K[day.s]) + ' · ' + tip('일주') + ' ' + esc(ju) + '</span></div>' +
+        '<div class="hhc"><small>지금의 운 흐름</small><p>' + flowLine + '</p><span class="hhc-sub">' + tip('대운') + ' · ' + tip('일진') + '</span></div></section>' +
+        '<h2 class="hh-h">무료 콘텐츠</h2><div class="hh-cards">' +
+        // 3. 일주
+        '<a class="cc feat" href="#/awaken?replay=1&to=home" data-ob-ev="ilju_video_play free_content_click" data-case="s-home-ilju" data-track="fortune_content_click" data-p="ilju"><small>ILJU · 무료</small><h3>나의 일주 확인하기</h3><p>' + esc(ju) + '일주 · 타고난 기질과 강점, 주의할 점을 영상으로 만납니다.</p><span class="go">일주 보기 →</span></a>' +
+        // 4. 오늘의 운세
+        '<a class="cc today" href="#/today" data-ob-ev="calendar_open free_content_click" data-case="s-home-today" data-track="fortune_content_click" data-p="today_card"><div class="ring" style="--p:' + t.score + '"><b>' + t.score + '</b></div><div><small>TODAY · 오늘의 일진</small><h3>' + esc(t.cond) + '의 날</h3><p>' + esc(t.line || '') + '</p></div></a>' +
+        // 5. 무료 타로 (+ 일진 캘린더)
+        '<a class="cc" href="#/tarot" data-ob-ev="tarot_start free_content_click" data-case="s-home-tarot" data-track="fortune_content_click" data-p="tarot"><small>FREE TAROT · 무료</small><h3>무료 타로</h3><p>마음속 질문 하나, 카드 한 장으로 가볍게 확인합니다.</p><span class="go">카드 뽑기 →</span></a>' +
+        '<a class="cc" href="#/today" data-ob-ev="calendar_open free_content_click" data-case="s-home-calendar" data-track="fortune_content_click" data-p="calendar"><small>CALENDAR · 무료</small><h3>일진 캘린더</h3><p>월운 그래프와 날짜별 일진, 내 일정에 맞는 날 고르기.</p><span class="go">캘린더 열기 →</span></a>' +
+        '</div>' +
+        // 6. 종합 무빙툰 리포트 미리보기
+        '<h2 class="hh-h">종합 무빙툰 리포트</h2>' +
+        '<a class="cc premium" href="#/go?to=deep" data-ob-ev="movingtoon_preview_start paid_report_view" data-case="s-home-report" data-track="premium_cta_click" data-p="deep_movingtoon"><small>DEEP MOVINGTOON · 프리미엄</small><h3>심층 무빙툰</h3><p>타고난 성향, 직업과 재물, 연애·결혼, 인생의 전환점과 대운·세운, 개운법까지 — 내 명식 하나로 읽는 종합 풀이입니다.</p><span class="go">무빙툰 열어 보기 →</span></a>' +
+        // 명식 요약(기존 계산 결과 그대로)
+        '<section class="hh-sum" aria-label="나의 명식 요약"><h2>나의 명식 요약</h2><div class="gr">' +
+        '<div><small>' + tip('일간') + ' · ' + tip('일주') + '</small><b>' + esc(M.STEM_K[day.s]) + '일간 · ' + esc(ju) + '일주</b></div>' +
+        '<div><small>현재 ' + tip('대운') + '</small><b>' + daeunTxt + '</b></div>' +
+        '<div><small>오늘의 ' + tip('일진') + '</small><b>' + esc(t.gz) + '日 <small>' + esc(t.cond) + '</small></b></div>' +
         '<div><small>현재 운의 흐름</small><b>' + esc(flow) + (t.flowLabel ? ' <small>' + esc(t.flowLabel) + '</small>' : '') + '</b></div></div>' +
         '<p class="hh-line">' + (nm ? esc(nm) + '님, ' : '') + esc(t.line || '') + (jc ? '<br><span>' + esc(jc.trait) + '</span>' : '') + '</p></section>' +
-        '<h2 class="hh-h">무료 콘텐츠</h2><div class="hh-cards">' +
-        '<a class="cc today" href="#/today" data-ob-ev="calendar_open" data-track="fortune_content_click" data-p="today_card"><div class="ring" style="--p:' + t.score + '"><b>' + t.score + '</b></div><div><small>TODAY · 오늘의 일진</small><h3>' + esc(t.cond) + '의 날</h3><p>' + esc(t.line || '') + '</p></div></a>' +
-        '<a class="cc" href="#/tarot" data-ob-ev="tarot_start" data-track="fortune_content_click" data-p="tarot"><small>FREE TAROT · 무료</small><h3>무료 타로</h3><p>마음속 질문 하나, 카드 한 장으로 가볍게 확인합니다.</p><span class="go">카드 뽑기 →</span></a>' +
-        '<a class="cc" href="#/awaken?replay=1&to=home" data-ob-ev="ilju_video_play" data-track="fortune_content_click" data-p="ilju"><small>ILJU · 무료</small><h3>나의 일주 확인하기</h3><p>' + esc(ju) + '일주 · 타고난 기질과 강점, 주의할 점을 영상으로 만납니다.</p><span class="go">일주 보기 →</span></a>' +
-        '<a class="cc" href="#/today" data-ob-ev="calendar_open" data-track="fortune_content_click" data-p="calendar"><small>CALENDAR · 무료</small><h3>일진 캘린더</h3><p>월운 그래프와 날짜별 일진, 내 일정에 맞는 날 고르기.</p><span class="go">캘린더 열기 →</span></a>' +
-        '</div><h2 class="hh-h">프리미엄</h2>' +
-        '<a class="cc premium" href="#/go?to=deep" data-ob-ev="movingtoon_preview_start" data-track="premium_cta_click" data-p="deep_movingtoon"><small>DEEP MOVINGTOON · 프리미엄</small><h3>심층 무빙툰</h3><p>타고난 성향, 직업과 재물, 연애·결혼, 인생의 전환점과 대운·세운, 개운법까지 — 내 명식 하나로 읽는 종합 풀이입니다.</p><span class="go">무빙툰 열어 보기 →</span></a>' +
         '<details class="hh-more"><summary>내 정보 · 더 보기</summary><div class="hh-acts">' +
         '<a href="#/begin?edit=1" data-track="profile_edit">출생정보 수정</a><a href="#/welcome?replay=1" data-track="onboarding_replay">온보딩 다시 보기</a><a href="#/my?s=1" data-track="fortune_content_click" data-p="my_home">MY 운명 홈</a>' +
         '<a href="/index.html" data-track="fortune_content_click" data-p="manse_app">만세력 원국 보기</a><button type="button" id="hhDel">내 정보 삭제</button></div>' +
         '<p class="note">출생정보는 이 기기에만 저장되며 서버로 보내지 않습니다. 삭제하면 저장된 정보와 입력 중이던 초안이 모두 지워집니다.</p></details>' +
         '<p class="dis">사주는 전통 해석에 바탕한 참고용 콘텐츠이며 미래를 단정하지 않습니다. 컨디션·주의 표시는 의학적 진단이나 사고 확률이 아닙니다.</p></section>');
+      $$('.tip', el).forEach(function (n) { n.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); var open = n.classList.contains('open'); $$('.tip.open', el).forEach(function (x) { x.classList.remove('open'); }); if (!open) n.classList.add('open'); }); });
+      document.addEventListener('click', function f(e) { if (!el.isConnected) { document.removeEventListener('click', f); return; } if (!(e.target.closest && e.target.closest('.tip'))) $$('.tip.open', el).forEach(function (x) { x.classList.remove('open'); }); });
       var del = $('#hhDel', el); if (del) del.onclick = function () { if (root.confirm('저장된 출생정보를 이 기기에서 삭제할까요? 되돌릴 수 없습니다.')) { Ob.clear(); H.toast('삭제했습니다.'); H.replace('#/welcome'); } };
       Ob.track('home_view', { daeun: cur ? 1 : 0 }, true);
     }).catch(function () { if (!H.alive(ctx)) return; H.view('<p class="pend">홈을 불러오지 못했습니다.<br><br><button type="button" class="btn ghost" id="rt">다시 시도</button><br><br><a class="btn ghost sm" href="#/welcome?replay=1">온보딩 다시 보기</a></p>'); $('#rt').onclick = function () { H.render(); }; });
@@ -345,5 +479,5 @@
   H.route('input', function (q, ctx) { if (q.classic) return oldInput(q, ctx); H.replace('#/begin' + (q.edit ? '?edit=1' : '')); });
 
   // data-ob-ev: 클릭 측정(서버 집계 포함). 사례 id 는 data-case
-  document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('[data-ob-ev]'); if (a) Ob.track(a.getAttribute('data-ob-ev'), { case: a.getAttribute('data-case') || '' }); });
+  document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('[data-ob-ev]'); if (a) a.getAttribute('data-ob-ev').split(/\s+/).filter(Boolean).forEach(function (ev) { Ob.track(ev, { case: a.getAttribute('data-case') || '' }); }); });
 })(window);
