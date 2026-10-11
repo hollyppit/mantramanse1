@@ -130,5 +130,26 @@
     return out;
   }
 
-  R.Quality = { parseRefs: parseRefs, formatRefs: formatRefs, refFromSource: refFromSource, refCheck: refCheck, STATUSES: STATUSES, evidence: evidence, reviewEdit: reviewEdit, textHash: textHash, MIN_LEN: MIN_LEN, textOf: textOf, chapterTexts: chapterTexts, missing: missing, absolute: absolute, assets: assets, worlds: worlds, audit: audit };
+  /* ── 일주 각성 영상 매핑 점검: /api/awakening?all=1 의 저장본(videos·ilgan·fallback)만 읽는다(저장·수정 없음).
+        일주 60 × 성별 2 = 120칸, 일간 10 × 성별 2 = 20칸. 영상 파일이 실제로 있는지는 probeUrls 를 화면이 따로 확인한다. ── */
+  var CLIP_RE = /^\/api\/clipfile\?k=[\w.\-]{1,120}$/;
+  function awakeningAudit(awk) {
+    awk = awk || {}; var M = R.Media; if (!M || !M.awakeningCoverage) return null;
+    var cov = M.awakeningCoverage(awk.videos || []), ig = M.ilganCoverage(awk.ilgan || []);
+    var by = { ok: 0, 'poster-only': 0, disabled: 0, missing: 0, error: 0 };
+    cov.cells.forEach(function (c) { by[c.status] = (by[c.status] || 0) + 1; });
+    var igBy = { ok: 0, missing: 0 }; ig.cells.forEach(function (c) { var k = c.status === 'ok' ? 'ok' : 'missing'; igBy[k]++; });
+    var urls = {}, add = function (u, label) { if (u && CLIP_RE.test(u) && !urls[u]) urls[u] = label; };
+    (awk.videos || []).forEach(function (v) { var l = (v.dayPillar || '') + ' ' + (v.gender || ''); add(v.videoUrl, l); add(v.videoWebm, l); add(v.posterUrl, l + ' 포스터'); });
+    (awk.ilgan || []).forEach(function (v) { var l = '일간 ' + (v.stem || '') + ' ' + (v.gender || ''); add(v.videoUrl, l); add(v.videoWebm, l); });
+    var fb = awk.fallback || {}; add(fb.videoUrl, '기본 영상'); add(fb.videoWebm, '기본 영상'); add(fb.posterUrl, '기본 포스터');
+    return {
+      pillars: { of: cov.of, ok: by.ok, posterOnly: by['poster-only'], disabled: by.disabled, missing: by.missing, error: by.error, male: cov.male, female: cov.female, missingList: cov.cells.filter(function (c) { return c.status !== 'ok'; }).map(function (c) { return c.dayPillar + c.gender + ':' + c.status; }), invalid: cov.invalid },
+      ilgan: { of: ig.of, ok: igBy.ok, missing: igBy.missing },
+      fallback: !!(fb.videoUrl || fb.videoWebm || fb.posterUrl), textOnly: !!awk.textOnly, publicBase: !!awk.publicBase,
+      urls: Object.keys(urls).map(function (u) { return { url: u, label: urls[u] }; }),
+    };
+  }
+
+  R.Quality = { awakeningAudit: awakeningAudit, parseRefs: parseRefs, formatRefs: formatRefs, refFromSource: refFromSource, refCheck: refCheck, STATUSES: STATUSES, evidence: evidence, reviewEdit: reviewEdit, textHash: textHash, MIN_LEN: MIN_LEN, textOf: textOf, chapterTexts: chapterTexts, missing: missing, absolute: absolute, assets: assets, worlds: worlds, audit: audit };
 })(typeof window !== 'undefined' ? window : globalThis);

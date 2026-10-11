@@ -31,6 +31,30 @@
       list(e.staleText.map(function (id) { return { id: id }; }), function (x) { return '<span class="mono">' + esc(x.id) + '</span> — 승인 당시와 문장이 달라졌습니다(근거 재확인 필요)'; }), '문제 없음');
   }
 
+  // 일주 각성 영상 매핑(120칸) + 일간 소개(20칸). 파일 연결 확인은 눌렀을 때만 한다(영상 파일에 Range 0-0 요청).
+  function awakeningSection(st) {
+    var a = st.awk; if (!a) return '<div class="card"><b style="color:var(--gold)">일주 각성 영상 매핑</b> <span class="chip">확인 못함</span><p class="muted">/api/awakening 을 불러오지 못했습니다.</p></div>';
+    var p = a.pillars, bad = p.missing + p.error + p.disabled + p.posterOnly, pr = st.awkProbe;
+    var body = '<p style="margin:0 0 8px;font-size:.84rem">일주 영상 <b>' + p.ok + ' / ' + p.of + '</b> (남 ' + p.male + ' · 여 ' + p.female + ') · 포스터만 ' + p.posterOnly + ' · 사용 안 함 ' + p.disabled + ' · 없음 ' + p.missing + (p.error ? ' · 주소 오류 ' + p.error : '') + (p.invalid ? ' · 형식 오류 ' + p.invalid : '') +
+      '<br>일간 소개 영상 <b>' + a.ilgan.ok + ' / ' + a.ilgan.of + '</b> · 기본 영상 ' + (a.fallback ? '있음' : '없음') + ' · 문구만 보이기 ' + (a.textOnly ? '켜짐' : '꺼짐') + ' · 공개 주소 ' + (a.publicBase ? '설정됨' : '없음(함수 경유)') + '</p>';
+    if (p.missingList.length) body += '<details><summary class="muted" style="font-size:.8rem">영상이 없거나 문제 있는 칸 ' + p.missingList.length + '개 보기</summary><p class="mono" style="font-size:.76rem;word-break:keep-all">' + esc(p.missingList.join('  ')) + '</p></details>';
+    body += '<div style="margin-top:8px"><button type="button" id="awkProbe"' + (pr && pr.running ? ' disabled' : '') + '>저장된 영상 파일 연결 확인 (' + a.urls.length + '개)</button> <span class="muted" id="awkProbeMsg">' + (pr ? (pr.running ? '확인 중… ' + pr.done + ' / ' + pr.total : '확인 완료 · 정상 ' + pr.okN + ' · 파일 없음 ' + pr.bad.length + (pr.skipped ? ' · 확인 안 함 ' + pr.skipped : '')) : '') + '</span></div>';
+    if (pr && pr.bad.length) body += list(pr.bad.slice(0, 40), function (x) { return esc(x.label) + ' <span class="muted mono">' + esc(x.url) + ' · ' + esc(String(x.status)) + '</span>'; }) + (pr.bad.length > 40 ? '<p class="muted">외 ' + (pr.bad.length - 40) + '건</p>' : '');
+    return section('일주 각성 영상 매핑', bad + a.ilgan.missing + (pr ? pr.bad.length : 0), body, '이상 없음');
+  }
+  function probeAwakening(box, st, M) {
+    var a = st.awk; if (!a || (st.awkProbe && st.awkProbe.running)) return;
+    var pr = st.awkProbe = { running: true, done: 0, total: a.urls.length, okN: 0, bad: [], skipped: 0 }, q = a.urls.slice(), msg = function () { var m = $('#awkProbeMsg', box); if (m) m.textContent = '확인 중… ' + pr.done + ' / ' + pr.total; };
+    var one = function (u) {
+      var ctl = window.AbortController ? new AbortController() : null;
+      return fetch(u.url, { headers: { range: 'bytes=0-0' }, signal: ctl && ctl.signal }).then(function (r) { if (ctl) ctl.abort(); if (r.status === 200 || r.status === 206) pr.okN++; else pr.bad.push({ label: u.label, url: u.url, status: r.status }); })
+        .catch(function (e) { if (e && e.name === 'AbortError') { pr.okN++; return; } pr.bad.push({ label: u.label, url: u.url, status: '요청 실패' }); }).then(function () { pr.done++; msg(); });
+    };
+    var worker = function () { var u = q.shift(); return u ? one(u).then(worker) : null; };
+    Promise.all([worker(), worker(), worker(), worker()]).then(function () { pr.running = false; draw(box, st, M); });
+    msg();
+  }
+
   function render(box, st) {
     var a = st.audit, h = '';
     h += '<div class="card"><b style="color:var(--gold)">서비스 점검</b><p class="muted" style="margin:6px 0 10px">테스트 사주로 실제 무빙툰 문서를 만들어 아래 네 가지를 점검합니다. 읽기 전용이며 아무것도 바꾸지 않습니다. 계산값과 문장의 불일치·문장 중복은 <b>정합성 검사</b> 탭에서 보세요.</p>' +
@@ -41,6 +65,7 @@
     var s = a.summary;
     h += '<div class="card"><b>요약</b> · 챕터 ' + a.chapters + '개 · 풀이 누락 의심 ' + s.missing + ' · 단정 표현 검토 ' + s.absolute + ' · 에셋 누락 ' + (s.assetMissing == null ? '확인 못함' : s.assetMissing) + ' · 세계 매핑 대체 ' + (s.worldFallback == null ? '-' : s.worldFallback) + ' · 빈 세계 ' + (s.worldEmpty == null ? '-' : s.worldEmpty) + '</div>';
     if (st.evidence) h += evidenceSection(st.evidence);
+    h += awakeningSection(st);
     h += section('풀이 누락 의심 (글자 수 ' + Q.MIN_LEN + '자 미만)', a.missing.length, list(a.missing, function (x) { return '<b>' + esc(x.title || x.id) + '</b> <span class="muted mono">' + esc(x.id) + ' · ' + x.len + '자</span>'; }));
     h += section('단정 표현 검토', a.absolute.length, list(a.absolute, function (x) { return '<b>' + esc(x.title || x.id) + '</b> — “' + esc(x.snippet) + '” <span class="muted">(' + esc(x.word) + ')</span>'; }) +
       (a.absolute.length ? '<p class="muted" style="font-size:.76rem;margin-top:6px">"~하지 않습니다" 같은 부정문·면책 문구도 걸릴 수 있습니다. 맥락을 보고 판단하세요.</p>' : ''));
@@ -64,6 +89,7 @@
     var L = ['# 서비스 점검 결과', '', '- 챕터 ' + a.chapters + '개 · 풀이 누락 의심 ' + a.summary.missing + ' · 단정 표현 검토 ' + a.summary.absolute + ' · 에셋 누락 ' + a.summary.assetMissing + ' · 세계 매핑 대체 ' + a.summary.worldFallback, ''];
     L.push('## 풀이 누락 의심'); a.missing.forEach(function (x) { L.push('- ' + (x.title || x.id) + ' (' + x.id + ', ' + x.len + '자)'); }); if (!a.missing.length) L.push('- 없음');
     L.push('', '## 단정 표현 검토'); a.absolute.forEach(function (x) { L.push('- ' + (x.title || x.id) + ': “' + x.snippet + '” (' + x.word + ')'); }); if (!a.absolute.length) L.push('- 없음');
+    if (st && st.awk) { var w = st.awk; L.push('', '## 일주 각성 영상 매핑', '- 일주 영상 ' + w.pillars.ok + '/' + w.pillars.of + ' (남 ' + w.pillars.male + ' · 여 ' + w.pillars.female + ') · 포스터만 ' + w.pillars.posterOnly + ' · 사용 안 함 ' + w.pillars.disabled + ' · 없음 ' + w.pillars.missing + ' · 주소 오류 ' + w.pillars.error, '- 일간 소개 ' + w.ilgan.ok + '/' + w.ilgan.of + ' · 기본 영상 ' + (w.fallback ? '있음' : '없음')); if (w.pillars.missingList.length) L.push('- 문제 칸: ' + w.pillars.missingList.join(' ')); if (st.awkProbe && !st.awkProbe.running) { L.push('- 파일 연결 확인: 정상 ' + st.awkProbe.okN + ' · 파일 없음 ' + st.awkProbe.bad.length); st.awkProbe.bad.forEach(function (x) { L.push('  - ' + x.label + ' ' + x.url + ' (' + x.status + ')'); }); } }
     if (st && st.evidence) { var e = st.evidence; L.push('', '## 풀이 DB 근거 상태 (정책 ' + e.policy + ')', '- 모듈 ' + e.total + ' · 승인 ' + e.status.approved + ' · legacy ' + e.status.legacy + ' · 근거 부족 ' + e.status.needs_evidence + ' · 초안 ' + e.status.draft + ' · 폐기 ' + e.status.retired, '- 숨김 ' + e.hidden + ' · hide_unverified 시 ' + e.wouldHide.hide_unverified + ' · strict 시 ' + e.wouldHide.strict); e.mismatch.forEach(function (x) { L.push('- 불일치: ' + x.id + ' — ' + x.reason); }); e.unknownCond.forEach(function (x) { L.push('- 알 수 없는 조건 키: ' + x.id + ' (' + x.keys.join(', ') + ')'); }); e.ruleConflict.forEach(function (x) { L.push('- 선택 조건과 제외 조건 충돌: ' + x.id + ' (' + x.keys.join(', ') + ')'); }); e.staleText.forEach(function (id) { L.push('- 승인 후 문장 변경: ' + id); }); }
     if (a.assets) { L.push('', '## 에셋 누락 (' + a.assets.image + '/' + a.assets.total + ')'); a.assets.missing.forEach(function (x) { L.push('- ' + x.title + ' (' + x.id + ')'); }); if (!a.assets.missing.length) L.push('- 없음'); }
     if (a.worlds) { L.push('', '## 세계 매핑'); a.worlds.list.forEach(function (w) { L.push('- ' + w.name + ': ' + w.count + '개' + (w.enabled ? '' : ' (사용 안 함)')); }); a.worlds.fallback.forEach(function (x) { L.push('- 대체 세계: ' + x.title + ' (' + x.id + ' → ' + x.world + ')'); }); }
@@ -76,6 +102,7 @@
       st.err = ''; st.audit = null; go.disabled = true; go.textContent = '점검 중…';
       run(M, st).then(function () { draw(box, st, M); });
     };
+    var pb = $('#awkProbe', box); if (pb) pb.onclick = function () { pb.disabled = true; probeAwakening(box, st, M); };
     var mdb = $('#qaMd', box); if (mdb) mdb.onclick = function () {
       var blob = new Blob([md(st.audit, st)], { type: 'text/markdown;charset=utf-8' }), u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = 'service-quality.md'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 1000);
     };
@@ -89,7 +116,9 @@
       C.api('/api/worlds').then(function (r) { return r.worlds || []; }).catch(function () { return []; }),
       C.load().then(function () { return C.ST.saved || {}; }).catch(function () { return {}; }),
       C.api('/api/src?a=list').then(function (r) { return r.docs || []; }).catch(function () { return null; }),
+      C.api('/api/awakening?all=1').then(function (r) { return r || {}; }).catch(function () { return null; }),
     ]).then(function (got) {
+      st.awk = got[4] ? Q.awakeningAudit(got[4]) : null; st.awkProbe = null;
       try {
         var ch = M.compute({ year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: TS.gender, city: '서울' });
         var sd = R.SajuData.build(ch, { now: now }), cfg = R.Chapters.forProject(null, 'full'), saved = got[2] || {}, lib = R.Compose.library({ modules: saved.modules, remedies: saved.remedies, evidencePolicy: saved.evidencePolicy }), rep = R.Compose.build(sd, lib, cfg, { name: '테스트' });
