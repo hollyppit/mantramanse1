@@ -175,10 +175,22 @@
     var box = $('#obPrevBox'); if (!box) return;
     if (!G.prev.on) { box.innerHTML = ''; return; }
     box.innerHTML = '<div class="ob-prevbox' + (G.prev.dev === 'mob' ? ' mob' : '') + '"><div class="ob-bar" style="justify-content:center"><button class="ob-chip' + (G.prev.dev === 'pc' ? ' on' : '') + '" data-pd="pc">PC</button><button class="ob-chip' + (G.prev.dev === 'mob' ? ' on' : '') + '" data-pd="mob">모바일</button><button class="ghost" id="obPrevRe">현재 편집 내용으로 새로고침</button><button class="ghost" id="obPrevX">닫기</button></div>' +
-      '<iframe id="obPrevFrame" title="랜딩 흐름 미리보기" src="/report/hub/?preview=1#/welcome"></iframe><p class="ob-lock">저장하지 않은 편집 내용까지 반영한 모습입니다. 검증 완료 + 공개로 설정한 사례만 보입니다. 통계에는 집계되지 않습니다.</p></div>';
+      '<iframe id="obPrevFrame" title="랜딩 흐름 미리보기" src="/report/hub/?preview=1#/welcome"></iframe><p class="ob-lock">저장하지 않은 편집 내용까지 반영한 모습입니다. <b>섹션을 누르면 위쪽에 그 섹션의 편집 입력란이 열립니다</b>(점선 테두리가 누를 수 있는 영역). 검증 완료 + 공개로 설정한 사례만 보입니다. 통계에는 집계되지 않습니다.</p></div>';
     var push = function () { collect(); var f = $('#obPrevFrame'); if (f && f.contentWindow) f.contentWindow.postMessage({ t: 'mt-onb-preview', config: body() }, location.origin); };
     if (prevListener) window.removeEventListener('message', prevListener);
-    prevListener = function (e) { if (e.origin === location.origin && e.data && e.data.t === 'mt-onb-ready') push(); };
+    var flash = function (el) { if (!el) return; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.transition = 'box-shadow .3s'; el.style.boxShadow = '0 0 0 2px #e0b36a'; setTimeout(function () { el.style.boxShadow = ''; }, 1600); var f = el.querySelector('input[type=text],textarea'); if (f) { try { f.focus({ preventScroll: true }); } catch (x) { } } };
+    var pick = function (d) { // 미리보기에서 누른 섹션·소개 장면의 편집 입력란을 연다
+      collect(); var cfg = G.cfg;
+      if (d.intro && G.sub === 'intro') { var ix = (cfg.intro || []).map(function (x) { return x.id; }).indexOf(d.intro); var fm = ix >= 0 ? $('#obI' + ix) : null; if (fm) { flash(fm.closest('.card') || fm); return; } }
+      if (d.sec && cfg.sections.some(function (x) { return x.id === d.sec; })) {
+        G.selSec = d.sec; secEditor(); $$('.ob-node[data-sec]').forEach(function (x) { x.classList.toggle('on', x.dataset.sec === d.sec); }); flash($('#obSecEd'));
+      }
+    };
+    prevListener = function (e) {
+      if (e.origin !== location.origin || !e.data) return;
+      if (e.data.t === 'mt-onb-ready') push();
+      else if (e.data.t === 'mt-onb-select') { var fr = $('#obPrevFrame'); if (fr && e.source === fr.contentWindow) pick({ intro: String(e.data.intro || ''), sec: String(e.data.sec || '') }); }
+    };
     window.addEventListener('message', prevListener);
     $$('[data-pd]', box).forEach(function (b) { b.onclick = function () { G.prev.dev = b.dataset.pd; drawPrev(); }; });
     $('#obPrevRe').onclick = push; $('#obPrevX').onclick = function () { G.prev.on = false; drawPrev(); };

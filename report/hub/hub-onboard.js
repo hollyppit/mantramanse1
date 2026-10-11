@@ -25,6 +25,16 @@
     if (e.data.hash) { try { if (location.hash !== e.data.hash) { location.hash = e.data.hash; return; } } catch (x) { } }
     try { H.render(); } catch (x) { }
   });
+  if (PREVIEW) { // 관리자 미리보기: 섹션을 누르면 부모 창이 해당 편집 입력란을 연다(링크·버튼·입력은 그대로 동작)
+    try {
+      var st = document.createElement('style'); st.textContent = '[data-sec],[data-intro]{cursor:pointer}[data-sec]:hover{outline:2px dashed rgba(224,179,106,.75);outline-offset:-2px}[data-intro]:hover{outline:2px dashed rgba(120,200,255,.75);outline-offset:-2px}'; document.head.appendChild(st);
+      document.addEventListener('click', function (e) {
+        var t = e.target; if (!t || !t.closest || t.closest('a,button,input,select,textarea,label,summary')) return;
+        var it = t.closest('[data-intro]'), sc = t.closest('[data-sec]'); if (!it && !sc) return;
+        root.parent.postMessage({ t: 'mt-onb-select', intro: it ? it.getAttribute('data-intro') : '', sec: sc ? sc.getAttribute('data-sec') : '' }, location.origin);
+      }, true);
+    } catch (e) { }
+  }
   Ob.config = function () {
     if (!cfgP) cfgP = new Promise(function (ok) {
       var done = false, fin = function (c, v) { if (done) return; done = true; if (c) { CFG = O.merge(O.DEFAULTS, c); version = v || ''; } ok(CFG); };
