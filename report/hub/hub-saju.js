@@ -216,7 +216,7 @@
     function finish(skipped) {
       if (done) return; done = true; clearTimeout(timer); host.remove(); H.cleanup = null;
       if (!replay) P.markAwakened(); H.track('ilju_awakening_complete', { skipped: skipped ? 1 : 0, replay: replay ? 1 : 0 });
-      H.replace('#/my');
+      H.replace(H.ctx && H.ctx.q && H.ctx.q.to === 'home' ? '#/' : '#/my'); // 새 홈에서 온 경우 홈으로 돌아간다
     }
     H.cleanup = function () { done = true; clearTimeout(timer); };
     host.onclick = function (e) { if (e.target.id === 'awSkip') finish(true); else show(); };
