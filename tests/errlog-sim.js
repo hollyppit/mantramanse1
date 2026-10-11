@@ -44,6 +44,7 @@ const url = p => 'file:///' + path.join(root, p).replace(/\\/g, '/');
   const odd = E.cleanReport({ kind: 'error', where: 'w', ch: '한글 챕터!', world: '../x', flow: 'zzz', v: 'bad version', src: 'a/b/<script>.js', env: { br: 'ie6' }, line: -5 });
   ok(odd.ch === '' && odd.world === '' && odd.flow === '' && odd.v === '' && odd.src === '' && odd.env.br === 'other' && odd.line === 0, '형식이 틀린 값은 빈 값으로');
   ok(E.cleanReport({ kind: 'error', where: 'w', line: 1e9 }).line === 99999, '줄 번호 상한');
+  ok(E.cleanReport({ kind: 'error', where: 'w', flow: 'hub', ch: 'today' }).flow === 'hub', '허브 흐름(flow: hub)');
 
   /* 3. 서명 · 집계 */
   const r1 = E.cleanReport({ kind: 'error', where: 'a', msg: 'x', src: 'v.js', line: 3 }), r2 = E.cleanReport({ kind: 'error', where: 'a', msg: 'x', src: 'v.js', line: 4 });

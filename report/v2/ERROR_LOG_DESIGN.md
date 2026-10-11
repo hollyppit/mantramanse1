@@ -171,6 +171,6 @@ sig = 짧은 해시(kind + where + src + line + msg 앞 80자)
 - 롤백: `report/v2/index.html` 의 `errlog.js` 스크립트 태그 제거 + 환경변수 제거.
 
 ### 한계
-- 허브(`report/hub`)는 아직 수집 대상이 아니다(뷰어만).
+- 허브(`report/hub`)는 전역 오류 핸들러만 붙였다(`flow: hub`, 챕터 칸에는 화면 이름 `today`·`tarot` 등). 허브에는 명시적 보고 지점이 아직 없다.
 - `Origin`/`Referer` 를 모두 지우는 환경에서는 수집되지 않는다(조용히 버림).
 - 오류의 `src` 는 브라우저가 알려 줄 때만 채워진다(교차 출처 스크립트는 "Script error." 로 가려질 수 있음).
