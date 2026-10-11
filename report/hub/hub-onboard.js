@@ -68,6 +68,25 @@
   function paint(html, cls) {
     var el = H.$('#screen'); el.className = ''; el.innerHTML = '<div class="ob ' + (cls || '') + (H.reduce ? ' rm' : '') + '">' + html + '</div>'; void el.offsetWidth; el.className = 'fx'; toHubTop(); return el;
   }
+  /* 전체 화면 무빙툰 장면: 같은 html(진행률·무대·입력·버튼)을 배경 / 캐릭터+말풍선 / 하단 입력 시트로 다시 배치한다.
+     id(#obBub #obForm #obMsg #obBack #obOk …)는 그대로라 기존 bind() 가 그대로 동작한다. 화면을 떠나면 걷어 낸다. */
+  function paintFs(html, cls) {
+    var tmp = document.createElement('div'); tmp.innerHTML = html;
+    var prog = tmp.querySelector('.ob-prog'), stage = tmp.querySelector('.ob-stage'); if (!stage) return paint(html, cls);
+    var host = document.getElementById('hub') || document.body, fs = document.getElementById('obFs');
+    if (!fs) { fs = document.createElement('div'); fs.id = 'obFs'; host.appendChild(fs); onLeave(function () { var e = document.getElementById('obFs'); if (e && e.parentNode) e.parentNode.removeChild(e); }); }
+    var mk = function (c) { var d = document.createElement('div'); d.className = c; return d; };
+    var bg = mk('ob-fs-bg ' + stage.className.replace(/\bob-stage\b/, '').trim()), sh = mk('ob-fs-shade'), top = mk('ob-fs-top'), mid = mk('ob-fs-mid'), sheet = mk('ob-fs-sheet');
+    var st = stage.getAttribute('style'); if (st) bg.setAttribute('style', st);
+    if (prog) top.appendChild(prog); // appendChild 가 원래 자리에서 옮긴다
+    while (stage.firstChild) mid.appendChild(stage.firstChild);
+    stage.parentNode.removeChild(stage);
+    var root0 = tmp.firstElementChild && tmp.children.length === 1 ? tmp.firstElementChild : tmp; while (root0.firstChild) sheet.appendChild(root0.firstChild);
+    fs.className = 'ob-fs' + (H.reduce ? ' rm' : ''); fs.innerHTML = '';
+    [bg, sh, top, mid, sheet].forEach(function (n) { fs.appendChild(n); });
+    var scr = H.$('#screen'); if (scr) { scr.className = ''; scr.innerHTML = ''; }
+    toHubTop(); return fs;
+  }
   // 화면을 떠날 때(허브 라우터가 H.cleanup 을 부른다) 리스너를 걷어 낸다
   function onLeave(fn) { var prev = H.cleanup; H.cleanup = function () { try { fn(); } catch (e) { } if (prev) prev(); }; }
   function swipe(el, onL, onR) { // 좌우 스와이프(세로 스크롤과 구분)
@@ -304,7 +323,7 @@
       function render() {
         var s = scenes[step], last = step === scenes.length - 1, nm = d.name;
         var lines = (s.field === 'time' && d.hourUnknown && s.unknownLines && s.unknownLines.length ? s.unknownLines : s.lines).map(function (t) { return F(t, nm); });
-        var el = paint('<div class="ob-prog" role="progressbar" aria-valuemin="1" aria-valuemax="' + scenes.length + '" aria-valuenow="' + (step + 1) + '"><i style="width:' + Math.round((step + 1) / scenes.length * 100) + '%"></i><span>' + esc(String(CFG.progressLabel || '{n} / {total} · {title}').replace(/{n}/g, step + 1).replace(/{total}/g, scenes.length).replace(/{title}/g, s.title)) + '</span></div>' +
+        var el = paintFs('<div class="ob-prog" role="progressbar" aria-valuemin="1" aria-valuemax="' + scenes.length + '" aria-valuenow="' + (step + 1) + '"><i style="width:' + Math.round((step + 1) / scenes.length * 100) + '%"></i><span>' + esc(String(CFG.progressLabel || '{n} / {total} · {title}').replace(/{n}/g, step + 1).replace(/{total}/g, scenes.length).replace(/{title}/g, s.title)) + '</span></div>' +
           '<div class="ob-stage ' + (BGTHEME[s.theme] || '') + '"' + (s.bg ? ' style="background-image:url(' + esc(s.bg) + ')"' : '') + '>' + avatar(s.face, s.image) + '<div class="ob-bubble' + (s.bubble ? ' bub-' + esc(s.bubble) : '') + '" id="obBub" aria-live="polite">' + lines.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join('') + '</div></div>' +
           '<div class="ob-form" id="obForm">' + fieldHtml(s) + '</div>' + (s.hint && s.field !== 'name' ? '<p class="note ob-hint">' + esc(s.hint) + '</p>' : '') +
           '<p class="msg err" id="obMsg" role="alert"></p><div class="ob-nav"><button type="button" class="btn ghost sm" id="obBack"' + (step === 0 ? ' hidden' : '') + '>‹ 이전</button><button type="button" class="btn sm" id="obOk">' + esc(s.button || '다음') + '</button></div>' +
@@ -374,7 +393,7 @@
         }).catch(function () { Ob.track('calculation_failure', { reason: 'engine' }); msg('분석 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.'); if (btn) { btn.disabled = false; btn.textContent = '나의 사주 확인하기'; } });
       }
       render();
-      swipe($('#screen'), function () { }, function () { if (step > 0) { step--; render(); } }); // 오른쪽으로 쓸면 이전 (입력 중 실수로 넘어가지 않게 다음은 버튼으로만)
+      swipe(document.getElementById('obFs') || $('#screen'), function () { }, function () { if (step > 0) { step--; render(); } }); // 오른쪽으로 쓸면 이전 (입력 중 실수로 넘어가지 않게 다음은 버튼으로만)
     });
   });
 
