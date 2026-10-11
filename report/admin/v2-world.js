@@ -9,7 +9,7 @@
   var $ = function (s, e) { return (e || document).querySelector(s); }, $$ = function (s, e) { return [].slice.call((e || document).querySelectorAll(s)); };
   var KEY = 'mt_v2_world_ts', TS = { date: '1992-06-23', time: '01:30', gender: 'M' };
   try { Object.assign(TS, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
-  var FIELDS = ['id', 'name', 'line', 'desc', 'notice', 'enabled', 'order', 'access', 'color', 'accent', 'bgImage', 'bgVideo', 'introImage', 'introVideo', 'chapters'];
+  var FIELDS = ['id', 'name', 'line', 'desc', 'notice', 'enabled', 'order', 'access', 'color', 'accent', 'bgImage', 'bgVideo', 'introImage', 'introVideo', 'chapters', 'cutImages'];
   var hex = function (v, d) { return /^#[0-9a-fA-F]{6}$/.test(v || '') ? v : d; };
   var dirty = function () { W.dirty = true; var b = $('#wdSave'); if (b) { b.disabled = false; b.textContent = '저장'; } var s = $('#wdState'); if (s) s.textContent = '저장하지 않은 변경이 있습니다'; };
   (window.AdminDirty = window.AdminDirty || {})['세계관'] = function () { return W.dirty; };

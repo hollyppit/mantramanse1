@@ -67,6 +67,13 @@ ok(S.extract({ chapters: [] }) === null && S.card(null, {}, null).indexOf('만�
   ok(imgsOf('B').every(x => x === '/b1.webp'), '챕터B: 이미지가 하나면 그 이미지');
   ok(imgsOf('C').every(x => x === '/bg.webp'), '이미지가 없는 챕터는 세계 배경');
   ok(new Set(wv.frames.map(f => f.img)).size === 4, '세계 전체 이미지가 한 장으로 뭉치지 않음: ' + new Set(wv.frames.map(f => f.img)).size);
+  // 관리자가 지정한 컷 이미지(meta.cut)는 본문 삽화보다 우선하고, 컷 순서대로 쓰며 모자라면 돌려 쓴다
+  const wo = S.fromChapters([{ id: 'a', title: '챕터A', html: withImg('a', '/a1.webp', '/a2.webp') }, { id: 'b', title: '챕터B', html: withImg('b', '/b1.webp', '/b1.webp') }, { id: 'c', title: '챕터C', html: txt(1) + txt(2) + txt(3) }],
+    { id: 'world:w9', title: '세계', bg: '/bg.webp', per: 3, max: 36, cut: { a: ['/o1.webp', '/o2.webp'], c: ['/o3.webp'] } });
+  const ofCh = id => wo.frames.filter(f => new RegExp('^챕터' + id).test(f.cap)).map(f => f.img);
+  ok(ofCh('A').join() === '/o1.webp,/o2.webp,/o1.webp', '지정 이미지가 본문 삽화보다 우선·컷 순서·돌려 쓰기: ' + ofCh('A'));
+  ok(ofCh('B').join() === '/b1.webp,/b1.webp,/b1.webp', '지정하지 않은 챕터는 본문 삽화 그대로');
+  ok(ofCh('C').every(x => x === '/o3.webp'), '삽화가 없는 챕터도 지정 이미지를 쓴다(그래프 챕터 등)');
   ok(/data-wtoon="w1"/.test(S.toonCard({ wid: 'w1', name: '세계', frames: 3 })), '세계 카드 버튼');
 }
 console.log('윤회의 문 검증 완료');
