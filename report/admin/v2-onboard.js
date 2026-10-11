@@ -341,7 +341,7 @@
         chk('enabled', s.enabled !== false, '노출') + '</form></div>'; }).join('') +
       '<div class="card"><h3 style="font-size:1rem">예전 마지막 문구·버튼 <span class="ob-lock">(최종 CTA 섹션 문구가 비어 있을 때 사용)</span></h3><form id="obLast" onsubmit="return false"><label class="ob-f">문구<input type="text" name="line" value="' + esc(cfg.introLast.line) + '"></label><label class="ob-f">버튼<input type="text" name="cta" value="' + esc(cfg.introLast.cta) + '"></label></form></div>';
     cfg.intro.forEach(function (s, i) { var fi = $('#obI' + i); if (fi) bindUploads(fi, 'onb-intro-'); });
-    $('[data-tp]').forEach(function (r) { r.onclick = function () { collect(); G.selTopic = r.dataset.tp; introView(); }; });
+    $$('[data-tp]').forEach(function (r) { r.onclick = function () { collect(); G.selTopic = r.dataset.tp; introView(); }; });
     $('#obTpAdd').onclick = function () { collect(); var id = uid('tp').slice(0, 30).toLowerCase(); cfg.topics.push({ id: id, enabled: false, nature: 'tradition', title: '새 주제', sub: '', summary: '', detail: '', analogy: '', term: '', termEasy: '', image: '', video: '', image2: '', anim: 'fade', refs: '' }); G.selTopic = id; G.dirty = true; introView(); };
     var f = $('#obTopic'); if (f) {
       bindUploads(f, 'onb-topic-');
