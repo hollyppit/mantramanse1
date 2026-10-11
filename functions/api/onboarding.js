@@ -84,7 +84,7 @@ function cleanCase(c, notes) {
 const QUEST_STEPS = ['seal', 'guide', 'name', 'gender', 'calendar', 'year', 'month', 'day', 'time', 'place', 'confirm'];
 const OPTIONAL_STEPS = ['seal', 'guide'];                                       // 연출용 단계만 끌 수 있다(나머지는 계산에 필요한 입력)
 const ASSET_KEYS = ['gate', 'courtyard', 'archive', 'papers', 'reeds', 'mirror', 'paths', 'letter', 'portal', 'office', 'male', 'female'];
-const FX = ['fade', 'rise', 'none'], TL_IDS = ['birth', 'flow', 'now', 'themes'], INTERESTS = ['', 'self', 'money', 'career', 'love', 'marriage', 'relation', 'future'];
+const FX = ['fade', 'rise', 'none'], TL_IDS = ['birth', 'flow', 'now', 'themes'];
 const GRAPH_KEYS = ['elements', 'ziwei', 'daeun', 'seun', 'wolun', 'today'];
 const focus = v => { v = s(v, 12); return /^\d{1,3}% \d{1,3}%$/.test(v) ? v : ''; };
 const pair = (o, n, len) => ({ male: arr(o && o.male, n, len), female: arr(o && o.female, n, len) });
@@ -110,13 +110,6 @@ function cleanTimeline(t) {
   const out = { enabled: bool(t.enabled, true) };
   if (Array.isArray(t.sections)) { const seen = new Set(); out.sections = t.sections.slice(0, 8).filter(x => x && TL_IDS.includes(x.id) && !seen.has(x.id) && seen.add(x.id)).map(x => ({ id: x.id, enabled: x.enabled !== false, title: s(x.title, 40), sub: s(x.sub, 120) })); }
   if (t.graph && typeof t.graph === 'object') { out.graph = {}; for (const k of GRAPH_KEYS) if (typeof t.graph[k] === 'boolean') out.graph[k] = t.graph[k]; }
-  if (Array.isArray(t.topics)) {
-    const seen = new Set();
-    out.topics = t.topics.slice(0, 16).filter(x => x && ID.test(String(x.id || '')) && !seen.has(x.id) && seen.add(x.id)).map(x => {
-      const lk = s(x.link, 200), okLink = /^(#\/[\w\-./?=&%]*|\/[\w\-./?=&#%]*|https:\/\/[^\s"'<>]+)$/.test(lk) ? lk : '', kind = x.kind === 'link' && okLink ? 'link' : 'interest';
-      return { id: x.id, enabled: x.enabled !== false, title: s(x.title, 40), desc: s(x.desc, 120), kind, interest: INTERESTS.includes(x.interest) ? x.interest : '', link: kind === 'link' ? okLink : '', asset: ASSET_KEYS.includes(x.asset) ? x.asset : 'archive', image: img(x.image), access: x.access === 'free' ? 'free' : 'paid' };
-    }).filter(x => x.title);
-  }
   if (t.texts && typeof t.texts === 'object') out.texts = flat(t.texts, ['intro', 'notice'], 300);
   return out;
 }

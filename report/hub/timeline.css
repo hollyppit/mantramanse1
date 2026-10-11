@@ -81,13 +81,13 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 #hub .tq-today{ display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; margin: 12px 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: rgba(19,24,39,.8); color: inherit; text-decoration: none; }
 #hub .tq-today small{ font-size: .7rem; color: var(--ink-3); letter-spacing: .06em; } #hub .tq-today h4{ font-family: var(--f-serif); font-size: 1.1rem; } #hub .tq-today p{ font-size: .84rem; color: var(--ink-2); } #hub .tq-today span{ font-size: .8rem; color: var(--gold); }
 
-/* 영역 4 */
-#hub .tq-topics{ display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 12px; }
-#hub .tq-topic{ position: relative; display: block; height: 190px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; color: var(--ink); text-decoration: none; background: #0b1117; }
-#hub .tq-topic img{ width: 100%; height: 100%; object-fit: cover; filter: brightness(.6); transition: .4s; display: block; } #hub .tq-topic:hover img{ transform: scale(1.06); filter: brightness(.86); }
+/* 영역 4: 운명 세계 지도(report/v2/explore.css 의 .xp-w)와 같은 이미지 타일 */
+#hub .tq-topics{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+#hub .tq-topic{ position: relative; display: block; height: 190px; border: 1px solid color-mix(in srgb, var(--wa, #D5B97F) 40%, var(--line)); border-radius: 14px; overflow: hidden; color: var(--ink); text-decoration: none; background: var(--wc, #0b1117); }
+#hub .tq-topic img{ width: 100%; height: 100%; object-fit: cover; filter: brightness(.62); transition: .4s; display: block; } #hub .tq-topic:hover img, #hub .tq-topic:focus-visible img{ transform: scale(1.06); filter: brightness(.86); }
 #hub .tq-topic::after{ content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(5,8,11,.92), transparent 62%); }
-#hub .tq-topic > div{ position: absolute; z-index: 1; left: 14px; right: 14px; bottom: 12px; } #hub .tq-topic h3{ font-size: 1.12rem; text-shadow: 0 3px 10px #000; } #hub .tq-topic p{ font-size: .76rem; color: var(--ink-2); margin-top: 2px; line-height: 1.5; }
-#hub .tq-acc{ position: absolute; z-index: 1; top: 10px; right: 10px; font-size: .68rem; padding: 2px 9px; border-radius: 999px; background: rgba(8,10,17,.75); border: 1px solid var(--line); color: var(--ink-2); } #hub .tq-acc.free{ color: #7FD6B0; border-color: #2f7a52; }
+#hub .tq-topic > div{ position: absolute; z-index: 1; left: 14px; right: 14px; bottom: 14px; } #hub .tq-topic h3{ font-size: 1.12rem; text-shadow: 0 3px 10px #000; } #hub .tq-ic{ font-size: 1rem; margin-right: 6px; } #hub .tq-topic p{ font-size: .76rem; color: var(--ink-2); margin-top: 2px; line-height: 1.5; }
+#hub .tq-acc{ position: absolute; z-index: 1; top: 10px; right: 10px; font-size: .68rem; padding: 2px 9px; border-radius: 999px; background: rgba(8,10,17,.75); border: 1px solid var(--line); color: var(--ink-2); } #hub .tq-acc.paid{ background: #5B3A8C; color: #fff; border-color: transparent; letter-spacing: .04em; }
 
 #hub .tq-foot{ margin-top: 34px; text-align: center; } #hub .tq-acts{ display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 14px; }
 
@@ -96,6 +96,6 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
   #hub .tq-hero{ padding-top: 38px; }
   #hub .tq-pl b{ font-size: 2rem; }
   #hub .tq-f{ grid-template-columns: 58px 1fr 68px; }
-  #hub .tq-topic{ height: 150px; }
+  #hub .tq-topic{ height: 160px; } #hub .tq-topic > div{ left: 11px; right: 11px; bottom: 12px; } #hub .tq-topic h3{ font-size: 1rem; } #hub .tq-topic p{ font-size: .72rem; }
 }
 @media (prefers-reduced-motion: reduce){ #hub .tq *{ transition: none !important; } }

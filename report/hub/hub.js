@@ -74,7 +74,7 @@
   H.toV2 = function (o) {
     o = o || {}; var s = P.get(); if (!s) { H.go('#/input?next=' + encodeURIComponent(o.next || 'my')); return; }
     try { sessionStorage.setItem('mt_v2_input', JSON.stringify({ inp: P.toInput(s), name: P.name(), interest: o.interest || '' })); } catch (e) { H.toast('이 브라우저에서는 이어 볼 수 없습니다.'); return; }
-    location.href = '/report/v2/?from=hub' + (o.classic ? '&flow=classic' : '');
+    location.href = '/report/v2/?from=hub' + (o.classic ? '&flow=classic' : '') + (o.world && /^[\w-]{1,30}$/.test(o.world) ? '&world=' + o.world : ''); // world: 운명 세계 지도에서 그 세계를 바로 연다
   };
 
   /* ── 라우터: #/경로?키=값 ──────────────────────────────────── */
@@ -138,6 +138,6 @@
   H.route('go', function (q) { // 저장된 정보가 있어야 하는 심층 콘텐츠로의 관문
     if (!P.has()) return H.replace('#/input?next=' + encodeURIComponent(q.to || 'my'));
     var INT = ['money', 'career', 'love', 'marriage', 'future', 'relation', 'self'];
-    if (q.to === 'deep') H.toV2({ classic: true }); else if (INT.indexOf(q.to) >= 0) H.toV2({ interest: q.to }); else H.toV2(); // life(기본): 인생 지도 문서. 관심 분야(interest)를 넘기면 그 이야기가 먼저 나온다
+    if (q.world) H.toV2({ world: q.world }); else if (q.to === 'deep') H.toV2({ classic: true }); else if (INT.indexOf(q.to) >= 0) H.toV2({ interest: q.to }); else H.toV2(); // life(기본): 인생 지도 문서. 관심 분야(interest)를 넘기면 그 이야기가 먼저 나온다
   });
 })(window);

@@ -7,7 +7,7 @@
   'use strict';
   var H = root.Hub, Ob = H.Onboard, O = root.Onboard, Q = root.Quest, P = H.profile, esc = H.esc, DOC = document;
   var $ = H.$, $$ = H.$$;
-  var V2 = ['chapters', 'saju-data', 'rules', 'narrator', 'content', 'content-pro', 'content-pro2', 'topics', 'story-director', 'luck6', 'timeline'];
+  var V2 = ['chapters', 'saju-data', 'rules', 'narrator', 'content', 'content-pro', 'content-pro2', 'topics', 'story-director', 'luck6', 'timeline', 'explore'];
   var EL_COL = ['#5E9E78', '#D0634A', '#BC9C62', '#AEB9C6', '#4A7AB5'], GROUPS5 = ['비겁', '식상', '재성', '관성', '인성'], EL_HJ = ['木', '火', '土', '金', '水'];
   var clamp = function (v) { return Math.max(0, Math.min(100, Math.round(v))); };
   var pct = function (fit) { return clamp((fit + 100) / 2); };
@@ -21,17 +21,25 @@
     return tlP;
   }
 
+  // 관리자가 저장한 세계 정의(/api/worlds). 4초 안에 못 받으면 코드 기본 6개 세계로 간다(운명 세계 지도와 같은 규칙).
+  function loadWorlds() {
+    return new Promise(function (ok) {
+      var done = false, fin = function (v) { if (!done) { done = true; ok(v); } }; setTimeout(function () { fin(null); }, 4000);
+      try { fetch('/api/worlds').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { fin(d && d.worlds && d.worlds.length ? d.worlds : null); }).catch(function () { fin(null); }); } catch (e) { fin(null); }
+    });
+  }
+
   H.route('timeline', function (q, ctx) {
     var PREVIEW = !!Ob.preview;
     if (!P.has() && !PREVIEW) return H.replace('#/welcome');
     H.view('<p class="pend">운명의 타임라인을 펼치는 중…</p>');
     Ob.config().then(function (cfg) {
       if (!cfg.timeline || cfg.timeline.enabled === false) return H.replace('#/');
-      return Promise.all([H.sajuKit(), PREVIEW ? H.engine().then(function (M) { return M.compute(SAMPLE); }) : H.chart(), loadTl()]).then(function (r) { if (H.alive(ctx)) draw(q, ctx, cfg, r[0], r[1], PREVIEW); });
+      return Promise.all([H.sajuKit(), PREVIEW ? H.engine().then(function (M) { return M.compute(SAMPLE); }) : H.chart(), loadTl().then(loadWorlds)]).then(function (r) { if (H.alive(ctx)) draw(q, ctx, cfg, r[0], r[1], PREVIEW, root.ReportV2.Explore.mergeWorlds(r[2])); });
     }).catch(function () { if (!H.alive(ctx)) return; H.view('<p class="pend">타임라인을 불러오지 못했습니다.<br><br><button type="button" class="btn ghost" id="rt">다시 시도</button><br><br><a class="btn ghost sm" href="#/">홈으로</a></p>'); $('#rt').onclick = function () { H.render(); }; });
   });
 
-  function draw(q, ctx, cfg, kit, ch, PREVIEW) {
+  function draw(q, ctx, cfg, kit, ch, PREVIEW, worlds) {
     var M = kit.M, T = kit.T, R = root.ReportV2, TL = R.Timeline, L = R.Luck6, TC = cfg.timeline, G = TC.graph, nm = PREVIEW ? '미리보기' : P.name(), mobile = (root.innerWidth || 1024) < 768;
     var now = Date.now(), nowY = new Date(now + 9 * 3600e3).getUTCFullYear(), day = ch.pillars.day, stemK = M.STEM_K[day.s], ju = M.gzNameK(day), g = ch.gender;
     var ig = T.ilganCard(stemK, nm), jc = T.ijuCard(ju, nm, g), S5 = (T.DATA.S || {})[stemK] || {};
@@ -124,13 +132,16 @@
       return yr + today + seun + mon + monthCard + '<p class="tq-sub">월운은 절기를 기준으로 하며, 1월 막대는 소한 이후입니다. 일별 흐름과 택일은 일진 캘린더에서 볼 수 있습니다.</p>';
     }
 
-    /* ── 영역 4: 인생의 주요 주제 ── */
+    /* ── 영역 4: 인생의 주요 주제 = 운명 세계 ──
+       기존 무빙툰의 "운명 세계" 지도(/report/v2/)와 같은 데이터(이름·한 줄 설명·아이콘·이미지·순서·유료 표시·활성화)를 그대로 쓴다.
+       관리자 "세계관" 탭에서 고친 내용이 여기에도 같이 바뀌고, 타일을 누르면 그 세계가 바로 열린다(?world=). */
     function themesHtml() {
-      var list = TC.topics.filter(function (t) { return t.enabled !== false; });
-      return '<div class="tq-topics">' + list.map(function (t) {
-        var href = t.kind === 'link' && t.link ? t.link : '#/go?to=' + (t.interest || 'life'), img = t.image || asset(t.asset);
-        return '<a class="tq-topic" href="' + esc(href) + '" data-track="timeline_topic_click" data-p="' + esc(t.id) + '" data-ob-ev="timeline_topic_click" data-case="t-' + esc(t.id) + '"><img src="' + esc(img) + '" alt="" loading="lazy" decoding="async"><span class="tq-acc ' + t.access + '">' + esc(Q.ACCESS[t.access] || '') + '</span><div><h3>' + esc(t.title) + '</h3><p>' + esc(t.desc) + '</p></div></a>';
-      }).join('') + '</div>';
+      var list = worlds.filter(function (w) { return w.enabled !== false; });
+      return '<div class="tq-topics">' + list.map(function (w) {
+        var href = '#/go?to=life&world=' + encodeURIComponent(w.id), accent = /^#[0-9a-fA-F]{6}$/.test(w.accent || '') ? w.accent : '#D5B97F', wc = /^#[0-9a-fA-F]{6}$/.test(w.color || '') ? w.color : '#0b1117';
+        return '<a class="tq-topic" href="' + esc(href) + '" style="--wa:' + accent + ';--wc:' + wc + '" data-track="timeline_topic_click" data-p="' + esc(w.id) + '" data-ob-ev="timeline_topic_click" data-case="t-' + esc(w.id) + '"><img src="' + esc(R.Explore.artOf(w)) + '" alt="" loading="lazy" decoding="async">' +
+          (w.access === 'paid' ? '<span class="tq-acc paid">유료</span>' : '') + '<div><h3><span class="tq-ic" aria-hidden="true">' + esc(w.icon || '') + '</span>' + esc(w.name) + '</h3><p>' + esc(w.line || '') + '</p></div></a>';
+      }).join('') + '</div><p class="tq-sub">운명 세계 지도와 같은 구성입니다. 세계를 누르면 그 세계의 풀이가 바로 열립니다.</p>';
     }
 
     /* ── 화면 조립 ── */
