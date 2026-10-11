@@ -42,6 +42,28 @@ const mk = (y, m, d, h, g) => M.compute({ year: y, month: m, day: d, hour: h, mi
   ok(a.missing.every(x => x.len < Q.MIN_LEN), tag + ' 누락 기준');
   console.log(tag, '풀이 누락 의심', a.missing.map(x => x.id + '(' + x.len + ')').join(' ') || '없음', '· 단정 검토', a.absolute.length);
 });
+// 일주 캐릭터 영상 매핑 점검(awakeningAudit): 합성 저장본으로 120칸·20칸 집계, 주소 형식, 확인 대상 URL 수집
+{
+  const ILJU = R.Media.ILJU, vids = [
+    { dayPillar: ILJU[0], gender: 'M', enabled: true, videoUrl: '/api/clipfile?k=a1.mp4', posterUrl: '/api/clipfile?k=a1.webp' },
+    { dayPillar: ILJU[0], gender: 'F', enabled: true, videoUrl: '/api/clipfile?k=a2.mp4' },
+    { dayPillar: ILJU[1], gender: 'M', enabled: true, posterUrl: '/api/clipfile?k=p1.webp' },
+    { dayPillar: ILJU[2], gender: 'F', enabled: false, videoUrl: '/api/clipfile?k=d1.mp4' },
+    { dayPillar: ILJU[3], gender: 'M', enabled: true, videoUrl: 'ftp://bad/x.mp4' },
+    { dayPillar: ILJU[4], gender: 'F', enabled: true, videoUrl: 'https://cdn.example.com/ext.mp4' },
+  ];
+  const a = Q.awakeningAudit({ videos: vids, ilgan: [{ stem: '갑', gender: 'M', enabled: true, videoUrl: '/api/clipfile?k=ig1.mp4' }], fallback: { videoUrl: '/api/clipfile?k=fb.mp4' }, textOnly: true });
+  ok(a.pillars.of === 120 && a.pillars.ok === 3 && a.pillars.posterOnly === 1 && a.pillars.disabled === 1 && a.pillars.error === 1, '일주 영상 집계: ' + JSON.stringify(a.pillars).slice(0, 160));
+  ok(a.pillars.ok + a.pillars.posterOnly + a.pillars.disabled + a.pillars.missing + a.pillars.error === 120, '120칸이 빠짐없이 분류됨');
+  ok(a.pillars.missingList.length === 120 - a.pillars.ok, '문제 칸 목록 = 120 - 정상');
+  ok(a.ilgan.of === 20 && a.ilgan.ok === 1 && a.ilgan.missing === 19, '일간 소개 집계');
+  ok(a.fallback === true && a.textOnly === true && a.publicBase === false, '기본 영상·문구만 보이기·공개 주소 플래그');
+  const us = a.urls.map(u => u.url);
+  ok(us.includes('/api/clipfile?k=a1.mp4') && us.includes('/api/clipfile?k=ig1.mp4') && us.includes('/api/clipfile?k=fb.mp4') && !us.some(u => /^ftp:|^https:/.test(u)) && new Set(us).size === us.length, '확인 대상은 이 사이트 업로드 주소만, 중복 없음: ' + us.length);
+  const none = Q.awakeningAudit({});
+  ok(none.pillars.ok === 0 && none.pillars.missing === 120 && none.ilgan.missing === 20 && none.urls.length === 0 && none.fallback === false, '비어 있는 저장본');
+}
+
 console.log('서비스 점검 검증 완료');
 if (fails.length) { console.log('실패 ' + fails.length + '건\n' + fails.slice(0, 20).map(f => ' ✗ ' + f).join('\n')); process.exit(1); }
 console.log('모두 통과');
