@@ -28,7 +28,7 @@ function cleanCase(c) {
   if (status === 'published' && !(source.doi || source.url)) status = 'verified'; // 출처 없는 자료는 공개하지 않는다
   const o = {
     id: c.id, type: TYPES.includes(c.type) ? c.type : 'research', status, weight: Math.max(0.1, Math.min(10, +c.weight || 1)),
-    title: s(c.title, 120), hook: s(c.hook, 160), body: arr(c.body, 6, 280), caveat: s(c.caveat, 300), who: s(c.who, 160), year: Math.max(0, Math.min(2100, +c.year || 0)),
+    title: s(c.title, 120), hook: s(c.hook, 160), body: arr(c.body, 6, 280), story: arr(c.story, 8, 420), takeaway: s(c.takeaway, 200), caveat: s(c.caveat, 300), who: s(c.who, 160), year: Math.max(0, Math.min(2100, +c.year || 0)),
     tags: arr(c.tags, 8, 20), source, verifiedNote: s(c.verifiedNote, 300), image: img(c.image), visual: s(c.visual, 20),
   };
   return o.title && o.body.length ? o : null;
@@ -37,6 +37,7 @@ const cleanLines = a => arr(a, 6, 120);
 function clean(b) {
   const out = {};
   if (typeof b.forceOnboarding === 'boolean') out.forceOnboarding = b.forceOnboarding;
+  if (b.bridge && typeof b.bridge === 'object') out.bridge = { toCelebrity: s(b.bridge.toCelebrity, 240), toIntro: s(b.bridge.toIntro, 240) };
   if (typeof b.honorific === 'string') { const h = s(b.honorific, 8); out.honorific = h && !FORBIDDEN.includes(h) ? h : '귀인'; }
   if (b.weights && typeof b.weights === 'object') { const r = Math.max(0, Math.min(100, +b.weights.research || 0)), c = Math.max(0, Math.min(100, +b.weights.celebrity || 0)); if (r + c > 0) out.weights = { research: r, celebrity: c }; }
   if (Array.isArray(b.cases)) { const seen = new Set(); out.cases = b.cases.slice(0, 100).map(cleanCase).filter(c => c && !seen.has(c.id) && seen.add(c.id)); }

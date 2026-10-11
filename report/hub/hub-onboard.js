@@ -34,8 +34,14 @@
   var tOnce = function (name, props) { var k = name + '|' + (props && props.case || ''); if (onceSent[k]) return; onceSent[k] = 1; Ob.track(name, props); };
 
   /* ── 화면 그리기: 온보딩은 허브의 "홈화면으로 가기" 줄 없이 직접 그린다 ── */
+  var firstPaint = true;
+  function toHubTop() {
+    if (!H.embed) { root.scrollTo(0, 0); return; }
+    if (firstPaint) { firstPaint = false; return; } // 랜딩 첫 화면을 보고 있는 동안에는 건드리지 않는다
+    var hb = H.$('#hub'); root.scrollTo(0, Math.max(0, hb.getBoundingClientRect().top + root.scrollY - 8));
+  }
   function paint(html, cls) {
-    var el = H.$('#screen'); el.className = ''; el.innerHTML = '<div class="ob ' + (cls || '') + (H.reduce ? ' rm' : '') + '">' + html + '</div>'; void el.offsetWidth; el.className = 'fx'; root.scrollTo(0, 0); return el;
+    var el = H.$('#screen'); el.className = ''; el.innerHTML = '<div class="ob ' + (cls || '') + (H.reduce ? ' rm' : '') + '">' + html + '</div>'; void el.offsetWidth; el.className = 'fx'; toHubTop(); return el;
   }
   // 화면을 떠날 때(허브 라우터가 H.cleanup 을 부른다) 리스너를 걷어 낸다
   function onLeave(fn) { var prev = H.cleanup; H.cleanup = function () { try { fn(); } catch (e) { } if (prev) prev(); }; }
@@ -66,71 +72,83 @@
 
   /* ═════════ 온보딩 1부: 연구·유명인 사례 + 명리학 소개 ═════════ */
   var TYPE_LABEL = { research: '실제 연구', celebrity: '실제 인물 이야기' };
-  function currentCase() {
-    var id = null; try { id = sessionStorage.getItem('mt_onb_case'); } catch (e) { }
-    var c = id && O.publicCases(CFG.cases).filter(function (x) { return x.id === id; })[0];
-    return c || null;
+  // 유형(research | celebrity)마다 한 건. 같은 세션에서는 고른 사례를 유지하고, 최근 본 사례는 피한다.
+  function currentCase(type) {
+    var id = null; try { id = sessionStorage.getItem('mt_onb_case_' + type); } catch (e) { }
+    return id && O.publicCases(CFG.cases).filter(function (x) { return x.id === id && x.type === type; })[0] || null;
   }
-  function chooseCase(forceNew) {
-    var cur = currentCase(); if (cur && !forceNew) return cur;
+  function chooseCase(type, forceNew) {
+    var cur = currentCase(type); if (cur && !forceNew) return cur;
     var recent = lget(RECENT) || []; if (forceNew && cur) recent = [cur.id].concat(recent.filter(function (r) { return r !== cur.id; }));
-    var c = O.pickCase(CFG, { recent: recent.slice(0, 3) });
-    if (c) { try { sessionStorage.setItem('mt_onb_case', c.id); } catch (e) { } lset(RECENT, [c.id].concat(recent.filter(function (r) { return r !== c.id; })).slice(0, 4)); }
+    var c = O.pickCase(CFG, { recent: recent.slice(0, 4), type: type });
+    if (c) { try { sessionStorage.setItem('mt_onb_case_' + type, c.id); } catch (e) { } lset(RECENT, [c.id].concat(recent.filter(function (r) { return r !== c.id; })).slice(0, 6)); }
     return c;
   }
   // 온보딩 1·2부는 한 페이지를 스크롤하며 읽는다: 사례 → 명리학 3장면 → [나의 운 확인하기]. 장면은 화면에 들어올 때 차례로 나타난다.
-  H.route('welcome', function (q, ctx) {
+  function welcome(q, ctx) {
     Ob.config().then(function () {
       if (!H.alive(ctx)) return;
       try { sessionStorage.setItem('mt_onb_shown', '1'); } catch (e) { }
       var Art = root.OnboardArt || { forCase: function () { return ''; }, forIntro: function () { return ''; } };
-      var intro = CFG.intro.filter(function (s) { return s.enabled !== false; }), c = chooseCase(false);
+      var intro = CFG.intro.filter(function (s) { return s.enabled !== false; }), cur = { research: chooseCase('research', false), celebrity: chooseCase('celebrity', false) };
+      var BR = CFG.bridge || {}, shown = {};
       var media = function (o, svg) { return o && o.video ? '<video class="cn-media" src="' + esc(o.video) + '" muted playsinline autoplay loop></video>' : o && o.image ? '<img class="cn-media" src="' + esc(o.image) + '" alt="" loading="lazy">' : svg; };
       function caseHtml(c) {
         var src = c.source || {}, link = src.url ? '<a href="' + esc(src.url) + '" target="_blank" rel="noopener noreferrer" data-ob-ev="onboarding_source_click" data-case="' + esc(c.id) + '">' + esc(src.doi ? 'DOI ' + src.doi : '원문 보기') + '</a>' : '';
-        return '<p class="cn-kick">' + esc(TYPE_LABEL[c.type] || '') + (c.year ? ' · ' + c.year : '') + '</p><div class="cn-art">' + media(c, Art.forCase(c.visual)) + '</div>' +
-          '<p class="cn-hook">' + esc(c.hook) + '</p><h1 class="cn-title">' + esc(c.title) + '</h1>' +
-          '<ol class="cn-beats">' + c.body.slice(0, 3).map(function (b, i) { return '<li style="--i:' + i + '"><span aria-hidden="true">' + (i + 1) + '</span><p>' + esc(b) + '</p></li>'; }).join('') + '</ol>' +
+        var paras = (c.story && c.story.length ? c.story : c.body || []).slice(0, 6);
+        return '<p class="cn-kick">' + (c.type === 'research' ? '01 · ' : '02 · ') + esc(TYPE_LABEL[c.type] || '') + (c.year ? ' · ' + c.year : '') + '</p><div class="cn-art">' + media(c, Art.forCase(c.visual)) + '</div>' +
+          '<p class="cn-hook">' + esc(c.hook) + '</p><h2 class="cn-title">' + esc(c.title) + '</h2>' +
+          '<div class="cn-story">' + paras.map(function (p) { return '<p class="cn-rev">' + esc(p) + '</p>'; }).join('') + '</div>' +
+          (c.takeaway ? '<p class="cn-take cn-rev">' + esc(c.takeaway) + '</p>' : '') +
           (c.caveat ? '<p class="cn-cav">' + esc(c.caveat) + '</p>' : '') +
           '<details class="cn-src"><summary>출처 확인</summary><p>' + esc(c.who || '') + (c.who && src.label ? ' · ' : '') + esc(src.label || '') + (link ? '<br>' + link : '') + '</p></details>' +
-          '<div class="cn-links"><button type="button" id="obOther">다른 사례 보기</button></div>';
+          '<div class="cn-links"><button type="button" data-other="' + esc(c.type) + '">다른 ' + (c.type === 'research' ? '연구' : '인물') + ' 이야기 보기</button></div>';
       }
+      var bridge = function (t) { return t ? '<section class="cn-sec cn-bridge"><p class="cn-bridge-t cn-rev">' + esc(t) + '</p></section>' : ''; };
       var h = '<div class="cn-prog" id="cnProg" aria-hidden="true"></div>';
-      if (c) h += '<section class="cn-sec" id="cnCase" data-case="' + esc(c.id) + '">' + caseHtml(c) + '</section>';
+      if (cur.research) h += '<section class="cn-sec" data-type="research" data-case="' + esc(cur.research.id) + '">' + caseHtml(cur.research) + '</section>';
+      if (cur.research && cur.celebrity) h += bridge(BR.toCelebrity);
+      if (cur.celebrity) h += '<section class="cn-sec" data-type="celebrity" data-case="' + esc(cur.celebrity.id) + '">' + caseHtml(cur.celebrity) + '</section>';
+      if (cur.research || cur.celebrity) h += bridge(BR.toIntro);
       h += intro.map(function (s, i) {
-        return '<section class="cn-sec" data-intro="' + esc(s.id) + '"><p class="cn-kick">동양 명리학 · ' + (i + 1) + ' / ' + intro.length + '</p><div class="cn-art">' + media(s, Art.forIntro(s.id)) + '</div>' +
-          '<h2 class="cn-title">' + esc(s.title) + '</h2><p class="cn-body">' + esc(s.body) + '</p>' + (s.sub ? '<p class="cn-sub">' + esc(s.sub) + '</p>' : '') + '</section>';
+        return '<section class="cn-sec" data-intro="' + esc(s.id) + '"><p class="cn-kick">03 · 동양 명리학 · ' + (i + 1) + ' / ' + intro.length + '</p><div class="cn-art">' + media(s, Art.forIntro(s.id)) + '</div>' +
+          '<h2 class="cn-title">' + esc(s.title) + '</h2><p class="cn-body cn-rev">' + esc(s.body) + '</p>' + (s.sub ? '<p class="cn-sub cn-rev">' + esc(s.sub) + '</p>' : '') + '</section>';
       }).join('');
       h += '<section class="cn-sec cn-last" id="cnLast"><div class="cn-art">' + Art.forIntro('end') + '</div><h2 class="cn-title big">' + esc(CFG.introLast.line) + '</h2>' +
-        '<button type="button" class="btn cn-go" id="obGo" data-ob-ev="onboarding_cta_click">' + esc(CFG.introLast.cta) + '</button><p class="cn-cav">' + esc(O.INTRO_NOTICE) + '</p></section>' +
+        '<button type="button" class="btn cn-go" id="obGo" data-ob-ev="onboarding_cta_click">' + esc(CFG.introLast.cta) + '</button><div class="cn-links" style="justify-content:center"><a class="cn-lnk" href="#/?skip=1" data-track="onboarding_browse_click">먼저 무료 타로·캘린더 둘러보기</a></div><p class="cn-cav">' + esc(O.INTRO_NOTICE) + '</p></section>' +
         '<button type="button" class="cn-skip" id="obSkip">건너뛰기 ↓</button>';
       var el = paint('<div class="cn">' + h + '</div>', 'ob-cine');
       var secs = $$('.cn-sec', el), skip = $('#obSkip', el), last = $('#cnLast', el), seen = 0;
+      var caseId = function () { return (cur.research && cur.research.id) || (cur.celebrity && cur.celebrity.id) || ''; };
       function enter(sec) {
         if (sec.classList.contains('in')) return; sec.classList.add('in'); seen++;
-        if (sec.id === 'cnCase' && c) tOnce('onboarding_card_impression', { case: c.id, type: c.type });
-        if (sec === last) { tOnce('onboarding_intro_complete', { case: c && c.id || '' }); skip.hidden = true; }
+        var id = sec.getAttribute('data-case'); if (id) tOnce('onboarding_card_impression', { case: id, type: sec.getAttribute('data-type') });
+        if (sec === last) { tOnce('onboarding_intro_complete', { case: caseId() }); skip.hidden = true; }
       }
-      // 화면 위쪽 80% 안으로 들어온 장면을 나타낸다(스크롤·크기 변경·처음 그릴 때). IntersectionObserver 가 멈추는 숨은 탭에서도 동작한다.
-      var prog = $('#cnProg', el), tick = function () {
+      // 화면 위쪽 80% 안으로 들어온 장면·문단을 나타낸다(스크롤·크기 변경·처음 그릴 때). IntersectionObserver 가 멈추는 숨은 탭에서도 동작한다.
+      var prog = $('#cnProg', el), hubEl = H.$('#hub'), tick = function () {
         var d = document.documentElement, m = d.scrollHeight - d.clientHeight, vh = root.innerHeight || d.clientHeight;
-        prog.style.transform = 'scaleX(' + (m > 0 ? Math.min(1, root.scrollY / m) : 0) + ')';
+        if (H.embed && hubEl) { var hr = hubEl.getBoundingClientRect(), inHub = hr.top < vh * 0.6 && hr.bottom > vh * 0.3; skip.style.visibility = inHub && !last.classList.contains('in') ? 'visible' : 'hidden'; prog.hidden = true; }
+        else prog.style.transform = 'scaleX(' + (m > 0 ? Math.min(1, root.scrollY / m) : 0) + ')';
         secs.forEach(function (x) { if (!x.classList.contains('in') && x.getBoundingClientRect().top < vh * 0.8) enter(x); });
+        $$('.cn-rev:not(.in)', el).forEach(function (x) { if (x.getBoundingClientRect().top < vh * 0.88) x.classList.add('in'); });
       };
       root.addEventListener('scroll', tick, { passive: true }); root.addEventListener('resize', tick);
       var t0 = setTimeout(tick, 60), t1 = setTimeout(tick, 600);
       onLeave(function () { root.removeEventListener('scroll', tick); root.removeEventListener('resize', tick); clearTimeout(t0); clearTimeout(t1); });
-      skip.onclick = function () { Ob.track('onboarding_skip', { seen: seen, case: c && c.id || '' }); last.scrollIntoView({ behavior: H.reduce ? 'auto' : 'smooth', block: 'center' }); };
-      var oth = $('#obOther', el);
-      if (oth) oth.onclick = function () {
-        var n = chooseCase(true); if (!n) return; c = n; Ob.track('onboarding_other_case', { case: n.id });
-        var sec = $('#cnCase', el); sec.classList.remove('in'); sec.setAttribute('data-case', n.id); sec.innerHTML = caseHtml(n); void sec.offsetWidth; sec.classList.add('in'); tOnce('onboarding_card_impression', { case: n.id, type: n.type });
-        $('#obOther', el).onclick = oth.onclick; sec.scrollIntoView({ behavior: H.reduce ? 'auto' : 'smooth', block: 'start' });
-      };
-      $('#obGo', el).onclick = function () { Ob.track('onboarding_cta_click', { case: c && c.id || '' }); lset(SEEN, 1); H.go(q.replay && P.has() ? '#/begin?edit=1' : '#/begin'); }; // 다시 보기: 저장된 값이 채워진 채로 슬라이드 툰을 끝까지 볼 수 있다
-      Ob.track('onboarding_view', { replay: q.replay ? 1 : 0, case: c && c.id || '' }, true);
+      skip.onclick = function () { Ob.track('onboarding_skip', { seen: seen, case: caseId() }); last.scrollIntoView({ behavior: H.reduce ? 'auto' : 'smooth', block: 'center' }); };
+      el.addEventListener('click', function (e) { // 다른 연구/인물 이야기 보기: 그 자리에서 같은 유형의 다른 사례로 바꾼다
+        var b = e.target.closest && e.target.closest('[data-other]'); if (!b) return;
+        var type = b.getAttribute('data-other'), n = chooseCase(type, true), sec = b.closest('.cn-sec'); if (!n || !sec) return;
+        cur[type] = n; Ob.track('onboarding_other_case', { case: n.id });
+        sec.classList.remove('in'); sec.setAttribute('data-case', n.id); sec.innerHTML = caseHtml(n); void sec.offsetWidth; sec.classList.add('in');
+        tOnce('onboarding_card_impression', { case: n.id, type: type }); sec.scrollIntoView({ behavior: H.reduce ? 'auto' : 'smooth', block: 'start' }); setTimeout(tick, 80);
+      });
+      $('#obGo', el).onclick = function () { Ob.track('onboarding_cta_click', { case: caseId() }); lset(SEEN, 1); H.go(q.replay && P.has() ? '#/begin?edit=1' : '#/begin'); }; // 다시 보기: 저장된 값이 채워진 채로 슬라이드 툰을 끝까지 볼 수 있다
+      Ob.track('onboarding_view', { replay: q.replay ? 1 : 0, case: caseId() }, true);
     });
-  });
+  }
+  H.route('welcome', welcome);
 
   /* ═════════ 출생정보 슬라이드 툰 ═════════ */
   var blank = function () { return { name: '', calendar: 'solar', leap: false, year: '', month: '', day: '', hour: '', minute: '', hourUnknown: false, country: 'KR', place: '서울', gender: '' }; };
@@ -271,14 +289,15 @@
   var oldHome = H.routes[''];
   H.route('', function (q, ctx) {
     if (!P.has()) {
-      if (q.skip || H.embed) { try { sessionStorage.setItem('mt_onb_skip', '1'); } catch (e) { } return oldHome(q, ctx); }
+      if (q.skip) { try { sessionStorage.setItem('mt_onb_skip', '1'); } catch (e) { } return oldHome(q, ctx); }
+      if (H.embed) return welcome({}, ctx);
       var skipped = false; try { skipped = sessionStorage.getItem('mt_onb_skip') === '1'; } catch (e) { }
       if (skipped) return oldHome(q, ctx);
       return H.replace('#/welcome');
     }
     var shown = false; try { shown = sessionStorage.getItem('mt_onb_shown') === '1'; } catch (e) { }
-    if (!shown && !q.nogate && !H.embed) {
-      Ob.config().then(function () { if (!H.alive(ctx)) return; if (CFG.forceOnboarding) H.replace('#/welcome?replay=1'); else renderHome(q, ctx); });
+    if (!shown && !q.nogate) {
+      Ob.config().then(function () { if (!H.alive(ctx)) return; if (CFG.forceOnboarding) { if (H.embed) welcome({ replay: 1 }, ctx); else H.replace('#/welcome?replay=1'); } else renderHome(q, ctx); });
       return;
     }
     renderHome(q, ctx);

@@ -157,3 +157,20 @@ ok(Array.isArray(ch.daeun.list) && ch.daeun.list.length >= 8 && ch.daeun.list.ev
   const src2 = fs.readFileSync(path.join(root, 'report', 'hub', 'hub-onboard.js'), 'utf8');
   ok2(/cn-sec/.test(src2) && /mt_onb_shown/.test(src2) && /forceOnboarding/.test(src2), '스크롤식 섹션·세션당 1회 강제 온보딩');
 }
+// (추가) 순서: 연구 → 유명인 → 명리학, 서사 원고, 랜딩 임베드 연결
+{
+  const O3 = require(path.join(root, 'report', 'hub', 'onboard-data.js')), c3 = O3.merge(O3.DEFAULTS, null);
+  const bad = (m) => { console.log('FAIL: ' + m); process.exitCode = 1; };
+  const pubs = O3.publicCases(c3.cases);
+  if (!pubs.every(c => c.story && c.story.length >= 3 && c.takeaway)) bad('공개 사례는 서사(3문단 이상)와 한 줄 결론을 가진다');
+  if (!pubs.every(c => c.story.every(p => (p.match(/[.!?]|니다\./g) || []).length <= 3))) bad('문단은 짧게(문장 3개 이하)');
+  if (!/반드시|무조건|100%|보장|확정/.test(JSON.stringify(pubs.map(c => [c.story, c.takeaway])) ) === true) { /* 단정 표현 없음 */ } else bad('서사에 단정 표현');
+  const r = O3.pickCase(c3, { type: 'research' }), c = O3.pickCase(c3, { type: 'celebrity' });
+  if (!r || r.type !== 'research' || !c || c.type !== 'celebrity') bad('유형 지정 선택');
+  const src = fs.readFileSync(path.join(root, 'report', 'hub', 'hub-onboard.js'), 'utf8');
+  const iR = src.indexOf("cur.research) h +="), iC = src.indexOf("cur.celebrity) h +="), iI = src.indexOf("h += intro.map");
+  if (!(iR > 0 && iR < iC && iC < iI)) bad('렌더 순서 연구 → 유명인 → 명리학');
+  const st = fs.readFileSync(path.join(root, 'report', 'story', 'story.js'), 'utf8');
+  if (!/hub-onboard\.js/.test(st) && !/onboard-data\.js/.test(st)) bad('랜딩(story.js)이 온보딩 스크립트를 불러와야 한다');
+  if (!/onboard\.css/.test(st)) bad('랜딩이 온보딩 CSS 를 불러와야 한다');
+}
