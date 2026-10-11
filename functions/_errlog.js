@@ -2,7 +2,7 @@
 // 설계: report/v2/ERROR_LOG_DESIGN.md. 원칙: 개인정보가 들어올 수 없게 "받는 필드를 허용 목록으로 제한하고, 문자열은 스크러버로 정리"한다.
 // 저장은 원문 로그가 아니라 하루 단위 서명 집계다(하루 서명 MAX_SIGS 종 상한).
 export const KINDS = ['error', 'rejection', 'caught', 'asset'];
-export const FLOWS = ['explore', 'classic', 'preview'];
+export const FLOWS = ['explore', 'classic', 'preview', 'hub'];
 export const BROWSERS = ['safari', 'chrome', 'edge', 'firefox', 'other'];
 export const MAX_BODY = 2048, MAX_SIGS = 200, MAX_MSG = 160, TTL_DAYS = 14, MAX_CH = 30, MAX_VER = 10;
 const TOKEN = /^[\w.-]{1,40}$/;

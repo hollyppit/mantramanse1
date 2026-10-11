@@ -104,6 +104,8 @@
   };
   H.alive = function (ctx) { return ctx.token === H.ctx.token; }; // 비동기 작업이 끝났을 때 아직 같은 화면인지
   H.start = function () {
+    // 오류 수집(report/v2/ERROR_LOG_DESIGN.md): 지금 화면 이름(경로의 첫 마디, 쿼리 제외)과 흐름만 알려 준다. 서버가 켜져 있을 때만 저장된다.
+    try { var EL = root.ReportV2 && root.ReportV2.ErrLog; if (EL) EL.setContext(function () { return { ch: String((H.ctx && H.ctx.path) || 'home').replace(/[^\w.-]/g, '').slice(0, 40) || 'home', flow: 'hub' }; }); } catch (e) { }
     // 카드 이미지 불러오기 실패 시 깨진 아이콘 대신 자리표시를 남긴다(error 는 버블링하지 않으므로 캡처 단계에서 받는다)
     DOC.addEventListener('error', function (e) { var t = e.target; if (t && t.tagName === 'IMG' && t.classList.contains('tcimg')) t.remove(); }, true);
     DOC.addEventListener('load', function (e) { var t = e.target; if (t && t.tagName === 'IMG' && t.classList.contains('tcimg')) t.classList.add('on'); }, true);
