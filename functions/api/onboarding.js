@@ -36,6 +36,7 @@ function cleanCase(c) {
 const cleanLines = a => arr(a, 6, 120);
 function clean(b) {
   const out = {};
+  if (typeof b.forceOnboarding === 'boolean') out.forceOnboarding = b.forceOnboarding;
   if (typeof b.honorific === 'string') { const h = s(b.honorific, 8); out.honorific = h && !FORBIDDEN.includes(h) ? h : '귀인'; }
   if (b.weights && typeof b.weights === 'object') { const r = Math.max(0, Math.min(100, +b.weights.research || 0)), c = Math.max(0, Math.min(100, +b.weights.celebrity || 0)); if (r + c > 0) out.weights = { research: r, celebrity: c }; }
   if (Array.isArray(b.cases)) { const seen = new Set(); out.cases = b.cases.slice(0, 100).map(cleanCase).filter(c => c && !seen.has(c.id) && seen.add(c.id)); }

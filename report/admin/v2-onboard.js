@@ -47,7 +47,7 @@
   }
   function save() {
     collect();
-    var b = G.cfg, body = { honorific: b.honorific, weights: b.weights, cases: b.cases, intro: b.intro, introLast: b.introLast, scenes: b.scenes.map(function (s) { return { id: s.id, title: s.title, lines: s.lines, unknownLines: s.unknownLines || [], hint: s.hint, button: s.button, face: s.face, image: s.image || '', bg: s.bg || '', enabled: s.enabled }; }), revealLines: b.revealLines };
+    var b = G.cfg, body = { forceOnboarding: b.forceOnboarding, honorific: b.honorific, weights: b.weights, cases: b.cases, intro: b.intro, introLast: b.introLast, scenes: b.scenes.map(function (s) { return { id: s.id, title: s.title, lines: s.lines, unknownLines: s.unknownLines || [], hint: s.hint, button: s.button, face: s.face, image: s.image || '', bg: s.bg || '', enabled: s.enabled }; }), revealLines: b.revealLines };
     C.api('/api/onboarding', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (d) { G.version = d.version; toast('저장했습니다'); return load(); }).then(draw).catch(function (e) { toast(e.message, true); });
   }
   // 현재 화면의 입력값을 G.cfg 로 옮긴다
@@ -68,7 +68,7 @@
       cfg.scenes.forEach(function (s, i) { var f = $('#obS' + i); if (!f) return; var v = function (n) { return f.elements[n].value; }; s.title = v('title').trim(); s.lines = lines(v('lines')); s.unknownLines = f.elements.unk ? lines(v('unk')) : s.unknownLines; s.hint = v('hint').trim(); s.button = v('button').trim() || '다음'; s.face = v('face'); s.image = v('image').trim(); s.bg = v('bg').trim(); s.enabled = REQ.indexOf(s.field) >= 0 ? true : f.elements.enabled.checked; });
       var r = $('#obReveal'); if (r) cfg.revealLines = lines(r.value);
     }
-    if (G.sub === 'basic') { var b = $('#obBasic'); if (b) { var h = b.elements.honorific.value.trim(); cfg.honorific = O.honorific({ honorific: h }); cfg.weights = { research: +b.elements.wr.value || 0, celebrity: +b.elements.wc.value || 0 }; if (cfg.weights.research + cfg.weights.celebrity <= 0) cfg.weights = { research: 60, celebrity: 40 }; } }
+    if (G.sub === 'basic') { var b = $('#obBasic'); if (b) { var h = b.elements.honorific.value.trim(); cfg.honorific = O.honorific({ honorific: h }); cfg.forceOnboarding = !!b.elements.force.checked; cfg.weights = { research: +b.elements.wr.value || 0, celebrity: +b.elements.wc.value || 0 }; if (cfg.weights.research + cfg.weights.celebrity <= 0) cfg.weights = { research: 60, celebrity: 40 }; } }
   }
 
   /* ── 사례 ── */
@@ -135,7 +135,7 @@
   /* ── 호칭·가중치 ── */
   function basicView() {
     var cfg = G.cfg;
-    $('#obBody').innerHTML = '<div class="card"><form id="obBasic" onsubmit="return false"><label class="ob-f">사용자 호칭 (모든 대사의 {귀인})<input type="text" name="honorific" maxlength="8" value="' + esc(cfg.honorific) + '"></label>' +
+    $('#obBody').innerHTML = '<div class="card"><form id="obBasic" onsubmit="return false"><label class="ob-f" style="grid-auto-flow:column;justify-content:start;gap:8px"><input type="checkbox" name="force"' + (cfg.forceOnboarding !== false ? ' checked' : '') + '> 개발 단계: 재방문자도 접속할 때마다(세션당 1회) 온보딩부터 보여 주기</label><p class="ob-lock">출시 전에 꺼 주세요. 끄면 프로필이 있는 방문자는 곧바로 홈으로 갑니다.</p><label class="ob-f">사용자 호칭 (모든 대사의 {귀인})<input type="text" name="honorific" maxlength="8" value="' + esc(cfg.honorific) + '"></label>' +
       '<p class="ob-lock">기본값은 \'귀인\'입니다. 성별에 따라 호칭을 나누지 않으며, 이름을 입력한 뒤에는 "[이름] 귀인"으로 부릅니다. \'대공·소협·대협\'은 저장되지 않습니다.</p>' +
       '<div class="ob-g2"><label class="ob-f">실제 연구 노출 가중치<input type="text" name="wr" type="number" min="0" max="100" value="' + esc(cfg.weights.research) + '"></label><label class="ob-f">유명인 사례 노출 가중치<input type="text" name="wc" type="number" min="0" max="100" value="' + esc(cfg.weights.celebrity) + '"></label></div>' +
       '<p class="ob-lock">두 값의 비율로 유형을 먼저 고르고, 그 안에서 사례별 가중치로 고릅니다. 공개 사례가 없는 유형은 건너뜁니다. 기본 60 : 40.</p></form></div>';

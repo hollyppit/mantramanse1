@@ -153,3 +153,48 @@
 #hub .hhome .cc.today .ring b{ font-size: 1.2rem; }
 #hub .ob-nav:has(#obBack[hidden]){ grid-template-columns: 1fr; }
 #hub .ob-nav [hidden]{ display: none; }
+
+/* ═════ 스크롤식 온보딩(시네마틱) ═════ */
+#hub #screen:has(.ob-cine){ max-width: 720px; }
+#hub .ob-cine::before{ content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(50% 38% at 50% 0%, rgba(205, 178, 122, .16), transparent 70%), radial-gradient(40% 30% at 90% 70%, rgba(92, 82, 156, .16), transparent 70%); }
+#hub .cn-prog{ position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 40; background: var(--gold); transform: scaleX(0); transform-origin: 0 50%; }
+#hub .cn{ display: block; }
+#hub .cn-sec{ min-height: 88svh; display: grid; align-content: center; gap: 16px; padding: 40px 0; opacity: .0; transform: translateY(26px); transition: opacity .9s ease, transform .9s ease; }
+#hub .cn-sec.in{ opacity: 1; transform: none; }
+#hub .cn-sec:not(.in) *{ animation-play-state: paused !important; }
+#hub .cn-kick{ font-family: var(--f-serif); color: var(--gold); letter-spacing: .26em; font-size: .74rem; }
+#hub .cn-art{ border-radius: 20px; overflow: hidden; border: 1px solid var(--line-2); background: radial-gradient(90% 100% at 50% 100%, rgba(205, 178, 122, .14), rgba(8, 10, 17, .0)), #0b0f1b; padding: 8px; }
+#hub .cn-svg{ width: 100%; height: auto; display: block; }
+#hub .cn-media{ width: 100%; max-height: 360px; object-fit: cover; border-radius: 14px; display: block; }
+#hub .cn-hook{ color: var(--ink-2); font-size: 1.02rem; }
+#hub .cn-title{ font-family: var(--f-serif); font-weight: 600; font-size: clamp(1.6rem, 6.6vw, 2.3rem); line-height: 1.42; letter-spacing: -.01em; }
+#hub .cn-title.big{ text-align: center; font-size: clamp(1.7rem, 7vw, 2.4rem); }
+#hub .cn-body{ font-size: 1.1rem; line-height: 1.9; color: var(--ink); }
+#hub .cn-sub{ color: var(--gold-l); font-family: var(--f-serif); font-size: 1.02rem; }
+#hub .cn-beats{ list-style: none; display: grid; gap: 0; margin-top: 4px; border-top: 1px solid var(--line-2); }
+#hub .cn-beats li{ display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 14px 0; border-bottom: 1px solid var(--line-2); opacity: 0; transform: translateY(10px); }
+#hub .cn-sec.in .cn-beats li{ animation: cnb .8s ease both; animation-delay: calc(.5s + var(--i) * .7s); }
+#hub .cn-beats span{ font-family: var(--f-serif); color: var(--gold); font-size: 1.15rem; }
+#hub .cn-beats p{ margin: 0; font-size: 1.04rem; line-height: 1.75; }
+@keyframes cnb{ to { opacity: 1; transform: none; } }
+#hub .cn-cav{ color: var(--ink-3); font-size: .8rem; line-height: 1.7; }
+#hub .cn-src{ font-size: .84rem; color: var(--ink-3); }
+#hub .cn-src summary{ cursor: pointer; padding: 6px 0; color: var(--gold); }
+#hub .cn-src a{ color: var(--gold-l); word-break: break-all; }
+#hub .cn-links{ display: flex; gap: 18px; }
+#hub .cn-links button{ background: none; border: 0; color: var(--gold-l); text-decoration: underline; text-underline-offset: 4px; min-height: 44px; cursor: pointer; font-size: .92rem; }
+#hub .cn-go{ margin-top: 6px; }
+#hub .cn-last{ min-height: 80svh; text-align: center; }
+#hub .cn-skip{ position: fixed; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 35; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line); background: rgba(8, 10, 17, .82); color: var(--ink-2); backdrop-filter: blur(6px); cursor: pointer; font-size: .86rem; }
+/* SVG 연출: 선 그리기·떠오르기·솟아오르기. 장면이 들어오면(.in) 재생된다 */
+#hub .cn-svg .dr{ animation: cndr 2.4s ease both; }
+#hub .cn-svg .dr.d2{ animation-delay: .9s; }
+@keyframes cndr{ from { stroke-dasharray: 900; stroke-dashoffset: 900; } to { stroke-dasharray: 900; stroke-dashoffset: 0; } }
+#hub .cn-svg .pop{ transform-box: fill-box; transform-origin: center; animation: cnpop 1s cubic-bezier(.2, .9, .3, 1.3) both; animation-delay: calc(1s + var(--i, 0) * .25s); }
+@keyframes cnpop{ from { opacity: 0; transform: scale(.2); } to { opacity: 1; transform: none; } }
+#hub .cn-svg .wd{ transform-box: fill-box; transform-origin: bottom; animation: cnrise .9s ease both; animation-delay: calc(.2s + var(--i, 0) * .18s); }
+#hub .cn-svg .rise{ transform-box: fill-box; transform-origin: bottom; animation: cnrise 1.1s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(.1s + var(--i, 0) * .2s); }
+@keyframes cnrise{ from { opacity: 0; transform: scaleY(.1); } to { opacity: 1; transform: none; } }
+#hub .ob.rm .cn-sec{ opacity: 1; transform: none; }
+#hub .ob.rm .cn-beats li{ opacity: 1; transform: none; animation: none; }
+@media (prefers-reduced-motion: reduce){ #hub .cn-sec{ opacity: 1; transform: none; transition: none; } #hub .cn-beats li{ opacity: 1; transform: none; animation: none !important; } #hub .cn-svg *{ animation: none !important; } }

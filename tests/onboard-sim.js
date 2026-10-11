@@ -147,3 +147,13 @@ ok(Array.isArray(ch.daeun.list) && ch.daeun.list.length >= 8 && ch.daeun.list.ev
   console.log(fails.length ? 'FAIL ' + fails.length + '\n' + fails.map(f => ' - ' + f).join('\n') : 'onboard-sim OK');
   process.exit(fails.length ? 1 : 0);
 })();
+// (추가) 개발 단계 강제 온보딩 기본값 · 스크롤 구성 · 일러스트
+{
+  const O2 = require(path.join(root, 'report', 'hub', 'onboard-data.js'));
+  const ok2 = (c, m) => { if (!c) { console.log('FAIL: ' + m); process.exitCode = 1; } };
+  ok2(O2.DEFAULTS.forceOnboarding === true && O2.merge(O2.DEFAULTS, { forceOnboarding: false }).forceOnboarding === false, 'forceOnboarding 기본 true, 관리자가 끌 수 있다');
+  const art = fs.readFileSync(path.join(root, 'report', 'hub', 'onboard-art.js'), 'utf8');
+  for (const k of ['bell', 'streak', 'worlds', 'steps', 'door', 'mask', 'eye', 'time', 'pillars', 'two', 'end']) ok2(art.indexOf(' ' + k + ': function') >= 0, '일러스트 ' + k);
+  const src2 = fs.readFileSync(path.join(root, 'report', 'hub', 'hub-onboard.js'), 'utf8');
+  ok2(/cn-sec/.test(src2) && /mt_onb_shown/.test(src2) && /forceOnboarding/.test(src2), '스크롤식 섹션·세션당 1회 강제 온보딩');
+}
