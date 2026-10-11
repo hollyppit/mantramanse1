@@ -279,6 +279,15 @@
       else if (k === 'go') { var i = +b.dataset.i; if (vw === 'reader') { pinTo(i); renderStrip(); gotoChapter(i, false, !!(S.mv && S.mv.state() === 'PLAYING')); T('strip_go', { index: i }); } else enterFromHome(i); }
     });
   }
+  // 읽기 화면 상단 바: 세계 지도로 들어온 흐름에서는 막(ACT II · 財·業·緣)이 아니라 지금 있는 세계 이름을 보여 준다.
+  // 막 이름은 옛 20챕터 문서의 분류라 세계 이름과 겹쳐 보였다. 세계 지도가 없는 흐름(?explore=0·미리보기)은 예전 표기 그대로.
+  function barLabel(ci) {
+    var rep = S.rep, c = rep && rep.chapters[ci]; if (!c) return;
+    var act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}, w = null;
+    if (EXPLORE && S.wmap && S.wmap.idx) { var wid = S.wmap.idx[ci]; w = (S.wmap.list || []).filter(function (x) { return x.id === wid; })[0] || null; }
+    if (w && w.name) { $('#barAct').textContent = (w.icon ? w.icon + ' ' : '') + w.name; $('#barTitle').textContent = c.title; }
+    else { $('#barAct').textContent = act.roman || ''; $('#barTitle').textContent = act.title ? act.title + ' · ' + c.title : c.title; }
+  }
   function renderStrip() {
     var n = document.getElementById('wstrip'); if (!n || !S.wmap || !S.rep) return; var vw = $('#app').dataset.view, cur = pinned() != null ? pinned() : S.idx, wid = vw === 'reader' ? S.wmap.idx[cur] : (vw === 'home' ? S.xpWorld : null);
     if (!wid) { n.hidden = true; document.documentElement.style.removeProperty('--bar-h'); return; }
@@ -286,6 +295,7 @@
     h += '<button type="button" class="ws-m" data-ws="map">‹ 세계 지도</button><button type="button" class="ws-t' + (vw === 'home' ? ' on' : '') + '" data-ws="tool">' + esc(w.icon || '') + ' ' + esc(TOOL_LABEL[wid] || '살펴보기') + '</button>';
     idxs.forEach(function (i) { var c = S.rep.chapters[i]; h += '<button type="button" class="ws-c' + (vw === 'reader' && i === cur ? ' on' : '') + (S.ended[c.id] ? ' dn' : '') + '" data-ws="go" data-i="' + i + '">' + esc(c.title) + '</button>'; });
     n.innerHTML = h; n.className = vw === 'reader' ? 'ws-r' : 'ws-h'; n.style.setProperty('--wa', w.accent || '#D5B97F'); n.hidden = false;
+    if (vw === 'reader') barLabel(cur); // 서버에서 세계 이름이 바뀌어 지도를 다시 만든 경우에도 상단 바가 따라가게 한다
     document.documentElement.style.setProperty('--bar-h', vw === 'reader' ? '110px' : '62px');
     var on = n.querySelector('.on'); if (on) n.scrollLeft = Math.max(0, on.offsetLeft - 90);
   }
@@ -740,7 +750,7 @@
   function enterChapter(c, ci) {
     if (S.pin) { if (Date.now() < S.pin.until && ci < S.pin.idx) return; if (ci >= S.pin.idx) S.pin = null; } // 점프 직후 앞 챕터 신호는 무시
     var rep = S.rep, n = rep.chapters.length, prev = S.cur ? rep.chapters[S.idx] : null, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}; S.idx = ci; S.cur = true;
-    $('#barAct').textContent = act.roman || ''; $('#barTitle').textContent = act.title ? act.title + ' · ' + c.title : c.title; $('#barNo').textContent = String(c.no).padStart(2, '0'); $('#barTot').textContent = n;
+    barLabel(ci); $('#barNo').textContent = String(c.no).padStart(2, '0'); $('#barTot').textContent = n;
     if (prev && prev.act !== c.act && !S.visited[c.id]) { T('act_completed', { act: prev.act }); var a = rep.acts.filter(function (x) { return x.id === prev.act; })[0]; if (a && a.pdfDone) toast(a.pdfDone, 3800); }
     if (!S.visited[c.id]) { S.visited[c.id] = 1; T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if ((c.base || c.id) === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {}); }
     if (R.Bgm && R.Bgm.has()) { var mo = c.scenes.filter(function (s) { return s.sceneType === 'insight' || s.sceneType === 'chapterIntro'; })[0]; R.Bgm.play(mo ? R.Cinema.resolve(mo, layersOf(mo)).bgmMood : 'minimal'); } // 챕터 분위기에 맞는 BGM
