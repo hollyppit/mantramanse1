@@ -272,6 +272,11 @@
     S.wmap = { idx: idx, by: by, list: list}; chapterTags();
   }
   // 챕터가 속한 세계(세계 지도 흐름에서만). 없으면 null → 예전 막(ACT) 표기를 쓴다.
+  // 표시용 번호: 세계 지도 흐름이면 세계 안에서의 순번과 그 세계의 챕터 수, 아니면 문서 번호와 전체 수.
+  function numOf(ci) {
+    var c = S.rep.chapters[ci], w = worldOf(ci), arr = w && S.wmap.by && S.wmap.by[w.id];
+    return arr && arr.indexOf(ci) >= 0 ? { n: arr.indexOf(ci) + 1, tot: arr.length } : { n: c.no, tot: S.rep.chapters.length };
+  }
   function worldOf(ci) {
     if (!EXPLORE || !S.wmap || !S.wmap.idx) return null; var id = S.wmap.idx[ci];
     var w = (S.wmap.list || []).filter(function (x) { return x.id === id; })[0]; return w && w.name ? w : null;
@@ -282,7 +287,7 @@
     S.rep.chapters.forEach(function (c, ci) {
       var els = root.querySelectorAll('[data-cno="' + c.id + '"]'); if (!els.length) return;
       var w = worldOf(ci), act = S.rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}, lead = w ? (w.icon ? w.icon + ' ' : '') + w.name : (act.roman || '');
-      for (var k = 0; k < els.length; k++) els[k].textContent = lead + ' · ' + String(c.no).padStart(2, '0');
+      for (var k = 0; k < els.length; k++) els[k].textContent = lead + ' · ' + String(numOf(ci).n).padStart(2, '0');
     });
   }
   function ensureStrip() {
@@ -300,6 +305,7 @@
     var act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}, w = worldOf(ci);
     if (w) { $('#barAct').textContent = (w.icon ? w.icon + ' ' : '') + w.name; $('#barTitle').textContent = c.title; }
     else { $('#barAct').textContent = act.roman || ''; $('#barTitle').textContent = act.title ? act.title + ' · ' + c.title : c.title; }
+    var nm = numOf(ci); $('#barNo').textContent = String(nm.n).padStart(2, '0'); $('#barTot').textContent = nm.tot;
   }
   function renderStrip() {
     var n = document.getElementById('wstrip'); if (!n || !S.wmap || !S.rep) return; var vw = $('#app').dataset.view, cur = pinned() != null ? pinned() : S.idx, wid = vw === 'reader' ? S.wmap.idx[cur] : (vw === 'home' ? S.xpWorld : null);
@@ -498,6 +504,9 @@
     ready.then(function () { if (S.stopWait) { S.stopWait(); S.stopWait = null; } view('reader'); if (EXPLORE) { try { exploreEntry(); } catch (e) { if (window.console) console.error('exploreEntry', e); openDoc(0, { autoStart: !PREVIEW }); } } else openDoc(0, { autoStart: !PREVIEW }); });
   }
   // 일간 소개·일주 캐릭터 영상은 프롤로그 앞이 아니라 본문의 첫 챕터(영상과 글을 따로)로 둔다
+  // 일간 소개 챕터(no 0)·"더 깊이 읽기"(복사본이라 no 0)를 끼운 뒤에도 번호가 문서 순서와 맞도록 1부터 다시 매긴다.
+  // 이 번호는 "N / 전체" 표시에 쓰이므로 겹치거나(00·00) 전체 개수와 어긋나면 안 된다. 다른 곳(PDF 등)이 같은 챕터 객체를 쓸 수 있어 번호가 다른 것만 복사한다.
+  function renumbered(list) { return list.map(function (c, i) { return c.no === i + 1 ? c : Object.assign({}, c, { no: i + 1 }); }); }
   function addCharIntro() {
     var rep = S.rep; if (PREVIEW || !R.CharIntro || !rep || !rep.chapters || rep.chapters.some(function (c) { return c.id === 'c-char'; })) return;
     var ch = null; try { ch = R.CharIntro.chapter(S.sd, S.name, S.awk, (rep.acts[0] || {}).id); } catch (e) { ch = null; }
@@ -508,10 +517,10 @@
         var mainCh = Object.assign({}, ch, { scenes: main }), moreCh = Object.assign({}, ch, { id: 'c-char-more', base: 'c-char-more', title: '일간·일주 더 깊이 읽기', scenes: [{ sceneId: 'ci-more-head', sceneType: 'life', html: '<section class="scene rd-sec rd-head" data-sc="ci-more-head"><div class="no">CHARACTER</div><h2>일간과 일주, 조금 더 깊이</h2></section>' }].concat(more) });
         var list = rep.chapters.slice(), at = -1; list.forEach(function (c, i) { if (c.id === 'life_here') at = i; });
         list.splice(at >= 0 ? at + 1 : 0, 0, moreCh);
-        S.rep = Object.assign({}, rep, { chapters: [mainCh].concat(list) }); S.visited = {}; S.ended = {}; return;
+        S.rep = Object.assign({}, rep, { chapters: renumbered([mainCh].concat(list)) }); S.visited = {}; S.ended = {}; return;
       }
     }
-    if (ch) { S.rep = Object.assign({}, rep, { chapters: [ch].concat(rep.chapters) }); S.visited = {}; S.ended = {}; }
+    if (ch) { S.rep = Object.assign({}, rep, { chapters: renumbered([ch].concat(rep.chapters)) }); S.visited = {}; S.ended = {}; }
   }
   // 본문 안의 영상은 화면에 들어오면 재생하고 벗어나면 멈춘다(소리는 꺼진 채, 컨트롤 없이 액자처럼 무한 루프)
   function watchVideos() {
@@ -763,7 +772,7 @@
   function enterChapter(c, ci) {
     if (S.pin) { if (Date.now() < S.pin.until && ci < S.pin.idx) return; if (ci >= S.pin.idx) S.pin = null; } // 점프 직후 앞 챕터 신호는 무시
     var rep = S.rep, n = rep.chapters.length, prev = S.cur ? rep.chapters[S.idx] : null, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}; S.idx = ci; S.cur = true;
-    barLabel(ci); $('#barNo').textContent = String(c.no).padStart(2, '0'); $('#barTot').textContent = n;
+    barLabel(ci);
     if (prev && prev.act !== c.act && !S.visited[c.id]) { T('act_completed', { act: prev.act }); var a = rep.acts.filter(function (x) { return x.id === prev.act; })[0]; if (a && a.pdfDone) toast(a.pdfDone, 3800); }
     if (!S.visited[c.id]) { S.visited[c.id] = 1; T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if ((c.base || c.id) === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {}); }
     if (R.Bgm && R.Bgm.has()) { var mo = c.scenes.filter(function (s) { return s.sceneType === 'insight' || s.sceneType === 'chapterIntro'; })[0]; R.Bgm.play(mo ? R.Cinema.resolve(mo, layersOf(mo)).bgmMood : 'minimal'); } // 챕터 분위기에 맞는 BGM
@@ -808,9 +817,9 @@
   var dr = $('#drawer'), drPick = false;
   $('#barBtn').onclick = function () {
     var rep = S.rep, h = '', act = 0; drPick = false; S.drWas = !!(S.mv && S.mv.state() === 'PLAYING'); if (S.drWas) S.mv.pause();
-    var item = function (c, i) { return '<li><button type="button" data-go="' + i + '"' + (i === S.idx ? ' class="cur" aria-current="true"' : '') + '><span>' + String(c.no).padStart(2, '0') + ' ' + esc(c.title) + '</span><small>' + (S.ended[c.id] ? '읽음' : '') + '</small></button></li>'; };
+    var item = function (c, i, no) { return '<li><button type="button" data-go="' + i + '"' + (i === S.idx ? ' class="cur" aria-current="true"' : '') + '><span>' + String(no == null ? c.no : no).padStart(2, '0') + ' ' + esc(c.title) + '</span><small>' + (S.ended[c.id] ? '읽음' : '') + '</small></button></li>'; };
     if (EXPLORE && S.wmap && S.wmap.by) { // 세계별로 묶는다: 사용자가 길을 찾는 분류와 같게(옛 막 이름은 쓰지 않는다)
-      (S.wmap.list || []).forEach(function (w) { var idxs = S.wmap.by[w.id]; if (!idxs || !idxs.length) return; h += '<li class="act">' + esc((w.icon ? w.icon + ' ' : '') + (w.name || '')) + '</li>'; idxs.forEach(function (i) { h += item(rep.chapters[i], i); }); });
+      (S.wmap.list || []).forEach(function (w) { var idxs = S.wmap.by[w.id]; if (!idxs || !idxs.length) return; h += '<li class="act">' + esc((w.icon ? w.icon + ' ' : '') + (w.name || '')) + '</li>'; idxs.forEach(function (i, k) { h += item(rep.chapters[i], i, k + 1); }); });
     } else rep.chapters.forEach(function (c, i) { if (c.act !== act) { act = c.act; var a = rep.acts.filter(function (x) { return x.id === act; })[0] || {}; h += '<li class="act">' + esc(a.roman || '') + ' · ' + esc(a.title || '') + '</li>'; }
       h += item(c, i); });
     $('#drHome').hidden = !EXPLORE; $('#drList').innerHTML = h; dr.showModal();
