@@ -4,7 +4,7 @@
 //   · 쓰기가 잦은 것(관리자 편집·방문자 호출 횟수·AI 합성 캐시·대기자)만 옮긴다. 이미지·홈 설정처럼 드물게 쓰는 키와 R2 는 그대로.
 //   · 이전은 따로 하지 않는다: Supabase 에 없는 키는 KV 의 기존 값을 읽어 온다(읽기 전용 폴백). 삭제는 묘비(value=null)를 남겨 폴백이 되살리지 않게 한다.
 // 테이블: supabase/schema.sql
-const ROUTED = ['ik:', 'src:', 'free:', 'rl:', 'ai:', 'compose:', 'lifeai:', 'waitlist:'];
+const ROUTED = ['ik:', 'src:', 'free:', 'rl:', 'ai:', 'compose:', 'lifeai:', 'waitlist:', 'err:'];
 const FALLBACK = ['ik:', 'src:', 'free:', 'waitlist:']; // 기존 KV 데이터가 있을 수 있는 접두어
 const MEMO_PREFIX = ['ik:', 'src:', 'free:'], MEMO_MS = 20000; // 공개(방문자) 읽기에서만 짧게 기억한다
 const startsWith = (k, list) => list.some(p => k.startsWith(p));

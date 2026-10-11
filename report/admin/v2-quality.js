@@ -32,6 +32,22 @@
   }
 
   // 일주 캐릭터 영상 매핑(120칸) + 일간 소개(20칸). 파일 연결 확인은 눌렀을 때만 한다(영상 파일에 Range 0-0 요청).
+  // 뷰어 오류(최근 7일): 사용자 화면에서 난 오류의 일 단위 집계. 수집은 서버 환경변수 ERRLOG_ON=1 일 때만 켜진다(기본 꺼짐).
+  function viewerErrSection(st) {
+    var e = st.errlog, t = '뷰어 오류 수집 (최근 7일)';
+    if (!e) return '<div class="card"><b style="color:var(--gold)">' + t + '</b> <span class="chip">확인 못함</span><p class="muted">/api/errlog 를 불러오지 못했습니다.</p></div>';
+    var s = e.summary || { total: 0, dropped: 0, kinds: {}, versions: {}, sigs: [] };
+    var head = '<p style="margin:0 0 8px;font-size:.84rem">수집 <b>' + (e.on ? '켜짐' : '꺼짐(서버 환경변수 ERRLOG_ON=1 로 켭니다)') + '</b> · 7일 합계 ' + s.total + '건' + (s.dropped ? ' · 상한 초과로 버린 ' + s.dropped + '건' : '') +
+      '<br>종류: ' + (Object.keys(s.kinds).map(function (k) { return esc(k) + ' ' + s.kinds[k]; }).join(' · ') || '없음') +
+      (Object.keys(s.versions).length ? '<br>콘텐츠 버전별: ' + Object.keys(s.versions).map(function (k) { return '<span class="mono">' + esc(k) + '</span> ' + s.versions[k]; }).join(' · ') : '') + '</p>';
+    var rows = s.sigs.map(function (x) {
+      var chs = Object.keys(x.ch).sort(function (a, b) { return x.ch[b] - x.ch[a]; }).slice(0, 4).map(function (c) { return esc(c) + ' ' + x.ch[c]; }).join(', ');
+      var mob = x.mobile + x.desktop ? Math.round(100 * x.mobile / (x.mobile + x.desktop)) + '%' : '-';
+      return '<tr><td>' + x.n + '</td><td>' + esc(x.kind) + ' · <span class="mono">' + esc(x.where) + '</span></td><td>' + esc(x.msg || '-') + '</td><td class="mono">' + esc(x.src || '-') + (x.line ? ':' + x.line : '') + '</td><td>' + (chs || '-') + '</td><td>' + mob + '</td></tr>';
+    }).join('');
+    var tbl = rows ? '<table style="width:100%;border-collapse:collapse;font-size:.8rem"><thead><tr><th style="text-align:left">건수</th><th style="text-align:left">종류 · 기능</th><th style="text-align:left">메시지</th><th style="text-align:left">위치</th><th style="text-align:left">챕터</th><th style="text-align:left">모바일</th></tr></thead><tbody>' + rows + '</tbody></table>' : '<p class="muted">기록된 오류가 없습니다.</p>';
+    return section(t, s.sigs.length ? s.total : 0, head + tbl, e.on ? '오류 없음' : '수집 꺼짐');
+  }
   function awakeningSection(st) {
     var a = st.awk; if (!a) return '<div class="card"><b style="color:var(--gold)">일주 캐릭터 영상 매핑</b> <span class="chip">확인 못함</span><p class="muted">/api/awakening 을 불러오지 못했습니다.</p></div>';
     var p = a.pillars, bad = p.missing + p.error + p.disabled + p.posterOnly, pr = st.awkProbe;
@@ -66,6 +82,7 @@
     h += '<div class="card"><b>요약</b> · 챕터 ' + a.chapters + '개 · 풀이 누락 의심 ' + s.missing + ' · 단정 표현 검토 ' + s.absolute + ' · 에셋 누락 ' + (s.assetMissing == null ? '확인 못함' : s.assetMissing) + ' · 세계 매핑 대체 ' + (s.worldFallback == null ? '-' : s.worldFallback) + ' · 빈 세계 ' + (s.worldEmpty == null ? '-' : s.worldEmpty) + '</div>';
     if (st.evidence) h += evidenceSection(st.evidence);
     h += awakeningSection(st);
+    h += viewerErrSection(st);
     h += section('풀이 누락 의심 (글자 수 ' + Q.MIN_LEN + '자 미만)', a.missing.length, list(a.missing, function (x) { return '<b>' + esc(x.title || x.id) + '</b> <span class="muted mono">' + esc(x.id) + ' · ' + x.len + '자</span>'; }));
     h += section('단정 표현 검토', a.absolute.length, list(a.absolute, function (x) { return '<b>' + esc(x.title || x.id) + '</b> — “' + esc(x.snippet) + '” <span class="muted">(' + esc(x.word) + ')</span>'; }) +
       (a.absolute.length ? '<p class="muted" style="font-size:.76rem;margin-top:6px">"~하지 않습니다" 같은 부정문·면책 문구도 걸릴 수 있습니다. 맥락을 보고 판단하세요.</p>' : ''));
@@ -89,6 +106,7 @@
     var L = ['# 서비스 점검 결과', '', '- 챕터 ' + a.chapters + '개 · 풀이 누락 의심 ' + a.summary.missing + ' · 단정 표현 검토 ' + a.summary.absolute + ' · 에셋 누락 ' + a.summary.assetMissing + ' · 세계 매핑 대체 ' + a.summary.worldFallback, ''];
     L.push('## 풀이 누락 의심'); a.missing.forEach(function (x) { L.push('- ' + (x.title || x.id) + ' (' + x.id + ', ' + x.len + '자)'); }); if (!a.missing.length) L.push('- 없음');
     L.push('', '## 단정 표현 검토'); a.absolute.forEach(function (x) { L.push('- ' + (x.title || x.id) + ': “' + x.snippet + '” (' + x.word + ')'); }); if (!a.absolute.length) L.push('- 없음');
+    if (st && st.errlog) { var el = st.errlog.summary || {}; L.push('', '## 뷰어 오류 수집 (최근 7일)', '- 수집 ' + (st.errlog.on ? '켜짐' : '꺼짐') + ' · 합계 ' + (el.total || 0) + ' · 상한 초과 ' + (el.dropped || 0)); (el.sigs || []).forEach(function (x) { L.push('- ' + x.n + '건 ' + x.kind + ' ' + x.where + ' ' + (x.src || '') + (x.line ? ':' + x.line : '') + (x.msg ? ' — ' + x.msg : '')); }); }
     if (st && st.awk) { var w = st.awk; L.push('', '## 일주 캐릭터 영상 매핑', '- 일주 영상 ' + w.pillars.ok + '/' + w.pillars.of + ' (남 ' + w.pillars.male + ' · 여 ' + w.pillars.female + ') · 포스터만 ' + w.pillars.posterOnly + ' · 사용 안 함 ' + w.pillars.disabled + ' · 없음 ' + w.pillars.missing + ' · 주소 오류 ' + w.pillars.error, '- 일간 소개 ' + w.ilgan.ok + '/' + w.ilgan.of + ' · 기본 영상 ' + (w.fallback ? '있음' : '없음')); if (w.pillars.missingList.length) L.push('- 문제 칸: ' + w.pillars.missingList.join(' ')); if (st.awkProbe && !st.awkProbe.running) { L.push('- 파일 연결 확인: 정상 ' + st.awkProbe.okN + ' · 파일 없음 ' + st.awkProbe.bad.length); st.awkProbe.bad.forEach(function (x) { L.push('  - ' + x.label + ' ' + x.url + ' (' + x.status + ')'); }); } }
     if (st && st.evidence) { var e = st.evidence; L.push('', '## 풀이 DB 근거 상태 (정책 ' + e.policy + ')', '- 모듈 ' + e.total + ' · 승인 ' + e.status.approved + ' · legacy ' + e.status.legacy + ' · 근거 부족 ' + e.status.needs_evidence + ' · 초안 ' + e.status.draft + ' · 폐기 ' + e.status.retired, '- 숨김 ' + e.hidden + ' · hide_unverified 시 ' + e.wouldHide.hide_unverified + ' · strict 시 ' + e.wouldHide.strict); e.mismatch.forEach(function (x) { L.push('- 불일치: ' + x.id + ' — ' + x.reason); }); e.unknownCond.forEach(function (x) { L.push('- 알 수 없는 조건 키: ' + x.id + ' (' + x.keys.join(', ') + ')'); }); e.ruleConflict.forEach(function (x) { L.push('- 선택 조건과 제외 조건 충돌: ' + x.id + ' (' + x.keys.join(', ') + ')'); }); e.staleText.forEach(function (id) { L.push('- 승인 후 문장 변경: ' + id); }); }
     if (a.assets) { L.push('', '## 에셋 누락 (' + a.assets.image + '/' + a.assets.total + ')'); a.assets.missing.forEach(function (x) { L.push('- ' + x.title + ' (' + x.id + ')'); }); if (!a.assets.missing.length) L.push('- 없음'); }
@@ -117,7 +135,9 @@
       C.load().then(function () { return C.ST.saved || {}; }).catch(function () { return {}; }),
       C.api('/api/src?a=list').then(function (r) { return r.docs || []; }).catch(function () { return null; }),
       C.api('/api/awakening?all=1').then(function (r) { return r || {}; }).catch(function () { return null; }),
+      C.api('/api/errlog?days=7').then(function (r) { return r || null; }).catch(function () { return null; }),
     ]).then(function (got) {
+      st.errlog = got[5] || null;
       st.awk = got[4] ? Q.awakeningAudit(got[4]) : null; st.awkProbe = null;
       try {
         var ch = M.compute({ year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: TS.gender, city: '서울' });
