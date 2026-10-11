@@ -43,6 +43,19 @@ const path = require('path'), fails = [], ok = (c, m) => { if (!c) fails.push(m)
   r = await post({ task: 'verify', category: 'wealth', conds: {}, headline: '', summary: '', detail: '' });
   ok(r.s === 400, '빈 풀이는 검증하지 않는다');
 
+  // 일괄 규칙 검사: AI 호출·한도 없이 동작한다
+  const nBefore = sent.length;
+  r = await post({ task: 'verify-rules', items: [
+    { id: 'a', headline: '돈은 들어오는 날 이미 반쯤 나가 있다', summary: '월급날 통장을 보면 이미 카드값이 줄을 서 있고, 남는 돈은 늘 이번 달이 아니라 다음 달 몫입니다.', detail: '상세' },
+    { id: 'b', headline: '이 사람은 반드시 부자가 됩니다', summary: '요약이 충분히 길게 이어지는 문장입니다 여기는.', detail: '' },
+    { id: 'c', headline: '다양한 가능성과 균형이 중요한 사람', summary: '노력하면 잠재력이 발휘됩니다 그리고 그렇습니다.', detail: '' },
+    { id: 'd', headline: '', summary: '', detail: '' },
+  ] });
+  const by = Object.fromEntries((r.d.results || []).map(x => [x.id, x]));
+  ok(r.s === 200 && by.a.verdict === 'pass' && by.b.verdict === 'fail' && by.c.verdict === 'revise' && by.c.issues.some(x => x.type === 'barnum') && by.d.verdict === 'revise', '일괄 규칙 검사: 통과/단정=수정 필요/빈말=고치면 좋음/빈 칸=고치면 좋음');
+  ok(sent.length === nBefore, '일괄 규칙 검사는 AI 를 호출하지 않는다');
+  ok((await post({ task: 'verify-rules', items: [] }, 'Bearer no')).s === 401, '일괄 규칙 검사도 관리자 인증이 필요하다');
+
   kv.clear();
   r = await post({ task: 'module', category: 'wealth', conds: {}, mode: 'new' });
   ok(r.s === 200 && r.d.refs.length === 0 && /참고할 DB 자료가 없습니다/.test(String(sent.at(-1).input)), 'DB 가 비어 있어도 동작하고, 근거가 없다고 프롬프트에 알린다');

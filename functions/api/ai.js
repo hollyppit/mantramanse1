@@ -8,6 +8,7 @@
 //   task "expand": 짧은 초안에 살을 붙여 보충하기 { text, tone?, chapter? }
 //   task "split" : 전체 문장을 자막 줄로 나누기      { text }
 //   task "polish": 이미 쓴 자막 다듬기              { lines: [...] }  (tone = 다듬는 방향)
+//   task "verify-rules": 일괄 규칙 검사(AI·한도 없음)   { items: [{id, headline, summary, detail}] ≤400 } → { results: [{id, verdict, issues}] }
 //   task "verify": 모듈 자체 검증(규칙 + 다른 AI)        { category, conds, conditions, headline, summary, detail } → { verdict: pass|revise|fail, issues[], revised? }
 //   task "module": 해석 모듈 풀이 작성(촌철살인)    { category, conditions(문장), headline?, summary?, detail?, mode?("new"), tone? } → { module: {headline, summary, detail} }
 //
@@ -150,6 +151,7 @@ function parseVerify(text) {
   const rv = d.revised && typeof d.revised === 'object' && typeof d.revised.headline === 'string' && d.revised.headline.trim() ? { headline: c(d.revised.headline, 160), summary: c(d.revised.summary, 600), detail: c(d.revised.detail, 1500) } : null;
   return { verdict: d.verdict, issues, revised: d.verdict === 'pass' ? null : rv };
 }
+const BARNUM_RE = /(다양한|균형(이|을|잡)|노력하면|잠재력|긍정적|조화(롭|를)|양면|누구에게나)/;
 // 규칙 검사: 확정·위험 표현, 채울 수 없는 {…} 자리. AI 가 놓쳐도 여기서 잡는다.
 function ruleIssues(m) {
   const out = [], all = [m.headline, m.summary, m.detail].join(' ');
@@ -222,6 +224,18 @@ async function overLimit(env) {
 export async function onRequestPost({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   let b; try { b = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); }
+  if (b && b.task === 'verify-rules') { // 일괄 규칙 검사: AI 호출 없음 · 하루 한도에 포함되지 않음. 한 번에 최대 400개
+    const items = (Array.isArray(b.items) ? b.items : []).slice(0, 400), res = items.map(x => {
+      x = x && typeof x === 'object' ? x : {};
+      const m = { headline: clip(x.headline, 300), summary: clip(x.summary, 800), detail: clip(x.detail, 1800) }, issues = ruleIssues(m), all = [m.headline, m.summary, m.detail].join(' ');
+      const bn = all.match(BARNUM_RE); if (bn) issues.push({ type: 'barnum', quote: bn[0], why: '누구에게나 해당되는 빈말일 수 있습니다(규칙 검사).', fix: '구체적 장면·대가·행동으로 바꾸세요.' });
+      if (!m.headline.trim() || !m.summary.trim()) issues.push({ type: 'dull', quote: '', why: '핵심 문장 또는 짧은 설명이 비어 있습니다.', fix: '두 칸을 채우세요.' });
+      else if (m.summary.trim().length < 25) issues.push({ type: 'dull', quote: m.summary.trim().slice(0, 30), why: '짧은 설명이 너무 짧아 구체성이 부족합니다.', fix: '장면과 대가가 보이게 2~3문장으로 쓰세요.' });
+      const verdict = issues.some(i => i.type === 'overclaim' || i.type === 'grounding') ? 'fail' : issues.length ? 'revise' : 'pass';
+      return { id: clip(x.id, 80), verdict, issues };
+    });
+    return json({ ok: true, results: res, count: res.length });
+  }
   const refs = b && (b.task === 'module' || b.task === 'verify') ? await dbRefs(env, b) : [];
   const prompt = buildPrompt(b || {}, refs);
   if (typeof prompt !== 'string') return json({ error: prompt.error }, 400);

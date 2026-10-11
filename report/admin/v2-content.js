@@ -222,7 +222,7 @@
   }
 
   function modCfg() {
-    return { panel: policyPanel, bindPanel: policyBind, title: '해석 모듈', base: R.Content.modules, key: 'modules', catKey: 'category', cats: CATS.map(function (c) { return [c, CAT_KO[c]]; }), catLabel: '카테고리', title2: function (x) { return x.headline; }, catName: function (x) { return CAT_KO[x.category] || x.category; },
+    return { panel: function () { return policyPanel() + batchPanel(); }, bindPanel: function (r) { policyBind(r); batchBind(r); }, title: '해석 모듈', base: R.Content.modules, key: 'modules', catKey: 'category', cats: CATS.map(function (c) { return [c, CAT_KO[c]]; }), catLabel: '카테고리', title2: function (x) { return x.headline; }, catName: function (x) { return CAT_KO[x.category] || x.category; },
       blank: function (cat) { return { id: 'mod_' + Date.now().toString(36), category: cat, conditions: {}, priority: 50, headline: '', summary: '', detail: '', keywords: [], imageTags: [], actionTags: [], extra: null, enabled: true }; },
       fields: function (x) { return '<div class="fx"><label>카테고리</label><select id="eCat">' + CATS.map(function (c) { return '<option value="' + c + '"' + (x.category === c ? ' selected' : '') + '>' + CAT_KO[c] + ' (' + c + ')</option>'; }).join('') + '</select></div>' + aiBox() + tf('eH', '핵심 문장 (headline, 1~2문장)', x.headline) + tf('eS', '짧은 설명 (summary)', x.summary, 1) + tf('eD', '상세 풀이 (detail, "자세히 보기"에 펼침)', x.detail, 1) +
         '<div class="fx2">' + tf('eK', '키워드 (쉼표)', (x.keywords || []).join(', ')) + tf('eI', '이미지 태그 imageTags (쉼표, 예: wood,growth,forest)', (x.imageTags || []).join(', ')) + '</div>' + tf('eA', '행동 태그 actionTags (쉼표)', (x.actionTags || []).join(', ')) +
@@ -230,6 +230,64 @@
       afterEd: aiBind,
       read: function (b, n) { var orig = clone(n); n.category = $('#eCat', b).value; n.headline = $('#eH', b).value; n.summary = $('#eS', b).value; n.detail = $('#eD', b).value; n.keywords = csv($('#eK', b).value); n.imageTags = csv($('#eI', b).value); n.actionTags = csv($('#eA', b).value);
         var x = $('#eX', b).value.trim(); try { n.extra = x ? JSON.parse(x) : null; } catch (e) { toast('extra JSON 형식이 올바르지 않아 비웠습니다', true); n.extra = null; } if (/(반드시|무조건|확정)/.test(n.headline + n.summary + n.detail)) toast('단정 표현이 포함되어 있습니다. 문구를 확인하세요', true); return layerRead(b, n, orig); } };
+  }
+  /* ── 해석 모듈 일괄 검증: ① 규칙 검사(무료·즉시, 전체) ② AI 검증(범위·개수를 정해 순서대로). 결과는 이 화면에만 보관하고, 고치는 일은 모듈을 열어서 한다 ── */
+  var BV = { res: {}, stop: false, run: false };
+  function batchPanel() {
+    return '<details id="bvBox" class="card" style="margin-top:10px;padding:8px 12px"><summary><b style="color:var(--gold)">AI 일괄 검증</b> <span class="muted">전체 모듈에서 단정 표현·빈말·근거 문제를 찾아 고칠 순서를 정합니다</span></summary>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px"><label class="muted">범위 <select id="bvCat"><option value="">전체 카테고리</option>' + CATS.map(function (c) { return '<option value="' + c + '">' + esc(CAT_KO[c] || c) + '</option>'; }).join('') + '</select></label>' +
+      '<button type="button" id="bvRules">① 규칙 검사 (무료·즉시)</button><label class="muted">AI 검증 개수 <input type="number" id="bvN" min="1" max="100" value="20" style="width:70px"></label><button type="button" id="bvAI">② AI 검증 시작</button><button type="button" id="bvStop" hidden>중지</button><button type="button" id="bvCsv">결과 CSV</button></div>' +
+      '<p class="muted" style="margin:6px 0">① 은 AI를 쓰지 않아 하루 한도에 포함되지 않습니다. ② 는 "수정 필요"·"고치면 좋음"인 모듈을 우선으로, 아직 검증하지 않은 것부터 개수만큼 돌립니다(모듈 1개당 AI 1회).</p><div id="bvSum" class="muted"></div><div id="bvList" style="max-height:340px;overflow:auto;margin-top:6px"></div></details>';
+  }
+  function batchBind(root) {
+    var box = $('#bvBox', root); if (!box) return;
+    var VK = { pass: ['통과', '#62C2AE'], revise: ['고치면 좋음', '#E0B04A'], fail: ['수정 필요', '#FF8A78'] }, VT = { grounding: '근거 이탈', overclaim: '단정·위험', barnum: '빈말', dull: '둔한 문장', tone: '어조', dup: '반복' };
+    var cur = function () { var c = $('#bvCat', box).value; return mix(R.Content.modules, ST.saved.modules).filter(function (m) { return m.enabled !== false && (!c || m.category === c); }); };
+    var order = { fail: 0, revise: 1, pass: 2 };
+    function draw() {
+      var all = cur(), rows = all.map(function (m) { return { m: m, r: BV.res[m.id] }; }).filter(function (x) { return x.r; }).sort(function (a, b) { return order[a.r.verdict] - order[b.r.verdict]; });
+      var n = { pass: 0, revise: 0, fail: 0 }; rows.forEach(function (x) { n[x.r.verdict]++; });
+      $('#bvSum', box).innerHTML = '대상 ' + all.length + '개 · 검사됨 ' + rows.length + '개 — <span style="color:#FF8A78">수정 필요 ' + n.fail + '</span> · <span style="color:#E0B04A">고치면 좋음 ' + n.revise + '</span> · <span style="color:#62C2AE">통과 ' + n.pass + '</span>';
+      $('#bvList', box).innerHTML = rows.filter(function (x) { return x.r.verdict !== 'pass'; }).slice(0, 300).map(function (x) {
+        var k = VK[x.r.verdict], is = (x.r.issues || []).map(function (i) { return esc(VT[i.type] || i.type) + (i.quote ? ' “' + esc(i.quote) + '”' : ''); }).join(' · ');
+        return '<div class="v2li" style="cursor:default"><b>' + esc(x.m.headline || x.m.id) + '</b><small><span style="color:' + k[1] + '">' + k[0] + '</span>' + (x.r.ai ? ' · AI' : ' · 규칙') + ' · ' + esc(CAT_KO[x.m.category] || x.m.category) + ' · ' + esc(x.m.id) + '<br>' + is + '</small> <button type="button" data-open="' + esc(x.m.id) + '">열기</button></div>';
+      }).join('') || '<p class="muted">문제가 있는 모듈이 아직 없습니다. 검사를 실행해 보세요.</p>';
+      $$('[data-open]', box).forEach(function (b) { b.onclick = function () { var q = $('#iQ', root); if (q) { q.value = b.dataset.open; q.dispatchEvent(new Event('input')); } var li = $('.v2li[data-id="' + b.dataset.open + '"]', root); if (li) { li.click(); li.scrollIntoView({ block: 'nearest' }); } }; });
+    }
+    $('#bvCat', box).onchange = draw;
+    $('#bvRules', box).onclick = function () {
+      var b = this, list = cur(); if (!list.length) return; b.disabled = true; $('#bvSum', box).textContent = '규칙 검사 중…';
+      var chunks = [], i; for (i = 0; i < list.length; i += 400) chunks.push(list.slice(i, i + 400));
+      chunks.reduce(function (p, ch) { return p.then(function () { return api('/api/ai', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ task: 'verify-rules', items: ch.map(function (m) { return { id: m.id, headline: m.headline, summary: m.summary, detail: m.detail }; }) }) }).then(function (d) { (d.results || []).forEach(function (r) { if (!BV.res[r.id] || !BV.res[r.id].ai) BV.res[r.id] = { verdict: r.verdict, issues: r.issues, ai: false }; }); }); }); }, Promise.resolve())
+        .then(draw).catch(function (e) { toast(e.message, true); }).then(function () { b.disabled = false; });
+    };
+    $('#bvAI', box).onclick = function () {
+      if (BV.run) return; var n = Math.max(1, Math.min(100, +$('#bvN', box).value || 20)), all = cur();
+      var rank = function (m) { var r = BV.res[m.id]; return r && r.ai ? 9 : r ? order[r.verdict] : 1.5; }; // AI 검증을 이미 한 것은 뒤로, 규칙에서 걸린 것을 앞으로
+      var todo = all.filter(function (m) { return !(BV.res[m.id] && BV.res[m.id].ai); }).sort(function (a, b) { return rank(a) - rank(b); }).slice(0, n);
+      if (!todo.length) return toast('AI 검증할 모듈이 없습니다(이미 모두 검증했습니다)');
+      if (!confirm('모듈 ' + todo.length + '개를 AI로 검증합니다(AI ' + todo.length + '회 호출, 하루 한도에 포함). 진행할까요?')) return;
+      BV.run = true; BV.stop = false; $('#bvAI', box).disabled = true; $('#bvRules', box).disabled = true; $('#bvStop', box).hidden = false; var done = 0, err = '';
+      function step() {
+        if (BV.stop || err || !todo.length) { BV.run = false; $('#bvAI', box).disabled = false; $('#bvRules', box).disabled = false; $('#bvStop', box).hidden = true; draw(); if (err) toast(err, true); else toast('AI 검증 ' + done + '개를 마쳤습니다'); return; }
+        var m = todo.shift(), ct = condText(m.conditions || {});
+        $('#bvSum', box).textContent = 'AI 검증 중… ' + done + ' / ' + (done + todo.length + 1);
+        api('/api/ai', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ task: 'verify', category: m.category, conds: m.conditions || {}, conditions: (CAT_KO[m.category] || m.category) + ' / ' + (ct === '조건 없음' ? '' : ct), headline: m.headline, summary: m.summary, detail: m.detail }) })
+          .then(function (d) { BV.res[m.id] = { verdict: d.verdict, issues: d.issues || [], ai: true }; done++; if (done % 3 === 0) draw(); })
+          .catch(function (e) { if (/한도|429|인증|키/.test(e.message)) err = e.message; else { BV.res[m.id] = BV.res[m.id] || { verdict: 'revise', issues: [{ type: 'dull', quote: '', why: '검증 실패: ' + e.message, fix: '다시 시도하세요' }], ai: false }; } })
+          .then(step);
+      }
+      step();
+    };
+    $('#bvStop', box).onclick = function () { BV.stop = true; };
+    $('#bvCsv', box).onclick = function () {
+      var rows = cur().filter(function (m) { return BV.res[m.id]; }).map(function (m) { var r = BV.res[m.id]; return [m.id, m.category, r.verdict, r.ai ? 'AI' : '규칙', (r.issues || []).map(function (i) { return (VT[i.type] || i.type) + ':' + (i.quote || '') + ':' + i.why; }).join(' | '), m.headline]; });
+      if (!rows.length) return toast('내려받을 검사 결과가 없습니다');
+      var q = function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
+      var blob = new Blob(['\ufeff' + [['id', '카테고리', '판정', '방식', '문제', '핵심 문장']].concat(rows).map(function (r) { return r.map(q).join(','); }).join('\r\n')], { type: 'text/csv;charset=utf-8' });
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'module-verify.csv'; a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+    };
+    draw();
   }
   /* ── 해석 모듈 AI 작성(촌철살인 + 풀이 지식 DB 참고) — 결과는 폼에만 채우고, "적용" → "변경사항 저장"을 눌러야 반영된다 ── */
   function aiBox() {
