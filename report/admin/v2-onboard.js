@@ -76,14 +76,14 @@
     var ok = !!(s.doi || s.url);
     return '<form id="obCase" onsubmit="return false"><div class="ob-g2"><label class="ob-f">유형<select name="type">' + sel(TY, c.type) + '</select></label><label class="ob-f">검증 상태 (초안 → 검토 중 → 검증 완료 → 공개)<select name="status">' + sel(ST, c.status) + '</select></label></div>' +
       (c.status === 'published' && !ok ? '<p class="err">출처(DOI 또는 URL)가 없어 저장 시 "검증 완료"로 내려갑니다.</p>' : '') +
-      '<label class="ob-f">제목<input name="title" maxlength="120" value="' + esc(c.title) + '"></label><label class="ob-f">후킹 문구<input name="hook" maxlength="160" value="' + esc(c.hook) + '"></label>' +
+      '<label class="ob-f">제목<input type="text" name="title" maxlength="120" value="' + esc(c.title) + '"></label><label class="ob-f">후킹 문구<input type="text" name="hook" maxlength="160" value="' + esc(c.hook) + '"></label>' +
       '<label class="ob-f">본문 (한 줄이 한 항목, 최대 3줄 노출 · 짧게)<textarea name="body">' + esc((c.body || []).join('\n')) + '</textarea></label>' +
       '<label class="ob-f">한계·주의 문구 (연구는 필수)<textarea name="caveat" style="min-height:52px">' + esc(c.caveat || '') + '</textarea></label>' +
-      '<div class="ob-g2"><label class="ob-f">연구자 또는 인물<input name="who" value="' + esc(c.who || '') + '"></label><label class="ob-f">연도<input name="year" type="number" value="' + esc(c.year || '') + '"></label></div>' +
-      '<div class="ob-g2"><label class="ob-f">출처 이름<input name="slabel" value="' + esc(s.label || '') + '"></label><label class="ob-f">DOI<input name="doi" value="' + esc(s.doi || '') + '" placeholder="10.xxxx/…"></label></div>' +
-      '<label class="ob-f">출처 URL (https)<input name="url" value="' + esc(s.url || '') + '"></label><label class="ob-f">검증 기록 (확인한 날짜·방법)<input name="vnote" value="' + esc(c.verifiedNote || '') + '"></label>' +
-      '<div class="ob-g2"><label class="ob-f">관심사 태그 (쉼표)<input name="tags" value="' + esc((c.tags || []).join(', ')) + '"></label><label class="ob-f">노출 가중치 (0.1~10, 같은 유형 안에서)<input name="weight" type="number" step="0.1" min="0.1" max="10" value="' + esc(c.weight || 1) + '"></label></div>' +
-      '<label class="ob-f">이미지 주소 (비워 두면 도형 시각 자료)<input name="image" value="' + esc(c.image || '') + '"></label><label class="ob-f">이미지 올리기 <input type="file" id="obUp" accept="image/*"></label>' +
+      '<div class="ob-g2"><label class="ob-f">연구자 또는 인물<input type="text" name="who" value="' + esc(c.who || '') + '"></label><label class="ob-f">연도<input type="text" name="year" type="number" value="' + esc(c.year || '') + '"></label></div>' +
+      '<div class="ob-g2"><label class="ob-f">출처 이름<input type="text" name="slabel" value="' + esc(s.label || '') + '"></label><label class="ob-f">DOI<input type="text" name="doi" value="' + esc(s.doi || '') + '" placeholder="10.xxxx/…"></label></div>' +
+      '<label class="ob-f">출처 URL (https)<input type="text" name="url" value="' + esc(s.url || '') + '"></label><label class="ob-f">검증 기록 (확인한 날짜·방법)<input type="text" name="vnote" value="' + esc(c.verifiedNote || '') + '"></label>' +
+      '<div class="ob-g2"><label class="ob-f">관심사 태그 (쉼표)<input type="text" name="tags" value="' + esc((c.tags || []).join(', ')) + '"></label><label class="ob-f">노출 가중치 (0.1~10, 같은 유형 안에서)<input type="text" name="weight" type="number" step="0.1" min="0.1" max="10" value="' + esc(c.weight || 1) + '"></label></div>' +
+      '<label class="ob-f">이미지 주소 (비워 두면 도형 시각 자료)<input type="text" name="image" value="' + esc(c.image || '') + '"></label><label class="ob-f">이미지 올리기 <input type="file" id="obUp" accept="image/*"></label>' +
       '<p class="ob-lock">id: ' + esc(c.id) + ' · 이미지는 사용 권한이 확인된 것만 올려 주세요. 인물 사진은 적법하게 사용 가능한 이미지 또는 상징 이미지를 쓰세요.</p><div class="ob-bar"><button id="obDel" class="ghost">이 사례 삭제</button></div></form>';
   }
   function upload(file, pre) {
@@ -97,10 +97,10 @@
   function introView() {
     var cfg = G.cfg;
     $('#obBody').innerHTML = cfg.intro.map(function (s, i) { return '<div class="card"><h3 style="font-size:1rem">장면 ' + (i + 1) + ' · ' + esc(s.id) + '</h3><form id="obI' + i + '" onsubmit="return false">' +
-      '<label class="ob-f">제목<input name="title" value="' + esc(s.title) + '"></label><label class="ob-f">본문<textarea name="body">' + esc(s.body) + '</textarea></label><label class="ob-f">보조 문구<input name="sub" value="' + esc(s.sub || '') + '"></label>' +
-      '<div class="ob-g2"><label class="ob-f">이미지 주소<input name="image" value="' + esc(s.image || '') + '"></label><label class="ob-f">영상 주소 (mp4)<input name="video" value="' + esc(s.video || '') + '"></label></div>' +
+      '<label class="ob-f">제목<input type="text" name="title" value="' + esc(s.title) + '"></label><label class="ob-f">본문<textarea name="body">' + esc(s.body) + '</textarea></label><label class="ob-f">보조 문구<input type="text" name="sub" value="' + esc(s.sub || '') + '"></label>' +
+      '<div class="ob-g2"><label class="ob-f">이미지 주소<input type="text" name="image" value="' + esc(s.image || '') + '"></label><label class="ob-f">영상 주소 (mp4)<input type="text" name="video" value="' + esc(s.video || '') + '"></label></div>' +
       '<label class="ob-f" style="grid-auto-flow:column;justify-content:start;gap:8px"><input type="checkbox" name="enabled"' + (s.enabled !== false ? ' checked' : '') + '> 노출</label></form></div>'; }).join('') +
-      '<div class="card"><h3 style="font-size:1rem">마지막 문구·버튼</h3><form id="obLast" onsubmit="return false"><label class="ob-f">문구<input name="line" value="' + esc(cfg.introLast.line) + '"></label><label class="ob-f">버튼<input name="cta" value="' + esc(cfg.introLast.cta) + '"></label></form>' +
+      '<div class="card"><h3 style="font-size:1rem">마지막 문구·버튼</h3><form id="obLast" onsubmit="return false"><label class="ob-f">문구<input type="text" name="line" value="' + esc(cfg.introLast.line) + '"></label><label class="ob-f">버튼<input type="text" name="cta" value="' + esc(cfg.introLast.cta) + '"></label></form>' +
       '<p class="ob-lock">장면 순서는 사주팔자 소개 흐름(시간 → 네 기둥 → 두 해석)에 맞춰 고정되어 있습니다. 노출을 끄면 해당 장면만 건너뜁니다.</p></div>';
   }
 
@@ -111,12 +111,12 @@
     $('#obBody').innerHTML = cfg.scenes.map(function (s, i) {
       var req = REQ.indexOf(s.field) >= 0;
       return '<div class="card"><h3 style="font-size:1rem">' + (i + 1) + '. ' + esc(s.title) + ' <span class="ob-lock">입력: ' + esc(s.field) + (req ? ' · 필수(끌 수 없음, 계산 연결 고정)' : '') + '</span></h3><form id="obS' + i + '" onsubmit="return false">' +
-        '<label class="ob-f">장면 제목<input name="title" value="' + esc(s.title) + '"></label>' +
+        '<label class="ob-f">장면 제목<input type="text" name="title" value="' + esc(s.title) + '"></label>' +
         '<label class="ob-f">수련생 대사 (한 줄이 한 말풍선 문단 · {귀인} {이름귀인} 사용)<textarea name="lines">' + esc((s.lines || []).join('\n')) + '</textarea></label>' +
         (s.field === 'time' ? '<label class="ob-f">시각을 모를 때 대사<textarea name="unk" style="min-height:60px">' + esc((s.unknownLines || []).join('\n')) + '</textarea></label>' : '') +
-        '<label class="ob-f">입력 안내 문구 (일반 한국어)<input name="hint" value="' + esc(s.hint || '') + '"></label>' +
-        '<div class="ob-g2"><label class="ob-f">버튼 문구<input name="button" value="' + esc(s.button || '') + '"></label><label class="ob-f">캐릭터 표정<select name="face">' + fo(s.face) + '</select></label></div>' +
-        '<div class="ob-g2"><label class="ob-f">캐릭터 이미지 주소<input name="image" value="' + esc(s.image || '') + '"></label><label class="ob-f">배경 이미지 주소<input name="bg" value="' + esc(s.bg || '') + '"></label></div>' +
+        '<label class="ob-f">입력 안내 문구 (일반 한국어)<input type="text" name="hint" value="' + esc(s.hint || '') + '"></label>' +
+        '<div class="ob-g2"><label class="ob-f">버튼 문구<input type="text" name="button" value="' + esc(s.button || '') + '"></label><label class="ob-f">캐릭터 표정<select name="face">' + fo(s.face) + '</select></label></div>' +
+        '<div class="ob-g2"><label class="ob-f">캐릭터 이미지 주소<input type="text" name="image" value="' + esc(s.image || '') + '"></label><label class="ob-f">배경 이미지 주소<input type="text" name="bg" value="' + esc(s.bg || '') + '"></label></div>' +
         '<label class="ob-f" style="grid-auto-flow:column;justify-content:start;gap:8px"><input type="checkbox" name="enabled"' + (s.enabled !== false || req ? ' checked' : '') + (req ? ' disabled' : '') + '> 사용</label></form></div>';
     }).join('') + '<div class="card"><h3 style="font-size:1rem">계산 완료 후 수련생 대사</h3><textarea id="obReveal" style="min-height:90px">' + esc((cfg.revealLines || []).join('\n')) + '</textarea>' +
       '<p class="ob-lock">장면 이동·진행률·입력 검증은 코드가 담당합니다. 금지 호칭(대공·소협·대협)을 넣어도 호칭 설정에서 \'귀인\'으로 되돌립니다.</p></div>';
@@ -125,9 +125,9 @@
   /* ── 호칭·가중치 ── */
   function basicView() {
     var cfg = G.cfg;
-    $('#obBody').innerHTML = '<div class="card"><form id="obBasic" onsubmit="return false"><label class="ob-f">사용자 호칭 (모든 대사의 {귀인})<input name="honorific" maxlength="8" value="' + esc(cfg.honorific) + '"></label>' +
+    $('#obBody').innerHTML = '<div class="card"><form id="obBasic" onsubmit="return false"><label class="ob-f">사용자 호칭 (모든 대사의 {귀인})<input type="text" name="honorific" maxlength="8" value="' + esc(cfg.honorific) + '"></label>' +
       '<p class="ob-lock">기본값은 \'귀인\'입니다. 성별에 따라 호칭을 나누지 않으며, 이름을 입력한 뒤에는 "[이름] 귀인"으로 부릅니다. \'대공·소협·대협\'은 저장되지 않습니다.</p>' +
-      '<div class="ob-g2"><label class="ob-f">실제 연구 노출 가중치<input name="wr" type="number" min="0" max="100" value="' + esc(cfg.weights.research) + '"></label><label class="ob-f">유명인 사례 노출 가중치<input name="wc" type="number" min="0" max="100" value="' + esc(cfg.weights.celebrity) + '"></label></div>' +
+      '<div class="ob-g2"><label class="ob-f">실제 연구 노출 가중치<input type="text" name="wr" type="number" min="0" max="100" value="' + esc(cfg.weights.research) + '"></label><label class="ob-f">유명인 사례 노출 가중치<input type="text" name="wc" type="number" min="0" max="100" value="' + esc(cfg.weights.celebrity) + '"></label></div>' +
       '<p class="ob-lock">두 값의 비율로 유형을 먼저 고르고, 그 안에서 사례별 가중치로 고릅니다. 공개 사례가 없는 유형은 건너뜁니다. 기본 60 : 40.</p></form></div>';
   }
 
