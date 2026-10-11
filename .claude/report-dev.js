@@ -1,7 +1,7 @@
 // 로컬 확인용: 정적 파일 서버 + 모의 API (KV·R2 없이 메모리에 저장, 서버를 끄면 사라짐). 관리자 비밀번호는 "test"
 const http = require('http'), fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..');
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json' };
+const TYPES = { '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json' };
 let awkExtra = { fallback: null, publicBase: '', textOnly: false }, rc = null, mediaList = [], awk = [], ilg = [], story = null, intro = { on: false, src: null, srcMobile: null, skipAfter: 0, once: 'session' }, clips = [], defaults = {}, chapters = null, folders = [], files = {};
 const ikMem = new Map(), ikEnv = { ADMIN_PASSWORD: 'test', GLOSSARY_KV: { get: async (k, t) => { const v = ikMem.get(k); return v == null ? null : t === 'json' ? JSON.parse(v) : v; }, put: async (k, v) => { ikMem.set(k, v); } } };
 // 로컬 확인용 가짜 AI(Anthropic): 구간의 첫 긴 문장을 원문 인용으로 삼아 키워드로 조건을 읽어 후보 1개를 돌려준다

@@ -44,6 +44,7 @@
     });
     return cfgP;
   };
+  Ob.cfg = function () { return CFG; };
   var A = function (name) { return O.addr(name, CFG); };           // [이름] 귀인
   var F = function (t, name) { return O.fill(t, name, CFG); };      // 대사 치환
 
@@ -266,7 +267,7 @@
         var dt = e.target.closest && e.target.closest('[data-detail]'); // 연구 자세히 보기
         if (dt) { var box = dt.closest('.rc'), pane = $('.rc-detail', box), open = pane.hidden; pane.hidden = !open; dt.setAttribute('aria-expanded', String(open)); dt.textContent = open ? '자세히 보기 닫기' : '연구 자세히 보기'; if (open) Ob.track('research_detail_open', { case: dt.getAttribute('data-detail') }); return; }
         var go = e.target.closest && e.target.closest('[data-go]'); // 나의 운 확인하기(섹션 어디서나)
-        if (go) { var sid = go.getAttribute('data-go'); Ob.track('landing_cta_click', { case: 's-' + sid }); Ob.track('onboarding_cta_click', { case: caseId() }); if (PREVIEW) return; lset(SEEN, 1); H.go(q.replay && P.has() ? '#/begin?edit=1' : '#/begin'); return; }
+        if (go) { var sid = go.getAttribute('data-go'); Ob.track('landing_cta_click', { case: 's-' + sid }); Ob.track('onboarding_cta_click', { case: caseId() }); if (PREVIEW) return; lset(SEEN, 1); var so = secs.filter(function (x) { return x.id === sid; })[0]; if (so && so.cta && so.cta.to === 'quick') { H.go('#/input?next=my'); return; } /* CTA 연결 경로: 기본은 인터랙티브 스토리 */ H.go(q.replay && P.has() ? '#/begin?edit=1' : '#/begin'); return; }
         var b = e.target.closest && e.target.closest('[data-other]'); if (!b) return; // 다른 연구/인물 이야기 보기(예전 후킹)
         var type = b.getAttribute('data-other'), n = chooseCase(type, true), sec = b.closest('.cn-sec'); if (!n || !sec) return;
         cur[type] = n; Ob.track('onboarding_other_case', { case: n.id });
@@ -452,6 +453,8 @@
         '<div class="hhc"><small>나의 타고난 기질</small><p>' + esc(trait || t.line || '') + '</p><span class="hhc-sub">' + tip('일간') + ' ' + esc(M.STEM_K[day.s]) + ' · ' + tip('일주') + ' ' + esc(ju) + '</span></div>' +
         '<div class="hhc"><small>지금의 운 흐름</small><p>' + flowLine + '</p><span class="hhc-sub">' + tip('대운') + ' · ' + tip('일진') + '</span></div></section>' +
         '<h2 class="hh-h">무료 콘텐츠</h2><div class="hh-cards">' +
+        // 운명의 타임라인(별도 화면 #/timeline): 태어난 순간 · 대운 · 세운·월운 · 주제. 관리자에서 끌 수 있다(config.timeline.enabled)
+        (CFG.timeline && CFG.timeline.enabled === false ? '' : '<a class="cc feat" href="#/timeline" data-ob-ev="free_content_click" data-case="s-home-timeline" data-track="fortune_content_click" data-p="timeline"><small>FATE TIMELINE · 무료</small><h3>운명의 타임라인</h3><p>태어난 순간부터 대운·세운·월운까지, 내 운의 흐름을 직접 눌러 따라가 봅니다.</p><span class="go">타임라인 열기 →</span></a>') +
         // 3. 일주
         '<a class="cc feat" href="#/awaken?replay=1&to=home" data-ob-ev="ilju_video_play free_content_click" data-case="s-home-ilju" data-track="fortune_content_click" data-p="ilju"><small>ILJU · 무료</small><h3>나의 일주 확인하기</h3><p>' + esc(ju) + '일주 · 타고난 기질과 강점, 주의할 점을 영상으로 만납니다.</p><span class="go">일주 보기 →</span></a>' +
         // 4. 오늘의 운세
@@ -483,11 +486,11 @@
   }
   // 내 정보: 홈 상단 링크 → 같은 홈의 접힌 영역으로
   H.route('me', function () { H.replace('#/'); setTimeout(function () { var d = H.$('.hh-more'); if (d) { d.open = true; d.scrollIntoView({ behavior: H.reduce ? 'auto' : 'smooth', block: 'center' }); } }, 400); });
-  Ob.clear = function () { try { localStorage.removeItem('mantra-manse-v1'); localStorage.removeItem('mt_hub_awk'); localStorage.removeItem('mt_daily_v1'); localStorage.removeItem(DRAFT); localStorage.removeItem(SEEN); } catch (e) { } H.afterInput(); };
+  Ob.clear = function () { try { localStorage.removeItem('mantra-manse-v1'); localStorage.removeItem('mt_hub_awk'); localStorage.removeItem('mt_daily_v1'); localStorage.removeItem(DRAFT); localStorage.removeItem(SEEN); localStorage.removeItem('mt_quest_draft'); localStorage.removeItem('mt_guide'); } catch (e) { } H.afterInput(); };
 
   // 기존 입력 화면(#/input)은 온보딩 슬라이드 툰으로 대체한다. 옛 폼이 필요하면 #/input?classic=1
   var oldInput = H.routes.input;
-  H.route('input', function (q, ctx) { if (q.classic) return oldInput(q, ctx); H.replace('#/begin' + (q.edit ? '?edit=1' : '')); });
+  H.route('input', function (q, ctx) { if (q.classic || q.next) return oldInput(q, ctx); H.replace('#/begin' + (q.edit ? '?edit=1' : '')); }); // 빠른 진입("바로 사주 분석하기" 등 next 지정)은 일반 입력 화면 — 인터랙티브 스토리는 "나의 운 확인하기"(#/begin)로만 들어간다
 
   // data-ob-ev: 클릭 측정(서버 집계 포함). 사례 id 는 data-case
   document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('[data-ob-ev]'); if (a) a.getAttribute('data-ob-ev').split(/\s+/).filter(Boolean).forEach(function (ev) { Ob.track(ev, { case: a.getAttribute('data-case') || '' }); }); });

@@ -189,7 +189,7 @@
       notice: '', bridge: '', topics: false, cta: { show: false, text: '' } },
     { id: 'service', type: 'service', enabled: true, effect: 'rise', kicker: '만트라 만세력', title: '운세를 읽는 시대에서,\n나의 운을 경험하는 시대로.', sub: '복잡한 사주팔자를 나만의 동양 판타지 무빙툰으로 만나보세요.', notice: '', bridge: '', cta: { show: false, text: '' } },
     { id: 'story', type: 'story', enabled: false, effect: 'fade', kicker: '', title: '', sub: '', notice: '', bridge: '', cta: { show: false, text: '' } },
-    { id: 'final', type: 'final', enabled: true, effect: 'fade', kicker: '', title: '이제, {귀인}의 운을 펼쳐볼 차례입니다.', sub: '{귀인}이 태어난 순간을 알려주십시오. 그 시간에 담긴 사주팔자를 펼쳐 보이겠습니다.', notice: '', bridge: '', cta: { show: true, text: '나의 운 확인하기' } },
+    { id: 'final', type: 'final', enabled: true, effect: 'fade', kicker: '', title: '이제, {귀인}의 운을 펼쳐볼 차례입니다.', sub: '{귀인}이 태어난 순간을 알려주십시오. 그 시간에 담긴 사주팔자를 펼쳐 보이겠습니다.', notice: '', bridge: '', cta: { show: true, text: '나의 운 확인하기', to: 'story' } },
   ];
 
   /* ── 서비스 소개(SECTION 04) ─ status: live(이용 가능) · soon(준비 중). visible=false 면 노출하지 않는다 ── */
@@ -257,7 +257,7 @@
     if (Array.isArray(ov.sections)) {
       var seenS = {}, list = ov.sections.filter(function (x) { return x && SECTION_TYPES.indexOf(x.type) >= 0 && x.id && !seenS[x.id] && (seenS[x.id] = 1); }).map(function (x) {
         var d = SECTIONS.filter(function (y) { return y.type === x.type; })[0] || SECTIONS[0];
-        return Object.assign({}, d, pick(x, ['id', 'type', 'enabled', 'effect', 'kicker', 'title', 'sub', 'notice', 'bridge', 'topics', 'bg', 'bgMobile', 'art', 'artVideo']), { cta: Object.assign({}, d.cta, x.cta && typeof x.cta === 'object' ? pick(x.cta, ['show', 'text']) : {}) });
+        return Object.assign({}, d, pick(x, ['id', 'type', 'enabled', 'effect', 'kicker', 'title', 'sub', 'notice', 'bridge', 'topics', 'bg', 'bgMobile', 'art', 'artVideo']), { cta: Object.assign({}, d.cta, x.cta && typeof x.cta === 'object' ? pick(x.cta, ['show', 'text', 'to']) : {}) });
       });
       out.sections = list;
       SECTIONS.forEach(function (d) { if (d.type !== 'story' && !list.some(function (x) { return x.type === d.type; })) out.sections.push(JSON.parse(JSON.stringify(d))); });
