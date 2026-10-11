@@ -28,7 +28,7 @@
     '.ob-flow{display:flex;gap:6px;align-items:stretch;overflow-x:auto;padding:6px 0}.ob-node{min-width:132px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.78rem;background:var(--bg);display:grid;gap:4px;cursor:grab}' +
     '.ob-node.fixed{cursor:default;opacity:.85}.ob-node.on{border-color:var(--gold)}.ob-node.dis{opacity:.5}.ob-node.over{outline:2px dashed var(--gold)}.ob-node b{font-size:.84rem}.ob-arrow{align-self:center;color:var(--ink3)}' +
     '.ob-box{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:10px 0}.ob-box h4{margin:0 0 4px;font-size:.88rem;color:var(--gold)}.ob-warnbox{border-color:#7a5f2f;background:rgba(224,179,106,.06)}.ob-okbox{border-color:#2f7a52}' +
-    '.ob-dirty{color:#e0b36a;font-size:.8rem}.ob-prevbox{border:1px solid var(--line);border-radius:10px;padding:8px;margin:10px 0;text-align:center}.ob-prevbox iframe{border:0;background:#080A11;border-radius:8px;width:100%;height:640px}.ob-prevbox.mob iframe{width:390px;max-width:100%}' +
+    '.ob-dirty{color:#e0b36a;font-size:.8rem}.ob-sstage{position:relative;height:230px;border-radius:10px;overflow:hidden;background:#0b0e18;border:1px solid var(--line);margin:6px 0 10px}.ob-sbg{position:absolute;inset:0;background:center/cover no-repeat;opacity:.92}.ob-sch{position:absolute;left:6%;bottom:0;height:90%;max-width:42%;object-fit:contain;display:none}.ob-sbub{position:absolute;right:5%;top:14%;width:48%;padding:10px 12px;border-radius:12px;background:rgba(10,12,20,.8);border:1px solid rgba(255,255,255,.16);color:#f4eede;font-size:.85rem;line-height:1.55}.ob-sph{position:absolute;left:8px;bottom:6px;background:rgba(0,0,0,.45);padding:1px 6px;border-radius:6px}.ob-prevbox{border:1px solid var(--line);border-radius:10px;padding:8px;margin:10px 0;text-align:center}.ob-prevbox iframe{border:0;background:#080A11;border-radius:8px;width:100%;height:640px}.ob-prevbox.mob iframe{width:390px;max-width:100%}' +
     '.ob-bars{display:grid;gap:4px}.ob-bar2{display:grid;grid-template-columns:150px 1fr 90px;gap:8px;align-items:center;font-size:.8rem}.ob-bar2 i{display:block;height:10px;background:var(--gold);border-radius:5px;min-width:1px}.ob-img{max-width:120px;max-height:70px;border-radius:6px;border:1px solid var(--line);margin-top:4px}';
   document.head.appendChild(css);
   window.addEventListener('beforeunload', function (e) { if (G.dirty) { e.preventDefault(); e.returnValue = ''; } });
@@ -240,7 +240,7 @@
     return C.api('/api/clipfile?name=' + encodeURIComponent(pre + file.name), { method: 'POST', headers: { 'content-type': file.type || 'application/octet-stream' }, body: file }).then(function (d) { if (!d.key) throw new Error('업로드 실패'); return '/api/clipfile?k=' + d.key; });
   }
   function bindUploads(form, pre) {
-    $$('[data-up]', form).forEach(function (u) { u.onchange = function () { upload(u.files[0], pre).then(function (url) { form.elements[u.dataset.up].value = url; markDirty(); toast('올렸습니다 — 초안 저장을 눌러 반영하세요'); }).catch(function (e) { toast(e.message, true); }); }; });
+    $$('[data-up]', form).forEach(function (u) { u.onchange = function () { upload(u.files[0], pre).then(function (url) { form.elements[u.dataset.up].value = url; try { form.elements[u.dataset.up].dispatchEvent(new Event('input', { bubbles: true })); } catch (x) { } markDirty(); toast('올렸습니다 — 초안 저장을 눌러 반영하세요'); }).catch(function (e) { toast(e.message, true); }); }; });
   }
   function move(list, id, d) { var i = list.map(function (x) { return x.id; }).indexOf(id), j = i + d; if (i < 0 || j < 0 || j >= list.length) return; var x = list.splice(i, 1)[0]; list.splice(j, 0, x); }
 
@@ -393,7 +393,23 @@
   }
 
   /* ── 슬라이드 툰 ── */
-  function scenesView() {
+  function scenesView() { scenesView0(); bindScenes(); }
+  function bindScenes() {
+    var cfg = G.cfg, hon = (cfg.honorific || '귀인');
+    (cfg.scenes || []).forEach(function (sc, i) {
+      var f = $('#obS' + i); if (!f) return;
+      bindUploads(f, 'onb-scene-');
+      var st = $('.ob-sstage[data-stage="' + i + '"]'); if (!st) return;
+      var upd = function () {
+        var bg = f.elements.bg ? f.elements.bg.value.trim() : '', im = f.elements.image ? f.elements.image.value.trim() : '', ln = ((f.elements.lines && f.elements.lines.value) || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean)[0] || '';
+        st.querySelector('.ob-sbg').style.backgroundImage = bg ? 'url("' + bg.replace(/["\\]/g, '') + '")' : '';
+        var ch = st.querySelector('.ob-sch'); if (im) { ch.src = im; ch.style.display = 'block'; } else { ch.removeAttribute('src'); ch.style.display = 'none'; }
+        st.querySelector('.ob-sbub').textContent = ln.replace(/\{이름귀인\}/g, '홍길동 ' + hon).replace(/\{귀인\}/g, hon) || '(수련생 대사가 여기에 표시됩니다)';
+      };
+      f.addEventListener('input', upd); upd();
+    });
+  }
+  function scenesView0() {
     var cfg = G.cfg, FACES = O.FACES, fo = function (cur) { return Object.keys(FACES).map(function (k) { return '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' + FACES[k] + '</option>'; }).join(''); };
     var BUB = { '': '기본', glass: '반투명', ink: '먹빛(진하게)' };
     $('#obBody').innerHTML = '<div class="card"><form id="obSceneMeta" onsubmit="return false"><div class="ob-g2"><label class="ob-f">진행률 문구 ({n} 현재 단계 · {total} 전체 · {title} 장면 제목)<input type="text" name="progress" value="' + esc(cfg.progressLabel || '{n} / {total} · {title}') + '"></label>' +
@@ -406,7 +422,9 @@
           (s.field === 'time' ? '<label class="ob-f">시각을 모를 때 대사<textarea name="unk" style="min-height:60px">' + esc((s.unknownLines || []).join('\n')) + '</textarea></label>' : '') +
           '<label class="ob-f">입력 안내 문구 (일반 한국어)<input type="text" name="hint" value="' + esc(s.hint || '') + '"></label>' +
           '<div class="ob-g2"><label class="ob-f">버튼 문구<input type="text" name="button" value="' + esc(s.button || '') + '"></label><label class="ob-f">캐릭터 표정(연출)<select name="face">' + fo(s.face) + '</select></label></div>' +
-          '<div class="ob-g2"><label class="ob-f">캐릭터 이미지 주소<input type="text" name="image" value="' + esc(s.image || '') + '"></label><label class="ob-f">배경 이미지 주소<input type="text" name="bg" value="' + esc(s.bg || '') + '"></label></div>' +
+          '<div class="ob-g2"><label class="ob-f">캐릭터 이미지 (주소 입력 또는 파일 올리기)<input type="text" name="image" value="' + esc(s.image || '') + '"><input type="file" data-up="image" accept="image/*"></label>' +
+          '<label class="ob-f">배경 이미지 (주소 입력 또는 파일 올리기)<input type="text" name="bg" value="' + esc(s.bg || '') + '"><input type="file" data-up="bg" accept="image/*"></label></div>' +
+          '<div class="ob-sstage" data-stage="' + i + '"><div class="ob-sbg"></div><img class="ob-sch" alt=""><div class="ob-sbub"></div><span class="ob-lock ob-sph">장면 미리보기 · 배경 위에 캐릭터와 첫 대사가 이렇게 놓입니다</span></div>' +
           '<label class="ob-f">대화창 스타일<select name="bubble">' + sel(BUB, s.bubble || '') + '</select></label>' +
           chk('enabled', s.enabled !== false || req, '사용' + (req ? ' (필수 단계 — 끌 수 없음)' : '')).replace('<input type="checkbox"', '<input type="checkbox"' + (req ? ' disabled' : '')) + '</form></div>';
       }).join('') + '<div class="card"><h3 style="font-size:1rem">계산 완료 후 수련생 대사</h3><textarea id="obReveal" style="min-height:90px">' + esc((cfg.revealLines || []).join('\n')) + '</textarea>' +
