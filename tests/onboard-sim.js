@@ -249,6 +249,19 @@ ok(Array.isArray(ch.daeun.list) && ch.daeun.list.length >= 8 && ch.daeun.list.ev
     r = await call(mod.onRequestGet, req('GET', '/api/onboarding?stats=1', null, true));
     if (!(r.j.stats.byDev.m.landing_view === 1 && r.j.stats.byDev.d.research_source_click === 1)) bad('기기별(모바일·PC) 집계');
     if (/birth|year|name|gender/i.test(JSON.stringify(r.j.stats))) bad('집계에 출생정보 필드 없음');
+    // 최종 CTA 대표 이미지·영상(기본 도형 대체): 서버 정리 → 방문자 설정 병합까지 유지, 위험 URL 은 제거
+    {
+      const sec = O.DEFAULTS.sections.map(x => ({ ...x }));
+      const fin = sec.filter(x => x.type === 'final')[0]; fin.art = '/api/clipfile?k=abc123.jpg'; fin.artVideo = 'javascript:alert(1)';
+      r = await call(mod.onRequestPut, req('PUT', '/api/onboarding', { sections: sec }, true));
+      r = await call(mod.onRequestPost, req('POST', '/api/onboarding?action=publish', null, true));
+      r = await call(mod.onRequestGet, req('GET', '/api/onboarding'));
+      const pf = (r.j.config.sections || []).filter(x => x.type === 'final')[0] || {};
+      if (pf.art !== '/api/clipfile?k=abc123.jpg') bad('최종 CTA 대표 이미지가 저장·공개 응답에 유지된다');
+      if (pf.artVideo) bad('최종 CTA 대표 영상의 위험 URL 은 제거된다');
+      const mf = (O.merge(O.DEFAULTS, r.j.config).sections || []).filter(x => x.type === 'final')[0] || {};
+      if (mf.art !== '/api/clipfile?k=abc123.jpg') bad('방문자 설정 병합(merge) 뒤에도 대표 이미지가 유지된다');
+    }
     console.log('onboard-sim(추가): 완료');
   })();
 }

@@ -189,7 +189,7 @@
 
       /* 최종 CTA */
       function finalSec(sec) {
-        var inner = '<div class="cn-art">' + media({ image: sec.bg ? '' : '' }, Art.forIntro('end')) + '</div>' +
+        var inner = '<div class="cn-art">' + media({ image: sec.art || '', video: sec.artVideo || '' }, Art.forIntro('end')) + '</div>' +
           '<h2 class="cn-title big">' + nl(F(sec.title || CFG.introLast.line)) + '</h2>' + (sec.sub ? '<p class="cn-body cn-rev">' + nl(F(sec.sub)) + '</p>' : '') +
           '<button type="button" class="btn cn-go" id="obGo" data-go="' + esc(sec.id) + '">' + esc(F((sec.cta && sec.cta.text) || CFG.introLast.cta)) + '</button>' +
           '<div class="cn-links" style="justify-content:center">' + (hasProfile ? '<a class="cn-lnk" href="#/?nogate=1" data-track="onboarding_home_back">내 홈으로 돌아가기</a>' : '<a class="cn-lnk" href="#/?skip=1" data-track="onboarding_browse_click">먼저 무료 타로·캘린더 둘러보기</a>') + '</div>' +

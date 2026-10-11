@@ -98,7 +98,7 @@ function clean(b, notes) {
     const seen = new Set();
     out.sections = b.sections.slice(0, 12).filter(x => x && SECTION_TYPES.includes(x.type) && ID.test(String(x.id || '')) && !seen.has(x.id) && seen.add(x.id)).map(x => ({
       id: x.id, type: x.type, enabled: x.enabled !== false, effect: EFFECTS.includes(x.effect) ? x.effect : 'fade', kicker: s(x.kicker, 60), title: s(x.title, 200), sub: s(x.sub, 400), notice: s(x.notice, 400), bridge: s(x.bridge, 300), topics: x.topics === true,
-      bg: img(x.bg), bgMobile: img(x.bgMobile), cta: cleanCta(x.cta) }));
+      bg: img(x.bg), bgMobile: img(x.bgMobile), art: img(x.art), artVideo: img(x.artVideo), cta: cleanCta(x.cta) }));
   }
   if (Array.isArray(b.services)) {
     const seen = new Set();
