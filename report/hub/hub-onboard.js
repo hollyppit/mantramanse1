@@ -118,60 +118,42 @@
       };
       var cta = function (sec, big) { return sec.cta && sec.cta.show && sec.cta.text ? '<div class="cn-cta-row"><button type="button" class="btn ' + (big ? 'cn-go' : 'cn-go sm') + '" data-go="' + esc(sec.id) + '">' + esc(F(sec.cta.text)) + '</button></div>' : ''; };
       var head = function (sec) {
-        return (sec.kicker ? '<p class="cn-kick">' + esc(sec.kicker) + '</p>' : '') + (sec.title ? '<h2 class="cn-title">' + nl(F(sec.title)) + '</h2>' : '') + (sec.sub ? '<p class="cn-body cn-rev">' + nl(F(sec.sub)) + '</p>' : '');
+        return (sec.kicker ? '<p class="cn-kick">' + esc(sec.kicker) + '</p>' : '') + (sec.title ? '<h2 class="cn-title">' + nl(F(sec.title)) + '</h2>' : '') + (sec.sub ? '<p class="tx-p cn-rev">' + nl(F(sec.sub)) + '</p>' : '');
       };
       var wrap = function (sec, inner, extra) {
         var st = (sec.bg ? '--sec-bg:url(' + esc(sec.bg) + ');' : '') + (sec.bgMobile ? '--sec-bg-m:url(' + esc(sec.bgMobile) + ');' : '');
         return '<section class="cn-sec cn-s-' + sec.type + ' fxe-' + esc(sec.effect || 'fade') + (sec.bg ? ' has-bg' : '') + (extra || '') + '" data-sec="' + esc(sec.id) + '" data-type="' + sec.type + '"' + (st ? ' style="' + st + '"' : '') + '>' + inner + '</section>';
       };
 
-      /* 연구 카드 */
+      /* 연구: 카드가 아니라 "컷". 그림 한 장 → 질문 → 문장이 하나씩 → 한 줄 단서 → 작은 출처 */
       function researchCard(c) {
-        var st = c.study || {}, src = c.source || {}, d = c.display || {}, url = src.url || st.url || '', doi = src.doi || st.doi || '';
-        var org = st.org || c.who || '', rel = O.RELATION[st.relation] || '', year = st.year || c.year || '';
-        var row = function (k, v) { return v ? '<div><dt>' + k + '</dt><dd>' + esc(v) + '</dd></div>' : ''; };
-        var link = url ? '<a class="rc-src" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" data-ob-ev="research_source_click onboarding_source_click" data-case="' + esc(c.id) + '">' + (doi ? '원문 보기 · DOI ' + esc(doi) : '원문 보기') + '</a>' : '';
-        var hasDetail = d.detail !== false && (st.name || st.researchers || st.journal || st.method || st.stats || st.scope || st.limits || c.verification.reviewedAt);
-        var sum = (c.body || []).slice(0, 4);
-        var m = c.media || {};
+        var st = c.study || {}, m = c.media || {}, d = c.display || {}, sum = (c.body || []).slice(0, 4);
         var art = media({ video: m.video, image: m.image, alt: m.alt }, Art.forCase(c.visual), 'fade');
-        return '<article class="rc rc-' + esc(d.design || 'plain') + (d.featured ? ' rc-feat' : '') + (d.mobileLayout === 'compact' ? ' rc-compact' : '') + ' cn-rev" data-case="' + esc(c.id) + '">' +
-          '<div class="rc-tags"><span class="rc-kind">' + esc(O.KINDS[c.kind] || '') + (year ? ' · ' + esc(year) : '') + '</span>' + (rel ? '<span class="rc-rel">' + esc(rel) + '</span>' : '') + '</div>' +
-          '<div class="rc-art">' + art + '</div>' +
-          (c.hook ? '<p class="cn-hook">' + esc(c.hook) + '</p>' : '') + (d.showTitle !== false ? '<h3 class="rc-title">' + esc(c.title) + '</h3>' : '') +
-          (org ? '<p class="rc-org">' + esc(org) + '</p>' : '') +
-          (d.showSummary !== false ? '<ul class="rc-sum">' + sum.map(function (p) { return '<li>' + esc(p) + '</li>'; }).join('') + '</ul>' : '') +
-          '<dl class="rc-facts">' + row('연구 대상', st.subject) + row('규모', st.sample) + row('핵심 결과', st.result) + '</dl>' +
-          (st.limits || c.caveat ? '<p class="rc-lim"><b>연구의 한계</b> ' + esc(st.limits || c.caveat) + '</p>' : '') +
-          '<div class="rc-act">' + (hasDetail ? '<button type="button" class="rc-more" aria-expanded="false" data-detail="' + esc(c.id) + '">연구 자세히 보기</button>' : '') + (d.showSource !== false ? link : '') + '</div>' +
-          (hasDetail ? '<div class="rc-detail" hidden>' +
-            '<dl class="rc-facts">' + row('연구명', st.name) + row('연구자', st.researchers) + row('학술지', st.journal) + row('연구 방법', st.method) + row('통계적 수치', st.stats) + row('이 연구가 다루는 범위', st.scope) + row('명리학과의 관련성', rel) + row('최종 검토일', c.verification.reviewedAt) + '</dl>' +
-            (c.caveat && st.limits ? '<p class="rc-lim"><b>유의</b> ' + esc(c.caveat) + '</p>' : '') + '</div>' : '') +
-          '</article>';
+        var full = String(st.limits || c.caveat || ''), k = full.indexOf('. '), cav = k > 0 ? full.slice(0, k + 1) : full; // 한계는 라벨 없이 한 문장으로 자연스럽게
+        var foot = [st.org || c.who, st.year || c.year].filter(Boolean).join(', ');
+        return '<article class="rc cn-rev" data-case="' + esc(c.id) + '"><div class="rc-art">' + art + '</div>' +
+          (c.hook ? '<p class="tx-q cn-rev">' + esc(c.hook) + '</p>' : '') +
+          (d.showTitle !== false ? '<h3 class="tx-h cn-rev">' + esc(c.title) + '</h3>' : '') +
+          (d.showSummary !== false ? sum.map(function (p) { return '<p class="tx-p cn-rev">' + esc(p) + '</p>'; }).join('') : '') +
+          (cav ? '<p class="tx-soft cn-rev">' + esc(cav) + '</p>' : '') +
+          (d.showSource !== false && foot ? '<p class="tx-src cn-rev">— ' + esc(foot) + '</p>' : '') + '</article>';
       }
       function researchSec(sec) {
         var cards = O.birthCards(CFG.cases); if (!cards.length) return '';
-        return wrap(sec, head(sec) + '<div class="rc-list">' + cards.map(researchCard).join('') + '</div>' +
-          (sec.notice ? '<p class="rc-notice cn-rev">' + nl(F(sec.notice)) + '</p>' : '') + (sec.bridge ? '<p class="cn-bridge-t cn-rev">' + nl(F(sec.bridge)) + '</p>' : '') + cta(sec), '');
+        return wrap(sec, head(sec) + cards.map(researchCard).join('') +
+          (sec.notice ? '<p class="tx-soft cn-rev">' + nl(F(sec.notice)) + '</p>' : '') + (sec.bridge ? '<p class="tx-turn cn-rev">' + nl(F(sec.bridge)) + '</p>' : '') + cta(sec), '');
       }
 
-      /* 명리학: 소개 장면(기존) + 원리 주제 */
+      /* 명리학: 장면 몇 컷. 원리 나열(주제 목록)은 섹션 설정에서 켠 경우에만 */
       function topicHtml(tp) {
-        var nat = O.NATURE[tp.nature] || '';
-        return '<details class="tp" data-topic="' + esc(tp.id) + '"><summary><span class="tp-t">' + esc(tp.title) + '</span>' + (tp.sub ? '<span class="tp-s">' + esc(tp.sub) + '</span>' : '') + '</summary>' +
-          '<div class="tp-b fxe-' + esc(tp.anim || 'fade') + '"><div class="cn-art tp-art">' + media(tp, Art.forTopic ? Art.forTopic(tp.id) : '', tp.anim) + (tp.image2 ? '<img class="cn-media tp-img2" src="' + esc(tp.image2) + '" alt="" loading="lazy">' : '') + '</div>' +
-          (nat ? '<span class="tp-nat tp-nat-' + esc(tp.nature) + '">' + esc(nat) + '</span>' : '') +
-          (tp.summary ? '<p class="tp-sum">' + esc(tp.summary) + '</p>' : '') + (tp.detail ? '<p class="tp-det">' + esc(tp.detail) + '</p>' : '') +
-          (tp.analogy ? '<p class="tp-ana"><b>쉬운 비유</b> ' + esc(tp.analogy) + '</p>' : '') + (tp.term && tp.termEasy ? '<p class="tp-term"><b>' + esc(tp.term) + '</b> ' + esc(tp.termEasy) + '</p>' : '') +
-          (tp.refs ? '<p class="tp-ref">참고 · ' + esc(tp.refs) + '</p>' : '') + '</div></details>';
+        return '<details class="tp"><summary><span class="tp-t">' + esc(tp.title) + '</span></summary><div class="tp-b"><p class="tx-p">' + esc(tp.summary || '') + '</p>' + (tp.detail ? '<p class="tx-soft">' + esc(tp.detail) + '</p>' : '') + (tp.analogy ? '<p class="tx-soft">' + esc(tp.analogy) + '</p>' : '') + '</div></details>';
       }
       function myeongriSec(sec) {
-        var scenes = intro.map(function (s, i) {
-          return '<div class="cn-sub-sec" data-intro="' + esc(s.id) + '"><div class="cn-art">' + media(s, Art.forIntro(s.id), sec.effect) + '</div><h3 class="cn-title sm">' + esc(s.title) + '</h3><p class="cn-body cn-rev">' + esc(s.body) + '</p>' + (s.sub ? '<p class="cn-sub cn-rev">' + esc(s.sub) + '</p>' : '') + '</div>';
+        var scenes = intro.map(function (s) {
+          return '<div class="cn-sub-sec" data-intro="' + esc(s.id) + '"><div class="cn-art">' + media(s, Art.forIntro(s.id), sec.effect) + '</div><h3 class="tx-h cn-rev">' + esc(s.title) + '</h3><p class="tx-p cn-rev">' + esc(s.body) + '</p>' + (s.sub ? '<p class="tx-soft cn-rev">' + esc(s.sub) + '</p>' : '') + '</div>';
         }).join('');
-        var tps = (CFG.topics || []).filter(function (x) { return x.enabled !== false; });
-        return wrap(sec, head(sec) + scenes + (tps.length ? '<div class="tp-list cn-rev"><p class="tp-h">명리학 원리, 하나씩 열어 보기</p>' + tps.map(topicHtml).join('') + '</div>' : '') +
-          '<p class="cn-cav cn-rev">' + esc(sec.notice || O.INTRO_NOTICE) + '</p>' + cta(sec), '');
+        var tps = sec.topics ? (CFG.topics || []).filter(function (x) { return x.enabled !== false; }) : [];
+        return wrap(sec, head(sec) + scenes + (tps.length ? '<div class="tp-list cn-rev">' + tps.map(topicHtml).join('') + '</div>' : '') + (sec.notice ? '<p class="tx-soft cn-rev">' + nl(F(sec.notice)) + '</p>' : '') + cta(sec), '');
       }
 
       /* 서비스 소개 */
@@ -211,7 +193,7 @@
           '<h2 class="cn-title big">' + nl(F(sec.title || CFG.introLast.line)) + '</h2>' + (sec.sub ? '<p class="cn-body cn-rev">' + nl(F(sec.sub)) + '</p>' : '') +
           '<button type="button" class="btn cn-go" id="obGo" data-go="' + esc(sec.id) + '">' + esc(F((sec.cta && sec.cta.text) || CFG.introLast.cta)) + '</button>' +
           '<div class="cn-links" style="justify-content:center">' + (hasProfile ? '<a class="cn-lnk" href="#/?nogate=1" data-track="onboarding_home_back">내 홈으로 돌아가기</a>' : '<a class="cn-lnk" href="#/?skip=1" data-track="onboarding_browse_click">먼저 무료 타로·캘린더 둘러보기</a>') + '</div>' +
-          '<p class="cn-cav">' + esc(O.INTRO_NOTICE) + '</p>';
+          '<p class="tx-soft" style="text-align:center">' + esc(O.INTRO_NOTICE) + '</p>';
         return wrap(sec, inner, ' cn-last" id="cnLast');
       }
       var builders = { research: researchSec, myeongri: myeongriSec, service: serviceSec, story: storySec, final: finalSec };

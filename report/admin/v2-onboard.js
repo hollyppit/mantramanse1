@@ -155,7 +155,7 @@
       '<label class="ob-f">제목 (줄바꿈 가능 · {귀인} 사용)<textarea name="title" style="min-height:56px">' + esc(s.title || '') + '</textarea></label><label class="ob-f">설명<textarea name="sub" style="min-height:70px">' + esc(s.sub || '') + '</textarea></label>' +
       (s.type === 'research' ? '<label class="ob-f">연구와 명리학을 구분하는 안내 문구 (항상 표시)<textarea name="notice" style="min-height:60px">' + esc(s.notice || '') + '</textarea></label>' : '<input type="hidden" name="notice" value="' + esc(s.notice || '') + '">') +
       (s.type === 'research' ? '<label class="ob-f">섹션 마지막 연결 문구<textarea name="bridge" style="min-height:56px">' + esc(s.bridge || '') + '</textarea></label>' : '<input type="hidden" name="bridge" value="' + esc(s.bridge || '') + '">') +
-      '<div class="ob-g2"><label class="ob-f">섹션 하단 버튼 문구<input type="text" name="cta" maxlength="30" value="' + esc(cta.text || '') + '"></label>' + chk('ctaShow', cta.show, '이 섹션 아래에 "나의 운 확인하기" 버튼 표시') + '</div>' +
+      (s.type === 'myeongri' ? chk('topics', s.topics === true, '원리 주제 목록(접이식)도 함께 표시 — 기본은 꺼짐: 장면 몇 컷만 읽히게') : '') + '<div class="ob-g2"><label class="ob-f">섹션 하단 버튼 문구<input type="text" name="cta" maxlength="30" value="' + esc(cta.text || '') + '"></label>' + chk('ctaShow', cta.show, '이 섹션 아래에 "나의 운 확인하기" 버튼 표시') + '</div>' +
       '<div class="ob-g2"><label class="ob-f">배경 이미지 (PC)<input type="text" name="bg" value="' + esc(s.bg || '') + '"><input type="file" data-up="bg" accept="image/*"></label><label class="ob-f">배경 이미지 (모바일, 비우면 PC와 같음)<input type="text" name="bgMobile" value="' + esc(s.bgMobile || '') + '"><input type="file" data-up="bgMobile" accept="image/*"></label></div>' +
       '<div class="ob-bar"><button type="button" class="ghost" id="obSecUp"' + (i === 0 ? ' disabled' : '') + '>↑ 위로</button><button type="button" class="ghost" id="obSecDn"' + (i === c.sections.length - 1 ? ' disabled' : '') + '>↓ 아래로</button><button type="button" class="ghost" id="obSecDup">섹션 복제</button>' +
       (s.type !== 'final' ? '<button type="button" class="ghost" id="obSecDel">섹션 삭제</button>' : '') + '</div>' +
@@ -188,7 +188,7 @@
     if (!G.cfg || !$('#obBody')) return;
     var cfg = G.cfg, v;
     var sf = $('#obSec'); if (sf) { var s = cfg.sections.filter(function (x) { return x.id === G.selSec; })[0]; if (s) { v = function (n) { return sf.elements[n] ? sf.elements[n].value : ''; };
-      s.kicker = v('kicker').trim(); s.effect = v('effect'); s.title = v('title').trim(); s.sub = v('sub').trim(); s.notice = v('notice').trim(); s.bridge = v('bridge').trim(); s.bg = v('bg').trim(); s.bgMobile = v('bgMobile').trim(); s.cta = { show: sf.elements.ctaShow.checked, text: v('cta').trim() }; } }
+      s.kicker = v('kicker').trim(); s.effect = v('effect'); s.title = v('title').trim(); s.sub = v('sub').trim(); s.notice = v('notice').trim(); s.bridge = v('bridge').trim(); s.bg = v('bg').trim(); s.bgMobile = v('bgMobile').trim(); s.cta = { show: sf.elements.ctaShow.checked, text: v('cta').trim() }; if (sf.elements.topics) s.topics = sf.elements.topics.checked; } }
     if (G.sub === 'cases' && G.sel) {
       var c = cfg.cases.filter(function (x) { return x.id === G.sel; })[0], f = $('#obCase'); if (c && f) {
         v = function (n) { return f.elements[n] ? f.elements[n].value : ''; }; var cb = function (n) { return f.elements[n] ? !!f.elements[n].checked : false; };

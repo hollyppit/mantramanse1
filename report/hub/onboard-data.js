@@ -182,12 +182,12 @@
      effect: none | fade | rise | parallax | crossfade   (글자 타이핑·스크롤 강제 이동은 제공하지 않는다) */
   var EFFECTS = { none: '기본 표시', fade: '페이드 인', rise: '아래에서 등장', parallax: '배경 패럴랙스', crossfade: '이미지 크로스페이드' };
   var SECTIONS = [
-    { id: 'research', type: 'research', enabled: true, effect: 'fade', kicker: '02 · 현대 연구', title: '태어난 시기는 우리의 삶에 어떤 흔적을 남길까?', sub: '현대 연구에서는 출생 시기와 일부 건강 지표 사이의 통계적 연관성이 관찰되었습니다.',
+    { id: 'research', type: 'research', enabled: true, effect: 'fade', kicker: '현대 연구는 말합니다', title: '태어난 시기는 우리의 삶에 어떤 흔적을 남길까?', sub: '현대 연구에서는 출생 시기와 일부 건강 지표 사이의 통계적 연관성이 관찰되었습니다.',
       notice: '출생 월·계절과 건강 지표의 통계적 연관성은 사주팔자의 성격·재물·결혼·미래 예측이 맞다는 근거가 아닙니다. 두 가지는 서로 다른 이야기입니다.',
       bridge: '현대 연구가 출생 시기와 환경의 관계를 탐구한다면, 동양에서는 오래전부터 시간과 계절의 흐름으로 인간을 이해하려 했습니다.', cta: { show: false, text: '' } },
-    { id: 'myeongri', type: 'myeongri', enabled: true, effect: 'rise', kicker: '03 · 동양 명리학', title: '수천 년 동안 이어져 온 시간의 해석.', sub: '동양 명리학은 사람이 태어난 연·월·일·시를 천간과 지지로 표현하고, 음양오행의 관계를 통해 개인의 특성과 운의 흐름을 해석하는 전통 체계입니다.',
-      notice: '', bridge: '', cta: { show: true, text: '나의 운 확인하기' } },
-    { id: 'service', type: 'service', enabled: true, effect: 'rise', kicker: '04 · 만트라 만세력', title: '운세를 읽는 시대에서,\n나의 운을 경험하는 시대로.', sub: '복잡한 사주팔자를 나만의 동양 판타지 무빙툰으로 만나보세요.', notice: '', bridge: '', cta: { show: false, text: '' } },
+    { id: 'myeongri', type: 'myeongri', enabled: true, effect: 'rise', kicker: '동양은 이렇게 보았습니다', title: '수천 년 동안 이어져 온 시간의 해석.', sub: '동양 명리학은 사람이 태어난 연·월·일·시를 천간과 지지로 표현하고, 음양오행의 관계를 통해 개인의 특성과 운의 흐름을 해석하는 전통 체계입니다.',
+      notice: '', bridge: '', topics: false, cta: { show: false, text: '' } },
+    { id: 'service', type: 'service', enabled: true, effect: 'rise', kicker: '만트라 만세력', title: '운세를 읽는 시대에서,\n나의 운을 경험하는 시대로.', sub: '복잡한 사주팔자를 나만의 동양 판타지 무빙툰으로 만나보세요.', notice: '', bridge: '', cta: { show: false, text: '' } },
     { id: 'story', type: 'story', enabled: false, effect: 'fade', kicker: '', title: '', sub: '', notice: '', bridge: '', cta: { show: false, text: '' } },
     { id: 'final', type: 'final', enabled: true, effect: 'fade', kicker: '', title: '이제, {귀인}의 운을 펼쳐볼 차례입니다.', sub: '{귀인}이 태어난 순간을 알려주십시오. 그 시간에 담긴 사주팔자를 펼쳐 보이겠습니다.', notice: '', bridge: '', cta: { show: true, text: '나의 운 확인하기' } },
   ];
@@ -257,7 +257,7 @@
     if (Array.isArray(ov.sections)) {
       var seenS = {}, list = ov.sections.filter(function (x) { return x && SECTION_TYPES.indexOf(x.type) >= 0 && x.id && !seenS[x.id] && (seenS[x.id] = 1); }).map(function (x) {
         var d = SECTIONS.filter(function (y) { return y.type === x.type; })[0] || SECTIONS[0];
-        return Object.assign({}, d, pick(x, ['id', 'type', 'enabled', 'effect', 'kicker', 'title', 'sub', 'notice', 'bridge', 'bg', 'bgMobile']), { cta: Object.assign({}, d.cta, x.cta && typeof x.cta === 'object' ? pick(x.cta, ['show', 'text']) : {}) });
+        return Object.assign({}, d, pick(x, ['id', 'type', 'enabled', 'effect', 'kicker', 'title', 'sub', 'notice', 'bridge', 'topics', 'bg', 'bgMobile']), { cta: Object.assign({}, d.cta, x.cta && typeof x.cta === 'object' ? pick(x.cta, ['show', 'text']) : {}) });
       });
       out.sections = list;
       SECTIONS.forEach(function (d) { if (d.type !== 'story' && !list.some(function (x) { return x.type === d.type; })) out.sections.push(JSON.parse(JSON.stringify(d))); });
