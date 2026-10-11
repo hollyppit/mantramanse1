@@ -68,6 +68,53 @@
       caveat: '', who: '알 파치노', year: 1972, source: { label: '전기·인터뷰 확인 전', url: '' }, verifiedNote: '출처 확인 전 — 검토 중', visual: 'door' },
   ];
 
+
+  /* ── 서사 원고 ─ 확인된 사실만 이야기로 풀었다. 없는 대사·감정·숫자를 만들지 않는다. 운영 노출 전 관리자가 출처와 함께 다시 확인할 것. ──
+     story: 문단(한 줄 = 한 문단, 2문장 이내) · takeaway: 이야기가 남기는 한 줄 */
+  var STORY = {
+    'r-pluchino-2018': { story: [
+      '가상의 사람 1,000명을 만들었습니다. 재능은 사람마다 조금씩 다르지만 대부분 평범한 수준이고, 출발선의 자본은 모두 같습니다.',
+      '그리고 40년. 6개월마다 무작위로 사건이 닥칩니다. 행운이 닿으면 재능이 있는 사람은 그 기회를 살려 자본을 두 배로 불리고, 불운이 닿으면 재능과 상관없이 자본이 절반이 됩니다.',
+      '40년 뒤 결과표를 열어 보니, 재능은 종 모양으로 고르게 퍼져 있었는데 부(富)는 극소수에게 크게 쏠려 있었습니다.',
+      '그리고 가장 큰 부를 쌓은 사람은 가장 재능 있는 사람이 아니었습니다. 평범한 재능에, 행운이 연달아 닿았던 사람이었습니다.'],
+      takeaway: '재능은 문을 여는 열쇠이지만, 어느 문 앞에 서게 되는지는 시간과 우연이 함께 정합니다.' },
+    'r-liu-2018': { story: [
+      '화가, 영화감독, 과학자. 서로 다른 분야 수천 명의 경력을 작품 하나, 논문 하나까지 시간순으로 따라가 보았습니다.',
+      '작품마다 영향력을 재 보니 대표작들은 경력 전체에 고르게 흩어져 있지 않았습니다. 짧은 기간에 몰려 있었습니다. 연구진은 이 시기를 “핫 스트릭”이라 불렀습니다.',
+      '이런 시기는 분야와 상관없이 대부분의 경력에서 나타났습니다. 다만 그 시기가 경력의 처음에 올지, 중간에 올지, 끝에 올지는 사람마다 달랐습니다.',
+      '같은 시간을 일해도 전성기가 오는 때는 저마다 다릅니다. 이미 지나온 사람과 아직 기다리는 사람이 같은 자리에 서 있는 것입니다.'],
+      takeaway: '전성기는 “얼마나 열심히”만이 아니라 “언제”의 문제이기도 합니다.' },
+    'r-salganik-2006': { story: [
+      '이름 없는 밴드의 노래 48곡을 온라인에 올리고, 1만 4천여 명에게 마음에 드는 곡을 내려받게 했습니다.',
+      '참가자들은 서로 모르는 여러 개의 “세계”로 나뉘었습니다. 어떤 세계에서는 다른 사람들이 많이 내려받은 곡이 보였고, 어떤 세계에서는 아무 정보도 없었습니다.',
+      '같은 노래, 같은 출발선. 그런데 세계마다 1등 곡이 달랐습니다. 남들의 선택이 보이는 세계일수록 인기는 한곳으로 쏠렸고 결과는 더 예측하기 어려웠습니다.',
+      '정말 좋은 곡이 바닥에 깔리는 일은 드물었지만, 어떤 곡이 정상에 설지는 세계가 열릴 때마다 달라졌습니다.'],
+      takeaway: '실력은 출발선에 가깝고, 무엇이 떠오르는지는 그때 그 자리의 흐름이 크게 좌우합니다.' },
+    'r-chetty-2014': { story: [
+      '같은 나라, 같은 법, 같은 언어. 연구진은 수천만 건의 세금 기록을 이어 부모의 소득과 자녀가 어른이 되어 번 소득을 지역별로 비교했습니다.',
+      '결과는 지역마다 뚜렷이 달랐습니다. 비슷한 가정 형편에서 태어났어도, 어디에서 자랐는지에 따라 소득 사다리를 오를 가능성이 크게 갈렸습니다.',
+      '연구진은 거주지의 분리, 학교의 질, 가족 구조 같은 “주변의 조건”과 이 차이가 함께 움직인다는 점도 보여 주었습니다.',
+      '아이의 재능이나 노력이 달라서만이 아니라, 아이가 서 있던 자리가 달랐다는 이야기입니다.'],
+      takeaway: '인생의 결과는 나의 노력과, 내가 서 있던 자리의 합입니다.' },
+    'c-ford-starwars': { story: [
+      '1970년대 초, 해리슨 포드는 배우였지만 연기만으로는 가족을 먹여 살리기 어려웠습니다. 그래서 집과 가구를 고치는 목수로 일했습니다.',
+      '「스타워즈」의 주인공을 찾던 조지 루카스는 이전 작품에 나온 배우를 다시 쓰는 데 신중했다고 전해집니다. 포드는 이미 「아메리칸 그래피티」에서 그와 함께한 얼굴이었습니다.',
+      '캐스팅 디렉터 프레드 루스는 그를 눈여겨보았고, 오디션을 보러 온 후보들의 상대역으로 대사를 읽어 주는 일을 맡겼습니다.',
+      '후보가 바뀌는 동안 상대역 자리에 서 있던 사람은 포드였습니다. 루카스는 결국 그를 한 솔로로 택했습니다.'],
+      takeaway: '기회는 “지원서”가 아니라 “그 자리에 있었던 때”에 찾아오기도 합니다.' },
+    'c-cranston-breakingbad': { story: [
+      '브라이언 크랜스턴은 시트콤 「말콤 인 더 미들」의 어수룩한 아버지 역으로 널리 알려져 있었습니다. 많은 사람의 머릿속에서 그는 “웃기는 아빠”였습니다.',
+      '2000년대 후반, 「브레이킹 배드」를 만든 빈스 길리건은 평범한 화학 교사가 범죄자로 변해 가는 주인공에 그를 떠올렸습니다. 방송사 쪽에서는 시트콤 이미지 때문에 망설였다고 전해집니다.',
+      '길리건이 근거로 든 것은 십 년 전 「X파일」의 한 에피소드였습니다. 같은 배우의 전혀 다른 얼굴이 거기 있었습니다.',
+      '오십을 갓 넘긴 나이에 맡은 이 역으로, 그는 이후 에미상 주연상을 여러 차례 받았습니다.'],
+      takeaway: '때로는 지금의 평판이 아니라, 누군가 알아본 “다른 얼굴”이 다음 시기를 엽니다.' },
+    'r-wiseman-luck': { story: ['리처드 와이즈먼은 스스로 운이 좋다고 여기는 사람과 나쁘다고 여기는 사람을 모아 같은 과제를 주었습니다.', '신문 속 사진의 수를 세는 과제였는데, 지면에는 정답을 알려 주는 큰 글씨가 숨어 있었다고 보고했습니다.'], takeaway: '운은 사건이기 전에, 알아보는 방식일 수도 있습니다.' },
+    'c-pacino-godfather': { story: ['「대부」 제작사는 마이클 역에 더 이름난 배우를 원했다고 전해집니다.', '감독 프랜시스 포드 코폴라는 알 파치노를 밀어붙였다고 알려져 있습니다.'], takeaway: '아직 아무도 몰랐던 사람을 알아본 한 사람이 있었습니다.' },
+  };
+  CASES.forEach(function (c) { var x = STORY[c.id]; if (x) { c.story = x.story; c.takeaway = x.takeaway; } });
+  // 구간 사이를 잇는 문장: 연구 → 유명인 → 명리학
+  var BRIDGE = { toCelebrity: '연구는 “평균”을 말합니다. 그렇다면 한 사람의 인생에서는 이 “때”와 “우연”이 어떻게 나타났을까요?', toIntro: '재능과 노력만으로는 설명되지 않는 “때”. 그렇다면 동양에서는 사람의 인생과 운의 흐름을 어떻게 바라봤을까요?' };
+
   /* ── 동양 명리학 소개 (3장면) ─ 관리자가 제목·본문·이미지·영상을 바꿀 수 있다 ── */
   var INTRO = [
     { id: 'time', enabled: true, title: '사람마다 꽃이 피는 때가 다르듯, 인생의 흐름도 저마다 다릅니다.', body: '동양의 명리학은 사람이 태어난 연월일시를 바탕으로 타고난 기질과 시간에 따른 변화의 흐름을 해석해 온 전통 체계입니다.', sub: '', glyph: '時', image: '', video: '', theme: 'mountain' },
@@ -90,7 +137,7 @@
   var REVEAL_LINES = ['대, 대단하옵니다, {귀인}!!', '마침내 {귀인}의 명식이 완성되었사옵니다!', '이제 {귀인}께서 타고난 기질과 운의 흐름을 살펴보시지요!'];
   var FACES = { greet: '반가움', ask: '궁금함', shock: '깜짝', serious: '진지함', proud: '뿌듯함', worry: '걱정' };
 
-  var DEFAULTS = { forceOnboarding: true, honorific: DEFAULT_HONORIFIC, weights: { research: 60, celebrity: 40 }, cases: CASES, intro: INTRO, introLast: INTRO_LAST, scenes: SCENES, revealLines: REVEAL_LINES };
+  var DEFAULTS = { bridge: BRIDGE, forceOnboarding: true, honorific: DEFAULT_HONORIFIC, weights: { research: 60, celebrity: 40 }, cases: CASES, intro: INTRO, introLast: INTRO_LAST, scenes: SCENES, revealLines: REVEAL_LINES };
 
   /* ── 설정 병합 ────────────────────────────────────────────────
      서버 값(관리자 저장본)을 기본값 위에 얹는다. 장면은 id 로 맞춰 문구·이미지만 덮어쓰고, 입력 종류(field)와 계산 연결은 코드가 지킨다
@@ -98,6 +145,7 @@
   var REQUIRED_FIELDS = ['name', 'date', 'time', 'place', 'gender', 'confirm'];
   function merge(base, ov) {
     base = base || DEFAULTS; var out = JSON.parse(JSON.stringify(base)); if (!ov || typeof ov !== 'object') return out;
+    if (ov.bridge && typeof ov.bridge === 'object') out.bridge = Object.assign({}, out.bridge, pick(ov.bridge, ['toCelebrity', 'toIntro']));
     if (typeof ov.forceOnboarding === 'boolean') out.forceOnboarding = ov.forceOnboarding;
     if (typeof ov.honorific === 'string') out.honorific = honorific(ov);
     if (ov.weights && typeof ov.weights === 'object') { var r = +ov.weights.research, c = +ov.weights.celebrity; if (r >= 0 && c >= 0 && r + c > 0) out.weights = { research: r, celebrity: c }; }
@@ -118,6 +166,7 @@
   function publicCases(cases) { return (cases || []).filter(function (c) { return c && c.status === 'published' && c.title && c.body && c.body.length && c.source && (c.source.doi || c.source.url); }); }
   function pickCase(cfg, opts) {
     opts = opts || {}; var rnd = opts.rnd || Math.random, recent = opts.recent || [], pool = publicCases(cfg.cases);
+    if (opts.type) pool = pool.filter(function (c) { return c.type === opts.type; });
     if (!pool.length) return null;
     var fresh = pool.filter(function (c) { return recent.indexOf(c.id) < 0; });
     if (!fresh.length) fresh = pool.filter(function (c) { return c.id !== recent[0]; }); if (!fresh.length) fresh = pool;

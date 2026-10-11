@@ -47,7 +47,7 @@
   }
   function save() {
     collect();
-    var b = G.cfg, body = { forceOnboarding: b.forceOnboarding, honorific: b.honorific, weights: b.weights, cases: b.cases, intro: b.intro, introLast: b.introLast, scenes: b.scenes.map(function (s) { return { id: s.id, title: s.title, lines: s.lines, unknownLines: s.unknownLines || [], hint: s.hint, button: s.button, face: s.face, image: s.image || '', bg: s.bg || '', enabled: s.enabled }; }), revealLines: b.revealLines };
+    var b = G.cfg, body = { forceOnboarding: b.forceOnboarding, honorific: b.honorific, weights: b.weights, cases: b.cases, intro: b.intro, introLast: b.introLast, bridge: b.bridge, scenes: b.scenes.map(function (s) { return { id: s.id, title: s.title, lines: s.lines, unknownLines: s.unknownLines || [], hint: s.hint, button: s.button, face: s.face, image: s.image || '', bg: s.bg || '', enabled: s.enabled }; }), revealLines: b.revealLines };
     C.api('/api/onboarding', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).then(function (d) { G.version = d.version; toast('저장했습니다'); return load(); }).then(draw).catch(function (e) { toast(e.message, true); });
   }
   // 현재 화면의 입력값을 G.cfg 로 옮긴다
@@ -57,7 +57,7 @@
     if (G.sub === 'cases' && G.sel) {
       var c = cfg.cases.filter(function (x) { return x.id === G.sel; })[0], f = $('#obCase'); if (c && f) {
         var v = function (n) { return f.elements[n] ? f.elements[n].value : ''; };
-        c.title = v('title').trim(); c.hook = v('hook').trim(); c.type = v('type'); c.status = v('status'); c.body = lines(v('body')); c.caveat = v('caveat').trim(); c.who = v('who').trim(); c.year = +v('year') || 0;
+        c.title = v('title').trim(); c.hook = v('hook').trim(); c.story = lines(v('story')); c.takeaway = v('takeaway').trim(); c.type = v('type'); c.status = v('status'); c.body = lines(v('body')); c.caveat = v('caveat').trim(); c.who = v('who').trim(); c.year = +v('year') || 0;
         c.tags = v('tags').split(',').map(function (x) { return x.trim(); }).filter(Boolean); c.weight = +v('weight') || 1; c.image = v('image').trim(); c.visual = c.visual || 'bell';
         c.source = { label: v('slabel').trim(), doi: v('doi').trim(), url: v('url').trim() }; c.verifiedNote = v('vnote').trim();
       }
@@ -68,7 +68,7 @@
       cfg.scenes.forEach(function (s, i) { var f = $('#obS' + i); if (!f) return; var v = function (n) { return f.elements[n].value; }; s.title = v('title').trim(); s.lines = lines(v('lines')); s.unknownLines = f.elements.unk ? lines(v('unk')) : s.unknownLines; s.hint = v('hint').trim(); s.button = v('button').trim() || '다음'; s.face = v('face'); s.image = v('image').trim(); s.bg = v('bg').trim(); s.enabled = REQ.indexOf(s.field) >= 0 ? true : f.elements.enabled.checked; });
       var r = $('#obReveal'); if (r) cfg.revealLines = lines(r.value);
     }
-    if (G.sub === 'basic') { var b = $('#obBasic'); if (b) { var h = b.elements.honorific.value.trim(); cfg.honorific = O.honorific({ honorific: h }); cfg.forceOnboarding = !!b.elements.force.checked; cfg.weights = { research: +b.elements.wr.value || 0, celebrity: +b.elements.wc.value || 0 }; if (cfg.weights.research + cfg.weights.celebrity <= 0) cfg.weights = { research: 60, celebrity: 40 }; } }
+    if (G.sub === 'basic') { var b = $('#obBasic'); if (b) { var h = b.elements.honorific.value.trim(); cfg.honorific = O.honorific({ honorific: h }); cfg.forceOnboarding = !!b.elements.force.checked; cfg.bridge = { toCelebrity: b.elements.bc.value.trim(), toIntro: b.elements.bi.value.trim() }; cfg.weights = { research: +b.elements.wr.value || 0, celebrity: +b.elements.wc.value || 0 }; if (cfg.weights.research + cfg.weights.celebrity <= 0) cfg.weights = { research: 60, celebrity: 40 }; } }
   }
 
   /* ── 사례 ── */
@@ -87,7 +87,9 @@
     return '<form id="obCase" onsubmit="return false"><div class="ob-g2"><label class="ob-f">유형<select name="type">' + sel(TY, c.type) + '</select></label><label class="ob-f">검증 상태 (초안 → 검토 중 → 검증 완료 → 공개)<select name="status">' + sel(ST, c.status) + '</select></label></div>' +
       (c.status === 'published' && !ok ? '<p class="err">출처(DOI 또는 URL)가 없어 저장 시 "검증 완료"로 내려갑니다.</p>' : '') +
       '<label class="ob-f">제목<input type="text" name="title" maxlength="120" value="' + esc(c.title) + '"></label><label class="ob-f">후킹 문구<input type="text" name="hook" maxlength="160" value="' + esc(c.hook) + '"></label>' +
-      '<label class="ob-f">본문 (한 줄이 한 항목, 최대 3줄 노출 · 짧게)<textarea name="body">' + esc((c.body || []).join('\n')) + '</textarea></label>' +
+      '<label class="ob-f">이야기 (한 줄 = 한 문단, 문단당 2문장 이내 · 확인된 사실만)<textarea name="story" style="min-height:190px">' + esc((c.story || []).join('\n')) + '</textarea></label>' +
+      '<label class="ob-f">이야기가 남기는 한 줄<input type="text" name="takeaway" value="' + esc(c.takeaway || '') + '"></label>' +
+      '<label class="ob-f">핵심 요약 (이야기가 없을 때만 대신 노출)<textarea name="body">' + esc((c.body || []).join('\n')) + '</textarea></label>' +
       '<label class="ob-f">한계·주의 문구 (연구는 필수)<textarea name="caveat" style="min-height:52px">' + esc(c.caveat || '') + '</textarea></label>' +
       '<div class="ob-g2"><label class="ob-f">연구자 또는 인물<input type="text" name="who" value="' + esc(c.who || '') + '"></label><label class="ob-f">연도<input type="text" name="year" type="number" value="' + esc(c.year || '') + '"></label></div>' +
       '<div class="ob-g2"><label class="ob-f">출처 이름<input type="text" name="slabel" value="' + esc(s.label || '') + '"></label><label class="ob-f">DOI<input type="text" name="doi" value="' + esc(s.doi || '') + '" placeholder="10.xxxx/…"></label></div>' +
@@ -138,7 +140,8 @@
     $('#obBody').innerHTML = '<div class="card"><form id="obBasic" onsubmit="return false"><label class="ob-f" style="grid-auto-flow:column;justify-content:start;gap:8px"><input type="checkbox" name="force"' + (cfg.forceOnboarding !== false ? ' checked' : '') + '> 개발 단계: 재방문자도 접속할 때마다(세션당 1회) 온보딩부터 보여 주기</label><p class="ob-lock">출시 전에 꺼 주세요. 끄면 프로필이 있는 방문자는 곧바로 홈으로 갑니다.</p><label class="ob-f">사용자 호칭 (모든 대사의 {귀인})<input type="text" name="honorific" maxlength="8" value="' + esc(cfg.honorific) + '"></label>' +
       '<p class="ob-lock">기본값은 \'귀인\'입니다. 성별에 따라 호칭을 나누지 않으며, 이름을 입력한 뒤에는 "[이름] 귀인"으로 부릅니다. \'대공·소협·대협\'은 저장되지 않습니다.</p>' +
       '<div class="ob-g2"><label class="ob-f">실제 연구 노출 가중치<input type="text" name="wr" type="number" min="0" max="100" value="' + esc(cfg.weights.research) + '"></label><label class="ob-f">유명인 사례 노출 가중치<input type="text" name="wc" type="number" min="0" max="100" value="' + esc(cfg.weights.celebrity) + '"></label></div>' +
-      '<p class="ob-lock">두 값의 비율로 유형을 먼저 고르고, 그 안에서 사례별 가중치로 고릅니다. 공개 사례가 없는 유형은 건너뜁니다. 기본 60 : 40.</p></form></div>';
+      '<p class="ob-lock">온보딩은 "실제 연구 1건 → 실제 유명인 1건 → 명리학 소개" 순서로 고정입니다. 유형 가중치는 현재 쓰지 않고, 같은 유형 안에서는 사례별 가중치로 고릅니다. 공개 사례가 없는 유형은 건너뜁니다.</p>' +
+      '<label class="ob-f">연구 → 유명인 연결 문장<textarea name="bc" style="min-height:60px">' + esc((cfg.bridge && cfg.bridge.toCelebrity) || '') + '</textarea></label><label class="ob-f">유명인 → 명리학 연결 문장<textarea name="bi" style="min-height:60px">' + esc((cfg.bridge && cfg.bridge.toIntro) || '') + '</textarea></label></form></div>';
   }
 
   /* ── 통계 ── */

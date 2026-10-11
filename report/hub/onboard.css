@@ -198,3 +198,17 @@
 #hub .ob.rm .cn-sec{ opacity: 1; transform: none; }
 #hub .ob.rm .cn-beats li{ opacity: 1; transform: none; animation: none; }
 @media (prefers-reduced-motion: reduce){ #hub .cn-sec{ opacity: 1; transform: none; transition: none; } #hub .cn-beats li{ opacity: 1; transform: none; animation: none !important; } #hub .cn-svg *{ animation: none !important; } }
+
+#hub .cn-lnk{ color: var(--gold-l); text-decoration: underline; text-underline-offset: 4px; min-height: 44px; display: inline-flex; align-items: center; font-size: .92rem; }
+#hub[data-embed] .cn-sec:first-child{ padding-top: 24px; }
+
+/* 스토리텔링: 문단이 하나씩 떠오르고, 구간 사이를 잇는 문장이 흐름을 만든다 */
+#hub .cn-rev{ opacity: 0; transform: translateY(14px); transition: opacity .8s ease, transform .8s ease; }
+#hub .cn-rev.in{ opacity: 1; transform: none; }
+#hub .cn-story{ display: grid; gap: 18px; margin-top: 4px; }
+#hub .cn-story p{ margin: 0; font-size: 1.08rem; line-height: 1.95; color: var(--ink); }
+#hub .cn-take{ margin: 6px 0 0; padding: 18px 0 18px 18px; border-left: 2px solid var(--gold); font-family: var(--f-serif); font-size: 1.18rem; line-height: 1.7; color: var(--gold-l); }
+#hub .cn-bridge{ min-height: 42svh; text-align: center; place-items: center; }
+#hub .cn-bridge-t{ margin: 0; font-family: var(--f-serif); font-size: clamp(1.2rem, 4.8vw, 1.5rem); line-height: 1.85; color: var(--ink-2); max-width: 30em; }
+#hub .ob.rm .cn-rev{ opacity: 1; transform: none; transition: none; }
+@media (prefers-reduced-motion: reduce){ #hub .cn-rev{ opacity: 1; transform: none; transition: none; } }
