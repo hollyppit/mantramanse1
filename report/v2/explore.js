@@ -95,6 +95,7 @@
   }
 
   var E = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var WORLD_ART_BASE = '/report/hub/quest/', WORLD_ART = { w1: 'courtyard', w2: 'archive', w3: 'mirror', w4: 'paths', w5: 'portal', w6: 'letter' }; // 타임라인 주제 타일과 같은 기본 에셋
   var STATE = { new: '탐험 가능', doing: '탐험 중', done: '탐험 완료' };
   var wstyle = function (w) { return ' style="--wc:' + E(w.color || '#1B2347') + ';--wa:' + E(w.accent || '#D5B97F') + (w.bgImage ? ';--wbg:url(' + E(w.bgImage) + ')' : '') + '"'; };
 
@@ -115,9 +116,12 @@
     h += '<label class="xp-auto"><input type="checkbox" id="xAuto"' + (m.auto ? ' checked' : '') + '><span>자동으로 넘겨 읽기' + (m.rate && m.rate > 1 ? ' (' + m.rate + '배속)' : '') + '</span></label><ol class="xp-map">';
     m.worlds.forEach(function (g) {
       var w = g.world;
-      h += '<li><button type="button" class="xp-w st-' + g.state + '" data-xw="' + esc(w.id) + '"' + wstyle(w) + '><span class="xp-wi" aria-hidden="true">' + esc(w.icon || '') + '</span>' +
-        '<span class="xp-wt"><b>' + esc(w.name) + '</b><small>' + esc(w.line) + '</small></span>' +
-        '<span class="xp-wb"><i class="xp-st">' + STATE[g.state] + '</i>' + (w.access === 'paid' ? '<i class="xp-paid">유료</i>' : '') + '<em>' + g.done + '/' + g.total + '</em></span></button></li>';
+      var pct = g.total ? Math.round(g.done / g.total * 100) : 0;
+      // 운명의 타임라인(허브 #/timeline)의 주제 타일과 같은 모양: 이미지 + 어두운 그라데이션 + 제목·한 줄 설명 + 상태 배지. 이미지는 세계에 올려 둔 배경(bgImage)이 있으면 그것, 없으면 기본 에셋.
+      h += '<li><button type="button" class="xp-w st-' + g.state + '" data-xw="' + esc(w.id) + '"' + wstyle(w) + '><img class="xp-wimg" src="' + esc(w.bgImage || (WORLD_ART_BASE + (WORLD_ART[w.id] || 'archive') + '.webp')) + '" alt="" loading="lazy" decoding="async">' +
+        '<span class="xp-wb"><i class="xp-st">' + STATE[g.state] + '</i>' + (w.access === 'paid' ? '<i class="xp-paid">유료</i>' : '') + '</span>' +
+        '<span class="xp-wt"><b><span class="xp-wi" aria-hidden="true">' + esc(w.icon || '') + '</span>' + esc(w.name) + '</b><small>' + esc(w.line) + '</small><em>' + g.done + '/' + g.total + '</em></span>' +
+        '<i class="xp-wbar" aria-hidden="true"><s style="width:' + pct + '%"></s></i></button></li>';
     });
     return h + '</ol><p class="fine">사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></div>';
   }

@@ -24,21 +24,29 @@
 .xp-ch.cur { background: rgba(213, 185, 127, .07); }
 .xp-ch.cur .xp-s { color: var(--gold-l); }
 
-/* 세계 지도(카드 목록 = 모바일 기본) */
-.xp-map { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 12px; }
-.xp-w { width: 100%; display: flex; align-items: center; gap: 14px; text-align: left; color: var(--ink); min-height: 76px; padding: 14px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--wa, #D5B97F) 45%, transparent); background: linear-gradient(135deg, var(--wc, #1B2347), rgba(7, 9, 19, .85)); }
+/* 세계 지도: 운명의 타임라인(허브 timeline.css 의 .tq-topic)과 같은 이미지 타일 */
+.xp-map { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.xp-map li { min-width: 0; }
+.xp-w { position: relative; display: block; width: 100%; height: 190px; padding: 0; overflow: hidden; text-align: left; color: var(--ink); border-radius: 14px; border: 1px solid color-mix(in srgb, var(--wa, #D5B97F) 40%, var(--line)); background: var(--wc, #0b1117); cursor: pointer; }
 .xp-w:active { transform: scale(.985); }
-.xp-wi { font-size: 1.7rem; flex: none; width: 44px; text-align: center; }
-.xp-wt { flex: 1; min-width: 0; }
-.xp-wt b { display: block; font-family: var(--f-serif); font-size: 1.05rem; }
-.xp-wt small { display: block; color: var(--ink2); font-size: .8rem; margin-top: 2px; }
-.xp-wb { flex: none; display: grid; justify-items: end; gap: 4px; font-size: .7rem; }
-.xp-wb em { font-style: normal; color: var(--ink3); }
-.xp-st { font-style: normal; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink2); }
+.xp-wimg { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(.62); transition: transform .4s, filter .4s; }
+.xp-w:hover .xp-wimg, .xp-w:focus-visible .xp-wimg { transform: scale(1.06); filter: brightness(.86); }
+.xp-w::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(5, 8, 11, .92), transparent 62%); pointer-events: none; }
+.xp-wt { position: absolute; z-index: 1; left: 14px; right: 14px; bottom: 14px; display: block; }
+.xp-wt b { display: block; font-family: var(--f-serif); font-size: 1.12rem; text-shadow: 0 3px 10px #000; }
+.xp-wi { font-size: 1rem; margin-right: 6px; }
+.xp-wt small { display: block; color: var(--ink2); font-size: .76rem; margin-top: 2px; line-height: 1.5; }
+.xp-wt em { display: block; font-style: normal; color: var(--ink3); font-size: .7rem; margin-top: 3px; }
+.xp-wb { position: absolute; z-index: 1; top: 10px; right: 10px; display: flex; gap: 4px; font-size: .68rem; }
+.xp-wbar { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, .1); }
+.xp-wbar s { display: block; height: 100%; background: var(--wa, #D5B97F); text-decoration: none; }
+.xp-st { font-style: normal; padding: 2px 9px; border-radius: 999px; background: rgba(8, 10, 17, .75); border: 1px solid var(--line); color: var(--ink2); }
 .xp-w.st-doing .xp-st { color: var(--gold-l); border-color: var(--gold); }
 .xp-w.st-done .xp-st { color: #9BE0B0; border-color: #5FB07A; }
 .xp-w.st-done .xp-st::before { content: '✓ '; }
-.xp-paid { font-style: normal; padding: 2px 8px; border-radius: 4px; background: #5B3A8C; color: #fff; letter-spacing: .08em; }
+.xp-paid { font-style: normal; padding: 2px 8px; border-radius: 999px; background: #5B3A8C; color: #fff; letter-spacing: .04em; }
+@media (max-width: 520px) { .xp-w { height: 160px; } .xp-wt { left: 11px; right: 11px; bottom: 12px; } .xp-wt b { font-size: 1rem; } .xp-wt small { font-size: .72rem; } }
+@media (prefers-reduced-motion: reduce) { .xp-wimg { transition: none; } }
 /* 세계 상세 */
 .xp-back { background: none; border: 0; color: var(--ink2); min-height: 44px; padding: 0; margin-bottom: 6px; }
 .xp-wd { border-radius: 16px; padding: 18px 14px 8px; background: linear-gradient(160deg, var(--wc, #1B2347), rgba(7, 9, 19, .9)); border: 1px solid color-mix(in srgb, var(--wa, #D5B97F) 40%, transparent); }
