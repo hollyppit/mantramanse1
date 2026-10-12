@@ -222,7 +222,7 @@
       function finalSec(sec) {
         var inner = '<div class="cn-art">' + media({ image: sec.art || '', video: sec.artVideo || '' }, Art.forIntro('end')) + '</div>' +
           '<h2 class="cn-title big"' + SA(sec.sty, 'title') + '>' + nl(F(sec.title || CFG.introLast.line)) + '</h2>' + (sec.sub ? '<p class="cn-body cn-rev"' + SA(sec.sty, 'sub') + '>' + nl(F(sec.sub)) + '</p>' : '') +
-          '<button type="button" class="btn cn-go" id="obGo" data-go="' + esc(sec.id) + '"' + SA(sec.sty, 'cta') + '>' + esc(F((sec.cta && sec.cta.text) || CFG.introLast.cta)) + '</button>' +
+          (H.embed && !PREVIEW && document.getElementById('productGuide') ? '' : '<button type="button" class="btn cn-go" id="obGo" data-go="' + esc(sec.id) + '"' + SA(sec.sty, 'cta') + '>내 운명 확인하기</button>') +
           '<div class="cn-links" style="justify-content:center">' + (hasProfile ? '<a class="cn-lnk" href="#/?nogate=1" data-track="onboarding_home_back">내 홈으로 돌아가기</a>' : '<a class="cn-lnk" href="#/?skip=1" data-track="onboarding_browse_click">먼저 무료 타로·캘린더 둘러보기</a>') + '</div>' +
           '<p class="tx-soft" style="text-align:center">' + esc(O.INTRO_NOTICE) + '</p>';
         return wrap(sec, inner, ' cn-last" id="cnLast');
