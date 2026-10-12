@@ -202,7 +202,7 @@
   function drawPrev() {
     var box = $('#obPrevBox'); if (!box) return;
     if (!G.prev.on) { box.innerHTML = ''; return; }
-    box.innerHTML = '<div class="ob-prevbox' + (G.prev.dev === 'mob' ? ' mob' : '') + '"><div class="ob-bar" style="justify-content:center"><button class="ob-chip' + (G.prev.dev === 'pc' ? ' on' : '') + '" data-pd="pc">PC</button><button class="ob-chip' + (G.prev.dev === 'mob' ? ' on' : '') + '" data-pd="mob">모바일</button><button class="ghost" id="obPrevRe">현재 편집 내용으로 새로고침</button><button class="ghost" id="obPrevX">닫기</button></div>' +
+    box.innerHTML = '<div class="ob-prevbox' + (G.prev.dev === 'mob' ? ' mob' : '') + '"><div class="ob-bar" style="justify-content:center"><button class="ob-chip' + (G.prev.dev === 'pc' ? ' on' : '') + '" data-pd="pc">PC</button><button class="ob-chip' + (G.prev.dev === 'mob' ? ' on' : '') + '" data-pd="mob">모바일</button>' + (G.sub === 'landing' ? '<button class="ghost" id="obCenter">선택 항목 가운데 정렬</button>' : '') + '<button class="ghost" id="obPrevRe">현재 편집 내용으로 새로고침</button><button class="ghost" id="obPrevX">닫기</button></div>' +
       '<iframe id="obPrevFrame" title="랜딩 흐름 미리보기" src="' + (G.sub === 'landing' ? '/report/?preview=1' : '/report/hub/?preview=1' + (G.prev.hash || '#/welcome')) + '"></iframe><p class="ob-lock">저장하지 않은 편집 내용까지 반영한 모습입니다. <b>섹션을 누르면 위쪽에 그 섹션의 편집 입력란이 열립니다</b>(점선 테두리가 누를 수 있는 영역). 검증 완료 + 공개로 설정한 사례만 보입니다. 통계에는 집계되지 않습니다.</p></div>';
     var push = function () { collect(); var f = $('#obPrevFrame'); if (f && f.contentWindow) f.contentWindow.postMessage(G.sub === 'landing' ? { t: 'st-content', story: { settings: Object.assign({}, window.OnboardingContent.settings, G.coverStory.settings || {}, { cover: G.cfg.cover }), blocks: [] } } : { t: 'mt-onb-preview', config: body() }, location.origin); };
     if (prevListener) window.removeEventListener('message', prevListener);
@@ -220,14 +220,15 @@
       if (e.data.t === 'mt-onb-ready' || e.data.t === 'st-ready') push();
       else if (G.sub === 'landing' && e.data.t === 'st-char') {
         var ch = (G.cfg.cover.chars || [])[+e.data.i], suffix = e.data.m ? 'M' : '';
-        if (ch) { ['x','y','size'].forEach(function (k) { if (Number.isFinite(e.data[k])) ch[k + suffix] = e.data[k]; }); markDirty(); }
+        if (ch) { if (e.data.m) ch.mobile = true; ['x','y','size'].forEach(function (k) { if (Number.isFinite(e.data[k])) ch[e.data.m ? {x:'mx',y:'my',size:'msize'}[k] : k] = e.data[k]; }); markDirty(); }
       } else if (G.sub === 'landing' && e.data.t === 'st-text') {
         var names = {title:'title',sub:'sub',button:'button'}, name = names[e.data.n], suffix = e.data.m ? 'M' : '';
-        if (name) { if (Number.isFinite(e.data.x)) G.cfg.cover[name + 'X' + suffix] = e.data.x; if (Number.isFinite(e.data.y)) G.cfg.cover[name + 'Y' + suffix] = e.data.y; markDirty(); }
-      } else if (e.data.t === 'mt-onb-select') { var fr = $('#obPrevFrame'); if (fr && e.source === fr.contentWindow) pick({ intro: String(e.data.intro || ''), sec: String(e.data.sec || '') }); }
+        if (name) { if (Number.isFinite(e.data.x)) G.cfg.cover[name + 'X' + suffix] = e.data.x; if (Number.isFinite(e.data.y)) G.cfg.cover[name + 'Y' + suffix] = e.data.y; if (e.data.align === 'center') G.cfg.cover[name + 'Align' + suffix] = 'center'; markDirty(); }
+      } else if (e.data.t === 'st-center-empty') { toast('미리보기에서 글자·버튼 또는 배치 이미지를 먼저 선택하세요'); } else if (e.data.t === 'mt-onb-select') { var fr = $('#obPrevFrame'); if (fr && e.source === fr.contentWindow) pick({ intro: String(e.data.intro || ''), sec: String(e.data.sec || '') }); }
     };
     window.addEventListener('message', prevListener);
     $$('[data-pd]', box).forEach(function (b) { b.onclick = function () { G.prev.dev = b.dataset.pd; drawPrev(); }; });
+    var center = $('#obCenter'); if (center) center.onclick = function () { var f = $('#obPrevFrame'); if (f && f.contentWindow) f.contentWindow.postMessage({t:'st-center'},location.origin); };
     $('#obPrevRe').onclick = push; $('#obPrevX').onclick = function () { G.prev.on = false; drawPrev(); };
   }
 
@@ -466,14 +467,14 @@
           '<label class="ob-f">대화창 스타일<select name="bubble">' + sel(BUB, s.bubble || '') + '</select></label>' +
           chk('enabled', s.enabled !== false || req, '사용' + (req ? ' (필수 단계 — 끌 수 없음)' : '')).replace('<input type="checkbox"', '<input type="checkbox"' + (req ? ' disabled' : '')) + '</form></div>';
       }).join('') + '<div class="card"><h3 style="font-size:1rem">계산 완료 후 수련생 대사</h3><textarea id="obReveal" style="min-height:90px">' + esc((cfg.revealLines || []).join('\n')) + '</textarea>' +
-      '<p class="ob-lock">장면 이동·진행률 계산·입력 검증·저장은 코드가 담당합니다. 문구를 고쳐도 필수 입력값 검증과 데이터 저장 로직은 바뀌지 않습니다. 금지 호칭(대공·소협·대협)을 넣어도 호칭 설정에서 \'귀인\'으로 되돌립니다.</p></div>';
+      '<p class="ob-lock">장면 이동·진행률 계산·입력 검증·저장은 코드가 담당합니다. 문구를 고쳐도 필수 입력값 검증과 데이터 저장 로직은 바뀌지 않습니다. 금지 호칭(대공·소협·대협)을 넣어도 호칭 설정에서 \'님\'으로 되돌립니다.</p></div>';
   }
 
   /* ── 호칭·가중치 ── */
   function basicView() {
     var cfg = G.cfg;
     $('#obBody').innerHTML = '<div class="card"><form id="obBasic" onsubmit="return false"><label class="ob-f ob-ck"><input type="checkbox" name="force"' + (cfg.forceOnboarding !== false ? ' checked' : '') + '> 개발 단계: 재방문자도 접속할 때마다(세션당 1회) 온보딩부터 보여 주기</label><p class="ob-lock">출시 전에 꺼 주세요. 끄면 프로필이 있는 방문자는 곧바로 홈으로 갑니다.</p><label class="ob-f">사용자 호칭 (모든 대사의 {귀인})<input type="text" name="honorific" maxlength="8" value="' + esc(cfg.honorific) + '"></label>' +
-      '<p class="ob-lock">기본값은 \'귀인\'입니다. 성별에 따라 호칭을 나누지 않으며, 이름을 입력한 뒤에는 "[이름] 귀인"으로 부릅니다. \'대공·소협·대협\'은 저장되지 않습니다.</p>' +
+      '<p class="ob-lock">기본값은 \'님\'입니다. 이름을 묻는 첫 질문은 호칭 없이, 입력한 뒤에는 "[이름] 님"으로 부릅니다. \'대공·소협·대협\'은 저장되지 않습니다.</p>' +
       '<div class="ob-g2"><label class="ob-f">실제 연구 노출 가중치(예전 후킹 풀)<input type="text" name="wr" inputmode="numeric" value="' + esc(cfg.weights.research) + '"></label><label class="ob-f">유명인 사례 노출 가중치(예전 후킹 풀)<input type="text" name="wc" inputmode="numeric" value="' + esc(cfg.weights.celebrity) + '"></label></div>' +
       '<p class="ob-lock">가중치는 "연구→유명인 후킹" 섹션이 켜졌을 때만 쓰입니다. 같은 유형 안에서는 사례별 가중치로 고릅니다.</p>' +
       '<label class="ob-f">후킹: 연구 → 유명인 연결 문장<textarea name="bc" style="min-height:60px">' + esc((cfg.bridge && cfg.bridge.toCelebrity) || '') + '</textarea></label><label class="ob-f">후킹: 유명인 → 명리학 연결 문장<textarea name="bi" style="min-height:60px">' + esc((cfg.bridge && cfg.bridge.toIntro) || '') + '</textarea></label></form></div>';

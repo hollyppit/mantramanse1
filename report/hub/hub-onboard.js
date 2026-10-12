@@ -109,7 +109,7 @@
     var eyes = { greet: '<path d="M38 56q4-6 8 0M64 56q4-6 8 0" /><circle cx="42" cy="57" r="0"/>', ask: '<circle cx="42" cy="55" r="3.2"/><circle cx="68" cy="55" r="3.2"/><path d="M34 46l12-3M64 43l12 3"/>', shock: '<circle cx="42" cy="55" r="5" class="o"/><circle cx="68" cy="55" r="5" class="o"/><circle cx="42" cy="55" r="1.6"/><circle cx="68" cy="55" r="1.6"/><path d="M34 42l10-4M66 38l10 4"/>', serious: '<path d="M37 55h11M62 55h11"/><path d="M34 47l13 2M63 49l13-2"/>', proud: '<path d="M37 57q5-7 10 0M63 57q5-7 10 0"/>', worry: '<circle cx="42" cy="56" r="3"/><circle cx="68" cy="56" r="3"/><path d="M34 49l12-4M64 45l12 4"/>' };
     var mouth = { greet: '<path d="M46 72q9 8 18 0"/>', ask: '<circle cx="55" cy="74" r="3"/>', shock: '<ellipse cx="55" cy="75" rx="5" ry="6.5" class="o"/>', serious: '<path d="M48 74h14"/>', proud: '<path d="M44 70q11 13 22 0" /><path d="M46 71h18" class="f"/>', worry: '<path d="M47 76q8-6 16 0"/>' };
     face = eyes[face] ? face : 'greet';
-    return '<svg class="ob-av" viewBox="0 0 110 150" role="img" aria-label="무림 수련생" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#2a2118" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' +
+    return '<svg class="ob-av" viewBox="0 0 110 150" role="img" aria-label="기록 안내자" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#2a2118" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' +
       '<path d="M18 150q4-44 37-44t37 44z" fill="#4c6a63"/><path d="M42 108l13 16 13-16" stroke="#d8c9a5"/><rect x="48" y="96" width="14" height="14" rx="5" fill="#e9cfa6"/>' +
       '<ellipse cx="55" cy="58" rx="31" ry="34" fill="#f0d8b2"/><path d="M24 50q4-30 31-30t31 30q-14-12-31-12T24 50z" fill="#2a2118"/><circle cx="55" cy="14" r="9" fill="#2a2118"/><path d="M24 48q31-10 62 0" stroke="#b5432f" stroke-width="5"/>' +
       '<g class="fe">' + eyes[face] + '</g><g class="fm">' + mouth[face] + '</g></g></svg>';
@@ -448,7 +448,7 @@
       var flowLine = cur ? '지금은 <b>' + esc(M.gzNameK(cur)) + ' 대운</b>(' + cur.startYear + '년~) 안에 있고, 오늘의 흐름은 <b>' + esc(flow || t.cond) + '</b>' + (flowSub ? ' · ' + esc(flowSub) : '') + '입니다.' : '대운이 시작되기 전의 시기입니다. 오늘의 흐름은 <b>' + esc(flow || t.cond) + '</b>입니다.';
       var el = H.view(
         '<section class="hhome"><div class="hh-top"><p class="kick">MANTRA FORTUNE</p><a class="hh-me" href="#/me" data-track="profile_open">' + esc(A(nm)) + ' ›</a></div>' +
-        '<div class="hh-guide"><div class="gav">' + avatar('greet', (CFG.scenes[0] || {}).image) + '</div><p>' + esc(F('{귀인}! 오늘의 일진이 도착했사옵니다!', nm)) + '</p></div>' +
+        '<div class="hh-guide"><div class="gav">' + avatar('greet', (CFG.scenes[0] || {}).image) + '</div><p>' + esc(F('{이름귀인}, 오늘의 흐름을 함께 살펴보겠습니다.', nm)) + '</p></div>' +
         // 1·2. 타고난 기질 한 문장 / 지금의 운 흐름 — 용어를 몰라도 읽히도록 쉬운 말을 먼저, 용어는 눌러서 설명
         '<section class="hh-core" aria-label="나의 기질과 지금의 흐름">' +
         '<div class="hhc"><small>나의 타고난 기질</small><p>' + esc(trait || t.line || '') + '</p><span class="hhc-sub">' + tip('일간') + ' ' + esc(M.STEM_K[day.s]) + ' · ' + tip('일주') + ' ' + esc(ju) + '</span></div>' +

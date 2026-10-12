@@ -270,10 +270,13 @@
     if (Array.isArray(ov.topics)) out.topics = ov.topics.filter(function (x) { return x && x.id && x.title; }).map(function (x) { return Object.assign({ enabled: true, nature: 'tradition', sub: '', summary: '', detail: '', analogy: '', term: '', termEasy: '', image: '', video: '', image2: '', anim: 'fade', refs: '' }, x); });
     if (Array.isArray(ov.intro)) out.intro = out.intro.map(function (d) { var o = ov.intro.filter(function (x) { return x && x.id === d.id; })[0]; return o ? Object.assign({}, d, pick(o, ['title', 'body', 'sub', 'image', 'video', 'enabled', 'glyph']), { sty: cleanStyleMap(o.sty, STY_ROLES.intro) }) : d; });
     if (Array.isArray(ov.scenes)) out.scenes = out.scenes.map(function (d) { var o = ov.scenes.filter(function (x) { return x && x.id === d.id; })[0]; return o ? Object.assign({}, d, pick(o, ['title', 'lines', 'hint', 'unknownLines', 'button', 'face', 'image', 'bg', 'bubble', 'enabled']), { field: d.field }) : d; });
+    // 이전 공개본의 무협 대사가 새 기본 문구를 다시 덮어쓰지 않도록 호환한다. 미디어·배치와 현대어 편집은 보존한다.
+    var legacySpeech = /사옵|하옵|이옵|소인이|소인은|강림하|존함|무림|강호/;
+    out.scenes.forEach(function (s) { var d = base.scenes.filter(function (x) { return x.id === s.id; })[0]; if (!d) return; ['lines','unknownLines'].forEach(function (k) { if (Array.isArray(s[k]) && s[k].some(function (t) { return legacySpeech.test(t); })) s[k] = JSON.parse(JSON.stringify(d[k] || [])); }); if (legacySpeech.test(s.title || '')) s.title = d.title; });
     // 필수 입력 단계는 끌 수 없다
     out.scenes.forEach(function (s) { if (REQUIRED_FIELDS.indexOf(s.field) >= 0) s.enabled = true; });
     if (ov.introLast && typeof ov.introLast === 'object') out.introLast = Object.assign({}, out.introLast, pick(ov.introLast, ['line', 'cta']));
-    if (Array.isArray(ov.revealLines) && ov.revealLines.length) out.revealLines = ov.revealLines.map(String).slice(0, 5);
+    if (Array.isArray(ov.revealLines) && ov.revealLines.length) out.revealLines = ov.revealLines.some(function (t) { return legacySpeech.test(t); }) ? base.revealLines.slice() : ov.revealLines.map(String).slice(0, 5);
     return out;
   }
   /* ── 글자 스타일(관리자가 문구마다 정하는 글씨체·크기·굵기·색) ──

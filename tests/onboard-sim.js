@@ -267,3 +267,5 @@ ok(fs.readFileSync(path.join(root, 'report', 'hub', 'hub-quest.js'), 'utf8').inc
     console.log('onboard-sim(추가): 완료');
   })();
 }
+
+{ const legacy = O.merge(O.DEFAULTS, { scenes:[{id:'day',lines:['강호에 강림하신 날은 언제이옵니까?'],image:'https://example.com/kept.webp'}], revealLines:['완성되었사옵니다!'] }); ok(!/강호|이옵/.test(legacy.scenes.find(x=>x.id==='day').lines.join(' ')), '이전 공개본 무협 말투 제거'); ok(legacy.scenes.find(x=>x.id==='day').image === 'https://example.com/kept.webp', '대사 호환 시 미디어 보존'); ok(!/사옵/.test(legacy.revealLines.join(' ')), '이전 공개본 공개 대사 호환'); }

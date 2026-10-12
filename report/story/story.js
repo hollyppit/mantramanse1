@@ -561,6 +561,16 @@
     var r = img.getBoundingClientRect(); hd.hidden = false; hd.style.left = (r.right - 7) + 'px'; hd.style.top = (r.top - 7) + 'px';
     document.querySelectorAll('.fx-ch').forEach(function (x) { x.classList.toggle('sel', x === img); });
   }
+  var centerGuide = null;
+  function showCenterGuide(on) { if (!centerGuide && on) { centerGuide = document.createElement('div'); centerGuide.style.cssText = 'position:fixed;left:50%;top:0;bottom:0;width:1px;background:#e4c39c;z-index:999;pointer-events:none'; centerGuide.setAttribute('aria-hidden','true'); document.body.appendChild(centerGuide); } if (centerGuide) centerGuide.hidden = !on; }
+  function snapCenter(node, value, free) { if (!node || free) { showCenterGuide(false); return value; } var r = node.getBoundingClientRect(), delta = root.innerWidth / 2 - (r.left + r.width / 2), hit = Math.abs(delta) <= 8; showCenterGuide(hit); return hit ? Math.round((value + delta / root.innerWidth * 100) * 10) / 10 : value; }
+  function centerSelected() {
+    var cv = C.settings.cover || {}, text = document.querySelector('#cover .cv-sel');
+    if (text) { var n = text.classList.contains('cv-t') ? 'title' : text.classList.contains('cv-s') ? 'sub' : 'button', m = fxMob(), suffix = m ? 'M' : ''; cv[n+'X'+suffix] = 0; cv[n+'Align'+suffix] = 'center'; document.getElementById('cover').setAttribute('style',coverStyle(cv)); parent.postMessage({t:'st-text',n:n,m:m,x:0,y:num(pv(cv,n+'Y'),0),align:'center'},location.origin); return; }
+    var c = (cv.chars || [])[fxSel], img = fxImg(fxSel);
+    if (c && img) { if (fxMob() && !c.mobile) { c.mobile=true; c.mx=num(c.x,75); c.my=num(c.y,0); c.msize=num(c.size,60); } var keys=fxKeys(c); c[keys[0]]=50; fxPlace(img,c); fxHandle(); parent.postMessage({t:'st-char',i:fxSel,m:fxMob(),x:50,y:num(c[keys[1]],0),size:num(c[keys[2]],60)},location.origin); return; }
+    parent.postMessage({t:'st-center-empty'},location.origin);
+  }
   function fxEdit(el) {
     if (el._edit) return; el._edit = true; el.classList.add('edit');
     var st = null;
@@ -568,7 +578,7 @@
       var t = e.target, img = t.closest && t.closest('.fx-ch'), hd = t.closest && t.closest('.fx-hd');
       if (!img && !hd) return;
       var i = hd ? fxSel : +img.getAttribute('data-ci'), c = ((C.settings.cover || {}).chars || [])[i]; if (!c) return;
-      fxSel = i; fxHandle();
+      fxSel = i; document.querySelectorAll('#cover .cv-sel').forEach(function (x) { x.classList.remove('cv-sel'); }); fxHandle();
       if (fxMob() && !c.mobile) { c.mobile = true; c.mx = num(c.x, 75); c.my = num(c.y, 0); c.msize = num(c.size, 60); } // 모바일 화면에서 만지면 모바일 따로 설정
       var k = fxKeys(c);
       st = { mode: hd ? 'size' : 'move', x: e.clientX, y: e.clientY, cx: num(c[k[0]], 75), cy: num(c[k[1]], 0), cs: num(c[k[2]], 60), c: c, i: i, k: k, m: fxMob() };
@@ -578,9 +588,9 @@
       if (!st) return; var dx = (e.clientX - st.x) / root.innerWidth * 100, dy = (e.clientY - st.y) / root.innerHeight * 100;
       if (st.mode === 'move') { st.c[st.k[0]] = Math.round((st.cx + dx) * 10) / 10; st.c[st.k[1]] = Math.round((st.cy - dy) * 10) / 10; }
       else st.c[st.k[2]] = Math.max(3, Math.round((st.cs - dy) * 10) / 10);
-      var img = fxImg(st.i); if (img) fxPlace(img, st.c); fxHandle();
+      var img = fxImg(st.i); if (img) { fxPlace(img,st.c); if (st.mode === 'move') { st.c[st.k[0]]=snapCenter(img,st.c[st.k[0]],e.altKey); fxPlace(img,st.c); } } fxHandle();
     });
-    function end() { if (!st) return; var c = st.c, i = st.i, st0 = st; st = null; try { parent.postMessage({ t: 'st-char', i: i, m: st0.m, x: c[st0.k[0]], y: c[st0.k[1]], size: c[st0.k[2]] }, location.origin); } catch (er) { } }
+    function end() { showCenterGuide(false); if (!st) return; var c = st.c, i = st.i, st0 = st; st = null; try { parent.postMessage({ t: 'st-char', i: i, m: st0.m, x: c[st0.k[0]], y: c[st0.k[1]], size: c[st0.k[2]] }, location.origin); } catch (er) { } }
     el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
   }
   function coverFx(cv) {
@@ -628,7 +638,7 @@
     if (el._edit) return; el._edit = true; var st = null;
     el.addEventListener('pointerdown', function (e) {
       var t = e.target.closest && e.target.closest('.cv-t, .cv-s, .cv-bw'); el.querySelectorAll('.cv-sel').forEach(function (x) { x.classList.remove('cv-sel'); });
-      if (!t) { try { parent.postMessage({ t: 'st-tsel', n: null }, location.origin); } catch (er) { } return; } t.classList.add('cv-sel');
+      if (!t) { try { parent.postMessage({ t: 'st-tsel', n: null }, location.origin); } catch (er) { } return; } t.classList.add('cv-sel'); fxSel = -1; fxHandle();
       var n = t.classList.contains('cv-t') ? 'title' : t.classList.contains('cv-s') ? 'sub' : 'button', cv = C.settings.cover, m = fxMob(), sx = m ? 'M' : '';
       if (m) ['X', 'Y'].forEach(function (k) { if (cv[n + k + 'M'] == null || cv[n + k + 'M'] === '') cv[n + k + 'M'] = num(cv[n + k], 0); });
       st = { n: n, m: m, kx: n + 'X' + sx, ky: n + 'Y' + sx, x: e.clientX, y: e.clientY, cx: num(cv[n + 'X' + sx], 0), cy: num(cv[n + 'Y' + sx], 0), cv: cv };
@@ -637,8 +647,9 @@
     el.addEventListener('pointermove', function (e) {
       if (!st) return; st.cv[st.kx] = Math.round((st.cx + (e.clientX - st.x) / root.innerWidth * 100) * 10) / 10; st.cv[st.ky] = Math.round((st.cy + (e.clientY - st.y) / root.innerHeight * 100) * 10) / 10;
       el.setAttribute('style', coverStyle(st.cv));
+      st.cv[st.kx]=snapCenter(el.querySelector('.cv-sel'),st.cv[st.kx],e.altKey); el.setAttribute('style',coverStyle(st.cv));
     });
-    function end() { if (!st) return; var s = st; st = null; try { parent.postMessage({ t: 'st-text', n: s.n, m: s.m, x: s.cv[s.kx], y: s.cv[s.ky] }, location.origin); } catch (er) { } }
+    function end() { showCenterGuide(false); if (!st) return; var s = st; st = null; try { parent.postMessage({ t: 'st-text', n: s.n, m: s.m, x: s.cv[s.kx], y: s.cv[s.ky] }, location.origin); } catch (er) { } }
     el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
   }
   // 글자를 "단어(줄바꿈 안 되는 묶음) > 글자" span 으로 나눠 하나씩 나타나게 한다. <br>·<em> 같은 태그 구조는 유지한다.
@@ -865,6 +876,7 @@
       function mark() { host0.querySelectorAll('.blk.sel').forEach(function (x) { x.classList.remove('sel'); }); var el = host0.querySelector('.blk[data-i="' + sel + '"]'); if (el) el.classList.add('sel'); return el; }
       root.addEventListener('message', function (e) {
         if (e.origin !== location.origin) return; var d = e.data || {};
+        if (d.t === 'st-center') { if (e.source === parent) centerSelected(); return; }
         if (d.t === 'st-content' && d.story) { applyStory(d.story); if (started) render(); else start(); mark(); }
         else if (d.t === 'st-tsel-set') { var cvEl = document.getElementById('cover'); if (cvEl) { cvEl.querySelectorAll('.cv-sel').forEach(function (x) { x.classList.remove('cv-sel'); }); var tt = cvEl.querySelector(d.n === 'title' ? '.cv-t' : d.n === 'sub' ? '.cv-s' : '.cv-bw'); if (tt) { tt.classList.add('cv-sel'); tt.scrollIntoView({ block: 'center' }); } } }
         else if (d.t === 'st-sel') { sel = +d.i; var el = mark(); if (el && d.scroll) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
