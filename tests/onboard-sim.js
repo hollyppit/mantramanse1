@@ -97,6 +97,8 @@ ok(M.gzName(chL.pillars.day) === M.gzName(chS.pillars.day), '음력·양력 환�
 // 대운 목록(현재 대운 표시용)이 있고 시작 시각이 오름차순
 ok(Array.isArray(ch.daeun.list) && ch.daeun.list.length >= 8 && ch.daeun.list.every((x, i, a) => !i || a[i - 1].startMs < x.startMs), '대운 목록');
 
+ok(fs.readFileSync(path.join(root, 'report', 'hub', 'hub-quest.js'), 'utf8').includes("H.route('begin'"), '공통 begin 라우트는 quest dispatcher가 등록');
+
 /* ⑥ API */
 (async () => {
   const mod = await import('file:///' + path.join(root, 'functions', 'api', 'onboarding.js').replace(/\\/g, '/'));
@@ -139,7 +141,7 @@ ok(Array.isArray(ch.daeun.list) && ch.daeun.list.length >= 8 && ch.daeun.list.ev
 
   /* ⑦ 화면 코드 점검 */
   const src = fs.readFileSync(path.join(root, 'report', 'hub', 'hub-onboard.js'), 'utf8');
-  for (const rt of ["'welcome'", "'begin'", "'reveal'", "H.route('',", "'me'", "'input'"]) ok(src.includes('H.route(' + rt.replace(/^H\.route\(/, '')) || src.includes(rt), '라우트 ' + rt);
+  for (const rt of ["'welcome'", "'reveal'", "H.route('',", "'me'", "'input'"]) ok(src.includes('H.route(' + rt.replace(/^H\.route\(/, '')) || src.includes(rt), '라우트 ' + rt);
   ok(!/대공|소협|대협/.test(src), '화면 코드에 금지 호칭 없음');
   ok(!/(Ob\.track|H\.track)\([^)]*(birth|year|month|day|name)\s*:/.test(src.replace(/birth_input_[a-z_]+/g, '')), '분석 이벤트 속성에 출생정보·이름 없음');
   ok(/touchstart/.test(src) && /prefers-reduced-motion/.test(fs.readFileSync(path.join(root, 'report', 'hub', 'onboard.css'), 'utf8')), '스와이프·애니메이션 감소');

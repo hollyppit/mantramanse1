@@ -202,7 +202,7 @@
     var QC = G.cfg.quest, TC = G.cfg.timeline, ids = QC.steps.map(function (s) { return s.id; });
     var stepOpts = {}; QC.steps.forEach(function (s) { stepOpts[s.id] = s.title; });
     $('#obBody').innerHTML = '<div class="card"><h3 style="font-size:1rem">운영 설정</h3><form id="qOps" onsubmit="return false">' +
-      chk('qEnabled', QC.enabled !== false, '인터랙티브 스토리 사용 (끄면 예전 슬라이드 툰 6장면으로 돌아갑니다 — 장애 시 즉시 되돌리는 스위치)') + chk('qResume', QC.resume !== false, '이어하기: 입력 중 이탈한 방문자에게 "이어서 하기 / 처음부터"를 묻습니다 (입력값은 그 기기에만 저장)') +
+      '<label class="ob-f">출생정보 입력 방식<select name="qMode">' + sel({story:'스토리 입력 (기본)',classic:'기본 입력 6장면 (호환)'}, QC.enabled === false ? 'classic' : 'story') + '</select></label><label class="ob-f">입력 완료 후 결과 화면<select name="destination">' + sel({timeline:'운명의 타임라인',home:'개인화 홈'}, window.Quest.destination(G.cfg)) + '</select></label>' + chk('qResume', QC.resume !== false, '이어하기: 입력 중 이탈한 방문자에게 "이어서 하기 / 처음부터"를 묻습니다 (입력값은 그 기기에만 저장)') +
       chk('qSkip', QC.skipReturning !== false, '재방문자 건너뛰기: 이미 입력한 방문자가 출생정보를 수정할 때는 부적 오프닝·안내자 선택을 건너뜁니다 (프로필이 있으면 #/begin 은 홈으로 돌아갑니다)') +
       chk('tlOn', TC.enabled !== false, '운명의 타임라인 사용') +
       '<label class="ob-f">기본 장면 전환 효과<select name="qFx">' + sel(FXG, QC.fx) + '</select></label>' +
@@ -217,11 +217,11 @@
   }
   function collectOps() {
     var f = $('#qOps'); if (!f) return; var QC = G.cfg.quest;
-    QC.enabled = f.elements.qEnabled.checked; QC.resume = f.elements.qResume.checked; QC.skipReturning = f.elements.qSkip.checked; G.cfg.timeline.enabled = f.elements.tlOn.checked; QC.fx = f.elements.qFx.value;
+    QC.enabled = f.elements.qMode.value === 'story'; G.cfg.resultDestination = f.elements.destination.value; QC.resume = f.elements.qResume.checked; QC.skipReturning = f.elements.qSkip.checked; G.cfg.timeline.enabled = f.elements.tlOn.checked; QC.fx = f.elements.qFx.value;
   }
 
   OB.register({ id: 'quest', label: '스토리 장면', view: questView, collect: collectQuest });
   OB.register({ id: 'qassets', label: '에셋 관리', view: assetsView, collect: collectAssets });
   OB.register({ id: 'tl', label: '운명의 타임라인', view: tlView, collect: collectTl });
-  OB.register({ id: 'qops', label: '스토리 운영', view: opsView, collect: collectOps });
+  OB.register({ id: 'qops', label: '흐름·운영 설정', view: opsView, collect: collectOps });
 })();

@@ -6,7 +6,7 @@
 (function (root) {
   'use strict';
   var H = root.Hub, Ob = H.Onboard, O = root.Onboard, Q = root.Quest, P = H.profile, esc = H.esc;
-  var oldBegin = H.routes.begin, DOC = document;
+  var oldBegin = Ob.classicBegin, DOC = document;
   var GUIDE_KEY = 'mt_guide';
   var lget = function (k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
   var lset = function (k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
@@ -313,7 +313,7 @@
         if (!P.save(saved)) H.toast('이 브라우저에서는 정보를 저장할 수 없어 이번만 사용합니다.');
         H.afterInput(); lset(Q.DRAFT_KEY, null); lset('mt_onb_draft', null);
         Ob.track('birth_input_complete', { hour_known: saved.hourUnknown ? 0 : 1, calendar: saved.calendar }); Ob.track('calculation_success', {}); H.track('saju_input_complete', { next: 'quest', hour_known: saved.hourUnknown ? 0 : 1 }); // 허브 분석 전용(서버 집계 목록에 없는 이벤트)
-        H.replace(editing ? '#/timeline' : '#/awaken?to=timeline');
+        H.replace(Q.completionRoute(cfg, editing));
       }).catch(function () { fail('분석 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.', 'engine'); });
     }
 

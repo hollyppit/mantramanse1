@@ -184,6 +184,7 @@ const anyHit = (conds, facts) => { const e = evalConds(conds, facts); return Obj
 // ───────────── 검색(Structured Retrieval) ─────────────
 // opts: { domain, includeDraft, sections }  production: status==='published' && reviewed && sourceType!=='AI_DRAFT'(검수 전)
 export const isProduction = it => it.status === 'published' && it.reviewed && !(it.sourceType === 'AI_DRAFT' && !it.reviewed);
+export const sourceAllowed = (it, blocked) => !(blocked && it.evidence && it.evidence.length && it.evidence.every(e => blocked.has(e.docId)));
 const CONF_W = { high: 3, mid: 2, low: 1 };
 export function retrieve(items, facts, opts) {
   opts = opts || {}; const used = [], excluded = [];
@@ -191,7 +192,7 @@ export function retrieve(items, facts, opts) {
     if (opts.domain && it.domain !== opts.domain) continue;
     if (it.status === 'archived') continue;
     if (!opts.includeDraft && !isProduction(it)) continue;
-    if (opts.blockedDocs && it.evidence && it.evidence.length && it.evidence.every(e => opts.blockedDocs.has(e.docId))) continue; // 근거 자료가 모두 비활성이거나 "Production 사용 OFF"
+    if (!sourceAllowed(it, opts.blockedDocs)) continue; // 근거 자료가 모두 비활성이거나 "Production 사용 OFF"
     const ev = evalItem(it, facts);
     const rec = { id: it.id, title: it.title, domain: it.domain, subDomain: it.subDomain, stance: it.stance, confidence: it.confidence, status: it.status, rows: ev.rows, spec: ev.spec, missing: ev.missing, general: !!ev.general };
     if (!ev.match) { if (ev.rows.some(r => r.hit) && !ev.missing.length) excluded.push({ ...rec, reason: 'unmatched' }); else if (ev.missing.length) excluded.push({ ...rec, reason: 'unsupported' }); continue; }

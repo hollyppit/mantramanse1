@@ -4,6 +4,7 @@
 // DELETE /api/story — 저장된 내용을 지우고 기본 내용으로 되돌린다
 // 저장 위치: GLOSSARY_KV 의 'story:config' 키. 모양은 report/story/content.js 의 window.OnboardingContent 와 같다(blocks·interests·settings·result·flow·locked·purchase).
 import { json, isAdmin, configError } from '../_lib.js';
+import { kvOf } from '../_store.js';
 
 const KEY = 'story:config';
 const BLOCK_TYPES = ['headline', 'text', 'quote', 'image', 'imageText', 'fullImage', 'gallery', 'video', 'chain', 'compare', 'stickySteps', 'interest', 'spacer', 'divider', 'cta', 'component'];
@@ -16,11 +17,11 @@ const HREF_OK = /^(\/[^\s]*|https:\/\/[^\s]+)$/;
 const ACTION_OK = /^(scroll:[\w-]{1,40}|href:(\/[^\s]*|https:\/\/[^\s]+)|flow:open|purchase|auto:start)$/;
 
 // 문자열·숫자·불리언·배열·객체만 남기고 길이를 제한한다. 화면에 그릴 때 모든 글자는 이스케이프되므로 글 내용 자체는 자유롭게 둔다.
-function clean(v, depth = 0, key = '') {
+export function clean(v, depth = 0, key = '') {
   if (typeof v === 'string') {
     v = v.slice(0, 3000);
     const t = v.trim();
-    if (/^(src|srcMobile|poster)$/.test(key) && t && !MEDIA_OK.test(t)) return '';
+    if (/^(src|srcMobile|poster|bgSrc)$/.test(key) && t && !MEDIA_OK.test(t)) return '';
     if (key === 'href' && t && !HREF_OK.test(t)) return '';
     if (key === 'action' && t && !ACTION_OK.test(t)) return '';
     return v;
@@ -38,7 +39,10 @@ function clean(v, depth = 0, key = '') {
 
 export async function onRequestGet({ env }) {
   if (!env.GLOSSARY_KV) return json({ story: null });
-  return json({ story: (await env.GLOSSARY_KV.get(KEY, 'json')) || null });
+  const story = (await env.GLOSSARY_KV.get(KEY, 'json')) || null;
+  const live = await kvOf(env, { cache: true }).get('free:onboard', 'json');
+  if (!live || !live.cover) return json({ story });
+  return json({ story: { ...(story || {}), settings: { ...((story && story.settings) || {}), cover: live.cover } } });
 }
 
 export async function onRequestPut({ request, env }) {

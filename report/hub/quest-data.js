@@ -220,6 +220,21 @@
 
   Q.STEPS = STEPS; Q.ASSETS = ASSETS; Q.ASSET_KEYS = ASSET_KEYS; Q.GUIDES = GUIDES; Q.DEFAULT = QUEST; Q.TIMELINE = TIMELINE; Q.TL_SECTIONS = TL_SECTIONS; Q.ACCESS = ACCESS; Q.FX = FX;
   Q.mergeQuest = mergeQuest; Q.mergeTimeline = mergeTimeline; Q.img = img; Q.focus = focus;
+  // Shared flow model: the admin and both input renderers use the same destination.
+  Q.inputMode = function (cfg) { return cfg.quest && cfg.quest.enabled === false ? 'classic' : 'story'; };
+  Q.destination = function (cfg) { return cfg.resultDestination === 'home' || (cfg.timeline && cfg.timeline.enabled === false) ? 'home' : 'timeline'; };
+  Q.completionRoute = function (cfg, editing) {
+    var target = Q.destination(cfg);
+    return editing ? (target === 'home' ? '#/?nogate=1' : '#/timeline') : '#/awaken?to=' + (target === 'home' ? 'home' : 'timeline');
+  };
+  Q.flow = function (cfg) {
+    var story = Q.inputMode(cfg) === 'story', target = Q.destination(cfg);
+    return [{ id: 'landing', label: '첫 화면', editor: 'landing', enabled: !cfg.cover || cfg.cover.show !== false }]
+      .concat(cfg.sections.map(function (s) { return { id: s.id, label: s.title || s.type, editor: 'section', enabled: s.type === 'final' || s.enabled !== false }; }))
+      .concat([{ id: 'input', label: story ? '스토리 입력' : '기본 입력 (호환)', editor: story ? 'quest' : 'scenes', enabled: true },
+        { id: 'awakening', label: '일주 각성', editor: 'qassets', enabled: true },
+        { id: 'result', label: target === 'timeline' ? '운명의 타임라인' : '개인화 홈', editor: target === 'timeline' ? 'tl' : 'qops', enabled: true }]);
+  };
   root.Quest = Q;
   if (typeof module !== 'undefined' && module.exports) module.exports = Q;
 })(typeof window !== 'undefined' ? window : globalThis);

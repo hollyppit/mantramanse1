@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   var R = window.ReportV2, Q = R.Quality, C = window.V2Content, esc = C.esc;
-  var KEY = 'mt_v2_quality_ts', TS = { date: '1994-07-24', time: '12:00', gender: 'F', interest: '' };
+  var KEY = 'mt_v2_quality_ts', TS = { date: '1994-07-24', time: '12:00', gender: 'F', interest: '', project: 'full' };
   try { Object.assign(TS, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
   var $ = function (s, e) { return (e || document).querySelector(s); };
   var LAST = null, GROUP_KO = { car: '차', career: '직업', spouse: '배우자 인상', past: '전생', place: '장소', style: '스타일', wealth: '재물', children: '자녀' };
@@ -75,11 +75,15 @@
     var a = st.audit, h = '';
     h += '<div class="card"><b style="color:var(--gold)">서비스 점검</b><p class="muted" style="margin:6px 0 10px">테스트 사주로 실제 무빙툰 문서를 만들어 아래 네 가지를 점검합니다. 읽기 전용이며 아무것도 바꾸지 않습니다. 계산값과 문장의 불일치·문장 중복은 <b>정합성 검사</b> 탭에서 보세요.</p>' +
       '<div class="pvh"><label>생년월일<input type="date" id="qaD" value="' + esc(TS.date) + '"></label><label>시각<input type="time" id="qaT" value="' + esc(TS.time) + '"></label><label>성별<select id="qaG"><option value="M"' + (TS.gender === 'M' ? ' selected' : '') + '>남</option><option value="F"' + (TS.gender === 'F' ? ' selected' : '') + '>여</option></select></label>' +
-      '<label>관심 분야<select id="qaI">' + R.StoryDirector.INTERESTS.map(function (i) { return '<option value="' + i.id + '"' + (TS.interest === i.id ? ' selected' : '') + '>' + esc(i.name) + '</option>'; }).join('') + '</select></label><button type="button" id="qaGo" class="gold">점검 실행</button></div></div>';
+      '<label>상품<select id="qaP">' + R.Chapters.projects(st.saved || C.ST.saved).map(function (p) { return '<option value="' + esc(p.id) + '"' + (TS.project === p.id ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('') + '</select></label><label>관심 분야<select id="qaI">' + R.StoryDirector.INTERESTS.map(function (i) { return '<option value="' + i.id + '"' + (TS.interest === i.id ? ' selected' : '') + '>' + esc(i.name) + '</option>'; }).join('') + '</select></label><button type="button" id="qaGo" class="gold">점검 실행</button></div></div>';
     if (st.err) return h + '<div class="card"><p class="err">' + esc(st.err) + '</p></div>';
     if (!a) return h + '<div class="card"><p class="muted">"점검 실행"을 누르면 결과가 나옵니다.</p></div>';
+    var p = st.pipeline;
+    if (p && p.ok) h += '<div class="card"><b style="color:var(--gold)">시스템 연결 상태</b><p class="muted">자료 → 검수·게시 지식 → AI·문체 → 상품·챕터 → 결과</p><p>자료 ' + p.knowledge.docs + '건 · 지식 ' + p.knowledge.total + '건 · 게시 ' + p.knowledge.published + '건 · 서비스 사용 가능 ' + p.knowledge.usable + '건</p><p class="muted">콘텐츠 ' + esc(p.versions.content) + ' · 지식 ' + esc(p.versions.k) + ' · 설계 ' + esc(p.versions.d) + ' · AI 규칙 ' + esc(p.versions.r) + ' · 문체 v' + p.versions.style + '</p><p class="muted">챕터 AI 편집: ' + (p.service.composeAiAvailable ? '제공자 연결됨' : '원문 사용') + ' · 지식 심화: ' + (!p.service.enabled ? '사용 중지' : p.service.body ? '본문 대체' : '심화 설명 추가') + '</p>' + p.findings.map(function (f) { return '<p>' + esc(f.text) + ' <button type="button" data-repair="' + esc(f.tab) + '">관리 화면 열기</button></p>'; }).join('') + '</div>';
+    else h += '<div class="card"><b>시스템 연결 상태: 확인 못함</b><p class="muted">' + esc(p && p.error || '응답 없음') + '</p></div>';
+    if (st.productAudit) h += '<div class="card"><b>저장된 상품 구성 검사</b> · ' + esc(TS.project) + ' · 챕터 ' + st.productAudit.chapters + '개 · 풀이 누락 의심 ' + st.productAudit.summary.missing + '개 <button type="button" data-repair="v2proj">상품 구성 열기</button></div>';
     var s = a.summary;
-    h += '<div class="card"><b>요약</b> · 챕터 ' + a.chapters + '개 · 풀이 누락 의심 ' + s.missing + ' · 단정 표현 검토 ' + s.absolute + ' · 에셋 누락 ' + (s.assetMissing == null ? '확인 못함' : s.assetMissing) + ' · 세계 매핑 대체 ' + (s.worldFallback == null ? '-' : s.worldFallback) + ' · 빈 세계 ' + (s.worldEmpty == null ? '-' : s.worldEmpty) + '</div>';
+    h += '<div class="card"><b>인생 지도 문서 검사</b> · 챕터 ' + a.chapters + '개 · 풀이 누락 의심 ' + s.missing + ' · 단정 표현 검토 ' + s.absolute + ' · 에셋 누락 ' + (s.assetMissing == null ? '확인 못함' : s.assetMissing) + ' · 세계 매핑 대체 ' + (s.worldFallback == null ? '-' : s.worldFallback) + ' · 빈 세계 ' + (s.worldEmpty == null ? '-' : s.worldEmpty) + '</div>';
     if (st.evidence) h += evidenceSection(st.evidence);
     h += awakeningSection(st);
     h += viewerErrSection(st);
@@ -116,10 +120,11 @@
 
   function bind(box, st, M) {
     var go = $('#qaGo', box); if (go) go.onclick = function () {
-      TS.date = $('#qaD', box).value; TS.time = $('#qaT', box).value; TS.gender = $('#qaG', box).value; TS.interest = $('#qaI', box).value; try { localStorage.setItem(KEY, JSON.stringify(TS)); } catch (e) { }
+      TS.date = $('#qaD', box).value; TS.time = $('#qaT', box).value; TS.gender = $('#qaG', box).value; TS.interest = $('#qaI', box).value; TS.project = $('#qaP', box).value; try { localStorage.setItem(KEY, JSON.stringify(TS)); } catch (e) { }
       st.err = ''; st.audit = null; go.disabled = true; go.textContent = '점검 중…';
       run(M, st).then(function () { draw(box, st, M); });
     };
+    box.querySelectorAll('[data-repair]').forEach(function (b) { b.onclick = function () { window.AdminShowTab(b.dataset.repair); }; });
     var pb = $('#awkProbe', box); if (pb) pb.onclick = function () { pb.disabled = true; probeAwakening(box, st, M); };
     var mdb = $('#qaMd', box); if (mdb) mdb.onclick = function () {
       var blob = new Blob([md(st.audit, st)], { type: 'text/markdown;charset=utf-8' }), u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = 'service-quality.md'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 1000);
@@ -132,28 +137,31 @@
     return Promise.all([
       C.api('/api/asset-art').then(function (r) { return r.slots || []; }).catch(function (e) { st.assetErr = e.message; return null; }),
       C.api('/api/worlds').then(function (r) { return r.worlds || []; }).catch(function () { return []; }),
-      C.load().then(function () { return C.ST.saved || {}; }).catch(function () { return {}; }),
+      C.api('/api/report-content').then(function (r) { return r.content || {}; }),
       C.api('/api/src?a=list').then(function (r) { return r.docs || []; }).catch(function () { return null; }),
       C.api('/api/awakening?all=1').then(function (r) { return r || {}; }).catch(function () { return null; }),
       C.api('/api/errlog?days=7').then(function (r) { return r || null; }).catch(function () { return null; }),
+      C.api('/api/media?all=1'),
+      C.api('/api/system-status').catch(function (e) { return {error:e.message}; }),
     ]).then(function (got) {
-      st.errlog = got[5] || null;
+      st.errlog = got[5] || null; st.pipeline = got[7]; st.saved = got[2];
       st.awk = got[4] ? Q.awakeningAudit(got[4]) : null; st.awkProbe = null;
       try {
         var ch = M.compute({ year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: TS.gender, city: '서울' });
-        var sd = R.SajuData.build(ch, { now: now }), cfg = R.Chapters.forProject(null, 'full'), saved = got[2] || {}, lib = R.Compose.library({ modules: saved.modules, remedies: saved.remedies, evidencePolicy: saved.evidencePolicy }), rep = R.Compose.build(sd, lib, cfg, { name: '테스트' });
+        var sd = R.SajuData.build(ch, { now: now }), saved = got[2] || {}, pack = R.Compose.fromSaved(saved, got[6].media || [], TS.project), lib = pack.lib, rep = R.Compose.build(sd, lib, pack.cfg, { name: '테스트' });
+        st.productAudit = Q.audit({doc:rep,slots:got[0]});
         st.evidence = Q.evidence(lib.all, { policy: lib.policy, hidden: lib.hidden.length, restored: lib.restored.length });
         st.evidence.refs = got[3] ? Q.refCheck(lib.all, got[3]) : null; st.evidence.refDocs = got[3] ? got[3].length : null;
         var doc = R.LifeDoc.build({ M: M, ch: ch, sd: sd, now: now, name: '테스트', interest: TS.interest, rep: rep, soc: R.StoryDirector.social(M, ch, sd, now), plan: (rep.chapters.find(function (c) { return c.plan; }) || {}).plan });
         var worlds = R.Explore ? R.Explore.mergeWorlds(got[1]) : null;
         st.audit = Q.audit({ doc: doc, worlds: worlds, slots: got[0] });
       } catch (e) { st.err = (e && e.message) || String(e); }
-    });
+    }).catch(function (e) { st.err = e.message || String(e); });
   }
 
   window.V2Quality = { open: function () {
     var box = document.getElementById('t-v2quality'); if (!box) return; var st = { audit: null, err: '' };
     box.innerHTML = '<p class="muted">엔진을 불러오는 중…</p>';
-    C.engine().then(function (M) { draw(box, st, M); }).catch(function (e) { box.innerHTML = '<p class="muted">' + esc(e.message) + '</p>'; });
+    C.load().then(function () { return C.engine(); }).then(function (M) { draw(box, st, M); }).catch(function (e) { box.innerHTML = '<p class="muted">' + esc(e.message) + '</p>'; });
   } };
 })();

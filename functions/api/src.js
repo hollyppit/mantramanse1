@@ -6,7 +6,7 @@ import { json, isAdmin, configError } from '../_lib.js';
 import * as IK from '../_ik.js';
 import * as S from '../_src.js';
 import { kvOf } from '../_store.js';
-import { MAX_PER_DOMAIN, dkey, loadDomain, loadAll, meta, bump, nextId, llm } from '../_ikstore.js';
+import { MAX_PER_DOMAIN, dkey, loadDomain, loadAll, meta, bump, nextId, llm, blockedDocs } from '../_ikstore.js';
 
 const IDX = 'src:idx', ck = id => 'src:chunks:' + id, ak = id => 'src:cand:' + id, ID = /^d[a-z0-9]{3,24}$/, CID = /^[\w.-]{1,40}$/;
 const STR = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
@@ -172,7 +172,8 @@ async function stats(kv, idx) {
   const items = await loadAll(kv), by = { need: 0, analyzed: 0, review: 0, done: 0 }; let queue = 0, conflict = 0, unsure = 0;
   for (const d of idx) { by[d.status] = (by[d.status] || 0) + 1; if (d.counts) { queue += d.counts.cands.new + d.counts.cands.held; conflict += d.counts.conflict; unsure += d.counts.unsure; } }
   const prod = items.filter(x => x.status === 'approved' || x.status === 'published');
-  return { docs: idx.length, by, queue, conflict, unsure, knowledge: prod.length, twoEvidence: prod.filter(x => (x.evidence || []).length >= 2).length, noEvidence: prod.filter(x => !(x.evidence || []).length).length };
+  const blocked = await blockedDocs(kv), published = prod.filter(IK.isProduction), usable = published.filter(it => IK.sourceAllowed(it, blocked));
+  return { docs: idx.length, by, queue, conflict, unsure, knowledge: prod.length, published: published.length, usable: usable.length, twoEvidence: prod.filter(x => (x.evidence || []).length >= 2).length, noEvidence: prod.filter(x => !(x.evidence || []).length).length };
 }
 // 새 자료 후보가 메워 줄 수 있는 "지금 근거가 없는" 항목 — 실제 커버리지에서만 계산한다
 async function impactCoverage(kv, cands) {

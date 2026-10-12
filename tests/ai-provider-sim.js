@@ -6,6 +6,7 @@ function load(file, fetch) {
     json: (d, s = 200) => new Response(JSON.stringify(d), { status: s }),
     isAdmin: () => true, kvOf: () => null,
     loadStyle: async () => ({ ver: 0, config: {} }), styleFor: () => ({ directive: '', story: '', sig: '', meta: {} }), // 문체 설정(import 제거 하네스용 스텁)
+    validatePayload: b => b.payload && Array.isArray(b.payload.chapters) ? {chapters:b.payload.chapters} : null, composeStyle: () => ({directive:'',sig:''}),
     runCompose: async (body, deps) => ({ ok: true, result: JSON.parse(await deps.llm('system', 'user')) }),
     validate: x => x, cacheKey: async () => 'test', buildUser: () => 'user', SYSTEM: 'system',
     sanitize: x => { try { return JSON.parse(x); } catch { return null; } }
@@ -29,7 +30,7 @@ function load(file, fetch) {
       const env = { ANTHROPIC_API_KEY: 'mock', ...(mode === 'claude-only' ? {} : { OPENAI_API_KEY: 'mock' }) };
       let result, thrown;
       try {
-        result = file.endsWith('_ikstore.js') ? await ctx.llm(env, 'system', 'user') : await (await ctx.onRequestPost({ env, request: new Request('https://test/api', { method: 'POST', body: JSON.stringify({ task: 'script' }) }) })).json();
+        result = file.endsWith('_ikstore.js') ? await ctx.llm(env, 'system', 'user') : await (await ctx.onRequestPost({ env, request: new Request('https://test/api', { method: 'POST', body: JSON.stringify(file.endsWith('/compose.js') ? {payload:{chapters:[{id:'c01'}]}} : { task: 'script' }) }) })).json();
       } catch (e) { thrown = e; }
       assert.deepEqual(calls, mode === 'success' ? ['openai'] : mode === 'claude-only' ? ['anthropic'] : ['openai', 'anthropic'], file + ' ' + mode);
       if (mode === 'all-fail') assert.ok(thrown || result.ok === false || result.error, file + ' must fail');

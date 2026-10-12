@@ -72,7 +72,7 @@
       var maskLead = picks[0] ? view(picks[0], vMask) : null; // AI 전송용(이름 대신 {hero…})
       var lead = views[0] || { headline: ch.title, summary: '', detail: '', keywords: [], imageTags: [], extra: null, why: [] };
       var out = { id: ch.id, base: ch.base || ch.id, project: ch.project || 'full', no: ch.no, act: ch.act, title: ch.title, subtitle: ch.subtitle, kind: ch.kind, accessLevel: ch.accessLevel || 'free', introText: ch.introText || '',
-        aiEnabled: ch.aiEnabled !== false, actionPool: (rec.action || []).slice(0, 4).map(function (x) { return x.item.title; }), fact: factOf(ch, sd), headline: lead.headline, interpretation: lead.summary, meaning: lead.detail, choice: lead.choice || '', tpl: maskLead ? { headline: maskLead.headline, interpretation: maskLead.summary, meaning: maskLead.detail } : null, details: views.slice(1), lead: lead, extra: lead.extra, modules: views.map(function (x) { return x.id; }), disclaimer: ch.disclaimer || null, cta: ch.cta || null, items: null };
+        aiEnabled: ch.aiEnabled !== false, styleKeys: [ch.id, ch.base || ch.id].concat(ch.moduleCategories || []), actionPool: (rec.action || []).slice(0, 4).map(function (x) { return x.item.title; }), fact: factOf(ch, sd), headline: lead.headline, interpretation: lead.summary, meaning: lead.detail, choice: lead.choice || '', tpl: maskLead ? { headline: maskLead.headline, interpretation: maskLead.summary, meaning: maskLead.detail } : null, details: views.slice(1), lead: lead, extra: lead.extra, modules: views.map(function (x) { return x.id; }), disclaimer: ch.disclaimer || null, cta: ch.cta || null, items: null };
 
       if (ch.kind === 'verdict' && vparts) { // 총평: 고정 첫 문장 + 동력 재료(모듈이 아니라 sd·규칙 문장에서 조립)
         out.verdict = R.Verdict.material(sd, vparts); out.headline = R.Verdict.FIRST; out.interpretation = out.verdict.discover; out.meaning = ''; out.details = []; out.modules = []; out.action = [];
@@ -160,14 +160,14 @@
      AI 에는 "이미 선택된 모듈 문장 + 계산 근거"만 보낸다. 새 명리 규칙을 만들 수 없도록 프롬프트가 제한한다.
      AI 응답은 챕터별 headline/lead(2문장 이내)만 받아들이고, 길이·단정 표현을 검사해 어긋나면 그 챕터는 원본 모듈 문장을 유지한다. */
   function aiPayload(report) {
-    return { promptVersion: PROMPT_VERSION, rules: ['서술은 전지적 관찰자 시점의 소설체(~다) 3인칭이며 "당신"·"~습니다"·"~하세요"를 쓰지 않는다', '{hero}·{hero은는}·{hero이가}·{hero을를}·{hero의} 자리표시자는 그대로 둔다', '제공된 문장과 근거만 사용한다', '새로운 명리 규칙·수치·직업·행동을 만들지 않는다', '중복 제거와 문체 통일만 한다', '단정 표현(반드시·무조건·확정)을 쓰지 않는다', '건강·투자수익·질병·임신·법률은 예측하지 않는다'],
+    return { promptVersion: PROMPT_VERSION,
       chapters: report.chapters.filter(function (c) { return c.aiEnabled !== false; }).map(function (c) { var t = c.tpl || c; // 이름이 들어간 문장 대신 {hero…} 자리표시자 문장을 보낸다
-        var o = { id: c.id, title: c.title, fact: c.fact, headline: t.headline, interpretation: t.interpretation, meaning: t.meaning, action: c.action }; if (c.verdict) o.verdict = { discover: c.verdict.discover, blocked: c.verdict.blocked.text, evidence: c.verdict.evidence ? c.verdict.evidence.text : '' }; return o; }) };
+        var o = { id: c.id, styleKeys: c.styleKeys || [c.id], title: c.title, fact: c.fact, headline: t.headline, interpretation: t.interpretation, meaning: t.meaning, action: c.action }; if (c.verdict) o.verdict = { discover: c.verdict.discover, blocked: c.verdict.blocked.text, evidence: c.verdict.evidence ? c.verdict.evidence.text : '' }; return o; }) };
   }
   function applyAi(report, ai) {
     var ok = 0, byId = {}; ((ai && ai.chapters) || []).forEach(function (x) { if (x && x.id) byId[x.id] = x; });
     report.chapters.forEach(function (c) {
-      var x = byId[c.id]; if (!x) return;
+      var x = byId[c.id]; if (!x || c.aiEnabled === false) return;
       if (c.verdict) { // 총평: 첫 문장·조언은 고정. 발견/막힘/증거만 검증을 통과하면 교체(막힘은 템플릿의 50% 이상 길이)
         var acc = R.Verdict.acceptAi(x.verdict, c.verdict, BANNED);
         if (acc.discover) { c.verdict.discover = acc.discover; c.interpretation = acc.discover; ok++; } if (acc.blocked) { c.verdict.blocked.text = acc.blocked; ok++; } if (acc.evidence && c.verdict.evidence) { c.verdict.evidence.text = acc.evidence; ok++; }
@@ -210,7 +210,7 @@
     // 에셋 정보는 한 번만(assets), 장면에는 후보 id·점수만. 후보가 2개 이상인 장면만 AI 선택 대상(최대 40장면, 후보 5개)
     var by = {}; (lib.media || []).forEach(function (a) { by[a.id] = a; });
     var assets = {}, scenes = [];
-    report.chapters.forEach(function (c) { (c.scenes || []).forEach(function (s) {
+    report.chapters.forEach(function (c) { if (c.aiEnabled === false) return; (c.scenes || []).forEach(function (s) {
       if (scenes.length >= 40 || !s.candidates || s.candidates.length < 2) return;
       var cs = s.candidates.filter(function (x) { return x.score > 0; }).slice(0, 5); if (cs.length < 2) return;
       cs.forEach(function (x) { var a = by[x.assetId] || {}; assets[x.assetId] = { title: a.title || '', description: a.description || '', tags: (a.tags || []).slice(0, 10) }; });
@@ -221,7 +221,7 @@
   function applyAiMedia(report, picks, lib) {
     var by = {}; (lib.media || []).forEach(function (a) { by[a.id] = a; }); var used = {}, n = 0;
     report.chapters.forEach(function (c) { (c.scenes || []).forEach(function (s) { if (s.media) used[s.media.assetId] = 1; }); });
-    report.chapters.forEach(function (c) { (c.scenes || []).forEach(function (s) {
+    report.chapters.forEach(function (c) { if (c.aiEnabled === false) return; (c.scenes || []).forEach(function (s) {
       var id = picks && picks[s.sceneId]; if (!id || !s.media || id === s.media.assetId) return;
       var ok = s.candidates.some(function (x) { return x.assetId === id && x.score > 0; }), a = by[id];
       if (!ok || !a || used[id]) return; // 후보 밖 id·이미 쓴 id 는 무시(AI 가 새 URL 을 만들 수 없다)

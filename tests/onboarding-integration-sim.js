@@ -1,0 +1,41 @@
+const assert = require('assert/strict');
+const {pathToFileURL} = require('url');
+const path = require('path');
+const O = require('../report/hub/onboard-data.js');
+const Q = require('../report/hub/quest-data.js');
+(async () => {
+  for (const enabled of [true, false]) for (const target of ['timeline','home']) {
+    const cfg = O.merge(O.DEFAULTS, {quest:{enabled},resultDestination:target});
+    assert.equal(Q.inputMode(cfg), enabled ? 'story' : 'classic');
+    assert.equal(Q.completionRoute(cfg,false), '#/awaken?to=' + target);
+    assert.equal(Q.completionRoute(cfg,true), target === 'home' ? '#/?nogate=1' : '#/timeline');
+    assert.equal(Q.flow(cfg).find(n => n.id === 'input').editor, enabled ? 'quest' : 'scenes');
+    assert.equal(Q.flow(cfg).at(-1).label, target === 'home' ? '개인화 홈' : '운명의 타임라인');
+  }
+  assert.equal(Q.destination({timeline:{enabled:false}}), 'home');
+  const onboard = await import(pathToFileURL(path.resolve(__dirname,'../functions/api/onboarding.js')));
+  const story = await import(pathToFileURL(path.resolve(__dirname,'../functions/api/story.js')));
+  const values = new Map();
+  const kv = {get:async (k,t) => values.has(k) ? t === 'json' ? JSON.parse(values.get(k)) : values.get(k) : null,put:async(k,v)=>values.set(k,v),delete:async k=>values.delete(k)};
+  const env = {GLOSSARY_KV:kv,ADMIN_PASSWORD:'pw'};
+  values.set('story:config', JSON.stringify({blocks:[{type:'text',text:'기존'}],settings:{cover:{title:'기존 커버'},brandName:'기존 브랜드'}}));
+  const call = async(fn,method,url,body) => {const response = await fn({env,request:new Request('https://test.local'+url,{method,headers:{authorization:'Bearer pw','content-type':'application/json'},body:body ? JSON.stringify(body) : undefined})});assert.equal(response.status,200);return response.json()};
+  const get = () => call(story.onRequestGet,'GET','/api/story');
+  const put = body => call(onboard.onRequestPut,'PUT','/api/onboarding',body);
+  const action = name => call(onboard.onRequestPost,'POST','/api/onboarding?action='+name);
+  const cover = {title:'통합 커버',chars:[{src:'https://test.local/char.png',x:20}],titleSize:17};
+  await put({cover,resultDestination:'home',quest:{enabled:false}});
+  assert.equal((await get()).story.settings.cover.title,'기존 커버','초안은 공개되지 않음');
+  await put({honorific:'귀인'});
+  await action('publish');
+  let live = (await get()).story;
+  assert.equal(live.settings.cover.title,'통합 커버');
+  assert.deepEqual(live.settings.cover.chars,cover.chars);
+  assert.equal(live.settings.brandName,'기존 브랜드');
+  assert.equal(live.blocks[0].text,'기존');
+  await put({cover:{title:'버릴 초안'}});await action('discard');
+  assert.equal((await get()).story.settings.cover.title,'통합 커버');
+  await action('unpublish');
+  assert.equal((await get()).story.settings.cover.title,'기존 커버');
+  console.log('onboarding-integration-sim OK: 두 입력 방식·공통 결과 경로·커버 초안/게시/폐기/공개중지·기존 설정 보존');
+})().catch(e=>{console.error(e);process.exitCode=1});

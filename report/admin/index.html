@@ -152,12 +152,13 @@ summary { cursor:pointer; padding:4px 0; }
     <header>
       <div class="row" style="align-items:center;gap:14px"><h1>사주 무빙툰 · 관리자</h1><a class="navbtn" href="/" target="_blank" rel="noopener" title="만트라 만세력(사주 계산 앱)을 새 탭으로 엽니다">만트라 만세력 ↗</a><a class="navbtn" href="/report/" target="_blank" rel="noopener" title="방문자가 처음 보는 랜딩 페이지(/report/)를 새 탭으로 엽니다">랜딩 페이지 ↗</a><a class="navbtn" href="/report/hub/#/welcome?replay=1" target="_blank" rel="noopener" title="사례 후킹 → 명리학 소개 → 귀인 슬라이드 툰 온보딩을 새 탭으로 엽니다">온보딩 ↗</a></div>
       <div class="row">
-        <span class="muted" id="dirtyBadge" role="status" style="color:var(--gold);cursor:help"></span><span class="muted" id="saveState"></span>
+        <button type="button" class="ghost" id="dirtyBadge" aria-label="저장하지 않은 변경 화면 보기" hidden></button><span class="muted" id="saveState"></span>
         <button class="pri" id="saveBtn" disabled>변경사항 저장</button>
         <button id="logoutBtn">로그아웃</button>
       </div>
     </header>
     <div class="tabs" id="grpBar" role="tablist" aria-label="관리 영역"></div>
+    <p id="navHint" class="muted" hidden style="margin:12px 0;font-size:.84rem"></p>
     <div class="tabs sub" id="subBar" role="tablist" aria-label="세부 메뉴">
       <button data-t="dash" class="on">현황</button><span class="tg">무빙툰 제작</span>
       <button data-t="v2clip">클립 라이브러리</button>
@@ -557,6 +558,7 @@ summary { cursor:pointer; padding:4px 0; }
 <script src="../hub/onboard-data.js"></script>
 <script src="../hub/onboard-style.js"></script>
 <script src="../hub/quest-data.js"></script>
+<script src="navigation.js"></script>
 <script src="v2-onboard.js"></script>
 <script src="v2-quest.js"></script>
 <script src="v2-batch.js"></script>
@@ -625,7 +627,12 @@ summary { cursor:pointer; padding:4px 0; }
   var DR = (window.AdminDirty = window.AdminDirty || {});
   DR['클립 라이브러리(구)'] = function () { return S.dirty; }; DR['온보딩 페이지'] = function () { return HM.dirty; };
   function dirtyList() { return Object.keys(DR).filter(function (k) { try { return DR[k](); } catch (e) { return false; } }); }
-  function dirtyShow() { var l = dirtyList(), b = $('dirtyBadge'); b.textContent = l.length ? '● 저장 안 됨 ' + l.length + '곳' : ''; b.title = l.join(', '); }
+  function dirtyShow() { var l = dirtyList(), b = $('dirtyBadge'); b.textContent = l.length ? '● 저장 안 됨 ' + l.length + '곳' : ''; b.title = l.join(', '); b.hidden = !l.length; }
+  $('dirtyBadge').onclick = function () {
+    var names = dirtyList(), dlg = document.createElement('dialog'); dlg.innerHTML = '<h3>저장하지 않은 변경</h3><p class="muted">아래 화면으로 이동해 해당 저장 버튼을 눌러 주세요.</p>';
+    names.forEach(function (name) { var b = document.createElement('button'); b.type = 'button'; b.textContent = name + ' →'; b.style.cssText = 'display:block;width:100%;margin:8px 0'; b.onclick = function () { dlg.close(); showTab(window.AdminNavigation.dirtyTarget(name)); }; dlg.appendChild(b); });
+    var close = document.createElement('button'); close.textContent = '닫기'; close.onclick = function () { dlg.close(); }; dlg.appendChild(close); document.body.appendChild(dlg); dlg.onclose = function () { dlg.remove(); }; dlg.showModal();
+  };
   setInterval(dirtyShow, 1000);
   $('logoutBtn').onclick = function () { var l = dirtyList(); if (l.length && !confirm('저장하지 않은 변경사항이 있습니다: ' + l.join(', ') + '. 나갈까요?')) return; ss('mt_pw'); ss('mt_tab'); location.reload(); };
   window.addEventListener('beforeunload', function (e) { if (dirtyList().length) { e.preventDefault(); e.returnValue = ''; } });
@@ -668,7 +675,7 @@ summary { cursor:pointer; padding:4px 0; }
     var b = btns.filter(function (x) { return x.id !== 'saveBtn'; })[0] || btns[0];
     if (b) b.click(); else $('saveState').textContent = '이 화면에 저장할 변경이 없습니다';
   });
-  
+
 
   // ── 불러오기·저장
   function load() {
@@ -1132,10 +1139,13 @@ summary { cursor:pointer; padding:4px 0; }
   // ── 탭: 위쪽 5개(클립 라이브러리·챕터 관리·조합 테스트·프로젝트·설정). 설정 안의 하위 화면(입장 인트로·온보딩 페이지·기존 클립)은 also 로 함께 보여 준다.
   var PANES = ['dash', 'lib', 'test', 'cov', 'intro', 'home', 'v2clip', 'v2chap', 'v2intro', 'v2test', 'v2story', 'v2world', 'v2quality', 'v2proj', 'v2set', 'ikdoc', 'ikknow', 'ikdesign', 'ikrules', 'iklab', 'stylecfg', 'check', 'freec', 'onboard', 'panelart'];
   function showTab(t, also) {
-    document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); });
+    if (window.V2Content && V2Content.flushEditors && !V2Content.flushEditors()) return;
+    var destination = window.AdminNavigation.resolve(t, also); t = destination.tab; also = destination.also;
+    var onboardLanding = t === 'onboard' && also === 'home'; if (onboardLanding) also = undefined;
+    document.querySelectorAll('.tabs button').forEach(function (x) { x.classList.toggle('on', x.dataset.t === t); x.setAttribute('aria-selected', String(x.dataset.t === t)); });
     syncGroups(t);
     PANES.forEach(function (p) { var e = $('t-' + p); if (e) e.classList.toggle('hide', !(p === t || p === also)); });
-    var cur = also || t; document.body.dataset.pane = cur; if (document.querySelector('.tabs button[data-t="' + t + '"]')) ss('mt_tab', t);
+    var cur = also || t; $('saveBtn').hidden = cur !== 'lib'; $('saveState').hidden = cur !== 'lib'; document.body.dataset.pane = cur; if (document.querySelector('.tabs button[data-t="' + t + '"]')) ss('mt_tab', t);
     if (/^v2/.test(t) && window.V2Shell) window.V2Shell.open(t, S.pw, also);
     if (t === 'ikdoc' && window.V2Src) window.V2Src.open(t, S.pw);
     else if (/^ik/.test(t) && window.V2IK) window.V2IK.open(t, S.pw);
@@ -1143,7 +1153,7 @@ summary { cursor:pointer; padding:4px 0; }
     if (t === 'check' && window.V2Check) window.V2Check.open();
     if (t === 'dash' && window.V2Dash) window.V2Dash.open(S.pw);
     if (t === 'freec' && window.V2Free) window.V2Free.open(t, S.pw);
-    if (t === 'onboard' && window.V2Onboard) window.V2Onboard.open(t, S.pw, also);
+    if (t === 'onboard' && window.V2Onboard) window.V2Onboard.open(t, S.pw, onboardLanding ? 'home' : also);
     if (t === 'panelart' && window.V2Panel) window.V2Panel.open(t, S.pw);
     if (cur === 'cov') renderCov();
     if (cur === 'intro') introLoad();
@@ -1155,18 +1165,21 @@ summary { cursor:pointer; padding:4px 0; }
   document.querySelectorAll('#subBar button').forEach(function (b) { b.onclick = function () { showTab(b.dataset.t); }; });
 
   // ── 메뉴 묶음: 22개 탭을 7개 영역으로 묶어 위 줄에서 영역을, 아래 줄에서 그 영역의 세부 메뉴를 고른다(기능·화면 id 는 그대로).
-  var GROUPS = [['dash', '현황', ['dash']], ['make', '무빙툰 제작', ['v2clip', 'v2chap', 'v2proj', 'v2world', 'v2story']], ['media', '영상·이미지', ['v2intro', 'panelart']],
-    ['content', '콘텐츠·온보딩', ['freec', 'onboard']], ['ai', 'AI 풀이', ['ikdoc', 'ikknow', 'ikdesign', 'ikrules', 'iklab', 'stylecfg']], ['qa', '점검·테스트', ['v2quality', 'check', 'v2test']], ['set', '설정', ['v2set']]];
+  var GROUPS = window.AdminNavigation.groups;
   var lastInGroup = {};
   function groupOf(t) { for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i][2].indexOf(t) >= 0) return GROUPS[i]; return null; }
   function syncGroups(t) {
     var g = groupOf(t); if (!g) return; lastInGroup[g[0]] = t;
+    var page = window.AdminNavigation.pages[t], hint = $('navHint'); hint.hidden = !page; hint.textContent = page ? page.hint : '';
+    if (page) (page.related || []).forEach(function (id) { var link = document.createElement('button'); link.type = 'button'; link.className = 'ghost'; link.textContent = (window.AdminNavigation.pages[id] || {}).label || id; link.style.marginLeft = '8px'; link.onclick = function () { showTab(id); }; hint.appendChild(link); });
+    g[2].forEach(function (id) { var button = document.querySelector('#subBar button[data-t="' + id + '"]'); if (button) { var meta = window.AdminNavigation.pages[id]; if (meta) button.textContent = meta.label; $('subBar').appendChild(button); } });
     document.querySelectorAll('#grpBar button').forEach(function (b) { b.classList.toggle('on', b.dataset.g === g[0]); });
     document.querySelectorAll('#subBar .tg').forEach(function (s) { s.hidden = true; });
     document.querySelectorAll('#subBar button').forEach(function (b) { b.hidden = g[2].indexOf(b.dataset.t) < 0; });
     $('subBar').hidden = g[2].length < 2; // 메뉴가 하나뿐인 영역은 아래 줄을 숨긴다
   }
   (function () {
+    Object.keys(window.AdminNavigation.pages).forEach(function (id) { var b = document.querySelector('#subBar button[data-t="' + id + '"]'); if (b) b.textContent = window.AdminNavigation.pages[id].label; });
     var bar = $('grpBar'); bar.innerHTML = GROUPS.map(function (g) { return '<button type="button" data-g="' + g[0] + '">' + g[1] + '</button>'; }).join('');
     bar.onclick = function (e) { var b = e.target.closest('button'); if (!b) return; var g = GROUPS.filter(function (x) { return x[0] === b.dataset.g; })[0]; showTab(lastInGroup[g[0]] || g[2][0]); };
   })();

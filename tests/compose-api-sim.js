@@ -39,6 +39,10 @@ vm.runInThisContext(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')); glob
   ok(MD.cleanIlgan({ stem: '자', gender: 'M' }) === null && MD.cleanIlgan({ stem: '경', gender: 'x' }) === null, '잘못된 일간·성별 거부');
   ok(MD.cleanIlgan({ stem: '경', gender: 'M', videoUrl: 'javascript:alert(1)' }).videoUrl === '', '비정상 영상 주소 제거');
   ok(MD.cleanAwakening({ dayPillar: '경오', gender: 'F' }).dayPillar === '경오' && MD.cleanAwakening({ dayPillar: '경축', gender: 'F' }) === null, '일주 검증 유지');
+  const disabled = rep.chapters.find(c => c.id === 'c20'), disabledBefore = disabled.headline;
+  R.Compose.applyAi(rep, {chapters:[{id:'c20',headline:'새 문장으로 바뀌면 안 됩니다',lead:'이 문장은 사용 중지된 챕터입니다.'}]});
+  ok(disabled.headline === disabledBefore, 'AI 응답에 사용 중지 챕터가 섞여도 원문 보존');
+  ok(!body.media.scenes.some(s => disabled.scenes.some(x => x.sceneId === s.sceneId)), 'AI 사용 중지 챕터의 미디어도 AI 후보에서 제외');
   // 글자 스타일 서버 검증
   const tp = path.join(os.tmpdir(), 'ts-test.mjs'); fs.writeFileSync(tp, fs.readFileSync(path.join(root, 'functions/_textstyle.js'), 'utf8'));
   const TSV = await import(require('url').pathToFileURL(tp).href);

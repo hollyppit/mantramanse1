@@ -32,7 +32,7 @@
 
   function subnav(el, items, active, cb) {
     el.innerHTML = items.map(function (i) { return '<button type="button" data-k="' + i[0] + '"' + (i[0] === active ? ' class="on"' : '') + '>' + i[1] + '</button>'; }).join('');
-    el.onclick = function (e) { var b = e.target.closest('button[data-k]'); if (!b) return; $$('button', el).forEach(function (x) { x.classList.toggle('on', x === b); }); cb(b.dataset.k); };
+    el.onclick = function (e) { var b = e.target.closest('button[data-k]'); if (!b) return; if (C.flushEditors && !C.flushEditors()) return; $$('button', el).forEach(function (x) { x.classList.toggle('on', x === b); }); cb(b.dataset.k); };
   }
   var gotoTab = function (t, also) { window.AdminShowTab(t, also); };
 
@@ -62,7 +62,7 @@
   }
   // 현재(작업본 포함) 콘텐츠로 프로젝트 리포트 생성
   function report(projectId, forceChapter) {
-    return Promise.all([C.load(), computeSd()]).then(function (a) {
+    return Promise.all([C.load(), computeSd(), C.reloadMedia()]).then(function (a) {
       var sd = a[1], ct = content(), pack = R.Compose.fromSaved(ct, ST.media, projectId || 'full');
       if (forceChapter && !pack.cfg.chapters.some(function (c) { return c.id === forceChapter; })) { var c = chapterById(forceChapter); if (c) { var cc = clone(c); cc.no = pack.cfg.chapters.length + 1; pack.cfg.chapters.push(cc); } }
       return { sd: sd, rep: R.Compose.build(sd, pack.lib, pack.cfg), pack: pack };
@@ -100,7 +100,7 @@
   var CH = { sel: null, tab: 'set', dirty: false, dbg: true, collapsed: {} };
   function chapOpen() {
     C.load().then(function () {
-      if (!built.chap) { built.chap = 1; CH.sel = (ownedBy('full')[0] || chaptersAll()[0]).id; chapDraw(); } else if (CH.pending) { CH.sel = CH.pending; CH.pending = null; CH.tab = 'set'; chapDraw(); }
+      if (!built.chap) { built.chap = 1; var first = ownedBy('full')[0] || chaptersAll()[0]; CH.sel = first ? first.id : null; chapDraw(); } else if (CH.pending) { CH.sel = CH.pending; CH.pending = null; CH.tab = 'set'; chapDraw(); }
     });
   }
   function projList() {
@@ -121,7 +121,7 @@
   // 챕터·프로젝트를 함께 저장(챕터 소속·ACT·순서와 프로젝트 ACT 문구는 한 묶음)
   function saveStructure() {
     var part = { chapters: { chapters: chaptersAll().map(clone), acts: [] }, projects: projList().map(function (p) { var q = clone(p); q.chapters = null; return q; }) };
-    return C.save(part).then(function () { ST.saved.chapters = part.chapters; ST.saved.projects = part.projects; CH.dirty = false; PJ.dirty = false; });
+    return C.withBusy(document.getElementById('app'), function () { return C.save(part); }).then(function () { ST.saved.chapters = part.chapters; ST.saved.projects = part.projects; CH.dirty = false; PJ.dirty = false; });
   }
   // 챕터 관리 맨 위 "도입" 그룹: 일간 소개(20)·일주 소개(120)의 영상·문구를 일괄 편집한다(상단 "일간·일주 소개" 탭과 같은 화면)
   function introGroup() {
@@ -166,7 +166,7 @@
   }
   function chapEditor() {
     var box = $('#chEd'); if (CH.sel === 'intro:prologue') { V2Prologue.mount(box); return; } if (/^intro:/.test(CH.sel || '')) { V2Intro.mount(box, PW, { mode: CH.sel.slice(6) }); return; }
-    var c = chapterById(CH.sel); if (!c) { box.innerHTML = ''; return; }
+    var c = chapterById(CH.sel); if (!c) { box.innerHTML = '<div class="card"><h3>편집할 챕터가 없습니다</h3><p class="muted">왼쪽 상품에서 + 챕터를 눌러 시작하세요.</p></div>'; return; }
     var tabs = [['set', '기본 설정'], ['mod', '해석 모듈'], ['pv', '미리보기']]; if (c.kind === 'remedy' || c.kind === 'summary') tabs.splice(2, 0, ['rem', '개운법 라이브러리']);
     box.innerHTML = '<div class="card"><div class="sub2" id="chTabs"></div><div id="chBody"></div></div>';
     subnav($('#chTabs', box), tabs, CH.tab, function (k) { CH.tab = k; chapBody(c); }); chapBody(c);
@@ -190,7 +190,7 @@
       $('#chDel', b).onclick = function () { // 기본 챕터는 코드에 들어 있어 목록에서 빼는 대신 "꺼서" 리포트에서 사라지게 한다. 만든 챕터는 완전히 지운다. 저장해야 반영된다.
         if (!confirm('이 챕터를 삭제할까요? (프로젝트에서도 빠집니다)')) return; var i = W.chapters.indexOf(c);
         if (isDefaultId(c.id)) { c.enabled = false; toast('삭제했습니다. 저장하면 리포트에서 빠집니다 (목록에서 체크하면 되살릴 수 있습니다)'); } else W.chapters = W.chapters.filter(function (x) { return x !== c; });
-        var next = W.chapters.filter(function (x) { return x.enabled !== false && x.project === c.project; })[0] || W.chapters.filter(function (x) { return x.enabled !== false; })[0] || W.chapters[0]; CH.sel = next.id; CH.dirty = true; chapDraw(); };
+        var next = W.chapters.filter(function (x) { return x.enabled !== false && x.project === c.project; })[0] || W.chapters.filter(function (x) { return x.enabled !== false; })[0] || W.chapters[0]; CH.sel = next ? next.id : null; CH.dirty = true; chapDraw(); };
     } else if (CH.tab === 'mod' || CH.tab === 'rem') {
       var cfg = CH.tab === 'mod' ? C.modCfg() : C.remCfg(), key = CH.tab === 'mod' ? 'modules' : 'remedies';
       b.innerHTML = '<p class="muted">' + (CH.tab === 'mod' ? '이 챕터에서 선택되는 해석 모듈(' + (c.moduleCategories || []).map(function (k) { return C.CAT_KO[k]; }).join('·') + ')입니다. 수정하면 "미리보기" 탭에 바로 반영됩니다.' : '개운법·행동 추천 라이브러리입니다(필요 행동 태그와 겹칠수록 추천).') + '</p><div id="chItems"></div>';
@@ -445,11 +445,12 @@
     d.addEventListener('change', function () { setTimeout(function () { d.close(); }, 1500); });
     var all = d.querySelector('#aiAll'); if (all) all.onclick = function () { // 빈 칸을 차례로(한 장씩). 연속 3번 실패하면 멈춘다
       var rows = [].slice.call(d.querySelectorAll('.srow2')), msg = d.querySelector('#aiAllMsg'); if (!confirm('빈 칸 ' + rows.length + '개를 AI 이미지로 차례로 채웁니다. 이미지 비용이 장당 발생하고 시간이 오래 걸립니다. 계속할까요?')) return; all.disabled = true; var fails = 0, done = 0, stop = false; d.addEventListener('close', function () { stop = true; });
-      (function next(i) { if (stop || i >= rows.length || fails >= 3) { msg.textContent = (fails >= 3 ? '연속 실패로 멈춤 · ' : '') + done + '장 완료'; all.disabled = false; if (done) afterSourceChange(); return; } msg.textContent = (i + 1) + ' / ' + rows.length + ' 만드는 중…'; aiMake(rows[i]).then(function (ok) { if (ok) { done++; fails = 0; } else fails++; next(i + 1); }); })(0); }; 
+      (function next(i) { if (stop || i >= rows.length || fails >= 3) { msg.textContent = (fails >= 3 ? '연속 실패로 멈춤 · ' : '') + done + '장 완료'; all.disabled = false; if (done) afterSourceChange(); return; } msg.textContent = (i + 1) + ' / ' + rows.length + ' 만드는 중…'; aiMake(rows[i]).then(function (ok) { if (ok) { done++; fails = 0; } else fails++; next(i + 1); }); })(0); };
   }
 
   /* ═════ ③ 조합 테스트 ═════ */
   var PRESETS = [['1990-05-15', '14:30', 'M', '경진 · 신강'], ['1985-11-23', '07:10', 'F', '1985 여'], ['2000-02-29', '22:40', 'M', '2000 남'], ['1978-08-08', '03:00', 'F', '1978 여']];
+  window.addEventListener('mt-content-saved', function () { PVS.forEach(function (p) { p.refresh(); }); });
   var TST = { sel: 'ilgan', rep: null, sd: null, pane: null, busy: 0 };
   function testOpen() {
     var root = $('#t-v2test');
@@ -475,7 +476,7 @@
     }
     C.load().then(function () { drawForm(); drawProj(); run(); });
   }
-  function drawProj() { var projs = R.Chapters.projects(content()).filter(function (p) { return p.enabled !== false; }); $('#tProj').innerHTML = projs.map(function (p) { return '<option value="' + esc(p.id) + '"' + (TS.project === p.id ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join(''); if (!projs.some(function (p) { return p.id === TS.project; })) TS.project = projs[0].id; }
+  function drawProj() { var projs = R.Chapters.projects(content()); $('#tProj').innerHTML = projs.map(function (p) { return '<option value="' + esc(p.id) + '"' + (TS.project === p.id ? ' selected' : '') + '>' + esc(p.name) + (p.enabled === false ? ' (비공개)' : '') + '</option>'; }).join(''); if (!projs.some(function (p) { return p.id === TS.project; })) TS.project = projs.length ? projs[0].id : 'full'; }
   function drawForm() {
     var f = $('#tForm'); f.innerHTML = '<div class="pvh"><label>양력 생년월일<input type="date" id="fD" value="' + TS.date + '"></label><label>시각<input type="time" id="fT" value="' + TS.time + '"></label><label>성별<select id="fG"><option value="M"' + (TS.gender === 'M' ? ' selected' : '') + '>남</option><option value="F"' + (TS.gender === 'F' ? ' selected' : '') + '>여</option></select></label><label>기준일(올해·이달 계산)<input type="date" id="fN" value="' + TS.now + '"></label><button type="button" class="pri" id="fOk">적용</button></div>' +
       '<div class="row" style="align-items:center"><span class="muted">자주 쓰는 사주</span>' + PRESETS.map(function (p, i) { return '<button type="button" data-pre="' + i + '">' + esc(p[3]) + '</button>'; }).join('') + '</div>';
@@ -498,8 +499,8 @@
         h += '<button type="button" data-c="' + esc(c.id) + '" class="ri' + (c.id === TST.sel ? ' on' : '') + '"><span>' + String(c.no).padStart(2, '0') + '</span><b>' + esc(c.title) + '</b>' + (fb ? '<i class="pill w" title="조건 있는 모듈이 없어 기본 안내만 나옵니다">기본안내</i>' : '') + (nm ? '<i class="pill" title="미디어가 없어 자리표시 장면이 나오는 장면 수">미디어 ' + nm + '</i>' : '') + '</button>';
       });
       h += '<button type="button" data-c="ending" class="ri' + (TST.sel === 'ending' ? ' on' : '') + '"><span>🎞</span><b>엔딩</b></button>';
-      rail.innerHTML = h; $('#tIssues').innerHTML = issues ? '<span class="pill w">기본 안내만 ' + issues + '개</span>' : '<span class="pill">모두 정상</span>';
-      if (!rep.chapters.some(function (c) { return c.id === TST.sel; }) && TST.sel !== 'ilgan' && TST.sel !== 'awakening' && TST.sel !== 'prologue' && TST.sel !== 'ending') TST.sel = rep.chapters[0].id;
+      rail.innerHTML = h; $('#tIssues').innerHTML = !rep.chapters.length ? '<span class="pill w">챕터 없음 · 상품 구성에서 추가하세요</span>' : issues ? '<span class="pill w">기본 안내만 ' + issues + '개</span>' : '<span class="pill">모두 정상</span>';
+      if (!rep.chapters.some(function (c) { return c.id === TST.sel; }) && TST.sel !== 'ilgan' && TST.sel !== 'awakening' && TST.sel !== 'prologue' && TST.sel !== 'ending') TST.sel = rep.chapters.length ? rep.chapters[0].id : 'prologue';
       inspect(); TST.pane.show(TST.sel, TS.project);
     }).catch(function (e) { rail.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
@@ -598,7 +599,7 @@
     var root = $('#t-v2set'); if (root.parentNode && $('#t-lib') && root.nextSibling !== $('#t-lib') && !built.setMoved) { built.setMoved = 1; $('#t-lib').parentNode.insertBefore(root, $('#t-lib')); }
     if (!built.set) {
       built.set = 1; root.innerHTML = '<div class="sub2" id="stNav"></div><div id="stScore" class="hide"></div><div id="stMove" class="hide"></div><div id="stCine" class="hide"></div>';
-      subnav($('#stNav', root), [['intro', '입장 인트로'], ['home', '랜딩 페이지 (온보딩 탭과 같은 화면)'], ['move', '무빙 연출'], ['cine', '시네마 기본 연출'], ['score', '미디어 점수·AI'], ['lib', '기존 클립 (구버전)']], also || 'intro', function (k) { gotoTab('v2set', k); });
+      subnav($('#stNav', root), [['intro', '입장 인트로'], ['move', '읽기·재생 설정'], ['cine', '시네마 기본 연출'], ['score', '미디어 점수·AI'], ['lib', '기존 클립 (구버전)']], also || 'intro', function (k) { gotoTab('v2set', k); });
     }
     $('#stScore', root).classList.toggle('hide', also !== 'score'); if (also === 'score') scoreOpen();
     $('#stMove', root).classList.toggle('hide', also !== 'move'); if (also === 'move') moveOpen();

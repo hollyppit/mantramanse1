@@ -8,7 +8,7 @@
   'use strict';
   var C = window.V2Content, esc = C.esc, toast = C.toast, O = window.Onboard;
   var PANE = null, $ = function (s, e) { return (e || PANE).querySelector(s); }, $$ = function (s, e) { return [].slice.call((e || PANE).querySelectorAll(s)); };
-  var G = { cfg: null, sub: 'cases', sel: null, selTopic: null, selSvc: null, selSec: null, stats: null, version: '', liveVersion: '', hasDraft: false, dirty: false, draftAt: '', liveAt: '', hist: null, flt: { q: '', kind: '', vs: '', vis: '' }, prev: { on: false, dev: 'pc' }, period: 'all', dev: 'all' };
+  var G = { cfg: null, sub: 'landing', sel: null, selTopic: null, selSvc: null, selSec: null, stats: null, version: '', liveVersion: '', hasDraft: false, dirty: false, draftAt: '', liveAt: '', hist: null, flt: { q: '', kind: '', vs: '', vis: '' }, prev: { on: false, dev: 'pc' }, period: 'all', dev: 'all' };
   var KINDS = O.KINDS, VST = O.VSTATE, REL = O.RELATION, DESIGNS = O.DESIGNS, EFFECTS = O.EFFECTS, NATURE = O.NATURE;
   var SECT = { research: '연구 카드', myeongri: '명리학 소개', service: '서비스 소개', story: '연구→유명인 후킹(예전)', final: '최종 CTA' };
   var REQ = O.REQUIRED_FIELDS;
@@ -32,6 +32,7 @@
     '.ob-dirty{color:#e0b36a;font-size:.8rem}.ob-sstage{position:relative;height:230px;border-radius:10px;overflow:hidden;background:#0b0e18;border:1px solid var(--line);margin:6px 0 10px}.ob-sbg{position:absolute;inset:0;background:center/cover no-repeat;opacity:.92}.ob-sch{position:absolute;left:6%;bottom:0;height:90%;max-width:42%;object-fit:contain;display:none}.ob-sbub{position:absolute;right:5%;top:14%;width:48%;padding:10px 12px;border-radius:12px;background:rgba(10,12,20,.8);border:1px solid rgba(255,255,255,.16);color:#f4eede;font-size:.85rem;line-height:1.55}.ob-sph{position:absolute;left:8px;bottom:6px;background:rgba(0,0,0,.45);padding:1px 6px;border-radius:6px}.ob-prevbox{border:1px solid var(--line);border-radius:10px;padding:8px;margin:10px 0;text-align:center}.ob-prevbox iframe{border:0;background:#080A11;border-radius:8px;width:100%;height:640px}.ob-prevbox.mob iframe{width:390px;max-width:100%}' +
     '.ob-bars{display:grid;gap:4px}.ob-bar2{display:grid;grid-template-columns:150px 1fr 90px;gap:8px;align-items:center;font-size:.8rem}.ob-bar2 i{display:block;height:10px;background:var(--gold);border-radius:5px;min-width:1px}.ob-img{max-width:120px;max-height:70px;border-radius:6px;border:1px solid var(--line);margin-top:4px}';
   document.head.appendChild(css);
+  (window.AdminDirty = window.AdminDirty || {})['온보딩 초안'] = function () { return G.dirty; };
   window.addEventListener('beforeunload', function (e) { if (G.dirty) { e.preventDefault(); e.returnValue = ''; } });
 
   /* ── 글자 스타일(문구마다 글씨체·크기·굵기·색) — 공통 도구는 report/hub/onboard-style.js ── */
@@ -46,8 +47,10 @@
 
   /* ── 불러오기·저장·게시 ── */
   function load() {
-    return C.api('/api/onboarding?draft=1').then(function (d) {
+    return Promise.all([C.api('/api/onboarding?draft=1'), C.api('/api/story')]).then(function (data) {
+      var d = data[0]; G.coverStory = data[1].story || {};
       G.cfg = O.merge(O.DEFAULTS, d.config || null); G.version = d.version || ''; G.liveVersion = d.liveVersion || ''; G.hasDraft = !!d.hasDraft; G.srvDirty = !!d.dirty; G.draftAt = d.draftAt || ''; G.liveAt = d.liveAt || ''; G.dirty = false;
+      if (!G.cfg.cover) G.cfg.cover = JSON.parse(JSON.stringify(Object.assign({}, window.OnboardingContent.settings.cover, G.coverStory.settings && G.coverStory.settings.cover || {})));
       if (!G.sel && G.cfg.cases.length) G.sel = G.cfg.cases[0].id;
       if (!G.selTopic && G.cfg.topics.length) G.selTopic = G.cfg.topics[0].id;
       if (!G.selSvc && G.cfg.services.length) G.selSvc = G.cfg.services[0].id;
@@ -56,12 +59,13 @@
   }
   function open(tab, pw, also) {
     C.setPw && C.setPw(pw); PANE = document.getElementById('t-onboard');
-    if (also === 'home') { G.sub = 'landing'; if (G.cfg) return draw(); }
+    if (also === 'home') G.sub = 'landing';
+    if (G.cfg) return draw();
     PANE.innerHTML = '<p class="muted">불러오는 중…</p>'; load().then(draw).catch(function (e) { PANE.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
   function body() {
     var b = G.cfg;
-    return { forceOnboarding: b.forceOnboarding, honorific: b.honorific, weights: b.weights, cases: b.cases, removedCases: b.removedCases || [], intro: b.intro, introLast: b.introLast, bridge: b.bridge,
+    return { cover: b.cover, resultDestination: b.resultDestination, forceOnboarding: b.forceOnboarding, honorific: b.honorific, weights: b.weights, cases: b.cases, removedCases: b.removedCases || [], intro: b.intro, introLast: b.introLast, bridge: b.bridge,
       sections: b.sections, services: b.services, topics: b.topics, progressLabel: b.progressLabel, afterDone: b.afterDone, quest: b.quest, timeline: b.timeline,
       scenes: b.scenes.map(function (s) { return { id: s.id, title: s.title, lines: s.lines, unknownLines: s.unknownLines || [], hint: s.hint, button: s.button, face: s.face, image: s.image || '', bg: s.bg || '', bubble: s.bubble || '', enabled: s.enabled }; }), revealLines: b.revealLines };
   }
@@ -91,7 +95,7 @@
   }
 
   /* ── 화면 틀: 상태 줄 + 전체 흐름 + 하위 메뉴 ── */
-  var SUBS0 = [['landing', '랜딩 첫 화면'], ['cases', '연구 사례·출처'], ['intro', '명리학 소개'], ['service', '서비스 소개'], ['@ext'], ['scenes', '슬라이드 툰(예전)'], ['basic', '호칭·가중치'], ['stats', '통계'], ['publish', '미리보기·게시 관리']];
+  var SUBS0 = [['landing', '랜딩 첫 화면'], ['cases', '연구 사례·출처'], ['intro', '명리학 소개'], ['service', '서비스 소개'], ['@ext'], ['scenes', '기본 입력 (호환)'], ['basic', '호칭·가중치'], ['stats', '통계'], ['publish', '미리보기·게시 관리']];
   var EXT = []; // 확장 하위 메뉴(report/admin/v2-quest.js: 인터랙티브 스토리·에셋·타임라인·운영). {id, label, view(), collect(), flow()}
   function subs() { var o = []; SUBS0.forEach(function (s) { if (s[0] === '@ext') EXT.forEach(function (x) { o.push([x.id, x.label]); }); else o.push(s); }); return o; }
   // 관리 영역을 둘로 나눈다: A 기존 온보딩(연구·명리학·서비스 소개 → 나의 운 확인하기) / B 인터랙티브 스토리(그 버튼 이후). 두 영역은 설정 키가 서로 독립이다(A: cases·sections·intro·services·topics…, B: quest·timeline·scenes).
@@ -100,27 +104,28 @@
   function groupsBar() {
     var all = subs(), pick = function (ids) { return all.filter(function (s) { return ids.indexOf(s[0]) >= 0; }).sort(function (a, b) { return ids.indexOf(a[0]) - ids.indexOf(b[0]); }); };
     var row = function (title, hint, list) { return '<div class="ob-bar"><b class="ob-grp">' + title + '</b><span class="ob-lock">' + hint + '</span>' + list.map(function (s) { return '<button class="ob-chip' + (G.sub === s[0] ? ' on' : '') + '" data-s="' + s[0] + '">' + s[1] + '</button>'; }).join('') + '</div>'; };
-    return row('A. 기존 온보딩', '랜딩 → 연구 사례 → 명리학 소개 → 서비스 소개 → "나의 운 확인하기"', pick(GA)) + row('B. 인터랙티브 스토리', '"나의 운 확인하기" 이후: 부적 오프닝 → 안내자 → 입력 → 계산 → 일주 각성 → 운명의 타임라인', pick(GB)) + row('공통', 'A·B 설정을 함께 게시·복원', pick(['publish']));
+    return row('방문자 흐름', '첫 화면 → 소개 → 입력 → 각성 → 결과', pick(['landing','cases','intro','service','quest','tl'])) + row('운영·게시', '모든 단계는 하나의 초안으로 저장하고 함께 게시합니다', pick(['qops','qassets','basic','stats','publish'])) + row('호환 모드', G.cfg.quest.enabled === false ? '현재 기본 입력 사용 중' : '이전 입력 설정 보존 · 현재 스토리 입력 사용 중', pick(['scenes']));
   }
   function draw() {
     var changed = G.dirty ? '<span class="ob-dirty">● 저장하지 않은 변경이 있습니다</span>' : (G.srvDirty ? '<span class="ob-st warn">초안 ≠ 공개본 — 게시 필요</span>' : '<span class="ob-st ok">공개본과 같음</span>');
     PANE.innerHTML = '<div class="card">' + groupsBar() +
       '<div class="ob-bar"><span id="obState">' + changed + '</span><span class="ob-lock">공개본 ' + esc(G.liveVersion || '(기본 문구)') + ' · 마지막 게시 ' + fmtT(G.liveAt) + ' · 초안 마지막 수정 ' + fmtT(G.draftAt) + '</span><span style="flex:1"></span>' +
-      (G.sub === 'landing' ? '' : '<button id="obSave">초안 저장</button><button id="obPrev" class="ghost">미리보기</button><button id="obPub">게시</button>') + '</div>' +
-      (G.sub === 'landing' ? '<p class="muted" style="margin:0">아래는 방문자가 맨 처음 만나는 첫 화면(/report/ 커버: 등불·안내 캐릭터·문구·버튼)의 편집기입니다. 저장은 아래 편집기의 저장 버튼을 쓰세요. 그 아래로 이어지는 흐름은 위 메뉴에서 편집합니다.</p>' : '<p class="muted" style="margin:0">저장은 "초안"에만 반영됩니다. <b>게시</b>를 눌러야 방문자에게 보입니다. 검증 완료 전 사례는 공개할 수 없습니다.</p>') + '</div>' +
-      (G.sub === 'landing' || !inA(G.sub) ? '' : flowHtml()) + '<div id="obPrevBox"></div><div id="obBody"></div>';
+      '<button id="obSave">초안 저장</button><button id="obPrev" class="ghost">미리보기</button><button id="obPub">게시</button>' + '</div>' +
+      '<p class="muted" style="margin:0">첫 화면부터 결과까지 같은 초안에 저장됩니다. <b>게시</b>를 눌러야 방문자에게 보입니다. 검증 완료 전 사례는 공개할 수 없습니다.</p></div>' + flowHtml() + '<div id="obPrevBox"></div><div id="obBody"></div>';
     $$('[data-s]').forEach(function (b) { b.onclick = function () {
-      collect(); var from = G.sub; G.sub = b.dataset.s;
-      if (G.sub === 'landing') window.AdminShowTab('onboard', 'home'); // 기존 랜딩 첫 화면 편집기를 이 탭 아래에 함께 보인다
-      else if (from === 'landing') window.AdminShowTab('onboard'); // 편집기를 닫고 이 탭만 보인다
-      else draw();
+      collect(); G.sub = b.dataset.s; draw();
     }; });
     if ($('#obSave')) $('#obSave').onclick = save;
     if ($('#obPub')) $('#obPub').onclick = publish;
     if ($('#obPrev')) $('#obPrev').onclick = function () { collect(); G.prev.on = !G.prev.on; if (G.prev.on) G.prev.hash = inA(G.sub) ? '#/welcome' : (G.sub === 'tl' ? '#/timeline' : '#/begin'); drawPrev(); };
     bindFlow(); drawPrev();
-    var view = ({ cases: casesView, intro: introView, service: serviceView, scenes: scenesView, basic: basicView, stats: statsView, publish: publishView })[G.sub], ex = EXT.filter(function (x) { return x.id === G.sub; })[0]; if (view) view(); else if (ex) ex.view(); else $('#obBody').innerHTML = '';
+    var view = ({ landing: landingView, cases: casesView, intro: introView, service: serviceView, scenes: scenesView, basic: basicView, stats: statsView, publish: publishView })[G.sub], ex = EXT.filter(function (x) { return x.id === G.sub; })[0]; if (view) view(); else if (ex) ex.view(); else $('#obBody').innerHTML = '';
     if (!PANE._obDirty) { PANE._obDirty = true; PANE.addEventListener('input', onEdit); PANE.addEventListener('change', onEdit); } // 편집기·흐름 카드·목록 어디서든 입력이 바뀌면 "저장 안 됨" 표시
+  }
+  function landingView() {
+    var c = G.cfg.cover;
+    $('#obBody').innerHTML = '<div class="card"><h3>첫 화면 · 커버</h3><form id="obCover" onsubmit="return false">' + chk('show', c.show !== false, '첫 화면 표시') + ['title','sub','button','hint','src','bgSrc','alt'].map(function (k) { var labels = {title:'제목',sub:'설명',button:'버튼 문구',hint:'안내 문구',src:'대표 이미지',bgSrc:'배경 이미지',alt:'이미지 설명'}; return '<label class="ob-f">' + labels[k] + '<textarea name="' + k + '">' + esc(c[k] || '') + '</textarea>' + (k === 'src' || k === 'bgSrc' ? '<input type="file" data-up="' + k + '" accept="image/*">' : '') + '</label>'; }).join('') + '<p class="ob-lock">기존 캐릭터 배치·글자 스타일·연출 설정은 보존됩니다. 첫 화면도 상단의 초안 저장·미리보기·게시를 사용합니다.</p></form></div>';
+    bindUploads($('#obCover'), 'onb-cover-');
   }
   function onEdit(e) { if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) && e.target.closest('form, #obReveal')) markDirty(); else if (e.target && e.target.id === 'obReveal') markDirty(); }
   function markDirty() { G.dirty = true; var s = $('#obState'); if (s) s.innerHTML = '<span class="ob-dirty">● 저장하지 않은 변경이 있습니다</span>'; }
@@ -142,12 +147,13 @@
         (s.type !== 'final' ? '<label class="ob-ck ob-f" style="margin:0"><input type="checkbox" data-en="' + esc(s.id) + '"' + (s.enabled !== false ? ' checked' : '') + '> 표시</label>' : '') + '</div>';
     }).join('<span class="ob-arrow">→</span>');
     return '<div class="card"><h3 style="font-size:.95rem;margin:0">전체 흐름 <span class="ob-lock">· 카드를 끌어서 순서를 바꾸고, 체크로 표시를 켜고 끕니다. 카드를 누르면 아래 편집기에서 문구·연출을 고칩니다.</span></h3>' +
-      '<div class="ob-flow"><div class="ob-node fixed"><b>0. 첫 화면</b><span>등불·캐릭터·메인 카피</span><span class="ob-st ok">고정</span><small class="ob-lock">"랜딩 첫 화면" 메뉴</small></div><span class="ob-arrow">→</span>' + nodes +
-      '<span class="ob-arrow">→</span><div class="ob-node fixed"><b>슬라이드 툰</b><span>' + (c.quest && c.quest.enabled !== false ? '인터랙티브 스토리' : '출생정보 6장면') + '</span><span class="ob-st ' + (c.quest && c.quest.enabled !== false ? 'ok' : 'warn') + '">' + (c.quest && c.quest.enabled !== false ? '켜짐' : '예전 방식') + '</span></div><span class="ob-arrow">→</span><div class="ob-node fixed"><b>일주 각성</b><span>일간·일주·영상</span><span class="ob-st ok">고정</span></div><span class="ob-arrow">→</span><div class="ob-node fixed"><b>운명의 타임라인</b><span>' + (c.timeline && c.timeline.enabled === false ? '숨김' : '4개 영역') + '</span><span class="ob-st ' + (c.timeline && c.timeline.enabled === false ? 'off' : 'ok') + '">' + (c.timeline && c.timeline.enabled === false ? '꺼짐' : '켜짐') + '</span></div><span class="ob-arrow">→</span><div class="ob-node fixed"><b>개인화 홈</b><span>기질·흐름·일주</span><span class="ob-st ok">고정</span></div></div>' +
+      '<div class="ob-flow"><div class="ob-node fixed" data-stage="landing"><b>0. 첫 화면</b><span>등불·캐릭터·메인 카피</span><span class="ob-st ok">고정</span><small class="ob-lock">"랜딩 첫 화면" 메뉴</small></div><span class="ob-arrow">→</span>' + nodes +
+      window.Quest.flow(c).filter(function (n) { return ['input','awakening','result'].indexOf(n.id) >= 0; }).map(function (n) { return '<span class="ob-arrow">→</span><div class="ob-node fixed" data-stage="' + n.editor + '"><b>' + esc(n.label) + '</b><span class="ob-lock">클릭하여 편집</span></div>'; }).join('') + '</div>' +
       '<div class="ob-bar"><button class="ghost" id="obSecAdd">+ 섹션 추가</button><span class="ob-lock">섹션 상세 편집은 ' + (G.sub === 'cases' || G.sub === 'intro' || G.sub === 'service' ? '아래 "미리보기·게시 관리" 메뉴 또는 이 카드를 눌러 열 수 있습니다' : '카드를 눌러 엽니다') + '</span></div><div id="obSecEd"></div></div>';
   }
   function bindFlow() {
     var c = G.cfg, drag = null;
+    $$('[data-stage]').forEach(function (n) { n.onclick = function () { collect(); G.sub = n.dataset.stage; draw(); }; });
     $$('.ob-node[data-sec]').forEach(function (n) {
       n.addEventListener('click', function (e) { if (e.target.closest('input')) return; collect(); G.selSec = n.dataset.sec; secEditor(); $$('.ob-node[data-sec]').forEach(function (x) { x.classList.toggle('on', x === n); }); });
       n.addEventListener('dragstart', function (e) { drag = n.dataset.sec; try { e.dataTransfer.setData('text/plain', drag); e.dataTransfer.effectAllowed = 'move'; } catch (x) { } });
@@ -159,7 +165,7 @@
         var j = c.sections.map(function (s) { return s.id; }).indexOf(n.dataset.sec); c.sections.splice(j + (i <= j ? 1 : 0), 0, a); G.dirty = true; draw();
       });
     });
-    $$('[data-en]').forEach(function (b) { b.onchange = function () { var s = c.sections.filter(function (x) { return x.id === b.dataset.en; })[0]; if (s) { s.enabled = b.checked; G.dirty = true; draw(); } }; });
+    $$('[data-en]').forEach(function (b) { b.onchange = function () { var s = c.sections.filter(function (x) { return x.id === b.dataset.en; })[0]; if (s) { collect(); s.enabled = b.checked; G.dirty = true; draw(); } }; });
     var add = $('#obSecAdd'); if (add) add.onclick = function () {
       var t = prompt('추가할 섹션 종류를 입력하세요: research(연구 카드) · myeongri(명리학) · service(서비스 소개) · story(연구→유명인 후킹)', 'service'); if (!t || O.SECTION_TYPES.indexOf(t) < 0 || t === 'final') return;
       var base = JSON.parse(JSON.stringify(O.SECTIONS.filter(function (s) { return s.type === t; })[0])); base.id = uid(t).slice(0, 30).toLowerCase(); base.enabled = true; collect();
@@ -196,8 +202,8 @@
     var box = $('#obPrevBox'); if (!box) return;
     if (!G.prev.on) { box.innerHTML = ''; return; }
     box.innerHTML = '<div class="ob-prevbox' + (G.prev.dev === 'mob' ? ' mob' : '') + '"><div class="ob-bar" style="justify-content:center"><button class="ob-chip' + (G.prev.dev === 'pc' ? ' on' : '') + '" data-pd="pc">PC</button><button class="ob-chip' + (G.prev.dev === 'mob' ? ' on' : '') + '" data-pd="mob">모바일</button><button class="ghost" id="obPrevRe">현재 편집 내용으로 새로고침</button><button class="ghost" id="obPrevX">닫기</button></div>' +
-      '<iframe id="obPrevFrame" title="랜딩 흐름 미리보기" src="/report/hub/?preview=1' + (G.prev.hash || '#/welcome') + '"></iframe><p class="ob-lock">저장하지 않은 편집 내용까지 반영한 모습입니다. <b>섹션을 누르면 위쪽에 그 섹션의 편집 입력란이 열립니다</b>(점선 테두리가 누를 수 있는 영역). 검증 완료 + 공개로 설정한 사례만 보입니다. 통계에는 집계되지 않습니다.</p></div>';
-    var push = function () { collect(); var f = $('#obPrevFrame'); if (f && f.contentWindow) f.contentWindow.postMessage({ t: 'mt-onb-preview', config: body() }, location.origin); };
+      '<iframe id="obPrevFrame" title="랜딩 흐름 미리보기" src="' + (G.sub === 'landing' ? '/report/?preview=1' : '/report/hub/?preview=1' + (G.prev.hash || '#/welcome')) + '"></iframe><p class="ob-lock">저장하지 않은 편집 내용까지 반영한 모습입니다. <b>섹션을 누르면 위쪽에 그 섹션의 편집 입력란이 열립니다</b>(점선 테두리가 누를 수 있는 영역). 검증 완료 + 공개로 설정한 사례만 보입니다. 통계에는 집계되지 않습니다.</p></div>';
+    var push = function () { collect(); var f = $('#obPrevFrame'); if (f && f.contentWindow) f.contentWindow.postMessage(G.sub === 'landing' ? { t: 'st-content', story: { settings: Object.assign({}, window.OnboardingContent.settings, G.coverStory.settings || {}, { cover: G.cfg.cover }), blocks: [] } } : { t: 'mt-onb-preview', config: body() }, location.origin); };
     if (prevListener) window.removeEventListener('message', prevListener);
     var flash = function (el) { if (!el) return; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.transition = 'box-shadow .3s'; el.style.boxShadow = '0 0 0 2px #e0b36a'; setTimeout(function () { el.style.boxShadow = ''; }, 1600); var f = el.querySelector('input[type=text],textarea'); if (f) { try { f.focus({ preventScroll: true }); } catch (x) { } } };
     var pick = function (d) { // 미리보기에서 누른 섹션·소개 장면의 편집 입력란을 연다
@@ -209,8 +215,15 @@
     };
     prevListener = function (e) {
       if (e.origin !== location.origin || !e.data) return;
-      if (e.data.t === 'mt-onb-ready') push();
-      else if (e.data.t === 'mt-onb-select') { var fr = $('#obPrevFrame'); if (fr && e.source === fr.contentWindow) pick({ intro: String(e.data.intro || ''), sec: String(e.data.sec || '') }); }
+      var frame = $('#obPrevFrame'); if (!frame || e.source !== frame.contentWindow) return;
+      if (e.data.t === 'mt-onb-ready' || e.data.t === 'st-ready') push();
+      else if (G.sub === 'landing' && e.data.t === 'st-char') {
+        var ch = (G.cfg.cover.chars || [])[+e.data.i], suffix = e.data.m ? 'M' : '';
+        if (ch) { ['x','y','size'].forEach(function (k) { if (Number.isFinite(e.data[k])) ch[k + suffix] = e.data[k]; }); markDirty(); }
+      } else if (G.sub === 'landing' && e.data.t === 'st-text') {
+        var names = {title:'title',sub:'sub',button:'button'}, name = names[e.data.n], suffix = e.data.m ? 'M' : '';
+        if (name) { if (Number.isFinite(e.data.x)) G.cfg.cover[name + 'X' + suffix] = e.data.x; if (Number.isFinite(e.data.y)) G.cfg.cover[name + 'Y' + suffix] = e.data.y; markDirty(); }
+      } else if (e.data.t === 'mt-onb-select') { var fr = $('#obPrevFrame'); if (fr && e.source === fr.contentWindow) pick({ intro: String(e.data.intro || ''), sec: String(e.data.sec || '') }); }
     };
     window.addEventListener('message', prevListener);
     $$('[data-pd]', box).forEach(function (b) { b.onclick = function () { G.prev.dev = b.dataset.pd; drawPrev(); }; });
@@ -222,6 +235,7 @@
     if (!G.cfg || !$('#obBody')) return;
     EXT.forEach(function (x) { if (x.id === G.sub && x.collect) x.collect(); });
     var cfg = G.cfg, v;
+    var coverForm = $('#obCover'); if (coverForm) { ['title','sub','button','hint','src','bgSrc','alt'].forEach(function (k) { cfg.cover[k] = coverForm.elements[k].value; }); cfg.cover.show = coverForm.elements.show.checked; }
     var sf = $('#obSec'); if (sf) { var s = cfg.sections.filter(function (x) { return x.id === G.selSec; })[0]; if (s) { v = function (n) { return sf.elements[n] ? sf.elements[n].value : ''; };
       s.kicker = v('kicker').trim(); s.effect = v('effect'); s.title = v('title').trim(); s.sub = v('sub').trim(); s.notice = v('notice').trim(); s.bridge = v('bridge').trim(); s.bg = v('bg').trim(); s.bgMobile = v('bgMobile').trim(); s.art = v('art').trim(); s.artVideo = v('artVideo').trim(); s.cta = { show: sf.elements.ctaShow.checked, text: v('cta').trim(), to: v('ctaTo') === 'quick' ? 'quick' : 'story' }; if (sf.elements.topics) s.topics = sf.elements.topics.checked; s.sty = readSty(sf, secRoles(s)); } }
     if (G.sub === 'cases' && G.sel) {
@@ -250,7 +264,7 @@
     if (G.sub === 'scenes') {
       cfg.scenes.forEach(function (s, i) { var f = $('#obS' + i); if (!f) return; var g = function (n) { return f.elements[n].value; }; s.title = g('title').trim(); s.lines = lines(g('lines')); s.unknownLines = f.elements.unk ? lines(g('unk')) : s.unknownLines; s.hint = g('hint').trim(); s.button = g('button').trim() || '다음'; s.face = g('face'); s.image = g('image').trim(); s.bg = g('bg').trim(); s.bubble = g('bubble'); s.enabled = REQ.indexOf(s.field) >= 0 ? true : f.elements.enabled.checked; });
       var r = $('#obReveal'); if (r) cfg.revealLines = lines(r.value);
-      var sm = $('#obSceneMeta'); if (sm) { cfg.progressLabel = sm.elements.progress.value.trim() || '{n} / {total} · {title}'; cfg.afterDone = sm.elements.after.value === 'home' ? 'home' : 'reveal'; }
+      var sm = $('#obSceneMeta'); if (sm) { cfg.progressLabel = sm.elements.progress.value.trim() || '{n} / {total} · {title}';  }
     }
     if (G.sub === 'basic') { var b = $('#obBasic'); if (b) { var h = b.elements.honorific.value.trim(); cfg.honorific = O.honorific({ honorific: h }); cfg.forceOnboarding = !!b.elements.force.checked; cfg.bridge = { toCelebrity: b.elements.bc.value.trim(), toIntro: b.elements.bi.value.trim() }; cfg.weights = { research: +b.elements.wr.value || 0, celebrity: +b.elements.wc.value || 0 }; if (cfg.weights.research + cfg.weights.celebrity <= 0) cfg.weights = { research: 60, celebrity: 40 }; } }
   }
@@ -436,7 +450,7 @@
     var cfg = G.cfg, FACES = O.FACES, fo = function (cur) { return Object.keys(FACES).map(function (k) { return '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' + FACES[k] + '</option>'; }).join(''); };
     var BUB = { '': '기본', glass: '반투명', ink: '먹빛(진하게)' };
     $('#obBody').innerHTML = '<div class="card"><form id="obSceneMeta" onsubmit="return false"><div class="ob-g2"><label class="ob-f">진행률 문구 ({n} 현재 단계 · {total} 전체 · {title} 장면 제목)<input type="text" name="progress" value="' + esc(cfg.progressLabel || '{n} / {total} · {title}') + '"></label>' +
-      '<label class="ob-f">입력을 마친 뒤 이동<select name="after">' + sel({ reveal: '일간·일주 공개 화면 → 홈', home: '바로 개인화 홈' }, cfg.afterDone === 'home' ? 'home' : 'reveal') + '</select></label></div></form></div>' +
+      '<p class="ob-lock">완료 후 이동은 흐름·운영 설정에서 공통으로 관리합니다. 현재: ' + esc(window.Quest.destination(cfg) === 'home' ? '개인화 홈' : '운명의 타임라인') + '</p></div></form></div>' +
       cfg.scenes.map(function (s, i) {
         var req = REQ.indexOf(s.field) >= 0;
         return '<div class="card"><h3 style="font-size:1rem">' + (i + 1) + '. ' + esc(s.title) + ' <span class="ob-lock">입력: ' + esc(s.field) + (req ? ' · 필수(끌 수 없음, 계산 연결 고정)' : '') + '</span></h3><form id="obS' + i + '" onsubmit="return false">' +

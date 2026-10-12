@@ -7,6 +7,12 @@
   var PANE = null; // 기존 관리자와 id 가 겹치지 않도록(eTitle·ePri 등) 검색 범위를 현재 패널로 제한한다
   var $ = function (s, e) { return (e || PANE || document).querySelector(s); }, $$ = function (s, e) { return [].slice.call((e || PANE || document).querySelectorAll(s)); };
   var G = { meta: null, items: null, stats: null, f: { q: '', domain: '', status: '', reviewed: '', conf: '', open: '' }, covOpen: '', design: null, dDomain: 'MONEY', lab: null, labTab: 'final', focus: null, ack: {} };
+  var unsaved = { design:false, rules:false, know:false, modal:false };
+  var dirtyRegistry = (window.AdminDirty = window.AdminDirty || {});
+  dirtyRegistry['풀이 구성'] = function () { return unsaved.design; };
+  dirtyRegistry['AI·서비스 연결'] = function () { return unsaved.rules; };
+  dirtyRegistry['풀이 지식 편집'] = function () { return unsaved.know || unsaved.modal; };
+  function watch(box, key) { if (!box._ikScope) { box._ikScope = true; ['pointerdown','input','change'].forEach(function (t) { box.addEventListener(t, function () { PANE = box; }, true); }); } box.oninput = box.onchange = function (e) { if (e.target.matches('input,textarea,select')) unsaved[key] = true; }; }
   var DOM_ORDER = ['SELF', 'MONEY', 'CAREER', 'LOVE', 'MARRIAGE', 'RELATIONSHIP', 'TIMING', 'ACTION'];
   var dko = function (d) { return (G.meta && G.meta.domains[d]) || d; };
   var STATUS_KO = { draft: '임시저장', review: '검수 필요', approved: '검수 완료(비공개)', published: '공개 중', archived: '보관' };
@@ -139,7 +145,7 @@
   // 다른 탭에서 풀이 지식 탭으로 넘어가 바로 무언가를 열 때(풀이 테스트 → 풀이 만들기 등): 목록이 그려진 뒤에 실행한다
   function goKnow(fn) { G.after = fn; window.AdminShowTab('ikknow'); }
   function knowOpen() {
-    var box = document.getElementById('t-ikknow'); box.innerHTML = '<p class="muted">불러오는 중…</p>'; PANE = box;
+    var box = document.getElementById('t-ikknow'); PANE = box; if (unsaved.know && box.querySelector('#wDraft')) return; box.innerHTML = '<p class="muted">불러오는 중…</p>'; PANE = box;
     Promise.all([G.meta ? 0 : loadMeta(), loadItems()]).then(function () { drawList(); if (G.after) { var f = G.after; G.after = null; f(); } }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
   function covPanel() {
@@ -232,13 +238,13 @@
   function sectionList(domain) { var dz = (G.design[domain] && G.design[domain].sections && G.design[domain].sections.length) ? G.design[domain] : G.meta.defaultDesign[domain]; return dz.sections; }
   function wizard(host, it, isNew, done) {
     var base = blank(it.domain || 'MONEY', ''); Object.keys(base).forEach(function (k) { if (it[k] === undefined || it[k] === null) it[k] = base[k]; }); it.realWorldExamples = Object.assign({}, base.realWorldExamples, it.realWorldExamples); // 다른 화면(풀이 자료 검수 등)에서 온 초안에 빠진 칸을 채운다
-    var step = 0, seen = {}, inModal = !!done;
+    var step = 0, seen = {}, inModal = !!done, original = clone(it);
     function draw() {
       host.innerHTML = (inModal ? '' : '<div class="ik-bar"><button id="wBack">← ' + (isNew ? '목록' : '상세') + '</button><b style="color:var(--gold)">' + (isNew ? '새 풀이 추가' : '풀이 수정') + '</b>' + (it.sourceType === 'AI_DRAFT' && !it.reviewed ? ' <span class="ik-st ik-ai">AI 초안 — 검수 전</span>' : '') + '</div>') +
         '<div class="ik-steps">' + STEPS.map(function (s, i) { return '<button type="button" data-s="' + i + '" class="' + (i === step ? 'on' : seen[i] ? 'done' : '') + '">' + s + '</button>'; }).join('') + '</div><div class="card" id="wBody"></div>' +
         '<div class="ik-foot">' + (step > 0 ? '<button id="wPrev">← 이전</button>' : '') + (step < 3 ? '<button id="wNext" class="pri">다음 →</button>' : '') + '<span style="flex:1"></span><button id="wDraft">임시저장</button>' + (inModal ? '' : '<button id="wTest">풀이 테스트</button>') + (step === 3 ? '<button id="wPub" class="pri">저장하고 공개</button>' : '') + '<span class="muted" id="wMsg"></span></div>';
-      seen[step] = 1; body(); $$('[data-s]', host).forEach(function (b) { b.onclick = function () { step = +b.dataset.s; draw(); }; });
-      var bk = $('#wBack', host); if (bk) bk.onclick = function () { if (isNew) knowOpen(); else detailView(host, it); };
+      seen[step] = 1; body(); watch(host, inModal ? 'modal' : 'know'); $$('[data-s]', host).forEach(function (b) { b.onclick = function () { step = +b.dataset.s; draw(); }; });
+      var bk = $('#wBack', host); if (bk) { bk.textContent = '변경 취소 · ' + (isNew ? '목록' : '상세'); bk.onclick = function () { unsaved.know = false; if (isNew) knowOpen(); else detailView(host, original); }; }
       var pv = $('#wPrev', host); if (pv) pv.onclick = function () { step--; draw(); }; var nx = $('#wNext', host); if (nx) nx.onclick = function () { step++; draw(); };
       $('#wDraft', host).onclick = function () { save(false); }; var pb = $('#wPub', host); if (pb) pb.onclick = function () { save(true); };
       var tb = $('#wTest', host); if (tb) tb.onclick = function () { clean(); G.focus = { item: clone(it) }; window.AdminShowTab('iklab'); };
@@ -296,9 +302,9 @@
       clean(); if (!it.title.trim()) { step = 0; draw(); return toast('풀이 이름을 입력하세요', true); }
       if (pub) { if (!it.reviewed) { step = 3; draw(); return toast('공개하려면 “검수 완료”를 체크하세요 — 검수 전 풀이는 서비스에 쓰이지 않습니다', true); } it.status = 'published'; }
       else if (it.status === 'published') it.status = it.reviewed ? 'approved' : 'draft'; // 임시저장은 공개 상태를 내린다(수정 중인 내용이 서비스에 나가지 않도록)
-      var m = $('#wMsg', host); if (m) m.textContent = '저장 중…';
-      post('save', { item: it, isNew: isNew, expectVersion: it.version }).then(function (d) {
-        if (pub && d.item.status !== 'published') toast('저장은 했지만 공개되지 않았습니다 — 문장 안의 {…} 자리표시자 중 채울 수 없는 것이 있습니다. 지우거나 풀어 쓴 뒤 다시 공개하세요', true); else toast('저장했습니다 · ' + (d.item.status === 'published' ? '공개 중' : d.item.status === 'approved' ? '비공개(검수 완료)' : STATUS_KO[d.item.status])); G.meta.meta = d.meta;
+      unsaved[inModal ? 'modal' : 'know'] = true; var m = $('#wMsg', host); if (m) m.textContent = '저장 중…';
+      C.withBusy(host, function () { return post('save', { item: it, isNew: isNew, expectVersion: it.version }); }).then(function (d) {
+        if (pub && d.item.status !== 'published') toast('저장은 했지만 공개되지 않았습니다 — 문장 안의 {…} 자리표시자 중 채울 수 없는 것이 있습니다. 지우거나 풀어 쓴 뒤 다시 공개하세요', true); else toast('저장했습니다 · ' + (d.item.status === 'published' ? '공개 중' : d.item.status === 'approved' ? '비공개(검수 완료)' : STATUS_KO[d.item.status])); G.meta.meta = d.meta; unsaved[inModal ? 'modal' : 'know'] = false;
         return loadItems().then(function () { if (done) done(d.item); else detailView(host, d.item); });
       }).catch(function (e) { if (m) m.textContent = ''; toast(e.message, true); });
     }
@@ -324,10 +330,10 @@
   /* ═════ ② 풀이 구성 ═════ */
   var ANALYSIS = ['일간 강약', '통근', '조후', '십성', '재성', '식상', '비겁', '관성', '인성', '신살', '합충', '용신', '대운', '세운', '월운'];
   function designOpen() {
-    var box = document.getElementById('t-ikdesign'); box.innerHTML = '<p class="muted">불러오는 중…</p>'; PANE = box;
+    var box = document.getElementById('t-ikdesign'); PANE = box; if (unsaved.design && box.querySelector('#dzSave')) return; box.innerHTML = '<p class="muted">불러오는 중…</p>'; PANE = box;
     Promise.all([G.meta ? 0 : loadMeta(), loadItems()]).then(drawDesign).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
-  function curDesign(d) { if (!G.design[d] || !G.design[d].sections || !G.design[d].sections.length) G.design[d] = clone(G.meta.defaultDesign[d]); return G.design[d]; }
+  function curDesign(d) { if (!G.design[d] || !G.design[d].sections || !G.design[d].sections.length) unsaved.design = true; G.design[d] = clone(G.meta.defaultDesign[d]); return G.design[d]; }
   function drawDesign() {
     var box = document.getElementById('t-ikdesign'), d = G.dDomain, dz = curDesign(d), drag = null, cov = G.stats.coverage[d]; PANE = box;
     var count = function (sid) { return G.items.filter(function (x) { return x.domain === d && x.subDomain === sid && x.status === 'published' && x.reviewed; }).length; };
@@ -342,40 +348,42 @@
       $('#dzList', box).innerHTML = dz.sections.map(function (s, i) { var n = count(s.id), pend = G.items.filter(function (x) { return x.domain === d && x.subDomain === s.id && x.status !== 'archived' && !(x.status === 'published' && x.reviewed); }).length; return '<div class="ik-dz' + (s.enabled === false ? ' off' : '') + '" draggable="true" data-i="' + i + '"><span class="gr">⠿</span><span class="muted">' + (i + 1) + '</span><span><input type="text" data-t value="' + esc(s.title) + '" style="width:100%"></span><span style="font-size:.78rem">공개 <b style="color:' + (n ? 'var(--green)' : 'var(--red)') + '">' + n + '</b>' + (pend ? ' · 검수 필요 ' + pend : '') + (n ? '' : ' <button type="button" data-new="' + s.id + '" style="padding:0 8px;font-size:.74rem">+ 풀이</button>') + '</span>' +
         '<label class="chk2"><input type="checkbox" data-en' + (s.enabled !== false ? ' checked' : '') + ' style="width:auto"> 사용</label><label class="chk2"><input type="checkbox" data-rq' + (s.required !== false ? ' checked' : '') + ' style="width:auto"> 필수</label><button type="button" data-x>삭제</button></div>'; }).join('');
       $$('.ik-dz', box).forEach(function (el) { var s = dz.sections[+el.dataset.i];
-        $('[data-t]', el).oninput = function () { s.title = this.value; }; $('[data-en]', el).onchange = function () { s.enabled = this.checked; el.classList.toggle('off', !this.checked); }; $('[data-rq]', el).onchange = function () { s.required = this.checked; }; $('[data-x]', el).onclick = function () { dz.sections.splice(+el.dataset.i, 1); list(); };
+        $('[data-t]', el).oninput = function () { s.title = this.value; }; $('[data-en]', el).onchange = function () { s.enabled = this.checked; el.classList.toggle('off', !this.checked); }; $('[data-rq]', el).onchange = function () { s.required = this.checked; }; $('[data-x]', el).onclick = function () { unsaved.design = true; dz.sections.splice(+el.dataset.i, 1); list(); };
         var nw = $('[data-new]', el); if (nw) nw.onclick = function () { goKnow(function () { startNew(d, nw.dataset.new); }); };
         el.ondragstart = function (e) { drag = +el.dataset.i; e.dataTransfer.effectAllowed = 'move'; }; el.ondragover = function (e) { e.preventDefault(); el.classList.add('over'); }; el.ondragleave = function () { el.classList.remove('over'); };
-        el.ondrop = function (e) { e.preventDefault(); var to = +el.dataset.i; if (drag == null || drag === to) return; var m = dz.sections.splice(drag, 1)[0]; dz.sections.splice(to, 0, m); drag = null; list(); };
+        el.ondrop = function (e) { e.preventDefault(); var to = +el.dataset.i; if (drag == null || drag === to) return; unsaved.design = true; var m = dz.sections.splice(drag, 1)[0]; dz.sections.splice(to, 0, m); drag = null; list(); };
       });
     }
     list();
-    $('#dzAdd', box).onclick = function () { var t = prompt('새 분석 항목의 이름 (예: 부수입, 사업 확장 시기)'); if (!t) return; var id = 'x' + Date.now().toString(36); dz.sections.push({ id: id, title: t, enabled: true, required: false }); list(); toast('항목을 추가했습니다 — 저장한 뒤 풀이 지식의 “세부 항목”에서 이 항목을 고르면 연결됩니다'); };
+    watch(box, 'design');
+    $('#dzAdd', box).onclick = function () { var t = prompt('새 분석 항목의 이름 (예: 부수입, 사업 확장 시기)'); if (!t) return; var id = 'x' + Date.now().toString(36); unsaved.design = true; dz.sections.push({ id: id, title: t, enabled: true, required: false }); list(); toast('항목을 추가했습니다 — 저장한 뒤 풀이 지식의 “세부 항목”에서 이 항목을 고르면 연결됩니다'); };
     if (window.V2Src && window.V2Src.mountBanner) window.V2Src.mountBanner(box, 'ikdesign');
     $('#dzReset', box).onclick = function () { if (!confirm(dko(d) + ' 구성을 기본값으로 되돌릴까요? (저장 전까지는 화면에서만 바뀝니다)')) return; G.design[d] = clone(G.meta.defaultDesign[d]); drawDesign(); };
-    $('#dzSave', box).onclick = function () { post('design', { design: G.design }).then(function (r) { G.design = clone(r.design); G.meta.meta = r.meta; toast('풀이 구성을 저장했습니다'); return loadItems().then(drawDesign); }).catch(function (e) { toast(e.message, true); }); };
+    $('#dzSave', box).onclick = function () { C.withBusy(box, function () { return post('design', { design: G.design }); }).then(function (r) { G.design = clone(r.design); G.meta.design = clone(r.design); unsaved.design = false; G.meta.meta = r.meta; toast('풀이 구성을 저장했습니다'); return loadItems().then(drawDesign); }).catch(function (e) { toast(e.message, true); }); };
   }
 
   /* ═════ ③ AI 작성 설정 ═════ */
-  function rulesOpen() { var box = document.getElementById('t-ikrules'); box.innerHTML = '<p class="muted">불러오는 중…</p>'; PANE = box; (G.meta ? Promise.resolve() : loadMeta()).then(drawRules).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
+  function rulesOpen() { var box = document.getElementById('t-ikrules'); PANE = box; if (unsaved.rules && box.querySelector('#rSave')) return; box.innerHTML = '<p class="muted">불러오는 중…</p>'; PANE = box; (G.meta ? Promise.resolve() : loadMeta()).then(drawRules).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
   function drawRules() {
     var box = document.getElementById('t-ikrules'), r = clone(G.meta.rules), cap = { brief: '항목 7개 이내 · 항목당 풀이 1개', standard: '항목 12개 이내 · 항목당 풀이 2개', detailed: '항목 18개 이내 · 항목당 풀이 4개', max: '근거가 있는 모든 항목 · 항목당 풀이 6개' }; PANE = box;
     var radio = function (name, opts, cur) { return '<div class="ik-radio">' + opts.map(function (o) { return '<label><input type="radio" name="' + name + '" value="' + o[0] + '"' + (String(o[0]) === String(cur) ? ' checked' : '') + '>' + o[1] + '</label>'; }).join('') + '</div>'; };
     box.innerHTML = '<div class="card"><p class="muted" style="margin:0">AI는 이미 계산·검색·판정된 풀이를 “쉽고 풍부한 말로 옮겨 쓰는” 역할만 합니다. 여기서 문체와 깊이를 조절하세요. AI 키가 없어도 같은 설정으로 규칙 기반 문장이 만들어집니다.</p>' +
-      '<div class="ik-sec">풀이 스타일</div>' + radio('tone', [['easy', '쉬운 말(현실형)'], ['story', '이야기하듯'], ['pro', '전문적인 말']], r.tone) +
+      '<div class="ik-sec">설명 방식</div>' + radio('tone', [['easy', '쉬운 말(현실형)'], ['story', '이야기하듯'], ['pro', '전문적인 말']], r.tone) +
       '<div class="ik-sec">풀이 깊이<small>글자 수가 아니라 “몇 개 항목을, 항목마다 풀이 몇 개로” 쓰는지가 달라집니다.</small></div><div class="ik-radio">' + ['brief', 'standard', 'detailed', 'max'].map(function (k) { return '<label><input type="radio" name="depth" value="' + k + '"' + (r.depth === k ? ' checked' : '') + '><b>' + ({ brief: '간단', standard: '기본', detailed: '상세', max: '매우 상세' })[k] + '</b> <small class="muted">' + cap[k] + '</small></label>'; }).join('') + '</div>' +
       '<div class="ik-sec">현실 사례</div>' + radio('ex', [[0, '쓰지 않음'], [1, '1개'], [2, '2개'], [3, '3개']], r.examples) + '<div class="ik-sec">전문용어</div>' + radio('jargon', [['min', '적게(쉬운 말로 풀어서)'], ['normal', '보통'], ['rich', '상세하게']], r.jargon) +
       '<div class="ik-sec">그 밖의 설정</div><label class="ik-radio"><span><input type="checkbox" id="rBal" style="width:auto"' + (r.balance ? ' checked' : '') + '> 장점과 주의점을 균형 있게</span></label><label class="ik-radio"><span><input type="checkbox" id="rAct" style="width:auto"' + (r.actions ? ' checked' : '') + '> 행동 조언 사용</span></label><label class="ik-radio"><span><input type="checkbox" id="rEv" style="width:auto"' + (r.showEvidence ? ' checked' : '') + '> 명리 근거를 상세 리포트에 표시</span></label>' +
       '<label class="ik-radio"><span><input type="checkbox" id="rSvc" style="width:auto"' + (r.serviceEnabled ? ' checked' : '') + '> <b>서비스(무빙툰·상세 리포트)에 풀이 지식 심화 풀이 포함</b> <small class="muted">— 끄면 공개된 풀이 지식이 있어도 사용자에게 나가지 않습니다</small></span></label>' +
-      '<label class="ik-radio"><span><input type="checkbox" id="rSvcAi" style="width:auto"' + (r.serviceAi ? ' checked' : '') + '> <b>추가 DB 심화 챕터를 AI가 엮기</b> <small class="muted">— 전체 무빙툰 본문은 별도로 원국과 검수된 DB 근거를 함께 읽어 AI가 새로 풀이합니다. 이 옵션을 켜면 추가 "더 깊이" 챕터의 풀이 지식 문장을 AI가 이 사람의 사주에 맞게 자연스럽게 다듬습니다(근거 풀이 지식 밖의 내용은 쓰지 못합니다). 같은 사주는 30일간 저장본을 재사용하고, 첫 방문은 최대 12초만 기다린 뒤 DB 문장으로 보여 줍니다. 하루 AI 호출 상한 기본 300회.</small></span></label>' +
+      '<label class="ik-radio"><span><input type="checkbox" id="rSvcAi" style="width:auto"' + (r.serviceAi ? ' checked' : '') + '> <b>추가 DB 심화 챕터를 AI가 엮기</b> <small class="muted">— 기본 챕터는 선택된 해석 모듈을 AI 편집기가 다듬습니다. 표현 강도는 풀이 문체 설정을 함께 사용합니다. 이 옵션을 켜면 추가 "더 깊이" 챕터의 풀이 지식 문장을 AI가 이 사람의 사주에 맞게 자연스럽게 다듬습니다(근거 풀이 지식 밖의 내용은 쓰지 못합니다). 같은 사주는 30일간 저장본을 재사용하고, 첫 방문은 최대 12초만 기다린 뒤 DB 문장으로 보여 줍니다. 하루 AI 호출 상한 기본 300회.</small></span></label>' +
       '<label class="ik-radio"><span><input type="checkbox" id="rSvcBody" style="width:auto"' + (r.serviceBody ? ' checked' : '') + '> <b>무빙툰 본문을 풀이 지식 DB 풀이로 대체</b> <small class="muted">— 켜면 DB 풀이가 충분한 분야(구성 항목 2개 이상 채워짐)는 기존 모듈 문장 챕터 대신 DB 풀이가 본문이 됩니다. DB가 부족한 분야는 기존 문장이 그대로 나옵니다. 끄면 "더 깊이" 챕터로만 덧붙습니다.</small></span></label>' +
       '<div class="ik-sec">분야별 추가 지시<small>해당 분야 풀이를 쓸 때만 AI 지시문에 덧붙습니다</small></div>' + DOM_ORDER.map(function (d) { return '<label class="ik-f"><b style="color:var(--ink)">' + esc(dko(d)) + '</b><textarea data-ov="' + d + '" rows="2" placeholder="예: 수입 증가와 돈이 남는 것을 구분한다.">' + esc((r.domainOverrides || {})[d] || '') + '</textarea></label>'; }).join('') +
       '<details style="margin-top:14px"><summary class="muted">고급 설정</summary><label class="ik-f">금지어(쉼표) — 풀이에 나오면 품질 검사에서 걸립니다<input type="text" id="rBan" value="' + esc((r.banned || []).join(', ')) + '"></label><label class="ik-f">AI 추가 지시문(프롬프트 끝에 덧붙음 · 사실을 만들어 내는 지시는 무시됩니다)<textarea id="rExtra" rows="4">' + esc(r.extraPrompt || '') + '</textarea></label></details>' +
       '<div class="ik-foot"><button class="pri" id="rSave">저장</button></div></div>';
+    watch(box, 'rules');
     $('#rSave', box).onclick = function () {
       var v = function (n) { var e = box.querySelector('input[name=' + n + ']:checked'); return e ? e.value : ''; };
       var x = { tone: v('tone'), depth: v('depth'), examples: +v('ex'), jargon: v('jargon'), balance: $('#rBal').checked, actions: $('#rAct').checked, showEvidence: $('#rEv').checked, serviceEnabled: $('#rSvc').checked, serviceAi: $('#rSvcAi').checked, serviceBody: $('#rSvcBody').checked, extraPrompt: $('#rExtra').value, banned: $('#rBan').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean), domainOverrides: {} };
       $$('[data-ov]', box).forEach(function (t) { if (t.value.trim()) x.domainOverrides[t.dataset.ov] = t.value.trim(); });
-      post('rules', { rules: x }).then(function (d) { G.meta.rules = d.rules; G.meta.meta = d.meta; toast('AI 작성 설정을 저장했습니다'); }).catch(function (e) { toast(e.message, true); });
+      C.withBusy(box, function () { return post('rules', { rules: x }); }).then(function (d) { G.meta.rules = d.rules; unsaved.rules = false; G.meta.meta = d.meta; toast('AI 작성 설정을 저장했습니다'); }).catch(function (e) { toast(e.message, true); });
     };
   }
 
@@ -443,7 +451,7 @@
   function wizardModal(item, isNew, done) { // 풀이 지식 편집기를 대화창으로 연다(풀이 테스트·풀이 자료 검수에서 공용). 저장하면 done(저장된 항목)
     (G.meta ? Promise.resolve() : loadMeta()).then(function () { return G.items ? 0 : loadItems(); }).then(function () {
       var dlg = document.createElement('dialog'); dlg.className = 'ik-dlg'; dlg.innerHTML = '<div class="ik-bar" style="margin-top:0"><b style="color:var(--gold)">' + (isNew ? '풀이 지식 확인·수정' : '풀이 수정') + '</b><span style="flex:1"></span><button data-close>닫기</button></div><div id="mHost"></div>';
-      document.body.appendChild(dlg); dlg.showModal(); var saved = PANE, shut = function () { PANE = saved; try { (dlg.close(), dlg.remove()); } catch (e) { } dlg.remove(); }; dlg.onclose = function () { PANE = saved; dlg.remove(); }; dlg.querySelector('[data-close]').onclick = shut;
+      document.body.appendChild(dlg); dlg.showModal(); var saved = PANE, shut = function () { PANE = saved; try { (dlg.close(), dlg.remove()); } catch (e) { } dlg.remove(); }; dlg.onclose = function () { unsaved.modal = false; PANE = saved; dlg.remove(); }; dlg.querySelector('[data-close]').onclick = shut;
       PANE = dlg; wizard(dlg.querySelector('#mHost'), item, isNew, function (it) { shut(); done(it); });
     }).catch(function (e) { toast(e.message, true); });
   }

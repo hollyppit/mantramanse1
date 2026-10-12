@@ -72,13 +72,12 @@
     }).catch(function () { clearInterval(tick); view('input'); $('#msg').textContent = '리포트를 구성하지 못했습니다. 잠시 후 다시 시도해 주세요.'; });
   }
 
-  // AI 컴포저(선택): 최대 9초만 기다리고, 실패·시간 초과·응답 불량이면 원본 모듈 문장으로 그대로 진행한다. 같은 리포트 키는 기기에도 캐시한다.
+  // AI 컴포저(선택): 최대 9초만 기다리고, 실패·시간 초과·응답 불량이면 원본 모듈 문장으로 그대로 진행한다. 서버가 현재 문체와 입력 문장 기준으로 캐시한다.
   function aiCompose() {
-    var rep = S.rep, key = 'mt_v2_ai_' + rep.meta.key, cached = null; try { cached = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { }
-    if (cached) { R.Compose.applyResult(rep, cached, S.pack.lib); return Promise.resolve(); }
+    var rep = S.rep; // 문체 버전은 서버 캐시가 관리한다. 기기 캐시는 설정 변경을 가려 사용하지 않는다.
     var body = { payload: R.Compose.aiPayload(rep), media: R.Compose.mediaPayload(rep, S.pack.lib) }, ctl = window.AbortController ? new AbortController() : null, timer = setTimeout(function () { if (ctl) ctl.abort(); }, 9000);
     return fetch('/api/compose', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: ctl && ctl.signal }).then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) { if (d && d.ok && d.result) { R.Compose.applyResult(rep, d.result, S.pack.lib); try { localStorage.setItem(key, JSON.stringify(d.result)); } catch (e) { } } })
+      .then(function (d) { if (d && d.ok && d.result) { R.Compose.applyResult(rep, d.result, S.pack.lib); } })
       .catch(function () { }).then(function () { clearTimeout(timer); });
   }
 

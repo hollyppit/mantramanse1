@@ -14,6 +14,7 @@
 import { json, isAdmin, configError } from '../_lib.js';
 import { kvOf } from '../_store.js';
 import { cleanStyle } from '../_textstyle.js';
+import { clean as cleanStoryValue } from './story.js';
 
 const KEY = 'free:onboard', DRAFT = 'free:onboard:draft', HIST = 'free:onboard:hist', HKEY = 'free:onboard:h:', STAT = 'free:onbstat', MAX_BYTES = 512 * 1024, MAX_HIST = 20;
 const ID = /^[a-z0-9][a-z0-9_-]{1,40}$/, IMG = /^(\/api\/clipfile\?k=[\w.-]{1,120}|\/report\/hub\/quest\/[\w.-]{1,60}\.(webp|png|jpe?g)|https:\/\/[^\s"'<>]{1,500})$/, DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -125,6 +126,8 @@ const cleanLines = a => arr(a, 6, 120);
 const cleanCta = c => ({ show: !!(c && c.show), text: s(c && c.text, 30), to: c && c.to === 'quick' ? 'quick' : 'story' }); // to: story(인터랙티브 스토리) | quick(일반 입력)
 function clean(b, notes) {
   const out = {};
+  if (b.cover && typeof b.cover === 'object' && !Array.isArray(b.cover)) out.cover = cleanStoryValue(b.cover);
+  if (['timeline', 'home'].includes(b.resultDestination)) out.resultDestination = b.resultDestination;
   if (typeof b.forceOnboarding === 'boolean') out.forceOnboarding = b.forceOnboarding;
   if (b.bridge && typeof b.bridge === 'object') out.bridge = { toCelebrity: s(b.bridge.toCelebrity, 240), toIntro: s(b.bridge.toIntro, 240) };
   if (typeof b.honorific === 'string') { const h = s(b.honorific, 8); out.honorific = h && !FORBIDDEN.includes(h) ? h : '귀인'; }

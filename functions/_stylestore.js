@@ -30,3 +30,18 @@ export function styleFor(loaded, keys, opts) {
   const id = resolveStyle(loaded.config, keys), text = directive(loaded.config, id, opts), story = storyDirective(loaded.config);
   return { id, name: STYLE_KO[id], ver: loaded.ver, directive: text, story, sig: sig(id + '|' + loaded.ver + '|' + text + '|' + story), meta: { id, ver: loaded.ver } };
 }
+
+// 같은 문체 설정을 챕터 ID → 원본 ID → 풀이 분야 순으로 적용한다.
+const CATEGORY_DOMAIN = {identity:'SELF',elements:'SELF',personality:'SELF',talent:'SELF',shadow:'SELF',career:'CAREER',success:'CAREER',wealth:'MONEY',love:'LOVE',marriage:'MARRIAGE',relationship:'RELATIONSHIP',compatibility:'RELATIONSHIP',family:'RELATIONSHIP',daewoon:'TIMING',currentCycle:'TIMING',sewoon:'TIMING',monthly:'TIMING',remedy:'ACTION',actionPlan:'ACTION'};
+export function composeStyle(loaded, chapters) {
+  const fallback = styleFor(loaded, []), selected = {}, assignments = [];
+  for (const ch of chapters) {
+    const keys = ch.styleKeys || [ch.id];
+    const resolved = styleFor(loaded, keys.concat(keys.map(k => CATEGORY_DOMAIN[k]).filter(Boolean)));
+    selected[resolved.id] = resolved;
+    assignments.push({id:ch.id,style:resolved.id});
+  }
+  const directives = Object.values(selected).map(s => '[' + s.id + ']\n' + s.directive).join('\n\n');
+  const text = fallback.directive + '\n\n각 챕터는 아래 배정된 문체 지시를 우선 적용한다. 사실과 근거는 바꾸지 않는다.\n' + JSON.stringify(assignments) + '\n' + directives;
+  return {...fallback,directive:text,sig:sig(text + '|' + loaded.ver)};
+}

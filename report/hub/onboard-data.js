@@ -244,6 +244,8 @@
   function merge(base, ov) {
     base = base || DEFAULTS; var out = JSON.parse(JSON.stringify(base)); if (!ov || typeof ov !== 'object') return out;
     if (ov.bridge && typeof ov.bridge === 'object') out.bridge = Object.assign({}, out.bridge, pick(ov.bridge, ['toCelebrity', 'toIntro']));
+    if (ov.cover && typeof ov.cover === 'object' && !Array.isArray(ov.cover)) out.cover = JSON.parse(JSON.stringify(ov.cover));
+    if (ov.resultDestination === 'timeline' || ov.resultDestination === 'home') out.resultDestination = ov.resultDestination;
     if (typeof ov.forceOnboarding === 'boolean') out.forceOnboarding = ov.forceOnboarding;
     if (typeof ov.honorific === 'string') out.honorific = honorific(ov);
     if (ov.weights && typeof ov.weights === 'object') { var r = +ov.weights.research, c = +ov.weights.celebrity; if (r >= 0 && c >= 0 && r + c > 0) out.weights = { research: r, celebrity: c }; }

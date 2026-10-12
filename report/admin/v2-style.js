@@ -93,9 +93,9 @@
     var ch = $('#stChars'); if (ch) ch.addEventListener('input', function (e) { var rows = $$('.st-char'), last = rows[rows.length - 1]; if (last && (last.querySelector('input').value || last.querySelector('textarea').value)) { var n = last.cloneNode(true); n.querySelector('input').value = ''; n.querySelector('textarea').value = ''; ch.appendChild(n); } });
     $('#stSave').onclick = function () {
       readForm(); var b = this; b.disabled = true;
-      post('save', { config: G.cfg, note: $('#stNote').value }).then(function (r) { toast('저장했습니다 · v' + r.active.ver + ' 적용'); return load(); }).then(draw).catch(function (e) { b.disabled = false; toast(e.message, true); });
+      C.withBusy(box, function () { return post('save', { config: G.cfg, note: $('#stNote').value }); }).then(function (r) { toast('저장했습니다 · v' + r.active.ver + ' 적용'); return load(); }).then(draw).catch(function (e) { b.disabled = false; toast(e.message, true); });
     };
-    $('#stRevert').onclick = function () { G.cfg = clone(G.saved); draw(); };
+    $('#stRevert').onclick = function () { G.cfg = clone(G.saved); G.dirty = false; draw(); };
     $$('button[data-rb]').forEach(function (b) { b.onclick = function () {
       if (!confirm('v' + b.dataset.rb + ' 설정으로 되돌립니다. 새 버전으로 저장되며 이후 생성되는 풀이부터 적용됩니다. 계속할까요?')) return;
       post('rollback', { ver: +b.dataset.rb }).then(function (r) { toast('v' + b.dataset.rb + ' 설정을 v' + r.active.ver + ' 로 다시 적용했습니다'); return load(); }).then(draw).catch(function (e) { toast(e.message, true); });
@@ -134,8 +134,10 @@
     out.innerHTML = h;
   }
 
+  (window.AdminDirty = window.AdminDirty || {})['풀이 문체'] = function () { return G.dirty; };
   window.V2Style = { open: function (tab, pw) {
     C.setPw(pw); box = document.getElementById('t-' + tab); if (!box) return;
+    if (G.dirty && box.querySelector('#stSave')) return;
     box.innerHTML = '<p class="muted">불러오는 중…</p>';
     load().then(draw).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }, _state: G };

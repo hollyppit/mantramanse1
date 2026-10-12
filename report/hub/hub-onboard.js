@@ -286,8 +286,8 @@
   function fromProfile(s) {
     return { name: s.name || '', calendar: s.calendar === 'lunar' ? 'lunar' : 'solar', leap: !!s.leap, year: s.year || '', month: s.month || '', day: s.day || '', hour: s.hourUnknown ? '' : s.hour, minute: s.hourUnknown ? '' : s.minute, hourUnknown: !!s.hourUnknown, country: s.country || 'KR', place: s.city || '서울', gender: s.gender || '' };
   }
-  H.route('begin', function (q, ctx) {
-    if (P.has() && !q.edit) return H.replace('#/'); // 이미 프로필이 있으면 입력을 건너뛴다
+  Ob.classicBegin = function (q, ctx) {
+    if (P.has() && !q.edit && !PREVIEW) return H.replace('#/'); // 이미 프로필이 있으면 입력을 건너뛴다
     H.engine().catch(function () { }); // 미리 불러 둔다(음력·윤달 검증에 필요)
     Ob.config().then(function () {
       if (!H.alive(ctx)) return;
@@ -391,13 +391,13 @@
           H.afterInput(); lset(DRAFT, null);
           Ob.track('birth_input_complete', { hour_known: saved.hourUnknown ? 0 : 1, calendar: saved.calendar });
           Ob.track('calculation_success', {}); Ob.track('saju_input_complete', { next: 'onboarding', hour_known: saved.hourUnknown ? 0 : 1 });
-          H.replace(CFG.afterDone === 'home' ? '#/?nogate=1' : '#/reveal');
+          H.replace(root.Quest.completionRoute(CFG, !!q.edit));
         }).catch(function () { Ob.track('calculation_failure', { reason: 'engine' }); msg('분석 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.'); if (btn) { btn.disabled = false; btn.textContent = '나의 사주 확인하기'; } });
       }
       render();
       swipe(document.getElementById('obFs') || $('#screen'), function () { }, function () { if (step > 0) { step--; render(); } }); // 오른쪽으로 쓸면 이전 (입력 중 실수로 넘어가지 않게 다음은 버튼으로만)
     });
-  });
+  };
 
   /* ═════════ 일간·일주 공개 ═════════ */
   H.route('reveal', function (q, ctx) {

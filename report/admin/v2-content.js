@@ -43,15 +43,16 @@
 
   function load() {
     if (ST.loaded) return Promise.resolve();
-    return Promise.all([fetch('/api/report-content').then(function (r) { return r.json(); }).catch(function () { return {}; }), fetch('/api/media?all=1', { headers: { authorization: 'Bearer ' + PW } }).then(function (r) { return r.json(); }).catch(function () { return {}; })])
+    return Promise.all([api('/api/report-content'), api('/api/media?all=1')])
       .then(function (a) { ST.saved = a[0].content || {}; if (ST.saved.remedies) ST.saved.remedies = ST.saved.remedies.map(R.Remedy.normalize); ST.media = a[1].media || []; ST.loaded = true; });
   }
+  function reloadMedia() { return api('/api/media?all=1').then(function (d) { ST.media = d.media || []; return ST.media; }); }
   function engine() {
     if (window.Manse) return Promise.resolve(window.Manse);
     return new Promise(function (ok, bad) { var s = document.createElement('script'); s.src = '/engine.js'; s.onload = function () { window.Manse ? ok(window.Manse) : bad(new Error('엔진 초기화 실패')); }; s.onerror = function () { bad(new Error('/engine.js 를 불러오지 못했습니다')); }; document.head.appendChild(s); });
   }
   function save(part, b) {
-    return api('/api/report-content', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(part) }).then(function (d) { ST.saved.version = d.version; toast('저장했습니다 · 콘텐츠 버전 ' + d.version); return d; });
+    return api('/api/report-content', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(part) }).then(function (d) { ST.saved = Object.assign(ST.saved || {}, clone(part), { version: d.version }); window.dispatchEvent(new CustomEvent('mt-content-saved', { detail: { keys: Object.keys(part), version: d.version } })); toast('저장했습니다 · 콘텐츠 버전 ' + d.version); return d; });
   }
   // 기본 + 저장본 병합 (id 기준)
   function mix(base, extra) { var m = {}, order = []; base.forEach(function (x) { m[x.id] = clone(x); order.push(x.id); }); (extra || []).forEach(function (x) { if (!m[x.id]) order.push(x.id); m[x.id] = Object.assign(m[x.id] || {}, clone(x)); }); return order.map(function (id) { return m[id]; }); }
@@ -75,44 +76,60 @@
   var condText = function (c) { return Object.keys(c || {}).map(function (k) { return (COND[k] ? COND[k][0].split(' ')[0] : k) + '=' + c[k].map(function (x) { return SEASON_KO[x] || LABELS[x] || x; }).join('/'); }).join(' · ') || '조건 없음(폴백)'; };
 
   /* ═══ 공통 아이템 관리자 (해석 모듈 / 개운법) ═══ */
+  var editors = [];
+  function flushEditors() { editors = editors.filter(function (e) { return document.body.contains(e.root); }); return editors.every(function (e) { return e.commit(); }); }
+  var busyActions = new WeakMap();
+  function withBusy(root, work) {
+    if (busyActions.has(root)) return busyActions.get(root);
+    var controls = $$('input,textarea,select,button', root).map(function (el) { var off = el.disabled; el.disabled = true; return {el:el,off:off}; });
+    root.setAttribute('aria-busy','true');
+    var task = Promise.resolve().then(work).finally(function () { controls.forEach(function (x) { x.el.disabled = x.off; }); root.removeAttribute('aria-busy'); busyActions.delete(root); });
+    busyActions.set(root,task); return task;
+  }
   function itemAdmin(root, o) { // o: {title, base[], key('modules'|'remedies'), cats, catLabel, fields(html builder), read(fn), blank(fn), summary(fn)}
-    var S = { list: [], sel: null, q: '', cat: '', st: '', dirty: false };
+    var S = { list: [], sel: null, q: '', cat: '', st: '', dirty: false, pending: false };
     S.list = o.initial ? o.initial : mix(o.base, ST.saved[o.key]); S.dirty = !!o.initialDirty;
-    var defs = defIds(o.base); (window.AdminDirty = window.AdminDirty || {})['해석 모듈·개운법 · '+o.key] = function () { return S.dirty; };
+    var defs = defIds(o.base); (window.AdminDirty = window.AdminDirty || {})['해석 모듈·개운법 · '+o.key] = function () { return S.dirty || S.pending; };
     root.innerHTML = '<div class="card"><div class="row" style="justify-content:space-between;align-items:center"><b style="color:var(--gold)">' + o.title + '</b><span class="muted">기본 시드 위에 덮어쓰기됩니다 · 비활성/삭제 가능</span><span style="flex:1"></span><button id="iNew">+ 새로 만들기</button><button class="pri" id="iSave" disabled>변경사항 저장</button></div>' +
       (o.panel ? o.panel() : '') + '<div class="v2split" style="margin-top:12px"><div><div class="row" style="margin-bottom:8px"><input type="text" id="iQ" placeholder="검색(제목·id·키워드)" style="flex:1">' + (o.lockCats ? '' : '<select id="iCat" style="width:auto"><option value="">' + o.catLabel + ' 전체</option>' + o.cats.map(function (c) { return '<option value="' + c[0] + '">' + c[1] + '</option>'; }).join('') + '</select>') + '</div><div class="muted" id="iCnt"></div><div class="v2list" id="iList"></div></div><div id="iEd"></div></div></div>';
+    var commitCurrent = function () { return true; };
+    editors.push({root:root,commit:function () { return commitCurrent(); }});
     if (o.bindPanel) o.bindPanel(root);
     function filt() { var q = S.q.toLowerCase(); return S.list.filter(function (x) { return (!S.cat || x[o.catKey] === S.cat) && (!o.lockCats || o.lockCats.indexOf(x[o.catKey]) >= 0) && (!q || (o.title2(x) + ' ' + x.id + ' ' + (x.keywords || x.tags || []).join(' ')).toLowerCase().indexOf(q) >= 0); }); }
     function renderList() {
-      var l = filt(); $('#iCnt', root).textContent = '전체 ' + S.list.length + ' · 표시 ' + l.length + (S.dirty ? ' · 저장 안 된 변경 있음' : '');
-      $('#iSave', root).disabled = !S.dirty;
+      var l = filt(); $('#iCnt', root).textContent = '전체 ' + S.list.length + ' · 표시 ' + l.length + ((S.dirty || S.pending) ? ' · 저장 안 된 변경 있음' : '');
+      $('#iSave', root).disabled = !(S.dirty || S.pending);
       $('#iList', root).innerHTML = l.map(function (x) { return '<div class="v2li' + (S.sel === x.id ? ' on' : '') + (x.enabled === false ? ' off' : '') + '" data-id="' + esc(x.id) + '"><b>' + esc(o.title2(x) || x.id) + '</b><small>' + esc(o.catName(x)) + ' · p' + (x.priority || 0) + (defs[x.id] ? '' : ' · 새로 만든 항목') + ' · ' + esc(condText(x.conditions)) + '</small></div>'; }).join('');
     }
-    $('#iList', root).onclick = function (e) { var li = e.target.closest('.v2li'); if (li) { S.sel = li.dataset.id; renderList(); renderEd(); } };
+    $('#iList', root).onclick = function (e) { var li = e.target.closest('.v2li'); if (li) { if (!commitCurrent()) return; S.sel = li.dataset.id; renderList(); renderEd(); } };
     $('#iQ', root).oninput = function (e) { S.q = e.target.value; renderList(); }; if ($('#iCat', root)) $('#iCat', root).onchange = function (e) { S.cat = e.target.value; renderList(); };
-    $('#iNew', root).onclick = function () { var n = o.blank(S.cat || (o.lockCats && o.lockCats[0]) || o.cats[0][0]); S.list.unshift(n); S.sel = n.id; S.dirty = true; renderList(); renderEd(); };
+    $('#iNew', root).onclick = function () { if (!commitCurrent()) return; var n = o.blank(S.cat || (o.lockCats && o.lockCats[0]) || o.cats[0][0]); S.list.unshift(n); S.sel = n.id; S.dirty = true; renderList(); renderEd(); };
     function renderEd() {
-      var x = S.list.filter(function (y) { return y.id === S.sel; })[0], box = $('#iEd', root); if (!x) { box.innerHTML = '<p class="muted">왼쪽에서 항목을 고르거나 새로 만드세요.</p>'; return; }
+      var x = S.list.filter(function (y) { return y.id === S.sel; })[0], box = $('#iEd', root); if (!x) { commitCurrent = function () { return true; }; box.innerHTML = '<p class="muted">왼쪽에서 항목을 고르거나 새로 만드세요.</p>'; return; }
       box.innerHTML = '<div class="card"><div class="fx2"><div class="fx"><label>id (영문·숫자·_)</label><input type="text" id="eId" value="' + esc(x.id) + '"' + (defs[x.id] ? ' disabled' : '') + '></div><div class="fx"><label>우선순위 (0~100, 같은 조건이면 높은 쪽)</label><input type="number" id="ePri" min="0" max="100" value="' + (x.priority || 0) + '"></div></div>' + o.fields(x) +
         '<details open style="margin-top:8px"><summary><b>선택 조건</b> <span class="muted">비어 있으면 상관없음 · 구체적인 조건일수록 먼저 뽑힙니다</span></summary><div id="eCond">' + condHtml(x.conditions) + '</div></details>' +
         '<label style="display:flex;gap:6px;align-items:center;margin:8px 0"><input type="checkbox" id="eOn"' + (x.enabled !== false ? ' checked' : '') + '>사용</label>' +
         '<div class="row"><button class="pri" id="eApply">적용</button><button id="eTest">이 항목이 선택되는 비율 테스트</button>' + (defs[x.id] ? (S.edited(x) ? '<button id="eRevert">기본값으로 되돌리기</button>' : '') : '<button class="danger" id="eDel">삭제</button>') + '</div><div id="eOut" class="dbgbox" hidden></div></div>';
-      $('#eApply', box).onclick = function () {
+      commitCurrent = function () {
+        if (!S.pending) return true;
         var n = o.read(box, clone(x)); n.id = defs[x.id] ? x.id : ($('#eId', box).value.trim() || x.id); n.priority = Math.max(0, Math.min(100, +$('#ePri', box).value || 0)); n.conditions = condRead($('#eCond', box)); n.enabled = $('#eOn', box).checked;
-        if (!/^[\w.\-가-힣]{1,80}$/.test(n.id)) return toast('id 는 영문·숫자·한글·_ . - 만 쓸 수 있습니다', true);
-        if (n.id !== x.id && S.list.some(function (y) { return y.id === n.id; })) return toast('이미 있는 id 입니다', true);
-        var i = S.list.indexOf(x); S.list[i] = n; S.sel = n.id; S.dirty = true; renderList(); renderEd(); o.onChange && o.onChange(S.list);
+        if (!/^[\w.\-가-힣]{1,80}$/.test(n.id)) { toast('id 는 영문·숫자·한글·_ . - 만 쓸 수 있습니다', true); return false; }
+        if (n.id !== x.id && S.list.some(function (y) { return y.id === n.id; })) { toast('이미 있는 id 입니다', true); return false; }
+        var i = S.list.indexOf(x); S.list[i] = n; x = n; S.sel = n.id; S.dirty = true; S.pending = false; o.onChange && o.onChange(S.list); return true;
       };
-      var rv = $('#eRevert', box); if (rv) rv.onclick = function () { S.list[S.list.indexOf(x)] = clone(defs[x.id]); S.dirty = true; renderList(); renderEd(); o.onChange && o.onChange(S.list); };
-      var dl = $('#eDel', box); if (dl) dl.onclick = function () { if (confirm('삭제할까요?')) { S.list = S.list.filter(function (y) { return y !== x; }); S.sel = null; S.dirty = true; renderList(); renderEd(); } };
+      box.oninput = box.onchange = function (e) { if (!e.target.matches('input,textarea,select')) return; S.pending = true; renderList(); };
+      $('#eApply', box).onclick = function () { S.pending = true; if (commitCurrent()) { renderList(); renderEd(); } };
+      var rv = $('#eRevert', box); if (rv) rv.onclick = function () { S.pending = false; S.list[S.list.indexOf(x)] = clone(defs[x.id]); S.dirty = true; renderList(); renderEd(); o.onChange && o.onChange(S.list); };
+      var dl = $('#eDel', box); if (dl) dl.onclick = function () { if (confirm('삭제할까요?')) { S.pending = false; S.list = S.list.filter(function (y) { return y !== x; }); S.sel = null; S.dirty = true; renderList(); renderEd(); } };
       $('#eTest', box).onclick = function () { condTest(clone(Object.assign({}, x, { conditions: condRead($('#eCond', box)) })), $('#eOut', box), o.key); }; if (o.afterEd) o.afterEd(box, x);
     }
     S.edited = function (x) { return JSON.stringify(x) !== JSON.stringify(defs[x.id]); };
     $('#iSave', root).onclick = function () {
+      if (!commitCurrent()) return;
       var out = S.list.filter(function (x) { return !defs[x.id] || S.edited(x); }).map(function (x) { // 시드와 같은 계층 메타(status·evidence 등)는 저장본에 복사하지 않는다 — 시드 쪽 메타가 바뀌어도 오래된 값이 덮어쓰지 않게
         var d = defs[x.id]; if (!d) return x; var c = clone(x); ['status', 'evidence', 'narrative', 'rule'].forEach(function (k) { if (JSON.stringify(c[k]) === JSON.stringify(d[k])) delete c[k]; }); return c;
       }); var part = {}; part[o.key] = out;
-      this.disabled = true; save(part).then(function () { ST.saved[o.key] = out; S.dirty = false; renderList(); o.onChange && o.onChange(S.list, true); }).catch(function (e) { toast(e.message, true); renderList(); });
+      withBusy(root, function () { return save(part); }).then(function () { ST.saved[o.key] = out; S.dirty = false; renderList(); o.onChange && o.onChange(S.list, true); }).catch(function (e) { toast(e.message, true); renderList(); });
     };
     renderList(); renderEd();
   }
@@ -377,6 +394,6 @@
   var MOTIONS = [['', '기본 (잔잔하게 가만히)', ''], ['smile', '살짝 미소', 'a gentle warm smile slowly forming on the face'], ['laugh', '소리 내어 웃음', 'laughing joyfully, mouth open, shoulders shaking lightly'], ['cry', '조용히 눈물', 'quietly tearing up, a tear rolling down the cheek, eyes glistening'], ['sad', '쓸쓸한 표정', 'a wistful, melancholic expression, gaze lowered, slow sigh'], ['surprise', '깜짝 놀람', 'eyes widening in surprise, a small gasp, slight lean back'], ['angry', '화난 표정', 'a tense angry expression, furrowed brows, jaw clenched'], ['talk', '이야기하며 손짓', 'talking naturally, lips moving, expressive hand gestures'], ['nod', '고개 끄덕임', 'nodding slowly in agreement, a soft smile'], ['look', '천천히 돌아봄', 'slowly turning the head to look toward the camera'], ['walk', '천천히 걸어감', 'walking slowly forward with a natural gait, clothes and hair swaying'], ['wind', '바람에 머리카락·옷자락', 'hair and clothes flowing softly in the wind, the character otherwise calm'], ['hug', '포옹 · 서로 기댐', 'leaning in close and embracing warmly']];
   function motionOptions() { return MOTIONS.map(function (m) { return '<option value="' + m[0] + '">' + m[1] + '</option>'; }).join(''); }
   function motionText(v) { var m = MOTIONS.filter(function (x) { return x[0] === v; })[0]; return m && m[2] ? 'Motion and emotion (takes priority over any instruction above to stay still or keep the mouth closed): ' + m[2] + '.' : ''; }
-  window.V2Content = { motionOptions: motionOptions, motionText: motionText, LABELS: LABELS, CATS: CATS, CAT_KO: CAT_KO, REM_TYPES: REM_TYPES, REM_KO: REM_KO, COND: COND, SEASONS: SEASONS, ST: ST, api: api, toast: toast, load: load, engine: engine, save: save, mix: mix, clone: clone, csv: csv, esc: esc, setPw: function (p) { PW = p; },
+  window.V2Content = { motionOptions: motionOptions, motionText: motionText, LABELS: LABELS, CATS: CATS, CAT_KO: CAT_KO, REM_TYPES: REM_TYPES, REM_KO: REM_KO, COND: COND, SEASONS: SEASONS, ST: ST, api: api, toast: toast, withBusy: withBusy, flushEditors: flushEditors, load: load, reloadMedia: reloadMedia, engine: engine, save: save, mix: mix, clone: clone, csv: csv, esc: esc, setPw: function (p) { PW = p; },
     itemAdmin: itemAdmin, modCfg: modCfg, remCfg: remCfg, covOpen: covOpen, condText: condText };
 })();

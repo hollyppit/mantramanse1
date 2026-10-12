@@ -1,0 +1,32 @@
+const assert=require('assert/strict'),fs=require('fs'),path=require('path'),vm=require('vm');
+const {pathToFileURL}=require('url');
+const uri=p=>pathToFileURL(path.resolve(__dirname,'..',p)).href;
+(async()=>{
+  const styles=await import(uri('functions/_stylestore.js')), S=await import(uri('functions/_style.js')), API=await import(uri('functions/api/system-status.js'));
+  const cfg=S.cleanConfig({defaultStyle:'firm',chapters:{MONEY:'cautious',c09:'direct'}});
+  // 문체 ID는 저장 모듈이 정의한 실제 값으로 검사한다.
+  const ids=S.STYLE_IDS;
+  cfg.defaultStyle=ids[0];cfg.chapters={MONEY:ids[1],c09:ids[2]};
+  const loaded={ver:1,config:cfg};
+  const a=styles.composeStyle(loaded,[{id:'c08',styleKeys:['c08','wealth']},{id:'c09',styleKeys:['c09','wealth']}]);
+  assert.ok(a.directive.includes(JSON.stringify({id:'c08',style:ids[1]})));
+  assert.ok(a.directive.includes(JSON.stringify({id:'c09',style:ids[2]})));
+  assert.notEqual(a.sig,styles.composeStyle({...loaded,ver:2},[{id:'c08',styleKeys:['c08','wealth']}]).sig);
+  const data=new Map(),kv={get:async(k,t)=>data.has(k)?t==='json'?JSON.parse(data.get(k)):data.get(k):null,put:async(k,v)=>data.set(k,v)};
+  const env={GLOSSARY_KV:kv,ADMIN_PASSWORD:'pw'};
+  data.set('src:idx',JSON.stringify([{id:'off',active:false}]));
+  data.set('ik:d:SELF',JSON.stringify([{id:'a',status:'published',reviewed:true,evidence:[{docId:'off'}]},{id:'b',status:'published',reviewed:true,evidence:[{docId:'off'},{docId:'on'}]},{id:'c',status:'approved',reviewed:true}]));
+  let r=await API.onRequestGet({request:new Request('https://test/api/system-status'),env});assert.equal(r.status,401);
+  r=await API.onRequestGet({request:new Request('https://test/api/system-status',{headers:{authorization:'Bearer pw'}}),env});assert.equal(r.status,200);
+  const d=await r.json();assert.equal(d.knowledge.published,2);assert.equal(d.knowledge.usable,1);assert.equal(d.knowledge.approved,1);
+  assert.ok(d.findings.some(f=>f.tab==='ikdoc'));assert.ok(d.findings.some(f=>f.tab==='ikknow'));
+  assert.ok(!JSON.stringify(d).includes('ADMIN_PASSWORD'));
+  const root=path.resolve(__dirname,'..');const context={console,setTimeout,clearTimeout,window:null,ReportV2:{SajuData:{SEASONS:{}},Remedy:{normalize:x=>x}},CustomEvent:function(type,init){this.type=type;this.detail=init.detail},document:{createElement:()=>({setAttribute(){},style:{},remove(){}}),head:{appendChild(){}},body:{appendChild(){}}},fetch:async()=>({ok:true,json:async()=>({version:'c2'})})};
+  context.window=context;let event;context.dispatchEvent=e=>event=e;vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(root,'report/admin/v2-content.js'),'utf8'),context);
+  const C=context.V2Content;C.ST.saved={version:'c1',sceneCopy:{old:1}};await C.save({textStyles:{all:{title:{size:25}}}});
+  assert.equal(C.ST.saved.version,'c2');assert.equal(C.ST.saved.sceneCopy.old,1);assert.equal(C.ST.saved.textStyles.all.title.size,25);assert.equal(event.type,'mt-content-saved');
+  C.ST.loaded=false;C.ST.media=[{id:'existing'}];context.fetch=async()=>({ok:false,status:503,json:async()=>({error:'서버 연결 실패'})});
+  await assert.rejects(C.load(),/서버 연결 실패/);assert.equal(C.ST.loaded,false);
+  await assert.rejects(C.reloadMedia(),/서버 연결 실패/);assert.equal(C.ST.media[0].id,'existing');
+  console.log('system-integration-sim OK: 분야·챕터 문체 우선순위, 버전 변경, 게시·출처 정책, 관리자 권한, 공통 저장 상태 갱신');
+})().catch(e=>{console.error(e);process.exitCode=1});
