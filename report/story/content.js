@@ -90,12 +90,12 @@
     //   embers 불씨 · light 빛무리 · smoke 연기 / amount 양(0=없음, 1=기본, 2=많이) / speed 속도 / opacity 진하기(0~1) / color 불씨·빛 색
     ambient: { embers: true, light: true, smoke: true, amount: 1, speed: 1, opacity: 0.8, color: '#E8B26A' },
     // 인트로 커버: 스토리 맨 앞 한 화면. src 는 이미지(비우면 은은한 빛무리), show:false 면 숨김
-    cover: { show: true, bgSrc: '', bgOpacity: 0.6, chars: [], src: '', alt: '신비한 등불', title: '태어난 순간은 같아도,\n펼쳐질 운은 저마다 다르다.', sub: '사주팔자와 동양 명리학으로 살펴보는 나의 성향, 재물, 인연, 그리고 인생의 흐름.\n복잡한 운의 해석을 한 편의 무빙툰으로 만나보세요.', button: '나의 운 확인하기', hint: '아래로 스크롤하여 운의 비밀 알아보기', action: '',
+    cover: { show: true, bgSrc: '', bgOpacity: 0.6, chars: [], src: '', alt: '신비한 등불', title: '태어난 순간은 같아도,\n펼쳐질 운은 저마다 다르다.', sub: '사주팔자와 동양 명리학으로 살펴보는 나의 성향, 재물, 인연, 그리고 인생의 흐름.\n복잡한 운의 해석을 한 편의 무빙툰으로 만나보세요.', button: '내 사주로 체험하기', hint: '출생정보를 입력하고 나의 이야기를 만나보세요', action: '',
       titleFont: 'serif', titleWeight: '400', titleSize: 17, titleSpacing: 4, titleColor: '#E9E4D8', titleAnim: '', coverBottom: 25, coverBottomM: 30, subAnim: '', textAnimSpeed: 6, subColor: '#7C786C', subFont: 'sans', subSize: 14, buttonFont: 'sans', buttonSize: 15 },
     autoSpeed: 1,                                  // 자동 스크롤 속도 (1=기본, 2=두 배 빠르게, 0.5=절반 속도)
     brandName: '만트라 포춘',                       // 위쪽 가운데 이름
     pageTitle: '내 이야기의 시작 · 만트라 사주 무빙툰',  // 브라우저 탭 제목
-    pageDesc: '요즘 이런 생각 해본 적 있나요? 스크롤하며 내 사주의 이야기를 따라가 보세요.',
+    pageDesc: '내 사주를 읽고 보는 이야기로. 기질과 관계, 일과 돈, 인생의 흐름을 개인화된 무빙툰으로 체험하세요.',
     skipLink: { text: '바로 사주 분석하기', target: 'sajuInput' },
     // 무료 콘텐츠 허브(/report/hub/): "둘러보기"는 긴 스토리 대신 허브(타로·오늘의 운세·일주 소개·인생 흐름)로, 위쪽 "바로 사주 분석하기"는 허브의 사주 입력으로 보냅니다.
     // enabled:false 로 끄면 예전처럼 이 페이지의 스토리가 자동으로 내려갑니다. (주소 뒤에 ?story=1 을 붙여도 임시로 예전 방식이 됩니다)
