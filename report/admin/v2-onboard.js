@@ -222,7 +222,7 @@
         var ch = (G.cfg.cover.chars || [])[+e.data.i], suffix = e.data.m ? 'M' : '';
         if (ch) { if (e.data.m) ch.mobile = true; ['x','y','size'].forEach(function (k) { if (Number.isFinite(e.data[k])) ch[e.data.m ? {x:'mx',y:'my',size:'msize'}[k] : k] = e.data[k]; }); markDirty(); }
       } else if (G.sub === 'landing' && e.data.t === 'st-text') {
-        var names = {title:'title',sub:'sub',button:'button'}, name = names[e.data.n], suffix = e.data.m ? 'M' : '';
+        var names = {title:'title',sub:'sub',button:'button',image:'image'}, name = names[e.data.n], suffix = e.data.m ? 'M' : '';
         if (name) { if (Number.isFinite(e.data.x)) G.cfg.cover[name + 'X' + suffix] = e.data.x; if (Number.isFinite(e.data.y)) G.cfg.cover[name + 'Y' + suffix] = e.data.y; if (e.data.align === 'center') G.cfg.cover[name + 'Align' + suffix] = 'center'; markDirty(); }
       } else if (e.data.t === 'st-center-empty') { toast('미리보기에서 글자·버튼 또는 배치 이미지를 먼저 선택하세요'); } else if (e.data.t === 'mt-onb-select') { var fr = $('#obPrevFrame'); if (fr && e.source === fr.contentWindow) pick({ intro: String(e.data.intro || ''), sec: String(e.data.sec || '') }); }
     };

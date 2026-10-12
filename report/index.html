@@ -282,11 +282,13 @@ html.hub-on #story { display: none; }
 .fx-hd { position: fixed; width: 14px; height: 14px; background: var(--gold); border: 1px solid #14100A; border-radius: 2px; cursor: nesw-resize; pointer-events: auto; touch-action: none; }
 .preview #cover, .preview .cv-in { pointer-events: none; }
 .preview .cv-t, .preview .cv-s, .preview .cv-bw { pointer-events: auto; cursor: move; touch-action: none; user-select: none; }
+.preview .cv-lamp { pointer-events:auto; cursor:move; touch-action:none; }
+.preview .cv-lamp .cv-img,.preview .cv-lamp .cv-glow { animation:none; }
 .cv-sel { outline: 1px dashed var(--gold); outline-offset: 4px; }
 #cover { position: relative; z-index: 1; min-height: calc(100svh + var(--cv-pt, 0svh) + var(--cv-pb, 0svh)); display: grid; place-items: center; overflow: hidden; padding: calc(64px + var(--cv-pt, 0svh)) 0 calc(40px + var(--cv-pb, 0svh)); }
 .cv-in { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; padding: 0 6vw; animation: pg 1.4s ease both; }
-.cv-lamp { align-self: center; height: min(50vh, 460px); height: min(50svh, 460px); width: min(70vw, 460px); display: grid; place-items: center; }
-.cv-img { max-width: 100%; max-height: 100%; object-fit: contain; -webkit-mask-image: radial-gradient(closest-side, #000 62%, transparent 100%); mask-image: radial-gradient(closest-side, #000 62%, transparent 100%); }
+.cv-lamp { position:relative; left:var(--cv-ix,0vw); top:var(--cv-iy,0svh); align-self:var(--cv-ia,center); flex-shrink:0; height: min(50vh, 460px); height: min(50svh, 460px); width: min(70vw, 460px); display: grid; place-items: center; }
+.cv-img { display:block; margin:auto; max-width: 100%; max-height: 100%; object-fit: contain; -webkit-mask-image: radial-gradient(closest-side, #000 62%, transparent 100%); mask-image: radial-gradient(closest-side, #000 62%, transparent 100%); }
 .cv-img, .cv-glow { animation: cvFloat 7s ease-in-out infinite; will-change: transform; }
 @keyframes cvFloat { 0%, 100% { transform: translateY(8px) rotate(-.6deg); } 50% { transform: translateY(-10px) rotate(.6deg); } }
 .cv-glow { width: 70%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgba(232, 178, 106, .32), rgba(232, 178, 106, .08) 55%, transparent 100%); }

@@ -566,7 +566,7 @@
   function snapCenter(node, value, free) { if (!node || free) { showCenterGuide(false); return value; } var r = node.getBoundingClientRect(), delta = root.innerWidth / 2 - (r.left + r.width / 2), hit = Math.abs(delta) <= 8; showCenterGuide(hit); return hit ? Math.round((value + delta / root.innerWidth * 100) * 10) / 10 : value; }
   function centerSelected() {
     var cv = C.settings.cover || {}, text = document.querySelector('#cover .cv-sel');
-    if (text) { var n = text.classList.contains('cv-t') ? 'title' : text.classList.contains('cv-s') ? 'sub' : 'button', m = fxMob(), suffix = m ? 'M' : ''; cv[n+'X'+suffix] = 0; cv[n+'Align'+suffix] = 'center'; document.getElementById('cover').setAttribute('style',coverStyle(cv)); parent.postMessage({t:'st-text',n:n,m:m,x:0,y:num(pv(cv,n+'Y'),0),align:'center'},location.origin); return; }
+    if (text) { var n = text.classList.contains('cv-t') ? 'title' : text.classList.contains('cv-s') ? 'sub' : text.classList.contains('cv-lamp') ? 'image' : 'button', m = fxMob(), suffix = m ? 'M' : ''; cv[n+'X'+suffix] = 0; cv[n+'Align'+suffix] = 'center'; document.getElementById('cover').setAttribute('style',coverStyle(cv)); parent.postMessage({t:'st-text',n:n,m:m,x:0,y:num(pv(cv,n+'Y'),0),align:'center'},location.origin); return; }
     var c = (cv.chars || [])[fxSel], img = fxImg(fxSel);
     if (c && img) { if (fxMob() && !c.mobile) { c.mobile=true; c.mx=num(c.x,75); c.my=num(c.y,0); c.msize=num(c.size,60); } var keys=fxKeys(c); c[keys[0]]=50; fxPlace(img,c); fxHandle(); parent.postMessage({t:'st-char',i:fxSel,m:fxMob(),x:50,y:num(c[keys[1]],0),size:num(c[keys[2]],60)},location.origin); return; }
     parent.postMessage({t:'st-center-empty'},location.origin);
@@ -616,7 +616,7 @@
     [fxEl, fxFr].forEach(function (e) { e.style.opacity = o; e.style.visibility = o <= 0 ? 'hidden' : 'visible'; }); fxHandle();
   }
   // 커버 글(브랜드명·서브 카피·버튼)은 PC/모바일 값이 따로 있다. 모바일 값(이름 끝에 M)이 비어 있으면 PC 값을 쓴다.
-  var CVN = { title: 't', sub: 's', button: 'b' }, ALIGN3 = { left: 'flex-start', center: 'center', right: 'flex-end' };
+  var CVN = { title: 't', sub: 's', button: 'b', image: 'i' }, ALIGN3 = { left: 'flex-start', center: 'center', right: 'flex-end' };
   function pv(cv, k) { var m = cv[k + 'M']; return fxMob() && m != null && m !== '' ? m : cv[k]; }
   function coverStyle(cv) {
     var SF = root.StoryFonts;
@@ -637,9 +637,9 @@
   function coverEdit(el) { // 관리자 미리보기: 글·버튼을 끌어 옮긴다 (PC 화면이면 PC 값, 모바일 화면이면 모바일 값)
     if (el._edit) return; el._edit = true; var st = null;
     el.addEventListener('pointerdown', function (e) {
-      var t = e.target.closest && e.target.closest('.cv-t, .cv-s, .cv-bw'); el.querySelectorAll('.cv-sel').forEach(function (x) { x.classList.remove('cv-sel'); });
+      var t = e.target.closest && e.target.closest('.cv-t, .cv-s, .cv-bw, .cv-lamp'); el.querySelectorAll('.cv-sel').forEach(function (x) { x.classList.remove('cv-sel'); });
       if (!t) { try { parent.postMessage({ t: 'st-tsel', n: null }, location.origin); } catch (er) { } return; } t.classList.add('cv-sel'); fxSel = -1; fxHandle();
-      var n = t.classList.contains('cv-t') ? 'title' : t.classList.contains('cv-s') ? 'sub' : 'button', cv = C.settings.cover, m = fxMob(), sx = m ? 'M' : '';
+      var n = t.classList.contains('cv-t') ? 'title' : t.classList.contains('cv-s') ? 'sub' : t.classList.contains('cv-lamp') ? 'image' : 'button', cv = C.settings.cover, m = fxMob(), sx = m ? 'M' : '';
       if (m) ['X', 'Y'].forEach(function (k) { if (cv[n + k + 'M'] == null || cv[n + k + 'M'] === '') cv[n + k + 'M'] = num(cv[n + k], 0); });
       st = { n: n, m: m, kx: n + 'X' + sx, ky: n + 'Y' + sx, x: e.clientX, y: e.clientY, cx: num(cv[n + 'X' + sx], 0), cy: num(cv[n + 'Y' + sx], 0), cv: cv };
       try { parent.postMessage({ t: 'st-tsel', n: n, m: m }, location.origin); } catch (er) { } try { t.setPointerCapture(e.pointerId); } catch (er) { } e.preventDefault();
@@ -878,7 +878,7 @@
         if (e.origin !== location.origin) return; var d = e.data || {};
         if (d.t === 'st-center') { if (e.source === parent) centerSelected(); return; }
         if (d.t === 'st-content' && d.story) { applyStory(d.story); if (started) render(); else start(); mark(); }
-        else if (d.t === 'st-tsel-set') { var cvEl = document.getElementById('cover'); if (cvEl) { cvEl.querySelectorAll('.cv-sel').forEach(function (x) { x.classList.remove('cv-sel'); }); var tt = cvEl.querySelector(d.n === 'title' ? '.cv-t' : d.n === 'sub' ? '.cv-s' : '.cv-bw'); if (tt) { tt.classList.add('cv-sel'); tt.scrollIntoView({ block: 'center' }); } } }
+        else if (d.t === 'st-tsel-set') { var cvEl = document.getElementById('cover'); if (cvEl) { cvEl.querySelectorAll('.cv-sel').forEach(function (x) { x.classList.remove('cv-sel'); }); var tt = cvEl.querySelector(d.n === 'title' ? '.cv-t' : d.n === 'sub' ? '.cv-s' : d.n === 'image' ? '.cv-lamp' : '.cv-bw'); if (tt) { tt.classList.add('cv-sel'); tt.scrollIntoView({ block: 'center' }); } } }
         else if (d.t === 'st-sel') { sel = +d.i; var el = mark(); if (el && d.scroll) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
       });
       document.addEventListener('click', function (e) {
