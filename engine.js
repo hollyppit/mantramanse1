@@ -155,6 +155,8 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     return months;
   }
   function solarToLunar(y, m, d) {
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    if (![y, m, d].every(Number.isInteger) || dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) throw new Error('존재하지 않는 날짜입니다');
     const J = jdnFromYMD(y, m, d);
     for (let ly = y; ly >= y - 1; ly--) {
       const ms = lunarYearMonths(ly); if (!ms) continue;
@@ -163,6 +165,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     return null;
   }
   function lunarToSolar(ly, m, d, leap) {
+    if (![ly, m, d].every(Number.isInteger) || m < 1 || m > 12 || d < 1) throw new Error('존재하지 않는 음력 날짜입니다');
     const ms = lunarYearMonths(ly); if (!ms) throw new Error('지원 범위를 벗어난 음력 연도입니다');
     const mo = ms.find(x => x.m === m && x.leap === !!leap);
     if (!mo) throw new Error(leap ? `${ly}년에는 윤${m}월이 없습니다` : '존재하지 않는 음력 월입니다');
@@ -976,21 +979,29 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
 
   // ───────────── 메인 ─────────────
   function compute(inp) {
+    if (!inp || typeof inp !== 'object') throw new Error('출생 정보를 입력하세요');
     let { year, month, day } = inp;
+    if (![year, month, day].every(Number.isInteger)) throw new Error('년·월·일은 정수로 입력하세요');
+    if (inp.calendar && !['solar', 'lunar'].includes(inp.calendar)) throw new Error('지원하지 않는 달력 기준입니다');
+    if (inp.timeMode && !Object.prototype.hasOwnProperty.call(TIME_MODES, inp.timeMode)) throw new Error('지원하지 않는 시간 기준입니다');
+    if (inp.jasi && !['jeong', 'ya'].includes(inp.jasi)) throw new Error('지원하지 않는 자시 기준입니다');
     if (year < MIN_Y || year > MAX_Y) throw new Error(`${MIN_Y}~${MAX_Y}년만 지원합니다`);
     let lunar = null;
     if (inp.calendar === 'lunar') {
       lunar = { y: year, m: month, d: day, leap: !!inp.leap };
       [year, month, day] = lunarToSolar(year, month, day, inp.leap);
+      if (year < MIN_Y || year > MAX_Y) throw new Error('음력 변환 결과가 지원 양력 연도 범위를 벗어납니다');
     } else {
       const dt = new Date(Date.UTC(year, month - 1, day));
-      if (dt.getUTCMonth() !== month - 1) throw new Error('존재하지 않는 날짜입니다');
+      if (dt.getUTCFullYear() !== year || dt.getUTCMonth() !== month - 1 || dt.getUTCDate() !== day) throw new Error('존재하지 않는 날짜입니다');
       lunar = solarToLunar(year, month, day);
     }
     const hourKnown = inp.hour != null && inp.hour !== '';
-    const h = hourKnown ? +inp.hour : 12, mi = hourKnown ? +(inp.minute || 0) : 0;
+    const h = hourKnown ? +inp.hour : 12, mi = hourKnown ? +(inp.minute == null || inp.minute === '' ? 0 : inp.minute) : 0;
+    if (!Number.isInteger(h) || h < 0 || h > 23 || !Number.isInteger(mi) || mi < 0 || mi > 59) throw new Error('출생 시간은 0~23시, 분은 0~59분으로 입력하세요');
     const utc = wallToUtc(year, month, day, h, mi);
     const lon = inp.lon ?? 126.98;
+    if (!Number.isFinite(lon) || lon < -180 || lon > 180) throw new Error('경도는 -180~180 범위의 숫자로 입력하세요');
     const timeMode = inp.timeMode || 'lmt';
     const jasi = inp.jasi || 'jeong';
     const P = pillarsFor(utc, lon, timeMode, jasi, hourKnown);
