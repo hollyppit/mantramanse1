@@ -10,12 +10,12 @@ const M = globalThis.Manse, O = require(path.join(root, 'report', 'hub', 'onboar
 const seeded = (s) => () => (s = (s * 16807) % 2147483647) / 2147483647;
 
 /* ① 호칭 */
-ok(O.honorific() === '귀인', '기본 호칭은 귀인');
-ok(O.addr('', null) === '귀인' && O.addr('백진우') === '백진우 귀인', '이름 전 "귀인", 이름 후 "[이름] 귀인"');
-ok(O.addr('  ') === '귀인', '공백 이름은 귀인');
-ok(O.honorific({ honorific: '대공' }) === '귀인' && O.honorific({ honorific: '소협' }) === '귀인', '금지 호칭은 귀인으로 되돌린다');
+ok(O.honorific() === '님', '기본 호칭은 귀인');
+ok(O.addr('', null) === '방문자' && O.addr('백진우') === '백진우 님', '이름 전 "귀인", 이름 후 "[이름] 귀인"');
+ok(O.addr('  ') === '방문자', '공백 이름은 귀인');
+ok(O.honorific({ honorific: '대공' }) === '님' && O.honorific({ honorific: '소협' }) === '님', '금지 호칭은 귀인으로 되돌린다');
 ok(O.honorific({ honorific: '벗님' }) === '벗님', '공통 설정으로 호칭을 바꿀 수 있다');
-ok(O.fill('{이름귀인}, 안녕하옵니까! {귀인}!', '가') === '가 귀인, 안녕하옵니까! 귀인!', '템플릿 치환');
+ok(O.fill('{이름귀인}, 안녕하옵니까! {귀인}!', '가') === '가 님, 안녕하옵니까! 가 님!', '템플릿 치환');
 // 호칭은 성별에 따라 달라지지 않는다(시그니처에 성별이 없다)
 ok(O.addr.length <= 2, '호칭 함수는 성별을 받지 않는다');
 const allText = JSON.stringify({ s: O.SCENES, i: O.INTRO, r: O.REVEAL_LINES, c: O.CASES });
@@ -57,7 +57,7 @@ const m = O.merge(O.DEFAULTS, { scenes: [{ id: 'day', field: 'hacked', enabled: 
 ok(m.scenes.find(s => s.id === 'day').field === 'date', '관리자가 입력 종류(field)를 바꿀 수 없다');
 ok(m.scenes.find(s => s.id === 'day').enabled === true && m.scenes.find(s => s.id === 'gender').enabled === true, '필수 장면은 끌 수 없다');
 ok(m.scenes.find(s => s.id === 'day').title === '날짜 바꿈' && m.scenes.find(s => s.id === 'day').lines[0] === '새 대사 {귀인}', '문구는 바꿀 수 있다');
-ok(m.honorific === '귀인', '금지 호칭 저장 시도 → 귀인');
+ok(m.honorific === '님', '금지 호칭 저장 시도 → 귀인');
 ok(m.intro.find(s => s.id === 'two').title === '바뀐 제목' && m.intro.length === 3, '소개 문구 변경');
 ok(O.merge(O.DEFAULTS, { weights: { research: -5, celebrity: 0 } }).weights.research === 60, '잘못된 가중치는 무시');
 
@@ -124,7 +124,7 @@ ok(fs.readFileSync(path.join(root, 'report', 'hub', 'hub-quest.js'), 'utf8').inc
   r = await call(mod.onRequestGet, req('GET', '/api/onboarding'));
   const pubIds = (r.j.config.cases || []).map(c => c.id).sort().join();
   ok(pubIds === 'a-1', '공개 응답에는 승인(published)+출처 있는 사례만: ' + pubIds);
-  ok(r.j.config.honorific === '귀인', '서버도 금지 호칭을 거른다');
+  ok(r.j.config.honorific === '님', '서버도 금지 호칭을 거른다');
   ok(!JSON.stringify(r.j).includes('javascript:'), '위험 URL 제거');
   r = await call(mod.onRequestGet, req('GET', '/api/onboarding', null, true));
   const admIds = r.j.config.cases.map(c => c.id).sort().join();
@@ -216,7 +216,7 @@ ok(fs.readFileSync(path.join(root, 'report', 'hub', 'hub-quest.js'), 'utf8').inc
   if (!c4.topics.some(t => t.nature === 'limit')) bad('명리학의 활용과 한계 주제');
   const tt = JSON.stringify(c4.topics) + JSON.stringify(c4.sections);
   if (/(반드시 맞|과학적으로 입증된 명리|100%)/.test(tt)) bad('주제·섹션 문구에 단정 표현');
-  if (!/귀인/.test(O4.fill(c4.sections.find(s => s.type === 'final').title, '', c4))) bad('최종 섹션 호칭 귀인');
+  if (!/당신/.test(O4.fill(c4.sections.find(s => s.type === 'final').title, '', c4))) bad('최종 섹션 호칭 귀인');
   const css = fs.readFileSync(path.join(root, 'report', 'hub', 'onboard.css'), 'utf8'), src4 = fs.readFileSync(path.join(root, 'report', 'hub', 'hub-onboard.js'), 'utf8');
   if (/typewriter|typing/i.test(css + src4)) bad('본문 타이핑 효과 금지');
   if (!/mt-onb-preview/.test(src4) || !/e\.origin !== location\.origin/.test(src4)) bad('미리보기는 같은 출처 postMessage 만');

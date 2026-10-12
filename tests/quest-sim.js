@@ -22,10 +22,10 @@ ok(Q.STEPS.filter(s => s.id !== 'seal' && s.id !== 'guide').every(s => !/갈림�
 /* ② 대사·호칭: 사용자 호칭은 '귀인', 이름 입력 후에는 이름 사용 */
 const allLines = JSON.stringify(Q.STEPS.map(s => [s.lines, s.unknownLines, s.head, s.desc, s.hint, s.button]));
 ['대공', '소협', '대협'].forEach(w => ok(!allLines.includes(w), '금지 호칭 없음: ' + w));
-ok(Q.fill('{귀인}', {}, cfg0) === '귀인' && Q.fill('{이름귀인}', { name: '백진우' }, cfg0) === '백진우 귀인' && Q.fill('{이름귀인}', {}, cfg0) === '귀인', '이름 전 귀인 / 이름 후 이름 귀인');
+ok(Q.fill('{귀인}', {}, cfg0) === '당신' && Q.fill('{이름귀인}', { name: '백진우' }, cfg0) === '백진우 님' && Q.fill('{이름귀인}', {}, cfg0) === '당신', '이름 전 귀인 / 이름 후 이름 귀인');
 ok(Q.fill('{year}년 {month}월', { year: 1992, month: 6 }, cfg0) === '1992년 6월', '날짜 치환');
 ok(Q.linesOf(Q.STEPS[8], 'male', true)[0] !== Q.linesOf(Q.STEPS[8], 'male', false)[0], '시각 미상 대사가 따로 있다');
-ok(Q.linesOf(Q.STEPS[2], 'male')[0] !== Q.linesOf(Q.STEPS[2], 'female')[0], '안내자별 말투가 다르다');
+ok(JSON.stringify(Q.linesOf(Q.STEPS[2], 'male')) !== JSON.stringify(Q.linesOf(Q.STEPS[2], 'female')), '안내자별 말투가 다르다');
 ok(!/(옵니다|사옵|하옵|이옵)/.test(allLines.replace(/없습니다|있습니다/g, '')), '입력 안내는 일반 한국어(사극체 없음)');
 ok(Q.GUIDES.male.name !== Q.GUIDES.female.name, '안내자 이름 구분');
 

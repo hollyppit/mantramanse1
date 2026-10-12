@@ -7,13 +7,13 @@
   /* ── 호칭 ─────────────────────────────────────────────────────
      세계관 속 존칭. 성별과 관계없이 같고, 특정 길신(吉神)이나 타고난 운명을 단정하는 뜻이 아니다.
      바꾸려면 config.honorific 한 곳만 바꾼다(관리자 "온보딩" 탭). */
-  var DEFAULT_HONORIFIC = '귀인';
+  var DEFAULT_HONORIFIC = '님';
   var FORBIDDEN_TITLES = ['대공', '소협', '대협']; // 이번 개편에서 쓰지 않기로 한 호칭
-  function honorific(cfg) { var h = cfg && typeof cfg.honorific === 'string' ? cfg.honorific.trim() : ''; return h && FORBIDDEN_TITLES.indexOf(h) < 0 ? h.slice(0, 8) : DEFAULT_HONORIFIC; }
+  function honorific(cfg) { var h = cfg && typeof cfg.honorific === 'string' ? cfg.honorific.trim() : ''; return h && h !== '귀인' && FORBIDDEN_TITLES.indexOf(h) < 0 ? h.slice(0, 8) : DEFAULT_HONORIFIC; }
   // 이름이 있으면 "[이름] 귀인", 없으면 "귀인"
-  function addr(name, cfg) { var n = String(name || '').trim().slice(0, 20); return n ? n + ' ' + honorific(cfg) : honorific(cfg); }
+  function addr(name, cfg) { var n = String(name || '').trim().slice(0, 20); return n ? n + ' ' + honorific(cfg) : '방문자'; }
   // 대사 안의 {귀인}(호칭) · {이름귀인}([이름] 귀인) 치환
-  function fill(text, name, cfg) { return String(text == null ? '' : text).replace(/\{이름귀인\}/g, addr(name, cfg)).replace(/\{귀인\}/g, honorific(cfg)); }
+  function fill(text, name, cfg) { var t = String(text == null ? '' : text); t = t.replace(/\{귀인\}을 어떤 이름으로 기록해 드리면 될까요\?/, '어떤 이름으로 기록해 드릴까요?').replace(/기록을 열기 전에 \{귀인\}의 성함부터 확인하겠습니다\./, '어떤 이름으로 기록해 드릴까요?'); var who = String(name || '').trim() ? addr(name, cfg) : '당신'; return t.replace(/\{이름귀인\}/g, who).replace(/\{귀인\}/g, who).replace(/귀인/g, who); }
 
   /* ── 후킹 사례 ─────────────────────────────────────────────────
      status: draft(초안) → review(검토 중) → verified(검증 완료) → published(공개). 공개 풀에는 published 만 들어간다.

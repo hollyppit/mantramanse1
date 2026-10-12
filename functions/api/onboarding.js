@@ -130,7 +130,7 @@ function clean(b, notes) {
   if (['timeline', 'home'].includes(b.resultDestination)) out.resultDestination = b.resultDestination;
   if (typeof b.forceOnboarding === 'boolean') out.forceOnboarding = b.forceOnboarding;
   if (b.bridge && typeof b.bridge === 'object') out.bridge = { toCelebrity: s(b.bridge.toCelebrity, 240), toIntro: s(b.bridge.toIntro, 240) };
-  if (typeof b.honorific === 'string') { const h = s(b.honorific, 8); out.honorific = h && !FORBIDDEN.includes(h) ? h : '귀인'; }
+  if (typeof b.honorific === 'string') { const h = s(b.honorific, 8); out.honorific = h && h !== '귀인' && !FORBIDDEN.includes(h) ? h : '님'; }
   if (b.weights && typeof b.weights === 'object') { const r = Math.max(0, Math.min(100, +b.weights.research || 0)), c = Math.max(0, Math.min(100, +b.weights.celebrity || 0)); if (r + c > 0) out.weights = { research: r, celebrity: c }; }
   if (Array.isArray(b.cases)) { const seen = new Set(); out.cases = b.cases.slice(0, 100).map(c => cleanCase(c, notes)).filter(c => c && !seen.has(c.id) && seen.add(c.id)); }
   if (Array.isArray(b.removedCases)) out.removedCases = b.removedCases.slice(0, 50).map(x => String(x)).filter(x => ID.test(x));
