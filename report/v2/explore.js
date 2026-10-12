@@ -21,17 +21,17 @@
 
   /* ── 세계 기본 정의. match: 챕터 base/id 를 검사하는 정규식 문자열(첫 번째로 맞는 세계). chapters: 관리자가 직접 연결한 챕터 ID(우선). ── */
   var DEFAULT_WORLDS = [
-    { id: 'w1', order: 1, name: '천명의 서고', line: '나의 본질과 타고난 기질', desc: '사주 원국, 일간·일주, 오행과 십성, 강약과 뿌리, 강점과 그림자를 읽습니다.', color: '#1B2347', accent: '#8FA6E8', icon: '📜',
+    { id: 'w1', order: 1, bgImage:'/report/hub/quest/archive.webp', name: '봉인된 서고', line: '나의 본질과 타고난 기질', desc: '사주 원국, 일간·일주, 오행과 십성, 강약과 뿌리, 강점과 그림자를 읽습니다.', color: '#1B2347', accent: '#8FA6E8', icon: '命',
       match: ['^c-char', '^c0[1-5]$', '^life_(self_who|tengods|stars)$', '^deep_(car|proscons|stages)$', '^life_ik_SELF'] },
-    { id: 'w2', order: 2, name: '황금의 성채', line: '직업 · 재물 · 성공', desc: '직업 적성, 유리한 업종과 불리한 업종, 사업과 독립, 재물 흐름을 읽습니다.', color: '#3A2C0E', accent: '#E3B341', icon: '🏯',
+    { id: 'w2', order: 2, bgImage:'/report/hub/quest/office.webp', name: '재물의 누각', line: '직업 · 재물 · 성공', desc: '직업 적성, 유리한 업종과 불리한 업종, 사업과 독립, 재물 흐름을 읽습니다.', color: '#3A2C0E', accent: '#E3B341', icon: '財',
       match: ['^c0[678]$', '^life_(career_style|money_nature|career_timing|money_timing)$', '^deep_(jobs|wealth)$', '^life_ik_(MONEY|CAREER)'] },
-    { id: 'w3', order: 3, name: '인연의 정원', line: '사랑과 인간관계', desc: '연애 성향, 결혼과 배우자, 대인관계, 가족과 자녀, 궁합을 읽습니다.', color: '#3A1B2A', accent: '#E58AA8', icon: '🌸',
+    { id: 'w3', order: 3, bgImage:'/report/hub/quest/reeds.webp', name: '인연의 정원', line: '사랑과 인간관계', desc: '연애 성향, 결혼과 배우자, 대인관계, 가족과 자녀, 궁합을 읽습니다.', color: '#3A1B2A', accent: '#E58AA8', icon: '緣',
       match: ['^c(09|1[0-3])$', '^life_(love_style|marriage_who|relation_style|love_timing|marriage_timing|relation_timing)$', '^deep_(love|spouse|marriage|children|ilju)$', '^life_ik_(LOVE|MARRIAGE|RELATIONSHIP)'] },
-    { id: 'w4', order: 4, name: '시간의 회랑', line: '인생의 흐름과 변화', desc: '대운·세운·월운과 인생의 전환점, 시기별 운의 흐름을 읽습니다.', color: '#102B33', accent: '#6FD0D8', icon: '⏳',
+    { id: 'w4', order: 4, bgImage:'/report/hub/quest/paths.webp', name: '시간의 회랑', line: '인생의 흐름과 변화', desc: '대운·세운·월운과 인생의 전환점, 시기별 운의 흐름을 읽습니다.', color: '#102B33', accent: '#6FD0D8', icon: '時',
       match: ['^c(00|1[5-8])$', '^life_(prologue|here|future)$', '^deep_(daewoon|seun|wolun)$', '^life_ik_TIMING'] },
-    { id: 'w5', order: 5, name: '윤회의 문', line: '전생과 상징적 서사', desc: '전생의 정체와 업보를 현재의 기질과 이어서 읽는 상징적 이야기입니다. 역사적 사실이나 검증된 개인 정보가 아닙니다.', color: '#241636', accent: '#B58CF0', icon: '🌀',
+    { id: 'w5', order: 5, bgImage:'/report/hub/quest/mirror.webp', name: '기억 너머의 문', line: '전생과 상징적 서사', desc: '전생의 정체와 업보를 현재의 기질과 이어서 읽는 상징적 이야기입니다. 역사적 사실이나 검증된 개인 정보가 아닙니다.', color: '#241636', accent: '#B58CF0', icon: '憶',
       notice: '사주 상징을 모티브로 한 창작 판타지 콘텐츠입니다.', match: ['^c14$', '^deep_past$'] },
-    { id: 'w6', order: 6, name: '개운의 성역', line: '앞으로의 선택과 행동', desc: '개운법, 운동·자기계발, 행운 명소, 생활 습관과 종합 행동 가이드를 정리합니다.', color: '#12301F', accent: '#7ED69A', icon: '⛩',
+    { id: 'w6', order: 6, bgImage:'/report/hub/quest/courtyard.webp', name: '새벽의 마당', line: '앞으로의 선택과 행동', desc: '개운법, 운동·자기계발, 행운 명소, 생활 습관과 종합 행동 가이드를 정리합니다.', color: '#12301F', accent: '#7ED69A', icon: '路',
       match: ['^c(19|20)$', '^life_(action|actions)$', '^deep_(remedy|places|health)$', '^life_ik_ACTION'] },
   ];
   // 어느 세계에도 안 맞는 챕터가 사라지지 않도록, 막 기준 대체 세계
@@ -45,6 +45,9 @@
       Object.keys(s).forEach(function (k) { if (s[k] !== '' && s[k] != null && !(Array.isArray(s[k]) && !s[k].length && k === 'chapters')) b[k] = s[k]; });
       if (s.enabled === false) b.enabled = false; if (s.access === 'paid') b.access = 'paid';
       if (Array.isArray(s.chapters) && s.chapters.length) b.match = []; // 관리자가 챕터를 직접 연결하면 기본 규칙 대신 그것만 쓴다
+      var oldNames = { w1:'천명의 서고', w2:'황금의 성채', w5:'윤회의 문', w6:'개운의 성역' };
+      var def = DEFAULT_WORLDS.filter(function (w) { return w.id === s.id; })[0];
+      if (def && b.name === oldNames[s.id]) { b.name = def.name; b.icon = def.icon; }
       by[s.id] = b;
     });
     return Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return (a.order || 0) - (b.order || 0); });

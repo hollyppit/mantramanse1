@@ -1,4 +1,4 @@
-/* 황금의 성채 — 직업·사업·재물을 주제별로 비교하는 인터랙션.
+/* 재물의 누각 — 직업·사업·재물을 주제별로 비교하는 인터랙션.
    ① 직업: 12개 분야 중 최대 2개를 골라 강점·주의·적합도·부담을 나란히 비교 ② 사업·독립: 일하는 방식 축(독립↔조직 등)과 부담이 큰 환경 ③ 재물: 앞으로 10년의 재물 지수와 구성 요소.
    값과 문장은 모두 엔진(careerProfile·evaluateDomainLuck)이 만든 것이다. 새 해석·수치를 만들지 않으며, 성공이나 수입을 보장하는 표현을 쓰지 않는다.
    R.Castle.model(M, ch, now) → { jobs, style, envs, wealth }   R.Castle.html(model, sel, esc)        검증: node tests/castle-sim.js */
@@ -38,7 +38,7 @@
 
   /** sel: { tab: 'job'|'biz'|'wealth', jobs: [key, key?], year: n } */
   function html(m, sel, esc) {
-    sel = sel || {}; var tab = sel.tab || 'job', h = '<section class="cs" aria-label="황금의 성채 · 직업·사업·재물"><div class="cs-tabs" role="tablist">' +
+    sel = sel || {}; var tab = sel.tab || 'job', h = '<section class="cs" aria-label="재물의 누각 · 직업·사업·재물"><div class="cs-tabs" role="tablist">' +
       [['job', '직업 비교'], ['biz', '사업·독립'], ['wealth', '재물 흐름']].map(function (t) { return '<button type="button" role="tab" data-cst="' + t[0] + '" aria-selected="' + (tab === t[0]) + '" class="' + (tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
     if (tab === 'job') {
       var pick = (sel.jobs && sel.jobs.length ? sel.jobs : [m.jobs[0].key, m.jobs[1].key]).filter(function (k) { return m.jobs.some(function (j) { return j.key === k; }); });

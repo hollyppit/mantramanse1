@@ -1,0 +1,9 @@
+/* 한국적 초현실 오컬트: 먹빛·한지·낡은 금·주사. 읽기 영역은 밝은 본문 대비를 유지한다. */
+:root{--bg:#080b0f;--bg-2:#0c1115;--bg2:#0c1115;--panel:#111619;--ink:#f1eee7;--ink2:#c3c0b9;--ink-2:#c3c0b9;--ink3:#aaa294;--ink-3:#aaa294;--gold:#d9c49e;--gold-d:#9c8462;--gold-l:#eadcc2;--line:rgba(217,196,158,.25);--line2:rgba(241,238,231,.12);--red:#a35243}
+body{background-color:#080b0f}#v-home{background:radial-gradient(100% 70% at 50% 0%,#25302b55,transparent 65%),var(--bg)}
+#productGuide{background:linear-gradient(180deg,#0c1115e8,#080b0f)}.pg-cards article{border-radius:2px;background:linear-gradient(120deg,#141a1ddd,#080b0feb)}
+#hub .btn,#qs .btn,#v-home .btn,#v-read .btn{border-radius:0;border:1px solid #c4a37c9c;background:#0c1119b9;color:#f1eee7;box-shadow:none}#hub .btn:hover,#qs .btn:hover,#v-home .btn:hover,#v-read .btn:hover{background:#c4a47e;color:#161617}
+.xp-world,.xp-card,.life-card{border-color:rgba(217,196,158,.25)}.cn-ph{background:radial-gradient(110% 85% at 50% 30%,#33443b88,#080b0f 75%)}
+.cn-stage .cn-text{text-shadow:0 3px 22px #000}.cn-stage .cn-dim{background:#050809}.cn-stage .cn-sub{color:#e2d5bb}
+#hub .cn-art,#hub .cn-pic{border-color:rgba(217,196,158,.25)}#cover .cv-s{color:#c3c0b9}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}

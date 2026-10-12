@@ -5,11 +5,11 @@
   // 運路 5막. 命·性·勢(타고난 것) → 財·業·緣(살아가는 자리) → 壁·機(반복과 기회) → 運·時(흐르는 때) → 路(선택할 길). 제목은 막의 이름, line 은 막이 시작될 때 화면에 나오는 한 줄이다.
   // 챕터별 第N章 한자 분류(命性勢財業緣壁機運時路)는 translator.js 의 HOOK/UNYEON 이 맡는다(챕터가 20개 이상이어도 상위 분류 11개로 묶는다).
   var ACTS = [
-    { id: 1, title: '命 · 性 · 勢', roman: 'ACT I', line: '타고난 것.', pdfDone: '타고난 명(命)과 기질, 힘의 방향이 리포트에 기록되었습니다.' },
-    { id: 2, title: '財 · 業 · 緣', roman: 'ACT II', line: '살아가는 자리.', pdfDone: '재물·업·인연 분석이 추가되었습니다.' },
-    { id: 3, title: '壁 · 機', roman: 'ACT III', line: '반복되는 벽,\n그리고 찾아오는 기회.', pdfDone: '반복되는 문제의 뿌리가 추가되었습니다.' },
-    { id: 4, title: '運 · 時', roman: 'ACT IV', line: '그리고 이제,\n시간이 움직이기 시작한다.', pdfDone: '시간축 분석(대운·세운)이 추가되었습니다.' },
-    { id: 5, title: '路', roman: 'ACT V', line: '이제,\n선택할 길.', pdfDone: '움직일 때와 준비할 때를 가르는 사용설명서가 완성되었습니다.' },
+    { id: 1, title: '命 · 性 · 勢', roman: 'ACT I', line: '봉인된 서고에서,\n나의 바탕을 읽습니다.', pdfDone: '타고난 명(命)과 기질, 힘의 방향이 리포트에 기록되었습니다.' },
+    { id: 2, title: '財 · 業 · 緣', roman: 'ACT II', line: '누각과 정원 사이,\n일과 인연의 기록을 펼칩니다.', pdfDone: '재물·업·인연 분석이 추가되었습니다.' },
+    { id: 3, title: '壁 · 機', roman: 'ACT III', line: '오래된 거울 앞에서,\n반복되는 흔적을 마주합니다.', pdfDone: '반복되는 문제의 뿌리가 추가되었습니다.' },
+    { id: 4, title: '運 · 時', roman: 'ACT IV', line: '시간의 회랑에서,\n흐름을 따라갑니다.', pdfDone: '시간축 분석(대운·세운)이 추가되었습니다.' },
+    { id: 5, title: '路', roman: 'ACT V', line: '새벽의 마당에서,\n다음 길을 선택합니다.', pdfDone: '움직일 때와 준비할 때를 가르는 사용설명서가 완성되었습니다.' },
   ];
 
   function C(no, act, title, subtitle, kind, cats, extra) {

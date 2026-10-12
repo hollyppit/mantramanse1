@@ -31,7 +31,7 @@
     o = o || {}; var K = C(), b = K.build(scene, o.layers), c = b.c, segs = b.segments, tm = b.timing, reduce = !!o.reduce, rate = Math.max(0.25, +o.rate || 1), sc = function (ms) { return Math.round(ms / rate); }, fx = !!o.intro && !o.lowFx && !reduce;
     var cv = camVars(c, reduce), trans = K.limitTransition(c, !!o.actChange); trans = trans === 'dip-black' ? 'dip-black' : 'crossfade'; // 전환은 CROSSFADE · DIP_BLACK 두 가지만
     var motion = c.imageMotion === 'focus-pull' ? 'slow-zoom-in' : c.imageMotion; // 글자가 아닌 배경에도 흐림(blur) 효과는 쓰지 않는다
-    var m = o.media, pc = o.color || EL_COLOR[(scene.mediaIntent && scene.mediaIntent.elements && scene.mediaIntent.elements[0]) || 'water'];
+    var m = scene.conceptMedia || o.media, pc = o.color || EL_COLOR[(scene.mediaIntent && scene.mediaIntent.elements && scene.mediaIntent.elements[0]) || 'water'];
     var bg = '';
     if (scene.bg !== 'black' && m) {
       var vid = /video|transition/i.test(m.type || '') && (m.url || m.webmUrl) && !o.saveData;

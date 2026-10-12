@@ -63,13 +63,23 @@ console.log('3. 성별 데이터가 없을 때 · 본편 다리 · 스타일 분
   const ch = mk(1992, 8, 5, 1, 'M'), sd = R.SajuData.build(ch, { now }), b = birthOf(ch); sd.gender = 'X';
   const t = texts(K.build(sd, '', R.Narrator.heroVars(sd, ''), b, {})); ok(/한 사람이—/.test(t) && !/한 사내|한 여인/.test(t), '성별 없음 → 한 사람');
   const sd2 = R.SajuData.build(ch, { now }), bt = K.bridge().cinema.segments;
-  ok(bt[0].text === 'CHAPTER 01' && bt[1].text === '나의 기본 사주', '본편 다리 문구');
+  ok(bt[0].text === '첫 번째 기록' && bt[1].text === '나의 사주를 읽습니다', '본편 다리 문구');
   const vars = R.Narrator.heroVars(sd2, '백진우'), epic = T.prologue(sd2, '백진우', vars, { style: 'EPIC_WUXIA_PARODY', birth: b, nowYear: sd2.nowYear }), old = T.prologue(sd2, '백진우', vars), mini = T.prologue(sd2, '백진우', vars, { style: 'MINIMAL' });
   ok(epic[0].sceneId === 'ep_01' && epic[epic.length - 1].sceneId === 'ep_bridge' && epic.length === 11, 'EPIC: INTRO 10장면 + 다리 (' + epic.length + ')');
-  ok(old[0].sceneId === 'pro_1' && mini.map(s => s.sceneId).join() === 'pro_6,pro_title', '기본(CINEMATIC)·MINIMAL 분기');
+  ok(old[0].sceneId === 'ko_s01' && mini.map(s => s.sceneId).join() === 'pro_6,pro_title', '기본(CINEMATIC)·MINIMAL 분기');
   ok(!/"say"|voice/i.test(JSON.stringify(epic)), 'TTS 관련 필드 없음');
 }
 
+{
+  const chart = mk(1992, 8, 5, null, 'M'), sd = R.SajuData.build(chart, { now });
+  const sc = T.prologue(sd, '백진우', R.Narrator.heroVars(sd, '백진우'), { style:'KOREAN_OCCULT', birth:birthOf(chart) });
+  const pillarScene = sc.find(x => x.pillars);
+  ok(K.DEFAULTS.style === 'KOREAN_OCCULT' && K.DEFAULTS.humor === 'OFF', '기본 콘셉트·패러디 해제');
+  ok(pillarScene.pillars[0].hj === '' && pillarScene.pillars[1].hj === sd.pillars.day.hanja, '새 오프닝 시각 미상·실제 일주 보존');
+  ok(sc.some(x => x.conceptMedia && x.conceptMedia.url === '/report/hub/quest/archive.webp'), '한국적 서고 배경 연결');
+  ok(texts(sc).includes('백진우 님') && !/강호|무림|검객/.test(texts(sc)), '이름 호칭·무협 표현 제거');
+  ok(K.totalMs(sc) <= 30000, '새 오프닝 전체 30초 이내');
+}
 console.log('4. 스키마 확장(hold·cue·big·lead·tail·MAXIMUM)이 정리 단계에서 살아남는지 + 서버 미러');
 {
   const seg = { text: '壬申年', hold: 1200, cue: 'deepDrum', big: true, block: 0, emphasis: 'impact', animation: 'fade' };

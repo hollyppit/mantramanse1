@@ -12,7 +12,7 @@ const fails = []; const ok = (c, m) => { if (!c) fails.push(m); };
 
 // 1. 기본 세계
 const W = X.mergeWorlds(null);
-ok(W.length === 6 && W.map(w => w.name).join() === '천명의 서고,황금의 성채,인연의 정원,시간의 회랑,윤회의 문,개운의 성역', '기본 6개 세계 이름·순서');
+ok(W.length === 6 && W.map(w => w.name).join() === '봉인된 서고,재물의 누각,인연의 정원,시간의 회랑,기억 너머의 문,새벽의 마당', '기본 6개 세계 이름·순서');
 ok(W.every(w => w.enabled && w.access === 'free'), '기본은 모두 활성·무료(가격 정책 미확정)');
 ok(/창작 판타지/.test(W[4].notice), '윤회의 문에 창작 판타지 표시');
 

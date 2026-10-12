@@ -28,7 +28,7 @@ for (const [y, m, d, h, g] of cases) {
   const P = sd.pillars; ok(tx.includes(P.year.hanja + '年') && tx.includes(P.month.hanja + '月') && tx.includes(P.year.ko + '년'), `${tag} 연주·월주는 만세력 값 그대로`);
   const pc = sc.find(s => s.pillars); ok(pc && pc.pillars.map(p => p.hj).join('') === (h == null ? '' : P.hour.hanja) + P.day.hanja + P.month.hanja + P.year.hanja, `${tag} 명식 카드가 만세력 값(時日月年)과 같다`);
   ok(pc && /四柱八字/.test(pc.cinema.segments[pc.pillarsAt].text), `${tag} 명식은 四柱八字 제목이 나온 뒤에 펼쳐진다`);
-  ok(sc[sc.length - 1].sceneId === 'ep_bridge' && /CHAPTER01/.test(flat([sc[sc.length - 1]])), `${tag} 마지막은 CHAPTER 01 로 이어지는 다리`);
+  ok(sc[sc.length - 1].sceneId === 'ep_bridge' && /첫번째기록/.test(flat([sc[sc.length - 1]])), `${tag} 마지막은 CHAPTER 01 로 이어지는 다리`);
   ok(sc[0].bg === 'black' && sc[0].cinema.segments[0].text === '때는,', `${tag} 검은 화면에서 "때는,"로 시작`);
   const hero = { M: '한 사내가 태어났으니—', F: '한 여인이 태어났으니—' }[g]; ok(segsOf(sc).some(s => s.text === hero), `${tag} 성별 문장: ${hero}`);
 }

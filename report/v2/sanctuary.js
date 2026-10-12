@@ -1,4 +1,4 @@
-/* 개운의 성역 — 앞으로의 선택과 행동을 한곳에 모은다.
+/* 새벽의 마당 — 앞으로의 선택과 행동을 한곳에 모은다.
    ① 개운법: 행동·성장·사람·공간·환경·타이밍 6유형(운동 포함)을 유형별로 보고, "왜 지금 이 시기에 맞는지" 근거 태그를 확인
    ② 명소: 용신·희신 오행에 맞춘 명산대천·풍수 명당 순위(R.Deep.placeList — 챕터 본문과 같은 점수)
    ③ 실천 계획: 4단계 전략·이번 주 체크리스트(체크는 기기에만 저장)·피할 행동
@@ -35,7 +35,7 @@
   /** sel: { tab:'remedy'|'places'|'plan'|'report', type, openId }  st: { checks:{text:1}, readDone, readTotal, unlocked } */
   function html(m, sel, st, esc) {
     sel = sel || {}; st = st || {}; var tab = sel.tab || 'remedy';
-    var h = '<section class="cs sn" aria-label="개운의 성역 · 개운법과 종합 행동 가이드"><div class="cs-tabs sn-tabs" role="tablist">' +
+    var h = '<section class="cs sn" aria-label="새벽의 마당 · 개운법과 종합 행동 가이드"><div class="cs-tabs sn-tabs" role="tablist">' +
       [['remedy', '개운법'], ['places', '명소'], ['plan', '실천 계획'], ['report', '종합 리포트']].map(function (t) { return '<button type="button" role="tab" data-snt="' + t[0] + '" aria-selected="' + (tab === t[0]) + '" class="' + (tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
     if (tab === 'remedy') {
       var ty = m.types.indexOf(sel.type) >= 0 ? sel.type : m.types[0];

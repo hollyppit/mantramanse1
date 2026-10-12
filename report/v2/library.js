@@ -1,4 +1,4 @@
-/* 천명의 서고 — 사주 네 기둥과 십성을 직접 눌러 해석을 확인하는 인터랙션.
+/* 봉인된 서고 — 사주 네 기둥과 십성을 직접 눌러 해석을 확인하는 인터랙션.
    값(글자·십성·지장간·12운성·신살·십성군 비중)은 모두 엔진/SajuData 에서 읽고, 설명 문장은 기존 풀이 텍스트(LifeDoc GRP·WEAK·PILLAR, StoryComposer.TOPICS.self)를 그대로 쓴다.
    새 해석 문장을 만들지 않는다. 비중이 0인 십성군은 "원국에 드러나지 않음"으로만 표시하고 능력의 부재로 단정하지 않는다.
    R.Library.model(M, ch, sd) → { pillars, groups }   R.Library.html(model, sel, esc) → HTML      검증: node tests/library-sim.js */
@@ -49,7 +49,7 @@
 
   /** sel: { p: 'day'|… | null, g: '비겁'|… | null } */
   function html(m, sel, esc) {
-    sel = sel || {}; var h = '<section class="lb" aria-label="천명의 서고 · 사주 네 기둥과 십성"><h3 class="lb-h">사주 네 기둥</h3><p class="lb-in">기둥이나 십성을 눌러 보세요. 같은 십성이 어느 자리에 있는지 함께 표시됩니다.</p>';
+    sel = sel || {}; var h = '<section class="lb" aria-label="봉인된 서고 · 사주 네 기둥과 십성"><h3 class="lb-h">사주 네 기둥</h3><p class="lb-in">기둥이나 십성을 눌러 보세요. 같은 십성이 어느 자리에 있는지 함께 표시됩니다.</p>';
     var hi = sel.g;
     h += '<div class="lb-pl" role="group" aria-label="사주 네 기둥">' + m.pillars.map(function (p) {
       if (p.unknown) return '<div class="lb-p unk"><b>' + E(p.label) + '</b><span class="lb-u">태어난 시간을<br>몰라 비워 둠</span></div>';

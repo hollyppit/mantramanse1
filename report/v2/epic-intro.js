@@ -8,8 +8,8 @@
 // style: EPIC_WUXIA_JOURNEY(기본 · 정통 무협 오프닝, 모험·출정·路) · EPIC_WUXIA_PARODY(예전 패러디) · CINEMATIC · MINIMAL
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
-  var STYLES = ['EPIC_WUXIA_JOURNEY_SHORT', 'EPIC_WUXIA_JOURNEY', 'EPIC_WUXIA_PARODY', 'CINEMATIC', 'MINIMAL'], HUMORS = ['OFF', 'SUBTLE', 'PARODY'];
-  var DEFAULTS = { style: 'EPIC_WUXIA_JOURNEY_SHORT', humor: 'PARODY', epicLevel: 5 };
+  var STYLES = ['KOREAN_OCCULT', 'EPIC_WUXIA_JOURNEY_SHORT', 'EPIC_WUXIA_JOURNEY', 'EPIC_WUXIA_PARODY', 'CINEMATIC', 'MINIMAL'], HUMORS = ['OFF', 'SUBTLE', 'PARODY'];
+  var DEFAULTS = { style: 'KOREAN_OCCULT', humor: 'OFF', epicLevel: 5 };
   var CAP_MS = 30000; // INTRO 최대 길이(운로 타이틀까지). 20~25초가 목표, 30초는 넘기지 않는다.
 
   // 사실로 입증할 수 없는 주장(INTRO 에서도 쓰지 않는다). 테스트가 검사한다.
@@ -293,8 +293,33 @@
   }
 
   // 본편으로 넘어가는 다리: 패러디는 여기서 끝난다. 문체는 본편과 같은 담백한 현대어.
+  // 한국적 초현실 서사: 상징은 장면에만, 사주 네 기둥은 원래 계산값 그대로.
+  function occult(sd, name, vars, birth, opts) {
+    var out = journeyShort(sd, name, null, birth, opts);
+    var lines = {
+      ep_s01: ['태어난 순간은 지나갔지만,', '그날의 기록은 남아 있습니다.'],
+      ep_s02: [String(name || '').trim() ? String(name).trim() + ' 님' : '당신의 기록'],
+      ep_s03: ['안개 너머의 서고에서,', '잠들어 있던 기록을 펼칩니다.'],
+      ep_s04: ['멈춰 있던 회랑에', '다시 시간이 흐릅니다.'],
+      ep_s05: ['네 기둥에 남은 기록.', '四柱八字', '이제 그 의미를 읽습니다.'],
+      ep_s06: ['운명의 기록', '타고난 기질에서, 지금의 선택까지.']
+    };
+    out.forEach(function (sc) {
+      var ls = lines[sc.sceneId]; if (!ls) return;
+      var art = {ep_s03:'archive',ep_s04:'paths',ep_s06:'courtyard'}[sc.sceneId];
+      if (art) sc.conceptMedia = { type:'image', url:'/report/hub/quest/' + art + '.webp' };
+      sc.sceneId = sc.sceneId.replace('ep_s', 'ko_s');
+      sc.cinema.segments = build(ls.map(function (t) { return S(t, 1800, { a: 'fade', min: 1000 }); }));
+      sc.cinema.transition = 'dip-black'; sc.cinema.motionIntensity = 1;
+      sc.cinema.bgmMood = 'ambient'; sc.cinema.overlayStrength = .6;
+      sc.cinema.visualMetaphor = '한국의 산수와 안개, 한지에 남은 먹빛 기록. 초현실적 공간 연출.';
+      if (sc.pillars) sc.pillarsAt = 1;
+      if (sc.sub) sc.sub = '기록을 읽고, 자신의 길을 선택합니다.';
+    });
+    return fit(out, SHORT_BODY_MS);
+  }
   function bridge() {
-    var segs = build([S('CHAPTER 01', 900, { a: 'fade', e: 'soft' }), S('나의 기본 사주', 2200, { a: 'fade', e: 'impact' })]);
+    var segs = build([S('첫 번째 기록', 900, { a: 'fade', e: 'soft' }), S('나의 사주를 읽습니다', 2200, { a: 'fade', e: 'impact' })]);
     return scene('ep_bridge', 'REALITY_CHECK', { sceneType: 'INTRO', lead: 300, tail: 500, pauseAfter: 0, pacing: 'MEDIUM', transition: 'dip-black', bgmMood: 'minimal', textPosition: 'center', textSize: 'L', overlayStrength: 1 }, segs, { bg: 'black', bgmCue: 'bgmDrone' });
   }
 
@@ -312,5 +337,5 @@
     return scenes;
   }
 
-  R.EpicIntro = { journey: journey, journeyShort: journeyShort, SHORT_CAP_MS: SHORT_CAP_MS, ANIM: ANIM, JOURNEY_CAP_MS: JOURNEY_CAP_MS, build: intro, bridge: bridge, totalMs: totalMs, fit: fit, timeWords: timeWords, pickPunch: pickPunch, PUNCH: PUNCH, STYLES: STYLES, HUMORS: HUMORS, DEFAULTS: DEFAULTS, CAP_MS: CAP_MS, FORBIDDEN: FORBIDDEN, BODY_BAN: BODY_BAN };
+  R.EpicIntro = { occult: occult, journey: journey, journeyShort: journeyShort, SHORT_CAP_MS: SHORT_CAP_MS, ANIM: ANIM, JOURNEY_CAP_MS: JOURNEY_CAP_MS, build: intro, bridge: bridge, totalMs: totalMs, fit: fit, timeWords: timeWords, pickPunch: pickPunch, PUNCH: PUNCH, STYLES: STYLES, HUMORS: HUMORS, DEFAULTS: DEFAULTS, CAP_MS: CAP_MS, FORBIDDEN: FORBIDDEN, BODY_BAN: BODY_BAN };
 })(typeof window !== 'undefined' ? window : globalThis);

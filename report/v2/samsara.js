@@ -1,4 +1,4 @@
-/* 윤회의 문 — 개인화된 전생 서사를 무빙툰 형태(전체 화면 컷 + 천천히 움직이는 카메라 + 문장)로 감상한다.
+/* 기억 너머의 문 — 개인화된 전생 서사를 무빙툰 형태(전체 화면 컷 + 천천히 움직이는 카메라 + 문장)로 감상한다.
    서사 문장은 새로 만들지 않는다: 이미 생성된 '전생의 모습'(deep_past, 없으면 c14) 챕터의 장면을 컷으로 나눠 보여 줄 뿐이다.
    이미지는 관리자가 올린 전생 에셋(past:십성군:오행:성별)을 쓰고, 없으면 색 바탕 + 한자(前)로 대신한다. 영상 슬롯이 있으면 영상을 쓴다.
    전생은 역사적 사실이나 검증된 개인 정보가 아니라 사주 상징을 모티브로 한 창작 판타지임을 모든 컷에 표시한다.
@@ -89,7 +89,7 @@
   function open(model, assets, videos, opts) {
     opts = opts || {}; var doc = root.document; if (!doc || !model) return null;
     var img = imageOf(model, assets) || ((model.frames.filter(function (f) { return f.img; })[0] || {}).img) || '', vid = !opts.saveData && !opts.reduce ? videoOf(model, assets, videos) : '';
-    var dlg = doc.createElement('dialog'); dlg.className = 'sm'; dlg.setAttribute('aria-label', '윤회의 문 · ' + model.title);
+    var dlg = doc.createElement('dialog'); dlg.className = 'sm'; dlg.setAttribute('aria-label', '기억 너머의 문 · ' + model.title);
     dlg.innerHTML = '<div class="sm-bg' + (img ? '' : ' none') + '"' + (img ? ' style="background-image:url(' + E(img) + ')"' : '') + '>' + (vid ? '<video src="' + E(vid) + '" poster="' + E(img) + '" muted loop playsinline autoplay preload="metadata"></video>' : '') + (img ? '' : '<span aria-hidden="true">前</span>') + '</div>' +
       '<div class="sm-sh" aria-hidden="true"></div><div class="sm-top"><span class="sm-nt' + (model.notice ? '' : ' sm-lb') + '">' + E(model.notice || model.label || '') + '</span><button type="button" class="chipbtn" data-smx>닫기</button></div>' +
       '<div class="sm-tx" role="region" aria-live="polite"></div><div class="sm-bar"><button type="button" class="chipbtn" data-smp aria-label="이전 컷">‹</button><div class="sm-dots" role="progressbar" aria-valuemin="1" aria-valuemax="' + model.frames.length + '"></div>' +

@@ -224,14 +224,14 @@
   /* ── 무협 슬라이드 툰 '귀인의 천명록' (6장면) ───────────────────
      lines: 수련생 대사(무협 사극체). hint/error/button 은 현대 한국어. field 는 입력 종류. face 는 표정 키. */
   var SCENES = [
-    { id: 'arrive', enabled: true, field: 'name', face: 'greet', theme: 'gate', title: '귀인의 등장', lines: ['오오… 마침내 오셨군요, {귀인}!', '소인이 {귀인}의 천명을 살피라는 명을 받았사옵니다!', '우선 {귀인}의 존함부터 여쭙겠사옵니다!'], hint: '이름 또는 별호를 입력하세요', button: '다음', image: '', bg: '' },
-    { id: 'day', enabled: true, field: 'date', face: 'ask', theme: 'scroll', title: '강호에 강림한 날', lines: ['{이름귀인}께서 이 강호에 강림하신 날은 언제이옵니까?', '그날의 하늘을 알아야 천기를 펼칠 수 있사옵니다!'], hint: '생년월일과 양력·음력을 선택하세요', button: '다음', image: '', bg: '' },
-    { id: 'time', enabled: true, field: 'time', face: 'shock', theme: 'stars', title: '천시를 밝히다', lines: ['{귀인}! 탄생하신 시각도 중요하옵니다!', '혹시 몇 시 몇 분에 첫 울음을 터뜨리셨는지 기억하시옵니까?'], hint: '출생 시각을 모르면 일부 사주 및 자미두수 해석이 제한될 수 있습니다.', unknownLines: ['허억… 천기가 안개에 가려졌군요!', '허나 염려 마시옵소서! 알 수 있는 것부터 살펴보겠사옵니다!'], button: '다음', image: '', bg: '' },
-    { id: 'place', enabled: true, field: 'place', face: 'ask', theme: 'map', title: '탄생의 땅', lines: ['하늘의 때는 알았으니, 이제 땅의 기록을 살필 차례이옵니다!', '{귀인}께서 처음 강림하신 고장은 어디이옵니까?'], hint: '태어난 지역은 시간 보정(경도)에 사용됩니다.', button: '다음', image: '', bg: '' },
-    { id: 'gender', enabled: true, field: 'gender', face: 'serious', theme: 'ledger', title: '마지막 명부', lines: ['{귀인}! 이제 마지막 한 가지만 더 여쭙겠사옵니다.', '명식을 바르게 세우기 위한 마지막 기록이옵니다!'], hint: '성별은 대운이 흐르는 방향(순행·역행)을 계산할 때만 사용합니다. 다른 용도로 쓰지 않습니다.', button: '다음', image: '', bg: '' },
-    { id: 'confirm', enabled: true, field: 'confirm', face: 'proud', theme: 'reveal', title: '천기의 문이 열리다', lines: ['{귀인}! 모든 기록이 모였사옵니다!', '이제 소인이 천기를 펼쳐 보이겠사옵니다!'], hint: '입력한 정보를 확인해 주세요.', button: '나의 사주 확인하기', image: '', bg: '' },
+    { id: 'arrive', enabled: true, field: 'name', face: 'greet', theme: 'gate', title: "기록의 문턱", lines: ["기록의 문이 열렸습니다.","어떤 이름으로 기록해 드릴까요?"], hint: "이름 또는 불리는 이름을 입력하세요", button: '다음', image: '', bg: '' },
+    { id: 'day', enabled: true, field: 'date', face: 'ask', theme: 'scroll', title: "태어난 날의 기록", lines: ["{이름귀인}, 태어난 날을 알려 주세요.","양력과 음력 기준을 함께 확인하겠습니다."], hint: '생년월일과 양력·음력을 선택하세요', button: '다음', image: '', bg: '' },
+    { id: 'time', enabled: true, field: 'time', face: 'shock', theme: 'stars', title: "시간의 흔적", lines: ["태어난 시각을 기록하겠습니다.","시간을 모르시면 모름을 선택해 주세요."], hint: '출생 시각을 모르면 일부 사주 및 자미두수 해석이 제한될 수 있습니다.', unknownLines: ["시간의 기록은 비워 두겠습니다.","확인할 수 있는 정보부터 살펴보겠습니다."], button: '다음', image: '', bg: '' },
+    { id: 'place', enabled: true, field: 'place', face: 'ask', theme: 'map', title: "태어난 곳", lines: ["이제 태어난 곳을 확인하겠습니다.","태어난 지역을 선택해 주세요."], hint: '태어난 지역은 시간 보정(경도)에 사용됩니다.', button: '다음', image: '', bg: '' },
+    { id: 'gender', enabled: true, field: 'gender', face: 'serious', theme: 'ledger', title: "마지막 기록", lines: ["마지막 정보를 확인하겠습니다.","대운의 흐름을 계산하는 데 사용하는 기록입니다."], hint: '성별은 대운이 흐르는 방향(순행·역행)을 계산할 때만 사용합니다. 다른 용도로 쓰지 않습니다.', button: '다음', image: '', bg: '' },
+    { id: 'confirm', enabled: true, field: 'confirm', face: 'proud', theme: 'reveal', title: "기록을 펼칠 시간", lines: ["{이름귀인}, 기록이 모였습니다.","입력한 내용을 확인하고 사주를 펼쳐보세요."], hint: '입력한 정보를 확인해 주세요.', button: '나의 사주 확인하기', image: '', bg: '' },
   ];
-  var REVEAL_LINES = ['대, 대단하옵니다, {귀인}!!', '마침내 {귀인}의 명식이 완성되었사옵니다!', '이제 {귀인}께서 타고난 기질과 운의 흐름을 살펴보시지요!'];
+  var REVEAL_LINES = ['{이름귀인}, 사주 기록이 완성되었습니다.', '이제 타고난 기질과 시간의 흐름을 살펴보겠습니다.', '기록을 읽고, 다음 선택을 생각해 보세요.'];
   var FACES = { greet: '반가움', ask: '궁금함', shock: '깜짝', serious: '진지함', proud: '뿌듯함', worry: '걱정' };
 
   var DEFAULTS = { bridge: BRIDGE, forceOnboarding: true, honorific: DEFAULT_HONORIFIC, weights: { research: 60, celebrity: 40 }, cases: CASES, intro: INTRO, introLast: INTRO_LAST, scenes: SCENES, revealLines: REVEAL_LINES, sections: SECTIONS, services: SERVICES, topics: TOPICS, progressLabel: '{n} / {total} · {title}', afterDone: 'reveal' };
