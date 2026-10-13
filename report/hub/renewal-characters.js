@@ -5,6 +5,8 @@ var R=root.Renewal;
 R.characters=function(scene,esc){return '<div class="rn-character-stage">'+(scene.characters||[]).filter(function(c){return c.enabled!==false&&c.image}).map(function(c){var p=c.pc||{x:50,y:50,width:22},m=c.mobile||p;return '<div class="rn-character" data-character="'+esc(c.id)+'" data-scene="'+esc(scene.id)+'" style="--cx:'+p.x+'%;--cy:'+p.y+'%;--cw:'+p.width+'%;--mx:'+m.x+'%;--my:'+m.y+'%;--mw:'+m.width+'%;--flip:'+(c.flip?-1:1)+'"><img src="'+esc(c.image)+'" alt="'+esc(c.name||'캐릭터')+'" draggable="false"><span class="rn-character-handle" aria-hidden="true"></span></div>'}).join('')+'</div>';};
 R.editCharacters=function(host){
 var handlers=[];
+function shortcuts(e){if(e.target.closest&&e.target.closest('input,textarea,select,[contenteditable=true]'))return;var mod=e.ctrlKey||e.metaKey,op;if(mod&&e.key.toLowerCase()==='z')op=e.shiftKey?'redo':'undo';else if(e.key==='Delete'&&document.activeElement&&document.activeElement.matches('.rn-character.editable,.rn-icon.editable'))op='delete';else return;e.preventDefault();e.stopImmediatePropagation();var el=document.activeElement;root.parent.postMessage({t:'mt-preview-command',action:op,scene:el&&el.dataset.scene,id:el&&el.dataset.character,icon:!!(el&&el.dataset.icon)},location.origin);}
+document.addEventListener('keydown',shortcuts,true);handlers.push(function(){document.removeEventListener('keydown',shortcuts,true)});
 host.querySelectorAll('.rn-character,.rn-icon').forEach(function(el){
 el.classList.add('editable');el.tabIndex=0;el.setAttribute('role','button');el.setAttribute('aria-label','캐릭터 이동. 모서리를 끌어 크기 조절. 방향키로 이동, + 또는 -로 크기 조절');
 var stage=el.parentElement;
