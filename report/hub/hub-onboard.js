@@ -235,6 +235,7 @@
       h += '<button type="button" class="cn-skip" id="obSkip">건너뛰기 ↓</button>';
       if (renewed && H.embed) { var cv = document.getElementById('cover'); if(cv) cv.hidden = true; }
       var el = paint('<div class="cn">' + h + '</div>', 'ob-cine');
+      if (renewed && root.Renewal.animate) onLeave(root.Renewal.animate(el));
       var allSecs = $$('.cn-sec', el), skip = $('#obSkip', el), last = $('#cnLast', el) || allSecs[allSecs.length - 1];
       var caseId = function () { return (cur.research && cur.research.id) || (cur.celebrity && cur.celebrity.id) || ''; };
       var EV = { research: ['research_section_view'], myeongri: ['myeongri_section_view'], service: ['service_section_view', 'movingtoon_preview_view'] };
