@@ -1,0 +1,21 @@
+const assert=require('assert/strict'),{pathToFileURL}=require('url'),path=require('path');
+const O=require('../report/hub/onboard-data.js');require('../report/hub/quest-data.js');const R=require('../report/hub/renewal-data.js');
+(async()=>{
+const api=await import(pathToFileURL(path.resolve('functions/api/onboarding.js'))),{cleanRenewal,renewalErrors}=await import(pathToFileURL(path.resolve('functions/_renewal.js'))),{migrateOnboardingCopy}=await import(pathToFileURL(path.resolve('functions/_onboarding-migration.js')));
+const values=new Map(),kv={get:async(k,t)=>values.has(k)?t==='json'?JSON.parse(values.get(k)):values.get(k):null,put:async(k,v)=>values.set(k,v),delete:async(k)=>values.delete(k)},env={GLOSSARY_KV:kv,ADMIN_PASSWORD:'test'};
+const call=async(method,url,body,auth=true)=>{const response=await api['onRequest'+method[0]+method.slice(1).toLowerCase()]({env,request:new Request('https://test.local'+url,{method,headers:{'content-type':'application/json',...(auth?{authorization:'Bearer test'}:{})},body:body?JSON.stringify(body):undefined})});return {status:response.status,data:await response.json()}};
+const legacy={honorific:'귀인',quest:{guides:{male:{name:'경계의 기록자',image:'https://test.local/character.png'}},steps:[{id:'name',lines:{male:['귀인, 알려주십시오.'],female:['{이름귀인}의 기록']}}]},cases:[{id:'research-original',title:'기존 연구 자료'}],unrelated:{id:'retained'},cover:{title:'기존 관리자 문구'},sections:[{id:'kept',title:'기존 섹션'}]};
+values.set('free:onboard',JSON.stringify({...legacy,version:'old'}));values.set('user:profile',JSON.stringify({name:'보존',birth:'1990-01-01'}));
+assert.equal((await call('PUT','/api/onboarding',{renewal:R.DEFAULT},false)).status,401);
+let r=await call('PUT','/api/onboarding',{renewal:R.DEFAULT});assert.equal(r.status,200);assert.equal(JSON.parse(values.get('free:onboard')).version,'old');
+let draft=JSON.parse(values.get('free:onboard:draft'));assert.deepEqual(draft.cover,legacy.cover);assert.deepEqual(draft.sections,legacy.sections);assert.deepEqual(draft.cases,legacy.cases);assert(!JSON.stringify(draft.quest).includes('귀인'));assert.equal(draft.quest.guides.male.image,legacy.quest.guides.male.image);
+assert.equal((await call('POST','/api/onboarding?action=publish')).status,200);const live=values.get('free:onboard');
+let invalid=structuredClone(R.DEFAULT);invalid.scenes[0].title='';await call('PUT','/api/onboarding',{renewal:invalid});assert.equal((await call('POST','/api/onboarding?action=publish')).status,400);assert.equal(values.get('free:onboard'),live);
+invalid=structuredClone(R.DEFAULT);invalid.scenes.forEach(s=>s.enabled=false);assert(renewalErrors(cleanRenewal(invalid)).length);invalid=structuredClone(R.DEFAULT);invalid.scenes[0].title='귀인 안녕하세요';assert(renewalErrors(cleanRenewal(invalid)).length);
+const dirty=structuredClone(R.DEFAULT);dirty.scenes[0].image='javascript:alert(1)';dirty.scenes[0].cta.to='https://evil.local';assert.equal(cleanRenewal(dirty).scenes[0].image,'');assert.equal(cleanRenewal(dirty).scenes[0].cta.to,'#/begin');
+await call('POST','/api/onboarding?action=discard');await call('POST','/api/onboarding?action=migrate-copy');assert.equal(JSON.parse(values.get('free:onboard:draft')).copyRevision,2);assert.equal(values.get('free:onboard'),live);
+const sample=migrateOnboardingCopy(legacy);assert.deepEqual(migrateOnboardingCopy(sample),sample);assert.equal(JSON.parse(values.get('user:profile')).birth,'1990-01-01');
+const config=O.merge(O.DEFAULTS,JSON.parse(values.get('free:onboard')));assert.equal(config.renewal.scenes.length,5);assert.equal(O.fill('{name}, 확인합니다.','지민',config),'지민, 확인합니다.');
+const saved=values.get('free:onboard');env.GLOSSARY_KV.put=async()=>{throw Error('simulated store failure')};await assert.rejects(call('PUT','/api/onboarding',{renewal:R.DEFAULT}));assert.equal(values.get('free:onboard'),saved);
+console.log('onboarding-renewal-sim PASS: auth, draft/live separation, compatibility, migration, publish validation, media/route safety, user preservation, save failure');
+})().catch(e=>{console.error(e);process.exitCode=1});

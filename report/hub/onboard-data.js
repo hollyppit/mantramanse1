@@ -13,7 +13,7 @@
   // 이름이 있으면 "[이름] 귀인", 없으면 "귀인"
   function addr(name, cfg) { var n = String(name || '').trim().slice(0, 20); return n ? n + ' ' + honorific(cfg) : '방문자'; }
   // 대사 안의 {귀인}(호칭) · {이름귀인}([이름] 귀인) 치환
-  function fill(text, name, cfg) { var t = String(text == null ? '' : text); t = t.replace(/\{귀인\}을 어떤 이름으로 기록해 드리면 될까요\?/, '어떤 이름으로 기록해 드릴까요?').replace(/기록을 열기 전에 \{귀인\}의 성함부터 확인하겠습니다\./, '어떤 이름으로 기록해 드릴까요?'); var who = String(name || '').trim() ? addr(name, cfg) : '당신'; return t.replace(/\{이름귀인\}/g, who).replace(/\{귀인\}/g, who).replace(/귀인/g, who); }
+  function fill(text, name, cfg) { var t = String(text == null ? '' : text); t = t.replace(/\{귀인\}을 어떤 이름으로 기록해 드리면 될까요\?/, '어떤 이름으로 기록해 드릴까요?').replace(/기록을 열기 전에 \{귀인\}의 성함부터 확인하겠습니다\./, '어떤 이름으로 기록해 드릴까요?'); var who = String(name || '').trim() ? addr(name, cfg) : '당신'; return t.replace(/\{name\}/g, String(name || '').trim() || '당신').replace(/\{이름\}/g, String(name || '').trim() || '당신').replace(/\{이름귀인\}/g, who).replace(/\{귀인\}/g, who).replace(/귀인/g, who); }
 
   /* ── 후킹 사례 ─────────────────────────────────────────────────
      status: draft(초안) → review(검토 중) → verified(검증 완료) → published(공개). 공개 풀에는 published 만 들어간다.
@@ -30,7 +30,7 @@
       title: '성과는 인생의 한 시기에 몰려서 터진다', hook: '사람마다 전성기가 찾아오는 시점은 왜 다를까요?',
       body: ['연구진은 예술가·영화감독·과학자 수천 명의 경력을 시간순으로 분석했습니다.', '대부분은 경력 중 한 번, 가장 큰 성과가 짧은 기간에 연달아 나오는 "핫 스트릭(hot streak)"을 겪었습니다.', '그 시기가 경력의 처음, 중간, 끝 어디에 오는지는 사람마다 달랐습니다.'],
       caveat: '과거 경력 자료를 분석한 결과이며, 언제 전성기가 온다는 예측이 아닙니다.',
-      who: 'L. Liu · Y. Wang · R. Sinatra · A.-L. Barabási 외', year: 2018, source: { label: 'Nature 559, 396–399', doi: '10.1038/s41586-018-0315-8', url: 'https://doi.org/10.1038/s41586-018-0315-8' },
+      who: 'Lu Liu · Roberta Sinatra · C. Lee Giles · Dashun Wang', year: 2018, source: { label: 'Nature 559, 396–399', doi: '10.1038/s41586-018-0315-8', url: 'https://doi.org/10.1038/s41586-018-0315-8' },
       verifiedNote: '2026-10-11 Crossref 에서 제목·저자·연도·저널 확인', visual: 'streak' },
     { id: 'r-salganik-2006', type: 'research', status: 'published', weight: 1, tags: ['우연', '예측불가', '성공'],
       title: '똑같은 노래도 세계마다 다른 히트곡이 되었다', hook: '실력이 같아도 어떤 것은 뜨고 어떤 것은 묻히는 이유는 무엇일까요?',

@@ -31,8 +31,8 @@
 
   /* ── 안내자: 말투와 진행 방식만 다르다(계산 결과는 같다) ── */
   var GUIDES = {
-    male:   { id: 'male',   name: '경계의 기록자', tag: '여유로운 기록의 수호자', asset: 'male',   tone: '여유롭고 능청스러운 존댓말' },
-    female: { id: 'female', name: '시간의 해독자', tag: '차분한 기록의 해독자',   asset: 'female', tone: '차분하고 지적인 단정한 존댓말' },
+    male:   { id: 'male',   name: '운명 감찰관', tag: '강점과 취약점, 주의할 선택을 점검합니다', asset: 'male',   tone: '냉철하고 직설적인 존댓말' },
+    female: { id: 'female', name: '명운 해독관', tag: '사주의 구조와 시간의 흐름을 해석합니다',   asset: 'female', tone: '차분하고 지적인 단정한 존댓말' },
   };
 
   /* ── 단계(장면) ──

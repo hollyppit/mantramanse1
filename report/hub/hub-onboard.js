@@ -37,10 +37,10 @@
   }
   Ob.config = function () {
     if (!cfgP) cfgP = new Promise(function (ok) {
-      var done = false, fin = function (c, v) { if (done) return; done = true; if (c) { CFG = O.merge(O.DEFAULTS, c); version = v || ''; } ok(CFG); };
+      var done = false, fin = function (c, v) { if (done) { if(c){CFG = O.merge(O.DEFAULTS,c);version=v||'';if(document.querySelector('#screen .rn')) H.render();} return; } done = true; if (c) { CFG = O.merge(O.DEFAULTS, c); version = v || ''; } ok(CFG); };
       if (PREVIEW) { setTimeout(function () { fin(null); }, 4000); try { root.parent.postMessage({ t: 'mt-onb-ready' }, location.origin); } catch (e) { } return; }
       setTimeout(function () { fin(null); }, 1500);
-      try { fetch('/api/onboarding').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { fin(d && d.config, d && d.version); }).catch(function () { fin(null); }); } catch (e) { fin(null); }
+      try { fetch('/api/onboarding', {cache:'no-store'}).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { fin(d && d.config, d && d.version); }).catch(function () { fin(null); }); } catch (e) { fin(null); }
     });
     return cfgP;
   };
@@ -139,8 +139,9 @@
       if (!PREVIEW) { try { sessionStorage.setItem('mt_onb_shown', '1'); } catch (e) { } }
       var Art = root.OnboardArt || { forCase: function () { return ''; }, forIntro: function () { return ''; }, forTopic: function () { return ''; } };
       var intro = CFG.intro.filter(function (s) { return s.enabled !== false; }), BR = CFG.bridge || {}, seenN = 0, hasProfile = P.has();
-      var secs = (CFG.sections || []).filter(function (s) { return s.enabled !== false; });
-      if (!secs.some(function (s) { return s.type === 'final'; })) secs.push(O.SECTIONS.filter(function (s) { return s.type === 'final'; })[0]); // 최종 CTA 는 끌 수 없다(막다른 길 방지)
+      var renewed = CFG.renewal && CFG.renewal.enabled !== false;
+      var secs = (renewed ? CFG.renewal.scenes : CFG.sections || []).filter(function (s) { return s.enabled !== false; });
+      if (!renewed && !secs.some(function (s) { return s.type === 'final'; })) secs.push(O.SECTIONS.filter(function (s) { return s.type === 'final'; })[0]); // 최종 CTA 는 끌 수 없다(막다른 길 방지)
       var cur = { research: null, celebrity: null };
       var media = function (o, svg, fx) {
         var m = o && o.video ? '<video class="cn-media" data-lazyvid src="' + esc(o.video) + '" muted playsinline loop preload="metadata"></video>' : o && o.image ? '<img class="cn-media" src="' + esc(o.image) + '" alt="' + esc(o.alt || '') + '" loading="lazy" decoding="async">' : '';
@@ -229,18 +230,21 @@
       }
       var builders = { research: researchSec, myeongri: myeongriSec, service: serviceSec, story: storySec, final: finalSec };
       var h = '<div class="cn-prog" id="cnProg" aria-hidden="true"></div>';
-      secs.forEach(function (sec) { h += (builders[sec.type] ? builders[sec.type](sec) : ''); });
+      if (renewed) h += root.Renewal.render(CFG, esc, function(t){return F(t, (P.get()||{}).name);});
+      else secs.forEach(function (sec) { h += (builders[sec.type] ? builders[sec.type](sec) : ''); });
       h += '<button type="button" class="cn-skip" id="obSkip">건너뛰기 ↓</button>';
+      if (renewed && H.embed) { var cv = document.getElementById('cover'); if(cv) cv.hidden = true; }
       var el = paint('<div class="cn">' + h + '</div>', 'ob-cine');
-      var allSecs = $$('.cn-sec', el), skip = $('#obSkip', el), last = $('#cnLast', el);
+      var allSecs = $$('.cn-sec', el), skip = $('#obSkip', el), last = $('#cnLast', el) || allSecs[allSecs.length - 1];
       var caseId = function () { return (cur.research && cur.research.id) || (cur.celebrity && cur.celebrity.id) || ''; };
       var EV = { research: ['research_section_view'], myeongri: ['myeongri_section_view'], service: ['service_section_view', 'movingtoon_preview_view'] };
       function enter(sec) {
         if (sec.classList.contains('in')) return; sec.classList.add('in'); seenN++;
         var type = sec.getAttribute('data-type'), sid = sec.getAttribute('data-sec');
+        if (renewed) sessOnce('onboarding_card_impression', {case:'s-'+sid});
         (EV[type] || []).forEach(function (ev) { sessOnce(ev, { case: 's-' + sid }); }); // 세션당 1회 — 전환 흐름의 분모(랜딩 진입)와 같은 기준
         var id = sec.getAttribute('data-case'); if (id) tOnce('onboarding_card_impression', { case: id, type: type });
-        $$('.rc', sec).forEach(function (c) { sessOnce('onboarding_card_impression', { case: c.getAttribute('data-case'), type: 'research' }); });
+        $$('.rc,[data-case]', sec).forEach(function (c) { sessOnce('onboarding_card_impression', { case: c.getAttribute('data-case'), type: 'research' }); });
         if (sec === last) { tOnce('onboarding_intro_complete', { case: caseId() }); skip.hidden = true; }
       }
       var prog = $('#cnProg', el), hubEl = H.$('#hub'), mobile = (root.innerWidth || 1024) < 768;
@@ -267,8 +271,9 @@
       el.addEventListener('click', function (e) {
         var dt = e.target.closest && e.target.closest('[data-detail]'); // 연구 자세히 보기
         if (dt) { var box = dt.closest('.rc'), pane = $('.rc-detail', box), open = pane.hidden; pane.hidden = !open; dt.setAttribute('aria-expanded', String(open)); dt.textContent = open ? '자세히 보기 닫기' : '연구 자세히 보기'; if (open) Ob.track('research_detail_open', { case: dt.getAttribute('data-detail') }); return; }
+        var source = e.target.closest && e.target.closest('[data-ob-ev]'); if(source) Ob.track(source.dataset.obEv,{case:source.dataset.case});
         var go = e.target.closest && e.target.closest('[data-go]'); // 나의 운 확인하기(섹션 어디서나)
-        if (go) { var sid = go.getAttribute('data-go'); Ob.track('landing_cta_click', { case: 's-' + sid }); Ob.track('onboarding_cta_click', { case: caseId() }); if (PREVIEW) return; lset(SEEN, 1); var so = secs.filter(function (x) { return x.id === sid; })[0]; if (so && so.cta && so.cta.to === 'quick') { H.go('#/input?next=my'); return; } /* CTA 연결 경로: 기본은 인터랙티브 스토리 */ H.go(q.replay && P.has() ? '#/begin?edit=1' : '#/begin'); return; }
+        if (go) { var sid = go.getAttribute('data-go'); Ob.track('landing_cta_click', { case: 's-' + sid }); Ob.track('onboarding_cta_click', { case: caseId() }); if (PREVIEW) return; lset(SEEN, 1); var so = secs.filter(function (x) { return x.id === sid; })[0]; if (so && so.cta && /^#\//.test(so.cta.to || '')) { H.go(so.cta.to); return; } if (so && so.cta && so.cta.to === 'quick') { H.go('#/input?next=my'); return; } /* CTA 연결 경로: 기본은 인터랙티브 스토리 */ H.go(q.replay && P.has() ? '#/begin?edit=1' : '#/begin'); return; }
         var b = e.target.closest && e.target.closest('[data-other]'); if (!b) return; // 다른 연구/인물 이야기 보기(예전 후킹)
         var type = b.getAttribute('data-other'), n = chooseCase(type, true), sec = b.closest('.cn-sec'); if (!n || !sec) return;
         cur[type] = n; Ob.track('onboarding_other_case', { case: n.id });

@@ -11,6 +11,8 @@
 //
 // 저장: GLOSSARY_KV(또는 Supabase kv) 'free:onboard'(공개본·예전과 같은 키) · 'free:onboard:draft' · 'free:onboard:hist'(+ 'free:onboard:h:<id>') · 'free:onbstat'.
 // 기본 문구는 report/hub/onboard-data.js — 여기엔 덮어쓴 값만 있다. 배포 전 저장본은 그대로 공개본이므로 이전 설정은 사라지지 않는다(초안이 없으면 공개본을 편집 시작점으로 쓴다).
+import { migrateOnboardingCopy } from '../_onboarding-migration.js';
+import { cleanRenewal, renewalErrors } from '../_renewal.js';
 import { json, isAdmin, configError } from '../_lib.js';
 import { kvOf } from '../_store.js';
 import { cleanStyle } from '../_textstyle.js';
@@ -159,6 +161,7 @@ function clean(b, notes) {
       id: x.id, enabled: x.enabled !== false, nature: NATURE.includes(x.nature) ? x.nature : 'tradition', title: s(x.title, 80), sub: s(x.sub, 160), summary: s(x.summary, 400), detail: s(x.detail, 1200), analogy: s(x.analogy, 300),
       term: s(x.term, 40), termEasy: s(x.termEasy, 300), image: img(x.image), image2: img(x.image2), video: img(x.video), anim: EFFECTS.includes(x.anim) ? x.anim : 'fade', refs: s(x.refs, 400) })).filter(x => x.title);
   }
+  if (b.renewal) out.renewal = cleanRenewal(b.renewal);
   return out;
 }
 
@@ -194,7 +197,7 @@ export async function onRequestPut({ request, env }) {
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
   let b; try { b = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); }
   if (!b || typeof b !== 'object') return json({ error: '잘못된 요청 형식입니다' }, 400);
-  const kv = kvOf(env), notes = [], base = (await kv.get(DRAFT, 'json')) || (await kv.get(KEY, 'json')) || {}, next = { ...base, ...clean(b, notes) };
+  const kv = kvOf(env), notes = [], base = (await kv.get(DRAFT, 'json')) || (await kv.get(KEY, 'json')) || {}, next = migrateOnboardingCopy({ ...base, ...clean(b, notes) });
   next.version = 'o' + Date.now().toString(36); next.at = new Date().toISOString(); delete next.publishedAt;
   const text = JSON.stringify(next); if (text.length > MAX_BYTES) return json({ error: '콘텐츠가 너무 큽니다' }, 413);
   await kv.put(DRAFT, text);
@@ -216,10 +219,15 @@ export async function onRequestPost({ request, env }) {
     if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
     const ce = configError(env); if (ce) return json({ error: ce }, 501);
     const kv = kvOf(env), live = (await kv.get(KEY, 'json')) || null, dr = (await kv.get(DRAFT, 'json')) || null;
+    if (action === 'migrate-copy') {
+      const next = migrateOnboardingCopy(dr || live || {}); next.version = 'o'+Date.now().toString(36); next.at = new Date().toISOString(); delete next.publishedAt;
+      await kv.put(DRAFT, JSON.stringify(next)); return json({ok:true,version:next.version});
+    }
     if (action === 'publish') {
       if (!dr) return json({ error: '게시할 초안이 없습니다' }, 400);
       const missing = Array.isArray(dr.cases) ? dr.cases.filter(c => c.visible && !(c.verification && c.verification.state === 'verified')).map(c => c.id) : [];
       if (missing.length) return json({ error: '검증 완료 전 사례가 공개로 되어 있습니다: ' + missing.join(', ') }, 400);
+      const errors = renewalErrors(dr.renewal); if (errors.length) return json({error: errors.join('\n')},400);
       await snapshot(kv, live, '게시 직전 공개본');
       const pub = { ...dr, publishedAt: new Date().toISOString() };
       await kv.put(KEY, JSON.stringify(pub)); // 공개본과 초안은 같은 version 을 가진다 → dirty=false

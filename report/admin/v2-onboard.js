@@ -66,7 +66,7 @@
   }
   function body() {
     var b = G.cfg;
-    return { cover: b.cover, resultDestination: b.resultDestination, forceOnboarding: b.forceOnboarding, honorific: b.honorific, weights: b.weights, cases: b.cases, removedCases: b.removedCases || [], intro: b.intro, introLast: b.introLast, bridge: b.bridge,
+    return { renewal: b.renewal, cover: b.cover, resultDestination: b.resultDestination, forceOnboarding: b.forceOnboarding, honorific: b.honorific, weights: b.weights, cases: b.cases, removedCases: b.removedCases || [], intro: b.intro, introLast: b.introLast, bridge: b.bridge,
       sections: b.sections, services: b.services, topics: b.topics, progressLabel: b.progressLabel, afterDone: b.afterDone, quest: b.quest, timeline: b.timeline,
       scenes: b.scenes.map(function (s) { return { id: s.id, title: s.title, lines: s.lines, unknownLines: s.unknownLines || [], hint: s.hint, button: s.button, face: s.face, image: s.image || '', bg: s.bg || '', bubble: s.bubble || '', enabled: s.enabled }; }), revealLines: b.revealLines };
   }
@@ -96,7 +96,7 @@
   }
 
   /* ── 화면 틀: 상태 줄 + 전체 흐름 + 하위 메뉴 ── */
-  var SUBS0 = [['landing', '랜딩 첫 화면'], ['cases', '연구 사례·출처'], ['intro', '명리학 소개'], ['service', '서비스 소개'], ['@ext'], ['scenes', '기본 입력 (호환)'], ['basic', '호칭·가중치'], ['stats', '통계'], ['publish', '미리보기·게시 관리']];
+  var SUBS0 = [['landing', '온보딩 5개 장면'], ['cases', '연구 사례·출처'], ['intro', '명리학 소개'], ['service', '서비스 소개'], ['@ext'], ['scenes', '기본 입력 (호환)'], ['basic', '호칭·가중치'], ['stats', '통계'], ['publish', '미리보기·게시 관리']];
   var EXT = []; // 확장 하위 메뉴(report/admin/v2-quest.js: 인터랙티브 스토리·에셋·타임라인·운영). {id, label, view(), collect(), flow()}
   function subs() { var o = []; SUBS0.forEach(function (s) { if (s[0] === '@ext') EXT.forEach(function (x) { o.push([x.id, x.label]); }); else o.push(s); }); return o; }
   // 관리 영역을 둘로 나눈다: A 기존 온보딩(연구·명리학·서비스 소개 → 나의 운 확인하기) / B 인터랙티브 스토리(그 버튼 이후). 두 영역은 설정 키가 서로 독립이다(A: cases·sections·intro·services·topics…, B: quest·timeline·scenes).
@@ -105,7 +105,7 @@
   function groupsBar() {
     var all = subs(), pick = function (ids) { return all.filter(function (s) { return ids.indexOf(s[0]) >= 0; }).sort(function (a, b) { return ids.indexOf(a[0]) - ids.indexOf(b[0]); }); };
     var row = function (title, hint, list) { return '<div class="ob-bar"><b class="ob-grp">' + title + '</b><span class="ob-lock">' + hint + '</span>' + list.map(function (s) { return '<button class="ob-chip' + (G.sub === s[0] ? ' on' : '') + '" data-s="' + s[0] + '">' + s[1] + '</button>'; }).join('') + '</div>'; };
-    return row('화면 편집', '첫 화면 → 소개 → 입력 → 각성 → 결과', pick(['landing','cases','intro','service','quest','tl'])) + row('운영·게시', '모든 단계는 하나의 초안으로 저장하고 함께 게시합니다', pick(['qops','qassets','basic','stats','publish'])) + '<details' + (G.sub === 'scenes' ? ' open' : '') + '><summary>이전 입력 설정</summary>' + row('호환 모드', G.cfg.quest.enabled === false ? '현재 기본 입력 사용 중' : '이전 입력 설정 보존 · 현재 스토리 입력 사용 중', pick(['scenes'])) + '</details>';
+    return row('화면 편집', '첫 화면 → 소개 → 입력 → 각성 → 결과', pick(['landing','cases','quest','tl'])) + row('운영·게시', '모든 단계는 하나의 초안으로 저장하고 함께 게시합니다', pick(['qops','qassets','basic','stats','publish'])) + '<details' + (G.sub === 'scenes' ? ' open' : '') + '><summary>이전 입력 설정</summary>' + row('호환 모드', G.cfg.quest.enabled === false ? '현재 기본 입력 사용 중' : '이전 입력 설정 보존 · 현재 스토리 입력 사용 중', pick(['scenes'])) + '</details>';
   }
   function draw() {
     var changed = G.dirty ? '<span class="ob-dirty">● 저장하지 않은 변경이 있습니다</span>' : (G.srvDirty ? '<span class="ob-st warn">초안 ≠ 공개본 — 게시 필요</span>' : '<span class="ob-st ok">공개본과 같음</span>');
@@ -120,7 +120,7 @@
     if ($('#obPub')) $('#obPub').onclick = publish;
     if ($('#obPrev')) $('#obPrev').onclick = function () { collect(); G.prev.on = !G.prev.on; if (G.prev.on) G.prev.hash = inA(G.sub) ? '#/welcome' : (G.sub === 'tl' ? '#/timeline' : '#/begin'); drawPrev(); };
     bindFlow(); drawPrev();
-    var view = ({ landing: landingView, cases: casesView, intro: introView, service: serviceView, scenes: scenesView, basic: basicView, stats: statsView, publish: publishView })[G.sub], ex = EXT.filter(function (x) { return x.id === G.sub; })[0]; if (view) view(); else if (ex) ex.view(); else $('#obBody').innerHTML = '';
+    var view = ({ landing: window.RenewalAdmin ? window.RenewalAdmin.view : landingView, cases: casesView, intro: introView, service: serviceView, scenes: scenesView, basic: basicView, stats: statsView, publish: publishView })[G.sub], ex = EXT.filter(function (x) { return x.id === G.sub; })[0]; if (view) view(); else if (ex) ex.view(); else $('#obBody').innerHTML = '';
     if (!PANE._obDirty) { PANE._obDirty = true; PANE.addEventListener('input', onEdit); PANE.addEventListener('change', onEdit); } // 편집기·흐름 카드·목록 어디서든 입력이 바뀌면 "저장 안 됨" 표시
   }
   function landingView() {
@@ -141,6 +141,7 @@
     return '필수 · 끌 수 없음';
   }
   function flowHtml() {
+    if (G.cfg.renewal && G.cfg.renewal.enabled !== false) return '<div class="card ob-flow-panel">' + G.cfg.renewal.scenes.map(function(s,i){return '<button type="button" data-renewal-stage="'+s.id+'">'+(i+1)+'. '+esc(s.title.slice(0,16))+(s.enabled?'':' (비활성)')+'</button>';}).join(' → ') + ' → 출생정보 입력 → 기존 결과 화면</div>';
     var c = G.cfg, nodes = c.sections.map(function (s, i) {
       var off = s.enabled === false && s.type !== 'final';
       return '<div class="ob-node' + (off ? ' dis' : '') + (G.selSec === s.id ? ' on' : '') + '" draggable="true" data-sec="' + esc(s.id) + '" data-i="' + i + '"><b>' + (i + 1) + '. ' + esc(SECT[s.type] || s.type) + '</b><span>' + esc(s.title ? s.title.split('\n')[0].slice(0, 18) : '') + '</span>' +
@@ -154,6 +155,7 @@
   }
   function bindFlow() {
     var c = G.cfg, drag = null;
+    $$('[data-renewal-stage]').forEach(function(n){n.onclick=function(){collect();G.sub='landing';window.RenewalAdmin.select(n.dataset.renewalStage);draw();};});
     $$('[data-stage]').forEach(function (n) { n.onclick = function () { collect(); G.selSec = null; G.sub = n.dataset.stage; draw(); }; });
     $$('.ob-node[data-sec]').forEach(function (n) {
       n.addEventListener('click', function (e) { if (e.target.closest('input')) return; collect(); G.selSec = n.dataset.sec; secEditor(); $$('.ob-node[data-sec]').forEach(function (x) { x.classList.toggle('on', x === n); }); });
@@ -203,8 +205,8 @@
     var box = $('#obPrevBox'); if (!box) return;
     if (!G.prev.on) { box.innerHTML = ''; return; }
     box.innerHTML = '<div class="ob-prevbox' + (G.prev.dev === 'mob' ? ' mob' : '') + '"><div class="ob-bar" style="justify-content:center"><button class="ob-chip' + (G.prev.dev === 'pc' ? ' on' : '') + '" data-pd="pc">PC</button><button class="ob-chip' + (G.prev.dev === 'mob' ? ' on' : '') + '" data-pd="mob">모바일</button>' + (G.sub === 'landing' ? '<button class="ghost" id="obCenter">선택 항목 가운데 정렬</button>' : '') + '<button class="ghost" id="obPrevRe">현재 편집 내용으로 새로고침</button><button class="ghost" id="obPrevX">닫기</button></div>' +
-      '<iframe id="obPrevFrame" title="랜딩 흐름 미리보기" src="' + (G.sub === 'landing' ? '/report/?preview=1' : '/report/hub/?preview=1' + (G.prev.hash || '#/welcome')) + '"></iframe><p class="ob-lock">저장하지 않은 편집 내용까지 반영한 모습입니다. <b>섹션을 누르면 위쪽에 그 섹션의 편집 입력란이 열립니다</b>(점선 테두리가 누를 수 있는 영역). 검증 완료 + 공개로 설정한 사례만 보입니다. 통계에는 집계되지 않습니다.</p></div>';
-    var push = function () { collect(); var f = $('#obPrevFrame'); if (f && f.contentWindow) f.contentWindow.postMessage(G.sub === 'landing' ? { t: 'st-content', story: { settings: Object.assign({}, window.OnboardingContent.settings, G.coverStory.settings || {}, { cover: G.cfg.cover }), blocks: [] } } : { t: 'mt-onb-preview', config: body() }, location.origin); };
+      '<iframe id="obPrevFrame" title="랜딩 흐름 미리보기" src="' + ('/report/hub/?preview=1' + (G.prev.hash || '#/welcome')) + '"></iframe><p class="ob-lock">저장하지 않은 편집 내용까지 반영한 모습입니다. <b>섹션을 누르면 위쪽에 그 섹션의 편집 입력란이 열립니다</b>(점선 테두리가 누를 수 있는 영역). 검증 완료 + 공개로 설정한 사례만 보입니다. 통계에는 집계되지 않습니다.</p></div>';
+    var push = function () { collect(); var f = $('#obPrevFrame'); if (f && f.contentWindow) f.contentWindow.postMessage({ t: 'mt-onb-preview', config: body() }, location.origin); };
     if (prevListener) window.removeEventListener('message', prevListener);
     var flash = function (el) { if (!el) return; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.transition = 'box-shadow .3s'; el.style.boxShadow = '0 0 0 2px #e0b36a'; setTimeout(function () { el.style.boxShadow = ''; }, 1600); var f = el.querySelector('input[type=text],textarea'); if (f) { try { f.focus({ preventScroll: true }); } catch (x) { } } };
     var pick = function (d) { // 미리보기에서 누른 섹션·소개 장면의 편집 입력란을 연다
@@ -237,6 +239,7 @@
     if (!G.cfg || !$('#obBody')) return;
     EXT.forEach(function (x) { if (x.id === G.sub && x.collect) x.collect(); });
     var cfg = G.cfg, v;
+    if (G.sub === 'landing' && window.RenewalAdmin) window.RenewalAdmin.collect();
     var coverForm = $('#obCover'); if (coverForm) { ['title','sub','button','hint','src','bgSrc','alt'].forEach(function (k) { cfg.cover[k] = coverForm.elements[k].value; }); cfg.cover.show = coverForm.elements.show.checked; }
     var sf = $('#obSec'); if (sf) { var s = cfg.sections.filter(function (x) { return x.id === G.selSec; })[0]; if (s) { v = function (n) { return sf.elements[n] ? sf.elements[n].value : ''; };
       s.kicker = v('kicker').trim(); s.effect = v('effect'); s.title = v('title').trim(); s.sub = v('sub').trim(); s.notice = v('notice').trim(); s.bridge = v('bridge').trim(); s.bg = v('bg').trim(); s.bgMobile = v('bgMobile').trim(); s.art = v('art').trim(); s.artVideo = v('artVideo').trim(); s.cta = { show: sf.elements.ctaShow.checked, text: v('cta').trim(), to: v('ctaTo') === 'quick' ? 'quick' : 'story' }; if (sf.elements.topics) s.topics = sf.elements.topics.checked; s.sty = readSty(sf, secRoles(s)); } }
