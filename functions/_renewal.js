@@ -14,7 +14,7 @@ export function cleanRenewal(r){
     scenes:(Array.isArray(r.scenes)?r.scenes:[]).filter(x=>x&&ids.includes(x.id)&&!seen.has(x.id)&&seen.add(x.id)).map(x=>({
       id:x.id,enabled:x.enabled!==false,title:text(x.title,200),sub:text(x.sub,400),body:lines(x.body),emphasis:text(x.emphasis,400),detail:text(x.detail,2400),
       image:media(x.image),imageMobile:media(x.imageMobile),video:media(x.video),bg:media(x.bg),overlay:Number.isFinite(+x.overlay)?Math.max(0,Math.min(1,+x.overlay)):0.65,
-      characters:characters(x.characters),character:x.character===true,guide:x.guide==='male'?'male':'female',dialogue:text(x.dialogue,600),researchIds:Array.isArray(x.researchIds)?x.researchIds.filter(v=>typeof v==='string'&&/^[a-z0-9_-]{2,41}$/.test(v)).slice(0,12):[],
+      imagePlacement:x.imagePlacement?{pc:placement(x.imagePlacement.pc),mobile:placement(x.imagePlacement.mobile)}:null,characters:characters(x.characters),character:x.character===true,guide:x.guide==='male'?'male':'female',dialogue:text(x.dialogue,600),researchIds:Array.isArray(x.researchIds)?x.researchIds.filter(v=>typeof v==='string'&&/^[a-z0-9_-]{2,41}$/.test(v)).slice(0,12):[],
       cta:{show:!!(x.cta&&x.cta.show),text:text(x.cta&&x.cta.text,80),to:route(x.cta&&x.cta.to)}
     })),
     previews:(Array.isArray(r.previews)?r.previews:[]).slice(0,16).filter(x=>x&&/^[a-z0-9_-]{2,41}$/.test(x.id)).map(x=>({id:x.id,enabled:x.enabled!==false,title:text(x.title,200),sample:text(x.sample),description:text(x.description),image:media(x.image),graph:Array.isArray(x.graph)?x.graph.slice(0,24).map(n=>Math.max(0,Math.min(100,+n||0))):[]}))
