@@ -27,3 +27,8 @@
 #hub .rn-icon.editable{cursor:move;touch-action:none;outline:1px dashed #cdb27a}
 #hub .rn-icon.editable .rn-character-handle{display:block;position:absolute;right:-9px;bottom:-9px;width:22px;height:22px;background:#cdb27a;border:2px solid #080a12;border-radius:4px;cursor:nwse-resize}
 @media(max-width:720px){#hub .rn-icon-slot{min-height:348px}#hub .rn-icon.placed{left:var(--mx,50%);top:var(--my,50%);width:var(--mw,40%)}}
+/* Characters sit behind foreground copy, icons and controls. */
+#hub .rn-character-stage{z-index:0}
+#hub .rn-scene>.rn-inner{position:relative;z-index:1;pointer-events:none}
+#hub .rn-inner :is(a,button,input,select,textarea,summary,details,.rn-icon.editable){pointer-events:auto}
+#hub .rn-inner :is(h2,h3,p,.rn-guide){text-shadow:0 2px 5px #000,0 0 16px #000b}
