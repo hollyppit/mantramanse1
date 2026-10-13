@@ -204,7 +204,7 @@
   function drawPrev() {
     var box = $('#obPrevBox'); if (!box) return;
     if (!G.prev.on) { box.innerHTML = ''; return; }
-    box.innerHTML = '<div class="ob-prevbox' + (G.prev.dev === 'mob' ? ' mob' : '') + '"><div class="ob-bar" style="justify-content:center"><button class="ob-chip' + (G.prev.dev === 'pc' ? ' on' : '') + '" data-pd="pc">PC</button><button class="ob-chip' + (G.prev.dev === 'mob' ? ' on' : '') + '" data-pd="mob">모바일</button>' + (G.sub === 'landing' ? '<button class="ghost" id="obCenter">선택 항목 가운데 정렬</button>' : '') + '<button class="ghost" id="obPrevRe">현재 편집 내용으로 새로고침</button><button class="ghost" id="obPrevX">닫기</button></div>' +
+    box.innerHTML = '<div class="ob-prevbox' + (G.prev.dev === 'mob' ? ' mob' : '') + '"><div class="ob-bar" style="justify-content:center"><button class="ob-chip' + (G.prev.dev === 'pc' ? ' on' : '') + '" data-pd="pc">PC</button><button class="ob-chip' + (G.prev.dev === 'mob' ? ' on' : '') + '" data-pd="mob">모바일</button>' + (G.sub === 'landing' ? '<button class="ghost" id="obCenter">선택 캐릭터 가운데 정렬</button>' : '') + '<button class="ghost" id="obPrevRe">현재 편집 내용으로 새로고침</button><button class="ghost" id="obPrevX">닫기</button></div>' +
       '<iframe id="obPrevFrame" title="랜딩 흐름 미리보기" src="' + ('/report/hub/?preview=1' + (G.prev.hash || '#/welcome')) + '"></iframe><p class="ob-lock">저장하지 않은 편집 내용까지 반영한 모습입니다. <b>섹션을 누르면 위쪽에 그 섹션의 편집 입력란이 열립니다</b>(점선 테두리가 누를 수 있는 영역). 검증 완료 + 공개로 설정한 사례만 보입니다. 통계에는 집계되지 않습니다.</p></div>';
     var push = function () { collect(); var f = $('#obPrevFrame'); if (f && f.contentWindow) f.contentWindow.postMessage({ t: 'mt-onb-preview', config: body() }, location.origin); };
     if (prevListener) window.removeEventListener('message', prevListener);

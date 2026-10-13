@@ -9,3 +9,13 @@
 #hub .rn img.rn-media{display:block;width:100%;height:440px;max-height:440px;object-fit:cover;margin:24px 0}
 #hub .rn .rn-scene:first-child img.rn-media{width:auto;height:auto;max-width:100%;object-fit:contain;margin:24px auto}
 @media(max-width:720px){#hub .rn img.rn-media{height:300px;max-height:300px}#hub .rn .rn-scene:first-child img.rn-media{height:auto}}
+/* Independent, responsive character layers; content and CTA remain usable. */
+#hub .rn-scene{position:relative;isolation:isolate}
+#hub .rn-character-stage{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+#hub .rn-character{position:absolute;left:var(--cx);top:var(--cy);width:var(--cw);transform:translate(-50%,-50%);pointer-events:none}
+#hub .rn-character>img{display:block;width:100%;height:auto;max-height:none;object-fit:contain;transform:scaleX(var(--flip));user-select:none}
+#hub .rn-character.editable{pointer-events:auto;cursor:move;touch-action:none;outline:1px dashed #cdb27a}
+#hub .rn-character.editable:focus{outline:2px solid #f1ce80}
+#hub .rn-character-handle{display:none}
+#hub .rn-character.editable .rn-character-handle{display:block;position:absolute;right:-9px;bottom:-9px;width:22px;height:22px;background:#cdb27a;border:2px solid #080a12;border-radius:4px;cursor:nwse-resize;touch-action:none}
+@media(max-width:720px){#hub .rn-character{left:var(--mx);top:var(--my);width:var(--mw)}}
