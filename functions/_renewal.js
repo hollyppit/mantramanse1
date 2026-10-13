@@ -6,7 +6,8 @@ const lines=v=>Array.isArray(v)?v.slice(0,12).map(x=>text(x)).filter(Boolean):[]
 const ids=['hook','research','prepare','decode','preview'];
 const bound=(v,d,min,max)=>Number.isFinite(+v)?Math.max(min,Math.min(max,+v)):d;
 const placement=(v={})=>({x:bound(v.x,50,0,100),y:bound(v.y,50,0,100),width:bound(v.width,22,3,80)});
-const characters=v=>Array.isArray(v)?v.slice(0,4).filter(c=>c&&/^[a-z0-9_-]{2,41}$/.test(c.id)).map(c=>({id:c.id,name:text(c.name,60),image:media(c.image),enabled:c.enabled!==false,flip:c.flip===true,pc:placement(c.pc),mobile:placement(c.mobile)})):[];
+const freePlacement=(v={})=>({x:Number.isFinite(+v.x)?+v.x:50,y:Number.isFinite(+v.y)?+v.y:50,width:Number.isFinite(+v.width)?Math.max(3,+v.width):22});
+const characters=v=>Array.isArray(v)?v.slice(0,4).filter(c=>c&&/^[a-z0-9_-]{2,41}$/.test(c.id)).map(c=>({id:c.id,name:text(c.name,60),image:media(c.image),enabled:c.enabled!==false,flip:c.flip===true,pc:freePlacement(c.pc),mobile:freePlacement(c.mobile)})):[];
 export function cleanRenewal(r){
   if(!r||typeof r!=='object')return null;
   const seen=new Set();
