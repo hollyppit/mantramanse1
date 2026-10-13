@@ -160,3 +160,10 @@
   #qs .qs-sigil.burning .qs-sigil-paper{ opacity: 0; } #qs .qs-sigil.burning .qs-hole{ opacity: 1; transform: scale(4.8); }
 }
 body.qs-open{ overflow: hidden; }
+/* Oversized red seal, isolated from layout so the original input flow stays intact. */
+#qs .qs-sigil.qs-sigil-large{position:fixed;left:50%;top:50%;width:100svh;height:100svh;max-width:none;margin:0;transform:translate(-50%,-50%);z-index:3;pointer-events:none;mix-blend-mode:screen}
+#qs .qs-sigil-large .qs-sigil-paper{width:100%;height:100%;background:none;border:0;box-shadow:none;padding:0;transform:rotate(-4deg)}
+#qs .qs-red-seal{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 18px #ab101040)}
+#qs.at-seal :is(.qs-head,.qs-desc,.qs-eyebrow,.qs-inst){position:relative;text-shadow:0 2px 6px #000,0 0 22px #000,0 0 36px #000}
+#qs.at-seal .qs-acts{position:relative}
+#qs .qs-sigil-large .qs-embers{position:absolute;left:50%;bottom:10%;color:#ee4937}

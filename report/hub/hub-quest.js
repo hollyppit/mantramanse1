@@ -124,6 +124,7 @@
 
     /* ── 장면 그리기 ── */
     function renderStep() {
+      var previousSeal=qs.querySelector('.qs-sigil-large');if(previousSeal)previousSeal.remove();
       var s = step(), html = '', kind = s.kind;
       qs.classList.toggle('at-seal', kind === 'seal');
       ['fade', 'rise', 'none'].forEach(function (f) { qs.classList.remove('fx-' + f); }); qs.classList.add('fx-' + (H.reduce ? 'none' : (s.fx || QC.fx || 'fade')));
@@ -144,9 +145,9 @@
     var VIEWS = {}, BIND = {};
 
     /* 1. 부적 봉인 */
-    VIEWS.seal = function (s) { return '<div class="qs-sigil" id="qsSigil" aria-hidden="true"><div class="qs-sigil-paper"><i class="qs-sigil-ink">命<br>運</i><div class="qs-hole"></div></div><span class="qs-embers">✦ · · ✧</span></div>' + eyebrow(s) + '<h1 class="qs-head"' + A('head') + '>' + nl(s.head) + '</h1><p class="qs-desc"' + A('desc') + '>' + nl(s.desc) + '</p><div class="qs-inst"' + A('hint') + '>' + esc(s.hint) + '</div>' + acts(btn('qsGo', s.button || '봉인을 태워 문을 열기 →')); };
+    VIEWS.seal = function (s) { return '<div class="qs-sigil qs-sigil-large" id="qsSigil" aria-hidden="true"><div class="qs-sigil-paper"><img class="qs-red-seal" src="/report/hub/quest/red-seal.png" alt="" decoding="async"><div class="qs-hole"></div></div><span class="qs-embers">✦ · · ✧</span></div>' + eyebrow(s) + '<h1 class="qs-head"' + A('head') + '>' + nl(s.head) + '</h1><p class="qs-desc"' + A('desc') + '>' + nl(s.desc) + '</p><div class="qs-inst"' + A('hint') + '>' + esc(s.hint) + '</div>' + acts(btn('qsGo', s.button || '봉인을 태워 문을 열기 →')); };
     BIND.seal = function () {
-      var sg = $('#qsSigil'), go1 = $('#qsGo'); go1.focus({ preventScroll: true });
+      var sg = $('#qsSigil'), go1 = $('#qsGo'); qs.appendChild(sg); go1.focus({ preventScroll: true });
       go1.onclick = function () {
         if (busy) return; busy = true; Ob.track('quest_view', {}, true); sg.classList.remove('burning'); void sg.offsetWidth; sg.classList.add('burning');
         setTimeout(function () { sg.classList.remove('burning'); next(); }, H.reduce ? 150 : 1050);
