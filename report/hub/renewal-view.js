@@ -18,7 +18,7 @@ if(!root.IntersectionObserver||!root.Element.prototype.animate||query.matches)re
 var nodes=host.querySelectorAll('.rn-inner > h2,.rn-inner > p,.rn-inner > .rn-visual,.rn-inner > .rn-card,.rn-cards > .rn-card,.rn-guide,.rn-seasons');
 observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(!entry.isIntersecting)return;observer.unobserve(entry.target);if(query.matches)return;var node=entry.target,visual=node.classList.contains('rn-visual');
 var animation=node.animate([{opacity:0,transform:visual?'translateY(24px) scale(.975)':'translateY(20px)'},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:visual?1000:750,easing:'cubic-bezier(.22,1,.36,1)'});animations.add(animation);animation.onfinish=function(){animations.delete(animation)};
-if(node.classList.contains('rn-card'))node.querySelectorAll('.rn-chart i').forEach(function(bar){var a=bar.animate([{transform:'scaleY(0)'},{transform:'scaleY(1)'}],{duration:1000,easing:'cubic-bezier(.22,1,.36,1)'});animations.add(a);a.onfinish=function(){animations.delete(a)}});
+if(node.classList.contains('rn-card'))node.querySelectorAll('.rn-chart i').forEach(function(bar){var a=bar.animate([{transform:'scaleY(0)',transformOrigin:'bottom'},{transform:'scaleY(1)',transformOrigin:'bottom'}],{duration:1000,easing:'cubic-bezier(.22,1,.36,1)'});animations.add(a);a.onfinish=function(){animations.delete(a)}});
 });},{threshold:0.12,rootMargin:'0px 0px -35px 0px'});
 nodes.forEach(function(n){observer.observe(n)});
 var stop=function(){observer.disconnect();animations.forEach(function(a){a.cancel()});animations.clear()};
