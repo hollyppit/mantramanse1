@@ -32,3 +32,9 @@
 #hub .rn-scene>.rn-inner{position:relative;z-index:1;pointer-events:none}
 #hub .rn-inner :is(a,button,input,select,textarea,summary,details,.rn-icon.editable){pointer-events:auto}
 #hub .rn-inner :is(h2,h3,p,.rn-guide){text-shadow:0 2px 5px #000,0 0 16px #000b}
+/* More legible onboarding body copy without changing headline hierarchy. */
+#hub .rn .rn-inner p{font-size:20px;line-height:1.85;color:#eee9df}
+#hub .rn .rn-inner .rn-label{font-size:16px;color:#cdb27a}
+#hub .rn .rn-inner .rn-emphasis{color:#ddc58f}
+#hub .rn .rn-inner summary{font-size:18px;line-height:1.7}
+@media(max-width:720px){#hub .rn .rn-inner p{font-size:18px;line-height:1.8}#hub .rn .rn-inner .rn-label{font-size:14px}#hub .rn .rn-inner summary{font-size:17px}}
