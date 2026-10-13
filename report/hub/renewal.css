@@ -6,5 +6,6 @@
 
 #hub .rn-seasons .pop,#hub .rn-seasons .dr,#hub .rn-seasons .rise,#hub .rn-seasons .wd{animation:none!important;opacity:1;transform:none}
 /* Display content images in their original proportions without cropping. */
-#hub .rn img.rn-media{display:block;width:auto;height:auto;max-width:100%;max-height:440px;object-fit:contain;margin:24px auto}
-@media(max-width:720px){#hub .rn img.rn-media{max-height:300px}}
+#hub .rn img.rn-media{display:block;width:100%;height:440px;max-height:440px;object-fit:cover;margin:24px 0}
+#hub .rn .rn-scene:first-child img.rn-media{width:auto;height:auto;max-width:100%;object-fit:contain;margin:24px auto}
+@media(max-width:720px){#hub .rn img.rn-media{height:300px;max-height:300px}#hub .rn .rn-scene:first-child img.rn-media{height:auto}}
