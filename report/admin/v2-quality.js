@@ -84,6 +84,7 @@
     if (st.productAudit) h += '<div class="card"><b>저장된 상품 구성 검사</b> · ' + esc(TS.project) + ' · 챕터 ' + st.productAudit.chapters + '개 · 풀이 누락 의심 ' + st.productAudit.summary.missing + '개 <button type="button" data-repair="v2proj">상품 구성 열기</button></div>';
     var s = a.summary;
     h += '<div class="card"><b>인생 지도 문서 검사</b> · 챕터 ' + a.chapters + '개 · 풀이 누락 의심 ' + s.missing + ' · 단정 표현 검토 ' + s.absolute + ' · 에셋 누락 ' + (s.assetMissing == null ? '확인 못함' : s.assetMissing) + ' · 세계 매핑 대체 ' + (s.worldFallback == null ? '-' : s.worldFallback) + ' · 빈 세계 ' + (s.worldEmpty == null ? '-' : s.worldEmpty) + '</div>';
+    if (st.readingFlow) h += section("공통 설명 구조 · 15주제", st.readingFlow.missing.length + st.readingFlow.duplicates.length, "<p>주제 " + st.readingFlow.sections + "개 · 요소 누락 " + st.readingFlow.missing.length + " · 같은 문장 " + st.readingFlow.duplicates.length + "</p>" + list(st.readingFlow.missing, function(x) { return esc(x.id + " / " + x.field); }) + list(st.readingFlow.duplicates, function(x) { return esc(x.id + " / " + x.field + " ↔ " + x.other); }));
     if (st.evidence) h += evidenceSection(st.evidence);
     h += awakeningSection(st);
     h += viewerErrSection(st);
@@ -152,7 +153,9 @@
         st.productAudit = Q.audit({doc:rep,slots:got[0]});
         st.evidence = Q.evidence(lib.all, { policy: lib.policy, hidden: lib.hidden.length, restored: lib.restored.length });
         st.evidence.refs = got[3] ? Q.refCheck(lib.all, got[3]) : null; st.evidence.refDocs = got[3] ? got[3].length : null;
+        if (R.Deep) R.Deep.augment(rep, { M: M, ch: ch, sd: sd, now: now, name: '테스트', assets: {} });
         var doc = R.LifeDoc.build({ M: M, ch: ch, sd: sd, now: now, name: '테스트', interest: TS.interest, rep: rep, soc: R.StoryDirector.social(M, ch, sd, now), plan: (rep.chapters.find(function (c) { return c.plan; }) || {}).plan });
+        if (R.ReadingFlow && TS.project === "full") { doc = R.ReadingFlow.build(doc, sd, { M: M, ch: ch }); st.readingFlow = R.ReadingFlow.audit(doc); }
         var worlds = R.Explore ? R.Explore.mergeWorlds(got[1]) : null;
         st.audit = Q.audit({ doc: doc, worlds: worlds, slots: got[0] });
       } catch (e) { st.err = (e && e.message) || String(e); }

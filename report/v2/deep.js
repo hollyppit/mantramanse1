@@ -120,6 +120,7 @@
     인성: [['배움과 사색, 윗사람·가족의 보호가 따릅니다', '생각만 길고 실행이 느리며 의존적일 수 있습니다'], ['행동이 빠르고 실전형입니다', '준비와 지지 기반이 약해 시행착오를 많이 겪습니다']],
   };
   SECTIONS.deep_proscons = function (H) {
+    if (R.ReadingFlow) return { title: '솔직한 장단점', sub: '여러 원국 조건을 함께 읽는 장점과 부담', scenes: R.ReadingFlow.scenes(R.ReadingFlow.card(H.sd, 2), 'deep_proscons') };
     var sd = H.sd, st = sd.dayMaster.stem, pros = [], cons = [], g = sd.groups, order = Object.keys(g).sort(function (a, b) { return g[b] - g[a]; });
     (STEM_PC[st] || STEM_PC.갑).forEach(function (x) { pros.push([x[0], '일간 ' + st + '(' + sd.dayMaster.el + ')']); cons.push([x[1], '일간 ' + st + '(' + sd.dayMaster.el + ')']); });
     var hi = order[0], lo = order[4], hip = GRP_PC[hi], lop = GRP_PC[lo];

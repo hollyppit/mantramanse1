@@ -89,7 +89,7 @@ export function cleanItem(b, prev) {
   const out = {
     id: b.id, title: str(b.title, 120), domain: b.domain, subDomain: str(b.subDomain, 40), status, priority: Math.max(0, Math.min(100, Math.round(+b.priority || 0))), stance: STANCES.includes(b.stance) ? b.stance : 'neutral',
     conditions: cleanConds(b.conditions), alsoWhen: (Array.isArray(b.alsoWhen) ? b.alsoWhen.slice(0, 5) : []).map(cleanConds).filter(g => Object.keys(g).length), modifiers: (Array.isArray(b.modifiers) ? b.modifiers.slice(0, 20) : []).map(cleanModifier).filter(Boolean), exclusions: cleanConds(b.exclusions),
-    principle: str(b.principle, 2000), interpretation: str(b.interpretation, 2000), strengths: strs(b.strengths, 12, 300), risks: strs(b.risks, 12, 300), behaviorPatterns: strs(b.behaviorPatterns, 12, 300), actions: strs(b.actions, 12, 300),
+    principle: str(b.principle, 2000), interpretation: str(b.interpretation, 2000), strengths: strs(b.strengths, 12, 300), risks: strs(b.risks, 12, 300), behaviorPatterns: strs(b.behaviorPatterns, 12, 300), actions: strs(b.actions, 12, 300), strengthenActions: strs(b.strengthenActions !== undefined ? b.strengthenActions : prev && prev.strengthenActions, 12, 300), copingActions: strs(b.copingActions !== undefined ? b.copingActions : prev && prev.copingActions, 12, 300),
     realWorldExamples: { worker: str(ex.worker, 600), business: str(ex.business, 600), freelance: str(ex.freelance, 600), love: str(ex.love, 600) },
     sourceType, sourceReference: str(b.sourceReference, 200), sourceMemo: str(b.sourceMemo, 1000), confidence: conf, reviewed, reviewedAt: reviewed ? (str(b.reviewedAt, 40) || now) : '',
     evidence: cleanEvidence(b.evidence !== undefined ? b.evidence : prev && prev.evidence), theory: strs(b.theory, 10, 20),
@@ -145,9 +145,9 @@ export function tplVars(sd) {
 }
 export function tplFill(str, vars) { return String(str == null ? '' : str).replace(/\{([\w.가-힣]+)\}/g, (m, k) => { let v = vars; k.split('.').forEach(p => { v = v == null ? v : v[p]; }); return v == null || typeof v === 'object' ? m : v; }); }
 const TEXT_KEYS = ['title', 'principle', 'interpretation', 'sourceMemo'];
-const textsOf = it => [...TEXT_KEYS.map(k => it[k]), ...(it.strengths || []), ...(it.risks || []), ...(it.behaviorPatterns || []), ...(it.actions || []), ...Object.values(it.realWorldExamples || {}), ...(it.modifiers || []).map(m => m.text)].filter(Boolean).join('\n');
+const textsOf = it => [...TEXT_KEYS.map(k => it[k]), ...(it.strengths || []), ...(it.risks || []), ...(it.behaviorPatterns || []), ...(it.actions || []), ...(it.strengthenActions || []), ...(it.copingActions || []), ...Object.values(it.realWorldExamples || {}), ...(it.modifiers || []).map(m => m.text)].filter(Boolean).join('\n');
 export const unknownVars = it => (textsOf(it).replace(KNOWN_VAR, '').match(ANY_VAR) || []);
-function fillItem(it, V) { const f = x => tplFill(x, V), o = { ...it }; ['principle', 'interpretation'].forEach(k => { o[k] = f(o[k]); }); ['strengths', 'risks', 'behaviorPatterns', 'actions'].forEach(k => { o[k] = (o[k] || []).map(f); }); o.realWorldExamples = Object.fromEntries(Object.entries(o.realWorldExamples || {}).map(([k, v]) => [k, f(v)])); o.modifiers = (o.modifiers || []).map(m => ({ ...m, text: f(m.text) })); return o; }
+function fillItem(it, V) { const f = x => tplFill(x, V), o = { ...it }; ['principle', 'interpretation'].forEach(k => { o[k] = f(o[k]); }); ['strengths', 'risks', 'behaviorPatterns', 'actions', 'strengthenActions', 'copingActions'].forEach(k => { o[k] = (o[k] || []).map(f); }); o.realWorldExamples = Object.fromEntries(Object.entries(o.realWorldExamples || {}).map(([k, v]) => [k, f(v)])); o.modifiers = (o.modifiers || []).map(m => ({ ...m, text: f(m.text) })); return o; }
 
 // ───────────── 조건 평가 ─────────────
 // 반환: { match, spec, rows, missing }  rows: 조건별 { key, label, want, have, hit }  missing: facts 에 값이 없어 판정 못 한 필드
@@ -288,7 +288,7 @@ export function buildPackage(sd, ext, items, design, rules, opts) {
     const max = (DEPTH_CAP[rl.depth] || DEPTH_CAP.standard).items, pick = here.slice(0, max);
     sections[sec.id] = { id: sec.id, title: sec.title, required: sec.required, status: 'ok', supporting: here.length, items: pick.map(u => {
       const a = applied.get(u.id), it = fillItem(u.item, V); a.interpretation = tplFill(a.interpretation, V); a.hits.forEach(h => { h.text = tplFill(h.text, V); });
-      return { id: u.id, version: u.item.version || null, title: it.title, evidence: (it.evidence || []).map(e => ({ docId: e.docId, title: e.title, chunkId: e.chunkId, pageStart: e.pageStart, pageEnd: e.pageEnd, heading: e.heading })), stance: it.stance, confidence: it.confidence, spec: u.spec, interpretation: a.interpretation, replaced: a.replaced, principle: it.principle, strengths: it.strengths, risks: it.risks, behaviorPatterns: it.behaviorPatterns, actions: it.actions, realWorldExamples: it.realWorldExamples,
+      return { id: u.id, version: u.item.version || null, title: it.title, evidence: (it.evidence || []).map(e => ({ docId: e.docId, title: e.title, chunkId: e.chunkId, pageStart: e.pageStart, pageEnd: e.pageEnd, heading: e.heading })), stance: it.stance, confidence: it.confidence, spec: u.spec, interpretation: a.interpretation, replaced: a.replaced, principle: it.principle, strengths: it.strengths, risks: it.risks, behaviorPatterns: it.behaviorPatterns, actions: it.actions, strengthenActions: it.strengthenActions, copingActions: it.copingActions, realWorldExamples: it.realWorldExamples,
         modifiers: a.hits.map(h => ({ id: h.id, effect: h.effect, text: h.text })), why: u.rows.filter(r => r.hit).map(r => r.label + ' = ' + (Array.isArray(r.have) ? r.have.join(',') : r.have)) };
     }) };
     pick.forEach(u => appliedRules.push({ rule: 'section:' + sec.id, knowledge: u.id, specificity: u.spec }));

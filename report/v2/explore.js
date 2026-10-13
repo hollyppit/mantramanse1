@@ -60,6 +60,7 @@
       w = worlds[i]; if (w.chapters && w.chapters.length) continue;
       for (j = 0; j < (w.match || []).length; j++) { var re = new RegExp(w.match[j]); if (re.test(id) || re.test(base)) return w.id; }
     }
+    if (c.readingSection) return ['w1','w1','w1','w1','w2','w2','w3','w3','w6','w4','w4','w4','w4','w6','w6'][c.readingSection-1] || 'w1';
     return FALLBACK_WORLD[c.act] || 'w1';
   }
 

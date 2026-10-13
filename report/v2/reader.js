@@ -136,10 +136,11 @@
       var vh = win.innerHeight, sy = win.scrollY, items = [], keep = pages[pi] && pages[pi].items[0] && pages[pi].items[0].el;
       secs = [].slice.call(host.querySelectorAll('.rd-sec'));
       secs.forEach(function (sec) {
+        if (sec.closest('details:not([open])')) return;
         var hd = sec.classList.contains('rd-head') ? sec : null;
         unitsOf(sec).forEach(function (u) {
           var r = u.getBoundingClientRect(), media = u === sec || u.tagName === 'FIGURE' || MEDIA_UNIT.test(u.className || ''), text = media ? '' : textOf(u);
-          if (!text && !media) return; items.push({ top: r.top + sy, bottom: r.bottom + sy, text: text, dur: text ? estimate(text, f.readSpeed) : (u === sec ? 2 : 4), hd: hd, sec: sec, el: u });
+          if (!u.getClientRects().length || r.height <= 0 || (!text && !media)) return; items.push({ top: r.top + sy, bottom: r.bottom + sy, text: text, dur: text ? estimate(text, f.readSpeed) : (u === sec ? 2 : 4), hd: hd, sec: sec, el: u });
         });
       });
       pages = paginate(items, vh); total = 0; offs = []; var maxY = doc.documentElement.scrollHeight - vh;

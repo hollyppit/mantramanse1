@@ -270,11 +270,13 @@
         b.innerHTML = '<div class="ik-sec" style="margin-top:0">핵심 풀이<small>이 조건은 어떤 의미인가요? 사용자에게 보여 줄 쉬운 말로 2~3문장.</small></div><textarea id="wInt" rows="4">' + esc(it.interpretation) + '</textarea>' +
           '<div class="ik-sec">현실에서는?<small>직장·사업·돈·연애·관계·생활에서 어떻게 나타날 수 있나요?</small></div><div id="wBeh"></div>' +
           '<div class="ik-g2"><div><div class="ik-sec">장점</div><div id="wStr"></div></div><div><div class="ik-sec">주의할 점</div><div id="wRisk"></div></div></div>' +
-          '<div class="ik-sec">해볼 것(행동 조언)</div><div id="wAct"></div>' +
+          '<div class="ik-sec">해볼 것(기존 행동 조언)</div><div id="wAct"></div><div class="ik-sec">장점 강화 전략</div><div id="wStrengthen"></div><div class="ik-sec">약점 보완 전략</div><div id="wCoping"></div><label>학파 기준 (쉼표 구분)<input id="wTheory" value="' + esc((it.theory || []).join(', ')) + '"></label>' +
           '<details style="margin-top:14px"' + (ex.worker || ex.business || ex.freelance || ex.love ? ' open' : '') + '><summary class="ik-sec" style="display:inline-block;margin:0">현실 사례 추가</summary><div class="ik-g2"><label class="ik-f">직장인<textarea id="exW" rows="2">' + esc(ex.worker) + '</textarea></label><label class="ik-f">사업자<textarea id="exB" rows="2">' + esc(ex.business) + '</textarea></label><label class="ik-f">프리랜서<textarea id="exF" rows="2">' + esc(ex.freelance) + '</textarea></label><label class="ik-f">연애/관계<textarea id="exL" rows="2">' + esc(ex.love) + '</textarea></label></div></details>' +
           '<details style="margin-top:12px"' + (it.principle ? ' open' : '') + '><summary class="muted">명리학적 근거 펼쳐보기 <small>(전문가용 — 사용자에게 그대로 보이지 않고 근거로 쓰입니다)</small></summary><textarea id="wPrin" rows="3">' + esc(it.principle) + '</textarea></details>';
         $('#wInt', b).oninput = function () { it.interpretation = this.value; }; $('#wPrin', b).oninput = function () { it.principle = this.value; };
         [['#exW', 'worker'], ['#exB', 'business'], ['#exF', 'freelance'], ['#exL', 'love']].forEach(function (p) { $(p[0], b).oninput = function () { it.realWorldExamples[p[1]] = this.value; }; });
+        it.strengthenActions = it.strengthenActions || []; it.copingActions = it.copingActions || [];
+        listEditor($('#wStrengthen', b), it.strengthenActions, '강점을 발휘할 조건과 반복할 행동'); listEditor($('#wCoping', b), it.copingActions, '부담 신호와 대응 행동'); $('#wTheory', b).oninput = function () { it.theory = this.value.split(',').map(function (x) { return x.trim(); }).filter(Boolean); };
         listEditor($('#wBeh', b), it.behaviorPatterns, '예: 벌이가 늘어도 지출이 같이 늘어나는 장면이 반복될 수 있습니다.'); listEditor($('#wStr', b), it.strengths, '장점 한 가지'); listEditor($('#wRisk', b), it.risks, '주의할 점 한 가지'); listEditor($('#wAct', b), it.actions, '해볼 것 한 가지');
       } else {
         b.innerHTML = '<div class="ik-sec" style="margin-top:0">이 풀이가 달라지는 경우<small>기본 조건에 “이런 조건이 더해지면” 해석이 더 강해지거나 약해지거나 바뀝니다. 맞는 것만 적용됩니다.</small></div><div class="ik-nl"><b>기본</b> ' + esc(sentence(it.conditions)) + '</div><div id="wMods"></div><button type="button" id="wModAdd">+ 다른 조건 추가</button>' +
@@ -295,7 +297,7 @@
       $$('[data-del]', w).forEach(function (x) { x.onclick = function () { it.modifiers.splice(+x.dataset.del, 1); mods(); }; });
     }
     function clean() {
-      ['behaviorPatterns', 'strengths', 'risks', 'actions'].forEach(function (k) { it[k] = it[k].map(function (x) { return String(x).trim(); }).filter(Boolean); });
+      ['behaviorPatterns', 'strengths', 'risks', 'actions', 'strengthenActions', 'copingActions'].forEach(function (k) { it[k] = (it[k] || []).map(function (x) { return String(x).trim(); }).filter(Boolean); });
       it.alsoWhen = it.alsoWhen.filter(function (g) { return !isEmpty(g); }); it.modifiers = it.modifiers.filter(function (m) { return !isEmpty(m.when); });
     }
     function save(pub) {

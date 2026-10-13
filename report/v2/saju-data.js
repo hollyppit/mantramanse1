@@ -69,6 +69,15 @@
       sd.usefulElementMethods[key] = { school: key, applicable: method.applicable !== false, yong: method.yong != null ? ELK[method.yong] : null, hee: method.hee != null ? ELK[method.hee] : null, roles: roleMap, reasons: (method.log || []).slice() };
     });
     try { var advice = M.methodAdvice(ch); sd.usefulElementAdvice = { verdict: advice.verdict, why: advice.why, agree: advice.agree, climateSkew: advice.clim, strengthSkew: advice.skew, eokYong: ELK[advice.eokYong], joYong: advice.joYong != null ? ELK[advice.joYong] : null }; } catch (e) { sd.usefulElementAdvice = null; }
+    sd.interpretationBasis = {
+      strength: { kind: 'weighted-model', note: '비겁과 인성의 가중 비중에 따른 강약 분류이며 통근의 강도와 독립된 기준입니다.' },
+      eokbu: { kind: 'simplified-balance', note: '돕는 비중 50%를 기준으로 보완 후보를 정하는 앱의 단순화 모델입니다. 중화 분류와 보완 방향은 구분합니다.' },
+      johu: { kind: 'simplified-climate', note: '글자별 한난조습 지표를 합산한 모델이며 궁통보감의 일간·월별 조후표를 그대로 구현한 결과가 아닙니다.' },
+      tonggwan: { kind: 'simplified-mediation', note: '극하는 두 오행의 비중 조건으로 중재 후보를 고르는 모델입니다.' },
+      groups: { note: '십성군 비중은 일간을 포함한 오행 분포 기준이고 개별 십성 비중은 일간을 제외한 집계이므로 합산 분모가 다릅니다.' },
+      unsupported: ['월령 중심 격국용신의 완전한 판정', '일간·월별 고전 조후표', '종격·전왕격의 확정']
+    };
+    sd.reviewConditions = { hourUnknown: !ch.hourKnown, extremeStrength: /극약|극왕/.test(ch.strength.zone), methodDifference: !!(sd.usefulElementMethods.eokbu?.yong && sd.usefulElementMethods.johu?.yong && sd.usefulElementMethods.eokbu.yong !== sd.usefulElementMethods.johu.yong) };
     sd.climate = ch.climate ? { temp: ch.climate.temp, hum: ch.climate.hum } : null;
     sd.twelveStages = {}; ['year', 'month', 'day', 'hour'].forEach(function (k) { var c = ch.cells && ch.cells[k]; if (c && P[k]) sd.twelveStages[k] = c.unseong; });
     var stars = {}; ['year', 'month', 'day', 'hour'].forEach(function (k) { ((ch.sinsal && ch.sinsal[k]) || []).forEach(function (s) { stars[s.name] = { name: s.name, good: !!s.good, pillar: k }; }); });

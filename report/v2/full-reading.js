@@ -4,21 +4,22 @@
   function collect(chapter, name) {
     var paragraphs = [], targets = [];
     // 생활 점검 지표와 예방 안내는 검증된 고정 문구로 유지한다.
-    if (chapter.id === 'deep_health' || chapter.base === 'deep_health') return { chapter: { id: chapter.id || chapter.base, title: chapter.title || '', paragraphs: [] }, targets: [] };
-    function push(text, set, kind) {
+    if (chapter.aiEnabled === false || chapter.readingSupplementary || chapter.id === 'deep_health' || chapter.base === 'deep_health') return { chapter: { id: chapter.id || chapter.base, title: chapter.title || '', paragraphs: [] }, targets: [] };
+    function push(text, set, kind, role) {
       if (!text || text.trim().length < 30) return;
       var id = String(targets.length);
-      paragraphs.push({ id: id, text: name ? text.split(name).join('본인') : text, kind: kind || 'reading' }); targets.push(set);
+      paragraphs.push({ id: id, text: name ? text.split(name).join('본인') : text, kind: kind || 'reading', role: role || '' }); targets.push(set);
     }
-    ['meaning', 'choice'].forEach(function (k) { if (typeof chapter[k] === 'string') push(chapter[k], function (text) { chapter[k] = text; }); });
-    (chapter.details || []).forEach(function (d) { ['summary', 'detail'].forEach(function (k) { if (typeof d[k] === 'string') push(d[k], function (text) { d[k] = text; }); }); });
+    ['meaning', 'choice'].forEach(function (k) { if (!chapter.readingCore && typeof chapter[k] === 'string') push(chapter[k], function (text) { chapter[k] = text; }); });
+    (chapter.readingCore ? [] : chapter.details || []).forEach(function (d) { ['summary', 'detail'].forEach(function (k) { if (typeof d[k] === 'string') push(d[k], function (text) { d[k] = text; }); }); });
     (chapter.scenes || []).forEach(function (scene) {
       // 예시 장면은 episode 종류로 전달해 설명체로 바뀌지 않게 한다.
+      if (scene.readingSupplementary || scene.readingLayer === 'fact' || scene.readingLayer === 'model') return;
       if (scene.html) {
         var box = root.document.createElement('div'); box.innerHTML = scene.html;
         [].forEach.call(box.querySelectorAll('p'), function (p) {
           if (p.closest('.rd-answer,.vd,.dp-note,.faint,[data-answer-topic]')) return;
-          push(p.textContent, function (text) { p.textContent = text; scene.html = box.innerHTML; }, scene.episode ? 'episode' : 'reading');
+          push(p.textContent, function (text) { p.textContent = text; scene.html = box.innerHTML; if (scene.readingRole && chapter.readingCore) chapter.readingCore[scene.readingRole] = text; }, scene.episode ? 'episode' : 'reading', scene.readingRole);
         });
       }
       ['body', 'narration', 'text'].forEach(function (k) { if (typeof scene[k] === 'string') push(scene[k], function (text) { scene[k] = text; }); });
@@ -33,12 +34,17 @@
     if (!result.paragraphs.every(function (p) { var i = Number(p.id); if (!Number.isInteger(i) || !job.targets[i] || seen[i] || typeof p.text !== 'string' || p.text.length < 30 || p.text.length > 1200) return false; seen[i] = true; return true; })) return false;
     result.paragraphs.forEach(function (p) { job.targets[Number(p.id)](p.text); }); return true;
   }
+  function uniqueAcross(result, seen, id) {
+    return !!(result && Array.isArray(result.paragraphs) && result.paragraphs.every(function(p) { var key=String(p.text || '').replace(/\s+/g,''); return !seen.has(key) || seen.get(key)===id; }));
+  }
+  function remember(result, seen, id) { result.paragraphs.forEach(function(p) { seen.set(p.text.replace(/\s+/g,''),id); }); }
   function prepare(rep, sd, name, onReady) {
     if (active) { active.cancelled = true; active.controllers.forEach(function (c) { c.abort(); }); }
     var session = { cancelled: false, controllers: [] }; active = session;
     var safe = {}; Object.keys(sd || {}).forEach(function (k) { if (k !== 'birth' && k !== 'name') safe[k] = sd[k]; });
     var chapters = rep.chapters || [], outline = chapters.map(function (c) { return { id: c.id || c.base, title: name ? (c.title || '').split(name).join('본인') : c.title || '' }; });
     var jobs = chapters.map(function (c) { return { c: c, job: collect(c, name) }; }), done = 0;
+    var acceptedTexts = new Map();
     var status = { total: jobs.length, completed: 0, failed: 0 };
     rep.readingStatus = status;
     async function run(item) {
@@ -51,7 +57,7 @@
       try {
         var r = await root.fetch('/api/movingtoon-reading', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sd: safe, outline: outline, chapter: job.chapter }), signal: ctl && ctl.signal });
         var d = await r.json(); if (d && ['no-ai', 'storage-unavailable', 'rate-limited'].indexOf(d.error) >= 0) done = jobs.length;
-        if (!session.cancelled && d && d.ok && apply(job, d.result)) { item.c.readingProvider = d.provider; if (d.style) { item.c.readingStyle = d.style; rep.readingStyle = rep.readingStyle || d.style; } status.completed++; if (onReady) onReady(item.c, job, d.result); } else status.failed++;
+        if (!session.cancelled && d && d.ok && uniqueAcross(d.result, acceptedTexts, item.c.id) && apply(job, d.result)) { item.c.readingProvider = d.provider; if (d.style) { item.c.readingStyle = d.style; rep.readingStyle = rep.readingStyle || d.style; } remember(d.result, acceptedTexts, item.c.id); status.completed++; if (onReady) onReady(item.c, job, d.result); } else status.failed++;
       } catch (e) { status.failed++; } finally { root.clearTimeout(timer); }
     }
     // 첫 챕터를 준비한 뒤 표시하고, 후속 챕터는 미리 준비한다. 현재 DOM은 다시 그리지 않는다.
@@ -61,5 +67,5 @@
     firstPromise.then(function () { worker(); worker(); });
     return { first: firstPromise, status: status };
   }
-  R.FullReading = { collect: collect, apply: apply, prepare: prepare };
+  R.FullReading = { uniqueAcross: uniqueAcross, collect: collect, apply: apply, prepare: prepare };
 })(typeof window !== 'undefined' ? window : globalThis);

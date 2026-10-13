@@ -1,0 +1,1703 @@
+{
+  "date": "2026-10-13",
+  "host": "https://mantramanse.pages.dev",
+  "readOnly": {
+    "assets": {
+      "status": 200,
+      "keys": [
+        "assets",
+        "videos"
+      ],
+      "images": 163
+    },
+    "prologue": {
+      "status": 200,
+      "keys": [
+        "on",
+        "M",
+        "F"
+      ],
+      "configured": {
+        "on": true,
+        "M": true,
+        "F": true
+      }
+    },
+    "report-content": {
+      "status": 200,
+      "keys": [
+        "content"
+      ],
+      "version": "cmv4584pa"
+    }
+  },
+  "cells": [
+    {
+      "pillar": "갑자",
+      "gender": "M",
+      "status": 200,
+      "matched": true,
+      "video": true,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": true
+    },
+    {
+      "pillar": "을축",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "갑자",
+      "gender": "F",
+      "status": 200,
+      "matched": true,
+      "video": true,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": true
+    },
+    {
+      "pillar": "을축",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "병인",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "병인",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "정묘",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "정묘",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "무진",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "무진",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "기사",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "기사",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "경오",
+      "gender": "M",
+      "status": 200,
+      "matched": true,
+      "video": true,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": true
+    },
+    {
+      "pillar": "경오",
+      "gender": "F",
+      "status": 200,
+      "matched": true,
+      "video": true,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": true
+    },
+    {
+      "pillar": "임신",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "신미",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "신미",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "임신",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "계유",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "계유",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "갑술",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "갑술",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "을해",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "병자",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "을해",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "병자",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "정축",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "정축",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "무인",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "기묘",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "무인",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "기묘",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "경진",
+      "gender": "M",
+      "status": 200,
+      "matched": true,
+      "video": true,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": true
+    },
+    {
+      "pillar": "경진",
+      "gender": "F",
+      "status": 200,
+      "matched": true,
+      "video": true,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": true
+    },
+    {
+      "pillar": "신사",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "신사",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "임오",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "임오",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "계미",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "계미",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "갑신",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "갑신",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "을유",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "을유",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "병술",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "병술",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "정해",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "정해",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "무자",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "무자",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "기축",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "기축",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "경인",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "경인",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "신묘",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "신묘",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "임진",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "임진",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "계사",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "계사",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "갑오",
+      "gender": "M",
+      "status": 200,
+      "matched": true,
+      "video": true,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": true
+    },
+    {
+      "pillar": "갑오",
+      "gender": "F",
+      "status": 200,
+      "matched": true,
+      "video": true,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": true
+    },
+    {
+      "pillar": "을미",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "을미",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "병신",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "병신",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "정유",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "정유",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "무술",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "무술",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "기해",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "기해",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "경자",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "신축",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "경자",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "임인",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "신축",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "계묘",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "임인",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "계묘",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "갑진",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "갑진",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "을사",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "을사",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "병오",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "병오",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "정미",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "정미",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "무신",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "무신",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "기유",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "경술",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "기유",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "신해",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "경술",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "신해",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "임자",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "임자",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "계축",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "계축",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "갑인",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "갑인",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "을묘",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "을묘",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "병진",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "병진",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "정사",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "정사",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "무오",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "무오",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "기미",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "경신",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "기미",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "경신",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "신유",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "신유",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "임술",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "임술",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "계해",
+      "gender": "M",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    },
+    {
+      "pillar": "계해",
+      "gender": "F",
+      "status": 200,
+      "matched": false,
+      "video": false,
+      "posterOnly": false,
+      "textOnly": false,
+      "ilgan": true,
+      "enabled": null
+    }
+  ],
+  "clips": [
+    {
+      "url": "/api/clipfile?k=4e25f70c8eab350bc7.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/16277873",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=316b4bd96e17f1fd05.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/18747794",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=fa771946ab81f417e3.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/22414608",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=67502f9c0e55beb3f9.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/30492616",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=0ddb5e95a6ea3fe920.webp",
+      "status": 206,
+      "mime": "image/webp",
+      "range": "bytes 0-31/575086",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=ad3c297c10004733ba.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/20000043",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=57fd919ce2b03c1ccf.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/30421441",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=b434fed5e557c6c0da.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/26901373",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=e60c3be8a7c1f03be1.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/22536381",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=756aeefc0852012e16.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/22078491",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=e468a4d569bd8a82c5.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/21211660",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=2ae8bb8c73c3e5c9d3.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/19726477",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=1d0cbb8975a4547c6c.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/23632759",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=aaf56975d76622fb8e.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/18568117",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=310fdbc1c8feb45998.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/31026048",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=99d16b2056234e051d.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/21040472",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=dbdd3f531209d59546.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/32284073",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=27b0de1d9c6f53295f.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/18696012",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=13739179a117788295.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/19087891",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=3617d2f4b67ee9189d.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/37940016",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=085cd2ba343277470f.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/9533659",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=3b494ef0698df69a66.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/27100779",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=5285173716ee6d035f.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/21299180",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=ef98f8cbf417c3071b.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/18871486",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=f125240df0ca17d60f.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/29876189",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=0af55b105393a3d275.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/18589758",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=77112dcfaa95d27427.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/18568117",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=87193ef0788556997d.mp4",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/18696012",
+      "length": "32"
+    },
+    {
+      "url": "/api/clipfile?k=a2a76010f348851393.mp4",
+      "slot": "prologue-M",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/30924518"
+    },
+    {
+      "url": "/api/clipfile?k=a63e98d685b4895bac.mp4",
+      "slot": "prologue-F",
+      "status": 206,
+      "mime": "video/mp4",
+      "range": "bytes 0-31/28383792"
+    }
+  ],
+  "liveAI": [
+    {
+      "dayPillar": "경오",
+      "hourKnown": true,
+      "status": 200,
+      "elapsedMs": 18176,
+      "provider": "openai",
+      "cached": false,
+      "knowledgeCount": 45,
+      "paragraphs": [
+        {
+          "id": "0",
+          "text": "귀인은 기준과 책임이 분명하며, 맡은 일을 허술하게 넘기지 않는 사람입니다. 여름 오월의 경금에 관성이 가장 강하고 년지 신금의 뿌리는 약한 통근이어서, 책임감이 강한 만큼 평가와 기대를 무겁게 받아들입니다. 식신·상관은 압박을 말과 결과물로 풀어내는 힘이지만, 월·일의 오와 시지 자가 충하므로 정해진 기준을 지키려는 마음과 자기 방식대로 표현하려는 마음이 부딪힙니다.",
+          "refs": [
+            "natal",
+            "SELF-0006",
+            "SELF-0011",
+            "RELATIONSHIP-0008"
+          ],
+          "layer": "reading"
+        },
+        {
+          "id": "1",
+          "text": "귀인의 보완은 버팀목을 마련하는 일과 과열을 식히는 일을 병행하는 것입니다. 억부의 토·금은 신약한 일간을 돕지만 토만 강조하면 덥고 건조한 조건을 놓치며, 조후의 수는 열을 식혀도 표현과 활동이 과하면 힘을 소모시킵니다. 2026-10-13 기준 대운·월운·일진의 근 보강은 두 기준에 도움이 되지만 세운에는 근이 없고 원국 판정은 그대로이므로, 지원받을 역할을 정하고 부담스러운 상황 하나를 기록해 휴식 전후의 대응을 비교하십시오.",
+          "refs": [
+            "natal",
+            "SELF-0002",
+            "SELF-0003",
+            "SELF-0083",
+            "draft"
+          ],
+          "layer": "reading"
+        }
+      ],
+      "localChecks": {
+        "paragraphs": 2,
+        "violations": [],
+        "inventedNames": [],
+        "sourceMembership": "서버가 반환한 refs이며 관리자 원문을 재조회해 검증하지 않음"
+      }
+    },
+    {
+      "dayPillar": "임자",
+      "hourKnown": true,
+      "status": 200,
+      "elapsedMs": 17590,
+      "provider": "openai",
+      "cached": false,
+      "knowledgeCount": 45,
+      "paragraphs": [
+        {
+          "id": "0",
+          "text": "귀인은 자기 기준이 분명하고, 납득되지 않는 규칙에는 이유를 따져 묻는 사람입니다. 일지와 년지·시지에 물의 뿌리가 단단하지만, 봄의 강한 목 기운이 말과 활동으로 힘을 빼내므로 버티는 기반과 여력은 별개인 신약 구조입니다. 문제를 짚고 개선안을 내는 데 강점이 있지만, 책임을 요구하는 환경에서 표현까지 날카로워지면 의견의 내용보다 말투로 충돌하기 쉽습니다.",
+          "refs": [
+            "natal",
+            "SELF-0008",
+            "SELF-0010",
+            "SELF-0078"
+          ],
+          "layer": "reading"
+        },
+        {
+          "id": "1",
+          "text": "귀인에게 필요한 보완은 더 많이 해내는 것이 아니라, 배움과 지원을 먼저 확보하는 것입니다. 업무의 문제점은 바로 말하면서도 정작 자신의 부담이나 도움 요청은 삼키기 쉬우므로, 요청받은 일 하나에 “여기까지 맡고 나머지는 지원이 필요합니다”라고 범위를 정해 보십시오. 용신 금의 방향에 맞춰 조언받을 사람과 검토 시간을 마련하고, 그날의 부담이 줄었는지 기록하면 표현력을 소진 없이 쓰는 기준이 생깁니다.",
+          "refs": [
+            "natal",
+            "RELATIONSHIP-0012",
+            "SELF-0002"
+          ],
+          "layer": "reading"
+        }
+      ],
+      "localChecks": {
+        "paragraphs": 2,
+        "violations": [],
+        "inventedNames": [],
+        "sourceMembership": "서버가 반환한 refs이며 관리자 원문을 재조회해 검증하지 않음"
+      }
+    },
+    {
+      "dayPillar": "신해",
+      "hourKnown": false,
+      "status": 200,
+      "elapsedMs": 16561,
+      "provider": "openai",
+      "cached": false,
+      "knowledgeCount": 45,
+      "paragraphs": [
+        {
+          "id": "0",
+          "text": "귀인은 자기 판단을 지키고 충분히 이해한 뒤 움직이는 사람입니다. 년지 술토에 있는 금의 뿌리는 매우 약하지만, 월간 비견과 월지 편인을 비롯한 주변의 지원이 충분해 원국은 신강입니다. 스스로 기준을 세우고 깊이 검토하는 힘이 강점인 반면, 생각을 밖으로 꺼내는 힘은 상대적으로 약해 협업에서는 설명 없이 결론을 고수하거나 준비만 길어지는 점이 부담입니다.",
+          "refs": [
+            "natal",
+            "SELF-0078",
+            "SELF-0012",
+            "RELATIONSHIP-0014"
+          ],
+          "layer": "reading"
+        },
+        {
+          "id": "1",
+          "text": "귀인에게 필요한 보완은 자신을 더 단단히 만드는 일보다 판단을 실행과 책임으로 옮기는 일입니다. 2026년 10월의 월운과 13일 일진은 근을 보강하지만, 대운은 원래 근 자리에 변동을 주며 이번 보강은 조후에는 일부 도움이어도 신강의 균형에는 부담입니다. 여름 출생이지만 계산상 급한 조후 보완은 없으므로 화의 규율과 목의 성과 방향을 우선해, 검토가 길어진 일 하나에 마감과 제출 기준을 정하고 실행 전후를 기록하는 방식이 좋습니다.",
+          "refs": [
+            "natal",
+            "SELF-0001",
+            "SELF-0083",
+            "SELF-0080"
+          ],
+          "layer": "reading"
+        }
+      ],
+      "localChecks": {
+        "paragraphs": 2,
+        "violations": [],
+        "inventedNames": [],
+        "sourceMembership": "서버가 반환한 refs이며 관리자 원문을 재조회해 검증하지 않음"
+      }
+    }
+  ],
+  "summary": {
+    "cells": 120,
+    "matched": 8,
+    "video": 8,
+    "missing": 112,
+    "posterOnly": 0,
+    "uniqueClipUrls": 30,
+    "rangeOK": 30,
+    "clipFailures": 0
+  },
+  "deployedReadingFlow": {
+    "status": 200,
+    "mime": "text/html; charset=utf-8",
+    "javascript": false,
+    "htmlFallback": true
+  }
+}

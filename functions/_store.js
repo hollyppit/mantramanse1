@@ -77,3 +77,34 @@ export async function storeCheck(env) {
   catch (e) { out.ok = false; out.error = String((e && e.message) || e).slice(0, 240); }
   return out;
 }
+
+// Operations export uses physical stores so Supabase tombstones and KV fallback copies survive.
+export async function operationsPage(env, store, cursor = '') {
+  if (store === 'kv') {
+    const page = await env.GLOSSARY_KV.list({ limit: 200, ...(cursor ? { cursor } : {}) });
+    const records = await Promise.all(page.keys.filter(k => !/^ops:|^adminfail:|^rl:|^ai:|^compose:|^lifeai:|^ik:pkg:|^ik:ping$/.test(k.name)).map(async k => ({ store, key: k.name, value: await env.GLOSSARY_KV.get(k.name), expiration: k.expiration || null })));
+    return { records: records.filter(x => x.value != null), complete: !!page.list_complete, cursor: page.cursor || '' };
+  }
+  if (store !== 'supabase' || !supabaseOn(env)) throw Error('store-unavailable');
+  const rows = await (await sb(env, 'kv?select=key,value,expires_at,updated_at&order=key.asc&limit=200' + (cursor ? '&key=gt.' + encodeURIComponent(cursor) : ''))).json();
+  return { records: rows.filter(r => !/^ops:|^rl:|^ai:|^compose:|^lifeai:|^ik:pkg:|^ik:ping$/.test(r.key)).map(r => ({ store, key: r.key, value: r.value, expiration: r.expires_at ? Math.floor(Date.parse(r.expires_at) / 1000) : null })), complete: rows.length < 200, cursor: rows.length ? rows[rows.length - 1].key : '' };
+}
+export async function operationsRead(env, store, key) {
+  if (store === 'kv') {
+    const [value,page] = await Promise.all([env.GLOSSARY_KV.get(key),env.GLOSSARY_KV.list({ prefix:key,limit:1 })]);
+    const meta=page.keys.find(x=>x.name===key);return {store,key,value,expiration:meta?.expiration||null,missing:!meta};
+  }
+  if (store !== 'supabase' || !supabaseOn(env)) throw Error('store-unavailable');
+  const rows=await (await sb(env,'kv?select=value,expires_at&limit=1&key=eq.'+encodeURIComponent(key))).json(),r=rows[0];
+  return {store,key,value:r?r.value:null,expiration:r?.expires_at?Math.floor(Date.parse(r.expires_at)/1000):null,missing:!r};
+}
+export async function operationsWrite(env, entry) {
+  memoAll.delete(entry.key);
+  if(entry.store==='kv') {
+    if(entry.missing || entry.expiration && entry.expiration<=Date.now()/1000)return env.GLOSSARY_KV.delete(entry.key);
+    if(entry.value===null)throw Error('kv-null');return env.GLOSSARY_KV.put(entry.key,entry.value,entry.expiration?{expiration:entry.expiration}:undefined);
+  }
+  if(entry.store!=='supabase'||!supabaseOn(env))throw Error('store-unavailable');
+  if(entry.missing)return sb(env,'kv?key=eq.'+encodeURIComponent(entry.key),{method:'DELETE',headers:{prefer:'return=minimal'}});
+  return sb(env,'kv?on_conflict=key',{method:'POST',headers:{prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({key:entry.key,value:entry.value,expires_at:entry.expiration?new Date(entry.expiration*1000).toISOString():null,updated_at:new Date().toISOString()})});
+}

@@ -1,0 +1,489 @@
+{
+  "date": "2026-10-13",
+  "results": [
+    {
+      "file": "admin-editing-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "admin-editing-sim OK: 적용 전 전환·연속 편집·직접 저장·검증 실패 보존·중복 저장 방지·실패 복구\n"
+    },
+    {
+      "file": "admin-login-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "관리자 로그인 잠금 검증 모두 통과\n"
+    },
+    {
+      "file": "admin-navigation-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "admin-navigation-sim OK: 메뉴 중복·존재·상품 우선 순서·이전 온보딩 경로\n"
+    },
+    {
+      "file": "ai-metering-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "ai-metering-sim PASS: absent≠zero · actual model · usage · cache preserves original generation metadata\n"
+    },
+    {
+      "file": "ai-provider-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "PASS: 20 provider priority/fallback scenarios\n"
+    },
+    {
+      "file": "asset-art-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 슬롯 목록\n2. 뷰어 슬롯이 서버 목록에 있다\n3. 비주얼 디렉션 공유\n4. 생성 API\n\n풀이 이미지 슬롯 검증 모두 통과\n"
+    },
+    {
+      "file": "asset-video-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 이미지가 없으면 거부\n2. 제출 · 미리보기\n3. 확정 · 공개 · 빼기\n풀이 슬롯 영상 검증 모두 통과\n"
+    },
+    {
+      "file": "batch-video-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 5칸을 동시에 제출\n2. 칸마다 따로 조회 · 완료\n3. 취소(삭제)\n영상 일괄 만들기(서버) 검증 모두 통과\n"
+    },
+    {
+      "file": "bgm-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "\nBGM 규칙 검증 모두 통과\n"
+    },
+    {
+      "file": "calendar-input-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "입력 검증 통과: 잘못된 입력 36건 및 정상·음력 왕복 확인\n"
+    },
+    {
+      "file": "calendar-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 24절기 vs 태양 시황경 (허용 오차 20분 — 기준식 정밀도)\n   4824개 · 최대 차이 13.3분\n2. 음력 표: 연속성·왕복·알려진 설날\n   1900~2099 연속·왕복 검사 완료\n3. 시간대 표 vs Asia/Seoul (1908~1988 전환 시각)\n4. 균시차: 연중 최대·최소와 부호\n   11/3 16.4분 · 2/11 -14.2분\n5. 일주·월주·시주·자시 처리\n6. 삼재·월령 사령\n\n모든 검증 통과\n"
+    },
+    {
+      "file": "calendar-ui-sim.js",
+      "status": "skip",
+      "exit": 0,
+      "output": "SKIP: playwright 가 설치되어 있지 않아 실행하지 않았습니다(달력 UI 브라우저 테스트). 설치: npm i -D playwright, 로컬 서버 8768 필요\n"
+    },
+    {
+      "file": "career-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "24%)\n   식상 과다→창작·콘텐츠: 활성도 81 vs 65 · 과부하 35 vs 5 · 지속성 58 vs 70 · 점수 55 vs 63 (491/1504명)\n   재성 과다→사업·거래: 활성도 78 vs 68 · 과부하 27 vs 9 · 지속성 61 vs 69 · 점수 54 vs 64 (498/1538명)\n   관성 과다→조직·행정: 활성도 76 vs 62 · 과부하 32 vs 4 · 지속성 55 vs 67 · 점수 52 vs 61 (510/1527명)\n   인성 과다→연구·분석: 활성도 84 vs 62 · 과부하 40 vs 2 · 지속성 54 vs 71 · 점수 53 vs 65 (516/1486명)\n   비겁 과다→단기 경쟁 환경 부담 29 vs 21\n\n6. 운과의 분리\n   기본 적성은 운 계산 전후 동일 · 운 활성도(careerLuckActivation)는 별도 값으로 분리됨\n   사업·거래 적성 ↔ 2027년 재물운 상관 0.07\n   금지 표현 0건\n\n모든 검증 통과\n"
+    },
+    {
+      "file": "castle-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "황금의 성채 검증 완료\n모두 통과\n"
+    },
+    {
+      "file": "chapter-data-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "차트가 붙는 챕터: c01:pillars c02:elements c03:strength c04:groups c05:groups c06:career c07:yong c08:groups c09:spouse c10:spouse c11:groups c12:yong c13:pillars c15:flow c18:months\n사주 48건 · 차트 1440개 렌더 · 빈 차트(용신 없음) 0개\n\n모두 통과\n"
+    },
+    {
+      "file": "cinema-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 텍스트 자동 분절\n2. 기존 데이터 호환(마이그레이션 fallback)\n3. 프리셋 14종 + 運路 연출 프리셋 17종 · 우선순위\n4. 모션 강도 · 전환 제한\n5. 장면 타이밍 · 정적 구간 · 시퀀스\n6. 運路 TRANSLATOR: 현실 해석이 먼저, 명리 용어는 근거 한 줄로만\n7. 감독: 챕터 장면 구성\n8. 렌더 HTML · 접근성\n9. 서버 검증 미러(functions/_cinema.js)\n\n시네마 레이어 검증 모두 통과\n"
+    },
+    {
+      "file": "compat-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "  43  49  57  62\n건조 편중        41  40  48  61  66\n습 편중         34  50  60  63  51\nALL          47  49  51  51  56\n\n[조후] 조후 편중 사주의 오행별 조후 성분(johuFit) 평균 — 한기는 화, 열기는 수 쪽이 높아야 함\n한기 편중      목 0.19  화 0.94  토 0.32  금 -0.23  수 -1.00\n열기 편중      목 0.03  화 -1.00  토 -0.10  금 0.45  수 0.88\n건조 편중      목 -0.04  화 -1.00  토 -0.18  금 0.38  수 1.00\n습 편중       목 0.14  화 1.00  토 0.28  금 -0.28  수 -1.00\n\n[규칙] 일지 충 후보 4000건 중 '주의 요소 있음' 92%\n[규칙] 일지 합 후보 9335건 중 상위5 진입 20% · '조화 높음' 13% (100%면 합=무조건 최고라는 뜻이라 실패)\n\n오류 없음\n"
+    },
+    {
+      "file": "compose-api-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "AI 컴포저 검증 모두 통과 (LLM 호출 2회)\n"
+    },
+    {
+      "file": "consistency-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "[7월 신해] 1994-07-24 월지=미 (늦여름)\n  카드: 일지 해의 \"겨울 문턱의 큰 물\" 기운 위에 앉은 보석 같은 기질을 타고난 여자.\n  옛 문장 검출: [\"birth-season\"]\n[12월 신해] 월지=해 (초겨울)\n[절입] 2024-07-06 12시 월지=오 / 2024-07-07 12시 월지=미\n\n정합성 검사 모두 통과\n"
+    },
+    {
+      "file": "content-db-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "조립 기준선: 사주 120 × 프로젝트 4종 일치\n모두 통과\n"
+    },
+    {
+      "file": "content-v3-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "각과 필요한 도움을 한 문장으로 정리해 직접 전달해 보세요.\n  [sewoon_transition]\n   올해의 흐름: 방향이 바뀌기 쉬운 구간\n   지금은 새로운 것을 무작정 늘리기보다 가져갈 것과 버릴 것을 구분하는 시기입니다. 직장에서는 역할 변화, 사업에서는 상품·거래처 정리, 프리랜서라면 일 방식의 변화로 나타날 수 있습니다.\n   조심할 점: 큰 결정을 한꺼번에 내리면 후회가 남기 쉽습니다. 하나씩 순서대로 정하세요. 지금 해 볼 것: 유지할 것 · 줄일 것 · 끝낼 것을 종이에 한 번 나눠 적어 보세요.\n  [marriage_str_신강]\n   서로의 주도권을 존중해야 이어지는 결혼\n   내 힘이 센 만큼 결정권을 혼자 쥐기 쉽습니다. 배우자와 역할을 나누지 않고 결정을 통보하는 일이 반복되면 대화가 줄어들 수 있습니다.\n   조심할 점: 결정을 혼자 내리고 통보하는 것입니다. 지금 해 볼 것: 이번 달 가계나 일정 중 하나는 배우자가 정하게 맡겨 보세요.\n\n모두 통과\n"
+    },
+    {
+      "file": "deep-ai-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": " 합성 사용 (호출 1회)\n  ✓ 같은 사주 재방문은 저장본 재사용 — AI 추가 호출 없음 (호출 1회)\n  ✓ 합성 결과가 ik:pkg: 키로 저장됨\n3. 지식이 바뀌면 새로 합성\n  ✓ 지식 버전이 바뀌어 다시 합성 (호출 1회)\n4. 위험 표현이 나오면 버리고 DB 문장\n  ✓ 단정 표현은 사용자에게 나가지 않음(DB 문장으로 대체)\n5. AI 가 늦으면 기다리지 않고 DB 문장 → 뒤에서 마저 저장 → 다음 방문은 AI 문장\n  ✓ 대기 한도(150ms)에 맞춰 응답: 162ms · DB 문장\n  ✓ 뒤에서 끝난 합성이 저장되어 다음 방문에는 AI 문장\n6. 일일 상한\n  ✓ 오늘 호출 상한을 넘으면 AI 를 부르지 않고 DB 문장\n7. 스위치를 다시 끄면\n  ✓ AI 호출 없음\n8. 본문 대체 스위치(serviceBody)가 응답에 실림\n  ✓ 기본: body=false (더 깊이 덧붙임)\n  ✓ 켜면 body=true (클라이언트가 본문 대체 모드로 조립)\n\n전부 통과\n"
+    },
+    {
+      "file": "deep-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 모든 섹션 생성\n2. 내용 점검(1992-06-23 01시 남)\n3. 챕터 끼워 넣기\n\n깊이 풀이 검증 모두 통과\n"
+    },
+    {
+      "file": "domain-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "음    228 건\n   전체 흐름 높음 + 사고수 높음    55 건\n   전체 흐름 낮음 + 사고수 낮음    3583 건\n   예시: 재정 활동은 매우 활발하지만 변동과 부담도 큰 시기입니다. {\"activity\":86,\"fit\":42,\"stability\":39,\"volatility\":67}\n\n7. 대운·세운·월운·일진\n   daeun  체인 daeun:甲午(100%) 합 1.00\n   seun   체인 daeun:壬寅(30%) → seun:甲午(70%) 합 1.00\n   wolun  체인 daeun:壬寅(15%) → seun:丙午(25%) → wolun:甲午(60%) 합 1.00\n   ilun   체인 daeun:壬寅(8%) → seun:丙午(12%) → wolun:癸巳(20%) → ilun:甲午(60%) 합 1.00\n   일진 단독 vs 대운·세운·월운 결합 — 애정 37 → 40 · 사고수 71 → 57\n   상위 운 결합으로 인한 최대 점수 변화 43\n\n모든 검증 통과\n"
+    },
+    {
+      "file": "engine-baseline-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "엔진 기준선 일치(120개 차트)\n"
+    },
+    {
+      "file": "epic-intro-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 시각 표기\n2. 샘플 × 설정 조합\n   126가지 조합 · 길이 28.9~30.0초 (최장: 1978M/PARODY/L3/무명) · PARODY 중 펀치라인이 길이 때문에 빠진 경우 0/42\n3. 성별 데이터가 없을 때 · 본편 다리 · 스타일 분기\n4. 스키마 확장(hold·cue·big·lead·tail·MAXIMUM)이 정리 단계에서 살아남는지 + 서버 미러\n5. 본편과의 분리: INTRO 문구·프리셋이 본편 생성 코드로 새지 않는다\n모두 통과\n"
+    },
+    {
+      "file": "errlog-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "[errlog] {\n  kind: 'error',\n  where: 'dbg',\n  msg: 'x3',\n  src: '',\n  line: 0,\n  ch: 'c06',\n  world: 'w2',\n  flow: 'explore',\n  v: 'ver1',\n  env: { mobile: false, br: 'other', saveData: false }\n}\n모두 통과\n"
+    },
+    {
+      "file": "explore-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "세계 지도 검증: 챕터 111건 매핑\n모두 통과\n"
+    },
+    {
+      "file": "flow-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "13% 수확 31% 축적 31% | +변동 33% +방어  4% 둘다  3%\n   재성 과다          n= 60 기회 27% 확장 12% 수확 34% 축적 27% | +변동 34% +방어  5% 둘다  4%\n   관성 과다          n= 60 기회 27% 확장 33% 수확 12% 축적 28% | +변동 32% +방어  5% 둘다  3%\n   인성 과다          n= 60 기회 38% 확장 14% 수확 15% 축적 32% | +변동 32% +방어  6% 둘다  3%\n   비겁 과다          n= 60 기회 36% 확장 17% 수확 18% 축적 28% | +변동 33% +방어  6% 둘다  4%\n   조후 편차 큼        n= 60 기회 40% 확장 11% 수확 20% 축적 30% | +변동 34% +방어  9% 둘다  3%\n   같은 날짜에 200명 중 가장 흔한 주 흐름의 비율: 평균 35% · 최대 51%\n\n5. 순환 의존·호환\n\n모든 검증 통과\n"
+    },
+    {
+      "file": "free-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 타로 합성기\n2. 오늘의 운세(실제 엔진)\n   144일 생성 · CTA 분포 {\"work\":95,\"life\":36,\"love\":12,\"money\":1}\n3. /api/free-content 정리 규칙\n\n전부 통과\n"
+    },
+    {
+      "file": "garden-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "인연의 정원 검증 완료\n모두 통과\n"
+    },
+    {
+      "file": "health-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "건강 챕터 검증 통과: 12개월 엔진 일치 · 실제 문서 순서 · 5장면 보존 · 중복 방지 · 낮음/높음/누락/시간 미상\n"
+    },
+    {
+      "file": "hub-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "PASS  (읽기 780건, 카드 78장)\n"
+    },
+    {
+      "file": "ik-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. facts · 조건 평가\n2. 검색 · 게시 규칙 · 보정 · 충돌\n3. Interpretation Package · 합성 · 품질 검사\n4. /api/ik (메모리 KV)\n5. 감사 후 개선 — 관리자 end-to-end (TEST 1~5)\n6. 조합 조건 · 깊이 · 진단 · 커버리지 · 가져오기 · 서비스 연결\n\n전부 통과\n"
+    },
+    {
+      "file": "ilgan-intro-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 사용자 화면에 수호신 문구가 없는지\n2. 공개 영상 기본 주소 (함수)\nN. 일간·일주 문구 검사(기토 영상에 경금 문구가 붙은 경우)\n\n모두 통과\n"
+    },
+    {
+      "file": "intro-text-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "며 앞장서는 자리에 섭니다.\n  일지 자의 정인 기운이 더해져, 정서적 보살핌과 이해를 기대합니다.\n  꺾이기 전에 쉬어 가고 도움을 청하는 법이 숙제입니다.\n일주 예) 계해\n  일지 해의 \"겨울 문턱의 큰 물\" 기운 위에 앉은 이슬, 계해일주입니다.\n  직관이 좋고 감수성이 깊으며 눈에 띄지 않게 스며듭니다.\n  일지 해의 겁재 기운이 더해져, 가까운 사람과 비교·경쟁이 섞이기 쉽습니다.\n  혼자 삼키지 말고 감정을 짧게라도 꺼내 보세요.\n카드 예) {\"name\":\"\",\"title\":\"庚金 · 경금\",\"line\":\"단단한 쇠처럼\\n결단하고 밀고 나가는 힘.\"}\n{\n \"name\": \"백진우.\",\n \"film\": \"일지 오의 \\\"한낮의 불\\\" 기운 위에 앉은 강철 같은 기질을 타고난 남자.\",\n \"title\": \"庚午 · 경오일주\",\n \"trait\": \"결단이 빠르고 추진력이 강하지만, 규칙에 얽매여 속마음을 숨기기도 합니다.\"\n}\n\n모두 통과 (일간 10 · 일주 60, 각 4줄)\n"
+    },
+    {
+      "file": "journey-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 카피 순서(요청서 최종 INTRO 카피)와 만세력 값\n2. 성별·이름·시각 데이터가 없을 때\n3. 애니메이션: 어휘 4개 이하 · 의미별 고정\n4. TTS · SFX 없음\n5. 길이 · 배속\n6. INTRO ↔ BODY 분리\n\nINTRO 여정 · BODY 분리 검증 모두 통과\n"
+    },
+    {
+      "file": "library-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "천명의 서고 검증 완료\n모두 통과\n"
+    },
+    {
+      "file": "life-doc-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "하는 나의 방식  [새 구성(엔진 값·현실 문체)]\n  27 ACT III   대인관계 설명서  [기존 챕터 c11]\n  28 ACT III   사람 사이의 변화가 커지는 때  [새 구성(엔진 값·현실 문체)]\n  29 ACT III   내가 자라온 자리  [기존 챕터 c13]\n  30 ACT III   오래된 뿌리  [기존 챕터 c14]\n  31 ACT IV    앞으로 10년의 구간  [새 구성(엔진 값·현실 문체)]\n  32 ACT IV    올해의 흐름  [기존 챕터 c17]\n  33 ACT IV    앞으로 12개월  [기존 챕터 c18]\n  34 FINAL     실천 뒤 확인할 변화  [새 구성(엔진 값·현실 문체)]\n  35 FINAL     버릴 것 · 지킬 것 · 시작할 것  [새 구성(엔진 값·현실 문체)]\n  36 FINAL     다음 길을 여는 개운 가이드  [기존 챕터 c19]\n  37 FINAL     운로 사용설명서  [기존 챕터 c20]\n\n모두 통과\n"
+    },
+    {
+      "file": "luck-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "5 0.34 0.38\nI 습 심함               29   0.1    30.7 |  27  23  16  35 |  30   37   18   15 |  32   14    |  41   57 0.29 0.40\nJ 억부=조후 용신           44  -1.9    31.1 |  21  23  25  31 |  28   34   22   16 |  32   15    |  41   54 0.36 0.32\nK 억부≠조후(반대)          41  -0.1    21.8 |  25  20  19  35 |  21   51   21    7 |  33    7    |  41   54 0.27 0.38\nALL                 600  -1.7    23.0 |  21  23  24  33 |  19   50   24    7 |  33    8    |  42   52 0.36 0.19\n\nNaN/undefined/빈 phase 없음, 유형별 편향 기준 통과\n"
+    },
+    {
+      "file": "luck6-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "6분류 분포 {\"방어기\":274,\"변동기\":766,\"확장기\":606,\"축적기\":1054,\"수확기\":701,\"기회기\":799} · 평가 4200건\n모두 통과\n"
+    },
+    {
+      "file": "middleware-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "미들웨어 검증 통과\n"
+    },
+    {
+      "file": "module-ai-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "모듈 AI(촌철살인 · DB 참고) 검증 모두 통과\n"
+    },
+    {
+      "file": "movingtoon-reading-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "원국 전체·자식운·AI 새 풀이·검증 실패 Claude 폴백·캐시·원자적 적용 통과\n"
+    },
+    {
+      "file": "narrator-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "민준이 붙잡은 것은 오래된 약속이었고, 사람들은 민준을 조용히 지켜보았다. 민준의 발걸음은 느렸다. 다음 장면에서 민준이 해야 할 선택은 멈추는 일이다.\n   [Jane(영문)] Jane는 새벽 골목을 걸었다. Jane가 붙잡은 것은 오래된 약속이었고, 사람들은 Jane를 조용히 지켜보았다. Jane의 발걸음은 느렸다. 다음 장면에서 Jane가 해야 할 선택은 멈추는 일이다.\n   [이름 없음(남)] 그는 새벽 골목을 걸었다. 그가 붙잡은 것은 오래된 약속이었고, 사람들은 그를 조용히 지켜보았다. 그의 발걸음은 느렸다. 다음 장면에서 그가 해야 할 선택은 멈추는 일이다.\n   [이름 없음(여)] 그녀는 새벽 골목을 걸었다. 그녀가 붙잡은 것은 오래된 약속이었고, 사람들은 그녀를 조용히 지켜보았다. 그녀의 발걸음은 느렸다. 다음 장면에서 그녀가 해야 할 선택은 멈추는 일이다.\n2. josa 규칙\n3. 리포트 빌드 · 이름 미전송 · AI 검증\n4. 글자 스타일 역할 분리\n\n모두 통과\n"
+    },
+    {
+      "file": "onboard-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "onboard-sim OK\nonboard-sim(추가): 완료\n"
+    },
+    {
+      "file": "onboarding-integration-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "onboarding-integration-sim OK: 두 입력 방식·공통 결과 경로·커버 초안/게시/폐기/공개중지·기존 설정 보존\n"
+    },
+    {
+      "file": "operations-binary-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "operations-binary-sim PASS: auth · missing-first refusal · SHA256 tamper refusal · conditional missing-only upload · idempotence · same-size conflict refusal · changed-source refusal · incomplete backup refusal\n"
+    },
+    {
+      "file": "operations-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "operations-sim PASS: auth · 430-key pagination · checksum · read-only preview · batched restore · stale edit refusal · failure rollback · undo created key · user preservation · Supabase tombstones\n"
+    },
+    {
+      "file": "opportunity-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "미만일 때\n   비겁 운의 기회기 비율 33%\n   식상 운의 기회기 비율 52%\n   재성 운의 기회기 비율 11%\n   관성 운의 기회기 비율 20%\n   인성 운의 기회기 비율 2%\n   F 기존 활동만 커짐(새 신호 약함): 4317건 중 확장기 59% · 기회기 0%\n   G 결과 회수 신호 강함: 4511건 중 수확기 80% · 기회기 0%\n   H 준비·기반 신호 강함: 5679건 중 축적기 87% · 기회기 0%\n   관성 운: 원국 관성 많음 828건 확장 89/기회 41 · 원국 관성 적음 864건 확장 45/기회 55\n   I 변동성 ≥55: 5855건 모두 변동 overlay true · 주 흐름 유지 true · J 부담+강도: 1597건 평균 부담도 38 (전체 14)\n   K 기회≥60 & 변동성≥55: 1632건, 대표 시기 기회기 1145 수확기 309 확장기 67 축적기 111\n\n5. 일진·월운·대운 1590건 정상 · 비정상 0건\n\n모든 검증 통과\n"
+    },
+    {
+      "file": "panel-edit-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "패널 세부 수정 검증 모두 통과\n"
+    },
+    {
+      "file": "panel-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 프리셋·태그\n1b. 용도 구분(본문 컷 panel- / 배경 panelbg-)\n1c. 외부 도구용 프롬프트(Leonardo · Kling)\n1d. 본문 컷 성별 칸(panelF · panelM)\n1e. 성별 외부 프롬프트\n1f. 뷰어: 사용자 성별에 맞는 칸 선택\n1g. 재테크 소재·추가 주제 연결\n2. 모델 선택(모의 fetch)\n3. 공통 등장 연출(소스 검사)\n\n패널 이미지 검증 모두 통과\n"
+    },
+    {
+      "file": "panel-video-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. JWT\n2. 키 없음 · 인증\n3. 제출\n4. 조회 · 완료\n5. 실패 · 취소\n6. 신형 API (KLING_API_KEY · Kling 3.0 Turbo)\n\n컷 영상 생성(Kling) 검증 모두 통과\n"
+    },
+    {
+      "file": "quality-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "#1 풀이 누락 의심 없음 · 단정 검토 0\n#2 풀이 누락 의심 없음 · 단정 검토 0\n#3 풀이 누락 의심 없음 · 단정 검토 0\n서비스 점검 검증 완료\n모두 통과\n"
+    },
+    {
+      "file": "quest-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "quest-sim OK\n"
+    },
+    {
+      "file": "reader-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 읽는 시간(글자 수 기반)\n2. 페이지 나누기: 작은 문단마다 넘기지 않는다\n3. 스크롤 목표(읽는 줄 약 44%)\n4. 설정(클라이언트·서버 같은 범위)\n5. 본문에서 글자 애니메이션이 쓰이지 않는다(소스 검사)\n6. 긴 풀이 문단 나누기(viewer.js chunk)\n\n읽기 문서 로직 검증 모두 통과\n"
+    },
+    {
+      "file": "reading-answer-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "PASS: 24 topic/choice contracts; provider fallback, validation, cache, rate limits, failure recovery and request races\n"
+    },
+    {
+      "file": "reading-renewal-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "reading-renewal: 8명식 · 15주제/8요소 · 시간 미상 · 원본/엔진/특화 보존 · 개인화 · 모순/중복 · PDF 계산표 · 명칭 가드 · DB 호환 통과\n"
+    },
+    {
+      "file": "reality-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "샘플 32명 · 현실 장면 736개 · 챕터별 현실 장면이 없던 횟수 {\"c05\":3}\n모두 통과\n"
+    },
+    {
+      "file": "report-v2-layers.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "rsonality_el_수\n     lead why: 일간 = 계 ✓ / 월지(태어난 계절) = 축 ✓\n  c05 pro2_계_shadow, shadow_grp_비겁, shadow_el_수, shadow_fallback\n     lead why: 일간 = 계 ✓\n  c08 pro2_계_wealth, wealth_grp_비겁, wealth_fallback\n     lead why: 일간 = 계 ✓\n  scenes c02 chapterIntro>chart:elements>insight>explanation>action>chapterEnding\n  scenes c03 chapterIntro>chart:strength>insight>explanation>action>chapterEnding\n\n① 1984-02-10 06:00 여 → c03 lead=pro_gap_m_인 (기대 pro_gap_m_인 : OK)\n② 미치환 템플릿: 0건\n③ BANNED 경고: 0개\n④ Charts 오류: 0건\n"
+    },
+    {
+      "file": "report-v2-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "vest\":61,\"seun:transition\":151,\"accumulation\":122,\"seun:accumulation\":149,\"defense\":41,\"seun:defense\":36,\"expansion\":94,\"seun:expansion\":58}\n4. 캐릭터 소개(일간 소개) 영상 매핑\n   커버리지 남 1/10 여 1/10 전체 2/20\n4a. 서버 저장 검증과 기본 id\n4b. Media Scene Library (테스트용 가상 미디어)\n   예시 DEBUG: c00_01 m51 score 61 state+25 theme+25 scene+6 priority+5\n   Element {\"wood\":13,\"fire\":12,\"earth\":12,\"metal\":12,\"water\":12} 경고 30 건\n4c. PDF·공유 카드\n4d. 일간 소개 영상\n4e. 글자 스타일\n4f. 챕터 전용 클립(보관함) — 고정이 아니라 그 챕터 안에서 선택 로직이 고름\n5. 기존 엔진 회귀\n\n모두 통과\n"
+    },
+    {
+      "file": "report-v2-verdict.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "힘 42% (2.1배) | 막힘 ← groupHigh:pro_high_재성 | 증거 2026 | 조언 2\n■ 갑술 | 스스로 길을 여는 힘 45% (2.3배) | 막힘 ← groupHigh:pro_high_비겁 | 증거 2025 | 조언 2\n■ 정미 | 기회를 알아보는 힘 23% (1.2배) | 막힘 ← c05:pro2_정_shadow | 증거 2026 | 조언 2\n■ 정사 | 스스로 길을 여는 힘 36% (1.8배) | 막힘 ← groupHigh:pro_high_비겁 | 증거 2026 | 조언 2\n■ 계해 | 스스로 길을 여는 힘 35% (1.7배) | 막힘 ← groupZero:pro_zero_인성 | 증거 2026 | 조언 2\n■ 경오 | 사람들이 믿고 따르게 만드는 힘 46% (2.3배) | 막힘 ← groupHigh:pro_high_관성 | 증거 2017 | 조언 2\n막힘 출처 분포 {\"groupHigh\":4,\"c05\":1,\"groupZero\":1}\n\n총평 검증 모두 통과\n"
+    },
+    {
+      "file": "root-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "+) 680/3819\n   己: O(억부+·조후−) 0/3712 · P(억부−·조후+) 754/3712\n   庚: O(억부+·조후−) 160/3905 · P(억부−·조후+) 1027/3905\n   辛: O(억부+·조후−) 118/3740 · P(억부−·조후+) 1005/3740\n   壬: O(억부+·조후−) 1342/3812 · P(억부−·조후+) 1/3812\n   癸: O(억부+·조후−) 1372/3797 · P(억부−·조후+) 0/3797\n\n6. 신강 원국 300개: 근 보강 억부 적합도 최대 -13\n10. 득령 O·무근 612개 · 득령 X·강한 통근 4404개 · 득령 O·강한 통근 7700개\n   무근 3524개 중 신강 이상 269 · 강한 통근 12104개 중 신약 이하 2108\n\n원국 통근 등급 분포 강한 통근 24% · 매우 약한 통근 10% · 무근 9% · 통근 29% · 매우 강한 통근 8% · 약한 통근 19% · 평균 53\n금지 표현 0건\n\n모든 검증 통과\n"
+    },
+    {
+      "file": "samsara-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "윤회의 문 검증 완료\n모두 통과\n"
+    },
+    {
+      "file": "sanctuary-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "개운의 성역 검증 완료\n모두 통과\n"
+    },
+    {
+      "file": "school-model-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "school-model-sim PASS {\n  rootedWeak: 178,\n  unrootedStrong: 4,\n  methodDifference: 145,\n  noJohu: 410,\n  extreme: 26,\n  unknown: 32\n}\n"
+    },
+    {
+      "file": "src-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 분할(chunking) · 원문 위치\n2. TEST A — MD 업로드 → AI 분석 → 후보 → 승인 → 풀이 테스트 → Trace → 원문\n3. TEST B — PDF(쪽 번호) → 후보 → 원본 쪽 연결 → 승인 → 사용\n4. TEST C — 동일 풀이 중복 → 새로 만들지 않고 근거 추가\n5. TEST D — 반대 해석 → 충돌 표시 · 자동 덮어쓰기 없음\n6. TEST E — AI 오류 후보 → 관리자 수정 → 수정본만 승인\n7. TEST F — 승인 전 후보 · 폐기 · 정책 · 검증\n   (참고) 확정 표현 후보 승인 → 200 approved\n8. 자료 삭제 · 검색 · 부족한 지식 · 대시보드\n9. 분석 영향(coverage)\n\n전부 통과\n"
+    },
+    {
+      "file": "store-integration-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 관리자: 풀이 지식 저장 · 자료 등록 · 점검\n  ✓ 풀이 지식 저장 200\n  ✓ Supabase 에서 다시 읽어 목록에 나옴\n  ✓ 풀이 자료 등록 200\n  ✓ 저장소 점검: backend=supabase ok=true\n  ✓ 무료 콘텐츠(타로 이미지 매핑) 저장 200\n  ✓ 공개 GET 이 Supabase 값을 돌려줌\n2. 방문자: 공개 심화 풀이(deep) · 호출 횟수 제한\n  ✓ 공개 deep 200 + 방금 저장한 풀이 지식이 Supabase 에서 읽혀 나옴 (인증 없음) {\"ok\":true,\"enabled\":true,\"body\":false,\"domains\":{\"SELF\":{\"title\":\"나 자신\",\"sectio\n  ✓ 호출 횟수 제한 카운터가 Supabase 에 기록됨\n3. KV 쓰기\n  ✓ 위 모든 작업에서 KV 쓰기 0회 (실제: 0)\n  ✓ Supabase 에 쌓인 키 접두어: ik, src, free, rl\n\n전부 통과\n"
+    },
+    {
+      "file": "store-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "되살아나지 않음\n  ✓ 어디에도 없으면 null\n  ✓ 만료된 값은 null\n  ✓ expirationTtl → expires_at 로 변환\n4. 대기자 목록(list)\n  ✓ Supabase 의 새 신청 + KV 에 남은 기존 신청을 합침: waitlist:a@b.co,waitlist:c@d.co\n5. 공개 읽기 기억(cache:true)\n  ✓ 같은 isolate 에서 20초 안에는 Supabase 를 한 번만 읽음(읽기 1회)\n  ✓ 쓰기 후에는 기억을 버리고 최신 값을 읽음\n  ✓ 호출 횟수 카운터는 기억하지 않음(항상 최신)\n  ✓ 관리자 경로(cache 없음)는 항상 최신\n6. 오류 · 점검\n  ✓ Supabase 오류는 숨기지 않고 던짐: supabase 500 boom\n  ✓ 점검: 실패를 이유와 함께 보고\n  ✓ 점검: Supabase 쓰기→읽기 성공 (1ms)\n  ✓ 점검: 설정 없으면 backend=kv\n  ✓ 점검: 키가 틀리면 401 을 알려 줌\n\n전부 통과\n"
+    },
+    {
+      "file": "story-composer-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "장면 1960개 검사 (40명 × 6주제)\n  [한 줄 결론] 돈은 직접 움직여서 벌고, 믿는 사람에게는 선뜻 쓰는 편입니다.\n  [현실에서는] 내 몫을 내가 챙겨야 마음이 놓입니다.\n  [그리고] 같이 벌고 같이 쓰는 구조에서 돈이 새기 쉽습니다.\n  [예를 들면] 직장인이라면 성과급·수당처럼 내 몫이 분명한 구조가 잘 맞습니다.\n  [또는] 사업자라면 공동 운영에서는 결정권과 정산 기준을 먼저 나누는 편이 좋습니다.\n  [좋은 점] 살릴 장점은 수입원을 직접 만들어 내는 추진력입니다.\n  [이 힘이 지나칠 때] 반복되기 쉬운 약점은 지인 사이의 보증·동업·빌려주기입니다.\n  [지금 해 볼 것] 공동 비용과 내 몫을 분리하고, 정산일과 책임 범위를 글로 남겨 보세요.\n\n모두 통과\n"
+    },
+    {
+      "file": "story-content-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "서사 검증 통과: 자녀상 10종 · 전생 드라마 6장면(한 줄 요약·근거·3장·결말) · 인연 챕터만 에피소드 · 억부/조후 충돌 재현 · AI 근거/종류 전달\n"
+    },
+    {
+      "file": "story-director-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": " 커지는 구간 | 돈 45 일 36 사랑 70\n   15~24세 무신 실력과 자산을 쌓는 구간 | 돈 52 일 44 사랑 46\n   25~34세 기유 실력과 자산을 쌓는 구간  ◀ 지금 | 돈 51 일 44 사랑 49\n   35~44세 경술 실력과 자산을 쌓는 구간 | 돈 51 일 36 사랑 48\n   45~54세 신해 새 기회가 열리는 구간 | 돈 53 일 45 사랑 48\n   55~64세 임자 방향이 바뀌기 쉬운 구간 | 돈 39 일 83 사랑 44\n   65~74세 계축 실력과 자산을 쌓는 구간 | 돈 56 일 74 사랑 60\n   75~84세 갑인 방향이 바뀌기 쉬운 구간 | 돈 40 일 13 사랑 54\n   85~94세 을묘 성과를 굳히는 구간 | 돈 35 일 13 사랑 68\n   95~104세 병진 확장 가능성이 커지는 구간 | 돈 46 일 36 사랑 47\n돈 이야기가 크게 두드러지는 해가 뚜렷하지 않습니다. 지금 수입 구조를 다듬는 꾸준한 구간으로 보세요.\n\n모두 통과\n"
+    },
+    {
+      "file": "story-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "검\n   블록 44개, 문제 0개\n2. A/B · 주소 규칙\n3. 실제 엔진 연결\n4. 잠재력 문장\n   1990-5-17-14-M 임오 → 이 이야기의 주인공을 움직이는 가장 큰 동력은 '기회를 알아보는 힘'이다. 재성 기운 42%, 평균의 2.1배다.\n   1984-2-10-6-F 갑술 → 이 이야기의 주인공을 움직이는 가장 큰 동력은 '스스로 길을 여는 힘'이다. 비겁 기운 45%, 평균의 2.3배다.\n   1974-9-3-23-M 정미 → 이 이야기의 주인공을 움직이는 가장 큰 동력은 '기회를 알아보는 힘'이다. 재성 기운 23%, 평균의 1.2배다.\n   2000-12-25-12-F 정사 → 이 이야기의 주인공을 움직이는 가장 큰 동력은 '스스로 길을 여는 힘'이다. 비겁 기운 36%, 평균의 1.8배다.\n   1964-1-15-11-M 계해 → 이 이야기의 주인공을 움직이는 가장 큰 동력은 '스스로 길을 여는 힘'이다. 비겁 기운 35%, 평균의 1.7배다.\n\n모두 통과\n"
+    },
+    {
+      "file": "style-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "된 풀이 DB 가 없는 분야는 AI 호출·본문 생성 없이 비움\n  ✓ 확정 예언 응답은 버리고 DB 문장을 그대로 씀\n  ✓ 무빙툰 챕터 → 분야 매핑\n  ✓ systemFor: 문체 지시를 붙이고 없으면 기존 프롬프트 그대로\n  ✓ 연출(episode)과 풀이(reading) 층이 분리된다고 지시\n  ✓ 후속 답변도 문체 지시를 받음\n  ✓ 편집기(compose)도 문체 지시를 받음\n  ✓ IK 합성기 기본 프롬프트: 완곡 강제 제거 · 기본 단정형\n  ✓ 편집기 캐시 키에 문체 서명이 들어감\n  ✓ 후속 답변 캐시 키에 문체 서명이 들어감\n  ✓ 무빙툰 본문 생성 응답 \n  ✓ 본문 생성 프롬프트에 활성 문체와 연출 지침이 들어감\n  ✓ 응답에 문체 버전과 문단별 층(reading/story)이 실림\n  ✓ \"반드시\" 확정 표현이 있는 본문은 문체와 무관하게 거부\n7. 하위 호환\n  ✓ deepView 빈 입력 처리\n  ✓ kind 없는 옛 AI 응답도 그대로 처리\n\n전부 통과\n"
+    },
+    {
+      "file": "system-integration-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "system-integration-sim OK: 분야·챕터 문체 우선순위, 버전 변경, 게시·출처 정책, 관리자 권한, 공통 저장 상태 갱신\n"
+    },
+    {
+      "file": "tarot-art-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 카드·프롬프트\n2. API 흐름\n\n타로 카드 이미지 검증 모두 통과\n"
+    },
+    {
+      "file": "timeline-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "타임라인 검증 완료\n모두 통과\n"
+    },
+    {
+      "file": "topics-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "1. 주제 슬롯·모듈\n2. 20명 샘플 × 챕터\n3. 용어 풀이 문장(개인화)\n\n주제 카드·용어 풀이 검증 모두 통과\n"
+    },
+    {
+      "file": "volatility-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "차트 400개 × 60갑자 · 변동 overlay 기준 55 · 단계 안정적 / 움직임 있음 / 변동성 높음 / 변동성 매우 높음\nA. 관계 없는 운 767건: 최대 변동성 0.0\nB. 약한 신호 하나 2745건: 최대 변동성 38.1, 변동기 0건\nC. 충 하나의 변동성 — 일지 55 · 월지 51 · 시지 36 · 년지 26\nD. 신호를 하나씩 더할 때 변동성 — 55 → 67 → 77 → 86\nE·F. 변동기 7774건 — 순풍 1510 · 보통 3582 · 주의 2056 · 부담 626\n   변동성 ↔ 흐름 점수 상관 -0.022 · 흐름 점수 평균: 변동성 매우 높음 -3.2 vs 안정적 -1.3\nG. 변동성 낮음 + 흐름 낮음 1296건 — 기회기 222 · 축적기 415 · 확장기 250 · 수확기 409\n\n변동성 단계 분포: 안정적 27% · 움직임 있음 33% · 변동성 높음 28% · 변동성 매우 높음 13% · 변동기 32%\n\n모든 검증 통과\n"
+    }
+  ],
+  "separateBrowserChecks": {
+    "calendar": {
+      "status": "pass",
+      "command": "CALENDAR_TEST_URL=http://127.0.0.1:8787 TEST_BROWSER=msedge node tests/calendar-ui-sim.js",
+      "output": "days 31 bars 12; recommendations 5; PASS calendar interactions"
+    },
+    "operations": "docs/MOVINGTOON_OPERATIONS_BROWSER.json",
+    "folderOperations": "docs/MOVINGTOON_FOLDER_BROWSER.json",
+    "pdfDelivery": "docs/MOVINGTOON_PDF_DELIVERY.json"
+  }
+}

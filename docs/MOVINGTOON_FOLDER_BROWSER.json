@@ -1,0 +1,9 @@
+{
+  "environment": "headless Edge; simulated File System Access handles and API fixtures",
+  "folderBackup": true,
+  "sha256": true,
+  "completeMarker": true,
+  "folderRestore": true,
+  "rollbackBeforeApply": true,
+  "originalBytesPreserved": true
+}

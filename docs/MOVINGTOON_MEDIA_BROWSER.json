@@ -1,0 +1,45 @@
+{
+  "device": "headless Edge mobile emulation; physical phone not tested",
+  "rows": [
+    {
+      "src": "https://mantramanse.pages.dev/api/clipfile?k=085cd2ba343277470f.mp4",
+      "slow": false,
+      "ok": true,
+      "width": 1072,
+      "height": 1928,
+      "duration": 10.041667,
+      "currentTime": 0.337046,
+      "elapsedMs": 2006
+    },
+    {
+      "src": "https://mantramanse.pages.dev/api/clipfile?k=4e25f70c8eab350bc7.mp4",
+      "slow": false,
+      "ok": true,
+      "width": 1072,
+      "height": 1928,
+      "duration": 10.041667,
+      "currentTime": 0.381059,
+      "elapsedMs": 1292
+    },
+    {
+      "src": "https://mantramanse.pages.dev/api/clipfile?k=085cd2ba343277470f.mp4",
+      "slow": true,
+      "ok": true,
+      "width": 1072,
+      "height": 1928,
+      "duration": 10.041667,
+      "currentTime": 0.381055,
+      "elapsedMs": 8105
+    },
+    {
+      "src": "https://mantramanse.pages.dev/api/clipfile?k=4e25f70c8eab350bc7.mp4",
+      "slow": true,
+      "ok": true,
+      "width": 1072,
+      "height": 1928,
+      "duration": 10.041667,
+      "currentTime": 0.33973,
+      "elapsedMs": 10747
+    }
+  ]
+}

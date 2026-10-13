@@ -72,7 +72,7 @@ assert(doc.chapters.some(c => c.id === 'deep_past') && !doc.chapters.find(c => c
   assert.deepEqual(K.deriveFacts(sd).currentRoots, sd.currentRoots);
   const payload = { sd, chapter: { id: 'c19', title: '개운법', paragraphs: [{ id: '0', kind: 'episode', text: '작은 일을 정하고 실제 생활에서 이어 가는 장면을 일상의 이야기로 살펴봅니다.' }] } };
   assert.equal(F.validate(payload).chapter.paragraphs[0].kind, 'episode');
-  assert(F.SYSTEM.includes('독립적으로 판단'));
+  assert(F.SYSTEM.includes('엔진 선택값을 임의로 바꾸거나 새로운 최종 용신을 선정하지 않는다')); // 계산 후보 고정 정책
   assert(F.SYSTEM.includes('kind=episode'));
   console.log('서사 검증 통과: 자녀상 10종 · 전생 드라마 6장면(한 줄 요약·근거·3장·결말) · 인연 챕터만 에피소드 · 억부/조후 충돌 재현 · AI 근거/종류 전달');
   if (process.argv.includes('--preview')) {

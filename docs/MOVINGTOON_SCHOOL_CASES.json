@@ -1,0 +1,385 @@
+{
+  "charts": 600,
+  "counts": {
+    "rootedWeak": 178,
+    "unrootedStrong": 4,
+    "methodDifference": 145,
+    "noJohu": 410,
+    "extreme": 26,
+    "unknown": 32
+  },
+  "examples": {
+    "rootedWeak": [
+      {
+        "input": {
+          "year": 1961,
+          "month": 2,
+          "day": 2,
+          "hour": 1,
+          "minute": 1,
+          "calendar": "solar",
+          "gender": "F",
+          "city": "서울"
+        },
+        "pillar": "병인",
+        "strength": "극약",
+        "root": "약한 통근",
+        "methods": {
+          "eokbu": "목",
+          "johu": "화",
+          "tonggwan": "금"
+        }
+      },
+      {
+        "input": {
+          "year": 1962,
+          "month": 3,
+          "day": 3,
+          "hour": 2,
+          "minute": 2,
+          "calendar": "solar",
+          "gender": "M",
+          "city": "서울"
+        },
+        "pillar": "경자",
+        "strength": "태약",
+        "root": "매우 약한 통근",
+        "methods": {
+          "eokbu": "토",
+          "johu": "화",
+          "tonggwan": null
+        }
+      },
+      {
+        "input": {
+          "year": 1967,
+          "month": 8,
+          "day": 8,
+          "hour": 7,
+          "minute": 7,
+          "calendar": "solar",
+          "gender": "F",
+          "city": "서울"
+        },
+        "pillar": "갑진",
+        "strength": "신약",
+        "root": "강한 통근",
+        "methods": {
+          "eokbu": "수",
+          "johu": "수",
+          "tonggwan": "화"
+        }
+      }
+    ],
+    "unrootedStrong": [
+      {
+        "input": {
+          "year": 1981,
+          "month": 10,
+          "day": 22,
+          "hour": 21,
+          "minute": 21,
+          "calendar": "solar",
+          "gender": "F",
+          "city": "서울"
+        },
+        "pillar": "계유",
+        "strength": "신강",
+        "root": "무근",
+        "methods": {
+          "eokbu": "화",
+          "johu": null,
+          "tonggwan": null
+        }
+      },
+      {
+        "input": {
+          "year": 1993,
+          "month": 10,
+          "day": 19,
+          "hour": 9,
+          "minute": 33,
+          "calendar": "solar",
+          "gender": "F",
+          "city": "서울"
+        },
+        "pillar": "계유",
+        "strength": "신강",
+        "root": "무근",
+        "methods": {
+          "eokbu": "토",
+          "johu": null,
+          "tonggwan": null
+        }
+      },
+      {
+        "input": {
+          "year": 1964,
+          "month": 5,
+          "day": 2,
+          "hour": 4,
+          "minute": 4,
+          "calendar": "solar",
+          "gender": "M",
+          "city": "서울"
+        },
+        "pillar": "신해",
+        "strength": "신강",
+        "root": "무근",
+        "methods": {
+          "eokbu": "목",
+          "johu": null,
+          "tonggwan": "화"
+        }
+      }
+    ],
+    "methodDifference": [
+      {
+        "input": {
+          "year": 1960,
+          "month": 1,
+          "day": 1,
+          "hour": null,
+          "minute": 0,
+          "calendar": "solar",
+          "gender": "M",
+          "city": "서울"
+        },
+        "pillar": "무자",
+        "strength": "중화",
+        "root": "매우 약한 통근",
+        "methods": {
+          "eokbu": "토",
+          "johu": "화",
+          "tonggwan": "금"
+        }
+      },
+      {
+        "input": {
+          "year": 1961,
+          "month": 2,
+          "day": 2,
+          "hour": 1,
+          "minute": 1,
+          "calendar": "solar",
+          "gender": "F",
+          "city": "서울"
+        },
+        "pillar": "병인",
+        "strength": "극약",
+        "root": "약한 통근",
+        "methods": {
+          "eokbu": "목",
+          "johu": "화",
+          "tonggwan": "금"
+        }
+      },
+      {
+        "input": {
+          "year": 1962,
+          "month": 3,
+          "day": 3,
+          "hour": 2,
+          "minute": 2,
+          "calendar": "solar",
+          "gender": "M",
+          "city": "서울"
+        },
+        "pillar": "경자",
+        "strength": "태약",
+        "root": "매우 약한 통근",
+        "methods": {
+          "eokbu": "토",
+          "johu": "화",
+          "tonggwan": null
+        }
+      }
+    ],
+    "noJohu": [
+      {
+        "input": {
+          "year": 1963,
+          "month": 4,
+          "day": 4,
+          "hour": 3,
+          "minute": 3,
+          "calendar": "solar",
+          "gender": "F",
+          "city": "서울"
+        },
+        "pillar": "정축",
+        "strength": "중화",
+        "root": "무근",
+        "methods": {
+          "eokbu": "금",
+          "johu": null,
+          "tonggwan": null
+        }
+      },
+      {
+        "input": {
+          "year": 1964,
+          "month": 5,
+          "day": 5,
+          "hour": 4,
+          "minute": 4,
+          "calendar": "solar",
+          "gender": "M",
+          "city": "서울"
+        },
+        "pillar": "갑인",
+        "strength": "중화",
+        "root": "강한 통근",
+        "methods": {
+          "eokbu": "목",
+          "johu": null,
+          "tonggwan": "화"
+        }
+      },
+      {
+        "input": {
+          "year": 1965,
+          "month": 6,
+          "day": 6,
+          "hour": 5,
+          "minute": 5,
+          "calendar": "solar",
+          "gender": "F",
+          "city": "서울"
+        },
+        "pillar": "신묘",
+        "strength": "중화",
+        "root": "약한 통근",
+        "methods": {
+          "eokbu": "화",
+          "johu": null,
+          "tonggwan": "수"
+        }
+      }
+    ],
+    "extreme": [
+      {
+        "input": {
+          "year": 1961,
+          "month": 2,
+          "day": 2,
+          "hour": 1,
+          "minute": 1,
+          "calendar": "solar",
+          "gender": "F",
+          "city": "서울"
+        },
+        "pillar": "병인",
+        "strength": "극약",
+        "root": "약한 통근",
+        "methods": {
+          "eokbu": "목",
+          "johu": "화",
+          "tonggwan": "금"
+        }
+      },
+      {
+        "input": {
+          "year": 1989,
+          "month": 6,
+          "day": 3,
+          "hour": 5,
+          "minute": 29,
+          "calendar": "solar",
+          "gender": "F",
+          "city": "서울"
+        },
+        "pillar": "갑오",
+        "strength": "극약",
+        "root": "약한 통근",
+        "methods": {
+          "eokbu": "수",
+          "johu": "수",
+          "tonggwan": null
+        }
+      },
+      {
+        "input": {
+          "year": 2007,
+          "month": 12,
+          "day": 21,
+          "hour": 23,
+          "minute": 47,
+          "calendar": "solar",
+          "gender": "F",
+          "city": "서울"
+        },
+        "pillar": "경인",
+        "strength": "극약",
+        "root": "무근",
+        "methods": {
+          "eokbu": "토",
+          "johu": "화",
+          "tonggwan": null
+        }
+      }
+    ],
+    "unknown": [
+      {
+        "input": {
+          "year": 1960,
+          "month": 1,
+          "day": 1,
+          "hour": null,
+          "minute": 0,
+          "calendar": "solar",
+          "gender": "M",
+          "city": "서울"
+        },
+        "pillar": "무자",
+        "strength": "중화",
+        "root": "매우 약한 통근",
+        "methods": {
+          "eokbu": "토",
+          "johu": "화",
+          "tonggwan": "금"
+        }
+      },
+      {
+        "input": {
+          "year": 1979,
+          "month": 8,
+          "day": 20,
+          "hour": null,
+          "minute": 19,
+          "calendar": "solar",
+          "gender": "F",
+          "city": "서울"
+        },
+        "pillar": "기미",
+        "strength": "신강",
+        "root": "강한 통근",
+        "methods": {
+          "eokbu": "금",
+          "johu": null,
+          "tonggwan": null
+        }
+      },
+      {
+        "input": {
+          "year": 1998,
+          "month": 3,
+          "day": 12,
+          "hour": null,
+          "minute": 38,
+          "calendar": "solar",
+          "gender": "M",
+          "city": "서울"
+        },
+        "pillar": "무오",
+        "strength": "중화",
+        "root": "약한 통근",
+        "methods": {
+          "eokbu": "화",
+          "johu": null,
+          "tonggwan": "화"
+        }
+      }
+    ]
+  }
+}

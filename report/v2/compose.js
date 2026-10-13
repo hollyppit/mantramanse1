@@ -43,7 +43,7 @@
   }
   function view(c, v) { // 선택된 모듈 → 화면용(템플릿 치환 포함)
     var T = R.Rules.tpl, m = c.mod;
-    return { id: m.id, category: m.category, headline: T(m.headline, v), summary: T(m.summary, v), detail: T(m.detail, v), choice: m.choice ? T(m.choice, v) : '', keywords: m.keywords || [], imageTags: m.imageTags || [], extra: m.extra || null,
+    return { id: m.id, category: m.category, headline: T(m.headline, v), summary: T(m.summary, v), detail: T(m.detail, v), choice: m.choice ? T(m.choice, v) : '', keywords: m.keywords || [], imageTags: m.imageTags || [], extra: m.extra || null, readingCoreTemplate: m.status === 'approved' && Object.keys(m.conditions || {}).length >= 2 && m.extra && m.extra.readingCore ? m.extra.readingCore : null,
       why: c.rows.map(function (r) { return r.label + ' = ' + (Array.isArray(r.have) ? r.have.join(',') : r.have) + (r.hit ? ' ✓' : ' ✗'); }), specificity: c.specificity };
   }
 

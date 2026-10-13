@@ -1,0 +1,16 @@
+{
+  "expectedPages": 38,
+  "progress": 38,
+  "bytes": 6413624,
+  "loaded": [
+    {
+      "url": "https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js",
+      "status": 200
+    },
+    {
+      "url": "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+      "status": 200
+    }
+  ],
+  "failures": []
+}

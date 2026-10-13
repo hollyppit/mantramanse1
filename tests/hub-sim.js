@@ -71,7 +71,7 @@ ok(!H.profile.awakened(), '처음에는 각성 전'); H.profile.markAwakened(); 
 
 /* ④ 랜딩 연결 */
 const story = fs.readFileSync(path.join(root, 'report', 'story', 'story.js'), 'utf8');
-ok(/hubUrl\(\)/.test(story) && /explore_click/.test(story) && /landing_view/.test(story), '랜딩 → 허브 연결과 이벤트');
+ok(/hubUrl\(\)/.test(story) && /quick_analyze_click/.test(story) && /location.hash = '#\/begin'/.test(story) && /landing_view/.test(story), '랜딩 → 허브 연결과 이벤트');
 ok(/hub: \{ enabled: true/.test(fs.readFileSync(path.join(root, 'report', 'story', 'content.js'), 'utf8')), '허브 기본 설정');
 
 console.log(fails.length ? 'FAIL\n' + fails.join('\n') : `PASS  (읽기 ${n}건, 카드 ${T.cards.length}장)`);

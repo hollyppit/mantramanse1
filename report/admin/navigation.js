@@ -1,8 +1,9 @@
 /* 관리자 메뉴의 단일 기준: 영역·순서·표시명·담당 작업 */
 (function(root){
   'use strict';
-  var groups = [['dash','현황',['dash']],['make','무빙툰 제작',['v2proj','v2chap','v2story','v2world']],['media','영상·이미지',['v2clip','v2intro','panelart']],['content','콘텐츠·온보딩',['onboard','freec']],['ai','AI 풀이',['ikdoc','ikknow','ikdesign','ikrules','iklab','stylecfg']],['qa','점검·테스트',['v2quality','check','v2test']],['set','설정',['v2set']]];
+  var groups = [['dash','현황',['dash']],['make','무빙툰 제작',['v2proj','v2chap','v2story','v2world']],['media','영상·이미지',['v2clip','v2intro','panelart']],['content','콘텐츠·온보딩',['onboard','freec']],['ai','AI 풀이',['ikdoc','ikknow','ikdesign','ikrules','iklab','stylecfg']],['qa','점검·테스트',['v2quality','check','v2test']],['set','운영·설정',['ops','v2set']]];
   var pages = {
+    ops:{label:'운영 관리',hint:'영상120칸 연결, AI, 데이터 백업과 복구를 한곳에서 관리합니다.',related:['v2intro','v2quality','ikrules']},
     v2proj:{label:'상품 구성',hint:'상품별 공개 여부, ACT 구성과 챕터 순서를 관리합니다. 챕터의 내용은 챕터·해석에서 편집합니다.'},
     v2chap:{label:'챕터·해석',hint:'상품에 속한 챕터의 문구, 해석 모듈과 개운법을 편집합니다. 상품의 ACT 구성과 순서는 상품 구성에서 관리합니다.'},
     v2story:{label:'스토리 흐름',hint:'사주와 관심사에 따른 이야기 전개를 관리합니다. 상품별 챕터 구성은 상품 구성에서 관리합니다.'},

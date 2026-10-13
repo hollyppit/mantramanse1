@@ -1,0 +1,8 @@
+{
+  "login": true,
+  "preview": true,
+  "backupChecksum": true,
+  "restore": true,
+  "undo": true,
+  "pageErrors": []
+}

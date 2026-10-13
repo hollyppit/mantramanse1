@@ -82,7 +82,12 @@
     return out;
   }
   // 문서(chapters) 전체 검사: 챕터별 위반 목록. 장면 html 의 글자만 본다.
-  function checkAll(sd, text) { return check(sd, text).concat(facts(sd, text)); }
+  function percentageFacts(sd,text) {
+    var out=[],re=/(?:^|[\s·(])(원국(?:에서|의)?\s+)?([목화토금수]|비겁|식상|재성|관성|인성)\s*(?:기운\s*)?((?:비중|비율|분포)\s*)?(?:은|는|이|가)?\s*(\d+(?:\.\d+)?)\s*%/g,m;
+    while((m=re.exec(String(text).replace(/<[^>]*>/g,' ')))) {if(!m[1] && !m[3])continue;var actual=(sd.fiveElements || {})[m[2]];if(actual==null)actual=(sd.groups || {})[m[2]];if(actual!=null && Math.abs(Number(m[4])-actual)>1)out.push({rule:'percentage',claimed:m[2]+' '+m[4]+'%',actual:m[2]+' '+actual+'%',snippet:m[0].trim()});}
+    return out;
+  }
+  function checkAll(sd, text) { return check(sd, text).concat(facts(sd, text),percentageFacts(sd,text)); }
   function checkDoc(sd, chapters) {
     var res = [];
     (chapters || []).forEach(function (c) { (c.scenes || []).forEach(function (s) { checkAll(sd, s.html || s.text || '').forEach(function (v) { v.chapter = c.id; v.scene = s.sceneId; res.push(v); }); }); });

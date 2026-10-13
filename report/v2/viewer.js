@@ -249,7 +249,7 @@
     }).catch(function (e) { if (window.console) console.error('lifeBegin', e); try { beginReader(); } catch (e2) { toast('화면을 여는 중 문제가 생겼습니다. 새로고침해 주세요.'); } });
   }
   /* ── 운명 탐험 홈(ACT 01 각성 이후 챕터를 골라 읽는다). ?explore=0 이면 예전처럼 처음부터 한 문서로 읽는다. 읽은 챕터·이어 읽을 위치는 이 기기에만 저장한다. ── */
-  var EXPLORE = !PREVIEW && !!R.Explore && !/[?&]explore=0(&|$)/.test(location.search);
+  var EXPLORE = !PREVIEW && !!R.Explore && !/[?&]explore=0(&|$)/.test(location.search) && (projectId() !== 'full' || MAPQ || /[?&]explore=1(&|$)/.test(location.search)); // 종합 기본은 15주제 순서, 세계 지도는 explore=1로 유지
   // 오류 수집(ERROR_LOG_DESIGN.md): 지금 보던 챕터·세계·흐름·콘텐츠 버전만 알려 준다. 이름·입력값은 읽지 않는다.
   if (R.ErrLog) R.ErrLog.setContext(function () {
     var c = S.rep && S.rep.chapters && S.rep.chapters[S.idx];
@@ -490,6 +490,10 @@
   });
   $('#v-home').addEventListener('change', function (e) { if (e.target.id === 'xAuto' && S.xp) { S.xp.auto = e.target.checked; xpSave(); } });
   function beginReader() {
+    if (!PREVIEW && R.ReadingFlow && projectId() === "full") {
+      S.rep = R.ReadingFlow.build(S.rep, S.sd, { M: window.Manse, ch: S.ch });
+      S.repPdf = S.rep; // 같은 공통 풀이 객체를 사용해 AI 수정도 PDF에 반영한다.
+    }
     addCharIntro();
     var reading = !PREVIEW && R.FullReading ? R.FullReading.prepare(S.rep, S.sd, S.name, function (c, job, result) {
       var ci = S.rep.chapters.indexOf(c), article = document.getElementById('ch-' + c.id);
@@ -497,6 +501,7 @@
       if (S.visited[c.id]) return;
       var sections = [].slice.call(article.querySelectorAll(':scope > section')), at = 0;
       c.scenes.forEach(function (scene, i) {
+        if (scene.readingSupplementary) return;
         var html = sceneHtml(c, scene, i); if (!html) return;
         var box = document.createElement('div'); box.innerHTML = html;
         var fresh = box.firstElementChild, existing = sections[at++];
@@ -754,7 +759,10 @@
     var rep = S.rep, h = ''; S.bg = []; planPanels(rep);
     rep.chapters.forEach(function (c, ci) {
       if (c.actTransition) h += actHeadHtml(c, ci);
-      h += '<article class="chap" id="ch-' + esc(c.id) + '" data-ch="' + ci + '" aria-label="' + esc(c.title) + '">' + c.scenes.map(function (s, k) { return secWrap(sceneHtml(c, s, k), s, c, ci); }).join('') + '</article>';
+      var main='', extra='';
+      c.scenes.forEach(function(s,k){ var html=secWrap(sceneHtml(c,s,k),s,c,ci); if(c.readingSupplementary || s.readingSupplementary) extra+=html; else main+=html; });
+      if(extra) main+='<details class="reading-supplement" style="margin:16px auto;max-width:720px;padding:16px"><summary>더 깊이 읽기 · '+esc(c.originalTitle || c.title)+'</summary>'+extra+'</details>';
+      h += '<article class="chap" id="ch-' + esc(c.id) + '" data-ch="' + ci + '" aria-label="' + esc(c.title) + '">' + main + '</article>';
     });
     $('#chapter').innerHTML = h; chapterTags(); try { emphasize($('#chapter')); } catch (e) { /* 강조가 실패해도 본문은 그대로 */ }
     rep.chapters.forEach(function (c) { if (c.kind === 'monthly') { var cur = (c.items || []).findIndex(function (x) { return x.isNow; }); moDetail(c, Math.max(0, cur)); } });

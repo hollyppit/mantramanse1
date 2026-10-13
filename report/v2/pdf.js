@@ -58,6 +58,7 @@
 
   // pages(rep, sd, opts) → ['<div class="pg">…</div>', …]   opts: { name }
   function pages(rep, sd, opts) {
+    if (rep.readingFlow) return readingPages(rep, sd, opts);
     opts = opts || {}; var who = opts.name || '', S = R.SajuData.SEASONS, out = [], total = rep.chapters.length + 3;
     var color = EL[sd.dayMaster.el] || '#B9975B', n = 0, K = R.SajuData.ELK;
     var cov1 = rep.chapters[0] || {};
@@ -83,6 +84,28 @@
       '<div class="cap">안내</div><p style="color:#6B6A63;font-size:12px">· 사주 해석은 과학적으로 검증된 예측이 아니며, 건강·재물 규모·법률·임신 등을 단정하지 않습니다.<br>· 전생 이야기는 사주 요소를 바탕으로 구성한 상징적 스토리 콘텐츠입니다.<br>· 운동·활동 추천은 건강 처방이 아니라 생활 콘텐츠입니다.</p></div>', color, n, total, who));
     return out;
   }
+  // Common explanation uses short, bounded pages instead of a clipped single chapter page.
+  function readingPages(rep, sd, opts) {
+    var who=(opts && opts.name)||'귀인', color=EL[sd.dayMaster.el]||'#B9975B', content=[];
+    content.push('<div class="act">MANTRA FORTUNE</div><h2>'+esc(who)+'의 사주 사용설명서</h2><p>'+esc(sd.dayPillar.ko)+'일주 · '+esc(sd.strength.zone)+'</p><p>계산 모델의 출력, 조건부 해석, 실천 제안을 구분해 읽습니다.</p>');
+    content.push('<h2>원국 계산표</h2><table><tr><th>구분</th><th>간지</th><th>십성</th></tr>'+['year','month','day','hour'].map(function(k){var p=sd.pillars[k];return '<tr><td>'+esc({year:'연주',month:'월주',day:'일주',hour:'시주'}[k])+'</td><td>'+esc(p?p.ko:'시간 미상')+'</td><td>'+esc(p ? (p.stemTG || '')+' / '+(p.branchTG || '') : '판단 보류')+'</td></tr>';}).join('')+'</table><div class="cap">오행 분포</div><p>'+Object.keys(sd.fiveElements).map(function(k){return esc(k+' '+sd.fiveElements[k]+'%');}).join(' · ')+'</p>');
+    (rep.chapters || []).filter(function(c){return c.readingCore;}).forEach(function(c){
+      var blocks=[];
+      R.ReadingFlow.FIELDS.forEach(function(f){
+        var text=String(c.readingCore[f[0]]||''), pieces=text.match(/[\s\S]{1,420}/g)||[''];
+        pieces.forEach(function(t,i){blocks.push('<div class="cap">'+esc(f[1])+(i?' (계속)':'')+'</div><p>'+nl(t)+'</p>');});
+      });
+      var group=[], height=0, pageNo=0;
+      function flush(){if(!group.length)return;content.push('<div class="act">'+c.readingSection+' / 15 · '+(++pageNo)+'</div><h2>'+esc(c.title)+'</h2>'+group.join(''));group=[];height=0;}
+      blocks.forEach(function(block){var len=block.replace(/<[^>]*>/g,'').length, estimate=Math.ceil(len/32)*32+60;if(group.length && (group.length>=4 || height+estimate>780))flush();group.push(block);height+=estimate;});flush();
+    });
+    // Engine tables remain distinct from the narrative. Never derive new years or scores here.
+    if(sd.daewoon && sd.daewoon.length) content.push('<h2>대운 계산표</h2><table><tr><th>나이</th><th>기간</th><th>간지</th></tr>'+sd.daewoon.slice(0,12).map(function(x){return '<tr><td>'+esc(x.startAge)+'</td><td>'+esc(x.startYear)+'–'+esc(x.endYear)+'</td><td>'+esc(x.ganzhi)+'</td></tr>';}).join('')+'</table>');
+    if(rep.readingFlow.future && rep.readingFlow.future.length) content.push('<h2>향후 10년 세운 계산표</h2><table><tr><th>연도</th><th>간지</th><th>모델 흐름</th></tr>'+rep.readingFlow.future.map(function(x){return '<tr><td>'+esc(x.year)+'</td><td>'+esc(x.ganzhi)+'</td><td>'+esc(R.SajuData.SEASONS[x.season] || '확인 불가')+'</td></tr>';}).join('')+'</table>');
+    if(sd.sewoon) content.push('<h2>올해와 월운 계산표</h2><p>'+esc(sd.sewoon.year)+'년 '+esc(sd.sewoon.ganzhi)+'</p><table>'+sd.monthlyLuck.map(function(x){return '<tr><td>'+esc(x.month)+'월</td><td>'+esc(x.ganzhi)+'</td><td>'+esc(x.label || x.condition || '')+'</td></tr>';}).join('')+'</table>');
+    content.push('<h2>실천 점검</h2><p>앞에서 선택한 행동과 시작일, 확인할 변화를 기록합니다. 실제 경험과 맞지 않는 설명은 환경과 선택의 조건을 다시 확인합니다.</p>');
+    return content.map(function(h,i){return page('<div class="band"></div><div class="in">'+h+'</div>',color,i+1,content.length,who);});
+  }
   function summaryPage(c, rep, n, total, who, color) {
     var sm = rep.summary, p = c.plan, K = [['core', '나의 핵심'], ['strengths', '강점'], ['weaknesses', '약점'], ['work', '일'], ['money', '돈'], ['people', '사람'], ['love', '사랑'], ['growth', '성장'], ['body', '몸과 활동'], ['place', '공간'], ['daewoon', '현재 대운'], ['thisYear', '올해']];
     return page('<div class="band"></div><div class="in"><div class="act">ACT IV · 20</div><h2>' + esc(c.title) + '</h2><div class="sub">' + esc(c.subtitle) + '</div><div class="hl">' + nl(c.headline) + '</div><div class="g2">' + K.map(function (k) { return sm[k[0]] ? '<div class="box"><b>' + k[1] + '</b>' + esc(sm[k[0]]) + '</div>' : ''; }).join('') + '</div>' +
@@ -91,7 +114,7 @@
   }
 
   /* ── 브라우저: 페이지 → 래스터 → PDF ───────────────────────────────────── */
-  function loadScript(src) { return new Promise(function (res, rej) { var e = document.createElement('script'); e.src = src; e.onload = res; e.onerror = function () { e.remove(); rej(new Error('라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하세요.')); }; document.head.appendChild(e); }); }
+  function loadScript(src) { return new Promise(function (res, rej) { var e = document.createElement('script'), done = false, timer = setTimeout(function () { finish(new Error('PDF 라이브러리 연결이 지연되었습니다. 다시 시도해 주세요.')); }, 15000); function finish(err) { if (done) return; done = true; clearTimeout(timer); e.onload = e.onerror = null; if (err) { e.remove(); rej(err); } else res(); } e.src = src; e.onload = function () { finish(); }; e.onerror = function () { finish(new Error('PDF 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하세요.')); }; document.head.appendChild(e); }); }
   function loadAny(srcs) { var p = Promise.reject(); srcs.forEach(function (u) { p = p.catch(function () { return loadScript(u); }); }); return p; }
   function libs() {
     var a = Promise.resolve();
@@ -106,7 +129,7 @@
     var wrap = document.createElement('div'); wrap.innerHTML = html.join(''); host.appendChild(wrap); document.body.appendChild(host);
     var els = [].slice.call(wrap.querySelectorAll('.pg'));
     var fonts = document.fonts && document.fonts.load ? Promise.all(['400 14px "Noto Sans KR"', '500 14px "Noto Sans KR"', '600 20px "Noto Serif KR"'].map(function (f) { return document.fonts.load(f, '가나다라마바사'); })).then(function () { return document.fonts.ready; }).catch(function () { }) : Promise.resolve();
-    return libs().then(function () { return fonts; }).then(function () {
+    return libs().then(function () { return Promise.race([fonts, new Promise(function (resolve) { setTimeout(resolve, 10000); })]); }).then(function () {
       // 한 페이지에 다 안 들어가면 글자 영역을 줄여 맞춘다(잘림 방지)
       els.forEach(function (el) { var inn = el.querySelector('.in'); if (!inn) return; var used = inn.offsetHeight; if (used > H) inn.style.zoom = Math.max(0.6, (H - 8) / used); });
       var pdf = new root.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }), i = 0;
@@ -121,8 +144,10 @@
     }).then(function (pdf) {
       var name = 'mantra-report-' + sd.dayPillar.ko + '.pdf', blob = pdf.output('blob'), file = new File([blob], name, { type: 'application/pdf' });
       host.remove();
-      if (MOBILE && navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file], title: '나의 인생 사용설명서' }).catch(function () { });
-      var u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 60000);
+      function download() { var u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 60000); }
+      if (!opts.downloadOnly && MOBILE && navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file], title: '나의 인생 사용설명서' }).catch(function (e) { if (e && e.name === 'AbortError') return; download(); });
+      download();
+
     }).catch(function (e) { host.remove(); throw e; });
   }
 

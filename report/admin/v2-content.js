@@ -238,15 +238,24 @@
     };
   }
 
+  function coreFields(x) {
+    var fields=R.ReadingFlow ? R.ReadingFlow.FIELDS.filter(function(f){return f[0]!=='why' && f[0]!=='evidence';}):[], values=x.extra && x.extra.readingCore || {};
+    return '<details><summary>공통 설명 템플릿 · 핵심/현실/강점/취약점/실천</summary><p class="muted">상태를 승인(approved)으로 바꾸고 조건을 두 종류 이상 설정한 모듈만 사용합니다. 계산 이유와 예외는 원국에서 고정합니다. {dominantGroup}, {strengthZone}, {dayMasterEl}을 사용할 수 있습니다.</p>'+fields.map(function(f){return tf('eCore_'+f[0],f[1],values[f[0]] || '',1);}).join('')+'</details>';
+  }
+  function readCore(b,n) {
+    if(!R.ReadingFlow)return; var core={}; R.ReadingFlow.FIELDS.forEach(function(f){var e=$('#eCore_'+f[0],b);if(e && e.value.trim())core[f[0]]=e.value.trim();});
+    n.extra=n.extra || {}; if(Object.keys(core).length)n.extra.readingCore=core;else delete n.extra.readingCore;
+    if(!Object.keys(n.extra).length)n.extra=null;
+  }
   function modCfg() {
     return { panel: function () { return policyPanel() + batchPanel(); }, bindPanel: function (r) { policyBind(r); batchBind(r); }, title: '해석 모듈', base: R.Content.modules, key: 'modules', catKey: 'category', cats: CATS.map(function (c) { return [c, CAT_KO[c]]; }), catLabel: '카테고리', title2: function (x) { return x.headline; }, catName: function (x) { return CAT_KO[x.category] || x.category; },
       blank: function (cat) { return { id: 'mod_' + Date.now().toString(36), category: cat, conditions: {}, priority: 50, headline: '', summary: '', detail: '', keywords: [], imageTags: [], actionTags: [], extra: null, enabled: true }; },
       fields: function (x) { return '<div class="fx"><label>카테고리</label><select id="eCat">' + CATS.map(function (c) { return '<option value="' + c + '"' + (x.category === c ? ' selected' : '') + '>' + CAT_KO[c] + ' (' + c + ')</option>'; }).join('') + '</select></div>' + aiBox() + tf('eH', '핵심 문장 (headline, 1~2문장)', x.headline) + tf('eS', '짧은 설명 (summary)', x.summary, 1) + tf('eD', '상세 풀이 (detail, "자세히 보기"에 펼침)', x.detail, 1) +
         '<div class="fx2">' + tf('eK', '키워드 (쉼표)', (x.keywords || []).join(', ')) + tf('eI', '이미지 태그 imageTags (쉼표, 예: wood,growth,forest)', (x.imageTags || []).join(', ')) + '</div>' + tf('eA', '행동 태그 actionTags (쉼표)', (x.actionTags || []).join(', ')) +
-        '<div class="fx"><label>구조화 보조 항목 extra (JSON, 선택) — 직업 환경·재물 항목 등</label><textarea id="eX" class="mono">' + esc(x.extra ? JSON.stringify(x.extra, null, 1) : '') + '</textarea></div><p class="muted">문장 속 {dayMasterEl} {yongEl} {el.인성} 같은 자리는 개인 사실로 치환됩니다. "반드시·무조건·확정" 표현은 쓰지 마세요.</p>' + layerFields(x); },
+        '<div class="fx"><label>구조화 보조 항목 extra (JSON, 선택) — 직업 환경·재물 항목 등</label><textarea id="eX" class="mono">' + esc(x.extra ? JSON.stringify(x.extra, null, 1) : '') + '</textarea></div><p class="muted">문장 속 {dayMasterEl} {yongEl} {el.인성} 같은 자리는 개인 사실로 치환됩니다. "반드시·무조건·확정" 표현은 쓰지 마세요.</p>' + coreFields(x) + layerFields(x); },
       afterEd: aiBind,
       read: function (b, n) { var orig = clone(n); n.category = $('#eCat', b).value; n.headline = $('#eH', b).value; n.summary = $('#eS', b).value; n.detail = $('#eD', b).value; n.keywords = csv($('#eK', b).value); n.imageTags = csv($('#eI', b).value); n.actionTags = csv($('#eA', b).value);
-        var x = $('#eX', b).value.trim(); try { n.extra = x ? JSON.parse(x) : null; } catch (e) { toast('extra JSON 형식이 올바르지 않아 비웠습니다', true); n.extra = null; } if (/(반드시|무조건|확정)/.test(n.headline + n.summary + n.detail)) toast('단정 표현이 포함되어 있습니다. 문구를 확인하세요', true); return layerRead(b, n, orig); } };
+        var x = $('#eX', b).value.trim(); try { n.extra = x ? JSON.parse(x) : null; } catch (e) { toast('extra JSON 형식이 올바르지 않아 비웠습니다', true); n.extra = null; } if (/(반드시|무조건|확정)/.test(n.headline + n.summary + n.detail)) toast('단정 표현이 포함되어 있습니다. 문구를 확인하세요', true); readCore(b,n); return layerRead(b, n, orig); } };
   }
   /* ── 해석 모듈 일괄 검증: ① 규칙 검사(무료·즉시, 전체) ② AI 검증(범위·개수를 정해 순서대로). 결과는 이 화면에만 보관하고, 고치는 일은 모듈을 열어서 한다 ── */
   var BV = { res: {}, stop: false, run: false };
