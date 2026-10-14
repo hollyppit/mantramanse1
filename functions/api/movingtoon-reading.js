@@ -110,7 +110,7 @@ export async function onRequestPost({ request, env }) {
         ...(analysis ? { interpretation: { version: analysis.version, mode, claims: analysis.claims, features: analysis.features, cross_analysis: analysis.cross_analysis, warnings: analysis.warnings, quality: analysis.quality, validation } } : {}) };
       if (kv) { try { await kv.put(key, JSON.stringify(value), { expirationTtl: 604800 }); } catch { } }
       return json({ ok: true, ...value, cached: false });
-    } catch { providerAttempts.push({provider,status:'provider-call-failed',elapsedMs:Date.now()-requestStarted}); }
+    } catch (e) { const error=/^provider-http-[0-9]{3}$/.test(e?.message || '')?e.message:e?.name==='TimeoutError'?'provider-timeout':'provider-call-error';providerAttempts.push({provider,status:'provider-call-failed',error,elapsedMs:Date.now()-requestStarted}); }
   }
   return json({ ok: false, error: lastRejection ? 'chapter-validation-failed' : 'ai-unavailable', validation: lastRejection, providerAttempts, elapsedMs:Date.now()-requestStarted, engineMode: mode }, 502);
 }
