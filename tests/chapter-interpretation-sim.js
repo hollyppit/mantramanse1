@@ -79,5 +79,6 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
  response=await API.onRequestPost({env,request:req('/api/movingtoon-reading',input,false)});const styled=await response.json();assert.equal(response.status,200,JSON.stringify(styled));assert.equal(styled.hook.source,'ai-reviewed','custom hook style must trigger evidence-bound rewriting');assert(styled.chapterQuality.semanticReview.ok);
  mem.set('src:idx',JSON.stringify([{id:'fixture',active:false}]));response=await API.onRequestPost({env,request:req('/api/movingtoon-reading',input,false)});assert.equal(response.status,422,'source deactivation invalidates cached body and hook');
  assert.equal(mem.get('src:chunks:fixture'),JSON.stringify(sourceIndex.get('fixture').chunks));global.fetch=originalFetch;
+ global.fetch=async()=>new Response(JSON.stringify({error:{code:'insufficient_quota',message:'do not expose secret provider content'}}),{status:429});await assert.rejects(API.generate({OPENAI_API_KEY:'secret'},'openai','{}','test'),/^Error: provider-http-429-insufficient_quota$/);global.fetch=originalFetch;
  console.log('chapter-interpretation: 32 calculated charts; topic routing; 5% ratio; synonym duplicates; grounded hook; source/cache/version/auth; independent AI review; admin rejection/preservation PASS');
 })().catch(e=>{console.error(e);process.exitCode=1;});
