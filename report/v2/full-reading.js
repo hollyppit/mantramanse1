@@ -26,7 +26,7 @@
       (scene.cards || []).forEach(function (c) { if (typeof c.summary === 'string') push(c.summary, function (text) { c.summary = text; }); });
       if (scene.insight && typeof scene.insight.body === 'string') push(scene.insight.body, function (text) { scene.insight.body = text; });
     });
-    return { chapter: { id: chapter.id || chapter.base, title: name ? (chapter.title || '').split(name).join('본인') : chapter.title || '', paragraphs: paragraphs }, targets: targets };
+    return { chapter: { id: chapter.id || chapter.base, base: chapter.base || '', chapterKind: R.ChapterPolicy ? R.ChapterPolicy.kind(chapter) : root.MantraChapterPolicy ? root.MantraChapterPolicy.kind(chapter) : '', title: name ? (chapter.title || '').split(name).join('본인') : chapter.title || '', paragraphs: paragraphs }, targets: targets };
   }
   function apply(job, result) {
     if (!result || !Array.isArray(result.paragraphs) || result.paragraphs.length !== job.targets.length) return false;
@@ -34,10 +34,11 @@
     if (!result.paragraphs.every(function (p) { var i = Number(p.id); if (!Number.isInteger(i) || !job.targets[i] || seen[i] || typeof p.text !== 'string' || p.text.length < 30 || p.text.length > 1200) return false; seen[i] = true; return true; })) return false;
     result.paragraphs.forEach(function (p) { job.targets[Number(p.id)](p.text); }); return true;
   }
-  function uniqueAcross(result, seen, id) {
-    return !!(result && Array.isArray(result.paragraphs) && result.paragraphs.every(function(p) { var key=String(p.text || '').replace(/\s+/g,''); return !seen.has(key) || seen.get(key)===id; }));
+  function uniqueAcross(result, seen, id, chapter) {
+    return !!(result && Array.isArray(result.paragraphs) && result.paragraphs.every(function(p) { var key=String(p.text || ''); var policy=root.MantraChapterPolicy;
+      return Array.from(seen.entries()).every(function(old){if(old[1]===id)return true;return policy ? policy.similarity(key,old[0])<0.9 && !(policy.generalTrait(key,policy.kind(chapter || {}) || 'other') && policy.duplicate(key,old[0])) : key.replace(/\s+/g,'')!==old[0].replace(/\s+/g,'');}); }));
   }
-  function remember(result, seen, id) { result.paragraphs.forEach(function(p) { seen.set(p.text.replace(/\s+/g,''),id); }); }
+  function remember(result, seen, id) { result.paragraphs.forEach(function(p) { seen.set(p.text,id); }); }
   function prepare(rep, sd, name, onReady) {
     if (active) { active.cancelled = true; active.controllers.forEach(function (c) { c.abort(); }); }
     var session = { cancelled: false, controllers: [] }; active = session;
@@ -55,16 +56,24 @@
       var ctl = root.AbortController ? new root.AbortController() : null, timer = root.setTimeout(function () { if (ctl) ctl.abort(); }, 85000);
       if (ctl) session.controllers.push(ctl);
       try {
-        var r = await root.fetch('/api/movingtoon-reading', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sd: safe, outline: outline, chapter: job.chapter }), signal: ctl && ctl.signal });
+        var r = await root.fetch('/api/movingtoon-reading', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sd: safe, outline: outline, chapter: job.chapter, previous: Array.from(acceptedTexts.entries()).slice(-80).map(function(x){return {text:name?x[0].split(name).join('본인'):x[0],chapter:x[1]};}) }), signal: ctl && ctl.signal });
         var d = await r.json(); if (d && ['no-ai', 'storage-unavailable', 'rate-limited'].indexOf(d.error) >= 0) done = jobs.length;
-        if (!session.cancelled && d && d.ok && uniqueAcross(d.result, acceptedTexts, item.c.id) && apply(job, d.result)) { item.c.readingProvider = d.provider; if (d.style) { item.c.readingStyle = d.style; rep.readingStyle = rep.readingStyle || d.style; } remember(d.result, acceptedTexts, item.c.id); status.completed++; if (onReady) onReady(item.c, job, d.result); } else status.failed++;
+        if (!session.cancelled && d && d.ok && uniqueAcross(d.result, acceptedTexts, item.c.id,item.c) && apply(job, d.result)) { item.c.readingProvider = d.provider; item.c.chapterHook = d.hook || null; item.c.chapterQuality = d.chapterQuality || null; item.c.hookName = name || '귀인'; if (d.interpretation) { item.c.interpretationAnalysis = d.interpretation; item.c.readingParagraphs = d.result.paragraphs.map(function(p){var original=job.chapter.paragraphs.find(function(x){return x.id===p.id;});return Object.assign({},p,{role:original && original.role || ''});}); item.c.readingFullText = d.result.paragraphs.map(function(p){return p.text;}).join('\n\n'); item.c.readingEvidence = d.result.paragraphs.map(function(p) { return { id: p.id, refs: p.refs, claim_ids: p.claim_ids || [] }; }); } if (d.style) { item.c.readingStyle = d.style; rep.readingStyle = rep.readingStyle || d.style; } remember(d.result, acceptedTexts, item.c.id); status.completed++; if (onReady) onReady(item.c, job, d.result); } else {
+          status.failed++; item.c.readingWarning = d && d.error || 'validation-failed';
+          if (!session.cancelled && (d && d.engineMode === 'grounded' || d && d.interpretation && d.interpretation.mode === 'grounded')) {
+            // Runtime presentation only; original saved chapters remain intact.
+            var deferred = { paragraphs: job.chapter.paragraphs.map(function(p,i){return {id:p.id,text:i===0?'이 주제의 풀이를 뒷받침할 검증된 근거가 부족하거나 생성 검증을 통과하지 못했습니다. 계산표를 확인하고 풀이 검수가 끝난 뒤 다시 살펴보세요.':'',refs:[],claim_ids:[]};}) };
+            deferred.paragraphs.forEach(function(p){job.targets[Number(p.id)](p.text);});
+            if(onReady)onReady(item.c,job,deferred);
+          }
+        }
       } catch (e) { status.failed++; } finally { root.clearTimeout(timer); }
     }
     // 첫 챕터를 준비한 뒤 표시하고, 후속 챕터는 미리 준비한다. 현재 DOM은 다시 그리지 않는다.
     var first = jobs.find(function (x) { return x.job.targets.length; });
     var firstPromise = first ? run(first) : Promise.resolve();
     async function worker() { while (!session.cancelled && done < jobs.length) { var x = jobs[done++]; if (x !== first) await run(x); } }
-    firstPromise.then(function () { worker(); worker(); });
+    firstPromise.then(function () { worker(); }); // Prior chapters must be available for semantic review.
     return { first: firstPromise, status: status };
   }
   R.FullReading = { uniqueAcross: uniqueAcross, collect: collect, apply: apply, prepare: prepare };

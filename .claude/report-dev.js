@@ -27,6 +27,15 @@ const body = q => new Promise(res => { const b = []; q.on('data', c => b.push(c)
 
 http.createServer(async (q, r) => {
   const u = new URL(q.url, 'http://x'), p = u.pathname;
+  if (['/api/interpretation','/api/interpretation-settings','/api/chapter-hook','/api/movingtoon-reading'].includes(p)) {
+    try {
+      const mod = await import(require('url').pathToFileURL(path.join(root,'functions',p+'.js')).href);
+      const raw = q.method === 'POST' ? await body(q) : undefined, handler = mod.onRequest || mod.onRequestPost;
+      if (!handler || !mod.onRequest && q.method !== 'POST') return send(r,405,{error:'method'});
+      const response = await handler({env:ikEnv,request:new Request('http://x'+q.url,{method:q.method,headers:{authorization:q.headers.authorization||'','content-type':'application/json'},body:raw && raw.length?raw:undefined})});
+      r.statusCode=response.status;r.setHeader('content-type','application/json; charset=utf-8');return r.end(await response.text());
+    } catch(e) { return send(r,500,{error:e.message}); }
+  }
   // PROXY_PROD=1: 운영의 영상·이미지·프롤로그 설정을 읽기 전용(GET)으로 가져와 로컬 화면에서 확인한다. 쓰기(POST/PUT)는 보내지 않는다.
   if (process.env.PROXY_PROD && q.method === 'GET' && /^\/api\/(prologue|awakening|assets|clipfile|media|report-content|story|intro|clips)$/.test(p)) {
     try {

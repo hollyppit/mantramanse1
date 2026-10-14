@@ -2,15 +2,15 @@
 // 원칙: 문체는 "표현 강도"만 바꾼다. 만세력 계산값·검색된 풀이 DB 근거·적용되는 명리 판단은 문체와 무관하게 같아야 한다.
 // 세 가지 유형(신중형·직설형·단정형)과 관리자 설정(config)을 검증·정리하고, AI 프롬프트에 붙일 지시문(directive)과 사후 검사를 만든다.
 // 저장은 api/style.js 가 KV 'style:cfg'(활성) · 'style:hist'(버전 이력)에 한다.
-export const STYLE_VERSION = 'style1';
+export const STYLE_VERSION = 'style2';
 export const STYLE_IDS = ['cautious', 'direct', 'assertive'];
-export const STYLE_KO = { cautious: '신중형', direct: '직설형', assertive: '단정형' };
+export const STYLE_KO = { cautious: '신중형', direct: '직설형 심층 감정', assertive: '단정형' };
 export const STYLE_DESC = {
   cautious: '가능성과 경향을 중심으로 설명합니다. 부드럽고 조심스러운 표현을 씁니다.',
-  direct: '명리학적 판단을 명확하게 전달합니다. 불필요한 완곡어법을 줄이고 근거 중심으로 설명합니다.',
-  assertive: '확신 있는 문장과 강한 서사적 표현을 씁니다. 반복적인 가능성 표현을 줄이고 성향·강점·약점·적성·운의 특징을 분명히 서술합니다. (기본값)',
+  direct: '차분하고 구체적으로 구조·강점·약점·모순·예외를 설명합니다. 전통 해석과 현실의 사실을 구분합니다. (기본값)',
+  assertive: '확신 있는 문장과 강한 서사적 표현을 씁니다. 반복적인 가능성 표현을 줄이고 성향·강점·약점·적성·운의 특징을 분명히 서술합니다.',
 };
-export const DEFAULT_STYLE = 'assertive';
+export const DEFAULT_STYLE = 'direct';
 
 export const DEFAULT_PROMPTS = {
   cautious: '가능성과 경향을 중심으로 설명한다. 부드럽고 조심스러운 표현("~하기 쉽습니다", "~하는 경향이 있습니다", "~로 읽을 수 있습니다")을 쓰되, 한 문단에서 같은 어미를 반복하지 않는다. 판단의 조건을 함께 밝힌다.',

@@ -7,12 +7,14 @@
   var PANE = null; // 기존 관리자와 id 가 겹치지 않도록(eTitle·ePri 등) 검색 범위를 현재 패널로 제한한다
   var $ = function (s, e) { return (e || PANE || document).querySelector(s); }, $$ = function (s, e) { return [].slice.call((e || PANE || document).querySelectorAll(s)); };
   var G = { meta: null, items: null, stats: null, f: { q: '', domain: '', status: '', reviewed: '', conf: '', open: '' }, covOpen: '', design: null, dDomain: 'MONEY', lab: null, labTab: 'final', focus: null, ack: {} };
-  var unsaved = { design:false, rules:false, know:false, modal:false };
+  var unsaved = { design:false, rules:false, know:false, modal:false, engine:false, hooks:false };
   var dirtyRegistry = (window.AdminDirty = window.AdminDirty || {});
   dirtyRegistry['풀이 구성'] = function () { return unsaved.design; };
   dirtyRegistry['AI·서비스 연결'] = function () { return unsaved.rules; };
   dirtyRegistry['풀이 지식 편집'] = function () { return unsaved.know || unsaved.modal; };
-  function watch(box, key) { if (!box._ikScope) { box._ikScope = true; ['pointerdown','input','change'].forEach(function (t) { box.addEventListener(t, function () { PANE = box; }, true); }); } box.oninput = box.onchange = function (e) { if (e.target.matches('input,textarea,select')) unsaved[key] = true; }; }
+  dirtyRegistry['챕터 후킹 직접 수정'] = function () { return unsaved.hooks; };
+  dirtyRegistry['AI·서비스 연결 — 신규 해석 엔진'] = function () { return unsaved.engine; };
+  function watch(box, key) { if (!box._ikScope) { box._ikScope = true; ['pointerdown','input','change'].forEach(function (t) { box.addEventListener(t, function () { PANE = box; }, true); }); } box.oninput = box.onchange = function (e) { if (e.target.matches('[data-hook-text],[data-hook-explanation]')) unsaved.hooks=true; else if (e.target.matches('input,textarea,select')) unsaved[key] = true; }; }
   var DOM_ORDER = ['SELF', 'MONEY', 'CAREER', 'LOVE', 'MARRIAGE', 'RELATIONSHIP', 'TIMING', 'ACTION'];
   var dko = function (d) { return (G.meta && G.meta.domains[d]) || d; };
   var STATUS_KO = { draft: '임시저장', review: '검수 필요', approved: '검수 완료(비공개)', published: '공개 중', archived: '보관' };
@@ -31,7 +33,11 @@
     monthBranch: ['태어난 달(월령)', 'opts', BR, 1], season: ['태어난 계절', 'opts', ['봄', '여름', '가을', '겨울'], 1], dayBranch: ['일지(배우자 자리)', 'opts', BR, 1], yongEl: ['용신 오행', 'opts', ELS, 1],
     pattern: ['격국·구조', 'text', ['관살혼잡', '상관견관', '상관패인', '군겁쟁재'], 1], star: ['신살', 'text', ['천을귀인', '도화살', '역마살', '화개살', '괴강살', '현침살', '천덕귀인', '월덕귀인'], 1], relation: ['합·충·형·파·해', 'text', ['육합', '방합', '삼합', '충', '형', '파', '해', '원진'], 1],
     daewoonSeason: ['현재 대운의 흐름', 'opts', SEAS, 1], seunSeason: ['올해(세운)의 흐름', 'opts', SEAS, 1], monthSeason: ['이달(월운)의 흐름', 'opts', SEAS, 1], futureSeason3: ['앞으로 3년에 포함되는 흐름', 'opts', SEAS, 1], futureSeason5: ['앞으로 5년에 포함되는 흐름', 'opts', SEAS, 1],
-    tenGod: ['십성 10종 강약', 'map', TENG, 1]
+    tenGod: ['십성 10종 강약', 'map', TENG, 1],
+    structure: ['구조 관찰 조건 (신규 엔진)', 'opts', ['output-with-low-wealth','wealth-with-weak-model','officer-output-coexist','resource-low-output','unrooted','method-difference'], 1],
+    rootLevel: ['통근 모델 구간', 'text', [], 1],
+    positionTG: ['위치별 십성 (예: month.stem:정관)', 'text', [], 1],
+    methodDifference: ['억부·조후 후보 차이', 'opts', ['있음','없음'], 1]
   };
   var BASIC = Object.keys(F).filter(function (k) { return !F[k][3]; }), ADV = Object.keys(F).filter(function (k) { return F[k][3]; });
 
@@ -259,12 +265,32 @@
         subs(); $$('[data-d]', b).forEach(function (x) { x.onclick = function () { it.domain = x.dataset.d; it.subDomain = ''; body(); }; });
         $('#wSub', b).onchange = function () { it.subDomain = this.value; }; $('#wTitle', b).oninput = function () { it.title = this.value; }; $('#wStance', b).onchange = function () { it.stance = this.value; };
       } else if (step === 1) {
+        var isZiwei = (it.tags || []).indexOf('system:ziwei') >= 0;
+        var systemBox = '<label class="ik-f">판단 체계<select id="wSystem"><option value="saju"' + (!isZiwei ? ' selected' : '') + '>명리학</option><option value="ziwei"' + (isZiwei ? ' selected' : '') + '>자미두수 독립 규칙</option></select></label>';
+        if (isZiwei) {
+          it.ziweiConditions = it.ziweiConditions || [];
+          var palaces = ['명궁','형제궁','부처궁','자녀궁','재백궁','질액궁','천이궁','노복궁','관록궁','전택궁','복덕궁','부모궁'];
+          var fields = {main:'주성',good:'길성',bad:'살성',adj:'보조성',brightness:'묘왕이함 (별:묘 등)',sihwa:'사화 (별:록·권·과·기)',fly:'비화 (별:록·권·과·기:도착 지지 번호)',sanbang:'삼방사정 궁'};
+          b.innerHTML = systemBox + '<p class="muted">아래 조건을 모두 충족하는 명반에만 적용합니다. 명리학 조건과 보정은 자미두수 판단에 사용하지 않습니다. 출처와 검수는 마지막 단계에서 연결합니다.</p><div id="zwConds"></div><button type="button" id="zwAdd">조건 추가</button>';
+          function drawZiwei() {
+            $('#zwConds', b).innerHTML = it.ziweiConditions.map(function(c,i){return '<div class="ik-mod"><select data-zp="'+i+'">'+palaces.map(function(p){return '<option'+(p===c.palace?' selected':'')+'>'+esc(p)+'</option>';}).join('')+'</select><select data-zf="'+i+'">'+Object.keys(fields).map(function(f){return '<option value="'+f+'"'+(f===c.field?' selected':'')+'>'+fields[f]+'</option>';}).join('')+'</select><input data-zv="'+i+'" value="'+esc((c.values||[]).join(', '))+'" placeholder="별 이름 또는 조건 값, 쉼표 구분"><button type="button" data-zdel="'+i+'">조건 삭제</button></div>';}).join('');
+            $$('[data-zp]',b).forEach(function(el){el.onchange=function(){it.ziweiConditions[+el.dataset.zp].palace=el.value;};});
+            $$('[data-zf]',b).forEach(function(el){el.onchange=function(){it.ziweiConditions[+el.dataset.zf].field=el.value;};});
+            $$('[data-zv]',b).forEach(function(el){el.oninput=function(){it.ziweiConditions[+el.dataset.zv].values=el.value.split(',').map(function(v){return v.trim();}).filter(Boolean);};});
+            $$('[data-zdel]',b).forEach(function(el){el.onclick=function(){it.ziweiConditions.splice(+el.dataset.zdel,1);drawZiwei();};});
+          }
+          drawZiwei(); $('#zwAdd', b).onclick=function(){it.ziweiConditions.push({palace:'명궁',field:'main',values:[]});drawZiwei();};
+          $('#wSystem', b).onchange=function(){it.tags=(it.tags||[]).filter(function(t){return t!=='system:ziwei';});if(this.value==='ziwei')it.tags.push('system:ziwei');body();};
+          return;
+        }
         b.innerHTML = '<div class="ik-sec" style="margin-top:0">언제 이 풀이를 사용할까요?<small>고른 조건이 모두 맞는 사주에만 쓰입니다. 조건이 구체적일수록 일반 풀이보다 먼저 쓰입니다. 엔진이 실제로 계산하는 값만 고를 수 있습니다.</small></div><div id="wCond"></div>' +
           '<div class="ik-sec">또는 이런 경우에도 쓴다<small>위 조건 대신, 아래 조건이 맞아도 이 풀이를 씁니다(각각 따로 계산).</small></div><div id="wAlso"></div><button type="button" id="wAlsoAdd">+ 다른 경우 추가</button>' +
           '<div class="ik-sec">이 풀이를 적용하지 않는 경우<small>아래 조건에 해당하면, 위 조건이 맞아도 이 풀이를 쓰지 않습니다.</small></div><div id="wExcl"></div>';
         condEditor($('#wCond', b), it.conditions); condEditor($('#wExcl', b), it.exclusions, { exclude: true });
         (function alsoDraw() { var w = $('#wAlso', b); w.innerHTML = it.alsoWhen.map(function (g, i) { return '<div class="ik-mod"><div class="ik-bar" style="margin-top:0"><b>또는</b><span style="flex:1"></span><button type="button" data-del="' + i + '">삭제</button></div><div data-g="' + i + '"></div></div>'; }).join('') || '<p class="muted" style="font-size:.82rem">없음</p>'; $$('[data-g]', w).forEach(function (el) { condEditor(el, it.alsoWhen[+el.dataset.g]); }); $$('[data-del]', w).forEach(function (x) { x.onclick = function () { it.alsoWhen.splice(+x.dataset.del, 1); alsoDraw(); }; }); })();
         $('#wAlsoAdd', b).onclick = function () { it.alsoWhen.push({}); body(); };
+        b.insertAdjacentHTML('afterbegin', systemBox);
+        $('#wSystem', b).onchange=function(){it.tags=(it.tags||[]).filter(function(t){return t!=='system:ziwei';});if(this.value==='ziwei')it.tags.push('system:ziwei');body();};
       } else if (step === 2) {
         var ex = it.realWorldExamples;
         b.innerHTML = '<div class="ik-sec" style="margin-top:0">핵심 풀이<small>이 조건은 어떤 의미인가요? 사용자에게 보여 줄 쉬운 말로 2~3문장.</small></div><textarea id="wInt" rows="4">' + esc(it.interpretation) + '</textarea>' +
@@ -365,7 +391,7 @@
   }
 
   /* ═════ ③ AI 작성 설정 ═════ */
-  function rulesOpen() { var box = document.getElementById('t-ikrules'); PANE = box; if (unsaved.rules && box.querySelector('#rSave')) return; box.innerHTML = '<p class="muted">불러오는 중…</p>'; PANE = box; (G.meta ? Promise.resolve() : loadMeta()).then(drawRules).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
+  function rulesOpen() { var box = document.getElementById('t-ikrules'); PANE = box; if ((unsaved.rules || unsaved.engine) && box.querySelector('#rSave')) return; box.innerHTML = '<p class="muted">불러오는 중…</p>'; PANE = box; (G.meta ? Promise.resolve() : loadMeta()).then(drawRules).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }); }
   function drawRules() {
     var box = document.getElementById('t-ikrules'), r = clone(G.meta.rules), cap = { brief: '항목 7개 이내 · 항목당 풀이 1개', standard: '항목 12개 이내 · 항목당 풀이 2개', detailed: '항목 18개 이내 · 항목당 풀이 4개', max: '근거가 있는 모든 항목 · 항목당 풀이 6개' }; PANE = box;
     var radio = function (name, opts, cur) { return '<div class="ik-radio">' + opts.map(function (o) { return '<label><input type="radio" name="' + name + '" value="' + o[0] + '"' + (String(o[0]) === String(cur) ? ' checked' : '') + '>' + o[1] + '</label>'; }).join('') + '</div>'; };
@@ -387,6 +413,55 @@
       $$('[data-ov]', box).forEach(function (t) { if (t.value.trim()) x.domainOverrides[t.dataset.ov] = t.value.trim(); });
       C.withBusy(box, function () { return post('rules', { rules: x }); }).then(function (d) { G.meta.rules = d.rules; unsaved.rules = false; G.meta.meta = d.meta; toast('AI 작성 설정을 저장했습니다'); }).catch(function (e) { toast(e.message, true); });
     };
+    mountEngineSettings(box);
+  }
+
+  function mountChapterSettings(panel,s) {
+    var old=panel.querySelector('[data-chapter-settings]');if(old)old.remove();
+    var host=document.createElement('div');host.dataset.chapterSettings='';
+    host.innerHTML='<h3>챕터별 책임과 후킹 설정</h3><p class="muted">수정 후 엔진 설정 저장을 누르면 새 리포트에 적용합니다. 기질 설명은 재물·연애·일에서 최대 5%, 흐름·개운은 0%입니다. 후킹 편집은 풀이 테스트에서 분석한 원국과 판단에만 연결됩니다.</p><label><input data-semantic-review type="checkbox" style="width:auto"'+(s.semanticReview!==false?' checked':'')+'> 근거 기반 생성에서 독립 AI 의미·근거 검토 (추가 호출)</label>' + Object.keys(s.chapters || {}).map(function(k){var p=s.chapters[k],h=p.hook;return '<details data-chapter="'+esc(k)+'"><summary><b>'+esc(p.title)+' · '+esc(p.hanja)+'</b></summary><label>해석 목적<textarea data-purpose rows="2">'+esc(p.purpose)+'</textarea></label><label>필수 분석 항목 (한 줄 하나)<textarea data-required rows="4">'+esc(p.required.join('\n'))+'</textarea></label><label>제외 항목 (한 줄 하나)<textarea data-excluded rows="3">'+esc(p.excluded.join('\n'))+'</textarea></label><label>일반 기질 설명 허용 비율 (%)<input data-trait-ratio type="number" min="0" max="'+(k==='self'?100:k==='timing'||k==='remedy'?0:5)+'" step="1" value="'+(p.temperamentRatio*100)+'"></label><label>문체<textarea data-style rows="2">'+esc(p.style)+'</textarea></label><label>문단 최대 글자수<input data-paragraph-max type="number" min="100" max="1200" value="'+p.maxParagraphChars+'"></label><label>챕터 전용 프롬프트<textarea data-prompt rows="3">'+esc(p.prompt)+'</textarea></label><p>DB 연결 분야: '+esc(p.domains.join(' · '))+' · 실제 조건·자료 인용은 풀이 테스트에서 확인</p>' + (['wealth','love','career'].indexOf(k)>=0?'<h4>챕터 후킹 설정</h4><label><input data-hook-on type="checkbox" style="width:auto"'+(h.enabled?' checked':'')+'> 후킹 사용</label><label>후킹 문체<textarea data-hook-style rows="2">'+esc(h.style)+'</textarea></label><label>선언 최대 글자수<input data-hook-max type="number" min="30" max="160" value="'+h.maxChars+'"></label><label>해설 문장수<select data-hook-sentences><option value="2"'+(h.explanationSentences===2?' selected':'')+'>2문장</option><option value="3"'+(h.explanationSentences===3?' selected':'')+'>3문장</option></select></label><label>해설 최대 글자수<input data-hook-explanation-max type="number" min="100" max="600" value="'+h.explanationMaxChars+'"></label><div class="ik-bar"><button type="button" data-hook-action="preview">후킹 미리보기·근거 검토</button><button type="button" data-hook-action="regenerate">AI 재생성</button></div><label>선언 직접 수정<textarea data-hook-text rows="2"></textarea></label><label>해설 직접 수정<textarea data-hook-explanation rows="3"></textarea></label><button type="button" data-hook-action="save">이 원국의 후킹만 저장·검증</button> <button type="button" data-hook-action="remove">직접 수정 해제</button><div data-hook-output class="muted"></div>':'')+'</details>';}).join('');
+    panel.appendChild(host);
+    [].forEach.call(host.querySelectorAll('[data-hook-action]'),function(button){button.onclick=function(){
+      var section=button.closest('[data-chapter]'),output=section.querySelector('[data-hook-output]'),k=section.dataset.chapter,action=button.dataset.hookAction,preview=section._hookPreview;
+      if(!G.chapterPreviewSd){output.textContent='풀이 테스트에서 원국을 먼저 분석하세요. 저장된 생년월일은 외부 모델에 전달하지 않습니다.';return;}
+      if(action!=='preview' && !preview){output.textContent='먼저 미리보기로 원국과 근거를 확인하세요.';return;}
+      var hook=preview && preview.hook || {},body={sd:G.chapterPreviewSd,action:action,chapterKind:k,expectVersion:preview && preview.settingsVersion,fingerprint:hook.fingerprint || preview && preview.fingerprint,claim_id:hook.claim_id || preview && preview.claims[0] && preview.claims[0].claim_id,claimSignature:hook.claimSignature,text:section.querySelector('[data-hook-text]').value,explanation:section.querySelector('[data-hook-explanation]').value};
+      C.withBusy(section,function(){return api('/api/chapter-hook',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});}).then(function(d){
+        if(action==='save'||action==='remove'){s.version=d.settingsVersion;section._hookPreview=Object.assign({},preview,d,{claims:preview.claims,fingerprint:preview.fingerprint});unsaved.hooks=false;toast(action==='save'?'후킹을 검증해 저장했습니다':'후킹 직접 수정을 해제했습니다');output.textContent=action==='save'?'원국과 근거에 연결해 저장했습니다. 본문은 변경하지 않았습니다.':'직접 수정을 해제했습니다. 새 리포트는 검증된 규칙으로 후킹을 만듭니다.';return;}
+        section._hookPreview=d;
+        section.querySelector('[data-hook-text]').value=d.hook && d.hook.text || '';section.querySelector('[data-hook-explanation]').value=d.hook && d.hook.explanation || '';
+        output.innerHTML=(d.hook?'<p><b>'+esc(d.hook.hanja)+' · '+esc(d.hook.text)+'</b></p><p>'+esc(d.hook.explanation)+'</p>':'<p>선언 길이·주제·출처 조건을 만족하는 근거가 부족합니다. AI 재생성은 검증된 판단이 있을 때만 가능합니다.</p>') + '<h4>핵심 근거와 계산 조건</h4>'+(d.claims || []).map(function(c){return '<details><summary>'+esc(c.claim_id+' · '+c.judgment)+'</summary><p>'+esc(c.elements.map(function(r){return r.label+': '+JSON.stringify(r.have);}).join(' / '))+'</p>'+evList(c.evidence)+'<p>'+esc(c.uncertainty.note)+'</p></details>';}).join('');bindEv(output);
+      }).catch(function(e){output.textContent=e.message+' — 원국·근거·버전 또는 의미 검증을 통과하지 못하면 저장하지 않습니다.';});
+    };});
+  }
+  function readChapterSettings(panel,existing){
+    var result=clone(existing || {});
+    [].forEach.call(panel.querySelectorAll('[data-chapter]'),function(box){var p=result[box.dataset.chapter],v=function(sel){return box.querySelector(sel).value;};p.purpose=v('[data-purpose]');p.required=v('[data-required]').split('\n').map(function(x){return x.trim();}).filter(Boolean);p.excluded=v('[data-excluded]').split('\n').map(function(x){return x.trim();}).filter(Boolean);p.temperamentRatio=Number(v('[data-trait-ratio]'))/100;p.style=v('[data-style]');p.prompt=v('[data-prompt]');p.maxParagraphChars=Number(v('[data-paragraph-max]'));if(box.querySelector('[data-hook-on]'))p.hook={enabled:box.querySelector('[data-hook-on]').checked,style:v('[data-hook-style]'),maxChars:Number(v('[data-hook-max]')),explanationSentences:Number(v('[data-hook-sentences]')),explanationMaxChars:Number(v('[data-hook-explanation-max]'))};});return result;
+  }
+  function mountEngineSettings(box) {
+    var panel = document.createElement('section'); panel.className = 'card'; panel.style.marginTop = '16px'; box.appendChild(panel);
+    panel.oninput = panel.onchange = function(e) { e.stopPropagation(); unsaved.engine = true; };
+    api('/api/interpretation-settings').then(function(data) {
+      var s = data.settings;
+      panel.innerHTML = '<h3>신규 해석 엔진</h3><p class="muted">검증된 판단을 먼저 만든 뒤 AI가 설명합니다. 비교 모드에서는 기존 서비스를 유지하면서 신규 판단을 확인합니다. 근거 기반 모드에서 출처가 부족하면 새 풀이를 적용하지 않습니다.</p>' +
+        '<label>서비스 모드<select data-mode>' + [['legacy','기존 엔진 (롤백)'],['shadow','비교 검증'],['grounded','근거 기반 신규 엔진']].map(function(x){return '<option value="'+x[0]+'"'+(s.mode===x[0]?' selected':'')+'>'+x[1]+'</option>';}).join('')+'</select></label>' +
+        '<p>현재 적용: '+esc(data.effectiveMode)+' · 프롬프트 버전 '+esc(s.promptVersion)+'</p>' +
+        '<div class="ik-g2"><label class="ik-f">OpenAI 모델<input type="text" data-openai value="'+esc(s.openaiModel)+'" placeholder="비우면 서버 설정 사용"></label><label class="ik-f">Anthropic 모델<input type="text" data-anthropic value="'+esc(s.anthropicModel)+'" placeholder="비우면 서버 설정 사용"></label>' +
+        '<label>출력 토큰 상한<input data-tokens type="number" min="1000" max="16000" value="'+s.maxOutputTokens+'"></label><label>판단 수 상한<input data-claims type="number" min="1" max="90" value="'+s.maxClaims+'"></label>' +
+        '<label>입력 100만 토큰 비용 (USD)<input data-input-price type="number" step="any" min="0" value="'+esc(s.inputPricePerMillion ?? '')+'"></label><label>출력 100만 토큰 비용 (USD)<input data-output-price type="number" step="any" min="0" value="'+esc(s.outputPricePerMillion ?? '')+'"></label></div>' +
+        '<label>요청당 비용 상한 (USD, 비우면 미설정)<input data-budget type="number" step="any" min="0" value="'+esc(s.maxRequestCost ?? '')+'"></label><p class="muted">비용은 입력한 단가로 추정합니다. 상한을 쓰려면 입력·출력 단가를 모두 설정하세요. 공급자 재시도 비용까지 보수적으로 예약합니다.</p>' +
+        '<label>비활성화할 풀이 규칙 (ID, 쉼표 구분)<textarea data-disabled rows="2">'+esc(s.disabledRules.join(', '))+'</textarea></label><button type="button" data-save>엔진 설정 저장</button>' +
+        '<details><summary>변경 이력과 이전 설정 불러오기</summary>'+data.history.map(function(h,i){return '<p>'+esc(h.at)+' · '+esc(h.settings.mode)+' · 버전 '+(h.settings.version||0)+' <button type="button" data-restore="'+i+'">이전 설정 불러오기</button></p>';}).join('')+'</details>';
+      mountChapterSettings(panel,s);
+      function value(sel){return panel.querySelector(sel).value;}
+      function number(sel){var v=value(sel);return v===''?null:Number(v);}
+      panel.querySelector('[data-save]').onclick=function(){
+        var next=Object.assign({},s,{chapters:readChapterSettings(panel,s.chapters),semanticReview:panel.querySelector('[data-semantic-review]').checked,mode:value('[data-mode]'),openaiModel:value('[data-openai]'),anthropicModel:value('[data-anthropic]'),maxOutputTokens:number('[data-tokens]'),maxClaims:number('[data-claims]'),inputPricePerMillion:number('[data-input-price]'),outputPricePerMillion:number('[data-output-price]'),maxRequestCost:number('[data-budget]'),disabledRules:value('[data-disabled]').split(',').map(function(x){return x.trim();}).filter(Boolean)});
+        delete next.hookOverrides; // Hook edits are independently managed by the authenticated hook endpoint.
+        C.withBusy(panel,function(){return api('/api/interpretation-settings',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({settings:next,expectVersion:s.version||0})});}).then(function(){unsaved.engine=false;toast('엔진 설정을 저장했습니다');panel.remove();mountEngineSettings(box);}).catch(function(e){toast(e.message,true);});
+      };
+      [].forEach.call(panel.querySelectorAll('[data-restore]'),function(button){button.onclick=function(){unsaved.engine=true;var old=data.history[+button.dataset.restore].settings;mountChapterSettings(panel,Object.assign({},s,old));[['mode','mode'],['openai','openaiModel'],['anthropic','anthropicModel'],['tokens','maxOutputTokens'],['claims','maxClaims'],['input-price','inputPricePerMillion'],['output-price','outputPricePerMillion'],['budget','maxRequestCost']].forEach(function(pair){panel.querySelector('[data-'+pair[0]+']').value=old[pair[1]] ?? '';});panel.querySelector('[data-disabled]').value=(old.disabledRules||[]).join(', ');toast('이전 설정을 불러왔습니다. 저장하면 새 버전으로 적용됩니다.');};});
+    }).catch(function(e){panel.textContent='엔진 설정 조회 실패: '+e.message;});
   }
 
   /* ═════ ④ 풀이 테스트 ═════ */
@@ -414,9 +489,10 @@
       var d = TSL.date.split('-').map(Number), t = (TSL.time || '12:00').split(':').map(Number), now = Date.now();
       var ch = M.compute({ year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: TSL.gender, city: '서울' }), sd = R.SajuData.build(ch, { now: now }), Y = sd.nowYear, ext = { future: [] };
       try { ext.future = M.seunRange(ch, Y, Y + 4).map(function (x, i) { return { year: Y + i, season: R.SajuData.seasonOf(x.ev) }; }); } catch (e) { }
+      G.chapterPreviewSd = sd;
       var body = { sd: sd, ext: ext, domain: TSL.domain, includeDraft: TSL.draft, compose: TSL.ai ? 'ai' : 'plain', force: !!force, scan: true, depth: TSL.depth };
       if (G.focus) body.focus = G.focus.item;
-      return post('lab', body).then(function (r) { G.lab = r; drawResult(); });
+      return Promise.all([post('lab', body), api('/api/interpretation', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sd: sd, domain: TSL.domain, compose: TSL.ai ? 'ai' : 'plain' }) }).catch(function(e) { return { error: e.message }; })]).then(function (results) { G.lab = results[0]; G.lab.interpretation = results[1]; drawResult(); });
     }).catch(function (e) { out.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
   var STAR = function (n) { return n == null ? '<b>측정 불가</b>' : '<b>' + '★★★★★'.slice(0, n) + '<span style="color:var(--line)">' + '★★★★★'.slice(n) + '</span></b>'; };
@@ -427,6 +503,23 @@
     var scan = r.scan ? '<details class="card" style="padding:10px 14px;margin:8px 0"><summary><b style="color:var(--gold)">이 사주로 본 분야별 풀이 지식 상태</b> <span class="muted" style="font-size:.8rem">— 분석 가능 / 근거 부족</span></summary><table style="margin-top:6px"><tbody>' + r.scan.map(function (s) { return '<tr><td>' + esc(s.name) + '</td><td>분석 가능 <b>' + s.ok + '</b></td><td>근거 부족 <b style="color:' + (s.lacking ? 'var(--red)' : 'inherit') + '">' + s.lacking + '</b></td><td class="muted" style="font-size:.78rem">' + esc(s.lackSections.slice(0, 3).map(function (x) { return x.title; }).join(', ')) + (s.lackSections.length > 3 ? ' 외' : '') + '</td></tr>'; }).join('') + '</tbody></table></details>' : '';
     out.innerHTML = head + q + scan + '<div class="ik-labtabs">' + [['final', '최종 풀이'], ['used', '사용된 풀이 지식'], ['why', '왜 이렇게 나왔나요?'], ['data', '계산 데이터']].map(function (t) { return '<button type="button" data-t="' + t[0] + '" class="' + (G.labTab === t[0] ? 'on' : '') + '">' + t[1] + (t[0] === 'used' && cf.length ? ' ⚠' + cf.length : '') + '</button>'; }).join('') + '</div><div id="labBody"></div>';
     $$('[data-t]', out).forEach(function (b) { b.onclick = function () { G.labTab = b.dataset.t; $$('[data-t]', out).forEach(function (x) { x.classList.toggle('on', x === b); }); tab(); }; });
+    var engine = r.interpretation;
+    if (engine && engine.ok) {
+      var section = document.createElement('details'); section.className = 'card';
+      var a = engine.analysis, report = engine.report;
+      section.innerHTML = '<summary><b>신규 엔진: 독립 판단과 근거 검사</b> · 명리학 ' + a.independent.saju.length + '개 / 자미두수 ' + a.independent.ziwei.length + '개</summary>' +
+        '<p class="muted">검수된 규칙으로 판단을 먼저 확정합니다. 계산·출처·반대 판단을 분리하며, 근거 없는 항목은 비워 둡니다. 작성 방식: ' + esc(engine.generation.mode) + ' · 이번 생성 비용 추정: ' + (engine.generation.estimatedCost == null ? '단가 또는 사용량 정보 부족' : esc(engine.generation.estimatedCost + ' USD')) + '</p>' +
+        '<h4>의미 중복·기질 비율·원국 정합성 검사</h4>' + (engine.generation.batches || []).map(function(b){var q=b.chapterQuality || b.validation;return '<details><summary>'+esc(b.ok?'검증 통과':'검토 필요: '+(b.error || '생성 실패'))+'</summary><p>기질 설명 비율: '+(q && q.temperamentRatio!=null?Math.round(q.temperamentRatio*100)+'%':'미측정')+' · 독립 의미 검토: '+esc(q && q.semanticReviewStatus || '미실행')+'</p><pre style="white-space:pre-wrap">'+esc(JSON.stringify(q ? {issues:q.issues || q.warnings || [],requiredCoverage:q.requiredCoverage || []} : [],null,2))+'</pre>'+(b.hook?'<p>후킹: '+esc(b.hook.text)+'</p><p>'+esc(b.hook.explanation)+'</p>':'')+'</details>';}).join('') +
+        '<h4>구조적 특징</h4>' + a.features.map(function(f) { return '<p>' + esc(f.label) + '<br><small>' + esc(f.exceptions.join(' · ')) + '</small></p>'; }).join('') +
+        '<h4>검증 경고</h4><p>' + a.warnings.map(function(w) { return esc(w.code); }).join(' · ') + '</p>' +
+        a.claims.map(function(c) { return '<details><summary>' + esc((c.system === 'saju' ? '명리학' : '자미두수') + ' · ' + c.judgment) + '</summary><p>' + esc(c.traditional_rules.map(function(rule){return rule.principle;}).join('\n')) + '</p>' + evList(c.evidence) + '<p>학파: ' + esc(c.schools.join(' · ') || '자료에 미기재') + '</p><p>반대 판단: ' + esc(c.counter_evidence.join(' · ') || '없음') + '</p><p>' + esc(c.uncertainty.note) + '</p></details>'; }).join('') +
+        '<h4>두 체계 비교</h4>' + a.cross_analysis.map(function(x){return '<p>' + esc(x.type + ' · ' + x.claims.join(' / ')) + '</p>';}).join('') +
+        '<h4>규칙 기반 리포트</h4>' + report.chapters.map(function(c){return '<details><summary>' + esc(c.topic) + '</summary><p style="white-space:pre-wrap">' + esc(c.full_text) + '</p><small>근거 부족으로 생략: ' + esc(c.omitted.join(' · ')) + '</small></details>';}).join('');
+      out.appendChild(section);
+      bindEv(section);
+    } else if (engine && engine.error) {
+      var notice = document.createElement('p'); notice.className = 'err'; notice.textContent = '신규 엔진 검사 실패: ' + engine.error; out.appendChild(notice);
+    }
     tab();
     function tab() { var b = $('#labBody', out); if (G.labTab === 'final') tabFinal(b, r, unres); else if (G.labTab === 'used') tabUsed(b, r); else if (G.labTab === 'why') tabWhy(b, r); else tabData(b, r); }
   }

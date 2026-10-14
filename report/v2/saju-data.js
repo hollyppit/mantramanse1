@@ -132,6 +132,34 @@
       sd.career = { top: (cp.top || []).map(function (c) { return { category: c.category, name: c.name, score: c.score }; }) };
     } catch (e) { sd.career = null; un.push('career'); }
 
+    sd.calculationProvenance = {
+      engine: 'Manse', calendar: ch.input.calendar || 'solar', timezone: 'Asia/Seoul',
+      utcOffsetMinutes: ch.tzOffset, daylightSaving: !!ch.dst, longitude: ch.lon,
+      timeMode: ch.timeMode, midnightRule: ch.jasi, timeKnown: !!ch.hourKnown,
+      solarTerms: 'engine.termsOf / surroundingJie', sajuYearBoundary: '입춘',
+      strengthModel: sd.interpretationBasis.strength, usefulElementModels: sd.interpretationBasis,
+      daeunDirection: ch.daeun.forward == null ? null : ch.daeun.forward,
+      ziweiSchool: '삼합파 기본 배치 + 궁간 비성 사화', ziweiLeapMonth: '15일까지 해당 월, 16일부터 다음 월',
+      asOf: new Date(now).toISOString()
+    };
+    sd.ziwei = null;
+    if (ch.ziwei && ch.hourKnown) {
+      var zw = ch.ziwei;
+      sd.ziwei = {
+        ming: zw.ming, shen: zw.shen, guk: zw.guk, forward: zw.forward,
+        sihwa: Object.assign({}, zw.sihwa),
+        palaces: zw.palaces.map(function(p) {
+          var allStars = p.main.concat(p.good, p.bad, p.adj), brightness = {};
+          allStars.forEach(function(star) { var b = M.zwBright(star, p.b); if (b) brightness[star] = b; });
+          return { name: p.name, branchIndex: p.b, stemIndex: p.s, shen: p.shen,
+            main: p.main.slice(), good: p.good.slice(), bad: p.bad.slice(), adj: p.adj.slice(),
+            brightness: brightness, sihwa: allStars.filter(function(star) { return zw.sihwa[star]; }).map(function(star) { return star + ':' + zw.sihwa[star]; }),
+            fly: p.fly.map(function(f) { return Object.assign({}, f); }), daehan: p.daehan.slice(),
+            sanbang: [4,8,6].map(function(offset) { return zw.palaces[(p.b + offset) % 12].name; }) };
+        }),
+        period: M.ziweiPeriod(zw, Y)
+      };
+    } else un.push('ziwei');
     sd.unavailable = un;
     return sd;
   }

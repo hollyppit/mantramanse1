@@ -1,11 +1,16 @@
+import { chapterPolicy, chapterInstruction, CHAPTER_DEFAULTS } from '../_chapter-policy.js';
+import { CHAPTER_VERSION, selectChapterClaims, buildHook, chapterQuality, REVIEW_SYSTEM, reviewPayload, parseReview, validateHook, chartFingerprint, claimSignature } from '../_chapter-engine.js';
 import { json } from '../_lib.js';
 import { kvOf } from '../_store.js';
 import { loadAll, blockedDocs, meta } from '../_ikstore.js';
 import { VERSION, validate, sources, sanitize, systemFor, domainsFor } from '../_movingtoon-reading.js';
 import { loadStyle, styleFor } from '../_stylestore.js';
-async function generate(env, provider, input, SYSTEM) {
+import { analyze, ENGINE_VERSION, WRITER_SYSTEM, validateWritten } from '../_interpretation-engine.js';
+import { loadSettings, loadSourceIndex } from '../_interpretation-store.js';
+export async function generate(env, provider, input, SYSTEM, settings = {}) {
   const started = Date.now(), isOpen = provider === 'openai';
-  const body = isOpen ? { model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: SYSTEM, input, max_output_tokens: 14000 } : { model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 14000, system: SYSTEM, messages: [{ role: 'user', content: input }] };
+  const maxTokens = settings.maxOutputTokens || 14000;
+  const body = isOpen ? { model: settings.openaiModel || env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: SYSTEM, input, max_output_tokens: maxTokens } : { model: settings.anthropicModel || env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: maxTokens, system: SYSTEM, messages: [{ role: 'user', content: input }] };
   const headers = isOpen ? { authorization: 'Bearer ' + env.OPENAI_API_KEY } : { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' };
   const r = await fetch(isOpen ? 'https://api.openai.com/v1/responses' : 'https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(40000), headers: { ...headers, 'content-type': 'application/json' }, body: JSON.stringify(body) });
   if (!r.ok) throw Error('provider');
@@ -19,38 +24,84 @@ export function usageOf(u) {
   return { inputTokens: n(u.input_tokens), outputTokens: n(u.output_tokens), totalTokens: n(u.total_tokens), cachedInputTokens: n(u.input_tokens_details?.cached_tokens) };
 }
 export async function onRequestPost({ request, env }) {
-  let clean;
-  try { const raw = await request.text(); if (raw.length > 160000) return json({ ok: false, error: 'too-large' }, 413); clean = validate(JSON.parse(raw)); } catch { }
+  let clean, original;
+  try { const raw = await request.text(); if (raw.length > 160000) return json({ ok: false, error: 'too-large' }, 413); original = JSON.parse(raw); clean = validate(original); } catch { }
   if (!clean) return json({ ok: false, error: 'bad-payload' }, 400);
-  if (!env.OPENAI_API_KEY && !env.ANTHROPIC_API_KEY) return json({ ok: false, error: 'no-ai' }, 503);
-  let kv, key, src, sty;
+  let kv, key, src, sty, analysis, settings, mode, policy, hook, hookDraft, previous = [], lastRejection = null;
   try {
-    kv = kvOf(env, { cache: true });
+    // Rule/source deactivation must be observed before reusing any AI cache.
+    kv = kvOf(env);
     const [items, blocked, version] = kv ? await Promise.all([loadAll(kv), blockedDocs(kv), meta(kv)]) : [[], new Set(), {}];
+    settings = await loadSettings(kv);
+    mode = env.INTERPRETATION_ENGINE_MODE || settings.mode;
+    policy = chapterPolicy(clean.chapter, settings.chapters);
+    previous = (Array.isArray(original.previous) ? original.previous : []).slice(-80).filter(p => p && typeof p.text === 'string' && p.text.length<=1200).map(p=>({id:String(p.id || '').slice(0,100),chapter:String(p.chapter || '').slice(0,80),text:p.text}));
+    if (!['legacy','shadow','grounded'].includes(mode)) return json({ ok: false, error: 'invalid-engine-mode' }, 503);
+    if (!env.OPENAI_API_KEY && !env.ANTHROPIC_API_KEY) return json({ ok: false, error: 'no-ai', engineMode: mode }, 503);
+    if (mode !== 'legacy' || policy?.hook.enabled) {
+      const sourceIndex = await loadSourceIndex(kv, items, blocked);
+      analysis = analyze(original.sd, items, { ...settings, sourceIndex, blockedDocs: blocked, domains: policy && ['timing','remedy'].includes(policy.key) ? undefined : domainsFor(clean.chapter) });
+      analysis = selectChapterClaims(analysis, policy);
+      hook = await buildHook(analysis, policy, settings);
+      if(hook?.source === 'verified-rule' && policy.hook.style !== CHAPTER_DEFAULTS[policy.key].hook.style){hookDraft=hook;hook=null;}
+      if (mode === 'grounded' && !analysis.claims.length) return json({ ok: false, error: 'insufficient-evidence', engine: ENGINE_VERSION, engineMode: mode, warnings: analysis.warnings }, 422);
+    }
     src = sources(items, clean.sd, blocked, clean.chapter);
+    // Explicitly authorized writer payload: excludes names and raw birth dates.
+    if (mode === 'grounded') src = { chart: analysis.normalized.chart, facts: analysis.normalized.saju, knowledge: analysis.claims.map(c => ({ id: c.knowledge_id, interpretation: c.judgment })), claims: analysis.claims, cross_analysis: analysis.cross_analysis };
     sty = styleFor(await loadStyle(kv), [clean.chapter.id, ...domainsFor(clean.chapter)], { soft: src.knowledge.length < 2 });
-    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ version: VERSION, db: version, style: sty.sig, clean, models: [env.OPENAI_MODEL, env.ANTHROPIC_MODEL] })));
+    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ chapterVersion: CHAPTER_VERSION, previous, hook, hookDraft, version: VERSION, engine: ENGINE_VERSION, mode, settings, claims: analysis?.claims, db: version, style: sty.sig, clean, models: [env.OPENAI_MODEL, env.ANTHROPIC_MODEL] })));
     key = 'ai:movingtoon:' + [...new Uint8Array(hash)].map(x => x.toString(16).padStart(2, '0')).join('');
     if (kv) {
       const hit = await kv.get(key, 'json');
-      if (hit && sanitize(JSON.stringify(hit.result), clean, src)) return json({ ok: true, ...hit, cached: true });
+      if (hit && (!hit.hook || analysis && validateHook(hit.hook,analysis,policy).ok) && sanitize(JSON.stringify(hit.result), clean, src, { deep: mode === 'grounded' }) && (mode !== 'grounded' || validateWritten(hit.result, analysis, clean).ok)) return json({ ok: true, ...hit, cached: true });
       const hour = new Date().toISOString().slice(0, 13), day = hour.slice(0, 10), ip = request.headers.get('cf-connecting-ip') || 'local';
       const hk = 'rl:movingtoon:' + ip + ':' + hour, dk = 'rl:movingtoon:day:' + day;
       const [h, d] = await Promise.all([kv.get(hk), kv.get(dk)]);
-      if ((+h || 0) >= (+env.MOVINGTOON_HOURLY_LIMIT || 100) || (+d || 0) >= (+env.MOVINGTOON_DAILY_LIMIT || 6000)) return json({ ok: false, error: 'rate-limited' }, 429);
+      if ((+h || 0) >= (+env.MOVINGTOON_HOURLY_LIMIT || 100) || (+d || 0) >= (+env.MOVINGTOON_DAILY_LIMIT || 6000)) return json({ ok: false, error: 'rate-limited', engineMode: mode }, 429);
       await Promise.all([kv.put(hk, String((+h || 0) + 1), { expirationTtl: 7200 }), kv.put(dk, String((+d || 0) + 1), { expirationTtl: 172800 })]);
     }
-  } catch { return json({ ok: false, error: 'storage-unavailable' }, 503); }
-  const input = JSON.stringify({ ...src, chapter: clean.chapter, outline: clean.outline });
+  } catch { return json({ ok: false, error: 'storage-unavailable', engineMode: mode }, 503); }
+  const input = JSON.stringify({ ...src, chapter: clean.chapter, outline: clean.outline, chapterPolicy: policy, previous, hookDraft: hookDraft ? {text:hookDraft.text,explanation:hookDraft.explanation,claim_id:hookDraft.claim_id}:null, hook: hook ? { text: hook.text, explanation: hook.explanation, claim_id: hook.claim_id } : null });
+  let writerSystem = mode === 'grounded' ? WRITER_SYSTEM + '\n[표현 설정]\n' + (sty.directive || '') + '\n위 표현 설정은 판단·근거·불확실성을 변경하지 않는다.' : systemFor(sty);
+  if (policy) writerSystem += '\n'+chapterInstruction(policy);
+  if (policy?.hook.enabled && analysis?.claims.length && !hook) writerSystem += '\n동일 JSON에 독립 hook 추가: '+JSON.stringify({text:'해당 주제의 가장 중요한 조건 한 가지. 최대 '+policy.hook.maxChars+'자',explanation:policy.hook.explanationSentences+'문장, 최대 '+policy.hook.explanationMaxChars+'자',claim_id:'검증된 단일 claim_id'})+'\n후킹 문체: '+policy.hook.style+'\n새 명리 판단을 만들지 말고 선택한 판단의 조건과 예외를 보존한다. 한국어만 사용한다.';
+  // UTF-8 bytes are a conservative token upper bound for budget reservation.
+  const estimatedMaxCost = settings.inputPricePerMillion != null && settings.outputPricePerMillion != null ? ((new TextEncoder().encode(input + writerSystem).length + 512) * settings.inputPricePerMillion + settings.maxOutputTokens * settings.outputPricePerMillion) / 1e6 : null;
+  if (settings.maxRequestCost != null && (estimatedMaxCost == null || estimatedMaxCost * (mode === 'grounded' && policy && settings.semanticReview ? 3 : 1) * [env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY].filter(Boolean).length > settings.maxRequestCost)) return json({ ok: false, error: 'cost-limit', estimatedMaxCost, engineMode: mode }, 429);
+  const fixedHook=hook;
   for (const [provider, secret] of [['openai', 'OPENAI_API_KEY'], ['anthropic', 'ANTHROPIC_API_KEY']]) {
     if (!env[secret]) continue;
+    hook=fixedHook;
     try {
-      const generation = await generate(env, provider, input, systemFor(sty));
-      const result = sanitize(generation.text, clean, src); if (!result) continue;
-      const value = { result, provider, generation: { model: generation.model, elapsedMs: generation.elapsedMs, usage: generation.usage }, knowledgeCount: src.knowledge.length, style: sty.meta };
+      const generation = await generate(env, provider, input, writerSystem, settings);
+      const result = sanitize(generation.text, clean, src, { deep: mode === 'grounded' }); if (!result) continue;
+      if (policy?.hook.enabled && analysis?.claims.length && !hook) {
+        let candidate; try { candidate=JSON.parse(generation.text).hook; } catch { }
+        const check=validateHook(candidate,analysis,policy);
+        if (!check.ok) { lastRejection={issues:check.issues.map(code=>({code}))}; continue; }
+        const claim=analysis.claims.find(c=>c.claim_id===candidate.claim_id);
+        hook={...candidate,hanja:policy.hanja,chapterKind:policy.key,fingerprint:await chartFingerprint(analysis),claimSignature:await claimSignature(claim),source:'ai-reviewed',basis:{elements:claim.elements,evidence:claim.evidence,judgment:claim.judgment,exceptions:claim.exceptions,counter_evidence:claim.counter_evidence}};
+      }
+      const validation = mode === 'grounded' ? validateWritten(result, analysis, clean) : null;
+      if (validation && !validation.ok) { lastRejection=validation; continue; }
+      const quality = chapterQuality(result, analysis, policy, previous, hook);
+      if (quality && !quality.ok) { lastRejection=quality; continue; }
+      let semantic = null, reviewUsage = null;
+      if (policy && (mode === 'grounded' && settings.semanticReview || hook?.source === 'ai-reviewed')) {
+        const review = await generate(env, provider, reviewPayload(result,analysis,policy,previous,hook), REVIEW_SYSTEM, { ...settings, maxOutputTokens: 2000 });
+        semantic = parseReview(review.text,policy); reviewUsage = review.usage;
+        if (semantic?.coverage?.some(x=>x.claim_ids.some(id=>!analysis.claims.some(c=>c.claim_id===id))))semantic=null;
+        if (!semantic || !semantic.ok) { lastRejection=semantic || {issues:[{code:'semantic-review-unavailable'}]}; continue; }
+      }
+      if (quality) { quality.semanticReview = semantic; quality.semanticReviewStatus = semantic ? 'passed' : 'not-run'; quality.requiredCoverage=semantic?.coverage || []; quality.warnings.push(...(semantic?.coverage || []).filter(x=>x.status==='missing-evidence').map(x=>'required-evidence-missing:'+x.item)); }
+      if (reviewUsage && generation.usage) { for(const k of ['inputTokens','outputTokens','totalTokens','cachedInputTokens'])generation.usage[k]=generation.usage[k]!=null && reviewUsage[k]!=null ? generation.usage[k]+reviewUsage[k] : null; }
+      const cost = generation.usage && generation.usage.inputTokens != null && generation.usage.outputTokens != null && settings.inputPricePerMillion != null && settings.outputPricePerMillion != null ? (generation.usage.inputTokens * settings.inputPricePerMillion + generation.usage.outputTokens * settings.outputPricePerMillion) / 1e6 : null;
+      const value = { result, provider, chapterPolicy: policy, chapterQuality: quality, hook: hook || null, hookWarning: policy?.hook.enabled && !hook ? 'hook-evidence-or-length-missing' : null, generation: { model: generation.model, elapsedMs: generation.elapsedMs, usage: generation.usage, estimatedCost: cost, costScope: 'accepted-writer-and-review-calls', priceSource: cost == null ? null : 'admin-configured', promptVersion: mode === 'grounded' ? ENGINE_VERSION : VERSION }, knowledgeCount: src.knowledge.length, style: sty.meta,
+        ...(analysis ? { interpretation: { version: analysis.version, mode, claims: analysis.claims, features: analysis.features, cross_analysis: analysis.cross_analysis, warnings: analysis.warnings, quality: analysis.quality, validation } } : {}) };
       if (kv) { try { await kv.put(key, JSON.stringify(value), { expirationTtl: 604800 }); } catch { } }
       return json({ ok: true, ...value, cached: false });
     } catch { }
   }
-  return json({ ok: false, error: 'ai-unavailable' }, 502);
+  return json({ ok: false, error: lastRejection ? 'chapter-validation-failed' : 'ai-unavailable', validation: lastRejection, engineMode: mode }, 502);
 }

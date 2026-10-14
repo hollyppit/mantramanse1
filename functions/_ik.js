@@ -33,10 +33,11 @@ export const COND_FIELDS = {
   daewoonSeason: ['현재 대운 흐름', 3, 'list'], seunSeason: ['올해 세운 흐름', 3, 'list'], monthSeason: ['이달 월운 흐름', 2, 'list'],
   futureSeason3: ['앞으로 3년 흐름(포함)', 2, 'list'], futureSeason5: ['앞으로 5년 흐름(포함)', 2, 'list'],
   el: ['오행 강약', 2, 'map'], group: ['십성군 강약', 3, 'map'], tenGod: ['십성 10종 강약', 3, 'map'],
+  structure: ['구조 관찰 조건', 4, 'list'], rootLevel: ['통근 모델 구간', 3, 'list'], positionTG: ['위치별 십성', 4, 'list'], methodDifference: ['억부·조후 후보 차이', 3, 'list'],
 };
 // 아직 엔진이 주지 않아 지원하지 않는 조건(TODO) — 관리자 화면에 그대로 안내한다.
 export const UNSUPPORTED = [
-  ['지장간', '엔진이 지장간별 십성 비중을 sd 로 내보내지 않음'], ['조후', '조후 판정 값이 sd 에 없음'], ['십성 위치(년·월·일·시주별)', 'sd 는 십성 비중만 제공, 주별 위치 조건은 미지원'],
+  ['지장간 비중', '지장간의 십성 존재는 positionTG 조건으로 지원하지만 지장간별 정량 비중은 미지원'], ['고전 조후표', '현재 조후는 단순화 모델이며 일간·월별 고전 조후표는 미지원'],
   ['형·파·해 세부 구분', 'sd.clashes 는 합과 충류를 두 갈래로만 나눔(유형명은 relation 조건으로 사용 가능)'], ['월운 12개월 전체 조건', '이달 한 달만 지원'],
 ];
 
@@ -93,7 +94,9 @@ export function cleanItem(b, prev) {
     realWorldExamples: { worker: str(ex.worker, 600), business: str(ex.business, 600), freelance: str(ex.freelance, 600), love: str(ex.love, 600) },
     sourceType, sourceReference: str(b.sourceReference, 200), sourceMemo: str(b.sourceMemo, 1000), confidence: conf, reviewed, reviewedAt: reviewed ? (str(b.reviewedAt, 40) || now) : '',
     evidence: cleanEvidence(b.evidence !== undefined ? b.evidence : prev && prev.evidence), theory: strs(b.theory, 10, 20),
-    tags: strs(b.tags, 20, 30), version: (prev && prev.version ? prev.version : 0), createdAt: (prev && prev.createdAt) || str(b.createdAt, 40) || now, updatedAt: now,
+    tags: strs(b.tags, 20, 30),
+    ziweiConditions: (Array.isArray(b.ziweiConditions !== undefined ? b.ziweiConditions : prev && prev.ziweiConditions) ? (b.ziweiConditions !== undefined ? b.ziweiConditions : prev.ziweiConditions) : []).slice(0, 20).filter(c => c && typeof c.palace === 'string' && ['main','good','bad','adj','brightness','sihwa','fly','sanbang'].includes(c.field)).map(c => ({ palace: str(c.palace, 20), field: c.field, values: strs(c.values, 20, 80) })),
+    version: (prev && prev.version ? prev.version : 0), createdAt: (prev && prev.createdAt) || str(b.createdAt, 40) || now, updatedAt: now,
   };
   if (out.status === 'published' && unknownVars(out).length) { out.status = 'review'; out.blockedBy = 'placeholder'; } // 채울 수 없는 {…} 가 문장에 남아 있으면 공개하지 않는다
   return out;
@@ -114,6 +117,9 @@ export function deriveFacts(sd, ext) {
     return [k, p ? { ko: p.ko, stemTG: p.stemTG, branchTG: p.branchTG, unseong: p.unseong, hidden: p.hidden || [] } : null];
   }));
   f.natalRelations = [...(sd.combinations || []), ...(sd.clashes || [])].map(r => ({ type: r.type, name: r.name, members: r.members || [] }));
+  f.positionTG = [];
+  Object.entries(f.natal).forEach(([position,p]) => { if (!p) return; if (p.stemTG) f.positionTG.push(position + '.stem:' + p.stemTG); if (p.branchTG) f.positionTG.push(position + '.branch:' + p.branchTG); (p.hidden || []).forEach(h => { if (h.tg) f.positionTG.push(position + '.hidden:' + h.tg); }); });
+  if (sd.reviewConditions && typeof sd.reviewConditions.methodDifference === 'boolean') f.methodDifference = sd.reviewConditions.methodDifference ? '있음' : '없음';
   f.usefulElements = sd.usefulElements || null;
   f.usefulElementMethods = sd.usefulElementMethods || null;
   f.usefulElementAdvice = sd.usefulElementAdvice || null;
@@ -189,6 +195,8 @@ const CONF_W = { high: 3, mid: 2, low: 1 };
 export function retrieve(items, facts, opts) {
   opts = opts || {}; const used = [], excluded = [];
   for (const it of items) {
+    // Independent ziwei rules must never be interpreted as generic saju rules.
+    if ((it.tags || []).includes('system:ziwei')) continue;
     if (opts.domain && it.domain !== opts.domain) continue;
     if (it.status === 'archived') continue;
     if (!opts.includeDraft && !isProduction(it)) continue;

@@ -1,0 +1,99 @@
+// Synthetic rules test engine plumbing; these fixtures are not traditional authorities.
+const fs = require('fs'), vm = require('vm'), path = require('path'), assert = require('assert/strict');
+const { pathToFileURL } = require('url');
+global.window = globalThis;
+for (const f of ['engine.js','report/v2/saju-data.js']) vm.runInThisContext(fs.readFileSync(f,'utf8'), { filename: f });
+const imp = f => import(pathToFileURL(path.resolve(f)).href);
+(async () => {
+  const E = await imp('functions/_interpretation-engine.js'), K = await imp('functions/_ik.js'), API = await imp('functions/api/movingtoon-reading.js'), LAB = await imp('functions/api/interpretation.js'), S = await imp('functions/api/interpretation-settings.js');
+  const now = Date.UTC(2026,9,14,3), cases = [], fingerprints = new Set();
+  for (let i = 0; i < 40; i++) {
+    const birth = { year: 1954 + i, month: i % 12 + 1, day: i % 25 + 1, hour: i % 9 === 0 ? null : [0,1,11,12,22,23][i%6], minute: i % 2 ? 29 : 31, gender: i%2?'M':'F', calendar:'solar', city:'서울' };
+    const ch = Manse.compute(birth), before = JSON.stringify(ch), sd = ReportV2.SajuData.build(ch,{now});
+    assert.equal(JSON.stringify(ch),before,'adapter must not mutate the calculated chart');
+    assert.equal(sd.calculationProvenance.daeunDirection,ch.daeun.forward);
+    assert.equal(sd.ziwei === null,!ch.hourKnown);
+    if(sd.ziwei) {
+      assert.equal(sd.ziwei.palaces.length,12);
+      for(const p of sd.ziwei.palaces) {
+        const original = ch.ziwei.palaces[p.branchIndex];
+        assert.deepEqual(p.main,original.main); assert.deepEqual(p.fly,original.fly);
+        for(const [star, bright] of Object.entries(p.brightness)) assert.equal(bright,Manse.zwBright(star,p.branchIndex));
+        assert.equal(p.sanbang.length,3);
+      }
+    }
+    const n = E.normalize(sd); assert(!n.chart.birth && !n.chart.name);
+    assert.equal(n.saju.natal.hour == null,!ch.hourKnown);
+    fingerprints.add(JSON.stringify(n.saju.natal)); cases.push(sd);
+  }
+  assert(fingerprints.size >= 30); assert(cases.some(s=>s.reviewConditions.methodDifference));
+  const sd=cases.find(s=>s.ziwei), facts=K.deriveFacts(sd);
+  const rule = K.cleanItem({id:'SELF-9001',domain:'SELF',subDomain:'personality',title:'검사 전용 규칙',status:'published',reviewed:true,sourceType:'book',conditions:{dayMaster:[facts.dayMaster],monthBranch:[facts.monthBranch]},principle:'테스트 자료에서 두 계산 조건을 함께 확인합니다.',interpretation:'월령과 일간이라는 두 조건이 동시에 맞는 경우에만 이 테스트 판단을 적용합니다. 실제 성향을 증명하는 자료로 사용하지 않습니다.',strengths:['조건이 분명한 상황에서는 판단의 적용 범위를 검토합니다.'],risks:['조건이 달라지면 이 판단의 적용 범위를 다시 확인합니다.'],actions:['최근 경험 중 설명과 다른 장면도 기록합니다.'],evidence:[{docId:'dtest',chunkId:'c1',quote:'테스트 규칙 근거'}],theory:['검사 전용']});
+  const sourceIndex=new Map([['dtest',{chunks:[{id:'c1',text:'테스트 규칙 근거. 이는 테스트 전용 자료입니다.'}]}]]);
+  let a=E.analyze(sd,[rule],{sourceIndex}); assert.equal(a.claims.length,1); assert(a.claims[0].elements.length===2);
+  assert.equal(a.quality.predictionAccuracy,null);
+  assert.equal(E.analyze(sd,[rule]).claims.length,0,'missing actual source index fails closed');
+  assert.equal(E.analyze(sd,[rule],{sourceIndex,blockedDocs:new Set(['dtest'])}).claims.length,0);
+  assert.equal(E.analyze(sd,[rule],{sourceIndex,disabledRules:[rule.id]}).claims.length,0);
+  assert.equal(E.analyze(sd,[{...rule,evidence:[{docId:'phantom',chunkId:'c1'}]}],{sourceIndex}).claims.length,0);
+  assert.equal(E.analyze(sd,[{...rule,evidence:[{docId:'dtest',chunkId:'c1',quote:'조작된 인용'}]}],{sourceIndex}).claims.length,0);
+  assert.equal(E.analyze(sd,[{...rule,conditions:{}}],{sourceIndex}).claims.length,0);
+  assert.equal(E.analyze(sd,[{...rule,conditions:{imaginary:['yes']}}],{sourceIndex}).claims.length,0);
+  assert.equal(E.analyze(sd,[{...rule,status:'draft'}],{sourceIndex}).claims.length,0);
+  assert.equal(E.analyze(sd,[{...rule,modifiers:[{when:{dayMaster:[facts.dayMaster]},effect:'exception',text:'적용 제외'}]}],{sourceIndex}).claims.length,0);
+  const palace=sd.ziwei.palaces.find(p=>p.main.length), z={...rule,id:'SELF-9002',tags:['system:ziwei'],conditions:{},ziweiConditions:[{palace:palace.name,field:'main',values:[palace.main[0]]}],interpretation:'명반의 해당 궁에 주성이 배치된 경우에만 이 테스트 독립 판단을 적용합니다. 명리학의 성향을 가져와 결론을 보정하지 않습니다.'};
+  a=E.analyze(sd,[rule,z],{sourceIndex}); assert.equal(a.independent.saju.length,1);assert.equal(a.independent.ziwei.length,1);
+  assert.equal(K.retrieve([z],facts).used.length,0,'legacy saju retrieval excludes ziwei');
+  const changed={...sd,dayMaster:{...sd.dayMaster,stem:sd.dayMaster.stem==='갑'?'을':'갑'}};
+  assert.deepEqual(E.analyze(changed,[z],{sourceIndex}).independent.ziwei,a.independent.ziwei);
+  assert.equal(E.compareClaims([{claim_id:'a',domain:'SELF',topic:'personality',stance:'positive',judgment:'A'}],[{claim_id:'b',domain:'SELF',topic:'personality',stance:'caution',judgment:'B'}])[0].type,'conflicting-perspectives');
+  const opposite={...rule,id:'SELF-9003',stance:'caution'}, positive={...rule,stance:'positive'};
+  const conflict=E.analyze(sd,[positive,opposite],{sourceIndex});assert.equal(conflict.claims.length,2);assert(conflict.claims.every(c=>c.counter_evidence.length===1));
+  const report=E.renderReport(a); assert(report.chapters[0].cards.length>2); assert(report.chapters[0].omitted.includes('verdict'));
+  assert.equal(report.chapters[0].full_text,report.chapters[0].cards.map(c=>c.text).join('\n\n'));
+  assert.throws(()=>E.normalize({...sd,gender:'X'}));
+  assert.throws(()=>E.normalize({...sd,groups:{...sd.groups,재성:NaN}}));
+  assert.throws(()=>E.normalize({...sd,reviewConditions:{hourUnknown:true}}));
+  const F=await imp('functions/_movingtoon-reading.js');
+  const input={sd:{...sd,name:'PRIVATE_NAME'},chapter:{id:'one',title:'성격',paragraphs:[{id:'0',text:'입력 문단의 배치에 사용할 검사 전용 초안입니다. 이 문장 자체를 해석 근거로 쓰지 않습니다.'}]}};
+  const answer={paragraphs:[{id:'0',text:'두 계산 조건이 함께 적용되는 범위에서만 이 설명을 참고합니다. 조건이 다른 상황과 실제 경험은 별도로 확인해야 합니다.',refs:[rule.id],claim_ids:['saju:'+rule.id]}]};
+  assert(E.validateWritten(answer,E.analyze(sd,[rule],{sourceIndex}),F.validate(input)).ok);
+  assert(!E.validateWritten({paragraphs:[{...answer.paragraphs[0],claim_ids:['phantom']}]},a,F.validate(input)).ok);
+  const memory=new Map([['ik:d:SELF',JSON.stringify([rule])],['src:idx',JSON.stringify([{id:'dtest',active:true}])],['src:chunks:dtest',JSON.stringify(sourceIndex.get('dtest').chunks)]]);
+  const kv={get:async(k,t)=>memory.has(k)?t==='json'?JSON.parse(memory.get(k)):memory.get(k):null,put:async(k,v)=>memory.set(k,v)};
+  const env={GLOSSARY_KV:kv,ADMIN_PASSWORD:'test',OPENAI_API_KEY:'mock',INTERPRETATION_ENGINE_MODE:'grounded'};
+  const req=(url,body,auth=true)=>new Request('http://test'+url,{method:'POST',headers:auth?{authorization:'Bearer test'}:{},body:JSON.stringify(body)});
+  const fetchBefore=global.fetch;let calls=0;
+  global.fetch=async(url,o)=>{calls++;const body=JSON.parse(o.body), user=JSON.parse(body.input); assert(!JSON.stringify(body).includes('PRIVATE_NAME'));assert(!user.chart.birth);assert(user.claims[0].claim_id);return new Response(JSON.stringify({output_text:JSON.stringify(answer),usage:{input_tokens:100,output_tokens:50},model:'mock-model'}));};
+  let response=await API.onRequestPost({request:req('/api/movingtoon-reading',input,false),env}),data=await response.json();
+  assert.equal(response.status,200,JSON.stringify(data));assert.equal(data.interpretation.mode,'grounded');assert.equal(data.result.paragraphs[0].claim_ids[0],'saju:'+rule.id);
+  response=await API.onRequestPost({request:req('/api/movingtoon-reading',input,false),env});data=await response.json();assert(data.cached);assert.equal(calls,1);
+  memory.set('src:idx',JSON.stringify([{id:'dtest',active:false}]));response=await API.onRequestPost({request:req('/api/movingtoon-reading',input,false),env});assert.equal(response.status,422);assert.equal(calls,1);
+  memory.set('src:idx',JSON.stringify([{id:'dtest',active:true}]));
+  response=await LAB.onRequestPost({request:req('/api/interpretation',{sd},false),env});assert.equal(response.status,401);
+  response=await LAB.onRequestPost({request:req('/api/interpretation',{sd}),env});data=await response.json();assert(data.ok);assert.equal(calls,1,'lab does not contact AI');
+  global.fetch=async(url,o)=>{
+    calls++;const payload=JSON.parse(JSON.parse(o.body).input);
+    if(payload.result)return new Response(JSON.stringify({output_text:JSON.stringify({ok:true,issues:[],temperamentRatio:0,coverage:payload.policy.required.map(item=>({item,status:'covered',claim_ids:payload.claims.map(c=>c.claim_id)}))}),usage:{input_tokens:100,output_tokens:50}}));
+    return new Response(JSON.stringify({output_text:JSON.stringify({paragraphs:payload.chapter.paragraphs.map(p=>({id:p.id,text:p.text.replace(/[.!?。]$/, '')+' (검사 카드 '+p.id+': 인용된 원리의 적용 범위만 확인합니다).',refs:p.expected_claim_ids.map(id=>id.split(':')[1]),claim_ids:p.expected_claim_ids}))}),usage:{input_tokens:100,output_tokens:50}}));
+  };
+  response=await LAB.onRequestPost({request:req('/api/interpretation',{sd,domain:'SELF',compose:'ai'}),env});data=await response.json();
+  assert(data.ok);assert(data.generation.batches.every(b=>b.ok),JSON.stringify(data.generation));assert.equal(data.report.chapters[0].full_text,data.report.chapters[0].cards.map(c=>c.text).join('\n\n'));
+  const afterPreview=calls;
+  const setting={...E.DEFAULT_SETTINGS,mode:'shadow',maxRequestCost:0,inputPricePerMillion:1,outputPricePerMillion:1};
+  response=await S.onRequest({request:req('/api/interpretation-settings',{settings:setting,expectVersion:0}),env});data=await response.json();assert(data.ok);assert.equal(data.settings.version,1);
+  response=await S.onRequest({request:req('/api/interpretation-settings',{settings:setting,expectVersion:0}),env});assert.equal(response.status,409);
+  response=await API.onRequestPost({request:req('/api/movingtoon-reading',input,false),env});assert.equal(response.status,429,'cost budget blocks before a provider call');assert.equal(calls,afterPreview);
+  memory.delete('ik:engine:settings'); env.INTERPRETATION_ENGINE_MODE='legacy';
+  global.fetch=async(url,o)=>{const user=JSON.parse(JSON.parse(o.body).input);assert(!user.claims);return new Response(JSON.stringify({output_text:JSON.stringify(answer)}));};
+  response=await API.onRequestPost({request:req('/api/movingtoon-reading',input,false),env});data=await response.json();assert.equal(response.status,200);assert(!data.interpretation,'rollback selects the legacy engine');
+  for(const f of ['report/v2/reading-flow.js','report/v2/full-reading.js','report/v2/pdf.js']) vm.runInThisContext(fs.readFileSync(f,'utf8'),{filename:f});
+  const delivered=JSON.parse(JSON.stringify(answer));delivered.paragraphs[0].text='검증된 심층 본문의 시작입니다. '+ '근거 설명을 보존합니다. '.repeat(45)+'심층 본문을 생략하지 않은 마지막 문장입니다.';
+  const chapter={id:'one',title:'성격',readingCore:{},readingSection:1,scenes:[{body:input.chapter.paragraphs[0].text}]},rep={chapters:[chapter],readingFlow:{future:[]}};
+  global.fetch=async()=>new Response(JSON.stringify({ok:true,result:delivered,interpretation:{...E.analyze(sd,[rule],{sourceIndex}),mode:'grounded'}}));
+  await ReportV2.FullReading.prepare(rep,sd,'').first;
+  assert.equal(chapter.scenes[0].body,delivered.paragraphs[0].text);assert.equal(chapter.readingFullText,delivered.paragraphs[0].text);
+  const html=ReportV2.Pdf.pages(rep,sd,{name:'검사'}).join('');assert(html.includes('심층 본문을 생략하지 않은 마지막 문장입니다.'));assert(html.includes(rule.principle));assert(html.includes('테스트 규칙 근거'));
+  global.fetch=fetchBefore;
+  console.log('interpretation-engine: 40 charts, independent rules, actual source verification, conflict preservation, output refs, API/cache/budget/auth/rollback PASS');
+})().catch(e=>{console.error(e);process.exit(1);});

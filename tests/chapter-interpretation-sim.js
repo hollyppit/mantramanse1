@@ -1,0 +1,78 @@
+// Synthetic source fixtures verify routing/guards; they do not validate traditional doctrine.
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict'),path=require('path'),{pathToFileURL}=require('url');
+global.window=globalThis;
+for(const f of ['engine.js','report/v2/saju-data.js','report/v2/reading-flow.js','report/v2/chapter-policy.js','report/v2/full-reading.js'])vm.runInThisContext(fs.readFileSync(f,'utf8'),{filename:f});
+const imp=f=>import(pathToFileURL(path.resolve(f)).href);
+(async()=>{
+ const P=await imp('functions/_chapter-policy.js'),C=await imp('functions/_chapter-engine.js'),E=await imp('functions/_interpretation-engine.js'),K=await imp('functions/_ik.js'),F=await imp('functions/_movingtoon-reading.js'),API=await imp('functions/api/movingtoon-reading.js'),H=await imp('functions/api/chapter-hook.js'),S=await imp('functions/api/interpretation-settings.js');
+ assert.equal(E.DEFAULT_SETTINGS.mode,'grounded');assert.equal(E.DEFAULT_SETTINGS.semanticReview,true);
+ const actual=[],bands=new Set(),wealthBands=new Set(),features=new Set();
+ const sourceIndex=new Map([['fixture',{id:'fixture',chunks:[{id:'one',text:'검사 전용 출처: 계산 조건에만 적용하는 합성 규칙.'}]}]]);
+ for(let i=0;i<32;i++){
+  const birth={year:1954+i,month:i%12+1,day:i%25+1,hour:i%8===0?null:[1,9,12,18,23][i%5],minute:29,gender:i%2?'M':'F',calendar:'solar',city:'서울'},chart=Manse.compute(birth),before=JSON.stringify(chart),sd=ReportV2.SajuData.build(chart,{now:Date.UTC(2026,9,14,3)}),facts=K.deriveFacts(sd);
+  const rule=K.cleanItem({id:'MONEY-'+(1000+i),domain:'MONEY',subDomain:'moneyStructure',status:'published',reviewed:true,sourceType:'internal',conditions:{dayMaster:[facts.dayMaster],monthBranch:[facts.monthBranch],strength:[facts.strength]},principle:'검사 전용 조건에 맞는 재물 자료를 사용합니다.',interpretation:'재성 '+Math.round(sd.groups.재성)+'%와 식상 '+Math.round(sd.groups.식상)+'%의 계산값을 수입 회수와 자금 관리 검토에 연결합니다.',actions:['수입과 지출, 실제 회수일을 따로 기록하고 고정비를 점검합니다.'],strengths:['수입 회수 조건이 분명하면 자금 관리의 유리한 점을 확인합니다.'],risks:['매출만 보고 지출과 회수일을 놓치면 자금 관리 부담이 생길 수 있습니다.'],evidence:[{docId:'fixture',chunkId:'one',quote:'검사 전용 출처'}]});
+  const a=E.analyze(sd,[rule],{sourceIndex}),p=P.chapterPolicy({id:'c08'}),selected=C.selectChapterClaims(a,p),hook=await C.buildHook(selected,p,{});
+  assert.equal(selected.claims.length,1);assert(hook);assert(C.validateHook(hook,selected,p).ok);assert.equal(JSON.stringify(chart),before);
+  for(const [kind,domain,judgment] of [['love','LOVE',sd.dayPillar.ko+'일주 원국의 배우자궁으로 연애 관계의 조율 조건을 확인합니다.'],['career','CAREER','관성 '+Math.round(sd.groups.관성)+'%와 인성 '+Math.round(sd.groups.인성)+'%의 계산값으로 조직 업무와 직업 역량의 조건을 검토합니다.']]){
+   const other=K.cleanItem({...rule,id:domain+'-'+(1000+i),domain,interpretation:judgment}),otherAnalysis=E.analyze(sd,[other],{sourceIndex}),otherPolicy=P.chapterPolicy({chapterKind:kind}),otherHook=await C.buildHook(otherAnalysis,otherPolicy,{});assert(otherHook,kind);assert(C.validateHook(otherHook,otherAnalysis,otherPolicy).ok);assert.equal(otherHook.chapterKind,kind);assert(!C.validateHook({...otherHook,text:'반드시 부자가 되고 결혼합니다.'},otherAnalysis,otherPolicy).ok);
+  }
+  const opposing={...selected,claims:[{...selected.claims[0],counter_evidence:['saju:opposite']}]} ,opposingHook=await C.buildHook(opposing,p,{});assert(opposingHook.explanation.includes('다른 방향'));assert(C.validateHook(opposingHook,opposing,p).ok);
+  const later=E.analyze({...sd,calculationProvenance:{...sd.calculationProvenance,asOf:'2026-10-14T03:00:05.000Z'}},[rule],{sourceIndex});assert.equal(await C.chartFingerprint(later),await C.chartFingerprint(a),'logging timestamp cannot invalidate edits to the same chart');
+  assert.notEqual(await C.chartFingerprint(E.analyze({...sd,nowYear:sd.nowYear+1},[rule],{sourceIndex})),await C.chartFingerprint(a),'changed calculation context must invalidate edits');
+  assert.equal(hook.basis.elements.length,3);assert.equal(hook.basis.evidence[0].docId,'fixture');
+  const foreign={...a.claims[0],claim_id:'saju:SELF-9999',domain:'SELF',judgment:'책임감이 강하고 추진력이 뛰어납니다.'};assert.equal(C.selectChapterClaims({...a,claims:[...a.claims,foreign]},p).claims.length,1);
+  assert(!C.validateHook({...hook,claim_id:foreign.claim_id},{...a,claims:[foreign]},p).ok);
+  assert.equal((await C.buildHook({...a,claims:[]},p,{})),null);
+  assert.equal(C.selectChapterClaims(a,P.chapterPolicy({id:'c15'})).claims.length,0,'natal rules never become timing rules');
+  const money=ReportV2.ReadingFlow.card(sd,5),love=ReportV2.ReadingFlow.card(sd,6),career=ReportV2.ReadingFlow.card(sd,4),timing=ReportV2.ReadingFlow.card(sd,10),remedy=ReportV2.ReadingFlow.card(sd,14);
+  for(const x of [money,love,career,timing,remedy])assert(!Object.values(x).join(' ').includes('스스로 기준을 세우는 힘'));
+  assert(money.why.includes('재성'));assert(love.why.includes('일지'));assert(career.why.includes('관성'));assert(timing.evidence.includes('월운'));assert(remedy.reality.includes('전통 상징'));
+  bands.add(sd.strength.band);wealthBands.add(K.levelOf(sd.groups.재성));a.features.forEach(f=>features.add(f.feature_id));actual.push({sd,rule,a,hook});
+ }
+ assert(bands.size>=2);assert(wealthBands.size>=2);assert(features.size>=3);
+ const merged=ReportV2.ReadingFlow.build({chapters:[{id:'c08',base:'c08',aiEnabled:true,scenes:[]},{id:'deep_wealth',base:'deep_wealth',deep:true,aiEnabled:false,scenes:[]}]},actual[0].sd);assert.equal(merged.chapters.find(c=>c.readingSection===6&&!c.readingSupplementary).aiEnabled,true,'protected supplementary scenes must not disable primary generation');
+ const disabled=ReportV2.ReadingFlow.build({chapters:[{id:'c08',base:'c08',aiEnabled:false,scenes:[]}]},actual[0].sd);assert.equal(disabled.chapters.find(c=>c.readingSection===6&&!c.readingSupplementary).aiEnabled,false,'explicit administrator primary switch is preserved');
+ const p=P.chapterPolicy({id:'c08'}),good={paragraphs:[{id:'0',text:'수입은 고정비와 변동비를 구분해서 확인하고 자금 회수 기간을 기록합니다. 매출 증가가 이익 증가로 이어지는 조건과 지출 부담을 함께 점검합니다.'}]};
+ assert(P.inspectChapter(good,p,[],null).ok);
+ const bad={paragraphs:[{id:'0',text:'당신은 책임감이 강하고 추진력이 뛰어난 성격입니다. 당신은 신중하고 꼼꼼하게 상황을 살피는 기질을 가지고 있습니다.'}]};assert(!P.inspectChapter(bad,p,[],null).ok);
+ assert(P.duplicate('당신은 책임감이 강한 성격입니다.','본인은 맡은 일을 끝까지 해내는 성향입니다.'));
+ const dup=P.inspectChapter(bad,p,[{id:'earlier',text:'본인은 맡은 일을 끝까지 해내는 성향입니다.'}],null);assert(dup.issues.some(x=>x.code==='semantic-trait-duplicate'));
+ assert(P.inspectChapter({paragraphs:[{id:'0',text:actual[0].hook.text}]},p,[],actual[0].hook).issues.some(x=>x.code==='hook-body-duplicate'));
+ assert.equal(F.domainsFor({id:'c08'})[0],'MONEY');assert(!F.domainsFor({id:'c08'}).includes('ACTION'));assert.deepEqual(F.domainsFor({id:'c06'}),['CAREER']);
+ assert(P.chapterInstruction(p).includes('5%'));assert(!C.parseReview('{"ok":true,"issues":[{"code":"bad","reason":"bad"}]}'));
+ const x=actual.find(x=>x.sd.ziwei),mem=new Map([['ik:d:MONEY',JSON.stringify([x.rule])],['src:idx',JSON.stringify([{id:'fixture',active:true}])],['src:chunks:fixture',JSON.stringify(sourceIndex.get('fixture').chunks)]]);
+ const kv={get:async(k,t)=>mem.has(k)?t==='json'?JSON.parse(mem.get(k)):mem.get(k):null,put:async(k,v)=>mem.set(k,v)},env={ADMIN_PASSWORD:'test',GLOSSARY_KV:kv,OPENAI_API_KEY:'mock',INTERPRETATION_ENGINE_MODE:'grounded'};
+ const req=(url,b,auth=true)=>new Request('http://test'+url,{method:'POST',headers:auth?{authorization:'Bearer test'}:{},body:JSON.stringify(b)});
+ let response=await H.onRequestPost({env,request:req('/api/chapter-hook',{action:'preview',chapterKind:'wealth',sd:x.sd},false)});assert.equal(response.status,401);
+ response=await H.onRequestPost({env,request:req('/api/chapter-hook',{action:'preview',chapterKind:'wealth',sd:x.sd})});let preview=await response.json();assert(preview.ok && preview.hook);
+ const save={action:'save',chapterKind:'wealth',sd:x.sd,expectVersion:preview.settingsVersion,...preview.hook};
+ response=await H.onRequestPost({env,request:req('/api/chapter-hook',save)});let saved=await response.json();assert.equal(response.status,200,JSON.stringify(saved));assert.equal(saved.settingsVersion,1);assert(mem.has('ik:engine:history'));
+ response=await H.onRequestPost({env,request:req('/api/chapter-hook',save)});assert.equal(response.status,409);
+ const originalFetch=global.fetch;let calls=0,reject=false;
+ const rejectedRatio=C.parseReview(JSON.stringify({ok:true,issues:[],temperamentRatio:0.2,coverage:p.required.map(item=>({item,status:'covered',claim_ids:['saju:test']}))}),p);assert.equal(rejectedRatio.ok,false);assert(rejectedRatio.issues.some(i=>i.code==='temperament-ratio'));
+ assert.equal(C.parseReview(JSON.stringify({ok:true,issues:[],temperamentRatio:0,coverage:[]}),p),null,'required item coverage is mandatory');
+ global.fetch=async(url,o)=>{
+  calls++;const payload=JSON.parse(JSON.parse(o.body).input);
+  assert(!JSON.stringify(payload).includes('SECRET_NAME'));
+  if(payload.result)return new Response(JSON.stringify({output_text:JSON.stringify({ok:!reject,temperamentRatio:0,coverage:payload.policy.required.map(item=>({item,status:'covered',claim_ids:payload.claims.map(c=>c.claim_id)})),issues:reject?[{code:'unsupported-claim',id:'0',reason:'검사 전용 근거 이탈 응답'}]:[]}),usage:{input_tokens:20,output_tokens:10,total_tokens:30}}));
+  if(payload.claim && !payload.chapter)return new Response(JSON.stringify({output_text:JSON.stringify({text:preview.hook.text,explanation:preview.hook.explanation,claim_id:preview.hook.claim_id}),usage:{input_tokens:10,output_tokens:10,total_tokens:20}}));
+  return new Response(JSON.stringify({output_text:JSON.stringify({hook:payload.hookDraft || null,paragraphs:payload.chapter.paragraphs.map(p=>({...good.paragraphs[0],id:p.id,refs:[x.rule.id],claim_ids:['saju:'+x.rule.id]}))}),usage:{input_tokens:100,output_tokens:50,total_tokens:150}}));
+ };
+ response=await H.onRequestPost({env,request:req('/api/chapter-hook',{...save,action:'regenerate',expectVersion:1})});const regenerated=await response.json();assert.equal(response.status,200,JSON.stringify(regenerated));assert.equal(regenerated.hook.text,preview.hook.text);assert.equal(JSON.parse(mem.get('ik:engine:settings')).version,1,'regenerate is preview only and cannot overwrite body/settings');calls=0;
+ const input={sd:{...x.sd,name:'SECRET_NAME'},chapter:{id:'c08',title:'재물운',paragraphs:[{id:'0',text:'재물운의 수입과 지출, 회수일을 구분하여 설명할 초안 문단입니다.'}]},previous:[]};
+ response=await API.onRequestPost({env,request:req('/api/movingtoon-reading',input,false)});let result=await response.json();assert.equal(response.status,200,JSON.stringify(result));assert(result.hook && result.chapterQuality.semanticReview.ok);assert.equal(calls,2);assert.equal(result.generation.usage.totalTokens,180);
+ response=await API.onRequestPost({env,request:req('/api/movingtoon-reading',input,false)});result=await response.json();assert(result.cached);assert.equal(calls,2);
+ reject=true;
+ response=await API.onRequestPost({env,request:req('/api/movingtoon-reading',{...input,previous:[{id:'other',text:'다른 재물 챕터의 회수 조건을 점검합니다.'}]},false)});result=await response.json();assert.equal(response.status,502);assert.equal(result.error,'chapter-validation-failed');assert.equal(result.validation.issues[0].code,'unsupported-claim');
+ response=await H.onRequestPost({env,request:req('/api/chapter-hook',{...save,expectVersion:1,text:'돈 관리에서는 모든 투자에 성공할 수 있습니다.'})});assert.equal(response.status,422);assert.equal(JSON.parse(mem.get('ik:engine:settings')).version,1,'rejected edit cannot be persisted');
+ reject=false;
+ response=await H.onRequestPost({env,request:req('/api/chapter-hook',{...save,action:'remove',expectVersion:1})});assert.equal(response.status,200);assert.equal(JSON.parse(mem.get('ik:engine:settings')).hookOverrides.length,0);
+ const current=JSON.parse(mem.get('ik:engine:settings')),invalid={...current,chapters:{...current.chapters,wealth:{...current.chapters.wealth,temperamentRatio:0.5}}};
+ response=await S.onRequest({env,request:req('/api/interpretation-settings',{settings:invalid,expectVersion:2})});assert.equal(response.status,400,'wealth ratio cannot exceed 5%');
+ const changedRule={...x.rule,version:(x.rule.version || 0)+1};mem.set('ik:d:MONEY',JSON.stringify([changedRule]));response=await H.onRequestPost({env,request:req('/api/chapter-hook',{...save,expectVersion:2})});assert.equal(response.status,409);
+ const customStyle=JSON.parse(mem.get('ik:engine:settings'));customStyle.chapters.wealth.hook.style='조건을 먼저 보여 주는 간결한 선언';response=await S.onRequest({env,request:req('/api/interpretation-settings',{settings:customStyle,expectVersion:2})});assert.equal(response.status,200);
+ response=await API.onRequestPost({env,request:req('/api/movingtoon-reading',input,false)});const styled=await response.json();assert.equal(response.status,200,JSON.stringify(styled));assert.equal(styled.hook.source,'ai-reviewed','custom hook style must trigger evidence-bound rewriting');assert(styled.chapterQuality.semanticReview.ok);
+ mem.set('src:idx',JSON.stringify([{id:'fixture',active:false}]));response=await API.onRequestPost({env,request:req('/api/movingtoon-reading',input,false)});assert.equal(response.status,422,'source deactivation invalidates cached body and hook');
+ assert.equal(mem.get('src:chunks:fixture'),JSON.stringify(sourceIndex.get('fixture').chunks));global.fetch=originalFetch;
+ console.log('chapter-interpretation: 32 calculated charts; topic routing; 5% ratio; synonym duplicates; grounded hook; source/cache/version/auth; independent AI review; admin rejection/preservation PASS');
+})().catch(e=>{console.error(e);process.exitCode=1;});

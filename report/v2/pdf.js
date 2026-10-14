@@ -32,13 +32,26 @@
   }
   function bullets(c) { var s = (c.scenes || []).filter(function (x) { return x.sceneType === 'recommendation' && x.bullets; })[0]; return s ? s.bullets : []; }
 
+  function evidenceBlocks(c) {
+    var a = c.interpretationAnalysis, blocks = []; if (!a || a.mode !== 'grounded') return blocks;
+    (a.claims || []).forEach(function(claim) {
+      var text = (claim.system === 'ziwei' ? '자미두수 독립 판단' : '명리학 독립 판단') + ' · ' + claim.judgment + '\n' +
+        claim.traditional_rules.map(function(r){return r.principle;}).join(' · ') + '\n' +
+        claim.evidence.map(function(e){return (e.title || e.docId) + (e.pageStart ? ' '+e.pageStart+'쪽' : '') + (e.heading ? ' '+e.heading : '') + (e.quote ? '\n인용: '+e.quote : '');}).join(' · ') + '\n' + claim.uncertainty.note;
+      (text.match(/[\s\S]{1,420}/g) || []).forEach(function(piece,i){blocks.push('<div class="cap">판단 근거와 예외'+(i?' (계속)':'')+'</div><p>'+nl(piece)+'</p>');});
+    });
+    return blocks;
+  }
+  function evidenceHtml(c) { return evidenceBlocks(c).join(''); }
+  function hookHtml(c, who) {var h=c.chapterHook;return h?'<div class="cap">'+esc(h.hanja)+'</div><div class="hl">'+esc(c.hookName || who || '귀인')+'님, '+nl(h.text)+'</div><p>'+nl(h.explanation)+'</p>':'';}
   function chapterPage(c, rep, n, total, who, color, sd) {
     var act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}, S = R.SajuData.SEASONS, h = '';
     h += '<div class="band"></div><div class="in"><div class="act">' + esc(act.roman || '') + ' · ' + esc(act.title || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2>' + esc(c.title) + '</h2><div class="sub">' + esc(c.subtitle || '') + '</div>' + heroImg(c) +
-      '<div class="hl">' + nl(c.headline) + '</div><span class="fact">FACT · ' + esc(c.fact) + '</span><p>' + nl(c.interpretation) + '</p>';
+      (c.chapterHook ? hookHtml(c,who) : '<div class="hl">' + nl(c.headline) + '</div><span class="fact">FACT · ' + esc(c.fact) + '</span><p>' + nl(c.interpretation) + '</p>');
     var ck = R.Scenes.chartKind ? R.Scenes.chartKind(c) : null; if (ck && sd) h += '<div style="margin:10px 0">' + R.Charts.html(ck, sd, { theme: 'light', chapter: c.base || c.id }) + '</div>';
     if (c.verdict) { var vv = c.verdict; h += '<div class="cap">' + esc(vv.blocked.label) + '</div><p>' + nl(vv.blocked.text) + '</p>' + (vv.evidence ? '<div class="cap">EVIDENCE</div><p>' + nl(vv.evidence.text) + '</p>' : '') + '<div class="cap">다음 장면을 위한 두 걸음</div><p style="color:#6B6A63;font-size:12px">' + esc(vv.advice.lead) + '</p>' + list(vv.advice.items); }
-    if (c.meaning) h += '<div class="cap">풀이</div><p>' + nl(c.meaning) + '</p>';
+    if (c.readingFullText && c.interpretationAnalysis && c.interpretationAnalysis.mode === 'grounded') h += '<div class="cap">심층 풀이 전문</div><p>' + nl(c.readingFullText) + '</p>' + evidenceHtml(c);
+    else if (c.meaning) h += '<div class="cap">풀이</div><p>' + nl(c.meaning) + '</p>';
     if (c.topics && c.topics.length) h += '<div class="cap">더 알아보기</div>' + c.topics.map(function (k) { return '<p style="margin:6px 0"><b>' + esc((k.hanja ? k.hanja + ' · ' : '') + k.title) + '</b> — ' + esc(k.headline) + '<br><span style="color:#6B6A63;font-size:12px">' + esc(k.summary) + '</span></p>'; }).join('');
     if (c.terms && c.terms.length) h += '<div class="cap">쉬운 용어 풀이</div>' + c.terms.map(function (k) { return '<p style="margin:6px 0"><b>' + esc(k.term) + (k.hanja ? ' (' + esc(k.hanja) + ')' : '') + '</b><br>' + (k.here ? esc(k.here) + '<br>' : '') + '<span style="color:#6B6A63;font-size:12px">' + esc(k.plain) + '</span></p>'; }).join('');
     if (c.kind === 'daewoon' && c.items) h += '<div class="cap">10-YEAR SEASONS</div><table><tr><th>나이</th><th>기간</th><th>대운</th><th>계절</th><th>핵심</th></tr>' + c.items.map(function (d) { return '<tr' + (d.isCurrent ? ' style="background:#F3EEE1"' : '') + '><td>' + d.startAge + '세</td><td>' + d.startYear + '–' + d.endYear + '</td><td>' + esc(d.ganzhi) + '</td><td>' + (SEA_ICON[d.season] || '') + ' ' + esc(d.seasonName || '') + (d.isCurrent ? ' (지금)' : '') + '</td><td style="text-align:left">' + esc((d.module && d.module.headline) || '') + '</td></tr>'; }).join('') + '</table>';
@@ -90,13 +103,16 @@
     content.push('<div class="act">MANTRA FORTUNE</div><h2>'+esc(who)+'의 사주 사용설명서</h2><p>'+esc(sd.dayPillar.ko)+'일주 · '+esc(sd.strength.zone)+'</p><p>계산 모델의 출력, 조건부 해석, 실천 제안을 구분해 읽습니다.</p>');
     content.push('<h2>원국 계산표</h2><table><tr><th>구분</th><th>간지</th><th>십성</th></tr>'+['year','month','day','hour'].map(function(k){var p=sd.pillars[k];return '<tr><td>'+esc({year:'연주',month:'월주',day:'일주',hour:'시주'}[k])+'</td><td>'+esc(p?p.ko:'시간 미상')+'</td><td>'+esc(p ? (p.stemTG || '')+' / '+(p.branchTG || '') : '판단 보류')+'</td></tr>';}).join('')+'</table><div class="cap">오행 분포</div><p>'+Object.keys(sd.fiveElements).map(function(k){return esc(k+' '+sd.fiveElements[k]+'%');}).join(' · ')+'</p>');
     (rep.chapters || []).filter(function(c){return c.readingCore;}).forEach(function(c){
-      var blocks=[];
-      R.ReadingFlow.FIELDS.forEach(function(f){
-        var text=String(c.readingCore[f[0]]||''), pieces=text.match(/[\s\S]{1,420}/g)||[''];
-        pieces.forEach(function(t,i){blocks.push('<div class="cap">'+esc(f[1])+(i?' (계속)':'')+'</div><p>'+nl(t)+'</p>');});
-      });
+      var blocks=[]; if(c.chapterHook)blocks.push(hookHtml(c,who));
+      if(c.readingParagraphs && c.interpretationAnalysis && c.interpretationAnalysis.mode==='grounded') {
+        c.readingParagraphs.forEach(function(p){var field=R.ReadingFlow.FIELDS.find(function(f){return f[0]===p.role;}),pieces=String(p.text).match(/[\s\S]{1,420}/g)||[];pieces.forEach(function(t,i){blocks.push('<div class="cap">'+esc(field?field[1]:'심층 풀이')+(i?' (계속)':'')+'</div><p>'+nl(t)+'</p>');});});
+      } else R.ReadingFlow.FIELDS.forEach(function(f){
+          var text=String(c.readingCore[f[0]]||''), pieces=text.match(/[\s\S]{1,420}/g)||[''];
+          pieces.forEach(function(t,i){blocks.push('<div class="cap">'+esc(f[1])+(i?' (계속)':'')+'</div><p>'+nl(t)+'</p>');});
+        });
       var group=[], height=0, pageNo=0;
       function flush(){if(!group.length)return;content.push('<div class="act">'+c.readingSection+' / 15 · '+(++pageNo)+'</div><h2>'+esc(c.title)+'</h2>'+group.join(''));group=[];height=0;}
+      blocks=blocks.concat(evidenceBlocks(c));
       blocks.forEach(function(block){var len=block.replace(/<[^>]*>/g,'').length, estimate=Math.ceil(len/32)*32+60;if(group.length && (group.length>=4 || height+estimate>780))flush();group.push(block);height+=estimate;});flush();
     });
     // Engine tables remain distinct from the narrative. Never derive new years or scores here.

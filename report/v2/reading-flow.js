@@ -77,7 +77,60 @@
     if(sd.reviewConditions && sd.reviewConditions.extremeStrength) c.evidence+=' 강약이 극단에 가까워 기본 보완 방향의 적용에는 추가 검토가 필요합니다. 다른 격국을 임의로 확정하지 않습니다.';
     if((i===13 || i===14) && sd.interpretationBasis) c.evidence+=' 조후 후보는 고전의 일간·월별 표를 그대로 계산한 결과가 아닌 한난조습 지표의 보완 방향입니다.';
     if(i===13 || i===14) c.evidence+=' 학파별 판단: '+(methodText || '용신 후보 확인 불가')+'. 후보가 다르면 조후와 억부의 목적을 구분하며, 색·물건을 확정적인 처방으로 제시하지 않습니다.';
-    return c;
+    return subjectCard(sd,i) || c;
+  }
+  // Subject-specific factual drafts. Verified DB claims replace these through the writer.
+  // These drafts never infer an event or a traditional structure from a single percentage.
+  function subjectCard(sd,i) {
+    var g=sd.groups || {}, pct=function(k){return Math.round(g[k] || 0)+'%';}, p=sd.pillars || {}, positions=function(groups){return ['year','month','day','hour'].filter(function(k){return p[k];}).map(function(k){var v=p[k];return ({year:'연주',month:'월주',day:'일주',hour:'시주'}[k])+': '+(v.stemTG || '천간 십성 미확인')+' / '+(v.branchTG || '지지 십성 미확인');}).join(' · ');};
+    var note=!(p.hour)?' 시간 미상이므로 시주·자녀궁·말년 관련 판단은 보류합니다.':'';
+    var base={title:'',why:'',reality:'',strength:'',risk:'',reinforce:'',practice:TASKS[i],evidence:''};
+    if(i===4) Object.assign(base,{
+      title:'직업 선택은 맡을 과제와 지원 조건부터 비교합니다.',
+      why:'직업 관련 계산값은 관성 '+pct('관성')+', 인성 '+pct('인성')+', 식상 '+pct('식상')+', 재성 '+pct('재성')+'입니다. 위치별 십성은 '+positions()+'. 비중만으로 직종이나 조직 적합성을 확정하지 않습니다.',
+      reality:'조직 안에서 맡는 업무와 독립적으로 납품하는 업무를 나누어 비교합니다. 전문·기술·창작·영업 직군은 실제 과제와 확보한 역량을 함께 확인해야 합니다.',
+      strength:'업무에서 활용할 강점은 검수된 직업 판단의 적용 조건이 있어야 설명할 수 있습니다. 현재 계산값만으로 추진력이나 책임감을 대신 평가하지 않습니다.',
+      risk:'사업에서는 매출과 이익, 역할과 권한을 혼동하면 운영 부담을 놓칩니다. 이직·확장에 유리한 시기라는 판단은 해당 대운·세운을 조건으로 가진 자료가 필요합니다.',
+      reinforce:'직무별 작은 과제를 수행하고 완성도·소요 시간·고객 반응을 비교합니다. 사업 수익 모델은 가격·원가·반복 구매·납품 가능량을 숫자로 기록합니다.',
+      evidence:'관성·인성·식상·재성의 비중과 위치는 계산 자료입니다. 조직 적합성·직군·사업 성취는 해당 조건에 맞는 검수된 직업 규칙이 확보된 뒤 조건부로 해석합니다.'+note});
+    else if(i===5) Object.assign(base,{
+      title:'돈을 버는 능력과 돈이 남는 구조를 나누어 봅니다.',
+      why:'재물 관련 계산값은 재성 '+pct('재성')+', 식상 '+pct('식상')+', 비겁 '+pct('비겁')+'입니다. 위치별 십성은 '+positions()+'. 재성 비중이 재산 규모나 수익률을 뜻하지는 않습니다.',
+      reality:'근로소득은 고정 수입과 생활비, 사업소득은 매출과 회수 기간, 투자소득은 원금과 감당할 손실을 나누어 확인합니다. 특정 소득원이 유리하다는 판단은 검수된 재물 근거가 필요합니다.',
+      strength:'수입을 늘릴 수 있는 조건과 재물을 축적할 조건은 별도 판단입니다. 재성·식상·비겁의 관계에 맞는 자료가 부족하면 어느 수익 방식이 적합한지 단정하지 않습니다.',
+      risk:'지출·고정비·미수금·과도한 투자는 서로 다른 손실 경로입니다. 재성 비중을 가난·파산의 예고로 바꾸지 않습니다.',
+      reinforce:'월 수입에서 고정비와 변동비를 분리하고 실제로 남는 금액을 확인합니다. 수익화 전에는 판매 단가·원가·회수 기간과 최대 손실을 먼저 적습니다.',
+      evidence:'재성의 강약·위치와 식상·비겁 분포를 근거로 확인합니다. 식상생재나 재물 손실 구조는 관계 조건이 충족된 규칙에서만 설명하고, 대운·세운의 수익을 보장하지 않습니다.'+note});
+    else if(i===6) Object.assign(base,{
+      title:'연애의 갈등과 결혼생활의 조율 조건을 구분합니다.',
+      why:'배우자궁으로 살필 일지는 '+(p.day ? p.day.ko : '확인 불가')+'입니다. 일지의 십성은 '+(p.day && p.day.branchTG || '확인 불가')+'이며 원국의 합 '+(sd.combinations || []).length+'개, 충·형 등 '+(sd.clashes || []).length+'개가 전달되어 있습니다. 개수만으로 혼인 결과를 결정하지 않습니다.',
+      reality:'연애에서는 연락과 애정 표현을, 결혼생활에서는 생활비·집안일·가족 경계를 조율하는 상황을 나누어 봅니다. 실제 상대와의 경험 없이 어떤 배우자를 만난다고 확정하지 않습니다.',
+      strength:'잘 맞는 관계는 서로의 기대와 부담을 조율하는 구체적인 조건으로 설명합니다. 배우자성과 배우자궁에 맞는 검수 자료가 부족하면 관계 적합성 판단을 보류합니다.',
+      risk:'갈등이 생기는 생활 장면과 관계 회복 방법을 함께 확인합니다. 원국의 충을 이혼으로, 합을 행복한 결혼으로 곧바로 바꾸어 해석하지 않습니다.',
+      reinforce:'원하는 연락 빈도와 혼자 쉴 시간, 갈등 때 대화할 시간을 상대와 합의합니다. 결혼을 논의한다면 생활비 분담·거주·가족 경계를 항목별로 적습니다.',
+      evidence:'배우자궁·십성·원국 관계는 계산 자료이며 배우자성은 기존 해석 기준과 자료를 함께 확인합니다. 혼인 시기는 실제 운 조건을 가진 검수 규칙이 있을 때만 조건부로 설명합니다.'+note});
+    else if(i>=9 && i<=12) {
+      var scope=['전체 인생 흐름','현재 대운','향후 세운','올해와 월운'][i-9];
+      Object.assign(base,{title:scope+'은 변화의 조건과 준비할 일을 나누어 읽습니다.',
+        why:scope+'의 계산 자료를 원국과 대조합니다. '+(i===10 && sd.currentDaewoon?'현재 대운은 '+sd.currentDaewoon.ganzhi+'입니다. ':i===12 && sd.sewoon?'올해 세운은 '+sd.sewoon.year+'년 '+sd.sewoon.ganzhi+'입니다. ':'시기별 간지는 아래 계산표에서 확인합니다. ')+'같은 운도 원국에 따라 작용이 달라지므로 검수된 시간 조건이 필요합니다.',
+        reality:scope+'에서 재물은 수입·회수·지출, 직업은 역할·이직·확장, 관계는 만남·갈등·조율로 구분합니다. 변화를 성격 재소개로 대신하지 않습니다.',
+        strength:scope+'의 기회는 어떤 원국 조건과 지원 환경이 만날 때 적용되는지 확인합니다. 계산 모델의 흐름 라벨만으로 부·승진·혼인을 예고하지 않습니다.',
+        risk:scope+'의 위험은 해당 시기의 부담 조건과 감당할 자원을 함께 비교합니다. 근거 없는 해·월의 사건을 만들어 경고하지 않습니다.',
+        reinforce:scope+'에 검토할 돈·업무·관계의 목표를 따로 적고 유지할 일과 미룰 일을 나눕니다. 실제 자원과 일정이 바뀌면 계획도 다시 점검합니다.',
+        evidence:scope+' 판단은 대운·세운·월운이 실제 적용 조건으로 연결된 규칙만 사용합니다. 원국과 운을 구분하고 유리·불리한 방향의 근거가 함께 있으면 양쪽을 보존합니다.'+note});
+    } else if(i===3 || i===13 || i===14) {
+      var focus=i===3?'약점 보완 계획':i===13?'환경과 활동':'개운 실천 계획';
+      Object.assign(base,{title:focus+'은 생활에서 실행하고 점검할 수 있어야 합니다.',
+        why:focus+'에 쓸 계산 참고값은 학파별 용신 후보와 기존 안내입니다. 앞선 재물·직업·관계 분석에서 확인된 부담을 우선하고 새로운 기질 판단을 만들지 않습니다.',
+        reality:focus+'에서는 운동·학습·직업 역량·수면·공간을 현실 행동으로 다룹니다. 색·방향·물건 등의 전통 상징은 행동 효과가 검증된 처방과 구분합니다.',
+        strength:focus+'의 우선순위는 앞서 확인한 강점이 실제로 쓰이는 상황을 늘리는 것입니다. 설명과 실제 생활이 다르면 경험과 환경을 먼저 다시 확인합니다.',
+        risk:focus+'을 바꿔도 결과가 보장되지는 않습니다. 상징적인 물건 구입이나 색 변경을 돈·관계·직업 문제의 해결로 단정하지 않습니다.',
+        reinforce:focus+'에서 행동 하나를 고르고 시작일·점검일·관찰할 결과·중단 기준을 적습니다. 학습은 산출물, 운동은 유지 가능한 횟수, 업무는 완료 기준으로 점검합니다.',
+        evidence:focus+'의 현실 전략은 앞선 검증된 분석을 종합한 조언이며 새로운 미래 예측이 아닙니다. 억부·조후·통관 후보가 다르면 목적과 예외를 구분하고 전통 상징은 상징으로 표시합니다.'+note});
+    } else return null;
+    if(sd.reviewConditions && sd.reviewConditions.extremeStrength)base.evidence+=' 극단적인 강약 모델은 추가 검토가 필요합니다.';
+    if(sd.reviewConditions && sd.reviewConditions.methodDifference)base.evidence+=' 억부와 조후 후보가 다르므로 각각의 목적과 적용 조건을 확인합니다.';
+    return base;
   }
   function scenes(c, id) { return FIELDS.map(function(f,n){ return { sceneId:id+'_guide_'+n, sceneType:'life', bg:'black', layout:'DATA', readingRole:f[0], readingLayer:f[2], html:'<section class="scene rv rd-prose" data-sc="'+esc(id+'_guide_'+n)+'"><div class="cap">'+esc(f[1])+' · '+({fact:'계산 모델의 출력',interpretation:'조건부 풀이',advice:'현실 실천 제안',model:'근거와 예외'}[f[2]])+'</div><p class="lead" data-reading-role="'+f[0]+'">'+esc(c[f[0]])+'</p></section>' }; }); }
   function build(rep, sd, H) {
@@ -98,13 +151,13 @@
       });
       cards.push({section:i+1,templateId:templateId,title:TITLES[i],core:core,sourceIds:list.map(function(c){return c.id;})});
       if(!first) first={id:id,base:i===3?'reading_transform':id,kind:'life',scenes:[],modules:[]};
-      var primary=Object.assign({},first,{title:TITLES[i],originalTitle:first.title || '',no:out.length+1,act:i+1,readingSection:i+1,aiEnabled:list.every(function(c){return c.aiEnabled !== false;}),readingCore:core,readingRoles:FIELDS.map(function(f){return f[0];})});
+      var primary=Object.assign({},first,{title:TITLES[i],originalTitle:first.title || '',no:out.length+1,act:i+1,readingSection:i+1,chapterKind:i<=2?'self':i===3?'remedy':i===4?'career':i===5?'wealth':i===6?'love':i>=9&&i<=12?'timing':i>=13?'remedy':'',aiEnabled:i!==8 && (list.find(function(c){return !c.deep;}) || {}).aiEnabled !== false,readingCore:core,readingRoles:FIELDS.map(function(f){return f[0];})});
       primary.scenes=[{sceneId:id+'_reading_header',sceneType:'chapterIntro',compact:true,subtitle:'이해 → 활용 → 근거',bg:'black'}].concat(scenes(core,id),(first.scenes || []).filter(function(s){return s.sceneType!=='chapterIntro' && !s.readingRole;}).map(function(s){return Object.assign({},s,{readingSupplementary:!(/^(chart|dataVisualization|timeline)$/.test(s.sceneType) || /<(svg|table)\b/.test(s.html || ''))});}));
       out.push(primary);
       list.slice(1).forEach(function(c){out.push(Object.assign({},c,{readingSupplementary:true,act:i+1,readingSection:i+1,no:out.length+1}));});
     });
     // Never discard custom chapters; unknown IDs stay in relationships as supplementary content.
-    return Object.assign({},rep,{chapters:out,acts:TITLES.map(function(t,i){return {id:i+1,title:t,roman:'제'+(i+1)+'부',line:'',pdfDone:''};}),readingFlow:{version:1,sections:cards,future:future},legacyChapters:original});
+    return Object.assign({},rep,{chapters:out,acts:TITLES.map(function(t,i){return {id:i+1,title:t,roman:'제'+(i+1)+'부',line:'',pdfDone:''};}),readingFlow:{version:2,sections:cards,future:future},legacyChapters:original});
   }
   function audit(rep) {
     var missing=[],duplicates=[],seen={};

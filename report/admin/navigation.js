@@ -25,7 +25,7 @@
     if (/풀이 문체/.test(name)) return 'stylecfg';
     if (/온보딩/.test(name)) return 'onboard';
     if (/풀이 구성/.test(name)) return 'ikdesign';
-    if (/AI·서비스/.test(name)) return 'ikrules';
+    if (/AI·서비스|후킹/.test(name)) return 'ikrules';
     if (/풀이 지식/.test(name)) return 'ikknow';
     if (/글자/.test(name)) return 'v2test';
     if (/챕터|프로젝트/.test(name)) return 'v2proj';

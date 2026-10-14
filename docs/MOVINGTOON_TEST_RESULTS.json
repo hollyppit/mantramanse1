@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-13",
+  "date": "2026-10-14",
   "results": [
     {
       "file": "admin-editing-sim.js",
@@ -92,6 +92,12 @@
       "output": "차트가 붙는 챕터: c01:pillars c02:elements c03:strength c04:groups c05:groups c06:career c07:yong c08:groups c09:spouse c10:spouse c11:groups c12:yong c13:pillars c15:flow c18:months\n사주 48건 · 차트 1440개 렌더 · 빈 차트(용신 없음) 0개\n\n모두 통과\n"
     },
     {
+      "file": "chapter-interpretation-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "chapter-interpretation: 32 calculated charts; topic routing; 5% ratio; synonym duplicates; grounded hook; source/cache/version/auth; independent AI review; admin rejection/preservation PASS\n"
+    },
+    {
       "file": "cinema-sim.js",
       "status": "pass",
       "exit": 0,
@@ -131,7 +137,7 @@
       "file": "deep-ai-sim.js",
       "status": "pass",
       "exit": 0,
-      "output": " 합성 사용 (호출 1회)\n  ✓ 같은 사주 재방문은 저장본 재사용 — AI 추가 호출 없음 (호출 1회)\n  ✓ 합성 결과가 ik:pkg: 키로 저장됨\n3. 지식이 바뀌면 새로 합성\n  ✓ 지식 버전이 바뀌어 다시 합성 (호출 1회)\n4. 위험 표현이 나오면 버리고 DB 문장\n  ✓ 단정 표현은 사용자에게 나가지 않음(DB 문장으로 대체)\n5. AI 가 늦으면 기다리지 않고 DB 문장 → 뒤에서 마저 저장 → 다음 방문은 AI 문장\n  ✓ 대기 한도(150ms)에 맞춰 응답: 162ms · DB 문장\n  ✓ 뒤에서 끝난 합성이 저장되어 다음 방문에는 AI 문장\n6. 일일 상한\n  ✓ 오늘 호출 상한을 넘으면 AI 를 부르지 않고 DB 문장\n7. 스위치를 다시 끄면\n  ✓ AI 호출 없음\n8. 본문 대체 스위치(serviceBody)가 응답에 실림\n  ✓ 기본: body=false (더 깊이 덧붙임)\n  ✓ 켜면 body=true (클라이언트가 본문 대체 모드로 조립)\n\n전부 통과\n"
+      "output": " 합성 사용 (호출 1회)\n  ✓ 같은 사주 재방문은 저장본 재사용 — AI 추가 호출 없음 (호출 1회)\n  ✓ 합성 결과가 ik:pkg: 키로 저장됨\n3. 지식이 바뀌면 새로 합성\n  ✓ 지식 버전이 바뀌어 다시 합성 (호출 1회)\n4. 위험 표현이 나오면 버리고 DB 문장\n  ✓ 단정 표현은 사용자에게 나가지 않음(DB 문장으로 대체)\n5. AI 가 늦으면 기다리지 않고 DB 문장 → 뒤에서 마저 저장 → 다음 방문은 AI 문장\n  ✓ 대기 한도(150ms)에 맞춰 응답: 166ms · DB 문장\n  ✓ 뒤에서 끝난 합성이 저장되어 다음 방문에는 AI 문장\n6. 일일 상한\n  ✓ 오늘 호출 상한을 넘으면 AI 를 부르지 않고 DB 문장\n7. 스위치를 다시 끄면\n  ✓ AI 호출 없음\n8. 본문 대체 스위치(serviceBody)가 응답에 실림\n  ✓ 기본: body=false (더 깊이 덧붙임)\n  ✓ 켜면 body=true (클라이언트가 본문 대체 모드로 조립)\n\n전부 통과\n"
     },
     {
       "file": "deep-sim.js",
@@ -212,6 +218,12 @@
       "output": "1. 사용자 화면에 수호신 문구가 없는지\n2. 공개 영상 기본 주소 (함수)\nN. 일간·일주 문구 검사(기토 영상에 경금 문구가 붙은 경우)\n\n모두 통과\n"
     },
     {
+      "file": "interpretation-engine-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "interpretation-engine: 40 charts, independent rules, actual source verification, conflict preservation, output refs, API/cache/budget/auth/rollback PASS\n"
+    },
+    {
       "file": "intro-text-sim.js",
       "status": "pass",
       "exit": 0,
@@ -282,6 +294,12 @@
       "status": "pass",
       "exit": 0,
       "output": "onboarding-integration-sim OK: 두 입력 방식·공통 결과 경로·커버 초안/게시/폐기/공개중지·기존 설정 보존\n"
+    },
+    {
+      "file": "onboarding-renewal-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "onboarding-renewal-sim PASS: auth, draft/live separation, compatibility, migration, publish validation, media/route safety, user preservation, save failure\n"
     },
     {
       "file": "operations-binary-sim.js",
@@ -413,7 +431,7 @@
       "file": "store-sim.js",
       "status": "pass",
       "exit": 0,
-      "output": "되살아나지 않음\n  ✓ 어디에도 없으면 null\n  ✓ 만료된 값은 null\n  ✓ expirationTtl → expires_at 로 변환\n4. 대기자 목록(list)\n  ✓ Supabase 의 새 신청 + KV 에 남은 기존 신청을 합침: waitlist:a@b.co,waitlist:c@d.co\n5. 공개 읽기 기억(cache:true)\n  ✓ 같은 isolate 에서 20초 안에는 Supabase 를 한 번만 읽음(읽기 1회)\n  ✓ 쓰기 후에는 기억을 버리고 최신 값을 읽음\n  ✓ 호출 횟수 카운터는 기억하지 않음(항상 최신)\n  ✓ 관리자 경로(cache 없음)는 항상 최신\n6. 오류 · 점검\n  ✓ Supabase 오류는 숨기지 않고 던짐: supabase 500 boom\n  ✓ 점검: 실패를 이유와 함께 보고\n  ✓ 점검: Supabase 쓰기→읽기 성공 (1ms)\n  ✓ 점검: 설정 없으면 backend=kv\n  ✓ 점검: 키가 틀리면 401 을 알려 줌\n\n전부 통과\n"
+      "output": "되살아나지 않음\n  ✓ 어디에도 없으면 null\n  ✓ 만료된 값은 null\n  ✓ expirationTtl → expires_at 로 변환\n4. 대기자 목록(list)\n  ✓ Supabase 의 새 신청 + KV 에 남은 기존 신청을 합침: waitlist:a@b.co,waitlist:c@d.co\n5. 공개 읽기 기억(cache:true)\n  ✓ 같은 isolate 에서 20초 안에는 Supabase 를 한 번만 읽음(읽기 1회)\n  ✓ 쓰기 후에는 기억을 버리고 최신 값을 읽음\n  ✓ 호출 횟수 카운터는 기억하지 않음(항상 최신)\n  ✓ 관리자 경로(cache 없음)는 항상 최신\n6. 오류 · 점검\n  ✓ Supabase 오류는 숨기지 않고 던짐: supabase 500 boom\n  ✓ 점검: 실패를 이유와 함께 보고\n  ✓ 점검: Supabase 쓰기→읽기 성공 (0ms)\n  ✓ 점검: 설정 없으면 backend=kv\n  ✓ 점검: 키가 틀리면 401 을 알려 줌\n\n전부 통과\n"
     },
     {
       "file": "story-composer-sim.js",
@@ -443,7 +461,7 @@
       "file": "style-sim.js",
       "status": "pass",
       "exit": 0,
-      "output": "된 풀이 DB 가 없는 분야는 AI 호출·본문 생성 없이 비움\n  ✓ 확정 예언 응답은 버리고 DB 문장을 그대로 씀\n  ✓ 무빙툰 챕터 → 분야 매핑\n  ✓ systemFor: 문체 지시를 붙이고 없으면 기존 프롬프트 그대로\n  ✓ 연출(episode)과 풀이(reading) 층이 분리된다고 지시\n  ✓ 후속 답변도 문체 지시를 받음\n  ✓ 편집기(compose)도 문체 지시를 받음\n  ✓ IK 합성기 기본 프롬프트: 완곡 강제 제거 · 기본 단정형\n  ✓ 편집기 캐시 키에 문체 서명이 들어감\n  ✓ 후속 답변 캐시 키에 문체 서명이 들어감\n  ✓ 무빙툰 본문 생성 응답 \n  ✓ 본문 생성 프롬프트에 활성 문체와 연출 지침이 들어감\n  ✓ 응답에 문체 버전과 문단별 층(reading/story)이 실림\n  ✓ \"반드시\" 확정 표현이 있는 본문은 문체와 무관하게 거부\n7. 하위 호환\n  ✓ deepView 빈 입력 처리\n  ✓ kind 없는 옛 AI 응답도 그대로 처리\n\n전부 통과\n"
+      "output": "검수된 풀이 DB 가 없는 분야는 AI 호출·본문 생성 없이 비움\n  ✓ 확정 예언 응답은 버리고 DB 문장을 그대로 씀\n  ✓ 무빙툰 챕터 → 분야 매핑\n  ✓ systemFor: 문체 지시를 붙이고 없으면 기존 프롬프트 그대로\n  ✓ 연출(episode)과 풀이(reading) 층이 분리된다고 지시\n  ✓ 후속 답변도 문체 지시를 받음\n  ✓ 편집기(compose)도 문체 지시를 받음\n  ✓ IK 합성기 기본 프롬프트: 근거 중심 직설형 심층 감정\n  ✓ 편집기 캐시 키에 문체 서명이 들어감\n  ✓ 후속 답변 캐시 키에 문체 서명이 들어감\n  ✓ 무빙툰 본문 생성 응답 \n  ✓ 본문 생성 프롬프트에 활성 문체와 연출 지침이 들어감\n  ✓ 응답에 문체 버전과 문단별 층(reading/story)이 실림\n  ✓ \"반드시\" 확정 표현이 있는 본문은 문체와 무관하게 거부\n7. 하위 호환\n  ✓ deepView 빈 입력 처리\n  ✓ kind 없는 옛 AI 응답도 그대로 처리\n\n전부 통과\n"
     },
     {
       "file": "system-integration-sim.js",
@@ -475,15 +493,5 @@
       "exit": 0,
       "output": "차트 400개 × 60갑자 · 변동 overlay 기준 55 · 단계 안정적 / 움직임 있음 / 변동성 높음 / 변동성 매우 높음\nA. 관계 없는 운 767건: 최대 변동성 0.0\nB. 약한 신호 하나 2745건: 최대 변동성 38.1, 변동기 0건\nC. 충 하나의 변동성 — 일지 55 · 월지 51 · 시지 36 · 년지 26\nD. 신호를 하나씩 더할 때 변동성 — 55 → 67 → 77 → 86\nE·F. 변동기 7774건 — 순풍 1510 · 보통 3582 · 주의 2056 · 부담 626\n   변동성 ↔ 흐름 점수 상관 -0.022 · 흐름 점수 평균: 변동성 매우 높음 -3.2 vs 안정적 -1.3\nG. 변동성 낮음 + 흐름 낮음 1296건 — 기회기 222 · 축적기 415 · 확장기 250 · 수확기 409\n\n변동성 단계 분포: 안정적 27% · 움직임 있음 33% · 변동성 높음 28% · 변동성 매우 높음 13% · 변동기 32%\n\n모든 검증 통과\n"
     }
-  ],
-  "separateBrowserChecks": {
-    "calendar": {
-      "status": "pass",
-      "command": "CALENDAR_TEST_URL=http://127.0.0.1:8787 TEST_BROWSER=msedge node tests/calendar-ui-sim.js",
-      "output": "days 31 bars 12; recommendations 5; PASS calendar interactions"
-    },
-    "operations": "docs/MOVINGTOON_OPERATIONS_BROWSER.json",
-    "folderOperations": "docs/MOVINGTOON_FOLDER_BROWSER.json",
-    "pdfDelivery": "docs/MOVINGTOON_PDF_DELIVERY.json"
-  }
+  ]
 }

@@ -7,7 +7,7 @@ export const loadDomain = async (kv, d) => (await kv.get(dkey(d), 'json')) || []
 export async function loadAll(kv, domains) { const ds = domains || Object.keys(DOMAINS); return (await Promise.all(ds.map(d => loadDomain(kv, d)))).flat(); }
 export async function meta(kv) { return (await kv.get('ik:meta', 'json')) || { k: 'k0', d: 'd0', r: 'r0' }; }
 export async function bump(kv, which) { const m = await meta(kv); m[which] = which + Date.now().toString(36); await kv.put('ik:meta', JSON.stringify(m)); return m; }
-export const scrub = sd => { if (!sd || typeof sd !== 'object') return sd; const c = { ...sd }; delete c.birth; return c; }; // 생년월일·출생시는 풀이 계층에 필요 없다
+export const scrub = sd => { if (!sd || typeof sd !== 'object') return sd; const c = { ...sd }; delete c.birth; delete c.name; delete c.ziwei; delete c.calculationProvenance; return c; }; // Legacy AI paths keep their existing data contract.
 export function nextId(items, domain) { const re = new RegExp('^' + domain + '-(\\d+)$'); let mx = 0; for (const x of items) { const m = re.exec(x.id); if (m) mx = Math.max(mx, +m[1]); } return domain + '-' + ('0000' + (mx + 1)).slice(-4); }
 
 // 풀이 자료 정책에 따라 production 에서 빼야 하는 자료 id (비활성 또는 "Production 풀이 사용" OFF)

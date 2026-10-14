@@ -20,7 +20,7 @@ global.fetch = async (u, o = {}) => {
 };
 const mem = new Map();
 const kv = { get: async (k, t) => { const v = mem.get(k); return v == null ? null : t === 'json' ? JSON.parse(v) : v; }, put: async (k, v) => { mem.set(k, String(v)); }, delete: async k => { mem.delete(k); }, list: async () => ({ keys: [] }) };
-const env = { ADMIN_PASSWORD: 'pw', GLOSSARY_KV: kv, ANTHROPIC_API_KEY: 'x', IK_DEEP_AI_WAIT_MS: '2000', IK_DEEP_HOURLY_LIMIT: '999', MOVINGTOON_HOURLY_LIMIT: '999' };
+const env = { INTERPRETATION_ENGINE_MODE: 'legacy', ADMIN_PASSWORD: 'pw', GLOSSARY_KV: kv, ANTHROPIC_API_KEY: 'x', IK_DEEP_AI_WAIT_MS: '2000', IK_DEEP_HOURLY_LIMIT: '999', MOVINGTOON_HOURLY_LIMIT: '999' };
 const M = globalThis.Manse, SD = globalThis.ReportV2.SajuData;
 const callApi = async (file, qs, body, admin, method) => { const mod = await imp('functions/' + file); const get = method === 'GET' || body == null; const res = await (mod.onRequest || mod.onRequestPost)({ env, waitUntil: p => p, request: new Request('http://x/api/' + qs, { method: get ? 'GET' : 'POST', headers: { 'content-type': 'application/json', ...(admin ? { authorization: 'Bearer pw' } : {}), 'cf-connecting-ip': '5.5.5.5' }, ...(get ? {} : { body: JSON.stringify(body) }) }) }); return { s: res.status, d: await res.json() }; };
 const sdOf = (y, mo, d, g) => { const ch = M.compute({ year: y, month: mo, day: d, hour: 14, minute: 30, calendar: 'solar', leap: false, gender: g || 'M', city: '서울' }), sd = SD.build(ch, { now: Date.UTC(2026, 9, 6) }); delete sd.birth; const Y = sd.nowYear; return { sd, ext: { future: M.seunRange(ch, Y, Y + 4).map((x, i) => ({ year: Y + i, season: SD.seasonOf(x.ev) })) } }; };
@@ -30,13 +30,13 @@ const sdOf = (y, mo, d, g) => { const ch = M.compute({ year: y, month: mo, day: 
 
   console.log('1. 설정 정리 · 문체 결정');
   const d0 = S.cleanConfig(null);
-  ok(d0.defaultStyle === 'assertive', '기본 문체는 단정형');
+  ok(d0.defaultStyle === 'direct', '기본 문체는 직설형 심층 감정');
   ok(S.STYLE_IDS.every(i => d0.prompts[i] && d0.prompts[i].length > 30), '세 유형 모두 기본 프롬프트가 있음');
   const c1 = S.cleanConfig({ defaultStyle: 'nope', chapters: { MONEY: 'cautious', '<bad key>': 'direct', LOVE: 'weird' }, prompts: { direct: '  ', assertive: '내가 쓴 단정형 지시' }, story: { address: '', voice: 'x'.repeat(2000) }, characters: { 도령: '말투', '': 'x' } });
-  ok(c1.defaultStyle === 'assertive' && c1.chapters.MONEY === 'cautious' && !c1.chapters['<bad key>'] && !c1.chapters.LOVE, '알 수 없는 문체·키는 버려짐');
+  ok(c1.defaultStyle === 'direct' && c1.chapters.MONEY === 'cautious' && !c1.chapters['<bad key>'] && !c1.chapters.LOVE, '알 수 없는 문체·키는 버려짐');
   ok(c1.prompts.direct === S.DEFAULT_PROMPTS.direct && c1.prompts.assertive === '내가 쓴 단정형 지시', '빈 프롬프트는 기본값 · 입력한 프롬프트는 유지');
   ok(c1.story.address === '귀인' && c1.story.voice.length === 800 && c1.characters['도령'] && !c1.characters[''], '호칭 기본 "귀인" · 길이 제한 · 캐릭터 정리');
-  ok(S.resolveStyle(c1, ['MONEY']) === 'cautious' && S.resolveStyle(c1, ['ch-x', 'MONEY']) === 'cautious' && S.resolveStyle(c1, ['LOVE']) === 'assertive', '챕터 키 → 기본 문체 순으로 결정');
+  ok(S.resolveStyle(c1, ['MONEY']) === 'cautious' && S.resolveStyle(c1, ['ch-x', 'MONEY']) === 'cautious' && S.resolveStyle(c1, ['LOVE']) === 'direct', '챕터 키 → 기본 문체 순으로 결정');
   ok(S.softer('assertive') === 'direct' && S.softer('direct') === 'cautious' && S.softer('cautious') === 'cautious', '근거가 얇을 때 한 단계 낮춤');
 
   console.log('2. 지시문');
@@ -61,7 +61,7 @@ const sdOf = (y, mo, d, g) => { const ch = M.compute({ year: y, month: mo, day: 
 
   console.log('4. API — 저장 · 버전 · 롤백 · 권한');
   let r = await callApi('api/style.js', 'style?a=cfg', null, false); ok(r.s === 401, '관리자 인증 없이 설정 조회 불가');
-  r = await callApi('api/style.js', 'style?a=active', null, false); ok(r.s === 200 && r.d.defaultStyle === 'assertive' && r.d.ver === 0 && r.d.prompts === undefined && r.d.address === '귀인', '공개 active: 기본 단정형 · 프롬프트 본문은 내보내지 않음');
+  r = await callApi('api/style.js', 'style?a=active', null, false); ok(r.s === 200 && r.d.defaultStyle === 'direct' && r.d.ver === 0 && r.d.prompts === undefined && r.d.address === '귀인', '공개 active: 기본 직설형 · 프롬프트 본문은 내보내지 않음');
   r = await callApi('api/style.js', 'style?a=save', { config: { defaultStyle: 'direct', chapters: { MONEY: 'cautious' } } }, false); ok(r.s === 401, '인증 없이 저장 불가');
   r = await callApi('api/style.js', 'style?a=save', { config: { defaultStyle: 'direct', chapters: { MONEY: 'cautious' } }, note: '직설형으로' }, true);
   ok(r.s === 200 && r.d.active.ver === 1 && r.d.active.config.defaultStyle === 'direct', 'v1 저장');
@@ -136,7 +136,7 @@ const sdOf = (y, mo, d, g) => { const ch = M.compute({ year: y, month: mo, day: 
   ok(/kind=episode/.test(MT.systemFor({ directive: 'x', story: 'y' })) && /귀인|캐릭터/.test(S.storyDirective(d0)), '연출(episode)과 풀이(reading) 층이 분리된다고 지시');
   ok(/풀이 문체: 신중형/.test(RA.systemFor({ directive: S.directive(d0, 'cautious') })) && RA.systemFor(null) === RA.SYSTEM, '후속 답변도 문체 지시를 받음');
   ok(/풀이 문체: 단정형/.test(CP.systemFor({ directive: S.directive(d0, 'assertive') })) && CP.systemFor(null) === CP.SYSTEM, '편집기(compose)도 문체 지시를 받음');
-  ok(!/모든 문장에 가능성|~할 수 있는 흐름/.test(IK.composerSystem(IK.DEFAULT_RULES, 'MONEY')) && /풀이 문체: 단정형/.test(IK.composerSystem(IK.DEFAULT_RULES, 'MONEY')), 'IK 합성기 기본 프롬프트: 완곡 강제 제거 · 기본 단정형');
+  ok(!/모든 문장에 가능성|~할 수 있는 흐름/.test(IK.composerSystem(IK.DEFAULT_RULES, 'MONEY')) && /풀이 문체: 직설형 심층 감정/.test(IK.composerSystem(IK.DEFAULT_RULES, 'MONEY')), 'IK 합성기 기본 프롬프트: 근거 중심 직설형 심층 감정');
   ok((await CP.cacheKey({ chapters: [] }, 'aaa')) !== (await CP.cacheKey({ chapters: [] }, 'bbb')), '편집기 캐시 키에 문체 서명이 들어감');
   ok((await RA.cacheKey({ a: 1 }, 'aaa')) !== (await RA.cacheKey({ a: 1 }, 'bbb')), '후속 답변 캐시 키에 문체 서명이 들어감');
 
