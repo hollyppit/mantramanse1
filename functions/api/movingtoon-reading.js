@@ -27,20 +27,21 @@ export async function onRequestPost({ request, env }) {
   let clean, original;
   try { const raw = await request.text(); if (raw.length > 160000) return json({ ok: false, error: 'too-large' }, 413); original = JSON.parse(raw); clean = validate(original); } catch { }
   if (!clean) return json({ ok: false, error: 'bad-payload' }, 400);
+  let storageStage='rules';
   let kv, key, src, sty, analysis, settings, mode, policy, hook, hookDraft, previous = [], lastRejection = null;
   try {
     // Rule/source deactivation must be observed before reusing any AI cache.
     kv = kvOf(env);
     const [items, blocked, version] = kv ? await Promise.all([loadAll(kv), blockedDocs(kv), meta(kv)]) : [[], new Set(), {}];
-    settings = await loadSettings(kv);
+    storageStage='settings';settings = await loadSettings(kv);
     mode = env.INTERPRETATION_ENGINE_MODE || settings.mode;
     policy = chapterPolicy(clean.chapter, settings.chapters);
     previous = (Array.isArray(original.previous) ? original.previous : []).slice(-80).filter(p => p && typeof p.text === 'string' && p.text.length<=1200).map(p=>({id:String(p.id || '').slice(0,100),chapter:String(p.chapter || '').slice(0,80),text:p.text}));
     if (!['legacy','shadow','grounded'].includes(mode)) return json({ ok: false, error: 'invalid-engine-mode' }, 503);
     if (!env.OPENAI_API_KEY && !env.ANTHROPIC_API_KEY) return json({ ok: false, error: 'no-ai', engineMode: mode }, 503);
     if (mode !== 'legacy' || policy?.hook.enabled) {
-      const sourceIndex = await loadSourceIndex(kv, items, blocked);
-      analysis = analyze(original.sd, items, { ...settings, sourceIndex, blockedDocs: blocked, domains: policy && ['timing','remedy'].includes(policy.key) ? undefined : domainsFor(clean.chapter) });
+      storageStage='source-index';const sourceIndex = await loadSourceIndex(kv, items, blocked);
+      storageStage='grounding';analysis = analyze(original.sd, items, { ...settings, sourceIndex, blockedDocs: blocked, domains: policy && ['timing','remedy'].includes(policy.key) ? undefined : domainsFor(clean.chapter) });
       analysis = selectChapterClaims(analysis, policy);
       hook = await buildHook(analysis, policy, settings);
       if(hook?.source === 'verified-rule' && policy.hook.style !== CHAPTER_DEFAULTS[policy.key].hook.style){hookDraft=hook;hook=null;}
@@ -49,8 +50,8 @@ export async function onRequestPost({ request, env }) {
     src = sources(items, clean.sd, blocked, clean.chapter);
     // Explicitly authorized writer payload: excludes names and raw birth dates.
     if (mode === 'grounded') src = { chart: analysis.normalized.chart, facts: analysis.normalized.saju, knowledge: analysis.claims.map(c => ({ id: c.knowledge_id, interpretation: c.judgment })), claims: analysis.claims, cross_analysis: analysis.cross_analysis };
-    sty = styleFor(await loadStyle(kv), [clean.chapter.id, ...domainsFor(clean.chapter)], { soft: src.knowledge.length < 2 });
-    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ chapterVersion: CHAPTER_VERSION, previous, hook, hookDraft, version: VERSION, engine: ENGINE_VERSION, mode, settings, claims: analysis?.claims, db: version, style: sty.sig, clean, models: [env.OPENAI_MODEL, env.ANTHROPIC_MODEL] })));
+    storageStage='style';sty = styleFor(await loadStyle(kv), [clean.chapter.id, ...domainsFor(clean.chapter)], { soft: src.knowledge.length < 2 });
+    storageStage='cache';const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ chapterVersion: CHAPTER_VERSION, previous, hook, hookDraft, version: VERSION, engine: ENGINE_VERSION, mode, settings, claims: analysis?.claims, db: version, style: sty.sig, clean, models: [env.OPENAI_MODEL, env.ANTHROPIC_MODEL] })));
     key = 'ai:movingtoon:' + [...new Uint8Array(hash)].map(x => x.toString(16).padStart(2, '0')).join('');
     if (kv) {
       const hit = await kv.get(key, 'json');
@@ -61,7 +62,7 @@ export async function onRequestPost({ request, env }) {
       if ((+h || 0) >= (+env.MOVINGTOON_HOURLY_LIMIT || 100) || (+d || 0) >= (+env.MOVINGTOON_DAILY_LIMIT || 6000)) return json({ ok: false, error: 'rate-limited', engineMode: mode }, 429);
       await Promise.all([kv.put(hk, String((+h || 0) + 1), { expirationTtl: 7200 }), kv.put(dk, String((+d || 0) + 1), { expirationTtl: 172800 })]);
     }
-  } catch { return json({ ok: false, error: 'storage-unavailable', engineMode: mode }, 503); }
+  } catch { return json({ ok: false, error: 'storage-unavailable', storageStage, engineMode: mode }, 503); }
   const input = JSON.stringify({ ...src, chapter: clean.chapter, outline: clean.outline, chapterPolicy: policy, previous, hookDraft: hookDraft ? {text:hookDraft.text,explanation:hookDraft.explanation,claim_id:hookDraft.claim_id}:null, hook: hook ? { text: hook.text, explanation: hook.explanation, claim_id: hook.claim_id } : null });
   let writerSystem = mode === 'grounded' ? WRITER_SYSTEM + '\n[표현 설정]\n' + (sty.directive || '') + '\n위 표현 설정은 판단·근거·불확실성을 변경하지 않는다.' : systemFor(sty);
   if (policy) writerSystem += '\n'+chapterInstruction(policy);

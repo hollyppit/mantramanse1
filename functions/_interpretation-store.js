@@ -8,6 +8,8 @@ export async function loadSettings(kv) {
 export async function loadSourceIndex(kv, items, blocked) {
   if (!kv) return new Map();
   const docs = (await kv.get('src:idx', 'json')) || [], ids = new Set(items.flatMap(it => (it.evidence || []).map(e => e.docId)));
-  const entries = await Promise.all(docs.filter(d => ids.has(d.id) && !blocked.has(d.id)).map(async d => [d.id, { ...d, chunks: (await kv.get('src:chunks:' + d.id, 'json')) || [] }]));
+  const selected=docs.filter(d=>ids.has(d.id)&&!blocked.has(d.id)), keys=selected.map(d=>'src:chunks:'+d.id);
+  const chunks=kv.getMany ? await kv.getMany(keys,'json') : await Promise.all(keys.map(k=>kv.get(k,'json')));
+  const entries=selected.map((d,i)=>[d.id,{...d,chunks:chunks[i] || []}]);
   return new Map(entries);
 }

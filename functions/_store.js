@@ -42,6 +42,20 @@ export function kvOf(env, opts) {
       if (useMemo) memoAll.set(key, { v: txt, exp: Date.now() + MEMO_MS });
       return parse(txt, type);
     },
+    // Source grounding may read dozens of chunks. One REST query avoids per-request subrequest limits.
+    async getMany(keys, type) {
+      const unique = [...new Set(keys)], values = new Map();
+      for (let offset=0; offset<unique.length; offset+=50) {
+        const batch=unique.slice(offset,offset+50), routed=batch.filter(k=>startsWith(k,ROUTED));
+        if(routed.length) {
+          const quoted=routed.map(k=>'"'+k.replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"').join(',');
+          const rows=await (await sb(env,'kv?select=key,value,expires_at&key=in.'+encodeURIComponent('('+quoted+')'))).json();
+          for(const row of rows)values.set(row.key,row.expires_at && Date.parse(row.expires_at)<=Date.now()?null:row.value);
+        }
+        await Promise.all(batch.filter(k=>!values.has(k)).map(async k=>values.set(k,!startsWith(k,ROUTED)||startsWith(k,FALLBACK)?await raw.get(k):null)));
+      }
+      return keys.map(k=>parse(values.get(k),type));
+    },
     async put(key, value, o) {
       if (!startsWith(key, ROUTED)) return raw.put(key, value, o);
       memoAll.delete(key);
