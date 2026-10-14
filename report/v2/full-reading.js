@@ -39,6 +39,10 @@
       return Array.from(seen.entries()).every(function(old){if(old[1]===id)return true;return policy ? policy.similarity(key,old[0])<0.9 && !(policy.generalTrait(key,policy.kind(chapter || {}) || 'other') && policy.duplicate(key,old[0])) : key.replace(/\s+/g,'')!==old[0].replace(/\s+/g,'');}); }));
   }
   function remember(result, seen, id) { result.paragraphs.forEach(function(p) { seen.set(p.text,id); }); }
+  function deferredParagraphs(job, chapter, sd) {
+    var basic=chapter.readingCore && chapter.readingSection && R.ReadingFlow ? R.ReadingFlow.card(sd,chapter.readingSection-1) : null;
+    return job.chapter.paragraphs.map(function(p,i){var action=basic && ['reinforce','practice'].indexOf(p.role)>=0 ? basic[p.role] : '';return {id:p.id,role:p.role || '',text:action?'일반 실천 점검: '+action:i===0?'개인별 풀이가 검수를 통과하지 못했습니다. 계산표와 일반적인 실천 점검을 확인하고, 풀이 검수가 끝난 뒤 다시 살펴보세요.':'',refs:[],claim_ids:[]};});
+  }
   function prepare(rep, sd, name, onReady) {
     if (active) { active.cancelled = true; active.controllers.forEach(function (c) { c.abort(); }); }
     var session = { cancelled: false, controllers: [] }; active = session;
@@ -64,7 +68,8 @@
           status.failed++; item.c.readingWarning = d && d.error || 'validation-failed';
           if (!session.cancelled && (d && d.engineMode === 'grounded' || d && d.interpretation && d.interpretation.mode === 'grounded')) {
             // Runtime presentation only; original saved chapters remain intact.
-            var deferred = { paragraphs: job.chapter.paragraphs.map(function(p,i){return {id:p.id,text:i===0?'이 주제의 풀이를 뒷받침할 검증된 근거가 부족하거나 생성 검증을 통과하지 못했습니다. 계산표를 확인하고 풀이 검수가 끝난 뒤 다시 살펴보세요.':'',refs:[],claim_ids:[]};}) };
+            var deferred = { paragraphs: deferredParagraphs(job,item.c,safe) };
+            item.c.chapterHook=null;item.c.readingParagraphs=deferred.paragraphs;item.c.readingEvidence=[];item.c.readingFullText=deferred.paragraphs.map(function(p){return p.text;}).filter(Boolean).join('\n\n');
             deferred.paragraphs.forEach(function(p){job.targets[Number(p.id)](p.text);});
             if(onReady)onReady(item.c,job,deferred);
           }
@@ -78,5 +83,5 @@
     firstPromise.then(function () { worker(); }); // Prior chapters must be available for semantic review.
     return { first: firstPromise, status: status };
   }
-  R.FullReading = { uniqueAcross: uniqueAcross, collect: collect, apply: apply, prepare: prepare };
+  R.FullReading = { deferredParagraphs: deferredParagraphs, uniqueAcross: uniqueAcross, collect: collect, apply: apply, prepare: prepare };
 })(typeof window !== 'undefined' ? window : globalThis);

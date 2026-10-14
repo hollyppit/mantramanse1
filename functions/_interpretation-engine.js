@@ -105,8 +105,8 @@ export function compareClaims(a, b) {
 export function sourceGenderScope(item) {
   if(!['LOVE','MARRIAGE'].includes(item.domain) || !Object.keys(item.conditions || {}).length)return item;
   const text=String(item.principle || '');
-  const female=/(?:^|[.。]\s*)(?:원문은\s*)?(?:여성|여명|여자|女命)(?:의|에게|\s*명조|\s*사주)|여성의 배우자성/.test(text);
-  const male=/(?:^|[.。]\s*)(?:원문은\s*)?(?:남성|남명|남자|男命)(?:의|에게|\s*명조|\s*사주)|남성의 배우자성/.test(text);
+  const female=/(?:^|[.。]\s*)(?:원문은\s*)?(?:여성|여명|여자|女命)(?:의|에게|\s*명조|\s*사주)|여성의 배우자성|여성(?:은|는|에게|\s*(?:기준|전제))|여명(?:은|는)|女命/.test(text);
+  const male=/(?:^|[.。]\s*)(?:원문은\s*)?(?:남성|남명|남자|男命)(?:의|에게|\s*명조|\s*사주)|남성의 배우자성|남성(?:은|는|에게|\s*(?:기준|전제))|남명(?:은|는)|男命/.test(text);
   if(female===male)return item;
   const gender=female?'F':'M', conditionGender=female?'여':'남', conflict=Array.isArray(item.conditions.gender) && !item.conditions.gender.includes(conditionGender);
   return {...item,conditions:{...item.conditions,gender:[conditionGender]},sourceScope:{gender,basis:'explicit-traditional-principle',conflict}};
