@@ -98,8 +98,8 @@ export function sourceGenderScope(item) {
   const female=/(?:^|[.。]\s*)(?:원문은\s*)?(?:여성|여명|여자|女命)(?:의|에게|\s*명조|\s*사주)|여성의 배우자성/.test(text);
   const male=/(?:^|[.。]\s*)(?:원문은\s*)?(?:남성|남명|남자|男命)(?:의|에게|\s*명조|\s*사주)|남성의 배우자성/.test(text);
   if(female===male)return item;
-  const gender=female?'F':'M', conflict=Array.isArray(item.conditions.gender) && !item.conditions.gender.includes(gender);
-  return {...item,conditions:{...item.conditions,gender:[gender]},sourceScope:{gender,basis:'explicit-traditional-principle',conflict}};
+  const gender=female?'F':'M', conditionGender=female?'여':'남', conflict=Array.isArray(item.conditions.gender) && !item.conditions.gender.includes(conditionGender);
+  return {...item,conditions:{...item.conditions,gender:[conditionGender]},sourceScope:{gender,basis:'explicit-traditional-principle',conflict}};
 }
 
 export function analyze(sd, items, opts = {}) {

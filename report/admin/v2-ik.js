@@ -28,7 +28,7 @@
 
   /* 조건 종류: [화면 이름, 입력 방식, 선택지, 고급 여부] — 입력 방식: opts(여러 개 중 고르기) | text(직접 입력) | map(항목별 강약) */
   var F = {
-    gender: ['해석 성별(M남/F여)', 'opts', ['M','F'], 1], dayMaster: ['일간', 'opts', STEMS, 0], dayPillar: ['일주', 'text', PILLARS, 0], strength: ['신강/신약', 'opts', ['신강', '중화', '신약'], 0], hasRoot: ['통근', 'opts', ['있음', '없음'], 0],
+    gender: ['해석 성별', 'opts', ['남','여'], 1], dayMaster: ['일간', 'opts', STEMS, 0], dayPillar: ['일주', 'text', PILLARS, 0], strength: ['신강/신약', 'opts', ['신강', '중화', '신약'], 0], hasRoot: ['통근', 'opts', ['있음', '없음'], 0],
     el: ['오행 강약', 'map', ELS, 0], group: ['십성(비겁·식상·재성·관성·인성) 강약', 'map', GRPS, 0],
     monthBranch: ['태어난 달(월령)', 'opts', BR, 1], season: ['태어난 계절', 'opts', ['봄', '여름', '가을', '겨울'], 1], dayBranch: ['일지(배우자 자리)', 'opts', BR, 1], yongEl: ['용신 오행', 'opts', ELS, 1],
     pattern: ['격국·구조', 'text', ['관살혼잡', '상관견관', '상관패인', '군겁쟁재'], 1], star: ['신살', 'text', ['천을귀인', '도화살', '역마살', '화개살', '괴강살', '현침살', '천덕귀인', '월덕귀인'], 1], relation: ['합·충·형·파·해', 'text', ['육합', '방합', '삼합', '충', '형', '파', '해', '원진'], 1],

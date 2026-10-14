@@ -27,7 +27,7 @@ const BRANCH_SEASON = { 인: '봄', 묘: '봄', 진: '봄', 사: '여름', 오: 
 
 // 조건 필드 → [표시 이름, 가중치(좁게 가리킬수록 큼), 종류]. 종류: list(값 목록 중 하나) | map(키별 강약)
 export const COND_FIELDS = {
-  gender: ['해석 성별(M남/F여)', 3, 'list'], dayPillar: ['일주', 8, 'list'], dayMaster: ['일간', 4, 'list'], strength: ['신강/신약', 3, 'list'], hasRoot: ['통근', 2, 'list'],
+  gender: ['해석 성별', 3, 'list'], dayPillar: ['일주', 8, 'list'], dayMaster: ['일간', 4, 'list'], strength: ['신강/신약', 3, 'list'], hasRoot: ['통근', 2, 'list'],
   monthBranch: ['월령(월지)', 3, 'list'], season: ['태어난 계절', 2, 'list'], dayBranch: ['일지', 2, 'list'],
   yongEl: ['용신 오행', 3, 'list'], pattern: ['격국·구조', 3, 'list'], star: ['신살', 2, 'list'], relation: ['합충형파해', 2, 'list'],
   daewoonSeason: ['현재 대운 흐름', 3, 'list'], seunSeason: ['올해 세운 흐름', 3, 'list'], monthSeason: ['이달 월운 흐름', 2, 'list'],
@@ -106,7 +106,7 @@ export function cleanItem(b, prev) {
 // ext.future: [{ year, season }] — 클라이언트가 M.seunRange 로 얻은 앞으로 5년(엔진 값). 없으면 futureSeason 조건은 unsupported 처리.
 export function deriveFacts(sd, ext) {
   if (!sd || !sd.dayMaster || !sd.dayPillar) throw new Error('sd 가 올바르지 않습니다');
-  const f = { unsupportedNow: [], gender: sd.gender };
+  const f = { unsupportedNow: [] };
   f.dayMaster = sd.dayMaster.stem; f.dayPillar = sd.dayPillar.ko; f.strength = sd.strength && sd.strength.band;
   if (sd.roots) f.hasRoot = sd.roots.hasRoot ? '있음' : '없음'; f.rootLevel = sd.roots && sd.roots.level;
   const mb = sd.pillars && sd.pillars.month && sd.pillars.month.ko && sd.pillars.month.ko[1]; if (mb) { f.monthBranch = mb; f.season = BRANCH_SEASON[mb]; }

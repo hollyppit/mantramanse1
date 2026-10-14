@@ -36,7 +36,7 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
  assert.equal(E.analyze({...scopeBase.sd,gender:'M'},[femaleRule],{sourceIndex}).claims.length,0,'female spouse-star rules must not enter male hooks');
  const femaleA=E.analyze({...scopeBase.sd,gender:'F'},[femaleRule],{sourceIndex});assert.equal(femaleA.claims.length,1);assert(femaleA.claims[0].elements.some(r=>r.key==='gender'));assert.equal(JSON.stringify(femaleRule),savedRule,'source qualification cannot mutate stored rules');
  const maleRule=K.cleanItem({...femaleRule,id:'LOVE-9002',principle:'남성의 사주를 전제로 한 검사 전용 관계 규칙입니다.'});assert.equal(E.analyze({...scopeBase.sd,gender:'F'},[maleRule],{sourceIndex}).claims.length,0);assert.equal(E.analyze({...scopeBase.sd,gender:'M'},[maleRule],{sourceIndex}).claims.length,1);
- assert.equal(E.analyze({...scopeBase.sd,gender:'F'},[{...femaleRule,conditions:{...femaleRule.conditions,gender:['M']}}],{sourceIndex}).claims.length,0,'contradictory explicit scope is rejected');
+ assert.equal(E.analyze({...scopeBase.sd,gender:'F'},[{...femaleRule,conditions:{...femaleRule.conditions,gender:['남']}}],{sourceIndex}).claims.length,0,'contradictory explicit scope is rejected');
  const p=P.chapterPolicy({id:'c08'}),good={paragraphs:[{id:'0',text:'수입은 고정비와 변동비를 구분해서 확인하고 자금 회수 기간을 기록합니다. 매출 증가가 이익 증가로 이어지는 조건과 지출 부담을 함께 점검합니다.'}]};
  assert(P.inspectChapter(good,p,[],null).ok);
  const bad={paragraphs:[{id:'0',text:'당신은 책임감이 강하고 추진력이 뛰어난 성격입니다. 당신은 신중하고 꼼꼼하게 상황을 살피는 기질을 가지고 있습니다.'}]};assert(!P.inspectChapter(bad,p,[],null).ok);
