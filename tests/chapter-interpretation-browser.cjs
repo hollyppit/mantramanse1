@@ -19,14 +19,15 @@ const BASE=process.env.TASK_CHAPTER_BASE || 'http://127.0.0.1:8793';
   const page=await browser.newPage({viewport:{width:390,height:844}});page.on('pageerror',e=>errors.push('viewer:'+e.message));
   const hook={text:'매출이 늘어도 회수와 지출 관리가 빠지면 돈이 남기 어렵습니다.',explanation:'검사 전용 후킹의 화면 연결을 확인합니다. 실제 미래 수익을 보장하는 해석이 아닙니다.',hanja:'財物運',claim_id:'saju:test',basis:{elements:[],evidence:[]},source:'fixture'};
   await page.route('**/api/movingtoon-reading',async route=>{
-   const b=route.request().postDataJSON(),p=MantraPolicyForTest(b.chapter);routed.push({id:b.chapter.id,kind:p,rows:b.chapter.paragraphs.length});const paragraphs=b.chapter.paragraphs.map(x=>({id:x.id,text:x.text+(p==='wealth'&&x.role==='reality'?' 기본 기질은 본래의 나에서 확인합니다.':''),refs:['natal'],claim_ids:[]}));
-   await route.fulfill({json:{ok:true,result:{paragraphs},provider:'fixture',hook:p==='wealth'?hook:null,interpretation:{mode:'grounded',claims:[]}}});
+   const b=route.request().postDataJSON(),p=MantraPolicyForTest(b.chapter);routed.push({id:b.chapter.id,kind:p,rows:b.chapter.paragraphs.length});if(p==='love')await new Promise(resolve=>setTimeout(resolve,250));const paragraphs=b.chapter.paragraphs.map(x=>({id:x.id,text:x.text+(p==='wealth'&&x.role==='reality'?' 기본 기질은 본래의 나에서 확인합니다.':''),refs:['natal'],claim_ids:[]}));
+   await route.fulfill({json:{ok:true,result:{paragraphs},provider:'fixture',hook:p==='wealth'?hook:p==='love'?{...hook,text:'늦게 도착한 연애 후킹도 첫 화면의 선언으로 표시됩니다.',hanja:'戀愛婚姻運'}:null,interpretation:{mode:'grounded',claims:[]}}});
   });
   function MantraPolicyForTest(c){return c.chapterKind || (/재물/.test(c.title)?'wealth':'');}
   await page.addInitScript(()=>sessionStorage.setItem('mt_v2_input',JSON.stringify({name:'테스트귀인',inp:{year:1992,month:6,day:23,hour:1,minute:0,calendar:'solar',gender:'M',city:'서울'}})));
   await page.goto(BASE+'/report/v2/?from=hub&flow=classic');await page.waitForSelector('#app[data-view="reader"]',{timeout:30000});
   await page.waitForFunction(()=>document.body.textContent.includes('매출이 늘어도 회수와 지출 관리'),undefined,{timeout:10000}).catch(async e=>{await page.screenshot({path:'output/chapter-browser-failure.png',fullPage:true});console.error(JSON.stringify({errors,routed,headlines:await page.locator('.rd-chead,.rd-mini').allTextContents()}));throw e;});
   assert(await page.locator('body').innerText().then(t=>t.includes('테스트귀인님, 매출이 늘어도')));assert(await page.locator('body').innerText().then(t=>t.includes('財物運')));assert(await page.locator('[data-reading-role]').count()>=120);
+  await page.locator('.rd-head.rd-chead').filter({hasText:'늦게 도착한 연애 후킹도 첫 화면의 선언으로 표시됩니다.'}).first().waitFor({timeout:10000});
   const basisLink=page.locator('[data-basis-reference="self"]').first();assert(await basisLink.count());const target=await basisLink.getAttribute('href');assert(await page.locator(target).count(),'self reference must point to a real chapter');
   await page.locator('.rd-play').click();await page.locator('[data-reading-role=title]').first().scrollIntoViewIfNeeded();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   const pdf=await page.evaluate(async fixture=>{

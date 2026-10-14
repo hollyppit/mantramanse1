@@ -512,6 +512,7 @@
         if (!fresh || !existing || /^(chart|dataVisualization|timeline)$/.test(scene.sceneType)) return;
         // 바깥 읽기 섹션과 관찰자는 유지하고, 아직 읽지 않은 본문만 갱신한다.
         var panel = panelOf(scene);
+        if (fresh.classList.contains('rd-head') || fresh.classList.contains('rd-mini')) ['rd-head','rd-chead','rd-mini','rv'].forEach(function (name) { existing.classList.toggle(name, fresh.classList.contains(name)); });
         existing.innerHTML = (panel ? panelHtml(panel) : '') + fresh.innerHTML;
       });
       linkBasisReferences(article); emphasize(article); watchVideos();
