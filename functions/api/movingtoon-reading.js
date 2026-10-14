@@ -3,7 +3,7 @@ import { CHAPTER_VERSION, selectChapterClaims, buildHook, chapterQuality, REVIEW
 import { json } from '../_lib.js';
 import { kvOf } from '../_store.js';
 import { loadAll, blockedDocs, meta } from '../_ikstore.js';
-import { VERSION, validate, sources, sanitize, systemFor, domainsFor } from '../_movingtoon-reading.js';
+import { VERSION, validate, sources, sanitize, allowedOutputNumbers, systemFor, domainsFor } from '../_movingtoon-reading.js';
 import { loadStyle, styleFor } from '../_stylestore.js';
 import { analyze, ENGINE_VERSION, WRITER_SYSTEM, validateWritten } from '../_interpretation-engine.js';
 import { loadSettings, loadSourceIndex } from '../_interpretation-store.js';
@@ -64,7 +64,7 @@ export async function onRequestPost({ request, env }) {
       await Promise.all([kv.put(hk, String((+h || 0) + 1), { expirationTtl: 7200 }), kv.put(dk, String((+d || 0) + 1), { expirationTtl: 172800 })]);
     }
   } catch { return json({ ok: false, error: 'storage-unavailable', storageStage, engineMode: mode }, 503); }
-  const allowedNumbers=[...new Set((JSON.stringify({chart:clean.sd,chapter:clean.chapter,knowledge:src.knowledge}).match(/\d+(?:\.\d+)?/g)||[]).map(Number))];
+  const allowedNumbers=allowedOutputNumbers(clean,src);
   const verifiedTimingClaimIds=(analysis?.claims || []).filter(c=>c.elements.some(r=>/daewoon|seun|monthSeason|futureSeason/.test(r.key))).map(c=>c.claim_id);
   const input = JSON.stringify({ ...src, allowedNumbers, verifiedTimingClaimIds, chapter: clean.chapter, outline: clean.outline, chapterPolicy: policy, previous, hookDraft: hookDraft ? {text:hookDraft.text,explanation:hookDraft.explanation,claim_id:hookDraft.claim_id}:null, hook: hook ? { text: hook.text, explanation: hook.explanation, claim_id: hook.claim_id } : null });
   let writerSystem = mode === 'grounded' ? WRITER_SYSTEM + '\n[표현 설정]\n' + (sty.directive || '') + '\n위 표현 설정은 판단·근거·불확실성을 변경하지 않는다.' : systemFor(sty);
@@ -98,7 +98,7 @@ export async function onRequestPost({ request, env }) {
       if (quality && !quality.ok) { rejected('chapter-quality',quality); continue; }
       let semantic = null, reviewUsage = null;
       if (policy && (mode === 'grounded' && settings.semanticReview || hook?.source === 'ai-reviewed')) {
-        const review = await generate(env, provider, reviewPayload(result,analysis,policy,previous,hook), REVIEW_SYSTEM, { ...settings, maxOutputTokens: 2000,timeoutMs:Math.max(1,deadline-Date.now()) });
+        const review = await generate(env, provider, reviewPayload(result,analysis,policy,previous,hook), REVIEW_SYSTEM, { ...settings, maxOutputTokens: 4000,timeoutMs:Math.max(1,deadline-Date.now()) });
         semantic = parseReview(review.text,policy); reviewUsage = review.usage;
         if (semantic?.coverage?.some(x=>x.claim_ids.some(id=>!analysis.claims.some(c=>c.claim_id===id))))semantic=null;
         if (!semantic || !semantic.ok) { rejected('semantic-review',semantic || {issues:[{code:'semantic-review-unavailable'}]}); continue; }

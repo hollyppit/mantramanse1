@@ -47,14 +47,19 @@ export function sources(items, sd, blocked, chapter) {
     return { id: x.id, domain: x.domain, principle: fill(x.item.principle), interpretation: fill(m.interpretation), strengths: list(x.item.strengths), risks: list(x.item.risks), actions: list(x.item.actions), strengthenActions: list(x.item.strengthenActions && x.item.strengthenActions.length ? x.item.strengthenActions : x.item.actions), copingActions: list(x.item.copingActions && x.item.copingActions.length ? x.item.copingActions : x.item.actions), theory: x.item.theory || [], behaviorPatterns: list(x.item.behaviorPatterns), modifiers: m.hits.map(h => ({ effect: h.effect, text: fill(h.text) })) };
   }) };
 }
+export function allowedOutputNumbers(clean, src) {
+  const base=JSON.stringify({chart:clean.sd,chapter:clean.chapter,knowledge:src.knowledge}),numbers=new Set((base.match(/\d+(?:\.\d+)?/g)||[]).map(Number));
+  // Display rounding is limited to existing calculated percentage tables.
+  for(const table of [clean.sd.tenGods,clean.sd.groups,clean.sd.fiveElements])for(const n of Object.values(table || {}))if(typeof n==='number' && Number.isFinite(n) && n>=0 && n<=100){numbers.add(Number(n.toFixed(1)));numbers.add(Number(n.toFixed(2)));}
+  return [...numbers];
+}
 export function sanitize(text, clean, src, options = {}) {
   const reject=(code,id,detail)=>{if(options.diagnostics)options.diagnostics.push({code,id,...detail});return null;};
   let d; try { d = JSON.parse(String(text).slice(String(text).indexOf('{'), String(text).lastIndexOf('}') + 1)); } catch { return reject('invalid-json'); }
   if (!d || !Array.isArray(d.paragraphs) || d.paragraphs.length !== clean.chapter.paragraphs.length) return reject('paragraph-count');
   const allowed = new Set(['natal', 'draft', ...src.knowledge.map(x => x.id)]), ids = new Set(clean.chapter.paragraphs.map(p => p.id)), seen = new Set();
   const out = [], seenText = new Set(), kinds = new Map(clean.chapter.paragraphs.map(p => [p.id, p.kind]));
-  const base = JSON.stringify({ chart: clean.sd, chapter: clean.chapter, knowledge: src.knowledge });
-  const numbers = new Set((base.match(/\d+(?:\.\d+)?/g) || []).map(Number));
+  const numbers = new Set(allowedOutputNumbers(clean,src));
   for (const p of d.paragraphs) {
     if (!p || !ids.has(p.id) || seen.has(p.id) || typeof p.text !== 'string') return reject('paragraph-schema',p?.id);
     const t = p.text.trim();

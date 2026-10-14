@@ -44,6 +44,7 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
  const dup=P.inspectChapter(bad,p,[{id:'earlier',text:'본인은 맡은 일을 끝까지 해내는 성향입니다.'}],null);assert(dup.issues.some(x=>x.code==='semantic-trait-duplicate'));
  assert(P.inspectChapter({paragraphs:[{id:'0',text:actual[0].hook.text}]},p,[],actual[0].hook).issues.some(x=>x.code==='hook-body-duplicate'));
  assert.equal(F.domainsFor({id:'c08'})[0],'MONEY');assert(!F.domainsFor({id:'c08'}).includes('ACTION'));assert.deepEqual(F.domainsFor({id:'c06'}),['CAREER']);
+ const numeric=F.allowedOutputNumbers({sd:{tenGods:{식신:19.583333333333332,상관:8.333333333333332},daewoon:[{startAge:7.2567}]},chapter:{paragraphs:[]}}, {knowledge:[]});assert(numeric.includes(19.58)&&numeric.includes(8.33));assert(!numeric.includes(19.57)&&!numeric.includes(7.26)&&!numeric.includes(1000000),'only calculated percentages gain display rounding');
  assert(P.chapterInstruction(p).includes('5%'));assert(!C.parseReview('{"ok":true,"issues":[{"code":"bad","reason":"bad"}]}'));
  const x=actual.find(x=>x.sd.ziwei),mem=new Map([['ik:d:MONEY',JSON.stringify([x.rule])],['src:idx',JSON.stringify([{id:'fixture',active:true}])],['src:chunks:fixture',JSON.stringify(sourceIndex.get('fixture').chunks)]]);
  const kv={get:async(k,t)=>mem.has(k)?t==='json'?JSON.parse(mem.get(k)):mem.get(k):null,put:async(k,v)=>mem.set(k,v)},env={ADMIN_PASSWORD:'test',GLOSSARY_KV:kv,OPENAI_API_KEY:'mock',INTERPRETATION_ENGINE_MODE:'grounded'};
