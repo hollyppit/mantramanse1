@@ -104,7 +104,8 @@
     content.push('<h2>원국 계산표</h2><table><tr><th>구분</th><th>간지</th><th>십성</th></tr>'+['year','month','day','hour'].map(function(k){var p=sd.pillars[k];return '<tr><td>'+esc({year:'연주',month:'월주',day:'일주',hour:'시주'}[k])+'</td><td>'+esc(p?p.ko:'시간 미상')+'</td><td>'+esc(p ? (p.stemTG || '')+' / '+(p.branchTG || '') : '판단 보류')+'</td></tr>';}).join('')+'</table><div class="cap">오행 분포</div><p>'+Object.keys(sd.fiveElements).map(function(k){return esc(k+' '+sd.fiveElements[k]+'%');}).join(' · ')+'</p>');
     (rep.chapters || []).filter(function(c){return c.readingCore;}).forEach(function(c){
       var blocks=[]; if(c.chapterHook)blocks.push(hookHtml(c,who));
-      if(c.readingParagraphs && c.interpretationAnalysis && c.interpretationAnalysis.mode==='grounded') {
+      if(c.readingParagraphs && (c.readingDeferred || c.interpretationAnalysis && c.interpretationAnalysis.mode==='grounded')) {
+        if(c.readingDeferred)blocks.push('<div class="cap">계산 참고값</div><p>'+nl(c.readingCore.why || '')+'</p>');
         c.readingParagraphs.forEach(function(p){var field=R.ReadingFlow.FIELDS.find(function(f){return f[0]===p.role;}),pieces=String(p.text).match(/[\s\S]{1,420}/g)||[];pieces.forEach(function(t,i){blocks.push('<div class="cap">'+esc(field?field[1]:'심층 풀이')+(i?' (계속)':'')+'</div><p>'+nl(t)+'</p>');});});
       } else R.ReadingFlow.FIELDS.forEach(function(f){
           var text=String(c.readingCore[f[0]]||''), pieces=text.match(/[\s\S]{1,420}/g)||[''];

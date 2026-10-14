@@ -60,6 +60,7 @@ export function sanitize(text, clean, src, options = {}) {
   const allowed = new Set(['natal', 'draft', ...src.knowledge.map(x => x.id)]), ids = new Set(clean.chapter.paragraphs.map(p => p.id)), seen = new Set();
   const out = [], seenText = new Set(), kinds = new Map(clean.chapter.paragraphs.map(p => [p.id, p.kind]));
   const numbers = new Set(allowedOutputNumbers(clean,src));
+  const sourceAliases=new Map((src.claims || []).map(c=>[c.claim_id,c.knowledge_id]));
   for (const p of d.paragraphs) {
     if (!p || !ids.has(p.id) || seen.has(p.id) || typeof p.text !== 'string') return reject('paragraph-schema',p?.id);
     const t = p.text.trim();
@@ -73,9 +74,10 @@ export function sanitize(text, clean, src, options = {}) {
     if (violations(clean.sd, t).length || inventedNames(clean.sd, t).length) return reject('calculation-or-name-mismatch',p.id); // 월령·오행·십성·신강약·일간 등 계산값과 어긋난 문장은 버린다
     const unknownNumbers=(t.match(/\d+(?:\.\d+)?/g)||[]).filter(n=>!numbers.has(Number(n)));
     if(unknownNumbers.length)return reject('unsupported-number',p.id,{numbers:[...new Set(unknownNumbers)].slice(0,8),role:clean.chapter.paragraphs.find(x=>x.id===p.id)?.role});
-    if (!Array.isArray(p.refs) || !p.refs.length || p.refs.some(r => !allowed.has(r))) return reject('source-reference-mismatch',p.id);
+    const refs=Array.isArray(p.refs)?p.refs.map(r=>sourceAliases.get(r)||r):null;
+    if (!refs || !refs.length || refs.some(r => !allowed.has(r))) return reject('source-reference-mismatch',p.id);
     if (src.knowledge.some(k => k.interpretation && t === k.interpretation.trim())) return reject('verbatim-rule-repetition',p.id);
-    seen.add(p.id); out.push({ id: p.id, text: t, refs: p.refs, ...(Array.isArray(p.claim_ids) ? { claim_ids: p.claim_ids.filter(x => typeof x === 'string') } : {}), layer: kinds.get(p.id) === 'episode' ? 'story' : 'reading' });
+    seen.add(p.id); out.push({ id: p.id, text: t, refs, ...(Array.isArray(p.claim_ids) ? { claim_ids: p.claim_ids.filter(x => typeof x === 'string') } : {}), layer: kinds.get(p.id) === 'episode' ? 'story' : 'reading' });
   }
   return { paragraphs: out };
 }

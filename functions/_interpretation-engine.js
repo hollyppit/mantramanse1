@@ -118,7 +118,7 @@ export function analyze(sd, items, opts = {}) {
   const eligible = items.filter(it => !disabled.has(it.id) && (!domains || domains.includes(it.domain)));
   const supported = cond => Object.keys(cond || {}).every(k => COND_FIELDS[k]);
   const scoped=eligible.map(sourceGenderScope);
-  const native = scoped.filter(it => !it.sourceScope?.conflict && !(it.tags || []).includes('system:ziwei') && supported(it.conditions) && (it.alsoWhen || []).every(supported) && supported(it.exclusions) && (it.modifiers || []).every(m => supported(m.when)));
+  const native = scoped.filter(it => !it.sourceScope?.conflict && (!it.sourceScope || it.sourceScope.gender===n.chart.gender) && !(it.tags || []).includes('system:ziwei') && supported(it.conditions) && (it.alsoWhen || []).every(supported) && supported(it.exclusions) && (it.modifiers || []).every(m => supported(m.when)));
   const retrieval = retrieve(native, n.saju, { blockedDocs: blocked });
   const saju = retrieval.used.map(rec => makeClaim(rec, n.saju, n.chart, 'saju', blocked, opts.sourceIndex)).filter(Boolean);
   const ziwei = eligible.filter(it => (it.tags || []).includes('system:ziwei') && isProduction(it)).map(it => {
@@ -133,7 +133,7 @@ export function analyze(sd, items, opts = {}) {
   if (claims.length < cap) claims.push(...saju.slice(sajuCount, sajuCount + cap - claims.length));
   // Preserve competing claims. Priority is an editorial preference, not proof.
   for (const a of claims) a.counter_evidence = claims.filter(b => b.system === a.system && b.topic === a.topic && b.domain === a.domain && a.stance !== 'neutral' && b.stance !== 'neutral' && a.stance !== b.stance).map(b => b.claim_id);
-  const warnings = scoped.filter(it=>it.sourceScope).map(it=>({code:it.sourceScope.conflict?'source-gender-conflict':'source-gender-qualified',rule:it.id,gender:it.sourceScope.gender}));
+  const warnings = scoped.filter(it=>it.sourceScope).map(it=>({code:it.sourceScope.conflict?'source-gender-conflict':it.sourceScope.gender!==n.chart.gender?'source-gender-mismatch':'source-gender-qualified',rule:it.id,gender:it.sourceScope.gender}));
   if (!n.provenance) warnings.push({ code: 'calculation-provenance-missing' });
   if (!opts.sourceIndex) warnings.push({ code: 'source-index-missing' });
   if (claims.length < saju.length + ziwei.length) warnings.push({ code: 'claim-limit', excludedCount: saju.length + ziwei.length - claims.length });
