@@ -35,7 +35,7 @@
   function evidenceBlocks(c) {
     var a = c.interpretationAnalysis, blocks = []; if (!a || a.mode !== 'grounded') return blocks;
     (a.claims || []).forEach(function(claim) {
-      var text = (claim.system === 'ziwei' ? '자미두수 독립 판단' : '명리학 독립 판단') + ' · ' + claim.judgment + '\n' +
+      var text = (claim.system === 'ziwei' ? '자미두수 검토 자료' : '명리학 검토 자료') + ' · ' + claim.judgment + '\n적용 여부와 제한은 본문에서 확인합니다. 원문 규칙의 모든 조건이 이 원국에 적용된다는 뜻은 아닙니다.\n' +
         claim.traditional_rules.map(function(r){return r.principle;}).join(' · ') + '\n' +
         claim.evidence.map(function(e){return (e.title || e.docId) + (e.pageStart ? ' '+e.pageStart+'쪽' : '') + (e.heading ? ' '+e.heading : '') + (e.quote ? '\n인용: '+e.quote : '');}).join(' · ') + '\n' + claim.uncertainty.note;
       (text.match(/[\s\S]{1,420}/g) || []).forEach(function(piece,i){blocks.push('<div class="cap">판단 근거와 예외'+(i?' (계속)':'')+'</div><p>'+nl(piece)+'</p>');});
