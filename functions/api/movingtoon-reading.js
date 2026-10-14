@@ -95,14 +95,17 @@ export async function onRequestPost({ request, env }) {
       const validation = mode === 'grounded' ? validateWritten(result, analysis, clean) : null;
       if (validation && !validation.ok) { rejected('grounding',validation); continue; }
       const quality = chapterQuality(result, analysis, policy, previous, hook);
-      if (quality && !quality.ok) { rejected('chapter-quality',quality); continue; }
+      const semanticRequired=!!(policy && (mode === 'grounded' && settings.semanticReview || hook?.source === 'ai-reviewed'));
+      const pendingRatio=!!(quality && !quality.ok && semanticRequired && quality.issues.every(x=>x.code==='temperament-ratio'));
+      if (quality && !quality.ok && !pendingRatio) { rejected('chapter-quality',quality); continue; }
       let semantic = null, reviewUsage = null;
-      if (policy && (mode === 'grounded' && settings.semanticReview || hook?.source === 'ai-reviewed')) {
+      if (semanticRequired) {
         const review = await generate(env, provider, reviewPayload(result,analysis,policy,previous,hook), REVIEW_SYSTEM, { ...settings, maxOutputTokens: 4000,timeoutMs:Math.max(1,deadline-Date.now()) });
         semantic = parseReview(review.text,policy); reviewUsage = review.usage;
         if (semantic?.coverage?.some(x=>x.claim_ids.some(id=>!analysis.claims.some(c=>c.claim_id===id))))semantic=null;
         if (!semantic || !semantic.ok) { rejected('semantic-review',semantic || {issues:[{code:'semantic-review-unavailable'}]}); continue; }
       }
+      if (pendingRatio && semantic?.ok) {quality.localReviewIssues=quality.issues;quality.issues=[];quality.ok=true;quality.warnings.push('local-ratio-reviewed-in-context');}
       if (quality) { quality.semanticReview = semantic; quality.semanticReviewStatus = semantic ? 'passed' : 'not-run'; quality.requiredCoverage=semantic?.coverage || []; quality.warnings.push(...(semantic?.coverage || []).filter(x=>x.status==='missing-evidence').map(x=>'required-evidence-missing:'+x.item)); }
       if (reviewUsage && generation.usage) { for(const k of ['inputTokens','outputTokens','totalTokens','cachedInputTokens'])generation.usage[k]=generation.usage[k]!=null && reviewUsage[k]!=null ? generation.usage[k]+reviewUsage[k] : null; }
       const cost = generation.usage && generation.usage.inputTokens != null && generation.usage.outputTokens != null && settings.inputPricePerMillion != null && settings.outputPricePerMillion != null ? (generation.usage.inputTokens * settings.inputPricePerMillion + generation.usage.outputTokens * settings.outputPricePerMillion) / 1e6 : null;
