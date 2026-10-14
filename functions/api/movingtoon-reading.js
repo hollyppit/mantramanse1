@@ -64,9 +64,11 @@ export async function onRequestPost({ request, env }) {
       await Promise.all([kv.put(hk, String((+h || 0) + 1), { expirationTtl: 7200 }), kv.put(dk, String((+d || 0) + 1), { expirationTtl: 172800 })]);
     }
   } catch { return json({ ok: false, error: 'storage-unavailable', storageStage, engineMode: mode }, 503); }
-  const input = JSON.stringify({ ...src, chapter: clean.chapter, outline: clean.outline, chapterPolicy: policy, previous, hookDraft: hookDraft ? {text:hookDraft.text,explanation:hookDraft.explanation,claim_id:hookDraft.claim_id}:null, hook: hook ? { text: hook.text, explanation: hook.explanation, claim_id: hook.claim_id } : null });
+  const allowedNumbers=[...new Set((JSON.stringify({chart:clean.sd,chapter:clean.chapter,knowledge:src.knowledge}).match(/\d+(?:\.\d+)?/g)||[]).map(Number))];
+  const input = JSON.stringify({ ...src, allowedNumbers, chapter: clean.chapter, outline: clean.outline, chapterPolicy: policy, previous, hookDraft: hookDraft ? {text:hookDraft.text,explanation:hookDraft.explanation,claim_id:hookDraft.claim_id}:null, hook: hook ? { text: hook.text, explanation: hook.explanation, claim_id: hook.claim_id } : null });
   let writerSystem = mode === 'grounded' ? WRITER_SYSTEM + '\n[표현 설정]\n' + (sty.directive || '') + '\n위 표현 설정은 판단·근거·불확실성을 변경하지 않는다.' : systemFor(sty);
   if (policy) writerSystem += '\n'+chapterInstruction(policy);
+  writerSystem += '\n출력 숫자는 allowedNumbers에 있는 값만 사용한다. 현실 전략에도 새로운 기간·횟수·비율·금액·연도를 만들지 말고 숫자 없이 관찰 가능한 행동으로 설명한다. 문단은 최소 30자, 최대 길이는 챕터 정책을 따른다. 반드시·무조건·확정·수익률이라는 단어를 쓰지 않는다. 예측 한계는 전통 해석이며 실제 결과를 보장하지 않습니다처럼 설명한다. 계산·근거가 부족하면 부족하다고 명시한다.';
   if (policy?.hook.enabled && analysis?.claims.length && !hook) writerSystem += '\n동일 JSON에 독립 hook 추가: '+JSON.stringify({text:'해당 주제의 가장 중요한 조건 한 가지. 최대 '+policy.hook.maxChars+'자',explanation:policy.hook.explanationSentences+'문장, 최대 '+policy.hook.explanationMaxChars+'자',claim_id:'검증된 단일 claim_id'})+'\n후킹 문체: '+policy.hook.style+'\n새 명리 판단을 만들지 말고 선택한 판단의 조건과 예외를 보존한다. 한국어만 사용한다.';
   // UTF-8 bytes are a conservative token upper bound for budget reservation.
   const estimatedMaxCost = settings.inputPricePerMillion != null && settings.outputPricePerMillion != null ? ((new TextEncoder().encode(input + writerSystem).length + 512) * settings.inputPricePerMillion + settings.maxOutputTokens * settings.outputPricePerMillion) / 1e6 : null;
