@@ -5,6 +5,7 @@ for(const f of ['engine.js','report/v2/saju-data.js','report/v2/reading-flow.js'
 const imp=f=>import(pathToFileURL(path.resolve(f)).href);
 (async()=>{
  const P=await imp('functions/_chapter-policy.js'),C=await imp('functions/_chapter-engine.js'),E=await imp('functions/_interpretation-engine.js'),K=await imp('functions/_ik.js'),F=await imp('functions/_movingtoon-reading.js'),API=await imp('functions/api/movingtoon-reading.js'),H=await imp('functions/api/chapter-hook.js'),S=await imp('functions/api/interpretation-settings.js');
+ assert.equal(K.bannedWrittenTerm('비중만으로 직업을 확정하지 못합니다.'),null);assert(K.bannedWrittenTerm('내년에 성공하는 일이 확정됩니다.'));assert(K.bannedWrittenTerm('확정하지 않더라도 반드시 부자가 됩니다.'));
  assert.equal(E.DEFAULT_SETTINGS.mode,'grounded');assert.equal(E.DEFAULT_SETTINGS.semanticReview,true);
  const actual=[],bands=new Set(),wealthBands=new Set(),features=new Set();
  const sourceIndex=new Map([['fixture',{id:'fixture',chunks:[{id:'one',text:'검사 전용 출처: 계산 조건에만 적용하는 합성 규칙.'}]}]]);
@@ -58,15 +59,16 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
  const save={action:'save',chapterKind:'wealth',sd:x.sd,expectVersion:preview.settingsVersion,...preview.hook};
  response=await H.onRequestPost({env,request:req('/api/chapter-hook',save)});let saved=await response.json();assert.equal(response.status,200,JSON.stringify(saved));assert.equal(saved.settingsVersion,1);assert(mem.has('ik:engine:history'));
  response=await H.onRequestPost({env,request:req('/api/chapter-hook',save)});assert.equal(response.status,409);
- const originalFetch=global.fetch;let calls=0,reject=false;
+ const originalFetch=global.fetch;let calls=0,reject=false,badHook=false;
  const rejectedRatio=C.parseReview(JSON.stringify({ok:true,issues:[],temperamentRatio:0.2,coverage:p.required.map(item=>({item,status:'covered',claim_ids:['saju:test']}))}),p);assert.equal(rejectedRatio.ok,false);assert(rejectedRatio.issues.some(i=>i.code==='temperament-ratio'));
  assert.equal(C.parseReview(JSON.stringify({ok:true,issues:[],temperamentRatio:0,coverage:[]}),p),null,'required item coverage is mandatory');
  global.fetch=async(url,o)=>{
   calls++;const payload=JSON.parse(JSON.parse(o.body).input);
   assert(!JSON.stringify(payload).includes('SECRET_NAME'));
   if(payload.result)return new Response(JSON.stringify({output_text:JSON.stringify({ok:!reject,temperamentRatio:0,coverage:payload.policy.required.map(item=>({item,status:'covered',claim_ids:payload.claims.map(c=>c.claim_id)})),issues:reject?[{code:'unsupported-claim',id:'0',reason:'검사 전용 근거 이탈 응답'}]:[]}),usage:{input_tokens:20,output_tokens:10,total_tokens:30}}));
+  if(payload.type==='hook-format-repair')return new Response(JSON.stringify({output_text:JSON.stringify({hook:{text:preview.hook.text,explanation:preview.hook.explanation,claim_id:preview.hook.claim_id}}),usage:{input_tokens:10,output_tokens:10,total_tokens:20}}));
   if(payload.claim && !payload.chapter)return new Response(JSON.stringify({output_text:JSON.stringify({text:preview.hook.text,explanation:preview.hook.explanation,claim_id:preview.hook.claim_id}),usage:{input_tokens:10,output_tokens:10,total_tokens:20}}));
-  return new Response(JSON.stringify({output_text:JSON.stringify({hook:payload.hookDraft || null,paragraphs:payload.chapter.paragraphs.map(p=>({...good.paragraphs[0],id:p.id,refs:[x.rule.id],claim_ids:['saju:'+x.rule.id]}))}),usage:{input_tokens:100,output_tokens:50,total_tokens:150}}));
+  return new Response(JSON.stringify({output_text:JSON.stringify({hook:badHook?{...payload.hookDraft,explanation:'검사 전용 형식 교정 안내입니다.'}:payload.hookDraft || null,paragraphs:payload.chapter.paragraphs.map(p=>({...good.paragraphs[0],id:p.id,refs:[x.rule.id],claim_ids:['saju:'+x.rule.id]}))}),usage:{input_tokens:100,output_tokens:50,total_tokens:150}}));
  };
  response=await H.onRequestPost({env,request:req('/api/chapter-hook',{...save,action:'regenerate',expectVersion:1})});const regenerated=await response.json();assert.equal(response.status,200,JSON.stringify(regenerated));assert.equal(regenerated.hook.text,preview.hook.text);assert.equal(JSON.parse(mem.get('ik:engine:settings')).version,1,'regenerate is preview only and cannot overwrite body/settings');calls=0;
  const input={sd:{...x.sd,name:'SECRET_NAME'},chapter:{id:'c08',title:'재물운',paragraphs:[{id:'0',text:'재물운의 수입과 지출, 회수일을 구분하여 설명할 초안 문단입니다.'}]},previous:[]};
@@ -82,6 +84,7 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
  const changedRule={...x.rule,version:(x.rule.version || 0)+1};mem.set('ik:d:MONEY',JSON.stringify([changedRule]));response=await H.onRequestPost({env,request:req('/api/chapter-hook',{...save,expectVersion:2})});assert.equal(response.status,409);
  const customStyle=JSON.parse(mem.get('ik:engine:settings'));customStyle.chapters.wealth.hook.style='조건을 먼저 보여 주는 간결한 선언';response=await S.onRequest({env,request:req('/api/interpretation-settings',{settings:customStyle,expectVersion:2})});assert.equal(response.status,200);
  response=await API.onRequestPost({env,request:req('/api/movingtoon-reading',input,false)});const styled=await response.json();assert.equal(response.status,200,JSON.stringify(styled));assert.equal(styled.hook.source,'ai-reviewed','custom hook style must trigger evidence-bound rewriting');assert(styled.chapterQuality.semanticReview.ok);
+ badHook=true;const callsBeforeRepair=calls;response=await API.onRequestPost({env,request:req('/api/movingtoon-reading',{...input,previous:[{text:'이전 챕터의 조건과 비교하며 생성 형식을 검사합니다.'}]},false)});const repaired=await response.json();assert.equal(response.status,200,JSON.stringify(repaired));assert.equal(calls-callsBeforeRepair,3,'one bounded hook repair must still receive independent review');assert(repaired.chapterQuality.semanticReview.ok);badHook=false;
  mem.set('src:idx',JSON.stringify([{id:'fixture',active:false}]));response=await API.onRequestPost({env,request:req('/api/movingtoon-reading',input,false)});assert.equal(response.status,422,'source deactivation invalidates cached body and hook');
  assert.equal(mem.get('src:chunks:fixture'),JSON.stringify(sourceIndex.get('fixture').chunks));global.fetch=originalFetch;
  global.fetch=async()=>new Response(JSON.stringify({error:{code:'insufficient_quota',message:'do not expose secret provider content'}}),{status:429});await assert.rejects(API.generate({OPENAI_API_KEY:'secret'},'openai','{}','test'),/^Error: provider-http-429-insufficient_quota$/);global.fetch=originalFetch;

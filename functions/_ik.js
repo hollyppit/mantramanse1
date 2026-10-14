@@ -338,6 +338,8 @@ function packageConfidence(p) {
 }
 
 // ───────────── 안전한 표현 / 품질 검사 ─────────────
+// Explicit uncertainty in written prose is not a positive certainty claim.
+export function bannedWrittenTerm(text) {return BANNED_RE.exec(String(text).replace(/확정(?=하지\s*(?:않|못)|할\s*수\s*없|할\s*근거가\s*없)/g,'판정'));}
 export const BANNED_RE = /(반드시|무조건|확정|100%|틀림없|사망|죽는|죽음|암에|질병에 걸|수익률|수익을 보장|임신한다|소송에서|범죄|이혼한다|파산한다|합격한다|결혼한다)/;
 const EVENT_RE = /(20\d\d년[에는\s]*[^.。\n]{0,12}(결혼|이혼|사망|합격|임신|파산|사고)[^.。\n]{0,6}(한다|합니다|됩니다|된다|할 것))/;
 const JARGON_RE = /(비겁|식상|재성|관성|인성|겁재|비견|식신|상관|편재|정재|편관|정관|편인|정인|신강|신약|통근|용신|격국|월령|지장간|조후)/g;

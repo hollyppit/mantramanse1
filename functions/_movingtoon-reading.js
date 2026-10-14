@@ -1,7 +1,7 @@
 import { chapterPolicy } from './_chapter-policy.js';
 // 전체 무빙툰 본문: 원국 + 게시/검수된 DB 원리를 근거로 새 문장을 작성한다.
 import { GUARD_PROMPT, violations } from './_guard.js';
-import { deriveFacts, retrieve, applyModifiers, detectConflicts, tplVars, tplFill, BANNED_RE } from './_ik.js';
+import { deriveFacts, retrieve, applyModifiers, detectConflicts, tplVars, tplFill, BANNED_RE, bannedWrittenTerm } from './_ik.js';
 import { PROHIBITED_RE } from './_style.js';
 export const VERSION = 'natal-reading-11';
 export const SYSTEM = `너는 솔직하고 차분한 역술 상담가다. 계산된 원국과 검수된 DB 원리, 현재 챕터의 초안을 근거로 해당 챕터의 본문을 새로 풀이한다. 해결된 충돌은 선택된 근거를 따르고 해결되지 않은 충돌은 조건을 나누어 설명한다. 적용된 modifiers를 강화·완화·예외에 맞게 반영한다. DB 문장을 복사하거나 초안을 단순히 바꾸어 쓰지 말고 개인 원국의 배합에 적용한다.
@@ -65,7 +65,7 @@ export function sanitize(text, clean, src, options = {}) {
     const t = p.text.trim();
     if(t.length<30 || t.length>(options.deep?1200:500))return reject('paragraph-length',p.id,{characters:t.length});
     if(/<[^>]*>|\{[^{}]+\}/.test(t))return reject('unsafe-markup',p.id);
-    if(BANNED_RE.test(t))return reject('prohibited-term',p.id,{term:(t.match(BANNED_RE)||[])[0]});
+    if(bannedWrittenTerm(t))return reject('prohibited-term',p.id,{term:bannedWrittenTerm(t)[0]});
     if(PROHIBITED_RE.test(t))return reject('prohibited-assertion',p.id);
     const normalized = t.replace(/\s+/g, '');
     if (seenText.has(normalized)) return reject('identical-paragraph',p.id);

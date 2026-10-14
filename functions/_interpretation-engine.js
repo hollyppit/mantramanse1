@@ -1,6 +1,6 @@
 // Calculation outputs -> structural observations -> independently sourced claims.
 // No calendar or star placement calculation and no generated traditional rules.
-import { deriveFacts, retrieve, applyModifiers, tplVars, tplFill, BANNED_RE, isProduction, COND_FIELDS } from './_ik.js';
+import { deriveFacts, retrieve, applyModifiers, tplVars, tplFill, BANNED_RE, bannedWrittenTerm, isProduction, COND_FIELDS } from './_ik.js';
 import { violations } from './_guard.js';
 import { PROHIBITED_RE } from './_style.js';
 
@@ -195,7 +195,7 @@ export function validateWritten(result, analysis, clean) {
       if (expected?.length && p.claim_ids.some(id => !expected.includes(id))) warnings.push('paragraph-claim-mismatch');
       if (!p.refs?.some(ref => cited.some(c => c.knowledge_id === ref)) || p.refs.some(ref => !cited.some(c => c.knowledge_id === ref))) warnings.push('claim-source-mismatch');
     }
-    if (!safeText(p.text) || violations(clean.sd, p.text).length || /무한한 가능성|긍정적인 마음으로 기다|노력한다면 좋은 결과/.test(p.text)) warnings.push('unsafe-or-generic');
+    if (typeof p.text!=='string' || !p.text.trim() || bannedWrittenTerm(p.text) || PROHIBITED_RE.test(p.text) || /\{[^{}]+\}/.test(p.text) || violations(clean.sd, p.text).length || /무한한 가능성|긍정적인 마음으로 기다|노력한다면 좋은 결과/.test(p.text)) warnings.push('unsafe-or-generic');
     for (const sentence of p.text.split(/(?<=[.!?。])\s+/).filter(s => s.length > 24)) {
       const key = sentence.replace(/\s+/g,''); if (seenSentences.has(key)) warnings.push('repeated-sentence'); seenSentences.add(key);
     }
