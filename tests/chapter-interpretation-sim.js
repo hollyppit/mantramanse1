@@ -17,6 +17,7 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
    const other=K.cleanItem({...rule,id:domain+'-'+(1000+i),domain,interpretation:judgment}),otherAnalysis=E.analyze(sd,[other],{sourceIndex}),otherPolicy=P.chapterPolicy({chapterKind:kind}),otherHook=await C.buildHook(otherAnalysis,otherPolicy,{});assert(otherHook,kind);assert(C.validateHook(otherHook,otherAnalysis,otherPolicy).ok);assert.equal(otherHook.chapterKind,kind);assert(!C.validateHook({...otherHook,text:'반드시 부자가 되고 결혼합니다.'},otherAnalysis,otherPolicy).ok);
   }
   const opposing={...selected,claims:[{...selected.claims[0],counter_evidence:['saju:opposite']}]} ,opposingHook=await C.buildHook(opposing,p,{});assert(opposingHook.explanation.includes('다른 방향'));assert(C.validateHook(opposingHook,opposing,p).ok);
+  assert(C.validateHook({...hook,explanation:'검사 전용 근거를 확인합니다. 적용 조건을 설명합니다.'},selected,p).ok);assert(!C.validateHook({...hook,explanation:'검사 전용 근거를 확인합니다. 적용 조건을 설명합니다. 세 번째 문장입니다. 네 번째 문장입니다.'},selected,p).ok);
   const later=E.analyze({...sd,calculationProvenance:{...sd.calculationProvenance,asOf:'2026-10-14T03:00:05.000Z'}},[rule],{sourceIndex});assert.equal(await C.chartFingerprint(later),await C.chartFingerprint(a),'logging timestamp cannot invalidate edits to the same chart');
   assert.notEqual(await C.chartFingerprint(E.analyze({...sd,nowYear:sd.nowYear+1},[rule],{sourceIndex})),await C.chartFingerprint(a),'changed calculation context must invalidate edits');
   assert.equal(hook.basis.elements.length,3);assert.equal(hook.basis.evidence[0].docId,'fixture');

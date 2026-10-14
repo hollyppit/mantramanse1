@@ -9,7 +9,7 @@
     timing:{title:'운의 흐름',hanja:'運勢流轉',domains:['TIMING'],purpose:'원국과 실제 전달된 운의 조건을 연결하고 재물·직업·관계의 변화를 구분한다.',required:['대운·세운·월운','재물·직업·관계별 변화','변화의 원인','유리·불리한 조건','시기별 기회·위험'],excluded:['일반 기질 소개','없는 운 계산','특정 연도 사건 확정'],temperamentRatio:0},
     remedy:{title:'개운법',hanja:'開運法',domains:['ACTION'],purpose:'앞서 검증된 판단을 개인의 실행 계획으로 연결한다.',required:['앞선 분석의 종합','운동·학습·직업 역량','습관·환경 개선','상징적 전통법과 현실 행동 구분','시작·점검·중단 기준'],excluded:['일반 성격 재소개','색·물건으로 운 변경 보장'],temperamentRatio:0}
   };
-  Object.keys(DATA).forEach(function(k){Object.assign(DATA[k],{style:COMMON_STYLE,maxParagraphChars:600,prompt:'',hook:{enabled:['wealth','love','career'].indexOf(k)>=0,style:'짧고 직설적인 조건부 핵심 진단. 장점과 취약점 모두 허용.',maxChars:100,explanationSentences:2,explanationMaxChars:420}});});
+  Object.keys(DATA).forEach(function(k){Object.assign(DATA[k],{style:COMMON_STYLE,maxParagraphChars:600,prompt:'',hook:{enabled:['wealth','love','career'].indexOf(k)>=0,style:'짧고 직설적인 조건부 핵심 진단. 장점과 취약점 모두 허용.',maxChars:100,explanationSentences:3,explanationMaxChars:420}});});
   var IDS={self:['c00','c01','c02','c03','c04','c05','deep_proscons','reading_transform','life_ik_SELF'],wealth:['c08','deep_wealth','life_ik_MONEY'],love:['c09','c10','deep_love','deep_marriage','deep_spouse','life_ik_LOVE','life_ik_MARRIAGE'],career:['c06','c07','deep_jobs','life_ik_CAREER'],timing:['c15','c16','c17','c18','deep_daewoon','deep_seun','deep_wolun','life_prologue','life_future','life_ik_TIMING'],remedy:['c19','c20','deep_places','deep_remedy','life_action','life_actions','life_ik_ACTION']};
   function clone(x){return JSON.parse(JSON.stringify(x));}
   function kind(c){

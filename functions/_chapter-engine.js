@@ -22,12 +22,12 @@ export function validateHook(h,analysis,p){
   if(!p?.hook.enabled || !c || !p.domains.includes(c.domain) || !c.evidence?.length || !c.elements?.length)issues.push('hook-evidence-missing');
   if(typeof h?.text!=='string' || !h.text.trim() || h.text.length>p.hook.maxChars || /[<>\n{}]/.test(h.text || ''))issues.push('hook-length-or-format');
   const es=sentences(h?.explanation);
-  if(typeof h?.explanation!=='string' || es.length!==p.hook.explanationSentences || h.explanation.length>p.hook.explanationMaxChars)issues.push('hook-explanation-length');
+  if(typeof h?.explanation!=='string' || (es.length<2 || es.length>p.hook.explanationSentences) || h.explanation.length>p.hook.explanationMaxChars)issues.push('hook-explanation-length');
   const text=(h?.text || '')+' '+(h?.explanation || '');
   if(BANNED_RE.test(text)||PROHIBITED_RE.test(text)||violations(analysis.normalized.chart,text).length||/무한한 가능성|반드시|무조건|확실히.{0,10}(부자|결혼|성공)|좋은 기운|객관적으로 검증/.test(text))issues.push('hook-unsafe-or-inconsistent');
   if(p.key!=='self' && generalTrait(h?.text || '',p.key))issues.push('hook-generic-trait');
   if(c && c.counter_evidence?.length && !/조건|반대|다른|상반|다만/.test(h?.explanation || ''))issues.push('hook-counter-evidence-omitted');
-  return {ok:issues.length===0,issues};
+  return {ok:issues.length===0,issues,metrics:{explanationSentences:es.length,explanationCharacters:String(h?.explanation || '').length}};
 }
 export async function buildHook(analysis,p,settings){
   if(!p?.hook.enabled || !['wealth','love','career'].includes(p.key))return null;
