@@ -51,7 +51,7 @@ function makeClaim(rec, facts, sd, system, blocked, sourceIndex) {
   if (m.hits.some(h => h.effect === 'exception')) return null;
   if (system === 'saju' && violations(sd, fill(m.interpretation)).length) return null;
   return {
-    claim_id: system + ':' + rec.id, system, topic: it.subDomain || it.domain, domain: it.domain,
+    claim_id: system + ':' + rec.id, source_scope: it.sourceScope || null, system, topic: it.subDomain || it.domain, domain: it.domain,
     judgment: fill(m.interpretation), elements: rec.rows, traditional_rules: [{ id: rec.id, principle: fill(it.principle), conditions: copy(it.conditions || {}), modifiers: m.hits }],
     db_material_ids: [...new Set(evidence.map(e => e.docId))], evidence: copy(evidence), knowledge_id: rec.id, knowledge_version: it.version || 0,
     counter_evidence: [], exceptions: copy(it.exclusions || {}), schools: it.theory || [],
@@ -91,12 +91,24 @@ export function compareClaims(a, b) {
   return out;
 }
 
+// Source scoping narrows legacy extraction filters without modifying stored rules.
+export function sourceGenderScope(item) {
+  if(!['LOVE','MARRIAGE'].includes(item.domain) || !Object.keys(item.conditions || {}).length)return item;
+  const text=String(item.principle || '');
+  const female=/(?:^|[.。]\s*)(?:원문은\s*)?(?:여성|여명|여자|女命)(?:의|에게|\s*명조|\s*사주)|여성의 배우자성/.test(text);
+  const male=/(?:^|[.。]\s*)(?:원문은\s*)?(?:남성|남명|남자|男命)(?:의|에게|\s*명조|\s*사주)|남성의 배우자성/.test(text);
+  if(female===male)return item;
+  const gender=female?'F':'M', conflict=Array.isArray(item.conditions.gender) && !item.conditions.gender.includes(gender);
+  return {...item,conditions:{...item.conditions,gender:[gender]},sourceScope:{gender,basis:'explicit-traditional-principle',conflict}};
+}
+
 export function analyze(sd, items, opts = {}) {
   const n = normalize(sd), blocked = opts.blockedDocs || new Set(), disabled = new Set(opts.disabledRules || []), domains = opts.domains;
   const features = extractFeatures(n); n.saju.structure = features.map(f => f.feature_id);
   const eligible = items.filter(it => !disabled.has(it.id) && (!domains || domains.includes(it.domain)));
   const supported = cond => Object.keys(cond || {}).every(k => COND_FIELDS[k]);
-  const native = eligible.filter(it => !(it.tags || []).includes('system:ziwei') && supported(it.conditions) && (it.alsoWhen || []).every(supported) && supported(it.exclusions) && (it.modifiers || []).every(m => supported(m.when)));
+  const scoped=eligible.map(sourceGenderScope);
+  const native = scoped.filter(it => !it.sourceScope?.conflict && !(it.tags || []).includes('system:ziwei') && supported(it.conditions) && (it.alsoWhen || []).every(supported) && supported(it.exclusions) && (it.modifiers || []).every(m => supported(m.when)));
   const retrieval = retrieve(native, n.saju, { blockedDocs: blocked });
   const saju = retrieval.used.map(rec => makeClaim(rec, n.saju, n.chart, 'saju', blocked, opts.sourceIndex)).filter(Boolean);
   const ziwei = eligible.filter(it => (it.tags || []).includes('system:ziwei') && isProduction(it)).map(it => {
@@ -111,7 +123,7 @@ export function analyze(sd, items, opts = {}) {
   if (claims.length < cap) claims.push(...saju.slice(sajuCount, sajuCount + cap - claims.length));
   // Preserve competing claims. Priority is an editorial preference, not proof.
   for (const a of claims) a.counter_evidence = claims.filter(b => b.system === a.system && b.topic === a.topic && b.domain === a.domain && a.stance !== 'neutral' && b.stance !== 'neutral' && a.stance !== b.stance).map(b => b.claim_id);
-  const warnings = [];
+  const warnings = scoped.filter(it=>it.sourceScope).map(it=>({code:it.sourceScope.conflict?'source-gender-conflict':'source-gender-qualified',rule:it.id,gender:it.sourceScope.gender}));
   if (!n.provenance) warnings.push({ code: 'calculation-provenance-missing' });
   if (!opts.sourceIndex) warnings.push({ code: 'source-index-missing' });
   if (claims.length < saju.length + ziwei.length) warnings.push({ code: 'claim-limit', excludedCount: saju.length + ziwei.length - claims.length });
