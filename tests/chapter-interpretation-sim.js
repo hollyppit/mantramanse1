@@ -40,6 +40,7 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
  const p=P.chapterPolicy({id:'c08'}),good={paragraphs:[{id:'0',text:'수입은 고정비와 변동비를 구분해서 확인하고 자금 회수 기간을 기록합니다. 매출 증가가 이익 증가로 이어지는 조건과 지출 부담을 함께 점검합니다.'}]};
  assert(P.inspectChapter(good,p,[],null).ok);
  const bad={paragraphs:[{id:'0',text:'당신은 책임감이 강하고 추진력이 뛰어난 성격입니다. 당신은 신중하고 꼼꼼하게 상황을 살피는 기질을 가지고 있습니다.'}]};assert(!P.inspectChapter(bad,p,[],null).ok);
+ assert(!P.generalTrait('일간과 오행의 기본 기질 설명은 본래의 나에서 확인합니다.','love'));assert(P.generalTrait('본래의 나에서 설명하듯 당신은 책임감이 강한 성격입니다.','love'),'reference wording cannot hide actual temperament prose');
  assert(P.duplicate('당신은 책임감이 강한 성격입니다.','본인은 맡은 일을 끝까지 해내는 성향입니다.'));
  const dup=P.inspectChapter(bad,p,[{id:'earlier',text:'본인은 맡은 일을 끝까지 해내는 성향입니다.'}],null);assert(dup.issues.some(x=>x.code==='semantic-trait-duplicate'));
  assert(P.inspectChapter({paragraphs:[{id:'0',text:actual[0].hook.text}]},p,[],actual[0].hook).issues.some(x=>x.code==='hook-body-duplicate'));
