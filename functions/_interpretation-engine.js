@@ -44,8 +44,18 @@ function evidenceFor(item, blocked, sourceIndex) {
     return chunks.length > 0 && (e.quote ? chunks.some(c => String(c.text || '').includes(e.quote)) : !!e.chunkId);
   });
 }
+export function sourcePremiseIssue(item, sd) {
+  const p=String(item.principle || ''), relations=sd.clashes || [];
+  if(/붕충의 해/.test(p) && !Object.keys(item.conditions || {}).some(k=>/daewoon|seun|monthSeason|futureSeason/.test(k)))return 'source-time-condition-missing';
+  if(/토끼리.*충|진술축미.*(?:붕충|부딪)/.test(p) && !relations.some(r=>r.type==='충' && r.members?.length===2 && r.members.every(k=>['진','술','축','미'].includes(sd.pillars?.[k]?.ko?.[1]))))return 'source-earth-clash-mismatch';
+  if(/두 사람의 일지/.test(p))return 'source-partner-chart-missing';
+  if(/일지[\s\S]{0,30}(?:도화살|홍염살)/.test(p) && !(sd.specialStars || []).some(s=>s.pillar==='day' && /도화|홍염/.test(s.name)))return 'source-spouse-star-location-mismatch';
+  for(const type of ['충','형'])if((type==='충'?/일지[\s\S]{0,16}충이/:/일지에 형/).test(p) && !relations.some(r=>r.type===type && r.members?.includes('day')))return 'source-spouse-relation-location-mismatch';
+  return null;
+}
 function makeClaim(rec, facts, sd, system, blocked, sourceIndex) {
   const it = rec.item, evidence = evidenceFor(it, blocked, sourceIndex), m = applyModifiers(rec, facts), V = tplVars(sd), fill = x => tplFill(x, V);
+  if (system==='saju' && sourcePremiseIssue(it,sd))return null;
   if (rec.general || !rec.rows.length || !it.principle || !evidence.length || !safeText(fill(m.interpretation)) || !safeText(fill(it.principle))) return null;
   const list = xs => (xs || []).map(fill).filter(safeText);
   if (m.hits.some(h => h.effect === 'exception')) return null;
@@ -131,7 +141,7 @@ export function analyze(sd, items, opts = {}) {
   if (!n.ziwei) warnings.push({ code: 'ziwei-unavailable' });
   else if (!ziwei.length) warnings.push({ code: 'ziwei-rules-missing' });
   if (n.chart.reviewConditions?.hourUnknown) warnings.push({ code: 'hour-unknown' });
-  const rejected = retrieval.used.filter(r => !saju.some(c => c.knowledge_id === r.id)).map(r => ({ id: r.id, reason: 'specific-conditions-source-or-safe-rule-missing' }));
+  const rejected = retrieval.used.filter(r => !saju.some(c => c.knowledge_id === r.id)).map(r => ({ id: r.id, reason: sourcePremiseIssue(r.item,n.chart) || 'specific-conditions-source-or-safe-rule-missing' }));
   return { version: ENGINE_VERSION, normalized: n, features, independent: { saju: claims.filter(c => c.system === 'saju'), ziwei: claims.filter(c => c.system === 'ziwei') }, claims, cross_analysis: compareClaims(claims.filter(c => c.system === 'saju'), claims.filter(c => c.system === 'ziwei')), rejected: [...retrieval.excluded, ...rejected], warnings, quality: { evidenceTraceability: claims.length ? 100 : null, personalization: claims.length ? Math.round(100 * claims.filter(c => c.elements.length > 1).length / claims.length) : null, predictionAccuracy: null } };
 }
 
