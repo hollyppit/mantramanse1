@@ -291,6 +291,10 @@
     var w = (S.wmap.list || []).filter(function (x) { return x.id === id; })[0]; return w && w.name ? w : null;
   }
   // 챕터 첫 화면 머리글의 "ACT II · 10" → "🏯 황금의 성채 · 10". 문서는 지도보다 먼저 만들어질 수 있고 세계 이름이 서버에서 바뀔 수도 있어, 만든 뒤 글자만 맞춘다.
+  function linkBasisReferences(root) {
+    var target=(S.rep && S.rep.chapters || []).find(function(c){return c.readingSection===2 && !c.readingSupplementary;});if(!target || !root)return;
+    root.querySelectorAll('p').forEach(function(p){var walker=document.createTreeWalker(p,NodeFilter.SHOW_TEXT),nodes=[],n;while((n=walker.nextNode()))if(n.nodeValue.includes('본래의 나') && !n.parentElement.closest('a,button'))nodes.push(n);nodes.forEach(function(n){var parts=n.nodeValue.split('본래의 나'),frag=document.createDocumentFragment();parts.forEach(function(t,i){if(i){var a=document.createElement('a');a.href='#ch-'+target.id;a.textContent='본래의 나';a.setAttribute('data-basis-reference','self');frag.appendChild(a);}frag.appendChild(document.createTextNode(t));});n.parentNode.replaceChild(frag,n);});});
+  }
   function chapterTags() {
     if (!S.rep) return; var root = document.getElementById('chapter'); if (!root) return;
     S.rep.chapters.forEach(function (c, ci) {
@@ -510,7 +514,7 @@
         var panel = panelOf(scene);
         existing.innerHTML = (panel ? panelHtml(panel) : '') + fresh.innerHTML;
       });
-      emphasize(article); watchVideos();
+      linkBasisReferences(article); emphasize(article); watchVideos();
       if (S.mv) S.mv.measure();
     }) : null;
     var ready = reading ? Promise.race([reading.first, new Promise(function (ok) { setTimeout(ok, 18000); })]) : Promise.resolve();
@@ -765,7 +769,7 @@
       if(extra) main+='<details class="reading-supplement" style="margin:16px auto;max-width:720px;padding:16px"><summary>더 깊이 읽기 · '+esc(c.originalTitle || c.title)+'</summary>'+extra+'</details>';
       h += '<article class="chap" id="ch-' + esc(c.id) + '" data-ch="' + ci + '" aria-label="' + esc(c.title) + '">' + main + '</article>';
     });
-    $('#chapter').innerHTML = h; chapterTags(); try { emphasize($('#chapter')); } catch (e) { /* 강조가 실패해도 본문은 그대로 */ }
+    $('#chapter').innerHTML = h; chapterTags(); linkBasisReferences($('#chapter')); try { emphasize($('#chapter')); } catch (e) { /* 강조가 실패해도 본문은 그대로 */ }
     rep.chapters.forEach(function (c) { if (c.kind === 'monthly') { var cur = (c.items || []).findIndex(function (x) { return x.isNow; }); moDetail(c, Math.max(0, cur)); } });
   }
   function openDoc(start, o) {
