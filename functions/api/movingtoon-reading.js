@@ -13,7 +13,7 @@ export async function generate(env, provider, input, SYSTEM, settings = {}) {
   const body = isOpen ? { model: settings.openaiModel || env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: SYSTEM, input, max_output_tokens: maxTokens } : { model: settings.anthropicModel || env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: maxTokens, system: SYSTEM, messages: [{ role: 'user', content: input }] };
   const headers = isOpen ? { authorization: 'Bearer ' + env.OPENAI_API_KEY } : { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' };
   const r = await fetch(isOpen ? 'https://api.openai.com/v1/responses' : 'https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(40000), headers: { ...headers, 'content-type': 'application/json' }, body: JSON.stringify(body) });
-  if (!r.ok) throw Error('provider');
+  if (!r.ok) throw Error('provider-http-'+r.status);
   const d = await r.json();
   const text = isOpen ? d.output_text || (d.output || []).flatMap(x => x.content || []).map(x => x.text || '').join('') : (d.content || []).filter(x => x.type === 'text').map(x => x.text).join('');
   return { text, model: String(d.model || body.model).slice(0, 120), elapsedMs: Date.now() - started, usage: usageOf(d.usage) };
@@ -27,6 +27,7 @@ export async function onRequestPost({ request, env }) {
   let clean, original;
   try { const raw = await request.text(); if (raw.length > 160000) return json({ ok: false, error: 'too-large' }, 413); original = JSON.parse(raw); clean = validate(original); } catch { }
   if (!clean) return json({ ok: false, error: 'bad-payload' }, 400);
+  const requestStarted=Date.now(),providerAttempts=[];
   let storageStage='rules';
   let kv, key, src, sty, analysis, settings, mode, policy, hook, hookDraft, previous = [], lastRejection = null;
   try {
@@ -76,7 +77,9 @@ export async function onRequestPost({ request, env }) {
     hook=fixedHook;
     try {
       const generation = await generate(env, provider, input, writerSystem, settings);
-      const result = sanitize(generation.text, clean, src, { deep: mode === 'grounded' }); if (!result) continue;
+      providerAttempts.push({provider,status:'writer-returned',elapsedMs:generation.elapsedMs});
+      const diagnostics=[];
+      const result = sanitize(generation.text, clean, src, { deep: mode === 'grounded',diagnostics }); if (!result) {lastRejection={issues:diagnostics};continue;}
       if (policy?.hook.enabled && analysis?.claims.length && !hook) {
         let candidate; try { candidate=JSON.parse(generation.text).hook; } catch { }
         const check=validateHook(candidate,analysis,policy);
@@ -104,5 +107,5 @@ export async function onRequestPost({ request, env }) {
       return json({ ok: true, ...value, cached: false });
     } catch { }
   }
-  return json({ ok: false, error: lastRejection ? 'chapter-validation-failed' : 'ai-unavailable', validation: lastRejection, engineMode: mode }, 502);
+  return json({ ok: false, error: lastRejection ? 'chapter-validation-failed' : 'ai-unavailable', validation: lastRejection, providerAttempts, elapsedMs:Date.now()-requestStarted, engineMode: mode }, 502);
 }

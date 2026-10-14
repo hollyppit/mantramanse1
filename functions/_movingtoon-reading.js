@@ -48,23 +48,24 @@ export function sources(items, sd, blocked, chapter) {
   }) };
 }
 export function sanitize(text, clean, src, options = {}) {
-  let d; try { d = JSON.parse(String(text).slice(String(text).indexOf('{'), String(text).lastIndexOf('}') + 1)); } catch { return null; }
-  if (!d || !Array.isArray(d.paragraphs) || d.paragraphs.length !== clean.chapter.paragraphs.length) return null;
+  const reject=(code,id)=>{if(options.diagnostics)options.diagnostics.push({code,id});return null;};
+  let d; try { d = JSON.parse(String(text).slice(String(text).indexOf('{'), String(text).lastIndexOf('}') + 1)); } catch { return reject('invalid-json'); }
+  if (!d || !Array.isArray(d.paragraphs) || d.paragraphs.length !== clean.chapter.paragraphs.length) return reject('paragraph-count');
   const allowed = new Set(['natal', 'draft', ...src.knowledge.map(x => x.id)]), ids = new Set(clean.chapter.paragraphs.map(p => p.id)), seen = new Set();
   const out = [], seenText = new Set(), kinds = new Map(clean.chapter.paragraphs.map(p => [p.id, p.kind]));
   const base = JSON.stringify({ chart: clean.sd, chapter: clean.chapter, knowledge: src.knowledge });
   const numbers = new Set((base.match(/\d+(?:\.\d+)?/g) || []).map(Number));
   for (const p of d.paragraphs) {
-    if (!p || !ids.has(p.id) || seen.has(p.id) || typeof p.text !== 'string') return null;
+    if (!p || !ids.has(p.id) || seen.has(p.id) || typeof p.text !== 'string') return reject('paragraph-schema',p?.id);
     const t = p.text.trim();
-    if (t.length < 30 || t.length > (options.deep ? 1200 : 500) || /<[^>]*>|\{[^{}]+\}/.test(t) || BANNED_RE.test(t) || PROHIBITED_RE.test(t)) return null;
+    if (t.length < 30 || t.length > (options.deep ? 1200 : 500) || /<[^>]*>|\{[^{}]+\}/.test(t) || BANNED_RE.test(t) || PROHIBITED_RE.test(t)) return reject('length-or-prohibited-expression',p.id);
     const normalized = t.replace(/\s+/g, '');
-    if (seenText.has(normalized)) return null;
+    if (seenText.has(normalized)) return reject('identical-paragraph',p.id);
     seenText.add(normalized);
-    if (violations(clean.sd, t).length || inventedNames(clean.sd, t).length) return null; // 월령·오행·십성·신강약·일간 등 계산값과 어긋난 문장은 버린다
-    if ((t.match(/\d+(?:\.\d+)?/g) || []).some(n => !numbers.has(Number(n)))) return null;
-    if (!Array.isArray(p.refs) || !p.refs.length || p.refs.some(r => !allowed.has(r))) return null;
-    if (src.knowledge.some(k => k.interpretation && t === k.interpretation.trim())) return null;
+    if (violations(clean.sd, t).length || inventedNames(clean.sd, t).length) return reject('calculation-or-name-mismatch',p.id); // 월령·오행·십성·신강약·일간 등 계산값과 어긋난 문장은 버린다
+    if ((t.match(/\d+(?:\.\d+)?/g) || []).some(n => !numbers.has(Number(n)))) return reject('unsupported-number',p.id);
+    if (!Array.isArray(p.refs) || !p.refs.length || p.refs.some(r => !allowed.has(r))) return reject('source-reference-mismatch',p.id);
+    if (src.knowledge.some(k => k.interpretation && t === k.interpretation.trim())) return reject('verbatim-rule-repetition',p.id);
     seen.add(p.id); out.push({ id: p.id, text: t, refs: p.refs, ...(Array.isArray(p.claim_ids) ? { claim_ids: p.claim_ids.filter(x => typeof x === 'string') } : {}), layer: kinds.get(p.id) === 'episode' ? 'story' : 'reading' });
   }
   return { paragraphs: out };
