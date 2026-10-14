@@ -45,6 +45,8 @@
     var safe = {}; Object.keys(sd || {}).forEach(function (k) { if (k !== 'birth' && k !== 'name') safe[k] = sd[k]; });
     var chapters = rep.chapters || [], outline = chapters.map(function (c) { return { id: c.id || c.base, title: name ? (c.title || '').split(name).join('본인') : c.title || '' }; });
     var jobs = chapters.map(function (c) { return { c: c, job: collect(c, name) }; }), done = 0;
+    // Prepare the three entrance declarations before longer supplemental introductions.
+    jobs.sort(function(a,b){function rank(x){var k=x.job.chapter.chapterKind;return x.c.readingCore && ['wealth','love','career'].indexOf(k)>=0 ? ['wealth','love','career'].indexOf(k) : x.c.id==='c-char'?5:4;}return rank(a)-rank(b);});
     var acceptedTexts = new Map();
     var status = { total: jobs.length, completed: 0, failed: 0 };
     rep.readingStatus = status;

@@ -2,7 +2,7 @@ import { chapterPolicy, sentences, generalTrait, inspectChapter, similarity } fr
 import { violations } from './_guard.js';
 import { BANNED_RE } from './_ik.js';
 import { PROHIBITED_RE } from './_style.js';
-export const CHAPTER_VERSION='chapter-responsibility-3';
+export const CHAPTER_VERSION='chapter-responsibility-4';
 const timeClaim=c=>(c.elements || []).some(r=>/daewoon|seun|monthSeason|futureSeason/.test(r.key));
 export function selectChapterClaims(analysis,p){
   if(!p)return analysis;

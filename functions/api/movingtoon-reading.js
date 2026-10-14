@@ -12,7 +12,7 @@ export async function generate(env, provider, input, SYSTEM, settings = {}) {
   const maxTokens = settings.maxOutputTokens || 14000;
   const body = isOpen ? { model: settings.openaiModel || env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: SYSTEM, input, max_output_tokens: maxTokens } : { model: settings.anthropicModel || env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: maxTokens, system: SYSTEM, messages: [{ role: 'user', content: input }] };
   const headers = isOpen ? { authorization: 'Bearer ' + env.OPENAI_API_KEY } : { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' };
-  const r = await fetch(isOpen ? 'https://api.openai.com/v1/responses' : 'https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(40000), headers: { ...headers, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  const r = await fetch(isOpen ? 'https://api.openai.com/v1/responses' : 'https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(Math.max(1, Math.min(40000, settings.timeoutMs || 40000))), headers: { ...headers, 'content-type': 'application/json' }, body: JSON.stringify(body) });
   if (!r.ok) throw Error('provider-http-'+r.status);
   const d = await r.json();
   const text = isOpen ? d.output_text || (d.output || []).flatMap(x => x.content || []).map(x => x.text || '').join('') : (d.content || []).filter(x => x.type === 'text').map(x => x.text).join('');
@@ -70,36 +70,38 @@ export async function onRequestPost({ request, env }) {
   let writerSystem = mode === 'grounded' ? WRITER_SYSTEM + '\n[표현 설정]\n' + (sty.directive || '') + '\n위 표현 설정은 판단·근거·불확실성을 변경하지 않는다.' : systemFor(sty);
   if (policy) writerSystem += '\n'+chapterInstruction(policy);
   writerSystem += '\n출력 숫자는 allowedNumbers에 있는 값만 사용한다. 현실 전략에도 새로운 기간·횟수·비율·금액·연도를 만들지 말고 숫자 없이 관찰 가능한 행동으로 설명한다. 문단은 최소 30자, 최대 길이는 챕터 정책을 따른다. 반드시·무조건·확정·수익률이라는 단어를 쓰지 않는다. 예측 한계는 전통 해석이며 실제 결과를 보장하지 않습니다처럼 설명한다. 기초 계산값이 존재하는데 계산값 자체가 없다고 말하지 않는다. 검수된 해석 규칙이 부족할 때는 계산표는 있으나 해당 작용을 해석할 규칙의 근거가 부족하다고 구분한다. verifiedTimingClaimIds가 비어 있으면 운의 간지·기간은 사실로 안내할 수 있지만 그 시기의 돈·관계·직업 작용을 만들지 않는다.';
-  if (policy?.hook.enabled && analysis?.claims.length && !hook) writerSystem += '\n동일 JSON에 독립 hook 추가: '+JSON.stringify({text:'해당 주제의 가장 중요한 조건 한 가지. 최대 '+policy.hook.maxChars+'자',explanation:policy.hook.explanationSentences+'문장, 최대 '+policy.hook.explanationMaxChars+'자',claim_id:'검증된 단일 claim_id'})+'\n후킹 문체: '+policy.hook.style+'\n후킹은 원문 소개나 일반적인 위로 대신 실제 계산 조건과 해당 주제의 결과·선택을 연결하는 간결한 선언으로 쓴다. 원문을 그대로 복사하지 않는다.\n새 명리 판단을 만들지 말고 선택한 판단의 조건과 예외를 보존한다. 한국어만 사용한다.';
+  if (policy?.hook.enabled && analysis?.claims.length && !hook) writerSystem += '\n동일 JSON에 독립 hook 추가: '+JSON.stringify({text:'해당 주제의 가장 중요한 조건 한 가지. 최대 '+policy.hook.maxChars+'자',explanation:policy.hook.explanationSentences+'문장, 최대 '+policy.hook.explanationMaxChars+'자',claim_id:'검증된 단일 claim_id'})+'\n후킹 문체: '+policy.hook.style+'\n후킹은 원문 소개나 일반적인 위로 대신 실제 계산 조건과 해당 주제의 결과·선택을 연결하는 간결한 선언으로 쓴다. 원문을 그대로 복사하지 않는다. 후킹을 먼저 작성한 뒤 본문에서 같은 핵심 선언을 반복하지 않는다. 본문은 적용 상황·구체 사례·대응 방법을 확장하고 후킹과 비슷한 문장을 다시 쓰지 않는다.\n새 명리 판단을 만들지 말고 선택한 판단의 조건과 예외를 보존한다. 한국어만 사용한다.';
   // UTF-8 bytes are a conservative token upper bound for budget reservation.
   const estimatedMaxCost = settings.inputPricePerMillion != null && settings.outputPricePerMillion != null ? ((new TextEncoder().encode(input + writerSystem).length + 512) * settings.inputPricePerMillion + settings.maxOutputTokens * settings.outputPricePerMillion) / 1e6 : null;
   if (settings.maxRequestCost != null && (estimatedMaxCost == null || estimatedMaxCost * (mode === 'grounded' && policy && settings.semanticReview ? 3 : 1) * [env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY].filter(Boolean).length > settings.maxRequestCost)) return json({ ok: false, error: 'cost-limit', estimatedMaxCost, engineMode: mode }, 429);
-  const fixedHook=hook;
+  const fixedHook=hook, deadline=requestStarted+78000;
   for (const [provider, secret] of [['openai', 'OPENAI_API_KEY'], ['anthropic', 'ANTHROPIC_API_KEY']]) {
     if (!env[secret]) continue;
+    if(Date.now()>=deadline)break;
     hook=fixedHook;
     try {
-      const generation = await generate(env, provider, input, writerSystem, settings);
+      const generation = await generate(env, provider, lastRejection ? input+'\n이전 후보는 다음 검증에서 거부되었다. 같은 오류를 반복하지 말고 원국·판단 근거를 그대로 유지하여 다시 작성한다: '+JSON.stringify(lastRejection.issues || []) : input, writerSystem, {...settings,timeoutMs:deadline-Date.now()});
       providerAttempts.push({provider,status:'writer-returned',elapsedMs:generation.elapsedMs});
+      const rejected=(stage,v)=>{lastRejection=v;providerAttempts.push({provider,status:'rejected',stage,issues:(v?.issues || []).map(x=>({code:x.code,id:x.id,reason:x.reason})),elapsedMs:Date.now()-requestStarted});};
       const diagnostics=[];
-      const result = sanitize(generation.text, clean, src, { deep: mode === 'grounded',diagnostics }); if (!result) {lastRejection={issues:diagnostics};continue;}
+      const result = sanitize(generation.text, clean, src, { deep: mode === 'grounded',diagnostics }); if (!result) {rejected('writer-format',{issues:diagnostics});continue;}
       if (policy?.hook.enabled && analysis?.claims.length && !hook) {
         let candidate; try { candidate=JSON.parse(generation.text).hook; } catch { }
         const check=validateHook(candidate,analysis,policy);
-        if (!check.ok) { lastRejection={issues:check.issues.map(code=>({code}))}; continue; }
+        if (!check.ok) { rejected('hook',{issues:check.issues.map(code=>({code}))}); continue; }
         const claim=analysis.claims.find(c=>c.claim_id===candidate.claim_id);
         hook={...candidate,hanja:policy.hanja,chapterKind:policy.key,fingerprint:await chartFingerprint(analysis),claimSignature:await claimSignature(claim),source:'ai-reviewed',basis:{elements:claim.elements,evidence:claim.evidence,judgment:claim.judgment,exceptions:claim.exceptions,counter_evidence:claim.counter_evidence}};
       }
       const validation = mode === 'grounded' ? validateWritten(result, analysis, clean) : null;
-      if (validation && !validation.ok) { lastRejection=validation; continue; }
+      if (validation && !validation.ok) { rejected('grounding',validation); continue; }
       const quality = chapterQuality(result, analysis, policy, previous, hook);
-      if (quality && !quality.ok) { lastRejection=quality; continue; }
+      if (quality && !quality.ok) { rejected('chapter-quality',quality); continue; }
       let semantic = null, reviewUsage = null;
       if (policy && (mode === 'grounded' && settings.semanticReview || hook?.source === 'ai-reviewed')) {
-        const review = await generate(env, provider, reviewPayload(result,analysis,policy,previous,hook), REVIEW_SYSTEM, { ...settings, maxOutputTokens: 2000 });
+        const review = await generate(env, provider, reviewPayload(result,analysis,policy,previous,hook), REVIEW_SYSTEM, { ...settings, maxOutputTokens: 2000,timeoutMs:Math.max(1,deadline-Date.now()) });
         semantic = parseReview(review.text,policy); reviewUsage = review.usage;
         if (semantic?.coverage?.some(x=>x.claim_ids.some(id=>!analysis.claims.some(c=>c.claim_id===id))))semantic=null;
-        if (!semantic || !semantic.ok) { lastRejection=semantic || {issues:[{code:'semantic-review-unavailable'}]}; continue; }
+        if (!semantic || !semantic.ok) { rejected('semantic-review',semantic || {issues:[{code:'semantic-review-unavailable'}]}); continue; }
       }
       if (quality) { quality.semanticReview = semantic; quality.semanticReviewStatus = semantic ? 'passed' : 'not-run'; quality.requiredCoverage=semantic?.coverage || []; quality.warnings.push(...(semantic?.coverage || []).filter(x=>x.status==='missing-evidence').map(x=>'required-evidence-missing:'+x.item)); }
       if (reviewUsage && generation.usage) { for(const k of ['inputTokens','outputTokens','totalTokens','cachedInputTokens'])generation.usage[k]=generation.usage[k]!=null && reviewUsage[k]!=null ? generation.usage[k]+reviewUsage[k] : null; }

@@ -27,7 +27,7 @@
   }
   function policies(saved){var out=clone(DATA);Object.keys(out).forEach(function(k){var s=saved && saved[k] || {};Object.assign(out[k],s,{domains:DATA[k].domains,hook:Object.assign({},DATA[k].hook,s.hook || {})});});return out;}
   function policy(c,saved){var k=kind(c);return k?Object.assign({key:k},policies(saved)[k]):null;}
-  var TOPIC={wealth:/돈|재물|재성|재물성|수입|수익|소득|투자|지출|자금|자산|현금|저축|손실|매출|재백/,love:/연애|결혼|배우자|애정|혼인|연인|부부|이별|관계|夫妻/,career:/직업|사업|직장|업무|직무|조직|독립활동|이직|창업|영업|전문직|기술직|창작|수익 모델|관록/};
+  var TOPIC={wealth:/돈|재물|재성|재물성|수입|수익|소득|투자|지출|자금|자산|현금|저축|손실|매출|원가|회수|급여|가격|거래|청구|대금|비용|재백/,love:/연애|결혼|배우자|애정|혼인|연인|부부|이별|관계|상대|고백|데이트|대화|연락|친밀|동반자|만남|夫妻/,career:/직업|사업|직장|업무|직무|조직|독립활동|이직|창업|영업|전문직|기술직|창작|수익 모델|팀|동료|납품|고객|상사|직종|계약|성과|권한|관록/};
   var TRAIT=/성격|기질|성향|추진력|책임감|주도적|독립적|꼼꼼|완벽주의|고집|신중|외향|내향|자존심|인내|공감|감정이|감수성/;
   function sentences(t){return String(t || '').split(/(?<=[.!?。])\s+|\n+/).map(function(x){return x.trim();}).filter(Boolean);}
   function generalTrait(t,k){return TRAIT.test(t) && !(TOPIC[k] && TOPIC[k].test(t));}
