@@ -13,7 +13,7 @@ export async function generate(env, provider, input, SYSTEM, settings = {}) {
   const body = isOpen ? { model: settings.openaiModel || env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: SYSTEM, input, max_output_tokens: maxTokens } : { model: settings.anthropicModel || env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: maxTokens, system: SYSTEM, messages: [{ role: 'user', content: input }] };
   const headers = isOpen ? { authorization: 'Bearer ' + env.OPENAI_API_KEY } : { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' };
   const r = await fetch(isOpen ? 'https://api.openai.com/v1/responses' : 'https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(Math.max(1, Math.min(40000, settings.timeoutMs || 40000))), headers: { ...headers, 'content-type': 'application/json' }, body: JSON.stringify(body) });
-  if (!r.ok) throw Error('provider-http-'+r.status);
+  if (!r.ok) { let detail;try{detail=(await r.json())?.error;}catch{} const code=['insufficient_quota','rate_limit_exceeded','billing_not_active','overloaded_error'].includes(detail?.code || detail?.type)?(detail.code || detail.type):'';throw Error('provider-http-'+r.status+(code?'-'+code:'')); }
   const d = await r.json();
   const text = isOpen ? d.output_text || (d.output || []).flatMap(x => x.content || []).map(x => x.text || '').join('') : (d.content || []).filter(x => x.type === 'text').map(x => x.text).join('');
   return { text, model: String(d.model || body.model).slice(0, 120), elapsedMs: Date.now() - started, usage: usageOf(d.usage) };
@@ -110,7 +110,7 @@ export async function onRequestPost({ request, env }) {
         ...(analysis ? { interpretation: { version: analysis.version, mode, claims: analysis.claims, features: analysis.features, cross_analysis: analysis.cross_analysis, warnings: analysis.warnings, quality: analysis.quality, validation } } : {}) };
       if (kv) { try { await kv.put(key, JSON.stringify(value), { expirationTtl: 604800 }); } catch { } }
       return json({ ok: true, ...value, cached: false });
-    } catch (e) { const error=/^provider-http-[0-9]{3}$/.test(e?.message || '')?e.message:e?.name==='TimeoutError'?'provider-timeout':'provider-call-error';providerAttempts.push({provider,status:'provider-call-failed',error,elapsedMs:Date.now()-requestStarted}); }
+    } catch (e) { const error=/^provider-http-[0-9]{3}(?:-(?:insufficient_quota|rate_limit_exceeded|billing_not_active|overloaded_error))?$/.test(e?.message || '')?e.message:e?.name==='TimeoutError'?'provider-timeout':'provider-call-error';providerAttempts.push({provider,status:'provider-call-failed',error,elapsedMs:Date.now()-requestStarted}); }
   }
   return json({ ok: false, error: lastRejection ? 'chapter-validation-failed' : 'ai-unavailable', validation: lastRejection, providerAttempts, elapsedMs:Date.now()-requestStarted, engineMode: mode }, 502);
 }
