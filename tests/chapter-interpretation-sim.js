@@ -23,7 +23,7 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
   const foreign={...a.claims[0],claim_id:'saju:SELF-9999',domain:'SELF',judgment:'책임감이 강하고 추진력이 뛰어납니다.'};assert.equal(C.selectChapterClaims({...a,claims:[...a.claims,foreign]},p).claims.length,1);
   assert(!C.validateHook({...hook,claim_id:foreign.claim_id},{...a,claims:[foreign]},p).ok);
   assert.equal((await C.buildHook({...a,claims:[]},p,{})),null);
-  assert.equal(C.selectChapterClaims(a,P.chapterPolicy({id:'c15'})).claims.length,0,'natal rules never become timing rules');
+  assert.equal(C.selectChapterClaims(a,P.chapterPolicy({id:'c15'})).claims.length,0,'natal rules never become timing rules');assert(C.REVIEW_SYSTEM.includes('시간 조건이 충족된 claim이 없으면'));assert(C.REVIEW_SYSTEM.includes('모델 점수나 라벨만으로 not-covered')); 
   const money=ReportV2.ReadingFlow.card(sd,5),love=ReportV2.ReadingFlow.card(sd,6),career=ReportV2.ReadingFlow.card(sd,4),timing=ReportV2.ReadingFlow.card(sd,10),remedy=ReportV2.ReadingFlow.card(sd,14);
   for(const x of [money,love,career,timing,remedy])assert(!Object.values(x).join(' ').includes('스스로 기준을 세우는 힘'));
   assert(money.why.includes('재성'));assert(love.why.includes('일지'));assert(career.why.includes('관성'));assert(timing.evidence.includes('월운'));assert(remedy.reality.includes('전통 상징'));
