@@ -3,7 +3,7 @@ const string = {type:'string'};
 const strings = values => ({type:'array',items:values.length?{type:'string',enum:[...new Set(values)]}:string,...(!values.length?{description:'No verified IDs are available. Return an empty array.'}:{})});
 export function hookSchema(claims){return object({text:string,explanation:string,claim_id:{type:'string',enum:claims.map(c=>c.claim_id)}});}
 export function writerSchema(clean,src,includeHook){
- const properties={paragraphs:{type:'array',items:object({id:{type:'string',enum:clean.chapter.paragraphs.map(p=>p.id)},text:string,refs:strings(['natal','draft',...src.knowledge.map(x=>x.id)]),claim_ids:strings((src.claims || []).map(x=>x.claim_id))})}};
+ const properties={paragraphs:{type:'array',items:object({id:{type:'string',enum:clean.chapter.paragraphs.map(p=>p.id)},text:string,refs:strings(src.knowledge.map(x=>x.id)),claim_ids:strings((src.claims || []).map(x=>x.claim_id))})}};
  if(includeHook)properties.hook=hookSchema(src.claims);
  return object(properties);
 }

@@ -48,8 +48,9 @@ export function sourcePremiseIssue(item, sd) {
   const p=String(item.principle || ''), relations=sd.clashes || [];
   if(/붕충의 해/.test(p) && !Object.keys(item.conditions || {}).some(k=>/daewoon|seun|monthSeason|futureSeason/.test(k)))return 'source-time-condition-missing';
   if(/토끼리.*충|진술축미.*(?:붕충|부딪)/.test(p) && !relations.some(r=>r.type==='충' && r.members?.length===2 && r.members.every(k=>['진','술','축','미'].includes(sd.pillars?.[k]?.ko?.[1]))))return 'source-earth-clash-mismatch';
-  if(/두 사람의 일지/.test(p))return 'source-partner-chart-missing';
+  if(/두 사람의 일지|일지끼리/.test(p))return 'source-partner-chart-missing';
   if(/일지[\s\S]{0,30}(?:도화살|홍염살)/.test(p) && !(sd.specialStars || []).some(s=>s.pillar==='day' && /도화|홍염/.test(s.name)))return 'source-spouse-star-location-mismatch';
+  if(/공망/.test(p) && /배우자궁/.test(String(item.interpretation || '')) && (!(sd.specialStars || []).some(s=>s.pillar==='day' && s.name==='공망') || !relations.some(r=>['충','형'].includes(r.type) && r.members?.includes('day'))))return 'source-spouse-empty-location-mismatch';
   for(const type of ['충','형'])if((type==='충'?/일지[\s\S]{0,16}충이/:/일지에 형/).test(p) && !relations.some(r=>r.type===type && r.members?.includes('day')))return 'source-spouse-relation-location-mismatch';
   return null;
 }

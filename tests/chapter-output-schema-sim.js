@@ -3,10 +3,10 @@ const assert=require('assert/strict'),path=require('path'),{pathToFileURL}=requi
  const S=await import(pathToFileURL(path.resolve('functions/_chapter-output-schema.js')).href),API=await import(pathToFileURL(path.resolve('functions/api/movingtoon-reading.js')).href);
  const clean={chapter:{paragraphs:[{id:'0'},{id:'1'}]}},src={knowledge:[{id:'MONEY-0012'}],claims:[{claim_id:'saju:MONEY-0012'}]},policy={required:['재물 구조','시기']};
  const schema=S.writerSchema(clean,src,true);
- assert.deepEqual(schema.properties.paragraphs.items.properties.refs.items.enum,['natal','draft','MONEY-0012']);
+ assert.deepEqual(schema.properties.paragraphs.items.properties.refs.items.enum,['MONEY-0012']);
  assert.deepEqual(schema.properties.paragraphs.items.properties.claim_ids.items.enum,['saju:MONEY-0012']);
  assert.deepEqual(schema.properties.paragraphs.items.properties.id.enum,['0','1']);
- assert(!schema.properties.paragraphs.items.properties.refs.items.enum.includes('saju:MONEY-0012'));
+ assert(!schema.properties.paragraphs.items.properties.refs.items.enum.includes('saju:MONEY-0012'));assert(!schema.properties.paragraphs.items.properties.refs.items.enum.includes('natal'));assert(!schema.properties.paragraphs.items.properties.refs.items.enum.includes('draft'));
  assert.deepEqual(schema.properties.hook.properties.claim_id.enum,['saju:MONEY-0012']);
  assert(!S.writerSchema(clean,src,false).properties.hook);
  const review=S.reviewSchema(policy,src.claims);assert.deepEqual(review.properties.coverage.items.properties.item.enum,policy.required);assert(review.properties.issues.items.properties.code.enum.includes('unsupported-claim'));
