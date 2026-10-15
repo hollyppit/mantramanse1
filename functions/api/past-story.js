@@ -53,7 +53,7 @@ export async function onRequestPost({request,env}){
   const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify({version:VERSION,engine:ENGINE_VERSION,db:version,chart:analysis.normalized.chart,claims:analysis.claims,models:[settings.openaiModel,settings.anthropicModel,env.OPENAI_MODEL,env.ANTHROPIC_MODEL]})));
   const key='ai:past-story:'+Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('');
   const cached=await kv.get(key,'json');
-  if(cached&&validatePlan(cached.plan,analysis.claims)&&validateStory(cached.story,cached.plan,analysis.claims)&&validateReview(cached.review))return json({ok:true,story:cached.story,visual:visualFor(analysis.normalized.chart),cached:true,version:VERSION});
+  if(cached&&validatePlan(cached.plan,analysis.claims)&&validateStory(cached.story,cached.plan,analysis.claims)&&validateReview(cached.review))return json({ok:true,story:cached.story,visual:visualFor(analysis.normalized.chart),cached:true,version:VERSION,...(isAdmin(request,env)?{audit:{plan:cached.plan,review:cached.review,claims:analysis.claims}}:{})});
   if(!env.OPENAI_API_KEY&&!env.ANTHROPIC_API_KEY)return json({ok:false,error:'no-ai'},503);
   if(settings.maxRequestCost!=null){
    const byteInput=new TextEncoder().encode(JSON.stringify(analysis)).length;
@@ -79,7 +79,7 @@ export async function onRequestPost({request,env}){
      }catch(e){attempts.push({provider,stage,model:String((provider==='openai'?settings.openaiModel||env.OPENAI_MODEL||'gpt-6.1-sol':settings.anthropicModel||env.ANTHROPIC_MODEL||'claude-sonnet-5-5')).slice(0,120),reason:e.providerReason||null,elapsedMs:Date.now()-at,status:'failed',error:/^provider-http-\d{3}(?:-[a-z_]+)?$/.test(e.message)?e.message:e.name==='TimeoutError'?'timeout':'call-error'});throw e;}
     });
     await kv.put(key,JSON.stringify({...result,version:VERSION,at:new Date().toISOString()}),{expirationTtl:2592000});
-    return json({ok:true,story:result.story,visual:visualFor(analysis.normalized.chart),cached:false,version:VERSION});
+    return json({ok:true,story:result.story,visual:visualFor(analysis.normalized.chart),cached:false,version:VERSION,...(isAdmin(request,env)?{audit:{plan:result.plan,review:result.review,claims:analysis.claims}}:{})});
    }catch(e){last=['plan-rejected','story-rejected','review-rejected','deadline'].includes(e.message)?e.message:'provider-unavailable';attempts.push({provider,status:'rejected',error:last,...(e.issues?{issues:e.issues}:{})});}
   }
   // Short-lived internal trace: allowlisted metadata only, no prompts, IDs or prose.
