@@ -286,7 +286,7 @@
     });
   }
   /* ── 챕터 탭 줄: 지금 읽는 챕터가 속한 세계의 챕터를 가로로 늘어놓는다. 읽는 중·세계 도구 화면 어디서든 바로 이동. ── */
-  var TOOL_LABEL = { w1: '기둥·십성', w2: '비교 탐색', w3: '궁합 탐색', w4: '타임라인', w5: '전생 무빙툰', w6: '행동 가이드' };
+  var TOOL_LABEL = { w1: '기둥·십성', w2: '재물 탐색', w7: '커리어 탐색', w3: '궁합 탐색', w4: '타임라인', w5: '전생 무빙툰', w6: '행동 가이드' };
   var pinTo = function (i) { S.pin = { idx: i, until: Date.now() + 3000 }; }, pinned = function () { return S.pin && Date.now() < S.pin.until ? S.pin.idx : null; };
   function buildWmap() {
     if (!S.rep || !R.Explore) return; var list = (S.xpWorlds || R.Explore.mergeWorlds(null)).map(function (w) { return Object.assign({}, w, { enabled: true }); }), idx = [], by = {};
@@ -395,7 +395,7 @@
     var worlds = R.Explore.worldsModel(rep.chapters, S.xpWorlds || R.Explore.mergeWorlds(null), S.ended, S.cur ? S.idx : st.last), cur = null;
     if (worldId) cur = worlds.filter(function (g) { return g.world.id === worldId; })[0] || null;
     S.xpWorld = cur ? cur.world.id : null;
-    var widget = cur && cur.world.id === 'w4' ? worldTimelineHtml() : cur && cur.world.id === 'w1' ? worldLibraryHtml() : cur && cur.world.id === 'w2' ? worldCastleHtml() : cur && cur.world.id === 'w3' ? worldGardenHtml() : cur && cur.world.id === 'w6' ? worldSanctuaryHtml() : cur && cur.world.id === 'w5' ? worldSamsaraHtml() : '';
+    var widget = cur && cur.world.id === 'w4' ? worldTimelineHtml() : cur && cur.world.id === 'w1' ? worldLibraryHtml() : cur && cur.world.id === 'w7' ? worldCastleHtml() : cur && cur.world.id === 'w3' ? worldGardenHtml() : cur && cur.world.id === 'w6' ? worldSanctuaryHtml() : cur && cur.world.id === 'w5' ? worldSamsaraHtml() : '';
     if (cur && cur.world.id !== 'w5') widget = worldToonCard(cur.world) + widget;
     var m = { mode: cur ? 'world' : 'map', widget: widget, name: S.name, progress: R.Explore.progress(rep.chapters, S.ended), resume: R.Explore.resumeIndex(rep.chapters, { ended: S.ended, last: S.cur ? S.idx : st.last }), auto: st.auto, rate: playbackRate(),
       worlds: worlds, current: cur, ended: S.ended, last: S.cur ? S.idx : st.last };
@@ -466,7 +466,7 @@
       if (!C0.jobs.length) { try { var mm = R.Castle.model(window.Manse, S.ch, Date.now()); C0.jobs = [mm.jobs[0].key, mm.jobs[1].key]; } catch (err) { C0.jobs = []; } }
       var at = C0.jobs.indexOf(k); if (at >= 0) { if (C0.jobs.length > 1) C0.jobs.splice(at, 1); } else { C0.jobs.push(k); if (C0.jobs.length > 2) C0.jobs.shift(); }
     }
-    var y = window.scrollY; showHome('w2'); window.scrollTo(0, y); T('castle_select', { tab: C0.tab });
+    var y = window.scrollY; showHome('w7'); window.scrollTo(0, y); T('castle_select', { tab: C0.tab });
   });
   /* 천명의 서고 인터랙션: 사주 네 기둥·십성군을 눌러 해석을 확인(R.Library). 선택 상태만 기기 메모리에 둔다. */
   function worldLibraryHtml() {

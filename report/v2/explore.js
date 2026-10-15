@@ -23,8 +23,10 @@
   var DEFAULT_WORLDS = [
     { id: 'w1', order: 1, bgImage:'/report/hub/quest/archive.webp', name: '봉인된 서고', line: '나의 본질과 타고난 기질', desc: '사주 원국, 일간·일주, 오행과 십성, 강약과 뿌리, 강점과 그림자를 읽습니다.', color: '#1B2347', accent: '#8FA6E8', icon: '命',
       match: ['^c-char', '^c0[1-5]$', '^life_(self_who|tengods|stars)$', '^deep_(car|proscons|stages)$', '^life_ik_SELF'] },
-    { id: 'w2', order: 2, bgImage:'/report/hub/quest/office.webp', name: '재물의 누각', line: '직업 · 재물 · 성공', desc: '직업 적성, 유리한 업종과 불리한 업종, 사업과 독립, 재물 흐름을 읽습니다.', color: '#3A2C0E', accent: '#E3B341', icon: '財',
-      match: ['^c0[678]$', '^life_(career_style|money_nature|career_timing|money_timing)$', '^deep_(jobs|wealth)$', '^life_ik_(MONEY|CAREER)'] },
+    { id: 'w2', order: 2, bgImage:'/report/hub/quest/office.webp', name: '재물의 누각', line: '수입 · 소비 · 재물 관리', desc: '돈을 버는 성향, 수입과 지출, 재물 관리와 시기별 재물 흐름을 읽습니다.', color: '#3A2C0E', accent: '#E3B341', icon: '財',
+      match: ['^c08$', '^life_(money_nature|money_timing)$', '^deep_wealth$', '^life_ik_MONEY'] },
+    { id: 'w7', order: 2.5, bgImage:'/report/hub/quest/archive.webp', name: '커리어운', line: '직업 · 일 · 성공', desc: '직업 적성, 잘 맞는 일의 방식, 업종 선택과 독립, 커리어 변화와 성공 방향을 읽습니다.', color: '#182B38', accent: '#81B7DE', icon: '業',
+      match: ['^c0[67]$', '^life_(career_style|career_timing)$', '^deep_jobs$', '^life_ik_CAREER'] },
     { id: 'w3', order: 3, bgImage:'/report/hub/quest/reeds.webp', name: '인연의 정원', line: '사랑과 인간관계', desc: '연애 성향, 결혼과 배우자, 대인관계, 가족과 자녀, 궁합을 읽습니다.', color: '#3A1B2A', accent: '#E58AA8', icon: '緣',
       match: ['^c(09|1[0-3])$', '^life_(love_style|marriage_who|relation_style|love_timing|marriage_timing|relation_timing)$', '^deep_(love|spouse|marriage|children|ilju)$', '^life_ik_(LOVE|MARRIAGE|RELATIONSHIP)'] },
     { id: 'w4', order: 4, bgImage:'/report/hub/quest/paths.webp', name: '시간의 회랑', line: '인생의 흐름과 변화', desc: '대운·세운·월운과 인생의 전환점, 시기별 운의 흐름을 읽습니다.', color: '#102B33', accent: '#6FD0D8', icon: '時',
@@ -50,17 +52,29 @@
       if (def && b.name === oldNames[s.id]) { b.name = def.name; b.icon = def.icon; }
       by[s.id] = b;
     });
+    // 기존 저장본의 재물운 분류에서도 커리어 항목을 분리한다.
+    var money = by.w2, career = by.w7;
+    if (money) {
+      if (money.line === '직업 · 재물 · 성공') money.line = '수입 · 소비 · 재물 관리';
+      if (/직업 적성, 유리한 업종/.test(money.desc || '')) money.desc = DEFAULT_WORLDS[1].desc;
+      var moved = (money.chapters || []).filter(isCareer);
+      money.chapters = (money.chapters || []).filter(function (id) { return !isCareer(id); });
+      money.match = DEFAULT_WORLDS[1].match;
+      if (career && moved.length) career.chapters = Array.from(new Set((career.chapters || []).concat(moved)));
+    }
     return Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
   }
+  function isCareer(id) { return /^(c0[67]|life_career_(style|timing)|deep_jobs|life_ik_CAREER.*)$/.test(id); }
 
   function worldFor(c, worlds, flow) {
     var id = c.id, base = c.base || c.id, i, w, j;
+    if ((isCareer(id) || isCareer(base) || c.readingSection === 5) && worlds.some(function (w) { return w.id === 'w7'; })) return 'w7';
     for (i = 0; i < worlds.length; i++) if (worlds[i].chapters && worlds[i].chapters.indexOf(id) >= 0) return worlds[i].id;
     for (i = 0; i < worlds.length; i++) {
       w = worlds[i]; if (w.chapters && w.chapters.length) continue;
       for (j = 0; j < (w.match || []).length; j++) { var re = new RegExp(w.match[j]); if (re.test(id) || re.test(base)) return w.id; }
     }
-    if (c.readingSection) return ['w1','w1','w1','w1','w2','w2','w3','w3','w6','w4','w4','w4','w4','w6','w6'][c.readingSection-1] || 'w1';
+    if (c.readingSection) return ['w1','w1','w1','w1','w7','w2','w3','w3','w6','w4','w4','w4','w4','w6','w6'][c.readingSection-1] || 'w1';
     return FALLBACK_WORLD[c.act] || 'w1';
   }
 

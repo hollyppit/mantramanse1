@@ -8,7 +8,7 @@ const KEY = 'prologue:video', OK = /^(\/api\/clipfile\?k=[\w.-]{1,120}|https:\/\
 export const clean = b => {
   b = b || {}; const u = v => (typeof v === 'string' && OK.test(v.trim()) ? v.trim() : '');
   const worlds = {};
-  for (const id of ['w1', 'w2', 'w3', 'w4', 'w5', 'w6']) {
+  for (const id of ['w1', 'w2', 'w3', 'w4', 'w5', 'w6', 'w7']) {
     const v = b.worlds && b.worlds[id];
     if (v && typeof v === 'object') worlds[id] = { M: u(v.M), F: u(v.F) };
   }
