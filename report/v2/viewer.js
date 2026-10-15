@@ -91,7 +91,7 @@
     var title = cfg.title, sub = cfg.sub || '', kw = cfg.kw || [], poster = clip && clip.posterUrl || '', rp = cfg.kind === 'iju' ? 'awk' : 'ilgan', ev = cfg.kind === 'iju' ? 'iju' : cfg.kind === 'prologue' ? 'prologue' : 'ilgan';
     cap.innerHTML = '<div class="t" data-tx="' + rp + '.title">' + esc(title) + '</div>' + (sub ? '<div class="s" data-tx="' + rp + '.sub">' + esc(sub).replace(/\n/g, '<br>') + '</div>' : '') + (kw.length ? '<div class="k" data-tx="' + rp + '.kw">' + kw.map(function (k) { return '<span>' + esc(k) + '</span>'; }).join('') + '</div>' : '');
     if (cfg.capHtml) cap.innerHTML = cfg.capHtml; if (cfg.noCap) cap.innerHTML = ''; cap.style.opacity = ''; cap.classList.remove('mcard'); var capT = cfg.capMs ? setTimeout(function () { cap.style.transition = 'opacity .6s'; cap.style.opacity = 0; }, cfg.capMs) : 0; // 소개 문구는 capMs 뒤에 사라진다(영상은 계속)
-    var cardT = 0, cardAt = 0;
+    var cardT = 0, cardAt = 0, proFadeFrame = 0;
     function showCard() { // 일주 소개 카드: 투명에서 서서히 나타난다(영상 위, 배경 상자 없음)
       var cd = cfg.card; if (!cd || cardAt) return; cardAt = Date.now(); clearTimeout(capT); cap.style.transition = 'none'; cap.style.opacity = 0; cap.classList.add('mcard'); cap.innerHTML = cd.html; void cap.offsetWidth; cap.style.transition = 'opacity 1.2s ease'; cap.style.opacity = 1;
     }
@@ -101,11 +101,11 @@
       var t = setTimeout(function () { cap.classList.remove('mcard'); cfg.onDone(kind); }, left); skip.onclick = function () { clearTimeout(t); cap.classList.remove('mcard'); cfg.onDone('skipped'); };
     }
     function finish(kind) {
-      if (done) return; done = true; clearTimeout(capT); skip.hidden = true; snd.hidden = true; start.hidden = true; start.textContent = startTxt; if (R.Bgm) R.Bgm.duck(false);
+      if (done) return; done = true; if (proFadeFrame) cancelAnimationFrame(proFadeFrame); clearTimeout(capT); skip.hidden = true; snd.hidden = true; start.hidden = true; start.textContent = startTxt; if (R.Bgm) R.Bgm.duck(false);
       if (kind === 'completed') T(ev + '_video_completed', {}); else if (kind === 'skipped') T(ev + '_video_skipped', {});
       endCard(kind);
     }
-    function still() { if (done) return; done = true; endCard('missing'); } // 영상이 없거나 재생이 막힌 경우: 건너뜀
+    function still() { if (done) return; done = true; if (proFadeFrame) cancelAnimationFrame(proFadeFrame); endCard('missing'); } // 영상이 없거나 재생이 막힌 경우: 건너뜀
     txApply(cap, '_', true); // 자막 스타일(영상 단계)
     var url = clip && (clip.videoUrl || clip.videoWebm);
     if (cfg.cardOnly) { box.innerHTML = ''; still(); return; }
@@ -116,13 +116,21 @@
     else if (!url || saveData && !poster) { still(); }
     else {
       var v = document.createElement('video'), silent = cfg.kind === 'prologue'; v.muted = true; v.defaultMuted = true;
-      if (silent) { v.volume = 0; v.addEventListener('volumechange', function () { if (!v.muted) v.muted = true; if (v.volume !== 0) v.volume = 0; }); }
+      if (silent) { v.style.opacity = 0; v.volume = 0; v.addEventListener('volumechange', function () { if (!v.muted) v.muted = true; if (v.volume !== 0) v.volume = 0; }); }
       v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); v.autoplay = true; v.preload = 'auto'; v.setAttribute('aria-label', (title || '캐릭터 소개') + ' 영상'); if (poster) v.poster = poster;
       if (clip.videoWebm && v.canPlayType && v.canPlayType('video/webm')) { var s1 = document.createElement('source'); s1.src = clip.videoWebm; s1.type = 'video/webm'; v.appendChild(s1); }
       if (clip.videoUrl) { var s2 = document.createElement('source'); s2.src = clip.videoUrl; s2.type = /\.webm(\?|$)/.test(clip.videoUrl) ? 'video/webm' : 'video/mp4'; v.appendChild(s2); }
       box.innerHTML = ''; box.appendChild(v);
-      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); start.hidden = true; if (cfg.card) cardT = setTimeout(showCard, cfg.cardAt != null ? cfg.cardAt : 3000); T(ev + '_video_started', {}); snd.hidden = silent; snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; if (!v.muted && R.Bgm) R.Bgm.duck(true); });
-      v.addEventListener('ended', function () { finish('completed'); });
+      function fadePrologue() {
+        if (done) return;
+        var duration = isFinite(v.duration) && v.duration > 0 ? v.duration : 5;
+        var span = Math.min(0.6, duration / 2), t = v.currentTime || 0;
+        v.style.opacity = Math.max(0, Math.min(1, t / span, (duration - t) / span));
+        proFadeFrame = requestAnimationFrame(fadePrologue);
+      }
+
+      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); if (silent) fadePrologue(); start.hidden = true; if (cfg.card) cardT = setTimeout(showCard, cfg.cardAt != null ? cfg.cardAt : 3000); T(ev + '_video_started', {}); snd.hidden = silent; snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; if (!v.muted && R.Bgm) R.Bgm.duck(true); });
+      v.addEventListener('ended', function () { if (silent) v.style.opacity = 0; finish('completed'); });
       var endGuard = 0, nearEnd = function () { return isFinite(v.duration) && v.duration > 1 && v.currentTime >= v.duration - 0.35; };
       var armEnd = function () { if (done || endGuard || !nearEnd()) return; endGuard = setTimeout(function () { endGuard = 0; if (!done && nearEnd()) finish('completed'); }, 1200); }; // 'ended' 가 먼저 오면 그쪽이 처리한다
       v.addEventListener('timeupdate', armEnd); v.addEventListener('pause', armEnd); v.addEventListener('waiting', armEnd);

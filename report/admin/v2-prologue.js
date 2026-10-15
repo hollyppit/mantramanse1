@@ -17,7 +17,7 @@
   }
   function draw(box) {
     var label = TOPICS.filter(function (t) { return t[0] === G.target; })[0][1];
-    box.innerHTML = '<div class="card"><b style="color:var(--gold)">프롤로그 영상</b><p class="muted" style="margin:6px 0 10px">주제를 선택하고 운명 감찰관·명운 해독관 영상을 각각 올리세요. 공통·주제별 프롤로그는 모두 소리 없이 재생됩니다. 해당 주제로 들어갈 때 선택한 영상이 먼저 재생됩니다. 영상이 끝나거나 건너뛰면 본문이 시작됩니다. 파일은 90MB 이하 mp4·webm·mov입니다. 업로드와 영상 빼기는 자동 저장됩니다.</p>' +
+    box.innerHTML = '<div class="card"><b style="color:var(--gold)">프롤로그 영상</b><p class="muted" style="margin:6px 0 10px">주제를 선택하고 운명 감찰관·명운 해독관 영상을 각각 올리세요. 공통·주제별 프롤로그는 모두 무음으로, 시작 0.6초 페이드인·마지막 0.6초 페이드아웃으로 재생됩니다. 해당 주제로 들어갈 때 선택한 영상이 먼저 재생됩니다. 영상이 끝나거나 건너뛰면 본문이 시작됩니다. 파일은 90MB 이하 mp4·webm·mov입니다. 업로드와 영상 빼기는 자동 저장됩니다.</p>' +
       '<label class="muted" style="display:flex;gap:6px;align-items:center;margin-bottom:10px"><input type="checkbox" id="prOn"' + (G.d.on ? ' checked' : '') + '> 전체 프롤로그 영상 사용</label>' +
       '<label>프롤로그 주제 <select id="prTopic">' + TOPICS.map(function (t) { return '<option value="' + t[0] + '"' + (t[0] === G.target ? ' selected' : '') + '>' + esc(t[1]) + '</option>'; }).join('') + '</select></label><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:12px">' + slot('M', esc(label) + ' · 운명 감찰관') + slot('F', esc(label) + ' · 명운 해독관') + '</div></div>';
     [].forEach.call(box.querySelectorAll('video'), function (v) { v.muted = true; v.defaultMuted = true; v.volume = 0; v.onvolumechange = function () { if (!v.muted) v.muted = true; if (v.volume !== 0) v.volume = 0; }; });
