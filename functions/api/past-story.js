@@ -33,7 +33,7 @@ export async function composeStory(analysis,call){
  throw Error('review-rejected');
 }
 export async function onRequestPost({request,env}){
- const started=Date.now(),deadline=started+78000,traceId=crypto.randomUUID(),attempts=[];
+ const started=Date.now(),deadline=started+240000,traceId=crypto.randomUUID(),attempts=[];
  let body,clean;
  try{const raw=await request.text();if(raw.length>150000)return json({ok:false,error:'too-large'},413);body=JSON.parse(raw);
    clean=validate({sd:body.sd,chapter:{id:'deep_past',title:'창작 전생 단편',paragraphs:[{id:'context',text:'원국 전체의 근거를 인물의 욕망과 선택으로 옮기는 창작 단편.'}]}});
@@ -70,11 +70,11 @@ export async function onRequestPost({request,env}){
    try{
     const result=await composeStory(analysis,async(system,input,tokens,stage)=>{
      const remaining=deadline-Date.now();if(remaining<3000)throw Error('deadline');
-     const at=Date.now(),budget=Math.min(remaining,stage==='plan'?20000:stage==='write'?35000:12000);
+     const at=Date.now(),budget=Math.min(remaining,stage==='plan'?60000:stage==='write'?100000:30000);
      try{
-      const r=await generate(env,provider,input,system,{...settings,outputSchema:stageSchema(stage,analysis.claims),maxOutputTokens:tokens,timeoutMs:budget});
+      const r=await generate(env,provider,input,system,{...settings,longRequest:true,reasoningEffort:'low',outputSchema:stageSchema(stage,analysis.claims),maxOutputTokens:tokens,timeoutMs:budget});
       attempts.push({provider,stage,model:r.model,elapsedMs:Date.now()-at,usage:r.usage,status:'returned',completionStatus:r.completionStatus,incompleteReason:r.incompleteReason,empty:!r.text});return r.text;
-     }catch(e){attempts.push({provider,stage,elapsedMs:Date.now()-at,status:'failed',error:/^provider-http-\d{3}(?:-[a-z_]+)?$/.test(e.message)?e.message:e.name==='TimeoutError'?'timeout':'call-error'});throw e;}
+     }catch(e){attempts.push({provider,stage,model:String((provider==='openai'?settings.openaiModel||env.OPENAI_MODEL||'gpt-6.1-sol':settings.anthropicModel||env.ANTHROPIC_MODEL||'claude-sonnet-5-5')).slice(0,120),reason:e.providerReason||null,elapsedMs:Date.now()-at,status:'failed',error:/^provider-http-\d{3}(?:-[a-z_]+)?$/.test(e.message)?e.message:e.name==='TimeoutError'?'timeout':'call-error'});throw e;}
     });
     await kv.put(key,JSON.stringify({...result,version:VERSION,at:new Date().toISOString()}),{expirationTtl:2592000});
     return json({ok:true,story:result.story,visual:visualFor(analysis.normalized.chart),cached:false,version:VERSION});

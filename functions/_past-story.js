@@ -1,5 +1,5 @@
 // 전생 단편: 원국 전체의 검수 판단 → 기획 → 집필 → 독립 검토.
-export const VERSION='past-story-3';
+export const VERSION='past-story-4';
 export const STAGES=['일상','사건','목표','딜레마','압박','절정','반전','여운'];
 const str=(x,min,max)=>typeof x==='string'&&x.trim().length>=min&&x.length<=max;
 const parse=text=>{try{return JSON.parse(String(text).replace(/^```(?:json)?\s*|\s*```$/g,''));}catch{return null;}};
@@ -54,10 +54,10 @@ export function planIssues(text,claims){
  return issues.slice(0,40);
 }
 const obj=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
-const txt={type:'string'},bool={type:'boolean'},arr=(items,min,max)=>({type:'array',items,...(min==null?{}:{minItems:min,maxItems:max})});
+const txt={type:'string'},bool={type:'boolean'},arr=(items,min,max)=>({type:'array',items});
 export function stageSchema(stage,claims){
  const ids=arr({type:'string',enum:claims.map(c=>c.claim_id)},1,12);
- if(stage==='plan')return obj({title:txt,premise:txt,setting:obj({era:txt,place:txt,pressure:txt}),protagonist:obj({name:txt,desire:txt,fear:txt,contradiction:txt,claim_ids:{...ids,minItems:2}}),antagonist:obj({name:txt,desire:txt,fear:txt}),dilemma:obj({choiceA:txt,costA:txt,choiceB:txt,costB:txt}),callback:obj({object:txt,openingUse:txt,endingUse:txt}),beats:arr(obj({id:{type:'string',enum:STAGES.map((_,i)=>'b'+(i+1))},stage:{type:'string',enum:STAGES},action:txt,consequence:txt,claim_ids:ids}),8,8)});
+ if(stage==='plan')return obj({title:txt,premise:txt,setting:obj({era:txt,place:txt,pressure:txt}),protagonist:obj({name:txt,desire:txt,fear:txt,contradiction:txt,claim_ids:ids}),antagonist:obj({name:txt,desire:txt,fear:txt}),dilemma:obj({choiceA:txt,costA:txt,choiceB:txt,costB:txt}),callback:obj({object:txt,openingUse:txt,endingUse:txt}),beats:arr(obj({id:{type:'string',enum:STAGES.map((_,i)=>'b'+(i+1))},stage:{type:'string',enum:STAGES},action:txt,consequence:txt,claim_ids:ids}),8,8)});
  if(stage==='write')return obj({title:txt,logline:txt,frames:arr(obj({id:{type:'string',enum:STAGES.map((_,i)=>'b'+(i+1))},cap:txt,paras:arr(txt,2,4),claim_ids:ids}),8,8)});
  return obj({passed:bool,grounding:bool,causality:bool,dilemma:bool,arc:bool,prose:bool,issues:arr(txt)});
 }

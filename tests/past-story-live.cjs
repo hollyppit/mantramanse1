@@ -6,7 +6,7 @@ global.window=globalThis;for(const f of ['engine.js','report/v2/saju-data.js','r
  const sd=ReportV2.SajuData.build(Manse.compute(input),{now:Date.UTC(2026,9,15,3)});
  const payload=ReportV2.PastStory.payload(sd),started=Date.now();
  fs.mkdirSync('output/past-story-live',{recursive:true});
- const response=await fetch('https://mantramanse.pages.dev/api/past-story',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(100000)});
+ const response=await fetch('https://mantramanse.pages.dev/api/past-story',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(260000)});
  const body=await response.json();fs.writeFileSync('output/past-story-live/first.json',JSON.stringify(body,null,2));
  console.log(JSON.stringify({status:response.status,elapsedMs:Date.now()-started,ok:body.ok,error:body.error,title:body.story?.title,frames:body.story?.frames?.length,cached:body.cached,visual:body.visual}));
  if(!body.ok){process.exitCode=1;return;}
