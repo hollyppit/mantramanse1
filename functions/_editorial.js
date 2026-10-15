@@ -48,7 +48,7 @@ export function selectCases(catalog,contract,claims,rawContext){
 }
 
 export function behaviorPlans(claims,examples){return (claims || []).map(c=>({claim_id:c.claim_id,knowledge_id:c.knowledge_id,system:c.system,
- conditions:c.elements,hypothesis:c.judgment,realityQuestions:c.reality_questions || [],existingExamples:Object.entries(c.examples || {}).map(([kind,text])=>({kind,text,source:'approved-rule-hypothetical'})),
+ conditions:c.elements,timeBasis:c.time_basis || {},hypothesis:c.judgment,realityQuestions:c.reality_questions || [],existingExamples:Object.entries(c.examples || {}).map(([kind,text])=>({kind,text,source:'approved-rule-hypothetical'})),
  examples:(examples || []).filter(e=>e.ruleIds.includes(c.knowledge_id)),strengths:c.strengths || [],vulnerabilities:c.vulnerabilities || [],
  exceptions:c.exceptions,counterEvidence:c.counter_evidence || [],actions:c.actions || [],evidence:c.evidence,
  kind:'conditional-traditional-interpretation-not-observed-user-fact'}));}

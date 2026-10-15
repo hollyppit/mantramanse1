@@ -67,6 +67,7 @@ function makeClaim(rec, facts, sd, system, blocked, sourceIndex) {
     claim_id: system + ':' + rec.id, source_scope: it.sourceScope || null, system, topic: it.subDomain || it.domain, domain: it.domain,
     judgment: fill(m.interpretation), elements: rec.rows, traditional_rules: [{ id: rec.id, principle: fill(it.principle), conditions: copy(it.conditions || {}), modifiers: m.hits }],
     db_material_ids: [...new Set(evidence.map(e => e.docId))], evidence: copy(evidence), knowledge_id: rec.id, knowledge_version: it.version || 0,
+    time_basis: Object.fromEntries(rec.rows.filter(r => facts.luckTenGodBasis?.[r.key]).map(r => [r.key, copy(facts.luckTenGodBasis[r.key])])),
     counter_evidence: [], exceptions: copy(it.exclusions || {}), schools: it.theory || [],
     uncertainty: { level: it.confidence || 'low', note: '전통 해석의 조건부 판단이며 실제 성향·미래 사건의 검증된 예측이 아닙니다.', reviewConditions: sd.reviewConditions || {} },
     reality_questions: list(it.behaviorPatterns), actions: list(it.actions), strengths: list(it.strengths), vulnerabilities: list(it.risks),

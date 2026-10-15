@@ -33,6 +33,8 @@ export const COND_FIELDS = {
   daewoonSeason: ['현재 대운 흐름', 3, 'list'], seunSeason: ['올해 세운 흐름', 3, 'list'], monthSeason: ['이달 월운 흐름', 2, 'list'],
   futureSeason3: ['앞으로 3년 흐름(포함)', 2, 'list'], futureSeason5: ['앞으로 5년 흐름(포함)', 2, 'list'],
   el: ['오행 강약', 2, 'map'], group: ['십성군 강약', 3, 'map'], tenGod: ['십성 10종 강약', 3, 'map'],
+  daewoonStemTG: ['현재 대운 천간 십성', 4, 'list'], daewoonBranchTG: ['현재 대운 지지 십성', 4, 'list'],
+  seunStemTG: ['올해 세운 천간 십성', 4, 'list'], seunBranchTG: ['올해 세운 지지 십성', 4, 'list'],
   structure: ['구조 관찰 조건', 4, 'list'], rootLevel: ['통근 모델 구간', 3, 'list'], positionTG: ['위치별 십성', 4, 'list'], methodDifference: ['억부·조후 후보 차이', 3, 'list'],
 };
 // 아직 엔진이 주지 않아 지원하지 않는 조건(TODO) — 관리자 화면에 그대로 안내한다.
@@ -132,6 +134,21 @@ export function deriveFacts(sd, ext) {
   f.el = {}; ELEMENTS.forEach(e => { const p = sd.fiveElements && sd.fiveElements[e]; if (p != null) f.el[e] = { pct: p, level: levelOf(p) }; });
   f.group = {}; GROUPS.forEach(g => { const p = sd.groups && sd.groups[g]; if (p != null) f.group[g] = { pct: p, level: levelOf(p) }; });
   f.tenGod = {}; Object.keys(sd.tenGods || {}).forEach(k => { f.tenGod[k] = { pct: sd.tenGods[k], level: levelOf(sd.tenGods[k] * 2) }; }); // 10종은 평균이 10% → 군 기준과 맞추려 2배
+  // Read existing engine outputs only; never infer a luck ten-god from a season label.
+  const validTG = new Set(['비견','겁재','식신','상관','편재','정재','편관','정관','편인','정인']);
+  const year = sd.nowYear, dw = sd.currentDaewoon, sy = sd.sewoon;
+  f.luckTenGodBasis = {};
+  const takeLuckTG = (prefix, value, period) => {
+    for (const part of ['stem','branch']) if (validTG.has(value[part + 'TG'])) {
+      const key = prefix + (part === 'stem' ? 'StemTG' : 'BranchTG');
+      f[key] = value[part + 'TG'];
+      f.luckTenGodBasis[key] = { ...period, ganzhi: value.ganzhi, part, tenGod: f[key], source: 'existing-manse-engine' };
+    }
+  };
+  if (Number.isInteger(year) && dw && Number.isInteger(dw.startYear) && Number.isInteger(dw.endYear) && dw.startYear <= year && year <= dw.endYear)
+    takeLuckTG('daewoon', dw, { year, startYear: dw.startYear, endYear: dw.endYear });
+  if (Number.isInteger(year) && sy && sy.year === year)
+    takeLuckTG('seun', sy, { year });
   if (sd.currentDaewoon && sd.currentDaewoon.season) f.daewoonSeason = SEASON_KO[sd.currentDaewoon.season];
   if (sd.sewoon && sd.sewoon.season) f.seunSeason = SEASON_KO[sd.sewoon.season];
   const m0 = (sd.monthlyLuck || [])[0]; if (m0 && m0.season) f.monthSeason = SEASON_KO[m0.season];
@@ -329,7 +346,7 @@ export function suggestConds(f) {
 function factSummary(f) {
   const lv = o => Object.keys(o || {}).map(k => k + ' ' + Math.round(o[k].pct) + '%(' + LEVEL_KO[o[k].level] + ')').join(' · ');
   return { dayPillar: f.dayPillar, dayMaster: f.dayMaster, strength: f.strength, hasRoot: f.hasRoot, rootLevel: f.rootLevel, monthBranch: f.monthBranch, season: f.season, yongEl: f.yongEl, elements: lv(f.el), groups: lv(f.group), patterns: f.pattern, stars: f.star, relations: f.relation, natal: f.natal, natalRelations: f.natalRelations, usefulElements: f.usefulElements, usefulElementMethods: f.usefulElementMethods, usefulElementAdvice: f.usefulElementAdvice, climate: f.climate, rootEvidence: f.rootEvidence, currentRoots: f.currentRoots, tenGods: lv(f.tenGod),
-    daewoonSeason: f.daewoonSeason, seunSeason: f.seunSeason, monthSeason: f.monthSeason, future: f.futureYears || null, nowYear: f.nowYear };
+    luckTenGodBasis: f.luckTenGodBasis, daewoonStemTG: f.daewoonStemTG, daewoonBranchTG: f.daewoonBranchTG, seunStemTG: f.seunStemTG, seunBranchTG: f.seunBranchTG, daewoonSeason: f.daewoonSeason, seunSeason: f.seunSeason, monthSeason: f.monthSeason, future: f.futureYears || null, nowYear: f.nowYear };
 }
 function packageConfidence(p) {
   const ok = p.order.filter(id => p.sections[id].status === 'ok'); if (!ok.length) return 'LOW';
