@@ -167,3 +167,55 @@ body.qs-open{ overflow: hidden; }
 #qs.at-seal :is(.qs-head,.qs-desc,.qs-eyebrow,.qs-inst){position:relative;text-shadow:0 2px 6px #000,0 0 22px #000,0 0 36px #000}
 #qs.at-seal .qs-acts{position:relative}
 #qs .qs-sigil-large .qs-embers{position:absolute;left:50%;bottom:10%;color:#ee4937}
+
+/* Input scenes: preserve the portrait above a compact, scrollable lower sheet. */
+#qs #qsInputVideo{object-position:center top}
+#qs.is-input .qs-main{min-height:100dvh;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:80px 24px max(6dvh,76px + env(safe-area-inset-bottom))}
+#qs.is-input .qs-card{width:min(720px,100%);max-height:50dvh;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#d9c49e66 transparent;scroll-padding:20px;margin:0;padding:20px 24px;border:1px solid #d9c49e40;border-radius:18px;background:rgba(10,12,18,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:0 12px 48px #0005;text-align:left}
+#qs.is-input .qs-stephead{margin:0 0 14px}
+#qs.is-input .qs-stephead .qs-eyebrow{margin:0 0 5px;font-size:10px;letter-spacing:.12em}
+#qs.is-input .qs-stephead h2{margin:0;font:600 clamp(18px,2.2vw,23px)/1.4 var(--f-sans);letter-spacing:-.03em;color:var(--q-cream)}
+#qs.is-input .qs-panel{max-width:none;margin:0;padding:0;border:0;background:none;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;text-align:left}
+#qs.is-input .qs-spk{justify-content:flex-start;gap:8px;margin:0 0 8px}
+#qs.is-input .qs-spk img{width:28px;height:28px}
+#qs.is-input .qs-say{font-size:clamp(14px,1.5vw,16px);line-height:1.65;margin:0 0 14px;color:#e5e0d6}
+#qs.is-input .qs-say p+p{margin-top:2px}
+#qs.is-input .qs-note{margin:12px 0 0;font-size:11px;color:#bdb6a7}
+#qs.is-input .qs-field{max-width:none;text-align:left;border-radius:10px;background:#080c13b3;min-height:48px}
+#qs.is-input .qs-acts{position:sticky;bottom:-20px;z-index:2;margin-top:14px;padding:10px 0 4px;justify-content:flex-end;background:linear-gradient(transparent,rgba(10,12,18,.97) 26%)}
+#qs.is-input .qs-btn{min-height:48px;min-width:160px;padding:12px 22px;border-radius:10px;background:#d9c49e;color:#17191e;font-weight:600;backdrop-filter:none}
+#qs.is-input .qs-opt{border-radius:10px;min-height:50px}
+#qs.is-input .qs-months{grid-template-columns:repeat(6,minmax(0,1fr))}
+#qs.is-input .qs-days{gap:6px}
+#qs.is-input :is(.qs-months,.qs-days) button{min-height:44px;height:44px;border-radius:8px;font-size:15px}
+#qs.is-input .qs-big{font-size:20px;margin:0 0 10px}
+#qs.is-input .qs-head{font-size:18px;line-height:1.5;margin:0 0 14px}
+#qs.is-input .qs-sum{max-width:none}
+#qs.is-input .qs-yr{justify-content:flex-start}
+#qs.is-input .qs-yr input{font-size:28px;min-width:0;flex:1}
+#qs.is-input .qs-yr button{width:44px;flex-shrink:0;border-radius:8px}
+#qs .qs-time-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px}
+#qs .qs-time-fields label{display:grid;gap:7px;font-size:12px;color:var(--q-gold)}
+#qs .qs-time-fields :is(select,input){width:100%;min-width:0;min-height:48px;border:1px solid #b6a98e77;background:#0b1119;color:#fff;border-radius:10px;padding:10px 12px;font-size:16px}
+#qs .qs-unknown{display:flex;align-items:center;gap:10px;min-height:44px;margin:0 0 12px;font-size:14px;cursor:pointer}
+#qs .qs-unknown input{width:20px;height:20px;accent-color:var(--q-gold)}
+#qs.is-input .qs-min{justify-content:flex-start;gap:8px;margin-top:10px}
+#qs.is-input .qs-min button{border-radius:8px;min-height:44px;flex:1}
+#qs.is-input .qs-clock{font:14px/1.6 var(--f-sans);margin:10px 0 0}
+#qs.is-input .qs-shade{background:linear-gradient(180deg,#06090e42,transparent 22%,transparent 52%,#05070b45 100%)}
+#qs.is-input .qs-vig{opacity:.4}
+#qs.is-input .qs-grain{opacity:.05}
+body.qs-open #guideChange{top:76px;bottom:auto;left:auto;right:18px;font-size:12px;padding:8px 12px;min-height:40px}
+@media(max-width:620px){
+  #qs.is-input .qs-main{padding:72px 12px max(6dvh,76px + env(safe-area-inset-bottom))}
+  #qs.is-input .qs-card{padding:16px;border-radius:16px;scroll-padding:16px}
+  #qs.is-input .qs-months{grid-template-columns:repeat(4,minmax(0,1fr))}
+  #qs.is-input .qs-days{gap:4px}
+  #qs.is-input .qs-days button{min-height:44px;padding:0}
+  #qs.is-input .qs-acts{bottom:-16px}
+  #qs.is-input .qs-btn{width:100%}
+  #qs.is-input .qs-sum{grid-template-columns:1fr 1fr}
+  #qs.is-input .qs-sum>div{padding:10px}
+  #qs.is-input .qs-sum strong{font-size:13px}
+  body.qs-open #guideChange{top:66px;right:12px}
+}

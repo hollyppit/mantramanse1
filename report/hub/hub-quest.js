@@ -51,7 +51,7 @@
     /* ── 레이어 ── */
     var host = DOC.getElementById('hub') || DOC.body, qs = DOC.createElement('div');
     qs.id = 'qs'; qs.setAttribute('role', 'region'); qs.setAttribute('aria-label', '운명의 기록');
-    qs.innerHTML = '<div class="qs-bgwrap"><div class="qs-bg" id="qsBgA"></div><div class="qs-bg" id="qsBgB"></div></div><video id="qsInputVideo" muted loop playsinline preload="metadata" aria-hidden="true" hidden style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;pointer-events:none"></video><div class="qs-season" id="qsSeason" aria-hidden="true"></div><div class="qs-shade"></div><div class="qs-vig"></div><div class="qs-grain"></div>' +
+    qs.innerHTML = '<div class="qs-bgwrap"><div class="qs-bg" id="qsBgA"></div><div class="qs-bg" id="qsBgB"></div></div><video id="qsInputVideo" muted loop playsinline preload="metadata" aria-hidden="true" hidden style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;z-index:1;pointer-events:none"></video><div class="qs-season" id="qsSeason" aria-hidden="true"></div><div class="qs-shade"></div><div class="qs-vig"></div><div class="qs-grain"></div>' +
             '<header class="qs-top"><div class="qs-logo">MANTRA<span>운명의 기록</span></div><button type="button" class="qs-lnk" id="qsExit">' + (editing ? '수정 취소 ↗' : '처음 화면 ↗') + '</button></header>' +
       '<div class="qs-meter" aria-hidden="true"><i id="qsMeter"></i></div><main class="qs-main"><div class="qs-card" id="qsCard" aria-live="polite"></div></main>' +
       '<footer class="qs-foot"><button type="button" id="qsBack">← 이전 장면</button><span id="qsCount"></span><span></span></footer>' + (PREVIEW ? '<div class="qs-pv">미리보기 · 저장·계산하지 않음</div>' : '');
@@ -113,7 +113,11 @@
       return '<div class="qs-spk"><img src="' + esc(Q.guideImage(cfg, guide, mobileNow)) + '" alt="" width="44" height="44" decoding="async"><b>' + esc(QC.guides[guide].name) + '</b></div><div class="qs-say"' + A('say') + '>' + lines.map(function (t) { return '<p>' + esc(fill(Q.speech(t, guide))) + '</p>'; }).join('') + '</div>';
     }
     var panel = function (inner, hint) { return '<div class="qs-panel">' + inner + (hint ? '<p class="qs-note"' + A('hint') + '>' + esc(fill(hint)) + '</p>' : '') + '</div>'; };
-    var eyebrow = function (s) { return '<p class="qs-eyebrow">' + esc(s.title) + '</p>'; };
+    var eyebrow = function (s) {
+      var labels = { name: '이름을 입력해 주세요', gender: '성별을 선택해 주세요', calendar: '생일의 달력 기준을 선택해 주세요', year: '태어난 연도를 입력해 주세요', month: '태어난 월을 선택해 주세요', day: '태어난 일을 선택해 주세요', time: '태어난 시각을 입력해 주세요', place: '태어난 지역을 선택해 주세요', confirm: '입력한 정보를 확인해 주세요' };
+      if (labels[s.id]) { var inputs = steps.filter(function (x) { return x.kind === 'input' || x.kind === 'confirm'; }); return '<div class="qs-stephead"><p class="qs-eyebrow">출생정보 입력 · ' + (inputs.indexOf(s) + 1) + ' / ' + inputs.length + '</p><h2>' + labels[s.id] + '</h2></div>'; }
+      return '<p class="qs-eyebrow">' + esc(s.title) + '</p>';
+    };
     var acts = function () { return '<div class="qs-acts">' + [].slice.call(arguments).join('') + '</div>'; };
     var btn = function (id, text, alt) { return '<button type="button" class="qs-btn' + (alt ? ' alt' : '') + '" id="' + id + '"' + (alt ? '' : A('button')) + '>' + esc(text) + '</button>'; };
     var errBox = '<p class="qs-err" id="qsErr" role="alert"></p>';
@@ -152,6 +156,7 @@
       var s = step(), html = '', kind = s.kind;
       qs.dataset.guideStep = s.id;
       qs.classList.toggle('at-seal', kind === 'seal');
+      qs.classList.toggle('is-input', kind === 'input' || kind === 'confirm');
       ['fade', 'rise', 'none'].forEach(function (f) { qs.classList.remove('fx-' + f); }); qs.classList.add('fx-' + (H.reduce ? 'none' : (s.fx || QC.fx || 'fade')));
       applyBg(); preloadNext();
       setSeason(['month', 'day'].indexOf(s.id) >= 0 ? Q.seasonOf(d.calendar, d.month) : '');
@@ -161,7 +166,7 @@
       if (needEngine) { card.innerHTML = '<div class="qs-panel"><p class="qs-say"><span class="qs-spin"></span>음력 달력을 불러오는 중…</p></div>'; var t = ctxToken; H.engine().then(function () { if (t === ctxToken && step() === s) renderStep(); }).catch(function () { card.innerHTML = '<div class="qs-panel"><p class="qs-err">계산 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.</p></div>'; }); return; }
       var fn = VIEWS[kind === 'input' ? s.field : kind];
       card.innerHTML = fn ? fn(s) : '';
-      card.style.animation = 'none'; void card.offsetWidth; card.style.animation = ''; qs.scrollTop = 0;
+      card.style.animation = 'none'; void card.offsetWidth; card.style.animation = ''; card.scrollTop = 0; qs.scrollTop = 0;
       if (fn && BIND[kind === 'input' ? s.field : kind]) BIND[kind === 'input' ? s.field : kind](s);
       save();
     }
@@ -262,23 +267,24 @@
     /* 9. 태어난 시각 — 시·분 정확 입력. 모르면 시주 없이(엔진 미상 처리) */
     var clockText = function () { if (d.hourUnknown) return '시각 미상 · 시주 제외'; if (d.hour === '' || d.hour == null) return ''; var h = +d.hour; return (h < 12 ? '오전 ' : '오후 ') + (h % 12 === 0 ? 12 : h % 12) + '시 ' + (+d.minute || 0) + '분'; };
     VIEWS.time = function (s) {
-      var hours = Array.from({ length: 24 }, function (_, h) { return '<button type="button" data-h="' + h + '" class="' + (!d.hourUnknown && d.hour !== '' && +d.hour === h && d.hour != null ? 'sel' : '') + '" aria-label="' + h + '시"><b>' + pad2(h) + '</b><small>' + (h < 12 ? '오전' : '오후') + '</small></button>'; }).join('');
-      var mins = [0, 10, 20, 30, 40, 50].map(function (m) { return '<button type="button" data-q="' + m + '" class="' + (d.minute !== '' && +d.minute === m && !d.hourUnknown ? 'sel' : '') + '">' + pad2(m) + '</button>'; }).join('');
-      return eyebrow(s) + panel('<div id="qsSay">' + say(Q.linesOf(s, guide, d.hourUnknown)) + '</div><div id="qsTimeBox"' + (d.hourUnknown ? ' style="opacity:.35;pointer-events:none"' : '') + '><p class="qs-cap" style="margin:0 0 8px">시 (24시간 기준)</p><div class="qs-hours" role="group" aria-label="태어난 시">' + hours + '</div><div class="qs-min"><span>분</span>' + mins + '<input id="qsMin" inputmode="numeric" maxlength="2" placeholder="직접" aria-label="분(0~59)" value="' + esc(d.minute) + '"></div></div><div class="qs-clock" id="qsClock">' + esc(clockText()) + '</div>' + errBox +
-        acts('<button type="button" class="qs-btn" id="qsOk"' + A('button') + '>' + esc(d.hourUnknown ? '시각 미상으로 기록하기 →' : s.button) + '</button>', '<button type="button" class="qs-btn alt" id="qsUnk">' + (d.hourUnknown ? '시각을 알고 있어요' : '태어난 시간을 모릅니다') + '</button>'), s.hint);
+      var hours = '<option value="">시 선택</option>' + Array.from({ length: 24 }, function (_, h) { return '<option value="' + h + '"' + (d.hour !== '' && d.hour != null && +d.hour === h ? ' selected' : '') + '>' + (h < 12 ? '오전 ' : '오후 ') + (h % 12 || 12) + '시 (' + pad2(h) + '시)</option>'; }).join('');
+      var mins = [0, 15, 30, 45].map(function (m) { return '<button type="button" data-q="' + m + '" class="' + (d.minute !== '' && +d.minute === m && !d.hourUnknown ? 'sel' : '') + '">' + pad2(m) + '분</button>'; }).join('');
+      return eyebrow(s) + panel('<div id="qsSay">' + say(Q.linesOf(s, guide, d.hourUnknown)) + '</div><label class="qs-unknown"><input type="checkbox" id="qsUnk"' + (d.hourUnknown ? ' checked' : '') + '> 태어난 시간을 모릅니다</label><div id="qsTimeBox"' + (d.hourUnknown ? ' hidden' : '') + '><div class="qs-time-fields"><label for="qsHour">시<select id="qsHour">' + hours + '</select></label><label for="qsMin">분<input id="qsMin" type="number" min="0" max="59" inputmode="numeric" placeholder="00" aria-label="태어난 분 (0~59)" value="' + esc(d.minute) + '"></label></div><div class="qs-min" aria-label="분 빠른 선택">' + mins + '</div></div><div class="qs-clock" id="qsClock" role="status">' + esc(clockText()) + '</div>' + errBox + acts('<button type="button" class="qs-btn" id="qsOk"' + A('button') + '>' + esc(d.hourUnknown ? '시각 미상으로 다음 →' : '다음 →') + '</button>'), s.hint);
+
     };
     BIND.time = function (s) {
       var clock = function () { $('#qsClock').textContent = clockText(); }, mark = function () {
-        $$('[data-h]').forEach(function (b) { b.classList.toggle('sel', !d.hourUnknown && d.hour !== '' && d.hour != null && +b.getAttribute('data-h') === +d.hour); });
-        $$('[data-q]').forEach(function (b) { b.classList.toggle('sel', !d.hourUnknown && d.minute !== '' && +b.getAttribute('data-q') === +d.minute); }); $('#qsMin').value = d.minute; clock(); save();
+        $('#qsHour').value = d.hour == null ? '' : d.hour;
+        $$('[data-q]').forEach(function (b) { b.classList.toggle('sel', d.minute !== '' && +b.getAttribute('data-q') === +d.minute); }); $('#qsMin').value = d.minute; clock(); save();
       };
-      $$('[data-h]').forEach(function (b) { b.onclick = function () { d.hour = +b.getAttribute('data-h'); if (d.minute === '' || d.minute == null) d.minute = 0; err(''); mark(); }; });
+      $('#qsHour').onchange = function () { d.hour = this.value === '' ? '' : +this.value; if (d.hour !== '' && (d.minute === '' || d.minute == null)) d.minute = 0; err(''); mark(); };
       $$('[data-q]').forEach(function (b) { b.onclick = function () { d.minute = +b.getAttribute('data-q'); err(''); mark(); }; });
       $('#qsMin').oninput = function () { var v = this.value.replace(/\D/g, '').slice(0, 2); this.value = v; d.minute = v === '' ? '' : Math.min(59, +v); if (v !== '' && +v > 59) this.value = 59; err(''); mark(); };
-      $('#qsUnk').onclick = function () {
-        d.hourUnknown = !d.hourUnknown; if (d.hourUnknown) { d.hour = ''; d.minute = ''; } err('');
-        $('#qsSay').innerHTML = say(Q.linesOf(s, guide, d.hourUnknown)); $('#qsTimeBox').style.cssText = d.hourUnknown ? 'opacity:.35;pointer-events:none' : '';
-        $('#qsOk').textContent = d.hourUnknown ? '시각 미상으로 기록하기 →' : s.button; $('#qsUnk').textContent = d.hourUnknown ? '시각을 알고 있어요' : '태어난 시간을 모릅니다'; mark();
+      $('#qsUnk').onchange = function () {
+        d.hourUnknown = this.checked; err('');
+        $('#qsSay').innerHTML = say(Q.linesOf(s, guide, d.hourUnknown)); $('#qsTimeBox').hidden = d.hourUnknown;
+        $('#qsHour').disabled = d.hourUnknown; $('#qsMin').disabled = d.hourUnknown;
+        $('#qsOk').textContent = d.hourUnknown ? '시각 미상으로 다음 →' : '다음 →'; mark();
       };
       $('#qsOk').onclick = function () { var t = O.validateTime(d); if (!t.ok) { err(t.msg); return; } if (!d.hourUnknown && (d.minute === '' || d.minute == null)) d.minute = 0; next(); };
     };
@@ -307,7 +313,7 @@
     VIEWS.confirm = function (s) {
       var row = function (label, val, jumpId) { return '<div><small>' + label + '</small><strong>' + esc(val) + '</strong><button type="button" data-j="' + jumpId + '" aria-label="' + label + ' 수정">수정</button></div>'; };
       var place = d.country === 'OT' ? '해외·기타 (한국 표준시 기준)' : d.place;
-      return eyebrow(s) + '<h1 class="qs-head" style="font-size:clamp(24px,4vw,40px);' + C('head') + '">' + esc(fill('{이름귀인}의 기록이 완성되었습니다.')) + '</h1>' + panel(say(Q.linesOf(s, guide)) + '<div class="qs-sum">' +
+      return eyebrow(s) + panel(say(Q.linesOf(s, guide)) + '<div class="qs-sum">' +
         row('이름', d.name, 'name') + row('성별', d.gender === 'M' ? '남성' : d.gender === 'F' ? '여성' : '-', 'gender') + row('출생일', dateText(), 'calendar') + row('출생 시각', d.hourUnknown || d.hour === '' ? '모름 (시주 제외)' : clockText(), 'time') + row('출생지', place, 'place') + (ids.indexOf('guide') >= 0 ? row('안내자', QC.guides[guide].name, 'guide') : '') + '</div>' + errBox + acts(btn('qsCalc', s.button)), s.hint);
     };
     BIND.confirm = function () {
