@@ -137,6 +137,7 @@
     function renderStep() {
       var previousSeal=qs.querySelector('.qs-sigil-large');if(previousSeal)previousSeal.remove();
       var s = step(), html = '', kind = s.kind;
+      qs.dataset.guideStep = s.id;
       qs.classList.toggle('at-seal', kind === 'seal');
       ['fade', 'rise', 'none'].forEach(function (f) { qs.classList.remove('fx-' + f); }); qs.classList.add('fx-' + (H.reduce ? 'none' : (s.fx || QC.fx || 'fade')));
       applyBg(); preloadNext();
