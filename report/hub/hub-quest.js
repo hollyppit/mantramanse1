@@ -60,6 +60,17 @@
     var $ = function (s) { return qs.querySelector(s); }, $$ = function (s) { return [].slice.call(qs.querySelectorAll(s)); };
     layers = [$('#qsBgA'), $('#qsBgB')];
     var card = $('#qsCard');
+    function changeGuide(e) {
+      if (PREVIEW) return;
+      guide = e.detail.guide; save();
+      if (busy) return;
+      // 입력 폼을 다시 만들지 않아 아직 제출하지 않은 이름·날짜도 보존한다.
+      var speaker = $('.qs-spk'), speech = speaker && speaker.nextElementSibling;
+      if (speaker) { var image = speaker.querySelector('img'); if (image) image.src = Q.guideImage(cfg, guide, mobileNow); var label = speaker.querySelector('b'); if (label) label.textContent = QC.guides[guide].name; }
+      if (speech && speech.classList.contains('qs-say')) speech.innerHTML = Q.linesOf(step(), guide, d.hourUnknown).map(function (t) { return '<p>' + esc(fill(Q.speech(t, guide))) + '</p>'; }).join('');
+    }
+    root.addEventListener('mantra:guide-change', changeGuide);
+    onLeave(function () { root.removeEventListener('mantra:guide-change', changeGuide); });
     onLeave(function () { root.removeEventListener('resize', onResize); root.removeEventListener('popstate', onPop); if (qs.parentNode) qs.parentNode.removeChild(qs); DOC.body.classList.remove('qs-open'); });
 
     var step = function () { return steps[idx]; };

@@ -186,6 +186,7 @@
     T('prologue_started', { video: 1 }); playStage({ kind: 'prologue', clip: { videoUrl: S.proVid }, noCap: true, onDone: function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', { video: 1 }); if (bb && R.Bgm && R.Bgm.has()) bb.hidden = false; try { if (R.Bgm) R.Bgm.play('cinematic'); } catch (e) { } try { next(true); } catch (e) { if (window.console) console.error('prologue→next', e); try { beginReader(); } catch (e2) { toast('화면을 여는 중 문제가 생겼습니다. 새로고침해 주세요.'); } } } });
   }
   function startGate() {
+    if (S.guideResume) { if (LIFE) lifeBegin(); else beginReader(); return; }
     if (MAPQ) { if (LIFE) lifeBegin(); else beginReader(); return; }
     if (HUB) { hubStart(); return; }
     if (PREVIEW || !R.Bgm || !R.Bgm.has() || R.Bgm.isMuted()) { intro(); return; }
@@ -372,6 +373,10 @@
   });
   function enterWorld(wid) {
     var idxs = (S.wmap && S.wmap.by[wid]) || []; if (!idxs.length) { showHome(wid); return; }
+    if (S.guideResume) {
+      var resume = idxs.filter(function (i) { return S.rep.chapters[i].id === S.guideResume; })[0]; S.guideResume = null;
+      if (resume != null) { enterFromHome(resume); return; }
+    }
     var pick = idxs.filter(function (i) { return !S.ended[S.rep.chapters[i].id]; })[0]; if (pick == null) pick = idxs[0]; enterFromHome(pick);
   }
   /* 세계 첫 입장 연출: 3.5초 안팎의 짧은 전환(영상·이미지가 없으면 색과 이름만). 탭하면 바로 건너뛰고, 두 번째 입장부터는 보이지 않는다. */
@@ -893,8 +898,18 @@
   /* /report/ 스토리 페이지에서 넘어온 입력(sessionStorage, 서버 전송 없음): 폼을 건너뛰고 바로 시작한다. 한 번 쓰면 지운다. */
   (function handoff() {
     var raw = sg('mt_v2_input'); if (!raw || !window.Manse) return; try { sessionStorage.removeItem('mt_v2_input'); } catch (e) { }
-    try { var h = JSON.parse(raw), ch = window.Manse.compute(h.inp); S.ch = ch; S.name = String(h.name || '').slice(0, 20); S.interest = h.interest || ''; S.guide = h.guide; setTimeout(function () { start(ch, h.inp.gender); }, 0); } catch (e) { /* 입력이 올바르지 않으면 폼을 그대로 보여 준다 */ }
+    try { var h = JSON.parse(raw), ch = window.Manse.compute(h.inp); S.ch = ch; S.name = String(h.name || '').slice(0, 20); S.interest = h.interest || ''; S.guide = h.guide; S.guideResume = h.resumeChapter || null; setTimeout(function () { start(ch, h.inp.gender); }, 0); } catch (e) { /* 입력이 올바르지 않으면 폼을 그대로 보여 준다 */ }
   })();
+  window.addEventListener('mantra:guide-change', function (e) {
+    S.guide = e.detail.guide;
+    if (!S.ch || PREVIEW) return;
+    // 기존 문장을 섞어 재사용하지 않고 선택 안내자의 캐시/풀이로 다시 연다.
+    var c = S.rep && S.rep.chapters[S.idx];
+    try {
+      sessionStorage.setItem('mt_v2_input', JSON.stringify({ inp: S.ch.input, name: S.name, interest: S.interest || '', guide: S.guide, resumeChapter: c && c.id }));
+      location.reload();
+    } catch (err) { toast('안내자는 저장했습니다. 다음 진입부터 적용됩니다.'); }
+  });
 
   /* ── 글자(자막) 스타일: [data-tx="역할"] 글자마다 글씨체·크기·색·정렬·위치·등장/사라짐 효과·나타나는/사라지는 시기를 적용한다 ──
      값은 관리자(조합 테스트 → 글자 편집)에서 정하고 content.textStyles 로 저장된다. 챕터별 값이 전체 값 위에 덮어쓴다. */

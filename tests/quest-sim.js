@@ -29,6 +29,10 @@ ok(JSON.stringify(Q.linesOf(Q.STEPS[2], 'male')) !== JSON.stringify(Q.linesOf(Q.
 ok(Q.linesOf(Q.STEPS[2], 'male')[0] === '어떤 이름으로 기록해 줄까?', '남자 안내자는 반말');
 ok(Q.linesOf(Q.STEPS[2], 'female')[0] === '어떤 이름으로 기록해 드릴까요?', '여자 안내자는 존댓말');
 ok(Q.speech('기록을 펼치는 중입니다. 잠시만요.', 'male') === '기록을 펼치고 있어. 잠깐만 기다려줘.', '계산 중 남자 대사도 반말');
+ok(Q.speech('당신을 어떤 이름으로 기록해 드리면 될까요?', 'male') === '어떤 이름으로 기록해 줄까?', '운영 저장된 이름 대사도 반말');
+ok(Q.speech('{name}, 한 가지만 더 여쭙겠습니다.', 'male') === '{이름}, 한 가지만 더 물을게.', '운영 name 변수와 기본 호칭 차이 처리');
+ok(Q.speech('새 기록을 확인하겠습니다.', 'male') === '새 기록을 확인할게.', '저장 문구의 수정된 문장도 반말');
+ok(Q.speech('당신을 어떤 이름으로 기록해 드리면 될까요?', 'female') === '당신을 어떤 이름으로 기록해 드리면 될까요?', '여자 존댓말은 유지');
 ok(!/(옵니다|사옵|하옵|이옵)/.test(allLines.replace(/없습니다|있습니다/g, '')), '입력 안내는 일반 한국어(사극체 없음)');
 ok(Q.GUIDES.male.name !== Q.GUIDES.female.name, '안내자 이름 구분');
 
