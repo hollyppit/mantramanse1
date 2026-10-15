@@ -626,7 +626,14 @@ summary { cursor:pointer; padding:4px 0; }
   function newId(p) { return p + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
 
   // ── 로그인
-  function enter() { $('loginBox').classList.add('hide'); $('app').classList.remove('hide'); load(); var t = sg('mt_tab'); showTab(t && document.querySelector('.tabs button[data-t="' + t + '"]') ? t : 'dash'); }
+  function pastDiagnostics() {
+    if ($('pastTraceBox')) return;
+    var box=document.createElement('details'); box.id='pastTraceBox';box.className='card';
+    box.innerHTML='<summary>전생 생성 실패 진단</summary><label>진단 번호<input type="text" id="pastTraceId" autocomplete="off"></label><button type="button" id="pastTraceLoad">진단 조회</button><pre id="pastTraceResult" style="white-space:pre-wrap"></pre>';
+    $('app').appendChild(box);
+    $('pastTraceLoad').onclick=function(){var id=$('pastTraceId').value.trim();$('pastTraceResult').textContent='조회 중…';api('/api/past-story?traceId='+encodeURIComponent(id)).then(function(d){$('pastTraceResult').textContent=JSON.stringify(d.trace,null,2);}).catch(function(e){$('pastTraceResult').textContent=e.message;});};
+  }
+  function enter() { pastDiagnostics(); $('loginBox').classList.add('hide'); $('app').classList.remove('hide'); load(); var t = sg('mt_tab'); showTab(t && document.querySelector('.tabs button[data-t="' + t + '"]') ? t : 'dash'); }
   function login() {
     var pw = $('pw').value; if (!pw) return;
     $('loginMsg').textContent = '';
