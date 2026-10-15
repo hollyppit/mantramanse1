@@ -380,7 +380,7 @@
       if(!R.PastStory||S.pastLoading)return;
       S.pastLoading=true;var ctl=new AbortController(),wait=document.createElement('dialog');
       wait.style.cssText='background:#11151e;color:#eee5d5;border:1px solid #8b7956;border-radius:16px;max-width:420px;padding:28px;line-height:1.8';
-      wait.innerHTML='<p>사주의 결을 따라 이야기를 엮고 있습니다.</p><p>처음에는 잠시 시간이 걸립니다. 완성한 이야기는 저장해 두고 다시 보여드립니다.</p><button type="button" class="btn">취소</button>';
+      wait.innerHTML='<p>사주의 결을 따라 이야기를 엮고 있습니다.</p><p>첫 이야기를 준비할 때는 몇 분 정도 걸릴 수 있습니다. 완성한 이야기는 저장해 두고 다시 보여드립니다.</p><button type="button" class="btn">취소</button>';
       wait.querySelector('button').onclick=function(){ctl.abort();wait.close();};wait.addEventListener('cancel',function(){ctl.abort();});document.body.appendChild(wait);wait.showModal();
       var timer=setTimeout(function(){ctl.abort();toast('이야기 준비가 지연되고 있습니다. 잠시 후 다시 열어주세요.',6000);},250000);
       try{model=await R.PastStory.load(S.sd,model,ctl.signal);S.personalPast=model;}

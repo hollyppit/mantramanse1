@@ -14,13 +14,14 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
   const ids=input.claims.map(c=>c.claim_id);let result;
   assert(input.visual && input.visual.slot.startsWith('past:'));assert(!input.chart.currentRoots&&!input.chart.nowYear);
   if(req.instructions===P.PLAN_SYSTEM){
-   result={title:'검사 단편',premise:'서로 다른 조건의 충돌을 인물의 선택으로 옮기는 검사 전용 기획입니다.',setting:{era:'가상의 시대',place:'항구',pressure:'해가 지기 전'},protagonist:{name:'윤',desire:'기록을 지킨다',fear:'혼자가 된다',contradiction:'지키려다 놓친다',claim_ids:ids.slice(0,2)},antagonist:{name:'현',desire:'사람을 보낸다',fear:'책임을 진다'},dilemma:{choiceA:'남는다',costA:'약속을 잃는다',choiceB:'떠난다',costB:'직책을 잃는다'},callback:{object:'열쇠',openingUse:'감춘다',endingUse:'건넨다'},beats:P.STAGES.map((stage,i)=>({id:'b'+(i+1),stage,action:'인물이 행동하며 상황을 바꾸는 장면 '+i,consequence:'그 행동으로 다음 상황이 생기는 인과 '+i,claim_ids:[ids[i%ids.length]]}))};plans.push(input.chart);
+   result={title:'검사 단편',premise:'서로 다른 조건의 충돌을 인물의 선택으로 옮기는 검사 전용 기획입니다.',setting:{era:'가상의 시대',place:'항구',pressure:'해가 지기 전'},protagonist:{name:'윤'+plans.length,desire:'기록을 지킨다',fear:'혼자가 된다',contradiction:'지키려다 놓친다',claim_ids:ids.slice(0,2)},antagonist:{name:'현',desire:'사람을 보낸다',fear:'책임을 진다'},dilemma:{choiceA:'남는다',costA:'약속을 잃는다',choiceB:'떠난다',costB:'직책을 잃는다'},callback:{object:'열쇠',openingUse:'감춘다',endingUse:'건넨다'},beats:P.STAGES.map((stage,i)=>({id:'b'+(i+1),stage,action:'인물이 행동하며 상황을 바꾸는 장면 '+i,consequence:'그 행동으로 다음 상황이 생기는 인과 '+i,claim_ids:[ids[i%ids.length]]}))};plans.push(input.chart);
   }else if(req.instructions===P.WRITE_SYSTEM){result={title:'검사 단편',logline:'목표와 대가 사이에서 다른 선택을 하는 검사 단편입니다.',frames:input.plan.beats.map((b,i)=>({id:b.id,cap:'장면 '+i,paras:['“이제 출발하자.” 장면 '+i+'에서 윤은 열쇠를 쥐고 문을 바라봤다. '+('문밖의 소리를 듣고, 전날의 약속을 떠올렸다. ').repeat(3),'다음 순간 '+i+'의 선택은 돌아갈 길을 바꿨다. '+('동행은 멈춰 서서 그가 하려던 말을 기다렸다. ').repeat(3)],claim_ids:b.claim_ids}))};
   }else{result={passed:!deny,grounding:!deny,causality:true,dilemma:true,arc:true,prose:true,issues:deny?['근거 불일치']:[]};}
   return new Response(JSON.stringify({output_text:JSON.stringify(result)}));
  };
  const request=data=>new Request('http://test/api/past-story',{method:'POST',headers:{'cf-connecting-ip':'test'},body:JSON.stringify({sd:{...data,name:'PRIVATE_NAME'}})});
- let r=await API.onRequestPost({request:request(sd),env}),d=await r.json();assert.equal(r.status,200,JSON.stringify(d));assert.equal(d.story.frames.length,8);assert.equal(calls,3);
+ let r=await API.onRequestPost({request:request(sd),env}),d=await r.json();assert.equal(r.status,200,JSON.stringify(d));assert.equal(d.story.frames.length,8);assert(!d.audit,'public responses never include audit sources');assert.equal(calls,3);
+ const adminRead=new Request(request(sd),{headers:{authorization:'Bearer test-admin'}});const adminBody=await (await API.onRequestPost({request:adminRead,env:{...env,ADMIN_PASSWORD:'test-admin'}})).json();assert(adminBody.cached&&adminBody.audit.plan&&adminBody.audit.review.passed&&adminBody.audit.claims.length===3);assert.equal(calls,3);
  r=await API.onRequestPost({request:request(sd),env});d=await r.json();assert(d.cached);assert.equal(calls,3);
  r=await API.onRequestPost({request:request({...sd,nowYear:sd.nowYear+1,currentRoots:{changed:true}}),env});d=await r.json();assert(d.cached);assert.equal(calls,3);
  const second=JSON.parse(JSON.stringify(sd));second.groups={...sd.groups,비겁:sd.groups.비겁+0.01};
