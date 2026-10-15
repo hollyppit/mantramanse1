@@ -325,7 +325,7 @@
     });
     n.addEventListener('click', function (e) {
       var b = e.target.closest('[data-ws]'); if (!b) return; var k = b.dataset.ws, vw = $('#app').dataset.view, wid = S.wmap && (vw === 'reader' ? S.wmap.idx[pinned() != null ? pinned() : S.idx] : S.xpWorld);
-      if (k === 'resume') { resumeReader(); } else if (k === 'map') { if (S.mv) S.mv.pause(); showHome(); } else if (k === 'tool') { if (S.mv) S.mv.pause(); showHome(wid); }
+      if (k === 'toon') { openWorldToon(wid); } else if (k === 'resume') { resumeReader(); } else if (k === 'map') { if (S.mv) S.mv.pause(); showHome(); } else if (k === 'tool') { if (S.mv) S.mv.pause(); showHome(wid); }
       else if (k === 'go') { var i = +b.dataset.i; if (vw === 'reader') { pinTo(i); renderStrip(); gotoChapter(i, false, !!(S.mv && S.mv.state() === 'PLAYING')); T('strip_go', { index: i }); } else enterFromHome(i); }
     });
   }
@@ -343,6 +343,7 @@
     if (!wid) { n.hidden = true; document.documentElement.style.removeProperty('--bar-h'); return; }
     var w = (S.wmap.list || []).filter(function (x) { return x.id === wid; })[0] || {}, idxs = S.wmap.by[wid] || [], h = '';
     h += '<button type="button" class="ws-m" data-ws="map">주제 목록</button><button type="button" class="ws-t' + (vw === 'home' ? ' on' : '') + '" data-ws="tool">' + esc(w.icon || '') + ' ' + esc(TOOL_LABEL[wid] || '살펴보기') + '</button>';
+    h += '<button type="button" class="ws-m" data-ws="toon">무빙툰으로 감상하기</button>';
     if (vw === 'home' && S.cur && S.readerWorld === wid) h += '<button type="button" class="ws-m" data-ws="resume">읽던 곳으로 돌아가기</button>';
     idxs.forEach(function (i) { var c = S.rep.chapters[i]; h += '<button type="button" class="ws-c' + (vw === 'reader' && i === cur ? ' on' : '') + (S.ended[c.id] ? ' dn' : '') + '" data-ws="go" data-i="' + i + '">' + esc(c.title) + '</button>'; });
     n.innerHTML = h; n.className = vw === 'reader' ? 'ws-r' : 'ws-h'; n.style.setProperty('--wa', w.accent || '#D5B97F'); n.hidden = false;
@@ -357,7 +358,7 @@
   }
   /* 세계 무빙툰: 세계의 챕터들이 화면에 그려진 내용에서 앞부분 핵심 컷을 뽑아 한 편으로 감상한다(문장은 원문 그대로). */
   function worldToonModel(w) {
-    var idxs = (S.wmap && S.wmap.by[w.id]) || [], list = idxs.map(function (i) { var c = S.rep.chapters[i], a = document.getElementById('ch-' + c.id); return a ? { id: c.id, title: c.title, html: a.innerHTML } : null; }).filter(Boolean);
+    var idxs = (S.wmap && S.wmap.by[w.id]) || [], list = idxs.map(function (i) { var c = S.rep.chapters[i], a = document.getElementById('ch-' + c.id); return { id: c.id, title: c.title, html: a ? a.innerHTML : (c.scenes || []).map(function(s,k){var panel=panelOf(s);return (panel?panelHtml(panel):'')+sceneHtml(c,s,k);}).join('') }; });
     return R.Samsara.fromChapters(list, { id: 'world:' + w.id, title: w.name, label: (w.icon || '') + ' ' + w.name, bg: w.bgImage || '', cut: w.cutImages || null, per: 3, max: 36 });
   }
   function worldToonCard(w) {
@@ -366,18 +367,22 @@
       return R.Samsara.toonCard({ wid: w.id, name: w.name, icon: w.icon, thumb: th, frames: m.frames.length }); } catch (e) { return ''; }
   }
   $('#v-home').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-wtoon]'); if (!b) return; var wid = b.dataset.wtoon, w = ((S.wmap && S.wmap.list) || []).filter(function (x) { return x.id === wid; })[0]; if (!w) return;
-    var model = null; try { model = worldToonModel(w); } catch (err) { model = null; } if (!model) { toast('이 세계는 컷으로 나눌 글이 적어 글로 읽어 주세요.'); return; }
+    var b = e.target.closest('[data-wtoon]'); if (b) openWorldToon(b.dataset.wtoon);
+  });
+  function openWorldToon(wid) {
+    var w = ((S.wmap && S.wmap.list) || []).filter(function (x) { return x.id === wid; })[0]; if (!w || !R.Samsara) return;
+    var model = null; try { model = wid === 'w5' ? R.Samsara.extract(S.rep) : worldToonModel(w); } catch (err) { model = null; } if (!model) { toast('무빙툰 장면을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
+    if (S.mv) S.mv.pause();
     T('world_toon_open', { world: wid, frames: model.frames.length });
     R.Samsara.open(model, S.assets || {}, S.assetVideos || {}, { reduce: reduce, saveData: saveData, rate: playbackRate(), onDone: function () { S.xp.seen['toon:' + wid] = 1; xpSave(); T('world_toon_done', { world: wid }); showHome(wid); } });
-  });
+  }
   function enterWorld(wid) {
     var idxs = (S.wmap && S.wmap.by[wid]) || []; if (!idxs.length) { showHome(wid); return; }
     if (S.guideResume) {
       var resume = idxs.filter(function (i) { return S.rep.chapters[i].id === S.guideResume; })[0]; S.guideResume = null;
       if (resume != null) { enterFromHome(resume); return; }
     }
-    var pick = idxs.filter(function (i) { return !S.ended[S.rep.chapters[i].id]; })[0]; if (pick == null) pick = idxs[0]; enterFromHome(pick);
+    showHome(wid);
   }
   /* 세계 첫 입장 연출: 3.5초 안팎의 짧은 전환(영상·이미지가 없으면 색과 이름만). 탭하면 바로 건너뛰고, 두 번째 입장부터는 보이지 않는다. */
   function worldIntro(g, done) {

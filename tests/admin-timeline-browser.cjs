@@ -26,9 +26,18 @@ const {chromium}=require(process.env.TASK_PLAYWRIGHT);
   fs.mkdirSync('output/admin-timeline',{recursive:true});await page.screenshot({path:'output/admin-timeline/desktop.png',fullPage:true});
   await page.evaluate(()=>sessionStorage.setItem('mt_v2_input',JSON.stringify({inp:{year:1992,month:6,day:23,hour:1,minute:30,calendar:'solar',gender:'M',city:'서울'},name:'',guide:'male'})));
   await page.goto('http://127.0.0.1:'+server.address().port+'/report/v2/?from=hub&world=w7');
+  await page.waitForSelector('#v-home:not([hidden]) [data-wtoon="w7"]',{timeout:45000});
+  await page.locator('#v-home [data-wtoon="w7"]').click();
+  await page.waitForSelector('[data-smx]');await page.locator('[data-smx]').click();
+  await page.locator('#v-home [data-xgo]').first().click();
   await page.waitForSelector('#v-reader:not([hidden]) .chap',{timeout:45000});
   await page.waitForFunction(()=>document.querySelectorAll('#chapter .chap').length===4,{timeout:20000});
   assert.equal(await page.locator('#barTitle').innerText(),'커리어 제목 저장 확인');
+  await page.locator('#wstrip [data-ws="map"]').click();
+  await page.locator('#v-home [data-xw="w2"]').click();
+  await page.waitForSelector('#v-home:not([hidden]) [data-wtoon="w2"]');
+  await page.locator('#v-home [data-wtoon="w2"]').click();
+  await page.waitForSelector('[data-smx]');await page.locator('[data-smx]').click();
   assert.deepEqual(errors,[]);console.log('Admin timeline browser PASS: actual document, seven topics, career separation, save/reload, preview and prologue link');
  }finally{if(browser)await browser.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1});
