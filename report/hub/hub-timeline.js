@@ -137,11 +137,11 @@
        관리자 "세계관" 탭에서 고친 내용이 여기에도 같이 바뀌고, 타일을 누르면 그 세계가 바로 열린다(?world=). */
     function themesHtml() {
       var list = worlds.filter(function (w) { return w.enabled !== false; });
-      return '<div class="tq-topics">' + list.map(function (w) {
+      return '<div class="tq-catalog"><div class="tq-catalog-nav"><span>좌우로 넘겨 나에게 맞는 풀이를 찾아보세요</span><div><button type="button" data-topic-slide="-1" aria-label="이전 상품">‹</button><button type="button" data-topic-slide="1" aria-label="다음 상품">›</button></div></div><div class="tq-topics" tabindex="0" role="region" aria-label="주제별 풀이 상품 슬라이드">' + list.map(function (w) {
         var href = '#/go?to=life&world=' + encodeURIComponent(w.id), accent = /^#[0-9a-fA-F]{6}$/.test(w.accent || '') ? w.accent : '#D5B97F', wc = /^#[0-9a-fA-F]{6}$/.test(w.color || '') ? w.color : '#0b1117';
         return '<a class="tq-topic" href="' + esc(href) + '" style="--wa:' + accent + ';--wc:' + wc + '" data-track="timeline_topic_click" data-p="' + esc(w.id) + '" data-ob-ev="timeline_topic_click" data-case="t-' + esc(w.id) + '"><img src="' + esc(R.Explore.artOf(w)) + '" alt="" loading="lazy" decoding="async">' +
           (w.access === 'paid' ? '<span class="tq-acc paid">유료</span>' : '') + '<div><h3><span class="tq-ic" aria-hidden="true">' + esc(w.icon || '') + '</span>' + esc(w.name) + '</h3><p>' + esc(w.line || '') + '</p></div></a>';
-      }).join('') + '</div><p class="tq-sub">운명 세계 지도와 같은 구성입니다. 세계를 누르면 그 세계의 풀이가 바로 열립니다.</p>';
+      }).join('') + '</div></div><p class="tq-sub">카드를 누르면 해당 주제의 풀이가 열립니다.</p>';
     }
 
     /* ── 화면 조립 ── */
@@ -159,6 +159,11 @@
     function redraw(id) { var b = $('#tqb-' + id, root0); if (b) { var y = root.scrollY; b.innerHTML = builders[id](); root.scrollTo(0, y); } }
     root0.addEventListener('click', function (e) {
       var t = e.target, b;
+      if ((b = t.closest('[data-topic-slide]'))) {
+        var track = $('.tq-topics', root0), first = track && $('.tq-topic', track);
+        if (first) track.scrollBy({ left: (+b.getAttribute('data-topic-slide')) * (first.getBoundingClientRect().width + 16), behavior: H.reduce ? 'auto' : 'smooth' });
+        return;
+      }
       if ((b = t.closest('[data-d]'))) { st.d = +b.getAttribute('data-d'); st.ev = null; redraw('flow'); return; }
       if ((b = t.closest('[data-y]'))) { st.y = +b.getAttribute('data-y'); st.m = null; st.ev = null; Ob.track('timeline_year_select', {}); redraw('flow'); if ($('#tqb-now', root0)) { redraw('now'); var s3 = $('#tq-now', root0); if (s3) s3.scrollIntoView({ behavior: H.reduce ? 'auto' : 'smooth', block: 'start' }); } return; }
       if ((b = t.closest('[data-yy]'))) { st.y = Math.max(1901, Math.min(2098, st.y + (+b.getAttribute('data-yy')))); st.m = null; st.ev = null; var dd = dOf(st.y); if (dd) st.d = dd.idx; redraw('now'); redraw('flow'); return; }

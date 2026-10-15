@@ -82,8 +82,13 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 #hub .tq-today small{ font-size: .7rem; color: var(--ink-3); letter-spacing: .06em; } #hub .tq-today h4{ font-family: var(--f-serif); font-size: 1.1rem; } #hub .tq-today p{ font-size: .84rem; color: var(--ink-2); } #hub .tq-today span{ font-size: .8rem; color: var(--gold); }
 
 /* 영역 4: 운명 세계 지도(report/v2/explore.css 의 .xp-w)와 같은 이미지 타일 */
-#hub .tq-topics{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-#hub .tq-topic{ position: relative; display: block; height: 190px; border: 1px solid color-mix(in srgb, var(--wa, #D5B97F) 40%, var(--line)); border-radius: 14px; overflow: hidden; color: var(--ink); text-decoration: none; background: var(--wc, #0b1117); }
+#hub .tq-catalog{ min-width: 0; }
+#hub .tq-catalog-nav{ display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; color: var(--ink-2); font-size: .8rem; }
+#hub .tq-catalog-nav > div{ display: flex; gap: 8px; flex-shrink: 0; }
+#hub .tq-catalog-nav button{ width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%; background: #11151d; color: var(--ink); font-size: 1.5rem; cursor: pointer; }
+#hub .tq-topics{ display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; padding: 4px 2px 16px; scrollbar-width: thin; scrollbar-color: #786644 transparent; }
+#hub .tq-topic{ position: relative; display: block; flex: 0 0 clamp(220px, 28vw, 280px); aspect-ratio: 2 / 3; scroll-snap-align: start; border: 1px solid color-mix(in srgb, var(--wa, #D5B97F) 40%, var(--line)); border-radius: 16px; overflow: hidden; color: var(--ink); text-decoration: none; background: var(--wc, #0b1117); }
+#hub .tq-topics:focus-visible, #hub .tq-topic:focus-visible, #hub .tq-catalog-nav button:focus-visible{ outline: 2px solid #D5B97F; outline-offset: 2px; }
 #hub .tq-topic img{ width: 100%; height: 100%; object-fit: cover; filter: brightness(.62); transition: .4s; display: block; } #hub .tq-topic:hover img, #hub .tq-topic:focus-visible img{ transform: scale(1.06); filter: brightness(.86); }
 #hub .tq-topic::after{ content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(5,8,11,.92), transparent 62%); }
 #hub .tq-topic > div{ position: absolute; z-index: 1; left: 14px; right: 14px; bottom: 14px; } #hub .tq-topic h3{ font-size: 1.12rem; text-shadow: 0 3px 10px #000; } #hub .tq-ic{ font-size: 1rem; margin-right: 6px; } #hub .tq-topic p{ font-size: .76rem; color: var(--ink-2); margin-top: 2px; line-height: 1.5; }
@@ -96,6 +101,6 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
   #hub .tq-hero{ padding-top: 38px; }
   #hub .tq-pl b{ font-size: 2rem; }
   #hub .tq-f{ grid-template-columns: 58px 1fr 68px; }
-  #hub .tq-topic{ height: 160px; } #hub .tq-topic > div{ left: 11px; right: 11px; bottom: 12px; } #hub .tq-topic h3{ font-size: 1rem; } #hub .tq-topic p{ font-size: .72rem; }
+  #hub .tq-topic{ flex-basis: 72%; max-width: 280px; } #hub .tq-topic > div{ left: 16px; right: 16px; bottom: 20px; } #hub .tq-topic h3{ font-size: 1.15rem; } #hub .tq-topic p{ font-size: .8rem; }
 }
 @media (prefers-reduced-motion: reduce){ #hub .tq *{ transition: none !important; } }
