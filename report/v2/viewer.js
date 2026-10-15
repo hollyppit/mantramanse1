@@ -17,7 +17,7 @@
   var HUB = !PREVIEW && /[?&]from=hub(&|$)/.test(location.search); // /report/hub/ 에서 넘어온 경우: 일간·일주 영상·프롤로그는 허브가 이미 보여 줬으므로 건너뛰고 바로 인생 지도로 간다
   var WORLD = (/[?&]world=([\w-]{1,30})(&|$)/.exec(location.search) || [])[1] || '';
   var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
-  var view = function (v) { var ws0 = document.getElementById('wstrip'); if (ws0 && v !== 'reader' && v !== 'home') { ws0.hidden = true; document.documentElement.style.removeProperty('--bar-h'); } if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
+  var view = function (v) { var steps0 = document.getElementById('wsteps'); if (steps0 && v !== 'reader') steps0.hidden = true; var ws0 = document.getElementById('wstrip'); if (ws0 && v !== 'reader' && v !== 'home') { ws0.hidden = true; document.documentElement.style.removeProperty('--bar-h'); } if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
   function toast(msg, ms) { var t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, ms || 3200); }
   var sg = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, ss = function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { } };
 
@@ -165,7 +165,7 @@
   // 허브 퍼널 이벤트: 허브(/report/hub/)와 같은 이름 그대로(gtag · dataLayer · 'mantra:track')로 내보낸다. v2 자체 이벤트(T)와는 따로 센다.
   function funnel(n, p) { if (!HUB) return; p = Object.assign({ src: 'v2', from: 'hub' }, p || {}); try { if (typeof window.gtag === 'function') window.gtag('event', n, p); } catch (e) { } try { if (window.dataLayer && window.dataLayer.push) window.dataLayer.push(Object.assign({ event: n }, p)); } catch (e) { } try { window.dispatchEvent(new CustomEvent('mantra:track', { detail: { name: n, props: p } })); } catch (e) { } }
   // 홈으로 가는 버튼은 어느 단계에서든(입력·로딩·영상·본문) 항상 보인다: 허브에서 왔으면 MY 운명, 아니면 허브 첫 화면. 관리자 미리보기에서는 숨긴다
-  (function () { var hb = $('#hubBack'); if (!hb) return; if (PREVIEW) { hb.hidden = true; return; } if (HUB) { hb.href = '/report/#/my'; hb.textContent = '‹ MY 운명'; } })();
+  (function () { var hb = $('#hubBack'); if (!hb) return; if (PREVIEW) { hb.hidden = true; return; } if (HUB || WORLD) { hb.href = '/report/#/timeline?z=themes'; hb.textContent = '‹ 운명의 타임라인'; } })();
   function hubStart() { funnel('movingtoon_start'); if (R.Bgm && !hasProVideo()) R.Bgm.play('cinematic'); proVideo(function () { if (LIFE) lifeBegin(); else beginReader(); }); }
   // 프롤로그 영상(관리자 > 챕터 관리 > 프롤로그 영상): 올려 둔 영상이 있으면 재생하고 끝나면 next(true), 없으면 곧바로 next(false)
   // 프롤로그 영상이 있으면 그 동안은 영상 원래 소리만 들리고, 배경음악은 영상이 끝난(또는 건너뛴) 뒤 무빙툰 시작(일간)부터 흐른다
@@ -312,9 +312,14 @@
   }
   function ensureStrip() {
     if (document.getElementById('wstrip')) return; var n = document.createElement('nav'); n.id = 'wstrip'; n.setAttribute('aria-label', '챕터 이동'); n.hidden = true; document.body.appendChild(n);
+    var steps = document.createElement('nav'); steps.id = 'wsteps'; steps.setAttribute('aria-label', '이전 다음 챕터'); steps.hidden = true; document.body.appendChild(steps);
+    steps.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-step]'); if (!b || b.disabled) return;
+      var i = +b.dataset.step; pinTo(i); gotoChapter(i, false, !!(S.mv && S.mv.state() === 'PLAYING')); renderStrip();
+    });
     n.addEventListener('click', function (e) {
       var b = e.target.closest('[data-ws]'); if (!b) return; var k = b.dataset.ws, vw = $('#app').dataset.view, wid = S.wmap && (vw === 'reader' ? S.wmap.idx[pinned() != null ? pinned() : S.idx] : S.xpWorld);
-      if (k === 'map') { if (S.mv) S.mv.pause(); showHome(); } else if (k === 'tool') { if (S.mv) S.mv.pause(); showHome(wid); }
+      if (k === 'resume') { resumeReader(); } else if (k === 'map') { if (S.mv) S.mv.pause(); showHome(); } else if (k === 'tool') { if (S.mv) S.mv.pause(); showHome(wid); }
       else if (k === 'go') { var i = +b.dataset.i; if (vw === 'reader') { pinTo(i); renderStrip(); gotoChapter(i, false, !!(S.mv && S.mv.state() === 'PLAYING')); T('strip_go', { index: i }); } else enterFromHome(i); }
     });
   }
@@ -331,11 +336,17 @@
     var n = document.getElementById('wstrip'); if (!n || !S.wmap || !S.rep) return; var vw = $('#app').dataset.view, cur = pinned() != null ? pinned() : S.idx, wid = vw === 'reader' ? S.wmap.idx[cur] : (vw === 'home' ? S.xpWorld : null);
     if (!wid) { n.hidden = true; document.documentElement.style.removeProperty('--bar-h'); return; }
     var w = (S.wmap.list || []).filter(function (x) { return x.id === wid; })[0] || {}, idxs = S.wmap.by[wid] || [], h = '';
-    h += '<button type="button" class="ws-m" data-ws="map">‹ 세계 지도</button><button type="button" class="ws-t' + (vw === 'home' ? ' on' : '') + '" data-ws="tool">' + esc(w.icon || '') + ' ' + esc(TOOL_LABEL[wid] || '살펴보기') + '</button>';
+    h += '<button type="button" class="ws-m" data-ws="map">주제 목록</button><button type="button" class="ws-t' + (vw === 'home' ? ' on' : '') + '" data-ws="tool">' + esc(w.icon || '') + ' ' + esc(TOOL_LABEL[wid] || '살펴보기') + '</button>';
+    if (vw === 'home' && S.cur && S.readerWorld === wid) h += '<button type="button" class="ws-m" data-ws="resume">읽던 곳으로 돌아가기</button>';
     idxs.forEach(function (i) { var c = S.rep.chapters[i]; h += '<button type="button" class="ws-c' + (vw === 'reader' && i === cur ? ' on' : '') + (S.ended[c.id] ? ' dn' : '') + '" data-ws="go" data-i="' + i + '">' + esc(c.title) + '</button>'; });
     n.innerHTML = h; n.className = vw === 'reader' ? 'ws-r' : 'ws-h'; n.style.setProperty('--wa', w.accent || '#D5B97F'); n.hidden = false;
     if (vw === 'reader') barLabel(cur); // 서버에서 세계 이름이 바뀌어 지도를 다시 만든 경우에도 상단 바가 따라가게 한다
-    document.documentElement.style.setProperty('--bar-h', vw === 'reader' ? '110px' : '62px');
+    var steps = document.getElementById('wsteps'), pos = idxs.indexOf(cur);
+    if (steps) {
+      steps.hidden = vw !== 'reader';
+      steps.innerHTML = '<button type="button" data-step="' + (pos > 0 ? idxs[pos - 1] : cur) + '"' + (pos > 0 ? ' title="' + esc(S.rep.chapters[idxs[pos - 1]].title) + '"' : ' disabled') + '>‹ 이전 챕터</button><span>' + (pos + 1) + ' / ' + idxs.length + '</span><button type="button" data-step="' + (pos >= 0 && pos < idxs.length - 1 ? idxs[pos + 1] : cur) + '"' + (pos >= 0 && pos < idxs.length - 1 ? ' title="' + esc(S.rep.chapters[idxs[pos + 1]].title) + '"' : ' disabled') + '>다음 챕터 ›</button>';
+    }
+    document.documentElement.style.setProperty('--bar-h', vw === 'reader' ? '154px' : '62px');
     var on = n.querySelector('.on'); if (on) n.scrollLeft = Math.max(0, on.offsetLeft - 90);
   }
   /* 세계 무빙툰: 세계의 챕터들이 화면에 그려진 내용에서 앞부분 핵심 컷을 뽑아 한 편으로 감상한다(문장은 원문 그대로). */
@@ -370,7 +381,7 @@
   }
   function showHome(worldId) {
     var rep = S.rep, st = S.xp; if (!st) return;
-    S.scroll.doc = window.scrollY; xpSave();
+    if ($('#app').dataset.view === 'reader') S.scroll.doc = window.scrollY; xpSave();
     var worlds = R.Explore.worldsModel(rep.chapters, S.xpWorlds || R.Explore.mergeWorlds(null), S.ended, S.cur ? S.idx : st.last), cur = null;
     if (worldId) cur = worlds.filter(function (g) { return g.world.id === worldId; })[0] || null;
     S.xpWorld = cur ? cur.world.id : null;
@@ -490,7 +501,7 @@
   });
   function enterFromHome(idx) {
     S.readerWorld = (S.wmap && S.wmap.idx[idx]) || null;
-    S.view = 'reader'; view('reader'); pinTo(idx); openDoc(idx, { autoStart: S.xp ? S.xp.auto : true }); renderStrip(); T('explore_chapter_picked', { index: idx });
+    S.view = 'reader'; view('reader'); pinTo(idx); renderStrip(); openDoc(idx, { autoStart: S.xp ? S.xp.auto : true }); renderStrip(); T('explore_chapter_picked', { index: idx });
   }
   $('#v-home').addEventListener('click', function (e) {
     var b = e.target.closest('[data-xgo]'); if (b) { enterFromHome(+b.dataset.xgo); return; }
@@ -799,7 +810,7 @@
     S.mv = R.Reading.mount($('#chapter'), { flow: Object.assign({}, S.pack && S.pack.flow, { playbackRate: playbackRate() }), reduce: reduce, saveData: saveData, bgList: S.bg, autoStart: auto, bgm: R.Bgm && R.Bgm.has() ? R.Bgm : null, onSection: onSection, onEnd: onDocEnd,
       onProgress: function (fr) { $('#progFill').style.width = Math.round(fr * 1000) / 10 + '%'; $('#prog').setAttribute('aria-valuenow', String(Math.round(fr * 100))); } });
   }
-  function resumeReader() { view('reader'); if (EXPLORE) renderStrip(); mountReading(false); window.scrollTo(0, S.scroll.doc || 0); if (S.mv) S.mv.measure(); }
+  function resumeReader() { view('reader'); S.view = 'reader'; if (EXPLORE) renderStrip(); mountReading(false); window.scrollTo(0, S.scroll.doc || 0); if (S.mv) S.mv.measure(); }
   function gotoChapter(i, instant, resume) {
     if (S.readerWorld && S.wmap && S.wmap.idx[i] && S.wmap.idx[i] !== S.readerWorld) { enterFromHome(i); return; }
     var el = $('#chapter .chap[data-ch="' + i + '"]'); if (!el || !S.mv) return; var p = el.previousElementSibling; if (p && (p.classList.contains('rd-act') || p.classList.contains('world-hook'))) el = p; S.mv.gotoEl(el, instant, resume);

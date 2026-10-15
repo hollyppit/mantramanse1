@@ -272,3 +272,10 @@
 .xp.xp-wv { padding-top: calc(112px + env(safe-area-inset-top, 0px)); }
 
 .sm-nt.sm-lb { background: rgba(10, 6, 18, .45); border-color: rgba(255, 255, 255, .15); }
+
+/* 탭을 가로로 스크롤해도 이전·다음 이동은 항상 같은 자리에 둔다. */
+#wsteps { position: fixed; top: calc(110px + env(safe-area-inset-top, 0px)); left: 0; right: 0; z-index: 29; height: 44px; display: flex; align-items: center; justify-content: center; gap: 16px; background: rgba(7, 9, 19, .96); border-bottom: 1px solid var(--line2); }
+#wsteps[hidden] { display: none; }
+#wsteps button { min-height: 36px; padding: 4px 12px; border: 1px solid var(--gold-d); border-radius: 999px; color: var(--gold-l); background: transparent; font-size: .8rem; }
+#wsteps button:disabled { opacity: .35; cursor: default; }
+#wsteps span { color: var(--ink2); font-size: .8rem; min-width: 48px; text-align: center; }
