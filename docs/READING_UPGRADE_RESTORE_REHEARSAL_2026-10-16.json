@@ -1,0 +1,8 @@
+{
+  "mode": "offline-memory-stores-no-production-writes",
+  "backupChecksum": true,
+  "restoredRecords": 266,
+  "allValuesMatched": true,
+  "rollbackRestoredEmptyStores": true,
+  "assetBinaryRestorationTested": false
+}

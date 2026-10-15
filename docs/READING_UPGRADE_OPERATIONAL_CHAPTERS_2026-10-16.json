@@ -1,0 +1,519 @@
+{
+  "source": "authenticated production backup",
+  "chapters": [
+    {
+      "id": "c00",
+      "base": "c00",
+      "title": "運路 · 序章",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "self_14",
+      "targetTopic": "self"
+    },
+    {
+      "id": "c01",
+      "base": "c01",
+      "title": "나의 일주",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "self_01",
+      "targetTopic": "self"
+    },
+    {
+      "id": "love_c01",
+      "base": "c01",
+      "title": "나의 일주",
+      "project": "love",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "self_01",
+      "targetTopic": "self"
+    },
+    {
+      "id": "wealth_c01",
+      "base": "c01",
+      "title": "나의 일주",
+      "project": "wealth",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "self_01",
+      "targetTopic": "self"
+    },
+    {
+      "id": "newyear_c01",
+      "base": "c01",
+      "title": "나의 일주",
+      "project": "newyear",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "self_01",
+      "targetTopic": "self"
+    },
+    {
+      "id": "c02",
+      "base": "c02",
+      "title": "내 안의 다섯 기운",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "self_12",
+      "targetTopic": "self"
+    },
+    {
+      "id": "love_c03",
+      "base": "c03",
+      "title": "타고난 성격과 기질",
+      "project": "love",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "self_03",
+      "targetTopic": "self"
+    },
+    {
+      "id": "wealth_c02",
+      "base": "c02",
+      "title": "내 안의 다섯 기운",
+      "project": "wealth",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "self_12",
+      "targetTopic": "self"
+    },
+    {
+      "id": "newyear_c16",
+      "base": "c16",
+      "title": "지금 나는 어느 계절인가",
+      "project": "newyear",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "timing_03",
+      "targetTopic": "timing"
+    },
+    {
+      "id": "c03",
+      "base": "c03",
+      "title": "타고난 성격과 기질",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "self_03",
+      "targetTopic": "self"
+    },
+    {
+      "id": "love_c09",
+      "base": "c09",
+      "title": "연애 성향",
+      "project": "love",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "love_01",
+      "targetTopic": "love"
+    },
+    {
+      "id": "wealth_c04",
+      "base": "c04",
+      "title": "숨겨진 재능",
+      "project": "wealth",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "self_08",
+      "targetTopic": "self"
+    },
+    {
+      "id": "newyear_c17",
+      "base": "c17",
+      "title": "올해의 흐름",
+      "project": "newyear",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "timing_06",
+      "targetTopic": "timing"
+    },
+    {
+      "id": "c04",
+      "base": "c04",
+      "title": "숨겨진 재능",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "self_08",
+      "targetTopic": "self"
+    },
+    {
+      "id": "love_c10",
+      "base": "c10",
+      "title": "결혼과 배우자",
+      "project": "love",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "love_06",
+      "targetTopic": "love"
+    },
+    {
+      "id": "wealth_c06",
+      "base": "c06",
+      "title": "직업 적성 진단",
+      "project": "wealth",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "career_03",
+      "targetTopic": "career"
+    },
+    {
+      "id": "newyear_c18",
+      "base": "c18",
+      "title": "앞으로 12개월",
+      "project": "newyear",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "timing_09",
+      "targetTopic": "timing"
+    },
+    {
+      "id": "c05",
+      "base": "c05",
+      "title": "나의 약점과 그림자",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "self_09",
+      "targetTopic": "self"
+    },
+    {
+      "id": "love_c11",
+      "base": "c11",
+      "title": "대인관계 설명서",
+      "project": "love",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "relationships_01",
+      "targetTopic": "relationships"
+    },
+    {
+      "id": "wealth_c07",
+      "base": "c07",
+      "title": "나의 성공 방식",
+      "project": "wealth",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "career_01",
+      "targetTopic": "career"
+    },
+    {
+      "id": "newyear_c19",
+      "base": "c19",
+      "title": "다음 길을 여는 방법",
+      "project": "newyear",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "remedy_01",
+      "targetTopic": "remedy"
+    },
+    {
+      "id": "c06",
+      "base": "c06",
+      "title": "직업 적성 진단",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "career_03",
+      "targetTopic": "career"
+    },
+    {
+      "id": "love_c12",
+      "base": "c12",
+      "title": "나와 잘 맞는 사람",
+      "project": "love",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "relationships_04",
+      "targetTopic": "relationships"
+    },
+    {
+      "id": "wealth_c08",
+      "base": "c08",
+      "title": "재물 그릇과 돈 버는 방식",
+      "project": "wealth",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "wealth_03",
+      "targetTopic": "wealth"
+    },
+    {
+      "id": "newyear_c20",
+      "base": "c20",
+      "title": "終章 · 운로 사용설명서",
+      "project": "newyear",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "remedy_07",
+      "targetTopic": "remedy"
+    },
+    {
+      "id": "c07",
+      "base": "c07",
+      "title": "나의 성공 방식",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "career_01",
+      "targetTopic": "career"
+    },
+    {
+      "id": "love_c13",
+      "base": "c13",
+      "title": "가족과 뿌리",
+      "project": "love",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "relationships_06",
+      "targetTopic": "relationships"
+    },
+    {
+      "id": "wealth_c16",
+      "base": "c16",
+      "title": "지금 나는 어느 계절인가",
+      "project": "wealth",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "timing_03",
+      "targetTopic": "timing"
+    },
+    {
+      "id": "c08",
+      "base": "c08",
+      "title": "재물 그릇과 돈 버는 방식",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "wealth_03",
+      "targetTopic": "wealth"
+    },
+    {
+      "id": "love_c16",
+      "base": "c16",
+      "title": "지금 나는 어느 계절인가",
+      "project": "love",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "timing_03",
+      "targetTopic": "timing"
+    },
+    {
+      "id": "wealth_c17",
+      "base": "c17",
+      "title": "올해의 흐름",
+      "project": "wealth",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "timing_06",
+      "targetTopic": "timing"
+    },
+    {
+      "id": "c09",
+      "base": "c09",
+      "title": "연애 성향",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "love_01",
+      "targetTopic": "love"
+    },
+    {
+      "id": "love_c17",
+      "base": "c17",
+      "title": "올해의 흐름",
+      "project": "love",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "timing_06",
+      "targetTopic": "timing"
+    },
+    {
+      "id": "wealth_c18",
+      "base": "c18",
+      "title": "앞으로 12개월",
+      "project": "wealth",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "timing_09",
+      "targetTopic": "timing"
+    },
+    {
+      "id": "c10",
+      "base": "c10",
+      "title": "결혼과 배우자",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "love_06",
+      "targetTopic": "love"
+    },
+    {
+      "id": "love_c18",
+      "base": "c18",
+      "title": "앞으로 12개월",
+      "project": "love",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "timing_09",
+      "targetTopic": "timing"
+    },
+    {
+      "id": "wealth_c19",
+      "base": "c19",
+      "title": "다음 길을 여는 방법",
+      "project": "wealth",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "remedy_01",
+      "targetTopic": "remedy"
+    },
+    {
+      "id": "c11",
+      "base": "c11",
+      "title": "대인관계 설명서",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "relationships_01",
+      "targetTopic": "relationships"
+    },
+    {
+      "id": "love_c19",
+      "base": "c19",
+      "title": "다음 길을 여는 방법",
+      "project": "love",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "remedy_01",
+      "targetTopic": "remedy"
+    },
+    {
+      "id": "wealth_c20",
+      "base": "c20",
+      "title": "終章 · 운로 사용설명서",
+      "project": "wealth",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "remedy_07",
+      "targetTopic": "remedy"
+    },
+    {
+      "id": "c12",
+      "base": "c12",
+      "title": "나와 잘 맞는 사람",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "relationships_04",
+      "targetTopic": "relationships"
+    },
+    {
+      "id": "love_c20",
+      "base": "c20",
+      "title": "終章 · 운로 사용설명서",
+      "project": "love",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "remedy_07",
+      "targetTopic": "remedy"
+    },
+    {
+      "id": "c13",
+      "base": "c13",
+      "title": "가족과 뿌리",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "relationships_06",
+      "targetTopic": "relationships"
+    },
+    {
+      "id": "c14",
+      "base": "c14",
+      "title": "나의 전생 이야기",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "creative_01",
+      "targetTopic": "creative"
+    },
+    {
+      "id": "c15",
+      "base": "c15",
+      "title": "인생 전체의 계절",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "timing_01",
+      "targetTopic": "timing"
+    },
+    {
+      "id": "c16",
+      "base": "c16",
+      "title": "지금 나는 어느 계절인가",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "timing_03",
+      "targetTopic": "timing"
+    },
+    {
+      "id": "c17",
+      "base": "c17",
+      "title": "올해의 흐름",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "timing_06",
+      "targetTopic": "timing"
+    },
+    {
+      "id": "c18",
+      "base": "c18",
+      "title": "앞으로 12개월",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "timing_09",
+      "targetTopic": "timing"
+    },
+    {
+      "id": "c19",
+      "base": "c19",
+      "title": "나에게 맞는 개운법",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "remedy_01",
+      "targetTopic": "remedy"
+    },
+    {
+      "id": "c20",
+      "base": "c20",
+      "title": "나의 인생 사용설명서",
+      "project": "full",
+      "enabled": true,
+      "classification": "유지 및 심화",
+      "targetChapter": "remedy_07",
+      "targetTopic": "remedy"
+    },
+    {
+      "id": "cx3fxod",
+      "base": "cx3fxod",
+      "title": "새 챕터",
+      "project": "full",
+      "enabled": true,
+      "classification": "관리자 검토·기존 구성 보존",
+      "targetChapter": null,
+      "targetTopic": null
+    }
+  ],
+  "missingMapping": [
+    "cx3fxod"
+  ],
+  "deleted": 0
+}

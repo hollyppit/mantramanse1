@@ -1,0 +1,973 @@
+{
+  "source": "local defaults, not live admin data",
+  "modules": 678,
+  "base": 21,
+  "legacy": [
+    {
+      "id": "life_prologue",
+      "base": "life",
+      "title": "나의 인생 지도",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_here",
+      "base": "life",
+      "title": "지금 내가 서 있는 곳",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c00",
+      "base": "c00",
+      "title": "運路 · 序章",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_self_who",
+      "base": "life",
+      "title": "나는 왜 이렇게 행동할까?",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c01",
+      "base": "c01",
+      "title": "나의 일주",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c02",
+      "base": "c02",
+      "title": "내 안의 다섯 기운",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_tengods",
+      "base": "life",
+      "title": "십성 · 내 안의 다섯 힘",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c03",
+      "base": "c03",
+      "title": "타고난 성격과 기질",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_car",
+      "base": "deep_car",
+      "title": "내 사주를 자동차에 비유하면",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c04",
+      "base": "c04",
+      "title": "숨겨진 재능",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c05",
+      "base": "c05",
+      "title": "나의 약점과 그림자",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_proscons",
+      "base": "deep_proscons",
+      "title": "솔직한 장단점",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_stars",
+      "base": "life",
+      "title": "신살 · 사주에 붙은 별",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_stages",
+      "base": "deep_stages",
+      "title": "12운성과 12신살",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_love_style",
+      "base": "life",
+      "title": "나는 사랑할 때 어떤 사람일까?",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c09",
+      "base": "c09",
+      "title": "연애 성향",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_love_timing",
+      "base": "life",
+      "title": "인연의 움직임이 커지는 때",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_love",
+      "base": "deep_love",
+      "title": "연애 지도",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_marriage_who",
+      "base": "life",
+      "title": "오래 가는 관계에서 바라는 것",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c10",
+      "base": "c10",
+      "title": "결혼과 배우자",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_marriage_timing",
+      "base": "life",
+      "title": "인연과 결혼 이야기가 커지는 때",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_spouse",
+      "base": "deep_spouse",
+      "title": "미래 연인 · 배우자 추정",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_marriage",
+      "base": "deep_marriage",
+      "title": "결혼 지도",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_children",
+      "base": "deep_children",
+      "title": "자식운 · 내 자식 자리의 모습",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c12",
+      "base": "c12",
+      "title": "끌리는 사람, 맞는 사람",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_ilju",
+      "base": "deep_ilju",
+      "title": "맞는 일주 · 끌리는 일주 · 부딪히는 일주",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_money_nature",
+      "base": "life",
+      "title": "나는 어떻게 돈을 버는 사람일까?",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c08",
+      "base": "c08",
+      "title": "재물 그릇과 돈 버는 방식",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_money_timing",
+      "base": "life",
+      "title": "돈의 움직임이 커지는 때",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_wealth",
+      "base": "deep_wealth",
+      "title": "재물 그릇 · 돈 버는 방식",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_career_style",
+      "base": "life",
+      "title": "나는 어떤 방식으로 일하는 사람일까?",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c06",
+      "base": "c06",
+      "title": "직업 적성 진단",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_career_timing",
+      "base": "life",
+      "title": "일의 움직임이 커지는 때",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_jobs",
+      "base": "deep_jobs",
+      "title": "직업 후보 지도",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c07",
+      "base": "c07",
+      "title": "나에게 맞는 성공 방식",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_relation_style",
+      "base": "life",
+      "title": "사람을 대하는 나의 방식",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c11",
+      "base": "c11",
+      "title": "대인관계 설명서",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_relation_timing",
+      "base": "life",
+      "title": "사람 사이의 변화가 커지는 때",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c13",
+      "base": "c13",
+      "title": "내가 자라온 자리",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_past",
+      "base": "deep_past",
+      "title": "전생의 모습",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_daewoon",
+      "base": "deep_daewoon",
+      "title": "대운 지도",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_future",
+      "base": "life",
+      "title": "앞으로 10년의 구간",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c17",
+      "base": "c17",
+      "title": "올해의 흐름",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_seun",
+      "base": "deep_seun",
+      "title": "세운 지도",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c18",
+      "base": "c18",
+      "title": "앞으로 12개월",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_wolun",
+      "base": "deep_wolun",
+      "title": "월운 지도",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_health",
+      "base": "deep_health",
+      "title": "건강 및 사고수",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_actions",
+      "base": "life",
+      "title": "실천 뒤 확인할 변화",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_action",
+      "base": "life",
+      "title": "버릴 것 · 지킬 것 · 시작할 것",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c19",
+      "base": "c19",
+      "title": "다음 길을 여는 개운 가이드",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_remedy",
+      "base": "deep_remedy",
+      "title": "개운법의 근거",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_places",
+      "base": "deep_places",
+      "title": "나에게 맞는 명소",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c20",
+      "base": "c20",
+      "title": "운로 사용설명서",
+      "readingSection": null,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    }
+  ],
+  "reading": [
+    {
+      "id": "c00",
+      "base": "c00",
+      "title": "나의 사주 핵심 요약",
+      "readingSection": 1,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_here",
+      "base": "life",
+      "title": "지금 내가 서 있는 곳",
+      "readingSection": 1,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c03",
+      "base": "c03",
+      "title": "타고난 특징과 성향",
+      "readingSection": 2,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_self_who",
+      "base": "life",
+      "title": "나는 왜 이렇게 행동할까?",
+      "readingSection": 2,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c01",
+      "base": "c01",
+      "title": "나의 일주",
+      "readingSection": 2,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c02",
+      "base": "c02",
+      "title": "내 안의 다섯 기운",
+      "readingSection": 2,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_tengods",
+      "base": "life",
+      "title": "십성 · 내 안의 다섯 힘",
+      "readingSection": 2,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_car",
+      "base": "deep_car",
+      "title": "내 사주를 자동차에 비유하면",
+      "readingSection": 2,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_stars",
+      "base": "life",
+      "title": "신살 · 사주에 붙은 별",
+      "readingSection": 2,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_stages",
+      "base": "deep_stages",
+      "title": "12운성과 12신살",
+      "readingSection": 2,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_proscons",
+      "base": "deep_proscons",
+      "title": "나의 강점과 취약점",
+      "readingSection": 3,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c04",
+      "base": "c04",
+      "title": "숨겨진 재능",
+      "readingSection": 3,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c05",
+      "base": "c05",
+      "title": "나의 약점과 그림자",
+      "readingSection": 3,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "reading_section_4",
+      "base": "reading_transform",
+      "title": "약점을 장점으로 승화하는 방법",
+      "readingSection": 4,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c06",
+      "base": "c06",
+      "title": "직업과 적성",
+      "readingSection": 5,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_career_style",
+      "base": "life",
+      "title": "나는 어떤 방식으로 일하는 사람일까?",
+      "readingSection": 5,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_career_timing",
+      "base": "life",
+      "title": "일의 움직임이 커지는 때",
+      "readingSection": 5,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_jobs",
+      "base": "deep_jobs",
+      "title": "직업 후보 지도",
+      "readingSection": 5,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c07",
+      "base": "c07",
+      "title": "나에게 맞는 성공 방식",
+      "readingSection": 5,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c08",
+      "base": "c08",
+      "title": "재물과 사업",
+      "readingSection": 6,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_money_nature",
+      "base": "life",
+      "title": "나는 어떻게 돈을 버는 사람일까?",
+      "readingSection": 6,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_money_timing",
+      "base": "life",
+      "title": "돈의 움직임이 커지는 때",
+      "readingSection": 6,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_wealth",
+      "base": "deep_wealth",
+      "title": "재물 그릇 · 돈 버는 방식",
+      "readingSection": 6,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c09",
+      "base": "c09",
+      "title": "연애와 결혼",
+      "readingSection": 7,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_love_style",
+      "base": "life",
+      "title": "나는 사랑할 때 어떤 사람일까?",
+      "readingSection": 7,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_love_timing",
+      "base": "life",
+      "title": "인연의 움직임이 커지는 때",
+      "readingSection": 7,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_love",
+      "base": "deep_love",
+      "title": "연애 지도",
+      "readingSection": 7,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_marriage_who",
+      "base": "life",
+      "title": "오래 가는 관계에서 바라는 것",
+      "readingSection": 7,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c10",
+      "base": "c10",
+      "title": "결혼과 배우자",
+      "readingSection": 7,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_marriage_timing",
+      "base": "life",
+      "title": "인연과 결혼 이야기가 커지는 때",
+      "readingSection": 7,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_spouse",
+      "base": "deep_spouse",
+      "title": "미래 연인 · 배우자 추정",
+      "readingSection": 7,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_marriage",
+      "base": "deep_marriage",
+      "title": "결혼 지도",
+      "readingSection": 7,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_children",
+      "base": "deep_children",
+      "title": "자식운 · 내 자식 자리의 모습",
+      "readingSection": 7,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c11",
+      "base": "c11",
+      "title": "인간관계와 궁합",
+      "readingSection": 8,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c12",
+      "base": "c12",
+      "title": "끌리는 사람, 맞는 사람",
+      "readingSection": 8,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_ilju",
+      "base": "deep_ilju",
+      "title": "맞는 일주 · 끌리는 일주 · 부딪히는 일주",
+      "readingSection": 8,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_relation_style",
+      "base": "life",
+      "title": "사람을 대하는 나의 방식",
+      "readingSection": 8,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_relation_timing",
+      "base": "life",
+      "title": "사람 사이의 변화가 커지는 때",
+      "readingSection": 8,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c13",
+      "base": "c13",
+      "title": "내가 자라온 자리",
+      "readingSection": 8,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_past",
+      "base": "deep_past",
+      "title": "전생의 모습",
+      "readingSection": 8,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_health",
+      "base": "deep_health",
+      "title": "건강과 생활 습관",
+      "readingSection": 9,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_prologue",
+      "base": "life",
+      "title": "전체 인생 흐름",
+      "readingSection": 10,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_daewoon",
+      "base": "deep_daewoon",
+      "title": "대운 분석",
+      "readingSection": 11,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_seun",
+      "base": "deep_seun",
+      "title": "향후 10년의 세운 분석",
+      "readingSection": 12,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_future",
+      "base": "life",
+      "title": "앞으로 10년의 구간",
+      "readingSection": 12,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c17",
+      "base": "c17",
+      "title": "올해와 월별 운세",
+      "readingSection": 13,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c18",
+      "base": "c18",
+      "title": "앞으로 12개월",
+      "readingSection": 13,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_wolun",
+      "base": "deep_wolun",
+      "title": "월운 지도",
+      "readingSection": 13,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_places",
+      "base": "deep_places",
+      "title": "나에게 맞는 환경과 활동",
+      "readingSection": 14,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "deep_remedy",
+      "base": "deep_remedy",
+      "title": "개운법의 근거",
+      "readingSection": 14,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c20",
+      "base": "c20",
+      "title": "개운 전략과 실천 계획",
+      "readingSection": 15,
+      "supplementary": false,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_actions",
+      "base": "life",
+      "title": "실천 뒤 확인할 변화",
+      "readingSection": 15,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "life_action",
+      "base": "life",
+      "title": "버릴 것 · 지킬 것 · 시작할 것",
+      "readingSection": 15,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    },
+    {
+      "id": "c19",
+      "base": "c19",
+      "title": "다음 길을 여는 개운 가이드",
+      "readingSection": 15,
+      "supplementary": true,
+      "classification": "유지 및 심화",
+      "status": "local-default-inventory"
+    }
+  ],
+  "missing": []
+}

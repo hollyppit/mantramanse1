@@ -1,3 +1,6 @@
+import {Editorial,loadEditorial,selectCases,behaviorPlans} from '../_editorial.js';
+import {chapterPolicy} from '../_chapter-policy.js';
+import {selectChapterClaims} from '../_chapter-engine.js';
 // Read-only analysis: no AI provider calls and no source/asset mutation.
 import { json, isAdmin } from '../_lib.js';
 import { kvOf } from '../_store.js';
@@ -16,7 +19,17 @@ export async function onRequestPost({ request, env }) {
     const kv = kvOf(env); if (!kv) return json({ ok: false, error: 'storage-unavailable' }, 503);
     const [items, blocked] = await Promise.all([loadAll(kv), blockedDocs(kv)]);
     const settings = await loadSettings(kv), sourceIndex = await loadSourceIndex(kv, items, blocked);
-    const analysis = analyze(body.sd, items, { ...settings, sourceIndex, blockedDocs: blocked, domains: body.domain ? [body.domain] : undefined });
+    let analysis = analyze(body.sd, items, { ...settings, sourceIndex, blockedDocs: blocked, domains: body.domain ? [body.domain] : undefined });
+    let editorialPreview=null;
+    if(body.editorialChapterId){
+      const catalog=await loadEditorial(kv,true),contract=catalog.chapters.find(c=>c.id===body.editorialChapterId);
+      if(!contract)return json({error:'unknown-editorial-chapter'},404);
+      const policy=chapterPolicy({chapterKind:catalog.topics.find(t=>t.id===contract.topicId)?.policyKind || contract.topicId},settings.chapters);
+      analysis=selectChapterClaims(analysis,policy);
+      if(contract.sourceRuleIds.length)analysis=selectChapterClaims({...analysis,claims:analysis.claims.filter(c=>contract.sourceRuleIds.includes(c.knowledge_id))},policy);
+      const examples=selectCases(catalog,contract,analysis.claims,body.realityContext);
+      editorialPreview={mode:'draft-preview-not-published',contract,realityContext:Editorial.contextLabels(body.realityContext),examples,behaviorPlans:behaviorPlans(analysis.claims,examples),ready:!!analysis.claims.length};
+    }
     const report = renderReport(analysis), generation = { mode: 'rules-only', batches: [], estimatedCost: 0 };
     if (body.compose === 'ai' && analysis.claims.length) {
       generation.mode = 'claim-bound-ai';
@@ -37,6 +50,6 @@ export async function onRequestPost({ request, env }) {
       report.chapters.forEach(c => { c.full_text = c.cards.map(card => card.text).join('\n\n'); });
       generation.estimatedCost = generation.batches.every(b => b.ok && b.generation?.estimatedCost != null) ? generation.batches.reduce((sum,b) => sum + (b.cached ? 0 : b.generation.estimatedCost),0) : null;
     }
-    return json({ ok: true, analysis, report, engine: ENGINE_VERSION, generation });
+    return json({ ok: true, ...(editorialPreview?{editorialPreview}:{}),analysis, report, engine: ENGINE_VERSION, generation });
   } catch (e) { return json({ ok: false, error: ['invalid-chart','unknown-hour-has-pillar','invalid-distribution'].includes(e.message) ? e.message : 'analysis-unavailable' }, 400); }
 }

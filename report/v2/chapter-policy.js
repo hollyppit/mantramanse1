@@ -7,15 +7,20 @@
     love:{title:'연애·결혼운',hanja:'戀愛婚姻運',domains:['LOVE','MARRIAGE'],purpose:'관계에서의 행동·갈등·배우자궁·시기와 관계 유지 전략에 답한다.',required:['연애의 구체적인 양상','배우자성·배우자궁','유리한 조건·갈등','맞는 관계 특징','조건부 혼인 시기','결혼생활의 반복 문제','관계 유지 전략'],excluded:['일반 성격 소개','배우자 외모·직업·결혼 연도 확정'],temperamentRatio:0.05},
     career:{title:'일·사업운',hanja:'職業事業運',domains:['CAREER'],purpose:'직업 선택·조직과 독립활동·사업 운영·수익 모델의 조건에 답한다.',required:['관성·인성·식상·재성의 직업 작용','조직·독립활동','전문·기술·창작·영업 직군','사업 강점·취약점','성취 방해 구조·갈등','이직·확장의 시기 조건','수익 모델·일하는 방식'],excluded:['추진력·책임감 칭찬 반복','일간·일주 일반 소개','취업·성공 보장'],temperamentRatio:0.05},
     timing:{title:'운의 흐름',hanja:'運勢流轉',domains:['TIMING'],purpose:'원국과 실제 전달된 운의 조건을 연결하고 재물·직업·관계의 변화를 구분한다.',required:['대운·세운·월운','재물·직업·관계별 변화','변화의 원인','유리·불리한 조건','시기별 기회·위험'],excluded:['일반 기질 소개','없는 운 계산','특정 연도 사건 확정'],temperamentRatio:0},
+    relationships:{title:'인간관계·가족운',hanja:'人間關係',domains:['RELATIONSHIP'],purpose:'친구·동료·가족의 상호작용과 경계에 답한다.',required:['관계에 해당하는 승인 근거','구체적 갈등 장면','상대의 선택과 예외','경계와 합의 전략'],excluded:['가족 구성·자녀 유무·상대의 실제 성격 단정'],temperamentRatio:0.05},
+    health:{title:'건강·생활운',hanja:'生活均衡',domains:['ACTION'],purpose:'질병 예측 없이 생활 리듬과 자기 관찰을 돕는다.',required:['전통 상징과 실제 건강 정보 구분','과로·휴식·수면 점검','무리하지 않는 생활 전략'],excluded:['질병·사고·수명·사망 시기 예언','사주에 의한 진단·운동 처방'],temperamentRatio:0},
+    creative:{title:'기억 너머의 문',hanja:'想像之門',domains:['SELF'],purpose:'실제 계산 상징을 사용하는 창작 이야기이며 사실을 밝히는 기능이 아님을 표시한다.',required:['창작 콘텐츠라는 명시','계산된 상징과 연결','개인의 선택이 있는 장면'],excluded:['실제 전생·역사 인물과의 동일성 단정','실제 미래 사건 예언'],temperamentRatio:0.2},
     remedy:{title:'개운법',hanja:'開運法',domains:['ACTION'],purpose:'앞서 검증된 판단을 개인의 실행 계획으로 연결한다.',required:['앞선 분석의 종합','운동·학습·직업 역량','습관·환경 개선','상징적 전통법과 현실 행동 구분','시작·점검·중단 기준'],excluded:['일반 성격 재소개','색·물건으로 운 변경 보장'],temperamentRatio:0}
   };
   Object.keys(DATA).forEach(function(k){Object.assign(DATA[k],{style:COMMON_STYLE,maxParagraphChars:600,prompt:'',hook:{enabled:['wealth','love','career'].indexOf(k)>=0,style:'짧고 직설적인 조건부 핵심 진단. 장점과 취약점 모두 허용.',maxChars:100,explanationSentences:3,explanationMaxChars:420}});});
-  var IDS={self:['c00','c01','c02','c03','c04','c05','deep_proscons','reading_transform','life_ik_SELF'],wealth:['c08','deep_wealth','life_ik_MONEY'],love:['c09','c10','deep_love','deep_marriage','deep_spouse','life_ik_LOVE','life_ik_MARRIAGE'],career:['c06','c07','deep_jobs','life_ik_CAREER'],timing:['c15','c16','c17','c18','deep_daewoon','deep_seun','deep_wolun','life_prologue','life_future','life_ik_TIMING'],remedy:['c19','c20','deep_places','deep_remedy','life_action','life_actions','life_ik_ACTION']};
+  var IDS={relationships:['c11','c12','c13','deep_children','life_ik_RELATIONSHIP'],health:['deep_health'],creative:['c14','deep_past'],self:['deep_car','c-char','c00','c01','c02','c03','c04','c05','deep_proscons','reading_transform','life_ik_SELF'],wealth:['c08','deep_wealth','life_ik_MONEY'],love:['c09','c10','deep_love','deep_marriage','deep_spouse','life_ik_LOVE','life_ik_MARRIAGE'],career:['c06','c07','deep_jobs','life_ik_CAREER'],timing:['c15','c16','c17','c18','deep_daewoon','deep_seun','deep_wolun','life_prologue','life_future','life_ik_TIMING'],remedy:['c19','c20','deep_places','deep_remedy','life_action','life_actions','life_ik_ACTION']};
   function clone(x){return JSON.parse(JSON.stringify(x));}
   function kind(c){
     if(c && DATA[c.chapterKind])return c.chapterKind;
     var id=c && (c.base || c.id) || '', t=(c && c.title || '')+' '+id;
-    if(/children|자녀|자식|health|건강|past|전생/.test(t))return null;
+    if(/health|건강|생활 리듬/.test(t))return 'health';
+    if(/past|전생|무협|기억 너머/.test(t))return 'creative';
+    if(/children|자녀|자식|인간관계|가족|c11|c12|c13|RELATIONSHIP/.test(t))return 'relationships';
     var keys=Object.keys(IDS);for(var i=0;i<keys.length;i++)if(IDS[keys[i]].indexOf(id)>=0)return keys[i];
     if(/개운|실천|remedy|action|환경과 활동/.test(t))return 'remedy';
     if(/대운|세운|월운|운의 흐름|인생 흐름|올해|timing|seun|wolun|daewoon/.test(t))return 'timing';

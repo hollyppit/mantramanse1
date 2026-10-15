@@ -58,13 +58,15 @@
   ('갑을병정무기경신임계').split('').forEach(function (sg) { D.BR.split('').forEach(function (b) { monthModule(sg === '갑' ? 'pro_gap_m_' + b : 'pro2_m_' + sg + '_' + b, sg, b); }); });
 
   /* ── 3. 십성군(가장 큰 기운)별: 재능·그림자·직업·재물·연애는 Story Composer 표와 같은 문장을 쓴다 ── */
+  var MONEY_HEAD={비겁:'함께 쓰는 돈은 각자의 몫부터 나눠야 합니다',식상:'재주를 수입으로 이을 가격과 납기를 확인하세요',재성:'기회보다 감당할 자금과 회수를 먼저 보세요',관성:'맡은 책임과 보상 조건을 함께 확인하세요',인성:'배운 것을 거래 가능한 결과물로 꺼내 보세요'};
+  var LOVE_HEAD={비겁:'대등한 관계에는 상대의 선택권도 필요합니다',식상:'애정 표현은 상대가 받아들일 때를 살피세요',재성:'돌보는 마음과 기대하는 반응을 구분하세요',관성:'약속을 지키는 만큼 감정도 말로 전해 보세요',인성:'상대의 뜻을 혼자 해석하기 전에 확인하세요'};
   GRP.forEach(function (g) {
     var cr = T.career[g], mn = T.money[g], lv = T.love[g], sf = T.self[g];
     set('talent_grp_' + g, '잘하는 것: ' + cr[3], cr[1][0] + ' ' + cr[2].job, tip(cr[4], cr[5]));
     set('shadow_grp_' + g, '조심할 점: ' + sf[4], sf[1][1] + ' ' + sf[2][0], '지금 해 볼 것: ' + sf[5]);
     set('career_grp_' + g, cr[0], cr[1][0] + ' ' + cr[1][1], '직장인이라면 ' + cr[2].job + ' ' + tip(cr[4], cr[5]));
-    set('wealth_grp_' + g, mn[0], mn[1][0] + ' ' + mn[1][1], '직장인이라면 ' + mn[2].job + ' ' + tip(mn[4], mn[5]));
-    set('love_grp_' + g, lv[0], lv[1][0] + ' ' + lv[1][1], lv[2][0] + ' ' + tip(lv[4], lv[5]));
+    set('wealth_grp_' + g, MONEY_HEAD[g], mn[1][0] + ' ' + mn[1][1], '직장인이라면 ' + mn[2].job + ' ' + tip(mn[4], mn[5]));
+    set('love_grp_' + g, LOVE_HEAD[g], lv[1][0] + ' ' + lv[1][1], lv[2][0] + ' ' + tip(lv[4], lv[5]));
   });
   var FAM = {
     비겁: ['가족 안에서도 각자의 몫을 존중하려 합니다', '가까운 사이에서 대등함과 내 영역을 중요하게 여길 수 있습니다. 비교가 힘겨루기로 이어지면 의리가 있어도 말이 거칠어질 수 있으므로, 함께할 일과 각자의 책임을 나눠야 합니다.', '가족의 선택을 내 기준으로 평가하는 것', '가족에게 바라는 역할과 내가 맡을 역할을 따로 적어 이야기해 보세요.'],
@@ -134,6 +136,6 @@
   var FB = { identity: '나만의 결을 가진 사람', elements: '내 안의 다섯 기운', personality: '내 성향의 중심', talent: '아직 쓰지 않은 힘', shadow: '알아두면 덜 흔들리는 습관', career: '일하는 방식의 기본', success: '나에게 맞는 성과 내는 길', wealth: '돈을 대하는 나의 방식', love: '사랑하는 나의 방식', marriage: '오래 가는 관계에서 바라는 것', relationship: '사람을 대하는 나의 방식', compatibility: '잘 맞는 사람의 유형', family: '내가 자라온 자리', daewoon: '인생 전체의 계절', currentCycle: '지금 서 있는 계절', sewoon: '올해의 흐름', monthly: '달마다 달라지는 흐름', remedy: '지금 해 볼 행동', actionPlan: '지금의 행동 계획', pastLife: '오래된 뿌리 이야기' };
   Object.keys(FB).forEach(function (c) { set(c + '_fallback', FB[c], FB[c] + '을 구체적으로 설명할 조건이 충분하지 않습니다. 이 항목을 근거로 성향이나 사건을 단정하지 않겠습니다.', '지금 해 볼 것: 이 항목은 실제 경험과 다른 풀이의 근거를 함께 확인한 뒤 판단해 보세요.'); });
 
-  C.version = String(C.version || '') + '+v3-editorial1';
+  C.version = String(C.version || '') + '+v3-editorial2';
   C.v3Count = n;
 })(typeof window !== 'undefined' ? window : globalThis);

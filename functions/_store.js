@@ -68,6 +68,14 @@ export function kvOf(env, opts) {
       if (startsWith(key, FALLBACK)) await sb(env, 'kv?on_conflict=key', { method: 'POST', headers: { prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ key, value: null, expires_at: null, updated_at: new Date().toISOString() }) }); // 묘비
       else await sb(env, 'kv?key=eq.' + encodeURIComponent(key), { method: 'DELETE', headers: { prefer: 'return=minimal' } });
     },
+    async listReadingMetrics(o) {
+      const prefix=o.prefix;
+      if(!startsWith(prefix,['err:reading-metric:']))throw Error('invalid-metrics-prefix');
+      let offset=0;try{offset=o.cursor?Number(o.cursor):0;}catch{}
+      if(!Number.isInteger(offset)||offset<0)throw Error('invalid-metrics-cursor');
+      const rows=await(await sb(env,'kv?select=key&order=key.asc&limit=101&offset='+offset+'&value=not.is.null&key=like.'+encodeURIComponent(prefix+'*')+'&or=(expires_at.is.null,expires_at.gt.'+new Date().toISOString()+')')).json();
+      return {keys:rows.slice(0,100).map(r=>({name:r.key})),list_complete:rows.length<=100,cursor:String(offset+100)};
+    },
     async list(o) { // 대기자 명단용: 접두어로 찾는다. Supabase 의 키 + 아직 KV 에 남은 기존 키를 합친다.
       const prefix = (o && o.prefix) || '';
       if (!startsWith(prefix, ROUTED)) return raw.list(o);

@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-15",
+  "date": "2026-10-16",
   "results": [
     {
       "file": "admin-editing-sim.js",
@@ -18,6 +18,12 @@
       "status": "pass",
       "exit": 0,
       "output": "admin-navigation-sim OK: 메뉴 중복·존재·상품 우선 순서·이전 온보딩 경로\n"
+    },
+    {
+      "file": "admin-timeline-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "Admin timeline: shared topic mapping, title, order, visibility, source preservation and server round-trip passed\n"
     },
     {
       "file": "ai-metering-sim.js",
@@ -69,9 +75,9 @@
     },
     {
       "file": "calendar-ui-sim.js",
-      "status": "skip",
+      "status": "pass",
       "exit": 0,
-      "output": "SKIP: playwright 가 설치되어 있지 않아 실행하지 않았습니다(달력 UI 브라우저 테스트). 설치: npm i -D playwright, 로컬 서버 8768 필요\n"
+      "output": "days 31 bars 12\nrecommendations 5\nPASS calendar interactions\n"
     },
     {
       "file": "career-sim.js",
@@ -143,7 +149,7 @@
       "file": "deep-ai-sim.js",
       "status": "pass",
       "exit": 0,
-      "output": " 합성 사용 (호출 1회)\n  ✓ 같은 사주 재방문은 저장본 재사용 — AI 추가 호출 없음 (호출 1회)\n  ✓ 합성 결과가 ik:pkg: 키로 저장됨\n3. 지식이 바뀌면 새로 합성\n  ✓ 지식 버전이 바뀌어 다시 합성 (호출 1회)\n4. 위험 표현이 나오면 버리고 DB 문장\n  ✓ 단정 표현은 사용자에게 나가지 않음(DB 문장으로 대체)\n5. AI 가 늦으면 기다리지 않고 DB 문장 → 뒤에서 마저 저장 → 다음 방문은 AI 문장\n  ✓ 대기 한도(150ms)에 맞춰 응답: 152ms · DB 문장\n  ✓ 뒤에서 끝난 합성이 저장되어 다음 방문에는 AI 문장\n6. 일일 상한\n  ✓ 오늘 호출 상한을 넘으면 AI 를 부르지 않고 DB 문장\n7. 스위치를 다시 끄면\n  ✓ AI 호출 없음\n8. 본문 대체 스위치(serviceBody)가 응답에 실림\n  ✓ 기본: body=false (더 깊이 덧붙임)\n  ✓ 켜면 body=true (클라이언트가 본문 대체 모드로 조립)\n\n전부 통과\n"
+      "output": " 합성 사용 (호출 1회)\n  ✓ 같은 사주 재방문은 저장본 재사용 — AI 추가 호출 없음 (호출 1회)\n  ✓ 합성 결과가 ik:pkg: 키로 저장됨\n3. 지식이 바뀌면 새로 합성\n  ✓ 지식 버전이 바뀌어 다시 합성 (호출 1회)\n4. 위험 표현이 나오면 버리고 DB 문장\n  ✓ 단정 표현은 사용자에게 나가지 않음(DB 문장으로 대체)\n5. AI 가 늦으면 기다리지 않고 DB 문장 → 뒤에서 마저 저장 → 다음 방문은 AI 문장\n  ✓ 대기 한도(150ms)에 맞춰 응답: 156ms · DB 문장\n  ✓ 뒤에서 끝난 합성이 저장되어 다음 방문에는 AI 문장\n6. 일일 상한\n  ✓ 오늘 호출 상한을 넘으면 AI 를 부르지 않고 DB 문장\n7. 스위치를 다시 끄면\n  ✓ AI 호출 없음\n8. 본문 대체 스위치(serviceBody)가 응답에 실림\n  ✓ 기본: body=false (더 깊이 덧붙임)\n  ✓ 켜면 body=true (클라이언트가 본문 대체 모드로 조립)\n\n전부 통과\n"
     },
     {
       "file": "deep-sim.js",
@@ -156,6 +162,18 @@
       "status": "pass",
       "exit": 0,
       "output": "음    228 건\n   전체 흐름 높음 + 사고수 높음    55 건\n   전체 흐름 낮음 + 사고수 낮음    3583 건\n   예시: 재정 활동은 매우 활발하지만 변동과 부담도 큰 시기입니다. {\"activity\":86,\"fit\":42,\"stability\":39,\"volatility\":67}\n\n7. 대운·세운·월운·일진\n   daeun  체인 daeun:甲午(100%) 합 1.00\n   seun   체인 daeun:壬寅(30%) → seun:甲午(70%) 합 1.00\n   wolun  체인 daeun:壬寅(15%) → seun:丙午(25%) → wolun:甲午(60%) 합 1.00\n   ilun   체인 daeun:壬寅(8%) → seun:丙午(12%) → wolun:癸巳(20%) → ilun:甲午(60%) 합 1.00\n   일진 단독 vs 대운·세운·월운 결합 — 애정 37 → 40 · 사고수 71 → 57\n   상위 운 결합으로 인한 최대 점수 변화 43\n\n모든 검증 통과\n"
+    },
+    {
+      "file": "editorial-headline-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "editorial-headline: ten shorter conclusions; remaining 678-module content/conditions/assets preserved PASS\n"
+    },
+    {
+      "file": "editorial-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "editorial: 9 topics/79 contracts/six core chapters; preservation; auth/version; gated publish; drafts/history; real-context case selection; active reader/PDF model PASS\n"
     },
     {
       "file": "engine-baseline-sim.js",
@@ -200,6 +218,12 @@
       "output": "인연의 정원 검증 완료\n모두 통과\n"
     },
     {
+      "file": "guide-visibility-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "Guide visibility: landing, welcome, selection, post-selection, return visits and viewer passed\n"
+    },
+    {
       "file": "health-sim.js",
       "status": "pass",
       "exit": 0,
@@ -222,6 +246,12 @@
       "status": "pass",
       "exit": 0,
       "output": "1. 사용자 화면에 수호신 문구가 없는지\n2. 공개 영상 기본 주소 (함수)\nN. 일간·일주 문구 검사(기토 영상에 경금 문구가 붙은 경우)\n\n모두 통과\n"
+    },
+    {
+      "file": "input-loop-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "input-loop-sim PASS: auth, separate PC/mobile, draft isolation, client merge, publish, remove mobile, unsafe URL filtering\n"
     },
     {
       "file": "interpretation-engine-sim.js",
@@ -264,6 +294,12 @@
       "status": "pass",
       "exit": 0,
       "output": "6분류 분포 {\"방어기\":274,\"변동기\":766,\"확장기\":606,\"축적기\":1054,\"수확기\":701,\"기회기\":799} · 평가 4200건\n모두 통과\n"
+    },
+    {
+      "file": "metaphor-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "metaphor: 40 charts; varying vessel/route; car and wealth limits; engine unchanged PASS\n"
     },
     {
       "file": "middleware-sim.js",
@@ -344,6 +380,30 @@
       "output": "1. JWT\n2. 키 없음 · 인증\n3. 제출\n4. 조회 · 완료\n5. 실패 · 취소\n6. 신형 API (KLING_API_KEY · Kling 3.0 Turbo)\n\n컷 영상 생성(Kling) 검증 모두 통과\n"
     },
     {
+      "file": "past-story-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "Past story: full chart egress, grounded three-stage generation, independent rejection, exact-chart cache and deactivation passed\n"
+    },
+    {
+      "file": "prologue-fade-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "prologue-fade-sim PASS: 5s timeline, 0.6s fade in/out, hold, buffering, completion, skip cleanup, ilgan preserved\n"
+    },
+    {
+      "file": "prologue-mute-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "prologue-mute-sim PASS: autoplay and tap retry stay silent, volume lock, no sound toggle, ilgan audio toggle preserved\n"
+    },
+    {
+      "file": "prologue-topics-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "Prologue topics: six worlds, guide fallback, legacy preservation, validation and admin authorization passed\n"
+    },
+    {
       "file": "quality-sim.js",
       "status": "pass",
       "exit": 0,
@@ -366,6 +426,18 @@
       "status": "pass",
       "exit": 0,
       "output": "PASS: 24 topic/choice contracts; provider fallback, validation, cache, rate limits, failure recovery and request races\n"
+    },
+    {
+      "file": "reading-failure-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "reading-failure: isolated chapters, network/invalid JSON/global outage, safe diagnostics, auth, opt-in, no stale prose PASS\n"
+    },
+    {
+      "file": "reading-metrics-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "reading-metrics: opt-in, origin/auth, de-identification, event dedup, completion/exit/feedback, separate expert outcomes PASS\n"
     },
     {
       "file": "reading-renewal-sim.js",
@@ -422,6 +494,12 @@
       "output": "school-model-sim PASS {\n  rootedWeak: 178,\n  unrootedStrong: 4,\n  methodDifference: 145,\n  noJohu: 410,\n  extreme: 26,\n  unknown: 32\n}\n"
     },
     {
+      "file": "short-story-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "Short stories: seven complete arcs × five motives, chart variation, image preservation and source immutability passed\n"
+    },
+    {
       "file": "source-batch-sim.js",
       "status": "pass",
       "exit": 0,
@@ -449,7 +527,7 @@
       "file": "story-composer-sim.js",
       "status": "pass",
       "exit": 0,
-      "output": "장면 1960개 검사 (40명 × 6주제)\n  [한 줄 결론] 돈은 직접 움직여서 벌고, 믿는 사람에게는 선뜻 쓰는 편입니다.\n  [현실에서는] 내 몫을 내가 챙겨야 마음이 놓입니다.\n  [그리고] 같이 벌고 같이 쓰는 구조에서 돈이 새기 쉽습니다.\n  [예를 들면] 직장인이라면 성과급·수당처럼 내 몫이 분명한 구조가 잘 맞습니다.\n  [또는] 사업자라면 공동 운영에서는 결정권과 정산 기준을 먼저 나누는 편이 좋습니다.\n  [좋은 점] 살릴 장점은 수입원을 직접 만들어 내는 추진력입니다.\n  [이 힘이 지나칠 때] 반복되기 쉬운 약점은 지인 사이의 보증·동업·빌려주기입니다.\n  [지금 해 볼 것] 공동 비용과 내 몫을 분리하고, 정산일과 책임 범위를 글로 남겨 보세요.\n\n모두 통과\n"
+      "output": "장면 1960개 검사 (40명 × 6주제)\n  [한 줄 결론] 돈을 향해 뛰는 발은 빠릅니다. 다만 함께 달린 사람에게 지갑까지 맡기면, 내 몫의 경계가 흐려지기 쉽습니다.\n  [현실에서는] 내 몫을 내가 챙겨야 마음이 놓입니다.\n  [그리고] 같이 벌고 같이 쓰는 구조에서 돈이 새기 쉽습니다.\n  [예를 들면] 직장인이라면 성과급·수당처럼 내 몫이 분명한 구조가 잘 맞습니다.\n  [또는] 사업자라면 공동 운영에서는 결정권과 정산 기준을 먼저 나누는 편이 좋습니다.\n  [좋은 점] 살릴 장점은 수입원을 직접 만들어 내는 추진력입니다.\n  [이 힘이 지나칠 때] 반복되기 쉬운 약점은 지인 사이의 보증·동업·빌려주기입니다.\n  [지금 해 볼 것] 공동 비용과 내 몫을 분리하고, 정산일과 책임 범위를 글로 남겨 보세요.\n\n모두 통과\n"
     },
     {
       "file": "story-content-sim.js",
@@ -462,6 +540,12 @@
       "status": "pass",
       "exit": 0,
       "output": " 커지는 구간 | 돈 45 일 36 사랑 70\n   15~24세 무신 실력과 자산을 쌓는 구간 | 돈 52 일 44 사랑 46\n   25~34세 기유 실력과 자산을 쌓는 구간  ◀ 지금 | 돈 51 일 44 사랑 49\n   35~44세 경술 실력과 자산을 쌓는 구간 | 돈 51 일 36 사랑 48\n   45~54세 신해 새 기회가 열리는 구간 | 돈 53 일 45 사랑 48\n   55~64세 임자 방향이 바뀌기 쉬운 구간 | 돈 39 일 83 사랑 44\n   65~74세 계축 실력과 자산을 쌓는 구간 | 돈 56 일 74 사랑 60\n   75~84세 갑인 방향이 바뀌기 쉬운 구간 | 돈 40 일 13 사랑 54\n   85~94세 을묘 성과를 굳히는 구간 | 돈 35 일 13 사랑 68\n   95~104세 병진 확장 가능성이 커지는 구간 | 돈 46 일 36 사랑 47\n돈 이야기가 크게 두드러지는 해가 뚜렷하지 않습니다. 지금 수입 구조를 다듬는 꾸준한 구간으로 보세요.\n\n모두 통과\n"
+    },
+    {
+      "file": "story-personalization-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "story-personalization PASS: seven topics, user names/josa, supporting cast preserved, eight distinct matched media, repeat-view variation, gender filter, cached past name mapping, no name egress\n"
     },
     {
       "file": "story-sim.js",
@@ -494,6 +578,12 @@
       "output": "타임라인 검증 완료\n모두 통과\n"
     },
     {
+      "file": "topic-navigation-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "Topic navigation: timeline return, scoped previous/next, boundaries, header spacing and resume passed\n"
+    },
+    {
       "file": "topics-sim.js",
       "status": "pass",
       "exit": 0,
@@ -504,6 +594,12 @@
       "status": "pass",
       "exit": 0,
       "output": "차트 400개 × 60갑자 · 변동 overlay 기준 55 · 단계 안정적 / 움직임 있음 / 변동성 높음 / 변동성 매우 높음\nA. 관계 없는 운 767건: 최대 변동성 0.0\nB. 약한 신호 하나 2745건: 최대 변동성 38.1, 변동기 0건\nC. 충 하나의 변동성 — 일지 55 · 월지 51 · 시지 36 · 년지 26\nD. 신호를 하나씩 더할 때 변동성 — 55 → 67 → 77 → 86\nE·F. 변동기 7774건 — 순풍 1510 · 보통 3582 · 주의 2056 · 부담 626\n   변동성 ↔ 흐름 점수 상관 -0.022 · 흐름 점수 평균: 변동성 매우 높음 -3.2 vs 안정적 -1.3\nG. 변동성 낮음 + 흐름 낮음 1296건 — 기회기 222 · 축적기 415 · 확장기 250 · 수확기 409\n\n변동성 단계 분포: 안정적 27% · 움직임 있음 33% · 변동성 높음 28% · 변동성 매우 높음 13% · 변동기 32%\n\n모든 검증 통과\n"
+    },
+    {
+      "file": "world-entry-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "World entry: six topic links, scoped content, original indices, full report and preview passed\n"
     }
   ]
 }

@@ -5,6 +5,15 @@
     var paragraphs = [], targets = [];
     // 생활 점검 지표와 예방 안내는 검증된 고정 문구로 유지한다.
     if (chapter.aiEnabled === false || chapter.readingSupplementary || chapter.id === 'deep_health' || chapter.base === 'deep_health') return { chapter: { id: chapter.id || chapter.base, title: chapter.title || '', paragraphs: [] }, targets: [] };
+    if(chapter.editorialDraft && R.ReadingFlow){
+      var contract=chapter.editorialContractId;
+      ['title','reality','strength','risk','reinforce','practice','evidence'].forEach(function(role,i){
+        var instructions={title:'첫 문장에서 이 챕터의 질문에 근거 범위 안에서 직접 답하세요.',reality:'해당 질문에 관련된 구체적인 생활 사례를 조건부로 설명하세요.',strength:'이 챕터의 조건이 장점으로 발휘되는 상황을 설명하세요.',risk:'이 챕터의 조건이 취약점으로 바뀌는 상황과 부담을 설명하세요.',reinforce:'장점을 강화할 실제 행동과 적용되지 않는 반대 조건·예외를 함께 설명하세요.',practice:'실제로 시도하고 점검할 수 있는 행동을 제안하세요.',evidence:'전달된 판단의 근거와 한계, 상반된 해석 조건을 설명하세요.'};
+        paragraphs.push({id:String(i),role:role,kind:'reading',text:instructions[role]+' 질문: '+chapter.title+' / 작성 계약 '+contract+'. 근거가 없으면 새로운 주장으로 채우지 마세요.'});
+        targets.push(function(text){chapter.readingCore[role]=text;if(role==='title')chapter.headline=text;var replacement=R.ReadingFlow.scenes(chapter.readingCore,chapter.id);chapter.scenes=chapter.scenes.map(function(scene){return scene.readingRole===role?replacement.find(function(x){return x.readingRole===role;}):scene;});});
+      });
+      return {chapter:{id:chapter.id,title:chapter.title,chapterKind:chapter.editorialTopicId,paragraphs:paragraphs},targets:targets};
+    }
     function push(text, set, kind, role) {
       if (!text || text.trim().length < 30) return;
       var id = String(targets.length);
@@ -41,7 +50,7 @@
   function remember(result, seen, id) { result.paragraphs.forEach(function(p) { seen.set(p.text,id); }); }
   function deferredParagraphs(job, chapter, sd) {
     var basic=chapter.readingCore && chapter.readingSection && R.ReadingFlow ? R.ReadingFlow.card(sd,chapter.readingSection-1) : null;
-    return job.chapter.paragraphs.map(function(p,i){var action=basic && ['reinforce','practice'].indexOf(p.role)>=0 ? basic[p.role] : '';return {id:p.id,role:p.role || '',text:action?'일반 실천 점검: '+action:i===0?'개인별 풀이가 검수를 통과하지 못했습니다. 계산표와 일반적인 실천 점검을 확인하고, 풀이 검수가 끝난 뒤 다시 살펴보세요.':'',refs:[],claim_ids:[]};});
+    return job.chapter.paragraphs.map(function(p,i){var action=basic && ['reinforce','practice'].indexOf(p.role)>=0 ? basic[p.role] : '';return {id:p.id,role:p.role || '',text:action?'일반 실천 점검: '+action:'',refs:[],claim_ids:[]};});
   }
   function prepare(rep, sd, name, onReady) {
     if (active) { active.cancelled = true; active.controllers.forEach(function (c) { c.abort(); }); }
@@ -55,27 +64,50 @@
     var acceptedTexts = new Map();
     var status = { total: jobs.length, completed: 0, failed: 0 };
     rep.readingStatus = status;
+    var unavailable = null;
+    function defer(item, data, fallback) {
+      if(session.cancelled)return;
+      var c=item.c,job=item.job,deferred={paragraphs:deferredParagraphs(job,c,safe)};
+      var known=['bad-payload','too-large','insufficient-evidence','storage-unavailable','chapter-validation-failed','ai-unavailable','no-ai','rate-limited','cost-limit','invalid-engine-mode'];
+      c.readingWarning=known.indexOf(data && data.error)>=0?data.error:fallback || 'composition-failed';
+      c.readingFailure={code:data && data.failure && data.failure.code || c.readingWarning,
+        requestId:data && /^[a-f0-9-]{36}$/.test(data.requestId || '')?data.requestId:null,
+        module:'full-reading',chapter:c.id || c.base || ''};
+      c.readingNotice='이 장의 풀이를 준비하지 못했습니다. 계산표를 먼저 확인해 주세요.';
+      c.readingDeferred=true;c.interpretationAnalysis=null;c.readingProvider=null;c.chapterHook=null;
+      c.chapterQuality={ok:false,issues:[],semanticReviewStatus:'not-accepted'};
+      c.readingParagraphs=deferred.paragraphs;c.readingEvidence=[];
+      c.readingFullText=deferred.paragraphs.map(function(p){return p.text;}).filter(Boolean).join('\n\n');
+      deferred.paragraphs.forEach(function(p){job.targets[Number(p.id)](p.text);});
+      status.failed++;
+      if(onReady)onReady(c,job,deferred);
+    }
     async function run(item) {
       if (session.cancelled) return;
       var job = item.job;
-      if (!job.chapter.paragraphs.length) return;
-      if (job.chapter.paragraphs.length > 60) { status.failed++; return; }
+      if (!job.chapter.paragraphs.length) {status.skipped=(status.skipped || 0)+1;return;}
+      if (job.chapter.paragraphs.length > 60) { defer(item,null,'composition-limit');return; }
+      if(unavailable){defer(item,unavailable);return;}
       var ctl = root.AbortController ? new root.AbortController() : null, timer = root.setTimeout(function () { if (ctl) ctl.abort(); }, 85000);
       if (ctl) session.controllers.push(ctl);
       try {
-        var r = await root.fetch('/api/movingtoon-reading', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ guide: guide, sd: safe, outline: outline, chapter: job.chapter, previous: Array.from(acceptedTexts.entries()).slice(-80).map(function(x){return {text:name?x[0].split(name).join('본인'):x[0],chapter:x[1]};}) }), signal: ctl && ctl.signal });
-        var d = await r.json(); if (d && ['no-ai', 'storage-unavailable', 'rate-limited'].indexOf(d.error) >= 0) done = jobs.length;
-        if (!session.cancelled && d && d.ok && uniqueAcross(d.result, acceptedTexts, item.c.id,item.c) && apply(job, d.result)) { item.c.readingDeferred=false; item.c.readingProvider = d.provider; item.c.chapterHook = d.hook || null; item.c.chapterQuality = d.chapterQuality || null; item.c.hookName = name || '귀인'; if (d.interpretation) { item.c.interpretationAnalysis = d.interpretation; item.c.readingParagraphs = d.result.paragraphs.map(function(p){var original=job.chapter.paragraphs.find(function(x){return x.id===p.id;});return Object.assign({},p,{role:original && original.role || ''});}); item.c.readingFullText = d.result.paragraphs.map(function(p){return p.text;}).join('\n\n'); item.c.readingEvidence = d.result.paragraphs.map(function(p) { return { id: p.id, refs: p.refs, claim_ids: p.claim_ids || [] }; }); } if (d.style) { item.c.readingStyle = d.style; rep.readingStyle = rep.readingStyle || d.style; } remember(d.result, acceptedTexts, item.c.id); status.completed++; if (onReady) onReady(item.c, job, d.result); } else {
-          status.failed++; item.c.readingWarning = d && d.error || 'validation-failed';
-          if (!session.cancelled && (d && d.engineMode === 'grounded' || d && d.interpretation && d.interpretation.mode === 'grounded')) {
-            // Runtime presentation only; original saved chapters remain intact.
-            var deferred = { paragraphs: deferredParagraphs(job,item.c,safe) };
-            item.c.readingDeferred=true;item.c.interpretationAnalysis=null;item.c.readingProvider=null;item.c.chapterQuality={ok:false,issues:d.validation && d.validation.issues || [],semanticReviewStatus:'not-accepted'};item.c.chapterHook=null;item.c.readingParagraphs=deferred.paragraphs;item.c.readingEvidence=[];item.c.readingFullText=deferred.paragraphs.map(function(p){return p.text;}).filter(Boolean).join('\n\n');
-            deferred.paragraphs.forEach(function(p){job.targets[Number(p.id)](p.text);});
-            if(onReady)onReady(item.c,job,deferred);
-          }
-        }
-      } catch (e) { status.failed++; } finally { root.clearTimeout(timer); }
+        var r = await root.fetch('/api/movingtoon-reading', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ realityContext:R.Editorial?R.Editorial.cleanContext(rep.realityContext):{}, guide: guide, sd: safe, outline: outline, chapter: job.chapter, previous: Array.from(acceptedTexts.entries()).slice(-80).map(function(x){return {text:name?x[0].split(name).join('본인'):x[0],chapter:x[1]};}) }), signal: ctl && ctl.signal });
+        var d;try {d=await r.json();}catch(e){defer(item,null,'server-response-invalid');return;}
+        if(session.cancelled)return;
+        if(d && ['no-ai','rate-limited','cost-limit'].indexOf(d.error)>=0)unavailable={error:d.error};
+        if (r.ok && d && d.ok && uniqueAcross(d.result, acceptedTexts, item.c.id,item.c) && apply(job, d.result)) {
+          item.c.readingDeferred=false;item.c.readingNotice='';item.c.readingFailure=null;item.c.readingWarning=null;
+          item.c.readingProvider=d.provider;item.c.chapterHook=d.hook || null;item.c.chapterQuality=d.chapterQuality || null;item.c.hookName=name || '귀인';
+          item.c.interpretationAnalysis=d.interpretation || null;
+          item.c.readingParagraphs=d.result.paragraphs.map(function(p){var original=job.chapter.paragraphs.find(function(x){return x.id===p.id;});return Object.assign({},p,{role:original && original.role || ''});});
+          item.c.readingFullText=d.result.paragraphs.map(function(p){return p.text;}).join('\n\n');
+          item.c.readingEvidence=d.result.paragraphs.map(function(p){return {id:p.id,refs:p.refs,claim_ids:p.claim_ids || []};});
+          if(d.style){item.c.readingStyle=d.style;rep.readingStyle=rep.readingStyle || d.style;}
+          remember(d.result,acceptedTexts,item.c.id);status.completed++;
+          if(onReady)onReady(item.c,job,d.result);
+        } else defer(item,d,d && d.ok?'client-validation-failed':'server-communication-failed');
+      } catch (e) { if(!session.cancelled)defer(item,null,e && e.name==='AbortError'?'server-timeout':'server-communication-failed'); }
+      finally {root.clearTimeout(timer);if(ctl)session.controllers=session.controllers.filter(function(c){return c!==ctl;});}
     }
     // 첫 챕터를 준비한 뒤 표시하고, 후속 챕터는 미리 준비한다. 현재 DOM은 다시 그리지 않는다.
     var first = jobs.find(function (x) { return x.job.targets.length; });

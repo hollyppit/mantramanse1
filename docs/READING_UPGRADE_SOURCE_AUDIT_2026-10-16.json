@@ -1,0 +1,51 @@
+{
+  "backupIntegrity": true,
+  "records": 266,
+  "assets": 826,
+  "documents": 43,
+  "rules": 288,
+  "publishedReviewed": 287,
+  "ziweiRules": 0,
+  "coreCoverage": {
+    "self_03": {
+      "question": "나는 왜 이렇게 행동할까?",
+      "charts": 40,
+      "withClaims": 40,
+      "uniqueRules": 31
+    },
+    "self_04": {
+      "question": "내 사주를 자동차로 비유하면?",
+      "charts": 40,
+      "withClaims": 40,
+      "uniqueRules": 31
+    },
+    "wealth_01": {
+      "question": "내 재물 그릇은?",
+      "charts": 40,
+      "withClaims": 33,
+      "uniqueRules": 8
+    },
+    "career_01": {
+      "question": "나는 어떤 방식으로 성공하는 사람인가?",
+      "charts": 40,
+      "withClaims": 40,
+      "uniqueRules": 9
+    },
+    "love_06": {
+      "question": "나와 잘 맞는 배우자 유형",
+      "charts": 40,
+      "withClaims": 40,
+      "uniqueRules": 24
+    },
+    "timing_07": {
+      "question": "향후 10년 연도별 분석",
+      "charts": 40,
+      "withClaims": 16,
+      "uniqueRules": 1
+    }
+  },
+  "mode": "grounded",
+  "charts": 40,
+  "assetBinaryIncluded": false,
+  "coverageMeaning": "각 장에 하나 이상의 적용 가능한 승인 근거가 있는 건수이며, 질문 전체의 품질 합격을 뜻하지 않습니다."
+}

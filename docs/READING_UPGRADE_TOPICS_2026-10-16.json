@@ -1,0 +1,384 @@
+{
+  "status": "design-only-not-published",
+  "topics": [
+    {
+      "id": "topic_1",
+      "title": "본래의 나",
+      "status": "design-only",
+      "chapters": [
+        {
+          "title": "나의 일간과 일주",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "일간·일주 더 깊이 읽기",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "나는 왜 이렇게 행동할까?",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "내 사주를 자동차로 비유하면?",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "남들이 보는 나와 실제 나",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "내가 유독 예민하게 반응하는 것",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "압박받을 때 드러나는 성격",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "내가 가진 가장 강력한 무기",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "스스로 발목을 잡는 약점",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "반복되는 실수와 행동 패턴",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "타고난 욕망과 숨겨진 야망",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "내 안의 십성과 오행",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "나와 잘 맞는 환경",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "내 인생의 핵심 과제",
+          "status": "needs-evidence-and-review"
+        }
+      ]
+    },
+    {
+      "id": "topic_2",
+      "title": "재물운",
+      "status": "design-only",
+      "chapters": [
+        {
+          "title": "내 재물 그릇은?",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "나는 돈복이 있는 사주일까?",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "돈이 들어오는 방식",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "돈을 잘 벌어도 남지 않는 이유",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "큰돈을 벌 기회와 조건",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "직장 소득·사업 소득·투자 소득 비교",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "돈 때문에 반복하기 쉬운 실수",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "재물운의 대운·세운 흐름",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "재정적으로 주의할 시기",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "나에게 맞는 자산 축적 전략",
+          "status": "needs-evidence-and-review"
+        }
+      ]
+    },
+    {
+      "id": "topic_3",
+      "title": "일·사업·성공운",
+      "status": "design-only",
+      "chapters": [
+        {
+          "title": "나는 어떤 방식으로 성공하는 사람인가?",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "직장인과 사업가 중 어느 쪽이 어울릴까?",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "타고난 직업 적성과 업무 스타일",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "나와 잘 맞는 업종",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "나와 맞지 않는 업무 환경",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "리더형인가, 전문가형인가?",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "동업과 독립의 장단점",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "조직에서 갈등이 발생하기 쉬운 이유",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "커리어의 전환점",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "지금부터 키워야 할 경쟁력",
+          "status": "needs-evidence-and-review"
+        }
+      ]
+    },
+    {
+      "id": "topic_4",
+      "title": "연애·결혼·배우자운",
+      "status": "design-only",
+      "chapters": [
+        {
+          "title": "나는 연애할 때 어떤 사람인가?",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "나에게 끌리는 사람들의 특징",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "내가 끌리는 상대의 특징",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "연애가 쉽게 풀리지 않는 이유",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "관계에서 반복되는 갈등",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "나와 잘 맞는 배우자 유형",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "배우자 덕의 전통적 해석",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "결혼운이 강해지는 시기",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "결혼 후 관계의 변화",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "이별과 관계 변화의 가능성",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "좋은 관계를 오래 유지하는 방법",
+          "status": "needs-evidence-and-review"
+        }
+      ]
+    },
+    {
+      "id": "topic_5",
+      "title": "인간관계·가족운",
+      "status": "design-only",
+      "chapters": [
+        {
+          "title": "사람들이 나를 보는 방식",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "사람을 믿고 실망하는 반복 패턴",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "친구·동료 관계의 특징",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "나와 잘 맞는 사람의 오행적 특징",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "갈등이 생기기 쉬운 관계",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "부모·형제 관계의 전통적 해석",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "자녀운과 양육 성향",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "인간관계에서 지켜야 할 경계선",
+          "status": "needs-evidence-and-review"
+        }
+      ]
+    },
+    {
+      "id": "topic_6",
+      "title": "인생의 흐름",
+      "status": "design-only",
+      "chapters": [
+        {
+          "title": "내 인생의 전체 흐름",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "어린 시절부터 현재까지의 대운",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "지금 지나고 있는 운",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "인생의 주요 전환점",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "재물·일·연애운의 시기별 비교",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "향후 3년 집중 분석",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "향후 10년 연도별 분석",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "기회기·축적기·전환기·방어기",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "운의 변화와 관련된 전통적 해석",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "앞으로의 선택 전략",
+          "status": "needs-evidence-and-review"
+        }
+      ]
+    },
+    {
+      "id": "topic_7",
+      "title": "건강·생활운",
+      "status": "design-only",
+      "chapters": [
+        {
+          "title": "전통 오행으로 보는 생활 균형",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "스트레스 상황과 대처 방식",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "과로와 생활 리듬",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "시기별 생활관리 참고 사항",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "나에게 맞는 운동과 휴식 습관",
+          "status": "needs-evidence-and-review"
+        }
+      ]
+    },
+    {
+      "id": "topic_8",
+      "title": "기억 너머의 문",
+      "status": "design-only",
+      "chapters": [
+        {
+          "title": "전생 이야기",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "내 운을 상징하는 인물과 세계관",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "다른 시대에 태어났다면?",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "내 인생을 무협 이야기로 표현한다면?",
+          "status": "needs-evidence-and-review"
+        }
+      ]
+    },
+    {
+      "id": "topic_9",
+      "title": "개운법·인생 전략",
+      "status": "design-only",
+      "chapters": [
+        {
+          "title": "지금 내게 필요한 변화",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "부족한 오행을 해석하는 방법",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "나에게 맞는 운동과 생활 습관",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "추천하는 공부와 자기계발",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "상징적 의미를 담은 행운의 장소",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "지금 버려야 할 행동 습관",
+          "status": "needs-evidence-and-review"
+        },
+        {
+          "title": "앞으로 1년간의 실천 계획",
+          "status": "needs-evidence-and-review"
+        }
+      ]
+    }
+  ]
+}

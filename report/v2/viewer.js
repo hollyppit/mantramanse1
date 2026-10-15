@@ -547,16 +547,29 @@
     }
   });
   $('#v-home').addEventListener('change', function (e) { if (e.target.id === 'xAuto' && S.xp) { S.xp.auto = e.target.checked; xpSave(); } });
-  function beginReader() {
+  async function beginReader() {
+    if(!PREVIEW && R.Editorial && !S.editorialLoaded){
+      S.editorialLoaded=true;
+      try{var editorialResponse=await fetch('/api/reading-editorial',{signal:AbortSignal.timeout(3500)});if(editorialResponse.ok)S.editorialCatalog=await editorialResponse.json();}catch(e){}
+    }
     if (!PREVIEW && !EXPLORE && R.ReadingFlow && projectId() === "full") {
       S.rep = R.ReadingFlow.build(S.rep, S.sd, { M: window.Manse, ch: S.ch });
       S.repPdf = S.rep; // 같은 공통 풀이 객체를 사용해 AI 수정도 PDF에 반영한다.
     }
     addCharIntro();
+    if(!PREVIEW && R.Editorial){try{S.rep=R.Editorial.prepare(S.rep,S.editorialCatalog,S.sd);}catch(e){elog('caught','editorial.prepare');}S.rep.realityContext=R.Editorial.cleanContext(S.realityContext);S.repPdf=S.rep;}
+    if(!PREVIEW && R.RealityContext)R.RealityContext.mount(S.realityContext,function(context){
+      var c=S.rep && S.rep.chapters[S.idx];sessionStorage.setItem('mt_v2_input',JSON.stringify({inp:S.ch.input,name:S.name,interest:S.interest || '',guide:S.guide,resumeChapter:c && c.id,realityContext:context}));location.reload();
+    });
     var reading = !PREVIEW && R.FullReading ? R.FullReading.prepare(S.rep, S.sd, S.name, function (c, job, result) {
       var ci = S.rep.chapters.findIndex(function(item){return item.id===c.id;}), article = document.getElementById('ch-' + c.id);
-      if (!article || ci <= S.idx) return;
-      if (S.visited[c.id]) return;
+      if(article && c.readingDeferred){
+        var head=article.querySelector('[data-reading-notice]');
+        if(!head){head=document.createElement('p');head.setAttribute('data-reading-notice','');head.setAttribute('role','status');var title=article.querySelector('h2');if(title)title.insertAdjacentElement('afterend',head);}
+        if(head)head.textContent=c.readingNotice;
+      }
+      if (!article || !c.readingDeferred && ci <= S.idx) return;
+      if (!c.readingDeferred && S.visited[c.id]) return;
       var sections = [].slice.call(article.querySelectorAll(':scope > section')), at = 0;
       c.scenes.forEach(function (scene, i) {
         if (scene.readingSupplementary) return;
@@ -708,6 +721,7 @@
     if (t === 'cinema') return cinemaHtml(c, s);
     if (t === 'chapterIntro') {
       var act = S.rep.acts.filter(function (a) { return a.id === c.act; })[0] || {};
+      if(c.readingDeferred)return '<section class="scene rd-head rd-chead" '+id+'><h2>'+esc(c.title)+'</h2><p role="status" data-reading-notice>'+esc(c.readingNotice)+'</p></section>';
       if (c.chapterHook) { var hook=c.chapterHook; return '<section class="scene rd-head rd-chead" '+id+'><div class="rd-rule" aria-hidden="true"></div><div class="no" data-hook-hanja> '+esc(hook.hanja)+'</div><h2>'+esc(c.title)+'</h2><p class="hl">'+esc(c.hookName || S.name || '귀인')+'님, '+lines(hook.text)+'</p><p class="intro">'+lines(hook.explanation)+'</p><div class="rd-rule" aria-hidden="true"></div></section>'; }
       if (s.compact) return '<section class="scene rv rd-mini" ' + id + '><div class="no" data-cno="' + esc(c.id) + '">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2>' + esc(c.title) + '</h2>' + (c.introText || s.subtitle ? '<p class="sub">' + esc(c.introText || s.subtitle) + '</p>' : '') + '</section>'; // 종합 풀이 안에서 순서대로 이어지는 작은 제목(서두 없이 바로 본론)
       return '<section class="scene rd-head rd-chead" ' + id + '><div class="rd-rule" aria-hidden="true"></div><div class="no" data-tx="intro.no" data-cno="' + esc(c.id) + '">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="rd-rule" aria-hidden="true"></div></section>';
@@ -830,6 +844,7 @@
       var main='', extra='';
       c.scenes.forEach(function(s,k){ var html=secWrap(sceneHtml(c,s,k),s,c,ci); if(c.readingSupplementary || s.readingSupplementary) extra+=html; else main+=html; });
       if(extra) main+='<details class="reading-supplement" style="margin:16px auto;max-width:720px;padding:16px"><summary>더 깊이 읽기 · '+esc(c.originalTitle || c.title)+'</summary>'+extra+'</details>';
+      if(c.readingCore)main+='<section class="scene rd-prose"><p>이 장의 풀이가 어땠나요?</p>'+[['helpful','도움이 됨'],['specific','구체적임'],['unclear','근거·설명이 부족함']].map(function(r){return '<button type="button" class="chipbtn" data-reading-feedback="'+r[0]+'">'+r[1]+'</button>';}).join('')+'<p role="status" data-feedback-status></p></section>';
       h += '<article class="chap" id="ch-' + esc(c.id) + '" data-ch="' + ci + '" aria-label="' + esc(c.title) + '">' + main + '</article>';
     });
     $('#chapter').innerHTML = h; chapterTags(); linkBasisReferences($('#chapter')); try { emphasize($('#chapter')); } catch (e) { /* 강조가 실패해도 본문은 그대로 */ }
@@ -869,6 +884,7 @@
   (function () { var root = $('#chapter'), chOf = function (el) { var a = el.closest('.chap'); return S.rep.chapters[a ? +a.dataset.ch : S.idx]; };
     root.addEventListener('click', function (e) {
       var c = chOf(e.target);
+      var feedback=e.target.closest('[data-reading-feedback]');if(feedback){T('chapter_feedback',{chapter:c.id,answer:feedback.dataset.readingFeedback});feedback.parentNode.querySelector('[data-feedback-status]').textContent='의견을 남겼습니다. 수집이 켜진 경우에만 익명 집계됩니다.';return;}
       if (R.ReadingAnswer && R.ReadingAnswer.handleClick(e.target, { sd: S.sd, onPause: function () { if (S.mv) S.mv.pause(); }, onMeasure: function () { if (S.mv) S.mv.measure(); }, onContinue: function () { if (S.mv) S.mv.play(); }, onChoice: function (topic, choice) { T('reading_question_selected', { topic: topic, choice: choice }); } })) return;
       var mo = e.target.closest('[data-mo]'); if (mo) { $$('.mo.sel', root).forEach(function (x) { x.classList.remove('sel'); x.style.borderColor = ''; }); mo.style.borderColor = 'var(--gold)'; moDetail(c, +mo.dataset.mo); return; }
       var vd = e.target.closest('[data-vd]'); if (vd) { var rp = vd.closest('.scene').querySelector('.vd-reply'); $$('[data-vd]', vd.parentNode).forEach(function (x) { x.setAttribute('aria-pressed', String(x === vd)); x.style.borderColor = x === vd ? 'var(--gold)' : ''; }); if (rp) rp.textContent = rp.getAttribute('data-' + vd.dataset.vd) || ''; T('verdict_answer', { chapter: c.id, answer: vd.dataset.vd }); if (S.mv) S.mv.choiceMade(); return; }
@@ -904,7 +920,10 @@
   $('#barBtn').onclick = function () {
     var rep = S.rep, h = '', act = 0; drPick = false; S.drWas = !!(S.mv && S.mv.state() === 'PLAYING'); if (S.drWas) S.mv.pause();
     var item = function (c, i, no) { return '<li><button type="button" data-go="' + i + '"' + (i === S.idx ? ' class="cur" aria-current="true"' : '') + '><span>' + String(no == null ? c.no : no).padStart(2, '0') + ' ' + esc(c.title) + '</span><small>' + (S.ended[c.id] ? '읽음' : '') + '</small></button></li>'; };
-    if (EXPLORE && S.wmap && S.wmap.by) { // 세계별로 묶는다: 사용자가 길을 찾는 분류와 같게(옛 막 이름은 쓰지 않는다)
+    if(rep.editorialTopics && rep.editorialTopics.length){
+      rep.editorialTopics.filter(function(t){return t.enabled;}).sort(function(a,b){return a.order-b.order;}).forEach(function(t){var matches=rep.chapters.map(function(c,i){return {c:c,i:i};}).filter(function(x){return x.c.editorialTopicId===t.id;});if(!matches.length)return;h+='<li class="act">'+esc(t.title)+'</li>';matches.forEach(function(x,k){h+=item(x.c,x.i,k+1);});});
+      var rest=rep.chapters.map(function(c,i){return {c:c,i:i};}).filter(function(x){return !x.c.editorialTopicId;});if(rest.length){h+='<li class="act">기존 추가 콘텐츠</li>';rest.forEach(function(x){h+=item(x.c,x.i);});}
+    } else if (EXPLORE && S.wmap && S.wmap.by) { // 세계별로 묶는다: 사용자가 길을 찾는 분류와 같게(옛 막 이름은 쓰지 않는다)
       (S.wmap.list || []).forEach(function (w) { var idxs = S.wmap.by[w.id]; if (!idxs || !idxs.length) return; h += '<li class="act">' + esc((w.icon ? w.icon + ' ' : '') + (w.name || '')) + '</li>'; idxs.forEach(function (i, k) { h += item(rep.chapters[i], i, k + 1); }); });
     } else rep.chapters.forEach(function (c, i) { if (c.act !== act) { act = c.act; var a = rep.acts.filter(function (x) { return x.id === act; })[0] || {}; h += '<li class="act">' + esc(a.roman || '') + ' · ' + esc(a.title || '') + '</li>'; }
       h += item(c, i); });
@@ -923,7 +942,7 @@
   /* /report/ 스토리 페이지에서 넘어온 입력(sessionStorage, 서버 전송 없음): 폼을 건너뛰고 바로 시작한다. 한 번 쓰면 지운다. */
   (function handoff() {
     var raw = sg('mt_v2_input'); if (!raw || !window.Manse) return; try { sessionStorage.removeItem('mt_v2_input'); } catch (e) { }
-    try { var h = JSON.parse(raw), ch = window.Manse.compute(h.inp); S.ch = ch; S.name = String(h.name || '').slice(0, 20); S.interest = h.interest || ''; S.guide = h.guide; S.guideResume = h.resumeChapter || null; setTimeout(function () { start(ch, h.inp.gender); }, 0); } catch (e) { /* 입력이 올바르지 않으면 폼을 그대로 보여 준다 */ }
+    try { var h = JSON.parse(raw), ch = window.Manse.compute(h.inp); S.ch = ch; S.name = String(h.name || '').slice(0, 20); S.interest = h.interest || ''; S.realityContext=R.Editorial?R.Editorial.cleanContext(h.realityContext):{}; S.guide = h.guide; S.guideResume = h.resumeChapter || null; setTimeout(function () { start(ch, h.inp.gender); }, 0); } catch (e) { /* 입력이 올바르지 않으면 폼을 그대로 보여 준다 */ }
   })();
   window.addEventListener('mantra:guide-change', function (e) {
     S.guide = e.detail.guide;
@@ -931,7 +950,7 @@
     // 기존 문장을 섞어 재사용하지 않고 선택 안내자의 캐시/풀이로 다시 연다.
     var c = S.rep && S.rep.chapters[S.idx];
     try {
-      sessionStorage.setItem('mt_v2_input', JSON.stringify({ inp: S.ch.input, name: S.name, interest: S.interest || '', guide: S.guide, resumeChapter: c && c.id }));
+      sessionStorage.setItem('mt_v2_input', JSON.stringify({ inp: S.ch.input, name: S.name, interest: S.interest || '', realityContext:S.realityContext || {}, guide: S.guide, resumeChapter: c && c.id }));
       location.reload();
     } catch (err) { toast('안내자는 저장했습니다. 다음 진입부터 적용됩니다.'); }
   });
