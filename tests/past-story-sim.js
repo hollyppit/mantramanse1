@@ -10,7 +10,7 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
  const env={GLOSSARY_KV:{get:async(k,t)=>memory.has(k)?t==='json'?JSON.parse(memory.get(k)):memory.get(k):null,put:async(k,v)=>memory.set(k,v)},OPENAI_API_KEY:'mock'};
  let calls=0,plans=[],deny=false;const originalFetch=global.fetch;
  global.fetch=async(url,opts)=>{
-  calls++;const req=JSON.parse(opts.body),input=JSON.parse(req.input);assert.equal(req.text.format.type,'json_schema');assert(!req.input.includes('PRIVATE_NAME'));assert(!input.chart.birth&&!input.chart.name&&!input.chart.ziwei);
+  calls++;const req=JSON.parse(opts.body),input=JSON.parse(req.input);assert.equal(req.text.format.type,'json_schema');assert.equal(req.reasoning.effort,'low');assert(!req.input.includes('PRIVATE_NAME'));assert(!input.chart.birth&&!input.chart.name&&!input.chart.ziwei);
   const ids=input.claims.map(c=>c.claim_id);let result;
   assert(input.visual && input.visual.slot.startsWith('past:'));assert(!input.chart.currentRoots&&!input.chart.nowYear);
   if(req.instructions===P.PLAN_SYSTEM){
@@ -33,7 +33,7 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
  assert.equal((await API.onRequestGet({request:traceRequest,env})).status,401);
  const authRequest=new Request(traceRequest,{headers:{authorization:'Bearer test-admin'}});
  assert.equal((await API.onRequestGet({request:authRequest,env:{...env,ADMIN_PASSWORD:'test-admin'}})).status,200);
- assert.deepEqual(P.planIssues('not-json',[]),['json-invalid']);
+ assert.deepEqual(P.planIssues('not-json',[]),['json-invalid']);assert.deepEqual(P.storyIssues('not-json',{},[]),['json-invalid']);assert(P.storyIssues({frames:[]},{beats:[]},[]).includes('frames:count'));
  assert(P.planIssues({title:'x',beats:[]},[]).includes('beats:count'));
  for(const stage of ['plan','write','review'])assert.equal(P.stageSchema(stage,[{claim_id:'test'}]).additionalProperties,false);
  await assert.rejects(API.composeStory({claims:[{claim_id:'test'}],normalized:{chart:plans[0]}},async()=>'{"title":"x"}'),e=>e.message==='plan-rejected'&&e.issues.includes('title:length-or-type'));

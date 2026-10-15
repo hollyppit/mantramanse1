@@ -5,7 +5,7 @@ import { loadSettings, loadSourceIndex } from '../_interpretation-store.js';
 import { analyze, ENGINE_VERSION } from '../_interpretation-engine.js';
 import { validate } from '../_movingtoon-reading.js';
 import { generate } from './movingtoon-reading.js';
-import { VERSION, PLAN_SYSTEM, WRITE_SYSTEM, REVIEW_SYSTEM, validatePlan, validateStory, validateReview, planIssues, stageSchema } from '../_past-story.js';
+import { VERSION, PLAN_SYSTEM, WRITE_SYSTEM, REVIEW_SYSTEM, validatePlan, validateStory, validateReview, planIssues, storyIssues, stageSchema } from '../_past-story.js';
 import { SLOT_BY_ID } from '../_assetart.js';
 
 export function visualFor(chart){
@@ -23,8 +23,9 @@ export async function composeStory(analysis,call){
  const input={...context,plan};
  let revision=null;
  for(let attempt=0;attempt<2;attempt++){
-  const story=validateStory(await call(WRITE_SYSTEM,JSON.stringify({...input,...(revision?{previous:revision.story,revision:revision.issues}:{})}),8000,'write'),plan,claims);
-  if(!story)throw Error('story-rejected');
+  const storyText=await call(WRITE_SYSTEM,JSON.stringify({...input,...(revision?{previous:revision.story,revision:revision.issues}:{})}),8000,'write');
+  const story=validateStory(storyText,plan,claims);
+  if(!story)throw Object.assign(Error('story-rejected'),{issues:storyIssues(storyText,plan,claims)});
   const reviewText=await call(REVIEW_SYSTEM,JSON.stringify({...input,story}),1600,'review');
   if(validateReview(reviewText))return {story,plan,review:{passed:true,grounding:true,causality:true,dilemma:true,arc:true,prose:true,issues:[]}};
   let review;try{review=JSON.parse(reviewText.replace(/^```(?:json)?\s*|\s*```$/g,''));}catch{}
@@ -56,7 +57,7 @@ export async function onRequestPost({request,env}){
   if(settings.maxRequestCost!=null){
    const byteInput=new TextEncoder().encode(JSON.stringify(analysis)).length;
    const providers=[env.OPENAI_API_KEY,env.ANTHROPIC_API_KEY].filter(Boolean).length;
-   const estimate=settings.inputPricePerMillion!=null&&settings.outputPricePerMillion!=null?(((byteInput*5+100000)*settings.inputPricePerMillion+19600*settings.outputPricePerMillion)/1e6)*providers:null;
+   const estimate=settings.inputPricePerMillion!=null&&settings.outputPricePerMillion!=null?(((byteInput*5+100000)*settings.inputPricePerMillion+24200*settings.outputPricePerMillion)/1e6)*providers:null;
    if(estimate==null||estimate>settings.maxRequestCost)return json({ok:false,error:'cost-limit'},429);
   }
   const ip=request.headers.get('cf-connecting-ip')||'local',hour=new Date().toISOString().slice(0,13),day=hour.slice(0,10);

@@ -61,3 +61,21 @@ export function stageSchema(stage,claims){
  if(stage==='write')return obj({title:txt,logline:txt,frames:arr(obj({id:{type:'string',enum:STAGES.map((_,i)=>'b'+(i+1))},cap:txt,paras:arr(txt,2,4),claim_ids:ids}),8,8)});
  return obj({passed:bool,grounding:bool,causality:bool,dilemma:bool,arc:bool,prose:bool,issues:arr(txt)});
 }
+
+export function storyIssues(text,plan,claims){
+ const s=typeof text==='string'?parse(text):text,ids=new Set(claims.map(c=>c.claim_id)),issues=[];
+ if(!s||typeof s!=='object')return ['json-invalid'];
+ if(!str(s.title,2,80))issues.push('title:length-or-type');if(!str(s.logline,15,400))issues.push('logline:length-or-type');
+ if(!Array.isArray(s.frames)||s.frames.length!==8)return [...issues,'frames:count'];
+ s.frames.forEach((f,i)=>{const path='frames.'+i;
+  if(f?.id!==plan.beats[i]?.id)issues.push(path+'.id:order');if(!str(f?.cap,1,60))issues.push(path+'.cap:length-or-type');
+  if(!Array.isArray(f?.paras)||f.paras.length<2||f.paras.length>4)issues.push(path+'.paras:count');
+  else f.paras.forEach((p,j)=>{if(!str(p,40,220))issues.push(path+'.paras.'+j+':length-or-type');});
+  if(!refs(f?.claim_ids,ids,1)||!f.claim_ids.some(id=>plan.beats[i]?.claim_ids.includes(id)))issues.push(path+'.claim_ids:invalid');
+ });
+ const prose=s.frames.flatMap(f=>Array.isArray(f?.paras)?f.paras:[]),all=prose.join('');
+ if(all.length<1600||all.length>4000)issues.push('prose:total-length');if(new Set(prose).size!==prose.length)issues.push('prose:duplicate');
+ if(!/[“「『"]/.test(all))issues.push('prose:dialogue-missing');
+ if(new Set(s.frames.flatMap(f=>Array.isArray(f?.claim_ids)?f.claim_ids:[])).size<3)issues.push('frames.claim_ids:coverage');
+ return issues.length?issues.slice(0,40):['prose:forbidden-content'];
+}
