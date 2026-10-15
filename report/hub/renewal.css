@@ -38,3 +38,4 @@
 #hub .rn .rn-inner .rn-emphasis{color:#ddc58f}
 #hub .rn .rn-inner summary{font-size:18px;line-height:1.7}
 @media(max-width:720px){#hub .rn .rn-inner p{font-size:18px;line-height:1.8}#hub .rn .rn-inner .rn-label{font-size:14px}#hub .rn .rn-inner summary{font-size:17px}}
+.rn-report-flow{display:flex;align-items:stretch;gap:10px;margin:24px 0 4px}.rn-report-flow>div{flex:1;min-width:0;padding:14px 8px;border:1px solid #514a3b;border-radius:8px;background:#171d28;text-align:center}.rn-report-flow span{display:block;color:#cdb27a;font-size:12px;letter-spacing:.12em;margin-bottom:8px}.rn-report-flow b{display:block;font-size:14px;line-height:1.6;word-break:keep-all;font-weight:500}.rn-report-wave{display:block;width:100%;height:100px;margin-top:20px}.rn-report-flow>div+div{border-top-color:#cdb27a}@media(max-width:400px){.rn-report-flow{gap:6px}.rn-report-flow b{font-size:12px}.rn-report-flow>div{padding:12px 4px}}
