@@ -71,6 +71,7 @@
       scenes: b.scenes.map(function (s) { return { id: s.id, title: s.title, lines: s.lines, unknownLines: s.unknownLines || [], hint: s.hint, button: s.button, face: s.face, image: s.image || '', bg: s.bg || '', bubble: s.bubble || '', enabled: s.enabled }; }), revealLines: b.revealLines };
   }
   function putDraft(quiet) {
+    if (G.loopUploading) return Promise.reject(new Error('영상 업로드가 끝난 뒤 저장·게시해 주세요'));
     collect();
     return C.api('/api/onboarding', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body()) }).then(function (d) {
       if (!quiet) toast('초안을 저장했습니다 (방문자 화면은 아직 그대로입니다)');
@@ -81,6 +82,7 @@
   function save() { putDraft().then(draw).catch(function (e) { toast(e.message, true); }); }
   function act(action, id) { return C.api('/api/onboarding?action=' + action + (id ? '&id=' + encodeURIComponent(id) : ''), { method: 'POST' }); }
   function publish() {
+    if (G.loopUploading) { toast('영상 업로드가 끝난 뒤 게시해 주세요', true); return; }
     collect();
     var pub = O.publicCases(G.cfg.cases).length, bc = O.birthCards(G.cfg.cases).length;
     if (!confirm('초안을 방문자 화면에 게시할까요?\n\n공개되는 사례 ' + pub + '건 (출생 시기 연구 카드 ' + bc + '건)\n게시 직전의 공개본은 이력에 남아 언제든 복원할 수 있습니다.')) return;
@@ -100,12 +102,12 @@
   var EXT = []; // 확장 하위 메뉴(report/admin/v2-quest.js: 인터랙티브 스토리·에셋·타임라인·운영). {id, label, view(), collect(), flow()}
   function subs() { var o = []; SUBS0.forEach(function (s) { if (s[0] === '@ext') EXT.forEach(function (x) { o.push([x.id, x.label]); }); else o.push(s); }); return o; }
   // 관리 영역을 둘로 나눈다: A 기존 온보딩(연구·명리학·서비스 소개 → 나의 운 확인하기) / B 인터랙티브 스토리(그 버튼 이후). 두 영역은 설정 키가 서로 독립이다(A: cases·sections·intro·services·topics…, B: quest·timeline·scenes).
-  var GA = ['landing', 'cases', 'intro', 'service', 'basic', 'stats'], GB = ['quest', 'qassets', 'tl', 'qops', 'scenes'];
+  var GA = ['landing', 'cases', 'intro', 'service', 'basic', 'stats'], GB = ['quest', 'qvideo', 'qassets', 'tl', 'qops', 'scenes'];
   function inA(id) { return GA.indexOf(id) >= 0; }
   function groupsBar() {
     var all = subs(), pick = function (ids) { return all.filter(function (s) { return ids.indexOf(s[0]) >= 0; }).sort(function (a, b) { return ids.indexOf(a[0]) - ids.indexOf(b[0]); }); };
     var row = function (title, hint, list) { return '<div class="ob-bar"><b class="ob-grp">' + title + '</b><span class="ob-lock">' + hint + '</span>' + list.map(function (s) { return '<button class="ob-chip' + (G.sub === s[0] ? ' on' : '') + '" data-s="' + s[0] + '">' + s[1] + '</button>'; }).join('') + '</div>'; };
-    return row('화면 편집', '첫 화면 → 소개 → 입력 → 각성 → 결과', pick(['landing','cases','quest','tl'])) + row('운영·게시', '모든 단계는 하나의 초안으로 저장하고 함께 게시합니다', pick(['qops','qassets','basic','stats','publish'])) + '<details' + (G.sub === 'scenes' ? ' open' : '') + '><summary>이전 입력 설정</summary>' + row('호환 모드', G.cfg.quest.enabled === false ? '현재 기본 입력 사용 중' : '이전 입력 설정 보존 · 현재 스토리 입력 사용 중', pick(['scenes'])) + '</details>';
+    return row('화면 편집', '첫 화면 → 소개 → 입력 → 각성 → 결과', pick(['landing','cases','quest','qvideo','tl'])) + row('운영·게시', '모든 단계는 하나의 초안으로 저장하고 함께 게시합니다', pick(['qops','qassets','basic','stats','publish'])) + '<details' + (G.sub === 'scenes' ? ' open' : '') + '><summary>이전 입력 설정</summary>' + row('호환 모드', G.cfg.quest.enabled === false ? '현재 기본 입력 사용 중' : '이전 입력 설정 보존 · 현재 스토리 입력 사용 중', pick(['scenes'])) + '</details>';
   }
   function draw() {
     var changed = G.dirty ? '<span class="ob-dirty">● 저장하지 않은 변경이 있습니다</span>' : (G.srvDirty ? '<span class="ob-st warn">초안 ≠ 공개본 — 게시 필요</span>' : '<span class="ob-st ok">공개본과 같음</span>');

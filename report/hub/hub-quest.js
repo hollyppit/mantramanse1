@@ -51,7 +51,7 @@
     /* ── 레이어 ── */
     var host = DOC.getElementById('hub') || DOC.body, qs = DOC.createElement('div');
     qs.id = 'qs'; qs.setAttribute('role', 'region'); qs.setAttribute('aria-label', '운명의 기록');
-    qs.innerHTML = '<div class="qs-bgwrap"><div class="qs-bg" id="qsBgA"></div><div class="qs-bg" id="qsBgB"></div></div><div class="qs-season" id="qsSeason" aria-hidden="true"></div><div class="qs-shade"></div><div class="qs-vig"></div><div class="qs-grain"></div>' +
+    qs.innerHTML = '<div class="qs-bgwrap"><div class="qs-bg" id="qsBgA"></div><div class="qs-bg" id="qsBgB"></div></div><video id="qsInputVideo" muted loop playsinline preload="metadata" aria-hidden="true" hidden style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;pointer-events:none"></video><div class="qs-season" id="qsSeason" aria-hidden="true"></div><div class="qs-shade"></div><div class="qs-vig"></div><div class="qs-grain"></div>' +
             '<header class="qs-top"><div class="qs-logo">MANTRA<span>운명의 기록</span></div><button type="button" class="qs-lnk" id="qsExit">' + (editing ? '수정 취소 ↗' : '처음 화면 ↗') + '</button></header>' +
       '<div class="qs-meter" aria-hidden="true"><i id="qsMeter"></i></div><main class="qs-main"><div class="qs-card" id="qsCard" aria-live="polite"></div></main>' +
       '<footer class="qs-foot"><button type="button" id="qsBack">← 이전 장면</button><span id="qsCount"></span><span></span></footer>' + (PREVIEW ? '<div class="qs-pv">미리보기 · 저장·계산하지 않음</div>' : '');
@@ -60,6 +60,7 @@
     var $ = function (s) { return qs.querySelector(s); }, $$ = function (s) { return [].slice.call(qs.querySelectorAll(s)); };
     layers = [$('#qsBgA'), $('#qsBgB')];
     var card = $('#qsCard');
+    $('#qsInputVideo').onerror = function () { this.hidden = true; };
     function changeGuide(e) {
       if (PREVIEW) return;
       guide = e.detail.guide; save();
@@ -71,7 +72,7 @@
     }
     root.addEventListener('mantra:guide-change', changeGuide);
     onLeave(function () { root.removeEventListener('mantra:guide-change', changeGuide); });
-    onLeave(function () { root.removeEventListener('resize', onResize); root.removeEventListener('popstate', onPop); if (qs.parentNode) qs.parentNode.removeChild(qs); DOC.body.classList.remove('qs-open'); });
+    onLeave(function () { root.removeEventListener('resize', onResize); root.removeEventListener('popstate', onPop); var video = $('#qsInputVideo'); video.pause(); video.removeAttribute('src'); video.load(); if (qs.parentNode) qs.parentNode.removeChild(qs); DOC.body.classList.remove('qs-open'); });
 
     var step = function () { return steps[idx]; };
     // 관리자가 이 장면의 글자마다 정한 글씨체·크기·굵기·색(quest.steps[].sty). A = style 속성, C = style 안에 이어 붙이는 선언
@@ -90,7 +91,16 @@
       var im = new Image(); im.onload = show; im.onerror = show; im.src = url; if (im.complete) show();
     }
     function preloadNext() { var n = steps[idx + 1]; if (!n) return; var im = new Image(); im.src = Q.stepBg(cfg, n, mobileNow); }
-    function applyBg() { var s = step(); setBg(Q.stepBg(cfg, s, mobileNow), Q.stepFocus(cfg, s, mobileNow)); }
+    function applyBg() {
+      var s = step(), video = $('#qsInputVideo'), url = (mobileNow && QC.inputLoopVideoMobile) || QC.inputLoopVideo || '';
+      var use = !!url && (s.kind === 'input' || s.kind === 'confirm');
+      if (use) {
+        if (video.getAttribute('src') !== url) { video.src = url; video.muted = true; }
+        video.hidden = false;
+        if (video.paused) { var play = video.play(); if (play && play.catch) play.catch(function () { video.hidden = true; }); }
+      } else { video.pause(); video.hidden = true; }
+      setBg(Q.stepBg(cfg, s, mobileNow), Q.stepFocus(cfg, s, mobileNow));
+    }
     function setSeason(v) { $('#qsSeason').setAttribute('data-s', v || ''); }
     function onResize() { var m = isMobile(); if (m !== mobileNow) { mobileNow = m; curBg = ''; applyBg(); } }
     root.addEventListener('resize', onResize);

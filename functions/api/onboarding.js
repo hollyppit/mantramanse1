@@ -102,6 +102,8 @@ const pair = (o, n, len) => ({ male: arr(o && o.male, n, len), female: arr(o && 
 function cleanQuest(q) {
   if (!q || typeof q !== 'object') return undefined;
   const out = { enabled: bool(q.enabled, true), resume: bool(q.resume, true), skipReturning: bool(q.skipReturning, true), fx: FX.includes(q.fx) ? q.fx : 'fade' };
+  if (typeof q.inputLoopVideo === 'string') out.inputLoopVideo = img(q.inputLoopVideo);
+  if (typeof q.inputLoopVideoMobile === 'string') out.inputLoopVideoMobile = img(q.inputLoopVideoMobile);
   if (Array.isArray(q.steps)) {
     const seen = new Set();
     out.steps = q.steps.slice(0, 16).filter(x => x && QUEST_STEPS.includes(x.id) && !seen.has(x.id) && seen.add(x.id)).map(x => ({

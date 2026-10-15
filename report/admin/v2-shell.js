@@ -658,6 +658,18 @@
       $('#bgmSave', box).onclick = function () { var o = {}; $$('[data-bgm]', box).forEach(function (i) { if (i.value.trim()) o[i.dataset.bgm] = i.value.trim(); }); C.save({ bgm: o }).then(function () { ST.saved.bgm = o; toast('BGM을 저장했습니다'); }).catch(function (e) { toast(e.message, true); }); };
     });
   }
+  function introVideosOpen(also) {
+    var root = document.getElementById('t-v2intro');
+    var selected = 'prologue';
+    root.innerHTML = '<div class="sub2" data-video-nav></div><div data-video-body></div>';
+    function show(k) {
+      subnav(root.querySelector('[data-video-nav]'), [['prologue', '프롤로그 영상 업로드'], ['ilgan', '일간 영상'], ['iju', '일주 영상']], k, show);
+      var box = root.querySelector('[data-video-body]');
+      if (k === 'prologue') { V2Prologue.selectWorld(also && also.world || ''); V2Prologue.mount(box); }
+      else V2Intro.mount(box, PW, { mode: k });
+    }
+    show(selected);
+  }
   function scoreOpen() {
     var box = $('#stScore'); C.load().then(function () {
       var sc = ST.saved.scoring || {}, Wt = Object.assign({}, R.Scenes.CONFIG.w, sc.w || {});
@@ -668,8 +680,9 @@
 
 (window.AdminDirty = window.AdminDirty || {})['챕터·프로젝트'] = function () { return CH.dirty || PJ.dirty; }; (window.AdminDirty = window.AdminDirty || {})['글자 설정'] = function () { return TX.dirty; }; window.V2Shell = { open: function (tab, pw, also) {
     PW = pw; C.setPw(pw);
+    if (tab === 'v2chap' && also && also.source === 'intro:prologue') { V2Prologue.selectWorld(also.world || ''); V2Prologue.mount(document.getElementById('t-v2chap')); return; }
     if ((tab === 'v2proj' || tab === 'v2chap') && !also && !CH.pending && window.V2Timeline) { window.V2Timeline.open(document.getElementById('t-' + tab)); return; }
     if (tab === 'v2chap' && also && also.source) { CH.pending = also.source; if (also.world && V2Prologue.selectWorld) V2Prologue.selectWorld(also.world); }
-    if (tab === 'v2clip') clipOpen(); else if (tab === 'v2chap') chapOpen(); else if (tab === 'v2test') testOpen(); else if (tab === 'v2proj') projOpen(); else if (tab === 'v2set') setOpen(also); else if (tab === 'v2story') window.V2Story && window.V2Story.open(); else if (tab === 'v2world') window.V2World && window.V2World.open(); else if (tab === 'ops') window.V2Operations && window.V2Operations.open(pw); else if (tab === 'v2quality') window.V2Quality && window.V2Quality.open(); else if (tab === 'v2intro') V2Intro.mount(document.getElementById('t-v2intro'), pw, {});
+    if (tab === 'v2clip') clipOpen(); else if (tab === 'v2chap') chapOpen(); else if (tab === 'v2test') testOpen(); else if (tab === 'v2proj') projOpen(); else if (tab === 'v2set') setOpen(also); else if (tab === 'v2story') window.V2Story && window.V2Story.open(); else if (tab === 'v2world') window.V2World && window.V2World.open(); else if (tab === 'ops') window.V2Operations && window.V2Operations.open(pw); else if (tab === 'v2quality') window.V2Quality && window.V2Quality.open(); else if (tab === 'v2intro') introVideosOpen(also);
   } };
 })();

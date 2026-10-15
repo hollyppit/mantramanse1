@@ -84,7 +84,7 @@
     resume: true,         // 입력 중 이탈 → 이어하기 제안
     skipReturning: true,  // 출생정보 수정(재방문)에서는 부적 오프닝·안내자 선택을 건너뛴다
     fx: 'fade',           // 장면 전환: fade | rise | none
-    steps: STEPS, guides: GUIDES, calcLines: CALC_LINES, errLines: ERR_LINES, resumeText: RESUME, leapText: LEAP, assets: {},
+    inputLoopVideo: '', inputLoopVideoMobile: '', steps: STEPS, guides: GUIDES, calcLines: CALC_LINES, errLines: ERR_LINES, resumeText: RESUME, leapText: LEAP, assets: {},
   };
 
   /* ── 운명의 타임라인 설정 ── */
@@ -115,6 +115,8 @@
 
   function mergeQuest(base, ov) {
     var out = clone(base || QUEST); if (!ov || typeof ov !== 'object') return out;
+    out.inputLoopVideo = img(ov.inputLoopVideo);
+    out.inputLoopVideoMobile = img(ov.inputLoopVideoMobile);
     if (typeof ov.enabled === 'boolean') out.enabled = ov.enabled;
     if (typeof ov.resume === 'boolean') out.resume = ov.resume;
     if (typeof ov.skipReturning === 'boolean') out.skipReturning = ov.skipReturning;

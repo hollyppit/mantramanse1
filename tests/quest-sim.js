@@ -146,7 +146,7 @@ ok(O.merge(O.DEFAULTS, { sections: [{ id: 'final', type: 'final', cta: { show: t
   /* ⑩ 인생의 주요 주제 = 운명 세계(같은 데이터·같은 이름·같은 이미지, 누르면 그 세계로) */
   vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2/explore.js'), 'utf8'), { filename: 'explore.js' });
   const EX = globalThis.ReportV2.Explore, defW = EX.mergeWorlds(null), savedW = EX.mergeWorlds([{ id: 'w2', name: '재물운', line: '직업 · 재물 · 성공', access: 'paid' }, { id: 'w5', enabled: false }]);
-  ok(defW.length === 6 && savedW.find(w => w.id === 'w2').name === '재물운', '세계 정의: 관리자 저장본이 기본값 위에 덮어쓴다');
+  ok(defW.length === 7 && defW.some(w => w.id === 'w7') && savedW.find(w => w.id === 'w2').name === '재물운', '세계 정의: 관리자 저장본이 기본값 위에 덮어쓴다');
   ok(defW.every(w => /\.webp$/.test(EX.artOf(w)) && fs.existsSync(path.join(root, EX.artOf(w).replace(/^\//, '')))), '세계 기본 이미지 = 존재하는 기본 에셋');
   ok(EX.artOf({ id: 'w2', bgImage: '/api/clipfile?k=x.webp' }) === '/api/clipfile?k=x.webp', '세계에 올린 배경이 기본 이미지보다 우선');
   ok(!('topics' in O.merge(O.DEFAULTS, null).timeline) && !('topics' in Q.TIMELINE), '타임라인 주제 목록을 따로 두지 않는다(운명 세계가 단일 출처)');

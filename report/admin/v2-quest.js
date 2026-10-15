@@ -220,6 +220,33 @@
     QC.enabled = f.elements.qMode.value === 'story'; G.cfg.resultDestination = f.elements.destination.value; QC.resume = f.elements.qResume.checked; QC.skipReturning = f.elements.qSkip.checked; G.cfg.timeline.enabled = f.elements.tlOn.checked; QC.fx = f.elements.qFx.value;
   }
 
+  function inputVideoView() {
+    var slots = [['inputLoopVideo', 'PC용 영상'], ['inputLoopVideoMobile', '모바일용 영상']];
+    $('#obBody').innerHTML = '<div class="card"><h3>생년월일시 입력 · 공통 루프 영상</h3><p>안내자 선택 이후 모든 입력 장면에서 같은 영상을 무음 반복 재생합니다. PC용과 모바일용을 각각 올리세요. 모바일용이 없으면 PC용을 사용합니다.</p><p class="ob-lock">모바일 기준: 화면 너비 768px 미만. 업로드 후 초안 저장 → 게시를 눌러 적용하세요.</p><div class="ob-g2">' + slots.map(function (slot) {
+      var url = G.cfg.quest[slot[0]] || '';
+      return '<form class="ob-box" data-loop-slot="' + slot[0] + '" onsubmit="return false"><h4>' + slot[1] + '</h4><label class="ob-f">영상 URL<input name="video" type="text" value="' + esc(url) + '"></label><label class="ob-f">영상 업로드 (90MB 이하 MP4·WebM·MOV)<input type="file" data-loop-upload accept="video/mp4,video/webm,video/quicktime"></label><span data-upload-status role="status"></span><video data-preview controls muted loop playsinline style="width:100%;max-height:360px;background:#000"' + (url ? ' src="' + esc(url) + '"' : ' hidden') + '></video><button type="button" data-remove>영상 연결 빼기</button></form>';
+    }).join('') + '</div><button type="button" id="qLoopScene">입력 장면 미리보기</button></div>';
+    slots.forEach(function (slot) {
+      var key = slot[0], f = $('[data-loop-slot="' + key + '"]');
+      function update() { var url = val(f, 'video').trim(), p = f.querySelector('[data-preview]'); G.cfg.quest[key] = url; p.hidden = !url; if (url) p.src = url; else { p.pause(); p.removeAttribute('src'); p.load(); } markDirty(); }
+      f.elements.video.oninput = update;
+      f.querySelector('[data-loop-upload]').onchange = function () {
+        var file = this.files[0], input = this, status = f.querySelector('[data-upload-status]');
+        if (!file) return;
+        if (G.loopUploading) { input.value = ''; toast('진행 중인 영상 업로드가 끝난 뒤 올려 주세요', true); return; }
+        if (!/\.(mp4|webm|mov)$/i.test(file.name) || file.size > 90 * 1048576) { status.textContent = '90MB 이하 MP4·WebM·MOV 파일을 선택해 주세요.'; input.value = ''; return; }
+        G.loopUploading = true; input.disabled = true; status.textContent = '영상 업로드 중… 저장·게시 전에 완료를 기다려 주세요.';
+        C.api('/api/clipfile?name=' + encodeURIComponent('quest-' + key + '-' + file.name), { method: 'POST', headers: { 'content-type': file.type || 'video/mp4' }, body: file })
+          .then(function (r) { if (!r.key) throw new Error('업로드 응답에 키가 없습니다'); var url = '/api/clipfile?k=' + r.key; G.cfg.quest[key] = url; f.elements.video.value = url; if (f.isConnected) update(); markDirty(); status.textContent = '업로드 완료 · 초안 저장 후 게시하세요.'; toast(slot[1] + '을 올렸습니다 — 초안 저장 후 게시하세요'); })
+          .catch(function (e) { status.textContent = '업로드 실패: ' + e.message; toast(e.message, true); })
+          .finally(function () { G.loopUploading = false; input.disabled = false; input.value = ''; });
+      };
+      f.querySelector('[data-remove]').onclick = function () { f.elements.video.value = ''; update(); };
+    });
+    $('#qLoopScene').onclick = function () { collectInputVideo(); openPrev('#/begin?step=year&guide=male'); };
+  }
+  function collectInputVideo() { $$('[data-loop-slot]').forEach(function (f) { G.cfg.quest[f.dataset.loopSlot] = val(f, 'video').trim(); }); }
+  OB.register({ id: 'qvideo', label: '입력 공통 루프 영상', view: inputVideoView, collect: collectInputVideo });
   OB.register({ id: 'quest', label: '스토리 장면', view: questView, collect: collectQuest });
   OB.register({ id: 'qassets', label: '에셋 관리', view: assetsView, collect: collectAssets });
   OB.register({ id: 'tl', label: '운명의 타임라인', view: tlView, collect: collectTl });
