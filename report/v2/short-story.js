@@ -85,18 +85,53 @@
       ['다음 날의 소리','다음 아침에도 늦잠을 잤다. 달라지지 않은 것은 많았다. 그래도 열쇠는 정해둔 곳에 있었다.','윤은 수첩을 새로 사지 않았다. 어제 쓴 첫 줄 옆에 조그만 표시를 남기고 문을 열었다.']
     ]}
   };
-  function build(w,sd,source){
-    var story=STORIES[w.id];if(!story || !sd || !sd.dominantGroup)return source || null;
+  function personalize(text, original, sd, name) {
+    var N=R.Narrator, hero=N?N.hero(sd,name):(String(name||'').trim()||(sd&&sd.gender==='F'?'그녀':'그'));
+    if(!original)return N?N.fill(text,N.heroVars(sd,name)):String(text||'');
+    var escaped=String(original).split('').map(function(c){return /[가-힣a-zA-Z0-9]/.test(c)?c:String.fromCharCode(92)+c;}).join('');
+    var re=new RegExp('(^|[^가-힣A-Za-z0-9])'+escaped+'(으로|에게|은|는|이|가|을|를|과|와|의|만|도|로)?(?=$|[^가-힣A-Za-z0-9])','g');
+    var pairs={은:'은/는',는:'은/는',이:'이/가',가:'이/가',을:'을/를',를:'을/를',과:'과/와',와:'과/와',으로:'으로/로',로:'으로/로'};
+    return String(text||'').replace(re,function(_,before,particle){return before+hero+(N&&pairs[particle]?N.josa(hero,pairs[particle]):particle||'');});
+  }
+  var THEMES={w1:['identity','talent','shadow'],w2:['wealth','money'],w7:['career','talent'],w3:['love','relationship','marriage','family'],w4:['daewoon','sewoon','monthly'],w5:['past','reincarnation'],w6:['remedy','action']};
+  function hash(s){var n=2166136261;for(var i=0;i<s.length;i++)n=Math.imul(n^s.charCodeAt(i),16777619);return n>>>0;}
+  function assignMedia(model,w,sd,options){
+    options=options||{};var pool=[],known={},themes=THEMES[w.id]||[],explicit=Object.keys(w.cutImages||{}).some(function(k){return (w.cutImages[k]||[]).length;});
+    if(explicit)return model;
+    function add(img,video,score,tags){var key=img||video;if(!key)return;var found=known[key];if(found){found.video=video||found.video;found.score=Math.max(found.score,score);if(tags&&tags.length)found.tags=tags;return;}var item={img:img||'',video:video||'',score:score,tags:tags||[],used:0};known[key]=item;pool.push(item);}
+
+    (model.frames||[]).forEach(function(f){add(f.img,f.video,40);});
+    if(!explicit)(options.media||[]).forEach(function(m){
+      if(!m||m.enabled===false||m.tagsApproved===false)return;
+      var g=/(?:^|[-:])([MF])$/.exec(m.id||'');if(g&&sd&&sd.gender&&g[1]!==sd.gender)return;
+      if(m.gender&&sd&&sd.gender&&String(m.gender).toUpperCase()!==sd.gender)return;
+      var ts=(m.themeTags||[]).concat(m.chapterTags||[]),hits=themes.filter(function(t){return ts.indexOf(t)>=0;}).length;
+      if(!hits&&ts.indexOf(w.id)<0)return;
+      var isVideo=/video/i.test(m.type||''),url=m.url||m.webmUrl||'';
+      add(isVideo?(m.posterUrl||m.thumbnailUrl||''):url,m.panelVideo||(isVideo?url:''),70+hits*10,(m.sceneTags||[]).concat(m.actionTags||[]));
+    });
+    if(!pool.length)return model;
+    var variant=options.variant||0,words={office:['회사','회의','발표','기획','자료','동료'],library:['책','수첩','메모','기록'],cafe:['커피','카페','잔','가게'],sea:['배','선착장','바람','물'],road:['길','출발','문','현관'],sunrise:['아침','새벽','다음 날'],rain:['비','젖은','우산'],mountain:['돌','기다','버티']};
+    function sceneScore(a,f){var text=(f.cap||'')+' '+(f.paras||[]).join(' ');return a.tags.reduce(function(n,t){return n+((words[t]||[]).some(function(w){return text.indexOf(w)>=0;})?15:0);},0);}
+    var frames=model.frames.map(function(f,i){
+      var ranked=pool.slice().sort(function(a,b){var sa=a.score+sceneScore(a,f)-a.used*10000+(hash(w.id+':'+variant+':'+i+':'+(a.img||a.video))%1000)/1000,sb=b.score+sceneScore(b,f)-b.used*10000+(hash(w.id+':'+variant+':'+i+':'+(b.img||b.video))%1000)/1000;return sb-sa;});
+      var pick=ranked[0];pick.used++;return Object.assign({},f,{img:pick.img,video:pick.video});
+    });return Object.assign({},model,{frames:frames});
+  }
+  function build(w,sd,source,options){
+
+    options=options||{};var story=STORIES[w.id];if(!story || !sd || !sd.dominantGroup)return source || null;
     var motive=MOTIVE[sd.dominantGroup] || MOTIVE.비겁, weak=GAP[sd.weakestGroup] || '자기 마음을 확인하는 일';
     var rawElement=sd.dayMaster && sd.dayMaster.el, element=({wood:'목',fire:'화',earth:'토',metal:'금',water:'수'})[rawElement] || rawElement, weather=WEATHER[element] || '', band=sd.strength && sd.strength.band;
     var support=band==='신약'?'혼자 감당할 수 없는 몫을 적고, 곁의 사람에게 구체적으로 나눠 맡겼다.':band==='신강'?'먼저 내리려던 결정을 늦추고, 다른 사람에게 선택할 자리를 남겼다.':'자기 몫과 다른 사람의 몫을 나누어, 오늘 할 수 있는 범위부터 정했다.';
     var pictures=(source && source.frames || []).filter(function(f){return f.img;});
     var frames=story.frames.map(function(f,i){var paras=[f[1],f[2]].map(function(p){return p.replace('{성향}',motive[0]+(weather?' '+weather:'')).replace('{고집}',motive[1]).replace('{전환}',motive[2]+' '+support);});
       if(i===3)paras.push('윤에게 특히 어려운 것은 '+weak+'이었다. 이번에도 그 말은 입 안에서 맴돌았다.');
-      return {cap:f[0],paras:paras,img:pictures.length?pictures[i%pictures.length].img:(w.bgImage || '')};
+      paras=paras.map(function(p){return personalize(p,'윤',sd,options.name);});
+      return {cap:personalize(f[0],'윤',sd,options.name),paras:paras,img:pictures.length?pictures[i%pictures.length].img:(w.bgImage || '')};
     });
-    return Object.assign({},source || {},{id:'story:'+w.id,title:story.title,hero:story.title,label:w.name+' · 단편',notice:w.id==='w5'?'사주 상징을 모티브로 한 창작 전생 이야기입니다.':'사주 성향을 인물과 사건으로 풀어낸 창작 단편입니다.',frames:frames,
-      storyBasis:{dominantGroup:sd.dominantGroup,weakestGroup:sd.weakestGroup,element:element || '',strength:band || ''}});
+    return assignMedia(Object.assign({},source || {},{id:'story:'+w.id,title:story.title,hero:(R.Narrator?R.Narrator.hero(sd,options.name):options.name||story.title),label:w.name+' · 단편',notice:w.id==='w5'?'사주 상징을 모티브로 한 창작 전생 이야기입니다.':'사주 성향을 인물과 사건으로 풀어낸 창작 단편입니다.',frames:frames,
+      storyBasis:{dominantGroup:sd.dominantGroup,weakestGroup:sd.weakestGroup,element:element || '',strength:band || ''}}),w,sd,options);
   }
-  R.ShortStory={build:build,STORIES:STORIES};
+  R.ShortStory={build:build,personalize:personalize,assignMedia:assignMedia,STORIES:STORIES};
 })(typeof window!=='undefined'?window:globalThis);

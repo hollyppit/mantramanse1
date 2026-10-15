@@ -56,7 +56,7 @@ export async function onRequestPost({request,env}){
   const slot=visualFor(analysis.normalized.chart)?.slot||'unknown',recentKey='past-story:recent:'+slot;
   const recent=(await kv.get(recentKey,'json')||[]).filter(p=>p.key!==key).slice(-6);
   const cached=await kv.get(key,'json');
-  if(cached&&validatePlan(cached.plan,analysis.claims)&&validateStory(cached.story,cached.plan,analysis.claims)&&validateReview(cached.review))return json({ok:true,story:cached.story,visual:visualFor(analysis.normalized.chart),cached:true,version:VERSION,...(isAdmin(request,env)?{audit:{plan:cached.plan,review:cached.review,generation:cached.generation||null,claims:analysis.claims}}:{})});
+  if(cached&&validatePlan(cached.plan,analysis.claims)&&validateStory(cached.story,cached.plan,analysis.claims)&&validateReview(cached.review))return json({ok:true,story:cached.story,protagonist:cached.plan.protagonist.name,visual:visualFor(analysis.normalized.chart),cached:true,version:VERSION,...(isAdmin(request,env)?{audit:{plan:cached.plan,review:cached.review,generation:cached.generation||null,claims:analysis.claims}}:{})});
   if(!env.OPENAI_API_KEY&&!env.ANTHROPIC_API_KEY)return json({ok:false,error:'no-ai'},503);
   if(settings.maxRequestCost!=null){
    const byteInput=new TextEncoder().encode(JSON.stringify(analysis)).length;
@@ -84,7 +84,7 @@ export async function onRequestPost({request,env}){
     await kv.put(key,JSON.stringify({...result,generation:{elapsedMs:Date.now()-started,attempts},version:VERSION,at:new Date().toISOString()}),{expirationTtl:2592000});
     const brief={key,title:result.plan.title,premise:result.plan.premise,protagonist:result.plan.protagonist.name,antagonist:result.plan.antagonist,dilemma:result.plan.dilemma,callback:result.plan.callback};
     await kv.put(recentKey,JSON.stringify([...recent,brief].slice(-6)),{expirationTtl:2592000});
-    return json({ok:true,story:result.story,visual:visualFor(analysis.normalized.chart),cached:false,version:VERSION,...(isAdmin(request,env)?{audit:{plan:result.plan,review:result.review,generation:{elapsedMs:Date.now()-started,attempts},claims:analysis.claims}}:{})});
+    return json({ok:true,story:result.story,protagonist:result.plan.protagonist.name,visual:visualFor(analysis.normalized.chart),cached:false,version:VERSION,...(isAdmin(request,env)?{audit:{plan:result.plan,review:result.review,generation:{elapsedMs:Date.now()-started,attempts},claims:analysis.claims}}:{})});
    }catch(e){last=['plan-rejected','story-rejected','review-rejected','deadline'].includes(e.message)?e.message:'provider-unavailable';attempts.push({provider,status:'rejected',error:last,...(e.issues?{issues:e.issues}:{})});}
   }
   // Short-lived internal trace: allowlisted metadata only, no prompts, IDs or prose.

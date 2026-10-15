@@ -89,6 +89,8 @@
   function open(model, assets, videos, opts) {
     opts = opts || {}; var doc = root.document; if (!doc || !model) return null;
     var img = imageOf(model, assets) || ((model.frames.filter(function (f) { return f.img; })[0] || {}).img) || '', vid = !opts.saveData && !opts.reduce ? videoOf(model, assets, videos) : '';
+    var frameImages=model.frames.map(function(f){return f.img;}).filter(Boolean);
+    var fallbackVideo=model.frames.some(function(f){return f.video;})||new Set(frameImages).size>1?'':vid;
     var dlg = doc.createElement('dialog'); dlg.className = 'sm'; dlg.setAttribute('aria-label', '기억 너머의 문 · ' + model.title);
     dlg.innerHTML = '<div class="sm-bg' + (img ? '' : ' none') + '"' + (img ? ' style="background-image:url(' + E(img) + ')"' : '') + '>' + (vid ? '<video src="' + E(vid) + '" poster="' + E(img) + '" muted loop playsinline autoplay preload="metadata"></video>' : '') + (img ? '' : '<span aria-hidden="true">前</span>') + '</div>' +
       '<div class="sm-sh" aria-hidden="true"></div><div class="sm-top"><span class="sm-nt' + (model.notice ? '' : ' sm-lb') + '">' + E(model.notice || model.label || '') + '</span><button type="button" class="chipbtn" data-smx>닫기</button></div>' +
@@ -102,13 +104,17 @@
       tx.classList.remove('in'); tx.innerHTML = frameHtml(model, i); void tx.offsetWidth; tx.classList.add('in');
       var fi = model.frames[i].img || cur || img; if (model.frames[i].img) cur = model.frames[i].img;
       if (fi && fi !== shown) { bg.style.backgroundImage = 'url(' + fi + ')'; shown = fi; }
+      var frame=model.frames[i], nextVideo=!opts.saveData&&!opts.reduce?(frame.video||fallbackVideo):'';
+      var currentVideo=bg.querySelector('video');
+      if(currentVideo&&currentVideo.getAttribute('src')!==nextVideo){currentVideo.pause();currentVideo.removeAttribute('src');currentVideo.load();currentVideo.remove();currentVideo=null;}
+      if(nextVideo&&!currentVideo){var v=doc.createElement('video');v.src=nextVideo;v.muted=true;v.defaultMuted=true;v.loop=true;v.playsInline=true;v.autoplay=true;v.preload='metadata';if(fi)v.poster=fi;v.onerror=function(){this.remove();};bg.appendChild(v);var play=v.play();if(play&&play.catch)play.catch(function(){});}
       bg.className = 'sm-bg' + (fi ? '' : ' none') + (opts.reduce ? '' : ' mv-' + MOVES[i % MOVES.length]);
       dots.setAttribute('aria-valuenow', String(i + 1)); dots.innerHTML = model.frames.map(function (_, k) { return '<i class="' + (k === i ? 'on' : k < i ? 'dn' : '') + '"></i>'; }).join('');
       btnA.setAttribute('aria-pressed', String(auto)); btnA.textContent = auto ? '자동 ❚❚' : '자동 ▶'; schedule();
     }
     function finish() { if (dead) return; if (opts.onDone) opts.onDone(); close(); }
     function next(fromAuto) { if (i >= model.frames.length - 1) { if (fromAuto) { auto = false; show(); return; } finish(); return; } i++; show(); }
-    function close() { if (dead) return; dead = true; clear(); try { dlg.close(); } catch (e) { } if (dlg.parentNode) dlg.parentNode.removeChild(dlg); if (opts.onClose) opts.onClose(); }
+    function close() { if (dead) return; dead = true; clear(); var playing=bg.querySelector('video');if(playing){playing.pause();playing.removeAttribute('src');playing.load();} try { dlg.close(); } catch (e) { } if (dlg.parentNode) dlg.parentNode.removeChild(dlg); if (opts.onClose) opts.onClose(); }
     dlg.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) { if (e.target.closest('.sm-tx')) return; next(false); return; }
       if (b.hasAttribute('data-smx')) close(); else if (b.hasAttribute('data-smn')) next(false); else if (b.hasAttribute('data-smp')) { if (i > 0) { i--; show(); } } else if (b.hasAttribute('data-sma')) { auto = !auto; show(); }
