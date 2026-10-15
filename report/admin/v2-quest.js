@@ -221,11 +221,11 @@
   }
 
   function inputVideoView() {
-    var slots = [['inputLoopVideo', 'PC용 영상'], ['inputLoopVideoMobile', '모바일용 영상']];
-    $('#obBody').innerHTML = '<div class="card"><h3>생년월일시 입력 · 공통 루프 영상</h3><p>안내자 선택 이후 모든 입력 장면에서 같은 영상을 무음 반복 재생합니다. PC용과 모바일용을 각각 올리세요. 모바일용이 없으면 PC용을 사용합니다.</p><p class="ob-lock">모바일 기준: 화면 너비 768px 미만. 업로드 후 초안 저장 → 게시를 눌러 적용하세요.</p><div class="ob-g2">' + slots.map(function (slot) {
+    var slots = [['inputLoopMale', '운명 감찰관 · PC용'], ['inputLoopMaleMobile', '운명 감찰관 · 모바일용'], ['inputLoopFemale', '명운 해독관 · PC용'], ['inputLoopFemaleMobile', '명운 해독관 · 모바일용'], ['inputLoopVideo', '공통 대체 · PC용'], ['inputLoopVideoMobile', '공통 대체 · 모바일용']];
+    $('#obBody').innerHTML = '<div class="card"><h3>생년월일시 입력 · 공통 루프 영상</h3><p>선택한 안내자에 맞는 영상을 모든 입력 장면에서 무음 반복 재생합니다. 운명 감찰관과 명운 해독관의 PC용·모바일용 영상을 각각 올리세요. 모바일용이 없으면 같은 안내자의 PC용을 사용합니다. 안내자 전용 영상이 없으면 기존 공통 대체 영상을 사용합니다.</p><p class="ob-lock">모바일 기준: 화면 너비 768px 미만. 업로드 후 초안 저장 → 게시를 눌러 적용하세요.</p><div class="ob-g2">' + slots.map(function (slot, i) {
       var url = G.cfg.quest[slot[0]] || '';
-      return '<form class="ob-box" data-loop-slot="' + slot[0] + '" onsubmit="return false"><h4>' + slot[1] + '</h4><label class="ob-f">영상 URL<input name="video" type="text" value="' + esc(url) + '"></label><label class="ob-f">영상 업로드 (90MB 이하 MP4·WebM·MOV)<input type="file" data-loop-upload accept="video/mp4,video/webm,video/quicktime"></label><span data-upload-status role="status"></span><video data-preview controls muted loop playsinline style="width:100%;max-height:360px;background:#000"' + (url ? ' src="' + esc(url) + '"' : ' hidden') + '></video><button type="button" data-remove>영상 연결 빼기</button></form>';
-    }).join('') + '</div><button type="button" id="qLoopScene">입력 장면 미리보기</button></div>';
+      return (i === 4 ? '</div><details><summary>공통 대체 영상 (기존 설정)</summary><div class="ob-g2">' : '') + '<form class="ob-box" data-loop-slot="' + slot[0] + '" onsubmit="return false"><h4>' + slot[1] + '</h4><label class="ob-f">영상 URL<input name="video" type="text" value="' + esc(url) + '"></label><label class="ob-f">영상 업로드 (90MB 이하 MP4·WebM·MOV)<input type="file" data-loop-upload accept="video/mp4,video/webm,video/quicktime"></label><span data-upload-status role="status"></span><video data-preview controls muted loop playsinline style="width:100%;max-height:360px;background:#000"' + (url ? ' src="' + esc(url) + '"' : ' hidden') + '></video><button type="button" data-remove>영상 연결 빼기</button></form>';
+    }).join('') + '</div></details><div class="ob-bar"><select id="qLoopGuide"><option value="male">운명 감찰관</option><option value="female">명운 해독관</option></select><button type="button" id="qLoopScene">선택한 안내자로 입력 장면 미리보기</button></div></div>';
     slots.forEach(function (slot) {
       var key = slot[0], f = $('[data-loop-slot="' + key + '"]');
       function update() { var url = val(f, 'video').trim(), p = f.querySelector('[data-preview]'); G.cfg.quest[key] = url; p.hidden = !url; if (url) p.src = url; else { p.pause(); p.removeAttribute('src'); p.load(); } markDirty(); }
@@ -243,7 +243,7 @@
       };
       f.querySelector('[data-remove]').onclick = function () { f.elements.video.value = ''; update(); };
     });
-    $('#qLoopScene').onclick = function () { collectInputVideo(); openPrev('#/begin?step=year&guide=male'); };
+    $('#qLoopScene').onclick = function () { collectInputVideo(); openPrev('#/begin?step=year&guide=' + $('#qLoopGuide').value); };
   }
   function collectInputVideo() { $$('[data-loop-slot]').forEach(function (f) { G.cfg.quest[f.dataset.loopSlot] = val(f, 'video').trim(); }); }
   OB.register({ id: 'qvideo', label: '입력 공통 루프 영상', view: inputVideoView, collect: collectInputVideo });

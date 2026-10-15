@@ -104,6 +104,7 @@ function cleanQuest(q) {
   const out = { enabled: bool(q.enabled, true), resume: bool(q.resume, true), skipReturning: bool(q.skipReturning, true), fx: FX.includes(q.fx) ? q.fx : 'fade' };
   if (typeof q.inputLoopVideo === 'string') out.inputLoopVideo = img(q.inputLoopVideo);
   if (typeof q.inputLoopVideoMobile === 'string') out.inputLoopVideoMobile = img(q.inputLoopVideoMobile);
+  for (const key of ['inputLoopMale', 'inputLoopMaleMobile', 'inputLoopFemale', 'inputLoopFemaleMobile']) if (typeof q[key] === 'string') out[key] = img(q[key]);
   if (Array.isArray(q.steps)) {
     const seen = new Set();
     out.steps = q.steps.slice(0, 16).filter(x => x && QUEST_STEPS.includes(x.id) && !seen.has(x.id) && seen.add(x.id)).map(x => ({

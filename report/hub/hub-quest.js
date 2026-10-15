@@ -63,11 +63,14 @@
     $('#qsInputVideo').onerror = function () { this.hidden = true; };
     function changeGuide(e) {
       if (PREVIEW) return;
+      if (!e.detail || (e.detail.guide !== 'male' && e.detail.guide !== 'female')) return;
       guide = e.detail.guide; save();
+      applyBg();
       if (busy) return;
       // 입력 폼을 다시 만들지 않아 아직 제출하지 않은 이름·날짜도 보존한다.
       var speaker = $('.qs-spk'), speech = speaker && speaker.nextElementSibling;
       if (speaker) { var image = speaker.querySelector('img'); if (image) image.src = Q.guideImage(cfg, guide, mobileNow); var label = speaker.querySelector('b'); if (label) label.textContent = QC.guides[guide].name; }
+      var guideRow = $('[data-j="guide"]'); if (guideRow) guideRow.parentNode.querySelector('strong').textContent = QC.guides[guide].name;
       if (speech && speech.classList.contains('qs-say')) speech.innerHTML = Q.linesOf(step(), guide, d.hourUnknown).map(function (t) { return '<p>' + esc(fill(Q.speech(t, guide))) + '</p>'; }).join('');
     }
     root.addEventListener('mantra:guide-change', changeGuide);
@@ -92,12 +95,12 @@
     }
     function preloadNext() { var n = steps[idx + 1]; if (!n) return; var im = new Image(); im.src = Q.stepBg(cfg, n, mobileNow); }
     function applyBg() {
-      var s = step(), video = $('#qsInputVideo'), url = (mobileNow && QC.inputLoopVideoMobile) || QC.inputLoopVideo || '';
+      var s = step(), video = $('#qsInputVideo'), url = Q.inputLoopUrl(cfg, guide, mobileNow);
       var use = !!url && (s.kind === 'input' || s.kind === 'confirm');
       if (use) {
         if (video.getAttribute('src') !== url) { video.src = url; video.muted = true; }
         video.hidden = false;
-        if (video.paused) { var play = video.play(); if (play && play.catch) play.catch(function () { video.hidden = true; }); }
+        if (video.paused) { var play = video.play(); if (play && play.catch) play.catch(function () { if (video.getAttribute('src') === url && video.paused) video.hidden = true; }); }
       } else { video.pause(); video.hidden = true; }
       setBg(Q.stepBg(cfg, s, mobileNow), Q.stepFocus(cfg, s, mobileNow));
     }

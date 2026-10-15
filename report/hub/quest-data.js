@@ -84,7 +84,7 @@
     resume: true,         // 입력 중 이탈 → 이어하기 제안
     skipReturning: true,  // 출생정보 수정(재방문)에서는 부적 오프닝·안내자 선택을 건너뛴다
     fx: 'fade',           // 장면 전환: fade | rise | none
-    inputLoopVideo: '', inputLoopVideoMobile: '', steps: STEPS, guides: GUIDES, calcLines: CALC_LINES, errLines: ERR_LINES, resumeText: RESUME, leapText: LEAP, assets: {},
+    inputLoopMale: '', inputLoopMaleMobile: '', inputLoopFemale: '', inputLoopFemaleMobile: '', inputLoopVideo: '', inputLoopVideoMobile: '', steps: STEPS, guides: GUIDES, calcLines: CALC_LINES, errLines: ERR_LINES, resumeText: RESUME, leapText: LEAP, assets: {},
   };
 
   /* ── 운명의 타임라인 설정 ── */
@@ -117,6 +117,7 @@
     var out = clone(base || QUEST); if (!ov || typeof ov !== 'object') return out;
     out.inputLoopVideo = img(ov.inputLoopVideo);
     out.inputLoopVideoMobile = img(ov.inputLoopVideoMobile);
+    ['inputLoopMale', 'inputLoopMaleMobile', 'inputLoopFemale', 'inputLoopFemaleMobile'].forEach(function (key) { out[key] = img(ov[key]); });
     if (typeof ov.enabled === 'boolean') out.enabled = ov.enabled;
     if (typeof ov.resume === 'boolean') out.resume = ov.resume;
     if (typeof ov.skipReturning === 'boolean') out.skipReturning = ov.skipReturning;
@@ -241,6 +242,10 @@
   };
 
   Q.STEPS = STEPS; Q.ASSETS = ASSETS; Q.ASSET_KEYS = ASSET_KEYS; Q.GUIDES = GUIDES; Q.DEFAULT = QUEST; Q.TIMELINE = TIMELINE; Q.TL_SECTIONS = TL_SECTIONS; Q.ACCESS = ACCESS; Q.FX = FX;
+  Q.inputLoopUrl = function (cfg, guide, mobile) {
+    var q = cfg.quest || {}, key = guide === 'female' ? 'inputLoopFemale' : 'inputLoopMale';
+    return (mobile && q[key + 'Mobile']) || q[key] || (mobile && q.inputLoopVideoMobile) || q.inputLoopVideo || '';
+  };
   Q.mergeQuest = mergeQuest; Q.mergeTimeline = mergeTimeline; Q.img = img; Q.focus = focus;
   // Shared flow model: the admin and both input renderers use the same destination.
   Q.inputMode = function (cfg) { return cfg.quest && cfg.quest.enabled === false ? 'classic' : 'story'; };
