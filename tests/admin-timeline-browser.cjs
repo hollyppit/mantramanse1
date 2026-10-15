@@ -8,7 +8,7 @@ const {chromium}=require(process.env.TASK_PLAYWRIGHT);
  try {
   browser=await chromium.launch({headless:true,channel:'msedge'});const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
-  await page.route('**/api/**',async route=>{const req=route.request(),u=new URL(req.url());let body={};if(u.pathname==='/api/worlds'){if(req.method()==='PUT'){worlds=JSON.parse(req.postData()).worlds;body={ok:true};}else body={worlds};}else if(u.pathname==='/api/admin')body={ok:true};else if(u.pathname==='/api/ik')body={ok:true,enabled:false};else if(u.pathname==='/api/report-content')body={content:{}};else if(u.pathname==='/api/media')body={media:[]};await route.fulfill({json:body});});
+  await page.route('**/api/**',async route=>{const req=route.request(),u=new URL(req.url());let body={};if(u.pathname==='/api/worlds'){if(req.method()==='PUT'){worlds=JSON.parse(req.postData()).worlds;body={ok:true};}else body={worlds};}else if(u.pathname==='/api/past-story')body={ok:true,story:{title:'개인화 전생 단편',logline:'개인 원국을 바탕으로 구성한 테스트 단편',frames:Array.from({length:8},(_,i)=>({cap:'개인화 장면 '+i,paras:['인물이 선택하고 그 결과가 이어지는 장면입니다.','과거와 미래를 사실로 주장하지 않는 창작 장면입니다.']}))}};else if(u.pathname==='/api/admin')body={ok:true};else if(u.pathname==='/api/ik')body={ok:true,enabled:false};else if(u.pathname==='/api/report-content')body={content:{}};else if(u.pathname==='/api/media')body={media:[]};await route.fulfill({json:body});});
   await page.goto('http://127.0.0.1:'+server.address().port+'/report/admin/');await page.locator('#pw').fill('test');await page.locator('#loginBtn').click();await page.waitForSelector('#app:not(.hide)');
   await page.evaluate(()=>AdminShowTab('v2proj'));await page.waitForSelector('#t-v2proj [data-topic="w7"]');
   assert.equal(await page.locator('#t-v2proj [data-topic]').count(),7);
@@ -40,7 +40,7 @@ const {chromium}=require(process.env.TASK_PLAYWRIGHT);
   await page.waitForSelector('[data-smx]');await page.locator('[data-smx]').click();
   await page.locator('#wstrip [data-ws="map"]').click();await page.locator('#v-home [data-xw="w5"]').click();
   await page.waitForSelector('#v-home:not([hidden]) [data-smopen]');await page.locator('[data-smopen]').click();await page.waitForSelector('[data-smx]');
-  assert((await page.locator('.sm-tx').innerText()).includes('문지기의 농담'));
+  assert((await page.locator('.sm-tx').innerText()).includes('개인화 장면 0'));
   fs.mkdirSync('output/short-story',{recursive:true});await page.waitForTimeout(1000);await page.screenshot({path:'output/short-story/past.png'});await page.locator('[data-smx]').click();
   assert.deepEqual(errors,[]);console.log('Admin timeline browser PASS: actual document, seven topics, career separation, save/reload, preview and prologue link');
  }finally{if(browser)await browser.close();await new Promise(r=>server.close(r));}

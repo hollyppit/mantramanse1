@@ -361,6 +361,7 @@
     var idxs = (S.wmap && S.wmap.by[w.id]) || [], list = idxs.map(function (i) { var c = S.rep.chapters[i], a = document.getElementById('ch-' + c.id); return { id: c.id, title: c.title, html: a ? a.innerHTML : (c.scenes || []).map(function(s,k){var panel=panelOf(s);return (panel?panelHtml(panel):'')+sceneHtml(c,s,k);}).join('') }; });
     var source = w.id === 'w5' ? R.Samsara.extract(S.rep) : R.Samsara.fromChapters(list, { id: 'world:' + w.id, title: w.name, label: (w.icon || '') + ' ' + w.name, bg: w.bgImage || '', cut: w.cutImages || null, per: 3, max: 36 });
     var storyWorld = w.id === 'w5' && source ? Object.assign({}, w, { bgImage: R.Samsara.imageOf(source, S.assets || {}) || w.bgImage }) : w;
+    if(w.id==='w5')return S.personalPast || Object.assign({},source || {},{title:'나의 전생 단편',hero:'사주에서 시작되는 한 편의 이야기',frames:Array.from({length:8},function(){return {cap:'',paras:[],img:storyWorld.bgImage || ''};})});
     return R.ShortStory ? R.ShortStory.build(storyWorld, S.sd, source) : source;
   }
   function worldToonCard(w) {
@@ -371,10 +372,21 @@
   $('#v-home').addEventListener('click', function (e) {
     var b = e.target.closest('[data-wtoon]'); if (b) openWorldToon(b.dataset.wtoon);
   });
-  function openWorldToon(wid) {
+  async function openWorldToon(wid) {
     var w = ((S.wmap && S.wmap.list) || []).filter(function (x) { return x.id === wid; })[0]; if (!w || !R.Samsara) return;
     var model = null; try { model = worldToonModel(w); } catch (err) { model = null; } if (!model) { toast('무빙툰 장면을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
     if (S.mv) S.mv.pause();
+    if(wid==='w5'&&!S.personalPast){
+      if(!R.PastStory||S.pastLoading)return;
+      S.pastLoading=true;var ctl=new AbortController(),wait=document.createElement('dialog');
+      wait.style.cssText='background:#11151e;color:#eee5d5;border:1px solid #8b7956;border-radius:16px;max-width:420px;padding:28px;line-height:1.8';
+      wait.innerHTML='<p>사주의 결을 따라 이야기를 엮고 있습니다.</p><p>처음에는 잠시 시간이 걸립니다. 완성한 이야기는 저장해 두고 다시 보여드립니다.</p><button type="button" class="btn">취소</button>';
+      wait.querySelector('button').onclick=function(){ctl.abort();wait.close();};wait.addEventListener('cancel',function(){ctl.abort();});document.body.appendChild(wait);wait.showModal();
+      var timer=setTimeout(function(){ctl.abort();toast('이야기 준비가 지연되고 있습니다. 잠시 후 다시 열어주세요.',6000);},90000);
+      try{model=await R.PastStory.load(S.sd,model,ctl.signal);S.personalPast=model;}
+      catch(err){if(!ctl.signal.aborted)toast(err.message || '이야기를 불러오지 못했습니다.',6000);return;}
+      finally{clearTimeout(timer);S.pastLoading=false;if(wait.open)wait.close();wait.remove();}
+    }
     T('world_toon_open', { world: wid, frames: model.frames.length });
     R.Samsara.open(model, S.assets || {}, S.assetVideos || {}, { reduce: reduce, saveData: saveData, rate: playbackRate(), onDone: function () { S.xp.seen['toon:' + wid] = 1; xpSave(); T('world_toon_done', { world: wid }); showHome(wid); } });
   }

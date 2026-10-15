@@ -30,7 +30,7 @@
           if(more.length && main.length) { var at=doc.chapters.findIndex(function(c){return c.id==='life_here';}); doc.chapters.splice(at>=0?at+1:1,0,Object.assign({},intro,{id:'c-char-more',base:'c-char-more',title:'일간·일주 더 깊이 읽기',scenes:more})); }
         }
         if(token!==state.generation)return;
-        state.sd=sd; state.chapters=doc.chapters; draw(box);
+        state.sd=sd; state.past=null; state.chapters=doc.chapters; draw(box);
       });
     }).catch(function(e){ if(token===state.generation) box.querySelector('[data-document]').textContent='목차를 구성하지 못했습니다: '+e.message; });
   }
@@ -41,6 +41,7 @@
     box.querySelector('[data-save]').disabled=!state.dirty;
   }
   function storyPreview(w) {
+    if(w.id==='w5')return '<details style="margin:16px 0"><summary>원국별 전생 단편</summary><p class="muted">선택한 테스트 사주의 풀이 근거로 인물·사건·갈등·결말을 구성하고 검토합니다. 완성한 이야기는 같은 원국에서 다시 불러옵니다.</p><button type="button" data-past-generate>전생 단편 생성·검토</button><div data-past-result></div></details>';
     var model=R.ShortStory && R.ShortStory.build(w,state.sd,null); if(!model)return '';
     return '<details style="margin:16px 0"><summary>무빙툰 단편 · '+esc(model.title)+'</summary><p class="muted">'+esc(model.notice)+'</p>'+model.frames.map(function(f){return '<h4>'+esc(f.cap)+'</h4>'+f.paras.map(function(p){return '<p>'+esc(p)+'</p>';}).join('');}).join('')+'</details>';
   }
@@ -54,6 +55,7 @@
     box.innerHTML='<div class="card"><h3>운명의 타임라인 · 주제와 챕터</h3><p>사용자 타임라인과 같은 주제·분류를 기준으로 관리합니다. 사주 조건에 따라 추가 풀이와 챕터 수는 달라질 수 있습니다.</p><div class="row"><label>테스트 생일 <input type="date" data-date value="1992-06-23"></label><label>시각 <input type="time" data-time value="01:30"></label><label>성별 <select data-gender><option value="M">남성</option><option value="F">여성</option></select></label><button type="button" data-rebuild>목차 다시 구성</button><button type="button" class="pri" data-save disabled>주제별 챕터 저장</button><button type="button" data-legacy>기존 상품 원본 관리</button></div><p data-status class="muted"></p></div><div data-document></div>';
     box.onchange=function(e){var row=e.target.closest('[data-chapter]');if(!row)return;var w=state.worlds.find(function(w){return w.id===state.selected;}),s=settings(w,row.dataset.chapter);if(e.target.matches('[data-title]'))s.title=e.target.value.trim();if(e.target.matches('[data-visible]'))s.enabled=e.target.checked;state.dirty=true;box.querySelector('[data-save]').disabled=false;};
     box.onclick=function(e){var b=e.target.closest('button');if(!b)return;
+      if(b.hasAttribute('data-past-generate')){b.disabled=true;var output=box.querySelector('[data-past-result]');output.textContent='기획·집필·검토를 진행하고 있습니다…';R.PastStory.load(state.sd,null).then(function(model){state.past=model;output.innerHTML='<h4>'+esc(model.title)+'</h4>'+model.frames.map(function(f){return '<h4>'+esc(f.cap)+'</h4>'+f.paras.map(function(p){return '<p>'+esc(p)+'</p>';}).join('');}).join('');}).catch(function(err){output.textContent=err.message;}).finally(function(){b.disabled=false;});return;}
       if(b.hasAttribute('data-topic')){state.selected=b.dataset.topic;draw(box);return;}
       if(b.hasAttribute('data-rebuild')){build(box);return;}
       if(b.hasAttribute('data-world')){window.AdminShowTab('v2world');return;}
