@@ -26,6 +26,9 @@ ok(Q.fill('{귀인}', {}, cfg0) === '당신' && Q.fill('{이름귀인}', { name:
 ok(Q.fill('{year}년 {month}월', { year: 1992, month: 6 }, cfg0) === '1992년 6월', '날짜 치환');
 ok(Q.linesOf(Q.STEPS[8], 'male', true)[0] !== Q.linesOf(Q.STEPS[8], 'male', false)[0], '시각 미상 대사가 따로 있다');
 ok(JSON.stringify(Q.linesOf(Q.STEPS[2], 'male')) !== JSON.stringify(Q.linesOf(Q.STEPS[2], 'female')), '안내자별 말투가 다르다');
+ok(Q.linesOf(Q.STEPS[2], 'male')[0] === '어떤 이름으로 기록해 줄까?', '남자 안내자는 반말');
+ok(Q.linesOf(Q.STEPS[2], 'female')[0] === '어떤 이름으로 기록해 드릴까요?', '여자 안내자는 존댓말');
+ok(Q.speech('기록을 펼치는 중입니다. 잠시만요.', 'male') === '기록을 펼치고 있어. 잠깐만 기다려줘.', '계산 중 남자 대사도 반말');
 ok(!/(옵니다|사옵|하옵|이옵)/.test(allLines.replace(/없습니다|있습니다/g, '')), '입력 안내는 일반 한국어(사극체 없음)');
 ok(Q.GUIDES.male.name !== Q.GUIDES.female.name, '안내자 이름 구분');
 
@@ -144,7 +147,7 @@ ok(O.merge(O.DEFAULTS, { sections: [{ id: 'final', type: 'final', cta: { show: t
   ok(EX.artOf({ id: 'w2', bgImage: '/api/clipfile?k=x.webp' }) === '/api/clipfile?k=x.webp', '세계에 올린 배경이 기본 이미지보다 우선');
   ok(!('topics' in O.merge(O.DEFAULTS, null).timeline) && !('topics' in Q.TIMELINE), '타임라인 주제 목록을 따로 두지 않는다(운명 세계가 단일 출처)');
   const rv = fs.readFileSync(path.join(root, 'report/v2/viewer.js'), 'utf8'), hubjs = fs.readFileSync(path.join(root, 'report/hub/hub.js'), 'utf8');
-  ok(/world=\(\[\\w-\]\{1,30\}\)/.test(rv) && /data-xw="' \+ wq/.test(rv), '뷰어: ?world= 로 해당 세계를 바로 연다');
+  ok(/world=\(\[\\w-\]\{1,30\}\)/.test(rv) && rv.includes('x.world.id === WORLD'), '뷰어: ?world= 로 해당 세계를 바로 연다');
   ok(/'&world='/.test(hubjs) && /q\.world/.test(hubjs), '허브: #/go?world= → 뷰어 ?world=');
   ok(/R\.Explore\.artOf\(w\)/.test(tj) && /mergeWorlds/.test(tj) && /#\/go\?to=life&world=/.test(tj) && /\/api\/worlds/.test(tj), '타임라인 주제 타일은 세계 데이터·이미지·링크를 쓴다');
 

@@ -790,9 +790,9 @@
     rep.chapters.forEach(function (c, ci) {
       if (S.readerWorld && S.wmap && S.wmap.idx[ci] !== S.readerWorld) return;
       if (!h && S.readerWorld && R.StoryComposer && R.StoryComposer.worldHook) {
-        var intro = R.StoryComposer.worldHook(S.readerWorld, S.sd);
+        var intro = R.StoryComposer.worldHook(S.readerWorld, S.sd, selectedGuide());
         if (intro) {
-          var opening = { sceneType: 'life', sceneId: 'world-hook-' + S.readerWorld, html: '<section class="scene rv rd-prose world-hook"><p>' + esc(S.name || '당신') + (S.name ? '님, ' : ', ') + esc(intro[0]) + '</p><p class="lead"><strong>' + esc(intro[1]) + '</strong></p></section>' };
+          var opening = { sceneType: 'life', sceneId: 'world-hook-' + S.readerWorld, html: '<section class="scene rv rd-prose world-hook"><p>' + (selectedGuide() === 'male' ? '' : esc(S.name || '당신') + (S.name ? '님, ' : ', ')) + esc(intro[0]) + '</p><p class="lead"><strong>' + esc(intro[1]) + '</strong></p></section>' };
           h += secWrap(sceneHtml(c, opening, -1), opening, c, ci);
         }
       }

@@ -46,6 +46,7 @@
   function prepare(rep, sd, name, onReady) {
     if (active) { active.cancelled = true; active.controllers.forEach(function (c) { c.abort(); }); }
     var session = { cancelled: false, controllers: [] }; active = session;
+    var guide = 'male'; try { guide = JSON.parse(root.localStorage.getItem('mt_guide') || 'null') === 'female' ? 'female' : 'male'; } catch (e) { }
     var safe = {}; Object.keys(sd || {}).forEach(function (k) { if (k !== 'birth' && k !== 'name') safe[k] = sd[k]; });
     var chapters = rep.chapters || [], outline = chapters.map(function (c) { return { id: c.id || c.base, title: name ? (c.title || '').split(name).join('본인') : c.title || '' }; });
     var jobs = chapters.map(function (c) { return { c: c, job: collect(c, name) }; }), done = 0;
@@ -62,7 +63,7 @@
       var ctl = root.AbortController ? new root.AbortController() : null, timer = root.setTimeout(function () { if (ctl) ctl.abort(); }, 85000);
       if (ctl) session.controllers.push(ctl);
       try {
-        var r = await root.fetch('/api/movingtoon-reading', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sd: safe, outline: outline, chapter: job.chapter, previous: Array.from(acceptedTexts.entries()).slice(-80).map(function(x){return {text:name?x[0].split(name).join('본인'):x[0],chapter:x[1]};}) }), signal: ctl && ctl.signal });
+        var r = await root.fetch('/api/movingtoon-reading', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ guide: guide, sd: safe, outline: outline, chapter: job.chapter, previous: Array.from(acceptedTexts.entries()).slice(-80).map(function(x){return {text:name?x[0].split(name).join('본인'):x[0],chapter:x[1]};}) }), signal: ctl && ctl.signal });
         var d = await r.json(); if (d && ['no-ai', 'storage-unavailable', 'rate-limited'].indexOf(d.error) >= 0) done = jobs.length;
         if (!session.cancelled && d && d.ok && uniqueAcross(d.result, acceptedTexts, item.c.id,item.c) && apply(job, d.result)) { item.c.readingDeferred=false; item.c.readingProvider = d.provider; item.c.chapterHook = d.hook || null; item.c.chapterQuality = d.chapterQuality || null; item.c.hookName = name || '귀인'; if (d.interpretation) { item.c.interpretationAnalysis = d.interpretation; item.c.readingParagraphs = d.result.paragraphs.map(function(p){var original=job.chapter.paragraphs.find(function(x){return x.id===p.id;});return Object.assign({},p,{role:original && original.role || ''});}); item.c.readingFullText = d.result.paragraphs.map(function(p){return p.text;}).join('\n\n'); item.c.readingEvidence = d.result.paragraphs.map(function(p) { return { id: p.id, refs: p.refs, claim_ids: p.claim_ids || [] }; }); } if (d.style) { item.c.readingStyle = d.style; rep.readingStyle = rep.readingStyle || d.style; } remember(d.result, acceptedTexts, item.c.id); status.completed++; if (onReady) onReady(item.c, job, d.result); } else {
           status.failed++; item.c.readingWarning = d && d.error || 'validation-failed';

@@ -86,7 +86,7 @@
 
     /* ── 공통 조각 ── */
     function say(lines) {
-      return '<div class="qs-spk"><img src="' + esc(Q.guideImage(cfg, guide, mobileNow)) + '" alt="" width="44" height="44" decoding="async"><b>' + esc(QC.guides[guide].name) + '</b></div><div class="qs-say"' + A('say') + '>' + lines.map(function (t) { return '<p>' + esc(fill(t)) + '</p>'; }).join('') + '</div>';
+      return '<div class="qs-spk"><img src="' + esc(Q.guideImage(cfg, guide, mobileNow)) + '" alt="" width="44" height="44" decoding="async"><b>' + esc(QC.guides[guide].name) + '</b></div><div class="qs-say"' + A('say') + '>' + lines.map(function (t) { return '<p>' + esc(fill(Q.speech(t, guide))) + '</p>'; }).join('') + '</div>';
     }
     var panel = function (inner, hint) { return '<div class="qs-panel">' + inner + (hint ? '<p class="qs-note"' + A('hint') + '>' + esc(fill(hint)) + '</p>' : '') + '</div>'; };
     var eyebrow = function (s) { return '<p class="qs-eyebrow">' + esc(s.title) + '</p>'; };
