@@ -60,7 +60,7 @@
       return new Promise(function (ok) { setTimeout(function () { ok(a); }, wait); });
     }).then(function (a) {
       S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
-      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.assets = (a[4] && a[4].assets) || {}; S.assetVideos = (a[4] && a[4].videos) || {}; S.proVid = prologueUrl(a[5], WORLD, sd.gender);
+      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.assets = (a[4] && a[4].assets) || {}; S.assetVideos = (a[4] && a[4].videos) || {}; S.proVid = prologueUrl(a[5], WORLD, selectedGuide());
       if (R.Deep && S.ch && !PREVIEW) { try { R.Deep.augment(S.rep, { M: window.Manse, ch: S.ch, sd: sd, now: Date.now(), name: S.name, assets: S.assets, videos: S.assetVideos }); } catch (e) { elog('caught', 'deep.augment'); /* 깊이 풀이가 실패해도 기본 리포트는 그대로 */ } S.repPdf = plainRep(S.rep); } // 자동차 비유·장단점·12운성·직업·배우자·일주·전생·대운/세운/월운·개운 근거·명소 챕터를 끼운다
       S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null, textOnly: !!(a[2] && a[2].textOnly) }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
       if (LIFE && S.ch && R.IKDeep) S.ikP = R.IKDeep.load(window.Manse, S.ch, sd, 16000); // AI 합성과 나란히 먼저 시작
@@ -169,9 +169,14 @@
   function hubStart() { funnel('movingtoon_start'); if (R.Bgm && !hasProVideo()) R.Bgm.play('cinematic'); proVideo(function () { if (LIFE) lifeBegin(); else beginReader(); }); }
   // 프롤로그 영상(관리자 > 챕터 관리 > 프롤로그 영상): 올려 둔 영상이 있으면 재생하고 끝나면 next(true), 없으면 곧바로 next(false)
   // 프롤로그 영상이 있으면 그 동안은 영상 원래 소리만 들리고, 배경음악은 영상이 끝난(또는 건너뛴) 뒤 무빙툰 시작(일간)부터 흐른다
-  function prologueUrl(config, world, gender) {
+  function selectedGuide() {
+    if (S.guide === 'female' || S.guide === 'male') return S.guide;
+    try { return JSON.parse(localStorage.getItem('mt_guide') || 'null') === 'female' ? 'female' : 'male'; } catch (e) { return 'male'; }
+  }
+  function prologueUrl(config, world, guide) {
     if (!config || config.on === false) return '';
-    var g = gender === 'F' ? 'F' : 'M', topic = config.worlds && config.worlds[world];
+    // 기존 영상 주소를 보존한다. M/F 저장 슬롯은 사용자 성별이 아닌 안내자에 대응한다.
+    var g = guide === 'female' ? 'F' : 'M', topic = config.worlds && config.worlds[world];
     return (topic && topic[g]) || config[g] || '';
   }
   function hasProVideo() { return !PREVIEW && !!S.proVid; }
@@ -888,7 +893,7 @@
   /* /report/ 스토리 페이지에서 넘어온 입력(sessionStorage, 서버 전송 없음): 폼을 건너뛰고 바로 시작한다. 한 번 쓰면 지운다. */
   (function handoff() {
     var raw = sg('mt_v2_input'); if (!raw || !window.Manse) return; try { sessionStorage.removeItem('mt_v2_input'); } catch (e) { }
-    try { var h = JSON.parse(raw), ch = window.Manse.compute(h.inp); S.ch = ch; S.name = String(h.name || '').slice(0, 20); S.interest = h.interest || ''; setTimeout(function () { start(ch, h.inp.gender); }, 0); } catch (e) { /* 입력이 올바르지 않으면 폼을 그대로 보여 준다 */ }
+    try { var h = JSON.parse(raw), ch = window.Manse.compute(h.inp); S.ch = ch; S.name = String(h.name || '').slice(0, 20); S.interest = h.interest || ''; S.guide = h.guide; setTimeout(function () { start(ch, h.inp.gender); }, 0); } catch (e) { /* 입력이 올바르지 않으면 폼을 그대로 보여 준다 */ }
   })();
 
   /* ── 글자(자막) 스타일: [data-tx="역할"] 글자마다 글씨체·크기·색·정렬·위치·등장/사라짐 효과·나타나는/사라지는 시기를 적용한다 ──

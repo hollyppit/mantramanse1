@@ -10,12 +10,19 @@ const assert = require('assert'), fs = require('fs'), vm = require('vm'), { path
   const source = fs.readFileSync('report/v2/viewer.js', 'utf8'), ctx = {};
   vm.runInNewContext(source.slice(source.indexOf('  function prologueUrl('), source.indexOf('  function hasProVideo(')), ctx);
   for (let i = 1; i <= 6; i++) {
-    assert.equal(ctx.prologueUrl(saved, 'w' + i, 'M'), '/api/clipfile?k=w' + i + '.mp4');
-    assert.equal(ctx.prologueUrl(saved, 'w' + i, 'F'), saved.F);
+    assert.equal(ctx.prologueUrl(saved, 'w' + i, 'male'), '/api/clipfile?k=w' + i + '.mp4');
+    assert.equal(ctx.prologueUrl(saved, 'w' + i, 'female'), saved.F);
   }
-  assert.equal(ctx.prologueUrl(saved, '', 'M'), saved.M);
-  assert.equal(ctx.prologueUrl({ ...saved, on: false }, 'w2', 'M'), '');
-  assert.equal(ctx.prologueUrl({}, 'w2', 'M'), '');
+  assert.equal(ctx.prologueUrl(saved, '', 'male'), saved.M);
+  assert.equal(ctx.prologueUrl({ ...saved, on: false }, 'w2', 'male'), '');
+  assert.equal(ctx.prologueUrl({}, 'w2', 'male'), '');
+  assert(source.includes('prologueUrl(a[5], WORLD, selectedGuide())'));
+  const guideCtx = { S: {}, localStorage: { getItem: () => JSON.stringify('female') } };
+  vm.runInNewContext(source.slice(source.indexOf('  function selectedGuide('), source.indexOf('  function prologueUrl(')), guideCtx);
+  assert.equal(guideCtx.selectedGuide(), 'female');
+  guideCtx.S.guide = 'male'; assert.equal(guideCtx.selectedGuide(), 'male');
+  guideCtx.S.guide = null; guideCtx.localStorage.getItem = () => null;
+  assert.equal(guideCtx.selectedGuide(), 'male');
   await put({ on: true, M: '/api/clipfile?k=updated.mp4', F: '' });
   assert.equal(saved.worlds.w2.M, '/api/clipfile?k=w2.mp4', 'old admin saves preserve topic videos');
   const clean = api.clean({ worlds: { w2: { M: 'javascript:alert(1)', F: '/api/clipfile?k=ok.webm' }, invalid: { M: 'https://example.com/x.mp4' } } });
@@ -24,5 +31,5 @@ const assert = require('assert'), fs = require('fs'), vm = require('vm'), { path
   assert.equal(denied.status, 401);
   const response = await api.onRequestGet({ env, request: new Request('https://test/api/prologue') });
   assert.equal((await response.json()).worlds.w6.M, '/api/clipfile?k=w6.mp4');
-  console.log('Prologue topics: six worlds, gender fallback, legacy preservation, validation and admin authorization passed');
+  console.log('Prologue topics: six worlds, guide fallback, legacy preservation, validation and admin authorization passed');
 })().catch(e => { console.error(e); process.exit(1); });

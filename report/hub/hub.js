@@ -73,7 +73,8 @@
   /* ── 기존 무빙툰 뷰어로 이어 가기 (입력값은 이 탭의 sessionStorage 로만 넘기고 서버로 보내지 않는다) ── */
   H.toV2 = function (o) {
     o = o || {}; var s = P.get(); if (!s) { H.go('#/input?next=' + encodeURIComponent(o.next || 'my')); return; }
-    try { sessionStorage.setItem('mt_v2_input', JSON.stringify({ inp: P.toInput(s), name: P.name(), interest: o.interest || '' })); } catch (e) { H.toast('이 브라우저에서는 이어 볼 수 없습니다.'); return; }
+    var guide = 'male'; try { guide = JSON.parse(localStorage.getItem('mt_guide') || 'null') === 'female' ? 'female' : 'male'; } catch (e) { }
+    try { sessionStorage.setItem('mt_v2_input', JSON.stringify({ inp: P.toInput(s), name: P.name(), interest: o.interest || '', guide: guide })); } catch (e) { H.toast('이 브라우저에서는 이어 볼 수 없습니다.'); return; }
     location.href = '/report/v2/?from=hub' + (o.classic ? '&flow=classic' : '') + (o.world && /^[\w-]{1,30}$/.test(o.world) ? '&world=' + o.world : ''); // world: 운명 세계 지도에서 그 세계를 바로 연다
   };
 

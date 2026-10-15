@@ -12,18 +12,18 @@
     var u = current()[g];
     return '<div class="card" style="background:var(--bg)"><b>' + label + '</b>' +
       (u ? '<video src="' + esc(u) + '" controls muted playsinline preload="metadata" style="display:block;width:100%;max-width:300px;margin:8px 0;border-radius:8px;background:#000"></video><p class="muted" style="font-size:.8rem;word-break:break-all">' + esc(u) + '</p>'
-        : '<p class="muted" style="margin:8px 0">' + (G.target ? '주제 영상이 없으면 해당 성별의 공통 영상을 사용합니다. 공통 영상도 없으면 바로 본문으로 이어집니다.' : '아직 공통 영상이 없습니다.') + '</p>') +
+        : '<p class="muted" style="margin:8px 0">' + (G.target ? '주제 영상이 없으면 선택한 안내자의 공통 영상을 사용합니다. 공통 영상도 없으면 바로 본문으로 이어집니다.' : '아직 공통 영상이 없습니다.') + '</p>') +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><input type="file" data-up="' + g + '" accept="video/mp4,video/webm,video/quicktime"><button type="button" data-rm="' + g + '"' + (u ? '' : ' disabled') + '>영상 빼기</button></div><p class="muted" data-msg="' + g + '" style="font-size:.8rem;margin-top:6px"></p></div>';
   }
   function draw(box) {
     var label = TOPICS.filter(function (t) { return t[0] === G.target; })[0][1];
-    box.innerHTML = '<div class="card"><b style="color:var(--gold)">프롤로그 영상</b><p class="muted" style="margin:6px 0 10px">주제를 선택하고 남성·여성 영상을 각각 올리세요. 해당 주제로 들어갈 때 선택한 영상이 먼저 재생됩니다. 영상이 끝나거나 건너뛰면 본문이 시작됩니다. 파일은 90MB 이하 mp4·webm·mov입니다. 업로드와 영상 빼기는 자동 저장됩니다.</p>' +
+    box.innerHTML = '<div class="card"><b style="color:var(--gold)">프롤로그 영상</b><p class="muted" style="margin:6px 0 10px">주제를 선택하고 운명 감찰관·명운 해독관 영상을 각각 올리세요. 해당 주제로 들어갈 때 선택한 영상이 먼저 재생됩니다. 영상이 끝나거나 건너뛰면 본문이 시작됩니다. 파일은 90MB 이하 mp4·webm·mov입니다. 업로드와 영상 빼기는 자동 저장됩니다.</p>' +
       '<label class="muted" style="display:flex;gap:6px;align-items:center;margin-bottom:10px"><input type="checkbox" id="prOn"' + (G.d.on ? ' checked' : '') + '> 전체 프롤로그 영상 사용</label>' +
-      '<label>프롤로그 주제 <select id="prTopic">' + TOPICS.map(function (t) { return '<option value="' + t[0] + '"' + (t[0] === G.target ? ' selected' : '') + '>' + esc(t[1]) + '</option>'; }).join('') + '</select></label><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:12px">' + slot('M', esc(label) + ' · 남성') + slot('F', esc(label) + ' · 여성') + '</div></div>';
+      '<label>프롤로그 주제 <select id="prTopic">' + TOPICS.map(function (t) { return '<option value="' + t[0] + '"' + (t[0] === G.target ? ' selected' : '') + '>' + esc(t[1]) + '</option>'; }).join('') + '</select></label><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:12px">' + slot('M', esc(label) + ' · 운명 감찰관') + slot('F', esc(label) + ' · 명운 해독관') + '</div></div>';
     box.querySelector('#prTopic').onchange = function () { if (G.busy) { this.value = G.target; return; } G.target = this.value; draw(box); };
     box.querySelector('#prOn').onchange = function () { G.d.on = this.checked; save('').catch(function () { }); };
     [].forEach.call(box.querySelectorAll('[data-up]'), function (i) { i.onchange = function () { if (i.files[0]) upload(box, i.dataset.up, i.files[0]); }; });
-    [].forEach.call(box.querySelectorAll('[data-rm]'), function (b) { b.onclick = function () { if (G.busy || !confirm(label + '의 해당 성별 영상 연결을 뺍니다. 계속할까요?')) return; var record = current(), old = record[b.dataset.rm]; record[b.dataset.rm] = ''; G.busy = true; save('').then(function () { G.busy = false; draw(box); }).catch(function () { record[b.dataset.rm] = old; G.busy = false; draw(box); }); }; });
+    [].forEach.call(box.querySelectorAll('[data-rm]'), function (b) { b.onclick = function () { if (G.busy || !confirm(label + '의 해당 안내자 영상 연결을 뺍니다. 계속할까요?')) return; var record = current(), old = record[b.dataset.rm]; record[b.dataset.rm] = ''; G.busy = true; save('').then(function () { G.busy = false; draw(box); }).catch(function () { record[b.dataset.rm] = old; G.busy = false; draw(box); }); }; });
   }
   function save(msg) {
     return C.api('/api/prologue', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(G.d) })
