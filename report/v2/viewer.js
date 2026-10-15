@@ -115,23 +115,24 @@
     }
     else if (!url || saveData && !poster) { still(); }
     else {
-      var v = document.createElement('video'), wantSound = cfg.kind === 'prologue'; v.muted = !wantSound; v.defaultMuted = !wantSound; // 프롤로그 영상은 소리가 기본(브라우저가 막으면 소리 없이 시작하고 "소리 켜기"를 보여 준다)
+      var v = document.createElement('video'), silent = cfg.kind === 'prologue'; v.muted = true; v.defaultMuted = true;
+      if (silent) { v.volume = 0; v.addEventListener('volumechange', function () { if (!v.muted) v.muted = true; if (v.volume !== 0) v.volume = 0; }); }
       v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', ''); v.autoplay = true; v.preload = 'auto'; v.setAttribute('aria-label', (title || '캐릭터 소개') + ' 영상'); if (poster) v.poster = poster;
       if (clip.videoWebm && v.canPlayType && v.canPlayType('video/webm')) { var s1 = document.createElement('source'); s1.src = clip.videoWebm; s1.type = 'video/webm'; v.appendChild(s1); }
       if (clip.videoUrl) { var s2 = document.createElement('source'); s2.src = clip.videoUrl; s2.type = /\.webm(\?|$)/.test(clip.videoUrl) ? 'video/webm' : 'video/mp4'; v.appendChild(s2); }
       box.innerHTML = ''; box.appendChild(v);
-      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); start.hidden = true; if (cfg.card) cardT = setTimeout(showCard, cfg.cardAt != null ? cfg.cardAt : 3000); T(ev + '_video_started', {}); snd.hidden = false; snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; if (!v.muted && R.Bgm) R.Bgm.duck(true); });
+      v.addEventListener('playing', function once() { v.removeEventListener('playing', once); start.hidden = true; if (cfg.card) cardT = setTimeout(showCard, cfg.cardAt != null ? cfg.cardAt : 3000); T(ev + '_video_started', {}); snd.hidden = silent; snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; if (!v.muted && R.Bgm) R.Bgm.duck(true); });
       v.addEventListener('ended', function () { finish('completed'); });
       var endGuard = 0, nearEnd = function () { return isFinite(v.duration) && v.duration > 1 && v.currentTime >= v.duration - 0.35; };
       var armEnd = function () { if (done || endGuard || !nearEnd()) return; endGuard = setTimeout(function () { endGuard = 0; if (!done && nearEnd()) finish('completed'); }, 1200); }; // 'ended' 가 먼저 오면 그쪽이 처리한다
       v.addEventListener('timeupdate', armEnd); v.addEventListener('pause', armEnd); v.addEventListener('waiting', armEnd);
       v.addEventListener('error', function () { if (!done) { elog('asset', 'asset.video'); v.remove(); still(); } }, true);
-      function tapToPlay() { // 자동 재생이 막힌 기기(iOS 저전력 모드·데이터 절약 등): 영상을 건너뛰지 않고 탭 한 번으로 재생한다(탭은 사용자 동작이라 소리도 가능)
+      function tapToPlay() { // 자동 재생이 막힌 기기(iOS 저전력 모드·데이터 절약 등): 영상을 건너뛰지 않고 탭 한 번으로 재생한다(프롤로그는 탭으로 시작해도 무음 유지)
         if (done) return; start.textContent = '▶ 탭해서 영상 보기'; start.hidden = false;
-        start.onclick = function () { start.hidden = true; v.muted = !wantSound; var q = v.play(); if (q && q.catch) q.catch(function () { v.muted = true; var q2 = v.play(); if (q2 && q2.catch) q2.catch(function () { if (!done) { v.remove(); still(); } }); }); };
+        start.onclick = function () { start.hidden = true; v.muted = true; var q = v.play(); if (q && q.catch) q.catch(function () { v.muted = true; var q2 = v.play(); if (q2 && q2.catch) q2.catch(function () { if (!done) { v.remove(); still(); } }); }); };
       }
-      var p = v.play(); if (p && p.catch) p.catch(function () { if (wantSound && !v.muted) { v.muted = true; var p2 = v.play(); if (p2 && p2.catch) p2.catch(tapToPlay); return; } tapToPlay(); });
-      snd.onclick = function () { v.muted = !v.muted; if (R.Bgm) R.Bgm.duck(!v.muted); snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; };
+      var p = v.play(); if (p && p.catch) p.catch(tapToPlay);
+      snd.onclick = function () { if (silent) return; v.muted = !v.muted; if (R.Bgm) R.Bgm.duck(!v.muted); snd.setAttribute('aria-pressed', String(!v.muted)); snd.textContent = v.muted ? '🔇 소리 켜기' : '🔊 소리 끄기'; };
       skip.onclick = function () { v.pause(); finish('skipped'); };
     }
   }
