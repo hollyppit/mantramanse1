@@ -10,7 +10,7 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
  const env={GLOSSARY_KV:{get:async(k,t)=>memory.has(k)?t==='json'?JSON.parse(memory.get(k)):memory.get(k):null,put:async(k,v)=>memory.set(k,v)},OPENAI_API_KEY:'mock'};
  let calls=0,plans=[],deny=false;const originalFetch=global.fetch;
  global.fetch=async(url,opts)=>{
-  calls++;const req=JSON.parse(opts.body),input=JSON.parse(req.input);assert(!req.input.includes('PRIVATE_NAME'));assert(!input.chart.birth&&!input.chart.name&&!input.chart.ziwei);
+  calls++;const req=JSON.parse(opts.body),input=JSON.parse(req.input);assert.equal(req.text.format.type,'json_schema');assert(!req.input.includes('PRIVATE_NAME'));assert(!input.chart.birth&&!input.chart.name&&!input.chart.ziwei);
   const ids=input.claims.map(c=>c.claim_id);let result;
   assert(input.visual && input.visual.slot.startsWith('past:'));assert(!input.chart.currentRoots&&!input.chart.nowYear);
   if(req.instructions===P.PLAN_SYSTEM){
@@ -27,6 +27,16 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
  deny=true;r=await API.onRequestPost({request:request(second),env});assert.equal(r.status,503);assert.equal((await r.json()).error,'review-rejected');assert.equal(plans.length,2);assert.notDeepEqual(plans[0],plans[1]);
  assert.equal(Array.from(memory.keys()).filter(k=>k.startsWith('ai:past-story:')).length,1,'failed review never cached');
  memory.set('src:idx',JSON.stringify([{id:'test',active:false}]));r=await API.onRequestPost({request:request(sd),env});assert.equal(r.status,422,'disabled evidence invalidates previous cache');
+ const traces=Array.from(memory.entries()).filter(([k])=>k.startsWith('diag:past-story:'));assert.equal(traces.length,1);
+ const trace=JSON.parse(traces[0][1]);assert(trace.attempts.some(x=>x.stage==='review'));assert(!JSON.stringify(trace).includes('PRIVATE_NAME'));assert(!JSON.stringify(trace).includes('검사 단편'));
+ const traceRequest=new Request('http://test/api/past-story?traceId='+traces[0][0].split(':').pop());
+ assert.equal((await API.onRequestGet({request:traceRequest,env})).status,401);
+ const authRequest=new Request(traceRequest,{headers:{authorization:'Bearer test-admin'}});
+ assert.equal((await API.onRequestGet({request:authRequest,env:{...env,ADMIN_PASSWORD:'test-admin'}})).status,200);
+ assert.deepEqual(P.planIssues('not-json',[]),['json-invalid']);
+ assert(P.planIssues({title:'x',beats:[]},[]).includes('beats:count'));
+ for(const stage of ['plan','write','review'])assert.equal(P.stageSchema(stage,[{claim_id:'test'}]).additionalProperties,false);
+ await assert.rejects(API.composeStory({claims:[{claim_id:'test'}],normalized:{chart:plans[0]}},async()=>'{"title":"x"}'),e=>e.message==='plan-rejected'&&e.issues.includes('title:length-or-type'));
  assert(!P.validateReview({passed:true,grounding:false,causality:true,dilemma:true,arc:true,prose:true,issues:[]}));
  const payload=ReportV2.PastStory.payload({...sd,name:'PRIVATE_NAME'});assert(!payload.sd.birth&&!payload.sd.name&&!payload.sd.ziwei);
  global.fetch=originalFetch;console.log('Past story: full chart egress, grounded three-stage generation, independent rejection, exact-chart cache and deactivation passed');

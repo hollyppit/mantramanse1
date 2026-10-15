@@ -21,7 +21,7 @@ export async function generate(env, provider, input, SYSTEM, settings = {}) {
   if (!r.ok) { let detail;try{detail=(await r.json())?.error;}catch{} const known=['insufficient_quota','rate_limit_exceeded','billing_not_active','overloaded_error'].find(x=>x===detail?.code || x===detail?.type), message=String(detail?.message || '');const code=known || (/insufficient.quota|exceeded your current quota|billing hard limit/i.test(message)?'insufficient_quota':/rate limit|tokens per min|requests per min/i.test(message)?'rate_limit_exceeded':'');throw Error('provider-http-'+r.status+(code?'-'+code:'')); }
   const d = await r.json();
   const text = isOpen ? d.output_text || (d.output || []).flatMap(x => x.content || []).map(x => x.text || '').join('') : (d.content || []).filter(x => x.type === 'text').map(x => x.text).join('');
-  return { text, model: String(d.model || body.model).slice(0, 120), elapsedMs: Date.now() - started, usage: usageOf(d.usage) };
+  return { text, completionStatus: ['completed','incomplete','failed'].includes(d.status)?d.status:null, incompleteReason: ['max_output_tokens','content_filter'].includes(d.incomplete_details?.reason)?d.incomplete_details.reason:null, model: String(d.model || body.model).slice(0, 120), elapsedMs: Date.now() - started, usage: usageOf(d.usage) };
 }
 export function usageOf(u) {
   if (!u || typeof u !== 'object') return null;

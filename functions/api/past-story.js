@@ -1,11 +1,11 @@
-import { json } from '../_lib.js';
+import { json, isAdmin } from '../_lib.js';
 import { kvOf } from '../_store.js';
 import { loadAll, blockedDocs, meta } from '../_ikstore.js';
 import { loadSettings, loadSourceIndex } from '../_interpretation-store.js';
 import { analyze, ENGINE_VERSION } from '../_interpretation-engine.js';
 import { validate } from '../_movingtoon-reading.js';
 import { generate } from './movingtoon-reading.js';
-import { VERSION, PLAN_SYSTEM, WRITE_SYSTEM, REVIEW_SYSTEM, validatePlan, validateStory, validateReview } from '../_past-story.js';
+import { VERSION, PLAN_SYSTEM, WRITE_SYSTEM, REVIEW_SYSTEM, validatePlan, validateStory, validateReview, planIssues, stageSchema } from '../_past-story.js';
 import { SLOT_BY_ID } from '../_assetart.js';
 
 export function visualFor(chart){
@@ -17,14 +17,15 @@ export function visualFor(chart){
 export async function composeStory(analysis,call){
  const claims=analysis.claims;
  const context={chart:analysis.normalized.chart,features:analysis.features,claims,cross_analysis:analysis.cross_analysis,visual:visualFor(analysis.normalized.chart)};
- const plan=validatePlan(await call(PLAN_SYSTEM,JSON.stringify(context),3400),claims);
- if(!plan)throw Error('plan-rejected');
+ const planText=await call(PLAN_SYSTEM,JSON.stringify(context),5000,'plan');
+ const plan=validatePlan(planText,claims);
+ if(!plan)throw Object.assign(Error('plan-rejected'),{issues:planIssues(planText,claims)});
  const input={...context,plan};
  let revision=null;
  for(let attempt=0;attempt<2;attempt++){
-  const story=validateStory(await call(WRITE_SYSTEM,JSON.stringify({...input,...(revision?{previous:revision.story,revision:revision.issues}:{})}),6500),plan,claims);
+  const story=validateStory(await call(WRITE_SYSTEM,JSON.stringify({...input,...(revision?{previous:revision.story,revision:revision.issues}:{})}),8000,'write'),plan,claims);
   if(!story)throw Error('story-rejected');
-  const reviewText=await call(REVIEW_SYSTEM,JSON.stringify({...input,story}),1600);
+  const reviewText=await call(REVIEW_SYSTEM,JSON.stringify({...input,story}),1600,'review');
   if(validateReview(reviewText))return {story,plan,review:{passed:true,grounding:true,causality:true,dilemma:true,arc:true,prose:true,issues:[]}};
   let review;try{review=JSON.parse(reviewText.replace(/^```(?:json)?\s*|\s*```$/g,''));}catch{}
   revision={story,issues:Array.isArray(review?.issues)?review.issues.slice(0,12):['근거·인과·딜레마·변화·문장의 검토를 다시 확인하라.']};
@@ -32,7 +33,7 @@ export async function composeStory(analysis,call){
  throw Error('review-rejected');
 }
 export async function onRequestPost({request,env}){
- const deadline=Date.now()+78000;
+ const started=Date.now(),deadline=started+78000,traceId=crypto.randomUUID(),attempts=[];
  let body,clean;
  try{const raw=await request.text();if(raw.length>150000)return json({ok:false,error:'too-large'},413);body=JSON.parse(raw);
    clean=validate({sd:body.sd,chapter:{id:'deep_past',title:'창작 전생 단편',paragraphs:[{id:'context',text:'원국 전체의 근거를 인물의 욕망과 선택으로 옮기는 창작 단편.'}]}});
@@ -67,14 +68,29 @@ export async function onRequestPost({request,env}){
   for(const [provider,secret] of [['openai','OPENAI_API_KEY'],['anthropic','ANTHROPIC_API_KEY']]){
    if(!env[secret]||Date.now()>deadline-15000)continue;
    try{
-    const result=await composeStory(analysis,async(system,input,tokens)=>{
+    const result=await composeStory(analysis,async(system,input,tokens,stage)=>{
      const remaining=deadline-Date.now();if(remaining<3000)throw Error('deadline');
-     const r=await generate(env,provider,input,system,{...settings,maxOutputTokens:tokens,timeoutMs:remaining});return r.text;
+     const at=Date.now(),budget=Math.min(remaining,stage==='plan'?20000:stage==='write'?35000:12000);
+     try{
+      const r=await generate(env,provider,input,system,{...settings,outputSchema:stageSchema(stage,analysis.claims),maxOutputTokens:tokens,timeoutMs:budget});
+      attempts.push({provider,stage,model:r.model,elapsedMs:Date.now()-at,usage:r.usage,status:'returned',completionStatus:r.completionStatus,incompleteReason:r.incompleteReason,empty:!r.text});return r.text;
+     }catch(e){attempts.push({provider,stage,elapsedMs:Date.now()-at,status:'failed',error:/^provider-http-\d{3}(?:-[a-z_]+)?$/.test(e.message)?e.message:e.name==='TimeoutError'?'timeout':'call-error'});throw e;}
     });
     await kv.put(key,JSON.stringify({...result,version:VERSION,at:new Date().toISOString()}),{expirationTtl:2592000});
     return json({ok:true,story:result.story,visual:visualFor(analysis.normalized.chart),cached:false,version:VERSION});
-   }catch(e){last=['plan-rejected','story-rejected','review-rejected','deadline'].includes(e.message)?e.message:'provider-unavailable';}
+   }catch(e){last=['plan-rejected','story-rejected','review-rejected','deadline'].includes(e.message)?e.message:'provider-unavailable';attempts.push({provider,status:'rejected',error:last,...(e.issues?{issues:e.issues}:{})});}
   }
-  return json({ok:false,error:last},503);
+  // Short-lived internal trace: allowlisted metadata only, no prompts, IDs or prose.
+  try{await kv.put('diag:past-story:'+traceId,JSON.stringify({version:VERSION,at:new Date().toISOString(),elapsedMs:Date.now()-started,attempts}),{expirationTtl:86400});}catch{}
+  return json({ok:false,error:last,traceId},503);
  }catch{return json({ok:false,error:'story-unavailable'},503);}
+}
+
+export async function onRequestGet({request,env}){
+ if(!isAdmin(request,env))return json({ok:false,error:'unauthorized'},401);
+ const id=new URL(request.url).searchParams.get('traceId');
+ if(!/^[a-f0-9-]{36}$/.test(id||''))return json({ok:false,error:'bad-trace'},400);
+ const kv=kvOf(env);if(!kv)return json({ok:false,error:'storage-unavailable'},503);
+ const trace=await kv.get('diag:past-story:'+id,'json');
+ return trace?json({ok:true,trace}):json({ok:false,error:'trace-expired'},404);
 }

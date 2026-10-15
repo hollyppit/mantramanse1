@@ -1,5 +1,5 @@
 // 전생 단편: 원국 전체의 검수 판단 → 기획 → 집필 → 독립 검토.
-export const VERSION='past-story-2';
+export const VERSION='past-story-3';
 export const STAGES=['일상','사건','목표','딜레마','압박','절정','반전','여운'];
 const str=(x,min,max)=>typeof x==='string'&&x.trim().length>=min&&x.length<=max;
 const parse=text=>{try{return JSON.parse(String(text).replace(/^```(?:json)?\s*|\s*```$/g,''));}catch{return null;}};
@@ -37,3 +37,27 @@ export function validateStory(text,plan,claims){
  return s;
 }
 export function validateReview(text){const r=typeof text==='string'?parse(text):text;return !!(r&&r.passed===true&&['grounding','causality','dilemma','arc','prose'].every(k=>r[k]===true)&&Array.isArray(r.issues)&&r.issues.length===0);}
+
+// Diagnostic codes contain field paths only; never retain generated text or chart data.
+export function planIssues(text,claims){
+ const p=typeof text==='string'?parse(text):text,ids=new Set(claims.map(c=>c.claim_id)),issues=[];
+ if(!p||typeof p!=='object')return ['json-invalid'];
+ const check=(value,min,max,path)=>{if(!str(value,min,max))issues.push(path+':length-or-type');};
+ check(p.title,2,80,'title');check(p.premise,20,600,'premise');
+ for(const [key,fields] of [['setting',['era','place','pressure']],['protagonist',['name','desire','fear','contradiction']],['antagonist',['name','desire','fear']],['dilemma',['choiceA','costA','choiceB','costB']],['callback',['object','openingUse','endingUse']]])for(const field of fields)check(p[key]?.[field],1,600,key+'.'+field);
+ if(!refs(p.protagonist?.claim_ids,ids,2))issues.push('protagonist.claim_ids:invalid');
+ if(!Array.isArray(p.beats)||p.beats.length!==8)issues.push('beats:count');
+ if(Array.isArray(p.beats)){
+  p.beats.forEach((b,i)=>{const path='beats.'+i;if(b?.id!=='b'+(i+1))issues.push(path+'.id:order');if(b?.stage!==STAGES[i])issues.push(path+'.stage:order');check(b?.action,10,900,path+'.action');check(b?.consequence,10,900,path+'.consequence');if(!refs(b?.claim_ids,ids,1))issues.push(path+'.claim_ids:invalid');});
+  if(new Set(p.beats.flatMap(b=>Array.isArray(b?.claim_ids)?b.claim_ids:[])).size<3)issues.push('beats.claim_ids:coverage');
+ }
+ return issues.slice(0,40);
+}
+const obj=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
+const txt={type:'string'},bool={type:'boolean'},arr=(items,min,max)=>({type:'array',items,...(min==null?{}:{minItems:min,maxItems:max})});
+export function stageSchema(stage,claims){
+ const ids=arr({type:'string',enum:claims.map(c=>c.claim_id)},1,12);
+ if(stage==='plan')return obj({title:txt,premise:txt,setting:obj({era:txt,place:txt,pressure:txt}),protagonist:obj({name:txt,desire:txt,fear:txt,contradiction:txt,claim_ids:{...ids,minItems:2}}),antagonist:obj({name:txt,desire:txt,fear:txt}),dilemma:obj({choiceA:txt,costA:txt,choiceB:txt,costB:txt}),callback:obj({object:txt,openingUse:txt,endingUse:txt}),beats:arr(obj({id:{type:'string',enum:STAGES.map((_,i)=>'b'+(i+1))},stage:{type:'string',enum:STAGES},action:txt,consequence:txt,claim_ids:ids}),8,8)});
+ if(stage==='write')return obj({title:txt,logline:txt,frames:arr(obj({id:{type:'string',enum:STAGES.map((_,i)=>'b'+(i+1))},cap:txt,paras:arr(txt,2,4),claim_ids:ids}),8,8)});
+ return obj({passed:bool,grounding:bool,causality:bool,dilemma:bool,arc:bool,prose:bool,issues:arr(txt)});
+}
