@@ -14,7 +14,7 @@
     { id: 'money', name: '돈', source: '엔진 evaluateDomainLuck.wealth (재정 활동성·적합도·안정성)', available: true },
     { id: 'career', name: '직업', source: '엔진 careerLuckActivation × 원국 상위 직업 분야 3개의 평균 활성도', available: true, note: '운이 일을 "활성화"하는 정도만 반영(분야 적합도는 원국 고정값이라 시간축에서 제외)' },
     { id: 'love', name: '사랑', source: '엔진 evaluateDomainLuck.love (관계 활성도·적합도·안정성)', available: true },
-    { id: 'relation', name: '관계', source: 'AI 추정(엔진 십성·합충 근거) · 실패 시 규칙 추정', available: true, ai: true, note: '엔진에 인간관계 전용 모델이 없어 AI 가 대운·세운의 십성·합충으로 추정합니다. 월 단위는 제공하지 않습니다.' },
+    { id: 'relation', name: '관계', source: '대운·세운의 십성·합충 흐름', available: true, ai: true, note: '대운·세운의 십성과 합충으로 변화 가능성을 살펴봅니다. 월 단위는 제공하지 않습니다.' },
   ];
   var levelWord = function (v) { return v >= 85 ? '매우 높음' : v >= 70 ? '높음' : v >= 55 ? '무난' : v >= 40 ? '다소 낮음' : '낮음'; };
 
@@ -63,8 +63,8 @@
     M('love_timing', 'love', '인연의 움직임이 커질 수 있는 시기는?', '인연의 움직임이 커지는 때', '관계 활성도(대운·세운)', [], { gen: 'timing:love', when: true, requiredData: ['daeun', 'seun', 'domain.love'], priority: 2 }),
     // 결혼
     M('marriage_who', 'marriage', '어떤 배우자와 비교적 잘 맞는가? 갈등이 생기기 쉬운 부분은?', '오래 가는 관계에서 바라는 것', '배우자궁 · 합충', ['c10'], { premium: false, priority: 1 }),
-    M('marriage_timing', 'marriage', '인연/결혼 관련 움직임이 커질 수 있는 시기는?', '인연과 결혼 이야기가 커지는 때', '배우자성·배우자궁 활성(AI·규칙 추정)', [], { gen: 'social:marriage', when: true, requiredData: ['daeun', 'seun', 'luckRelations'], priority: 2, ai: true, note: '엔진에 결혼 전용 모델이 없어 AI 가 추정(실패 시 배우자성·일지 합충 규칙 추정). 사건은 확정하지 않음.' }),
-    M('relation_timing', 'relation', '인간관계의 변화가 커지는 시기는?', '사람 사이의 변화가 커지는 때', '비겁·관성·인성 + 합충(AI·규칙 추정)', [], { gen: 'social:relation', when: true, requiredData: ['daeun', 'seun', 'luckRelations'], priority: 3, ai: true }),
+    M('marriage_timing', 'marriage', '인연/결혼 관련 움직임이 커질 수 있는 시기는?', '인연과 결혼 이야기가 커지는 때', '배우자성·배우자궁의 흐름', [], { gen: 'social:marriage', when: true, requiredData: ['daeun', 'seun', 'luckRelations'], priority: 2, ai: true, note: '배우자성과 일지의 합충으로 변화 가능성을 살펴봅니다. 결혼 시기나 사건을 확정하지 않습니다.' }),
+    M('relation_timing', 'relation', '인간관계의 변화가 커지는 시기는?', '사람 사이의 변화가 커지는 때', '비겁·관성·인성과 합충의 흐름', [], { gen: 'social:relation', when: true, requiredData: ['daeun', 'seun', 'luckRelations'], priority: 3, ai: true }),
     // 미래
     M('future_cycle', 'future', '인생 전체의 계절은?', '인생 전체의 계절', '대운 10개', ['c15'], { priority: 1 }),
     M('future_now', 'future', '지금 나는 어느 계절인가?', '지금 서 있는 계절', '현재 대운', ['c16'], { premium: false, priority: 1 }),

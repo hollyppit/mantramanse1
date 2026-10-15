@@ -64,7 +64,7 @@
     box.className = 'view lf'; var items = itemsFor(), fld = D.FIELDS.filter(function (f) { return f.id === st.field; })[0];
     var title = st.zoom === 'life' ? '당신의 인생 지도' : st.zoom === 'years' ? st.map[st.decade].startAge + '~' + st.map[st.decade].endAge + '세, 해마다' : st.year + '년, 달마다';
     var hint = st.zoom === 'life' ? '구간을 눌러 10년씩 확대해 보세요.' : st.zoom === 'years' ? '해를 눌러 12개월로 더 확대해 보세요.' : '달마다 어울리는 움직임이 다릅니다.';
-    var srcName = st.soc && st.soc.source === 'ai' ? 'AI 추정' : '규칙 추정', note = !fld.available ? '<p class="lf-note">이 분야의 시기별 흐름은 아직 계산 모델이 없어 보여 드리지 않습니다.</p>' : (fld.ai ? '<p class="lf-note"><b>' + srcName + '</b> · ' + (st.zoom === 'months' ? '관계 흐름은 월 단위로 제공하지 않습니다. 한 단계 넓게 보세요.' : '엔진에 인간관계 전용 모델이 없어 대운·세운의 십성·합충을 근거로 추정한 값입니다.') + '</p>' : '');
+    var srcName = '흐름 참고', note = !fld.available ? '<p class="lf-note">이 분야의 시기별 흐름은 아직 계산 모델이 없어 보여 드리지 않습니다.</p>' : (fld.ai ? '<p class="lf-note"><b>' + srcName + '</b> · ' + (st.zoom === 'months' ? '관계 흐름은 월 단위로 제공하지 않습니다. 한 단계 넓게 보세요.' : '대운·세운의 십성과 합충을 바탕으로 살펴본 변화 가능성입니다. 실제 관계의 결과를 확정하지 않습니다.') + '</p>' : '');
     box.innerHTML = '<div class="lf-wrap"><p class="lf-kick">PROLOGUE · 전체 인생</p><h2 class="lf-h">' + esc(title) + '</h2><p class="lf-sub">' + esc(hint) + '</p>' + crumbs() +
       '<div class="lf-tabs" role="tablist" aria-label="분야 보기">' + FIELDTAB() + '</div>' + note + (fld.available && !(fld.ai && st.zoom === 'months') ? '<div class="lf-chart">' + curve(items, { aria: title }) + '</div>' + rows(items, {}) : '') +
       '<p class="lf-fine">시기의 성격을 보여 줄 뿐, 특정한 사건을 예언하지 않습니다.</p>' +
@@ -132,7 +132,7 @@
     var h = '<div class="lf-wrap"><p class="lf-kick">' + esc(s.sub) + '</p><h2 class="lf-h">' + esc(s.title) + '</h2>';
     if (/^social:/.test(s.gen)) {
       var sf = s.gen.split(':')[1], sn = sf === 'marriage' ? '인연' : '사람 사이', t2 = D.timing(H.M, H.ch, H.sd, H.now, sf, st.soc);
-      h += '<p class="lf-lead">' + esc(t2.line) + '</p><p class="lf-note"><b>' + (t2.source === 'ai' ? 'AI 추정' : '규칙 추정') + '</b> · ' + esc(t2.caution || '') + '</p>' + (t2.note ? '<p class="lf-p">' + esc(t2.note) + '</p>' : '') + (t2.windows || []).map(function (w) { return '<div class="lf-fu exp"><small>' + sn + '의 움직임이 커질 수 있는 구간</small><b>' + esc(w.range) + '</b> ' + esc(w.note || '') + '</div>'; }).join('');
+      h += '<p class="lf-lead">' + esc(t2.line) + '</p><p class="lf-note"><b>' + '흐름 참고' + '</b> · ' + esc(t2.caution || '') + '</p>' + (t2.note ? '<p class="lf-p">' + esc(t2.note) + '</p>' : '') + (t2.windows || []).map(function (w) { return '<div class="lf-fu exp"><small>' + sn + '의 움직임이 커질 수 있는 구간</small><b>' + esc(w.range) + '</b> ' + esc(w.note || '') + '</div>'; }).join('');
       if (t2.years) h += '<div class="lf-bars" role="img" aria-label="앞으로 10년 ' + sn + ' 흐름">' + t2.years.map(function (y) { var on = (t2.windows || []).some(function (w) { return y.year >= w.fromYear && y.year <= w.toYear; }); return '<div class="lf-bar' + (on ? ' on' : '') + '"><i style="height:' + Math.max(8, y.score) + '%"></i><b>' + String(y.year).slice(2) + '</b><small>' + esc(y.band) + '</small></div>'; }).join('') + '</div>';
     } else if (/^timing:/.test(s.gen)) {
       var f = s.gen.split(':')[1], t = D.timing(H.M, H.ch, H.sd, H.now, f), nm = { money: '돈', career: '일', love: '인연' }[f];

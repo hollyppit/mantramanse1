@@ -75,7 +75,7 @@
       lineScene('같은 인생도 분야에 따라 높낮이가 다릅니다.\n돈 · 일 · 사랑 · 관계를 하나씩 겹쳐 봅니다.'),
     ];
     ['money', 'career', 'love', 'relation'].forEach(function (f) {
-      var ai = f === 'relation' ? '<span class="lf-ai">' + (H.soc && H.soc.source === 'ai' ? 'AI 추정' : '규칙 추정') + '</span>' : '';
+      var ai = ''; 
       out.push(scene(sec('rv', '<div class="cap">' + FIELD_NAME[f] + ' ' + ai + '</div>' + curve(items, f, FIELD_NAME[f] + '의 시기별 흐름') + '<p class="lead" style="font-size:.98rem">' + esc(peakLine(items, f)) + '</p>'), { layout: 'DATA' }));
     });
     return out;
@@ -133,7 +133,7 @@
     out.push(lineScene(t.line, 'impact', title));
     if (t.years) out.push(scene(sec('rv', '<div class="cap">' + esc(sub) + '</div>' + bars(t, nm) + '<p class="faint">막대가 진한 해가 상대적으로 ' + nm + ' 이야기가 두드러지는 해입니다.</p>'), { layout: 'DATA' }));
     try { var cd = candidates(f, t, H); if (cd) out.push(scene(cd, { layout: 'DATA' })); } catch (e) { }
-    var src = t.source ? '<b>' + (t.source === 'ai' ? 'AI 추정' : '규칙 추정') + '</b> · ' : '';
+    var src = ''; 
     out.push(scene(sec('rv', '<p class="faint">' + src + esc(t.caution || '') + '</p>')));
     return out;
   }
