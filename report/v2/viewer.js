@@ -15,6 +15,7 @@
   var elog = function (kind, where) { try { if (R.ErrLog) R.ErrLog.report(kind, { where: where }); } catch (e) { } }; // 잡아서 넘어가는 오류를 기록만 한다(메시지는 보내지 않음)
   var MAPQ = !PREVIEW && /[?&]map=[^&]+/.test(location.search); // ?map=생년월일,시각,성별 — 프롤로그를 건너뛰고 곧바로 세계 지도(확인용)
   var HUB = !PREVIEW && /[?&]from=hub(&|$)/.test(location.search); // /report/hub/ 에서 넘어온 경우: 일간·일주 영상·프롤로그는 허브가 이미 보여 줬으므로 건너뛰고 바로 인생 지도로 간다
+  var WORLD = (/[?&]world=([\w-]{1,30})(&|$)/.exec(location.search) || [])[1] || '';
   var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
   var view = function (v) { var ws0 = document.getElementById('wstrip'); if (ws0 && v !== 'reader' && v !== 'home') { ws0.hidden = true; document.documentElement.style.removeProperty('--bar-h'); } if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
   function toast(msg, ms) { var t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, ms || 3200); }
@@ -249,7 +250,7 @@
     }).catch(function (e) { if (window.console) console.error('lifeBegin', e); try { beginReader(); } catch (e2) { toast('화면을 여는 중 문제가 생겼습니다. 새로고침해 주세요.'); } });
   }
   /* ── 운명 탐험 홈(ACT 01 각성 이후 챕터를 골라 읽는다). ?explore=0 이면 예전처럼 처음부터 한 문서로 읽는다. 읽은 챕터·이어 읽을 위치는 이 기기에만 저장한다. ── */
-  var EXPLORE = !PREVIEW && !!R.Explore && !/[?&]explore=0(&|$)/.test(location.search) && (projectId() !== 'full' || MAPQ || /[?&]explore=1(&|$)/.test(location.search)); // 종합 기본은 15주제 순서, 세계 지도는 explore=1로 유지
+  var EXPLORE = !PREVIEW && !!R.Explore && (!!WORLD || (!/[?&]explore=0(&|$)/.test(location.search) && (projectId() !== 'full' || MAPQ || /[?&]explore=1(&|$)/.test(location.search)))); // 주제 링크는 세계 탐험으로, 종합 기본은 15주제 순서
   // 오류 수집(ERROR_LOG_DESIGN.md): 지금 보던 챕터·세계·흐름·콘텐츠 버전만 알려 준다. 이름·입력값은 읽지 않는다.
   if (R.ErrLog) R.ErrLog.setContext(function () {
     var c = S.rep && S.rep.chapters && S.rep.chapters[S.idx];
@@ -268,8 +269,9 @@
       clearTimeout(tm); if (d && d.worlds && d.worlds.length) { S.xpWorlds = R.Explore.mergeWorlds(d.worlds); buildWmap(); if (S.view === 'home') showHome(S.xpWorld); else renderStrip(); }
     }).catch(function () { clearTimeout(tm); }).then(function () {
       // 허브 운명의 타임라인 주제 타일에서 넘어온 경우(?world=w2): 그 세계를 바로 연다(세계 지도의 카드를 누른 것과 같다). 한 번만.
-      var wq = (/[?&]world=([\w-]{1,30})(&|$)/.exec(location.search) || [])[1]; if (!wq || PREVIEW || S.deepWorld) return; S.deepWorld = 1;
-      var b = document.querySelector('#v-home [data-xw="' + wq + '"]'); if (b) b.click();
+      if (!WORLD || PREVIEW || S.deepWorld) return; S.deepWorld = 1;
+      var g = R.Explore.worldsModel(S.rep.chapters, S.xpWorlds, S.ended, S.idx).filter(function (x) { return x.world.id === WORLD; })[0];
+      if (g) worldIntro(g, function () { enterWorld(g.world.id); });
     });
   }
   /* ── 챕터 탭 줄: 지금 읽는 챕터가 속한 세계의 챕터를 가로로 늘어놓는다. 읽는 중·세계 도구 화면 어디서든 바로 이동. ── */
@@ -482,7 +484,8 @@
     var y = window.scrollY; showHome('w4'); window.scrollTo(0, y); T('timeline_select', { level: b.dataset.tld != null ? 'daeun' : b.dataset.tly != null ? 'year' : 'month' });
   });
   function enterFromHome(idx) {
-    S.view = 'reader'; view('reader'); pinTo(idx); renderStrip(); mountReading(S.xp ? S.xp.auto : true); window.scrollTo(0, 0); if (idx > 0) gotoChapter(idx, true); T('explore_chapter_picked', { index: idx });
+    S.readerWorld = (S.wmap && S.wmap.idx[idx]) || null;
+    S.view = 'reader'; view('reader'); pinTo(idx); openDoc(idx, { autoStart: S.xp ? S.xp.auto : true }); renderStrip(); T('explore_chapter_picked', { index: idx });
   }
   $('#v-home').addEventListener('click', function (e) {
     var b = e.target.closest('[data-xgo]'); if (b) { enterFromHome(+b.dataset.xgo); return; }
@@ -494,7 +497,7 @@
   });
   $('#v-home').addEventListener('change', function (e) { if (e.target.id === 'xAuto' && S.xp) { S.xp.auto = e.target.checked; xpSave(); } });
   function beginReader() {
-    if (!PREVIEW && R.ReadingFlow && projectId() === "full") {
+    if (!PREVIEW && !EXPLORE && R.ReadingFlow && projectId() === "full") {
       S.rep = R.ReadingFlow.build(S.rep, S.sd, { M: window.Manse, ch: S.ch });
       S.repPdf = S.rep; // 같은 공통 풀이 객체를 사용해 AI 수정도 PDF에 반영한다.
     }
@@ -764,6 +767,7 @@
   function buildDoc() {
     var rep = S.rep, h = ''; S.bg = []; planPanels(rep);
     rep.chapters.forEach(function (c, ci) {
+      if (S.readerWorld && S.wmap && S.wmap.idx[ci] !== S.readerWorld) return;
       if (c.actTransition) h += actHeadHtml(c, ci);
       var main='', extra='';
       c.scenes.forEach(function(s,k){ var html=secWrap(sceneHtml(c,s,k),s,c,ci); if(c.readingSupplementary || s.readingSupplementary) extra+=html; else main+=html; });
@@ -785,6 +789,7 @@
   }
   function resumeReader() { view('reader'); if (EXPLORE) renderStrip(); mountReading(false); window.scrollTo(0, S.scroll.doc || 0); if (S.mv) S.mv.measure(); }
   function gotoChapter(i, instant, resume) {
+    if (S.readerWorld && S.wmap && S.wmap.idx[i] && S.wmap.idx[i] !== S.readerWorld) { enterFromHome(i); return; }
     var el = $('#chapter .chap[data-ch="' + i + '"]'); if (!el || !S.mv) return; var p = el.previousElementSibling; if (p && p.classList.contains('rd-act')) el = p; S.mv.gotoEl(el, instant, resume);
   }
   function onSection(sec) { // 현재 읽고 있는 섹션이 바뀔 때(자동 진행·직접 스크롤 모두)
@@ -801,7 +806,7 @@
     if (R.Bgm && R.Bgm.has()) { var mo = c.scenes.filter(function (s) { return s.sceneType === 'insight' || s.sceneType === 'chapterIntro'; })[0]; R.Bgm.play(mo ? R.Cinema.resolve(mo, layersOf(mo)).bgmMood : 'minimal'); } // 챕터 분위기에 맞는 BGM
     checkUnlock(); ss('mt_v2_idx', String(ci)); if (EXPLORE) { xpSave(); renderStrip(); }
   }
-  function onDocEnd() { if (!PREVIEW) endingCinema(finalView); } // 끝까지 읽어 주면 엔딩 장면으로 이어진다
+  function onDocEnd() { if (S.readerWorld) { showHome(S.readerWorld); return; } if (!PREVIEW) endingCinema(finalView); } // 주제를 마치면 해당 세계로, 종합 문서는 엔딩으로
   // 문서 안 클릭·체크 처리(한 번만 등록). 어느 챕터의 것인지는 가장 가까운 .chap 에서 읽는다.
   (function () { var root = $('#chapter'), chOf = function (el) { var a = el.closest('.chap'); return S.rep.chapters[a ? +a.dataset.ch : S.idx]; };
     root.addEventListener('click', function (e) {
