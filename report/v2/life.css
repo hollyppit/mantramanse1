@@ -45,7 +45,7 @@
 .rd-why { margin-top: 1.1em; text-align: left; font-size: .86rem; color: var(--ink2); border-top: 1px solid var(--line, rgba(255,255,255,.12)); padding-top: .7em; } .rd-why summary { cursor: pointer; color: var(--gold-l); } .rd-why .rw-h { margin: .9em 0 .2em; font-size: .72rem; letter-spacing: .12em; color: var(--ink3); } .rd-why ul { margin: 0; padding-left: 1.1em; } .rd-why li { margin: .15em 0; line-height: 1.7; }
 .rd-prose { text-align: left; } .rd-prose .lead strong { color: var(--gold-l); font-weight: 600; } .rd-prose .lead + .lead { margin-top: 1.15em; } .lf-ai { font-size: .66rem; letter-spacing: .1em; color: var(--ink3); border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; margin-left: 6px; }
 .rd-mini { text-align: left; padding-top: 54px !important; padding-bottom: 6px !important; } .rd-mini .no { font-size: .7rem; letter-spacing: .3em; color: var(--gold); margin-bottom: 8px; } .rd-mini h2 { font-size: 1.4rem; line-height: 1.4; } .rd-mini .sub { color: var(--ink3); font-size: .8rem; margin-top: 6px; }
-.rd-react { text-align: left; } .rd-react .vd { display: flex; gap: 10px; margin-top: 10px; } .rd-react .vd .btn { flex: 1; min-height: 44px; }
+.rd-react { text-align: left; } .rd-react .vd { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; } .rd-react .vd .btn { flex: 0 0 auto; min-height: 44px; max-width: 100%; border-radius: 10px; word-break: keep-all; }
 .lf-grp { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 6px 0 12px; } .lf-g { border: 1px solid var(--line2); border-radius: 10px; padding: 8px 4px; text-align: center; background: var(--panel); display: grid; gap: 2px; } .lf-g.top { border-color: var(--gold); background: rgba(213,185,127,.1); } .lf-g b { font-size: .9rem; } .lf-g span { font-size: .62rem; color: var(--ink2); line-height: 1.3; } .lf-g small { font-size: .56rem; color: var(--ink3); line-height: 1.3; } .lf-g i { font-style: normal; color: var(--gold-l); font-size: .8rem; }
 .lf-stars { display: grid; gap: 8px; margin: 6px 0; } .lf-star { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; background: var(--panel); display: grid; gap: 2px; } .lf-star.g { border-color: rgba(94,158,120,.5); } .lf-star b { font-size: 1rem; } .lf-star small { color: var(--ink3); font-size: .7rem; } .lf-star span { color: var(--ink2); font-size: .88rem; line-height: 1.6; }
 #lifeBack { position: fixed; z-index: 40; left: 12px; top: calc(var(--bar-h) + 8px); }
@@ -56,8 +56,8 @@
 /* 선택형 추가 풀이: 작은 화면에서도 문장을 읽고 고를 수 있는 버튼 */
 .rd-answer { margin-top: 20px; }
 .rd-answer-question { font-weight: 600; }
-.rd-answer-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin: 16px 0; }
-.rd-answer-choices .btn { white-space: normal; text-align: left; line-height: 1.65; min-height: 60px; padding: 13px 15px; }
+.rd-react .rd-answer-choices { display: flex; flex-wrap: wrap; gap: 9px; margin: 16px 0; }
+.rd-react .rd-answer-choices .btn { flex: 0 0 auto; white-space: nowrap; text-align: left; line-height: 1.5; min-height: 48px; padding: 12px 18px; border-radius: 10px; }
 .rd-answer-choices .btn[aria-pressed="true"] { border-color: var(--gold); background: rgba(188,156,98,.13); }
 .rd-answer-choices .btn:focus-visible, .rd-answer-actions .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 .rd-answer-result { margin-top: 18px; padding: 18px; border: 1px solid rgba(188,156,98,.35); border-radius: 12px; background: rgba(188,156,98,.04); }
@@ -66,5 +66,6 @@
 .rd-answer-part h4 { margin: 0 0 8px; color: var(--ink2); font-size: .85rem; }
 .rd-answer-part .lead { margin: 0; }
 .rd-answer-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
+.rd-answer-actions .btn { border-radius: 10px; }
 .rd-answer [hidden] { display: none !important; }
-@media (max-width: 520px) { .rd-answer-choices { grid-template-columns: 1fr; } .rd-answer-choices .btn { min-height: 48px; } .rd-answer-result { padding: 15px; } }
+@media (max-width: 520px) { .rd-react .rd-answer-choices { flex-wrap: nowrap; overflow-x: auto; padding: 3px 2px 12px; scroll-snap-type: x proximity; } .rd-react .rd-answer-choices .btn { max-width: none; scroll-snap-align: start; font-size: .9rem; } .rd-answer-result { padding: 15px; } }
