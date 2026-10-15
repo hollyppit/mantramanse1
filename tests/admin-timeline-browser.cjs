@@ -1,0 +1,34 @@
+const fs=require('fs'),path=require('path'),http=require('http'),assert=require('assert');
+const {chromium}=require(process.env.TASK_PLAYWRIGHT);
+(async()=>{
+ const root=path.resolve('.'); let worlds=[];
+ const server=http.createServer((req,res)=>{let pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname),file=path.resolve(root,'.'+pathname);if(!file.startsWith(root+path.sep)){res.writeHead(403);return res.end();}if(fs.existsSync(file)&&fs.statSync(file).isDirectory())file=path.join(file,'index.html');fs.readFile(file,(err,data)=>{if(err){res.writeHead(404);return res.end();}res.setHeader('content-type',file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':file.endsWith('.html')?'text/html':'application/octet-stream');res.end(data);});});
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ let browser;
+ try {
+  browser=await chromium.launch({headless:true,channel:'msedge'});const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.route('**/api/**',async route=>{const req=route.request(),u=new URL(req.url());let body={};if(u.pathname==='/api/worlds'){if(req.method()==='PUT'){worlds=JSON.parse(req.postData()).worlds;body={ok:true};}else body={worlds};}else if(u.pathname==='/api/admin')body={ok:true};else if(u.pathname==='/api/ik')body={ok:true,enabled:false};else if(u.pathname==='/api/report-content')body={content:{}};else if(u.pathname==='/api/media')body={media:[]};await route.fulfill({json:body});});
+  await page.goto('http://127.0.0.1:'+server.address().port+'/report/admin/');await page.locator('#pw').fill('test');await page.locator('#loginBtn').click();await page.waitForSelector('#app:not(.hide)');
+  await page.evaluate(()=>AdminShowTab('v2proj'));await page.waitForSelector('#t-v2proj [data-topic="w7"]');
+  assert.equal(await page.locator('#t-v2proj [data-topic]').count(),7);
+  await page.locator('#t-v2proj [data-topic="w7"]').click();
+  const ids=await page.locator('#t-v2proj [data-chapter]').evaluateAll(es=>es.map(e=>e.dataset.chapter));assert(ids.includes('life_career_style'));assert(!ids.includes('c08'));
+  const first=page.locator('#t-v2proj [data-chapter]').first();await first.locator('[data-title]').fill('커리어 제목 저장 확인');await first.locator('[data-title]').blur();
+  const last=page.locator('#t-v2proj [data-chapter]').last();await last.locator('[data-visible]').uncheck();
+  await page.locator('#t-v2proj [data-save]').click();await page.waitForFunction(()=>document.querySelector('#t-v2proj [data-status]').textContent.includes('저장했습니다'));
+  assert(Object.values(worlds.find(w=>w.id==='w7').chapterSettings).some(s=>s.title==='커리어 제목 저장 확인'));
+  await page.evaluate(()=>AdminShowTab('v2chap'));await page.waitForSelector('#t-v2chap [data-topic="w7"]');await page.locator('#t-v2chap [data-topic="w7"]').click();
+  assert.equal(await page.locator('#t-v2chap [data-title]').first().inputValue(),'커리어 제목 저장 확인');
+  await page.locator('#t-v2chap [data-preview]').first().click();assert(await page.locator('#t-v2chap [data-body]').first().isVisible());
+  await page.locator('#t-v2chap [data-prologue]').click();await page.waitForSelector('#prTopic');assert.equal(await page.locator('#prTopic').inputValue(),'w7');
+  await page.evaluate(()=>AdminShowTab('v2proj'));await page.waitForSelector('#t-v2proj [data-topic="w7"]');
+  fs.mkdirSync('output/admin-timeline',{recursive:true});await page.screenshot({path:'output/admin-timeline/desktop.png',fullPage:true});
+  await page.evaluate(()=>sessionStorage.setItem('mt_v2_input',JSON.stringify({inp:{year:1992,month:6,day:23,hour:1,minute:30,calendar:'solar',gender:'M',city:'서울'},name:'',guide:'male'})));
+  await page.goto('http://127.0.0.1:'+server.address().port+'/report/v2/?from=hub&world=w7');
+  await page.waitForSelector('#v-reader:not([hidden]) .chap',{timeout:45000});
+  await page.waitForFunction(()=>document.querySelectorAll('#chapter .chap').length===4,{timeout:20000});
+  assert.equal(await page.locator('#barTitle').innerText(),'커리어 제목 저장 확인');
+  assert.deepEqual(errors,[]);console.log('Admin timeline browser PASS: actual document, seven topics, career separation, save/reload, preview and prologue link');
+ }finally{if(browser)await browser.close();await new Promise(r=>server.close(r));}
+})().catch(e=>{console.error(e);process.exitCode=1});

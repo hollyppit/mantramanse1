@@ -6,7 +6,7 @@
   function current() { if (!G.target) return G.d; return G.d.worlds[G.target] || (G.d.worlds[G.target] = { M: '', F: '' }); }
   function mount(box) {
     box.innerHTML = '<div class="card"><p class="muted">불러오는 중…</p></div>';
-    C.api('/api/prologue').then(function (d) { G.d = { on: d.on !== false, M: d.M || '', F: d.F || '', worlds: d.worlds || {} }; draw(box); }).catch(function (e) { box.innerHTML = '<div class="card"><p class="err">' + esc(e.message) + '</p></div>'; });
+    Promise.all([C.api('/api/prologue'), C.api('/api/worlds')]).then(function (results) { var d=results[0]; TOPICS = [['', '공통 프롤로그']].concat(window.ReportV2.Explore.mergeWorlds(results[1].worlds || []).map(function(w){return [w.id,w.name];})); G.d = { on: d.on !== false, M: d.M || '', F: d.F || '', worlds: d.worlds || {} }; draw(box); }).catch(function (e) { box.innerHTML = '<div class="card"><p class="err">' + esc(e.message) + '</p></div>'; });
   }
   function slot(g, label) {
     var u = current()[g];
@@ -38,5 +38,5 @@
       .then(function () { G.busy = false; draw(box); })
       .catch(function (e) { record[g] = old; G.busy = false; m.textContent = '실패: ' + e.message; toast(e.message, true); });
   }
-  window.V2Prologue = { mount: mount };
+  window.V2Prologue = { mount: mount, selectWorld: function(id) { G.target=id; } };
 })();

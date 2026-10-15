@@ -270,14 +270,14 @@
   function xpSave() { if (!S.xp || !S.xpKey) return; S.xp.ended = S.ended; S.xp.last = S.cur ? S.idx : S.xp.last; R.Explore.save(S.xpKey, S.xp); }
   function exploreEntry() {
     ensureStrip();
-    S.xpKey = (S.rep.meta && S.rep.meta.key) || 'default'; S.xp = R.Explore.load(S.xpKey); S.xpWorlds = R.Explore.mergeWorlds(null); buildWmap();
+    S.xpKey = (S.rep.meta && S.rep.meta.key) || 'default'; S.xp = R.Explore.load(S.xpKey); S.xpWorlds = R.Explore.mergeWorlds(null); S.topicSource = S.rep.chapters.slice(); S.rep.chapters = R.Explore.applyTopics(S.topicSource, S.xpWorlds); buildWmap();
     Object.keys(S.xp.ended).forEach(function (id) { S.ended[id] = 1; S.visited[id] = 1; });
     // 프롤로그(영상 또는 텍스트)가 끝나면 곧바로 세계 지도. 일간·일주 소개와 일주 영상은 지도에서 '천명의 서고'로 들어가 볼 수 있다.
     openDoc(0, { autoStart: false }); showHome();
     // 관리자가 저장한 세계 정의(이름·색·연결 챕터·순서·활성화)가 있으면 기본값 위에 덮어 쓴다. 실패하면 기본 6개 세계 그대로.
     var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 4000);
     fetch('/api/worlds', { signal: ctl && ctl.signal }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-      clearTimeout(tm); if (d && d.worlds && d.worlds.length) { S.xpWorlds = R.Explore.mergeWorlds(d.worlds); buildWmap(); if (S.view === 'home') showHome(S.xpWorld); else renderStrip(); }
+      clearTimeout(tm); if (d && d.worlds && d.worlds.length) { S.xpWorlds = R.Explore.mergeWorlds(d.worlds); S.rep.chapters = R.Explore.applyTopics(S.topicSource, S.xpWorlds); buildWmap(); var home = S.view === 'home', currentWorld = S.xpWorld; S.readerWorld = null; openDoc(0, { autoStart: false }); if (home) showHome(currentWorld); else renderStrip(); }
     }).catch(function () { clearTimeout(tm); }).then(function () {
       // 허브 운명의 타임라인 주제 타일에서 넘어온 경우(?world=w2): 그 세계를 바로 연다(세계 지도의 카드를 누른 것과 같다). 한 번만.
       if (!WORLD || PREVIEW || S.deepWorld) return; S.deepWorld = 1;
@@ -529,7 +529,7 @@
     }
     addCharIntro();
     var reading = !PREVIEW && R.FullReading ? R.FullReading.prepare(S.rep, S.sd, S.name, function (c, job, result) {
-      var ci = S.rep.chapters.indexOf(c), article = document.getElementById('ch-' + c.id);
+      var ci = S.rep.chapters.findIndex(function(item){return item.id===c.id;}), article = document.getElementById('ch-' + c.id);
       if (!article || ci <= S.idx) return;
       if (S.visited[c.id]) return;
       var sections = [].slice.call(article.querySelectorAll(':scope > section')), at = 0;

@@ -100,7 +100,7 @@
   var CH = { sel: null, tab: 'set', dirty: false, dbg: true, collapsed: {} };
   function chapOpen() {
     C.load().then(function () {
-      if (!built.chap) { built.chap = 1; var first = ownedBy('full')[0] || chaptersAll()[0]; CH.sel = first ? first.id : null; chapDraw(); } else if (CH.pending) { CH.sel = CH.pending; CH.pending = null; CH.tab = 'set'; chapDraw(); }
+      if (!built.chap) { built.chap = 1; var first = ownedBy('full')[0] || chaptersAll()[0]; CH.sel = CH.pending || (first ? first.id : null); CH.pending = null; chapDraw(); } else if (CH.pending) { CH.sel = CH.pending; CH.pending = null; CH.tab = 'set'; chapDraw(); } else chapDraw();
     });
   }
   function projList() {
@@ -472,7 +472,7 @@
         if (msg) msg.textContent = '올리는 중…'; A.quickAwakening(kind, key, f, PW, function (p) { if (msg) msg.textContent = '올리는 중 ' + Math.round(p * 100) + '%'; }).then(function () { awkMemo = null; toast('영상을 연결했습니다'); run(); }).catch(function (er) { if (msg) msg.textContent = er.message; toast(er.message, true); });
       });
       bindSources($('#tInsp', root)); bindCopy($('#tInsp', root)); $('#tInsp', root).addEventListener('click', function (e) { if (e.target.closest('[data-allsrc]') && TST.rep) allSourcesDialog(); });
-      $('#tInsp', root).onclick = function (e) { var b = e.target.closest('[data-edit]'); if (!b) return; CH.pending = b.dataset.edit; CH.pendingModule = b.dataset.mod || null; if (built.chap) { CH.sel = CH.pending; CH.tab = b.dataset.mod ? 'mod' : 'set'; CH.pending = null; } else CH.sel = null; gotoTab('v2chap'); if (built.chap) chapDraw(); };
+      $('#tInsp', root).onclick = function (e) { var b = e.target.closest('[data-edit]'); if (!b) return; CH.pending = b.dataset.edit; CH.pendingModule = b.dataset.mod || null; if (built.chap) { CH.sel = CH.pending; CH.tab = b.dataset.mod ? 'mod' : 'set'; CH.pending = null; } else CH.sel = null; gotoTab('v2chap', 'legacy'); if (built.chap) chapDraw(); };
     }
     C.load().then(function () { drawForm(); drawProj(); run(); });
   }
@@ -580,7 +580,7 @@
       var row = t.closest('[data-c]'); if (row && t.matches('[data-move]')) { var c = chapterById(row.dataset.c); c.act = +t.value; c.order = 9999; renumber(p.id); dirty(); projDraw(); }
     };
     box.onclick = function (e) {
-      var ed = e.target.closest('[data-edit]'); if (ed) { CH.pending = ed.dataset.edit; if (built.chap) { CH.sel = CH.pending; CH.tab = 'set'; CH.pending = null; } else CH.sel = null; gotoTab('v2chap'); if (built.chap) chapDraw(); return; }
+      var ed = e.target.closest('[data-edit]'); if (ed) { CH.pending = ed.dataset.edit; if (built.chap) { CH.sel = CH.pending; CH.tab = 'set'; CH.pending = null; } else CH.sel = null; gotoTab('v2chap', 'legacy'); if (built.chap) chapDraw(); return; }
       var mv = e.target.closest('[data-mv]'); if (mv) { var c = chapterById(mv.closest('[data-c]').dataset.c), same = ownedBy(p.id).filter(function (x) { return (x.act || 1) === (c.act || 1); }), i = same.indexOf(c), j = i + +mv.dataset.mv; if (j >= 0 && j < same.length) { var t = same[j].order; same[j].order = c.order; c.order = t; renumber(p.id); dirty(); projDraw(); } return; }
       var hd = e.target.closest('[data-hide]'); if (hd) { var c2 = chapterById(hd.closest('[data-c]').dataset.c); if (c2.enabled === false) c2.enabled = true; else if (isDefaultId(c2.id)) c2.enabled = false; else if (confirm('이 챕터를 삭제할까요?')) W.chapters = chaptersAll().filter(function (x) { return x !== c2; }); else return; renumber(p.id); dirty(); projDraw(); return; }
       if (e.target.id === 'aAdd') { p.acts.push({ title: '새 ACT', line: '', pdfDone: '' }); dirty(); projDraw(); return; }
@@ -668,6 +668,8 @@
 
 (window.AdminDirty = window.AdminDirty || {})['챕터·프로젝트'] = function () { return CH.dirty || PJ.dirty; }; (window.AdminDirty = window.AdminDirty || {})['글자 설정'] = function () { return TX.dirty; }; window.V2Shell = { open: function (tab, pw, also) {
     PW = pw; C.setPw(pw);
+    if ((tab === 'v2proj' || tab === 'v2chap') && !also && !CH.pending && window.V2Timeline) { window.V2Timeline.open(document.getElementById('t-' + tab)); return; }
+    if (tab === 'v2chap' && also && also.source) { CH.pending = also.source; if (also.world && V2Prologue.selectWorld) V2Prologue.selectWorld(also.world); }
     if (tab === 'v2clip') clipOpen(); else if (tab === 'v2chap') chapOpen(); else if (tab === 'v2test') testOpen(); else if (tab === 'v2proj') projOpen(); else if (tab === 'v2set') setOpen(also); else if (tab === 'v2story') window.V2Story && window.V2Story.open(); else if (tab === 'v2world') window.V2World && window.V2World.open(); else if (tab === 'ops') window.V2Operations && window.V2Operations.open(pw); else if (tab === 'v2quality') window.V2Quality && window.V2Quality.open(); else if (tab === 'v2intro') V2Intro.mount(document.getElementById('t-v2intro'), pw, {});
   } };
 })();

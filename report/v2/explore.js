@@ -65,6 +65,21 @@
     return Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
   }
   function isCareer(id) { return /^(c0[67]|life_career_(style|timing)|deep_jobs|life_ik_CAREER.*)$/.test(id); }
+  // 관리자와 사용자 화면이 같은 제목·노출·순서를 사용한다.
+  function applyTopics(chapters, worlds) {
+    var groups = {};
+    worlds.forEach(function (w) { groups[w.id] = []; });
+    (chapters || []).forEach(function (c, i) {
+      var wid = worldFor(c, worlds), w = worlds.filter(function (x) { return x.id === wid; })[0];
+      if (!w || w.enabled === false) return;
+      var setting = (w.chapterSettings || {})[c.id] || {};
+      if (setting.enabled === false) return;
+      groups[wid].push({ chapter: setting.title ? Object.assign({}, c, { title: setting.title }) : c, order: setting.order == null ? i : +setting.order, index: i });
+    });
+    var out = [];
+    worlds.forEach(function (w) { groups[w.id].sort(function (a,b) { return a.order-b.order || a.index-b.index; }).forEach(function (x) { out.push(x.chapter); }); });
+    return out;
+  }
 
   function worldFor(c, worlds, flow) {
     var id = c.id, base = c.base || c.id, i, w, j;
@@ -145,5 +160,5 @@
     return h + '</ol><p class="fine">사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></div>';
   }
 
-  R.Explore = { artOf: artOf, ACTS: ACTS, DEFAULT_WORLDS: DEFAULT_WORLDS, actOf: actOf, mergeWorlds: mergeWorlds, worldFor: worldFor, worldsModel: worldsModel, load: load, save: save, progress: progress, resumeIndex: resumeIndex, html: html };
+  R.Explore = { applyTopics: applyTopics, artOf: artOf, ACTS: ACTS, DEFAULT_WORLDS: DEFAULT_WORLDS, actOf: actOf, mergeWorlds: mergeWorlds, worldFor: worldFor, worldsModel: worldsModel, load: load, save: save, progress: progress, resumeIndex: resumeIndex, html: html };
 })(typeof window !== 'undefined' ? window : globalThis);

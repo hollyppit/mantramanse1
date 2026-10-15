@@ -1,0 +1,21 @@
+const assert=require('assert'), fs=require('fs'), vm=require('vm'), path=require('path'), {pathToFileURL}=require('url');
+global.window=globalThis;
+vm.runInThisContext(fs.readFileSync('report/v2/explore.js','utf8'));
+const X=ReportV2.Explore, worlds=X.mergeWorlds(null), money=worlds.find(w=>w.id==='w2');
+const original=[{id:'c08',title:'Money'},{id:'life_money_timing',title:'Timing'},{id:'c06',title:'Career'}];
+money.chapterSettings={c08:{title:'재물 관리',order:2},life_money_timing:{order:1}};
+let result=X.applyTopics(original,worlds);
+assert.deepEqual(result.map(c=>c.id),['life_money_timing','c08','c06']);
+assert.equal(result[1].title,'재물 관리'); assert.equal(original[0].title,'Money');
+money.chapterSettings.c08.enabled=false;
+assert(!X.applyTopics(original,worlds).some(c=>c.id==='c08'));
+worlds.find(w=>w.id==='w7').enabled=false;
+assert(!X.applyTopics(original,worlds).some(c=>c.id==='c06'));
+(async()=>{
+ const api=await import(pathToFileURL(path.resolve('functions/api/worlds.js')).href);
+ const saved=api.cleanWorlds([{...money,chapterSettings:{...money.chapterSettings,'bad/id':{title:'invalid'}}}]);
+ assert.equal(saved[0].chapterSettings.c08.title,'재물 관리');assert.equal(saved[0].chapterSettings.c08.enabled,false);
+ assert(!saved[0].chapterSettings['bad/id']);
+ const merged=X.mergeWorlds(saved);assert(!X.applyTopics(original,merged).some(c=>c.id==='c08'));
+ console.log('Admin timeline: shared topic mapping, title, order, visibility, source preservation and server round-trip passed');
+})().catch(e=>{console.error(e);process.exit(1)});

@@ -9,7 +9,7 @@
   var $ = function (s, e) { return (e || document).querySelector(s); }, $$ = function (s, e) { return [].slice.call((e || document).querySelectorAll(s)); };
   var KEY = 'mt_v2_world_ts', TS = { date: '1992-06-23', time: '01:30', gender: 'M' };
   try { Object.assign(TS, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
-  var FIELDS = ['id', 'name', 'line', 'desc', 'notice', 'enabled', 'order', 'access', 'color', 'accent', 'bgImage', 'bgVideo', 'introImage', 'introVideo', 'chapters', 'cutImages'];
+  var FIELDS = ['id', 'name', 'line', 'desc', 'notice', 'enabled', 'order', 'access', 'color', 'accent', 'bgImage', 'bgVideo', 'introImage', 'introVideo', 'chapters', 'cutImages', 'chapterSettings'];
   var hex = function (v, d) { return /^#[0-9a-fA-F]{6}$/.test(v || '') ? v : d; };
   var dirty = function () { W.dirty = true; var b = $('#wdSave'); if (b) { b.disabled = false; b.textContent = '저장'; } var s = $('#wdState'); if (s) s.textContent = '저장하지 않은 변경이 있습니다'; };
   (window.AdminDirty = window.AdminDirty || {})['세계관'] = function () { return W.dirty; };
@@ -77,7 +77,7 @@
 
   function draw(box) {
     var n = W.list.length;
-    box.innerHTML = '<div class="card"><b style="color:var(--gold)">세계관 (운명 세계 지도)</b><p class="muted" style="margin:6px 0 10px">사용자가 일주 각성 뒤에 도착하는 세계 지도의 세계들입니다. 이름·색·순서·배경·입장 연출·연결 챕터를 바꿀 수 있고, 저장하면 새로 여는 무빙툰부터 반영됩니다. 기존 챕터는 지워지지 않고 세계에 연결만 바뀝니다.</p>' +
+    box.innerHTML = '<div class="card"><b style="color:var(--gold)">운명의 타임라인 · 주제·표지 설정</b><p class="muted" style="margin:6px 0 10px">운명의 타임라인과 주제별 무빙툰이 함께 사용하는 주제 목록입니다. 이름·색·순서·배경·입장 연출·연결 챕터를 바꿀 수 있고, 저장하면 새로 여는 무빙툰부터 반영됩니다. 기존 챕터는 지워지지 않고 세계에 연결만 바뀝니다.</p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button type="button" id="wdSave" class="gold"' + (W.dirty ? '' : ' disabled') + '>저장</button><button type="button" id="wdAdd"' + (n >= 12 ? ' disabled' : '') + '>세계 추가</button><button type="button" id="wdReset"' + (W.saved ? '' : ' disabled') + '>기본값으로 되돌리기</button><a class="btn" href="/report/v2/?map=1992-06-23,01:30,M" target="_blank" rel="noopener" style="text-decoration:none">사용자 화면에서 세계 지도 열기 ↗</a><span class="muted" id="wdState">' + (W.saved ? '저장된 설정을 쓰는 중' : '코드 기본값을 쓰는 중') + '</span></div></div>' +
       W.list.map(function (w, i) { return card(w, i, n); }).join('') +
       '<div class="card"><b style="color:var(--gold)">미리보기</b><div class="pvh" style="margin:8px 0"><label>생년월일<input type="date" id="wdD" value="' + esc(TS.date) + '"></label><label>시각<input type="time" id="wdT" value="' + esc(TS.time) + '"></label><label>성별<select id="wdG"><option value="M"' + (TS.gender === 'M' ? ' selected' : '') + '>남</option><option value="F"' + (TS.gender === 'F' ? ' selected' : '') + '>여</option></select></label><button type="button" id="wdPrev">미리보기 만들기</button></div><div id="wdPv">' + previewHtml() + '</div><p class="muted" style="font-size:.76rem;margin-top:8px">저장 전 변경도 이 미리보기에는 반영됩니다. 세계가 비어 있으면 사용자 지도에서 숨겨집니다.</p></div>';
@@ -133,7 +133,7 @@
       draw(box); dirty();
     };
     $('#wdReset', box).onclick = function () {
-      if (!confirm('저장된 세계관 설정을 지우고 코드 기본값(6개 세계)으로 되돌립니다. 업로드한 이미지·영상 파일은 삭제되지 않습니다. 계속할까요?')) return;
+      if (!confirm('저장된 세계관 설정을 지우고 코드 기본 주제 목록으로 되돌립니다. 업로드한 이미지·영상 파일은 삭제되지 않습니다. 계속할까요?')) return;
       C.api('/api/worlds', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ worlds: [] }) }).then(function () { toast('기본값으로 되돌렸습니다'); load(box); }).catch(function (e) { toast(e.message, true); });
     };
     $('#wdPrev', box).onclick = function () {

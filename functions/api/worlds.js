@@ -12,6 +12,13 @@ const color = v => (typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v.trim()) 
 // 세계 무빙툰 컷 이미지(관리자 패널 이미지 탭): { 챕터id: [주소 최대 3] }. 주소는 media() 와 같은 규칙, 챕터 id 는 ids() 와 같은 규칙.
 const cuts = v => { const o = {}; if (!v || typeof v !== 'object' || Array.isArray(v)) return o; for (const k of Object.keys(v).slice(0, 80)) { if (!/^[\w-]{1,60}$/.test(k) || !Array.isArray(v[k])) continue; const l = v[k].map(media).filter(Boolean).slice(0, 3); if (l.length) o[k] = l; } return o; };
 const ids = v => (Array.isArray(v) ? v.filter(x => typeof x === 'string' && /^[\w-]{1,60}$/.test(x)).slice(0, 80) : []);
+const chapterSettings = v => {
+  const out = {}; if (!v || typeof v !== 'object' || Array.isArray(v)) return out;
+  for (const [id, setting] of Object.entries(v).slice(0, 160)) {
+    if (!/^[\w-]{1,80}$/.test(id) || !setting || typeof setting !== 'object') continue;
+    out[id] = { title: str(setting.title, 200), enabled: setting.enabled !== false, order: Number.isFinite(+setting.order) ? Math.max(0, Math.min(999, +setting.order)) : 999 };
+  } return out;
+};
 
 export function cleanWorlds(list) {
   if (!Array.isArray(list)) return [];
@@ -25,6 +32,7 @@ export function cleanWorlds(list) {
       access: w.access === 'paid' ? 'paid' : 'free',
       color: color(w.color), accent: color(w.accent), bgImage: media(w.bgImage), bgVideo: media(w.bgVideo), introImage: media(w.introImage), introVideo: media(w.introVideo),
       chapters: ids(w.chapters), notice: str(w.notice, 120),
+      chapterSettings: chapterSettings(w.chapterSettings),
       ...(Object.keys(cuts(w.cutImages)).length ? { cutImages: cuts(w.cutImages) } : {}),
     });
   }

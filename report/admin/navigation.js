@@ -4,10 +4,10 @@
   var groups = [['dash','현황',['dash']],['make','무빙툰 제작',['v2proj','v2chap','v2story','v2world']],['media','영상·이미지',['v2clip','v2intro','panelart']],['content','콘텐츠·온보딩',['onboard','freec']],['ai','AI 풀이',['ikdoc','ikknow','ikdesign','ikrules','iklab','stylecfg']],['qa','점검·테스트',['v2quality','check','v2test']],['set','운영·설정',['ops','v2set']]];
   var pages = {
     ops:{label:'운영 관리',hint:'영상120칸 연결, AI, 데이터 백업과 복구를 한곳에서 관리합니다.',related:['v2intro','v2quality','ikrules']},
-    v2proj:{label:'상품 구성',hint:'상품별 공개 여부, ACT 구성과 챕터 순서를 관리합니다. 챕터의 내용은 챕터·해석에서 편집합니다.'},
-    v2chap:{label:'챕터·해석',hint:'상품에 속한 챕터의 문구, 해석 모듈과 개운법을 편집합니다. 상품의 ACT 구성과 순서는 상품 구성에서 관리합니다.'},
-    v2story:{label:'스토리 흐름',hint:'사주와 관심사에 따른 이야기 전개를 관리합니다. 상품별 챕터 구성은 상품 구성에서 관리합니다.'},
-    v2world:{label:'세계관',hint:'세계 지도, 지역과 진행 구조를 관리합니다.'},
+    v2proj:{label:'타임라인 구성',hint:'운명의 타임라인 주제를 기준으로 실제 챕터와 공개 여부·제목·순서를 관리합니다.'},
+    v2chap:{label:'주제별 챕터·해석',hint:'타임라인과 같은 주제별 실제 목차에서 내용·원본 편집·프롤로그로 이동합니다.'},
+    v2story:{label:'종합 스토리 흐름',hint:'종합 풀이의 이야기 전개를 관리합니다. 주제별 목차는 타임라인 구성에서 관리합니다.'},
+    v2world:{label:'주제·표지 설정',hint:'타임라인 주제의 이름·소개·표지·공개 여부와 순서를 관리합니다.'},
     v2clip:{label:'클립 라이브러리',hint:'챕터가 사용하는 공통 영상과 이미지를 등록하고 연결 상태를 확인합니다.'},
     v2intro:{label:'일간·일주 영상',hint:'일간·일주 소개와 프롤로그 영상을 관리합니다.'},
     ikdoc:{label:'풀이 자료',hint:'자료를 등록하고 추출된 지식 후보를 검수합니다. 승인한 지식의 서비스 게시 상태는 풀이 지식에서 관리합니다.',related:['ikknow','v2quality']},
