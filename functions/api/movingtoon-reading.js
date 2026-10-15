@@ -12,6 +12,7 @@ export async function generate(env, provider, input, SYSTEM, settings = {}) {
   const started = Date.now(), isOpen = provider === 'openai';
   const maxTokens = settings.maxOutputTokens || 14000;
   const body = isOpen ? { model: settings.openaiModel || env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: SYSTEM, input, max_output_tokens: maxTokens } : { model: settings.anthropicModel || env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: maxTokens, system: SYSTEM, messages: [{ role: 'user', content: input }] };
+  if(!isOpen && settings.disableThinking)body.thinking={type:'disabled'};
   if(isOpen && settings.reasoningEffort && /^(?:gpt-[5-9]|o[134])/.test(body.model))body.reasoning={effort:settings.reasoningEffort};
   if(settings.outputSchema){
     if(isOpen)body.text={format:{type:'json_schema',name:'chapter_result',strict:true,schema:settings.outputSchema}};
@@ -23,7 +24,7 @@ export async function generate(env, provider, input, SYSTEM, settings = {}) {
     error.providerReason=/schema|output_config|response_format|text.format/i.test(message)?'schema-unsupported':/model/i.test(message)?'model-configuration':/credit|balance|billing/i.test(message)?'billing':/max.*token|token.*max/i.test(message)?'token-limit':'request-rejected';throw error; }
   const d = await r.json();
   const text = isOpen ? d.output_text || (d.output || []).flatMap(x => x.content || []).map(x => x.text || '').join('') : (d.content || []).filter(x => x.type === 'text').map(x => x.text).join('');
-  return { text, completionStatus: ['completed','incomplete','failed'].includes(d.status)?d.status:null, incompleteReason: ['max_output_tokens','content_filter'].includes(d.incomplete_details?.reason)?d.incomplete_details.reason:null, model: String(d.model || body.model).slice(0, 120), elapsedMs: Date.now() - started, usage: usageOf(d.usage) };
+  return { text, stopReason:['end_turn','max_tokens','tool_use','stop_sequence','refusal','pause_turn'].includes(d.stop_reason)?d.stop_reason:null, contentKinds:[...new Set((d.content||[]).map(x=>x.type).filter(x=>['text','thinking','redacted_thinking','tool_use'].includes(x)))], completionStatus: ['completed','incomplete','failed'].includes(d.status)?d.status:null, incompleteReason: ['max_output_tokens','content_filter'].includes(d.incomplete_details?.reason)?d.incomplete_details.reason:null, model: String(d.model || body.model).slice(0, 120), elapsedMs: Date.now() - started, usage: usageOf(d.usage) };
 }
 export function usageOf(u) {
   if (!u || typeof u !== 'object') return null;

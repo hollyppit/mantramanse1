@@ -16,8 +16,9 @@ export function visualFor(chart){
 
 export async function composeStory(analysis,call){
  const claims=analysis.claims;
- const context={chart:analysis.normalized.chart,features:analysis.features,claims,cross_analysis:analysis.cross_analysis,visual:visualFor(analysis.normalized.chart)};
- const planText=await call(PLAN_SYSTEM,JSON.stringify(context),5000,'plan');
+ const compactClaims=claims.map(c=>Object.fromEntries(['claim_id','domain','topic','judgment','elements','traditional_rules','exceptions','counter_evidence','uncertainty','strengths','vulnerabilities','source_scope'].filter(k=>c[k]!==undefined).map(k=>[k,c[k]])));
+ const context={chart:analysis.normalized.chart,features:(analysis.features||[]).map(({elements,...rest})=>rest),claims:compactClaims,cross_analysis:analysis.cross_analysis,visual:visualFor(analysis.normalized.chart)};
+ const planText=await call(PLAN_SYSTEM,JSON.stringify(context),8000,'plan');
  const plan=validatePlan(planText,claims);
  if(!plan)throw Object.assign(Error('plan-rejected'),{issues:planIssues(planText,claims)});
  const input={...context,plan};
@@ -26,7 +27,7 @@ export async function composeStory(analysis,call){
   const storyText=await call(WRITE_SYSTEM,JSON.stringify({...input,...(revision?{previous:revision.story,revision:revision.issues}:{})}),8000,'write');
   const story=validateStory(storyText,plan,claims);
   if(!story)throw Object.assign(Error('story-rejected'),{issues:storyIssues(storyText,plan,claims)});
-  const reviewText=await call(REVIEW_SYSTEM,JSON.stringify({...input,story}),1600,'review');
+  const reviewText=await call(REVIEW_SYSTEM,JSON.stringify({...input,source_evidence:claims.map(c=>({claim_id:c.claim_id,evidence:c.evidence})),story}),2400,'review');
   if(validateReview(reviewText))return {story,plan,review:{passed:true,grounding:true,causality:true,dilemma:true,arc:true,prose:true,issues:[]}};
   let review;try{review=JSON.parse(reviewText.replace(/^```(?:json)?\s*|\s*```$/g,''));}catch{}
   revision={story,issues:Array.isArray(review?.issues)?review.issues.slice(0,12):['근거·인과·딜레마·변화·문장의 검토를 다시 확인하라.']};
@@ -57,7 +58,7 @@ export async function onRequestPost({request,env}){
   if(settings.maxRequestCost!=null){
    const byteInput=new TextEncoder().encode(JSON.stringify(analysis)).length;
    const providers=[env.OPENAI_API_KEY,env.ANTHROPIC_API_KEY].filter(Boolean).length;
-   const estimate=settings.inputPricePerMillion!=null&&settings.outputPricePerMillion!=null?(((byteInput*5+100000)*settings.inputPricePerMillion+24200*settings.outputPricePerMillion)/1e6)*providers:null;
+   const estimate=settings.inputPricePerMillion!=null&&settings.outputPricePerMillion!=null?(((byteInput*5+100000)*settings.inputPricePerMillion+28800*settings.outputPricePerMillion)/1e6)*providers:null;
    if(estimate==null||estimate>settings.maxRequestCost)return json({ok:false,error:'cost-limit'},429);
   }
   const ip=request.headers.get('cf-connecting-ip')||'local',hour=new Date().toISOString().slice(0,13),day=hour.slice(0,10);
@@ -71,10 +72,10 @@ export async function onRequestPost({request,env}){
    try{
     const result=await composeStory(analysis,async(system,input,tokens,stage)=>{
      const remaining=deadline-Date.now();if(remaining<3000)throw Error('deadline');
-     const at=Date.now(),budget=Math.min(remaining,stage==='plan'?60000:stage==='write'?100000:30000);
+     const at=Date.now(),budget=Math.min(remaining,stage==='plan'?100000:stage==='write'?100000:40000);
      try{
-      const r=await generate(env,provider,input,system,{...settings,longRequest:true,reasoningEffort:'low',outputSchema:stageSchema(stage,analysis.claims),maxOutputTokens:tokens,timeoutMs:budget});
-      attempts.push({provider,stage,model:r.model,elapsedMs:Date.now()-at,usage:r.usage,status:'returned',completionStatus:r.completionStatus,incompleteReason:r.incompleteReason,empty:!r.text});return r.text;
+      const r=await generate(env,provider,input,system,{...settings,longRequest:true,reasoningEffort:'low',disableThinking:true,outputSchema:stageSchema(stage,analysis.claims),maxOutputTokens:tokens,timeoutMs:budget});
+      attempts.push({provider,stage,model:r.model,elapsedMs:Date.now()-at,usage:r.usage,status:'returned',completionStatus:r.completionStatus,incompleteReason:r.incompleteReason,stopReason:r.stopReason,contentKinds:r.contentKinds,inputBytes:new TextEncoder().encode(input).length,empty:!r.text});return r.text;
      }catch(e){attempts.push({provider,stage,model:String((provider==='openai'?settings.openaiModel||env.OPENAI_MODEL||'gpt-6.1-sol':settings.anthropicModel||env.ANTHROPIC_MODEL||'claude-sonnet-5-5')).slice(0,120),reason:e.providerReason||null,elapsedMs:Date.now()-at,status:'failed',error:/^provider-http-\d{3}(?:-[a-z_]+)?$/.test(e.message)?e.message:e.name==='TimeoutError'?'timeout':'call-error'});throw e;}
     });
     await kv.put(key,JSON.stringify({...result,version:VERSION,at:new Date().toISOString()}),{expirationTtl:2592000});
