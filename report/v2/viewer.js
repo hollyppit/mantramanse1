@@ -231,7 +231,7 @@
     t = setTimeout(function () {
       if (done) return;
       el = document.createElement('div'); el.className = 'wait-note'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
-      el.innerHTML = '<img class="orb" src="/report/v2/lantern-wait.webp" alt="" aria-hidden="true" width="120" height="120" decoding="async"><p class="loadtext">로딩 중입니다<span class="wait-dots" aria-hidden="true"></span><br><small>이야기를 준비하고 있어요. 잠시만 기다려 주세요.</small></p>';
+      el.innerHTML = '<img class="orb" src="/report/v2/lantern-wait.webp" alt="" aria-hidden="true" width="120" height="120" decoding="async"><p class="loadtext">풀이중입니다.<br><small>잠시만 기다려 주세요</small></p>';
       document.body.appendChild(el);
     }, 1200);
     return function () { done = true; clearTimeout(t); if (el && el.parentNode) { var e = el; e.classList.add('off'); setTimeout(function () { if (e.parentNode) e.parentNode.removeChild(e); }, 400); } };
@@ -768,6 +768,13 @@
     var rep = S.rep, h = ''; S.bg = []; planPanels(rep);
     rep.chapters.forEach(function (c, ci) {
       if (S.readerWorld && S.wmap && S.wmap.idx[ci] !== S.readerWorld) return;
+      if (!h && S.readerWorld && R.StoryComposer && R.StoryComposer.worldHook) {
+        var intro = R.StoryComposer.worldHook(S.readerWorld, S.sd);
+        if (intro) {
+          var opening = { sceneType: 'life', sceneId: 'world-hook-' + S.readerWorld, html: '<section class="scene rv rd-prose world-hook"><p>' + esc(S.name || '당신') + (S.name ? '님, ' : ', ') + esc(intro[0]) + '</p><p class="lead"><strong>' + esc(intro[1]) + '</strong></p></section>' };
+          h += secWrap(sceneHtml(c, opening, -1), opening, c, ci);
+        }
+      }
       if (c.actTransition) h += actHeadHtml(c, ci);
       var main='', extra='';
       c.scenes.forEach(function(s,k){ var html=secWrap(sceneHtml(c,s,k),s,c,ci); if(c.readingSupplementary || s.readingSupplementary) extra+=html; else main+=html; });
@@ -790,7 +797,7 @@
   function resumeReader() { view('reader'); if (EXPLORE) renderStrip(); mountReading(false); window.scrollTo(0, S.scroll.doc || 0); if (S.mv) S.mv.measure(); }
   function gotoChapter(i, instant, resume) {
     if (S.readerWorld && S.wmap && S.wmap.idx[i] && S.wmap.idx[i] !== S.readerWorld) { enterFromHome(i); return; }
-    var el = $('#chapter .chap[data-ch="' + i + '"]'); if (!el || !S.mv) return; var p = el.previousElementSibling; if (p && p.classList.contains('rd-act')) el = p; S.mv.gotoEl(el, instant, resume);
+    var el = $('#chapter .chap[data-ch="' + i + '"]'); if (!el || !S.mv) return; var p = el.previousElementSibling; if (p && (p.classList.contains('rd-act') || p.classList.contains('world-hook'))) el = p; S.mv.gotoEl(el, instant, resume);
   }
   function onSection(sec) { // 현재 읽고 있는 섹션이 바뀔 때(자동 진행·직접 스크롤 모두)
     var ci = +sec.dataset.ch, c = S.rep.chapters[ci]; if (!c) return;

@@ -16,6 +16,7 @@ for (const [search, preview, expected] of [['', false, false], ['?explore=1', fa
 const chapters = Array.from({ length: 6 }, (_, i) => ({ id: 'topic' + i, title: 'Topic ' + i, scenes: [{ text: 'Unique content ' + i }] }));
 const chapter = { innerHTML: '' };
 const context = {
+  R: {},
   S: { rep: { chapters }, wmap: { idx: chapters.map((_, i) => 'w' + (i + 1)) } },
   $: () => chapter, planPanels() {}, sceneHtml: (c, s) => s.text,
   secWrap: html => html, esc: s => s, chapterTags() {}, linkBasisReferences() {}, emphasize() {}, moDetail() {}
