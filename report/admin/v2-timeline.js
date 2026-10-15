@@ -30,14 +30,19 @@
           if(more.length && main.length) { var at=doc.chapters.findIndex(function(c){return c.id==='life_here';}); doc.chapters.splice(at>=0?at+1:1,0,Object.assign({},intro,{id:'c-char-more',base:'c-char-more',title:'일간·일주 더 깊이 읽기',scenes:more})); }
         }
         if(token!==state.generation)return;
-        state.chapters=doc.chapters; draw(box);
+        state.sd=sd; state.chapters=doc.chapters; draw(box);
       });
     }).catch(function(e){ if(token===state.generation) box.querySelector('[data-document]').textContent='목차를 구성하지 못했습니다: '+e.message; });
   }
   function draw(box) {
     var host=box.querySelector('[data-document]'), w=state.worlds.find(function(w){return w.id===state.selected;}) || state.worlds[0]; state.selected=w.id;
     host.innerHTML='<div class="cols"><div class="card">'+state.worlds.map(function(topic){var items=list(topic);return '<button type="button" class="pjc'+(topic.id===w.id?' on':'')+'" style="width:100%;text-align:left" data-topic="'+esc(topic.id)+'"><b>'+esc(topic.name)+'</b><small>'+esc(topic.line || '')+'</small><span>'+items.length+'개 챕터'+(topic.enabled===false?' · 비공개':'')+'</span></button>';}).join('')+'</div><div class="card"><h3>'+esc(w.name)+'</h3><p>'+esc(w.desc || '')+'</p><div class="row"><a class="btn" target="_blank" rel="noopener" href="/report/v2/?from=hub&amp;world='+esc(w.id)+'">사용자 화면 열기 ↗</a><button type="button" data-prologue>이 주제 프롤로그</button><button type="button" data-world>이름·이미지·주제 순서</button></div><p class="muted">아래는 선택한 테스트 사주로 조립한 실제 목차입니다. 제목·노출·순서를 저장하면 새로 여는 사용자 화면에 적용됩니다. 원본의 문구·모듈은 원본 편집에서, 생성 풀이의 근거는 풀이 지식에서 관리합니다.</p>'+list(w).map(function(c,i){var s=(w.chapterSettings || {})[c.id] || {}, base=c.base || c.id;return '<div class="card" style="margin:8px 0;padding:12px" data-chapter="'+esc(c.id)+'"><div class="row"><label><input type="checkbox" data-visible'+(s.enabled!==false?' checked':'')+'> 노출</label><b>'+(i+1)+'</b><input data-title aria-label="챕터 제목" value="'+esc(s.title || c.title)+'" style="flex:1;min-width:160px"><button type="button" data-move="-1"'+(i===0?' disabled':'')+'>↑</button><button type="button" data-move="1"'+(i===list(w).length-1?' disabled':'')+'>↓</button></div><small class="muted">'+esc(c.id)+' · '+(/^life_|^deep_|^c-char/.test(c.id)?'주제별 조립 챕터':'원본 연결 챕터')+'</small><div class="row" style="margin-top:8px"><button type="button" data-preview>내용 확인</button><button type="button" data-source="'+esc(base)+'">원본 편집</button></div><div data-body hidden></div></div>';}).join('')+'</div></div>';
+    var right=host.querySelector('.cols > .card:last-child'), preview=document.createElement('div'); preview.innerHTML=storyPreview(w); right.insertBefore(preview,right.children[2]);
     box.querySelector('[data-save]').disabled=!state.dirty;
+  }
+  function storyPreview(w) {
+    var model=R.ShortStory && R.ShortStory.build(w,state.sd,null); if(!model)return '';
+    return '<details style="margin:16px 0"><summary>무빙툰 단편 · '+esc(model.title)+'</summary><p class="muted">'+esc(model.notice)+'</p>'+model.frames.map(function(f){return '<h4>'+esc(f.cap)+'</h4>'+f.paras.map(function(p){return '<p>'+esc(p)+'</p>';}).join('');}).join('')+'</details>';
   }
   function open(box) {
     if(state.dirty && state.loaded){ shell(box); draw(box); return; }

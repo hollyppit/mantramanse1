@@ -359,19 +359,21 @@
   /* 세계 무빙툰: 세계의 챕터들이 화면에 그려진 내용에서 앞부분 핵심 컷을 뽑아 한 편으로 감상한다(문장은 원문 그대로). */
   function worldToonModel(w) {
     var idxs = (S.wmap && S.wmap.by[w.id]) || [], list = idxs.map(function (i) { var c = S.rep.chapters[i], a = document.getElementById('ch-' + c.id); return { id: c.id, title: c.title, html: a ? a.innerHTML : (c.scenes || []).map(function(s,k){var panel=panelOf(s);return (panel?panelHtml(panel):'')+sceneHtml(c,s,k);}).join('') }; });
-    return R.Samsara.fromChapters(list, { id: 'world:' + w.id, title: w.name, label: (w.icon || '') + ' ' + w.name, bg: w.bgImage || '', cut: w.cutImages || null, per: 3, max: 36 });
+    var source = w.id === 'w5' ? R.Samsara.extract(S.rep) : R.Samsara.fromChapters(list, { id: 'world:' + w.id, title: w.name, label: (w.icon || '') + ' ' + w.name, bg: w.bgImage || '', cut: w.cutImages || null, per: 3, max: 36 });
+    var storyWorld = w.id === 'w5' && source ? Object.assign({}, w, { bgImage: R.Samsara.imageOf(source, S.assets || {}) || w.bgImage }) : w;
+    return R.ShortStory ? R.ShortStory.build(storyWorld, S.sd, source) : source;
   }
   function worldToonCard(w) {
     if (!R.Samsara || !R.Samsara.fromChapters) return '';
     try { var m = worldToonModel(w); if (!m) return ''; var th = (m.frames.filter(function (f) { return f.img; })[0] || {}).img || w.bgImage || '';
-      return R.Samsara.toonCard({ wid: w.id, name: w.name, icon: w.icon, thumb: th, frames: m.frames.length }); } catch (e) { return ''; }
+      return R.Samsara.toonCard({ wid: w.id, name: w.name, icon: w.icon, thumb: th, frames: m.frames.length, title:m.storyBasis?m.title:'', story:!!m.storyBasis }); } catch (e) { return ''; }
   }
   $('#v-home').addEventListener('click', function (e) {
     var b = e.target.closest('[data-wtoon]'); if (b) openWorldToon(b.dataset.wtoon);
   });
   function openWorldToon(wid) {
     var w = ((S.wmap && S.wmap.list) || []).filter(function (x) { return x.id === wid; })[0]; if (!w || !R.Samsara) return;
-    var model = null; try { model = wid === 'w5' ? R.Samsara.extract(S.rep) : worldToonModel(w); } catch (err) { model = null; } if (!model) { toast('무빙툰 장면을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
+    var model = null; try { model = worldToonModel(w); } catch (err) { model = null; } if (!model) { toast('무빙툰 장면을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
     if (S.mv) S.mv.pause();
     T('world_toon_open', { world: wid, frames: model.frames.length });
     R.Samsara.open(model, S.assets || {}, S.assetVideos || {}, { reduce: reduce, saveData: saveData, rate: playbackRate(), onDone: function () { S.xp.seen['toon:' + wid] = 1; xpSave(); T('world_toon_done', { world: wid }); showHome(wid); } });
@@ -409,14 +411,10 @@
   /* 윤회의 문 인터랙션: 개인화된 전생 서사를 컷 단위 무빙툰으로 감상(R.Samsara). 이미 만들어진 전생 챕터의 문장을 그대로 쓰고, 에셋이 없으면 색 바탕으로 대신한다. */
   function worldSamsaraHtml() {
     if (!R.Samsara || !S.rep) return '';
-    try { return R.Samsara.card(R.Samsara.extract(S.rep), S.assets || {}, esc); } catch (e) { return ''; }
+    try { var w = S.wmap.list.find(function(w){return w.id==='w5';}); return R.Samsara.card(worldToonModel(w), S.assets || {}, esc); } catch (e) { return ''; }
   }
   $('#v-home').addEventListener('click', function (e) {
-    if (!e.target.closest('[data-smopen]')) return; var model = null;
-    try { model = R.Samsara.extract(S.rep); } catch (err) { model = null; } if (!model) { toast('전생 이야기를 준비하지 못했습니다.'); return; }
-    T('samsara_open', { frames: model.frames.length, image: !!R.Samsara.imageOf(model, S.assets || {}) });
-    R.Samsara.open(model, S.assets || {}, S.assetVideos || {}, { reduce: reduce, saveData: saveData, rate: playbackRate(),
-      onDone: function () { S.ended[model.id] = 1; S.visited[model.id] = 1; xpSave(); T('samsara_completed', {}); toast('윤회의 문 탐험을 마쳤습니다. 운명 세계 지도로 돌아갑니다.', 3200); showHome(); } });
+    if (e.target.closest('[data-smopen]')) openWorldToon('w5');
   });
   /* 개운의 성역 인터랙션: 개운법 · 명소 · 실천 계획 · 종합 리포트(R.Sanctuary). 체크리스트는 기기에만 저장한다. */
   function sanctuaryModel() { return R.Sanctuary.model(S.rep, S.sd); }

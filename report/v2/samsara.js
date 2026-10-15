@@ -62,8 +62,8 @@
   }
   function toonCard(info) {
     var E2 = E, n = info.frames || 0, thumb = info.thumb || '';
-    return '<div class="cs-card sm-card"><div class="sm-th' + (thumb ? '' : ' none') + '"' + (thumb ? ' style="background-image:url(' + E2(thumb) + ')"' : '') + '>' + (thumb ? '' : '<span aria-hidden="true">' + E2(info.icon || '像') + '</span>') + '</div><div><p class="cs-ct">' + E2(info.name || '') + ' · 무빙툰</p><h4>챕터별 핵심 장면으로 보는 ' + E2(info.name || '이 세계') + '</h4>' +
-      '<p class="cs-sum">' + n + '개의 컷 · 챕터마다 앞부분의 핵심 문장을 이미지와 함께 이어서 봅니다. 자동 재생·이전/다음·건너뛰기를 고를 수 있습니다.</p><button type="button" class="btn gold big" data-wtoon="' + E2(info.wid || '') + '">무빙툰으로 감상하기</button></div></div>';
+    return '<div class="cs-card sm-card"><div class="sm-th' + (thumb ? '' : ' none') + '"' + (thumb ? ' style="background-image:url(' + E2(thumb) + ')"' : '') + '>' + (thumb ? '' : '<span aria-hidden="true">' + E2(info.icon || '像') + '</span>') + '</div><div><p class="cs-ct">' + E2(info.name || '') + ' · 무빙툰</p><h4>' + E2(info.title || ('챕터별 핵심 장면으로 보는 ' + (info.name || '이 세계'))) + '</h4>' +
+      '<p class="cs-sum">' + n + '개의 컷 · '+(info.story?'인물의 선택을 따라 읽는 한 편의 단편 이야기입니다.':'챕터마다 앞부분의 핵심 문장을 이미지와 함께 이어서 봅니다.')+' 자동 재생·이전/다음·건너뛰기를 고를 수 있습니다.</p><button type="button" class="btn gold big" data-wtoon="' + E2(info.wid || '') + '">무빙툰으로 감상하기</button></div></div>';
   }
   function fromDom(article, meta) { return article ? fromHtml(article.innerHTML, meta) : null; }
 
