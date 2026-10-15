@@ -48,6 +48,10 @@
     var act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}, S = R.SajuData.SEASONS, h = '';
     h += '<div class="band"></div><div class="in"><div class="act">' + esc(act.roman || '') + ' · ' + esc(act.title || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2>' + esc(c.title) + '</h2><div class="sub">' + esc(c.subtitle || '') + '</div>' + heroImg(c) +
       (c.chapterHook ? hookHtml(c,who) : '<div class="hl">' + nl(c.headline) + '</div><span class="fact">FACT · ' + esc(c.fact) + '</span><p>' + nl(c.interpretation) + '</p>');
+    if(c.readingDeferred){
+      var pendingChart=R.Scenes.chartKind ? R.Scenes.chartKind(c) : null;
+      return page('<div class="band"></div><div class="in"><h2>'+esc(c.title)+'</h2><p role="status">'+esc(c.readingNotice || '이 장의 풀이를 준비하지 못했습니다.')+'</p>'+(pendingChart && sd?R.Charts.html(pendingChart,sd,{theme:'light',chapter:c.base || c.id}):'')+(c.readingParagraphs || []).filter(function(p){return p.text;}).map(function(p){return '<p>'+nl(p.text)+'</p>';}).join('')+'</div>',color,n,total,who);
+    }
     var ck = R.Scenes.chartKind ? R.Scenes.chartKind(c) : null; if (ck && sd) h += '<div style="margin:10px 0">' + R.Charts.html(ck, sd, { theme: 'light', chapter: c.base || c.id }) + '</div>';
     if (c.verdict) { var vv = c.verdict; h += '<div class="cap">' + esc(vv.blocked.label) + '</div><p>' + nl(vv.blocked.text) + '</p>' + (vv.evidence ? '<div class="cap">EVIDENCE</div><p>' + nl(vv.evidence.text) + '</p>' : '') + '<div class="cap">다음 장면을 위한 두 걸음</div><p style="color:#6B6A63;font-size:12px">' + esc(vv.advice.lead) + '</p>' + list(vv.advice.items); }
     if (c.readingFullText && c.interpretationAnalysis && c.interpretationAnalysis.mode === 'grounded') h += '<div class="cap">심층 풀이 전문</div><p>' + nl(c.readingFullText) + '</p>' + evidenceHtml(c);
@@ -105,14 +109,14 @@
     (rep.chapters || []).filter(function(c){return c.readingCore;}).forEach(function(c){
       var blocks=[]; if(c.chapterHook)blocks.push(hookHtml(c,who));
       if(c.readingParagraphs && (c.readingDeferred || c.interpretationAnalysis && c.interpretationAnalysis.mode==='grounded')) {
-        if(c.readingDeferred)blocks.push('<div class="cap">계산 참고값</div><p>'+nl(c.readingCore.why || '')+'</p>');
+        if(c.readingDeferred)blocks.push('<p role="status">'+esc(c.readingNotice || '이 장의 풀이를 준비하지 못했습니다.')+'</p><div class="cap">계산 참고값</div><p>'+nl(c.readingCore.why || '')+'</p>');
         c.readingParagraphs.forEach(function(p){var field=R.ReadingFlow.FIELDS.find(function(f){return f[0]===p.role;}),pieces=String(p.text).match(/[\s\S]{1,420}/g)||[];pieces.forEach(function(t,i){blocks.push('<div class="cap">'+esc(field?field[1]:'심층 풀이')+(i?' (계속)':'')+'</div><p>'+nl(t)+'</p>');});});
       } else R.ReadingFlow.FIELDS.forEach(function(f){
           var text=String(c.readingCore[f[0]]||''), pieces=text.match(/[\s\S]{1,420}/g)||[''];
           pieces.forEach(function(t,i){blocks.push('<div class="cap">'+esc(f[1])+(i?' (계속)':'')+'</div><p>'+nl(t)+'</p>');});
         });
       var group=[], height=0, pageNo=0;
-      function flush(){if(!group.length)return;content.push('<div class="act">'+c.readingSection+' / 15 · '+(++pageNo)+'</div><h2>'+esc(c.title)+'</h2>'+group.join(''));group=[];height=0;}
+      function flush(){if(!group.length)return;content.push('<div class="act">'+(rep.editorialVersion>0?c.act+' / '+rep.acts.length:c.readingSection+' / 15')+' · '+(++pageNo)+'</div><h2>'+esc(c.title)+'</h2>'+group.join(''));group=[];height=0;}
       blocks=blocks.concat(evidenceBlocks(c));
       blocks.forEach(function(block){var len=block.replace(/<[^>]*>/g,'').length, estimate=Math.ceil(len/32)*32+60;if(group.length && (group.length>=4 || height+estimate>780))flush();group.push(block);height+=estimate;});flush();
     });

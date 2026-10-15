@@ -68,19 +68,22 @@
     ['인성', '내비게이션·정비소', '배움·보호·방향, 길을 알려 주고 고쳐 주는 것', '생각과 점검이 길어 출발이 늦어집니다', '길 안내와 정비가 약해 혼자 헤매다 지칩니다']];
   SECTIONS.deep_car = function (H) {
     var sd = H.sd, st = sd.dayMaster.stem, car = CAR[st] || CAR.갑, g = sd.groups, strong = sd.strength.band, el = sd.dayMaster.el, yong = sd.usefulElements && sd.usefulElements.yong;
+    var trim={비겁:'독립 운용 사양',식상:'표현·제작 사양',재성:'자원 운용 사양',관성:'기준·책임 사양',인성:'학습·점검 사양'}[sd.dominantGroup] || '복합 사양',variant=car[0]+' · '+trim;
     var out = [], lv = function (v) { return v >= 25 ? '높음' : v >= 12 ? '보통' : '낮음'; };
-    out.push(scene(sec('dp-hero', cap('MY CAR · 내 사주를 자동차에 비유하면') + fig(H, 'car:' + st, 'car', car[0], '') + '<h3 class="dp-h">' + esc(nz(H) + ' ' + car[0] + '입니다') + '</h3><p class="lead">' + esc(car[1]) + '</p>' +
+    out.push(scene(sec('dp-hero', cap('MY CAR · 내 사주를 자동차에 비유하면') + fig(H, 'car:' + st, 'car', car[0], '') + '<h3 class="dp-h">' + esc(nz(H) + ' ' + variant + '입니다') + '</h3><p class="lead">' + esc(car[1]) + '</p>' +
       '<p class="dp-note">타고난 일간 <b>' + esc(st + '(' + (sd.dayMaster.hanja || '') + EL_HJ[el] + ')') + '</b>의 성질을 자동차로 옮긴 비유입니다. 좋고 나쁨이 아니라 "어떤 차인지"를 알면 운전이 쉬워집니다.</p>')));
+    out.push(scene(sec('',cap('차체와 구동 · 서로 다른 계산 근거')+'<div class="dp-grid2"><div class="dp-card"><h4>기본 구조</h4><p>'+esc(sd.dayPillar.ko+'일주 · '+trim)+'</p><p>같은 차종도 부품 비중과 운용 조건이 다릅니다.</p></div><div class="dp-card"><h4>강약과 통근</h4><p>'+esc('강약 분류: '+strong+' / 원국 통근: '+(sd.roots?sd.roots.level:'자료 없음'))+'</p><p>강약과 통근은 다른 기준입니다. 체력·운전 능력·성공 가능성을 평가하는 값이 아닙니다.</p></div></div>')));
     var pb = PARTS.map(function (p) { var v = g[p[0]] || 0; return '<div class="dp-part"><div class="dp-ph1"><b>' + esc(p[1]) + '</b><small>' + esc(p[0] + ' · ' + p[2]) + '</small></div>' + bar(lv(v), v * 2, { text: Math.round(v) + '%', color: v >= 25 ? '#D9694F' : v < 12 ? '#6B7A99' : '' }) + '<p>' + esc(v >= 25 ? p[3] : v < 12 ? p[4] : '비중만으로는 특별한 장점이나 문제를 단정하기 어렵습니다.') + '</p></div>'; }).join('');
     out.push(scene(sec('', cap('차량 사양 · 부품별 점검') + '<p class="dp-lead2">같은 차종이라도 부품 상태는 사람마다 다릅니다. 아래 막대가 길수록 그 부품이 <b>강하게</b> 달려 있다는 뜻입니다.</p><div class="dp-parts">' + pb + '</div>')));
     var eng = strong === '신강' ? '일간을 돕는 기운이 우세한 구조입니다. 운전의 비유로는 내 힘을 어디에 쓸지 정하는 일이 중요하며, 체력이나 성공 능력이 크다는 뜻은 아닙니다.' : strong === '신약' ? '일간을 돕는 기운보다 밖으로 쓰거나 감당할 기운이 우세한 구조입니다. 지원과 책임의 배분을 먼저 살피며, 체력이나 의지가 약하다는 뜻은 아닙니다.' : '일간을 돕는 힘과 밖으로 쓰는 힘의 쏠림이 크지 않은 구조입니다. 실제로 감당할 일의 양은 상황과 준비에 따라 달라집니다.';
     out.push(scene(sec('', cap('엔진 · 연료 · 정비') + '<div class="dp-grid2"><div class="dp-card"><h4>엔진 (일간의 힘)</h4><p>' + esc(eng) + '</p></div><div class="dp-card"><h4>잘 맞는 연료</h4><p>' + (yong ? '이 차는 <b>' + esc(yong + '(' + EL_HJ[yong] + ')') + '</b> 기운을 균형의 보완 방향으로 읽습니다. 색이나 물건을 더하는 것보다, 그 기운이 맡는 역할을 생활에서 어떻게 쓸지 살피는 비유입니다.' : '용신을 특정할 근거가 부족하므로, 한 기운을 더하거나 줄이는 처방은 하지 않습니다.') + '</p></div></div>' +
       '<div class="dp-pc"><div class="dp-pro"><h4>장점</h4><ul>' + carPros(H, car).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div><div class="dp-con"><h4>단점 · 정비 포인트</h4><ul>' + carCons(H, car).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div></div>')));
-    var road = sd.currentDaewoon, se = sd.sewoon, mo = sd.monthlyLuck && sd.monthlyLuck[0];
+    var road = sd.currentDaewoon, se = sd.sewoon, mo = sd.monthlyLuck && sd.monthlyLuck[0], day=null;
+    try{var date=new Date((H.now || Date.now())+9*3600e3);day=H.M.ilun(H.ch,date.getUTCFullYear(),date.getUTCMonth()+1)[date.getUTCDate()-1];}catch(e){}
     out.push(scene(sec('', cap('지금 달리는 도로 · 날씨') + '<div class="dp-road">' +
       (road ? '<div><small>도로(대운)</small><b>' + esc(road.ganzhi) + ' 대운</b><span>' + esc(SEA[road.season] || '') + ' · ' + esc(road.condition || '') + '</span></div>' : '') +
       (se ? '<div><small>날씨(세운)</small><b>' + esc(se.year + ' ' + se.ganzhi) + '</b><span>' + esc(SEA[se.season] || '') + ' · ' + esc(se.condition || '') + '</span></div>' : '') +
-      (mo ? '<div><small>교통 상황(월운)</small><b>이번 달 ' + esc(mo.ganzhi) + '</b><span>' + esc(SEA[mo.season] || '') + ' · ' + esc(mo.condition || '') + '</span></div>' : '') + '</div><p class="dp-note">같은 차도 도로(대운 10년), 날씨(세운 1년), 교통 상황(월운 1달)에 따라 달리는 느낌이 달라집니다. 이어지는 "운의 흐름" 챕터에서 시기별로 자세히 봅니다.</p>')));
+      (mo ? '<div><small>교통 상황(월운)</small><b>이번 달 ' + esc(mo.ganzhi) + '</b><span>' + esc(SEA[mo.season] || '') + ' · ' + esc(mo.condition || '') + '</span></div>' : '') + (day?'<div><small>당일 세부 조건(일진)</small><b>'+esc(H.M.gzNameK(day))+'</b><span>'+esc(H.M.flowLabel(day.ev))+' · 서비스 내부 지표</span></div>':'') + '</div><p class="dp-note">원국은 차의 기본 구조, 일간은 운전의 중심, 오행·십성은 부품, 통근·강약은 구동 안정성에 대한 교육용 비유입니다. 도로(대운), 날씨(세운), 교통 상황(월운)은 별도의 시기 조건입니다. 실제 판단과 행동은 운전자인 개인의 선택이며, 이 비유를 운세 계산 공식으로 사용하지 않습니다. 이어지는 "운의 흐름" 챕터에서 시기별로 자세히 봅니다.</p>')));
     return { title: '내 사주를 자동차에 비유하면', sub: car[0], scenes: out };
   };
   function carPros(H, car) {

@@ -1,3 +1,5 @@
+import {Editorial,loadEditorial,contractFor,selectCases,behaviorPlans} from '../_editorial.js';
+import { diagnosticRecord, saveDiagnostic } from '../_reading-diagnostics.js';
 import { writerSchema, reviewSchema, repairSchema } from '../_chapter-output-schema.js';
 import { chapterPolicy, chapterInstruction, CHAPTER_DEFAULTS } from '../_chapter-policy.js';
 import { CHAPTER_VERSION, selectChapterClaims, buildHook, chapterQuality, REVIEW_SYSTEM, reviewPayload, parseReview, validateHook, chartFingerprint, claimSignature } from '../_chapter-engine.js';
@@ -31,28 +33,33 @@ export function usageOf(u) {
   const n = x => typeof x === 'number' && Number.isFinite(x) && x >= 0 ? x : null;
   return { inputTokens: n(u.input_tokens), outputTokens: n(u.output_tokens), totalTokens: n(u.total_tokens), cachedInputTokens: n(u.input_tokens_details?.cached_tokens) };
 }
-export async function onRequestPost({ request, env }) {
+async function handleReading({ request, env }, context) {
   let clean, original;
   try { const raw = await request.text(); if (raw.length > 160000) return json({ ok: false, error: 'too-large' }, 413); original = JSON.parse(raw); clean = validate(original); } catch { }
   if (!clean) return json({ ok: false, error: 'bad-payload' }, 400);
+  context.chapter = clean.chapter.id;
   clean.guide = original.guide === 'female' ? 'female' : 'male'; // 캐시도 안내자별로 분리한다.
   const requestStarted=Date.now(),providerAttempts=[];
   let storageStage='rules';
-  let kv, key, src, sty, analysis, settings, mode, policy, hook, hookDraft, previous = [], lastRejection = null;
+  let kv, key, src, sty, analysis, settings, mode, policy, hook, hookDraft, previous = [], lastRejection = null, editorial, contract, examples=[], userContext=Editorial.cleanContext(original.realityContext);
   try {
     // Rule/source deactivation must be observed before reusing any AI cache.
     kv = kvOf(env);
     const [items, blocked, version] = kv ? await Promise.all([loadAll(kv), blockedDocs(kv), meta(kv)]) : [[], new Set(), {}];
     storageStage='settings';settings = await loadSettings(kv);
+    editorial=await loadEditorial(kv);contract=contractFor(editorial,clean.chapter);
     mode = env.INTERPRETATION_ENGINE_MODE || settings.mode;
     policy = chapterPolicy(clean.chapter, settings.chapters);
+    if(contract){const kind=editorial.topics.find(t=>t.id===contract.topicId)?.policyKind || contract.topicId;policy=chapterPolicy({...clean.chapter,chapterKind:kind},settings.chapters)||policy;if(policy)policy={...policy,required:[...new Set([...policy.required,...contract.requiredEvidence])]};}
     previous = (Array.isArray(original.previous) ? original.previous : []).slice(-80).filter(p => p && typeof p.text === 'string' && p.text.length<=1200).map(p=>({id:String(p.id || '').slice(0,100),chapter:String(p.chapter || '').slice(0,80),text:p.text}));
     if (!['legacy','shadow','grounded'].includes(mode)) return json({ ok: false, error: 'invalid-engine-mode' }, 503);
     if (!env.OPENAI_API_KEY && !env.ANTHROPIC_API_KEY) return json({ ok: false, error: 'no-ai', engineMode: mode }, 503);
     if (mode !== 'legacy' || policy?.hook.enabled) {
       storageStage='source-index';const sourceIndex = await loadSourceIndex(kv, items, blocked);
       storageStage='grounding';analysis = analyze(original.sd, items, { ...settings, sourceIndex, blockedDocs: blocked, domains: policy && ['timing','remedy'].includes(policy.key) ? undefined : domainsFor(clean.chapter) });
+      if(contract?.state==='active')analysis={...analysis,claims:analysis.claims.filter(c=>contract.sourceRuleIds.includes(c.knowledge_id))};
       analysis = selectChapterClaims(analysis, policy);
+      examples=selectCases(editorial,contract,analysis.claims,userContext);
       hook = await buildHook(analysis, policy, settings);
       if(hook?.source === 'verified-rule'){hookDraft=hook;hook=null;}
       if (mode === 'grounded' && !analysis.claims.length) return json({ ok: false, error: 'insufficient-evidence', engine: ENGINE_VERSION, engineMode: mode, warnings: analysis.warnings }, 422);
@@ -61,7 +68,7 @@ export async function onRequestPost({ request, env }) {
     // Explicitly authorized writer payload: excludes names and raw birth dates.
     if (mode === 'grounded') src = { chart: analysis.normalized.chart, facts: analysis.normalized.saju, knowledge: analysis.claims.map(c => ({ id: c.knowledge_id, interpretation: c.judgment })), claims: analysis.claims, cross_analysis: analysis.cross_analysis };
     storageStage='style';sty = styleFor(await loadStyle(kv), [clean.chapter.id, ...domainsFor(clean.chapter)], { soft: src.knowledge.length < 2 });
-    storageStage='cache';const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ chapterVersion: CHAPTER_VERSION, previous, hook, hookDraft, version: VERSION, engine: ENGINE_VERSION, mode, settings, claims: analysis?.claims, db: version, style: sty.sig, clean, models: [env.OPENAI_MODEL, env.ANTHROPIC_MODEL] })));
+    storageStage='cache';const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ editorialVersion:editorial.version,contract,examples,userContext,chapterVersion: CHAPTER_VERSION, previous, hook, hookDraft, version: VERSION, engine: ENGINE_VERSION, mode, settings, claims: analysis?.claims, db: version, style: sty.sig, clean, models: [env.OPENAI_MODEL, env.ANTHROPIC_MODEL] })));
     key = 'ai:movingtoon:' + [...new Uint8Array(hash)].map(x => x.toString(16).padStart(2, '0')).join('');
     if (kv) {
       const hit = await kv.get(key, 'json');
@@ -75,8 +82,9 @@ export async function onRequestPost({ request, env }) {
   } catch { return json({ ok: false, error: 'storage-unavailable', storageStage, engineMode: mode }, 503); }
   const allowedNumbers=allowedOutputNumbers(clean,src);
   const verifiedTimingClaimIds=(analysis?.claims || []).filter(c=>c.elements.some(r=>/daewoon|seun|monthSeason|futureSeason/.test(r.key))).map(c=>c.claim_id);
-  const input = JSON.stringify({ ...src, allowedNumbers, verifiedTimingClaimIds, chapter: clean.chapter, outline: clean.outline, chapterPolicy: policy, previous, hookDraft: hookDraft ? {text:hookDraft.text,explanation:hookDraft.explanation,claim_id:hookDraft.claim_id}:null, hook: hook ? { text: hook.text, explanation: hook.explanation, claim_id: hook.claim_id } : null });
+  const input = JSON.stringify({ ...src, behaviorPlans:behaviorPlans(analysis?.claims,examples), realityContext:Editorial.contextLabels(userContext),examples,chapterContract:contract, allowedNumbers, verifiedTimingClaimIds, chapter: clean.chapter, outline: clean.outline, chapterPolicy: policy, previous, hookDraft: hookDraft ? {text:hookDraft.text,explanation:hookDraft.explanation,claim_id:hookDraft.claim_id}:null, hook: hook ? { text: hook.text, explanation: hook.explanation, claim_id: hook.claim_id } : null });
   let writerSystem = mode === 'grounded' ? WRITER_SYSTEM + '\n[표현 설정]\n' + (sty.directive || '') + '\n위 표현 설정은 판단·근거·불확실성을 변경하지 않는다.' : systemFor(sty);
+  writerSystem += '\n'+Editorial.instruction(contract)+'\n[현실 정보 분리] realityContext는 사용자가 선택한 실제 상황이고 명리 근거가 아니다. 비어 있는 답변은 추정하지 않는다. examples는 검수된 가정 사례이며 사용자가 겪은 사실로 쓰지 않는다. 현실 답변은 사례·전략 선택에만 쓰고 원국·판단·계산은 변경하지 않는다.';
   writerSystem += clean.guide === 'male'
     ? '\n[안내자 말투 최우선] 운명 감찰관은 사용자 성별과 무관하게 반말로 안내한다. 일반 풀이와 후킹은 ~야/~해/~할 수 있어/~해봐의 자연스럽고 직설적인 해체를 쓴다. 사용자를 모욕하거나 하대하지 않는다. ~습니다/~입니다/~세요/~요 존댓말을 섞지 않는다. 이름 뒤에 님을 붙이지 않는다. episode와 전생의 ~했다/~다 서사체, 사실·수치·근거·불확실성은 유지한다.'
     : '\n[안내자 말투 최우선] 명운 해독관은 사용자 성별과 무관하게 차분한 존댓말로 안내한다. 일반 풀이와 후킹은 ~습니다/~입니다/~해보세요로 통일한다. episode와 전생의 ~했다/~다 서사체, 사실·수치·근거·불확실성은 유지한다.';
@@ -120,7 +128,7 @@ export async function onRequestPost({ request, env }) {
       if (quality && !quality.ok && !pendingRatio) { rejected('chapter-quality',quality); continue; }
       let semantic = null, reviewUsage = null;
       if (semanticRequired) {
-        const review = await generate(env, provider, reviewPayload(result,analysis,policy,previous,hook), REVIEW_SYSTEM, { ...settings, outputSchema:reviewSchema(policy,analysis.claims), maxOutputTokens: 4000,timeoutMs:Math.max(1,deadline-Date.now()) });
+        const review = await generate(env, provider, JSON.stringify({...JSON.parse(reviewPayload(result,analysis,policy,previous,hook)),realityContext:Editorial.contextLabels(userContext),examples,chapterContract:contract}), REVIEW_SYSTEM, { ...settings, outputSchema:reviewSchema(policy,analysis.claims), maxOutputTokens: 4000,timeoutMs:Math.max(1,deadline-Date.now()) });
         semantic = parseReview(review.text,policy); reviewUsage = review.usage;
         if (semantic?.coverage?.some(x=>x.claim_ids.some(id=>!analysis.claims.some(c=>c.claim_id===id))))semantic=null;
         if (!semantic || !semantic.ok) { rejected('semantic-review',semantic || {issues:[{code:'semantic-review-unavailable'}]}); continue; }
@@ -129,11 +137,23 @@ export async function onRequestPost({ request, env }) {
       if (quality) { quality.semanticReview = semantic; quality.semanticReviewStatus = semantic ? 'passed' : 'not-run'; quality.requiredCoverage=semantic?.coverage || []; quality.warnings.push(...(semantic?.coverage || []).filter(x=>x.status==='missing-evidence').map(x=>'required-evidence-missing:'+x.item)); }
       if (reviewUsage && generation.usage) { for(const k of ['inputTokens','outputTokens','totalTokens','cachedInputTokens'])generation.usage[k]=generation.usage[k]!=null && reviewUsage[k]!=null ? generation.usage[k]+reviewUsage[k] : null; }
       const cost = generation.usage && generation.usage.inputTokens != null && generation.usage.outputTokens != null && settings.inputPricePerMillion != null && settings.outputPricePerMillion != null ? (generation.usage.inputTokens * settings.inputPricePerMillion + generation.usage.outputTokens * settings.outputPricePerMillion) / 1e6 : null;
-      const value = { result, provider, chapterVersion:CHAPTER_VERSION, chapterPolicy: policy, chapterQuality: quality, hook: hook || null, hookWarning: policy?.hook.enabled && !hook ? 'hook-evidence-or-length-missing' : null, generation: { model: generation.model, elapsedMs: generation.elapsedMs, usage: generation.usage, estimatedCost: cost, costScope: 'accepted-writer-repair-and-review-calls', priceSource: cost == null ? null : 'admin-configured', promptVersion: mode === 'grounded' ? ENGINE_VERSION : VERSION }, knowledgeCount: src.knowledge.length, style: sty.meta,
-        ...(analysis ? { interpretation: { version: analysis.version, mode, claims: analysis.claims, features: analysis.features, cross_analysis: analysis.cross_analysis, warnings: analysis.warnings, quality: analysis.quality, validation } } : {}) };
+      const value = { result, provider, editorialVersion:editorial.version, chapterContractId:contract?.id || null, exampleIds:examples.map(c=>c.id), chapterVersion:CHAPTER_VERSION, chapterPolicy: policy, chapterQuality: quality, hook: hook || null, hookWarning: policy?.hook.enabled && !hook ? 'hook-evidence-or-length-missing' : null, generation: { model: generation.model, elapsedMs: generation.elapsedMs, usage: generation.usage, estimatedCost: cost, costScope: 'accepted-writer-repair-and-review-calls', priceSource: cost == null ? null : 'admin-configured', promptVersion: mode === 'grounded' ? ENGINE_VERSION : VERSION }, knowledgeCount: src.knowledge.length, style: sty.meta,
+        ...(analysis ? { interpretation: { version: analysis.version, mode, claims: analysis.claims, behaviorPlans:behaviorPlans(analysis.claims,examples), features: analysis.features, cross_analysis: analysis.cross_analysis, warnings: analysis.warnings, quality: analysis.quality, validation } } : {}) };
       if (kv) { try { await kv.put(key, JSON.stringify(value), { expirationTtl: 604800 }); } catch { } }
       return json({ ok: true, ...value, cached: false });
     } catch (e) { const error=/^provider-http-[0-9]{3}(?:-(?:insufficient_quota|rate_limit_exceeded|billing_not_active|overloaded_error))?$/.test(e?.message || '')?e.message:e?.name==='TimeoutError'?'provider-timeout':'provider-call-error';providerAttempts.push({provider,status:'provider-call-failed',error,elapsedMs:Date.now()-requestStarted}); }
   }
   return json({ ok: false, error: lastRejection ? 'chapter-validation-failed' : 'ai-unavailable', chapterVersion:CHAPTER_VERSION, validation: lastRejection, providerAttempts, elapsedMs:Date.now()-requestStarted, engineMode: mode }, 502);
+}
+
+// Attach a fresh correlation ID even to cache hits. Never log input, chart, prose or provider messages.
+export async function onRequestPost({request, env}) {
+  const context = {requestId:crypto.randomUUID(), chapter:'', started:Date.now()};
+  let response;
+  try { response = await handleReading({request, env}, context); }
+  catch { response = json({ok:false,error:'pipeline-unavailable'},503); }
+  const body = await response.json();
+  const diagnostic = diagnosticRecord(body, response.status, context);
+  await saveDiagnostic(env, diagnostic);
+  return json({...body,requestId:context.requestId,...(!body.ok ? {failure:diagnostic} : {})},response.status);
 }

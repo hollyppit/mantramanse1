@@ -94,11 +94,11 @@
     var size = clamp(p.C * 2.8, 4, 100), solid = clamp(30 + (p.rooted ? 25 : 0) + (p.vault.length ? 25 : 0) + (p.pj >= p.pp ? 10 : 0) - (p.open.length ? 20 : 0) - Math.max(0, p.clashN - 1) * 4, 6, 100),
       leak = p.leak, flow = clamp(p.O * 2.6 + (p.C >= 10 && p.O >= 15 ? 12 : 0), 4, 100), hold = p.band === '신강' ? 80 : p.band === '신약' ? 32 : 58, r = ROLE_TXT[p.role];
     var g = [
-      { name: '크기', sub: '돈의 기운(재성)의 양', v: size, text: size >= 66 ? '큰 편' : size >= 38 ? '보통' : '작은 편', plain: size >= 66 ? '많이 담을 수 있는 크기입니다.' : size >= 38 ? '생활하기 알맞은 크기입니다.' : '큰 통에 쌓기보다 채워지는 구조가 맞아요.', color: '#5FBF9A' },
+      { name: '크기', sub: '돈의 기운(재성)의 양', v: size, text: size >= 66 ? '큰 편' : size >= 38 ? '보통' : '작은 편', plain: size >= 66 ? '재성의 비중이 두드러지는 상징입니다. 부의 크기를 뜻하지 않습니다.' : size >= 38 ? '재성의 비중이 중간인 상징입니다. 생활비 충당 여부는 별도입니다.' : '재성의 비중이 낮은 상징입니다. 소득이나 자산이 적다는 뜻은 아닙니다.', color: '#5FBF9A' },
       { name: '단단함', sub: '재성의 뿌리 · 재고(창고) · 충', v: solid, text: solid >= 66 ? '단단함' : solid >= 40 ? '보통' : '흔들림', plain: solid >= 66 ? '한번 담으면 잘 지켜지는 그릇입니다.' : solid >= 40 ? '지키는 힘은 평범해서 관리가 도움이 됩니다.' : '충·뿌리 부족으로 돈이 흔들리기 쉽습니다.', color: '#8AA7D6' },
       { name: '새는 정도', sub: '비겁·겁재가 나눠 가져가는 힘', v: leak, text: leak >= 68 ? '많이 샘' : leak >= 45 ? '조금 샘' : '거의 안 샘', plain: leak >= 68 ? '사람·경쟁·체면으로 나가는 돈이 큽니다. 틈 막기가 1순위입니다.' : leak >= 45 ? '가끔 새는 곳이 있으니 한도를 정해 두세요.' : '새는 곳이 적어 모으기 유리합니다.', color: '#FF9A3C', bad: true },
       { name: '물길', sub: '식상생재 · 재주가 돈이 되는 통로', v: flow, text: flow >= 55 ? '잘 흐름' : flow >= 28 ? '보통' : '가는 편', plain: flow >= 55 ? '재주와 일이 곧 수입이 되는 통로가 넓습니다.' : flow >= 28 ? '재능을 돈으로 바꾸는 노력이 필요합니다.' : '재주가 돈으로 이어지는 연결을 만들어야 합니다.', color: '#4A9BD1' },
-      { name: '감당력', sub: '일간(나)의 힘 · 신강·신약', v: hold, text: p.band || '중화', plain: p.band === '신강' ? '큰 돈도 들고 갈 힘이 있습니다.' : p.band === '신약' ? '큰 돈 앞에서는 쉽게 지쳐 도움이 필요합니다.' : '무리 없는 크기를 감당하는 균형형입니다.', color: '#D5B97F' }];
+      { name: '감당력', sub: '일간(나)의 힘 · 신강·신약', v: hold, text: p.band || '중화', plain: p.band === '신강' ? '일간을 돕는 기운이 우세한 모델 분류입니다. 실제 자금 감당 능력과는 구분합니다.' : p.band === '신약' ? '일간을 돕는 기운이 상대적으로 적은 모델 분류입니다. 의지나 자산 규모의 평가가 아닙니다.' : '기운의 쏠림이 크지 않은 모델 분류입니다. 실제 위험 부담은 재무 상황으로 확인합니다.', color: '#D5B97F' }];
     if (r) g.push({ name: '재물 인연', sub: '재성이 용신·희신인가, 기신·구신인가', v: r[2], text: p.role, plain: r[0] + '.', color: '#C58BD6' });
     return g;
   }
@@ -122,7 +122,7 @@
     // 1) 그릇 이미지 + 이름
     out.push(scene(sec('dp-hero', cap('MY WEALTH BOWL · 나의 재물 그릇') + fig(H, 'wealth:' + bk, 'wealth', BW[0], '') + '<h3 class="dp-h">' + esc(nz(H) + ' ' + BW[0] + ' 같은 그릇입니다') + '</h3><p class="lead">' + esc(BW[1]) + '</p>' +
       '<div class="dp-tags">' + chip('힘 · ' + P.name) + chip('성질 · ' + RT.name) + (p.role ? chip('재물 인연 · ' + p.role) : '') + '</div>' +
-      '<p class="dp-note">①그릇의 힘(신강·신약 × 재성) ②재물의 성질(정재·편재·통로) ③보관과 누수(재고·겁재탈재) ④재물 인연(재성이 용신인가 기신인가)을 차례로 읽은 <b>상징적 비유</b>입니다. 그릇의 크고 작음은 등급이 아니라 아래 사양 그래프로 봅니다.</p>')));
+      '<p class="dp-note">①그릇의 힘(신강·신약 × 재성) ②재물의 성질(정재·편재·통로) ③보관과 누수(재고·겁재탈재) ④재물 인연(재성이 용신인가 기신인가)을 차례로 읽은 <b>상징적 비유</b>입니다. 아래 점수는 전통 규칙을 시각화한 서비스 내부 지표이며, 실제 재산 규모·소득 상한·투자 수익률을 뜻하지 않습니다. 개인의 소득·부채·지출은 실제 자료로 따로 확인합니다.</p>')));
     // 2) ① 그릇의 힘
     out.push(scene(sec('', cap('① 그릇의 힘 · ' + P.name + '(' + P.short + ')') + '<p class="lead">' + esc(P.head) + '</p>' + P.body.map(function (t) { return '<p class="lead">' + esc(t) + '</p>'; }).join('') +
       '<div class="dp-card" style="margin-top:12px"><h4>명리 근거</h4><ul class="dp-ul">' + li('일간의 힘 · ' + (p.band || '중화') + (sd.strength && sd.strength.zone ? ' (' + sd.strength.zone + ')' : '')) + li('재성(돈의 기운) ' + rd(p.C) + '% — 정재 ' + rd(p.pj) + '% · 편재 ' + rd(p.pp) + '%') + li(p.C >= 26 ? '재성이 많은 편(재왕)' : p.C < 14 ? '재성이 적은 편(재약)' : '재성이 보통') + '</ul></div>')));
@@ -134,7 +134,7 @@
     // 5) ④ 재물 인연(용신 관점)
     if (role) out.push(scene(sec('', cap('④ 재물 인연 · ' + role[0]) + '<p class="lead">' + esc('재성의 오행은 ' + p.el + '(' + EL_HJ[p.el] + ')이고, 이 사주에서 ' + p.role + ' 자리입니다. ' + role[1]) + '</p>')));
     // 6) 그릇 사양 그래프
-    out.push(scene(sec('', cap('그릇 사양 · 한눈에 보기') + '<p class="dp-lead2">크고 작음은 그릇 종류가 아니라 아래 막대로 봅니다. 막대가 길수록 그 성질이 <b>강하다</b>는 뜻이고, 주황색 "새는 정도"는 길수록 돈이 나가기 쉬운 쪽입니다.</p><div class="dp-parts">' +
+    out.push(scene(sec('', cap('그릇 사양 · 한눈에 보기') + '<p class="dp-lead2">크고 작음은 그릇 종류가 아니라 아래 막대로 봅니다. 막대 길이는 각 전통 조건의 내부 표시값입니다. 주황색 "새는 정도"도 실제 지출액이나 손실 확률이 아니며, 지출 내역을 확인할 점검 항목입니다.</p><div class="dp-parts">' +
       g.map(function (x) { return '<div class="dp-part"><div class="dp-ph1"><b>' + esc(x.name) + '</b><small>' + esc(x.sub) + '</small></div>' + bar(x.text, x.v, { text: Math.round(x.v) + '', color: x.color }) + '<p>' + esc(x.plain) + '</p></div>'; }).join('') + '</div>')));
     // 7) 장단점 + 일간 성향
     out.push(scene(sec('', cap('이 그릇의 장점과 조심할 점') + '<div class="dp-pc"><div class="dp-pro"><h4>장점</h4><ul>' + P.pros.map(li).join('') + '</ul></div><div class="dp-con"><h4>조심할 점</h4><ul>' + P.cons.map(li).join('') + '</ul></div></div><p class="dp-note">그릇을 잘 쓰는 법: ' + esc(P.tip) + '</p>')));
@@ -145,7 +145,7 @@
     var top = ms.slice(0, 2), low = ms[ms.length - 1];
     out.push(scene(sec('', cap('이렇게 벌면 편합니다') + '<div class="dp-pc"><div class="dp-pro" style="grid-column:1/-1"><h4>추천 조합</h4><ul>' + top.map(function (m, i) { return '<li><span>' + (i === 0 ? '주력 · ' : '보조 · ') + esc(m.name) + ' <small>(' + esc(m.sub) + ')</small></span><em>' + esc(m.why) + ' ' + esc(m.warn) + '</em></li>'; }).join('') + '</ul></div></div>' +
       '<div class="dp-pc"><div class="dp-con" style="grid-column:1/-1"><h4>무리하지 말 것</h4><ul><li><span>' + esc(low.name) + ' <small>(' + esc(low.v + '점') + ')</small></span><em>' + esc('내 구조에서는 가장 힘이 덜 실리는 방식입니다. ' + low.warn) + '</em></li></ul></div></div>' +
-      '<p class="dp-note">재물은 원국(그릇)만큼 대운·세운(물이 들어오는 때)에 크게 좌우됩니다. 대운에서 재성이 들어오는 시기에는 그릇이 한 단계 커질 수 있고, 이어지는 "운의 흐름" 챕터에서 그 때를 함께 봅니다.</p>')));
+      '<p class="dp-note">원국(그릇)은 고정된 계산 구조이고 대운·세운은 시기 조건입니다. 재성이 들어오는 시기는 재물 주제를 검토하는 전통적 단서이며 자산 증가의 예고가 아닙니다. 실제로 돈을 버는 선택은 가격·납기·회수일을, 지키는 선택은 고정비·부채·비상 지출을 따로 기록해 비교하세요. 운의 흐름은 뒤의 계산표에서 확인합니다.</p>')));
     return { title: '재물 그릇 · 돈 버는 방식', sub: BW[0] + ' · ' + top[0].name, scenes: out, vessel: bk, power: pw, flow: fl, route: rt };
   };
   R.DeepWealth = { profile: profile, powerOf: powerOf, flowOf: flowOf, routeOf: routeOf, storage: storage, POWER: POWER, BOWLS: BOWLS, ROUTE: ROUTE, ROLE_TXT: ROLE_TXT, STEM_HABIT: STEM_HABIT, modes: modes, gauges: gauges };

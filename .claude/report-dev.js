@@ -3,7 +3,7 @@ const http = require('http'), fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..');
 const TYPES = { '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json' };
 let awkExtra = { fallback: null, publicBase: '', textOnly: false }, rc = null, mediaList = [], awk = [], ilg = [], story = null, intro = { on: false, src: null, srcMobile: null, skipAfter: 0, once: 'session' }, clips = [], defaults = {}, chapters = null, folders = [], files = {};
-const ikMem = new Map(), ikEnv = { ADMIN_PASSWORD: 'test', GLOSSARY_KV: { get: async (k, t) => { const v = ikMem.get(k); return v == null ? null : t === 'json' ? JSON.parse(v) : v; }, put: async (k, v) => { ikMem.set(k, v); }, delete: async k => ikMem.delete(k), list: async o => {const keys=[...ikMem.keys()].filter(k=>k.startsWith(o?.prefix||'')).sort().map(name=>({name}));const offset=Number(o?.cursor||0),limit=o?.limit||200;return {keys:keys.slice(offset,offset+limit),list_complete:offset+limit>=keys.length,cursor:String(offset+limit)};} } };
+const ikMem = new Map(), ikEnv = { ADMIN_PASSWORD: 'test', ERRLOG_ON:process.env.ERRLOG_ON,READING_METRICS_ON:process.env.READING_METRICS_ON, GLOSSARY_KV: { get: async (k, t) => { const v = ikMem.get(k); return v == null ? null : t === 'json' ? JSON.parse(v) : v; }, put: async (k, v) => { ikMem.set(k, v); }, delete: async k => ikMem.delete(k), list: async o => {const keys=[...ikMem.keys()].filter(k=>k.startsWith(o?.prefix||'')).sort().map(name=>({name}));const offset=Number(o?.cursor||0),limit=o?.limit||200;return {keys:keys.slice(offset,offset+limit),list_complete:offset+limit>=keys.length,cursor:String(offset+limit)};} } };
 // 로컬 확인용 가짜 AI(Anthropic): 구간의 첫 긴 문장을 원문 인용으로 삼아 키워드로 조건을 읽어 후보 1개를 돌려준다
 const r2mem = new Map(),r2meta=new Map(); ikEnv.ANTHROPIC_API_KEY='mock';
   function r2head(k){if(!r2mem.has(k))return null;const bytes=r2mem.get(k),hash=require('crypto').createHash('sha256').update(bytes).digest();return {key:k,size:bytes.length,etag:hash.toString('hex'),checksums:{sha256:hash},uploaded:new Date(0),httpMetadata:r2meta.get(k)?.httpMetadata||{contentType:'application/octet-stream'},customMetadata:r2meta.get(k)?.customMetadata||{}};}
@@ -27,12 +27,12 @@ const body = q => new Promise(res => { const b = []; q.on('data', c => b.push(c)
 
 http.createServer(async (q, r) => {
   const u = new URL(q.url, 'http://x'), p = u.pathname;
-  if (['/api/interpretation','/api/interpretation-settings','/api/chapter-hook','/api/movingtoon-reading'].includes(p)) {
+  if (['/api/interpretation','/api/interpretation-settings','/api/chapter-hook','/api/movingtoon-reading','/api/reading-diagnostics','/api/reading-editorial','/api/reading-metrics'].includes(p)) {
     try {
       const mod = await import(require('url').pathToFileURL(path.join(root,'functions',p+'.js')).href);
-      const raw = q.method === 'POST' ? await body(q) : undefined, handler = mod.onRequest || mod.onRequestPost;
-      if (!handler || !mod.onRequest && q.method !== 'POST') return send(r,405,{error:'method'});
-      const response = await handler({env:ikEnv,request:new Request('http://x'+q.url,{method:q.method,headers:{authorization:q.headers.authorization||'','content-type':'application/json'},body:raw && raw.length?raw:undefined})});
+      const raw = q.method === 'POST' ? await body(q) : undefined, handler = mod.onRequest || (q.method==='GET'?mod.onRequestGet:mod.onRequestPost);
+      if (!handler) return send(r,405,{error:'method'});
+      const response = await handler({env:ikEnv,request:new Request('http://x'+q.url,{method:q.method,headers:{authorization:q.headers.authorization||'','content-type':'application/json',origin:q.headers.origin||'',referer:q.headers.referer||''},body:raw && raw.length?raw:undefined})});
       r.statusCode=response.status;r.setHeader('content-type','application/json; charset=utf-8');return r.end(await response.text());
     } catch(e) { return send(r,500,{error:e.message}); }
   }

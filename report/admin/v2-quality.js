@@ -48,6 +48,19 @@
     var tbl = rows ? '<table style="width:100%;border-collapse:collapse;font-size:.8rem"><thead><tr><th style="text-align:left">건수</th><th style="text-align:left">종류 · 기능</th><th style="text-align:left">메시지</th><th style="text-align:left">위치</th><th style="text-align:left">챕터</th><th style="text-align:left">모바일</th></tr></thead><tbody>' + rows + '</tbody></table>' : '<p class="muted">기록된 오류가 없습니다.</p>';
     return section(t, s.sigs.length ? s.total : 0, head + tbl, e.on ? '오류 없음' : '수집 꺼짐');
   }
+  function engagementSection(st){
+    var m=st.engagement,body='<button type="button" id="qaReadingMetrics">최근 7일 읽기·피드백 지표 불러오기</button>';
+    if(!m)return '<div class="card"><b>완독·이탈·피드백·전문가 검토</b><p>수집은 READING_METRICS_ON=1일 때만 작동합니다. 이름·생년월일·원국·자유 의견은 수집하지 않습니다.</p>'+body+'</div>';
+    if(m.error)return '<div class="card"><p>'+esc(m.error)+'</p>'+body+'</div>';
+    var s=window.MantraReadingMetrics.summarize(m.records),rows=Object.keys(s.chapters).map(function(id){var c=s.chapters[id];return '<tr><td>'+esc(id)+'</td><td>'+c.views+'</td><td>'+(c.completionRate==null?'-':Math.round(100*c.completionRate)+'%')+'</td><td>'+(c.exitRate==null?'-':Math.round(100*c.exitRate)+'%')+'</td><td>'+c.feedback.helpful+' / '+c.feedback.specific+' / '+c.feedback.unclear+'</td></tr>';}).join('');
+    return '<div class="card"><b>완독·이탈·피드백·전문가 검토</b><p>수집 '+(m.on?'켜짐':'꺼짐')+' · 최근 7일 '+s.records+'건 · 리포트 세션 '+s.reports+'개'+(m.truncated?' · 조회 상한으로 일부만 표시':' · 조회 완료')+'</p><p>'+esc(s.note)+'</p><div style="overflow:auto"><table><thead><tr><th>챕터</th><th>열람</th><th>완독률</th><th>종료 시 미완료율</th><th>도움 / 구체적 / 설명 부족</th></tr></thead><tbody>'+rows+'</tbody></table></div><p>별도 전문가 검토: 채택 '+s.expert.accepted+'건 · 수정 요청 '+s.expert.revise+'건. 사용자 피드백과 합산하지 않습니다.</p>'+body+'</div>';
+  }
+  function readingDiagnosticsSection(st) {
+    var d=st.readingDiagnostics;
+    if(!d)return '<div class="card"><b>풀이 생성 진단</b><p>진단 정보를 불러오지 못했습니다.</p></div>';
+    var s=d.summary, byCode=Object.keys(s.codes).map(function(k){return esc(k)+' '+s.codes[k]+'건';}).join(' · '), byChapter=Object.keys(s.chapters).map(function(k){var c=s.chapters[k];return esc(k)+' '+c.failed+'/'+c.total+'건 실패 ('+Math.round(c.failed/c.total*100)+'%)';}).join(' · '), rows=d.records.map(function(r){return '<tr><td>'+esc(r.at)+'</td><td>'+esc(r.chapter)+'</td><td>'+esc(r.code)+' / '+esc(r.stage)+(r.storageStage?' / '+esc(r.storageStage):'')+'<br>'+esc((r.issueCodes || []).join(', '))+'</td><td class="mono">'+esc(r.requestId)+'</td><td>'+r.attempts.map(function(a){return esc(a.provider+' '+a.status+(a.stage?' '+a.stage:'')+(a.error?' '+a.error:''));}).join('<br>')+'</td></tr>';}).join('');
+    return '<div class="card"><b>풀이 생성 진단 · 최근 7일 최대 100건</b><p>수집 '+(d.on?'켜짐':'꺼짐(ERRLOG_ON=1로 설정)')+' · 조회 '+s.total+'건 · 성공 '+s.accepted+' · 실패 '+s.failed+' · 캐시 '+s.cached+'<br>조회 표본 성공률 '+(s.successRate==null?'자료 없음':Math.round(s.successRate*100)+'%')+(d.truncated?' · 일부 기록만 조회됨':'')+'<br>오류·결과 코드: '+byCode+'<br>챕터별 실패율(조회 표본): '+byChapter+'<br>개인정보·원국·생성 문장·API 키는 기록하지 않습니다.</p><div style="overflow-x:auto"><table><thead><tr><th>발생 시각(UTC)</th><th>챕터</th><th>코드 / 단계</th><th>요청 식별자</th><th>제한된 생성·재검수 이력</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  }
   function awakeningSection(st) {
     var a = st.awk; if (!a) return '<div class="card"><b style="color:var(--gold)">일주 캐릭터 영상 매핑</b> <span class="chip">확인 못함</span><p class="muted">/api/awakening 을 불러오지 못했습니다.</p></div>';
     var p = a.pillars, bad = p.missing + p.error + p.disabled + p.posterOnly, pr = st.awkProbe;
@@ -88,6 +101,8 @@
     if (st.evidence) h += evidenceSection(st.evidence);
     h += awakeningSection(st);
     h += viewerErrSection(st);
+    h += readingDiagnosticsSection(st);
+    h += engagementSection(st);
     h += section('풀이 누락 의심 (글자 수 ' + Q.MIN_LEN + '자 미만)', a.missing.length, list(a.missing, function (x) { return '<b>' + esc(x.title || x.id) + '</b> <span class="muted mono">' + esc(x.id) + ' · ' + x.len + '자</span>'; }));
     h += section('단정 표현 검토', a.absolute.length, list(a.absolute, function (x) { return '<b>' + esc(x.title || x.id) + '</b> — “' + esc(x.snippet) + '” <span class="muted">(' + esc(x.word) + ')</span>'; }) +
       (a.absolute.length ? '<p class="muted" style="font-size:.76rem;margin-top:6px">"~하지 않습니다" 같은 부정문·면책 문구도 걸릴 수 있습니다. 맥락을 보고 판단하세요.</p>' : ''));
@@ -111,6 +126,7 @@
     var L = ['# 서비스 점검 결과', '', '- 챕터 ' + a.chapters + '개 · 풀이 누락 의심 ' + a.summary.missing + ' · 단정 표현 검토 ' + a.summary.absolute + ' · 에셋 누락 ' + a.summary.assetMissing + ' · 세계 매핑 대체 ' + a.summary.worldFallback, ''];
     L.push('## 풀이 누락 의심'); a.missing.forEach(function (x) { L.push('- ' + (x.title || x.id) + ' (' + x.id + ', ' + x.len + '자)'); }); if (!a.missing.length) L.push('- 없음');
     L.push('', '## 단정 표현 검토'); a.absolute.forEach(function (x) { L.push('- ' + (x.title || x.id) + ': “' + x.snippet + '” (' + x.word + ')'); }); if (!a.absolute.length) L.push('- 없음');
+    if(st && st.readingDiagnostics){var rd=st.readingDiagnostics;L.push('', '## 풀이 생성 진단 (조회 표본)', '- 조회 '+rd.summary.total+'건 · 성공 '+rd.summary.accepted+' · 실패 '+rd.summary.failed+' · 일부 기록만 조회 '+rd.truncated);rd.records.forEach(function(r){L.push('- '+r.requestId+' · '+r.chapter+' · '+r.code+' · '+r.stage+' · '+r.at);});}
     if (st && st.errlog) { var el = st.errlog.summary || {}; L.push('', '## 뷰어 오류 수집 (최근 7일)', '- 수집 ' + (st.errlog.on ? '켜짐' : '꺼짐') + ' · 합계 ' + (el.total || 0) + ' · 상한 초과 ' + (el.dropped || 0)); (el.sigs || []).forEach(function (x) { L.push('- ' + x.n + '건 ' + x.kind + ' ' + x.where + ' ' + (x.src || '') + (x.line ? ':' + x.line : '') + (x.msg ? ' — ' + x.msg : '')); }); }
     if (st && st.awk) { var w = st.awk; L.push('', '## 일주 캐릭터 영상 매핑', '- 일주 영상 ' + w.pillars.ok + '/' + w.pillars.of + ' (남 ' + w.pillars.male + ' · 여 ' + w.pillars.female + ') · 포스터만 ' + w.pillars.posterOnly + ' · 사용 안 함 ' + w.pillars.disabled + ' · 없음 ' + w.pillars.missing + ' · 주소 오류 ' + w.pillars.error, '- 일간 소개 ' + w.ilgan.ok + '/' + w.ilgan.of + ' · 기본 영상 ' + (w.fallback ? '있음' : '없음')); if (w.pillars.missingList.length) L.push('- 문제 칸: ' + w.pillars.missingList.join(' ')); if (st.awkProbe && !st.awkProbe.running) { L.push('- 파일 연결 확인: 정상 ' + st.awkProbe.okN + ' · 파일 없음 ' + st.awkProbe.bad.length); st.awkProbe.bad.forEach(function (x) { L.push('  - ' + x.label + ' ' + x.url + ' (' + x.status + ')'); }); } }
     if (st && st.evidence) { var e = st.evidence; L.push('', '## 풀이 DB 근거 상태 (정책 ' + e.policy + ')', '- 모듈 ' + e.total + ' · 승인 ' + e.status.approved + ' · legacy ' + e.status.legacy + ' · 근거 부족 ' + e.status.needs_evidence + ' · 초안 ' + e.status.draft + ' · 폐기 ' + e.status.retired, '- 숨김 ' + e.hidden + ' · hide_unverified 시 ' + e.wouldHide.hide_unverified + ' · strict 시 ' + e.wouldHide.strict); e.mismatch.forEach(function (x) { L.push('- 불일치: ' + x.id + ' — ' + x.reason); }); e.unknownCond.forEach(function (x) { L.push('- 알 수 없는 조건 키: ' + x.id + ' (' + x.keys.join(', ') + ')'); }); e.ruleConflict.forEach(function (x) { L.push('- 선택 조건과 제외 조건 충돌: ' + x.id + ' (' + x.keys.join(', ') + ')'); }); e.staleText.forEach(function (id) { L.push('- 승인 후 문장 변경: ' + id); }); }
@@ -126,6 +142,7 @@
       run(M, st).then(function () { draw(box, st, M); });
     };
     box.querySelectorAll('[data-repair]').forEach(function (b) { b.onclick = function () { window.AdminShowTab(b.dataset.repair); }; });
+    var metricsButton=$('#qaReadingMetrics',box);if(metricsButton)metricsButton.onclick=async function(){metricsButton.disabled=true;metricsButton.textContent='기록을 읽는 중…';var records=[],next={},on=false,pages=0;try{while(next && pages<100){var url='/api/reading-metrics'+(next.date?'?date='+encodeURIComponent(next.date)+'&cursor='+encodeURIComponent(next.cursor || ''):''),r=await C.api(url);records=records.concat(r.records);on=r.on;next=r.next;pages++;}st.engagement={records:records,on:on,truncated:!!next};}catch(e){st.engagement={error:'지표를 읽지 못했습니다: '+e.message};}draw(box,st,M);};
     var pb = $('#awkProbe', box); if (pb) pb.onclick = function () { pb.disabled = true; probeAwakening(box, st, M); };
     var mdb = $('#qaMd', box); if (mdb) mdb.onclick = function () {
       var blob = new Blob([md(st.audit, st)], { type: 'text/markdown;charset=utf-8' }), u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = 'service-quality.md'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 1000);
@@ -144,8 +161,9 @@
       C.api('/api/errlog?days=7').then(function (r) { return r || null; }).catch(function () { return null; }),
       C.api('/api/media?all=1'),
       C.api('/api/system-status').catch(function (e) { return {error:e.message}; }),
+      C.api('/api/reading-diagnostics').catch(function(){return null;}),
     ]).then(function (got) {
-      st.errlog = got[5] || null; st.pipeline = got[7]; st.saved = got[2];
+      st.readingDiagnostics=got[8] || null; st.errlog = got[5] || null; st.pipeline = got[7]; st.saved = got[2];
       st.awk = got[4] ? Q.awakeningAudit(got[4]) : null; st.awkProbe = null;
       try {
         var ch = M.compute({ year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: TS.gender, city: '서울' });
