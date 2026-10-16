@@ -71,7 +71,7 @@
     if (T.busy) return; T.busy = true;
     var worlds = (T.saved || []).map(function (w) { return Object.assign({}, w); }), cur = worlds.filter(function (w) { return w.id === wid; })[0];
     if (!cur) { var base = T.worlds.filter(function (w) { return w.id === wid; })[0]; if (!base) { T.busy = false; return; }
-      cur = {}; ['id', 'name', 'line', 'desc', 'notice', 'enabled', 'order', 'access', 'color', 'accent', 'bgImage', 'bgVideo', 'introImage', 'introVideo', 'chapters'].forEach(function (k) { if (base[k] !== undefined) cur[k] = base[k]; }); worlds.push(cur); }
+      cur = {}; ['id', 'name', 'line', 'desc', 'notice', 'enabled', 'order', 'access', 'color', 'accent', 'bgImage', 'bgVideo', 'introImage', 'introVideo', 'introImageF', 'introVideoF', 'chapters'].forEach(function (k) { if (base[k] !== undefined) cur[k] = base[k]; }); worlds.push(cur); }
     var ci = Object.assign({}, cur.cutImages || {}); if (list.length) ci[cid] = list.slice(0, MAX); else delete ci[cid];
     cur.cutImages = ci;
     var m = row && $('.tn-msg', row); if (m) m.textContent = '저장 중…';

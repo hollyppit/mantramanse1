@@ -413,8 +413,9 @@
     var w = g.world; if (S.xp.seen[w.id] || reduce) { S.xp.seen[w.id] = 1; xpSave(); done(); return; }
     S.xp.seen[w.id] = 1; xpSave();
     var el = document.createElement('div'); el.className = 'xp-intro'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', w.name + ' 입장');
-    el.style.cssText = '--wc:' + w.color + ';--wa:' + w.accent + (w.introImage || w.bgImage ? ';background-image:url(' + (w.introImage || w.bgImage) + ')' : '');
-    el.innerHTML = (w.introVideo && !saveData ? '<video src="' + esc(w.introVideo) + '" autoplay muted playsinline preload="metadata"></video>' : '') + '<div class="xi-t"><p>' + esc(w.line) + '</p><h3>' + esc(w.icon || '') + ' ' + esc(w.name) + '</h3></div><span class="xi-s">탭하면 건너뜁니다</span>';
+    var fem = selectedGuide() === 'female', iImg = (fem && w.introImageF) || w.introImage, iVid = (fem && w.introVideoF) || w.introVideo;
+    el.style.cssText = '--wc:' + w.color + ';--wa:' + w.accent + (iImg || w.bgImage ? ';background-image:url(' + (iImg || w.bgImage) + ')' : '');
+    el.innerHTML = (iVid && !saveData ? '<video src="' + esc(iVid) + '" autoplay muted playsinline preload="metadata"></video>' : '') + '<div class="xi-t"><p>' + esc(w.line) + '</p><h3>' + esc(w.icon || '') + ' ' + esc(w.name) + '</h3></div><span class="xi-s">탭하면 건너뜁니다</span>';
     var fin = false, go = function () { if (fin) return; fin = true; clearTimeout(t); el.classList.add('off'); setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 300); done(); }, t = setTimeout(go, 3500);
     el.addEventListener('click', go); document.body.appendChild(el); T('world_intro', { world: w.id });
   }

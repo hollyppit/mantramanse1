@@ -30,7 +30,7 @@ export function cleanWorlds(list) {
       id, name: str(w.name, 40), line: str(w.line, 80), desc: str(w.desc, 300), enabled: w.enabled !== false,
       order: Number.isFinite(+w.order) ? Math.max(0, Math.min(999, Math.round(+w.order))) : out.length + 1,
       access: w.access === 'paid' ? 'paid' : 'free',
-      color: color(w.color), accent: color(w.accent), bgImage: media(w.bgImage), bgVideo: media(w.bgVideo), introImage: media(w.introImage), introVideo: media(w.introVideo),
+      color: color(w.color), accent: color(w.accent), bgImage: media(w.bgImage), bgVideo: media(w.bgVideo), introImage: media(w.introImage), introVideo: media(w.introVideo), introImageF: media(w.introImageF), introVideoF: media(w.introVideoF),
       chapters: ids(w.chapters), notice: str(w.notice, 120),
       chapterSettings: chapterSettings(w.chapterSettings),
       ...(Object.keys(cuts(w.cutImages)).length ? { cutImages: cuts(w.cutImages) } : {}),

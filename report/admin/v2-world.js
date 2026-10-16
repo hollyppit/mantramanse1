@@ -9,7 +9,7 @@
   var $ = function (s, e) { return (e || document).querySelector(s); }, $$ = function (s, e) { return [].slice.call((e || document).querySelectorAll(s)); };
   var KEY = 'mt_v2_world_ts', TS = { date: '1992-06-23', time: '01:30', gender: 'M' };
   try { Object.assign(TS, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { }
-  var FIELDS = ['id', 'name', 'line', 'desc', 'notice', 'enabled', 'order', 'access', 'color', 'accent', 'bgImage', 'bgVideo', 'introImage', 'introVideo', 'chapters', 'cutImages', 'chapterSettings'];
+  var FIELDS = ['id', 'name', 'line', 'desc', 'notice', 'enabled', 'order', 'access', 'color', 'accent', 'bgImage', 'bgVideo', 'introImage', 'introVideo', 'introImageF', 'introVideoF', 'chapters', 'cutImages', 'chapterSettings'];
   var hex = function (v, d) { return /^#[0-9a-fA-F]{6}$/.test(v || '') ? v : d; };
   var dirty = function () { W.dirty = true; var b = $('#wdSave'); if (b) { b.disabled = false; b.textContent = '저장'; } var s = $('#wdState'); if (s) s.textContent = '저장하지 않은 변경이 있습니다'; };
   (window.AdminDirty = window.AdminDirty || {})['세계관'] = function () { return W.dirty; };
@@ -17,7 +17,7 @@
   function load(box) {
     box.innerHTML = '<div class="card"><p class="muted">불러오는 중…</p></div>';
     C.api('/api/worlds').then(function (d) {
-      W.saved = !!(d.worlds && d.worlds.length); W.list = X.mergeWorlds(d.worlds || []).map(function (w) { return Object.assign({ line: '', desc: '', notice: '', bgImage: '', bgVideo: '', introImage: '', introVideo: '', color: '', accent: '', chapters: [] }, w); });
+      W.saved = !!(d.worlds && d.worlds.length); W.list = X.mergeWorlds(d.worlds || []).map(function (w) { return Object.assign({ line: '', desc: '', notice: '', bgImage: '', bgVideo: '', introImage: '', introVideo: '', introImageF: '', introVideoF: '', color: '', accent: '', chapters: [] }, w); });
       W.dirty = false; draw(box);
     }).catch(function (e) { box.innerHTML = '<div class="card"><p class="err">' + esc(e.message) + '</p></div>'; });
   }
@@ -58,7 +58,7 @@
       '<label class="fx"><span>강조색</span><input type="color" data-f="accent" data-i="' + i + '" value="' + a + '"></label>' +
       '<label class="fx"><span>이용 권한</span><select data-f="access" data-i="' + i + '"><option value="free"' + (w.access !== 'paid' ? ' selected' : '') + '>무료</option><option value="paid"' + (w.access === 'paid' ? ' selected' : '') + '>유료 표시</option></select></label></div>' +
       '<p class="muted" style="font-size:.76rem;margin:2px 0 6px">유료 표시는 지도에 "유료" 배지만 붙입니다. 결제·서버 권한 검증은 아직 연결되지 않았습니다.</p>' +
-      mediaRow(i, 'bgImage', '배경 이미지', 'image') + mediaRow(i, 'introImage', '입장 연출 이미지 (영상이 없을 때 사용)', 'image') + mediaRow(i, 'introVideo', '입장 연출 영상 (3~5초 권장, 소리 없음)', 'video') +
+      mediaRow(i, 'bgImage', '배경 이미지', 'image') + mediaRow(i, 'introImage', '입장 연출 이미지 · 운명 감찰관 (영상이 없을 때 사용)', 'image') + mediaRow(i, 'introVideo', '입장 연출 영상 · 운명 감찰관 (3~5초 권장, 소리 없음)', 'video') + mediaRow(i, 'introImageF', '입장 연출 이미지 · 명운 해독관 (비우면 운명 감찰관 것 사용)', 'image') + mediaRow(i, 'introVideoF', '입장 연출 영상 · 명운 해독관 (비우면 운명 감찰관 것 사용)', 'video') +
       chapPicker(i, w) +
       '<label class="fx"><span>연결 챕터 ID 직접 입력 (쉼표로 구분 · 목록과 같은 값입니다 · 비우면 기본 규칙 사용)</span><textarea data-f="chapters" data-i="' + i + '" rows="2" class="mono" placeholder="예: c19, c20, life_actions">' + esc((w.chapters || []).join(', ')) + '</textarea></label>' +
       '<p class="muted" style="font-size:.76rem;margin:0">기본 규칙: ' + (w.match && w.match.length ? '<span class="mono">' + esc(w.match.join('  ')) + '</span>' : '없음(직접 연결만)') + '</p></div>';
