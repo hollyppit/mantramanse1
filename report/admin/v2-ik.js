@@ -36,6 +36,8 @@
     tenGod: ['십성 10종 강약', 'map', TENG, 1],
     structure: ['구조 관찰 조건 (신규 엔진)', 'opts', ['output-with-low-wealth','wealth-with-weak-model','officer-output-coexist','resource-low-output','unrooted','method-difference'], 1],
     rootLevel: ['통근 모델 구간', 'text', [], 1],
+    daewoonStemTG: ['현재 대운 천간 십성', 'opts', TENG, 1], daewoonBranchTG: ['현재 대운 지지 십성', 'opts', TENG, 1],
+    seunStemTG: ['올해 세운 천간 십성', 'opts', TENG, 1], seunBranchTG: ['올해 세운 지지 십성', 'opts', TENG, 1],
     positionTG: ['위치별 십성 (예: month.stem:정관)', 'text', [], 1],
     methodDifference: ['억부·조후 후보 차이', 'opts', ['있음','없음'], 1]
   };
