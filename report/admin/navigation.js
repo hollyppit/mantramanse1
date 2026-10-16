@@ -1,8 +1,9 @@
 /* 관리자 메뉴의 단일 기준: 영역·순서·표시명·담당 작업 */
 (function(root){
   'use strict';
-  var groups = [['dash','현황',['dash']],['make','무빙툰 제작',['v2proj','v2chap','v2story','v2world','editorial']],['media','영상·이미지',['v2clip','v2intro','panelart']],['content','콘텐츠·온보딩',['onboard','freec']],['ai','AI 풀이',['ikdoc','ikknow','ikdesign','ikrules','iklab','stylecfg']],['qa','점검·테스트',['v2quality','check','v2test']],['set','운영·설정',['ops','v2set']]];
+  var groups = [['dash','현황',['dash']],['make','무빙툰 제작',['v2proj','v2chap','v2story','v2world','editorial']],['media','영상·이미지',['v2clip','v2intro','panelart']],['content','콘텐츠·온보딩',['onboard','freec']],['ai','AI 풀이',['ikdoc','ikknow','ikdesign','ikrules','iklab','stylecfg']],['qa','점검·테스트',['research','v2quality','check','v2test']],['set','운영·설정',['ops','v2set']]];
   var pages = {
+    research:{label:'문헌·명조 검수',hint:'합성 명조 32건의 원문 근거·유보 사유·문헌 비교를 읽기 전용으로 확인합니다.'},
     editorial:{label:'챕터 계약·현실 사례',hint:'9개 주제와 챕터별 질문·근거·중복 방지 규칙 및 현실 사례를 편집하고 검사 후 게시합니다.'},
     ops:{label:'운영 관리',hint:'영상120칸 연결, AI, 데이터 백업과 복구를 한곳에서 관리합니다.',related:['v2intro','v2quality','ikrules']},
     v2proj:{label:'타임라인 구성',hint:'운명의 타임라인 주제를 기준으로 실제 챕터와 공개 여부·제목·순서를 관리합니다.'},
