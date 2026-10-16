@@ -6,7 +6,7 @@
   function current() { if (!G.target) return G.d; return G.d.worlds[G.target] || (G.d.worlds[G.target] = { M: '', F: '' }); }
   function mount(box) {
     box.innerHTML = '<div class="card"><p class="muted">불러오는 중…</p></div>';
-    Promise.all([C.api('/api/prologue'), C.api('/api/worlds')]).then(function (results) { var d=results[0]; TOPICS = [['', '공통 프롤로그']].concat(window.ReportV2.Explore.mergeWorlds(results[1].worlds || []).map(function(w){return [w.id,w.name];})); G.d = { on: d.on !== false, M: d.M || '', F: d.F || '', worlds: d.worlds || {} }; draw(box); }).catch(function (e) { box.innerHTML = '<div class="card"><p class="err">' + esc(e.message) + '</p></div>'; });
+    Promise.all([C.api('/api/prologue'), C.api('/api/worlds')]).then(function (results) { var d=results[0]; G.d = { on: d.on !== false, M: d.M || '', F: d.F || '', worlds: d.worlds || {} }; draw(box); }).catch(function (e) { box.innerHTML = '<div class="card"><p class="err">' + esc(e.message) + '</p></div>'; });
   }
   function slot(g, label) {
     var u = current()[g];
@@ -17,11 +17,10 @@
   }
   function draw(box) {
     var label = TOPICS.filter(function (t) { return t[0] === G.target; })[0][1];
-    box.innerHTML = '<div class="card"><b style="color:var(--gold)">프롤로그 영상</b><p class="muted" style="margin:6px 0 10px">주제를 선택하고 운명 감찰관·명운 해독관 영상을 각각 올리세요. 공통·주제별 프롤로그는 모두 무음으로, 시작 0.6초 페이드인·마지막 0.6초 페이드아웃으로 재생됩니다. 해당 주제로 들어갈 때 선택한 영상이 먼저 재생됩니다. 영상이 끝나거나 건너뛰면 본문이 시작됩니다. 파일은 90MB 이하 mp4·webm·mov입니다. 업로드와 영상 빼기는 자동 저장됩니다.</p>' +
+    box.innerHTML = '<div class="card"><b style="color:var(--gold)">프롤로그 영상</b><p class="muted" style="margin:6px 0 10px">운명 감찰관·명운 해독관 영상을 각각 올리세요. 공통 프롤로그는 무음으로, 시작 0.6초 페이드인·마지막 0.6초 페이드아웃으로 재생됩니다. 영상이 끝나거나 건너뛰면 본문이 시작됩니다. 파일은 90MB 이하 mp4·webm·mov입니다. 업로드와 영상 빼기는 자동 저장됩니다.</p>' +
       '<label class="muted" style="display:flex;gap:6px;align-items:center;margin-bottom:10px"><input type="checkbox" id="prOn"' + (G.d.on ? ' checked' : '') + '> 전체 프롤로그 영상 사용</label>' +
-      '<label>프롤로그 주제 <select id="prTopic">' + TOPICS.map(function (t) { return '<option value="' + t[0] + '"' + (t[0] === G.target ? ' selected' : '') + '>' + esc(t[1]) + '</option>'; }).join('') + '</select></label><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:12px">' + slot('M', esc(label) + ' · 운명 감찰관') + slot('F', esc(label) + ' · 명운 해독관') + '</div></div>';
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:12px">' + slot('M', esc(label) + ' · 운명 감찰관') + slot('F', esc(label) + ' · 명운 해독관') + '</div></div>';
     [].forEach.call(box.querySelectorAll('video'), function (v) { v.muted = true; v.defaultMuted = true; v.volume = 0; v.onvolumechange = function () { if (!v.muted) v.muted = true; if (v.volume !== 0) v.volume = 0; }; });
-    box.querySelector('#prTopic').onchange = function () { if (G.busy) { this.value = G.target; return; } G.target = this.value; draw(box); };
     box.querySelector('#prOn').onchange = function () { G.d.on = this.checked; save('').catch(function () { }); };
     [].forEach.call(box.querySelectorAll('[data-up]'), function (i) { i.onchange = function () { if (i.files[0]) upload(box, i.dataset.up, i.files[0]); }; });
     [].forEach.call(box.querySelectorAll('[data-rm]'), function (b) { b.onclick = function () { if (G.busy || !confirm(label + '의 해당 안내자 영상 연결을 뺍니다. 계속할까요?')) return; var record = current(), old = record[b.dataset.rm]; record[b.dataset.rm] = ''; G.busy = true; save('').then(function () { G.busy = false; draw(box); }).catch(function () { record[b.dataset.rm] = old; G.busy = false; draw(box); }); }; });
@@ -39,5 +38,5 @@
       .then(function () { G.busy = false; draw(box); })
       .catch(function (e) { record[g] = old; G.busy = false; m.textContent = '실패: ' + e.message; toast(e.message, true); });
   }
-  window.V2Prologue = { mount: mount, selectWorld: function(id) { G.target=id; } };
+  window.V2Prologue = { mount: mount, selectWorld: function() { G.target=''; } };
 })();
