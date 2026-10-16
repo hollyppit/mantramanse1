@@ -279,3 +279,11 @@
 #wsteps button { min-height: 36px; padding: 4px 12px; border: 1px solid var(--gold-d); border-radius: 999px; color: var(--gold-l); background: transparent; font-size: .8rem; }
 #wsteps button:disabled { opacity: .35; cursor: default; }
 #wsteps span { color: var(--ink2); font-size: .8rem; min-width: 48px; text-align: center; }
+
+/* 무빙툰: 글이 먼저 읽히도록 이미지·영상은 어둡게 깔고, 본문은 넓은 읽기 패널에 둔다. */
+.sm-bg { filter: brightness(.42) saturate(.9); }
+.sm-sh { background: linear-gradient(180deg, rgba(10, 6, 18, .7) 0, rgba(10, 6, 18, .35) 30%, rgba(10, 6, 18, .75) 100%); }
+.sm-tx { top: calc(64px + env(safe-area-inset-top, 0px)); bottom: calc(72px + env(safe-area-inset-bottom, 0px)); max-height: none; left: 50%; right: auto; width: min(720px, calc(100% - 24px)); transform: translateX(-50%); display: flex; flex-direction: column; justify-content: safe center; padding: 22px 24px; background: rgba(10, 6, 18, .66); border: 1px solid rgba(255, 255, 255, .12); border-radius: 14px; backdrop-filter: blur(4px); }
+.sm-cap { font-size: .82rem; margin-bottom: 12px; }
+.sm-p { font-size: 1.14rem; line-height: 1.95; margin-bottom: 14px; text-shadow: none; word-break: keep-all; }
+@media (max-width: 560px) { .sm-tx { padding: 16px 16px; } .sm-p { font-size: 1.06rem; line-height: 1.85; } }

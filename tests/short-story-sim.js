@@ -5,11 +5,11 @@ const source={slot:'past:관성:금:M',frames:[{img:'/one.webp',paras:['한 줄 
 for(let i=1;i<=7;i++)for(const group of groups){
  const w={id:'w'+i,name:'주제',bgImage:'/cover.webp'},sd={dominantGroup:group,weakestGroup:'식상',dayMaster:{el:'metal'},strength:{band:'신강'}};
  const model=B.build(w,sd,source),text=model.frames.map(f=>f.paras.join(' ')).join('\n');
- assert.equal(model.frames.length,8);assert(model.frames.every(f=>f.cap&&f.paras.length>=2));
+ assert.equal(model.frames.length,15);assert(model.frames.every(f=>f.cap&&f.paras.length>=2));
  assert(!/\{[^}]+\}|한 줄 요약|왜 이런 이야기가/.test(text));assert(text.includes('“'));assert(text.includes('찬 공기'));
  assert.equal(model.slot,source.slot);assert(model.frames.every(f=>f.img));
  seen.add(text);assert(model.notice.includes('창작'));assert.equal(model.storyBasis.dominantGroup,group);
- const other=B.build(w,{...sd,strength:{band:'신약'}},source);assert.notDeepEqual(model.frames[6].paras,other.frames[6].paras);
+ const other=B.build(w,{...sd,strength:{band:'신약'}},source);assert.notDeepEqual(model.frames[12].paras,other.frames[12].paras);
 }
 assert.equal(seen.size,35);assert.equal(JSON.stringify(source),snapshot);
 assert.equal(B.build({id:'custom'},null,source),source);
