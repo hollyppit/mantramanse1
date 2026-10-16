@@ -10,6 +10,10 @@ for(const f of ['engine.js','report/v2/saju-data.js','report/v2/reading-flow.js'
  const memory=new Map(),kv={get:async(k,t)=>memory.has(k)?t==='json'?JSON.parse(memory.get(k)):memory.get(k):null,put:async(k,v)=>memory.set(k,v)},env={GLOSSARY_KV:kv,ADMIN_PASSWORD:'test'};
  const call=(body,auth=true,admin=true)=>API.onRequest({env,request:new Request('http://test/api/reading-editorial'+(admin?'?view=admin':''),{method:body?'POST':'GET',headers:auth?{authorization:'Bearer test'}:{},body:body?JSON.stringify(body):undefined})});
  assert.equal((await call(null,false)).status,401);let res=await call(null),d=await res.json();assert.equal(d.catalog.chapters.length,79);assert.equal(memory.size,0);
+ const beforeCheck=[...memory];
+ assert.equal((await call({action:'check',expectVersion:0,catalog:seed},false)).status,401);
+ res=await call({action:'check',expectVersion:0,catalog:seed});d=await res.json();assert.equal(res.status,200);assert.equal(d.writesPerformed,false);assert.equal(d.issues.length,79);assert(d.issues.every(i=>i.details.some(x=>x.code==='no-linked-rules')));assert.deepEqual([...memory],beforeCheck);
+ assert.equal((await call({action:'check',expectVersion:99,catalog:seed})).status,409);
  const draft=structuredClone(seed);draft.chapters[0].question='검사 전용 개별 질문';res=await call({action:'save',expectVersion:0,catalog:draft});d=await res.json();assert(d.ok);assert.equal(d.catalog.version,1);assert(!memory.has(E.PUBLISHED_KEY));assert.notEqual(E.contractFor(await E.loadEditorial(kv),{id:'c01'}).question,draft.chapters[0].question);
  assert.equal((await call({action:'save',expectVersion:0,catalog:draft})).status,409);
  const active=structuredClone(d.catalog),contract=active.chapters.find(c=>c.id==='wealth_01');contract.state='active';contract.sourceRuleIds=['MONEY-0001'];
