@@ -29,7 +29,7 @@ export function validateEditorial(next,current){
 export function publicationIssues(catalog,items,blocked=new Set(),sourceIndex){
  const domainMap={self:['SELF'],wealth:['MONEY'],career:['CAREER'],love:['LOVE','MARRIAGE'],relationships:['RELATIONSHIP'],timing:['TIMING'],health:['ACTION'],creative:['SELF'],remedy:['ACTION']};
  const ruleMap=new Map(items.map(r=>[r.id,r]));
- const usable=new Set(items.filter(r=>r.status==='published'&&r.reviewed&&r.conditions&&Object.keys(r.conditions).length&&r.principle&&r.evidence?.length&&r.evidence.every(e=>e.docId&&!blocked.has(e.docId)&&sourceIndex?.has(e.docId))).map(r=>r.id));
+ const usable=new Set(items.filter(r=>r.status==='published'&&r.reviewed&&r.conditions&&Object.keys(r.conditions).length&&r.principle&&r.evidence?.length&&r.evidence.every(e=>{if(!e.docId||blocked.has(e.docId))return false;const doc=sourceIndex?.get(e.docId);if(!doc)return false;const chunks=(doc.chunks || []).filter(c=>!e.chunkId||c.id===e.chunkId);return chunks.length>0 && (e.quote?chunks.some(c=>String(c.text || '').includes(e.quote)):!!e.chunkId);})).map(r=>r.id));
  const issues=[];
  for(const c of catalog.chapters)if(['active','reviewed'].includes(c.state)&&(!c.sourceRuleIds.length||c.sourceRuleIds.some(id=>!usable.has(id)||!(domainMap[catalog.topics.find(t=>t.id===c.topicId)?.policyKind || c.topicId] || []).includes(ruleMap.get(id)?.domain))))issues.push({code:'chapter-source-not-ready',id:c.id});
  for(const c of catalog.cases)if(['active','reviewed'].includes(c.state)&&c.ruleIds.some(id=>!usable.has(id)||!(domainMap[catalog.topics.find(t=>t.id===c.topicId)?.policyKind || c.topicId] || []).includes(ruleMap.get(id)?.domain)))issues.push({code:'case-source-not-ready',id:c.id});
