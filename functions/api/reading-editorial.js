@@ -16,7 +16,7 @@ export async function onRequest({request,env}){
   if(request.method!=='POST')return json({error:'method-not-allowed'},405);
   const raw=await request.text();if(raw.length>900000)return json({error:'too-large'},413);
   let b;try{b=JSON.parse(raw);}catch{return json({error:'invalid-json'},400);}
-  if(!['save','publish','restore'].includes(b.action))return json({error:'invalid-action'},400);
+  if(!['save','publish','restore','check'].includes(b.action))return json({error:'invalid-action'},400);
   if(b.expectVersion!==current.version)return json({error:'version-conflict',version:current.version},409);
   let candidate=b.catalog;
   if(b.action==='restore'){
@@ -26,9 +26,11 @@ export async function onRequest({request,env}){
    candidate=structuredClone(candidate);for(const key of ['topics','chapters','cases'])for(const row of current[key])if(!candidate[key].some(x=>x.id===row.id))candidate[key].push({...row,...(key==='topics'?{enabled:false}:{state:'archived'})});
   }
   const invalid=validateEditorial(candidate,current);if(invalid)return json({error:invalid},400);
-  if(b.action==='publish'){
+  if(b.action==='publish'||b.action==='check'){
    const items=await loadAll(kv),blocked=await blockedDocs(kv),index=await loadSourceIndex(kv,items,blocked);
-   const issues=publicationIssues(candidate,items,blocked,index);if(issues.length)return json({error:'publication-blocked',issues},422);
+   const issues=publicationIssues(candidate,items,blocked,index,{includeDrafts:b.action==='check'});
+   if(b.action==='check')return json({ok:true,version:current.version,issues,scope:'source-links-only',writesPerformed:false});
+   if(issues.length)return json({error:'publication-blocked',issues},422);
   }
   const next={version:current.version+1,updatedAt:new Date().toISOString(),topics:candidate.topics,chapters:candidate.chapters,cases:candidate.cases};
   const history=(await kv.get(HISTORY_KEY,'json'))||[];
