@@ -1,3 +1,4 @@
+import { annualEvidence } from '../_annual-evidence.js';
 import {Editorial,loadEditorial,selectCases,behaviorPlans} from '../_editorial.js';
 import {chapterPolicy} from '../_chapter-policy.js';
 import {selectChapterClaims} from '../_chapter-engine.js';
@@ -28,7 +29,8 @@ export async function onRequestPost({ request, env }) {
       analysis=selectChapterClaims(analysis,policy);
       if(contract.sourceRuleIds.length)analysis=selectChapterClaims({...analysis,claims:analysis.claims.filter(c=>contract.sourceRuleIds.includes(c.knowledge_id))},policy);
       const examples=selectCases(catalog,contract,analysis.claims,body.realityContext);
-      editorialPreview={mode:'draft-preview-not-published',contract,realityContext:Editorial.contextLabels(body.realityContext),examples,behaviorPlans:behaviorPlans(analysis.claims,examples),ready:!!analysis.claims.length};
+      const annual=contract.id==='timing_07' && body.annualPeriods ? annualEvidence(body.sd,body.annualPeriods,items,{...settings,sourceIndex,blockedDocs:blocked,sourceRuleIds:contract.sourceRuleIds}) : null;
+      editorialPreview={...(annual?{annual}:{}),mode:'draft-preview-not-published',contract,realityContext:Editorial.contextLabels(body.realityContext),examples,behaviorPlans:behaviorPlans(analysis.claims,examples),ready:!!analysis.claims.length};
     }
     const report = renderReport(analysis), generation = { mode: 'rules-only', batches: [], estimatedCost: 0 };
     if (body.compose === 'ai' && analysis.claims.length) {
@@ -51,5 +53,5 @@ export async function onRequestPost({ request, env }) {
       generation.estimatedCost = generation.batches.every(b => b.ok && b.generation?.estimatedCost != null) ? generation.batches.reduce((sum,b) => sum + (b.cached ? 0 : b.generation.estimatedCost),0) : null;
     }
     return json({ ok: true, ...(editorialPreview?{editorialPreview}:{}),analysis, report, engine: ENGINE_VERSION, generation });
-  } catch (e) { return json({ ok: false, error: ['invalid-chart','unknown-hour-has-pillar','invalid-distribution'].includes(e.message) ? e.message : 'analysis-unavailable' }, 400); }
+  } catch (e) { return json({ ok: false, error: ['invalid-chart','unknown-hour-has-pillar','invalid-distribution','invalid-annual-periods'].includes(e.message) ? e.message : 'analysis-unavailable' }, 400); }
 }

@@ -10,7 +10,7 @@ for(let i=0;i<40;i++){
  const absent=structuredClone(sd);delete absent.sewoon;delete absent.currentDaewoon;const af=K.deriveFacts(absent);assert(!K.evalConds({seunStemTG:[sd.sewoon.stemTG]},af).match);assert.equal(af.daewoonStemTG,undefined);
  const stale=structuredClone(sd);if(stale.currentDaewoon){stale.currentDaewoon.endYear=sd.nowYear-1;assert.equal(K.deriveFacts(stale).daewoonStemTG,undefined);}
  const invalid=structuredClone(sd);invalid.sewoon.stemTG='INVALID';assert.equal(K.deriveFacts(invalid).seunStemTG,undefined);
- const rule={id:'TIMING-TEST',domain:'TIMING',status:'published',reviewed:true,sourceType:'internal',title:'配線 fixture',principle:'テスト fixture',interpretation:'검사 전용 조건부 판단입니다.',conditions:{seunStemTG:[sd.sewoon.stemTG]},evidence:[{docId:'fixture',chunkId:'c1',quote:'fixture'}],confidence:'low',priority:10};
+ const rule={id:'TIMING-TEST',domain:'TIMING',status:'published',reviewed:true,sourceType:'internal',title:'검사 전용 픽스처',principle:'검사 전용 픽스처',interpretation:'검사 전용 조건부 판단입니다.',conditions:{seunStemTG:[sd.sewoon.stemTG]},evidence:[{docId:'fixture',chunkId:'c1',quote:'fixture'}],confidence:'low',priority:10};
  const a=E.analyze(sd,[rule],{sourceIndex:new Map([['fixture',{chunks:[{id:'c1',text:'fixture'}]}]])});assert.equal(a.claims.length,1);assert.equal(a.claims[0].time_basis.seunStemTG.year,sd.nowYear);assert.equal(a.claims[0].time_basis.seunStemTG.part,'stem');assert.equal(C.selectChapterClaims(a,P.chapterPolicy({chapterKind:'timing'})).claims.length,1);
  assert.equal(E.analyze(bad,[rule],{sourceIndex:new Map([['fixture',{chunks:[{id:'c1',text:'fixture'}]}]])}).claims.length,0);
 }

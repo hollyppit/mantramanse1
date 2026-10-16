@@ -38,6 +38,12 @@
       "output": "PASS: 20 provider priority/fallback scenarios\n"
     },
     {
+      "file": "annual-evidence-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "annual-evidence: 30 charts x 10 years; original engine unchanged; daeun transitions; per-year matching/provenance; draft isolation; stale/duplicate/oversize rejection; admin API PASS\n"
+    },
+    {
       "file": "asset-art-sim.js",
       "status": "pass",
       "exit": 0,
@@ -149,7 +155,7 @@
       "file": "deep-ai-sim.js",
       "status": "pass",
       "exit": 0,
-      "output": " 합성 사용 (호출 1회)\n  ✓ 같은 사주 재방문은 저장본 재사용 — AI 추가 호출 없음 (호출 1회)\n  ✓ 합성 결과가 ik:pkg: 키로 저장됨\n3. 지식이 바뀌면 새로 합성\n  ✓ 지식 버전이 바뀌어 다시 합성 (호출 1회)\n4. 위험 표현이 나오면 버리고 DB 문장\n  ✓ 단정 표현은 사용자에게 나가지 않음(DB 문장으로 대체)\n5. AI 가 늦으면 기다리지 않고 DB 문장 → 뒤에서 마저 저장 → 다음 방문은 AI 문장\n  ✓ 대기 한도(150ms)에 맞춰 응답: 156ms · DB 문장\n  ✓ 뒤에서 끝난 합성이 저장되어 다음 방문에는 AI 문장\n6. 일일 상한\n  ✓ 오늘 호출 상한을 넘으면 AI 를 부르지 않고 DB 문장\n7. 스위치를 다시 끄면\n  ✓ AI 호출 없음\n8. 본문 대체 스위치(serviceBody)가 응답에 실림\n  ✓ 기본: body=false (더 깊이 덧붙임)\n  ✓ 켜면 body=true (클라이언트가 본문 대체 모드로 조립)\n\n전부 통과\n"
+      "output": " 합성 사용 (호출 1회)\n  ✓ 같은 사주 재방문은 저장본 재사용 — AI 추가 호출 없음 (호출 1회)\n  ✓ 합성 결과가 ik:pkg: 키로 저장됨\n3. 지식이 바뀌면 새로 합성\n  ✓ 지식 버전이 바뀌어 다시 합성 (호출 1회)\n4. 위험 표현이 나오면 버리고 DB 문장\n  ✓ 단정 표현은 사용자에게 나가지 않음(DB 문장으로 대체)\n5. AI 가 늦으면 기다리지 않고 DB 문장 → 뒤에서 마저 저장 → 다음 방문은 AI 문장\n  ✓ 대기 한도(150ms)에 맞춰 응답: 163ms · DB 문장\n  ✓ 뒤에서 끝난 합성이 저장되어 다음 방문에는 AI 문장\n6. 일일 상한\n  ✓ 오늘 호출 상한을 넘으면 AI 를 부르지 않고 DB 문장\n7. 스위치를 다시 끄면\n  ✓ AI 호출 없음\n8. 본문 대체 스위치(serviceBody)가 응답에 실림\n  ✓ 기본: body=false (더 깊이 덧붙임)\n  ✓ 켜면 body=true (클라이언트가 본문 대체 모드로 조립)\n\n전부 통과\n"
     },
     {
       "file": "deep-sim.js",
@@ -288,6 +294,12 @@
       "status": "pass",
       "exit": 0,
       "output": "5 0.34 0.38\nI 습 심함               29   0.1    30.7 |  27  23  16  35 |  30   37   18   15 |  32   14    |  41   57 0.29 0.40\nJ 억부=조후 용신           44  -1.9    31.1 |  21  23  25  31 |  28   34   22   16 |  32   15    |  41   54 0.36 0.32\nK 억부≠조후(반대)          41  -0.1    21.8 |  25  20  19  35 |  21   51   21    7 |  33    7    |  41   54 0.27 0.38\nALL                 600  -1.7    23.0 |  21  23  24  33 |  19   50   24    7 |  33    8    |  42   52 0.36 0.19\n\nNaN/undefined/빈 phase 없음, 유형별 편향 기준 통과\n"
+    },
+    {
+      "file": "luck-ten-god-sim.js",
+      "status": "pass",
+      "exit": 0,
+      "output": "luck-ten-god: 40 charts; exact engine values; missing/stale/invalid rejection; separate scopes; source-bound time provenance PASS\n"
     },
     {
       "file": "luck6-sim.js",

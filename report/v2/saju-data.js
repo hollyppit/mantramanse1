@@ -164,6 +164,20 @@
     return sd;
   }
 
+  // Annual snapshots reuse the original chart and engine luck outputs; no new calendar calculation.
+  function annualPeriods(ch, opts) {
+    opts = opts || {};
+    var M = root.Manse, now = opts.now == null ? Date.now() : opts.now;
+    var start = M.yearPillarAt(now).sajuYear, count = opts.count == null ? 10 : opts.count;
+    if (!Number.isInteger(count) || count < 1 || count > 10) throw Error('invalid-annual-count');
+    var sd = build(ch, { now: now });
+    return M.seunRange(ch, start, start + count - 1).map(function (se, i) {
+      var year = start + i, dw = sd.daewoon.find(function (x) { return x.startYear <= year && year <= x.endYear; });
+      return { year: year, currentDaewoon: dw ? Object.assign({}, dw) : null,
+        sewoon: { year: year, ganzhi: M.gzNameK(se), stemTG: se.stemTG, branchTG: se.branchTG } };
+    });
+  }
+
   root.ReportV2 = root.ReportV2 || {};
-  root.ReportV2.SajuData = { build: build, seasonOf: seasonOf, SEASONS: SEASONS, GROUPS: GROUPS, ELK: ELK };
+  root.ReportV2.SajuData = { build: build, annualPeriods: annualPeriods, seasonOf: seasonOf, SEASONS: SEASONS, GROUPS: GROUPS, ELK: ELK };
 })(typeof window !== 'undefined' ? window : globalThis);
