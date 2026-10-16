@@ -41,7 +41,7 @@
      lines: 안내자별 대사 — 템플릿 {귀인} {이름귀인} {이름} {year} {month}. */
   var STEPS = [
     { id: 'seal', kind: 'seal', asset: 'gate', title: '서막 · 불타는 봉인', required: false, button: '봉인을 태워 문을 열기 →',
-      head: '불에 사라지는 것은\n봉인뿐입니다.', desc: '태어난 순간은 지나갔어도,\n그날의 기록은 아직 이곳에 남아 있습니다.', hint: '부적의 봉인이 타들어 가면, 경계가 열립니다.', lines: { male: [], female: [] } },
+      head: '',desc: '태어난 순간은 지나갔어도,\n그날의 기록은 아직 이곳에 남아 있습니다.', hint: '부적의 봉인이 타들어 가면, 경계가 열립니다.', lines: { male: [], female: [] } },
     { id: 'guide', kind: 'guide', asset: 'courtyard', title: '제2막 · 두 명의 안내자', required: false, button: '',
       head: '경계의 기록을 누가 펼쳐 드릴까요?', hint: '안내자의 말투와 진행 방식만 달라집니다. 운명의 계산 결과는 같습니다.', lines: { male: [], female: [] } },
     { id: 'name', kind: 'input', field: 'name', group: 'name', asset: 'archive', title: '첫 번째 기록 · 이름', required: true, button: '이 이름으로 기록하기 →',

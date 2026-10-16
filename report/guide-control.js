@@ -19,7 +19,7 @@
   function updateVisibility() {
     var saved = null; try { saved = JSON.parse(localStorage.getItem('mt_guide') || 'null'); } catch (e) { }
     var route = location.hash.replace(/^#\/?/, '').split('?')[0], scene = document.querySelector('[data-guide-step]');
-    button.hidden = !canShow(saved, route, scene && scene.dataset.guideStep, /\/report\/v2\//.test(location.pathname));
+    button.hidden = true;
     if (button.hidden && dialog.open) dialog.close();
   }
   updateVisibility();
@@ -27,7 +27,8 @@
   window.addEventListener('storage', updateVisibility);
   window.addEventListener('mantra:guide-change', updateVisibility);
   new MutationObserver(updateVisibility).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-guide-step'] });
-  button.onclick = function () { dialog.querySelectorAll('[data-guide]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.guide === current())); }); dialog.showModal(); };
+  window.mantraOpenGuidePicker = button.onclick = function () { dialog.querySelectorAll('[data-guide]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.guide === current())); }); dialog.showModal(); };
+  document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('[data-guide-open]')) button.onclick(); });
   dialog.onclick = function (e) {
     var b = e.target.closest('[data-guide]');
     if (b) {
