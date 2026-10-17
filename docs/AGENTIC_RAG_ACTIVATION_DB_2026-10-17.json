@@ -1,0 +1,125 @@
+{
+  "checkedAt": "2026-10-17T13:00:55.806Z",
+  "originalPreservationPassed": true,
+  "rows": [
+    {
+      "original_rows": 159,
+      "original_hash": "b032d9871790dea1ccca4f8e91f30343",
+      "knowledge": 386,
+      "reviewed": 382,
+      "published": 333,
+      "config": {
+        "time": "03:00",
+        "model": "gpt-4.1-mini-2025-04-14",
+        "allowed": [
+          {
+            "grade": "B",
+            "quote": true,
+            "store": true,
+            "author": "Wikisource contributors; 고전 원저자 및 문서 이력 참조",
+            "origin": "https://zh.wikisource.org",
+            "license": "Public-domain classical texts; CC BY-SA 4.0 attribution/share-alike where applicable",
+            "rightsUrl": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+            "commercial": true,
+            "aiGenerated": false,
+            "automaticSupport": true
+          }
+        ],
+        "blocked": [],
+        "enabled": true,
+        "maxDocs": 1,
+        "retries": 0,
+        "maxTasks": 1,
+        "inputPrice": 0.5,
+        "legacyOnly": false,
+        "taskBudget": 0.05,
+        "autoPublish": true,
+        "dailyBudget": 1,
+        "maxSearches": 1,
+        "outputPrice": 2,
+        "searchPrice": 0.005,
+        "cooldownDays": 30,
+        "documentPrice": 0,
+        "maxInputBytes": 24000,
+        "monthlyBudget": 1,
+        "maxOutputTokens": 2500,
+        "storagePricePerKB": 0,
+        "autoApproveChanges": true
+      },
+      "revision": 15,
+      "ledger": {
+        "2026-10": {
+          "spent": 0.049313,
+          "started": 2,
+          "reserved": 0
+        },
+        "2026-10-17": {
+          "spent": 0.049313,
+          "started": 2,
+          "reserved": 0
+        }
+      },
+      "last_daily": "2026-10-17",
+      "lock": null,
+      "candidates": 0,
+      "active_overlays": 0,
+      "jobs": [
+        {
+          "id": "4c3d9360-9a41-472e-a446-8c46186f72f7",
+          "state": "failed",
+          "tasks": null
+        },
+        {
+          "id": "71e66cec-2c68-4365-ba15-36c33a89ef73",
+          "state": "completed",
+          "tasks": [
+            {
+              "id": "d3bf9975-412a-40e4-9912-6e63d8f69ee9",
+              "stage": "search",
+              "state": "failed",
+              "errors": [
+                {
+                  "at": "2026-10-17T12:57:00.793Z",
+                  "error": "invalid-search-response",
+                  "retry": false,
+                  "stage": "search"
+                }
+              ],
+              "knowledgeId": "MONEY-0030",
+              "accountedCost": 0.0246565
+            },
+            {
+              "id": "06a8b14b-da9d-4a53-983e-3a17dc73f976",
+              "stage": "search",
+              "state": "cancelled",
+              "errors": [],
+              "knowledgeId": "SELF-0067",
+              "accountedCost": null
+            }
+          ]
+        },
+        {
+          "id": "8cc43e10-ead5-418c-b3e8-0d3d3cf2ccea",
+          "state": "completed",
+          "tasks": [
+            {
+              "id": "9bcd6304-18b3-4235-90c1-aa85a7c233c6",
+              "stage": "search",
+              "state": "failed",
+              "errors": [
+                {
+                  "at": "2026-10-17T12:53:49.926Z",
+                  "error": "Invalid redirect value, must be one of \"follow\" or \"manual\" (\"error\" won't be implemented since it does not make sense at the edge; use \"manual\" and check the response status code).",
+                  "retry": false,
+                  "stage": "search"
+                }
+              ],
+              "knowledgeId": "MONEY-0030",
+              "accountedCost": 0.0246565
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -30,9 +30,14 @@ export function kvOf(env, opts) {
   const slot = (opts && opts.cache) ? 'c' : 'n'; let m = cache.get(env); if (!m) { m = {}; cache.set(env, m); } if (m[slot]) return m[slot];
   const memo = !!(opts && opts.cache);
   const adapter = {
+    async researchCAS(expected, next) {
+      const r = await sb(env, 'rpc/rag_compare_and_swap', { method: 'POST', body: JSON.stringify({ p_expected: expected, p_next: next }) });
+      memoAll.delete('ik:agentic:runtime');
+      return (await r.json()) === true;
+    },
     async get(key, type) {
       if (!startsWith(key, ROUTED)) return raw.get(key, type);
-      const useMemo = memo && startsWith(key, MEMO_PREFIX), hit = useMemo && memoAll.get(key);
+      const useMemo = memo && key !== 'ik:agentic:runtime' && startsWith(key, MEMO_PREFIX), hit = useMemo && memoAll.get(key);
       if (hit && hit.exp > Date.now()) return parse(hit.v, type);
       const rows = await (await sb(env, 'kv?select=value,expires_at&limit=1&key=eq.' + encodeURIComponent(key))).json();
       let txt;
@@ -52,7 +57,10 @@ export function kvOf(env, opts) {
           const rows=await (await sb(env,'kv?select=key,value,expires_at&key=in.'+encodeURIComponent('('+quoted+')'))).json();
           for(const row of rows)values.set(row.key,row.expires_at && Date.parse(row.expires_at)<=Date.now()?null:row.value);
         }
-        await Promise.all(batch.filter(k=>!values.has(k)).map(async k=>values.set(k,!startsWith(k,ROUTED)||startsWith(k,FALLBACK)?await raw.get(k):null)));
+        const missing=batch.filter(k=>!values.has(k)),fallback=missing.filter(k=>!startsWith(k,ROUTED)||startsWith(k,FALLBACK));
+        // KV supports up to 100 keys in one get(). Preserve missing-key fallback without exhausting 50 subrequests.
+        if(fallback.length){const bulk=await raw.get(fallback);if(bulk instanceof Map)for(const k of fallback)values.set(k,bulk.get(k)??null);else await Promise.all(fallback.map(async k=>values.set(k,await raw.get(k))));}
+        for(const k of missing)if(!values.has(k))values.set(k,null);
       }
       return keys.map(k=>parse(values.get(k),type));
     },

@@ -1,0 +1,11 @@
+# Reference only. Not used by the default deploy configuration.
+name = "mantra-rag-scheduler"
+main = "rag-scheduler.js"
+compatibility_date = "2026-10-17"
+workers_dev = false
+
+[triggers]
+crons = ["0 18 * * *"] # 03:00 KST, once daily
+
+# Use only after approval, backup, and real provider/database verification.
+# Add RAG_API_ORIGIN and RAG_SCHEDULER_SECRET through protected configuration.

@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-10-17T12:10:38.774Z",
+  "mode": "live-search-fetch-extraction-local-pg17",
+  "productionWrites": 0,
+  "apiCapUSD": 0.05,
+  "checks": {
+    "realSearch": false,
+    "realDocument": false,
+    "realExtraction": true,
+    "realAutomaticPublicationAndRollback": true,
+    "originalsUnchanged": true
+  },
+  "requests": {
+    "search": 0,
+    "generate": 1,
+    "document": 0
+  },
+  "passed": true,
+  "priorReservedUSD": 0.0429732,
+  "cachedSource": "unmodified document from prior real Brave search and HTTPS collection",
+  "cumulativeReservedUSD": 0.0495256,
+  "task": {
+    "state": "completed",
+    "stage": "validate",
+    "errors": [],
+    "urls": [
+      "https://zh.wikisource.org/zh-hant/%E6%BB%B4%E5%A4%A9%E9%AB%93/02"
+    ]
+  },
+  "actualLedgerUSD": 0.00163361,
+  "reservedWorstCaseUSD": 0.006552400000000001,
+  "candidates": [
+    {
+      "id": "60f8d5f8-de08-4a3a-8744-b07ab23b026c",
+      "kind": "evidence",
+      "approval": "automatic_approved",
+      "publication": "published",
+      "automaticEligible": true
+    }
+  ],
+  "finalPublications": [
+    {
+      "id": "60f8d5f8-de08-4a3a-8744-b07ab23b026c",
+      "publication": "rolled_back"
+    }
+  ],
+  "pipelineProvenance": {
+    "searchAndDocument": "actual Brave and HTTPS results from earlier attempts, cached unmodified",
+    "generation": "actual OpenAI response from final attempt",
+    "publicationAndRollback": "actual isolated local PostgreSQL 17.5; not hosted publication"
+  }
+}

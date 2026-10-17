@@ -1,12 +1,16 @@
 // 풀이 지식(IK)·풀이 자료(SRC) API 가 함께 쓰는 저장·AI 도우미. 파일명이 _로 시작해 라우트로 노출되지 않는다.
 import { DOMAINS } from './_ik.js';
+import { serviceItems } from './_rag-view.js';
+import { STATE_KEY } from './_rag-state.js';
 
 export const MAX_PER_DOMAIN = 2000, MAX_BYTES = 20 * 1024 * 1024, TIMEOUT_MS = 40000;
 export const dkey = d => 'ik:d:' + d;
 export const loadDomain = async (kv, d) => (await kv.get(dkey(d), 'json')) || [];
-export async function loadAll(kv, domains) { const ds = domains || Object.keys(DOMAINS); return (await Promise.all(ds.map(d => loadDomain(kv, d)))).flat(); }
-export async function meta(kv) { return (await kv.get('ik:meta', 'json')) || { k: 'k0', d: 'd0', r: 'r0' }; }
-export async function bump(kv, which) { const m = await meta(kv); m[which] = which + Date.now().toString(36); await kv.put('ik:meta', JSON.stringify(m)); return m; }
+export async function loadAll(kv, domains) { const ds = domains || Object.keys(DOMAINS); return (kv.getMany ? (await kv.getMany(ds.map(dkey),'json')).map(x=>x||[]) : await Promise.all(ds.map(d => loadDomain(kv, d)))).flat(); }
+export async function loadServiceAll(kv, domains) { const items=await serviceItems(kv,await loadAll(kv));return domains?items.filter(x=>domains.includes(x.domain)):items; }
+export async function loadServiceDomain(kv, domain) {return loadServiceAll(kv,[domain]);}
+export async function meta(kv) { const m=(await kv.get('ik:meta', 'json')) || { k: 'k0', d: 'd0', r: 'r0' };const s=await kv.get(STATE_KEY,'json').catch(()=>null);return s?{...m,research:s.config.legacyOnly?'legacy:'+(s.indexVersion||0):(s.indexVersion||0)}:m; }
+export async function bump(kv, which) { const m = await meta(kv); m[which] = which + Date.now().toString(36); const stored={...m};delete stored.research;await kv.put('ik:meta', JSON.stringify(stored)); return m; }
 export const scrub = sd => { if (!sd || typeof sd !== 'object') return sd; const c = { ...sd }; delete c.birth; delete c.name; delete c.ziwei; delete c.calculationProvenance; return c; }; // Legacy AI paths keep their existing data contract.
 export function nextId(items, domain) { const re = new RegExp('^' + domain + '-(\\d+)$'); let mx = 0; for (const x of items) { const m = re.exec(x.id); if (m) mx = Math.max(mx, +m[1]); } return domain + '-' + ('0000' + (mx + 1)).slice(-4); }
 

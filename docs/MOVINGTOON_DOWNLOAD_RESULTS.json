@@ -1,7 +1,7 @@
 {
-  "expectedPages": 38,
-  "progress": 38,
-  "bytes": 6413624,
+  "expectedPages": 36,
+  "progress": 36,
+  "bytes": 6013681,
   "loaded": [
     {
       "url": "https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js",

@@ -1,0 +1,22 @@
+const assert=require('node:assert/strict'),{pathToFileURL}=require('node:url'),path=require('node:path');
+(async()=>{
+ const imp=f=>import(pathToFileURL(path.resolve(f))),R=await imp('functions/_rag-runner.js'),S=await imp('functions/_rag-state.js'),K=await imp('functions/_ik.js'),V=await imp('functions/_rag-view.js');
+ assert.equal(S.DEFAULTS.autoApproveChanges,false);
+ const target={...K.cleanItem({id:'SELF-owner-test',title:'기존 결론',domain:'SELF',status:'published',reviewed:true,principle:'기존 원칙',interpretation:'기존 설명',conditions:{dayMaster:['갑']}},null),version:1};
+ const item={domain:'SELF',title:'새 결론',principle:'새로운 전통 원칙',interpretation:'다른 조건부 설명',conditions:{dayMaster:['을']},exclusions:{},modifiers:[],alsoWhen:[],theory:[],stance:'neutral'};
+ const quote='을 조건에 새로운 전통 원칙 및 다른 조건부 설명을 적용한다.';
+ const policy={origin:'https://library.org',grade:'A',author:'검증 저자',license:'허용',rightsUrl:'https://library.org/rights',commercial:true,quote:true,store:true,automaticSupport:true};
+ const docs=[{url:'https://library.org/source',text:quote,...policy}],raw=JSON.stringify({kind:'interpretation',quote,sourceUrl:docs[0].url,item});
+ const c={...S.DEFAULTS,enabled:true,autoPublish:true,legacyOnly:false,allowed:[policy]};
+ const legacy=await R.validateExtraction(raw,target,docs,[target],c);assert.equal(legacy.approval,'review_required');
+ const approved=await R.validateExtraction(raw,target,docs,[target],{...c,autoApproveChanges:true});assert.equal(approved.approval,'automatic_approved');assert.equal(approved.validation.changeAuthorized,true);assert.equal(approved.next.id,target.id);
+ const unsupported=JSON.stringify({kind:'interpretation',quote,sourceUrl:docs[0].url,item:{...item,interpretation:'근거 없는 다른 결론'}});
+ assert.equal((await R.validateExtraction(unsupported,target,docs,[target],{...c,autoApproveChanges:true})).approval,'review_required');
+ const missingCondition=JSON.stringify({kind:'interpretation',quote,sourceUrl:docs[0].url,item:{...item,conditions:{dayMaster:['경']}}});
+ assert.equal((await R.validateExtraction(missingCondition,target,docs,[target],{...c,autoApproveChanges:true})).approval,'review_required');
+ const originalJSON=JSON.stringify([target]),map=new Map([['ik:d:SELF',originalJSON]]),state=S.initialState();state.config={...c,autoApproveChanges:true};approved.publication='published';state.candidates[approved.id]=approved;state.active[target.id]=approved.id;map.set(S.STATE_KEY,JSON.stringify(state));
+ const kv={get:async(k,t)=>{const v=map.get(k)||null;return t==='json'&&v?JSON.parse(v):v;},researchCAS:async(a,b)=>{if(map.get(S.STATE_KEY)!==a)return false;map.set(S.STATE_KEY,b);return true;}};
+ assert.equal((await V.researchView(kv,[target])).items[0].interpretation,item.interpretation);
+ await R.rollbackCandidate(kv,approved.id,0,'검증된 결론 변경 개별 복원');assert.equal((await V.researchView(kv,[target])).items[0].interpretation,target.interpretation);assert.equal(map.get('ik:d:SELF'),originalJSON);
+ console.log('owner opt-in conclusion changes: exact source/conditions required; default approval unchanged; original preservation and individual rollback passed');
+})().catch(e=>{console.error(e);process.exitCode=1;});

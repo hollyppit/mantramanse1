@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),path=require('node:path'),{pathToFileURL}=require('node:url');
+(async()=>{const {kvOf}=await import(pathToFileURL(path.resolve('functions/_store.js')));let remoteReads=0,kvReads=0;
+ global.fetch=async()=>{remoteReads++;return Response.json([]);};
+ const raw={get:async keys=>{kvReads++;assert(Array.isArray(keys));assert(keys.length<=50);return new Map(keys.map(k=>[k,k==='src:chunks:0'?'[{"id":"c1","text":"preserved KV fallback"}]':null]));}};
+ const kv=kvOf({SUPABASE_URL:'https://db.org',SUPABASE_SERVICE_KEY:'fake',GLOSSARY_KV:raw}),keys=Array.from({length:100},(_,i)=>'src:chunks:'+i),result=await kv.getMany(keys,'json');
+ assert.equal(result.length,100);assert.equal(result[0][0].text,'preserved KV fallback');assert(result.slice(1).every(x=>x===null));assert.equal(remoteReads,2);assert.equal(kvReads,2);
+ const I=await import(pathToFileURL(path.resolve('functions/_ikstore.js')));assert.equal(I.dkey('SELF'),'ik:d:SELF');
+ let requested;const all=await I.loadAll({getMany:async(keys,type)=>{requested=keys;assert.equal(type,'json');return keys.map((k,i)=>i===0?[{id:'preserved',key:k}]:null);}});
+ assert(requested.every(k=>k.startsWith('ik:d:')));assert.equal(all.length,1);assert.equal(all[0].id,'preserved');
+ console.log('100 missing source chunks: KV fallback preserved in 4 operations; exported dkey and loadAll bulk branch passed');
+})().catch(e=>{console.error(e);process.exitCode=1;});

@@ -1,0 +1,36 @@
+[
+  {
+    "at": "2026-10-17T12:52:54.110Z",
+    "status": 200,
+    "result": {
+      "blocked": "run-already-active"
+    }
+  },
+  {
+    "at": "2026-10-17T12:53:41.884Z",
+    "status": 200,
+    "result": {
+      "id": "8cc43e10-ead5-418c-b3e8-0d3d3cf2ccea"
+    }
+  },
+  {
+    "at": "2026-10-17T12:53:50.442Z",
+    "status": 200,
+    "result": {
+      "runId": "8cc43e10-ead5-418c-b3e8-0d3d3cf2ccea",
+      "taskId": "9bcd6304-18b3-4235-90c1-aa85a7c233c6",
+      "state": "failed",
+      "stage": "search"
+    }
+  },
+  {
+    "at": "2026-10-17T12:57:01.939Z",
+    "status": 200,
+    "result": {
+      "runId": "71e66cec-2c68-4365-ba15-36c33a89ef73",
+      "taskId": "d3bf9975-412a-40e4-9912-6e63d8f69ee9",
+      "state": "failed",
+      "stage": "search"
+    }
+  }
+]

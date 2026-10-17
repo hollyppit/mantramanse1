@@ -1,0 +1,13 @@
+name = "mantra-rag-scheduler"
+main = "rag-scheduler.js"
+compatibility_date = "2026-10-17"
+workers_dev = false
+
+# KST daily start is checked in durable state, not by this UTC heartbeat.
+# One checkpoint/minute; at most one new scheduled run per KST day.
+[triggers]
+crons = []
+
+# Set RAG_API_ORIGIN and RAG_SCHEDULER_SECRET via deployment configuration/secrets.
+# No production origin or credentials are embedded here.
+# Activate a cron only after release approval and live connection validation.

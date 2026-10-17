@@ -1,0 +1,115 @@
+{
+  "preparedAt": "2026-10-17T12:16:41.684Z",
+  "mode": "proposal-not-deployed",
+  "productionWrites": 0,
+  "costGeneratingCalls": 0,
+  "requiresExplicitProductionApproval": true,
+  "target": {
+    "pages": "mantramanse",
+    "supabase": "devkslhggrkqtianjamj"
+  },
+  "scope": "initial OFF rollout only; no worker, cron, research activation or automatic publication",
+  "safeConfig": {
+    "enabled": false,
+    "autoPublish": false,
+    "legacyOnly": true,
+    "time": "03:00",
+    "dailyBudget": 0,
+    "monthlyBudget": 0,
+    "taskBudget": 0,
+    "maxTasks": 1,
+    "maxSearches": 1,
+    "maxDocs": 1,
+    "retries": 0,
+    "cooldownDays": 30,
+    "model": "",
+    "inputPrice": 0,
+    "outputPrice": 0,
+    "searchPrice": 0,
+    "documentPrice": 0,
+    "storagePricePerKB": 0,
+    "maxInputBytes": 24000,
+    "maxOutputTokens": 2500,
+    "allowed": [],
+    "blocked": []
+  },
+  "originalFingerprint": "b032d9871790dea1ccca4f8e91f30343",
+  "bootstrapSQL": {
+    "file": "output/rag-production-proposal-bb496616/01-bootstrap-safe.sql",
+    "sha256": "749801ca850354352ff6476fd5ca3e6611948508d18571f2c2cca668dc4fc9fa"
+  },
+  "applicationFiles": [
+    {
+      "file": "functions/_agentic-rag.js",
+      "sha256": "2808872ae4848aceaa15cfbafa594fdad4d221dfa1e5171f7d420133fd55733d"
+    },
+    {
+      "file": "functions/_rag-state.js",
+      "sha256": "6881438f370e366f3104cd4d01ab7e3d4fa54ee4ff62764e889ae6de40e88200"
+    },
+    {
+      "file": "functions/_rag-network.js",
+      "sha256": "68f9e0edaeff0990cccf1466ae43688f3330a95f8022db8b98b2643fcd09c0b8"
+    },
+    {
+      "file": "functions/_rag-runner.js",
+      "sha256": "2516476c14abe130ee8e7dcf84217484a23297e3c3f2a3f877f2e1adf0de1e9e"
+    },
+    {
+      "file": "functions/_rag-view.js",
+      "sha256": "3ecd1bbae4fc67bb2231dec332c672218cc0e56e3dee44e878eb117374a6d6c8"
+    },
+    {
+      "file": "functions/_ikstore.js",
+      "sha256": "2458e50822fd151cf792932eebee44b56df052eedba4e403cc0a2e4db8c8ebc6"
+    },
+    {
+      "file": "functions/_interpretation-store.js",
+      "sha256": "b1bf9ddf3bfadc667a6a54658ed2f21c8aba5842c72b605427391fb3451a9e6e"
+    },
+    {
+      "file": "functions/_store.js",
+      "sha256": "7fdfb7bdda7c95caa491e38637f000757e5fcc16f4c6fdb2a6ad18f5267f44e1"
+    },
+    {
+      "file": "functions/api/agentic-rag.js",
+      "sha256": "3faf4d35c569bb77b5f35dc484e570767705202f66d3aa4ca024cd4bb28082e9"
+    },
+    {
+      "file": "functions/api/ik.js",
+      "sha256": "6b6053f391eeedcc12906b65dbdaa0429985f4f5b7b9885096f6b58073791db6"
+    },
+    {
+      "file": "functions/api/interpretation.js",
+      "sha256": "897f5ac9213635350d7775f26f8018ed8266533a72a9019c49a6eb41362d73c8"
+    },
+    {
+      "file": "functions/api/movingtoon-reading.js",
+      "sha256": "20a947a107ff4b0676b268b5a80487eac2ab7c5a0143692b58c69c00634b31a9"
+    },
+    {
+      "file": "report/admin/index.html",
+      "sha256": "5c813825f9ac482ef00ad965c7faca8a7e67bdc09573b05b7d497316a8da56d7"
+    },
+    {
+      "file": "report/admin/navigation.js",
+      "sha256": "c19844434f2014c6597cfb6b2cad43b5b3178e8198069ffe13f5b60db3592ac0"
+    },
+    {
+      "file": "report/admin/v2-ik.js",
+      "sha256": "e4e0c2b638bedd68dd72fd071024c7f4c82c46d18fcf8364495d2ac2f21f3a1f"
+    },
+    {
+      "file": "report/admin/v2-agentic-rag.js",
+      "sha256": "38242d02d4b44b878e0a2b25e7f6ee2b94b68a59853ad58b7eaa63523accdccf"
+    }
+  ],
+  "rehearsal": {
+    "passed": true,
+    "engine": "PostgreSQL 17.5 on aarch64-unknown-linux-gnu, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit",
+    "originalRows": 159,
+    "originalFingerprintUnchanged": true,
+    "safeStateCreated": true,
+    "existingStateOverwriteRejected": true
+  }
+}

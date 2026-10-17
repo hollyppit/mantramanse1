@@ -1,0 +1,82 @@
+{
+  "checkedAt": "2026-10-17T12:41:04.447Z",
+  "project": "devkslhggrkqtianjamj",
+  "passed": true,
+  "rows": [
+    {
+      "original_rows": 159,
+      "original_hash": "b032d9871790dea1ccca4f8e91f30343",
+      "knowledge": 386,
+      "reviewed": 382,
+      "published": 333,
+      "config": {
+        "time": "03:00",
+        "model": "",
+        "allowed": [],
+        "blocked": [],
+        "enabled": false,
+        "maxDocs": 1,
+        "retries": 0,
+        "maxTasks": 1,
+        "inputPrice": 0,
+        "legacyOnly": true,
+        "taskBudget": 0,
+        "autoPublish": false,
+        "dailyBudget": 0,
+        "maxSearches": 1,
+        "outputPrice": 0,
+        "searchPrice": 0,
+        "cooldownDays": 30,
+        "documentPrice": 0,
+        "maxInputBytes": 24000,
+        "monthlyBudget": 0,
+        "maxOutputTokens": 2500,
+        "storagePricePerKB": 0
+      },
+      "revision": 1,
+      "jobs": {},
+      "candidates": {},
+      "active": {},
+      "ledger": {},
+      "last_daily": null,
+      "events": [
+        {
+          "at": "2026-10-17T12:38:57.375988+00:00",
+          "id": "4baa247d-6795-4efd-9db5-0d19ef09878c",
+          "type": "deployment-bootstrap",
+          "actor": "deployment-tool",
+          "reason": "승인된 1차 도입: 연구·자동 게시·예약 OFF, 원본 지식 유지",
+          "nextVersion": {
+            "config": {
+              "time": "03:00",
+              "model": "",
+              "allowed": [],
+              "blocked": [],
+              "enabled": false,
+              "maxDocs": 1,
+              "retries": 0,
+              "maxTasks": 1,
+              "inputPrice": 0,
+              "legacyOnly": true,
+              "taskBudget": 0,
+              "autoPublish": false,
+              "dailyBudget": 0,
+              "maxSearches": 1,
+              "outputPrice": 0,
+              "searchPrice": 0,
+              "cooldownDays": 30,
+              "documentPrice": 0,
+              "maxInputBytes": 24000,
+              "monthlyBudget": 0,
+              "maxOutputTokens": 2500,
+              "storagePricePerKB": 0
+            },
+            "schema": 2,
+            "revision": 1
+          },
+          "previousVersion": null
+        }
+      ]
+    }
+  ]
+}

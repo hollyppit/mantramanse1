@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-17T12:40:23.138Z",
+  "passed": true,
+  "wrangler": "4.151.1",
+  "compatibilityDate": "2026-09-29",
+  "compatibilityFlags": [],
+  "checks": [
+    {
+      "pathname": "/",
+      "status": 200
+    },
+    {
+      "pathname": "/report/admin/",
+      "status": 200
+    },
+    {
+      "pathname": "/api/agentic-rag",
+      "anonymousStatus": 401
+    },
+    {
+      "pathname": "/api/agentic-rag",
+      "authorizedStatus": 200,
+      "researchEnabled": false,
+      "autoPublish": false,
+      "budgets": 0,
+      "externalProvidersConfigured": false
+    }
+  ],
+  "productionWrites": 0,
+  "paidAPICalls": 0,
+  "limitations": [
+    "Local KV/R2 only, no hosted RPC in this smoke test.",
+    "Fresh local runtime defaults; production legacyOnly=true verified separately in SQL rehearsal.",
+    "Request.cf metadata fetch blocked by sandbox; local HTTP checks passed."
+  ]
+}

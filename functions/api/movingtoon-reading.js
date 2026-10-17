@@ -5,7 +5,7 @@ import { chapterPolicy, chapterInstruction, CHAPTER_DEFAULTS } from '../_chapter
 import { CHAPTER_VERSION, selectChapterClaims, buildHook, chapterQuality, REVIEW_SYSTEM, reviewPayload, parseReview, validateHook, chartFingerprint, claimSignature } from '../_chapter-engine.js';
 import { json } from '../_lib.js';
 import { kvOf } from '../_store.js';
-import { loadAll, blockedDocs, meta } from '../_ikstore.js';
+import { loadServiceAll as loadAll, blockedDocs, meta } from '../_ikstore.js';
 import { VERSION, validate, sources, sanitize, allowedOutputNumbers, systemFor, domainsFor } from '../_movingtoon-reading.js';
 import { loadStyle, styleFor } from '../_stylestore.js';
 import { analyze, ENGINE_VERSION, WRITER_SYSTEM, validateWritten } from '../_interpretation-engine.js';

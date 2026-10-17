@@ -1,0 +1,9 @@
+// Prepare a scoped Git allowlist; never stages or pushes by itself.
+const fs=require('node:fs'),assert=require('node:assert/strict'),{SOURCES,TESTS}=require('./prepare-rag-release.cjs'),{readConfig}=require('./check-rag-provider-connections.cjs');
+const tools=fs.readdirSync('tools').filter(f=>f.includes('rag')&&f.endsWith('.cjs')&&!/^(fix-|update-)/.test(f)).map(f=>'tools/'+f);
+const docs=fs.readdirSync('docs').filter(f=>f.startsWith('AGENTIC_RAG_')&&(f.endsWith('.md')||/^(AGENTIC_RAG_(ACTIVATION_(DB|DEPLOYMENT|LIVE_STEPS|SECRETS)|PRODUCTION_(DB_VERIFIED|DEPLOYMENT|PROPOSAL)|LIVE_RESEARCH|HOSTED_RPC|POSTGRES17_TEST|POSTGRES_TEST|RELEASE_CHECKS|ROLLOUT_SMOKE|SITE_PACKAGE)_)/.test(f))).map(f=>'docs/'+f);
+const extras=['.gitignore','tests/store-integration-sim.js','docs/MOVINGTOON_DOWNLOAD_RESULTS.json','tests/agentic-rag-browser.cjs','tests/agentic-rag-runtime-browser.cjs'];
+const files=[...new Set([...SOURCES,...TESTS,...tools,...docs,...extras])].sort();
+const credentials=readConfig('output/protected-backup/api-probe.env'),privateValues=[...Object.values(credentials).filter(v=>typeof v==='string'&&v.length>20),fs.readFileSync('E:/만트라 스튜디오 사업/앱 개발 소스/Cloudflare Workers API token 260411.txt','utf8').trim(),JSON.parse(fs.readFileSync('output/protected-backup/rag-production-scheduler.json')).secret];
+for(const file of files){assert(!/^(output|\.wrangler|\.claude)\//.test(file));const text=fs.readFileSync(file,'utf8');for(const value of privateValues)assert(!text.includes(value),'credential found: '+file);assert(!/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(text));}
+fs.writeFileSync('output/rag-git-files.txt',files.join('\0')+'\0');fs.writeFileSync('output/rag-git-files.json',JSON.stringify(files,null,2));console.log(JSON.stringify({scopedFiles:files.length,privateArtifactsExcluded:true,actualCredentialScanPassed:true,files}));

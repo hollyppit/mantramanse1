@@ -8,7 +8,7 @@ const rows = new Map(); const realFetch = global.fetch;
 global.fetch = async (u, o = {}) => {
   u = String(u); if (!u.includes('supabase.test/rest/v1/kv')) return realFetch(u, o);
   const url = new URL(u), q = url.searchParams, m = o.method || 'GET', J = x => new Response(JSON.stringify(x), { status: 200, headers: { 'content-type': 'application/json' } });
-  if (m === 'GET') { const k = q.get('key'); if (k.startsWith('eq.')) { const r = rows.get(k.slice(3)); return J(r ? [{ value: r.value, expires_at: r.expires_at }] : []); } return J([...rows.entries()].filter(([x]) => x.startsWith(k.slice(5).replace(/\*$/, ''))).map(([key, r]) => ({ key, value: r.value }))); }
+  if (m === 'GET') { const k = q.get('key'); if (k.startsWith('eq.')) { const r = rows.get(k.slice(3)); return J(r ? [{ value: r.value, expires_at: r.expires_at }] : []); } if(k.startsWith('in.(')){const keys=JSON.parse('['+k.slice(4,-1)+']');return J(keys.filter(key=>rows.has(key)).map(key=>({key,...rows.get(key)})));} return J([...rows.entries()].filter(([x]) => x.startsWith(k.slice(5).replace(/\*$/, ''))).map(([key, r]) => ({ key, value: r.value }))); }
   if (m === 'POST') { const b = JSON.parse(o.body); rows.set(b.key, { value: b.value, expires_at: b.expires_at }); return new Response(null, { status: 201 }); }
   if (m === 'DELETE') { rows.delete(q.get('key').slice(3)); return new Response(null, { status: 204 }); }
   return J({});

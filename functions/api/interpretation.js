@@ -5,7 +5,7 @@ import {selectChapterClaims} from '../_chapter-engine.js';
 // Read-only analysis: no AI provider calls and no source/asset mutation.
 import { json, isAdmin } from '../_lib.js';
 import { kvOf } from '../_store.js';
-import { loadAll, blockedDocs } from '../_ikstore.js';
+import { loadServiceAll as loadAll, blockedDocs } from '../_ikstore.js';
 import { analyze, renderReport, ENGINE_VERSION } from '../_interpretation-engine.js';
 import { loadSourceIndex, loadSettings } from '../_interpretation-store.js';
 import { onRequestPost as writeChapter } from './movingtoon-reading.js';

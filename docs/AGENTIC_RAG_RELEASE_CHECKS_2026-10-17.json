@@ -1,0 +1,147 @@
+{
+  "checkedAt": "2026-10-17T13:03:13.825Z",
+  "mode": "offline-review-only",
+  "costGeneratingCalls": 0,
+  "productionReads": 0,
+  "productionWrites": 0,
+  "localPreparationPassed": true,
+  "operationalDeploymentReady": false,
+  "checks": {
+    "safeRolloutTemplate": true,
+    "schedulerDefaultOff": true,
+    "restrictedAdditiveSQL": true,
+    "allowlistCopyHashesVerified": true,
+    "knownSecretPatternsAbsent": true
+  },
+  "tests": [
+    {
+      "file": "tests/agentic-rag-sim.cjs",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/agentic-rag-runtime-sim.cjs",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/rag-store-sim.cjs",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/rag-postgres-integration.cjs",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/ik-sim.js",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/src-sim.js",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/interpretation-engine-sim.js",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/movingtoon-reading-sim.js",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/reading-answer-sim.js",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/store-sim.js",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/store-integration-sim.js",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/admin-navigation-sim.js",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/admin-login-sim.js",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/research-review-api-sim.cjs",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/chapter-output-schema-sim.js",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/rag-backup-audit-sim.cjs",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/rag-cloud-backup-sim.cjs",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/rag-provider-probe-sim.cjs",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/rag-postgres17-sim.cjs",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/rag-extractor-contract.cjs",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/rag-owner-policy.cjs",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/rag-bulk-fallback.cjs",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/rag-empty-search.cjs",
+      "passed": true,
+      "error": null
+    },
+    {
+      "file": "tests/rag-daily-worker.cjs",
+      "passed": true,
+      "error": null
+    }
+  ],
+  "remaining": [
+    "운영 백업 및 실제 ID·승인·게시 집계 대조",
+    "실제 검색·AI 연결과 출처 이용 권한·비용 상한 확인",
+    "운영과 같은 PostgreSQL 17 환경에서 SQL·REST 권한 확인",
+    "무빙툰·PDF 운영 조건 회귀 확인",
+    "결과 보고 후 사용자 운영 배포 승인"
+  ],
+  "reviewFolder": "output/rag-release-review-2026-10-17T13-03-13-825Z-8d89cd4c",
+  "reviewFileCount": 61
+}

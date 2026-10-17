@@ -1,0 +1,46 @@
+{
+  "checkedAt": "2026-10-17T12:40:21.202Z",
+  "passed": true,
+  "productionDeployment": "a5b6c5e1-d746-4cf0-9b0f-d2486d938083",
+  "url": "https://a5b6c5e1.mantramanse.pages.dev",
+  "previousDeployment": "af43e068-9557-4614-9136-ab585f94f406",
+  "environment": "production",
+  "productionConfigUnchanged": true,
+  "compatibilityDate": "2026-09-29",
+  "compatibilityFlags": [],
+  "checks": [
+    {
+      "file": "index.html",
+      "status": 200,
+      "hashMatched": true
+    },
+    {
+      "file": "report/admin/index.html",
+      "status": 200,
+      "hashMatched": true
+    },
+    {
+      "file": "report/admin/v2-agentic-rag.js",
+      "status": 200,
+      "hashMatched": true
+    },
+    {
+      "path": "/api/agentic-rag",
+      "anonymousStatus": 401
+    },
+    {
+      "path": "/api/ik?a=stats",
+      "anonymousStatus": 401
+    },
+    {
+      "path": "/api/free-content",
+      "status": 200
+    }
+  ],
+  "aiCalls": 0,
+  "cronDeployed": false,
+  "keysUploaded": false,
+  "limitations": [
+    "Authenticated dashboard HTTP check unavailable without production admin session; stored production OFF state verified through Supabase SQL."
+  ]
+}

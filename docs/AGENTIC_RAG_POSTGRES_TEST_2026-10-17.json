@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-17T13:03:16.094Z",
+  "databaseEngine": "PostgreSQL/PGlite",
+  "hostedSupabase": false,
+  "providerMode": "fixture",
+  "liveExternalAI": false,
+  "productionAccess": false,
+  "checks": {
+    "migrationApplied": true,
+    "noOwnerPrivilegeEscalation": true,
+    "anonymousAndAuthenticatedDenied": true,
+    "atomicCAS": true,
+    "preRolloutBackupRestoredExactly": true,
+    "automaticPublicationWithFixtureProviders": true,
+    "publishedEvidenceReachesReadingAndPdfTemplate": true,
+    "individualRollback": true,
+    "rolledBackEvidenceExcludedFromReading": true,
+    "originalRowsApprovalPublicationUnchanged": true,
+    "historyRetained": true,
+    "diskPersistence": true,
+    "postRolloutBackupRestoredExactly": true,
+    "corruptRestoreRejected": true
+  },
+  "postgresVersion": "PostgreSQL 18.6 (PGlite 0.5.10) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.5 (1db513782be24469589d7cb8a1f1834e9a33f271), 32-bit",
+  "backupRestore": {
+    "matched": true,
+    "counts": {
+      "rows": 3,
+      "knowledge": 2,
+      "published": 2,
+      "reviewed": 2,
+      "sourceRows": 2
+    },
+    "sha256": "d73e6eef3e2eab591bac17fdb09d5cf082333f94d02581dc0150b01297d1296a"
+  },
+  "passed": true
+}

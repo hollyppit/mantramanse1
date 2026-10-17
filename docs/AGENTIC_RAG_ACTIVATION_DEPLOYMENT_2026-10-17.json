@@ -1,0 +1,55 @@
+{
+  "checkedAt": "2026-10-17T12:59:38.070Z",
+  "passed": true,
+  "productionDeployment": "cf1ed509-036d-41c5-87ff-d5e242ab04fb",
+  "url": "https://cf1ed509.mantramanse.pages.dev",
+  "previousDeployment": "a5b6c5e1-d746-4cf0-9b0f-d2486d938083",
+  "environment": "production",
+  "productionConfigUnchanged": true,
+  "compatibilityDate": "2026-09-29",
+  "compatibilityFlags": [],
+  "checks": [
+    {
+      "file": "index.html",
+      "status": 200,
+      "hashMatched": true
+    },
+    {
+      "file": "report/admin/index.html",
+      "status": 200,
+      "hashMatched": true
+    },
+    {
+      "file": "report/admin/v2-agentic-rag.js",
+      "status": 200,
+      "hashMatched": true
+    },
+    {
+      "path": "/api/agentic-rag",
+      "anonymousStatus": 401
+    },
+    {
+      "path": "/api/ik?a=stats",
+      "anonymousStatus": 401
+    },
+    {
+      "path": "/api/free-content",
+      "status": 200
+    }
+  ],
+  "aiCalls": null,
+  "cronDeployed": true,
+  "keysUploaded": true,
+  "limitations": [
+    "Authenticated dashboard visually checked separately. No provider-generation success was observed in this production run; search response failed validation."
+  ],
+  "scheduler": {
+    "schedules": [
+      {
+        "cron": "0 18 * * *",
+        "created_on": "2026-10-17T12:55:53.128401Z",
+        "modified_on": "2026-10-17T12:55:53.128401Z"
+      }
+    ]
+  }
+}

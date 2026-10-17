@@ -9,7 +9,7 @@ import { kvOf, storeCheck } from '../_store.js';
 
 import { loadStyle, styleFor } from '../_stylestore.js';
 import { PROHIBITED_RE } from '../_style.js';
-import { MAX_PER_DOMAIN, MAX_BYTES, dkey, loadDomain, loadAll, meta, bump, scrub, llm, blockedDocs } from '../_ikstore.js';
+import { MAX_PER_DOMAIN, MAX_BYTES, dkey, loadDomain, loadAll, loadServiceAll, loadServiceDomain, meta, bump, scrub, llm, blockedDocs } from '../_ikstore.js';
 
 export async function onRequest({ request, env, waitUntil }) {
   const url = new URL(request.url), a = url.searchParams.get('a') || '', post = request.method === 'POST';
@@ -26,14 +26,14 @@ export async function onRequest({ request, env, waitUntil }) {
     return json({ version: IK.IK_VERSION, meta: m, design: design || null, defaultDesign: IK.DEFAULT_DESIGN, rules: rules || IK.DEFAULT_RULES, domains: IK.DOMAINS, unsupported: IK.UNSUPPORTED, levelCut: IK.LEVEL_CUT, aiAvailable: !!(env.ANTHROPIC_API_KEY || env.OPENAI_API_KEY) });
   }
   if (a === 'list' && !post) { // 전체 항목(가벼운 요약 + 조건). 본문은 get 으로.
-    const d = url.searchParams.get('domain'), items = await loadAll(kv, IK.DOMAINS[d] ? [d] : null);
-    return json({ items: items.map(it => ({ id: it.id, title: it.title, domain: it.domain, subDomain: it.subDomain, status: it.status, stance: it.stance, priority: it.priority, conditions: it.conditions, confidence: it.confidence, reviewed: it.reviewed, sourceType: it.sourceType, tags: it.tags, version: it.version, updatedAt: it.updatedAt, hasMods: (it.modifiers || []).length, text: (it.title + ' ' + it.principle + ' ' + it.interpretation + ' ' + (it.tags || []).join(' ')).slice(0, 600) })) });
+    const d = url.searchParams.get('domain'), items = await loadServiceAll(kv, IK.DOMAINS[d] ? [d] : null);
+    return json({ items: items.map(it => ({ id: it.id, title: it.title, domain: it.domain, subDomain: it.subDomain, status: it.status, stance: it.stance, priority: it.priority, conditions: it.conditions, confidence: it.confidence, reviewed: it.reviewed, sourceType: it.sourceType, tags: it.tags, version: it.version, updatedAt: it.updatedAt, hasMods: (it.modifiers || []).length, researchChangeId: it.researchChangeId, text: (it.title + ' ' + it.principle + ' ' + it.interpretation + ' ' + (it.tags || []).join(' ')).slice(0, 600) })) });
   }
   if (a === 'get' && !post) {
     const d = url.searchParams.get('domain'), id = url.searchParams.get('id'); if (!IK.DOMAINS[d]) return json({ error: '분야가 필요합니다' }, 400);
-    const it = (await loadDomain(kv, d)).find(x => x.id === id); return it ? json({ item: it }) : json({ error: '없는 항목입니다' }, 404);
+    const raw = (await loadDomain(kv,d)).find(x=>x.id===id); const it=raw || (await loadServiceDomain(kv,d)).find(x=>x.id===id); return it ? json({ item: raw || {...it,researchManaged:true} }) : json({ error: '없는 항목입니다' }, 404);
   }
-  if (a === 'stats' && !post) { const [items, design] = await Promise.all([loadAll(kv), kv.get('ik:design', 'json')]); const total = items.length, prod = items.filter(IK.isProduction).length;
+  if (a === 'stats' && !post) { const [items, design] = await Promise.all([loadServiceAll(kv), kv.get('ik:design', 'json')]); const total = items.length, prod = items.filter(IK.isProduction).length;
     return json({ total, published: items.filter(x => x.status === 'published').length, reviewed: items.filter(x => x.reviewed).length, needReview: items.filter(x => x.status !== 'archived' && !x.reviewed).length, aiDraft: items.filter(x => x.sourceType === 'AI_DRAFT' && !x.reviewed).length, production: prod, coverage: IK.coverageStats(items, design) }); }
   if (a === 'classify' && post) { // 구성 항목(subDomain)이 비었거나 목록에 없는 풀이 지식을 AI 가 가장 맞는 항목에 배정한다. 이미 맞는 값은 건드리지 않는다. 한 번에 최대 40개 — remaining 이 0 이 될 때까지 offset 을 (tried - assigned)씩 늘려 반복 호출.
     const dom = b.domain; if (!IK.DOMAINS[dom]) return json({ error: '분야가 필요합니다' }, 400);
@@ -103,10 +103,10 @@ export async function onRequest({ request, env, waitUntil }) {
   if (a === 'lab' && post) { // 풀이 실험실: 초안 포함 여부 선택, 합성 방식 선택(plain | ai)
     if (!IK.DOMAINS[b.domain]) return json({ error: '분야가 필요합니다' }, 400);
     try {
-      const [items, design, rules, m] = await Promise.all([loadAll(kv, [b.domain]), kv.get('ik:design', 'json'), kv.get('ik:rules', 'json'), meta(kv)]);
+      const [items, design, rules, m] = await Promise.all([loadServiceAll(kv, [b.domain]), kv.get('ik:design', 'json'), kv.get('ik:rules', 'json'), meta(kv)]);
       const rl0 = rules || IK.DEFAULT_RULES, rl = IK.DEPTH_CAP[b.depth] ? { ...rl0, depth: b.depth } : rl0, fi = b.focus ? IK.cleanItem({ ...b.focus, status: 'published', reviewed: true }) : null; // 편집 중(저장 전) 풀이를 이번 실행에만 포함
       const pool = fi ? items.filter(x => x.id !== fi.id).concat(fi) : items, pkg = IK.buildPackage(scrub(b.sd), b.ext, pool, design, rl, { domain: b.domain, includeDraft: !!b.includeDraft, blockedDocs: b.includeDraft ? null : await blockedDocs(kv) });
-      pkg.versions = { knowledge: m.k, design: m.d, rules: m.r, composer: IK.COMPOSER_VERSION };
+      pkg.versions = { knowledge: m.k, research: m.research, design: m.d, rules: m.r, composer: IK.COMPOSER_VERSION };
       const styleCur = await loadStyle(kv), styleCfg = b.style ? { ...styleCur.config, defaultStyle: b.style, chapters: {} } : styleCur.config;
       const sty = styleFor({ ver: styleCur.ver, config: styleCfg }, [b.domain], { structure: true, soft: IK.hasSoft(pkg) });
       let composed = IK.composePlain(pkg, rl), mode = 'plain', provider = null, cached = false, aiError = null;
@@ -132,9 +132,9 @@ async function publicPackage(request, env) {
   let b; try { if (+request.headers.get('content-length') > 200 * 1024) return json({ ok: false, error: 'too-large' }, 413); b = await request.json(); } catch { return json({ ok: false, error: 'bad-json' }, 400); }
   if (!IK.DOMAINS[b.domain]) return json({ ok: false, error: 'bad-domain' }, 400);
   try {
-    const [items, design, rules, m] = await Promise.all([loadAll(kv, [b.domain]), kv.get('ik:design', 'json'), kv.get('ik:rules', 'json'), meta(kv)]);
+    const [items, design, rules, m] = await Promise.all([loadServiceAll(kv, [b.domain]), kv.get('ik:design', 'json'), kv.get('ik:rules', 'json'), meta(kv)]);
     const pkg = IK.buildPackage(scrub(b.sd), b.ext, items, design, rules || IK.DEFAULT_RULES, { domain: b.domain, includeDraft: false, blockedDocs: await blockedDocs(kv) });
-    pkg.versions = { knowledge: m.k, design: m.d, rules: m.r, composer: IK.COMPOSER_VERSION };
+    pkg.versions = { knowledge: m.k, research: m.research, design: m.d, rules: m.r, composer: IK.COMPOSER_VERSION };
     return json({ ok: true, package: pkg });
   } catch (e) { return json({ ok: false, error: 'bad-input' }, 400); }
 }
@@ -162,10 +162,10 @@ async function deepForService(request, env, waitUntil) {
   try {
     const [design, rules, styleCur] = await Promise.all([kv.get('ik:design', 'json'), kv.get('ik:rules', 'json'), loadStyle(kv)]), rl = rules || IK.DEFAULT_RULES;
     if (rl.serviceEnabled === false) return json({ ok: true, enabled: false, body: false, domains: {} });
-    const out = {}, styles = {}, blocked = await blockedDocs(kv), m = await meta(kv), ver = { knowledge: m.k, design: m.d, rules: m.r, composer: IK.COMPOSER_VERSION }, sd = scrub(b.sd), res = {}, jobs = [];
+    const out = {}, styles = {}, blocked = await blockedDocs(kv), m = await meta(kv), ver = { knowledge: m.k, research: m.research, design: m.d, rules: m.r, composer: IK.COMPOSER_VERSION }, sd = scrub(b.sd), res = {}, jobs = [];
     const useAi = rl.serviceAi === true && !!(env.ANTHROPIC_API_KEY || env.OPENAI_API_KEY || env.GEMINI_API_KEY);
     for (const d of doms) {
-      const items = await loadDomain(kv, d), pkg = IK.buildPackage(sd, b.ext, items, design, rl, { domain: d, includeDraft: false, blockedDocs: blocked }); pkg.versions = ver;
+      const items = await loadServiceDomain(kv, d), pkg = IK.buildPackage(sd, b.ext, items, design, rl, { domain: d, includeDraft: false, blockedDocs: blocked }); pkg.versions = ver;
       const plain = IK.composePlain(pkg, rl); res[d] = { pkg, composed: plain };
       const sty = styleFor(styleCur, [d], { structure: true, soft: IK.hasSoft(pkg) }); styles[d] = sty.meta;
       if (useAi && Object.keys(plain).length) jobs.push(aiForDomain(env, kv, pkg, rl, d, sd, b.ext, sty).then(c => { if (c) res[d].composed = c; }).catch(() => { /* 실패하면 DB 문장 그대로 */ }));
