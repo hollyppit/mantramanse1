@@ -1,0 +1,49 @@
+/* Public controls stay dark; only the control being approached/pressed turns red. */
+:root{--action-idle:#10151c;--action-line:#62646b;--action-ink:#f1eee7;--action-hot:#8f1d1d;--action-hot-line:#ed8c83}
+#hub :is(button,a.btn,a.linkbtn,a.chipbtn,.tq-nav a),#qs button,.mc button{
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  transition:background-color .14s ease,border-color .14s ease,color .14s ease;
+}
+#hub :is(button,a.btn,a.chipbtn,.tq-nav a),#hub #qs button,.mc .mc-controls #mcPlay,:is(#skipLink,#guideChange),.mc :is(.mc-seal,#mcPlay,.mc-arrow){
+  background:var(--action-idle);border-color:var(--action-line);color:var(--action-ink);filter:none;transform:none;
+}
+#hub #qs .qs-panel button.sel,#hub #qs .qs-panel button.sel small,#hub #qs .qs-panel button[aria-checked="true"],#hub .tq-nav a.on{
+  background:#1c232c;border-color:#d2bda0;color:var(--action-ink);
+}
+#qs .qs-panel button.sel{box-shadow:inset 0 0 0 1px #d2bda0}
+#hub :is(button,a.btn,a.chipbtn):disabled,#hub #qs button:disabled,.mc button:disabled{
+  background:#20242a;border-color:#494e56;color:#a7a9af;opacity:.65;cursor:not-allowed;
+}
+#hub :is(button,a.btn,a.linkbtn,a.chipbtn,.tq-nav a):not(:disabled):is(:focus-visible,:active),
+#hub #qs button:not(:disabled):is(:focus-visible,:active),.mc .mc-controls #mcPlay:is(:focus-visible,:active),:is(#skipLink,#guideChange):is(:focus-visible,:active),.mc button:not(:disabled):is(:focus-visible,:active){
+  background:var(--action-hot);border-color:var(--action-hot-line);color:#fff8f0;transform:none;filter:none;
+}
+#hub #qs button:not(:disabled):is(:focus-visible,:active) small{background:transparent;color:inherit}
+#hub :is(button,a.btn,a.linkbtn,a.chipbtn,.tq-nav a):focus-visible,#qs button:focus-visible,.mc button:focus-visible{
+  outline:2px solid var(--action-hot-line);outline-offset:3px;
+}
+@media(hover:hover) and (pointer:fine){
+  #hub :is(button,a.btn,a.linkbtn,a.chipbtn,.tq-nav a):not(:disabled):hover,
+  #hub #qs button:not(:disabled):hover,.mc .mc-controls #mcPlay:hover,:is(#skipLink,#guideChange):hover,.mc button:not(:disabled):hover{
+    background:var(--action-hot);border-color:var(--action-hot-line);color:#fff8f0;transform:none;filter:none;
+  }
+  #hub #qs button:not(:disabled):hover small{background:transparent;color:inherit}
+}
+/* Stable targets and one scroll surface: moving/sticky layers must not steal taps. */
+#qs.is-input .qs-card{animation:none!important;max-height:min(62dvh,calc(var(--q-view-height,100dvh) - 152px));scroll-padding:20px;overflow-anchor:none}
+#qs.is-input .qs-main{min-height:var(--q-view-height,100dvh)}
+#qs.is-input .qs-acts{position:static;margin-top:16px;padding:8px 0 0;background:none}
+#qs :is(.qs-bgwrap,.qs-bg,.qs-season,.qs-shade,.qs-vig,.qs-grain,.qs-sigil-large){pointer-events:none}
+#qs button{min-height:44px}
+#qs .qs-sum button{min-width:44px;min-height:44px;padding:8px}
+#qs .qs-field,#qs .qs-time-fields :is(input,select){font-size:16px}
+#qs .qs-note{line-height:1.7}
+#qs{height:var(--q-view-height,100dvh);bottom:auto}
+@media(max-width:620px){
+  #qs.is-input .qs-main{padding-bottom:max(70px,env(safe-area-inset-bottom))}
+  #qs.is-input .qs-card{max-height:calc(var(--q-view-height,100dvh) - 150px)}
+  #qs.is-input .qs-sum{grid-template-columns:1fr}
+  #qs.is-input .qs-days{gap:3px}
+}
+@media(max-width:379px){#qs.is-input .qs-days{grid-template-columns:repeat(5,minmax(44px,1fr));gap:4px}}
+@media(prefers-reduced-motion:reduce){#hub button,#qs button,.mc button{transition:none}}

@@ -56,6 +56,12 @@
       '<div class="qs-meter" aria-hidden="true"><i id="qsMeter"></i></div><main class="qs-main"><div class="qs-card" id="qsCard" aria-live="polite"></div></main>' +
       '<footer class="qs-foot"><button type="button" id="qsBack">← 이전 장면</button><span id="qsCount"></span><span></span></footer>' + (PREVIEW ? '<div class="qs-pv">미리보기 · 저장·계산하지 않음</div>' : '');
     host.appendChild(qs); DOC.body.classList.add('qs-open');
+    // Keep the lower input sheet reachable when a mobile keyboard shrinks the visual viewport.
+    var viewport = root.visualViewport;
+    function fitViewport() { qs.style.setProperty('--q-view-height', Math.round(viewport ? viewport.height : root.innerHeight) + 'px'); }
+    fitViewport(); root.addEventListener('resize', fitViewport);
+    if(viewport) viewport.addEventListener('resize', fitViewport);
+    onLeave(function(){root.removeEventListener('resize',fitViewport);if(viewport)viewport.removeEventListener('resize',fitViewport);});
     var scr = H.$('#screen'); if (scr) { scr.className = ''; scr.innerHTML = ''; }
     var $ = function (s) { return qs.querySelector(s); }, $$ = function (s) { return [].slice.call(qs.querySelectorAll(s)); };
     layers = [$('#qsBgA'), $('#qsBgB')];
@@ -121,7 +127,7 @@
     var acts = function () { return '<div class="qs-acts">' + [].slice.call(arguments).join('') + '</div>'; };
     var btn = function (id, text, alt) { return '<button type="button" class="qs-btn' + (alt ? ' alt' : '') + '" id="' + id + '"' + (alt ? '' : A('button')) + '>' + esc(text) + '</button>'; };
     var errBox = '<p class="qs-err" id="qsErr" role="alert"></p>';
-    function err(t) { var e = $('#qsErr'); if (e) e.textContent = t || ''; }
+    function err(t) { var e = $('#qsErr'); if (e) { e.textContent = t || ''; if(t)e.scrollIntoView({block:'nearest'}); } }
 
     /* ── 대화 상자(브라우저 기본 확인창 대신) ── */
     function dialog(o, cb) {
@@ -133,7 +139,15 @@
 
     /* ── 이동 ── */
     function pushHist() { if (PREVIEW) return; try { history.pushState({ qs: idx }, '', location.href); } catch (e) { } }
-    function go(i, fromPop) { idx = Math.max(0, Math.min(steps.length - 1, i)); busy = false; renderStep(); if (!fromPop) pushHist(); }
+    var pendingNext = null;
+    function cancelNext() { if (pendingNext !== null) clearTimeout(pendingNext); pendingNext = null; }
+    function queueNext() {
+      if (pendingNext !== null) return;
+      busy = true; var origin = idx;
+      pendingNext = setTimeout(function () { pendingNext = null; if (idx === origin) next(); }, H.reduce ? 0 : 140);
+    }
+    onLeave(cancelNext);
+    function go(i, fromPop) { cancelNext(); idx = Math.max(0, Math.min(steps.length - 1, i)); busy = false; renderStep(); if (!fromPop) pushHist(); }
     function next() {
       var s = step();
       if (!started && s.kind === 'input') { started = true; Ob.track('birth_input_start', {}, true); }
@@ -166,6 +180,7 @@
       if (needEngine) { card.innerHTML = '<div class="qs-panel"><p class="qs-say"><span class="qs-spin"></span>음력 달력을 불러오는 중…</p></div>'; var t = ctxToken; H.engine().then(function () { if (t === ctxToken && step() === s) renderStep(); }).catch(function () { card.innerHTML = '<div class="qs-panel"><p class="qs-err">계산 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.</p></div>'; }); return; }
       var fn = VIEWS[kind === 'input' ? s.field : kind];
       card.innerHTML = fn ? fn(s) : '';
+      if($('#qsErr')) $$('input,select').forEach(function(el){el.setAttribute('aria-describedby','qsErr');});
       card.style.animation = 'none'; void card.offsetWidth; card.style.animation = ''; card.scrollTop = 0; qs.scrollTop = 0;
       if (fn && BIND[kind === 'input' ? s.field : kind]) BIND[kind === 'input' ? s.field : kind](s);
       save();
@@ -177,7 +192,7 @@
     /* 1. 부적 봉인 */
     VIEWS.seal = function (s) { return '<div class="qs-sigil qs-sigil-large" id="qsSigil" aria-hidden="true"><div class="qs-sigil-paper"><img class="qs-red-seal" src="/report/hub/quest/red-seal.png" alt="" decoding="async"><div class="qs-hole"></div></div><span class="qs-embers">✦ · · ✧</span></div>' + eyebrow(s) + (s.head ? '<h1 class="qs-head"' + A('head') + '>' + nl(s.head) + '</h1>' : '') + '<p class="qs-desc"' + A('desc') + '>' + nl(s.desc) + '</p><div class="qs-inst"' + A('hint') + '>' + esc(s.hint) + '</div>' + acts(btn('qsGo', s.button || '봉인을 태워 문을 열기 →')); };
     BIND.seal = function () {
-      var sg = $('#qsSigil'), go1 = $('#qsGo'); qs.appendChild(sg); go1.focus({ preventScroll: true });
+      var sg = $('#qsSigil'), go1 = $('#qsGo'); qs.appendChild(sg);
       go1.onclick = function () {
         if (busy) return; busy = true; Ob.track('quest_view', {}, true); sg.classList.remove('burning'); void sg.offsetWidth; sg.classList.add('burning');
         setTimeout(function () { sg.classList.remove('burning'); next(); }, H.reduce ? 150 : 1050);
@@ -201,11 +216,11 @@
 
     /* 4. 성별 — 대운 방향 계산에 쓰이는 입력 */
     VIEWS.gender = function (s) { return eyebrow(s) + panel(say(Q.linesOf(s, guide)) + '<div class="qs-opts" role="radiogroup" aria-label="성별"><button type="button" role="radio" aria-checked="' + (d.gender === 'M') + '" class="qs-opt' + (d.gender === 'M' ? ' sel' : '') + '" data-v="M">남성</button><button type="button" role="radio" aria-checked="' + (d.gender === 'F') + '" class="qs-opt' + (d.gender === 'F' ? ' sel' : '') + '" data-v="F">여성</button></div>', s.hint); };
-    BIND.gender = function () { $$('[data-v]').forEach(function (b) { b.onclick = function () { d.gender = b.getAttribute('data-v'); $$('[data-v]').forEach(function (x) { x.classList.toggle('sel', x === b); }); setTimeout(next, H.reduce ? 0 : 140); }; }); };
+    BIND.gender = function () { $$('[data-v]').forEach(function (b) { b.onclick = function () { if(busy)return; d.gender = b.getAttribute('data-v'); $$('[data-v]').forEach(function (x) { x.classList.toggle('sel', x === b); x.setAttribute('aria-checked',String(x===b)); }); queueNext(); }; }); };
 
     /* 5. 달력 */
     VIEWS.calendar = function (s) { return eyebrow(s) + panel(say(Q.linesOf(s, guide)) + '<div class="qs-opts" role="radiogroup" aria-label="달력"><button type="button" role="radio" aria-checked="' + (d.calendar === 'solar') + '" class="qs-opt' + (d.calendar === 'solar' ? ' sel' : '') + '" data-v="solar">양력으로 기억합니다</button><button type="button" role="radio" aria-checked="' + (d.calendar === 'lunar') + '" class="qs-opt' + (d.calendar === 'lunar' ? ' sel' : '') + '" data-v="lunar">음력으로 기억합니다</button></div>', s.hint); };
-    BIND.calendar = function () { $$('[data-v]').forEach(function (b) { b.onclick = function () { var v = b.getAttribute('data-v'); if (d.calendar !== v) { d.leap = false; d.leapAsked = false; if (d.month) d.day = ''; } d.calendar = v; $$('[data-v]').forEach(function (x) { x.classList.toggle('sel', x === b); }); setTimeout(next, H.reduce ? 0 : 140); }; }); };
+    BIND.calendar = function () { $$('[data-v]').forEach(function (b) { b.onclick = function () { if(busy)return; var v = b.getAttribute('data-v'); if (d.calendar !== v) { d.leap = false; d.leapAsked = false; if (d.month) d.day = ''; } d.calendar = v; $$('[data-v]').forEach(function (x) { x.classList.toggle('sel', x === b); x.setAttribute('aria-checked',String(x===b)); }); queueNext(); }; }); };
 
     /* 6. 태어난 해 */
     var yearBounds = function () { var M = root.Manse, nowY = new Date().getFullYear(); return { min: M ? M.MIN_Y : 1901, max: M ? Math.min(M.MAX_Y, nowY) : nowY }; };
@@ -236,7 +251,7 @@
         b.onmouseenter = prev; b.onfocus = prev; b.onmouseleave = restore; b.onblur = restore;
         b.onclick = function () {
           if (busy) return; busy = true; var changed = +d.month !== m; d.month = m; if (changed) d.day = ''; prev(); $$('[data-m]').forEach(function (x) { x.classList.toggle('sel', x === b); });
-          var finish = function () { busy = false; setTimeout(next, H.reduce ? 0 : 160); };
+          var finish = function () { queueNext(); };
           if (d.calendar !== 'lunar') { d.leap = false; return finish(); }
           H.engine().then(function (M) {
             var has = Q.leapExists(M, d.year, m);
@@ -258,9 +273,9 @@
     };
     BIND.day = function () {
       $$('[data-d]').forEach(function (b) { b.onclick = function () {
-        d.day = +b.getAttribute('data-d'); var r = O.validateDate(root.Manse, d);
+        if(busy)return; d.day = +b.getAttribute('data-d'); var r = O.validateDate(root.Manse, d);
         if (!r.ok) { err(r.msg); $$('[data-d]').forEach(function (x) { x.classList.remove('sel'); }); return; }
-        $$('[data-d]').forEach(function (x) { x.classList.toggle('sel', x === b); }); setTimeout(next, H.reduce ? 0 : 140);
+        $$('[data-d]').forEach(function (x) { x.classList.toggle('sel', x === b); }); queueNext();
       }; });
     };
 

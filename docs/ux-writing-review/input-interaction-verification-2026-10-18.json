@@ -1,0 +1,61 @@
+{
+  "localDate": "2026-10-18",
+  "verifiedAt": "2026-10-17T17:30:28.929Z",
+  "deployment": "e7e356c1-10ab-4a82-8a15-ea85d9d6bde5",
+  "productionUrl": "https://mantramanse.pages.dev/report/#/welcome",
+  "checks": {
+    "productionRootEntryLoadsInteractionCSS": true,
+    "defaultButtonRGB": [
+      16,
+      21,
+      28
+    ],
+    "intentButtonRGB": [
+      143,
+      29,
+      29
+    ],
+    "otherButtonsStayDark": true,
+    "keyboardFocusVisible": true,
+    "desktopViewport": [
+      1280,
+      720
+    ],
+    "mobileViewport": [
+      390,
+      844
+    ],
+    "narrowViewport": [
+      320,
+      568
+    ],
+    "reducedHeightViewport": [
+      390,
+      440
+    ],
+    "narrowDayMinimumSize": [
+      47.1953125,
+      44
+    ],
+    "narrowHorizontalOverflow": false,
+    "summaryEditTargetHeight": 44,
+    "genderAndMonthDoubleClickAdvanceOnce": true,
+    "nameToTimelineCompleted": true,
+    "timeUnknownToggleAndMinuteTyping": true,
+    "storedDraftResumeAndEditReturn": true
+  },
+  "regressions": [
+    "quest-sim",
+    "onboarding-integration-sim",
+    "onboarding-renewal-sim",
+    "ux-onboarding-display-sim",
+    "story-sim",
+    "ux-writing-copy-audit-sim"
+  ],
+  "productionFileHashes": 4,
+  "workerAndBindingsUnchanged": true,
+  "unrelatedWorkingChangesExcluded": true,
+  "paidAICalls": 0,
+  "localQAEventsSuppressed": true,
+  "physicalPhoneKeyboardTested": false
+}
