@@ -1,5 +1,5 @@
 import { annualEvidence } from '../_annual-evidence.js';
-import {Editorial,loadEditorial,selectCases,behaviorPlans} from '../_editorial.js';
+import {Editorial,loadEditorial,selectCases,behaviorPlans,applyContractPolicy} from '../_editorial.js';
 import {chapterPolicy} from '../_chapter-policy.js';
 import {selectChapterClaims} from '../_chapter-engine.js';
 // Read-only analysis: no AI provider calls and no source/asset mutation.
@@ -25,11 +25,12 @@ export async function onRequestPost({ request, env }) {
     if(body.editorialChapterId){
       const catalog=await loadEditorial(kv,true),contract=catalog.chapters.find(c=>c.id===body.editorialChapterId);
       if(!contract)return json({error:'unknown-editorial-chapter'},404);
-      const policy=chapterPolicy({chapterKind:catalog.topics.find(t=>t.id===contract.topicId)?.policyKind || contract.topicId},settings.chapters);
-      analysis=selectChapterClaims(analysis,policy);
-      if(contract.sourceRuleIds.length)analysis=selectChapterClaims({...analysis,claims:analysis.claims.filter(c=>contract.sourceRuleIds.includes(c.knowledge_id))},policy);
+      let policy=chapterPolicy({chapterKind:catalog.topics.find(t=>t.id===contract.topicId)?.policyKind || contract.topicId},settings.chapters);
+
+      policy=applyContractPolicy(policy,catalog,contract);
+      analysis=selectChapterClaims(analyze(body.sd,items.filter(r=>contract.sourceRuleIds.includes(r.id)),{...settings,sourceIndex,blockedDocs:blocked,domains:policy?.domains}),policy);
       const examples=selectCases(catalog,contract,analysis.claims,body.realityContext);
-      const annual=contract.id==='timing_07' && body.annualPeriods ? annualEvidence(body.sd,body.annualPeriods,items,{...settings,sourceIndex,blockedDocs:blocked,sourceRuleIds:contract.sourceRuleIds}) : null;
+      const annual=/^(timing_07|timeline_self_21)$/.test(contract.id) && body.annualPeriods ? annualEvidence(body.sd,body.annualPeriods,items,{...settings,sourceIndex,blockedDocs:blocked,sourceRuleIds:contract.sourceRuleIds}) : null;
       editorialPreview={...(annual?{annual}:{}),mode:'draft-preview-not-published',contract,realityContext:Editorial.contextLabels(body.realityContext),examples,behaviorPlans:behaviorPlans(analysis.claims,examples),ready:!!analysis.claims.length};
     }
     const report = renderReport(analysis), generation = { mode: 'rules-only', batches: [], estimatedCost: 0 };

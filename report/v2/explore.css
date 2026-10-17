@@ -287,3 +287,11 @@
 .sm-cap { font-size: .82rem; margin-bottom: 12px; }
 .sm-p { font-size: 1.14rem; line-height: 1.95; margin-bottom: 14px; text-shadow: none; word-break: keep-all; }
 @media (max-width: 560px) { .sm-tx { padding: 16px 16px; } .sm-p { font-size: 1.06rem; line-height: 1.85; } }
+
+.xp-chapters{list-style:none;padding:0;margin:24px 0;display:grid;gap:8px}.xp-chapters button{display:block;width:100%;min-height:48px;padding:14px;text-align:left;white-space:normal;overflow-wrap:anywhere;border:1px solid var(--line,#343846);border-radius:10px;background:rgba(255,255,255,.035);color:inherit;font:inherit;line-height:1.6}.xp-chapters span{opacity:.65;margin-right:8px}
+
+/* Keep reading controls opaque over scrolling content; stack narrow toon cards. */
+#bar{background:#080b14}#wstrip{background:#080b14}#wsteps{background:#080b14}
+@media(max-width:560px){.sm-card{grid-template-columns:1fr}.sm-card .sm-th{width:100%;height:150px}.sm-card .btn{width:100%;white-space:normal}#barBtn{padding-right:146px}.barbtn .b1{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.barbtn .b2{display:none}}
+
+#bar .barbtn{min-height:60px}

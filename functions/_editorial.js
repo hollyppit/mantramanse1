@@ -15,7 +15,7 @@ export function validateEditorial(next,current){
   if(!id(c.id)||chapters.has(c.id)||!topics.has(c.topicId)||!['draft','reviewed','active','archived'].includes(c.state)||!Number.isInteger(c.order)||c.order<0)return 'invalid-chapter';
   for(const k of ['title','question','purpose','example','difference','visual'])if(!text(c[k],k==='title'?200:2000))return 'invalid-chapter-text';
   if(!list(c.requiredEvidence,20,x=>text(x,300))||!c.requiredEvidence.length||!list(c.avoid,20,x=>text(x,300))||!list(c.legacyIds,80,id)||!list(c.sourceRuleIds,100,id)||!Number.isInteger(c.targetMin)||!Number.isInteger(c.targetMax)||c.targetMin<200||c.targetMax<c.targetMin||c.targetMax>3000)return 'invalid-chapter-contract';
-  for(const old of c.legacyIds){if(legacy.has(old))return 'duplicate-legacy-mapping';legacy.add(old);}chapters.add(c.id);
+  for(const old of c.legacyIds){if(c.state!=='archived'){if(legacy.has(old))return 'duplicate-legacy-mapping';legacy.add(old);}}chapters.add(c.id);
  }
  for(const c of next.cases){
   if(!id(c.id)||cases.has(c.id)||!topics.has(c.topicId)||!list(c.chapterIds,100,x=>chapters.has(x))||!list(c.ruleIds,100,id)||!c.ruleIds.length||!['draft','reviewed','active','archived'].includes(c.state))return 'invalid-case';
@@ -26,7 +26,7 @@ export function validateEditorial(next,current){
  if(current && ((current.topics || []).some(t=>!topics.has(t.id))||(current.chapters || []).some(c=>!chapters.has(c.id))||(current.cases || []).some(c=>!cases.has(c.id))))return 'preservation-required';
  return null;
 }
-const editorialDomains={self:['SELF'],wealth:['MONEY'],career:['CAREER'],love:['LOVE','MARRIAGE'],relationships:['RELATIONSHIP'],timing:['TIMING'],health:['ACTION'],creative:['SELF'],remedy:['ACTION']};
+const editorialDomains={self:['SELF'],wealth:['MONEY'],career:['CAREER'],love:['LOVE','MARRIAGE','RELATIONSHIP'],relationships:['RELATIONSHIP'],timing:['TIMING'],health:['ACTION'],creative:['SELF'],remedy:['ACTION']};
 export function ruleSourceIssues(rule,blocked=new Set(),sourceIndex){
  if(!rule)return ['rule-missing'];
  const reasons=[];
@@ -45,11 +45,20 @@ export function ruleSourceIssues(rule,blocked=new Set(),sourceIndex){
  }
  return [...new Set(reasons)];
 }
+export function contractDomains(catalog,contract){
+ const base=editorialDomains[catalog.topics.find(t=>t.id===contract.topicId)?.policyKind || contract.topicId] || [];
+ const timed=(contract.requiredEvidence || []).some(e=>/대운·세운 계산/.test(e));
+ return [...new Set([...base,...(timed?['TIMING']:[]),...(contract.id==='timeline_wealth_04'?['CAREER']:[])])];
+}
+export function applyContractPolicy(policy,catalog,contract){
+ if(!policy || !contract)return policy;
+ return {...policy,domains:contractDomains(catalog,contract),purpose:contract.purpose,required:contract.requiredEvidence.slice(),excluded:[...new Set([...(policy.excluded || []),...(contract.avoid || [])])]};
+}
 export function publicationIssues(catalog,items,blocked=new Set(),sourceIndex,{includeDrafts=false}={}){
  const ruleMap=new Map(items.map(r=>[r.id,r])),cache=new Map(),issues=[];
  for(const [kind,rows,key] of [['chapter',catalog.chapters,'sourceRuleIds'],['case',catalog.cases,'ruleIds']])for(const c of rows){
   if(!(['active','reviewed'].includes(c.state)||includeDrafts&&c.state==='draft'))continue;
-  const domains=editorialDomains[catalog.topics.find(t=>t.id===c.topicId)?.policyKind || c.topicId] || [];
+  const domains=contractDomains(catalog,c);
   const details=[];
   if(!c[key].length)details.push({code:'no-linked-rules'});
   for(const ruleId of c[key]){

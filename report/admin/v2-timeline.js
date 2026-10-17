@@ -20,7 +20,7 @@
       var H = { M:M, ch:ch, sd:sd, now:now, name:'', interest:'', rep:rep, assets:{}, videos:{}, soc:R.StoryDirector.social(M,ch,sd,now), plan:null };
       if (R.Deep) R.Deep.augment(rep,H);
       H.plan = (rep.chapters.find(function(c){return c.plan;}) || {}).plan || null;
-      return (R.IKDeep ? R.IKDeep.load(M,ch,sd,6000) : Promise.resolve(null)).then(function(ik) {
+      return (R.IKDeep ? R.IKDeep.load(M,ch,sd,6000) : Promise.resolve(null)).then(async function(ik) {
         H.ik=ik; var doc=R.LifeDoc.build(H);
         var intro=R.CharIntro && R.CharIntro.chapter(sd,'',{},(doc.acts[0] || {}).id);
         if(intro) {
@@ -30,6 +30,7 @@
           if(more.length && main.length) { var at=doc.chapters.findIndex(function(c){return c.id==='life_here';}); doc.chapters.splice(at>=0?at+1:1,0,Object.assign({},intro,{id:'c-char-more',base:'c-char-more',title:'일간·일주 더 깊이 읽기',scenes:more})); }
         }
         if(token!==state.generation)return;
+        var catalog=null;if(R.Editorial){try{catalog=await C.api('/api/reading-editorial');}catch(e){}if(token!==state.generation)return;doc=R.Editorial.prepare(doc,catalog,sd);}
         state.sd=sd; state.past=null; state.chapters=doc.chapters; draw(box);
       });
     }).catch(function(e){ if(token===state.generation) box.querySelector('[data-document]').textContent='목차를 구성하지 못했습니다: '+e.message; });

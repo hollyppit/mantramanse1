@@ -129,3 +129,4 @@ li mark.wn b { color: #FFB066; } li mark.ac b { color: #6FDDA8; }
 .reading-evidence[open]{padding-bottom:16px}
 .rd-prose:has(>.reading-evidence:not([open])){min-height:0;padding-block:16px}
 .reading-evidence .lead{font-size:15px;color:var(--ink2)}
+.reading-evidence a{color:#dfc999;text-decoration:underline;overflow-wrap:anywhere}

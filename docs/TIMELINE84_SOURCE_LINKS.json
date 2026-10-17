@@ -1,0 +1,1344 @@
+{
+  "snapshot": {
+    "path": "output/timeline84-live/verified-local-snapshot.json",
+    "sha256": "0eb33f652e5576f94214011a425f1947d11335faad6bcab200942a1381cf388b",
+    "date": "2026-10-17T13:30:08.062Z",
+    "sourceChunkFallback": {
+      "path": "output/rules45-publication-after-2026-10-16.json",
+      "sameHashOrMissingHashOnly": true,
+      "documents": 38
+    },
+    "ruleCount": 386,
+    "documentCount": 50
+  },
+  "expertApproval": false,
+  "productionWrites": 0,
+  "rows": [
+    {
+      "id": "timeline_self_01",
+      "title": "나는 어떤 사람으로 태어났을까?",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0005",
+        "SELF-0006",
+        "SELF-0007",
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_02",
+      "title": "내 사주를 자동차로 비유하면?",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 34,
+      "sourceRuleIds": [
+        "SELF-0001",
+        "SELF-0002"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_03",
+      "title": "나의 일간과 일주",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 2,
+      "sourceRuleIds": [
+        "SELF-0015",
+        "SELF-0017",
+        "SELF-0019",
+        "SELF-0020",
+        "SELF-0021",
+        "SELF-0022",
+        "SELF-0023",
+        "SELF-0024",
+        "SELF-0025",
+        "SELF-0026",
+        "SELF-0027",
+        "SELF-0028",
+        "SELF-0029",
+        "SELF-0030",
+        "SELF-0031",
+        "SELF-0032",
+        "SELF-0033",
+        "SELF-0034",
+        "SELF-0035",
+        "SELF-0036",
+        "SELF-0037",
+        "SELF-0038",
+        "SELF-0039",
+        "SELF-0040",
+        "SELF-0041"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_04",
+      "title": "나는 왜 이렇게 행동할까?",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_05",
+      "title": "남들이 보는 나와 진짜 나",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 15,
+      "sourceRuleIds": [
+        "SELF-0044"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_06",
+      "title": "내가 타고난 가장 강력한 무기",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 16,
+      "sourceRuleIds": [
+        "SELF-0005",
+        "SELF-0006",
+        "SELF-0007",
+        "SELF-0031",
+        "SELF-0040",
+        "SELF-0041"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_07",
+      "title": "나의 약점과 그림자",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012",
+        "SELF-0064"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_08",
+      "title": "내가 숨기고 있는 욕망",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 11,
+      "sourceRuleIds": [
+        "SELF-0019",
+        "SELF-0029",
+        "SELF-0064"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_09",
+      "title": "나는 무엇에 유독 예민할까?",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 14,
+      "sourceRuleIds": [
+        "SELF-0011",
+        "SELF-0012",
+        "SELF-0034"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_10",
+      "title": "내가 스트레스를 받는 진짜 이유",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 14,
+      "sourceRuleIds": [
+        "SELF-0011",
+        "SELF-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_11",
+      "title": "나도 몰랐던 숨겨진 재능",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 2,
+      "sourceRuleIds": [
+        "SELF-0025",
+        "SELF-0036",
+        "SELF-0040",
+        "SELF-0041"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_12",
+      "title": "내가 반복하기 쉬운 실수",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 38,
+      "sourceRuleIds": [
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0012",
+        "SELF-0064"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_13",
+      "title": "나는 어떤 환경에서 가장 빛날까?",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0001",
+        "SELF-0002",
+        "SELF-0003",
+        "SELF-0004",
+        "SELF-0071"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_14",
+      "title": "나에게 독이 되는 환경",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 14,
+      "sourceRuleIds": [
+        "SELF-0011",
+        "SELF-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_15",
+      "title": "위기가 닥쳤을 때 드러나는 모습",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 31,
+      "sourceRuleIds": [
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0064"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_16",
+      "title": "나를 성장시키는 경쟁과 압박",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 17,
+      "sourceRuleIds": [
+        "SELF-0011",
+        "SELF-0064"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_17",
+      "title": "나의 가장 강한 생존 능력",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "SELF-0005",
+        "SELF-0006",
+        "SELF-0007",
+        "SELF-0044"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_18",
+      "title": "같은 기질, 최고의 나와 최악의 나",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0005",
+        "SELF-0006",
+        "SELF-0007",
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012",
+        "SELF-0064"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_19",
+      "title": "내 사주의 가장 큰 모순",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_20",
+      "title": "내 인생의 대운과 전환점",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "시기 조건에 맞는 원국에만 적용. 실제 사건의 시점·성공 확정 불가.",
+      "matchedCharts": 48,
+      "sourceRuleIds": [
+        "D27-20261016-T-peerD",
+        "D27-20261016-T-outputD",
+        "D27-20261016-T-wealthD",
+        "D27-20261016-T-officerD",
+        "D27-20261016-T-resourceD"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_21",
+      "title": "앞으로 10년, 무엇이 달라질까?",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "시기 조건에 맞는 원국에만 적용. 실제 사건의 시점·성공 확정 불가.",
+      "matchedCharts": 48,
+      "sourceRuleIds": [
+        "D27-20261016-T-peerS",
+        "D27-20261016-T-outputS",
+        "D27-20261016-T-wealthS",
+        "D27-20261016-T-officerS",
+        "D27-20261016-T-resourceS"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_self_22",
+      "title": "나라는 사람의 최종 사용설명서",
+      "topicId": "self",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 47,
+      "sourceRuleIds": [
+        "SELF-0001",
+        "SELF-0002",
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_wealth_01",
+      "title": "내 재물 그릇은 얼마나 클까?",
+      "topicId": "wealth",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 19,
+      "sourceRuleIds": [
+        "MONEY-0006",
+        "MONEY-0007",
+        "MONEY-0008",
+        "MONEY-0011",
+        "MONEY-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_wealth_02",
+      "title": "나는 어떤 방식으로 돈을 벌까?",
+      "topicId": "wealth",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 4,
+      "sourceRuleIds": [
+        "MONEY-0006",
+        "MONEY-0012",
+        "MONEY-0014"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_wealth_03",
+      "title": "돈이 들어와도 왜 남지 않을까?",
+      "topicId": "wealth",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 24,
+      "sourceRuleIds": [
+        "MONEY-0007",
+        "MONEY-0008",
+        "MONEY-0011",
+        "MONEY-0013"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_wealth_04",
+      "title": "월급형 인간일까, 사업형 인간일까?",
+      "topicId": "wealth",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "MONEY-0006",
+        "MONEY-0009",
+        "MONEY-0010",
+        "CAREER-0006",
+        "CAREER-0007"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_wealth_05",
+      "title": "나는 돈을 모으는 사람일까, 쓰는 사람일까?",
+      "topicId": "wealth",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 15,
+      "sourceRuleIds": [
+        "MONEY-0007",
+        "MONEY-0008",
+        "MONEY-0011"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_wealth_06",
+      "title": "큰돈을 만날 기회는 언제일까?",
+      "topicId": "wealth",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "시기 조건에 맞는 원국에만 적용. 실제 사건의 시점·성공 확정 불가.",
+      "matchedCharts": 20,
+      "sourceRuleIds": [
+        "D27-20261016-M-wealthD",
+        "D27-20261016-M-wealthS"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_wealth_07",
+      "title": "돈 때문에 가장 조심해야 할 선택",
+      "topicId": "wealth",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 24,
+      "sourceRuleIds": [
+        "MONEY-0007",
+        "MONEY-0008",
+        "MONEY-0011",
+        "MONEY-0013"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_wealth_08",
+      "title": "나는 투자와 재테크에 어울리는 성향일까?",
+      "topicId": "wealth",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 15,
+      "sourceRuleIds": [
+        "MONEY-0007",
+        "MONEY-0008",
+        "MONEY-0011"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_wealth_09",
+      "title": "사람 때문에 돈을 잃기 쉬울까?",
+      "topicId": "wealth",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "MONEY-0008",
+        "MONEY-0010",
+        "MONEY-0013"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_wealth_10",
+      "title": "나에게 유리한 재물운의 시기",
+      "topicId": "wealth",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "시기 조건에 맞는 원국에만 적용. 실제 사건의 시점·성공 확정 불가.",
+      "matchedCharts": 20,
+      "sourceRuleIds": [
+        "D27-20261016-M-wealthD",
+        "D27-20261016-M-wealthS"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_wealth_11",
+      "title": "최고의 재물 시나리오 vs 최악의 재물 시나리오",
+      "topicId": "wealth",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 19,
+      "sourceRuleIds": [
+        "MONEY-0006",
+        "MONEY-0007",
+        "MONEY-0008",
+        "MONEY-0011",
+        "MONEY-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_wealth_12",
+      "title": "내 재산을 키우기 위한 현실 전략",
+      "topicId": "wealth",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 19,
+      "sourceRuleIds": [
+        "MONEY-0006",
+        "MONEY-0007",
+        "MONEY-0008",
+        "MONEY-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_career_01",
+      "title": "나는 어떤 일을 해야 잘할까?",
+      "topicId": "career",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "CAREER-0001",
+        "CAREER-0002",
+        "CAREER-0004",
+        "CAREER-0005",
+        "CAREER-0006",
+        "CAREER-0007"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_career_02",
+      "title": "내가 가진 가장 돈 되는 재능",
+      "topicId": "career",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 35,
+      "sourceRuleIds": [
+        "CAREER-0001",
+        "CAREER-0005",
+        "CAREER-0016",
+        "CAREER-0007",
+        "CAREER-0029"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_career_03",
+      "title": "직장인과 사업가, 어느 쪽이 맞을까?",
+      "topicId": "career",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "CAREER-0006",
+        "CAREER-0007"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_career_04",
+      "title": "나는 리더일까, 전문가일까?",
+      "topicId": "career",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 7,
+      "sourceRuleIds": [
+        "CAREER-0014",
+        "CAREER-0015",
+        "CAREER-0006"
+      ],
+      "rejected": [
+        {
+          "id": "CAREER-0022",
+          "issues": [
+            "quote-mismatch"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "timeline_career_05",
+      "title": "나에게 잘 맞는 업종과 맞지 않는 업종",
+      "topicId": "career",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 48,
+      "sourceRuleIds": [
+        "CAREER-0009",
+        "CAREER-0010",
+        "CAREER-0011",
+        "CAREER-0012",
+        "CAREER-0013"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_career_06",
+      "title": "나는 어떤 직장 환경에서 성공할까?",
+      "topicId": "career",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "CAREER-0006",
+        "CAREER-0007",
+        "CAREER-0014"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_career_07",
+      "title": "조직생활에서 내가 부딪히는 문제",
+      "topicId": "career",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "CAREER-0008",
+        "CAREER-0006",
+        "CAREER-0007"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_career_08",
+      "title": "이직과 독립, 언제 움직이는 게 좋을까?",
+      "topicId": "career",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "시기 조건에 맞는 원국에만 적용. 실제 사건의 시점·성공 확정 불가.",
+      "matchedCharts": 11,
+      "sourceRuleIds": [
+        "D27-20261016-C-transition",
+        "D27-20261016-C-officer-output"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_career_09",
+      "title": "창업과 사업에서 내가 조심해야 할 것",
+      "topicId": "career",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 15,
+      "sourceRuleIds": [
+        "CAREER-0003",
+        "CAREER-0007",
+        "CAREER-0008"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_career_10",
+      "title": "성공을 가로막는 나의 습관",
+      "topicId": "career",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "CAREER-0003",
+        "CAREER-0008",
+        "CAREER-0006",
+        "CAREER-0007"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_career_11",
+      "title": "최고의 커리어 시나리오 vs 최악의 커리어 시나리오",
+      "topicId": "career",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "CAREER-0006",
+        "CAREER-0007",
+        "CAREER-0008"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_career_12",
+      "title": "앞으로 10년, 나의 커리어 전략",
+      "topicId": "career",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "시기 조건에 맞는 원국에만 적용. 실제 사건의 시점·성공 확정 불가.",
+      "matchedCharts": 11,
+      "sourceRuleIds": [
+        "D27-20261016-C-transition",
+        "D27-20261016-C-officer-output"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_love_01",
+      "title": "나는 사람들과 어떤 관계를 맺을까?",
+      "topicId": "love",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 41,
+      "sourceRuleIds": [
+        "RELATIONSHIP-0009",
+        "RELATIONSHIP-0010",
+        "RELATIONSHIP-0011",
+        "RELATIONSHIP-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_love_02",
+      "title": "사람들이 나를 좋아하거나 불편해하는 이유",
+      "topicId": "love",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 41,
+      "sourceRuleIds": [
+        "RELATIONSHIP-0009",
+        "RELATIONSHIP-0010",
+        "RELATIONSHIP-0011",
+        "RELATIONSHIP-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_love_03",
+      "title": "내 곁에 남는 사람과 멀어지는 사람",
+      "topicId": "love",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 30,
+      "sourceRuleIds": [
+        "RELATIONSHIP-0008",
+        "RELATIONSHIP-0009",
+        "RELATIONSHIP-0010"
+      ],
+      "rejected": [
+        {
+          "id": "RELATIONSHIP-0006",
+          "issues": [
+            "quote-mismatch"
+          ]
+        },
+        {
+          "id": "RELATIONSHIP-0007",
+          "issues": [
+            "quote-mismatch"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "timeline_love_04",
+      "title": "나는 사랑할 때 어떤 사람이 될까?",
+      "topicId": "love",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 17,
+      "sourceRuleIds": [
+        "LOVE-0004",
+        "LOVE-0005"
+      ],
+      "rejected": [
+        {
+          "id": "LOVE-0003",
+          "issues": [
+            "quote-mismatch"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "timeline_love_05",
+      "title": "내가 끌리는 사람과 실제 잘 맞는 사람",
+      "topicId": "love",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 48,
+      "sourceRuleIds": [
+        "LOVE-0008",
+        "LOVE-0009",
+        "LOVE-0010",
+        "LOVE-0011",
+        "LOVE-0012",
+        "LOVE-0013",
+        "LOVE-0014",
+        "LOVE-0015",
+        "LOVE-0016",
+        "LOVE-0017"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_love_06",
+      "title": "연애에서 반복하기 쉬운 실수",
+      "topicId": "love",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 17,
+      "sourceRuleIds": [
+        "LOVE-0004",
+        "LOVE-0005"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_love_07",
+      "title": "나에게 잘 맞는 배우자의 성향",
+      "topicId": "love",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 35,
+      "sourceRuleIds": [
+        "D27-20261016-R-yong-0",
+        "D27-20261016-R-yong-1",
+        "D27-20261016-R-yong-2",
+        "D27-20261016-R-yong-3",
+        "D27-20261016-R-yong-4"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_love_08",
+      "title": "결혼운은 언제 강해질까?",
+      "topicId": "love",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "시기 조건에 맞는 원국에만 적용. 실제 사건의 시점·성공 확정 불가.",
+      "matchedCharts": 16,
+      "sourceRuleIds": [
+        "D27-20261016-B-time-male-daewoon",
+        "D27-20261016-B-time-male-seun",
+        "D27-20261016-B-time-female-daewoon",
+        "D27-20261016-B-time-female-seun"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_love_09",
+      "title": "결혼생활에서 가장 조심해야 할 갈등",
+      "topicId": "love",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 3,
+      "sourceRuleIds": [
+        "D27-20261016-B-male",
+        "D27-20261016-B-female"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_love_10",
+      "title": "나의 가족운과 부모·형제 관계",
+      "topicId": "love",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 34,
+      "sourceRuleIds": [
+        "RELATIONSHIP-0018",
+        "RELATIONSHIP-0025"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_love_11",
+      "title": "나의 자식운과 부모가 되었을 때의 모습",
+      "topicId": "love",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 16,
+      "sourceRuleIds": [
+        "D27-20261016-R-child-female",
+        "D27-20261016-R-child-male"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_love_12",
+      "title": "최고의 인연 시나리오 vs 최악의 인연 시나리오",
+      "topicId": "love",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 41,
+      "sourceRuleIds": [
+        "RELATIONSHIP-0009",
+        "RELATIONSHIP-0010",
+        "RELATIONSHIP-0011",
+        "RELATIONSHIP-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_health_01",
+      "title": "내 사주에서 보는 건강의 기본 균형",
+      "topicId": "health",
+      "status": "needs-approved-evidence",
+      "gap": "핵심 질문을 직접 지지하는 승인 근거 부족. 생성·게시 보류.",
+      "matchedCharts": 0,
+      "sourceRuleIds": [],
+      "rejected": []
+    },
+    {
+      "id": "timeline_health_02",
+      "title": "나는 어떤 상황에서 쉽게 지칠까?",
+      "topicId": "health",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "D27-20261016-A-rest"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_health_03",
+      "title": "스트레스가 쌓일 때 나타나는 생활 패턴",
+      "topicId": "health",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "D27-20261016-A-rest"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_health_04",
+      "title": "내가 무리하기 쉬운 순간",
+      "topicId": "health",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 4,
+      "sourceRuleIds": [
+        "D27-20261016-A-health-year"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_health_05",
+      "title": "내 생활 리듬에서 조심할 점",
+      "topicId": "health",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "D27-20261016-A-rest"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_health_06",
+      "title": "전통 명리학에서 보는 사고수란?",
+      "topicId": "health",
+      "status": "needs-approved-evidence",
+      "gap": "핵심 질문을 직접 지지하는 승인 근거 부족. 생성·게시 보류.",
+      "matchedCharts": 0,
+      "sourceRuleIds": [],
+      "rejected": []
+    },
+    {
+      "id": "timeline_health_07",
+      "title": "사고수와 주의 시기를 어떻게 해석할까?",
+      "topicId": "health",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "시기 조건에 맞는 원국에만 적용. 실제 사건의 시점·성공 확정 불가.",
+      "matchedCharts": 4,
+      "sourceRuleIds": [
+        "D27-20261016-A-health-year"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_health_08",
+      "title": "무리한 선택이 위험을 키우는 상황",
+      "topicId": "health",
+      "status": "needs-approved-evidence",
+      "gap": "핵심 질문을 직접 지지하는 승인 근거 부족. 생성·게시 보류.",
+      "matchedCharts": 0,
+      "sourceRuleIds": [],
+      "rejected": []
+    },
+    {
+      "id": "timeline_health_09",
+      "title": "건강과 안전을 지키는 생활 습관",
+      "topicId": "health",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "D27-20261016-A-rest"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_health_10",
+      "title": "최고의 건강관리 시나리오 vs 최악의 관리 시나리오",
+      "topicId": "health",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "D27-20261016-A-rest"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_creative_01",
+      "title": "전생의 문이 열리다",
+      "topicId": "creative",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "창작 모티프만 연결. 전생 사실 판정이 아님.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0005",
+        "SELF-0006",
+        "SELF-0007",
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012",
+        "SELF-0017",
+        "SELF-0019",
+        "SELF-0025",
+        "SELF-0029",
+        "SELF-0031",
+        "SELF-0040",
+        "SELF-0041"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_creative_02",
+      "title": "나는 어떤 시대에 살았을까?",
+      "topicId": "creative",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "창작 모티프만 연결. 전생 사실 판정이 아님.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0005",
+        "SELF-0006",
+        "SELF-0007",
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012",
+        "SELF-0017",
+        "SELF-0019",
+        "SELF-0025",
+        "SELF-0029",
+        "SELF-0031",
+        "SELF-0040",
+        "SELF-0041"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_creative_03",
+      "title": "전생의 나는 어떤 신분이었을까?",
+      "topicId": "creative",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "창작 모티프만 연결. 전생 사실 판정이 아님.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0005",
+        "SELF-0006",
+        "SELF-0007",
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012",
+        "SELF-0017",
+        "SELF-0019",
+        "SELF-0025",
+        "SELF-0029",
+        "SELF-0031",
+        "SELF-0040",
+        "SELF-0041"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_creative_04",
+      "title": "전생에서 가장 중요했던 사람",
+      "topicId": "creative",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "창작 모티프만 연결. 전생 사실 판정이 아님.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0005",
+        "SELF-0006",
+        "SELF-0007",
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012",
+        "SELF-0017",
+        "SELF-0019",
+        "SELF-0025",
+        "SELF-0029",
+        "SELF-0031",
+        "SELF-0040",
+        "SELF-0041"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_creative_05",
+      "title": "전생에서 가장 빛났던 순간",
+      "topicId": "creative",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "창작 모티프만 연결. 전생 사실 판정이 아님.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0005",
+        "SELF-0006",
+        "SELF-0007",
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012",
+        "SELF-0017",
+        "SELF-0019",
+        "SELF-0025",
+        "SELF-0029",
+        "SELF-0031",
+        "SELF-0040",
+        "SELF-0041"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_creative_06",
+      "title": "전생에서 저질렀던 가장 큰 실수",
+      "topicId": "creative",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "창작 모티프만 연결. 전생 사실 판정이 아님.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0005",
+        "SELF-0006",
+        "SELF-0007",
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012",
+        "SELF-0017",
+        "SELF-0019",
+        "SELF-0025",
+        "SELF-0029",
+        "SELF-0031",
+        "SELF-0040",
+        "SELF-0041"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_creative_07",
+      "title": "끝내 이루지 못한 소망",
+      "topicId": "creative",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "창작 모티프만 연결. 전생 사실 판정이 아님.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0005",
+        "SELF-0006",
+        "SELF-0007",
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012",
+        "SELF-0017",
+        "SELF-0019",
+        "SELF-0025",
+        "SELF-0029",
+        "SELF-0031",
+        "SELF-0040",
+        "SELF-0041"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_creative_08",
+      "title": "전생의 나에게서 받는 마지막 메시지",
+      "topicId": "creative",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "창작 모티프만 연결. 전생 사실 판정이 아님.",
+      "matchedCharts": 42,
+      "sourceRuleIds": [
+        "SELF-0005",
+        "SELF-0006",
+        "SELF-0007",
+        "SELF-0009",
+        "SELF-0010",
+        "SELF-0011",
+        "SELF-0012",
+        "SELF-0017",
+        "SELF-0019",
+        "SELF-0025",
+        "SELF-0029",
+        "SELF-0031",
+        "SELF-0040",
+        "SELF-0041"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_remedy_01",
+      "title": "내 운을 바꾸는 첫 번째 습관",
+      "topicId": "remedy",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 34,
+      "sourceRuleIds": [
+        "ACTION-0011",
+        "ACTION-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_remedy_02",
+      "title": "나에게 맞는 운동과 생활 리듬",
+      "topicId": "remedy",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 34,
+      "sourceRuleIds": [
+        "ACTION-0011",
+        "ACTION-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_remedy_03",
+      "title": "나에게 잘 맞는 공부와 자기계발",
+      "topicId": "remedy",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 22,
+      "sourceRuleIds": [
+        "ACTION-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_remedy_04",
+      "title": "나를 회복시키는 환경과 공간",
+      "topicId": "remedy",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 34,
+      "sourceRuleIds": [
+        "ACTION-0011",
+        "ACTION-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_remedy_05",
+      "title": "나에게 어울리는 행운의 장소",
+      "topicId": "remedy",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 35,
+      "sourceRuleIds": [
+        "D27-20261016-A-place-0",
+        "D27-20261016-A-place-1",
+        "D27-20261016-A-place-2",
+        "D27-20261016-A-place-3",
+        "D27-20261016-A-place-4"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_remedy_06",
+      "title": "돈과 인간관계에서 운을 지키는 방법",
+      "topicId": "remedy",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 34,
+      "sourceRuleIds": [
+        "ACTION-0011",
+        "ACTION-0012"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_remedy_07",
+      "title": "앞으로 30일, 나만의 개운 프로젝트",
+      "topicId": "remedy",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 48,
+      "sourceRuleIds": [
+        "D27-20261016-A-year-peer",
+        "D27-20261016-A-year-output",
+        "D27-20261016-A-year-wealth",
+        "D27-20261016-A-year-officer",
+        "D27-20261016-A-year-resource"
+      ],
+      "rejected": []
+    },
+    {
+      "id": "timeline_remedy_08",
+      "title": "내 인생을 더 좋은 방향으로 이끄는 최종 전략",
+      "topicId": "remedy",
+      "status": "linked-approved-rule-partial-scope",
+      "gap": "연결 규칙의 조건에 해당하는 부분 근거만 지원. 질문 전체·최강점 순위·실제 생활 이력은 별도 검수.",
+      "matchedCharts": 34,
+      "sourceRuleIds": [
+        "ACTION-0011",
+        "ACTION-0012"
+      ],
+      "rejected": []
+    }
+  ]
+}

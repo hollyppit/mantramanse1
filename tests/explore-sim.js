@@ -15,7 +15,7 @@ const W = X.mergeWorlds(null);
 const legacyMoney = X.mergeWorlds([{ id: 'w2', line: '직업 · 재물 · 성공', chapters: ['c06', 'c08', 'life_career_style'] }]);
 for (const id of ['c06', 'c07', 'deep_jobs', 'life_career_style', 'life_career_timing', 'life_ik_CAREER']) ok(X.worldFor({ id }, legacyMoney) === 'w7', '커리어 분리: ' + id);
 for (const id of ['c08', 'deep_wealth', 'life_money_nature', 'life_money_timing']) ok(X.worldFor({ id }, W) === 'w2', '재물 분리: ' + id);
-ok(W.length === 7 && W.map(w => w.name).join() === '봉인된 서고,재물의 누각,커리어운,인연의 정원,시간의 회랑,기억 너머의 문,새벽의 마당', '기본 7개 세계 이름·순서');
+ok(W.length === 7 && W.map(w => w.name).join() === '종합풀이,재물운,커리어운,인연운,건강 및 사고수,전생 체험,개운법', '기본 7개 세계 이름·순서');
 ok(W.every(w => w.enabled && w.access === 'free'), '기본은 모두 활성·무료(가격 정책 미확정)');
 ok(/창작 판타지/.test(W.find(w => w.id === 'w5').notice), '윤회의 문에 창작 판타지 표시');
 
@@ -34,7 +34,7 @@ let total = 0; const viaFallback = new Set();
   const doc = R.LifeDoc.build({ M, ch, sd, now, name: '백진우', interest: '', rep, soc, plan: (rep.chapters.find(c => c.plan) || {}).plan });
   const model = X.worldsModel(doc.chapters, W, {}, -1), n = model.reduce((s, g) => s + g.total, 0);
   total += n; ok(n === doc.chapters.length, `챕터 누락: ${n}/${doc.chapters.length}`);
-  ok(model.length === 7, '7개 세계가 모두 채워짐: ' + model.map(g => g.world.id + ':' + g.total).join());
+  ok(model.length === 6 && !model.some(g=>g.world.id==='w4'), '건강 챕터가 없는 기존 문서는 6개 주제 표시: ' + model.map(g => g.world.id + ':' + g.total).join());
   doc.chapters.forEach(c => { const hit = W.some(w => (w.match || []).some(r => new RegExp(r).test(c.id) || new RegExp(r).test(c.base || c.id))); if (!hit) viaFallback.add(c.id); });
 });
 if (viaFallback.size) console.log('규칙에 안 걸려 막 기준 대체 세계로 간 챕터:', [...viaFallback].join(', '));

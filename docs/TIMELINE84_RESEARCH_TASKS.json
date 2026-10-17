@@ -1,0 +1,114 @@
+{
+  "operatingDatabaseWrites": 0,
+  "jobs": [
+    {
+      "chapterId": "timeline_love_09",
+      "question": "결혼생활에서 가장 조심해야 할 갈등",
+      "state": "partially-linked-needs-conflict-specific-evidence",
+      "registeredInProduction": false,
+      "reason": "최신 승인된 배우자궁 위치 규칙 2개를 연결했으나 위치 배속만으로 부부 갈등을 판단할 수 없음",
+      "candidateRuleIds": [
+        "D27-20261016-B-male",
+        "D27-20261016-B-female"
+      ],
+      "requirements": [
+        "원문·청크·정확한 인용문 확보",
+        "원국에 적용 가능한 구조화 조건 확인",
+        "질문을 직접 지지하는 판단·예외·반대 조건 확인",
+        "장점과 약점·현실 행동의 범위 검토",
+        "질병·사고·혼인 사건 확정 금지",
+        "전문가 검수 전 승인 상태로 바꾸지 않음"
+      ]
+    },
+    {
+      "chapterId": "timeline_health_01",
+      "question": "내 사주에서 보는 건강의 기본 균형",
+      "state": "educational-supplement-draft-personalized-evidence-unavailable",
+      "registeredInProduction": false,
+      "reason": "전통 용어의 한계와 공식 보건·안전 자료에 기반한 일반 안내 본문 보완. 개인 건강·사고 판단 근거는 계속 부족.",
+      "candidateRuleIds": [],
+      "requirements": [
+        "원문·청크·정확한 인용문 확보",
+        "원국에 적용 가능한 구조화 조건 확인",
+        "질문을 직접 지지하는 판단·예외·반대 조건 확인",
+        "장점과 약점·현실 행동의 범위 검토",
+        "질병·사고·혼인 사건 확정 금지",
+        "전문가 검수 전 승인 상태로 바꾸지 않음"
+      ],
+      "supplementFile": "docs/TIMELINE84_HEALTH_SUPPLEMENT.json"
+    },
+    {
+      "chapterId": "timeline_health_06",
+      "question": "전통 명리학에서 보는 사고수란?",
+      "state": "educational-supplement-draft-personalized-evidence-unavailable",
+      "registeredInProduction": false,
+      "reason": "전통 용어의 한계와 공식 보건·안전 자료에 기반한 일반 안내 본문 보완. 개인 건강·사고 판단 근거는 계속 부족.",
+      "candidateRuleIds": [],
+      "requirements": [
+        "원문·청크·정확한 인용문 확보",
+        "원국에 적용 가능한 구조화 조건 확인",
+        "질문을 직접 지지하는 판단·예외·반대 조건 확인",
+        "장점과 약점·현실 행동의 범위 검토",
+        "질병·사고·혼인 사건 확정 금지",
+        "전문가 검수 전 승인 상태로 바꾸지 않음"
+      ],
+      "supplementFile": "docs/TIMELINE84_HEALTH_SUPPLEMENT.json"
+    },
+    {
+      "chapterId": "timeline_health_08",
+      "question": "무리한 선택이 위험을 키우는 상황",
+      "state": "educational-supplement-draft-personalized-evidence-unavailable",
+      "registeredInProduction": false,
+      "reason": "전통 용어의 한계와 공식 보건·안전 자료에 기반한 일반 안내 본문 보완. 개인 건강·사고 판단 근거는 계속 부족.",
+      "candidateRuleIds": [],
+      "requirements": [
+        "원문·청크·정확한 인용문 확보",
+        "원국에 적용 가능한 구조화 조건 확인",
+        "질문을 직접 지지하는 판단·예외·반대 조건 확인",
+        "장점과 약점·현실 행동의 범위 검토",
+        "질병·사고·혼인 사건 확정 금지",
+        "전문가 검수 전 승인 상태로 바꾸지 않음"
+      ],
+      "supplementFile": "docs/TIMELINE84_HEALTH_SUPPLEMENT.json"
+    }
+  ],
+  "sampleCoverageGaps": [
+    {
+      "chapterId": "timeline_self_05",
+      "question": "남들이 보는 나와 진짜 나",
+      "reason": "계산된 12신살 전달 누락 수정. 내면 모티프만 지원하며 타인의 인식 추정 금지.",
+      "state": "partial-evidence-matched-in-48-samples"
+    },
+    {
+      "chapterId": "timeline_wealth_04",
+      "question": "월급형 인간일까, 사업형 인간일까?",
+      "reason": "적용 가능한 별도 승인 규칙의 부분 근거 연결. 격국·구조 조건 완화 없음.",
+      "state": "partial-evidence-matched-in-48-samples"
+    },
+    {
+      "chapterId": "timeline_career_02",
+      "question": "내가 가진 가장 돈 되는 재능",
+      "reason": "적용 가능한 별도 승인 규칙의 부분 근거 연결. 격국·구조 조건 완화 없음.",
+      "state": "partial-evidence-matched-in-48-samples"
+    },
+    {
+      "chapterId": "timeline_career_04",
+      "question": "나는 리더일까, 전문가일까?",
+      "reason": "적용 가능한 별도 승인 규칙의 부분 근거 연결. 격국·구조 조건 완화 없음.",
+      "state": "partial-evidence-matched-in-48-samples"
+    },
+    {
+      "chapterId": "timeline_career_07",
+      "question": "조직생활에서 내가 부딪히는 문제",
+      "reason": "적용 가능한 별도 승인 규칙의 부분 근거 연결. 격국·구조 조건 완화 없음.",
+      "state": "partial-evidence-matched-in-48-samples"
+    },
+    {
+      "chapterId": "timeline_career_10",
+      "question": "성공을 가로막는 나의 습관",
+      "reason": "적용 가능한 별도 승인 규칙의 부분 근거 연결. 격국·구조 조건 완화 없음.",
+      "state": "partial-evidence-matched-in-48-samples"
+    }
+  ],
+  "lastReassessment": "2026-10-18"
+}

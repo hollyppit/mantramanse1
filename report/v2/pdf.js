@@ -48,7 +48,7 @@
     var act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}, S = R.SajuData.SEASONS, h = '';
     h += '<div class="band"></div><div class="in"><div class="act">' + esc(act.roman || '') + ' · ' + esc(act.title || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2>' + esc(c.title) + '</h2><div class="sub">' + esc(c.subtitle || '') + '</div>' + heroImg(c) +
       (c.chapterHook ? hookHtml(c,who) : '<div class="hl">' + nl(c.headline) + '</div><span class="fact">FACT · ' + esc(c.fact) + '</span><p>' + nl(c.interpretation) + '</p>');
-    if(c.readingDeferred){
+    if(c.readingDeferred || c.readingProvider==='local-reviewed-education'){
       var pendingChart=R.Scenes.chartKind ? R.Scenes.chartKind(c) : null;
       return page('<div class="band"></div><div class="in"><h2>'+esc(c.title)+'</h2><p role="status">'+esc(c.readingNotice || '이 장의 풀이를 준비하지 못했습니다.')+'</p>'+(pendingChart && sd?R.Charts.html(pendingChart,sd,{theme:'light',chapter:c.base || c.id}):'')+(c.readingParagraphs || []).filter(function(p){return p.text;}).map(function(p){return '<p>'+nl(p.text)+'</p>';}).join('')+'</div>',color,n,total,who);
     }
@@ -108,7 +108,8 @@
     content.push('<h2>원국 계산표</h2><table><tr><th>구분</th><th>간지</th><th>십성</th></tr>'+['year','month','day','hour'].map(function(k){var p=sd.pillars[k];return '<tr><td>'+esc({year:'연주',month:'월주',day:'일주',hour:'시주'}[k])+'</td><td>'+esc(p?p.ko:'시간 미상')+'</td><td>'+esc(p ? (p.stemTG || '')+' / '+(p.branchTG || '') : '판단 보류')+'</td></tr>';}).join('')+'</table><div class="cap">오행 분포</div><p>'+Object.keys(sd.fiveElements).map(function(k){return esc(k+' '+sd.fiveElements[k]+'%');}).join(' · ')+'</p>');
     (rep.chapters || []).filter(function(c){return c.readingCore;}).forEach(function(c){
       var blocks=[]; if(c.chapterHook)blocks.push(hookHtml(c,who));
-      if(c.readingParagraphs && (c.readingDeferred || c.interpretationAnalysis && c.interpretationAnalysis.mode==='grounded')) {
+      if(c.readingParagraphs && (c.readingDeferred || c.readingProvider==='local-reviewed-education' || c.interpretationAnalysis && c.interpretationAnalysis.mode==='grounded')) {
+        if(c.readingProvider==='local-reviewed-education')blocks.push('<p role="status">'+esc(c.readingNotice)+'</p>');
         if(c.readingDeferred)blocks.push('<p role="status">'+esc(c.readingNotice || '이 장의 풀이를 준비하지 못했습니다.')+'</p><div class="cap">계산 참고값</div><p>'+nl(c.readingCore.why || '')+'</p>');
         c.readingParagraphs.slice().sort(function(a,b){return Number(["why","evidence"].includes(a.role))-Number(["why","evidence"].includes(b.role));}).forEach(function(p){var field=R.ReadingFlow.FIELDS.find(function(f){return f[0]===p.role;}),pieces=String(p.text).match(/[\s\S]{1,420}/g)||[];pieces.forEach(function(t,i){blocks.push('<div class="cap">'+esc(field?field[1]:'심층 풀이')+(i?' (계속)':'')+'</div><p>'+nl(t)+'</p>');});});
       } else R.ReadingFlow.FIELDS.forEach(function(f){

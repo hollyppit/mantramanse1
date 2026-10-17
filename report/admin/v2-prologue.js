@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var C = window.V2Content, esc = C.esc, toast = C.toast, G = { d: { on: true, M: '', F: '', worlds: {} }, target: '', busy: false };
-  var TOPICS = [['', '공통 프롤로그'], ['w1', '본래의 나'], ['w2', '재물운'], ['w7', '커리어운'], ['w3', '인연운'], ['w4', '운의 흐름'], ['w5', '기억 너머의 문'], ['w6', '개운법']];
+  var TOPICS = [['', '공통 프롤로그'], ['w1', '종합풀이'], ['w2', '재물운'], ['w7', '커리어운'], ['w3', '인연운'], ['w8', '건강 및 사고수'], ['w5', '전생 체험'], ['w6', '개운법']];
   function current() { if (!G.target) return G.d; return G.d.worlds[G.target] || (G.d.worlds[G.target] = { M: '', F: '' }); }
   function mount(box) {
     box.innerHTML = '<div class="card"><p class="muted">불러오는 중…</p></div>';

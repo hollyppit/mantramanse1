@@ -1,5 +1,5 @@
 const assert=require('assert/strict'),{pathToFileURL}=require('url'),path=require('path');
-(async()=>{const E=await import(pathToFileURL(path.resolve('functions/_editorial.js')));const catalog=E.Editorial.defaults(),chapter=catalog.chapters.find(c=>c.id==='wealth_01');chapter.state='active';chapter.sourceRuleIds=['MONEY-TEST'];const rule={id:'MONEY-TEST',domain:'MONEY',status:'published',reviewed:true,principle:'검사 원리',conditions:{dayMaster:['갑']},evidence:[{docId:'source',chunkId:'c1',quote:'검사 원문'}]},idx=new Map([['source',{chunks:[{id:'c1',text:'검사 원문이 있습니다.'}]}]]);
+(async()=>{const E=await import(pathToFileURL(path.resolve('functions/_editorial.js')));const catalog=E.Editorial.defaults(),chapter=catalog.chapters.find(c=>c.id==='timeline_wealth_01');chapter.state='active';chapter.sourceRuleIds=['MONEY-TEST'];const rule={id:'MONEY-TEST',domain:'MONEY',status:'published',reviewed:true,principle:'검사 원리',conditions:{dayMaster:['갑']},evidence:[{docId:'source',chunkId:'c1',quote:'검사 원문'}]},idx=new Map([['source',{chunks:[{id:'c1',text:'검사 원문이 있습니다.'}]}]]);
 const check=(r=rule,s=idx,b=new Set())=>E.publicationIssues(catalog,[r],b,s);assert.equal(check().length,0);
 assert(check({...rule,evidence:[{docId:'source',chunkId:'c1',quote:'없는 인용'}]}).length);
 assert(check({...rule,evidence:[{docId:'source',chunkId:'missing'}]}).length);

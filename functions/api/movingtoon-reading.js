@@ -1,5 +1,5 @@
 import { inspectWriting, writingPlan, writingDirective } from '../_ux-writing.js';
-import {Editorial,loadEditorial,contractFor,selectCases,behaviorPlans} from '../_editorial.js';
+import {Editorial,loadEditorial,contractFor,selectCases,behaviorPlans,contractDomains,applyContractPolicy} from '../_editorial.js';
 import { diagnosticRecord, saveDiagnostic } from '../_reading-diagnostics.js';
 import { writerSchema, reviewSchema, repairSchema } from '../_chapter-output-schema.js';
 import { chapterPolicy, chapterInstruction, CHAPTER_DEFAULTS } from '../_chapter-policy.js';
@@ -51,13 +51,13 @@ async function handleReading({ request, env }, context) {
     editorial=await loadEditorial(kv);contract=contractFor(editorial,clean.chapter);
     mode = env.INTERPRETATION_ENGINE_MODE || settings.mode;
     policy = chapterPolicy(clean.chapter, settings.chapters);
-    if(contract){const kind=editorial.topics.find(t=>t.id===contract.topicId)?.policyKind || contract.topicId;policy=chapterPolicy({...clean.chapter,chapterKind:kind},settings.chapters)||policy;if(policy)policy={...policy,required:[...new Set([...policy.required,...contract.requiredEvidence])]};}
+    if(contract){const kind=editorial.topics.find(t=>t.id===contract.topicId)?.policyKind || contract.topicId;policy=chapterPolicy({...clean.chapter,chapterKind:kind},settings.chapters)||policy;policy=applyContractPolicy(policy,editorial,contract);}
     previous = (Array.isArray(original.previous) ? original.previous : []).slice(-80).filter(p => p && typeof p.text === 'string' && p.text.length<=1200).map(p=>({id:String(p.id || '').slice(0,100),chapter:String(p.chapter || '').slice(0,80),text:p.text}));
     if (!['legacy','shadow','grounded'].includes(mode)) return json({ ok: false, error: 'invalid-engine-mode' }, 503);
     if (!env.OPENAI_API_KEY && !env.ANTHROPIC_API_KEY) return json({ ok: false, error: 'no-ai', engineMode: mode }, 503);
     if (mode !== 'legacy' || policy?.hook.enabled) {
       storageStage='source-index';const sourceIndex = await loadSourceIndex(kv, items, blocked);
-      storageStage='grounding';analysis = analyze(original.sd, items, { ...settings, sourceIndex, blockedDocs: blocked, domains: policy && ['timing','remedy'].includes(policy.key) ? undefined : domainsFor(clean.chapter) });
+      storageStage='grounding';analysis = analyze(original.sd, contract?.state==='active'?items.filter(r=>contract.sourceRuleIds.includes(r.id)):items, { ...settings, sourceIndex, blockedDocs: blocked, domains: contract?.state==='active'?contractDomains(editorial,contract):policy && ['timing','remedy'].includes(policy.key) ? undefined : domainsFor(clean.chapter) });
       if(contract?.state==='active')analysis={...analysis,claims:analysis.claims.filter(c=>contract.sourceRuleIds.includes(c.knowledge_id))};
       analysis = selectChapterClaims(analysis, policy);
       examples=selectCases(editorial,contract,analysis.claims,userContext);

@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "reviewedAt": "2026-10-18",
+  "productionWrites": 0,
+  "deployed": false,
+  "aiProviderCalls": 2,
+  "expertApproved": false,
+  "sources": [
+    {
+      "id": "balance",
+      "kind": "traditional-reference",
+      "documentId": "dmux34os0thh",
+      "chunkId": "c1",
+      "title": "오행의 균형을 맞추는 핵심",
+      "sha256": "5c0b63e0938589c709bb004612a978a1723213452a27b544aff8e7dc3871dbe4",
+      "scope": "용어·상징 설명만 지원. 의학적 검증 자료가 아님.",
+      "limitations": "저자·발행정보 및 원문 내 cite 번호의 원출처 미확인. 개인 사건 예측에 사용하지 않음."
+    },
+    {
+      "id": "stars",
+      "kind": "traditional-reference",
+      "documentId": "dmux6klw5wy0",
+      "chunkId": "c2",
+      "title": "12신살",
+      "sha256": "10d9eab6dbdadf0e70b3c605425afc7fb9e96b58a44e3d7fe14773bad636552c",
+      "scope": "용어·상징 설명만 지원. 의학적 검증 자료가 아님.",
+      "limitations": "저자·발행정보 및 원문 내 cite 번호의 원출처 미확인. 개인 사건 예측에 사용하지 않음."
+    },
+    {
+      "id": "who-activity",
+      "kind": "public-health",
+      "title": "WHO · Physical activity",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/physical-activity",
+      "accessedAt": "2026-10-18",
+      "scope": "일반적인 신체 활동과 좌식 시간 관리. 오행·체질·개인 질환 추론은 지원하지 않음.",
+      "summary": "신체 활동은 건강에 도움이 되며, 적은 양의 활동도 의미가 있고 오래 앉아 있는 시간을 줄이는 것이 권고된다."
+    },
+    {
+      "id": "nhtsa-drowsy",
+      "kind": "public-safety",
+      "title": "NHTSA · Drowsy Driving",
+      "url": "https://www.nhtsa.gov/risky-driving/drowsy-driving",
+      "accessedAt": "2026-10-18",
+      "scope": "졸음운전 예방. 개인의 사고 발생 여부·시기·확률은 지원하지 않음.",
+      "summary": "충분한 수면이 졸음운전 예방의 기본이다. 졸릴 때 운전을 계속하지 않고 안전한 장소에서 멈추는 대응을 안내한다."
+    }
+  ],
+  "chapters": [
+    {
+      "id": "timeline_health_01",
+      "sourceIds": [
+        "balance",
+        "who-activity"
+      ],
+      "paragraphs": [
+        {
+          "text": "이 장의 건강 균형은 생활을 돌아보기 위한 질문입니다. 사주의 오행 비율이나 신강·신약으로 현재 건강 상태, 체력 또는 특정 질환을 판단할 수는 없습니다."
+        },
+        {
+          "text": "기존 명리 자료에서 균형은 일간과 주변 오행의 관계를 읽는 해석 용어입니다. 여기서 말하는 강함과 약함을 몸의 강함과 약함으로 바꾸어 읽거나, 부족한 오행을 영양 결핍으로 해석하지 않습니다."
+        },
+        {
+          "text": "일반 건강 정보로는 신체 활동과 오래 앉아 있는 시간을 점검할 수 있습니다. WHO는 신체 활동의 건강상 이점과 좌식 시간 줄이기를 안내합니다. 이 내용은 생년월일과 관계없이 참고하는 정보입니다."
+        },
+        {
+          "text": "예를 들어 책상 앞에서 보내는 날이 많다면, 실제로 얼마나 오래 앉아 있었는지 확인하고 일상에서 가능한 움직임을 찾아볼 수 있습니다. 이는 오행을 보충하는 치료법이나 개인별 운동 처방이 아닙니다."
+        },
+        {
+          "text": "지금 할 일은 원국에서 병명을 찾는 대신 생활 기록과 실제 몸의 변화를 살피는 것입니다. 증상이나 건강 문제가 있다면 사주 해석 대신 의료진의 평가를 기준으로 판단합니다."
+        }
+      ],
+      "state": "draft",
+      "mode": "educational-only",
+      "personalizedEvidenceAccepted": false,
+      "expertApproved": false,
+      "sourceRuleIds": []
+    },
+    {
+      "id": "timeline_health_06",
+      "sourceIds": [
+        "stars",
+        "nhtsa-drowsy"
+      ],
+      "paragraphs": [
+        {
+          "text": "이 콘텐츠에서 사고수는 전통 운세의 주의·변동 표현을 설명하는 말로만 사용합니다. 개인에게 사고가 일어난다는 뜻이나 실제 위험도를 계산한 결과가 아닙니다."
+        },
+        {
+          "text": "검토한 신살 자료는 길흉을 하나의 신살만으로 결정하지 말라는 주의를 담고 있습니다. 다만 출처의 원저자와 인용 번호를 확인하지 못했으므로, 이를 사고 예측의 검증된 이론이나 통일된 정의로 제시하지 않습니다."
+        },
+        {
+          "text": "특정 신살이나 충이 있다는 이유로 교통사고, 수술, 재난을 예고하지 않습니다. 또한 그런 표시가 없다고 안전을 보장하지도 않습니다. 실제 안전 판단은 지금의 환경과 행동을 확인하는 데서 출발합니다."
+        },
+        {
+          "text": "예를 들어 졸린 상태로 운전할지 고민한다면, 판단 기준은 운세가 아니라 현재의 졸음입니다. NHTSA는 충분한 수면을 기본 예방책으로 안내하며, 운전 중 졸리면 안전한 장소에서 멈추도록 권고합니다."
+        },
+        {
+          "text": "이 장은 불길한 사건을 찾기보다 일정을 조정하거나 이동 수단을 바꾸는 현실적 선택을 생각하게 하는 안내입니다. 예방 행동은 위험을 줄이기 위한 것이며 특정 사건의 발생이나 회피를 보장하지 않습니다."
+        }
+      ],
+      "state": "draft",
+      "mode": "educational-only",
+      "personalizedEvidenceAccepted": false,
+      "expertApproved": false,
+      "sourceRuleIds": []
+    },
+    {
+      "id": "timeline_health_08",
+      "sourceIds": [
+        "nhtsa-drowsy"
+      ],
+      "paragraphs": [
+        {
+          "text": "무리한 선택을 점검할 때는 현재 확인할 수 있는 상황을 먼저 봅니다. 사주로 개인의 무모함이나 사고 성향을 판단할 수는 없으므로, 이 장에서는 일반적인 안전 사례를 살펴봅니다."
+        },
+        {
+          "text": "구체적인 사례는 잠을 충분히 자지 못했거나 운전 중 졸린데도 도착 시간을 맞추려고 계속 운전하는 상황입니다. NHTSA의 졸음운전 안내는 수면과 운전 중 대응을 다루며, 이는 생년월일에 따른 위험 해석과 별개입니다."
+        },
+        {
+          "text": "출발 전 충분히 잘 수 있는 일정인지 확인하고, 졸린 상태라면 이동을 미루거나 다른 교통수단을 고려할 수 있습니다. 이미 운전 중 졸리다면 안전한 장소에서 멈추는 것이 우선입니다."
+        },
+        {
+          "text": "예를 들어 밤늦게 일을 마친 뒤 장거리 이동이 남았다면, 오늘 도착해야 한다는 계획 자체를 다시 검토하는 것입니다. 이 예시는 독자의 현재 수면 상태나 운전 습관을 추정한 내용이 아닙니다."
+        },
+        {
+          "text": "같은 원칙을 다른 위험 작업에 적용할 때에는 해당 작업의 안전 지침을 따로 확인해야 합니다. 졸음운전 자료를 근거로 모든 작업의 위험도나 개인의 사고 확률을 일반화하지 않습니다."
+        }
+      ],
+      "state": "draft",
+      "mode": "educational-only",
+      "personalizedEvidenceAccepted": false,
+      "expertApproved": false,
+      "sourceRuleIds": []
+    }
+  ],
+  "aiReview": {
+    "passed": true,
+    "report": "output/timeline84-live/health-supplement-ai-review.json",
+    "reviewedChapterHash": "43a048af839f4ea2819119392dca8361d9929d869f90fbb0a97ff1a02facc412",
+    "model": "gpt-4.1-2025-04-14",
+    "recheckModel": null,
+    "expertApproved": false,
+    "initialReport": "output/timeline84-live/health-supplement-ai-review-initial.json",
+    "localEdits": [
+      {
+        "chapterId": "timeline_health_08",
+        "paragraphIndex": 0,
+        "reason": "독자 본문에서 승인 근거라는 내부 용어 제거. 수정 후 AI 재검수 통과."
+      }
+    ]
+  }
+}
