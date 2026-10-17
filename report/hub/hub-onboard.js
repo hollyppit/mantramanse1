@@ -37,7 +37,7 @@
   }
   Ob.config = function () {
     if (!cfgP) cfgP = new Promise(function (ok) {
-      var done = false, fin = function (c, v) { if (done) { if(c){CFG = O.merge(O.DEFAULTS,c);version=v||'';if(document.querySelector('#screen .rn')) H.render();} return; } done = true; if (c) { CFG = O.merge(O.DEFAULTS, c); version = v || ''; } ok(CFG); };
+      var done = false, fin = function (c, v) { if (done) { if(c){CFG = O.merge(O.DEFAULTS,c);version=v||'';if(document.querySelector('#screen .rn, .mc')) H.render();} return; } done = true; if (c) { CFG = O.merge(O.DEFAULTS, c); version = v || ''; } ok(CFG); };
       if (PREVIEW) { setTimeout(function () { fin(null); }, 4000); try { root.parent.postMessage({ t: 'mt-onb-ready' }, location.origin); } catch (e) { } return; }
       setTimeout(function () { fin(null); }, 1500);
       try { fetch('/api/onboarding', {cache:'no-store'}).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { fin(d && d.config, d && d.version); }).catch(function () { fin(null); }); } catch (e) { fin(null); }
@@ -137,6 +137,7 @@
     Ob.config().then(function () {
       if (!H.alive(ctx)) return;
       if (!PREVIEW) { try { sessionStorage.setItem('mt_onb_shown', '1'); } catch (e) { } }
+      if (CFG.renewal && CFG.renewal.cinematic && CFG.renewal.cinematic.enabled !== false && root.Cinematic) { var cv = document.getElementById('cover'); if(cv) cv.hidden=true; var ce=paint('<div></div>','ob-cine'); onLeave(root.Cinematic.mount(ce,CFG,function(){ if(PREVIEW) return; lset(SEEN,1); H.go(q.replay && P.has() ? '#/begin?edit=1' : '#/begin'); })); return; }
       var Art = root.OnboardArt || { forCase: function () { return ''; }, forIntro: function () { return ''; }, forTopic: function () { return ''; } };
       var intro = CFG.intro.filter(function (s) { return s.enabled !== false; }), BR = CFG.bridge || {}, seenN = 0, hasProfile = P.has();
       var renewed = CFG.renewal && CFG.renewal.enabled !== false;

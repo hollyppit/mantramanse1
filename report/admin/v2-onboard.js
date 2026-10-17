@@ -98,7 +98,7 @@
   }
 
   /* ── 화면 틀: 상태 줄 + 전체 흐름 + 하위 메뉴 ── */
-  var SUBS0 = [['landing', '온보딩 5개 장면'], ['cases', '연구 사례·출처'], ['intro', '명리학 소개'], ['service', '서비스 소개'], ['@ext'], ['scenes', '기본 입력 (호환)'], ['basic', '호칭·가중치'], ['stats', '통계'], ['publish', '미리보기·게시 관리']];
+  var SUBS0 = [['landing', '시네마틱 온보딩'], ['cases', '연구 사례·출처'], ['intro', '명리학 소개'], ['service', '서비스 소개'], ['@ext'], ['scenes', '기본 입력 (호환)'], ['basic', '호칭·가중치'], ['stats', '통계'], ['publish', '미리보기·게시 관리']];
   var EXT = []; // 확장 하위 메뉴(report/admin/v2-quest.js: 인터랙티브 스토리·에셋·타임라인·운영). {id, label, view(), collect(), flow()}
   function subs() { var o = []; SUBS0.forEach(function (s) { if (s[0] === '@ext') EXT.forEach(function (x) { o.push([x.id, x.label]); }); else o.push(s); }); return o; }
   // 관리 영역을 둘로 나눈다: A 기존 온보딩(연구·명리학·서비스 소개 → 나의 운 확인하기) / B 인터랙티브 스토리(그 버튼 이후). 두 영역은 설정 키가 서로 독립이다(A: cases·sections·intro·services·topics…, B: quest·timeline·scenes).
@@ -143,6 +143,7 @@
     return '필수 · 끌 수 없음';
   }
   function flowHtml() {
+    if (G.cfg.renewal && G.cfg.renewal.cinematic && G.cfg.renewal.cinematic.enabled !== false) return '<div class="card ob-flow-panel">' + G.cfg.renewal.cinematic.scenes.map(function(s,i){return '<button type="button" data-renewal-stage="'+esc(s.id)+'">'+(i+1)+'. '+esc(s.title.slice(0,16))+(s.enabled!==false?'':' (비활성)')+'</button>';}).join(' → ') + ' → 출생정보 입력 → 기존 결과 화면</div>';
     if (G.cfg.renewal && G.cfg.renewal.enabled !== false) return '<div class="card ob-flow-panel">' + G.cfg.renewal.scenes.map(function(s,i){return '<button type="button" data-renewal-stage="'+s.id+'">'+(i+1)+'. '+esc(s.title.slice(0,16))+(s.enabled?'':' (비활성)')+'</button>';}).join(' → ') + ' → 출생정보 입력 → 기존 결과 화면</div>';
     var c = G.cfg, nodes = c.sections.map(function (s, i) {
       var off = s.enabled === false && s.type !== 'final';

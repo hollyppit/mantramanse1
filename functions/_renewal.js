@@ -1,3 +1,4 @@
+import { cleanCinematic, cinematicErrors } from './_cinematic.js';
 // Additive JSON schema in free:onboard; no tables or asset keys are replaced.
 const text=(v,n=1200)=>typeof v==='string'?v.trim().slice(0,n):'';
 const media=v=>{v=text(v,600);return /^(\/api\/clipfile\?k=[\w.-]{1,120}|\/report\/[\w./-]+\.(webp|png|jpe?g|mp4|webm)|https:\/\/[^\s"'<>]+)$/.test(v)?v:''};
@@ -11,7 +12,7 @@ const characters=v=>Array.isArray(v)?v.slice(0,4).filter(c=>c&&/^[a-z0-9_-]{2,41
 export function cleanRenewal(r){
   if(!r||typeof r!=='object')return null;
   const seen=new Set();
-  return {revision:2,enabled:r.enabled!==false,
+  return {revision:3,enabled:r.enabled!==false,cinematic:cleanCinematic(r.cinematic),
     scenes:(Array.isArray(r.scenes)?r.scenes:[]).filter(x=>x&&ids.includes(x.id)&&!seen.has(x.id)&&seen.add(x.id)).map(x=>({
       id:x.id,enabled:x.enabled!==false,title:text(x.title,200),sub:text(x.sub,400),body:lines(x.body),emphasis:text(x.emphasis,400),detail:text(x.detail,2400),
       image:media(x.image),imageMobile:media(x.imageMobile),video:media(x.video),bg:media(x.bg),overlay:Number.isFinite(+x.overlay)?Math.max(0,Math.min(1,+x.overlay)):0.65,
@@ -23,6 +24,7 @@ export function cleanRenewal(r){
 }
 export function renewalErrors(r){
   if(!r||r.enabled===false)return [];
+  if(r.cinematic && r.cinematic.enabled !== false)return cinematicErrors(r.cinematic);
   const errors=[];
   if(r.scenes.length!==5||new Set(r.scenes.map(s=>s.id)).size!==5)errors.push('5개 장면을 모두 유지해야 합니다. 비활성화로 숨길 수 있습니다.');
   const active=r.scenes.filter(s=>s.enabled!==false);
