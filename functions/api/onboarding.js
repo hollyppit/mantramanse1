@@ -180,7 +180,7 @@ export async function onRequestGet({ request, env }) {
     if (q('draft')) {
       const live = (await kv.get(KEY, 'json')) || null, dr = (await kv.get(DRAFT, 'json')) || null, base = dr || live;
       if (!base) return json({ config: null, version: '', liveVersion: '', hasDraft: false, dirty: false });
-      const { config, version } = split(base);
+      const { config, version } = split(migrateOnboardingCopy(base));
       return json({ config, version, liveVersion: live ? live.version || '' : '', hasDraft: !!dr, dirty: !!dr && (!live || dr.version !== live.version), draftAt: dr ? dr.at || '' : '', liveAt: live ? live.publishedAt || live.at || '' : '' });
     }
     const id = q('hist');
@@ -190,7 +190,7 @@ export async function onRequestGet({ request, env }) {
   if (!env.GLOSSARY_KV) return json({ config: null, version: '' });
   const c = (await kvOf(env, { cache: true }).get(KEY, 'json')) || null;
   if (!c) return json({ config: null, version: '' });
-  const { config, version } = split(c);
+  const { config, version } = split(migrateOnboardingCopy(c));
   if (!admin && Array.isArray(config.cases)) config.cases = config.cases.filter(x => x.visible === true || (x.visible === undefined && x.status === 'published')).filter(x => !x.verification || x.verification.state === 'verified');
   return json({ config, version });
 }
