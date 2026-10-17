@@ -2,6 +2,7 @@
 //   style:cfg   활성 설정 { ver, at, config }          — 읽기 경로(풀이 생성기들이 매 호출마다 읽는다)
 //   style:hist  버전 이력 [{ ver, at, note, config }]    — 최근 40개, 최신이 앞. 롤백은 과거 설정을 "새 버전"으로 다시 저장한다
 // KV 오류·설정 없음이면 기본 설정(단정형)으로 동작한다 — 풀이 생성이 문체 저장소 때문에 멈추지 않는다.
+import { writingFor } from './_ux-writing.js';
 import { DEFAULT_CONFIG, cleanConfig, resolveStyle, directive, storyDirective, sig, STYLE_KO } from './_style.js';
 
 export const MAX_HIST = 40;
@@ -27,8 +28,8 @@ export async function saveStyle(kv, config, note, extra) {
 // 생성기가 쓰는 한 덩어리: 어느 문체를 쓸지(챕터/분야 키 순서대로), 프롬프트 지시문, 캐시 서명, 메타.
 // opts: { structure, soft }
 export function styleFor(loaded, keys, opts) {
-  const id = resolveStyle(loaded.config, keys), text = directive(loaded.config, id, opts), story = storyDirective(loaded.config);
-  return { id, name: STYLE_KO[id], ver: loaded.ver, directive: text, story, sig: sig(id + '|' + loaded.ver + '|' + text + '|' + story), meta: { id, ver: loaded.ver } };
+  const id = resolveStyle(loaded.config, keys), text = directive(loaded.config, id, { ...opts, keys: Array.isArray(keys) ? keys : [keys] }), story = storyDirective(loaded.config);
+  return { id, name: STYLE_KO[id], ver: loaded.ver, directive: text, story, sig: sig(id + '|' + loaded.ver + '|' + text + '|' + story), config: loaded.config, writing: writingFor(loaded.config.writing, Array.isArray(keys) ? keys : [keys], !!opts?.consent), meta: { id, ver: loaded.ver, directness: writingFor(loaded.config.writing, Array.isArray(keys) ? keys : [keys], !!opts?.consent).directness } };
 }
 
 // 같은 문체 설정을 챕터 ID → 원본 ID → 풀이 분야 순으로 적용한다.
@@ -38,10 +39,10 @@ export function composeStyle(loaded, chapters) {
   for (const ch of chapters) {
     const keys = ch.styleKeys || [ch.id];
     const resolved = styleFor(loaded, keys.concat(keys.map(k => CATEGORY_DOMAIN[k]).filter(Boolean)));
-    selected[resolved.id] = resolved;
-    assignments.push({id:ch.id,style:resolved.id});
+    selected[resolved.sig] = resolved;
+    assignments.push({id:ch.id,style:resolved.id,directness:resolved.meta.directness,policy:resolved.sig});
   }
-  const directives = Object.values(selected).map(s => '[' + s.id + ']\n' + s.directive).join('\n\n');
+  const directives = Object.values(selected).map(s => '[' + s.sig + ']\n' + s.directive).join('\n\n');
   const text = fallback.directive + '\n\n각 챕터는 아래 배정된 문체 지시를 우선 적용한다. 사실과 근거는 바꾸지 않는다.\n' + JSON.stringify(assignments) + '\n' + directives;
   return {...fallback,directive:text,sig:sig(text + '|' + loaded.ver)};
 }

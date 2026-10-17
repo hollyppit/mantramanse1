@@ -54,12 +54,12 @@
   /* ── 펀치라인 풀: 건조한 deadpan 만. 밈·이모티콘·코믹 효과음·조롱·사주 결과 희화화는 쓰지 않는다. 사용 가능한 자리(slot)가 정해져 있다 ── */
   //  born: 탄생 장면 · saju: 명식 장면 · present: 현재 장면 · question: 마지막 질문. 한 INTRO 에서 슬롯이 겹치지 않게 최대 2개.
   var PUNCH = {
-    A: { slot: 'born', lines: function () { return [S('하늘은 평소와 다름없이 하늘이었고.', 1900, { e: 'normal' }), S('땅 또한 평소와 다름없는 땅이었다.', 1900, { e: 'normal' }), S('그러나.', 700, { e: 'pause', cue: 'drum' })]; } },
-    B: { slot: 'born', lines: function () { return [S('당시에는 아무도 알지 못했다.', 1700), S('본인조차.', 1100, { e: 'pause' })]; } },
-    C: { slot: 'present', lines: function () { return [S('생년월일시를 입력했다.', 1800, { e: 'impact', a: 'zoom-in' })]; } },
+    A: { slot: 'born', lines: function () { return [S('하늘은 평소와 다름없이 하늘이었고.', 1900, { e: 'normal' }), S("땅 또한 평소와 다름없는 땅이었습니다.", 1900, { e: 'normal' }), S('그러나.', 700, { e: 'pause', cue: 'drum' })]; } },
+    B: { slot: 'born', lines: function () { return [S("당시에는 아무도 알지 못했습니다.", 1700), S('본인조차.', 1100, { e: 'pause' })]; } },
+    C: { slot: 'present', lines: function () { return [S("생년월일시를 입력하셨습니다.", 1800, { e: 'impact', a: 'zoom-in' })]; } },
     D: { slot: 'saju', lines: function () { return [S('그리고.', 600, { e: 'pause' }), S('한 사람의 수많은 고민.', 1800)]; } },
-    E: { slot: 'question', lines: function () { return [S('수많은 선택을 지나 마침내 묻는다.', 2100), S('그래서.', 800, { e: 'pause' })]; } },
-    F: { slot: 'question', lines: function () { return [S('천하는 넓고 인생은 길다.', 1900), S('그러나 대운은.', 1000, { e: 'pause' }), S('십 년이다.', 1200, { e: 'impact', a: 'zoom-in', cue: 'drum' })]; } },
+    E: { slot: 'question', lines: function () { return [S("수많은 선택을 지나 마침내 묻게 됩니다.", 2100), S('그래서.', 800, { e: 'pause' })]; } },
+    F: { slot: 'question', lines: function () { return [S("천하는 넓고 인생은 깁니다.", 1900), S('그러나 대운은.', 1000, { e: 'pause' }), S("십 년입니다.", 1200, { e: 'impact', a: 'zoom-in', cue: 'drum' })]; } },
   };
   function hash(s) { var h = 2166136261; String(s).split('').forEach(function (c) { h = (h ^ c.charCodeAt(0)) * 16777619 >>> 0; }); return h; }
   // 같은 사람에게는 같은 펀치라인 순서(새로고침해도 안 바뀐다). n >= 후보 수면 전체 순위를 돌려준다.
@@ -108,7 +108,7 @@
     var born = [S('그날.', Math.round(700 * rate), { e: 'pause', cue: cue('drum'), min: 450 })];
     add(born, 'A');
     born.push(S('훗날 자신의 운을 확인하기 위해 생년월일시를 입력할 ' + hero + '—', 3200, { min: 2000 }));
-    born.push(S('바로 이날 태어났다.', Math.round(1500 * rate) + 300, { e: 'impact', a: 'zoom-in', cue: cue('drum'), min: 1200 }));
+    born.push(S("바로 이날 태어났습니다.", Math.round(1500 * rate) + 300, { e: 'impact', a: 'zoom-in', cue: cue('drum'), min: 1200 }));
     add(born, 'B');
     out.push(scene('ep_04', 'TENSION', C1({ pacing: 'SLOW', motionIntensity: 2, imageMotion: 'drift', transition: 'dip-black', sceneType: 'INTRO', bgmMood: 'tension', overlayStrength: 0.55, textPosition: 'center', textSize: 'L', mediaTags: ['windyForest', 'cloud', 'rain'] }), build(born), { mediaIntent: { scenes: ['windyForest', 'cloud', 'rain', 'mist'], emotions: ['tense', 'powerful'] } }));
     // 05 이름 — 암전, 음악 정지, 정적, 북, 이름
@@ -121,7 +121,7 @@
     var pil = ['hour', 'day', 'month', 'year'].map(function (k, i) { var p = P[k]; return { label: '時日月年'[i], hj: k === 'hour' && !ph ? '' : (p ? p.hanja : ''), ko: k === 'hour' && !ph ? '' : (p ? p.ko : '') }; });
     out.push(scene('ep_06', 'REALITY_CHECK', C1({ sceneType: 'INTRO', lead: 250, pacing: 'SLOW', transition: 'hard-cut', bgmMood: 'emotional', textPosition: 'bottom', textSize: 'L', overlayStrength: 0.8 }), build(sj), { bg: 'black', pillars: pil, bgmCue: 'bgmUp' }));
     // 07 세월 폭주 — 숫자가 빠르게 흐른다
-    var tm = [S('그리고.', 600, { e: 'pause', a: 'fade', min: 400 }), S('세월은 흘렀다.', 1100, { cue: cue('drum'), a: 'fade', min: 700 })];
+    var tm = [S('그리고.', 600, { e: 'pause', a: 'fade', min: 400 }), S("세월은 흘렀습니다.", 1100, { cue: cue('drum'), a: 'fade', min: 700 })];
     yearSteps(by || now, now).slice(0, -1).forEach(function (y) { tm.push(S(String(y), 240, { big: true, a: 'fade', min: 200 })); });
     out.push(scene('ep_07', 'TIMELINE', C1({ sceneType: 'INTRO', lead: 100, pacing: 'FAST', transition: 'hard-cut', bgmMood: 'ambient', motionIntensity: 3, imageMotion: 'drift', overlayStrength: 0.55, textPosition: 'center', textSize: 'L', mediaTags: ['road', 'city', 'rain'] }), build(tm), { mediaIntent: { scenes: ['road', 'city', 'crossroads', 'rain'], emotions: ['contemplative'] }, bgmCue: 'bgmUp' }));
     // 08 현재 — 검은 화면, 음악 정지, 현재 연도, 마침내 자신의 사주를 보게 된다
@@ -129,17 +129,17 @@
     if (nm) cur.push(S('{hero}', 800, { name: true, a: 'fade', min: 500 }));
     add(cur, 'C');
     cur.push(S('마침내.', Math.round(800 * rate), { e: 'pause', a: 'fade', min: 450 }));
-    cur.push(S('자신의 사주를 보게 된다.', 1900, { e: 'impact', a: 'zoom-in', cue: 'bgmUp', min: 1500 }));
+    cur.push(S("자신의 사주를 보시게 됩니다.", 1900, { e: 'impact', a: 'zoom-in', cue: 'bgmUp', min: 1500 }));
     out.push(scene('ep_08', 'SILENCE', C1({ sceneType: 'INTRO', lead: 250, pacing: 'PAUSE', nameEmphasis: nm ? 'NORMAL' : 'NONE', transition: 'dip-black', bgmMood: 'tension', textSize: 'L' }), build(cur), { bg: 'black' }));
     // 09 질문 — 命 · 運 · 대체 내 운은 — 언제 풀리는가
-    var qs = [S('命', 150, { big: true, a: 'fade', min: 150 }), S('타고난 명은 무엇인가.', 900, { a: 'fade', together: true, min: 600 }), S('運', 150, { big: true, a: 'fade', min: 150 }), S('지금 흐르는 운은 무엇인가.', 900, { a: 'fade', together: true, min: 600 })];
+    var qs = [S('命', 150, { big: true, a: 'fade', min: 150 }), S("타고난 명은 무엇입니까?", 900, { a: 'fade', together: true, min: 600 }), S('運', 150, { big: true, a: 'fade', min: 150 }), S("지금 흐르는 운은 무엇입니까?", 900, { a: 'fade', together: true, min: 600 })];
     add(qs, 'F'); add(qs, 'E');
     qs.push(S('대체. 내 운은—', 1400, { e: 'pause', cue: 'bgmCut', min: 900 }));
-    qs.push(S('언제 풀리는가.', Math.round(1700 * rate) + 200, { e: 'impact', a: 'zoom-in', cue: cue('deepDrum'), min: 1300 }));
+    qs.push(S("언제 풀리는지 궁금하실 수 있습니다.", Math.round(1700 * rate) + 200, { e: 'impact', a: 'zoom-in', cue: cue('deepDrum'), min: 1300 }));
     out.push(scene('ep_09', 'MOUNTAIN', C1({ sceneType: 'INTRO', pacing: 'SLOW', transition: 'dip-black', motionIntensity: 2, bgmMood: 'tension', overlayStrength: 0.55, textPosition: 'center', textSize: 'XL', mediaTags: ['mountain', 'river', 'stars'] }), build(qs), { mediaIntent: { scenes: ['mountain', 'river', 'stars', 'cloud'], emotions: ['powerful', 'awe'] }, bgmCue: 'bgmUp' }));
     // 10 運路 타이틀 — 산 뒤에서 해가 떠오른다
     out.push(scene('ep_10', 'CINEMATIC_INTRO', C1({ sceneType: 'INTRO', textAnimation: 'cinematic-title', pacing: 'PAUSE', transition: 'dip-white', motionIntensity: 2, imageMotion: 'slow-zoom-in', overlayStrength: 0.45, bgmMood: 'cinematic', lead: 100, tail: 1200, nameEmphasis: nm ? 'TITLE' : 'NONE', mediaTags: ['sunrise', 'mountain', 'cloud'] }),
-      build([S('運路', 1000, { e: 'impact', a: 'cinematic-title', cue: 'bgmUp', min: 800 })]), { kind: 'title', sub: nm ? '{hero}의 운이 흐르는 길\n\n{hero}에게는,\n{hero}의 때가 있다.' : '모든 사람에게는,\n각자의 때가 있다.', bgmCue: 'full', mediaIntent: { scenes: ['sunrise', 'mountain', 'cloud'], emotions: ['hopeful', 'powerful'] } }));
+      build([S('運路', 1000, { e: 'impact', a: 'cinematic-title', cue: 'bgmUp', min: 800 })]), { kind: 'title', sub: nm ? "{hero}의 운이 흐르는 길\n\n{hero}에게는,\n{hero}의 때가 있습니다." : "모든 사람에게는\n각자에게 맞는 때가 있습니다.", bgmCue: 'full', mediaIntent: { scenes: ['sunrise', 'mountain', 'cloud'], emotions: ['hopeful', 'powerful'] } }));
     if (!drumOn) eachSeg(out, function (g) { if (g.cue === 'drum') g.cue = undefined; }); // 낮은 레벨에서는 일반 북 신호를 쓰지 않는다(펀치라인 포함)
     out = fit(out, cap);
     // 이름이 들어간 문장은 자리표시자로 두었다가 여기서 채운다(이름은 이 기기 안에서만 쓴다)
@@ -192,7 +192,7 @@
 
     // 02 탄생 — 새벽 산맥, 운해, 갈대
     var s2 = [T('어느 새벽.', 1700, { min: 1000 })];
-    s2.push(T('한 사람이\n세상에 첫발을\n내디뎠다.', 2800, { min: 1800 }), T(hero + ' 태어났으니—', 2400, { min: 1500, e: 'pause' }));
+    s2.push(T("한 사람이\n세상에 첫발을\n내디뎠습니다.", 2800, { min: 1800 }), T(hero + ' 태어났으니—', 2400, { min: 1500, e: 'pause' }));
     out.push(sc('ep_j02', 'DAWN', Object.assign({ sceneType: 'INTRO', imageMotion: 'slow-zoom-in', overlayStrength: 0.4, bgmMood: 'ambient', textPosition: 'center', textSize: 'L' }, tags(['mountain', 'mist', 'field', 'sunrise'])), s2,
       { mediaIntent: { scenes: ['mountain', 'mist', 'field', 'sunrise'], emotions: ['awe', 'calm'] } }));
 
@@ -202,60 +202,60 @@
 
     // 04 命 — 산 정상, 안개, 새벽빛
     out.push(sc('ep_j04', 'MOUNTAIN', Object.assign({ sceneType: 'INTRO', imageMotion: 'slow-zoom-in', overlayStrength: 0.42, bgmMood: 'cinematic', textPosition: 'center' }, tags(['mountain', 'cloud', 'mist', 'sunrise'])), [
-      T('누구에게나\n태어나며 주어진 것이\n있다.', 3000, { min: 1800 }), Hj('命', 2300, { min: 1500 }),
+      T("누구에게나\n태어나면서 주어진 것이\n있습니다.", 3000, { min: 1800 }), Hj('命', 2300, { min: 1500 }),
       T('태어난 시간.', 1000, { min: 700 }), T('태어난 계절.', 1000, { min: 700 }), T('타고난 기질.', 1000, { min: 700 }), T('세상을 바라보는 방식.', 1700, { min: 1000 }),
-      T('그 시작을', 1300, { min: 800 }), T('명이라 부른다.', 2200, { min: 1400, e: 'pause' })],
+      T('그 시작을', 1300, { min: 800 }), T("명이라고 부릅니다.", 2200, { min: 1400, e: 'pause' })],
       { mediaIntent: { scenes: ['mountain', 'cloud', 'mist'], emotions: ['awe', 'powerful'] } }));
 
     // 05 運 — 산 정상에서 흐르는 강, 이어지는 길로
     out.push(sc('ep_j05', 'RIVER', Object.assign({ sceneType: 'INTRO', imageMotion: 'pan-left', overlayStrength: 0.45, bgmMood: 'ambient', textPosition: 'center' }, tags(['river', 'road', 'mist', 'lake'])), [
-      T('그러나—', 1500, { min: 900 }), T('태어난 것이\n전부는 아니다.', 2300, { min: 1500 }), Hj('運', 2300, { min: 1500 }), T('시간이 흐르면\n운도 흐른다.', 2500, { min: 1600 }),
-      T('어떤 길은 열리고.', 1700, { min: 1000 }), T('어떤 길은 막힌다.', 1700, { min: 1000 }), T('어떤 사람은 찾아오고.', 1700, { min: 1000 }), T('어떤 사람은 떠난다.', 1900, { min: 1100 }), T('어떤 선택은\n삶의 방향을 바꾼다.', 2700, { min: 1600 })],
+      T('그러나—', 1500, { min: 900 }), T('태어난 것이\n전부는 아니다.', 2300, { min: 1500 }), Hj('運', 2300, { min: 1500 }), T("시간이 흐르면\n운도 함께 흐릅니다.", 2500, { min: 1600 }),
+      T('어떤 길은 열리고.', 1700, { min: 1000 }), T("어떤 길은 막히기도 합니다.", 1700, { min: 1000 }), T('어떤 사람은 찾아오고.', 1700, { min: 1000 }), T("어떤 사람은 떠나기도 합니다.", 1900, { min: 1100 }), T("어떤 선택은\n삶의 방향을 바꾸기도 합니다.", 2700, { min: 1600 })],
       { mediaIntent: { scenes: ['river', 'road', 'mist'], emotions: ['reflective', 'calm'] } }));
 
     // 06 길 — 광활한 산맥, 여러 갈래의 길
     out.push(sc('ep_j06', 'CROSSROAD', Object.assign({ sceneType: 'INTRO', imageMotion: 'slow-zoom-out', overlayStrength: 0.4, bgmMood: 'reflective', textPosition: 'center' }, tags(['mountain', 'road', 'crossroads', 'cloud'])), [
-      T('그렇게 사람은', 1500, { min: 900 }), T('수많은 길을 지나고.', 1800, { min: 1000 }), T('수많은 선택을 하며.', 1800, { min: 1000 }), T('자신의 시간을\n살아간다.', 2300, { min: 1400 }),
-      T('그리고—', 1600, { min: 1000, e: 'pause' }), T('누구에게나\n한 번쯤 이런 순간이\n찾아온다.', 2900, { min: 1800 })],
+      T('그렇게 사람은', 1500, { min: 900 }), T('수많은 길을 지나고.', 1800, { min: 1000 }), T('수많은 선택을 하며.', 1800, { min: 1000 }), T("자신의 시간을\n살아갑니다.", 2300, { min: 1400 }),
+      T('그리고—', 1600, { min: 1000, e: 'pause' }), T("누구에게나\n한 번쯤 이런 순간이\n찾아옵니다.", 2900, { min: 1800 })],
       { mediaIntent: { scenes: ['mountain', 'road', 'crossroads'], emotions: ['reflective'] } }));
 
     // 07 질문 — 안개 낀 산길, 앞이 보이지 않는다
     out.push(sc('ep_j07', 'MIST', Object.assign({ sceneType: 'INTRO', imageMotion: 'drift', overlayStrength: 0.52, bgmMood: 'tension', textPosition: 'center' }, tags(['mist', 'road', 'walkingAlone', 'mountain'])), [
-      Im('나는 지금\n어디쯤 와 있는가.', 4200, { min: 2600 }), T('지나온 길에는\n무엇이 있었는가.', 2700, { min: 1700 }), T('지금 내 앞에는\n어떤 운이 흐르고 있는가.', 3000, { min: 1900 }), T('그리고—', 1700, { min: 1100, e: 'pause' })],
+      Im("저는 지금\n어디쯤 와 있을까요?", 4200, { min: 2600 }), T("지나온 길에는\n무엇이 있었을까요?", 2700, { min: 1700 }), T("지금 제 앞에는\n어떤 운이 흐르고 있을까요?", 3000, { min: 1900 }), T('그리고—', 1700, { min: 1100, e: 'pause' })],
       { mediaIntent: { scenes: ['mist', 'road', 'walkingAlone'], emotions: ['lonely', 'reflective'] } }));
     out.push(sc('ep_j08', 'MOUNTAIN', Object.assign({ sceneType: 'INTRO', imageMotion: 'slow-zoom-in', overlayStrength: 0.45, bgmMood: 'tension', textPosition: 'center' }, tags(['mountain', 'cloud', 'mist'])), [
-      Im('산 너머에는\n무엇이 기다리고 있는가.', 4200, { min: 2600 })], { mediaIntent: { scenes: ['mountain', 'cloud', 'mist'], emotions: ['awe'] } }));
+      Im("산 너머에는\n무엇이 기다리고 있을까요?", 4200, { min: 2600 })], { mediaIntent: { scenes: ['mountain', 'cloud', 'mist'], emotions: ['awe'] } }));
 
     // 09 여정의 시작 — 안개가 조금씩 걷힌다. 본편에서 다룰 주제를 자연스럽게 예고
     out.push(sc('ep_j09', 'DAWN', Object.assign({ sceneType: 'INTRO', imageMotion: 'slow-zoom-in', overlayStrength: 0.38, bgmMood: 'hopeful', textPosition: 'center' }, tags(['mist', 'sunrise', 'road', 'field'])), [
-      T('그래서 이제.', 1400, { min: 900 }), T('지나온 운을 거슬러', 1800, { min: 1100 }), T('아직 오지 않은 때를\n향해 간다.', 2500, { min: 1500 }),
+      T('그래서 이제.', 1400, { min: 900 }), T('지나온 운을 거슬러', 1800, { min: 1100 }), T("아직 오지 않은 때를\n향해 나아갑니다.", 2500, { min: 1500 }),
       T('재물이 흐르는 곳.', 1500, { min: 900 }), T('인연이 기다리는 곳.', 1500, { min: 900 }), T('기회가 열리는 때.', 1500, { min: 900 }), T('그리고', 1000, { min: 700 }), T('피해야 할 길까지.', 2100, { min: 1300 })],
       { mediaIntent: { scenes: ['mist', 'sunrise', 'road'], emotions: ['hopeful'] } }));
 
     // 10 四柱八字 — 고풍스러운 지도·두루마리·먹(이미지 대신 양피지·먹 배경). 실제 명식은 만세력 값 그대로
-    var s10 = [T('그 길을 찾기 위해.', 1900, { min: 1200 }), T('네 개의 기둥.', 1700, { min: 1000 }), T('여덟 개의 글자를\n펼친다.', 2200, { min: 1400 }), S('四柱八字', 3200, { big: true, e: 'impact', a: ANIM.cine, title: true, min: 2200 })];
+    var s10 = [T('그 길을 찾기 위해.', 1900, { min: 1200 }), T('네 개의 기둥.', 1700, { min: 1000 }), T("여덟 개의 글자를\n펼칩니다.", 2200, { min: 1400 }), S('四柱八字', 3200, { big: true, e: 'impact', a: ANIM.cine, title: true, min: 2200 })];
     var pil = ['hour', 'day', 'month', 'year'].map(function (k, i) { var p = P[k]; return { label: '時日月年'[i], hj: k === 'hour' && !ph ? '' : (p ? p.hanja : ''), ko: k === 'hour' && !ph ? '' : (p ? p.ko : '') }; });
     out.push(sc('ep_j10', 'REALITY_CHECK', { sceneType: 'INTRO', motionIntensity: 0, imageMotion: 'none', overlayStrength: 0.7, bgmMood: 'cinematic', textPosition: 'top', textSize: 'L' }, s10, { phTone: 'map', pillars: pil, pillarsAt: 3 }));
     // 11 사주팔자의 의미 — "지도"가 핵심 은유. 미래를 확정한다는 표현은 쓰지 않는다
     out.push(sc('ep_j11', 'REALITY_CHECK', { sceneType: 'INTRO', motionIntensity: 0, imageMotion: 'none', overlayStrength: 0.7, bgmMood: 'reflective', textPosition: 'center', textSize: 'L' }, [
-      T('이것은\n정답이 아니다.', 2400, { min: 1500 }), T('길을 대신\n걸어주지도 않는다.', 2800, { min: 1800 }), T('다만—', 1700, { min: 1100, e: 'pause' }),
-      T('지나온 흐름을 살피고.', 2000, { min: 1200 }), T('지금 서 있는 곳을\n확인하고.', 2200, { min: 1400 }), T('앞으로 마주할 길을\n헤아리기 위한', 2400, { min: 1500 }), Im('하나의 지도다.', 3000, { min: 1900 })], { phTone: 'map' }));
+      T('이것은\n정답이 아니다.', 2400, { min: 1500 }), T("길을 대신\n걸어주지는 않습니다.", 2800, { min: 1800 }), T('다만—', 1700, { min: 1100, e: 'pause' }),
+      T('지나온 흐름을 살피고.', 2000, { min: 1200 }), T('지금 서 있는 곳을\n확인하고.', 2200, { min: 1400 }), T('앞으로 마주할 길을\n헤아리기 위한', 2400, { min: 1500 }), Im("하나의 지도입니다.", 3000, { min: 1900 })], { phTone: 'map' }));
 
     // 12 출정 — 가장 큰 스케일: 광활한 산맥, 운해, 절벽, 끝없이 이어지는 길, 아직 완전히 뜨지 않은 태양
     out.push(sc('ep_j12', 'SUNRISE', Object.assign({ sceneType: 'INTRO', imageMotion: 'slow-zoom-in', overlayStrength: 0.3, bgmMood: 'cinematic', textPosition: 'lower-third', textSize: 'L' }, tags(['mountain', 'cloud', 'sunrise', 'road'])), [
-      Im('이제.', 1900, { min: 1200 }), T('길을 나선다.', 2000, { min: 1200 }), T('지나온 운을 넘어.', 1900, { min: 1200 }), T('아직 오지 않은', 1600, { min: 1000 }), Im('나의 때를 향해.', 3000, { min: 1900 })],
+      Im('이제.', 1900, { min: 1200 }), T("길을 나섭니다.", 2000, { min: 1200 }), T('지나온 운을 넘어.', 1900, { min: 1200 }), T('아직 오지 않은', 1600, { min: 1000 }), Im('나의 때를 향해.', 3000, { min: 1900 })],
       { mediaIntent: { scenes: ['mountain', 'cloud', 'sunrise', 'road'], emotions: ['powerful', 'hopeful'] } }));
     // 13 마지막 빌드업 — 길 자체가 주인공
     out.push(sc('ep_j13', 'MOUNTAIN', Object.assign({ sceneType: 'INTRO', imageMotion: 'pan-up', overlayStrength: 0.42, bgmMood: 'cinematic', textPosition: 'center' }, tags(['road', 'mountain', 'mist', 'walkingAlone'])), [
-      T('산 너머', 1400, { min: 900 }), T('무엇이 기다리고 있는지는', 2000, { min: 1300 }), T('아직 알 수 없다.', 2400, { min: 1500 }), T('다만—', 3000, { min: 2200, e: 'pause' }), Im('길은\n이미 열렸다.', 3400, { min: 2200 })],
+      T('산 너머', 1400, { min: 900 }), T('무엇이 기다리고 있는지는', 2000, { min: 1300 }), T("아직 알 수 없습니다.", 2400, { min: 1500 }), T('다만—', 3000, { min: 2200, e: 'pause' }), Im("길은\n이미 열려 있습니다.", 3400, { min: 2200 })],
       { mediaIntent: { scenes: ['road', 'mountain', 'mist'], emotions: ['awe', 'hopeful'] } }));
 
     // 14 運路 — 태양이 산맥 너머로 떠오르고, 운해 사이로 길이 이어진다. INTRO 에서 가장 강한 글자 연출(ink + opacity + 0.97→1 scale)
     out.push(scene('ep_j14', 'CINEMATIC_INTRO', C1({ sceneType: 'INTRO', pacing: 'PAUSE', transition: 'dip-white', motionIntensity: 2, imageMotion: 'slow-zoom-in', overlayStrength: 0.38, bgmMood: 'cinematic', lead: 300, tail: 1800, nameEmphasis: nm ? 'TITLE' : 'NONE', mediaTags: ['sunrise', 'mountain', 'cloud', 'road', 'mist'] }),
       build([S('運路', 2400, { big: true, e: 'impact', a: ANIM.cine, title: true, min: 1800 })]),
-      { kind: 'title', sub: nm ? '{hero}의 운이 흐르는 길\n\n{hero}에게는,\n{hero}의 때가 있다.' : '모든 사람에게는,\n각자의 때가 있다.', bgmCue: 'full', mediaIntent: { scenes: ['sunrise', 'mountain', 'cloud', 'road'], emotions: ['hopeful', 'powerful'] } }));
+      { kind: 'title', sub: nm ? "{hero}의 운이 흐르는 길\n\n{hero}에게는,\n{hero}의 때가 있습니다." : "모든 사람에게는\n각자에게 맞는 때가 있습니다.", bgmCue: 'full', mediaIntent: { scenes: ['sunrise', 'mountain', 'cloud', 'road'], emotions: ['hopeful', 'powerful'] } }));
     // 15 이제, 출발한다. — 여기서 INTRO 연출이 끝난다(이후 본편은 글자가 움직이지 않는다)
-    out.push(sc('ep_j15', 'SILENCE', { sceneType: 'INTRO', lead: 600, pacing: 'PAUSE', transition: 'dip-black', bgmMood: 'minimal', textSize: 'XL', tail: 600 }, [T('이제,', 1700, { min: 1100 }), Im('출발한다.', 2800, { min: 1800 })], { bg: 'black' }));
+    out.push(sc('ep_j15', 'SILENCE', { sceneType: 'INTRO', lead: 600, pacing: 'PAUSE', transition: 'dip-black', bgmMood: 'minimal', textSize: 'XL', tail: 600 }, [T('이제,', 1700, { min: 1100 }), Im("출발합니다.", 2800, { min: 1800 })], { bg: 'black' }));
 
     out = fit(out, cap);
     // 이름이 들어간 문장은 자리표시자로 두었다가 여기서 채운다(이름은 이 기기 안에서만 쓴다)
@@ -278,14 +278,14 @@
     if (nm) out.push(sc('ep_s02', 'NAME_REVEAL', { sceneType: 'INTRO', lead: 300, pacing: 'PAUSE', nameEmphasis: 'MAXIMUM', bgmMood: 'minimal', transition: 'dip-black', textSize: 'XL' }, [S('{hero}', 2400, { name: true, big: true, e: 'impact', a: ANIM.cine, min: 1600 })], { bg: 'black' }));
     out.push(sc('ep_s03', 'MOUNTAIN', Object.assign({ sceneType: 'INTRO', imageMotion: 'slow-zoom-in', overlayStrength: 0.42, bgmMood: 'cinematic', textPosition: 'center' }, mt(['mountain', 'cloud', 'mist', 'sunrise'])), [T('태어나며 주어진 것.', 1400, { min: 900 }), Hj('命', 1300, { min: 900 })],
       { mediaIntent: { scenes: ['mountain', 'cloud', 'mist'], emotions: ['awe', 'powerful'] } }));
-    out.push(sc('ep_s04', 'RIVER', Object.assign({ sceneType: 'INTRO', imageMotion: 'pan-left', overlayStrength: 0.45, bgmMood: 'ambient', textPosition: 'center' }, mt(['river', 'road', 'mist'])), [T('그러나 시간이 흐르면\n운도 흐른다.', 2000, { min: 1300 }), Hj('運', 1300, { min: 900 })],
+    out.push(sc('ep_s04', 'RIVER', Object.assign({ sceneType: 'INTRO', imageMotion: 'pan-left', overlayStrength: 0.45, bgmMood: 'ambient', textPosition: 'center' }, mt(['river', 'road', 'mist'])), [T("그러나 시간이 흐르면 운도\n함께 흐릅니다.", 2000, { min: 1300 }), Hj('運', 1300, { min: 900 })],
       { mediaIntent: { scenes: ['river', 'road', 'mist'], emotions: ['reflective', 'calm'] } }));
     var pil = ['hour', 'day', 'month', 'year'].map(function (k, i) { var p = P[k]; return { label: '時日月年'[i], hj: k === 'hour' && !ph ? '' : (p ? p.hanja : ''), ko: k === 'hour' && !ph ? '' : (p ? p.ko : '') }; });
     out.push(sc('ep_s05', 'REALITY_CHECK', { sceneType: 'INTRO', motionIntensity: 0, imageMotion: 'none', overlayStrength: 0.7, bgmMood: 'cinematic', textPosition: 'top', textSize: 'L' },
-      [T('길을 찾기 위해, 네 개의 기둥.', 1500, { min: 1000 }), S('四柱八字', 1700, { big: true, e: 'impact', a: ANIM.cine, title: true, min: 1200 }), Im('하나의 지도다.', 1700, { min: 1100 })], { phTone: 'map', pillars: pil, pillarsAt: 1 }));
+      [T('길을 찾기 위해, 네 개의 기둥.', 1500, { min: 1000 }), S('四柱八字', 1700, { big: true, e: 'impact', a: ANIM.cine, title: true, min: 1200 }), Im("하나의 지도입니다.", 1700, { min: 1100 })], { phTone: 'map', pillars: pil, pillarsAt: 1 }));
     out.push(scene('ep_s06', 'CINEMATIC_INTRO', C1({ sceneType: 'INTRO', pacing: 'PAUSE', transition: 'dip-white', motionIntensity: 2, imageMotion: 'slow-zoom-in', overlayStrength: 0.38, bgmMood: 'cinematic', lead: 200, tail: 900, nameEmphasis: nm ? 'TITLE' : 'NONE' }),
       build([S('運路', 1800, { big: true, e: 'impact', a: ANIM.cine, title: true, min: 1400 })]),
-      { kind: 'title', sub: nm ? '{hero}에게는,\n{hero}의 때가 있다.' : '모든 사람에게는,\n각자의 때가 있다.', bgmCue: 'full', mediaIntent: { scenes: ['sunrise', 'mountain', 'cloud', 'road'], emotions: ['powerful', 'hopeful'] } }));
+      { kind: 'title', sub: nm ? "{hero}에게는,\n{hero}에게 맞는 때가 있습니다." : "모든 사람에게는\n각자에게 맞는 때가 있습니다.", bgmCue: 'full', mediaIntent: { scenes: ['sunrise', 'mountain', 'cloud', 'road'], emotions: ['powerful', 'hopeful'] } }));
     out = fit(out, SHORT_BODY_MS);
     if (N && vars) out.forEach(function (s) { (s.cinema.segments || []).forEach(function (g) { g.text = N.fill(g.text, vars); }); if (s.sub) s.sub = N.fill(s.sub, vars); });
     out.forEach(function (s) { if (s.pillars) { var segs = s.cinema.segments || [], at = -1; segs.forEach(function (g, i) { if (/四柱八字/.test(g.text)) at = i; }); if (at >= 0) s.pillarsAt = at; } });

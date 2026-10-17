@@ -110,7 +110,7 @@
       var blocks=[]; if(c.chapterHook)blocks.push(hookHtml(c,who));
       if(c.readingParagraphs && (c.readingDeferred || c.interpretationAnalysis && c.interpretationAnalysis.mode==='grounded')) {
         if(c.readingDeferred)blocks.push('<p role="status">'+esc(c.readingNotice || '이 장의 풀이를 준비하지 못했습니다.')+'</p><div class="cap">계산 참고값</div><p>'+nl(c.readingCore.why || '')+'</p>');
-        c.readingParagraphs.forEach(function(p){var field=R.ReadingFlow.FIELDS.find(function(f){return f[0]===p.role;}),pieces=String(p.text).match(/[\s\S]{1,420}/g)||[];pieces.forEach(function(t,i){blocks.push('<div class="cap">'+esc(field?field[1]:'심층 풀이')+(i?' (계속)':'')+'</div><p>'+nl(t)+'</p>');});});
+        c.readingParagraphs.slice().sort(function(a,b){return Number(["why","evidence"].includes(a.role))-Number(["why","evidence"].includes(b.role));}).forEach(function(p){var field=R.ReadingFlow.FIELDS.find(function(f){return f[0]===p.role;}),pieces=String(p.text).match(/[\s\S]{1,420}/g)||[];pieces.forEach(function(t,i){blocks.push('<div class="cap">'+esc(field?field[1]:'심층 풀이')+(i?' (계속)':'')+'</div><p>'+nl(t)+'</p>');});});
       } else R.ReadingFlow.FIELDS.forEach(function(f){
           var text=String(c.readingCore[f[0]]||''), pieces=text.match(/[\s\S]{1,420}/g)||[''];
           pieces.forEach(function(t,i){blocks.push('<div class="cap">'+esc(f[1])+(i?' (계속)':'')+'</div><p>'+nl(t)+'</p>');});

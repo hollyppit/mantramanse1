@@ -72,7 +72,7 @@
     insightHeadline: { A: '사람마다 잘되는 *방식*도,\n잘되는 *시기*도 다릅니다.', B: '문제는 노력이 아니라\n*타이밍*일 수 있습니다.' },
     movingToonHeadline: { A: '당신의 인생에는\n이야기가 있으니까.', B: '당신의 사주는\n한 편의 이야기입니다.' },
     freeResultCta: { A: '내 사주 분석하기', B: '나의 기질 확인하기' },
-    paywallHeadline: { A: '그래서,\n나는 언제 움직여야 할까?', B: '내가 움직일 때는\n언제일까?' },
+    paywallHeadline: { A: '그래서,\n나는 언제 움직여야 할까?', B: "제가 움직이는 때는\n언제일까요?" },
     purchaseCta: { A: '내 전체 이야기 열기', B: '전체 리포트 열어보기' },
   };
 
@@ -90,7 +90,7 @@
     //   embers 불씨 · light 빛무리 · smoke 연기 / amount 양(0=없음, 1=기본, 2=많이) / speed 속도 / opacity 진하기(0~1) / color 불씨·빛 색
     ambient: { embers: true, light: true, smoke: true, amount: 1, speed: 1, opacity: 0.8, color: '#E8B26A' },
     // 인트로 커버: 스토리 맨 앞 한 화면. src 는 이미지(비우면 은은한 빛무리), show:false 면 숨김
-    cover: { show: true, bgSrc: '', bgOpacity: 0.6, chars: [], src: '', alt: '신비한 등불', title: '태어난 순간은 같아도,\n펼쳐질 운은 저마다 다르다.', sub: '사주팔자와 동양 명리학으로 살펴보는 나의 성향, 재물, 인연, 그리고 인생의 흐름.\n복잡한 운의 해석을 한 편의 무빙툰으로 만나보세요.', button: '내 사주로 체험하기', hint: '출생정보를 입력하고 나의 이야기를 만나보세요', action: '',
+    cover: { show: true, bgSrc: '', bgOpacity: 0.6, chars: [], src: '', alt: '신비한 등불', title: "태어난 순간은 같아도\n펼쳐질 운명은 저마다 다릅니다.", sub: '사주팔자와 동양 명리학으로 살펴보는 나의 성향, 재물, 인연, 그리고 인생의 흐름.\n복잡한 운의 해석을 한 편의 무빙툰으로 만나보세요.', button: '내 사주로 체험하기', hint: '출생정보를 입력하고 나의 이야기를 만나보세요', action: '',
       titleFont: 'serif', titleWeight: '400', titleSize: 17, titleSpacing: 4, titleColor: '#E9E4D8', titleAnim: '', coverBottom: 25, coverBottomM: 30, subAnim: '', textAnimSpeed: 6, subColor: '#7C786C', subFont: 'sans', subSize: 14, buttonFont: 'sans', buttonSize: 15 },
     autoSpeed: 1,                                  // 자동 스크롤 속도 (1=기본, 2=두 배 빠르게, 0.5=절반 속도)
     brandName: '만트라 포춘',                       // 위쪽 가운데 이름
@@ -139,7 +139,7 @@
     interestLine: '"{interest}", 궁금하다고 하셨죠. 그 이야기는 다음 장면에서 이어집니다.',
     flowHint: '같은 사람도 시기마다 다른 얼굴로 살아갑니다.',
     // 주인공의 가장 큰 동력 한 줄(무료 결과). 이름은 우세 십성군 매핑으로만 만들고 AI 는 쓰지 않습니다.
-    potentialLine: "이 이야기의 주인공을 움직이는 가장 큰 동력은 '{potential}'이다. {group} 기운 {n}%, 평균의 {times}배다.",
+    potentialLine: "이 이야기에서는 '{potential}'을 주요 동력으로 살펴봅니다. 실제 행동과 얼마나 맞는지는 경험을 돌아보며 확인해보세요.",
   };
 
   var FLOW = {
@@ -188,7 +188,7 @@
     { type: 'imageText', title: '지금 밀어붙여야 할까,\n기다려야 할까?', imagePosition: 'top', src: 'problem/problem-02.webp', alt: '두 갈래 길 앞에 선 사람', aspectRatio: '4/5', anim: 'lines',
       todo: '두 갈래 길 또는 선택을 표현하는 이미지 삽입' },
     { type: 'headline', title: '돈은 언제쯤 풀릴까?\n이 사람과 계속 가도 될까?', size: 'm', anim: 'lines' },
-    { type: 'headline', title: '내 인생에도\n잘 풀리는 때가 있을까?', size: 'l', anim: 'lines' },
+    { type: 'headline', title: "제 인생에도\n잘 풀리는 때가 있을까요?", size: 'l', anim: 'lines' },
     { type: 'spacer', size: 'large' },
 
     /* ===== 02 INSIGHT : "사람마다 타이밍이 다르구나" ===== */

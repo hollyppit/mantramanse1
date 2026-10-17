@@ -1,5 +1,5 @@
 /* 관리자 "풀이 문체" 화면 — 풀이 문체 및 단정성(신중형·직설형·단정형) 설정을 한 화면에서 관리한다. 저장은 /api/style (KV 'style:cfg' · 'style:hist').
-   구성: 기본 문체 · 챕터(분야)별 문체 · 유형별 프롬프트 · 권장/지양 표현 · 캐릭터 대사 · 테스트 사주 미리보기(세 문체 비교) · 버전 이력·롤백.
+   구성: 기본 문체 · 챕터(분야)별 문체 · 유형별 프롬프트 · 권장/지양 표현 · 캐릭터 대사 · 테스트 사주 미리보기(네 가지 풀이 비교) · 버전 이력·롤백.
    문체는 표현 강도만 바꾼다 — 계산·근거는 같다는 것을 미리보기의 "근거 서명"으로 확인한다. 이미 저장된 리포트는 건드리지 않고, 새로 생성·재생성할 때부터 이 버전이 적용된다.
    탭: stylecfg. index.html 의 showTab 이 V2Style.open(탭, 비밀번호) 를 부른다. */
 (function () {
@@ -32,6 +32,13 @@
   function readForm() { // 화면 → G.cfg
     var c = G.cfg;
     var r = $('input[name=stDef]:checked'); if (r) c.defaultStyle = r.value;
+    c.writing = c.writing || {};
+    c.writing.directness = Number($('#stDirectness').value);
+    ['terminology','examples'].forEach(function(k){c.writing[k]=$('#stW_'+k).value;});
+    ['sentenceChars','paragraphChars'].forEach(function(k){c.writing[k]=Number($('#stW_'+k).value);});
+    c.writing.chapterDirectness={}; $$('[data-direct-ch]').forEach(function(el){if(el.value)c.writing.chapterDirectness[el.dataset.directCh]=Number(el.value);});
+    var extraId=$('#stExtraDirectId').value.trim(), extraLevel=$('#stExtraDirect').value;
+    if(extraId && extraLevel)c.writing.chapterDirectness[extraId]=Number(extraLevel);
     c.chapters = {}; $$('select[data-ch]').forEach(function (s) { if (s.value) c.chapters[s.dataset.ch] = s.value; });
     $$('input[data-extra-ch]').forEach(function (i) { var k = i.value.trim(), sel = i.parentNode.querySelector('select'); if (k && sel && sel.value) c.chapters[k] = sel.value; });
     $$('textarea[data-prompt]').forEach(function (t) { c.prompts[t.dataset.prompt] = t.value; });
@@ -43,12 +50,18 @@
 
   function draw() {
     var d = G.data, c = G.cfg, A = d.active;
+    c.writing=c.writing || {directness:3,chapterDirectness:{},terminology:"hidden",sentenceChars:85,paragraphChars:320,examples:"balanced"};
+    var w=c.writing, levels=["부드럽게","현실적으로","팩폭","강한 팩폭","매우 강한 팩폭"], levelOpts=function(value,empty){return (empty?'<option value="">전체 기본값</option>':'')+levels.map(function(t,i){return '<option value="'+(i+1)+'"'+(Number(value)===i+1?' selected':'')+'>'+(i+1)+' · '+t+'</option>';}).join('');};
     var styleOpts = function (cur, withDefault) { return (withDefault ? '<option value="">기본 문체 따름</option>' : '') + d.styles.map(function (s) { return '<option value="' + s.id + '"' + (cur === s.id ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join(''); };
     var extra = Object.keys(c.chapters).filter(function (k) { return DOMS.indexOf(k) < 0; });
     box.innerHTML = '<div class="card"><h3 style="margin:0 0 4px">풀이 문체 및 단정성</h3><p class="muted" style="margin:0">문체는 <b>표현의 강도</b>만 바꿉니다. 만세력 계산 결과와 풀이 DB 근거는 어떤 문체를 골라도 같습니다. 이미 만들어 저장된 리포트는 그대로 두고, 새로 만들거나 다시 만들 때부터 적용됩니다.</p>' +
       '<p style="margin:8px 0 0">현재 적용 중: <b style="color:var(--gold)">' + (A.ver ? 'v' + A.ver : '기본값(저장 전)') + '</b> · 기본 문체 ' + esc(sname(A.config.defaultStyle)) + (A.at ? ' <span class="muted">(' + esc(String(A.at).slice(0, 16).replace('T', ' ')) + ')</span>' : '') + ' <span id="stDirty" class="muted" style="margin-left:8px"></span></p></div>' +
 
-      '<div class="st-sec">기본 문체<small>챕터별로 따로 정하지 않은 모든 풀이에 쓰입니다. 처음 값은 단정형입니다.</small></div><div class="st-g3">' +
+      '<div class="st-sec">생활밀착형 풀이 설정</div><div class="card"><p>모든 풀이는 자연스러운 존댓말을 사용합니다. 강도는 표현만 바꿉니다. 5단계는 독자가 명시적으로 선택한 요청에만 적용하며, 그 외에는 4단계까지 적용합니다.</p><label>전체 직설성 <select id="stDirectness">'+levelOpts(w.directness,false)+'</select></label>' +
+      ['terminology','examples'].map(function(k){var options=k==='terminology'?[['hidden','전문 근거에만 표시'],['explained','개념 소개에서 쉬운 설명 병기']]:[['sparse','적게'],['balanced','보통'],['rich','풍부하게']];return '<div class="st-row"><span>'+(k==='terminology'?'전문 용어':'현실 사례')+'</span><select id="stW_'+k+'">'+options.map(function(o){return '<option value="'+o[0]+'"'+(w[k]===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>';}).join('')+
+      '<label>문장 권장 길이 <input type="number" id="stW_sentenceChars" min="40" max="140" value="'+w.sentenceChars+'"></label><label>문단 최대 길이 <input type="number" id="stW_paragraphChars" min="120" max="500" value="'+w.paragraphChars+'"></label><p>강조는 핵심 결론·약점·비교 제목·실천 핵심으로 제한합니다.</p>'+
+      Array.from(new Set(DOMS.concat(Object.keys(w.chapterDirectness || {})))).map(function(k){return '<div class="st-row"><span>'+esc(d.domains[k] || k)+'</span><select data-direct-ch="'+esc(k)+'">'+levelOpts((w.chapterDirectness || {})[k],true)+'</select></div>';}).join('')+'<div class="st-row"><input id="stExtraDirectId" placeholder="챕터 id"><select id="stExtraDirect">'+levelOpts('',true)+'</select></div></div>'+
+      '<div class="st-sec">기본 문체<small>챕터별로 따로 정하지 않은 모든 풀이에 쓰입니다. 처음 값은 직설형이며 존댓말·직설성 정책을 함께 적용합니다.</small></div><div class="st-g3">' +
       d.styles.map(function (s) { return '<label class="st-opt' + (c.defaultStyle === s.id ? ' on' : '') + '"><input type="radio" name="stDef" value="' + s.id + '"' + (c.defaultStyle === s.id ? ' checked' : '') + ' style="width:auto"> <b>' + esc(s.name) + '</b><small>' + esc(s.desc) + '</small></label>'; }).join('') + '</div>' +
 
       '<div class="st-sec">챕터(분야)별 문체<small>분야마다 다른 문체를 쓸 수 있습니다. 비워 두면 기본 문체를 따릅니다.</small></div><div class="card">' +
@@ -72,12 +85,12 @@
       '<div class="muted" style="font-size:.82rem;margin-top:8px">캐릭터별 말투(캐릭터 이름 → 말투·성격)</div><div id="stChars">' +
       Object.keys(c.characters).concat(['']).map(function (k) { return '<div class="st-char st-row" style="grid-template-columns:130px 1fr"><input type="text" value="' + esc(k) + '" placeholder="캐릭터 이름"><textarea rows="2" placeholder="말투·성격" style="width:100%">' + esc(c.characters[k] || '') + '</textarea></div>'; }).join('') + '</div></div>' +
 
-      '<div class="st-sec">테스트 사주 · 문체별 결과 비교<small>같은 사주·같은 근거로 세 문체의 결과를 나란히 봅니다. 저장하지 않은 변경도 미리보기에 반영됩니다.</small></div><div class="card">' +
+      '<div class="st-sec">테스트 사주 · 문체별 결과 비교<small>같은 사주·같은 근거로 기존 원문·일반 풀이·팩폭 3·4단계 결과를 나란히 봅니다. 저장하지 않은 변경도 미리보기에 반영됩니다.</small></div><div class="card">' +
       '<div class="ik-bar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><label class="fx">생년월일<input type="date" id="stD" value="' + esc(G.TS.date) + '"></label><label class="fx">출생 시간<input type="time" id="stT" value="' + esc(G.TS.time) + '"></label>' +
       '<label class="fx">성별<select id="stG"><option value="M"' + (G.TS.gender === 'M' ? ' selected' : '') + '>남</option><option value="F"' + (G.TS.gender === 'F' ? ' selected' : '') + '>여</option></select></label>' +
       '<label class="fx">풀이 분야<select id="stDom">' + DOMS.map(function (k) { return '<option value="' + k + '"' + (G.TS.domain === k ? ' selected' : '') + '>' + esc(d.domains[k] || k) + '</option>'; }).join('') + '</select></label>' +
-      '<label class="fx" style="flex-direction:row;display:flex;gap:6px;align-items:center"><input type="checkbox" id="stAi" style="width:auto"' + (G.TS.ai ? ' checked' : '') + (d.aiAvailable ? '' : ' disabled') + '> AI 로 작성(' + (d.aiAvailable ? '키 있음' : 'AI 키 없음') + ')</label>' +
-      '<button type="button" class="pri" id="stRun">세 문체 비교</button></div><div id="stOut" style="margin-top:12px"></div></div>' +
+      '<label class="fx" style="flex-direction:row;display:flex;gap:6px;align-items:center"><input type="checkbox" id="stAi" style="width:auto"' + (G.TS.ai && d.aiAvailable ? ' checked' : '') + (d.aiAvailable ? '' : ' disabled') + '> AI 로 작성(' + (d.aiAvailable ? '키 있음' : 'AI 키 없음') + ')</label>' +
+      '<button type="button" class="pri" id="stRun">네 가지 풀이 비교</button></div><div id="stOut" style="margin-top:12px"></div></div>' +
 
       '<div class="st-sec">버전 이력 · 롤백<small>저장할 때마다 새 버전이 생깁니다. 롤백은 과거 설정을 새 버전으로 다시 저장합니다(이력은 지워지지 않습니다).</small></div><div class="card"><table class="st-tb"><tr><th>버전</th><th>시각</th><th>기본 문체</th><th>메모</th><th></th></tr>' +
       d.hist.map(function (h) { return '<tr><td>' + (h.ver ? 'v' + h.ver : '기본값') + (h.ver === A.ver ? ' <span class="st-badge PASS">적용 중</span>' : '') + '</td><td>' + esc(String(h.at || '').slice(0, 16).replace('T', ' ')) + '</td><td>' + esc(sname(h.defaultStyle)) + '</td><td>' + esc(h.note || '') + (h.rolledBackFrom != null ? ' <span class="muted">(v' + h.rolledBackFrom + ' 에서 롤백)</span>' : '') + '</td><td>' + (h.ver !== A.ver ? '<button type="button" data-rb="' + h.ver + '" style="padding:1px 10px;font-size:.78rem">이 버전으로 되돌리기</button>' : '') + '</td></tr>'; }).join('') + '</table>' +
@@ -106,12 +119,12 @@
   function run() {
     readForm(); var out = $('#stOut'), b = $('#stRun');
     G.TS = { date: $('#stD').value, time: $('#stT').value, gender: $('#stG').value, domain: $('#stDom').value, ai: $('#stAi').checked };
-    out.innerHTML = '<p class="muted">계산·작성 중… (세 문체를 차례로 만들어 20~60초 걸릴 수 있습니다)</p>'; b.disabled = true;
+    out.innerHTML = '<p class="muted">계산·작성 중… (네 가지 풀이를 차례로 만들어 20~60초 걸릴 수 있습니다)</p>'; b.disabled = true;
     C.engine().then(function (M) {
       var d = G.TS.date.split('-').map(Number), t = (G.TS.time || '12:00').split(':').map(Number);
       var ch = M.compute({ year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: G.TS.gender, city: '서울' }), sd = R.SajuData.build(ch, { now: Date.now() }), Y = sd.nowYear, ext = { future: [] };
       try { ext.future = M.seunRange(ch, Y, Y + 4).map(function (x, i) { return { year: Y + i, season: R.SajuData.seasonOf(x.ev) }; }); } catch (e) { }
-      return post('preview', { sd: sd, ext: ext, domain: G.TS.domain, config: G.cfg, compose: G.TS.ai ? 'ai' : 'plain' });
+      return post('preview', { sd: sd, ext: ext, domain: G.TS.domain, config: G.cfg, compose: G.TS.ai ? 'ai' : 'plain', comparison: true });
     }).then(function (r) { G.prev = r; drawPrev(r); }).catch(function (e) { out.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }).then(function () { b.disabled = false; });
   }
   function paras(r, id) {
@@ -119,14 +132,18 @@
     if (!comp) return '<p class="muted">' + (r.aiError ? 'AI 결과 없음: ' + esc(r.aiError) : 'AI 합성을 끄고 실행했거나 결과가 없습니다. 아래 “DB 원문”을 보세요.') + '</p>';
     return r.sectionTitles && Object.keys(comp).map(function (sec) { return '<div class="st-p" style="margin-top:12px"><b style="color:var(--ink)">' + esc(r.sectionTitles[sec] || sec) + '</b></div>' + comp[sec].map(function (p) { return '<p class="st-p">' + (KIND_KO[p.kind] ? '<span class="st-k">' + KIND_KO[p.kind] + '</span>' : '') + esc(p.text) + '</p>'; }).join(''); }).join('');
   }
+  function beforeAfter(r,id) {
+    var s=r.styles[id];if(id==='legacy' || !s.composed)return '';
+    return '<details><summary>항목별 수정 전후 비교</summary>'+Object.keys(s.composed).map(function(sec){return '<h5>'+esc(r.sectionTitles[sec] || sec)+'</h5><p class="muted">수정 전 · DB 원문</p>'+((r.plain || {})[sec] || []).map(function(p){return '<p class="st-p">'+esc(p.text)+'</p>';}).join('')+'<p class="muted">수정 후 · 새 풀이</p>'+s.composed[sec].map(function(p){return '<p class="st-p">'+esc(p.text)+'</p>';}).join('');}).join('')+'</details>';
+  }
   function drawPrev(r) {
-    var out = $('#stOut'), ids = Object.keys(r.styles), same = true;
-    var h = '<p style="margin:0 0 8px">근거 서명 <span class="mono" style="font-family:ui-monospace,Consolas,monospace">' + esc(r.factsHash) + '</span> <span class="st-badge PASS">세 문체 모두 같은 계산·같은 근거</span> · 풀이 DB ' + esc(r.versions.knowledge) + ' · 신뢰도 ' + esc(r.confidence) + '</p>';
+    var out = $('#stOut'), ids = Object.keys(r.styles).sort(function(a,b){return ['legacy','general','level3','level4'].indexOf(a)-['legacy','general','level3','level4'].indexOf(b);}), same = true;
+    var h = '<p style="margin:0 0 8px">근거 서명 <span class="mono" style="font-family:ui-monospace,Consolas,monospace">' + esc(r.factsHash) + '</span> <span class="st-badge PASS">네 가지 풀이 모두 같은 계산·같은 근거</span> · 풀이 DB ' + esc(r.versions.knowledge) + ' · 신뢰도 ' + esc(r.confidence) + '</p>';
     if (r.soft && r.soft.length) h += '<p class="muted" style="margin:0 0 8px">근거가 얇아 표현 강도를 한 단계 낮춘 항목: ' + r.soft.map(function (x) { return esc(r.sectionTitles[x] || x); }).join(', ') + '</p>';
     if (r.insufficient && r.insufficient.length) h += '<p class="muted" style="margin:0 0 8px">근거가 없어 쓰지 않은 항목: ' + r.insufficient.map(function (x) { return esc(r.sectionTitles[x] || x); }).join(', ') + '</p>';
     h += '<div class="st-cmp">' + ids.map(function (id) {
       var s = r.styles[id], c = s.check, bad = c ? c.issues.map(function (i) { return '<div class="st-p muted">• ' + esc(i.msg) + '</div>'; }).join('') : '';
-      return '<div class="st-col"><h4>' + esc(s.name) + ' ' + (c ? '<span class="st-badge ' + c.status + '">' + c.status + '</span> <span class="muted" style="font-size:.74rem">완곡 문장 ' + Math.round(c.ratio * 100) + '%</span>' : '') + '</h4>' + bad + paras(r, id) + '<details style="margin-top:8px"><summary class="muted" style="font-size:.78rem">이 문체로 AI 에 전달된 지시문</summary><pre style="white-space:pre-wrap;font-size:.74rem;color:var(--ink3)">' + esc(s.directive) + '</pre></details></div>';
+      return '<div class="st-col"><h4>' + esc(s.name) + ' ' + (c ? '<span class="st-badge ' + c.status + '">' + c.status + '</span> <span class="muted" style="font-size:.74rem">완곡 문장 ' + Math.round(c.ratio * 100) + '%</span>' : '') + '</h4>' + bad + (s.metrics ? '<p class="muted">직설성 '+s.metrics.directness+' · 근거 ID 연결 '+s.metrics.withRefs+'/'+s.metrics.paragraphs+'문단 · 동일 문단 반복 '+s.metrics.duplicates+'개</p>' : '') + paras(r, id) + beforeAfter(r,id) + '<details style="margin-top:8px"><summary class="muted" style="font-size:.78rem">이 문체로 AI 에 전달된 지시문</summary><pre style="white-space:pre-wrap;font-size:.74rem;color:var(--ink3)">' + esc(s.directive) + '</pre></details></div>';
     }).join('') + '</div>';
     h += '<details style="margin-top:12px"><summary class="muted">DB 원문(문체 적용 전 · 규칙 기반 합성)</summary>' + Object.keys(r.plain).map(function (sec) { return '<p class="st-p"><b>' + esc(r.sectionTitles[sec] || sec) + '</b></p>' + r.plain[sec].map(function (p) { return '<p class="st-p">' + esc(p.text) + '</p>'; }).join(''); }).join('') + '</details>';
     h += '<div class="st-sec" style="margin-top:16px">근거 연결 상태<small>이 풀이에 실제로 쓰인 풀이 DB 자료와 출처·버전입니다.</small></div>' +

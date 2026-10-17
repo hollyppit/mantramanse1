@@ -199,7 +199,7 @@
     if (MAPQ) { if (LIFE) lifeBegin(); else beginReader(); return; }
     if (HUB) { hubStart(); return; }
     if (PREVIEW || !R.Bgm || !R.Bgm.has() || R.Bgm.isMuted()) { intro(); return; }
-    var nm = S.name; view('gate'); $('#gateName').innerHTML = nm ? esc(nm) + '에게는,<br>' + esc(nm) + '의 때가 있다.' : '모든 사람에게는,<br>각자의 때가 있다.';
+    var nm = S.name; view('gate'); $('#gateName').innerHTML = nm ? esc(nm) + '에게는,<br>' + esc(nm) + "때가 있습니다." : "모든 사람에게는,<br>자신에게 맞는 때가 있습니다.";
     var b = $('#gateBtn'); b.onclick = function () { b.onclick = null; T('gate_tapped', {}); intro(); }; try { b.focus({ preventScroll: true }); } catch (e) { }
   }
   function intro() { if (R.Bgm && !hasProVideo()) R.Bgm.play('cinematic'); proVideo(function (played) { if (played) { if (LIFE) lifeBegin(); else beginReader(); } else prologue(); }); } // 배경음악은 일간 인트로(첫 화면)부터 흐른다(입력 제출 = 사용자의 첫 터치)
@@ -906,7 +906,7 @@
   function finalView() {
     view('final'); funnel('movingtoon_complete'); T('report_completed', { viewed: Object.keys(S.visited).length }); checkUnlock();
     var rep = S.rep, a4 = rep.acts[rep.acts.length - 1], steps = rep.plan.strategy;
-    $('#v-final').innerHTML = '<div class="fin"><p class="kicker">運路</p><h2>' + (S.name ? esc(S.name) + '에게는,<br>' + esc(S.name) + '의 때가 있다.' : '모든 사람에게는,<br>각자의 때가 있다.') + '</h2><p>' + rep.chapters.length + '개의 챕터를 지나왔다.<br>타고난 명부터 운의 흐름,<br>움직일 때를 위한 행동 전략까지.</p>' +
+    $('#v-final').innerHTML = '<div class="fin"><p class="kicker">運路</p><h2>' + (S.name ? esc(S.name) + '에게는,<br>' + esc(S.name) + "때가 있습니다." : "모든 사람에게는,<br>자신에게 맞는 때가 있습니다.") + '</h2><p>' + rep.chapters.length + "개의 챕터를 살펴봤습니다.<br>타고난 특징부터 운의 흐름,<br>일상에서 시도할 행동까지 정리했습니다.</p>" +
       '<div class="cap" style="margin-top:28px">다음 장면의 전략</div><div class="strategy">' + steps.map(function (x, i) { return (i ? '<i aria-hidden="true">→</i>' : '') + '<b>' + esc(x.label) + '</b>'; }).join('') + '</div>' +
       '<div class="btns"><button type="button" class="btn gold big" id="fPdf"' + (S.pdfUnlocked ? '' : ' disabled') + '>나의 종합 리포트 PDF 받기</button><button type="button" class="btn big" id="fShare">공유 카드 만들기</button><button type="button" class="btn" id="fCompat">궁합 볼 사람 추가하기</button><button type="button" class="btn" id="fBack">리포트 다시 보기</button></div>' + (S.pdfUnlocked ? '' : '<p class="lock">더 많은 챕터를 읽으면 PDF가 열립니다.</p>') + '<p class="fine">사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></div>';
     if (EXPLORE) { var bk = $('#fBack'), mp = document.createElement('button'); mp.type = 'button'; mp.className = 'btn big'; mp.id = 'fMap'; mp.textContent = '운명 세계 지도로 가기'; bk.parentNode.insertBefore(mp, bk); mp.onclick = function () { showHome(); }; }

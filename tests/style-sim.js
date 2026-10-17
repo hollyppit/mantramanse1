@@ -132,7 +132,7 @@ const sdOf = (y, mo, d, g) => { const ch = M.compute({ year: y, month: mo, day: 
   const sd = A.sd, ps = [{ id: 'p1', text: '재물 구조에 대한 초안 문단입니다. 수입과 지출의 균형을 살펴봅니다.', kind: 'reading' }, { id: 'p2', text: '주인공은 시장 골목에서 장부를 펼쳤다.', kind: 'episode' }];
   const clean = MT.validate({ sd, chapter: { id: 'wealth', title: '재물운', paragraphs: ps }, outline: [] });
   ok(clean && MT.domainsFor(clean.chapter)[0] === 'MONEY', '무빙툰 챕터 → 분야 매핑');
-  ok(MT.systemFor(null) === MT.SYSTEM && /풀이 문체: 직설형/.test(MT.systemFor({ directive: S.directive(d0, 'direct'), story: S.storyDirective(d0) })), 'systemFor: 문체 지시를 붙이고 없으면 기존 프롬프트 그대로');
+  ok(/생활밀착형 UX 라이팅/.test(MT.systemFor(null)) && /풀이 문체: 직설형/.test(MT.systemFor({ directive: S.directive(d0, 'direct'), story: S.storyDirective(d0) })), 'systemFor: 문체 지시를 붙이고 없어도 기본 UX 정책 적용');
   ok(/kind=episode/.test(MT.systemFor({ directive: 'x', story: 'y' })) && /귀인|캐릭터/.test(S.storyDirective(d0)), '연출(episode)과 풀이(reading) 층이 분리된다고 지시');
   ok(/풀이 문체: 신중형/.test(RA.systemFor({ directive: S.directive(d0, 'cautious') })) && RA.systemFor(null) === RA.SYSTEM, '후속 답변도 문체 지시를 받음');
   ok(/풀이 문체: 단정형/.test(CP.systemFor({ directive: S.directive(d0, 'assertive') })) && CP.systemFor(null) === CP.SYSTEM, '편집기(compose)도 문체 지시를 받음');
@@ -143,7 +143,7 @@ const sdOf = (y, mo, d, g) => { const ch = M.compute({ year: y, month: mo, day: 
   // 무빙툰 API: 가짜 AI → 문체 적용 · layer 구분 · 확정 예언 거부
   const dayStem = sd.dayMaster, nat = JSON.stringify({ n: 1 });
   const goodText = '재물을 다루는 방식에서 가장 중요한 문제는 수입이 아니라 지출 구조입니다. 이 사주는 안정적인 월급보다 자기 역량을 발휘하는 환경에서 돈의 흐름이 커집니다.';
-  reply = () => JSON.stringify({ paragraphs: [{ id: 'p1', text: goodText, refs: ['natal', 'draft'] }, { id: 'p2', text: '귀인은 낡은 장부를 펼치며 한 줄씩 숫자를 맞추기 시작했다. 장터의 소란이 멀어졌다.', refs: ['draft'] }] });
+  reply = () => JSON.stringify({ paragraphs: [{ id: 'p1', text: goodText, refs: ['natal', 'draft'] }, { id: 'p2', text: '가정의 장면입니다. 장부를 펼쳐 기록을 맞추는 동안 놓쳤던 지출 항목을 확인할 수 있습니다.', refs: ['draft'] }] });
   seen.length = 0;
   r = await callApi('api/movingtoon-reading.js', 'movingtoon-reading', { sd, chapter: { id: 'wealth', title: '재물운', paragraphs: ps }, outline: [] }, false);
   ok(r.s === 200 && r.d.ok, '무빙툰 본문 생성 응답 ' + (r.d.error || ''));

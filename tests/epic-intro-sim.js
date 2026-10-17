@@ -10,7 +10,7 @@ const now = Date.UTC(2026, 9, 6), show = process.argv.includes('--show');
 const mk = (y, m, d, h, g) => M.compute({ year: y, month: m, day: d, hour: h, minute: h == null ? 0 : 20, calendar: 'solar', leap: false, gender: g, lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' });
 const birthOf = ch => ({ y: ch.solar.y, m: ch.solar.m, d: ch.solar.d, hour: ch.hourKnown ? ch.solar.h : null, minute: ch.hourKnown ? ch.solar.mi : 0, hourKnown: !!ch.hourKnown, place: '서울' });
 const texts = sc => sc.map(s => (s.cinema.segments || []).map(g => g.text).join(' ') + ' ' + (s.sub || '')).join(' ');
-const PUNCH_TEXT = ['하늘은 평소와 다름없이', '본인조차', '생년월일시를 입력했다', '한 사람의 수많은 고민', '십 년이다', '수많은 선택을 지나'];
+const PUNCH_TEXT = ['하늘은 평소와 다름없이', '본인조차', '생년월일시를 입력하셨습니다', '한 사람의 수많은 고민', '십 년입니다', '수많은 선택을 지나'];
 
 console.log('1. 시각 표기');
 [[1, 20, '새벽 1시 20분'], [0, 0, '자정'], [14, 30, '오후 2시 30분'], [13, 0, '오후 1시'], [12, 0, '낮 12시'], [23, 5, '밤 11시 5분'], [7, 0, '아침 7시']].forEach(([h, m, disp]) => { const t = K.timeWords(h, m); ok(t && t.disp === disp, `timeWords ${h}:${m} → ${JSON.stringify(t)}`); });
@@ -50,7 +50,7 @@ for (const [y, m, d, h, g] of cases) {
     const cnt = PUNCH_TEXT.filter(p => tx.includes(p)).length;
     ok(humor === 'PARODY' ? cnt <= 2 : cnt === 0, `${tag} 펀치라인 수 ${cnt}`); if (humor === 'PARODY') { punchRuns++; if (cnt === 0) punchDropped++; }
     // 핵심 대사는 어떤 설정에서도 나온다
-    const must = ['때는.', '바로 이날 태어났다.', '그 이름.', '언제 풀리는가.']; ok(must.every(m => sc.some(s => s.cinema.segments.some(x => x.text === m))) && /훗날 자신의 운을 확인하기 위해 생년월일시를 입력할 한 (사내가|여인이|사람이)—/.test(sc.find(s => s.sceneId === 'ep_04').cinema.segments.map(x => x.text).join(' ')), `${tag} 핵심 대사 누락`);
+    const must = ['때는.', '바로 이날 태어났습니다.', '그 이름.', '언제 풀리는지 궁금하실 수 있습니다.']; ok(must.every(m => sc.some(s => s.cinema.segments.map(x => x.text).join(' ').replace(/\s/g,'').includes(m.replace(/\s/g,'')))) && /훗날 자신의 운을 확인하기 위해 생년월일시를 입력할 한 (사내가|여인이|사람이)—/.test(sc.find(s => s.sceneId === 'ep_04').cinema.segments.map(x => x.text).join(' ')), `${tag} 핵심 대사 누락`);
     // 낮은 레벨은 북 신호가 적다
     const drums = sc.reduce((a, s) => a + s.cinema.segments.filter(x => /^drum$/i.test(x.cue || '')).length, 0); if (L === 1) ok(drums === 0, `${tag} L1 에는 일반 북 신호 없음`);
     if (show && y === 1992 && humor === 'PARODY' && L === 5 && nm) { console.log('\n── ' + tag + ' · ' + ms + 'ms'); sc.forEach(s => console.log(`[${s.sceneId}] ` + s.cinema.segments.map(x => (x.cue ? '(' + x.cue + ')' : '') + x.text.replace(/\n/g, '/')  + '~' + x.hold).join(' | '))); }

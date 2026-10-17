@@ -9,6 +9,7 @@
 import { json, isAdmin, configError } from '../_lib.js';
 import { kvOf } from '../_store.js';
 import * as S from '../_style.js';
+import { inspectWriting } from '../_ux-writing.js';
 import { loadStyle, loadHist, saveStyle, styleFor } from '../_stylestore.js';
 import * as IK from '../_ik.js';
 import { loadAll, meta, scrub, llm, blockedDocs } from '../_ikstore.js';
@@ -17,7 +18,7 @@ export async function onRequest({ request, env }) {
   const url = new URL(request.url), a = url.searchParams.get('a') || '', post = request.method === 'POST';
   if (a === 'active' && !post) {
     const kv = kvOf(env, { cache: true }), cur = await loadStyle(kv), c = cur.config;
-    return json({ ok: true, ver: cur.ver, defaultStyle: c.defaultStyle, chapters: c.chapters, address: c.story.address, styleVersion: S.STYLE_VERSION });
+    return json({ ok: true, ver: cur.ver, defaultStyle: c.defaultStyle, chapters: c.chapters, writing: c.writing, address: c.story.address, styleVersion: S.STYLE_VERSION });
   }
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
@@ -60,18 +61,30 @@ async function preview(env, kv, b) {
     const factsHash = S.sig(IK.stable({ facts: pkg.facts, sections: pkg.order.map(id => [id, pkg.sections[id].status, pkg.sections[id].items.map(i => i.id)]) }));
     const plain = IK.composePlain(pkg, rl), out = {}; let provider = null, aiError = null;
     const wantAi = b.compose !== 'plain';
-    for (const id of styles) {
+    const variants = b.comparison ? [{key:"general",id:"cautious",level:2,name:"B. 개선된 일반 풀이"},{key:"level3",id:"direct",level:3,name:"C. 팩폭 3단계"},{key:"level4",id:"direct",level:4,name:"D. 팩폭 4단계"}] : styles.map(id=>({key:id,id,name:S.STYLE_KO[id]}));
+    for (const variant of variants) {
+      const { id } = variant;
       const st = styleFor(loaded, [id === loaded.config.defaultStyle ? null : null], { structure: true, soft: IK.hasSoft(pkg) }); // 문체는 미리보기에서 강제로 지정
-      const forced = styleFor({ ver: loaded.ver, config: { ...cfg, defaultStyle: id, chapters: {} } }, [], { structure: true, soft: IK.hasSoft(pkg) });
+      const forced = styleFor({ ver: loaded.ver, config: { ...cfg, defaultStyle: id, chapters: {}, writing: {...cfg.writing,directness:variant.level || cfg.writing.directness,chapterDirectness:{}} } }, [], { structure: true, soft: IK.hasSoft(pkg) });
       let composed = null, text = null;
       if (wantAi) {
         try { const r = await llm(env, IK.composerSystem(rl, b.domain, forced), IK.composerUser(pkg), 6000, 60000); composed = IK.sanitizeComposed(r.text, pkg); provider = r.provider; if (!composed) aiError = 'AI 답이 형식에 맞지 않습니다'; }
         catch (e) { aiError = e.message; }
       }
       if (composed) text = Object.values(composed).flat().map(p => p.text);
-      out[id] = { style: id, name: S.STYLE_KO[id], directive: forced.directive, composed, check: text ? S.styleCheck(text, id, cfg) : null, sig: forced.sig };
+      const paragraphs=composed ? Object.entries(composed).flatMap(([section,ps])=>ps.map((p,i)=>({...p,id:section+':'+i}))) : [];
+      const writingCheck=paragraphs.length ? inspectWriting(paragraphs,forced.writing) : null;
+      const check=text ? S.styleCheck(text,id,cfg) : null;
+      if (check && writingCheck) {
+        check.issues.push(...writingCheck.issues.map(x=>({level:x.severity,msg:x.id+' · '+x.code+' · '+x.excerpt})));
+        check.status=check.issues.some(x=>x.level==='FAIL')?'FAIL':check.issues.length?'WARNING':'PASS';
+      }
+      const seen=new Set();let duplicates=0;
+      paragraphs.forEach(p=>{const t=p.text.replace(/\s/g,'');if(seen.has(t))duplicates++;seen.add(t);});
+      out[variant.key] = { style: id, name: variant.name, directive: forced.directive, composed, check, writingCheck, metrics: {paragraphs:paragraphs.length,withRefs:paragraphs.filter(p=>p.refs?.length).length,duplicates,directness:forced.meta.directness}, sig: forced.sig };
       void st;
     }
+    if (b.comparison) out.legacy={style:"legacy",name:"A. 기존 원문",composed:plain,check:null,directive:"원본 DB 기반 합성. 새 문체 적용 전입니다."};
     return json({ ok: true, factsHash, versions: pkg.versions, knowledge: knowledgeBasis(pkg), insufficient: pkg.insufficient, soft: IK.softSections(pkg), confidence: pkg.confidence, plain, styles: out, provider, aiError, sectionTitles: Object.fromEntries(pkg.order.map(id => [id, pkg.sections[id].title])) });
   } catch (e) { return json({ error: e.message || '실패' }, 400); }
 }

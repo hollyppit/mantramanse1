@@ -91,7 +91,7 @@
       var ctl = root.AbortController ? new root.AbortController() : null, timer = root.setTimeout(function () { if (ctl) ctl.abort(); }, 85000);
       if (ctl) session.controllers.push(ctl);
       try {
-        var r = await root.fetch('/api/movingtoon-reading', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ realityContext:R.Editorial?R.Editorial.cleanContext(rep.realityContext):{}, guide: guide, sd: safe, outline: outline, chapter: job.chapter, previous: Array.from(acceptedTexts.entries()).slice(-80).map(function(x){return {text:name?x[0].split(name).join('본인'):x[0],chapter:x[1]};}) }), signal: ctl && ctl.signal });
+        var r = await root.fetch('/api/movingtoon-reading', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ realityContext:R.Editorial?R.Editorial.cleanContext(rep.realityContext):{}, guide: guide, directnessConsent: root.document && root.document.getElementById("directnessConsent") && root.document.getElementById("directnessConsent").checked ? 5 : null, sd: safe, outline: outline, chapter: job.chapter, previous: Array.from(acceptedTexts.entries()).slice(-80).map(function(x){return {text:name?x[0].split(name).join('본인'):x[0],chapter:x[1]};}) }), signal: ctl && ctl.signal });
         var d;try {d=await r.json();}catch(e){defer(item,null,'server-response-invalid');return;}
         if(session.cancelled)return;
         if(d && ['no-ai','rate-limited','cost-limit'].indexOf(d.error)>=0)unavailable={error:d.error};
@@ -99,6 +99,8 @@
           item.c.readingDeferred=false;item.c.readingNotice='';item.c.readingFailure=null;item.c.readingWarning=null;
           item.c.readingProvider=d.provider;item.c.chapterHook=d.hook || null;item.c.chapterQuality=d.chapterQuality || null;item.c.hookName=name || '귀인';
           item.c.interpretationAnalysis=d.interpretation || null;
+          item.c.writingQuality=d.writingQuality || null;
+          if(R.ReadingFlow && R.ReadingFlow.evidenceScene){var evidence=R.ReadingFlow.evidenceScene(item.c);item.c.scenes=item.c.scenes.filter(function(s){return s.sceneId!==item.c.id+'_ux_sources';});if(evidence)item.c.scenes.push(evidence);}
           item.c.readingParagraphs=d.result.paragraphs.map(function(p){var original=job.chapter.paragraphs.find(function(x){return x.id===p.id;});return Object.assign({},p,{role:original && original.role || ''});});
           item.c.readingFullText=d.result.paragraphs.map(function(p){return p.text;}).join('\n\n');
           item.c.readingEvidence=d.result.paragraphs.map(function(p){return {id:p.id,refs:p.refs,claim_ids:p.claim_ids || []};});

@@ -59,7 +59,7 @@ console.log('4. 잠재력 문장');
   const c = M.compute({ year: b[0], month: b[1], day: b[2], hour: b[3], minute: 0, calendar: 'solar', gender: b[4], lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' });
   const line = St.potentialLine(c), pot = St.potential(c);
   console.log('   ' + b.join('-') + ' ' + M.gzNameK(c.pillars.day) + ' → ' + line);
-  ok(pot && St.POTENTIAL[pot.group] === pot.name && line.includes("'" + pot.name + "'") && line.includes(pot.group + ' 기운 ' + pot.n + '%') && line.includes('평균의 ' + pot.times + '배'), '잠재력 문장 형식 ' + b);
+  ok(pot && St.POTENTIAL[pot.group] === pot.name && line.includes("'" + pot.name + "'") && !/%|평균의/.test(line) && line.includes('경험을 돌아보며'), '잠재력 문장 형식 ' + b);
   ok(Math.abs(pot.times - pot.pct / 20) < 0.06, '배수 계산');
 });
 ok(St.potentialLine(M.compute({ year: 1990, month: 5, day: 17, hour: 14, minute: 0, calendar: 'solar', gender: 'M', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' }), '{group}={potential}/{n}/{times}').split('/').length === 3, '문장 틀 치환(관리자 수정)');

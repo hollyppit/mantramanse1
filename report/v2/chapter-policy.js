@@ -1,6 +1,6 @@
 (function(root){
   'use strict';
-  var COMMON_STYLE='핵심 판단 → 근거 → 유리한 조건 → 불리한 조건 → 가능한 생활 사례 → 대응 전략. 추상적인 칭찬을 쓰지 않고 전통 해석을 검증된 미래 예측처럼 표현하지 않는다.';
+  var COMMON_STYLE='핵심 결론 → 가능한 생활 사례 → 불편한 행동과 손해 → 유리·불리한 조건 → 대응 전략 → 별도 근거. 추상적인 칭찬을 쓰지 않고 전통 해석을 검증된 미래 예측처럼 표현하지 않는다.';
   var DATA={
     self:{title:'본래의 나',hanja:'本然之我',domains:['SELF','RELATIONSHIP'],purpose:'기질과 행동 패턴의 상세 설명을 이 챕터에서 완결한다.',required:['일간·일주','오행 강약','신강약·통근','십성 구조','장점·단점·모순','대인관계 반복 패턴','강점 활용·약점 보완'],excluded:['재물·혼인·취업의 확정 예고'],temperamentRatio:1},
     wealth:{title:'재물운',hanja:'財物運',domains:['MONEY'],purpose:'돈을 버는 구조와 남기는 구조를 구분하고 수익·지출·손실 조건에 답한다.',required:['재성 유무·강약·위치','식상생재·비겁과 재성','근로·사업·투자소득','수입 증가 조건','축적·지출·손실','대운·세운의 돈 관련 조건','돈 관리·수익화 전략'],excluded:['일간·일주 일반 소개','기질 장단점 나열','수익률·부자 되는 연도 확정'],temperamentRatio:0.05},
@@ -12,7 +12,7 @@
     creative:{title:'기억 너머의 문',hanja:'想像之門',domains:['SELF'],purpose:'실제 계산 상징을 사용하는 창작 이야기이며 사실을 밝히는 기능이 아님을 표시한다.',required:['창작 콘텐츠라는 명시','계산된 상징과 연결','개인의 선택이 있는 장면'],excluded:['실제 전생·역사 인물과의 동일성 단정','실제 미래 사건 예언'],temperamentRatio:0.2},
     remedy:{title:'개운법',hanja:'開運法',domains:['ACTION'],purpose:'앞서 검증된 판단을 개인의 실행 계획으로 연결한다.',required:['앞선 분석의 종합','운동·학습·직업 역량','습관·환경 개선','상징적 전통법과 현실 행동 구분','시작·점검·중단 기준'],excluded:['일반 성격 재소개','색·물건으로 운 변경 보장'],temperamentRatio:0}
   };
-  Object.keys(DATA).forEach(function(k){Object.assign(DATA[k],{style:COMMON_STYLE,maxParagraphChars:600,prompt:'',hook:{enabled:['wealth','love','career'].indexOf(k)>=0,style:'짧고 직설적인 조건부 핵심 진단. 장점과 취약점 모두 허용.',maxChars:100,explanationSentences:3,explanationMaxChars:420}});});
+  Object.keys(DATA).forEach(function(k){Object.assign(DATA[k],{style:COMMON_STYLE,maxParagraphChars:320,prompt:'',hook:{enabled:['wealth','love','career'].indexOf(k)>=0,style:'짧고 직설적인 조건부 핵심 진단. 장점과 취약점 모두 허용.',maxChars:100,explanationSentences:3,explanationMaxChars:420}});});
   var IDS={relationships:['c11','c12','c13','deep_children','life_ik_RELATIONSHIP'],health:['deep_health'],creative:['c14','deep_past'],self:['deep_car','c-char','c00','c01','c02','c03','c04','c05','deep_proscons','reading_transform','life_ik_SELF'],wealth:['c08','deep_wealth','life_ik_MONEY'],love:['c09','c10','deep_love','deep_marriage','deep_spouse','life_ik_LOVE','life_ik_MARRIAGE'],career:['c06','c07','deep_jobs','life_ik_CAREER'],timing:['c15','c16','c17','c18','deep_daewoon','deep_seun','deep_wolun','life_prologue','life_future','life_ik_TIMING'],remedy:['c19','c20','deep_places','deep_remedy','life_action','life_actions','life_ik_ACTION']};
   function clone(x){return JSON.parse(JSON.stringify(x));}
   function kind(c){

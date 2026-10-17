@@ -6,8 +6,8 @@
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
   var ACTS = [
-    { id: 1, roman: 'ACT 01', title: '각성', line: '나의 기운이 깨어나다' },
-    { id: 2, roman: 'ACT 02', title: '해독', line: '나는 어떤 사람인가' },
+    { id: 1, roman: 'ACT 01', title: '각성', line: "나의 기운이 깨어납니다" },
+    { id: 2, roman: 'ACT 02', title: '해독', line: "저는 어떤 사람일까요?" },
     { id: 3, roman: 'ACT 03', title: '운명 지도', line: '내 인생의 흐름' },
     { id: 4, roman: 'ACT 04', title: '선택', line: '내 인생의 주요 질문' },
     { id: 5, roman: 'ACT 05', title: '여정', line: '앞으로의 나침반' },

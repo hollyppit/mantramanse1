@@ -40,34 +40,34 @@
     { id: 'money', name: '돈', hook: '언제 돈이 풀리고\n어떻게 벌어야 할까?', icon: '財' },
     { id: 'career', name: '일과 성공', hook: '나는 어떤 일로\n성공하기 쉬울까?', icon: '業' },
     { id: 'love', name: '연애', hook: '언제 좋은 인연을\n만날 가능성이 커질까?', icon: '緣' },
-    { id: 'marriage', name: '결혼', hook: '어떤 사람과\n오래 갈 가능성이 높을까?', icon: '合' },
+    { id: 'marriage', name: '결혼', hook: "어떤 사람과\n오래 갈 가능성이 높을까요?", icon: '合' },
     { id: 'future', name: '미래', hook: '앞으로 내 인생은\n어떻게 흘러갈까?', icon: '運' },
     { id: 'relation', name: '인간관계', hook: '왜 어떤 사람은 편하고\n어떤 사람은 힘들까?', icon: '人' },
-    { id: 'self', name: '나 자신', hook: '나는 어떤 사람이고\n무엇을 타고났을까?', icon: '命' },
+    { id: 'self', name: '나 자신', hook: "저는 어떤 사람이고\n무엇을 타고났을까요?", icon: '命' },
   ];
   function M(id, cat, q, title, sub, chapters, extra) { var o = { id: id, category: cat, question: q, title: title, sub: sub, chapters: chapters || [], gen: null, when: false, requiredData: [], premium: true, priority: 5, relatedModules: [] }; for (var k in (extra || {})) o[k] = extra[k]; return o; }
   var MODULES = [
     // 돈
-    M('money_nature', 'money', '나는 돈복이 있는 사람일까? 어떻게 돈을 버는 사람일까?', '나는 어떻게 돈을 버는 사람일까?', '재성 · 식상 · 운 흐름 분석', ['c08'], { premium: false, priority: 1, requiredData: ['groups', 'strength'], relatedModules: ['career_style', 'money_timing'] }),
-    M('money_style', 'money', '직장 / 프리랜서 / 사업 중 어떤 방식과 잘 맞을까?', '직장·프리랜서·사업, 어디서 힘이 날까?', '신강약 · 관성 · 식상', ['c06'], { priority: 3, relatedModules: ['career_style'] }),
+    M('money_nature', 'money', "저는 돈복이 있는 사람일까요? 어떻게 돈을 벌고 있을까요?", "저는 어떻게 돈을 버는 사람일까요?", '재성 · 식상 · 운 흐름 분석', ['c08'], { premium: false, priority: 1, requiredData: ['groups', 'strength'], relatedModules: ['career_style', 'money_timing'] }),
+    M('money_style', 'money', "직장, 프리랜서, 사업 중 어떤 방식이 더 잘 맞으실까요?", '직장·프리랜서·사업, 어디서 힘이 날까?', '신강약 · 관성 · 식상', ['c06'], { priority: 3, relatedModules: ['career_style'] }),
     M('money_timing', 'money', '내 인생에서 돈의 움직임이 커지는 시기는?', '돈의 움직임이 커지는 때', '재정 활동성(대운·세운)', [], { gen: 'timing:money', when: true, requiredData: ['daeun', 'seun', 'domain.wealth'], priority: 2 }),
-    M('money_leak', 'money', '돈이 들어와도 왜 안 모일까? 반복하기 쉬운 실수는?', '돈이 새는 자리', '약한 십성 · 그림자', ['c05'], { priority: 4, status: 'merged', note: '독립 챕터 없음 — c05(약점)와 c08 안의 topics(새는 돈)를 재사용. 전용 모듈은 관리자 "해석 모듈"에서 추가' }),
+    M('money_leak', 'money', "돈이 들어와도 왜 안 모일까요? 반복하기 쉬운 실수는 무엇일까요?", '돈이 새는 자리', '약한 십성 · 그림자', ['c05'], { priority: 4, status: 'merged', note: '독립 챕터 없음 — c05(약점)와 c08 안의 topics(새는 돈)를 재사용. 전용 모듈은 관리자 "해석 모듈"에서 추가' }),
     // 일·성공
-    M('career_style', 'career', '나는 어떤 방식으로 일하는 사람인가? 어떤 직업군과 궁합이 좋은가?', '나는 어떤 방식으로 일하는 사람일까?', '직업 적성 · 십성군', ['c06'], { premium: false, priority: 1, requiredData: ['career', 'groups'] }),
+    M('career_style', 'career', "저는 어떤 방식으로 일하는 사람인가요? 어떤 직업군과 궁합이 좋은 편일까요?", "저는 어떤 방식으로 일하는 사람일까요?", '직업 적성 · 십성군', ['c06'], { premium: false, priority: 1, requiredData: ['career', 'groups'] }),
     M('career_success', 'career', '나에게 맞는 성공 방식은?', '나에게 맞는 성공 방식', '억부 · 용신', ['c07'], { priority: 2 }),
     M('career_talent', 'career', '남들보다 쉽게 잘하는 것은?', '남들보다 쉽게 잘하는 것', '십성 · 통근', ['c04'], { priority: 3 }),
     M('career_timing', 'career', '직업 변화가 커질 수 있는 시기는?', '일의 움직임이 커지는 때', '직업 활성도(대운·세운)', [], { gen: 'timing:career', when: true, requiredData: ['daeun', 'seun', 'career'], priority: 4 }),
     // 연애
-    M('love_style', 'love', '나는 사랑할 때 어떤 사람인가? 어떤 사람에게 끌리는가?', '나는 사랑할 때 어떤 사람일까?', '연애 성향 · 일지 12운성', ['c09'], { premium: false, priority: 1 }),
+    M('love_style', 'love', "저는 사랑할 때 어떤 사람인가요? 어떤 사람에게 끌리나요?", "저는 사랑할 때 어떤 사람일까요?", '연애 성향 · 일지 12운성', ['c09'], { premium: false, priority: 1 }),
     M('love_match', 'love', '끌리는 사람과 잘 맞는 사람은 같은가?', '끌리는 사람, 맞는 사람', '궁합 · 일주 상성', ['c12'], { priority: 3 }),
     M('love_timing', 'love', '인연의 움직임이 커질 수 있는 시기는?', '인연의 움직임이 커지는 때', '관계 활성도(대운·세운)', [], { gen: 'timing:love', when: true, requiredData: ['daeun', 'seun', 'domain.love'], priority: 2 }),
     // 결혼
-    M('marriage_who', 'marriage', '어떤 배우자와 비교적 잘 맞는가? 갈등이 생기기 쉬운 부분은?', '오래 가는 관계에서 바라는 것', '배우자궁 · 합충', ['c10'], { premium: false, priority: 1 }),
+    M('marriage_who', 'marriage', "어떤 배우자와 비교적 잘 맞으실까요? 갈등이 생기기 쉬운 부분은 무엇일까요?", '오래 가는 관계에서 바라는 것', '배우자궁 · 합충', ['c10'], { premium: false, priority: 1 }),
     M('marriage_timing', 'marriage', '인연/결혼 관련 움직임이 커질 수 있는 시기는?', '인연과 결혼 이야기가 커지는 때', '배우자성·배우자궁의 흐름', [], { gen: 'social:marriage', when: true, requiredData: ['daeun', 'seun', 'luckRelations'], priority: 2, ai: true, note: '배우자성과 일지의 합충으로 변화 가능성을 살펴봅니다. 결혼 시기나 사건을 확정하지 않습니다.' }),
     M('relation_timing', 'relation', '인간관계의 변화가 커지는 시기는?', '사람 사이의 변화가 커지는 때', '비겁·관성·인성과 합충의 흐름', [], { gen: 'social:relation', when: true, requiredData: ['daeun', 'seun', 'luckRelations'], priority: 3, ai: true }),
     // 미래
     M('future_cycle', 'future', '인생 전체의 계절은?', '인생 전체의 계절', '대운 10개', ['c15'], { priority: 1 }),
-    M('future_now', 'future', '지금 나는 어느 계절인가?', '지금 서 있는 계절', '현재 대운', ['c16'], { premium: false, priority: 1 }),
+    M('future_now', 'future', "지금 저는 어느 계절에 해당할까요?", '지금 서 있는 계절', '현재 대운', ['c16'], { premium: false, priority: 1 }),
     M('future_3_5_10', 'future', '앞으로 3년 · 5년 · 10년은?', '앞으로 10년의 구간', '세운 10개', [], { gen: 'future', when: true, requiredData: ['seun'], priority: 2 }),
     M('future_year', 'future', '올해 흐름은?', '올해의 흐름', '세운', ['c17'], { priority: 3 }),
     M('future_months', 'future', '앞으로 12개월 중 움직임이 커지는 달은?', '앞으로 12개월', '월운', ['c18'], { priority: 4 }),
@@ -76,9 +76,9 @@
     M('relation_match', 'relation', '나와 잘 맞는 사람은?', '나와 잘 맞는 사람', '일주 궁합', ['c12'], { priority: 2 }),
     M('relation_family', 'relation', '가족과 내 뿌리는?', '내가 자라온 자리', '년주 · 월주', ['c13'], { priority: 3 }),
     // 나 자신
-    M('self_who', 'self', '나는 어떤 사람인가? 왜 이렇게 판단하는가?', '나는 왜 이렇게 행동할까?', '경오일주 형식의 일주 · 일간', ['c01', 'c03'], { premium: false, priority: 1 }),
+    M('self_who', 'self', "저는 어떤 사람일까요? 왜 그렇게 판단하실까요?", '나는 왜 이렇게 행동할까?', '경오일주 형식의 일주 · 일간', ['c01', 'c03'], { premium: false, priority: 1 }),
     M('self_force', 'self', '내 안에서 가장 강한 힘은?', '내 안에서 가장 강한 힘', '오행 분석', ['c02'], { priority: 2 }),
-    M('self_shadow', 'self', '스트레스를 받으면 어떻게 변하는가? 나도 모르게 반복하는 실수는?', '스트레스 받으면 나오는 모습', '약점 · 그림자', ['c05'], { priority: 3 }),
+    M('self_shadow', 'self', "스트레스를 받으면 어떻게 변하시는지요? 나도 모르게 반복하시는 실수는 무엇인지요?", '스트레스 받으면 나오는 모습', '약점 · 그림자', ['c05'], { priority: 3 }),
     M('self_talent', 'self', '남들보다 쉽게 잘하는 것은?', '남들보다 쉽게 잘하는 것', '십성 · 통근', ['c04'], { priority: 4 }),
     M('self_root', 'self', '오래된 뿌리(상징 콘텐츠)', '오래된 뿌리', '상징 스토리', ['c14'], { priority: 9 }),
     // 공통 마무리

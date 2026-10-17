@@ -33,12 +33,12 @@ ok(!/지수/.test(pay), 'AI 페이로드에 실제 이름이 없다');
 ok(JSON.stringify(R.Compose.aiPayload(repN)) === JSON.stringify(R.Compose.aiPayload(repX)), '이름과 무관하게 같은 페이로드(캐시 키 동일)');
 ok(!/지수/.test(JSON.stringify(repN.meta.key)) && repN.meta.key === repX.meta.key, 'meta.key 가 이름에 의존하지 않는다');
 const c1 = repN.chapters[1], idc = c1.id, tplHead = (c1.tpl || {}).headline || c1.headline;
-const goodAi = { chapters: [{ id: idc, headline: '{hero은는} 오래 마음에 담아 둔 사람이다', lead: '{hero이가} 먼저 입을 열지 못했던 이유가 있었다.' }] };
+const goodAi = { chapters: [{ id: idc, headline: '{hero은는} 오래 마음에 담아 두는 편입니다', lead: '{hero이가} 먼저 말하기 어렵다면 이유를 함께 살펴보세요.' }] };
 const r1 = R.Compose.build(sdM, lib, cfg, { name: '지수' }); R.Compose.applyAi(r1, goodAi);
-ok(r1.chapters[1].headline === '지수는 오래 마음에 담아 둔 사람이다' && r1.chapters[1].interpretation === '지수가 먼저 입을 열지 못했던 이유가 있었다.', '응답의 {hero…} 를 로컬에서 치환');
+ok(r1.chapters[1].headline === '지수는 오래 마음에 담아 두는 편입니다' && r1.chapters[1].interpretation === '지수가 먼저 말하기 어렵다면 이유를 함께 살펴보세요.', '응답의 {hero…} 를 로컬에서 치환');
 const r1b = R.Compose.build(sdM, lib, cfg); R.Compose.applyAi(r1b, goodAi);
-ok(r1b.chapters[1].headline === '그는 오래 마음에 담아 둔 사람이다', '이름 없으면 그는');
-for (const [label, bad] of [['당신', { headline: '당신은 오래 마음에 담아 둔 사람입니다', lead: '좋은 흐름이다.' }], ['해요체', { headline: '{hero은는} 조용한 사람입니다', lead: '표현을 어려워해요.' }], ['~하세요', { headline: '{hero은는} 조용한 사람이다', lead: '오늘은 쉬어 가세요.' }], ['엉뚱한 자리표시자', { headline: '{name}은 조용한 사람이다', lead: '좋은 흐름이다.' }]]) {
+ok(r1b.chapters[1].headline === '그는 오래 마음에 담아 두는 편입니다', '이름 없으면 그는');
+for (const [label, bad] of [['당신', { headline: '당신은 오래 마음에 담아 둔 사람입니다', lead: '좋은 흐름이다.' }], ['해요체', { headline: '{hero은는} 조용한 사람입니다', lead: '표현을 어려워해요.' }], ['반말', { headline: '{hero은는} 조용한 사람이다', lead: '오늘은 쉬어 가세요.' }], ['엉뚱한 자리표시자', { headline: '{name}은 조용한 사람이다', lead: '좋은 흐름이다.' }]]) {
   const r = R.Compose.build(sdM, lib, cfg, { name: '지수' }), before = r.chapters[1].headline + '|' + r.chapters[1].interpretation; R.Compose.applyAi(r, { chapters: [Object.assign({ id: idc }, bad)] });
   ok(r.chapters[1].headline + '|' + r.chapters[1].interpretation === before, label + ' 포함 응답은 template 유지');
 }

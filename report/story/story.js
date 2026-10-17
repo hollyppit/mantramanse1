@@ -59,7 +59,7 @@
   // ───────── 주인공의 가장 큰 동력: 우세 십성군 → 이름 (매핑만, AI 없음) ─────────
   var GROUPS5 = ['비겁', '식상', '재성', '관성', '인성'];
   var POTENTIAL = { 비겁: '스스로 길을 여는 힘', 식상: '생각을 형태로 만드는 힘', 재성: '기회를 알아보는 힘', 관성: '사람들이 믿고 따르게 만드는 힘', 인성: '깊이 이해하고 꿰뚫는 힘' };
-  var POTENTIAL_LINE = "이 이야기의 주인공을 움직이는 가장 큰 동력은 '{potential}'이다. {group} 기운 {n}%, 평균의 {times}배다.";
+  var POTENTIAL_LINE = "이 이야기에서는 '{potential}'을 주요 동력으로 살펴봅니다. 실제 행동과 얼마나 맞는지는 경험을 돌아보며 확인해보세요.";
   var EL_COLORS = ['#5E9E78', '#D0634A', '#BC9C62', '#AEB9C6', '#4A7AB5'];
   function potential(ch) { // 엔진이 이미 계산한 십성군 비중(ch.weights.groups, 일간 기준 비겁·식상·재성·관성·인성)만 읽는다
     var g = ch && ch.weights && ch.weights.groups; if (!g || g.length < 5) return null;

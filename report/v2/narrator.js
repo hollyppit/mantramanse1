@@ -40,7 +40,7 @@
   var NARR_BAD = /당신|니다(?=[.!?…\s"'”’)]|$)|세요/;
   function isNarrative(text) { return !NARR_BAD.test(String(text || '')); }
   // 풀이 본문은 차분한 상담체(~습니다). 시네마의 짧은 서술체 검사는 isNarrative로 유지한다.
-  var READING_BAD = /당신|(?:이에요|예요|해요|있어요|없어요|거든요|잖아요|볼게요|세요)(?=[.!?…\s"'”’)]|$)/;
+  var READING_BAD = /당신|(?:이에요|예요|해요|있어요|없어요|거든요|잖아요|볼게요)(?=[.!?…\s"'”’)]|$)|[가-힣]+(?<!니)다[.!?。](?=\s|$)|(?:이다|한다|된다|있다|없다)$/;
   function isReading(text) { return !READING_BAD.test(String(text || '')); }
   // 허용되는 자리표시자만 남았는지(AI 가 {hero} 를 지어내거나 깨뜨리지 않았는지)
   function placeholdersOk(text) {

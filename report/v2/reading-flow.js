@@ -132,7 +132,7 @@
     if(sd.reviewConditions && sd.reviewConditions.methodDifference)base.evidence+=' 억부와 조후 후보가 다르므로 각각의 목적과 적용 조건을 확인합니다.';
     return base;
   }
-  function scenes(c, id) { return FIELDS.map(function(f,n){ return { sceneId:id+'_guide_'+n, sceneType:'life', bg:'black', layout:'DATA', readingRole:f[0], readingLayer:f[2], html:'<section class="scene rv rd-prose" data-sc="'+esc(id+'_guide_'+n)+'"><div class="cap">'+esc(f[1])+' · '+({fact:'계산 모델의 출력',interpretation:'조건부 풀이',advice:'현실 실천 제안',model:'근거와 예외'}[f[2]])+'</div><p class="lead" data-reading-role="'+f[0]+'">'+esc(c[f[0]])+'</p></section>' }; }); }
+  function scenes(c, id) { return FIELDS.map(function(f,n){ return { sceneId:id+'_guide_'+n, sceneType:'life', bg:'black', layout:'DATA', readingRole:f[0], readingLayer:f[2], html:'<section class="scene rv rd-prose" data-sc="'+esc(id+'_guide_'+n)+'">'+(['why','evidence'].indexOf(f[0])>=0?'<details class="reading-evidence"><summary>왜 이런 풀이가 나왔나요?</summary>':'')+'<div class="cap">'+esc(f[1])+' · '+({fact:'계산 모델의 출력',interpretation:'조건부 풀이',advice:'현실 실천 제안',model:'근거와 예외'}[f[2]])+'</div><p class="lead" data-reading-role="'+f[0]+'">'+esc(c[f[0]])+'</p>'+(['why','evidence'].indexOf(f[0])>=0?'</details>':'')+'</section>' }; }); }
   function build(rep, sd, H) {
     if(rep.readingFlow || rep.project && rep.project.id && rep.project.id !== 'full') return rep;
     var original=rep.chapters || [], buckets=TITLES.map(function(){return [];});
@@ -164,5 +164,13 @@
     (rep.chapters || []).forEach(function(c){if(!c.readingCore)return; FIELDS.forEach(function(f){var t=c.readingCore[f[0]];if(typeof t!=='string'||!t.trim())missing.push({id:c.id,field:f[0]});if(typeof t==='string' && f[0]!=='evidence' && f[0]!=='why'){var k=t.replace(/\s+/g,'');if(seen[k])duplicates.push({id:c.id,field:f[0],other:seen[k]});else seen[k]=c.id;}});});
     return {sections:rep.readingFlow ? rep.readingFlow.sections.length : 0,missing:missing,duplicates:duplicates};
   }
-  R.ReadingFlow={scenes:scenes,TITLES:TITLES,FIELDS:FIELDS,MAP:MAP,card:card,build:build,audit:audit,sectionOf:sectionOf};
+  function evidenceScene(chapter) {
+    var claims=(chapter.interpretationAnalysis || {}).claims || [];
+    var body=claims.map(function(c){
+      return '<article><h4>'+esc(c.judgment)+'</h4><p>'+esc((c.elements || []).map(function(x){return x.key+' '+JSON.stringify(x.value);}).join(' · '))+'</p><p>'+esc((c.traditional_rules || []).map(function(x){return x.principle;}).join(' · '))+'</p><p>'+esc((c.evidence || []).map(function(x){return (x.title || x.docId)+(x.pageStart?' '+x.pageStart+'쪽':'')+(x.heading?' · '+x.heading:'');}).join(' / '))+'</p><p>'+esc((c.uncertainty || {}).note || '전통 해석에 따른 가설이며 실제 경험과 다를 수 있습니다.')+'</p></article>';
+    }).join('');
+    if(!body)return null;
+    return {sceneId:chapter.id+'_ux_sources',sceneType:'life',readingLayer:'model',bg:'black',html:'<section class="scene rd-prose"><details class="reading-evidence"><summary>왜 이런 풀이가 나왔나요?</summary>'+body+'</details></section>'};
+  }
+  R.ReadingFlow={evidenceScene:evidenceScene,scenes:scenes,TITLES:TITLES,FIELDS:FIELDS,MAP:MAP,card:card,build:build,audit:audit,sectionOf:sectionOf};
 })(typeof window!=='undefined'?window:globalThis);

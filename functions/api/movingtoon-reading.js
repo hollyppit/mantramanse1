@@ -1,3 +1,4 @@
+import { inspectWriting, writingPlan, writingDirective } from '../_ux-writing.js';
 import {Editorial,loadEditorial,contractFor,selectCases,behaviorPlans} from '../_editorial.js';
 import { diagnosticRecord, saveDiagnostic } from '../_reading-diagnostics.js';
 import { writerSchema, reviewSchema, repairSchema } from '../_chapter-output-schema.js';
@@ -67,12 +68,14 @@ async function handleReading({ request, env }, context) {
     src = sources(items, clean.sd, blocked, clean.chapter);
     // Explicitly authorized writer payload: excludes names and raw birth dates.
     if (mode === 'grounded') src = { chart: analysis.normalized.chart, facts: analysis.normalized.saju, knowledge: analysis.claims.map(c => ({ id: c.knowledge_id, interpretation: c.judgment })), claims: analysis.claims, cross_analysis: analysis.cross_analysis };
-    storageStage='style';sty = styleFor(await loadStyle(kv), [clean.chapter.id, ...domainsFor(clean.chapter)], { soft: src.knowledge.length < 2 });
+    storageStage='style';sty = styleFor(await loadStyle(kv), [clean.chapter.id, ...domainsFor(clean.chapter)], { soft: src.knowledge.length < 2, consent: original.directnessConsent === 5 });
+    if (hook && !inspectWriting([{id:'hook',text:hook.text},{id:'explanation',text:hook.explanation}],{...sty.writing,paragraphChars:500}).ok) {hookDraft=hook;hook=null;}
     storageStage='cache';const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ editorialVersion:editorial.version,contract,examples,userContext,chapterVersion: CHAPTER_VERSION, previous, hook, hookDraft, version: VERSION, engine: ENGINE_VERSION, mode, settings, claims: analysis?.claims, db: version, style: sty.sig, clean, models: [env.OPENAI_MODEL, env.ANTHROPIC_MODEL] })));
     key = 'ai:movingtoon:' + [...new Uint8Array(hash)].map(x => x.toString(16).padStart(2, '0')).join('');
     if (kv) {
       const hit = await kv.get(key, 'json');
-      if (hit && (!hit.hook || analysis && validateHook(hit.hook,analysis,policy).ok) && sanitize(JSON.stringify(hit.result), clean, src, { deep: mode === 'grounded' }) && (mode !== 'grounded' || validateWritten(hit.result, analysis, clean).ok)) return json({ ok: true, ...hit, cached: true });
+      const cachedWriting = hit && inspectWriting(hit.result.paragraphs.map(p=>({...p,role:clean.chapter.paragraphs.find(x=>x.id===p.id)?.role})),sty.writing,{concept:/일간|일주/.test(clean.chapter.title),previous});
+      if (hit && cachedWriting.ok && (!hit.hook || analysis && validateHook(hit.hook,analysis,policy).ok) && sanitize(JSON.stringify(hit.result), clean, src, { deep: mode === 'grounded' }) && (mode !== 'grounded' || validateWritten(hit.result, analysis, clean).ok)) return json({ ok: true, ...hit, cached: true });
       const hour = new Date().toISOString().slice(0, 13), day = hour.slice(0, 10), ip = request.headers.get('cf-connecting-ip') || 'local';
       const hk = 'rl:movingtoon:' + ip + ':' + hour, dk = 'rl:movingtoon:day:' + day;
       const [h, d] = await Promise.all([kv.get(hk), kv.get(dk)]);
@@ -82,19 +85,17 @@ async function handleReading({ request, env }, context) {
   } catch { return json({ ok: false, error: 'storage-unavailable', storageStage, engineMode: mode }, 503); }
   const allowedNumbers=allowedOutputNumbers(clean,src);
   const verifiedTimingClaimIds=(analysis?.claims || []).filter(c=>c.elements.some(r=>/daewoon|seun|monthSeason|futureSeason/.test(r.key))).map(c=>c.claim_id);
-  const input = JSON.stringify({ ...src, behaviorPlans:behaviorPlans(analysis?.claims,examples), realityContext:Editorial.contextLabels(userContext),examples,chapterContract:contract, allowedNumbers, verifiedTimingClaimIds, chapter: clean.chapter, outline: clean.outline, chapterPolicy: policy, previous, hookDraft: hookDraft ? {text:hookDraft.text,explanation:hookDraft.explanation,claim_id:hookDraft.claim_id}:null, hook: hook ? { text: hook.text, explanation: hook.explanation, claim_id: hook.claim_id } : null });
+  const input = JSON.stringify({ ...(mode==='grounded'?writingPlan(analysis,clean):src), behaviorPlans:behaviorPlans(analysis?.claims,examples), realityContext:Editorial.contextLabels(userContext),examples,chapterContract:contract, allowedNumbers, verifiedTimingClaimIds, chapter: clean.chapter, outline: clean.outline, chapterPolicy: policy, previous, hookDraft: hookDraft ? {text:hookDraft.text,explanation:hookDraft.explanation,claim_id:hookDraft.claim_id}:null, hook: hook ? { text: hook.text, explanation: hook.explanation, claim_id: hook.claim_id } : null });
   let writerSystem = mode === 'grounded' ? WRITER_SYSTEM + '\n[표현 설정]\n' + (sty.directive || '') + '\n위 표현 설정은 판단·근거·불확실성을 변경하지 않는다.' : systemFor(sty);
   writerSystem += '\n'+Editorial.instruction(contract)+'\n[현실 정보 분리] realityContext는 사용자가 선택한 실제 상황이고 명리 근거가 아니다. 비어 있는 답변은 추정하지 않는다. examples는 검수된 가정 사례이며 사용자가 겪은 사실로 쓰지 않는다. 현실 답변은 사례·전략 선택에만 쓰고 원국·판단·계산은 변경하지 않는다.';
-  writerSystem += clean.guide === 'male'
-    ? '\n[안내자 말투 최우선] 운명 감찰관은 사용자 성별과 무관하게 반말로 안내한다. 일반 풀이와 후킹은 ~야/~해/~할 수 있어/~해봐의 자연스럽고 직설적인 해체를 쓴다. 사용자를 모욕하거나 하대하지 않는다. ~습니다/~입니다/~세요/~요 존댓말을 섞지 않는다. 이름 뒤에 님을 붙이지 않는다. episode와 전생의 ~했다/~다 서사체, 사실·수치·근거·불확실성은 유지한다.'
-    : '\n[안내자 말투 최우선] 명운 해독관은 사용자 성별과 무관하게 차분한 존댓말로 안내한다. 일반 풀이와 후킹은 ~습니다/~입니다/~해보세요로 통일한다. episode와 전생의 ~했다/~다 서사체, 사실·수치·근거·불확실성은 유지한다.';
+  writerSystem += '\n[안내자 공통 문체] 안내자 종류와 사용자 성별에 관계없이 풀이·후킹·사례 모두 자연스러운 존댓말로 작성한다. ~해보세요를 허용한다. 전생도 가정의 맥락을 유지하고 존댓말로 쓴다.';
   if (policy) writerSystem += '\n'+chapterInstruction(policy);
   writerSystem += '\n출력 숫자는 allowedNumbers에 있는 값만 사용한다. 현실 전략에도 새로운 기간·횟수·비율·금액·연도를 만들지 말고 숫자 없이 관찰 가능한 행동으로 설명한다. 문단은 최소 30자, 최대 길이는 챕터 정책을 따른다. 반드시·무조건·확정·수익률이라는 단어를 쓰지 않는다. 예측 한계는 전통 해석이며 실제 결과를 보장하지 않습니다처럼 설명한다. 기초 계산값이 존재하는데 계산값 자체가 없다고 말하지 않는다. 검수된 해석 규칙이 부족할 때는 계산표는 있으나 해당 작용을 해석할 규칙의 근거가 부족하다고 구분한다. verifiedTimingClaimIds가 비어 있으면 운의 간지·기간은 사실로 안내할 수 있지만 그 시기의 돈·관계·직업 작용을 만들지 않는다.';
-  if (policy?.hook.enabled && analysis?.claims.length && !hook) writerSystem += '\n동일 JSON에 독립 hook 추가: '+JSON.stringify({text:'해당 주제의 가장 중요한 조건 한 가지. 최대 '+policy.hook.maxChars+'자',explanation:(policy.hook.explanationSentences===3?'2~3':'2')+'문장, 최대 '+policy.hook.explanationMaxChars+'자',claim_id:'검증된 단일 claim_id'})+'\n후킹 문체: '+policy.hook.style+'\nhookDraft가 있으면 그 판단 ID를 유지한다. 후킹 선언 자체에 재성 부재·관성 약함·비겁 강함·용신 등 선택된 실제 원국 조건을 짧게 연결한다. 누구나 원하는 인정·사랑·성공에 관한 문장을 단독 선언으로 쓰지 않는다. 후킹은 원문 소개나 일반적인 위로 대신 실제 계산 조건과 해당 주제의 결과·선택을 연결하는 간결한 선언으로 쓴다. 원문을 그대로 복사하지 않는다. 후킹을 먼저 작성한 뒤 본문에서 같은 핵심 선언을 반복하지 않는다. 본문은 적용 상황·구체 사례·대응 방법을 확장하고 후킹과 비슷한 문장을 다시 쓰지 않는다.\n새 명리 판단을 만들지 말고 선택한 판단의 조건과 예외를 보존한다. 한국어만 사용한다.';
+  if (policy?.hook.enabled && analysis?.claims.length && !hook) writerSystem += '\n동일 JSON에 독립 hook 추가: '+JSON.stringify({text:'해당 주제의 가장 중요한 조건 한 가지. 최대 '+policy.hook.maxChars+'자',explanation:(policy.hook.explanationSentences===3?'2~3':'2')+'문장, 최대 '+policy.hook.explanationMaxChars+'자',claim_id:'검증된 단일 claim_id'})+'\n후킹 문체: '+policy.hook.style+'\nhookDraft가 있으면 그 판단 ID를 유지한다. 후킹에는 선택한 판단의 생활 속 결론을 쓰고 전문 용어와 계산 비중은 별도 근거에 남긴다. 누구나 원하는 인정·사랑·성공에 관한 문장을 단독 선언으로 쓰지 않는다. 후킹은 원문 소개나 일반적인 위로 대신 실제 계산 조건과 해당 주제의 결과·선택을 연결하는 간결한 선언으로 쓴다. 원문을 그대로 복사하지 않는다. 후킹을 먼저 작성한 뒤 본문에서 같은 핵심 선언을 반복하지 않는다. 본문은 적용 상황·구체 사례·대응 방법을 확장하고 후킹과 비슷한 문장을 다시 쓰지 않는다.\n새 명리 판단을 만들지 말고 선택한 판단의 조건과 예외를 보존한다. 한국어만 사용한다.';
   writerSystem += '\n본문의 각 문단은 생활의 판단이나 대응으로 시작한다. 검수된 판단·검수된 근거·검수된 규칙이라는 내부 처리 표현을 문단마다 반복하지 않는다. 근거가 부족한 경우에는 현재 자료만으로 해당 작용을 판단하기 어렵다고 짧게 설명한다. 불확실성을 유지하면서 실제 상황과 선택을 직접 설명한다. 원문이 경향·가능성을 말하면 조건문 뒤에도 마찰이 생긴다·손실로 이어진다·환경 변화가 따른다고 결과를 단정하지 말고 그럴 수 있다는 가능성을 유지한다. 행동 권유는 직접 쓰되 그 효과를 보장하지 않는다.';
   // UTF-8 bytes are a conservative token upper bound for budget reservation.
   const estimatedMaxCost = settings.inputPricePerMillion != null && settings.outputPricePerMillion != null ? ((new TextEncoder().encode(input + writerSystem).length + 512) * settings.inputPricePerMillion + settings.maxOutputTokens * settings.outputPricePerMillion) / 1e6 : null;
-  if (settings.maxRequestCost != null && (estimatedMaxCost == null || estimatedMaxCost * (mode === 'grounded' && policy && settings.semanticReview ? 3 : 1) * [env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY].filter(Boolean).length > settings.maxRequestCost)) return json({ ok: false, error: 'cost-limit', estimatedMaxCost, engineMode: mode }, 429);
+  if (settings.maxRequestCost != null && (estimatedMaxCost == null || estimatedMaxCost * (mode === 'grounded' && policy && settings.semanticReview ? 4 : 3) * [env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY].filter(Boolean).length > settings.maxRequestCost)) return json({ ok: false, error: 'cost-limit', estimatedMaxCost, engineMode: mode }, 429);
   const fixedHook=hook, deadline=requestStarted+78000;
   for (const [provider, secret] of [['openai', 'OPENAI_API_KEY'], ['anthropic', 'ANTHROPIC_API_KEY']]) {
     if (!env[secret]) continue;
@@ -106,6 +107,26 @@ async function handleReading({ request, env }, context) {
       const rejected=(stage,v)=>{lastRejection=v;providerAttempts.push({provider,status:'rejected',stage,issues:(v?.issues || []).map(x=>({code:x.code,id:x.id,reason:x.reason})),elapsedMs:Date.now()-requestStarted});};
       const diagnostics=[];
       const result = sanitize(generation.text, clean, src, { deep: mode === 'grounded',diagnostics }); if (!result) {rejected('writer-format',{issues:diagnostics});continue;}
+      const roleMap = new Map(clean.chapter.paragraphs.map(p=>[p.id,p.role]));
+      const inspect = paragraphs => inspectWriting(paragraphs.map(p=>({...p,role:roleMap.get(p.id)})),sty.writing,{concept:/일간|일주/.test(clean.chapter.title),previous});
+      const writingQuality = inspect(result.paragraphs);
+      if (!writingQuality.ok) {
+        const badIds = new Set(writingQuality.issues.filter(x=>x.severity==='FAIL').map(x=>x.id));
+        if (deadline-Date.now()<12000) {rejected('ux-writing',writingQuality);continue;}
+        const repair = await generate(env,provider,JSON.stringify({source:JSON.parse(input),issues:writingQuality.issues,paragraphs:result.paragraphs.filter(p=>badIds.has(p.id))}),writingDirective(sty.writing)+'\n역술 판단을 새로 하지 않는 UX 문장 편집자입니다. 수정 대상으로 전달된 문단 id만 JSON의 paragraphs로 반환합니다. refs와 claim_ids는 원래 배열을 그대로 보존합니다. 지적된 전문 용어를 생활의 의미로 설명하고 나머지 조건·불확실성을 보존합니다. 문장 전체를 자연스러운 존댓말로 재작성하며 새 장점·약점·사건을 추가하지 않습니다.',{...settings,maxOutputTokens:Math.min(settings.maxOutputTokens,4000),timeoutMs:deadline-Date.now()});
+        let patches; try {patches=JSON.parse(repair.text).paragraphs;} catch {}
+        if (!Array.isArray(patches) || patches.length!==badIds.size || new Set(patches.map(p=>p.id)).size!==badIds.size || patches.some(p=>!badIds.has(p.id))) {rejected('ux-repair-format',writingQuality);continue;}
+        const refSet=xs=>JSON.stringify([...(xs || [])].sort());
+        if(patches.some(p=>{const old=result.paragraphs.find(x=>x.id===p.id);return refSet(p.refs)!==refSet(old.refs) || refSet(p.claim_ids)!==refSet(old.claim_ids);})){rejected('ux-repair-evidence-changed',writingQuality);continue;}
+        const merged={paragraphs:result.paragraphs.map(p=>patches.find(x=>x.id===p.id)||p)};
+        const checked=sanitize(JSON.stringify(merged),clean,src,{deep:mode==='grounded'});
+        const after=checked && inspect(checked.paragraphs);
+        if (!checked || !after.ok) {rejected('ux-repair-failed',after || writingQuality);continue;}
+        writingQuality.repairs=patches.map(p=>({id:p.id,before:result.paragraphs.find(x=>x.id===p.id)?.text,after:p.text}));
+        result.paragraphs=checked.paragraphs;
+        writingQuality.ok=true; writingQuality.remainingIssues=after.issues;
+        if(generation.usage && repair.usage)for(const k of ['inputTokens','outputTokens','totalTokens','cachedInputTokens'])generation.usage[k]=generation.usage[k]!=null && repair.usage[k]!=null?generation.usage[k]+repair.usage[k]:null;
+      }
       if (policy?.hook.enabled && analysis?.claims.length && !hook) {
         let candidate; try { candidate=JSON.parse(generation.text).hook; } catch { }
         let check=validateHook(candidate,analysis,policy);
@@ -120,6 +141,7 @@ async function handleReading({ request, env }, context) {
         const claim=analysis.claims.find(c=>c.claim_id===candidate.claim_id);
         hook={...candidate,hanja:policy.hanja,chapterKind:policy.key,fingerprint:await chartFingerprint(analysis),claimSignature:await claimSignature(claim),source:'ai-reviewed',basis:{elements:claim.elements,evidence:claim.evidence,judgment:claim.judgment,exceptions:claim.exceptions,counter_evidence:claim.counter_evidence}};
       }
+      if (hook && !inspectWriting([{id:'hook',text:hook.text},{id:'hook-explanation',text:hook.explanation}],{...sty.writing,paragraphChars:500},{concept:false}).ok) { rejected('hook-ux-writing',{issues:[{code:'hook-writing-failed'}]});continue; }
       const validation = mode === 'grounded' ? validateWritten(result, analysis, clean) : null;
       if (validation && !validation.ok) { rejected('grounding',{...validation,issues:validation.warnings.map(code=>({code}))}); continue; }
       const quality = chapterQuality(result, analysis, policy, previous, hook);
@@ -137,7 +159,7 @@ async function handleReading({ request, env }, context) {
       if (quality) { quality.semanticReview = semantic; quality.semanticReviewStatus = semantic ? 'passed' : 'not-run'; quality.requiredCoverage=semantic?.coverage || []; quality.warnings.push(...(semantic?.coverage || []).filter(x=>x.status==='missing-evidence').map(x=>'required-evidence-missing:'+x.item)); }
       if (reviewUsage && generation.usage) { for(const k of ['inputTokens','outputTokens','totalTokens','cachedInputTokens'])generation.usage[k]=generation.usage[k]!=null && reviewUsage[k]!=null ? generation.usage[k]+reviewUsage[k] : null; }
       const cost = generation.usage && generation.usage.inputTokens != null && generation.usage.outputTokens != null && settings.inputPricePerMillion != null && settings.outputPricePerMillion != null ? (generation.usage.inputTokens * settings.inputPricePerMillion + generation.usage.outputTokens * settings.outputPricePerMillion) / 1e6 : null;
-      const value = { result, provider, editorialVersion:editorial.version, chapterContractId:contract?.id || null, exampleIds:examples.map(c=>c.id), chapterVersion:CHAPTER_VERSION, chapterPolicy: policy, chapterQuality: quality, hook: hook || null, hookWarning: policy?.hook.enabled && !hook ? 'hook-evidence-or-length-missing' : null, generation: { model: generation.model, elapsedMs: generation.elapsedMs, usage: generation.usage, estimatedCost: cost, costScope: 'accepted-writer-repair-and-review-calls', priceSource: cost == null ? null : 'admin-configured', promptVersion: mode === 'grounded' ? ENGINE_VERSION : VERSION }, knowledgeCount: src.knowledge.length, style: sty.meta,
+      const value = { result, writingQuality, provider, editorialVersion:editorial.version, chapterContractId:contract?.id || null, exampleIds:examples.map(c=>c.id), chapterVersion:CHAPTER_VERSION, chapterPolicy: policy, chapterQuality: quality, hook: hook || null, hookWarning: policy?.hook.enabled && !hook ? 'hook-evidence-or-length-missing' : null, generation: { model: generation.model, elapsedMs: generation.elapsedMs, usage: generation.usage, estimatedCost: cost, costScope: 'accepted-writer-repair-and-review-calls', priceSource: cost == null ? null : 'admin-configured', promptVersion: mode === 'grounded' ? ENGINE_VERSION : VERSION }, knowledgeCount: src.knowledge.length, style: sty.meta,
         ...(analysis ? { interpretation: { version: analysis.version, mode, claims: analysis.claims, behaviorPlans:behaviorPlans(analysis.claims,examples), features: analysis.features, cross_analysis: analysis.cross_analysis, warnings: analysis.warnings, quality: analysis.quality, validation } } : {}) };
       if (kv) { try { await kv.put(key, JSON.stringify(value), { expirationTtl: 604800 }); } catch { } }
       return json({ ok: true, ...value, cached: false });

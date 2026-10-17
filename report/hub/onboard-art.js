@@ -28,7 +28,7 @@
       return wrap('<line x1="30" y1="205" x2="570" y2="205" stroke="' + INK3 + '" stroke-opacity=".5"/>' +
         '<path class="dr" d="M40 205 C 90 205 120 70 170 70 S 250 205 300 205" fill="none" stroke="' + G + '" stroke-width="3"/><path d="M40 205 C 90 205 120 70 170 70 S 250 205 300 205 Z" fill="url(#gA)" opacity=".18"/>' +
         '<path class="dr d2" d="M340 205 L340 40 C 350 150 400 196 560 203" fill="none" stroke="' + GL + '" stroke-width="3"/>' +
-        '<circle class="pop" cx="340" cy="40" r="7" fill="' + GL + '"/><circle cx="340" cy="40" r="22" fill="url(#gG)"/>' + t(170, 232, '재능 — 고르게 퍼진다') + t(450, 232, '성과 — 소수에게 쏠린다'));
+        '<circle class="pop" cx="340" cy="40" r="7" fill="' + GL + '"/><circle cx="340" cy="40" r="22" fill="url(#gG)"/>' + t(170, 232, "재능 — 고르게 분포되어 있습니다") + t(450, 232, "성과 — 소수에게 쏠리는 편입니다"));
     },
     // 성과가 몰리는 짧은 시기
     streak: function () {

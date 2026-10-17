@@ -6,7 +6,7 @@
   document.head.appendChild(style);
   var button = document.createElement('button'); button.id = 'guideChange'; button.type = 'button'; button.textContent = '안내자 변경'; button.hidden = true;
   var dialog = document.createElement('dialog'); dialog.id = 'guidePicker'; dialog.setAttribute('aria-labelledby', 'guidePickerTitle');
-  dialog.innerHTML = '<h2 id="guidePickerTitle">안내자 변경</h2><p>지금 보던 단계에서 계속합니다.</p><button type="button" data-guide="male">운명 감찰관<small>직설적인 반말</small></button><button type="button" data-guide="female">명운 해독관<small>차분한 존댓말</small></button><button type="button" data-close>닫기</button>';
+  dialog.innerHTML = "<h2 id=\"guidePickerTitle\">안내자 변경</h2><p>지금 보시던 단계에서 계속 진행합니다.</p><button type=\"button\" data-guide=\"male\">운명 감찰관<small>직설적인 존댓말</small></button><button type=\"button\" data-guide=\"female\">명운 해독관<small>차분한 존댓말</small></button><button type=\"button\" data-close>닫기</button>";
   document.body.appendChild(button); document.body.appendChild(dialog);
   function current() { try { return JSON.parse(localStorage.getItem('mt_guide') || 'null') === 'female' ? 'female' : 'male'; } catch (e) { return 'male'; } }
   function canShow(saved, route, step, viewer) {

@@ -121,3 +121,11 @@ li mark.wn b { color: #FFB066; } li mark.ac b { color: #6FDDA8; }
 .rd-vsec { padding-top: 8px; padding-bottom: 8px; }
 .ci-lb { display: block; color: var(--gold); font: 600 .78rem/1 var(--f-sans); letter-spacing: .14em; margin-bottom: 6px; }
 .ci-ul { margin: 6px 0 0; padding: 0 0 0 1.2em; } .ci-ul li { margin-bottom: .7em; line-height: 1.75; }
+
+/* 생활밀착형 풀이: 한 장면 한 메시지, 근거는 독자가 펼쳐 확인합니다. */
+.rd-prose p.lead{font-size:clamp(17px,4.4vw,20px);line-height:1.95;max-width:38em;word-break:keep-all;overflow-wrap:anywhere;font-weight:400;color:var(--ink)}
+.rd-prose .reading-evidence{font-size:15px;line-height:1.85;max-width:42em}
+.reading-evidence summary{cursor:pointer;padding:12px 0;font-weight:500}
+.reading-evidence[open]{padding-bottom:16px}
+.rd-prose:has(>.reading-evidence:not([open])){min-height:0;padding-block:16px}
+.reading-evidence .lead{font-size:15px;color:var(--ink2)}

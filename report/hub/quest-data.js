@@ -31,7 +31,7 @@
 
   /* ── 안내자: 말투와 진행 방식만 다르다(계산 결과는 같다) ── */
   var GUIDES = {
-    male:   { id: 'male',   name: '운명 감찰관', tag: '강점과 취약점, 주의할 선택을 짚어줄게', asset: 'male',   tone: '냉철하고 직설적이지만 무례하지 않은 반말' },
+    male:   { id: 'male',   name: '운명 감찰관', tag: "강점과 취약점, 주의해야 할 선택을 짚어 드리겠습니다.", asset: 'male',   tone: "냉철하고 직설적이지만 무례하지 않은 존댓말입니다." },
     female: { id: 'female', name: '명운 해독관', tag: '사주의 구조와 시간의 흐름을 해석합니다',   asset: 'female', tone: '차분하고 지적인 단정한 존댓말' },
   };
 
@@ -170,26 +170,8 @@
     d = d || {}; var name = String(d.name || '').trim().slice(0, 20);
     return O.fill(String(text == null ? '' : text), name, cfg).replace(/\{이름\}|\{name\}/g, name || O.honorific(cfg)).replace(/\{year\}/g, d.year || '').replace(/\{month\}/g, d.month || '');
   };
-  var MALE_LINES = {"어떤 이름으로 기록해 드릴까요?":"어떤 이름으로 기록해 줄까?","본명이든 불리는 이름이든 괜찮습니다.":"본명이든 불리는 이름이든 괜찮아.","{이름귀인}, 한 가지만 더 여쭙겠습니다.":"{이름}, 한 가지만 더 물을게.","운이 흐르는 방향을 읽을 때 필요한 기록입니다.":"운이 흐르는 방향을 읽는 데 필요한 기록이야.","{이름귀인}, 태어난 날은 양력과 음력 중 어느 쪽으로 기억하고 계십니까?":"{이름}, 태어난 날은 양력이야, 음력이야?","이제 연대기의 봉인을 풀어 볼까요.":"이제 연대기의 봉인을 풀어보자.","태어나신 해는 언제입니까?":"태어난 해는 언제야?","몇 월이었는지 기억하십니까?":"몇 월이었는지 기억해?","달을 고르시면 그 계절의 풍경이 따라 바뀝니다.":"달을 고르면 그 계절의 풍경이 따라 바뀔 거야.","{year}년 {month}월이군요.":"{year}년 {month}월이구나.","그달의 며칠이었습니까?":"그달 며칠이었어?","시간의 원판을 돌려 보겠습니다.":"시간의 원판을 돌려볼게.","태어난 시각을 기억하십니까?":"태어난 시각은 기억해?","시각을 모르셔도 괜찮습니다.":"시각을 몰라도 괜찮아.","시주는 비워 두고 연·월·일 기준으로 읽겠습니다.":"시주는 비워두고 연·월·일을 기준으로 읽을게.","마지막으로, 태어난 곳을 알려 주십시오.":"마지막으로, 태어난 곳을 알려줘.","{이름귀인}, 기록이 완성되었습니다.":"{이름}, 기록이 완성됐어.","틀린 곳이 없는지 한 번만 봐 주십시오.":"틀린 곳이 없는지 한 번만 봐줘.","기록을 펼치는 중입니다. 잠시만요.":"기록을 펼치고 있어. 잠깐만 기다려줘.","이런, 기록이 맞물리지 않습니다.":"이런, 기록이 맞물리지 않아.","아래 안내를 보시고 한 번만 고쳐 주십시오.":"아래 안내를 보고 한 번만 고쳐줘."};
-  Object.assign(MALE_LINES, {
-    '당신을 어떤 이름으로 기록해 드리면 될까요?': '어떤 이름으로 기록해 줄까?',
-    '당신이 세상에 나오신 해는 언제입니까?': '네가 세상에 나온 해는 언제야?',
-    '마지막으로, 이 태어난 땅의 이름을 알려 주십시오.': '마지막으로, 네가 태어난 곳을 알려줘.'
-  });
-  Q.speech = function (text, guide) {
-    if (guide !== 'male') return text;
-    var line = String(text || '').replace(/\{name\}|\{이름귀인\}/g, '{이름}');
-    var legacy = String(text || '').replace(/\{name\}/g, '{이름귀인}');
-    if (MALE_LINES[text] || MALE_LINES[legacy]) return MALE_LINES[text] || MALE_LINES[legacy];
-    // 저장된 사용자 문구도 적용한다. 원문 전체 일치에만 의존하지 않는다.
-    return line.replace(/당신을/g, '너를').replace(/당신의/g, '네').replace(/당신이/g, '네가')
-      .replace(/해 드리면 될까요/g, '해 줄까').replace(/해 드릴까요/g, '해 줄까').replace(/해 주십시오|해 주세요/g, '해줘')
-      .replace(/알려 주십시오|알려 주세요/g, '알려줘').replace(/기억하고 계십니까/g, '기억해').replace(/기억하십니까/g, '기억해')
-      .replace(/여쭙겠습니다/g, '물을게').replace(/하겠습니다/g, '할게').replace(/보겠습니다/g, '볼게')
-      .replace(/되었습니다/g, '됐어').replace(/괜찮습니다/g, '괜찮아').replace(/있습니다/g, '있어').replace(/없습니다/g, '없어')
-      .replace(/입니까/g, '이야').replace(/입니다/g, '이야').replace(/군요/g, '구나').replace(/볼까요/g, '볼까')
-      .replace(/잠시만요/g, '잠깐만 기다려줘');
-  };
+  // Both guides use authored polite copy. No grammatical ending conversion is applied.
+  Q.speech = function (text) { return String(text == null ? "" : text); };
   Q.linesOf = function (step, guide, unknown) { var src = unknown && step.unknownLines && step.unknownLines[guide] && step.unknownLines[guide].length ? step.unknownLines : step.lines; return ((src && (src[guide] || src.male)) || []).map(function (line) { return Q.speech(line, guide); }); };
 
   /* ── 에셋 주소·초점 ── */

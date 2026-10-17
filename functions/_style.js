@@ -1,8 +1,9 @@
+import { cleanWriting, writingFor, writingDirective } from './_ux-writing.js';
 // 풀이 문체·단정성 정책(순수 함수, import 없음 → Node 테스트 가능). 파일명이 _로 시작해 라우트로 노출되지 않는다.
 // 원칙: 문체는 "표현 강도"만 바꾼다. 만세력 계산값·검색된 풀이 DB 근거·적용되는 명리 판단은 문체와 무관하게 같아야 한다.
 // 세 가지 유형(신중형·직설형·단정형)과 관리자 설정(config)을 검증·정리하고, AI 프롬프트에 붙일 지시문(directive)과 사후 검사를 만든다.
 // 저장은 api/style.js 가 KV 'style:cfg'(활성) · 'style:hist'(버전 이력)에 한다.
-export const STYLE_VERSION = 'style2';
+export const STYLE_VERSION = 'style3-ux';
 export const STYLE_IDS = ['cautious', 'direct', 'assertive'];
 export const STYLE_KO = { cautious: '신중형', direct: '직설형 심층 감정', assertive: '단정형' };
 export const STYLE_DESC = {
@@ -14,14 +15,14 @@ export const DEFAULT_STYLE = 'direct';
 
 export const DEFAULT_PROMPTS = {
   cautious: '가능성과 경향을 중심으로 설명한다. 부드럽고 조심스러운 표현("~하기 쉽습니다", "~하는 경향이 있습니다", "~로 읽을 수 있습니다")을 쓰되, 한 문단에서 같은 어미를 반복하지 않는다. 판단의 조건을 함께 밝힌다.',
-  direct: '명리학적 판단을 명확하게 전달한다. 불필요한 완곡어법을 쓰지 않고 근거 중심으로 설명한다. 판단의 근거(오행·십성·구조)를 먼저 말하고 결론을 이어 쓴다. 조건이 실제로 필요한 판단에만 "~할 때"처럼 조건을 붙인다.',
+  direct: '명리학적 판단을 명확하게 전달한다. 불필요한 완곡어법을 쓰지 않고 근거 중심으로 설명한다. 결론을 먼저 말하고 생활 장면과 손해, 실천을 연결한다. 전문 근거는 별도 항목에 쓴다. 조건이 실제로 필요한 판단에만 "~할 때"처럼 조건을 붙인다.',
   assertive: '확신 있는 문장과 힘 있는 서사적 표현을 쓴다. 성향·강점·약점·적성·재물 관리 방식·인간관계의 특징·운의 성격은 "~입니다"로 분명하게 말한다. "~일 수 있습니다", "~할 가능성이 있습니다", "~하는 경향이 있습니다", "~볼 수도 있습니다"를 문단마다 반복하지 않는다(한 항목에 많아야 한 번, 근거가 실제로 불확실한 판단에만). 항목의 첫 문장에 핵심 결론을 둔다. 좋은 이야기만 반복하지 말고 약점과 불리한 조건도 같은 힘으로 말한다.',
 };
 
 // 어떤 문체를 골라도 지키는 한계. 관리자가 지울 수 없다.
 export const HARD_LIMITS = `[문체와 무관하게 지키는 한계]
 - 문체는 표현의 강도만 바꾼다. 입력의 계산값(기둥·오행·십성·신강약·통근·대운·세운)과 풀이 DB 근거를 바꾸거나, 입력에 없는 사주 정보·근거·신살·수치를 만들어 내지 않는다.
-- 근거가 있는 성향·강점·약점·구조는 단정해서 말해도 된다. 근거가 없거나 입력이 부족한 판단은 단정하지 않고 "근거가 부족합니다"라고 말하거나 쓰지 않는다.
+- 전통 해석은 가설이다. 근거가 있어도 실제 행동이나 미래를 확인된 사실처럼 단정하지 않는다. 근거가 없거나 입력이 부족한 판단은 단정하지 않고 "근거가 부족합니다"라고 말하거나 쓰지 않는다.
 - 결혼·이직·재물 상승 같은 시기는 "전환의 기운이 강하게 작용하는 시기"처럼 시기의 성격을 분명히 말하되, 실제 결혼·이직·수익 발생 같은 미래 사건이 일어난다고 확정하지 않는다.
 - 쓰지 않는 것: 특정 연도의 사망·중대 사고 확정, 질병 발생·의학적 진단, 파산 확정, 범죄 성향·사기꾼 여부 단정, 배우자의 외도·이혼 확정, 특정 연도의 임신·출산 확정. 이런 주제는 전통 명리학의 해석 범위와 현실의 불확실성을 구분해 말하고, 의학·법률·투자 판단은 전문가에게 맡기도록 한다.
 - 인격을 낙인찍거나 모욕하지 않는다. 사람이 아니라 구조와 습관을 짚는다.`;
@@ -29,11 +30,11 @@ export const HARD_LIMITS = `[문체와 무관하게 지키는 한계]
 // 풀이 항목의 6단 구조(IK 합성기·무빙툰 본문·PDF 공통)
 export const STRUCTURE = [
   ['conclusion', '핵심 결론', '사용자가 가장 궁금해하는 내용을 첫 문장에 분명하게 제시한다.'],
-  ['basis', '명리학적 근거', '어떤 오행·십성·일간·지지·합충·통근이 판단에 영향을 주었는지, 입력에 있는 값으로만 설명한다.'],
   ['reality', '현실에서 나타나는 특징', '직업·돈·인간관계·연애·생활습관의 구체적인 장면과 연결한다.'],
   ['strengthWeak', '강점과 약점', '긍정과 불리한 면을 모두 쓴다. 좋은 이야기만 반복하지 않는다.'],
   ['luck', '운의 흐름에 따른 변화', '원국의 특징이 대운·세운에 따라 어떻게 달라지는지 쓴다. 입력에 운 정보가 없으면 쓰지 않는다.'],
   ['action', '현실적인 대응', '어떤 상황에서 움직이고 어떤 상황에서 대비해야 하는지 쓴다.'],
+  ['basis', '명리학적 근거', '본문 뒤 별도 근거 영역에 어떤 오행·십성·일간·지지·합충·통근이 판단에 영향을 주었는지, 입력에 있는 값과 출처·예외로만 설명한다.'],
 ];
 export const KIND_IDS = STRUCTURE.map(s => s[0]);
 
@@ -45,7 +46,7 @@ export const DEFAULT_STORY = {
 };
 export const DEFAULT_CONFIG = {
   defaultStyle: DEFAULT_STYLE, chapters: {}, prompts: { ...DEFAULT_PROMPTS }, preferred: DEFAULT_PREFERRED.slice(), discouraged: DEFAULT_DISCOURAGED.slice(),
-  story: { ...DEFAULT_STORY }, characters: {}, note: '',
+  writing: cleanWriting(), story: { ...DEFAULT_STORY }, characters: {}, note: '',
 };
 
 const str = (v, n) => (typeof v === 'string' ? v.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '').trim().slice(0, n) : '');
@@ -63,6 +64,7 @@ export function cleanConfig(b) {
   if (Array.isArray(b.discouraged)) o.discouraged = strs(b.discouraged, 30, 80);
   if (b.story && typeof b.story === 'object') { o.story.address = str(b.story.address, 12) || DEFAULT_STORY.address; o.story.voice = str(b.story.voice, 800) || DEFAULT_STORY.voice; }
   if (b.characters && typeof b.characters === 'object') for (const k of Object.keys(b.characters).slice(0, 30)) { const v = str(b.characters[k], 300); if (KEY_RE.test(k) && v) o.characters[k] = v; }
+  o.writing = cleanWriting(b.writing);
   o.note = str(b.note, 200);
   return o;
 }
@@ -86,6 +88,7 @@ export function directive(cfg, id, opts) {
   if (pref) lines.push(pref); if (disc) lines.push(disc);
   if (o.structure) lines.push('[항목 구성] 가능하면 아래 순서로 문단을 쓴다(근거가 없는 단계는 건너뛴다). 문단마다 kind 를 달아라.\n' + STRUCTURE.map((s, i) => (i + 1) + '. kind="' + s[0] + '" ' + s[1] + ': ' + s[2]).join('\n'));
   lines.push(HARD_LIMITS);
+  lines.push(writingDirective(writingFor(c.writing, o.keys || [], !!o.consent)));
   if (o.soft) lines.push('[이번 입력의 근거 부족] "expression":"soft" 로 표시된 항목은 근거가 얇다. 그 항목만 한 단계 낮춘 표현(' + STYLE_KO[softer(sid)] + ')으로 쓰고, 근거 없는 내용은 보태지 않는다.');
   return lines.join('\n');
 }
