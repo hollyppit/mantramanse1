@@ -1,6 +1,5 @@
 // Reviewed editorial components, selected from calculated facts only. No provider or network access.
 // Components are ordinary library passages: administrators can edit, validate and publish them.
-import {deriveFacts,evalConds} from './_ik.js';
 import {CONDITION_PLANS} from './_reading-conditional-copy.js';
 export const COMPOUND_VERSION='compound-20261020-1';
 const roles=['reality','strength','risk','reinforce','practice'];
@@ -64,14 +63,3 @@ export function compoundPassages(c){
  return out;
 }
 export const isCompound=p=>p.id.startsWith('compound-');
-export function composeCompound(text,role,selected,sd){
- if(!roles.includes(role))return {text,components:[]};
- // A partial or invalid chart must not be padded with inferred conditions.
- const facts=deriveFacts(sd),parts=selected.filter(p=>isCompound(p)&&p.role===role);
- const score=p=>Object.keys(p.when.tenGod||{}).reduce((n,k)=>n+(facts.tenGod[k]?.pct||0),0);
- const pick=family=>parts.filter(p=>p.id.includes('-'+family+'-')).sort((a,b)=>evalConds(b.when,facts).spec-evalConds(a.when,facts).spec||score(b)-score(a)||a.id.localeCompare(b.id))[0];
- const capacityPart=pick('capacity'),pair=pick('pair'),god=pick('god'),stem=pick('stem');
- // Keep the scene question-specific. Pair interactions replace single-god commentary rather than repeating it.
- const components=[capacityPart,pair||god,stem].filter(Boolean);
- return {text:[text,...components.map(p=>p.text)].join('\n\n'),components:components.map(p=>({id:p.id,when:p.when,rows:evalConds(p.when,facts).rows}))};
-}

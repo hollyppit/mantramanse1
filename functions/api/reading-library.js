@@ -12,8 +12,12 @@ export async function onRequest({request,env}){
  try{
   const url=new URL(request.url),catalog=await loadEditorial(kv,true),chapter=url.searchParams.get('chapter');
   if(request.method==='GET'&&!chapter){
+   let rows;
+   if(kv.librarySummaries){const summaries=new Map((await kv.librarySummaries(catalog.chapters.map(c=>c.id))).map(s=>[s.chapter,s]));rows=catalog.chapters.map(c=>{const s=summaries.get(c.id)||{};return {id:c.id,title:c.title,topicId:c.topicId,sourceRuleIds:c.sourceRuleIds,version:s.version||0,draftCount:s.draft_count||0,publishedCount:s.published_count||0};});}
+   else{
    const libraries=kv.getMany?await kv.getMany(catalog.chapters.map(c=>libraryKey(c.id)),'json'):await Promise.all(catalog.chapters.map(c=>readLibrary(kv,c.id)));
-   const rows=catalog.chapters.map((c,i)=>{const l=libraries[i]||{version:0,draft:[],published:[]};return {id:c.id,title:c.title,topicId:c.topicId,sourceRuleIds:c.sourceRuleIds,version:l.version,draftCount:l.draft.length,publishedCount:l.published.length};});
+   rows=catalog.chapters.map((c,i)=>{const l=libraries[i]||{version:0,draft:[],published:[]};return {id:c.id,title:c.title,topicId:c.topicId,sourceRuleIds:c.sourceRuleIds,version:l.version,draftCount:l.draft.length,publishedCount:l.published.length};});
+   }
    return json({ok:true,chapters:rows,mode:'reviewed-only',providerCallsPerReading:0,engine:LIBRARY_VERSION});
   }
   const contract=catalog.chapters.find(c=>c.id===chapter);if(!contract)return fail('unknown-chapter',404);

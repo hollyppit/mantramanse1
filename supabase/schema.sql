@@ -19,3 +19,31 @@ revoke all on public.kv from anon, authenticated;
 
 -- (선택) 만료된 행을 매일 새벽에 지운다. Database → Extensions 에서 pg_cron 을 켠 뒤 실행.
 -- select cron.schedule('kv-expire', '17 3 * * *', $$ delete from public.kv where expires_at is not null and expires_at < now() $$);
+
+-- Narrow service-only projections: public reads never transfer drafts, scenarios or history.
+create or replace function public.reading_published_library(p_chapter text)
+returns jsonb language sql stable security invoker set search_path = '' as $fn$
+  with entry as materialized (
+    select case when value is null or (expires_at is not null and expires_at <= now()) then '{}'::jsonb else value::jsonb end as doc
+    from public.kv
+    where p_chapter ~ '^timeline_(self|wealth|career|love|health|creative|remedy)_[0-9]{2}$'
+      and key = 'ik:blocks:chapter:library.' || p_chapter
+  )
+  select jsonb_build_object('version',coalesce((doc->>'version')::integer,0),'published',coalesce(doc->'published','[]'::jsonb)) from entry;
+$fn$;
+revoke all on function public.reading_published_library(text) from public, anon, authenticated;
+grant execute on function public.reading_published_library(text) to service_role;
+
+create or replace function public.reading_library_summaries(p_chapters text[])
+returns table(chapter text, version integer, draft_count integer, published_count integer)
+language sql stable security invoker set search_path = '' as $fn$
+  with entries as materialized (
+    select c.chapter, case when k.value is null or (k.expires_at is not null and k.expires_at <= now()) then '{}'::jsonb else k.value::jsonb end as doc
+    from unnest(p_chapters) as c(chapter)
+    join public.kv k on k.key = 'ik:blocks:chapter:library.' || c.chapter
+    where cardinality(p_chapters) <= 100 and c.chapter ~ '^timeline_(self|wealth|career|love|health|creative|remedy)_[0-9]{2}$'
+  )
+  select chapter, coalesce((doc->>'version')::integer,0), jsonb_array_length(coalesce(doc->'draft','[]'::jsonb)),jsonb_array_length(coalesce(doc->'published','[]'::jsonb)) from entries;
+$fn$;
+revoke all on function public.reading_library_summaries(text[]) from public, anon, authenticated;
+grant execute on function public.reading_library_summaries(text[]) to service_role;

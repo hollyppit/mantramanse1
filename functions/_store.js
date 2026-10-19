@@ -32,6 +32,19 @@ export function kvOf(env, opts) {
   const slot = (opts && opts.cache) ? 'c' : 'n'; let m = cache.get(env); if (!m) { m = {}; cache.set(env, m); } if (m[slot]) return m[slot];
   const memo = !!(opts && opts.cache);
   const adapter = {
+    async publishedLibrary(chapter) {
+      if(!/^timeline_(?:self|wealth|career|love|health|creative|remedy)_[0-9]{2}$/.test(chapter))throw Error('invalid-library-chapter');
+      const doc=await(await sb(env,'rpc/reading_published_library',{method:'POST',body:JSON.stringify({p_chapter:chapter})})).json();
+      if(doc!==null)return doc;
+      const legacy=await raw.get('ik:blocks:chapter:library.'+chapter,'json');
+      return legacy?{version:legacy.version,published:legacy.published}:null;
+    },
+    async librarySummaries(chapters) {
+      const rows=await(await sb(env,'rpc/reading_library_summaries',{method:'POST',body:JSON.stringify({p_chapters:chapters})})).json();
+      const seen=new Set(rows.map(r=>r.chapter)),missing=chapters.filter(c=>!seen.has(c));
+      if(missing.length){const keys=missing.map(c=>'ik:blocks:chapter:library.'+c),bulk=await raw.get(keys);for(let i=0;i<keys.length;i++){const txt=bulk instanceof Map?bulk.get(keys[i]):await raw.get(keys[i]);if(txt){const l=typeof txt==='string'?JSON.parse(txt):txt;rows.push({chapter:missing[i],version:l.version,draft_count:(l.draft||[]).length,published_count:(l.published||[]).length});}}}
+      return rows;
+    },
     async readingCAS(key,expected,next,ttl=null) {
       const r=await sb(env,'rpc/reading_compare_and_swap',{method:'POST',body:JSON.stringify({p_key:key,p_expected:expected,p_next:Polite.stored(key,next),p_ttl:ttl})});
       memoAll.delete(key);return (await r.json())===true;

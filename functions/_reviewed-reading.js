@@ -5,7 +5,7 @@ import {loadSourceIndex,loadSettings} from './_interpretation-store.js';
 import {analyze} from './_interpretation-engine.js';
 import {Editorial,loadEditorial,contractFor,contractDomains} from './_editorial.js';
 import {validate} from './_movingtoon-reading.js';
-import {readLibrary,composeReviewed,LIBRARY_VERSION} from './_reviewed-library.js';
+import {readLibrary,readPublishedLibrary,composeReviewed,LIBRARY_VERSION} from './_reviewed-library.js';
 import {cleanAdviceHistory} from './_reading-advice.js';
 import {HEALTH_EDUCATION,isHealthEducation} from './_health-education.js';
 import {diagnosticRecord,saveDiagnostic} from './_reading-diagnostics.js';
@@ -17,7 +17,7 @@ export async function prepareReviewed(env,body,{draft=false,passages=null}={}){
  if(!draft&&saved&&(saved.state==='archived'||catalog.topics.some(t=>t.id===saved.topicId&&!t.enabled)))throw Error('unknown-reviewed-chapter');
  const contract=draft&&saved?saved:contractFor(catalog,clean.chapter);
  if(!contract)throw Error('unknown-reviewed-chapter');
- const [items,blocked,settings,library]=await Promise.all([loadServiceAll(kv,contractDomains(catalog,contract)),blockedDocs(kv),loadSettings(kv),readLibrary(kv,contract.id)]);
+ const [items,blocked,settings,library]=await Promise.all([loadServiceAll(kv,contractDomains(catalog,contract)),blockedDocs(kv),loadSettings(kv),draft?readLibrary(kv,contract.id):readPublishedLibrary(kv,contract.id)]);
  const sourceIndex=await loadSourceIndex(kv,items.filter(r=>contract.sourceRuleIds.includes(r.id)),blocked),linked=new Set(contract.sourceRuleIds);
  const analysis=analyze(body.sd,items.filter(r=>linked.has(r.id)),{...settings,sourceIndex,blockedDocs:blocked,domains:contractDomains(catalog,contract)});
  if(passages){library.published=passages;library.preview=true;}else if(draft){library.published=library.draft;library.preview=true;}

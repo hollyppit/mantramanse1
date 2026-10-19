@@ -1,0 +1,90 @@
+import {deriveFacts,evalConds} from './_ik.js';
+import {CONDITION_PLANS} from './_reading-conditional-copy.js';
+import {CONDITIONAL_BODIES} from './_reading-conditional-bodies.js';
+import {FLOW_SCENES} from './_reading-flow-scenes.js';
+export const FLOW_VERSION='coherent-flow-20261020-1';
+const roles=['reality','strength','risk','reinforce','practice'];
+// Dependent clauses, not standalone advice paragraphs. They fill one causal scene.
+const voices={
+ 비견:['내 선택을 내가 지키고 싶은','직접 기준을 세우는','스스로 방향을 정하고 움직이는 힘','다른 방법을 내 판단에 대한 간섭처럼 느끼기 시작할','상대의 방법과 내가 책임질 결과를 나누고'],
+ 겁재:['함께하는 사람들 사이에서 내 몫을 놓치고 싶지 않은','주변의 속도에 맞춰 먼저 움직이는','사람들의 참여를 끌어내는 힘','남에게 뒤처지지 않는 것이 원래 목적보다 중요해질','남과 비교해서 늘린 몫을 덜어내고'],
+ 식신:['한 번 해낸 일을 다시 잘해내고 싶은','익숙한 순서로 차근차근 해보는','반복 속에서 실제 결과를 쌓는 힘','익숙한 방법이면 이번에도 통할 거라고 여길','계속할 방법과 달라진 조건을 나누어 보고'],
+ 상관:['지금보다 나은 방법을 찾아내고 싶은','불편한 부분부터 바꿔 보는','남들이 그냥 넘긴 문제를 짚는 힘','문제를 짚는 말이 상대를 설득하는 일보다 앞설','상대가 받아들일 수 있는 대안부터 제시하고'],
+ 편재:['눈앞의 가능성을 놓치지 않고 넓혀 가고 싶은','새 사람이나 기회와 연결하는','따로 있던 자원을 연결하는 힘','좋은 반응만 보고 실제로 맡을 범위를 키울','끝까지 챙길 수 있는 범위를 먼저 정하고'],
+ 정재:['들인 수고가 안정적으로 남기를 바라는','확실하게 관리할 수 있는','작은 몫도 놓치지 않고 쌓는 힘','당장의 손해를 피하는 것이 필요한 변화보다 앞설','지켜야 할 몫과 바꿔 볼 부분을 나누고'],
+ 편관:['어려운 상황에서도 맡은 일을 해결하고 싶은','급한 문제부터 책임지는','복잡한 상황에서 우선순위를 세우는 힘','급하지 않은 일까지 당장 해결해야 한다고 느낄','바로 대응할 일과 기다려도 될 일을 구분하고'],
+ 정관:['믿고 맡길 수 있는 사람으로 남고 싶은','합의한 약속과 기준을 지키는','약속을 실제 행동으로 이어가는 힘','거절하는 일보다 기대를 저버리지 않는 것이 중요해질','실제로 합의한 책임이 어디까지인지 확인하고'],
+ 편인:['겉으로 드러나지 않은 이유까지 알아두고 싶은','충분히 살핀 다음 판단하는','남들이 놓친 연결을 발견하는 힘','생각 속에서 검토한 것을 실제로 확인한 것처럼 여길','짐작과 확인된 사실을 구별하고'],
+ 정인:['믿을 만한 기준을 알고 안심하고 싶은','배운 내용이나 익숙한 경험을 참고하는','경험에서 필요한 기준을 정리하는 힘','익숙한 설명에 맞지 않는 경험을 예외로 치울','배운 기준이 지금도 맞는지 대조하고'],
+ '식신+정재':['꾸준히 해낸 수고가 나에게 남기를 바라는','반복해서 유지할 수 있는','만드는 과정과 남기는 과정을 연결하는 힘','계속 해왔다는 이유로 불리한 조건까지 견딜','들이는 수고와 실제로 남는 몫을 함께 보고'],
+ '상관+편재':['새로운 방법을 실제 기회로 만들어 보고 싶은','좋은 아이디어를 사람들에게 제안하는','불편을 쓸모 있는 제안으로 바꾸는 힘','호응을 얻는 속도가 약속을 지키는 속도보다 빨라질','확장하기 전에 끝까지 제공할 범위를 정하고'],
+ '정관+정인':['충분히 준비해 믿을 만한 답을 내고 싶은','배운 기준에 맞춰 확실하게 준비하는','배운 것을 다른 사람도 믿을 수 있게 정리하는 힘','작은 결정까지 정답을 확인받아야 마음이 놓일','확인이 필요한 일과 스스로 결정할 일을 나누고'],
+ '편관+편인':['어려운 요구가 와도 이유를 알아내 해결하고 싶은','문제가 생길 가능성까지 미리 살피는','복잡한 요구에서 중요한 조건을 찾아내는 힘','아직 생기지 않은 문제까지 혼자 해결하려 할','걱정 중에서 실제로 확인할 수 있는 것부터 골라내고'],
+ '비견+겁재':['내 기준을 지키면서 사람들 사이에서도 뒤처지고 싶지 않은','먼저 움직여 주변도 함께 끌어가는','참여를 이끌고 추진력을 만드는 힘','작은 양보도 내 몫을 빼앗기는 일처럼 느낄','같이 결정할 일과 각자 결정할 일을 나누고']
+};
+const capacity={
+ 신강:'다른 방법도 받아들일 여지를 두고',
+ 신약:'지금 가능한 범위에서',
+ 중화:'내가 맡을 몫을 정한 뒤'
+};
+const strengthNames={비견:'주도성',겁재:'경쟁심',식신:'꾸준함',상관:'문제를 짚는 감각',편재:'기회를 보는 감각',정재:'꼼꼼함',편관:'대응력',정관:'책임감',편인:'깊이 살피는 태도',정인:'배운 기준','식신+정재':'결과를 쌓는 힘','상관+편재':'새 제안을 만드는 힘','정관+정인':'준비하고 약속을 지키는 힘','편관+편인':'어려운 문제를 살피는 힘','비견+겁재':'함께 움직이게 하는 힘'};
+const adjustment={비견:'선택권을 남기는 방향으로',겁재:'서로의 몫을 나누어',식신:'꾸준히 이어갈 수 있게',상관:'상대도 이해할 수 있도록',편재:'끝까지 챙길 범위 안에서',정재:'필요한 여유를 남기면서',편관:'급한 일과 아닌 일을 가려서',정관:'합의한 책임을 바탕으로',편인:'확인된 사실을 바탕으로',정인:'지금의 상황에 맞춰','식신+정재':'수고에 비해 남는 것을 보면서','상관+편재':'약속을 지킬 수 있는 범위에서','정관+정인':'꼭 확인할 기준을 정해서','편관+편인':'확인할 수 있는 일부터','비견+겁재':'각자 결정할 몫을 나누어'};
+const motives={self:{비겁:'내가 어떤 선택을 할 사람인지 스스로 정하고 싶은',식상:'생각을 감추기보다 실제 모습으로 보여 주고 싶은',재성:'내가 쓴 시간과 수고가 어디에 남는지 알고 싶은',관성:'어떤 상황에서도 내가 맡은 몫은 해내고 싶은',인성:'내가 왜 이렇게 반응하는지 속사정까지 이해하고 싶은'},wealth:{비겁:'돈이 오갈 때도 내 선택권과 몫을 지키고 싶은',식상:'내가 해낸 일이 눈에 보이는 보상으로 돌아오길 바라는',재성:'들어온 돈이 사라지지 않고 내 생활에 남기를 바라는',관성:'돈 때문에 이미 한 약속을 어기고 싶지 않은',인성:'조건을 충분히 이해한 뒤 돈을 움직이고 싶은'},career:{비겁:'내 일의 방향을 남에게만 맡기고 싶지 않은',식상:'맡은 일을 내 실력으로 보여 주고 싶은',재성:'일한 만큼 결과와 보상이 남기를 바라는',관성:'믿고 맡길 수 있는 사람으로 인정받고 싶은',인성:'무엇을 왜 해야 하는지 알고 준비하고 싶은'},love:{비겁:'가까운 사이에서도 내 생활과 선택을 지키고 싶은',식상:'마음이 상대에게 제대로 전해지길 바라는',재성:'관계에 들인 마음과 시간이 일상에서도 돌아오길 바라는',관성:'상대와 한 약속을 끝까지 지키고 싶은',인성:'상대의 마음을 충분히 알고 나서 다가가고 싶은'},health:{비겁:'내 몸과 생활의 결정은 내가 하고 싶은',식상:'하고 싶은 활동을 답답함 없이 이어가고 싶은',재성:'관리한 수고가 실제 생활의 편안함으로 남기를 바라는',관성:'정해 둔 일정과 약속을 빠뜨리고 싶지 않은',인성:'몸에서 느낀 변화와 설명의 이유를 알아두고 싶은'},remedy:{비겁:'내가 고른 방식으로 생활을 바꾸고 싶은',식상:'생각한 변화를 직접 해보며 느끼고 싶은',재성:'바꾸는 데 쓴 수고가 실제 효과로 남기를 바라는',관성:'한번 정한 실천은 꾸준히 지키고 싶은',인성:'이 방법이 왜 필요한지 납득하고 시작하고 싶은'}};
+const families={비견:'비겁',겁재:'비겁',식신:'식상',상관:'식상',편재:'재성',정재:'재성',편관:'관성',정관:'관성',편인:'인성',정인:'인성'};
+// One way of doing the same action; never a second or third unrelated task.
+const methods={
+ 갑:{신강:'다른 사람의 기준과도 비교하면서',중화:'끝낼 기준을 먼저 정한 다음',신약:'지금 할 수 있는 한 가지부터'},
+ 을:{신강:'상대가 원하는 조건도 들어보면서',중화:'함께하는 사람과 조건을 맞춰 보면서',신약:'필요한 도움을 받아 작게'},
+ 병:{신강:'좋은 반응보다 실제 내용을 보면서',중화:'혼자 머릿속으로만 그리지 말고 눈에 보이게',신약:'다른 일까지 넓히지 말고 한 부분만'},
+ 정:{신강:'내가 신경 쓰지 못한 부분도 보면서',중화:'지금 신경 쓸 한 부분에 집중해서',신약:'모두 챙기려 하지 말고 가까운 것부터'},
+ 무:{신강:'오래 해온 방식도 당연하게 여기지 말고',중화:'전부터 유지하던 조건을 기준 삼아',신약:'이미 익숙한 부분에서 작은 것부터'},
+ 기:{신강:'고칠 부분을 한꺼번에 늘리지 말고',중화:'생활에서 자꾸 걸리는 작은 부분부터',신약:'생활에서 부담이 적은 부분부터'},
+ 경:{신강:'바로 결론짓기 전에 다른 경우도 보면서',중화:'남길 것과 덜어낼 것을 구분하면서',신약:'모든 조건을 끝내려 하지 말고 한 부분부터'},
+ 신:{신강:'모든 차이를 바로잡으려 하지 말고',중화:'이번에 꼭 확인할 한 가지에 집중해서',신약:'완벽한 답보다 지금 확인할 수 있는 것부터'},
+ 임:{신강:'더 많은 경우로 넓히기 전에',중화:'가능한 경우를 늘리기보다 실제 상황 하나를 골라',신약:'다른 가능성은 잠시 두고 한 상황에서'},
+ 계:{신강:'혼자 알아낸 이유를 사실로 정하기 전에',중화:'막연했던 부분을 구체적인 상황에 대입해',신약:'계속 짐작하기보다 직접 확인할 수 있는 부분부터'}
+};
+export const isFlow=p=>typeof p?.id==='string'&&p.id.startsWith('flow-');
+const last=t=>[...String(t)].at(-1)||'',josa=(t,p)=>{const n=last(t).charCodeAt(0)-0xac00,b=n>=0&&n<11172?n%28:0;return t+({은:b?'은':'는',이:b?'이':'가',을:b?'을':'를',과:b?'과':'와',으로:b&&b!==8?'으로':'로'}[p]||'');};
+const marker=/〔([^〕]+)〕/g;
+const allowed=new Set(['동기','선택','역량','과잉','수정','부담','실행','주의시작']);
+export function flowTemplateIssue(p){
+ if(!isFlow(p))return null;
+ if(!roles.includes(p.role))return 'invalid-flow-role';
+ for(const m of p.text.matchAll(marker)){const [key,particle]=m[1].split(':');if(!allowed.has(key)||particle&&!['은','이','을','과'].includes(particle))return 'invalid-flow-slot';}
+ if((p.text.match(/〔/g)||[]).length!==[...p.text.matchAll(marker)].length||(p.text.match(/〕/g)||[]).length!==[...p.text.matchAll(marker)].length||/〕[^〔]*〕/.test(p.text))return 'invalid-flow-slot';
+ return null;
+}
+export function flowPassages(c){
+ const m=c.id.match(/^timeline_(\w+)_(\d+)$/),i=m&&Number(m[2])-1,plan=m&&CONDITION_PLANS[m[1]]?.[i],scene=m&&FLOW_SCENES[m[1]]?.[i];if(!plan||!scene)return [];
+ const [s,object,gain,cost]=scene;
+ return ['strong','mid','weak'].flatMap((band,slot)=>{
+  const focus=plan[slot+1],body=CONDITIONAL_BODIES[m[1]][i][slot],practice=body[4];
+  const texts={
+   reality:s+'는 〔선택〕 쪽에 더 끌릴 수 있어요. 〔동기〕 마음이 '+josa(object,'을')+' 판단하는 데에도 작용하기 때문이에요.',
+   strength:'〔역량:은〕 '+josa(object,'을')+' 살피는 데 쓸 수 있어요. '+['눈앞의 결과에만 쏠리지 않으면, ','서로 다른 조건을 함께 놓고 보면, ','작게라도 직접 해볼 자리를 만들면, '][slot]+gain.replace(/것$/,'데')+' 도움이 돼요.',
+   risk:'그런데 〔주의시작〕 '+body[2],
+   reinforce:'〔부담〕 〔수정〕 '+body[3],
+   practice:'〔실행〕 '+practice
+  };
+  return roles.map(role=>({id:'flow-'+m[1]+'-'+(i+1)+'-'+band+'-'+role,role,kind:'guide',text:texts[role],when:{group:{[plan[0]]:band}},unless:{},ruleIds:[],adviceKey:'flow-'+m[1]+'-'+(i+1)+'-'+band+'-'+role}));
+ });
+}
+export function renderFlow(role,selected,sd){
+ const facts=deriveFacts(sd),template=selected.filter(p=>isFlow(p)&&p.role===role).sort((a,b)=>evalConds(b.when,facts).spec-evalConds(a.when,facts).spec||a.id.localeCompare(b.id))[0];if(!template)return null;
+ const parts=selected.filter(p=>p.id.startsWith('compound-'));
+ const score=p=>Object.keys(p.when.tenGod||{}).reduce((n,k)=>n+(facts.tenGod[k]?.pct||0),0);
+ const pick=family=>parts.filter(p=>p.id.includes('-'+family+'-')&&p.role===(family==='capacity'||family==='stem'?'reality':'strength')).sort((a,b)=>score(b)-score(a)||a.id.localeCompare(b.id))[0];
+ const cap=pick('capacity'),pair=pick('pair'),god=pick('god'),stem=pick('stem'),lead=pair||god;
+ if(!cap||!lead||!stem)return null;
+ const gods=Object.keys(lead.when.tenGod||{}),key=gods.join('+'),v=voices[key],budget=capacity[facts.strength],method=methods[facts.dayMaster]?.[facts.strength];if(!v||!budget||!method)return null;
+ const topic=template.id.split('-')[1],family=families[gods[0]],motive=motives[topic]?.[family]||v[0];
+ const style={신강:['스스로 ','흔들리지 않고 ','내 판단만 앞세워 '],신약:['도움을 받으면서도 ','주변의 도움을 받아 ','부담을 혼자 떠안은 채 '],중화:['상황에 맞추면서도 ','상황을 살피며 ','여러 요구를 맞추다가 ']}[facts.strength];
+ const pace={신강:'먼저 ',신약:'부담이 덜한 선에서 ',중화:'주변의 조건도 보면서 '}[facts.strength];
+ const warning={신강:'그 '+strengthNames[key]+'만 믿고',신약:'지금 여유가 적을 때는 그 '+josa(strengthNames[key],'이')+' 있어도,',중화:'그 '+josa(strengthNames[key],'으로')+' 상황을 조절하더라도,'}[facts.strength];
+ const slots={주의시작:warning,동기:motive,선택:pace+v[1],역량:style[1]+v[2],과잉:style[2]+v[3],수정:adjustment[key],부담:budget,실행:method};
+ const text=template.text.replace(marker,(_,key)=>{const [k,p]=key.split(':');return p?josa(slots[k],p):slots[k];});
+ // Keep the exact publication conditions and component IDs inspectable; no claims are manufactured.
+ const components=[template,cap,lead,stem].map(p=>({id:p.id,when:p.when,rows:evalConds(p.when,facts).rows}));
+ return {text,components,version:FLOW_VERSION};
+}

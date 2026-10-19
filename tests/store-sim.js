@@ -30,7 +30,8 @@ function fakeKV() { const m = new Map(), s = { get: 0, put: 0 }; return { s, m, 
   const kv = fakeKV(), envOff = { GLOSSARY_KV: kv }, envOn = { GLOSSARY_KV: kv, SUPABASE_URL: 'https://supabase.test', SUPABASE_SERVICE_KEY: 'svc' };
 
   console.log('1. 설정이 없으면 지금처럼 KV');
-  ok(kvOf(envOff) === kv && !supabaseOn(envOff), '환경변수 없음 → 원래 KV 객체를 그대로 돌려줌(원복 가능)');
+  const fallback=fakeKV(),wrapped=kvOf({GLOSSARY_KV:fallback});await wrapped.put('fallback-check','그대로');
+  ok(await wrapped.get('fallback-check')==='그대로'&&fallback.m.get('fallback-check')==='그대로'&&!supabaseOn(envOff), '환경변수 없음 → 기존 존댓말 프록시를 거쳐 KV 읽기·쓰기 유지');
   ok(kvOf({}) === undefined, 'KV 바인딩도 없으면 undefined(기존 `if (!kv)` 분기가 그대로 동작)');
 
   console.log('2. Supabase 켜짐: 라우팅');
