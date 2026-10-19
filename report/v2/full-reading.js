@@ -1,6 +1,33 @@
 // 완성된 무빙툰의 모든 본문 챕터를 원국과 DB 원리로 다시 풀이한다.
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {}, active = null;
+  // A gateway can return HTML (or a truncated body) before the JSON API finishes.
+  // Retry only transport failures; evidence/validation/quota decisions are final.
+  async function readingResponse(init, session, chapter) {
+    var transientStatus=function(s){return s===408 || s===425 || s===502 || s===503 || s===504 || s>=520 && s<=524;};
+    for(var attempt=0;attempt<3;attempt++){
+      if(session.cancelled || init.signal && init.signal.aborted){var cancelled=new Error('cancelled');cancelled.name='AbortError';throw cancelled;}
+      var response=null, data=null, failure=null;
+      try {
+        response=await root.fetch('/api/movingtoon-reading',init);
+        try{data=await response.json();}catch(e){failure=e;}
+        if(!failure){
+          // Only explicit in-progress/storage responses are retriable JSON errors.
+          // Never repeat paid generation after a quality or cost rejection.
+          if(!(data && !data.ok && ['generation-in-progress','storage-unavailable'].indexOf(data.error)>=0 && (response.status===202 || transientStatus(response.status))))return {r:response,d:data};
+          failure=new Error('temporary-reading-service');
+        }
+        if(!transientStatus(response.status) && !response.ok)throw failure;
+      } catch(e){
+        if(e.name==='AbortError' || init.signal && init.signal.aborted)throw e;
+        failure=e;
+        if(response && !transientStatus(response.status) && !response.ok)throw e;
+      }
+      if(attempt===2)throw failure;
+      chapter.readingRecovery={attempt:attempt+1,status:response?response.status:0,reason:failure instanceof SyntaxError?'invalid-json':'transport'};
+      await new Promise(function(resolve){root.setTimeout(resolve,attempt===0?800:2000);});
+    }
+  }
   function collect(chapter, name) {
     var paragraphs = [], targets = [];
     // 생활 점검 지표와 예방 안내는 검증된 고정 문구로 유지한다.
@@ -123,8 +150,9 @@
       var ctl = root.AbortController ? new root.AbortController() : null, timer = root.setTimeout(function () { if (ctl) ctl.abort(); }, 85000);
       if (ctl) session.controllers.push(ctl);
       try {
-        var r = await root.fetch('/api/movingtoon-reading', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ realityContext:R.Editorial?R.Editorial.cleanContext(rep.realityContext):{}, guide: guide, directnessConsent: root.document && root.document.getElementById("directnessConsent") && root.document.getElementById("directnessConsent").checked ? 5 : null, sd: safe, outline: outline, chapter: job.chapter, previous: Array.from(acceptedTexts.entries()).slice(-80).map(function(x){return {text:name?x[0].split(name).join('본인'):x[0],chapter:x[1]};}) }), signal: ctl && ctl.signal });
-        var d;try {d=await r.json();}catch(e){defer(item,null,'server-response-invalid');return;}
+        var response = await readingResponse({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ realityContext:R.Editorial?R.Editorial.cleanContext(rep.realityContext):{}, guide: guide, directnessConsent: root.document && root.document.getElementById("directnessConsent") && root.document.getElementById("directnessConsent").checked ? 5 : null, sd: safe, outline: outline, chapter: job.chapter, previous: Array.from(acceptedTexts.entries()).slice(-80).map(function(x){return {text:name?x[0].split(name).join('본인'):x[0],chapter:x[1]};}) }), signal: ctl && ctl.signal },session,item.c);
+        var r=response.r;
+        var d=response.d;
         if(session.cancelled)return;
         if(d && ['no-ai','rate-limited','cost-limit'].indexOf(d.error)>=0)unavailable={error:d.error};
         if (r.ok && d && d.ok && uniqueAcross(d.result, acceptedTexts, item.c.id,item.c) && apply(job, d.result)) {
@@ -140,7 +168,7 @@
           remember(d.result,acceptedTexts,item.c.id);status.completed++;
           if(onReady)onReady(item.c,job,d.result);
         } else defer(item,d,d && d.ok?'client-validation-failed':'server-communication-failed');
-      } catch (e) { if(!session.cancelled)defer(item,null,e && e.name==='AbortError'?'server-timeout':'server-communication-failed'); }
+      } catch (e) { if(!session.cancelled)defer(item,null,e && e.name==='AbortError'?'server-timeout':e instanceof SyntaxError?'server-response-invalid':'server-communication-failed'); }
       finally {root.clearTimeout(timer);if(ctl)session.controllers=session.controllers.filter(function(c){return c!==ctl;});}
     }
     // 첫 챕터를 준비한 뒤 표시하고, 후속 챕터는 미리 준비한다. 현재 DOM은 다시 그리지 않는다.
