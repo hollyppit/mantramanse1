@@ -129,7 +129,7 @@ export function deriveFacts(sd, ext) {
   f.rootEvidence = sd.roots || null;
   f.currentRoots = sd.currentRoots || null;
   if (sd.usefulElements) f.yongEl = sd.usefulElements.yong;
-  f.pattern = (sd.patterns || []).map(p => p.name); f.star = [...new Set([...(sd.specialStars || []).map(s => s.name),...Object.entries(sd.sinsal12 || {}).filter(([pillar,name])=>sd.pillars?.[pillar] && typeof name==='string').map(([,name])=>name)])];
+  f.pattern = [...new Set([...(sd.patterns || []).map(p => p.name), f.dayPillar + '일주'])]; f.star = [...new Set([...(sd.specialStars || []).map(s => s.name),...Object.entries(sd.sinsal12 || {}).filter(([pillar,name])=>sd.pillars?.[pillar] && typeof name==='string').map(([,name])=>name)])];
   const rel = new Set(); [...(sd.combinations || []), ...(sd.clashes || [])].forEach(r => { if (r.type) rel.add(r.type); if (r.name) rel.add(r.name); }); f.relation = [...rel];
   f.el = {}; ELEMENTS.forEach(e => { const p = sd.fiveElements && sd.fiveElements[e]; if (p != null) f.el[e] = { pct: p, level: levelOf(p) }; });
   f.group = {}; GROUPS.forEach(g => { const p = sd.groups && sd.groups[g]; if (p != null) f.group[g] = { pct: p, level: levelOf(p) }; });

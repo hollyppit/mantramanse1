@@ -4,7 +4,7 @@ import { deriveFacts, retrieve, applyModifiers, tplVars, tplFill, BANNED_RE, ban
 import { violations } from './_guard.js';
 import { PROHIBITED_RE } from './_style.js';
 
-export const ENGINE_VERSION = 'interpretation-2';
+export const ENGINE_VERSION = 'interpretation-3';
 export const SECTIONS = ['diagnosis','basis','strength','vulnerability','examples','timing','strategy','verdict'];
 export const DEFAULT_SETTINGS = { mode: 'grounded', semanticReview: true, disabledRules: [], maxClaims: 45, maxOutputTokens: 14000, openaiModel: '', anthropicModel: '', promptVersion: ENGINE_VERSION, inputPricePerMillion: null, outputPricePerMillion: null, maxRequestCost: null };
 const copy = x => JSON.parse(JSON.stringify(x));
@@ -44,10 +44,21 @@ function evidenceFor(item, blocked, sourceIndex) {
     return chunks.length > 0 && (e.quote ? chunks.some(c => String(c.text || '').includes(e.quote)) : !!e.chunkId);
   });
 }
+// Research source deficits independently of whether a different general claim is available.
+export function missingSourceRules(items,linkedIds,sourceIndex,blocked=new Set()) {
+ const linked=new Set(linkedIds||[]);
+ return items.filter(item=>linked.has(item.id)&&!evidenceFor(item,blocked,sourceIndex).length).map(item=>item.id);
+}
 export function sourcePremiseIssue(item, sd) {
   const p=String(item.principle || ''), relations=sd.clashes || [];
+  if(/지지에\s*강하게\s*통근|강한\s*통근/.test(p) && sd.roots?.level!=='강한 통근')return 'source-root-strength-mismatch';
   const scopedPillar=p.match(/^\s*([갑을병정무기경신임계][자축인묘진사오미신유술해])(?:\([^)]+\))?\s*일주/);
   if(scopedPillar && scopedPillar[1]!==sd.dayPillar?.ko)return 'source-day-pillar-mismatch';
+  if(/일주에[^.!?]{0,60}(?:년살|도화살|화개살)[^.!?]{0,20}(?:있으면|있을|있는)/.test(p) && item.conditions?.star?.length){
+    const canonical=n=>String(n||'').replace(/도화살|도화/g,'년살');
+    const dayStars=[...(sd.specialStars||[]).filter(x=>x.pillar==='day').map(x=>x.name),typeof sd.sinsal12?.day==='string'?sd.sinsal12.day:sd.sinsal12?.day?.name].filter(Boolean).map(canonical);
+    if(!item.conditions.star.some(n=>dayStars.includes(canonical(n))))return 'source-day-star-location-mismatch';
+  }
   if(/붕충의 해/.test(p) && !Object.keys(item.conditions || {}).some(k=>/daewoon|seun|monthSeason|futureSeason/.test(k)))return 'source-time-condition-missing';
   if(/토끼리.*충|진술축미.*(?:붕충|부딪)/.test(p) && !relations.some(r=>r.type==='충' && r.members?.length===2 && r.members.every(k=>['진','술','축','미'].includes(sd.pillars?.[k]?.ko?.[1]))))return 'source-earth-clash-mismatch';
   if(/두 사람의 일지|일지끼리/.test(p))return 'source-partner-chart-missing';

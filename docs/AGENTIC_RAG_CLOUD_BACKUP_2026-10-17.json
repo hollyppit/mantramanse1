@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-17T11:37:24.189Z",
+  "productionWrites": 0,
+  "deployments": 0,
+  "folder": "output/protected-backup/cloud-2026-10-17T11-37-24-189Z",
+  "kvKeys": 146,
+  "r2Objects": 920,
+  "r2Bytes": 2923467818,
+  "nonStandardObjects": 0,
+  "usage": {
+    "checkedAt": "2026-10-17T11:37:24.534Z",
+    "r2MonthOperations": 41313,
+    "kvMonthOperations": 65639,
+    "dailyReads": 1686,
+    "dailyLists": 0,
+    "conservativeMarginPassed": true,
+    "billingLedgerAvailable": false,
+    "analyticsCanLag": true
+  },
+  "complete": true,
+  "kvListingUnchanged": true,
+  "r2ListingUnchanged": true,
+  "productionConfigUnchanged": true,
+  "localHashesVerified": true,
+  "manifestSHA256": "6ed5c118a21fa5ad5e9ddf7c71215451f394642cd59d971d5c562e4429a34fc6"
+}

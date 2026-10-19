@@ -1,3 +1,4 @@
+import { aiFetch } from '../_ai-cost.js';
 // 리포트 미디어 라이브러리 (이미지·영상·루프·배경·캐릭터·상징·전환·챕터 커버)
 // GET  /api/media            — 공개. 활성+태그 승인된 미디어만 (조합용). 관리자 인증 + ?all=1 이면 전부
 // PUT  /api/media            — 관리자. { media: [...] } 전체 저장 (태그는 taxonomy 밖 값 제거)
@@ -41,7 +42,7 @@ async function ask(env, mime, b64, note) {
   const errs = [], user = note || '이 미디어의 태그를 추천해줘.';
   if (env.ANTHROPIC_API_KEY) {
     try {
-      const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(40000), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+      const r = await aiFetch(env, 'media', 'https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(40000), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
         body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 700, system: PROMPT, messages: [{ role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: mime, data: b64 } }, { type: 'text', text: user }] }] }) });
       if (r.ok) { const d = await r.json(); return (d.content || []).filter(x => x.type === 'text').map(x => x.text).join(''); }
       errs.push('anthropic ' + r.status);
@@ -49,7 +50,7 @@ async function ask(env, mime, b64, note) {
   }
   if (env.OPENAI_API_KEY) {
     try {
-      const r = await fetch('https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(40000), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY },
+      const r = await aiFetch(env, 'media', 'https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(40000), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY },
         body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: PROMPT, input: [{ role: 'user', content: [{ type: 'input_text', text: user }, { type: 'input_image', image_url: `data:${mime};base64,${b64}` }] }] }) });
       if (r.ok) { const d = await r.json(); return typeof d.output_text === 'string' ? d.output_text : (d.output || []).flatMap(o => o.content || []).map(c => c.text || '').join(''); }
       errs.push('openai ' + r.status);

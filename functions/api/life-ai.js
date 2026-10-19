@@ -1,3 +1,4 @@
+import { aiFetch } from '../_ai-cost.js';
 // 인생 지도 AI 추정(공개 엔드포인트): 인간관계 · 결혼(인연) 시기 활성도. 엔진에 전용 모델이 없는 두 분야만 AI 가 추정한다.
 // POST /api/life-ai  { gender, natal:{pillars,strength,dayBranchTG}, decades:[{a,g,s,b,r}], years:[{y,a,g,s,b,r}] } → { ok, result:{relation,marriage}, cached, source:'ai' }
 // 보내는 데이터에는 생년월일·이름이 없다(간지·십성·합충 요약만). 같은 입력은 KV 에 30일 캐시. 실패하면 { ok:false } — 클라이언트가 규칙 추정을 그대로 쓴다.
@@ -8,13 +9,13 @@ import { validate, SYSTEM, buildUser, sanitize, cacheKey } from '../_lifeai.js';
 
 const TIMEOUT_MS = 30000;
 async function claude(env, system, user) {
-  const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+  const r = await aiFetch(env, 'life-ai', 'https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
     body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 3500, system, messages: [{ role: 'user', content: user }] }) });
   if (!r.ok) throw new Error('anthropic ' + r.status);
   const d = await r.json(); return (d.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
 }
 async function openai(env, system, user) {
-  const r = await fetch('https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY },
+  const r = await aiFetch(env, 'life-ai', 'https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY },
     body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-4.1', instructions: system, input: user, max_output_tokens: 3500 }) });
   if (!r.ok) throw new Error('openai ' + r.status);
   const d = await r.json(); return typeof d.output_text === 'string' ? d.output_text : (d.output || []).flatMap(o => o.content || []).map(c => c.text || '').join('');

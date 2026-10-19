@@ -1,0 +1,28 @@
+import json, pathlib, hashlib
+root=pathlib.Path('.')
+out=root/'output/independent-reference-2026-10-17'
+sources=[
+ dict(id='ZP24',title='子平真詮·論妻子',url='https://www.donglishuzhai.net/chapter/3737.html',locator='妻宮/妻星 두 문단, 웹 전사 L50–52',layer='沈氏 본문; 校 표기는 교감자 층',quote='其理不可執一也',finding='배우자궁의 재관·상관·양인은 월령의 격과 희기에 따라 해석이 달라진다. 처성 투출도 성격/파격 및 궁의 형충을 나누어 본다.',limit='남성 처성 논의를 여성 관성에 그대로 전이하지 않는다. 현대 관계 결과의 실증 정답이 아니다.'),
+ dict(id='ZP25',title='子平真詮·論行運',url='https://www.donglishuzhai.net/chapter/3738.html',locator='喜忌·干支有別 문단, L48–60',layer='沈氏 본문; 東里山人按은 현대 편집자 의견',quote='配命中八字而統觀之',finding='운을 원국 전체와 대조한다. 丙의 子월亥년에는 丙丁 지원과 巳午 충이 구별되고, 丁의 亥월壬 투간에는 丙 지원과 丁 합관이 구별된다.',limit='같은 오행·십성군이라는 이유로 지원 효과를 통일할 수 없다. 대운 논의를 연도 종합 수치 공식으로 간주하지 않는다.'),
+ dict(id='ZP33',title='子平真詮·論財',url='https://www.donglishuzhai.net/chapter/3746.html',locator='財旺生官/財用食生/佩印/食印, L50–57',layer='沈氏 본문; 校/按 분리',quote='財印不宜相並',finding='재왕생관에는 신강·상관 불투·칠살 불혼 조건이 붙는다. 재용식생도 신강 등 조건을 둔다. 재인 및 식인의 위치와 방해 여부를 구별한다.',limit='재가 많다는 관찰만으로 과다·손상·관계 악화를 확정하지 않는다. 재격의 조건을 모든 격에 일반화하지 않는다.'),
+ dict(id='ZP34',title='子平真詮·論財取運',url='https://www.donglishuzhai.net/chapter/3747.html',locator='財用食生/財格佩印/財用食印, L48–56',layer='沈氏 본문; 官運/印 이문 및 東里按 별도',quote='財食重而身輕',finding='재식이 무겁고 몸이 가벼운 경우 지원을, 재식이 가볍고 몸이 무거운 경우 재식을 취하는 상반 조건이 있다. 식인 병용에서도 재경/신경에 따라 취운이 달라진다.',limit='重/輕의 백분율은 제시되지 않는다. 官運/印 이문과 식재살 연결에 대한 편집자 의문은 미해결로 남긴다.'),
+ dict(id='SM7',title='三命通會·卷七·論女命 및 清/安靜守分',url='https://zh.wikisource.org/zh/三命通會/卷七',locator='論女命 L155; 清 L171; 安靜守分 L221',layer='萬民英 편찬 전통의 집록 본문, 내부 관법/인용 혼재; 디지털 전사',quote='相停無克',finding='관살을 배우자 성분으로 보는 범주 외에 득시·근기·재생관·인조신·형충·혼잡을 함께 논한다. 두 관이 있어도 살이 섞이지 않은 경우와 순살을 별도로 허용해 개수만의 단정을 막는다.',limit='역사적 여성 종속·도덕 평가 문구를 현대 성격·성윤리·혼인 결과로 채택하지 않는다. 집록 내부의 자왕 찬반은 동일 조건으로 합치지 않는다.')]
+rules={
+'D27-20261016-M-risk':dict(evidence=['ZP25','ZP33','ZP34'],checks=['재격 해당 여부와 재식/일간 상대 작용을 먼저 입증','원국-대운-세운 천간·지지별 지원/충/합을 각각 기록','인성 지원이 재에 막히거나 합으로 역할이 바뀌는지 검수'],missing=['재식重/身輕의 독립 판정','대운·세운 결합의 효과 순서와 재현 가능한 비교 기준','28% 등 엔진 경계와 원문 의미의 동등성']),
+'D27-20261016-L-male-over':dict(evidence=['ZP24','ZP33','ZP34'],checks=['처성 및 처궁을 구분','월령 격의 성패·희기와 재인 위치 확인','재 다수와 실제 과도 작용을 구분'],missing=['재多가 실제 신약을 압도한다는 사례별 근거','30%/도움42%의 동등성','현대 관계 서술로 전환할 독립 근거']),
+'D27-20261016-L-female-over':dict(evidence=['SM7','ZP25'],checks=['관/살의 개수와 혼잡·역할을 분리','득시·근기·인조신·재생관과 형충 함께 기록','남성 처성 조문을 대칭 전용하지 않음'],missing=['관살의 상대 과도와 일간 감당 능력의 독립 판정','집록 내부 상반 관법의 적용 범위','30%/도움42%의 동등성'])}
+cases=json.loads((out/'cases.json').read_text(encoding='utf-8-sig'))
+rows=[]
+for c in cases:
+ r=rules[c['ruleId']]
+ rows.append(dict(id=c['id'],ruleId=c['ruleId'],raw=c['raw'],sourceIds=r['evidence'],requiredChecks=r['checks'],unresolved=r['missing'],hourMissing=not c['raw']['hourKnown'],verdict='unknown',publishable=False,note='문헌 조건 연결표이며 사례의 조건 충족을 새로 확정한 검수는 아님'))
+ledger=dict(date='2026-10-17',scope='조건 근거 보강; 엔진 정답 사용 안 함',sources=sources,rules=rules,cases=rows,externalAI=False,published=False,limitation='디지털 전사 대조; 영인본 교감 및 독립 전문가 확정 미완료')
+(out/'held-three-literature-reinforcement.json').write_text(json.dumps(ledger,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+lines=['# 보류 세 규칙 — 추가 문헌 근거 및 적용 조건','', '2026-10-17. 원전 2종의 5개 장·절 묶음을 확인해 조건과 반례를 보강했다. 문헌의 존재·조건 서술 확인과 실제 명조 판정 확정은 구분한다. 규칙 3개 및 독립 표본 32개 최종 판정은 유보한다. 게시·배포·운영 변경·외부 AI 호출 없음.','', '## 출처와 보강 내용','']
+for s in sources:
+ lines += ['### '+s['id']+' — '+s['title'],'', '['+s['title']+']('+s['url']+') · '+s['locator']+'.','', '**출처층:** '+s['layer']+'. 짧은 표제 구절: 「'+s['quote']+'」.','',s['finding'],'','**적용 한계:** '+s['limit'],'']
+lines += ['## 세 규칙에 연결한 검수 조건','', '| 규칙 | 근거 | 먼저 확인할 조건 | 남은 공백 |','|---|---|---|---|']
+for k,r in rules.items(): lines += ['| '+k+' | '+', '.join(r['evidence'])+' | '+'; '.join(r['checks'])+' | '+'; '.join(r['missing'])+' |']
+lines += ['','## 관법·판본 차이와 채택 제한','', '자평진전의 월령·격국·성패 관법과 삼명통회의 집록 관법을 한 수치 모델로 합치지 않는다. 동리 전사의 校/東里山人按은 심씨 본문과 구분한다. 특히 식재살의 생극 설명에 편집자가 제기한 의문과 官運/印 이문은 합의된 규칙으로 채택하지 않았다. 삼명통회는 내부에 자왕을 좋게 보는 문장과 지나친 자왕을 경계하는 문장이 함께 있어 전후 조건 없이 하나만 선택하지 않는다.','', '이번에 확보한 것은 원전 디지털 전사다. 영인본 대조까지 완료한 비평판 자료나 현대 예측 정확도의 증거라고 표시하지 않는다. 역사적 여성 비하·성윤리·신분 단정 및 질병·수명 예측은 규칙 보강 대상으로 채택하지 않았다.','', '## 32개 표본과 G14·G15 처리','', '비공개 JSON에 32개 ID별 원국 원자료, 관련 출처, 추가 확인 조건, 남은 공백을 연결했다. 이 연결은 새 명조 검수 완료나 조건 충족 판정이 아니다. 기존 엔진 점수·다수결·기존 모델 결과를 정답으로 읽지 않았다. 시주 미상 표본에는 추가 누락 표시를 유지한다.','', 'G14는 壬의 午월이라는 일부 조건만으로 論財의 사례 전체와 동일시할 수 없다. 寅午戌/辰戌 경합 이후 辰의 근 효력과 두 庚의 실제 지원은 여전히 미확정이다. G15는 시주 미상과 卯戌/辰戌 경합이 남아 있다. 새 여성 명조 조문도 이 배치의 근 보존·손상을 직접 증명하지 않는다. 두 사례 모두 이전 유보를 유지한다.','', '## 검증과 다음 판정 요건','', '로컬 검증은 출처 ID 참조, 기존 표본 32개와 ID·원자료 일치, 세 규칙 연결, 전체 unknown/publishable=false, 엔진 결과 입력 부재를 검사한다. 문헌 내용의 독립 전문가 검증이나 수치 동등성 검증을 통과했다는 뜻은 아니다.','', '다음 확정에는 ① 근의 실효·상대 작용을 조건별로 설명할 독립 검수 ② 시주 보완 또는 가능한 시주 전체에서 결론 안정성 확인 ③ 重/輕·과다와 수치 경계의 독립 대응 검증이 필요하다. 현재 확보한 원전에는 28%·30%·42% 임계값이 없으므로 이를 고전의 기준으로 소급하지 않는다.','', '상세 원장: output/independent-reference-2026-10-17/held-three-literature-reinforcement.json. 재생성: python tools/reinforce-held-literature.py. 검증: node tests/held-literature-reinforcement-sim.cjs.','']
+(root/'docs/HELD_THREE_LITERATURE_REINFORCEMENT_2026-10-17.md').write_text('\n'.join(lines),encoding='utf-8')
+print('Saved 5 source sections, 3 rule requirement maps, 32 case link records (all held).')

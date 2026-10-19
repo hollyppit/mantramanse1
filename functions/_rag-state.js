@@ -40,3 +40,17 @@ export function sourcePolicy(url,c) {
   if(!p||!p.commercial||!p.quote||!p.store||!p.license||!p.rightsUrl||!p.author||p.aiGenerated)throw Error('source-rights-not-approved');
   return p;
 }
+
+// Queue only evidence gaps, never private charts or prose. Keyed by chapter and rule.
+export async function queueResearch(kv,knowledgeIds,chapter,{now=Date.now()}={}) {
+ if(!kv?.researchCAS || !/^[\w.-]{1,80}$/.test(chapter || ''))return {queued:0};
+ const ids=[...new Set(knowledgeIds)].filter(id=>typeof id==='string'&&/^[\w.-]{1,120}$/.test(id));
+ return updateState(kv,s=>{s.readingRequests ||= {};let queued=0;
+  for(const id of ids){const key=chapter+':'+id,old=s.readingRequests[key];
+   if(old)continue;if(Object.keys(s.readingRequests).length>=500)break;
+   s.readingRequests[key]={knowledgeId:id,chapter,state:'pending',at:new Date(now).toISOString(),attempts:0};queued++;
+  }
+  if(queued)event(s,'reading-evidence-queued',{chapter,knowledgeIds:ids,queued},'reading-service',now);
+  return {queued};
+ });
+}

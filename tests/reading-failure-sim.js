@@ -8,7 +8,8 @@ async function run(fetcher,chapters){
  global.fetch=fetcher;const rep={chapters};let finish;const ready=new Promise(r=>finish=r);let n=0;
  const task=F.prepare(rep,{name:'SECRET_NAME',birth:'SECRET_BIRTH'},'SECRET_NAME',()=>{if(++n===chapters.length)finish();});
  await task.first;
- await Promise.race([ready,new Promise((_,reject)=>{const t=setTimeout(()=>reject(Error('worker did not settle')),1000);t.unref();})]);
+ for(const c of chapters){F.prioritize(c.id);while(!c.readingFullText && !c.readingWarning)await new Promise(resolve=>setTimeout(resolve,0));}
+ await Promise.race([ready,new Promise((_,reject)=>{const t=setTimeout(()=>reject(Error('worker did not settle')),6000);t.unref();})]);
  return rep;
 }
 (async()=>{
@@ -31,5 +32,6 @@ async function run(fetcher,chapters){
  rep=await run(async()=>{throw Error('SECRET_NETWORK');},[chapter('c01')]);assert.equal(rep.chapters[0].readingWarning,'server-communication-failed');assert(!JSON.stringify(rep).includes('SECRET_NETWORK'));
  rep=await run(async()=>new Response('<html>gateway</html>',{status:502}),[chapter('c01')]);assert.equal(rep.chapters[0].readingWarning,'server-response-invalid');
  count=0;rep=await run(async()=>{count++;return new Response(JSON.stringify({ok:false,error:'no-ai'}),{status:503});},[chapter('c01'),chapter('c08')]);assert.equal(count,1);assert.equal(rep.readingStatus.failed,2);assert(rep.chapters.every(c=>c.readingDeferred && !c.scenes[0].body));
+ count=0;rep=await run(async()=>{count++;return count===1?new Response(JSON.stringify({ok:false,error:'rate-limited'}),{status:429}):new Response(JSON.stringify({ok:true,cached:true,result:{paragraphs:[{id:'0',text:'앞 장의 생성 한도 초과와 관계없이 이 장에 저장된 검수 완료 본문을 정상적으로 읽을 수 있어야 합니다.',refs:[]}]}}));},[chapter('c01'),chapter('c08')]);assert.equal(count,2);assert.equal(rep.readingStatus.completed,1);assert.equal(rep.readingStatus.failed,1);
  console.log('reading-failure: isolated chapters, network/invalid JSON/global outage, safe diagnostics, auth, opt-in, no stale prose PASS');
 })().catch(e=>{console.error(e);process.exitCode=1;}).finally(()=>{global.fetch=originalFetch;});

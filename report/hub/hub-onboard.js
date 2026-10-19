@@ -137,7 +137,7 @@
     Ob.config().then(function () {
       if (!H.alive(ctx)) return;
       if (!PREVIEW) { try { sessionStorage.setItem('mt_onb_shown', '1'); } catch (e) { } }
-      if (CFG.renewal && CFG.renewal.cinematic && CFG.renewal.cinematic.enabled !== false && root.Cinematic) { var cv = document.getElementById('cover'); if(cv) cv.hidden=true; var ce=paint('<div></div>','ob-cine'); onLeave(root.Cinematic.mount(ce,CFG,function(){ if(PREVIEW) return; lset(SEEN,1); H.go(q.replay && P.has() ? '#/begin?edit=1' : '#/begin'); })); return; }
+      if (q.home !== '1' && CFG.renewal && CFG.renewal.cinematic && CFG.renewal.cinematic.enabled !== false && root.Cinematic) { var cv = document.getElementById('cover'); if(cv) cv.hidden=true; var ce=paint('<div></div>','ob-cine'); onLeave(root.Cinematic.mount(ce,CFG,function(){ if(PREVIEW) return; lset(SEEN,1); H.go(q.replay && P.has() ? '#/begin?edit=1' : '#/begin'); })); return; }
       var Art = root.OnboardArt || { forCase: function () { return ''; }, forIntro: function () { return ''; }, forTopic: function () { return ''; } };
       var intro = CFG.intro.filter(function (s) { return s.enabled !== false; }), BR = CFG.bridge || {}, seenN = 0, hasProfile = P.has();
       var renewed = CFG.renewal && CFG.renewal.enabled !== false;

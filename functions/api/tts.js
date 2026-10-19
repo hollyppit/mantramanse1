@@ -1,3 +1,4 @@
+import { aiFetch } from '../_ai-cost.js';
 // 음성 합성 (관리자 전용): 일레븐랩스(ElevenLabs) 또는 OpenAI. provider 로 고른다(기본 eleven). 만든 mp3는 R2(CLIPS_R2)에 저장하고, 재생은 /api/clipfile?k=<키> 로 한다.
 // 필요한 설정: Secret ELEVENLABS_API_KEY(일레븐랩스) 또는 OPENAI_API_KEY(OpenAI), R2 바인딩 CLIPS_R2, Secret ADMIN_PASSWORD
 // GET  /api/tts?status=1 — 어떤 공급자가 설정돼 있는지 { eleven, openai, r2 }
@@ -75,7 +76,7 @@ export async function onRequestPost({ request, env }) {
 
   const body = { text, model_id: model, voice_settings: { stability, similarity_boost: similarity, style, use_speaker_boost: true, speed } };
   if (LANG_MODELS.includes(model)) body.language_code = 'ko';
-  const r = await fetch(`${API}/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`, {
+  const r = await aiFetch(env, 'elevenlabs-tts', `${API}/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`, {
     method: 'POST', headers: { 'xi-api-key': env.ELEVENLABS_API_KEY, 'content-type': 'application/json', accept: 'audio/mpeg' }, body: JSON.stringify(body),
   });
   if (!r.ok) return apiError(r);
@@ -96,7 +97,7 @@ async function speakOpenAI(env, b, text) {
   if (!b.force && await env.CLIPS_R2.head(key)) return json({ ok: true, key, cached: true });
   const body = { model, input: text, voice, response_format: 'mp3', speed };
   if (instructions) body.instructions = instructions;
-  const r = await fetch('https://api.openai.com/v1/audio/speech', { method: 'POST', headers: { authorization: 'Bearer ' + env.OPENAI_API_KEY, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  const r = await aiFetch(env, 'tts', 'https://api.openai.com/v1/audio/speech', { method: 'POST', headers: { authorization: 'Bearer ' + env.OPENAI_API_KEY, 'content-type': 'application/json' }, body: JSON.stringify(body) });
   if (!r.ok) return openAIError(r);
   const audio = await r.arrayBuffer();
   await env.CLIPS_R2.put(key, audio, { httpMetadata: { contentType: 'audio/mpeg' } });

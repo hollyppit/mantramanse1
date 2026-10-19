@@ -1,3 +1,4 @@
+import { aiFetch } from './_ai-cost.js';
 // 풀이 지식(IK)·풀이 자료(SRC) API 가 함께 쓰는 저장·AI 도우미. 파일명이 _로 시작해 라우트로 노출되지 않는다.
 import { DOMAINS } from './_ik.js';
 import { serviceItems } from './_rag-view.js';
@@ -26,14 +27,14 @@ export async function llm(env, system, user, maxTokens = 6000, timeoutMs = TIMEO
   const errs = [];
   if (env.OPENAI_API_KEY) {
     try {
-      const r = await fetch('https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(timeoutMs), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: system, input: user }) });
+      const r = await aiFetch(env, 'ikstore', 'https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(timeoutMs), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: system, input: user }) });
       if (!r.ok) throw new Error('openai ' + r.status + await errDetail(r));
       const d = await r.json(); return { text: typeof d.output_text === 'string' ? d.output_text : (d.output || []).flatMap(o => o.content || []).map(c => c.text || '').join(''), provider: 'openai' };
     } catch (e) { errs.push(e.message); }
   }
   if (env.ANTHROPIC_API_KEY) {
     try {
-      const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(timeoutMs), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+      const r = await aiFetch(env, 'ikstore', 'https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(timeoutMs), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
         body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] }) });
       if (!r.ok) throw new Error('anthropic ' + r.status + await errDetail(r));
       const d = await r.json(); return { text: (d.content || []).filter(b => b.type === 'text').map(b => b.text).join(''), provider: 'anthropic', stop: d.stop_reason || '' };
@@ -41,7 +42,7 @@ export async function llm(env, system, user, maxTokens = 6000, timeoutMs = TIMEO
   }
   if (env.GEMINI_API_KEY) {
     try {
-      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + (env.GEMINI_MODEL || 'gemini-2.5-flash') + ':generateContent', { method: 'POST', signal: AbortSignal.timeout(timeoutMs), headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+      const r = await aiFetch(env, 'ikstore', 'https://generativelanguage.googleapis.com/v1beta/models/' + (env.GEMINI_MODEL || 'gemini-2.5-flash') + ':generateContent', { method: 'POST', signal: AbortSignal.timeout(timeoutMs), headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
         body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ role: 'user', parts: [{ text: user }] }], generationConfig: { maxOutputTokens: maxTokens } }) });
       if (!r.ok) throw new Error('gemini ' + r.status + await errDetail(r));
       const d = await r.json(), c = (d.candidates || [])[0] || {};

@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-17T11:56:40.585Z",
+  "scope": "Supabase RAG rows only",
+  "sourceProject": "mantramanse1",
+  "projectIsLiveSiteDatabase": "unconfirmed-secret-url",
+  "mode": "isolated-local-restore",
+  "engine": "PostgreSQL 17.5 on aarch64-unknown-linux-gnu, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit",
+  "cloudWrites": 0,
+  "externalAPICalls": 0,
+  "backupFile": "output/protected-backup/mantramanse1-rag-20261017.json",
+  "backupFileSHA256": "3f76f38a3cefb5834a7579ed2875483df7d46182c567c8fe9a8932b96d721316",
+  "matched": true,
+  "counts": {
+    "rows": 159,
+    "knowledge": 386,
+    "published": 333,
+    "reviewed": 382,
+    "sourceRows": 25
+  },
+  "sha256": "9ceb7f58551bdb56d82a68766c23f2c2e65db4bca87a9b0791a867bab2d3bd9d",
+  "excluded": [
+    "R2 original files",
+    "Cloudflare KV",
+    "non-RAG DB rows",
+    "database roles and database-wide configuration"
+  ]
+}

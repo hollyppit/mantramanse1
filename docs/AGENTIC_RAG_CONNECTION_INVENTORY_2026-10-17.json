@@ -1,0 +1,185 @@
+{
+  "checkedAt": "2026-10-17T11:03:40.868Z",
+  "mode": "read-only",
+  "tokenVerified": true,
+  "accounts": [
+    {
+      "reference": "98f95fe9dedf"
+    }
+  ],
+  "projects": [
+    {
+      "name": "mantramanse",
+      "domain": "mantramanse.pages.dev",
+      "productionBranch": "main",
+      "production": {
+        "variables": {
+          "ADMIN_PASSWORD": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "ANTHROPIC_API_KEY": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "ELEVENLABS_API_KEY": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "GEMINI_API_KEY": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "KLING_API_KEY": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "KLING_MODEL": {
+            "type": "plain_text",
+            "readable": true
+          },
+          "OPENAI_API_KEY": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "SUPABASE_SERVICE_KEY": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "SUPABASE_URL": {
+            "type": "secret_text",
+            "readable": false
+          }
+        },
+        "supabaseHost": null,
+        "kv": [
+          "GLOSSARY_KV"
+        ],
+        "r2": [
+          "CLIPS_R2"
+        ]
+      },
+      "preview": {
+        "variables": {},
+        "supabaseHost": null,
+        "kv": [],
+        "r2": []
+      },
+      "previewSharesSupabase": null,
+      "previewHasSupabase": false,
+      "previewSharesKV": false,
+      "previewSharesR2": false,
+      "productionConfigurationUnchanged": true,
+      "dataIntegrityChecked": false
+    },
+    {
+      "name": "mantrahome1",
+      "domain": "mantrahome1.pages.dev",
+      "productionBranch": "main",
+      "production": {
+        "variables": {},
+        "supabaseHost": null,
+        "kv": [],
+        "r2": []
+      },
+      "preview": {
+        "variables": {},
+        "supabaseHost": null,
+        "kv": [],
+        "r2": []
+      },
+      "previewSharesSupabase": null,
+      "previewHasSupabase": false,
+      "previewSharesKV": false,
+      "previewSharesR2": false,
+      "productionConfigurationUnchanged": true,
+      "dataIntegrityChecked": false
+    },
+    {
+      "name": "mantracopliot4",
+      "domain": "mantracopliot4.pages.dev",
+      "productionBranch": "main",
+      "production": {
+        "variables": {
+          "ADMIN_PASSWORD": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "ANTHROPIC_API_KEY": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "OPENAI_API_KEY": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "SUPABASE_SERVICE_KEY": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "SUPABASE_URL": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "YOUTUBE_API_KEY": {
+            "type": "secret_text",
+            "readable": false
+          }
+        },
+        "supabaseHost": null,
+        "kv": [],
+        "r2": []
+      },
+      "preview": {
+        "variables": {
+          "ADMIN_PASSWORD": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "ANTHROPIC_API_KEY": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "OPENAI_API_KEY": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "SUPABASE_SERVICE_KEY": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "SUPABASE_URL": {
+            "type": "secret_text",
+            "readable": false
+          },
+          "YOUTUBE_API_KEY": {
+            "type": "secret_text",
+            "readable": false
+          }
+        },
+        "supabaseHost": null,
+        "kv": [],
+        "r2": []
+      },
+      "previewSharesSupabase": "unknown-secret-values",
+      "previewHasSupabase": true,
+      "previewSharesKV": false,
+      "previewSharesR2": false,
+      "productionConfigurationUnchanged": true,
+      "dataIntegrityChecked": false
+    }
+  ],
+  "writesPerformed": 0,
+  "availableProjectNames": [
+    "mantramanse",
+    "movingtoonmake1",
+    "charactorbuild1",
+    "ultra-audiostudy",
+    "sajuvision2",
+    "ultra-audiostudy1",
+    "art-psychology-analyzer4",
+    "boldhome1",
+    "mantrahome1",
+    "mantracopliot4"
+  ]
+}

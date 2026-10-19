@@ -15,25 +15,32 @@ export function visualFor(chart){
 }
 
 export async function composeStory(analysis,call,recent=[]){
- const claims=analysis.claims;
+ const ordered=analysis.claims.slice().sort((a,b)=>b.elements.length-a.elements.length),claims=[];
+ for(const domain of ['SELF','CAREER','MONEY','LOVE','RELATIONSHIP','ACTION']){const c=ordered.find(c=>c.domain===domain&&!claims.includes(c));if(c)claims.push(c);}
+ for(const c of ordered){if(claims.length>=6)break;if(!claims.includes(c))claims.push(c);}
  const compactClaims=claims.map(c=>Object.fromEntries(['claim_id','domain','topic','judgment','elements','traditional_rules','exceptions','counter_evidence','uncertainty','strengths','vulnerabilities','source_scope'].filter(k=>c[k]!==undefined).map(k=>[k,c[k]])));
- const context={chart:analysis.normalized.chart,features:(analysis.features||[]).map(({elements,...rest})=>rest),claims:compactClaims,cross_analysis:analysis.cross_analysis,visual:visualFor(analysis.normalized.chart),avoid_recent_patterns:recent.map(({key,...plot})=>plot)};
- const planText=await call(PLAN_SYSTEM,JSON.stringify(context),8000,'plan');
- const plan=validatePlan(planText,claims);
+ const context={chart:Object.fromEntries(['dayMaster','dayPillar','pillars','gender','strength','groups','elements','patterns','dominantGroup','reviewConditions'].filter(k=>analysis.normalized.chart[k]!==undefined).map(k=>[k,analysis.normalized.chart[k]])),features:(analysis.features||[]).slice(0,12).map(({elements,...rest})=>rest),claims:compactClaims,cross_analysis:analysis.cross_analysis,visual:visualFor(analysis.normalized.chart),avoid_recent_patterns:recent.map(({key,...plot})=>plot)};
+ let planText=await call(PLAN_SYSTEM,JSON.stringify(context),8000,'plan',claims);
+ let plan=validatePlan(planText,claims);
+ if(!plan){planText=await call(PLAN_SYSTEM,JSON.stringify({...context,previous:planText,revision:planIssues(planText,claims)}),8000,'plan',claims);plan=validatePlan(planText,claims);}
  if(plan&&recent.some(p=>p.protagonist===plan.protagonist.name))throw Object.assign(Error('plan-rejected'),{issues:['protagonist.name:recent-duplicate']});
  if(!plan)throw Object.assign(Error('plan-rejected'),{issues:planIssues(planText,claims)});
  const input={...context,plan};
  let revision=null;
  for(let attempt=0;attempt<2;attempt++){
-  const storyText=await call(WRITE_SYSTEM,JSON.stringify({...input,...(revision?{previous:revision.story,revision:revision.issues}:{})}),8000,'write');
+  const storyText=await call(WRITE_SYSTEM,JSON.stringify({...input,...(revision?{previous:revision.story,revision:revision.issues}:{})}),8000,'write',claims);
   const story=validateStory(storyText,plan,claims);
-  if(!story)throw Object.assign(Error('story-rejected'),{issues:storyIssues(storyText,plan,claims)});
-  const reviewText=await call(REVIEW_SYSTEM,JSON.stringify({...input,source_evidence:claims.map(c=>({claim_id:c.claim_id,evidence:c.evidence})),story}),2400,'review');
+  if(!story){revision={story:storyText,issues:storyIssues(storyText,plan,claims)};if(attempt===0)continue;throw Object.assign(Error('story-rejected'),{issues:revision.issues});}
+  let reviewText = await call(REVIEW_SYSTEM,JSON.stringify({...input,source_evidence:claims.map(c=>({claim_id:c.claim_id,evidence:c.evidence.map(e=>({docId:e.docId,chunkId:e.chunkId,title:e.title}))})),story}),2400,'review',claims);
+  let reviewShape;try{reviewShape=JSON.parse(reviewText.replace(/^```(?:json)?\s*|\s*```$/g,''));}catch{}
+  if(reviewShape && ['grounding','causality','dilemma','arc','prose'].every(k=>reviewShape[k]===true) && Array.isArray(reviewShape.issues) && reviewShape.issues.length){
+    reviewText=await call(REVIEW_SYSTEM,JSON.stringify({...input,story,reviewFormatFeedback:'이전 검수는 모든 평가가 true인데 issues가 비어 있지 않아 형식이 모순됩니다. 원래 근거와 본문을 독립적으로 다시 평가하세요. 실제 위반만 issues에 적고 통과 이유는 넣지 마세요. 단순히 빈 배열로 바꾸지 말고 근거와 내용을 다시 검토하세요.'}),2400,'review',claims);
+  }
   if(validateReview(reviewText))return {story,plan,review:{passed:true,grounding:true,causality:true,dilemma:true,arc:true,prose:true,issues:[]}};
   let review;try{review=JSON.parse(reviewText.replace(/^```(?:json)?\s*|\s*```$/g,''));}catch{}
   revision={story,issues:Array.isArray(review?.issues)?review.issues.slice(0,12):['근거·인과·딜레마·변화·문장의 검토를 다시 확인하라.']};
  }
- throw Error('review-rejected');
+ throw Object.assign(Error('review-rejected'),{issues:revision?.issues || []});
 }
 export async function onRequestPost({request,env}){
  const started=Date.now(),deadline=started+240000,traceId=crypto.randomUUID(),attempts=[];
@@ -51,7 +58,7 @@ export async function onRequestPost({request,env}){
   // 이름·출생 날짜·자미두수는 외부 집필 입력과 캐시에서 제외한다.
   const analysis=analyze(clean.sd,items,{...settings,maxClaims:24,sourceIndex,blockedDocs:blocked,domains:['SELF','CAREER','MONEY','LOVE','MARRIAGE','RELATIONSHIP','ACTION']});
   if(analysis.claims.length<3)return json({ok:false,error:'insufficient-evidence'},422);
-  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify({version:VERSION,engine:ENGINE_VERSION,db:version,chart:analysis.normalized.chart,claims:analysis.claims,models:[settings.openaiModel,settings.anthropicModel,env.OPENAI_MODEL,env.ANTHROPIC_MODEL]})));
+  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify({version:VERSION,pipeline:'compact-motifs-2',engine:ENGINE_VERSION,db:version,chart:analysis.normalized.chart,claims:analysis.claims,models:[settings.openaiModel,settings.anthropicModel,env.OPENAI_MODEL,env.ANTHROPIC_MODEL]},(k,v)=>k==='asOf'?undefined:v)));
   const key='ai:past-story:'+Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('');
   const slot=visualFor(analysis.normalized.chart)?.slot||'unknown',recentKey='past-story:recent:'+slot;
   const recent=(await kv.get(recentKey,'json')||[]).filter(p=>p.key!==key).slice(-6);
@@ -73,11 +80,11 @@ export async function onRequestPost({request,env}){
   for(const [provider,secret] of [['openai','OPENAI_API_KEY'],['anthropic','ANTHROPIC_API_KEY']]){
    if(!env[secret]||Date.now()>deadline-15000)continue;
    try{
-    const result=await composeStory(analysis,async(system,input,tokens,stage)=>{
+    const result=await composeStory(analysis,async(system,input,tokens,stage,stageClaims)=>{
      const remaining=deadline-Date.now();if(remaining<3000)throw Error('deadline');
      const at=Date.now(),budget=Math.min(remaining,stage==='plan'?100000:stage==='write'?100000:40000);
      try{
-      const r=await generate(env,provider,input,system,{...settings,longRequest:true,reasoningEffort:'low',disableThinking:true,outputSchema:stageSchema(stage,analysis.claims),maxOutputTokens:tokens,timeoutMs:budget});
+      const r=await generate(env,provider,input,system,{...settings,telemetryPurpose:'past-story-'+stage,openaiModel:settings.openaiModel || env.OPENAI_MODEL || 'gpt-4.1-2025-04-14',longRequest:true,reasoningEffort:'low',disableThinking:true,outputSchema:stageSchema(stage,stageClaims || analysis.claims),maxOutputTokens:tokens,timeoutMs:budget});
       attempts.push({provider,stage,model:r.model,elapsedMs:Date.now()-at,usage:r.usage,status:'returned',completionStatus:r.completionStatus,incompleteReason:r.incompleteReason,stopReason:r.stopReason,contentKinds:r.contentKinds,inputBytes:new TextEncoder().encode(input).length,empty:!r.text});return r.text;
      }catch(e){attempts.push({provider,stage,model:String((provider==='openai'?settings.openaiModel||env.OPENAI_MODEL||'gpt-6.1-sol':settings.anthropicModel||env.ANTHROPIC_MODEL||'claude-sonnet-5-5')).slice(0,120),reason:e.providerReason||null,elapsedMs:Date.now()-at,status:'failed',error:/^provider-http-\d{3}(?:-[a-z_]+)?$/.test(e.message)?e.message:e.name==='TimeoutError'?'timeout':'call-error'});throw e;}
     },recent);

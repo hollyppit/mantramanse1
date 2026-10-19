@@ -1,0 +1,40 @@
+const assert=require('node:assert/strict'),fs=require('fs'),path=require('path'),{pathToFileURL}=require('url');
+const imp=f=>import(pathToFileURL(path.resolve(f)).href);
+(async()=>{
+ const {PGlite}=require('../output/rag-pg17-tools/node_modules/@electric-sql/pglite');const db=await PGlite.create();
+ try{
+ await db.exec('create role anon nologin;create role authenticated nologin;create role service_role nologin bypassrls;');
+ await db.exec(fs.readFileSync('supabase/schema.sql','utf8'));await db.exec('grant usage on schema public to service_role,anon,authenticated;grant all on public.kv to service_role;');await db.exec(fs.readFileSync('supabase/reading-block-runtime.sql','utf8'));
+ const query=(key,expected,next,ttl=null)=>db.query('select public.reading_compare_and_swap($1,$2,$3,$4) as ok',[key,expected,next,ttl]);
+ const winners=await Promise.all(Array.from({length:20},(_,i)=>query('ik:blocks:runtime',null,JSON.stringify({owner:i}))));assert.equal(winners.filter(r=>r.rows[0].ok).length,1);
+ assert(!(await query('ik:blocks:runtime','stale','{}')).rows[0].ok);
+ await assert.rejects(()=>query('ik:d:SELF',null,'[]'),/invalid reading state/);
+ const props=(await db.query("select prosecdef,proconfig from pg_proc where oid='public.reading_compare_and_swap(text,text,text,integer)'::regprocedure")).rows[0];assert.equal(props.prosecdef,false);assert(props.proconfig.includes('search_path=pg_catalog'));
+ const permissions=(await db.query("select has_function_privilege('anon','public.reading_compare_and_swap(text,text,text,integer)','execute') as anon,has_function_privilege('authenticated','public.reading_compare_and_swap(text,text,text,integer)','execute') as auth,has_function_privilege('service_role','public.reading_compare_and_swap(text,text,text,integer)','execute') as service")).rows[0];assert.deepEqual(permissions,{anon:false,auth:false,service:true});
+ const leaseKey='ai:flight:'+'a'.repeat(64);await query(leaseKey,null,'old',1);await db.query('update public.kv set expires_at=clock_timestamp()-interval \'1 second\' where key=$1',[leaseKey]);assert((await query(leaseKey,null,'new',5)).rows[0].ok);
+ console.log('PASS PostgreSQL 17: 20 concurrent CAS contenders / one winner, stale fencing, expired lease reacquisition, narrow prefixes, invoker privilege and service-only execute');
+ }finally{await db.close();}
+ const F=await imp('functions/_reading-flight.js'),S=await imp('functions/_reading-block-store.js'),B=await imp('functions/_reading-blocks.js'),R=await imp('functions/_reading-block-runner.js');
+ const memory=new Map(),kv={get:async(k,t)=>memory.has(k)?t==='json'?JSON.parse(memory.get(k)):memory.get(k):null,put:async(k,v)=>memory.set(k,v),readingCAS:async(k,expected,next)=>{if((memory.get(k)||null)!==expected)return false;memory.set(k,next);return true;},researchCAS:async(expected,next)=>{const key='ik:agentic:runtime';if((memory.get(key)||null)!==expected)return false;memory.set(key,next);return true;}};
+ let executions=0,release;const hold=new Promise(r=>release=r),work=async()=>{executions++;await hold;return Response.json({ok:true});};
+ const a=F.distributedFlight(kv,'test-distributed',work,{pollMs:1}),b=F.distributedFlight(kv,'test-distributed',work,{pollMs:1});setTimeout(release,15);const responses=await Promise.all([a,b]);assert.equal(executions,1);assert.equal(responses.filter(r=>r.headers.get('x-reading-coalesced')==='1').length,1);
+ const losing=await F.distributedFlight(kv,'fence-test',async()=>{const key=[...memory.keys()].find(k=>{try{return JSON.parse(memory.get(k)).state==='running';}catch{return false;}});memory.set(key,JSON.stringify({owner:'replacement',state:'running',until:Date.now()+1000}));return Response.json({ok:true});});assert.equal(losing.status,503);
+ const {claimSignature}=await imp('functions/_chapter-engine.js'),claim={claim_id:'saju:SELF-1234',knowledge_id:'SELF-1234',elements:[{key:'month',value:'인'},{key:'root',value:true}],judgment:'가상 조건에서만 적용합니다',evidence:[{docId:'fixture'}],exceptions:[]};
+ const sample={id:'fixture',synthetic:true,knowledgeIds:['SELF-1234'],payload:{sd:{dayMaster:{}},chapter:{id:'c01',paragraphs:[{id:'0',role:'reality'}]}}};
+ await S.updateRuntime(kv,s=>{s.config={...s.config,enabled:true,autoPublish:true,dailyBudget:2,monthlyBudget:3,taskBudget:.5,maxDailyTasks:4};s.samples=[sample];});
+ const answer={ok:true,blockStyleSignature:'s1',provider:'openai',result:{paragraphs:[{id:'0',text:'상황을 정리하는 능력은 강점이 될 수 있습니다. 다만 역할을 혼자 떠안으면 부담이 커질 수 있으니 경계를 먼저 확인해 보세요.',refs:['SELF-1234'],claim_ids:[claim.claim_id]}]},interpretation:{claims:[claim],features:[]},generatedParagraphCount:1};
+ const execute=async({env})=>{env.__AI_BEFORE_CALL({rates:{input:2,output:10},requestBody:{max_output_tokens:200}});env.__AI_COST_COLLECTOR({costUSD:.001});return Response.json(answer);};
+ const review=async env=>{env.__AI_BEFORE_CALL({rates:{input:2,output:10},requestBody:{max_output_tokens:200}});env.__AI_COST_COLLECTOR({costUSD:.002});return {text:JSON.stringify({ok:true,source:true,semantic:true,privacy:true,scenarios:true,issues:[]})};};
+ let out=await R.tickReadingBlocks({GLOSSARY_KV:kv},{execute,review});assert(out.completed);assert.equal(out.published,1);assert.equal(out.costUSD,.003);assert.equal(JSON.parse(memory.get(B.blockKey('c01')))[0].status,'approved');
+ out=await R.tickReadingBlocks({GLOSSARY_KV:kv},{execute,review});assert.equal(out.reason,'no-changed-or-missing-content');
+ memory.set('ik:meta',JSON.stringify({r:'new-source-version'}));const rounds=await Promise.all([R.tickReadingBlocks({GLOSSARY_KV:kv},{execute,review}),R.tickReadingBlocks({GLOSSARY_KV:kv},{execute,review})]);assert.equal(rounds.filter(r=>r.blocked==='reading-task-running').length,1);
+ assert.equal((await R.queueResearch(kv,['SELF-1234'],'c01')).queued,1);assert.equal((await R.queueResearch(kv,['SELF-1234'],'c01')).queued,0);
+ await S.recordGap(kv,{chapter:'c01',claims:[claim],missing:['practice']});await S.recordGap(kv,{chapter:'c01',claims:[claim],missing:['practice']});const runtime=JSON.parse(memory.get(S.RUNTIME_KEY));assert.equal(Object.values(runtime.gaps)[0].count,2);assert(!JSON.stringify(runtime.gaps).includes('상황을 정리'));
+ memory.set('ik:meta',JSON.stringify({r:'budget-limit'}));await S.updateRuntime(kv,s=>{s.config.monthlyBudget=.1;});assert.equal((await R.tickReadingBlocks({GLOSSARY_KV:kv},{execute,review})).blocked,'reading-budget-limit');
+ const mixedSample={...sample,id:'mixed',payload:{...sample.payload,chapter:{id:'c02',paragraphs:[{id:'0',role:'reality'},{id:'1',role:'practice'}]}}};
+ await S.updateRuntime(kv,s=>{s.config.monthlyBudget=3;s.tasks={};s.ledger={};s.samples=[mixedSample];});
+ const executeMixed=async({env})=>{env.__AI_COST_COLLECTOR({costUSD:.001});return Response.json({...answer,result:{paragraphs:[answer.result.paragraphs[0],{...answer.result.paragraphs[0],id:'1',text:'일을 시작하기 전에 맡은 범위와 점검 기준을 적어 보세요. 다만 실제 환경에 맞지 않으면 그 기준도 다시 조정해 보시는 편이 좋습니다.'}]}});};
+ const reviewMixed=async(env,provider,input)=>{const b=JSON.parse(input).blocks;return {text:JSON.stringify({reviews:Object.fromEntries(b.map(x=>[x.id,{ok:x.role==='reality',source:true,semantic:x.role==='reality',privacy:true,scenarios:true,issues:x.role==='reality'?[]:['실천 블록의 별도 근거 확인 필요']}]))})};};
+ const mixed=await R.tickReadingBlocks({GLOSSARY_KV:kv},{execute:executeMixed,review:reviewMixed});assert.equal(mixed.published,1);assert.equal(mixed.error,'block-validation-failed');const mixedLibrary=JSON.parse(memory.get(B.blockKey('c02')));assert.equal(mixedLibrary.filter(b=>b.status==='approved').length,1);assert.equal(mixedLibrary.filter(b=>b.status==='candidate').length,1);
+ console.log('PASS distributed leases + automated blocks: cross-instance coalescing, stale-owner fencing, task reservation, source changes, no-op reuse, verified publication, research request deduplication, private-data-free gaps and monthly cap');
+})().catch(e=>{console.error(e);process.exitCode=1});

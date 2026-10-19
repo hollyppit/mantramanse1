@@ -1,3 +1,4 @@
+import { aiFetch } from '../_ai-cost.js';
 // AI 연출 추천 (관리자 전용) — 장면의 연출값을 "추천"만 한다. 저장하지 않고, 관리자가 확인해서 적용해야 반영된다.
 // POST /api/direct  { scene: { narration, sceneType, chapter:{id,title}, media?:{type,tags}, previous?:{sceneType}, next?:{sceneType}, factualBasis? } }
 //   → { ok, suggestion: { sceneType, preset, pacing, motionIntensity, imageMotion, transition, textAnimation, textPosition, textSize, overlayStrength, pauseAfter, bgmMood, mood, narrativePurpose, visualConcept } }
@@ -30,7 +31,7 @@ async function ask(env, user) {
   const errs = [];
   if (env.ANTHROPIC_API_KEY) {
     try {
-      const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(30000), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+      const r = await aiFetch(env, 'direct', 'https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(30000), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
         body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 600, system: SYSTEM, messages: [{ role: 'user', content: user }] }) });
       if (r.ok) { const d = await r.json(); return (d.content || []).filter(x => x.type === 'text').map(x => x.text).join(''); }
       errs.push('anthropic ' + r.status);
@@ -38,7 +39,7 @@ async function ask(env, user) {
   }
   if (env.OPENAI_API_KEY) {
     try {
-      const r = await fetch('https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(30000), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY },
+      const r = await aiFetch(env, 'direct', 'https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(30000), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY },
         body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: SYSTEM, input: user }) });
       if (r.ok) { const d = await r.json(); return typeof d.output_text === 'string' ? d.output_text : (d.output || []).flatMap(o => o.content || []).map(c => c.text || '').join(''); }
       errs.push('openai ' + r.status);

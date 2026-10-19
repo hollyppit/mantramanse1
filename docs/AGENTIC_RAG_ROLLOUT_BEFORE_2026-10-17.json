@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-10-17T12:38:13.148Z",
+  "deployment": "af43e068-9557-4614-9136-ab585f94f406",
+  "productionBranch": "main",
+  "compatibilityDate": "2026-09-29",
+  "compatibilityFlags": [],
+  "kv": {
+    "GLOSSARY_KV": {
+      "namespace_id": "1a48b15379fc4a7191c9b2249e225c80"
+    }
+  },
+  "r2": {
+    "CLIPS_R2": {
+      "name": "mantra-clips"
+    }
+  },
+  "configHash": "9dc123a2ce0b94faddb3c7daa69583417544e5919c99dd85f040e0047878c0a1",
+  "variableNames": [
+    "ADMIN_PASSWORD",
+    "ANTHROPIC_API_KEY",
+    "ELEVENLABS_API_KEY",
+    "GEMINI_API_KEY",
+    "KLING_API_KEY",
+    "KLING_MODEL",
+    "OPENAI_API_KEY",
+    "SUPABASE_SERVICE_KEY",
+    "SUPABASE_URL"
+  ]
+}

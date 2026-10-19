@@ -47,7 +47,7 @@ ok(X.resumeIndex(cs, { ended: { a: 1, b: 1 }, last: 1 }) === 2, '끝낸 챕터 �
 ok(X.resumeIndex(cs, { ended: { a: 1, b: 1, c: 1 }, last: 2 }) === -1, '모두 읽으면 -1');
 X.save('k', { ended: { a: 1 }, seen: { w1: 1 }, last: 1, auto: false }); const L = X.load('k');
 ok(L.ended.a === 1 && L.seen.w1 === 1 && L.last === 1 && L.auto === false, '진행 저장·복원');
-ok(X.load('none').auto === true && X.load('none').last === -1, '저장본 없음 기본값');
+ok(X.load('none').auto === false && X.load('none').last === -1, '저장본 없음 기본값');
 
 // 5. 상태 구분(탐험 완료 ≠ 유료)
 const mm = X.worldsModel([{ id: 'c01', base: 'c01', act: 2 }, { id: 'c02', base: 'c02', act: 2 }], X.mergeWorlds([{ id: 'w1', access: 'paid' }]), { c01: 1, c02: 1 }, -1);

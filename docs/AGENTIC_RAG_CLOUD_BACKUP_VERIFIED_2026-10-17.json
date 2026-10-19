@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-17T11:45:25.386Z",
+  "mode": "offline-local-verification",
+  "complete": true,
+  "kvKeys": 146,
+  "r2Objects": 920,
+  "bytes": 2925661189,
+  "allHashesMatch": true,
+  "allInventoryMetadataPreserved": true,
+  "cloudWrites": 0,
+  "manifestSHA256": "6ed5c118a21fa5ad5e9ddf7c71215451f394642cd59d971d5c562e4429a34fc6"
+}

@@ -39,10 +39,15 @@ export function writingPlan(analysis, clean) {
   return {
     layer:'ux-writing-only',
     identity:{dayMaster:clean.sd.dayMaster?.stem,dayPillar:clean.sd.dayPillar?.ko,hourKnown:!!clean.sd.pillars?.hour},
+    calculationFacts:{
+      roots:clean.sd.roots?{hasRoot:clean.sd.roots.hasRoot,level:clean.sd.roots.level,reasons:(clean.sd.roots.reasons||[]).slice(0,3)}:null,
+      strengthModel:clean.sd.strength?{band:clean.sd.strength.band}:null,
+      usefulElementModels:Object.fromEntries(Object.entries(clean.sd.usefulElementMethods||{}).map(([school,v])=>[school,{applicable:v.applicable,yong:v.yong,hee:v.hee,reasons:(v.reasons||[]).slice(0,3)}]))
+    },
     allowedReferences:(analysis.claims || []).map(c=>({claim_id:c.claim_id,knowledge_id:c.knowledge_id})),
     claims:(analysis.claims || []).map(c=>({claim_id:c.claim_id,knowledge_id:c.knowledge_id,domain:c.domain,judgment:c.judgment,strengths:c.strengths,vulnerabilities:c.vulnerabilities,actions:c.actions,examples:c.examples,exceptions:c.exceptions,counter_evidence:c.counter_evidence,uncertainty:c.uncertainty,elements:c.elements,evidenceOnly:{rules:c.traditional_rules,sources:(c.evidence || []).map(e=>({title:e.title,pageStart:e.pageStart,heading:e.heading}))}})),
     chapter:clean.chapter,
-    instruction:'계산을 다시 해석하지 않습니다. claims의 결론·장점·취약점·행동을 생활 언어로 작성하고 elements와 evidenceOnly의 전문 용어는 마지막 근거 문단에만 둡니다. refs는 allowedReferences의 knowledge_id만, claim_ids는 claim_id만 사용합니다.'
+    instruction:'계산을 다시 해석하지 않습니다. calculationFacts는 이미 계산된 결과와 학파별 모델 판정입니다. 통근의 계산값이 있으나 이를 해석할 별도 claim이 없는 경우 두 상태를 구분합니다. 조후 모델이 applicable=false이면 전통 계절 규칙과 모델 미적용을 구분하고 조후 용신이 계산상 확정됐다고 쓰지 않습니다. 이 계산 요약만으로 현실의 사건이나 새 명리 판단을 만들지 않습니다. claims의 결론·장점·취약점·행동을 생활 언어로 작성하고 elements와 evidenceOnly의 전문 용어는 마지막 근거 문단에만 둡니다. refs는 allowedReferences의 knowledge_id만, claim_ids는 claim_id만 사용합니다.'
   };
 }
 export function inspectWriting(paragraphs, config, { concept = false, previous = [] } = {}) {

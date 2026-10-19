@@ -1,3 +1,4 @@
+import { aiFetch } from '../_ai-cost.js';
 // 공개 POST /api/reading-answer — 선택에 대한 추가 풀이. OpenAI 우선 → Claude 폴백.
 // Secrets: OPENAI_API_KEY / ANTHROPIC_API_KEY. 기존 모델 변수 사용. 캐시 7일, IP 시간당 기본 12회.
 import { json } from '../_lib.js';
@@ -6,12 +7,12 @@ import { validate, systemFor, buildUser, sanitize, cacheKey } from '../_reading-
 import { loadStyle, styleFor } from '../_stylestore.js';
 const TIMEOUT_MS = 25000;
 async function openai(env, input, system) {
-  const r = await fetch('https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: system, input, max_output_tokens: 2200 }) });
+  const r = await aiFetch(env, 'reading-answer', 'https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: system, input, max_output_tokens: 2200 }) });
   if (!r.ok) throw new Error('provider-error');
   const d = await r.json(); return typeof d.output_text === 'string' ? d.output_text : (d.output || []).flatMap(o => o.content || []).filter(c => c.type === 'output_text' || c.type === 'text').map(c => c.text || '').join('');
 }
 async function claude(env, input, system) {
-  const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 2200, system: system, messages: [{ role: 'user', content: input }] }) });
+  const r = await aiFetch(env, 'reading-answer', 'https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 2200, system: system, messages: [{ role: 'user', content: input }] }) });
   if (!r.ok) throw new Error('provider-error');
   const d = await r.json(); return (d.content || []).filter(c => c.type === 'text').map(c => c.text || '').join('');
 }

@@ -286,7 +286,7 @@
     // 관리자가 저장한 세계 정의(이름·색·연결 챕터·순서·활성화)가 있으면 기본값 위에 덮어 쓴다. 실패하면 기본 6개 세계 그대로.
     var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 4000);
     fetch('/api/worlds', { signal: ctl && ctl.signal }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-      clearTimeout(tm); if (d && d.worlds && d.worlds.length) { S.xpWorlds = R.Explore.mergeWorlds(d.worlds); S.rep.chapters = R.Explore.applyTopics(S.topicSource, S.xpWorlds); buildWmap(); var home = S.view === 'home', currentWorld = S.xpWorld; S.readerWorld = null; openDoc(0, { autoStart: false }); if (home) showHome(currentWorld); else renderStrip(); }
+      clearTimeout(tm); if (d && d.worlds && d.worlds.length) { if(S.view==='reader'){S.pendingWorlds=d.worlds;return;} S.xpWorlds = R.Explore.mergeWorlds(d.worlds); S.rep.chapters = R.Explore.applyTopics(S.topicSource, S.xpWorlds); buildWmap(); var home = S.view === 'home', currentWorld = S.xpWorld; S.readerWorld = null; openDoc(0, { autoStart: false }); if (home) showHome(currentWorld); else renderStrip(); }
     }).catch(function () { clearTimeout(tm); }).then(function () {
       // 허브 운명의 타임라인 주제 타일에서 넘어온 경우(?world=w2): 그 세계를 바로 연다(세계 지도의 카드를 누른 것과 같다). 한 번만.
       if (!WORLD || PREVIEW || S.deepWorld) return; S.deepWorld = 1;
@@ -352,7 +352,7 @@
     if (!wid) { n.hidden = true; document.documentElement.style.removeProperty('--bar-h'); return; }
     var w = (S.wmap.list || []).filter(function (x) { return x.id === wid; })[0] || {}, idxs = S.wmap.by[wid] || [], h = '';
     h += '<button type="button" class="ws-m" data-ws="map">주제 목록</button><button type="button" class="ws-t' + (vw === 'home' ? ' on' : '') + '" data-ws="tool">' + esc(w.icon || '') + ' ' + esc(TOOL_LABEL[wid] || '살펴보기') + '</button>';
-    h += '<button type="button" class="ws-m" data-ws="toon">무빙툰으로 감상하기</button>';
+    h += '<button type="button" class="ws-m" data-ws="toon">내 사주 웹소설 감상하기</button>';
     if (vw === 'home' && S.cur && S.readerWorld === wid) h += '<button type="button" class="ws-m" data-ws="resume">읽던 곳으로 돌아가기</button>';
     idxs.forEach(function (i) { var c = S.rep.chapters[i]; h += '<button type="button" class="ws-c' + (vw === 'reader' && i === cur ? ' on' : '') + (S.ended[c.id] ? ' dn' : '') + '" data-ws="go" data-i="' + i + '">' + esc(c.title) + '</button>'; });
     n.innerHTML = h; n.className = vw === 'reader' ? 'ws-r' : 'ws-h'; n.style.setProperty('--wa', w.accent || '#D5B97F'); n.hidden = false;
@@ -384,7 +384,7 @@
   async function openWorldToon(wid) {
     var w = ((S.wmap && S.wmap.list) || []).filter(function (x) { return x.id === wid; })[0]; if (!w || !R.Samsara) return;
     S.toonVisits=S.toonVisits||{};S.toonVisits[wid]=(S.toonVisits[wid]||Date.now())+1;
-    var model = null; try { model = worldToonModel(w); } catch (err) { model = null; } if (!model) { toast('무빙툰 장면을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
+    var model = null; try { model = worldToonModel(w); } catch (err) { model = null; } if (!model) { toast('웹소설을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
     if (S.mv) S.mv.pause();
     if(wid==='w5'&&!S.personalPast){
       if(!R.PastStory||S.pastLoading)return;
@@ -420,6 +420,7 @@
     el.addEventListener('click', go); document.body.appendChild(el); T('world_intro', { world: w.id });
   }
   function showHome(worldId) {
+    if(S.pendingWorlds){var current=S.rep.chapters[S.idx];S.xpWorlds=R.Explore.mergeWorlds(S.pendingWorlds);S.pendingWorlds=null;S.rep.chapters=R.Explore.applyTopics(S.topicSource,S.xpWorlds);buildWmap();if(current){var nextIndex=S.rep.chapters.findIndex(function(c){return c.id===current.id;});if(nextIndex>=0)S.idx=nextIndex;}}
     var rep = S.rep, st = S.xp; if (!st) return;
     if ($('#app').dataset.view === 'reader') S.scroll.doc = window.scrollY; xpSave();
     var worlds = R.Explore.worldsModel(rep.chapters, S.xpWorlds || R.Explore.mergeWorlds(null), S.ended, S.cur ? S.idx : st.last), cur = null;
@@ -536,6 +537,7 @@
     var y = window.scrollY; showHome('w1'); window.scrollTo(0, y); T('timeline_select', { level: b.dataset.tld != null ? 'daeun' : b.dataset.tly != null ? 'year' : 'month' });
   });
   function enterFromHome(idx) {
+    if(R.FullReading && S.rep.chapters[idx])R.FullReading.prioritize(S.rep.chapters[idx].id);
     S.readerWorld = (S.wmap && S.wmap.idx[idx]) || null;
     S.view = 'reader'; view('reader'); pinTo(idx); renderStrip(); openDoc(idx, { autoStart: S.xp ? S.xp.auto : true }); renderStrip(); T('explore_chapter_picked', { index: idx });
   }
@@ -563,28 +565,35 @@
       var c=S.rep && S.rep.chapters[S.idx];sessionStorage.setItem('mt_v2_input',JSON.stringify({inp:S.ch.input,name:S.name,interest:S.interest || '',guide:S.guide,resumeChapter:c && c.id,realityContext:context}));location.reload();
     });
     var reading = !PREVIEW && R.FullReading ? R.FullReading.prepare(S.rep, S.sd, S.name, function (c, job, result) {
+      var liveChapter=S.rep.chapters.find(function(item){return item.id===c.id;});
+      if(liveChapter && liveChapter!==c){Object.keys(c).forEach(function(k){if(/^reading/.test(k)||['scenes','headline','chapterHook','chapterQuality','interpretationAnalysis','writingQuality','hookName'].indexOf(k)>=0)liveChapter[k]=c[k];});}
       var ci = S.rep.chapters.findIndex(function(item){return item.id===c.id;}), article = document.getElementById('ch-' + c.id);
       if(article && c.readingDeferred){
         var head=article.querySelector('[data-reading-notice]');
         if(!head){head=document.createElement('p');head.setAttribute('data-reading-notice','');head.setAttribute('role','status');var title=article.querySelector('h2');if(title)title.insertAdjacentElement('afterend',head);}
         if(head)head.textContent=c.readingNotice;
       }
-      if (!article || !c.readingDeferred && ci <= S.idx) return;
-      if (!c.readingDeferred && S.visited[c.id]) return;
-      var sections = [].slice.call(article.querySelectorAll(':scope > section')), at = 0;
-      c.scenes.forEach(function (scene, i) {
-        if (scene.readingSupplementary) return;
-        var html = sceneHtml(c, scene, i); if (!html) return;
-        var box = document.createElement('div'); box.innerHTML = html;
-        var fresh = box.firstElementChild, existing = sections[at++];
-        if (!fresh || !existing || /^(chart|dataVisualization|timeline)$/.test(scene.sceneType)) return;
-        // 바깥 읽기 섹션과 관찰자는 유지하고, 아직 읽지 않은 본문만 갱신한다.
-        var panel = panelOf(scene);
-        if (fresh.classList.contains('rd-head') || fresh.classList.contains('rd-mini')) ['rd-head','rd-chead','rd-mini','rv'].forEach(function (name) { existing.classList.toggle(name, fresh.classList.contains(name)); });
-        existing.innerHTML = (panel ? panelHtml(panel) : '') + fresh.innerHTML;
+      planPanels(S.rep);
+      var wasPending=article && article.querySelector('[data-reading-notice]');
+      if (!article || !wasPending && !c.readingDeferred && ci <= S.idx) return;
+      if (!wasPending && !c.readingDeferred && S.visited[c.id]) return;
+      var sections=[].slice.call(article.querySelectorAll(':scope > section[data-sc]')), fragment=document.createDocumentFragment(), retained=new Set();
+      c.scenes.forEach(function(scene,i){
+        if(scene.readingSupplementary && !scene.readingInline)return;
+        var existing=sections.find(function(node){return node.dataset.sc===scene.sceneId;});
+        if(existing && (scene.readingSupplementary || /^(chart|dataVisualization|timeline)$/.test(scene.sceneType))){retained.add(existing);fragment.appendChild(existing);return;}
+        var html=secWrap(sceneHtml(c,scene,i),scene,c,ci);if(!html)return;
+        var box=document.createElement('div');box.innerHTML=html;var fresh=box.firstElementChild;if(!fresh)return;
+        fresh.dataset.sc=scene.sceneId;fresh.dataset.ch=ci;fresh.classList.add('rd-sec');
+        if(existing){existing.classList.toggle('reading-pending',fresh.classList.contains('reading-pending'));if(fresh.hasAttribute('aria-busy'))existing.setAttribute('aria-busy',fresh.getAttribute('aria-busy'));else existing.removeAttribute('aria-busy');existing.hidden=fresh.hidden;existing.toggleAttribute('data-reading-placeholder',fresh.hasAttribute('data-reading-placeholder'));existing.innerHTML=fresh.innerHTML;['rd-head','rd-chead','rd-mini','rv','rd-prose'].forEach(function(name){existing.classList.toggle(name,fresh.classList.contains(name));});}
+        else {existing=fresh;existing.dataset.layout=scene.layout || 'TEXT';existing.dataset.bg='-1';}
+        retained.add(existing);fragment.appendChild(existing);
       });
+      sections.forEach(function(node){if(!retained.has(node))node.remove();});
+      article.insertBefore(fragment,article.firstChild);
+      if(!c.readingDeferred)article.querySelectorAll('[data-reading-notice]').forEach(function(n){n.remove();});
       linkBasisReferences(article); emphasize(article); watchVideos();
-      if (S.mv) S.mv.measure();
+      if (S.mv) { S.mv.measure(); if (!c.readingDeferred || c.readingWarning) S.mv.readingReady(); }
     }) : null;
     var ready = reading ? Promise.race([reading.first, new Promise(function (ok) { setTimeout(ok, 18000); })]) : Promise.resolve();
     if (!S.stopWait && !PREVIEW) S.stopWait = waitNotice();
@@ -718,11 +727,13 @@
 
   function sceneHtml(c, s, i) {
     var t = s.sceneType, id = 'data-sc="' + esc(s.sceneId) + '"';
+    if(s.readingRole && !c.readingDeferred && !String(c.readingCore && c.readingCore[s.readingRole] || '').trim())return '';
+    if(c.readingDeferred && s.readingRole && s.readingLayer!=='fact')return '<section class="scene rd-prose" '+id+' data-reading-placeholder hidden></section>';
     if (t === 'life') return s.episode ? s.html : splitLeads(s.html); // 인생 지도 문서의 새 구성 조각(R.LifeDoc 가 만든 HTML). 긴 문단은 읽기 좋게 나눈다
     if (t === 'cinema') return cinemaHtml(c, s);
     if (t === 'chapterIntro') {
       var act = S.rep.acts.filter(function (a) { return a.id === c.act; })[0] || {};
-      if(c.readingDeferred)return '<section class="scene rd-head rd-chead" '+id+'><h2>'+esc(c.title)+'</h2><p role="status" data-reading-notice>'+esc(c.readingNotice)+'</p></section>';
+      if(c.readingDeferred && !s.readingSupplementary)return '<section class="scene rd-head rd-chead reading-pending" '+id+' aria-busy="'+(!c.readingWarning)+'"><h2>'+esc(c.title)+'</h2><p role="status" data-reading-notice>'+esc(c.readingNotice)+'</p>'+(c.readingWarning?'<button type="button" class="chipbtn" data-reading-retry>이 장 다시 생성하기</button>':'')+'</section>';
       if (c.chapterHook) { var hook=c.chapterHook; return '<section class="scene rd-head rd-chead" '+id+'><div class="rd-rule" aria-hidden="true"></div><div class="no" data-hook-hanja> '+esc(hook.hanja)+'</div><h2>'+esc(c.title)+'</h2><p class="hl">'+esc(c.hookName || S.name || '귀인')+'님, '+lines(hook.text)+'</p><p class="intro">'+lines(hook.explanation)+'</p><div class="rd-rule" aria-hidden="true"></div></section>'; }
       if (s.compact) return '<section class="scene rv rd-mini" ' + id + '><div class="no" data-cno="' + esc(c.id) + '">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2>' + esc(c.title) + '</h2>' + (c.introText || s.subtitle ? '<p class="sub">' + esc(c.introText || s.subtitle) + '</p>' : '') + '</section>'; // 종합 풀이 안에서 순서대로 이어지는 작은 제목(서두 없이 바로 본론)
       return '<section class="scene rd-head rd-chead" ' + id + '><div class="rd-rule" aria-hidden="true"></div><div class="no" data-tx="intro.no" data-cno="' + esc(c.id) + '">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="rd-rule" aria-hidden="true"></div></section>';
@@ -819,14 +830,14 @@
   function planPanels(rep) {
     var lib = (S.pack && S.pack.lib && S.pack.lib.media) || S.media || [], ctx = { usedIds: [], pool: 'panel', gender: S.sd && S.sd.gender }, el = (S.sd && S.sd.dayMaster && S.sd.dayMaster.el) || 'water';
     S.pv = {}; (S.media || []).concat(lib).forEach(function (m) { if (m && m.panelVideo && m.url) S.pv[m.url] = m.panelVideo; }); S.pv = {}; (S.media || []).concat(lib).forEach(function (m) { if (m && m.panelVideo && m.url) S.pv[m.url] = m.panelVideo; }); if (!R.Director || !lib.length) return;
-    var host = function (s) { return !s.media && !s.panel && (s.sceneType === 'insight' || (s.sceneType === 'life' && /rd-prose|rd-cin/.test(s.html || '') && s.layout !== 'DATA')); };
+    var host = function (s) { return !s.readingSupplementary && !s.media && !s.panel && (s.sceneType === 'insight' || (s.sceneType === 'life' && /rd-prose|rd-cin/.test(s.html || '') && s.layout !== 'DATA')); };
     rep.chapters.forEach(function (c) {
       var scs = c.scenes || [], th = themeOf(c), place = function (s, th2) {
         var intent = { mediaIntent: { elements: [(s.intent && s.intent.desiredElements && s.intent.desiredElements[0]) || el], themes: [th2] } }, choices = R.Scenes && R.Scenes.panelThemes ? R.Scenes.panelThemes(c) : [th2], m = null;
         choices.some(function (topic) { var themed = lib.filter(function (a) { return (a.themeTags || a.themes || []).indexOf(topic) >= 0; }); intent.mediaIntent.themes = [topic]; m = R.Director.pickMedia(intent, themed, ctx, c.id); return !!m; });
         if (m && !/video|transition/i.test(m.type) && (m.url || m.posterUrl)) s.panel = m.url || m.posterUrl; return !!s.panel;
       };
-      var first = scs.filter(host)[0]; if (first && !first.panel) place(first, th);
+      var first = c.readingDeferred ? scs.find(function(s){return s.sceneType==='chapterIntro' && !s.readingSupplementary;}) : scs.filter(host)[0]; if (first && !first.panel) place(first, th);
       if (scs.length > 9) { var mid = scs.slice(Math.floor(scs.length / 2)).filter(host)[0]; if (mid && mid !== first) place(mid, th); }
     });
   }
@@ -843,7 +854,7 @@
       }
       if (c.actTransition) h += actHeadHtml(c, ci);
       var main='', extra='';
-      c.scenes.forEach(function(s,k){ var html=secWrap(sceneHtml(c,s,k),s,c,ci); if(c.readingSupplementary || s.readingSupplementary) extra+=html; else main+=html; });
+      c.scenes.forEach(function(s,k){ var html=secWrap(sceneHtml(c,s,k),s,c,ci); if((c.readingSupplementary || s.readingSupplementary) && !s.readingInline) extra+=html; else main+=html; });
       if(extra) main+='<details class="reading-supplement" style="margin:16px auto;max-width:720px;padding:16px"><summary>더 깊이 읽기 · '+esc(c.originalTitle || c.title)+'</summary>'+extra+'</details>';
       if(c.readingCore)main+='<section class="scene rd-prose"><p>이 장의 풀이가 어땠나요?</p>'+[['helpful','도움이 됨'],['specific','구체적임'],['unclear','근거·설명이 부족함']].map(function(r){return '<button type="button" class="chipbtn" data-reading-feedback="'+r[0]+'">'+r[1]+'</button>';}).join('')+'<p role="status" data-feedback-status></p></section>';
       h += (c.legacyIds || []).filter(function(id){return id!==c.id;}).map(function(id){return '<span id="ch-'+esc(id)+'" aria-hidden="true"></span>';}).join('');
@@ -859,33 +870,35 @@
     window.scrollTo(0, 0); mountReading(o.autoStart !== false); if (start > 0) gotoChapter(start, true);
   }
   function mountReading(auto) {
-    S.mv = R.Reading.mount($('#chapter'), { flow: Object.assign({}, S.pack && S.pack.flow, { playbackRate: playbackRate() }), reduce: reduce, saveData: saveData, bgList: S.bg, autoStart: auto, bgm: R.Bgm && R.Bgm.has() ? R.Bgm : null, onSection: onSection, onEnd: onDocEnd,
+    S.mv = R.Reading.mount($('#chapter'), { flow: Object.assign({}, S.pack && S.pack.flow, { playbackRate: playbackRate() }), reduce: reduce, saveData: saveData, bgList: S.bg, autoStart: auto, bgm: R.Bgm && R.Bgm.has() ? R.Bgm : null, onSection: onSection, onEnd: onDocEnd, canAdvance: function(sec){var c=S.rep.chapters[+sec.dataset.ch];return !c || !c.readingDeferred || !!c.readingWarning;},
       onProgress: function (fr) { $('#progFill').style.width = Math.round(fr * 1000) / 10 + '%'; $('#prog').setAttribute('aria-valuenow', String(Math.round(fr * 100))); } });
   }
   function resumeReader() { view('reader'); S.view = 'reader'; if (EXPLORE) renderStrip(); mountReading(false); window.scrollTo(0, S.scroll.doc || 0); if (S.mv) S.mv.measure(); }
   function gotoChapter(i, instant, resume) {
+    if(R.FullReading && S.rep.chapters[i])R.FullReading.prioritize(S.rep.chapters[i].id);
     if (S.readerWorld && S.wmap && S.wmap.idx[i] && S.wmap.idx[i] !== S.readerWorld) { enterFromHome(i); return; }
     var el = $('#chapter .chap[data-ch="' + i + '"]'); if (!el || !S.mv) return; var p = el.previousElementSibling; if (p && (p.classList.contains('rd-act') || p.classList.contains('world-hook'))) el = p; S.mv.gotoEl(el, instant, resume);
   }
   function onSection(sec) { // 현재 읽고 있는 섹션이 바뀔 때(자동 진행·직접 스크롤 모두)
     var ci = +sec.dataset.ch, c = S.rep.chapters[ci]; if (!c) return;
     if (ci !== S.idx || !S.cur) enterChapter(c, ci);
-    if (sec.classList.contains('s-end') && !S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); if (EXPLORE) { xpSave(); if (c.id === 'c-char' && !S.homeShown) { S.homeShown = 1; setTimeout(function () { if (S.mv) S.mv.pause(); showHome(); }, 900); } } }
+    if (sec.classList.contains('s-end') && !c.readingDeferred && !S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); if (EXPLORE) { xpSave(); if (c.id === 'c-char' && !S.homeShown) { S.homeShown = 1; setTimeout(function () { if (S.mv) S.mv.pause(); showHome(); }, 900); } } }
   }
   function enterChapter(c, ci) {
     if (S.pin) { if (Date.now() < S.pin.until && ci < S.pin.idx) return; if (ci >= S.pin.idx) S.pin = null; } // 점프 직후 앞 챕터 신호는 무시
-    var rep = S.rep, n = rep.chapters.length, prev = S.cur ? rep.chapters[S.idx] : null, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}; S.idx = ci; S.cur = true;
+    var rep = S.rep, n = rep.chapters.length, prev = S.cur ? rep.chapters[S.idx] : null, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}; S.idx = ci; S.cur = true; if(R.FullReading && R.FullReading.prioritize)R.FullReading.prioritize(c.id);
     barLabel(ci);
     if (prev && prev.act !== c.act && !S.visited[c.id]) { T('act_completed', { act: prev.act }); var a = rep.acts.filter(function (x) { return x.id === prev.act; })[0]; if (a && a.pdfDone) toast(a.pdfDone, 3800); }
     if (!S.visited[c.id]) { S.visited[c.id] = 1; T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if ((c.base || c.id) === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {}); }
     if (R.Bgm && R.Bgm.has()) { var mo = c.scenes.filter(function (s) { return s.sceneType === 'insight' || s.sceneType === 'chapterIntro'; })[0]; R.Bgm.play(mo ? R.Cinema.resolve(mo, layersOf(mo)).bgmMood : 'minimal'); } // 챕터 분위기에 맞는 BGM
     checkUnlock(); ss('mt_v2_idx', String(ci)); if (EXPLORE) { xpSave(); renderStrip(); }
   }
-  function onDocEnd() { if (S.readerWorld) { showHome(S.readerWorld); return; } if (!PREVIEW) endingCinema(finalView); } // 주제를 마치면 해당 세계로, 종합 문서는 엔딩으로
+  function onDocEnd() { if (S.readerWorld) { if(S.mv)S.mv.pause();toast('이 주제의 끝입니다. 읽던 화면을 유지합니다.');return; } if (!PREVIEW) endingCinema(finalView); } // 주제를 마치면 해당 세계로, 종합 문서는 엔딩으로
   // 문서 안 클릭·체크 처리(한 번만 등록). 어느 챕터의 것인지는 가장 가까운 .chap 에서 읽는다.
   (function () { var root = $('#chapter'), chOf = function (el) { var a = el.closest('.chap'); return S.rep.chapters[a ? +a.dataset.ch : S.idx]; };
     root.addEventListener('click', function (e) {
       var c = chOf(e.target);
+      if(e.target.closest('[data-reading-retry]')){if(R.FullReading && R.FullReading.retry)R.FullReading.retry(c.id);return;}
       var feedback=e.target.closest('[data-reading-feedback]');if(feedback){T('chapter_feedback',{chapter:c.id,answer:feedback.dataset.readingFeedback});feedback.parentNode.querySelector('[data-feedback-status]').textContent='의견을 남겼습니다. 수집이 켜진 경우에만 익명 집계됩니다.';return;}
       if (R.ReadingAnswer && R.ReadingAnswer.handleClick(e.target, { sd: S.sd, onPause: function () { if (S.mv) S.mv.pause(); }, onMeasure: function () { if (S.mv) S.mv.measure(); }, onContinue: function () { if (S.mv) S.mv.play(); }, onChoice: function (topic, choice) { T('reading_question_selected', { topic: topic, choice: choice }); } })) return;
       var mo = e.target.closest('[data-mo]'); if (mo) { $$('.mo.sel', root).forEach(function (x) { x.classList.remove('sel'); x.style.borderColor = ''; }); mo.style.borderColor = 'var(--gold)'; moDetail(c, +mo.dataset.mo); return; }

@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-17T11:46:17.143Z",
+  "mode": "offline-backup-link-check",
+  "scope": "source-link-coverage; not backup byte completeness",
+  "cloudWrites": 0,
+  "sourceDocuments": 50,
+  "documentsWithOriginalFile": 0,
+  "missingOriginalFileReferences": 0,
+  "missingChunkRows": 39,
+  "knowledgeWithUnknownSourceReferences": 0,
+  "sourceLinkCoverageComplete": false,
+  "limitations": [
+    "Missing chunk rows were already absent from the approved Supabase export; this check does not indicate backup data loss.",
+    "Documents may be metadata-only legacy entries; missing chunks require review, not automatic removal."
+  ]
+}

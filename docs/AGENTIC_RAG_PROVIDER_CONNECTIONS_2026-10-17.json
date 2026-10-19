@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-10-17T11:55:15.736Z",
+  "inferenceRequests": 0,
+  "searchQueries": 1,
+  "productionWrites": 0,
+  "providers": {
+    "openai": {
+      "tlsHTTPReachable": true,
+      "httpStatus": 200,
+      "authenticated": true,
+      "localCredentialAvailable": true,
+      "freeQuotaBasis": null,
+      "fullResearchValidated": false
+    },
+    "brave": {
+      "tlsHTTPReachable": true,
+      "httpStatus": 200,
+      "authenticated": true,
+      "localCredentialAvailable": true,
+      "freeQuotaBasis": "user-confirmed dashboard allowance",
+      "fullResearchValidated": false
+    }
+  },
+  "limitations": [
+    "OpenAI GET /models does not run inference.",
+    "Brave search runs at most once only with an explicitly confirmed available free query; otherwise no token or query is sent.",
+    "Sealed production keys are not extracted. Authentication errors do not establish a working research pipeline."
+  ],
+  "freeSearchAuthorization": "user confirmed free allowance and authorized one search in current chat"
+}

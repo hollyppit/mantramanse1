@@ -1,4 +1,5 @@
 import '../report/v2/reading-catalog.js';
+import {isHealthEducation} from './_health-education.js';
 export const Editorial=globalThis.MantraEditorial;
 export const DRAFT_KEY='ik:editorial:draft',PUBLISHED_KEY='ik:editorial:published',HISTORY_KEY='ik:editorial:history';
 const id=x=>typeof x==='string'&&/^[a-zA-Z][\w.-]{1,79}$/.test(x);
@@ -58,6 +59,8 @@ export function publicationIssues(catalog,items,blocked=new Set(),sourceIndex,{i
  const ruleMap=new Map(items.map(r=>[r.id,r])),cache=new Map(),issues=[];
  for(const [kind,rows,key] of [['chapter',catalog.chapters,'sourceRuleIds'],['case',catalog.cases,'ruleIds']])for(const c of rows){
   if(!(['active','reviewed'].includes(c.state)||includeDrafts&&c.state==='draft'))continue;
+  // Fixed, reviewed general education is published separately from personal rule-based interpretations.
+  if(kind==='chapter' && isHealthEducation(c))continue;
   const domains=contractDomains(catalog,c);
   const details=[];
   if(!c[key].length)details.push({code:'no-linked-rules'});
@@ -72,7 +75,9 @@ export function publicationIssues(catalog,items,blocked=new Set(),sourceIndex,{i
  return issues;
 }
 export function contractFor(catalog,chapter){
- const candidate=Editorial.find(catalog,chapter);
+ const direct=Editorial.find(catalog,chapter);
+ const byTitle=!direct && typeof chapter?.title==='string' ? catalog.chapters.filter(c=>c.state==='active' && c.title===chapter.title && catalog.topics.some(t=>t.id===c.topicId&&t.enabled)) : [];
+ const candidate=direct || (byTitle.length===1?byTitle[0]:null);
  // Saved draft changes never leak into public generation. Built-in defaults are design constraints, not evidence.
  return candidate?.state==='active' && catalog.topics.some(t=>t.id===candidate.topicId&&t.enabled)?candidate:Editorial.find(Editorial.defaults(),chapter);
 }

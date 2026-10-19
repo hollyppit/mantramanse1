@@ -1,0 +1,142 @@
+{
+  "checkedAt": "2026-10-17T11:34:46.450Z",
+  "productionWrites": 0,
+  "productionDeployment": "af43e068-9557-4614-9136-ab585f94f406",
+  "configFingerprint": "9dc123a2ce0b94faddb3c7daa69583417544e5919c99dd85f040e0047878c0a1",
+  "kv": {
+    "GLOSSARY_KV": {
+      "namespace_id": "1a48b15379fc4a7191c9b2249e225c80"
+    }
+  },
+  "r2": {
+    "CLIPS_R2": {
+      "name": "mantra-clips"
+    }
+  },
+  "secretReadable": false,
+  "providerKeys": {
+    "OPENAI_API_KEY": {
+      "present": true,
+      "sealed": true
+    },
+    "BRAVE_SEARCH_API_KEY": {
+      "present": false,
+      "sealed": false
+    }
+  },
+  "usage": {
+    "billable/usage": {
+      "retrieved": false,
+      "error": "cloudflare-403-10000"
+    },
+    "subscriptions": {
+      "retrieved": false,
+      "error": "cloudflare-403-10000"
+    },
+    "r2": {
+      "viewer": {
+        "accounts": [
+          {
+            "r2OperationsAdaptiveGroups": [
+              {
+                "dimensions": {
+                  "actionType": "PutObject"
+                },
+                "sum": {
+                  "requests": 2494
+                }
+              },
+              {
+                "dimensions": {
+                  "actionType": "ListBuckets"
+                },
+                "sum": {
+                  "requests": 10
+                }
+              },
+              {
+                "dimensions": {
+                  "actionType": "DeleteObject"
+                },
+                "sum": {
+                  "requests": 1329
+                }
+              },
+              {
+                "dimensions": {
+                  "actionType": "ListMultipartUploads"
+                },
+                "sum": {
+                  "requests": 1
+                }
+              },
+              {
+                "dimensions": {
+                  "actionType": "ListObjects"
+                },
+                "sum": {
+                  "requests": 92
+                }
+              },
+              {
+                "dimensions": {
+                  "actionType": "GetObject"
+                },
+                "sum": {
+                  "requests": 29061
+                }
+              },
+              {
+                "dimensions": {
+                  "actionType": "PutBucket"
+                },
+                "sum": {
+                  "requests": 2
+                }
+              },
+              {
+                "dimensions": {
+                  "actionType": "HeadBucket"
+                },
+                "sum": {
+                  "requests": 336
+                }
+              },
+              {
+                "dimensions": {
+                  "actionType": "HeadObject"
+                },
+                "sum": {
+                  "requests": 7988
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "kv": {
+      "viewer": {
+        "accounts": [
+          {
+            "kvOperationsAdaptiveGroups": [
+              {
+                "dimensions": {
+                  "actionType": "read"
+                },
+                "sum": {
+                  "requests": 1686
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "blockers": [
+    "Usage must establish remaining free allowance before bulk reads."
+  ],
+  "productionConfigUnchanged": true,
+  "freeQuotaVerified": false
+}

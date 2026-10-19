@@ -219,3 +219,22 @@ body.qs-open #guideChange{top:76px;bottom:auto;left:auto;right:18px;font-size:12
   #qs.is-input .qs-sum strong{font-size:13px}
   body.qs-open #guideChange{top:66px;right:12px}
 }
+
+/* Active actions and selections share the same cinnabar red. */
+#qs { --q-action: #8f1d1d; --q-action-hover: #ad2927; --q-action-border: #db6560; }
+#qs .qs-btn:not(:disabled) { background: var(--q-action); border-color: var(--q-action-border); color: #fff8f0; }
+#qs .qs-btn.alt:not(:disabled) { background: #0c1119dc; border-color: #a6504b; color: #fff0e9; }
+#qs .qs-panel button.sel { background: var(--q-action); border-color: var(--q-action-border); color: #fff8f0; }
+#qs .qs-panel button.sel small { color: #fff0e9; }
+#qs button:not(:disabled):active { background: #701919; border-color: #ef8a82; color: #fff8f0; }
+#qs button:focus-visible { outline: 2px solid #ef8a82; outline-offset: 3px; }
+#qs :is(input, select, textarea):focus { outline-color: #db6560; border-color: #db6560; box-shadow: 0 0 0 3px #8f1d1d40; }
+#qs input[type="checkbox"], #qs input[type="radio"] { accent-color: var(--q-action); }
+#qs .qs-btn:disabled { background: #25282d; border-color: #555960; color: #a7a9af; opacity: .6; }
+@media (hover: hover) {
+  #qs button:hover:not(:disabled),
+  #qs .qs-btn:hover:not(:disabled),
+  #qs :is(.qs-yr, .qs-months, .qs-days, .qs-hours, .qs-min, .qs-places, .qs-seg) button:hover:not(:disabled) { background: var(--q-action-hover); border-color: #ef8a82; color: #fff8f0; }
+  #qs .qs-hours button:hover:not(:disabled) small { color: #fff0e9; }
+  #qs :is(.qs-sum, .qs-foot) button:hover:not(:disabled), #qs .qs-lnk:hover { color: #ffaba1; }
+}

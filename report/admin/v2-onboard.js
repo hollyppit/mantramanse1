@@ -71,6 +71,7 @@
       scenes: b.scenes.map(function (s) { return { id: s.id, title: s.title, lines: s.lines, unknownLines: s.unknownLines || [], hint: s.hint, button: s.button, face: s.face, image: s.image || '', bg: s.bg || '', bubble: s.bubble || '', enabled: s.enabled }; }), revealLines: b.revealLines };
   }
   function putDraft(quiet) {
+    if (G.imageOptimizing) return Promise.reject(new Error('이미지 최적화가 끝난 뒤 저장·게시해 주세요'));
     if (G.loopUploading) return Promise.reject(new Error('영상 업로드가 끝난 뒤 저장·게시해 주세요'));
     collect();
     return C.api('/api/onboarding', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body()) }).then(function (d) {
@@ -82,6 +83,7 @@
   function save() { putDraft().then(draw).catch(function (e) { toast(e.message, true); }); }
   function act(action, id) { return C.api('/api/onboarding?action=' + action + (id ? '&id=' + encodeURIComponent(id) : ''), { method: 'POST' }); }
   function publish() {
+    if (G.imageOptimizing) { toast('이미지 최적화가 끝난 뒤 게시해 주세요', true); return; }
     if (G.loopUploading) { toast('영상 업로드가 끝난 뒤 게시해 주세요', true); return; }
     collect();
     var pub = O.publicCases(G.cfg.cases).length, bc = O.birthCards(G.cfg.cases).length;
@@ -102,25 +104,26 @@
   var EXT = []; // 확장 하위 메뉴(report/admin/v2-quest.js: 인터랙티브 스토리·에셋·타임라인·운영). {id, label, view(), collect(), flow()}
   function subs() { var o = []; SUBS0.forEach(function (s) { if (s[0] === '@ext') EXT.forEach(function (x) { o.push([x.id, x.label]); }); else o.push(s); }); return o; }
   // 관리 영역을 둘로 나눈다: A 기존 온보딩(연구·명리학·서비스 소개 → 나의 운 확인하기) / B 인터랙티브 스토리(그 버튼 이후). 두 영역은 설정 키가 서로 독립이다(A: cases·sections·intro·services·topics…, B: quest·timeline·scenes).
-  var GA = ['landing', 'cases', 'intro', 'service', 'basic', 'stats'], GB = ['quest', 'qvideo', 'qassets', 'tl', 'qops', 'scenes'];
+  var GA = ['legacy', 'landing', 'cases', 'intro', 'service', 'basic', 'stats'], GB = ['quest', 'qvideo', 'qassets', 'tl', 'qops', 'scenes'];
   function inA(id) { return GA.indexOf(id) >= 0; }
   function groupsBar() {
     var all = subs(), pick = function (ids) { return all.filter(function (s) { return ids.indexOf(s[0]) >= 0; }).sort(function (a, b) { return ids.indexOf(a[0]) - ids.indexOf(b[0]); }); };
     var row = function (title, hint, list) { return '<div class="ob-bar"><b class="ob-grp">' + title + '</b><span class="ob-lock">' + hint + '</span>' + list.map(function (s) { return '<button class="ob-chip' + (G.sub === s[0] ? ' on' : '') + '" data-s="' + s[0] + '">' + s[1] + '</button>'; }).join('') + '</div>'; };
-    return row('화면 편집', '첫 화면 → 소개 → 입력 → 각성 → 결과', pick(['landing','cases','quest','qvideo','tl'])) + row('운영·게시', '모든 단계는 하나의 초안으로 저장하고 함께 게시합니다', pick(['qops','qassets','basic','stats','publish'])) + '<details' + (G.sub === 'scenes' ? ' open' : '') + '><summary>이전 입력 설정</summary>' + row('호환 모드', G.cfg.quest.enabled === false ? '현재 기본 입력 사용 중' : '이전 입력 설정 보존 · 현재 스토리 입력 사용 중', pick(['scenes'])) + '</details>';
+    return row('화면 편집', '첫 화면 → 소개 → 입력 → 각성 → 결과', pick(['landing','legacy','cases','intro','service','quest','qvideo','tl'])) + row('운영·게시', '모든 단계는 하나의 초안으로 저장하고 함께 게시합니다', pick(['qops','qassets','basic','stats','publish'])) + '<details' + (G.sub === 'scenes' ? ' open' : '') + '><summary>이전 입력 설정</summary>' + row('호환 모드', G.cfg.quest.enabled === false ? '현재 기본 입력 사용 중' : '이전 입력 설정 보존 · 현재 스토리 입력 사용 중', pick(['scenes'])) + '</details>';
   }
   function draw() {
     var changed = G.dirty ? '<span class="ob-dirty">● 저장하지 않은 변경이 있습니다</span>' : (G.srvDirty ? '<span class="ob-st warn">초안 ≠ 공개본 — 게시 필요</span>' : '<span class="ob-st ok">공개본과 같음</span>');
     PANE.innerHTML = '<div class="ob-workspace"><nav class="card ob-sidebar" aria-label="온보딩 편집 메뉴">' + groupsBar() + '</nav><div class="ob-main"><div class="card ob-toolbar">' +
       '<div class="ob-bar"><span id="obState">' + changed + '</span><span style="flex:1"></span>' +
-      '<button id="obSave">초안 저장</button><button id="obPrev" class="ghost">미리보기</button><button id="obPub">게시</button>' + '</div>' +
+      '<button id="obOptimize" type="button">기존 이미지 전체 자동 최적화</button><button id="obSave">초안 저장</button><button id="obPrev" class="ghost">미리보기</button><button id="obPub">게시</button>' + '</div>' +
       '<p class="muted">저장은 초안에 반영 · 게시는 방문자에게 공개</p><details class="ob-meta"><summary>게시 정보</summary><span>공개본 ' + esc(G.liveVersion || '(기본 문구)') + ' · 마지막 게시 ' + fmtT(G.liveAt) + ' · 초안 수정 ' + fmtT(G.draftAt) + '</span></details></div>' + flowHtml() + '<h3 class="ob-editor-title">' + esc((subs().filter(function (x) { return x[0] === G.sub; })[0] || ['', '편집'])[1]) + '</h3><div id="obPrevBox"></div><div id="obBody"></div></div></div>';
     $$('[data-s]').forEach(function (b) { b.onclick = function () {
-      collect(); G.selSec = null; G.sub = b.dataset.s; draw();
+      collect(); G.selSec = null; G.sub = b.dataset.s; G.prev.hash = G.sub === 'legacy' ? '#/welcome?home=1' : inA(G.sub) ? '#/welcome' : G.sub === 'tl' ? '#/timeline' : '#/begin'; draw();
     }; });
+    if ($('#obOptimize')) $('#obOptimize').onclick = function () { window.AdminImageOptimizer.optimizeDraft(window.V2Onboard.tools()); };
     if ($('#obSave')) $('#obSave').onclick = save;
     if ($('#obPub')) $('#obPub').onclick = publish;
-    if ($('#obPrev')) $('#obPrev').onclick = function () { collect(); G.prev.on = !G.prev.on; if (G.prev.on) G.prev.hash = inA(G.sub) ? '#/welcome' : (G.sub === 'tl' ? '#/timeline' : '#/begin'); drawPrev(); };
+    if ($('#obPrev')) $('#obPrev').onclick = function () { collect(); G.prev.on = !G.prev.on; if (G.prev.on) G.prev.hash = G.sub === 'legacy' ? '#/welcome?home=1' : inA(G.sub) ? '#/welcome' : (G.sub === 'tl' ? '#/timeline' : '#/begin'); drawPrev(); };
     bindFlow(); drawPrev();
     var view = ({ landing: window.RenewalAdmin ? window.RenewalAdmin.view : landingView, cases: casesView, intro: introView, service: serviceView, scenes: scenesView, basic: basicView, stats: statsView, publish: publishView })[G.sub], ex = EXT.filter(function (x) { return x.id === G.sub; })[0]; if (view) view(); else if (ex) ex.view(); else $('#obBody').innerHTML = '';
     if (!PANE._obDirty) { PANE._obDirty = true; PANE.addEventListener('input', onEdit); PANE.addEventListener('change', onEdit); } // 편집기·흐름 카드·목록 어디서든 입력이 바뀌면 "저장 안 됨" 표시
@@ -143,7 +146,7 @@
     return '필수 · 끌 수 없음';
   }
   function flowHtml() {
-    if (G.cfg.renewal && G.cfg.renewal.cinematic && G.cfg.renewal.cinematic.enabled !== false) return '<div class="card ob-flow-panel">' + G.cfg.renewal.cinematic.scenes.map(function(s,i){return '<button type="button" data-renewal-stage="'+esc(s.id)+'">'+(i+1)+'. '+esc(s.title.slice(0,16))+(s.enabled!==false?'':' (비활성)')+'</button>';}).join(' → ') + ' → 출생정보 입력 → 기존 결과 화면</div>';
+    if (G.sub !== 'legacy' && G.cfg.renewal && G.cfg.renewal.cinematic && G.cfg.renewal.cinematic.enabled !== false) return '<div class="card ob-flow-panel">' + G.cfg.renewal.cinematic.scenes.map(function(s,i){return '<button type="button" data-renewal-stage="'+esc(s.id)+'">'+(i+1)+'. '+esc(s.title.slice(0,16))+(s.enabled!==false?'':' (비활성)')+'</button>';}).join(' → ') + ' → 출생정보 입력 → 기존 결과 화면</div>';
     if (G.cfg.renewal && G.cfg.renewal.enabled !== false) return '<div class="card ob-flow-panel">' + G.cfg.renewal.scenes.map(function(s,i){return '<button type="button" data-renewal-stage="'+s.id+'">'+(i+1)+'. '+esc(s.title.slice(0,16))+(s.enabled?'':' (비활성)')+'</button>';}).join(' → ') + ' → 출생정보 입력 → 기존 결과 화면</div>';
     var c = G.cfg, nodes = c.sections.map(function (s, i) {
       var off = s.enabled === false && s.type !== 'final';
@@ -158,7 +161,7 @@
   }
   function bindFlow() {
     var c = G.cfg, drag = null;
-    $$('[data-renewal-stage]').forEach(function(n){n.onclick=function(){collect();G.sub='landing';window.RenewalAdmin.select(n.dataset.renewalStage);draw();};});
+    $$('[data-renewal-stage]').forEach(function(n){n.onclick=function(){collect();if(G.sub==='legacy')window.RenewalLegacyAdmin.select(n.dataset.renewalStage);else{G.sub='landing';window.RenewalAdmin.select(n.dataset.renewalStage);}draw();};});
     $$('[data-stage]').forEach(function (n) { n.onclick = function () { collect(); G.selSec = null; G.sub = n.dataset.stage; draw(); }; });
     $$('.ob-node[data-sec]').forEach(function (n) {
       n.addEventListener('click', function (e) { if (e.target.closest('input')) return; collect(); G.selSec = n.dataset.sec; secEditor(); $$('.ob-node[data-sec]').forEach(function (x) { x.classList.toggle('on', x === n); }); });
@@ -195,7 +198,7 @@
       (s.type !== 'final' ? '<button type="button" class="ghost" id="obSecDel">섹션 삭제</button>' : '') + '</div>' +
       '</details><p class="ob-lock">연출은 화면에 들어올 때 한 번 나타나는 효과뿐입니다. 글자 타이핑·자동 스크롤은 제공하지 않으며, 시스템의 "동작 줄이기" 설정을 따릅니다. 문구에 {귀인}을 쓰면 호칭 설정이 적용됩니다.</p></form>';
     var f = $('#obSec'); if (window.ObStyle) window.ObStyle.bind(f);
-    $$('[data-up]', f).forEach(function (u) { u.onchange = function () { upload(u.files[0], 'onb-sec-').then(function (url) { f.elements[u.dataset.up].value = url; markDirty(); toast('올렸습니다 — 초안 저장을 눌러 반영하세요'); }).catch(function (e) { toast(e.message, true); }); }; });
+    $$('[data-up]', f).forEach(function (u) { u.onchange = function () { upload(u.files[0], 'onb-sec-').then(function (url) { f.elements[u.dataset.up].value = url; markDirty(); toast('이미지는 자동 축소·압축해 올렸습니다 — 초안 저장 후 게시하세요'); }).catch(function (e) { toast(e.message, true); }); }; });
     var mv = function (d) { collect(); var j = i + d; if (j < 0 || j >= c.sections.length) return; c.sections.splice(i, 1); c.sections.splice(j, 0, s); G.dirty = true; draw(); };
     $('#obSecUp').onclick = function () { mv(-1); }; $('#obSecDn').onclick = function () { mv(1); };
     $('#obSecDup').onclick = function () { collect(); var n = JSON.parse(JSON.stringify(s)); n.id = uid(s.type).slice(0, 30).toLowerCase(); n.title = (s.title || '') + ' (복제)'; c.sections.splice(i + 1, 0, n); G.selSec = n.id; G.dirty = true; draw(); };
@@ -281,8 +284,8 @@
   function upload(file, pre) {
     if (!file) return Promise.reject(new Error('파일을 선택하세요'));
     if (!/^image[/]/.test(file.type) && !/^video[/]/.test(file.type)) return Promise.reject(new Error('이미지 또는 영상 파일만 올릴 수 있습니다'));
-    if (file.size > 25 * 1024 * 1024) return Promise.reject(new Error('25MB 이하만 올릴 수 있습니다'));
-    return C.api('/api/clipfile?name=' + encodeURIComponent(pre + file.name), { method: 'POST', headers: { 'content-type': file.type || 'application/octet-stream' }, body: file }).then(function (d) { if (!d.key) throw new Error('업로드 실패'); return '/api/clipfile?k=' + d.key; });
+    if (file.size > (/^image[/]/.test(file.type) ? 40 : 25) * 1024 * 1024) return Promise.reject(new Error('이미지는 40MB, 영상은 25MB 이하만 올릴 수 있습니다'));
+    return (window.AdminImageOptimizer ? window.AdminImageOptimizer.prepare(file) : Promise.resolve(file)).then(function (file) { return C.api('/api/clipfile?name=' + encodeURIComponent(pre + file.name), { method: 'POST', headers: { 'content-type': file.type || 'application/octet-stream' }, body: file }).then(function (d) { if (!d.key) throw new Error('업로드 실패'); return '/api/clipfile?k=' + d.key; }); });
   }
   function bindUploads(form, pre) {
     $$('[data-up]', form).forEach(function (u) { u.onchange = function () { upload(u.files[0], pre).then(function (url) { form.elements[u.dataset.up].value = url; try { form.elements[u.dataset.up].dispatchEvent(new Event('input', { bubbles: true })); } catch (x) { } markDirty(); toast('올렸습니다 — 초안 저장을 눌러 반영하세요'); }).catch(function (e) { toast(e.message, true); }); }; });
@@ -537,5 +540,5 @@
   }
 
   // 확장 모듈이 같은 초안·게시·이력 체계를 그대로 쓰도록 내부 도구를 건네 준다
-  window.V2Onboard = { open: open, register: function (x) { EXT.push(x); }, tools: function () { return { styBox: styBox, readSty: readSty, G: G, C: C, esc: esc, toast: toast, $: $, $$: $$, sel: sel, chk: chk, lines: lines, markDirty: markDirty, draw: draw, upload: upload, bindUploads: bindUploads, uid: uid, fmtT: fmtT, putDraft: putDraft }; } };
+  window.V2Onboard = { open: open, register: function (x) { EXT.push(x); }, tools: function () { return { collect: collect, styBox: styBox, readSty: readSty, G: G, C: C, esc: esc, toast: toast, $: $, $$: $$, sel: sel, chk: chk, lines: lines, markDirty: markDirty, draw: draw, upload: upload, bindUploads: bindUploads, uid: uid, fmtT: fmtT, putDraft: putDraft }; } };
 })();

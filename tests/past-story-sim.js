@@ -10,7 +10,7 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
  const env={GLOSSARY_KV:{get:async(k,t)=>memory.has(k)?t==='json'?JSON.parse(memory.get(k)):memory.get(k):null,put:async(k,v)=>memory.set(k,v)},OPENAI_API_KEY:'mock'};
  let calls=0,plans=[],deny=false;const originalFetch=global.fetch;
  global.fetch=async(url,opts)=>{
-  calls++;const req=JSON.parse(opts.body),input=JSON.parse(req.input);assert.equal(req.text.format.type,'json_schema');assert.equal(req.reasoning.effort,'low');assert(!req.input.includes('PRIVATE_NAME'));assert(!input.chart.birth&&!input.chart.name&&!input.chart.ziwei);
+  calls++;const req=JSON.parse(opts.body),input=JSON.parse(req.input);assert.equal(req.text.format.type,'json_schema');assert.equal(req.model,'gpt-4.1-2025-04-14');assert.equal(req.reasoning,undefined);assert(!req.input.includes('PRIVATE_NAME'));assert(!input.chart.birth&&!input.chart.name&&!input.chart.ziwei);
   const ids=input.claims.map(c=>c.claim_id);let result;
   assert(input.visual && input.visual.slot.startsWith('past:'));assert(Array.isArray(input.avoid_recent_patterns));assert(input.avoid_recent_patterns.every(p=>!p.key&&!p.claim_ids&&!p.chart));assert(!input.chart.currentRoots&&!input.chart.nowYear);
   if(req.instructions===P.PLAN_SYSTEM){
@@ -23,6 +23,12 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
  let r=await API.onRequestPost({request:request(sd),env}),d=await r.json();assert.equal(r.status,200,JSON.stringify(d));assert.equal(d.story.frames.length,8);assert(!d.audit,'public responses never include audit sources');assert.equal(calls,3);
  const adminRead=new Request(request(sd),{headers:{authorization:'Bearer test-admin'}});const adminBody=await (await API.onRequestPost({request:adminRead,env:{...env,ADMIN_PASSWORD:'test-admin'}})).json();assert(adminBody.cached&&adminBody.audit.plan&&adminBody.audit.review.passed&&adminBody.audit.claims.length===3);assert.equal(calls,3);
  await assert.rejects(API.composeStory({claims:adminBody.audit.claims,normalized:{chart:plans[0]}},async()=>JSON.stringify(adminBody.audit.plan),[{protagonist:adminBody.audit.plan.protagonist.name}]),e=>e.message==='plan-rejected'&&e.issues.includes('protagonist.name:recent-duplicate'));
+ let reviewCalls=0,writeCalls=0;
+ const corrected=await API.composeStory({claims:adminBody.audit.claims,normalized:{chart:plans[0]}},async(system,input,tokens,stage)=>{if(stage==='plan')return JSON.stringify(adminBody.audit.plan);if(stage==='write'){writeCalls++;return JSON.stringify(d.story);}reviewCalls++;return JSON.stringify({passed:true,grounding:true,causality:true,dilemma:true,arc:true,prose:true,issues:reviewCalls===1?['모든 장면이 검수 근거와 잘 연결되어 있습니다.']:[]});});assert(corrected.review.passed);assert.equal(reviewCalls,2);assert.equal(writeCalls,1,'a contradictory positive review is independently reassessed without rewriting valid prose');
+ let negativeRecheck=0;
+ await assert.rejects(API.composeStory({claims:adminBody.audit.claims,normalized:{chart:plans[0]}},async(system,input,tokens,stage)=>{if(stage==='plan')return JSON.stringify(adminBody.audit.plan);if(stage==='write')return JSON.stringify(d.story);negativeRecheck++;return JSON.stringify(negativeRecheck===1?{passed:true,grounding:true,causality:true,dilemma:true,arc:true,prose:true,issues:['근거와 장면이 잘 연결되어 있습니다.']}:{passed:false,grounding:false,causality:true,dilemma:true,arc:true,prose:true,issues:['원문의 조건을 뒤집은 실제 위반이 남아 있습니다.']});}),e=>e.message==='review-rejected');assert.equal(negativeRecheck,3,'independent rejection after contradictory positive metadata must remain rejected');
+ const expanded=Array.from({length:8},(_,i)=>({...adminBody.audit.claims[0],claim_id:'scope-'+i}));
+ await assert.rejects(API.composeStory({claims:expanded,normalized:{chart:plans[0]}},async(system,input,tokens,stage,allowed)=>{assert.equal(allowed.length,6);assert.deepEqual(allowed.map(c=>c.claim_id),JSON.parse(input).claims.map(c=>c.claim_id));throw Error('captured-exact-scope');}),/captured-exact-scope/);
  r=await API.onRequestPost({request:request(sd),env});d=await r.json();assert(d.cached);assert.equal(calls,3);
  r=await API.onRequestPost({request:request({...sd,nowYear:sd.nowYear+1,currentRoots:{changed:true}}),env});d=await r.json();assert(d.cached);assert.equal(calls,3);
  const second=JSON.parse(JSON.stringify(sd));second.groups={...sd.groups,비겁:sd.groups.비겁+0.01};

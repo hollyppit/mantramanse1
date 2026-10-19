@@ -10,7 +10,7 @@ function tracked(){const p=spawnSync('git',['ls-files','-z'],{encoding:'utf8'});
 async function get(url){const r=await fetch(url,{signal:AbortSignal.timeout(30000)});assert.equal(r.status,200,url);return Buffer.from(await r.arrayBuffer())}
 async function main(){const mode=process.argv[2];fs.mkdirSync(DIR,{recursive:true});
 if(mode==='prepare'){
- const files=[...tracked(),...added],site=DIR+'/site';fs.mkdirSync(site,{recursive:true});const manifest=[];
+ const files=[...new Set([...tracked(),...added,'report/v2/toon-reader.css'])],site=DIR+'/site';fs.mkdirSync(site,{recursive:true});const manifest=[];
  for(const f of files){const data=fs.readFileSync(f);assert(!/(?:sk-proj-|sb_secret_)[A-Za-z0-9_-]{12,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(data.toString('utf8')),f);const out=path.join(site,f);fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,data);manifest.push({file:f,sha256:sha(data),bytes:data.length})}
  for(const [name,source]of [['_worker.js','index.js'],['_routes.json','_routes.json']])fs.copyFileSync(DIR+'/build/'+source,site+'/'+name);
  fs.writeFileSync(DIR+'/manifest.json',JSON.stringify({files:manifest,workerSHA256:sha(fs.readFileSync(site+'/_worker.js')),excluded:['docs','tests','tools','output/protected-backup','config','supabase','workers','.git','.env']},null,2));console.log('Prepared '+manifest.length+' allowlisted public files');

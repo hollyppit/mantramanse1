@@ -1,0 +1,38 @@
+import json,pathlib
+p=pathlib.Path('output/independent-reference-2026-10-17')
+a=json.loads((p/'cases.json').read_text(encoding='utf-8-sig'))
+g=next(c for c in a if c['id']=='G17-N')
+t=json.loads((p/'literature-hidden-root-rereview.json').read_text(encoding='utf-8-sig'))['hiddenTable']
+old=json.loads((p/'self-combination-three-comparators.json').read_text(encoding='utf-8'))
+h=next(c for c in old['comparators'] if c['id']=='H03')
+wiki='https://zh.wikisource.org/zh-hant/滴天髓闡微'
+libo='https://libokang.com/zh-hant/guji/bazi/滴天髓闡微/2/'
+sources=[dict(id='DT-B',url=libo,layer='通神論·地支 任氏曰 본문만 사용; 현대 번역과 분리',locators=['L121,127: 지장간별 상호 작용','L145–151: 형·해 관법 비판','L175–181: 충의 방향·세력 및 구제 조건'],claim='충을 성분·세력·지원에 따라 검토하며 형 자체의 독립 근거를 부정하는 임씨 관법을 별도로 기록한다.'),dict(id='DT-C',url=wiki,layer='任氏 명조 해설층; 본경·原注와 구분',locators=['女命 L6546–6568 H03','父母 L5583–5600 J02'],claim='H03의 관인 유지와 J02의 두 巳 존재만으로 화 보존을 보증할 수 없는 서술을 구별한다.'),dict(id='ZP7',url='https://www.donglishuzhai.net/chapter/3720.html',layer='沈氏 본문; 東里山人按 별도',locators=['L48–59'],claim='巳申을 형 용례로 기록하고 합회의 해소·재발 예시를 다룬다. 임씨 형 비판과 합쳐 보편 판정으로 만들지 않는다.'),dict(id='YH',url='https://sajumania.com/ebook/to01-06/to01-06-01-61.htm',layer='기존 문헌 배속 원장',locators=['地支藏遁歌'],claim='지장간 소속 확인용; 강도·손상량 자료가 아니다.')]
+comp=[
+ dict(id='H03',pillars=h['pillars'],source='DT-C',locator='女命 L6546–6568',reading='관인·재생관 경로를 계속 논하는 기존 비교 명조.',shared='丁巳년·戊申월 및 癸 일간, 戊癸 인접 일치.',different='일지 丑 대 亥; 乙卯시 대 丁巳시. G17의 충·성분 교체를 포함하지 않는다.',use='배치 차이의 기준점; 균형 결론 이식 금지.'),
+ dict(id='J01',pillars=['甲寅','壬申','癸巳','癸亥'],source='DT-B',locator='地支 L130, 원문 명조 해설',reading='申월 癸에서 巳火 역할과 巳亥 충을 함께 논한다.',shared='申월·癸 일간·巳/亥 및 申 공존.',different='巳日亥時로 위치가 반대; 寅申沖·壬 및 두 癸, 戊/丁 부재.',use='申월에도 巳 역할이 남을 수 있다는 조건부 대조; G17의 승패 증명 아님.'),
+ dict(id='J02',pillars=['乙亥','辛巳','丙辰','癸巳'],source='DT-C',locator='父母 L5583–5600',reading='두 巳가 있어도 다른 제약·충을 함께 보고 화 손실을 논한다.',shared='두 巳·한 亥; 천간 재관과 지원 문제.',different='巳월·丙 일간; 亥年·巳月/時; 辰 존재·申 부재.',use='두 巳의 개수만으로 보존·승리를 단정하는 가정에 대한 문헌상 경계.'),
+ dict(id='J03',pillars=['癸巳','癸亥','甲寅','壬申'],source='DT-B',locator='地支 L133, 원문 명조 해설',reading='寅亥 합을 구제 조건으로 들어 巳火의 재활용을 논한다.',shared='巳·亥·申 공존 및 충합 경합.',different='亥월·甲 일간, 寅 존재. G17에는 寅이 없다.',use='구제 조건을 찾는 대조 사례. 해당 寅亥 구제를 G17에 가정하지 않는다.')]
+changes=[dict(position='day',before='癸丑',after='癸亥',removedHidden=t['丑'],addedHidden=t['亥'],confirmed='己七殺·辛偏印·癸比肩 배속 대신 壬劫財·甲傷官 배속. 癸 일간에 대한 범주이며 실효 판정 아님.',held='亥의 壬 지원과 甲의 설기/제관이 충 이후 남는지 미확정.'),dict(position='hour',before='乙卯',after='丁巳',removedHidden=t['卯'],addedHidden=t['巳'],confirmed='乙食神 투출·卯乙 대신 丁偏財 투출·巳의 庚正印/丙正財/戊正官 배속.',held='食制官 경로를 삭제 확정하거나 財生官·官生印·印生身을 완료된 작용으로 볼 수 없다. 亥甲·申庚 등 다른 경로도 있음.')]
+edges=[dict(kind='clash',positions=['day','hour'],branches=['亥','巳'],adjacent=True),dict(kind='clash',positions=['year','day'],branches=['巳','亥'],adjacent=False),dict(kind='liuhe-reference',positions=['year','month'],branches=['巳','申'],adjacent=True),dict(kind='liuhe-reference',positions=['month','hour'],branches=['申','巳'],adjacent=False)]
+questions=[
+ dict(id='C1',subject='亥水 지원',confirmed='亥壬 배속 및 日亥–時巳 인접 충, 年巳–日亥 비인접 충이 있다.',held='亥壬 근 성분의 실효 보존·손상량',needs='申庚 생조·申壬 대체 지원을 亥壬 자체 보존과 구분하고 두 丁 및 巳火에 대항하는 역할을 설명할 동배치 근거',sources=['DT-B','YH'],comparator=['J01','J02']),
+ dict(id='C2',subject='申金 인성',confirmed='申庚은 正印, 申壬은 劫財, 申戊는 正官 성분이다. 월지 申의 계절 단서와 이 세 역할은 다르다.',held='巳申 이후 庚印의 생수 및 관을 받아 일간을 돕는 효력',needs='월지라는 이유만으로 무손상이라 하지 말고 申庚의 火 제약·土 생조·水 설기를 각각 검수. 巳申水化는 별도 성립 근거 필요',sources=['DT-B','ZP7'],comparator=['H03','J01']),
+ dict(id='C3',subject='戊官 잔존',confirmed='戊月–癸日 본신 합은 유지하며 申·두 巳에 戊 배속이 있다.',held='戊官의 직접 제수와 생금 경유 작용 중 무엇이 우세한지',needs='戊의 토 성분이 火 생조를 받는지, 木 제약·金 설기로 어떻게 달라지는지 검수. 戊癸 합 자체와 巳亥 충의 토 성분 결과는 별도',sources=['DT-C','DT-B'],comparator=['H03']),
+ dict(id='C4',subject='두 丁·두 巳',confirmed='丁偏財가 연·시에 있고 두 巳에 丙財·戊官·庚印 배속이 반복된다.',held='두 巳의 지원 보존과 財生官/財克印의 상대 효과',needs='두 글자/두 천간을 두 배 강도로 환산하지 말고 丁과 巳의 관계, 인접·비인접 충합 경로를 분리 검수',sources=['DT-C','DT-B'],comparator=['J02']),
+ dict(id='C5',subject='巳申 합·형과 충의 경합',confirmed='巳申 관계는 두 위치쌍에 걸리나 인접 여부가 다르고 G17에는 寅이 없다.',held='합으로 충이 풀리는지·충으로 합이 제한되는지 및 실효 화수',needs='ZP7의 형 용례와 임씨의 형 비판을 관법별로 따로 검수. 寅巳申 삼자 완비나 寅亥 구제를 가정하지 않음. 한 申과 두 巳의 경합을 설명할 구체 배치 근거 필요',sources=['DT-B','ZP7'],comparator=['J03','H03'])]
+x=dict(date='2026-10-17',id='G17-N',raw=g['raw'],baseline=dict(id='H03',pillars=h['pillars']),sources=sources,comparators=comp,changes=changes,edges=edges,questions=questions,finalVerdict='unknown',officialEffectiveness='unknown',sealEffectiveness='unknown',publishable=False,engineTruthUsed=False,externalAI=False,published=False,limitation='임씨 조건부 설명을 원국 세력의 독립 정답으로 쓰지 않음; 일시 동시 변경은 단일 변수 인과 실험 아님')
+(p/'g17-hai-dingsi-effect-review.json').write_text(json.dumps(x,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+lines=['# G17 亥 일지·丁巳 시주 — 충합과 관인 실효 추가 검수','', '2026-10-17. G17=丁巳/戊申/癸亥/丁巳, 비교 H03=丁巳/戊申/癸丑/乙卯. 기둥·배속·인접/비인접 관계는 확인했다. 관성 실효·인성 실효·전체 강약은 유보한다. 게시·운영 변경·외부 AI 호출 없음. 기존 엔진 판정·비중을 읽거나 정답으로 사용하지 않았다.','', '## 출처와 관법 구분','']
+for s in sources:lines+=['- ['+s['id']+']('+s['url']+') · '+s['layer']+' · '+'; '.join(s['locators'])+'. '+s['claim']]
+lines+=['', 'DT-B 페이지에서 任氏曰로 표시된 고전 전사만 채택하고 현대 백화 번역은 증거에서 제외했다. 本經·原注·任氏 해설은 같은 층이 아니다. 임씨는 형 자체의 독립 판정 근거를 비판하지만 ZP7은 巳申을 형 용례로 제시한다. 두 관점을 벌점으로 합산하거나 합의된 우선순위라고 표시하지 않는다. 기존 지장간 원장은 배속 확인에만 사용했다. 영인본 대조·독립 전문가 합의는 미완료다.','', '## 실제로 바뀐 조건','', '| 위치 | H03 | G17 | 확인된 성분 교체 | 실효 유보 |','|---|---|---|---|---|']
+for c in changes:lines+=['| '+c['position']+' | '+c['before']+' | '+c['after']+' | '+c['confirmed']+' | '+c['held']+' |']
+lines+=['', '이는 일지와 시주가 함께 바뀐 대조다. 어느 한 변경이 특정 효과를 일으켰다는 인과 분리 실험이 아니다. H03의 官印 균형·食神得地 결론을 그대로 유지할 수도, 역으로 G17을 불리하다고 확정할 수도 없다.','', '## 관계 배치에서 확정 가능한 것','', '| 관계 | 위치 | 인접 | 판정 한계 |','|---|---|---|---|']
+for e in edges:lines+=['| '+e['kind']+' '+'–'.join(e['branches'])+' | '+'–'.join(e['positions'])+' | '+str(e['adjacent'])+' | 글자 관계 확인; 효과·강도·해소는 미확정 |']
+lines+=['', '두 巳는 위치가 다르므로 서로 교환 가능한 두 배 힘으로 세지 않는다. 月申–日亥의 申亥 관계도 알려진 논점이지만 임씨는 해 자체의 독립 근거를 비판한다. 이번 충합 목록은 모든 학파의 관계를 망라한 계산 결과가 아니다.','', '## 문헌 명조 대조','', '| ID | 연 / 월 / 일 / 시 | 문헌 서술 | 공통 | 차이와 적용 한계 |','|---|---|---|---|---|']
+for c in comp:lines+=['| '+c['id']+' | '+' / '.join(c['pillars'])+' | '+c['reading']+' | '+c['shared']+' | '+c['different']+' '+c['use']+' |']
+lines+=['', '위치는 '+ '; '.join(c['id']+': '+c['locator'] for c in comp)+'. 명조 속 재산·혼인·사망 서술은 실제 결과 라벨로 채택하지 않는다. J01의 申월·癸·巳亥 공통점도 壬·癸 투간 및 寅의 차이를 지우지 못한다. J03의 寅亥 구제는 G17에 없는 조건이다.','', '## 성분별 확정과 유보, 다음 증거','']
+for q in questions:lines+=['### '+q['id']+' '+q['subject'],'','**확정:** '+q['confirmed'],'','**유보:** '+q['held']+'.','', '**확정에 필요한 근거:** '+q['needs']+'.','', '문헌: '+', '.join(q['sources'])+' / 대조: '+', '.join(q['comparator'])+'.','']
+lines+=['## 이번 검수로 좁혀진 결론','', '충이 있으므로 亥 근과 申 인성이 모두 사라진다는 결론, 申월이므로 두 지원이 온전히 보존된다는 결론, 巳申이 있으므로 물로 변해 충을 모두 해소한다는 결론은 현재 근거로 확정할 수 없다. 戊官의 직접 제수와 金印을 거친 생신은 동일 작용이 아니며, 庚印의 보존과 亥壬 자체의 보존 역시 별개다.','', '우선 C1의 亥壬 대체 지원 여부와 C2의 申庚 기능 보존을 각각 판단한 후 C3의 戊官 작용을 비교해야 한다. 이는 연구 절차이며 전통 관법의 보편 작동 순서를 확정한 것이 아니다. 아직 두 지원의 실효가 미확정이므로 관다신약·수치 경계·관계 규칙의 결론도 계속 유보한다.','', '검증 범위: 원자료·비교 명조·배속 교체·관계 위치·출처 연결의 일관성. 해석의 전문가 합의·예측 정확도를 검증한 것은 아니다. 상세: output/independent-reference-2026-10-17/g17-hai-dingsi-effect-review.json. 재생성: python tools/review-g17-hai-dingsi.py. 검증: python tools/check-g17-hai-dingsi.py.','']
+pathlib.Path('docs/G17_HAI_DINGSI_EFFECT_REVIEW_2026-10-17.md').write_text('\n'.join(lines),encoding='utf-8')
+print('Saved G17 review: 4 comparators, 2 coupled pillar changes, 4 positional edges, 5 narrowed evidence requirements; final held.')

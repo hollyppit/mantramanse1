@@ -2984,9 +2984,9 @@ function instruction(c){if(!c)return '';return '[개별 챕터 계약]\n핵심 �
 function generationChapter(existing,c,sd){
  var R=root.ReportV2,sections={self:1,wealth:5,career:4,love:6,relationships:7,timing:11,health:8,creative:7,remedy:14},i=sections[c.topicId]==null?1:sections[c.topicId],basic=R.ReadingFlow.card(sd,i),core={};
  R.ReadingFlow.FIELDS.forEach(function(f){core[f[0]]=f[0]==='why'?basic.why:'';});
- var oldScenes=(existing && existing.scenes || []).filter(function(scene){return !scene.readingRole;}).map(function(scene){return Object.assign({},scene,{readingSupplementary:true});});
+ var oldScenes=(existing && existing.scenes || []).filter(function(scene){return !scene.readingRole;}).map(function(scene){return Object.assign({},scene,{readingSupplementary:true,readingInline:!!scene.readingInline || /^ci-/.test(scene.sceneId || '')});});
  var id=existing?existing.id:c.id;
- return Object.assign({},existing || {},{id:id,base:existing?existing.base:c.id,title:c.title,act:existing?existing.act:i+1,kind:'life',aiEnabled:true,readingSupplementary:false,readingCore:core,readingSection:i+1,editorialContractId:c.id,editorialTopicId:c.topicId,editorialDraft:true,readingDeferred:true,readingNotice:'이 장의 풀이를 준비하고 있습니다.',scenes:[{sceneId:id+'_editorial_header',sceneType:'chapterIntro',compact:true}].concat(R.ReadingFlow.scenes(core,id)).concat([{sceneId:id+'_editorial_end',sceneType:'chapterEnding'}]).concat(oldScenes)});
+ return Object.assign({},existing || {},{id:id,base:existing?existing.base:c.id,title:c.title,act:existing?existing.act:i+1,kind:'life',aiEnabled:true,readingSupplementary:false,readingCore:core,readingSection:i+1,editorialContractId:c.id,editorialTopicId:c.topicId,editorialDraft:true,readingDeferred:true,readingNotice:'이 장의 개인 풀이를 준비하고 있습니다. 생성과 검수가 끝날 때까지 자동 진행을 멈춥니다.',scenes:[{sceneId:id+'_editorial_header',sceneType:'chapterIntro',compact:true}].concat(R.ReadingFlow.scenes(core,id)).concat([{sceneId:id+'_editorial_end',sceneType:'chapterEnding'}]).concat(oldScenes)});
 }
 function prepare(rep,published,sd){
  var source=(rep.chapters || []).slice(),catalog=published || defaults(),seed=defaults(),active=(catalog.chapters || []).filter(function(c){return c.state==='active'&&catalog.topics.some(function(t){return t.id===c.topicId&&t.enabled;});}),out=[],archive=[];

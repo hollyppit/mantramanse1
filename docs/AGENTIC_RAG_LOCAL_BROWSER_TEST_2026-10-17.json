@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-17T11:24:19.520Z",
+  "url": "http://127.0.0.1:55478",
+  "storage": "actual PostgreSQL/PGlite",
+  "httpEndpoints": "real local HTTP",
+  "externalAPIs": "fixture (no paid calls)",
+  "productionAccess": false,
+  "originalRowsApprovalPublicationUnchanged": true,
+  "automaticPublished": 2,
+  "individuallyRolledBack": 1,
+  "otherKnowledgeStillPublished": true,
+  "anonymousRejected": true,
+  "crossOriginWritesRejected": true,
+  "actualExternalAPICost": 0,
+  "passed": true
+}

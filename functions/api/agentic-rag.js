@@ -2,11 +2,11 @@ import { json, isAdmin, configError } from '../_lib.js';
 import { kvOf } from '../_store.js';
 import { PREFIX, FLAGS, audit, plan, propose, withdraw } from '../_agentic-rag.js';
 import { readState } from '../_rag-state.js';
-import { saveConfig, startResearch, tickResearch, controlResearch, publishCandidate, rollbackCandidate, scheduledResearch } from '../_rag-runner.js';
+import { saveConfig, startResearch, tickResearch, controlResearch, publishCandidate, rollbackCandidate, scheduledResearch, repairVerification, syncReadingRequests } from '../_rag-runner.js';
 
 export async function onRequest({ request, env }) {
   const action = new URL(request.url).searchParams.get('a') || 'dashboard';
-  const scheduler=action==='scheduled'&&request.method==='POST'&&isAdmin(request,{ADMIN_PASSWORD:env.RAG_SCHEDULER_SECRET});
+  const scheduler=['scheduled','verify-queued'].includes(action)&&request.method==='POST'&&isAdmin(request,{ADMIN_PASSWORD:env.RAG_SCHEDULER_SECRET});
   if (!scheduler&&!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   if (!['GET','POST'].includes(request.method)) return json({ error: '허용되지 않은 메서드' }, 405);
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
@@ -21,6 +21,14 @@ export async function onRequest({ request, env }) {
       if (+(request.headers.get('content-length') || 0) > 65536) return json({ error: '요청이 너무 큽니다' }, 413);
       const raw = await request.text(); if (new TextEncoder().encode(raw).length > 65536) return json({ error: '요청이 너무 큽니다' }, 413);
       const input = JSON.parse(raw || '{}');
+      if(action==='verify-queued'){
+        if(input.repairValidation===true)return json(await repairVerification(kv,input.id));
+        if(!input.id)return json(await startResearch(kv,env,{verification:true}));
+        const state=await readState(kv),job=state.jobs[input.id];
+        if(!job||job.budgetLane!=='verification')return json({error:'unknown-verification-run'},400);
+        if(job.state!=='running'){await syncReadingRequests(kv);return json({id:job.id,state:job.state});}
+        return json(await tickResearch(kv,env));
+      }
       if(action==='scheduled')return json(await scheduledResearch(kv,env));
       if(action==='settings')return json({config:await saveConfig(kv,input.config,input.expectRevision)});
       if(action==='start')return json(await startResearch(kv,env));

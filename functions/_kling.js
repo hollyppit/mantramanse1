@@ -1,3 +1,4 @@
+import { aiFetch } from './_ai-cost.js';
 // Kling AI 이미지 → 영상(image-to-video) 클라이언트 — Cloudflare Pages Functions(WebCrypto)용. 파일명이 _로 시작해 라우트로 노출되지 않는다.
 // 두 가지 API 를 지원한다(둘 다 비동기: 제출 → 상태 조회).
 //
@@ -28,7 +29,8 @@ export async function klingJwt(env, now) {
 }
 const authOf = async env => 'Bearer ' + (isNew(env) ? env.KLING_API_KEY : await klingJwt(env));
 async function call(env, method, path, body) {
-  const r = await fetch(baseOf(env) + path, { method, signal: AbortSignal.timeout(60000), headers: { 'content-type': 'application/json', authorization: await authOf(env) }, body: body ? JSON.stringify(body) : undefined });
+  const send=method==='POST'?(url,init)=>aiFetch(env,'kling-submit',url,init):fetch;
+  const r = await send(baseOf(env) + path, { method, signal: AbortSignal.timeout(60000), headers: { 'content-type': 'application/json', authorization: await authOf(env) }, body: body ? JSON.stringify(body) : undefined });
   const text = await r.text(); let j = null; try { j = JSON.parse(text); } catch { /* JSON 아님 */ }
   if (!r.ok || !j || (j.code != null && j.code !== 0)) throw new Error('kling ' + r.status + ' ' + ((j && (j.message || j.msg)) || text.slice(0, 200)));
   return j.data;

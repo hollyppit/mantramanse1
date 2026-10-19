@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-17T11:56:40.461Z",
+  "sourceProject": "mantramanse1",
+  "mode": "offline-audit-of-approved-backup",
+  "productionWrites": 0,
+  "originalRowsUnchanged": true,
+  "localMigrationAppliedTwice": true,
+  "total": 386,
+  "reviewed": 382,
+  "published": 333,
+  "counts": {
+    "evidence": 272,
+    "source": 1,
+    "conditions": 105,
+    "conflict": 4,
+    "duplicate": 0,
+    "chapter": 34,
+    "usage": 0,
+    "usageUnknown": 333
+  },
+  "limitations": [
+    "충돌·중복은 규칙 기반 검토 후보입니다.",
+    "인용은 저장 원문과 대조했습니다. 이용 권한·주장의 타당성은 별도 검증 대상입니다.",
+    "챕터 연결은 기존 풀이 구성의 subDomain 기준입니다.",
+    "사용 이력 미측정은 실제 미사용으로 판정하지 않습니다."
+  ],
+  "privateDetails": "output/protected-backup/mantramanse1-health-private.json"
+}

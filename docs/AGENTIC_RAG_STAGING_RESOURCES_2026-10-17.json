@@ -1,0 +1,33 @@
+{
+  "name": "mantramanse-rag-test-20261017",
+  "createdAt": "2026-10-17T11:06:10.443Z",
+  "accountId": "9691f5fe73bf481a5d884db649c7eb01",
+  "productionWrites": 0,
+  "productionDataCopied": false,
+  "sqlApplied": false,
+  "externalResearchExecuted": false,
+  "resources": {
+    "kv": {
+      "id": "97c9e1ffd284412f83fc4e70b1d2d435",
+      "title": "mantramanse-rag-test-20261017",
+      "isolated": true
+    },
+    "r2": {
+      "name": "mantramanse-rag-test-20261017",
+      "isolated": true
+    },
+    "pages": {
+      "name": "mantramanse-rag-test-20261017",
+      "domain": "mantramanse-rag-test-20261017.pages.dev",
+      "gitConnected": false,
+      "kvBoundToTest": true,
+      "r2BoundToTest": true,
+      "secretNames": []
+    }
+  },
+  "blockers": [
+    "Separate Supabase project and SQL management connection required",
+    "OpenAI and Brave test API keys required"
+  ],
+  "productionConfigurationUnchanged": true
+}

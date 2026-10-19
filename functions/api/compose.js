@@ -1,3 +1,4 @@
+import { aiFetch } from '../_ai-cost.js';
 // AI Composer (공개 엔드포인트). 리포트의 이미 선택된 해석 문장을 매끄럽게 잇고 미디어 후보 중에서 고른다. AI 는 선택 기능이며, 실패하면 { ok:false } 만 돌려주고 클라이언트는 원본 문장으로 계속한다.
 // POST /api/compose  { payload: ReportV2.Compose.aiPayload(rep), media: ReportV2.Compose.mediaPayload(rep, lib) } → { ok, result:{chapters:[{id,headline?,lead?}], media:{sceneId:assetId}}, cached }
 // 보내는 데이터에는 생년월일·이름이 없다(해석 문장과 계산 근거 요약만).
@@ -10,13 +11,13 @@ import { loadStyle, composeStyle } from '../_stylestore.js';
 
 const TIMEOUT_MS = 30000;
 async function claude(env, system, user) {
-  const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+  const r = await aiFetch(env, 'compose', 'https://api.anthropic.com/v1/messages', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
     body: JSON.stringify({ model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5', max_tokens: 3500, system, messages: [{ role: 'user', content: user }] }) });
   if (!r.ok) throw new Error('anthropic ' + r.status);
   const d = await r.json(); return (d.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
 }
 async function openai(env, system, user) {
-  const r = await fetch('https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: system, input: user }) });
+  const r = await aiFetch(env, 'compose', 'https://api.openai.com/v1/responses', { method: 'POST', signal: AbortSignal.timeout(TIMEOUT_MS), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-6.1-sol', instructions: system, input: user }) });
   if (!r.ok) throw new Error('openai ' + r.status);
   const d = await r.json(); return typeof d.output_text === 'string' ? d.output_text : (d.output || []).flatMap(o => o.content || []).map(c => c.text || '').join('');
 }

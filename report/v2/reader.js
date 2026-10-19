@@ -176,6 +176,7 @@
       if (dead) return; clearTimers(); if (i >= pages.length) { finish(); return; } pi = Math.max(0, i); var p = pages[pi]; userMoved = false;
       if (scrollOn) moveTo(p.y, Math.max(260, Math.min(900, Math.max(420, Math.abs(p.y - win.scrollY) * 0.7)) / Math.max(1, rate * 0.6))); // MOVE (0.4~0.9초) 뒤에는 움직이지 않는다 = HOLD
       setCur(p.sec); remain = pageMs(p);
+      if(o.canAdvance && !o.canAdvance(p.sec)){state='PAUSED';pausedBy='reading-pending';ui();showNote('이 장의 풀이가 준비되면 이어 읽을 수 있습니다. 자동 진행을 멈췄습니다.');return;}
       if (f.stopAtChoice && p.choice && !p.choiceDone) { p.choiceDone = true; state = 'PAUSED'; pausedBy = 'choice'; ui(); showNote('상황을 선택해 더 읽거나, 선택 없이 이어갈 수 있습니다'); return; }
       ui(); begin();
     }
@@ -189,7 +190,7 @@
     }
     function pause() { if (state !== 'PLAYING') return; halt('PAUSED'); }
     function userTake() { // wheel · touchmove · 키보드 · 스크롤바: 자동 진행과 싸우지 않고 바로 양보한다
-      userMoved = true; if (state === 'PLAYING') { halt('USER_READING'); showNote('자동 진행 일시정지'); } else if (state === 'IDLE') state = 'USER_READING';
+      pausedBy = ''; userMoved = true; if (state === 'PLAYING') { halt('USER_READING'); showNote('자동 진행 일시정지'); } else if (state === 'IDLE') state = 'USER_READING';
       cancelTween();
     }
     function seek(fr) {
@@ -238,7 +239,7 @@
       doc.removeEventListener('keydown', onKey, true); doc.removeEventListener('pointerdown', onPtr, true); doc.removeEventListener('visibilitychange', onVis); win.removeEventListener('resize', onResize);
       [ctl, note].forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); }); doc.body.classList.remove('rd-on');
     }
-    return { play: play, pause: pause, toggle: function () { if (state === 'PLAYING') pause(); else play(); }, state: function () { return state; }, measure: measure, gotoEl: gotoEl, destroy: destroy, pages: function () { return pages; }, flow: f,
+    return { readingReady: function () { if (!dead && !doc.hidden && pausedBy === 'reading-pending' && state === 'PAUSED') { var p=pages[pi]; if (!p || !o.canAdvance || o.canAdvance(p.sec)) { showNote(''); play(); } } }, play: play, pause: pause, toggle: function () { if (state === 'PLAYING') pause(); else play(); }, state: function () { return state; }, measure: measure, gotoEl: gotoEl, destroy: destroy, pages: function () { return pages; }, flow: f,
       choiceMade: function () { if (pausedBy === 'choice' && state === 'PAUSED') setTimeout(function () { if (!dead && pausedBy === 'choice' && state === 'PAUSED') play(); }, 1800); } };
   }
 

@@ -1,3 +1,4 @@
+import { aiFetch } from './_ai-cost.js';
 // 무빙툰 패널 이미지(장면 삽화) 생성 — 프리셋 + 이미지 모델 호출. 파일명이 _로 시작해 라우트로 노출되지 않는다.
 // 사용자별 실시간 생성은 하지 않는다: 오행 5 × 이야기 주제 14 = 70장을 관리자가 미리 만들어 미디어 라이브러리에 태그와 함께 저장 → 조합 규칙(Director.pickMedia)이 장면에 맞는 컷을 고른다.
 // 모델: ① OpenAI gpt-image-2(env PANEL_IMAGE_MODEL 로 교체 가능) → 실패·키 없음이면 ② Gemini 이미지 모델(env GEMINI_IMAGE_MODEL, 기본 gemini-2.5-flash-image)
@@ -233,8 +234,8 @@ async function viaOpenAI(env, prompt, ref, opts) {
   if (refs.length) { // 참고·바탕 이미지가 있으면 images/edits (multipart, 여러 장 가능)
     const f = new FormData(); f.append('model', model); f.append('prompt', prompt); f.append('size', size); f.append('quality', quality); f.append('output_format', 'webp');
     refs.forEach((x, i) => f.append('image[]', new Blob([x.bytes], { type: x.mime }), 'ref' + i + '.' + (/webp/.test(x.mime) ? 'webp' : /jpe?g/.test(x.mime) ? 'jpg' : 'png')));
-    r = await fetch('https://api.openai.com/v1/images/edits', { method: 'POST', signal: AbortSignal.timeout(110000), headers: { authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: f });
-  } else r = await fetch('https://api.openai.com/v1/images/generations', { method: 'POST', signal: AbortSignal.timeout(110000), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY },
+    r = await aiFetch(env, 'panelart', 'https://api.openai.com/v1/images/edits', { method: 'POST', signal: AbortSignal.timeout(110000), headers: { authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: f });
+  } else r = await aiFetch(env, 'panelart', 'https://api.openai.com/v1/images/generations', { method: 'POST', signal: AbortSignal.timeout(110000), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY },
     body: JSON.stringify({ model, prompt, size, quality, output_format: 'webp', output_compression: 82, n: 1 }) });
   if (!r.ok) throw new Error(`openai(${model}) ${r.status}` + await errDetail(r));
   const d = await r.json(), x = d.data && d.data[0]; if (!x || !x.b64_json) throw new Error('openai 응답에 이미지가 없습니다');
@@ -244,7 +245,7 @@ const toB64 = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s 
 async function viaGemini(env, prompt, ref, opts) {
   const refs = ref ? [].concat(ref) : [];
   const model = env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
-  const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent', { method: 'POST', signal: AbortSignal.timeout(110000), headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+  const r = await aiFetch(env, 'panelart', 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent', { method: 'POST', signal: AbortSignal.timeout(110000), headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }].concat(refs.map(x => ({ inlineData: { mimeType: x.mime, data: toB64(new Uint8Array(x.bytes)) } }))) }], generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: (opts && opts.aspect) || '3:4' } } }) });
   if (!r.ok) throw new Error(`gemini(${model}) ${r.status}` + await errDetail(r));
   const d = await r.json(), parts = (((d.candidates || [])[0] || {}).content || {}).parts || [], p = parts.find(x => x.inlineData && x.inlineData.data);

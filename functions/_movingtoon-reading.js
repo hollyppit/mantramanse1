@@ -71,7 +71,7 @@ export function sanitize(text, clean, src, options = {}) {
     const normalized = t.replace(/\s+/g, '');
     if (seenText.has(normalized)) return reject('identical-paragraph',p.id);
     seenText.add(normalized);
-    if (violations(clean.sd, t).length || inventedNames(clean.sd, t).length) return reject('calculation-or-name-mismatch',p.id); // 월령·오행·십성·신강약·일간 등 계산값과 어긋난 문장은 버린다
+    if (violations(clean.sd, t).length || inventedNames(clean.sd, t).length) return reject('calculation-or-name-mismatch',p.id,{calculationIssues:violations(clean.sd,t),unknownNames:inventedNames(clean.sd,t)}); // 월령·오행·십성·신강약·일간 등 계산값과 어긋난 문장은 버린다
     const unknownNumbers=(t.match(/\d+(?:\.\d+)?/g)||[]).filter(n=>!numbers.has(Number(n)));
     if(unknownNumbers.length)return reject('unsupported-number',p.id,{numbers:[...new Set(unknownNumbers)].slice(0,8),role:clean.chapter.paragraphs.find(x=>x.id===p.id)?.role});
     const refs=Array.isArray(p.refs)?p.refs.map(r=>sourceAliases.get(r)||r):null;

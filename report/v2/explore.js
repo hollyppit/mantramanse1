@@ -50,7 +50,7 @@
       var oldNames = { w1:'천명의 서고', w2:'황금의 성채', w5:'윤회의 문', w6:'개운의 성역' };
       var previousNames={w1:'봉인된 서고',w2:'재물의 누각',w3:'인연의 정원',w5:'기억 너머의 문',w6:'새벽의 마당'};
       var def = DEFAULT_WORLDS.filter(function (w) { return w.id === s.id; })[0];
-      if (def && (b.name === oldNames[s.id] || b.name === previousNames[s.id])) { b.name = def.name; b.icon = def.icon; }
+      if (def && (b.name === oldNames[s.id] || b.name === previousNames[s.id] || s.id === 'w1' && b.name === '본래의 나')) { b.name = def.name; b.icon = def.icon; }
       by[s.id] = b;
     });
     // 기존 저장본의 재물운 분류에서도 커리어 항목을 분리한다.
@@ -113,7 +113,7 @@
   var PREFIX = 'mt_v2_xp_';
   function load(key) {
     var o = null; try { o = JSON.parse(localStorage.getItem(PREFIX + key) || 'null'); } catch (e) { o = null; }
-    return { ended: (o && o.ended && typeof o.ended === 'object') ? o.ended : {}, seen: (o && o.seen && typeof o.seen === 'object') ? o.seen : {}, checks: (o && o.checks && typeof o.checks === 'object') ? o.checks : {}, last: o && typeof o.last === 'number' ? o.last : -1, auto: !o || o.auto !== false };
+    return { ended: (o && o.ended && typeof o.ended === 'object') ? o.ended : {}, seen: (o && o.seen && typeof o.seen === 'object') ? o.seen : {}, checks: (o && o.checks && typeof o.checks === 'object') ? o.checks : {}, last: o && typeof o.last === 'number' ? o.last : -1, auto: !!(o && o.auto === true) };
   }
   function save(key, st) { try { localStorage.setItem(PREFIX + key, JSON.stringify({ ended: st.ended || {}, seen: st.seen || {}, checks: st.checks || {}, last: st.last, auto: st.auto !== false, t: Date.now() })); } catch (e) { /* 저장이 막혀도 읽기는 계속된다 */ } }
 

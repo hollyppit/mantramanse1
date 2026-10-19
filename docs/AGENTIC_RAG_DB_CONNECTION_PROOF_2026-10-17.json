@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-17T11:38:39.543Z",
+  "site": "https://mantramanse.pages.dev",
+  "project": "mantramanse1",
+  "projectRef": "devkslhggrkqtianjamj",
+  "method": "public free:content fingerprint matches Supabase; key absent in bound physical KV",
+  "publicHTTPStatus": 200,
+  "publicContentMD5": "b41969b422c4eaef9a349c37e87f1303",
+  "supabaseContentMD5": "b41969b422c4eaef9a349c37e87f1303",
+  "contentMatches": true,
+  "keyAbsentInBoundKV": true,
+  "productionWrites": 0,
+  "secretURLRead": false,
+  "limitation": "Read-path evidence, not decrypted deployment secret or direct config host attestation.",
+  "connectionConfirmedByReadPath": true
+}

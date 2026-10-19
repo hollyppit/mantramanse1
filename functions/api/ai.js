@@ -1,3 +1,4 @@
+import { aiFetch } from '../_ai-cost.js';
 // 무빙툰 자막 작성 AI (관리자 전용). OpenAI가 메인, 실패하면 Claude로 한 번 더 시도한다.
 // 필요한 설정: Secret ANTHROPIC_API_KEY, OPENAI_API_KEY (둘 중 있는 것만 써도 됨), ADMIN_PASSWORD
 // 선택 변수: ANTHROPIC_MODEL (기본 claude-sonnet-5-5), OPENAI_MODEL (기본 gpt-6.1-sol), AI_DAILY_LIMIT (하루 호출 한도, 기본 300)
@@ -34,9 +35,9 @@ async function failFrom(provider, r) {
   try { const d = await r.json(); msg = (d.error && (d.error.message || d.error.type)) || ''; } catch { /* JSON 아님 */ }
   return new ProviderError(provider, `${provider} 오류 ${r.status}${msg ? ': ' + String(msg).slice(0, 200) : ''}`, retryableStatus(r.status), r.status);
 }
-async function post(provider, url, headers, body) {
+async function post(env, provider, url, headers, body) {
   try {
-    return await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body), signal: AbortSignal.timeout(TIMEOUT_MS) });
+    return await aiFetch(env, 'admin-ai', url, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body), signal: AbortSignal.timeout(TIMEOUT_MS) });
   } catch (e) { // 네트워크 오류·시간 초과
     throw new ProviderError(provider, `${provider} 연결 실패: ${e && e.name === 'TimeoutError' ? '시간 초과' : (e && e.message) || e}`, true, 0);
   }
@@ -44,7 +45,7 @@ async function post(provider, url, headers, body) {
 
 async function callClaude(env, system, user) {
   const model = env.ANTHROPIC_MODEL || DEFAULT_MODEL.anthropic;
-  const r = await post('anthropic', 'https://api.anthropic.com/v1/messages', { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+  const r = await post(env, 'anthropic', 'https://api.anthropic.com/v1/messages', { 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
     { model, max_tokens: 1500, system, messages: [{ role: 'user', content: user }] });
   if (!r.ok) throw await failFrom('anthropic', r);
   const d = await r.json();
@@ -53,7 +54,7 @@ async function callClaude(env, system, user) {
 
 async function callOpenAI(env, system, user) {
   const model = env.OPENAI_MODEL || DEFAULT_MODEL.openai;
-  const r = await post('openai', 'https://api.openai.com/v1/responses', { authorization: 'Bearer ' + env.OPENAI_API_KEY }, { model, instructions: system, input: user });
+  const r = await post(env, 'openai', 'https://api.openai.com/v1/responses', { authorization: 'Bearer ' + env.OPENAI_API_KEY }, { model, instructions: system, input: user });
   if (!r.ok) throw await failFrom('openai', r);
   const d = await r.json();
   const text = typeof d.output_text === 'string' ? d.output_text

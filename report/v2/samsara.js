@@ -62,8 +62,8 @@
   }
   function toonCard(info) {
     var E2 = E, n = info.frames || 0, thumb = info.thumb || '';
-    return '<div class="cs-card sm-card"><div class="sm-th' + (thumb ? '' : ' none') + '"' + (thumb ? ' style="background-image:url(' + E2(thumb) + ')"' : '') + '>' + (thumb ? '' : '<span aria-hidden="true">' + E2(info.icon || '像') + '</span>') + '</div><div><p class="cs-ct">' + E2(info.name || '') + ' · 무빙툰</p><h4>' + E2(info.title || ('챕터별 핵심 장면으로 보는 ' + (info.name || '이 세계'))) + '</h4>' +
-      '<p class="cs-sum">' + n + '개의 컷 · '+(info.story?'인물의 선택을 따라 읽는 한 편의 단편 이야기입니다.':'챕터마다 앞부분의 핵심 문장을 이미지와 함께 이어서 봅니다.')+' 자동 재생·이전/다음·건너뛰기를 고를 수 있습니다.</p><button type="button" class="btn gold big" data-wtoon="' + E2(info.wid || '') + '">무빙툰으로 감상하기</button></div></div>';
+    return '<div class="cs-card sm-card"><div class="sm-th' + (thumb ? '' : ' none') + '"' + (thumb ? ' style="background-image:url(' + E2(thumb) + ')"' : '') + '>' + (thumb ? '' : '<span aria-hidden="true">' + E2(info.icon || '像') + '</span>') + '</div><div><p class="cs-ct">' + E2(info.name || '') + ' · 웹소설</p><h4>' + E2(info.title || ('챕터별 핵심 장면으로 보는 ' + (info.name || '이 세계'))) + '</h4>' +
+      '<p class="cs-sum">' + n + '개 장면 · '+(info.story?'인물의 선택을 따라 읽는 한 편의 단편 이야기입니다.':'각 주제의 이야기를 글로 차분히 읽습니다.')+' 원하는 속도로 읽고 이전·다음으로 이동할 수 있습니다.</p><button type="button" class="btn gold big" data-wtoon="' + E2(info.wid || '') + '">내 사주 웹소설 감상하기</button></div></div>';
   }
   function fromDom(article, meta) { return article ? fromHtml(article.innerHTML, meta) : null; }
 
@@ -87,40 +87,42 @@
 
   /** 전체 화면 감상 창. opts: { reduce, saveData, rate, onDone(), onClose() } */
   function open(model, assets, videos, opts) {
-    opts = opts || {}; var doc = root.document; if (!doc || !model) return null;
-    var img = imageOf(model, assets) || ((model.frames.filter(function (f) { return f.img; })[0] || {}).img) || '', vid = !opts.saveData && !opts.reduce ? videoOf(model, assets, videos) : '';
-    var frameImages=model.frames.map(function(f){return f.img;}).filter(Boolean);
-    var fallbackVideo=model.frames.some(function(f){return f.video;})||new Set(frameImages).size>1?'':vid;
-    var dlg = doc.createElement('dialog'); dlg.className = 'sm'; dlg.setAttribute('aria-label', '기억 너머의 문 · ' + model.title);
-    dlg.innerHTML = '<div class="sm-bg' + (img ? '' : ' none') + '"' + (img ? ' style="background-image:url(' + E(img) + ')"' : '') + '>' + (vid ? '<video src="' + E(vid) + '" poster="' + E(img) + '" muted loop playsinline autoplay preload="metadata"></video>' : '') + (img ? '' : '<span aria-hidden="true">前</span>') + '</div>' +
-      '<div class="sm-sh" aria-hidden="true"></div><div class="sm-top"><span class="sm-nt' + (model.notice ? '' : ' sm-lb') + '">' + E(model.notice || model.label || '') + '</span><button type="button" class="chipbtn" data-smx>닫기</button></div>' +
-      '<div class="sm-tx" role="region" aria-live="polite"></div><div class="sm-bar"><button type="button" class="chipbtn" data-smp aria-label="이전 컷">‹</button><div class="sm-dots" role="progressbar" aria-valuemin="1" aria-valuemax="' + model.frames.length + '"></div>' +
-      '<button type="button" class="chipbtn" data-sma aria-pressed="false">자동 ▶</button><button type="button" class="chipbtn" data-smn aria-label="다음 컷">›</button></div>';
+    opts = opts || {}; var doc = root.document; if (!doc || !model || !model.frames || !model.frames.length) return null;
+    if (!doc.getElementById('smReaderStyles')) { var style = doc.createElement('link'); style.id = 'smReaderStyles'; style.rel = 'stylesheet'; style.href = '/report/v2/toon-reader.css'; doc.head.appendChild(style); }
+    var oldOverflow = doc.body.style.overflow, previousFocus = doc.activeElement; doc.body.style.overflow = 'hidden';
+    var dlg = doc.createElement('dialog'); dlg.className = 'sm'; dlg.setAttribute('aria-label', '내 사주 웹소설 · ' + model.title);
+    dlg.innerHTML = '<div class="sm-top"><div class="sm-heading"><p class="sm-kicker">내 사주 웹소설</p><h1 class="sm-title">' + E(model.title || model.hero || '나의 이야기') + '</h1><p class="sm-nt">' + E(model.notice || model.label || '') + '</p></div><button type="button" class="chipbtn" data-smx>닫기</button></div>' +
+      '<div class="sm-tx" role="region" aria-label="이야기 본문" tabindex="0" aria-live="polite"></div><div class="sm-bar"><div class="sm-dots" role="group" aria-label="원하는 페이지로 이동"></div><button type="button" class="chipbtn" data-smp aria-label="이전 페이지">← 이전</button>' +
+      '<div class="sm-middle"><span class="sm-count" role="status"></span><button type="button" class="chipbtn" data-sma aria-pressed="false">자동 ▶</button></div><button type="button" class="chipbtn" data-smn aria-label="다음 페이지">다음 →</button></div>';
     doc.body.appendChild(dlg);
-    var cur = '', shown = img, i = 0, auto = !opts.reduce, timer = 0, tx = dlg.querySelector('.sm-tx'), bg = dlg.querySelector('.sm-bg'), dots = dlg.querySelector('.sm-dots'), btnA = dlg.querySelector('[data-sma]'), dead = false;
+    var i = 0, auto = false, timer = 0, tx = dlg.querySelector('.sm-tx'), dots = dlg.querySelector('.sm-dots'), btnA = dlg.querySelector('[data-sma]'), dead = false;
     function clear() { clearTimeout(timer); timer = 0; }
     function schedule() { clear(); if (!auto || dead) return; timer = setTimeout(function () { next(true); }, dwell(model.frames[i], opts.rate)); }
     function show() {
-      tx.classList.remove('in'); tx.innerHTML = frameHtml(model, i); void tx.offsetWidth; tx.classList.add('in');
-      var fi = model.frames[i].img || cur || img; if (model.frames[i].img) cur = model.frames[i].img;
-      if (fi && fi !== shown) { bg.style.backgroundImage = 'url(' + fi + ')'; shown = fi; }
-      var frame=model.frames[i], nextVideo=!opts.saveData&&!opts.reduce?(frame.video||fallbackVideo):'';
-      var currentVideo=bg.querySelector('video');
-      if(currentVideo&&currentVideo.getAttribute('src')!==nextVideo){currentVideo.pause();currentVideo.removeAttribute('src');currentVideo.load();currentVideo.remove();currentVideo=null;}
-      if(nextVideo&&!currentVideo){var v=doc.createElement('video');v.src=nextVideo;v.muted=true;v.defaultMuted=true;v.loop=true;v.playsInline=true;v.autoplay=true;v.preload='metadata';if(fi)v.poster=fi;v.onerror=function(){this.remove();};bg.appendChild(v);var play=v.play();if(play&&play.catch)play.catch(function(){});}
-      bg.className = 'sm-bg' + (fi ? '' : ' none') + (opts.reduce ? '' : ' mv-' + MOVES[i % MOVES.length]);
-      dots.setAttribute('aria-valuenow', String(i + 1)); dots.innerHTML = model.frames.map(function (_, k) { return '<i class="' + (k === i ? 'on' : k < i ? 'dn' : '') + '"></i>'; }).join('');
-      btnA.setAttribute('aria-pressed', String(auto)); btnA.textContent = auto ? '자동 ❚❚' : '자동 ▶'; schedule();
+      tx.classList.remove('in'); tx.innerHTML = frameHtml(model, i); tx.scrollTop = 0; void tx.offsetWidth; tx.classList.add('in');
+      var seekFocused = dots.contains(doc.activeElement);
+      dots.innerHTML = model.frames.map(function (f, k) { return '<button type="button" data-smseek="' + k + '" class="' + (k === i ? 'on' : k < i ? 'dn' : '') + '" aria-label="' + (k + 1) + '번째 페이지: ' + E(f.cap) + '"' + (k === i ? ' aria-current="step"' : '') + '></button>'; }).join('');
+      if (seekFocused) dots.querySelector('[aria-current]').focus({ preventScroll: true });
+      dlg.querySelector('.sm-count').textContent = (i + 1) + ' / ' + model.frames.length;
+      dlg.querySelector('[data-smp]').disabled = i === 0;
+      var nextButton = dlg.querySelector('[data-smn]'); nextButton.textContent = i === model.frames.length - 1 ? '감상 마치기 ✓' : '다음 →'; nextButton.setAttribute('aria-label', i === model.frames.length - 1 ? '감상 마치기' : '다음 페이지');
+      updateAuto(); schedule();
     }
+    function updateAuto() { btnA.setAttribute('aria-pressed', String(auto)); btnA.textContent = auto ? '자동 넘김 중 Ⅱ' : '자동 넘김'; }
+    function manual(n) { auto = false; i = Math.max(0, Math.min(model.frames.length - 1, n)); show(); }
     function finish() { if (dead) return; if (opts.onDone) opts.onDone(); close(); }
     function next(fromAuto) { if (i >= model.frames.length - 1) { if (fromAuto) { auto = false; show(); return; } finish(); return; } i++; show(); }
-    function close() { if (dead) return; dead = true; clear(); var playing=bg.querySelector('video');if(playing){playing.pause();playing.removeAttribute('src');playing.load();} try { dlg.close(); } catch (e) { } if (dlg.parentNode) dlg.parentNode.removeChild(dlg); if (opts.onClose) opts.onClose(); }
+    function close() { if (dead) return; dead = true; clear();  try { dlg.close(); } catch (e) { } if (dlg.parentNode) dlg.parentNode.removeChild(dlg); doc.body.style.overflow = oldOverflow; if (previousFocus && previousFocus.isConnected && previousFocus.focus) previousFocus.focus(); if (opts.onClose) opts.onClose(); }
     dlg.addEventListener('click', function (e) {
-      var b = e.target.closest('button'); if (!b) { if (e.target.closest('.sm-tx')) return; next(false); return; }
-      if (b.hasAttribute('data-smx')) close(); else if (b.hasAttribute('data-smn')) next(false); else if (b.hasAttribute('data-smp')) { if (i > 0) { i--; show(); } } else if (b.hasAttribute('data-sma')) { auto = !auto; show(); }
+      var b = e.target.closest('button'); if (!b) return;
+      if (b.hasAttribute('data-smx')) close(); else if (b.hasAttribute('data-smn')) { if (i === model.frames.length - 1) finish(); else manual(i + 1); } else if (b.hasAttribute('data-smp')) { manual(i - 1); } else if (b.hasAttribute('data-smseek')) { manual(+b.getAttribute('data-smseek')); } else if (b.hasAttribute('data-sma')) { auto = !auto; updateAuto(); schedule(); }
     });
     dlg.addEventListener('cancel', function (e) { e.preventDefault(); close(); });
-    doc.addEventListener('keydown', function onKey(e) { if (dead) { doc.removeEventListener('keydown', onKey); return; } if (e.key === 'ArrowRight') next(false); else if (e.key === 'ArrowLeft' && i > 0) { i--; show(); } });
+    dlg.addEventListener('keydown', function (e) { if (e.altKey || e.ctrlKey || e.metaKey || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return; if (e.key === 'ArrowRight') { e.preventDefault(); e.stopPropagation(); manual(i + 1); } else if (e.key === 'ArrowLeft') { e.preventDefault(); e.stopPropagation(); manual(i - 1); } else if (e.key === 'Home') { e.preventDefault(); manual(0); } else if (e.key === 'End') { e.preventDefault(); manual(model.frames.length - 1); } });
+    tx.addEventListener('scroll', function () { if (auto && tx.scrollTop > 8) { auto = false; clear(); updateAuto(); } }, { passive: true });
+    var touch = null;
+    dlg.addEventListener('touchstart', function (e) { var t = e.changedTouches[0]; touch = { x: t.clientX, y: t.clientY }; }, { passive: true });
+    dlg.addEventListener('touchend', function (e) { if (!touch || e.target.closest('button')) return; var t = e.changedTouches[0], x = t.clientX - touch.x, y = t.clientY - touch.y; touch = null; if (Math.abs(x) > 60 && Math.abs(x) > Math.abs(y) * 1.5) manual(i + (x < 0 ? 1 : -1)); }, { passive: true });
     if (dlg.showModal) dlg.showModal(); show();
     return { close: close };
   }
@@ -130,7 +132,7 @@
     if (!model) return '<div class="cs-card sm-card"><p class="cs-sum">전생 이야기를 만들지 못했습니다. 아래 챕터 목록에서 기존 이야기를 읽을 수 있습니다.</p></div>';
     var img = imageOf(model, assets);
     return '<div class="cs-card sm-card"><div class="sm-th' + (img ? '' : ' none') + '"' + (img ? ' style="background-image:url(' + E(img) + ')"' : '') + '>' + (img ? '' : '<span aria-hidden="true">前</span>') + '</div><div><p class="cs-ct">내 사주로 만든 창작 전생 서사</p><h4>' + E(model.hero || model.title) + '</h4>' +
-      '<p class="cs-sum">' + model.frames.length + '개의 컷 · 컷마다 이어서 읽기, 자동 재생, 건너뛰기를 고를 수 있습니다.</p><button type="button" class="btn gold big" data-smopen>무빙툰으로 감상하기</button></div></div>';
+      '<p class="cs-sum">' + model.frames.length + '개 장면 · 원하는 속도로 읽고 이전·다음으로 이동할 수 있습니다.</p><button type="button" class="btn gold big" data-smopen>내 사주 웹소설 감상하기</button></div></div>';
   }
 
   R.Samsara = { fromChapters: fromChapters, toonCard: toonCard, fromHtml: fromHtml, fromDom: fromDom, extract: extract, open: open, card: card, imageOf: imageOf, videoOf: videoOf, dwell: dwell, NOTICE: NOTICE };

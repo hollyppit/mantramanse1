@@ -1,0 +1,11 @@
+{
+  "AI_COST_LOG_ON": "1",
+  "READING_BLOCK_MODE": "off",
+  "AI_PRICING_JSON": "{\"EXACT_PROVIDER_MODEL_ID\":{\"input\":null,\"output\":null,\"cached\":null,\"cacheWrite\":null}}",
+  "notes": [
+    "모든 단가는 USD / 1,000,000 tokens. 실제 계약 단가를 입력하기 전에는 금액 미계측으로 기록합니다.",
+    "READING_BLOCK_MODE=prefer 는 승인 블록을 먼저 조합하고 기존 품질 검사를 모두 통과하면 AI를 생략합니다.",
+    "관리자 후보 제작에는 기존 AI·서비스 설정의 입력/출력 단가와 요청당 비용 상한이 필요합니다.",
+    "이 파일은 배포 설정을 자동으로 변경하지 않습니다. API 키와 개인정보를 넣지 마세요."
+  ]
+}

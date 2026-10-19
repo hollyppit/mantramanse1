@@ -109,7 +109,7 @@
         '<div class="ob-g2"><label class="ob-f">PC 초점 (예 50% 40%)<input type="text" name="focusPc" value="' + esc(a.focusPc || '') + '" placeholder="' + esc(d.pc) + '"></label><label class="ob-f">모바일 초점<input type="text" name="focusMobile" value="' + esc(a.focusMobile || '') + '" placeholder="' + esc(d.mobile) + '"></label></div>' +
         '<p class="qa-use">사용처: ' + (uses.length ? esc(uses.join(' · ')) : '현재 쓰는 장면 없음') + '</p></form>';
     }).join('');
-    $('#obBody').innerHTML = '<div class="card"><h3 style="font-size:1rem">배경·안내자 에셋 <span class="ob-lock">· 기본 12종 (report/hub/quest/*.webp)</span></h3>' + note('이미지를 올리면 그 에셋을 쓰는 모든 장면에 적용됩니다(장면별로 따로 지정하려면 "스토리 장면"의 배경 직접 지정). 세로로 긴 그림은 가로 화면에서 위아래가 잘리므로 "초점"(CSS background-position)으로 피사체 위치를 맞춥니다 — 미리보기 두 칸이 PC·모바일에서 실제로 보이는 모습입니다. 권장: WebP · 세로 1116×2000 이하 · 25MB 이하.') +
+    $('#obBody').innerHTML = '<div class="card"><h3 style="font-size:1rem">배경·안내자 에셋 <span class="ob-lock">· 기본 12종 (report/hub/quest/*.webp)</span></h3>' + note('이미지를 올리면 그 에셋을 쓰는 모든 장면에 적용됩니다(장면별로 따로 지정하려면 "스토리 장면"의 배경 직접 지정). 세로로 긴 그림은 가로 화면에서 위아래가 잘리므로 "초점"(CSS background-position)으로 피사체 위치를 맞춥니다 — 미리보기 두 칸이 PC·모바일에서 실제로 보이는 모습입니다. PNG·JPEG·WebP는 업로드 시 긴 변 1920px 이하로 자동 축소·압축합니다(비율·투명도 유지). 기존 파일은 위의 전체 자동 최적화를 사용하세요. 원본은 보존됩니다.') +
       '<div class="ob-bar">' + pvBtn('qaCheck', '에셋 상태 확인 (미등록·불러오기 실패)') + '<span class="ob-lock" id="qaCheckMsg"></span></div><div class="qa-grid">' + cards + '</div></div>' +
       '<div class="card"><h3 style="font-size:1rem">일주 각성 영상 연결 <span class="ob-lock">· 기존 일간·일주 영상 시스템을 그대로 씁니다</span></h3><div id="qaAw"><p class="muted">불러오는 중…</p></div></div>';
     $$('.qa-card').forEach(function (f) {

@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-10-17T11:28:54.299Z",
+  "project": "mantramanse1",
+  "ref": "devkslhggrkqtianjamj",
+  "liveSiteDatabaseIdentity": "unconfirmed",
+  "postgresVersion": "17.11",
+  "mode": "read-only",
+  "productionWrites": 0,
+  "rlsEnabled": true,
+  "anonSelect": false,
+  "authenticatedSelect": false,
+  "serviceRoleAccess": true,
+  "researchFunctionInstalled": false,
+  "ragRows": 159,
+  "knowledge": 386,
+  "reviewed": 382,
+  "published": 333,
+  "ragRowsFingerprint": "b032d9871790dea1ccca4f8e91f30343",
+  "beforeAfterFingerprintMatched": true,
+  "backupScope": "Supabase ik:* and src:* only"
+}

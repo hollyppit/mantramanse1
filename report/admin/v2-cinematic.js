@@ -12,8 +12,10 @@ if(s){$('#mcSegment').onclick=function(){collect();s.segments.push({text:'새 �
 T.bindUploads($('#mcForm'),'onb-cinematic-');T.$$('[data-lib]').forEach(function(b){b.onclick=function(){T.C.api('/api/media?all=1').then(function(d){var box=document.createElement('div');box.className='ob-box';(d.media||[]).filter(function(m){return m.url}).forEach(function(m){var p=document.createElement('button');p.type='button';p.textContent=m.title||m.id||'미디어';p.onclick=function(){$('#mcForm').elements[b.dataset.lib].value=m.url;collect();T.markDirty();box.remove()};box.appendChild(p)});var close=document.createElement('button');close.textContent='닫기';close.onclick=function(){box.remove()};box.appendChild(close);b.after(box)}).catch(function(e){T.toast(e.message,true)})}});
 function duration(){var sec=r.scenes.filter(function(s){return s.enabled!==false}).reduce(function(a,s){return a+s.segments.reduce(function(n,p){return n+window.Cinematic.duration(p)},0)},0);$('#mcDuration').textContent='전체 예상 재생 시간: '+Math.round(sec)+'초 · 문장을 충분히 읽을 수 있도록 시간을 조정하세요.'}duration();
 $('#mcForm').oninput=function(){collect();T.markDirty();duration();var f=$('#obPrevBox iframe');if(f)f.contentWindow.postMessage({t:'mt-onb-preview',config:G.cfg,hash:'#/welcome'},location.origin)};
-$('#mcLegacy').onclick=function(){collect();oldView();var b=document.createElement('button');b.textContent='시네마틱 편집으로 돌아가기';b.onclick=function(){oldCollect();view()};$('#obBody').prepend(b)};
+$('#mcLegacy').onclick=function(){collect();G.sub='legacy';G.prev.hash='#/welcome?home=1';T.draw()};
 }
+window.RenewalLegacyAdmin={view:oldView,collect:oldCollect,select:old.select};
+window.V2Onboard.register({id:'legacy',label:'홈 온보딩 이미지·문구',view:oldView,collect:oldCollect});
 var oldSelect=old.select;
 old.view=view;old.collect=collect;old.select=function(id){var r=G.cfg.renewal.cinematic,n=r&&r.scenes.findIndex(function(s){return s.id===id});if(n>=0)selected=n;else oldSelect(id)};
 })();

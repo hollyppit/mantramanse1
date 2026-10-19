@@ -1,0 +1,31 @@
+import pathlib,json
+p=pathlib.Path('output/independent-reference-2026-10-17')
+c=next(x for x in json.loads((p/'cases.json').read_text(encoding='utf-8-sig')) if x['id']=='G12-N')
+t=json.loads((p/'literature-hidden-root-rereview.json').read_text(encoding='utf-8-sig'))['hiddenTable']
+base=['壬寅','戊申','丙寅','癸巳'];target=list(c['raw']['pillars'].values())
+sources=[dict(id='XU',url='https://www.ncc.com.tw/fate/paleo/bg/bg_032.htm',locator='L62–67,130–135',layer='徐樂吾 평주',scope='C7의 합관유살 및 통근 癸의 합 후 작용 반례'),dict(id='DT',url='https://sajumania.com/ebook/to01-02/to01-02-01-21.htm',locator='L142–144,288–305',layer='任氏 주석 명조',scope='戌 지원·戊 제수, 戊 합 뒤 壬 제어, 寅 인성 경로를 분리'),dict(id='ZP6',url='https://www.donglishuzhai.net/chapter/3719.html',locator='L51–53',layer='沈氏 본문',scope='丙戌의 화고 통근 인정 및 근의 종류 구별; G12 전체 충분성으로 전용하지 않음'),dict(id='BT',url='https://www.suanzhun.net/book/2369_2.html',locator='L56,60–61,66',layer='韋千里 八字提要 조건 조문 전사',scope='申월에서 근 지원·토 제수·설기 부담·巳申 작용을 조건별로 구별; 일부 전사 손상은 이전 평행 전사 참조')]
+changes=[dict(position='year',before='壬寅',after='壬子',beforeHidden=t['寅'],afterHidden=t['子'],fact='寅의 甲丙戊 배속이 빠지고 子의 癸 배속이 들어온다.',gui='癸의 동간 장간 연결 후보가 새로 생김. 실제 보존·합 후 작용량은 별도.',wu='이 자리의 戊 배속과 甲의 제토·丙 생토 후보가 함께 빠짐. 순효과를 단일 방향으로 정할 수 없음.'),dict(position='day',before='丙寅',after='丙戌',beforeHidden=t['寅'],afterHidden=t['戌'],fact='甲丙戊에서 辛丁戊로 바뀐다. 일간과 천간 순서는 동일.',gui='甲 인성으로 수를 유통시키는 후보가 줄지만, 癸의 합거 불가를 증명하지 않음.',wu='戊 배속은 남고 甲 제토·丙 생토가 丁 지원·辛 생금 후보로 바뀜. 戌이 충분한 제수력을 준다는 판정은 불가.'),dict(position='relations',before='寅 두 곳·申·巳',after='子·申·戌·巳',fact='寅申 충 및 완전 寅巳申 구성은 없어지고 申子 관련 검토가 새로 생김. 辰 없음.',gui='申子를 완성 申子辰 수국으로 간주하지 않음. 회합 결과가 확정되기 전 癸 강화량을 만들지 않음.',wu='충형 조건 제거가 곧 戊 강화 또는 巳 보존 확정은 아님. 남은 巳申과 戌 지원의 실효를 따로 심사.' )]
+comps=[
+ dict(id='C7-recheck',pillars=base,source='XU L130–135',role='기준 명조',reading='같은 천간 순서에서 합관유살을 논한다.',limit='두 寅을 子·戌로 바꾼 평가까지 제시하지 않는다.'),
+ dict(id='C8-recheck',pillars=['戊子','癸亥','庚寅','戊寅'],source='XU L62–67',role='癸 잔존 반례',reading='통근한 癸의 작용을 합 뒤에도 남긴다.',limit='亥월·庚일간·인접 합이며 戊도 둘. G12 子 하나만으로 같은 효과를 보장하지 않는다.'),
+ dict(id='C1-recheck',pillars=['壬子','壬子','丙戌','戊戌'],source='DT L142–144',role='戌과 戊의 제수 비교',reading='任氏는 戌 둘의 지원과 戊 제수를 함께 취한다.',limit='子월·戌 둘·癸 및 巳申 없음. G12 戌 하나의 대체 지원 충분성은 미증명.'),
+ dict(id='C9',pillars=['癸亥','戊午','壬午','己酉'],source='DT L288–290',role='戊의 합·제어 분리 반례',reading='任氏는 癸의 합으로 戊가 壬을 공격하지 않는다고 설명한다.',limit='壬일간·午월·인접 합. 합은 언제나 戊 제어력과 무관하다는 일반론을 제한하지만 G12의 소진량은 알 수 없다.'),
+ dict(id='C10',pillars=['壬辰','壬子','丙寅','癸巳'],source='DT L304–305',role='寅의 인성 유통·巳 지원 비교',reading='任氏는 寅의 인성 경로와 巳의 지원을 함께 논한다.',limit='子월·戊 투출 없음. 寅이 戌로 바뀌어도 동일 감당 능력이 남는다는 근거가 아니다.')]
+axes=[dict(axis='癸 잔존',confirmed='子의 癸 배속이 추가되므로 원표상 독립적인 동간 연결 후보는 C7보다 늘어난다. 합 뒤에도 통근한 癸의 기능을 남기는 평주 반례가 있다.',held='G12의 子가 실제 얼마나 지원하는지, 戊癸 합거·합반 후 癸가 어느 정도 작용하는지는 유보. 형식적 배속 증가를 실효 강도 증가 확정으로 쓰지 않는다.',needed='같은 申월·격위 戊癸에서 子의 지원과 합 후 癸 작용을 직접 연결한 명조 또는 적용 조문'),dict(axis='戊 제살 능력',confirmed='두 寅의 甲 제토 후보가 사라지는 동시에 丙 생토 후보와 년지 戊 배속도 사라진다. 일지 戌의 戊·丁·辛은 제수 외 생금·설기 경로까지 검토해야 한다.',held='戊가 강해졌는지 약해졌는지, 癸와 합하면서 壬을 충분히 제어하는지 유보. 합이 戊 작용을 바꾸는 반례와 戌 제수 비교를 서로 상쇄하여 중간값으로 만들지 않는다.',needed='戊의 근 실효·癸와의 관계·壬의 子申 지원·丙의 설기 감당을 함께 설명하는 독립 근거')]
+assert [v[0] for v in base]==[v[0] for v in target]==list('壬戊丙癸')
+assert [i for i,(a,b) in enumerate(zip(base,target)) if a!=b]==[0,2]
+assert '癸' in t['子'] and '甲' not in [s for v in target for s in t[v[1]]]
+assert len(comps)==5 and len(axes)==2
+x=dict(date='2026-10-17',case=c,baseline=base,sources=sources,changes=changes,comparisons=comps,axes=axes,finalVerdict='unknown',engineTruthUsed=False,published=False,publishable=False,externalAI=False,newCompleteCharts=2,recheckedCompleteCharts=3)
+(p/'g12-yin-to-zi-xu-review.json').write_text(json.dumps(x,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+lines=['# G12 비교 명조의 寅 둘 → 子·戌 변경 검수','','2026-10-17. 기준 C7: 壬寅 / 戊申 / 丙寅 / 癸巳. G12: 壬子 / 戊申 / 丙戌 / 癸巳. 천간 4개와 월·시주는 같고 년·일지 두 곳이 다르다. 새 명조 2건과 기존 명조 3건을 다시 대조했다. 癸 잔존·戊 제살 두 축 모두 최종 유보. 게시·운영 변경·외부 AI 호출 없음. 엔진 판정·점수 미사용.','','## 출처','']
+for s in sources:lines+=['- ['+s['id']+']('+s['url']+') · '+s['locator']+' · '+s['layer']+'. '+s['scope']+'.']
+lines+=['','沈氏·徐評·任氏·韋氏를 별도 관법 층위로 유지한다. 완성 명조의 저자 설명은 역사적 결과나 예측 정확도가 독립 검증됐다는 뜻이 아니다. 원본 영상 교감은 완료하지 않았으며 기존 온라인 전사를 확인했다.','','## 두 변경의 작용 경로','','| 변경 | 배속·구성에서 확인된 변화 | 癸 검토 | 戊 검토 |','|---|---|---|---|']
+for r in changes:lines+=['| '+r['before']+' → '+r['after']+' | '+r['fact']+' | '+r['gui']+' | '+r['wu']+' |']
+lines+=['','지장간은 선택한 기존 원표의 성분 목록이며 가중치·실효량이 아니다. 子·戌로 바뀌면 알려진 네 지지에 甲乙 장간이 없어지는 것은 확인되지만, 그 사실만으로 丙이 감당 불가라거나 戊가 무조건 자유롭다고 확정하지 않는다. 두 변화가 동시에 일어났으므로 각각의 순효과를 통제한 관찰도 아니다.','','## 문헌 명조·반례','']
+for r in comps:lines+=['### '+r['id']+' — '+' / '.join(r['pillars']),'','- **역할·출처:** '+r['role']+'; '+r['source'],'- **문헌 요지:** '+r['reading'],'- **차이·한계:** '+r['limit'],'']
+lines+=['## 癸와 戊의 독립 결론','']
+for r in axes:lines+=['### '+r['axis'],'','- **부분 확인:** '+r['confirmed'],'- **유보:** '+r['held'],'- **확정에 필요한 근거:** '+r['needed'],'']
+lines+=['','## 남는 네 조합','','| 가설 | 처리 |','|---|---|','| 癸 잔존 / 戊 제살 충분 | 상호 모순으로 배제하지 않되 두 충분성을 따로 입증해야 함 |','| 癸 잔존 / 戊 제살 불충분 | 癸 잔존만으로 제살 실패를 확정하지 않음 |','| 癸 작용 제한 / 戊 제살 충분 | 癸 제한이 戊를 자유롭게 만든다는 가정을 정답으로 쓰지 않음 |','| 癸 작용 제한 / 戊 제살 불충분 | 관 정리와 일간·제어자의 감당 능력은 별개이므로 논리적으로 열어 둠 |','','어느 조합도 이번에 채택하지 않았다. 근 잔존과 기능 잔존, 기능 잔존과 상대 우세, 戊의 제어 능력과 그것이 丙에게 유익한지 여부를 구별한다. 壬을 더 제어할수록 반드시 좋다는 단조 규칙도 세우지 않는다.','','## 이전보다 좁혀진 결론','','子 추가는 癸의 근 후보를 보강하지만 합거 불가의 충분조건이 아니다. 戌은 沈氏 조문에서 丙의 화고 근으로 인정되지만 寅의 목→화 지원과 동일한 성분·같은 강도는 아니다. 戊는 甲 제어의 감소와 丙 생조·일부 근 후보의 감소가 함께 있으므로 단순 강화·약화로 결론낼 수 없다. 새 C9는 합이 戊 제어와 무관하다는 도약을 제한하고, C10은 寅 인성 유통을 삭제한 뒤에도 동일 감당 능력이라고 가정하는 도약을 제한한다.','','네 기둥이 G12와 일치하며 이 두 변화의 실제 작용을 해설한 직접 문헌 명조는 이번 확인 범위에서 확보하지 못했다. 검색 결과 부재를 문헌 전체의 부재로 주장하지 않는다. 기존 유보를 확정으로 바꾸거나 엔진 임계값에 맞춘 라벨을 만들지 않았다.','','기록 검사: 천간 순서 보존, 변경 위치 2곳, 새 완성 명조 2/재검수 3, 두 판정 축의 유보·필요 근거, 원표상 子癸와 목 장간 부재를 확인했다. 이는 기록 정합성 검사이며 독립 전문가 검증은 아니다. 상세: output/independent-reference-2026-10-17/g12-yin-to-zi-xu-review.json. 재생성: tools/review-g12-yin-to-zi-xu.py.','']
+pathlib.Path('docs/G12_YIN_TO_ZI_XU_REVIEW_2026-10-17.md').write_text('\n'.join(lines),encoding='utf-8')
+print('PASS: two branch changes only; 2 new / 3 rechecked comparators; Gui remainder and Wu control held; no engine/publication/AI')

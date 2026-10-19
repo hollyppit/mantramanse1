@@ -3,6 +3,8 @@ const fs = require('fs'), path = require('path'), vm = require('vm'), assert = r
 const root = path.join(__dirname, '..');
 function load(file, fetch) {
   const ctx = vm.createContext({ Response, Request, AbortSignal, fetch, console,
+    compactPrompt: x=>x,
+    aiFetch: (_env,_scope,url,init) => fetch(url,init),
     json: (d, s = 200) => new Response(JSON.stringify(d), { status: s }),
     isAdmin: () => true, kvOf: () => null,
     loadStyle: async () => ({ ver: 0, config: {} }), styleFor: () => ({ directive: '', story: '', sig: '', meta: {} }), // 문체 설정(import 제거 하네스용 스텁)

@@ -12,7 +12,7 @@ for(const f of ['engine.js','report/v2/saju-data.js','report/v2/reading-flow.js'
  assert.equal((await call(null,false)).status,401);let res=await call(null),d=await res.json();assert.equal(d.catalog.chapters.length,84);assert.equal(memory.size,0);
  const beforeCheck=[...memory];
  assert.equal((await call({action:'check',expectVersion:0,catalog:seed},false)).status,401);
- res=await call({action:'check',expectVersion:0,catalog:seed});d=await res.json();assert.equal(res.status,200);assert.equal(d.writesPerformed,false);assert.equal(d.issues.length,84);assert(d.issues.every(i=>i.details.some(x=>['no-linked-rules','rule-missing'].includes(x.code))));assert.deepEqual([...memory],beforeCheck);
+ res=await call({action:'check',expectVersion:0,catalog:seed});d=await res.json();assert.equal(res.status,200);assert.equal(d.writesPerformed,false);assert.equal(d.issues.length,81);assert(d.issues.every(i=>i.details.some(x=>['no-linked-rules','rule-missing'].includes(x.code))));assert.deepEqual([...memory],beforeCheck);
  assert.equal((await call({action:'check',expectVersion:99,catalog:seed})).status,409);
  const draft=structuredClone(seed);draft.chapters[0].question='검사 전용 개별 질문';res=await call({action:'save',expectVersion:0,catalog:draft});d=await res.json();assert(d.ok);assert.equal(d.catalog.version,1);assert(!memory.has(E.PUBLISHED_KEY));assert.notEqual(E.contractFor(await E.loadEditorial(kv),{id:'c01'}).question,draft.chapters[0].question);
  assert.equal((await call({action:'save',expectVersion:0,catalog:draft})).status,409);

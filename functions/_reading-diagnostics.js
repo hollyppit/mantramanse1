@@ -23,7 +23,7 @@ export function diagnosticRecord(body,status,ctx) {
     stage:STAGES.includes(a.stage)?a.stage:null,
     error:/^provider-http-\d{3}(?:-(?:insufficient_quota|rate_limit_exceeded|billing_not_active|overloaded_error))?$/.test(a.error || '')?a.error:['provider-timeout','provider-call-error'].includes(a.error)?a.error:null
   }));
-  const chapter=/^(?:c\d{2}|c-char|deep_[a-z_]+|life_[a-zA-Z_]+|reading_[a-z_]+)$/.test(ctx.chapter || '')?ctx.chapter:'other';
+  const chapter=/^(?:c\d{2}|c-char|deep_[a-z_]+|life_[a-zA-Z_]+|reading_[a-z_]+|timeline_[a-z_0-9]+)$/.test(ctx.chapter || '')?ctx.chapter:'other';
   return {requestId:ctx.requestId,at:new Date(ctx.started).toISOString(),chapter,
     ok:body.ok===true,cached:body.cached===true,status,code:body.ok?'OK':type[0],
     module:'movingtoon-reading',stage:body.ok?'complete':type[1],

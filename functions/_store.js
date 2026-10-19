@@ -30,6 +30,10 @@ export function kvOf(env, opts) {
   const slot = (opts && opts.cache) ? 'c' : 'n'; let m = cache.get(env); if (!m) { m = {}; cache.set(env, m); } if (m[slot]) return m[slot];
   const memo = !!(opts && opts.cache);
   const adapter = {
+    async readingCAS(key,expected,next,ttl=null) {
+      const r=await sb(env,'rpc/reading_compare_and_swap',{method:'POST',body:JSON.stringify({p_key:key,p_expected:expected,p_next:next,p_ttl:ttl})});
+      memoAll.delete(key);return (await r.json())===true;
+    },
     async researchCAS(expected, next) {
       const r = await sb(env, 'rpc/rag_compare_and_swap', { method: 'POST', body: JSON.stringify({ p_expected: expected, p_next: next }) });
       memoAll.delete('ik:agentic:runtime');
@@ -75,6 +79,14 @@ export function kvOf(env, opts) {
       memoAll.delete(key);
       if (startsWith(key, FALLBACK)) await sb(env, 'kv?on_conflict=key', { method: 'POST', headers: { prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ key, value: null, expires_at: null, updated_at: new Date().toISOString() }) }); // 묘비
       else await sb(env, 'kv?key=eq.' + encodeURIComponent(key), { method: 'DELETE', headers: { prefer: 'return=minimal' } });
+    },
+    async listAICost(o) {
+      const prefix=o.prefix;
+      if(!/^ai:(?:cost|outcome):[0-9-]+$/.test(prefix))throw Error('invalid-cost-prefix');
+      const offset=o.cursor?Number(o.cursor):0;
+      if(!Number.isInteger(offset)||offset<0)throw Error('invalid-cost-cursor');
+      const rows=await(await sb(env,'kv?select=key&order=key.asc&limit=101&offset='+offset+'&value=not.is.null&key=like.'+encodeURIComponent(prefix+'*')+'&or=(expires_at.is.null,expires_at.gt.'+new Date().toISOString()+')')).json();
+      return {keys:rows.slice(0,100).map(r=>({name:r.key})),list_complete:rows.length<=100,cursor:String(offset+100)};
     },
     async listReadingMetrics(o) {
       const prefix=o.prefix;
