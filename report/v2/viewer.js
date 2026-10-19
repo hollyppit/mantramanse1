@@ -573,7 +573,7 @@
       var ci = S.rep.chapters.findIndex(function(item){return item.id===c.id;}), article = document.getElementById('ch-' + c.id);
       if(article && R.ReadingText && c.readingCore){
         var anchor=null;if(S.view==='reader'){var activeIndex=pinned()!=null?pinned():S.idx,activeArticle=document.querySelector('#chapter .chap[data-ch="'+activeIndex+'"]');if(activeArticle){var anchorNode=Array.from(activeArticle.querySelectorAll('.rd-sec')).find(function(n){return n.getBoundingClientRect().bottom>160;})||activeArticle;anchor={chapter:activeIndex,key:anchorNode.dataset.sc,top:anchorNode.getBoundingClientRect().top};}}
-        c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];
+        c.readingVisualData={groups:S.sd.groups,fiveElements:S.sd.fiveElements,strength:S.sd.strength,pillars:S.sd.pillars,dayMaster:S.sd.dayMaster};c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];
         R.ReadingText.update(article,c,ci);if(R.ReadingMedia)R.ReadingMedia.mount(article,{reduce:reduce,saveData:saveData}); linkBasisReferences(article);
         if(anchor){var nextArticle=document.querySelector('#chapter .chap[data-ch="'+anchor.chapter+'"]'),nextNode=nextArticle&&(Array.from(nextArticle.querySelectorAll('[data-sc]')).find(function(n){return n.dataset.sc===anchor.key;})||nextArticle);if(nextNode)window.scrollBy(0,nextNode.getBoundingClientRect().top-anchor.top);}
         if(S.mv){S.mv.measure();if(!c.readingDeferred||c.readingWarning)S.mv.readingReady();}return;
@@ -855,7 +855,7 @@
     var rep = S.rep, h = ''; S.bg = []; if(!R.ReadingText)planPanels(rep);
     rep.chapters.forEach(function (c, ci) {
       if (S.readerWorld && S.wmap && S.wmap.idx[ci] !== S.readerWorld) return;
-      if(R.ReadingText && c.readingCore){c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];h+='<article class="chap" id="ch-'+esc(c.id)+'" data-ch="'+ci+'" aria-label="'+esc(c.title)+'">'+R.ReadingText.html(c,ci)+'</article>';return;}
+      if(R.ReadingText && c.readingCore){c.readingVisualData={groups:S.sd.groups,fiveElements:S.sd.fiveElements,strength:S.sd.strength,pillars:S.sd.pillars,dayMaster:S.sd.dayMaster};c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];h+='<article class="chap" id="ch-'+esc(c.id)+'" data-ch="'+ci+'" aria-label="'+esc(c.title)+'">'+R.ReadingText.html(c,ci)+'</article>';return;}
       if (!h && S.readerWorld && R.StoryComposer && R.StoryComposer.worldHook) {
         var intro = R.StoryComposer.worldHook(S.readerWorld, S.sd, selectedGuide());
         if (intro) {
