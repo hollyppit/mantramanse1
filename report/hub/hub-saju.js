@@ -47,7 +47,7 @@
     var next = NEXT_NAME[q.next] ? q.next : 'my', has = P.has(), s = P.get() || {}, y = new Date().getFullYear();
     H.engine().catch(function () { }); // 미리 불러 둔다
     var sy = +s.year || 1990, sm = +s.month || 1, sd = +s.day || 1, g = s.gender === 'M' ? 'M' : s.gender === 'F' ? 'F' : '', minY = 1900;
-    var el = H.view('<section class="hero" style="text-align:left;padding-bottom:0"><p class="kick">BIRTH</p><h1 class="h1">' + (q.next && NEXT_NAME[q.next] ? esc(NEXT_NAME[q.next]) + '을 보려면<br>태어난 순간이 필요해요' : '당신이 태어난<br>순간을 알려주세요') + '</h1><p class="sub">한 번만 입력하면 다른 콘텐츠에서도 그대로 쓰입니다.<br>입력한 정보는 이 기기 안에서만 계산되고 서버로 보내지 않습니다.</p></section>' +
+    var el = H.view('<section class="hero" style="text-align:left;padding-bottom:0"><p class="kick">BIRTH</p><h1 class="h1">' + (q.next && NEXT_NAME[q.next] ? esc(NEXT_NAME[q.next]) + ' 콘텐츠를 보려면<br>태어난 순간이 필요해요' : '당신이 태어난<br>순간을 알려주세요') + '</h1><p class="sub">한 번만 입력하면 다른 콘텐츠에서도 그대로 쓰입니다.<br>입력한 정보는 이 기기 안에서만 계산되고 서버로 보내지 않습니다.</p></section>' +
       '<form class="form" id="sf" novalidate autocomplete="off">' +
       '<label class="f"><span>이름 (선택)</span><input type="text" name="name" maxlength="20" autocomplete="off" value="' + esc(s.name || '') + '"></label>' +
       '<div class="f seg" role="radiogroup" aria-label="성별"><span>성별</span><label><input type="radio" name="gender" value="F"' + (g === 'F' ? ' checked' : '') + '><i>여</i></label><label><input type="radio" name="gender" value="M"' + (g === 'M' ? ' checked' : '') + '><i>남</i></label></div>' +
@@ -56,21 +56,30 @@
       '<div class="f"><span>태어난 시간</span><div class="inl"><input type="time" name="time" value="' + (s.hourUnknown || s.hour == null || s.hour === '' ? '' : ('0' + s.hour).slice(-2) + ':' + ('0' + (s.minute || 0)).slice(-2)) + '" aria-label="태어난 시간"><label class="chk"><input type="checkbox" name="unknown"' + (!has || s.hourUnknown || s.hour == null ? ' checked' : '') + '><i>시간을 몰라요</i></label></div></div>' +
       '<label class="f"><span>태어난 곳</span><select name="city">' + CITIES.map(function (c) { return '<option value="' + c[1] + '"' + (c[0] === (s.city || '서울') ? ' selected' : '') + '>' + c[0] + '</option>'; }).join('') + '</select></label>' +
       '<p class="msg err" id="sm" role="alert"></p><button type="submit" class="btn">' + (q.next === 'today' ? '내 운 캘린더 보기' : q.next === 'life' ? '내 인생 지도 펼치기' : '내 운명 이야기 시작') + '</button></form>');
-    var f = $('#sf', el), msg = $('#sm', el);
+    var f = $('#sf', el), msg = $('#sm', el), busy = false, submit = f.querySelector('[type=submit]'), submitLabel = submit.textContent;
+    function fail(text, field) { msg.textContent = text; if (field) field.focus(); }
+    function fixDays() {
+      var limit = f.calendar.value === 'lunar' ? 30 : new Date(+f.year.value, +f.month.value, 0).getDate();
+      var day = Math.min(+f.day.value || 1, limit);
+      f.day.innerHTML = opts(1, limit, day, '일');
+    }
     function fix() { f.leap.parentElement.hidden = f.calendar.value !== 'lunar'; f.time.disabled = f.unknown.checked; }
-    f.addEventListener('change', fix); fix();
+    f.addEventListener('change', function (e) { fix(); if (['year', 'month', 'calendar'].indexOf(e.target.name) >= 0) fixDays(); msg.textContent = ''; }); fix(); fixDays();
     f.addEventListener('focusin', function () { H.track('saju_input_start', { next: next }, true); });
     f.addEventListener('submit', function (e) {
-      e.preventDefault(); msg.textContent = '';
-      if (!f.gender.value) { msg.textContent = '성별을 선택해 주세요.'; return; }
+      e.preventDefault(); if (busy) return; msg.textContent = '';
+      if (!f.gender.value) { fail('성별을 선택해 주세요.', f.querySelector('[name=gender]')); return; }
+      if (!f.unknown.checked && !/^\d\d:\d\d$/.test(f.time.value)) { fail('태어난 시간을 입력하거나 ‘시간을 몰라요’를 선택해 주세요.', f.time); return; }
       var t = f.time.value, hasT = !f.unknown.checked && /^\d\d:\d\d$/.test(t), city = CITIES.filter(function (c) { return String(c[1]) === f.city.value; })[0];
       var saved = { name: String(f.name.value || '').trim().slice(0, 20), gender: f.gender.value, calendar: f.calendar.value, leap: f.calendar.value === 'lunar' && f.leap.checked, year: +f.year.value, month: +f.month.value, day: +f.day.value, hour: hasT ? +t.slice(0, 2) : 12, minute: hasT ? +t.slice(3) : 0, hourUnknown: !hasT, city: city ? city[0] : '서울', lon: +f.city.value, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' };
+      busy = true; submit.disabled = true; submit.textContent = '분석 준비 중…'; f.setAttribute('aria-busy', 'true');
       H.engine().then(function (M) {
+        if (!H.alive(ctx)) return;
         try { M.compute(P.toInput(saved)); } catch (err) { msg.textContent = (err && err.message) || '입력을 확인해 주세요.'; return; }
-        if (!P.save(saved)) { H.toast('이 브라우저에서는 정보를 저장할 수 없어 이번만 사용합니다.'); }
+        if (!P.save(saved)) { fail('정보를 저장하지 못했습니다. 브라우저의 사이트 저장 허용 여부와 저장 공간을 확인한 뒤 다시 시도해 주세요.'); return; }
         H.afterInput(); H.track('saju_input_complete', { next: next, hour_known: hasT ? 1 : 0 });
         H.replace(after(next)); // 입력 화면은 기록에 남기지 않는다(뒤로가기가 입력 폼으로 돌아가지 않게)
-      }).catch(function () { msg.textContent = '분석 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.'; });
+      }).catch(function () { if (H.alive(ctx)) msg.textContent = '분석 엔진을 불러오지 못했습니다. 다시 시도해 주세요.'; }).finally(function () { busy = false; submit.disabled = false; submit.textContent = submitLabel; f.removeAttribute('aria-busy'); });
     });
   });
 

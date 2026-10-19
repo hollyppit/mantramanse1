@@ -46,7 +46,7 @@
 
   <!-- 단계형 로딩 (실제 진행률 숫자는 보여주지 않는다) -->
   <section id="v-load" class="view" aria-live="polite" hidden>
-    <div class="loadbox"><img class="orb" src="/report/v2/lantern.webp" alt="" aria-hidden="true" width="120" height="120" decoding="async"><p id="loadText" class="loadtext"></p></div>
+    <div class="loadbox"><div class="text-loading-mark" aria-hidden="true">運</div><p id="loadText" class="loadtext"></p></div>
   </section>
 
   <!-- 탭해서 시작: 배경음악이 있을 때만. 사용자의 터치가 있어야 소리를 낼 수 있어서 일간 소개 직전에 한 번 받는다 -->
@@ -136,6 +136,7 @@
 <script src="deep-love.js"></script>
 <script src="reading-answer.js"></script>
 <script src="reading-flow.js"></script>
+<script src="reading-text.js"></script>
 <script src="chapter-policy.js"></script>
 <script src="reading-catalog.js"></script>
 <script src="reality-context.js"></script>

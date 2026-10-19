@@ -75,6 +75,9 @@
       var part=chapter && chapter.editorialDraft && collect(chapter,'').chapter.paragraphs.find(function(x){return x.id===p.id;});if(part && part.role==='evidence')return true;
       return Array.from(seen.entries()).every(function(old){if(old[1]===id)return true;return policy ? policy.similarity(key,old[0])<0.9 && !(policy.similarity(key,old[0])>=0.65 && policy.generalTrait(key,policy.kind(chapter || {}) || 'other') && policy.duplicate(key,old[0])) : key.replace(/\s+/g,'')!==old[0].replace(/\s+/g,'');}); }));
   }
+  function adviceHistory(chapters,currentId,name){
+    var total=0;return (chapters || []).filter(function(c){return c.id!==currentId && !c.readingDeferred && c.readingProvider!=='local-reviewed-education' && c.editorialTopicId!=='creative' && Array.isArray(c.readingParagraphs);}).map(function(c){var row={chapter:c.id,title:c.title || ''};['reinforce','practice','risk'].forEach(function(role){var p=c.readingParagraphs.find(function(p){return p.role===role;});if(p && p.text.length<=500)row[role==='risk'?'caution':role]=name?p.text.split(name).join('본인'):p.text;});return row;}).filter(function(row){return row.reinforce || row.practice || row.caution;}).slice(-84).reverse().filter(function(row){var size=JSON.stringify(row).length;if(total+size>60000)return false;total+=size;return true;}).reverse();
+  }
   function remember(result, seen, id) { result.paragraphs.forEach(function(p) { seen.set(p.text,id); }); }
   function deferredParagraphs(job, chapter, sd) {
     var basic=chapter.readingCore && chapter.readingSection && R.ReadingFlow ? R.ReadingFlow.card(sd,chapter.readingSection-1) : null;
@@ -137,6 +140,7 @@
         c.readingNotice='일반 건강·안전 안내입니다. 개인의 건강 상태나 사고를 예측하는 풀이가 아닙니다.';
         c.readingDeferred=false;c.readingProvider='local-reviewed-education';c.interpretationAnalysis=null;c.readingEvidence=[];
         c.readingParagraphs=education.row.paragraphs.map(function(p,i){return {id:String(i),text:p.text,refs:[],claim_ids:[]};});
+        c.readingEducationSources=education.sources.filter(function(s){return education.row.sourceIds.indexOf(s.id)>=0;});
         c.readingFullText=c.readingParagraphs.map(function(p){return p.text;}).join('\n\n');
         c.chapterQuality={ok:true,semanticReviewStatus:'educational-ai-reviewed',personalizedEvidenceAccepted:false,expertApproved:false};
         var supplementary=c.scenes.filter(function(s){return s.readingSupplementary;});
@@ -163,7 +167,7 @@
       var deadline = new Promise(function(resolve,reject){timer=root.setTimeout(function(){if(ctl)ctl.abort();var e=new Error('reading timeout');e.name='AbortError';reject(e);},90000);});
       if (ctl) session.controllers.push(ctl);
       try {
-        var response = await Promise.race([readingResponse({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ realityContext:R.Editorial?R.Editorial.cleanContext(rep.realityContext):{}, guide: guide, directnessConsent: root.document && root.document.getElementById("directnessConsent") && root.document.getElementById("directnessConsent").checked ? 5 : null, sd: safe, outline: outline, chapter: job.chapter, previous: Array.from(acceptedTexts.entries()).filter(function(x){var prior=chapters.find(function(c){return c.id===x[1];});return prior && (!item.c.editorialTopicId || prior.editorialTopicId===item.c.editorialTopicId) && !(prior.readingParagraphs || []).some(function(p){return p.text===x[0] && p.role==='evidence';});}).slice(-8).map(function(x){return {text:name?x[0].split(name).join('본인'):x[0],chapter:x[1],title:(chapters.find(function(c){return c.id===x[1];}) || {}).title || ''};}) }), signal: ctl && ctl.signal },session,item.c),deadline]);
+        var response = await Promise.race([readingResponse({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ realityContext:R.Editorial?R.Editorial.cleanContext(rep.realityContext):{}, guide: guide, directnessConsent: root.document && root.document.getElementById("directnessConsent") && root.document.getElementById("directnessConsent").checked ? 5 : null, sd: safe, outline: outline, chapter: job.chapter, adviceHistory: adviceHistory(chapters,item.c.id,name), previous: Array.from(acceptedTexts.entries()).filter(function(x){var prior=chapters.find(function(c){return c.id===x[1];});return prior && (!item.c.editorialTopicId || prior.editorialTopicId===item.c.editorialTopicId) && !(prior.readingParagraphs || []).some(function(p){return p.text===x[0] && p.role==='evidence';});}).slice(-8).map(function(x){return {text:name?x[0].split(name).join('본인'):x[0],chapter:x[1],title:(chapters.find(function(c){return c.id===x[1];}) || {}).title || ''};}) }), signal: ctl && ctl.signal },session,item.c),deadline]);
         var r=response.r;
         var d=response.d;
         if(session.cancelled)return;
@@ -197,5 +201,5 @@
     session.prioritize=function(id){var item=jobs.find(function(x){return x.c.id===id;});if(!item)return;selected=item.started?null:item;pump();};
     return {first:Promise.resolve(),status:status};
   }
-  R.FullReading = { retry:function(id){if(active && !active.cancelled && active.retry)active.retry(id);}, prioritize:function(id){if(active && !active.cancelled && active.prioritize)active.prioritize(id);}, deferredParagraphs: deferredParagraphs, uniqueAcross: uniqueAcross, collect: collect, apply: apply, prepare: prepare };
+  R.FullReading = { retry:function(id){if(active && !active.cancelled && active.retry)active.retry(id);}, prioritize:function(id){if(active && !active.cancelled && active.prioritize)active.prioritize(id);}, adviceHistory: adviceHistory, deferredParagraphs: deferredParagraphs, uniqueAcross: uniqueAcross, collect: collect, apply: apply, prepare: prepare };
 })(typeof window !== 'undefined' ? window : globalThis);

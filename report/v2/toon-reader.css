@@ -26,3 +26,13 @@ dialog.sm[open] { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; w
 .sm .sm-heading{min-width:0}.sm .sm-kicker{margin:0 0 6px;color:#cdb27a;font-size:11px;letter-spacing:.14em}.sm .sm-title{margin:0 0 8px;color:#f5f0e6;font-size:20px;line-height:1.5;text-wrap:balance}.sm .sm-nt{margin:0;font-size:12px;line-height:1.7}.sm .sm-top [data-smx]{min-height:40px;padding:8px 14px}
 @media(max-width:600px){.sm .sm-top{padding:18px 22px 16px;gap:16px}.sm .sm-title{font-size:18px}.sm .sm-nt{font-size:11px}.sm .sm-tx{padding:28px 24px 40px}.sm .sm-top [data-smx]{font-size:12px;padding:6px 10px}}
 @media(max-height:500px){.sm .sm-top{padding-top:8px;padding-bottom:8px}.sm .sm-kicker,.sm .sm-nt{display:none}.sm .sm-title{margin:0;font-size:17px}.sm .sm-tx{padding-top:20px}}
+
+/* Only nearby pages are shown, so each page target remains easy to tap. */
+.sm .sm-dots, .sm .sm-dots button { min-height: 44px; height: 44px; }
+.sm .sm-top [data-smx], .sm [data-sma] { min-height: 44px; }
+.sm .sm-dots button, .sm .chipbtn { touch-action: manipulation; }
+.sm .sm-top { padding-top: max(16px, env(safe-area-inset-top)); }
+.sm .sm-top, .sm .sm-tx, .sm .sm-bar { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+@media(max-width:600px) { .sm .sm-bar { grid-template-columns: minmax(72px,1fr) auto minmax(72px,1fr); padding-left:max(12px,env(safe-area-inset-left)); padding-right:max(12px,env(safe-area-inset-right)); }.sm [data-sma] { font-size:12px; } }
+@media(max-height:500px) { .sm .sm-top { padding-top:max(8px,env(safe-area-inset-top)); }.sm .sm-bar { padding-bottom:max(6px,env(safe-area-inset-bottom)); } }
+.sm .chipbtn { min-height:44px; }

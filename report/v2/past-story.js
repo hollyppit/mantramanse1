@@ -7,7 +7,7 @@
   options=options||{};
   var r=await fetch('/api/past-story',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload(sd)),signal:signal});
   var d;try{d=await r.json();}catch(e){throw Error(message('unavailable'));}if(!r.ok||!d.ok||!d.story||!Array.isArray(d.story.frames)||d.story.frames.length!==8)throw Error(message(d.error));
-  function named(t){return R.ShortStory?R.ShortStory.personalize(t,d.protagonist,sd,options.name):t;}
+  function named(t){return String(t||'');} // Keep the fictional protagonist consistent; do not replace only their full name with the reader's name.
   var images=((source&&source.frames)||[]).filter(function(f){return f.img;});
   return Object.assign({},source||{},{id:'personal-past',slot:d.visual&&d.visual.slot||(source&&source.slot)||'',title:named(d.story.title),hero:options.name||named(d.story.title),sub:named(d.story.logline),personalized:true,cached:!!d.cached,
    notice:'사주 해석을 모티브로 한 창작 전생 단편입니다.',frames:d.story.frames.map(function(f,i){return {cap:named(f.cap),paras:f.paras.map(named),img:images.length?images[i%images.length].img:''};})});

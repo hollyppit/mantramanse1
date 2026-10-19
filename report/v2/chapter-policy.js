@@ -53,7 +53,7 @@
     rows.forEach(function(row,i){
       rows.slice(0,i).concat(previous || []).forEach(function(old){
         // A shared calculation is legitimate in different subjects. General trait definitions are not.
-        if(generalTrait(row.text,p.key) && TRAIT.test(old.text) && duplicate(row.text,old.text))issues.push({code:'semantic-trait-duplicate',id:row.id,other:old.id || old.chapter});
+        if(generalTrait(row.text,p.key) && TRAIT.test(old.text) && similarity(row.text,old.text)>=0.65 && duplicate(row.text,old.text))issues.push({code:'semantic-trait-duplicate',id:row.id,other:old.id || old.chapter});
         else if(row.text.length>24 && similarity(row.text,old.text)>0.9)issues.push({code:'sentence-duplicate',id:row.id,other:old.id || old.chapter});
       });
       if(hook && similarity(row.text,hook.text)>0.78)issues.push({code:'hook-body-duplicate',id:row.id});

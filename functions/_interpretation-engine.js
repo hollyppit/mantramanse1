@@ -1,10 +1,10 @@
 // Calculation outputs -> structural observations -> independently sourced claims.
 // No calendar or star placement calculation and no generated traditional rules.
-import { deriveFacts, retrieve, applyModifiers, tplVars, tplFill, BANNED_RE, bannedWrittenTerm, isProduction, COND_FIELDS } from './_ik.js';
+import { deriveFacts, retrieve, applyModifiers, tplVars, tplFill, BANNED_RE, bannedWrittenTerm, isProduction, COND_FIELDS, LEVEL_CUT } from './_ik.js';
 import { violations } from './_guard.js';
 import { PROHIBITED_RE } from './_style.js';
 
-export const ENGINE_VERSION = 'interpretation-3';
+export const ENGINE_VERSION = 'interpretation-6';
 export const SECTIONS = ['diagnosis','basis','strength','vulnerability','examples','timing','strategy','verdict'];
 export const DEFAULT_SETTINGS = { mode: 'grounded', semanticReview: true, disabledRules: [], maxClaims: 45, maxOutputTokens: 14000, openaiModel: '', anthropicModel: '', promptVersion: ENGINE_VERSION, inputPricePerMillion: null, outputPricePerMillion: null, maxRequestCost: null };
 const copy = x => JSON.parse(JSON.stringify(x));
@@ -51,6 +51,22 @@ export function missingSourceRules(items,linkedIds,sourceIndex,blocked=new Set()
 }
 export function sourcePremiseIssue(item, sd) {
   const p=String(item.principle || ''), relations=sd.clashes || [];
+  if(/방합/.test(p)&&/삼합/.test(p)&&!(sd.combinations||[]).some(r=>['방합','삼합'].includes(r.type)&&r.members?.length===3))return 'source-full-combination-missing';
+  const resourceElement=p.match(/인성인\s*([목화토금수])/);
+  if(resourceElement && sd.groupEl?.['인성']!==resourceElement[1])return 'source-resource-element-mismatch';
+  if(/세운이\s*(?:연지|월지|일지|시지)와\s*(?:합|충)/.test(p))return 'source-annual-pillar-relation-unverified';
+  if(/일지/.test(p) && /도화살|홍염살/.test(p) && /충[·\s]*형/.test(p) && !relations.some(r=>['충','형'].includes(r.type)&&r.members?.includes('day')))return 'source-spouse-star-activation-mismatch';
+  if(/배우자성이 강하고/.test(p)){
+    const group=sd.gender==='M'?'재성':sd.gender==='F'?'관성':null;
+    if(!group||!(sd.groups?.[group]>=LEVEL_CUT.strong))return 'source-spouse-strength-mismatch';
+    if(/대운·세운에/.test(p)&&!Object.keys(item.conditions||{}).some(k=>/^(daewoon|seun)(Stem|Branch)TG$/.test(k)))return 'source-spouse-support-time-unverified';
+  }
+  // A decade's model label is not the source's narrow window around an actual boundary.
+  if(/대운이 바뀌는 전후 1[~～〜-]2년/.test(p)){
+    const year=sd.nowYear,boundaries=[sd.currentDaewoon?.startYear,...(sd.daewoon || []).map(d=>d.startYear)].filter(Number.isInteger);
+    if(!Number.isInteger(year)||!boundaries.length||!boundaries.some(y=>Math.abs(year-y)<=2))return 'source-daewoon-boundary-window-mismatch';
+  }
+  if(/운에서\s*(?:오면|들어오|만나)/.test(p) && item.conditions?.star?.length)return 'source-luck-star-time-condition-missing';
   if(/지지에\s*강하게\s*통근|강한\s*통근/.test(p) && sd.roots?.level!=='강한 통근')return 'source-root-strength-mismatch';
   const scopedPillar=p.match(/^\s*([갑을병정무기경신임계][자축인묘진사오미신유술해])(?:\([^)]+\))?\s*일주/);
   if(scopedPillar && scopedPillar[1]!==sd.dayPillar?.ko)return 'source-day-pillar-mismatch';

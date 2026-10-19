@@ -44,7 +44,7 @@
     // 저장 형태 → 엔진 입력(만세력 앱 run() 과 같은 변환)
     toInput: function (s) { s = s || P.get(); if (!s) return null; return { year: +s.year, month: +s.month, day: +s.day, hour: s.hourUnknown || s.hour == null || s.hour === '' ? null : +s.hour, minute: +s.minute || 0, calendar: s.calendar || 'solar', leap: !!s.leap, gender: s.gender, lon: +s.lon || 126.98, timeMode: s.timeMode || 'lmt', jasi: s.jasi || 'jeong', sinsalBase: s.sinsalBase || 'year', model: s.model || 'season', school: s.school || 'eokbu' }; },
     name: function () { var s = P.get(); return s && s.name ? String(s.name).slice(0, 20) : ''; },
-    sig: function () { var s = P.get(); return s ? [s.year, s.month, s.day, s.hour, s.minute, s.gender, s.calendar, s.leap].join('-') : ''; },
+    sig: function () { var s = P.get(); return s ? [s.name || '', s.year, s.month, s.day, s.hour, s.minute, !!s.hourUnknown, s.gender, s.calendar, !!s.leap, s.lon, s.timeMode, s.jasi, s.sinsalBase, s.model, s.school].join('|') : ''; },
     awakened: function () { try { return localStorage.getItem('mt_hub_awk') === P.sig(); } catch (e) { return false; } },
     markAwakened: function () { try { localStorage.setItem('mt_hub_awk', P.sig()); } catch (e) { } },
   };

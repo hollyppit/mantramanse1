@@ -25,7 +25,7 @@ const vm = require('node:vm');
   const inspect=(text,role='reality',extra={})=>U.inspectWriting([{id:'p',text,role}],{},extra);
   assert.equal(inspect('관성이 강하므로 책임감이 있습니다.').ok,false);
   assert.equal(inspect('관성의 실제 배치와 적용 조건을 확인합니다.','evidence').ok,true);
-  assert.equal(inspect('관성은 맡은 역할과 기준을 살피는 전통 개념입니다.','reality',{concept:true}).ok,true);
+  assert.equal(inspect('관성은 맡은 역할과 기준을 살피는 전통 개념입니다.','reality',{concept:true}).ok,false);
   assert.equal(inspect('그는 모든 일을 직접 확인한다.').ok,false);
   assert.equal(inspect('결과가 걱정된다면 맡길 범위를 먼저 합의해보세요.').ok,true);
   assert.equal(inspect('책임감은 46%입니다.').ok,false);

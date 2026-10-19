@@ -100,7 +100,7 @@
 
     /* 컨트롤러 */
     var ctl = doc.createElement('div'); ctl.className = 'rd-ctl'; ctl.setAttribute('role', 'group'); ctl.setAttribute('aria-label', '읽기 컨트롤');
-    ctl.innerHTML = '<div class="rd-seek" role="progressbar" aria-label="진행률" aria-valuemin="0" aria-valuemax="100"><i></i></div><div class="rd-row"><button type="button" class="rd-play" aria-label="재생"></button><span class="rd-time">00:00 / 00:00</span><span class="rd-gap"></span>' +
+    ctl.innerHTML = '<div class="rd-seek" role="slider" tabindex="0" aria-label="읽기 위치" aria-valuemin="0" aria-valuemax="100"><i></i></div><div class="rd-row"><button type="button" class="rd-play" aria-label="재생"></button><span class="rd-time">00:00 / 00:00</span><span class="rd-gap"></span>' +
       '<button type="button" class="rd-tg" data-k="scroll" aria-pressed="true">스크롤</button>' + (o.bgm ? '<button type="button" class="rd-tg" data-k="bgm" aria-pressed="true">BGM</button>' : '') + '</div>';
     var note = doc.createElement('div'); note.className = 'rd-note'; note.setAttribute('aria-live', 'polite'); note.hidden = true;
     doc.body.appendChild(ctl); doc.body.appendChild(note); doc.body.classList.add('rd-on');
@@ -212,6 +212,12 @@
     var ro = win.ResizeObserver ? new win.ResizeObserver(onResize) : null; if (ro) ro.observe(host);
     var io = new win.IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting && state !== 'PLAYING') setCur(e.target); }); }, { rootMargin: '-44% 0px -55% 0px', threshold: 0 });
     playBtn.onclick = function () { if (state === 'PLAYING') pause(); else play(); };
+    seekEl.addEventListener('keydown', function (e) {
+      if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].indexOf(e.key) < 0) return;
+      e.preventDefault(); e.stopPropagation();
+      var current = +(seekEl.getAttribute('aria-valuenow') || 0), delta = e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -5 : 5;
+      seek((e.key === 'Home' ? 0 : e.key === 'End' ? 100 : Math.max(0,Math.min(100,current + delta))) / 100);
+    });
     seekEl.onclick = function (e) { var r = seekEl.getBoundingClientRect(); seek(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width))); };
     ctl.addEventListener('click', function (e) {
       var b = e.target.closest('[data-k]'); if (!b) return; var k = b.dataset.k;

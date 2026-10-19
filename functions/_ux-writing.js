@@ -1,5 +1,5 @@
 // Presentation policy only. Never mutates calculations, rules or retrieved knowledge.
-export const UX_VERSION = 'ux-writing-1';
+export const UX_VERSION = 'ux-writing-6';
 export const LEVELS = ['부드럽게', '현실적으로', '팩폭', '강한 팩폭', '매우 강한 팩폭'];
 export const UX_DEFAULT = { directness: 3, chapterDirectness: {}, terminology: 'hidden', sentenceChars: 85, paragraphChars: 320, examples: 'balanced', emphasis: 'minimal' };
 const level = x => Number.isInteger(x) && x >= 1 && x <= 5;
@@ -30,9 +30,13 @@ export function writingDirective(c) {
 - 전문 근거(원국 조건·적용 규칙·십성/오행/궁위·RAG 출처·예외·불확실성)는 role=evidence 또는 kind=basis로 분리한다. ${c.terminology === 'hidden' ? '본문에는 전문 용어를 쓰지 않는다.' : '개념 자체를 소개하는 챕터에서만 전문 용어와 쉬운 설명을 함께 쓴다.'} 용어를 행동으로 일대일 치환하지 않는다.
 - 중요한 장면에서만 같은 기질의 최고의 케이스·최악의 케이스·갈림길을 조건부로 대비한다. 모든 챕터에 같은 소제목이나 성격 소개를 반복하지 않는다. 돈은 거래·소비·관리, 일은 수행·조직, 관계는 감정·경계·협력, 운은 시기 조건, 개운은 습관에 집중한다. 재물 그릇과 자동차 비유는 유지한다.
 - 한 문장 권장 ${c.sentenceChars}자, 한 문단 최대 ${c.paragraphChars}자. 사례 밀도 ${c.examples}. 한 문단 한 메시지. 본문에 산정 기준이 확인되지 않은 비중·백분율을 쓰지 않는다. 강조는 핵심 결론·약점·비교 제목·실천 핵심만 허용한다. 색상·HTML·마크다운 장식을 넣지 않는다.
+- 제목의 가장·최고·최악은 비교 순위의 근거가 아니다. 승인 판단에 우열 비교가 없으면 강점 후보로 한정한다. 함께 있는 특성만으로 내면의 갈등이나 가장 큰 모순을 단정하지 않는다. 적용되지 않는 다른 강약 분류의 규칙이 전달되지 않았다면 그 규칙의 내용을 새로 설명하지 않는다.
+- 84개 질문은 각각 다른 결정에 답한다. 같은 원국이더라도 성격 소개와 일반적인 '기록·도움·휴식' 조언을 장마다 재사용하지 않는다. 전달된 근거가 같으면 질문에 필요한 적용 장면만 좁혀 설명하며, 해당 질문에 새로 답할 근거가 없으면 한계를 짧게 밝힌다. 빈 역할을 채우려고 같은 조언을 바꿔 쓰지 않는다.
+- 본문에는 일간·일주·월령·천간·지지·지장간·십성·신강약·통근·용신·조후·억부·합충·궁위 등 전문 설명을 넣지 않는다. 개념 소개 장도 본문은 생활 언어로 쓰고, 계산된 명칭·비중과 학파별 판단은 evidence에만 적는다. 서로 다른 용신 후보가 있으면 선택된 학파를 표시하고 다른 학파의 후보를 없애거나 최종 용신 하나로 확정하지 않는다.
+- 한 문단에서 같은 메시지를 여러 표현으로 반복하지 않는다. 가정 사례와 판단 한계는 필요한 자리에서 한 번만 밝힌다. 이미 전달한 결론을 마지막 근거 문단에 그대로 다시 쓰지 않는다. '강점과 부담은 구분합니다', '실제 결과를 보장하지 않습니다' 같은 공통 안내로 매 장을 채우지 않는다.
 - 전문 지식은 판단 근거로만 사용하고 원본을 덮어쓰지 않는다. 장점·약점·사례·해결책의 근거가 없으면 부족함을 밝힌다.`;
 }
-export const TERMS = /관성|재성|인성|식상|비겁|정관|편관|정재|편재|식신|상관|통근|무근|신강|신약|용신|기신|희신|격국|조후|억부|합충형파해/;
+export const TERMS = /오행|신살|원국|육친|십간|양간|음간|한난조습|사고수|관성|재성|인성|식상|비겁|정관|편관|정재|편재|식신|상관(?=[은이가을의\s·])|일간|일주(?!일)|월령|월주|시주|천간|지지|지장간|십성|배우자궁|자녀궁|통근|무근|신강|신약|용신|기신|희신|격국|조후|억부|합충형파해/;
 // A writer receives verified conclusions rather than a raw chart to reinterpret.
 // Full calculation and original source records remain in the analysis/reviewer layer.
 export function writingPlan(analysis, clean) {
@@ -40,6 +44,8 @@ export function writingPlan(analysis, clean) {
     layer:'ux-writing-only',
     identity:{dayMaster:clean.sd.dayMaster?.stem,dayPillar:clean.sd.dayPillar?.ko,hourKnown:!!clean.sd.pillars?.hour},
     calculationFacts:{
+      placements:{pillars:clean.sd.pillars,combinations:clean.sd.combinations,clashes:clean.sd.clashes,specialStars:clean.sd.specialStars,sinsal12:clean.sd.sinsal12,patterns:clean.sd.patterns},
+      timeCalculation:{nowYear:clean.sd.nowYear,daewoon:clean.sd.daewoon,currentDaewoon:clean.sd.currentDaewoon,sewoon:clean.sd.sewoon?Object.fromEntries(['year','ganzhi','stemTG','branchTG'].map(k=>[k,clean.sd.sewoon[k]])):null},
       roots:clean.sd.roots?{hasRoot:clean.sd.roots.hasRoot,level:clean.sd.roots.level,reasons:(clean.sd.roots.reasons||[]).slice(0,3)}:null,
       strengthModel:clean.sd.strength?{band:clean.sd.strength.band}:null,
       usefulElementModels:Object.fromEntries(Object.entries(clean.sd.usefulElementMethods||{}).map(([school,v])=>[school,{applicable:v.applicable,yong:v.yong,hee:v.hee,reasons:(v.reasons||[]).slice(0,3)}]))
@@ -47,7 +53,7 @@ export function writingPlan(analysis, clean) {
     allowedReferences:(analysis.claims || []).map(c=>({claim_id:c.claim_id,knowledge_id:c.knowledge_id})),
     claims:(analysis.claims || []).map(c=>({claim_id:c.claim_id,knowledge_id:c.knowledge_id,domain:c.domain,judgment:c.judgment,strengths:c.strengths,vulnerabilities:c.vulnerabilities,actions:c.actions,examples:c.examples,exceptions:c.exceptions,counter_evidence:c.counter_evidence,uncertainty:c.uncertainty,elements:c.elements,evidenceOnly:{rules:c.traditional_rules,sources:(c.evidence || []).map(e=>({title:e.title,pageStart:e.pageStart,heading:e.heading}))}})),
     chapter:clean.chapter,
-    instruction:'계산을 다시 해석하지 않습니다. calculationFacts는 이미 계산된 결과와 학파별 모델 판정입니다. 통근의 계산값이 있으나 이를 해석할 별도 claim이 없는 경우 두 상태를 구분합니다. 조후 모델이 applicable=false이면 전통 계절 규칙과 모델 미적용을 구분하고 조후 용신이 계산상 확정됐다고 쓰지 않습니다. 이 계산 요약만으로 현실의 사건이나 새 명리 판단을 만들지 않습니다. claims의 결론·장점·취약점·행동을 생활 언어로 작성하고 elements와 evidenceOnly의 전문 용어는 마지막 근거 문단에만 둡니다. refs는 allowedReferences의 knowledge_id만, claim_ids는 claim_id만 사용합니다.'
+    instruction:'계산을 다시 해석하지 않습니다. placements의 합충 참여 기둥과 신살 pillar 위치, timeCalculation의 기간·간지는 이미 존재하는 계산 사실입니다. 이 값이 있으면 위치·기간 자체가 제공되지 않았다고 쓰지 않습니다. 해당 위치·기간의 작용을 해석할 claim이 부족한 상태와 구분합니다. 시간 미상이면 없는 시주를 보충하지 않습니다. 계산 사실과 조건이 있어도 자녀·혼인·사고·성과 등 현실 결과를 추가하지 않습니다. calculationFacts는 이미 계산된 결과와 학파별 모델 판정입니다. 통근의 계산값이 있으나 이를 해석할 별도 claim이 없는 경우 두 상태를 구분합니다. 조후 모델이 applicable=false이면 전통 계절 규칙과 모델 미적용을 구분하고 조후 용신이 계산상 확정됐다고 쓰지 않습니다. 이 계산 요약만으로 현실의 사건이나 새 명리 판단을 만들지 않습니다. claims의 결론·장점·취약점·행동을 생활 언어로 작성하고 elements와 evidenceOnly의 전문 용어는 마지막 근거 문단에만 둡니다. refs는 allowedReferences의 knowledge_id만, claim_ids는 claim_id만 사용합니다.'
   };
 }
 export function inspectWriting(paragraphs, config, { concept = false, previous = [] } = {}) {
@@ -57,7 +63,7 @@ export function inspectWriting(paragraphs, config, { concept = false, previous =
     const add = (code, severity, excerpt) => issues.push({id:p.id,code,severity,excerpt:excerpt || text.slice(0,180)});
     if (/(?:이다|한다|된다|있다|없다|했다|해야 한다|할 수 있어|해봐|거야)[.!?。]?(?:\s|$)/.test(text)) add('informal-ending','FAIL');
     if (/사기꾼|정신병자|인간쓰레기|무능한 인간|당신은 실패자/.test(text)) add('insult-or-stigma','FAIL');
-    if (!evidence && !concept && TERMS.test(text)) add('technical-term','FAIL',text.match(TERMS)[0]);
+    if (!evidence && TERMS.test(text)) add('technical-term','FAIL',text.match(TERMS)[0]);
     if (!evidence && /\d+(?:\.\d+)?\s*[%％]/.test(text)) add('unverified-display-metric','FAIL');
     if (/\*\*|<\/?(?:b|strong|span)\b/.test(text)) add('excessive-emphasis','FAIL');
     if (text.length > c.paragraphChars) add('long-paragraph','FAIL');

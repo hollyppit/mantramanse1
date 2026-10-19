@@ -69,6 +69,12 @@ ok(H.profile.has() && H.profile.name() === '테스트', '프로필 저장/읽기
 H.profile.save({ name: '테스트', year: 1990 }); ok(JSON.parse(store['mantra-manse-v1']).gender === 'M', '저장은 병합(다른 필드 보존)');
 ok(!H.profile.awakened(), '처음에는 각성 전'); H.profile.markAwakened(); ok(H.profile.awakened(), '각성 표시'); H.profile.save({ day: 16 }); ok(!H.profile.awakened(), '생일이 바뀌면 다시 각성');
 
+// Result caches must be invalidated when calculation inputs or the displayed name change.
+for (const patch of [{lon:129.08},{hourUnknown:false},{timeMode:'wall'},{jasi:'yaja'},{name:'새 이름'}]) {
+  const before = H.profile.sig(); H.profile.save(patch);
+  ok(H.profile.sig() !== before, '프로필 캐시 갱신: ' + Object.keys(patch)[0]);
+}
+
 /* ④ 랜딩 연결 */
 const story = fs.readFileSync(path.join(root, 'report', 'story', 'story.js'), 'utf8');
 ok(/hubUrl\(\)/.test(story) && /quick_analyze_click/.test(story) && /location.hash = '#\/begin'/.test(story) && /landing_view/.test(story), '랜딩 → 허브 연결과 이벤트');

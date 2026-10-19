@@ -1,3 +1,4 @@
+import { cleanAdviceHistory, repeatedAdvice, adviceFocus, ADVICE_INSTRUCTION } from '../_reading-advice.js';
 import { compactPrompt, PROMPT_VERSION } from '../_reading-prompt.js';
 import { recordGap, recordCoverageGap, readingEnvironment } from '../_reading-block-store.js';
 import { singleFlight, distributedFlight } from '../_reading-flight.js';
@@ -51,6 +52,7 @@ async function handleReading({ request, env }, context) {
   try { const raw = await request.text(); if (raw.length > 160000) return json({ ok: false, error: 'too-large' }, 413); original = JSON.parse(raw); clean = validate(original); } catch { }
   if (!clean) return json({ ok: false, error: 'bad-payload' }, 400);
   context.chapter = clean.chapter.id;
+  const adviceHistory=cleanAdviceHistory(original.adviceHistory,clean.chapter.id);
   clean.guide = original.guide === 'female' ? 'female' : 'male'; // 캐시도 안내자별로 분리한다.
   const requestStarted=Date.now(),providerAttempts=[];
   let storageStage='rules';
@@ -64,7 +66,7 @@ async function handleReading({ request, env }, context) {
     mode = env.INTERPRETATION_ENGINE_MODE || settings.mode;
     policy = chapterPolicy(clean.chapter, settings.chapters);
     if(contract){const kind=editorial.topics.find(t=>t.id===contract.topicId)?.policyKind || contract.topicId;policy=chapterPolicy({...clean.chapter,chapterKind:kind},settings.chapters)||policy;policy=applyContractPolicy(policy,editorial,contract);}
-    privateRequest=Object.keys(userContext || {}).length>0 || (Array.isArray(original.previous)&&original.previous.length>0);
+    privateRequest=adviceHistory.length>0 || Object.keys(userContext || {}).length>0 || (Array.isArray(original.previous)&&original.previous.length>0);
     previous = (Array.isArray(original.previous) ? original.previous : []).slice(-80).filter(p => p && typeof p.text === 'string' && p.text.length<=1200).map(p=>({id:String(p.id || '').slice(0,100),chapter:String(p.chapter || '').slice(0,80),title:String(p.title || '').slice(0,150),text:p.text}));
     if (!['legacy','shadow','grounded'].includes(mode)) return json({ ok: false, error: 'invalid-engine-mode' }, 503);
 
@@ -90,7 +92,7 @@ async function handleReading({ request, env }, context) {
     storageStage='style';sty = styleFor(await loadStyle(kv), [contract && !Editorial.find(editorial,clean.chapter) ? contract.id : clean.chapter.id, ...domainsFor(clean.chapter)], { soft: src.knowledge.length < 2, consent: original.directnessConsent === 5 });
     if (hook && !inspectWriting([{id:'hook',text:hook.text},{id:'explanation',text:hook.explanation}],{...sty.writing,paragraphChars:500}).ok) {hookDraft=hook;hook=null;}
     // Runtime gates preserve the existing evidence and chapter quality contract.
-    if(kv && mode==='grounded' && env.READING_BLOCK_MODE==='prefer' && !Object.keys(userContext || {}).length){
+    if(kv && mode==='grounded' && env.READING_BLOCK_MODE==='prefer' && !Object.keys(userContext || {}).length && !adviceHistory.length){
       const library=await kv.get(blockKey(clean.chapter.id),'json') || [];
       const assembled=await composeBlocks(library.filter(b=>!(env.__READING_OMIT_BLOCK_IDS||[]).includes(b.id)),{clean,analysis,styleSignature:sty.sig,previous,allowCandidates:env.__READING_ALLOW_CANDIDATES===true});
       if(assembled.result.paragraphs.length){
@@ -141,8 +143,9 @@ async function handleReading({ request, env }, context) {
   const writerClean=hybrid?{...clean,chapter:{...clean.chapter,paragraphs:clean.chapter.paragraphs.filter(p=>hybrid.missing.includes(p.id))}}:clean;
   const allowedNumbers=allowedOutputNumbers(clean,src);
   const verifiedTimingClaimIds=(analysis?.claims || []).filter(c=>c.elements.some(r=>/daewoon|seun|monthSeason|futureSeason/.test(r.key))).map(c=>c.claim_id);
-  const input = JSON.stringify({ requiredCoverage:policy?.required || [], ...(mode==='grounded'?writingPlan(analysis,clean):src), behaviorPlans:behaviorPlans(analysis?.claims,examples), realityContext:Editorial.contextLabels(userContext),examples,chapterContract:contract ? {...contract,sourceRuleIds:(analysis?.claims || []).map(c=>c.knowledge_id)} : null, allowedNumbers, verifiedTimingClaimIds, chapter: writerClean.chapter, reusedParagraphs:hybrid?.result.paragraphs || [],blockRepairIssues:env.__READING_REPAIR_ISSUES||[], outline: clean.outline, chapterPolicy: policy, previous, hookDraft: hookDraft ? {text:hookDraft.text,explanation:hookDraft.explanation,claim_id:hookDraft.claim_id}:null, hook: hook ? { text: hook.text, explanation: hook.explanation, claim_id: hook.claim_id } : null });
+  const input = JSON.stringify({ requiredCoverage:policy?.required || [], ...(mode==='grounded'?writingPlan(analysis,clean):src), behaviorPlans:behaviorPlans(analysis?.claims,examples), realityContext:Editorial.contextLabels(userContext),examples,chapterContract:contract ? {...contract,sourceRuleIds:(analysis?.claims || []).map(c=>c.knowledge_id)} : null, allowedNumbers, verifiedTimingClaimIds, chapter: writerClean.chapter, reusedParagraphs:hybrid?.result.paragraphs || [],blockRepairIssues:env.__READING_REPAIR_ISSUES||[], outline: clean.outline, chapterPolicy: policy, previous, adviceHistory, adviceFocus:adviceFocus(contract), hookDraft: hookDraft ? {text:hookDraft.text,explanation:hookDraft.explanation,claim_id:hookDraft.claim_id}:null, hook: hook ? { text: hook.text, explanation: hook.explanation, claim_id: hook.claim_id } : null });
   let writerSystem = mode === 'grounded' ? WRITER_SYSTEM + '\n[표현 설정]\n' + (sty.directive || '') + '\n위 표현 설정은 판단·근거·불확실성을 변경하지 않는다.' : systemFor(sty);
+  writerSystem += '\n'+ADVICE_INSTRUCTION;
   writerSystem += '\n'+Editorial.instruction(contract)+'\n[현실 정보 분리] realityContext는 사용자가 선택한 실제 상황이고 명리 근거가 아니다. 비어 있는 답변은 추정하지 않는다. examples는 검수된 가정 사례이며 사용자가 겪은 사실로 쓰지 않는다. 현실 답변은 사례·전략 선택에만 쓰고 원국·판단·계산은 변경하지 않는다.';
   writerSystem += '\n[안내자 공통 문체] 안내자 종류와 사용자 성별에 관계없이 풀이·후킹·사례 모두 자연스러운 존댓말로 작성한다. ~해보세요를 허용한다. 전생도 가정의 맥락을 유지하고 존댓말로 쓴다.';
   if (policy) writerSystem += '\n'+chapterInstruction(policy);
@@ -210,6 +213,8 @@ async function handleReading({ request, env }, context) {
       const validation = mode === 'grounded' ? validateWritten(result, analysis, clean) : null;
       if (validation && !validation.ok) { rejected('grounding',{...validation,issues:validation.warnings.map(code=>({code}))}); continue; }
       const quality = chapterQuality(result, analysis, policy, previous, hook);
+      const repeated=repeatedAdvice(result.paragraphs,adviceHistory,clean.chapter.paragraphs);
+      if(quality && repeated.length){quality.issues.push(...repeated);quality.ok=false;}
       const semanticRequired=!!(policy && (mode === 'grounded' && settings.semanticReview || hook?.source === 'ai-reviewed'));
       const pendingRatio=!!(quality && !quality.ok && semanticRequired && quality.issues.every(x=>x.code==='temperament-ratio'));
       if (quality && !quality.ok && !pendingRatio) { rejected('chapter-quality',quality); continue; }
@@ -217,7 +222,7 @@ async function handleReading({ request, env }, context) {
       if (semanticRequired) {
         for(let reviewAttempt=0;reviewAttempt<2;reviewAttempt++){
           if(deadline-Date.now()<5000)break;
-          const review=await generate(env,provider,JSON.stringify({...JSON.parse(reviewPayload(result,analysis,policy,previous,hook)),realityContext:Editorial.contextLabels(userContext),examples,chapterContract:contract}),REVIEW_SYSTEM+'\n출력 스키마를 우선합니다. coverage는 policy.required의 원문 각각을 키로 하는 객체입니다. 각 키에 status와 claim_ids를 반환하세요. 같은 키를 반복하거나 누락하지 마세요. ok=true이면 issues는 빈 배열이어야 합니다.',{...settings,telemetryPurpose:reviewAttempt?'reading-review-retry':'reading-semantic-review',outputSchema:reviewSchema(policy,analysis.claims),maxOutputTokens:2500,reasoningEffort:settings.reasoningEffort||'low',timeoutMs:Math.max(1,Math.min(35000,deadline-Date.now()))});
+          const review=await generate(env,provider,JSON.stringify({...JSON.parse(reviewPayload(result,analysis,policy,previous,hook)),realityContext:Editorial.contextLabels(userContext),examples,adviceHistory,paragraphRoles:clean.chapter.paragraphs.map(({id,role})=>({id,role})),chapterContract:contract}),REVIEW_SYSTEM+'\n'+ADVICE_INSTRUCTION+'\n출력 스키마를 우선합니다. coverage는 policy.required의 원문 각각을 키로 하는 객체입니다. 각 키에 status와 claim_ids를 반환하세요. 같은 키를 반복하거나 누락하지 마세요. ok=true이면 issues는 빈 배열이어야 합니다.',{...settings,telemetryPurpose:reviewAttempt?'reading-review-retry':'reading-semantic-review',outputSchema:reviewSchema(policy,analysis.claims),maxOutputTokens:2500,reasoningEffort:settings.reasoningEffort||'low',timeoutMs:Math.max(1,Math.min(35000,deadline-Date.now()))});
           semantic=parseReview(review.text,policy);
           if(semantic?.coverage?.some(x=>x.claim_ids.some(id=>!analysis.claims.some(c=>c.claim_id===id))))semantic=null;
           if(review.usage){if(!reviewUsage)reviewUsage={...review.usage};else for(const k of ['inputTokens','outputTokens','totalTokens','cachedInputTokens'])reviewUsage[k]=reviewUsage[k]!=null && review.usage[k]!=null?reviewUsage[k]+review.usage[k]:null;}
@@ -255,7 +260,7 @@ export async function onRequestPost({request, env}) {
     const raw=await request.clone().text();let input;try{input=JSON.parse(raw);}catch{}
     context.chapter=typeof input?.chapter?.id==='string'?input.chapter.id:'';
     // Personal contexts have no authenticated user identity in this API; never pool them.
-    const share=raw.length<=160000 && input && !Object.keys(input.realityContext||{}).length && !input.sd?.name && !input.sd?.birth && !(input.previous||[]).length;
+    const share=raw.length<=160000 && input && !Object.keys(input.realityContext||{}).length && !input.sd?.name && !input.sd?.birth && !(input.previous||[]).length && !(input.adviceHistory||[]).length;
     const scopedEnv={...env,__AI_COST_COLLECTOR:e=>{requestEvents.push(e);if(env.__AI_COST_COLLECTOR)env.__AI_COST_COLLECTOR(e);},__AI_CONTEXT:{requestId:context.requestId,chapter:/^(?:c\d{2}|c-char|deep_[a-z_]+|life_[a-zA-Z_]+|reading_[a-z_]+|timeline_[a-z_0-9]+)$/.test(context.chapter)?context.chapter:'other'}};
     response=share ? await singleFlight(env,await digest(raw),()=>handleReading({request,env:scopedEnv},context)) : await handleReading({request,env:scopedEnv},context);
   }

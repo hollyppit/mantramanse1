@@ -295,3 +295,7 @@
 @media(max-width:560px){.sm-card{grid-template-columns:1fr}.sm-card .sm-th{width:100%;height:150px}.sm-card .btn{width:100%;white-space:normal}#barBtn{padding-right:146px}.barbtn .b1{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.barbtn .b2{display:none}}
 
 #bar .barbtn{min-height:60px}
+
+#wstrip button, #wsteps button { min-height: 44px; touch-action: manipulation; }
+#wstrip { padding-left:max(10px,env(safe-area-inset-left)); padding-right:max(10px,env(safe-area-inset-right)); }
+@media(max-width:560px) { #wsteps { gap:8px; }#wsteps button { padding:4px 12px; } }

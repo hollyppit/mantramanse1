@@ -77,8 +77,8 @@
     var base = model.slot.replace(/^(past:[^:]+:[^:]+):[FM]$/, '$1');
     return videos[model.slot] || (assets && assets[model.slot] ? '' : videos[base]) || '';
   }
-  // 문장이 길수록 오래 머문다(읽는 속도). 4~16초.
-  function dwell(f, rate) { var n = f.paras.join('').length + (f.cap || '').length; return Math.max(4000, Math.min(16000, 3200 + n * 70)) / (rate && rate > 1 ? rate : 1); }
+  // 문장이 길수록 오래 머문다(읽는 속도). 4~120초. 화면 아래에 본문이 남으면 자동 넘김을 멈춘다.
+  function dwell(f, rate) { var n = f.paras.join('').length + (f.cap || '').length; return Math.max(4000, Math.min(120000, 3200 + n * 70)) / (rate && rate > 0 ? rate : 1); }
 
   function frameHtml(model, i) {
     var f = model.frames[i], last = i === model.frames.length - 1;
@@ -97,11 +97,16 @@
     doc.body.appendChild(dlg);
     var i = 0, auto = false, timer = 0, tx = dlg.querySelector('.sm-tx'), dots = dlg.querySelector('.sm-dots'), btnA = dlg.querySelector('[data-sma]'), dead = false;
     function clear() { clearTimeout(timer); timer = 0; }
-    function schedule() { clear(); if (!auto || dead) return; timer = setTimeout(function () { next(true); }, dwell(model.frames[i], opts.rate)); }
+    function schedule() { clear(); if (!auto || dead) return; timer = setTimeout(function () {
+      if (tx.scrollHeight - tx.clientHeight - tx.scrollTop > 8) { auto = false; updateAuto(); btnA.textContent = '본문 아래로'; return; }
+      next(true);
+    }, dwell(model.frames[i], opts.rate)); }
+    function pageWindow() { var size = root.innerWidth <= 600 ? 5 : 9, start = Math.max(0, Math.min(i - Math.floor(size / 2), model.frames.length - size)); return { start: start, end: Math.min(model.frames.length, start + size) }; }
     function show() {
       tx.classList.remove('in'); tx.innerHTML = frameHtml(model, i); tx.scrollTop = 0; void tx.offsetWidth; tx.classList.add('in');
       var seekFocused = dots.contains(doc.activeElement);
-      dots.innerHTML = model.frames.map(function (f, k) { return '<button type="button" data-smseek="' + k + '" class="' + (k === i ? 'on' : k < i ? 'dn' : '') + '" aria-label="' + (k + 1) + '번째 페이지: ' + E(f.cap) + '"' + (k === i ? ' aria-current="step"' : '') + '></button>'; }).join('');
+      var windowPages = pageWindow();
+      dots.innerHTML = model.frames.slice(windowPages.start, windowPages.end).map(function (f, offset) { var k = windowPages.start + offset; return '<button type="button" data-smseek="' + k + '" class="' + (k === i ? 'on' : k < i ? 'dn' : '') + '" aria-label="' + (k + 1) + '번째 페이지: ' + E(f.cap) + '"' + (k === i ? ' aria-current="step"' : '') + '></button>'; }).join('');
       if (seekFocused) dots.querySelector('[aria-current]').focus({ preventScroll: true });
       dlg.querySelector('.sm-count').textContent = (i + 1) + ' / ' + model.frames.length;
       dlg.querySelector('[data-smp]').disabled = i === 0;
@@ -110,9 +115,9 @@
     }
     function updateAuto() { btnA.setAttribute('aria-pressed', String(auto)); btnA.textContent = auto ? '자동 넘김 중 Ⅱ' : '자동 넘김'; }
     function manual(n) { auto = false; i = Math.max(0, Math.min(model.frames.length - 1, n)); show(); }
-    function finish() { if (dead) return; if (opts.onDone) opts.onDone(); close(); }
+    function finish() { if (dead) return; close(); if (opts.onDone) opts.onDone(); }
     function next(fromAuto) { if (i >= model.frames.length - 1) { if (fromAuto) { auto = false; show(); return; } finish(); return; } i++; show(); }
-    function close() { if (dead) return; dead = true; clear();  try { dlg.close(); } catch (e) { } if (dlg.parentNode) dlg.parentNode.removeChild(dlg); doc.body.style.overflow = oldOverflow; if (previousFocus && previousFocus.isConnected && previousFocus.focus) previousFocus.focus(); if (opts.onClose) opts.onClose(); }
+    function close() { if (dead) return; dead = true; clear(); doc.removeEventListener('visibilitychange', onVisibility); root.removeEventListener('resize', onResize); try { dlg.close(); } catch (e) { } if (dlg.parentNode) dlg.parentNode.removeChild(dlg); doc.body.style.overflow = oldOverflow; if (previousFocus && previousFocus.isConnected && previousFocus.focus) previousFocus.focus(); if (opts.onClose) opts.onClose(); }
     dlg.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       if (b.hasAttribute('data-smx')) close(); else if (b.hasAttribute('data-smn')) { if (i === model.frames.length - 1) finish(); else manual(i + 1); } else if (b.hasAttribute('data-smp')) { manual(i - 1); } else if (b.hasAttribute('data-smseek')) { manual(+b.getAttribute('data-smseek')); } else if (b.hasAttribute('data-sma')) { auto = !auto; updateAuto(); schedule(); }
@@ -123,6 +128,9 @@
     var touch = null;
     dlg.addEventListener('touchstart', function (e) { var t = e.changedTouches[0]; touch = { x: t.clientX, y: t.clientY }; }, { passive: true });
     dlg.addEventListener('touchend', function (e) { if (!touch || e.target.closest('button')) return; var t = e.changedTouches[0], x = t.clientX - touch.x, y = t.clientY - touch.y; touch = null; if (Math.abs(x) > 60 && Math.abs(x) > Math.abs(y) * 1.5) manual(i + (x < 0 ? 1 : -1)); }, { passive: true });
+    function onVisibility() { if (doc.hidden && auto) { auto = false; clear(); updateAuto(); } }
+    function onResize() { if (!dead) { var top = tx.scrollTop; show(); tx.scrollTop = top; } }
+    doc.addEventListener('visibilitychange', onVisibility); root.addEventListener('resize', onResize);
     if (dlg.showModal) dlg.showModal(); show();
     return { close: close };
   }

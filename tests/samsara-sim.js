@@ -29,7 +29,7 @@ const slots = new Set(), titles = new Set();
   const text = m.frames.map(f => f.cap + f.paras.join('')).join('');
   ok(!BANNED.test(text), tag + ' 단정 표현 없음');
   ok(/창작 판타지/.test(m.notice) && /역사적 사실이나 검증된/.test(m.notice), tag + ' 창작 표시');
-  ok(m.frames.every(f => S.dwell(f, 1) >= 4000 && S.dwell(f, 1) <= 16000) && S.dwell(m.frames[0], 2) < S.dwell(m.frames[0], 1), tag + ' 체류 시간·배속');
+  ok(m.frames.every(f => S.dwell(f, 1) >= 4000 && S.dwell(f, 1) <= 120000) && S.dwell(m.frames[0], 2) < S.dwell(m.frames[0], 1), tag + ' 체류 시간·배속');
   slots.add(m.slot); titles.add(m.hero);
   // 에셋 해석
   const base = m.slot.replace(/:[FM]$/, '');
@@ -76,6 +76,8 @@ ok(S.extract({ chapters: [] }) === null && S.card(null, {}, null).indexOf('만�
   ok(ofCh('C').every(x => x === '/o3.webp'), '삽화가 없는 챕터도 지정 이미지를 쓴다(그래프 챕터 등)');
   ok(/data-wtoon="w1"/.test(S.toonCard({ wid: 'w1', name: '세계', frames: 3 })), '세계 카드 버튼');
 }
+ok(S.dwell({paras:['가'.repeat(1000)],cap:''},1)>16000,'긴 본문은 16초 안에 넘기지 않는다');
+ok(S.dwell({paras:['짧은 글'],cap:''},0.5)===S.dwell({paras:['짧은 글'],cap:''},1)*2,'0.5배속은 두 배 머문다');
 console.log('윤회의 문 검증 완료');
 if (fails.length) { console.log('실패 ' + fails.length + '건\n' + fails.slice(0, 20).map(f => ' ✗ ' + f).join('\n')); process.exit(1); }
 console.log('모두 통과');
