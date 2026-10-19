@@ -1,6 +1,6 @@
 /* Text-only reading view. Evidence and accepted wording remain available; calculations are never rewritten. */
 (function(root){'use strict';var R=root.ReportV2=root.ReportV2||{};
- var LABELS={title:'한마디로',reality:'실제로는 이런 모습',strength:'확실한 장점',risk:'팩트로 짚는 약점',reinforce:'장점을 살리는 방법',practice:'오늘 바꿀 한 가지'};
+ var LABELS={title:'먼저 들려드리고 싶은 이야기',reality:'생활 속에서는 이렇게 나타나요',strength:'이런 점이 참 든든해요',risk:'이 부분은 조금 조심해 주세요',reinforce:'내 장점을 더 잘 살리려면',practice:'오늘은 이렇게 해보세요'};
  var TECH=/오행|신살|원국|육친|십간|양간|음간|한난조습|사고수|관성|재성|인성|식상|비겁|정관|편관|정재|편재|식신|통근|무근|신강|신약|용신|기신|희신|격국|조후|억부|합충|지장간|십성|월령|일간|일주(?!일)|월주|시주|배우자궁|자녀궁|[甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌亥]|상관(?=[은이가을의\s·])/;
  var METHOD=/전통 해석.{0,20}(?:보장|학파)|학파.{0,35}(?:차이|다르|달라)|(?:가정|가능한|비교).{0,12}(?:사례|예시).{0,12}(?:아니|뜻하지|전제하지)|실제 (?:경험|생활|성향)을 (?:전제|확인).{0,18}(?:않|아니)|이는.{0,22}(?:가정|예시).{0,25}(?:실제|뜻하지|아니)/;
  var edit=function(t){t=root.MantraPlainCopy?root.MantraPlainCopy.text(t):t;return (root.MantraPolite?root.MantraPolite.text(String(t||'')):String(t||'')).replace(/\bvs\b/g,'그리고').replace(/자기 결정을 함께 확보하는 태도/g,'스스로 선택할 여지를 남기는 태도').replace(/직설적인 표현이 있다는 이유로 호감을 얻는 면까지 없다고 판단하지 않습니다\./g,'분명한 표현과 배려는 함께 드러날 수 있습니다.').replace(/판단의 범위는 직무 후보까지입니다\./g,'어떤 일을 탐색할지 정하는 참고로 읽어 주세요.').replace(/실리 계산과 마무리/g,'수입·비용 확인과 정산').replace(/실리 계산/g,'수입과 비용 계산').replace(/조직형 판단/g,'조직에서 일하는 방식에 대한 판단').trim();};
