@@ -28,6 +28,11 @@
       await new Promise(function(resolve){root.setTimeout(resolve,attempt===0?800:2000);});
     }
   }
+  function readerAddress(name){return String(name||'').trim().replace(/[\u0000-\u001f\u007f]/g,'').slice(0,40).replace(/님$/,'');}
+  function redactReader(text,name){
+    var t=String(text||''),variants=[String(name||''),readerAddress(name)];
+    variants.forEach(function(v){if(v)t=t.split(v).join('본인');});return t;
+  }
   function collect(chapter, name) {
     var paragraphs = [], targets = [];
     // 생활 점검 지표와 예방 안내는 검증된 고정 문구로 유지한다.
@@ -44,7 +49,7 @@
     function push(text, set, kind, role) {
       if (!text || text.trim().length < 30) return;
       var id = String(targets.length);
-      paragraphs.push({ id: id, text: name ? text.split(name).join('본인') : text, kind: kind || 'reading', role: role || '' }); targets.push(set);
+      paragraphs.push({ id: id, text: redactReader(text,name), kind: kind || 'reading', role: role || '' }); targets.push(set);
     }
     ['meaning', 'choice'].forEach(function (k) { if (!chapter.readingCore && typeof chapter[k] === 'string') push(chapter[k], function (text) { chapter[k] = text; }); });
     (chapter.readingCore ? [] : chapter.details || []).forEach(function (d) { ['summary', 'detail'].forEach(function (k) { if (typeof d[k] === 'string') push(d[k], function (text) { d[k] = text; }); }); });
@@ -62,7 +67,7 @@
       (scene.cards || []).forEach(function (c) { if (typeof c.summary === 'string') push(c.summary, function (text) { c.summary = text; }); });
       if (scene.insight && typeof scene.insight.body === 'string') push(scene.insight.body, function (text) { scene.insight.body = text; });
     });
-    return { chapter: { id: chapter.id || chapter.base, base: chapter.base || '', chapterKind: R.ChapterPolicy ? R.ChapterPolicy.kind(chapter) : root.MantraChapterPolicy ? root.MantraChapterPolicy.kind(chapter) : '', title: name ? (chapter.title || '').split(name).join('본인') : chapter.title || '', paragraphs: paragraphs }, targets: targets };
+    return { chapter: { id: chapter.id || chapter.base, base: chapter.base || '', chapterKind: R.ChapterPolicy ? R.ChapterPolicy.kind(chapter) : root.MantraChapterPolicy ? root.MantraChapterPolicy.kind(chapter) : '', title: redactReader(chapter.title,name), paragraphs: paragraphs }, targets: targets };
   }
   function apply(job, result) {
     if (!result || !Array.isArray(result.paragraphs) || result.paragraphs.length !== job.targets.length) return false;
@@ -76,7 +81,7 @@
       return Array.from(seen.entries()).every(function(old){if(old[1]===id)return true;return policy ? policy.similarity(key,old[0])<0.9 && !(policy.similarity(key,old[0])>=0.65 && policy.generalTrait(key,policy.kind(chapter || {}) || 'other') && policy.duplicate(key,old[0])) : key.replace(/\s+/g,'')!==old[0].replace(/\s+/g,'');}); }));
   }
   function adviceHistory(chapters,currentId,name){
-    var total=0;return (chapters || []).filter(function(c){return c.id!==currentId && !c.readingDeferred && c.readingProvider!=='local-reviewed-education' && c.editorialTopicId!=='creative' && Array.isArray(c.readingParagraphs);}).map(function(c){var row={chapter:c.id,title:c.title || ''};['reinforce','practice','risk'].forEach(function(role){var p=c.readingParagraphs.find(function(p){return p.role===role;});if(p && p.text.length<=500)row[role==='risk'?'caution':role]=name?p.text.split(name).join('본인'):p.text;});return row;}).filter(function(row){return row.reinforce || row.practice || row.caution;}).slice(-84).reverse().filter(function(row){var size=JSON.stringify(row).length;if(total+size>60000)return false;total+=size;return true;}).reverse();
+    var total=0;return (chapters || []).filter(function(c){return c.id!==currentId && !c.readingDeferred && c.readingProvider!=='local-reviewed-education' && c.editorialTopicId!=='creative' && Array.isArray(c.readingParagraphs);}).map(function(c){var row={chapter:c.id,title:redactReader(c.title,name)};['reinforce','practice','risk'].forEach(function(role){var p=c.readingParagraphs.find(function(p){return p.role===role;});if(p && p.text.length<=500)row[role==='risk'?'caution':role]=redactReader(p.text,name);});return row;}).filter(function(row){return row.reinforce || row.practice || row.caution;}).slice(-84).reverse().filter(function(row){var size=JSON.stringify(row).length;if(total+size>60000)return false;total+=size;return true;}).reverse();
   }
   function remember(result, seen, id) { result.paragraphs.forEach(function(p) { seen.set(p.text,id); }); }
   function deferredParagraphs(job, chapter, sd) {
@@ -89,7 +94,7 @@
     // Both guides use the same polite reading and therefore share its server cache.
     var guide = 'male';
     var safe = {}; Object.keys(sd || {}).forEach(function (k) { if (k !== 'birth' && k !== 'name') safe[k] = sd[k]; });
-    var chapters = rep.chapters || [], outline = chapters.map(function (c) { return { id: c.id || c.base, title: name ? (c.title || '').split(name).join('본인') : c.title || '' }; });
+    var chapters = rep.chapters || [], outline = chapters.map(function (c) { return { id: c.id || c.base, title: redactReader(c.title,name) }; });
     var jobs = chapters.map(function (c) { return { c: c, job: collect(c, name) }; }), done = 0;
     // Prepare the three entrance declarations before longer supplemental introductions.
     jobs.sort(function(a,b){function rank(x){var k=x.job.chapter.chapterKind;return x.c.readingCore && ['wealth','love','career'].indexOf(k)>=0 ? ['wealth','love','career'].indexOf(k) : x.c.id==='c-char'?5:4;}return rank(a)-rank(b);});
@@ -160,12 +165,20 @@
       var deadline = new Promise(function(resolve,reject){timer=root.setTimeout(function(){if(ctl)ctl.abort();var e=new Error('reading timeout');e.name='AbortError';reject(e);},90000);});
       if (ctl) session.controllers.push(ctl);
       try {
-        var response = await Promise.race([readingResponse({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ realityContext:R.Editorial?R.Editorial.cleanContext(rep.realityContext):{}, guide: guide, directnessConsent: root.document && root.document.getElementById("directnessConsent") && root.document.getElementById("directnessConsent").checked ? 5 : null, sd: safe, outline: outline, chapter: job.chapter, usedAdviceKeys: chapters.filter(function(c){return c.id!==item.c.id;}).flatMap(function(c){return c.readingAdviceKeys||[];}).slice(-512), adviceHistory: adviceHistory(chapters,item.c.id,name), previous: Array.from(acceptedTexts.entries()).filter(function(x){var prior=chapters.find(function(c){return c.id===x[1];});return prior && (!item.c.editorialTopicId || prior.editorialTopicId===item.c.editorialTopicId) && !(prior.readingParagraphs || []).some(function(p){return p.text===x[0] && p.role==='evidence';});}).slice(-8).map(function(x){return {text:name?x[0].split(name).join('본인'):x[0],chapter:x[1],title:(chapters.find(function(c){return c.id===x[1];}) || {}).title || ''};}) }), signal: ctl && ctl.signal },session,item.c),deadline]);
+        var response = await Promise.race([readingResponse({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ realityContext:R.Editorial?R.Editorial.cleanContext(rep.realityContext):{}, guide: guide, directnessConsent: root.document && root.document.getElementById("directnessConsent") && root.document.getElementById("directnessConsent").checked ? 5 : null, sd: safe, outline: outline, chapter: job.chapter, usedAdviceKeys: chapters.filter(function(c){return c.id!==item.c.id;}).flatMap(function(c){return c.readingAdviceKeys||[];}).slice(-512), adviceHistory: adviceHistory(chapters,item.c.id,name), previous: Array.from(acceptedTexts.entries()).filter(function(x){var prior=chapters.find(function(c){return c.id===x[1];});return prior && (!item.c.editorialTopicId || prior.editorialTopicId===item.c.editorialTopicId) && !(prior.readingParagraphs || []).some(function(p){return p.text===x[0] && p.role==='evidence';});}).slice(-8).map(function(x){return {text:redactReader(x[0],name),chapter:x[1],title:(chapters.find(function(c){return c.id===x[1];}) || {}).title || ''};}) }), signal: ctl && ctl.signal },session,item.c),deadline]);
         var r=response.r;
         var d=response.d;
         if(session.cancelled)return;
         // The reviewed legacy serial also uses the reader name locally; the API never receives it.
         if(d&&d.ok&&item.c.editorialTopicId==='creative'&&R.ShortStory&&R.ShortStory.legacyFiction)d=Object.assign({},d,{result:Object.assign({},d.result,{paragraphs:d.result.paragraphs.map(function(p){return Object.assign({},p,{text:R.ShortStory.legacyFiction(p.text,sd,name)});})})});
+        // Local address only: names never enter shared reading payloads or the source evidence.
+        if(d&&d.ok&&item.c.editorialTopicId!=='creative'&&String(name||'').trim()){
+          var address=readerAddress(name)+'님';
+          d=Object.assign({},d,{result:Object.assign({},d.result,{paragraphs:d.result.paragraphs.map(function(p){
+            var role=p.role||(job.chapter.paragraphs.find(function(x){return x.id===p.id;})||{}).role;
+            return role==='title'?Object.assign({},p,{text:address+', '+p.text}):p;
+          })})});
+        }
         if(d && d.error==='no-ai')unavailable={error:d.error};
         if (r.ok && d && d.ok && (d.provider==='reviewed-library' || uniqueAcross(d.result, acceptedTexts, item.c.id,item.c)) && apply(job, d.result)) {
           item.c.readingDeferred=false;item.c.readingNotice='';item.c.readingFailure=null;item.c.readingWarning=null;
