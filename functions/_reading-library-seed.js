@@ -1,10 +1,11 @@
+import {bundlePassages} from './_reading-coherent-bundles.js';
 import {flowPassages} from './_reading-flow-copy.js';
 import {compoundPassages} from './_reading-compound-copy.js';
 import {conditionalPassages} from './_reading-conditional-copy.js';
 import {GUIDE_COPY} from './_reading-guide-copy.js';
 import {FICTION_COPY,FICTION_MOTIFS} from './_reading-fiction-copy.js';
 import {politeText} from './_polite.js';
-export const SEED_VERSION='everyday-reading-76-20261020-8';
+export const SEED_VERSION='coherent-bundles-84-20261020-9';
 const stems={목:['갑','을'],화:['병','정'],토:['무','기'],금:['경','신'],수:['임','계']};
 const elementId={목:'wood',화:'fire',토:'earth',금:'metal',수:'water'};
 export function seedPassages(contract){
@@ -21,7 +22,7 @@ export function seedPassages(contract){
    make('evidence','이 연작은 기록관 서윤과 목수 하람이 항구의 빠진 기록을 찾는 창작 이야기입니다. 인물 이름과 사건은 모든 장에서 이어지며 사주 근거를 대신하지 않습니다.','fiction')];
  }
  const row=GUIDE_COPY[topic]?.[i];if(!row)return [];
- return [...conditionalPassages(contract,row),...compoundPassages(contract),...flowPassages(contract),...fields.map((role,n)=>make(role,row[n])),
+ return [...bundlePassages(contract),...conditionalPassages(contract,row),...compoundPassages(contract),...flowPassages(contract),...fields.map((role,n)=>make(role,row[n])),
   make('why','이 항목의 예시는 「'+contract.example+'」을 가정한 설명입니다. 질문과 관련된 생활 조건을 비교하는 데 쓰며, 독자의 실제 경험을 확인한 사실로 제시하지 않습니다.'),
   make('evidence','질문 「'+contract.question+'」의 전통 해석에서는 '+contract.requiredEvidence.join(', ')+'을 구분해 확인합니다. 적용된 게시 근거가 있을 때만 개인 풀이로 연결하고, 이 참고 설명 자체를 새로운 명리 근거로 사용하지 않습니다.')];
 }

@@ -7,7 +7,7 @@ import {PROHIBITED_RE} from './_style.js';
 import {similarity} from './_chapter-policy.js';
 import {digest} from './_reading-blocks.js';
 import {adviceFocus} from './_reading-advice.js';
-export const LIBRARY_VERSION='reviewed-library-8-coherent-flow';
+export const LIBRARY_VERSION='reviewed-library-9-authored-bundles';
 // Reuse the existing service-only CAS namespace; no broader database privileges are required.
 export const libraryKey=id=>'ik:blocks:chapter:library.'+id;
 export const ROLES=['title','why','reality','strength','risk','reinforce','practice','evidence'];
@@ -84,11 +84,12 @@ export function composeReviewed({clean,contract,analysis,library,adviceHistory=[
    }else{pending.push(role);const label={title:'개인별 핵심 풀이',why:'적용 이유',reality:'생활 사례',strength:'강점',risk:'주의할 점'}[role]||'추가 설명',particle=(label.charCodeAt(label.length-1)-0xAC00)%28?'은':'는';text='「'+contract.title+'」의 '+label+particle+' 연결된 검수 문장이 충분해지면 제공하겠습니다. 현재 근거로는 구체적인 개인 성향이나 사건을 단정하기 어렵습니다.';}
   }
   let components=[];
-  if(contentKind==='conditional-guide'&&['reality','strength','risk','reinforce','practice'].includes(role)){
+  if(contentKind==='conditional-guide'&&guide?.id.startsWith('condition-')&&['reality','strength','risk','reinforce','practice'].includes(role)){
    const composed=renderFlow(role,selected,clean.sd);if(composed){text=composed.text;components=composed.components;}
    // Missing profile facts keep the question-specific reading; never append unrelated generic advice.
    for(const part of components)blocks.push({id:part.id,version:library.version});
   }
+  if(guide?.id.startsWith('bundle-')&&contentKind==='conditional-guide'){components=[{id:guide.id,when:guide.when,rows:evalConds(guide.when,deriveFacts(clean.sd)).rows}];}
   if(role==='evidence'){
    const applied=selected.filter(isCompound);if(applied.length){text+='\n복합 문안 '+COMPOUND_VERSION+': 일간은 접근 방식의 전통 비유, 신강신약은 기존 가중 계산의 분류로 사용합니다. 개별 십성은 일간을 제외한 비중을 사용하며, 묶음 비중과 더하지 않습니다. 개별 십성 14% 이상인 후보 중 비중이 큰 조합을 우선하고, 두 조건을 모두 충족하는 검수된 쌍이 있으면 단독 설명을 대체합니다. 시주가 없으면 주어진 기둥만으로 계산한 결과입니다. 생활 사례는 실제 경험의 확인이나 건강 진단이 아닙니다.\n'+[...new Set(applied.flatMap(p=>evalConds(p.when,deriveFacts(clean.sd)).rows.map(r=>r.label+': '+r.have)))].join(' · ');}
   }

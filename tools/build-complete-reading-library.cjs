@@ -9,6 +9,10 @@ async function build(){
  const {deriveFacts}=await import('../functions/_ik.js'),coverage=new Set(),collect=sd=>Object.entries(deriveFacts(sd).group).forEach(([g,v])=>coverage.add(g+':'+v.level));samples.forEach(s=>collect(s.sd));
  for(let n=0;n<800&&coverage.size<15;n++){const sd=calc(1950+n%65,1+n%12,1+n%27,n%3===0?null:n%24,n%2?'F':'M'),before=coverage.size;collect(sd);if(coverage.size>before)samples.push({id:'coverage-'+n,synthetic:true,sd});}
  if(coverage.size!==15)throw Error('Missing calculated group-band coverage');
+ // Independently calculated positive cases for each whole-paragraph conjunction.
+ const {BUNDLE_WHEN}=await import('../functions/_reading-coherent-bundles.js'),{evalConds}=await import('../functions/_ik.js');let bundlePositives=0;
+ for(let n=0;n<10000&&bundlePositives<2;n++){const sd=calc(1950+n%75,1+Math.floor(n/75)%12,1+Math.floor(n/900)%27,n%24,n%2?'F':'M');if(evalConds(BUNDLE_WHEN,deriveFacts(sd)).match)samples.push({id:'bundle-positive-'+bundlePositives++,synthetic:true,sd});}
+ if(bundlePositives!==2)throw Error('Missing independent bundle positives');
  const chapters=MantraEditorial.defaults().chapters,checks=[],libraries=[];
  for(const c of chapters){const passages=seedPassages(c),issues=validatePassages(passages,c,[]);if(issues.length)throw Error(c.id+': '+JSON.stringify(issues));const needed=new Set(),chosen=c.topicId==='creative'?samples.slice(0,11):samples.filter(s=>{const ids=selectPassages(passages,c,{claims:[]},s.sd).filter(p=>Object.keys(p.when).length).map(p=>p.id),fresh=ids.some(id=>!needed.has(id));ids.forEach(id=>needed.add(id));return fresh||s.id==='unknown-hour';});
  const scenarios=chosen.map(s=>{const matched=selectPassages(passages,c,{claims:[]},s.sd).map(p=>p.id);checks.push({chapter:c.id,sample:s.id,matched:matched.length});return {sampleId:s.id,sd:s.sd,expectedPassageIds:matched,forbiddenPassageIds:passages.filter(p=>Object.keys(p.when).length&&!matched.includes(p.id)).map(p=>p.id)};});

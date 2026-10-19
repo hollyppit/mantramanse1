@@ -2,7 +2,7 @@ import {deriveFacts,evalConds} from './_ik.js';
 import {CONDITION_PLANS} from './_reading-conditional-copy.js';
 import {CONDITIONAL_BODIES} from './_reading-conditional-bodies.js';
 import {FLOW_SCENES} from './_reading-flow-scenes.js';
-export const FLOW_VERSION='everyday-flow-20261020-2';
+export const FLOW_VERSION='question-body-flow-20261020-3';
 const roles=['reality','strength','risk','reinforce','practice'];
 // Dependent clauses, not standalone advice paragraphs. They fill one causal scene.
 const voices={
@@ -39,6 +39,9 @@ const choices={
  "편관+편인": "당장 눈앞의 일뿐 아니라 다음에 생길 문제까지 살펴요",
  "비견+겁재": "내가 먼저 나서서 주변 사람들도 함께 움직이게 해요"
 };
+const perspective={"비견":"내가 정할 부분이 있어야 편해서,","겁재":"함께하는 사람의 반응에 마음이 움직여,","식신":"전에 잘됐던 순서를 떠올리며,","상관":"불편한 점을 그냥 넘기기 어려워,","편재":"새로운 길이 있는지 살피면서,","정재":"약속한 몫을 놓치지 않으려,","편관":"급한 일을 그냥 두기 어려워,","정관":"내가 맡은 일은 지키고 싶어서,","편인":"겉으로 안 보이는 이유도 생각하며,","정인":"배운 내용과 경험을 참고하면서,","식신+정재":"한 번의 결과보다 계속 남을 것을 생각해,","상관+편재":"새 방법을 쓸 기회부터 떠올려,","정관+정인":"제대로 알고 책임지고 싶어서,","편관+편인":"요구의 속사정과 해결 방법을 같이 살피며,","비견+겁재":"내 판단과 함께할 사람의 반응을 보며,"};
+const pitfalls={"비견":"내 방식으로 마쳐야 마음이 놓일수록,","겁재":"남에게 뒤처지는 게 싫을수록,","식신":"전에 잘된 방식을 믿을수록,","상관":"틀린 점을 바로잡고 싶을수록,","편재":"새 기회를 놓치기 싫을수록,","정재":"작은 손해도 막고 싶을수록,","편관":"지금 해결해야 한다는 마음이 급할수록,","정관":"한 약속을 지켜야 한다는 생각이 클수록,","편인":"생길 수 있는 문제를 모두 알아두려 할수록,","정인":"믿는 설명대로 하고 싶을수록,","식신+정재":"해온 수고를 헛되게 하고 싶지 않을수록,","상관+편재":"반응이 좋은 제안을 키우고 싶을수록,","정관+정인":"준비한 대로 잘해내고 싶을수록,","편관+편인":"문제의 이유까지 혼자 풀려 할수록,","비견+겁재":"주도권과 내 몫을 놓치기 싫을수록,"};
+const adjustments={"비견":"내 생각을 숨기지 말고,","겁재":"남의 속도에 쫓기기보다,","식신":"익숙한 순서만 고집하기보다,","상관":"누가 틀렸는지 따지기 전에,","편재":"새 일을 더 벌이기 전에,","정재":"당장 손해인지부터 따지기보다,","편관":"급하다는 마음을 잠깐 내려놓고,","정관":"내가 다 책임지려 하기보다,","편인":"아직 생기지 않은 일을 짐작하기보다,","정인":"배운 방법을 그대로 따르기보다,","식신+정재":"계속해 왔다는 이유만으로 견디기보다,","상관+편재":"좋은 반응만 보고 약속을 늘리기보다,","정관+정인":"정답을 더 준비하기 전에,","편관+편인":"걱정을 혼자 해결하려 하기보다,","비견+겁재":"작은 양보를 지는 일로 받아들이기보다,"};
 const capacity={
  신강:'혼자 다 정하기보다',
  신약:'한꺼번에 무리하기보다',
@@ -64,7 +67,7 @@ const methods={
 export const isFlow=p=>typeof p?.id==='string'&&p.id.startsWith('flow-');
 const last=t=>[...String(t)].at(-1)||'',josa=(t,p)=>{const n=last(t).charCodeAt(0)-0xac00,b=n>=0&&n<11172?n%28:0;return t+({은:b?'은':'는',이:b?'이':'가',을:b?'을':'를',과:b?'과':'와',으로:b&&b!==8?'으로':'로'}[p]||'');};
 const marker=/〔([^〕]+)〕/g;
-const allowed=new Set(['행동','동기','선택','역량','과잉','수정','부담','실행','주의시작']);
+const allowed=new Set(['시작시선','포착','조정','행동','동기','선택','역량','과잉','수정','부담','실행','주의시작']);
 export function flowTemplateIssue(p){
  if(!isFlow(p))return null;
  if(!roles.includes(p.role))return 'invalid-flow-role';
@@ -78,11 +81,11 @@ export function flowPassages(c){
  return ['strong','mid','weak'].flatMap((band,slot)=>{
   const focus=plan[slot+1],body=CONDITIONAL_BODIES[m[1]][i][slot],practice=body[4];
   const texts={
-   reality:s+'면, 〔동기〕 마음에 〔행동〕.',
-   strength:'〔역량:을〕 잘 쓰면, '+gain.replace(/것$/,'데')+' 도움이 돼요.',
-   risk:'〔주의시작〕 '+body[2],
-   reinforce:s+'에는 〔부담〕 〔수정〕 '+body[3],
-   practice:'〔실행〕 '+practice
+   reality:'〔시작시선〕 '+body[0],
+   strength:'〔역량:을〕 바탕으로 '+body[1],
+   risk:'〔포착〕 '+body[2],
+   reinforce:'〔조정〕 '+body[3],
+   practice:'〔실행〕, '+practice
   };
   return roles.map(role=>({id:'flow-'+m[1]+'-'+(i+1)+'-'+band+'-'+role,role,kind:'guide',text:texts[role],when:{group:{[plan[0]]:band}},unless:{},ruleIds:[],adviceKey:'flow-'+m[1]+'-'+(i+1)+'-'+band+'-'+role}));
  });
@@ -99,7 +102,7 @@ export function renderFlow(role,selected,sd){
  const style={신강:['스스로 ','흔들리지 않고 ','내 판단만 앞세워 '],신약:['도움을 받으면서도 ','주변의 도움을 받아 ','부담을 혼자 떠안은 채 '],중화:['상황에 맞추면서도 ','상황을 살피며 ','여러 요구를 맞추다가 ']}[facts.strength];
  const pace={신강:'',신약:'부담이 덜한 선에서 ',중화:'상황을 보면서 '}[facts.strength];
  const warning={신강:'그 '+strengthNames[key]+'만 믿지는 마세요.',신약:'그 '+josa(strengthNames[key],'이')+' 있어도 도움은 받으세요.',중화:'그 '+josa(strengthNames[key],'으로')+' 다 맞추지는 마세요.'}[facts.strength];
- const slots={주의시작:warning,동기:motive,행동:pace+choices[key],선택:pace+v[1],역량:style[1]+v[2],과잉:style[2]+v[3],수정:({비견:'함께 정할 일은 상대의 의견도 들어보세요.',겁재:'남의 속도보다 내게 필요한 일을 먼저 챙겨보세요.',식신:'익숙한 방법도 지금 상황에 맞는지 확인해 보세요.',상관:'틀린 점을 말할 때는 바꿀 방법도 같이 제안해 주세요.',편재:'좋은 기회여도 끝까지 챙길 수 있는 만큼만 맡으세요.',정재:'끝까지 지킬 부분과 바꿔볼 부분을 나누어 보세요.',편관:'급한 일과 나중에 해도 될 일을 먼저 나누세요.',정관:'약속한 일과 혼자 떠안은 일을 구별해 보세요.',편인:'짐작한 내용과 직접 확인한 내용을 나누어 보세요.',정인:'배운 대로 해도 괜찮은 상황인지 다시 보세요.','식신+정재':'계속 노력한 만큼 내게 남는 것도 있는지 보세요.','상관+편재':'제안하기 전에 실제로 해줄 수 있는지 확인해 주세요.','정관+정인':'작은 결정까지 전부 허락받을 필요는 없어요.','편관+편인':'아직 생기지 않은 문제까지 혼자 책임지지 마세요.','비견+겁재':'함께할 일과 각자 정할 일을 처음부터 나누세요.'})[key],부담:budget,실행:method};
+ const slots={시작시선:perspective[key],포착:pitfalls[key],조정:adjustments[key],주의시작:warning,동기:motive,행동:pace+choices[key],선택:pace+v[1],역량:style[1]+v[2],과잉:style[2]+v[3],수정:({비견:'함께 정할 일은 상대의 의견도 들어보세요.',겁재:'남의 속도보다 내게 필요한 일을 먼저 챙겨보세요.',식신:'익숙한 방법도 지금 상황에 맞는지 확인해 보세요.',상관:'틀린 점을 말할 때는 바꿀 방법도 같이 제안해 주세요.',편재:'좋은 기회여도 끝까지 챙길 수 있는 만큼만 맡으세요.',정재:'끝까지 지킬 부분과 바꿔볼 부분을 나누어 보세요.',편관:'급한 일과 나중에 해도 될 일을 먼저 나누세요.',정관:'약속한 일과 혼자 떠안은 일을 구별해 보세요.',편인:'짐작한 내용과 직접 확인한 내용을 나누어 보세요.',정인:'배운 대로 해도 괜찮은 상황인지 다시 보세요.','식신+정재':'계속 노력한 만큼 내게 남는 것도 있는지 보세요.','상관+편재':'제안하기 전에 실제로 해줄 수 있는지 확인해 주세요.','정관+정인':'작은 결정까지 전부 허락받을 필요는 없어요.','편관+편인':'아직 생기지 않은 문제까지 혼자 책임지지 마세요.','비견+겁재':'함께할 일과 각자 정할 일을 처음부터 나누세요.'})[key],부담:budget,실행:method};
  const text=template.text.replace(marker,(_,key)=>{const [k,p]=key.split(':');return p?josa(slots[k],p):slots[k];});
  // Keep the exact publication conditions and component IDs inspectable; no claims are manufactured.
  const components=[template,cap,lead,stem].map(p=>({id:p.id,when:p.when,rows:evalConds(p.when,facts).rows}));
