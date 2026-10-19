@@ -69,3 +69,6 @@
 .rd-answer-actions .btn { border-radius: 10px; }
 .rd-answer [hidden] { display: none !important; }
 @media (max-width: 520px) { .rd-react .rd-answer-choices { flex-wrap: nowrap; overflow-x: auto; padding: 3px 2px 12px; scroll-snap-type: x proximity; } .rd-react .rd-answer-choices .btn { max-width: none; scroll-snap-align: start; font-size: .9rem; } .rd-answer-result { padding: 15px; } }
+
+/* 작은 화면에서도 추가 풀이 선택지를 모두 발견할 수 있게 줄바꿈합니다. */
+@media (max-width:520px){.rd-react .rd-answer-choices{display:grid;grid-template-columns:minmax(0,1fr);overflow:visible;gap:8px;padding:3px 0 12px}.rd-react .rd-answer-choices .btn{width:100%;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:keep-all;text-align:start}.rd-answer-actions .btn{min-height:44px;white-space:normal;line-height:1.6}}

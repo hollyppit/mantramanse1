@@ -40,7 +40,7 @@
   var P = H.profile = {
     get: function () { try { var s = JSON.parse(localStorage.getItem(STORE) || 'null'); return s && s.year && s.month && s.day && (s.gender === 'M' || s.gender === 'F') ? s : null; } catch (e) { return null; } },
     has: function () { return !!P.get(); },
-    save: function (saved) { try { var old = JSON.parse(localStorage.getItem(STORE) || 'null') || {}; localStorage.setItem(STORE, JSON.stringify(Object.assign({}, old, saved))); return true; } catch (e) { return false; } },
+    save: function (saved) { try { var old = {}; try { old = JSON.parse(localStorage.getItem(STORE) || 'null') || {}; } catch (e) {} if (typeof old !== 'object' || Array.isArray(old)) old = {}; localStorage.setItem(STORE, JSON.stringify(Object.assign({}, old, saved))); return true; } catch (e) { return false; } },
     // 저장 형태 → 엔진 입력(만세력 앱 run() 과 같은 변환)
     toInput: function (s) { s = s || P.get(); if (!s) return null; return { year: +s.year, month: +s.month, day: +s.day, hour: s.hourUnknown || s.hour == null || s.hour === '' ? null : +s.hour, minute: +s.minute || 0, calendar: s.calendar || 'solar', leap: !!s.leap, gender: s.gender, lon: +s.lon || 126.98, timeMode: s.timeMode || 'lmt', jasi: s.jasi || 'jeong', sinsalBase: s.sinsalBase || 'year', model: s.model || 'season', school: s.school || 'eokbu' }; },
     name: function () { var s = P.get(); return s && s.name ? String(s.name).slice(0, 20) : ''; },

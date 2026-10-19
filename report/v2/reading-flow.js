@@ -2,7 +2,7 @@
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
   var TITLES = ['나의 사주 핵심 요약','타고난 특징과 성향','나의 강점과 취약점','약점을 장점으로 승화하는 방법','직업과 적성','재물과 사업','연애와 결혼','인간관계와 궁합','건강과 생활 습관','전체 인생 흐름','대운 분석','향후 10년의 세운 분석','올해와 월별 운세','나에게 맞는 환경과 활동','개운 전략과 실천 계획'];
-  var FIELDS = [['title','핵심 제목','interpretation'],['why','나에게 해당하는 이유','fact'],['reality','현실에서 나타날 수 있는 특징','interpretation'],['strength','장점으로 발휘되는 경우','interpretation'],['risk','약점으로 나타나는 경우','interpretation'],['reinforce','장점을 강화하는 방법','advice'],['practice','약점을 보완하는 실천 전략','advice'],['evidence','명리학적 근거와 예외 조건','model']];
+  var FIELDS = [['title','먼저 읽는 핵심','interpretation'],['why','나에게 해당하는 이유','fact'],['reality','일상에서는 이렇게','interpretation'],['strength','이럴 때 강점이 됩니다','interpretation'],['risk','이럴 때 부담이 커집니다','interpretation'],['reinforce','장점을 강화하는 방법','advice'],['practice','직접 해 보고 확인할 일','advice'],['evidence','명리학적 근거와 예외 조건','model']];
   var MAP = [
     ['c00','life_here'], ['c01','c02','c03','life_self_who','life_tengods','life_stars','deep_car','deep_stages','life_ik_SELF'],
     ['c04','c05','deep_proscons'], ['reading_transform'],
@@ -132,7 +132,7 @@
     if(sd.reviewConditions && sd.reviewConditions.methodDifference)base.evidence+=' 억부와 조후 후보가 다르므로 각각의 목적과 적용 조건을 확인합니다.';
     return base;
   }
-  function scenes(c, id) { return FIELDS.map(function(f,n){ return { sceneId:id+'_guide_'+n, sceneType:'life', bg:'black', layout:'DATA', readingRole:f[0], readingLayer:f[2], html:'<section class="scene rv rd-prose" data-sc="'+esc(id+'_guide_'+n)+'">'+(['why','evidence'].indexOf(f[0])>=0?'<details class="reading-evidence"><summary>왜 이런 풀이가 나왔나요?</summary>':'')+'<div class="cap">'+esc(f[1])+' · '+({fact:'계산 모델의 출력',interpretation:'조건부 풀이',advice:'현실 실천 제안',model:'근거와 예외'}[f[2]])+'</div><p class="lead" data-reading-role="'+f[0]+'">'+esc(c[f[0]])+'</p>'+(['why','evidence'].indexOf(f[0])>=0?'</details>':'')+'</section>' }; }); }
+  function scenes(c, id) { return FIELDS.map(function(f,n){ return { sceneId:id+'_guide_'+n, sceneType:'life', bg:'black', layout:'DATA', readingRole:f[0], readingLayer:f[2], html:'<section class="scene rv rd-prose reading-step reading-step-'+f[0]+'" data-reading-step="'+f[0]+'" data-sc="'+esc(id+'_guide_'+n)+'">'+(['why','evidence'].indexOf(f[0])>=0?'<details class="reading-evidence"><summary>'+ (f[0]==='why'?'내 사주와 연결해서 보기':'왜 이런 풀이가 나왔나요?') +'</summary>':'')+'<div class="cap">'+esc(f[1])+' · '+({fact:'사주와의 연결',interpretation:'나에게 비추어 읽기',advice:'생활에 적용하기',model:'해석의 범위'}[f[2]])+'</div><p class="lead" data-reading-role="'+f[0]+'">'+esc(c[f[0]])+'</p>'+(['why','evidence'].indexOf(f[0])>=0?'</details>':'')+'</section>' }; }); }
   function build(rep, sd, H) {
     if(rep.readingFlow || rep.project && rep.project.id && rep.project.id !== 'full') return rep;
     var original=rep.chapters || [], buckets=TITLES.map(function(){return [];});

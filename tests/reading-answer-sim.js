@@ -65,6 +65,7 @@ function button(p, key) { return { dataset: {}, hasAttribute: a => a === key, cl
   assert.ok(q.els['.rd-answer-result'].innerHTML.includes('현재 경험이 다르다면'));
   const r = panel('relation'); await A.ask(r, 'risk', { sd, fetch: async () => new Response(JSON.stringify({ ok: false, error: 'ai-unavailable' }), { status: 502 }) });
   assert.equal(r.els['[data-answer-retry]'].hidden, false); assert.equal(r.els['[data-answer-skip]'].hidden, false); assert.equal(r['aria-busy'], 'false');
+  const syncFailure = panel('self'); await A.ask(syncFailure, 'action', { sd, fetch: () => { throw Error('network unavailable'); } }); assert.equal(syncFailure['aria-busy'], 'false'); assert.equal(syncFailure.els['[data-answer-retry]'].hidden, false);
   const t = panel('career'); let done; const wait = A.ask(t, 'risk', { sd, fetch: () => new Promise(resolve => done = resolve) }); A.handleClick(button(t, 'data-answer-skip'), { sd }); done(new Response(JSON.stringify({ ok: true, result: reply }))); await wait; assert.equal(t.els['.rd-answer-result'].hidden, true); assert.equal(t.dataset.completed, '1');
   assert.ok(A.render({ ...reply, meaning: '<img src=x onerror=alert(1)>' }).includes('&lt;img'));
   console.log('PASS: 24 topic/choice contracts; provider fallback, validation, cache, rate limits, failure recovery and request races');

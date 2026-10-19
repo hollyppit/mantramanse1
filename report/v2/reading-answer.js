@@ -37,7 +37,7 @@
     var key = JSON.stringify(data), hit = cache[key];
     var ctl = root.AbortController ? new root.AbortController() : null; panel._answerController = ctl;
     var timer = root.setTimeout(function () { if (ctl) ctl.abort(); }, 60000);
-    var run = hit && Date.now() - hit.at < 900000 ? Promise.resolve(hit.result) : (o.fetch || root.fetch)('/api/reading-answer', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data), signal: ctl && ctl.signal }).then(function (res) { return res.json().then(function (d) { if (!res.ok || !d.ok || !validResult(d.result)) throw new Error(d.error || 'ai-unavailable'); cache[key] = { result: d.result, at: Date.now() }; return d.result; }); });
+    var run = hit && Date.now() - hit.at < 900000 ? Promise.resolve(hit.result) : (function () { try { return Promise.resolve((o.fetch || root.fetch)('/api/reading-answer', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data), signal: ctl && ctl.signal })); } catch (e) { return Promise.reject(e); } })().then(function (res) { return res.json().then(function (d) { if (!res.ok || !d.ok || !validResult(d.result)) throw new Error(d.error || 'ai-unavailable'); cache[key] = { result: d.result, at: Date.now() }; return d.result; }); });
     return run.then(function (r) {
       if (panel._answerSeq !== id || !panel.isConnected) return;
       output.innerHTML = render(r); output.hidden = false; status.textContent = '선택한 상황에 대한 풀이입니다. 읽은 뒤 이어가거나 다른 상황을 골라 보세요.'; next.hidden = false; skip.hidden = true;

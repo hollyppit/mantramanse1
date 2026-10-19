@@ -134,3 +134,15 @@ li mark.wn b { color: #FFB066; } li mark.ac b { color: #6FDDA8; }
 #chapter .reading-pending{min-height:0;height:auto;padding:32px 20px;margin:24px auto;border:1px solid #bba26a55;border-radius:12px;max-width:720px;gap:16px}
 #chapter .reading-pending h2{font-size:24px;margin:0 0 16px}
 #chapter .reading-pending [data-reading-notice]{font-size:16px;line-height:1.8;word-break:keep-all}
+
+/* 풀이의 역할을 구분하되 긴 본문과 확대 글꼴은 자연스럽게 흘러갑니다. */
+#chapter .reading-step{width:100%;max-width:720px;margin-inline:auto;box-sizing:border-box;padding-inline:clamp(20px,5vw,40px);min-width:0}
+#chapter .reading-step .cap{line-height:1.65;letter-spacing:.04em;word-break:keep-all;overflow-wrap:anywhere;margin-bottom:14px;color:var(--gold-l,var(--ink))}
+#chapter .reading-step p.lead{max-width:34em;line-height:1.95;letter-spacing:0;white-space:pre-line;text-align:start;margin-block:0 1.2em}
+#chapter .reading-step-title p.lead{font-size:clamp(21px,5.3vw,27px);line-height:1.65;font-weight:500;color:var(--gold-l,var(--ink))}
+#chapter .reading-step-strength,#chapter .reading-step-risk,#chapter .reading-step-reinforce,#chapter .reading-step-practice{border-inline-start:2px solid var(--line2,var(--line));margin-block:16px;padding-block:24px;min-height:0}
+#chapter .reading-step-practice{border-inline-start-color:var(--gold);background:rgba(187,162,106,.06);border-radius:0 12px 12px 0}
+#chapter .reading-step .reading-evidence{width:100%;max-width:100%;box-sizing:border-box}
+#chapter .reading-step .reading-evidence summary{min-height:44px;box-sizing:border-box;line-height:1.7;overflow-wrap:anywhere}
+#chapter .reading-step .reading-evidence summary:focus-visible{outline:2px solid var(--gold);outline-offset:4px;border-radius:4px}
+#chapter .reading-step .reading-evidence p.lead{font-size:16px;line-height:1.9;color:var(--ink2)}
