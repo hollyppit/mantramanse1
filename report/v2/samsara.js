@@ -82,7 +82,7 @@
 
   function frameHtml(model, i) {
     var f = model.frames[i], last = i === model.frames.length - 1;
-    return '<p class="sm-cap">' + E(f.cap) + '</p>' + f.paras.map(function (p) { return '<p class="sm-p">' + E(p) + '</p>'; }).join('') + (last ? '<p class="sm-end">이 이야기는 창작이며, 지금의 나에게 건네는 질문으로만 읽어 주세요.</p>' : '');
+    return '<p class="sm-cap">' + E(f.cap) + '</p>' + (R.ReadingMedia&&f.media?R.ReadingMedia.html(f.media):'') + f.paras.map(function (p) { return '<p class="sm-p">' + E(p) + '</p>'; }).join('') + (last ? '<p class="sm-end">이 이야기는 창작이며, 지금의 나에게 건네는 질문으로만 읽어 주세요.</p>' : '');
   }
 
   /** 전체 화면 감상 창. opts: { reduce, saveData, rate, onDone(), onClose() } */
@@ -103,7 +103,7 @@
     }, dwell(model.frames[i], opts.rate)); }
     function pageWindow() { var size = root.innerWidth <= 600 ? 5 : 9, start = Math.max(0, Math.min(i - Math.floor(size / 2), model.frames.length - size)); return { start: start, end: Math.min(model.frames.length, start + size) }; }
     function show() {
-      tx.classList.remove('in'); tx.innerHTML = frameHtml(model, i); tx.scrollTop = 0; void tx.offsetWidth; tx.classList.add('in');
+      tx.classList.remove('in');if(R.ReadingMedia)R.ReadingMedia.unmount(tx); tx.innerHTML = frameHtml(model, i); tx.scrollTop = 0;if(R.ReadingMedia)R.ReadingMedia.mount(tx,opts); void tx.offsetWidth; tx.classList.add('in');
       var seekFocused = dots.contains(doc.activeElement);
       var windowPages = pageWindow();
       dots.innerHTML = model.frames.slice(windowPages.start, windowPages.end).map(function (f, offset) { var k = windowPages.start + offset; return '<button type="button" data-smseek="' + k + '" class="' + (k === i ? 'on' : k < i ? 'dn' : '') + '" aria-label="' + (k + 1) + '번째 페이지: ' + E(f.cap) + '"' + (k === i ? ' aria-current="step"' : '') + '></button>'; }).join('');
@@ -117,7 +117,7 @@
     function manual(n) { auto = false; i = Math.max(0, Math.min(model.frames.length - 1, n)); show(); }
     function finish() { if (dead) return; close(); if (opts.onDone) opts.onDone(); }
     function next(fromAuto) { if (i >= model.frames.length - 1) { if (fromAuto) { auto = false; show(); return; } finish(); return; } i++; show(); }
-    function close() { if (dead) return; dead = true; clear(); doc.removeEventListener('visibilitychange', onVisibility); root.removeEventListener('resize', onResize); try { dlg.close(); } catch (e) { } if (dlg.parentNode) dlg.parentNode.removeChild(dlg); doc.body.style.overflow = oldOverflow; if (previousFocus && previousFocus.isConnected && previousFocus.focus) previousFocus.focus(); if (opts.onClose) opts.onClose(); }
+    function close() { if (dead) return;if(R.ReadingMedia)R.ReadingMedia.unmount(dlg); dead = true; clear(); doc.removeEventListener('visibilitychange', onVisibility); root.removeEventListener('resize', onResize); try { dlg.close(); } catch (e) { } if (dlg.parentNode) dlg.parentNode.removeChild(dlg); doc.body.style.overflow = oldOverflow; if (previousFocus && previousFocus.isConnected && previousFocus.focus) previousFocus.focus(); if (opts.onClose) opts.onClose(); }
     dlg.addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       if (b.hasAttribute('data-smx')) close(); else if (b.hasAttribute('data-smn')) { if (i === model.frames.length - 1) finish(); else manual(i + 1); } else if (b.hasAttribute('data-smp')) { manual(i - 1); } else if (b.hasAttribute('data-smseek')) { manual(+b.getAttribute('data-smseek')); } else if (b.hasAttribute('data-sma')) { auto = !auto; updateAuto(); schedule(); }

@@ -160,6 +160,8 @@
         var r=response.r;
         var d=response.d;
         if(session.cancelled)return;
+        // The reviewed legacy serial also uses the reader name locally; the API never receives it.
+        if(d&&d.ok&&item.c.editorialTopicId==='creative'&&R.ShortStory&&R.ShortStory.legacyFiction)d=Object.assign({},d,{result:Object.assign({},d.result,{paragraphs:d.result.paragraphs.map(function(p){return Object.assign({},p,{text:R.ShortStory.legacyFiction(p.text,sd,name)});})})});
         if(d && d.error==='no-ai')unavailable={error:d.error};
         if (r.ok && d && d.ok && (d.provider==='reviewed-library' || uniqueAcross(d.result, acceptedTexts, item.c.id,item.c)) && apply(job, d.result)) {
           item.c.readingDeferred=false;item.c.readingNotice='';item.c.readingFailure=null;item.c.readingWarning=null;

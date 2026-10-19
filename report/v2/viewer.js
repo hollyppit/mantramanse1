@@ -379,18 +379,12 @@
     var on = n.querySelector('.on'); if (on) n.scrollLeft = Math.max(0, on.offsetLeft - 90);
   }
   /* 세계 무빙툰: 세계의 챕터들이 화면에 그려진 내용에서 앞부분 핵심 컷을 뽑아 한 편으로 감상한다(문장은 원문 그대로). */
+  function panelPool(){return (S.media||[]).concat(R.ReadingMedia?R.ReadingMedia.fromAssets(S.assets,S.assetVideos,S.sd):[]);}
   function worldToonModel(w) {
-    var idxs = (S.wmap && S.wmap.by[w.id]) || [], list = idxs.map(function (i) { var c = S.rep.chapters[i], a = document.getElementById('ch-' + c.id); return { id: c.id, title: c.title, html: a ? a.innerHTML : (c.scenes || []).map(function(s,k){var panel=panelOf(s);return (panel?panelHtml(panel):'')+sceneHtml(c,s,k);}).join('') }; });
-    var source = w.id === 'w5' ? R.Samsara.extract(S.rep) : R.Samsara.fromChapters(list, { id: 'world:' + w.id, title: w.name, label: (w.icon || '') + ' ' + w.name, bg: w.bgImage || '', cut: w.cutImages || null, per: 3, max: 36 });
-    var storyWorld = w.id === 'w5' && source ? Object.assign({}, w, { bgImage: R.Samsara.imageOf(source, S.assets || {}) || w.bgImage }) : w;
-    if(w.id==='w5')return {id:'reviewed-past-story',title:'열린 장부의 이야기',hero:'서윤과 하람의 항구 기록',sub:'사주 상징을 소재로 미리 작성한 8편의 창작 연작입니다.',notice:'실제 전생이나 개인의 과거를 확인한 이야기가 아닙니다.',personalized:false,storyBasis:'reviewed-library',frames:idxs.map(function(i){var c=S.rep.chapters[i],core=c.readingCore||{};return {cap:c.title,paras:String(core.reality||'').split(/\n\n+/).filter(Boolean),img:''};})};
-    return R.ShortStory ? R.ShortStory.build(storyWorld, S.sd, source, {name:S.name,media:S.media,variant:(S.toonVisits||{})[w.id]||0}) : source;
+    return R.ShortStory ? R.ShortStory.build(w,S.sd,null,{name:S.name,media:panelPool()}) : null;
   }
   function worldToonCard(w) {
-    if(R.ReadingText)return '';
-    if (!R.Samsara || !R.Samsara.fromChapters) return '';
-    try { var m = worldToonModel(w); if (!m) return ''; var th = (m.frames.filter(function (f) { return f.img; })[0] || {}).img || w.bgImage || '';
-      return R.Samsara.toonCard({ wid: w.id, name: w.name, icon: w.icon, thumb: R.ReadingText?'':th, frames: m.frames.length, title:m.storyBasis?m.title:'', story:!!m.storyBasis }); } catch (e) { return ''; }
+    var story=worldToonModel(w);return story?'<div class="cs-card"><div><p class="cs-ct">내 이름으로 읽는 창작 단편</p><h4>'+esc(story.title)+'</h4><p class="cs-sum">'+story.frames.length+'개 장면 · 사주 유형에 맞춰 고른 완성된 이야기입니다.</p><button type="button" class="chipbtn" data-wtoon="'+esc(w.id)+'">단편 읽기</button></div></div>':'';
   }
   $('#v-home').addEventListener('click', function (e) {
     var b = e.target.closest('[data-wtoon]'); if (b) openWorldToon(b.dataset.wtoon);
@@ -399,11 +393,11 @@
     var w = ((S.wmap && S.wmap.list) || []).filter(function (x) { return x.id === wid; })[0]; if (!w || !R.Samsara) return;
     if(S.toonLoading)return;S.toonLoading=true;
     try{
-      if(R.FullReading && !PREVIEW){toast('검수된 문안을 불러오고 있습니다. AI를 호출하지 않습니다.',4000);var ready=await R.FullReading.ensure(((S.wmap&&S.wmap.by[wid])||[]).map(function(i){return S.rep.chapters[i].id;}));if(!ready){toast('문안을 불러오지 못했습니다. 잠시 후 다시 열어주세요.');return;}}
+      // Complete stories are already local; opening them never fetches readings or AI.
     S.toonVisits=S.toonVisits||{};S.toonVisits[wid]=(S.toonVisits[wid]||Date.now())+1;
     var model = null; try { model = worldToonModel(w); } catch (err) { model = null; } if (!model) { toast('웹소설을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
     if (S.mv) S.mv.pause();
-    // Stories use the prepared report frames; no per-reader paid generation.
+    // The selected, reviewed plot is rendered locally with the reader name.
     T('world_toon_open', { world: wid, frames: model.frames.length });
     R.Samsara.open(model, S.assets || {}, S.assetVideos || {}, { reduce: reduce, saveData: saveData, rate: playbackRate(), onDone: function () { S.xp.seen['toon:' + wid] = 1; xpSave(); T('world_toon_done', { world: wid }); showHome(wid); } });
     }catch(e){toast('문안을 불러오지 못했습니다. 잠시 후 다시 열어주세요.');}finally{S.toonLoading=false;}
@@ -443,9 +437,8 @@
   }
   /* 윤회의 문 인터랙션: 개인화된 전생 서사를 컷 단위 무빙툰으로 감상(R.Samsara). 이미 만들어진 전생 챕터의 문장을 그대로 쓰고, 에셋이 없으면 색 바탕으로 대신한다. */
   function worldSamsaraHtml() {
-    if(R.ReadingText)return '';
-    if (!R.Samsara || !S.rep) return '';
-    try { var w = S.wmap.list.find(function(w){return w.id==='w5';}); return R.Samsara.card(worldToonModel(w), S.assets || {}, esc); } catch (e) { return ''; }
+    if(!R.Samsara||!S.rep)return '';
+    try{var w=S.wmap.list.find(function(w){return w.id==='w5';});if(!w)return '';return R.ReadingText?worldToonCard(w):R.Samsara.card(worldToonModel(w),S.assets||{},esc);}catch(e){return '';}
   }
   $('#v-home').addEventListener('click', function (e) {
     if (e.target.closest('[data-smopen]')) openWorldToon('w5');
@@ -579,7 +572,10 @@
       if(liveChapter && liveChapter!==c){Object.keys(c).forEach(function(k){if(/^reading/.test(k)||['scenes','headline','chapterHook','chapterQuality','interpretationAnalysis','writingQuality','hookName'].indexOf(k)>=0)liveChapter[k]=c[k];});}
       var ci = S.rep.chapters.findIndex(function(item){return item.id===c.id;}), article = document.getElementById('ch-' + c.id);
       if(article && R.ReadingText && c.readingCore){
-        R.ReadingText.update(article,c,ci); linkBasisReferences(article);
+        var anchor=null;if(S.view==='reader'){var activeIndex=pinned()!=null?pinned():S.idx,activeArticle=document.querySelector('#chapter .chap[data-ch="'+activeIndex+'"]');if(activeArticle){var anchorNode=Array.from(activeArticle.querySelectorAll('.rd-sec')).find(function(n){return n.getBoundingClientRect().bottom>160;})||activeArticle;anchor={chapter:activeIndex,key:anchorNode.dataset.sc,top:anchorNode.getBoundingClientRect().top};}}
+        c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];
+        R.ReadingText.update(article,c,ci);if(R.ReadingMedia)R.ReadingMedia.mount(article,{reduce:reduce,saveData:saveData}); linkBasisReferences(article);
+        if(anchor){var nextArticle=document.querySelector('#chapter .chap[data-ch="'+anchor.chapter+'"]'),nextNode=nextArticle&&(Array.from(nextArticle.querySelectorAll('[data-sc]')).find(function(n){return n.dataset.sc===anchor.key;})||nextArticle);if(nextNode)window.scrollBy(0,nextNode.getBoundingClientRect().top-anchor.top);}
         if(S.mv){S.mv.measure();if(!c.readingDeferred||c.readingWarning)S.mv.readingReady();}return;
       }
       if(article && c.readingDeferred){
@@ -859,7 +855,7 @@
     var rep = S.rep, h = ''; S.bg = []; if(!R.ReadingText)planPanels(rep);
     rep.chapters.forEach(function (c, ci) {
       if (S.readerWorld && S.wmap && S.wmap.idx[ci] !== S.readerWorld) return;
-      if(R.ReadingText && c.readingCore){h+='<article class="chap" id="ch-'+esc(c.id)+'" data-ch="'+ci+'" aria-label="'+esc(c.title)+'">'+R.ReadingText.html(c,ci)+'</article>';return;}
+      if(R.ReadingText && c.readingCore){c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];h+='<article class="chap" id="ch-'+esc(c.id)+'" data-ch="'+ci+'" aria-label="'+esc(c.title)+'">'+R.ReadingText.html(c,ci)+'</article>';return;}
       if (!h && S.readerWorld && R.StoryComposer && R.StoryComposer.worldHook) {
         var intro = R.StoryComposer.worldHook(S.readerWorld, S.sd, selectedGuide());
         if (intro) {
@@ -885,6 +881,7 @@
     window.scrollTo(0, 0); mountReading(o.autoStart !== false); if (start > 0) gotoChapter(start, true);
   }
   function mountReading(auto) {
+    if(R.ReadingMedia)R.ReadingMedia.mount($('#chapter'),{reduce:reduce,saveData:saveData});
     S.mv = R.Reading.mount($('#chapter'), { flow: Object.assign({}, S.pack && S.pack.flow, { playbackRate: playbackRate() }), reduce: reduce, saveData: saveData, bgList: S.bg, autoStart: auto, bgm: R.Bgm && R.Bgm.has() ? R.Bgm : null, onSection: onSection, onEnd: onDocEnd, canAdvance: function(sec){var c=S.rep.chapters[+sec.dataset.ch];return !c || !c.readingDeferred || !!c.readingWarning;},
       onProgress: function (fr) { $('#progFill').style.width = Math.round(fr * 1000) / 10 + '%'; $('#prog').setAttribute('aria-valuenow', String(Math.round(fr * 100))); } });
   }

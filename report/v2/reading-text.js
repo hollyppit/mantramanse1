@@ -1,9 +1,9 @@
 /* Text-only reading view. Evidence and accepted wording remain available; calculations are never rewritten. */
 (function(root){'use strict';var R=root.ReportV2=root.ReportV2||{};
- var LABELS={title:'핵심',reality:'생활 속 예시',strength:'잘 맞는 상황',risk:'주의할 점',reinforce:'강점을 쓰는 방법',practice:'지금 해볼 일'};
+ var LABELS={title:'한마디로',reality:'실제로는 이런 모습',strength:'확실한 장점',risk:'팩트로 짚는 약점',reinforce:'장점을 살리는 방법',practice:'오늘 바꿀 한 가지'};
  var TECH=/오행|신살|원국|육친|십간|양간|음간|한난조습|사고수|관성|재성|인성|식상|비겁|정관|편관|정재|편재|식신|통근|무근|신강|신약|용신|기신|희신|격국|조후|억부|합충|지장간|십성|월령|일간|일주(?!일)|월주|시주|배우자궁|자녀궁|[甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌亥]|상관(?=[은이가을의\s·])/;
  var METHOD=/전통 해석.{0,20}(?:보장|학파)|학파.{0,35}(?:차이|다르|달라)|(?:가정|가능한|비교).{0,12}(?:사례|예시).{0,12}(?:아니|뜻하지|전제하지)|실제 (?:경험|생활|성향)을 (?:전제|확인).{0,18}(?:않|아니)|이는.{0,22}(?:가정|예시).{0,25}(?:실제|뜻하지|아니)/;
- var edit=function(t){return (root.MantraPolite?root.MantraPolite.text(String(t||'')):String(t||'')).replace(/\bvs\b/g,'그리고').replace(/자기 결정을 함께 확보하는 태도/g,'스스로 선택할 여지를 남기는 태도').replace(/직설적인 표현이 있다는 이유로 호감을 얻는 면까지 없다고 판단하지 않습니다\./g,'분명한 표현과 배려는 함께 드러날 수 있습니다.').replace(/판단의 범위는 직무 후보까지입니다\./g,'어떤 일을 탐색할지 정하는 참고로 읽어 주세요.').replace(/실리 계산과 마무리/g,'수입·비용 확인과 정산').replace(/실리 계산/g,'수입과 비용 계산').replace(/조직형 판단/g,'조직에서 일하는 방식에 대한 판단').trim();};
+ var edit=function(t){t=root.MantraPlainCopy?root.MantraPlainCopy.text(t):t;return (root.MantraPolite?root.MantraPolite.text(String(t||'')):String(t||'')).replace(/\bvs\b/g,'그리고').replace(/자기 결정을 함께 확보하는 태도/g,'스스로 선택할 여지를 남기는 태도').replace(/직설적인 표현이 있다는 이유로 호감을 얻는 면까지 없다고 판단하지 않습니다\./g,'분명한 표현과 배려는 함께 드러날 수 있습니다.').replace(/판단의 범위는 직무 후보까지입니다\./g,'어떤 일을 탐색할지 정하는 참고로 읽어 주세요.').replace(/실리 계산과 마무리/g,'수입·비용 확인과 정산').replace(/실리 계산/g,'수입과 비용 계산').replace(/조직형 판단/g,'조직에서 일하는 방식에 대한 판단').trim();};
  var esc=function(t){return String(t==null?'':t).replace(/[&<>"']/g,function(x){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x];});};
  var sentences=function(t){return String(t||'').split(/(?<=[.!?。])\s+|\n{2,}/).map(function(x){return x.trim();}).filter(Boolean);};
  var key=function(t){return t.replace(/[\s\p{P}\p{S}]/gu,'');};
@@ -18,8 +18,9 @@
   var source=education?(c.readingParagraphs||[]).map(function(p){return {role:'education',text:p.text};}):Object.keys(LABELS).map(function(role){var p=(c.readingParagraphs||[]).find(function(p){return p.role===role;});return {role:role,text:p?p.text:(c.readingCore||{})[role]||''};});
   source=source.filter(function(p){return (c.readingPendingRoles||[]).indexOf(p.role)<0;});
   source.forEach(function(p){var visible=[];sentences(edit(p.text)).forEach(function(text){var k=key(text);if(seen.has(k)){duplicates.push({role:p.role,text:text});return;}seen.add(k);
-    if(TECH.test(text)||METHOD.test(text)||text==='감당할 여력과 전체 조건을 함께 봐야 합니다.'){basisAdd(text,TECH.test(text)?'terminology':'scope');moved.push({role:p.role,text:text});}else visible.push(text);
+    if(TECH.test(text)||root.MantraPlainCopy&&root.MantraPlainCopy.technical(text)||METHOD.test(text)||text==='감당할 여력과 전체 조건을 함께 봐야 합니다.'){basisAdd(text,TECH.test(text)?'terminology':'scope');moved.push({role:p.role,text:text});}else visible.push(text);
   });if(visible.length)rows.push({role:p.role,label:education?'':LABELS[p.role],text:visible.join(' ')});});
+  (c.interpretationAnalysis&&c.interpretationAnalysis.claims||[]).forEach(function(cl){if(cl.judgment)basisAdd(cl.judgment,'original');});
   ['why','evidence'].forEach(function(role){if((c.readingPendingRoles||[]).indexOf(role)>=0)return;var p=(c.readingParagraphs||[]).find(function(p){return p.role===role;});var text=p?p.text:(c.readingCore||{})[role];if(text)basisAdd(edit(text),role);});
   if(!rows.length && basis.length)rows.push({role:'scope',label:'이번 풀이의 범위',text:'현재 연결된 자료로 설명할 수 있는 범위와 판단하기 어려운 부분을 풀이 근거에서 확인할 수 있습니다.'});
   return {rows:rows,basis:basis,creative:false,education:education,notice:education?'일반적인 건강·안전 안내입니다. 사주로 질병이나 사고를 예측하지 않습니다.':c.readingNotice||'생활 속 예시는 가정한 상황입니다. 실제 경험과 다른 부분은 적용하지 않아도 됩니다.',moved:moved,duplicates:duplicates};
@@ -28,7 +29,7 @@
  function html(c,ci){var out=organize(c),h=section(c,ci,'head','<h2>'+esc(c.title)+'</h2>','rd-head rd-chead text-reading-head');
   if(out.pending)return h+section(c,ci,'pending','<p role="status" data-reading-notice>'+esc(out.notice)+'</p>'+(c.readingWarning?'<button type="button" class="chipbtn" data-reading-retry>이 장 다시 불러오기</button>':'')+(c.readingFailure?'<details class="reading-error-detail"><summary>오류 상세 정보</summary><p>'+esc(c.readingFailure.code)+(c.readingFailure.requestId?' · '+esc(c.readingFailure.requestId):'')+'</p></details>':''),'reading-pending');
   if(out.notice)h+=section(c,ci,'notice','<p class="text-reading-note">'+esc(out.notice)+'</p>');
-  out.rows.forEach(function(row,i){h+=section(c,ci,'body_'+i,(row.label?'<h3>'+esc(row.label)+'</h3>':'')+row.text.split(/\n{2,}/).map(function(t){return '<p class="lead" data-reading-role="'+row.role+'">'+esc(t)+'</p>';}).join(''));});
+  out.rows.forEach(function(row,i){if((i===0||i===3)&&R.ReadingMedia){var media=(c.readingMedia||[])[i===0?0:1];if(media)h+=section(c,ci,'panel_'+i,R.ReadingMedia.html(media),'text-reading-media');}h+=section(c,ci,'body_'+i,(row.label?'<h3>'+esc(row.label)+'</h3>':'')+row.text.split(/\n{2,}/).map(function(t){return '<p class="lead" data-reading-role="'+row.role+'">'+esc(t)+'</p>';}).join(''));});
   var body=out.basis.map(function(b){return '<p data-reading-role="'+(b.reason==='why'?'why':'evidence')+'">'+esc(b.text)+'</p>';}).join('');
   var claims=(c.interpretationAnalysis||{}).claims||[],sources=[],conditions=[];
   claims.forEach(function(cl){(cl.elements||[]).forEach(function(e){var value=e.have!==undefined?e.have:e.value;if(value==null||typeof value==='object')return;var line=(e.label||e.key)+': '+value;if(conditions.indexOf(line)<0)conditions.push(line);});(cl.evidence||[]).forEach(function(e){var name=(e.title||e.docId)+(e.pageStart?' · '+e.pageStart+'쪽':'');if(sources.indexOf(name)<0)sources.push(name);});});

@@ -148,6 +148,7 @@
         offs.push(total); total += p.dur; p.y = anchorY(p, vh, maxY); p.choice = false;
       });
       secs.forEach(function (sec) { var answer = sec.querySelector('.rd-answer'); if (answer && answer.dataset.completed === '1') return; if (sec.querySelector('.vd,[data-stop]')) { for (var i = pages.length - 1; i >= 0; i--) if (pages[i].sec === sec || pages[i].items.some(function (x) { return x.sec === sec; })) { pages[i].choice = true; break; } } });
+      if(keep&&!keep.isConnected){var oldSec=keep.closest&&keep.closest('.rd-sec'),key=oldSec&&oldSec.dataset.sc,chapter=oldSec&&oldSec.dataset.ch,replacement=items.find(function(x){return key&&x.sec.dataset.sc===key;})||items.find(function(x){return chapter!=null&&x.sec.dataset.ch===chapter;});if(replacement)keep=replacement.el;}
       if (keep) for (var i = 0; i < pages.length; i++) if (pages[i].items.some(function (x) { return x.el === keep; })) { if (i !== pi) { pi = i; if (state !== 'PLAYING') remain = pages[i].dur * 1000 / rate; } break; }
       if (!remain && pages[pi]) remain = pages[pi].dur * 1000 / rate; ui();
     }

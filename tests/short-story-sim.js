@@ -1,16 +1,12 @@
-const assert=require('assert'),fs=require('fs'),vm=require('vm');
-global.window=globalThis;vm.runInThisContext(fs.readFileSync('report/v2/short-story.js','utf8'));
-const B=ReportV2.ShortStory,groups=['비겁','식상','재성','관성','인성'];
-const source={slot:'past:관성:금:M',frames:[{img:'/one.webp',paras:['한 줄 요약 · 이전 해설입니다.']},{img:'/two.webp',paras:['기존 풀이입니다.']}]},snapshot=JSON.stringify(source),seen=new Set();
-for(let i=1;i<=7;i++)for(const group of groups){
- const w={id:'w'+i,name:'주제',bgImage:'/cover.webp'},sd={dominantGroup:group,weakestGroup:'식상',dayMaster:{el:'metal'},strength:{band:'신강'}};
- const model=B.build(w,sd,source),text=model.frames.map(f=>f.paras.join(' ')).join('\n');
- assert.equal(model.frames.length,15);assert(model.frames.every(f=>f.cap&&f.paras.length>=2));
- assert(!/\{[^}]+\}|한 줄 요약|왜 이런 이야기가/.test(text));assert(text.includes('“'));assert(text.includes('찬 공기'));
- assert.equal(model.slot,source.slot);assert(model.frames.every(f=>f.img));
- seen.add(text);assert(model.notice.includes('창작'));assert.equal(model.storyBasis.dominantGroup,group);
- const other=B.build(w,{...sd,strength:{band:'신약'}},source);assert.notDeepEqual(model.frames[12].paras,other.frames[12].paras);
+const assert=require('assert/strict'),fs=require('fs'),vm=require('vm');global.window=globalThis;
+for(const file of ['narrator','short-story'])vm.runInThisContext(fs.readFileSync('report/v2/'+file+'.js','utf8'),{filename:file});
+const B=ReportV2.ShortStory,groups=['비겁','식상','재성','관성','인성'],worlds=Object.keys(B.CATALOG),source={frames:[{img:'/old.webp',paras:['old']}],slot:'legacy'},snapshot=JSON.stringify(source),seen=new Set(),titles=new Set();let calls=0;global.fetch=()=>{calls++;throw Error('network-forbidden');};
+assert.equal(worlds.length,8);let checks=0;
+for(const world of worlds)for(const group of groups){const sd={dominantGroup:group,weakestGroup:'식상',dayMaster:{el:'금'},strength:{band:'신강'},gender:'F'},story=B.CATALOG[world][group];assert(story.reviewed);assert.equal(story.frames.length,10);assert.deepEqual(story.frames.map(f=>f.beat),B.BEATS);assert(story.frames[0].paras.join('').includes(story.seed),'seed setup '+story.id);assert(story.frames.slice(-2).some(f=>f.paras.join('').includes(story.seed)),'seed payoff '+story.id);
+ for(const name of ['지우','민준','윤','하람','서윤','민.J $&','<img src=x onerror=alert(1)>']){const m=B.build({id:world,name:'주제'},sd,source,{name,media:[{url:'/ignored.mp4'}],variant:1}),text=m.frames.map(f=>f.paras.join(' ')).join('\n');assert.equal(m.hero,name);assert(text.includes(name));assert(!/\{hero[^}]*\}|윤에게 특히|일이번에도|그 말씀이/.test(text));assert(m.frames.every(f=>f.cap&&f.paras.length&&f.paras[0].length>=45&&!f.img&&!f.video));assert(m.frames.every(f=>!/<img|<video|<iframe/.test(f.cap)));assert.equal(m.providerCallCount,0);assert.equal(m.requestCostUSD,0);assert.equal(m.storyBasis.type,group);assert(m.notice.includes('창작'));assert.deepEqual(B.build({id:world},sd,source,{name,variant:Date.now()}).frames,m.frames,'visits must not randomize the plot');assert(!/(지우은|지우이 |민준는|민준가 )/.test(text));checks++;}
+ const m=B.build({id:world},sd,null,{name:'검수자'});seen.add(m.frames.map(f=>f.paras.join('')).join(''));titles.add(m.title);const other=B.build({id:world},{...sd,strength:{band:'신약'},weakestGroup:'재성'},null,{name:'검수자'});assert.deepEqual(other.frames,m.frames,'no incompatible line splicing from secondary traits');
 }
-assert.equal(seen.size,35);assert.equal(JSON.stringify(source),snapshot);
-assert.equal(B.build({id:'custom'},null,source),source);
-console.log('Short stories: seven complete arcs × five motives, chart variation, image preservation and source immutability passed');
+assert.equal(seen.size,40);assert.equal(titles.size,40);assert.equal(calls,0);assert.equal(JSON.stringify(source),snapshot);assert.equal(B.build({id:'custom'},null,source),source);assert.equal(B.build({id:'w1'},{},null),null);
+assert.equal(B.personalize('윤곽과 윤은 다릅니다.','윤',{},'지우'),'윤곽과 지우는 다릅니다.');assert.equal(B.personalize('Min.J는 문을 엽니다.','Min.J',{},'민준'),'민준은 문을 엽니다.');assert.equal(B.legacyFiction('서윤은 하람과 장부를 봅니다.',{},'하람'),'하람은 목수와 장부를 봅니다.');
+const viewer=fs.readFileSync('report/v2/viewer.js','utf8'),model=viewer.slice(viewer.indexOf('function worldToonModel'),viewer.indexOf('function enterWorld'));assert(!model.includes('FullReading.ensure'));assert(!model.includes('PastStory.load'));assert(model.includes('name:S.name'));assert(!model.includes('reviewed-past-story'));
+console.log('PASS: 40 complete plots × 7 names = '+checks+' local render checks; 10 causal beats, seed/payoff, distinct complete plots, stable selection, josa, name collision, source immutability, media-free, zero fetch/AI');

@@ -1,3 +1,4 @@
+import {seedPassages} from '../_reading-library-seed.js';
 import {json,isAdmin} from '../_lib.js';
 import {kvOf} from '../_store.js';
 import {loadServiceAll,blockedDocs} from '../_ikstore.js';
@@ -19,7 +20,7 @@ export async function onRequest({request,env}){
   const library=await readLibrary(kv,chapter),revision=await libraryRevision(library);
   const items=await loadServiceAll(kv),linked=items.filter(r=>contract.sourceRuleIds.includes(r.id));
   const suggested=linked.filter(r=>r.status==='published'&&r.reviewed).flatMap(r=>[['title',r.interpretation],['strength',r.strengths?.[0]],['risk',r.risks?.[0]],['practice',r.actions?.[0]]].filter(([,t])=>typeof t==='string'&&t.length>=30&&t.length<=1000&&!/[<>{}]/.test(t)).map(([role,text])=>({id:r.id+'-'+role,role,kind:'personal',text,ruleIds:[r.id],when:{},unless:{},adviceKey:r.id+'-'+role}))).slice(0,60);
-  if(request.method==='GET')return json({ok:true,contract,library,revision,suggested,rules:linked.map(r=>({id:r.id,title:r.title,interpretation:r.interpretation,conditions:r.conditions,exclusions:r.exclusions,status:r.status,reviewed:r.reviewed,version:r.version})),scope:'approved-rules-plus-published-passages'});
+  if(request.method==='GET')return json({ok:true,contract,library,revision,suggested,compiledPassages:seedPassages(contract),rules:linked.map(r=>({id:r.id,title:r.title,interpretation:r.interpretation,conditions:r.conditions,exclusions:r.exclusions,status:r.status,reviewed:r.reviewed,version:r.version})),scope:'approved-rules-plus-published-passages'});
   if(request.method!=='POST')return fail('method-not-allowed',405);
   const raw=await request.text();if(raw.length>900000)return fail('too-large',413);let b;try{b=JSON.parse(raw);}catch{return fail('invalid-json');}
   if(!['save','check','publish','preview','restore'].includes(b.action))return fail('invalid-action');
@@ -44,7 +45,7 @@ export async function onRequest({request,env}){
     scenarios.push({index:i,matched:matches,ok:!bad.length,unexpected:bad});if(bad.length)issues.push({code:'scenario-mismatch',scenario:i,ids:bad});
    }
    // A reusable personal passage must be demonstrated on both a fitting chart and a counterexample.
-   for(const p of passages.filter(p=>p.kind==='personal')){
+   for(const p of passages.filter(p=>p.kind==='personal'||Object.keys(p.when||{}).length||Object.keys(p.unless||{}).length)){
     if(!b.scenarios?.some(s=>s.expectedPassageIds?.includes(p.id)))issues.push({id:p.id,code:'positive-example-required'});
     if(!b.scenarios?.some(s=>s.forbiddenPassageIds?.includes(p.id)))issues.push({id:p.id,code:'counterexample-required'});
    }
