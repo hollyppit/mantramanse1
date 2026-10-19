@@ -1,0 +1,17 @@
+# Full condition-selected reading bodies — 2026-10-20
+
+The previous edition varied only the opening by calculated chart band; the five body roles remained question-level common guidance. This edition gives each of the 76 non-fiction questions three complete body bundles: reality, strength, risk, reinforcement and practice. All 1,140 body paragraphs were authored and checked in advance. No public request invokes a model.
+
+Selection uses the existing question-specific CONDITION_PLANS axis and unchanged measured groups bands (<12, 12–<28, >=28). A band selects all five related paragraphs. It does not independently shuffle examples, strengths and advice. Equal conditions intentionally reuse the same reviewed text; absent facts use explicitly general fallback guidance. Editorial guide paragraphs are not new source-backed claims, confirmed personal events or medical assessments.
+
+- Expanded conditional passages from title/why/evidence to all eight roles; the six-role visible reading schema and evidence folding remain compatible with the administrator.
+- Non-fiction libraries now have 32 passages each (24 conditional + 8 fallback); the eight creative libraries retain their 12 passages each, for 2,528 total passages.
+- Production health chapters 01/06/08 use the same reviewed conditional API when usable group facts exist. The former static-education short circuit no longer overrides the selected body. Local isolated educational drafts and fact-missing fallback remain available. Health variants concern planning/checking/support, not diagnoses or predictions.
+- Prepared and applied version 4 -> 5 with expected version, seed, passage count, guide-only content, draft/public equality, unchanged original scenario groups, and compare-and-swap guards. Previous publications and scenario editions are archived. Original synthetic charts are preserved; expected and forbidden passage IDs now cover every body role. No source rule, threshold, schema, grant, authentication or scheduler change.
+- In the DB, all 76 libraries have 15 conditional body paragraphs. Their 304 saved cases contain 16 expected and 16 forbidden IDs per case, with no overlap and all expected IDs present.
+
+Validation: 228 complete bundles / 1,140 globally distinct paragraphs; all five roles differ in all three bands and differ from the old common body. Display audit reports no hidden/dropped body sentences. 1,176 full-book synthetic requests, 228 chapter-band checks including old intro-only DB compatibility, source withdrawal/version gates, and the reader/PDF path for three health routes × three actual bands pass without provider calls or name/birth egress.
+
+Production deployment: 178a22a0-5cc9-4239-8592-9a62fc515d72. All 228 live condition requests matched the authored five-role bundles and displayed them intact, with zero pending roles, zero provider calls and zero request cost. Public asset hashes match the release manifest. Detailed reports are in ignored output/conditional-bodies-20261020.
+
+Actual production-screen comparison: separate synthetic inputs 1996-06-05 09:00 F and 1990-01-01 unknown time M. Read the same wealth-capacity question; all five rendered body roles differed. The unknown-hour health entry also showed the conditional bundle rather than the old static education body. Evidence remained folded. Screenshot and DOM records are in the ignored release output and the visualization workspace.

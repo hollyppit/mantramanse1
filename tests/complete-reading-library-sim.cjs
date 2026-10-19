@@ -15,7 +15,7 @@ for(const f of ['engine.js','report/v2/saju-data.js','report/v2/reading-catalog.
    previous=previous.concat(d.result.paragraphs.filter(p=>p.role!=='evidence').map(p=>({text:p.text,chapter:c.id}))).slice(-80);adviceHistory.push({chapter:c.id,practice:d.result.paragraphs.find(p=>p.role==='practice').text,reinforce:d.result.paragraphs.find(p=>p.role==='reinforce').text});usedAdviceKeys.push(...d.adviceKeys);requests++;
   }
  }
- assert.equal(endings.size,5,'five prewritten symbolic variants');assert.equal(providerCalls,0);assert.equal(pack.libraries.length,84);assert.equal(pack.libraries.reduce((n,l)=>n+l.passages.length,0),1388);
+ assert.equal(endings.size,5,'five prewritten symbolic variants');assert.equal(providerCalls,0);assert.equal(pack.libraries.length,84);assert.equal(pack.libraries.reduce((n,l)=>n+l.passages.length,0),2528);
  // DB publication and compiled fallback must agree; existing personal source gates remain independent.
  for(const l of pack.libraries){const c=catalog.chapters.find(c=>c.id===l.chapter);for(const s of l.scenarios){const ids=L.selectPassages(l.passages,c,{claims:[]},s.sd).map(p=>p.id);assert(s.expectedPassageIds.every(id=>ids.includes(id)));assert(s.forbiddenPassageIds.every(id=>!ids.includes(id)));}}
  global.fetch=originalFetch;console.log('PASS: '+requests+' full-book synthetic requests; 84 chapters × '+pack.samples.length+' charts, zero pending/provider calls, six visible sections, distinct action copy, five continuous fiction motifs, positive/counterexamples, evidence folding and no media');

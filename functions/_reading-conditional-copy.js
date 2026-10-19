@@ -1,3 +1,4 @@
+import {CONDITIONAL_BODIES} from './_reading-conditional-bodies.js';
 import {NARRATIVE_OPENINGS} from './_reading-narrative-openings.js';
 // Editorial prompts selected by measured chart structure, never evidence of life events.
 // Each row: condition axis, high/middle/low question-specific decision focus.
@@ -98,9 +99,10 @@ export function conditionalPassages(contract,row){
  return Object.entries(levels).flatMap(([level,b])=>{
  const prefix='condition-'+match[1]+'-'+Number(match[2])+'-'+level;
  const opening=NARRATIVE_OPENINGS[match[1]]?.[Number(match[2])-1]?.[b.slot];
- const texts={title:opening+'\n\n'+row[0],reality:row[1],strength:row[2],risk:row[3],reinforce:row[4],practice:row[5],
+ const body=CONDITIONAL_BODIES[match[1]]?.[Number(match[2])-1]?.[b.slot];if(!body||body.length!==5)throw Error('missing-reviewed-body:'+contract.id+':'+level);
+ const texts={title:opening+'\n\n'+row[0],reality:body[0],strength:body[1],risk:body[2],reinforce:body[3],practice:body[4],
  why:'이 문장은 '+group+' 비중이 '+b.label+' 구간('+b.range+')인 계산 조건에서 고른 참고 조언입니다. 개인의 실제 경험을 확인한 문장이 아니며, 출처에 연결한 개인 판단과 구분합니다.',
  evidence:'적용 조건: '+group+' 비중 '+b.range+'. 기존 계산 엔진의 groups 값과 같은 구간 기준으로 선택합니다. 비중 하나로 능력의 우열이나 특정 사건의 발생을 판단하지 않습니다.'};
- return Object.entries(texts).filter(([role])=>['title','why','evidence'].includes(role)).map(([role,text])=>({id:prefix+'-'+role,role,kind:'guide',text,ruleIds:[],when:{group:{[group]:level}},unless:{},adviceKey:prefix+'-'+role}));
+ return Object.entries(texts).map(([role,text])=>({id:prefix+'-'+role,role,kind:'guide',text,ruleIds:[],when:{group:{[group]:level}},unless:{},adviceKey:prefix+'-'+role}));
  });
 }

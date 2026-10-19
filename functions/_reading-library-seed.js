@@ -2,7 +2,7 @@ import {conditionalPassages} from './_reading-conditional-copy.js';
 import {GUIDE_COPY} from './_reading-guide-copy.js';
 import {FICTION_COPY,FICTION_MOTIFS} from './_reading-fiction-copy.js';
 import {politeText} from './_polite.js';
-export const SEED_VERSION='narrative-76-20261020-4';
+export const SEED_VERSION='full-conditional-76-20261020-5';
 const stems={목:['갑','을'],화:['병','정'],토:['무','기'],금:['경','신'],수:['임','계']};
 const elementId={목:'wood',화:'fire',토:'earth',금:'metal',수:'water'};
 export function seedPassages(contract){

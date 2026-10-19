@@ -5,7 +5,7 @@ import {PROHIBITED_RE} from './_style.js';
 import {similarity} from './_chapter-policy.js';
 import {digest} from './_reading-blocks.js';
 import {adviceFocus} from './_reading-advice.js';
-export const LIBRARY_VERSION='reviewed-library-5-connected-narrative';
+export const LIBRARY_VERSION='reviewed-library-6-conditional-body';
 // Reuse the existing service-only CAS namespace; no broader database privileges are required.
 export const libraryKey=id=>'ik:blocks:chapter:library.'+id;
 export const ROLES=['title','why','reality','strength','risk','reinforce','practice','evidence'];

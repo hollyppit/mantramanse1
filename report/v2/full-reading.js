@@ -102,6 +102,9 @@
     function localHealth(c){
       if(!root.location || !/^timeline_health_(01|06|08)$/.test(c.editorialContractId || ''))return Promise.resolve(null);
       var local=/^(localhost|127\.0\.0\.1|\[::1\])$/.test(root.location.hostname);
+      // Production charts use the same condition-selected body bundles as every other topic.
+      // Static education remains available for local drafts or charts without usable group facts.
+      if(!local&&safe.groups&&['비겁','식상','재성','관성','인성'].every(function(g){return typeof safe.groups[g]==='number'&&isFinite(safe.groups[g]);}))return Promise.resolve(null);
       if(!localHealthPromise){
         var healthController=root.AbortController?new root.AbortController():null,healthTimer;
         if(healthController)session.controllers.push(healthController);
