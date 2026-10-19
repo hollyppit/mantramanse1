@@ -1,3 +1,4 @@
+import {GUIDE_COPY} from './_reading-guide-copy.js';
 // Reviewed general education; never personalized health evidence.
 export const HEALTH_EDUCATION={
   "version": 2,
@@ -135,4 +136,7 @@ export const HEALTH_EDUCATION={
     }
   ]
 };
+// Preserve the previously AI-reviewed source edition; the current display copy has separate editorial review.
+HEALTH_EDUCATION.displayReview={passed:true,method:'editorial',version:'narrative-76-20261020-4'};
+HEALTH_EDUCATION.chapters.forEach(c=>{const i=Number(c.id.split('_').at(-1))-1;c.displayParagraphs=GUIDE_COPY.health[i].map(text=>({text}));});
 export function isHealthEducation(c){const seed=c && globalThis.MantraEditorial.defaults().chapters.find(x=>x.id===c.id);return seed && c.title===seed.title && c.question===seed.question && c.topicId==="health" && c.sourceRuleIds.length===0 && HEALTH_EDUCATION.chapters.some(x=>x.id===c.id);}

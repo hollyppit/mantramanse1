@@ -17,9 +17,9 @@
   }
   var source=education?(c.readingParagraphs||[]).map(function(p){return {role:'education',text:p.text};}):Object.keys(LABELS).map(function(role){var p=(c.readingParagraphs||[]).find(function(p){return p.role===role;});return {role:role,text:p?p.text:(c.readingCore||{})[role]||''};});
   source=source.filter(function(p){return (c.readingPendingRoles||[]).indexOf(p.role)<0;});
-  source.forEach(function(p){var visible=[];sentences(edit(p.text)).forEach(function(text){var k=key(text);if(seen.has(k)){duplicates.push({role:p.role,text:text});return;}seen.add(k);
+  source.forEach(function(p){var paragraphs=[];edit(p.text).split(/\n{2,}/).forEach(function(paragraph){var visible=[];sentences(paragraph).forEach(function(text){var k=key(text);if(seen.has(k)){duplicates.push({role:p.role,text:text});return;}seen.add(k);
     if(TECH.test(text)||root.MantraPlainCopy&&root.MantraPlainCopy.technical(text)||METHOD.test(text)||text==='감당할 여력과 전체 조건을 함께 봐야 합니다.'){basisAdd(text,TECH.test(text)?'terminology':'scope');moved.push({role:p.role,text:text});}else visible.push(text);
-  });if(visible.length)rows.push({role:p.role,label:education?'':LABELS[p.role],text:visible.join(' ')});});
+  });if(visible.length)paragraphs.push(visible.join(' '));});if(paragraphs.length)rows.push({role:p.role,label:education?'':LABELS[p.role],text:paragraphs.join('\n\n')});});
   (c.interpretationAnalysis&&c.interpretationAnalysis.claims||[]).forEach(function(cl){if(cl.judgment)basisAdd(cl.judgment,'original');});
   ['why','evidence'].forEach(function(role){if((c.readingPendingRoles||[]).indexOf(role)>=0)return;var p=(c.readingParagraphs||[]).find(function(p){return p.role===role;});var text=p?p.text:(c.readingCore||{})[role];if(text)basisAdd(edit(text),role);});
   if(!rows.length && basis.length)rows.push({role:'scope',label:'이번 풀이의 범위',text:'현재 연결된 자료로 설명할 수 있는 범위와 판단하기 어려운 부분을 풀이 근거에서 확인할 수 있습니다.'});
@@ -29,7 +29,7 @@
  function html(c,ci){var out=organize(c),h=section(c,ci,'head','<h2>'+esc(c.title)+'</h2>','rd-head rd-chead text-reading-head');
   if(out.pending)return h+section(c,ci,'pending','<p role="status" data-reading-notice>'+esc(out.notice)+'</p>'+(c.readingWarning?'<button type="button" class="chipbtn" data-reading-retry>이 장 다시 불러오기</button>':'')+(c.readingFailure?'<details class="reading-error-detail"><summary>오류 상세 정보</summary><p>'+esc(c.readingFailure.code)+(c.readingFailure.requestId?' · '+esc(c.readingFailure.requestId):'')+'</p></details>':''),'reading-pending');
   if(out.notice)h+=section(c,ci,'notice','<p class="text-reading-note">'+esc(out.notice)+'</p>');
-  out.rows.forEach(function(row,i){if((i===0||i===3)&&R.ReadingMedia){var media=(c.readingMedia||[])[i===0?0:1];if(media)h+=section(c,ci,'panel_'+i,R.ReadingMedia.html(media),'text-reading-media');}h+=section(c,ci,'body_'+i,(row.label?'<h3>'+esc(row.label)+'</h3>':'')+row.text.split(/\n{2,}/).map(function(t){return '<p class="lead" data-reading-role="'+row.role+'">'+esc(t)+'</p>';}).join(''));});
+  out.rows.forEach(function(row,i){if((i===0||i===3)&&R.ReadingMedia){var media=(c.readingMedia||[])[i===0?0:1];if(media)h+=section(c,ci,'panel_'+i,R.ReadingMedia.html(media),'text-reading-media');}h+=section(c,ci,'body_'+i,(out.creative||out.education?(row.label?'<h3>'+esc(row.label)+'</h3>':''):row.role==='strength'?'<h3>이 특징이 힘이 되는 순간</h3>':row.role==='reinforce'?'<h3>생활에서는 이렇게 활용해 보세요</h3>':'')+row.text.split(/\n{2,}/).map(function(t){return '<p class="lead" data-reading-role="'+row.role+'">'+esc(t)+'</p>';}).join(''));});
   var body=out.basis.map(function(b){return '<p data-reading-role="'+(b.reason==='why'?'why':'evidence')+'">'+esc(b.text)+'</p>';}).join('');
   var claims=(c.interpretationAnalysis||{}).claims||[],sources=[],conditions=[];
   claims.forEach(function(cl){(cl.elements||[]).forEach(function(e){var value=e.have!==undefined?e.have:e.value;if(value==null||typeof value==='object')return;var line=(e.label||e.key)+': '+value;if(conditions.indexOf(line)<0)conditions.push(line);});(cl.evidence||[]).forEach(function(e){var name=(e.title||e.docId)+(e.pageStart?' · '+e.pageStart+'쪽':'');if(sources.indexOf(name)<0)sources.push(name);});});

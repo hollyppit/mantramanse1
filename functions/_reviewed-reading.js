@@ -25,8 +25,8 @@ export async function prepareReviewed(env,body,{draft=false,passages=null}={}){
  const usedAdviceKeys=(Array.isArray(body.usedAdviceKeys)?body.usedAdviceKeys:[]).filter(k=>typeof k==='string'&&/^[\w.-]{1,80}$/.test(k)).slice(0,512);
  const result=composeReviewed({clean,contract,analysis,library,usedAdviceKeys,adviceHistory:cleanAdviceHistory(body.adviceHistory,contract.id),previous:Array.isArray(body.previous)?body.previous.slice(-80):[]});
  if(isHealthEducation(contract)){
-  const edu=HEALTH_EDUCATION.chapters.find(c=>c.id===contract.id);
-  const texts=(edu.paragraphs||[]).map(p=>p.text);if(texts.length){result.pending=[];result.result.paragraphs=result.result.paragraphs.map(p=>p.role==='title'||p.role==='reality'?{...p,text:p.text+'\n\n'+texts[p.role==='title'?0:Math.min(1,texts.length-1)],claim_ids:[],refs:[],contentKind:'education'}:p);}
+  // The current coherent guide already includes the educational context; keep the original supplement as references, not repeated body copy.
+  result.pending=[];
  }
  return {ok:true,...result,conditionalParagraphCount:result.result.paragraphs.filter(p=>p.contentKind==='conditional-guide').length,provider:'reviewed-library',aiSkipped:true,cached:false,generatedParagraphCount:0,generation:{model:'none',usage:null,estimatedCost:0},chapterContractId:contract.id,editorialVersion:catalog.version,interpretation:{version:analysis.version,mode:'reviewed-only',claims:result.claims,features:analysis.features,cross_analysis:analysis.cross_analysis,warnings:analysis.warnings},hook:null,contentMode:'reviewed-only',seedVersion:SEED_VERSION,scopeNotice:contract.topicId==='creative'?'사주에서 빌린 상징을 넣은 창작 연작입니다. 실제 전생이나 과거의 사실을 확인한 내용이 아닙니다.':!result.claims.length&&result.result.paragraphs.some(p=>p.contentKind==='conditional-guide')?'계산 조건에 맞춰 고른 참고 조언입니다. 내 생활과 맞는 부분부터 써보세요.':!result.claims.length?'이 항목은 생활 속 예시와 참고 조언입니다. 실제 경험과 맞는 부분부터 골라 읽어주세요.':null};
 }

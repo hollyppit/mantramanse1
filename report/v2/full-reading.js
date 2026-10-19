@@ -109,7 +109,7 @@
         var healthRequest=Promise.resolve().then(function(){return root.fetch(local?'/api/local-health-supplement':'/api/health-education',{signal:healthController && healthController.signal});}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
         localHealthPromise=Promise.race([healthRequest,healthDeadline]).finally(function(){root.clearTimeout(healthTimer);if(healthController)session.controllers=session.controllers.filter(function(c){return c!==healthController;});});
       }
-      return localHealthPromise.then(function(data){if(!data || !data.aiReview || !data.aiReview.passed || !Array.isArray(data.chapters) || !Array.isArray(data.sources))return null;var row=data.chapters.find(function(x){return x && x.id===c.editorialContractId;});return row && Array.isArray(row.paragraphs) && row.paragraphs.length>0 && row.paragraphs.every(function(p){return p && typeof p.text==='string' && p.text.trim();}) && Array.isArray(row.sourceIds) && row.mode==='educational-only' && row.state===(local?'draft':'released-education') && row.personalizedEvidenceAccepted===false?{row:row,sources:data.sources}:null;});
+      return localHealthPromise.then(function(data){if(!data || !data.aiReview || !data.aiReview.passed || !Array.isArray(data.chapters) || !Array.isArray(data.sources))return null;var row=data.chapters.find(function(x){return x && x.id===c.editorialContractId;});return row && Array.isArray(row.paragraphs) && row.paragraphs.length>0 && row.paragraphs.every(function(p){return p && typeof p.text==='string' && p.text.trim();}) && Array.isArray(row.sourceIds) && row.mode==='educational-only' && row.state===(local?'draft':'released-education') && row.personalizedEvidenceAccepted===false?{row:row,sources:data.sources,displayReviewed:!!(data.displayReview&&data.displayReview.passed===true&&data.displayReview.method==='editorial'&&Array.isArray(row.displayParagraphs)&&row.displayParagraphs.length===6&&row.displayParagraphs.every(function(p){return p&&typeof p.text==='string'&&p.text.trim().length>=30;}))}:null;});
     }
     function defer(item, data, fallback) {
       if(session.cancelled)return;
@@ -136,13 +136,14 @@
       var job = item.job;
       var education=await localHealth(item.c);if(session.cancelled)return;
       if(education){
-        var c=item.c,escape=function(t){return String(t).replace(/[&<>"']/g,function(x){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x];});};
+        var displayReviewed=education.displayReviewed,displayParagraphs=displayReviewed?education.row.displayParagraphs:education.row.paragraphs;
+      var c=item.c,escape=function(t){return String(t).replace(/[&<>"']/g,function(x){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x];});};
         c.readingNotice='일반 건강·안전 안내입니다. 개인의 건강 상태나 사고를 예측하는 풀이가 아닙니다.';
         c.readingDeferred=false;c.readingProvider='local-reviewed-education';c.interpretationAnalysis=null;c.readingEvidence=[];
-        c.readingParagraphs=education.row.paragraphs.map(function(p,i){return {id:String(i),text:p.text,refs:[],claim_ids:[]};});
+        c.readingParagraphs=displayParagraphs.map(function(p,i){return {id:String(i),text:p.text,refs:[],claim_ids:[]};});
         c.readingEducationSources=education.sources.filter(function(s){return education.row.sourceIds.indexOf(s.id)>=0;});
         c.readingFullText=c.readingParagraphs.map(function(p){return p.text;}).join('\n\n');
-        c.chapterQuality={ok:true,semanticReviewStatus:'educational-ai-reviewed',personalizedEvidenceAccepted:false,expertApproved:false};
+        c.chapterQuality={ok:true,semanticReviewStatus:displayReviewed?'editorial-reviewed-education':'educational-ai-reviewed',personalizedEvidenceAccepted:false,expertApproved:false};
         var supplementary=c.scenes.filter(function(s){return s.readingSupplementary;});
         c.scenes=[{sceneId:c.id+'_education_notice',sceneType:'life',html:'<section class="scene rd-prose"><p class="lead"><strong>'+escape(c.readingNotice)+'</strong></p></section>'}].concat(c.readingParagraphs.map(function(p,i){return {sceneId:c.id+'_education_'+i,sceneType:'life',html:'<section class="scene rd-prose"><p class="lead">'+escape(p.text)+'</p></section>'};}));
         c.scenes.push({sceneId:c.id+'_education_sources',sceneType:'life',html:'<section class="scene rd-prose"><details class="reading-evidence"><summary>일반 안내의 출처와 한계</summary>'+education.row.sourceIds.map(function(id){var s=education.sources.find(function(x){return x && x.id===id;});if(!s)return '';var url=s.url && /^https:\/\//.test(s.url)?s.url:null;return '<p>'+(url?'<a href="'+escape(url)+'" target="_blank" rel="noopener noreferrer">'+escape(s.title)+'</a>':escape(s.title))+'<br>'+escape(s.scope)+(s.limitations?'<br>'+escape(s.limitations):'')+'</p>';}).join('')+'<p>일반 교육 초안의 AI 품질 검수 결과입니다. 전문가 승인이나 개인 건강·사고 판단 근거를 뜻하지 않습니다.</p></details></section>'});

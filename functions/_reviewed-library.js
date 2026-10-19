@@ -5,7 +5,7 @@ import {PROHIBITED_RE} from './_style.js';
 import {similarity} from './_chapter-policy.js';
 import {digest} from './_reading-blocks.js';
 import {adviceFocus} from './_reading-advice.js';
-export const LIBRARY_VERSION='reviewed-library-4-plain-media';
+export const LIBRARY_VERSION='reviewed-library-5-connected-narrative';
 // Reuse the existing service-only CAS namespace; no broader database privileges are required.
 export const libraryKey=id=>'ik:blocks:chapter:library.'+id;
 export const ROLES=['title','why','reality','strength','risk','reinforce','practice','evidence'];
@@ -60,7 +60,7 @@ export function composeReviewed({clean,contract,analysis,library,adviceHistory=[
    if(!claims.length&&guide)contentKind=Object.keys(guide.when).length?'conditional-guide':'guide';
    if(guide&&Object.keys(guide.when).length){const evaluated=evalConds(guide.when,deriveFacts(clean.sd));text+='\n'+evaluated.rows.map(r=>r.label+': '+r.have).join(' · ');}
    refs=claims.slice(0,3).map(c=>c.knowledge_id);claim_ids=claims.slice(0,3).map(c=>c.claim_id);
-  }else if(role==='title'&&guide){text=guide.text;contentKind=Object.keys(guide.when).length?'conditional-guide':'guide';blocks.push({id:guide.id,version:library.version});
+  }else if(guide&&['title','reality','strength','risk','reinforce','practice'].includes(role)){text=guide.text;contentKind=Object.keys(guide.when).length?'conditional-guide':'guide';blocks.push({id:guide.id,version:library.version});
   }else{
    const values=claims.flatMap(c=>{let xs=role==='title'?[c.judgment]:role==='strength'?c.strengths:role==='risk'?c.vulnerabilities:role==='reality'?Object.values(c.examples||{}):role==='practice'?c.actions:role==='reinforce'?c.actions:[];return (xs||[]).filter(t=>available(t)&&!isTechnical(t)).map(t=>({c,t:plainText(politeText(t)),original:t}));});
    const row=values.find(x=>x.t.length<=900&&!repeats(x.t));

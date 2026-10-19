@@ -1,3 +1,4 @@
+import {NARRATIVE_OPENINGS} from './_reading-narrative-openings.js';
 // Editorial prompts selected by measured chart structure, never evidence of life events.
 // Each row: condition axis, high/middle/low question-specific decision focus.
 export const CONDITION_PLANS={
@@ -90,21 +91,14 @@ export const CONDITION_PLANS={
  ['비겁','독립된 판단을 외부 피드백과 연결하는 과정','지킬 원칙과 수정할 방법의 구분','도움을 구하면서 정할 다음 선택']
  ]
 };
-const hooks={
- 비겁:['내 생각을 말하는 것과 남의 선택까지 대신하는 것은 다릅니다.','혼자 정할 일과 같이 정할 일을 나누면 괜한 힘겨루기가 줄어듭니다.','다 맞춰주고 나서 서운해하지 말고, 어려운 조건은 처음에 말하세요.'],
- 식상:['말과 시작이 앞서면 확인이 빠집니다. 끝낼 기준부터 정해두세요.','생각을 보여줄 일과 먼저 물어볼 일을 나누면 대화가 짧아집니다.','생각이 있어도 꺼내지 않으면 상대는 모릅니다. 작은 질문부터 말하세요.'],
- 재성:['눈앞에 남을 것만 세다 보면 계속 나갈 비용을 놓칩니다.','얻을 것과 감당할 것을 같이 보면 큰 말에 덜 흔들립니다.','기억으로 관리하지 말고 금액과 날짜를 눈에 보이게 남기세요.'],
- 관성:['약속을 지키려고 내 한계까지 지우면 결국 뒤처리가 커집니다.','지킬 기준과 조정할 방법을 나누면 무작정 참을 일이 줄어듭니다.','눈치로 맞추지 말고 누가 무엇을 책임질지 먼저 물어보세요.'],
- 인성:['설명을 더 모으는 것과 문제를 푸는 것은 다릅니다. 확인한 내용을 실제 선택에 쓰세요.','알아보는 시간과 직접 확인하는 시간을 나눠야 일이 앞으로 갑니다.','모르면 아는 척하지 말고 필요한 정보를 먼저 물어보세요.']
-};
 const levels={strong:{label:'높은',range:'28% 이상',slot:0},mid:{label:'중간',range:'12% 이상 28% 미만',slot:1},weak:{label:'낮은',range:'12% 미만',slot:2}};
 export function conditionalPassages(contract,row){
  const match=contract.id.match(/^timeline_(\w+)_(\d+)$/),plan=match&&CONDITION_PLANS[match[1]]?.[Number(match[2])-1];if(!plan||!row)return [];
  const [group]=plan;
  return Object.entries(levels).flatMap(([level,b])=>{
  const prefix='condition-'+match[1]+'-'+Number(match[2])+'-'+level;
- const hook=contract.topicId==='health'?'계획을 지키는 것보다 지금 상태를 확인하는 게 먼저입니다. '+['급한 요청에도 점검할 시간은 남겨두세요.','일정이 바뀌면 쉬는 시간과 확인 기준도 다시 정하세요.','모르는 상태를 혼자 판단하지 말고 필요한 창구에 물어보세요.'][b.slot]:hooks[group][b.slot];
- const texts={title:row[0]+' '+hook,reality:row[1],strength:row[2],risk:row[3],reinforce:row[4],practice:row[5],
+ const opening=NARRATIVE_OPENINGS[match[1]]?.[Number(match[2])-1]?.[b.slot];
+ const texts={title:opening+'\n\n'+row[0],reality:row[1],strength:row[2],risk:row[3],reinforce:row[4],practice:row[5],
  why:'이 문장은 '+group+' 비중이 '+b.label+' 구간('+b.range+')인 계산 조건에서 고른 참고 조언입니다. 개인의 실제 경험을 확인한 문장이 아니며, 출처에 연결한 개인 판단과 구분합니다.',
  evidence:'적용 조건: '+group+' 비중 '+b.range+'. 기존 계산 엔진의 groups 값과 같은 구간 기준으로 선택합니다. 비중 하나로 능력의 우열이나 특정 사건의 발생을 판단하지 않습니다.'};
  return Object.entries(texts).filter(([role])=>['title','why','evidence'].includes(role)).map(([role,text])=>({id:prefix+'-'+role,role,kind:'guide',text,ruleIds:[],when:{group:{[group]:level}},unless:{},adviceKey:prefix+'-'+role}));
