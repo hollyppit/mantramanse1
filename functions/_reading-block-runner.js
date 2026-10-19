@@ -1,7 +1,7 @@
 import {loadEditorial,contractFor,applyContractPolicy} from './_editorial.js';
 import {chapterPolicy} from './_chapter-policy.js';
 import { kvOf } from './_store.js';
-import { readState, updateState, dates, queueResearch } from './_rag-state.js';
+import { readState, updateState, dates, queueResearch, queueResearchMany } from './_rag-state.js';
 import { meta } from './_ikstore.js';
 import { loadSettings } from './_interpretation-store.js';
 import { ENGINE_VERSION } from './_interpretation-engine.js';
@@ -24,7 +24,7 @@ export async function verifyEvidenceQueue(env,sampleId,{historicalCoverage=[]}={
   await recordCoverageGap(kv,{chapter:payload.chapter.id,claims:[...knownIds].map(knowledge_id=>({knowledge_id,claim_id:'saju:'+knowledge_id})),coverage:historicalCoverage});
  }
 
- const response=await writeChapter({env:{...env,__READING_BACKGROUND:true,__READING_EXPERIMENT:crypto.randomUUID(),__READING_BYPASS_CACHE:true,__AI_BEFORE_CALL:()=>{throw Error('evidence-verification-forbids-ai');}},request:new Request('https://internal/api/movingtoon-reading',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})});
+ const response=await writeChapter({env:{...env,__READING_ADMIN_GENERATION:true,__READING_BACKGROUND:true,__READING_EXPERIMENT:crypto.randomUUID(),__READING_BYPASS_CACHE:true,__AI_BEFORE_CALL:()=>{throw Error('evidence-verification-forbids-ai');}},request:new Request('https://internal/api/movingtoon-reading',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})});
  const result=await response.json(),research=await readState(kv);
  return {sampleId,chapter:payload.chapter.id,status:response.status,error:result.error||null,providerCallCount:result.providerCallCount,requestCostUSD:result.requestCostUSD,queued:Object.values(research.readingRequests||{}).filter(r=>r.chapter===payload.chapter.id).map(({knowledgeId,state,runId,changeId,lastError})=>({knowledgeId,state,runId,changeId,lastError})),noAIGuarantee:true};
 }
@@ -33,14 +33,14 @@ export async function measureApprovedBlocks(env,sampleId){
  const kv=kvOf(env),state=await kv.get(RUNTIME_KEY,'json'),sample=state?.samples.find(p=>p.id===sampleId);
  if(!sample)return {completed:false,error:'unknown-synthetic-sample'};
  const payload={...sample.payload,sd:sample.payload.sd||state.charts?.[sample.chartId]?.sd},events=[];
- const response=await writeChapter({env:{...env,__READING_BACKGROUND:true,__READING_EXPERIMENT:crypto.randomUUID(),__READING_BYPASS_CACHE:true,READING_BLOCK_MODE:'prefer',__AI_BEFORE_CALL:()=>{throw Error('approved-block-read-forbids-ai');},__AI_COST_COLLECTOR:e=>events.push(e)},request:new Request('https://internal/api/movingtoon-reading',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})});
+ const response=await writeChapter({env:{...env,__READING_ADMIN_GENERATION:true,__READING_BACKGROUND:true,__READING_EXPERIMENT:crypto.randomUUID(),__READING_BYPASS_CACHE:true,READING_BLOCK_MODE:'prefer',__AI_BEFORE_CALL:()=>{throw Error('approved-block-read-forbids-ai');},__AI_COST_COLLECTOR:e=>events.push(e)},request:new Request('https://internal/api/movingtoon-reading',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})});
  const result=await response.json(),completed=result.ok===true && result.provider==='reading-blocks' && events.length===0;
  return {completed,error:completed?null:'approved-block-coverage-not-ready',published:0,candidates:0,providerCalls:0,costUSD:0,measurement:{variant:'blocks',sampleId,providerEvents:[],foregroundCostUSD:0,result},readOnlyNoAIGuarantee:true};
 }
 export async function tickReadingBlocks(env,{now=Date.now(),execute=writeChapter,review=generate,sampleId=null,variant=null}={}){
  const kv=kvOf(env);if(!kv?.readingCAS)return {blocked:'reading-atomic-storage-required'};
  const snapshot=await kv.get(RUNTIME_KEY,'json')||initialRuntime();
- for(const gap of Object.values(snapshot.gaps).filter(g=>g.reason==='insufficient-evidence'))await queueResearch(kv,gap.knowledgeIds,gap.chapter);
+ await queueResearchMany(kv,Object.values(snapshot.gaps).filter(g=>g.reason==='insufficient-evidence'));
  const version=await digest({knowledge:await meta(kv),engine:ENGINE_VERSION,blocks:BLOCK_VERSION}),day=dates(now).day,month=dates(now).month,owner=crypto.randomUUID();
  const gate=await updateRuntime(kv,s=>{
   separateMeasurementLedger(s);
@@ -64,15 +64,17 @@ export async function tickReadingBlocks(env,{now=Date.now(),execute=writeChapter
  });
  if(!gate.task)return gate;
  const {task,sample,config}=gate,events=[];let admitted=0,ceilings=0,result,error=null,published=0,candidatesCount=0;
- const settings=await loadSettings(kv),existingLibrary=await kv.get(blockKey(sample.payload.chapter.id),'json')||[];
- const scoped={...env,__READING_REPAIR_ISSUES:[...new Set(existingLibrary.flatMap(b=>b.automation?.validation?.issues||[]))].slice(0,12),__READING_BACKGROUND:true,__READING_ALLOW_CANDIDATES:variant!=='baseline'&&existingLibrary.some(b=>b.status==='candidate'&&b.automation?.sampleId===sample.id),READING_BLOCK_MODE:variant==='baseline'?'off':'prefer',__READING_BYPASS_CACHE:!!variant,__READING_EXPERIMENT:variant?owner:null,__READING_SETTINGS:{maxRequestCost:null},__AI_COST_COLLECTOR:e=>events.push(e),__AI_BEFORE_CALL:({rates,requestBody})=>{
+ let initializationStage='settings';
+ try{
+ const settings=await loadSettings(kv);initializationStage='library';const existingLibrary=await kv.get(blockKey(sample.payload.chapter.id),'json')||[];initializationStage='prepare';
+ const scoped={...env,__READING_REPAIR_ISSUES:[...new Set(existingLibrary.flatMap(b=>b.automation?.validation?.issues||[]))].slice(0,12),__READING_ADMIN_GENERATION:true,__READING_BACKGROUND:true,__READING_ALLOW_CANDIDATES:variant!=='baseline'&&existingLibrary.some(b=>b.status==='candidate'&&b.automation?.sampleId===sample.id),READING_BLOCK_MODE:variant==='baseline'?'off':'prefer',__READING_BYPASS_CACHE:!!variant,__READING_EXPERIMENT:variant?owner:null,__READING_SETTINGS:{maxRequestCost:null},__AI_COST_COLLECTOR:e=>events.push(e),__AI_BEFORE_CALL:({rates,requestBody})=>{
   if(!rates || ![rates.input,rates.output].every(n=>Number.isFinite(n)&&n>=0))throw Error('reading-prebuild-price-missing');
   const cap=requestBody.max_output_tokens ?? requestBody.max_tokens ?? settings.maxOutputTokens;
   const maximum=((new TextEncoder().encode(JSON.stringify(requestBody)).length+2048)*Math.max(rates.input,rates.cacheWrite||0)+cap*rates.output)/1e6;
   if(++admitted>(config.maxCallsPerTask||8) || ceilings+maximum>task.reservation.amount)throw Error('reading-prebuild-call-budget');ceilings+=maximum;
  }};
  if(variant==='hybrid'){const library=await kv.get(blockKey(sample.payload.chapter.id),'json')||[];scoped.__READING_OMIT_BLOCK_IDS=library.filter(b=>b.role==='practice').map(b=>b.id);}
- try{
+ initializationStage=null;
   const response=await execute({env:scoped,request:new Request('https://internal/api/movingtoon-reading',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(sample.payload)})});
   result=await response.json();
   if(!result.ok){if(result.error==='insufficient-evidence')await queueResearch(kv,sample.knowledgeIds||[],sample.payload.chapter.id);throw Error(result.error||'prebuild-failed');}
@@ -96,7 +98,7 @@ export async function tickReadingBlocks(env,{now=Date.now(),execute=writeChapter
     try{await publishLibrary(kv,sample.payload.chapter.id,next,await digest(current));published=eligible.filter(b=>b.status==='approved').length;break;}catch(e){if(e.message!=='version-conflict'||attempt===7)throw e;}
    }
   }
- }catch(e){error=String(e.message).slice(0,100);}
+ }catch(e){error=initializationStage?'reading-task-initialization-failed':String(e.message).slice(0,100);}
  const known=events.every(e=>e.costUSD!=null),actual=known?events.reduce((n,e)=>n+e.costUSD,0):task.reservation.amount;
  await updateRuntime(kv,s=>{
   const t=s.tasks[task.id];if(t?.owner!==owner || t.state!=='running')return;
@@ -106,5 +108,5 @@ export async function tickReadingBlocks(env,{now=Date.now(),execute=writeChapter
   Object.assign(t,{state:error?'failed':'completed',finishedAt:Date.now(),error,costUSD:known?actual:null,accountedUSD:cost,providerCalls:events.length,generatedParagraphCount:result?.generatedParagraphCount||0,reusedBlockCount:result?.reusedBlocks?.length||0,published,candidates:candidatesCount});
   s.events.push({at:new Date().toISOString(),taskId:t.id,state:t.state,published,candidates:candidatesCount,accountedUSD:cost});s.events=s.events.slice(-200);
  });
- return {completed:!error,taskId:task.id,error,published,candidates:candidatesCount,providerCalls:events.length,costUSD:known?actual:null,...(variant?{measurement:{variant,sampleId,providerEvents:events,foregroundCostUSD:events.filter(e=>e.scope!=='reading-block-validation').every(e=>e.costUSD!=null)?events.filter(e=>e.scope!=='reading-block-validation').reduce((n,e)=>n+e.costUSD,0):null,result}}:{})};
+ return {completed:!error,taskId:task.id,error,failureStage:error?initializationStage:null,published,candidates:candidatesCount,providerCalls:events.length,costUSD:known?actual:null,...(variant?{measurement:{variant,sampleId,providerEvents:events,foregroundCostUSD:events.filter(e=>e.scope!=='reading-block-validation').every(e=>e.costUSD!=null)?events.filter(e=>e.scope!=='reading-block-validation').reduce((n,e)=>n+e.costUSD,0):null,result}}:{})};
 }

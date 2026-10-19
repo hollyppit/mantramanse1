@@ -43,6 +43,7 @@ export async function composeStory(analysis,call,recent=[]){
  throw Object.assign(Error('review-rejected'),{issues:revision?.issues || []});
 }
 export async function onRequestPost({request,env}){
+  if(env.__READING_ADMIN_GENERATION!==true)return json({ok:false,error:"reviewed-content-only",aiSkipped:true,providerCallCount:0,requestCostUSD:0},409);
  const started=Date.now(),deadline=started+240000,traceId=crypto.randomUUID(),attempts=[];
  let body,clean;
  try{const raw=await request.text();if(raw.length>150000)return json({ok:false,error:'too-large'},413);body=JSON.parse(raw);

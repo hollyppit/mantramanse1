@@ -1,3 +1,4 @@
+import {Polite} from './_polite.js';
 // 저장소 어댑터: Cloudflare KV 와 같은 모양(get/put/delete/list)으로 Supabase 를 쓴다.
 //   · 환경변수 SUPABASE_URL + SUPABASE_SERVICE_KEY(service_role, 서버 전용 Secret) 가 있으면 아래 ROUTED 접두어의 키는 Supabase 테이블 public.kv 에 읽고 쓴다.
 //   · 없으면 지금처럼 전부 KV(GLOSSARY_KV)를 쓴다 — 환경변수를 지우면 바로 원복된다.
@@ -26,12 +27,13 @@ const parse = (txt, type) => (txt == null ? null : type === 'json' ? JSON.parse(
 
 // opts.cache === true: 방문자용 읽기 경로(공개 API) — 같은 isolate 에서 20초 동안 읽은 값을 다시 쓴다. 관리자 경로는 항상 최신.
 export function kvOf(env, opts) {
-  const raw = env && env.GLOSSARY_KV; if (!raw || !supabaseOn(env)) return raw;
+  const raw = env && env.GLOSSARY_KV; if (!raw) return raw;
+  if (!supabaseOn(env)) return new Proxy(raw,{get(target,key){if(key==='put')return (k,v,o)=>raw.put(k,Polite.stored(k,v),o);if(key==='readingCAS'&&raw.readingCAS)return (k,e,n,t)=>raw.readingCAS(k,e,Polite.stored(k,n),t);const v=raw[key];return typeof v==='function'?v.bind(raw):v;}});
   const slot = (opts && opts.cache) ? 'c' : 'n'; let m = cache.get(env); if (!m) { m = {}; cache.set(env, m); } if (m[slot]) return m[slot];
   const memo = !!(opts && opts.cache);
   const adapter = {
     async readingCAS(key,expected,next,ttl=null) {
-      const r=await sb(env,'rpc/reading_compare_and_swap',{method:'POST',body:JSON.stringify({p_key:key,p_expected:expected,p_next:next,p_ttl:ttl})});
+      const r=await sb(env,'rpc/reading_compare_and_swap',{method:'POST',body:JSON.stringify({p_key:key,p_expected:expected,p_next:Polite.stored(key,next),p_ttl:ttl})});
       memoAll.delete(key);return (await r.json())===true;
     },
     async researchCAS(expected, next) {
@@ -69,6 +71,7 @@ export function kvOf(env, opts) {
       return keys.map(k=>parse(values.get(k),type));
     },
     async put(key, value, o) {
+      value=Polite.stored(key,value);
       if (!startsWith(key, ROUTED)) return raw.put(key, value, o);
       memoAll.delete(key);
       const exp = o && o.expirationTtl ? new Date(Date.now() + o.expirationTtl * 1000).toISOString() : null;

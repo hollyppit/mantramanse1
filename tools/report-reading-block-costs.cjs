@@ -1,6 +1,7 @@
 const fs=require('fs'),path=require('path'),assert=require('assert/strict');const dir='output/reading-block-release',deployment=JSON.parse(fs.readFileSync(dir+'/deployment.json'));
 const experiments=fs.readdirSync(dir).filter(f=>/^measurement-.*\.json$/.test(f)).map(file=>({file,...JSON.parse(fs.readFileSync(dir+'/'+file))}));
-function latest(variant){const rows=experiments.filter(d=>d.completed&&d.measurement?.variant===variant).sort((a,b)=>a.measuredAt.localeCompare(b.measuredAt));assert(rows.length,'Missing successful final '+variant+' measurement');return rows.at(-1);}
+const measurementDate=process.env.READING_MEASUREMENT_SINCE||new Date(Date.now()+9*3600000).toISOString().slice(0,10),cutoff=Date.parse(measurementDate+'T00:00:00+09:00');assert(Number.isFinite(cutoff),'Invalid measurement date');
+function latest(variant){const rows=experiments.filter(d=>d.completed&&d.measurement?.variant===variant&&Date.parse(d.measuredAt)>=cutoff).sort((a,b)=>a.measuredAt.localeCompare(b.measuredAt));assert(rows.length,'Missing successful final '+variant+' measurement');return rows.at(-1);}
 const selected=['baseline','blocks','hybrid'].map(latest),rows=selected.map(d=>{const m=d.measurement,r=m.result;assert(r.ok);assert(r.writingQuality.ok);assert(r.interpretation.validation.ok);return {variant:m.variant,file:d.file,foregroundCostUSD:m.foregroundCostUSD,totalCostUSD:d.costUSD,foregroundCalls:m.providerEvents.filter(e=>e.scope!=='reading-block-validation').length,totalCalls:d.providerCalls,generatedParagraphs:r.generatedParagraphCount,reusedBlocks:r.reusedBlocks?.length||0,paragraphs:r.result.paragraphs.length,characters:r.result.paragraphs.reduce((n,p)=>n+p.text.length,0),engine:r.interpretation.version,chapter:r.chapterContractId||m.sampleId.replace(/^synthetic-1994F-/,''),quality:r.chapterQuality?.ok===true,usage:m.providerEvents.filter(e=>e.scope!=='reading-block-validation').reduce((a,e)=>({input:a.input+(e.usage?.input||0),output:a.output+(e.usage?.output||0),cached:a.cached+(e.usage?.cached||0)}),{input:0,output:0,cached:0})};});
 assert(rows.every(r=>r.paragraphs===rows[0].paragraphs));assert(rows.every(r=>r.engine===rows[0].engine));assert.equal(rows[1].foregroundCalls,0);assert.equal(rows[1].foregroundCostUSD,0);assert.equal(rows[2].generatedParagraphs,1);assert.equal(rows[2].reusedBlocks,6);
 const A=selected[0].measurement.result,B=selected[1].measurement.result,C=selected[2].measurement.result;
@@ -14,7 +15,7 @@ const rollout=JSON.parse(fs.readFileSync(dir+'/rollout-snapshot.json'));
 const summary={rollout,at:new Date().toISOString(),deployment,measurementType:'live production API, registered synthetic chart, real provider tokens and configured official list rates',invoiceVerified:false,wholeUserPopulationMeasured:false,rows,identicalBaselineAndBlocks:identicalAB,sixApprovedParagraphsRetained:retained,experimentTotalUSD:experimentTotal,unknownRuns,conservativeBreakEvenIdenticalQualifiedRequests:Math.ceil(experimentTotal/rows[0].foregroundCostUSD),failureCount:runs.filter(r=>r.taskId&&!r.completed).length,notes:['All failed experiments and publication checks are included in experimentTotalUSD.','Provider prompt-cache savings may also affect the partial-generation comparison.','No assertion of overall user-average savings or invoice reconciliation.','Existing AI model and paragraph count are preserved.']};
 fs.writeFileSync(dir+'/cost-comparison.json',JSON.stringify(summary,null,2));
 const fmt=n=>'$'+n.toFixed(6),labels={baseline:'A. 전체 생성',blocks:'B. 승인 블록',hybrid:'C. 문단 하나 누락'};
-const md=`# 풀이 블록 전환 운영 배포·비용 실측 — 2026-10-19
+const md=`# 풀이 블록 전환 운영 배포·비용 실측 — ${measurementDate}
 
 운영 배포와 실제 API 비교를 완료했습니다. 이 문서는 1차 감사 기록의 후속 결과입니다. 전체 사용자 모집단의 평균 절감률은 아직 계산하지 않았습니다.
 
@@ -30,7 +31,7 @@ ${rows.map(r=>'| '+labels[r.variant]+' | '+r.generatedParagraphs+' | '+r.reusedB
 
 ### 초기 비용을 포함한 해석
 
-실패한 시험, 사전 제작, 게시 검수와 최종 비교를 포함한 이번 실험 기록의 총 AI 비용은 ${fmt(experimentTotal)}입니다. 금액 미계측 작업은 ${unknownRuns}건입니다. 같은 기간 자동 작업까지 포함한 운영 제작 원장의 누적 비용은 ${fmt(rollout.ledger['2026-10'].spent)}이며, 일일 작업 한도는 ${rollout.config.maxDailyTasks}로 유지했습니다. 현재 승인 블록은 ${rollout.libraries.reduce((n,l)=>n+l.approved,0)}개입니다.\n\nC는 검수 응답 재시도 때문에 이 표본에서 A보다 4.4% 비쌌습니다. 일부만 생성하면 항상 더 저렴하다고 주장하지 않습니다.\n\n실시간 비용과 분리해 집계한 각 측정의 총비용(A/B/C)은 ${rows.map(r=>fmt(r.totalCostUSD)).join(' / ')}입니다.
+실패한 시험, 사전 제작, 게시 검수와 최종 비교를 포함한 이번 실험 기록의 총 AI 비용은 ${fmt(experimentTotal)}입니다. 금액 미계측 작업은 ${unknownRuns}건입니다. 같은 기간 자동 작업까지 포함한 운영 제작 원장의 누적 비용은 ${fmt(rollout.ledger['2026-10'].spent)}이며, 일일 작업 한도는 ${rollout.config.maxDailyTasks}로 유지했습니다. 현재 승인 블록은 ${rollout.libraries.reduce((n,l)=>n+l.approved,0)}개입니다.\n\nC의 실시간 비용은 이 표본에서 A 대비 ${(100*(rows[2].foregroundCostUSD/rows[0].foregroundCostUSD-1)).toFixed(1)}% 변동했습니다. 원시 호출별 비용으로 재시도 포함 내역을 확인합니다. 일부만 생성하면 항상 더 저렴하다고 주장하지 않습니다.\n\n실시간 비용과 분리해 집계한 각 측정의 총비용(A/B/C)은 ${rows.map(r=>fmt(r.totalCostUSD)).join(' / ')}입니다.
 
 당장의 전체 사업 비용이 위 실시간 절감률만큼 줄었다고 주장하지 않습니다. 이번 전체 실험비까지 같은 조건의 블록 적중 요청에서 회수한다고 가정한 단순 산술 기준은 약 ${summary.conservativeBreakEvenIdenticalQualifiedRequests}회입니다. 실제 회수 속도는 조건별 적중률·새 근거 도입·실패/재시도·사용자가 읽는 챕터 분포에 달려 있습니다. 부분 생성 비교에는 제공자의 프롬프트 캐시 효과도 포함됩니다.
 

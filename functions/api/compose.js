@@ -33,6 +33,7 @@ async function overLimit(env, request) {
 }
 
 export async function onRequestPost({ request, env }) {
+  if(env.__READING_ADMIN_GENERATION!==true)return json({ok:false,error:"reviewed-content-only",aiSkipped:true,providerCallCount:0,requestCostUSD:0},409);
   if (!env.ANTHROPIC_API_KEY && !env.OPENAI_API_KEY) return json({ ok: false, error: 'no-ai' });
   let body; try { if (+request.headers.get('content-length') > 40 * 1024) return json({ ok: false, error: 'too-large' }, 413); body = await request.json(); } catch { return json({ ok: false, error: 'bad-json' }, 400); }
   const kv = kvOf(env), ttl = { expirationTtl: 60 * 60 * 24 * 30 };

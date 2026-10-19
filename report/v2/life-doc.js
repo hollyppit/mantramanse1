@@ -14,12 +14,7 @@
   function hash(s) { var h = 5381; for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
   function loadSocial(H, waitMs) {
     var rule; try { rule = D.social(H.M, H.ch, H.sd, H.now); } catch (e) { return Promise.resolve(null); }
-    var pl; try { pl = D.aiPayload(H.M, H.ch, H.sd); } catch (e) { return Promise.resolve(rule); }
-    var key = 'mt_life_ai_l2_' + hash(JSON.stringify(pl)), got; try { got = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { }
-    if (got) return Promise.resolve(D.mergeSocial(rule, got));
-    var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, waitMs || 12000);
-    return fetch('/api/life-ai', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(pl), signal: ctl && ctl.signal }).then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) { if (d && d.ok && d.result) { try { localStorage.setItem(key, JSON.stringify(d.result)); } catch (e) { } return D.mergeSocial(rule, d.result); } return rule; }).catch(function () { return rule; }).then(function (x) { clearTimeout(tm); return x; });
+    return Promise.resolve(rule); // Reviewed basic flow never loads a paid model or old AI cache.
   }
 
   /* ── 화면 조각 ── */

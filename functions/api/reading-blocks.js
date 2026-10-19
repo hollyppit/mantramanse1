@@ -8,7 +8,7 @@ import { blockKey, checkBlock, candidateBlocks, digest } from '../_reading-block
 import { loadSettings } from '../_interpretation-store.js';
 import { summarizeAICost } from '../_ai-cost.js';
 import { onRequestPost as writeChapter } from './movingtoon-reading.js';
-const chapterOK=c=>typeof c==='string' && /^[\w.-]{1,80}$/.test(c);
+const chapterOK=c=>typeof c==='string' && /^[\w.-]{1,80}$/.test(c) && !c.startsWith('library.');
 export async function onRequest({request,env}){
  const initialURL=new URL(request.url),scheduler=['scheduled','measure','verify-evidence'].includes(initialURL.searchParams.get('a')) && request.method==='POST' && isAdmin(request,{ADMIN_PASSWORD:env.RAG_SCHEDULER_SECRET});
  if(!scheduler && !isAdmin(request,env))return json({error:'unauthorized'},401);
@@ -55,7 +55,7 @@ export async function onRequest({request,env}){
    const settings=await loadSettings(kv);
    if(!(settings.maxRequestCost>0) || !(settings.inputPricePerMillion>0) || !(settings.outputPricePerMillion>0))return json({error:'prebuild-requires-configured-request-budget-and-prices'},409);
    const sample={sd:body.sample.sd,chapter:body.sample.chapter,outline:[]};
-   const response=await writeChapter({env:{...env,READING_BLOCK_MODE:'off'},request:new Request(request.url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(sample)})});
+   const response=await writeChapter({env:{...env,__READING_ADMIN_GENERATION:true,READING_BLOCK_MODE:'off'},request:new Request(request.url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(sample)})});
    const d=await response.json();if(!d.ok)return json({error:'prebuild-failed',failure:d.failure},422);
    if(!d.interpretation || !d.blockStyleSignature)return json({error:'grounded-prebuild-required'},422);
    const candidates=await candidateBlocks({clean:sample,analysis:d.interpretation,result:d.result,hook:d.hook,styleSignature:d.blockStyleSignature});

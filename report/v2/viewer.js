@@ -86,14 +86,7 @@
   }
 
   // AI 컴포저(선택): 최대 9초만 기다리고, 실패·시간 초과·응답 불량이면 원본 모듈 문장으로 그대로 진행한다. 서버가 현재 문체와 입력 문장 기준으로 캐시한다.
-  function aiCompose() {
-    var rep = S.rep; // 문체 버전은 서버 캐시가 관리한다. 기기 캐시는 설정 변경을 가려 사용하지 않는다.
-    var body = { payload: R.Compose.aiPayload(rep), media: R.Compose.mediaPayload(rep, S.pack.lib) }, ctl = window.AbortController ? new AbortController() : null, timer = setTimeout(function () { if (ctl) ctl.abort(); }, 9000);
-    return fetch('/api/compose', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: ctl && ctl.signal }).then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) { if (d && d.ok && d.result) { R.Compose.applyResult(rep, d.result, S.pack.lib); } })
-      .catch(function () { }).then(function () { clearTimeout(timer); });
-  }
-
+  function aiCompose() { return Promise.resolve(); } // Reviewed basic reading has no paid smoothing call.
   /* ── 3. 캐릭터 소개(영상이 있을 때만): ① 일간 소개(10일간×성별 20) → ② 일주 캐릭터(60일주×성별 120) 영상. ──
      음소거 자동재생·SKIP·소리 켜기·poster 대체. 영상이 없으면 이 단계는 건너뛰고, 끝나면 자동으로 프롤로그로 넘어간다. */
   function playStage(cfg) {
@@ -390,7 +383,7 @@
     var idxs = (S.wmap && S.wmap.by[w.id]) || [], list = idxs.map(function (i) { var c = S.rep.chapters[i], a = document.getElementById('ch-' + c.id); return { id: c.id, title: c.title, html: a ? a.innerHTML : (c.scenes || []).map(function(s,k){var panel=panelOf(s);return (panel?panelHtml(panel):'')+sceneHtml(c,s,k);}).join('') }; });
     var source = w.id === 'w5' ? R.Samsara.extract(S.rep) : R.Samsara.fromChapters(list, { id: 'world:' + w.id, title: w.name, label: (w.icon || '') + ' ' + w.name, bg: w.bgImage || '', cut: w.cutImages || null, per: 3, max: 36 });
     var storyWorld = w.id === 'w5' && source ? Object.assign({}, w, { bgImage: R.Samsara.imageOf(source, S.assets || {}) || w.bgImage }) : w;
-    if(w.id==='w5')return S.personalPast || Object.assign({},source || {},{title:'나의 전생 단편',hero:'사주에서 시작되는 한 편의 이야기',frames:Array.from({length:8},function(){return {cap:'',paras:[],img:storyWorld.bgImage || ''};})});
+    if(w.id==='w5')return {id:'reviewed-past-story',title:'열린 장부의 이야기',hero:'서윤과 하람의 항구 기록',sub:'사주 상징을 소재로 미리 작성한 8편의 창작 연작입니다.',notice:'실제 전생이나 개인의 과거를 확인한 이야기가 아닙니다.',personalized:false,storyBasis:'reviewed-library',frames:idxs.map(function(i){var c=S.rep.chapters[i],core=c.readingCore||{};return {cap:c.title,paras:String(core.reality||'').split(/\n\n+/).filter(Boolean),img:''};})};
     return R.ShortStory ? R.ShortStory.build(storyWorld, S.sd, source, {name:S.name,media:S.media,variant:(S.toonVisits||{})[w.id]||0}) : source;
   }
   function worldToonCard(w) {
@@ -404,22 +397,16 @@
   });
   async function openWorldToon(wid) {
     var w = ((S.wmap && S.wmap.list) || []).filter(function (x) { return x.id === wid; })[0]; if (!w || !R.Samsara) return;
+    if(S.toonLoading)return;S.toonLoading=true;
+    try{
+      if(R.FullReading && !PREVIEW){toast('검수된 문안을 불러오고 있습니다. AI를 호출하지 않습니다.',4000);var ready=await R.FullReading.ensure(((S.wmap&&S.wmap.by[wid])||[]).map(function(i){return S.rep.chapters[i].id;}));if(!ready){toast('문안을 불러오지 못했습니다. 잠시 후 다시 열어주세요.');return;}}
     S.toonVisits=S.toonVisits||{};S.toonVisits[wid]=(S.toonVisits[wid]||Date.now())+1;
     var model = null; try { model = worldToonModel(w); } catch (err) { model = null; } if (!model) { toast('웹소설을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
     if (S.mv) S.mv.pause();
-    if(wid==='w5'&&!S.personalPast){
-      if(!R.PastStory||S.pastLoading)return;
-      S.pastLoading=true;var ctl=new AbortController(),wait=document.createElement('dialog');
-      wait.style.cssText='background:#11151e;color:#eee5d5;border:1px solid #8b7956;border-radius:16px;max-width:420px;padding:28px;line-height:1.8';
-      wait.innerHTML='<p>사주의 결을 따라 이야기를 엮고 있습니다.</p><p>첫 이야기를 준비할 때는 몇 분 정도 걸릴 수 있습니다. 완성한 이야기는 저장해 두고 다시 보여드립니다.</p><button type="button" class="btn">취소</button>';
-      wait.querySelector('button').onclick=function(){ctl.abort();wait.close();};wait.addEventListener('cancel',function(){ctl.abort();});document.body.appendChild(wait);wait.showModal();
-      var timer=setTimeout(function(){ctl.abort();toast('이야기 준비가 지연되고 있습니다. 잠시 후 다시 열어주세요.',6000);},250000);
-      try{model=await R.PastStory.load(S.sd,model,ctl.signal,{name:S.name});S.personalPast=model;}
-      catch(err){if(!ctl.signal.aborted)toast(err.message || '이야기를 불러오지 못했습니다.',6000);return;}
-      finally{clearTimeout(timer);S.pastLoading=false;if(wait.open)wait.close();wait.remove();}
-    }
+    // Stories use the prepared report frames; no per-reader paid generation.
     T('world_toon_open', { world: wid, frames: model.frames.length });
     R.Samsara.open(model, S.assets || {}, S.assetVideos || {}, { reduce: reduce, saveData: saveData, rate: playbackRate(), onDone: function () { S.xp.seen['toon:' + wid] = 1; xpSave(); T('world_toon_done', { world: wid }); showHome(wid); } });
+    }catch(e){toast('문안을 불러오지 못했습니다. 잠시 후 다시 열어주세요.');}finally{S.toonLoading=false;}
   }
   function enterWorld(wid) {
     var idxs = (S.wmap && S.wmap.by[wid]) || []; if (!idxs.length) { showHome(wid); return; }
@@ -760,7 +747,7 @@
     if (t === 'cinema') return cinemaHtml(c, s);
     if (t === 'chapterIntro') {
       var act = S.rep.acts.filter(function (a) { return a.id === c.act; })[0] || {};
-      if(c.readingDeferred && !s.readingSupplementary)return '<section class="scene rd-head rd-chead reading-pending" '+id+' aria-busy="'+(!c.readingWarning)+'"><h2>'+esc(c.title)+'</h2><p role="status" data-reading-notice>'+esc(String(c.readingNotice || '').replace(/ \(오류: [^)]*\)$/, ''))+'</p>'+(c.readingFailure?'<details class="reading-error-detail"><summary>오류 상세 정보</summary><p>'+esc(c.readingFailure.code)+(c.readingFailure.requestId?' · 요청 '+esc(c.readingFailure.requestId):'')+'</p></details>':'')+(c.readingWarning?'<button type="button" class="chipbtn" data-reading-retry>이 장 다시 생성하기</button>':'')+'</section>';
+      if(c.readingDeferred && !s.readingSupplementary)return '<section class="scene rd-head rd-chead reading-pending" '+id+' aria-busy="'+(!c.readingWarning)+'"><h2>'+esc(c.title)+'</h2><p role="status" data-reading-notice>'+esc(String(c.readingNotice || '').replace(/ \(오류: [^)]*\)$/, ''))+'</p>'+(c.readingFailure?'<details class="reading-error-detail"><summary>오류 상세 정보</summary><p>'+esc(c.readingFailure.code)+(c.readingFailure.requestId?' · 요청 '+esc(c.readingFailure.requestId):'')+'</p></details>':'')+(c.readingWarning?'<button type="button" class="chipbtn" data-reading-retry>이 장 다시 불러오기</button>':'')+'</section>';
       if (c.chapterHook) { var hook=c.chapterHook; return '<section class="scene rd-head rd-chead" '+id+'><div class="rd-rule" aria-hidden="true"></div><div class="no" data-hook-hanja> '+esc(hook.hanja)+'</div><h2>'+esc(c.title)+'</h2><p class="hl">'+esc(c.hookName || S.name || '귀인')+'님, '+lines(hook.text)+'</p><p class="intro">'+lines(hook.explanation)+'</p><div class="rd-rule" aria-hidden="true"></div></section>'; }
       if (s.compact) return '<section class="scene rv rd-mini" ' + id + '><div class="no" data-cno="' + esc(c.id) + '">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2>' + esc(c.title) + '</h2>' + (c.introText || s.subtitle ? '<p class="sub">' + esc(c.introText || s.subtitle) + '</p>' : '') + '</section>'; // 종합 풀이 안에서 순서대로 이어지는 작은 제목(서두 없이 바로 본론)
       return '<section class="scene rd-head rd-chead" ' + id + '><div class="rd-rule" aria-hidden="true"></div><div class="no" data-tx="intro.no" data-cno="' + esc(c.id) + '">' + esc(act.roman || '') + ' · ' + String(c.no).padStart(2, '0') + '</div><h2 data-tx="intro.title">' + esc(c.title) + '</h2><p class="hl" data-tx="intro.headline">' + lines(c.headline) + '</p>' + (c.introText || s.subtitle ? '<p class="intro" data-tx="intro.note">' + esc(c.introText || s.subtitle) + '</p>' : '') + '<div class="rd-rule" aria-hidden="true"></div></section>';

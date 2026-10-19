@@ -7,7 +7,7 @@ const imp=f=>import(pathToFileURL(path.resolve(f)).href);
  const now=Date.UTC(2026,9,15),chart=Manse.compute({year:1992,month:6,day:23,hour:1,minute:30,calendar:'solar',gender:'M',city:'서울'}),sd=ReportV2.SajuData.build(chart,{now}),facts=K.deriveFacts(sd);
  const rules=[1,2,3].map(i=>K.cleanItem({id:'SELF-900'+i,domain:'SELF',title:'검사 전용 '+i,subDomain:'personality',status:'published',reviewed:true,sourceType:'book',conditions:{dayMaster:[facts.dayMaster],monthBranch:[facts.monthBranch]},principle:'검사 전용 조건을 함께 확인합니다.',interpretation:'두 계산 조건이 함께 맞을 때 적용하는 테스트 판단입니다. 실제 성향의 권위 근거가 아닙니다.',strengths:['검사 전용 장점'],risks:['검사 전용 부담'],actions:['검사 전용 행동'],evidence:[{docId:'test',chunkId:'c1',quote:'검사 전용 근거'}],theory:['검사 전용']}));
  const memory=new Map([['ik:d:SELF',JSON.stringify(rules)],['src:idx',JSON.stringify([{id:'test',active:true}])],['src:chunks:test',JSON.stringify([{id:'c1',text:'검사 전용 근거'}])]]);
- const env={GLOSSARY_KV:{get:async(k,t)=>memory.has(k)?t==='json'?JSON.parse(memory.get(k)):memory.get(k):null,put:async(k,v)=>memory.set(k,v)},OPENAI_API_KEY:'mock'};
+ const env={__READING_ADMIN_GENERATION:true,GLOSSARY_KV:{get:async(k,t)=>memory.has(k)?t==='json'?JSON.parse(memory.get(k)):memory.get(k):null,put:async(k,v)=>memory.set(k,v)},OPENAI_API_KEY:'mock'};
  let calls=0,plans=[],deny=false;const originalFetch=global.fetch;
  global.fetch=async(url,opts)=>{
   calls++;const req=JSON.parse(opts.body),input=JSON.parse(req.input);assert.equal(req.text.format.type,'json_schema');assert.equal(req.model,'gpt-4.1-2025-04-14');assert.equal(req.reasoning,undefined);assert(!req.input.includes('PRIVATE_NAME'));assert(!input.chart.birth&&!input.chart.name&&!input.chart.ziwei);

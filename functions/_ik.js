@@ -1,3 +1,4 @@
+import {politeContent} from './_polite.js';
 // MANTRA INTERPRETATION KNOWLEDGE SYSTEM — 순수 로직(외부 import 없음 → Node 테스트 가능). 파일명이 _로 시작해 라우트로 노출되지 않는다.
 // 계층: 계산(sd) → deriveFacts → retrieve(구조화 필터) → modifiers → conflicts → buildPackage → composePlain/AI Composer → qualityCheck
 // 원칙: 새 명리 계산은 하지 않는다. sd(ReportV2.SajuData.build 결과)에 있는 값만 조건으로 쓴다. 없는 값은 UNSUPPORTED 로 표시하고 매칭에서 제외한다.
@@ -101,7 +102,7 @@ export function cleanItem(b, prev) {
     version: (prev && prev.version ? prev.version : 0), createdAt: (prev && prev.createdAt) || str(b.createdAt, 40) || now, updatedAt: now,
   };
   if (out.status === 'published' && unknownVars(out).length) { out.status = 'review'; out.blockedBy = 'placeholder'; } // 채울 수 없는 {…} 가 문장에 남아 있으면 공개하지 않는다
-  return out;
+  return politeContent(out);
 }
 
 // ───────────── 사실(facts) 추출: sd → 조건 평가용 평평한 값 ─────────────

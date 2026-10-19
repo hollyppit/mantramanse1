@@ -1,3 +1,4 @@
+import {serveReviewed} from '../_reviewed-reading.js';
 import { cleanAdviceHistory, repeatedAdvice, adviceFocus, ADVICE_INSTRUCTION } from '../_reading-advice.js';
 import { compactPrompt, PROMPT_VERSION } from '../_reading-prompt.js';
 import { recordGap, recordCoverageGap, readingEnvironment } from '../_reading-block-store.js';
@@ -253,6 +254,8 @@ async function handleReading({ request, env }, context) {
 
 // Attach a fresh correlation ID even to cache hits. Never log input, chart, prose or provider messages.
 export async function onRequestPost({request, env}) {
+  // A request body, force flag, cache miss or configured API key cannot enable paid generation.
+  if(env.__READING_ADMIN_GENERATION!==true)return serveReviewed({request,env});
   try{env=await readingEnvironment(env);}catch{return json({ok:false,error:'storage-unavailable'},503);}
   const context = {requestId:crypto.randomUUID(), chapter:'', started:Date.now()},requestEvents=[];
   let response;

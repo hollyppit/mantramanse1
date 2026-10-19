@@ -1,0 +1,22 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');global.window=globalThis;
+for(const f of ['engine.js','report/v2/saju-data.js','report/v2/reading-catalog.js','report/v2/reading-text.js'])vm.runInThisContext(fs.readFileSync(f,'utf8'),{filename:f});
+(async()=>{
+ const {build}=require('../tools/build-complete-reading-library.cjs'),pack=await build(),API=await import('../functions/api/movingtoon-reading.js'),L=await import('../functions/_reviewed-library.js');
+ const catalog=MantraEditorial.defaults(),memory=new Map(),kv={get:async(k,t)=>memory.has(k)?t==='json'?JSON.parse(memory.get(k)):memory.get(k):null,put:async(k,v)=>memory.set(k,v)};
+ const env={GLOSSARY_KV:kv,OPENAI_API_KEY:'must-never-be-used',ANTHROPIC_API_KEY:'must-never-be-used'};
+ const originalFetch=global.fetch;let providerCalls=0;global.fetch=async()=>{providerCalls++;throw Error('network-forbidden');};
+ const roles=['title','reality','strength','risk','reinforce','practice','evidence'];let requests=0,visible=0;const endings=new Set();
+ for(const sample of pack.samples){let previous=[],adviceHistory=[],usedAdviceKeys=[];const sentences=new Map();
+  for(const c of catalog.chapters){const r=await API.onRequestPost({env,request:new Request('http://qa/api/movingtoon-reading',{method:'POST',body:JSON.stringify({sd:sample.sd,chapter:{id:c.id,title:c.title,paragraphs:roles.map((role,i)=>({id:String(i),role,text:'미리 작성한 문안의 전체 표시 여부를 확인하는 요청입니다.'}))},previous,adviceHistory,usedAdviceKeys,force:true})})}),d=await r.json();assert.equal(r.status,200,JSON.stringify({sample:sample.id,id:c.id,...d}));assert.equal(d.pending.length,0,c.id+' must have no pending role');assert(d.aiSkipped&&d.providerCallCount===0&&d.requestCostUSD===0);assert.equal(d.result.paragraphs.length,roles.length);
+   for(const p of d.result.paragraphs){assert(p.text.length>=30&&p.text.length<=1200,p.id+' length');assert(!/準備|준비하고 있습니다|보완 대기|충분해지면 제공|연결할 검수 문장/.test(p.text),c.id+' placeholder');if(p.contentKind==='guide'||p.contentKind==='fiction')assert.equal(p.claim_ids.length,0,'guides and fiction must never acquire personal evidence refs');if(c.topicId!=='creative'&&['reinforce','practice'].includes(p.role)){const normalized=p.text.replace(/[\s\p{P}\p{S}]/gu,'');assert(!sentences.has(normalized),'repeated action: '+c.id+' / '+sentences.get(normalized));sentences.set(normalized,c.id);}}
+   const chapter={id:c.id,title:c.title,editorialTopicId:c.topicId,readingProvider:d.provider,readingParagraphs:d.result.paragraphs,readingCore:Object.fromEntries(d.result.paragraphs.map(p=>[p.role,p.text])),readingPendingRoles:d.pending,readingNotice:d.scopeNotice};
+   const organized=ReportV2.ReadingText.organize(chapter);assert(!organized.pending);if(c.topicId==='creative'){assert.equal(organized.rows.length,1);assert(organized.rows[0].text.length>200);assert(/서윤|하람/.test(organized.rows[0].text));if(c.id.endsWith('_08'))endings.add(organized.rows[0].text);}else{assert.equal(organized.rows.length,6,c.id+' all six visible sections must remain');visible+=organized.rows.length;}
+   const html=ReportV2.ReadingText.html(chapter,requests);assert(!/<(?:img|video|iframe)\b/i.test(html));if(c.topicId!=='creative')assert(!/<details[^>]*\bopen\b/.test(html),'evidence stays folded');
+   previous=previous.concat(d.result.paragraphs.filter(p=>p.role!=='evidence').map(p=>({text:p.text,chapter:c.id}))).slice(-80);adviceHistory.push({chapter:c.id,practice:d.result.paragraphs.find(p=>p.role==='practice').text,reinforce:d.result.paragraphs.find(p=>p.role==='reinforce').text});usedAdviceKeys.push(...d.adviceKeys);requests++;
+  }
+ }
+ assert.equal(endings.size,5,'five prewritten symbolic variants');assert.equal(providerCalls,0);assert.equal(pack.libraries.length,84);assert.equal(pack.libraries.reduce((n,l)=>n+l.passages.length,0),704);
+ // DB publication and compiled fallback must agree; existing personal source gates remain independent.
+ for(const l of pack.libraries){const c=catalog.chapters.find(c=>c.id===l.chapter);for(const s of l.scenarios){const ids=L.selectPassages(l.passages,c,{claims:[]},s.sd).map(p=>p.id);assert(s.expectedPassageIds.every(id=>ids.includes(id)));assert(s.forbiddenPassageIds.every(id=>!ids.includes(id)));}}
+ global.fetch=originalFetch;console.log('PASS: '+requests+' full-book synthetic requests; 84 chapters × 11 charts, zero pending/provider calls, six visible sections, distinct action copy, five continuous fiction motifs, positive/counterexamples, evidence folding and no media');
+})().catch(e=>{console.error(e);process.exit(1)});

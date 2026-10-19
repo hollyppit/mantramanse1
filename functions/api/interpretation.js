@@ -40,7 +40,7 @@ export async function onRequestPost({ request, env }) {
       for (let offset = 0; offset < cards.length; offset += 40) {
         const batch = cards.slice(offset, offset + 40);
         const chapter = { id: 'engine-' + offset, title: DOMAINS[body.domain] + ' ' + body.domain.toLowerCase(), paragraphs: batch.map((card,i) => ({ id: String(i), text: card.text, expected_claim_ids: card.claim_ids })) };
-        const response = await writeChapter({ env: { ...env, INTERPRETATION_ENGINE_MODE: 'grounded' }, request: new Request(request.url, { method: 'POST', headers: request.headers, body: JSON.stringify({ sd: body.sd, chapter, outline: [] }) }) });
+        const response = await writeChapter({ env: { ...env, __READING_ADMIN_GENERATION:true, INTERPRETATION_ENGINE_MODE: 'grounded' }, request: new Request(request.url, { method: 'POST', headers: request.headers, body: JSON.stringify({ sd: body.sd, chapter, outline: [] }) }) });
         const value = await response.json();
         const snapshotStable = value.ok && value.result.paragraphs.every(p => p.claim_ids.every(id => {
           const original = analysis.claims.find(c => c.claim_id === id), current = value.interpretation?.claims.find(c => c.claim_id === id);

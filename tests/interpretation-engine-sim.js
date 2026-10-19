@@ -61,7 +61,7 @@ const imp = f => import(pathToFileURL(path.resolve(f)).href);
   assert(!E.validateWritten({paragraphs:[{...answer.paragraphs[0],claim_ids:['phantom']}]},a,F.validate(input)).ok);
   const memory=new Map([['ik:d:SELF',JSON.stringify([rule])],['src:idx',JSON.stringify([{id:'dtest',active:true}])],['src:chunks:dtest',JSON.stringify(sourceIndex.get('dtest').chunks)]]);
   const kv={get:async(k,t)=>memory.has(k)?t==='json'?JSON.parse(memory.get(k)):memory.get(k):null,put:async(k,v)=>memory.set(k,v)};
-  const env={GLOSSARY_KV:kv,ADMIN_PASSWORD:'test',OPENAI_API_KEY:'mock',INTERPRETATION_ENGINE_MODE:'grounded'};
+  const env={__READING_ADMIN_GENERATION:true,GLOSSARY_KV:kv,ADMIN_PASSWORD:'test',OPENAI_API_KEY:'mock',INTERPRETATION_ENGINE_MODE:'grounded'};
   const req=(url,body,auth=true)=>new Request('http://test'+url,{method:'POST',headers:auth?{authorization:'Bearer test'}:{},body:JSON.stringify(body)});
   const fetchBefore=global.fetch;let calls=0;
   global.fetch=async(url,o)=>{calls++;const body=JSON.parse(o.body), user=require('./helpers/prompt-input.cjs')(body.input); assert(!JSON.stringify(body).includes('PRIVATE_NAME'));assert(!user.chart?.birth);assert(user.claims[0].claim_id);return new Response(JSON.stringify({output_text:JSON.stringify(answer),usage:{input_tokens:100,output_tokens:50},model:'mock-model'}));};
@@ -86,7 +86,7 @@ const imp = f => import(pathToFileURL(path.resolve(f)).href);
   global.fetch=async(url,o)=>{
     calls++;const payload=require('./helpers/prompt-input.cjs')(JSON.parse(o.body).input);
     if(payload.result)return new Response(JSON.stringify({output_text:JSON.stringify({ok:true,issues:[],temperamentRatio:0,coverage:payload.policy.required.map(item=>({item,status:'covered',claim_ids:payload.claims.map(c=>c.claim_id)}))}),usage:{input_tokens:100,output_tokens:50}}));
-    return new Response(JSON.stringify({output_text:JSON.stringify({paragraphs:payload.chapter.paragraphs.map(p=>({id:p.id,text:p.text.replace(/[.!?。]$/, '')+' (검사 카드 '+p.id+': 인용된 원리의 적용 범위만 확인합니다).',refs:p.expected_claim_ids.map(id=>id.split(':')[1]),claim_ids:p.expected_claim_ids}))}),usage:{input_tokens:100,output_tokens:50}}));
+    return new Response(JSON.stringify({output_text:JSON.stringify({paragraphs:payload.chapter.paragraphs.map(p=>({id:p.id,text:p.text.replace(/월령\(월지\)|월령/g,'계절 조건').replace(/일간/g,'태어난 날의 조건').replace(/[.!?。]$/, '')+' (검사 카드 '+p.id+': 인용된 원리의 적용 범위만 확인합니다).',refs:p.expected_claim_ids.map(id=>id.split(':')[1]),claim_ids:p.expected_claim_ids}))}),usage:{input_tokens:100,output_tokens:50}}));
   };
   response=await LAB.onRequestPost({request:req('/api/interpretation',{sd,domain:'SELF',compose:'ai'}),env});data=await response.json();
   assert(data.ok);assert(data.generation.batches.every(b=>b.ok),JSON.stringify(data.generation));assert.equal(data.report.chapters[0].full_text,data.report.chapters[0].cards.map(c=>c.text).join('\n\n'));

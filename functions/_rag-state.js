@@ -42,15 +42,21 @@ export function sourcePolicy(url,c) {
 }
 
 // Queue only evidence gaps, never private charts or prose. Keyed by chapter and rule.
-export async function queueResearch(kv,knowledgeIds,chapter,{now=Date.now()}={}) {
- if(!kv?.researchCAS || !/^[\w.-]{1,80}$/.test(chapter || ''))return {queued:0};
- const ids=[...new Set(knowledgeIds)].filter(id=>typeof id==='string'&&/^[\w.-]{1,120}$/.test(id));
+export async function queueResearch(kv,knowledgeIds,chapter,options={}) {
+ return queueResearchMany(kv,[{knowledgeIds,chapter}],options);
+}
+// Batch the existing gaps in one CAS transaction; never drop a chapter or alter research budgets.
+export async function queueResearchMany(kv,gaps,{now=Date.now()}={}) {
+ if(!kv?.researchCAS)return {queued:0};
+ const requests=gaps.filter(g=>/^[\w.-]{1,80}$/.test(g.chapter||'')).map(g=>({chapter:g.chapter,ids:[...new Set(g.knowledgeIds||[])].filter(id=>typeof id==='string'&&/^[\w.-]{1,120}$/.test(id))}));
+ if(!requests.length)return {queued:0};
  return updateState(kv,s=>{s.readingRequests ||= {};let queued=0;
-  for(const id of ids){const key=chapter+':'+id,old=s.readingRequests[key];
-   if(old)continue;if(Object.keys(s.readingRequests).length>=500)break;
-   s.readingRequests[key]={knowledgeId:id,chapter,state:'pending',at:new Date(now).toISOString(),attempts:0};queued++;
+  for(const {chapter,ids} of requests){const added=[];
+   for(const id of ids){const key=chapter+':'+id;if(s.readingRequests[key])continue;if(Object.keys(s.readingRequests).length>=500)break;
+    s.readingRequests[key]={knowledgeId:id,chapter,state:'pending',at:new Date(now).toISOString(),attempts:0};added.push(id);queued++;
+   }
+   if(added.length)event(s,'reading-evidence-queued',{chapter,knowledgeIds:added,queued:added.length},'reading-service',now);
   }
-  if(queued)event(s,'reading-evidence-queued',{chapter,knowledgeIds:ids,queued},'reading-service',now);
   return {queued};
  });
 }
