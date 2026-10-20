@@ -14,11 +14,11 @@ function eligible(p){return !!scenes[p.season]&&p.startAge<80&&['순풍','보통
 function reason(p,sd){
  var rs=p.assessment&&p.assessment.reasons||[],positive=rs.filter(function(t){return /→ 보완$/.test(t);}),parts=[];
  if(positive.some(function(t){return /억부/.test(t);})){
-  parts.push(sd.strength&&sd.strength.band==='신약'?'원래 사주에서 나를 받쳐주는 기운보다 일을 맡고 책임지는 기운에 더 힘이 실려 있어요. 이 대운에는 나를 받쳐주는 쪽이 보충돼요.':sd.strength&&sd.strength.band==='신강'?'원래 사주에는 내 뜻대로 밀고 나가는 힘이 충분해요. 이 대운에는 그 힘을 일과 결과에 쓰도록 돕는 기운이 들어와요.':'원래 사주의 한쪽에만 힘이 몰리지 않도록, 이 대운의 기운이 균형을 돕고 있어요.');
+  parts.push(sd.strength&&sd.strength.band==='신약'?'원래 사주는 일과 책임의 무게가 큰 편이라 혼자 버티기 벅찰 때가 있어요. 이 시기에는 나를 받쳐 주는 힘이 보충돼서 숨통이 트이는 구간이에요.':sd.strength&&sd.strength.band==='신강'?'원래 사주에는 내 뜻대로 밀고 나가는 힘이 이미 충분해요. 이 시기에는 그 힘이 일과 결과로 이어지도록 도와주는 흐름이 들어와요.':'원래 사주가 한쪽으로만 쏠리지 않도록, 이 시기가 균형을 잡아 줘요.');
  }
  var climate=positive.find(function(t){return /조후/.test(t);});
- if(climate)parts.push(/더운 원국/.test(climate)?'사주를 자동차에 빗대면 뜨거워진 엔진을 식혀주는 물이 들어오는 때예요. 원래 사주에 몰린 뜨거운 기운을 들어오는 기운이 누그러뜨려요.':/찬 원국/.test(climate)?'사주를 자동차에 빗대면 차가운 엔진이 움직이기 좋게 예열되는 때예요. 원래 사주의 찬 기운을 들어오는 기운이 덥혀줘요.':'원래 사주의 차고 더운 기운을 들어오는 기운이 고르게 해주는 때예요.');
- if(!parts.length)parts.push('이 대운에 들어오는 기운을 원래 사주와 비교했을 때, 일을 무리하게 벌이는 부담보다 내 힘을 쓰는 데 도움이 되는 쪽으로 계산됐어요.');
+ if(climate)parts.push(/더운 원국/.test(climate)?'사주를 자동차에 빗대면 뜨겁게 달아오른 엔진에 냉각수가 들어오는 때예요. 원래 사주에 몰린 열기를 이 시기가 가라앉혀 줘요.':/찬 원국/.test(climate)?'사주를 자동차에 빗대면 차갑게 식은 엔진이 예열되는 때예요. 원래 사주가 차가운 쪽이라, 이 시기가 시동이 걸리게 데워 줘요.':'원래 사주의 차고 더운 쪽을 이 시기가 고르게 맞춰 주는 때예요.');
+ if(!parts.length)parts.push('이 시기의 흐름을 원래 사주와 견주어 보면, 일을 무리하게 벌이는 부담보다 내 힘을 쓰기 좋은 쪽으로 계산됐어요.');
  return parts.slice(0,2).join(' ')+' 그래서 '+labels[p.season]+'로 읽어요.';
 }
 function build(sd,name){

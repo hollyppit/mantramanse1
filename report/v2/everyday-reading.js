@@ -68,26 +68,26 @@ love:[
 '예를 들어, 평소에는 잘 맞아도 바쁠 때 연락이나 집안일이 한 사람에게 몰리면 관계가 힘들어질 수 있어요. 사이가 좋을 때 어려운 날의 약속도 정해두면 도움이 돼요.|서로 여유가 없을 때 줄여도 되는 일과 꼭 알려줄 일을 하나씩 이야기해 보세요. 좋은 관계를 유지하는 작은 준비예요.'
 ],
 health:[
-'예를 들어, 비슷하게 잤어도 늦은 식사나 긴 이동이 있던 날에는 하루가 더 버겁게 느껴질 수 있어요. 생활을 돌아볼 때 수면, 식사, 활동을 함께 살펴보는 예시예요.|요즘 편했던 날과 버거웠던 날의 생활을 간단히 적어보세요. 사주로 건강 상태를 판단하기보다 실제로 달랐던 일정을 보는 거예요.',
-'예를 들어, 계속 서서 일한 날보다 연락이 끊이지 않아 쉬지 못한 날에 더 지칠 수 있어요. 내게 어떤 상황이 부담이었는지 나눠보세요.|오늘 지친 이유가 활동량, 이동, 쉬지 못한 시간 중 무엇에 가까운지 적어보세요. 바꿀 수 있는 일정 하나부터 살펴보세요.',
-'예를 들어, 일이 밀릴 때 식사를 건너뛰거나 밤늦게까지 휴대전화를 보는 습관이 반복될 수 있어요. 스트레스를 받았을 때 생활이 어떻게 바뀌는지 살펴보는 거예요.|바쁜 날에도 지킬 작은 일상 하나를 골라보세요. 한꺼번에 생활 전체를 고치려 하기보다 실제로 이어갈 수 있는 것부터 시작하세요.',
-'예를 들어, 피곤한데도 약속을 취소하기 미안해 일정을 모두 지키려 할 수 있어요. 남에게 성실한 선택이 지금 내 생활에는 무리인지 돌아보세요.|다가오는 약속 하나에서 시간을 줄이거나 날짜를 바꿀 수 있는지 물어보세요. 여유가 없다는 사실을 미리 말해도 돼요.',
-'예를 들어, 평일에는 늦게 자고 주말에만 길게 쉬면 다음 주 첫날의 일정이 유난히 힘들 수 있어요. 어떤 생활이 반복됐는지 확인해 보는 예시예요.|일어나는 시간과 일정이 크게 달랐던 날을 적어보세요. 내 생활에서 무리 없이 조정할 수 있는 부분 하나를 찾아보세요.',
-'예를 들어, 비 오는 날 급히 계단을 내려가며 휴대전화를 보면 주변을 놓치기 쉬워요. 여기서는 특정 날짜의 사고 예고가 아니라 누구에게나 필요한 안전 습관을 이야기해요.|이동할 때 메시지를 확인해야 한다면 잠시 멈춘 뒤 보세요. 사주의 표시는 사고가 일어날 확률을 뜻하지 않아요.',
-'예를 들어, 일정이 겹친 날에는 약속 사이 이동 시간이 부족해 서두를 수 있어요. 조심할 시기를 읽더라도 실제 일정에서 급해질 이유부터 살펴보는 게 좋아요.|약속 사이에 이동과 준비 시간이 있는지 확인해 보세요. 여유가 없다면 약속 시간을 조정할 수 있는지 먼저 물어보세요.',
-'예를 들어, 시간이 없다고 익숙하지 않은 도구를 설명 없이 사용하면 실수할 수 있어요. 급한 마음과 작업 조건을 함께 살펴보는 생활 예시예요.|처음 쓰는 도구나 처음 가는 곳에서는 안내를 확인할 시간을 남겨두세요. 모르는 부분은 시작하기 전에 물어보면 좋아요.',
-'예를 들어, 잠깐 쉬기로 해놓고 계속 업무 메시지를 확인하면 일에서 벗어난 느낌이 들지 않을 수 있어요. 쉬는 시간에도 실제로 어떤 행동을 하는지 살펴보세요.|짧은 휴식 하나에서는 업무 알림을 확인하지 않고 편하게 쉬어보세요. 지속되는 불편은 생활 해설로 판단하지 말고 적절한 도움을 구하세요.',
-'예를 들어, 계획이 밀렸다고 쉬는 시간을 모두 없애면 다음 일정까지 버거워질 수 있어요. 목표를 지키는 것과 무리한 분량을 계속 유지하는 것은 달라요.|이번 주 일정에서 꼭 할 일과 줄여도 되는 일을 나눠보세요. 못 지킨 항목을 한꺼번에 만회하려 하지 않아도 돼요.'
+'예를 들어, 똑같이 잤는데도 점심을 걸렀거나 하루 종일 이동한 날은 유독 더 피곤해요. 잠만 탓하지 말고 그날 먹은 것, 움직인 것까지 같이 보세요.|요즘 편했던 날과 버거웠던 날을 하루씩 골라 잠, 식사, 이동을 적어 보세요. 사주가 아니라 실제로 달랐던 점이 답이에요.',
+'예를 들어, 하루 종일 서서 일한 날보다 메시지가 끊이지 않아 쉬지 못한 날이 더 지칠 때가 있어요. 내가 어떤 상황에서 닳는지 나눠 보세요.|오늘 지친 이유가 활동량, 이동, 쉬지 못한 시간 중 무엇에 가까운지 적어 보세요. 바꿀 수 있는 일정 하나부터 건드리면 돼요.',
+'예를 들어, 일이 밀리면 밥을 거르고 밤늦게까지 폰을 붙들고 있죠. 스트레스를 받을 때 내 생활이 어떻게 바뀌는지 보는 거예요.|바쁜 날에도 지킬 작은 일상 하나를 고르세요. 생활 전체를 고치려 하지 말고 실제로 이어 갈 수 있는 것 하나면 충분해요.',
+'예를 들어, 피곤한데 약속을 취소하기 미안해서 일정을 다 지키는 사람이 있어요. 남에게 성실한 선택이 지금 내 몸에는 무리일 수 있어요.|다가오는 약속 하나에서 시간을 줄이거나 날짜를 바꿀 수 있는지 물어보세요. 여유가 없다고 미리 말해도 괜찮아요.',
+'예를 들어, 평일엔 늦게 자고 주말에 몰아서 자면 월요일 아침이 유독 힘들죠. 어떤 생활이 반복됐는지 확인해 보는 거예요.|일어나는 시간이 크게 달랐던 날을 적어 보세요. 무리 없이 조정할 수 있는 부분 하나만 찾으면 돼요.',
+'예를 들어, 비 오는 날 급하게 계단을 내려가면서 휴대폰을 보면 주변을 놓치기 쉬워요. 특정 날짜의 사고 예고가 아니라 누구에게나 필요한 안전 습관 이야기예요.|이동하면서 메시지를 확인해야 한다면 잠깐 멈춘 뒤에 보세요. 사주의 표시는 사고가 날 확률을 뜻하지 않아요.',
+'예를 들어, 일정이 겹친 날은 약속 사이 이동 시간이 모자라서 서두르게 돼요. 조심하라는 시기를 읽더라도 내 일정에서 급해지는 이유부터 보는 게 먼저예요.|약속 사이에 이동하고 준비할 시간이 있는지 확인해 보세요. 여유가 없다면 시간을 조정할 수 있는지 먼저 물어보세요.',
+'예를 들어, 시간이 없다고 처음 쓰는 도구를 설명 없이 쓰다가 실수하는 경우가 있어요. 급한 마음과 작업 조건을 같이 보는 생활 예시예요.|처음 쓰는 도구나 처음 가는 곳에서는 안내를 확인할 시간을 남겨 두세요. 모르는 건 시작하기 전에 물어보는 게 제일 빨라요.',
+'예를 들어, 잠깐 쉬기로 해 놓고 업무 메시지를 계속 확인하면 일에서 벗어난 느낌이 안 들어요. 쉬는 시간에 실제로 뭘 하고 있는지 보세요.|짧은 휴식 하나만큼은 업무 알림을 끄고 쉬어 보세요. 불편이 계속되면 생활 해설로 판단하지 말고 전문가에게 도움을 구하세요.',
+'예를 들어, 계획이 밀렸다고 쉬는 시간을 전부 없애면 다음 일정까지 버거워져요. 목표를 지키는 것과 무리한 분량을 계속 유지하는 건 달라요.|이번 주 일정에서 꼭 할 일과 줄여도 되는 일을 나눠 보세요. 못 지킨 항목을 한꺼번에 만회하려 하지 않아도 돼요.'
 ],
 creative:[
-'이 장면을 일상에 비유하면, 낯선 일을 시작하기 전 문 앞에서 망설이는 순간과 비슷해요. 등장인물의 선택을 내 과거로 받아들이기보다 지금의 고민과 비교해 볼 수 있어요.|인물이 문을 열기 전에 궁금해했을 것 한 가지를 떠올려보세요. 내가 새 일을 시작할 때 먼저 알고 싶은 것과 닮았는지 살펴보세요.',
-'이 장면을 일상에 비유하면, 같은 사람도 학교와 직장에서 맡는 역할이 달라지는 모습과 비슷해요. 시대와 배경은 인물의 선택을 이해하기 위한 창작 설정이에요.|배경이 지금의 동네나 회사라면 인물이 어떤 선택을 했을지 상상해 보세요. 이야기 속 상황을 다른 각도에서 읽는 방법이에요.',
-'이 장면을 일상에 비유하면, 모임에서 진행을 맡는 사람과 뒤에서 준비하는 사람이 서로 다른 부담을 지는 모습이에요. 인물의 신분은 실제 전생에 대한 정보가 아니에요.|인물이 가진 권한과 감당해야 할 일을 나눠보세요. 그 역할이 좋아 보이는 이유와 버거워 보이는 이유를 하나씩 떠올려보세요.',
-'이 장면을 일상에 비유하면, 힘들 때 조용히 들어준 친구가 오래 기억에 남는 모습과 비슷해요. 이야기 속 인연을 현재의 특정 사람이라고 단정할 필요는 없어요.|인물에게 도움이 된 말이나 행동을 하나 골라보세요. 지금의 관계에서도 고마움을 전하고 싶은 장면이 떠오르는지 살펴보세요.',
-'이 장면을 일상에 비유하면, 오래 준비한 발표를 마치거나 만든 것을 처음 보여주는 순간과 비슷해요. 성취를 상상하는 창작 장면으로 읽어보세요.|결과 외에 인물이 끝까지 이어간 행동을 하나 찾아보세요. 마지막 장면보다 그 과정에서 마음에 남는 부분을 골라도 좋아요.',
-'이 장면을 일상에 비유하면, 급하게 보낸 말 한마디를 나중에 후회하는 순간과 비슷해요. 이야기의 실수는 독자에게 같은 일이 있었다는 뜻이 아니에요.|인물이 잠깐 멈출 수 있었던 순간을 찾아보세요. 그때 어떤 질문을 했다면 선택이 달라졌을지 상상해 보세요.',
-'이 장면을 일상에 비유하면, 배우고 싶던 것을 바쁘다는 이유로 계속 미뤄둔 모습과 비슷해요. 소망은 인물의 설정이며 내 과거에 대한 설명이 아니에요.|인물이 다시 기회를 얻는다면 가장 작게 무엇부터 할지 생각해 보세요. 거창한 결말 대신 작은 시작을 상상해도 좋아요.',
-'이 장면을 일상에 비유하면, 지난 경험을 돌아보며 다음에는 다르게 해보겠다고 마음먹는 순간과 비슷해요. 메시지는 이야기를 마무리하는 창작 표현이에요.|가장 마음에 남은 장면 하나를 고르고 인물에게 해주고 싶은 말을 적어보세요. 감상에 맞는 해석을 자유롭게 남겨도 돼요.'
+'이 장면을 일상에 비유하면, 낯선 일을 시작하기 전에 문 앞에서 한참 망설이는 순간이에요. 인물의 선택은 내 과거가 아니라 지금의 고민과 견줘 보는 거울이에요.|인물이 문을 열기 전에 궁금했을 것 한 가지를 떠올려 보세요. 내가 새 일을 시작할 때 먼저 알고 싶은 것과 닮았는지 보세요.',
+'이 장면을 일상에 비유하면, 같은 사람이 학교에서와 회사에서 전혀 다른 모습으로 지내는 것과 비슷해요. 시대와 배경은 인물의 선택을 이해하려고 만든 창작 설정이에요.|이 배경이 지금 우리 동네나 회사라면 인물이 어떤 선택을 했을지 상상해 보세요. 같은 이야기를 다른 각도로 읽는 방법이에요.',
+'이 장면을 일상에 비유하면, 모임에서 진행을 맡은 사람과 뒤에서 준비하는 사람이 서로 다른 부담을 지는 모습이에요. 인물의 신분은 실제 전생에 대한 정보가 아니에요.|인물이 가진 권한과 감당해야 할 일을 나눠 보세요. 그 역할이 좋아 보이는 이유와 버거워 보이는 이유를 하나씩 떠올려 보세요.',
+'이 장면을 일상에 비유하면, 힘들 때 조용히 들어 준 친구가 오래 기억에 남는 것과 비슷해요. 이야기 속 인연을 지금의 특정 사람으로 단정할 필요는 없어요.|인물에게 도움이 된 말이나 행동을 하나 골라 보세요. 지금 내 관계에서도 고마움을 전하고 싶은 장면이 떠오르는지 보세요.',
+'이 장면을 일상에 비유하면, 오래 준비한 발표를 마치거나 만든 걸 처음 보여 주는 순간이에요. 성취를 상상해 보는 창작 장면으로 읽어 보세요.|결과보다 인물이 끝까지 이어 간 행동을 하나 찾아보세요. 마지막 장면보다 과정에서 마음에 남는 부분을 골라도 좋아요.',
+'이 장면을 일상에 비유하면, 급하게 보낸 말 한마디를 나중에 후회하는 순간이에요. 이야기 속 실수는 독자에게 같은 일이 있었다는 뜻이 아니에요.|인물이 잠깐 멈출 수 있었던 순간을 찾아보세요. 그때 어떤 질문을 했다면 선택이 달라졌을지 상상해 보세요.',
+'이 장면을 일상에 비유하면, 배우고 싶던 걸 바쁘다는 핑계로 계속 미뤄 둔 모습이에요. 소망은 인물의 설정이지 내 과거에 대한 설명이 아니에요.|인물이 다시 기회를 얻는다면 가장 작게 무엇부터 할지 생각해 보세요. 거창한 결말 대신 작은 시작을 상상해도 좋아요.',
+'이 장면을 일상에 비유하면, 지난 일을 돌아보며 다음엔 다르게 해 봐야겠다고 마음먹는 순간이에요. 마지막 메시지는 이야기를 마무리하려고 만든 창작 표현이에요.|가장 마음에 남은 장면 하나를 고르고, 인물에게 해 주고 싶은 말을 적어 보세요. 감상에 맞는 해석은 자유롭게 남겨도 돼요.'
 ],
 remedy:[
 '예를 들어, 아침마다 열쇠를 찾느라 바쁘다면 전날 같은 자리에 놓는 작은 습관이 하루를 편하게 만들 수 있어요. 생활을 바꾸는 일은 이런 반복부터 시작할 수 있어요.|요즘 자꾸 시간을 쓰는 불편 하나를 고르세요. 의지로 참기보다 물건을 놓는 곳이나 행동 순서를 바꿔보세요.',
@@ -102,14 +102,54 @@ remedy:[
 };
 var scenes={};Object.keys(raw).forEach(function(topic){raw[topic].forEach(function(line,i){var pair=line.split('|');scenes['timeline_'+topic+'_'+String(i+1).padStart(2,'0')]={example:pair[0],action:pair[1],kind:topic==='creative'?'fiction-reflection':topic==='health'?'general-education':'illustrative'};});});
 scenes.timeline_self_peak={example:'예를 들어, 실력을 쌓기 좋은 때라면 자격증 이름만 늘리기보다 배운 것으로 작은 작업을 끝내보는 거예요. 도움이 되는 흐름과 실제 성과 사이에는 내가 해보는 과정이 있어요.',action:'이번 주에 써볼 기술 하나와 완성할 결과 하나를 골라보세요. 해본 뒤 더 쉬워진 일과 아직 어려운 일을 나눠보세요.',kind:'illustrative'};
-var preciseIds=['timeline_self_06','timeline_self_09','timeline_career_01','timeline_career_02','timeline_career_05'];
-function starExample(sd,id){if(preciseIds.indexOf(id)<0||!sd||!(sd.specialStars||[]).some(function(s){return s&&s.name==='현침살';}))return '';var examples={
- timeline_self_06:'작은 차이를 알아차리는 모습을 장점으로 활용해 볼 수 있어요. 예를 들어, 다른 사람이 놓친 옷의 박음질이나 사진의 작은 얼룩을 찾아 마무리 품질을 높이는 식이에요.',
- timeline_self_09:'이 이름을 생활에 빗대면 작은 차이가 눈에 잘 들어와 신경이 쓰이는 모습이에요. 예를 들어, 미용사가 머리 길이를 세밀하게 맞추거나 의료인이 정밀한 작업을 할 때처럼, 세부를 놓치지 않는 일이 장점이 될 수 있어요.',
- timeline_career_01:'세밀한 차이를 살피는 모습을 실제 업무에서 시험해 볼 수 있어요. 예를 들어, 미용사의 커트나 의료인의 정밀한 작업처럼 작은 오차를 확인하는 일과 연결해 생각해 볼 수 있어요.',
- timeline_career_02:'꼼꼼히 살피는 행동이 다른 사람에게 필요한 도움인지 확인해 보세요. 예를 들어, 판매할 제품의 작은 흠을 검수하거나 문서의 오타와 숫자 오류를 찾아주는 작업으로 시험해 볼 수 있어요.',
- timeline_career_05:'직업 이름보다 매일 하는 작업이 얼마나 세밀한지 살펴보세요. 예를 들어, 도면의 치수를 대조하는 일과 고객 앞에서 즉석 설명을 하는 일은 같은 회사 안에서도 쓰는 능력이 달라요.'
- };return '사주에 현침살이 있어요. '+examples[id];}
+// Star lines: only shown when the calculated chart actually lists that star. Tendencies, never events.
+var starLines={
+ 현침살:{
+  timeline_self_06:'바늘 끝처럼 작은 것에 꽂히는 별이라, 남들이 못 보는 오타나 얼룩, 어긋난 한 줄이 내 눈에는 먼저 들어와요. 이 촉이 내 무기예요. 검수, 교정, 정밀 작업처럼 작은 차이가 돈이 되는 일에서 특히 빛나요.',
+  timeline_self_09:'바늘 같은 별이라 작은 말투와 표정, 어긋난 약속이 남들보다 따갑게 와닿아요. 예민하다는 소리를 듣지만 유별난 게 아니라 촉이 좋은 거예요. 이 촉은 미용사나 의료인, 정밀 세공처럼 세밀함이 실력인 일에서 장점이 돼요. 다만 알아챈 걸 그대로 말로 꺼내면 가까운 사람이 찔려요. 한 템포 늦춰서 말하세요.',
+  timeline_career_01:'바늘처럼 작은 것을 집어내는 별이라, 세밀하게 맞추는 일에서 실력이 드러나기 쉬워요. 미용사의 커트나 의료인의 정밀한 손길, 도면 치수를 대조하는 일처럼 오차 하나가 결과를 바꾸는 직무가 잘 어울려요.',
+  timeline_career_02:'바늘 끝처럼 꼼꼼하게 짚어내는 별이라, 남이 대충 넘긴 곳을 잡아주는 일이 돈이 돼요. 제품의 작은 흠을 검수하거나 문서의 오타와 숫자 오류를 찾아주는 일처럼 작게 시험해 볼 수 있어요.',
+  timeline_career_05:'바늘 같은 세밀함이 무기라서, 업종 이름보다 하루 작업이 얼마나 정밀한지를 보세요. 도면의 치수를 대조하는 일과 고객 앞에서 즉석으로 설명하는 일은 같은 회사 안에서도 쓰는 능력이 달라요. 정밀한 쪽이 더 편한 편이에요.'
+ },
+ 홍염살:{
+  timeline_self_08:'눈빛과 분위기로 이성의 시선을 끄는 별이에요. 그만큼 내 안에서도 끌림이 쉽게 켜져서 마음이 흔들리는 순간이 많은데, 실제로는 선을 넘지 않고 혼자 상상하다 끝나는 날이 대부분이에요. 숨기는 욕망이 아니라 말하지 않는 욕망이에요.',
+  timeline_love_02:'눈빛이나 분위기로 호감을 사기 쉬운 별이에요. 말 한마디 안 했는데 상대가 혼자 설레는 일이 생길 수 있어요. 그래서 오히려 선을 분명히 안 그으면 의도하지 않은 오해를 받아요.',
+  timeline_love_04:'분위기에 끌림이 따르는 별이라, 사랑에 빠지는 속도가 빠른 편이에요. 좋아하면 머릿속으로는 이미 몇 번이나 데이트를 마쳤는데, 현실에서는 어색해서 한 걸음이 늦어요.',
+  timeline_love_05:'끌림이 쉽게 켜지는 별이에요. 첫눈에 이성적으로 끌리는 순간이 오면 속으로 상상이 먼저 달려가요. 그런데 생각만 하고 끝나는 일이 많아서, 정작 일상 궁합은 만나 보고 나서야 알게 돼요.'
+ },
+ 괴강살:{
+  timeline_self_07:'기질이 센 별이에요. 한번 마음먹으면 물러서지 않는 힘이 장점인데, 그만큼 주변이 한 발 물러서서 입을 닫는 순간을 못 알아채기 쉬워요. 이기고 나서 사람이 떠나 있는 일이 가장 큰 그림자예요.',
+  timeline_self_18:'기질이 강한 별이라 좋을 땐 추진력이고 나쁠 땐 독단이에요. 같은 힘인데 방향만 달라요. 결정할 때 한 사람의 의견만 더 듣는 것으로도 최악의 모습은 확 줄어요.',
+  timeline_career_04:'결단이 빠르고 밀어붙이는 별이라 책임을 지는 자리에서 힘이 나요. 대신 팀이 따라올 시간을 주지 않으면 리더가 아니라 혼자 달리는 사람이 돼요.'
+ },
+ 양인살:{
+  timeline_self_16:'날이 선 별이라 경쟁에서 지면 오래 곱씹어요. 그 날카로움이 노력으로 가면 큰 힘이 되는데, 사람 쪽으로 가면 서로 상처만 남아요. 이길 상대는 어제의 나로 정해 두세요.',
+  timeline_career_07:'칼날 같은 승부욕이 있는 별이라 회의에서 옳은 말을 하고도 분위기를 얼려 버릴 수 있어요. 말의 날을 한 단계만 무디게 해도 같은 의견이 훨씬 잘 통해요.'
+ },
+ 천을귀인:{
+  timeline_self_15:'어려울 때 도와주는 사람이 나타나기 쉬운 별이에요. 다만 가만히 있으면 귀인도 몰라요. 힘들다는 말을 한 번 꺼내는 사람에게 손을 내밀어요.',
+  timeline_wealth_10:'사람이 기회를 물어다 주기 쉬운 별이에요. 돈의 기회가 숫자보다 소개와 인연으로 먼저 오는 편이라, 연락을 끊지 않는 게 재물 관리의 일부예요.',
+  timeline_career_08:'필요한 순간에 길을 알려주는 사람이 나타나기 쉬운 별이에요. 움직이기 전에 선배 한 명에게 물어보면 보이는 길이 달라져요.'
+ },
+ 문창귀인:{
+  timeline_remedy_03:'글과 공부에 복이 있다고 보는 별이에요. 읽고 쓰고 정리하는 방식의 공부가 잘 맞는 편이라, 듣기만 하지 말고 꼭 한 줄씩 적어 두세요.',
+  timeline_career_10:'글과 배움에 복이 있다고 보는 별이에요. 준비를 오래 하는 습관만 조심하면, 정리해서 내놓는 힘이 오히려 강점이에요.'
+ },
+ 학당귀인:{
+  timeline_remedy_03:'배움에 인연이 닿는 별이에요. 새로운 걸 익히는 속도가 빠른 편이라, 배운 걸 바로 써먹을 곳을 만들어 주면 훨씬 오래 가요.'
+ }
+};
+// Earlier wording of the star line. Cached paragraphs that still carry it are replaced, never stacked.
+var legacyStarBodies=["작은 차이를 알아차리는 모습을 장점으로 활용해 볼 수 있어요. 예를 들어, 다른 사람이 놓친 옷의 박음질이나 사진의 작은 얼룩을 찾아 마무리 품질을 높이는 식이에요.","이 이름을 생활에 빗대면 작은 차이가 눈에 잘 들어와 신경이 쓰이는 모습이에요. 예를 들어, 미용사가 머리 길이를 세밀하게 맞추거나 의료인이 정밀한 작업을 할 때처럼, 세부를 놓치지 않는 일이 장점이 될 수 있어요.","세밀한 차이를 살피는 모습을 실제 업무에서 시험해 볼 수 있어요. 예를 들어, 미용사의 커트나 의료인의 정밀한 작업처럼 작은 오차를 확인하는 일과 연결해 생각해 볼 수 있어요.","꼼꼼히 살피는 행동이 다른 사람에게 필요한 도움인지 확인해 보세요. 예를 들어, 판매할 제품의 작은 흠을 검수하거나 문서의 오타와 숫자 오류를 찾아주는 작업으로 시험해 볼 수 있어요.","직업 이름보다 매일 하는 작업이 얼마나 세밀한지 살펴보세요. 예를 들어, 도면의 치수를 대조하는 일과 고객 앞에서 즉석 설명을 하는 일은 같은 회사 안에서도 쓰는 능력이 달라요."];
+var starOrder=['현침살','홍염살','괴강살','양인살','천을귀인','문창귀인','학당귀인'];
+var preciseIds=Object.keys(starLines).reduce(function(all,name){Object.keys(starLines[name]).forEach(function(id){if(all.indexOf(id)<0)all.push(id);});return all;},[]);
+function starExample(sd,id){
+ if(preciseIds.indexOf(id)<0||!sd)return '';
+ var have=(sd.specialStars||[]).map(function(s){return s&&s.name;});
+ for(var i=0;i<starOrder.length;i++){var name=starOrder[i];
+  if(have.indexOf(name)>=0&&starLines[name][id])return '사주에 '+name+'이 있어요. '+starLines[name][id];}
+ return '';
+}
 
 // Editorial hypotheses use conjunctions of existing facts, never biography or classical source claims.
 var frankRules=[
@@ -858,24 +898,25 @@ function chapterVariant(c){var fixed={'resource-low-output':0,'peer-wealth':1,'o
 var focusNarratives=[['wood-initiative',['갑','을'],'신강','비견','겁재',1],['fire-opportunity',['병','정'],'신약','상관','편재',2],['earth-steady',['무','기'],'중화','식신','정재',6],['metal-reform',['경','신'],'신강','상관','정관',2],['water-vigilance',['임','계'],'신약','편관','편인',0]];
 var focusIds=['timeline_self_01','timeline_self_05','timeline_self_12','timeline_self_22','timeline_wealth_02','timeline_career_01','timeline_love_06'];
 var steadyExamples={timeline_self_01:'같은 작업을 매주 빠짐없이 끝내지만, 도구를 바꾸자는 제안에는 익숙한 순서를 먼저 설명해요.',timeline_self_05:'약속한 일은 조용히 챙겼는데 어떻게 신경 썼는지는 말하지 않아, 상대는 짧은 답장만 기억할 수 있어요.',timeline_self_12:'전에 쓰던 점검표를 그대로 따라가다가 이번에 새로 들어온 요청은 뒤늦게 발견해요.',timeline_self_22:'매주 하던 작업의 결과 기준은 유지하면서 오래 걸리는 단계 하나만 새 도구로 시험해 보는 거예요.',timeline_wealth_02:'매달 같은 문서 정리 일을 맡는다면 전달 날짜와 포함할 문서 수를 정해 반복해서 제공할 수 있어요.',timeline_career_01:'정기 점검이나 제작 업무에서 일정한 품질을 유지하면서 반복 순서를 조금씩 개선하는 과제를 해볼 수 있어요.',timeline_love_06:'늘 같은 시간에 연락했는데 상대의 일정이 바뀌자 관심이 줄었다고 느끼기 전에 새로운 연락 시간을 물어보는 거예요.'};
-function chapterReview(sd,id,selection){var selectedId=typeof selection==='string'?selection:selection&&selection.id,selectedWhen=selection&&typeof selection==='object'?selection.when:null;var c=frankContext(sd,id),view=chapterViews[id];if(!c||!view)return null;var profile=focusIds.indexOf(id)>=0&&focusNarratives.find(function(p){return p[1].indexOf(sd.dayMaster&&sd.dayMaster.stem)>=0&&sd.strength&&sd.strength.band===p[2]&&sd.tenGods&&sd.tenGods[p[3]]>=14&&sd.tenGods[p[4]]>=14&&(selectedId===undefined||String(selectedId).indexOf('bundle-focus-'+p[0]+'-')===0);});var matchingGroup=selectedWhen&&Object.keys(selectedWhen.group||{}).find(function(k){return selectedWhen.group[k]==='strong';}),variant=profile?profile[5]:matchingGroup?{인성:0,비겁:1,식상:2,관성:3,재성:4}[matchingGroup]:-1,example=variant===6?steadyExamples[id]:variant>=0?view.situations[variant]:scenes[id].example.replace(/^예를 들어, /,''),rows=c.rows.slice();if(selectedWhen)rows.push('본문에 실제 선택된 조건 '+JSON.stringify(selectedWhen));if(profile)rows.push('본문 조합 '+profile[0]+' · '+sd.dayMaster.stem+' · '+profile[2]+' · '+profile[3]+' '+sd.tenGods[profile[3]].toFixed(1)+'% · '+profile[4]+' '+sd.tenGods[profile[4]].toFixed(1)+'% (각 14% 이상)');return Object.assign({},c,{sceneVersion:3,sourceWhen:selectedWhen,sceneSource:profile?'compound-profile':matchingGroup?'selected-group':'chapter-context',narrativeProfile:profile?profile[0]:null,rows:rows,example:example,risk:view.question,exampleKey:id+'-scene-'+variant,sceneVariant:variant,question:view.question});}
+function chapterReview(sd,id,selection){var selectedId=typeof selection==='string'?selection:selection&&selection.id,selectedWhen=selection&&typeof selection==='object'?selection.when:null;var c=frankContext(sd,id),view=chapterViews[id];if(!c||!view)return null;var profile=focusIds.indexOf(id)>=0&&focusNarratives.find(function(p){return p[1].indexOf(sd.dayMaster&&sd.dayMaster.stem)>=0&&sd.strength&&sd.strength.band===p[2]&&sd.tenGods&&sd.tenGods[p[3]]>=14&&sd.tenGods[p[4]]>=14&&(selectedId===undefined||String(selectedId).indexOf('bundle-focus-'+p[0]+'-')===0);});var matchingGroup=selectedWhen&&Object.keys(selectedWhen.group||{}).find(function(k){return selectedWhen.group[k]==='strong';}),variant=profile?profile[5]:matchingGroup?{인성:0,비겁:1,식상:2,관성:3,재성:4}[matchingGroup]:-1,example=variant===6?steadyExamples[id]:variant>=0?view.situations[variant]:'',rows=c.rows.slice();if(selectedWhen)rows.push('본문에 실제 선택된 조건 '+JSON.stringify(selectedWhen));if(profile)rows.push('본문 조합 '+profile[0]+' · '+sd.dayMaster.stem+' · '+profile[2]+' · '+profile[3]+' '+sd.tenGods[profile[3]].toFixed(1)+'% · '+profile[4]+' '+sd.tenGods[profile[4]].toFixed(1)+'% (각 14% 이상)');return Object.assign({},c,{sceneVersion:3,sourceWhen:selectedWhen,sceneSource:profile?'compound-profile':matchingGroup?'selected-group':'chapter-context',narrativeProfile:profile?profile[0]:null,rows:rows,example:example,risk:view.question,exampleKey:id+'-scene-'+variant,sceneVariant:variant,question:view.question});}
 
-function frankText(sd,id,role,review){var c=review||chapterReview(sd,id),view=chapterViews[id];if(!c||!view)return '';if(role==='evidence')return legacyFrankText(sd,id,role)+(c.narrativeProfile?' 본문과 생활 장면은 '+c.rows[c.rows.length-1]+' 조건도 함께 확인해 연결했습니다.':'');if(role==='risk')return '조금 더 솔직히 점검하면, '+view.question;if(role==='reality'){if(!c.example)return '';return '예를 들어, '+c.example;}return '';}
+function frankText(sd,id,role,review){var c=review||chapterReview(sd,id),view=chapterViews[id];if(!c||!view)return '';if(role==='evidence')return legacyFrankText(sd,id,role)+(c.narrativeProfile?' 본문과 생활 장면은 '+c.rows[c.rows.length-1]+' 조건도 함께 확인해 연결했습니다.':'');if(role==='risk')return view.question;if(role==='reality'){if(!c.example)return '';return '예를 들어, '+c.example;}return '';}
 function displayCopy(text){if(root.MantraPlainCopy)text=root.MantraPlainCopy.text(text);if(root.MantraPolite)text=root.MantraPolite.text(text);return text;}
 var incomeRevisions=[{"id":"bundle-focus-wood-initiative-income-reality","old":"사람과 경쟁에서 힘을 얻는 사주라, 혼자 고민하던 소비도 친구가 시작하면 바로 결정하기 쉬워요. 공동 구매나 동업 제안에서 “우리 같이 하자”는 말이 숫자보다 먼저 마음을 움직여요.","next":"비견·겁재 조건은 함께 일하는 사람과 내 역할을 구분해 보는 단서로 사용해요. 수입 방식에서는 사람을 모으는 능력과 내가 직접 제공할 일을 나눠 설명해 보세요."},{"id":"bundle-focus-wood-initiative-income-risk","old":"같이 시작한 사람을 실망시키기 싫어 비용을 더 내거나, 경쟁에서 밀리기 싫어 예산을 올리는 일이 생겨요. 사람을 믿는 마음과 돈을 나누는 약속이 뒤섞이면 정산할 때 서운해져요.","next":"사람을 모았다는 이유만으로 모든 수입이 내 몫이 되지는 않아요. 고객을 찾은 사람, 작업한 사람, 비용을 낸 사람의 대가를 시작 전에 합의해 보세요."},{"id":"bundle-focus-fire-opportunity-income-reality","old":"표현하는 상관과 거래 기회를 찾는 편재가 이어져, 아이디어를 상품이나 제안으로 바꾸는 일에 관심이 가요. 지인이 해보자고 하면 고객 반응부터 상상하고 준비 비용은 나중에 계산하기 쉬워요.","next":"상관·편재 조건은 생각을 표현하는 일과 거래의 접점을 함께 살피는 단서예요. 수입으로 시험하려면 짧은 수업, 시안, 소량 제작처럼 고객이 받을 결과를 먼저 정해보세요."},{"id":"bundle-focus-fire-opportunity-income-risk","old":"판매가를 낮추거나 서비스를 더 얹어 거래를 잡으면 바빠져도 남는 돈은 적어요. 주문이 늘어도 혼자 처리할 시간이 함께 늘어나는 것은 아니에요.","next":"반응을 얻는 말과 실제 납품 약속을 구분해야 해요. 재미있는 제안을 여러 개 내더라도 이번에 돈을 받고 끝낼 범위가 흐리면 수정과 응대만 늘어날 수 있어요."},{"id":"bundle-focus-earth-steady-income-reality","old":"식신의 만드는 힘이 정재의 관리하는 힘으로 이어져요. 제품 하나를 팔더라도 다음 달에 같은 품질로 다시 제공할 수 있는지, 비용을 빼고 무엇이 남는지에 관심을 둬요.","next":"식신·정재 조건은 반복해서 만드는 일과 일정한 대가를 받는 방식을 함께 살피는 단서예요. 정기 작업이나 유지 관리처럼 다음번에도 제공할 결과가 같은지 확인해 보세요."},{"id":"bundle-focus-earth-steady-income-risk","old":"꾸준히 해왔다는 이유로 가격이나 보상을 그대로 두면 손에 익은 일이 오히려 손해가 돼요. 재료비와 시간이 달라졌는데 옛 기준을 유지하는 상황을 조심하세요.","next":"손에 익은 작업이라는 이유만으로 작은 추가 요청을 전부 포함하지 마세요. 정기적으로 받는 대가에 어디까지의 결과가 들어가는지 먼저 알려야 반복 수입의 범위도 분명해져요."},{"id":"bundle-focus-metal-reform-income-reality","old":"상관은 더 나은 거래 방식을 찾고 정관은 약속과 기준을 확인해요. 견적서를 받으면 비용뿐 아니라 제공 범위와 빠진 조건까지 따지는 모습으로 나타나요.","next":"상관·정관 조건은 개선 아이디어와 지켜야 할 기준을 함께 보는 단서예요. 수입 방식에서는 점검·편집·품질 개선처럼 전후 차이를 보여줄 결과를 만들어 볼 수 있어요."},{"id":"bundle-focus-metal-reform-income-risk","old":"조건의 작은 차이까지 모두 바로잡으려 하면 거래를 끝낼 때를 놓쳐요. 상대를 설득하는 데 쓴 시간이 실제 절약한 비용보다 커질 수 있어요.","next":"문제를 많이 찾았다는 사실만으로 의뢰인이 대가를 더 주지는 않아요. 점검 보고서인지 실제 수정까지인지, 돈을 받는 완성 범위를 먼저 맞춰 보세요."},{"id":"bundle-focus-water-vigilance-income-reality","old":"편관은 당장 닥칠 요구에 민감하고 편인은 보이지 않는 조건을 오래 살펴요. 결제 전에 후기와 약관을 여러 번 찾아보고, 혹시 몰라 추가 옵션까지 넣는 모습이에요.","next":"편관·편인 조건은 급한 요구에 대응하는 일과 빠진 조건을 조사하는 일을 함께 살피는 단서예요. 자료 정리나 사전 검토를 제공한다면 전달할 문서와 검토 범위를 정해보세요."},{"id":"bundle-focus-water-vigilance-income-risk","old":"대비 항목을 계속 더하면 안전해진 느낌은 커져도 지출이 함께 늘어요. 아직 사용할지 모르는 기능이나 장비가 걱정을 잠시 덜어주는 소비가 될 수 있어요.","next":"모든 경우의 답까지 책임지려 하면 조사한 만큼 대가를 받기 어려워요. 확인된 내용과 남은 질문을 나눠 전달하고, 추가 조사가 필요한 경우에는 별도 범위를 합의하세요."},{"id":"bundle-focus-wood-initiative-income-strength","old":"필요한 사람을 모아 거래를 시작하고 조건을 직접 협상하는 힘이 있어요. 눈치만 보며 기다리기보다 내가 받을 가격과 원하는 역할을 먼저 말할 수 있어요.","next":"사람을 연결하고 역할을 나누는 행동을 실제 서비스로 시험해 볼 수 있어요. 행사 진행이나 공동 작업처럼 누가 무엇을 끝낼지 정리한 결과를 보여주는 방식이에요."},{"id":"bundle-focus-wood-initiative-income-reinforce","old":"재물 그릇을 키우는 열쇠는 더 크게 판을 벌이는 일이 아니라, 참여한 만큼 내게 남는 구조를 만드는 일이에요. 친한 사이일수록 비용·결정권·돌려받을 몫을 따로 정하세요.","next":"수입 방식을 정할 때 내가 직접 하는 작업과 다른 사람이 하는 작업을 한 문장씩 적어보세요. 연결·진행·제작 중 어떤 역할에 대가를 받는지 분명히 하는 연습이에요."},{"id":"bundle-focus-wood-initiative-income-practice","old":"공동 지출 하나를 골라 누가 얼마를 내고 언제 정산하는지 한 메시지에 적어 공유하세요. 상대가 알아서 맞춰 줄 거라는 기대를 구체적인 약속으로 바꾸세요.","next":"최근 함께 끝낸 일 하나에서 내 역할이 보이는 결과를 골라보세요. 같은 도움이 필요한 사람에게 제공할 범위와 완료 날짜를 짧게 써보세요."},{"id":"bundle-focus-fire-opportunity-income-strength","old":"기존 상품의 불편을 짚어 다른 방식으로 소개하고, 필요로 하는 사람에게 연결하는 힘이 있어요. 같은 물건도 누가 왜 쓰는지 설명하며 판매할 수 있어요.","next":"관심을 끄는 설명을 고객이 써볼 결과로 옮기는 역할을 시험해 볼 수 있어요. 작은 시안이나 짧은 수업을 완성해 반응을 확인하는 방식이에요."},{"id":"bundle-focus-fire-opportunity-income-reinforce","old":"재물 그릇은 기회의 수보다 끝까지 제공하고 대가를 받을 수 있는 범위로 보세요. 주문을 받기 전에 비용과 수정 횟수, 시간을 가격 안에 넣어야 해요.","next":"아이디어마다 새 상품을 만들기보다 고객 한 사람이 받을 결과 하나를 고르세요. 설명한 장점이 실제 사용에서도 느껴지는지 확인한 뒤 제공 범위를 넓혀보세요."},{"id":"bundle-focus-fire-opportunity-income-practice","old":"제안 하나에 준비비·제공 시간·받을 금액을 써보세요. 추가 요청은 별도 비용이라는 조건을 미리 넣고 작은 주문 하나를 끝내보고 실제로 얼마나 손이 가는지 살펴보세요.","next":"팔아보고 싶은 아이디어를 한 장의 시안이나 짧은 체험으로 만들어보세요. 받아본 사람이 어느 부분을 실제로 썼는지 묻고 다음 제안을 고쳐보세요."},{"id":"bundle-focus-earth-steady-income-strength","old":"수입과 지출을 생활의 반복 속에서 관리하는 능력이 있어요. 작은 수고를 일정한 결과로 쌓아가고, 잘되는 일을 다시 제공할 방식을 만들어요.","next":"일정한 품질을 되풀이해 제공하는 작업을 수입의 형태로 시험해 볼 수 있어요. 매번 새로 설득하기보다 같은 약속을 안정적으로 이행하는 과제예요."},{"id":"bundle-focus-earth-steady-income-reinforce","old":"재물 그릇은 익숙한 수입을 얼마나 편하게 반복하고 남길 수 있는지로 살펴보세요. 아끼는 것뿐 아니라 제값을 받는 기준도 정기적으로 바꿔야 해요.","next":"반복해서 받을 일이라면 한 번 잘한 결과보다 다음번에도 지킬 작업 순서가 필요해요. 제공 주기와 완료 기준을 정하고 매번 달라지는 요청은 별도로 표시해 보세요."},{"id":"bundle-focus-earth-steady-income-practice","old":"반복해서 받는 일 하나의 최근 비용과 소요 시간을 다시 적어보세요. 처음 정한 가격과 비교해, 다음 거래에서 바꿀 조건 하나를 정하세요.","next":"자주 해준 작업 하나를 골라 시작부터 전달까지 순서를 적어보세요. 같은 요청이 다시 왔을 때 그대로 쓸 수 있는 안내문을 짧게 만들어보세요."},{"id":"bundle-focus-metal-reform-income-strength","old":"불분명한 계약이나 반복 비용을 찾아내고 조정하는 능력이 있어요. 좋은 말에 바로 결제하기보다 무엇을 받는지 확인해 불필요한 수고를 줄여요.","next":"어디가 달라졌는지 보여주는 점검·개선 작업을 시험해 볼 수 있어요. 지적의 개수보다 의뢰인이 비교할 수 있는 수정 전후 결과를 남기는 방식이에요."},{"id":"bundle-focus-metal-reform-income-reinforce","old":"재물 그릇을 볼 때는 협상으로 얻는 몫과 확인에 쓰는 시간을 함께 보세요. 꼭 지킬 조건과 받아들일 수 있는 차이를 나누는 것이 핵심이에요.","next":"개선 제안을 수입으로 연결하려면 문제 목록과 실제로 고칠 분량을 분리해 보세요. 의뢰인이 원하는 결과와 검토할 기준을 먼저 맞추면 작업의 끝도 정하기 쉬워져요."},{"id":"bundle-focus-metal-reform-income-practice","old":"다음 계약에서 꼭 필요한 조건 세 가지만 먼저 표시하세요. 나머지 차이는 금액과 시간을 비교하고, 핵심 조건이 맞으면 결정을 마무리해 보세요.","next":"고칠 수 있는 문서나 작업 하나를 작은 범위로 골라보세요. 수정 전후를 나란히 놓고 무엇이 읽기 쉽거나 쓰기 편해졌는지 두 문장으로 설명해 보세요."},{"id":"bundle-focus-water-vigilance-income-strength","old":"계약의 예외와 숨은 비용을 확인하는 힘이 있어요. 급한 분위기에 휩쓸리지 않고 환불이나 유지 비용처럼 나중에 문제가 될 부분을 살펴요.","next":"자료의 빠진 조건을 찾아 질문과 요약으로 정리하는 과제를 시험해 볼 수 있어요. 모든 답을 아는 역할보다 다음 결정에 필요한 정보를 전달하는 역할이에요."},{"id":"bundle-focus-water-vigilance-income-reinforce","old":"재물 그릇을 넓히려면 모든 위험을 돈으로 막으려 하지 않아야 해요. 실제 필요한 보호와 정보 확인으로 해결할 부분을 나눠 보세요.","next":"검토 작업을 제공한다면 조사할 질문의 수와 결과를 전달할 형식을 먼저 정해보세요. 확인하지 못한 항목도 따로 남겨야 조사가 끝없이 늘어나는 것을 막기 쉬워요."},{"id":"bundle-focus-water-vigilance-income-practice","old":"구매하려는 추가 옵션 하나에서 언제 쓸지와 대체 방법을 적어보세요. 사용 조건이 설명되지 않으면 바로 결제하지 말고 기본 범위부터 확인하세요.","next":"자료 하나에서 확인된 사실과 아직 물어볼 내용을 나눠 한 장으로 정리해 보세요. 읽는 사람이 다음 행동을 고를 수 있는지 확인받아보세요."}];
 function apply(text,id,role,sd,review){var scene=scenes[id];if(!scene||!text)return String(text||'');var value=String(text),ctx=review&&review.sceneVersion===3?review:chapterReview(sd,id),view=chapterViews[id];
  // Replace only exact paragraphs owned by the earlier shared module, preserving authored/source paragraphs.
  if(id==='timeline_wealth_02'&&['reality','risk','strength','reinforce','practice'].indexOf(role)>=0)value=value.split(/\n{2,}/).map(function(p){var r=incomeRevisions.find(function(r){return r.id.endsWith('-'+role)&&(p.trim()===r.old||p.trim()===displayCopy(r.old));});return r?displayCopy(r.next):p;}).join('\n\n');
- var legacy=ctx&&view?legacyFrankText(sd,id,role):'',oldScene=role==='reality'?scene.example:role==='practice'?scene.action:'';
+ var legacy=ctx&&view?legacyFrankText(sd,id,role):'',oldScene=role==='reality'?scene.example:role==='practice'?scene.action:'',oldRisk=role==='risk'&&view?'조금 더 솔직히 점검하면, '+view.question:'';
  if(view&&role==='reality')value=value.split(/\n{2,}/).filter(function(p){return !view.situations.some(function(t){return p.trim()===displayCopy('예를 들어, '+t);})&&!(steadyExamples[id]&&p.trim()===displayCopy('예를 들어, '+steadyExamples[id]));}).join('\n\n');
- if(legacy||oldScene)value=value.split(/\n{2,}/).filter(function(p){return ![legacy,displayCopy(legacy),oldScene,displayCopy(oldScene)].filter(Boolean).some(function(t){return p.trim()===t.trim();});}).join('\n\n');
+ if(legacy||oldScene||oldRisk)value=value.split(/\n{2,}/).filter(function(p){return ![legacy,displayCopy(legacy),oldScene,displayCopy(oldScene),oldRisk,oldRisk&&displayCopy(oldRisk)].filter(Boolean).some(function(t){return p.trim()===t.trim();});}).join('\n\n');
+ if(role==='reality')value=value.split(/\n{2,}/).filter(function(p){var t=p.trim().replace(/^.{1,41}님은 (?=사주에 현침살이)/,'');return !legacyStarBodies.some(function(b){var full='사주에 현침살이 있어요. '+b;return t===full||t===displayCopy(full);});}).join('\n\n');
  var extras=[],star=role==='reality'?starExample(sd,id):'',frank=frankText(sd,id,role,ctx),authoredExample=role==='reality'&&/(?:예를\s*들[어면]|상황을\s*떠올려)/.test(value);
  if(role==='reality'&&(authoredExample||star))frank='';
- if(role==='reality'){if(star)extras.push(star);else if(!frank&&!authoredExample)extras.push(scene.example);}
+ if(role==='reality'){if(star)extras.push(star);else if(!frank&&!authoredExample&&(scene.kind==='fiction-reflection'||value.replace(/s+/g,' ').trim().length<60))extras.push(scene.example);}
  if(role==='practice'&&value.trim().length<30)extras.push(scene.action);if(frank)extras.push(frank);
  extras.forEach(function(extra){extra=displayCopy(extra);if(extra&&value.indexOf(extra)<0)value=value.trim()+'\n\n'+extra;});return value;
 }
 
-function personalize(text,name){var value=typeof name==='string'?name.trim().slice(0,40):'';return value?String(text).replace('사주에 현침살이 있어요.',function(){return value+'님은 사주에 현침살이 있어요.';}):String(text);}
+function personalize(text,name){var value=typeof name==='string'?name.trim().slice(0,40):'';return value?String(text).replace(/사주에 (현침살|홍염살|괴강살|양인살|천을귀인|문창귀인|학당귀인)이 있어요\./,function(all,star){return value+'님은 사주에 '+star+'이 있어요.';}):String(text);}
 root.MantraEverydayReading={personalize:personalize,version:'everyday-reader-continuity-20261021-4',chapterViews:chapterViews,chapterVariant:chapterVariant,chapterReview:chapterReview,frankRules:frankRules,frankContext:frankContext,frankText:frankText,scenes:scenes,apply:apply,starExample:starExample};
 })(typeof window!=='undefined'?window:globalThis);

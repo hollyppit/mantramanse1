@@ -29,6 +29,7 @@ function text(value){
  // Only sentence-final words, including list items without a final period.
  return value.replace(/[가-힣]+(?=[.!?。…]*(?:[”’"']?)(?:\s|$))/g,function(w,offset,whole){
    var rest=whole.slice(offset+w.length);if(!/^(?:[.!?。…]+|[”’"']?(?:\s*\n|\s*$))/.test(rest))return w;
+   if(/^[?]/.test(rest))return w;
    return ending(w);
  });
 }
