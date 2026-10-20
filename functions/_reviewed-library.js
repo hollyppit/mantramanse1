@@ -29,7 +29,7 @@ export async function readPublishedLibrary(kv,id){
 }
 export function validatePassages(passages,contract,items){
  const issues=[],ids=new Set(),rules=new Map(items.map(r=>[r.id,r]));
- if(!Array.isArray(passages)||passages.length>200)return [{code:'invalid-passages'}];
+ if(!Array.isArray(passages)||passages.length>256)return [{code:'invalid-passages'}];
  for(const b of passages){
   const add=code=>issues.push({id:b?.id||'',code});
   if(!b||!/^[\w.-]{1,80}$/.test(b.id||'')||ids.has(b.id)){add('invalid-id');continue;}ids.add(b.id);

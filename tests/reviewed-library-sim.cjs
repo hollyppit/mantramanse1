@@ -25,7 +25,7 @@ global.window=globalThis;for(const f of ['engine.js','report/v2/saju-data.js'])v
  x=await admin({action:'check',expectRevision:current.d.revision,passages:[passage],scenarios:cases});assert.equal(x.d.issues.length,0,JSON.stringify(x.d));assert.equal(x.d.providerCallCount,0);
  assert.equal((await admin({action:'publish',expectRevision:current.d.revision,passages:[passage],scenarios:cases})).r.status,422);
  x=await admin({action:'publish',expectRevision:current.d.revision,passages:[passage],scenarios:cases,reviewed:true});assert.equal(x.r.status,200,JSON.stringify(x.d));
- let d=await (await API.onRequestPost({env,request:request(contract,charts[0])})).json();assert.equal(d.result.paragraphs[0].text,passage.text);
+ let d=await (await API.onRequestPost({env,request:request(contract,charts[0])})).json();assert.equal(d.result.paragraphs[0].text,(await import('../functions/_plain-copy.js')).plainText(passage.text));
  d=await (await API.onRequestPost({env,request:request(contract,charts[2])})).json();assert(!d.blocks.some(b=>b.id===passage.id),'counterexample must not receive personal passage');
  rule.version++;memory.set('ik:d:SELF',JSON.stringify([rule]));d=await (await API.onRequestPost({env,request:request(contract,charts[0])})).json();assert(!d.blocks.some(b=>b.id===passage.id),'source revision invalidates approved passage');
  memory.set('src:idx',JSON.stringify([{id:'fixture',active:false}]));d=await (await API.onRequestPost({env,request:request(contract,charts[0])})).json();assert.equal(d.interpretation.claims.length,0,'source withdrawal must take effect immediately');
