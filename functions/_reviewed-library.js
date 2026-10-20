@@ -7,7 +7,7 @@ import {PROHIBITED_RE} from './_style.js';
 import {similarity} from './_chapter-policy.js';
 import {digest} from './_reading-blocks.js';
 import {adviceFocus} from './_reading-advice.js';
-export const LIBRARY_VERSION='reviewed-library-9-authored-bundles';
+export const LIBRARY_VERSION='reviewed-library-10-contextual-profiles';
 // Reuse the existing service-only CAS namespace; no broader database privileges are required.
 export const libraryKey=id=>'ik:blocks:chapter:library.'+id;
 export const ROLES=['title','why','reality','strength','risk','reinforce','practice','evidence'];
@@ -51,7 +51,14 @@ export function validatePassages(passages,contract,items){
 export function normalizePassages(passages){return passages.map(b=>({id:b?.id,role:b?.role,kind:b?.kind,text:politeText(typeof b?.text==='string'?b.text.trim():''),ruleIds:b?.ruleIds||[],when:b?.when||{},unless:b?.unless||{},adviceKey:b?.adviceKey||b?.id}));}
 export function selectPassages(passages,contract,analysis,sd){
  const facts=deriveFacts(sd),claims=new Map(analysis.claims.map(c=>[c.knowledge_id,c]));
- return passages.filter(b=>!validatePassages([b],contract,analysis.claims.map(c=>({id:c.knowledge_id,status:'published',reviewed:true}))).length&&b.ruleIds.every(id=>claims.has(id)&&(!b.sourceVersions||b.sourceVersions[id]===(claims.get(id).knowledge_version||0)))&&(!Object.keys(b.when).length||evalConds(b.when,facts).match)&&(!Object.keys(b.unless).length||(!evalConds(b.unless,facts).match&&!evalConds(b.unless,facts).missing.length)));
+ const items=analysis.claims.map(c=>({id:c.knowledge_id,status:'published',reviewed:true}));
+ // Reject unmatched conditions before expensive prose validation. Matching copy still passes every source/style gate.
+ return passages.filter(b=>{try{
+  if(!b||!b.when||!b.unless)return false;
+  if(Object.keys(b.when).length&&!evalConds(b.when,facts).match)return false;
+  if(Object.keys(b.unless).length){const excluded=evalConds(b.unless,facts);if(excluded.match||excluded.missing.length)return false;}
+  return !validatePassages([b],contract,items).length&&b.ruleIds.every(id=>claims.has(id)&&(!b.sourceVersions||b.sourceVersions[id]===(claims.get(id).knowledge_version||0)));
+ }catch{return false;}});
 }
 // Database rules remain the sole evidence. Editorial instructions and fiction are never evidence.
 export function composeReviewed({clean,contract,analysis,library,adviceHistory=[],previous=[],usedAdviceKeys=[]}){

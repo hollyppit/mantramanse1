@@ -1,8 +1,8 @@
 import { readState, sourcePolicy } from './_rag-state.js';
 // Hash the exact original record: a concurrent legacy edit automatically invalidates its overlay.
 export async function recordHash(x) {const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(x)));return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join('');}
-export async function researchView(kv,original) {
-  let s;try{s=await readState(kv);}catch{return {items:original,docs:[],version:'research-unavailable'};}
+export async function researchView(kv,original,snapshot) {
+  let s;try{s=snapshot===undefined?await readState(kv):snapshot;if(!s)throw Error('unavailable');}catch{return {items:original,docs:[],version:'research-unavailable'};}
   if(s.config.legacyOnly)return {items:original,docs:[],version:'legacy-only:'+(s.indexVersion||0)};
   const items=original.slice(),docs=[],byId=new Map(original.map((x,i)=>[x.id,i]));
   for(const [id,changeId] of Object.entries(s.active)) {
@@ -18,4 +18,4 @@ export async function researchView(kv,original) {
   }
   return {items,docs,version:'research:'+(s.indexVersion||0)};
 }
-export async function serviceItems(kv,original) {return (await researchView(kv,original)).items;}
+export async function serviceItems(kv,original,snapshot) {return (await researchView(kv,original,snapshot)).items;}
