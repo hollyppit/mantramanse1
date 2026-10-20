@@ -379,7 +379,7 @@
     var on = n.querySelector('.on'); if (on) n.scrollLeft = Math.max(0, on.offsetLeft - 90);
   }
   /* 세계 무빙툰: 세계의 챕터들이 화면에 그려진 내용에서 앞부분 핵심 컷을 뽑아 한 편으로 감상한다(문장은 원문 그대로). */
-  function panelPool(){return (S.media||[]).concat(R.ReadingMedia?R.ReadingMedia.fromAssets(S.assets,S.assetVideos,S.sd):[]);}
+  function panelPool(){return (S.media||[]).concat(R.ReadingMedia?R.ReadingMedia.fromAssets(S.assets,S.assetVideos,S.sd).concat(R.ReadingMedia.fromAwakening(S.awk,S.sd)):[]);}
   function worldToonModel(w) {
     return R.ShortStory ? R.ShortStory.build(w,S.sd,null,{name:S.name,media:panelPool()}) : null;
   }
@@ -567,13 +567,14 @@
     if(!PREVIEW && R.RealityContext)R.RealityContext.mount(S.realityContext,function(context){
       var c=S.rep && S.rep.chapters[S.idx];sessionStorage.setItem('mt_v2_input',JSON.stringify({inp:S.ch.input,name:S.name,interest:S.interest || '',guide:S.guide,resumeChapter:c && c.id,realityContext:context}));location.reload();
     });
+    if(!PREVIEW&&R.PeakReading)S.rep=R.PeakReading.add(S.rep,S.sd,S.name);
     var reading = !PREVIEW && R.FullReading ? R.FullReading.prepare(S.rep, S.sd, S.name, function (c, job, result) {
       var liveChapter=S.rep.chapters.find(function(item){return item.id===c.id;});
       if(liveChapter && liveChapter!==c){Object.keys(c).forEach(function(k){if(/^reading/.test(k)||['scenes','headline','chapterHook','chapterQuality','interpretationAnalysis','writingQuality','hookName'].indexOf(k)>=0)liveChapter[k]=c[k];});}
       var ci = S.rep.chapters.findIndex(function(item){return item.id===c.id;}), article = document.getElementById('ch-' + c.id);
       if(article && R.ReadingText && c.readingCore){
         var anchor=null;if(S.view==='reader'){var activeIndex=pinned()!=null?pinned():S.idx,activeArticle=document.querySelector('#chapter .chap[data-ch="'+activeIndex+'"]');if(activeArticle){var anchorNode=Array.from(activeArticle.querySelectorAll('.rd-sec')).find(function(n){return n.getBoundingClientRect().bottom>160;})||activeArticle;anchor={chapter:activeIndex,key:anchorNode.dataset.sc,top:anchorNode.getBoundingClientRect().top};}}
-        c.readingVisualData={groups:S.sd.groups,fiveElements:S.sd.fiveElements,strength:S.sd.strength,pillars:S.sd.pillars,dayMaster:S.sd.dayMaster};c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];
+        c.readingVisualData=Object.assign({},c.readingVisualData,{name:S.name,groups:S.sd.groups,fiveElements:S.sd.fiveElements,strength:S.sd.strength,pillars:S.sd.pillars,dayMaster:S.sd.dayMaster});c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];
         R.ReadingText.update(article,c,ci);if(R.ReadingMedia)R.ReadingMedia.mount(article,{reduce:reduce,saveData:saveData}); linkBasisReferences(article);
         if(anchor){var nextArticle=document.querySelector('#chapter .chap[data-ch="'+anchor.chapter+'"]'),nextNode=nextArticle&&(Array.from(nextArticle.querySelectorAll('[data-sc]')).find(function(n){return n.dataset.sc===anchor.key;})||nextArticle);if(nextNode)window.scrollBy(0,nextNode.getBoundingClientRect().top-anchor.top);}
         if(S.mv){S.mv.measure();if(!c.readingDeferred||c.readingWarning)S.mv.readingReady();}return;
@@ -855,7 +856,7 @@
     var rep = S.rep, h = ''; S.bg = []; if(!R.ReadingText)planPanels(rep);
     rep.chapters.forEach(function (c, ci) {
       if (S.readerWorld && S.wmap && S.wmap.idx[ci] !== S.readerWorld) return;
-      if(R.ReadingText && c.readingCore){c.readingVisualData={groups:S.sd.groups,fiveElements:S.sd.fiveElements,strength:S.sd.strength,pillars:S.sd.pillars,dayMaster:S.sd.dayMaster};c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];h+='<article class="chap" id="ch-'+esc(c.id)+'" data-ch="'+ci+'" aria-label="'+esc(c.title)+'">'+R.ReadingText.html(c,ci)+'</article>';return;}
+      if(R.ReadingText && c.readingCore){c.readingVisualData=Object.assign({},c.readingVisualData,{name:S.name,groups:S.sd.groups,fiveElements:S.sd.fiveElements,strength:S.sd.strength,pillars:S.sd.pillars,dayMaster:S.sd.dayMaster});c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];h+='<article class="chap" id="ch-'+esc(c.id)+'" data-ch="'+ci+'" aria-label="'+esc(c.title)+'">'+R.ReadingText.html(c,ci)+'</article>';return;}
       if (!h && S.readerWorld && R.StoryComposer && R.StoryComposer.worldHook) {
         var intro = R.StoryComposer.worldHook(S.readerWorld, S.sd, selectedGuide());
         if (intro) {
