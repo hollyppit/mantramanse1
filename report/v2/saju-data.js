@@ -89,7 +89,7 @@
     // 운 흐름: 대운 10개 + 현재 대운 + 올해 세운 + 앞으로 12개월
     sd.daewoon = ch.daeun.list.map(function (x) {
       var s = seasonOf(x.ev);
-      return { ganzhi: M.gzNameK(x), startYear: x.startYear, endYear: x.startYear + 9, startAge: x.startAge, season: s, flow: x.ev.flow.primaryFlow, condition: x.ev.flow.condition.name, stemTG: x.stemTG, branchTG: x.branchTG };
+      return { ganzhi: M.gzNameK(x), startYear: x.startYear, endYear: x.startYear + 9, startAge: x.startAge, season: s, flow: x.ev.flow.primaryFlow, condition: x.ev.flow.condition.name, stemTG: x.stemTG, branchTG: x.branchTG, assessment:{fitScore:x.ev.flow.condition.fitScore,flows:Object.assign({},x.ev.flow.flows),reasons:(x.ev.flow.reasons||[]).slice(),defense:!!x.ev.flow.overlays.defense.active,volatile:!!x.ev.flow.overlays.volatility.active} };
     });
     var Y = M.yearPillarAt(now).sajuYear;
     sd.nowYear = Y;

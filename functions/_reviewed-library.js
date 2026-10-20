@@ -1,3 +1,4 @@
+import {NARRATIVE_OPENINGS,LEGACY_NARRATIVE_OPENINGS} from './_reading-narrative-openings.js';
 import {isFlow,renderFlow,flowTemplateIssue} from './_reading-flow-copy.js';
 import {isCompound,COMPOUND_VERSION} from './_reading-compound-copy.js';
 import {plainText,isTechnical} from './_plain-copy.js';
@@ -100,6 +101,7 @@ export function composeReviewed({clean,contract,analysis,library,adviceHistory=[
   if(role==='evidence'){
    const applied=selected.filter(isCompound);if(applied.length){text+='\n복합 문안 '+COMPOUND_VERSION+': 일간은 접근 방식의 전통 비유, 신강신약은 기존 가중 계산의 분류로 사용합니다. 개별 십성은 일간을 제외한 비중을 사용하며, 묶음 비중과 더하지 않습니다. 개별 십성 14% 이상인 후보 중 비중이 큰 조합을 우선하고, 두 조건을 모두 충족하는 검수된 쌍이 있으면 단독 설명을 대체합니다. 시주가 없으면 주어진 기둥만으로 계산한 결과입니다. 생활 사례는 실제 경험의 확인이나 건강 진단이 아닙니다.\n'+[...new Set(applied.flatMap(p=>evalConds(p.when,deriveFacts(clean.sd)).rows.map(r=>r.label+': '+r.have)))].join(' · ');}
   }
+  if(role==='title'&&guide?.id.startsWith('condition-')){const m=guide.id.match(/^condition-(\w+)-(\d+)-(strong|mid|weak)-title$/),slot=m&&({strong:0,mid:1,weak:2}[m[3]]);if(m&&plainText(text)===plainText(LEGACY_NARRATIVE_OPENINGS[m[1]]?.[Number(m[2])-1]?.[slot]))text=NARRATIVE_OPENINGS[m[1]][Number(m[2])-1][slot];}
   if(!['why','evidence'].includes(role)&&contentKind!=='fiction')text=plainText(politeText(text));
   seen.add(norm(text));if(text.length<30)text+=' 실제 생활에서 해당하는 조건과 다른 조건을 함께 확인해 주세요.';
   return {id:p.id,text,refs,claim_ids,role,contentKind,...(components.length?{components}: {})};

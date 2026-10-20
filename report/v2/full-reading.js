@@ -196,14 +196,24 @@
       } catch (e) { if(!session.cancelled)defer(item,null,e && e.name==='AbortError'?'server-timeout':e instanceof SyntaxError?'server-response-invalid':'server-communication-failed'); }
       finally {root.clearTimeout(timer);if(ctl)session.controllers=session.controllers.filter(function(c){return c!==ctl;});}
     }
-    // 첫 챕터를 준비한 뒤 표시하고, 후속 챕터는 미리 준비한다. 현재 DOM은 다시 그리지 않는다.
-    // Generate only the chapter the user is reading. Never fill the report in the background.
-    // One in-flight request per session; quick navigation keeps only the latest queued selection.
-    var running=false, selected=null, runningPromise=Promise.resolve();
+    // A single request lane prioritizes navigation and warms at most two neighbours.
+    var running=false, selected=null, warm=[], runningItem=null, runningPromise=Promise.resolve();
+    function neighbours(item){
+      if(!rep.readingPrefetch || session.cancelled)return;
+      var at=jobs.indexOf(item), topic=item.c.editorialTopicId;
+      warm=jobs.slice(at+1,at+3).filter(function(x){return !x.started && x.c.editorialTopicId===topic;});
+    }
     function pump(){
-      if(session.cancelled || running || !selected)return;
-      var item=selected;selected=null;if(item.started)return;
-      running=true;runningPromise=run(item).finally(function(){running=false;pump();});
+      if(session.cancelled || running)return;
+      var foreground=!!selected, item=selected || warm.shift();selected=null;
+      if(!item)return;
+      if(item.started){pump();return;}
+      running=true;runningItem=item;
+      runningPromise=run(item).finally(function(){
+        running=false;runningItem=null;
+        if(foreground || item.visibleRequested){item.visibleRequested=false;if(!selected)neighbours(item);}
+        pump();
+      });
     }
     // An explicit novel view may need several chapters. Reuse the same one-request lane and accepted results.
     session.ensure=async function(ids){
@@ -215,8 +225,8 @@
         if(item.c.readingDeferred)return false;
       }return !session.cancelled;
     };
-    session.retry=function(id){var item=jobs.find(function(x){return x.c.id===id;});if(!item || !item.c.readingWarning)return;status.failed=Math.max(0,status.failed-1);unavailable=null;item.started=false;item.c.readingWarning=null;item.c.readingFailure=null;item.c.readingNotice='검수된 문안을 다시 불러오고 있습니다.';if(onReady)onReady(item.c,item.job,{paragraphs:[]});selected=item;pump();};
-    session.prioritize=function(id){var item=jobs.find(function(x){return x.c.id===id;});if(!item)return;selected=item.started?null:item;pump();};
+    session.retry=function(id){var item=jobs.find(function(x){return x.c.id===id;});if(!item || !item.c.readingWarning)return;status.failed=Math.max(0,status.failed-1);unavailable=null;item.started=false;item.c.readingWarning=null;item.c.readingFailure=null;item.c.readingNotice='검수된 문안을 다시 불러오고 있습니다.';if(onReady)onReady(item.c,item.job,{paragraphs:[]});warm=[];selected=item;item.visibleRequested=true;pump();};
+    session.prioritize=function(id){var item=jobs.find(function(x){return x.c.id===id;});if(!item)return;warm=[];selected=item.started?null:item;if(item===runningItem)item.visibleRequested=true;else if(item.started)neighbours(item);pump();};
     return {first:Promise.resolve(),status:status};
   }
   R.FullReading = { ensure:function(ids){return active && !active.cancelled && active.ensure?active.ensure(ids):Promise.resolve(false);}, retry:function(id){if(active && !active.cancelled && active.retry)active.retry(id);}, prioritize:function(id){if(active && !active.cancelled && active.prioritize)active.prioritize(id);}, adviceHistory: adviceHistory, deferredParagraphs: deferredParagraphs, uniqueAcross: uniqueAcross, collect: collect, apply: apply, prepare: prepare };

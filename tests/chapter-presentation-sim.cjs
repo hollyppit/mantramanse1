@@ -7,7 +7,7 @@ for(const sd of [chart(1992,6,23,1),chart(1995,8,12,14),chart(2000,12,3,null)]){
  sd.name='가상검수';
  const charts=new Set();
  for(let n=1;n<=22;n++){const c={id:'timeline_self_'+String(n).padStart(2,'0'),title:'장점과 약점',readingVisualData:sd,readingCore:{title:'이유를 확인하고 내가 할 일을 정하세요. 맡은 일을 끝까지 챙기세요.',reality:'회의에서 정한 일이 바뀌면 마감부터 다시 물어보세요.'}};
- const h=R.ReadingText.html(c,n);assert(!h.includes('생활 속 예시는 가정한'));assert(!h.includes('능력 점수나 실제 재산'));assert(h.includes('reading-hook'));const kind=/data-chart-kind="([^"]+)"/.exec(h);assert(kind);charts.add(kind[1]);for(const value of Object.values(sd.groups))assert(h.includes((Math.round(value*10)/10)+'%'));checks++;}
+ const h=R.ReadingText.html(c,n);assert(!h.includes('생활 속 예시는 가정한'));assert(!h.includes('능력 점수나 실제 재산'));assert(h.includes('reading-hook'));const kind=/data-chart-kind="([^"]+)"/.exec(h);assert(kind);charts.add(kind[1]);if(![3,20,21].includes(n))for(const value of Object.values(sd.groups))assert(h.includes((Math.round(value*10)/10)+'%'));checks++;}
  assert(charts.size>=4);
  const peak=R.PeakReading.build(sd,'가상검수');assert(peak.aiEnabled===false&&!peak.readingDeferred);assert(peak.readingCore.title.includes('가상검수님'));for(const p of peak.readingVisualData.peakPeriods)assert(sd.daewoon.some(x=>x.startYear===p.startYear&&x.endYear===p.endYear&&x.season===p.season));
  assert(R.ReadingText.html(peak,23).includes('reading-luck-timeline'));

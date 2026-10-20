@@ -68,9 +68,6 @@
     S.sd = sd; S.birth = birthOf(ch); var t0 = Date.now();
     // 서버 저장본(콘텐츠·미디어·일간 소개 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
     Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story'), getJson('/api/assets'), getJson('/api/prologue')]).then(function (a) {
-      var wait = Math.max(0, (HUB ? 500 : 2600) - (Date.now() - t0));
-      return new Promise(function (ok) { setTimeout(function () { ok(a); }, wait); });
-    }).then(function (a) {
       S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
       S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.assets = (a[4] && a[4].assets) || {}; S.assetVideos = (a[4] && a[4].videos) || {}; S.proVid = prologueUrl(a[5], WORLD, selectedGuide());
       if (R.Deep && S.ch && !PREVIEW) { try { R.Deep.augment(S.rep, { M: window.Manse, ch: S.ch, sd: sd, now: Date.now(), name: S.name, assets: S.assets, videos: S.assetVideos }); } catch (e) { elog('caught', 'deep.augment'); /* 깊이 풀이가 실패해도 기본 리포트는 그대로 */ } S.repPdf = plainRep(S.rep); } // 자동차 비유·장단점·12운성·직업·배우자·일주·전생·대운/세운/월운·개운 근거·명소 챕터를 끼운다
@@ -568,13 +565,14 @@
       var c=S.rep && S.rep.chapters[S.idx];sessionStorage.setItem('mt_v2_input',JSON.stringify({inp:S.ch.input,name:S.name,interest:S.interest || '',guide:S.guide,resumeChapter:c && c.id,realityContext:context}));location.reload();
     });
     if(!PREVIEW&&R.PeakReading)S.rep=R.PeakReading.add(S.rep,S.sd,S.name);
+    if (!PREVIEW) S.rep.readingPrefetch = true;
     var reading = !PREVIEW && R.FullReading ? R.FullReading.prepare(S.rep, S.sd, S.name, function (c, job, result) {
       var liveChapter=S.rep.chapters.find(function(item){return item.id===c.id;});
       if(liveChapter && liveChapter!==c){Object.keys(c).forEach(function(k){if(/^reading/.test(k)||['scenes','headline','chapterHook','chapterQuality','interpretationAnalysis','writingQuality','hookName'].indexOf(k)>=0)liveChapter[k]=c[k];});}
       var ci = S.rep.chapters.findIndex(function(item){return item.id===c.id;}), article = document.getElementById('ch-' + c.id);
       if(article && R.ReadingText && c.readingCore){
         var anchor=null;if(S.view==='reader'){var activeIndex=pinned()!=null?pinned():S.idx,activeArticle=document.querySelector('#chapter .chap[data-ch="'+activeIndex+'"]');if(activeArticle){var anchorNode=Array.from(activeArticle.querySelectorAll('.rd-sec')).find(function(n){return n.getBoundingClientRect().bottom>160;})||activeArticle;anchor={chapter:activeIndex,key:anchorNode.dataset.sc,top:anchorNode.getBoundingClientRect().top};}}
-        c.readingVisualData=Object.assign({},c.readingVisualData,{name:S.name,groups:S.sd.groups,fiveElements:S.sd.fiveElements,strength:S.sd.strength,pillars:S.sd.pillars,dayMaster:S.sd.dayMaster});c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];
+        c.readingVisualData=Object.assign({},c.readingVisualData,{name:S.name,daewoon:S.sd.daewoon,nowYear:S.sd.nowYear,groups:S.sd.groups,fiveElements:S.sd.fiveElements,strength:S.sd.strength,pillars:S.sd.pillars,dayMaster:S.sd.dayMaster});c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];
         R.ReadingText.update(article,c,ci);if(R.ReadingMedia)R.ReadingMedia.mount(article,{reduce:reduce,saveData:saveData}); linkBasisReferences(article);
         if(anchor){var nextArticle=document.querySelector('#chapter .chap[data-ch="'+anchor.chapter+'"]'),nextNode=nextArticle&&(Array.from(nextArticle.querySelectorAll('[data-sc]')).find(function(n){return n.dataset.sc===anchor.key;})||nextArticle);if(nextNode)window.scrollBy(0,nextNode.getBoundingClientRect().top-anchor.top);}
         if(S.mv){S.mv.measure();if(!c.readingDeferred||c.readingWarning)S.mv.readingReady();}return;
@@ -856,7 +854,7 @@
     var rep = S.rep, h = ''; S.bg = []; if(!R.ReadingText)planPanels(rep);
     rep.chapters.forEach(function (c, ci) {
       if (S.readerWorld && S.wmap && S.wmap.idx[ci] !== S.readerWorld) return;
-      if(R.ReadingText && c.readingCore){c.readingVisualData=Object.assign({},c.readingVisualData,{name:S.name,groups:S.sd.groups,fiveElements:S.sd.fiveElements,strength:S.sd.strength,pillars:S.sd.pillars,dayMaster:S.sd.dayMaster});c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];h+='<article class="chap" id="ch-'+esc(c.id)+'" data-ch="'+ci+'" aria-label="'+esc(c.title)+'">'+R.ReadingText.html(c,ci)+'</article>';return;}
+      if(R.ReadingText && c.readingCore){c.readingVisualData=Object.assign({},c.readingVisualData,{name:S.name,daewoon:S.sd.daewoon,nowYear:S.sd.nowYear,groups:S.sd.groups,fiveElements:S.sd.fiveElements,strength:S.sd.strength,pillars:S.sd.pillars,dayMaster:S.sd.dayMaster});c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,2):[];h+='<article class="chap" id="ch-'+esc(c.id)+'" data-ch="'+ci+'" aria-label="'+esc(c.title)+'">'+R.ReadingText.html(c,ci)+'</article>';return;}
       if (!h && S.readerWorld && R.StoryComposer && R.StoryComposer.worldHook) {
         var intro = R.StoryComposer.worldHook(S.readerWorld, S.sd, selectedGuide());
         if (intro) {

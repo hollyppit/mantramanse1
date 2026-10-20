@@ -1,3 +1,4 @@
+import {DIRECT_OPENINGS} from './_reading-direct-openings.js';
 // Human-authored openings for low-axis cases; low share never means low ability or bad fortune.
 import {FLOW_SCENES} from './_reading-flow-scenes.js';
 const low={
@@ -89,8 +90,10 @@ remedy:[
 '한 달을 바꾸려면 오늘 손댈 일이 있어야 해요. 큰 목표보다 바로 만들어볼 작은 결과를 골라보세요.',
 '좋은 조언을 많이 읽는 것만으로 생활이 달라지지는 않아요. 내게 필요한 도움과 다음 행동 하나를 정해보세요.'
 ]};
-export const NARRATIVE_OPENINGS=Object.fromEntries(Object.entries(FLOW_SCENES).map(([topic,rows])=>[topic,rows.map(([scene,object,gain,cost],i)=>[
+export const LEGACY_NARRATIVE_OPENINGS=Object.fromEntries(Object.entries(FLOW_SCENES).map(([topic,rows])=>[topic,rows.map(([scene,object,gain,cost],i)=>[
  gain+'도 중요하지만, '+cost+'까지 감수할 필요는 없어요.',
  scene+'라면, '+gain.replace(/것$/,'걸')+' 먼저 챙겨보세요.',
  low[topic][i]
 ]) ]));
+
+export const NARRATIVE_OPENINGS=Object.fromEntries(Object.entries(LEGACY_NARRATIVE_OPENINGS).map(([topic,rows])=>[topic,rows.map((row,i)=>[...(DIRECT_OPENINGS[topic]?.[i]||row.slice(0,2)),row[2]])]));
