@@ -342,16 +342,20 @@
     return { ok: true };
   }
   // 입력 초안 → 허브 저장 형태(Hub.profile.save 가 받는 모양). 시각을 모르면 임의 시각을 만들지 않고 hourUnknown 으로 표시한다.
+  function adjustmentFields(d) {
+    return '<details class="f"><summary>원국 계산 보정 · 기본 자동 적용</summary>'+['combinationMode','climatePalaceMode'].map(function(k,i){return '<label class="f"><span>'+['합에 따른 오행 변화 적용','조후와 궁성에 따른 보정'][i]+'</span><select data-adjustment="'+k+'"><option value="auto"'+(d[k]==='off'?'':' selected')+'>자동 적용</option><option value="off"'+(d[k]==='off'?' selected':'')+'>미적용</option></select></label>';}).join('')+'<p class="note">합의 조건과 태어난 계절·글자의 자리를 살펴 오행 비중을 보정해요. 원국 글자는 그대로이며 무빙툰에도 같은 기준을 적용해요.</p></details>';
+  }
+  function bindAdjustments(el,d,save) { el.querySelectorAll('[data-adjustment]').forEach(function(s){s.onchange=function(){d[this.getAttribute('data-adjustment')]=this.value;save();};}); }
   function toProfile(d, place) {
     var unknown = !!d.hourUnknown || d.hour === '' || d.hour == null;
     return { name: String(d.name || '').trim().slice(0, 20), gender: d.gender, calendar: d.calendar === 'lunar' ? 'lunar' : 'solar', leap: d.calendar === 'lunar' && !!d.leap, year: +d.year, month: +d.month, day: +d.day,
-      hour: unknown ? 12 : +d.hour, minute: unknown ? 0 : (+d.minute || 0), hourUnknown: unknown, city: place ? place.name : '서울', lon: place ? +place.lon : 126.98, country: d.country || 'KR', timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' };
+      hour: unknown ? 12 : +d.hour, minute: unknown ? 0 : (+d.minute || 0), hourUnknown: unknown, city: place ? place.name : '서울', lon: place ? +place.lon : 126.98, country: d.country || 'KR', timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu', combinationMode:d.combinationMode==='off'?'off':'auto', climatePalaceMode:d.climatePalaceMode==='off'?'off':'auto' };
   }
 
   // 한국 지역(시·도 대표 도시) — 기존 입력 화면과 같은 경도 값. 엔진은 한국 표준시 기준이라 국내 출생을 기본으로 한다.
   var PLACES = [['서울', 126.98], ['부산', 129.08], ['대구', 128.60], ['인천', 126.70], ['광주', 126.85], ['대전', 127.38], ['울산', 129.31], ['세종', 127.29], ['수원', 127.03], ['고양', 126.83], ['성남', 127.14], ['용인', 127.18], ['청주', 127.49], ['천안', 127.15], ['전주', 127.15], ['목포', 126.39], ['여수', 127.66], ['포항', 129.36], ['경주', 129.22], ['안동', 128.73], ['창원', 128.68], ['진주', 128.11], ['춘천', 127.73], ['강릉', 128.90], ['제주', 126.53]].map(function (p) { return { name: p[0], lon: p[1] }; });
 
   root.Onboard = { cleanStyle: cleanStyle, cleanStyleMap: cleanStyleMap, STY_ROLES: STY_ROLES, FONT_KEYS: FONT_KEYS, WEIGHTS: WEIGHTS, TERMS: TERMS, DEFAULTS: DEFAULTS, CASES: CASES, INTRO: INTRO, INTRO_LAST: INTRO_LAST, INTRO_NOTICE: INTRO_NOTICE, SCENES: SCENES, REVEAL_LINES: REVEAL_LINES, FACES: FACES, PLACES: PLACES, REQUIRED_FIELDS: REQUIRED_FIELDS, FORBIDDEN_TITLES: FORBIDDEN_TITLES,
-    honorific: honorific, addr: addr, fill: fill, merge: merge, publicCases: publicCases, birthCards: birthCards, normalizeCase: normalizeCase, KINDS: KINDS, VSTATE: VSTATE, RELATION: RELATION, DESIGNS: DESIGNS, EFFECTS: EFFECTS, NATURE: NATURE, SECTIONS: SECTIONS, SERVICES: SERVICES, TOPICS: TOPICS, SECTION_TYPES: SECTION_TYPES, pickCase: pickCase, validateDate: validateDate, validateTime: validateTime, toProfile: toProfile };
+    honorific: honorific, addr: addr, fill: fill, merge: merge, publicCases: publicCases, birthCards: birthCards, normalizeCase: normalizeCase, KINDS: KINDS, VSTATE: VSTATE, RELATION: RELATION, DESIGNS: DESIGNS, EFFECTS: EFFECTS, NATURE: NATURE, SECTIONS: SECTIONS, SERVICES: SERVICES, TOPICS: TOPICS, SECTION_TYPES: SECTION_TYPES, pickCase: pickCase, validateDate: validateDate, validateTime: validateTime, toProfile: toProfile, adjustmentFields:adjustmentFields, bindAdjustments:bindAdjustments };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.Onboard;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1280,7 +1280,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return body;
   }
 
-  const EXAMPLE = { name: '', gender: 'F', calendar: 'solar', leap: false, year: 1990, month: 3, day: 15, hour: 14, minute: 30, hourUnknown: false, city: '서울', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' };
+  const EXAMPLE = { name: '', gender: 'F', calendar: 'solar', leap: false, year: 1990, month: 3, day: 15, hour: 14, minute: 30, hourUnknown: false, city: '서울', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu', combinationMode:'auto', climatePalaceMode:'auto' };
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) { saved = null; }
   const S = { inp: Object.assign({}, EXAMPLE, saved || {}), isExample: !saved, editing: !saved, tab: 'wonguk', ch: null, err: null, sheet: null, sel: null, selYear: null, selYM: null, glq: '' };
@@ -1294,7 +1294,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       S.ch = M.compute({
         year: +i.year, month: +i.month, day: +i.day, hour: i.hourUnknown ? null : +i.hour, minute: +i.minute || 0,
         calendar: i.calendar, leap: i.leap, gender: i.gender, lon: +i.lon, timeMode: i.timeMode, jasi: i.jasi,
-        sinsalBase: i.sinsalBase, model: i.model, school: i.school,
+        sinsalBase: i.sinsalBase, model: i.model, school: i.school, combinationMode:i.combinationMode, climatePalaceMode:i.climatePalaceMode,
       });
       S.err = null;
       if (S.selYear == null) S.selYear = M.yearPillarAt(NOW).sajuYear;
@@ -1360,6 +1360,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <label class="field"><span>출생지</span><select id="f-city">${CITIES.map(([c, l]) => `<option value="${c}" ${i.city === c ? 'selected' : ''}>${c}${l ? ` (${l.toFixed(2)}°)` : ''}</option>`).join('')}</select></label>
         ${i.city === '직접 입력' ? `<label class="field"><span>동경 (°)</span><input id="f-lon" type="number" step="0.01" value="${esc(i.lon)}"></label>` : ''}
       </div>
+      <div class="frow"><label class="field"><span>합에 따른 오행 변화 적용</span><select id="f-combination"><option value="auto" ${i.combinationMode !== 'off' ? 'selected' : ''}>자동 적용</option><option value="off" ${i.combinationMode === 'off' ? 'selected' : ''}>미적용</option></select></label><label class="field"><span>조후와 궁성에 따른 보정</span><select id="f-climate-palace"><option value="auto" ${i.climatePalaceMode !== 'off' ? 'selected' : ''}>자동 적용</option><option value="off" ${i.climatePalaceMode === 'off' ? 'selected' : ''}>미적용</option></select></label></div><p class="note">합이 성립하는 조건과 태어난 계절·글자의 자리를 살펴 오행 비중을 보정합니다. 선택한 기준은 무빙툰 풀이에도 이어집니다.</p>
       <details class="adv"${S.advOpen ? ' open' : ''}><summary>계산 기준 설정</summary>
         <div class="adv-grid">
           <label class="field"><span>시간 기준 · ${term('진태양시', '설명')}</span><select id="f-tm">${Object.entries(M.TIME_MODES).map(([k, l]) => `<option value="${k}" ${i.timeMode === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
@@ -1383,6 +1384,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     i.city = g('f-city').value;
     const c = CITIES.find(x => x[0] === i.city);
     if (c && c[1] != null) i.lon = c[1]; else if (g('f-lon')) i.lon = g('f-lon').value;
+    i.combinationMode=g('f-combination').value; i.climatePalaceMode=g('f-climate-palace').value;
     i.timeMode = g('f-tm').value; i.jasi = g('f-js').value; i.sinsalBase = g('f-sb').value;
     S.advOpen = document.querySelector('details.adv')?.open;
   }
@@ -1412,6 +1414,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="pills"><span class="hp">${term('일간')} ${term(stemKey(d), M.STEM_K[d] + M.EL_K[e])}</span><span class="hp">${term('신강신약', '강약')} ${ch.strength.zone} ${ch.strength.help.toFixed(0)}%</span><span class="hp">${term('용신')} ${elLabel(yongEl)} · ${M.SCHOOLS[y.school].split(' ')[0]}</span><span class="hp">${term('대운수')} ${ch.daeun.num} · ${ch.daeun.forward ? '순행' : '역행'}</span></div>
     </section>`;
   }
+  function adjustmentNotice(ch) { const a=ch.weights.adjustments,n=a.combinations.filter(r=>r.applied).length;return (a.options.combinationMode==='off'?'합에 따른 오행 변화는 끄고, ':n?'조건을 충족한 합 '+n+'건을 오행 비중에 일부 반영하고, ':'합은 확인했지만 반영 조건을 충족하지 않아 원래 오행을 유지하고, ')+(a.options.climatePalaceMode==='auto'?'태어난 계절과 글자의 자리에 따른 보정을 적용했어요.':'조후·궁성 보정은 껐어요.'); }
   function renderWonguk() {
     const ch = S.ch, cols = ['hour', 'day', 'month', 'year'];
     const C = k => ch.cells[k];
@@ -1437,6 +1440,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${ch.alternativesJasi ? ch.alternativesJasi.map(a => `<tr class="${a.jasi === ch.jasi ? 'cur' : ''}"><td>${a.jasi === 'jeong' ? term('정자시') : term('야자시')} 처리</td><td>—</td><td class="gz">${a.day}</td><td class="gz">${a.hour}</td></tr>`).join('') : ''}
     </tbody></table></div>`;
     return `
+    <section class="card"><h2>원국 계산 기준</h2><p>${esc(adjustmentNotice(ch))}</p><details><summary>적용 전후와 근거 보기</summary><p class="note">합은 월령 지원·인접·충·중복을 확인해 25~50%만 반영합니다. 조후·궁성은 앱의 참고 가중치이며 원국 글자는 바꾸지 않습니다.</p><table><tr><th>오행</th><th>보정 전</th><th>적용 후</th></tr>${M.EL_K.map((e,i)=>`<tr><td>${e}</td><td>${ch.baseWeights.pct[i].toFixed(1)}%</td><td>${ch.weights.pct[i].toFixed(1)}%</td></tr>`).join('')}</table>${ch.weights.adjustments.combinations.map(r=>`<p>${esc(r.name)} · ${r.applied?'일부 반영':'미반영'}: ${esc(r.reasons.join(' · '))}</p>`).join('')}</details></section>
     ${ch.warnings.length ? `<div class="warn"><b>확인 필요</b>${ch.warnings.map(w => `<span>${esc(w)}</span>`).join('')}</div>` : ''}
     ${renderHero()}
     <section class="card">

@@ -1,0 +1,10 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
+global.window=globalThis;vm.runInThisContext(fs.readFileSync('report/v2/reading-text.js','utf8'));
+const source='갑목과 정재의 조합을 살펴요. 이는 결과를 보장하지 않아요.';
+const chapter={id:'timeline_wealth_01',readingParagraphs:[{role:'title',text:'돈의 흐름을 돌아보세요.'},{role:'why',text:source},{role:'evidence',text:'출처의 조건과 현재 원국을 함께 확인해요.'}],readingVisualData:{pillars:{day:{ko:'갑자'}},strength:{band:'중화'}}};
+const html=ReportV2.ReadingText.html(chapter,0);
+for(const text of ['이렇게 풀이한 이유','명리 설명과 해석 범위','만트라 만세력에서 계산한 내 원국','갑목과 정재의 조합을 살펴요.','이는 결과를 보장하지 않아요.','출처의 조건과 현재 원국을 함께 확인해요.'])assert(html.includes(text),text);
+assert.equal((html.match(/<summary>풀이 근거/g)||[]).length,1);
+assert.equal((html.match(/reading-basis-group/g)||[]).length,2);
+assert(!html.includes('max-height:'),'expanded evidence must not be clipped by inline heights');
+console.log('PASS: grouped grounds, original wording, natal facts, one accessible disclosure');

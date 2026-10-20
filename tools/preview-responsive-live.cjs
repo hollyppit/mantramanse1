@@ -1,0 +1,4 @@
+const http=require('http');
+http.createServer((req,res)=>{const u=new URL(req.url,'http://127.0.0.1:8800'),w=[360,390,430,1024].includes(+u.searchParams.get('width'))?+u.searchParams.get('width'):360;
+res.setHeader('Content-Type','text/html;charset=utf-8');res.end(`<!doctype html><html lang="ko"><meta charset="utf-8"><title>운영 화면 반응형 검수</title><style>body{margin:0;background:#eceef3;font:14px system-ui}header{text-align:center;padding:10px}a{margin:0 10px}iframe{display:block;width:${w}px;height:780px;margin:auto;border:1px solid #afb5c3}</style><header>운영 사용자 화면 · ${w}px ${[360,390,430,1024].map(n=>`<a href="/?width=${n}">${n}px</a>`).join('')}</header><iframe title="운영 풀이 ${w}px" src="https://mantramanse.pages.dev/report/v2/"></iframe></html>`);
+}).listen(8800,'127.0.0.1',()=>console.log('http://127.0.0.1:8800/?width=360'));

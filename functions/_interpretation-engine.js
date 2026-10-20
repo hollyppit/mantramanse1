@@ -13,7 +13,7 @@ const read = (o, path) => path.split('.').reduce((v, k) => v == null ? undefined
 
 export function normalize(sd) {
   if (!sd?.dayMaster?.stem || !sd?.dayPillar?.ko || !sd?.pillars?.month || !['M','F'].includes(sd.gender)) throw Error('invalid-chart');
-  const fields = ['version','gender','pillars','dayMaster','dayPillar','fiveElements','dominantEl','weakestEl','lackEl','groups','dominantGroup','weakestGroup','groupEl','tenGods','strength','roots','combinations','clashes','usefulElements','usefulElementMethods','usefulElementAdvice','interpretationBasis','reviewConditions','climate','twelveStages','specialStars','sinsal12','patterns','daewoon','nowYear','currentDaewoon','sewoon','monthlyLuck','currentRoots','career','unavailable','calculationProvenance','ziwei'];
+  const fields = ['version','gender','pillars','dayMaster','dayPillar','fiveElements','elementAdjustments','dominantEl','weakestEl','lackEl','groups','dominantGroup','weakestGroup','groupEl','tenGods','strength','roots','combinations','clashes','usefulElements','usefulElementMethods','usefulElementAdvice','interpretationBasis','reviewConditions','climate','twelveStages','specialStars','sinsal12','patterns','daewoon','nowYear','currentDaewoon','sewoon','monthlyLuck','currentRoots','career','unavailable','calculationProvenance','ziwei'];
   const chart = copy(Object.fromEntries(fields.filter(k => sd[k] !== undefined).map(k => [k,sd[k]])));
   if (chart.reviewConditions?.hourUnknown && chart.pillars.hour) throw Error('unknown-hour-has-pillar');
   for (const values of [chart.fiveElements, chart.groups]) {

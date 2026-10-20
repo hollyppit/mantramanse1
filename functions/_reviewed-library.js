@@ -1,3 +1,6 @@
+import {LuckReading} from './_luck-reading.js';
+import {EverydayReading} from './_everyday-reading.js';
+import {FOCUS_CHAPTERS} from './_reading-focus-eight.js';
 import {NARRATIVE_OPENINGS,LEGACY_NARRATIVE_OPENINGS} from './_reading-narrative-openings.js';
 import {isFlow,renderFlow,flowTemplateIssue} from './_reading-flow-copy.js';
 import {isCompound,COMPOUND_VERSION} from './_reading-compound-copy.js';
@@ -8,7 +11,7 @@ import {PROHIBITED_RE} from './_style.js';
 import {similarity} from './_chapter-policy.js';
 import {digest} from './_reading-blocks.js';
 import {adviceFocus} from './_reading-advice.js';
-export const LIBRARY_VERSION='reviewed-library-10-contextual-profiles';
+export const LIBRARY_VERSION='reviewed-library-15-reader-continuity';
 // Reuse the existing service-only CAS namespace; no broader database privileges are required.
 export const libraryKey=id=>'ik:blocks:chapter:library.'+id;
 export const ROLES=['title','why','reality','strength','risk','reinforce','practice','evidence'];
@@ -17,8 +20,10 @@ const ordered=x=>Array.isArray(x)?x.map(ordered):x&&typeof x==='object'?Object.f
 const disjoint=(a,b)=>Object.keys(a.when||{}).some(k=>{const x=a.when[k],y=b.when?.[k];return Array.isArray(x)&&Array.isArray(y)?!x.some(v=>y.includes(v)):x&&y&&typeof x==='object'&&typeof y==='object'&&Object.keys(x).some(key=>y[key]&&x[key]!==y[key]);});
 // A retained legacy paragraph and its slot-bearing replacement intentionally coexist during migration.
 const flowMigrationPair=(a,b)=>{
+ const focus=a.id?.startsWith('bundle-focus-')?a:b.id?.startsWith('bundle-focus-')?b:null,legacy=focus===a?b:a;
+ if(focus){const previous=focus.id.replace(/^bundle-focus-/,'bundle-detail-').replace(/-identity-/,'-self-').replace(/-work-/,'-career-');if(legacy.id===previous&&focus.role===legacy.role&&JSON.stringify(ordered(focus.when))===JSON.stringify(ordered(legacy.when)))return true;}
  const flow=isFlow(a)?a:isFlow(b)?b:null,old=flow===a?b:a;
- return !!flow&&flow.text.includes('〔')&&old.id===flow.id.replace(/^flow-/,'condition-');
+ return !!flow&&old.id===flow.id.replace(/^flow-/,'condition-')&&flow.role===old.role&&JSON.stringify(ordered(flow.when))===JSON.stringify(ordered(old.when));
 };
 export const emptyLibrary=()=>({version:0,draft:[],published:[],history:[],scenarios:[]});
 export async function readLibrary(kv,id){return kv && await kv.get(libraryKey(id),'json') || emptyLibrary();}
@@ -29,7 +34,7 @@ export async function readPublishedLibrary(kv,id){
 }
 export function validatePassages(passages,contract,items){
  const issues=[],ids=new Set(),rules=new Map(items.map(r=>[r.id,r]));
- if(!Array.isArray(passages)||passages.length>256)return [{code:'invalid-passages'}];
+ if(!Array.isArray(passages)||passages.length>(FOCUS_CHAPTERS[contract.id]?320:256))return [{code:'invalid-passages'}];
  for(const b of passages){
   const add=code=>issues.push({id:b?.id||'',code});
   if(!b||!/^[\w.-]{1,80}$/.test(b.id||'')||ids.has(b.id)){add('invalid-id');continue;}ids.add(b.id);
@@ -71,7 +76,7 @@ export function composeReviewed({clean,contract,analysis,library,adviceHistory=[
  const pending=[],blocks=[],priorKeys=new Set(usedAdviceKeys),adviceKeys=[];
  const paragraphs=clean.chapter.paragraphs.map((p,i)=>{
   const role=ROLES.includes(p.role)?p.role:ROLES[Math.min(i,ROLES.length-1)];let text='',refs=[],claim_ids=[],contentKind='personal';
-  const guide=selected.filter(b=>!isFlow(b)&&!isCompound(b)&&b.role===role&&b.kind==='guide').sort((a,b)=>Object.keys(b.when).length-Object.keys(a.when).length)[0];
+  const guide=selected.filter(b=>!isFlow(b)&&!isCompound(b)&&b.role===role&&b.kind==='guide').sort((a,b)=>Number(b.id.startsWith('bundle-focus-'))-Number(a.id.startsWith('bundle-focus-'))||Object.keys(b.when).length-Object.keys(a.when).length)[0];
   const authored=selected.find(b=>b.kind!=='guide'&&b.role===role&&!used.has(b.id)&&(!['practice','reinforce'].includes(role)||(!repeats(b.text)&&!priorKeys.has(b.adviceKey||b.id))))||(['why','practice','reinforce'].includes(role)&&guide&&!priorKeys.has(guide.adviceKey||guide.id)?guide:null);
   if(authored&&['practice','reinforce'].includes(role)){const key=authored.adviceKey||authored.id;priorKeys.add(key);adviceKeys.push(key);}
   if(authored){used.add(authored.id);text=authored.text;refs=authored.ruleIds;claim_ids=refs.map(id=>claims.find(c=>c.knowledge_id===id).claim_id);contentKind=authored.kind==='guide'&&Object.keys(authored.when).length?'conditional-guide':authored.kind;blocks.push({id:authored.id,version:library.version});if(authored.kind==='general')text='일반 실천 점검: '+text;}
@@ -103,9 +108,11 @@ export function composeReviewed({clean,contract,analysis,library,adviceHistory=[
   }
   if(role==='title'&&guide?.id.startsWith('condition-')){const m=guide.id.match(/^condition-(\w+)-(\d+)-(strong|mid|weak)-title$/),slot=m&&({strong:0,mid:1,weak:2}[m[3]]);if(m&&plainText(text)===plainText(LEGACY_NARRATIVE_OPENINGS[m[1]]?.[Number(m[2])-1]?.[slot]))text=NARRATIVE_OPENINGS[m[1]][Number(m[2])-1][slot];}
   if(!['why','evidence'].includes(role)&&contentKind!=='fiction')text=plainText(politeText(text));
+  const editorialReview=!pending.includes(role)?EverydayReading.chapterReview(clean.sd,contract.id,{id:guide?.id||'',when:components[0]?.when||guide?.when||{}}):null;
+  if(!pending.includes(role))text=EverydayReading.apply(text,contract.id,role,clean.sd,editorialReview);
   seen.add(norm(text));if(text.length<30)text+=' 실제 생활에서 해당하는 조건과 다른 조건을 함께 확인해 주세요.';
-  return {id:p.id,text,refs,claim_ids,role,contentKind,...(components.length?{components}: {})};
+  return {id:p.id,text,refs,claim_ids,role,contentKind,...(editorialReview&&['reality','risk','evidence'].includes(role)?{editorialReview}:{}),...(components.length?{components}: {})};
  });
- return {result:{paragraphs},blocks,adviceKeys,pending:[...new Set(pending)],claims,libraryVersion:library.version,engine:LIBRARY_VERSION,contentSignature:null};
+ return {luckExplanation:LuckReading.context(contract.id,clean.sd),result:{paragraphs},blocks,adviceKeys,pending:[...new Set(pending)],claims,libraryVersion:library.version,engine:LIBRARY_VERSION,contentSignature:null};
 }
 export async function libraryRevision(library){return digest(library);}

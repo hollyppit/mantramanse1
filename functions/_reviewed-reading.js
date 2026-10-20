@@ -10,9 +10,9 @@ import {cleanAdviceHistory} from './_reading-advice.js';
 import {HEALTH_EDUCATION,isHealthEducation} from './_health-education.js';
 import {diagnosticRecord,saveDiagnostic} from './_reading-diagnostics.js';
 import {seedPassages,SEED_VERSION} from './_reading-library-seed.js';
-export async function prepareReviewed(env,body,{draft=false,passages=null}={}){
+export async function prepareReviewed(env,body,{draft=false,passages=null,store:requestStore=null}={}){
  const clean=validate(body);if(!clean)throw Error('bad-payload');
- const store=kvOf(env);if(!store)throw Error('storage-unavailable');
+ const store=requestStore||kvOf(env);if(!store)throw Error('storage-unavailable');
  // Reuse identical reads only within this request; later requests always observe withdrawals and edits.
  const reads=new Map(),kv=new Proxy(store,{get(target,key){if(key==='get')return (id,type)=>{const k=id+'\0'+(type||'');if(!reads.has(k))reads.set(k,Promise.resolve().then(()=>!draft&&id==='ik:agentic:runtime'&&type==='json'&&target.readingResearchState?target.readingResearchState():target.get(id,type)));return reads.get(k);};const v=target[key];return typeof v==='function'?v.bind(target):v;}});
  const catalog=await loadEditorial(kv,draft),saved=Editorial.find(catalog,clean.chapter);

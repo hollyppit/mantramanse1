@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="viewer.css">
 <link rel="stylesheet" href="cinema.css">
-<link rel="stylesheet" href="reader.css">
+<link rel="stylesheet" href="reader.css?v=20261021-responsive-2">
 <link rel="stylesheet" href="life.css">
 <link rel="stylesheet" href="deep.css">
 <link rel="stylesheet" href="explore.css">
@@ -37,6 +37,7 @@
         <div class="f"><span>태어난 시간</span><div class="inl"><input type="time" name="time" value="12:00"><label class="chk"><input type="checkbox" name="unknown"><i>모릅니다</i></label></div></div>
         <label class="f"><span>태어난 곳</span><select name="city"></select></label>
         <label class="f"><span>직설성 5단계 선택</span><span class="chk"><input type="checkbox" id="directnessConsent"> 약점을 가장 직접적으로 설명하는 5단계를 선택합니다. 관리자 설정이 5단계일 때 적용됩니다.</span></label>
+<label class="f"><span>합에 따른 오행 변화 적용</span><select name="combinationMode"><option value="auto" selected>자동 적용</option><option value="off">미적용</option></select></label><label class="f"><span>조후와 궁성에 따른 보정</span><select name="climatePalaceMode"><option value="auto" selected>자동 적용</option><option value="off">미적용</option></select></label><p class="fine">합의 성립 조건과 태어난 계절·글자의 자리를 살펴 오행 비중을 보정해요. 원국 글자는 그대로이며, 무빙툰도 같은 기준으로 풀이해요.</p>
         <p class="msg" id="msg" role="alert"></p>
         <button type="submit" class="btn big">내 운의 길 시작하기</button>
       </form>
@@ -138,7 +139,9 @@
 <script src="reading-flow.js"></script>
 <script src="polite-text.js"></script><script src="plain-copy.js"></script>
 <script src="reading-media.js"></script>
-<script src="reading-text.js"></script>
+<script src="everyday-reading.js"></script>
+<script src="luck-reading.js"></script>
+<script src="reading-text.js?v=20261021-responsive"></script>
 <script src="chapter-policy.js"></script>
 <script src="reading-catalog.js"></script><script src="reading-peak.js"></script>
 <script src="reality-context.js"></script>
@@ -154,9 +157,9 @@
 <script src="short-story.js"></script>
 <script src="past-story.js"></script>
 <script src="explore.js"></script>
-<script src="reader.js"></script>
+<script src="reader.js?v=20261021-navigation"></script>
 <script src="cinema-render.js"></script>
-<script src="viewer.js"></script>
+<script src="viewer.js?v=20261021-navigation-2"></script>
 <script src="../guide-control.js"></script>
 <script>
 // 재방문자는 공용 인트로를 생략한다 (첫 방문에만 /api/intro 영상 재생). 인트로 영상은 관리자 "입장 인트로" 탭에서 설정.

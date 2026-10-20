@@ -150,7 +150,10 @@
       secs.forEach(function (sec) { var answer = sec.querySelector('.rd-answer'); if (answer && answer.dataset.completed === '1') return; if (sec.querySelector('.vd,[data-stop]')) { for (var i = pages.length - 1; i >= 0; i--) if (pages[i].sec === sec || pages[i].items.some(function (x) { return x.sec === sec; })) { pages[i].choice = true; break; } } });
       if(keep&&!keep.isConnected){var oldSec=keep.closest&&keep.closest('.rd-sec'),key=oldSec&&oldSec.dataset.sc,chapter=oldSec&&oldSec.dataset.ch,replacement=items.find(function(x){return key&&x.sec.dataset.sc===key;})||items.find(function(x){return chapter!=null&&x.sec.dataset.ch===chapter;});if(replacement)keep=replacement.el;}
       if (keep) for (var i = 0; i < pages.length; i++) if (pages[i].items.some(function (x) { return x.el === keep; })) { if (i !== pi) { pi = i; if (state !== 'PLAYING') remain = pages[i].dur * 1000 / rate; } break; }
-      if (!remain && pages[pi]) remain = pages[pi].dur * 1000 / rate; ui();
+      if (!remain && pages[pi]) remain = pages[pi].dur * 1000 / rate;
+      // Hydrated articles replace their section nodes. Observe the new nodes too.
+      if(io){io.disconnect();secs.forEach(function(sec){io.observe(sec);});}
+      ui();
     }
 
     /* 현재 섹션: 배경 crossfade · 다음 배경 미리 불러오기 · 바깥(뷰어)에 알림 */
@@ -236,9 +239,11 @@
     ui();
 
     function gotoEl(el, instant, resume) { // 챕터 목록 등에서 특정 위치로: 재생 중이면 그 페이지부터 이어서 읽는다
+      if(state==='PLAYING'&&!resume)halt('PAUSED');
       var off = (parseFloat(win.getComputedStyle(doc.documentElement).getPropertyValue('--bar-h')) || 62) + 10, y = Math.max(0, el.getBoundingClientRect().top + win.scrollY - off); // 상단 바(+챕터 탭 줄) 높이만큼 띄운다
       for (var i = 0; i < pages.length; i++) if (pages[i].items.some(function (x) { return x.sec === el || el.contains(x.el); })) { if (state === 'PLAYING') { startPage(i); return; } pi = i; remain = pages[i].dur * 1000 / rate; userMoved = false; break; }
-      moveTo(y, instant ? 0 : 600);
+      var target=el.matches('.rd-sec')?el:el.querySelector('.rd-sec');if(target)setCur(target);
+      moveTo(y, instant ? 0 : 320);
     }
     function destroy() {
       dead = true; clearTimers(); clearInterval(tick); clearTimeout(rt); cancelTween(); io.disconnect(); stopReveal(); if (ro) ro.disconnect(); bg.destroy();

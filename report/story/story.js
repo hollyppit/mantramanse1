@@ -244,6 +244,7 @@
           '<div class="f row3"><span>생년월일</span><select name="year" aria-label="년">' + opts(minY, y, sy, '년') + '</select><select name="month" aria-label="월">' + opts(1, 12, sm, '월') + '</select><select name="day" aria-label="일">' + opts(1, 31, sd, '일') + '</select></div>' +
           '<div class="f"><span>태어난 시간</span><div class="inl"><input type="time" name="time" value="' + (saved.hourUnknown ? '' : esc(saved.hour != null ? ('0' + saved.hour).slice(-2) + ':' + ('0' + (saved.minute || 0)).slice(-2) : '')) + '" aria-label="태어난 시간"><label class="chk"><input type="checkbox" name="unknown"' + (saved.hourUnknown || saved.hour == null ? ' checked' : '') + '><i>시간을 몰라요</i></label></div></div>' +
           '<label class="f"><span>태어난 곳</span><select name="city">' + CITIES.map(function (c) { return '<option value="' + c[1] + '"' + (c[0] === (saved.city || '서울') ? ' selected' : '') + '>' + c[0] + '</option>'; }).join('') + '</select></label>' +
+          '<label class="f"><span>합에 따른 오행 변화 적용</span><select name="combinationMode"><option value="auto">자동 적용</option><option value="off"' + (saved.combinationMode==='off'?' selected':'') + '>미적용</option></select></label><label class="f"><span>조후와 궁성에 따른 보정</span><select name="climatePalaceMode"><option value="auto">자동 적용</option><option value="off"' + (saved.climatePalaceMode==='off'?' selected':'') + '>미적용</option></select></label><p class="note">합의 조건과 계절·글자의 자리를 살펴 오행 비중을 보정합니다.</p>' +
           '<p class="msg err" id="sajuMsg" role="alert"></p>' +
           '<button type="submit" class="btn big">' + esc(pick(b.ctaText)) + '</button>' +
           (b.hint ? '<p class="note">' + fmt(pick(b.hint)) + '</p>' : '') + '</form>';
@@ -262,7 +263,7 @@
           if (!M()) { msg.textContent = '분석 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.'; return; }
           var t = f.time.value, hasT = !f.unknown.checked && /^\d\d:\d\d$/.test(t);
           if (!f.gender.value) { msg.textContent = '성별을 선택해 주세요.'; return; }
-          var inp = { year: +f.year.value, month: +f.month.value, day: +f.day.value, hour: hasT ? +t.slice(0, 2) : null, minute: hasT ? +t.slice(3) : 0, calendar: f.calendar.value, leap: f.calendar.value === 'lunar' && f.leap.checked, gender: f.gender.value, lon: +f.city.value, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' };
+          var inp = { year: +f.year.value, month: +f.month.value, day: +f.day.value, hour: hasT ? +t.slice(0, 2) : null, minute: hasT ? +t.slice(3) : 0, calendar: f.calendar.value, leap: f.calendar.value === 'lunar' && f.leap.checked, gender: f.gender.value, lon: +f.city.value, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu', combinationMode:f.combinationMode.value, climatePalaceMode:f.climatePalaceMode.value };
           var ch;
           try { ch = M().compute(inp); } catch (err) { msg.textContent = (err && err.message) || '입력을 확인해 주세요.'; return; }
           S.chart = ch; S.name = String(f.name.value || '').trim().slice(0, 20);

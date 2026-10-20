@@ -325,7 +325,7 @@
           '<div id="fPlaceKR"' + (d.country === 'KR' ? '' : ' hidden') + '><label class="f"><span>지역 검색</span><input type="text" id="fPS" autocomplete="off" placeholder="예: 부산"></label><div class="ob-places" id="fPL" role="listbox" aria-label="지역">' + placeChips('') + '</div></div>' +
           '<p class="ob-warn" id="fPlaceOT"' + (d.country === 'KR' ? ' hidden' : '') + '>현재 계산은 한국 표준시를 기준으로 합니다. 해외에서 태어났다면 한국 시각으로 환산한 시각을 입력해야 정확합니다. 시각이 불확실하면 이전 단계에서 "시각을 몰라요"를 선택하세요.</p>';
         if (s.field === 'gender') return '<div class="ob-gender" role="radiogroup" aria-label="성별"><button type="button" role="radio" aria-checked="' + (d.gender === 'F') + '" data-g="F" class="' + (d.gender === 'F' ? 'on' : '') + '">여</button><button type="button" role="radio" aria-checked="' + (d.gender === 'M') + '" data-g="M" class="' + (d.gender === 'M' ? 'on' : '') + '">남</button></div>';
-        if (s.field === 'confirm') return summary();
+        if (s.field === 'confirm') return summary()+O.adjustmentFields(d);
         return '';
       }
       function placeChips(f) { f = String(f || '').trim(); return O.PLACES.filter(function (p) { return !f || p.name.indexOf(f) >= 0; }).map(function (p) { return '<button type="button" role="option" aria-selected="' + (p.name === d.place) + '" class="' + (p.name === d.place ? 'on' : '') + '" data-p="' + esc(p.name) + '">' + esc(p.name) + '</button>'; }).join('') || '<p class="note">검색 결과가 없습니다. "해외·기타"를 선택해 주세요.</p>'; }
@@ -345,6 +345,7 @@
       var msg = function (t) { var m = $('#obMsg'); if (m) m.textContent = t || ''; };
       function bind(el, s, last) {
         var f = s.field;
+        if(f==='confirm')O.bindAdjustments(el,d,save);
         if (f === 'name') $('#fName', el).oninput = function () { d.name = this.value.trim().slice(0, 20); save(); };
         if (f === 'date') {
           var chk = function () { // 입력 즉시 안내

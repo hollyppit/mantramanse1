@@ -1,8 +1,10 @@
+import {plainText} from './_plain-copy.js';
+import {politeText} from './_polite.js';
 import {deriveFacts,evalConds} from './_ik.js';
 import {CONDITION_PLANS} from './_reading-conditional-copy.js';
 import {CONDITIONAL_BODIES} from './_reading-conditional-bodies.js';
 import {FLOW_SCENES} from './_reading-flow-scenes.js';
-export const FLOW_VERSION='question-body-flow-20261020-5';
+export const FLOW_VERSION='question-body-flow-20261020-6';
 const roles=['reality','strength','risk','reinforce','practice'];
 // Dependent clauses, not standalone advice paragraphs. They fill one causal scene.
 const voices={
@@ -143,7 +145,7 @@ const methodAlternatives={
 export const isFlow=p=>typeof p?.id==='string'&&p.id.startsWith('flow-');
 const last=t=>[...String(t)].at(-1)||'',josa=(t,p)=>{const n=last(t).charCodeAt(0)-0xac00,b=n>=0&&n<11172?n%28:0;return t+({은:b?'은':'는',이:b?'이':'가',을:b?'을':'를',과:b?'과':'와',으로:b&&b!==8?'으로':'로'}[p]||'');};
 const marker=/〔([^〕]+)〕/g;
-const allowed=new Set(['시작시선','포착','조정','위험여건','조정여건','강점연결','행동','동기','선택','실력','과잉','수정','부담','실행','주의시작']);
+const allowed=new Set(['시작시선','포착','조정','위험여건','조정여건','강점연결','행동','동기','선택','실력','역량','과잉','수정','부담','실행','주의시작']);
 export function flowTemplateIssue(p){
  if(!isFlow(p))return null;
  if(!roles.includes(p.role))return 'invalid-flow-role';
@@ -157,11 +159,7 @@ export function flowPassages(c){
  return ['strong','mid','weak'].flatMap((band,slot)=>{
   const focus=plan[slot+1],body=CONDITIONAL_BODIES[m[1]][i][slot],practice=body[4];
   const texts={
-   reality:'〔시작시선〕 '+body[0],
-   strength:(band==='strong'?'〔실력:은〕 이럴 때 ':'〔실력:을〕 이럴 때 ')+gain.replace(/것$/,'데')+({strong:' 도움이 돼요.',mid:' 써볼 수 있어요.',weak:' 써볼 수 있어요.'})[band],
-   risk:'〔과잉〕 때는, '+body[2],
-   reinforce:'〔조정〕 '+body[3],
-   practice:'〔실행〕, '+practice
+   reality:body[0],strength:body[1],risk:body[2],reinforce:body[3],practice:body[4]
   };
   return roles.map(role=>({id:'flow-'+m[1]+'-'+(i+1)+'-'+band+'-'+role,role,kind:'guide',text:texts[role],when:{group:{[plan[0]]:band}},unless:{},ruleIds:[],adviceKey:'flow-'+m[1]+'-'+(i+1)+'-'+band+'-'+role}));
  });
@@ -187,10 +185,14 @@ export function renderFlow(role,selected,sd){
  const warning={신강:'그 '+strengthNames[key]+'만 믿지는 마세요.',신약:'그 '+josa(strengthNames[key],'이')+' 있어도 도움은 받으세요.',중화:'그 '+josa(strengthNames[key],'으로')+' 다 맞추지는 마세요.'}[facts.strength];
  const doing=v[1].replace(/있는$/,'있도록 계획하면서').replace(/는$/,'면서');
  const slots={강점연결:doing+',',시작시선:relevance(lead)>0?perspective[key]:(weakAxisBridges[axis]?.[key]||weakAxisBridges[axis]?.[family]||perspective[key]),포착:pitfalls[key],조정:relevance(lead)>0?adjustments[key]:(crossAxisCopy[axis]?.[key]?.[1]||crossAxisCopy[axis]?.[family]?.[1]||adjustments[key]),위험여건:({신강:'내가 정한 방식만 밀어붙일 때는,',신약:'이미 맡은 일에 새 부담까지 겹칠 때는,',중화:'여러 요구를 맞추느라 내 기준을 놓칠 때는,'})[facts.strength],조정여건:({신강:'상대가 정할 몫도 남겨두고,',신약:'실제로 함께할 사람과 가능한 분량을 확인한 뒤,',중화:'바꿀 방법과 지킬 기준을 구별해서,'})[facts.strength],주의시작:warning,동기:motive,행동:pace+choices[key],선택:pace+v[1],실력:style[1]+v[2],과잉:style[2]+(relevance(lead)>0?v[3]:(crossAxisCopy[axis]?.[key]?.[0]||crossAxisCopy[axis]?.[family]?.[0]||v[3])),수정:({비견:'함께 정할 일은 상대의 의견도 들어보세요.',겁재:'남의 속도보다 내게 필요한 일을 먼저 챙겨보세요.',식신:'익숙한 방법도 지금 상황에 맞는지 확인해 보세요.',상관:'틀린 점을 말할 때는 바꿀 방법도 같이 제안해 주세요.',편재:'좋은 기회여도 끝까지 챙길 수 있는 만큼만 맡으세요.',정재:'끝까지 지킬 부분과 바꿔볼 부분을 나누어 보세요.',편관:'급한 일과 나중에 해도 될 일을 먼저 나누세요.',정관:'약속한 일과 혼자 떠안은 일을 구별해 보세요.',편인:'짐작한 내용과 직접 확인한 내용을 나누어 보세요.',정인:'배운 대로 해도 괜찮은 상황인지 다시 보세요.','식신+정재':'계속 노력한 만큼 내게 남는 것도 있는지 보세요.','상관+편재':'제안하기 전에 실제로 해줄 수 있는지 확인해 주세요.','정관+정인':'작은 결정까지 전부 허락받을 필요는 없어요.','편관+편인':'아직 생기지 않은 문제까지 혼자 책임지지 마세요.','비견+겁재':'함께할 일과 각자 정할 일을 처음부터 나누세요.'})[key]||v[4]+' 다음 행동을 정해보세요.',부담:budget,실행:methodAlternatives[facts.dayMaster]&&Number(template.id.split('-')[2])%3?methodAlternatives[facts.dayMaster][Number(template.id.split('-')[2])%3-1]:method};
- let text=template.text.replace(marker,(_,key)=>{const [k,p]=key.split(':');return p?josa(slots[k],p):slots[k];});
+ const match=/^flow-(\w+)-(\d+)-(strong|mid|weak)-(reality|strength|risk|reinforce|practice)$/.exec(template.id),index=match&&Number(match[2])-1,band=match&&match[3],body=match&&CONDITIONAL_BODIES[match[1]]?.[index]?.[{strong:0,mid:1,weak:2}[band]],scene=match&&FLOW_SCENES[match[1]]?.[index];
+ slots.역량=slots.실력;
+ const legacy=body&&scene?{reality:'〔시작시선〕 '+body[0],strength:(band==='strong'?'〔실력:은〕 이럴 때 ':'〔실력:을〕 이럴 때 ')+scene[2].replace(/것$/,'데')+(band==='strong'?' 도움이 돼요.':' 써볼 수 있어요.'),risk:'〔과잉〕 때는, '+body[2],reinforce:'〔조정〕 '+body[3],practice:'〔실행〕, '+body[4]}[role]:null;
+ const complete=body?.[roles.indexOf(role)],same=(a,b)=>a&&b&&(a===b||plainText(politeText(a))===plainText(politeText(b))),migrated=same(template.text,legacy),authored=same(template.text,complete),source=migrated?complete:template.text;
+ let text=source.replace(marker,(_,key)=>{const [k,p]=key.split(':');return p?josa(slots[k],p):slots[k];});
  // Drop a duplicated leading manner clause rather than repeat it around the same action.
- if(role==='practice'&&template.text.startsWith('〔실행〕')){const manner=slots.실행,lastWord=manner.trim().split(/\s+/).at(-1);if(lastWord?.length>=3&&template.text.slice('〔실행〕'.length).includes(lastWord))text=template.text.slice('〔실행〕'.length).replace(/^[,\s]+/,'');}
+ if(!migrated&&role==='practice'&&template.text.startsWith('〔실행〕')){const manner=slots.실행,lastWord=manner.trim().split(/\s+/).at(-1);if(lastWord?.length>=3&&template.text.slice('〔실행〕'.length).includes(lastWord))text=template.text.slice('〔실행〕'.length).replace(/^[,\s]+/,'');}
  // Keep the exact publication conditions and component IDs inspectable; no claims are manufactured.
- const components=[template,cap,lead,stem].map(p=>({id:p.id,when:p.when,rows:evalConds(p.when,facts).rows}));
+ const components=(migrated||authored?[template]:[template,cap,lead,stem]).map(p=>({id:p.id,when:p.when,rows:evalConds(p.when,facts).rows}));
  return {text,components,version:FLOW_VERSION};
 }

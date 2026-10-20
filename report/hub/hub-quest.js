@@ -329,9 +329,10 @@
       var row = function (label, val, jumpId) { return '<div><small>' + label + '</small><strong>' + esc(val) + '</strong><button type="button" data-j="' + jumpId + '" aria-label="' + label + ' 수정">수정</button></div>'; };
       var place = d.country === 'OT' ? '해외·기타 (한국 표준시 기준)' : d.place;
       return eyebrow(s) + panel(say(Q.linesOf(s, guide)) + '<div class="qs-sum">' +
-        row('이름', d.name, 'name') + row('성별', d.gender === 'M' ? '남성' : d.gender === 'F' ? '여성' : '-', 'gender') + row('출생일', dateText(), 'calendar') + row('출생 시각', d.hourUnknown || d.hour === '' ? '모름 (시주 제외)' : clockText(), 'time') + row('출생지', place, 'place') + (ids.indexOf('guide') >= 0 ? row('안내자', QC.guides[guide].name, 'guide') : '') + '</div>' + errBox + acts(btn('qsCalc', s.button)), s.hint);
+        row('이름', d.name, 'name') + row('성별', d.gender === 'M' ? '남성' : d.gender === 'F' ? '여성' : '-', 'gender') + row('출생일', dateText(), 'calendar') + row('출생 시각', d.hourUnknown || d.hour === '' ? '모름 (시주 제외)' : clockText(), 'time') + row('출생지', place, 'place') + (ids.indexOf('guide') >= 0 ? row('안내자', QC.guides[guide].name, 'guide') : '') + '</div>' + O.adjustmentFields(d) + errBox + acts(btn('qsCalc', s.button)), s.hint);
     };
     BIND.confirm = function () {
+      O.bindAdjustments(card,d,save);
       $$('[data-j]').forEach(function (b) { b.onclick = function () { jump(b.getAttribute('data-j')); }; });
       $('#qsCalc').onclick = calc;
     };

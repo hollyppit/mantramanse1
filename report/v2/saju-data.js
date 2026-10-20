@@ -16,6 +16,10 @@
   }
   function bandOfZone(z) { return /강|왕/.test(z || '') ? '신강' : /약/.test(z || '') ? '신약' : '중화'; }
   function round1(x) { return Math.round(x * 10) / 10; }
+  // Copy the engine's existing luck/natal relations; never reconstruct them from a flow label.
+  function luckRelations(ch,p){try{return (root.Manse.luckRelations(ch,p).rels||[]).map(function(r){return {kind:r.kind,type:r.type,name:r.name,members:r.members.slice()};});}catch(e){return [];}}
+  function luckDateKst(ms){return Number.isFinite(ms)?new Date(ms+9*3600e3).toISOString().slice(0,10):null;}
+
 
   function build(ch, opts) {
     var M = root.Manse, now = (opts && opts.now) || Date.now(), un = [];
@@ -87,19 +91,20 @@
     sd.patterns = ((ch.patterns && ch.patterns.list) || []).map(function (p) { return { name: p.name, level: p.level }; });
 
     // 운 흐름: 대운 10개 + 현재 대운 + 올해 세운 + 앞으로 12개월
-    sd.daewoon = ch.daeun.list.map(function (x) {
+    sd.daewoon = ch.daeun.list.map(function (x,i) {
+      var next=ch.daeun.list[i+1],endDate=next?luckDateKst(next.startMs-1):null;
       var s = seasonOf(x.ev);
-      return { ganzhi: M.gzNameK(x), startYear: x.startYear, endYear: x.startYear + 9, startAge: x.startAge, season: s, flow: x.ev.flow.primaryFlow, condition: x.ev.flow.condition.name, stemTG: x.stemTG, branchTG: x.branchTG, assessment:{fitScore:x.ev.flow.condition.fitScore,flows:Object.assign({},x.ev.flow.flows),reasons:(x.ev.flow.reasons||[]).slice(),defense:!!x.ev.flow.overlays.defense.active,volatile:!!x.ev.flow.overlays.volatility.active} };
+      return { ganzhi: M.gzNameK(x), startYear: x.startYear, endYear: endDate?Number(endDate.slice(0,4)):x.startYear+9,startDate:luckDateKst(x.startMs),endBefore:next?luckDateKst(next.startMs):null, startAge: x.startAge, season: s, flow: x.ev.flow.primaryFlow, condition: x.ev.flow.condition.name, stemTG: x.stemTG, branchTG: x.branchTG, relations:luckRelations(ch,x), assessment:{fitScore:x.ev.flow.condition.fitScore,flows:Object.assign({},x.ev.flow.flows),reasons:(x.ev.flow.reasons||[]).slice(),defense:!!x.ev.flow.overlays.defense.active,volatile:!!x.ev.flow.overlays.volatility.active} };
     });
     var Y = M.yearPillarAt(now).sajuYear;
     sd.nowYear = Y;
-    var cur = null; sd.daewoon.forEach(function (x) { if (x.startYear <= Y) cur = x; });
+    var active=M.daeunAt(ch,now),cur=null;sd.daewoon.forEach(function(x){if(active&&x.startDate===luckDateKst(active.startMs))cur=x;});
     sd.currentDaewoon = cur;
     if (!cur) un.push('currentDaewoon');
     try {
       var se = M.seunRange(ch, Y, Y)[0], dom = null;
       try { dom = M.evaluateDomainLuck(ch, se, 'seun'); } catch (e) { }
-      sd.sewoon = { year: Y, ganzhi: M.gzNameK(se), season: seasonOf(se.ev), flow: se.ev.flow.primaryFlow, condition: se.ev.flow.condition.name, stemTG: se.stemTG, branchTG: se.branchTG,
+      sd.sewoon = { year: Y, ganzhi: M.gzNameK(se), season: seasonOf(se.ev), flow: se.ev.flow.primaryFlow, condition: se.ev.flow.condition.name, stemTG: se.stemTG, branchTG: se.branchTG, relations:luckRelations(ch,se),
         label: M.flowLabel(se.ev), summary: M.flowSummary(se.ev),
         // 건강·사고 영역은 리포트에서 쓰지 않는다(의료/사건 예측 금지 원칙). 연애·재물 밴드만 전달.
         love: dom ? { band: dom.love.band, summary: dom.love.summary } : null, wealth: dom ? { band: dom.wealth.band, summary: dom.wealth.summary } : null };
@@ -108,7 +113,7 @@
       var l1 = M.wolun(ch, Y), l2 = M.wolun(ch, Y + 1), all = l1.concat(l2), ci = 0;
       all.forEach(function (x, i) { if (x.startMs <= now) ci = i; });
       sd.monthlyLuck = all.slice(ci, ci + 12).map(function (x, i) {
-        return { month: new Date(x.startMs + 9 * 3600e3).getUTCMonth() + 1, term: x.termName, ganzhi: M.gzNameK(x), season: seasonOf(x.ev), flow: x.ev.flow.primaryFlow, condition: x.ev.flow.condition.name, label: M.flowLabel(x.ev), isNow: i === 0 };
+        var next=all[ci+i+1];return { year:new Date(x.startMs+9*3600e3).getUTCFullYear(),startDate:luckDateKst(x.startMs),endBefore:next?luckDateKst(next.startMs):null,stemTG:x.stemTG,branchTG:x.branchTG,relations:luckRelations(ch,x), month: new Date(x.startMs + 9 * 3600e3).getUTCMonth() + 1, term: x.termName, ganzhi: M.gzNameK(x), season: seasonOf(x.ev), flow: x.ev.flow.primaryFlow, condition: x.ev.flow.condition.name, label: M.flowLabel(x.ev), isNow: i === 0 };
       });
     } catch (e) { sd.monthlyLuck = []; un.push('monthlyLuck'); }
 
@@ -132,6 +137,13 @@
       sd.career = { top: (cp.top || []).map(function (c) { return { category: c.category, name: c.name, score: c.score }; }) };
     } catch (e) { sd.career = null; un.push('career'); }
 
+    if(ch.weights.adjustments){
+      var a=ch.weights.adjustments,n=a.combinations.filter(function(r){return r.applied;}).length;
+      var summary=(a.options.combinationMode==='off'?'합에 따른 오행 변화는 끄고, ':n?'조건을 충족한 합 '+n+'건을 오행 비중에 일부 반영하고, ':'합은 확인했지만 반영 조건을 충족하지 않아 원래 오행을 유지하고, ')+(a.options.climatePalaceMode==='auto'?'태어난 계절과 글자의 자리에 따른 보정을 적용했어요.':'조후·궁성 보정은 껐어요.');
+      sd.elementAdjustments=Object.assign({},a,{summary:summary,baseFiveElements:{},adjustedFiveElements:Object.assign({},sd.fiveElements)});
+      ELK.forEach(function(e,i){sd.elementAdjustments.baseFiveElements[e]=round1(ch.baseWeights.pct[i]);});
+      sd.interpretationBasis.elementAdjustments={kind:a.version,note:'합의 조건별 부분 반영과 앱의 조후·궁성 가중 모델입니다. 원국 글자와 일간은 유지합니다.'};
+    }
     sd.calculationProvenance = {
       engine: 'Manse', calendar: ch.input.calendar || 'solar', timezone: 'Asia/Seoul',
       utcOffsetMinutes: ch.tzOffset, daylightSaving: !!ch.dst, longitude: ch.lon,

@@ -1,0 +1,22 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
+const source=fs.readFileSync('report/v2/viewer.js','utf8');
+function fn(name,next){return source.slice(source.indexOf('  function '+name+'('),source.indexOf('  function '+next+'('));}
+let active=1,calls=[];const chapters=[{id:'first'},{id:'second'},{id:'third'}];
+const context={S:{rep:{chapters},idx:1,cur:true,ended:{}},pinned:()=>active,enterChapter:(c,i)=>calls.push(['enter',i]),T:()=>{},checkUnlock:()=>{},EXPLORE:false};
+vm.createContext(context);vm.runInContext(fn('onSection','enterChapter'),context);
+const sec=i=>({dataset:{ch:String(i)},classList:{contains:()=>false}});
+context.onSection(sec(0));context.onSection(sec(2));assert.deepEqual(calls,[],'both earlier and later observer signals must respect an explicit jump');
+active=null;context.onSection(sec(2));assert.deepEqual(calls,[['enter',2]],'manual reading resumes after navigation guard expires');
+calls=[];Object.assign(context,{pinTo:i=>{active=i;calls.push(['pin',i]);},R:{FullReading:{prioritize:id=>calls.push(['load',id])}},$:()=>({}),enterFromHome:()=>{},S:{rep:{chapters},mv:{gotoEl:()=>calls.push(['scroll'])}}});
+vm.runInContext(fn('gotoChapter','onSection'),context);context.gotoChapter(2,true,false);
+assert.deepEqual(calls,[['pin',2],['load','third'],['enter',2],['scroll']],'the selected chapter must be committed before scrolling');
+console.log('PASS: jump selection wins both observer directions; scrolling resumes; header and priority commit before movement');
+const reader=fs.readFileSync('report/v2/reader.js','utf8'),measure=reader.slice(reader.indexOf('    function measure()'),reader.indexOf('    /* 현재 섹션:'));
+let observed=[],current=[];const node=id=>({id,className:'',tagName:'SECTION',classList:{contains:()=>false},closest:()=>null,querySelector:()=>null,getBoundingClientRect:()=>({top:100,bottom:200,height:100}),getClientRects:()=>[1]});
+const layout={win:{innerHeight:780,scrollY:0},host:{querySelectorAll:()=>current},pages:[],pi:0,secs:[],unitsOf:s=>[s],MEDIA_UNIT:/FIGURE/,textOf:()=>'',estimate:()=>1,f:{readSpeed:6},paginate:items=>items.map(x=>({items:[x],dur:2,sec:x.sec})),total:0,offs:[],doc:{documentElement:{scrollHeight:1000}},anchorY:()=>0,remain:0,rate:1,state:'PAUSED',ui:()=>{},io:{disconnect:()=>{observed=[];},observe:n=>observed.push(n.id)}};
+vm.createContext(layout);vm.runInContext(measure,layout);current=[node('pending')];layout.measure();assert.deepEqual(observed,['pending']);current=[node('hydrated-body'),node('hydrated-basis')];layout.measure();assert.deepEqual(observed,['hydrated-body','hydrated-basis']);
+console.log('PASS: pending observer targets are replaced by hydrated body and grounds nodes');
+let delayed=[],homeCalls=0;active=null;Object.assign(context,{EXPLORE:true,xpSave:()=>{},setTimeout:fn=>delayed.push(fn),showHome:()=>homeCalls++,S:{rep:{chapters:[{id:'c-char'},{id:'next'}]},idx:0,cur:true,ended:{},readerWorld:'w1',view:'reader'}});
+const ending={dataset:{ch:'0'},classList:{contains:()=>true}};context.onSection(ending);assert.equal(delayed.length,0,'a world reader must not be sent back to the map after the character chapter');
+context.S.readerWorld=null;context.S.ended={};context.onSection(ending);assert.equal(delayed.length,1);context.S.idx=1;delayed[0]();assert.equal(homeCalls,0,'legacy delayed navigation must not interrupt another chapter');
+console.log('PASS: character ending cannot send an active world reader or a later chapter back to the map');

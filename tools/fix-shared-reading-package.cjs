@@ -1,0 +1,1 @@
+const fs=require('fs'),p='tools/prepare-everyday-production.cjs';let s=fs.readFileSync(p,'utf8');s=s.replace("new Set(['index.html'","new Set(['report/v2/everyday-reading.js','report/v2/luck-reading.js','index.html'");fs.writeFileSync(p,s);
