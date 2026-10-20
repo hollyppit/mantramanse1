@@ -1,3 +1,4 @@
+import {SCENE_THEMES} from './_panel-scenes.js';
 import { aiFetch } from './_ai-cost.js';
 // 무빙툰 패널 이미지(장면 삽화) 생성 — 프리셋 + 이미지 모델 호출. 파일명이 _로 시작해 라우트로 노출되지 않는다.
 // 사용자별 실시간 생성은 하지 않는다: 오행 5 × 이야기 주제 14 = 70장을 관리자가 미리 만들어 미디어 라이브러리에 태그와 함께 저장 → 조합 규칙(Director.pickMedia)이 장면에 맞는 컷을 고른다.
@@ -85,6 +86,7 @@ export const THEMES = {
   monthly: { name: '월별 흐름', scene: '이번 달 일정을 점검하는 글자 없는 월간 계획 보드', tags: ['desk', 'thinking'] },
   action: { name: '실천 · 변화', scene: '계획을 한 단계 실행하며 정돈하는 작업 공간', tags: ['workspace', 'working'] },
 };
+Object.assign(THEMES,SCENE_THEMES);
 // 오행은 풍경의 계절·빛을 정한다(장면 태그에도 더해진다).
 const SCENE_BY_EL = { wood: ['forest', 'sunrise'], fire: ['sunset'], earth: ['field', 'mountain'], metal: ['nightCity', 'stars'], water: ['rain', 'sea'] };
 const ACTIONS = /^(walking|studying|working|meeting|thinking|resting|lookingBack|lookingForward)$/;
@@ -98,7 +100,7 @@ export const presetId = (el, th, kind) => { const k = kindOf(kind); return k ===
 const KIND_SUFFIX = { panel: '', panelF: ' · 여성', panelM: ' · 남성', bg: ' (배경)' };
 export function presets(kind) {
   const out = [], k = kindOf(kind);
-  for (const el of Object.keys(ELEMENTS)) for (const th of Object.keys(THEMES)) out.push({ id: presetId(el, th, k), kind: k, gender: genderOfKind(k), element: el, theme: th, title: `${ELEMENTS[el].name} · ${THEMES[th].name}${KIND_SUFFIX[k]}` });
+  for (const el of Object.keys(ELEMENTS)) for (const th of Object.keys(THEMES).filter(th => !THEMES[th].phase || k === 'panelF' || k === 'panelM')) out.push({ phase:THEMES[th].phase||'base', topic:THEMES[th].topic||'', topicName:THEMES[th].topicName||'', baseTheme:THEMES[th].baseTheme||th, id: presetId(el, th, k), kind: k, gender: genderOfKind(k), element: el, theme: th, title: `${ELEMENTS[el].name} · ${THEMES[th].name}${KIND_SUFFIX[k]}` });
   return out;
 }
 // 본문 컷 장면(한국어): 본문 내용에 맞춘 현대 한국 일상 + 표정이 보이는 주인공. {P} = 주인공(성별에 따라 한국인 여성·남성·청년).
@@ -191,22 +193,22 @@ const shotOf = (el, th, dyn, pov) => { if (FOCUSED_SHOTS[th]) return '연출: ' 
 export function promptFor(el, th, dir, kind) {
   const E = ELEMENTS[el], T = THEMES[th]; if (!E || !T) return '';
   const k = kindOf(kind);
-  if (k === 'bg') return `${bgStyleOf(dir)}\n배경 분위기: ${PLACE[th]}. 이 장면을 멀리서 본 넓고 고요한 풍경으로 그린다.\n색과 빛: ${PAL[el]}.\n오행 ${E.name}의 기운이 풍경 전체의 계절감과 분위기로 드러나게 한다.`;
+  if (k === 'bg') return `${bgStyleOf(dir)}\n배경 분위기: ${(PLACE[th] || T.scene)}. 이 장면을 멀리서 본 넓고 고요한 풍경으로 그린다.\n색과 빛: ${PAL[el]}.\n오행 ${E.name}의 기운이 풍경 전체의 계절감과 분위기로 드러나게 한다.`;
   const cd = cleanDirection(dir), people = cd.people, sameLook = cd.refUse === 'character' && cd.refs.length > 0; // 레퍼런스 인물 외형 통일 모드: 컷마다 다른 얼굴 대신 레퍼런스의 헤어·생김새를 따른다
-  const looks = sameLook ? ' 실존 인물이 아닌 가상의 인물이다. 첨부한 레퍼런스 인물과 같은 헤어스타일·얼굴 생김새로 그려 모든 컷에서 통일감이 있게 한다. 얼굴이 가려지는 구도여도 헤어스타일은 레퍼런스와 같게 보여야 하고, 옆얼굴·3/4 각도에서는 얼굴 생김새가 알아볼 만큼 드러나게 한다(옷만 이 컷에 맞게 — ' + LOOK_CLOTHES[(Object.keys(THEMES).indexOf(th) * 3 + Object.keys(ELEMENTS).indexOf(el)) % LOOK_CLOTHES.length] + ' 차림).'
-    : ' 실존 인물을 닮지 않은 가상의 인물이며 이 컷만의 고유한 외형이다 — ' + lookOf(el, th, k) + ' 다른 컷의 인물, 레퍼런스의 인물과 얼굴이 겹치지 않게 한다.';
+  const looks = T.topic === 'creative' ? ' 실존 인물이 아닌 가상의 한국인 성인이다. 장면의 시대에 맞는 옷과 소품을 사용하고 현대 사무실 의상과 전자 기기는 쓰지 않는다.' : sameLook ? ' 실존 인물이 아닌 가상의 인물이다. 첨부한 레퍼런스 인물과 같은 헤어스타일·얼굴 생김새로 그려 모든 컷에서 통일감이 있게 한다. 얼굴이 가려지는 구도여도 헤어스타일은 레퍼런스와 같게 보여야 하고, 옆얼굴·3/4 각도에서는 얼굴 생김새가 알아볼 만큼 드러나게 한다(옷만 이 컷에 맞게 — ' + LOOK_CLOTHES[(Object.keys(THEMES).indexOf(th) * 3 + Object.keys(ELEMENTS).indexOf(el)) % LOOK_CLOTHES.length] + ' 차림).'
+    : ' 실존 인물을 닮지 않은 가상의 인물이며 이 컷만의 고유한 외형이다 — ' + lookOf(el, T.phase ? T.topic+'_daily' : th, k) + (T.phase ? ' 같은 주제의 평소·갈등·실천 장면은 같은 헤어스타일과 의상의 동일한 주인공으로 이어진다.' : ' 다른 컷의 인물, 레퍼런스의 인물과 얼굴이 겹치지 않게 한다.');
   const pov = k === 'panel' && people !== 'none'; // 공용 칸: 1인칭 POV(얼굴 없이 손만) — 외형·표정 지정은 쓰지 않는다
   const face = people === 'none' ? '' : '\n' + (th === 'wealth' ? WEALTH[el].shot + '.' : shotOf(el, th, k === 'panel', pov)) + (people === 'face' && !pov ? looks : '') +
     (pov ? '\n' + POV_RULE + '\n위 연출(카메라 거리·각도·손동작)이 장면 문장의 인물·표정 묘사보다 우선한다. 손으로 무언가 하고 있는 동작이 보이게 그리고, 컷마다 구도와 상황을 다르게 한다.' :
       '\n위 연출(카메라 거리·각도·몸짓)이 장면 문장의 인물 묘사보다 우선한다. 증명사진처럼 가만히 서서 정면을 보는 포즈, 얼굴만 가득 찬 구도는 피하고 장면 속에서 무언가 하고 있는 동작으로 그린다.');
-  const scene = (th === 'wealth' ? WEALTH[el].ko : PLOT[th]).replace('{P}', pov ? '1인칭 시점의 주인공' : WHO_KO[genderOfKind(k)]), style = styleOf(dir);
-  return `${pov ? style.replace('인물의 얼굴과 표정이 보여도 좋다(특정 실존 인물을 닮게 그리지 않는다).', '주인공의 얼굴은 나오지 않고 손만 보인다.') : style}\n장면: ${pov ? scene.replace(/[,.] ?[^,.]*(표정|옆얼굴)[^,.]*/g, '') : scene}.${face}${th === 'wealth' ? '\n' + WEALTH_GUARD_KO : ''}\n색과 빛: ${PAL[el]}.\n오행 ${E.name}의 기운이 장면 전체의 빛과 분위기로 드러나게 한다.`;
+  const scene = (th === 'wealth' ? WEALTH[el].ko : (PLOT[th] || T.scene)).replace('{P}', pov ? '1인칭 시점의 주인공' : WHO_KO[genderOfKind(k)]), style = styleOf(T.topic === 'creative' && cd.world === 'modern' ? {...cd,world:'eastFantasy'} : dir);
+  return `${pov ? style.replace('인물의 얼굴과 표정이 보여도 좋다(특정 실존 인물을 닮게 그리지 않는다).', '주인공의 얼굴은 나오지 않고 손만 보인다.') : style}\n장면: ${pov ? scene.replace(/[,.] ?[^,.]*(표정|옆얼굴)[^,.]*/g, '') : scene}.${face}${(th === 'wealth' || T.baseTheme === 'wealth') ? '\n' + WEALTH_GUARD_KO : ''}\n색과 빛: ${PAL[el]}.\n오행 ${E.name}의 기운이 장면 전체의 빛과 분위기로 드러나게 한다.`;
 }
 // 생성된 파일 → 미디어 라이브러리 항목(태그는 승인 상태라 조합에 바로 쓰인다). cleanMedia 가 TAX 밖 태그를 걸러낸다.
 export function mediaItem(el, th, url, bytes, provider, panelVideo, kind) {
   const E = ELEMENTS[el], T = THEMES[th], k = kindOf(kind), bg = k === 'bg', g = genderOfKind(k);
-  return cleanMedia({ id: presetId(el, th, k), type: 'image', url, posterUrl: url, title: `${E.name} · ${T.name} ${bg ? '배경' : '패널'}${g ? (g === 'F' ? ' 여성' : ' 남성') : ''}`, description: `AI 생성 ${bg ? '배경' : '패널'}(${provider}) — ${bg ? PLACE[th] : (th === 'wealth' ? WEALTH[el].ko : PLOT[th]).replace('{P}', WHO_KO[g])}`, orientation: 'portrait', priority: bg ? 55 : g ? 62 : 60,
-    elementTags: [el], stateTags: [E.state], emotionTags: [E.mood], themeTags: [th], sceneTags: SCENE_BY_EL[el].concat(T.tags.filter(t => !ACTIONS.test(t))), actionTags: T.tags.filter(t => ACTIONS.test(t)),
+  return cleanMedia({ id: presetId(el, th, k), type: 'image', url, posterUrl: url, title: `${E.name} · ${T.name} ${bg ? '배경' : '패널'}${g ? (g === 'F' ? ' 여성' : ' 남성') : ''}`, description: `AI 생성 ${bg ? '배경' : '패널'}(${provider}) — ${bg ? (PLACE[th] || T.scene) : (th === 'wealth' ? WEALTH[el].ko : (PLOT[th] || T.scene)).replace('{P}', WHO_KO[g])}`, orientation: 'portrait', priority: bg ? 55 : g ? 62 : 60,
+    elementTags: [el], stateTags: [E.state], emotionTags: [E.mood], themeTags: [T.baseTheme || th], sceneTags: SCENE_BY_EL[el].concat(T.tags.filter(t => !ACTIONS.test(t))), actionTags: T.tags.filter(t => ACTIONS.test(t)),
     visualRole: bg ? ['background', 'hero'] : ['hero'], loopable: bg && !!panelVideo, enabled: true, tagsApproved: true, bytes, uploadedAt: Date.now(), panelVideo: panelVideo || '' });
 }
 

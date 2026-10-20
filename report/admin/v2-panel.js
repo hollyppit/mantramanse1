@@ -3,7 +3,7 @@
    뷰어의 조합 규칙(오행·주제 점수)이 장면마다 알맞은 컷을 고른다. 이 화면은 만들기·다시 만들기만 한다. index.html 의 showTab 이 V2Panel.open('panelart', 비밀번호) 를 부른다. */
 (function () {
   'use strict';
-  var C = window.V2Content, esc = C.esc, toast = C.toast, PANE = null, G = { d: null, busy: false, stop: false, provider: '', log: [], sel: {}, selK: '' };
+  var C = window.V2Content, esc = C.esc, toast = C.toast, PANE = null, G = { d: null, busy: false, stop: false, provider: '', log: [], sel: {}, selK: '', phase: 'base' };
   var EL = { wood: '木 목', fire: '火 화', earth: '土 토', metal: '金 금', water: '水 수' }, TH = { identity: '나는 누구', talent: '재능', career: '일', wealth: '돈·재테크', love: '사랑', relationship: '관계', family: '가족', shadow: '약점', daewoon: '대운·전환', remedy: '회복', marriage: '결혼·동반자', children: '자식운·자녀', sewoon: '올해 흐름', monthly: '월별 흐름', action: '실천·변화' };
   var $ = function (s) { return PANE.querySelector(s); };
   var css = document.createElement('style');
@@ -15,7 +15,7 @@
   document.head.appendChild(css);
 
   // 패널 목록 + Kling 영상 생성 상태(키 설정 여부 · 진행 중 작업). Kling 쪽이 실패해도 목록은 그대로 보여 준다.
-  function load() { return Promise.all([C.api('/api/panel-art'), C.api('/api/panel-video').catch(function () { return { enabled: false, tasks: [] }; })]).then(function (a) { G.d = a[0]; G.vid = a[1]; }); }
+  function load() { return Promise.all([C.api('/api/panel-art'), C.api('/api/panel-video').catch(function () { return { enabled: false, tasks: [] }; })]).then(function (a) { G.d = a[0]; G.vid = a[1]; (G.d.presets||[]).forEach(function(p){if(p.phase&&p.phase!=='base')TH[p.theme]=p.topicName||p.title;}); }); }
   function jpegOf(url) { // 현재 이미지를 JPEG 로 바꾼다(Kling 은 JPG·PNG 만 받는다. 같은 출처 이미지라 캔버스가 막히지 않는다)
     return new Promise(function (ok, no) { var im = new Image(); im.onload = function () { var c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; c.getContext('2d').drawImage(im, 0, 0); c.toBlob(function (b) { b ? ok(b) : no(new Error('이미지를 JPEG 로 바꾸지 못했습니다')); }, 'image/jpeg', 0.95); }; im.onerror = function () { no(new Error('현재 이미지를 불러오지 못했습니다')); }; im.src = url; });
   }
@@ -36,24 +36,28 @@
   ['panelF', 'panelM'].forEach(function (k) { KIND[k] = { title: '패널 이미지 · 본문 컷 · ' + GEN[k], desc: KIND.panel.desc + ' <b>' + GEN[k] + '</b> 칸입니다: 뷰어가 사용자의 성별에 맞는 칸을 쓰고, 이 칸이 비어 있으면 공용 칸으로 대신합니다.' }; });
   KIND.panel = { title: '패널 이미지 · 본문 컷 · 공용(성별 무관)', desc: KIND.panel.desc + ' 성별 칸이 비어 있을 때 대신 쓰는 <b>공용</b> 칸입니다. 기존 50장은 유지되며 새 주제는 빈 칸으로 추가됩니다.' };
   function tabsOf(cur) {
-    return '<div class="row" style="gap:6px;margin:0 0 10px;flex-wrap:wrap">' + ['panelF', 'panelM'].map(function (k) { var l = G.d.presets.filter(function (p) { return p.kind === k; }), h = l.filter(function (p) { return p.url; }).length; return '<button type="button" class="pa-tab btn' + (k === cur ? ' gold' : '') + '" data-pg="' + k + '">' + GEN[k] + ' · ' + h + '/' + l.length + '</button>'; }).join('') + (G.d.commonCount ? '<button type="button" class="btn pa-delcommon"' + (G.busy ? ' disabled' : '') + '>공용 컷 ' + G.d.commonCount + '장 삭제</button>' : '') + '</div>';
+    return '<div class="row" style="gap:6px;margin:0 0 10px;flex-wrap:wrap">' + ['panelF', 'panelM'].map(function (k) { var l = G.d.presets.filter(function (p) { return inScope(p,k); }), h = l.filter(function (p) { return p.url; }).length; return '<button type="button" class="pa-tab btn' + (k === cur ? ' gold' : '') + '" data-pg="' + k + '">' + GEN[k] + ' · ' + h + '/' + l.length + '</button>'; }).join('') + (G.phase === 'base' && G.d.commonCount ? '<button type="button" class="btn pa-delcommon"' + (G.busy ? ' disabled' : '') + '>공용 컷 ' + G.d.commonCount + '장 삭제</button>' : '') + '</div>';
   }
+  function inScope(p,kind){return p.kind===kind&&(p.phase||'base')===(kind==='bg'?'base':G.phase||'base');}
+  function keysOf(kind){return Array.from(new Set(G.d.presets.filter(function(p){return inScope(p,kind);}).map(function(p){return p.theme;})));}
+  function sceneCard(){return '<div class="card"><h3>본문 장면 추가 제작 · 210칸</h3><p>7개 주제 × 평소 모습·갈등·실천 × 오행 5 × 여성·남성입니다. 만든 장면은 해당 주제 본문의 생활 설명·약점·실천 앞에 연결됩니다.</p><label>제작할 장면 <select id="paPhase"'+(G.busy?' disabled':'')+'>'+[['base','기존 기본 패널·배경'],['daily','평소 모습 · 70칸'],['conflict','갈등·약점 · 70칸'],['practice','변화·실천 · 70칸']].map(function(x){return '<option value="'+x[0]+'"'+(x[0]===G.phase?' selected':'')+'>'+x[1]+'</option>';}).join('')+'</select></label><p class="muted">일괄 만들기는 지금 보고 있는 장면과 선택한 성별의 칸에만 적용됩니다.</p></div>';}
   function cardOf(kind) {
-    var d = G.d, pv = d.providers, list = d.presets.filter(function (p) { return p.kind === kind; }), have = list.filter(function (p) { return p.url; }).length, I = KIND[kind];
+    var d = G.d, pv = d.providers, list = d.presets.filter(function (p) { return inScope(p,kind); }), have = list.filter(function (p) { return p.url; }).length, I = KIND[kind];
+    if(kind!=='bg'&&G.phase!=='base')I={title:I.title+' · '+({daily:'평소 모습',conflict:'갈등·약점',practice:'변화·실천'}[G.phase]),desc:'7개 주제 × 오행 5 = 이 성별의 장면 35칸입니다. 칸을 눌러 이미지 생성·수정 또는 이미지·영상 업로드를 할 수 있습니다. 등록하면 같은 주제·오행·성별의 본문에서 이 단계에 사용합니다.'};
     var sm = G.selK === kind, nsel = list.filter(function (p) { return G.sel[p.id]; }).length;
-    var cells = '<span></span>' + Object.keys(TH).map(function (t) { return '<span class="pa-h"' + (sm ? ' data-selcol="' + t + '" title="이 주제 열 전체 선택/해제"' : '') + '>' + esc(TH[t]) + '</span>'; }).join('');
+    var cells = '<span></span>' + keysOf(kind).map(function (t) { return '<span class="pa-h"' + (sm ? ' data-selcol="' + t + '" title="이 주제 열 전체 선택/해제"' : '') + '>' + esc(TH[t]) + '</span>'; }).join('');
     Object.keys(EL).forEach(function (e) {
-      cells += '<span class="pa-r"' + (sm ? ' data-selrow="' + e + '" title="이 오행 줄 전체 선택/해제"' : '') + '>' + esc(EL[e]) + '</span>' + Object.keys(TH).map(function (t) {
-        var p = list.filter(function (x) { return x.element === e && x.theme === t; })[0];
+      cells += '<span class="pa-r"' + (sm ? ' data-selrow="' + e + '" title="이 오행 줄 전체 선택/해제"' : '') + '>' + esc(EL[e]) + '</span>' + keysOf(kind).map(function (t) {
+        var p = list.filter(function (x) { return x.element === e && x.theme === t; })[0];if(!p)return '<span></span>';
         return '<div class="pa-c' + (p.url ? ' has' : '') + (sm && G.sel[p.id] ? ' sel' : '') + '" data-id="' + p.id + '" data-k="' + kind + '" data-e="' + e + '" data-t="' + t + '" title="' + esc(p.title) + ' — 눌러서 ' + (p.url ? '다시 만들기' : '만들기') + '"' + (p.url ? ' style="background-image:url(\'' + esc(p.url) + '\')"' : '') + '>' + (p.url ? (p.video ? '<b>▶ 영상</b>' : '') : '<b>비어 있음</b>') + '</div>';
       }).join('');
     });
     return '<div class="card" style="margin-top:12px"><b style="color:var(--gold)">' + I.title + ' · ' + have + ' / ' + list.length + '장</b><p class="muted" style="margin:6px 0 10px">' + I.desc + '</p>' + (kind !== 'bg' ? tabsOf(kind) : '') +
       '<div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><label class="muted">모델 <select class="paProv"><option value="">GPT 우선 · 실패 시 Gemini 로 자동 전환</option><option value="openai"' + (G.provider === 'openai' ? ' selected' : '') + (pv.openai ? '' : ' disabled') + '>OpenAI ' + esc(d.models.openai) + (pv.openai ? '' : ' (키 없음)') + '</option><option value="gemini"' + (G.provider === 'gemini' ? ' selected' : '') + (pv.gemini ? '' : ' disabled') + '>Gemini ' + esc(d.models.gemini) + (pv.gemini ? '' : ' (키 없음)') + '</option></select></label>' +
-      '<button class="btn pa-run" data-run="missing" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>빈 칸 모두 만들기</button><button class="btn pa-run" data-run="all" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>모두 다시 만들기</button><button class="btn pa-bv" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>영상 일괄 만들기</button><button class="btn pa-sel' + (sm ? ' gold' : '') + '" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>' + (sm ? '선택 끝내기' : '선택해서 다시 만들기') + '</button><button class="pa-stop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
+      '<button class="btn pa-run" data-run="missing" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>이 화면의 빈 칸 만들기</button><button class="btn pa-run" data-run="all" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>이 화면 다시 만들기</button><button class="btn pa-bv" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>영상 일괄 만들기</button><button class="btn pa-sel' + (sm ? ' gold' : '') + '" data-k="' + kind + '"' + (G.busy ? ' disabled' : '') + '>' + (sm ? '선택 끝내기' : '선택해서 다시 만들기') + '</button><button class="pa-stop"' + (G.busy ? '' : ' disabled') + '>중지</button></div>' +
       (sm ? '<div class="row pa-selbar" data-k="' + kind + '"><span class="muted">다시 만들 칸을 누르세요(오행·주제 이름을 누르면 줄/열 전체). <b class="pa-selcnt" style="color:var(--gold)">' + nsel + '</b>장 선택</span><button type="button" class="pa-selall" data-k="' + kind + '">전체 선택</button><button type="button" class="pa-selnone" data-k="' + kind + '">선택 해제</button><button type="button" class="btn gold pa-runsel" data-k="' + kind + '"' + (G.busy || !nsel ? ' disabled' : '') + '>선택한 ' + nsel + '장 다시 만들기</button></div>' : '') +
       (kind !== 'bg' && !d.r2 ?'<p class="err">R2(CLIPS_R2)가 연결되지 않아 저장할 수 없습니다.</p>' : '') + (kind !== 'bg' && !pv.openai && !pv.gemini ?'<p class="err">OPENAI_API_KEY 또는 GEMINI_API_KEY 가 없습니다. Cloudflare 환경 변수에 추가하세요.</p>' : '') +
-      '<div class="pa-grid-wrap" role="region" aria-label="오행별 패널 이미지 목록" tabindex="0"><div class="pa-grid' + (sm ? ' pa-selmode' : '') + '">' + cells + '</div></div></div>';
+      '<div class="pa-grid-wrap" role="region" aria-label="오행별 패널 이미지 목록" tabindex="0"><div class="pa-grid' + (sm ? ' pa-selmode' : '') + '" style="grid-template-columns:60px repeat('+keysOf(kind).length+',minmax(94px,1fr))">' + cells + '</div></div></div>';
   }
   // 선택해서 다시 만들기: 칸을 여러 개 골라 한 번에 새로 만든다(runList 와 같은 방식 — 성공한 칸만 교체, 연속 실패 3회면 멈춤).
   function cardEl(kind) { var g = PANE.querySelector('.pa-grid .pa-c[data-k="' + kind + '"]'); return g ? g.closest('.card') : null; }
@@ -62,22 +66,23 @@
     [].forEach.call(card.querySelectorAll('.pa-c'), function (c) { var on = !!G.sel[c.dataset.id]; c.classList.toggle('sel', on); if (on) n++; });
     var cnt = card.querySelector('.pa-selcnt'), go = card.querySelector('.pa-runsel'); if (cnt) cnt.textContent = n; if (go) { go.textContent = '선택한 ' + n + '장 다시 만들기'; go.disabled = G.busy || !n; }
   }
-  function selWhere(kind, fn, on) { G.d.presets.forEach(function (p) { if (p.kind === kind && fn(p)) { if (on) G.sel[p.id] = true; else delete G.sel[p.id]; } }); syncSel(kind); }
+  function selWhere(kind, fn, on) { G.d.presets.forEach(function (p) { if (inScope(p,kind) && fn(p)) { if (on) G.sel[p.id] = true; else delete G.sel[p.id]; } }); syncSel(kind); }
   function runSel(kind) {
-    var todo = G.d.presets.filter(function (p) { return p.kind === kind && G.sel[p.id]; }); if (!todo.length) { toast('선택한 칸이 없습니다'); return; }
+    var todo = G.d.presets.filter(function (p) { return inScope(p,kind) && G.sel[p.id]; }); if (!todo.length) { toast('선택한 칸이 없습니다'); return; }
     if (!confirm((LBL[kind] || '').replace(/[\[\]]/g, '') + ' 선택한 ' + todo.length + '장을 현재 비주얼 디렉션으로 다시 만듭니다.\n이미지 비용이 장당 발생하고, 성공한 칸의 기존 이미지는 삭제됩니다. 계속할까요?')) return;
     var custom = todo.filter(function (p) { return p.custom; }).length, reset = false;
     if (custom) reset = confirm('선택한 칸 중 직접 고쳐 저장한 프롬프트가 ' + custom + '개 있습니다.\n[확인] 그 프롬프트를 버리고 현재 디렉션으로 만듭니다.\n[취소] 고친 프롬프트를 그대로 사용합니다.');
     G.sel = {}; runList(todo, reset, true);
   }
   function draw() {
-    PANE.innerHTML = dirCard(G.d) + cardOf(G.pg || 'panelF') + cardOf('bg') + '<div class="card" style="margin-top:12px"><div class="pa-log"></div></div><div id="taBox"></div><div id="asBox"></div><div id="tnBox"></div>';
+    PANE.innerHTML = dirCard(G.d) + sceneCard() + cardOf(G.pg || 'panelF') + (G.phase==='base'?cardOf('bg'):'') + '<div class="card" style="margin-top:12px"><div class="pa-log"></div></div><div id="taBox"></div><div id="asBox"></div><div id="tnBox"></div>';
+    $('#paPhase').onchange=function(){if(G.busy)return;G.phase=this.value;G.sel={};G.selK='';draw();};
     bindDir(); if (window.V2Tarot) window.V2Tarot.open(PANE.querySelector('#taBox')); if (window.V2Assets) window.V2Assets.open(PANE.querySelector('#asBox')); if (window.V2Toon) window.V2Toon.open(PANE.querySelector('#tnBox'));
     [].forEach.call(PANE.querySelectorAll('.paProv'), function (sel) { sel.onchange = function () { G.provider = this.value; [].forEach.call(PANE.querySelectorAll('.paProv'), function (o) { o.value = G.provider; }); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-run'), function (b) { b.onclick = function () { (b.dataset.run === 'all' ? runAll : runMissing)(b.dataset.k); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-bv'), function (b) { b.onclick = function () {
       if (G.busy) return; var kind = b.dataset.k;
-      var cells = G.d.presets.filter(function (p) { return p.kind === kind && p.url; }).map(function (p) { return { id: p.id, label: TH[p.theme] + ' · ' + EL[p.element], imageUrl: p.url, hasVideo: !!p.video, body: { kind: kind, element: p.element, theme: p.theme },
+      var cells = G.d.presets.filter(function (p) { return inScope(p,kind) && p.url; }).map(function (p) { return { id: p.id, label: TH[p.theme] + ' · ' + EL[p.element], imageUrl: p.url, hasVideo: !!p.video, body: { kind: kind, element: p.element, theme: p.theme },
         apply: function (key) { return C.api('/api/panel-art', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, element: p.element, theme: p.theme, uploadVideo: key, uploadPoster: '' }) }).then(function (r) { p.video = r.video; return r; }); } }; });
       if (!cells.length) { toast('이미지가 있는 칸이 없습니다'); return; }
       window.V2Batch.open({ title: '영상 일괄 만들기 · ' + (KIND[kind] ? KIND[kind].title : kind), cells: cells, onClose: function () { load().then(draw); } }); }; });
@@ -93,7 +98,7 @@
     [].forEach.call(PANE.querySelectorAll('.pa-runsel'), function (b) { b.onclick = function () { if (!G.busy) runSel(b.dataset.k); }; });
     [].forEach.call(PANE.querySelectorAll('[data-selrow],[data-selcol]'), function (h) { h.onclick = function () {
       var k = G.selK, row = h.dataset.selrow, col = h.dataset.selcol, f = function (p) { return row ? p.element === row : p.theme === col; };
-      var all = G.d.presets.filter(function (p) { return p.kind === k && f(p); }).every(function (p) { return G.sel[p.id]; }); selWhere(k, f, !all); }; });
+      var all = G.d.presets.filter(function (p) { return inScope(p,k) && f(p); }).every(function (p) { return G.sel[p.id]; }); selWhere(k, f, !all); }; });
     log('');
   }
   /* 컷 하나 세부 수정: 프롬프트·추가 요청으로 여러 번 미리 만들어 보고, 마음에 드는 결과만 이 칸에 확정한다(안 고른 결과는 닫을 때 지운다). */
@@ -239,10 +244,10 @@
       .catch(function (er) { if (cell) cell.classList.remove('run'); log('✗ ' + EL[e] + ' · ' + TH[t] + ' — ' + er.message); toast(er.message, true); return false; })
       .then(function (ok) { G.busy = false; return ok; });
   }
-  function runMissing(kind) { runList(G.d.presets.filter(function (p) { return p.kind === kind && !p.url; }), false); }
+  function runMissing(kind) { runList(G.d.presets.filter(function (p) { return inScope(p,kind) && !p.url; }), false); }
   // 모두 다시 만들기: 이미 있는 컷까지 현재 비주얼 디렉션으로 전부 새로 만든다. 새로 만드는 데 성공한 칸만 교체되고(실패하면 옛 이미지 유지) 옛 파일은 지워진다.
   function runAll(kind) {
-    var all = G.d.presets.filter(function (p) { return p.kind === kind; }), n = all.length, custom = all.filter(function (p) { return p.custom; }).length; if (!confirm((LBL[kind] || '').replace(/[\[\]]/g, '') + ' ' + n + '장 전체를 현재 비주얼 디렉션(화풍·감성·세계관…)으로 다시 만듭니다.\n이미지 비용이 장당 발생하고 30분 이상 걸릴 수 있으며, 성공한 칸의 기존 이미지는 삭제됩니다. 계속할까요?')) return;
+    var all = G.d.presets.filter(function (p) { return inScope(p,kind); }), n = all.length, custom = all.filter(function (p) { return p.custom; }).length; if (!confirm((LBL[kind] || '').replace(/[\[\]]/g, '') + ' ' + n + '장 전체를 현재 비주얼 디렉션(화풍·감성·세계관…)으로 다시 만듭니다.\n이미지 비용이 장당 발생하고 30분 이상 걸릴 수 있으며, 성공한 칸의 기존 이미지는 삭제됩니다. 계속할까요?')) return;
     var reset = false; if (custom) reset = confirm('칸별로 직접 고쳐 저장한 프롬프트가 ' + custom + '개 있습니다.\n[확인] 그 프롬프트를 버리고 현재 디렉션으로 만듭니다.\n[취소] 고친 프롬프트를 그대로 사용합니다.');
     runList(all, reset, true);
   }

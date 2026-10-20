@@ -24,7 +24,7 @@ export async function onRequestGet({ request, env }) {
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
   const list = (await env.GLOSSARY_KV.get(KEY, 'json')) || [], by = new Map(list.map(m => [m.id, m]));
   const saved = (await env.GLOSSARY_KV.get(PKEY, 'json')) || {}, dir = await loadDir(env);
-  return json({ commonCount: list.filter(m => /^panel-[a-z]+-[a-z]+$/.test(m.id || '')).length, presets: presets('panelF').concat(presets('panelM'), presets('bg')).map(p => ({ ...p, url: (by.get(p.id) || {}).url || '', video: (by.get(p.id) || {}).panelVideo || '', prompt: saved[p.id] ? saved[p.id] + (p.theme === 'wealth' ? '\n' + WEALTH_GUARD_KO : '') : promptFor(p.element, p.theme, dir, p.kind), custom: !!saved[p.id], defaultPrompt: promptFor(p.element, p.theme, dir, p.kind), tools: toolsFor(p.element, p.theme, dir, p.kind) })), direction: dir, directionOptions: Object.fromEntries(Object.entries(DIRECTION_OPTIONS).map(([k, v]) => [k, { label: v.label, items: Object.fromEntries(Object.entries(v.items).map(([i, x]) => [i, x[0]])) }])), refUse: Object.fromEntries(Object.entries(REF_USE).map(([k, v]) => [k, v[0]])), providers: { openai: !!env.OPENAI_API_KEY, gemini: !!env.GEMINI_API_KEY }, r2: !!env.CLIPS_R2,
+  return json({ commonCount: list.filter(m => /^panel-[a-z]+-[a-z]+$/.test(m.id || '')).length, presets: presets('panelF').concat(presets('panelM'), presets('bg')).map(p => ({ ...p, url: (by.get(p.id) || {}).url || '', video: (by.get(p.id) || {}).panelVideo || '', prompt: saved[p.id] ? saved[p.id] + ((p.theme === 'wealth' || THEMES[p.theme]?.baseTheme === 'wealth') ? '\n' + WEALTH_GUARD_KO : '') : promptFor(p.element, p.theme, dir, p.kind), custom: !!saved[p.id], defaultPrompt: promptFor(p.element, p.theme, dir, p.kind), tools: toolsFor(p.element, p.theme, dir, p.kind) })), direction: dir, directionOptions: Object.fromEntries(Object.entries(DIRECTION_OPTIONS).map(([k, v]) => [k, { label: v.label, items: Object.fromEntries(Object.entries(v.items).map(([i, x]) => [i, x[0]])) }])), refUse: Object.fromEntries(Object.entries(REF_USE).map(([k, v]) => [k, v[0]])), providers: { openai: !!env.OPENAI_API_KEY, gemini: !!env.GEMINI_API_KEY }, r2: !!env.CLIPS_R2,
     models: { openai: env.PANEL_IMAGE_MODEL || 'gpt-image-2', gemini: env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image' } });
 }
 
@@ -102,7 +102,7 @@ export async function onRequestPost({ request, env }) {
     ref = { bytes: await o.arrayBuffer(), mime: (o.httpMetadata && o.httpMetadata.contentType) || 'image/webp' };
     prompt = '첨부한 이미지를 바탕으로, 같은 구도와 그림체를 유지하면서 아래 요청만 반영해 다시 그린다. 화면 안에 글자·숫자·로고는 넣지 않는다.\n수정 요청: ' + (String(b.extra || '').trim().slice(0, 500) || '전체적으로 조금 더 선명하게');
   } else if (typeof b.extra === 'string' && b.extra.trim()) prompt += '\n추가 요청: ' + b.extra.trim().slice(0, 500);
-  if (b.theme === 'wealth') prompt += '\n' + WEALTH_GUARD_KO; // 저장 프롬프트·현재 이미지 수정에도 재물 소재를 유지
+  if ((b.theme === 'wealth' || THEMES[b.theme]?.baseTheme === 'wealth')) prompt += '\n' + WEALTH_GUARD_KO; // 저장 프롬프트·현재 이미지 수정에도 재물 소재를 유지
   let refs = ref ? [ref] : []; if (!b.fromCurrent) { refs = await refsFor(env, dir, b); prompt = withRefs(prompt, refs, dir); } // 새로 그릴 때만 그림체 레퍼런스를 붙인다(현재 컷 수정은 그 컷이 바탕)
   let g; try { g = await generate(env, prompt, only, refs.length ? refs : null); } catch (e) { return json({ error: e.message }, 502); }
   if (b.preview) { // 미리보기: 칸을 바꾸지 않고 임시 파일로 돌려준다(확정은 accept)

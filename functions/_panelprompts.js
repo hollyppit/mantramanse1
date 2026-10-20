@@ -59,7 +59,8 @@ function styleEN(dir, kind) {
 // Leonardo.ai 이미지 프롬프트 + 권장 설정
 export function leonardo(el, th, dir, kind) {
   if (!ELEMENTS[el] || !THEMES[th]) return null;
-  return { prompt: `${styleEN(dir, kind)}\nScene: ${(th === 'wealth' ? WEALTH[el].en : TH_EN[th]).split("{c}").join(cOf(kind)).split(" (the main character is the adult, the partner is of the opposite sex)").join("")}.${povOf(cleanDirection(dir), kind) ? '\n' + POV_EN : ''}\nColor and light: ${EL_EN[el]}.${th === 'wealth' ? '\n' + WEALTH_GUARD_EN : ''}\nThe five-element energy of ${NAME_EN[el]} should show through the light, color and mood of the whole scene. No text, numbers or logos anywhere in the image.`,
+  const d=cleanDirection(dir),creative=THEMES[th].topic==='creative',style=styleEN(creative&&d.world==='modern'?{...d,world:'eastFantasy'}:dir,kind);
+  return { prompt: `${creative?style.replace('everyday modern clothing','period clothing appropriate to the fictional harbor setting'):style}\nScene: ${(th === 'wealth' ? WEALTH[el].en : (TH_EN[th] || THEMES[th].sceneEN)).split("{c}").join(cOf(kind)).split(" (the main character is the adult, the partner is of the opposite sex)").join("")}.${povOf(cleanDirection(dir), kind) ? '\n' + POV_EN : ''}\nColor and light: ${EL_EN[el]}.${(th === 'wealth' || THEMES[th].baseTheme === 'wealth') ? '\n' + WEALTH_GUARD_EN : ''}\nThe five-element energy of ${NAME_EN[el]} should show through the light, color and mood of the whole scene. No text, numbers or logos anywhere in the image.`,
     negative: NEGATIVE_IMAGE, size: '832 × 1248 (2:3 세로)' };
 }
 // Kling 이미지→영상 프롬프트(시작 프레임 = 위에서 만든 이미지). 움직임은 작고 잔잔하게, 인물의 얼굴·정체성이 변하지 않게.
@@ -89,7 +90,7 @@ const up = s => s[0].toUpperCase() + s.slice(1);
 export function kling(el, th, kind) {
   if (!ELEMENTS[el] || !THEMES[th]) return null;
   const pov = kindOf(kind) === 'panel';
-  return { prompt: `Gentle, cinematic motion on the first-frame image. ${pov ? 'This is a first-person POV shot: the protagonist\'s face never appears, only their hands and sleeves at the frame edge move slightly and naturally.' : 'The character remains composed with a relaxed closed mouth and still shoulders, with only a soft natural blink.'} ${up(th === 'wealth' ? WEALTH[el].motion : MOT_TH[th])}. ${up(MOT_EL[el])}. The camera does a very slow push-in. Keep the character's face, identity, composition, colors and the webtoon illustration style exactly as in the image; smooth, loop-friendly movement; no text appears.`,
+  return { prompt: `Gentle, cinematic motion on the first-frame image. ${pov ? 'This is a first-person POV shot: the protagonist\'s face never appears, only their hands and sleeves at the frame edge move slightly and naturally.' : 'The character remains composed with a relaxed closed mouth and still shoulders, with only a soft natural blink.'} ${up(th === 'wealth' ? WEALTH[el].motion : (MOT_TH[th] || 'the character makes one small natural hand gesture'))}. ${up(MOT_EL[el])}. The camera does a very slow push-in. Keep the character's face, identity, composition, colors and the webtoon illustration style exactly as in the image; smooth, loop-friendly movement; no text appears.`,
     negative: NEGATIVE_VIDEO, settings: '이미지→영상 · 길이 5초 · 시작 프레임 = 위에서 만든 이미지 · 창의성(관련도) 낮음~중간(얼굴이 변하면 더 낮추기) · 카메라 움직임은 프롬프트에 맡김' };
 }
 export function toolsFor(el, th, dir, kind) { const l = leonardo(el, th, dir, kind), k = kling(el, th, kind); return l && k ? { leo: l.prompt, leoNeg: l.negative, leoSize: l.size, kling: k.prompt, klingNeg: k.negative, klingSet: k.settings } : null; }
