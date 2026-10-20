@@ -32,6 +32,20 @@ export function kvOf(env, opts) {
   const slot = (opts && opts.cache) ? 'c' : 'n'; let m = cache.get(env); if (!m) { m = {}; cache.set(env, m); } if (m[slot]) return m[slot];
   const memo = !!(opts && opts.cache);
   const adapter = {
+    async readingResearchState() {
+      const result=await(await sb(env,'rpc/reading_research_state',{method:'POST',body:'{}'})).json();
+      return result.present?result.state:raw.get('ik:agentic:runtime','json');
+    },
+    async readingKnowledge(ids) {
+      if(!Array.isArray(ids)||ids.length>1000||ids.some(id=>typeof id!=='string'||!/^[a-zA-Z][\w.-]{1,79}$/.test(id)))throw Error('invalid-reading-rule-ids');
+      const wanted=new Set(ids);if(!wanted.size)return [];
+      const result=await(await sb(env,'rpc/reading_knowledge_records',{method:'POST',body:JSON.stringify({p_ids:[...wanted]})})).json();
+      if(!Array.isArray(result.items)||!Array.isArray(result.missingDomains))throw Error('invalid-reading-rules');
+      const items=result.items.slice();
+      // Missing domain records retain the existing KV fallback. Expired or tombstoned rows do not resurrect it.
+      for(const key of result.missingDomains){if(!/^ik:d:[A-Z]+$/.test(key))throw Error('invalid-reading-domain');const old=await raw.get(key,'json');if(Array.isArray(old))items.push(...old.filter(x=>wanted.has(x.id)));}
+      return items;
+    },
     async publishedLibrary(chapter) {
       if(!/^timeline_(?:self|wealth|career|love|health|creative|remedy)_[0-9]{2}$/.test(chapter))throw Error('invalid-library-chapter');
       const doc=await(await sb(env,'rpc/reading_published_library',{method:'POST',body:JSON.stringify({p_chapter:chapter})})).json();

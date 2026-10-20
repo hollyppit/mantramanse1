@@ -9,14 +9,22 @@ export const dkey = d => 'ik:d:' + d;
 export const loadDomain = async (kv, d) => (await kv.get(dkey(d), 'json')) || [];
 export async function loadAll(kv, domains) { const ds = domains || Object.keys(DOMAINS); return (kv.getMany ? (await kv.getMany(ds.map(dkey),'json')).map(x=>x||[]) : await Promise.all(ds.map(d => loadDomain(kv, d)))).flat(); }
 export async function loadServiceAll(kv,domains) {
- const state=await readState(kv).catch(()=>null);let required=domains;
+ const state=await readState(kv).catch(()=>null);let required=domains?Object.keys(DOMAINS).filter(d=>domains.includes(d)):undefined;
  if(domains&&state&&!state.config.legacyOnly){
   const relevant=Object.values(state.active).map(id=>state.candidates[id]).filter(c=>c?.publication==='published'&&(domains.includes(c.next?.domain)||domains.includes(c.previous?.domain)));
   // Domain moves need their original records for the exact hash gate. A new rule needs a global collision check.
-  required=relevant.some(c=>!c.previous||!DOMAINS[c.previous.domain])?undefined:[...new Set([...domains,...relevant.map(c=>c.previous.domain)])];
+  required=relevant.some(c=>!c.previous||!DOMAINS[c.previous.domain])?undefined:Object.keys(DOMAINS).filter(d=>domains.includes(d)||relevant.some(c=>c.previous.domain===d));
  }
  const items=await serviceItems(kv,await loadAll(kv,required),state);
  return domains?items.filter(x=>domains.includes(x.domain)):items;
+}
+export async function loadServiceRules(kv,ids,domains) {
+ if(!ids.length)return [];
+ if(!kv.readingKnowledge)return (await loadServiceAll(kv,domains)).filter(x=>ids.includes(x.id));
+ const state=await readState(kv).catch(()=>null),needed=[...new Set([...ids,...Object.keys(state?.active||{})])];
+ if(needed.length>1000)return (await loadServiceAll(kv,domains)).filter(x=>ids.includes(x.id));
+ const order=Object.keys(DOMAINS),originals=(await kv.readingKnowledge(needed)).slice().sort((a,b)=>order.indexOf(a.domain)-order.indexOf(b.domain)),items=await serviceItems(kv,originals,state);
+ return items.filter(x=>ids.includes(x.id)&&(!domains||domains.includes(x.domain)));
 }
 export async function loadServiceDomain(kv, domain) {return loadServiceAll(kv,[domain]);}
 export async function meta(kv) { const m=(await kv.get('ik:meta', 'json')) || { k: 'k0', d: 'd0', r: 'r0' };const s=await kv.get(STATE_KEY,'json').catch(()=>null);return s?{...m,research:s.config.legacyOnly?'legacy:'+(s.indexVersion||0):(s.indexVersion||0)}:m; }

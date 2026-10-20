@@ -1,6 +1,6 @@
 import {json} from './_lib.js';
 import {kvOf} from './_store.js';
-import {loadServiceAll,blockedDocs} from './_ikstore.js';
+import {loadServiceRules,blockedDocs} from './_ikstore.js';
 import {loadSourceIndex,loadSettings} from './_interpretation-store.js';
 import {analyze} from './_interpretation-engine.js';
 import {Editorial,loadEditorial,contractFor,contractDomains} from './_editorial.js';
@@ -14,12 +14,12 @@ export async function prepareReviewed(env,body,{draft=false,passages=null}={}){
  const clean=validate(body);if(!clean)throw Error('bad-payload');
  const store=kvOf(env);if(!store)throw Error('storage-unavailable');
  // Reuse identical reads only within this request; later requests always observe withdrawals and edits.
- const reads=new Map(),kv=new Proxy(store,{get(target,key){if(key==='get')return (id,type)=>{const k=id+'\0'+(type||'');if(!reads.has(k))reads.set(k,Promise.resolve().then(()=>target.get(id,type)));return reads.get(k);};const v=target[key];return typeof v==='function'?v.bind(target):v;}});
+ const reads=new Map(),kv=new Proxy(store,{get(target,key){if(key==='get')return (id,type)=>{const k=id+'\0'+(type||'');if(!reads.has(k))reads.set(k,Promise.resolve().then(()=>!draft&&id==='ik:agentic:runtime'&&type==='json'&&target.readingResearchState?target.readingResearchState():target.get(id,type)));return reads.get(k);};const v=target[key];return typeof v==='function'?v.bind(target):v;}});
  const catalog=await loadEditorial(kv,draft),saved=Editorial.find(catalog,clean.chapter);
  if(!draft&&saved&&(saved.state==='archived'||catalog.topics.some(t=>t.id===saved.topicId&&!t.enabled)))throw Error('unknown-reviewed-chapter');
  const contract=draft&&saved?saved:contractFor(catalog,clean.chapter);
  if(!contract)throw Error('unknown-reviewed-chapter');
- const [items,blocked,settings,library]=await Promise.all([loadServiceAll(kv,contractDomains(catalog,contract)),blockedDocs(kv),loadSettings(kv),draft?readLibrary(kv,contract.id):readPublishedLibrary(kv,contract.id)]);
+ const [items,blocked,settings,library]=await Promise.all([loadServiceRules(kv,contract.sourceRuleIds,contractDomains(catalog,contract)),blockedDocs(kv),loadSettings(kv),draft?readLibrary(kv,contract.id):readPublishedLibrary(kv,contract.id)]);
  const sourceIndex=await loadSourceIndex(kv,items.filter(r=>contract.sourceRuleIds.includes(r.id)),blocked),linked=new Set(contract.sourceRuleIds);
  const analysis=analyze(body.sd,items.filter(r=>linked.has(r.id)),{...settings,sourceIndex,blockedDocs:blocked,domains:contractDomains(catalog,contract)});
  if(passages){library.published=passages;library.preview=true;}else if(draft){library.published=library.draft;library.preview=true;}
