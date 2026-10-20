@@ -39,8 +39,8 @@
     if (chapter.aiEnabled === false || chapter.readingSupplementary || (!chapter.editorialContractId && (chapter.id === 'deep_health' || chapter.base === 'deep_health'))) return { chapter: { id: chapter.id || chapter.base, title: chapter.title || '', paragraphs: [] }, targets: [] };
     if(chapter.editorialDraft && R.ReadingFlow){
       var contract=chapter.editorialContractId;
-      ['title','reality','strength','risk','reinforce','practice','evidence'].forEach(function(role,i){
-        var instructions={title:'첫 문장에서 이 챕터의 질문에 근거 범위 안에서 직접 답하세요.',reality:'해당 질문에 관련된 구체적인 생활 사례를 조건부로 설명하세요.',strength:'이 챕터의 조건이 장점으로 발휘되는 상황을 설명하세요.',risk:'이 챕터의 조건이 취약점으로 바뀌는 상황과 부담을 설명하세요.',reinforce:'장점을 강화할 실제 행동과 적용되지 않는 반대 조건·예외를 함께 설명하세요.',practice:'실제로 시도하고 점검할 수 있는 행동을 제안하세요.',evidence:'전달된 판단의 근거와 한계, 상반된 해석 조건을 설명하세요.'};
+      ['title','why','reality','strength','risk','reinforce','practice','evidence'].forEach(function(role,i){
+        var instructions={title:'첫 문장에서 이 챕터의 질문에 근거 범위 안에서 직접 답하세요.',why:'실제로 선택한 문안의 적용 조건과 원국 계산값이 어떻게 맞는지 설명하세요.',reality:'해당 질문에 관련된 구체적인 생활 사례를 조건부로 설명하세요.',strength:'이 챕터의 조건이 장점으로 발휘되는 상황을 설명하세요.',risk:'이 챕터의 조건이 취약점으로 바뀌는 상황과 부담을 설명하세요.',reinforce:'장점을 강화할 실제 행동과 적용되지 않는 반대 조건·예외를 함께 설명하세요.',practice:'실제로 시도하고 점검할 수 있는 행동을 제안하세요.',evidence:'전달된 판단의 근거와 한계, 상반된 해석 조건을 설명하세요.'};
         paragraphs.push({id:String(i),role:role,kind:'reading',text:instructions[role]+' 질문: '+chapter.title+' / 작성 계약 '+contract+'. 근거가 없으면 새로운 주장으로 채우지 마세요.'});
         targets.push(function(text){chapter.readingCore[role]=text;if(role==='title')chapter.headline=text;var replacement=R.ReadingFlow.scenes(chapter.readingCore,chapter.id);chapter.scenes=chapter.scenes.map(function(scene){return scene.readingRole===role?replacement.find(function(x){return x.readingRole===role;}):scene;});});
       });
