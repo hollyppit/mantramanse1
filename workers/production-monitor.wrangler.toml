@@ -1,0 +1,15 @@
+name = "mantra-production-monitor"
+main = "production-monitor.js"
+compatibility_date = "2026-09-29"
+workers_dev = true
+[triggers]
+crons = ["*/5 * * * *"]
+[[kv_namespaces]]
+binding = "MONITOR_STATE"
+id = "f3499a45bd0c4018ac966e6be91f0838"
+[[analytics_engine_datasets]]
+binding = "READING_MONITOR"
+dataset = "mantra_production_monitor"
+[vars]
+SERVICE_ORIGIN = "https://mantramanse.pages.dev"
+ACCOUNT_ID = "9691f5fe73bf481a5d884db649c7eb01"

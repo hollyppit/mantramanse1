@@ -1,3 +1,4 @@
+import {monitorProvider} from './_production-monitor.js';
 import { kvOf } from './_store.js';
 
 const count = n => Number.isFinite(n) && n >= 0 ? n : null;
@@ -28,13 +29,14 @@ async function costEnvironment(env){
 }
 export async function aiFetch(env, scope, url, init) {
   env=await costEnvironment(env);
-  if(env.AI_COST_LOG_ON!=='1' && !env.__AI_COST_COLLECTOR && !env.__AI_BEFORE_CALL)return fetch(url,init);
+  if(env.AI_COST_LOG_ON!=='1' && !env.__AI_COST_COLLECTOR && !env.__AI_BEFORE_CALL){monitorProvider(env,scope);return fetch(url,init);}
   const started=Date.now();let response,usage=null,model='unknown',rates,requestBody;
   try {requestBody=typeof init?.body==='string'?JSON.parse(init.body):null;model=requestBody?.model || requestBody?.model_id || (typeof init?.body?.get==='function'?init.body.get('model'):null) || (url.match(/\/models\/([^/:?]+)/)||[])[1] || 'unknown';}catch{}
   try {rates=JSON.parse(env.AI_PRICING_JSON || '{}')[model];}catch{}
   const provider=url.includes('openai.com')?'openai':url.includes('anthropic.com')?'anthropic':url.includes('googleapis.com')?'google':url.includes('kling')?'kling':url.includes('elevenlabs.io')?'elevenlabs':'other';
   if(env.__AI_BEFORE_CALL)await env.__AI_BEFORE_CALL({scope,model,rates,requestBody});
   try {
+    monitorProvider(env,scope);
     response=await fetch(url,init);
     if(scope!=='panelart' && (response.headers.get('content-type')||'').includes('json'))try{const d=await response.clone().json();usage=tokenUsage(d);}catch{}
     return response;
