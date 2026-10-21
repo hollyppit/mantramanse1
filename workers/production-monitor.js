@@ -18,9 +18,9 @@ export async function run(env,{now=Date.now(),manual=false,fetcher=fetch,readMet
  if(!manual&&old.slot>=slot)return {skipped:'already-checked'};
  const results=[],jobs=probeJobs(slot);let cursor=0;await Promise.all(Array.from({length:4},async()=>{while(cursor<jobs.length){const result=await probe(env,jobs[cursor++],fetcher);results.push(result);if(result.error||result.ms>=10000)point(env,'incident',result.error||'synthetic-slow',{status:result.status,ms:result.ms,valid:!result.error,id:result.chapter});}}));
  let observations=null,metricError=null;try{observations=await readMetrics(env,now);}catch(e){metricError=e.message;point(env,'incident','monitor-metrics-unavailable',{status:503});}
- const slow=observations?.realRequests>=20&&observations.p95>=3000,streak=slow?(old.slowStreak||0)+1:0;if(streak>=2)point(env,'incident','real-p95-slow',{ms:observations.p95});
- const state={version:1,slot,at:new Date(now).toISOString(),source:'cloudflare-cron',manual,checked:results.length,failures:results.filter(x=>x.error||x.ms>=10000),observations,metricError,slowStreak:streak,coverage:{...old.coverage,...Object.fromEntries(results.map(r=>[r.chapter,{at:new Date(now).toISOString(),status:r.status,error:r.error,ms:r.ms}]))}};
- await env.MONITOR_STATE.put('state',JSON.stringify(state));point(env,'heartbeat','scheduled-complete',{valid:!state.failures.length&&!metricError});return state;
+ const baseline=old.baselineP95||0,slow=observations?.realRequests>=20&&(observations.p95>=3000||(baseline>0&&observations.p95>=baseline*2)),streak=slow?(old.slowStreak||0)+1:0;if(streak>=2)point(env,'incident','real-p95-slow',{ms:observations.p95});
+ const state={version:1,slot,at:new Date(now).toISOString(),source:'cloudflare-cron',manual,checked:results.length,failures:results.filter(x=>x.error||x.ms>=10000),observations,metricError,slowStreak:streak,baselineP95:observations?.realRequests>=20&&!slow?(baseline?baseline*0.8+observations.p95*0.2:observations.p95):baseline,coverage:{...old.coverage,...Object.fromEntries(results.map(r=>[r.chapter,{at:new Date(now).toISOString(),status:r.status,error:r.error,ms:r.ms}]))}};
+ await env.MONITOR_STATE.put(manual?'manual-state':'state',JSON.stringify(state));point(env,'heartbeat',manual?'manual-complete':'scheduled-complete',{valid:!state.failures.length&&!metricError});return state;
 }
 export default {
  async scheduled(event,env,ctx){ctx.waitUntil(run(env));},
