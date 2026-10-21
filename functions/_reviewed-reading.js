@@ -9,6 +9,7 @@ import {readLibrary,readPublishedLibrary,composeReviewed,LIBRARY_VERSION} from '
 import {cleanAdviceHistory} from './_reading-advice.js';
 import {HEALTH_EDUCATION,isHealthEducation} from './_health-education.js';
 import {diagnosticRecord,saveDiagnostic} from './_reading-diagnostics.js';
+import {seedPassageIds,SEED_INDEX_VERSION} from './_reading-seed-index.js';
 import {seedPassages,SEED_VERSION} from './_reading-library-seed.js';
 export async function prepareReviewed(env,body,{draft=false,passages=null,store:requestStore=null}={}){
  const clean=validate(body);if(!clean)throw Error('bad-payload');
@@ -23,7 +24,11 @@ export async function prepareReviewed(env,body,{draft=false,passages=null,store:
  const sourceIndex=await loadSourceIndex(kv,items.filter(r=>contract.sourceRuleIds.includes(r.id)),blocked),linked=new Set(contract.sourceRuleIds);
  const analysis=analyze(body.sd,items.filter(r=>linked.has(r.id)),{...settings,sourceIndex,blockedDocs:blocked,domains:contractDomains(catalog,contract)});
  if(passages){library.published=passages;library.preview=true;}else if(draft){library.published=library.draft;library.preview=true;}
- if(!draft){const have=new Set(library.published.map(p=>p.id));library.published=[...library.published,...seedPassages(contract).filter(p=>!have.has(p.id))];}
+ if(!draft){const have=new Set(library.published.map(p=>p.id)),ids=SEED_INDEX_VERSION===SEED_VERSION?seedPassageIds(contract):null;
+  // Only IDs are inspected on complete publications. Rebuilding all reviewed prose here exhausted Worker CPU.
+  // Missing or unknown editions retain the original fallback; no publication/source state is cached.
+  if(!ids||ids.some(id=>!have.has(id)))library.published=[...library.published,...seedPassages(contract).filter(p=>!have.has(p.id))];
+ }
  const usedAdviceKeys=(Array.isArray(body.usedAdviceKeys)?body.usedAdviceKeys:[]).filter(k=>typeof k==='string'&&/^[\w.-]{1,80}$/.test(k)).slice(0,512);
  const result=composeReviewed({clean,contract,analysis,library,usedAdviceKeys,adviceHistory:cleanAdviceHistory(body.adviceHistory,contract.id),previous:Array.isArray(body.previous)?body.previous.slice(-80):[]});
  if(isHealthEducation(contract)){
@@ -34,6 +39,6 @@ export async function prepareReviewed(env,body,{draft=false,passages=null,store:
 }
 export async function serveReviewed({request,env}){
  const context={requestId:crypto.randomUUID(),started:Date.now(),chapter:''};
- try{const raw=await request.text();if(raw.length>160000)throw Error('too-large');let body;try{body=JSON.parse(raw);}catch{throw Error('bad-payload');}context.chapter=body.chapter?.id||'';const value=await prepareReviewed(env,body);const {claims,...publicValue}=value;return json({...publicValue,requestCostUSD:0,providerCallCount:0,requestId:context.requestId,libraryEngine:LIBRARY_VERSION});}
+ try{const raw=await request.text();if(raw.length>160000)throw Error('too-large');let body;try{body=JSON.parse(raw);}catch{throw Error('bad-payload');}context.chapter=body.chapter?.id||'';const value=await prepareReviewed(env,body);const {claims,selectionTrace,...publicValue}=value;return json({...publicValue,requestCostUSD:0,providerCallCount:0,requestId:context.requestId,libraryEngine:LIBRARY_VERSION});}
  catch(e){const known=['too-large','bad-payload','invalid-chart','unknown-hour-has-pillar','invalid-distribution','unknown-reviewed-chapter'],status=e.message==='too-large'?413:known.includes(e.message)?400:503,body={ok:false,error:known.includes(e.message)?e.message:'storage-unavailable',aiSkipped:true,providerCallCount:0,requestCostUSD:0},failure=diagnosticRecord(body,status,context);await saveDiagnostic(env,failure).catch(()=>{});return json({...body,requestId:context.requestId,failure},status);}
 }

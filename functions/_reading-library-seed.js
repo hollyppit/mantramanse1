@@ -1,3 +1,4 @@
+import {revisePassages} from './_reading-editorial-revisions.js';
 import {focusPassages,FOCUS_CHAPTERS} from './_reading-focus-eight.js';
 import {detailPassages} from './_reading-detail-profiles.js';
 import {bundlePassages} from './_reading-coherent-bundles.js';
@@ -7,10 +8,11 @@ import {conditionalPassages} from './_reading-conditional-copy.js';
 import {GUIDE_COPY} from './_reading-guide-copy.js';
 import {FICTION_COPY,FICTION_MOTIFS} from './_reading-fiction-copy.js';
 import {politeText} from './_polite.js';
-export const SEED_VERSION='everyday-all-84-20261021-14';
+export const SEED_VERSION='everyday-all-84-20261021-15';
 const stems={목:['갑','을'],화:['병','정'],토:['무','기'],금:['경','신'],수:['임','계']};
 const elementId={목:'wood',화:'fire',토:'earth',금:'metal',수:'water'};
-export function seedPassages(contract){
+export function seedPassages(contract){return revisePassages(baseSeedPassages(contract));}
+function baseSeedPassages(contract){
  const m=contract.id.match(/^timeline_(self|wealth|career|love|health|creative|remedy)_(\d+)$/);if(!m)return [];
  const topic=m[1],i=Number(m[2])-1,fields=['title','reality','strength','risk','reinforce','practice'];
  const make=(role,text,kind='guide',suffix=role,when={})=>({id:'seed-'+topic+'-'+(i+1)+'-'+suffix,role,kind,text:politeText(text),ruleIds:[],when,unless:{},adviceKey:'seed-'+topic+'-'+(i+1)+'-'+suffix});

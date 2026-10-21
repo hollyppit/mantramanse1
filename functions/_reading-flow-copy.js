@@ -4,7 +4,7 @@ import {deriveFacts,evalConds} from './_ik.js';
 import {CONDITION_PLANS} from './_reading-conditional-copy.js';
 import {CONDITIONAL_BODIES} from './_reading-conditional-bodies.js';
 import {FLOW_SCENES} from './_reading-flow-scenes.js';
-export const FLOW_VERSION='question-body-flow-20261020-6';
+export const FLOW_VERSION='question-body-flow-20261021-7';
 const roles=['reality','strength','risk','reinforce','practice'];
 // Dependent clauses, not standalone advice paragraphs. They fill one causal scene.
 const voices={
@@ -159,13 +159,13 @@ export function flowPassages(c){
  return ['strong','mid','weak'].flatMap((band,slot)=>{
   const focus=plan[slot+1],body=CONDITIONAL_BODIES[m[1]][i][slot],practice=body[4];
   const texts={
-   reality:body[0],strength:body[1],risk:body[2],reinforce:body[3],practice:body[4]
+   reality:'〔시작시선〕 사례를 살펴보면, '+body[0],strength:'〔실력:은〕 다음 생활 장면에서 활용해 볼 수 있습니다. '+body[1],risk:'〔포착〕 '+body[2],reinforce:'〔조정〕 생활에 맞게 조절해 보세요. '+body[3],practice:'〔조정〕 〔실행〕 '+body[4]
   };
   return roles.map(role=>({id:'flow-'+m[1]+'-'+(i+1)+'-'+band+'-'+role,role,kind:'guide',text:texts[role],when:{group:{[plan[0]]:band}},unless:{},ruleIds:[],adviceKey:'flow-'+m[1]+'-'+(i+1)+'-'+band+'-'+role}));
  });
 }
-export function renderFlow(role,selected,sd){
- const facts=deriveFacts(sd),template=selected.filter(p=>isFlow(p)&&p.role===role).sort((a,b)=>evalConds(b.when,facts).spec-evalConds(a.when,facts).spec||a.id.localeCompare(b.id))[0];if(!template)return null;
+export function renderFlow(role,selected,sd,facts=deriveFacts(sd)){
+ const template=selected.filter(p=>isFlow(p)&&p.role===role).sort((a,b)=>evalConds(b.when,facts).spec-evalConds(a.when,facts).spec||a.id.localeCompare(b.id))[0];if(!template)return null;
  const parts=selected.filter(p=>p.id.startsWith('compound-'));
  const score=p=>Object.keys(p.when.tenGod||{}).reduce((n,k)=>n+(facts.tenGod[k]?.pct||0),0);
  const pick=family=>parts.filter(p=>p.id.includes('-'+family+'-')&&p.role===(family==='capacity'||family==='stem'?'reality':'strength')).sort((a,b)=>score(b)-score(a)||a.id.localeCompare(b.id))[0];
