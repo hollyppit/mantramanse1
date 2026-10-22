@@ -32,6 +32,11 @@ export function kvOf(env, opts) {
   const slot = (opts && opts.cache) ? 'c' : 'n'; let m = cache.get(env); if (!m) { m = {}; cache.set(env, m); } if (m[slot]) return m[slot];
   const memo = !!(opts && opts.cache);
   const adapter = {
+    async readingCatalog(chapter) {
+      const s=v=>typeof v==='string'?v.slice(0,200):null;
+      const result=await(await sb(env,'rpc/reading_editorial_contract',{method:'POST',body:JSON.stringify({p_id:s(chapter?.id),p_base:s(chapter?.base),p_title:s(chapter?.title)})})).json();
+      return result.present?result.catalog:raw.get('ik:editorial:published','json');
+    },
     async readingResearchState() {
       const result=await(await sb(env,'rpc/reading_research_state',{method:'POST',body:'{}'})).json();
       return result.present?result.state:raw.get('ik:agentic:runtime','json');

@@ -18,7 +18,7 @@ export async function prepareReviewed(env,body,{draft=false,passages=null,store:
  // Reuse identical reads only within this request; later requests always observe withdrawals and edits.
  const reads=new Map(),kv=new Proxy(store,{get(target,key){if(key==='get')return (id,type)=>{const k=id+'\0'+(type||'');if(!reads.has(k))reads.set(k,Promise.resolve().then(()=>!draft&&id==='ik:agentic:runtime'&&type==='json'&&target.readingResearchState?target.readingResearchState():target.get(id,type)));return reads.get(k);};const v=target[key];return typeof v==='function'?v.bind(target):v;}});
  // Independent metadata reads start together, scoped to this request only.
- let stageStarted=Date.now();const [catalog,blocked,settings]=await Promise.all([loadEditorial(kv,draft),blockedDocs(kv),loadSettings(kv),kv.get('ik:agentic:runtime','json').catch(()=>null)]);timings.catalog=Date.now()-stageStarted;const saved=Editorial.find(catalog,clean.chapter);
+ let stageStarted=Date.now();const [catalog,blocked,settings]=await Promise.all([!draft&&kv.readingCatalog?kv.readingCatalog(clean.chapter).then(c=>c||Editorial.defaults()):loadEditorial(kv,draft),blockedDocs(kv),loadSettings(kv),kv.get('ik:agentic:runtime','json').catch(()=>null)]);timings.catalog=Date.now()-stageStarted;const saved=Editorial.find(catalog,clean.chapter);
  if(!draft&&saved&&(saved.state==='archived'||catalog.topics.some(t=>t.id===saved.topicId&&!t.enabled)))throw Error('unknown-reviewed-chapter');
  const contract=draft&&saved?saved:contractFor(catalog,clean.chapter);
  if(!contract)throw Error('unknown-reviewed-chapter');
