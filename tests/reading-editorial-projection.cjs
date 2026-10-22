@@ -1,0 +1,7 @@
+const assert=require('assert/strict');
+(async()=>{const {kvOf}=await import('../functions/_store.js');let present=true,catalog={version:1,chapters:[{id:'first'}],topics:[],cases:[]},fallbackReads=0;const requests=[],original=global.fetch;
+ const env={SUPABASE_URL:'https://fixture.invalid',SUPABASE_SERVICE_KEY:'test-only',GLOSSARY_KV:{get:async key=>{assert.equal(key,'ik:editorial:published');fallbackReads++;return {legacy:true};}}};
+ global.fetch=async(url,init)=>{assert.equal(url,'https://fixture.invalid/rest/v1/rpc/reading_editorial_contract');requests.push(JSON.parse(init.body));return Response.json({present,catalog});};
+ try{const kv=kvOf(env);assert.deepEqual(await kv.readingCatalog({id:'first',base:'legacy',title:'title'}),catalog);catalog={version:2,chapters:[],topics:[],cases:[]};assert.equal((await kv.readingCatalog({id:'second'})).version,2,'later request must see edits');assert.equal(requests.length,2);assert.equal(requests[0].p_base,'legacy');assert.equal(requests[1].p_id,'second');catalog=null;assert.equal(await kv.readingCatalog({id:'withdrawn'}),null,'tombstone/expiry must not resurrect legacy');assert.equal(fallbackReads,0);present=false;assert.deepEqual(await kv.readingCatalog({id:'missing'}),{legacy:true});assert.equal(fallbackReads,1);}finally{global.fetch=original;}
+ console.log('PASS scoped RPC, fresh later reads, legacy lookup parameters, absent fallback, tombstone/expiry no resurrection; no real network');
+})();
