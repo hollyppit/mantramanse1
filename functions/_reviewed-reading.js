@@ -29,7 +29,10 @@ export async function prepareReviewed(env,body,{draft=false,passages=null,store:
  if(!draft){const have=new Set(library.published.map(p=>p.id)),ids=SEED_INDEX_VERSION===SEED_VERSION?seedPassageIds(contract):null;
   // Only IDs are inspected on complete publications. Rebuilding all reviewed prose here exhausted Worker CPU.
   // Missing or unknown editions retain the original fallback; no publication/source state is cached.
-  if(!ids||ids.some(id=>!have.has(id)))library.published=[...library.published,...seedPassages(contract).filter(p=>!have.has(p.id))];
+  // A rebuilt edition (rb- passages, published with its own unconditional fallback) replaces the code seeds; appending them would let the
+  // older, more specific seed conditions outrank the rebuilt prose.
+  const rebuilt=library.published.some(p=>typeof p.id==='string'&&p.id.startsWith('rb-'));
+  if(!rebuilt&&(!ids||ids.some(id=>!have.has(id))))library.published=[...library.published,...seedPassages(contract).filter(p=>!have.has(p.id))];
  }
  const usedAdviceKeys=(Array.isArray(body.usedAdviceKeys)?body.usedAdviceKeys:[]).filter(k=>typeof k==='string'&&/^[\w.-]{1,80}$/.test(k)).slice(0,512);
  const result=composeReviewed({clean,contract,analysis,library,usedAdviceKeys,adviceHistory:cleanAdviceHistory(body.adviceHistory,contract.id),previous:Array.isArray(body.previous)?body.previous.slice(-80):[]});
