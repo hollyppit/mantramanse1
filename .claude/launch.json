@@ -51,6 +51,18 @@
       "env": {
         "PORT": "8795"
       }
+    },
+    {
+      "name": "rebuild-admin",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tools/rebuild-admin.cjs",
+        "--port",
+        "4789",
+        "--token",
+        "localdevtoken0123456789abcdef0123"
+      ],
+      "port": 4789
     }
   ]
 }

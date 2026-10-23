@@ -33,6 +33,8 @@ export const COND_FIELDS = {
   yongEl: ['용신 오행', 3, 'list'], pattern: ['격국·구조', 3, 'list'], star: ['신살', 2, 'list'], relation: ['합충형파해', 2, 'list'],
   daewoonSeason: ['현재 대운 흐름', 3, 'list'], seunSeason: ['올해 세운 흐름', 3, 'list'], monthSeason: ['이달 월운 흐름', 2, 'list'],
   futureSeason3: ['앞으로 3년 흐름(포함)', 2, 'list'], futureSeason5: ['앞으로 5년 흐름(포함)', 2, 'list'],
+  natalDayRelation: ['원국 안에서 일지(배우자궁)가 받는 관계', 4, 'list'], daewoonDayRelation: ['현재 대운과 일지(배우자궁)의 관계', 4, 'list'], seunDayRelation: ['올해 세운과 일지(배우자궁)의 관계', 4, 'list'],
+  daewoonNextStemTG: ['다음 대운 천간 십성', 4, 'list'], daewoonNextSeason: ['다음 대운 흐름', 3, 'list'], daewoonChangeIn: ['다음 대운 교체까지', 2, 'list'],
   el: ['오행 강약', 2, 'map'], group: ['십성군 강약', 3, 'map'], tenGod: ['십성 10종 강약', 3, 'map'],
   daewoonStemTG: ['현재 대운 천간 십성', 4, 'list'], daewoonBranchTG: ['현재 대운 지지 십성', 4, 'list'],
   seunStemTG: ['올해 세운 천간 십성', 4, 'list'], seunBranchTG: ['올해 세운 지지 십성', 4, 'list'],
@@ -151,6 +153,21 @@ export function deriveFacts(sd, ext) {
   if (Number.isInteger(year) && sy && sy.year === year)
     takeLuckTG('seun', sy, { year });
   if (sd.currentDaewoon && sd.currentDaewoon.season) f.daewoonSeason = SEASON_KO[sd.currentDaewoon.season];
+  // Natal relations that include the day branch (배우자궁). Stem-only relations (천간합/천간충) are excluded because they involve the day stem, not the branch.
+  { const ty = [...new Set((f.natalRelations || []).filter(r => r && Array.isArray(r.members) && r.members.includes('day') && r.type && !/^천간/.test(r.type)).map(r => r.type))]; f.natalDayRelation = ty.length ? ty : ['없음']; }
+  // Luck-vs-natal-day-branch relations, read from the engine's own luckRelations (no interpretation). Day branch = 배우자궁 in traditional reading.
+  const dayRel = rs => Array.isArray(rs) ? [...new Set(rs.filter(r => r && r.kind === 'branch' && Array.isArray(r.members) && r.members.includes('day') && r.type).map(r => r.type))] : null;
+  if (sd.currentDaewoon && Number.isInteger(year) && dw && dw.startYear <= year && year <= dw.endYear) { const r = dayRel(sd.currentDaewoon.relations); if (r) f.daewoonDayRelation = r.length ? r : ['없음']; }
+  if (sd.sewoon && sd.sewoon.year === year) { const r = dayRel(sd.sewoon.relations); if (r) f.seunDayRelation = r.length ? r : ['없음']; }
+  // Next daewoon, read from the existing engine list only (no interpretation). daewoonChangeIn is calendar arithmetic: years until the next daewoon starts.
+  if (Array.isArray(sd.daewoon) && sd.currentDaewoon && Number.isInteger(year)) {
+    const at = sd.daewoon.indexOf(sd.currentDaewoon), nx = at >= 0 ? sd.daewoon[at + 1] : null;
+    if (nx && Number.isInteger(nx.startYear)) {
+      if (validTG.has(nx.stemTG)) f.daewoonNextStemTG = nx.stemTG;
+      if (nx.season && SEASON_KO[nx.season]) f.daewoonNextSeason = SEASON_KO[nx.season];
+      const left = nx.startYear - year; f.daewoonChangeIn = left <= 3 ? '3년 이내' : left <= 6 ? '4~6년' : '7년 이상';
+    }
+  }
   if (sd.sewoon && sd.sewoon.season) f.seunSeason = SEASON_KO[sd.sewoon.season];
   const m0 = (sd.monthlyLuck || [])[0]; if (m0 && m0.season) f.monthSeason = SEASON_KO[m0.season];
   const fut = ext && Array.isArray(ext.future) ? ext.future.filter(x => x && x.season) : [];
