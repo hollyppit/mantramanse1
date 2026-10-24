@@ -29,7 +29,7 @@ export function entryPassages(e,{fiction=false}={}){
 }
 
 // Role lead-ins for passages shorter than the production minimum (30 characters); added only when needed.
-const LEAD={strength:'이 사주의 강점을 짚어 보면 ',risk:'조심해서 봐야 할 점을 짚어 보면 ',practice:'생활에서 실천해 볼 일은 이렇습니다. ',reinforce:'상황별로 나누어 보면 ',reality:'생활 장면으로 보면 ',title:'',why:'이 풀이가 나온 이유를 짚어 보면 '};
+const LEAD={strength:'이 사주의 강점을 짚어 보면 ',risk:'조심해서 봐야 할 점을 짚어 보면 ',practice:'이렇게 해 보세요. ',reinforce:'상황별로 나누어 보면 ',reality:'생활 장면으로 보면 ',title:'',why:'이 풀이가 나온 이유를 짚어 보면 '};
 const sentencesOf=t=>String(t).split(/(?<=[.!?])\s+/).filter(Boolean);
 const normS=t=>t.replace(/[\s\p{P}\p{S}]/gu,'');
 // Chapter library: authored entries first (ranked), then the currently published unconditional passages as the fallback for charts no entry matches.

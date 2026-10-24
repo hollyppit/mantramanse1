@@ -32,6 +32,8 @@ const V_BASE={
   advice:'돈과 몫에 관한 이야기는 만나자마자 말하는 대신 메신저로 먼저 정리해서 보내세요. 양보할 수 있는 한도를 금액으로 미리 정해 두세요.'},
 };
 export const LOW_VARIANTS={...V_BASE,...V01,...V04,...V0607,...V091011};
+// 2026-10-24 이후 다시 쓴 장은 신강·중화·신약 문안을 항목 안에서 직접 쓰므로 예전 덮어쓰기를 적용하지 않는다.
+export const REWRITTEN_PREFIXES=['self01-','self02-','self03-','self04-','self05-','self06-','self07-','self08-','self09-','self10-','self11-','self12-','self13-','self14-','self15-','self16-','self17-','self18-','self19-','self20-','self21-','self22-'];
 export function applyLowVariants(entries){
- return entries.map(e=>LOW_VARIANTS[e.id]?{...e,...LOW_VARIANTS[e.id]}:e);
+ return entries.map(e=>LOW_VARIANTS[e.id]&&!REWRITTEN_PREFIXES.some(p=>e.id.startsWith(p))?{...e,...LOW_VARIANTS[e.id]}:e);
 }
