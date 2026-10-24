@@ -3,7 +3,8 @@
 새 대화에서 이 문서를 먼저 읽고 이어가세요. **운영 DB 쓰기·푸시·배포는 사용자가 매번 명시적으로 승인한 뒤에만** 합니다. 이전 인계 문서: `docs/HANDOFF_2026-10-23_풀이재작성_운영게시준비.md`.
 
 ## 0. 최신 진행 상황 (2026-10-24 말 갱신 — 아래 1~7절보다 우선)
-- **self 묶음 22개 장(`timeline_self_01`~`22`) 전부 해요체 새 문안으로 재작성·운영 게시 완료**(각 장 게시 직후 읽기 전용으로 초안=게시본·해시 일치 확인). 나머지 62개 장(wealth 12·career 12·love 12·health 10·creative 8·remedy 8)은 1차 합니다체 문안 그대로, 아직 새로 쓰지 않았다.
+- **self 묶음 22개 장(`timeline_self_01`~`22`) 전부 해요체 새 문안으로 재작성·운영 게시 완료**(각 장 게시 직후 읽기 전용으로 초안=게시본·해시 일치 확인). **wealth 12개 장(`timeline_wealth_01`~`12`)도 같은 방식으로 재작성·운영 게시 완료**(2026-10-25). 나머지 50개 장(career 12·love 12·health 10·creative 8·remedy 8)은 1차 합니다체 문안 그대로, 아직 새로 쓰지 않았다. 다음은 career부터(건강·창작·개운은 안전 고지가 필수인 묶음이라 notice 처리를 먼저 확인).
+- wealth 메모: 상충 선언(`wealth-conflicts.mjs`)이 항목 id를 참조하므로 id·조건을 바꾸지 않는다. 고지는 `wealth-01-04.mjs`의 `WEALTH_NOTE`(기본, `index.mjs`가 wealth 묶음 전체에 붙임)와 항목별 `notice`(06 `NOTE_TIME`, 08 `NOTE_INVEST`, 10 `NOTE_FLOW`, 11 `NOTE_SCENARIO`, 12 `NOTE_STRATEGY`)로 둔다. `wealth_10`의 `seun-build`(올해 세운·축적기) 7개 문단은 조건이 모순이라 게시에서 빠진다(1차부터 동일, 도달 불가).
 - 게시는 사용자가 사용자 환경변수 `SUPABASE_ACCESS_TOKEN`을 저장해 둔 PowerShell 도구에서 `apply-runner.mjs`로 실행(`dry` → `"apply" | node apply-runner.mjs apply <장>`). 토큰은 채팅에 쓰지 않는다. 작업이 끝나면 토큰을 지우고 폐기한다.
 - 한 장당 운영 저장 값은 7.5MB 상한(`reading_compare_and_swap`)이 있다. `self_01`은 이를 넘어서 apply SQL의 이력 `limit 14`를 8로 줄여 게시했다. 지금 큰 장: `self_20` 6.1MB, `self_01` 7.2MB, `self_03` 6.5MB, `self_12` 5.1MB. 다시 고쳐 올릴 때는 이력을 줄여야 할 수 있다.
 - 새로 쓸 때의 함정(모두 검증으로 잡았다):
