@@ -239,3 +239,10 @@ body #wstrip button{max-width:none;text-overflow:clip}
  #wsteps button{min-width:0;flex-shrink:1;white-space:normal;line-height:1.4}
  #chapter .reading-chart-parts .reading-chart-row{grid-template-columns:minmax(0,1.6fr) minmax(28px,1fr) 44px}
 }
+/* 챕터 후킹 문장: 본문 h3(16px) 규칙에 눌리지 않게 크고 굵게 */
+#chapter .text-reading-section h3.reading-hook,.text-reading-section h3.reading-hook{font-size:clamp(26px,4vw,40px);font-weight:800;line-height:1.42;letter-spacing:-.01em;color:var(--gold-l);margin:6px 0 22px;text-wrap:balance;word-break:keep-all}
+@media(max-width:560px){#chapter .text-reading-section h3.reading-hook,.text-reading-section h3.reading-hook{font-size:25px;line-height:1.45}}
+/* 풀이 근거: 접지 않고 본문 사이에 섞어 보여 준다 */
+#chapter .text-reading-why .reading-basis-group{border-left:3px solid #d5b97f70;padding:2px 0 2px 16px}
+#chapter .text-reading-why h3{font-size:15px;line-height:1.7;margin:0 0 10px;color:var(--gold-l)}
+#chapter .text-reading-why p{font-size:16px;line-height:1.9;color:var(--ink2);margin-block:0 .9em}
