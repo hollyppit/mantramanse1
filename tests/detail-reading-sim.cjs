@@ -15,6 +15,8 @@ const ROOT=path.resolve(__dirname,'..');const imp=p=>import(pathToFileURL(path.j
    for(const s of rows){sentences++;all.push(s);assert(s.length>=30&&s.length<=170,`${axis}.${k}.${t} 길이 ${s.length}: ${s}`);assert(/요\.$/.test(s),`${axis}.${k}.${t} 해요체 종결: ${s}`);
     assert(!/[{}<>]/.test(s),`${axis}.${k}.${t} 기호`);assert(!FORBID.test(s),`${axis}.${k}.${t} 금지어: `+s);if(t==='remedy')assert(!REMEDY_BAN.test(s),`${axis}.${k} 개운 구매·색·방위: `+s);}}}
  assert.equal(new Set(all).size,all.length,'사전 문장 중복');
+ // 문장 단위로도 겹치지 않아야 한다(한 리포트의 여러 장에 같은 문장이 나오지 않도록)
+ const one=new Map();for(const x of all)for(const sen of x.split(/(?<=[.])[ ]/))if(sen.length>=15){assert(!one.has(sen),'문장 단위 중복: '+sen);one.set(sen,1);}
 
  // 2) 앵커: 자격 있는 모든 장에 하나씩, (축,변형) 칸이 장마다 다르고, 칸마다 모든 키에 문장이 있다. 자동차 장은 제외.
  const COUNT=M.COUNT;let covered=0,total=0;
