@@ -12,6 +12,7 @@ import {PROHIBITED_RE} from './_style.js';
 import {similarity} from './_chapter-policy.js';
 import {digest} from './_reading-blocks.js';
 import {adviceFocus} from './_reading-advice.js';
+import {DetailReading} from './_detail-reading.js';
 export const LIBRARY_VERSION='reviewed-library-15-reader-continuity';
 // Reuse the existing service-only CAS namespace; no broader database privileges are required.
 export const libraryKey=id=>'ik:blocks:chapter:library.'+id;
@@ -114,6 +115,7 @@ export function composeReviewed({clean,contract,analysis,library,adviceHistory=[
   if(!authored&&guide&&blocks.some(b=>b.id===guide.id)&&!chosen.includes(guide))chosen.push(guide);
   if(!['why','evidence'].includes(role)&&contentKind!=='fiction')text=plainText(politeText(text));
   const editorialReview=!pending.includes(role)?EverydayReading.chapterReview(clean.sd,contract.id,{id:guide?.id||'',when:components[0]?.when||guide?.when||{}}):null;
+  if(role==='reality'&&!pending.includes(role)&&contentKind!=='fiction'){const extra=DetailReading.sentence(contract.id,clean.sd);if(extra&&!text.includes(extra))text=text.trim()+'\n\n'+extra;}
   if(!pending.includes(role))text=EverydayReading.apply(text,contract.id,role,clean.sd,editorialReview);
   seen.add(norm(text));if(text.length<30)text+=' 실제 생활에서 해당하는 조건과 다른 조건을 함께 확인해 주세요.';
   return {id:p.id,text,refs,claim_ids,role,contentKind,...(editorialReview&&['reality','risk','evidence'].includes(role)?{editorialReview}:{}),...(components.length?{components}: {})};
