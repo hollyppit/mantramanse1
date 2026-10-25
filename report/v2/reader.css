@@ -246,3 +246,28 @@ body #wstrip button{max-width:none;text-overflow:clip}
 #chapter .text-reading-why .reading-basis-group{border-left:3px solid #d5b97f70;padding:2px 0 2px 16px}
 #chapter .text-reading-why h3{font-size:15px;line-height:1.7;margin:0 0 10px;color:var(--gold-l)}
 #chapter .text-reading-why p{font-size:16px;line-height:1.9;color:var(--ink2);margin-block:0 .9em}
+
+/* 유료 풀이 보강 카드(시그니처·요약·렌즈·대운·달력·30일 계획)와 문단 반응 버튼 */
+#chapter .text-reading-plus .plus-card{border:1px solid var(--line2);border-radius:12px;padding:18px 20px;margin:0 0 16px;background:#ffffff05}
+#chapter .text-reading-plus .plus-card h3{font-size:18px;line-height:1.5;margin:0 0 10px;color:var(--gold-l)}
+#chapter .text-reading-plus .plus-card p,#chapter .text-reading-plus .plus-card li,#chapter .text-reading-plus .plus-card dd{font-size:16px;line-height:1.85;color:var(--ink);margin:0 0 .7em}
+#chapter .text-reading-plus .plus-lead{color:var(--ink2)!important}
+#chapter .text-reading-plus .plus-note{font-size:13px!important;color:var(--ink2)!important}
+#chapter .text-reading-plus .plus-signature ol{padding-inline-start:1.2em;margin:0 0 12px}
+#chapter .text-reading-plus .plus-signature li strong{display:block;font-size:17px;color:var(--gold-l)}
+#chapter .text-reading-plus .plus-signature li small{display:block;font-size:13px;color:var(--ink2)}
+#chapter .text-reading-plus .plus-pair{border-left:3px solid #d5b97f70;padding-left:12px}
+#chapter .text-reading-plus .plus-summary dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0 0 10px}
+#chapter .text-reading-plus .plus-summary dt{font-size:14px;color:var(--gold-l);font-weight:600}
+#chapter .text-reading-plus .plus-calendar ol{list-style:none;padding:0;margin:0 0 10px}
+#chapter .text-reading-plus .plus-calendar li{display:grid;grid-template-columns:max-content 1fr;gap:2px 12px;padding:8px 0;border-bottom:1px solid var(--line2)}
+#chapter .text-reading-plus .plus-calendar li span{grid-column:1/-1}
+#chapter .text-reading-plus .plus-calendar li em{font-style:normal;color:var(--ink2);font-size:14px}
+#chapter .text-reading-plus .plus-calendar li.is-now b{color:var(--gold-l)}
+#chapter .text-reading-plus .plus-plan fieldset{border:0;padding:0;margin:0 0 12px}
+#chapter .text-reading-plus .plus-plan legend{font-weight:600;color:var(--gold-l);margin-bottom:6px}
+#chapter .text-reading-plus .plus-plan label{display:flex;gap:10px;align-items:flex-start;font-size:16px;line-height:1.7;padding:4px 0;min-height:32px}
+#chapter .part-feedback{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:-.2em 0 1.2em;font-size:13px;color:var(--ink2)}
+#chapter .part-feedback button{min-height:32px;padding:4px 12px;border:1px solid var(--line2);border-radius:999px;background:transparent;color:var(--ink);font-size:13px;cursor:pointer}
+#chapter .part-feedback button:disabled{opacity:.5;cursor:default}
+@media(max-width:560px){#chapter .text-reading-plus .plus-card{padding:14px}#chapter .text-reading-plus .plus-summary dl{grid-template-columns:1fr}}
