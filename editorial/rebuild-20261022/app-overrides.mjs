@@ -54,7 +54,7 @@ export const APP_OVERRIDES={
  'l09-day-friction-steady':{employee:L9E,business:L9B},'l09-day-friction-low':{employee:L9E,business:L9B},'l09-day-hap-steady':{employee:L9E,business:L9B},'l09-day-hap-low':{employee:L9E,business:L9B},
  'w09-close':{business:'가까운 사람에게 돈을 빌려줄 때는 사업 자금과 분리된 계좌에서 하세요.'},
  'l10-parent-bigeop-steady':{business:L10B},'l10-parent-bigeop-low':{business:L10B},'l10-parent-siksang-steady':{business:L10B},'l10-parent-siksang-low':{business:L10B},'l10-parent-jaeseong-steady':{business:L10B},'l10-parent-jaeseong-low':{business:L10B},
- 'l10-parent-gwanseong-steady':{business:L10B},'l10-parent-gwanseong-low':{business:L10B},'l10-parent-inseong-steady':{business:L10B},'l10-parent-inseong-low':{business:L10B},'l10-sibling-compete':{business:L10B},'l10-sibling-alone':{business:L10B},
+ 'l10-parent-gwanseong-steady':{business:L10B},'l10-parent-gwanseong-low':{business:L10B},'l10-parent-inseong-steady':{business:L10B},'l10-parent-inseong-low':{business:L10B},'l10-sibling-compete':{business:'형제와 같은 일을 한다면 각자 맡는 영역과 몫을 시작 전에 나눠 두세요.'},'l10-sibling-alone':{business:'형제에게 기대기 어렵다면 사업의 큰 결정은 믿을 만한 외부 조언자와 나누세요.'},
  'c05-earth-steady':{freelance:'몇 년씩 거래할 고객을 업종 안에서 세 곳 정도 중심으로 두세요.'},
  'c02-sanggwan-B':{freelance:'재능을 오래 쓰려면 한 달 작업량 상한을 정해 두세요.'},
  'c06-bigorg-A':{freelance:'큰 조직에서 한 일을 프로젝트 단위로 정리해 두세요.'},
