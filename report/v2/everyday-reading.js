@@ -143,12 +143,37 @@ var starLines={
 var legacyStarBodies=["작은 차이를 알아차리는 모습을 장점으로 활용해 볼 수 있어요. 예를 들어, 다른 사람이 놓친 옷의 박음질이나 사진의 작은 얼룩을 찾아 마무리 품질을 높이는 식이에요.","이 이름을 생활에 빗대면 작은 차이가 눈에 잘 들어와 신경이 쓰이는 모습이에요. 예를 들어, 미용사가 머리 길이를 세밀하게 맞추거나 의료인이 정밀한 작업을 할 때처럼, 세부를 놓치지 않는 일이 장점이 될 수 있어요.","세밀한 차이를 살피는 모습을 실제 업무에서 시험해 볼 수 있어요. 예를 들어, 미용사의 커트나 의료인의 정밀한 작업처럼 작은 오차를 확인하는 일과 연결해 생각해 볼 수 있어요.","꼼꼼히 살피는 행동이 다른 사람에게 필요한 도움인지 확인해 보세요. 예를 들어, 판매할 제품의 작은 흠을 검수하거나 문서의 오타와 숫자 오류를 찾아주는 작업으로 시험해 볼 수 있어요.","직업 이름보다 매일 하는 작업이 얼마나 세밀한지 살펴보세요. 예를 들어, 도면의 치수를 대조하는 일과 고객 앞에서 즉석 설명을 하는 일은 같은 회사 안에서도 쓰는 능력이 달라요."];
 var starOrder=['현침살','홍염살','괴강살','양인살','천을귀인','문창귀인','학당귀인'];
 var preciseIds=Object.keys(starLines).reduce(function(all,name){Object.keys(starLines[name]).forEach(function(id){if(all.indexOf(id)<0)all.push(id);});return all;},[]);
-function starExample(sd,id){
- if(preciseIds.indexOf(id)<0||!sd)return '';
- var have=(sd.specialStars||[]).map(function(s){return s&&s.name;});
+// 한 사주 안에서 같은 요소를 장마다 되풀이하지 않도록, 사주 내용만으로 장별 배정을 한 번에 계산한다(서버·화면·재조회에서 항상 같다).
+// 후보가 적은 장부터 드문 요소를 배정하고, 한 요소는 최대 5개 장에만 쓴다. 읽는 순서로 두 번째부터는 문장 머리를 바꿔 쓴다.
+var EXAMPLE_ORDER=['self','wealth','career','love','health','remedy'],EXAMPLE_CAP=5,exampleCache=typeof WeakMap!=='undefined'?new WeakMap():null;
+function exampleKey(id){var m=/^timeline_([a-z]+)_([0-9]+)$/.exec(id||'');return m?EXAMPLE_ORDER.indexOf(m[1])*100+Number(m[2]):9999;}
+function exampleCandidates(sd,id){
+ var CL=root.MantraChartLines,have=(sd.specialStars||[]).map(function(s){return s&&s.name;}),out=[];
  for(var i=0;i<starOrder.length;i++){var name=starOrder[i];
-  if(have.indexOf(name)>=0&&starLines[name][id])return '사주에 '+name+'이 있어요. '+starLines[name][id];}
- return '';
+  if(have.indexOf(name)>=0&&starLines[name][id])out.push({kind:'star',name:name,legacy:true,rank:CL&&CL.FREQ&&CL.FREQ[name]!=null?CL.FREQ[name]:500,body:starLines[name][id],first:'사주에 '+name+'이 있어요.'});}
+ if(CL&&CL.candidates)CL.candidates(sd,id).forEach(function(c){if(!out.some(function(x){return x.name===c.name;}))out.push({kind:c.kind,name:c.name,rank:c.rank,body:c.body,first:c.first});});
+ // 직접 쓴 신살 문장(먼저 있던 7종)은 그 장에서 사주에 있으면 항상 먼저 쓰고, 나머지는 드문 요소부터 쓴다.
+ return out.sort(function(a,b){return (b.legacy?1:0)-(a.legacy?1:0)||a.rank-b.rank||(a.kind+a.name<b.kind+b.name?-1:1);});
+}
+function exampleAssignment(sd){
+ if(exampleCache&&exampleCache.has(sd))return exampleCache.get(sd);
+ var CL=root.MantraChartLines,ids=preciseIds.slice();(CL&&CL.ids?CL.ids():[]).forEach(function(x){if(ids.indexOf(x)<0)ids.push(x);});
+ var rows=ids.map(function(id){return {id:id,cands:exampleCandidates(sd,id)};}).filter(function(r){return r.cands.length;});
+ // 직접 쓴 먼저의 신살 문장이 있는 장을 먼저 배정하고(그 장의 예시가 밀리지 않게), 그다음 후보가 적은 장부터 배정한다.
+ rows.forEach(function(r){r.first=r.cands.some(function(c){return c.legacy;})?0:1;});
+ rows.sort(function(a,b){return a.first-b.first||a.cands.length-b.cands.length||exampleKey(a.id)-exampleKey(b.id);});
+ var used={},picked=[];
+ rows.forEach(function(r){for(var i=0;i<r.cands.length;i++){var c=r.cands[i],k=c.kind+':'+c.name;if((used[k]||0)<EXAMPLE_CAP){used[k]=(used[k]||0)+1;picked.push({id:r.id,c:c});return;}}});
+ picked.sort(function(a,b){return exampleKey(a.id)-exampleKey(b.id);});
+ var times={},map={};
+ picked.forEach(function(x){var k=x.c.kind+':'+x.c.name;times[k]=(times[k]||0)+1;
+  map[x.id]=times[k]===1?x.c.first+' '+x.c.body:(CL&&CL.again?CL.again(x.c.kind,x.c.name,times[k]-1):x.c.first)+' '+x.c.body;});
+ if(exampleCache)exampleCache.set(sd,map);
+ return map;
+}
+function starExample(sd,id){
+ if(!sd||!id)return '';
+ return exampleAssignment(sd)[id]||'';
 }
 
 // Editorial hypotheses use conjunctions of existing facts, never biography or classical source claims.
@@ -917,6 +942,7 @@ function apply(text,id,role,sd,review){var scene=scenes[id];if(!scene||!text)ret
  extras.forEach(function(extra){extra=displayCopy(extra);if(extra&&value.indexOf(extra)<0)value=value.trim()+'\n\n'+extra;});return value;
 }
 
-function personalize(text,name){var value=typeof name==='string'?name.trim().slice(0,40):'';return value?String(text).replace(/사주에 (현침살|홍염살|괴강살|양인살|천을귀인|문창귀인|학당귀인)이 있어요\./,function(all,star){return value+'님은 사주에 '+star+'이 있어요.';}):String(text);}
+var NAMED_LINE=new RegExp('(^|'+String.fromCharCode(10)+')(사주에 [가-힣]+(?:이|가) 있어요[.]|사주 글자들 사이에 [가-힣]+(?:이|가) 걸려 있어요[.]|사주에 [가-힣]+의 힘이 두드러져요[.])');
+function personalize(text,name){var value=typeof name==='string'?name.trim().slice(0,40):'';if(!value)return String(text);var out=String(text).replace(/사주에 (현침살|홍염살|괴강살|양인살|천을귀인|문창귀인|학당귀인)이 있어요[.]/,function(all,star){return value+'님은 사주에 '+star+'이 있어요.';});if(out!==String(text))return out;return out.replace(NAMED_LINE,function(all,lead,sentence){return lead+value+'님은 '+sentence;});}
 root.MantraEverydayReading={personalize:personalize,version:'everyday-reader-continuity-20261021-4',chapterViews:chapterViews,chapterVariant:chapterVariant,chapterReview:chapterReview,frankRules:frankRules,frankContext:frankContext,frankText:frankText,scenes:scenes,apply:apply,starExample:starExample};
 })(typeof window!=='undefined'?window:globalThis);
