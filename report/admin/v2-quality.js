@@ -48,12 +48,28 @@
     var tbl = rows ? '<table style="width:100%;border-collapse:collapse;font-size:.8rem"><thead><tr><th style="text-align:left">건수</th><th style="text-align:left">종류 · 기능</th><th style="text-align:left">메시지</th><th style="text-align:left">위치</th><th style="text-align:left">챕터</th><th style="text-align:left">모바일</th></tr></thead><tbody>' + rows + '</tbody></table>' : '<p class="muted">기록된 오류가 없습니다.</p>';
     return section(t, s.sigs.length ? s.total : 0, head + tbl, e.on ? '오류 없음' : '수집 꺼짐');
   }
+  // 문단별 반응(맞아요/아니에요): 개인화 문장 종류마다 동의율을 보여 주고, 응답이 충분한데 동의율이 낮은 문장은 검토 대상으로 표시한다.
+  var PART_FAMILY={precise:'정밀한 눈',drive:'밀고 나가는 힘',expression:'말과 표현',duty:'책임감',learning:'배우고 이해하는 힘',charm:'사람을 끄는 매력',mobility:'변화와 이동',depth:'혼자 깊어지는 힘',competition:'지지 않으려는 힘',stability:'쌓고 지키는 힘',intuition:'감과 직관',support:'사람의 도움'};
+  var PART_LENS={self:'나',wealth:'재물 렌즈',career:'일 렌즈',love:'관계 렌즈',health:'생활 리듬 렌즈',remedy:'개운 렌즈',daewoon:'대운 10년 과제',calendar:'12개월 테마 달력',plan:'30일 실천 체크리스트'};
+  function partLabel(key){var m=/^([a-z]+):(.+)$/.exec(key||'');if(!m)return [key,''];
+    if(m[1]==='el')return [m[2],'사주 요소 문장'];
+    if(m[1]==='dt')return [{dm:'일간 문장',mb:'월지 문장',yong:'용신 문장'}[m[2]]||m[2],'정밀 보정 문장'];
+    if(m[1]==='sig')return ['시그니처 · '+(PART_FAMILY[m[2]]||m[2]),'시그니처 카드'];
+    if(m[1]==='lens')return [PART_LENS[m[2]]||m[2],'보강 카드'];
+    return [key,''];}
+  function partsTable(s){
+    var keys=Object.keys(s.parts||{});if(!keys.length)return '<p>문단별 반응: 아직 기록이 없습니다.</p>';
+    keys.sort(function(a,b){var x=s.parts[a],y=s.parts[b];return (y.agree+y.disagree)-(x.agree+x.disagree)||a.localeCompare(b);});
+    var MIN=5,rows=keys.map(function(k){var q=s.parts[k],n=q.agree+q.disagree,l=partLabel(k),rate=q.agreeRate==null?'-':Math.round(100*q.agreeRate)+'%',flag=n>=MIN&&q.agreeRate!=null&&q.agreeRate<0.5;
+      return '<tr'+(flag?' style="background:#c0392b14"':'')+'><td>'+esc(l[0])+'</td><td>'+esc(l[1])+'</td><td>'+q.agree+'</td><td>'+q.disagree+'</td><td>'+n+'</td><td>'+rate+(flag?' · 검토 필요':(n<MIN?' · 표본 적음':''))+'</td></tr>';}).join('');
+    return '<b>문단별 반응 (내 얘기 같나요?)</b><p>개인화 문장 아래 "맞아요/아니에요" 응답을 문장 종류별로 모았습니다. 응답 '+MIN+'건 이상에서 동의율 50% 미만이면 검토 필요로 표시합니다. 동의율은 체감 반응이며 해석의 정확도를 입증하지 않습니다.</p><div style="overflow:auto"><table><thead><tr><th>대상</th><th>종류</th><th>맞아요</th><th>아니에요</th><th>응답</th><th>동의율</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
   function engagementSection(st){
     var m=st.engagement,body='<button type="button" id="qaReadingMetrics">최근 7일 읽기·피드백 지표 불러오기</button>';
     if(!m)return '<div class="card"><b>완독·이탈·피드백·전문가 검토</b><p>수집은 READING_METRICS_ON=1일 때만 작동합니다. 이름·생년월일·원국·자유 의견은 수집하지 않습니다.</p>'+body+'</div>';
     if(m.error)return '<div class="card"><p>'+esc(m.error)+'</p>'+body+'</div>';
     var s=window.MantraReadingMetrics.summarize(m.records),rows=Object.keys(s.chapters).map(function(id){var c=s.chapters[id];return '<tr><td>'+esc(id)+'</td><td>'+c.views+'</td><td>'+(c.completionRate==null?'-':Math.round(100*c.completionRate)+'%')+'</td><td>'+(c.exitRate==null?'-':Math.round(100*c.exitRate)+'%')+'</td><td>'+c.feedback.helpful+' / '+c.feedback.specific+' / '+c.feedback.unclear+'</td></tr>';}).join('');
-    return '<div class="card"><b>완독·이탈·피드백·전문가 검토</b><p>수집 '+(m.on?'켜짐':'꺼짐')+' · 최근 7일 '+s.records+'건 · 리포트 세션 '+s.reports+'개'+(m.truncated?' · 조회 상한으로 일부만 표시':' · 조회 완료')+'</p><p>'+esc(s.note)+'</p><div style="overflow:auto"><table><thead><tr><th>챕터</th><th>열람</th><th>완독률</th><th>종료 시 미완료율</th><th>도움 / 구체적 / 설명 부족</th></tr></thead><tbody>'+rows+'</tbody></table></div><p>별도 전문가 검토: 채택 '+s.expert.accepted+'건 · 수정 요청 '+s.expert.revise+'건. 사용자 피드백과 합산하지 않습니다.</p>'+body+'</div>';
+    return '<div class="card"><b>완독·이탈·피드백·전문가 검토</b><p>수집 '+(m.on?'켜짐':'꺼짐')+' · 최근 7일 '+s.records+'건 · 리포트 세션 '+s.reports+'개'+(m.truncated?' · 조회 상한으로 일부만 표시':' · 조회 완료')+'</p><p>'+esc(s.note)+'</p><div style="overflow:auto"><table><thead><tr><th>챕터</th><th>열람</th><th>완독률</th><th>종료 시 미완료율</th><th>도움 / 구체적 / 설명 부족</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+partsTable(s)+'<p>별도 전문가 검토: 채택 '+s.expert.accepted+'건 · 수정 요청 '+s.expert.revise+'건. 사용자 피드백과 합산하지 않습니다.</p>'+body+'</div>';
   }
   function readingDiagnosticsSection(st) {
     var d=st.readingDiagnostics;
