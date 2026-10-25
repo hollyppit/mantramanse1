@@ -99,7 +99,7 @@ for(const lv of ['weak','mid','strong']){
  entries.push(W('06',`daewoon-${lv}`,{daewoonStemTG:TGW,group:{재성:lv}},[`${D6[lv].core[0]} ${D6[lv].core[1]}`,`현재 대운 천간의 십성이 재성(편재·정재) 쪽이고, 원국에서 재성의 세력이 ${L6[lv]} 계산돼서 ${lv==='weak'?'기회를 담을 구조부터 점검하는':lv==='mid'?'하던 수입 구조를 다듬는':'기회와 책임이 함께 커지는'} 구간으로 읽어요. 대운 십성은 만세력 엔진이 계산한 값이고, 재성 대운은 전통적으로 재물 주제가 강조되는 구간으로 읽어요.`,D6[lv].example,D6[lv].pos,D6[lv].neg,D6[lv].adv,D6[lv].emp,D6[lv].biz,D6[lv].free],{tag:`daewoon.${lv}`,timing:TIMING_WEALTH,notice:NOTE_TIME}));
  entries.push(W('06',`seun-${lv}`,{seunStemTG:TGW,group:{재성:lv}},[`${S6[lv].core[0]} ${S6[lv].core[1]}`,`올해 세운 천간의 십성이 재성(편재·정재) 쪽이고, 원국에서 재성의 세력이 ${L6[lv]} 계산돼서 ${lv==='weak'?'돈을 다루는 방식을 익히는':lv==='mid'?'하던 일의 조건을 조정해 보는':'돈 얘기가 겹쳐 커지는'} 해로 읽어요. 세운은 한 해의 흐름이고 같은 해 안에서 월별 시점이나 사건은 말하지 않아요. 세운 십성은 엔진 값이에요.`,S6[lv].example,S6[lv].pos,S6[lv].neg,S6[lv].adv,S6[lv].emp,S6[lv].biz,S6[lv].free],{tag:`seun.${lv}`,timing:TIMING_WEALTH,priority:95,notice:NOTE_TIME}));
 }
-entries.push(W('06','both',{daewoonStemTG:TGW,seunStemTG:TGW},['제안이 한꺼번에 몰려서 우선순위를 정하기 어려운, 재물 주제가 겹쳐 강조되는 시기예요.',
+entries.push(W('06','both',{daewoonStemTG:TGW,seunStemTG:TGW},['제안이 한꺼번에 몰려서 뭐부터 잡을지 정하기 어려운 시기예요. 재물 주제가 겹쳐 강조되는 시기라 우선순위가 더 필요해요.',
  '엔진 기준으로 현재 대운과 올해 세운이 모두 재성 쪽이라서, 재물 주제가 겹쳐 강조되는 시기로 읽어요. 기회가 많아 보이는 만큼 한 번에 모든 제안을 잡으려 하지 않는 게 핵심이에요.',
  '현재 대운 천간과 올해 세운 천간의 십성이 모두 재성(편재·정재)으로 계산돼서 재물 주제가 겹쳐 강조되는 시기예요. 같은 주제의 운이 겹치면 전통에서는 그 주제를 강조해서 보고, 이 해석은 엔진 값만을 근거로 해요.',
  '수입 제안, 계약, 지출 이슈가 한꺼번에 몰려서 우선순위를 정하기 어렵고, 제안마다 조건이 달라서 비교에 시간이 많이 들 수 있어요. 처음 들어온 제안을 급하게 수락하면 이후 더 나은 선택지를 놓치기도 하고요.',
