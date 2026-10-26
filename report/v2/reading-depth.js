@@ -5,15 +5,15 @@ var GROUPS=['비겁','식상','재성','관성','인성'],BANDS=['신강','중�
 var GLOSS={비겁:'내 편·경쟁·자기 힘',식상:'표현·재주',재성:'돈·현실',관성:'책임·자리',인성:'배움·보호'};
 var EL_GLOSS={목:'성장·시작',화:'표현·열기',토:'안정·중심',금:'결단·정리',수:'지혜·흐름'};
 var TG_GROUP={비견:'비겁',겁재:'비겁',식신:'식상',상관:'식상',편재:'재성',정재:'재성',편관:'관성',정관:'관성',편인:'인성',정인:'인성'};
-var BAND_LEAD={신강:'내 힘이 센 편이라는 계산이 나왔어요.',중화:'내 힘이 한쪽으로 치우치지 않은 편이에요.',신약:'내 힘이 상대적으로 여린 편이에요.'};
+var BAND_LEADS={신강:['내 힘이 센 편이라는 계산이 나왔어요.','일간을 받치는 힘이 넉넉한 편이에요.','내 중심이 단단한 쪽으로 계산됐어요.','스스로 밀고 나갈 힘이 충분한 편이에요.','기운이 안에서 꽉 차 있는 쪽이에요.','내 힘이 남는 쪽에 가까워요.'],중화:['내 힘이 한쪽으로 치우치지 않은 편이에요.','힘의 균형이 비교적 잘 잡혀 있어요.','강하지도 약하지도 않은 중간 지점에 있어요.','기운이 고르게 퍼져 있는 편이에요.','상황에 따라 힘이 오르내리는 균형형이에요.','어느 한쪽으로 크게 기울지 않았어요.'],신약:['내 힘이 상대적으로 여린 편이에요.','일간을 받치는 힘이 조금 모자란 편이에요.','내 힘이 쉽게 소진되는 쪽으로 계산됐어요.','도움이 있을 때 더 잘 서는 편이에요.','기운이 바깥으로 많이 흘러 나가는 쪽이에요.','내 중심을 지켜 줄 받침이 필요한 편이에요.']};
 // 문안이 앞 문장과 같은 사실을 다시 말하면 그 앞머리를 덜어 낸다.
 function trimBand(t){return t.replace(/^힘이 (?:센|고른|여린) 편이라(?:는 )?,? ?/,'');}
 function trimYong(t){return t.replace(/^(?:충전 방법: |나를 채워 주는 )?(?:연료가 )?[목화토금수] (?:기운(?:이|을)? ?(?:나를 )?(?:채워 주니|도와주니|채우면|채워 주세요\.)|쪽이라|쪽이 )[,\s]*/,'').replace(/^(?:나를 채워 주는 )?연료가 [목화토금수] 쪽이라,? ?/,'');}
 // 한 리포트에서 20장 넘게 같은 문장으로 시작하지 않도록, 장 id로 앞머리 표현을 돌려 쓴다.
-var LEAD_STRONG=['내 사주에서 가장 두드러진 기운은 {g}이에요.','원국에서 가장 큰 몫을 차지하는 기운은 {g}이에요.','타고난 글자 중 가장 힘이 센 쪽은 {g}이에요.','내 사주를 움직이는 중심 기운은 {g}이에요.'];
-var LEAD_WEAK=['상대적으로 가장 약한 기운은 {g}이에요.','가장 적게 담긴 기운은 {g}이에요.','원국에서 가장 조용한 기운은 {g}이에요.','힘이 가장 덜 실린 쪽은 {g}이에요.'];
-var LEAD_YONG=['나를 채워 주는 기운은 {e} 쪽이에요.','내게 힘을 보태 주는 기운은 {e} 쪽이에요.','부족한 곳을 메워 주는 기운은 {e} 쪽이에요.','내 사주의 균형을 잡아 주는 기운은 {e} 쪽이에요.'];
-var LEAD_LUCK=['지금 지나는 대운은 {g}이 강조되는 구간이에요.','지금의 10년 대운은 {g} 쪽으로 기울어 있어요.','현재 대운에서는 {g}의 기운이 두드러져요.','지금 걷는 대운은 {g}이 중심이 되는 시기예요.'];
+var LEAD_STRONG=['내 사주에서 가장 두드러진 기운은 {g}이에요.','원국에서 가장 큰 몫을 차지하는 기운은 {g}이에요.','타고난 글자 중 가장 힘이 센 쪽은 {g}이에요.','내 사주를 움직이는 중심 기운은 {g}이에요.','내 사주의 얼굴이 되는 기운은 {g}이에요.','글자들이 가장 크게 모여 있는 쪽은 {g}이에요.','내 안에서 제일 먼저 반응하는 기운은 {g}이에요.','원국에서 목소리가 가장 큰 기운은 {g}이에요.'];
+var LEAD_WEAK=['상대적으로 가장 약한 기운은 {g}이에요.','가장 적게 담긴 기운은 {g}이에요.','원국에서 가장 조용한 기운은 {g}이에요.','힘이 가장 덜 실린 쪽은 {g}이에요.','내 사주에서 비어 보이기 쉬운 기운은 {g}이에요.','글자 수가 가장 적은 쪽은 {g}이에요.','가장 챙겨 줘야 하는 기운은 {g}이에요.','원국에서 존재감이 가장 옅은 기운은 {g}이에요.'];
+var LEAD_YONG=['나를 채워 주는 기운은 {e} 쪽이에요.','내게 힘을 보태 주는 기운은 {e} 쪽이에요.','부족한 곳을 메워 주는 기운은 {e} 쪽이에요.','내 사주의 균형을 잡아 주는 기운은 {e} 쪽이에요.','내게 숨통을 틔워 주는 기운은 {e} 쪽이에요.','내 사주가 필요로 하는 기운은 {e} 쪽이에요.','균형을 맞출 때 기대면 좋은 기운은 {e} 쪽이에요.','내 흐름을 받쳐 주는 기운은 {e} 쪽이에요.'];
+var LEAD_LUCK=['지금 지나는 대운은 {g}이 강조되는 구간이에요.','지금의 10년 대운은 {g} 쪽으로 기울어 있어요.','현재 대운에서는 {g}의 기운이 두드러져요.','지금 걷는 대운은 {g}이 중심이 되는 시기예요.','지금 10년의 바람은 {g} 쪽에서 불어와요.','요즘 대운의 주제는 {g}이에요.','지금 들어와 있는 대운은 {g}의 색이 짙어요.','현재 10년 흐름은 {g}을 키워 주는 쪽이에요.'];
 function hashId(id){var n=0;for(var i=0;i<String(id).length;i++)n=(n*31+String(id).charCodeAt(i))>>>0;return n;}
 function lead(list,id,salt,k,v){return list[(hashId(id)+salt)%list.length].replace(k,v);}
 function pickStrongest(sd){var g=sd.groups||{},best=null;GROUPS.forEach(function(k){if(Number.isFinite(g[k])&&(best===null||g[k]>g[best]))best=k;});return GROUPS.indexOf(sd.dominantGroup)>=0?sd.dominantGroup:best;}
@@ -24,7 +24,7 @@ function paragraphs(c,sd){var id=c&&(c.editorialContractId||c.id),d=R.ReadingDep
  var ti=GROUPS.indexOf(top),wi=GROUPS.indexOf(weak),bi=BANDS.indexOf(band),yi=ELS.indexOf(yong);
  if(ti>=0&&d.g&&d.g[ti])out.push({key:'strong',text:lead(LEAD_STRONG,id,0,'{g}',top+'('+GLOSS[top]+')')+' '+d.g[ti]});
  if(wi>=0&&d.w&&d.w[wi]&&weak!==top)out.push({key:'weak',text:lead(LEAD_WEAK,id,1,'{g}',weak+'('+GLOSS[weak]+')')+' '+d.w[wi]});
- if(bi>=0&&d.b&&d.b[bi])out.push({key:'band',text:BAND_LEAD[band]+' '+trimBand(d.b[bi])});
+ if(bi>=0&&d.b&&d.b[bi])out.push({key:'band',text:BAND_LEADS[band][hashId(id)%BAND_LEADS[band].length]+' '+trimBand(d.b[bi])});
  if(yi>=0&&d.y&&d.y[yi])out.push({key:'yong',text:lead(LEAD_YONG,id,2,'{e}',yong+'('+EL_GLOSS[yong]+')')+' '+trimYong(d.y[yi])});
  if(d.t&&tg&&dw&&(!nowY||(dw.startYear<=nowY&&nowY<=dw.endYear))){var ki=GROUPS.indexOf(tg);if(ki>=0&&d.t[ki])out.push({key:'luck',text:lead(LEAD_LUCK,id,3,'{g}',tg+'('+GLOSS[tg]+')')+' '+d.t[ki]});}
  return out;}
