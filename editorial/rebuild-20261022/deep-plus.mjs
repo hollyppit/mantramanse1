@@ -1,7 +1,7 @@
 // 재물운·커리어운·인연운 심화 장 13~15 · 맞는 사람과 피해야 할 사람(용신 오행), 타이밍(현재 대운 천간 십성군), 주제별 개운법(용신 오행).
 // 구체적인 연도·달은 화면에서 엔진 값(대운표·월운)으로 그래프와 함께 붙고, 문안은 그 시기를 어떤 주제로 읽는지만 말한다.
 // 해요체, 사건·수입·합격·결혼을 단정하지 않는다. 개운법은 지금 가진 것으로 하는 행동만 쓴다.
-import {entry} from './lib.mjs';
+import {entry,oppose} from './lib.mjs';
 
 const NEG=''; // 단서 문장은 화면에서 쓰지 않는다
 const ALL=['신강','중화','신약'];
@@ -228,8 +228,30 @@ const L_REMEDY={
   adv:'일주일에 한 번 휴대폰을 내려놓고 30분 대화하는 시간을 만들어 보세요. 겨울이나 밤에는 하루를 돌아보는 짧은 대화를 나눠 보세요.',emp:'주말 하루는 대화 시간을 정해 두세요.',biz:'중요한 관계 결정은 충분히 이야기한 뒤 하세요.',free:'바쁜 시기 전에 상황을 미리 나눠 두세요.'},
 };
 
-export const entries=[
- ...people('w','timeline_wealth_13',W_PEOPLE,'돈과 거래'),...timing('w','timeline_wealth_14',W_TIMING,'재물'),...remedy('w','timeline_wealth_15',W_REMEDY,'재물'),
- ...people('c','timeline_career_13',C_PEOPLE,'일과 조직'),...timing('c','timeline_career_14',C_TIMING,'커리어'),...remedy('c','timeline_career_15',C_REMEDY,'커리어'),
- ...people('l','timeline_love_13',L_PEOPLE,'관계'),...timing('l','timeline_love_14',L_TIMING,'인연'),...remedy('l','timeline_love_15',L_REMEDY,'인연'),
+// 타이밍 장 대체 문안: 첫 대운이 시작되기 전(대운 천간 십성이 없는) 명식용. 대운 항목과는 서로 배타로 묶어 함께 나오지 않게 하고, 우선순위는 낮게 둔다.
+const PRE={
+ w:{label:'재물',core:'아직 첫 대운이 시작되기 전이라, 돈의 흐름은 10년 단위보다 해마다 읽는 게 맞아요.',
+  ex:'용돈이나 첫 수입, 모으는 습관처럼 작은 돈의 감각이 이 시기에 자리를 잡아요. 큰 투자보다 쓰고 남기는 방식이 먼저 몸에 붙어요.',
+  pos:'지금 만든 돈 습관이 나중 대운이 시작될 때 기반이 돼요.',neg:'남의 돈 이야기에 휩쓸리면 기준이 흐려지기 쉬워요.',
+  adv:'위 그래프의 해별 흐름을 보면서 쓰는 돈과 모으는 돈의 비율만 정해 두세요.',emp:'월급이 들어오면 먼저 모을 몫을 떼어 두세요.',biz:'사업 자금과 생활비를 처음부터 나눠 두세요.',free:'들어온 돈의 일부를 세금과 비상금으로 먼저 떼어 두세요.'},
+ c:{label:'커리어',core:'아직 첫 대운이 시작되기 전이라, 일의 흐름은 10년 단위보다 해마다 읽는 게 맞아요.',
+  ex:'어떤 일이 나한테 맞는지 이것저것 해 보며 감을 잡는 시기예요. 배우고 경험한 것이 나중 방향의 재료가 돼요.',
+  pos:'지금 쌓는 경험은 방향을 정할 때 선택지를 넓혀 줘요.',neg:'아직 정해지지 않은 방향을 서둘러 확정하려 하면 오히려 답답해져요.',
+  adv:'위 그래프의 해별 흐름을 참고해서 올해 해 볼 한 가지 경험만 정해 보세요.',emp:'맡은 일에서 배우는 점을 한 줄씩 적어 두세요.',biz:'작게 시험해 보고 반응을 확인하세요.',free:'작은 일부터 맡아 보며 나한테 맞는 방식을 찾으세요.'},
+ l:{label:'인연',core:'아직 첫 대운이 시작되기 전이라, 관계의 흐름은 10년 단위보다 해마다 읽는 게 맞아요.',
+  ex:'가족, 친구, 학교나 직장의 사람들과 어울리며 관계의 방식을 배우는 시기예요. 어떤 사람과 편한지 알아 가는 과정이 인연의 바탕이 돼요.',
+  pos:'지금 익힌 대화 방식이 나중에 가까운 관계를 만들 때 도움이 돼요.',neg:'한두 번의 서운한 경험으로 사람 전체를 판단하면 관계 폭이 좁아져요.',
+  adv:'위 그래프의 해별 흐름을 보면서 편한 사람과 불편한 사람의 차이를 한 번 적어 보세요.',emp:'함께 일하는 사람 중 편한 대화 방식을 눈여겨보세요.',biz:'관계를 넓히는 시간을 일정에 넣어 두세요.',free:'연락이 끊긴 사람에게 가볍게 안부를 보내 보세요.'},
+};
+const pre=(topic,ch)=>{const r=PRE[topic];
+ return entry({id:`${topic}14-pre`,chapter:ch,priority:10,when:{strength:ALL,gender:['남','여']},tags:[`${topic}14.pre`],
+  timing:`첫 대운이 시작되기 전이라 현재 대운이 없어요. 연도별 흐름은 위 그래프에 엔진이 계산한 값으로 표시돼요.`,
+  text:[r.core,`첫 대운 전에는 해마다 바뀌는 흐름을 중심으로 ${r.label}을 읽어요. 연도별 흐름과 힘이 실리는 달은 위 그래프에 표시돼요.`,r.ex,r.pos,r.neg,r.adv,r.emp,r.biz,r.free]});};
+
+const base=[
+ ...people('w','timeline_wealth_13',W_PEOPLE,'돈과 거래'),...timing('w','timeline_wealth_14',W_TIMING,'재물'),pre('w','timeline_wealth_14'),...remedy('w','timeline_wealth_15',W_REMEDY,'재물'),
+ ...people('c','timeline_career_13',C_PEOPLE,'일과 조직'),...timing('c','timeline_career_14',C_TIMING,'커리어'),pre('c','timeline_career_14'),...remedy('c','timeline_career_15',C_REMEDY,'커리어'),
+ ...people('l','timeline_love_13',L_PEOPLE,'관계'),...timing('l','timeline_love_14',L_TIMING,'인연'),pre('l','timeline_love_14'),...remedy('l','timeline_love_15',L_REMEDY,'인연'),
 ];
+for(const t of ['w','c','l'])oppose(base,[`${t}14-pre`],Object.keys(TG).map(k=>`${t}14-${k}`));
+export const entries=base;
