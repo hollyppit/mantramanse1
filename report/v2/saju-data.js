@@ -116,6 +116,18 @@
         var next=all[ci+i+1];return { year:new Date(x.startMs+9*3600e3).getUTCFullYear(),startDate:luckDateKst(x.startMs),endBefore:next?luckDateKst(next.startMs):null,stemTG:x.stemTG,branchTG:x.branchTG,relations:luckRelations(ch,x), month: new Date(x.startMs + 9 * 3600e3).getUTCMonth() + 1, term: x.termName, ganzhi: M.gzNameK(x), season: seasonOf(x.ev), flow: x.ev.flow.primaryFlow, condition: x.ev.flow.condition.name, label: M.flowLabel(x.ev), isNow: i === 0 };
       });
     } catch (e) { sd.monthlyLuck = []; un.push('monthlyLuck'); }
+    // 궁합 일주(엔진 compatAttraction): 보완도 높은 일주·충돌 주의 일주·끌림. 상대 일주 두 글자만 가정한 참고값이고, 개인 정보는 담지 않는다.
+    try {
+      var cpAll = M.compatAttraction(ch, 'opposite'), cpPack = function (x, k) { var at = x.attract || {}; return { i: x.i, hanja: M.STEM[x.s] + M.BR[x.b], k: x.ganzhiK, sEl: M.stemEl(x.s), bEl: M.BR_EL[x.b], s: M.STEM[x.s], b: M.BR[x.b], score: k === 'to' ? at.toThem.score : k === 'from' ? at.toMe.score : k === 'mutual' ? at.mutual : x.score, compat: x.score, type: x.type, condition: x.condition, risk: Math.round(x.risk * 100), reasons: (x.reasons || []).slice(0, 2), cautions: (x.cautions || []).slice(0, 2) }; };
+      var cpTop = function (key, n) { return cpAll.slice().sort(function (a, b) { return key(b) - key(a) || b.score - a.score; }).slice(0, n); };
+      sd.compat = {
+        good: cpAll.filter(function (x) { return x.condition !== '주의 요소 있음'; }).slice(0, 5).map(function (x) { return cpPack(x, 'compat'); }),
+        risky: cpAll.filter(function (x) { return x.risk >= 0.3; }).sort(function (a, b) { return b.risk - a.risk || a.score - b.score; }).slice(0, 5).map(function (x) { return cpPack(x, 'compat'); }),
+        toThem: cpTop(function (x) { return x.attract.toThem.score; }, 5).map(function (x) { return cpPack(x, 'to'); }),
+        toMe: cpTop(function (x) { return x.attract.toMe.score; }, 5).map(function (x) { return cpPack(x, 'from'); }),
+        mutual: cpTop(function (x) { return x.attract.mutual; }, 5).map(function (x) { return cpPack(x, 'mutual'); })
+      };
+    } catch (e) { sd.compat = null; un.push('compat'); }
     // 앞으로 10년 세운(해마다). 읽기 화면의 타이밍 순위·그래프가 쓴다. 엔진의 세운 계산값만 옮겨 담는다.
     try {
       sd.annualLuck = M.seunRange(ch, Y, Y + 9).map(function (se, i) {

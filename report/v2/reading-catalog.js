@@ -377,8 +377,8 @@ var SEED={
     {
       "id": "timeline_self_28",
       "topicId": "self",
-      "title": "잘 맞는 일주와 충돌하는 일주",
-      "question": "잘 맞는 일주와 충돌하는 일주",
+      "title": "대인관계 궁합",
+      "question": "대인관계 궁합",
       "purpose": "「잘 맞는 일주와 충돌하는 일주」에 한 장으로 답한다. 종합풀이 20장 중 요약 장이라 같은 주제의 상세 장(재물운·커리어운·인연운)의 결론을 그대로 옮기지 않고 한 화면 분량으로 압축한다.",
       "requiredEvidence": [
         "배우자성·배우자궁",
@@ -3762,8 +3762,11 @@ function generationChapter(existing,c,sd){
  var id=existing?existing.id:c.id;
  return Object.assign({},existing || {},{id:id,base:existing?existing.base:c.id,title:c.title,act:existing?existing.act:i+1,kind:'life',aiEnabled:true,readingSupplementary:false,readingCore:core,readingSection:i+1,editorialContractId:c.id,editorialTopicId:c.topicId,editorialDraft:true,readingDeferred:true,readingNotice:'검수된 문안을 불러오고 있습니다. 잠시만 기다려 주세요.',scenes:[{sceneId:id+'_editorial_header',sceneType:'chapterIntro',compact:true}].concat(R.ReadingFlow.scenes(core,id)).concat([{sceneId:id+'_editorial_end',sceneType:'chapterEnding'}]).concat(oldScenes)});
 }
+// 저장된 카탈로그의 이름이 옛 이름이면 화면에서는 새 이름으로 덮어쓴다(운영 카탈로그를 다시 게시하기 전까지).
+var TITLE_OVERRIDE={timeline_self_28:'대인관계 궁합'};
+function retitle(catalog){return Object.assign({},catalog,{chapters:(catalog.chapters || []).map(function(c){return TITLE_OVERRIDE[c.id]?Object.assign({},c,{title:TITLE_OVERRIDE[c.id],question:TITLE_OVERRIDE[c.id]}):c;})});}
 function prepare(rep,published,sd){
- var source=(rep.chapters || []).slice(),catalog=published || defaults(),seed=defaults(),active=(catalog.chapters || []).filter(function(c){return c.state==='active'&&catalog.topics.some(function(t){return t.id===c.topicId&&t.enabled;});}),out=[],archive=[];
+ var source=(rep.chapters || []).slice(),catalog=retitle(published || defaults()),seed=defaults(),active=(catalog.chapters || []).filter(function(c){return c.state==='active'&&catalog.topics.some(function(t){return t.id===c.topicId&&t.enabled;});}),out=[],archive=[];
  if(active.some(function(c){return /^timeline_/.test(c.id);})){
  var ordered=active.slice().sort(function(a,b){var ta=catalog.topics.find(function(t){return t.id===a.topicId;}),tb=catalog.topics.find(function(t){return t.id===b.topicId;});return ta.order-tb.order || a.order-b.order;});
  var used={};var chapters=ordered.map(function(c){var originals=source.filter(function(x){return c.legacyIds.indexOf(x.id)>=0 || c.legacyIds.indexOf(x.base)>=0;});originals.forEach(function(x){used[x.id]=true;});var primary=originals[0];if(primary)primary=Object.assign({},primary,{scenes:originals.reduce(function(all,x){return all.concat(x.scenes || []);},[])});var ch=generationChapter(primary,c,sd);ch.legacyIds=c.legacyIds.slice();ch.editorialSequence=c.order;ch.editorialContractId=c.id;return ch;});
