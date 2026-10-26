@@ -271,3 +271,12 @@ body #wstrip button{max-width:none;text-overflow:clip}
 #chapter .part-feedback button{min-height:32px;padding:4px 12px;border:1px solid var(--line2);border-radius:999px;background:transparent;color:var(--ink);font-size:13px;cursor:pointer}
 #chapter .part-feedback button:disabled{opacity:.5;cursor:default}
 @media(max-width:560px){#chapter .text-reading-plus .plus-card{padding:14px}#chapter .text-reading-plus .plus-summary dl{grid-template-columns:1fr}}
+
+/* 패널 이미지·영상: 본문 가로폭에 맞추고 위아래는 잘려도 된다. 일간과 일주 장은 자르지 않고 가로폭을 꽉 채운다. */
+#chapter .text-reading-media .reading-panel{width:100%;max-width:none;aspect-ratio:16/10;max-height:none}
+#chapter .text-reading-media .reading-panel img,#chapter .text-reading-media .reading-panel video{width:100%;height:100%;max-height:none;object-fit:cover}
+#chapter .text-reading-media .reading-panel-no-poster video{height:100%}
+#chapter [data-sc^="timeline_self_03_text_panel"] .reading-panel{aspect-ratio:auto}
+#chapter [data-sc^="timeline_self_03_text_panel"] .reading-panel img{height:auto;object-fit:fill}
+#chapter [data-sc^="timeline_self_03_text_panel"] .reading-panel video{object-fit:fill}
+@media(max-width:600px){#chapter .text-reading-media .reading-panel{aspect-ratio:4/5}}

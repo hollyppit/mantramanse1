@@ -32,7 +32,7 @@ function signature(sd){
  var pair=D.P[fams[0]+'+'+fams[1]]||D.P[fams[1]+'+'+fams[0]]||'';
  return {top:fams.map(function(f){return {key:f,label:D.F[f].label,core:D.F[f].core,sources:(src[f]||[]).slice(0,3),score:Math.round(score[f]*10)/10};}),pair:pair,band:sd.strength&&D.BAND[sd.strength.band]||''};
 }
-function feedback(part,label){return '<div class="part-feedback" data-part="'+esc(part)+'"><span>'+esc(label||'내 얘기 같나요?')+'</span><button type="button" data-part-feedback="agree">맞아요</button><button type="button" data-part-feedback="disagree">아니에요</button><em data-part-status></em></div>';}
+function feedback(part,label,force){if(force!==true)return '';return '<div class="part-feedback" data-part="'+esc(part)+'"><span>'+esc(label||'내 얘기 같나요?')+'</span><button type="button" data-part-feedback="agree">맞아요</button><button type="button" data-part-feedback="disagree">아니에요</button><em data-part-status></em></div>';}
 // ───────── 개인화 문단 판별(반응 버튼용): 사주 요소 문장·일간/월지/용신 문장 ─────────
 var AGAIN=/^([가-힣]+?)(?:은|는) 이 장에서도|^([가-힣]+)의 (?:결이|흔적은|영향이|결은|힘은|기운이) |^이 장에서도 ([가-힣]+)의 /;
 function partFor(text){

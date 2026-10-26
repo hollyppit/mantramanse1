@@ -1,6 +1,6 @@
 /* Explain only supplied engine luck values. No calendar, ten-god or clash calculation here. */
 (function(root){'use strict';
-var ids=['timeline_self_20','timeline_self_21','timeline_self_peak','timeline_wealth_06','timeline_wealth_10','timeline_career_08','timeline_career_12','timeline_love_08'];
+var ids=['timeline_self_20','timeline_self_21','timeline_self_24','timeline_self_peak','timeline_wealth_06','timeline_wealth_10','timeline_career_08','timeline_career_12','timeline_love_08'];
 var gods={
 비견:['내가 직접 정하고 밀고 나가는 힘이 커지는 시기예요.','누가 정해 주길 기다리지 말고 내가 맡을 일과 하고 싶은 방식을 먼저 말해 보세요.','돈 문제에서는 남이 정해 주길 기다리지 말고 내가 쓸 한도와 받을 몫을 먼저 정해 보세요.','일에서는 누가 시키기 전에 내가 맡을 범위와 하고 싶은 방식을 먼저 제안해 보세요.','관계에서는 상대가 정해 주길 기다리지 말고 내가 원하는 거리와 방식을 먼저 말해 보세요.'],
 겁재:['사람들과 함께 움직이고 경쟁하면서 힘이 붙는 시기예요.','함께하는 일이 생기면 의욕만 맞추지 말고 역할과 몫을 처음부터 나눠 두세요.','동료나 친구와 돈이 얽힌 일을 한다면 비용과 정산 방식을 시작 전에 정해 두세요.','동료와 새 일을 시작한다면 의욕만 맞추지 말고 역할과 책임을 처음부터 나눠 두세요.','사람들 사이에서 경쟁심이 올라올 수 있어요. 연애에서는 남과 비교하기보다 둘만의 속도를 지키세요.'],

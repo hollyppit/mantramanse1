@@ -34,7 +34,7 @@ const P=globalThis.ReportV2.ReadingPlus,D=globalThis.MantraSignatureData,CL=glob
  const DR=await import(pathToFileURL(path.join(ROOT,'functions/_detail-reading.js')).href);let dn=0;for(const axis of Object.keys(DR.DICT))for(const k of Object.keys(DR.DICT[axis]))for(const t of Object.keys(DR.DICT[axis][k]))for(const x of DR.DICT[axis][k][t]){dn++;assert.equal(P.partFor(x),'dt:'+axis,x.slice(0,30));}
  for(const kind of Object.keys(CL.TABLE))for(const name of Object.keys(CL.TABLE[kind])){const shown=(CL.DISPLAY[name]||name);assert.equal(P.partFor(CL.prefix(kind,name)+' 본문이에요.'),'el:'+shown,kind+':'+name);for(let i=1;i<=4;i++)assert.equal(P.partFor(CL.again(kind,name,i)+' 본문이에요.'),'el:'+shown,kind+':'+name+' again '+i);}
  assert(dn>=680);
- const fb=P.feedback('el:현침살');assert(fb.includes('data-part="el:현침살"')&&fb.includes('data-part-feedback="agree"')&&fb.includes('data-part-feedback="disagree"'));
+ assert.equal(P.feedback('el:현침살'),'');const fb=P.feedback('el:현침살',null,true);assert(fb.includes('data-part="el:현침살"')&&fb.includes('data-part-feedback="agree"')&&fb.includes('data-part-feedback="disagree"'));
  // 4) 측정 요약: 문단 반응은 part별 맞아요/아니에요 비율로 모이고, 장 지표에는 섞이지 않는다
  const S=globalThis.MantraReadingMetrics.summarize([{reportId:'a',chapter:'timeline_self_06',event:'viewed',source:'user'},{reportId:'a',chapter:'timeline_self_06',event:'part-agree',part:'el:현침살',source:'user'},{reportId:'b',chapter:'timeline_self_09',event:'part-disagree',part:'el:현침살',source:'user'},{reportId:'b',chapter:'timeline_self_01',event:'part-agree',part:'sig:drive',source:'user'}]);
  assert.deepEqual(S.parts['el:현침살'],{agree:1,disagree:1,agreeRate:0.5});assert.equal(S.parts['sig:drive'].agree,1);assert.equal(S.chapters.timeline_self_06.views,1);

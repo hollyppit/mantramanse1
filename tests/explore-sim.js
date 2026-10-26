@@ -15,15 +15,16 @@ const W = X.mergeWorlds(null);
 const legacyMoney = X.mergeWorlds([{ id: 'w2', line: '직업 · 재물 · 성공', chapters: ['c06', 'c08', 'life_career_style'] }]);
 for (const id of ['c06', 'c07', 'deep_jobs', 'life_career_style', 'life_career_timing', 'life_ik_CAREER']) ok(X.worldFor({ id }, legacyMoney) === 'w7', '커리어 분리: ' + id);
 for (const id of ['c08', 'deep_wealth', 'life_money_nature', 'life_money_timing']) ok(X.worldFor({ id }, W) === 'w2', '재물 분리: ' + id);
-ok(W.length === 7 && W.map(w => w.name).join() === '종합풀이,재물운,커리어운,인연운,건강 및 사고수,전생 체험,개운법', '기본 7개 세계 이름·순서');
-ok(W.every(w => w.enabled && w.access === 'free'), '기본은 모두 활성·무료(가격 정책 미확정)');
+ok(W.length === 7 && W.filter(w => w.enabled).map(w => w.name).join() === '종합풀이,재물운,커리어운,인연운', '기본 4개 세계(건강·전생·개운법은 종합풀이로 합침) 이름·순서');
+ok(W.filter(w => w.enabled).length === 4 && W.every(w => w.access === 'free') && ['w5', 'w6', 'w8'].every(id => !W.find(w => w.id === id).enabled), '활성 세계는 무료, 합쳐진 세계는 꺼짐(가격 정책 미확정)');
 ok(/창작 판타지/.test(W.find(w => w.id === 'w5').notice), '윤회의 문에 창작 판타지 표시');
 
 // 2. 병합: 이름 변경·비활성·유료·챕터 직접 연결
-const W2 = X.mergeWorlds([{ id: 'w2', name: '새 이름', enabled: false }, { id: 'w3', access: 'paid' }, { id: 'w6', chapters: ['c19'] }]);
+const W2 = X.mergeWorlds([{ id: 'w2', name: '새 이름', enabled: false }, { id: 'w3', access: 'paid' }, { id: 'w7', chapters: ['c19'] }, { id: 'w6', enabled: true }]);
 ok(W2.find(w => w.id === 'w2').name === '새 이름' && !W2.find(w => w.id === 'w2').enabled, '이름 변경·비활성');
 ok(W2.find(w => w.id === 'w3').access === 'paid' && W2.find(w => w.id === 'w1').access === 'free', '유료 지정은 해당 세계만');
-ok(X.worldFor({ id: 'c19', base: 'c19' }, W2) === 'w6', '직접 연결 챕터 우선');
+ok(X.worldFor({ id: 'c19', base: 'c19' }, W2) === 'w7', '직접 연결 챕터 우선');
+ok(!W2.find(w => w.id === 'w6').enabled && X.worldFor({ id: 'c20', base: 'c20' }, W2) === 'w1', '예전 저장본이 켜 둔 개운법 세계는 다시 나타나지 않고 챕터는 종합풀이로');
 
 // 3. 실제 문서의 모든 챕터가 한 세계에 들어가고 사라지지 않는다
 const now = Date.UTC(2026, 9, 6), cfg = R.Chapters.forProject(null, 'full'), lib = R.Compose.library(null);
@@ -34,7 +35,7 @@ let total = 0; const viaFallback = new Set();
   const doc = R.LifeDoc.build({ M, ch, sd, now, name: '백진우', interest: '', rep, soc, plan: (rep.chapters.find(c => c.plan) || {}).plan });
   const model = X.worldsModel(doc.chapters, W, {}, -1), n = model.reduce((s, g) => s + g.total, 0);
   total += n; ok(n === doc.chapters.length, `챕터 누락: ${n}/${doc.chapters.length}`);
-  ok(model.length === 6 && !model.some(g=>g.world.id==='w4'), '건강 챕터가 없는 기존 문서는 6개 주제 표시: ' + model.map(g => g.world.id + ':' + g.total).join());
+  ok(model.length === 4 && !model.some(g=>['w4','w5','w6','w8'].includes(g.world.id)), '기존 문서도 4개 주제 표시: ' + model.map(g => g.world.id + ':' + g.total).join());
   doc.chapters.forEach(c => { const hit = W.some(w => (w.match || []).some(r => new RegExp(r).test(c.id) || new RegExp(r).test(c.base || c.id))); if (!hit) viaFallback.add(c.id); });
 });
 if (viaFallback.size) console.log('규칙에 안 걸려 막 기준 대체 세계로 간 챕터:', [...viaFallback].join(', '));

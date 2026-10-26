@@ -21,7 +21,7 @@
 
   /* ── 세계 기본 정의. match: 챕터 base/id 를 검사하는 정규식 문자열(첫 번째로 맞는 세계). chapters: 관리자가 직접 연결한 챕터 ID(우선). ── */
   var DEFAULT_WORLDS = [
-    { id: 'w1', order: 1, bgImage:'/report/hub/quest/archive.webp', name: '종합풀이', line: '나의 본질과 타고난 기질', desc: '사주 원국, 일간·일주, 오행과 십성, 강약과 뿌리, 강점과 그림자를 읽습니다.', color: '#1B2347', accent: '#8FA6E8', icon: '命',
+    { id: 'w1', order: 1, bgImage:'/report/hub/quest/archive.webp', name: '종합풀이', line: '나의 사주 전체를 한 번에', desc: '타고난 기질과 인생 흐름, 강점과 약점, 일, 인연, 재물, 건강, 전생, 개운법까지 20개 챕터로 읽습니다.', color: '#1B2347', accent: '#8FA6E8', icon: '命',
       match: ['^c-char', '^c0[1-5]$', '^life_(self_who|tengods|stars)$', '^deep_(car|proscons|stages)$', '^life_ik_SELF'] },
     { id: 'w2', order: 2, bgImage:'/report/hub/quest/office.webp', name: '재물운', line: '수입 · 소비 · 재물 관리', desc: '돈을 버는 성향, 수입과 지출, 재물 관리와 시기별 재물 흐름을 읽습니다.', color: '#3A2C0E', accent: '#E3B341', icon: '財',
       match: ['^c08$', '^life_(money_nature|money_timing)$', '^deep_wealth$', '^life_ik_MONEY'] },
@@ -29,13 +29,14 @@
       match: ['^c0[67]$', '^life_(career_style|career_timing)$', '^deep_jobs$', '^life_ik_CAREER'] },
     { id: 'w3', order: 3, bgImage:'/report/hub/quest/reeds.webp', name: '인연운', line: '사랑과 인간관계', desc: '연애 성향, 결혼과 배우자, 대인관계, 가족과 자녀, 궁합을 읽습니다.', color: '#3A1B2A', accent: '#E58AA8', icon: '緣',
       match: ['^c(09|1[0-3])$', '^life_(love_style|marriage_who|relation_style|love_timing|marriage_timing|relation_timing)$', '^deep_(love|spouse|marriage|children|ilju)$', '^life_ik_(LOVE|MARRIAGE|RELATIONSHIP)'] },
-    { id:'w8',order:4,bgImage:'/report/hub/quest/paths.webp',name:'건강 및 사고수',line:'생활 균형과 안전',desc:'전통적인 주의 개념을 생활 습관과 안전 점검으로 연결합니다. 질병이나 사고 발생을 예측하지 않습니다.',color:'#102B33',accent:'#6FD0D8',icon:'安',match:['^deep_health$','^timeline_health_'] },
-    { id: 'w5', order: 5, bgImage:'/report/hub/quest/mirror.webp', name: '전생 체험', line: '전생과 상징적 서사', desc: '전생의 정체와 업보를 현재의 기질과 이어서 읽는 상징적 이야기입니다. 역사적 사실이나 검증된 개인 정보가 아닙니다.', color: '#241636', accent: '#B58CF0', icon: '憶',
+    { id:'w8',enabled:false,order:4,bgImage:'/report/hub/quest/paths.webp',name:'건강 및 사고수',line:'생활 균형과 안전',desc:'전통적인 주의 개념을 생활 습관과 안전 점검으로 연결합니다. 질병이나 사고 발생을 예측하지 않습니다.',color:'#102B33',accent:'#6FD0D8',icon:'安',match:['^deep_health$','^timeline_health_'] },
+    { id: 'w5', enabled: false, order: 5, bgImage:'/report/hub/quest/mirror.webp', name: '전생 체험', line: '전생과 상징적 서사', desc: '전생의 정체와 업보를 현재의 기질과 이어서 읽는 상징적 이야기입니다. 역사적 사실이나 검증된 개인 정보가 아닙니다.', color: '#241636', accent: '#B58CF0', icon: '憶',
       notice: '사주 상징을 모티브로 한 창작 판타지 콘텐츠입니다.', match: ['^c14$', '^deep_past$'] },
-    { id: 'w6', order: 6, bgImage:'/report/hub/quest/courtyard.webp', name: '개운법', line: '앞으로의 선택과 행동', desc: '개운법, 운동·자기계발, 행운 명소, 생활 습관과 종합 행동 가이드를 정리합니다.', color: '#12301F', accent: '#7ED69A', icon: '路',
+    { id: 'w6', enabled: false, order: 6, bgImage:'/report/hub/quest/courtyard.webp', name: '개운법', line: '앞으로의 선택과 행동', desc: '개운법, 운동·자기계발, 행운 명소, 생활 습관과 종합 행동 가이드를 정리합니다.', color: '#12301F', accent: '#7ED69A', icon: '路',
       match: ['^c(19|20)$', '^life_(action|actions)$', '^deep_(remedy|places|health)$', '^life_ik_ACTION'] },
   ];
   // 어느 세계에도 안 맞는 챕터가 사라지지 않도록, 막 기준 대체 세계
+  var FOLDED_WORLDS = ['w5', 'w6', 'w8'];
   var FALLBACK_WORLD = { 1: 'w1', 2: 'w1', 3: 'w1', 4: 'w2', 5: 'w1', 6: 'w6' };
 
   function mergeWorlds(saved) {
@@ -63,6 +64,7 @@
       money.match = DEFAULT_WORLDS[1].match;
       if (career && moved.length) career.chapters = Array.from(new Set((career.chapters || []).concat(moved)));
     }
+    FOLDED_WORLDS.forEach(function (id) { if (by[id]) by[id].enabled = false; }); // 건강·전생·개운법은 종합풀이 챕터로 합쳤다. 예전 저장본이 켜 두어도 다시 나타나지 않는다.
     return Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
   }
   function isCareer(id) { return /^(c0[67]|life_career_(style|timing)|deep_jobs|life_ik_CAREER.*)$/.test(id); }
@@ -82,9 +84,11 @@
     return out;
   }
 
-  function worldFor(c, worlds, flow) {
+  // 합쳐진 세계(건강·전생·개운법)로 가던 예전 문서의 챕터는 종합풀이로 보낸다.
+  function worldFor(c, worlds, flow) { var id = worldForRaw(c, worlds, flow); return FOLDED_WORLDS.indexOf(id) >= 0 ? 'w1' : id; }
+  function worldForRaw(c, worlds, flow) {
     var id = c.id, base = c.base || c.id, i, w, j;
-    var editorial={self:'w1',wealth:'w2',career:'w7',love:'w3',relationships:'w3',timing:'w1',health:'w8',creative:'w5',remedy:'w6'};if(c.editorialTopicId && editorial[c.editorialTopicId])return editorial[c.editorialTopicId];
+    var editorial={self:'w1',wealth:'w2',career:'w7',love:'w3',relationships:'w3',timing:'w1',health:'w1',creative:'w1',remedy:'w1'};if(c.editorialTopicId && editorial[c.editorialTopicId])return editorial[c.editorialTopicId];
     if(/^(c(00|1[5-8])|deep_(daewoon|seun|wolun)|life_(prologue|here|future))$/.test(id))return 'w1';
     if ((isCareer(id) || isCareer(base) || c.readingSection === 5) && worlds.some(function (w) { return w.id === 'w7'; })) return 'w7';
     for (i = 0; i < worlds.length; i++) if (worlds[i].chapters && worlds[i].chapters.indexOf(id) >= 0) return worlds[i].id;
