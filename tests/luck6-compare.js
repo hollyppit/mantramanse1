@@ -33,5 +33,7 @@ for (const inp of inputs) {
 }
 console.log(`비교 ${n}건: 분류 일치 ${same} (${(same / n * 100).toFixed(1)}%) · 점수 불일치 ${scoreDiff} · 변동/방어 불일치 ${ovDiff}`);
 console.log(`현재 기준 ${NOW_VOL} (옛 ${LEGACY_VOL}): 변동기 ${legacyVol}건(${(legacyVol / n * 100).toFixed(1)}%) → ${nowVol}건(${(nowVol / n * 100).toFixed(1)}%) · 바뀐 항목 ${shifted}건 · 예상 밖 변경 ${badShift}건`);
-if (scoreDiff || ovDiff || same / n < 0.97 || badShift || nowVol >= legacyVol) { console.log('기대치와 다름'); process.exit(1); }
+// 2026-10: 옛 6분류 구현과의 점수·분류 동등성은 더는 기대하지 않는다(엔진이 이후 의도적으로 바뀜: 시간 단위별 배율, 보정 검토 등). 위 수치는 참고로만 출력하고,
+// 지금 엔진·표시 계층에서 지켜야 할 불변식만 검사한다: 변동기 기준을 올렸을 때 '변동성 55 이상 65 미만의 옛 변동기'만 주 흐름으로 바뀌고, 새로 변동기가 되는 항목은 없으며, 변동기 수는 줄어든다.
+if (badShift || nowVol >= legacyVol) { console.log('기대치와 다름'); process.exit(1); }
 console.log('통과');
