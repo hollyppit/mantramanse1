@@ -69,7 +69,7 @@
  function timingReason(p,topic,gender){var g=TG_GROUP[p.stemTG],m=GROUP_MEANING[topic][g],want=timingWant(topic,gender),out='';
   if(p.stemTG)out+=p.stemTG+' 대운이라 '+(m||'새로운 기운')+'이 들어오고, ';
   out+=(COND_TEXT[p.condition]||'원래 사주와의 관계는 보통이에요')+'.';
-  if(want&&g===want[0])out+=' '+TOPIC_LABEL[topic]+'과 가장 직접 닿는 기운이라 점수를 더했어요.';
+  if(want&&g===want[0])out+=' '+TOPIC_LABEL[topic]+((TOPIC_LABEL[topic].charCodeAt(TOPIC_LABEL[topic].length-1)-0xAC00)%28?'과':'와')+' 가장 직접 닿는 기운이라 점수를 더했어요.';
   if(hasClash(p))out+=' 원래 사주와 부딪히는 글자가 있어 변동이 섞여요.';
   return out;}
  function rankedTiming(periods,now,topic,gender,monthly,withMonths){
