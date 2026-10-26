@@ -116,6 +116,12 @@
         var next=all[ci+i+1];return { year:new Date(x.startMs+9*3600e3).getUTCFullYear(),startDate:luckDateKst(x.startMs),endBefore:next?luckDateKst(next.startMs):null,stemTG:x.stemTG,branchTG:x.branchTG,relations:luckRelations(ch,x), month: new Date(x.startMs + 9 * 3600e3).getUTCMonth() + 1, term: x.termName, ganzhi: M.gzNameK(x), season: seasonOf(x.ev), flow: x.ev.flow.primaryFlow, condition: x.ev.flow.condition.name, label: M.flowLabel(x.ev), isNow: i === 0 };
       });
     } catch (e) { sd.monthlyLuck = []; un.push('monthlyLuck'); }
+    // 앞으로 10년 세운(해마다). 읽기 화면의 타이밍 순위·그래프가 쓴다. 엔진의 세운 계산값만 옮겨 담는다.
+    try {
+      sd.annualLuck = M.seunRange(ch, Y, Y + 9).map(function (se, i) {
+        return { year: Y + i, ganzhi: M.gzNameK(se), stemTG: se.stemTG, branchTG: se.branchTG, relations: luckRelations(ch, se), season: seasonOf(se.ev), flow: se.ev.flow.primaryFlow, condition: se.ev.flow.condition.name, isNow: i === 0 };
+      });
+    } catch (e) { sd.annualLuck = []; un.push('annualLuck'); }
 
     // 만트라 만세력 rootNowCtx와 같은 KST 현재 대운·세운·월운·일진을 사용한다.
     // 현재 운의 보강은 원국 통근·신강약 고정 판정을 바꾸지 않는다.
