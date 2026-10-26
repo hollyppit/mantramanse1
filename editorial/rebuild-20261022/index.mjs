@@ -44,9 +44,10 @@ import {entries as h0506} from './health-05-08.mjs';
 import {entries as h0708} from './health-07-08.mjs';
 import {entries as h0910} from './health-09-10.mjs';
 import {entries as ovA} from './overview-a.mjs';
+import {entries as deepPlus} from './deep-plus.mjs';
 import {entries as ovB} from './overview-b.mjs';
 import {entries as ovC} from './overview-c.mjs';
-export const bundles={overview:[...ovA,...ovB,...ovC],pilot,self:applyLowVariants([...s01,...s02,...s03,...s04,...s05,...s06]),self2:applyLowVariants([...s07,...s08,...s09,...s10,...s11,...s12]),self3:[...s13,...s14,...s15,...s16,...s17],self4:[...s18,...s19,...s20,...s21,...s22],remedy:[...rm0104,...rm0508].map(e=>({...e,notice:REMEDY_NOTE})),creative:[...cr0104,...cr0508].map(e=>({...e,notice:CREATIVE_NOTE})),health:[...h0104,...h0506,...h0708,...h0910].map(e=>({...e,notice:e.notice||HEALTH_SAFETY})),love:applyLoveConflicts([...l0104,...l0508,...l0912]).map(e=>({...e,notice:e.notice||LOVE_NOTE})),career:applyCareerConflicts([...c0104,...c0508,...c0912]).map(e=>({...e,notice:e.notice||CAREER_NOTE})),wealth:applyWealthConflicts([...w0104,...w0508,...w0912]).map(e=>({...e,notice:e.notice||WEALTH_NOTE}))};
+export const bundles={overview:[...ovA,...ovB,...ovC],deepplus:deepPlus,pilot,self:applyLowVariants([...s01,...s02,...s03,...s04,...s05,...s06]),self2:applyLowVariants([...s07,...s08,...s09,...s10,...s11,...s12]),self3:[...s13,...s14,...s15,...s16,...s17],self4:[...s18,...s19,...s20,...s21,...s22],remedy:[...rm0104,...rm0508].map(e=>({...e,notice:REMEDY_NOTE})),creative:[...cr0104,...cr0508].map(e=>({...e,notice:CREATIVE_NOTE})),health:[...h0104,...h0506,...h0708,...h0910].map(e=>({...e,notice:e.notice||HEALTH_SAFETY})),love:applyLoveConflicts([...l0104,...l0508,...l0912]).map(e=>({...e,notice:e.notice||LOVE_NOTE})),career:applyCareerConflicts([...c0104,...c0508,...c0912]).map(e=>({...e,notice:e.notice||CAREER_NOTE})),wealth:applyWealthConflicts([...w0104,...w0508,...w0912]).map(e=>({...e,notice:e.notice||WEALTH_NOTE}))};
 // 장 사이에 똑같이 들어 있던 상황별 적용 문장을 뒤 장에서 다시 쓴 것으로 바꾼다(app-overrides.mjs).
 for(const k of Object.keys(bundles))bundles[k]=applyAppOverrides(bundles[k]);
 export const allEntries=Object.values(bundles).flat();

@@ -1,5 +1,6 @@
 // 종합풀이 20장 개편을 운영 DB에 적용한다(Supabase Management API). 사용자가 직접 실행한다. 어시스턴트는 실행하지 않는다.
 //   set SUPABASE_ACCESS_TOKEN=<personal access token>   (대시보드 > Account > Access Tokens, 채팅에 붙여 넣지 않는다)
+//   (심화 장 묶음은 모든 명령 뒤에 --set deep)
 //   node apply-overview-runner.mjs dry         읽기 전용 점검: 모든 파일이 DRYRUN-OK 로 끝나야 한다
 //   node apply-overview-runner.mjs libraries   새 챕터 14개의 라이브러리 행만 만든다(화면에는 아직 영향 없음)
 //   node apply-overview-runner.mjs catalog     게시 카탈로그를 바꾼다(이 순간부터 20장 구조가 보인다). 라이브러리가 먼저 있어야 한다
@@ -9,10 +10,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline/promises';
 import {fileURLToPath} from 'node:url';
-const OUT=path.join(path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../..'),'output','rebuild-publication-20261026-overview');
-const NEW_IDS=Array.from({length:14},(_,i)=>'timeline_self_'+(24+i));
+// --set deep: 재물·커리어·인연 심화 장 9개와 주제 이름 변경(prepare-overview.mjs --set deep 로 만든 파일)
+const SET=process.argv.includes('deep')?'deep':'overview';
+const OUT=path.join(path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../..'),'output',SET==='deep'?'rebuild-publication-20261026-deep':'rebuild-publication-20261026-overview');
+const NEW_IDS=SET==='deep'?['wealth','career','love'].flatMap(t=>[13,14,15].map(n=>`timeline_${t}_${n}`)):Array.from({length:14},(_,i)=>'timeline_self_'+(24+i));
 
-const REF='devkslhggrkqtianjamj',mode=process.argv[2],withLib=process.argv.includes('--libraries');
+const REF='devkslhggrkqtianjamj',mode=process.argv.slice(2).find(a=>['dry','libraries','catalog','rollback'].includes(a)),withLib=process.argv.includes('--libraries');
 if(!['dry','libraries','catalog','rollback'].includes(mode)){console.error('usage: node apply-overview-runner.mjs dry|libraries|catalog|rollback');process.exit(1);}
 const token=process.env.SUPABASE_ACCESS_TOKEN;if(!token){console.error('SUPABASE_ACCESS_TOKEN is not set');process.exit(1);}
 const plan=JSON.parse(fs.readFileSync(path.join(OUT,'plan.json'),'utf8'));

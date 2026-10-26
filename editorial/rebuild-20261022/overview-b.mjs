@@ -2,7 +2,7 @@
 // 재물운 탭의 상세 장과 문장이 겹치지 않게 한 화면 분량으로 압축했고, 수입·성공·시기를 단정하지 않는다.
 import {byStrength} from './overview-lib.mjs';
 
-const NEG='가능성이지 정해진 일은 아니에요.';
+const NEG=''; // 단서 문장은 화면에서 쓰지 않는다
 
 // 30 · 전체 재물운
 export const flow=byStrength({ch:'timeline_self_30',key:'s30',

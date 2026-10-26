@@ -3,7 +3,7 @@
 import {entry} from './lib.mjs';
 import {byStrength} from './overview-lib.mjs';
 
-const NEG='가능성이지 정해진 일은 아니에요.';
+const NEG=''; // 단서 문장은 화면에서 쓰지 않는다
 export const HEALTH_NOTE='생활 습관을 돌아보는 참고용이에요. 몸이 걱정되면 의료기관 진료를 먼저 받으세요.';
 export const PAST_NOTE='사주 상징을 모티브로 한 창작 이야기예요.';
 export const REMEDY_NOTE='지금 가진 것으로 할 수 있는 행동만 담았어요.';

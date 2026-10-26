@@ -23,11 +23,11 @@
   var DEFAULT_WORLDS = [
     { id: 'w1', order: 1, bgImage:'/report/hub/quest/archive.webp', name: '종합풀이', line: '나의 사주 전체를 한 번에', desc: '타고난 기질과 인생 흐름, 강점과 약점, 일, 인연, 재물, 건강, 전생, 개운법까지 20개 챕터로 읽습니다.', color: '#1B2347', accent: '#8FA6E8', icon: '命',
       match: ['^c-char', '^c0[1-5]$', '^life_(self_who|tengods|stars)$', '^deep_(car|proscons|stages)$', '^life_ik_SELF'] },
-    { id: 'w2', order: 2, bgImage:'/report/hub/quest/office.webp', name: '재물운', line: '수입 · 소비 · 재물 관리', desc: '돈을 버는 성향, 수입과 지출, 재물 관리와 시기별 재물 흐름을 읽습니다.', color: '#3A2C0E', accent: '#E3B341', icon: '財',
+    { id: 'w2', order: 2, bgImage:'/report/hub/quest/office.webp', name: '재물운 심화', line: '돈 그릇 · 맞는 사람 · 타이밍 · 개운법', desc: '돈을 버는 성향, 수입과 지출, 재물 관리와 시기별 재물 흐름을 읽습니다.', color: '#3A2C0E', accent: '#E3B341', icon: '財',
       match: ['^c08$', '^life_(money_nature|money_timing)$', '^deep_wealth$', '^life_ik_MONEY'] },
-    { id: 'w7', order: 2.5, bgImage:'/report/hub/quest/archive.webp', name: '커리어운', line: '직업 · 일 · 성공', desc: '직업 적성, 잘 맞는 일의 방식, 업종 선택과 독립, 커리어 변화와 성공 방향을 읽습니다.', color: '#182B38', accent: '#81B7DE', icon: '業',
+    { id: 'w7', order: 2.5, bgImage:'/report/hub/quest/archive.webp', name: '커리어운 심화', line: '적성 · 맞는 사람 · 타이밍 · 개운법', desc: '직업 적성, 잘 맞는 일의 방식, 업종 선택과 독립, 커리어 변화와 성공 방향을 읽습니다.', color: '#182B38', accent: '#81B7DE', icon: '業',
       match: ['^c0[67]$', '^life_(career_style|career_timing)$', '^deep_jobs$', '^life_ik_CAREER'] },
-    { id: 'w3', order: 3, bgImage:'/report/hub/quest/reeds.webp', name: '인연운', line: '사랑과 인간관계', desc: '연애 성향, 결혼과 배우자, 대인관계, 가족과 자녀, 궁합을 읽습니다.', color: '#3A1B2A', accent: '#E58AA8', icon: '緣',
+    { id: 'w3', order: 3, bgImage:'/report/hub/quest/reeds.webp', name: '인연운 심화', line: '관계 · 맞는 사람 · 타이밍 · 개운법', desc: '연애 성향, 결혼과 배우자, 대인관계, 가족과 자녀, 궁합을 읽습니다.', color: '#3A1B2A', accent: '#E58AA8', icon: '緣',
       match: ['^c(09|1[0-3])$', '^life_(love_style|marriage_who|relation_style|love_timing|marriage_timing|relation_timing)$', '^deep_(love|spouse|marriage|children|ilju)$', '^life_ik_(LOVE|MARRIAGE|RELATIONSHIP)'] },
     { id:'w8',enabled:false,order:4,bgImage:'/report/hub/quest/paths.webp',name:'건강 및 사고수',line:'생활 균형과 안전',desc:'전통적인 주의 개념을 생활 습관과 안전 점검으로 연결합니다. 질병이나 사고 발생을 예측하지 않습니다.',color:'#102B33',accent:'#6FD0D8',icon:'安',match:['^deep_health$','^timeline_health_'] },
     { id: 'w5', enabled: false, order: 5, bgImage:'/report/hub/quest/mirror.webp', name: '전생 체험', line: '전생과 상징적 서사', desc: '전생의 정체와 업보를 현재의 기질과 이어서 읽는 상징적 이야기입니다. 역사적 사실이나 검증된 개인 정보가 아닙니다.', color: '#241636', accent: '#B58CF0', icon: '憶',
@@ -51,6 +51,7 @@
       var oldNames = { w1:'천명의 서고', w2:'황금의 성채', w5:'윤회의 문', w6:'개운의 성역' };
       var previousNames={w1:'봉인된 서고',w2:'재물의 누각',w3:'인연의 정원',w5:'기억 너머의 문',w6:'새벽의 마당'};
       var def = DEFAULT_WORLDS.filter(function (w) { return w.id === s.id; })[0];
+      if (def && /^(재물운|커리어운|인연운)$/.test(b.name || '')) b.name = def.name; // 심화로 이름을 바꾸기 전의 저장본
       if (def && (b.name === oldNames[s.id] || b.name === previousNames[s.id] || s.id === 'w1' && b.name === '본래의 나')) { b.name = def.name; b.icon = def.icon; }
       by[s.id] = b;
     });

@@ -15,7 +15,7 @@ const W = X.mergeWorlds(null);
 const legacyMoney = X.mergeWorlds([{ id: 'w2', line: '직업 · 재물 · 성공', chapters: ['c06', 'c08', 'life_career_style'] }]);
 for (const id of ['c06', 'c07', 'deep_jobs', 'life_career_style', 'life_career_timing', 'life_ik_CAREER']) ok(X.worldFor({ id }, legacyMoney) === 'w7', '커리어 분리: ' + id);
 for (const id of ['c08', 'deep_wealth', 'life_money_nature', 'life_money_timing']) ok(X.worldFor({ id }, W) === 'w2', '재물 분리: ' + id);
-ok(W.length === 7 && W.filter(w => w.enabled).map(w => w.name).join() === '종합풀이,재물운,커리어운,인연운', '기본 4개 세계(건강·전생·개운법은 종합풀이로 합침) 이름·순서');
+ok(W.length === 7 && W.filter(w => w.enabled).map(w => w.name).join() === '종합풀이,재물운 심화,커리어운 심화,인연운 심화', '기본 4개 세계(건강·전생·개운법은 종합풀이로 합침) 이름·순서');
 ok(W.filter(w => w.enabled).length === 4 && W.every(w => w.access === 'free') && ['w5', 'w6', 'w8'].every(id => !W.find(w => w.id === id).enabled), '활성 세계는 무료, 합쳐진 세계는 꺼짐(가격 정책 미확정)');
 ok(/창작 판타지/.test(W.find(w => w.id === 'w5').notice), '윤회의 문에 창작 판타지 표시');
 

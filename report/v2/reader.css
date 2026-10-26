@@ -280,3 +280,20 @@ body #wstrip button{max-width:none;text-overflow:clip}
 #chapter [data-sc^="timeline_self_03_text_panel"] .reading-panel img{height:auto;object-fit:fill}
 #chapter [data-sc^="timeline_self_03_text_panel"] .reading-panel video{object-fit:fill}
 @media(max-width:600px){#chapter .text-reading-media .reading-panel{aspect-ratio:4/5}}
+
+/* 타이밍 장: 흐름 그래프 + 순위 */
+.reading-timing-rank .rt-flow{display:flex;align-items:flex-end;gap:6px;height:180px;margin:12px 0 4px;padding-top:18px}
+.reading-timing-rank .rt-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:12px}
+.reading-timing-rank .rt-col i{display:block;width:100%;max-width:38px;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,#d5b97f,#8a6f3e)}
+.reading-timing-rank .rt-col b{font-size:12px;margin-bottom:4px;color:#d5b97f}
+.reading-timing-rank .rt-col small{margin-top:6px;opacity:.75;text-align:center;line-height:1.3}
+.reading-timing-rank .rt-col.is-past{opacity:.38}
+.reading-timing-rank .rt-col.is-current i{background:linear-gradient(180deg,#f3d58f,#c99a3f);box-shadow:0 0 0 2px #f3d58f55}
+.reading-timing-rank .rt-sub{margin:18px 0 8px;font-weight:700}
+.reading-timing-rank .rt-rank{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.reading-timing-rank .rt-rank li{display:flex;gap:12px;align-items:flex-start;border:1px solid #ffffff1f;border-radius:12px;padding:12px 14px}
+.reading-timing-rank .rt-no{flex:0 0 auto;font-weight:800;color:#d5b97f;min-width:34px}
+.reading-timing-rank .rt-rank strong{display:inline-block;margin-right:8px}
+.reading-timing-rank .rt-rank em{font-style:normal;font-weight:800;color:#f3d58f}
+.reading-timing-rank .rt-rank p{margin:6px 0 0;opacity:.85;line-height:1.6}
+@media(max-width:600px){.reading-timing-rank .rt-flow{height:150px;gap:4px}.reading-timing-rank .rt-col{font-size:11px}}

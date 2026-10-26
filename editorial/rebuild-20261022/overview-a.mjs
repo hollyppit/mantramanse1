@@ -4,7 +4,7 @@
 import {entry} from './lib.mjs';
 import {byStrength,ST,ANY_ROOT} from './overview-lib.mjs';
 
-const NEG='가능성이지 정해진 일은 아니에요.';
+const NEG=''; // 단서 문장은 화면에서 쓰지 않는다
 
 // 24 · 움직여야 될 때와 기다려야 할 때 — 실제 대운·세운 흐름은 화면에서 엔진 값으로 따로 붙는다.
 export const move=byStrength({ch:'timeline_self_24',key:'s24',

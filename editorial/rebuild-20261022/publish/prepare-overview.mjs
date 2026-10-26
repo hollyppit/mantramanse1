@@ -1,5 +1,6 @@
 // 종합풀이 20장 개편 준비: 새 챕터 14개의 라이브러리 행 생성 SQL + 게시 카탈로그 변경 SQL을 만든다. 파일만 쓰고 운영 DB에는 아무것도 쓰지 않는다.
-//   node prepare-overview.mjs <observedCatalogMd5>
+//   node prepare-overview.mjs [--set overview|deep] <observedCatalogMd5>
+// overview: 종합풀이 20장(새 장 14개, 건강·전생·개운법 주제 끔). deep: 재물·커리어·인연 심화 장 9개 추가, 세 주제 이름을 '심화'로.
 // 출력: output/rebuild-publication-20261026-overview/ {payload, sql/dry, sql/apply, sql/rollback, plan.json}
 // 적용은 apply-overview-runner.mjs 로 사용자가 직접(토큰 필요, 입력 확인 있음). 순서: 라이브러리 행 → 카탈로그.
 import fs from 'node:fs';
@@ -7,9 +8,15 @@ import path from 'node:path';
 import {ROOT,allEntries,chapterPassages,loadService} from './convert.mjs';
 import {textHash,MAX_SCENARIOS,chartPool,chooseScenarios} from './prepare.mjs';
 
-export const OUT=path.join(ROOT,'output','rebuild-publication-20261026-overview');
-export const NEW_IDS=Array.from({length:14},(_,i)=>'timeline_self_'+(24+i));
-const CATALOG_MD5=/^[a-f0-9]{32}$/.test(process.argv[2]||'')?process.argv[2]:'b23da0b36c95c6689fb7ae8c0414b405';
+const SET=process.argv.includes('deep')?'deep':'overview';
+const SETS={
+ overview:{out:'rebuild-publication-20261026-overview',ids:Array.from({length:14},(_,i)=>'timeline_self_'+(24+i)),md5:'b23da0b36c95c6689fb7ae8c0414b405',backup:'backup-before-overview'},
+ deep:{out:'rebuild-publication-20261026-deep',ids:['wealth','career','love'].flatMap(t=>[13,14,15].map(n=>`timeline_${t}_${n}`)),md5:'08ffee1e2aee220e6959e06c0616f69e',backup:'backup-before-deep'},
+};
+const CFG=SETS[SET];
+export const OUT=path.join(ROOT,'output',CFG.out);
+export const NEW_IDS=CFG.ids;
+const CATALOG_MD5=process.argv.find(a=>/^[a-f0-9]{32}$/.test(a))||CFG.md5;
 const q=s=>"$j$"+s+"$j$";
 const HASH=x=>`(select md5(string_agg((p->>'id')||chr(31)||(p->>'text'),chr(30) order by (p->>'id') collate "C")) from jsonb_array_elements(${x}) p)`;
 const NOW="to_jsonb(to_char(clock_timestamp() at time zone 'utc','YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"'))";
@@ -47,7 +54,8 @@ if exists(select 1 from jsonb_array_elements(passages) p where p->'when'<>'{}'::
 const seed=globalThis.MantraEditorial.defaults();
 const slotIds=new Set(seed.chapters.filter(c=>c.topicId==='self'&&c.state!=='archived').map(c=>c.id));
 const folded=new Set(['self','health','creative','remedy']);
-const patch=seed.chapters.filter(c=>slotIds.has(c.id)||(c.state==='archived'&&folded.has(c.topicId))).map(c=>({...c,state:c.state==='archived'?'archived':'active'}));
+const patch=SET==='deep'?seed.chapters.filter(c=>NEW_IDS.includes(c.id)).map(c=>({...c,state:'active'})):seed.chapters.filter(c=>slotIds.has(c.id)||(c.state==='archived'&&folded.has(c.topicId))).map(c=>({...c,state:c.state==='archived'?'archived':'active'}));
+const topicTitles=Object.fromEntries(seed.topics.filter(t=>['wealth','career','love'].includes(t.id)).map(t=>[t.id,t.title]));
 fs.writeFileSync(path.join(OUT,'payload','catalog-patch.json'),JSON.stringify(patch,null,1));
 const expectActive=seed.chapters.filter(c=>c.state!=='archived').length,expectAll=seed.chapters.length+0;
 const catalogCommon=`prior text; draftv text; old jsonb; patch jsonb:=${q(JSON.stringify(patch))}::jsonb; chs jsonb; tps jsonb; next jsonb; stamp jsonb:=${NOW};`;
@@ -57,16 +65,16 @@ if prior is null or md5(prior)<>'${CATALOG_MD5}' then raise exception 'published
 if draftv is distinct from prior then raise exception 'unpublished catalog draft exists';end if;
 old:=prior::jsonb;
 chs:=(select jsonb_agg(coalesce(c||(select p from jsonb_array_elements(patch) p where p->>'id'=c->>'id'),c) order by n) from jsonb_array_elements(old->'chapters') with ordinality t(c,n))||(select coalesce(jsonb_agg(p),'[]'::jsonb) from jsonb_array_elements(patch) p where not exists(select 1 from jsonb_array_elements(old->'chapters') c where c->>'id'=p->>'id'));
-tps:=(select jsonb_agg(case when t->>'id' in ('health','creative','remedy') then t||'{"enabled":false}'::jsonb else t end order by n) from jsonb_array_elements(old->'topics') with ordinality x(t,n));
+${SET==='deep'?`tps:=(select jsonb_agg(case t->>'id' ${Object.entries(topicTitles).map(([k,v])=>`when '${k}' then t||jsonb_build_object('title','${v}')`).join(' ')} else t end order by n) from jsonb_array_elements(old->'topics') with ordinality x(t,n));`:`tps:=(select jsonb_agg(case when t->>'id' in ('health','creative','remedy') then t||'{"enabled":false}'::jsonb else t end order by n) from jsonb_array_elements(old->'topics') with ordinality x(t,n));`}
 next:=old||jsonb_build_object('version',(old->>'version')::int+1,'topics',tps,'chapters',chs,'updatedAt',stamp);
 if jsonb_array_length(chs)<>jsonb_array_length(old->'chapters')+${NEW_IDS.length} then raise exception 'chapter count';end if;
-if (select count(*) from jsonb_array_elements(chs) c where c->>'topicId'='self' and c->>'state'='active')<>${slotIds.size} then raise exception 'self active count';end if;
-if exists(select 1 from jsonb_array_elements(chs) c where c->>'topicId' in ('health','creative','remedy') and c->>'state'<>'archived') then raise exception 'folded topic still has live chapters';end if;
+${SET==='deep'?`if exists(select 1 from (select c->>'topicId' t,count(*) n from jsonb_array_elements(chs) c where c->>'topicId' in ('wealth','career','love') and c->>'state'='active' group by 1) x where n<>15) then raise exception 'deep active count';end if;`:`if (select count(*) from jsonb_array_elements(chs) c where c->>'topicId'='self' and c->>'state'='active')<>${slotIds.size} then raise exception 'self active count';end if;
+if exists(select 1 from jsonb_array_elements(chs) c where c->>'topicId' in ('health','creative','remedy') and c->>'state'<>'archived') then raise exception 'folded topic still has live chapters';end if;`}
 if exists(select l from jsonb_array_elements(chs) c, jsonb_array_elements_text(c->'legacyIds') l where c->>'state'<>'archived' group by l having count(*)>1) then raise exception 'duplicate legacy mapping';end if;
 `;
 fs.writeFileSync(path.join(OUT,'sql/dry','catalog.sql'),`-- catalog: READ-ONLY DRY RUN\ndo $run$ declare ${catalogCommon}\nbegin\n${catalogBody}raise exception 'DRYRUN-OK catalog version % -> %, chapters %, active self %',(old->>'version'),(next->>'version'),jsonb_array_length(chs),(select count(*) from jsonb_array_elements(chs) c where c->>'topicId'='self' and c->>'state'='active');\nend $run$;\n`);
-fs.writeFileSync(path.join(OUT,'sql/apply','catalog.sql'),`-- catalog: APPLY (draft and published together; the old catalog is kept in ik:editorial:history as action 'backup-before-overview')\ndo $run$ declare ${catalogCommon} hist jsonb;\nbegin\n${catalogBody}select coalesce(value::jsonb,'[]'::jsonb) into hist from public.kv where key='ik:editorial:history';\nhist:=jsonb_build_array(jsonb_build_object('at',stamp#>>'{}','action','publish','catalog',next),jsonb_build_object('at',stamp#>>'{}','action','backup-before-overview','catalog',old))||hist;\nupdate public.kv set value=next::text,updated_at=now() where key in ('ik:editorial:published','ik:editorial:draft');\nupdate public.kv set value=hist::text,updated_at=now() where key='ik:editorial:history';\nend $run$;\n`);
-fs.writeFileSync(path.join(OUT,'sql/rollback','catalog.sql'),`-- catalog: ROLLBACK (restores the catalog saved by the apply; aborts if the catalog changed after it)\ndo $rb$ declare cur jsonb; hist jsonb; bk jsonb;\nbegin\nselect value::jsonb into cur from public.kv where key='ik:editorial:published' for update;\nselect value::jsonb into hist from public.kv where key='ik:editorial:history' for update;\nbk:=(select e->'catalog' from jsonb_array_elements(hist) e where e->>'action'='backup-before-overview' limit 1);\nif bk is null then raise exception 'no backup entry';end if;\nif (cur->>'version')::int<>(bk->>'version')::int+1 then raise exception 'catalog changed after the overview publish';end if;\nupdate public.kv set value=bk::text,updated_at=now() where key in ('ik:editorial:published','ik:editorial:draft');\nend $rb$;\n`);
+fs.writeFileSync(path.join(OUT,'sql/apply','catalog.sql'),`-- catalog: APPLY (draft and published together; the old catalog is kept in ik:editorial:history as action '${CFG.backup}')\ndo $run$ declare ${catalogCommon} hist jsonb;\nbegin\n${catalogBody}select coalesce(value::jsonb,'[]'::jsonb) into hist from public.kv where key='ik:editorial:history';\nhist:=jsonb_build_array(jsonb_build_object('at',stamp#>>'{}','action','publish','catalog',next),jsonb_build_object('at',stamp#>>'{}','action','${CFG.backup}','catalog',old))||hist;\nupdate public.kv set value=next::text,updated_at=now() where key in ('ik:editorial:published','ik:editorial:draft');\nupdate public.kv set value=hist::text,updated_at=now() where key='ik:editorial:history';\nend $run$;\n`);
+fs.writeFileSync(path.join(OUT,'sql/rollback','catalog.sql'),`-- catalog: ROLLBACK (restores the catalog saved by the apply; aborts if the catalog changed after it)\ndo $rb$ declare cur jsonb; hist jsonb; bk jsonb;\nbegin\nselect value::jsonb into cur from public.kv where key='ik:editorial:published' for update;\nselect value::jsonb into hist from public.kv where key='ik:editorial:history' for update;\nbk:=(select e->'catalog' from jsonb_array_elements(hist) e where e->>'action'='${CFG.backup}' limit 1);\nif bk is null then raise exception 'no backup entry';end if;\nif (cur->>'version')::int<>(bk->>'version')::int+1 then raise exception 'catalog changed after the overview publish';end if;\nupdate public.kv set value=bk::text,updated_at=now() where key in ('ik:editorial:published','ik:editorial:draft');\nend $rb$;\n`);
 plan.push({chapter:'catalog',kind:'catalog',patchRows:patch.length,expectedActive:expectActive,expectedTotal:expectAll,observedCatalogMd5:CATALOG_MD5});
 fs.writeFileSync(path.join(OUT,'plan.json'),JSON.stringify(plan,null,1));
 console.log(JSON.stringify(plan.map(p=>p.kind==='create'?{c:p.chapter,pass:p.passages,sc:p.scenarios,iss:p.validatorIssues,unc:p.uncoveredConditionalPassages,drop:p.droppedUnreachable.length,pre:p.prefixed,dup:p.droppedForDuplicate}:p)));

@@ -10,19 +10,19 @@ var SEED={
     },
     {
       "id": "wealth",
-      "title": "재물운",
+      "title": "재물운 심화",
       "order": 1,
       "enabled": true
     },
     {
       "id": "career",
-      "title": "커리어운",
+      "title": "커리어운 심화",
       "order": 2,
       "enabled": true
     },
     {
       "id": "love",
-      "title": "인연운",
+      "title": "인연운 심화",
       "order": 3,
       "enabled": true
     },
@@ -1203,6 +1203,93 @@ var SEED={
       "core": false
     },
     {
+      "id": "timeline_wealth_13",
+      "topicId": "wealth",
+      "title": "재물운에서 나와 맞는 사람과 피해야 할 사람",
+      "question": "재물운에서 나와 맞는 사람과 피해야 할 사람",
+      "purpose": "「재물운에서 나와 맞는 사람과 피해야 할 사람」에 답한다. 재물운 심화 장으로 계산값(용신·대운·월운)에 맞춰 사람·시기·행동을 구체적으로 말하고 사건을 단정하지 않는다.",
+      "requiredEvidence": [
+        "용신 오행",
+        "일간의 힘"
+      ],
+      "example": "함께하면 힘이 나는 사람과 부딪히기 쉬운 사람의 차이 (재물운)",
+      "difference": "핵심 질문 「재물운에서 나와 맞는 사람과 피해야 할 사람」에 한정하며 같은 탭의 다른 장 결론을 반복하지 않는다.",
+      "avoid": [
+        "다른 챕터의 동일 결론·사례",
+        "실제 개인 사실 추정",
+        "근거 없는 시기·미래 사건 확정"
+      ],
+      "targetMin": 500,
+      "targetMax": 900,
+      "visual": "용신 오행 비교",
+      "legacyIds": [],
+      "order": 12,
+      "state": "draft",
+      "sourceRuleIds": [
+        "D27-20261016-M-wealthD",
+        "D27-20261016-M-wealthS"
+      ],
+      "core": false
+    },
+    {
+      "id": "timeline_wealth_14",
+      "topicId": "wealth",
+      "title": "재물운 타이밍: 힘이 실리는 때",
+      "question": "재물운 타이밍: 힘이 실리는 때",
+      "purpose": "「재물운 타이밍: 힘이 실리는 때」에 답한다. 재물운 심화 장으로 계산값(용신·대운·월운)에 맞춰 사람·시기·행동을 구체적으로 말하고 사건을 단정하지 않는다.",
+      "requiredEvidence": [
+        "현재 대운 천간 십성",
+        "대운표·월운 계산값"
+      ],
+      "example": "지금 10년과 다가오는 달 중 힘이 실리는 때 (재물운)",
+      "difference": "핵심 질문 「재물운 타이밍: 힘이 실리는 때」에 한정하며 같은 탭의 다른 장 결론을 반복하지 않는다.",
+      "avoid": [
+        "다른 챕터의 동일 결론·사례",
+        "실제 개인 사실 추정",
+        "근거 없는 시기·미래 사건 확정"
+      ],
+      "targetMin": 500,
+      "targetMax": 900,
+      "visual": "대운·월운 흐름 그래프",
+      "legacyIds": [],
+      "order": 13,
+      "state": "draft",
+      "sourceRuleIds": [
+        "D27-20261016-M-wealthD",
+        "D27-20261016-M-wealthS"
+      ],
+      "core": false
+    },
+    {
+      "id": "timeline_wealth_15",
+      "topicId": "wealth",
+      "title": "재물운을 끌어올리는 개운법",
+      "question": "재물운을 끌어올리는 개운법",
+      "purpose": "「재물운을 끌어올리는 개운법」에 답한다. 재물운 심화 장으로 계산값(용신·대운·월운)에 맞춰 사람·시기·행동을 구체적으로 말하고 사건을 단정하지 않는다.",
+      "requiredEvidence": [
+        "용신 오행",
+        "일간의 힘"
+      ],
+      "example": "이번 주부터 바꿀 수 있는 습관과 시기 (재물운)",
+      "difference": "핵심 질문 「재물운을 끌어올리는 개운법」에 한정하며 같은 탭의 다른 장 결론을 반복하지 않는다.",
+      "avoid": [
+        "색·물건·방위 단정",
+        "구매 권유",
+        "결과 보장"
+      ],
+      "targetMin": 500,
+      "targetMax": 900,
+      "visual": "실천 체크리스트",
+      "legacyIds": [],
+      "order": 14,
+      "state": "draft",
+      "sourceRuleIds": [
+        "D27-20261016-M-wealthD",
+        "D27-20261016-M-wealthS"
+      ],
+      "core": false
+    },
+    {
       "id": "timeline_career_01",
       "topicId": "career",
       "title": "나는 어떤 일을 해야 잘할까?",
@@ -1586,6 +1673,93 @@ var SEED={
         "career_10"
       ],
       "order": 11,
+      "state": "draft",
+      "sourceRuleIds": [
+        "D27-20261016-C-transition",
+        "D27-20261016-C-officer-output"
+      ],
+      "core": false
+    },
+    {
+      "id": "timeline_career_13",
+      "topicId": "career",
+      "title": "커리어운에서 나와 맞는 사람과 피해야 할 사람",
+      "question": "커리어운에서 나와 맞는 사람과 피해야 할 사람",
+      "purpose": "「커리어운에서 나와 맞는 사람과 피해야 할 사람」에 답한다. 커리어운 심화 장으로 계산값(용신·대운·월운)에 맞춰 사람·시기·행동을 구체적으로 말하고 사건을 단정하지 않는다.",
+      "requiredEvidence": [
+        "용신 오행",
+        "일간의 힘"
+      ],
+      "example": "함께하면 힘이 나는 사람과 부딪히기 쉬운 사람의 차이 (커리어운)",
+      "difference": "핵심 질문 「커리어운에서 나와 맞는 사람과 피해야 할 사람」에 한정하며 같은 탭의 다른 장 결론을 반복하지 않는다.",
+      "avoid": [
+        "다른 챕터의 동일 결론·사례",
+        "실제 개인 사실 추정",
+        "근거 없는 시기·미래 사건 확정"
+      ],
+      "targetMin": 500,
+      "targetMax": 900,
+      "visual": "용신 오행 비교",
+      "legacyIds": [],
+      "order": 12,
+      "state": "draft",
+      "sourceRuleIds": [
+        "D27-20261016-C-transition",
+        "D27-20261016-C-officer-output"
+      ],
+      "core": false
+    },
+    {
+      "id": "timeline_career_14",
+      "topicId": "career",
+      "title": "커리어운 타이밍: 힘이 실리는 때",
+      "question": "커리어운 타이밍: 힘이 실리는 때",
+      "purpose": "「커리어운 타이밍: 힘이 실리는 때」에 답한다. 커리어운 심화 장으로 계산값(용신·대운·월운)에 맞춰 사람·시기·행동을 구체적으로 말하고 사건을 단정하지 않는다.",
+      "requiredEvidence": [
+        "현재 대운 천간 십성",
+        "대운표·월운 계산값"
+      ],
+      "example": "지금 10년과 다가오는 달 중 힘이 실리는 때 (커리어운)",
+      "difference": "핵심 질문 「커리어운 타이밍: 힘이 실리는 때」에 한정하며 같은 탭의 다른 장 결론을 반복하지 않는다.",
+      "avoid": [
+        "다른 챕터의 동일 결론·사례",
+        "실제 개인 사실 추정",
+        "근거 없는 시기·미래 사건 확정"
+      ],
+      "targetMin": 500,
+      "targetMax": 900,
+      "visual": "대운·월운 흐름 그래프",
+      "legacyIds": [],
+      "order": 13,
+      "state": "draft",
+      "sourceRuleIds": [
+        "D27-20261016-C-transition",
+        "D27-20261016-C-officer-output"
+      ],
+      "core": false
+    },
+    {
+      "id": "timeline_career_15",
+      "topicId": "career",
+      "title": "커리어운을 끌어올리는 개운법",
+      "question": "커리어운을 끌어올리는 개운법",
+      "purpose": "「커리어운을 끌어올리는 개운법」에 답한다. 커리어운 심화 장으로 계산값(용신·대운·월운)에 맞춰 사람·시기·행동을 구체적으로 말하고 사건을 단정하지 않는다.",
+      "requiredEvidence": [
+        "용신 오행",
+        "일간의 힘"
+      ],
+      "example": "이번 주부터 바꿀 수 있는 습관과 시기 (커리어운)",
+      "difference": "핵심 질문 「커리어운을 끌어올리는 개운법」에 한정하며 같은 탭의 다른 장 결론을 반복하지 않는다.",
+      "avoid": [
+        "색·물건·방위 단정",
+        "구매 권유",
+        "결과 보장"
+      ],
+      "targetMin": 500,
+      "targetMax": 900,
+      "visual": "실천 체크리스트",
+      "legacyIds": [],
+      "order": 14,
       "state": "draft",
       "sourceRuleIds": [
         "D27-20261016-C-transition",
@@ -2018,6 +2192,99 @@ var SEED={
         "RELATIONSHIP-0010",
         "RELATIONSHIP-0011",
         "RELATIONSHIP-0012"
+      ],
+      "core": false
+    },
+    {
+      "id": "timeline_love_13",
+      "topicId": "love",
+      "title": "인연운에서 나와 맞는 사람과 피해야 할 사람",
+      "question": "인연운에서 나와 맞는 사람과 피해야 할 사람",
+      "purpose": "「인연운에서 나와 맞는 사람과 피해야 할 사람」에 답한다. 인연운 심화 장으로 계산값(용신·대운·월운)에 맞춰 사람·시기·행동을 구체적으로 말하고 사건을 단정하지 않는다.",
+      "requiredEvidence": [
+        "용신 오행",
+        "일간의 힘"
+      ],
+      "example": "함께하면 힘이 나는 사람과 부딪히기 쉬운 사람의 차이 (인연운)",
+      "difference": "핵심 질문 「인연운에서 나와 맞는 사람과 피해야 할 사람」에 한정하며 같은 탭의 다른 장 결론을 반복하지 않는다.",
+      "avoid": [
+        "다른 챕터의 동일 결론·사례",
+        "실제 개인 사실 추정",
+        "근거 없는 시기·미래 사건 확정"
+      ],
+      "targetMin": 500,
+      "targetMax": 900,
+      "visual": "용신 오행 비교",
+      "legacyIds": [],
+      "order": 12,
+      "state": "draft",
+      "sourceRuleIds": [
+        "D27-20261016-B-time-male-daewoon",
+        "D27-20261016-B-time-male-seun",
+        "D27-20261016-B-time-female-daewoon",
+        "D27-20261016-B-time-female-seun"
+      ],
+      "core": false
+    },
+    {
+      "id": "timeline_love_14",
+      "topicId": "love",
+      "title": "인연운 타이밍: 힘이 실리는 때",
+      "question": "인연운 타이밍: 힘이 실리는 때",
+      "purpose": "「인연운 타이밍: 힘이 실리는 때」에 답한다. 인연운 심화 장으로 계산값(용신·대운·월운)에 맞춰 사람·시기·행동을 구체적으로 말하고 사건을 단정하지 않는다.",
+      "requiredEvidence": [
+        "현재 대운 천간 십성",
+        "대운표·월운 계산값"
+      ],
+      "example": "지금 10년과 다가오는 달 중 힘이 실리는 때 (인연운)",
+      "difference": "핵심 질문 「인연운 타이밍: 힘이 실리는 때」에 한정하며 같은 탭의 다른 장 결론을 반복하지 않는다.",
+      "avoid": [
+        "다른 챕터의 동일 결론·사례",
+        "실제 개인 사실 추정",
+        "근거 없는 시기·미래 사건 확정"
+      ],
+      "targetMin": 500,
+      "targetMax": 900,
+      "visual": "대운·월운 흐름 그래프",
+      "legacyIds": [],
+      "order": 13,
+      "state": "draft",
+      "sourceRuleIds": [
+        "D27-20261016-B-time-male-daewoon",
+        "D27-20261016-B-time-male-seun",
+        "D27-20261016-B-time-female-daewoon",
+        "D27-20261016-B-time-female-seun"
+      ],
+      "core": false
+    },
+    {
+      "id": "timeline_love_15",
+      "topicId": "love",
+      "title": "인연운을 끌어올리는 개운법",
+      "question": "인연운을 끌어올리는 개운법",
+      "purpose": "「인연운을 끌어올리는 개운법」에 답한다. 인연운 심화 장으로 계산값(용신·대운·월운)에 맞춰 사람·시기·행동을 구체적으로 말하고 사건을 단정하지 않는다.",
+      "requiredEvidence": [
+        "용신 오행",
+        "일간의 힘"
+      ],
+      "example": "이번 주부터 바꿀 수 있는 습관과 시기 (인연운)",
+      "difference": "핵심 질문 「인연운을 끌어올리는 개운법」에 한정하며 같은 탭의 다른 장 결론을 반복하지 않는다.",
+      "avoid": [
+        "색·물건·방위 단정",
+        "구매 권유",
+        "결과 보장"
+      ],
+      "targetMin": 500,
+      "targetMax": 900,
+      "visual": "실천 체크리스트",
+      "legacyIds": [],
+      "order": 14,
+      "state": "draft",
+      "sourceRuleIds": [
+        "D27-20261016-B-time-male-daewoon",
+        "D27-20261016-B-time-male-seun",
+        "D27-20261016-B-time-female-daewoon",
+        "D27-20261016-B-time-female-seun"
       ],
       "core": false
     },
@@ -3472,7 +3739,7 @@ var SEED={
     }
   ],
   "cases": []
-}
+};
 var QUESTIONS={
  income:{label:'현재 소득 형태',options:{salary:'직장 급여',business:'사업·프리랜서',mixed:'여러 소득',none:'현재 소득 없음'}},
  moneyFocus:{label:'돈과 관련된 관심사',options:{saving:'저축·축적',debt:'부채·고정비',sales:'매출·대금 회수',investing:'투자 판단'}},
