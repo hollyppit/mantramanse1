@@ -23,7 +23,7 @@ export function entryPassages(e,{fiction=false}={}){
  const fields={title:e.core,why:[e.basis,e.notice].filter(Boolean).join(' '),reality:e.example,strength:e.positive,risk:e.negative,practice:e.advice,reinforce:appText};
  for(const role of ['title','why','reality','strength','risk','reinforce','practice']){
   const text=clean(fields[role]);if(!text)continue;
-  out.push({id:id(role),role,kind,text,ruleIds:[],when:e.when||{},unless:e.unless||{},adviceKey:id(role)});
+  out.push({id:id(role),role,kind,text,ruleIds:[],when:e.fallback?{}:e.when||{},unless:e.unless||{},adviceKey:id(role)});
  }
  return out;
 }

@@ -91,7 +91,7 @@ const R={
 export const remedy=Object.values(R).map(r=>({...entry({id:`s37-${r.id}`,chapter:'timeline_self_37',when:{yongEl:[{wood:'목',fire:'화',earth:'토',metal:'금',water:'수'}[r.id]],strength:['신강','중화','신약']},tags:[`s37.${r.id}.yong`],
  text:[`${r.core[0]} ${r.core[1]}`,
   `${r.core[1]} 용신 오행은 사주의 균형을 맞추는 데 쓰이는 오행이고, ${r.hint}. 이 장은 지금 가진 것으로 할 수 있는 행동 위주로 풀었고, 장소나 입는 톤이 결과를 정해 준다고 단정하지 않아요.`,
-  `${r.ex} 걷기 좋은 곳으로는 ${r.place}이 있어요. 마음이 가라앉는 길이라는 뜻이고 꼭 가야 하는 곳은 아니에요.`,
+  `${r.ex} 걷기 좋은 곳으로는 ${r.place}${(r.place.charCodeAt(r.place.length-1)-0xAC00)%28?"이":"가"} 있어요. 마음이 가라앉는 길이라는 뜻이고 꼭 가야 하는 곳은 아니에요.`,
   `곁에 두면 편한 귀인의 성향은 ${r.noble}이에요. 특정한 사람을 맞히는 게 아니라 어떤 사람과 있을 때 힘이 나는지를 짚은 거예요.`,
   `${r.watch} ${NEG}`,
   `${r.act} 시간대는 ${r.timing}에 해 보면 의욕이 붙는 쪽으로 읽어요. 입는 옷은 새로 사지 않아도 옷장에서 ${r.tone} 중 하나를 포인트로 골라 보세요.`,

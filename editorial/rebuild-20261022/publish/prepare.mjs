@@ -9,7 +9,7 @@ import {allEntries,chapterPassages,loadService,ROOT} from './convert.mjs';
 import {loadEngine} from '../admin/sim.mjs';
 import {deriveFacts,evalConds} from '../../../functions/_ik.js';
 
-export const OUT=path.join(ROOT,'output','rebuild-publication-20261023');
+export const OUT=path.join(ROOT,'output',process.env.PREPARE_OUT||'rebuild-publication-20261023');
 const md5=x=>crypto.createHash('md5').update(x).digest('hex'),byId=(a,b)=>a.id<b.id?-1:a.id>b.id?1:0;
 export const textHash=ps=>md5(ps.slice().sort(byId).map(p=>p.id+'\x1f'+p.text).join('\x1e'));
 const strip=sd=>{sd=structuredClone(sd);for(const k of ['birth','name','ziwei','calculationProvenance'])delete sd[k];return sd;};

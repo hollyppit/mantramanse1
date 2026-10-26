@@ -244,9 +244,9 @@ const PRE={
   adv:'위 그래프의 해별 흐름을 보면서 편한 사람과 불편한 사람의 차이를 한 번 적어 보세요.',emp:'함께 일하는 사람 중 편한 대화 방식을 눈여겨보세요.',biz:'관계를 넓히는 시간을 일정에 넣어 두세요.',free:'연락이 끊긴 사람에게 가볍게 안부를 보내 보세요.'},
 };
 const pre=(topic,ch)=>{const r=PRE[topic];
- return entry({id:`${topic}14-pre`,chapter:ch,priority:10,when:{strength:ALL,gender:['남','여']},tags:[`${topic}14.pre`],
+ return {fallback:true,...entry({id:`${topic}14-pre`,chapter:ch,priority:10,when:{strength:ALL,gender:['남','여']},tags:[`${topic}14.pre`],
   timing:`첫 대운이 시작되기 전이라 현재 대운이 없어요. 연도별 흐름은 위 그래프에 엔진이 계산한 값으로 표시돼요.`,
-  text:[r.core,`첫 대운 전에는 해마다 바뀌는 흐름을 중심으로 ${r.label}을 읽어요. 연도별 흐름과 힘이 실리는 달은 위 그래프에 표시돼요.`,r.ex,r.pos,r.neg,r.adv,r.emp,r.biz,r.free]});};
+  text:[r.core,`첫 대운 전에는 해마다 바뀌는 흐름을 중심으로 ${r.label}을 읽어요. 연도별 흐름과 힘이 실리는 달은 위 그래프에 표시돼요.`,r.ex,r.pos,r.neg,r.adv,r.emp,r.biz,r.free]})};};
 
 const base=[
  ...people('w','timeline_wealth_13',W_PEOPLE,'돈과 거래'),...timing('w','timeline_wealth_14',W_TIMING,'재물'),pre('w','timeline_wealth_14'),...remedy('w','timeline_wealth_15',W_REMEDY,'재물'),
