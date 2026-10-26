@@ -60,7 +60,7 @@
  var COND_TEXT={순풍:'원래 사주와 흐름이 잘 맞아 순풍을 받아요',보통:'원래 사주를 무난하게 받쳐 줘요',주의:'힘을 쓰려면 조심이 필요한 흐름이 섞여 있어요',부담:'버거운 흐름이 섞여 있어 점수를 낮췄어요'};
  var TOPIC_LABEL={life:'인생',wealth:'재물',career:'커리어',love:'인연'};
  function hasClash(x){return (x.relations||[]).some(function(r){return r&&/충/.test(r.type||'');});}
- function timingWant(topic,gender){return topic==='wealth'?['재성','식상']:topic==='career'?['관성','식상']:topic==='love'?(gender==='M'?['재성','식상']:['관성','식상']):null;}
+ function timingWant(topic,gender){return topic==='wealth'?['재성','식상']:topic==='career'?['관성','식상']:topic==='love'?(gender==='M'?['재성','인성']:['관성','인성']):null;}
  function timingScore(p,topic,gender){var fit=p.assessment&&typeof p.assessment.fitScore==='number'?p.assessment.fitScore:({순풍:25,보통:5,주의:-15,부담:-25}[p.condition]||0),want=timingWant(topic,gender),sg=TG_GROUP[p.stemTG],bg=TG_GROUP[p.branchTG],n;
   if(!want)n=50+Math.max(-30,Math.min(40,fit))*0.9+({opportunity:5,expansion:6,harvest:6,accumulation:2}[p.season]||0);
   else n=45+Math.max(-30,Math.min(40,fit))*0.6+(sg===want[0]?22:sg===want[1]?10:0)+(bg===want[0]?10:bg===want[1]?5:0);
