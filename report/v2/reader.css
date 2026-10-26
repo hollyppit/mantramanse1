@@ -307,4 +307,5 @@ body #wstrip button{max-width:none;text-overflow:clip}
 .reading-compat .rc-gz{display:inline-flex;gap:3px}.reading-compat .rc-gz b{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:7px;color:#111;font-size:19px;font-weight:700}
 .reading-compat .rc-k{font-size:13px;opacity:.75}.reading-compat .rc-tile strong{font-size:22px;color:#f3d58f}.reading-compat .rc-tile strong small{font-size:12px;margin-left:2px;opacity:.7}.reading-compat .rc-tile em{font-style:normal;font-size:12px;opacity:.85}
 .reading-compat .rc-tile p{margin:6px 0 0;font-size:12px;line-height:1.55;opacity:.78;word-break:keep-all}
-@media(max-width:600px){.reading-compat .rc-tiles{grid-template-columns:repeat(2,1fr)}}
+.reading-compat .rc-tiles.n5{grid-template-columns:repeat(5,minmax(0,1fr))}.reading-compat .rc-tiles.n3{grid-template-columns:repeat(3,minmax(0,1fr))}.reading-compat .rc-tile{padding:12px 6px}
+@media(max-width:600px){.reading-compat .rc-tiles.n5,.reading-compat .rc-tiles.n3{grid-template-columns:repeat(2,minmax(0,1fr))}}

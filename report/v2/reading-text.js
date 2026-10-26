@@ -130,7 +130,7 @@
  function cpFriendly(t){return String(t||'').replace(/입니다/g,'이에요').replace(/합니다/g,'해요');}
  function cpTile(x,withWhy,whyKey){var sc=elementColors[elementOrder[x.sEl]]||'#d5b97f',bc=elementColors[elementOrder[x.bEl]]||'#d5b97f',why=withWhy?cpFriendly((x[whyKey]||[])[0]||''):'';
   return '<li class="rc-tile"><span class="rc-gz" aria-hidden="true"><b style="background:'+sc+'">'+esc(x.s)+'</b><b style="background:'+bc+'">'+esc(x.b)+'</b></span><span class="rc-k">'+esc(x.k)+'일주</span><strong>'+x.score+'<small>점</small></strong><em>'+esc(x.type||'')+(x.condition?' · '+esc(x.condition):'')+'</em>'+(why?'<p>'+esc(why)+'</p>':'')+'</li>';}
- function cpList(title,note,rows,withWhy,whyKey,n){rows=(rows||[]).slice(0,n||5);if(!rows.length)return '';return '<h4>'+esc(title)+(note?' <small>'+esc(note)+'</small>':'')+'</h4><ul class="rc-tiles">'+rows.map(function(x){return cpTile(x,withWhy,whyKey);}).join('')+'</ul>';}
+ function cpList(title,note,rows,withWhy,whyKey,n){rows=(rows||[]).slice(0,n||5);if(!rows.length)return '';return '<h4>'+esc(title)+(note?' <small>'+esc(note)+'</small>':'')+'</h4><ul class="rc-tiles n'+rows.length+'">'+rows.map(function(x){return cpTile(x,withWhy,whyKey);}).join('')+'</ul>';}
  function compatHtml(c){var sd=c&&c.readingVisualData,cp=sd&&sd.compat;if(!cp||!(cp.good||[]).length)return '';
   return '<div class="reading-compat"><h3>만세력이 계산한 나의 궁합 일주</h3><p class="rc-note">내 원국의 억부·조후·오행 균형을 기준으로 60일주를 하나씩 비교한 값이에요. 상대의 전체 사주가 아니라 일주 두 글자만 가정한 참고라서, 두 사람의 전체 사주를 보면 달라질 수 있어요.</p>'
    +cpList('나와 잘 맞는 일주','보완도가 높은 순',cp.good,true,'reasons',5)
