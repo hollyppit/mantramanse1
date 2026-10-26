@@ -27,5 +27,11 @@ counts.signatureMap=write('4_signature_mapping.csv',['종류','요소','성향�
 const fam=[];for(const f of SIG.ORDER){const x=SIG.F[f];fam.push([f,x.label,'핵심',x.core,'','']);for(const [t,v] of Object.entries(x.topic))fam.push([f,x.label,'주제:'+t,v,'','']);x.practice.forEach((v,i)=>fam.push([f,x.label,'실천'+(i+1),v,'','']));}
 for(const [k,v] of Object.entries(SIG.P))fam.push([k,'조합','조합',v,'','']);
 counts.signatureText=write('5_signature_text.csv',['성향군','이름','구분','문장',...REVIEW],fam);
+// 6) 이 사주에서만 읽히는 포인트(교차 통찰) 문장: 관점(자기·재물·일·인연)별로 어떤 사주 값에서 어떤 문장이 나가는지
+for(const f of ['reading-insight-data-1','reading-insight-data-2','reading-insight-data-3','reading-insight-data-4'])req(path.join(ROOT,'report/v2/'+f+'.js'));
+{const ID=globalThis.ReportV2.ReadingInsightData,LENS={self:'성향·삶',wealth:'재물',career:'일',love:'인연'},rows=[];
+ const walk=(table,path,lens)=>{for(const [k,v] of Object.entries(table)){if(typeof v==='string')rows.push([path,LENS[lens],k,v,'','']);else if(Array.isArray(v))v.forEach((x,i)=>rows.push([path,LENS[lens],k+'#'+(i+1),x,'','']));else if(v&&typeof v==='object')walk(v,path,lens);}};
+ for(const [name,tab] of Object.entries(ID))for(const lens of Object.keys(LENS)){if(tab[lens])walk(tab[lens],name,lens);if(tab.POS&&tab.POS[lens])walk(tab.POS[lens],name+'.POS',lens);if(tab.TYPE&&tab.TYPE[lens])walk(tab.TYPE[lens],name+'.TYPE',lens);}
+ counts.insight=write('6_insight_text.csv',['사전','관점','키','문장',...REVIEW],rows);}
 fs.writeFileSync(path.join(OUT,'summary.json'),JSON.stringify({generatedAt:new Date().toISOString(),counts},null,1));
 console.log(JSON.stringify(counts));

@@ -148,6 +148,7 @@
    function basisGroup(role){var items=out.basis.filter(function(b){return (b.reason==='why'?'why':'evidence')===role;});var paras=items.map(function(b){return readingParagraphs(b.text,false).filter(function(t){return !NOTE_SENTENCE.test(t)&&!CALC_SENTENCE.test(t);}).map(function(t){return '<p data-reading-role="'+role+'">'+esc(t)+'</p>';}).join('');}).join('');if(!paras)return '';return '<div class="reading-basis-group"><h3>'+(role==='why'?'왜 이렇게 풀이했는지 짚어 볼게요':'명리 설명과 해석 범위')+'</h3>'+paras+'</div>';}
   if((c.editorialContractId||c.id)==='timeline_self_28'&&!out.creative&&!out.education){var cph=compatHtml(c);if(cph)h+=section(c,ci,'compat',cph,'text-reading-compat');}
   if(R.ReadingDepth&&!out.creative&&!out.education){var depth=R.ReadingDepth.html(c,esc);if(depth)h+=section(c,ci,'depth',depth,'text-reading-depth');}
+  if(R.ReadingInsight&&!out.creative&&!out.education){var insight=R.ReadingInsight.html(c,esc);if(insight)h+=section(c,ci,'insight',insight,'text-reading-insight');}
   var body=basisGroup('evidence');
   var claims=(c.interpretationAnalysis||{}).claims||[],sources=[],conditions=[];
   claims.forEach(function(cl){(cl.elements||[]).forEach(function(e){var value=e.have!==undefined?e.have:e.value;if(value==null||typeof value==='object')return;var line=(e.label||e.key)+': '+value;if(conditions.indexOf(line)<0)conditions.push(line);});(cl.evidence||[]).forEach(function(e){var name=(e.title||e.docId)+(e.pageStart?' · '+e.pageStart+'쪽':'');if(sources.indexOf(name)<0)sources.push(name);});});
