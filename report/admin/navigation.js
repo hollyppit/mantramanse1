@@ -1,8 +1,9 @@
 /* 관리자 메뉴의 단일 기준: 영역·순서·표시명·담당 작업 */
 (function(root){
   'use strict';
-  var groups = [['dash','현황',['dash']],['make','무빙툰 제작',['v2proj','v2chap','v2story','v2world','editorial']],['media','영상·이미지',['v2clip','v2intro','panelart']],['content','콘텐츠·온보딩',['onboard','freec']],['ai','AI 풀이',['readinglibrary','ikdoc','ikknow','ikdesign','ikrules','iklab','agentic','stylecfg']],['qa','점검·테스트',['research','v2quality','check','v2test']],['set','운영·설정',['ops','v2set']]];
+  var groups = [['dash','현황',['dash']],['make','무빙툰 제작',['v2proj','v2chap','v2story','v2world','editorial']],['media','영상·이미지',['v2clip','v2intro','panelart']],['content','콘텐츠·온보딩',['onboard','freec']],['ai','AI 풀이',['readinglibrary','ichingreview','ikdoc','ikknow','ikdesign','ikrules','iklab','agentic','stylecfg']],['qa','점검·테스트',['research','v2quality','check','v2test']],['set','운영·설정',['ops','v2set']]];
   var pages = {
+    ichingreview:{label:'주역 검수',hint:'주역 64괘 원문·현대어·분야 해석을 검수·수정·승인하고 게시본을 점검·롤백합니다. 승인한 문구만 게시되며 게시 전에는 사용자에게 보이지 않습니다.'},
     readinglibrary:{label:'검수 풀이 라이브러리',hint:'질문별 문장을 편집하고 가상 사주 적용·반례 검증 후 게시합니다. 기본 풀이 AI 호출은 0회입니다.'},
     agentic:{label:'AI 자동 연구',hint:'기존 지식의 승인·게시 상태를 보존하면서 근거·조건·중복·충돌을 진단하고 연구 과제를 준비합니다.'},
     research:{label:'문헌·명조 검수',hint:'합성 명조 32건의 원문 근거·유보 사유·문헌 비교를 읽기 전용으로 확인합니다.'},
