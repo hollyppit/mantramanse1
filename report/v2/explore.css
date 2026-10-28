@@ -7,6 +7,10 @@
 .xp-prog i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold-d), var(--gold-l)); }
 .xp-pn { color: var(--ink3); font-size: .78rem; margin-top: 6px; }
 .xp-cta { margin-top: 18px; }
+.xp-cta-top { margin: 16px 0 6px; }
+/* 읽기 시작 버튼: 주사(붉은색). 다른 화면의 행동 버튼(#8f1d1d)과 같은 색을 쓴다 */
+.xp-cta .xp-red { width: 100%; background: #8f1d1d; border-color: #db6560; color: #fff8f0; font-weight: 700; box-shadow: 0 6px 18px rgba(143, 29, 29, .45); }
+.xp-cta .xp-red:hover, .xp-cta .xp-red:focus-visible { background: #ad2927; border-color: #ed8c83; }
 .xp-auto { display: flex; align-items: center; gap: 10px; margin-top: 14px; color: var(--ink2); font-size: .88rem; min-height: 44px; }
 .xp-auto input { width: 20px; height: 20px; accent-color: var(--gold); }
 .xp-act { margin-top: 26px; }

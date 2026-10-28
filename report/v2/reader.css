@@ -309,3 +309,5 @@ body #wstrip button{max-width:none;text-overflow:clip}
 .reading-compat .rc-tile p{margin:6px 0 0;font-size:12px;line-height:1.55;opacity:.78;word-break:keep-all}
 .reading-compat .rc-tiles.n5{grid-template-columns:repeat(5,minmax(0,1fr))}.reading-compat .rc-tiles.n3{grid-template-columns:repeat(3,minmax(0,1fr))}.reading-compat .rc-tile{padding:12px 6px}
 @media(max-width:600px){.reading-compat .rc-tiles.n5,.reading-compat .rc-tiles.n3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* 챕터 후킹 아래 보조 줄: 신강·신약 한 줄 + 이 장의 은유 질문 */
+#chapter .text-reading-section p.reading-hook-sub,.text-reading-section p.reading-hook-sub{font-size:clamp(16px,2.2vw,19px);line-height:1.7;color:var(--ink2,#c3c0b9);margin:-10px 0 24px;text-wrap:pretty;word-break:keep-all}

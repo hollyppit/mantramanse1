@@ -145,17 +145,18 @@
     esc = esc || E; var p = m.progress, nm = m.name ? esc(m.name) + '님의 운명 세계' : '나의 운명 세계', h = '<div class="xp' + (m.mode === 'world' ? ' xp-wv' : '') + '">';
     if (m.mode === 'world') {
       var g = m.current, w = g.world;
+      var nx = g.items.filter(function (x) { return !m.ended[x.id]; })[0] || g.items[0];
+      // 읽기 버튼은 제목 바로 아래(설명·위젯보다 위)에 붉은색으로 둔다 — 긴 설명을 내려 읽지 않아도 바로 시작할 수 있게.
       h += '<section class="xp-wd"' + wstyle(w) + '><p class="kicker">WORLD ' + esc(String(w.order || '')) + '</p><h2 class="xp-h">' + esc(w.icon || '') + ' ' + esc(w.name) + '</h2><p class="xp-sum">' + esc(w.line) + '</p>' +
+        (nx ? '<div class="xp-cta xp-cta-top"><button type="button" class="btn big xp-red" data-xgo="' + nx.index + '">' + (g.done ? '이어서 읽기' : '읽기 시작하기') + '</button></div>' : '') +
         (w.desc ? '<p class="xp-desc">' + esc(w.desc) + '</p>' : '') + (w.notice ? '<p class="xp-note" role="note">' + esc(w.notice) + '</p>' : '') + (m.widget || '') +
         '<p class="xp-pn">' + g.done + ' / ' + g.total + '개 챕터 읽음 · 위쪽 탭에서 챕터를 바로 고를 수 있습니다</p>';
-      var nx = g.items.filter(function (x) { return !m.ended[x.id]; })[0] || g.items[0];
-      if (nx) h += '<div class="xp-cta"><button type="button" class="btn big gold" data-xgo="' + nx.index + '">' + (g.done ? '이어서 읽기' : '읽기 시작하기') + '</button></div>';
       h += '<ol class="xp-chapters" aria-label="챕터 목록">'+g.items.map(function(x,i){return '<li><button type="button" data-xgo="'+x.index+'"><span>'+String(i+1).padStart(2,'0')+'</span> '+esc(x.title)+'</button></li>';}).join('')+'</ol>';
       return h + '</section></div>';
     }
     h += '<p class="kicker">運路 · WORLD MAP</p><h2 class="xp-h">' + nm + '</h2><p class="xp-sum">가고 싶은 세계를 골라 탐험하세요. 순서는 정해져 있지 않습니다.</p>' +
       '<div class="xp-prog" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + p.pct + '" aria-label="전체 탐험 진행률"><i style="width:' + p.pct + '%"></i></div><p class="xp-pn">' + p.done + ' / ' + p.total + '개 챕터 읽음</p>';
-    h += '<div class="xp-cta">' + (m.resume >= 0 ? '<button type="button" class="btn big gold" data-xgo="' + m.resume + '">' + (p.done ? '이어서 읽기' : '처음부터 읽기') + '</button>' : '<button type="button" class="btn big gold" data-xgo="0">처음부터 다시 읽기</button>') + '</div>';
+    h += '<div class="xp-cta">' + (m.resume >= 0 ? '<button type="button" class="btn big xp-red" data-xgo="' + m.resume + '">' + (p.done ? '이어서 읽기' : '처음부터 읽기') + '</button>' : '<button type="button" class="btn big xp-red" data-xgo="0">처음부터 다시 읽기</button>') + '</div>';
     h += '<label class="xp-auto"><input type="checkbox" id="xAuto"' + (m.auto ? ' checked' : '') + '><span>자동으로 넘겨 읽기' + (m.rate && m.rate > 1 ? ' (' + m.rate + '배속)' : '') + '</span></label><ol class="xp-map">';
     m.worlds.forEach(function (g) {
       var w = g.world;
