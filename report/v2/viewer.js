@@ -65,7 +65,7 @@
     function show() { tx.style.opacity = 0; setTimeout(function () { tx.textContent = STAGES[Math.min(i, STAGES.length - 1)]; tx.style.opacity = 1; i++; }, 250); }
     show(); tick = setInterval(show, 1100);
     var sd; try { sd = R.SajuData.build(ch, { now: Date.now() }); } catch (e) { elog('caught', 'sd.build'); clearInterval(tick); view('input'); $('#msg').textContent = '계산 결과를 정리하지 못했습니다.'; return; }
-    S.sd = sd; S.birth = birthOf(ch); var t0 = Date.now();
+    S.sd = sd; S.birth = birthOf(ch); if (R.IchingCard) R.IchingCard.init(); var t0 = Date.now();
     // 서버 저장본(콘텐츠·미디어·일간 소개 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
     Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story'), getJson('/api/assets'), getJson('/api/prologue')]).then(function (a) {
       S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
@@ -867,6 +867,10 @@
       c.scenes.forEach(function(s,k){ var html=secWrap(sceneHtml(c,s,k),s,c,ci); if((c.readingSupplementary || s.readingSupplementary) && !s.readingInline) extra+=html; else main+=html; });
       if(extra) main+='<details class="reading-supplement" style="margin:16px auto;max-width:720px;padding:16px"><summary>더 깊이 읽기 · '+esc(c.originalTitle || c.title)+'</summary>'+extra+'</details>';
       if(c.readingCore)main+='<section class="scene rd-prose"><p>이 장의 풀이가 어땠나요?</p>'+[['helpful','도움이 됨'],['specific','구체적임'],['unclear','근거·설명이 부족함']].map(function(r){return '<button type="button" class="chipbtn" data-reading-feedback="'+r[0]+'">'+r[1]+'</button>';}).join('')+'<p role="status" data-feedback-status></p></section>';
+      if (S.readerWorld && R.IchingCard && R.IchingCard.offered(S.readerWorld) && S.wmap && S.wmap.by && ci === R.IchingCard.anchorFor(S.wmap.by[S.readerWorld])) { // 주제별 풀이 중간의 주역 점괘(선택·건너뛰기 가능)
+        var icScene = { sceneType: 'life', sceneId: 'iching-' + S.readerWorld, episode: true, html: '<section class="scene rv rd-react">' + R.IchingCard.html(S.readerWorld) + '</section>' };
+        main += secWrap(sceneHtml(c, icScene, -1), icScene, c, ci); T('iching_offer_shown', { world: S.readerWorld });
+      }
       h += (c.legacyIds || []).filter(function(id){return id!==c.id;}).map(function(id){return '<span id="ch-'+esc(id)+'" aria-hidden="true"></span>';}).join('');
       h += '<article class="chap" id="ch-' + esc(c.id) + '" data-ch="' + ci + '" aria-label="' + esc(c.title) + '">' + main + '</article>';
     });
@@ -915,6 +919,7 @@
       var c = chOf(e.target);
       if(e.target.closest('[data-reading-retry]')){if(R.FullReading && R.FullReading.retry)R.FullReading.retry(c.id);return;}
       var feedback=e.target.closest('[data-reading-feedback]');if(feedback){T('chapter_feedback',{chapter:c.id,answer:feedback.dataset.readingFeedback});feedback.parentNode.querySelector('[data-feedback-status]').textContent='의견을 남겼습니다. 수집이 켜진 경우에만 익명 집계됩니다.';return;}
+      if (R.IchingCard && R.IchingCard.handleClick(e.target, { sd: S.sd, onPause: function () { if (S.mv) S.mv.pause(); }, onMeasure: function () { if (S.mv) S.mv.measure(); }, onContinue: function () { if (S.mv) S.mv.play(); }, onTrack: function (n, p) { T(n, p); } })) return;
       if (R.ReadingAnswer && R.ReadingAnswer.handleClick(e.target, { sd: S.sd, onPause: function () { if (S.mv) S.mv.pause(); }, onMeasure: function () { if (S.mv) S.mv.measure(); }, onContinue: function () { if (S.mv) S.mv.play(); }, onChoice: function (topic, choice) { T('reading_question_selected', { topic: topic, choice: choice }); } })) return;
       var mo = e.target.closest('[data-mo]'); if (mo) { $$('.mo.sel', root).forEach(function (x) { x.classList.remove('sel'); x.style.borderColor = ''; }); mo.style.borderColor = 'var(--gold)'; moDetail(c, +mo.dataset.mo); return; }
       var vd = e.target.closest('[data-vd]'); if (vd) { var rp = vd.closest('.scene').querySelector('.vd-reply'); $$('[data-vd]', vd.parentNode).forEach(function (x) { x.setAttribute('aria-pressed', String(x === vd)); x.style.borderColor = x === vd ? 'var(--gold)' : ''; }); if (rp) rp.textContent = rp.getAttribute('data-' + vd.dataset.vd) || ''; T('verdict_answer', { chapter: c.id, answer: vd.dataset.vd }); if (S.mv) S.mv.choiceMade(); return; }

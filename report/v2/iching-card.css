@@ -1,0 +1,36 @@
+/* 주제별 풀이 중간의 주역 점괘 카드(report/v2/iching-card.js). 읽기 화면의 어두운 테마 변수(--gold, --ink 등)를 쓴다. */
+.rd-iching { margin: 8px auto; max-width: 720px; padding: 18px 16px; border: 1px solid var(--gold-d, #9A8250); border-radius: 14px; background: rgba(20, 22, 34, .72); backdrop-filter: blur(2px); }
+.rd-iching .rd-answer-question { margin: 0 0 6px; }
+.rdic-hints { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 8px; }
+.rdic-q { width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, .18); background: rgba(0, 0, 0, .28); color: var(--ink, #EDE8DC); font: inherit; }
+.rdic-small { font-size: .82rem; color: var(--ink2, #BDB8AB); line-height: 1.6; margin: 6px 0; }
+.rdic-err { color: #FF9C8A; }
+.rdic-go { border-color: var(--gold, #D5B97F); }
+.rdic-fig { display: flex; flex-direction: column; gap: 7px; width: 132px; flex: none; padding: 10px 12px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .12); border-radius: 12px; }
+.rdic-ln { position: relative; display: flex; align-items: center; gap: 8px; height: 13px; }
+.rdic-ln i { display: block; height: 11px; border-radius: 3px; background: var(--ink, #EDE8DC); }
+.rdic-ln i.y, .rdic-ln i.n { flex: 1; } .rdic-ln i.n + i.n { margin-left: 12px; }
+.rdic-ln i.e { flex: 1; background: none; border: 1px dashed rgba(255, 255, 255, .22); }
+.rdic-ln.chg i { background: var(--red, #D9694F); } .rdic-ln .mk { position: absolute; left: -3px; top: -5px; font-size: .68rem; color: var(--red, #D9694F); line-height: 1; }
+.rdic-ln small { font-size: .6rem; color: var(--ink3, #8A8678); width: 18px; text-align: right; flex: none; }
+.rdic-ln.on { animation: rdicIn .5s ease both; } @keyframes rdicIn { from { opacity: 0; transform: translateY(8px) scaleX(.6); } to { opacity: 1; transform: none; } }
+.rdic-cast { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 6px 0; }
+.rdic-coins { display: flex; gap: 14px; min-height: 56px; }
+.rdic-coin { width: 52px; height: 52px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; border: 3px solid #B98A3C; color: #6B4A12; background: radial-gradient(circle at 35% 30%, #FBE8B5, #E2B454); box-shadow: 0 3px 8px rgba(0, 0, 0, .35); animation: rdicFlip .6s ease both; }
+.rdic-coin.b { background: radial-gradient(circle at 35% 30%, #E9D7AE, #C99B45); font-weight: 500; }
+@keyframes rdicFlip { 0% { transform: rotateY(0) translateY(-24px); opacity: 0; } 60% { transform: rotateY(540deg) translateY(0); opacity: 1; } 100% { transform: rotateY(720deg); } }
+.rdic-say { margin: 0; color: var(--ink2, #BDB8AB); font-size: .92rem; min-height: 1.4em; }
+.rdic-head { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+.rdic-head > div { flex: 1; min-width: 200px; } .rdic-head p { margin: 4px 0; }
+.rdic-name { font-size: 1.15rem; font-weight: 800; color: var(--gold-l, #F0DFB2); }
+.rdic-tag { display: inline-block; padding: 1px 9px; border-radius: 99px; border: 1px solid var(--gold-d, #9A8250); color: var(--gold, #D5B97F); font-size: .76rem; }
+.rdic-ai { margin: 12px 0; padding: 12px 14px; border-radius: 12px; background: rgba(213, 185, 127, .08); border: 1px solid rgba(213, 185, 127, .28); }
+.rdic-ai h5, .rdic-more h5 { margin: 12px 0 4px; font-size: .84rem; color: var(--ink2, #BDB8AB); }
+.rdic-ai ul, .rdic-more ul { margin: 2px 0 6px 18px; padding: 0; }
+.rdic-answer { font-size: 1.02rem; line-height: 1.7; font-weight: 600; margin: 8px 0; }
+.rdic-more { margin: 10px 0; } .rdic-more summary { cursor: pointer; color: var(--gold, #D5B97F); }
+.rdic-orig { font-family: 'Noto Serif KR', serif; letter-spacing: .02em; }
+.rdic-final { font-weight: 700; line-height: 1.6; }
+.rd-iching .vd { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+@media (max-width: 560px) { .rdic-fig { width: 120px; } .rd-iching { padding: 14px 12px; } }
+@media (prefers-reduced-motion: reduce) { .rdic-ln.on, .rdic-coin { animation: none; } }
