@@ -103,8 +103,37 @@
     return out;
   }
 
+  // 여러 장 배열(원 카드·과거/현재/미래·상황/장애물/조언/결과)의 종합 읽기. 만세력 앱 타로 탭의 종합 풀이(index.html renderTarot)와 같은 규칙을 공용으로 옮긴 것이다 — 허브 무료 타로가 같은 배열을 쓴다.
+  // picks: 배열 자리 순서대로 [{ id, rev }]. 새 판단을 만들지 않고 기존 점수·TR_BAND·TR_ADV·키워드를 조합한다. AI 호출 없음.
+  function spreadList() { return Object.keys(TR_SPREAD).map(k => ({ key: k, name: TR_SPREAD[k][0], positions: TR_SPREAD[k][1].map(([pk, label, weight, frame]) => ({ key: pk, label, weight, frame })) })); }
+  function readSpread(spreadKey, picks, modeKey) {
+    const sp = TR_SPREAD[spreadKey]; if (!sp) return null;
+    const mode = MODES[modeKey] || MODES.today, topic = mode.topic, [topicName, topicSuits] = TR_TOPIC[topic] || TR_TOPIC.all;
+    const rows = sp[1].map(([k, label, w, frame], i) => { const p = picks && picks[i], card = p && BYID[p.id]; return card ? { k, label, weight: w, frame, card, rev: !!p.rev, sc: p.rev ? card.scoreRev : card.scoreUp, kw: p.rev ? card.reversed : card.upright } : null; }).filter(Boolean);
+    if (!rows.length) return null;
+    const W = rows.reduce((a, r) => a + r.weight, 0), score = rows.reduce((a, r) => a + r.weight * r.sc, 0) / W;
+    const bi = TR_BAND.findIndex(([t]) => score >= t), [, band, bandClass] = TR_BAND[bi];
+    const cnt = { M: 0, W: 0, C: 0, S: 0, P: 0 }; rows.forEach(r => cnt[r.card.suit]++);
+    const nRev = rows.filter(r => r.rev).length, courts = rows.filter(r => r.card.suit !== 'M' && r.card.rank >= 11);
+    const domS = TR_SUIT.filter(([k]) => cnt[k] >= 2).sort((a, b) => cnt[b[0]] - cnt[a[0]])[0];
+    const notes = [];
+    if (rows.length >= 2 && cnt.M * 2 >= rows.length) notes.push(`메이저 카드가 ${cnt.M}장으로 많습니다. 내 뜻만으로 바꾸기 어려운 큰 흐름, 인생의 전환점에 서 있다는 뜻입니다.`);
+    else if (rows.length >= 3 && !cnt.M) notes.push('메이저 카드가 없어 운명적인 일보다 일상의 선택과 노력으로 충분히 바꿀 수 있는 문제입니다.');
+    if (domS) notes.push(`${domS[1]}(${domS[2]})가 ${cnt[domS[0]]}장으로 두드러져, 이 질문의 핵심은 ${domS[3]}에 있습니다.`);
+    if (rows.length >= 2 && nRev * 2 >= rows.length) notes.push(`역방향이 ${nRev}장입니다. 일이 막히거나 늦어지는 흐름이니, 밖으로 밀어붙이기보다 안을 먼저 정리하세요.`);
+    if (courts.length) notes.push(`인물 카드(${courts.map(r => r.card.nameKo).join(', ')})가 나와 이 일에 특정한 사람이 크게 관여합니다.`);
+    const rel = topicSuits.length ? rows.filter(r => topicSuits.includes(r.card.suit)) : [];
+    if (rel.length) notes.push(`${topicName} 질문과 직접 맞닿은 카드: ${rel.map(r => `${r.card.nameKo}(${r.label})`).join(', ')}.`);
+    const byK = Object.fromEntries(rows.map(r => [r.k, r]));
+    const [a, b] = spreadKey === 'three' ? [byK.past, byK.fut] : spreadKey === 'four' ? [byK.sit, byK.res] : [];
+    let trend = '';
+    if (a && b) { const d = b.sc - a.sc; trend = d >= 1 && b.sc < 0 ? '가장 힘든 고비는 지나가지만 아직 회복하는 중입니다.' : d >= 2 ? '흐름이 뚜렷하게 나아지고 있습니다.' : d >= 1 ? '조금씩 나아지는 흐름입니다.' : d <= -2 ? '갈수록 조심해야 하는 흐름입니다.' : d <= -1 ? '기세가 조금 꺾이는 흐름이니 속도를 조절하세요.' : '큰 기복 없이 이어지는 흐름입니다.'; }
+    const key = rows.find(r => r.k === 'fut' || r.k === 'res' || r.k === 'msg') || rows[rows.length - 1], adv = byK.adv || null, now = byK.now || byK.sit || null;
+    return { spreadKey, spreadName: sp[0], mode: modeKey, topic, topicName, rows, score, bandIndex: bi, band, bandClass, notes, trend, keyRow: key, advRow: adv, nowRow: now && now !== key ? now : null, advice: TR_ADV[topic][bi], oneLine: ONE_LINE[bi] };
+  }
+
   const api = {
-    Tarot: { cards: CARDS, byId: BYID, modes: MODES, draw, read, imageBase: IMAGE_BASE, suitKo: SUIT_KO, legacy: { TR_MAJ, TR_SUIT, TR_RANK, TR_MIN, TR, TR_TOPIC, TR_SPREAD, TR_BAND, TR_ADV } },
+    Tarot: { cards: CARDS, byId: BYID, modes: MODES, draw, read, readSpread, spreads: spreadList, imageBase: IMAGE_BASE, suitKo: SUIT_KO, legacy: { TR_MAJ, TR_SUIT, TR_RANK, TR_MIN, TR, TR_TOPIC, TR_SPREAD, TR_BAND, TR_ADV } },
     DAYMODE,
   };
   root.MantraCore = Object.assign(root.MantraCore || {}, api);
