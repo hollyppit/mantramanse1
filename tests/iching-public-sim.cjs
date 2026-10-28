@@ -6,7 +6,7 @@ const assert = require('assert/strict'), path = require('path'), { pathToFileURL
   let puts = 0; const mem = new Map();
   const kv = { get: async (k, t) => (mem.has(k) ? (t === 'json' ? JSON.parse(mem.get(k)) : mem.get(k)) : null), put: async (k, v) => { puts++; mem.set(k, v); }, delete: async k => { mem.delete(k); }, list: async ({ prefix }) => ({ keys: [...mem.keys()].filter(k => k.startsWith(prefix)).map(name => ({ name })) }) };
   const env = { ADMIN_PASSWORD: 'pw', GLOSSARY_KV: kv };
-  const status = async () => (await (await PUB.onRequestGet({ request: new Request('http://x/api/iching?a=status'), env })).json());
+  const status = async () => { const { ai, ...rest } = await (await PUB.onRequestGet({ request: new Request('http://x/api/iching?a=status'), env })).json(); assert.deepEqual(ai, { enabled: false }, 'AI 상세 풀이는 기본 꺼짐'); return rest; };
   const ask = async body => { const r = await PUB.onRequestPost({ request: new Request('http://x/api/iching?a=interpret', { method: 'POST', body: JSON.stringify(body) }), env }); return { s: r.status, b: await r.json(), cc: r.headers.get('cache-control') }; };
   const adm = async (qs, body) => { const r = await REV.onRequestPost({ request: new Request('http://x/api/iching-review?' + qs, { method: 'POST', headers: { authorization: 'Bearer pw' }, body: JSON.stringify(body) }), env }); return { s: r.status, b: await r.json() }; };
   const Q = { question: '지금 투자를 시작해도 될까요?', category: 'wealth', values: [7, 7, 9, 8, 7, 8] };

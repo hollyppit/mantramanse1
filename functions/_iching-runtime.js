@@ -22,5 +22,6 @@ import '../report/iching/compose.js';
 import '../report/iching/result-schema.js';
 import '../report/iching/quality.js';
 import '../report/iching/review-core.js';
+import '../report/iching/ai-detail.js';
 
 export const Ic = () => ({ Hexagrams: globalThis.IchingHexagrams, Engine: globalThis.Iching, Content: globalThis.IchingContent, Compose: globalThis.IchingCompose, Schema: globalThis.IchingResultSchema, Quality: globalThis.IchingQuality, Review: globalThis.IchingReview });

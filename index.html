@@ -4161,10 +4161,35 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const body = { question: IC.q.trim(), category: IC.cat, values: IC.values, saju: IC.useSaju ? icSaju() : null };
     fetch('/api/iching?a=interpret', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       .then(r => r.json().then(d => ({ s: r.status, d }))).catch(() => ({ s: 0, d: {} })).then(({ s, d }) => {
-        if (s === 200 && d.ok) { IC.result = d.result; IC.phase = 'result'; IC.reveal = 1; IC.hist.unshift({ at: new Date().toISOString(), result: d.result }); icSave(); }
+        if (s === 200 && d.ok) { IC.result = d.result; IC.phase = 'result'; IC.reveal = 1; IC.hist.unshift({ at: new Date().toISOString(), result: d.result, saju: body.saju }); icSave(); IC.ai = { phase: 'idle' }; IC.aiOk = false; IC.lastSaju = body.saju; }
         else { IC.phase = 'form'; IC.err = s === 403 ? '주역 점괘는 아직 열리지 않았습니다.' : s === 503 ? '이 점괘의 해석이 아직 준비되지 않았습니다. 잠시 뒤 다시 시도해 주세요.' : s === 0 ? '서버에 연결하지 못했습니다. 잠시 뒤 다시 시도해 주세요.' : '점괘를 보지 못했습니다. 다시 시도해 주세요.'; icLoadStatusAgain(); }
         render();
       });
+  }
+  // AI 상세 풀이: 검수·게시된 결과를 근거로 서버가 AI 에게 보충 풀이만 쓰게 한다(관리자가 켠 경우에만 보임, 동의 필요, 이용 횟수 제한).
+  const IC_AI_ERR = { 'ai-off': 'AI 상세 풀이는 지금 쓸 수 없습니다.', 'ip-limit': '오늘 이용 가능한 횟수를 모두 썼습니다. 내일 다시 이용해 주세요.', 'daily-limit': '오늘 AI 풀이 이용이 많아 잠시 닫혔습니다. 내일 다시 이용해 주세요.', 'ai-invalid': 'AI가 기준에 맞는 풀이를 만들지 못했습니다. 잠시 뒤 다시 시도해 주세요.', 'ai-failed': 'AI 서비스에 연결하지 못했습니다. 잠시 뒤 다시 시도해 주세요.', 'cost-limit': '지금은 AI 풀이를 쓸 수 없습니다.', 'ai-unavailable': 'AI 상세 풀이는 지금 쓸 수 없습니다.' };
+  function icAiAsk() {
+    const r = IC.result; if (!r || !IC.aiOk) return;
+    IC.ai = { phase: 'loading' }; render();
+    fetch('/api/iching?a=detail', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: r.question, category: r.question_category, values: r.hexagram.values, saju: IC.lastSaju || null, consent: true }) })
+      .then(x => x.json().then(d => ({ s: x.status, d }))).catch(() => ({ s: 0, d: {} })).then(({ s, d }) => {
+        if (s === 200 && d.ok) { IC.ai = { phase: 'done', detail: d.detail }; const h = IC.hist.find(x => x.result && x.result.result_id === r.result_id); if (h) { h.ai = d.detail; icSave(); } }
+        else IC.ai = { phase: 'err', err: IC_AI_ERR[d && d.error] || (s === 0 ? '서버에 연결하지 못했습니다.' : 'AI 풀이를 만들지 못했습니다. 잠시 뒤 다시 시도해 주세요.') };
+        render();
+      });
+  }
+  function icAiCard() {
+    if (!IC.open || !IC.open.ai || !IC.open.ai.enabled) return '';
+    const A = IC.ai || { phase: 'idle' };
+    if (A.phase === 'done' && A.detail) {
+      const d = A.detail;
+      return `<article class="ic-card ic-ai" aria-label="AI 상세 풀이"><h3>AI 상세 풀이 <span class="pill b-평">AI 작성</span></h3><p class="note">위의 검수된 풀이를 바탕으로 AI가 이 질문에 맞게 다시 풀어 쓴 보충 설명입니다. 관리자가 한 줄씩 검수한 문장은 아닙니다.</p>
+        <div class="sumbox">${esc(d.answer)}</div><h4>괘가 말하는 것</h4>${d.reading.map(t => '<p>' + esc(t) + '</p>').join('')}${d.saju_note ? '<h4>사주와 함께 보면</h4><p>' + esc(d.saju_note) + '</p>' : ''}<h4>이 질문에 맞춘 행동</h4>${icList(d.steps)}<h4>스스로에게 물어볼 것</h4>${icList(d.ask_yourself)}<p class="note">${esc(d.caution)}</p></article>`;
+    }
+    if (A.phase === 'loading') return '<article class="ic-card ic-ai"><h3>AI 상세 풀이</h3><p class="muted">질문에 맞춰 풀이를 쓰는 중입니다… (10~30초 걸릴 수 있습니다)</p></article>';
+    return `<article class="ic-card ic-ai" aria-label="AI 상세 풀이"><h3>AI로 더 자세히 풀어보기</h3><p class="small">질문에 맞춰 괘와 변효를 더 구체적으로 풀어 줍니다. 위의 검수된 풀이는 바꾸지 않고 보충 설명만 덧붙입니다.</p>
+      <ul class="pos-ul small"><li>질문과 풀이 내용이 AI 서비스(OpenAI 또는 Anthropic)로 전송됩니다. 이름·생년월일·출생지는 보내지 않습니다.</li><li>AI가 쓴 글이라 관리자 검수를 거치지 않으며, 점괘는 참고 자료입니다.</li><li>하루 이용 횟수에 제한이 있습니다.</li></ul>
+      ${A.phase === 'err' ? '<p class="err">' + esc(A.err) + '</p>' : ''}<div class="frow"><button type="button" class="opt" data-act="ic-ai-ok" aria-pressed="${!!IC.aiOk}">${IC.aiOk ? '✓ ' : ''}위 내용에 동의합니다</button><button class="btn primary" data-act="ic-ai"${IC.aiOk ? '' : ' disabled'}>AI 풀이 받기</button></div></article>`;
   }
   function icAct(a) {
     if (a.startsWith('ic-cat:')) { IC.cat = a.slice(7); render(); return; }
@@ -4172,9 +4197,11 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (a === 'ic-go') { IC.q = (document.getElementById('ic-q') || { value: IC.q }).value; icStart(); return; }
     if (a === 'ic-next') { IC.reveal = Math.min(8, IC.reveal + 1); render(); setTimeout(() => { const n = document.querySelectorAll('.ic-card'); if (n.length) n[n.length - 1].scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 30); return; }
     if (a === 'ic-all') { IC.reveal = 8; render(); return; }
-    if (a === 'ic-new') { IC.phase = 'form'; IC.result = null; IC.values = []; IC.coins = []; IC.err = null; render(); window.scrollTo(0, 0); return; }
+    if (a === 'ic-ai-ok') { IC.aiOk = !IC.aiOk; render(); return; }
+    if (a === 'ic-ai') { icAiAsk(); return; }
+    if (a === 'ic-new') { IC.ai = null; IC.phase = 'form'; IC.result = null; IC.values = []; IC.coins = []; IC.err = null; render(); window.scrollTo(0, 0); return; }
     if (a === 'ic-hist') { IC.showHist = !IC.showHist; render(); return; }
-    if (a.startsWith('ic-open:')) { const h = IC.hist[+a.slice(8)]; if (h) { IC.result = h.result; IC.values = h.result.hexagram.values.slice(); IC.phase = 'result'; IC.reveal = 8; IC.cat = h.result.question_category; IC.q = h.result.question || ''; render(); window.scrollTo(0, 0); } return; }
+    if (a.startsWith('ic-open:')) { const h = IC.hist[+a.slice(8)]; if (h) { IC.result = h.result; IC.values = h.result.hexagram.values.slice(); IC.ai = h.ai ? { phase: 'done', detail: h.ai } : { phase: 'idle' }; IC.aiOk = false; IC.lastSaju = h.saju || null; IC.phase = 'result'; IC.reveal = 8; IC.cat = h.result.question_category; IC.q = h.result.question || ''; render(); window.scrollTo(0, 0); } return; }
     if (a.startsWith('ic-del:')) { IC.hist.splice(+a.slice(7), 1); icSave(); render(); return; }
     if (a === 'ic-clear') { if (confirm('이 기기에 저장된 점괘 기록을 모두 지울까요?')) { IC.hist = []; icSave(); render(); } return; }
   }
@@ -4222,7 +4249,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     ];
     const n = IC.reveal;
     return `<p class="muted small">${esc(IC_CAT[r.question_category])} · ${esc(hx.ko)}${tr ? ' → ' + esc(tr.ko) : ''} · ${n}/8 단계</p>` + cards.slice(0, n).map((h, i) => `<article class="ic-card" aria-label="${IC_SECTIONS[i]}">${h}</article>`).join('')
-      + `<div class="frow" style="margin-top:10px">${n < 8 ? `<button class="btn primary" data-act="ic-next">다음 · ${IC_SECTIONS[n]} ›</button><button class="btn" data-act="ic-all">전체 펼치기</button>` : ''}<button class="btn" data-act="ic-new">새 점괘 보기</button></div>`;
+      + (n >= 8 ? icAiCard() : '') + `<div class="frow" style="margin-top:10px">${n < 8 ? `<button class="btn primary" data-act="ic-next">다음 · ${IC_SECTIONS[n]} ›</button><button class="btn" data-act="ic-all">전체 펼치기</button>` : ''}<button class="btn" data-act="ic-new">새 점괘 보기</button></div>`;
   }
   // ───────────── 용어 ─────────────
   function glList() {

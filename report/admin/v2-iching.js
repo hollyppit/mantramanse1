@@ -27,6 +27,7 @@
       '<details class="card" style="margin-top:12px"><summary style="cursor:pointer;color:var(--gold)">항목별 목록 (고급 검색·일괄 처리)</summary><div id="icFilter" style="margin-top:8px"></div><div id="icList"></div></details>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px;color:var(--gold)">점괘 미리보기</h3><div id="icPrev"></div></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px;color:var(--gold)">게시·롤백·서비스 개방</h3><div id="icRel"></div></div>' +
+      '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px;color:var(--gold)">AI 상세 풀이</h3><div id="icAi"></div></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px;color:var(--gold)">최근 변경 이력</h3><div id="icLog"></div></div>';
     var w = $('#icWho'); w.value = reviewer(); w.onchange = function () { try { localStorage.setItem('iching_reviewer', w.value.trim()); } catch (e) { } };
   }
@@ -253,6 +254,21 @@
       if (!dry) { msg('게시했습니다(v' + d.version + ')'); loadSum(); loadList(); loadLog(); }
     });
   }
+  // ── AI 상세 풀이(사용자가 "AI로 더 자세히" 버튼을 눌렀을 때만 호출, 기본 꺼짐) ──
+  function aiPanel() {
+    return call('GET', 'a=ai').then(function (d) {
+      var b = $('#icAi'); if (!b) return; if (!d.ok) { b.innerHTML = '<p class="err">' + esc(d.error || '불러오지 못했습니다') + '</p>'; return; }
+      var c = d.config, keys = d.keysPresent;
+      b.innerHTML = '<p class="muted" style="margin:0 0 8px">사용자가 결과 화면에서 동의하고 "AI 풀이 받기"를 눌렀을 때만 AI를 부릅니다. AI는 <b>이미 승인·게시된 풀이를 바꾸지 않고</b> 질문에 맞춘 보충 풀이만 쓰며, 출력은 서버가 규칙(확률·확정 표현·날짜·반말·지양 표현·다른 괘 언급)으로 검사해 통과한 것만 보여 줍니다. 질문·응답은 서버에 저장하지 않고 하루 횟수만 셉니다. 비용 상한은 기존 AI 설정(최대 요청 비용·단가)을 그대로 따릅니다.</p>' +
+        '<p>AI 키: ' + (keys.openai ? 'OpenAI 있음' : 'OpenAI 없음') + ' · ' + (keys.anthropic ? 'Anthropic 있음' : 'Anthropic 없음') + (d.provider ? ' → <b>' + esc(d.provider) + '</b> 사용' : ' → <b class="err">키가 없어 켜도 동작하지 않습니다</b>') + ' · 오늘 사용 ' + d.usedToday + '회</p>' +
+        '<div class="row" style="gap:12px;flex-wrap:wrap;align-items:center"><label><input id="aiOn" type="checkbox"' + (c.enabled ? ' checked' : '') + '> 사용자에게 AI 상세 풀이 버튼 보이기</label>' +
+        '<label>하루 전체 <input id="aiDay" type="number" min="0" max="5000" value="' + c.dailyLimit + '" style="width:80px">회</label><label>1인(IP)당 하루 <input id="aiIp" type="number" min="1" max="50" value="' + c.perIpLimit + '" style="width:60px">회</label><label>최대 출력 토큰 <input id="aiTok" type="number" min="400" max="3000" step="100" value="' + c.maxOutputTokens + '" style="width:80px"></label><button id="aiSave" class="pri">저장</button></div>';
+      $('#aiSave').onclick = function () {
+        if ($('#aiOn').checked && !c.enabled && !confirm('AI 상세 풀이를 켭니다. 사용자가 버튼을 누를 때마다 AI 비용이 발생합니다(하루 상한 ' + $('#aiDay').value + '회). 계속할까요?')) return;
+        call('POST', 'a=ai', { enabled: $('#aiOn').checked, dailyLimit: +$('#aiDay').value, perIpLimit: +$('#aiIp').value, maxOutputTokens: +$('#aiTok').value }).then(function (r) { msg(r.ok ? '저장했습니다' : (r.error || '실패'), !r.ok); aiPanel(); });
+      };
+    });
+  }
   function loadLog() {
     return call('GET', 'a=log&limit=15').then(function (d) { var b = $('#icLog'); if (!b) return; b.innerHTML = (d.log || []).length ? '<ul style="margin:0 0 0 18px">' + d.log.map(function (e) { return '<li>' + esc(e.at.slice(0, 16)) + ' · ' + esc(e.by) + ' · <b>' + esc(e.action) + '</b> ' + (e.keyCount ? e.keyCount + '개' : '') + (e.releaseVersion ? ' (게시 v' + e.releaseVersion + ')' : '') + (e.note ? ' — ' + esc(e.note) : '') + '</li>'; }).join('') + '</ul>' : '<p class="muted">이력이 없습니다.</p>'; });
   }
@@ -261,7 +277,7 @@
     open: function (password) {
       pw = password; root = document.getElementById('t-ichingreview'); if (!root) return;
       if (!root.dataset.ready) { root.dataset.ready = '1'; shell(); filterBar(); prevPanel(); }
-      loadSum().then(loadGrid).then(loadList).then(loadLog);
+      loadSum().then(loadGrid).then(loadList).then(loadLog).then(aiPanel);
     }
   };
 })();

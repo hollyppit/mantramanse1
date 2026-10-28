@@ -5,6 +5,7 @@
 import { json, isAdmin, configError } from '../_lib.js';
 import { kvOf } from '../_store.js';
 import * as S from '../_iching-review.js';
+import { aiAdminState, setAiConfig } from '../_iching-ai.js';
 
 const reply = r => json(r, r && r.status ? r.status : (r && r.ok === false ? 400 : 200));
 const guard = ({ request, env }) => {
@@ -24,6 +25,7 @@ export async function onRequestGet(ctx) {
     if (a === 'grid') return reply(await S.getGrid(kv));
     if (a === 'log') return reply({ ok: true, log: await S.readLog(kv, { key: o.key, limit: Math.min(200, +o.limit || 50) }) });
     if (a === 'releases') return reply(await S.listReleases(kv));
+    if (a === 'ai') return reply(await aiAdminState(kv, ctx.env));
     if (a === 'preview') return reply(await S.preview(kv, o));
     return json({ ok: false, error: 'unknown-action' }, 400);
   } catch (e) { return json({ ok: false, error: 'server-error' }, 500); }
@@ -42,6 +44,7 @@ export async function onRequestPost(ctx) {
     if (a === 'publish') return reply(await S.publish(kv, b, who));
     if (a === 'rollback') return reply(await S.rollback(kv, b, who));
     if (a === 'flags') return reply(await S.setFlags(kv, b, who));
+    if (a === 'ai') return reply(await setAiConfig(kv, b, who));
     return json({ ok: false, error: 'unknown-action' }, 400);
   } catch (e) { return json({ ok: false, error: 'server-error' }, 500); }
 }

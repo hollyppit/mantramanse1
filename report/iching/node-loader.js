@@ -5,6 +5,6 @@ const base = __dirname, texts = path.join(base, 'texts');
 ['hexagrams.js', 'engine.js', 'texts/classics.js', 'texts/modern-1.js', 'texts/modern-2.js', 'texts/modern-3.js', 'texts/modern-4.js', 'texts/packs-sample.js', 'texts/packs-banks.js']
   .forEach(f => require(path.join(base, f)));
 fs.readdirSync(texts).filter(f => /^packs-ext-\d+\.js$/.test(f)).sort().forEach(f => require(path.join(texts, f)));
-['texts/packs-extended.js', 'content.js', 'saju-link.js', 'compose.js', 'result-schema.js', 'quality.js', 'review-core.js']
+['texts/packs-extended.js', 'content.js', 'saju-link.js', 'compose.js', 'result-schema.js', 'quality.js', 'review-core.js', 'ai-detail.js']
   .forEach(f => { if (fs.existsSync(path.join(base, f))) require(path.join(base, f)); });
 module.exports = { Hexagrams: globalThis.IchingHexagrams, Engine: globalThis.Iching, Content: globalThis.IchingContent, Compose: globalThis.IchingCompose, Schema: globalThis.IchingResultSchema, Quality: globalThis.IchingQuality, Review: globalThis.IchingReview };
