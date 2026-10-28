@@ -27,6 +27,10 @@ const assert = require('assert/strict'), path = require('path'), fs = require('f
   assert.equal(st.flags.enabled, false);
   assert.equal(st.summary.byType.classics['source-imported'], 64); assert.equal(st.summary.byType.modern.draft, 64);
 
+  // ── 괘별 현황·괘 단위 보기 ──
+  const gr = (await GET('a=grid')).b; assert.equal(gr.rows.length, 64); assert.equal(gr.rows[0].s.length, 12); assert.equal(gr.rows[0].s, 'iddddddddddd', '원문 1 + 나머지 초안 11');
+  const hx = (await GET('a=hex&num=5')).b; assert.equal(hx.items.length, 12); assert.deepEqual(hx.items.map(i => i.type), ['classics', 'modern', 'pack', 'pack', 'pack', 'pack', 'pack-line', 'pack-line', 'pack-line', 'pack-line', 'pack-line', 'pack-line']); assert.ok(hx.items.every(i => i.content && i.errors.length === 0));
+  assert.equal((await GET('a=hex&num=99')).s, 400);
   // ── 목록·검색·상세 ──
   let l = (await GET('a=items&type=pack&hex=5&limit=10')).b; assert.equal(l.total, 4 + 0); // 5괘의 분야 해석 4개
   assert.ok(l.items.every(i => i.num === 5 && i.type === 'pack'));

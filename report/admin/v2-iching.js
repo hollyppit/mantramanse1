@@ -18,11 +18,13 @@
   function badge(s, rel) { var c = { reviewed: '#62C2AE', rejected: '#FF8A78', stale: '#E0BC74', draft: '#8A8678', 'source-imported': '#8A8678' }[s] || '#8A8678'; return '<span style="border:1px solid ' + c + ';color:' + c + ';border-radius:99px;padding:1px 8px;font-size:.75rem">' + esc(ST_KO[s] || s) + '</span>' + (rel ? ' <span style="border:1px solid #62C2AE;background:#16301F;color:#fff;border-radius:99px;padding:1px 8px;font-size:.75rem">게시됨</span>' : ''); }
 
   function shell() {
-    root.innerHTML = '<div class="card"><h2 style="margin:0 0 6px;color:var(--gold)">주역 검수·승인·게시</h2>' +
+    root.innerHTML = '<style>.ic-o{font-family:"Noto Serif KR",serif;letter-spacing:.02em}#icHex td{vertical-align:top;padding:5px 8px 5px 0}#icHex ul{margin:2px 0 6px 18px}</style><div class="card"><h2 style="margin:0 0 6px;color:var(--gold)">주역 검수·승인·게시</h2>' +
       '<p class="muted" style="margin:0 0 10px">문구는 <b>승인 → 게시</b> 두 단계를 거쳐야 사용자에게 보입니다. 승인 뒤 내용을 고치면 승인이 무효가 되어 게시본에서도 바로 빠집니다. AI 초안은 승인 전까지 어디에도 노출되지 않습니다.</p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><label>검수자 이름 <input id="icWho" maxlength="30" style="width:130px" placeholder="이력에 남습니다"></label><span id="icMsg" role="status"></span></div><div id="icSum"></div></div>' +
-      '<div class="card" style="margin-top:12px"><div id="icFilter"></div><div id="icList"></div></div>' +
+      '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">괘별 현황</h3><p class="muted" style="margin:0 0 8px">괘를 누르면 12개 항목(원문·현대어·분야 해석 4·변효 해석 6)을 한 화면에서 읽고 승인할 수 있습니다. 칸은 위에서부터 원문·현대어·종합·재물·커리어·인연·초효~상효입니다.</p><div id="icGrid"></div></div>' +
+      '<div id="icHex" class="card" style="margin-top:12px" hidden></div>' +
       '<div id="icDetail" class="card" style="margin-top:12px" hidden></div>' +
+      '<details class="card" style="margin-top:12px"><summary style="cursor:pointer;color:var(--gold)">항목별 목록 (고급 검색·일괄 처리)</summary><div id="icFilter" style="margin-top:8px"></div><div id="icList"></div></details>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px;color:var(--gold)">점괘 미리보기</h3><div id="icPrev"></div></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px;color:var(--gold)">게시·롤백·서비스 개방</h3><div id="icRel"></div></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px;color:var(--gold)">최근 변경 이력</h3><div id="icLog"></div></div>';
@@ -35,7 +37,10 @@
       if (!d.ok) { msg(d.error || '불러오지 못했습니다', true); return; }
       S.sum = d; var c = d.summary.counts, r = d.release;
       $('#icSum').innerHTML = '<div class="row" style="gap:14px;flex-wrap:wrap"><span>전체 <b>' + d.summary.total + '</b></span>' + ['source-imported', 'draft', 'reviewed', 'stale', 'rejected'].map(function (k) { return '<span>' + esc(ST_KO[k]) + ' <b>' + (c[k] || 0) + '</b></span>'; }).join('') + '<span>게시됨 <b>' + d.summary.released + '</b></span><span>게시본 <b>' + (r ? 'v' + r.version : '없음') + '</b></span><span>서비스 개방 <b style="color:' + (d.flags.enabled ? '#62C2AE' : '#FF8A78') + '">' + (d.flags.enabled ? '켜짐' : '꺼짐') + '</b></span></div>' +
+        '<div title="게시됨 ' + d.summary.released + ' · 승인 ' + (c.reviewed || 0) + ' / ' + d.summary.total + '" style="height:10px;background:#262C42;border-radius:5px;margin-top:10px;overflow:hidden;display:flex"><i style="width:' + (d.summary.released / d.summary.total * 100) + '%;background:#62C2AE"></i><i style="width:' + (Math.max(0, (c.reviewed || 0) - d.summary.released) / d.summary.total * 100) + '%;background:#6FA8FF"></i></div>' +
+        '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px"><button id="qpPub" class="pri"' + ((c.reviewed || 0) - d.summary.released > 0 || (c.stale || 0) > 0 ? '' : ' disabled') + '>승인된 ' + Math.max(0, (c.reviewed || 0) - d.summary.released) + '개 게시하기</button><span class="muted">초록 = 게시됨, 파랑 = 승인했지만 아직 게시 전. 검수 대기(초안·재검수) ' + ((c.draft || 0) + (c['source-imported'] || 0) + (c.stale || 0)) + '개.</span></div>' +
         '<p class="muted" style="margin:8px 0 0">서비스 개방 점검: ' + (d.readiness.ready ? '<b style="color:#62C2AE">모든 괘·분야가 게시됨 — 개방 가능</b>' : '게시본에 빠진 항목 <b>' + d.readiness.missing + '</b>개 (원문·현대어 64괘, 분야 해석·효 해석이 모두 게시돼야 개방할 수 있습니다)') + '</p>';
+      var qp = $('#qpPub'); if (qp) qp.onclick = quickPublish;
       relPanel();
     });
   }
@@ -132,7 +137,70 @@
       refresh(it.key);
     });
   }
-  function refresh(key) { return loadSum().then(loadList).then(function () { if (key) return openItem(key); }).then(loadLog); }
+  function refresh(key) { return loadSum().then(loadGrid).then(function () { if (S.hex) return openHex(S.hex); }).then(function () { if (key) return openItem(key); }).then(loadList).then(loadLog); }
+
+  // ── 괘별 현황(64괘 한눈에) ──
+  var CELL = { p: ['#62C2AE', '게시됨'], r: ['#6FA8FF', '승인(게시 전)'], d: ['#4A4F63', '초안'], i: ['#4A4F63', '원문 가져옴(대조 전)'], s: ['#E0BC74', '수정됨·재검수 필요'], x: ['#FF8A78', '반려'], m: ['#222', '없음'] };
+  function loadGrid() {
+    return call('GET', 'a=grid').then(function (d) {
+      if (!d.ok) return; S.grid = d.rows;
+      var legend = '<p class="muted" style="margin:8px 0 0;display:flex;gap:12px;flex-wrap:wrap">' + ['p', 'r', 'd', 's', 'x'].map(function (k) { return '<span><i style="display:inline-block;width:12px;height:9px;border-radius:2px;margin-right:4px;background:' + CELL[k][0] + '"></i>' + esc(CELL[k][1]) + '</span>'; }).join('') + '</p>';
+      $('#icGrid').innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px">' + d.rows.map(function (r) {
+        var done = r.s.split('').filter(function (c) { return c === 'p'; }).length, need = r.s.split('').filter(function (c) { return 'dis'.indexOf(c) >= 0; }).length;
+        return '<button type="button" data-hx="' + r.num + '" style="text-align:left;padding:8px;' + (S.hex === r.num ? 'border-color:var(--gold);background:#1c2238;' : '') + '"><b>' + r.num + ' ' + esc(r.ko) + '</b> <small class="muted">' + esc(r.hanja) + '</small><div style="display:grid;grid-template-columns:repeat(6,1fr);gap:2px;margin-top:6px">' + r.s.split('').map(function (c) { return '<i title="' + esc(CELL[c][1]) + '" style="height:9px;border-radius:2px;background:' + CELL[c][0] + '"></i>'; }).join('') + '</div><small class="muted">' + done + '/12 게시' + (need ? ' · 검수 ' + need : '') + '</small></button>';
+      }).join('') + '</div>' + legend;
+      $('#icGrid').querySelectorAll('[data-hx]').forEach(function (b) { b.onclick = function () { openHex(+b.dataset.hx); }; });
+    });
+  }
+  var LBL = { issue: '핵심 쟁점', summary: '결론', final: '최종 한마디', conditions: '판단에 필요한 조건', favorable: '유리한 조건', unfavorable: '불리한 조건', errors: '주의할 판단 오류', improve: '개선 조건', 'do': '해야 할 행동', avoid: '피해야 할 행동', check: '확인 조건', review: '점검 기준' };
+  function openHex(n) {
+    S.hex = n;
+    return call('GET', 'a=hex&num=' + n).then(function (d) { if (!d.ok) { msg(d.error || '불러오지 못했습니다', true); return; } drawHex(d); var g = $('#icGrid'); if (g) g.querySelectorAll('[data-hx]').forEach(function (b) { var on = +b.dataset.hx === n; b.style.borderColor = on ? 'var(--gold)' : ''; b.style.background = on ? '#1c2238' : ''; }); });
+  }
+  function btns(it) { return '<span style="white-space:nowrap"><button data-ap="' + esc(it.key) + '"' + (it.status === 'reviewed' ? ' disabled' : '') + '>승인</button> <button data-rj="' + esc(it.key) + '">반려</button> <button data-ed="' + esc(it.key) + '">편집</button></span>'; }
+  function drawHex(d) {
+    var box = $('#icHex'), n = d.num, by = {}; d.items.forEach(function (i) { by[i.key] = i; });
+    var cl = by['classics:' + n], md = by['modern:' + n], pend = d.items.filter(function (i) { return ['draft', 'source-imported', 'stale'].indexOf(i.status) >= 0 && !i.errors.length; });
+    var h = '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button id="hxPrev"' + (n <= 1 ? ' disabled' : '') + '>‹ 이전 괘</button><h3 style="margin:0;color:var(--gold)">제' + n + '괘 · ' + esc(d.hex) + '</h3><button id="hxNext"' + (n >= 64 ? ' disabled' : '') + '>다음 괘 ›</button><span style="flex:1"></span><button id="hxApprove" class="pri"' + (pend.length ? '' : ' disabled') + '>이 괘 전체 승인 (' + pend.length + ')</button><button id="hxApproveNext"' + (pend.length ? '' : ' disabled') + '>승인하고 다음 괘 ›</button></div>' +
+      '<p class="muted" style="margin:6px 0">읽어 보고 문제없으면 승인, 고칠 곳이 있으면 "편집"(아래 편집기가 열립니다)을 누르세요. 승인은 게시 전에는 사용자에게 보이지 않습니다.</p>';
+    // A. 원문·번역 대조
+    var c = cl.content, m = md.content, rows = '<tr><td><b>괘사</b></td><td class="ic-o">' + esc(c.guaci) + '</td><td>' + esc(m.guaci) + '</td></tr>';
+    c.lines.forEach(function (l, i) { rows += '<tr><td>' + esc(l.label) + '</td><td class="ic-o">' + esc(l.yaoci) + '</td><td>' + esc(m.lines[i]) + '</td></tr>'; });
+    if (c.yong) rows += '<tr><td>' + esc(c.yong.label) + '</td><td class="ic-o">' + esc(c.yong.yaoci) + '</td><td>' + esc(m.yong || '') + '</td></tr>';
+    h += '<div class="card" style="margin-top:10px;background:#10131E"><b>원문 ↔ 현대어 대조</b> <span class="muted">원문 ' + badge(cl.status, cl.released) + ' ' + btns(cl) + '</span><br><span class="muted">현대어 ' + badge(md.status, md.released) + ' ' + btns(md) + '</span>' +
+      '<p style="margin:8px 0 4px">키워드 ' + esc((m.kw || []).join(' · ')) + ' · 핵심 의미: ' + esc(m.core) + '</p>' +
+      '<table style="width:100%;border-collapse:collapse"><thead><tr style="text-align:left;color:var(--ink3)"><th style="width:70px">구분</th><th>원문(위키문헌)</th><th>현대어(AI 초안)</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<details style="margin-top:6px"><summary>단전·대상전 원문 · 출처</summary><p class="ic-o">' + esc(c.tuan) + '</p><p class="ic-o">' + esc(c.daexiang) + '</p><p class="muted">출처: 중국어 위키문헌 「周易」(고전 원문은 퍼블릭 도메인, 전사본 CC BY-SA 4.0) · 위키문헌 품질 표시 50%라 대조가 필요합니다.' + (c.variants ? ' 판본 차이 ' + c.variants.length + '건: ' + esc(c.variants.map(function (v) { return v.alt ? v.text + '↔' + v.alt : (v.note || ''); }).join(', ')) : '') + '</p></details></div>';
+    // B. 분야 해석 4개
+    var CK = { general: '종합', wealth: '재물', career: '커리어', love: '인연' };
+    ['general', 'wealth', 'career', 'love'].forEach(function (cat) {
+      var it = by['pack:' + n + ':' + cat], p = it.content, more = ['conditions', 'favorable', 'unfavorable', 'errors', 'improve', 'do', 'avoid', 'check', 'review'].map(function (k) { return '<b>' + LBL[k] + '</b>' + li(p[k]); }).join('') + '<b>유리한 전개</b>' + li(p.good.conditions.concat(p.good.actions)) + '<b>불리한 전개</b>' + li(p.bad.gaps.concat(p.bad.repeats));
+      h += '<div class="card" style="margin-top:10px;background:#10131E"><b>' + CK[cat] + ' 분야</b> ' + badge(it.status, it.released) + ' <span class="pri" style="padding:1px 8px;border-radius:99px;border:1px solid var(--gold-d);color:var(--gold);font-size:.78rem">' + esc(p.direction) + '</span> ' + btns(it) + (it.errors.length ? '<p class="err">규칙 위반: ' + it.errors.map(esc).join(' / ') + '</p>' : '') +
+        '<p style="margin:8px 0 2px"><b>쟁점</b> ' + esc(p.issue) + '</p><p style="margin:2px 0"><b>결론</b> ' + esc(p.summary) + '</p><p style="margin:2px 0"><b>최종 한마디</b> ' + esc(p.final) + '</p><details><summary>나머지 전체 보기(조건·행동 처방·시나리오)</summary>' + more + '</details></div>';
+    });
+    // C. 변효 6
+    var lr = '', lpend = [];
+    for (var k = 1; k <= 6; k++) { var it2 = by['pack:' + n + ':line:' + k], l = it2.content; if (['draft', 'stale'].indexOf(it2.status) >= 0) lpend.push(it2.key); lr += '<tr style="border-top:1px solid var(--line)"><td>' + ['초', '이', '삼', '사', '오', '상'][k - 1] + '효</td><td>' + esc(l.meaning) + '</td><td>' + esc(l.caution) + '</td><td>' + esc(l.check) + '</td><td>' + badge(it2.status, it2.released) + '</td><td>' + btns(it2) + '</td></tr>'; }
+    h += '<div class="card" style="margin-top:10px;background:#10131E"><b>변효 해석 6개</b> <button id="hxLines"' + (lpend.length ? '' : ' disabled') + '>효 해석 모두 승인 (' + lpend.length + ')</button><table style="width:100%;border-collapse:collapse;margin-top:6px"><thead><tr style="text-align:left;color:var(--ink3)"><th>효</th><th>의미</th><th>주의</th><th>확인 조건</th><th>상태</th><th></th></tr></thead><tbody>' + lr + '</tbody></table></div>';
+    box.hidden = false; box.innerHTML = h;
+    var keys = pend.map(function (i) { return i.key; });
+    $('#hxPrev').onclick = function () { openHex(n - 1); }; $('#hxNext').onclick = function () { openHex(n + 1); };
+    $('#hxApprove').onclick = function () { review(keys, 'approve', '').then(function () { return openHex(n); }); };
+    $('#hxApproveNext').onclick = function () { review(keys, 'approve', '').then(function () { return openHex(Math.min(64, n + 1)); }); };
+    $('#hxLines').onclick = function () { review(lpend, 'approve', '').then(function () { return openHex(n); }); };
+    box.querySelectorAll('[data-ap]').forEach(function (b) { b.onclick = function () { review([b.dataset.ap], 'approve', '').then(function () { return openHex(n); }); }; });
+    box.querySelectorAll('[data-rj]').forEach(function (b) { b.onclick = function () { var t = prompt('반려 사유를 적어 주세요(수정자가 볼 수 있습니다).'); if (t && t.trim()) review([b.dataset.rj], 'reject', t.trim()).then(function () { return openHex(n); }); }; });
+    box.querySelectorAll('[data-ed]').forEach(function (b) { b.onclick = function () { openItem(b.dataset.ed); }; });
+  }
+  function quickPublish() {
+    var rv = S.sum.release ? S.sum.release.version : 0;
+    call('POST', 'a=publish', { dryRun: true, expectReleaseVersion: rv, expectReviewVersion: S.sum.reviewVersion }).then(function (d) {
+      if (d.error === 'nothing-to-publish') { msg('게시할 변경이 없습니다'); return; }
+      if (!d.ok && d._status !== 200) { msg(d.error || '점검 실패', true); return; }
+      if (!confirm('승인된 항목을 게시합니다.\n추가 ' + d.diff.added + ' · 변경 ' + d.diff.changed + ' · 제거 ' + d.diff.removed + (d.skippedCount ? ' · 제외 ' + d.skippedCount : '') + '\n게시하면 서비스 개방이 켜져 있는 경우 바로 사용자에게 보입니다. 계속할까요?')) return;
+      call('POST', 'a=publish', { expectReleaseVersion: rv, expectReviewVersion: S.sum.reviewVersion }).then(function (r) { msg(r.ok ? '게시했습니다(v' + r.version + ')' : (r.error || '실패'), !r.ok); refresh(S.cur); });
+    });
+  }
 
   // ── 미리보기 ──
   function prevPanel() {
@@ -193,7 +261,7 @@
     open: function (password) {
       pw = password; root = document.getElementById('t-ichingreview'); if (!root) return;
       if (!root.dataset.ready) { root.dataset.ready = '1'; shell(); filterBar(); prevPanel(); }
-      loadSum().then(loadList).then(loadLog);
+      loadSum().then(loadGrid).then(loadList).then(loadLog);
     }
   };
 })();

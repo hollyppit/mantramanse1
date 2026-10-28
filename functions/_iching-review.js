@@ -140,3 +140,22 @@ export async function preview(kv, q) {
   const result = Compose.compose({ question: String(q.question || '(미리보기 질문)').slice(0, 200), category: cat, cast, saju }, { mode });
   return { ok: true, result, validation: Schema.validate(result), quality: Quality.check(result, { cast, saju }), note: saju ? '사주 입력은 형식 확인용 예시 값입니다.' : null };
 }
+
+// 괘 단위 보기: 한 괘의 12개 항목(원문·현대어·분야 4·효 6)을 내용·상태·규칙 검사와 함께 한 번에 돌려준다.
+export async function getHex(kv, num) {
+  const { Content: K, Review: R } = Ic(), n = +num; if (!(n >= 1 && n <= 64)) return { ok: false, error: 'invalid-hex', status: 400 };
+  const store = await load(kv); hydrate(store);
+  const keys = ['classics:' + n, 'modern:' + n, ...K.CATEGORIES.map(c => 'pack:' + n + ':' + c), ...[1, 2, 3, 4, 5, 6].map(p => 'pack:' + n + ':line:' + p)];
+  return { ok: true, num: n, hex: R.info(keys[0]).hex, reviewVersion: store.state.version, items: keys.map(k => ({ ...itemRow(K, R, store, k), content: K.effective(k), errors: R.validateContent(k, K.effective(k)).errors })) };
+}
+
+// 64괘 한눈에 보기: 괘마다 12개 항목의 상태를 한 글자씩(p 게시됨 · r 승인 · d 초안 · i 원문 가져옴 · s 수정됨(재검수) · x 반려)
+export async function getGrid(kv) {
+  const { Content: K, Review: R, Hexagrams: HX } = Ic(), store = await load(kv); hydrate(store);
+  const L = { reviewed: 'r', draft: 'd', 'source-imported': 'i', stale: 's', rejected: 'x', missing: 'm' };
+  const rows = []; for (let n = 1; n <= 64; n++) {
+    const keys = ['classics:' + n, 'modern:' + n, ...K.CATEGORIES.map(c => 'pack:' + n + ':' + c), ...[1, 2, 3, 4, 5, 6].map(p => 'pack:' + n + ':line:' + p)];
+    rows.push({ num: n, ko: HX.byNum(n).ko, hanja: HX.byNum(n).hanja, s: keys.map(k => (K.released(k) ? 'p' : L[K.status(k)] || 'd')).join('') });
+  }
+  return { ok: true, rows, reviewVersion: store.state.version };
+}

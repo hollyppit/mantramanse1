@@ -1,5 +1,5 @@
 // 주역 콘텐츠 검수·승인·게시 API (관리자 전용). 규칙: report/iching/review-core.js, 저장: functions/_iching-review.js. 설계: docs/ICHING_REVIEW_ADMIN_DESIGN.md
-//   GET  ?a=state | items | item | log | releases | preview
+//   GET  ?a=state | grid | hex | items | item | log | releases | preview
 //   POST ?a=review | edit | revert | publish | rollback | flags     (JSON 본문)
 // 모든 호출에 Authorization: Bearer <관리자 비밀번호>가 필요하다. 사용자 서비스 API 가 아니므로 공개 경로가 없다.
 import { json, isAdmin, configError } from '../_lib.js';
@@ -20,6 +20,8 @@ export async function onRequestGet(ctx) {
     if (a === 'state') return reply(await S.getState(kv));
     if (a === 'items') return reply(await S.listItems(kv, o));
     if (a === 'item') return reply(await S.getItem(kv, o.key || ''));
+    if (a === 'hex') return reply(await S.getHex(kv, o.num));
+    if (a === 'grid') return reply(await S.getGrid(kv));
     if (a === 'log') return reply({ ok: true, log: await S.readLog(kv, { key: o.key, limit: Math.min(200, +o.limit || 50) }) });
     if (a === 'releases') return reply(await S.listReleases(kv));
     if (a === 'preview') return reply(await S.preview(kv, o));
