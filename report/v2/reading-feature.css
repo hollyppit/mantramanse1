@@ -1,0 +1,14 @@
+/* 종합풀이 심화 블록(reading-feature.js). deep.css 의 .dp 조각을 새 풀이 화면 안에 자연스럽게 앉힌다. */
+.reading-feature{margin:6px 0 4px}
+.reading-feature-title{font-size:16px;line-height:1.6;color:var(--gold-l,#e8d5a6);margin:4px 0 14px;letter-spacing:.02em}
+.dp-embed{margin:0 0 26px;padding:0;background:none;min-height:0}
+.dp-embed:last-child{margin-bottom:0}
+.dp-embed .dp-fig.dp-thumb.dp-ithumb{width:64px;max-width:64px;margin:0 0 6px}
+.dp-embed .dp-fig.dp-thumb.dp-ithumb.dp-ph span{font-size:1.6rem}
+.dp-embed .dp-iface{display:block;color:var(--ink3,#9a9aa8);font-size:.72rem;margin-bottom:4px}
+.dp-embed .dp-ilju{grid-template-columns:6.4em 1fr}
+.dp-embed .dp-meter{margin:6px 0 4px}
+.dp-embed .dp-job{padding-bottom:6px;border-bottom:1px solid var(--line2,rgba(213,185,127,.18))}
+.reading-feature-lead .dp-hero{text-align:center}
+.reading-feature-lead .dp-fig{margin:0 auto 14px;max-width:340px}
+@media(max-width:560px){.dp-embed .dp-ilju{grid-template-columns:5.6em 1fr}}
