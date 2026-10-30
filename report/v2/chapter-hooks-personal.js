@@ -31,10 +31,19 @@ function family(id){
  return P[k]?k:'self';
 }
 function hash(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h;}
+var ORDER=['갑','을','병','정','무','기','경','신','임','계'],BANDS=['신강','신약','중화'];
 // sd: readingVisualData. 일간이 없으면 null.
+// 장별 문안(MantraPersonalHookData)이 있는 장은 그 장의 질문에 맞춘 문장을 쓴다. 없으면 예전 주제군 문장.
 function make(id,sd){
  var stem=sd&&sd.dayMaster&&sd.dayMaster.stem,s=STEM[stem];if(!s)return null;
- var fam=family(id),phrase=P[fam][stem],name=sd.name&&String(sd.name).trim()?String(sd.name).trim().slice(0,40)+'님':'당신',band=sd.strength&&sd.strength.band,
+ var name=sd.name&&String(sd.name).trim()?String(sd.name).trim().slice(0,40)+'님':'당신',band=sd.strength&&sd.strength.band,
+  data=root.MantraPersonalHookData&&root.MantraPersonalHookData[id],fam=family(id);
+ if(data&&data.p&&data.p[ORDER.indexOf(stem)]){
+  var line=data.p[ORDER.indexOf(stem)],bi=BANDS.indexOf(band),
+   chapterFrames=[s[1]+' 일간인 '+name+', '+line+'.',name+'은 '+s[0]+' 같은 '+s[1]+' 일간이에요. '+line+'.',name+'은 '+s[1]+'('+s[0]+') 일간이에요. '+line+'.'];
+  return {main:chapterFrames[hash(id)%3],tail:(bi>=0&&data.t&&data.t[bi])||'',family:fam,chapter:true};
+ }
+ var phrase=P[fam][stem],
   frames=[s[0]+' 같은 '+s[1]+', '+name+'은 '+phrase+'.',name+'은 '+s[0]+' 같은 '+s[1]+' 일간이에요. '+phrase+'.',s[1]+' 일간답게 '+name+'은 '+phrase+'.'];
  return {main:frames[hash(id)%3],tail:(BAND[fam][band]||''),family:fam};
 }
