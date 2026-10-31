@@ -1,3 +1,4 @@
+import {observeReadingStore} from './_reading-store-observation.js';
 import {monitorReading,MONITOR_VERSION} from './_production-monitor.js';
 import {json} from './_lib.js';
 import {kvOf} from './_store.js';
@@ -12,9 +13,9 @@ import {HEALTH_EDUCATION,isHealthEducation} from './_health-education.js';
 import {diagnosticRecord,saveDiagnostic} from './_reading-diagnostics.js';
 import {seedPassageIds,SEED_INDEX_VERSION} from './_reading-seed-index.js';
 import {seedPassages,SEED_VERSION} from './_reading-library-seed.js';
-export async function prepareReviewed(env,body,{draft=false,passages=null,store:requestStore=null,timings={}}={}){
+export async function prepareReviewed(env,body,{draft=false,passages=null,store:requestStore=null,timings={},observation=null}={}){
  const clean=validate(body);if(!clean)throw Error('bad-payload');
- const store=requestStore||kvOf(env);if(!store)throw Error('storage-unavailable');
+ const baseStore=requestStore||kvOf(env),store=baseStore&&observeReadingStore(baseStore,env,observation);if(!store)throw Error('storage-unavailable');
  // Reuse identical reads only within this request; later requests always observe withdrawals and edits.
  const reads=new Map(),kv=new Proxy(store,{get(target,key){if(key==='get')return (id,type)=>{const k=id+'\0'+(type||'');if(!reads.has(k))reads.set(k,Promise.resolve().then(()=>!draft&&id==='ik:agentic:runtime'&&type==='json'&&target.readingResearchState?target.readingResearchState():target.get(id,type)));return reads.get(k);};const v=target[key];return typeof v==='function'?v.bind(target):v;}});
  // Independent metadata reads start together, scoped to this request only.
@@ -44,6 +45,6 @@ export async function prepareReviewed(env,body,{draft=false,passages=null,store:
 }
 export async function serveReviewed({request,env}){
  const context={requestId:crypto.randomUUID(),started:Date.now(),chapter:'',timings:{},synthetic:request.headers.has('x-release-verification')||request.headers.has('x-mantra-monitor')};
- try{const raw=await request.text();if(raw.length>160000)throw Error('too-large');let body;try{body=JSON.parse(raw);}catch{throw Error('bad-payload');}context.chapter=body.chapter?.id||'';context.expected=body.chapter?.paragraphs?.length;const value=await prepareReviewed(env,body,{timings:context.timings});const {claims,selectionTrace,...publicValue}=value;const payload={...publicValue,requestCostUSD:0,providerCallCount:0,requestId:context.requestId,libraryEngine:LIBRARY_VERSION};const tracked=monitorReading(env,context,payload,200,context.expected),response=json(payload);if(context.synthetic)response.headers.set('Server-Timing',Object.entries(context.timings).map(([k,v])=>k+';dur='+Math.max(0,v)).join(', '));response.headers.set('x-mantra-monitor',tracked?MONITOR_VERSION:'unavailable');return response;}
+ try{const raw=await request.text();if(raw.length>160000)throw Error('too-large');let body;try{body=JSON.parse(raw);}catch{throw Error('bad-payload');}context.chapter=body.chapter?.id||'';context.expected=body.chapter?.paragraphs?.length;const value=await prepareReviewed(env,body,{timings:context.timings,observation:{colo:request.cf?.colo,synthetic:context.synthetic}});const {claims,selectionTrace,...publicValue}=value;const payload={...publicValue,requestCostUSD:0,providerCallCount:0,requestId:context.requestId,libraryEngine:LIBRARY_VERSION};const tracked=monitorReading(env,context,payload,200,context.expected),response=json(payload);if(context.synthetic)response.headers.set('Server-Timing',Object.entries(context.timings).map(([k,v])=>k+';dur='+Math.max(0,v)).join(', '));response.headers.set('x-mantra-monitor',tracked?MONITOR_VERSION:'unavailable');return response;}
  catch(e){const known=['too-large','bad-payload','invalid-chart','unknown-hour-has-pillar','invalid-distribution','unknown-reviewed-chapter'],status=e.message==='too-large'?413:known.includes(e.message)?400:503,body={ok:false,error:known.includes(e.message)?e.message:'storage-unavailable',aiSkipped:true,providerCallCount:0,requestCostUSD:0},failure=diagnosticRecord(body,status,context);await saveDiagnostic(env,failure).catch(()=>{});const tracked=monitorReading(env,context,body,status,context.expected),response=json({...body,requestId:context.requestId,failure},status);response.headers.set('x-mantra-monitor',tracked?MONITOR_VERSION:'unavailable');return response;}
 }
