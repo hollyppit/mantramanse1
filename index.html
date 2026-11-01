@@ -421,8 +421,7 @@ tr.row-g-avoid td { background: color-mix(in srgb, var(--bad) 7%, transparent); 
 .dom { display: grid; gap: 8px; }
 .dom-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px; }
 .dom-g { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-@media (min-width: 720px) { .dom-g { grid-template-columns: repeat(4, minmax(0, 1fr)); } .dom-g5 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.dom-h2 { margin-top: 12px; margin-bottom: 6px; }
+@media (min-width: 720px) { .dom-g { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .dcard { display: grid; gap: 2px; justify-items: start; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 10px 12px; cursor: pointer; min-width: 0; }
 .dcard:hover { background: var(--surface-2); }
 .dcard .dn { font-size: 0.78rem; color: var(--ink-3); font-weight: 700; }
@@ -2395,17 +2394,17 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 계산은 M.evaluateDomainLuck(기존 운 평가 결과를 읽는 별도 계층)이며, 이 절은 표시만 맡는다.
   const DOM_ORDER = ['love', 'wealth', 'health', 'accident'];
   const DOM_INFO = {
-    love: { name: '연애', full: '연애운', sub: '관계 영역의 활성도·적합도·안정성을 종합한 지표', note: '애정운은 관계 영역의 활성·적합·안정·변동을 명리 모델로 계산한 참고 지표이며, 만남이나 이별 같은 사건을 예측하지 않습니다.' },
+    love: { name: '애정', full: '애정운', sub: '관계 영역의 활성도·적합도·안정성을 종합한 지표', note: '애정운은 관계 영역의 활성·적합·안정·변동을 명리 모델로 계산한 참고 지표이며, 만남이나 이별 같은 사건을 예측하지 않습니다.' },
     wealth: { name: '재물', full: '재물운', sub: '재정 활동의 활성도·적합도·안정성을 종합한 지표', note: '재물운은 재정 활동·적합·안정·변동을 명리 모델로 계산한 참고 지표이며, 수입이나 손실의 금액·결과를 예측하지 않습니다.' },
     health: { name: '건강', full: '건강 지수', label: '건강 균형', sub: '오행 균형·조후·부담도를 바탕으로 한 명리적 균형 지표', note: '건강 지수는 명리 해석상의 균형·부담 지표이며 질병의 진단이나 발생 가능성을 의미하지 않습니다.' },
     accident: { name: '사고수', full: '사고수', short: '사고수는 사고 발생 확률을 의미하지 않습니다.', sub: '변동·충돌·과부하 신호의 중첩 정도를 나타내는 주의 지표', note: '사고수는 명리학적 변화·충돌·부담 신호를 수치화한 참고 지표입니다. 실제 사고 발생 여부나 확률을 예측하지 않습니다. 사고 발생 확률을 의미하지 않으며, 높을수록 주의 신호가 많이 겹쳤다는 뜻입니다.' },
   };
   // 시간 단위별 해석 범위
   const DOM_SCOPE = {
-    daeun: { love: '10년 동안의 관계 환경', wealth: '10년 동안의 재정 환경', health: '10년 동안의 균형·부담 환경', accident: '10년 동안의 주의 신호 환경입니다. 10년 동안 사고가 난다는 뜻이 아닙니다', job: '10년 동안 조직과 닿는 환경', move: '10년 동안 직장 환경이 움직이는 정도', career: '10년 동안의 직업 활동 환경', business: '10년 동안의 사업 환경', child: '10년 동안의 자녀 영역 환경' },
-    seun: { love: '해당 연도의 관계 활성·부담', wealth: '해당 연도의 재정 활성·부담', health: '해당 연도의 균형·부담', accident: '해당 연도의 주의 신호 환경입니다', job: '해당 연도의 취업·입사 환경', move: '해당 연도의 이동 신호와 안착', career: '해당 연도의 직업 활동·성과 환경', business: '해당 연도의 사업 활동·부담', child: '해당 연도의 자녀 영역 신호' },
-    wolun: { love: '해당 달의 구체적인 관계 흐름', wealth: '해당 달의 구체적인 재정 흐름', health: '해당 달의 균형·부담 흐름', accident: '해당 달의 주의 신호입니다', job: '해당 달의 취업 활동 흐름', move: '해당 달의 이동 신호 흐름', career: '해당 달의 직업 활동 흐름', business: '해당 달의 사업 활동 흐름', child: '해당 달의 자녀 영역 흐름' },
-    ilun: { love: '해당 날짜의 단기적인 관계 흐름', wealth: '해당 날짜의 단기적인 재정 흐름', health: '해당 날짜의 단기적인 균형·부담 흐름', accident: '해당 날짜의 단기적인 주의 신호입니다', job: '해당 날짜의 단기적인 취업 활동 흐름', move: '해당 날짜의 단기적인 이동 신호', career: '해당 날짜의 단기적인 직업 활동 흐름', business: '해당 날짜의 단기적인 사업 활동 흐름', child: '해당 날짜의 단기적인 자녀 영역 흐름' },
+    daeun: { love: '10년 동안의 관계 환경', wealth: '10년 동안의 재정 환경', health: '10년 동안의 균형·부담 환경', accident: '10년 동안의 주의 신호 환경입니다. 10년 동안 사고가 난다는 뜻이 아닙니다' },
+    seun: { love: '해당 연도의 관계 활성·부담', wealth: '해당 연도의 재정 활성·부담', health: '해당 연도의 균형·부담', accident: '해당 연도의 주의 신호 환경입니다' },
+    wolun: { love: '해당 달의 구체적인 관계 흐름', wealth: '해당 달의 구체적인 재정 흐름', health: '해당 달의 균형·부담 흐름', accident: '해당 달의 주의 신호입니다' },
+    ilun: { love: '해당 날짜의 단기적인 관계 흐름', wealth: '해당 날짜의 단기적인 재정 흐름', health: '해당 날짜의 단기적인 균형·부담 흐름', accident: '해당 날짜의 단기적인 주의 신호입니다' },
   };
   const DOM_LEVEL_NAME = { daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
   // 점수 색: 애정·재물·건강은 높을수록, 사고수는 낮을수록 좋은 쪽 색. 색만으로 뜻을 전하지 않도록 항상 숫자·단계 글자를 함께 쓴다
@@ -2424,10 +2423,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return `<div class="dom"><div class="dom-h"><b>분야별 지수</b><span class="muted small">${DOM_LEVEL_NAME[kind]} 기준 · 누르면 근거가 열립니다</span></div>
       <div class="dom-g">${DOM_ORDER.map(k => { const r = res[k];
         return `<button type="button" class="dcard" data-dom="${id}:${k}" aria-label="${DOM_INFO[k].full} ${r.score} ${r.band}"><span class="dn">${k === 'health' ? '건강 균형' : DOM_INFO[k].name}</span><b class="dv num" style="color:${domCol(k, r.score)}">${r.score}</b><span class="db">${r.band}</span>${r.tags.length ? `<span class="dt">${r.tags.join(' · ')}</span>` : ''}<span class="dbar"><i style="width:${r.score}%;background:${domCol(k, r.score)}"></i></span></button>`; }).join('')}</div>
-      <div class="dom-h dom-h2"><b>직업·가족 세부 지수</b><span class="muted small">취업 · 이직 · 직업 · 사업 · 자식 · 결혼 · 귀인 · 학업 · 문서·이사 · 대인·구설 · 부모·가족</span></div>
-      <div class="dom-g dom-g5">${DOM_SUB.map(k => { const r = res[k];
-        return `<button type="button" class="dcard" data-dom="${id}:${k}" aria-label="${DOM_INFO[k].full} ${r.score} ${r.band}"><span class="dn">${DOM_INFO[k].name}</span><b class="dv num" style="color:${domCol(k, r.score)}">${r.score}</b><span class="db">${r.band}</span>${r.tags.length ? `<span class="dt">${r.tags.join(' · ')}</span>` : ''}<span class="dbar"><i style="width:${r.score}%;background:${domCol(k, r.score)}"></i></span></button>`; }).join('')}</div>
-      <p class="small muted dom-n">${DOM_INFO.health.note} ${DOM_INFO.accident.short} 세부 지수도 사건·결과를 예측하지 않는 참고 지표입니다.</p></div>`;
+      <p class="small muted dom-n">${DOM_INFO.health.note} ${DOM_INFO.accident.short}</p></div>`;
   }
   const domRow = (label, v, inverse) => `<div class="dpart"><span>${label}</span><span class="dbar"><i style="width:${Math.round(v)}%;background:${domCol('health', inverse ? 100 - v : v)}"></i></span><b class="num">${Math.round(v)}</b></div>`;
   // 상세 시트(분야 하나)
@@ -2452,9 +2448,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
 
   // ── 지표 선택과 그래프
-  const METRICS = [['flow', '전체 흐름'], ['love', '연애'], ['wealth', '재물'], ['health', '건강'], ['accident', '사고수']];
-  const METRICS_SUB = DOM_SUB.map(k => [k, DOM_INFO[k].name]);   // 취업·이직·직업·사업·자식
-  const isDomain = () => DOM_ORDER.includes(S.metric) || DOM_SUB.includes(S.metric);
+  const METRICS = [['flow', '전체 흐름'], ['love', '애정'], ['wealth', '재물'], ['health', '건강'], ['accident', '사고수']];
+  const isDomain = () => DOM_ORDER.includes(S.metric);
   function metricBar() {
     const m = S.metric || 'flow', info = DOM_INFO[m];
     return `<section class="card"><div class="card-h"><h2>그래프 지표</h2><span class="note">아래 대운·연도·월운 그래프와 일진 달력에 적용됩니다</span></div>
@@ -4714,17 +4709,3 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
 </script>
 </body>
 </html>
-    job: { name: '취업', full: '취업운', sub: '조직 진입·합격 신호의 활성도·적합도·안정성을 종합한 지표', note: '취업운은 조직과 닿는 신호(관성·인성·직장 환경)를 명리 모델로 계산한 참고 지표이며, 합격·채용 여부를 예측하지 않습니다.' },
-    move: { name: '이직', full: '이직운', sub: '이동 신호의 강도·옮길 때의 유리함·옮긴 뒤 안착을 종합한 지표', note: '이직운은 직장 환경이 움직이는 신호를 명리 모델로 계산한 참고 지표입니다. 점수가 높다고 옮겨야 한다는 뜻이 아니며, 이직 여부와 결과를 예측하지 않습니다.' },
-    career: { name: '직업', full: '직업운', sub: '원국의 직업 적성 분야가 운에서 얼마나 활성화되는지와 업무 구조를 종합한 지표', note: '직업운은 원국의 직업 적성과 운의 접점을 명리 모델로 계산한 참고 지표이며, 승진·성과·수입 같은 결과를 예측하지 않습니다.' },
-    business: { name: '사업', full: '사업운', sub: '사업 활동성·원국의 사업 적합도·안정성을 종합한 지표', note: '사업운은 거래·독립·동업 신호를 명리 모델로 계산한 참고 지표이며, 창업의 성공이나 수익을 예측하지 않습니다.' },
-    marriage: { name: '결혼', full: '결혼운', sub: '배우자궁의 결속 신호·배우자성 적합·안정성을 종합한 지표(연애의 활성도가 아니라 관계가 이어지는 구조)', note: '결혼운은 배우자궁(일지)의 합·충과 배우자성 신호를 명리 모델로 계산한 참고 지표이며, 혼인·이별 같은 사건을 예측하지 않습니다.' },
-    noble: { name: '귀인', full: '귀인운', sub: '도와 주는 사람·후원 신호(인성·관성·합·귀인 신살)와 경쟁·긴장의 균형을 종합한 지표', note: '귀인운은 도움이 되는 인연의 신호를 명리 모델로 계산한 참고 지표입니다. 신살은 보조로만 쓰며, 특정 사람이나 결과를 예측하지 않습니다.' },
-    study: { name: '학업', full: '학업운', sub: '공부·시험 신호의 활성도·적합도·집중 안정성을 종합한 지표', note: '학업운은 인성·식상·관성과 집중 환경을 명리 모델로 계산한 참고 지표이며, 합격·성적을 예측하지 않습니다.' },
-    estate: { name: '문서·이사', full: '문서·이사운', sub: '문서·계약·거처 이동 신호의 활성도·적합도·안정성을 종합한 지표', note: '문서·이사운은 문서(인성)·재산(재성)·거처 환경의 움직임을 명리 모델로 계산한 참고 지표이며, 계약이나 이사의 성사·결과를 예측하지 않습니다.' },
-    social: { name: '대인·구설', full: '대인·구설운', sub: '교류 활성도와 마찰·구설 신호의 억제(높을수록 안정)를 종합한 지표', note: '대인·구설운은 교류와 마찰 신호를 명리 모델로 계산한 참고 지표입니다. 점수가 높을수록 마찰 신호가 적다는 뜻이며, 특정 갈등이나 구설을 예측하지 않습니다.' },
-    family: { name: '부모·가족', full: '부모·가족운', sub: '인성·재성과 년주·월주 궁 신호의 활성도·적합도·가정 안정성을 종합한 지표', note: '부모·가족운은 가족 환경의 신호를 명리 모델로 계산한 참고 지표이며, 부모·가족의 건강·사건을 예측하지 않습니다.' },
-    child: { name: '자식', full: '자식운', sub: '자식성(남 관성·여 식상)과 자녀궁(시지) 신호의 활성도·적합도·안정성을 종합한 지표', note: '자식운은 자식성·자녀궁 신호를 명리 모델로 계산한 참고 지표이며, 출산이나 자녀의 일을 예측하지 않습니다. 출생 시각을 모르면 자녀궁 신호를 빼고 계산합니다.' },
-  const DOM_SUB = ['job', 'move', 'career', 'business', 'child', 'marriage', 'noble', 'study', 'estate', 'social', 'family'];   // 엔진 M.SUB_DOMAIN_KEYS와 같은 순서
-  { const T = { daeun: '10년 동안의', seun: '해당 연도의', wolun: '해당 달의', ilun: '해당 날짜의 단기적인' }; ['study', 'estate', 'social', 'family'].forEach(k => Object.keys(T).forEach(lv => { DOM_SCOPE[lv][k] = `${T[lv]} ${DOM_INFO[k].name} 영역 흐름`; })); }
-      <div class="cp-filters" role="group" aria-label="직업·가족 세부 지표" style="margin-top:6px">${METRICS_SUB.map(([k, l]) => `<button type="button" class="opt" data-act="metric:${k}" aria-pressed="${m === k}">${l}운</button>`).join('')}</div>
