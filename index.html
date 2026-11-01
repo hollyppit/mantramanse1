@@ -17,6 +17,7 @@
   --wood-on: #fff; --fire-on: #fff; --earth-on: #2A2100; --metal-on: #1D2230; --water-on: #fff;
   --d-atk: #1E9E57; --d-ext: #0E9AA7; --d-hrv: #8A5CF6; --d-acc: #2F6BFF; --d-chg: #E08A00; --d-def: #E5533D;
   --good: #1E9E57; --bad: #F0563F; --mid: #BAC1CE; --good-soft: #E3F5EA; --bad-soft: #FFEAE6;
+  --sg-best: #0B7A3A; --sg-good: #2DB36B; --sg-ok: #B5BDCB; --sg-warn: #F2A516; --sg-bad: #E5483A;   /* 운 신호등: 최고·좋음·무난·주의·부담 */
   --shadow: 0 1px 2px rgba(18, 21, 31, .04), 0 10px 30px -12px rgba(30, 40, 90, .12);
   --f-display: "Noto Serif KR", "Nanum Myeongjo", "Apple SD Gothic Neo", serif;
   --f-head: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
@@ -243,7 +244,7 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .nowc .tgs { font-size: 0.76rem; color: var(--ink-2); }
 .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
 .cal .dow { font-size: 0.7rem; color: var(--ink-3); text-align: center; font-weight: 600; }
-.cal button { border: 1px solid transparent; border-radius: 12px; padding: 5px 2px; min-height: 78px; cursor: pointer; display: grid; gap: 1px; justify-items: center; align-content: start; background: var(--surface-2); }
+.cal button { border: 1px solid transparent; border-radius: 12px; padding: 5px 2px; min-height: 96px; cursor: pointer; display: grid; gap: 1px; justify-items: center; align-content: start; background: var(--surface-2); }
 .cal button { position: relative; }
 .cal .ctop { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 3px; }
 .son { display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 50%; background: var(--seal); color: var(--surface); font-size: 9px; font-weight: 700; line-height: 1; }
@@ -262,8 +263,19 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .cal button .dg { font-family: var(--f-display); font-weight: 700; font-size: 0.9rem; line-height: 1.1; }
 .cal button.today { border-color: var(--ink); }
 .cal button.sel { box-shadow: inset 0 0 0 2px var(--accent); }
+/* 운 신호등: 색 = 이 시기가 나에게 얼마나 유리한가(초록 좋음 → 회색 무난 → 주황 주의 → 빨강 부담), 글자는 활성화되는 일 */
+.sgleg { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 0.78rem; color: var(--ink-2); margin: 2px 0 4px; }
+.sgchip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; font-weight: 800; font-size: 0.74rem; line-height: 1.35; background: var(--c); color: var(--on); white-space: nowrap; }
+.sgbar { display: flex; height: 24px; border-radius: 12px; overflow: hidden; gap: 2px; margin: 8px 0 4px; }
+.sgbar i { display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 0.72rem; font-weight: 800; background: var(--c); color: var(--on); min-width: 0; overflow: hidden; white-space: nowrap; }
+.sgsum { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.78rem; color: var(--ink-2); margin-bottom: 8px; }
+.sgsum b { color: var(--ink); }
+.cal .sgw { font-size: 0.7rem; font-weight: 800; line-height: 1.3; padding: 1px 8px; border-radius: 999px; background: var(--c); color: var(--on); }
+.cal .sgw + .sc { margin-top: 1px; }
+.lt-sc .sgchip { margin-right: 2px; }
+.list .v .sgchip { margin: 2px 6px 2px 0; }
 .lts { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(92px, 1fr); gap: 6px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: thin; }
-.lt { border: 0; box-shadow: inset 0 0 0 1px var(--line); background: var(--surface); border-radius: 16px; padding: 8px 6px; display: grid; gap: 3px; justify-items: center; align-content: start; cursor: pointer; text-align: center; }
+.lt { border: 0; border-top: 4px solid var(--c, transparent); box-shadow: inset 0 0 0 1px var(--line); background: var(--surface); border-radius: 16px; padding: 8px 6px; display: grid; gap: 3px; justify-items: center; align-content: start; cursor: pointer; text-align: center; }
 .lt:hover { box-shadow: inset 0 0 0 2px var(--accent); }
 .lt.sel { box-shadow: inset 0 0 0 2px var(--ink); }
 .lt.cur { background: var(--accent-soft); }
@@ -4753,7 +4765,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const ovTag = k => `<span class="ovb ov-${k}">${OVL[k][0]}</span>`;
   const ovBtn = (k, e) => `<button type="button" class="term ovb ov-${k}" data-term="${OVL[k][2]}"${volAttr(e)}>${OVL[k][0]}</button>`;
   const ovTags = (e, btn) => ['volatility', 'defense'].filter(k => e.overlays[k].active).map(k => btn ? ovBtn(k, e) : ovTag(k)).join('');
-  const modeLegend = () => `<div class="legend">${Object.keys(MODE6_COL).map(m => `<span><i class="sw" style="background:${m6Col(m)}"></i>${term(m, flowTxt(m))}</span>`).join('')}<span>막대 높이 = 흐름 적합도 · 색 = 주 흐름</span><span>${ovTag('volatility')}${ovTag('defense')} ${term('변동기', '변동 신호')}·${term('방어기', '방어 신호')} = 막대 테두리와 아래 글자(변·방)</span><span>배지 ${Object.keys(CONDS).map(c => `<span class="pill b-${c}">${c}</span>`).join(' ')}</span>${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))}만 따로 본 값</span>` : ''}</div>`;
+  const modeLegend = () => `${sigLegend(flowRule())}<div class="legend"><span>막대 높이 = 흐름 적합도 · 막대 아래 글자 = 활성화되는 일(${Object.keys(MODE6_COL).map(m => term(m, flowTxt(m))).join('·')})</span><span>${ovTag('volatility')}${ovTag('defense')} ${term('변동기', '변동 신호')}·${term('방어기', '방어 신호')} = 막대 테두리와 아래 글자(변·방)</span><span>배지 ${Object.keys(CONDS).map(c => `<span class="pill b-${c}">${c}</span>`).join(' ')}</span>${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))}만 따로 본 값</span>` : ''}</div>`;
   // 시진 4단계 실행 등급. 목적마다 맞는 기운(십성 묶음 번호: 0 비겁 1 식상 2 재성 3 관성 4 인성)
   const PURPOSE = { gen: ['일반', null], deal: ['계약', [3, 4]], money: ['돈', [2, 1]], create: ['창작', [1, 4]] };
   const GRADE = { '실행': ['◎', 'g-go'], '활용': ['○', 'g-use'], '주의': ['△', 'g-warn'], '회피': ['×', 'g-avoid'] };
@@ -5838,7 +5850,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   function luckTile(x, top, pick, on, cur) {
     const se = M.stemEl(x.s), be = M.BR_EL[x.b];
-    return `<button type="button" class="lt${on ? ' sel' : ''}${cur ? ' cur' : ''}" data-pick="${pick}">
+    return `<button type="button" class="lt${on ? ' sel' : ''}${cur ? ' cur' : ''}" data-pick="${pick}" style="${sgVars(tileSig(x))}">
       <span class="lt-top num">${top}</span>
       <span class="lt-tg">${x.stemTG}</span>
       <span class="lt-g ${ECLS[se]}"><b>${M.STEM[x.s]}</b><i>${M.STEM_K[x.s]}${M.EL_K[se]}</i></span>
@@ -5846,7 +5858,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <span class="lt-tg">${x.branchTG}</span>
       <span class="lt-us">${x.unseong} · ${x.sinsal12}</span>
       <span class="lt-ev">${luckChips(x)}</span>
-      <span class="lt-sc">${m6Tag(luckMode(x).mode)}${ovTags(x.ev, false)} ${pill(x.ev.condition)}</span>${x.year && x.ev.level === "seun" ? samjaeTag(samjaeOf(x.year)) : ""}
+      <span class="lt-sc"><span class="sgchip" style="${sgVars(tileSig(x))}">${tileSig(x).n}</span>${m6Tag(luckMode(x).mode)}${ovTags(x.ev, false)} ${pill(x.ev.condition)}</span>${x.year && x.ev.level === "seun" ? samjaeTag(samjaeOf(x.year)) : ""}
     </button>`;
   }
   // 이 시기에 들어오는 오행과 원국과의 작용(합·충·형·신살)을 풀어 쓴다
@@ -5908,11 +5920,41 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   };
   { const T = { daeun: '10년 동안의', seun: '해당 연도의', wolun: '해당 달의', ilun: '해당 날짜의 단기적인' }; ['study', 'estate', 'social', 'family'].forEach(k => Object.keys(T).forEach(lv => { DOM_SCOPE[lv][k] = `${T[lv]} ${DOM_INFO[k].name} 영역 흐름`; })); }
   const DOM_LEVEL_NAME = { daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
-  // 점수 색: 애정·재물·건강은 높을수록, 사고수는 낮을수록 좋은 쪽 색. 색만으로 뜻을 전하지 않도록 항상 숫자·단계 글자를 함께 쓴다
-  function domCol(key, v) {
-    const g = key === 'accident' ? 100 - v : v;
-    return g >= 70 ? 'var(--good)' : g >= 55 ? 'var(--accent)' : g >= 40 ? 'var(--ink-3)' : g >= 25 ? 'var(--d-chg)' : 'var(--bad)';
+  // ───────────── 운 신호등 ─────────────
+  // 색 = 이 시기가 나에게 얼마나 유리한가: 최고(진한 초록) · 좋음(초록) · 무난(회색) · 주의(주황) · 부담(빨강).
+  // 글자 = 어떤 일이 활성화되는가(기회·확장·수확·축적). 색만으로 뜻을 전하지 않도록 단계 글자를 항상 같이 쓴다.
+  //  · 전체 흐름: 엔진의 상태 기준(순풍 ≥ +18, 주의 ≤ −12, 부담 ≤ −35)을 그대로 쓰고, +30 이상만 "최고"로 한 단계 더 나눈다
+  //  · 분야별 지표(0~100): 점수가 한쪽으로 몰려 있어 절대 점수 대신 "이 사주의 평소 수준 대비"로 나눈다(하위 10%·30%, 상위 70%·90% 지점).
+  //    기준값은 사주 수백 개 × 대운·세운·월운·일진 점수 분포에서 뽑았다. 사고수는 낮을수록 좋은 쪽이라 거꾸로 읽는다.
+  const SIG = [
+    { i: 0, k: 'best', n: '최고', c: 'var(--sg-best)', t: '#fff', soft: 34 },
+    { i: 1, k: 'good', n: '좋음', c: 'var(--sg-good)', t: '#fff', soft: 24 },
+    { i: 2, k: 'ok', n: '무난', c: 'var(--sg-ok)', t: 'var(--ink)', soft: 15 },
+    { i: 3, k: 'warn', n: '주의', c: 'var(--sg-warn)', t: '#3A2700', soft: 30 },
+    { i: 4, k: 'bad', n: '부담', c: 'var(--sg-bad)', t: '#fff', soft: 34 }];
+  const SIG_CUTS = {"love":[45,49,58,66],"wealth":[39,44,51,56],"health":[56,63,73,78],"accident":[16,23,37,50],"job":[45,50,57,63],"move":[47,51,59,67],"career":[41,49,60,66],"business":[44,50,58,64],"child":[42,46,58,67],"marriage":[39,47,62,72],"noble":[40,49,60,68],"study":[43,49,58,65],"estate":[45,51,60,66],"social":[45,51,58,63],"family":[44,49,59,66]};   // 지표별 [하위10%, 하위30%, 상위30%, 상위10%] 점수
+  const sgVars = g => `--c:${g.c};--on:${g.t}`;
+  const sgSoft = g => `color-mix(in srgb, ${g.c} ${g.soft}%, var(--surface))`;
+  const sigFlow = v => { const C = M.LUCK_CFG.condition; return v >= 30 ? SIG[0] : v >= C.tailwind ? SIG[1] : v > C.caution ? SIG[2] : v > C.burden ? SIG[3] : SIG[4]; };
+  function sigMetric(key, v) {
+    const c = SIG_CUTS[key]; if (!c) return SIG[2];
+    const x = key === 'accident' ? -v : v, q = key === 'accident' ? c.slice().reverse().map(z => -z) : c;
+    return x >= q[3] ? SIG[0] : x >= q[2] ? SIG[1] : x > q[1] ? SIG[2] : x > q[0] ? SIG[3] : SIG[4];
   }
+  function domCol(key, v) { return sigMetric(key, v).c; }
+  // 막대 하나·타일 하나의 신호등(현재 선택한 지표 기준)
+  const tileSig = x => { if (isDomain()) { try { return sigMetric(S.metric, domOf(x, x.ev.level)[S.metric].score); } catch (e) { } } return sigFlow(x.ev && x.ev.level === 'seun' && x.combined != null ? x.combined : luckV(x)); };
+  // 그래프 배경 띠: 좋음 구간(초록)·주의 구간(주황)·부담 구간(빨강)을 옅게 깔아 어느 높이가 좋은지 바로 보이게 한다
+  const sgZone = (x0, x1, yA, yB, g) => `<rect x="${x0}" y="${Math.min(yA, yB)}" width="${x1 - x0}" height="${Math.abs(yB - yA)}" style="fill:${g.c};opacity:.1"/>`;
+  const flowZones = (y, x0, x1, RG = 100) => { const C = M.LUCK_CFG.condition; return sgZone(x0, x1, y(RG), y(C.tailwind), SIG[1]) + sgZone(x0, x1, y(C.caution), y(C.burden), SIG[3]) + sgZone(x0, x1, y(C.burden), y(-RG), SIG[4]); };
+  function metricZones(key, y, x0, x1) {
+    const c = SIG_CUTS[key]; if (!c) return '';
+    return key === 'accident' ? sgZone(x0, x1, y(0), y(c[1]), SIG[1]) + sgZone(x0, x1, y(c[2]), y(c[3]), SIG[3]) + sgZone(x0, x1, y(c[3]), y(100), SIG[4])
+      : sgZone(x0, x1, y(100), y(c[2]), SIG[1]) + sgZone(x0, x1, y(c[1]), y(c[0]), SIG[3]) + sgZone(x0, x1, y(c[0]), y(0), SIG[4]);
+  }
+  const sigLegend = rule => `<div class="sgleg">${SIG.map(g => `<span class="sgchip" style="${sgVars(g)}">${g.n}</span>`).join('')}<span>${rule}</span></div>`;
+  const flowRule = () => { const C = M.LUCK_CFG.condition; return `색 = 이 시기가 나에게 얼마나 유리한가 (흐름 점수 +${C.tailwind} 이상 좋음 · ${C.caution} 이하 주의 · ${C.burden} 이하 부담)`; };
+  const metricRule = k => `색 = 이 사주의 평소 수준보다 얼마나 좋은가${k === 'accident' ? ' (사고수는 낮을수록 좋음)' : ''}`;
   const domLabel = (key, r) => key === 'health' ? `건강 균형 ${r.score}` : `${DOM_INFO[key].name} ${r.score}`;
   const domCtx = (x, kind) => kind === 'seun' ? { ms: x.midMs } : kind === 'wolun' ? { ms: x.startMs + 12 * 864e5 } : kind === 'ilun' ? { ms: Date.UTC(x.date[0], x.date[1] - 1, x.date[2], 3) } : {};
   const domOf = (x, kind) => M.evaluateDomainLuck(S.ch, x, kind, domCtx(x, kind));
@@ -5923,10 +5965,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const id = 'd' + (++domSeq); DOM_CTX[id] = { res, kind, title };
     return `<div class="dom"><div class="dom-h"><b>분야별 지수</b><span class="muted small">${DOM_LEVEL_NAME[kind]} 기준 · 누르면 근거가 열립니다</span></div>
       <div class="dom-g">${DOM_ORDER.map(k => { const r = res[k];
-        return `<button type="button" class="dcard" data-dom="${id}:${k}" aria-label="${DOM_INFO[k].full} ${r.score} ${r.band}"><span class="dn">${k === 'health' ? '건강 균형' : DOM_INFO[k].name}</span><b class="dv num" style="color:${domCol(k, r.score)}">${r.score}</b><span class="db">${r.band}</span>${r.tags.length ? `<span class="dt">${r.tags.join(' · ')}</span>` : ''}<span class="dbar"><i style="width:${r.score}%;background:${domCol(k, r.score)}"></i></span></button>`; }).join('')}</div>
+        return `<button type="button" class="dcard" data-dom="${id}:${k}" aria-label="${DOM_INFO[k].full} ${r.score} ${sigMetric(k, r.score).n}"><span class="dn">${k === 'health' ? '건강 균형' : DOM_INFO[k].name}</span><b class="dv num" style="color:${domCol(k, r.score)}">${r.score}</b><span class="db">${sigMetric(k, r.score).n}</span>${r.tags.length ? `<span class="dt">${r.tags.join(' · ')}</span>` : ''}<span class="dbar"><i style="width:${r.score}%;background:${domCol(k, r.score)}"></i></span></button>`; }).join('')}</div>
       <div class="dom-h dom-h2"><b>직업·가족 세부 지수</b><span class="muted small">취업 · 이직 · 직업 · 사업 · 자식 · 결혼 · 귀인 · 학업 · 문서·이사 · 대인·구설 · 부모·가족</span></div>
       <div class="dom-g dom-g5">${DOM_SUB.map(k => { const r = res[k];
-        return `<button type="button" class="dcard" data-dom="${id}:${k}" aria-label="${DOM_INFO[k].full} ${r.score} ${r.band}"><span class="dn">${DOM_INFO[k].name}</span><b class="dv num" style="color:${domCol(k, r.score)}">${r.score}</b><span class="db">${r.band}</span>${r.tags.length ? `<span class="dt">${r.tags.join(' · ')}</span>` : ''}<span class="dbar"><i style="width:${r.score}%;background:${domCol(k, r.score)}"></i></span></button>`; }).join('')}</div>
+        return `<button type="button" class="dcard" data-dom="${id}:${k}" aria-label="${DOM_INFO[k].full} ${r.score} ${sigMetric(k, r.score).n}"><span class="dn">${DOM_INFO[k].name}</span><b class="dv num" style="color:${domCol(k, r.score)}">${r.score}</b><span class="db">${sigMetric(k, r.score).n}</span>${r.tags.length ? `<span class="dt">${r.tags.join(' · ')}</span>` : ''}<span class="dbar"><i style="width:${r.score}%;background:${domCol(k, r.score)}"></i></span></button>`; }).join('')}</div>
       <p class="small muted dom-n">${DOM_INFO.health.note} ${DOM_INFO.accident.short} 세부 지수도 사건·결과를 예측하지 않는 참고 지표입니다.</p></div>`;
   }
   const domRow = (label, v, inverse) => `<div class="dpart"><span>${label}</span><span class="dbar"><i style="width:${Math.round(v)}%;background:${domCol('health', inverse ? 100 - v : v)}"></i></span><b class="num">${Math.round(v)}</b></div>`;
@@ -5934,7 +5976,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function domSheetHTML(sel) {
     const ctx = DOM_CTX[sel.id]; if (!ctx) return '<p>표시할 정보가 없습니다.</p><button class="btn x" data-act="close">닫기</button>';
     const { res, kind, title } = ctx, k = sel.key, r = res[k], I = DOM_INFO[k], c = r.components;
-    const head = k === 'health' ? `${I.full} ${r.score} · ${r.band}` : k === 'accident' ? `사고수 ${r.score} · ${r.band}` : `${I.full} ${r.score} · ${r.band}`;
+    const head = `${k === 'accident' ? '사고수' : I.full} ${r.score} · ${sigMetric(k, r.score).n}`;
     const rows = k === 'accident' ? r.parts.map(p => domRow(p.label, p.v, true)).join('')
       : k === 'health' ? r.parts.map(p => p.key === 'volatility' ? domRow(p.label, p.v, true) : domRow(p.label, p.v, p.inverse)).join('')
         : r.parts.map(p => p.key === 'volatility' ? domRow(p.label, p.v, true) : domRow(p.label, p.v, false)).join('');
@@ -5960,22 +6002,24 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return `<section class="card"><div class="card-h"><h2>그래프 지표</h2><span class="note">아래 대운·연도·월운 그래프와 일진 달력에 적용됩니다</span></div>
       <div class="cp-filters" role="group" aria-label="그래프 지표">${METRICS.map(([k, l]) => `<button type="button" class="opt" data-act="metric:${k}" aria-pressed="${m === k}">${l}</button>`).join('')}</div>
       <div class="cp-filters" role="group" aria-label="직업·가족 세부 지표" style="margin-top:6px">${METRICS_SUB.map(([k, l]) => `<button type="button" class="opt" data-act="metric:${k}" aria-pressed="${m === k}">${l}운</button>`).join('')}</div>
-      <p class="small" style="color:var(--ink-2)">${m === 'flow' ? '전체 흐름: 원국의 불균형을 들어오는 운이 보완하는지 심화하는지를 나타내는 −100~+100의 상대 지표입니다.' : `<b>${info.full}</b> — ${info.sub}. 0~100 눈금이며 ${m === 'accident' ? '높을수록 주의 신호가 많이 겹쳤다는 뜻입니다.' : '높을수록 그 지표의 값이 큽니다.'}`}</p>
+      <p class="small" style="color:var(--ink-2)">${m === 'flow' ? '전체 흐름: 원국의 불균형을 들어오는 운이 보완하는지 심화하는지를 나타내는 −100~+100의 상대 지표입니다. 막대 색은 좋고 나쁨(최고·좋음·무난·주의·부담)이고, 막대 아래 글자는 활성화되는 일입니다.' : `<b>${info.full}</b> — ${info.sub}. 0~100 눈금이며 ${m === 'accident' ? '높을수록 주의 신호가 많이 겹쳤다는 뜻입니다.' : '높을수록 그 지표의 값이 큽니다.'}`}</p>
       ${m === 'health' || m === 'accident' ? `<p class="cp-disc">${info.note}</p>` : m !== 'flow' ? `<p class="small muted">${info.note}</p>` : ''}
     </section>`;
   }
-  const chartLegend = () => !isDomain() ? modeLegend() : `<div class="legend"><span>막대 높이 = ${DOM_INFO[S.metric].full} 점수(0~100)</span>${S.metric === 'accident' ? '<span><i class="sw" style="background:var(--good)"></i>낮음</span><span><i class="sw" style="background:var(--d-chg)"></i>주의</span><span><i class="sw" style="background:var(--bad)"></i>주의 높음</span>' : '<span><i class="sw" style="background:var(--good)"></i>높음</span><span><i class="sw" style="background:var(--ink-3)"></i>보통</span><span><i class="sw" style="background:var(--bad)"></i>낮음</span>'}<span>단계 글자는 누르면 나오는 상세와 툴팁에 표시됩니다</span></div>`;
-  function domTip(title, res) { const k = S.metric, r = res[k]; return `<b>${esc(title)}</b><br>${DOM_INFO[k].full} <b>${r.score}</b> · ${r.band}${r.tags.length ? `<br>${r.tags.join(' · ')}` : ''}<br>${r.summary}${r.reasons.slice(0, 2).map(t => `<br>· ${esc(t)}`).join('')}`; }
+  const chartLegend = () => !isDomain() ? modeLegend() : `${sigLegend(metricRule(S.metric))}<div class="legend"><span>막대 높이 = ${DOM_INFO[S.metric].full} 점수(0~100) · 막대 위 글자 = 신호등 단계</span></div>`;
+  function domTip(title, res) { const k = S.metric, r = res[k]; return `<b>${esc(title)}</b><br>${DOM_INFO[k].full} <b>${r.score}</b> · ${sigMetric(k, r.score).n}${r.tags.length ? `<br>${r.tags.join(' · ')}` : ''}<br>${r.summary}${r.reasons.slice(0, 2).map(t => `<br>· ${esc(t)}`).join('')}`; }
   // 0~100 눈금 막대(대운·월운)
   function drawDomainDiv(el, items) {
     const k = S.metric, n = items.length, cw = el.clientWidth || 320, W = Math.max(cw, n * 40), H = 246, L = 34, R = 6, T = 30, B = 54;
     const step = (W - L - R) / n, bw = Math.min(30, step * 0.58), y = v => T + (100 - v) / 100 * (H - T - B);
     let s = svgEl(W, H);
+    s += metricZones(k, y, L, W - R);
     for (const g of [0, 25, 50, 75, 100]) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'};stroke-width:1" ${g && g !== 100 ? 'stroke-dasharray="3 3"' : ''}/><text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g}</text>`;
     items.forEach((it, i) => {
       const cx = L + step * (i + 0.5), h = Math.max(2, y(0) - y(it.v)), top = y(it.v), x0 = cx - bw / 2, r = Math.min(4, h / 2);
       s += `<path d="M${x0},${y(0)} V${top + r} Q${x0},${top} ${x0 + r},${top} H${x0 + bw - r} Q${x0 + bw},${top} ${x0 + bw},${top + r} V${y(0)} Z" style="fill:${domCol(k, it.v)};${it.sel ? 'stroke:var(--ink);stroke-width:2' : ''}"/>`;
       s += `<text x="${cx}" y="${top - 5}" text-anchor="middle" style="fill:var(--ink-2);font-size:10px;font-weight:700">${it.v}</text>`;
+      { const g = sigMetric(k, it.v), by = top - 22; s += `<rect x="${cx - 14}" y="${by}" width="28" height="12" rx="6" style="fill:${g.c}"/><text x="${cx}" y="${by + 9}" text-anchor="middle" style="fill:${g.t};font-size:9px;font-weight:800">${g.n}</text>`; }
       if (it.cur) s += `<circle cx="${cx}" cy="${T - 12}" r="3" style="fill:var(--seal)"/>`;
       s += `<text x="${cx}" y="${H - B + 18}" text-anchor="middle" style="fill:var(--ink);font-size:14px;font-weight:${it.sel ? 900 : 700};font-family:var(--f-display)">${it.label}</text>`;
       s += `<text x="${cx}" y="${H - B + 33}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${it.sub}</text>`;
@@ -5990,6 +6034,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const cw = el.clientWidth || 320, W = Math.max(cw, 320), H = 270, L = 34, R = 18, T = 26, B = 46;
     const x = Y => L + (Y - y0) / (y1 - y0) * (W - L - R), y = v => T + (100 - v) / 100 * (H - T - B);
     let s = svgEl(W, H);
+    s += metricZones(k, y, L, W - R);
     ch.daeun.list.forEach((d, i) => { const a = Math.max(y0, d.startYear), b = Math.min(y1, d.startYear + 10); if (b <= a) return; if (i % 2 === 0) s += `<rect x="${x(a)}" y="${T}" width="${x(b) - x(a)}" height="${H - T - B}" style="fill:var(--surface-2)"/>`; if (x(b) - x(a) > 28) s += `<text x="${(x(a) + x(b)) / 2}" y="${T - 9}" text-anchor="middle" style="fill:var(--ink-2);font-size:12px;font-weight:700;font-family:var(--f-display)">${M.gzName(d)}</text>`; });
     for (const g of [0, 25, 50, 75, 100]) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'}" ${g && g !== 100 ? 'stroke-dasharray="3 3"' : ''}/><text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g}</text>`;
     for (let Y = Math.ceil(y0 / 10) * 10; Y <= y1; Y += 10) s += `<text x="${x(Y)}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${Y}</text>`;
@@ -6213,32 +6258,40 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">◎ 실행 = 목적과 잘 맞아 결과가 생기는 행동(전화·제출·서명·공개)을 두기 좋은 시간, ○ 활용 = 안정적이라 회의·업무·제작에 무난, △ 주의 = 충·형 같은 불안 요소가 있어 중요한 결정은 옮기기, × 회피 = 그날과 충돌이 강해 중요한 일은 피하기. 목적을 바꾸면 ◎ 시간이 달라집니다. 시각은 ${shift ? `출생지 경도 보정(${shift}분)을 적용한 표준시입니다` : '한국 표준시 그대로입니다'}. 자시는 전날 밤부터 시작합니다${ch.jasi === 'ya' ? ' (야자시 설정: 밤 11시~자정은 다음 날 기준 천간을 씁니다)' : ''}.</p></div>`;
   }
   function renderCalendar(cy, cm, cal, firstDow, sel, ilDetail) {
-    const scored = cal.map((x, i) => ({ d: i + 1, v: luckV(x), x }));
-    const CC = M.LUCK_CFG.condition;
-    const best = [...scored].sort((a, b) => b.v - a.v).filter(q => q.v >= CC.tailwind).slice(0, 3);
-    const worst = [...scored].sort((a, b) => a.v - b.v).filter(q => q.v <= CC.caution).slice(0, 3);
-    // 칸 색 = 시기, 진하기 = 점수 크기
-    const tint = (v, dm) => `color-mix(in srgb, ${dmCol(dm)} ${14 + Math.round(Math.min(80, Math.abs(v)) / 80 * 36)}%, var(--surface))`;
-    const dayBtn = q => `<button type="button" class="chip ${q.v >= 0 ? 'good' : 'bad'}" data-pick="ilun:${q.d}" style="border:0;cursor:pointer">${cm}/${q.d} ${M.gzName(q.x)} ${signed(q.v)}</button>`;
-    const cells = scored.map(({ d, v, x }) => {
-      const dm = dayMode(x).mode, top = x.ev.topOverlay, mv = isDomain() ? domOf(x, 'ilun')[S.metric] : null;
+    // 칸 색 = 그날이 나에게 얼마나 유리한가(신호등), 칸 안 글자 = 단계 · 점수 · 주 흐름. 지표를 고르면 그 지표 기준으로 바뀐다
+    const metric = isDomain() ? S.metric : null;
+    const scored = cal.map((x, i) => {
+      const v = luckV(x), mv = metric ? domOf(x, 'ilun')[metric] : null, sg = mv ? sigMetric(metric, mv.score) : sigFlow(v);
+      return { d: i + 1, v, x, mv, sg, rank: mv ? (metric === 'accident' ? -mv.score : mv.score) : v };
+    });
+    const counts = SIG.map(g => scored.filter(q => q.sg === g).length);
+    const good = [...scored].sort((a, b) => b.rank - a.rank).filter(q => q.sg.i <= 1).slice(0, 3);
+    const caution = [...scored].sort((a, b) => a.rank - b.rank).filter(q => q.sg.i >= 3).slice(0, 3);
+    const dayBtn = q => `<button type="button" class="sgchip" style="${sgVars(q.sg)};border:0;cursor:pointer" data-pick="ilun:${q.d}">${cm}/${q.d} ${M.gzName(q.x)} ${q.sg.n} ${q.mv ? q.mv.score : signed(q.v)}</button>`;
+    const cells = scored.map(({ d, v, x, mv, sg }) => {
+      const dm = dayMode(x).mode, top = x.ev.topOverlay;
       const isT = cy === TODAY[0] && cm === TODAY[1] && d === TODAY[2];
       const son = M.sonOf(x.lunar.d) === '없음';
-      const strong = Math.abs(v) >= 45;
-      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}" style="background:${mv ? `color-mix(in srgb, ${domCol(S.metric, mv.score)} 28%, var(--surface))` : tint(v, dm)}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''} · ${M.flowLabel(x.ev)} · 흐름 ${signed(v)}${mv ? ' · ' + DOM_INFO[S.metric].full + ' ' + mv.score + ' ' + mv.band : ''}">
+      const strong = sg.i === 0 || sg.i === 4;
+      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}" style="background:${sgSoft(sg)}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''} · ${sg.n} · ${M.flowLabel(x.ev)} · 흐름 ${signed(v)}${mv ? ' · ' + DOM_INFO[S.metric].full + ' ' + mv.score : ''}">
         <span class="ctop"><span class="dn">${d}</span>${son ? '<span class="son" title="손 없는 날">손</span>' : ''}</span>
         <span class="dg">${M.gzName(x)}</span>
-        <span class="dmn" style="color:${dmCol(dm)}">${flowTxt(dm)}${top ? `<em class="ovm ov-${top}">+${OVL[top][0]}</em>` : ''}</span>
+        <span class="sgw" style="${sgVars(sg)}">${sg.n}</span>
         <span class="sc${strong ? ' strong' : ''}">${mv ? mv.score : signed(v)}</span>
+        <span class="dmn" style="color:${dmCol(dm)}">${flowTxt(dm)}${top ? `<em class="ovm ov-${top}">+${OVL[top][0]}</em>` : ''}</span>
         <span class="ld">${x.lunar.d === 1 ? x.lunar.m + '월' : x.lunar.d}</span></button>`;
     }).join('');
+    const total = scored.length || 1;
     return `<section class="card">
       <div class="card-h"><h2>${cy}년 ${cm}월 ${term('일운', '일진')} 달력 <span class="lvl">${LEVEL_ROLE.ilun}</span></h2><span class="seg"><button data-act="ym:-1" aria-label="이전 달">‹</button><button data-act="ym:1" aria-label="다음 달">›</button></span></div>
-      <div class="legend">${Object.keys(DAYMODE).map(m => `<span><i class="sw" style="background:${dmCol(m)}"></i>${term(m, flowTxt(m))}</span>`).join('')}<span>${ovTag('volatility')}${ovTag('defense')} 칸 아래 +변동·+방어 = 가장 중요한 상태 하나</span><span>색이 진할수록 흐름 점수의 크기가 큼</span><span><span class="son">손</span> ${term('손 없는 날')}</span><span>칸 아래 숫자 = 음력 일</span></div>
+      ${sigLegend(metric ? metricRule(metric) : flowRule())}
+      <div class="sgbar" role="img" aria-label="이달 신호등 분포">${SIG.map((g, i) => counts[i] ? `<i style="${sgVars(g)};flex:${counts[i]} 1 0">${counts[i] >= 3 ? g.n + ' ' + counts[i] : counts[i]}</i>` : '').join('')}</div>
+      <div class="sgsum">${SIG.map((g, i) => `<span>${g.n} <b>${counts[i]}일</b></span>`).join('')}<span>(${total}일 중)</span></div>
+      <div class="legend"><span>칸 글자 = 신호등 단계 · 점수 · 활성화되는 일(${Object.keys(DAYMODE).map(m => term(m, flowTxt(m))).join('·')})</span><span>${ovTag('volatility')}${ovTag('defense')} 칸 아래 +변동·+방어 = 가장 중요한 상태 하나</span><span><span class="son">손</span> ${term('손 없는 날')}</span><span>칸 아래 숫자 = 음력 일</span></div>
       <div class="cal">${['일', '월', '화', '수', '목', '금', '토'].map(d => `<span class="dow">${d}</span>`).join('')}${'<span></span>'.repeat(firstDow)}${cells}</div>
       <div class="list">
-        <div class="li"><span class="k">순풍이 강한 날</span><span class="v">${best.length ? best.map(dayBtn).join('') : `<span class="muted small">+${CC.tailwind} 이상인 날이 없습니다</span>`}</span><span></span></div>
-        <div class="li"><span class="k">리스크 관리일</span><span class="v">${worst.length ? worst.map(dayBtn).join('') : `<span class="muted small">${CC.caution} 이하인 날이 없습니다</span>`}</span><span></span></div>
+        <div class="li"><span class="k">좋은 날</span><span class="v">${good.length ? good.map(dayBtn).join('') : '<span class="muted small">이달에는 뚜렷하게 좋은 날이 없습니다</span>'}</span><span></span></div>
+        <div class="li"><span class="k">조심할 날</span><span class="v">${caution.length ? caution.map(dayBtn).join('') : '<span class="muted small">이달에는 뚜렷하게 조심할 날이 없습니다</span>'}</span><span></span></div>
       </div>
       ${ilDetail || '<p class="note">날짜를 누르면 그날의 주 흐름·변동·방어 상태, 판정 순서, 점수 근거와 12시진 실행 등급이 열립니다. 일진 흐름 점수는 이 사주의 억부·조후·관계·구조를 종합해 그날 간지만 평가한 값이며, 대운·세운의 큰 흐름은 위 그래프에서 봅니다.</p>'}
     </section>`;
@@ -6253,8 +6306,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const strip = `<div class="lts">${ys.map(q => luckTile(q, `${q.year} · ${q.age}세`, 'seun:' + q.year, S.sel && S.sel.kind === 'seun' && S.sel.Y === q.year, q.year === curY)).join('')}</div>`;
     return `<div><h3 style="margin-bottom:8px">앞으로 10년</h3>${strip}</div>
       <div class="list">
-        <div class="li"><span class="k">순풍이 강한 해</span><span class="v">${best.length ? best.map(btn).join('') : `<span class="muted small">+${CC.tailwind} 이상인 해가 없습니다</span>`}</span><span></span></div>
-        <div class="li"><span class="k">리스크 관리할 해</span><span class="v">${worst.length ? worst.map(btn).join('') : `<span class="muted small">${CC.caution} 이하인 해가 없습니다</span>`}</span><span></span></div>
+        <div class="li"><span class="k">좋은 해</span><span class="v">${best.length ? best.map(btn).join('') : `<span class="muted small">+${CC.tailwind} 이상인 해가 없습니다</span>`}</span><span></span></div>
+        <div class="li"><span class="k">조심할 해</span><span class="v">${worst.length ? worst.map(btn).join('') : `<span class="muted small">${CC.caution} 이하인 해가 없습니다</span>`}</span><span></span></div>
       </div>`;
   }
   // ───────────── 풀이 DB 해설 (관리자 전용) ─────────────
@@ -6345,14 +6398,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${chartLegend()}
       <div class="chart" data-chart="daeun"></div>
       <div class="lts">${ch.daeun.list.map((x, i) => luckTile(x, `${x.startAge}세 · ${x.startYear}`, 'daeun:' + i, sel.kind === 'daeun' && sel.i === i, du === x)).join('')}</div>
-      ${daeunDetail || '<p class="note">막대 높이는 흐름 적합도, 색은 주 흐름(기회·확장·수확·축적)이고 변동·방어는 테두리와 아래 글자(변·방)입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
+      ${daeunDetail || '<p class="note">막대 높이는 흐름 적합도, 색은 좋고 나쁨(최고·좋음·무난·주의·부담), 막대 아래 글자는 주 흐름(기회·확장·수확·축적), 변동·방어는 테두리와 아래 글자(변·방)입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>연도별 흐름 · ${term('세운')} <span class="lvl">${LEVEL_ROLE.seun}</span></h2></div>
       ${chartLegend()}
       <div class="chart" data-chart="life"></div>
       ${yearSummary(curY)}
-      ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 주 흐름(기회·확장·수확·축적), 테두리·아래 글자는 변동·방어 상태입니다. 순풍·보통·주의·부담 같은 상태는 툴팁과 타일 배지로 따로 보입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
+      ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 좋고 나쁨(최고·좋음·무난·주의·부담), 테두리·아래 글자는 변동·방어 상태입니다. 순풍·보통·주의·부담 같은 상태는 툴팁과 타일 배지로 따로 보입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>${Y}년 ${term('월운')} <span class="lvl">${LEVEL_ROLE.wolun}</span></h2><span class="seg"><button data-act="year:-1" aria-label="이전 해">‹</button><button data-act="year:1" aria-label="다음 해">›</button></span></div>
@@ -7777,18 +7830,19 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function svgEl(W, H) { return `<svg xmlns="${NS}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img">`; }
   function drawDiv(el, items, opt = {}) {
     const n = items.length; const cw = el.clientWidth || 320;
-    const W = Math.max(cw, n * 40), H = 258, L = 34, R = 6, T = 30, B = 54;
+    const W = Math.max(cw, n * 40), H = 276, L = 34, R = 6, T = 30, B = 72;
     const step = (W - L - R) / n, bw = Math.min(30, step * 0.58);
-    const y = v => T + (100 - v) / 200 * (H - T - B);
+    const RG = 60, y = v => T + (RG - Math.max(-RG, Math.min(RG, v))) / (2 * RG) * (H - T - B);   // 점수 대부분이 ±40 안이라 세로축은 ±60
     let s = svgEl(W, H);
-    for (const g of [100, 50, 0, -50, -100]) {
-      s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'};stroke-width:1" ${g && g % 100 ? 'stroke-dasharray="3 3"' : ''}/>`;
+    s += flowZones(y, L, W - R, RG);
+    for (const g of [60, 30, 0, -30, -60]) {
+      s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'};stroke-width:1" ${g && Math.abs(g) !== RG ? 'stroke-dasharray="3 3"' : ''}/>`;
       s += `<text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g > 0 ? '+' + g : g < 0 ? '−' + (-g) : '0'}</text>`;
     }
     items.forEach((it, i) => {
       const cx = L + step * (i + 0.5), v = it.v ?? 0, y0 = y(0), y1 = y(v);
       const top = Math.min(y0, y1), h = Math.max(Math.abs(y1 - y0), 2);
-      const col = it.ph ? m6Col(it.ph) : Math.abs(v) < 1 ? 'var(--mid)' : v > 0 ? 'var(--good)' : 'var(--bad)';
+      const sg = sigFlow(v), col = sg.c;
       if (it.alt != null) { const ya = y(it.alt); s += `<rect x="${cx - bw / 2 - 4}" y="${Math.min(y0, ya)}" width="${bw + 8}" height="${Math.max(Math.abs(ya - y0), 2)}" rx="3" class="ghost"/>`; }
       const r = Math.min(4, h / 2), x0 = cx - bw / 2;
       const d = v >= 0 ? `M${x0},${y0} V${top + r} Q${x0},${top} ${x0 + r},${top} H${x0 + bw - r} Q${x0 + bw},${top} ${x0 + bw},${top + r} V${y0} Z`
@@ -7796,11 +7850,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const ovs = it.ov ? ovStroke(it.ov) : '';
       s += `<path d="${d}" style="fill:${col};${ovs}${it.sel ? ';stroke:var(--ink);stroke-width:2;stroke-dasharray:none' : ''}"/>`;
       if (it.ov && (it.ov.volatility.active || it.ov.defense.active)) s += `<text x="${cx}" y="${H - 4}" text-anchor="middle" style="fill:${it.ov.defense.active ? 'var(--d-def)' : 'var(--d-chg)'};font-size:9px;font-weight:800">${it.ov.volatility.active ? '변' : ''}${it.ov.defense.active ? '방' : ''}</text>`;
-      if (it.cond) { const by = v >= 0 ? top - 15 : top + h + 4; s += `<rect x="${cx - 8}" y="${by}" width="16" height="11" rx="5.5" style="fill:${COND_COL[it.cond]};opacity:.9"/><text x="${cx}" y="${by + 8.5}" text-anchor="middle" style="fill:#fff;font-size:8px;font-weight:700">${it.cond[0]}</text>`; }
+      { const by = v >= 0 ? top - 16 : top + h + 4; s += `<rect x="${cx - 14}" y="${by}" width="28" height="12" rx="6" style="fill:${sg.c}"/><text x="${cx}" y="${by + 9}" text-anchor="middle" style="fill:${sg.t};font-size:9px;font-weight:800">${sg.n}</text>`; }
       if (it.cur) s += `<circle cx="${cx}" cy="${T + 2}" r="3" style="fill:var(--seal)"/>`;
       s += `<text x="${cx}" y="${H - B + 18}" text-anchor="middle" style="fill:var(--ink);font-size:14px;font-weight:${it.sel ? 900 : 700};font-family:var(--f-display)">${it.label}</text>`;
       s += `<text x="${cx}" y="${H - B + 33}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${it.sub}</text>`;
       if (it.sub2) s += `<text x="${cx}" y="${H - B + 45}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${it.sub2}</text>`;
+      if (it.ph) s += `<text x="${cx}" y="${H - B + 58}" text-anchor="middle" style="fill:${m6Col(it.ph)};font-size:10px;font-weight:800">${flowTxt(it.ph)}</text>`;
       if (it.sel) s += `<text x="${cx}" y="${v >= 0 ? top - 18 : top + h + 27}" text-anchor="middle" style="fill:var(--ink);font-size:11px;font-weight:700">${signed(v)}</text>`;
       s += `<rect class="hit" x="${cx - step / 2}" y="0" width="${step}" height="${H}" style="fill:transparent" data-pick="${it.pick}" data-tip="${esc(it.tip)}"/>`;
     });
@@ -7811,7 +7866,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const data = M.seunRange(ch, y0, y1);
     const cw = el.clientWidth || 320, W = Math.max(cw, 320), H = 270, L = 34, R = 18, T = 26, B = 46;
     const x = Y => L + (Y - y0) / (y1 - y0) * (W - L - R);
-    const y = v => T + (100 - v) / 200 * (H - T - B);
+    const RG = 60, y = v => T + (RG - Math.max(-RG, Math.min(RG, v))) / (2 * RG) * (H - T - B);
     let s = svgEl(W, H);
     ch.daeun.list.forEach((d, i) => {
       const a = Math.max(y0, d.startYear), b = Math.min(y1, d.startYear + 10);
@@ -7819,10 +7874,11 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (i % 2 === 0) s += `<rect x="${x(a)}" y="${T}" width="${x(b) - x(a)}" height="${H - T - B}" style="fill:var(--surface-2)"/>`;
       if (x(b) - x(a) > 28) s += `<text x="${(x(a) + x(b)) / 2}" y="${T - 9}" text-anchor="middle" style="fill:var(--ink-2);font-size:12px;font-weight:700;font-family:var(--f-display)">${M.gzName(d)}</text>`;
     });
-    for (const g of [50, 0, -50]) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'}" ${g ? 'stroke-dasharray="3 3"' : ''}/><text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g > 0 ? '+' + g : g < 0 ? '−' + (-g) : '0'}</text>`;
+    s += flowZones(y, L, W - R, RG);
+    for (const g of [30, 0, -30]) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'}" ${g ? 'stroke-dasharray="3 3"' : ''}/><text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g > 0 ? '+' + g : g < 0 ? '−' + (-g) : '0'}</text>`;
     for (let Y = Math.ceil(y0 / 10) * 10; Y <= y1; Y += 10) s += `<text x="${x(Y)}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${Y}</text>`;
     const bw = Math.max(1.5, (W - L - R) / (y1 - y0 + 1) - 1.2);
-    data.forEach(d => { const v = d.combined, yy = y(v), z = y(0); const h = Math.max(1.5, Math.abs(yy - z)); const col = m6Col(luckMode(d).mode); s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${Math.min(yy, z).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${col};${ovStroke(d.ev.overlays)}"/>`; });
+    data.forEach(d => { const v = d.combined, yy = y(v), z = y(0); const h = Math.max(1.5, Math.abs(yy - z)); const col = sigFlow(v).c; s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${Math.min(yy, z).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${col};${ovStroke(d.ev.overlays)}"/>`; });
     if (showGhost()) s += `<polyline class="ghost-line" points="${data.map(d => `${x(d.year).toFixed(1)},${y(altOf(d)).toFixed(1)}`).join(' ')}"/>`;
     const curY = M.yearPillarAt(NOW).sajuYear;
     if (curY >= y0 && curY <= y1) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.5" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T + 11}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
