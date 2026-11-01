@@ -273,6 +273,16 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .cal .sgw { font-size: 0.7rem; font-weight: 800; line-height: 1.3; padding: 1px 8px; border-radius: 999px; background: var(--c); color: var(--on); }
 .cal .sgw + .sc { margin-top: 1px; }
 .lt-sc .sgchip { margin-right: 2px; }
+/* 12운성 에너지 곡선 */
+.unc { display: block; width: 100%; height: auto; max-width: 720px; margin: 4px auto 2px; }
+.unc text { font-family: var(--f-body); }
+.unc .term, .unc .term:hover { text-decoration: none; color: inherit; }
+.unc .unst { cursor: pointer; }
+.unc .unst:hover .unbg { fill: var(--accent); opacity: .1; }
+.unchips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+.unchip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; background: var(--surface-2); color: var(--ink-2); }
+.unchip i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); display: inline-block; }
+.unchip b { color: var(--ink); }
 .list .v .sgchip { margin: 2px 6px 2px 0; }
 .lts { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(92px, 1fr); gap: 6px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: thin; }
 .lt { border: 0; border-top: 4px solid var(--c, transparent); box-shadow: inset 0 0 0 1px var(--line); background: var(--surface); border-radius: 16px; padding: 8px 6px; display: grid; gap: 3px; justify-items: center; align-content: start; cursor: pointer; text-align: center; }
@@ -4982,6 +4992,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${table}
     </section>
     <section class="card">
+      <div class="card-h"><h2>12운성 에너지 곡선</h2><span class="note">일간 기준 · 네 지지가 생애 주기의 어디에 있는지</span></div>
+      ${unNatalHTML(ch)}
+    </section>
+    <section class="card">
       <div class="card-h"><h2>시간 기준별 비교</h2><span class="note">기준에 따라 일주·시주가 바뀌는지 확인합니다</span></div>
       ${altTable}
       <p class="note">한국 표준시는 동경 135° 기준이라 서울의 실제 태양시는 약 32분 늦습니다. 출생 시각이 시(時) 경계 근처면 기준 선택만으로 시주가 바뀝니다. 기본값은 ${term('평균태양시', '경도 보정')}이며, 위 입력의 계산 기준 설정에서 바꿀 수 있습니다.</p>
@@ -6398,6 +6412,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${chartLegend()}
       <div class="chart" data-chart="daeun"></div>
       <div class="lts">${ch.daeun.list.map((x, i) => luckTile(x, `${x.startAge}세 · ${x.startYear}`, 'daeun:' + i, sel.kind === 'daeun' && sel.i === i, du === x)).join('')}</div>
+      ${unDaeunHTML(ch, du)}
       ${daeunDetail || '<p class="note">막대 높이는 흐름 적합도, 색은 좋고 나쁨(최고·좋음·무난·주의·부담), 막대 아래 글자는 주 흐름(기회·확장·수확·축적), 변동·방어는 테두리와 아래 글자(변·방)입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
     </section>
     <section class="card">
@@ -7825,6 +7840,78 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div id="gl-list">${glList()}</div></section>`;
   }
 
+  // ───────────── 12운성 에너지 곡선 ─────────────
+  // 12운성은 일간이 지지에서 얻는 힘을 사람의 일생에 빗댄 12단계다. 단계 순서가 곧 생애 주기(올라감 → 정점 → 내려감 → 갈무리 → 새 출발)라서
+  // 곡선으로 그리면 한눈에 읽힌다. 세기 눈금(0~100)은 단계끼리 견주려고 붙인 상징값이며, 점수·판정에는 쓰이지 않고 좋고 나쁨도 뜻하지 않는다.
+  // 강(70 이상): 장생·관대·건록·제왕 / 중: 목욕·쇠·양 / 약(40 미만): 병·사·묘·절·태. 이 앱은 양간은 순서대로, 음간은 거꾸로 센다.
+  const UN_ORDER = ['장생', '목욕', '관대', '건록', '제왕', '쇠', '병', '사', '묘', '절', '태', '양'];
+  const UN_POW = { 장생: 72, 목욕: 42, 관대: 82, 건록: 92, 제왕: 100, 쇠: 58, 병: 26, 사: 12, 묘: 20, 절: 5, 태: 30, 양: 45 };
+  const UN_MEAN = { 장생: '태어나 도움을 받으며 자라기 시작', 목욕: '불안정하지만 매력과 호기심이 큼', 관대: '자신감과 패기가 커지는 청년기', 건록: '스스로 서서 일하는 힘이 단단함', 제왕: '힘이 가장 센 전성기', 쇠: '힘은 줄고 노련함이 쌓임', 병: '추진력은 약하고 섬세함이 큼', 사: '움직임이 멈추고 깊이 몰입함', 묘: '거두어 저장하는 갈무리', 절: '기운이 끊겨 새 출발을 준비함', 태: '아직 드러나지 않은 가능성', 양: '보호받으며 준비하고 자람' };
+  const UN_PHASE = [['올라가는 때', 0, 4], ['내려가는 때', 5, 7], ['갈무리', 8, 9], ['새 출발 준비', 10, 11]];
+  const unTier = p => p >= 70 ? '강' : p >= 40 ? '중' : '약';
+  const UN_WHO = { year: ['년지', 'var(--d-hrv)'], month: ['월지', 'var(--d-ext)'], day: ['일지', 'var(--ink)'], hour: ['시지', 'var(--earth-ink)'] };
+  function unSmooth(pts) {
+    let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+      d += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)},${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)},${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+    }
+    return d;
+  }
+  // marks: [{ stage, lab, color, ring }] — 곡선 위에 찍을 점(원국의 네 지지, 대운 등). hi: 강조할 단계
+  function unCurve({ marks = [], hi = null } = {}) {
+    const W = 680, H = 272, L = 40, R = 26, T = 52, B = 78, step = (W - L - R) / 11;
+    const xs = i => L + i * step, y = v => T + (100 - v) / 100 * (H - T - B);
+    const bandTxt = { 강: 85, 중: 55, 약: 20 };
+    let s = `<svg class="unc" xmlns="${NS}" viewBox="0 0 ${W} ${H}" role="img" aria-label="12운성 에너지 곡선: 장생에서 시작해 제왕에서 가장 높고 절에서 가장 낮은 뒤 다시 이어집니다">`;
+    [['강', 70, 100, .12], ['중', 40, 70, .06], ['약', 0, 40, .02]].forEach(([n, lo, hi2, op]) => { s += `<rect x="${L - 8}" y="${y(hi2)}" width="${W - L - R + 16}" height="${y(lo) - y(hi2)}" style="fill:var(--accent);opacity:${op}"/><text x="${L - 14}" y="${y(bandTxt[n]) + 4}" text-anchor="end" style="fill:var(--ink-3);font-size:11px;font-weight:700">${n}</text>`; });
+    // 올라가는 때 · 내려가는 때 · 갈무리 · 새 출발 준비
+    UN_PHASE.forEach(([n, a, b], k) => { const x0 = xs(a) - step * 0.42, x1 = xs(b) + step * 0.42, c = ['var(--d-atk)', 'var(--d-chg)', 'var(--ink-3)', 'var(--d-ext)'][k]; s += `<line x1="${x0}" x2="${x1}" y1="${T - 24}" y2="${T - 24}" style="stroke:${c};stroke-width:3;stroke-linecap:round;opacity:.7"/><text x="${(x0 + x1) / 2}" y="${T - 30}" text-anchor="middle" style="fill:var(--ink-2);font-size:11px;font-weight:700">${n}</text>`; });
+    const pts = UN_ORDER.map((n, i) => [xs(i), y(UN_POW[n])]);
+    s += `<path d="${unSmooth(pts)} L${xs(11).toFixed(1)},${y(0)} L${xs(0).toFixed(1)},${y(0)} Z" style="fill:var(--accent);opacity:.1"/>`;
+    s += `<path d="${unSmooth(pts)}" style="fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round"/>`;
+    s += `<text x="${W - 6}" y="${y(UN_POW['양']) - 8}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">양 → 다시 장생 ↻</text>`;
+    const by = {}; marks.forEach(m => { const i = UN_ORDER.indexOf(m.stage); if (i >= 0) (by[i] = by[i] || []).push(m); });
+    UN_ORDER.forEach((n, i) => {
+      const x = xs(i), on = hi === n, has = !!by[i], tip = `${n} · 세기 ${UN_POW[n]}(${unTier(UN_POW[n])}) — ${UN_MEAN[n]}`;
+      s += `<g class="term unst" data-term="${n}" data-tip="${esc(tip)}"><rect class="unbg" x="${x - step / 2}" y="${T - 20}" width="${step}" height="${H - T - 4}" style="fill:${on ? 'var(--accent)' : 'transparent'};opacity:${on ? .14 : 0}"/>`;
+      s += `<circle cx="${x}" cy="${y(UN_POW[n])}" r="${on ? 6.5 : 4}" style="fill:${on ? 'var(--accent)' : 'var(--surface)'};stroke:var(--accent);stroke-width:2"/>`;
+      s += `<text x="${x}" y="${H - B + 20}" text-anchor="middle" style="fill:var(--ink);font-size:13px;font-weight:${on || has ? 900 : 600};font-family:var(--f-display)">${n}</text>`;
+      s += `<text x="${x}" y="${H - B + 35}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${UN_POW[n]}</text>`;
+      s += `</g>`;
+    });
+    // 점 찍기: 같은 단계에 여러 개면 위로 쌓는다
+    Object.keys(by).forEach(i => by[i].forEach((m, k) => {
+      const x = xs(+i), cy = y(UN_POW[UN_ORDER[+i]]), col = m.color || 'var(--accent-2)', w = Math.max(30, m.lab.length * 10 + 14), by0 = cy - 22 - k * 20;
+      s += `<circle cx="${x}" cy="${cy}" r="${m.ring ? 8 : 6.5}" style="fill:${col};stroke:var(--surface);stroke-width:2"/>`;
+      s += `<rect x="${x - w / 2}" y="${by0 - 7}" width="${w}" height="17" rx="8.5" style="fill:${col}"/><text x="${x}" y="${by0 + 5.5}" text-anchor="middle" style="fill:#fff;font-size:10.5px;font-weight:800">${m.lab}</text>`;
+    }));
+    return s + '</svg>';
+  }
+  const unNote = '세기 눈금(0~100)은 12단계를 서로 견주려고 붙인 상징값입니다. 12운성은 좋고 나쁨이 아니라 힘의 상태이며(제왕은 가장 세지만 독선이 될 수도, 약한 단계는 섬세함·몰입으로 쓰일 수 있음), 점수·판정에는 쓰이지 않습니다. 음간(을·정·기·신·계)은 거꾸로 세는 이 앱의 표 기준입니다.';
+  function unChips(marks) { return `<div class="unchips">${marks.map(m => `<span class="unchip" style="--c:${m.color}"><i></i>${m.lab} <b>${m.stage}</b> · 세기 ${UN_POW[m.stage]} · ${unTier(UN_POW[m.stage])}</span>`).join('')}</div>`; }
+  // 원국 탭: 일간 기준으로 네 지지가 곡선의 어디에 있는지
+  function unNatalHTML(ch) {
+    const d = ch.pillars.day.s, marks = ['year', 'month', 'day', 'hour'].filter(k => ch.cells[k]).map(k => ({ stage: ch.cells[k].unseong, lab: UN_WHO[k][0], color: UN_WHO[k][1], ring: k === 'day' }));
+    const strong = marks.filter(m => UN_POW[m.stage] >= 70).length, weak = marks.filter(m => UN_POW[m.stage] < 40).length;
+    const sum = strong >= 3 ? '힘이 센 단계에 놓인 지지가 많은 사주입니다.' : weak >= 3 ? '힘이 약한 단계에 놓인 지지가 많은 사주입니다. 약하다는 것은 섬세함·몰입·정리에 쓰이는 기운이라는 뜻이기도 합니다.' : '힘이 센 단계와 약한 단계가 섞여 있는 사주입니다.';
+    return `<p class="small" style="color:var(--ink-2)">${M.STEM[d]}${M.EL_K[M.stemEl(d)]} 일간(나)이 네 지지에서 받는 힘(${term('봉법')})을 12운성 곡선 위에 찍었습니다. ${sum} 단계 이름을 누르면 설명이 열립니다.</p>${unCurve({ marks })}${unChips(marks)}<p class="note">${unNote}</p>`;
+  }
+  // 대운 카드: 10개의 대운이 곡선의 어디를 지나는지
+  function unDaeunHTML(ch, du) {
+    const marks = ch.daeun.list.map(x => ({ stage: x.unseong, lab: `${x.startAge}세`, color: x === du ? 'var(--seal)' : 'var(--accent-2)', ring: x === du }));
+    const now = du ? `지금 대운 ${M.gzName(du)}은 ${du.unseong}(세기 ${UN_POW[du.unseong]} · ${unTier(UN_POW[du.unseong])}) 단계입니다. ${UN_MEAN[du.unseong]}.` : '아직 대운이 시작되기 전입니다.';
+    return `<div class="card-h" style="margin:14px 0 4px"><h3>대운으로 보는 에너지 곡선 <span class="lvl">12운성</span></h3></div><p class="small" style="color:var(--ink-2)">10개의 대운이 12운성 곡선의 어디를 지나는지 보여 줍니다(붉은 점이 지금 대운). ${now}</p>${unCurve({ marks, hi: du ? du.unseong : null })}<p class="note">${unNote}</p>`;
+  }
+  // 용어 팝업: 그 단계를 곡선에서 밝히고, 내 사주에서 어느 지지에 있는지 같이 보여 준다
+  function unSheetHTML(key) {
+    const ch = S.ch, hi = UN_POW[key] != null ? key : null;
+    const marks = ch ? ['year', 'month', 'day', 'hour'].filter(k => ch.cells[k]).map(k => ({ stage: ch.cells[k].unseong, lab: UN_WHO[k][0], color: UN_WHO[k][1], ring: k === 'day' })) : [];
+    const mine = hi ? marks.filter(m => m.stage === hi).map(m => m.lab) : [];
+    const head = hi ? `<p class="small"><b>${hi}</b> · 세기 <b>${UN_POW[hi]}</b>(${unTier(UN_POW[hi])}) — ${UN_MEAN[hi]}.${ch ? (mine.length ? ` 내 사주에서는 <b>${mine.join('·')}</b>에 있습니다.` : ' 내 사주의 네 지지에는 없습니다.') : ''}</p>` : '<p class="small">12단계가 한 바퀴 도는 모양입니다. 단계 이름을 누르면 그 설명이 열립니다.</p>';
+    return `<div class="facts"><b>에너지 곡선</b>${head}${unCurve({ marks, hi })}${marks.length ? unChips(marks) : ''}<p class="note">${unNote}</p></div>`;
+  }
+
   // ───────────── 차트 ─────────────
   const NS = 'http://www.w3.org/2000/svg';
   function svgEl(W, H) { return `<svg xmlns="${NS}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img">`; }
@@ -8110,6 +8197,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const title = c === '일간' ? `${key} 일간` : c === '육십갑자' ? `${key} (${gzHanja(key)})` : (TERM_TITLE[key] || key);
     sh.innerHTML = `<div class="sheet-bg" data-act="close"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(key)}"><span class="cat">${esc(c)}${adminPw ? ' · 관리자 편집' : ''}</span><h3>${esc(title)}</h3>
       ${c === '육십갑자' ? `<div class="facts">${gzFacts(key)}</div>` : ''}
+      ${c === '12운성' || (UN_POW[key] != null && c === '신살') ? unSheetHTML(key) : ''}
       ${body}
       ${c === '육십갑자' ? gzPosHTML(key, S.sheetPos) : ''}
       ${S.sheetVol && key === '기회기' ? `<div class="facts"><b>이번 운의 기회 활성도 ${S.sheetVol.opportunityActivation} / 100</b><div class="volbar" style="--v:${S.sheetVol.opportunityActivation}"><i style="background:var(--d-atk)"></i></div><div class="small">${M.opportunityNote(S.sheetVol)}</div>${S.sheetVol.opportunityActivation >= 40 && S.sheetVol.opportunityType.length ? `<div class="small"><b>주요 기회</b></div><ul class="pos-ul small">${S.sheetVol.opportunityType.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}${S.sheetVol.opportunityActivation >= 40 && S.sheetVol.opportunityReasons.length ? `<div class="small"><b>판단 근거</b></div><ul class="pos-ul small">${S.sheetVol.opportunityReasons.slice(0, 5).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}<div class="small muted">변동성 ${Math.round(S.sheetVol.volatilityScore)} · 부담도 ${S.sheetVol.overlays.defense.score} · 흐름 적합도 ${signed(S.sheetVol.fitScore)} · 상태 ${S.sheetVol.condition} — 기회 활성도와 따로 확인하세요.</div></div>` : ''}
