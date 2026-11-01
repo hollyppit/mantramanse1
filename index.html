@@ -632,6 +632,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <body>
 <div id="app"></div>
 <script src="engine.js"></script>
+<script src="glossary-cases.js"></script>
 <script src="report/iching/hexagrams.js"></script><script src="report/iching/engine.js"></script>
 <script src="shared-core.js"></script>
 <script src="report/v2/saju-data.js"></script>
@@ -4615,6 +4616,15 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const kstYMD = ms => { const t = new Date(ms + 540 * 60000); return [t.getUTCFullYear(), t.getUTCMonth() + 1, t.getUTCDate()]; };
   // 차트 화면 안에 끼워 넣는 짧은 설명용: 풀이 문단(육십갑자는 일주 특징 줄까지)만 보여 주고, 운·자리·조합·원리 같은 긴 보강 줄은 용어 팝업에서만 보여 준다.
   const glHtml = t => esc(t).replace(/^■ .*$/gm, m => '<b class="gl-h">' + m + '</b>');
+  // "많을 때 · 적을 때 · 아예 없을 때" 보강: 기본 문구든 관리자가 고친 문구든 뒤에 자동으로 붙인다(glossary-cases.js).
+  // 이미 본문에 같은 제목이 있으면(관리자가 붙여 넣은 경우) 중복해서 붙이지 않는다. 관리자 편집창에는 원문만 보여 저장 문구가 오염되지 않는다.
+  const GL_CASES_HEAD = '■ 많고 적고 없고에 따라';
+  const GL_CASE_LABEL = [['many', '많을 때'], ['few', '적을 때'], ['none', '아예 없을 때'], ['fill', '운에서 채워질 때']];
+  const glCasesText = (k, t) => {
+    const c = window.GLOSSARY_CASES && window.GLOSSARY_CASES[k]; if (!c || String(t).includes(GL_CASES_HEAD)) return '';
+    return '\n\n' + [GL_CASES_HEAD + ' (더 자세히)', '-. (판단 기준) ' + window.GLOSSARY_CASES_BASIS[c.basis], ...GL_CASE_LABEL.filter(([f]) => c[f]).map(([f, l]) => `-. (${l}) ${c[f]}`)].join('\n');
+  };
+  const glFull = (k, t) => glHtml(t + glCasesText(k, t));
   const glInline = k => { const e = GL[k]; if (!e) return ''; const t = e[1], para = t.split('\n\n')[0]; if (e[0] !== '육십갑자') return para; const bul = t.split('\n').filter(l => /^-\. (성향|장점|단점·주의|어울리는 직군|연애·관계|조언):/.test(l)); return bul.length ? para + '\n' + bul.join('\n') : para; };
   const term = (t, label) => GL[t] ? `<button type="button" class="term" data-term="${esc(t)}">${esc(label ?? t)}</button>` : esc(label ?? t);
   const patTerm = n => GL[n] ? n : (/결핍/.test(n) ? '오행 결핍' : n);
@@ -7732,10 +7742,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function glList() {
     const q = S.glq.trim();
     const cats = {};
-    for (const [k, [c, t]] of Object.entries(GL)) { if (q && !k.includes(q) && !t.includes(q)) continue; (cats[c] ||= []).push([k, t]); }
+    for (const [k, [c, t]] of Object.entries(GL)) { if (q && !k.includes(q) && !(t + glCasesText(k, t)).includes(q)) continue; (cats[c] ||= []).push([k, t]); }
     const keys = Object.keys(cats);
     if (!keys.length) return '<p class="muted small">찾는 용어가 없습니다.</p>';
-    return keys.map(c => `<div class="gl-cat"><h3>${c}</h3>${cats[c].map(([k, t]) => `<div class="gl-item"><span>${term(k)}${adminPw && k in OVR ? ' <span class="chip edited">수정됨</span>' : ''}</span><p>${glHtml(t)}</p></div>`).join('')}</div>`).join('');
+    return keys.map(c => `<div class="gl-cat"><h3>${c}</h3>${cats[c].map(([k, t]) => `<div class="gl-item"><span>${term(k)}${adminPw && k in OVR ? ' <span class="chip edited">수정됨</span>' : ''}</span><p>${glFull(k, t)}</p></div>`).join('')}</div>`).join('');
   }
   function renderGl() {
     return `<section class="card"><div class="card-h"><h2>용어 사전</h2><span class="note num">${Object.keys(GL).length}개 항목${adminPw ? ` · 수정됨 ${Object.keys(OVR).length}개 · 용어를 눌러 편집` : ''}</span></div>
@@ -8020,7 +8030,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const body = adminPw
       ? `<textarea id="gl-edit" aria-label="설명 문구">${esc(t)}</textarea>
         <div class="acts"><button class="btn primary" data-act="gl-save">저장</button>${edited ? '<button class="btn" data-act="gl-reset">기본 문구로 되돌리기</button>' : ''}<span class="grow"></span><span id="gl-msg" class="admin-msg">${edited ? '수정된 문구입니다' : '기본 문구입니다'}</span></div>`
-      : `<p>${glHtml(t)}</p>`;
+      : `<p>${glFull(key, t)}</p>`;
     const TERM_TITLE = { '운의 시기': '운의 흐름 구조', '기회기': '기회 흐름', '확장기': '확장 흐름', '수확기': '수확 흐름', '축적기': '축적 흐름', '변동기': '변동 신호', '방어기': '방어 신호', '일진 행동모드': '일진의 흐름', '운의 작동 방식': '운은 어떻게 작동하나요?' };
     const title = c === '일간' ? `${key} 일간` : c === '육십갑자' ? `${key} (${gzHanja(key)})` : (TERM_TITLE[key] || key);
     sh.innerHTML = `<div class="sheet-bg" data-act="close"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(key)}"><span class="cat">${esc(c)}${adminPw ? ' · 관리자 편집' : ''}</span><h3>${esc(title)}</h3>
