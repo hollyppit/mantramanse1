@@ -633,6 +633,9 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <div id="app"></div>
 <script src="engine.js"></script>
 <script src="glossary-cases.js"></script>
+<script src="glossary-sections.js"></script>
+<script src="glossary-sections-2.js"></script>
+<script src="glossary-sections-3.js"></script>
 <script src="report/iching/hexagrams.js"></script><script src="report/iching/engine.js"></script>
 <script src="shared-core.js"></script>
 <script src="report/v2/saju-data.js"></script>
@@ -4625,7 +4628,22 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const P = window.GLOSSARY_CASES_POSITION;
     return '\n\n' + [GL_CASES_HEAD + ' (더 자세히)', '-. (판단 기준) ' + window.GLOSSARY_CASES_BASIS[c.basis], ...(P && P.bases.includes(c.basis) ? ['-. (자리와 뿌리) ' + P.text] : []), ...glCaseLabel(c).filter(([f]) => c[f]).map(([f, l]) => `-. (${l}) ${c[f]}`)].join('\n');
   };
-  const glFull = (k, t) => glHtml(t + glCasesText(k, t));
+  // 기본 문구에 빠진 "쓰임과 특징 · 운에서 들어올 때 · 사주 속 자리별 · 다른 글자와 함께 있을 때"를 glossary-sections*.js에서 채운다.
+  // 본문에 같은 항목이 이미 있으면(기본 문구든 관리자가 쓴 문구든) 그 항목은 건너뛴다.
+  const GL_SECTION_DEF = [
+    ['use', /■ 쓰임과 특징/, '■ 쓰임과 특징'],
+    ['luck', /■ 운에서|\(대운\)|\(운세 ?흐름상 들어왔다면\)/, '■ 운에서 들어올 때 (대운·세운)'],
+    ['pos', /■ 사주 속 자리별|\([년월일시][간지주]에 있다면\)/, '■ 사주 속 자리별'],
+    ['combo', /■ 다른 글자와|와 같이 있을 때\)|와 함께 있을 때/, '■ 다른 글자와 함께 있을 때']];
+  const glSectionsText = (k, t) => {
+    const S = window.GLOSSARY_SECTIONS && window.GLOSSARY_SECTIONS[k]; if (!S) return '';
+    const parts = GL_SECTION_DEF.filter(([f, re]) => S[f] && !re.test(t)).map(([f, , head]) => {
+      const s = S[f];
+      return [head, ...(s.intro ? [s.intro] : []), ...s.rows.map(([l, x]) => l ? `-. (${l}) ${x}` : `-. ${x}`)].join('\n');
+    });
+    return parts.length ? '\n\n' + parts.join('\n\n') : '';
+  };
+  const glFull = (k, t) => { const s = glSectionsText(k, t); return glHtml(t + s + glCasesText(k, t + s)); };
   const glInline = k => { const e = GL[k]; if (!e) return ''; const t = e[1], para = t.split('\n\n')[0]; if (e[0] !== '육십갑자') return para; const bul = t.split('\n').filter(l => /^-\. (성향|장점|단점·주의|어울리는 직군|연애·관계|조언):/.test(l)); return bul.length ? para + '\n' + bul.join('\n') : para; };
   const term = (t, label) => GL[t] ? `<button type="button" class="term" data-term="${esc(t)}">${esc(label ?? t)}</button>` : esc(label ?? t);
   const patTerm = n => GL[n] ? n : (/결핍/.test(n) ? '오행 결핍' : n);
@@ -7743,7 +7761,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function glList() {
     const q = S.glq.trim();
     const cats = {};
-    for (const [k, [c, t]] of Object.entries(GL)) { if (q && !k.includes(q) && !(t + glCasesText(k, t)).includes(q)) continue; (cats[c] ||= []).push([k, t]); }
+    for (const [k, [c, t]] of Object.entries(GL)) { if (q && !k.includes(q) && !(t + glSectionsText(k, t) + glCasesText(k, t)).includes(q)) continue; (cats[c] ||= []).push([k, t]); }
     const keys = Object.keys(cats);
     if (!keys.length) return '<p class="muted small">찾는 용어가 없습니다.</p>';
     return keys.map(c => `<div class="gl-cat"><h3>${c}</h3>${cats[c].map(([k, t]) => `<div class="gl-item"><span>${term(k)}${adminPw && k in OVR ? ' <span class="chip edited">수정됨</span>' : ''}</span><p>${glFull(k, t)}</p></div>`).join('')}</div>`).join('');
