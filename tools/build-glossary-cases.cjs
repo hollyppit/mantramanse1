@@ -8,10 +8,10 @@ const ovrFile = process.argv[2], outFile = process.argv[3] || path.join(root, 'd
 if (!ovrFile) { console.error('사용법: node tools/build-glossary-cases.cjs <overrides.json> [out.txt]'); process.exit(1); }
 const ovr = JSON.parse(fs.readFileSync(ovrFile, 'utf8'));
 const ctx = { window: {} }; vm.createContext(ctx); vm.runInContext(fs.readFileSync(path.join(root, 'glossary-cases.js'), 'utf8'), ctx);
-const C = ctx.window.GLOSSARY_CASES, BASIS = ctx.window.GLOSSARY_CASES_BASIS;
+const C = ctx.window.GLOSSARY_CASES, BASIS = ctx.window.GLOSSARY_CASES_BASIS, POS = ctx.window.GLOSSARY_CASES_POSITION;
 const HEADING = '■ 많고 적고 없고에 따라';
 const LABEL = [['many', '많을 때'], ['few', '적을 때'], ['none', '아예 없을 때'], ['fill', '운에서 채워질 때']];
-const block = k => [HEADING + ' (더 자세히)', '-. (판단 기준) ' + BASIS[C[k].basis], ...LABEL.filter(([f]) => C[k][f]).map(([f, l]) => `-. (${l}) ${C[k][f]}`)].join('\n');
+const block = k => [HEADING + ' (더 자세히)', '-. (판단 기준) ' + BASIS[C[k].basis], ...LABEL.filter(([f]) => C[k][f]).map(([f, l]) => `-. (${l}) ${C[k][f]}`), ...(POS.bases.includes(C[k].basis) ? ['-. (자리와 뿌리) ' + POS.text] : [])].join('\n');
 
 const terms = Object.keys(ovr), out = [], missing = [], over = [], dup = [];
 out.push('용어 설명 "많고 적고 없고에 따라" — 관리자 화면 붙여 넣기용 (사용자가 수정한 용어 ' + terms.length + '개)');

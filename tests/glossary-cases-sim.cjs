@@ -33,6 +33,12 @@ const FORBID = /반드시|틀림없|죽습니다|사망|암에|질병에 걸|진
 for (const k of keys) for (const f of ['many', 'few', 'none', 'fill']) if (C[k][f]) ok(!FORBID.test(C[k][f]), `${k}.${f}: 단정·의학 표현`);
 // 건강 이야기는 "참고"를 붙인다
 for (const k of ['목 기운', '화 기운', '토 기운', '금 기운', '수 기운']) ok(/참고/.test(C[k].many), `${k}.many: 건강 언급에 "참고"가 없음`);
+// 자리와 뿌리 줄: 월지>일지>시지>년지 순서를 말하고, 십성·오행에만 붙는다(신살·12운성·관계·구조에는 붙지 않는다)
+const POS = ctx.window.GLOSSARY_CASES_POSITION;
+ok(POS && /월지 > 일지 > 시지 > 년지/.test(POS.text) && /통근/.test(POS.text), '자리와 뿌리 설명이 없음');
+ok(POS.bases.join() === 'group,single,element', '자리와 뿌리 적용 대상이 달라짐');
+ok(keys.filter(k => POS.bases.includes(C[k].basis)).length === 21, '자리와 뿌리 줄이 붙는 용어 수가 21개가 아님');
+ok(/GLOSSARY_CASES_POSITION/.test(html), 'index.html이 자리와 뿌리 줄을 쓰지 않음');
 // 같은 용어 안에서 세 항목이 똑같지 않다
 for (const k of keys) { const v = ['many', 'few', 'none'].map(f => C[k][f]).filter(Boolean); ok(new Set(v).size === v.length, `${k}: 항목 문장이 중복`); }
 

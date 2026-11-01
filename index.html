@@ -4622,7 +4622,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const GL_CASE_LABEL = [['many', '많을 때'], ['few', '적을 때'], ['none', '아예 없을 때'], ['fill', '운에서 채워질 때']];
   const glCasesText = (k, t) => {
     const c = window.GLOSSARY_CASES && window.GLOSSARY_CASES[k]; if (!c || String(t).includes(GL_CASES_HEAD)) return '';
-    return '\n\n' + [GL_CASES_HEAD + ' (더 자세히)', '-. (판단 기준) ' + window.GLOSSARY_CASES_BASIS[c.basis], ...GL_CASE_LABEL.filter(([f]) => c[f]).map(([f, l]) => `-. (${l}) ${c[f]}`)].join('\n');
+    const P = window.GLOSSARY_CASES_POSITION;
+    return '\n\n' + [GL_CASES_HEAD + ' (더 자세히)', '-. (판단 기준) ' + window.GLOSSARY_CASES_BASIS[c.basis], ...GL_CASE_LABEL.filter(([f]) => c[f]).map(([f, l]) => `-. (${l}) ${c[f]}`), ...(P && P.bases.includes(c.basis) ? ['-. (자리와 뿌리) ' + P.text] : [])].join('\n');
   };
   const glFull = (k, t) => glHtml(t + glCasesText(k, t));
   const glInline = k => { const e = GL[k]; if (!e) return ''; const t = e[1], para = t.split('\n\n')[0]; if (e[0] !== '육십갑자') return para; const bul = t.split('\n').filter(l => /^-\. (성향|장점|단점·주의|어울리는 직군|연애·관계|조언):/.test(l)); return bul.length ? para + '\n' + bul.join('\n') : para; };

@@ -348,6 +348,13 @@
     }
   });
 
+  /* 자리와 뿌리에 따른 강도: 십성·오행처럼 "어디에 얼마나 있느냐"가 중요한 용어(basis가 group·single·element)에만 붙인다 */
+  var POSITION = {
+    bases: ['group', 'single', 'element'],
+    text: '자리와 뿌리에 따라 같은 "있음"도 힘이 다릅니다. 자리는 월지 > 일지 > 시지 > 년지 순으로 힘이 크고(월지는 계절을 쥐고 있어 가장 큼), 천간은 겉으로 드러난 모습이라 지지에 뿌리(통근)가 있어야 힘이 붙습니다. 월지에서 계절을 얻고 천간에도 같은 글자가 나와 있으면 가장 확실한 "있음", 천간에만 있고 뿌리가 없으면 드러나도 약하게 읽고, 시지·년지에만 있으면 영향이 작다고 봅니다.'
+  };
+
   window.GLOSSARY_CASES = C;
   window.GLOSSARY_CASES_BASIS = BASIS;
+  window.GLOSSARY_CASES_POSITION = POSITION;
 })();
