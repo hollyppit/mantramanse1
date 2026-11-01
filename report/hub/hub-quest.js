@@ -22,6 +22,7 @@
     H.engine().catch(function () { }); // 윤달·일수 판정에 필요 — 미리 불러 둔다
     Ob.config().then(function (cfg) {
       if (!H.alive(ctx)) return;
+      if (!Ob.preview) return oldBegin(Object.assign({}, q, { compact: true }), ctx);
       if (!cfg.quest || cfg.quest.enabled === false) return oldBegin(q, ctx);
       run(q, ctx, cfg);
     });

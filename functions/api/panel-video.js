@@ -1,3 +1,4 @@
+import { deleteDerivedFile, isProtectedOriginal, putDerivedFile } from '../_original-assets.js';
 // 무빙툰 컷 영상 생성(Kling 이미지 → 영상) — 칸에 있는 이미지를 시작 프레임으로 영상을 만들어 그 칸의 영상으로 저장한다 (관리자 전용)
 // GET    /api/panel-video             — { enabled(Kling 키 설정 여부), tasks:[진행 중 작업] }
 // POST   /api/panel-video { kind, element, theme | slot, startKey, prompt?, extra?, negative?, mode?, duration? } — 시작 프레임(관리자 화면이 JPEG 로 변환해 /api/clipfile 로 올린 키)으로 Kling 작업 제출
@@ -18,7 +19,7 @@ const getTask = async (env, id) => { const t = await env.GLOSSARY_KV.get(TP + id
 const putTask = (env, id, t) => env.GLOSSARY_KV.put(TP + id, JSON.stringify(t), { expirationTtl: 86400 });
 const delTask = (env, id) => env.GLOSSARY_KV.delete(TP + id);
 const listTasks = async env => { const out = {}, l = await env.GLOSSARY_KV.list({ prefix: TP }); for (const k of (l && l.keys) || []) { const id = k.name.slice(TP.length), t = await getTask(env, id); if (t) out[id] = t; } return out; };
-const delFile = async (env, k) => { if (k) { try { await env.CLIPS_R2.delete(k); } catch { /* 정리 실패 무시 */ } } };
+const delFile = async (env, k) => { if (k) { try { await deleteDerivedFile(env, k); } catch { /* 정리 실패 무시 */ } } };
 
 export async function onRequestGet({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
@@ -40,13 +41,13 @@ export async function onRequestGet({ request, env }) {
   if (t.asset) { // 풀이 화면 이미지 슬롯: 슬롯의 이미지가 아직 있는지만 확인하고, 영상은 미리보기로 저장
     const amap = (await env.GLOSSARY_KV.get(AKEY, 'json')) || {}; if (!amap[id]) { await finish(); return json({ status: 'failed', error: '그 사이 슬롯의 이미지가 없어져 영상을 붙이지 못했습니다' }); }
     const akey = keyOf(id) + '-v-' + Array.from(crypto.getRandomValues(new Uint8Array(4)), x => x.toString(16).padStart(2, '0')).join('') + '.mp4';
-    await env.CLIPS_R2.put(akey, buf, { httpMetadata: { contentType: 'video/mp4' } }); await finish();
+    await putDerivedFile(env, akey, buf, { httpMetadata: { contentType: 'video/mp4' } }); await finish();
     return json({ status: 'done', id, preview: akey, video: '/api/clipfile?k=' + akey });
   }
   const list = (await env.GLOSSARY_KV.get(KEY, 'json')) || [], old = list.find(m => m.id === id);
   if (!old || !old.url) { await finish(); return json({ status: 'failed', error: '그 사이 칸의 이미지가 없어져 영상을 붙이지 못했습니다' }); }
   const key = id + '-k-' + Array.from(crypto.getRandomValues(new Uint8Array(4)), x => x.toString(16).padStart(2, '0')).join('') + '.mp4';
-  await env.CLIPS_R2.put(key, buf, { httpMetadata: { contentType: 'video/mp4' } }); await finish();
+  await putDerivedFile(env, key, buf, { httpMetadata: { contentType: 'video/mp4' } }); await finish();
   return json({ status: 'done', id, preview: key, video: '/api/clipfile?k=' + key });
 }
 

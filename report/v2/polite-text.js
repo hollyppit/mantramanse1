@@ -42,6 +42,8 @@ function content(value,key){
  var out={};Object.keys(value).forEach(function(k){out[k]=skip.has(k)?value[k]:content(value[k],k);});return out;
 }
 function stored(key,value){
+ // Reviewed scene metadata is compared by digest; never rewrite a stored draft or publication.
+ if(key==='ik:blocks:chapter:seals.presentation')return value;
  if(typeof value!=='string'||!(/^(?:ik:d:|ik:blocks:chapter:|ik:library:)/.test(key)||/^ik:editorial:(?:draft|published)$/.test(key))||/:history$/.test(key))return value;
  try{return JSON.stringify(content(JSON.parse(value)));}catch{return value;}
 }

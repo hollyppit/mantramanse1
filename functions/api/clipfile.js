@@ -1,3 +1,4 @@
+import { isProtectedOriginal, putDerivedFile } from '../_original-assets.js';
 // 무빙툰 영상 파일 (R2 바인딩 CLIPS_R2 필요)
 // GET    /api/clipfile?k=<키>            — 영상 재생 (Range 지원). <video> 태그는 인증 헤더를 못 보내므로 공개, 키는 추측 불가능한 값
 // POST   /api/clipfile?name=<파일명>     — 영상(또는 홈 화면용 이미지, BGM 음원) 업로드, 본문은 파일 원본 (관리자 전용) → { key }
@@ -57,7 +58,7 @@ export async function onRequestPost({ request, env }) {
 
   const rand = crypto.getRandomValues(new Uint8Array(9));
   const key = Array.from(rand, b => b.toString(16).padStart(2, '0')).join('') + '.' + ext;
-  await env.CLIPS_R2.put(key, request.body, { httpMetadata: { contentType: type } });
+  await putDerivedFile(env, key, request.body, { httpMetadata: { contentType: type } });
   return json({ ok: true, key, size: len });
 }
 
@@ -66,6 +67,7 @@ export async function onRequestDelete({ request, env }) {
   if (!env.CLIPS_R2) return noR2();
   const k = new URL(request.url).searchParams.get('k') || '';
   if (!KEY_RE.test(k)) return json({ error: '키가 올바르지 않습니다' }, 400);
+  if (isProtectedOriginal(k)) return json({ error: '보존 대상 원본은 삭제할 수 없습니다. 별도 파생본을 사용하세요', code: 'ORIGINAL_PROTECTED' }, 409);
   await env.CLIPS_R2.delete(k);
   return json({ ok: true });
 }

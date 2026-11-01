@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),fs=require('fs'),vm=require('vm');
+const R=require('../report/v2/seal-reader.js');
+const c={id:'timeline_self_01',title:'나는 어떤 사람일까요?',readingCore:{title:'검수한 원문입니다.',risk:'조건이 다르면 반대로 볼 수 있습니다.',practice:'실천을 기록합니다.',evidence:'자료 부족이라는 한계를 보존합니다.'},interpretationAnalysis:{claims:[{id:'c1',exceptions:['반대 조건'],counter_evidence:['반례'],evidence:[{docId:'d1',pageStart:2}]}]}};
+const before=JSON.stringify(c),p=R.plan(c);assert.equal(JSON.stringify(c),before);assert.deepEqual(p.scenes.map(x=>x.source.text),Object.values(c.readingCore));assert(p.scenes.every(x=>x.references.claims[0].exceptions[0]==='반대 조건'));
+assert.equal(p.contentVersion,R.plan({...c,readingCore:Object.fromEntries(Object.entries(c.readingCore).reverse())}).contentVersion,'object key order must not change content fingerprint');
+assert.notEqual(p.contentVersion,R.plan({...c,readingCore:{...c.readingCore,risk:'다른 검수 문안'}}).contentVersion);
+assert.equal(R.plan({...c,sealPresentation:{status:'draft',question:'미검수'}}).question,c.title);
+const published=R.plan({...c,sealPresentation:{status:'published',question:'검수 질문',scenes:[{id:'risk-stable',role:'risk',order:0}]}});assert.equal(published.question,'검수 질문');assert.equal(published.scenes.find(x=>x.role==='risk').id,'timeline_self_01:risk-stable');
+const context={module:{exports:{}},localStorage:{getItem(){throw Error('blocked')},setItem(){throw Error('quota')}},console};context.globalThis=context;vm.createContext(context);vm.runInContext(fs.readFileSync('report/v2/seal-reader.js','utf8'),context);const memory=context.ReportV2.SealReader,st=memory.state('test','v1');st.opened=true;st.practice='계속 읽기';assert.equal(memory.save('test',st),false);assert.equal(memory.state('test','v1').practice,'계속 읽기');assert.equal(memory.state('test','v2').opened,false);assert.equal(memory.state('other','v1').practice,'');
+assert(!/\bfetch\s*\(/.test(fs.readFileSync('report/v2/seal-reader.js','utf8')));
+console.log('PASS seal contract: immutable source, counterconditions/references, stable metadata IDs, published-only, content fingerprints, identity isolation, storage failure memory fallback and no network calls');

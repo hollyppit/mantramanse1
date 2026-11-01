@@ -17,7 +17,7 @@
   var HUB = !PREVIEW && /[?&]from=hub(&|$)/.test(location.search); // /report/hub/ 에서 넘어온 경우: 일간·일주 영상·프롤로그는 허브가 이미 보여 줬으므로 건너뛰고 바로 인생 지도로 간다
   var WORLD = (/[?&]world=([\w-]{1,30})(&|$)/.exec(location.search) || [])[1] || '';
   var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
-  var view = function (v) { var steps0 = document.getElementById('wsteps'); if (steps0 && v !== 'reader') steps0.hidden = true; var ws0 = document.getElementById('wstrip'); if (ws0 && v !== 'reader' && v !== 'home') { ws0.hidden = true; document.documentElement.style.removeProperty('--bar-h'); } if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
+  var view = function (v) { var steps0 = document.getElementById('wsteps'); if (steps0 && v !== 'reader') steps0.hidden = true; var ws0 = document.getElementById('wstrip'); if (ws0 && v !== 'reader' && v !== 'home') { ws0.hidden = true; document.documentElement.style.removeProperty('--bar-h'); } if(v!=='reader'&&R.FullReading&&R.FullReading.cancelMany)R.FullReading.cancelMany();if (v !== 'reader' && R.ReadingMedia)R.ReadingMedia.unmount($('#chapter')); if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
   function toast(msg, ms) { var t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, ms || 3200); }
   var sg = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, ss = function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { } };
 
@@ -67,8 +67,8 @@
     var sd; try { sd = R.SajuData.build(ch, { now: Date.now() }); } catch (e) { elog('caught', 'sd.build'); clearInterval(tick); view('input'); $('#msg').textContent = '계산 결과를 정리하지 못했습니다.'; return; }
     S.sd = sd; S.birth = birthOf(ch); if (R.IchingCard) R.IchingCard.init(); var t0 = Date.now();
     // 서버 저장본(콘텐츠·미디어·일간 소개 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
-    Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story'), getJson('/api/assets'), getJson('/api/prologue')]).then(function (a) {
-      S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
+    Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story'), getJson('/api/assets'), getJson('/api/prologue'), getJson('/api/seal-scenes')]).then(function (a) {
+      S.sealPresentations=(a[6]&&a[6].chapters)||[]; S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
       S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.assets = (a[4] && a[4].assets) || {}; S.assetVideos = (a[4] && a[4].videos) || {}; S.proVid = prologueUrl(a[5], WORLD, selectedGuide());
       if (R.Deep && S.ch && !PREVIEW) { try { R.Deep.augment(S.rep, { M: window.Manse, ch: S.ch, sd: sd, now: Date.now(), name: S.name, assets: S.assets, videos: S.assetVideos }); } catch (e) { elog('caught', 'deep.augment'); /* 깊이 풀이가 실패해도 기본 리포트는 그대로 */ } S.repPdf = plainRep(S.rep); } // 자동차 비유·장단점·12운성·직업·배우자·일주·전생·대운/세운/월운·개운 근거·명소 챕터를 끼운다
       S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null, textOnly: !!(a[2] && a[2].textOnly) }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
@@ -536,7 +536,10 @@
     if (b.dataset.tld != null) { T0.d = +b.dataset.tld; T0.y = null; T0.m = null; } else if (b.dataset.tly != null) { T0.y = +b.dataset.tly; T0.m = null; } else { T0.m = +b.dataset.tlm; }
     var y = window.scrollY; showHome('w1'); window.scrollTo(0, y); T('timeline_select', { level: b.dataset.tld != null ? 'daeun' : b.dataset.tly != null ? 'year' : 'month' });
   });
-  function enterFromHome(idx) {
+  function enterFromHome(idx, navigation) {
+    var targetWorld=S.wmap&&S.wmap.idx[idx];if(R.SealReader&&targetWorld&&!(navigation&&navigation.history===false)){var targetUrl=new URL(location.href);if(targetUrl.searchParams.get('world')!==targetWorld){targetUrl.searchParams.set('world',targetWorld);targetUrl.hash='';history.pushState({sealWorld:targetWorld},'',targetUrl.href);}}
+
+    if(R.FullReading&&R.FullReading.cancelMany)R.FullReading.cancelMany();
     if(R.FullReading && S.rep.chapters[idx])R.FullReading.prioritize(S.rep.chapters[idx].id);
     S.readerWorld = (S.wmap && S.wmap.idx[idx]) || null;
     S.view = 'reader'; view('reader'); pinTo(idx); renderStrip(); openDoc(idx, { autoStart: S.xp ? S.xp.auto : true }); renderStrip(); T('explore_chapter_picked', { index: idx });
@@ -572,8 +575,8 @@
       var ci = S.rep.chapters.findIndex(function(item){return item.id===c.id;}), article = document.getElementById('ch-' + c.id);
       if(article && R.ReadingText && c.readingCore){
         var anchor=null;if(S.view==='reader'){var activeIndex=pinned()!=null?pinned():S.idx,activeArticle=document.querySelector('#chapter .chap[data-ch="'+activeIndex+'"]');if(activeArticle){var anchorNode=Array.from(activeArticle.querySelectorAll('.rd-sec')).find(function(n){return n.getBoundingClientRect().bottom>160;})||activeArticle;anchor={chapter:activeIndex,key:anchorNode.dataset.sc,top:anchorNode.getBoundingClientRect().top};}}
-        c.readingVisualData=Object.assign({},c.readingVisualData,{name:S.name,daewoon:S.sd.daewoon,nowYear:S.sd.nowYear,currentDaewoon:S.sd.currentDaewoon,sewoon:S.sd.sewoon,monthlyLuck:S.sd.monthlyLuck,annualLuck:S.sd.annualLuck,compat:S.sd.compat,currentRoots:S.sd.currentRoots,specialStars:S.sd.specialStars,groups:S.sd.groups,tenGods:S.sd.tenGods,fiveElements:S.sd.fiveElements,strength:S.sd.strength,pillars:S.sd.pillars,dayMaster:S.sd.dayMaster,dayPillar:S.sd.dayPillar,sinsal12:S.sd.sinsal12,combinations:S.sd.combinations,clashes:S.sd.clashes,usefulElements:S.sd.usefulElements,reviewConditions:S.sd.reviewConditions});try{Object.defineProperty(c,'readingFeature',{value:{M:window.Manse,ch:S.ch,sd:S.sd,now:Date.now(),name:S.name,assets:S.assets||{},videos:S.assetVideos||{}},writable:true,configurable:true,enumerable:false});}catch(e){}c.readingMedia=R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,3):[];
-        R.ReadingText.update(article,c,ci);if(R.ReadingMedia)R.ReadingMedia.mount(article,{reduce:reduce,saveData:saveData}); linkBasisReferences(article);
+        c.readingVisualData=Object.assign({},c.readingVisualData,{name:S.name,daewoon:S.sd.daewoon,nowYear:S.sd.nowYear,currentDaewoon:S.sd.currentDaewoon,sewoon:S.sd.sewoon,monthlyLuck:S.sd.monthlyLuck,annualLuck:S.sd.annualLuck,compat:S.sd.compat,currentRoots:S.sd.currentRoots,specialStars:S.sd.specialStars,groups:S.sd.groups,tenGods:S.sd.tenGods,fiveElements:S.sd.fiveElements,strength:S.sd.strength,pillars:S.sd.pillars,dayMaster:S.sd.dayMaster,dayPillar:S.sd.dayPillar,sinsal12:S.sd.sinsal12,combinations:S.sd.combinations,clashes:S.sd.clashes,usefulElements:S.sd.usefulElements,reviewConditions:S.sd.reviewConditions});try{Object.defineProperty(c,'readingFeature',{value:{M:window.Manse,ch:S.ch,sd:S.sd,now:Date.now(),name:S.name,assets:S.assets||{},videos:S.assetVideos||{}},writable:true,configurable:true,enumerable:false});}catch(e){}prepareSeal(c);
+        var sealFocus=R.SealReader&&R.SealReader.capture(article);if(R.SealReader)R.SealReader.unmount(article);if(R.ReadingMedia)R.ReadingMedia.unmount(article);R.ReadingText.update(article,c,ci);mountSeal(article,c,ci);if(R.SealReader)R.SealReader.restoreFocus(article,sealFocus);if(R.ReadingMedia)R.ReadingMedia.mount(article,{reduce:reduce,saveData:saveData}); linkBasisReferences(article);
         if(anchor){var nextArticle=document.querySelector('#chapter .chap[data-ch="'+anchor.chapter+'"]'),nextNode=nextArticle&&(Array.from(nextArticle.querySelectorAll('[data-sc]')).find(function(n){return n.dataset.sc===anchor.key;})||nextArticle);if(nextNode)window.scrollBy(0,nextNode.getBoundingClientRect().top-anchor.top);}
         if(S.mv){S.mv.measure();if(!c.readingDeferred||c.readingWarning)S.mv.readingReady();}return;
       }
@@ -850,6 +853,23 @@
       if (scs.length > 9) { var mid = scs.slice(Math.floor(scs.length / 2)).filter(host)[0]; if (mid && mid !== first) place(mid, th); }
     });
   }
+  function prepareSeal(c){
+    c.sealPresentation=(S.sealPresentations||[]).find(function(m){return m.chapterId===(c.editorialContractId||c.id);})||null;
+    c.readingMedia=R.SealReader?R.SealReader.media(panelPool(),c,S.sd):R.ReadingMedia?R.ReadingMedia.pick(panelPool(),c,S.sd,3):[];c.readingMediaAudit=R.ReadingMedia&&R.ReadingMedia.explain?R.ReadingMedia.explain(panelPool(),c,S.sd,c.readingMedia):[];
+  }
+  function sealIdentity(){return {input:S.ch&&S.ch.input,birth:S.sd.birth,gender:S.sd.gender,pillars:S.sd.pillars,adjustments:S.sd.elementAdjustments};}
+  function sealIndexes(c){var wid=c&&S.wmap&&S.wmap.idx[S.rep.chapters.indexOf(c)]||S.readerWorld;return wid&&S.wmap?S.wmap.by[wid]||[]:S.rep.chapters.map(function(c,i){return i;});}
+  function sealNavigate(id){var index=S.rep.chapters.findIndex(function(c){return c.id===id;});if(index<0)return;var c=S.rep.chapters[index];if(c.readingWarning&&R.FullReading)R.FullReading.retry(c.id);gotoChapter(index,false,false);}
+  window.addEventListener('popstate',function(){if(!R.SealReader||!S.rep||!S.wmap)return;var wid=new URL(location.href).searchParams.get('world');if(!wid){showHome();return;}var indexes=S.wmap.by[wid]||[];if(!indexes.length)return;var remembered=S.sealTopicLast&&S.sealTopicLast[wid];enterFromHome(indexes.indexOf(remembered)>=0?remembered:indexes[0],{history:false});});
+  function mountSealBook(){if(!R.SealReader)return;var all=S.rep.chapters,rows=all.filter(function(c,i){return !S.readerWorld||S.wmap.idx[i]===S.readerWorld;}),topics=['self','wealth','career','love'].map(function(id){var pool=all.filter(function(c){return R.SealTopics&&R.SealTopics.topicOf(c)===id;}),info=pool.length&&R.SealTopics.describe(pool[0]);return info?{id:id,title:info.title,total:pool.length}:null;}).filter(Boolean),first=rows[0],info=first&&R.SealTopics?R.SealTopics.describe(first):null;if(!S.readerWorld&&topics.length>1)info={id:'all',title:'나의 운명 이야기',label:'네 가지 주제',intro:'종합·재물·커리어·인연의 봉인을 편한 순서로 읽어 보세요.',accent:'#d5b97f'};
+    R.SealReader.mountBook($('#chapter'),{identity:sealIdentity(),chapters:rows,topic:info,topics:topics,currentId:all[S.idx]&&all[S.idx].id,onNavigate:sealNavigate,onTopic:function(id){var pool=all.filter(function(c){return R.SealTopics.topicOf(c)===id;}),resume=pool.slice().sort(function(a,b){return R.SealReader.progress(b,{identity:sealIdentity()}).lastVisitedAt-R.SealReader.progress(a,{identity:sealIdentity()}).lastVisitedAt;}).find(function(c){var p=R.SealReader.progress(c,{identity:sealIdentity()});return p.opened&&!p.read;})||pool[0];if(resume)enterFromHome(all.indexOf(resume));},onReadAll:function(ids,report){return R.FullReading&&R.FullReading.requestMany?R.FullReading.requestMany(ids,{onProgress:report}):null;},onLayout:function(){if(S.mv){S.mv.pause();S.mv.measure();}}});
+  }
+  function mountSeal(article,c,ci){
+    if(!R.SealReader)return;
+    c.sealPresentation=(S.sealPresentations||[]).find(function(m){return m.chapterId===(c.editorialContractId||c.id);})||null;
+    var indexes=sealIndexes(c),position=indexes.indexOf(ci),next=indexes[position+1],topicId=R.SealTopics&&R.SealTopics.topicOf(c),topicOrder=['self','wealth','career','love'],nextTopic=topicOrder[topicOrder.indexOf(topicId)+1];
+    R.SealReader.mount(article,c,ci,{identity:sealIdentity(),ordinal:position+1,total:indexes.length,reduce:reduce,saveData:saveData,nextLabel:next!=null?'다음 봉인 · '+S.rep.chapters[next].title:nextTopic?'다음 주제로':'주제 목록으로',onNext:function(){if(next!=null)sealNavigate(S.rep.chapters[next].id);else if(nextTopic){var i=S.rep.chapters.findIndex(function(x){return R.SealTopics.topicOf(x)===nextTopic;});if(i>=0)enterFromHome(i);}else showHome();},onChange:function(change){if(change&&(change.reason==='read'||change.reason==='reset')){if(change.read)S.ended[c.id]=1;else delete S.ended[c.id];if(S.xp)xpSave();renderStrip();}if(S.mv){S.mv.pause();S.mv.measure();}}});article.dispatchEvent(new CustomEvent('sealchange',{bubbles:true}));
+  }
   function buildDoc() {
     var rep = S.rep, h = ''; S.bg = []; if(!R.ReadingText)planPanels(rep);
     rep.chapters.forEach(function (c, ci) {
@@ -875,7 +895,7 @@
       h += '<article class="chap" id="ch-' + esc(c.id) + '" data-ch="' + ci + '" aria-label="' + esc(c.title) + '">' + main + '</article>';
     });
     if(S.sd.elementAdjustments)h='<aside class="card" aria-label="원국 계산 기준"><p>'+esc(S.sd.elementAdjustments.summary)+'</p></aside>'+h;
-    $('#chapter').innerHTML = h; chapterTags(); linkBasisReferences($('#chapter')); try { emphasize($('#chapter')); } catch (e) { /* 강조가 실패해도 본문은 그대로 */ }
+    if(R.SealReader)R.SealReader.unmountBook($('#chapter'));if(R.SealReader)$('#chapter').querySelectorAll('.chap').forEach(function(a){R.SealReader.unmount(a);});if(R.ReadingMedia)R.ReadingMedia.unmount($('#chapter'));$('#chapter').innerHTML = h; if(R.SealReader)S.rep.chapters.forEach(function(c,ci){var a=document.getElementById('ch-'+c.id);if(a)mountSeal(a,c,ci);}); if(R.SealReader)mountSealBook(); chapterTags(); linkBasisReferences($('#chapter')); try { emphasize($('#chapter')); } catch (e) { /* 강조가 실패해도 본문은 그대로 */ }
     rep.chapters.forEach(function (c) { if (c.kind === 'monthly') { var cur = (c.items || []).findIndex(function (x) { return x.isNow; }); moDetail(c, Math.max(0, cur)); } });
   }
   function openDoc(start, o) {
@@ -886,7 +906,7 @@
   }
   function mountReading(auto) {
     if(R.ReadingMedia)R.ReadingMedia.mount($('#chapter'),{reduce:reduce,saveData:saveData});
-    S.mv = R.Reading.mount($('#chapter'), { flow: Object.assign({}, S.pack && S.pack.flow, { playbackRate: playbackRate() }), reduce: reduce, saveData: saveData, bgList: S.bg, autoStart: auto, bgm: R.Bgm && R.Bgm.has() ? R.Bgm : null, onSection: onSection, onEnd: onDocEnd, canAdvance: function(sec){var c=S.rep.chapters[+sec.dataset.ch];return !c || !c.readingDeferred || !!c.readingWarning;},
+    S.mv = R.Reading.mount($('#chapter'), { flow: Object.assign({}, S.pack && S.pack.flow, { playbackRate: playbackRate(), auto:R.SealReader?false:undefined }), reduce: reduce, saveData: saveData, bgList: S.bg, autoStart: R.SealReader?false:auto, bgm: R.Bgm && R.Bgm.has() ? R.Bgm : null, onSection: onSection, onEnd: onDocEnd, canAdvance: function(sec){var c=S.rep.chapters[+sec.dataset.ch];return !c || !c.readingDeferred || !!c.readingWarning;},
       onProgress: function (fr) { $('#progFill').style.width = Math.round(fr * 1000) / 10 + '%'; $('#prog').setAttribute('aria-valuenow', String(Math.round(fr * 100))); } });
   }
   function resumeReader() { view('reader'); S.view = 'reader'; if (EXPLORE) renderStrip(); mountReading(false); window.scrollTo(0, S.scroll.doc || 0); if (S.mv) S.mv.measure(); }
@@ -894,18 +914,18 @@
     pinTo(i);
     if(R.FullReading && S.rep.chapters[i])R.FullReading.prioritize(S.rep.chapters[i].id);
     if (S.readerWorld && S.wmap && S.wmap.idx[i] && S.wmap.idx[i] !== S.readerWorld) { enterFromHome(i); return; }
-    var el = $('#chapter .chap[data-ch="' + i + '"]'); if (!el || !S.mv) return;enterChapter(S.rep.chapters[i],i); S.mv.gotoEl(el, instant, resume);
+    var el = $('#chapter .chap[data-ch="' + i + '"]'); if (!el || !S.mv) return;enterChapter(S.rep.chapters[i],i);if(R.SealReader&&el.querySelector('.seal-gate,h2')){S.mv.pause();el.querySelector('.seal-gate,h2').scrollIntoView({block:'start',behavior:instant||reduce?'auto':'smooth'});}else S.mv.gotoEl(el, instant, resume);
   }
   function onSection(sec) { // 현재 읽고 있는 섹션이 바뀔 때(자동 진행·직접 스크롤 모두)
     var ci = +sec.dataset.ch, c = S.rep.chapters[ci]; if (!c) return;
     if(pinned()!=null&&ci!==pinned())return;
     if (ci !== S.idx || !S.cur) enterChapter(c, ci);
-    if (sec.classList.contains('s-end') && !c.readingDeferred && !S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); if (EXPLORE) { xpSave(); if (c.id === 'c-char' && !S.homeShown && !S.readerWorld) { S.homeShown = 1; setTimeout(function () { if(S.view!=='reader'||S.readerWorld||!S.rep.chapters[S.idx]||S.rep.chapters[S.idx].id!==c.id)return; if (S.mv) S.mv.pause(); showHome(); }, 900); } } }
+    if (!(R.SealReader&&c.readingCore) && sec.classList.contains('s-end') && !c.readingDeferred && !S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); if (EXPLORE) { xpSave(); if (c.id === 'c-char' && !S.homeShown && !S.readerWorld) { S.homeShown = 1; setTimeout(function () { if(S.view!=='reader'||S.readerWorld||!S.rep.chapters[S.idx]||S.rep.chapters[S.idx].id!==c.id)return; if (S.mv) S.mv.pause(); showHome(); }, 900); } } }
   }
   function enterChapter(c, ci) {
     if (S.pin) { if (Date.now() < S.pin.until && ci !== S.pin.idx) return; if(Date.now()>=S.pin.until)S.pin=null; } // 이동 중 앞·뒤 챕터 감지가 선택을 덮어쓰지 않게 한다.
     var rep = S.rep, n = rep.chapters.length, prev = S.cur ? rep.chapters[S.idx] : null, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}; S.idx = ci; S.cur = true; if(R.FullReading && R.FullReading.prioritize)R.FullReading.prioritize(c.id);
-    barLabel(ci); saveReadingSession(c.id);
+    if(S.wmap){S.sealTopicLast=S.sealTopicLast||{};S.sealTopicLast[S.wmap.idx[ci]]=ci;}barLabel(ci); saveReadingSession(c.id);if(R.SealReader)mountSealBook();
     if (prev && prev.act !== c.act && !S.visited[c.id]) { T('act_completed', { act: prev.act }); var a = rep.acts.filter(function (x) { return x.id === prev.act; })[0]; if (a && a.pdfDone) toast(a.pdfDone, 3800); }
     if (!S.visited[c.id]) { S.visited[c.id] = 1; T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if ((c.base || c.id) === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {}); }
     if (R.Bgm && R.Bgm.has()) { var mo = c.scenes.filter(function (s) { return s.sceneType === 'insight' || s.sceneType === 'chapterIntro'; })[0]; R.Bgm.play(mo ? R.Cinema.resolve(mo, layersOf(mo)).bgmMood : 'minimal'); } // 챕터 분위기에 맞는 BGM

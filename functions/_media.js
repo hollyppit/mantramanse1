@@ -17,16 +17,34 @@ const txt = (v, n) => (typeof v === 'string' ? v.slice(0, n) : '');
 const tags = (v, allowed) => (Array.isArray(v) ? [...new Set(v.filter(t => allowed.includes(t)))] : []);
 export const FIELD = { elementTags: 'element', stateTags: 'state', emotionTags: 'emotion', sceneTags: 'scene', themeTags: 'theme', chapterTags: 'theme', actionTags: 'action', visualRole: 'role' };
 
+const MEDIA_STATES = ['draft','pending','rejected','retired','inactive','unpublished','archived','withdrawn','approved','published','active','released','reviewed'];
+const PUBLIC_STATES = ['approved','published','active','released'];
+export function isPublicMedia(m) {
+  return !!m && m.enabled === true && m.tagsApproved === true && m.approved !== false && m.published !== false && ['state','status'].every(k=>m[k] == null || m[k] === '' || PUBLIC_STATES.includes(m[k])) && !!(m.url || m.posterUrl);
+}
 export function cleanMedia(m) {
   if (!m || typeof m !== 'object' || !/^[\w.-]{1,80}$/.test(m.id || '')) return null;
   const o = { id: m.id, type: TAX.type.includes(m.type) ? m.type : 'image', url: url(m.url), webmUrl: url(m.webmUrl), thumbnailUrl: url(m.thumbnailUrl), posterUrl: url(m.posterUrl), panelVideo: url(m.panelVideo),
     title: txt(m.title, 80), description: txt(m.description, 400), orientation: ['portrait', 'landscape', 'square'].includes(m.orientation) ? m.orientation : 'portrait',
     duration: Math.max(0, Math.min(600, +m.duration || 0)), loopable: !!m.loopable, hasAudio: !!m.hasAudio, priority: Math.max(0, Math.min(100, Math.round(+m.priority || 0))),
-    chapterIds: Array.isArray(m.chapterIds) ? [...new Set(m.chapterIds.filter(x => typeof x === 'string' && /^[\w.\-가-힣]{1,80}$/.test(x)))].slice(0, 30) : [], enabled: m.enabled !== false, tagsApproved: m.tagsApproved !== false, bytes: Math.max(0, +m.bytes || 0), uploadedAt: +m.uploadedAt || 0 };
+    chapterIds: Array.isArray(m.chapterIds) ? [...new Set(m.chapterIds.filter(x => typeof x === 'string' && /^[\w.\-가-힣]{1,80}$/.test(x)))].slice(0, 30) : [], enabled: m.enabled !== false, tagsApproved: m.tagsApproved === true, bytes: Math.max(0, +m.bytes || 0), uploadedAt: +m.uploadedAt || 0 };
+  for (const key of ['state','status']) if (m[key] != null && m[key] !== '') o[key] = MEDIA_STATES.includes(m[key]) ? m[key] : 'draft';
+  for (const key of ['approved','published']) if (m[key] != null) o[key] = m[key] === true;
+  if (['daily','conflict','practice'].includes(m.phase)) o.phase=m.phase;
   for (const [f, k] of Object.entries(FIELD)) o[f] = tags(m[f], TAX[k]);
   o.tags = [...new Set([...o.elementTags, ...o.stateTags, ...o.emotionTags, ...o.sceneTags, ...o.themeTags, ...o.actionTags])];
   // AI가 추천만 한 태그: 관리자가 승인하기 전에는 조합에 쓰이지 않는다
   o.pending = m.pending && typeof m.pending === 'object' ? { tags: Object.fromEntries(Object.keys(FIELD).map(f => [f, tags((m.pending.tags || {})[f], TAX[FIELD[f]])])), description: txt(m.pending.description, 400) } : null;
+  // Reading scene geometry uses percentages. Keep legacy cinema's 0..1 coordinates separate.
+  const percent = (value, fallback) => { const n = value === '' || value == null ? NaN : Number(value); return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : fallback; };
+  if (m.focalPoint && typeof m.focalPoint === 'object') o.focalPoint = {x:percent(m.focalPoint.x,50),y:percent(m.focalPoint.y,50)};
+  if (m.textSafeArea && typeof m.textSafeArea === 'object') {
+    const a = Object.fromEntries(['top','right','bottom','left'].map(k=>[k,percent(m.textSafeArea[k],0)]));
+    for (const [first,second] of [['top','bottom'],['left','right']]) { const total=a[first]+a[second]; if(total>90){a[first]=Math.round(a[first]*90/total*100)/100;a[second]=Math.round((90-a[first])*100)/100;} }
+    o.textSafeArea=a;
+  }
+  if (['contain','cover'].includes(m.crop)) o.crop=m.crop;
+  if (['title','why','reality','strength','risk','reinforce','practice','evidence','daily','conflict'].includes(m.paragraphRole)) o.paragraphRole=m.paragraphRole;
   const cin = cleanCinema(m.cinema); if (Object.keys(cin).length) o.cinema = cin; // 클립 개별 연출(sceneType·preset·pacing·motionIntensity·imageMotion·transition·textAnimation·textPosition·textSize·overlayStrength·focalPoint·pauseAfter·bgmMood)
   return o;
 }

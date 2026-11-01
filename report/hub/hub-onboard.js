@@ -292,7 +292,7 @@
   /* ═════════ 출생정보 슬라이드 툰 ═════════ */
   var blank = function () { return { name: '', calendar: 'solar', leap: false, year: '', month: '', day: '', hour: '', minute: '', hourUnknown: false, country: 'KR', place: '서울', gender: '' }; };
   function fromProfile(s) {
-    return { name: s.name || '', calendar: s.calendar === 'lunar' ? 'lunar' : 'solar', leap: !!s.leap, year: s.year || '', month: s.month || '', day: s.day || '', hour: s.hourUnknown ? '' : s.hour, minute: s.hourUnknown ? '' : s.minute, hourUnknown: !!s.hourUnknown, country: s.country || 'KR', place: s.city || '서울', gender: s.gender || '' };
+    return { name: s.name || '', calendar: s.calendar === 'lunar' ? 'lunar' : 'solar', leap: !!s.leap, year: s.year || '', month: s.month || '', day: s.day || '', hour: s.hourUnknown ? '' : s.hour, minute: s.hourUnknown ? '' : s.minute, hourUnknown: !!s.hourUnknown, country: s.country || 'KR', place: s.city || '서울', gender: s.gender || '', combinationMode:s.combinationMode, climatePalaceMode:s.climatePalaceMode };
   }
   Ob.classicBegin = function (q, ctx) {
     if (P.has() && !q.edit && !PREVIEW) return H.replace('#/'); // 이미 프로필이 있으면 입력을 건너뛴다
@@ -304,6 +304,7 @@
       if (q.edit && P.get()) { d = fromProfile(P.get()); }
       else if (dr && dr.d && dr.v === 1) { d = Object.assign(blank(), dr.d); step = Math.max(0, Math.min(scenes.length - 1, +dr.step || 0)); }
       else d = blank();
+      if(q.compact && !q.edit && root.Quest){var prior=lget(root.Quest.DRAFT_KEY);if(prior&&prior.d)d=Object.assign(d,prior.d);}
       var started = !!(dr && dr.d);
       var save = function () { lset(DRAFT, { v: 1, step: step, d: d }); };
       function summary() { return '<dl class="ob-sum">' + [['이름', d.name ? esc(d.name) : '입력 안 함', 'name'], ['생년월일', dateText(), 'date'], ['태어난 시각', d.hourUnknown || d.hour === '' ? '모름' : d.hour + '시 ' + (+d.minute || 0) + '분', 'time'], ['태어난 곳', d.country === 'KR' ? esc(d.place) : '해외·기타 (한국 표준시 기준)', 'place'], ['성별', d.gender === 'M' ? '남' : d.gender === 'F' ? '여' : '-', 'gender']].map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd><button type="button" class="lnk" data-jump="' + r[2] + '">수정</button></div>'; }).join('') + '</dl>'; }
@@ -330,7 +331,15 @@
       }
       function placeChips(f) { f = String(f || '').trim(); return O.PLACES.filter(function (p) { return !f || p.name.indexOf(f) >= 0; }).map(function (p) { return '<button type="button" role="option" aria-selected="' + (p.name === d.place) + '" class="' + (p.name === d.place ? 'on' : '') + '" data-p="' + esc(p.name) + '">' + esc(p.name) + '</button>'; }).join('') || '<p class="note">검색 결과가 없습니다. "해외·기타"를 선택해 주세요.</p>'; }
 
+      function renderCompact() {
+        var el=paint('<div class="ob-compact"><p class="ob-kick">MANTRA · 운명의 기록</p><h1>출생정보를 알려 주세요</h1><p class="note">한 번 입력하면 바로 사주를 볼 수 있어요.</p><div id="obForm" class="ob-form"><p>성별</p>'+fieldHtml({field:'gender'})+fieldHtml({field:'date'})+fieldHtml({field:'time'})+'<details><summary>이름 · 출생지역 · 추가 설정</summary>'+fieldHtml({field:'name'})+fieldHtml({field:'place'})+O.adjustmentFields(d)+'</details></div><p id="obMsg" class="msg err" role="alert"></p><button id="obBack" hidden></button><button type="button" class="btn" id="obOk">내 사주 보기</button><p class="note ob-priv">출생정보는 이 기기에만 저장돼요. 기본 출생지역은 서울이며, 추가 설정에서 변경할 수 있어요.</p></div>','ob-compact-page');
+        var quick=el.querySelector('#fQuick');if(quick)quick.closest('label').hidden=true;
+        ['name','gender','date','time','place'].forEach(function(f){bind(el,{field:f,lines:[]},false);});O.bindAdjustments(el,d,save);
+        function submitCompact(){msg('');H.engine().then(function(M){var r=O.validateDate(M,d),t=O.validateTime(d);if(!d.gender)return msg('성별을 선택해 주세요.');if(!r.ok)return msg(r.msg);if(!t.ok)return msg(t.msg);calc();}).catch(function(){msg('계산 엔진을 불러오지 못했습니다. 다시 시도해 주세요.');});}
+        $('#obOk',el).onclick=submitCompact;el.querySelectorAll('input').forEach(function(i){i.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();submitCompact();}};});save();
+      }
       function render() {
+        if(q.compact)return renderCompact();
         var s = scenes[step], last = step === scenes.length - 1, nm = d.name;
         var lines = (s.field === 'time' && d.hourUnknown && s.unknownLines && s.unknownLines.length ? s.unknownLines : s.lines).map(function (t) { return F(t, nm); });
         var el = paintFs('<div class="ob-prog" role="progressbar" aria-valuemin="1" aria-valuemax="' + scenes.length + '" aria-valuenow="' + (step + 1) + '"><i style="width:' + Math.round((step + 1) / scenes.length * 100) + '%"></i><span>' + esc(String(CFG.progressLabel || '{n} / {total} · {title}').replace(/{n}/g, step + 1).replace(/{total}/g, scenes.length).replace(/{title}/g, s.title)) + '</span></div>' +
@@ -356,7 +365,7 @@
           $$('input[name=cal]', el).forEach(function (r) { r.onchange = function () { d.calendar = this.value; if (d.calendar !== 'lunar') d.leap = false; chk(); }; });
           ['Y', 'M', 'D'].forEach(function (k) { $('#f' + k, el).onchange = function () { d[{ Y: 'year', M: 'month', D: 'day' }[k]] = this.value; chk(); }; });
           $('#fLeap', el).onchange = function () { d.leap = this.checked; chk(); };
-          $('#fQuick', el).oninput = function () { var v = this.value.replace(/\D/g, ''); if (v.length === 8) { d.year = +v.slice(0, 4); d.month = +v.slice(4, 6); d.day = +v.slice(6); $('#fY', el).value = d.year; $('#fM', el).value = d.month; $('#fD', el).value = d.day; chk(); } };
+          var quickInput=$('#fQuick',el); if(quickInput) quickInput.oninput = function () { var v = this.value.replace(/\D/g, ''); if (v.length === 8) { d.year = +v.slice(0, 4); d.month = +v.slice(4, 6); d.day = +v.slice(6); $('#fY', el).value = d.year; $('#fM', el).value = d.month; $('#fD', el).value = d.day; chk(); } };
         }
         if (f === 'time') {
           var sync = function () { $('#fH', el).disabled = $('#fMin', el).disabled = d.hourUnknown; var b = $('#obBub'); var ls = (d.hourUnknown && s.unknownLines && s.unknownLines.length ? s.unknownLines : s.lines).map(function (t) { return F(t, d.name); }); if (b) b.innerHTML = ls.map(function (t) { return '<p>' + esc(t) + '</p>'; }).join(''); save(); };
@@ -372,7 +381,7 @@
         if (f === 'confirm') $$('[data-jump]', el).forEach(function (b) { b.onclick = function () { var i = scenes.map(function (x) { return x.field; }).indexOf(b.dataset.jump); if (i >= 0) { step = i; render(); } }; });
         $('#obBack', el).onclick = function () { if (step > 0) { step--; render(); } };
         $('#obOk', el).onclick = function () { advance(s, last); };
-        var inp = $('input[type=text],input[type=number]', el); if (inp && f !== 'place') inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); advance(s, last); } });
+        var inp = $('input[type=text],input[type=number]', el); if (inp && f !== 'place' && !q.compact) inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); advance(s, last); } });
       }
       function advance(s, last) {
         msg('');
@@ -404,7 +413,7 @@
         }).catch(function () { Ob.track('calculation_failure', { reason: 'engine' }); msg('분석 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.'); if (btn) { btn.disabled = false; btn.textContent = '나의 사주 확인하기'; } });
       }
       render();
-      swipe(document.getElementById('obFs') || $('#screen'), function () { }, function () { if (step > 0) { step--; render(); } }); // 오른쪽으로 쓸면 이전 (입력 중 실수로 넘어가지 않게 다음은 버튼으로만)
+      if(!q.compact) swipe(document.getElementById('obFs') || $('#screen'), function () { }, function () { if (step > 0) { step--; render(); } }); // 오른쪽으로 쓸면 이전 (입력 중 실수로 넘어가지 않게 다음은 버튼으로만)
     });
   };
 

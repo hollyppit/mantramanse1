@@ -89,7 +89,7 @@
     return job.chapter.paragraphs.map(function(p,i){var action=basic && ['reinforce','practice'].indexOf(p.role)>=0 ? basic[p.role] : '';return {id:p.id,role:p.role || '',text:action?'일반 실천 점검: '+action:'',refs:[],claim_ids:[]};});
   }
   function prepare(rep, sd, name, onReady) {
-    if (active) { active.cancelled = true; active.controllers.forEach(function (c) { c.abort(); }); }
+    if (active) { active.cancelled = true; if(active.cancelMany)active.cancelMany(); active.controllers.forEach(function (c) { c.abort(); }); }
     var session = { cancelled: false, controllers: [] }; active = session;
     // Both guides use the same polite reading and therefore share its server cache.
     var guide = 'male';
@@ -160,7 +160,6 @@
       }
       if (!job.chapter.paragraphs.length) {status.skipped=(status.skipped || 0)+1;return;}
       if (job.chapter.paragraphs.length > 60) { defer(item,null,'composition-limit');return; }
-      if(unavailable){defer(item,unavailable);return;}
       var ctl = root.AbortController ? new root.AbortController() : null, timer;
       var deadline = new Promise(function(resolve,reject){timer=root.setTimeout(function(){if(ctl)ctl.abort();var e=new Error('reading timeout');e.name='AbortError';reject(e);},90000);});
       if (ctl) session.controllers.push(ctl);
@@ -179,7 +178,6 @@
             return role==='title'?Object.assign({},p,{text:address+', '+p.text}):p;
           })})});
         }
-        if(d && d.error==='no-ai')unavailable={error:d.error};
         if (r.ok && d && d.ok && (d.provider==='reviewed-library' || uniqueAcross(d.result, acceptedTexts, item.c.id,item.c)) && apply(job, d.result)) {
           item.c.readingDeferred=false;item.c.readingNotice='';item.c.readingFailure=null;item.c.readingWarning=null;
           item.c.readingProvider=d.provider;item.c.readingAdviceKeys=d.adviceKeys||[];item.c.readingPendingRoles=d.pending||[];item.c.readingNotice=d.scopeNotice||(d.pending&&d.pending.length?'검수된 근거를 조합한 풀이입니다. 일부 항목은 문장을 보완하고 있습니다.':'');item.c.chapterHook=d.hook || null;item.c.chapterQuality=d.chapterQuality || null;item.c.hookName=name || '귀인';
@@ -197,7 +195,17 @@
       finally {root.clearTimeout(timer);if(ctl)session.controllers=session.controllers.filter(function(c){return c!==ctl;});}
     }
     // A single request lane prioritizes navigation and warms at most two neighbours.
-    var running=false, selected=null, warm=[], runningItem=null, runningPromise=Promise.resolve();
+    // Explicit whole-reading batches share this lane; entry never enqueues the entire report.
+    var running=false, selected=null, warm=[], runningItem=null, runningPromise=Promise.resolve(), batches=[];
+    function batchStatus(batch){
+      var complete=0,failed=batch.missing.length;
+      batch.items.forEach(function(item){if(item.settled){if(item.c.readingWarning || item.c.readingDeferred && item.job.chapter.paragraphs.length)failed++;else complete++;}});
+      Object.assign(batch.status,{total:batch.items.length+batch.missing.length,completed:complete,failed:failed,pending:batch.items.length-complete-(failed-batch.missing.length),unknownIds:batch.missing.slice()});
+      return batch.status;
+    }
+    function notifyBatch(batch){var snapshot=Object.assign({},batchStatus(batch));if(batch.onProgress){try{batch.onProgress(snapshot);}catch(e){}}if(batch.status.cancelled || !snapshot.pending){if(!batch.finished){batch.finished=true;batch.resolve(snapshot);}}}
+    function updateBatches(){batches.slice().forEach(notifyBatch);batches=batches.filter(function(b){return !b.finished;});}
+    function nextBatch(){for(var b of batches){if(b.status.cancelled)continue;var item=b.items.find(function(x){return !x.started;});if(item)return item;}return null;}
     function neighbours(item){
       if(!rep.readingPrefetch || session.cancelled)return;
       var at=jobs.indexOf(item), topic=item.c.editorialTopicId;
@@ -205,29 +213,33 @@
     }
     function pump(){
       if(session.cancelled || running)return;
-      var foreground=!!selected, item=selected || warm.shift();selected=null;
+      var foreground=!!selected, item=selected || warm.shift() || nextBatch();selected=null;
       if(!item)return;
       if(item.started){pump();return;}
       running=true;runningItem=item;
       runningPromise=run(item).finally(function(){
-        running=false;runningItem=null;
+        item.settled=true;running=false;runningItem=null;
         if(foreground || item.visibleRequested){item.visibleRequested=false;if(!selected)neighbours(item);}
-        pump();
+        updateBatches();pump();
       });
     }
-    // An explicit novel view may need several chapters. Reuse the same one-request lane and accepted results.
-    session.ensure=async function(ids){
-      for(var id of ids){
-        if(session.cancelled)return false;
-        while(running){await runningPromise;if(session.cancelled)return false;}
-        var item=jobs.find(function(x){return x.c.id===id;});if(!item)return false;
-        if(!item.started){running=true;runningPromise=run(item).finally(function(){running=false;pump();});await runningPromise;}
-        if(item.c.readingDeferred)return false;
-      }return !session.cancelled;
+    // Cancelling a batch stops queued work. The sole in-flight reviewed lookup may finish and is retained.
+    session.requestMany=function(ids,options){
+      options=options || {};var seen=new Set(),items=[],missing=[];
+      (Array.isArray(ids)?ids:[]).forEach(function(id){if(seen.has(id))return;seen.add(id);var item=jobs.find(function(x){return x.c.id===id;});if(item)items.push(item);else missing.push(id);});
+      var batch={items:items,missing:missing,status:{total:items.length,completed:0,failed:0,pending:items.length,cancelled:!!session.cancelled},onProgress:options.onProgress,finished:false},done=new Promise(function(resolve){batch.resolve=resolve;});
+      var handle={status:batch.status,done:done,cancel:function(){if(batch.finished)return;batch.status.cancelled=true;notifyBatch(batch);batches=batches.filter(function(b){return b!==batch;});}};
+      batches.push(batch);notifyBatch(batch);updateBatches();pump();return handle;
     };
-    session.retry=function(id){var item=jobs.find(function(x){return x.c.id===id;});if(!item || !item.c.readingWarning)return;status.failed=Math.max(0,status.failed-1);unavailable=null;item.started=false;item.c.readingWarning=null;item.c.readingFailure=null;item.c.readingNotice='검수된 문안을 다시 불러오고 있습니다.';if(onReady)onReady(item.c,item.job,{paragraphs:[]});warm=[];selected=item;item.visibleRequested=true;pump();};
+    session.cancelMany=function(){batches.slice().forEach(function(batch){batch.status.cancelled=true;notifyBatch(batch);});batches=[];};
+    // Preserve the novel API while sharing the exact same lane, pending jobs and accepted results.
+    session.ensure=async function(ids){
+      if(!Array.isArray(ids) || ids.some(function(id){return !jobs.some(function(x){return x.c.id===id;});}))return false;
+      var result=await session.requestMany(ids).done;return !session.cancelled && !result.cancelled && !result.failed;
+    };
+    session.retry=function(id){var item=jobs.find(function(x){return x.c.id===id;});if(!item || !item.c.readingWarning)return;status.failed=Math.max(0,status.failed-1);unavailable=null;item.started=false;item.settled=false;item.c.readingWarning=null;item.c.readingFailure=null;item.c.readingNotice='검수된 문안을 다시 불러오고 있습니다.';if(onReady)onReady(item.c,item.job,{paragraphs:[]});warm=[];selected=item;item.visibleRequested=true;pump();};
     session.prioritize=function(id){var item=jobs.find(function(x){return x.c.id===id;});if(!item)return;warm=[];selected=item.started?null:item;if(item===runningItem)item.visibleRequested=true;else if(item.started)neighbours(item);pump();};
     return {first:Promise.resolve(),status:status};
   }
-  R.FullReading = { ensure:function(ids){return active && !active.cancelled && active.ensure?active.ensure(ids):Promise.resolve(false);}, retry:function(id){if(active && !active.cancelled && active.retry)active.retry(id);}, prioritize:function(id){if(active && !active.cancelled && active.prioritize)active.prioritize(id);}, adviceHistory: adviceHistory, deferredParagraphs: deferredParagraphs, uniqueAcross: uniqueAcross, collect: collect, apply: apply, prepare: prepare };
+  R.FullReading = { requestMany:function(ids,options){return active && active.requestMany?active.requestMany(ids,options):{status:{total:0,completed:0,failed:0,pending:0,cancelled:true},done:Promise.resolve({total:0,completed:0,failed:0,pending:0,cancelled:true}),cancel:function(){}};},cancelMany:function(){if(active && active.cancelMany)active.cancelMany();},ensure:function(ids){return active && !active.cancelled && active.ensure?active.ensure(ids):Promise.resolve(false);}, retry:function(id){if(active && !active.cancelled && active.retry)active.retry(id);}, prioritize:function(id){if(active && !active.cancelled && active.prioritize)active.prioritize(id);}, adviceHistory: adviceHistory, deferredParagraphs: deferredParagraphs, uniqueAcross: uniqueAcross, collect: collect, apply: apply, prepare: prepare };
 })(typeof window !== 'undefined' ? window : globalThis);

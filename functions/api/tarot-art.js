@@ -1,3 +1,4 @@
+import { deleteDerivedFile, isProtectedOriginal, putDerivedFile } from '../_original-assets.js';
 // 타로 카드 78장 이미지 생성 (관리자 전용) — 화풍·감성·세계관·분위기 + 레퍼런스(참고) 이미지 + 카드별 세부 수정
 // GET  /api/tarot-art                         — 카드 78장(현재 이미지·프롬프트) + 비주얼 디렉션 + 선택지 + 사용 가능한 모델
 // PUT  /api/tarot-art { direction }           — 비주얼 디렉션 저장(art·feel·world·mood·frame·label·extra·refs[최대3]·refUse). 새로 만드는 이미지부터 적용
@@ -34,7 +35,7 @@ export async function onRequestGet({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
   const dir = await loadDir(env), saved = (await env.GLOSSARY_KV.get(PKEY, 'json')) || {}, imgs = await imagesOf(env);
-  return json({ cards: CARDS.map(c => ({ id: c.id, suit: c.suit, rank: c.rank, nameKo: c.nameKo, nameEn: c.nameEn, url: imgs[c.id] || '', prompt: saved[c.id] || tarotPrompt(c, dir), custom: !!saved[c.id], defaultPrompt: tarotPrompt(c, dir) })), direction: dir, frame: await frameOf(env), defaultFrame: { url: DEFAULT_FRAME, win: [0.1, 0.0595, 0.8, 0.7381] },
+  return json({ originalProtection: { enabled: true, baseline: '2026-10-29', protectedKeys: 683, policy: '원본 파일은 삭제하지 않고 새 파일을 별도로 연결합니다' }, cards: CARDS.map(c => ({ id: c.id, suit: c.suit, rank: c.rank, nameKo: c.nameKo, nameEn: c.nameEn, url: imgs[c.id] || '', prompt: saved[c.id] || tarotPrompt(c, dir), custom: !!saved[c.id], defaultPrompt: tarotPrompt(c, dir) })), direction: dir, frame: await frameOf(env), defaultFrame: { url: DEFAULT_FRAME, win: [0.1, 0.0595, 0.8, 0.7381] },
     options: Object.fromEntries(Object.entries(TAROT_OPTIONS).map(([k, v]) => [k, { label: v.label, items: Object.fromEntries(Object.entries(v.items).map(([i, x]) => [i, x[0]])) }])), refUse: Object.fromEntries(Object.entries(REF_USE).map(([k, v]) => [k, v[0]])),
     providers: { openai: !!env.OPENAI_API_KEY, gemini: !!env.GEMINI_API_KEY }, r2: !!env.CLIPS_R2, models: { openai: env.PANEL_IMAGE_MODEL || 'gpt-image-2', gemini: env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image' } });
 }
@@ -51,7 +52,7 @@ export async function onRequestPost({ request, env }) {
   const ce = configError(env); if (ce) return json({ error: ce }, 501);
   if (!env.CLIPS_R2) return json({ error: 'R2 바인딩(CLIPS_R2)이 없어 이미지를 저장할 수 없습니다' }, 501);
   let b; try { b = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); }
-  if (b.discard) { if (!PREV_KEY.test(b.discard)) return json({ error: '키가 올바르지 않습니다' }, 400); try { await env.CLIPS_R2.delete(b.discard); } catch { /* 이미 없음 */ } return json({ ok: true }); }
+  if (b.discard) { if (!PREV_KEY.test(b.discard)) return json({ error: '키가 올바르지 않습니다' }, 400); try { await deleteDerivedFile(env, b.discard); } catch { /* 이미 없음 */ } return json({ ok: true }); }
   if ('setFrame' in b) {
     const f = b.setFrame; if (f === null) { await setFrame(env, null); return json({ ok: true, frame: null }); }
     const okWin = f && Array.isArray(f.win) && f.win.length === 4 && f.win.every(n => typeof n === 'number' && n >= 0 && n <= 1) && f.win[2] > 0.3 && f.win[3] > 0.3;
@@ -63,17 +64,17 @@ export async function onRequestPost({ request, env }) {
     const dirF = await loadDir(env), refsF = []; for (const u of (b.useGlobalRefs === false ? [] : dirF.refs)) { const r = await r2Ref(env, u); if (r) refsF.push(r); }
     const onlyF = b.provider === 'openai' || b.provider === 'gemini' ? b.provider : '';
     let g; try { g = await generate(env, (refsF.length ? REF_USE[dirF.refUse][1] + '\n' : '') + framePrompt(dirF, b.extra), onlyF, refsF.length ? refsF : null, OPTS); } catch (e) { return json({ error: e.message }, 502); }
-    const pk = 'tarotprev-' + rnd(8) + '.' + g.ext; await env.CLIPS_R2.put(pk, g.bytes, { httpMetadata: { contentType: g.mime } });
+    const pk = 'tarotprev-' + rnd(8) + '.' + g.ext; await putDerivedFile(env, pk, g.bytes, { httpMetadata: { contentType: g.mime } });
     return json({ ok: true, preview: pk, url: '/api/clipfile?k=' + pk, provider: g.provider, model: g.model });
   }
   const card = CARD_BY_ID[b.card]; if (!card) return json({ error: '카드 id 가 올바르지 않습니다' }, 400);
   const id = card.id, only = b.provider === 'openai' || b.provider === 'gemini' ? b.provider : '', dir = await loadDir(env), prompts = (await env.GLOSSARY_KV.get(PKEY, 'json')) || {}, oldUrl = (await imagesOf(env))[id] || '';
-  const delOld = async () => { const m = /^\/api\/clipfile\?k=(tarotai-[\w.-]+)$/.exec(oldUrl); if (m) { try { await env.CLIPS_R2.delete(m[1]); } catch { /* 무시 */ } } }; // 우리가 만든 파일만 지운다(직접 올린 파일은 건드리지 않는다)
+  const delOld = async () => { const m = /^\/api\/clipfile\?k=(tarotai-[\w.-]+)$/.exec(oldUrl); if (m) { try { await deleteDerivedFile(env, m[1]); } catch { /* 무시 */ } } }; // 우리가 만든 파일만 지운다(직접 올린 파일은 건드리지 않는다)
   if (b.accept) { // 미리 만든 결과를 이 카드의 이미지로 확정
     if (!PREV_KEY.test(b.accept)) return json({ error: '키가 올바르지 않습니다' }, 400);
     const o = await env.CLIPS_R2.get(b.accept); if (!o) return json({ error: '미리보기 파일이 만료되었습니다. 다시 만들어 주세요' }, 410);
     const ext = b.accept.split('.').pop() || 'webp', key = 'tarotai-' + id + '-' + rnd(4) + '.' + ext, buf = await o.arrayBuffer();
-    await env.CLIPS_R2.put(key, buf, { httpMetadata: { contentType: TYPE_OF[ext] || 'image/webp' } }); try { await env.CLIPS_R2.delete(b.accept); } catch { /* 무시 */ }
+    await putDerivedFile(env, key, buf, { httpMetadata: { contentType: TYPE_OF[ext] || 'image/webp' } }); try { await deleteDerivedFile(env, b.accept); } catch { /* 무시 */ }
     await setImage(env, id, '/api/clipfile?k=' + key); await delOld();
     if (typeof b.prompt === 'string' && b.prompt.trim() && b.prompt.trim() !== tarotPrompt(card, dir)) { prompts[id] = b.prompt.trim().slice(0, 2500); await env.GLOSSARY_KV.put(PKEY, JSON.stringify(prompts)); }
     return json({ ok: true, id, url: '/api/clipfile?k=' + key });
@@ -91,10 +92,10 @@ export async function onRequestPost({ request, env }) {
   }
   let g; try { g = await generate(env, prompt, only, refs.length ? refs : null, OPTS); } catch (e) { return json({ error: e.message }, 502); }
   if (b.preview) {
-    const pk = 'tarotprev-' + rnd(8) + '.' + g.ext; await env.CLIPS_R2.put(pk, g.bytes, { httpMetadata: { contentType: g.mime } });
+    const pk = 'tarotprev-' + rnd(8) + '.' + g.ext; await putDerivedFile(env, pk, g.bytes, { httpMetadata: { contentType: g.mime } });
     return json({ ok: true, preview: pk, url: '/api/clipfile?k=' + pk, provider: g.provider, model: g.model, refs: refs.length });
   }
-  const key = 'tarotai-' + id + '-' + rnd(4) + '.' + g.ext; await env.CLIPS_R2.put(key, g.bytes, { httpMetadata: { contentType: g.mime } });
+  const key = 'tarotai-' + id + '-' + rnd(4) + '.' + g.ext; await putDerivedFile(env, key, g.bytes, { httpMetadata: { contentType: g.mime } });
   await setImage(env, id, '/api/clipfile?k=' + key); await delOld();
   return json({ ok: true, id, url: '/api/clipfile?k=' + key, provider: g.provider, model: g.model, refs: refs.length });
 }

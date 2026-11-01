@@ -598,12 +598,13 @@
   function setOpen(also) {
     var root = $('#t-v2set'); if (root.parentNode && $('#t-lib') && root.nextSibling !== $('#t-lib') && !built.setMoved) { built.setMoved = 1; $('#t-lib').parentNode.insertBefore(root, $('#t-lib')); }
     if (!built.set) {
-      built.set = 1; root.innerHTML = '<div class="sub2" id="stNav"></div><div id="stScore" class="hide"></div><div id="stMove" class="hide"></div><div id="stCine" class="hide"></div>';
-      subnav($('#stNav', root), [['intro', '입장 인트로'], ['move', '읽기·재생 설정'], ['cine', '시네마 기본 연출'], ['score', '미디어 점수·AI'], ['lib', '기존 클립 (구버전)']], also || 'intro', function (k) { gotoTab('v2set', k); });
+      built.set = 1; root.innerHTML = '<div class="sub2" id="stNav"></div><div id="stScore" class="hide"></div><div id="stMove" class="hide"></div><div id="stCine" class="hide"></div><div id="stSeals" class="hide"></div>';
+      subnav($('#stNav', root), [['intro', '입장 인트로'], ['seals', '봉인 장면 관리'], ['move', '읽기·재생 설정'], ['cine', '시네마 기본 연출'], ['score', '미디어 점수·AI'], ['lib', '기존 클립 (구버전)']], also || 'intro', function (k) { gotoTab('v2set', k); });
     }
     $('#stScore', root).classList.toggle('hide', also !== 'score'); if (also === 'score') scoreOpen();
     $('#stMove', root).classList.toggle('hide', also !== 'move'); if (also === 'move') moveOpen();
     $('#stCine', root).classList.toggle('hide', also !== 'cine'); if (also === 'cine') cineOpen();
+    $('#stSeals', root).classList.toggle('hide', also !== 'seals'); if (also === 'seals' && window.V2Seals) window.V2Seals.mount($('#stSeals', root));
     if (!also) { $$('#stNav button', root).forEach(function (b) { b.classList.toggle('on', b.dataset.k === 'intro'); }); setTimeout(function () { window.AdminShowTab('v2set', 'intro'); }, 0); }
   }
   // 무빙 연출: 장면 안 요소가 차례로 나타나는 효과 + 자동 스크롤(누르면 멈춤). 저장하면 /api/report-content 의 flow 로 올라가고 viewer 가 같은 값을 쓴다.

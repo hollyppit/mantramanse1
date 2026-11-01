@@ -15,6 +15,7 @@
   var inGroup = function (s) { return !G.group || s.group === G.group; };
 
   function draw() {
+    if (BOX) { var previous = BOX.previousElementSibling; if (!previous || !previous.classList.contains('original-protection-note')) { var note = document.createElement('p'); note.className = 'muted original-protection-note'; note.setAttribute('role', 'status'); note.textContent = '원본 보존 보호 적용 · 2026-10-16 백업 원본은 서버에서 삭제가 차단됩니다. 교체 시 새 파일을 별도로 연결합니다. 현재 카드·슬롯 연결은 아래 목록에서 확인할 수 있습니다. 백업 이후 추가된 파일은 별도 보존 검수가 필요합니다.'; BOX.parentNode.insertBefore(note, BOX); } }
     var d = G.d, pv = d.providers, have = d.slots.filter(function (s) { return s.url; }).length;
     var grid = Object.keys(d.groups).filter(function (g) { return !G.group || g === G.group; }).map(function (g) {
       return '<div class="cap2" style="margin-top:12px">' + esc(d.groups[g]) + ' · ' + d.slots.filter(function (s) { return s.group === g && s.url; }).length + ' / ' + d.slots.filter(function (s) { return s.group === g; }).length + '</div><div class="as-grid">' +
@@ -27,7 +28,7 @@
     $('#asTrendSave').onclick = function () { var b = $('#asTrendSave'); b.disabled = true; post({ trend: $('#asTrend').value }).then(function (r) { G.d.trend = r.trend; $('#asTrendMsg').textContent = '저장했습니다. 이후 만드는 패션 이미지부터 반영됩니다.'; }).catch(function (e) { toast(e.message, true); }).then(function () { b.disabled = false; }); };
     $('#asGroup').onchange = function () { G.group = this.value; draw(); }; $('#asProv').onchange = function () { G.provider = this.value; };
     $('#asMissing').onclick = function () { runList(G.d.slots.filter(function (s) { return inGroup(s) && !s.url; }), false); };
-    $('#asAll').onclick = function () { var list = G.d.slots.filter(inGroup), custom = list.filter(function (s) { return s.custom; }).length; if (!confirm(list.length + '장을 현재 비주얼 디렉션으로 모두 다시 만듭니다.\n이미지 비용이 장당 발생하고 오래 걸리며, 성공한 칸의 기존 이미지는 삭제됩니다. 계속할까요?')) return;
+    $('#asAll').onclick = function () { var list = G.d.slots.filter(inGroup), custom = list.filter(function (s) { return s.custom; }).length; if (!confirm(list.length + '장을 현재 비주얼 디렉션으로 모두 다시 만듭니다.\n이미지 비용이 장당 발생하고 오래 걸리며, 성공한 칸은 새 이미지로 연결되며 보존 대상 원본 파일은 유지됩니다. 계속할까요?')) return;
       runList(list, custom ? confirm('칸별로 직접 고쳐 저장한 프롬프트가 ' + custom + '개 있습니다.\n[확인] 버리고 현재 디렉션으로 만듭니다.\n[취소] 고친 프롬프트를 그대로 사용합니다.') : false, true); };
     $('#asBatch').onclick = function () {
       if (G.busy) return; var cells = G.d.slots.filter(function (s) { return inGroup(s) && s.url; }).map(function (s) { return { id: s.id, label: s.title.replace(/ ·.*$/, '').slice(0, 16) + (s.group === 'spouse' || s.group === 'past' ? ' ' + (s.title.split(' · ')[1] || '').slice(0, 10) : ''), imageUrl: s.url, hasVideo: !!s.video, body: { slot: s.id },

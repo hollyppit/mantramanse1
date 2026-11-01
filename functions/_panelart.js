@@ -1,3 +1,4 @@
+import { OCCULT_OPTIONS, OCCULT_WORLD_KO, occultText, SEAL_PLATES } from './_panel-occult.js';
 import {SCENE_THEMES} from './_panel-scenes.js';
 import { aiFetch } from './_ai-cost.js';
 // 무빙툰 패널 이미지(장면 삽화) 생성 — 프리셋 + 이미지 모델 호출. 파일명이 _로 시작해 라우트로 노출되지 않는다.
@@ -27,6 +28,7 @@ export const DIRECTION_OPTIONS = {
     lyrical: ['서정적 감성', '서정적인 감성: 조용하고 섬세한 분위기, 여백과 부드러운 빛 번짐.'],
     none: ['지정 안 함', ''] } },
   world: { label: '세계관·배경', default: 'modern', items: {
+    koreanOccult: ['한국형 초현실 오컬트', OCCULT_WORLD_KO],
     asis: ['장면 그대로', ''],
     modern: ['현실 · 현대 한국', '배경은 현대 한국의 실제 장소(도시·골목·사무실·집·카페·지하철 등)로 현실감 있게 그린다. 판타지 요소는 넣지 않는다.'],
     eastFantasy: ['동양 판타지', '배경은 동양 판타지 세계로 바꿔 그린다. 한옥·누각·기와지붕·서원·돌다리·등불·안개 낀 산수, 한복풍 의복. 장면의 장소·소품은 이 세계관에 맞게 번역한다(사무실→서원, 도시→성곽 마을).'],
@@ -45,7 +47,8 @@ export const REF_USE = { style: ['그림체·채색·질감만 참고 (구도·�
 REF_USE.character = ['그림체 + 인물 외형 통일 (헤어·생김새 닮게)', '첨부한 레퍼런스 이미지의 그림체(선화의 굵기와 질감, 채색·명암 방식, 색감과 보정 톤, 배경 묘사의 밀도)를 따른다. 더해서, 인물이 그려지는 컷에서는 레퍼런스 인물을 이 연작의 주인공으로 삼아 헤어스타일(길이·결·가르마·머리색)과 얼굴 생김새(눈매·눈썹·코·입매·얼굴형·피부 톤)를 그대로 닮게 그린다. 연작 전체에서 한 사람(또는 같은 가족)처럼 보여야 한다. 성별·나이는 아래 장면 지시를 따르되 그 안에서 최대한 같은 인상과 같은 헤어스타일 계열로 맞춘다. 옷·포즈·카메라 거리·구도·배경은 레퍼런스를 따라 하지 않고 아래 장면과 연출 지시대로 새로 그린다.'];
 export const REF_OK =/^\/api\/clipfile\?k=([\w.-]{1,120})$/;
 export const cleanRefs = v => (Array.isArray(v) ? [...new Set(v.filter(x => typeof x === 'string' && REF_OK.test(x)))].slice(0, 3) : []);
-export const DEFAULT_DIRECTION = { art: 'webtoon', feel: 'cinematic', world: 'modern', mood: 'auto', people: 'face', extra: '', refs: [], refUse: 'character' };
+Object.assign(DIRECTION_OPTIONS,OCCULT_OPTIONS);
+export const DEFAULT_DIRECTION = { art: 'webtoon', feel: 'cinematic', world: 'modern', mood: 'auto', people: 'face', motif:'threshold', surreal:'subtle', extra: '', refs: [], refUse: 'character' };
 export function cleanDirection(v) {
   v = v && typeof v === 'object' ? { ...v } : {}; const o = { ...DEFAULT_DIRECTION };
   const OLD = { ink: ['webtoonInk', 'cinematic'], film: ['realistic', 'cinematic'], photo: ['realistic', 'documentary'], anime: ['anime', 'lyrical'], painting: ['painting', 'lyrical'], noir: ['realistic', 'noir'] }; // 예전 저장값(look 하나) 호환
@@ -56,7 +59,7 @@ export function cleanDirection(v) {
 // 공통 화풍 문장(글자 금지·글자 자리 비우기는 항상 붙는다)
 export function styleOf(dir) {
   const d = cleanDirection(dir), O = DIRECTION_OPTIONS, part = k => O[k].items[d[k]][1];
-  return [part('art'), part('feel'), part('world'), part('mood'), part('people'), d.extra && '추가 방향: ' + d.extra + '.'].filter(Boolean).join(' ') +
+  return [part('art'), part('feel'), part('world'), part('mood'), part('people'), occultText(d), d.extra && '추가 방향: ' + d.extra + '.'].filter(Boolean).join(' ') +
     ' 화면 안에 글자·숫자·간판·로고·워터마크는 절대 넣지 않는다. 세로 구도, 아래쪽 30%는 비교적 어둡고 단순하게 비워 둔다(글자가 올라갈 자리).';
 }
 
@@ -87,6 +90,9 @@ export const THEMES = {
   action: { name: '실천 · 변화', scene: '계획을 한 단계 실행하며 정돈하는 작업 공간', tags: ['workspace', 'working'] },
 };
 Object.assign(THEMES,SCENE_THEMES);
+for(const [topic,t] of Object.entries(SEAL_PLATES))THEMES[topic+'_seal']={name:t.name+' · 봉인 공간 배경',topic,topicName:t.name,baseTheme:t.base,sealPlate:true,scene:t.ko,sceneEN:t.en,tags:['mist','lookingForward']};
+export function sealPresets(){return Object.keys(ELEMENTS).flatMap(element=>Object.entries(SEAL_PLATES).map(([topic,t])=>({id:presetId(element,topic+'_seal','bg'),kind:'bg',gender:'',element,theme:topic+'_seal',topic,topicName:t.name,phase:'seal',title:ELEMENTS[element].name+' · '+t.name+' · 봉인 공간 배경'})));}
+
 // 오행은 풍경의 계절·빛을 정한다(장면 태그에도 더해진다).
 const SCENE_BY_EL = { wood: ['forest', 'sunrise'], fire: ['sunset'], earth: ['field', 'mountain'], metal: ['nightCity', 'stars'], water: ['rain', 'sea'] };
 const ACTIONS = /^(walking|studying|working|meeting|thinking|resting|lookingBack|lookingForward)$/;
@@ -100,7 +106,7 @@ export const presetId = (el, th, kind) => { const k = kindOf(kind); return k ===
 const KIND_SUFFIX = { panel: '', panelF: ' · 여성', panelM: ' · 남성', bg: ' (배경)' };
 export function presets(kind) {
   const out = [], k = kindOf(kind);
-  for (const el of Object.keys(ELEMENTS)) for (const th of Object.keys(THEMES).filter(th => !THEMES[th].phase || k === 'panelF' || k === 'panelM')) out.push({ phase:THEMES[th].phase||'base', topic:THEMES[th].topic||'', topicName:THEMES[th].topicName||'', baseTheme:THEMES[th].baseTheme||th, id: presetId(el, th, k), kind: k, gender: genderOfKind(k), element: el, theme: th, title: `${ELEMENTS[el].name} · ${THEMES[th].name}${KIND_SUFFIX[k]}` });
+  for (const el of Object.keys(ELEMENTS)) for (const th of Object.keys(THEMES).filter(th => !THEMES[th].sealPlate && (!THEMES[th].phase || k === 'panelF' || k === 'panelM'))) out.push({ phase:THEMES[th].phase||'base', topic:THEMES[th].topic||'', topicName:THEMES[th].topicName||'', baseTheme:THEMES[th].baseTheme||th, id: presetId(el, th, k), kind: k, gender: genderOfKind(k), element: el, theme: th, title: `${ELEMENTS[el].name} · ${THEMES[th].name}${KIND_SUFFIX[k]}` });
   return out;
 }
 // 본문 컷 장면(한국어): 본문 내용에 맞춘 현대 한국 일상 + 표정이 보이는 주인공. {P} = 주인공(성별에 따라 한국인 여성·남성·청년).
@@ -132,7 +138,7 @@ const WHO_KO = { F: '20대 후반의 한국인 여성', M: '20대 후반의 한�
 // 배경용 공통 문장: 본문 컷과 같은 화풍·감성이되, 글 아래 30%만 비우는 대신 화면 전체가 글 뒤에서 은은하게 깔리도록 한다.
 export function bgStyleOf(dir) {
   const d = cleanDirection(dir), O = DIRECTION_OPTIONS, part = k => O[k].items[d[k]][1];
-  return [part('art'), part('feel'), part('world'), part('mood'), d.extra && '추가 방향: ' + d.extra + '.'].filter(Boolean).join(' ') +
+  return [part('art'), part('feel'), part('world'), part('mood'), occultText(d,'ko',true), d.extra && '추가 방향: ' + d.extra + '.'].filter(Boolean).join(' ') +
     ' 이 그림은 글 뒤에 깔리는 전체 화면 배경이다. 세로 구도 전체가 비교적 어둡고 차분하며 대비는 낮게, 시선을 끄는 뚜렷한 초점·밝은 광원·인물 클로즈업은 두지 않는다. 인물은 아주 작은 실루엣이거나 없어도 된다. 화면 위에 흰 글자가 올라가도 읽히도록 어둡게 정리한다. 화면 안에 글자·숫자·간판·로고·워터마크는 절대 넣지 않는다.';
 }
 // 컷마다 인물 외형을 달리 지정한다(레퍼런스·다른 컷과 같은 얼굴이 나오는 것을 막는다). 오행×주제 조합마다 고정된 값이라 다시 만들어도 같은 사람이다.
@@ -208,7 +214,7 @@ export function promptFor(el, th, dir, kind) {
 export function mediaItem(el, th, url, bytes, provider, panelVideo, kind) {
   const E = ELEMENTS[el], T = THEMES[th], k = kindOf(kind), bg = k === 'bg', g = genderOfKind(k);
   return cleanMedia({ id: presetId(el, th, k), type: 'image', url, posterUrl: url, title: `${E.name} · ${T.name} ${bg ? '배경' : '패널'}${g ? (g === 'F' ? ' 여성' : ' 남성') : ''}`, description: `AI 생성 ${bg ? '배경' : '패널'}(${provider}) — ${bg ? (PLACE[th] || T.scene) : (th === 'wealth' ? WEALTH[el].ko : (PLOT[th] || T.scene)).replace('{P}', WHO_KO[g])}`, orientation: 'portrait', priority: bg ? 55 : g ? 62 : 60,
-    elementTags: [el], stateTags: [E.state], emotionTags: [E.mood], themeTags: [T.baseTheme || th], sceneTags: SCENE_BY_EL[el].concat(T.tags.filter(t => !ACTIONS.test(t))), actionTags: T.tags.filter(t => ACTIONS.test(t)),
+    ...(T.phase ? {phase:T.phase,paragraphRole:T.phase} : {}), ...(T.sealPlate ? {crop:'cover',focalPoint:{x:50,y:35},textSafeArea:{top:12,right:12,bottom:18,left:12}} : {}), elementTags: [el], stateTags: [E.state], emotionTags: [E.mood], themeTags: [T.baseTheme || th], sceneTags: SCENE_BY_EL[el].concat(T.tags.filter(t => !ACTIONS.test(t))), actionTags: T.tags.filter(t => ACTIONS.test(t)),
     visualRole: bg ? ['background', 'hero'] : ['hero'], loopable: bg && !!panelVideo, enabled: true, tagsApproved: true, bytes, uploadedAt: Date.now(), panelVideo: panelVideo || '' });
 }
 

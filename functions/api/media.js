@@ -6,15 +6,15 @@ import { aiFetch } from '../_ai-cost.js';
 //                              (저장하지 않는다. 관리자가 승인해야 반영된다)
 // 저장 위치: GLOSSARY_KV 'media:index'. 파일은 /api/clipfile (R2).
 import { json, isAdmin, configError } from '../_lib.js';
-import { TAX, FIELD, cleanMedia } from '../_media.js';
+import { TAX, FIELD, cleanMedia, isPublicMedia } from '../_media.js';
 
 const KEY = 'media:index', MAX_ITEMS = 3000, MAX_BYTES = 5 * 1024 * 1024;
 
 export async function onRequestGet({ request, env }) {
   if (!env.GLOSSARY_KV) return json({ media: [] });
   const all = new URL(request.url).searchParams.get('all') && isAdmin(request, env);
-  const list = (await env.GLOSSARY_KV.get(KEY, 'json')) || [];
-  return json({ media: all ? list : list.filter(m => m.enabled && m.tagsApproved && (m.url || m.posterUrl)).map(({ pending, bytes, uploadedAt, ...pub }) => pub) });
+  const stored = await env.GLOSSARY_KV.get(KEY, 'json'), list = Array.isArray(stored) ? stored : [];
+  return json({ media: all ? list : list.filter(isPublicMedia).map(({ pending, bytes, uploadedAt, ...pub }) => pub) });
 }
 
 export async function onRequestPut({ request, env }) {

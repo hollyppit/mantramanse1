@@ -49,6 +49,7 @@
   function reload() { return C.api('/api/tarot-art').then(function (d) { G.d = d; }); }
 
   function draw() {
+    if (BOX) { var previous = BOX.previousElementSibling; if (!previous || !previous.classList.contains('original-protection-note')) { var note = document.createElement('p'); note.className = 'muted original-protection-note'; note.setAttribute('role', 'status'); note.textContent = '원본 보존 보호 적용 · 2026-10-16 백업 원본은 서버에서 삭제가 차단됩니다. 교체 시 새 파일을 별도로 연결합니다. 현재 카드·슬롯 연결은 아래 목록에서 확인할 수 있습니다. 백업 이후 추가된 파일은 별도 보존 검수가 필요합니다.'; BOX.parentNode.insertBefore(note, BOX); } }
     var d = G.d, v = d.direction, O = d.options, have = d.cards.filter(function (c) { return c.url; }).length, pv = d.providers;
     var dir = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px">' + Object.keys(O).map(function (k) { return '<label class="muted">' + esc(O[k].label) + '<select data-td="' + k + '">' + Object.keys(O[k].items).map(function (i) { return '<option value="' + i + '"' + (v[k] === i ? ' selected' : '') + '>' + esc(O[k].items[i]) + '</option>'; }).join('') + '</select></label>'; }).join('') + '</div>' +
       '<label class="muted" style="display:block;margin-top:10px">추가 방향 <small>(예: 금박 장식, 보라색 계열, 80년대 필름 느낌)</small><input data-td="extra" value="' + esc(v.extra || '') + '" maxlength="300" style="width:100%"></label>' +

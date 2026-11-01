@@ -3,7 +3,7 @@
    뷰어의 조합 규칙(오행·주제 점수)이 장면마다 알맞은 컷을 고른다. 이 화면은 만들기·다시 만들기만 한다. index.html 의 showTab 이 V2Panel.open('panelart', 비밀번호) 를 부른다. */
 (function () {
   'use strict';
-  var C = window.V2Content, esc = C.esc, toast = C.toast, PANE = null, G = { d: null, busy: false, stop: false, provider: '', log: [], sel: {}, selK: '', phase: 'base' };
+  var C = window.V2Content, esc = C.esc, toast = C.toast, PANE = null, G = { d: null, busy: false, stop: false, provider: '', log: [], sel: {}, selK: '', phase: 'daily', topic:'all' };
   var EL = { wood: '木 목', fire: '火 화', earth: '土 토', metal: '金 금', water: '水 수' }, TH = { identity: '나는 누구', talent: '재능', career: '일', wealth: '돈·재테크', love: '사랑', relationship: '관계', family: '가족', shadow: '약점', daewoon: '대운·전환', remedy: '회복', marriage: '결혼·동반자', children: '자식운·자녀', sewoon: '올해 흐름', monthly: '월별 흐름', action: '실천·변화' };
   var $ = function (s) { return PANE.querySelector(s); };
   var css = document.createElement('style');
@@ -38,12 +38,13 @@
   function tabsOf(cur) {
     return '<div class="row" style="gap:6px;margin:0 0 10px;flex-wrap:wrap">' + ['panelF', 'panelM'].map(function (k) { var l = G.d.presets.filter(function (p) { return inScope(p,k); }), h = l.filter(function (p) { return p.url; }).length; return '<button type="button" class="pa-tab btn' + (k === cur ? ' gold' : '') + '" data-pg="' + k + '">' + GEN[k] + ' · ' + h + '/' + l.length + '</button>'; }).join('') + (G.phase === 'base' && G.d.commonCount ? '<button type="button" class="btn pa-delcommon"' + (G.busy ? ' disabled' : '') + '>공용 컷 ' + G.d.commonCount + '장 삭제</button>' : '') + '</div>';
   }
-  function inScope(p,kind){return p.kind===kind&&(p.phase||'base')===(kind==='bg'?'base':G.phase||'base');}
+  function inScope(p,kind){if(p.kind!==kind)return false;if(G.phase==='base')return (p.phase||'base')==='base';var topics=G.topic==='support'?['health','creative','remedy']:G.topic==='all'?['self','wealth','career','love']:[G.topic];if(kind==='bg')return p.phase==='seal'&&topics.includes(p.topic);return p.phase===G.phase&&topics.includes(p.topic);}
   function keysOf(kind){return Array.from(new Set(G.d.presets.filter(function(p){return inScope(p,kind);}).map(function(p){return p.theme;})));}
-  function sceneCard(){return '<div class="card"><h3>본문 장면 추가 제작 · 210칸</h3><p>7개 주제 × 평소 모습·갈등·실천 × 오행 5 × 여성·남성입니다. 만든 장면은 해당 주제 본문의 생활 설명·약점·실천 앞에 연결됩니다.</p><label>제작할 장면 <select id="paPhase"'+(G.busy?' disabled':'')+'>'+[['base','기존 기본 패널·배경'],['daily','평소 모습 · 70칸'],['conflict','갈등·약점 · 70칸'],['practice','변화·실천 · 70칸']].map(function(x){return '<option value="'+x[0]+'"'+(x[0]===G.phase?' selected':'')+'>'+x[1]+'</option>';}).join('')+'</select></label><p class="muted">일괄 만들기는 지금 보고 있는 장면과 선택한 성별의 칸에만 적용됩니다.</p></div>';}
+  function sceneCard(){return '<div class="card"><h3>봉인 해독형 패널 구성 · 4주제 65장</h3><p>본문 120칸 = 4주제 × 생활 장면·갈등·실천 × 오행5 × 성별2. 공간 배경 20칸 = 4주제 × 오행5(성별 공용). 65장은 이 공통 컷을 풀이에 맞게 조합하며, 장별 전용 컷은 봉인 장면 관리에서 연결합니다.</p><p class="muted">본문은 행동과 상황을, 배경은 인물 없는 낮은 대비의 공간을 표현합니다. 질문·계산 근거에는 상징 컷을 강제로 반복하지 않습니다. 건강·전생·개운 실천은 종합풀이의 보조 컷으로 별도 유지합니다.</p><label>제작 장면 <select id="paPhase"'+(G.busy?' disabled':'')+'>'+[['daily','생활 속 장면 · 본문 40칸'],['conflict','갈등·조건 · 본문 40칸'],['practice','변화·실천 · 본문 40칸'],['base','기존 기본 패널·배경 보관함']].map(function(x){return '<option value="'+x[0]+'"'+(x[0]===G.phase?' selected':'')+'>'+x[1]+'</option>';}).join('')+'</select></label><label>주제 <select id="paTopic"'+(G.busy?' disabled':'')+'>'+[['all','현재 4개 주제 전체'],['self','종합풀이 · 20장'],['wealth','재물운 · 15장'],['career','커리어운 · 15장'],['love','인연운 · 15장'],['support','종합 보조 · 건강·전생·개운 실천']].map(function(x){return '<option value="'+x[0]+'"'+(x[0]===G.topic?' selected':'')+'>'+x[1]+'</option>';}).join('')+'</select></label><p class="muted">일괄 제작은 화면에 표시된 장면·주제·성별에만 적용됩니다. 이미지는 자동으로 생성되지 않습니다. 기존 원본 파일은 보존합니다.</p></div>';}
   function cardOf(kind) {
     var d = G.d, pv = d.providers, list = d.presets.filter(function (p) { return inScope(p,kind); }), have = list.filter(function (p) { return p.url; }).length, I = KIND[kind];
-    if(kind!=='bg'&&G.phase!=='base')I={title:I.title+' · '+({daily:'평소 모습',conflict:'갈등·약점',practice:'변화·실천'}[G.phase]),desc:'7개 주제 × 오행 5 = 이 성별의 장면 35칸입니다. 칸을 눌러 이미지 생성·수정 또는 이미지·영상 업로드를 할 수 있습니다. 등록하면 같은 주제·오행·성별의 본문에서 이 단계에 사용합니다.'};
+    if(kind!=='bg'&&G.phase!=='base')I={title:I.title+' · '+({daily:'평소 모습',conflict:'갈등·약점',practice:'변화·실천'}[G.phase]),desc:'선택한 주제 × 오행 5의 성별별 본문 장면입니다. 칸을 눌러 이미지 생성·수정 또는 이미지·영상 업로드를 할 수 있습니다. 등록하면 같은 주제·오행·성별의 본문에서 이 단계에 사용합니다.'};
+    if(kind==='bg'&&G.phase!=='base')I={title:'봉인 공간 배경 · 성별 공용',desc:'4주제별 오행 공간 배경입니다. 인물·강한 초점 없이 중앙 글 영역 전체를 낮은 대비로 비웁니다. 생활·갈등·실천에 동일한 공간의 여운을 사용하며 본문 삽화와 섞지 않습니다.'};
     var sm = G.selK === kind, nsel = list.filter(function (p) { return G.sel[p.id]; }).length;
     var cells = '<span></span>' + keysOf(kind).map(function (t) { return '<span class="pa-h"' + (sm ? ' data-selcol="' + t + '" title="이 주제 열 전체 선택/해제"' : '') + '>' + esc(TH[t]) + '</span>'; }).join('');
     Object.keys(EL).forEach(function (e) {
@@ -69,14 +70,15 @@
   function selWhere(kind, fn, on) { G.d.presets.forEach(function (p) { if (inScope(p,kind) && fn(p)) { if (on) G.sel[p.id] = true; else delete G.sel[p.id]; } }); syncSel(kind); }
   function runSel(kind) {
     var todo = G.d.presets.filter(function (p) { return inScope(p,kind) && G.sel[p.id]; }); if (!todo.length) { toast('선택한 칸이 없습니다'); return; }
-    if (!confirm((LBL[kind] || '').replace(/[\[\]]/g, '') + ' 선택한 ' + todo.length + '장을 현재 비주얼 디렉션으로 다시 만듭니다.\n이미지 비용이 장당 발생하고, 성공한 칸의 기존 이미지는 삭제됩니다. 계속할까요?')) return;
+    if (!confirm((LBL[kind] || '').replace(/[\[\]]/g, '') + ' 선택한 ' + todo.length + '장을 현재 비주얼 디렉션으로 다시 만듭니다.\n이미지 비용이 장당 발생하고, 성공한 칸의 보존 대상 원본은 유지되고 새 이미지로 연결됩니다. 계속할까요?')) return;
     var custom = todo.filter(function (p) { return p.custom; }).length, reset = false;
     if (custom) reset = confirm('선택한 칸 중 직접 고쳐 저장한 프롬프트가 ' + custom + '개 있습니다.\n[확인] 그 프롬프트를 버리고 현재 디렉션으로 만듭니다.\n[취소] 고친 프롬프트를 그대로 사용합니다.');
     G.sel = {}; runList(todo, reset, true);
   }
   function draw() {
-    PANE.innerHTML = dirCard(G.d) + sceneCard() + cardOf(G.pg || 'panelF') + (G.phase==='base'?cardOf('bg'):'') + '<div class="card" style="margin-top:12px"><div class="pa-log"></div></div><div id="taBox"></div><div id="asBox"></div><div id="tnBox"></div>';
+    PANE.innerHTML = dirCard(G.d) + sceneCard() + cardOf(G.pg || 'panelF') + cardOf('bg') + '<div class="card" style="margin-top:12px"><div class="pa-log"></div></div><div id="taBox"></div><div id="asBox"></div><div id="tnBox"></div>';
     $('#paPhase').onchange=function(){if(G.busy)return;G.phase=this.value;G.sel={};G.selK='';draw();};
+    $('#paTopic').onchange=function(){if(G.busy)return;G.topic=this.value;G.sel={};G.selK='';draw();};
     bindDir(); if (window.V2Tarot) window.V2Tarot.open(PANE.querySelector('#taBox')); if (window.V2Assets) window.V2Assets.open(PANE.querySelector('#asBox')); if (window.V2Toon) window.V2Toon.open(PANE.querySelector('#tnBox'));
     [].forEach.call(PANE.querySelectorAll('.paProv'), function (sel) { sel.onchange = function () { G.provider = this.value; [].forEach.call(PANE.querySelectorAll('.paProv'), function (o) { o.value = G.provider; }); }; });
     [].forEach.call(PANE.querySelectorAll('.pa-run'), function (b) { b.onclick = function () { (b.dataset.run === 'all' ? runAll : runMissing)(b.dataset.k); }; });
@@ -204,7 +206,7 @@
   }
   /* 비주얼 디렉션: 감성(화풍) · 배경(세계관) · 분위기 · 인물 + 한 줄 추가. 저장하면 이후 새로 만드는 모든 이미지의 프롬프트에 들어간다(이미 만든 이미지·칸별로 직접 고친 프롬프트는 그대로). */
   function dirCard(d) {
-    var O = d.directionOptions, v = d.direction, h = '<div class="card"><b style="color:var(--gold)">비주얼 디렉션</b><p class="muted" style="margin:6px 0 10px">모든 컷에 공통으로 적용되는 감성·배경 설정입니다. 저장한 뒤 새로 만들거나 다시 만드는 이미지부터 반영됩니다.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">';
+    var O = d.directionOptions, v = d.direction, h = '<div class="card"><b style="color:var(--gold)">비주얼 디렉션</b><button type="button" id="paOccultPreset" class="btn" style="margin-left:12px">한국형 초현실 오컬트 프리셋</button><p class="muted" style="margin:6px 0 10px">모든 컷에 공통으로 적용되는 감성·배경 설정입니다. 저장한 뒤 새로 만들거나 다시 만드는 이미지부터 반영됩니다.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">';
     Object.keys(O).forEach(function (k) { h += '<label class="muted">' + esc(O[k].label) + '<select data-dir="' + k + '">' + Object.keys(O[k].items).map(function (i) { return '<option value="' + i + '"' + (v[k] === i ? ' selected' : '') + '>' + esc(O[k].items[i]) + '</option>'; }).join('') + '</select></label>'; });
     h += '</div>'; var ru = d.refUse || {};
     h += '<div style="margin-top:12px"><b class="muted">그림체 레퍼런스 (최대 3장)</b> <small class="muted">마음에 드는 컷을 올리면 새로 만드는 모든 컷(본문 컷·배경)이 그 그림체를 따라 통일됩니다. 올리거나 빼면 바로 저장됩니다.</small><div class="pa-rf" id="paRefs"></div><label class="muted" style="display:inline-block;margin-top:8px">참고 방식 <select data-dir="refUse">' + Object.keys(ru).map(function (k) { return '<option value="' + k + '"' + ((v.refUse || 'style') === k ? ' selected' : '') + '>' + esc(ru[k]) + '</option>'; }).join('') + '</select></label></div>';
@@ -231,6 +233,7 @@
   }
   function bindDir() {
     paintRefs();
+    var preset=$('#paOccultPreset');if(preset)preset.onclick=function(){var v={art:'webtoonInk',feel:'cinematic',world:'koreanOccult',mood:'dreamy',people:'face',motif:'threshold',surreal:'subtle'};Object.keys(v).forEach(function(k){var e=PANE.querySelector('[data-dir="'+k+'"]');if(e)e.value=v[k];});$('#paDirMsg').textContent='프리셋을 골랐습니다. 디렉션 저장 후 새로 제작할 컷에 반영됩니다.';};
     $('#paDirSave').onclick = function () {
       var v = readDir(); $('#paDirSave').disabled = true;
       C.api('/api/panel-art', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ direction: v }) }).then(function (r) { G.d.direction = r.direction; $('#paDirMsg').textContent = '저장했습니다 — 지금부터 새로 만드는 이미지에 적용됩니다'; toast('비주얼 디렉션을 저장했습니다'); return load(); })
@@ -247,7 +250,7 @@
   function runMissing(kind) { runList(G.d.presets.filter(function (p) { return inScope(p,kind) && !p.url; }), false); }
   // 모두 다시 만들기: 이미 있는 컷까지 현재 비주얼 디렉션으로 전부 새로 만든다. 새로 만드는 데 성공한 칸만 교체되고(실패하면 옛 이미지 유지) 옛 파일은 지워진다.
   function runAll(kind) {
-    var all = G.d.presets.filter(function (p) { return inScope(p,kind); }), n = all.length, custom = all.filter(function (p) { return p.custom; }).length; if (!confirm((LBL[kind] || '').replace(/[\[\]]/g, '') + ' ' + n + '장 전체를 현재 비주얼 디렉션(화풍·감성·세계관…)으로 다시 만듭니다.\n이미지 비용이 장당 발생하고 30분 이상 걸릴 수 있으며, 성공한 칸의 기존 이미지는 삭제됩니다. 계속할까요?')) return;
+    var all = G.d.presets.filter(function (p) { return inScope(p,kind); }), n = all.length, custom = all.filter(function (p) { return p.custom; }).length; if (!confirm((LBL[kind] || '').replace(/[\[\]]/g, '') + ' ' + n + '장 전체를 현재 비주얼 디렉션(화풍·감성·세계관…)으로 다시 만듭니다.\n이미지 비용이 장당 발생하고 30분 이상 걸릴 수 있으며, 성공한 칸은 새 파일로 연결되고 보존 대상 원본은 유지됩니다. 계속할까요?')) return;
     var reset = false; if (custom) reset = confirm('칸별로 직접 고쳐 저장한 프롬프트가 ' + custom + '개 있습니다.\n[확인] 그 프롬프트를 버리고 현재 디렉션으로 만듭니다.\n[취소] 고친 프롬프트를 그대로 사용합니다.');
     runList(all, reset, true);
   }
