@@ -692,6 +692,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="region-reading.js"></script>
 <script src="byeongyak.js"></script>
 <script src="jonggyeok.js"></script>
+<script src="gyeokguk.js"></script>
 <script src="glossary-cases.js"></script>
 <script src="glossary-sections.js"></script>
 <script src="glossary-sections-2.js"></script>
@@ -5937,15 +5938,18 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         ['강점', '극약·극왕 사주에서 보통의 억부가 정반대 결론을 내는 문제를 짚어 줍니다.'],
         ['한계', '조건이 까다로워 실제로 성립하는 사주는 드뭅니다. 인성·비겁이 조금만 뚜렷해도 성립하지 않고, 그 경계의 판단(가종격)은 학파마다 갈립니다.'],
         ['이 앱의 구현', '돕는 힘이 30% 미만 또는 70% 이상일 때만 검토합니다. 종약계는 일간의 힘·뿌리·득령·비겁·인성·따를 세력의 6개 조건, 종강·종왕계는 일간의 힘·뿌리·득령·식상재관 부재·한 세력 쏠림의 5개 조건을 보고 충족/가능성/해당 없음/보류로 나눕니다. 억부·조후·병약 결과는 바꾸지 않고 따로 보여 주며, 용신 배치는 이 앱의 단순화 모델입니다.']] },
+    gyeokguk: { t: '격국 (格局)', lead: '월지에서 투출한 십성으로 격을 정하고, 격의 성패를 봅니다.',
+      rows: [['원리', '월지 지장간 중 천간에 드러난 글자(투출)의 십성으로 격을 정합니다(정관격·편관격·정재격 등). 격을 돕는 요소(상신)가 있고 격을 깨는 요인(파격 요인)이 없으면 성격(成格), 파격 요인이 있어도 이를 구하는 요소(구응)가 있으면 부분, 구응이 없으면 파격으로 봅니다.'],
+        ['대표 문헌', '자평진전(子平眞詮) 계열의 논격 방식입니다. 학파마다 격을 정하는 세부 규칙과 성패 기준이 다릅니다.'],
+        ['강점', '사주의 구조(무엇이 격이고 무엇이 그것을 돕거나 깨는가)를 이름과 근거로 설명합니다.'],
+        ['한계', '합·충·형의 세부 작용, 월령 사령, 학파별 가감에 따라 결과가 달라집니다. 억부·조후와 용신이 같지 않을 수 있습니다.'],
+        ['이 앱의 구현', '8격(정관·편관·정재·편재·식신·상관·정인·편인)과 월겁격(건록·양인)을 판정하고, 격마다 대표적인 상신·파격 요인·구응만 규칙으로 넣었습니다. 시주를 모르면 성패를 보류합니다. 억부·조후·병약·종격 결과와 용신 계산·흐름 점수에는 더하지 않고 따로 보여 줍니다.']] },
   };
-  const SCHOOL_MISSING = [
-    ['격국 (格局)', '월지에서 투출한 십성으로 격을 정하고, 격을 완성하는 상신(相神)을 찾습니다(자평진전). 성격·파격 판정 규칙이 많아 다음 단계 과제입니다.']];
   function renderSchoolInfo(ch) {
     return `<section class="card">
       <div class="card-h"><h2>학파는 무엇이 다른가</h2><span class="note">눌러서 펼치기</span></div>
       <div class="acc">${Object.entries(SCHOOL_INFO).map(([k, x]) => `<details${k === ch.school ? ' open' : ''}><summary><b>${x.t}</b>${k === ch.school ? ' <span class="pill" style="background:var(--accent);color:var(--surface)">선택됨</span>' : ''}<span class="small muted" style="display:block">${x.lead}</span></summary>
         <dl>${x.rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl></details>`).join('')}
-        <details><summary><b>이 앱에 없는 기준</b><span class="small muted" style="display:block">격국</span></summary><dl>${SCHOOL_MISSING.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl></details>
       </div></section>`;
   }
 
@@ -5959,6 +5963,28 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   };
   // ───────────── 종격·전왕격: jonggyeok.js — 억부·조후·병약과 따로 보는 판단(용신 계산·흐름 점수에 더해지지 않음) ─────────────
   const JG_ST = { jin: ['충족', 'good'], ga: ['가능성', 'mid'], hold: ['보류', 'hold'], none: ['해당 없음', ''] };
+  // ───────────── 격국: gyeokguk.js — 억부·조후·병약·종격과 따로 보는 판단(용신 계산·흐름 점수에 더해지지 않음) ─────────────
+  const GG_ST = { seong: 'good', part: 'mid', pa: 'bad', hold: 'hold', none: '' };
+  const ggRow = ch => {
+    const Gk = window.MantraGyeokguk; if (!Gk) return ''; const r = Gk.analyze(M, ch);
+    const f = e => e == null ? '<span class="muted small">—</span>' : `<span class="eltxt ${ECLS[e]}">${elLabel(e)}</span>`;
+    const lab = `${term('격국')} <span class="muted small">${esc(r.kind)}</span> <span class="wc-chip ${GG_ST[r.status]}">${r.statusLabel}</span>`;
+    if (!r.table) return `<tr><td>${lab}</td><td colspan="4" class="muted small">격을 분명히 정하기 어려움</td></tr>`;
+    return `<tr><td>${lab}</td><td>${f(r.table.yong)}</td><td>${f(r.table.hee)}</td><td>${f(r.table.gi)}</td><td>${f(r.table.gu)}</td></tr>`;
+  };
+  function ggCard(ch) {
+    const Gk = window.MantraGyeokguk; if (!Gk) return ''; const r = Gk.analyze(M, ch);
+    const li = a => a && a.length ? `<ul class="pos-ul small">${a.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
+    const TY = { '상신': 'good', '구응': 'mid', '파격 요인': 'bad' };
+    const fac = r.factors.length ? `<div class="ib-k">격을 돕는 것과 깨는 것</div><div class="small">${r.factors.map(x => `<div style="padding:5px 0;border-top:1px solid var(--line)"><span class="wc-chip ${x.type === '상신' ? (x.ok ? 'good' : '') : TY[x.type]}">${x.type}${x.type === '상신' && !x.ok ? ' 없음' : ''}</span> ${esc(x.text)}${x.group ? ` <span class="muted">(${esc(x.group)})</span>` : ''}</div>`).join('')}</div>` : '';
+    return `<section class="card"><div class="card-h"><h2>${term('격국')} 판단</h2><span class="note">월지에서 투출한 십성으로 격을 정함</span></div>
+      <p><b>${esc(r.kind)}</b> <span class="wc-chip ${GG_ST[r.status]}">${r.statusLabel}</span></p>
+      <div class="ib-k">격을 정한 근거</div>${li(r.basis)}
+      <p class="small">${esc(r.text.summary)}</p>
+      ${r.caveat.map(t => `<div class="warn"><span>${esc(t)}</span></div>`).join('')}
+      ${fac}
+      <p class="note">격국 판단은 억부·조후·병약·종격과 따로 보는 관점이며, 용신 계산·흐름 점수·다른 탭의 해석에는 더해지지 않습니다. 표의 격국 행은 용신=상신, 희신=다음 상신, 기신=파격 요인입니다. 8격과 대표적인 상신·파격 조건만 구현한 단순화 모델이며, 전통 해석이므로 결과를 보장하지 않습니다.</p></section>`;
+  }
   // 엔진이 남기는 억부 판단 로그의 “종격을 판정하지 않는다” 문장을 종격 판단 카드 안내로 바꿔 보여 준다(엔진 로그는 그대로)
   const jgLog = l => l.replace('이 앱은 종격을 판정하지 않으므로 아래 결과를 그대로 받아들이기 전에 검토가 필요합니다.', '아래 ‘종격·전왕격 판단’에서 이 사주가 종격에 해당하는지 확인하세요.');
   const jgRow = ch => {
@@ -6014,11 +6040,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         ${Object.entries(M.SCHOOLS).map(([k, l]) => { const x = ch.yongAll[k]; const f = r => { const e = +Object.keys(x.roles).find(q => x.roles[q] === r); return `<span class="eltxt ${ECLS[e]}">${elLabel(e)}</span>`; }; return `<tr class="${k === ch.school ? 'cur' : ''}"><td>${term(l.split(' ')[0])} <span class="muted small">${l.split(' ').slice(1).join(' ')}</span></td>${x.applicable ? `<td>${f('용신')}</td><td>${f('희신')}</td><td>${f('기신')}</td><td>${f('구신')}</td>` : '<td colspan="4" class="muted small">해당 없음</td>'}</tr>`; }).join('')}
         ${byRow(ch)}
         ${jgRow(ch)}
+        ${ggRow(ch)}
       </tbody></table></div>
       <p class="note">억부는 강약, 조후는 계절 온도, 통관은 오행 대립을 기준으로 합니다. 두 기준이 서로 다른 오행을 가리키면 해석자가 어느 쪽을 우선할지 판단해야 합니다. 이 앱은 그 판단을 대신하지 않고 근거를 보여줍니다.</p>
     </section>
     ${byCard(ch)}
     ${jgCard(ch)}
+    ${ggCard(ch)}
     ${renderRoot(ch)}
     ${climateCard(ch)}`;
   }
