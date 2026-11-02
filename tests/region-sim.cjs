@@ -25,5 +25,14 @@ const before = h(); R.REGIONS.forEach(r => { R.tradition(r); R.compare(r, R.get(
 const ch = M.compute(inp), x = M.seunRange(ch, 2026, 2026)[0], r = LI.build(M, ch, x, 'seun', { daeun: x.daeun });
 const lk = R.link(R.get('seoul'), r.topAreas, '이 해');
 ok(lk.length === r.topAreas.length && lk.every(l => /자료 부족/.test(l.text)), '연결 문장'); lk.forEach(l => ok(!BAN.test(l.text) && /니다\.?$/.test(l.text.trim()), '연결 문장 형식'));
+// 6 용신 역할 연결(fit): 엔진의 역할표를 그대로 읽고, 상생·상극을 새로 계산하지 않으며, 원국은 바뀌지 않는다
+{
+  const ch2 = M.compute(inp), roles = ch2.yong.roles, EL = ['목', '화', '토', '금', '수'];
+  const snap = JSON.stringify([ch2.pillars, ch2.weights, ch2.yong]);
+  EL.forEach((e, i) => { const f = R.fit(e, roles); ok(f.role === roles[i], 'fit 역할 불일치 ' + e); ok(/(니다|세요).$/.test(f.text) && !BAN.test(f.text), 'fit 문장 ' + e); ok((f.tone === 'good') === (roles[i] === '용신' || roles[i] === '희신') && (f.tone === 'bad') === (roles[i] === '기신' || roles[i] === '구신'), 'fit tone ' + e); });
+  ok(R.fit('수', null).tone === 'none' && R.fit('x', roles).tone === 'none', 'fit 정보 없음 처리');
+  R.REGIONS.forEach(r => R.fit(R.tradition(r).element, roles));
+  ok(JSON.stringify([ch2.pillars, ch2.weights, ch2.yong]) === snap, 'fit이 원국을 바꿈');
+}
 if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log('  ' + f)); process.exit(1); }
 console.log('모든 검증 통과 · 지역 ' + R.REGIONS.length + '곳 · 통계 항목은 출처 확인 전까지 모두 자료 부족');

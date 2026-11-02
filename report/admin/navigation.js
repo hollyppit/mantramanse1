@@ -1,7 +1,7 @@
 /* 관리자 메뉴의 단일 기준: 영역·순서·표시명·담당 작업 */
 (function(root){
   'use strict';
-  var groups = [['dash','현황',['dash']],['make','무빙툰 제작',['v2proj','v2chap','v2story','v2world','editorial']],['media','영상·이미지',['v2clip','v2intro','panelart']],['content','콘텐츠·온보딩',['onboard','freec']],['ai','AI 풀이',['readinglibrary','ichingreview','regiondata','luckenv','ikdoc','ikknow','ikdesign','ikrules','iklab','agentic','stylecfg']],['qa','점검·테스트',['research','v2quality','check','v2test']],['set','운영·설정',['ops','v2set']]];
+  var groups = [['dash','현황',['dash']],['make','무빙툰 제작',['v2proj','v2chap','v2story','v2world','editorial']],['media','영상·이미지',['v2clip','v2intro','panelart']],['content','콘텐츠·온보딩',['onboard','freec']],['ai','AI 풀이',['readinglibrary','ichingreview','luckenv','ikdoc','ikknow','ikdesign','ikrules','iklab','agentic','stylecfg']],['qa','점검·테스트',['research','v2quality','check','v2test']],['set','운영·설정',['ops','v2set']]];
   var pages = {
     luckenv:{label:'운세 환경 문구',hint:'운세 환경 해석 문구를 수정·승인·게시하고 이전 본문으로 되돌립니다. 통합 시뮬레이터로 테스트 사주의 해석과 적용·배제된 규칙을 추적합니다.'},
     regiondata:{label:'지역 데이터',hint:'나의 운명 지도의 지역 환경 항목을 출처·기준일과 함께 등록하고 변경 이력에서 되돌립니다. 등록하지 않은 항목은 자료 부족으로 표시됩니다.'},

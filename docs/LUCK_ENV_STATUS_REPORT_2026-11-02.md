@@ -23,6 +23,8 @@
 | 보안 검증 | 부분 완료 | 아래 4번 |
 | 롤백 준비 | 부분 완료 | `docs/LUCK_ENV_ROLLBACK_2026-11-02.md`, 기능 스위치 구현. **복구 리허설 미실시** |
 
+**단순화 갱신(같은 날):** 지도 카드는 전통 명리로 계산되는 것만 보여 주도록 줄였습니다. 도시별 방위오행과, 이 사주의 용신 체계에서 그 오행이 용신·희신·한신·구신·기신 중 무엇인지(`RegionData.fit`)만 표시합니다. 통계 표·"자료 부족"·지역 비교 표는 화면에서 뺐고, 관리자 "지역 데이터" 탭도 메뉴에서 제거했습니다(`/api/region`과 관련 코드는 향후 확장용으로 남겨 두었고 화면에서는 호출하지 않습니다).
+
 ## 2. 변경 파일
 신규: `luck-interpret.js`, `region-data.js`, `feature-flags.js`, `functions/api/region.js`, `functions/api/luck-phrases.js`, `report/admin/v2-region.js`, `report/admin/v2-luckenv.js`, 테스트 8개(`luck-interpret-sim`, `region-sim`, `region-api-sim`, `luck-phrases-api-sim`, `luck-boundary-sim`, `luck-cache-sim` 등), 문서 3개.
 수정: `index.html`, `report/admin/index.html`, `report/admin/navigation.js`, `tests/engine-baseline.txt`, `tests/volatility-sim.js`.

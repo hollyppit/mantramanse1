@@ -80,7 +80,18 @@
     });
     return n;
   }
-  var api = { merge: merge, VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
+  // 사주 연결(참고): 이 사주의 용신 체계에서 방위오행이 어떤 역할(용신·희신·한신·구신·기신)인지 그대로 읽는다.
+  // 새 규칙이나 점수가 아니며, 원국에 더하거나 용신을 바꾸지 않는다. roles는 엔진의 ch.yong.roles({0..4: 역할}, 0=목 1=화 2=토 3=금 4=수)
+  var EL5 = ['목', '화', '토', '금', '수'];
+  var josa = function (w) { var c = w.charCodeAt(w.length - 1) - 44032; return w + (c >= 0 && c % 28 ? '은' : '는'); };
+  function fit(el, roles) {
+    var i = EL5.indexOf(el), role = roles && roles[i];
+    if (i < 0 || !role) return { role: null, tone: 'none', text: '이 사주의 용신 정보가 없어 연결해서 읽지 않습니다.' };
+    var good = role === '용신' || role === '희신', bad = role === '기신' || role === '구신';
+    return { role: role, tone: good ? 'good' : bad ? 'bad' : 'neutral',
+      text: '이 사주에서 ' + josa(el) + ' ' + role + ' 오행이라, ' + (good ? '전통적으로 이 방위가 상징적으로 맞는 편으로 읽습니다.' : bad ? '상징적으로는 맞지 않는 편으로 읽지만, 실제 생활 조건이 더 중요하니 참고로만 보세요.' : '특별한 도움이나 부담으로 읽지 않습니다.') };
+  }
+  var api = { fit: fit, merge: merge, VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
   G.MantraRegion = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
