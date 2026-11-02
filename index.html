@@ -485,6 +485,23 @@ tr.row-g-avoid td { background: color-mix(in srgb, var(--bad) 7%, transparent); 
 .cr-envtags { display: flex; flex-wrap: wrap; gap: 6px; }
 .cr-env + .cr-env { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
 .cr-detail { margin-top: 8px; }
+.wc-card { gap: 12px; } .wc-no { display: block; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.08em; color: var(--accent); }
+.wc-q { margin: 0; font-weight: 800; color: var(--ink); } .wc-card p { margin: 0 0 6px; line-height: 1.6; } .wc-card h4 { margin: 10px 0 4px; font-size: 0.86rem; }
+.wc-hero { display: grid; gap: 8px; border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 16px; padding: 14px; } .wc-hero h3 { margin: 0; font-size: 1.25rem; }
+.wc-kv { display: grid; gap: 4px; min-width: 0; } .wc-kv > b, .wc-sub > b, .wc-grid2 b { font-size: 0.8rem; color: var(--ink-3); } .wc-sub > b:first-child { color: var(--ink); }
+.wc-sub { border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; display: grid; gap: 6px; min-width: 0; } .wc-sub p { margin: 0; }
+.wc-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .wc-grid2 > * { min-width: 0; }
+.wc-g { color: var(--good) !important; } .wc-b { color: var(--bad) !important; }
+.wc-track { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; } .wc-track span { text-align: center; font-size: 0.78rem; padding: 7px 2px; border-radius: 8px; background: var(--surface-2); color: var(--ink-3); overflow-wrap: anywhere; } .wc-track .on { background: var(--accent); color: #fff; font-weight: 800; }
+.wc-why { margin-top: 4px; } .wc-why > summary { cursor: pointer; font-weight: 700; color: var(--accent); font-size: 0.86rem; }
+.wc-st { display: grid; grid-template-columns: minmax(6em, auto) auto 1fr; gap: 2px 8px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--line); } .wc-st .wc-ev { grid-column: 1 / -1; }
+.wc-ev { margin: 2px 0 0; padding-left: 1.1em; color: var(--ink-2); } .wc-ev .neg { color: var(--bad); }
+.wc-chip { display: inline-block; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; } .wc-chip.good { background: var(--good-soft); color: var(--good); } .wc-chip.mid { background: var(--accent-soft); color: var(--accent); } .wc-chip.bad { background: var(--bad-soft); color: var(--bad); } .wc-chip.hold { background: #FFF3D6; color: #A86A00; }
+.wc-jobs { display: grid; gap: 8px; } .wc-job { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); } .wc-job > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 1.8em 1fr auto; gap: 8px; align-items: center; padding: 10px 12px; } .wc-job > summary::-webkit-details-marker { display: none; }
+.wc-rk { width: 1.6em; height: 1.6em; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 800; font-size: 0.8rem; display: grid; place-items: center; } .wc-jn { display: grid; min-width: 0; } .wc-jb { display: grid; gap: 8px; padding: 0 12px 12px; }
+.wc-wk { gap: 8px; } .wc-wh { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; } .wc-bad { border-left: 3px solid var(--bad); padding-left: 10px; } .wc-fix { border-left: 3px solid var(--good); padding-left: 10px; }
+.wc-legacy { margin-top: 4px; } .wc-legacy > summary { cursor: pointer; font-weight: 800; padding: 12px 4px; color: var(--ink-2); } .wc-legacy > .card, .wc-legacy > section { margin-top: 10px; }
+@media (max-width: 560px) { .wc-grid2 { grid-template-columns: 1fr; } .wc-st { grid-template-columns: 1fr auto; } .wc-st .small { grid-column: 1 / -1; } }
 @media (max-width: 560px) { .cr-row { grid-template-columns: 6.5em 1fr 2em; } .cr-lab { grid-column: 1 / -1; } .cr-ax { grid-template-columns: 3.6em 1fr 3.6em; } .cr-v { grid-column: 2; } }
 .rt-dm { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 1.05rem; }
 .rt-ms { display: grid; gap: 10px; }
@@ -660,6 +677,11 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="feature-flags.js"></script>
 <script src="engine.js"></script>
 <script src="luck-interpret.js"></script>
+<script src="wealth-career-data.js"></script>
+<script src="wealth-career-data-2.js"></script>
+<script src="wealth-career-data-3.js"></script>
+<script src="wealth-career-jobs.js"></script>
+<script src="wealth-career.js"></script>
 <script src="region-gu-data.js"></script>
 <script src="region-data.js"></script>
 <script src="glossary-cases.js"></script>
@@ -5548,6 +5570,79 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <button class="btn x" data-act="close">닫기</button>`;
   }
 
+  // ───────────── 직업 · 활동 적성 고도화: 나의 돈 버는 방식 · 업무 환경 · 직업 · 약점 (wealth-career.js) ─────────────
+  // 계산·문구 조합은 MantraWealthCareer(원국만 읽음, AI 호출 없음). 이 절은 표시만 맡는다. 기능 스위치 MANTRA_FLAGS.wealth (기본 꺼짐).
+  const WC_ST = { full: 'good', part: 'mid', rel: '', none: '', hold: 'hold' };
+  const WC_CONF = { solid: '근거가 비교적 뚜렷함', mid: '일부 구조에서 확인된 근거(부분 성립 중심)', low: '근거가 약함 — 참고용' };
+  let wcLoaded = false;
+  const wcOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.wealth === true && window.MantraWealthCareer);
+  // 관리자가 켜고 게시한 문구·직업을 한 번 받아 반영한다(실패하면 기본 문구, 스위치가 꺼져 있으면 아무 일도 하지 않음)
+  function wcLoad() {
+    if (wcLoaded || !window.MantraWealthCareer) return; wcLoaded = true;
+    try { fetch('/api/wealth-career').then(r => r.ok ? r.json() : null).then(d => { if (!d || !d.enabled || !d.pub) return; window.MantraWealthCareer.applyPublished(d.pub); window.MANTRA_FLAGS.wealth = true; render(); }).catch(() => { }); } catch (e) { }
+  }
+  const wcP = a => (a || []).map(x => `<p>${esc(x.text)}</p>`).join('');
+  const wcLi = a => a && a.length ? `<ul class="pos-ul small">${a.map(x => `<li>${esc(x.text || x)}</li>`).join('')}</ul>` : '';
+  function wcWhyBox(r) {
+    const stRow = s => `<div class="wc-st"><b>${esc(s.name)}</b><span class="wc-chip ${WC_ST[s.state]}">${s.label}</span><span class="small muted">${esc(s.plain || s.desc)}</span>${s.evidence.length || s.miss.length || s.notes.length ? `<ul class="small wc-ev">${s.evidence.map(t => `<li>${esc(t)}</li>`).join('')}${s.miss.map(t => `<li class="neg">부족: ${esc(t)}</li>`).join('')}${s.notes.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}</div>`;
+    const yong = r.yong.map(y => y.el ? `<li><b>${y.name}</b> ${esc(y.el)}(${esc(y.group)}) — ${esc(y.role)}</li>` : `<li><b>${y.name}</b> 해당 없음</li>`).join('');
+    return `<details class="wc-why"><summary>왜 이런 결과가 나왔나요?</summary>
+      <div class="small"><h4>일간의 힘과 용신</h4><p>${esc(r.zone.label)} 원국(나를 돕는 힘 ${r.zone.help}%)</p><ul class="pos-ul">${yong}</ul>${r.notes.map(n => `<p class="muted">${esc(n.text)}</p>`).join('')}
+      <h4>십성별 쓸 만한 힘 <span class="muted">투출=천간에 드러남 · 통근=지지 지장간에 뿌리</span></h4><div>${r.power.map(p => `<span class="chip">${p.tg} ${p.label}${p.touched ? ' · 투출' : ''}${p.rooted ? ' · 통근' : ''}</span>`).join('')}</div>
+      <p class="muted">십성 묶음 비율: ${r.pct.map(g => `${g.group} ${g.pct}%`).join(' · ')}</p>
+      <h4>구조 판정 11가지 <span class="muted">있다는 사실과 구조가 성립한다는 사실은 다릅니다</span></h4>${r.structures.map(stRow).join('')}
+      <h4>수익 유형 후보와 근거</h4>${r.s1.rows.map(t => `<div class="wc-st"><b>${esc(t.name)}</b><span class="wc-chip ${t.qualified ? 'good' : ''}">${t.qualified ? '근거 충족' : t.gate ? '관문 통과·점수 부족' : '관문 미충족'}</span><span></span><ul class="small wc-ev">${t.evidence.map(x => `<li>${esc(x)}</li>`).join('') || '<li class="muted">뚜렷한 근거 없음</li>'}</ul></div>`).join('')}</div></details>`;
+  }
+  function wcS1(r) {
+    const s = r.s1, p = s.primary;
+    let body;
+    if (p) {
+      body = `<div class="wc-hero"><span class="wc-no">대표 수익 유형</span><h3>${esc(p.name)}</h3><p class="small muted" style="margin:0">${esc(p.plain)} · ${WC_CONF[s.conf]}${s.tie ? ' · 보조 유형과 점수가 근접해 함께 읽는 편이 좋습니다' : ''}</p>${wcP(p.head)}
+        <div class="wc-grid2"><div class="wc-kv"><b>핵심 역량</b>${wcP(p.skill)}</div><div class="wc-kv"><b>적합한 수익 창출 방식</b>${wcP(p.method)}</div></div></div>
+        <div class="wc-kv"><b>명리학적 판단 근거</b>${wcLi(p.via)}${wcLi(p.reason)}</div>
+        <div class="wc-kv"><b>이런 모습으로 나타날 수 있어요</b>${wcLi(p.scene)}</div>
+        <div class="wc-grid2"><div class="wc-sub"><b class="wc-g">강점</b>${wcP(p.strength)}</div><div class="wc-sub"><b class="wc-b">경계할 점</b>${wcP(p.risk)}</div></div>
+        <div class="wc-kv"><b>실천 전략</b>${wcP(p.action)}</div>
+        ${s.secondary.length ? `<div class="wc-kv"><b>보조 수익 유형</b>${s.secondary.map(q => `<div class="wc-sub"><b>${esc(q.name)}</b>${wcP(q.line)}<p class="small muted">수익 방식: ${esc((q.method[0] || {}).text || '')}</p></div>`).join('')}</div>` : ''}`;
+    } else {
+      body = `<div class="wc-hero"><span class="wc-no">유형 미확정</span><h3>한 가지로 정하지 않았습니다</h3>${wcP(s.insufficient)}</div>
+        <div class="wc-kv"><b>가장 근거가 가까운 후보</b>${s.candidates.map(c => `<div class="wc-sub"><b>${esc(c.name)}</b> <span class="muted small">${esc(c.plain)}</span>${wcLi(c.evidence)}<p class="small muted">부족한 조건: ${esc(c.missing.join(' / '))}</p></div>`).join('')}</div>`;
+    }
+    return `<section class="card wc-card"><div class="card-h"><div><span class="wc-no">SECTION 01</span><h2>나의 돈 버는 방식</h2></div></div><p class="wc-q">“나는 무엇을 통해 돈을 버는 사람인가?”</p>${wcP(r.intro)}${body}${wcWhyBox(r)}</section>`;
+  }
+  function wcS2(r) {
+    const AX = window.MantraWealthCareerData.AXES;
+    const axis = a => {
+      const def = AX.find(x => x.id === a.id), keys = Object.keys(def.verdicts), L = keys[0], R = keys[1];
+      const seg = k => `<span class="${a.verdict === k ? 'on' : ''}">${esc(def.verdicts[k])}</span>`;
+      return `<div class="wc-sub wc-ax"><b>${esc(a.name)}</b><div class="wc-track" role="img" aria-label="${esc(a.name)}: ${esc(a.label)}">${seg(L)}${seg('mix')}${seg(R)}</div><p class="small"><b>${esc(a.label)}</b> <span class="muted">— ${esc(a.leanLabel)}</span></p>
+        <div class="wc-grid2"><div><b class="wc-g">강점이 드러나는 환경</b>${wcP(a.strength)}</div><div><b class="wc-b">부담이 커지는 환경</b>${wcP(a.burden)}</div></div>
+        <p class="small"><b>현실 사례</b> ${esc((a.example[0] || {}).text || '')}</p>
+        <details class="wc-why"><summary>왜 이런 결과가 나왔나요?</summary><ul class="small wc-ev">${a.basis.map(t => `<li>${esc(t)}</li>`).join('')}</ul></details></div>`;
+    };
+    return `<section class="card wc-card"><div class="card-h"><div><span class="wc-no">SECTION 02</span><h2>나에게 맞는 업무 환경</h2></div></div><p class="wc-q">“나는 어떤 환경에서 강점을 발휘하는가?”</p>${wcP(r.s2.intro)}${r.s2.axes.map(axis).join('')}${r.s2.cohere.length ? `<div class="wc-kv"><b>앞의 수익 방식과 함께 읽을 점</b>${wcLi(r.s2.cohere)}</div>` : ''}<p class="small muted">${esc((r.s2.note[0] || {}).text || '')}</p></section>`;
+  }
+  function wcS3(r) {
+    const envNm = k => (M.CAREER_CONFIG.environments[k] || {}).name || k;
+    const job = j => `<details class="wc-job"><summary><span class="wc-rk">${j.rank}</span><span class="wc-jn"><b>${esc(j.name)}</b><span class="small muted">${esc(j.typeRole)} 유형 · ${esc(j.typeName)}</span></span><span class="chip">${esc(j.barrierLabel)}</span></summary><div class="wc-jb">
+      <div class="wc-kv"><b>추천 이유</b>${j.link ? `<p>${esc(j.link.text)}</p>` : ''}${j.structures.length ? `<p class="small muted">연결되는 구조: ${esc(j.structures.join(' · '))}</p>` : ''}${j.envMatch.length ? `<p class="small muted">잘 맞는 업무 환경: ${esc(j.envMatch.join(' · '))}</p>` : ''}${j.envGap.length ? `<p class="small muted">다를 수 있는 점: ${j.envGap.map(g => esc(g.axis + ' — 내 성향 ' + g.mine + ' / 이 직무 ' + g.job)).join(' · ')}</p>` : ''}</div>
+      <div class="wc-kv"><b>적합한 업무 방식</b><p>${esc(j.how)}</p></div><div class="wc-kv"><b>수익 창출 방식</b><p>${esc(j.income)}</p></div>
+      <div class="wc-kv"><b>주의할 점</b><p>${esc(j.caution)}</p>${j.exposes.length ? `<p class="small muted">원국상 부담이 커질 수 있는 환경이 포함될 수 있습니다: ${esc(j.exposes.map(envNm).join(' · '))}</p>` : ''}</div>
+      <div class="wc-kv"><b>진입 조건과 경로</b><p class="small">${esc(j.barrierText)}</p>${j.path ? `<p class="small">${esc(j.path)}</p>` : ''}</div>
+      <p class="small muted">쓰이는 기운: ${esc(j.els.join('·') || '-')} · 관련 활동 분야: ${esc(j.cats.map(c => c.name).join(', '))}</p></div></details>`;
+    return `<section class="card wc-card"><div class="card-h"><div><span class="wc-no">SECTION 03</span><h2>나에게 맞는 직업과 업종</h2></div></div><p class="wc-q">“나에게 적합한 직업과 업종은 무엇인가?”</p>${wcP(r.s3.intro)}${wcP(r.s3.weak)}<div class="wc-jobs">${r.s3.jobs.map(job).join('')}</div><p class="small muted">${esc((r.s3.reality[0] || {}).text || '')}</p></section>`;
+  }
+  function wcS4(r) {
+    const item = w => `<div class="wc-sub wc-wk"><div class="wc-wh"><b>${esc((w.title[0] || {}).text || '')}</b><span class="chip">${esc(w.domain)}</span><span class="wc-chip ${w.level === 'high' ? 'bad' : ''}">${esc(w.levelLabel)}</span></div>
+      <div class="wc-grid2"><div class="wc-bad"><b>이렇게 약해질 수 있어요</b>${wcP(w.why)}${wcP(w.scene)}<p class="small muted">수익에 미칠 영향: ${esc((w.impact[0] || {}).text || '')}</p></div><div class="wc-fix"><b>이렇게 보완하세요</b>${wcP(w.fix)}</div></div>
+      <details class="wc-why"><summary>왜 이런 결과가 나왔나요?</summary><ul class="small wc-ev">${w.basis.map(t => `<li>${esc(t)}</li>`).join('')}</ul></details></div>`;
+    return `<section class="card wc-card"><div class="card-h"><div><span class="wc-no">SECTION 04</span><h2>돈을 벌 때의 약점과 해결책</h2></div></div><p class="wc-q">“돈을 벌고 유지하는 과정에서 무엇을 경계해야 하는가?”</p>${wcP(r.s4.intro)}${wcP(r.s4.nowealth)}${wcP(r.s4.few)}${r.s4.items.map(item).join('')}</section>`;
+  }
+  function wcHTML(ch) {
+    let r; try { r = window.MantraWealthCareer.build(M, ch, { name: (S.inp && S.inp.name) || '' }); } catch (e) { return ''; }
+    return `${wcS1(r)}${wcS2(r)}${wcS3(r)}${wcS4(r)}<p class="cp-disc">${esc(window.MantraWealthCareerData.CAUTION_STRUCT)}</p>`;
+  }
+
   // ───────────── 직업 · 활동 적성 (원국 기반 · 운세와 별개) ─────────────
   // 계산은 M.careerProfile(원국만 읽는 별도 계층, CAREER_CONFIG 한 곳에서 조절). 이 절은 표시만 맡는다.
   const CR_DISC = '직업 적성은 원국의 구조적 성향을 해석한 참고 지표이며 실제 직업 성과는 능력, 경험, 교육, 시장 환경 등에 따라 달라질 수 있습니다.';
@@ -5555,10 +5650,11 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function renderCareer(ch) {
     const P = M.careerProfile(ch), ws = P.workStyle, cfg = M.CAREER_CONFIG;
     const axis = a => { const x = ws[a], [pn, pv] = M.careerPole(a, x.value);
-      return `<div class="cr-ax"><span class="l${x.value >= 50 ? ' on' : ''}">${x.left}</span><span class="cr-bar2" role="img" aria-label="${x.left} ${x.value}, ${x.right} ${x.other}"><i class="a" style="width:${x.value}%"></i><i class="b" style="width:${x.other}%"></i></span><span class="r${x.value < 50 ? ' on' : ''}">${x.right}</span><span class="cr-v num">${x.value} / ${x.other}</span><span class="cr-w">${pn} 쪽 · ${M.careerLevelWord(pv)}</span></div>`; };
+      return `<div class="cr-ax"><span class="l${x.value >= 50 ? ' on' : ''}">${x.left}</span><span class="cr-bar2" role="img" aria-label="${x.left} ${x.value}, ${x.right} ${x.other}"><i class="a" style="width:${x.value}%"></i><i class="b" style="width:${x.other}%"></i></span><span class="r${x.value < 50 ? ' on' : ''}">${x.right}</span>${wcOn() ? '' : `<span class="cr-v num">${x.value} / ${x.other}</span>`}<span class="cr-w">${pn} 쪽 · ${M.careerLevelWord(pv)}</span></div>`; };
     const row = c => `<button type="button" class="cr-row" data-cr="cat:${c.category}"><b class="cr-n">${c.name}</b><span class="cr-b"><i style="width:${c.score}%"></i></span><b class="cr-s num">${c.score}</b><span class="cr-lab ${crTone(c.score)}">${c.band}</span><span class="cr-why">${esc(c.reasons[0] || '')}</span></button>`;
     const topRow = c => `<button type="button" class="cr-row" data-cr="cat:${c.category}"><b class="cr-n">${c.name}</b><span class="cr-b"><i style="width:${c.score}%"></i></span><b class="cr-s num">${c.score}</b><span class="cr-lab ${crTone(c.score)}">${c.band}</span><span class="cr-why">${esc(cfg.categories[c.category].what)} — ${esc(c.strengths[0] || c.reasons[0] || '')}</span><span class="cr-more">자세히 보기 ›</span></button>`;
-    return `
+    wcLoad();
+    const legacy = `
     <div class="cp-title"><h2>직업 · 활동 적성</h2><p class="note">출생 원국의 구조를 바탕으로 "어떤 방식으로 일할 때 강점을 활용하기 쉬운가"를 살펴보는 참고 분석입니다. 특정 직업을 정해 주는 것이 아니며, 운세 흐름·재물운과는 별개입니다.</p></div>
     <section class="card">
       <div class="card-h"><h2>나에게 맞는 업무 방식</h2><span class="note">숫자는 성향의 기울기일 뿐 심리검사 결과가 아닙니다</span></div>
@@ -5587,6 +5683,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <dt>재물운과의 차이</dt><dd>적성은 "이 방식을 활용하기 쉬운가"이고 재물운은 "지금 재정 흐름이 활성화되는가"입니다. 서로 다른 값이 나오는 것이 정상입니다.</dd></dl></details>
       <p class="cp-disc">${CR_DISC}</p>
     </section>`;
+    if (!wcOn()) return legacy;
+    return `<div class="cp-title"><h2>직업 · 활동 적성</h2><p class="note">출생 원국의 구조에서 읽을 수 있는 “돈을 버는 방식 → 맞는 환경 → 직업 → 약점” 순서의 참고 분석입니다. 운세 흐름·재물운과는 별개입니다.</p></div>${wcHTML(ch)}<details class="wc-legacy"><summary>기존 세부 분석 보기 (활동 분야별 조화도·업무 성향·부담 환경)</summary><p class="note">아래의 숫자는 계산 과정의 상대적 기울기일 뿐, 심리검사나 적성검사 점수가 아닙니다.</p>${legacy}</details>`;
   }
   function crSheetHTML(ch, sel) {
     if (sel.key === 'detail') return rootSheetHTML(ch);
