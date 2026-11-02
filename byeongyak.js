@@ -4,7 +4,7 @@
    · 병: 태과(어떤 오행이 30% 이상) 또는 불급(일간에게 꼭 필요한 기운이 모자람). 일간의 강약에 따라 해로운 정도가 다르다
        (신약이면 관성·재성·식상 과다가 심하고, 신강이면 비겁·인성 과다가 심하다).
    · 약: 병 오행을 설(洩: 병이 생하는 오행)하거나 제(制: 병을 극하는 오행)하는 오행 중, 일간의 균형에 맞고 원국에 실제로 있으며 그 자신이 병이 아닌 것.
-   · 종격(극약·극왕) 가능성이 있는 사주는 병약의 의미가 달라질 수 있어 안내를 붙인다(이 앱은 종격을 아직 판정하지 않는다).
+   · 종격(극약·극왕) 가능성이 있는 사주는 병약의 의미가 달라질 수 있어 안내를 붙인다(종격 판정은 jonggyeok.js 가 따로 한다).
    사용: MantraByeongyak.analyze(Manse, chart) */
 (function (G) {
   'use strict';
@@ -35,7 +35,7 @@
     if (side === 'strong' && leak < CFG.supportMin) { var s2 = 0.4 + 0.5 * clamp((CFG.supportMin - leak) / CFG.supportMin, 0, 1); cands.push({ el: el(1), kind: '불급', need: '설기(식상·재성·관성)', sev: s2, score: s2 * 0.9, pct: leak }); }
     cands.sort(function (a, b) { return b.score - a.score; });
     var res = { version: VERSION, side: side, zone: st.zone, help: Math.round(st.help * 10) / 10, caveat: [], candidates: cands.map(function (c) { return { el: EL[c.el], kind: c.kind, score: Math.round(c.score * 100) / 100 }; }) };
-    if (side !== 'mid' && (st.zone === '극약' || st.zone === '극왕')) res.caveat.push(st.zone + ' 사주는 억제하지 않고 강한 세력을 따르는 종격·전왕격일 가능성이 있어, 병약 해석이 보통의 경우와 달라질 수 있습니다. 이 앱은 종격을 아직 판정하지 않으므로 참고로만 보세요.');
+    if (side !== 'mid' && (st.zone === '극약' || st.zone === '극왕')) res.caveat.push(st.zone + ' 사주는 억제하지 않고 강한 세력을 따르는 종격·전왕격일 가능성이 있어, 병약 해석이 보통의 경우와 달라질 수 있습니다. 아래 ‘종격·전왕격 판단’을 함께 확인하세요.');
     var top = cands[0];
     if (!top || top.score < CFG.minHarm) {
       res.status = 'none'; res.headline = '뚜렷한 병이 없습니다';

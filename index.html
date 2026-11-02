@@ -691,6 +691,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="region-reading-data.js"></script>
 <script src="region-reading.js"></script>
 <script src="byeongyak.js"></script>
+<script src="jonggyeok.js"></script>
 <script src="glossary-cases.js"></script>
 <script src="glossary-sections.js"></script>
 <script src="glossary-sections-2.js"></script>
@@ -5910,7 +5911,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       rows: [['원리', '먼저 신강·신약을 판단합니다. 약하면 인성·비겁, 강하면 식상·재성·관성 가운데 가장 효과적인 것을 고릅니다.'],
         ['대표 문헌', '적천수(滴天髓) 계열. 현대 한국 명리에서 가장 널리 쓰입니다.'],
         ['강점', '기준이 명확하고 거의 모든 사주에 적용할 수 있습니다.'],
-        ['한계', '강약 판단이 오행 계산 모델(월령 가중, 지장간 처리)에 따라 흔들립니다. 계절 온도를 보지 않아 한여름·한겨울생에서는 조후와 정반대 답을 내기도 합니다. 극약·극왕 사주를 종격으로 볼지 여부도 판단하지 않습니다.'],
+        ['한계', '강약 판단이 오행 계산 모델(월령 가중, 지장간 처리)에 따라 흔들립니다. 계절 온도를 보지 않아 한여름·한겨울생에서는 조후와 정반대 답을 내기도 합니다. 극약·극왕 사주를 종격으로 볼지 여부는 억부 자체로는 판단하지 못해, 아래 ‘종격·전왕격 판단’에서 따로 봅니다.'],
         ['이 앱의 구현', '돕는 힘 50%를 기준으로 신약·신강을 나눕니다. 신약이면 가장 강한 소모 세력(식상·재성·관성)에 따라 인성 또는 비겁을, 신강이면 인성과 비겁 중 어느 쪽이 주도하는지와 관성의 크기에 따라 재성·관성·식상을 고릅니다.']] },
     johu: { t: '조후 (調候)', lead: '태어난 계절의 온도와 습도를 맞춥니다. 여름생은 식히고, 겨울생은 데웁니다.',
       rows: [['원리', '월지가 가리키는 계절이 사주 전체의 기후를 정한다고 봅니다. 너무 더우면 수(水), 너무 추우면 화(火)를 먼저 찾습니다.'],
@@ -5930,16 +5931,21 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         ['강점', '한 오행이 넘치거나 모자란 사주에서 처방이 구체적이고 직관적입니다.'],
         ['한계', '균형 잡힌 사주에는 뚜렷한 병이 없어 세우지 않습니다. 억부와 결과가 겹치는 경우가 많고, 갈릴 때는 어느 쪽을 앞세울지 해석자의 판단이 필요합니다.'],
         ['이 앱의 구현', '한 오행이 원국의 30% 이상이면 태과, 신약인데 비겁·인성이 25% 미만(신강이면 식상·재성·관성이 25% 미만)이면 불급으로 보고, 일간의 강약에 따른 해로운 정도로 가장 큰 병을 고릅니다. 약은 설·제 후보 가운데 일간의 균형에 맞고 원국에 있으며 스스로 병이 되지 않는 오행을 고릅니다. 용신·점수·흐름에는 더하지 않고 따로 보여 줍니다.']] },
+    jonggyeok: { t: '종격·전왕격 (從格·專旺格)', lead: '일간이 극단적으로 약하거나 강하면 억제하지 않고 가장 센 세력을 따릅니다.',
+      rows: [['원리', '일간이 뿌리도 도움도 없이 아주 약하면 재성·관성·식상 중 가장 센 세력을 따르고(종재·종살·종아), 반대로 일간과 비겁·인성이 한쪽으로 극단적으로 강하면 그 흐름을 따릅니다(종왕·종강, 전왕격). 이때는 일간을 돕는 기운이 오히려 흐름을 깨는 기신이 됩니다.'],
+        ['대표 문헌', '종격과 전왕격은 고전 명리서에서 널리 다루며, 성립 조건의 엄격함은 학파마다 다릅니다.'],
+        ['강점', '극약·극왕 사주에서 보통의 억부가 정반대 결론을 내는 문제를 짚어 줍니다.'],
+        ['한계', '조건이 까다로워 실제로 성립하는 사주는 드뭅니다. 인성·비겁이 조금만 뚜렷해도 성립하지 않고, 그 경계의 판단(가종격)은 학파마다 갈립니다.'],
+        ['이 앱의 구현', '돕는 힘이 30% 미만 또는 70% 이상일 때만 검토합니다. 종약계는 일간의 힘·뿌리·득령·비겁·인성·따를 세력의 6개 조건, 종강·종왕계는 일간의 힘·뿌리·득령·식상재관 부재·한 세력 쏠림의 5개 조건을 보고 충족/가능성/해당 없음/보류로 나눕니다. 억부·조후·병약 결과는 바꾸지 않고 따로 보여 주며, 용신 배치는 이 앱의 단순화 모델입니다.']] },
   };
   const SCHOOL_MISSING = [
-    ['격국 (格局)', '월지에서 투출한 십성으로 격을 정하고, 격을 완성하는 상신(相神)을 찾습니다(자평진전). 성격·파격 판정 규칙이 많아 다음 단계 과제입니다.'],
-    ['종격·전왕격', '극약이나 극왕 사주는 억제하지 않고 강한 세력을 따른다고 봅니다. 이 앱은 해당 가능성만 경고합니다.']];
+    ['격국 (格局)', '월지에서 투출한 십성으로 격을 정하고, 격을 완성하는 상신(相神)을 찾습니다(자평진전). 성격·파격 판정 규칙이 많아 다음 단계 과제입니다.']];
   function renderSchoolInfo(ch) {
     return `<section class="card">
       <div class="card-h"><h2>학파는 무엇이 다른가</h2><span class="note">눌러서 펼치기</span></div>
       <div class="acc">${Object.entries(SCHOOL_INFO).map(([k, x]) => `<details${k === ch.school ? ' open' : ''}><summary><b>${x.t}</b>${k === ch.school ? ' <span class="pill" style="background:var(--accent);color:var(--surface)">선택됨</span>' : ''}<span class="small muted" style="display:block">${x.lead}</span></summary>
         <dl>${x.rows.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl></details>`).join('')}
-        <details><summary><b>이 앱에 없는 기준</b><span class="small muted" style="display:block">격국 · 종격</span></summary><dl>${SCHOOL_MISSING.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl></details>
+        <details><summary><b>이 앱에 없는 기준</b><span class="small muted" style="display:block">격국</span></summary><dl>${SCHOOL_MISSING.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl></details>
       </div></section>`;
   }
 
@@ -5951,6 +5957,30 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (!r.table) return `<tr><td>${lab}</td><td colspan="4" class="muted small">뚜렷한 병이 없어 세우지 않음</td></tr>`;
     return `<tr><td>${lab}</td><td>${f(r.table.yong)}</td><td>${f(r.table.hee)}</td><td>${f(r.table.gi)}</td><td>${f(r.table.gu)}</td></tr>`;
   };
+  // ───────────── 종격·전왕격: jonggyeok.js — 억부·조후·병약과 따로 보는 판단(용신 계산·흐름 점수에 더해지지 않음) ─────────────
+  const JG_ST = { jin: ['충족', 'good'], ga: ['가능성', 'mid'], hold: ['보류', 'hold'], none: ['해당 없음', ''] };
+  // 엔진이 남기는 억부 판단 로그의 “종격을 판정하지 않는다” 문장을 종격 판단 카드 안내로 바꿔 보여 준다(엔진 로그는 그대로)
+  const jgLog = l => l.replace('이 앱은 종격을 판정하지 않으므로 아래 결과를 그대로 받아들이기 전에 검토가 필요합니다.', '아래 ‘종격·전왕격 판단’에서 이 사주가 종격에 해당하는지 확인하세요.');
+  const jgRow = ch => {
+    const J = window.MantraJonggyeok; if (!J) return ''; const r = J.analyze(M, ch);
+    const f = e => e == null ? '<span class="muted small">—</span>' : `<span class="eltxt ${ECLS[e]}">${elLabel(e)}</span>`;
+    const lab = `${term('종격', '종격·전왕격')} <span class="muted small">세력을 따름</span>`;
+    if (!r.table) return `<tr><td>${lab}</td><td colspan="4" class="muted small">${r.side === 'mid' ? '검토하지 않음(강약이 극단적이지 않음)' : '해당 없음'}</td></tr>`;
+    return `<tr><td>${lab} <span class="wc-chip ${JG_ST[r.status][1]}">${JG_ST[r.status][0]}</span></td><td>${f(r.table.yong)}</td><td>${f(r.table.hee)}</td><td>${f(r.table.gi)}</td><td>${f(r.table.gu)}</td></tr>`;
+  };
+  function jgCard(ch) {
+    const J = window.MantraJonggyeok; if (!J) return ''; const r = J.analyze(M, ch);
+    const li = a => a && a.length ? `<ul class="pos-ul small">${a.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
+    const crit = r.criteria.length ? `<div class="ib-k">판정 조건별 근거</div><div class="small">${r.criteria.map(c => `<div style="padding:5px 0;border-top:1px solid var(--line)"><span class="wc-chip ${c.level === 1 ? 'good' : c.level === 0.5 ? 'mid' : ''}">${c.mark}</span> <b>${esc(c.label)}</b><div class="muted">${esc(c.detail)}</div></div>`).join('')}</div>` : '';
+    return `<section class="card"><div class="card-h"><h2>${term('종격', '종격·전왕격')} 판단</h2><span class="note">극약·극왕 사주만 검토</span></div>
+      <p><b>${esc(r.headline)}</b> <span class="wc-chip ${JG_ST[r.status][1]}">${JG_ST[r.status][0]}</span></p>
+      <p class="small">${esc(r.text.summary)}</p>
+      ${r.caveat.map(t => `<div class="warn"><span>${esc(t)}</span></div>`).join('')}
+      ${crit}
+      ${r.text.relation.length ? `<div class="ib-k">억부·조후와의 관계</div>${li(r.text.relation)}` : ''}
+      ${r.text.why ? `<p class="small muted">${esc(r.text.why)}</p>` : ''}
+      <p class="note">종격 판단은 억부·조후·병약과 따로 보는 관점이며, 용신 계산·흐름 점수·다른 탭의 해석에는 더해지지 않습니다. 표의 종격 행은 종격이 성립한다고 가정했을 때의 용신 배치입니다. 성립 조건과 용신 배치는 이 앱의 단순화 모델이며, 전통 해석이므로 결과를 보장하지 않습니다.</p></section>`;
+  }
   function byCard(ch) {
     const B = window.MantraByeongyak; if (!B) return ''; const r = B.analyze(M, ch);
     const li = a => a && a.length ? `<ul class="pos-ul small">${a.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
@@ -5973,7 +6003,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="card-h"><h2>${term('용신')} · 희신 · 기신</h2>${seg('school', Object.entries(M.SCHOOLS).map(([k, l]) => [k, l.split(' ')[0]]), ch.school)}</div>
       ${!chosen.applicable ? `<div class="warn"><b>${M.SCHOOLS[ch.school]} 해당 없음</b><span>${esc(chosen.log[chosen.log.length - 1])}</span><span>아래 역할과 운세 그래프는 억부 기준으로 표시합니다.</span></div>` : ''}
       <div class="roles">${order.map(r => { const e = elOf(r); return `<div class="role ${ECLS[e]}${r === '용신' ? ' main' : ''}"><span class="rn">${term(r)}</span><span class="rg">${M.EL[e]}</span><span class="rp">${M.EL_K[e]} · ${M.TG_GROUP[(e - dEl + 5) % 5]}</span><span class="rp num">원국 ${ch.weights.pct[e].toFixed(0)}%</span></div>`; }).join('')}</div>
-      <div><h3 style="margin-bottom:8px">판단 근거 · ${M.SCHOOLS[y.school]}</h3><ol class="log">${y.log.map(l => `<li>${esc(l)}</li>`).join('')}</ol></div>
+      <div><h3 style="margin-bottom:8px">판단 근거 · ${M.SCHOOLS[y.school]}</h3><ol class="log">${y.log.map(l => `<li>${esc(jgLog(l))}</li>`).join('')}</ol></div>
       <p class="note">선택한 학파는 흐름 점수에서 해당 기준의 가중치를 높입니다. 강약·기후 치우침이 크면 학파와 관계없이 억부·조후 비중이 자동으로 조정되고, 합충·십성 균형도 함께 반영됩니다.</p>
     </section>
     <section class="card"><div class="card-h"><h2>조후론 vs 억부론</h2><span class="note">근거는 오행·강약 탭의 한난조습</span></div>${adviceCard(ch)}</section>
@@ -5983,10 +6013,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="tbl-wrap"><table class="dt"><thead><tr><th>기준</th><th>${term('용신')}</th><th>${term('희신')}</th><th>${term('기신')}</th><th>${term('구신')}</th></tr></thead><tbody>
         ${Object.entries(M.SCHOOLS).map(([k, l]) => { const x = ch.yongAll[k]; const f = r => { const e = +Object.keys(x.roles).find(q => x.roles[q] === r); return `<span class="eltxt ${ECLS[e]}">${elLabel(e)}</span>`; }; return `<tr class="${k === ch.school ? 'cur' : ''}"><td>${term(l.split(' ')[0])} <span class="muted small">${l.split(' ').slice(1).join(' ')}</span></td>${x.applicable ? `<td>${f('용신')}</td><td>${f('희신')}</td><td>${f('기신')}</td><td>${f('구신')}</td>` : '<td colspan="4" class="muted small">해당 없음</td>'}</tr>`; }).join('')}
         ${byRow(ch)}
+        ${jgRow(ch)}
       </tbody></table></div>
       <p class="note">억부는 강약, 조후는 계절 온도, 통관은 오행 대립을 기준으로 합니다. 두 기준이 서로 다른 오행을 가리키면 해석자가 어느 쪽을 우선할지 판단해야 합니다. 이 앱은 그 판단을 대신하지 않고 근거를 보여줍니다.</p>
     </section>
     ${byCard(ch)}
+    ${jgCard(ch)}
     ${renderRoot(ch)}
     ${climateCard(ch)}`;
   }
