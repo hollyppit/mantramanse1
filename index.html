@@ -6296,7 +6296,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 현재 거주지·비교 지역은 원국 계산과 무관한 별도 설정이다(브라우저에만 저장). 출생지는 기존 입력(만세력 계산용)을 그대로 쓴다.
   // 실제 환경 데이터와 전통 방위오행 해석은 서로 다른 블록으로 표시하고, 지역 오행은 원국에 합산하지 않는다.
   const REG_KEY = 'mantra-region-v1';
-  const REG = (() => { try { const v = JSON.parse(localStorage.getItem(REG_KEY) || '{}'); const ok = x => /^(prov|gu|dong):\d+$/.test(x) ? x : ''; return { home: ok(v.home || ''), cmp: ok(v.cmp || ''), base: v.base === 'birth' ? 'birth' : 'home' }; } catch (e) { return { home: '', cmp: '', base: 'home' }; } })();
+  const REG = (() => { try { const v = JSON.parse(localStorage.getItem(REG_KEY) || '{}'); const ok = x => /^(prov|gu|dong):\d+$/.test(x) ? x : ''; return { home: ok(v.home || ''), cmp: ok(v.cmp || ''), base: v.base === 'birth' ? 'birth' : 'home', basis: ['eokbu', 'johu', 'both'].includes(v.basis) ? v.basis : 'auto' }; } catch (e) { return { home: '', cmp: '', base: 'home', basis: 'auto' }; } })();
   const regSave = () => { try { localStorage.setItem(REG_KEY, JSON.stringify(REG)); } catch (e) { } };
   // 관리자가 출처와 함께 등록한 지역 자료를 한 번만 받아 합친다(실패하면 기존대로 자료 부족).
   let regLoaded = false;
@@ -6328,28 +6328,36 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const px = r => ((r.lon - 125.8) / 4.6 * 300).toFixed(0), py = r => ((38.6 - r.lat) / 5.8 * 330).toFixed(0);
     const dots = RG.REGIONS.map(r => { const c = home && home.name.indexOf(r.name) >= 0 ? 'home' : cmp && cmp.name.indexOf(r.name) >= 0 ? 'cmp' : ''; return '<g class="rg-d ' + c + '" data-reg-pick="' + r.id + '" role="button" tabindex="0" aria-label="' + esc(r.name) + '"><circle cx="' + px(r) + '" cy="' + py(r) + '" r="' + (c ? 7 : 5) + '"/><text x="' + (+px(r) + 9) + '" y="' + (+py(r) + 4) + '">' + esc(r.name) + '</text></g>'; }).join('');
     // 사주 연결: 이 사주의 용신 체계에서 방위오행이 어떤 역할인지 읽는다. 원국에 더하거나 용신을 바꾸지 않는다(참고 표시).
-    const roles = (ch.yong && ch.yong.roles) || ch.yongAll.eokbu.roles;
-    const one = r => { const t = RG.tradition(r), f = RG.fit(t.element, roles); return '<div class="rg-one ' + f.tone + '"><b>' + esc(r.name) + '</b> <span class="chip">' + esc(t.direction) + ' · ' + esc(t.element) + '</span><p class="small">' + esc(t.basis) + '</p><p class="small">' + esc(f.text) + '</p></div>'; };
+    // 해석 기준: 억부·조후는 사주마다 갈릴 수 있어서 이 사주의 앱 판정(자동)을 기본으로 하고, 직접 고를 수 있다. 병행은 두 기준을 함께 본다.
+    const rolesE = ch.yongAll.eokbu.roles, jo = ch.yongAll.johu, rolesJ = jo && jo.applicable !== false && jo.roles ? jo.roles : null, adv = M.methodAdvice(ch);
+    const autoMode = adv.verdict === '병행' ? 'both' : adv.verdict === '조후' ? 'johu' : 'eokbu';
+    let mode = ['eokbu', 'johu', 'both'].includes(REG.basis) ? REG.basis : autoMode; if (!rolesJ) mode = 'eokbu';
+    const roles = mode === 'johu' ? rolesJ : rolesE, modeName = { eokbu: '억부', johu: '조후', both: '억부·조후 병행' }[mode];
+    const bopt = (v, t, off) => '<option value="' + v + '"' + ((REG.basis === v || (v === 'auto' && !['eokbu', 'johu', 'both'].includes(REG.basis))) ? ' selected' : '') + (off ? ' disabled' : '') + '>' + esc(t) + '</option>';
+    const basisSel = '<label class="field"><span class="small">해석 기준</span><select data-reg-basis="1">' + bopt('auto', '자동 — 이 사주 권장: ' + (adv.verdict === '병행' ? '병행(억부·조후 함께)' : adv.verdict + '론')) + bopt('eokbu', '억부') + bopt('johu', '조후', !rolesJ) + bopt('both', '병행(두 기준 함께)', !rolesJ) + '</select></label><p class="small muted">' + (rolesJ ? esc(adv.why) : '이 사주는 기후가 치우치지 않아 억부 기준으로 봅니다.') + '</p>';
+    const one = r => { const t = RG.tradition(r), f = mode === 'both' ? RG.fitBasis(t.element, rolesE, rolesJ) : RG.fit(t.element, roles); return '<div class="rg-one ' + f.tone + '"><b>' + esc(r.name) + '</b> <span class="chip">' + esc(t.direction) + ' · ' + esc(t.element) + '</span><p class="small">' + esc(t.basis) + '</p><p class="small">' + esc(f.text) + '</p></div>'; };
     let body = '';
     if (home) body += one(home);
     if (cmp && (!home || cmp.id !== home.id)) body += one(cmp);
-    if (body) body = '<div class="ib-k">전통 방위오행 해석 (상징적 참고)</div>' + body + '<p class="small muted">' + esc(RG.NOTE) + '</p>';
+    if (body) body = '<div class="ib-k">전통 방위오행 해석 (상징적 참고) · 기준: ' + modeName + '</div>' + basisSel + body + '<p class="small muted">' + esc(RG.NOTE) + '</p>';
     // 사주에 맞는 방향의 지역 후보: 기준 지역에서 본 방위오행이 용신·희신인 시·군·구(거리순, 점수·순위 아님)
     let cand = '';
     const birthReg = RG.REGIONS.find(r => r.name === S.inp.city), baseReg = REG.base === 'birth' && birthReg ? birthReg : home;
     if (baseReg) {
-      const sg = RG.suggest(baseReg, roles), baseName = baseReg === birthReg ? '출생지(' + birthReg.name + ')' : home.name;
+      const sg = RG.suggestBasis(baseReg, rolesE, rolesJ, mode), baseName = baseReg === birthReg ? '출생지(' + birthReg.name + ')' : home.name;
       if (sg) {
-        const dtxt = role => sg.elements[role] ? role + ' ' + sg.elements[role] + '(' + sg.dirs[role].join('·') + '쪽)' : '';
         const chip = c => '<button type="button" class="chip rg-cand" data-reg-cand="' + c.id + '" title="비교 지역으로 선택">' + esc(c.name) + ' · ' + esc(c.direction) + ' · ' + c.distKm + 'km' + (c.near ? ' <span class="muted">(경계: ' + esc(c.near) + ')</span>' : '') + '</button>';
-        const block = (role) => {
-          const all = sg.list.filter(c => c.role === role); if (!all.length) return '';
-          const same = all.filter(c => c.sameProv), other = all.filter(c => !c.sameProv), row = (t, a) => a.length ? '<p class="small"><b>' + t + '</b> ' + a.slice(0, 6).map(chip).join('') + (a.length > 6 ? '<details class="adv"><summary>' + (a.length - 6) + '곳 더 보기</summary>' + a.slice(6, 60).map(chip).join('') + '</details>' : '') + '</p>' : '';
-          return '<div class="ib-k">' + role + ' 방향 · ' + esc(sg.elements[role]) + ' (' + esc(sg.dirs[role].join('·')) + '쪽) · ' + all.length + '곳</div>' + row('같은 시·도', same) + row('다른 시·도', other);
+        const row = (t, a) => a.length ? '<p class="small"><b>' + t + '</b> ' + a.slice(0, 6).map(chip).join('') + (a.length > 6 ? '<details class="adv"><summary>' + (a.length - 6) + '곳 더 보기</summary>' + a.slice(6, 60).map(chip).join('') + '</details>' : '') + '</p>' : '';
+        const grp = g => {
+          const same = g.list.filter(c => c.sameProv), other = g.list.filter(c => !c.sameProv);
+          const head = esc(g.title) + ' · ' + esc(g.elements.join('·')) + ' (' + esc(g.dirs.join('·')) + '쪽) · ' + g.list.length + '곳';
+          const inner = (g.note ? '<p class="small muted">' + esc(g.note) + '</p>' : '') + row('같은 시·도', same) + row('다른 시·도', other);
+          return g.collapsed ? '<details class="adv"><summary class="ib-k">' + head + '</summary>' + inner + '</details>' : '<div class="ib-k">' + head + '</div>' + inner;
         };
-        cand = '<div class="ib-k">사주에 맞는 방향의 지역 후보 (참고)</div><p class="small">' + esc(baseName) + '에서 본 방위의 오행이 이 사주의 ' + [dtxt('용신'), dtxt('희신')].filter(Boolean).join('·') + ' 쪽에 해당하는 시·군·구입니다. 점수나 순위가 아니라 방향이 맞는 후보를 거리순으로 보여 줍니다.</p>' +
-          (birthReg ? '<label class="field"><span class="small">기준</span><select data-reg-base="1"><option value="home"' + (baseReg === home ? ' selected' : '') + '>현재 거주지</option><option value="birth"' + (baseReg === birthReg ? ' selected' : '') + '>출생지(' + esc(birthReg.name) + ')</option></select></label>' : '') +
-          block('용신') + block('희신') + '<p class="small muted">이사나 이직 같은 큰 결정의 근거로 쓰지 마세요. 방위는 전통적인 상징 해석이고, 실제 생활 조건(직장·가족·비용)이 훨씬 중요합니다. 후보를 누르면 비교 지역으로 담깁니다.</p>';
+        const lead = mode === 'both' ? '억부·조후 두 기준을 함께 보아, 두 기준이 모두 맞는 방향을 먼저 보여 주고 한쪽에서만 맞는 방향은 접어 두었습니다.' : modeName + ' 기준의 용신·희신 방향입니다.';
+        cand = '<div class="ib-k">사주에 맞는 방향의 지역 후보 (참고)</div><p class="small">' + esc(baseName) + '에서 본 방위의 오행이 이 사주에 맞는 쪽에 해당하는 시·군·구입니다. ' + lead + ' 점수나 순위가 아니라 방향이 맞는 후보를 거리순으로 보여 줍니다.</p>' +
+          (birthReg ? '<label class="field"><span class="small">기준 지역</span><select data-reg-base="1"><option value="home"' + (baseReg === home ? ' selected' : '') + '>현재 거주지</option><option value="birth"' + (baseReg === birthReg ? ' selected' : '') + '>출생지(' + esc(birthReg.name) + ')</option></select></label>' : '') +
+          (sg.groups.length ? sg.groups.map(grp).join('') : '<p class="small muted">이 기준에서 맞는 방향의 시·군·구가 없습니다.</p>') + '<p class="small muted">이사나 이직 같은 큰 결정의 근거로 쓰지 마세요. 방위는 전통적인 상징 해석이고, 실제 생활 조건(직장·가족·비용)이 훨씬 중요합니다. 후보를 누르면 비교 지역으로 담깁니다.</p>';
       }
     }
     return '<section class="card"><div class="card-h"><h2>나의 운명 지도</h2><span class="note">미리보기 · 시·도 → 시·군·구 → 읍·면·동</span></div>' +
@@ -6358,6 +6366,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       '<svg class="rg-map" viewBox="0 0 340 340" role="group" aria-label="국내 주요 도시 지도">' + dots + '</svg><p class="small muted">점을 누르면 가까운 시·군·구가 ' + (home ? '비교 지역' : '현재 거주지') + '으로 선택됩니다. 외부 지도 서비스를 쓰지 않아 호출 비용이 없습니다.</p>' + body + cand + '</section>';
   }
   document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-reg]'); if (!t) return; REG[t.dataset.reg] = t.value; regSave(); readForm(); render(); });
+  document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-reg-basis]'); if (!t) return; REG.basis = ['eokbu', 'johu', 'both'].includes(t.value) ? t.value : 'auto'; regSave(); render(); });
   document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-reg-base]'); if (!t) return; REG.base = t.value === 'birth' ? 'birth' : 'home'; regSave(); render(); });
   document.addEventListener('click', ev => { const c = ev.target.closest && ev.target.closest('[data-reg-cand]'); if (!c) return; REG.cmp = c.dataset.regCand; regSave(); render(); });
   document.addEventListener('click', ev => { const t = ev.target.closest && ev.target.closest('[data-reg-pick]'); if (!t) return; const city = window.MantraRegion.get(t.dataset.regPick), id = city ? window.MantraRegion.nearestGu(city.lat, city.lon) : ''; if (!id) return; if (!REG.home) REG.home = id; else if (id !== REG.home) REG.cmp = id; regSave(); render(); });
