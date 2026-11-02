@@ -5430,6 +5430,28 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return `${t > 0 ? (h ? '덥고' : '더운') : (h ? '춥고' : '추운')}${h ? ' ' + hum : ''} 사주`;
   }
   // 조후론·억부론 중 무엇이 유리한지
+  // 억부·조후 자동 판단 아래에 병약·종격·격국을 함께 보여 준다(표시용: 흐름 점수·methodAdvice·다른 계산에는 반영하지 않음).
+  //  · 종격이 충족(또는 가능성)이면 억부·조후 판정보다 종격을 먼저 보라는 경고를 낸다 — 종격에서는 억부 용신이 정반대가 될 수 있기 때문이다.
+  //  · 네 관점(억부·조후·병약·격국, 종격이 있으면 종격)이 가리키는 오행을 모아 얼마나 합의하는지 보여 준다.
+  function adviceExtra(ch) {
+    const J = window.MantraJonggyeok, B = window.MantraByeongyak, K = window.MantraGyeokguk; if (!J || !B || !K) return '';
+    const a = M.methodAdvice(ch), j = J.analyze(M, ch), b = B.analyze(M, ch), k = K.analyze(M, ch);
+    const chip = e => `<b class="eltxt ${ECLS[e]}">${elLabel(e)}</b>`;
+    const votes = [['억부', a.eokYong]]; if (a.joYong != null) votes.push(['조후', a.joYong]);
+    if (b.table && b.table.yong != null) votes.push(['병약', b.table.yong]);
+    if (k.table && k.table.yong != null && (k.status === 'seong' || k.status === 'part')) votes.push(['격국', k.table.yong]);
+    if ((j.status === 'jin' || j.status === 'ga') && j.table) votes.push(['종격', j.table.yong]);
+    const by = {}; votes.forEach(([l, e]) => (by[e] = by[e] || []).push(l));
+    const order = Object.keys(by).sort((x, y) => by[y].length - by[x].length), top = by[order[0]].length, n = votes.length;
+    const cons = j.status === 'jin' ? '종격이 충족되면 일간을 돕는 방향(억부·병약)과 세력을 따르는 방향(종격)이 반대가 되므로, 위 오행들을 하나로 모아 합의로 읽을 수 없습니다. 종격 해석을 기준으로 보세요.' : top >= 3 ? `${n}개 관점 중 ${top}개가 같은 오행(${chip(+order[0])})을 가리켜 방향이 비교적 모입니다.` : top === 2 ? `${n}개 관점 중 2개가 같은 오행(${chip(+order[0])})을 가리키지만 나머지는 다릅니다.` : `${n}개 관점이 서로 다른 오행을 가리켜 한 가지로 단정하기 어렵습니다.`;
+    const jong = (j.status === 'jin' || j.status === 'ga') ? `<div class="warn"><b>${esc(j.headline)}</b><span>${j.status === 'jin' ? '위 억부·조후 판정보다 종격을 먼저 읽는 해석이 맞을 수 있습니다.' : '종격 가능성이 있어 위 억부·조후 판정을 그대로 받아들이기 전에 확인이 필요합니다.'} ${esc((j.text.relation[0] || ''))}</span></div>` : (j.status === 'hold' ? `<div class="warn"><span>종격 후보이나 시주를 몰라 보류 중입니다. 시주를 확인한 뒤 아래 종격·전왕격 판단을 보세요.</span></div>` : '');
+    return `${jong}<div class="ib-k">다른 관점의 의견 <span class="muted small">표시용 · 흐름 점수에는 반영되지 않음</span></div>
+      <div class="list">
+        <div class="li"><span class="k">${term('병약용신', '병약')}</span><span class="v small">${esc(b.headline)}</span><span></span></div>
+        <div class="li"><span class="k">${term('격국')}</span><span class="v small">${esc(k.headline)}</span><span></span></div>
+        <div class="li"><span class="k">관점 합의</span><span class="v small">${votes.map(([l, e]) => `${l} ${chip(e)}`).join(' · ')}<br>${cons}</span><span></span></div>
+      </div>`;
+  }
   function adviceCard(ch, compact) {
     const a = M.methodAdvice(ch), st = ch.strength;
     const opts = [['억부', '억부론 유리'], ['병행', a.agree ? '같은 방향 (병행)' : '병행 필요'], ['조후', '조후론 유리']];
@@ -5442,6 +5464,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <div class="li"><span class="k">강약 치우침</span><span class="v small">${term(st.zone)} · 나를 돕는 힘 <b class="num">${st.help.toFixed(1)}%</b> (중간 50%에서 ${a.skew.toFixed(0)}%p)</span><span></span></div>
         <div class="li"><span class="k">두 기준의 용신</span><span class="v small">${term('억부')} <b class="eltxt ${ECLS[a.eokYong]}">${elLabel(a.eokYong)}</b>${a.joYong != null ? ` · ${term('조후')} <b class="eltxt ${ECLS[a.joYong]}">${elLabel(a.joYong)}</b> (억부 기준으로는 ${a.joRole})` : ' · 조후 용신 없음'}</span><span></span></div>
       </div>
+      ${compact ? '' : adviceExtra(ch)}
       ${compact ? '' : `<p class="note">운세 흐름의 흐름 점수는 억부·조후를 이 사주의 치우침에 맞춰 섞어 계산하고, 덜 앞세운 기준을 단독으로 본 값이 흐린 막대로 함께 보입니다. 병행이면 두 기준이 모두 보완되는 시기에 흐름 점수가 가장 높아집니다.${ch.school !== want && a.verdict !== '병행' ? ` <button type="button" class="btn" data-set="school:${want}">${a.verdict} 기준으로 보기</button>` : ''}</p>`}
     </div>`;
   }
