@@ -32,18 +32,6 @@ export const REVISIONS=[
     "reason": "chapter-specific editorial review"
   },
   {
-    "id": "condition-self-1-strong-strength",
-    "from": "다들 우물쭈물할 때 \"일단 이렇게 가요\" 하고 길을 여는 사람이에요. 일이 막막한 순간에 이런 사람이 한 명 있으면 팀이 움직이고, 그 한 명이 대개 나예요.",
-    "to": "막막한 일을 첫 단계로 나누고 가능한 선택지를 제시하는 데 주도성을 활용할 수 있습니다. 팀이 실제로 움직일 수 있는지 확인하고 다른 사람의 결정을 받을 여지도 남깁니다.",
-    "reason": "chapter-specific editorial review"
-  },
-  {
-    "id": "condition-self-1-strong-practice",
-    "from": "이번 주 회의나 모임에서 결론을 말하기 전에 \"다른 생각 있는 분?\" 한마디를 먼저 던져 보세요. 대답이 없어도 괜찮아요. 물어봤다는 사실만으로 분위기가 달라지는 걸 느낄 거예요.",
-    "to": "이번 주 회의나 모임에서 결론을 말하기 전에 다른 의견을 먼저 받아보세요. 나온 의견 하나를 반영할 수 있는지 확인하고, 반영하지 못한다면 그 이유를 설명합니다.",
-    "reason": "chapter-specific editorial review"
-  },
-  {
     "id": "condition-self-1-mid-title",
     "from": "사람들이 나를 센 사람인지 순한 사람인지 헷갈려 하죠? 어떤 날은 앞에 서고, 어떤 날은 뒤에서 구경하는 사람이에요.",
     "to": "상황에 따라 앞장서거나 협력하는 방식을 조절할 구간입니다. 역할을 바꾸더라도 내 의견을 말할 시점은 놓치지 않는 것이 과제입니다.",
@@ -77,12 +65,6 @@ export const REVISIONS=[
     "id": "condition-self-2-weak-title",
     "from": "시동 거는 데 한참 걸리죠? 대신 일단 달리기 시작하면 연비가 아주 좋은 차예요.",
     "to": "시작의 부담을 줄이고 익숙해질 시간을 확보하는 쪽을 살펴봅니다. 속도가 늦다는 이유만으로 능력이나 성과를 평가하지 않습니다.",
-    "reason": "chapter-specific editorial review"
-  },
-  {
-    "id": "condition-self-2-weak-risk",
-    "from": "생각만 하다가 기회가 지나가 버려서 속상한 적이 있을 거예요. 시작이 늦은 것뿐인데 그걸 능력 부족으로 착각하면 다음 시작이 더 어려워져요.",
-    "to": "검토가 길어져 시도할 시점을 놓치면 다음 시작까지 더 부담스러워질 수 있습니다. 시작에 걸린 시간과 실제 업무 수행 능력을 같은 것으로 판단하지 마세요.",
     "reason": "chapter-specific editorial review"
   },
   {
@@ -248,12 +230,6 @@ export const REVISIONS=[
     "reason": "chapter-specific editorial review"
   },
   {
-    "id": "condition-self-14-strong-strength",
-    "from": "규칙과 기준이 분명한 곳에서는 안정적으로 실력을 보여요. 책임이 명확하면 누구보다 잘 해내고, 그래서 구조가 잡힌 조직에서 신뢰를 빠르게 쌓아요.",
-    "to": "규칙과 책임이 분명한 업무에서 맡은 결과를 일정하게 유지하는 데 힘을 써볼 수 있습니다. 기준을 지킨 과정과 실제 결과를 기록하면 다음 업무를 합의할 자료가 됩니다.",
-    "reason": "chapter-specific editorial review"
-  },
-  {
     "id": "condition-self-14-mid-title",
     "from": "어수선한 분위기에서도 금방 중심을 잡는 편이죠? 정말 위험한 건 기준이 아예 없는 곳이에요.",
     "to": "어수선한 상황을 조정할 때도 최소한의 기준은 필요합니다. 담당자와 마감이 정해지지 않은 환경에서는 그 두 항목부터 확인합니다.",
@@ -269,12 +245,6 @@ export const REVISIONS=[
     "id": "condition-self-15-weak-title",
     "from": "위기에는 생각보다 몸이 먼저 움직이죠? 일단 움직이고 보는 타입이에요.",
     "to": "급할 때 먼저 움직이는 방식이 확인 누락으로 이어지는지 살펴봅니다. 행동 전에 사람·일정·담당 중 우선 확인할 항목을 정합니다.",
-    "reason": "chapter-specific editorial review"
-  },
-  {
-    "id": "condition-self-16-strong-strength",
-    "from": "승부욕이 에너지가 되어서 목표가 보이면 누구보다 빨리 따라잡아요. 경쟁이 있는 곳에서 실력이 훌쩍 늘고, 라이벌이 있는 날이 오히려 일이 잘돼요.",
-    "to": "비교할 목표가 분명하면 연습량이나 작업 속도를 조절하는 동기로 써볼 수 있습니다. 상대를 이겼는지보다 이전의 내 결과에서 무엇을 개선했는지 확인합니다.",
     "reason": "chapter-specific editorial review"
   },
   {
@@ -329,18 +299,6 @@ export const REVISIONS=[
     "id": "condition-self-20-weak-reality",
     "from": "정해진 틀에서 벗어날 때 오히려 숨이 쉬어져요. 변화가 불안하기보다 설레는 사람이라, 전환기에 새 길이 열려요. 틀이 끝나는 날 서운함보다 후련함이 먼저 올라오는 경험을 한 적이 있을 거예요.",
     "to": "정해진 역할이 끝나면서 새로운 방식을 선택할 여지가 생기는 장면을 가정해 보세요. 실제로 계획을 바꿀 수 있는지는 계약 기간과 생활비, 함께 일하는 사람의 일정까지 확인해야 합니다.",
-    "reason": "chapter-specific editorial review"
-  },
-  {
-    "id": "condition-self-22-strong-strength",
-    "from": "스스로 시작하고 끝까지 밀어붙이는 힘이 가장 큰 무기예요. 방향이 정해지면 가장 빠르게 나가는 사람이고, 그 속도가 팀의 엔진이 돼요.",
-    "to": "스스로 정한 목표를 첫 작업으로 나누고 실행을 시작하는 데 힘을 써볼 수 있습니다. 혼자 정할 일과 다른 사람의 동의가 필요한 일을 구분하면 추진 과정을 공유하기 쉽습니다.",
-    "reason": "chapter-specific editorial review"
-  },
-  {
-    "id": "condition-self-22-weak-strength",
-    "from": "팀워크와 배려가 가장 큰 무기예요. 주변을 살피고 필요한 곳을 채워 주는 능력이 있고, 곁에 있으면 마음이 편해지는 사람이에요.",
-    "to": "주변의 요구를 듣고 빠진 역할을 찾아보는 태도는 공동 작업에 활용할 수 있습니다. 다만 빈자리를 모두 채우기보다 맡을 범위를 합의해야 도움이 오래 이어집니다.",
     "reason": "chapter-specific editorial review"
   },
   {
@@ -455,12 +413,6 @@ export const REVISIONS=[
     "id": "condition-wealth-9-weak-title",
     "from": "정이 많아서 부탁을 잘 받죠? 도와주고 나서 연락이 끊기는 일이 가장 마음 아파요.",
     "to": "도와줄지 결정할 때는 돌려받는 조건과 감당할 한도를 함께 봅니다. 관계의 좋고 나쁨을 상대가 돈을 갚을 능력과 같은 것으로 보지 않습니다.",
-    "reason": "chapter-specific editorial review"
-  },
-  {
-    "id": "condition-wealth-11-strong-strength",
-    "from": "성과가 커질 때 그 기회를 놓치지 않고 규모를 키울 줄 아는 힘이 있어요. 판을 키우는 감각이 뛰어난 사람이고, 흐름을 탈 때는 누구보다 빨라요.",
-    "to": "성과를 본 뒤 다음 제안의 규모를 조정하는 데 관심을 활용해 볼 수 있습니다. 호응과 실제 주문, 주문과 실제 입금은 구분해서 확인해야 합니다.",
     "reason": "chapter-specific editorial review"
   },
   {
@@ -671,12 +623,6 @@ export const REVISIONS=[
     "id": "condition-remedy-2-strong-reality",
     "from": "운동을 시작하면 일주일 계획을 빡빡하게 짜요. 계획대로 하면 뿌듯한데, 하루 빠뜨리면 '이번 주는 망했네' 하고 아예 접어 버려요. 월요일부터 완벽하게 시작했다가 수요일에 한 번 빠지고 다음 주로 미룬 적이 몇 번 있을 거예요.",
     "to": "일주일 계획을 빽빽하게 세운 뒤 하루를 빠뜨렸다는 이유로 나머지 일정도 미루는 상황을 가정해 봅니다. 계획을 지킨 횟수만 세기보다 빠진 뒤 돌아올 최소 분량을 정해 보세요.",
-    "reason": "chapter-specific editorial review"
-  },
-  {
-    "id": "condition-remedy-8-strong-strength",
-    "from": "스스로 정한 목표를 끝까지 밀고 나가는 힘이 가장 큰 무기예요. 방향이 맞을 때는 누구보다 빠르게 도착해요.",
-    "to": "정한 목표를 첫 행동으로 옮기는 데 추진력을 활용해 볼 수 있습니다. 속도보다 목표에 맞는 결과를 냈는지 확인하면 같은 수고를 반복하는 일을 줄일 수 있습니다.",
     "reason": "chapter-specific editorial review"
   },
   {
