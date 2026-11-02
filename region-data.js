@@ -68,7 +68,19 @@
     return out;
   }
 
-  var api = { VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
+  // 관리자가 등록한 값을 합친다. 형식이 맞고 출처·기준일이 있는 항목만 받는다(없으면 기존대로 자료 부족).
+  function merge(doc) {
+    if (!doc || typeof doc.items !== 'object' || !doc.items) return 0; var n = 0;
+    Object.keys(doc.items).forEach(function (id) {
+      var r = BY[id]; if (!r) return;
+      Object.keys(doc.items[id]).forEach(function (k) {
+        var f = doc.items[id][k]; if (FACT_KEYS.indexOf(k) < 0 || !f || typeof f.value !== 'string' || !f.source || !f.source.name || typeof f.source.url !== 'string' || f.source.url.indexOf('https://') !== 0 || !f.updated) return;
+        r.facts[k] = f.value; r.sources.push({ fact: k, name: f.source.name, url: f.source.url, updated: f.updated }); r.updated = !r.updated || f.updated > r.updated ? f.updated : r.updated; n++;
+      });
+    });
+    return n;
+  }
+  var api = { merge: merge, VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
   G.MantraRegion = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

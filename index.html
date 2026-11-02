@@ -6295,8 +6295,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const REG_KEY = 'mantra-region-v1';
   const REG = (() => { try { const v = JSON.parse(localStorage.getItem(REG_KEY) || '{}'); return { home: v.home || '', cmp: v.cmp || '' }; } catch (e) { return { home: '', cmp: '' }; } })();
   const regSave = () => { try { localStorage.setItem(REG_KEY, JSON.stringify(REG)); } catch (e) { } };
+  // 관리자가 출처와 함께 등록한 지역 자료를 한 번만 받아 합친다(실패하면 기존대로 자료 부족).
+  let regLoaded = false;
+  function regLoad() { if (regLoaded || !window.MantraRegion) return; regLoaded = true; fetch('/api/region').then(r => r.ok ? r.json() : null).then(d => { if (d && window.MantraRegion.merge(d)) render(); }).catch(() => { }); }
+  const srcOf = (r, k) => (r.sources || []).find(q => q.fact === k);
   function regionCard(sel, du, se, curY) {
     const RG = window.MantraRegion, LI = window.MantraLuckInterpret; if (!RG || !LI) return '';
+    regLoad();
     const home = RG.get(REG.home), cmp = RG.get(REG.cmp), ch = S.ch;
     const opts = v => '<option value="">선택 안 함</option>' + RG.REGIONS.map(r => '<option value="' + r.id + '"' + (r.id === v ? ' selected' : '') + '>' + esc(r.name) + ' (' + esc(r.admin) + ')</option>').join('');
     const px = r => ((r.lon - 125.8) / 4.6 * 300).toFixed(0), py = r => ((38.6 - r.lat) / 5.8 * 330).toFixed(0);
@@ -6307,7 +6312,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     else if (sel && sel.kind === 'seun') { const q = M.seunRange(ch, sel.Y, sel.Y)[0]; if (q) { item = q; lab = sel.Y + '년 세운'; } }
     let linkHTML = '';
     if (home && item) { try { const r = LI.build(M, ch, item, kind, interpCtx(item, kind)); const lk = RG.link(home, r.topAreas, lab); linkHTML = lk.length ? '<div class="ib-k">' + esc(lab) + '의 주제와 ' + esc(home.name) + '의 환경 자료</div><ul class="ib-ul">' + lk.map(l => '<li>' + esc(l.text) + '</li>').join('') + '</ul>' : ''; } catch (e) { } }
-    const factsTbl = r => '<table class="tl-t"><tbody>' + RG.facts(r).map(f => '<tr><td>' + esc(f.label) + '</td><td>' + (f.value == null ? '<span class="muted">자료 부족</span>' : esc(f.value)) + '</td></tr>').join('') + '</tbody></table>';
+    const factsTbl = r => '<table class="tl-t"><tbody>' + RG.facts(r).map(f => '<tr><td>' + esc(f.label) + '</td><td>' + (f.value == null ? '<span class="muted">자료 부족</span>' : esc(f.value) + (srcOf(r, f.key) ? ' <span class="muted small">· <a href="' + esc(srcOf(r, f.key).url) + '" target="_blank" rel="noopener noreferrer">' + esc(srcOf(r, f.key).name) + '</a> ' + esc(srcOf(r, f.key).updated) + '</span>' : '')) + '</td></tr>').join('') + '</tbody></table>';
     const trad = r => { const t = RG.tradition(r); return '<p class="small"><b>' + esc(r.name) + '</b> — ' + esc(t.basis) + '</p>'; };
     let body = '';
     if (home) body += '<div class="ib-k">' + esc(home.name) + ' · 현실 환경 데이터</div>' + factsTbl(home) + '<p class="small muted">공식 통계의 출처와 갱신 시점을 확인한 값만 표시합니다. 등록되지 않은 항목은 임의로 채우지 않습니다.</p>' + linkHTML;
