@@ -59,6 +59,12 @@ ok(Object.keys(tops).length >= 4, '사주가 달라도 1위가 거의 같음(' +
 { const c = charts[1], near = { ...spots[1], id: 'near', lat: base.lat + 0.1, lon: base.lon }, far = { ...spots[1], id: 'far', lat: base.lat + 2, lon: base.lon }, r = WS.rank(M, c, [near, far], base, 'general'); const n = r.items.find(x => x.id === 'near'), f = r.items.find(x => x.id === 'far'); ok(n.parts.dist > f.parts.dist && n.direction === f.direction, '가까운 장소의 거리 점수가 더 높아야 함'); }
 // 비활성 장소 제외·빈 목록
 { const c = charts[2], r = WS.rank(M, c, spots.map((s, i) => ({ ...s, on: i % 2 === 0 })), base, 'wealth'); ok(r.items.length === 20, '비활성 장소 제외'); ok(WS.rank(M, c, [], base, 'wealth').items.length === 0, '빈 목록'); ok(WS.rank(M, c, spots, base, 'zzz').wish.id === 'general', '알 수 없는 소원 분야는 종합'); }
+// 거주지 후보 순위: 점수 = round((80*방위 + 20*거리)/100), 내림차순, 후보를 만들지 않음, 원국 불변
+{ const c = charts[3], b2 = RG.get('jeonju'), sg = RG.suggestBasis(b2, c.yongAll.eokbu.roles, null, 'eokbu'); const cands = sg ? sg.groups.reduce((x, g) => x.concat(g.list), []) : [];
+  const r = WS.rankCandidates(M, c, cands.concat(cands.slice(0, 3)), { mode: 'eokbu' });
+  ok(r.items.length === new Set(cands.map(x => x.id)).size, '후보 중복 제거·개수'); ok(r.weights.dir + r.weights.dist === 100, '거주지 가중치 합');
+  r.items.forEach((x, i) => { ok(x.rank === i + 1 && (i === 0 || r.items[i - 1].score >= x.score), '거주지 순위 정렬'); ok(Math.round((80 * x.parts.dir + 20 * x.parts.dist) / 100) === x.score, '거주지 총점 계산'); ok(cands.some(y => y.id === x.id), '새 후보가 생김'); });
+  ok(WS.rankCandidates(M, c, [], {}).items.length === 0, '빈 후보'); }
 // 불변식
 charts.slice(0, 20).forEach((c, i) => ok(JSON.stringify([c.pillars, c.weights, c.yongAll, c.strength]) === snaps[i], '명당 분석이 원국을 바꿈'));
 ok(JSON.stringify(WS.rank(M, charts[0], spots, base, 'wealth')) === JSON.stringify(WS.rank(M, charts[0], spots, base, 'wealth')), '같은 입력 다른 결과'); ok(netCalls === 0, 'AI·네트워크 호출 ' + netCalls);

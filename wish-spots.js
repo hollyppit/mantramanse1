@@ -90,5 +90,19 @@
     return { version: VERSION, wish: { id: w.id, name: w.name, element: wEl ? EL[wEl.el] : null, label: wEl ? wEl.label : null }, base: { name: base.name || '기준 위치', lat: base.lat, lon: base.lon }, weights: W, items: items,
       note: '점수는 이 앱의 해석 모델에서 장소끼리 비교하기 위한 상대값(0~100)이며 확률이나 효과를 뜻하지 않습니다. 방위오행은 전통적인 상징 해석입니다.' };
   }
-  G.MantraWishSpots = { VERSION: VERSION, rank: rank, validateSpot: validateSpot, WISH: WISH, TYPES: TYPES, WEIGHTS: W, ID_RE: ID_RE };
+  // 거주지 후보 순위: 이미 고른 후보(시·군·구)를 방위 적합도 80 + 근접성 20으로 점수화한다. 후보를 새로 만들지 않는다.
+  var RW = { dir: 80, dist: 20 };
+  function rankCandidates(M, ch, cands, opts) {
+    opts = opts || {}; var RR = G.MantraRegionReading; if (!RR) throw new Error('region-reading.js 가 필요합니다');
+    var seen = {}, items = [];
+    (cands || []).forEach(function (c) {
+      if (seen[c.id]) return; seen[c.id] = 1;
+      var E = EL.indexOf(c.element), a = RR.analyze(M, ch, E, opts.mode), dir = Math.round(clamp(50 + a.net * 22, 0, 100)), ds = distScore(c.distKm);
+      items.push({ id: c.id, name: c.name, direction: c.direction, element: c.element, near: c.near || null, distKm: c.distKm, sameProv: !!c.sameProv, role: c.role || null, tone: a.tone, parts: { dir: dir, dist: ds }, score: Math.round((RW.dir * dir + RW.dist * ds) / 100) });
+    });
+    items.sort(function (x, y) { return y.score - x.score || x.distKm - y.distKm || (x.name < y.name ? -1 : 1); });
+    items.forEach(function (it, i) { it.rank = i + 1; });
+    return { weights: RW, items: items, note: '점수는 이 앱의 해석 모델에서 후보끼리 비교하기 위한 상대값(0~100)입니다. 방위 적합도가 같은 방향끼리는 가까운 곳이 앞섭니다.' };
+  }
+  G.MantraWishSpots = { VERSION: VERSION, rank: rank, rankCandidates: rankCandidates, RESIDENCE_WEIGHTS: RW, validateSpot: validateSpot, WISH: WISH, TYPES: TYPES, WEIGHTS: W, ID_RE: ID_RE };
 })(typeof window !== 'undefined' ? window : globalThis);

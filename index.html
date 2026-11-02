@@ -6601,7 +6601,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return '<div class="ws">' + head + lead + top.map(item).join('') + (more.length ? '<details class="adv"><summary>' + more.length + '곳 더 보기</summary>' + more.map(item).join('') + '</details>' : '') + '<p class="small muted">' + esc(r.note) + ' 점수 구성: 방위 적합도 40 · 소원-방위 적합도 30 · 분야 태그 20 · 거리 10. 장소 정보는 등록 시점의 출처 기준이므로 방문 전에 이용 안내를 확인하세요.</p></div>';
   }
   document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-ws-wish]'); if (!t) return; WSEL.wish = t.value; try { localStorage.setItem(WSEL_KEY, JSON.stringify(WSEL)); } catch (e) { } render(); });
-  { const st = document.createElement('style'); st.textContent = '.ws{margin-top:10px}.ws-i{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0}.ws-i p{margin:3px 0}.ws-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.ws-rk{display:inline-flex;min-width:22px;height:22px;border-radius:11px;background:var(--accent);color:#fff;font-size:.78rem;font-weight:700;align-items:center;justify-content:center}.ws-sc{margin-left:auto;font-weight:700}.ws-sc small{font-weight:400;font-size:.7rem}'; document.head.appendChild(st); }
+  { const st = document.createElement('style'); st.textContent = '.ws{margin-top:10px}.ws-i{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0}.ws-i p{margin:3px 0}.ws-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.ws-rk{display:inline-flex;min-width:22px;height:22px;border-radius:11px;background:var(--accent);color:#fff;font-size:.78rem;font-weight:700;align-items:center;justify-content:center}.ws-sc{margin-left:auto;font-weight:700}.ws-sc small{font-weight:400;font-size:.7rem}.rg-rk{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:4px 0;font:inherit;color:inherit;cursor:pointer}.rg-rk-n{display:flex;flex-direction:column;min-width:0;flex:1}.rg-rk-n small{font-size:.74rem}'; document.head.appendChild(st); }
   function regionCard(sel, du, se, curY) {
     rrLoad();
     const RG = window.MantraRegion, LI = window.MantraLuckInterpret; if (!RG || !LI || window.MANTRA_FLAGS.region === false) return '';
@@ -6636,10 +6636,19 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
           const inner = (g.note ? '<p class="small muted">' + esc(g.note) + '</p>' : '') + row('같은 시·도', same) + row('다른 시·도', other);
           return g.collapsed ? '<details class="adv"><summary class="ib-k">' + head + '</summary>' + inner + '</details>' : '<div class="ib-k">' + head + '</div>' + inner;
         };
+        // 거주지 후보 점수·순위(방위 적합도 80 + 근접성 20). 새 후보를 만들지 않고 위에서 고른 후보만 점수를 매긴다.
+        let rankHtml = '';
+        if (rrOn() && window.MantraWishSpots && window.MantraWishSpots.rankCandidates && sg.groups.length) {
+          try {
+            const rk = window.MantraWishSpots.rankCandidates(M, S.ch, sg.groups.reduce((a, g) => a.concat(g.list), []), { mode: rrModeSel() });
+            const ri = x => '<button type="button" class="rg-rk ' + (x.tone ? 'rr-' + x.tone : '') + '" data-reg-cand="' + x.id + '" title="비교 지역으로 선택"><span class="ws-rk">' + x.rank + '</span><span class="rg-rk-n"><b>' + esc(x.name) + '</b><small>' + esc(x.direction) + ' · ' + esc(x.element) + ' · ' + x.distKm + 'km' + (x.near ? ' (경계: ' + esc(x.near) + ')' : '') + (x.sameProv ? ' · 같은 시·도' : '') + '</small><small class="muted">방위 ' + x.parts.dir + ' · 거리 ' + x.parts.dist + '</small></span><span class="ws-sc">' + x.score + '<small>점</small></span></button>';
+            rankHtml = '<div class="ib-k">거주지 후보 순위</div><p class="small">위 후보를 방위 적합도(80)와 기준 지역에서의 가까움(20)으로 점수 매긴 순서입니다. 누르면 비교 지역으로 담깁니다.</p>' + rk.items.slice(0, 15).map(ri).join('') + (rk.items.length > 15 ? '<details class="adv"><summary>' + Math.min(rk.items.length - 15, 45) + '곳 더 보기</summary>' + rk.items.slice(15, 60).map(ri).join('') + '</details>' : '') + '<p class="small muted">' + esc(rk.note) + '</p>';
+          } catch (e) { rankHtml = ''; }
+        }
         const lead = mode === 'both' ? '억부·조후 두 기준을 함께 보아, 두 기준이 모두 맞는 방향을 먼저 보여 주고 한쪽에서만 맞는 방향은 접어 두었습니다.' : modeName + ' 기준의 용신·희신 방향입니다.';
-        cand = '<div class="ib-k">사주에 맞는 방향의 지역 후보 (참고)</div><p class="small">' + esc(baseName) + '에서 본 방위의 오행이 이 사주에 맞는 쪽에 해당하는 시·군·구입니다. ' + lead + ' 점수나 순위가 아니라 방향이 맞는 후보를 거리순으로 보여 줍니다.' + (rrOn() ? ' 월령·한난조습·상생상극까지 함께 보아 맞지 않는 쪽으로 읽히는 방향은 후보에서 뺐습니다.' : '') + '</p>' +
+        cand = '<div class="ib-k">사주에 맞는 방향의 지역 후보 (참고)</div><p class="small">' + esc(baseName) + '에서 본 방위의 오행이 이 사주에 맞는 쪽에 해당하는 시·군·구입니다. ' + lead + ' ' + (rankHtml ? '아래에 점수 순위로, 그 밑에 방향별로 정리했습니다.' : '점수나 순위가 아니라 방향이 맞는 후보를 거리순으로 보여 줍니다.') + (rrOn() ? ' 월령·한난조습·상생상극까지 함께 보아 맞지 않는 쪽으로 읽히는 방향은 후보에서 뺐습니다.' : '') + '</p>' +
           (birthReg ? '<label class="field"><span class="small">기준 지역</span><select data-reg-base="1"><option value="home"' + (baseReg === home ? ' selected' : '') + '>현재 거주지</option><option value="birth"' + (baseReg === birthReg ? ' selected' : '') + '>출생지(' + esc(birthReg.name) + ')</option></select></label>' : '') +
-          (sg.groups.length ? sg.groups.map(grp).join('') : '<p class="small muted">이 기준에서 맞는 방향의 시·군·구가 없습니다.</p>') + '<p class="small muted">이사나 이직 같은 큰 결정의 근거로 쓰지 마세요. 방위는 전통적인 상징 해석이고, 실제 생활 조건(직장·가족·비용)이 훨씬 중요합니다. 후보를 누르면 비교 지역으로 담깁니다.</p>';
+          (sg.groups.length ? (rankHtml ? rankHtml + '<details class="adv"><summary>방향별로 보기</summary>' + sg.groups.map(grp).join('') + '</details>' : sg.groups.map(grp).join('')) : '<p class="small muted">이 기준에서 맞는 방향의 시·군·구가 없습니다.</p>') + '<p class="small muted">이사나 이직 같은 큰 결정의 근거로 쓰지 마세요. 방위는 전통적인 상징 해석이고, 실제 생활 조건(직장·가족·비용)이 훨씬 중요합니다. 후보를 누르면 비교 지역으로 담깁니다.</p>';
       }
     }
     return '<section class="card"><div class="card-h"><h2>나의 운명 지도</h2><span class="note">미리보기 · 시·도 → 시·군·구 → 읍·면·동</span></div>' +
