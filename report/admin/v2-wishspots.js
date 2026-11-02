@@ -31,31 +31,29 @@
   var selIds = function () { return Object.keys(S.sel).filter(function (k) { return S.sel[k]; }); };
   function drawList() {
     var n = selIds().length;
-    $('#wsBody').innerHTML = '<div class="card"><div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="wsNew">새 장소 등록</button><button class="btn" id="wsImp">JSON 일괄 등록·게시</button><button class="btn" id="wsAll">초안 전체 게시</button><button class="btn" id="wsBp"' + (n ? '' : ' disabled') + '>선택 게시 (' + n + ')</button><button class="btn" id="wsBu"' + (n ? '' : ' disabled') + '>선택 게시 취소</button><span class="muted">' + ids().length + '곳</span></div>' +
+    $('#wsBody').innerHTML = '<div class="card"><div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="wsNew">새 장소 등록</button><button class="btn" id="wsImp">JSON 일괄 등록·게시</button><button class="btn" id="wsSeed">기본 목록 54곳 불러와 게시</button><button class="btn" id="wsAll">초안 전체 게시</button><button class="btn" id="wsBp"' + (n ? '' : ' disabled') + '>선택 게시 (' + n + ')</button><button class="btn" id="wsBu"' + (n ? '' : ' disabled') + '>선택 게시 취소</button><span class="muted">' + ids().length + '곳</span></div>' +
       '<div style="overflow:auto;max-height:300px;margin-top:8px"><table style="width:100%;font-size:.84rem"><thead><tr><th style="width:26px"><input type="checkbox" id="wsCkAll" title="전체 선택"></th><th>ID</th><th>이름</th><th>유형</th><th>태그</th><th>확인일</th><th>상태</th></tr></thead><tbody>' + (ids().length ? ids().map(function (k) { var it = S.doc.spots[k], f = it.fields; return '<tr data-id="' + esc(k) + '" style="cursor:pointer' + (S.cur === k ? ';background:rgba(255,255,255,.07)' : '') + '"><td><input type="checkbox" data-ck="' + esc(k) + '"' + (S.sel[k] ? ' checked' : '') + '></td><td>' + esc(k) + '</td><td>' + esc(f.name) + (f.on === false ? ' <span style="color:#FF8A78">비활성</span>' : '') + '</td><td>' + esc(WS.TYPES[f.type]) + '</td><td>' + esc(f.tags.map(function (t) { return (WS.WISH.filter(function (w) { return w.id === t; })[0] || {}).name; }).join('·')) + '</td><td>' + esc(f.source.checked) + '</td><td>' + ST[it.status] + '</td></tr>'; }).join('') : '<tr><td colspan="7" class="muted">등록된 장소가 없습니다. “새 장소 등록”으로 출처가 확인된 장소를 추가하세요.</td></tr>') + '</tbody></table></div><div id="wsEd" style="margin-top:10px"></div></div>';
     $$('input[data-ck]').forEach(function (cb) { cb.onclick = function (e) { e.stopPropagation(); S.sel[cb.dataset.ck] = cb.checked; var m = selIds().length; $('#wsBp').disabled = $('#wsBu').disabled = !m; $('#wsBp').textContent = '선택 게시 (' + m + ')'; }; });
     $('#wsCkAll').onclick = function (e) { var v = e.target.checked; ids().forEach(function (k) { S.sel[k] = v; }); drawList(); };
     $$('tr[data-id]').forEach(function (tr) { tr.onclick = function () { S.cur = tr.dataset.id; S.isNew = false; drawList(); }; });
     var bulk = function (op) { var a = selIds(); if (!a.length || !confirm(a.length + '곳을 ' + (op === 'publish' ? '게시' : '게시 취소') + '합니다.')) return; call('PUT', '', { kind: 'spot', action: 'bulk', ids: a, op: op }).then(function (d) { S.sel = {}; d._ok ? load((op === 'publish' ? '게시 ' : '게시 취소 ') + d.done + '곳' + (d.failed.length ? ' · 실패 ' + d.failed.length + '곳: ' + d.failed.slice(0, 2).map(function (x) { return x.id + ' ' + x.error; }).join(' / ') : '')) : fail(d); }); };
     $('#wsBp').onclick = function () { bulk('publish'); }; $('#wsBu').onclick = function () { bulk('unpublish'); };
+    var doImport = function (arr) {
+      if (!Array.isArray(arr) || !arr.length || arr.length > 200) return msg('장소 배열(1~200개)이어야 합니다', true);
+        var bad = arr.map(function (s) { var v = WS.validateSpot(s, true); return v.error ? (s.name || s.id) + ': ' + v.error : ''; }).filter(Boolean);
+        if (bad.length) return msg('검증 실패 ' + bad.length + '건 — ' + bad.slice(0, 2).join(' / '), true);
+        var fresh = arr.filter(function (s) { return !S.doc.spots[s.id]; });
+        if (!confirm(arr.length + '곳 중 새로 ' + fresh.length + '곳을 등록하고 바로 게시합니다(이미 있는 ID는 건너뛰고, 이미 초안인 항목도 함께 게시). 공개 스위치가 꺼져 있으면 사용자에게는 보이지 않습니다.')) return;
+        var ok = 0, err = [], chain = Promise.resolve();
+        fresh.forEach(function (s) { chain = chain.then(function () { var id = s.id, fl = Object.assign({}, s); delete fl.id; return call('PUT', '', { kind: 'spot', id: id, action: 'create', fields: fl }).then(function (d) { d._ok ? ok++ : err.push(id + ' ' + d.error); }); }); });
+        chain.then(function () { return call('PUT', '', { kind: 'spot', action: 'bulk', ids: arr.map(function (s) { return s.id; }), op: 'publish' }); }).then(function (d) { load('등록 ' + ok + '곳' + (err.length ? '(실패 ' + err.length + '곳: ' + err.slice(0, 2).join(' / ') + ')' : '') + ' · 게시 ' + (d && d.done != null ? d.done : 0) + '곳' + (d && d.failed && d.failed.length ? ' · 게시 실패 ' + d.failed.length + '곳' : '')); });
+    };
     $('#wsImp').onclick = function () {
       var inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
-      inp.onchange = function () {
-        var f = inp.files[0]; if (!f) return;
-        f.text().then(function (t) {
-          var arr; try { arr = JSON.parse(t); } catch (e) { return msg('JSON을 읽을 수 없습니다', true); }
-          if (!Array.isArray(arr) || !arr.length || arr.length > 200) return msg('장소 배열(1~200개)이어야 합니다', true);
-          var bad = arr.map(function (s) { var v = WS.validateSpot(s, true); return v.error ? (s.name || s.id) + ': ' + v.error : ''; }).filter(Boolean);
-          if (bad.length) return msg('검증 실패 ' + bad.length + '건 — ' + bad.slice(0, 2).join(' / '), true);
-          var fresh = arr.filter(function (s) { return !S.doc.spots[s.id]; });
-          if (!confirm(arr.length + '곳 중 새로 ' + fresh.length + '곳을 등록하고 바로 게시합니다(이미 있는 ID는 건너뛰고, 이미 초안인 항목도 함께 게시). 공개 스위치가 꺼져 있으면 사용자에게는 보이지 않습니다.')) return;
-          var ok = 0, err = [], chain = Promise.resolve();
-          fresh.forEach(function (s) { chain = chain.then(function () { var id = s.id, fl = Object.assign({}, s); delete fl.id; return call('PUT', '', { kind: 'spot', id: id, action: 'create', fields: fl }).then(function (d) { d._ok ? ok++ : err.push(id + ' ' + d.error); }); }); });
-          chain.then(function () { return call('PUT', '', { kind: 'spot', action: 'bulk', ids: arr.map(function (s) { return s.id; }), op: 'publish' }); }).then(function (d) { load('등록 ' + ok + '곳' + (err.length ? '(실패 ' + err.length + '곳: ' + err.slice(0, 2).join(' / ') + ')' : '') + ' · 게시 ' + (d && d.done != null ? d.done : 0) + '곳' + (d && d.failed && d.failed.length ? ' · 게시 실패 ' + d.failed.length + '곳' : '')); });
-        });
-      };
+      inp.onchange = function () { var f = inp.files[0]; if (!f) return; f.text().then(function (t) { var arr; try { arr = JSON.parse(t); } catch (e) { return msg('JSON을 읽을 수 없습니다', true); } doImport(arr); }); };
       inp.click();
     };
+    $('#wsSeed').onclick = function () { fetch('wish-spots-seed.json').then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(doImport, function () { msg('기본 목록을 불러오지 못했습니다', true); }); };
     $('#wsAll').onclick = function () { var a = ids().filter(function (k) { return S.doc.spots[k].status !== 'published'; }); if (!a.length) return msg('게시할 초안이 없습니다'); if (!confirm('초안·미게시 ' + a.length + '곳을 모두 게시합니다.')) return; call('PUT', '', { kind: 'spot', action: 'bulk', ids: a.slice(0, 200), op: 'publish' }).then(function (d) { d._ok ? load('게시 ' + d.done + '곳' + (d.failed.length ? ' · 실패 ' + d.failed.length + '곳' : '')) : fail(d); }); };
     $('#wsNew').onclick = function () { S.isNew = true; S.cur = null; editor({ name: '', lat: '', lon: '', type: 'mountain', tags: ['general'], source: { name: '', url: 'https://', checked: new Date().toISOString().slice(0, 10) }, note: '', on: true }, ''); };
     if (S.cur && S.doc.spots[S.cur]) editor(S.doc.spots[S.cur].fields, S.cur);

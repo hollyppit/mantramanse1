@@ -1,0 +1,958 @@
+[
+ {
+  "id": "seed-01",
+  "name": "지리산",
+  "lat": 35.3369,
+  "lon": 127.7306,
+  "type": "mountain",
+  "tags": [
+   "health",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 지리산",
+   "url": "https://ko.wikipedia.org/wiki/%EC%A7%80%EB%A6%AC%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-02",
+  "name": "한라산",
+  "lat": 33.3617,
+  "lon": 126.5292,
+  "type": "mountain",
+  "tags": [
+   "general",
+   "health"
+  ],
+  "source": {
+   "name": "위키백과 한라산",
+   "url": "https://ko.wikipedia.org/wiki/%ED%95%9C%EB%9D%BC%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-03",
+  "name": "낙산사",
+  "lat": 38.1247,
+  "lon": 128.6281,
+  "type": "temple",
+  "tags": [
+   "general",
+   "love"
+  ],
+  "source": {
+   "name": "위키백과 낙산사",
+   "url": "https://ko.wikipedia.org/wiki/%EB%82%99%EC%82%B0%EC%82%AC",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-04",
+  "name": "해인사",
+  "lat": 35.8011,
+  "lon": 128.0983,
+  "type": "temple",
+  "tags": [
+   "study",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 해인사",
+   "url": "https://ko.wikipedia.org/wiki/%ED%95%B4%EC%9D%B8%EC%82%AC",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-05",
+  "name": "불국사",
+  "lat": 35.7903,
+  "lon": 129.3319,
+  "type": "temple",
+  "tags": [
+   "general",
+   "health"
+  ],
+  "source": {
+   "name": "위키백과 불국사",
+   "url": "https://ko.wikipedia.org/wiki/%EB%B6%88%EA%B5%AD%EC%82%AC",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-06",
+  "name": "석굴암",
+  "lat": 35.7951,
+  "lon": 129.3496,
+  "type": "temple",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 석굴암",
+   "url": "https://ko.wikipedia.org/wiki/%EC%84%9D%EA%B5%B4%EC%95%94",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-07",
+  "name": "향일암",
+  "lat": 34.5914,
+  "lon": 127.8028,
+  "type": "temple",
+  "tags": [
+   "wealth",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 향일암",
+   "url": "https://ko.wikipedia.org/wiki/%ED%96%A5%EC%9D%BC%EC%95%94",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-08",
+  "name": "법주사",
+  "lat": 36.5425,
+  "lon": 127.8339,
+  "type": "temple",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 법주사",
+   "url": "https://ko.wikipedia.org/wiki/%EB%B2%95%EC%A3%BC%EC%82%AC",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-09",
+  "name": "통도사",
+  "lat": 35.4878,
+  "lon": 129.0644,
+  "type": "temple",
+  "tags": [
+   "general",
+   "health"
+  ],
+  "source": {
+   "name": "위키백과 통도사",
+   "url": "https://ko.wikipedia.org/wiki/%ED%86%B5%EB%8F%84%EC%82%AC",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-10",
+  "name": "금산사",
+  "lat": 35.7228,
+  "lon": 127.0533,
+  "type": "temple",
+  "tags": [
+   "wealth",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 금산사",
+   "url": "https://ko.wikipedia.org/wiki/%EA%B8%88%EC%82%B0%EC%82%AC",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-11",
+  "name": "부석사",
+  "lat": 36.9989,
+  "lon": 128.6875,
+  "type": "temple",
+  "tags": [
+   "general",
+   "create"
+  ],
+  "source": {
+   "name": "위키백과 부석사",
+   "url": "https://ko.wikipedia.org/wiki/%EB%B6%80%EC%84%9D%EC%82%AC",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-12",
+  "name": "명동성당",
+  "lat": 37.5642,
+  "lon": 126.9873,
+  "type": "church",
+  "tags": [
+   "love",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 명동성당",
+   "url": "https://ko.wikipedia.org/wiki/%EB%AA%85%EB%8F%99%EC%84%B1%EB%8B%B9",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-13",
+  "name": "약현성당",
+  "lat": 37.5591,
+  "lon": 126.9675,
+  "type": "church",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 약현성당",
+   "url": "https://ko.wikipedia.org/wiki/%EC%95%BD%ED%98%84%EC%84%B1%EB%8B%B9",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-14",
+  "name": "호미곶",
+  "lat": 36.0764,
+  "lon": 129.5686,
+  "type": "sea",
+  "tags": [
+   "career",
+   "wealth"
+  ],
+  "source": {
+   "name": "위키백과 호미곶",
+   "url": "https://ko.wikipedia.org/wiki/%ED%98%B8%EB%AF%B8%EA%B3%B6",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-15",
+  "name": "변산반도",
+  "lat": 35.6809,
+  "lon": 126.5314,
+  "type": "sea",
+  "tags": [
+   "create",
+   "health"
+  ],
+  "source": {
+   "name": "위키백과 변산반도",
+   "url": "https://ko.wikipedia.org/wiki/%EB%B3%80%EC%82%B0%EB%B0%98%EB%8F%84",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-16",
+  "name": "남해 금산",
+  "lat": 34.7561,
+  "lon": 127.9775,
+  "type": "mountain",
+  "tags": [
+   "love",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 금산 (경남)",
+   "url": "https://ko.wikipedia.org/wiki/%EA%B8%88%EC%82%B0_(%EA%B2%BD%EB%82%A8)",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-17",
+  "name": "도산서원",
+  "lat": 36.7272,
+  "lon": 128.8378,
+  "type": "shrine",
+  "tags": [
+   "study",
+   "career"
+  ],
+  "source": {
+   "name": "위키백과 안동 도산서원",
+   "url": "https://ko.wikipedia.org/wiki/%EC%95%88%EB%8F%99_%EB%8F%84%EC%82%B0%EC%84%9C%EC%9B%90",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-18",
+  "name": "병산서원",
+  "lat": 36.5405,
+  "lon": 128.546,
+  "type": "shrine",
+  "tags": [
+   "study"
+  ],
+  "source": {
+   "name": "위키백과 안동 병산서원",
+   "url": "https://ko.wikipedia.org/wiki/%EC%95%88%EB%8F%99_%EB%B3%91%EC%82%B0%EC%84%9C%EC%9B%90",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-19",
+  "name": "참성단",
+  "lat": 37.6158,
+  "lon": 126.4281,
+  "type": "shrine",
+  "tags": [
+   "general",
+   "career"
+  ],
+  "source": {
+   "name": "위키백과 강화 참성단",
+   "url": "https://ko.wikipedia.org/wiki/%EA%B0%95%ED%99%94_%EC%B0%B8%EC%84%B1%EB%8B%A8",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-20",
+  "name": "탄금대",
+  "lat": 36.9883,
+  "lon": 127.8978,
+  "type": "shrine",
+  "tags": [
+   "create"
+  ],
+  "source": {
+   "name": "위키백과 충주 탄금대",
+   "url": "https://ko.wikipedia.org/wiki/%EC%B6%A9%EC%A3%BC_%ED%83%84%EA%B8%88%EB%8C%80",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-21",
+  "name": "죽서루",
+  "lat": 37.4417,
+  "lon": 129.1603,
+  "type": "shrine",
+  "tags": [
+   "create"
+  ],
+  "source": {
+   "name": "위키백과 삼척 죽서루",
+   "url": "https://ko.wikipedia.org/wiki/%EC%82%BC%EC%B2%99_%EC%A3%BD%EC%84%9C%EB%A3%A8",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-22",
+  "name": "경포대",
+  "lat": 37.795,
+  "lon": 128.8967,
+  "type": "shrine",
+  "tags": [
+   "create",
+   "love"
+  ],
+  "source": {
+   "name": "위키백과 경포대",
+   "url": "https://ko.wikipedia.org/wiki/%EA%B2%BD%ED%8F%AC%EB%8C%80",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-23",
+  "name": "소쇄원",
+  "lat": 35.1833,
+  "lon": 127.0075,
+  "type": "other",
+  "tags": [
+   "create",
+   "study"
+  ],
+  "source": {
+   "name": "위키백과 소쇄원",
+   "url": "https://ko.wikipedia.org/wiki/%EC%86%8C%EC%87%84%EC%9B%90",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-24",
+  "name": "외암민속마을",
+  "lat": 36.7306,
+  "lon": 127.0158,
+  "type": "other",
+  "tags": [
+   "health"
+  ],
+  "source": {
+   "name": "위키백과 외암마을",
+   "url": "https://ko.wikipedia.org/wiki/%EC%99%B8%EC%95%94%EB%A7%88%EC%9D%84",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-25",
+  "name": "팔공산",
+  "lat": 36.0151,
+  "lon": 128.6998,
+  "type": "mountain",
+  "tags": [
+   "study",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 팔공산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%ED%8C%94%EA%B3%B5%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-26",
+  "name": "마니산",
+  "lat": 37.6167,
+  "lon": 126.4333,
+  "type": "mountain",
+  "tags": [
+   "general",
+   "career"
+  ],
+  "source": {
+   "name": "위키백과 마니산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EB%A7%88%EB%8B%88%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-27",
+  "name": "태백산",
+  "lat": 37.0957,
+  "lon": 128.9152,
+  "type": "mountain",
+  "tags": [
+   "general",
+   "health"
+  ],
+  "source": {
+   "name": "위키백과 태백산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%ED%83%9C%EB%B0%B1%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-28",
+  "name": "계룡산",
+  "lat": 36.3433,
+  "lon": 127.2061,
+  "type": "mountain",
+  "tags": [
+   "general",
+   "career"
+  ],
+  "source": {
+   "name": "위키백과 계룡산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EA%B3%84%EB%A3%A1%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-29",
+  "name": "설악산",
+  "lat": 38.1194,
+  "lon": 128.4656,
+  "type": "mountain",
+  "tags": [
+   "health",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 설악산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EC%84%A4%EC%95%85%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-30",
+  "name": "속리산",
+  "lat": 36.5333,
+  "lon": 127.9,
+  "type": "mountain",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 속리산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EC%86%8D%EB%A6%AC%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-31",
+  "name": "월출산",
+  "lat": 34.7678,
+  "lon": 126.7044,
+  "type": "mountain",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 월출산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EC%9B%94%EC%B6%9C%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-32",
+  "name": "북한산",
+  "lat": 37.6608,
+  "lon": 126.9933,
+  "type": "mountain",
+  "tags": [
+   "career",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 북한산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EB%B6%81%ED%95%9C%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-33",
+  "name": "모악산",
+  "lat": 35.7292,
+  "lon": 127.0853,
+  "type": "mountain",
+  "tags": [
+   "general",
+   "health"
+  ],
+  "source": {
+   "name": "위키백과 모악산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EB%AA%A8%EC%95%85%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-34",
+  "name": "보문사",
+  "lat": 37.6883,
+  "lon": 126.3216,
+  "type": "temple",
+  "tags": [
+   "general",
+   "study"
+  ],
+  "source": {
+   "name": "위키백과 보문사 (강화군) (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EB%B3%B4%EB%AC%B8%EC%82%AC_(%EA%B0%95%ED%99%94%EA%B5%B0)",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-35",
+  "name": "송광사",
+  "lat": 35.0022,
+  "lon": 127.2761,
+  "type": "temple",
+  "tags": [
+   "study",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 송광사 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EC%86%A1%EA%B4%91%EC%82%AC",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-36",
+  "name": "선암사",
+  "lat": 34.9966,
+  "lon": 127.3311,
+  "type": "temple",
+  "tags": [
+   "general",
+   "create"
+  ],
+  "source": {
+   "name": "위키백과 선암사 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EC%84%A0%EC%95%94%EC%82%AC",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-37",
+  "name": "정동진",
+  "lat": 37.6919,
+  "lon": 129.033,
+  "type": "sea",
+  "tags": [
+   "love",
+   "create"
+  ],
+  "source": {
+   "name": "위키백과 정동진 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EC%A0%95%EB%8F%99%EC%A7%84",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-38",
+  "name": "해운대",
+  "lat": 35.1587,
+  "lon": 129.1601,
+  "type": "sea",
+  "tags": [
+   "wealth",
+   "love"
+  ],
+  "source": {
+   "name": "위키백과 해운대 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%ED%95%B4%EC%9A%B4%EB%8C%80",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-39",
+  "name": "산방산",
+  "lat": 33.2406,
+  "lon": 126.3136,
+  "type": "mountain",
+  "tags": [
+   "general",
+   "health"
+  ],
+  "source": {
+   "name": "위키백과 산방산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EC%82%B0%EB%B0%A9%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-40",
+  "name": "오대산",
+  "lat": 37.7981,
+  "lon": 128.5431,
+  "type": "mountain",
+  "tags": [
+   "health",
+   "study"
+  ],
+  "source": {
+   "name": "위키백과 오대산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EC%98%A4%EB%8C%80%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-41",
+  "name": "치악산",
+  "lat": 37.365,
+  "lon": 128.0553,
+  "type": "mountain",
+  "tags": [
+   "health",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 치악산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EC%B9%98%EC%95%85%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-42",
+  "name": "덕유산",
+  "lat": 35.8606,
+  "lon": 127.7464,
+  "type": "mountain",
+  "tags": [
+   "health"
+  ],
+  "source": {
+   "name": "위키백과 덕유산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EB%8D%95%EC%9C%A0%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-43",
+  "name": "내장산",
+  "lat": 35.4833,
+  "lon": 126.8833,
+  "type": "mountain",
+  "tags": [
+   "health",
+   "create"
+  ],
+  "source": {
+   "name": "위키백과 내장산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EB%82%B4%EC%9E%A5%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-44",
+  "name": "가야산",
+  "lat": 35.8221,
+  "lon": 128.1179,
+  "type": "mountain",
+  "tags": [
+   "study",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 가야산 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%EA%B0%80%EC%95%BC%EC%82%B0",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-45",
+  "name": "현충사",
+  "lat": 36.8046,
+  "lon": 127.0291,
+  "type": "shrine",
+  "tags": [
+   "career"
+  ],
+  "source": {
+   "name": "위키백과 현충사 (좌표: 위키데이터)",
+   "url": "https://ko.wikipedia.org/wiki/%ED%98%84%EC%B6%A9%EC%82%AC",
+   "checked": "2026-11-02"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-46",
+  "name": "갓바위",
+  "lat": 35.9817,
+  "lon": 128.7364,
+  "type": "mountain",
+  "tags": [
+   "study"
+  ],
+  "source": {
+   "name": "위키백과 경산 팔공산 관봉 석조여래좌상",
+   "url": "https://ko.wikipedia.org/wiki/%EA%B2%BD%EC%82%B0_%ED%8C%94%EA%B3%B5%EC%82%B0_%EA%B4%80%EB%B4%89_%EC%84%9D%EC%A1%B0%EC%97%AC%EB%9E%98%EC%A2%8C%EC%83%81",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-47",
+  "name": "보리암",
+  "lat": 34.7522,
+  "lon": 127.9831,
+  "type": "temple",
+  "tags": [
+   "general",
+   "study"
+  ],
+  "source": {
+   "name": "위키백과 보리암 (남해군)",
+   "url": "https://ko.wikipedia.org/wiki/%EB%B3%B4%EB%A6%AC%EC%95%94_(%EB%82%A8%ED%95%B4%EA%B5%B0)",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-48",
+  "name": "사직단",
+  "lat": 37.5756,
+  "lon": 126.9678,
+  "type": "shrine",
+  "tags": [
+   "general",
+   "career"
+  ],
+  "source": {
+   "name": "위키백과 서울 사직단",
+   "url": "https://ko.wikipedia.org/wiki/%EC%84%9C%EC%9A%B8_%EC%82%AC%EC%A7%81%EB%8B%A8",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-49",
+  "name": "독립기념관",
+  "lat": 36.7836,
+  "lon": 127.223,
+  "type": "shrine",
+  "tags": [
+   "career"
+  ],
+  "source": {
+   "name": "위키백과 독립기념관 (대한민국)",
+   "url": "https://ko.wikipedia.org/wiki/%EB%8F%85%EB%A6%BD%EA%B8%B0%EB%85%90%EA%B4%80_(%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD)",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-50",
+  "name": "성산일출봉",
+  "lat": 33.4585,
+  "lon": 126.9423,
+  "type": "sea",
+  "tags": [
+   "career",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 성산일출봉",
+   "url": "https://ko.wikipedia.org/wiki/%EC%84%B1%EC%82%B0%EC%9D%BC%EC%B6%9C%EB%B4%89",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-51",
+  "name": "종묘",
+  "lat": 37.5744,
+  "lon": 126.9942,
+  "type": "shrine",
+  "tags": [
+   "career",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 종묘",
+   "url": "https://ko.wikipedia.org/wiki/%EC%A2%85%EB%AC%98",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-52",
+  "name": "수원 화성",
+  "lat": 37.2722,
+  "lon": 127.0083,
+  "type": "shrine",
+  "tags": [
+   "career"
+  ],
+  "source": {
+   "name": "위키백과 수원 화성",
+   "url": "https://ko.wikipedia.org/wiki/%EC%88%98%EC%9B%90_%ED%99%94%EC%84%B1",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-53",
+  "name": "안동 하회마을",
+  "lat": 36.5381,
+  "lon": 128.5206,
+  "type": "other",
+  "tags": [
+   "create"
+  ],
+  "source": {
+   "name": "위키백과 안동 하회마을",
+   "url": "https://ko.wikipedia.org/wiki/%EC%95%88%EB%8F%99_%ED%95%98%ED%9A%8C%EB%A7%88%EC%9D%84",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-54",
+  "name": "절두산 순교성지",
+  "lat": 37.5444,
+  "lon": 126.9117,
+  "type": "church",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 서울 양화나루와 잠두봉 유적",
+   "url": "https://ko.wikipedia.org/wiki/%EC%84%9C%EC%9A%B8_%EC%96%91%ED%99%94%EB%82%98%EB%A3%A8%EC%99%80_%EC%9E%A0%EB%91%90%EB%B4%89_%EC%9C%A0%EC%A0%81",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ }
+]
