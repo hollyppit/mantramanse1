@@ -6032,7 +6032,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div><h3 style="margin-bottom:8px">판단 근거 · ${M.SCHOOLS[y.school]}</h3><ol class="log">${y.log.map(l => `<li>${esc(jgLog(l))}</li>`).join('')}</ol></div>
       <p class="note">선택한 학파는 흐름 점수에서 해당 기준의 가중치를 높입니다. 강약·기후 치우침이 크면 학파와 관계없이 억부·조후 비중이 자동으로 조정되고, 합충·십성 균형도 함께 반영됩니다.</p>
     </section>
-    <section class="card"><div class="card-h"><h2>조후론 vs 억부론</h2><span class="note">근거는 오행·강약 탭의 한난조습</span></div>${adviceCard(ch)}</section>
+    <section class="card"><div class="card-h"><h2>조후론 vs 억부론</h2><span class="note">근거는 바로 아래 한난조습</span></div>${adviceCard(ch)}</section>
+    ${climateCard(ch)}
     ${renderSchoolInfo(ch)}
     <section class="card">
       <div class="card-h"><h2>학파별 비교</h2><span class="note">같은 사주, 다른 답</span></div>
@@ -6047,8 +6048,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     ${byCard(ch)}
     ${jgCard(ch)}
     ${ggCard(ch)}
-    ${renderRoot(ch)}
-    ${climateCard(ch)}`;
+    ${renderRoot(ch)}`;
   }
 
   // ───────────── 운세 흐름 ─────────────
