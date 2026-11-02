@@ -4902,6 +4902,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="frow">
         <label class="field"><span>출생지</span><select id="f-city">${CITIES.map(([c, l]) => `<option value="${c}" ${i.city === c ? 'selected' : ''}>${c}${l ? ` (${l.toFixed(2)}°)` : ''}</option>`).join('')}</select></label>
         ${i.city === '직접 입력' ? `<label class="field"><span>동경 (°)</span><input id="f-lon" type="number" step="0.01" value="${esc(i.lon)}"></label>` : ''}
+        ${regFormBlock()}
       </div>
       <div class="frow"><label class="field"><span>합에 따른 오행 변화 적용</span><select id="f-combination"><option value="auto" ${i.combinationMode !== 'off' ? 'selected' : ''}>자동 적용</option><option value="off" ${i.combinationMode === 'off' ? 'selected' : ''}>미적용</option></select></label><label class="field"><span>조후와 궁성에 따른 보정</span><select id="f-climate-palace"><option value="auto" ${i.climatePalaceMode !== 'off' ? 'selected' : ''}>자동 적용</option><option value="off" ${i.climatePalaceMode === 'off' ? 'selected' : ''}>미적용</option></select></label></div><p class="note">합이 성립하는 조건과 태어난 계절·글자의 자리를 살펴 오행 비중을 보정합니다. 선택한 기준은 무빙툰 풀이에도 이어집니다.</p>
       <details class="adv"${S.advOpen ? ' open' : ''}><summary>계산 기준 설정</summary>
@@ -6304,20 +6305,26 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const regParse = id => { const m = /^(prov|gu|dong):(\d+)$/.exec(id || ''); if (!m) return {}; const c = m[2]; return m[1] === 'prov' ? { p: c } : m[1] === 'gu' ? { p: c.slice(0, 2), g: c } : { p: c.slice(0, 2), g: c.slice(0, 5), d: c }; };
   let dongLoading = false;
   function regEnsureDong() { if (window.MantraRegionDong || dongLoading) return; dongLoading = true; const sc = document.createElement('script'); sc.src = 'region-dong-data.js'; sc.onload = () => render(); sc.onerror = () => { dongLoading = false; }; document.head.appendChild(sc); }
+  const regOpt = (id, t, v) => '<option value="' + id + '"' + (id === v ? ' selected' : '') + '>' + esc(t) + '</option>';
+  // 시·도 → 시·군·구 → 읍·면·동 순서로 고른다. 위 단계의 "전체"를 고르면 그 단계의 방위를 본다(동 목록은 처음 필요할 때만 내려받는다).
+  // 나의 운명 지도 카드와 사주 입력 폼이 같은 선택(REG)을 공유한다. 사주 계산(S.inp)과는 무관하다.
+  function regCascade(side, v, label) {
+    const RG = window.MantraRegion, dReady = RG.dongReady(), o1 = regOpt;
+    if (regParse(v).g) regEnsureDong();
+    const q = regParse(v), sel = (lv, inner, off) => '<label class="field"><select data-reg="' + side + '" aria-label="' + label + ' ' + lv + '"' + (off ? ' disabled' : '') + '>' + inner + '</select></label>';
+    const pO = '<option value="">시·도 선택</option>' + RG.provinces().map(pv => o1('prov:' + pv.code, pv.name, q.p ? 'prov:' + q.p : '')).join('');
+    const gO = q.p ? '<option value="prov:' + q.p + '">시·도 전체</option>' + RG.guList(q.p).map(g => o1(g.id, g.name, q.g ? 'gu:' + q.g : '')).join('') : '<option value="">시·군·구</option>';
+    const dO = q.g ? '<option value="gu:' + q.g + '">시·군·구 전체</option>' + (dReady ? RG.dongList(q.g).map(d => o1(d.id, d.name, q.d ? 'dong:' + q.d : '')).join('') : '<option disabled>불러오는 중…</option>') : '<option value="">읍·면·동</option>';
+    return '<div class="rg-casc"><span class="rg-lab">' + label + '</span>' + sel('시·도', pO) + sel('시·군·구', gO, !q.p) + sel('읍·면·동', dO, !q.g) + '</div>';
+  }
+  // 사주 입력 폼의 거주지 선택: 신기능(나의 운명 지도)이 켜져 있을 때만 보인다. 거주지는 사주 계산에 쓰이지 않고 지역 해석에만 쓰인다.
+  function regFormBlock() {
+    const RG = window.MantraRegion; if (!RG || !window.MantraRegionGu || !window.MANTRA_FLAGS || window.MANTRA_FLAGS.region !== true) return '';
+    return '<div class="rg-form"><div class="rg-formh">현재 거주지 <span class="muted small">(선택)</span></div>' + regCascade('home', REG.home, '시·도 → 시·군·구 → 읍·면·동') + '<p class="small muted">거주지는 사주 계산에 쓰이지 않고, 운세 흐름 탭의 "나의 운명 지도"에서 지역 해석에만 쓰입니다. 바꿔도 사주 원국은 바뀌지 않습니다.</p></div>';
+  }
   function regionCard(sel, du, se, curY) {
     const RG = window.MantraRegion, LI = window.MantraLuckInterpret; if (!RG || !LI || window.MANTRA_FLAGS.region === false) return '';
     const home = RG.get(REG.home), cmp = RG.get(REG.cmp), ch = S.ch;
-    const o1 = (id, t, v) => '<option value="' + id + '"' + (id === v ? ' selected' : '') + '>' + esc(t) + '</option>';
-    const dReady = RG.dongReady();
-    if (regParse(REG.home).g || regParse(REG.cmp).g) regEnsureDong();
-    // 시·도 → 시·군·구 → 읍·면·동 순서로 고른다. 위 단계의 "전체"를 고르면 그 단계의 방위를 본다(동 목록은 처음 필요할 때만 내려받는다).
-    const cascade = (side, v, label) => {
-      const q = regParse(v), sel = (lv, inner, off) => '<label class="field"><select data-reg="' + side + '" aria-label="' + label + ' ' + lv + '"' + (off ? ' disabled' : '') + '>' + inner + '</select></label>';
-      const pO = '<option value="">시·도 선택</option>' + RG.provinces().map(pv => o1('prov:' + pv.code, pv.name, q.p ? 'prov:' + q.p : '')).join('');
-      const gO = q.p ? '<option value="prov:' + q.p + '">시·도 전체</option>' + RG.guList(q.p).map(g => o1(g.id, g.name, q.g ? 'gu:' + q.g : '')).join('') : '<option value="">시·군·구</option>';
-      const dO = q.g ? '<option value="gu:' + q.g + '">시·군·구 전체</option>' + (dReady ? RG.dongList(q.g).map(d => o1(d.id, d.name, q.d ? 'dong:' + q.d : '')).join('') : '<option disabled>불러오는 중…</option>') : '<option value="">읍·면·동</option>';
-      return '<div class="rg-casc"><span class="rg-lab">' + label + '</span>' + sel('시·도', pO) + sel('시·군·구', gO, !q.p) + sel('읍·면·동', dO, !q.g) + '</div>';
-    };
     const px = r => ((r.lon - 125.8) / 4.6 * 300).toFixed(0), py = r => ((38.6 - r.lat) / 5.8 * 330).toFixed(0);
     const dots = RG.REGIONS.map(r => { const c = home && home.name.indexOf(r.name) >= 0 ? 'home' : cmp && cmp.name.indexOf(r.name) >= 0 ? 'cmp' : ''; return '<g class="rg-d ' + c + '" data-reg-pick="' + r.id + '" role="button" tabindex="0" aria-label="' + esc(r.name) + '"><circle cx="' + px(r) + '" cy="' + py(r) + '" r="' + (c ? 7 : 5) + '"/><text x="' + (+px(r) + 9) + '" y="' + (+py(r) + 4) + '">' + esc(r.name) + '</text></g>'; }).join('');
     // 사주 연결: 이 사주의 용신 체계에서 방위오행이 어떤 역할인지 읽는다. 원국에 더하거나 용신을 바꾸지 않는다(참고 표시).
@@ -6347,19 +6354,19 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     }
     return '<section class="card"><div class="card-h"><h2>나의 운명 지도</h2><span class="note">미리보기 · 시·도 → 시·군·구 → 읍·면·동</span></div>' +
       '<p class="note">출생지(' + esc(S.inp.city === '직접 입력' ? '경도 ' + S.inp.lon + '°' : S.inp.city) + ')는 만세력 계산에만 쓰이고, 아래 거주지는 생활환경을 살펴보는 참고용입니다. 거주지를 바꿔도 사주 원국은 바뀌지 않습니다.</p>' +
-      '<div class="rg-sel">' + cascade('home', REG.home, '현재 거주지') + cascade('cmp', REG.cmp, '비교 지역') + '</div>' +
+      '<div class="rg-sel">' + regCascade('home', REG.home, '현재 거주지') + regCascade('cmp', REG.cmp, '비교 지역') + '</div>' +
       '<svg class="rg-map" viewBox="0 0 340 340" role="group" aria-label="국내 주요 도시 지도">' + dots + '</svg><p class="small muted">점을 누르면 가까운 시·군·구가 ' + (home ? '비교 지역' : '현재 거주지') + '으로 선택됩니다. 외부 지도 서비스를 쓰지 않아 호출 비용이 없습니다.</p>' + body + cand + '</section>';
   }
-  document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-reg]'); if (!t) return; REG[t.dataset.reg] = t.value; regSave(); render(); });
+  document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-reg]'); if (!t) return; REG[t.dataset.reg] = t.value; regSave(); readForm(); render(); });
   document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-reg-base]'); if (!t) return; REG.base = t.value === 'birth' ? 'birth' : 'home'; regSave(); render(); });
   document.addEventListener('click', ev => { const c = ev.target.closest && ev.target.closest('[data-reg-cand]'); if (!c) return; REG.cmp = c.dataset.regCand; regSave(); render(); });
   document.addEventListener('click', ev => { const t = ev.target.closest && ev.target.closest('[data-reg-pick]'); if (!t) return; const city = window.MantraRegion.get(t.dataset.regPick), id = city ? window.MantraRegion.nearestGu(city.lat, city.lon) : ''; if (!id) return; if (!REG.home) REG.home = id; else if (id !== REG.home) REG.cmp = id; regSave(); render(); });
-  { const st = document.createElement('style'); st.textContent = '.rg-one{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0}.rg-one p{margin:3px 0}.rg-sel{display:grid;grid-template-columns:1fr;gap:10px}.rg-casc{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.rg-lab{grid-column:1/-1;font-size:.8rem;font-weight:600;color:var(--ink-2)}.rg-casc .field{min-width:0}.rg-casc select{width:100%}.rg-map{width:100%;max-width:340px;height:auto;display:block;margin:8px auto;background:var(--surface-2);border-radius:12px}.rg-d{cursor:pointer}.rg-d circle{fill:var(--ink-3)}.rg-d text{font-size:10px;fill:var(--ink-2)}.rg-d.home circle{fill:var(--accent)}.rg-d.home text{fill:var(--ink);font-weight:700}.rg-d.cmp circle{fill:var(--ink)}@media(max-width:600px){.rg-sel{grid-template-columns:1fr}}'; document.head.appendChild(st); }
+  { const st = document.createElement('style'); st.textContent = '.rg-one{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0}.rg-one p{margin:3px 0}.rg-form{grid-column:1/-1;margin:8px 0}.rg-formh{font-size:.8rem;font-weight:600;color:var(--ink-2);margin-bottom:4px}.rg-sel{display:grid;grid-template-columns:1fr;gap:10px}.rg-casc{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.rg-lab{grid-column:1/-1;font-size:.8rem;font-weight:600;color:var(--ink-2)}.rg-casc .field{min-width:0}.rg-casc select{width:100%}.rg-map{width:100%;max-width:340px;height:auto;display:block;margin:8px auto;background:var(--surface-2);border-radius:12px}.rg-d{cursor:pointer}.rg-d circle{fill:var(--ink-3)}.rg-d text{font-size:10px;fill:var(--ink-2)}.rg-d.home circle{fill:var(--accent)}.rg-d.home text{fill:var(--ink);font-weight:700}.rg-d.cmp circle{fill:var(--ink)}@media(max-width:600px){.rg-sel{grid-template-columns:1fr}}'; document.head.appendChild(st); }
   const LVL_CLS = { '강조': 'good', '보통': '', '약함': '' };
   // 관리자 화면의 [모두 켜기]로 켠 신기능 스위치를 한 번 받아 반영한다(켜진 것만 반영, 실패하면 기본값 꺼짐 그대로).
   (function remoteFlags() {
     const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region)) return;
-    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (ch && S.ch) render(); }).catch(() => { }); } catch (e) { }
+    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
   })();
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
   let phrLoaded = false;
