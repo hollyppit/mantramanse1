@@ -7,7 +7,7 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var $ = function (s) { return root.querySelector(s); };
   var BASE = {};
-  var S = { items: {}, phrases: [], version: 0, f: { type: '', status: '', q: '' }, cur: null, sel: {} };
+  var S = { flags: null, items: {}, phrases: [], version: 0, f: { type: '', status: '', q: '' }, cur: null, sel: {} };
   var ST = { draft: '미게시', reviewed: '미게시', published: '게시됨' }, FST = { unpub: '미게시', published: '게시됨' }, TYPE = { core: '핵심 기운', scene: '상황', good: '유리 조건', bad: '불리 조건', act: '대응' };
   var stOf = function (id) { return (S.items[id] && S.items[id].status) || 'draft'; };
   var txOf = function (p) { return (S.items[p.id] && S.items[p.id].text) || p.text; };
@@ -20,7 +20,8 @@
   function load(note) {
     return call('GET', '?all=1').then(function (d) {
       if (!d._ok) { root.innerHTML = '<div class="card"><p class="muted">' + esc(d.error || '불러오지 못했습니다') + '</p></div>'; return; }
-      S.items = d.items || {}; S.phrases = d.phrases || []; S.version = d.version || 0; draw(); if (note) msg(note);
+      S.items = d.items || {}; S.phrases = d.phrases || []; S.version = d.version || 0;
+      return fetch('/api/luck-flags', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (f) { S.flags = f; draw(); if (note) msg(note); });
     });
   }
   function counts() { var c = { published: 0, unpub: 0 }; S.phrases.forEach(function (p) { c[stOf(p.id) === 'published' ? 'published' : 'unpub']++; }); return c; }
@@ -40,7 +41,12 @@
   }
   function draw() {
     var c = counts(), f = S.f, list = visible(), shown = list.slice(0, 200), n = selIds().length, allSel = shown.length && shown.every(function (p) { return S.sel[p.id]; });
-    root.innerHTML = '<div class="card"><h3 style="margin:0 0 6px;color:var(--gold)">운세 환경 문구 게시</h3>' +
+    var fl = S.flags, on = fl && fl.interpret && fl.timeline && fl.region, part = fl && !on && (fl.interpret || fl.timeline || fl.region);
+    var flagBox = '<div class="card"><h3 style="margin:0 0 6px;color:var(--gold)">운세 환경 신기능 공개 스위치</h3>' +
+      '<p style="margin:0 0 8px">현재: <b style="color:' + (on ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '상태를 불러오지 못했습니다' : on ? '● 켜짐 — 모든 사용자에게 보입니다' : part ? '◐ 일부만 켜짐' : '○ 꺼짐 — 사용자에게 보이지 않습니다') + '</b>' + (fl && fl.at ? ' <span class="muted">(마지막 변경 ' + esc(fl.at.slice(0, 16).replace('T', ' ')) + (fl.by ? ' · ' + esc(fl.by) : '') + ')</span>' : '') + '</p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leFOn">모두 켜기</button><button class="btn" id="leFOff">모두 끄기</button></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 환경 해석 카드·환경 변화 타임라인·나의 운명 지도가 <b>약 1분 안에</b> 모든 사용자의 운세 흐름 탭에 나타나고, 끄면 같은 방식으로 사라집니다(코드 배포 필요 없음). 아직 게시하지 않은 문구는 기본 문구로 보입니다. 큰 문제가 생기면 [모두 끄기]를 누르세요.</p></div>';
+    root.innerHTML = flagBox + '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">운세 환경 문구 게시</h3>' +
       '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 12px;margin:0 0 8px;line-height:1.7"><b>사용법</b><br>① 목록의 문구를 읽어 봅니다.<br>② 괜찮으면 체크하고 <b>[선택 게시]</b>, 전부 괜찮으면 <b>[목록 전체 게시]</b>를 누릅니다.<br>③ 고치려면 문구를 눌러 본문을 수정한 뒤 <b>[저장하고 게시]</b>를 누릅니다.</div>' +
       '<p class="muted" style="margin:0 0 8px">게시한 문구만 사용자 화면에 반영되고, 수정하면 게시본에서 빠집니다(사용자에게는 기본 문구). 단정·반말 표현이나 같은 문구는 저장되지 않습니다. 운세 환경 해석 기능이 꺼져 있으면 게시해도 아직 사용자에게 보이지 않습니다. <b>전체 ' + S.phrases.length + '건 · 게시됨 ' + c.published + ' · 미게시 ' + c.unpub + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><label>유형 <select id="leT"><option value="">전체</option>' + Object.keys(TYPE).map(function (k) { return '<option value="' + k + '"' + (f.type === k ? ' selected' : '') + '>' + TYPE[k] + '</option>'; }).join('') + '</select></label>' +
@@ -52,6 +58,14 @@
       shown.map(function (p) { return '<tr data-id="' + esc(p.id) + '" style="cursor:pointer' + (S.cur === p.id ? ';background:rgba(255,255,255,.06)' : '') + '"><td><input type="checkbox" data-ck="' + esc(p.id) + '"' + (S.sel[p.id] ? ' checked' : '') + '></td><td>' + esc(p.id) + '</td><td>' + (TYPE[p.type] || '') + '</td><td>' + esc(txOf(p)) + '</td><td>' + ST[stOf(p.id)] + '</td></tr>'; }).join('') + '</tbody></table></div>' +
       (list.length > 200 ? '<p class="muted">처음 200건만 표시합니다. 필터로 좁혀 주세요.</p>' : '') + '<div id="leEd" style="margin-top:10px"></div></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">통합 운세 시뮬레이터</h3><div id="leSim"></div></div>';
+    function setFlags(v) {
+      if (v && !confirm('운세 환경 신기능(해석 카드·타임라인·나의 운명 지도)을 모든 사용자에게 공개합니다.\n지금 게시된 문구만 바뀐 문구로 보이고, 나머지는 기본 문구입니다.\n켜시겠습니까?')) return;
+      var who = ''; try { who = localStorage.getItem('iching_reviewer') || ''; } catch (e) { }
+      fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ on: v }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
+        .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '켰습니다(약 1분 안에 반영)' : '껐습니다(약 1분 안에 반영)'); });
+    }
+    $('#leFOn').onclick = function () { setFlags(true); }; $('#leFOff').onclick = function () { setFlags(false); };
     $('#leT').onchange = function () { S.f.type = this.value; draw(); }; $('#leS').onchange = function () { S.f.status = this.value; draw(); };
     $('#leQ').onchange = function () { S.f.q = this.value.trim(); draw(); };
     $('#leAll').onchange = function () { var on = this.checked; shown.forEach(function (p) { S.sel[p.id] = on; }); draw(); };
