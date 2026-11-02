@@ -59,11 +59,13 @@
     { k: '북', el: '수', min: -22.5 }, { k: '북동', el: '토', min: 22.5 }, { k: '동', el: '목', min: 67.5 }, { k: '남동', el: '목', min: 112.5 },
     { k: '남', el: '화', min: 157.5 }, { k: '남서', el: '토', min: 202.5 }, { k: '서', el: '금', min: 247.5 }, { k: '북서', el: '금', min: 292.5 },
   ];
-  function bearing(r, ref) {   // 기준점에서 본 방위각(0=북, 시계방향). 위도 보정한 평면 근사
-    ref = ref || REF; var dy = r.lat - ref.lat, dx = (r.lon - ref.lon) * Math.cos(ref.lat * Math.PI / 180), dist = Math.sqrt(dx * dx + dy * dy);
-    var a = Math.atan2(dx, dy) * 180 / Math.PI; if (a < -22.5) a += 360;
-    return { deg: a, dist: dist };
+  function bearing(r, ref) {   // 기준점에서 본 방위각(0=북, 시계방향). 구면 초기 방위각(대권 항로의 출발 방위). dist 는 평면 근사(기준 반경 비교용)
+    ref = ref || REF; var t = Math.PI / 180, p1 = ref.lat * t, p2 = r.lat * t, dl = (r.lon - ref.lon) * t;
+    var a = Math.atan2(Math.sin(dl) * Math.cos(p2), Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dl)) * 180 / Math.PI; if (a < -22.5) a += 360;
+    var dy = r.lat - ref.lat, dx = (r.lon - ref.lon) * Math.cos(ref.lat * t);
+    return { deg: a, dist: Math.sqrt(dx * dx + dy * dy) };
   }
+  var norm360 = function (d) { return Math.round((((d % 360) + 360) % 360) * 10) / 10; };
   function sector(deg) { var d = DIR[0], i = 0; DIR.forEach(function (x, k) { if (deg >= x.min) { d = x; i = k; } }); return { d: d, i: i }; }
   // 계층 공통: 한 단계 위(시·도 또는 시·군·구)의 면적 중심에서 본 8방위. 반경의 20% 이내는 중앙, 방위 경계 3° 이내는 인접 방위를 함께 알린다(좌표 오차로 방위가 바뀔 수 있음).
   function hierTradition(r, ref, radius, single, refName) {
@@ -71,7 +73,7 @@
     if (single || b.dist < 0.2 * radius) return { direction: '중앙', element: '토', near: null, basis: refName + '에 가까워 중앙으로 봅니다.', refPoint: refName, kind: 'symbolic', note: NOTE };
     var sc = sector(b.deg), x = ((b.deg + 22.5) % 45 + 45) % 45, near = null;
     if (x < 3) near = DIR[(sc.i + 7) % 8]; else if (x > 42) near = DIR[(sc.i + 1) % 8];
-    return { direction: sc.d.k, element: sc.d.el, near: near ? { direction: near.k, element: near.el } : null,
+    return { direction: sc.d.k, element: sc.d.el, deg: norm360(b.deg), near: near ? { direction: near.k, element: near.el } : null,
       basis: refName + '에서 본 ' + sc.d.k + '쪽이며, 전통 방위오행으로는 ' + sc.d.el + '에 대응합니다.' + (near ? ' 방위 경계에 가까워 ' + near.k + '쪽(' + near.el + ')과도 맞닿아 있어, 좌표에 따라 방위가 달라질 수 있습니다.' : ''),
       refPoint: refName, kind: 'symbolic', note: NOTE };
   }
@@ -86,7 +88,7 @@
     var b = bearing(r);
     if (b.dist < 0.35) return { direction: '중앙', element: '토', basis: '방위 기준점(' + REF.name + ')과 가까워 중앙으로 봅니다.', refPoint: REF.name, kind: 'symbolic', note: NOTE };
     var d = DIR[0]; DIR.forEach(function (x) { if (b.deg >= x.min) d = x; });
-    return { direction: d.k, element: d.el, basis: REF.name + '에서 본 ' + d.k + '쪽이며, 전통 방위오행으로는 ' + d.el + '에 대응합니다.', refPoint: REF.name, kind: 'symbolic', note: NOTE };
+    return { direction: d.k, element: d.el, deg: norm360(b.deg), basis: REF.name + '에서 본 ' + d.k + '쪽이며, 전통 방위오행으로는 ' + d.el + '에 대응합니다.', refPoint: REF.name, kind: 'symbolic', note: NOTE };
   }
   var NOTE = '전통 방위오행은 방위의 상징적 대응일 뿐 이 지역의 실제 오행량이 아니며, 원국의 오행·용신·점수에 더해지지 않습니다. 풍수지리와 사주명리는 서로 다른 체계이고, 이 해석이 운세 개선을 보장하지 않습니다.';
 
