@@ -97,7 +97,8 @@ console.log('\n변동성 단계 분포:', V.bands.map(x => `${x[1]} ${((bandCnt[
 const gl = html.split('\n').find(l => l.startsWith("  '변동기': ['운의 흐름'")) || '';
 ok(gl.includes('길흉을 의미하지 않으며'), '용어 사전: 변동기 정의에 "길흉을 의미하지 않으며"가 없음');
 for (const bad of ['흉운', '나쁜 일이 생기는', '손실이 발생', '반드시 이직', '반드시 이사', '반드시 이별']) ok(!gl.includes(bad), `용어 사전에 금지 표현 "${bad}"`);
-ok(!/전환기|전환일/.test(html), '"전환기"/"전환일" 문자열이 남아 있음');
+// 옛 단계 이름('전환기'·'전환일')이 값·라벨로 남았는지만 본다. 용어 설명의 일반 낱말("큰 전환기")은 단계 이름이 아니다
+ok(!/['"`]전환[기일]['"`]/.test(html), '단계 이름 "전환기"/"전환일"이 남아 있음');
 
 if (fails.length) { console.log('\n실패', fails.length, '건'); fails.forEach(x => console.log(' ', x)); process.exit(1); }
 console.log('\n모든 검증 통과');

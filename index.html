@@ -657,7 +657,11 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 </head>
 <body>
 <div id="app"></div>
+<script src="feature-flags.js"></script>
 <script src="engine.js"></script>
+<script src="luck-interpret.js"></script>
+<script src="region-gu-data.js"></script>
+<script src="region-data.js"></script>
 <script src="glossary-cases.js"></script>
 <script src="glossary-sections.js"></script>
 <script src="glossary-sections-2.js"></script>
@@ -6239,6 +6243,146 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="small">예: <b>기회 + 변동 · 순풍</b> = 새로운 가능성이 활성화되고 변화도 많은 편이지만 현재 원국과의 적합도는 비교적 좋은 흐름. 자세한 정의는 ${term('운의 시기', '운의 흐름 구조')}를 보세요.</p>
       <p class="note">실제 교통 안전 확률처럼 읽는 것이 아니라, 흐름을 이해하기 위한 비유입니다.</p></details>`;
   }
+  // ───────────── 환경 해석 카드 (luck-interpret.js) ─────────────
+  // 선택한 기간 하나만으로 상위 운(대운→세운→월운)을 찾아 같은 해석 체계로 연결한다. 점수는 건드리지 않는다.
+  function interpCtx(x, kind) {
+    const ch = S.ch, c = {};
+    try {
+      if (kind === 'daeun') { const i = ch.daeun.list.indexOf(x); if (i > 0) c.prev = ch.daeun.list[i - 1]; }
+      else if (kind === 'seun') { c.daeun = x.daeun; c.prev = M.seunRange(ch, x.year - 1, x.year - 1)[0]; }
+      else if (kind === 'wolun') {
+        const Y = M.yearPillarAt(x.startMs).sajuYear, wl = M.wolun(ch, Y), i = wl.findIndex(m => m.startMs === x.startMs);
+        c.seun = M.seunRange(ch, Y, Y)[0]; c.daeun = M.daeunAt(ch, x.startMs);
+        c.prev = i > 0 ? wl[i - 1] : M.wolun(ch, Y - 1)[11];
+      } else if (kind === 'ilun') {
+        const [y, m, d] = x.date, ms = Date.UTC(y, m - 1, d, 3), Y = M.yearPillarAt(ms).sajuYear;
+        let wm = null; M.wolun(ch, Y).forEach(q => { if (q.startMs <= ms) wm = q; }); if (!wm) wm = M.wolun(ch, Y - 1)[11];
+        c.wolun = wm; c.seun = M.seunRange(ch, Y, Y)[0]; c.daeun = M.daeunAt(ch, ms);
+        if (d > 1) c.prev = M.ilun(ch, y, m)[d - 2];
+      }
+    } catch (e) { }
+    return c;
+  }
+  // ───────────── 환경 변화 타임라인 ─────────────
+  // 연도(앞뒤 2년) 또는 선택한 해의 12개월을 환경 5영역의 부각 정도(강조·보통·약함)로 나란히 보여 준다. 길흉이나 점수가 아니다.
+  const TL_SHORT = { work: '직업', wealth: '재물', rel: '인연', move: '이동', learn: '학습' };
+  function envTimeline(kind) {
+    const LI = window.MantraLuckInterpret, ch = S.ch; if (!LI || window.MANTRA_FLAGS.timeline === false) return '';
+    let rows = [], selI = -1, label = kind === 'seun' ? '해' : '달';
+    try {
+      if (kind === 'seun') {
+        const Y0 = S.selYear, ys = []; for (let y = Y0 - 2; y <= Y0 + 2; y++) if (y >= M.MIN_Y && y <= M.MAX_Y - 2) ys.push(y);
+        const its = ys.map(y => M.seunRange(ch, y, y)[0]);
+        rows = its.map((x, i) => ({ x, pick: 'seun:' + x.year, name: x.year + '년', r: LI.buildCached(M, ch, x, 'seun', { daeun: x.daeun, prev: i ? its[i - 1] : M.seunRange(ch, x.year - 1, x.year - 1)[0] }) }));
+        selI = ys.indexOf(Y0);
+      } else {
+        const Y = S.selYear, wl = M.wolun(ch, Y), se = M.seunRange(ch, Y, Y)[0], pm = M.wolun(ch, Y - 1)[11];
+        rows = wl.map((x, i) => ({ x, pick: 'wolun:' + i, name: kstYMD(x.startMs)[1] + '월', r: LI.buildCached(M, ch, x, 'wolun', { seun: se, daeun: M.daeunAt(ch, x.startMs), prev: i ? wl[i - 1] : pm }) }));
+        selI = S.sel && S.sel.kind === 'wolun' ? S.sel.i : rows.findIndex((q, i) => NOW >= q.x.startMs && (!wl[i + 1] || NOW < wl[i + 1].startMs));
+      }
+    } catch (e) { return ''; }
+    if (!rows.length) return '';
+    const cell = a => '<td class="tl-c tl-' + (a.level === '강조' ? 'hi' : a.level === '보통' ? 'mid' : 'lo') + '" title="' + esc(a.name + ' · ' + a.level) + '">' + (a.level === '강조' ? '●' : a.level === '보통' ? '◐' : '·') + '</td>';
+    let detail = '';
+    if (selI >= 0) {
+      const c = LI.compare(selI ? rows[selI - 1].r : null, rows[selI].r, rows[selI + 1] ? rows[selI + 1].r : null, label);
+      detail = '<div class="tl-d"><b>' + esc(rows[selI].name) + ' ' + esc(M.gzNameK(rows[selI].x)) + '</b><ul class="ib-ul">' + c.lines.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul></div>';
+    }
+    return '<div class="tl"><div class="ib-k">환경 변화 타임라인 <span class="muted">· ● 강조 ◐ 보통 · 약함 — 주제가 부각되는 정도이며 좋고 나쁨이 아닙니다</span></div><div class="tbl-wrap"><table class="tl-t"><thead><tr><th></th>' + LI.AREA_KEYS.map(k => '<th>' + TL_SHORT[k] + '</th>').join('') + '</tr></thead><tbody>' +
+      rows.map((q, i) => '<tr class="' + (i === selI ? 'sel' : '') + '" data-pick="' + q.pick + '" role="button" tabindex="0"><td class="tl-n">' + esc(q.name) + ' <span class="muted">' + esc(M.gzNameK(q.x)) + '</span></td>' + q.r.areas.map(cell).join('') + '</tr>').join('') + '</tbody></table></div>' + detail + '</div>';
+  }
+  // ───────────── 나의 운명 지도 (지역 환경 · 미리보기) ─────────────
+  // 현재 거주지·비교 지역은 원국 계산과 무관한 별도 설정이다(브라우저에만 저장). 출생지는 기존 입력(만세력 계산용)을 그대로 쓴다.
+  // 실제 환경 데이터와 전통 방위오행 해석은 서로 다른 블록으로 표시하고, 지역 오행은 원국에 합산하지 않는다.
+  const REG_KEY = 'mantra-region-v1';
+  const REG = (() => { try { const v = JSON.parse(localStorage.getItem(REG_KEY) || '{}'); const ok = x => /^(prov|gu|dong):\d+$/.test(x) ? x : ''; return { home: ok(v.home || ''), cmp: ok(v.cmp || ''), base: v.base === 'birth' ? 'birth' : 'home' }; } catch (e) { return { home: '', cmp: '', base: 'home' }; } })();
+  const regSave = () => { try { localStorage.setItem(REG_KEY, JSON.stringify(REG)); } catch (e) { } };
+  // 관리자가 출처와 함께 등록한 지역 자료를 한 번만 받아 합친다(실패하면 기존대로 자료 부족).
+  let regLoaded = false;
+  function regLoad() { if (regLoaded || !window.MantraRegion) return; regLoaded = true; fetch('/api/region').then(r => r.ok ? r.json() : null).then(d => { if (d && window.MantraRegion.merge(d)) render(); }).catch(() => { }); }
+  const srcOf = (r, k) => (r.sources || []).find(q => q.fact === k);
+  const regParse = id => { const m = /^(prov|gu|dong):(\d+)$/.exec(id || ''); if (!m) return {}; const c = m[2]; return m[1] === 'prov' ? { p: c } : m[1] === 'gu' ? { p: c.slice(0, 2), g: c } : { p: c.slice(0, 2), g: c.slice(0, 5), d: c }; };
+  let dongLoading = false;
+  function regEnsureDong() { if (window.MantraRegionDong || dongLoading) return; dongLoading = true; const sc = document.createElement('script'); sc.src = 'region-dong-data.js'; sc.onload = () => render(); sc.onerror = () => { dongLoading = false; }; document.head.appendChild(sc); }
+  function regionCard(sel, du, se, curY) {
+    const RG = window.MantraRegion, LI = window.MantraLuckInterpret; if (!RG || !LI || window.MANTRA_FLAGS.region === false) return '';
+    const home = RG.get(REG.home), cmp = RG.get(REG.cmp), ch = S.ch;
+    const o1 = (id, t, v) => '<option value="' + id + '"' + (id === v ? ' selected' : '') + '>' + esc(t) + '</option>';
+    const dReady = RG.dongReady();
+    if (regParse(REG.home).g || regParse(REG.cmp).g) regEnsureDong();
+    // 시·도 → 시·군·구 → 읍·면·동 순서로 고른다. 위 단계의 "전체"를 고르면 그 단계의 방위를 본다(동 목록은 처음 필요할 때만 내려받는다).
+    const cascade = (side, v, label) => {
+      const q = regParse(v), sel = (lv, inner, off) => '<label class="field"><select data-reg="' + side + '" aria-label="' + label + ' ' + lv + '"' + (off ? ' disabled' : '') + '>' + inner + '</select></label>';
+      const pO = '<option value="">시·도 선택</option>' + RG.provinces().map(pv => o1('prov:' + pv.code, pv.name, q.p ? 'prov:' + q.p : '')).join('');
+      const gO = q.p ? '<option value="prov:' + q.p + '">시·도 전체</option>' + RG.guList(q.p).map(g => o1(g.id, g.name, q.g ? 'gu:' + q.g : '')).join('') : '<option value="">시·군·구</option>';
+      const dO = q.g ? '<option value="gu:' + q.g + '">시·군·구 전체</option>' + (dReady ? RG.dongList(q.g).map(d => o1(d.id, d.name, q.d ? 'dong:' + q.d : '')).join('') : '<option disabled>불러오는 중…</option>') : '<option value="">읍·면·동</option>';
+      return '<div class="rg-casc"><span class="rg-lab">' + label + '</span>' + sel('시·도', pO) + sel('시·군·구', gO, !q.p) + sel('읍·면·동', dO, !q.g) + '</div>';
+    };
+    const px = r => ((r.lon - 125.8) / 4.6 * 300).toFixed(0), py = r => ((38.6 - r.lat) / 5.8 * 330).toFixed(0);
+    const dots = RG.REGIONS.map(r => { const c = home && home.name.indexOf(r.name) >= 0 ? 'home' : cmp && cmp.name.indexOf(r.name) >= 0 ? 'cmp' : ''; return '<g class="rg-d ' + c + '" data-reg-pick="' + r.id + '" role="button" tabindex="0" aria-label="' + esc(r.name) + '"><circle cx="' + px(r) + '" cy="' + py(r) + '" r="' + (c ? 7 : 5) + '"/><text x="' + (+px(r) + 9) + '" y="' + (+py(r) + 4) + '">' + esc(r.name) + '</text></g>'; }).join('');
+    // 사주 연결: 이 사주의 용신 체계에서 방위오행이 어떤 역할인지 읽는다. 원국에 더하거나 용신을 바꾸지 않는다(참고 표시).
+    const roles = (ch.yong && ch.yong.roles) || ch.yongAll.eokbu.roles;
+    const one = r => { const t = RG.tradition(r), f = RG.fit(t.element, roles); return '<div class="rg-one ' + f.tone + '"><b>' + esc(r.name) + '</b> <span class="chip">' + esc(t.direction) + ' · ' + esc(t.element) + '</span><p class="small">' + esc(t.basis) + '</p><p class="small">' + esc(f.text) + '</p></div>'; };
+    let body = '';
+    if (home) body += one(home);
+    if (cmp && (!home || cmp.id !== home.id)) body += one(cmp);
+    if (body) body = '<div class="ib-k">전통 방위오행 해석 (상징적 참고)</div>' + body + '<p class="small muted">' + esc(RG.NOTE) + '</p>';
+    // 사주에 맞는 방향의 지역 후보: 기준 지역에서 본 방위오행이 용신·희신인 시·군·구(거리순, 점수·순위 아님)
+    let cand = '';
+    const birthReg = RG.REGIONS.find(r => r.name === S.inp.city), baseReg = REG.base === 'birth' && birthReg ? birthReg : home;
+    if (baseReg) {
+      const sg = RG.suggest(baseReg, roles), baseName = baseReg === birthReg ? '출생지(' + birthReg.name + ')' : home.name;
+      if (sg) {
+        const dtxt = role => sg.elements[role] ? role + ' ' + sg.elements[role] + '(' + sg.dirs[role].join('·') + '쪽)' : '';
+        const chip = c => '<button type="button" class="chip rg-cand" data-reg-cand="' + c.id + '" title="비교 지역으로 선택">' + esc(c.name) + ' · ' + esc(c.direction) + ' · ' + c.distKm + 'km' + (c.near ? ' <span class="muted">(경계: ' + esc(c.near) + ')</span>' : '') + '</button>';
+        const block = (role) => {
+          const all = sg.list.filter(c => c.role === role); if (!all.length) return '';
+          const same = all.filter(c => c.sameProv), other = all.filter(c => !c.sameProv), row = (t, a) => a.length ? '<p class="small"><b>' + t + '</b> ' + a.slice(0, 6).map(chip).join('') + (a.length > 6 ? '<details class="adv"><summary>' + (a.length - 6) + '곳 더 보기</summary>' + a.slice(6, 60).map(chip).join('') + '</details>' : '') + '</p>' : '';
+          return '<div class="ib-k">' + role + ' 방향 · ' + esc(sg.elements[role]) + ' (' + esc(sg.dirs[role].join('·')) + '쪽) · ' + all.length + '곳</div>' + row('같은 시·도', same) + row('다른 시·도', other);
+        };
+        cand = '<div class="ib-k">사주에 맞는 방향의 지역 후보 (참고)</div><p class="small">' + esc(baseName) + '에서 본 방위의 오행이 이 사주의 ' + [dtxt('용신'), dtxt('희신')].filter(Boolean).join('·') + ' 쪽에 해당하는 시·군·구입니다. 점수나 순위가 아니라 방향이 맞는 후보를 거리순으로 보여 줍니다.</p>' +
+          (birthReg ? '<label class="field"><span class="small">기준</span><select data-reg-base="1"><option value="home"' + (baseReg === home ? ' selected' : '') + '>현재 거주지</option><option value="birth"' + (baseReg === birthReg ? ' selected' : '') + '>출생지(' + esc(birthReg.name) + ')</option></select></label>' : '') +
+          block('용신') + block('희신') + '<p class="small muted">이사나 이직 같은 큰 결정의 근거로 쓰지 마세요. 방위는 전통적인 상징 해석이고, 실제 생활 조건(직장·가족·비용)이 훨씬 중요합니다. 후보를 누르면 비교 지역으로 담깁니다.</p>';
+      }
+    }
+    return '<section class="card"><div class="card-h"><h2>나의 운명 지도</h2><span class="note">미리보기 · 시·도 → 시·군·구 → 읍·면·동</span></div>' +
+      '<p class="note">출생지(' + esc(S.inp.city === '직접 입력' ? '경도 ' + S.inp.lon + '°' : S.inp.city) + ')는 만세력 계산에만 쓰이고, 아래 거주지는 생활환경을 살펴보는 참고용입니다. 거주지를 바꿔도 사주 원국은 바뀌지 않습니다.</p>' +
+      '<div class="rg-sel">' + cascade('home', REG.home, '현재 거주지') + cascade('cmp', REG.cmp, '비교 지역') + '</div>' +
+      '<svg class="rg-map" viewBox="0 0 340 340" role="group" aria-label="국내 주요 도시 지도">' + dots + '</svg><p class="small muted">점을 누르면 가까운 시·군·구가 ' + (home ? '비교 지역' : '현재 거주지') + '으로 선택됩니다. 외부 지도 서비스를 쓰지 않아 호출 비용이 없습니다.</p>' + body + cand + '</section>';
+  }
+  document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-reg]'); if (!t) return; REG[t.dataset.reg] = t.value; regSave(); render(); });
+  document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-reg-base]'); if (!t) return; REG.base = t.value === 'birth' ? 'birth' : 'home'; regSave(); render(); });
+  document.addEventListener('click', ev => { const c = ev.target.closest && ev.target.closest('[data-reg-cand]'); if (!c) return; REG.cmp = c.dataset.regCand; regSave(); render(); });
+  document.addEventListener('click', ev => { const t = ev.target.closest && ev.target.closest('[data-reg-pick]'); if (!t) return; const city = window.MantraRegion.get(t.dataset.regPick), id = city ? window.MantraRegion.nearestGu(city.lat, city.lon) : ''; if (!id) return; if (!REG.home) REG.home = id; else if (id !== REG.home) REG.cmp = id; regSave(); render(); });
+  { const st = document.createElement('style'); st.textContent = '.rg-one{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0}.rg-one p{margin:3px 0}.rg-sel{display:grid;grid-template-columns:1fr;gap:10px}.rg-casc{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.rg-lab{grid-column:1/-1;font-size:.8rem;font-weight:600;color:var(--ink-2)}.rg-casc .field{min-width:0}.rg-casc select{width:100%}.rg-map{width:100%;max-width:340px;height:auto;display:block;margin:8px auto;background:var(--surface-2);border-radius:12px}.rg-d{cursor:pointer}.rg-d circle{fill:var(--ink-3)}.rg-d text{font-size:10px;fill:var(--ink-2)}.rg-d.home circle{fill:var(--accent)}.rg-d.home text{fill:var(--ink);font-weight:700}.rg-d.cmp circle{fill:var(--ink)}@media(max-width:600px){.rg-sel{grid-template-columns:1fr}}'; document.head.appendChild(st); }
+  const LVL_CLS = { '강조': 'good', '보통': '', '약함': '' };
+  // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
+  let phrLoaded = false;
+  function phrLoad() { if (phrLoaded || !window.MantraLuckInterpret) return; phrLoaded = true; fetch('/api/luck-phrases').then(r => r.ok ? r.json() : null).then(d => { if (d && window.MantraLuckInterpret.applyPublished(d.published)) render(); }).catch(() => { }); }
+  function interpBox(x, kind) {
+    const LI = window.MantraLuckInterpret; if (!LI || !x || !x.ev || window.MANTRA_FLAGS.interpret === false) return '';
+    phrLoad();
+    let r; try { r = LI.buildCached(M, S.ch, x, kind, interpCtx(x, kind)); } catch (e) { return ''; }
+    const li = a => a.length ? '<ul class="ib-ul">' + a.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '';
+    const ev = r.evidence;
+    return '<div class="ib">' +
+      '<div class="ib-k">이 시기의 핵심 기운</div><p><b>' + esc(r.core.title) + '</b><br>' + esc(r.core.text) + '</p>' +
+      '<div class="ib-k">나에게 어떤 의미인가</div><p>' + esc(r.relation) + '</p>' +
+      '<div class="ib-k">어떤 환경에 놓이는가</div><div class="ib-areas">' + r.areas.map(a => '<span class="chip ' + (LVL_CLS[a.level] || '') + '" title="활성도는 주제가 부각되는 정도이며 좋고 나쁨이 아닙니다">' + esc(a.name) + ' · ' + a.level + '</span>').join('') + '</div><p class="small muted">' + esc(r.summary) + '</p>' +
+      '<div class="ib-k">어떤 상황이 나타날 수 있는가</div>' + li(r.scenes.map(s => s.name + ' — ' + s.text)) +
+      (r.chain.length || r.change ? '<div class="ib-k">앞뒤 기간과의 연결</div>' + li(r.chain.map(c => c.text).concat(r.change ? [r.change] : [])) : '') +
+      '<div class="ib-k">기회와 위험</div><div class="ib-cols"><div><b class="ib-g">유리하게 작용하는 조건</b>' + (r.good.length ? li(r.good) : '<p class="small muted">뚜렷하게 성립하는 유리 조건은 없습니다.</p>') + '</div><div><b class="ib-b">불리하게 작용하는 조건</b>' + (r.bad.length ? li(r.bad) : '<p class="small muted">뚜렷하게 성립하는 불리 조건은 없습니다.</p>') + '</div></div>' +
+      '<div class="ib-k">어떻게 대응할 것인가</div>' + li(r.strategy) +
+      '<p class="small muted">' + r.uncertainty.map(esc).join(' ') + '</p>' +
+      '<details class="adv"><summary>명리학적 근거 보기</summary><div class="small">' +
+      '<p><b>원국</b> ' + esc(ev.natal.join(' · ')) + '<br><b>이 기간</b> ' + esc(ev.luck) + ' · 십성 ' + esc(ev.tenGods.join('/')) + ' · 지장간 ' + esc(ev.hiddenStems.join(' ')) + '<br><b>오행</b> 천간 ' + esc(ev.elements.stem) + '(' + esc(ev.elements.roles[0]) + ') · 지지 ' + esc(ev.elements.branch) + '(' + esc(ev.elements.roles[1]) + ')<br><b>원국 십성 비율</b> ' + esc(ev.natalGroupPct.join(' · ')) + '</p>' +
+      (r.relations.length ? '<p><b>원국과의 작용</b></p>' + li(r.relations.map(q => q.text)) : '<p>이 기간의 글자가 원국과 합·충·형 등을 만들지 않습니다.</p>') +
+      '<p><b>적용된 규칙 ID</b> ' + esc(ev.rules.map(q => q.id).filter((v, i, a) => a.indexOf(v) === i).join(', ')) + '<br><b>선택된 문구 ID</b> ' + esc(ev.phraseIds.join(', ')) + '</p>' +
+      (ev.excluded.length ? '<p><b>적용하지 않은 규칙</b></p>' + li(ev.excluded.map(q => q.id + ' — ' + q.why)) : '') +
+      '<p class="muted">해석 엔진 ' + esc(r.version) + ' · 문구 v' + r.phraseVersion + ' (검수 완료 ' + r.evidence.phraseReview.published + '/' + r.evidence.phraseReview.total + '건)</p></div></details></div>';
+  }
+  const IB_CSS = '.tl{margin:10px 0}.tl-t{width:100%;border-collapse:collapse;font-size:.84rem}.tl-t th{font-weight:600;color:var(--ink-2);padding:4px 2px;text-align:center}.tl-t tr[data-pick]{cursor:pointer}.tl-t tr.sel{background:var(--surface-2)}.tl-t td{padding:6px 2px;border-top:1px solid var(--line)}.tl-n{white-space:nowrap}.tl-c{text-align:center}.tl-hi{color:var(--accent);font-weight:800}.tl-mid{color:var(--ink-2)}.tl-lo{color:var(--ink-3)}.tl-d{margin-top:6px;padding:8px 10px;border-radius:10px;background:var(--surface-2)}.ib{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0;background:var(--surface)}.ib p{margin:4px 0}.ib-k{font-size:.74rem;font-weight:700;letter-spacing:.04em;color:var(--ink-2);margin:12px 0 2px}.ib-k:first-child{margin-top:0}.ib-ul{margin:2px 0 0;padding-left:18px;font-size:.88rem}.ib-ul li{margin:3px 0}.ib-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ib-g{color:var(--good)}.ib-b{color:var(--bad)}@media(max-width:600px){.ib-cols{grid-template-columns:1fr}}';
+  { const st = document.createElement('style'); st.textContent = IB_CSS; document.head.appendChild(st); }
   function detailHTML(title, x, extra = '', kind = '', banner = '') {
     if (!x || !x.ev) return '';
     const e = x.ev, w = e.weights;
@@ -6246,6 +6390,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (e.tonggwanScore != null) comps.splice(2, 0, ['통관', 'tonggwan', e.tonggwanScore]);
     return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${condTag(e.condition)} <b class="num">${signed(luckV(x))}</b></span></div>
       ${banner}
+      ${kind ? interpBox(x, kind) : ''}
       <div class="small" style="color:var(--ink-2)">${luckCells(x)}</div>
       ${kind ? (kind === 'ilun' ? dayBox(x) : phaseBox(x, kind)) + domainBox(x, kind, title) + rootBox(x, kind) + luckEffects(x, kind) : ''}
       <h4 style="margin:4px 0 0">${term('흐름 점수')} 근거</h4>
@@ -6424,16 +6569,19 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${chartLegend()}
       <div class="chart" data-chart="life"></div>
       ${yearSummary(curY)}
+      ${envTimeline('seun')}
       ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 좋고 나쁨(최고·좋음·무난·주의·부담), 테두리·아래 글자는 변동·방어 상태입니다. 순풍·보통·주의·부담 같은 상태는 툴팁과 타일 배지로 따로 보입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>${Y}년 ${term('월운')} <span class="lvl">${LEVEL_ROLE.wolun}</span></h2><span class="seg"><button data-act="year:-1" aria-label="이전 해">‹</button><button data-act="year:1" aria-label="다음 해">›</button></span></div>
       ${chartLegend()}
       <div class="chart" data-chart="wolun"></div>
+      ${envTimeline("wolun")}
       <div class="lts">${M.wolun(ch, Y).map((x, i, a) => luckTile(x, `${x.termName} · ${kstYMD(x.startMs)[1]}월`, 'wolun:' + i, sel.kind === 'wolun' && sel.i === i, NOW >= x.startMs && NOW < (a[i + 1] ? a[i + 1].startMs : Infinity))).join('')}</div>
       ${wolDetail || `<p class="note">입춘(${Y}.2.4 무렵)부터 다음 해 소한까지의 12개월입니다. 막대를 누르면 그 달의 ${term('일운')} 달력으로 이동합니다.</p>`}
     </section>
     ${renderCalendar(cy, cm, cal, firstDow, sel, ilDetail)}
+    ${regionCard(sel, du, se, curY)}
     <p class="note">흐름 점수는 현재 원국의 불균형을 들어오는 운이 얼마나 보완하거나 심화시키는지를 나타내는 상대 지표이며, 미래의 행운·불운 확률이 아닙니다. 계산 방식은 ${term('흐름 점수')}에 있습니다.</p>`;
   }
 
