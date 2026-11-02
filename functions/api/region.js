@@ -7,6 +7,7 @@ import { json, isAdmin, configError } from '../_lib.js';
 import '../../region-data.js';
 
 const KEY = 'region:facts', MAX_HISTORY = 200;
+const safeDecode = s => { try { return decodeURIComponent(s); } catch { return ''; } };
 const R = () => globalThis.MantraRegion;
 const empty = () => ({ version: 0, items: {}, history: [] });
 const today = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
@@ -59,7 +60,7 @@ export async function onRequestPut({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   let body; try { body = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); }
   body = body || {};
-  const by = decodeURIComponent(request.headers.get('x-reviewer') || '').slice(0, 30), at = new Date().toISOString();
+  const by = safeDecode(request.headers.get('x-reviewer') || '').slice(0, 30), at = new Date().toISOString();
   const doc = (await env.GLOSSARY_KV.get(KEY, 'json')) || empty();
   if (body.restore != null) {
     if (!Number.isInteger(body.restore)) return json({ error: '이력번호가 올바르지 않습니다' }, 400);

@@ -5,7 +5,7 @@
      ctx = { daeun, seun, wolun, prev }  (각각 M.luckItem 형태. 해당 기간의 상위 운과 직전 기간) */
 (function (G) {
   'use strict';
-  var VERSION = 'luck-env-20261102-1', PHRASE_VERSION = 1;
+  var VERSION = 'luck-env-20261102-1', PHRASE_VERSION = 1, REV = 0;   // REV: 게시 문구가 바뀔 때마다 올라 캐시를 무효화한다
 
   // ───────────── 사전 문구: 십성별 ─────────────
   // area: work 직업·사회 / wealth 재물·경제 / rel 인간관계·인연 / move 생활·이동 / learn 학습·재정비
@@ -281,9 +281,19 @@
   function applyPublished(map) {
     var n = 0; if (!map || typeof map !== 'object') return 0;
     Object.keys(map).forEach(function (id) { if (PH[id] && typeof map[id] === 'string' && map[id].trim()) { PH[id].text = map[id].trim(); PH[id].review = 'published'; n++; } });
+    if (n) REV++;
     return n;
   }
-  var api = { applyPublished: applyPublished, compare: compare, VERSION: VERSION, PHRASE_VERSION: PHRASE_VERSION, build: build, PHRASES: PHRASES, AREA: AREA, AREA_KEYS: AREA_KEYS };
+  var CACHE = new WeakMap(), STATS = { hit: 0, miss: 0 };
+  var pk = function (p) { return p ? p.i + ':' + (p.startMs != null ? p.startMs : p.year != null ? p.year : p.date ? p.date.join('-') : '') : ''; };
+  function buildCached(M, ch, x, level, ctx) {
+    ctx = ctx || {};
+    var m = CACHE.get(ch); if (!m) CACHE.set(ch, m = new Map());
+    var key = [VERSION, PHRASE_VERSION, REV, level, pk(x), pk(ctx.daeun || (level === 'seun' ? x.daeun : null)), pk(ctx.seun), pk(ctx.wolun), pk(ctx.prev)].join('|');
+    if (m.has(key)) { STATS.hit++; return m.get(key); }
+    STATS.miss++; var r = build(M, ch, x, level, ctx); m.set(key, r); return r;
+  }
+  var api = { buildCached: buildCached, cacheStats: STATS, applyPublished: applyPublished, compare: compare, VERSION: VERSION, PHRASE_VERSION: PHRASE_VERSION, build: build, PHRASES: PHRASES, AREA: AREA, AREA_KEYS: AREA_KEYS };
   G.MantraLuckInterpret = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

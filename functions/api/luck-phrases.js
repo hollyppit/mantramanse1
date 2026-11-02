@@ -12,6 +12,7 @@ import { json, isAdmin, configError } from '../_lib.js';
 import '../../luck-interpret.js';
 
 const KEY = 'luckenv:phrases', MAX_HIST = 30;
+const safeDecode = s => { try { return decodeURIComponent(s); } catch { return ''; } };
 const LI = () => globalThis.MantraLuckInterpret;
 const BAN = /반드시|확실히|틀림없이|무조건|100%|보장합니다|예언|재물운이 (좋아집니다|올라갑니다)/;
 const empty = () => ({ version: 0, items: {} });
@@ -57,7 +58,7 @@ export async function onRequestPut({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   let body; try { body = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); }
   body = body || {};
-  const by = decodeURIComponent(request.headers.get('x-reviewer') || '').slice(0, 30), at = new Date().toISOString();
+  const by = safeDecode(request.headers.get('x-reviewer') || '').slice(0, 30), at = new Date().toISOString();
   const doc = (await env.GLOSSARY_KV.get(KEY, 'json')) || empty();
   const r = transition(doc, body, at, by);
   if (r.error) return json({ error: r.error }, r.status);

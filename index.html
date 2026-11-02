@@ -657,6 +657,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 </head>
 <body>
 <div id="app"></div>
+<script src="feature-flags.js"></script>
 <script src="engine.js"></script>
 <script src="luck-interpret.js"></script>
 <script src="region-data.js"></script>
@@ -6265,17 +6266,17 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 연도(앞뒤 2년) 또는 선택한 해의 12개월을 환경 5영역의 부각 정도(강조·보통·약함)로 나란히 보여 준다. 길흉이나 점수가 아니다.
   const TL_SHORT = { work: '직업', wealth: '재물', rel: '인연', move: '이동', learn: '학습' };
   function envTimeline(kind) {
-    const LI = window.MantraLuckInterpret, ch = S.ch; if (!LI) return '';
+    const LI = window.MantraLuckInterpret, ch = S.ch; if (!LI || window.MANTRA_FLAGS.timeline === false) return '';
     let rows = [], selI = -1, label = kind === 'seun' ? '해' : '달';
     try {
       if (kind === 'seun') {
         const Y0 = S.selYear, ys = []; for (let y = Y0 - 2; y <= Y0 + 2; y++) if (y >= M.MIN_Y && y <= M.MAX_Y - 2) ys.push(y);
         const its = ys.map(y => M.seunRange(ch, y, y)[0]);
-        rows = its.map((x, i) => ({ x, pick: 'seun:' + x.year, name: x.year + '년', r: LI.build(M, ch, x, 'seun', { daeun: x.daeun, prev: i ? its[i - 1] : M.seunRange(ch, x.year - 1, x.year - 1)[0] }) }));
+        rows = its.map((x, i) => ({ x, pick: 'seun:' + x.year, name: x.year + '년', r: LI.buildCached(M, ch, x, 'seun', { daeun: x.daeun, prev: i ? its[i - 1] : M.seunRange(ch, x.year - 1, x.year - 1)[0] }) }));
         selI = ys.indexOf(Y0);
       } else {
         const Y = S.selYear, wl = M.wolun(ch, Y), se = M.seunRange(ch, Y, Y)[0], pm = M.wolun(ch, Y - 1)[11];
-        rows = wl.map((x, i) => ({ x, pick: 'wolun:' + i, name: kstYMD(x.startMs)[1] + '월', r: LI.build(M, ch, x, 'wolun', { seun: se, daeun: M.daeunAt(ch, x.startMs), prev: i ? wl[i - 1] : pm }) }));
+        rows = wl.map((x, i) => ({ x, pick: 'wolun:' + i, name: kstYMD(x.startMs)[1] + '월', r: LI.buildCached(M, ch, x, 'wolun', { seun: se, daeun: M.daeunAt(ch, x.startMs), prev: i ? wl[i - 1] : pm }) }));
         selI = S.sel && S.sel.kind === 'wolun' ? S.sel.i : rows.findIndex((q, i) => NOW >= q.x.startMs && (!wl[i + 1] || NOW < wl[i + 1].startMs));
       }
     } catch (e) { return ''; }
@@ -6300,7 +6301,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function regLoad() { if (regLoaded || !window.MantraRegion) return; regLoaded = true; fetch('/api/region').then(r => r.ok ? r.json() : null).then(d => { if (d && window.MantraRegion.merge(d)) render(); }).catch(() => { }); }
   const srcOf = (r, k) => (r.sources || []).find(q => q.fact === k);
   function regionCard(sel, du, se, curY) {
-    const RG = window.MantraRegion, LI = window.MantraLuckInterpret; if (!RG || !LI) return '';
+    const RG = window.MantraRegion, LI = window.MantraLuckInterpret; if (!RG || !LI || window.MANTRA_FLAGS.region === false) return '';
     regLoad();
     const home = RG.get(REG.home), cmp = RG.get(REG.cmp), ch = S.ch;
     const opts = v => '<option value="">선택 안 함</option>' + RG.REGIONS.map(r => '<option value="' + r.id + '"' + (r.id === v ? ' selected' : '') + '>' + esc(r.name) + ' (' + esc(r.admin) + ')</option>').join('');
@@ -6311,7 +6312,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (sel && sel.kind === 'daeun' && ch.daeun.list[sel.i]) { item = ch.daeun.list[sel.i]; lab = item.startAge + '세 대운'; kind = 'daeun'; }
     else if (sel && sel.kind === 'seun') { const q = M.seunRange(ch, sel.Y, sel.Y)[0]; if (q) { item = q; lab = sel.Y + '년 세운'; } }
     let linkHTML = '';
-    if (home && item) { try { const r = LI.build(M, ch, item, kind, interpCtx(item, kind)); const lk = RG.link(home, r.topAreas, lab); linkHTML = lk.length ? '<div class="ib-k">' + esc(lab) + '의 주제와 ' + esc(home.name) + '의 환경 자료</div><ul class="ib-ul">' + lk.map(l => '<li>' + esc(l.text) + '</li>').join('') + '</ul>' : ''; } catch (e) { } }
+    if (home && item) { try { const r = LI.buildCached(M, ch, item, kind, interpCtx(item, kind)); const lk = RG.link(home, r.topAreas, lab); linkHTML = lk.length ? '<div class="ib-k">' + esc(lab) + '의 주제와 ' + esc(home.name) + '의 환경 자료</div><ul class="ib-ul">' + lk.map(l => '<li>' + esc(l.text) + '</li>').join('') + '</ul>' : ''; } catch (e) { } }
     const factsTbl = r => '<table class="tl-t"><tbody>' + RG.facts(r).map(f => '<tr><td>' + esc(f.label) + '</td><td>' + (f.value == null ? '<span class="muted">자료 부족</span>' : esc(f.value) + (srcOf(r, f.key) ? ' <span class="muted small">· <a href="' + esc(srcOf(r, f.key).url) + '" target="_blank" rel="noopener noreferrer">' + esc(srcOf(r, f.key).name) + '</a> ' + esc(srcOf(r, f.key).updated) + '</span>' : '')) + '</td></tr>').join('') + '</tbody></table>';
     const trad = r => { const t = RG.tradition(r); return '<p class="small"><b>' + esc(r.name) + '</b> — ' + esc(t.basis) + '</p>'; };
     let body = '';
@@ -6331,9 +6332,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   let phrLoaded = false;
   function phrLoad() { if (phrLoaded || !window.MantraLuckInterpret) return; phrLoaded = true; fetch('/api/luck-phrases').then(r => r.ok ? r.json() : null).then(d => { if (d && window.MantraLuckInterpret.applyPublished(d.published)) render(); }).catch(() => { }); }
   function interpBox(x, kind) {
-    const LI = window.MantraLuckInterpret; if (!LI || !x || !x.ev) return '';
+    const LI = window.MantraLuckInterpret; if (!LI || !x || !x.ev || window.MANTRA_FLAGS.interpret === false) return '';
     phrLoad();
-    let r; try { r = LI.build(M, S.ch, x, kind, interpCtx(x, kind)); } catch (e) { return ''; }
+    let r; try { r = LI.buildCached(M, S.ch, x, kind, interpCtx(x, kind)); } catch (e) { return ''; }
     const li = a => a.length ? '<ul class="ib-ul">' + a.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '';
     const ev = r.evidence;
     return '<div class="ib">' +
