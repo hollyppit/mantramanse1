@@ -24,7 +24,18 @@
     return { id: r[0], country: 'KR', countryName: '대한민국', name: r[1], admin: r[2], lat: r[3], lon: r[4], tz: 'Asia/Seoul', facts: emptyFacts(), sources: [], updated: null, version: 1 };
   });
   var BY = {}; REGIONS.forEach(function (r) { BY[r.id] = r; });
-  var get = function (id) { return BY[id] || null; };
+  // ───────────── 시·군·구 (region-gu-data.js 가 있을 때) ─────────────
+  // id 'gu:11230' 형태. 방위 기준점은 소속 시·도의 면적 중심이다(전국 기준점과 다름 — 구 단위에서는 시·도 안에서의 방위를 본다).
+  var PROV_SHORT = { 11: '서울', 21: '부산', 22: '대구', 23: '인천', 24: '광주', 25: '대전', 26: '울산', 29: '세종', 31: '경기', 32: '강원', 33: '충북', 34: '충남', 35: '전북', 36: '전남', 37: '경북', 38: '경남', 39: '제주' };
+  var GUD = function () { return G.MantraRegionGu || null; };
+  function provOf(code) { var d = GUD(); if (!d) return null; for (var i = 0; i < d.PROVINCES.length; i++) if (d.PROVINCES[i][0] === String(code).slice(0, 2)) return d.PROVINCES[i]; return null; }
+  function guObj(code) {
+    var d = GUD(); if (!d) return null; var g = null; for (var i = 0; i < d.GU.length; i++) if (d.GU[i][0] === code) { g = d.GU[i]; break; } if (!g) return null;
+    var pv = provOf(code); return { id: 'gu:' + code, gu: true, country: 'KR', countryName: '대한민국', name: PROV_SHORT[+code.slice(0, 2)] + ' ' + g[1], admin: pv[1], lat: g[2], lon: g[3], tz: 'Asia/Seoul', facts: emptyFacts(), sources: [], updated: null, version: 1, provCode: pv[0] };
+  }
+  function provinces() { var d = GUD(); return d ? d.PROVINCES.map(function (p) { return { code: p[0], name: p[1], short: PROV_SHORT[+p[0]] }; }) : []; }
+  function guList(provCode) { var d = GUD(); return d ? d.GU.filter(function (g) { return g[0].slice(0, 2) === String(provCode); }).map(function (g) { return { id: 'gu:' + g[0], code: g[0], name: g[1] }; }) : []; }
+  var get = function (id) { if (BY[id]) return BY[id]; return typeof id === 'string' && id.indexOf('gu:') === 0 ? guObj(id.slice(3)) : null; };
 
   // ───────────── 전통 방위오행 (상징 해석, 참고용) ─────────────
   // 8방위 → 전통 대응 오행. 후천팔괘 기준: 동·동남=木, 남=火, 서·서북=金, 북=水, 동북·서남·중앙=土.
@@ -32,12 +43,25 @@
     { k: '북', el: '수', min: -22.5 }, { k: '북동', el: '토', min: 22.5 }, { k: '동', el: '목', min: 67.5 }, { k: '남동', el: '목', min: 112.5 },
     { k: '남', el: '화', min: 157.5 }, { k: '남서', el: '토', min: 202.5 }, { k: '서', el: '금', min: 247.5 }, { k: '북서', el: '금', min: 292.5 },
   ];
-  function bearing(r) {   // 기준점에서 본 방위각(0=북, 시계방향). 위도 보정한 평면 근사
-    var dy = r.lat - REF.lat, dx = (r.lon - REF.lon) * Math.cos(REF.lat * Math.PI / 180), dist = Math.sqrt(dx * dx + dy * dy);
+  function bearing(r, ref) {   // 기준점에서 본 방위각(0=북, 시계방향). 위도 보정한 평면 근사
+    ref = ref || REF; var dy = r.lat - ref.lat, dx = (r.lon - ref.lon) * Math.cos(ref.lat * Math.PI / 180), dist = Math.sqrt(dx * dx + dy * dy);
     var a = Math.atan2(dx, dy) * 180 / Math.PI; if (a < -22.5) a += 360;
     return { deg: a, dist: dist };
   }
+  function sector(deg) { var d = DIR[0], i = 0; DIR.forEach(function (x, k) { if (deg >= x.min) { d = x; i = k; } }); return { d: d, i: i }; }
+  // 구 단위: 소속 시·도 면적 중심에서 본 방위. 시·도 반경의 20% 이내는 중앙, 방위 경계 3° 이내는 인접 방위를 함께 알린다(좌표 오차로 방위가 바뀔 수 있음).
+  function guTradition(r) {
+    var pv = provOf(r.provCode), ref = { lat: pv[2], lon: pv[3] }, b = bearing(r, ref), refName = pv[1] + ' 면적 중심';
+    var gl = guList(r.provCode);
+    if (gl.length === 1 || b.dist < 0.2 * pv[4]) return { direction: '중앙', element: '토', near: null, basis: refName + '에 가까워 중앙으로 봅니다.', refPoint: refName, kind: 'symbolic', note: NOTE };
+    var sc = sector(b.deg), x = ((b.deg + 22.5) % 45 + 45) % 45, near = null;
+    if (x < 3) near = DIR[(sc.i + 7) % 8]; else if (x > 42) near = DIR[(sc.i + 1) % 8];
+    return { direction: sc.d.k, element: sc.d.el, near: near ? { direction: near.k, element: near.el } : null,
+      basis: refName + '에서 본 ' + sc.d.k + '쪽이며, 전통 방위오행으로는 ' + sc.d.el + '에 대응합니다.' + (near ? ' 방위 경계에 가까워 ' + near.k + '쪽(' + near.el + ')과도 맞닿아 있어, 좌표에 따라 방위가 달라질 수 있습니다.' : ''),
+      refPoint: refName, kind: 'symbolic', note: NOTE };
+  }
   function tradition(r) {
+    if (r.gu) return guTradition(r);
     var b = bearing(r);
     if (b.dist < 0.35) return { direction: '중앙', element: '토', basis: '방위 기준점(' + REF.name + ')과 가까워 중앙으로 봅니다.', refPoint: REF.name, kind: 'symbolic', note: NOTE };
     var d = DIR[0]; DIR.forEach(function (x) { if (b.deg >= x.min) d = x; });
@@ -91,7 +115,7 @@
     return { role: role, tone: good ? 'good' : bad ? 'bad' : 'neutral',
       text: '이 사주에서 ' + josa(el) + ' ' + role + ' 오행이라, ' + (good ? '전통적으로 이 방위가 상징적으로 맞는 편으로 읽습니다.' : bad ? '상징적으로는 맞지 않는 편으로 읽지만, 실제 생활 조건이 더 중요하니 참고로만 보세요.' : '특별한 도움이나 부담으로 읽지 않습니다.') };
   }
-  var api = { fit: fit, merge: merge, VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
+  var api = { provinces: provinces, guList: guList, fit: fit, merge: merge, VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
   G.MantraRegion = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

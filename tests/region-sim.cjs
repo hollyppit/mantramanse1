@@ -34,5 +34,21 @@ ok(lk.length === r.topAreas.length && lk.every(l => /자료 부족/.test(l.text)
   R.REGIONS.forEach(r => R.fit(R.tradition(r).element, roles));
   ok(JSON.stringify([ch2.pillars, ch2.weights, ch2.yong]) === snap, 'fit이 원국을 바꿈');
 }
+// 7 시·군·구: 데이터 정합성·시·도 면적 중심 기준 방위·경계/중앙 표시·원국 불변
+{
+  const GD = require(path.join(root, 'region-gu-data.js')); globalThis.MantraRegionGu = GD;
+  ok(GD.GU.length === 250 && GD.PROVINCES.length === 17 && new Set(GD.GU.map(g => g[0])).size === 250, '시·군·구 250/시·도 17/코드 중복');
+  ok(GD.GU.every(g => g[2] > 33 && g[2] < 39 && g[3] > 124.5 && g[3] < 131.0 && GD.PROVINCES.some(p => p[0] === g[0].slice(0, 2))), '좌표 범위·시·도 코드');
+  ok(R.provinces().length === 17 && R.guList('11').length === 25 && R.guList('31').length === 42, '시·도별 구 개수(서울 25·경기 42)');
+  // 알려진 지리와 대조: 서울 안에서 강남은 남동, 종로는 북, 부산에서 해운대는 동, 제주에서 서귀포는 남쪽(남 또는 경계), 제주시는 북쪽
+  const dir = c => R.tradition(R.get('gu:' + c));
+  ok(dir('11230').direction === '남동' && dir('11010').direction === '북' && dir('21090').direction === '동', '서울·부산 구 방위');
+  ok(['남'].includes(dir('39020').direction) && dir('39010').direction === '북', '제주 방위');
+  ok(dir('29010').direction === '중앙', '세종(단일 구)은 중앙');
+  let near = 0, mid = 0; GD.GU.forEach(g => { const t = dir(g[0]); ok(t.kind === 'symbolic' && /면적 중심/.test(t.refPoint) && /더해지지 않/.test(t.note) && ['목', '화', '토', '금', '수'].includes(t.element), '구 해석 형식 ' + g[1]); if (t.near) { near++; ok(t.basis.includes('경계'), '경계 문구 ' + g[1]); } if (t.direction === '중앙') mid++; });
+  ok(near > 0 && near < 125 && mid > 0, '경계 ' + near + '·중앙 ' + mid);
+  ok(R.get('gu:00000') === null && R.get('seoul').id === 'seoul', '없는 코드/기존 도시');
+  const ch3 = M.compute(inp), snap3 = JSON.stringify([ch3.pillars, ch3.weights, ch3.yong]); GD.GU.forEach(g => R.fit(dir(g[0]).element, ch3.yong.roles)); ok(JSON.stringify([ch3.pillars, ch3.weights, ch3.yong]) === snap3, '구 단위 연결이 원국을 바꿈');
+}
 if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log('  ' + f)); process.exit(1); }
 console.log('모든 검증 통과 · 지역 ' + R.REGIONS.length + '곳 · 통계 항목은 출처 확인 전까지 모두 자료 부족');

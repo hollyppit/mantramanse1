@@ -25,6 +25,8 @@
 
 **단순화 갱신(같은 날):** 지도 카드는 전통 명리로 계산되는 것만 보여 주도록 줄였습니다. 도시별 방위오행과, 이 사주의 용신 체계에서 그 오행이 용신·희신·한신·구신·기신 중 무엇인지(`RegionData.fit`)만 표시합니다. 통계 표·"자료 부족"·지역 비교 표는 화면에서 뺐고, 관리자 "지역 데이터" 탭도 메뉴에서 제거했습니다(`/api/region`과 관련 코드는 향후 확장용으로 남겨 두었고 화면에서는 호출하지 않습니다).
 
+**시·군·구 단위 추가:** 거주지·비교 지역 선택 목록에 전국 250개 시·군·구를 시·도별로 묶어 넣었습니다(주요 도시 17곳은 그대로). 구 단위의 방위는 **소속 시·도의 면적 중심**에서 본 8방위이고(전국 기준점인 대전과 다름), 시·도 반경 20% 이내는 중앙, 방위 경계 3° 이내는 "인접 방위와도 맞닿아 있음"을 함께 표시합니다(250개 중 39곳). 좌표는 통계청(KOSTAT) 센서스용 행정구역경계 2018(`southkorea/southkorea-maps`, 250개 시·군·구)에서 면적 중심을 계산해 `region-gu-data.js`(11KB)로 만들었고, 18MB 원본은 저장소에 넣지 않았으며 생성 스크립트는 `tools/build-region-gu.cjs`입니다. **공공데이터 이용 조건(출처 표시)은 확인하지 못했으니 배포 전에 확인이 필요합니다.** 동 단위, 2018년 이후 행정구역 개편(예: 군위군의 대구 편입, 시·도 명칭 변경)은 반영되지 않았습니다.
+
 ## 2. 변경 파일
 신규: `luck-interpret.js`, `region-data.js`, `feature-flags.js`, `functions/api/region.js`, `functions/api/luck-phrases.js`, `report/admin/v2-region.js`, `report/admin/v2-luckenv.js`, 테스트 8개(`luck-interpret-sim`, `region-sim`, `region-api-sim`, `luck-phrases-api-sim`, `luck-boundary-sim`, `luck-cache-sim` 등), 문서 3개.
 수정: `index.html`, `report/admin/index.html`, `report/admin/navigation.js`, `tests/engine-baseline.txt`, `tests/volatility-sim.js`.

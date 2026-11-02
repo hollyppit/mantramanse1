@@ -660,6 +660,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="feature-flags.js"></script>
 <script src="engine.js"></script>
 <script src="luck-interpret.js"></script>
+<script src="region-gu-data.js"></script>
 <script src="region-data.js"></script>
 <script src="glossary-cases.js"></script>
 <script src="glossary-sections.js"></script>
@@ -6303,7 +6304,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function regionCard(sel, du, se, curY) {
     const RG = window.MantraRegion, LI = window.MantraLuckInterpret; if (!RG || !LI || window.MANTRA_FLAGS.region === false) return '';
     const home = RG.get(REG.home), cmp = RG.get(REG.cmp), ch = S.ch;
-    const opts = v => '<option value="">선택 안 함</option>' + RG.REGIONS.map(r => '<option value="' + r.id + '"' + (r.id === v ? ' selected' : '') + '>' + esc(r.name) + ' (' + esc(r.admin) + ')</option>').join('');
+    const o1 = (id, t, v) => '<option value="' + id + '"' + (id === v ? ' selected' : '') + '>' + esc(t) + '</option>';
+    const opts = v => '<option value="">선택 안 함</option><optgroup label="주요 도시">' + RG.REGIONS.map(r => o1(r.id, r.name + ' (' + r.admin + ')', v)).join('') + '</optgroup>' + RG.provinces().map(pv => '<optgroup label="' + esc(pv.name) + ' · 시·군·구">' + RG.guList(pv.code).map(g => o1(g.id, g.name, v)).join('') + '</optgroup>').join('');
     const px = r => ((r.lon - 125.8) / 4.6 * 300).toFixed(0), py = r => ((38.6 - r.lat) / 5.8 * 330).toFixed(0);
     const dots = RG.REGIONS.map(r => { const c = home && r.id === home.id ? 'home' : cmp && r.id === cmp.id ? 'cmp' : ''; return '<g class="rg-d ' + c + '" data-reg-pick="' + r.id + '" role="button" tabindex="0" aria-label="' + esc(r.name) + '"><circle cx="' + px(r) + '" cy="' + py(r) + '" r="' + (c ? 7 : 5) + '"/><text x="' + (+px(r) + 9) + '" y="' + (+py(r) + 4) + '">' + esc(r.name) + '</text></g>'; }).join('');
     // 사주 연결: 이 사주의 용신 체계에서 방위오행이 어떤 역할인지 읽는다. 원국에 더하거나 용신을 바꾸지 않는다(참고 표시).
