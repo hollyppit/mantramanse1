@@ -5,6 +5,8 @@
 //        save     본문 수정 → 초안(draft)이 되고 게시본에서 즉시 빠진다
 //        approve  초안 → 승인(reviewed). 수정 없이 기본 문구를 승인할 때도 같은 동작
 //        publish  승인된 것만 → 게시(published)
+//        approve_publish  승인과 게시를 한 번에(관리자 화면의 "게시" 버튼). 검사는 승인과 같다
+//        bulk     { ids:[…(최대 200)], op:'publish'|'unpublish' } 여러 문구를 한 번에. 실패한 항목은 사유와 함께 돌려주고 나머지는 처리한다
 //        unpublish 게시 → 승인 상태로 되돌림(공개 화면은 기본 문구로 돌아감)
 //        restore  이력 v번의 본문으로 되돌림(초안)
 // 저장은 KV 키 luckenv:phrases 하나만 쓴다. 기존 데이터·키와 섞이지 않는다.
@@ -35,6 +37,7 @@ export function transition(doc, body, at, by) {
   switch (body.action) {
     case 'save': { const bad = validateText(body.text, body.id, doc); if (bad) return { error: bad, status: 400 }; it.text = body.text.trim(); it.status = 'draft'; it.version += 1; log(); break; }
     case 'approve': { if (it.status === 'published') return { error: '이미 게시된 문구입니다', status: 400 }; const bad = validateText(it.text, body.id, doc); if (bad) return { error: bad, status: 400 }; it.status = 'reviewed'; log(); break; }
+    case 'approve_publish': { if (it.status === 'published') return { error: '이미 게시된 문구입니다', status: 400 }; const bad = validateText(it.text, body.id, doc); if (bad) return { error: bad, status: 400 }; it.status = 'published'; log(); break; }
     case 'publish': { if (it.status !== 'reviewed') return { error: '승인된 문구만 게시할 수 있습니다', status: 400 }; it.status = 'published'; log(); break; }
     case 'unpublish': { if (it.status !== 'published') return { error: '게시된 문구가 아닙니다', status: 400 }; it.status = 'reviewed'; log(); break; }
     case 'restore': { const h = it.history.find(x => x.v === body.v); if (!h) return { error: '이력을 찾을 수 없습니다', status: 404 }; const bad = validateText(h.text, body.id, doc); if (bad) return { error: bad, status: 400 }; it.text = h.text; it.status = 'draft'; it.version += 1; log(); break; }
@@ -60,6 +63,19 @@ export async function onRequestPut({ request, env }) {
   body = body || {};
   const by = safeDecode(request.headers.get('x-reviewer') || '').slice(0, 30), at = new Date().toISOString();
   const doc = (await env.GLOSSARY_KV.get(KEY, 'json')) || empty();
+  if (body.action === 'bulk') {
+    if (!Array.isArray(body.ids) || !body.ids.length || body.ids.length > 200 || !body.ids.every(i => typeof i === 'string')) return json({ error: 'ids는 1~200개의 문구 ID여야 합니다' }, 400);
+    if (!['publish', 'unpublish'].includes(body.op)) return json({ error: '지원하지 않는 작업입니다' }, 400);
+    const done = [], skipped = [], failed = [];
+    for (const id of [...new Set(body.ids)]) {
+      const cur = doc.items[id] && doc.items[id].status;
+      if ((body.op === 'publish' && cur === 'published') || (body.op === 'unpublish' && cur !== 'published')) { skipped.push(id); continue; }
+      const r = transition(doc, { id, action: body.op === 'publish' ? 'approve_publish' : 'unpublish' }, at, by);
+      if (r.error) failed.push({ id, error: r.error }); else done.push(id);
+    }
+    if (done.length) await env.GLOSSARY_KV.put(KEY, JSON.stringify(doc));
+    return json({ ok: true, version: doc.version, done: done.length, skipped: skipped.length, failed });
+  }
   const r = transition(doc, body, at, by);
   if (r.error) return json({ error: r.error }, r.status);
   await env.GLOSSARY_KV.put(KEY, JSON.stringify(doc));

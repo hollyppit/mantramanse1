@@ -1,5 +1,5 @@
-/* 관리자 "운세 환경 문구" 탭 — ① 환경 해석 문구의 검수(수정·승인·게시·되돌리기) ② 통합 운세 시뮬레이터(해석 추적)
-   API: /api/luck-phrases. 문구는 승인 → 게시 두 단계를 거쳐야 사용자 화면에 반영되고, 수정하면 게시본에서 즉시 빠진다.
+/* 관리자 "운세 환경 문구" 탭 — ① 환경 해석 문구의 게시(체크 후 일괄 게시·수정 후 저장하고 게시·되돌리기) ② 통합 운세 시뮬레이터(해석 추적)
+   API: /api/luck-phrases. 화면에서는 "게시" 한 번으로 끝나고(내부적으로 승인+게시), 게시한 문구만 사용자 화면에 반영된다. 수정하면 게시본에서 즉시 빠진다.
    시뮬레이터는 브라우저에서 engine.js·luck-interpret.js를 그대로 써서 사용자 화면과 같은 결과를 보여 주며, 서버에 아무것도 저장하지 않는다. */
 (function () {
   'use strict';
@@ -7,8 +7,8 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var $ = function (s) { return root.querySelector(s); };
   var BASE = {};
-  var S = { items: {}, phrases: [], version: 0, f: { type: '', status: '', q: '' }, cur: null };
-  var ST = { draft: '초안', reviewed: '승인(게시 전)', published: '게시됨' }, TYPE = { core: '핵심 기운', scene: '상황', good: '유리 조건', bad: '불리 조건', act: '대응' };
+  var S = { items: {}, phrases: [], version: 0, f: { type: '', status: '', q: '' }, cur: null, sel: {} };
+  var ST = { draft: '미게시', reviewed: '미게시', published: '게시됨' }, FST = { unpub: '미게시', published: '게시됨' }, TYPE = { core: '핵심 기운', scene: '상황', good: '유리 조건', bad: '불리 조건', act: '대응' };
   var stOf = function (id) { return (S.items[id] && S.items[id].status) || 'draft'; };
   var txOf = function (p) { return (S.items[p.id] && S.items[p.id].text) || p.text; };
   function call(method, qs, body) {
@@ -23,33 +23,62 @@
       S.items = d.items || {}; S.phrases = d.phrases || []; S.version = d.version || 0; draw(); if (note) msg(note);
     });
   }
-  function counts() { var c = { draft: 0, reviewed: 0, published: 0 }; S.phrases.forEach(function (p) { c[stOf(p.id)]++; }); return c; }
+  function counts() { var c = { published: 0, unpub: 0 }; S.phrases.forEach(function (p) { c[stOf(p.id) === 'published' ? 'published' : 'unpub']++; }); return c; }
+  function visible() {
+    var f = S.f;
+    return S.phrases.filter(function (p) { var pub = stOf(p.id) === 'published'; return (!f.type || p.type === f.type) && (!f.status || (f.status === 'published' ? pub : !pub)) && (!f.q || (p.id + txOf(p)).indexOf(f.q) >= 0); });
+  }
+  var selIds = function () { return Object.keys(S.sel).filter(function (k) { return S.sel[k]; }); };
+  function bulk(ids, op) {
+    if (!ids.length) return;
+    var pubWord = op === 'publish';
+    if (!confirm(ids.length + '건을 ' + (pubWord ? '게시' : '게시 취소') + '합니다.' + (pubWord ? '\n게시한 문구는 사용자 화면의 해석에 그대로 쓰입니다(운세 환경 해석 기능이 꺼져 있으면 아직 보이지 않습니다).\n내용을 확인하셨나요?' : '\n사용자 화면은 기본 문구로 돌아갑니다.'))) return;
+    var chunks = [], i; for (i = 0; i < ids.length; i += 200) chunks.push(ids.slice(i, i + 200));
+    var done = 0, skipped = 0, failed = [];
+    chunks.reduce(function (p, ch) { return p.then(function () { return call('PUT', '', { action: 'bulk', ids: ch, op: op }).then(function (d) { if (!d._ok) failed.push({ id: '(요청)', error: d.error || '실패' }); else { done += d.done; skipped += d.skipped; failed = failed.concat(d.failed || []); } }); }); }, Promise.resolve())
+      .then(function () { S.sel = {}; load((pubWord ? '게시 ' : '게시 취소 ') + done + '건' + (skipped ? ' · 이미 처리됨 ' + skipped + '건' : '') + (failed.length ? ' · 실패 ' + failed.length + '건: ' + failed.slice(0, 3).map(function (x) { return x.id + ' (' + x.error + ')'; }).join(', ') : '')); });
+  }
   function draw() {
-    var c = counts(), f = S.f;
-    var list = S.phrases.filter(function (p) { return (!f.type || p.type === f.type) && (!f.status || stOf(p.id) === f.status) && (!f.q || (p.id + txOf(p)).indexOf(f.q) >= 0); });
-    root.innerHTML = '<div class="card"><h3 style="margin:0 0 6px;color:var(--gold)">운세 환경 문구 검수</h3>' +
-      '<p class="muted" style="margin:0 0 8px">문구는 <b>승인 → 게시</b> 두 단계를 거쳐야 사용자 화면에 반영됩니다. 수정하면 초안으로 돌아가 게시본에서 즉시 빠지고(사용자에게는 기본 문구), 같은 문구가 이미 있거나 단정·반말 표현이면 저장되지 않습니다. 전체 ' + S.phrases.length + '건 · 초안 ' + c.draft + ' · 승인 ' + c.reviewed + ' · 게시 ' + c.published + '</p>' +
+    var c = counts(), f = S.f, list = visible(), shown = list.slice(0, 200), n = selIds().length, allSel = shown.length && shown.every(function (p) { return S.sel[p.id]; });
+    root.innerHTML = '<div class="card"><h3 style="margin:0 0 6px;color:var(--gold)">운세 환경 문구 게시</h3>' +
+      '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 12px;margin:0 0 8px;line-height:1.7"><b>사용법</b><br>① 목록의 문구를 읽어 봅니다.<br>② 괜찮으면 체크하고 <b>[선택 게시]</b>, 전부 괜찮으면 <b>[목록 전체 게시]</b>를 누릅니다.<br>③ 고치려면 문구를 눌러 본문을 수정한 뒤 <b>[저장하고 게시]</b>를 누릅니다.</div>' +
+      '<p class="muted" style="margin:0 0 8px">게시한 문구만 사용자 화면에 반영되고, 수정하면 게시본에서 빠집니다(사용자에게는 기본 문구). 단정·반말 표현이나 같은 문구는 저장되지 않습니다. 운세 환경 해석 기능이 꺼져 있으면 게시해도 아직 사용자에게 보이지 않습니다. <b>전체 ' + S.phrases.length + '건 · 게시됨 ' + c.published + ' · 미게시 ' + c.unpub + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><label>유형 <select id="leT"><option value="">전체</option>' + Object.keys(TYPE).map(function (k) { return '<option value="' + k + '"' + (f.type === k ? ' selected' : '') + '>' + TYPE[k] + '</option>'; }).join('') + '</select></label>' +
-      '<label>상태 <select id="leS"><option value="">전체</option>' + Object.keys(ST).map(function (k) { return '<option value="' + k + '"' + (f.status === k ? ' selected' : '') + '>' + ST[k] + '</option>'; }).join('') + '</select></label>' +
-      '<label>검색 <input id="leQ" value="' + esc(f.q) + '" style="width:160px"></label><span id="leMsg" class="muted"></span></div>' +
-      '<div style="overflow:auto;max-height:340px;margin-top:8px"><table style="width:100%;font-size:.86rem"><thead><tr><th>ID</th><th>유형</th><th>본문</th><th>상태</th></tr></thead><tbody>' +
-      list.slice(0, 200).map(function (p) { return '<tr data-id="' + esc(p.id) + '" style="cursor:pointer' + (S.cur === p.id ? ';background:rgba(255,255,255,.06)' : '') + '"><td>' + esc(p.id) + '</td><td>' + (TYPE[p.type] || '') + '</td><td>' + esc(txOf(p)) + '</td><td>' + ST[stOf(p.id)] + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<label>상태 <select id="leS"><option value="">전체</option>' + Object.keys(FST).map(function (k) { return '<option value="' + k + '"' + (f.status === k ? ' selected' : '') + '>' + FST[k] + '</option>'; }).join('') + '</select></label>' +
+      '<label>검색 <input id="leQ" value="' + esc(f.q) + '" style="width:160px"></label></div>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px"><button class="btn" id="leBp"' + (n ? '' : ' disabled') + '>선택 게시 (' + n + ')</button><button class="btn" id="leBu"' + (n ? '' : ' disabled') + '>선택 게시 취소</button>' +
+      '<button class="btn" id="leAp"' + (list.length ? '' : ' disabled') + '>목록 전체 게시 (' + Math.min(list.length, 200) + ')</button><button class="btn" id="leAu"' + (list.length ? '' : ' disabled') + '>목록 전체 게시 취소</button><span id="leMsg" class="muted"></span></div>' +
+      '<div style="overflow:auto;max-height:340px;margin-top:8px"><table style="width:100%;font-size:.86rem"><thead><tr><th style="width:28px"><input type="checkbox" id="leAll"' + (allSel ? ' checked' : '') + ' aria-label="보이는 문구 전체 선택"></th><th>ID</th><th>유형</th><th>본문</th><th>상태</th></tr></thead><tbody>' +
+      shown.map(function (p) { return '<tr data-id="' + esc(p.id) + '" style="cursor:pointer' + (S.cur === p.id ? ';background:rgba(255,255,255,.06)' : '') + '"><td><input type="checkbox" data-ck="' + esc(p.id) + '"' + (S.sel[p.id] ? ' checked' : '') + '></td><td>' + esc(p.id) + '</td><td>' + (TYPE[p.type] || '') + '</td><td>' + esc(txOf(p)) + '</td><td>' + ST[stOf(p.id)] + '</td></tr>'; }).join('') + '</tbody></table></div>' +
       (list.length > 200 ? '<p class="muted">처음 200건만 표시합니다. 필터로 좁혀 주세요.</p>' : '') + '<div id="leEd" style="margin-top:10px"></div></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">통합 운세 시뮬레이터</h3><div id="leSim"></div></div>';
     $('#leT').onchange = function () { S.f.type = this.value; draw(); }; $('#leS').onchange = function () { S.f.status = this.value; draw(); };
     $('#leQ').onchange = function () { S.f.q = this.value.trim(); draw(); };
+    $('#leAll').onchange = function () { var on = this.checked; shown.forEach(function (p) { S.sel[p.id] = on; }); draw(); };
+    root.querySelectorAll('input[data-ck]').forEach(function (cb) { cb.onclick = function (e) { e.stopPropagation(); S.sel[cb.dataset.ck] = cb.checked; var m = selIds().length; $('#leBp').disabled = $('#leBu').disabled = !m; $('#leBp').textContent = '선택 게시 (' + m + ')'; }; });
+    $('#leBp').onclick = function () { bulk(selIds(), 'publish'); }; $('#leBu').onclick = function () { bulk(selIds(), 'unpublish'); };
+    $('#leAp').onclick = function () { bulk(shown.map(function (p) { return p.id; }), 'publish'); }; $('#leAu').onclick = function () { bulk(shown.map(function (p) { return p.id; }), 'unpublish'); };
     root.querySelectorAll('tr[data-id]').forEach(function (tr) { tr.onclick = function () { S.cur = tr.dataset.id; draw(); }; });
     if (S.cur) editor(); drawSim();
   }
   function editor() {
     var p = S.phrases.filter(function (x) { return x.id === S.cur; })[0]; if (!p) return;
     var it = S.items[p.id], st = stOf(p.id), hist = (it && it.history || []).slice().reverse();
-    $('#leEd').innerHTML = '<div style="border-top:1px solid var(--line,#333);padding-top:10px"><b>' + esc(p.id) + '</b> · ' + ST[st] + ' · 버전 ' + (it ? it.version : 1) + (it && it.by ? ' · 마지막 ' + esc(it.by) : '') +
+    $('#leEd').innerHTML = '<div style="border-top:1px solid var(--line,#333);padding-top:10px"><b>' + esc(p.id) + '</b> · ' + ST[st] + (it && it.by ? ' · 마지막 ' + esc(it.by) : '') +
       '<p class="muted" style="margin:4px 0">기본 문구: ' + esc(p.text) + '</p><textarea id="leTx" rows="3" maxlength="200" style="width:100%">' + esc(txOf(p)) + '</textarea>' +
-      '<div class="row" style="gap:8px;margin-top:6px;flex-wrap:wrap"><button class="btn" data-a="save">저장(초안)</button><button class="btn" data-a="approve"' + (st === 'published' ? ' disabled' : '') + '>승인</button><button class="btn" data-a="publish"' + (st !== 'reviewed' ? ' disabled' : '') + '>게시</button><button class="btn" data-a="unpublish"' + (st !== 'published' ? ' disabled' : '') + '>게시 취소</button></div>' +
+      '<div class="row" style="gap:8px;margin-top:6px;flex-wrap:wrap"><button class="btn" data-a="pub">' + (st === 'published' ? '수정해서 다시 게시' : '저장하고 게시') + '</button><button class="btn" data-a="save">수정만 저장(미게시)</button><button class="btn" data-a="unpublish"' + (st !== 'published' ? ' disabled' : '') + '>게시 취소</button></div>' +
       (hist.length ? '<details style="margin-top:8px"><summary>이력 ' + hist.length + '건</summary><ul style="margin:6px 0 0 18px">' + hist.map(function (h) { return '<li>v' + h.v + ' · ' + ST[h.status] + ' · ' + esc(h.at.slice(0, 16).replace('T', ' ')) + (h.by ? ' · ' + esc(h.by) : '') + ' — ' + esc(h.text) + ' <button class="btn" data-rs="' + h.v + '">이 본문으로</button></li>'; }).join('') + '</ul></details>' : '') + '</div>';
-    root.querySelectorAll('#leEd [data-a]').forEach(function (b) { b.onclick = function () { var body = { id: p.id, action: b.dataset.a }; if (b.dataset.a === 'save') body.text = $('#leTx').value; call('PUT', '', body).then(function (d) { if (!d._ok) return msg(d.error || '실패했습니다', true); load('처리했습니다'); }); }; });
-    root.querySelectorAll('#leEd [data-rs]').forEach(function (b) { b.onclick = function () { call('PUT', '', { id: p.id, action: 'restore', v: +b.dataset.rs }).then(function (d) { if (!d._ok) return msg(d.error || '실패했습니다', true); load('되돌렸습니다'); }); }; });
+    var fail = function (d) { msg(d.error || '실패했습니다', true); };
+    root.querySelectorAll('#leEd [data-a]').forEach(function (b) {
+      b.onclick = function () {
+        var a = b.dataset.a, text = $('#leTx').value, changed = text.trim() !== txOf(p).trim();
+        if (a === 'unpublish') return call('PUT', '', { id: p.id, action: 'unpublish' }).then(function (d) { d._ok ? load('게시를 취소했습니다') : fail(d); });
+        if (a === 'save') return call('PUT', '', { id: p.id, action: 'save', text: text }).then(function (d) { d._ok ? load('저장했습니다(미게시)') : fail(d); });
+        // 저장하고 게시: 본문을 고쳤으면 저장 후, 아니면 바로 게시
+        (changed || st === 'published' ? call('PUT', '', { id: p.id, action: 'save', text: text }) : Promise.resolve({ _ok: true })).then(function (d) { if (!d._ok) return fail(d); return call('PUT', '', { id: p.id, action: 'approve_publish' }).then(function (d2) { d2._ok ? load('게시했습니다') : fail(d2); }); });
+      };
+    });
+    root.querySelectorAll('#leEd [data-rs]').forEach(function (b) { b.onclick = function () { call('PUT', '', { id: p.id, action: 'restore', v: +b.dataset.rs }).then(function (d) { if (!d._ok) return fail(d); load('되돌렸습니다(미게시) — 게시하려면 [저장하고 게시]를 누르세요'); }); }; });
   }
 
   // ── 시뮬레이터 ──
