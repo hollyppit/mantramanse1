@@ -283,6 +283,10 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .unchip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; background: var(--surface-2); color: var(--ink-2); }
 .unchip i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); display: inline-block; }
 .unchip b { color: var(--ink); }
+.undiff { margin: 6px 0 2px; font-size: 0.78rem; color: var(--ink-2); }
+.undiff summary { cursor: pointer; color: var(--ink-3); font-weight: 700; }
+.undiff ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 3px; }
+.undiff b { color: var(--ink); }
 .list .v .sgchip { margin: 2px 6px 2px 0; }
 .lts { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(92px, 1fr); gap: 6px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: thin; }
 .lt { border: 0; border-top: 4px solid var(--c, transparent); box-shadow: inset 0 0 0 1px var(--line); background: var(--surface); border-radius: 16px; padding: 8px 6px; display: grid; gap: 3px; justify-items: center; align-content: start; cursor: pointer; text-align: center; }
@@ -7897,6 +7901,19 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       return { stage: jwa ? c.unseongJwa : c.unseong, lab: jwa ? UN_WHO[k][0].replace('지', '주') : UN_WHO[k][0], sub: jwa ? M.gzName(ch.pillars[k]) : '', color: UN_WHO[k][1], ring: k === 'day' };
     });
   }
+  // 봉법과 좌법의 차이를 작게 접어 둔 설명. 예시는 내 사주에서 두 값이 다른 기둥(월주 → 년주 → 시주 순)으로 든다
+  function unDiffHTML(ch) {
+    let ex = '';
+    if (ch) {
+      const d = ch.pillars.day.s;
+      const k = ['month', 'year', 'hour'].find(q => ch.cells[q] && ch.cells[q].unseong !== ch.cells[q].unseongJwa);
+      if (k) { const p = ch.pillars[k], c = ch.cells[k], nm = UN_WHO[k][0].replace('지', '주'); ex = `<li>내 사주의 예: ${nm} ${M.gzName(p)} — 봉법은 일간 ${M.STEM[d]}이 ${M.BR[p.b]}에서 <b>${c.unseong}</b>, 좌법은 ${nm}의 천간 ${M.STEM[p.s]}이 ${M.BR[p.b]}에서 <b>${c.unseongJwa}</b>입니다.</li>`; }
+    }
+    return `<details class="undiff"><summary>봉법과 좌법의 차이</summary><ul>
+      <li><b>봉법</b> — 일간(나) 하나를 기준으로 네 지지에서 받는 힘. "나의 에너지가 그 자리에서 얼마나 센가". 원국 표에 크게 적힌 값입니다.</li>
+      <li><b>좌법</b> — 각 기둥의 천간이 바로 아래 자기 지지에서 받는 힘. "그 글자(십성)가 뿌리를 내려 단단한가". 표에 작게 적힌 값입니다.</li>
+      ${ex}<li>일주는 일간이 곧 그 기둥의 천간이라 두 값이 항상 같습니다. 봉법은 나의 상태를, 좌법은 각 십성의 뿌리(통근)를 볼 때 주로 씁니다.</li></ul></details>`;
+  }
   // 원국 탭: 봉법(일간 기준)과 좌법(각 기둥 천간 기준)을 바꿔 가며 네 지지가 곡선의 어디에 있는지 본다
   function unNatalHTML(ch, mode = S.unMode || 'bong') {
     const d = ch.pillars.day.s, jwa = mode === 'jwa', marks = unMarks(ch, mode);
@@ -7904,7 +7921,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const sum = strong >= 3 ? '힘이 센 단계에 놓인 곳이 많습니다.' : weak >= 3 ? '힘이 약한 단계에 놓인 곳이 많습니다. 약하다는 것은 섬세함·몰입·정리에 쓰이는 기운이라는 뜻이기도 합니다.' : '힘이 센 단계와 약한 단계가 섞여 있습니다.';
     const toggle = `<div class="seg" role="group" aria-label="12운성 보는 기준" style="margin:2px 0 8px"><button type="button" data-act="un:bong" aria-pressed="${!jwa}">봉법 · 일간 기준</button><button type="button" data-act="un:jwa" aria-pressed="${jwa}">좌법 · 각 기둥 천간 기준</button></div>`;
     const intro = jwa ? `각 기둥의 천간이 바로 아래 자기 지지에서 받는 힘(${term('좌법')})입니다. 그 기둥 천간의 뿌리가 튼튼한지 보는 값이고, 원국 표에 작게 적힌 값입니다.` : `${M.STEM[d]}${M.EL_K[M.stemEl(d)]} 일간(나)이 네 지지에서 받는 힘(${term('봉법')})입니다. 원국 표에 크게 적힌 값입니다.`;
-    return `${toggle}<p class="small" style="color:var(--ink-2)">${intro} ${sum} 단계 이름을 누르면 설명이 열립니다.</p>${unCurve({ marks })}${unChips(marks)}<p class="note">${unNote}</p>`;
+    return `${toggle}<p class="small" style="color:var(--ink-2)">${intro} ${sum} 단계 이름을 누르면 설명이 열립니다.</p>${unCurve({ marks })}${unChips(marks)}${unDiffHTML(ch)}<p class="note">${unNote}</p>`;
   }
   // 대운 카드: 10개의 대운이 곡선의 어디를 지나는지
   function unDaeunHTML(ch, du) {
@@ -7926,7 +7943,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     } else if (key === '봉법') {
       head = `<p class="small">일간(나)이 네 지지에서 받는 힘입니다.${ch ? ` 내 사주에서는 ${marks.map(m => `${m.lab} <b>${m.stage}</b>`).join(' · ')}입니다. 아래 점이 이 값입니다.` : ''}</p>`;
     } else head = '<p class="small">12단계가 한 바퀴 도는 모양입니다. 단계 이름을 누르면 그 설명이 열립니다.</p>';
-    return `<div class="facts"><b>에너지 곡선</b>${head}${unCurve({ marks, hi })}${marks.length ? unChips(marks) : ''}<p class="note">${unNote}</p></div>`;
+    return `<div class="facts"><b>에너지 곡선</b>${head}${unCurve({ marks, hi })}${marks.length ? unChips(marks) : ''}${key === '봉법' || key === '좌법' ? unDiffHTML(ch) : ''}<p class="note">${unNote}</p></div>`;
   }
 
   // ───────────── 차트 ─────────────

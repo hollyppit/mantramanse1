@@ -66,6 +66,12 @@ for (let i = 0; i < 80; i++) {
   ok(jw.includes('data-act="un:jwa" aria-pressed="true"') && jw.includes('data-act="un:bong" aria-pressed="false"') && nat.includes('data-act="un:bong" aria-pressed="true"') && nat.includes('data-act="un:jwa" aria-pressed="false"'), '봉법·좌법 스위치 상태가 맞지 않음');
   const shJ = X.unSheetHTML('좌법'), shB = X.unSheetHTML('봉법');
   keys.forEach(k => { ok(shJ.includes(`<b>${ch.cells[k].unseongJwa}</b>`), `좌법 팝업이 ${k}주의 좌법 값을 쓰지 않음`); ok(shB.includes(`<b>${ch.cells[k].unseong}</b>`), `봉법 팝업이 ${k}지의 봉법 값을 쓰지 않음`); });
+  // 봉법·좌법 차이 설명: 원국 카드와 봉법·좌법 팝업에만 붙고, 예시는 내 사주에서 두 값이 다른 기둥으로 만든다
+  ok(nat.includes('봉법과 좌법의 차이') && shJ.includes('봉법과 좌법의 차이') && shB.includes('봉법과 좌법의 차이'), '봉법·좌법 차이 설명이 빠짐');
+  ok(!X.unSheetHTML(X.UN_ORDER[i % 12]).includes('봉법과 좌법의 차이'), '단계 팝업에는 차이 설명이 붙지 않아야 함');
+  const dk = ['month', 'year', 'hour'].find(q => ch.cells[q] && ch.cells[q].unseong !== ch.cells[q].unseongJwa);
+  if (dk) ok(nat.includes('내 사주의 예') && nat.includes(`<b>${ch.cells[dk].unseong}</b>`) && nat.includes(`<b>${ch.cells[dk].unseongJwa}</b>`) && nat.includes(M.gzName(ch.pillars[dk])), `${dk}주 봉법·좌법 예시가 맞지 않음`);
+  else ok(!nat.includes('내 사주의 예'), '두 값이 같은데 예시가 붙음');
   const key = X.UN_ORDER[i % 12], sh = X.unSheetHTML(key);
   ok(/봉법/.test(sh) && /좌법/.test(sh), `${key} 팝업에 봉법·좌법 구분 안내가 없음`);
   ok(sh.includes(`세기 <b>${P[key]}</b>`) && /내 사주에서는|내 사주의 네 지지에는 없습니다/.test(sh), `${key} 팝업 요약이 없음`);
