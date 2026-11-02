@@ -690,6 +690,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="region-data.js"></script>
 <script src="region-reading-data.js"></script>
 <script src="region-reading.js"></script>
+<script src="wish-spots.js"></script>
 <script src="byeongyak.js"></script>
 <script src="jonggyeok.js"></script>
 <script src="gyeokguk.js"></script>
@@ -6569,6 +6570,38 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       '<p><b>이 방향의 ' + esc(d.element) + ' 기운</b> 십성 ' + esc(ev.grp) + ' · 억부 ' + esc(ev.eok) + ' · 조후 ' + esc(ev.johu) + ' · 월령 ' + esc({ wang: '旺', sang: '相', hyu: '休', su: '囚', sa: '死' }[ev.mstate]) + ' · 원국 비율 ' + ev.pct + '%<br>항목별 기여: 억부 ' + sc.eok + ' · 조후 ' + sc.johu + ' · 한난조습 ' + sc.climate + ' · 상생상극 ' + sc.flow + ' × 월령 ' + sc.season + ' = 종합 ' + sc.net + ' <span class="muted">(점수가 아니라 판정 근거입니다)</span></p>' +
       '<p class="muted">적용된 문구 ID: ' + esc(d.trace.phrases.join(', ')) + '</p></div></details></div>';
   }
+  // ───────────── 소원 성취 명당 (wish-spots.js) ─────────────
+  // 관리자가 출처와 함께 게시한 장소(/api/wish-spots)를 내 사주·소원 분야·기준 지역에 맞춰 점수순으로 나열한다. 스위치 wishSpots(기본 꺼짐) 또는 관리자 스위치가 켜져야 보인다.
+  const WSEL_KEY = 'mantra-wish-v1';
+  const WSEL = (() => { try { const v = JSON.parse(localStorage.getItem(WSEL_KEY) || '{}'); return { wish: typeof v.wish === 'string' ? v.wish : 'wealth' }; } catch (e) { return { wish: 'wealth' }; } })();
+  let wsSpots = null, wsLoaded = false;
+  function wsLoad() {
+    if (wsLoaded || !window.MantraWishSpots) return; wsLoaded = true;
+    try { fetch('/api/wish-spots').then(r => r.ok ? r.json() : null).then(d => { if (!d || !d.enabled) return; wsSpots = Array.isArray(d.spots) ? d.spots : []; window.MANTRA_FLAGS.wishSpots = true; render(); }).catch(() => { }); } catch (e) { }
+  }
+  function wsBlock(baseReg, baseName) {
+    const WS = window.MantraWishSpots; if (!WS) return '';
+    wsLoad(); if (!window.MANTRA_FLAGS || window.MANTRA_FLAGS.wishSpots !== true) return '';
+    const sel = WS.WISH.some(w => w.id === WSEL.wish) ? WSEL.wish : 'wealth';
+    const opts = WS.WISH.map(w => '<option value="' + w.id + '"' + (w.id === sel ? ' selected' : '') + '>' + esc(w.name) + '</option>').join('');
+    let head = '<div class="ib-k">소원 성취 명당 (참고)</div><p class="small">소원 분야를 고르면, 등록된 장소를 내 사주와 기준 지역에서 본 방위로 비교해 점수가 높은 순서로 보여 줍니다.</p><label class="field"><span class="small">소원 분야</span><select data-ws-wish="1">' + opts + '</select></label>';
+    if (!baseReg) return '<div class="ws">' + head + '<p class="small muted">현재 거주지를 고르면 그 위치에서 본 방위로 점수를 계산합니다.</p></div>';
+    const list = wsSpots || [];
+    if (!list.length) return '<div class="ws">' + head + '<p class="small muted">아직 등록된 장소가 없습니다.</p></div>';
+    let r; try { r = WS.rank(M, S.ch, list, { lat: baseReg.lat, lon: baseReg.lon, name: baseName }, sel); } catch (e) { return ''; }
+    const w = r.wish, lead = w.element ? '<p class="small">이 소원은 <b>' + esc(w.label) + '</b>(' + esc(w.element) + ' 기운)과 이어집니다. ' + esc(baseName) + ' 기준입니다.</p>' : '<p class="small">' + esc(baseName) + ' 기준, 방위 적합도만으로 비교합니다.</p>';
+    const li = a => a.length ? '<ul class="pos-ul small">' + a.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '';
+    const item = x => '<div class="ws-i rr-' + x.tone + '"><div class="ws-h"><span class="ws-rk">' + x.rank + '</span><b>' + esc(x.name) + '</b> <span class="chip">' + esc(x.typeName) + '</span><span class="ws-sc">' + x.score + '<small>점</small></span></div>' +
+      '<p class="small">' + esc(x.direction) + (x.deg != null ? ' ' + x.deg + '°' : '') + ' · ' + esc(x.element) + ' · ' + x.distKm + 'km · ' + esc(x.toneLabel) + '</p>' +
+      '<p class="small muted">방위 ' + x.parts.dir + ' · 소원 ' + x.parts.wish + ' · 분야 ' + x.parts.tag + ' · 거리 ' + x.parts.dist + '</p>' +
+      (x.note ? '<p class="small">' + esc(x.note) + '</p>' : '') +
+      '<details class="adv"><summary>왜 이 순위인가</summary><div class="small">' + li(x.reasons) + (x.reading.pros.length || x.reading.cons.length ? '<div class="rr-cols"><div><b class="ib-g">유리한 점</b>' + li(x.reading.pros) + '</div><div><b class="ib-b">불리한 점</b>' + li(x.reading.cons) + '</div></div>' : '') +
+      (x.source ? '<p class="muted">출처: ' + (/^https:\/\//.test(x.source.url) ? '<a href="' + esc(x.source.url) + '" target="_blank" rel="noopener noreferrer">' + esc(x.source.name) + '</a>' : esc(x.source.name)) + ' · 확인일 ' + esc(x.source.checked) + '</p>' : '') + '</div></details></div>';
+    const top = r.items.slice(0, 10), more = r.items.slice(10, 50);
+    return '<div class="ws">' + head + lead + top.map(item).join('') + (more.length ? '<details class="adv"><summary>' + more.length + '곳 더 보기</summary>' + more.map(item).join('') + '</details>' : '') + '<p class="small muted">' + esc(r.note) + ' 점수 구성: 방위 적합도 40 · 소원-방위 적합도 30 · 분야 태그 20 · 거리 10. 장소 정보는 등록 시점의 출처 기준이므로 방문 전에 이용 안내를 확인하세요.</p></div>';
+  }
+  document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-ws-wish]'); if (!t) return; WSEL.wish = t.value; try { localStorage.setItem(WSEL_KEY, JSON.stringify(WSEL)); } catch (e) { } render(); });
+  { const st = document.createElement('style'); st.textContent = '.ws{margin-top:10px}.ws-i{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0}.ws-i p{margin:3px 0}.ws-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.ws-rk{display:inline-flex;min-width:22px;height:22px;border-radius:11px;background:var(--accent);color:#fff;font-size:.78rem;font-weight:700;align-items:center;justify-content:center}.ws-sc{margin-left:auto;font-weight:700}.ws-sc small{font-weight:400;font-size:.7rem}'; document.head.appendChild(st); }
   function regionCard(sel, du, se, curY) {
     rrLoad();
     const RG = window.MantraRegion, LI = window.MantraLuckInterpret; if (!RG || !LI || window.MANTRA_FLAGS.region === false) return '';
@@ -6612,7 +6645,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return '<section class="card"><div class="card-h"><h2>나의 운명 지도</h2><span class="note">미리보기 · 시·도 → 시·군·구 → 읍·면·동</span></div>' +
       '<p class="note">출생지(' + esc(S.inp.city === '직접 입력' ? '경도 ' + S.inp.lon + '°' : S.inp.city) + ')는 만세력 계산에만 쓰이고, 아래 거주지는 생활환경을 살펴보는 참고용입니다. 거주지를 바꿔도 사주 원국은 바뀌지 않습니다.</p>' +
       '<div class="rg-sel">' + regCascade('home', REG.home, '현재 거주지') + regCascade('cmp', REG.cmp, '비교 지역') + '</div>' +
-      '<svg class="rg-map" viewBox="0 0 340 340" role="group" aria-label="국내 주요 도시 지도">' + RG_LAND + dots + '</svg><p class="small muted">점을 누르면 가까운 시·군·구가 ' + (home ? '비교 지역' : '현재 거주지') + '으로 선택됩니다. 외부 지도 서비스를 쓰지 않아 호출 비용이 없습니다.</p>' + body + cand + '</section>';
+      '<svg class="rg-map" viewBox="0 0 340 340" role="group" aria-label="국내 주요 도시 지도">' + RG_LAND + dots + '</svg><p class="small muted">점을 누르면 가까운 시·군·구가 ' + (home ? '비교 지역' : '현재 거주지') + '으로 선택됩니다. 외부 지도 서비스를 쓰지 않아 호출 비용이 없습니다.</p>' + body + cand + wsBlock(baseReg, baseReg === birthReg && birthReg ? '출생지(' + birthReg.name + ')' : (home ? home.name : '')) + '</section>';
   }
   document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-reg]'); if (!t) return; REG[t.dataset.reg] = t.value; regSave(); readForm(); render(); });
   document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-reg-basis]'); if (!t) return; REG.basis = ['eokbu', 'johu', 'both'].includes(t.value) ? t.value : 'auto'; regSave(); render(); });

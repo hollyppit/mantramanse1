@@ -187,7 +187,14 @@
     else { tone = 'neutral'; tail = '두 기준 모두 특별한 도움이나 부담으로 읽지 않습니다.'; }
     return { role: e.role + '/' + j.role, tone: tone, text: '이 사주에서 ' + josa(el) + ' ' + rolesTxt + ' 오행이라, ' + tail };
   }
-  var api = { suggestBasis: suggestBasis, fitBasis: fitBasis, suggest: suggest, nearestGu: nearestGu, dongList: dongList, dongReady: dongReady, provinces: provinces, guList: guList, fit: fit, merge: merge, VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
+  // 임의의 기준 위치에서 임의의 장소까지의 방위각·8방위·방위오행·거리(소원 성취 명당 등 행정구역이 아닌 지점용). 3km 안쪽은 중앙(土).
+  function directionFrom(base, target) {
+    var km = Math.round(haversine(base, target)), b = bearing(target, base);
+    if (km < 3) return { deg: null, direction: '중앙', element: '토', near: null, refPoint: base.name || '기준 위치', distKm: km, center: true };
+    var sc = sector(b.deg), x = ((b.deg + 22.5) % 45 + 45) % 45, near = x < 3 ? DIR[(sc.i + 7) % 8] : x > 42 ? DIR[(sc.i + 1) % 8] : null;
+    return { deg: norm360(b.deg), direction: sc.d.k, element: sc.d.el, near: near ? { direction: near.k, element: near.el } : null, refPoint: base.name || '기준 위치', distKm: km, center: false };
+  }
+  var api = { directionFrom: directionFrom, distanceKm: function (p, q) { return Math.round(haversine(p, q)); }, suggestBasis: suggestBasis, fitBasis: fitBasis, suggest: suggest, nearestGu: nearestGu, dongList: dongList, dongReady: dongReady, provinces: provinces, guList: guList, fit: fit, merge: merge, VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
   G.MantraRegion = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
