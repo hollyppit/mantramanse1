@@ -98,5 +98,15 @@ ok(lk.length === r.topAreas.length && lk.every(l => /자료 부족/.test(l.text)
   const ch5 = M.compute(inp2), snap5 = JSON.stringify([ch5.pillars, ch5.weights, ch5.yong]); R.suggest(R.get('gu:' + code('종로구')), ch5.yong.roles); ok(JSON.stringify([ch5.pillars, ch5.weights, ch5.yong]) === snap5, '후보 계산이 원국을 바꿈');
   const html2 = fs.readFileSync(path.join(root, 'index.html'), 'utf8'); ok(/큰 결정의 근거로 쓰지 마세요/.test(html2) && /점수나 순위가 아니라/.test(html2), '후보 안내 문구');
 }
+// 10 사주 입력 폼의 거주지: 신기능이 켜졌을 때만 보이고, 사주 계산 입력(S.inp)·저장값과 분리되어 있다
+{
+  const html3 = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  ok(html3.includes('${regFormBlock()}') && html3.includes("MANTRA_FLAGS.region !== true) return ''"), '폼의 거주지 블록은 region 스위치가 켜졌을 때만');
+  ok(html3.includes('function regCascade(side, v, label)') && (html3.match(/regCascade\(/g) || []).length >= 4, '카드와 폼이 같은 선택 함수 공유');
+  ok(html3.includes('REG[t.dataset.reg] = t.value; regSave(); readForm(); render();'), '지역 선택 시 입력 중이던 폼 값을 먼저 읽어 둠');
+  const body = html3.slice(html3.indexOf('function readForm()'), html3.indexOf('function validate()'));
+  ok(body.length > 200 && !/REG|prov:|gu:|dong:|home/.test(body), 'readForm(사주 입력 읽기)이 거주지를 읽지 않음');
+  ok(!/S\.inp\.(home|residence)|inp\.region/.test(html3), '사주 입력(S.inp)에 거주지 필드 없음');
+}
 if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log('  ' + f)); process.exit(1); }
 console.log('모든 검증 통과 · 지역 ' + R.REGIONS.length + '곳 · 통계 항목은 출처 확인 전까지 모두 자료 부족');
