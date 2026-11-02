@@ -6295,7 +6295,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 현재 거주지·비교 지역은 원국 계산과 무관한 별도 설정이다(브라우저에만 저장). 출생지는 기존 입력(만세력 계산용)을 그대로 쓴다.
   // 실제 환경 데이터와 전통 방위오행 해석은 서로 다른 블록으로 표시하고, 지역 오행은 원국에 합산하지 않는다.
   const REG_KEY = 'mantra-region-v1';
-  const REG = (() => { try { const v = JSON.parse(localStorage.getItem(REG_KEY) || '{}'); const ok = x => /^(prov|gu|dong):\d+$/.test(x) ? x : ''; return { home: ok(v.home || ''), cmp: ok(v.cmp || '') }; } catch (e) { return { home: '', cmp: '' }; } })();
+  const REG = (() => { try { const v = JSON.parse(localStorage.getItem(REG_KEY) || '{}'); const ok = x => /^(prov|gu|dong):\d+$/.test(x) ? x : ''; return { home: ok(v.home || ''), cmp: ok(v.cmp || ''), base: v.base === 'birth' ? 'birth' : 'home' }; } catch (e) { return { home: '', cmp: '', base: 'home' }; } })();
   const regSave = () => { try { localStorage.setItem(REG_KEY, JSON.stringify(REG)); } catch (e) { } };
   // 관리자가 출처와 함께 등록한 지역 자료를 한 번만 받아 합친다(실패하면 기존대로 자료 부족).
   let regLoaded = false;
@@ -6327,12 +6327,32 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (home) body += one(home);
     if (cmp && (!home || cmp.id !== home.id)) body += one(cmp);
     if (body) body = '<div class="ib-k">전통 방위오행 해석 (상징적 참고)</div>' + body + '<p class="small muted">' + esc(RG.NOTE) + '</p>';
+    // 사주에 맞는 방향의 지역 후보: 기준 지역에서 본 방위오행이 용신·희신인 시·군·구(거리순, 점수·순위 아님)
+    let cand = '';
+    const birthReg = RG.REGIONS.find(r => r.name === S.inp.city), baseReg = REG.base === 'birth' && birthReg ? birthReg : home;
+    if (baseReg) {
+      const sg = RG.suggest(baseReg, roles), baseName = baseReg === birthReg ? '출생지(' + birthReg.name + ')' : home.name;
+      if (sg) {
+        const dtxt = role => sg.elements[role] ? role + ' ' + sg.elements[role] + '(' + sg.dirs[role].join('·') + '쪽)' : '';
+        const chip = c => '<button type="button" class="chip rg-cand" data-reg-cand="' + c.id + '" title="비교 지역으로 선택">' + esc(c.name) + ' · ' + esc(c.direction) + ' · ' + c.distKm + 'km' + (c.near ? ' <span class="muted">(경계: ' + esc(c.near) + ')</span>' : '') + '</button>';
+        const block = (role) => {
+          const all = sg.list.filter(c => c.role === role); if (!all.length) return '';
+          const same = all.filter(c => c.sameProv), other = all.filter(c => !c.sameProv), row = (t, a) => a.length ? '<p class="small"><b>' + t + '</b> ' + a.slice(0, 6).map(chip).join('') + (a.length > 6 ? '<details class="adv"><summary>' + (a.length - 6) + '곳 더 보기</summary>' + a.slice(6, 60).map(chip).join('') + '</details>' : '') + '</p>' : '';
+          return '<div class="ib-k">' + role + ' 방향 · ' + esc(sg.elements[role]) + ' (' + esc(sg.dirs[role].join('·')) + '쪽) · ' + all.length + '곳</div>' + row('같은 시·도', same) + row('다른 시·도', other);
+        };
+        cand = '<div class="ib-k">사주에 맞는 방향의 지역 후보 (참고)</div><p class="small">' + esc(baseName) + '에서 본 방위의 오행이 이 사주의 ' + [dtxt('용신'), dtxt('희신')].filter(Boolean).join('·') + ' 쪽에 해당하는 시·군·구입니다. 점수나 순위가 아니라 방향이 맞는 후보를 거리순으로 보여 줍니다.</p>' +
+          (birthReg ? '<label class="field"><span class="small">기준</span><select data-reg-base="1"><option value="home"' + (baseReg === home ? ' selected' : '') + '>현재 거주지</option><option value="birth"' + (baseReg === birthReg ? ' selected' : '') + '>출생지(' + esc(birthReg.name) + ')</option></select></label>' : '') +
+          block('용신') + block('희신') + '<p class="small muted">이사나 이직 같은 큰 결정의 근거로 쓰지 마세요. 방위는 전통적인 상징 해석이고, 실제 생활 조건(직장·가족·비용)이 훨씬 중요합니다. 후보를 누르면 비교 지역으로 담깁니다.</p>';
+      }
+    }
     return '<section class="card"><div class="card-h"><h2>나의 운명 지도</h2><span class="note">미리보기 · 시·도 → 시·군·구 → 읍·면·동</span></div>' +
       '<p class="note">출생지(' + esc(S.inp.city === '직접 입력' ? '경도 ' + S.inp.lon + '°' : S.inp.city) + ')는 만세력 계산에만 쓰이고, 아래 거주지는 생활환경을 살펴보는 참고용입니다. 거주지를 바꿔도 사주 원국은 바뀌지 않습니다.</p>' +
       '<div class="rg-sel">' + cascade('home', REG.home, '현재 거주지') + cascade('cmp', REG.cmp, '비교 지역') + '</div>' +
-      '<svg class="rg-map" viewBox="0 0 340 340" role="group" aria-label="국내 주요 도시 지도">' + dots + '</svg><p class="small muted">점을 누르면 가까운 시·군·구가 ' + (home ? '비교 지역' : '현재 거주지') + '으로 선택됩니다. 외부 지도 서비스를 쓰지 않아 호출 비용이 없습니다.</p>' + body + '</section>';
+      '<svg class="rg-map" viewBox="0 0 340 340" role="group" aria-label="국내 주요 도시 지도">' + dots + '</svg><p class="small muted">점을 누르면 가까운 시·군·구가 ' + (home ? '비교 지역' : '현재 거주지') + '으로 선택됩니다. 외부 지도 서비스를 쓰지 않아 호출 비용이 없습니다.</p>' + body + cand + '</section>';
   }
   document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-reg]'); if (!t) return; REG[t.dataset.reg] = t.value; regSave(); render(); });
+  document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-reg-base]'); if (!t) return; REG.base = t.value === 'birth' ? 'birth' : 'home'; regSave(); render(); });
+  document.addEventListener('click', ev => { const c = ev.target.closest && ev.target.closest('[data-reg-cand]'); if (!c) return; REG.cmp = c.dataset.regCand; regSave(); render(); });
   document.addEventListener('click', ev => { const t = ev.target.closest && ev.target.closest('[data-reg-pick]'); if (!t) return; const city = window.MantraRegion.get(t.dataset.regPick), id = city ? window.MantraRegion.nearestGu(city.lat, city.lon) : ''; if (!id) return; if (!REG.home) REG.home = id; else if (id !== REG.home) REG.cmp = id; regSave(); render(); });
   { const st = document.createElement('style'); st.textContent = '.rg-one{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0}.rg-one p{margin:3px 0}.rg-sel{display:grid;grid-template-columns:1fr;gap:10px}.rg-casc{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.rg-lab{grid-column:1/-1;font-size:.8rem;font-weight:600;color:var(--ink-2)}.rg-casc .field{min-width:0}.rg-casc select{width:100%}.rg-map{width:100%;max-width:340px;height:auto;display:block;margin:8px auto;background:var(--surface-2);border-radius:12px}.rg-d{cursor:pointer}.rg-d circle{fill:var(--ink-3)}.rg-d text{font-size:10px;fill:var(--ink-2)}.rg-d.home circle{fill:var(--accent)}.rg-d.home text{fill:var(--ink);font-weight:700}.rg-d.cmp circle{fill:var(--ink)}@media(max-width:600px){.rg-sel{grid-template-columns:1fr}}'; document.head.appendChild(st); }
   const LVL_CLS = { '강조': 'good', '보통': '', '약함': '' };

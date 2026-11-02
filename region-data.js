@@ -136,7 +136,24 @@
     return { role: role, tone: good ? 'good' : bad ? 'bad' : 'neutral',
       text: '이 사주에서 ' + josa(el) + ' ' + role + ' 오행이라, ' + (good ? '전통적으로 이 방위가 상징적으로 맞는 편으로 읽습니다.' : bad ? '상징적으로는 맞지 않는 편으로 읽지만, 실제 생활 조건이 더 중요하니 참고로만 보세요.' : '특별한 도움이나 부담으로 읽지 않습니다.') };
   }
-  var api = { nearestGu: nearestGu, dongList: dongList, dongReady: dongReady, provinces: provinces, guList: guList, fit: fit, merge: merge, VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
+  // ───────────── 이사 방위 후보 (참고) ─────────────
+  // 기준 지역(거주지 또는 출생지)에서 전국 시·군·구까지의 방위를 계산하고, 그 방위오행이 이 사주의 용신·희신인 곳만 모은다.
+  // 점수나 순위가 아니라 "방향이 맞는 후보"이며, 거리순으로만 정렬한다. 한신·기신·구신 방향과 기준 지역 자신이 속한 시·군·구는 제외한다.
+  function dirsOfElement(el) { return DIR.filter(function (x) { return x.el === el; }).map(function (x) { return x.k; }); }
+  function suggest(home, roles) {
+    var d = GUD(); if (!d || !home || !roles) return null;
+    var homeGu = home.gu ? home.id.slice(3) : home.dong ? home.guCode : null, homeProv = home.provCode || (home.prov ? home.id.slice(5) : null), list = [];
+    d.GU.forEach(function (g) {
+      if (g[0] === homeGu) return;
+      var r = guObj(g[0]), b = bearing(r, home), sc = sector(b.deg), x = ((b.deg + 22.5) % 45 + 45) % 45, near = x < 3 ? DIR[(sc.i + 7) % 8] : x > 42 ? DIR[(sc.i + 1) % 8] : null, f = fit(sc.d.el, roles);
+      if (f.tone !== 'good') return;
+      list.push({ id: r.id, name: r.name, direction: sc.d.k, element: sc.d.el, role: f.role, distKm: Math.round(haversine(home, r)), sameProv: r.provCode === homeProv, near: near ? near.k : null });
+    });
+    list.sort(function (a, b) { return a.distKm - b.distKm; });
+    var el = {}; ['용신', '희신'].forEach(function (role) { Object.keys(roles).forEach(function (i) { if (roles[i] === role) el[role] = EL5[i]; }); });
+    return { list: list, elements: el, dirs: { 용신: el['용신'] ? dirsOfElement(el['용신']) : [], 희신: el['희신'] ? dirsOfElement(el['희신']) : [] } };
+  }
+  var api = { suggest: suggest, nearestGu: nearestGu, dongList: dongList, dongReady: dongReady, provinces: provinces, guList: guList, fit: fit, merge: merge, VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
   G.MantraRegion = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

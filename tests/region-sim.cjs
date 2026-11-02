@@ -74,5 +74,29 @@ ok(lk.length === r.topAreas.length && lk.every(l => /자료 부족/.test(l.text)
   ok(!/<script[^>]+region-dong-data\.js/.test(html) && /regEnsureDong/.test(html) && /region-gu-data\.js/.test(html), '동 데이터 지연 로드');
   const ch4 = M.compute(inp), snap4 = JSON.stringify([ch4.pillars, ch4.weights, ch4.yong]); DD.DONG.forEach(d => R.fit(R.tradition(R.get('dong:' + d[0])).element, ch4.yong.roles)); ok(JSON.stringify([ch4.pillars, ch4.weights, ch4.yong]) === snap4, '동 단위 연결이 원국을 바꿈');
 }
+// 9 방향 후보(suggest): 기준 지역에서 본 방위·용신/희신만·거리순·본인 구 제외·원국 불변
+{
+  const GU = globalThis.MantraRegionGu.GU, code = n => GU.find(g => g[1] === n)[0];
+  const EL = ['목', '화', '토', '금', '수'], inp2 = { ...inp }, chA = M.compute(inp2), rolesA = chA.yong.roles;
+  // 알려진 지리: 서울 종로구에서 해운대구는 남동, 제주시는 남, 강릉시는 동 / 부산 해운대구에서 종로구는 북서 — 해당 오행이 용신·희신인 역할표를 만들어 방향이 후보에 들어오는지 본다
+  const allGood = { 0: '용신', 1: '용신', 2: '희신', 3: '희신', 4: '희신' };   // 모든 오행이 후보가 되는 가짜 역할표(방위 계산만 검증)
+  const from = (n, roles) => R.suggest(R.get('gu:' + code(n)), roles), dirTo = (n, t) => { const x = from(n, allGood).list.find(c => c.id === 'gu:' + code(t)); return x && x.direction; };
+  ok(dirTo('종로구', '해운대구') === '남동' && dirTo('종로구', '제주시') === '남' && dirTo('종로구', '강릉시') === '동' && dirTo('해운대구', '종로구') === '북서', '기준 지역에서 본 방위');
+  const sg = from('종로구', allGood);
+  ok(sg.list.length === 249 && !sg.list.some(c => c.id === 'gu:' + code('종로구')), '본인 시·군·구 제외/나머지 249곳');
+  ok(sg.list.every((c, i, a) => !i || a[i - 1].distKm <= c.distKm), '거리순 정렬');
+  ok(sg.list.every(c => c.sameProv === (c.id.slice(3, 5) === '11')), '같은 시·도 구분');
+  // 실제 사주: 용신·희신 방향만, 한신·기신·구신 방향은 없다
+  const sA = R.suggest(R.get('gu:' + code('종로구')), rolesA), goodEl = new Set(EL.filter((e, i) => ['용신', '희신'].includes(rolesA[i])));
+  ok(sA.list.length > 0 && sA.list.every(c => goodEl.has(c.element) && (c.role === '용신' || c.role === '희신') && c.role === rolesA[EL.indexOf(c.element)]), '용신·희신 방향만');
+  ok(sA.dirs['용신'].length > 0, '방향 안내');
+  const noGood = { 0: '기신', 1: '구신', 2: '한신', 3: '기신', 4: '구신' }; ok(R.suggest(R.get('gu:' + code('종로구')), noGood).list.length === 0, '맞는 방향이 없으면 빈 목록');
+  ok(R.suggest(null, rolesA) === null && R.suggest(R.get('gu:' + code('종로구')), null) === null, '입력 없음');
+  // 읍·면·동·시·도 단계 기준도 가능, 같은 구에 속한 동이면 그 구를 제외
+  const dng = R.dongList(code('강남구'))[0], sD = R.suggest(R.get(dng.id), allGood); ok(sD.list.length === 249 && !sD.list.some(c => c.id === 'gu:' + code('강남구')), '동 기준: 소속 구 제외');
+  ok(R.suggest(R.get('prov:11'), allGood).list.length === 250, '시·도 기준');
+  const ch5 = M.compute(inp2), snap5 = JSON.stringify([ch5.pillars, ch5.weights, ch5.yong]); R.suggest(R.get('gu:' + code('종로구')), ch5.yong.roles); ok(JSON.stringify([ch5.pillars, ch5.weights, ch5.yong]) === snap5, '후보 계산이 원국을 바꿈');
+  const html2 = fs.readFileSync(path.join(root, 'index.html'), 'utf8'); ok(/큰 결정의 근거로 쓰지 마세요/.test(html2) && /점수나 순위가 아니라/.test(html2), '후보 안내 문구');
+}
 if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log('  ' + f)); process.exit(1); }
 console.log('모든 검증 통과 · 지역 ' + R.REGIONS.length + '곳 · 통계 항목은 출처 확인 전까지 모두 자료 부족');

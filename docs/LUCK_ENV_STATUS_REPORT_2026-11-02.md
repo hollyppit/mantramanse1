@@ -29,6 +29,8 @@
 
 **읍·면·동 단위 추가:** 선택은 시·도 → 시·군·구 → 읍·면·동 순서의 3단계 목록입니다. 각 단계는 **한 단계 위의 면적 중심**에서 본 방위입니다(시·도=전국 기준점 대전, 시·군·구=시·도 중심, 읍·면·동=시·군·구 중심). 위 단계의 "전체"를 고르면 그 단계의 방위를 봅니다. 좌표는 같은 출처의 읍·면·동 경계(3,504개, 행정동 기준)에서 계산했고(`tools/build-region-dong.cjs`, 결과 `region-dong-data.js` 150KB), **이 파일은 구 단위를 고를 때에만 내려받아** 평소 화면 로딩에 영향이 없습니다. 지도의 점(주요 도시)을 누르면 가장 가까운 시·군·구가 선택됩니다.
 
+**방향 후보(이사 방위) 추가:** 현재 거주지(또는 출생지가 17개 주요 도시에 해당할 때 출생지)를 기준으로 전국 시·군·구까지의 방위를 계산해, 방위오행이 이 사주의 **용신·희신**인 곳을 후보로 보여 줍니다(`RegionData.suggest`). 점수·순위가 아니라 거리순이며, 용신·희신 방향별로 같은 시·도/다른 시·도로 나눕니다. 한신·기신·구신 방향과 기준 지역이 속한 시·군·구는 제외합니다. 후보를 누르면 비교 지역으로 담깁니다. 화면에 "큰 결정의 근거로 쓰지 마세요"를 명시했으며, 원래 명세의 "운이 좋은 도시 순위 금지" 원칙은 순위·점수를 쓰지 않는 것으로 지켰습니다.
+
 ## 2. 변경 파일
 신규: `luck-interpret.js`, `region-data.js`, `feature-flags.js`, `functions/api/region.js`, `functions/api/luck-phrases.js`, `report/admin/v2-region.js`, `report/admin/v2-luckenv.js`, 테스트 8개(`luck-interpret-sim`, `region-sim`, `region-api-sim`, `luck-phrases-api-sim`, `luck-boundary-sim`, `luck-cache-sim` 등), 문서 3개.
 수정: `index.html`, `report/admin/index.html`, `report/admin/navigation.js`, `tests/engine-baseline.txt`, `tests/volatility-sim.js`.
