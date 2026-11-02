@@ -2,7 +2,7 @@
    그 장의 주제에 맞는 풀이를 고른다. 문장 사전은 chart-lines-stars.js / chart-lines-rest.js. AI·네트워크 없음, 결정적.
    사주에 없는 요소는 말하지 않고, 흔한 요소보다 드문 요소를 먼저 고른다(그 사람만의 특징이 먼저 보이도록). */
 (function(root){'use strict';
-var STARS=root.MantraChartLinesStars||{},REST=root.MantraChartLinesRest||{},FILL=root.MantraChartLinesFill||{},
+var DEPTH=root.MantraChartLinesDepth||null,STARS=root.MantraChartLinesStars||{},REST=root.MantraChartLinesRest||{},FILL=root.MantraChartLinesFill||{},
 S12=REST.S12||{},REL=REST.REL||{},TG=REST.TG||{};
 function mergeInto(base,add){Object.keys(add||{}).forEach(function(name){base[name]=Object.assign({},base[name]||{},add[name]);});return base;}
 STARS=mergeInto(Object.assign({},STARS),FILL.star);REL=mergeInto(Object.assign({},REL),FILL.rel);S12=mergeInto(Object.assign({},S12),FILL.s12);
@@ -34,7 +34,8 @@ function candidates(sd,id){
  ['star','s12','rel','tg'].forEach(function(kind){have[kind].forEach(function(name){var tag=kind+':'+name;if(seen[tag])return;seen[tag]=1;var body=TABLE[kind][name]&&TABLE[kind][name][key];if(body)out.push({kind:kind,name:name,rank:FREQ[name]==null?500:FREQ[name],body:body,first:prefix(kind,name),text:prefix(kind,name)+' '+body});});});
  return out.sort(function(a,b){return a.rank-b.rank||(a.kind+a.name<b.kind+b.name?-1:1);});
 }
-var api={candidates:candidates,ids:ids,prefix:prefix,again:again,FREQ:FREQ,TABLE:TABLE,DISPLAY:DISPLAY,version:'chart-lines-20261026-1'};
+function depth(kind,name,sd){return DEPTH&&DEPTH.depth?DEPTH.depth(kind,name,sd):'';}
+var api={depth:depth,candidates:candidates,ids:ids,prefix:prefix,again:again,FREQ:FREQ,TABLE:TABLE,DISPLAY:DISPLAY,version:'chart-lines-20261026-1'};
 root.MantraChartLines=api;
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

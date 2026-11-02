@@ -167,7 +167,7 @@ function exampleAssignment(sd){
  picked.sort(function(a,b){return exampleKey(a.id)-exampleKey(b.id);});
  var times={},map={};
  picked.forEach(function(x){var k=x.c.kind+':'+x.c.name;times[k]=(times[k]||0)+1;
-  map[x.id]=times[k]===1?x.c.first+' '+x.c.body:(CL&&CL.again?CL.again(x.c.kind,x.c.name,times[k]-1):x.c.first)+' '+x.c.body;});
+  map[x.id]=times[k]===1?x.c.first+' '+x.c.body+(CL&&CL.depth&&CL.depth(x.c.kind,x.c.name,sd)?' '+CL.depth(x.c.kind,x.c.name,sd):''):(CL&&CL.again?CL.again(x.c.kind,x.c.name,times[k]-1):x.c.first)+' '+x.c.body;});
  if(exampleCache)exampleCache.set(sd,map);
  return map;
 }

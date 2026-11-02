@@ -2,7 +2,7 @@
 // AI·네트워크 호출 없음. 원국은 엔진으로 계산한 가상 명식이다.
 const assert=require('node:assert');const path=require('node:path');const {pathToFileURL}=require('node:url');
 const ROOT=path.resolve(__dirname,'..');
-for(const f of ['chart-lines-stars','chart-lines-rest','chart-lines-fill','chart-lines','signature-data','reading-plus','reading-metrics-summary'])require(path.join(ROOT,'report/v2/'+f+'.js'));
+for(const f of ['chart-lines-stars','chart-lines-rest','chart-lines-fill','chart-lines-depth','chart-lines','signature-data','reading-plus','reading-metrics-summary'])require(path.join(ROOT,'report/v2/'+f+'.js'));
 const P=globalThis.ReportV2.ReadingPlus,D=globalThis.MantraSignatureData,CL=globalThis.MantraChartLines;
 (async()=>{
  const FORBID=/(반드시|무조건|확정|100%|틀림없|사망|질병|진단|치료|수술|파산|이혼한다|결혼한다|합격한다|수익을 보장)/;
