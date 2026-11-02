@@ -131,12 +131,12 @@
     // A. 핵심 기운
     var core = {
       title: gzN + ' — ' + M.EL_K[se] + (se === be ? '' : '·' + M.EL_K[be]) + '의 기운',
-      text: sc[1] + ' ' + josa(gzK, '은', '는') + ' 천간 ' + M.STEM_K[x.s] + '(' + M.STEM[x.s] + ', ' + M.EL_K[se] + ')과 지지 ' + M.BR_K[x.b] + '(' + M.BR[x.b] + ', ' + M.EL_K[be] + ')가 함께 들어오는 기간입니다. 지지 속에는 ' + hidden.join(' · ') + '이 들어 있습니다.',
+      text: sc[1] + ' ' + josa(gzK, '은', '는') + ' 천간 ' + M.STEM_K[x.s] + '(' + M.STEM[x.s] + ', ' + M.EL_K[se] + ')과 지지 ' + M.BR_K[x.b] + '(' + M.BR[x.b] + ', ' + M.EL_K[be] + ')' + ((M.BR_K[x.b].charCodeAt(0) - 44032) % 28 ? '이' : '가') + ' 함께 들어오는 기간입니다. 지지 속에는 ' + hidden.join(' · ') + '이 들어 있습니다.',
     };
     R('CORE-GZ', gzN);
 
     // B. 원국과의 관계
-    var relation = M.STEM_K[d] + '(' + M.STEM[d] + ', ' + M.EL_K[dEl] + ') 일간에게 ' + josa(M.STEM_K[x.s], '은', '는') + ' ' + stemTG + '에 해당합니다. 전통 명리학에서는 ' + TGD[stemTG].mean + '과(와) 연결해 해석합니다. 지지의 정기 ' + branchTG + '도 함께 작용합니다.';
+    var relation = M.STEM_K[d] + '(' + M.STEM[d] + ', ' + M.EL_K[dEl] + ') 일간에게 ' + josa(M.STEM_K[x.s], '은', '는') + ' ' + stemTG + '에 해당합니다. 전통 명리학에서는 ' + josa(TGD[stemTG].mean, '과', '와') + ' 연결해 해석합니다. 지지의 정기 ' + branchTG + '도 함께 작용합니다.';
     R('TG-' + stemTG, '일간 ' + M.STEM[d] + ' 기준 천간 십성'); R('TG-' + branchTG, '일간 기준 지지(정기) 십성');
     var roleS = roles[se], roleB = roles[be];
     relation += se === be ? ' 이 사주에서 ' + josa(M.EL_K[se], '은', '는') + ' ' + roleS + ' 역할입니다.' : ' 이 사주에서 ' + josa(M.EL_K[se], '은', '는') + ' ' + roleS + ', ' + josa(M.EL_K[be], '은', '는') + ' ' + roleB + ' 역할입니다.';
@@ -251,6 +251,7 @@
         elements: { stem: M.EL_K[se], branch: M.EL_K[be], roles: [roleS, roleB] },
         natalGroupPct: G.map(function (v, i) { return GN[i] + ' ' + v.toFixed(0) + '%'; }),
         rules: rule, phraseIds: used.filter(function (v, i, a) { return a.indexOf(v) === i; }), excluded: excl,
+        phraseReview: (function () { var ids = used.filter(function (v, i, a) { return a.indexOf(v) === i; }); return { published: ids.filter(function (i) { return PH[i].review === 'published'; }).length, total: ids.length }; })(),
       },
     };
   }
@@ -276,7 +277,13 @@
     return out;
   }
 
-  var api = { compare: compare, VERSION: VERSION, PHRASE_VERSION: PHRASE_VERSION, build: build, PHRASES: PHRASES, AREA: AREA, AREA_KEYS: AREA_KEYS };
+  // 관리자가 승인·게시한 문구만 본문을 교체한다. 알 수 없는 ID나 문자열이 아닌 값은 무시한다(기본 문구 유지).
+  function applyPublished(map) {
+    var n = 0; if (!map || typeof map !== 'object') return 0;
+    Object.keys(map).forEach(function (id) { if (PH[id] && typeof map[id] === 'string' && map[id].trim()) { PH[id].text = map[id].trim(); PH[id].review = 'published'; n++; } });
+    return n;
+  }
+  var api = { applyPublished: applyPublished, compare: compare, VERSION: VERSION, PHRASE_VERSION: PHRASE_VERSION, build: build, PHRASES: PHRASES, AREA: AREA, AREA_KEYS: AREA_KEYS };
   G.MantraLuckInterpret = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

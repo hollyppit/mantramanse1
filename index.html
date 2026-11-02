@@ -6327,8 +6327,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   document.addEventListener('click', ev => { const t = ev.target.closest && ev.target.closest('[data-reg-pick]'); if (!t) return; const id = t.dataset.regPick; if (!REG.home) REG.home = id; else if (id !== REG.home) REG.cmp = id; regSave(); render(); });
   { const st = document.createElement('style'); st.textContent = '.rg-sel{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rg-map{width:100%;max-width:340px;height:auto;display:block;margin:8px auto;background:var(--surface-2);border-radius:12px}.rg-d{cursor:pointer}.rg-d circle{fill:var(--ink-3)}.rg-d text{font-size:10px;fill:var(--ink-2)}.rg-d.home circle{fill:var(--accent)}.rg-d.home text{fill:var(--ink);font-weight:700}.rg-d.cmp circle{fill:var(--ink)}@media(max-width:600px){.rg-sel{grid-template-columns:1fr}}'; document.head.appendChild(st); }
   const LVL_CLS = { '강조': 'good', '보통': '', '약함': '' };
+  // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
+  let phrLoaded = false;
+  function phrLoad() { if (phrLoaded || !window.MantraLuckInterpret) return; phrLoaded = true; fetch('/api/luck-phrases').then(r => r.ok ? r.json() : null).then(d => { if (d && window.MantraLuckInterpret.applyPublished(d.published)) render(); }).catch(() => { }); }
   function interpBox(x, kind) {
     const LI = window.MantraLuckInterpret; if (!LI || !x || !x.ev) return '';
+    phrLoad();
     let r; try { r = LI.build(M, S.ch, x, kind, interpCtx(x, kind)); } catch (e) { return ''; }
     const li = a => a.length ? '<ul class="ib-ul">' + a.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '';
     const ev = r.evidence;
@@ -6346,7 +6350,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       (r.relations.length ? '<p><b>원국과의 작용</b></p>' + li(r.relations.map(q => q.text)) : '<p>이 기간의 글자가 원국과 합·충·형 등을 만들지 않습니다.</p>') +
       '<p><b>적용된 규칙 ID</b> ' + esc(ev.rules.map(q => q.id).filter((v, i, a) => a.indexOf(v) === i).join(', ')) + '<br><b>선택된 문구 ID</b> ' + esc(ev.phraseIds.join(', ')) + '</p>' +
       (ev.excluded.length ? '<p><b>적용하지 않은 규칙</b></p>' + li(ev.excluded.map(q => q.id + ' — ' + q.why)) : '') +
-      '<p class="muted">해석 엔진 ' + esc(r.version) + ' · 문구 v' + r.phraseVersion + ' (초안, 검수 전)</p></div></details></div>';
+      '<p class="muted">해석 엔진 ' + esc(r.version) + ' · 문구 v' + r.phraseVersion + ' (검수 완료 ' + r.evidence.phraseReview.published + '/' + r.evidence.phraseReview.total + '건)</p></div></details></div>';
   }
   const IB_CSS = '.tl{margin:10px 0}.tl-t{width:100%;border-collapse:collapse;font-size:.84rem}.tl-t th{font-weight:600;color:var(--ink-2);padding:4px 2px;text-align:center}.tl-t tr[data-pick]{cursor:pointer}.tl-t tr.sel{background:var(--surface-2)}.tl-t td{padding:6px 2px;border-top:1px solid var(--line)}.tl-n{white-space:nowrap}.tl-c{text-align:center}.tl-hi{color:var(--accent);font-weight:800}.tl-mid{color:var(--ink-2)}.tl-lo{color:var(--ink-3)}.tl-d{margin-top:6px;padding:8px 10px;border-radius:10px;background:var(--surface-2)}.ib{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0;background:var(--surface)}.ib p{margin:4px 0}.ib-k{font-size:.74rem;font-weight:700;letter-spacing:.04em;color:var(--ink-2);margin:12px 0 2px}.ib-k:first-child{margin-top:0}.ib-ul{margin:2px 0 0;padding-left:18px;font-size:.88rem}.ib-ul li{margin:3px 0}.ib-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ib-g{color:var(--good)}.ib-b{color:var(--bad)}@media(max-width:600px){.ib-cols{grid-template-columns:1fr}}';
   { const st = document.createElement('style'); st.textContent = IB_CSS; document.head.appendChild(st); }
