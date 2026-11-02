@@ -153,7 +153,39 @@
     var el = {}; ['용신', '희신'].forEach(function (role) { Object.keys(roles).forEach(function (i) { if (roles[i] === role) el[role] = EL5[i]; }); });
     return { list: list, elements: el, dirs: { 용신: el['용신'] ? dirsOfElement(el['용신']) : [], 희신: el['희신'] ? dirsOfElement(el['희신']) : [] } };
   }
-  var api = { suggest: suggest, nearestGu: nearestGu, dongList: dongList, dongReady: dongReady, provinces: provinces, guList: guList, fit: fit, merge: merge, VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
+  // 두 기준(억부·조후)이 갈릴 수 있어서 기준을 고른다. 'both'(병행)는 두 기준이 모두 용신·희신으로 보는 방향을 먼저, 한쪽에서만 맞는 방향은 따로 나눈다.
+  //   rE 억부 역할표, rJ 조후 역할표(해당 없으면 null → 억부로 처리). 새 규칙 없이 엔진이 이미 계산한 역할표만 읽는다.
+  function elList(list) { var s = []; list.forEach(function (c) { if (s.indexOf(c.element) < 0) s.push(c.element); }); return s; }
+  function dirsOfList(els) { var d = []; els.forEach(function (e) { dirsOfElement(e).forEach(function (k) { if (d.indexOf(k) < 0) d.push(k); }); }); return d; }
+  function mk(key, title, list, collapsed, note) { var els = elList(list); return { key: key, title: title, list: list, elements: els, dirs: dirsOfList(els), collapsed: !!collapsed, note: note || '' }; }
+  function suggestBasis(home, rE, rJ, mode) {
+    var a = suggest(home, rE); if (!a) return null;
+    var b = rJ ? suggest(home, rJ) : null;
+    var byRole = function (sg, label) { return ['용신', '희신'].map(function (role) { return mk(role, label + ' ' + role + ' 방향', sg.list.filter(function (c) { return c.role === role; })); }).filter(function (g) { return g.list.length; }); };
+    if (mode === 'johu' && b) return { mode: 'johu', groups: byRole(b, '조후 기준') };
+    if (mode === 'both' && b) {
+      var inB = {}; b.list.forEach(function (c) { inB[c.id] = c; });
+      var inA = {}; a.list.forEach(function (c) { inA[c.id] = c; });
+      var both = a.list.filter(function (c) { return inB[c.id]; }).map(function (c) { return Object.assign({}, c, { role: c.role + '/' + inB[c.id].role }); });
+      var onlyE = a.list.filter(function (c) { return !inB[c.id]; }).map(function (c) { return Object.assign({}, c, { otherRole: fit(c.element, rJ).role }); });
+      var onlyJ = b.list.filter(function (c) { return !inA[c.id]; }).map(function (c) { return Object.assign({}, c, { otherRole: fit(c.element, rE).role }); });
+      return { mode: 'both', groups: [mk('both', '두 기준 모두 맞는 방향', both, false, '억부와 조후가 같은 방향을 가리키는 곳입니다.'), mk('onlyE', '억부 기준에서만 맞는 방향', onlyE, true, '조후 기준으로는 맞지 않거나 해당 없는 방향입니다.'), mk('onlyJ', '조후 기준에서만 맞는 방향', onlyJ, true, '억부 기준으로는 맞지 않거나 해당 없는 방향입니다.')].filter(function (g) { return g.list.length; }) };
+    }
+    return { mode: 'eokbu', groups: byRole(a, '억부 기준') };
+  }
+  // 병행일 때 한 지역의 방위오행이 두 기준에서 각각 무엇인지 읽는다.
+  function fitBasis(el, rE, rJ) {
+    var e = fit(el, rE), j = fit(el, rJ), rolesTxt = '억부 기준 ' + e.role + ', 조후 기준 ' + j.role;
+    if (!e.role || !j.role) return e.role ? e : j;
+    var tone, tail;
+    if (e.tone === 'good' && j.tone === 'good') { tone = 'good'; tail = '두 기준 모두 상징적으로 맞는 편으로 읽습니다.'; }
+    else if ((e.tone === 'good' && j.tone === 'bad') || (e.tone === 'bad' && j.tone === 'good')) { tone = 'neutral'; tail = '두 기준이 엇갈려 한쪽에서는 맞고 다른 쪽에서는 맞지 않는 편이니 참고로만 보세요.'; }
+    else if (e.tone === 'good' || j.tone === 'good') { tone = 'good'; tail = '한 기준에서는 맞는 편이고 다른 기준에서는 특별한 영향이 없습니다.'; }
+    else if (e.tone === 'bad' || j.tone === 'bad') { tone = 'bad'; tail = '상징적으로는 맞지 않는 편으로 읽지만, 실제 생활 조건이 더 중요하니 참고로만 보세요.'; }
+    else { tone = 'neutral'; tail = '두 기준 모두 특별한 도움이나 부담으로 읽지 않습니다.'; }
+    return { role: e.role + '/' + j.role, tone: tone, text: '이 사주에서 ' + josa(el) + ' ' + rolesTxt + ' 오행이라, ' + tail };
+  }
+  var api = { suggestBasis: suggestBasis, fitBasis: fitBasis, suggest: suggest, nearestGu: nearestGu, dongList: dongList, dongReady: dongReady, provinces: provinces, guList: guList, fit: fit, merge: merge, VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
   G.MantraRegion = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -108,5 +108,28 @@ ok(lk.length === r.topAreas.length && lk.every(l => /자료 부족/.test(l.text)
   ok(body.length > 200 && !/REG|prov:|gu:|dong:|home/.test(body), 'readForm(사주 입력 읽기)이 거주지를 읽지 않음');
   ok(!/S\.inp\.(home|residence)|inp\.region/.test(html3), '사주 입력(S.inp)에 거주지 필드 없음');
 }
+// 11 기준별(억부·조후·병행) 후보와 방위 해석
+{
+  const chB = M.compute({ year: 1992, month: 6, day: 23, hour: 1, minute: 45, calendar: 'solar', leap: false, gender: 'M', lon: 127.15, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' });
+  const rE = chB.yongAll.eokbu.roles, rJ = chB.yongAll.johu.roles, GU2 = globalThis.MantraRegionGu.GU;
+  const home = R.get('gu:' + GU2.find(g => g[1] === '전주시완산구')[0]);
+  ok(chB.yongAll.johu.applicable !== false && rJ, '샘플 사주는 조후가 해당됨');
+  const sE = R.suggestBasis(home, rE, rJ, 'eokbu'), sJ = R.suggestBasis(home, rE, rJ, 'johu'), sB = R.suggestBasis(home, rE, rJ, 'both');
+  const ids = g => new Set(g.list.map(c => c.id)), all = s2 => new Set(s2.groups.flatMap(g => g.list.map(c => c.id)));
+  ok(sE.mode === 'eokbu' && JSON.stringify([...all(sE)].sort()) === JSON.stringify(R.suggest(home, rE).list.map(c => c.id).sort()), '억부 기준 = 기존 방향 후보');
+  ok(sJ.mode === 'johu' && JSON.stringify([...all(sJ)].sort()) === JSON.stringify(R.suggest(home, rJ).list.map(c => c.id).sort()), '조후 기준 = 조후 역할표 후보');
+  const gBoth = sB.groups.find(g => g.key === 'both'), gE = sB.groups.find(g => g.key === 'onlyE'), gJ = sB.groups.find(g => g.key === 'onlyJ');
+  ok(sB.mode === 'both' && gBoth && gBoth.elements.join('') === '금' && !gBoth.collapsed && gE && gE.collapsed && gJ && gJ.collapsed, '병행: 둘 다 맞는 방향(금)이 먼저, 한쪽만 맞는 방향은 접힘');
+  const eIds = new Set(R.suggest(home, rE).list.map(c => c.id)), jIds = new Set(R.suggest(home, rJ).list.map(c => c.id));
+  ok([...ids(gBoth)].every(x => eIds.has(x) && jIds.has(x)) && [...ids(gE)].every(x => eIds.has(x) && !jIds.has(x)) && [...ids(gJ)].every(x => jIds.has(x) && !eIds.has(x)), '병행 그룹의 집합 관계(교집합·차집합)');
+  ok(ids(gBoth).size + ids(gE).size === eIds.size && ids(gBoth).size + ids(gJ).size === jIds.size, '병행 그룹이 빠짐없이 나뉨');
+  ok(gE.list.every(c => c.otherRole && !['용신', '희신'].includes(c.otherRole)) && gJ.list.every(c => c.otherRole && !['용신', '희신'].includes(c.otherRole)), '한쪽만 맞는 후보의 다른 기준 역할은 용신·희신이 아님');
+  ok(R.suggestBasis(home, rE, null, 'both').mode === 'eokbu' && R.suggestBasis(home, rE, null, 'johu').mode === 'eokbu', '조후가 해당 없으면 억부로 처리');
+  ok(R.suggestBasis(null, rE, rJ, 'both') === null, '기준 지역 없음');
+  const EL6 = ['목', '화', '토', '금', '수'];
+  EL6.forEach((e, i) => { const f = R.fitBasis(e, rE, rJ), ge = ['용신', '희신'].includes(rE[i]), gj = ['용신', '희신'].includes(rJ[i]); ok(/(니다|세요)\.$/.test(f.text) && !BAN.test(f.text) && f.text.includes('억부 기준') && f.text.includes('조후 기준'), '병행 해석 문장 ' + e); ok((ge && gj) === (f.tone === 'good' && /두 기준 모두/.test(f.text)), '병행 tone ' + e); if (ge !== gj && (rE[i] === '기신' || rE[i] === '구신' || rJ[i] === '기신' || rJ[i] === '구신')) ok(/엇갈려/.test(f.text), '엇갈림 표시 ' + e); });
+  const snap6 = JSON.stringify([chB.pillars, chB.weights, chB.yong, chB.yongAll]); R.suggestBasis(home, rE, rJ, 'both'); ok(JSON.stringify([chB.pillars, chB.weights, chB.yong, chB.yongAll]) === snap6, '기준별 계산이 원국·용신을 바꾸지 않음');
+  const html4 = fs.readFileSync(path.join(root, 'index.html'), 'utf8'); ok(html4.includes('data-reg-basis') && html4.includes("adv.verdict === '병행' ? 'both'") && html4.includes('RG.suggestBasis(baseReg, rolesE, rolesJ, mode)'), '화면: 기준 선택·자동(이 사주 권장)·후보 연결');
+}
 if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log('  ' + f)); process.exit(1); }
 console.log('모든 검증 통과 · 지역 ' + R.REGIONS.length + '곳 · 통계 항목은 출처 확인 전까지 모두 자료 부족');

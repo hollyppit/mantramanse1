@@ -31,6 +31,8 @@
 
 **방향 후보(이사 방위) 추가:** 현재 거주지(또는 출생지가 17개 주요 도시에 해당할 때 출생지)를 기준으로 전국 시·군·구까지의 방위를 계산해, 방위오행이 이 사주의 **용신·희신**인 곳을 후보로 보여 줍니다(`RegionData.suggest`). 점수·순위가 아니라 거리순이며, 용신·희신 방향별로 같은 시·도/다른 시·도로 나눕니다. 한신·기신·구신 방향과 기준 지역이 속한 시·군·구는 제외합니다. 후보를 누르면 비교 지역으로 담깁니다. 화면에 "큰 결정의 근거로 쓰지 마세요"를 명시했으며, 원래 명세의 "운이 좋은 도시 순위 금지" 원칙은 순위·점수를 쓰지 않는 것으로 지켰습니다.
 
+**억부·조후·병행 기준 반영:** 방향 후보와 방위오행의 용신 역할 표시가 이 사주의 억부/조후 역할표(`yongAll.eokbu`·`yongAll.johu`)를 따릅니다. 기본은 **자동**(앱의 `methodAdvice` 판정: 억부론 유리/조후론 유리/병행 필요)이고 억부·조후·병행을 직접 고를 수 있습니다. **병행**이면 두 기준이 모두 용신·희신으로 보는 방향을 먼저 보여 주고, 한쪽 기준에서만 맞는 방향은 접어서 따로 둡니다(방위오행 설명에는 "억부 기준 ○○, 조후 기준 ○○"이 함께 나오고 엇갈리면 그렇게 표시). 조후가 해당 없는 사주는 억부로 처리합니다. 새 명리 규칙은 없고 엔진이 이미 계산한 역할표를 읽습니다.
+
 ## 2. 변경 파일
 신규: `luck-interpret.js`, `region-data.js`, `feature-flags.js`, `functions/api/region.js`, `functions/api/luck-phrases.js`, `report/admin/v2-region.js`, `report/admin/v2-luckenv.js`, 테스트 8개(`luck-interpret-sim`, `region-sim`, `region-api-sim`, `luck-phrases-api-sim`, `luck-boundary-sim`, `luck-cache-sim` 등), 문서 3개.
 수정: `index.html`, `report/admin/index.html`, `report/admin/navigation.js`, `tests/engine-baseline.txt`, `tests/volatility-sim.js`.
