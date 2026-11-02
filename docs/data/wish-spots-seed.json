@@ -797,5 +797,162 @@
   },
   "note": "",
   "on": true
+ },
+ {
+  "id": "seed-46",
+  "name": "갓바위",
+  "lat": 35.9817,
+  "lon": 128.7364,
+  "type": "mountain",
+  "tags": [
+   "study"
+  ],
+  "source": {
+   "name": "위키백과 경산 팔공산 관봉 석조여래좌상",
+   "url": "https://ko.wikipedia.org/wiki/%EA%B2%BD%EC%82%B0_%ED%8C%94%EA%B3%B5%EC%82%B0_%EA%B4%80%EB%B4%89_%EC%84%9D%EC%A1%B0%EC%97%AC%EB%9E%98%EC%A2%8C%EC%83%81",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-47",
+  "name": "보리암",
+  "lat": 34.7522,
+  "lon": 127.9831,
+  "type": "temple",
+  "tags": [
+   "general",
+   "study"
+  ],
+  "source": {
+   "name": "위키백과 보리암 (남해군)",
+   "url": "https://ko.wikipedia.org/wiki/%EB%B3%B4%EB%A6%AC%EC%95%94_(%EB%82%A8%ED%95%B4%EA%B5%B0)",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-48",
+  "name": "사직단",
+  "lat": 37.5756,
+  "lon": 126.9678,
+  "type": "shrine",
+  "tags": [
+   "general",
+   "career"
+  ],
+  "source": {
+   "name": "위키백과 서울 사직단",
+   "url": "https://ko.wikipedia.org/wiki/%EC%84%9C%EC%9A%B8_%EC%82%AC%EC%A7%81%EB%8B%A8",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-49",
+  "name": "독립기념관",
+  "lat": 36.7836,
+  "lon": 127.223,
+  "type": "shrine",
+  "tags": [
+   "career"
+  ],
+  "source": {
+   "name": "위키백과 독립기념관 (대한민국)",
+   "url": "https://ko.wikipedia.org/wiki/%EB%8F%85%EB%A6%BD%EA%B8%B0%EB%85%90%EA%B4%80_(%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD)",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-50",
+  "name": "성산일출봉",
+  "lat": 33.4585,
+  "lon": 126.9423,
+  "type": "sea",
+  "tags": [
+   "career",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 성산일출봉",
+   "url": "https://ko.wikipedia.org/wiki/%EC%84%B1%EC%82%B0%EC%9D%BC%EC%B6%9C%EB%B4%89",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-51",
+  "name": "종묘",
+  "lat": 37.5744,
+  "lon": 126.9942,
+  "type": "shrine",
+  "tags": [
+   "career",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 종묘",
+   "url": "https://ko.wikipedia.org/wiki/%EC%A2%85%EB%AC%98",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-52",
+  "name": "수원 화성",
+  "lat": 37.2722,
+  "lon": 127.0083,
+  "type": "shrine",
+  "tags": [
+   "career"
+  ],
+  "source": {
+   "name": "위키백과 수원 화성",
+   "url": "https://ko.wikipedia.org/wiki/%EC%88%98%EC%9B%90_%ED%99%94%EC%84%B1",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-53",
+  "name": "안동 하회마을",
+  "lat": 36.5381,
+  "lon": 128.5206,
+  "type": "other",
+  "tags": [
+   "create"
+  ],
+  "source": {
+   "name": "위키백과 안동 하회마을",
+   "url": "https://ko.wikipedia.org/wiki/%EC%95%88%EB%8F%99_%ED%95%98%ED%9A%8C%EB%A7%88%EC%9D%84",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-54",
+  "name": "절두산 순교성지",
+  "lat": 37.5444,
+  "lon": 126.9117,
+  "type": "church",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 서울 양화나루와 잠두봉 유적",
+   "url": "https://ko.wikipedia.org/wiki/%EC%84%9C%EC%9A%B8_%EC%96%91%ED%99%94%EB%82%98%EB%A3%A8%EC%99%80_%EC%9E%A0%EB%91%90%EB%B4%89_%EC%9C%A0%EC%A0%81",
+   "checked": "2026-11-03"
+  },
+  "note": "",
+  "on": true
  }
 ]
