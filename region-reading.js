@@ -12,7 +12,7 @@
   var EL5 = ['목', '화', '토', '금', '수'], GRPK = ['bi', 'sik', 'jae', 'gwan', 'in'], GRPN = ['비겁', '식상', '재성', '관성', '인성'];
   var ROLE = { 용신: 'yong', 희신: 'hee', 한신: 'han', 구신: 'gu', 기신: 'gi' }, ROLE_KO = { yong: '용신', hee: '희신', han: '한신', gu: '구신', gi: '기신', none: '해당 없음' };
   var VAL = { yong: 2, hee: 1, han: 0, gu: -1, gi: -2, none: 0 };
-  var ZONE = { 극약: 'xweak', 신약: 'weak', 중화: 'mid', 신강: 'strong', 극왕: 'xstrong', 극신강: 'xstrong', 극신약: 'xweak' };
+  var ZONE = { 극약: 'xweak', 태약: 'weak', 신약: 'weak', 중화: 'mid', 신강: 'strong', 태강: 'strong', 극왕: 'xstrong', 극신강: 'xstrong', 극신약: 'xweak' };
   var ZONE_ORD = { xweak: 0, weak: 1, mid: 2, strong: 3, xstrong: 4 };
   var ZONE_WORD = { xweak: '매우 약한', weak: '약한', mid: '균형에 가까운', strong: '강한', xstrong: '매우 강한' };
   // 오행 하나가 원국의 한난·조습 지표를 움직이는 방향(engine.js STEM_TEMP·STEM_HUM 의 오행별 평균): + 덥다/습하다

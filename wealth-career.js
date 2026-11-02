@@ -16,7 +16,7 @@
   var POSK = { year: '년', month: '월', day: '일', hour: '시' }, ROLEK = { main: '정기', mid: '중기', res: '여기' };
   var PAL = { year: 0.6, month: 1, day: 0.9, hour: 0.7 }, STW = { year: 0.8, month: 1, hour: 0.8 }, HW = { main: 1, mid: 0.55, res: 0.35 };
   var LV = ['absent', 'weak', 'mid', 'strong'], SC = { full: 1, part: 0.55, rel: 0.2, none: 0, hold: 0 }, SL = [0, 0.3, 0.65, 1];
-  var ZONE = { 극약: 'xweak', 신약: 'weak', 중화: 'mid', 신강: 'strong', 극왕: 'xstrong', 극신강: 'xstrong', 극신약: 'xweak' };
+  var ZONE = { 극약: 'xweak', 태약: 'weak', 신약: 'weak', 중화: 'mid', 신강: 'strong', 태강: 'strong', 극왕: 'xstrong', 극신강: 'xstrong', 극신약: 'xweak' };
   var BAN = /반드시|무조건|확실히|틀림없이|100%|보장|예언|천직|돈복이 없|가난|활짝|성공합니다|망합니다|절대/;
   var NOUN_ROLES = { skill: 1, method: 1, example: 1 };
   var clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
