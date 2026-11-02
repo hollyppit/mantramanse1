@@ -60,7 +60,14 @@ for (let i = 0; i < 80; i++) {
   const du = M.daeunAt(ch, Date.UTC(2026, 10, 2)), dae = X.unDaeunHTML(ch, du);
   ok((dae.match(/세<\/text>/g) || []).length >= ch.daeun.list.length, '대운 곡선에 10개의 나이 표시가 없음');
   if (du) ok(dae.includes(`${du.unseong}(세기 ${P[du.unseong]}`), '현재 대운의 12운성 설명이 없음');
+  // 좌법(각 기둥 천간이 자기 지지에서 받는 힘)은 봉법(일간 기준)과 따로 찍는다: 원국 표의 작은 글씨 값(unseongJwa)과 같아야 한다
+  const jw = X.unNatalHTML(ch, 'jwa');
+  keys.forEach(k => ok(jw.includes(`<b>${ch.cells[k].unseongJwa}</b>`) && jw.includes(M.gzName(ch.pillars[k])), `${k}주의 좌법 ${ch.cells[k].unseongJwa}이 좌법 곡선 요약에 없음`));
+  ok(jw.includes('data-act="un:jwa" aria-pressed="true"') && jw.includes('data-act="un:bong" aria-pressed="false"') && nat.includes('data-act="un:bong" aria-pressed="true"') && nat.includes('data-act="un:jwa" aria-pressed="false"'), '봉법·좌법 스위치 상태가 맞지 않음');
+  const shJ = X.unSheetHTML('좌법'), shB = X.unSheetHTML('봉법');
+  keys.forEach(k => { ok(shJ.includes(`<b>${ch.cells[k].unseongJwa}</b>`), `좌법 팝업이 ${k}주의 좌법 값을 쓰지 않음`); ok(shB.includes(`<b>${ch.cells[k].unseong}</b>`), `봉법 팝업이 ${k}지의 봉법 값을 쓰지 않음`); });
   const key = X.UN_ORDER[i % 12], sh = X.unSheetHTML(key);
+  ok(/봉법/.test(sh) && /좌법/.test(sh), `${key} 팝업에 봉법·좌법 구분 안내가 없음`);
   ok(sh.includes(`세기 <b>${P[key]}</b>`) && /내 사주에서는|내 사주의 네 지지에는 없습니다/.test(sh), `${key} 팝업 요약이 없음`);
   const mine = keys.filter(k => ch.cells[k].unseong === key).length; ok(mine === 0 || sh.includes('내 사주에서는'), `${key}: 내 사주에 있는데 안내가 없음`);
 }

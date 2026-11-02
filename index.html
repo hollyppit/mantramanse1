@@ -7889,13 +7889,22 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return s + '</svg>';
   }
   const unNote = '세기 눈금(0~100)은 12단계를 서로 견주려고 붙인 상징값입니다. 12운성은 좋고 나쁨이 아니라 힘의 상태이며(제왕은 가장 세지만 독선이 될 수도, 약한 단계는 섬세함·몰입으로 쓰일 수 있음), 점수·판정에는 쓰이지 않습니다. 음간(을·정·기·신·계)은 거꾸로 세는 이 앱의 표 기준입니다.';
-  function unChips(marks) { return `<div class="unchips">${marks.map(m => `<span class="unchip" style="--c:${m.color}"><i></i>${m.lab} <b>${m.stage}</b> · 세기 ${UN_POW[m.stage]} · ${unTier(UN_POW[m.stage])}</span>`).join('')}</div>`; }
-  // 원국 탭: 일간 기준으로 네 지지가 곡선의 어디에 있는지
-  function unNatalHTML(ch) {
-    const d = ch.pillars.day.s, marks = ['year', 'month', 'day', 'hour'].filter(k => ch.cells[k]).map(k => ({ stage: ch.cells[k].unseong, lab: UN_WHO[k][0], color: UN_WHO[k][1], ring: k === 'day' }));
+  function unChips(marks) { return `<div class="unchips">${marks.map(m => `<span class="unchip" style="--c:${m.color}"><i></i>${m.lab}${m.sub ? ' ' + m.sub : ''} <b>${m.stage}</b> · 세기 ${UN_POW[m.stage]} · ${unTier(UN_POW[m.stage])}</span>`).join('')}</div>`; }
+  // 원국의 네 기둥을 곡선에 찍을 점으로 만든다. 봉법 = 일간이 각 지지에서 받는 힘(표에 크게 적힌 값), 좌법 = 각 기둥의 천간이 바로 아래 자기 지지에서 받는 힘(표에 작게 적힌 값)
+  function unMarks(ch, mode) {
+    return ['year', 'month', 'day', 'hour'].filter(k => ch.cells[k]).map(k => {
+      const c = ch.cells[k], jwa = mode === 'jwa';
+      return { stage: jwa ? c.unseongJwa : c.unseong, lab: jwa ? UN_WHO[k][0].replace('지', '주') : UN_WHO[k][0], sub: jwa ? M.gzName(ch.pillars[k]) : '', color: UN_WHO[k][1], ring: k === 'day' };
+    });
+  }
+  // 원국 탭: 봉법(일간 기준)과 좌법(각 기둥 천간 기준)을 바꿔 가며 네 지지가 곡선의 어디에 있는지 본다
+  function unNatalHTML(ch, mode = S.unMode || 'bong') {
+    const d = ch.pillars.day.s, jwa = mode === 'jwa', marks = unMarks(ch, mode);
     const strong = marks.filter(m => UN_POW[m.stage] >= 70).length, weak = marks.filter(m => UN_POW[m.stage] < 40).length;
-    const sum = strong >= 3 ? '힘이 센 단계에 놓인 지지가 많은 사주입니다.' : weak >= 3 ? '힘이 약한 단계에 놓인 지지가 많은 사주입니다. 약하다는 것은 섬세함·몰입·정리에 쓰이는 기운이라는 뜻이기도 합니다.' : '힘이 센 단계와 약한 단계가 섞여 있는 사주입니다.';
-    return `<p class="small" style="color:var(--ink-2)">${M.STEM[d]}${M.EL_K[M.stemEl(d)]} 일간(나)이 네 지지에서 받는 힘(${term('봉법')})을 12운성 곡선 위에 찍었습니다. ${sum} 단계 이름을 누르면 설명이 열립니다.</p>${unCurve({ marks })}${unChips(marks)}<p class="note">${unNote}</p>`;
+    const sum = strong >= 3 ? '힘이 센 단계에 놓인 곳이 많습니다.' : weak >= 3 ? '힘이 약한 단계에 놓인 곳이 많습니다. 약하다는 것은 섬세함·몰입·정리에 쓰이는 기운이라는 뜻이기도 합니다.' : '힘이 센 단계와 약한 단계가 섞여 있습니다.';
+    const toggle = `<div class="seg" role="group" aria-label="12운성 보는 기준" style="margin:2px 0 8px"><button type="button" data-act="un:bong" aria-pressed="${!jwa}">봉법 · 일간 기준</button><button type="button" data-act="un:jwa" aria-pressed="${jwa}">좌법 · 각 기둥 천간 기준</button></div>`;
+    const intro = jwa ? `각 기둥의 천간이 바로 아래 자기 지지에서 받는 힘(${term('좌법')})입니다. 그 기둥 천간의 뿌리가 튼튼한지 보는 값이고, 원국 표에 작게 적힌 값입니다.` : `${M.STEM[d]}${M.EL_K[M.stemEl(d)]} 일간(나)이 네 지지에서 받는 힘(${term('봉법')})입니다. 원국 표에 크게 적힌 값입니다.`;
+    return `${toggle}<p class="small" style="color:var(--ink-2)">${intro} ${sum} 단계 이름을 누르면 설명이 열립니다.</p>${unCurve({ marks })}${unChips(marks)}<p class="note">${unNote}</p>`;
   }
   // 대운 카드: 10개의 대운이 곡선의 어디를 지나는지
   function unDaeunHTML(ch, du) {
@@ -7903,12 +7912,20 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const now = du ? `지금 대운 ${M.gzName(du)}은 ${du.unseong}(세기 ${UN_POW[du.unseong]} · ${unTier(UN_POW[du.unseong])}) 단계입니다. ${UN_MEAN[du.unseong]}.` : '아직 대운이 시작되기 전입니다.';
     return `<div class="card-h" style="margin:14px 0 4px"><h3>대운으로 보는 에너지 곡선 <span class="lvl">12운성</span></h3></div><p class="small" style="color:var(--ink-2)">10개의 대운이 12운성 곡선의 어디를 지나는지 보여 줍니다(붉은 점이 지금 대운). ${now}</p>${unCurve({ marks, hi: du ? du.unseong : null })}<p class="note">${unNote}</p>`;
   }
-  // 용어 팝업: 그 단계를 곡선에서 밝히고, 내 사주에서 어느 지지에 있는지 같이 보여 준다
+  // 용어 팝업: 그 단계를 곡선에서 밝히고, 내 사주에서 어느 기둥에 있는지 같이 보여 준다. '좌법' 용어는 좌법 값으로, 나머지는 봉법 값으로 찍는다
   function unSheetHTML(key) {
-    const ch = S.ch, hi = UN_POW[key] != null ? key : null;
-    const marks = ch ? ['year', 'month', 'day', 'hour'].filter(k => ch.cells[k]).map(k => ({ stage: ch.cells[k].unseong, lab: UN_WHO[k][0], color: UN_WHO[k][1], ring: k === 'day' })) : [];
-    const mine = hi ? marks.filter(m => m.stage === hi).map(m => m.lab) : [];
-    const head = hi ? `<p class="small"><b>${hi}</b> · 세기 <b>${UN_POW[hi]}</b>(${unTier(UN_POW[hi])}) — ${UN_MEAN[hi]}.${ch ? (mine.length ? ` 내 사주에서는 <b>${mine.join('·')}</b>에 있습니다.` : ' 내 사주의 네 지지에는 없습니다.') : ''}</p>` : '<p class="small">12단계가 한 바퀴 도는 모양입니다. 단계 이름을 누르면 그 설명이 열립니다.</p>';
+    const ch = S.ch, hi = UN_POW[key] != null ? key : null, mode = key === '좌법' ? 'jwa' : 'bong';
+    const marks = ch ? unMarks(ch, mode) : [];
+    const where = (m2) => ch ? unMarks(ch, m2).filter(m => m.stage === hi).map(m => m.lab) : [];
+    let head;
+    if (hi) {
+      const b2 = where('bong'), j2 = where('jwa');
+      head = `<p class="small"><b>${hi}</b> · 세기 <b>${UN_POW[hi]}</b>(${unTier(UN_POW[hi])}) — ${UN_MEAN[hi]}.${ch ? ` 내 사주에서는 ${term('봉법')}(일간 기준)으로 <b>${b2.length ? b2.join('·') : '없음'}</b>, ${term('좌법')}(각 기둥 천간 기준)으로 <b>${j2.length ? j2.join('·') : '없음'}</b>입니다. 아래 점은 봉법 값입니다.` : ''}</p>`;
+    } else if (key === '좌법') {
+      head = `<p class="small">각 기둥의 천간이 바로 아래 자기 지지에서 받는 힘입니다.${ch ? ` 내 사주에서는 ${marks.map(m => `${m.lab} ${m.sub} <b>${m.stage}</b>`).join(' · ')}입니다. 아래 점이 이 값입니다.` : ''}</p>`;
+    } else if (key === '봉법') {
+      head = `<p class="small">일간(나)이 네 지지에서 받는 힘입니다.${ch ? ` 내 사주에서는 ${marks.map(m => `${m.lab} <b>${m.stage}</b>`).join(' · ')}입니다. 아래 점이 이 값입니다.` : ''}</p>`;
+    } else head = '<p class="small">12단계가 한 바퀴 도는 모양입니다. 단계 이름을 누르면 그 설명이 열립니다.</p>';
     return `<div class="facts"><b>에너지 곡선</b>${head}${unCurve({ marks, hi })}${marks.length ? unChips(marks) : ''}<p class="note">${unNote}</p></div>`;
   }
 
@@ -8263,6 +8280,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const a = act.dataset.act;
       if (a === 'close') { if (t === act || t.classList.contains('x')) { S.sheet = null; S.cpSheet = null; S.domSheet = null; S.crSheet = null; S.sheetVol = null; renderSheet(); } return; }
       if (a.startsWith('metric:')) { S.metric = a.slice(7); render(); return; }
+      if (a.startsWith('un:')) { S.unMode = a.slice(3) === 'jwa' ? 'jwa' : 'bong'; render(); return; }
       if (a === 'cr-all') { S.crAll = !S.crAll; render(); return; }
       if (a === 'cp-all') { S.cpAll = !S.cpAll; render(); return; }
       if (a.startsWith('cp-p:')) { S.cpPartner = a.slice(5); render(); return; }
