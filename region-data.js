@@ -35,7 +35,23 @@
   }
   function provinces() { var d = GUD(); return d ? d.PROVINCES.map(function (p) { return { code: p[0], name: p[1], short: PROV_SHORT[+p[0]] }; }) : []; }
   function guList(provCode) { var d = GUD(); return d ? d.GU.filter(function (g) { return g[0].slice(0, 2) === String(provCode); }).map(function (g) { return { id: 'gu:' + g[0], code: g[0], name: g[1] }; }) : []; }
-  var get = function (id) { if (BY[id]) return BY[id]; return typeof id === 'string' && id.indexOf('gu:') === 0 ? guObj(id.slice(3)) : null; };
+  // 시·도: 전국 기준점(대전)에서 본 방위, 시·군·구: 시·도 면적 중심, 읍·면·동: 시·군·구 면적 중심에서 본 방위(한 단계 위를 기준으로 본다).
+  function provObj(code) { var pv = provOf(code); return pv ? { id: 'prov:' + code, prov: true, country: 'KR', countryName: '대한민국', name: PROV_SHORT[+code] + ' (' + pv[1] + ')', admin: pv[1], lat: pv[2], lon: pv[3], tz: 'Asia/Seoul', facts: emptyFacts(), sources: [], updated: null, version: 1 } : null; }
+  var DD = function () { return G.MantraRegionDong || null; };
+  function guRefOf(code) { var d = DD(); if (!d) return null; for (var i = 0; i < d.GUREF.length; i++) if (d.GUREF[i][0] === code) return d.GUREF[i]; return null; }
+  function dongObj(code) {
+    var d = DD(); if (!d) return null; var x = null; for (var i = 0; i < d.DONG.length; i++) if (d.DONG[i][0] === code) { x = d.DONG[i]; break; } if (!x) return null;
+    var gu = guObj(code.slice(0, 5)); if (!gu) return null;
+    return { id: 'dong:' + code, dong: true, country: 'KR', countryName: '대한민국', name: gu.name + ' ' + x[1], admin: gu.admin, lat: x[2], lon: x[3], tz: 'Asia/Seoul', facts: emptyFacts(), sources: [], updated: null, version: 1, guCode: code.slice(0, 5), provCode: gu.provCode };
+  }
+  function dongList(guCode) { var d = DD(); return d ? d.DONG.filter(function (x) { return x[0].slice(0, 5) === String(guCode); }).map(function (x) { return { id: 'dong:' + x[0], code: x[0], name: x[1] }; }) : []; }
+  var dongReady = function () { return !!DD(); };
+  // 지도의 점(도시)을 눌렀을 때 가장 가까운 시·군·구로 연결한다
+  function nearestGu(lat, lon) { var d = GUD(); if (!d) return ''; var best = null, bd = 1e9; d.GU.forEach(function (g) { var x = Math.hypot((g[3] - lon) * 0.81, g[2] - lat); if (x < bd) { bd = x; best = g[0]; } }); return best ? 'gu:' + best : ''; }
+  var get = function (id) {
+    if (BY[id]) return BY[id]; if (typeof id !== 'string') return null;
+    if (id.indexOf('gu:') === 0) return guObj(id.slice(3)); if (id.indexOf('prov:') === 0) return provObj(id.slice(5)); if (id.indexOf('dong:') === 0) return dongObj(id.slice(5)); return null;
+  };
 
   // ───────────── 전통 방위오행 (상징 해석, 참고용) ─────────────
   // 8방위 → 전통 대응 오행. 후천팔괘 기준: 동·동남=木, 남=火, 서·서북=金, 북=水, 동북·서남·중앙=土.
@@ -49,19 +65,24 @@
     return { deg: a, dist: dist };
   }
   function sector(deg) { var d = DIR[0], i = 0; DIR.forEach(function (x, k) { if (deg >= x.min) { d = x; i = k; } }); return { d: d, i: i }; }
-  // 구 단위: 소속 시·도 면적 중심에서 본 방위. 시·도 반경의 20% 이내는 중앙, 방위 경계 3° 이내는 인접 방위를 함께 알린다(좌표 오차로 방위가 바뀔 수 있음).
-  function guTradition(r) {
-    var pv = provOf(r.provCode), ref = { lat: pv[2], lon: pv[3] }, b = bearing(r, ref), refName = pv[1] + ' 면적 중심';
-    var gl = guList(r.provCode);
-    if (gl.length === 1 || b.dist < 0.2 * pv[4]) return { direction: '중앙', element: '토', near: null, basis: refName + '에 가까워 중앙으로 봅니다.', refPoint: refName, kind: 'symbolic', note: NOTE };
+  // 계층 공통: 한 단계 위(시·도 또는 시·군·구)의 면적 중심에서 본 8방위. 반경의 20% 이내는 중앙, 방위 경계 3° 이내는 인접 방위를 함께 알린다(좌표 오차로 방위가 바뀔 수 있음).
+  function hierTradition(r, ref, radius, single, refName) {
+    var b = bearing(r, ref);
+    if (single || b.dist < 0.2 * radius) return { direction: '중앙', element: '토', near: null, basis: refName + '에 가까워 중앙으로 봅니다.', refPoint: refName, kind: 'symbolic', note: NOTE };
     var sc = sector(b.deg), x = ((b.deg + 22.5) % 45 + 45) % 45, near = null;
     if (x < 3) near = DIR[(sc.i + 7) % 8]; else if (x > 42) near = DIR[(sc.i + 1) % 8];
     return { direction: sc.d.k, element: sc.d.el, near: near ? { direction: near.k, element: near.el } : null,
       basis: refName + '에서 본 ' + sc.d.k + '쪽이며, 전통 방위오행으로는 ' + sc.d.el + '에 대응합니다.' + (near ? ' 방위 경계에 가까워 ' + near.k + '쪽(' + near.el + ')과도 맞닿아 있어, 좌표에 따라 방위가 달라질 수 있습니다.' : ''),
       refPoint: refName, kind: 'symbolic', note: NOTE };
   }
+  function guTradition(r) { var pv = provOf(r.provCode); return hierTradition(r, { lat: pv[2], lon: pv[3] }, pv[4], guList(r.provCode).length === 1, pv[1] + ' 면적 중심'); }
+  function dongTradition(r) {
+    var ref = guRefOf(r.guCode), gu = guObj(r.guCode); if (!ref) return { direction: '중앙', element: '토', near: null, basis: '기준점 자료가 없어 방위를 읽지 않습니다.', refPoint: '', kind: 'symbolic', note: NOTE };
+    return hierTradition(r, { lat: ref[1], lon: ref[2] }, ref[3], dongList(r.guCode).length === 1, gu.name + ' 면적 중심');
+  }
   function tradition(r) {
     if (r.gu) return guTradition(r);
+    if (r.dong) return dongTradition(r);
     var b = bearing(r);
     if (b.dist < 0.35) return { direction: '중앙', element: '토', basis: '방위 기준점(' + REF.name + ')과 가까워 중앙으로 봅니다.', refPoint: REF.name, kind: 'symbolic', note: NOTE };
     var d = DIR[0]; DIR.forEach(function (x) { if (b.deg >= x.min) d = x; });
@@ -115,7 +136,7 @@
     return { role: role, tone: good ? 'good' : bad ? 'bad' : 'neutral',
       text: '이 사주에서 ' + josa(el) + ' ' + role + ' 오행이라, ' + (good ? '전통적으로 이 방위가 상징적으로 맞는 편으로 읽습니다.' : bad ? '상징적으로는 맞지 않는 편으로 읽지만, 실제 생활 조건이 더 중요하니 참고로만 보세요.' : '특별한 도움이나 부담으로 읽지 않습니다.') };
   }
-  var api = { provinces: provinces, guList: guList, fit: fit, merge: merge, VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
+  var api = { nearestGu: nearestGu, dongList: dongList, dongReady: dongReady, provinces: provinces, guList: guList, fit: fit, merge: merge, VERSION: VERSION, REF: REF, FACT_KEYS: FACT_KEYS, FACT_LABEL: FACT_LABEL, REGIONS: REGIONS, get: get, tradition: tradition, facts: facts, dataCoverage: dataCoverage, compare: compare, link: link, NOTE: NOTE };
   G.MantraRegion = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

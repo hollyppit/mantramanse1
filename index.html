@@ -6295,19 +6295,31 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 현재 거주지·비교 지역은 원국 계산과 무관한 별도 설정이다(브라우저에만 저장). 출생지는 기존 입력(만세력 계산용)을 그대로 쓴다.
   // 실제 환경 데이터와 전통 방위오행 해석은 서로 다른 블록으로 표시하고, 지역 오행은 원국에 합산하지 않는다.
   const REG_KEY = 'mantra-region-v1';
-  const REG = (() => { try { const v = JSON.parse(localStorage.getItem(REG_KEY) || '{}'); return { home: v.home || '', cmp: v.cmp || '' }; } catch (e) { return { home: '', cmp: '' }; } })();
+  const REG = (() => { try { const v = JSON.parse(localStorage.getItem(REG_KEY) || '{}'); const ok = x => /^(prov|gu|dong):\d+$/.test(x) ? x : ''; return { home: ok(v.home || ''), cmp: ok(v.cmp || '') }; } catch (e) { return { home: '', cmp: '' }; } })();
   const regSave = () => { try { localStorage.setItem(REG_KEY, JSON.stringify(REG)); } catch (e) { } };
   // 관리자가 출처와 함께 등록한 지역 자료를 한 번만 받아 합친다(실패하면 기존대로 자료 부족).
   let regLoaded = false;
   function regLoad() { if (regLoaded || !window.MantraRegion) return; regLoaded = true; fetch('/api/region').then(r => r.ok ? r.json() : null).then(d => { if (d && window.MantraRegion.merge(d)) render(); }).catch(() => { }); }
   const srcOf = (r, k) => (r.sources || []).find(q => q.fact === k);
+  const regParse = id => { const m = /^(prov|gu|dong):(\d+)$/.exec(id || ''); if (!m) return {}; const c = m[2]; return m[1] === 'prov' ? { p: c } : m[1] === 'gu' ? { p: c.slice(0, 2), g: c } : { p: c.slice(0, 2), g: c.slice(0, 5), d: c }; };
+  let dongLoading = false;
+  function regEnsureDong() { if (window.MantraRegionDong || dongLoading) return; dongLoading = true; const sc = document.createElement('script'); sc.src = 'region-dong-data.js'; sc.onload = () => render(); sc.onerror = () => { dongLoading = false; }; document.head.appendChild(sc); }
   function regionCard(sel, du, se, curY) {
     const RG = window.MantraRegion, LI = window.MantraLuckInterpret; if (!RG || !LI || window.MANTRA_FLAGS.region === false) return '';
     const home = RG.get(REG.home), cmp = RG.get(REG.cmp), ch = S.ch;
     const o1 = (id, t, v) => '<option value="' + id + '"' + (id === v ? ' selected' : '') + '>' + esc(t) + '</option>';
-    const opts = v => '<option value="">선택 안 함</option><optgroup label="주요 도시">' + RG.REGIONS.map(r => o1(r.id, r.name + ' (' + r.admin + ')', v)).join('') + '</optgroup>' + RG.provinces().map(pv => '<optgroup label="' + esc(pv.name) + ' · 시·군·구">' + RG.guList(pv.code).map(g => o1(g.id, g.name, v)).join('') + '</optgroup>').join('');
+    const dReady = RG.dongReady();
+    if (regParse(REG.home).g || regParse(REG.cmp).g) regEnsureDong();
+    // 시·도 → 시·군·구 → 읍·면·동 순서로 고른다. 위 단계의 "전체"를 고르면 그 단계의 방위를 본다(동 목록은 처음 필요할 때만 내려받는다).
+    const cascade = (side, v, label) => {
+      const q = regParse(v), sel = (lv, inner, off) => '<label class="field"><select data-reg="' + side + '" aria-label="' + label + ' ' + lv + '"' + (off ? ' disabled' : '') + '>' + inner + '</select></label>';
+      const pO = '<option value="">시·도 선택</option>' + RG.provinces().map(pv => o1('prov:' + pv.code, pv.name, q.p ? 'prov:' + q.p : '')).join('');
+      const gO = q.p ? '<option value="prov:' + q.p + '">시·도 전체</option>' + RG.guList(q.p).map(g => o1(g.id, g.name, q.g ? 'gu:' + q.g : '')).join('') : '<option value="">시·군·구</option>';
+      const dO = q.g ? '<option value="gu:' + q.g + '">시·군·구 전체</option>' + (dReady ? RG.dongList(q.g).map(d => o1(d.id, d.name, q.d ? 'dong:' + q.d : '')).join('') : '<option disabled>불러오는 중…</option>') : '<option value="">읍·면·동</option>';
+      return '<div class="rg-casc"><span class="rg-lab">' + label + '</span>' + sel('시·도', pO) + sel('시·군·구', gO, !q.p) + sel('읍·면·동', dO, !q.g) + '</div>';
+    };
     const px = r => ((r.lon - 125.8) / 4.6 * 300).toFixed(0), py = r => ((38.6 - r.lat) / 5.8 * 330).toFixed(0);
-    const dots = RG.REGIONS.map(r => { const c = home && r.id === home.id ? 'home' : cmp && r.id === cmp.id ? 'cmp' : ''; return '<g class="rg-d ' + c + '" data-reg-pick="' + r.id + '" role="button" tabindex="0" aria-label="' + esc(r.name) + '"><circle cx="' + px(r) + '" cy="' + py(r) + '" r="' + (c ? 7 : 5) + '"/><text x="' + (+px(r) + 9) + '" y="' + (+py(r) + 4) + '">' + esc(r.name) + '</text></g>'; }).join('');
+    const dots = RG.REGIONS.map(r => { const c = home && home.name.indexOf(r.name) >= 0 ? 'home' : cmp && cmp.name.indexOf(r.name) >= 0 ? 'cmp' : ''; return '<g class="rg-d ' + c + '" data-reg-pick="' + r.id + '" role="button" tabindex="0" aria-label="' + esc(r.name) + '"><circle cx="' + px(r) + '" cy="' + py(r) + '" r="' + (c ? 7 : 5) + '"/><text x="' + (+px(r) + 9) + '" y="' + (+py(r) + 4) + '">' + esc(r.name) + '</text></g>'; }).join('');
     // 사주 연결: 이 사주의 용신 체계에서 방위오행이 어떤 역할인지 읽는다. 원국에 더하거나 용신을 바꾸지 않는다(참고 표시).
     const roles = (ch.yong && ch.yong.roles) || ch.yongAll.eokbu.roles;
     const one = r => { const t = RG.tradition(r), f = RG.fit(t.element, roles); return '<div class="rg-one ' + f.tone + '"><b>' + esc(r.name) + '</b> <span class="chip">' + esc(t.direction) + ' · ' + esc(t.element) + '</span><p class="small">' + esc(t.basis) + '</p><p class="small">' + esc(f.text) + '</p></div>'; };
@@ -6315,14 +6327,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (home) body += one(home);
     if (cmp && (!home || cmp.id !== home.id)) body += one(cmp);
     if (body) body = '<div class="ib-k">전통 방위오행 해석 (상징적 참고)</div>' + body + '<p class="small muted">' + esc(RG.NOTE) + '</p>';
-    return '<section class="card"><div class="card-h"><h2>나의 운명 지도</h2><span class="note">미리보기 · 국내 주요 도시</span></div>' +
+    return '<section class="card"><div class="card-h"><h2>나의 운명 지도</h2><span class="note">미리보기 · 시·도 → 시·군·구 → 읍·면·동</span></div>' +
       '<p class="note">출생지(' + esc(S.inp.city === '직접 입력' ? '경도 ' + S.inp.lon + '°' : S.inp.city) + ')는 만세력 계산에만 쓰이고, 아래 거주지는 생활환경을 살펴보는 참고용입니다. 거주지를 바꿔도 사주 원국은 바뀌지 않습니다.</p>' +
-      '<div class="rg-sel"><label class="field"><span>현재 거주지</span><select data-reg="home">' + opts(REG.home) + '</select></label><label class="field"><span>비교 지역</span><select data-reg="cmp">' + opts(REG.cmp) + '</select></label></div>' +
-      '<svg class="rg-map" viewBox="0 0 340 340" role="group" aria-label="국내 주요 도시 지도">' + dots + '</svg><p class="small muted">점을 누르면 ' + (home ? '비교 지역' : '현재 거주지') + '으로 선택됩니다. 외부 지도 서비스를 쓰지 않아 호출 비용이 없습니다.</p>' + body + '</section>';
+      '<div class="rg-sel">' + cascade('home', REG.home, '현재 거주지') + cascade('cmp', REG.cmp, '비교 지역') + '</div>' +
+      '<svg class="rg-map" viewBox="0 0 340 340" role="group" aria-label="국내 주요 도시 지도">' + dots + '</svg><p class="small muted">점을 누르면 가까운 시·군·구가 ' + (home ? '비교 지역' : '현재 거주지') + '으로 선택됩니다. 외부 지도 서비스를 쓰지 않아 호출 비용이 없습니다.</p>' + body + '</section>';
   }
   document.addEventListener('change', ev => { const t = ev.target.closest && ev.target.closest('[data-reg]'); if (!t) return; REG[t.dataset.reg] = t.value; regSave(); render(); });
-  document.addEventListener('click', ev => { const t = ev.target.closest && ev.target.closest('[data-reg-pick]'); if (!t) return; const id = t.dataset.regPick; if (!REG.home) REG.home = id; else if (id !== REG.home) REG.cmp = id; regSave(); render(); });
-  { const st = document.createElement('style'); st.textContent = '.rg-one{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0}.rg-one p{margin:3px 0}.rg-sel{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rg-map{width:100%;max-width:340px;height:auto;display:block;margin:8px auto;background:var(--surface-2);border-radius:12px}.rg-d{cursor:pointer}.rg-d circle{fill:var(--ink-3)}.rg-d text{font-size:10px;fill:var(--ink-2)}.rg-d.home circle{fill:var(--accent)}.rg-d.home text{fill:var(--ink);font-weight:700}.rg-d.cmp circle{fill:var(--ink)}@media(max-width:600px){.rg-sel{grid-template-columns:1fr}}'; document.head.appendChild(st); }
+  document.addEventListener('click', ev => { const t = ev.target.closest && ev.target.closest('[data-reg-pick]'); if (!t) return; const city = window.MantraRegion.get(t.dataset.regPick), id = city ? window.MantraRegion.nearestGu(city.lat, city.lon) : ''; if (!id) return; if (!REG.home) REG.home = id; else if (id !== REG.home) REG.cmp = id; regSave(); render(); });
+  { const st = document.createElement('style'); st.textContent = '.rg-one{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0}.rg-one p{margin:3px 0}.rg-sel{display:grid;grid-template-columns:1fr;gap:10px}.rg-casc{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.rg-lab{grid-column:1/-1;font-size:.8rem;font-weight:600;color:var(--ink-2)}.rg-casc .field{min-width:0}.rg-casc select{width:100%}.rg-map{width:100%;max-width:340px;height:auto;display:block;margin:8px auto;background:var(--surface-2);border-radius:12px}.rg-d{cursor:pointer}.rg-d circle{fill:var(--ink-3)}.rg-d text{font-size:10px;fill:var(--ink-2)}.rg-d.home circle{fill:var(--accent)}.rg-d.home text{fill:var(--ink);font-weight:700}.rg-d.cmp circle{fill:var(--ink)}@media(max-width:600px){.rg-sel{grid-template-columns:1fr}}'; document.head.appendChild(st); }
   const LVL_CLS = { '강조': 'good', '보통': '', '약함': '' };
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
   let phrLoaded = false;

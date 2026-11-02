@@ -50,5 +50,29 @@ ok(lk.length === r.topAreas.length && lk.every(l => /자료 부족/.test(l.text)
   ok(R.get('gu:00000') === null && R.get('seoul').id === 'seoul', '없는 코드/기존 도시');
   const ch3 = M.compute(inp), snap3 = JSON.stringify([ch3.pillars, ch3.weights, ch3.yong]); GD.GU.forEach(g => R.fit(dir(g[0]).element, ch3.yong.roles)); ok(JSON.stringify([ch3.pillars, ch3.weights, ch3.yong]) === snap3, '구 단위 연결이 원국을 바꿈');
 }
+// 8 읍·면·동 / 시·도 단계: 데이터 정합성·한 단계 위 기준 방위·지연 로드·원국 불변
+{
+  const DD = require(path.join(root, 'region-dong-data.js')); globalThis.MantraRegionDong = DD;
+  const GD = globalThis.MantraRegionGu, guSet = new Set(GD.GU.map(g => g[0]));
+  ok(DD.DONG.length === 3504 && new Set(DD.DONG.map(d => d[0])).size === 3504, '읍·면·동 3504/코드 중복');
+  ok(DD.DONG.every(d => d[0].length === 7 && guSet.has(d[0].slice(0, 5)) && d[2] > 33 && d[2] < 39 && d[3] > 124.5 && d[3] < 131.0), '읍·면·동 코드·시·군·구 연결·좌표');
+  ok(GD.GU.every(g => R.dongList(g[0]).length > 0) && DD.GUREF.length === 250, '모든 시·군·구에 동이 있음/기준점 250');
+  ok(R.dongReady() === true, 'dongReady');
+  const dn = (gu, name) => { const d = R.dongList(gu).find(x => x.name === name); return d && R.get(d.id); };
+  // 알려진 지리(강남구 안): 압구정동은 북서, 일원1동은 동쪽, 개포1동은 남쪽, 삼성1동은 북쪽
+  const dd = (gu, name) => R.tradition(dn(gu, name)).direction;
+  ok(dd('11230', '압구정동') === '북서' && dd('11230', '일원1동') === '동' && dd('11230', '개포1동') === '남' && dd('11230', '삼성1동') === '북', '강남구 안 동 방위');
+  ok(R.tradition(dn('11230', '압구정동')).refPoint === '서울 강남구 면적 중심', '동의 기준점은 소속 시·군·구');
+  let near = 0, mid = 0; DD.DONG.forEach(d => { const r = R.get('dong:' + d[0]), t = R.tradition(r); ok(r && t.kind === 'symbolic' && /면적 중심/.test(t.refPoint) && /더해지지 않/.test(t.note) && ['목', '화', '토', '금', '수'].includes(t.element), '동 해석 형식 ' + d[0]); if (t.near) { near++; ok(t.basis.includes('경계'), '동 경계 문구 ' + d[0]); } if (t.direction === '중앙') mid++; });
+  ok(near > 100 && near < 1800 && mid > 100, '동 경계 ' + near + '·중앙 ' + mid);
+  // 시·도 단계: 전국 기준점(대전)에서 본 방위, 시·군·구 단계와 같은 규칙
+  ok(R.tradition(R.get('prov:11')).direction === '북' && R.tradition(R.get('prov:39')).direction === '남' && R.tradition(R.get('prov:11')).refPoint.indexOf('대전') >= 0, '시·도 단계 방위');
+  ok(R.nearestGu(35.8242, 127.1480).startsWith('gu:35') && R.nearestGu(33.4996, 126.5312).startsWith('gu:39'), '도시 점 → 가까운 시·군·구');
+  ok(R.get('dong:0000000') === null && R.get('prov:99') === null, '없는 코드');
+  // 지연 로드: 동 데이터는 화면 첫 로드에 포함되지 않고 필요할 때만 불러온다
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  ok(!/<script[^>]+region-dong-data\.js/.test(html) && /regEnsureDong/.test(html) && /region-gu-data\.js/.test(html), '동 데이터 지연 로드');
+  const ch4 = M.compute(inp), snap4 = JSON.stringify([ch4.pillars, ch4.weights, ch4.yong]); DD.DONG.forEach(d => R.fit(R.tradition(R.get('dong:' + d[0])).element, ch4.yong.roles)); ok(JSON.stringify([ch4.pillars, ch4.weights, ch4.yong]) === snap4, '동 단위 연결이 원국을 바꿈');
+}
 if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log('  ' + f)); process.exit(1); }
 console.log('모든 검증 통과 · 지역 ' + R.REGIONS.length + '곳 · 통계 항목은 출처 확인 전까지 모두 자료 부족');
