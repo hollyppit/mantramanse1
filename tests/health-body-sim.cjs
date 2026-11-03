@@ -18,6 +18,7 @@ for (let n = 0; n < N; n++) {
   units.forEach(([kind, x]) => {
     const r = HB.read(M, ch, x, kind); reads++;
     ok(r.items.length <= 3, '항목 3개 초과'); ok(r.items.every((it, i) => it.score >= 1.5 && (i === 0 || r.items[i - 1].score >= it.score) && ['주의', '참고'].includes(it.level) && (it.level === '주의') === (it.score >= 2.5)), '점수·단계');
+    r.items.forEach(it => ok(it.reasons.some(t => !/^원국/.test(t)), '이 시기 근거 없이 원국 근거만으로 항목이 나옴'));
     r.items.forEach(it => { ok(ORG.includes(it.organ) && it.reasons.length && it.reasons.every(t => typeof t === 'string' && !/undefined|NaN|\(가\)|\(과\)/.test(t)), '근거 문장'); });
     ok(typeof r.summary === 'string' && !/undefined|NaN/.test(r.summary), '요약'); ok(r.caution.includes('진단') && r.caution.includes('의료기관'), '면책 문구');
     ok(!/(암|뇌졸중|심근경색|당뇨병|우울증|수술|사망|죽)/.test(JSON.stringify(r)), '질병·사망 단정 표현');

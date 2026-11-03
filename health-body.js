@@ -42,7 +42,7 @@
     var nb = natalOf(M, ch), sc = nb.sc.slice(), why = nb.why.map(function (a) { return a.slice(); }), pct = nb.pct, relief = [], L = luckEls(M, x), roles = ch.yongAll && ch.yongAll.eokbu && ch.yongAll.eokbu.roles || {};
     var label = KIND[kind] || '이 시기', lz = HJ[L.s] + HJ[L.b], seen = {};
     // ① 많은 오행을 더함 ④ 적은 오행을 극함 / 채움 (천간·지지가 같은 결과를 내면 한 문장으로 합친다)
-    var adds = {}, ctls = {}, fills = {};
+    var adds = {}, ctls = {}, fills = {}, padd = [0, 0, 0, 0, 0];
     [L.s, L.b].forEach(function (le, k) {
       var which = k === 0 ? '천간' : '지지';
       for (var e = 0; e < 5; e++) {
@@ -51,13 +51,13 @@
         if ((e + 3) % 5 === le && pct[e] <= 8) (ctls[e + ':' + le] = ctls[e + ':' + le] || []).push(which);
       }
     });
-    Object.keys(adds).forEach(function (e) { e = +e; sc[e] += 1.2; why[e].push(label + '의 ' + adds[e].join('·') + ' ' + nm(e) + ' 기운이 이미 많은 ' + EL[e] + '을 더해 ' + PART[e].organ + ' 쪽 쏠림이 커집니다.'); });
+    Object.keys(adds).forEach(function (e) { e = +e; sc[e] += 1.2; padd[e] += 1.2; why[e].push(label + '의 ' + adds[e].join('·') + ' ' + nm(e) + ' 기운이 이미 많은 ' + EL[e] + '을 더해 ' + PART[e].organ + ' 쪽 쏠림이 커집니다.'); });
     Object.keys(fills).forEach(function (e) { e = +e; sc[e] -= 0.8; relief.push(label + '의 ' + fills[e].join('·') + ' ' + nm(e) + ' 기운이 원국에서 모자란 ' + EL[e] + '을 채워 ' + PART[e].organ + ' 쪽에는 도움이 되는 흐름입니다.'); });
-    Object.keys(ctls).forEach(function (key) { var p = key.split(':'), e = +p[0], le = +p[1]; sc[e] += 1.0; why[e].push(label + '의 ' + ctls[key].join('·') + ' ' + nm(le) + ' 기운이 원국에서 적은 ' + EL[e] + '을 극해 ' + PART[e].organ + ' 쪽이 더 약해지기 쉽습니다.'); });
+    Object.keys(ctls).forEach(function (key) { var p = key.split(':'), e = +p[0], le = +p[1]; sc[e] += 1.0; padd[e] += 1.0; why[e].push(label + '의 ' + ctls[key].join('·') + ' ' + nm(le) + ' 기운이 원국에서 적은 ' + EL[e] + '을 극해 ' + PART[e].organ + ' 쪽이 더 약해지기 쉽습니다.'); });
     // ② 억부상 기신·구신 오행
     var burdenDone = {};
     [L.s, L.b].forEach(function (le) {
-      var r = roles[le]; if ((r === '기신' || r === '구신') && !burdenDone[le]) { burdenDone[le] = 1; sc[le] += r === '기신' ? 1.0 : 0.6; why[le].push(label + '의 ' + nm(le) + ' 기운은 억부 기준 ' + r + '이라 ' + PART[le].organ + ' 쪽에 부담으로 읽습니다.'); }
+      var r = roles[le]; if ((r === '기신' || r === '구신') && !burdenDone[le]) { burdenDone[le] = 1; sc[le] += r === '기신' ? 1.0 : 0.6; padd[le] += r === '기신' ? 1.0 : 0.6; why[le].push(label + '의 ' + nm(le) + ' 기운은 억부 기준 ' + r + '이라 ' + PART[le].organ + ' 쪽에 부담으로 읽습니다.'); }
     });
     // ③ 원국과의 충·형·파·해·원진 (같은 오행에 걸린 관계는 한 문장으로 합친다)
     var hit = [0, 0, 0, 0, 0], hits = [[], [], [], [], []];
@@ -67,13 +67,13 @@
         var t = r.type || ''; var w = /충/.test(t) ? 1.5 : /형/.test(t) ? 1.0 : /(파|해|원진)/.test(t) ? 0.5 : 0; if (!w) return;
         var pos = (r.members || []).filter(function (m) { return m !== 'luck'; })[0]; if (!pos || !ch.pillars[pos]) return;
         var el = r.kind === 'stem' ? M.stemEl(ch.pillars[pos].s) : M.BR_EL[ch.pillars[pos].b], key = el + ':' + t + ':' + pos; if (seen[key]) return; seen[key] = 1;
-        if (hit[el] + w > 2.5) w = Math.max(0, 2.5 - hit[el]); if (!w) return; hit[el] += w; sc[el] += w;
+        if (hit[el] + w > 2.5) w = Math.max(0, 2.5 - hit[el]); if (!w) return; hit[el] += w; sc[el] += w; padd[el] += w;
         hits[el].push(POS[pos] + '와 ' + r.name);
       });
       for (var h = 0; h < 5; h++) if (hits[h].length) why[h].push(label + '의 ' + lz + ' 글자가 원국 ' + hits[h].join(', ') + ' 관계를 이뤄 ' + nm(h) + '에 해당하는 ' + PART[h].organ + ' 쪽이 흔들리기 쉬운 때로 읽습니다.');
     } catch (e) { }
     var items = [];
-    for (var e2 = 0; e2 < 5; e2++) if (sc[e2] >= 1.5) items.push({ el: e2, elName: EL[e2], hanja: HJ[e2], organ: PART[e2].organ, body: PART[e2].body, level: sc[e2] >= 2.5 ? '주의' : '참고', score: Math.round(sc[e2] * 10) / 10, reasons: why[e2].slice(0, 4) });
+    for (var e2 = 0; e2 < 5; e2++) if (sc[e2] >= 1.5 && padd[e2] >= 0.5) items.push({ el: e2, elName: EL[e2], hanja: HJ[e2], organ: PART[e2].organ, body: PART[e2].body, level: sc[e2] >= 2.5 ? '주의' : '참고', score: Math.round(sc[e2] * 10) / 10, reasons: why[e2].slice(0, 4) });
     items.sort(function (a, b) { return b.score - a.score || a.el - b.el; });
     items = items.slice(0, 3);
     var summary = items.length ? label + '에는 ' + items.map(function (i) { return i.organ; }).join('·') + ' 쪽을 평소보다 살펴보면 좋은 흐름으로 읽습니다.' : label + '에는 특정 장부로 뚜렷하게 쏠리는 신호가 없어 무난한 흐름으로 읽습니다.';
