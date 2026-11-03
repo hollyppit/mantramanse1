@@ -691,6 +691,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="region-reading-data.js"></script>
 <script src="region-reading.js"></script>
 <script src="wish-spots.js"></script>
+<script src="health-body.js"></script>
 <script src="byeongyak.js"></script>
 <script src="jonggyeok.js"></script>
 <script src="gyeokguk.js"></script>
@@ -6695,6 +6696,16 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   const IB_CSS = '.tl{margin:10px 0}.tl-t{width:100%;border-collapse:collapse;font-size:.84rem}.tl-t th{font-weight:600;color:var(--ink-2);padding:4px 2px;text-align:center}.tl-t tr[data-pick]{cursor:pointer}.tl-t tr.sel{background:var(--surface-2)}.tl-t td{padding:6px 2px;border-top:1px solid var(--line)}.tl-n{white-space:nowrap}.tl-c{text-align:center}.tl-hi{color:var(--accent);font-weight:800}.tl-mid{color:var(--ink-2)}.tl-lo{color:var(--ink-3)}.tl-d{margin-top:6px;padding:8px 10px;border-radius:10px;background:var(--surface-2)}.ib{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0;background:var(--surface)}.ib p{margin:4px 0}.ib-k{font-size:.74rem;font-weight:700;letter-spacing:.04em;color:var(--ink-2);margin:12px 0 2px}.ib-k:first-child{margin-top:0}.ib-ul{margin:2px 0 0;padding-left:18px;font-size:.88rem}.ib-ul li{margin:3px 0}.ib-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ib-g{color:var(--good)}.ib-b{color:var(--bad)}@media(max-width:600px){.ib-cols{grid-template-columns:1fr}}';
   { const st = document.createElement('style'); st.textContent = IB_CSS; document.head.appendChild(st); }
+  // 건강 측면 참고(health-body.js): 건강 지표를 보는 중일 때 선택한 시기의 오행 쏠림을 전통 오행-장부 대응으로 서술한다. 스위치 healthBody(기본 켜짐).
+  function hbBox(x, kind) {
+    const HB = window.MantraHealthBody; if (!HB || !x || !kind || !window.MANTRA_FLAGS || window.MANTRA_FLAGS.healthBody === false) return '';
+    let r; try { r = HB.read(M, S.ch, x, kind); } catch (e) { return ''; }
+    const li = a => a.length ? '<ul class="pos-ul small">' + a.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '';
+    const it = r.items.map(i => '<div class="hb-i"><b>' + esc(i.organ) + '</b> <span class="chip ' + (i.level === '주의' ? 'hb-w' : '') + '">' + i.level + '</span> <span class="muted small">' + esc(i.elName) + '(' + esc(i.hanja) + ') · 관련 부위: ' + esc(i.body) + '</span>' + li(i.reasons) + '</div>').join('');
+    return '<div class="hb"><div class="ib-k">건강 측면 — 살펴볼 부위 (참고)</div><p class="small">' + esc(r.summary) + '</p>' + it + (r.relief.length ? '<p class="small"><b class="ib-g">도움이 되는 점</b></p>' + li(r.relief) : '') +
+      (r.natal.length ? '<details class="adv"><summary>평소 타고난 경향 보기</summary><div class="small">' + li(r.natal) + '</div></details>' : '') + '<p class="small muted">' + esc(r.caution) + '</p></div>';
+  }
+  { const st = document.createElement('style'); st.textContent = '.hb{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;background:var(--surface)}.hb-i{margin:6px 0;padding-top:6px;border-top:1px dashed var(--line)}.hb-i:first-of-type{border-top:0;padding-top:0}.chip.hb-w{background:var(--bad-soft);color:var(--bad)}'; document.head.appendChild(st); }
   function detailHTML(title, x, extra = '', kind = '', banner = '') {
     if (!x || !x.ev) return '';
     const e = x.ev, w = e.weights;
@@ -6703,6 +6714,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${condTag(e.condition)} <b class="num">${signed(luckV(x))}</b></span></div>
       ${banner}
       ${kind ? interpBox(x, kind) : ''}
+      ${S.metric === 'health' ? hbBox(x, kind) : ''}
       <div class="small" style="color:var(--ink-2)">${luckCells(x)}</div>
       ${kind ? (kind === 'ilun' ? dayBox(x) : phaseBox(x, kind)) + domainBox(x, kind, title) + rootBox(x, kind) + luckEffects(x, kind) : ''}
       <h4 style="margin:4px 0 0">${term('흐름 점수')} 근거</h4>
