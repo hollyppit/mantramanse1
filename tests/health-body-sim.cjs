@@ -18,6 +18,7 @@ for (let n = 0; n < N; n++) {
   units.forEach(([kind, x]) => {
     const r = HB.read(M, ch, x, kind); reads++;
     ok(r.items.length <= 3, '항목 3개 초과'); ok(r.items.every((it, i) => it.score >= 1.5 && (i === 0 || r.items[i - 1].score >= it.score) && ['주의', '참고'].includes(it.level) && (it.level === '주의') === (it.score >= 2.5)), '점수·단계');
+    r.items.forEach(it => { ok(it.focus.length >= 1 && it.focus.length <= 2, '세부 장부 개수'); it.focus.forEach(f => { const SH = '甲乙丙丁戊己庚辛壬癸', BH = '子丑寅卯辰巳午未申酉戌亥'; const el = f.kind === '천간' ? M.stemEl(SH.indexOf(f.glyph)) : M.BR_EL[BH.indexOf(f.glyph)]; ok(el === it.el, '세부 글자의 오행이 항목 오행과 다름 ' + f.glyph + ' ' + it.elName); ok(f.organ && f.body, '세부 장부 문구'); }); ok(new Set(it.focus.map(f => f.organ)).size === it.focus.length, '세부 장부 중복'); if (it.reasons.some(t => /글자가 원국/.test(t))) ok(it.zone.length > 0, '충·형 항목의 몸 위치'); });
     r.items.forEach(it => ok(it.reasons.some(t => !/^원국/.test(t)), '이 시기 근거 없이 원국 근거만으로 항목이 나옴'));
     r.items.forEach(it => { ok(ORG.includes(it.organ) && it.reasons.length && it.reasons.every(t => typeof t === 'string' && !/undefined|NaN|\(가\)|\(과\)/.test(t)), '근거 문장'); });
     ok(typeof r.summary === 'string' && !/undefined|NaN/.test(r.summary), '요약'); ok(r.caution.includes('진단') && r.caution.includes('의료기관'), '면책 문구');

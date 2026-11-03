@@ -6702,9 +6702,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const HB = window.MantraHealthBody; if (!HB || !x || !kind || !window.MANTRA_FLAGS || window.MANTRA_FLAGS.healthBody === false) return '';
     let r; try { r = HB.read(M, S.ch, x, kind); } catch (e) { return ''; }
     const li = a => a.length ? '<ul class="pos-ul small">' + a.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '';
-    const it = r.items.map(i => '<div class="hb-i"><b>' + esc(i.organ) + '</b> <span class="chip ' + (i.level === '주의' ? 'hb-w' : '') + '">' + i.level + '</span> <span class="muted small">' + esc(i.elName) + '(' + esc(i.hanja) + ') · 관련 부위: ' + esc(i.body) + '</span>' + li(i.reasons) + '</div>').join('');
+    const it = r.items.map(i => '<div class="hb-i"><b>' + esc(i.organ) + '</b> <span class="chip ' + (i.level === '주의' ? 'hb-w' : '') + '">' + i.level + '</span> <span class="muted small">' + esc(i.elName) + '(' + esc(i.hanja) + ') · 관련 부위: ' + esc(i.body) + '</span>' + (i.focus && i.focus.length ? '<p class="small" style="margin:3px 0"><b>더 좁히면</b> ' + i.focus.map(f => esc(f.organ) + '(' + esc(f.glyph) + ' ' + f.kind + ') — ' + esc(f.body)).join(' / ') + (i.zone ? '<br><span class="muted">몸의 위치(원국 기둥 대응): ' + esc(i.zone) + '</span>' : '') + '</p>' : '') + li(i.reasons) + '</div>').join('');
     return '<div class="hb"><div class="ib-k">건강 측면 — 살펴볼 부위 (참고)</div><p class="small">' + esc(r.summary) + '</p>' + it + (r.relief.length ? '<p class="small"><b class="ib-g">도움이 되는 점</b></p>' + li(r.relief) : '') +
-      (r.natal.length ? '<details class="adv"><summary>평소 타고난 경향 보기</summary><div class="small">' + li(r.natal) + '</div></details>' : '') + '<p class="small muted">' + esc(r.caution) + '</p></div>';
+      (r.natal.length ? '<details class="adv"><summary>평소 타고난 경향 보기</summary><div class="small">' + li(r.natal) + '</div></details>' : '') + '<p class="small muted">천간·지지별 장부 대응과 몸의 위치는 유파에 따라 다릅니다. ' + esc(r.caution) + '</p></div>';
   }
   // 사고수 참고(accident-hint.js): 사고수 지표를 보는 중일 때 어떤 장면(장소·종류)에서 부주의를 살피면 좋은지 전통 해석으로 서술한다. 스위치 accidentHint(기본 켜짐).
   function ahBox(x, kind) {

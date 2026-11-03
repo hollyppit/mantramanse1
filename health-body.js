@@ -6,7 +6,7 @@
    의학적 진단·예측이 아니며 전통 해석을 참고용으로 서술한다. */
 (function (G) {
   'use strict';
-  var VERSION = 'health-body-1.0';
+  var VERSION = 'health-body-1.1';
   var EL = ['목', '화', '토', '금', '수'], HJ = ['木', '火', '土', '金', '水'];
   var PART = [
     { organ: '간·담', body: '눈, 근육·힘줄, 손발톱, 신경(두통·목어깨 뻣뻣함)' },
@@ -14,6 +14,23 @@
     { organ: '비장·위', body: '소화기, 입, 살과 근육, 복부' },
     { organ: '폐·대장', body: '호흡기(코·기관지), 피부, 장' },
     { organ: '신장·방광', body: '비뇨·생식기, 허리·무릎·뼈, 귀, 몸의 냉기' }
+  ];
+  // 천간·지지별 세부 장부(전통 대응이며 유파에 따라 다르다). 천간은 음양으로 장(臟)·부(腑)가 갈린다.
+  var STEM_HJ = '甲乙丙丁戊己庚辛壬癸', BR_HJ = '子丑寅卯辰巳午未申酉戌亥';
+  var STEMO = [
+    { organ: '담(膽)', body: '옆구리·담낭, 머리 옆쪽 두통, 관절' }, { organ: '간(肝)', body: '눈, 근육·힘줄, 손발톱, 목어깨 뻣뻣함' },
+    { organ: '소장', body: '어깨, 소화·흡수, 얼굴 열감' }, { organ: '심장', body: '혈관·혈압, 가슴 두근거림, 수면' },
+    { organ: '위', body: '위장, 입, 복부 팽만' }, { organ: '비장', body: '소화·흡수, 살과 근육, 기력' },
+    { organ: '대장', body: '장 운동·배변, 뼈' }, { organ: '폐', body: '기관지·호흡기, 코, 피부' },
+    { organ: '방광', body: '요로·배뇨, 허리' }, { organ: '신장', body: '신장 기능, 귀, 뼈·무릎, 몸의 냉기' }
+  ];
+  var BRO = [
+    { organ: '방광·귀', body: '요로·배뇨, 귀, 생식기' }, { organ: '비장·복부', body: '아랫배, 소화, 입' },
+    { organ: '담·팔다리', body: '옆구리, 팔다리 관절' }, { organ: '간·눈', body: '눈, 신경, 근육' },
+    { organ: '위·피부', body: '위장, 어깨, 피부' }, { organ: '소장·얼굴', body: '얼굴, 소화·흡수, 심혈관' },
+    { organ: '심장·혈압', body: '심장, 혈압, 눈' }, { organ: '비장·위', body: '소화기, 입맛' },
+    { organ: '대장·뼈', body: '장, 뼈와 골격, 기관지' }, { organ: '폐·기관지', body: '호흡기, 피부, 치아' },
+    { organ: '위·가슴', body: '위장, 가슴 답답함' }, { organ: '신장·혈행', body: '신장, 혈액순환, 머리' }
   ];
   var POS = { year: '년주(전통적으로 머리·얼굴에 대응)', month: '월주(가슴·어깨)', day: '일주(복부·허리)', hour: '시주(하체)' };
   var KIND = { daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
@@ -36,19 +53,37 @@
   }
   function natalOf(M, ch) { if (cache && cache.has(ch)) return cache.get(ch); var b = natalBase(M, ch); if (cache) cache.set(ch, b); return b; }
 
+  // 원국 글자 중 해당 오행인 천간·지지 키. 하나도 없으면 그 오행의 음양 천간 둘(장·부)을 모두 돌려준다.
+  function natalGlyphs(ch, M, e) {
+    var out = [];
+    ['year', 'month', 'day', 'hour'].forEach(function (p) { var q = ch.pillars[p]; if (!q) return; if (M.stemEl(q.s) === e) out.push('S' + q.s); if (M.BR_EL[q.b] === e) out.push('B' + q.b); });
+    if (!out.length) { var a = e * 2; out = ['S' + a, 'S' + (a + 1)]; }
+    return out;
+  }
+  function focusOf(e, gw, zn) {
+    var keys = Object.keys(gw[e]).sort(function (a, b) { return gw[e][b] - gw[e][a] || (a < b ? -1 : 1); }), out = [], seenO = {};
+    keys.forEach(function (k) {
+      if (out.length >= 2) return; var st = k.charAt(0) === 'S', i = +k.slice(1), o = st ? STEMO[i] : BRO[i]; if (seenO[o.organ]) return; seenO[o.organ] = 1;
+      out.push({ glyph: st ? STEM_HJ.charAt(i) : BR_HJ.charAt(i), kind: st ? '천간' : '지지', organ: o.organ, body: o.body });
+    });
+    var zs = Object.keys(zn[e]).map(function (p) { return POS[p]; });
+    return { focus: out, zone: zs.join(', ') };
+  }
   function luckEls(M, x) { var s = M.stemEl(x.s), b = M.BR_EL[x.b]; return { s: s, b: b }; }
 
   function read(M, ch, x, kind) {
     var nb = natalOf(M, ch), sc = nb.sc.slice(), why = nb.why.map(function (a) { return a.slice(); }), pct = nb.pct, relief = [], L = luckEls(M, x), roles = ch.yongAll && ch.yongAll.eokbu && ch.yongAll.eokbu.roles || {};
     var label = KIND[kind] || '이 시기', lz = HJ[L.s] + HJ[L.b], seen = {};
+    var gw = [{}, {}, {}, {}, {}], zn = [{}, {}, {}, {}, {}];
+    var addG = function (e, key, w) { gw[e][key] = (gw[e][key] || 0) + w; };
     // ① 많은 오행을 더함 ④ 적은 오행을 극함 / 채움 (천간·지지가 같은 결과를 내면 한 문장으로 합친다)
     var adds = {}, ctls = {}, fills = {}, padd = [0, 0, 0, 0, 0];
     [L.s, L.b].forEach(function (le, k) {
       var which = k === 0 ? '천간' : '지지';
       for (var e = 0; e < 5; e++) {
-        if (le === e && pct[e] >= 32) (adds[e] = adds[e] || []).push(which);
+        if (le === e && pct[e] >= 32) { (adds[e] = adds[e] || []).push(which); addG(e, k === 0 ? 'S' + x.s : 'B' + x.b, 1.2); }
         if (le === e && pct[e] <= 8) (fills[e] = fills[e] || []).push(which);
-        if ((e + 3) % 5 === le && pct[e] <= 8) (ctls[e + ':' + le] = ctls[e + ':' + le] || []).push(which);
+        if ((e + 3) % 5 === le && pct[e] <= 8) { (ctls[e + ':' + le] = ctls[e + ':' + le] || []).push(which); natalGlyphs(ch, M, e).forEach(function (g) { addG(e, g, 1.0); }); }
       }
     });
     Object.keys(adds).forEach(function (e) { e = +e; sc[e] += 1.2; padd[e] += 1.2; why[e].push(label + '의 ' + adds[e].join('·') + ' ' + nm(e) + ' 기운이 이미 많은 ' + EL[e] + '을 더해 ' + PART[e].organ + ' 쪽 쏠림이 커집니다.'); });
@@ -57,7 +92,7 @@
     // ② 억부상 기신·구신 오행
     var burdenDone = {};
     [L.s, L.b].forEach(function (le) {
-      var r = roles[le]; if ((r === '기신' || r === '구신') && !burdenDone[le]) { burdenDone[le] = 1; sc[le] += r === '기신' ? 1.0 : 0.6; padd[le] += r === '기신' ? 1.0 : 0.6; why[le].push(label + '의 ' + nm(le) + ' 기운은 억부 기준 ' + r + '이라 ' + PART[le].organ + ' 쪽에 부담으로 읽습니다.'); }
+      var r = roles[le]; if ((r === '기신' || r === '구신') && !burdenDone[le]) { burdenDone[le] = 1; addG(le, M.stemEl(x.s) === le ? 'S' + x.s : 'B' + x.b, 1.0); sc[le] += r === '기신' ? 1.0 : 0.6; padd[le] += r === '기신' ? 1.0 : 0.6; why[le].push(label + '의 ' + nm(le) + ' 기운은 억부 기준 ' + r + '이라 ' + PART[le].organ + ' 쪽에 부담으로 읽습니다.'); }
     });
     // ③ 원국과의 충·형·파·해·원진 (같은 오행에 걸린 관계는 한 문장으로 합친다)
     var hit = [0, 0, 0, 0, 0], hits = [[], [], [], [], []];
@@ -67,16 +102,16 @@
         var t = r.type || ''; var w = /충/.test(t) ? 1.5 : /형/.test(t) ? 1.0 : /(파|해|원진)/.test(t) ? 0.5 : 0; if (!w) return;
         var pos = (r.members || []).filter(function (m) { return m !== 'luck'; })[0]; if (!pos || !ch.pillars[pos]) return;
         var el = r.kind === 'stem' ? M.stemEl(ch.pillars[pos].s) : M.BR_EL[ch.pillars[pos].b], key = el + ':' + t + ':' + pos; if (seen[key]) return; seen[key] = 1;
-        if (hit[el] + w > 2.5) w = Math.max(0, 2.5 - hit[el]); if (!w) return; hit[el] += w; sc[el] += w; padd[el] += w;
+        if (hit[el] + w > 2.5) w = Math.max(0, 2.5 - hit[el]); if (!w) return; hit[el] += w; sc[el] += w; padd[el] += w; addG(el, r.kind === 'stem' ? 'S' + ch.pillars[pos].s : 'B' + ch.pillars[pos].b, w); zn[el][pos] = 1;
         hits[el].push(POS[pos] + '와 ' + r.name);
       });
       for (var h = 0; h < 5; h++) if (hits[h].length) why[h].push(label + '의 ' + lz + ' 글자가 원국 ' + hits[h].join(', ') + ' 관계를 이뤄 ' + nm(h) + '에 해당하는 ' + PART[h].organ + ' 쪽이 흔들리기 쉬운 때로 읽습니다.');
     } catch (e) { }
     var items = [];
-    for (var e2 = 0; e2 < 5; e2++) if (sc[e2] >= 1.5 && padd[e2] >= 0.5) items.push({ el: e2, elName: EL[e2], hanja: HJ[e2], organ: PART[e2].organ, body: PART[e2].body, level: sc[e2] >= 2.5 ? '주의' : '참고', score: Math.round(sc[e2] * 10) / 10, reasons: why[e2].slice(0, 4) });
+    for (var e2 = 0; e2 < 5; e2++) if (sc[e2] >= 1.5 && padd[e2] >= 0.5) items.push({ el: e2, elName: EL[e2], hanja: HJ[e2], organ: PART[e2].organ, body: PART[e2].body, focus: focusOf(e2, gw, zn).focus, zone: focusOf(e2, gw, zn).zone, level: sc[e2] >= 2.5 ? '주의' : '참고', score: Math.round(sc[e2] * 10) / 10, reasons: why[e2].slice(0, 4) });
     items.sort(function (a, b) { return b.score - a.score || a.el - b.el; });
     items = items.slice(0, 3);
-    var summary = items.length ? label + '에는 ' + items.map(function (i) { return i.organ; }).join('·') + ' 쪽을 평소보다 살펴보면 좋은 흐름으로 읽습니다.' : label + '에는 특정 장부로 뚜렷하게 쏠리는 신호가 없어 무난한 흐름으로 읽습니다.';
+    var summary = items.length ? label + '에는 ' + items.map(function (i) { return i.focus.length ? i.focus.map(function (f) { return f.organ + '(' + f.glyph + ')'; }).join('·') : i.organ; }).join(' · ') + ' 쪽을 평소보다 살펴보면 좋은 흐름으로 읽습니다.' : label + '에는 특정 장부로 뚜렷하게 쏠리는 신호가 없어 무난한 흐름으로 읽습니다.';
     return { version: VERSION, kind: kind || null, luck: lz, items: items, relief: relief.slice(0, 2), summary: summary, natal: natalLines(M, ch), caution: CAUTION };
   }
   function natalLines(M, ch) {
@@ -84,5 +119,5 @@
     for (var e = 0; e < 5; e++) if (nb.sc[e] >= 1.0 && nb.why[e].length) out.push(nb.why[e][0]);
     return out.slice(0, 3);
   }
-  G.MantraHealthBody = { VERSION: VERSION, read: read, PART: PART, CAUTION: CAUTION };
+  G.MantraHealthBody = { VERSION: VERSION, read: read, PART: PART, STEMO: STEMO, BRO: BRO, CAUTION: CAUTION };
 })(typeof window !== 'undefined' ? window : globalThis);
