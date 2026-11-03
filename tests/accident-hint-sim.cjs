@@ -22,6 +22,7 @@ for (let n = 0; n < N; n++) {
     ok(JSON.stringify(r).indexOf('undefined') < 0 && !/NaN/.test(JSON.stringify(r)), 'undefined/NaN'); ok(r.caution.includes('예측') && r.caution.includes('확률'), '면책 문구');
     ok(!/(사망|죽|즉사|중상|불구|참변|반드시|틀림없)/.test(JSON.stringify(r)), '단정·극단 표현'); ok(/\d/.test(r.summary) === (score != null), '지수 표시');
     if (r.items.length) { withItems++; tops.add(r.items[0].key); kinds[r.items[0].key] = (kinds[r.items[0].key] || 0) + 1; if (r.items.some(i => i.position)) withPos++; }
+    r.items.forEach(it => { ok(it.focus.length <= 2, '세부 장면 개수'); it.focus.forEach(f => { ok(f.title && f.place && f.glyph, '세부 장면 문구'); }); ok(new Set(it.focus.map(f => f.title)).size === it.focus.length, '세부 장면 중복'); const ei = ['wood', 'fire', 'earth', 'metal', 'water'].indexOf(it.key); if (ei >= 0) it.focus.forEach(f => { const SH = '甲乙丙丁戊己庚辛壬癸', BH = '子丑寅卯辰巳午未申酉戌亥'; const el = f.kind === '천간' ? M.stemEl(SH.indexOf(f.glyph)) : M.BR_EL[BH.indexOf(f.glyph)]; ok(el === ei, '세부 글자의 오행이 장면 오행과 다름'); }); if (ei >= 0) ok(it.focus.length >= 1, '오행 장면에 세부 글자가 없음'); });
     // 독립 재계산: '이미 많은 오행' 근거는 그 오행이 원국에서 32% 이상일 때만 붙는다
     r.items.forEach(it => { const ei = ['wood', 'fire', 'earth', 'metal', 'water'].indexOf(it.key); if (ei >= 0 && it.reasons.some(t => /이미 많은/.test(t))) ok(ch.weights.pct[ei] >= 32, '많은 오행 근거가 32% 미만 오행에 붙음'); if (it.reasons.some(t => /충|형|해|원진|파/.test(t) && /글자가 원국/.test(t))) ok(it.position.length > 0, '관계 근거에 기둥 위치가 없음'); });
     ok(JSON.stringify(AH.read(M, ch, x, kind, score)) === JSON.stringify(r), '같은 입력 다른 결과');

@@ -6,7 +6,7 @@
    사고 발생·결과를 예측하지 않는 참고 서술이며, 사망·중상 같은 단정 표현은 쓰지 않는다. */
 (function (G) {
   'use strict';
-  var VERSION = 'accident-hint-1.0';
+  var VERSION = 'accident-hint-1.1';
   var EL = ['목', '화', '토', '금', '수'], HJ = ['木', '火', '土', '金', '水'];
   var SCENE = [
     { key: 'wood', title: '높은 곳·계단·운동 중 넘어짐', where: '계단, 산책로·운동장, 높은 곳', tip: '계단과 높은 곳에서는 서두르지 않고, 운동 전에는 몸을 충분히 풀어 주세요.' },
@@ -17,6 +17,23 @@
     { key: 'edge', title: '날카로운 것에 베이거나 찔리는 부주의', where: '주방·작업대, 유리·칼·바늘 등을 다루는 곳', tip: '칼·유리·바늘을 다룰 때는 서두르지 말고 손 방향을 확인하세요.' },
     { key: 'sudden', title: '갑작스러운 충격·과격한 행동', where: '붐비는 곳, 격한 운동·레저, 속도를 내는 곳', tip: '급하게 움직이거나 격한 활동을 할 때는 평소보다 한 단계 천천히 하세요.' }
   ];
+  // 천간·지지 글자별 구체 장면(전통 상징이며 유파에 따라 다르다). 걸린 글자가 어떤 상황을 닮았는지만 말하고 사건을 단정하지 않는다.
+  var STEM_HJ = '甲乙丙丁戊己庚辛壬癸', BR_HJ = '子丑寅卯辰巳午未申酉戌亥';
+  var STEMD = [
+    { title: '큰 나무·높은 곳', place: '높은 곳, 사다리·발코니, 나무 아래' }, { title: '풀·덩굴·화단', place: '화단·풀숲, 줄·덩굴에 발이 걸리기 쉬운 곳' },
+    { title: '햇볕·큰 불', place: '한낮 야외, 불놀이·캠핑장' }, { title: '작은 불·전열기구', place: '주방 가스불, 촛불·히터 주변' },
+    { title: '산·언덕·건축물', place: '언덕길, 건물 외벽·옥상, 낙하물이 있는 곳' }, { title: '흙·논밭·진흙', place: '진흙길, 논밭, 비 온 뒤 흙바닥' },
+    { title: '큰 금속·차량', place: '도로, 철제 구조물, 중장비·차량 주변' }, { title: '바늘·유리·작은 금속', place: '주방, 유리 제품, 바늘·칼날을 다루는 곳' },
+    { title: '큰물·강·바다', place: '강·바다·계곡, 폭우 때 하천 주변' }, { title: '빗물·이슬·결빙', place: '욕실, 비 온 뒤 보도, 빙판' }
+  ];
+  var BRD = [
+    { title: '한밤의 물가', place: '밤 시간 욕실·물가' }, { title: '이른 새벽·언 땅', place: '새벽 출근길, 창고, 얼어붙은 바닥' },
+    { title: '산길·숲·이동 중 도로', place: '산길·숲, 먼 거리 이동 중' }, { title: '계단·울타리·가시', place: '계단, 울타리, 가시 있는 식물 주변' },
+    { title: '물웅덩이·흙더미', place: '저수지·물웅덩이, 흙더미·공사 현장' }, { title: '열기구·전기', place: '전기 설비, 뜨거운 조리기구' },
+    { title: '한낮 햇볕·불', place: '한낮 야외, 화기 주변' }, { title: '메마른 더위', place: '건조하고 더운 곳, 탈수가 쉬운 활동' },
+    { title: '도로·기계', place: '도로·교차로, 기계·공작기계 주변' }, { title: '칼날·유리·금속 가공', place: '칼·유리·금속을 가공하는 곳' },
+    { title: '절벽·건물 모서리', place: '난간·절벽 가장자리, 건물 모서리' }, { title: '밤 이동·물', place: '늦은 밤 이동, 물가' }
+  ];
   var POSW = { year: '집 밖 먼 곳·이동 중', month: '직장·일터', day: '집과 가까운 생활권', hour: '귀가길·늦은 시간' };
   var POSN = { year: '년주', month: '월주', day: '일주', hour: '시주' };
   var KIND = { daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
@@ -24,8 +41,17 @@
   var CAUTION = '사고수 서술은 오행의 쏠림과 충·형 신호를 전통 방식으로 읽은 참고 해석이며, 사고가 일어난다는 예측이나 확률이 아닙니다. 평소 안전 수칙을 지키는 것이 가장 중요합니다.';
   var nm = function (i) { return EL[i] + '(' + HJ[i] + ')'; };
 
+  function focusOf(g) {
+    var keys = Object.keys(g).sort(function (a, b) { return g[b] - g[a] || (a < b ? -1 : 1); }), out = [], seenT = {};
+    keys.forEach(function (k) {
+      if (out.length >= 2) return; var st = k.charAt(0) === 'S', i = +k.slice(1), d = st ? STEMD[i] : BRD[i]; if (seenT[d.title]) return; seenT[d.title] = 1;
+      out.push({ glyph: st ? STEM_HJ.charAt(i) : BR_HJ.charAt(i), kind: st ? '천간' : '지지', title: d.title, place: d.place });
+    });
+    return out;
+  }
   function read(M, ch, x, kind, score) {
     var pct = ch.weights.pct, roles = ch.yongAll && ch.yongAll.eokbu && ch.yongAll.eokbu.roles || {}, label = KIND[kind] || '이 시기', lz = HJ[M.stemEl(x.s)] + HJ[M.BR_EL[x.b]];
+    var gw = [{}, {}, {}, {}, {}, {}, {}], addG = function (e, key, w) { gw[e][key] = (gw[e][key] || 0) + w; };
     var sc = [0, 0, 0, 0, 0, 0, 0], why = [[], [], [], [], [], [], []], where = [{}, {}, {}, {}, {}, {}, {}], seen = {};
     // 충·형·파·해·원진: 걸린 원국 글자의 오행 장면 + 기둥 위치
     var hit = [0, 0, 0, 0, 0], hits = [[], [], [], [], []];
@@ -34,7 +60,7 @@
         var t = r.type || '', w = /충/.test(t) ? 1.5 : /형/.test(t) ? 1.0 : /(파|해|원진)/.test(t) ? 0.5 : 0; if (!w) return;
         var pos = (r.members || []).filter(function (m) { return m !== 'luck'; })[0]; if (!pos || !ch.pillars[pos]) return;
         var el = r.kind === 'stem' ? M.stemEl(ch.pillars[pos].s) : M.BR_EL[ch.pillars[pos].b], key = el + ':' + t + ':' + pos; if (seen[key]) return; seen[key] = 1;
-        if (hit[el] + w > 2.5) w = Math.max(0, 2.5 - hit[el]); if (!w) return; hit[el] += w; sc[el] += w; where[el][pos] = 1;
+        if (hit[el] + w > 2.5) w = Math.max(0, 2.5 - hit[el]); if (!w) return; hit[el] += w; sc[el] += w; where[el][pos] = 1; addG(el, r.kind === 'stem' ? 'S' + ch.pillars[pos].s : 'B' + ch.pillars[pos].b, w);
         hits[el].push(POSN[pos] + '와 ' + r.name);
       });
       for (var h = 0; h < 5; h++) if (hits[h].length) why[h].push(label + '의 ' + lz + ' 글자가 원국 ' + hits[h].join(', ') + ' 관계를 이뤄 ' + nm(h) + ' 기운과 얽힌 장면에서 부딪힘이 생기기 쉬운 신호입니다.');
@@ -42,8 +68,8 @@
     // 이미 많은 오행을 운이 더함 / 억부 기신·구신
     var added = {}, burden = {};
     [M.stemEl(x.s), M.BR_EL[x.b]].forEach(function (le, k) {
-      if (pct[le] >= 32) (added[le] = added[le] || []).push(k === 0 ? '천간' : '지지');
-      var r = roles[le]; if ((r === '기신' || r === '구신') && !burden[le]) burden[le] = r;
+      if (pct[le] >= 32) { (added[le] = added[le] || []).push(k === 0 ? '천간' : '지지'); addG(le, k === 0 ? 'S' + x.s : 'B' + x.b, 1.2); }
+      var r = roles[le]; var r = roles[le]; if ((r === '기신' || r === '구신') && !burden[le]) { burden[le] = r; addG(le, k === 0 ? 'S' + x.s : 'B' + x.b, 1.0); }
     });
     Object.keys(added).forEach(function (e) { e = +e; sc[e] += 1.2; why[e].push(label + '의 ' + added[e].join('·') + ' ' + nm(e) + ' 기운이 이미 많은 ' + EL[e] + '을 더해 이 오행의 장면에서 과해지기 쉽습니다.'); });
     Object.keys(burden).forEach(function (e) { e = +e; sc[e] += burden[e] === '기신' ? 0.6 : 0.4; why[e].push(label + '의 ' + nm(e) + ' 기운은 억부 기준 ' + burden[e] + '이라 이 장면에서 부담이 커지기 쉽습니다.'); });
@@ -56,12 +82,12 @@
     var items = [];
     for (var i = 0; i < 7; i++) if (sc[i] >= 1.5) {
       var ps = Object.keys(where[i]), pl = ps.length ? ps.map(function (p) { return POSN[p] + '(' + POSW[p] + ')'; }).join(', ') : '';
-      items.push({ key: SCENE[i].key, title: SCENE[i].title, where: SCENE[i].where, position: pl, level: sc[i] >= 2.5 ? '주의' : '참고', score: Math.round(sc[i] * 10) / 10, reasons: why[i].slice(0, 4), tip: SCENE[i].tip });
+      items.push({ key: SCENE[i].key, title: SCENE[i].title, where: SCENE[i].where, position: pl, focus: focusOf(gw[i]), level: sc[i] >= 2.5 ? '주의' : '참고', score: Math.round(sc[i] * 10) / 10, reasons: why[i].slice(0, 4), tip: SCENE[i].tip });
     }
     items.sort(function (a, b) { return b.score - a.score; }); items = items.slice(0, 3);
     var sLv = score == null ? null : score >= 66 ? '높은 편' : score >= 45 ? '보통' : '낮은 편';
     var summary = items.length ? label + '에는 다음 장면을 평소보다 조심하면 좋은 흐름으로 읽습니다: ' + items.map(function (t) { return t.title; }).join(' · ') + '.' + (sLv ? ' (사고수 지수 ' + score + ' · ' + sLv + ')' : '') : label + '에는 특정 장면으로 뚜렷하게 모이는 신호가 없어 일상적인 안전 수칙 정도로 충분한 흐름으로 읽습니다.' + (sLv ? ' (사고수 지수 ' + score + ' · ' + sLv + ')' : '');
     return { version: VERSION, kind: kind || null, luck: lz, items: items, summary: summary, caution: CAUTION };
   }
-  G.MantraAccidentHint = { VERSION: VERSION, read: read, SCENE: SCENE, CAUTION: CAUTION };
+  G.MantraAccidentHint = { VERSION: VERSION, read: read, STEMD: STEMD, BRD: BRD, SCENE: SCENE, CAUTION: CAUTION };
 })(typeof window !== 'undefined' ? window : globalThis);
