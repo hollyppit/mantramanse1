@@ -692,6 +692,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="region-reading.js"></script>
 <script src="wish-spots.js"></script>
 <script src="health-body.js"></script>
+<script src="accident-hint.js"></script>
 <script src="byeongyak.js"></script>
 <script src="jonggyeok.js"></script>
 <script src="gyeokguk.js"></script>
@@ -6705,6 +6706,15 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return '<div class="hb"><div class="ib-k">건강 측면 — 살펴볼 부위 (참고)</div><p class="small">' + esc(r.summary) + '</p>' + it + (r.relief.length ? '<p class="small"><b class="ib-g">도움이 되는 점</b></p>' + li(r.relief) : '') +
       (r.natal.length ? '<details class="adv"><summary>평소 타고난 경향 보기</summary><div class="small">' + li(r.natal) + '</div></details>' : '') + '<p class="small muted">' + esc(r.caution) + '</p></div>';
   }
+  // 사고수 참고(accident-hint.js): 사고수 지표를 보는 중일 때 어떤 장면(장소·종류)에서 부주의를 살피면 좋은지 전통 해석으로 서술한다. 스위치 accidentHint(기본 켜짐).
+  function ahBox(x, kind) {
+    const AH = window.MantraAccidentHint; if (!AH || !x || !kind || !window.MANTRA_FLAGS || window.MANTRA_FLAGS.accidentHint === false) return '';
+    let r, sc = null; try { sc = domOf(x, kind).accident.score; } catch (e) { }
+    try { r = AH.read(M, S.ch, x, kind, sc); } catch (e) { return ''; }
+    const li = a => a.length ? '<ul class="pos-ul small">' + a.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>' : '';
+    const it = r.items.map(i => '<div class="hb-i"><b>' + esc(i.title) + '</b> <span class="chip ' + (i.level === '주의' ? 'hb-w' : '') + '">' + i.level + '</span><p class="small muted" style="margin:2px 0">살펴볼 장소: ' + esc(i.where) + (i.position ? ' · 원국에서 걸린 자리: ' + esc(i.position) : '') + '</p>' + li(i.reasons) + '<p class="small"><b>조심하면 좋은 점</b> ' + esc(i.tip) + '</p></div>').join('');
+    return '<div class="hb"><div class="ib-k">사고수 — 어떤 장면을 조심할까 (참고)</div><p class="small">' + esc(r.summary) + '</p>' + it + '<p class="small muted">' + esc(r.caution) + '</p></div>';
+  }
   { const st = document.createElement('style'); st.textContent = '.hb{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;background:var(--surface)}.hb-i{margin:6px 0;padding-top:6px;border-top:1px dashed var(--line)}.hb-i:first-of-type{border-top:0;padding-top:0}.chip.hb-w{background:var(--bad-soft);color:var(--bad)}'; document.head.appendChild(st); }
   function detailHTML(title, x, extra = '', kind = '', banner = '') {
     if (!x || !x.ev) return '';
@@ -6714,7 +6724,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${condTag(e.condition)} <b class="num">${signed(luckV(x))}</b></span></div>
       ${banner}
       ${kind ? interpBox(x, kind) : ''}
-      ${S.metric === 'health' ? hbBox(x, kind) : ''}
+      ${S.metric === 'health' ? hbBox(x, kind) : S.metric === 'accident' ? ahBox(x, kind) : ''}
       <div class="small" style="color:var(--ink-2)">${luckCells(x)}</div>
       ${kind ? (kind === 'ilun' ? dayBox(x) : phaseBox(x, kind)) + domainBox(x, kind, title) + rootBox(x, kind) + luckEffects(x, kind) : ''}
       <h4 style="margin:4px 0 0">${term('흐름 점수')} 근거</h4>
