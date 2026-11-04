@@ -212,6 +212,40 @@ button.pill { border: 0; cursor: pointer; font-family: inherit; }
 .rel-more summary { cursor: pointer; color: var(--ink-3); font-size: 0.8rem; }
 .rel-more p { margin: 6px 0 0; line-height: 1.65; }
 .rel-more summary { padding: 6px 0; }
+/* 궁합(두 사람) */
+.pr-hero { text-align: center; justify-items: center; gap: 10px; background: linear-gradient(160deg, var(--surface), var(--accent-soft)); }
+.pr-hero.tone-top, .pr-hero.tone-good { background: linear-gradient(160deg, var(--surface), var(--good-soft)); }
+.pr-hero.tone-warn, .pr-hero.tone-bad { background: linear-gradient(160deg, var(--surface), var(--bad-soft)); }
+.pr-names { display: flex; align-items: center; justify-content: center; gap: 18px; }
+.pr-names > div { display: grid; gap: 2px; }
+.pr-gz { font-family: var(--f-display); font-size: 1.5rem; letter-spacing: 2px; }
+.pr-vs { font-size: 1.3rem; color: var(--seal); }
+.pr-ring { --c: var(--accent); width: 132px; height: 132px; border-radius: 50%; background: conic-gradient(var(--c) calc(var(--p) * 1%), var(--surface-2) 0); display: grid; place-items: center; }
+.pr-hero.tone-top .pr-ring, .pr-hero.tone-good .pr-ring { --c: var(--good); } .pr-hero.tone-warn .pr-ring { --c: #E0A23A; } .pr-hero.tone-bad .pr-ring { --c: var(--bad); }
+.pr-ring > div { width: 104px; height: 104px; border-radius: 50%; background: var(--surface); display: grid; place-content: center; text-align: center; }
+.pr-ring b { font-size: 2.4rem; line-height: 1; } .pr-ring span { font-size: 0.8rem; color: var(--ink-3); }
+.pr-grade { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.pr-grade-b { font-weight: 800; font-size: 1.05rem; padding: 4px 14px; border-radius: 999px; background: var(--surface-2); }
+.pr-grade-b.tone-top, .pr-grade-b.tone-good { background: var(--good); color: #fff; } .pr-grade-b.tone-mid { background: var(--surface-2); color: var(--ink); } .pr-grade-b.tone-warn { background: #FBE9C8; color: #8A5A00; } .pr-grade-b.tone-bad { background: var(--bad); color: #fff; }
+.pr-sum { margin: 0; font-size: 1.02rem; font-weight: 700; line-height: 1.6; }
+.pr-acts { display: grid; gap: 8px; justify-items: center; width: 100%; }
+.pr-parts { display: grid; gap: 14px; }
+.pr-part { display: grid; gap: 4px; }
+.pr-part-h { display: flex; align-items: baseline; gap: 8px; }
+.pr-part-h b { flex: 1; } .pr-sc { font-size: 1.1rem; font-weight: 800; }
+.pr-part p { margin: 0; }
+.pr-list { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; font-size: 0.9rem; line-height: 1.65; color: var(--ink-2); }
+.pr-sum3 { display: grid; gap: 10px; }
+.pr-box { border-radius: 14px; padding: 12px 14px; background: var(--surface-2); display: grid; gap: 6px; }
+.pr-box.good { background: var(--good-soft); } .pr-box.bad { background: var(--bad-soft); }
+.pr-box ul { margin: 0; padding-left: 1.1em; display: grid; gap: 5px; font-size: 0.9rem; line-height: 1.6; }
+.pr-recent { display: grid; gap: 6px; }
+.pr-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pr-chip { display: inline-flex; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+.pr-chip button { border: 0; background: none; font: inherit; font-size: 0.86rem; font-weight: 600; color: var(--ink-2); padding: 8px 12px; cursor: pointer; }
+.pr-chip .pr-x { padding-left: 4px; color: var(--ink-3); }
+@media (max-width: 640px) { .pair-submit { bottom: calc(56px + env(safe-area-inset-bottom, 0px)); } }
+@media (min-width: 641px) { .pr-sum3 { grid-template-columns: repeat(3, 1fr); } }
 /* 소제목 접고 펴기 */
 .fold-h { position: relative; cursor: pointer; padding-right: 32px; -webkit-tap-highlight-color: transparent; user-select: none; }
 .fold-h:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
@@ -773,6 +807,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <body>
 <div id="app"></div>
 <script src="feature-flags.js"></script>
+<script src="compat-pair.js"></script>
 <script src="engine.js"></script>
 <script src="luck-interpret.js"></script>
 <script src="wealth-career-data.js"></script>
@@ -4990,7 +5025,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     <button type="button" class="to-top" data-act="to-top" aria-label="맨 위로">↑</button>`;
   }
   function renderTop() {
-    const tabs = [['wonguk', '원국'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ['tk', '택일'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ['fs', '풍수'], ['tarot', '타로'], ['iching', '주역'], ['gl', '용어']];
+    const tabs = [['wonguk', '원국'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ['pair', '궁합'], ['tk', '택일'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ['fs', '풍수'], ['tarot', '타로'], ['iching', '주역'], ['gl', '용어']];
     return `<header class="top"><div class="top-in">
       <div class="brand"><div class="seal" aria-hidden="true">萬<br>歲</div><h1>만트라 만세력</h1></div>
       <div class="who">${whoLine()}</div>
@@ -8839,6 +8874,183 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (t) showTip(ev, t.getAttribute('data-tip')); else if (!ev.target.closest || !ev.target.closest('.ov')) hideTip();
   });
 
+  // ───────────── 궁합(두 사람) ─────────────
+  // 계산은 compat-pair.js(PairCompat)가 맡고, 이 절은 상대 입력·저장·표시만 맡는다.
+  const PR_KEY = STORE + '-partners';
+  const prLoad = () => { try { const l = JSON.parse(localStorage.getItem(PR_KEY) || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; } };
+  const prSaveList = l => { try { localStorage.setItem(PR_KEY, JSON.stringify(l.slice(0, 8))); } catch (e) { } };
+  const PR = { inp: null, rel: 'lover', ch: null, res: null, editing: true, err: null, list: prLoad() };
+  const prDefault = () => ({ name: '', gender: S.inp.gender === 'M' ? 'F' : 'M', calendar: 'solar', leap: false, year: 1990, month: 1, day: 1, hour: 12, minute: 0, hourUnknown: false, city: S.inp.city || '서울', lon: S.inp.lon || 126.98 });
+  const prName = () => (PR.inp && PR.inp.name) || '상대';
+  const prMyName = () => S.inp.name || '나';
+  function prCompute() {
+    const i = PR.inp, me = S.inp;
+    PR.ch = M.compute({
+      year: +i.year, month: +i.month, day: +i.day, hour: i.hourUnknown ? null : +i.hour, minute: +i.minute || 0,
+      calendar: i.calendar, leap: i.leap, gender: i.gender, lon: +i.lon, timeMode: me.timeMode, jasi: me.jasi,
+      sinsalBase: me.sinsalBase, model: me.model, school: me.school, combinationMode: me.combinationMode, climatePalaceMode: me.climatePalaceMode,
+    });
+    prEval();
+  }
+  function prEval() { PR.res = PairCompat.evaluate(M, S.ch, PR.ch, PR.rel, { a: prMyName(), b: prName() }); }
+  function prRead() {
+    const g = id => document.getElementById(id); if (!g('pf-y')) return;
+    const i = PR.inp;
+    i.name = g('pf-name').value.trim(); i.year = g('pf-y').value; i.month = g('pf-m').value; i.day = g('pf-d').value;
+    i.hourUnknown = g('pf-hu').checked; if (!i.hourUnknown) { i.hour = g('pf-h').value; i.minute = g('pf-mi').value; }
+    if (g('pf-leap')) i.leap = g('pf-leap').checked;
+    i.city = g('pf-city').value; const c = CITIES.find(x => x[0] === i.city); if (c && c[1] != null) i.lon = c[1];
+  }
+  function prSubmit() {
+    prRead();
+    const i = PR.inp, n = (v, a, b, name) => { const x = String(v).trim() === '' ? NaN : Number(v); if (!Number.isInteger(x) || x < a || x > b) throw new Error(`${name}을(를) ${a}~${b} 사이로 입력하세요`); };
+    try {
+      n(i.year, M.MIN_Y, M.MAX_Y - 1, '년'); n(i.month, 1, 12, '월'); n(i.day, 1, 31, '일');
+      if (!i.hourUnknown) { n(i.hour, 0, 23, '시'); n(i.minute, 0, 59, '분'); }
+      prCompute(); PR.err = null; PR.editing = false;
+      const rec = Object.assign({}, i, { rel: PR.rel }), key = x => [x.name, x.year, x.month, x.day, x.hour, x.minute, x.gender, x.calendar].join('|');
+      PR.list = [rec, ...PR.list.filter(x => key(x) !== key(rec))].slice(0, 8); prSaveList(PR.list);
+    } catch (e) { PR.err = e.message || String(e); PR.editing = true; }
+    render(); if (!PR.err) scrollToContentTop();
+  }
+  function prForm() {
+    const i = PR.inp, leapM = i.calendar === 'lunar' ? M.lunarLeapMonth(+i.year) : 0;
+    const recent = PR.list.length ? `<div class="pr-recent"><span class="muted small">최근 본 사람</span><div class="pr-chips">${PR.list.map((x, k) => `<span class="pr-chip"><button type="button" data-pact="load:${k}">${esc(x.name || `${x.year}.${x.month}.${x.day}`)}</button><button type="button" class="pr-x" data-pact="del:${k}" aria-label="삭제">×</button></span>`).join('')}</div></div>` : '';
+    const sg = (name, opts, cur) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-ps="${name}:${v}" aria-pressed="${String(cur) === String(v)}">${l}</button>`).join('')}</div>`;
+    return `<form class="card form" id="pair-form" autocomplete="off">
+      <div class="card-h"><h2>상대 정보</h2><span class="note">입력한 정보는 이 기기에만 저장됩니다</span></div>
+      ${recent}
+      <div class="field"><span>어떤 사이인가요?</span>${sg('rel', Object.entries(PairCompat.REL_TYPES).map(([k, v]) => [k, v.label]), PR.rel)}</div>
+      <div class="frow">
+        <label class="field"><span>이름 (선택)</span><input id="pf-name" value="${esc(i.name)}" maxlength="20" placeholder="예: 민수"></label>
+        <div class="field"><span>성별</span>${sg('gender', [['M', '남'], ['F', '여']], i.gender)}</div>
+        <div class="field"><span>달력</span>${sg('calendar', [['solar', '양력'], ['lunar', '음력']], i.calendar)}</div>
+        ${i.calendar === 'lunar' ? `<label class="check"><input type="checkbox" id="pf-leap" ${i.leap ? 'checked' : ''}> 윤달${leapM ? ` <span class="muted small">(${i.year}년 윤${leapM}월)</span>` : ''}</label>` : ''}
+      </div>
+      <div class="frow">
+        <label class="field"><span>년</span><input id="pf-y" type="number" inputmode="numeric" value="${esc(i.year)}"></label>
+        <label class="field"><span>월</span><input id="pf-m" type="number" inputmode="numeric" min="1" max="12" value="${esc(i.month)}"></label>
+        <label class="field"><span>일</span><input id="pf-d" type="number" inputmode="numeric" min="1" max="31" value="${esc(i.day)}"></label>
+        <label class="field"><span>시</span><input id="pf-h" type="number" inputmode="numeric" min="0" max="23" value="${esc(i.hour)}" ${i.hourUnknown ? 'disabled' : ''}></label>
+        <label class="field"><span>분</span><input id="pf-mi" type="number" inputmode="numeric" min="0" max="59" value="${esc(i.minute)}" ${i.hourUnknown ? 'disabled' : ''}></label>
+        <label class="check"><input type="checkbox" id="pf-hu" ${i.hourUnknown ? 'checked' : ''}> 시간 모름</label>
+      </div>
+      <div class="frow"><label class="field"><span>출생지</span><select id="pf-city">${CITIES.filter(c => c[1] != null).map(([c, l]) => `<option value="${c}" ${i.city === c ? 'selected' : ''}>${c} (${l.toFixed(2)}°)</option>`).join('')}</select></label></div>
+      <p class="note">시간 계산 기준(진태양시·자시 등)은 내 사주와 같은 설정을 씁니다. 시간을 모르면 시주 없이 비교합니다.</p>
+      <div class="frow form-submit pair-submit"><button class="btn primary" type="submit">궁합 보기</button>${PR.err ? `<span class="err">${esc(PR.err)}</span>` : ''}</div>
+    </form>`;
+  }
+  const PR_BAND = s => s >= 72 ? 0 : s >= 50 ? 1 : 2;
+  const PR_PART_TXT = {
+    yong: ['서로의 부족한 기운을 채워 줍니다. 함께 있으면 힘이 나는 사이예요.', '기운 면에서는 크게 돕지도 해치지도 않습니다.', '서로에게 필요한 기운이 아니라서, 오래 붙어 있으면 에너지가 새기 쉽습니다.'],
+    dayStem: ['성향과 사고방식이 잘 맞습니다. 말이 통하는 사이예요.', '성향은 무난하게 맞춰 갈 수 있습니다.', '생각하는 방식이 달라 자주 엇갈립니다.'],
+    dayBranch: ['마음 깊은 곳이 통합니다. 속마음을 편하게 터놓을 수 있어요.', '속마음은 무난하게 맞습니다.', '마음자리가 부딪칩니다. 가까울수록 서운함과 마찰이 커져요.'],
+    harmony: ['두 사람의 전체 사주가 서로 잘 맞물려 있습니다.', '맞물리는 자리와 부딪치는 자리가 섞여 있습니다.', '사주 곳곳에서 부딪치는 자리가 많아 신경 쓸 일이 자주 생깁니다.'],
+    balance: ['한쪽이 이끌고 한쪽이 받쳐 주는 균형이 좋습니다.', '균형은 무난합니다.', '둘 다 비슷하게 치우쳐 있어 같은 약점이 함께 드러나기 쉽습니다.'],
+  };
+  const PR_PART_TIP = {
+    yong: '같이 있는 시간만 늘리지 말고, 각자 충전하는 시간을 따로 확보하세요.',
+    dayStem: '상대의 방식을 고치려 하지 말고 "왜 그렇게 하는지"를 먼저 물어보세요.',
+    dayBranch: '속마음은 감정이 가라앉은 뒤에, 짧게 한 가지씩 이야기하세요.',
+    harmony: '부딪치는 주제(돈·가족·일정)는 미리 규칙을 정해 두세요.',
+    balance: '서로 닮은 약점이 있으니, 부족한 부분은 주변의 도움이나 외부 도구로 채우세요.',
+  };
+  const PR_REL_TIP = {
+    lover: '중요한 이야기는 감정이 가라앉은 뒤에 하고, 기념일과 돈 문제는 미리 약속을 정해 두세요.',
+    work: '역할과 책임을 문서로 나누고, 의견이 갈리면 근거 자료로 결정하세요.',
+    friend: '서운한 점은 쌓아 두지 말고 가볍게 바로 말하세요.',
+    family: '가까운 사이일수록 말투를 조심하고, 돌봄과 간섭의 선을 정해 두세요.',
+  };
+  const PR_SUMMARY = ['천생연분입니다. 서로 부족한 곳을 채우고 마음자리까지 통하는, 만나기 어려운 조합입니다.', '아주 잘 맞는 사이입니다. 큰 틀에서 서로 힘이 되고, 작은 갈등은 금방 풀립니다.', '좋은 인연입니다. 맞는 부분이 확실히 많고, 몇 가지만 조심하면 오래갑니다.', '무난한 사이입니다. 크게 좋지도 나쁘지도 않아서, 노력하는 만큼 달라집니다.', '노력이 필요한 사이입니다. 끌림과 마찰이 함께 있어 서로 맞춰 가야 오래갑니다.', '상극이 강한 사이입니다. 자주 부딪치니 거리와 규칙을 정해야 관계가 유지됩니다.'];
+  const prGradeIdx = s => s >= 90 ? 0 : s >= 80 ? 1 : s >= 70 ? 2 : s >= 60 ? 3 : s >= 50 ? 4 : 5;
+  function prRelCard(r, R) {
+    const t = r.txt, strong = Math.max(1, Math.min(3, Math.round(t[4])));
+    const where = `${esc(R.names.a)}의 ${PairCompat.AREA[r.aPos[0]]}${r.aPos.length > 1 ? ' 외' : ''} ↔ ${esc(R.names.b)}의 ${PairCompat.AREA[r.bPos]}`;
+    return `<article class="rel-card tone-${t[0]}">
+      <div class="rel-top"><span class="rel-badge">${term(r.type)}</span><b class="rel-name muted">${esc(r.name)}</b><span class="rel-str" title="영향 세기">${'●'.repeat(strong)}${'○'.repeat(3 - strong)}</span></div>
+      <div class="rel-where">${where}</div>
+      <p class="rel-head">${t[1]}</p>
+      <p class="rel-place">${t[2]}</p>
+      <p class="rel-tip"><b>이렇게 해보세요</b> ${t[3]}</p>
+    </article>`;
+  }
+  function prResult() {
+    const R = PR.res, ch = S.ch, P = PR.ch, a = R.names.a, b = R.names.b, sc = R.score, gi = prGradeIdx(sc);
+    const dg = c => `${M.STEM[c.pillars.day.s]}${M.BR[c.pillars.day.b]}`;
+    const rows = R.parts.map(p => `<div class="pr-part"><div class="pr-part-h"><b>${p.label}</b><span class="pr-sc num">${p.score}</span><span class="cr-lab ${p.score >= 72 ? 'good' : p.score < 50 ? 'bad' : ''}">${PairCompat.gradeOf(p.score).name}</span></div><span class="cp-bar"><i style="width:${p.score}%"></i></span><p class="small muted">${PR_PART_TXT[p.key][PR_BAND(p.score)]}</p></div>`).join('');
+    const jong = n => { const c = String(n).charCodeAt(String(n).length - 1); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0; };
+    const sj = n => n === '나' ? '<b>내</b>가' : `<b>${esc(n)}</b>${jong(n) ? '이' : '가'}`;
+    const tp = n => n === '나' ? '<b>나</b>는' : `<b>${esc(n)}</b>${jong(n) ? '은' : '는'}`;
+    const elTxt = e => `${M.EL_K[e]}(${M.EL[e]})`;
+    const elLine = (who, other, g) => {
+      const t = g.top;
+      return `<li>${sj(other)} <b>${esc(who)}</b>에게 채워 주는 정도 <b class="num">${g.score}점</b> — ${t ? `${esc(who)}에게 필요한 ${esc(t.role)} ${elTxt(t.e)} 기운을 ${other === '나' ? '내가' : esc(other) + (jong(other) ? '이' : '가')} ${Math.round(t.pct)}% 가지고 있습니다.` : `${esc(who)}에게 필요한 기운을 ${tp(other)} 거의 가지고 있지 않습니다.`} ${esc(other)}의 일간은 ${elTxt(g.dayEl)} 기운으로, ${esc(who)}에게는 <b>${g.dayRole}</b>(${({ '용신': '가장 필요한', '희신': '도움이 되는', '한신': '돕지도 해치지도 않는', '구신': '부담이 되는', '기신': '가장 해로운' })[g.dayRole] || ''} 기운)입니다.</li>`;
+    };
+    const tgLine = (who, other, tg) => `<li><b>${esc(other)}</b>의 일간은 <b>${esc(who)}</b>에게 <b>${tg}</b> — ${TG_KW[tg] || ''}</li>`;
+    const goods = R.relations.filter(x => x.tone === 'good'), bads = R.relations.filter(x => x.tone === 'bad');
+    const dedup = arr => { const seen = new Set(); return arr.filter(x => { const k = x.name + x.aPos.join() + x.bPos; if (seen.has(k)) return false; seen.add(k); return true; }); };
+    const rels = dedup(R.relations), shown = rels.slice(0, 6), more = rels.slice(6);
+    const strengths = [...goods.slice(0, 2).map(x => `${PairCompat.AREA[x.aPos[0]]}↔${PairCompat.AREA[x.bPos]}: ${x.txt[1]}`), ...R.parts.filter(p => p.score >= 72).slice(0, 2).map(p => `${p.label} — ${PR_PART_TXT[p.key][0]}`)].slice(0, 4);
+    const cautions = [...bads.slice(0, 2).map(x => `${PairCompat.AREA[x.aPos[0]]}↔${PairCompat.AREA[x.bPos]}: ${x.txt[1]}`), ...R.parts.filter(p => p.score < 50).slice(0, 2).map(p => `${p.label} — ${PR_PART_TXT[p.key][2]}`)].slice(0, 4);
+    const tips = [PR_REL_TIP[R.rel], ...R.parts.filter(p => p.score < 60).sort((x, y) => x.score - y.score).slice(0, 2).map(p => PR_PART_TIP[p.key])];
+    const relSeg = `<div class="seg" role="group" aria-label="관계">${Object.entries(PairCompat.REL_TYPES).map(([k, v]) => `<button type="button" data-ps="rel:${k}" aria-pressed="${PR.rel === k}">${v.label}</button>`).join('')}</div>`;
+    return `
+    <section class="card pr-hero tone-${R.grade.tone}">
+      <div class="pr-names"><div><span class="muted small">${esc(a)}</span><b class="pr-gz">${dg(ch)}</b></div><span class="pr-vs">♡</span><div><span class="muted small">${esc(b)}</span><b class="pr-gz">${dg(P)}</b></div></div>
+      <div class="pr-ring" style="--p:${sc}"><div><b class="num">${sc}</b><span>점</span></div></div>
+      <div class="pr-grade"><span class="pr-grade-b tone-${R.grade.tone}">${R.grade.name}</span><span class="muted small">${R.relLabel} 기준</span></div>
+      <p class="pr-sum">${PR_SUMMARY[gi]}</p>
+      <p class="small muted">가장 큰 힘은 <b>${R.best.label}</b>(${R.best.score}점), 가장 약한 곳은 <b>${R.worst.label}</b>(${R.worst.score}점)입니다.</p>
+      <div class="pr-acts"><button type="button" class="btn" data-pact="edit">상대 바꾸기</button>${relSeg}</div>
+    </section>
+    <section class="card">
+      <div class="card-h"><h2>항목별 점수</h2><span class="note">${R.relLabel} 기준 가중치로 합산했습니다</span></div>
+      <div class="pr-parts">${rows}</div>
+    </section>
+    <section class="card">
+      <div class="card-h"><h2>서로의 기운 · 성향</h2><span class="note">오행 보완과 일간(나 자신)을 비교합니다</span></div>
+      <h3 class="cp-h3">오행 보완</h3>
+      <ul class="pr-list">${elLine(a, b, R.element.aGets)}${elLine(b, a, R.element.bGets)}</ul>
+      <h3 class="cp-h3">일간으로 본 서로의 자리</h3>
+      <ul class="pr-list">${tgLine(a, b, R.stems.aSeesB)}${tgLine(b, a, R.stems.bSeesA)}${R.stems.hap ? '<li><b>일간끼리 천간합</b> — 마음이 쉽게 끌리는 인연입니다.</li>' : ''}${R.stems.chung ? '<li><b>일간끼리 천간충</b> — 생각이 정면으로 맞서 말다툼이 잦습니다.</li>' : ''}<li>강약: ${esc(a)} ${R.strength.a} · ${esc(b)} ${R.strength.b}</li></ul>
+    </section>
+    <section class="card">
+      <div class="card-h"><h2>두 사람의 간지 관계</h2><span class="note">영향이 큰 순서 · 위쪽이 더 중요합니다</span></div>
+      ${rels.length ? `<div class="rel-list">${shown.map(r => prRelCard(r, R)).join('')}</div>${more.length ? `<details class="rel-more"><summary>나머지 ${more.length}개 보기</summary><div class="rel-list" style="margin-top:8px">${more.map(r => prRelCard(r, R)).join('')}</div></details>` : ''}` : '<p class="muted small">두 사람 사이에 뚜렷한 합·충이 없습니다. 서로에게 크게 끌리지도 부딪치지도 않는 담백한 사이입니다.</p>'}
+    </section>
+    <section class="card">
+      <div class="card-h"><h2>한눈에 정리</h2></div>
+      <div class="pr-sum3">
+        <div class="pr-box good"><b>잘 맞는 점</b>${strengths.length ? `<ul>${strengths.map(x => `<li>${x}</li>`).join('')}</ul>` : '<p class="small muted">뚜렷하게 맞는 점이 적습니다.</p>'}</div>
+        <div class="pr-box bad"><b>조심할 점</b>${cautions.length ? `<ul>${cautions.map(x => `<li>${x}</li>`).join('')}</ul>` : '<p class="small muted">크게 부딪치는 점이 없습니다.</p>'}</div>
+        <div class="pr-box"><b>이렇게 해보세요</b><ul>${tips.map(x => `<li>${x}</li>`).join('')}</ul></div>
+      </div>
+      <p class="note">궁합 점수는 두 사람의 오행·십성·합충을 계산한 명리 참고 지표입니다. 같은 점수라도 서로 맞춰 가는 노력에 따라 관계는 달라집니다.</p>
+    </section>`;
+  }
+  function renderPair() {
+    if (!S.ch) return '<section class="card"><p class="muted">먼저 내 사주를 입력하세요.</p></section>';
+    if (!PR.inp) PR.inp = prDefault();
+    if (PR.editing || !PR.res) return `<div class="cp-title"><h2>나와 상대의 궁합</h2><p class="note">두 사람의 사주를 직접 비교해 점수와 등급, 이유를 알려 드립니다.</p></div>${prForm()}`;
+    return prResult();
+  }
+  document.addEventListener('click', ev => {
+    const t = ev.target; if (!t.closest) return;
+    const ps = t.closest('[data-ps]');
+    if (ps) {
+      const [k, v] = ps.dataset.ps.split(':');
+      if (k === 'rel') { PR.rel = v; if (!PR.editing && PR.ch) prEval(); else prRead(); render(); return; }
+      prRead(); PR.inp[k] = v; if (k === 'calendar') PR.inp.leap = false; render(); return;
+    }
+    const pa = t.closest('[data-pact]');
+    if (pa) {
+      const [a, v] = pa.dataset.pact.split(':');
+      if (a === 'edit') { PR.editing = true; PR.err = null; render(); return; }
+      if (a === 'load') { const x = PR.list[+v]; if (x) { PR.inp = Object.assign(prDefault(), x); PR.rel = x.rel || PR.rel; delete PR.inp.rel; prSubmit(); } return; }
+      if (a === 'del') { PR.list.splice(+v, 1); prSaveList(PR.list); render(); return; }
+    }
+  });
+
   // ───────────── 렌더 ─────────────
   const root = document.getElementById('app');
   function render() {
@@ -8853,6 +9065,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     else if (S.tab === 'ohaeng') body = renderOhaeng();
     else if (S.tab === 'yong') body = renderYong();
     else if (S.tab === 'luck') body = renderLuck();
+    else if (S.tab === 'pair') body = renderPair();
     else if (S.tab === 'tk') body = renderTk();
     else if (S.tab === 'zw') body = S.ch.ziwei ? renderZiwei() : renderWonguk();
     else body = renderGl();
@@ -9054,6 +9267,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   });
   document.addEventListener('submit', ev => {
     ev.preventDefault();
+    if (ev.target.id === 'pair-form') { prSubmit(); return; }
     if (ev.target.id === 'admin-form') { adminLogin(document.getElementById('admin-pw').value); return; }
     readForm();
     try { validate(); } catch (e) { S.err = e.message; render(); return; }
