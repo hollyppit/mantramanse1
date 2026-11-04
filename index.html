@@ -215,6 +215,14 @@ button.pill { border: 0; cursor: pointer; font-family: inherit; }
 .easy-list { display: grid; gap: 12px; }
 .easy-row { display: grid; gap: 3px; padding: 12px 14px; border-radius: 14px; background: var(--surface-2); }
 .easy-row > b { font-size: 0.82rem; color: var(--ink-3); }
+.prof { display: grid; gap: 6px; }
+.prof-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.prof-chip { display: inline-flex; align-items: stretch; background: var(--surface-2); border-radius: 12px; overflow: hidden; box-shadow: inset 0 0 0 1px transparent; }
+.prof-chip.on { background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.prof-chip > button { border: 0; background: none; font: inherit; cursor: pointer; padding: 8px 12px; display: grid; text-align: left; line-height: 1.25; color: var(--ink-2); }
+.prof-chip b { font-size: 0.9rem; color: var(--ink); }
+.prof-chip small { font-size: 0.72rem; color: var(--ink-3); }
+.prof-chip > .prof-x { padding: 8px 12px 8px 6px; color: var(--ink-3); font-size: 1rem; align-content: center; }
 .wf-row { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.9rem; }
 .wf-loss { display: grid; gap: 4px; background: var(--bad-soft); border-radius: 12px; padding: 10px 12px; }
 .wf-loss p { margin: 0; color: var(--ink-2); }
@@ -5108,6 +5116,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const leapM = i.calendar === 'lunar' ? M.lunarLeapMonth(+i.year) : 0;
     return `<form class="card form" id="form" autocomplete="off">
       <div class="card-h"><h2>출생 정보</h2><span class="note">${M.MIN_Y}~${M.MAX_Y - 1}년 · 한국 표준시 기준 출생지</span></div>
+      ${profChips()}
       <div class="frow">
         <label class="field"><span>이름 (선택)</span><input id="f-name" value="${esc(i.name)}" maxlength="20" placeholder="표시용"></label>
         <div class="field"><span>성별</span>${seg('gender', [['M', '남'], ['F', '여']], i.gender)}</div>
@@ -5136,6 +5145,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         </div>
         <p class="note" style="margin-top:10px">오행 계산 모델과 용신 학파는 각 탭에서 바로 바꿀 수 있습니다.</p>
       </details>
+      ${PROFS.length ? '<div class="frow"><button type="button" class="btn" data-prof="clear">저장된 정보 모두 지우기</button></div>' : ''}
       <div class="frow form-submit"><button class="btn primary" type="submit">만세력 보기</button>${S.err ? `<span class="err">${esc(S.err)}</span>` : ''}</div>
     </form>`;
   }
@@ -9584,6 +9594,33 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <span class="muted">원국 표에서 기둥 이름(간지)을 누르면 내 일간 기준으로 자세히 풀어 줍니다.</span></div>`;
   }
   function save() { try { localStorage.setItem(STORE, JSON.stringify(S.inp)); } catch (e) { } }
+  // ── 저장된 사람 목록: 만세력 보기를 누를 때마다 그 사람을 이 기기에 저장하고, 목록에서 골라 바로 불러오거나 한 명씩 지울 수 있다 ──
+  const PROF_KEY = STORE + '-profiles', PROF_MAX = 12;
+  const profLoad = () => { try { const l = JSON.parse(localStorage.getItem(PROF_KEY) || '[]'); return Array.isArray(l) ? l.filter(x => x && x.year) : []; } catch (e) { return []; } };
+  const profStore = l => { try { localStorage.setItem(PROF_KEY, JSON.stringify(l.slice(0, PROF_MAX))); } catch (e) { } };
+  const profId = x => [x.name || '', x.calendar, x.leap ? 1 : 0, x.year, x.month, x.day, x.hourUnknown ? 'u' : x.hour + ':' + x.minute, x.gender].join('|');
+  const profLabel = x => x.name || `${x.year}.${x.month}.${x.day}`;
+  let PROFS = profLoad();
+  if (!PROFS.length && saved && saved.year) { PROFS = [Object.assign({}, EXAMPLE, saved)]; profStore(PROFS); }   // 예전에 저장해 둔 사람도 목록에 올린다
+  function profUpsert() { const rec = Object.assign({}, S.inp), id = profId(rec); PROFS = [rec, ...PROFS.filter(p => profId(p) !== id)].slice(0, PROF_MAX); profStore(PROFS); }
+  function profChips() {
+    if (!PROFS.length) return `<p class="note">입력한 정보는 이 기기(브라우저)에만 저장되고, 서버로 보내지 않아요. 저장하면 다음에 열 때 다시 입력하지 않아도 됩니다.</p>`;
+    const cur = profId(S.inp);
+    return `<div class="prof"><span class="muted small">저장된 사람 (${PROFS.length}명) · 이 기기에만 저장돼요</span><div class="prof-chips">${PROFS.map((p, i) => `<span class="prof-chip${profId(p) === cur ? ' on' : ''}"><button type="button" data-prof="load:${i}" title="${esc(p.year)}.${esc(p.month)}.${esc(p.day)} ${p.gender === 'M' ? '남' : '여'}"><b>${esc(profLabel(p))}</b><small>${p.gender === 'M' ? '남' : '여'} · ${esc(p.year)}</small></button><button type="button" class="prof-x" data-prof="del:${i}" aria-label="${esc(profLabel(p))} 삭제">×</button></span>`).join('')}</div></div>`;
+  }
+  function profClearAll() {
+    PROFS = []; profStore(PROFS);
+    try { localStorage.removeItem(STORE); localStorage.removeItem(STORE + '-partners'); } catch (e) { }
+    if (typeof PR !== 'undefined') { PR.list = []; PR.inp = null; PR.ch = null; PR.res = null; PR.editing = true; }
+    S.inp = Object.assign({}, EXAMPLE); S.isExample = true; S.editing = true; S.sel = null; S.err = null; run(); render(); window.scrollTo(0, 0);
+  }
+  document.addEventListener('click', ev => {
+    const t = ev.target && ev.target.closest ? ev.target.closest('[data-prof]') : null; if (!t) return;
+    const [a, v] = t.dataset.prof.split(':');
+    if (a === 'load') { const p = PROFS[+v]; if (!p) return; S.inp = Object.assign({}, EXAMPLE, p); S.isExample = false; S.editing = false; S.sel = null; S.zwSel = null; S.zwY = null; S.err = null; run(); if (!S.err) { save(); profUpsert(); } render(); window.scrollTo(0, 0); return; }
+    if (a === 'del') { const p = PROFS[+v]; if (!p || !window.confirm(`"${profLabel(p)}"의 저장된 정보를 지울까요?`)) return; const wasCur = profId(p) === profId(S.inp); PROFS.splice(+v, 1); profStore(PROFS); if (wasCur) { try { localStorage.removeItem(STORE); } catch (e) { } } render(); return; }
+    if (a === 'clear') { if (window.confirm('저장된 모든 사람의 정보(내 사주·궁합 상대)를 이 기기에서 지울까요? 되돌릴 수 없어요.')) profClearAll(); return; }
+  });
   function pick(p) {
     const [k, v] = p.split(':');
     if (k === 'now') S.sel = { kind: 'now', k: v };
@@ -9678,7 +9715,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     readForm();
     try { validate(); } catch (e) { S.err = e.message; render(); return; }
     run();
-    if (!S.err) { S.isExample = false; S.editing = false; S.sel = null; S.zwSel = null; S.zwY = null; save(); }
+    if (!S.err) { S.isExample = false; S.editing = false; S.sel = null; S.zwSel = null; S.zwY = null; save(); profUpsert(); }
     render();
     if (!S.err) window.scrollTo(0, 0);
   });
