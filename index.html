@@ -8754,18 +8754,34 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const a = roomsAt(five), b = m5 ? roomsAt(m5) : [];
       link = `<p class="small"><b>${esc(home.c.name)}</b>(${home.an.xuankong.period}운 건물) 기준: 올해 오황 방위 ${esc(spD(five))}에는 ${a.length ? '<b>' + a.join('·') + '</b>이(가) 있어 공사·소음·큰 가구 이동을 특히 삼가세요.' : '입력하신 방 배치 중 해당하는 곳이 없습니다.'}${m5 ? ' 이번 달 오황은 ' + esc(spD(m5)) + '' + (b.length ? '이며 ' + b.join('·') + '이(가) 있습니다.' : '입니다.') : ''}</p>`;
     } else link = '<p class="small muted">‘공간·명당’ 탭에서 집의 향과 방 배치를 입력하면 올해·이번 달 별이 내 집 어느 방에 닿는지 이어서 보여 드립니다.</p>';
-    return `<section class="card"><div class="card-h"><h2>공간의 흐름 (풍수)</h2><span class="note">삼원구운·연비성·월비성 · 참고</span></div>
-      <p class="small">지금은 <b>${p}운</b>(${F.yuanOfYear(curY)} · ${r[0]}~${r[1]}년)이며 ${nxt}운은 ${p === 9 ? r[1] + 1 : r[1] + 1}년부터입니다. ${p}운에는 ${D_STAR_NAME(p)} 기운이 가장 힘을 받습니다.</p>
-      <div class="list"><div class="li"><span class="k">${curY}년 연비성</span><span class="v small">중궁 ${o.yearCenter}. 오황 ${esc(spD(five))} · 이흑 ${esc(spD(two))} · 길한 별(8·9·1)은 ${esc(good.join(', '))}.<br>${esc(o.samsal.text)}<br>${esc(o.taesae.text)}</span><span></span></div>
-      ${mIdx ? `<div class="li"><span class="k">이번 달 월비성</span><span class="v small">중궁 ${o.monthCenter}. 오황은 ${esc(spD(m5))}입니다. 월비성은 절기(${esc(curM.termName)}) 기준으로 바뀝니다.</span><span></span></div>` : ''}</div>${link}
+    const pz = d => d === '중앙' ? '집 한가운데' : d + '쪽';
+    const goodTxt = good.length ? good.join(', ') : '뚜렷하지 않음';
+    const sum = '올해는 <b>' + pz(five) + '</b>' + '을 조심하고, <b>' + goodTxt + '</b>을 잘 쓰는 해입니다. 이번 달은 <b>' + (m5 ? pz(m5) : '-') + '</b>을 조심하세요.';
+    return `<section class="card"><div class="card-h"><h2>올해·이번 달 우리 집 방위 운 (풍수)</h2><span class="note">참고용</span></div>
+      <div class="sumbox">${sum}</div>
+      <h3>지금 이렇게 하세요</h3>
+      <ul class="pos-ul small">
+        <li><b>${curY}년 가장 조심할 방위: ${esc(pz(five))}</b> — 풍수에서 가장 꺼리는 별(오황)이 들어옵니다. 이쪽 방에는 침대·책상처럼 오래 머무는 자리를 두지 말고, 벽 공사·큰 가구 옮기기·시끄러운 일은 미루세요.</li>
+        <li><b>건강에 신경 쓸 방위: ${esc(pz(two))}</b> — 몸이 처지기 쉬운 별(이흑)이 들어옵니다. 자주 환기하고 청소해 두세요.</li>
+        <li><b>잘 쓰면 좋은 방위: ${esc(goodTxt)}</b> — 재물·명예·기쁜 일과 연결되는 별이 들어옵니다. 침실·서재·거실처럼 자주 쓰는 공간으로 쓰기 좋습니다.</li>
+        <li><b>이사·수리·문 내기를 피할 방향: ${esc(o.samsal.dir)}쪽, ${esc(o.taesae.dir)}쪽</b> — 올해 이사나 큰 공사를 계획한다면 이 방향으로 가거나 이 방향 벽을 뚫는 일은 피하는 것이 전통입니다.</li>
+        ${mIdx ? `<li><b>이번 달(${esc(curM.termName)} 이후) 조심할 방위: ${esc(pz(m5))}</b> — 한 달 동안만 해당하며, 다음 절기가 지나면 바뀝니다.</li>` : ''}
+      </ul>${link}
+      <details class="adv"><summary>용어가 어려우세요? 쉽게 풀어 드려요</summary><dl class="small" style="margin:6px 0 0">
+        <dt><b>운(9운)</b></dt><dd style="margin:0 0 8px">풍수에서는 20년마다 집과 땅의 기운 주인공이 바뀐다고 봅니다. 지금(${r[0]}~${r[1]}년)은 <b>${p}운</b>으로 ${esc(D_STAR_NAME(p))} 기운이 가장 힘이 센 시기이고, ${r[1] + 1}년부터는 ${nxt}운이 됩니다. 사주의 대운과는 별개입니다.</dd>
+        <dt><b>연비성(年飛星)</b></dt><dd style="margin:0 0 8px">집을 9칸(동서남북·네 모서리·가운데)으로 나누고, <b>해마다 1~9번 별이 한 칸씩 돌아가며 들어온다</b>고 보는 방법입니다. 올해 어느 방위에 어떤 별이 오는지 알려 주는 ‘올해 방위별 운세표’라고 생각하시면 됩니다. 올해 가운데 칸 별은 ${o.yearCenter}번입니다.</dd>
+        <dt><b>월비성(月飛星)</b></dt><dd style="margin:0 0 8px">같은 원리를 <b>한 달 단위</b>로 본 것입니다. 달력 월이 아니라 절기(입춘·경칩 등)에 따라 바뀝니다. 이번 달 가운데 칸 별은 ${o.monthCenter || '-'}번입니다.</dd>
+        <dt><b>오황(五黃)·이흑(二黑)</b></dt><dd style="margin:0 0 8px">가장 조심하는 두 별입니다. 오황은 사고·정체, 이흑은 몸의 피로와 연결해 보며, 그 방위에서는 공사와 큰 이동을 삼갑니다.</dd>
+        <dt><b>삼살(三煞)·태세(太歲)</b></dt><dd style="margin:0 0 8px">그해 이사·수리·땅 파기를 피하는 방향입니다. 해마다 방향이 바뀝니다. 올해는 삼살 ${esc(o.samsal.dir)}쪽, 태세 ${esc(o.taesae.dir)}쪽입니다.</dd>
+        <dt><b>길한 별(8·9·1)</b></dt><dd style="margin:0">팔백(재물·부동산), 구자(경사·명예), 일백(인맥·학업)처럼 좋은 일과 연결하는 별입니다.</dd></dl></details>
       ${spMonthTable(curY, home)}
-      <p class="note">풍수 흐름은 사주의 대운·세운·월운 계산과 별개로 건물 쪽의 시간 흐름을 보는 참고 정보이며, 위 사주 점수에는 반영되지 않습니다. ${esc(window.MantraFengshuiData.DISCLAIMER)}</p></section>`;
+      <p class="note">풍수는 사주의 대운·세운·월운과 별개로 집 쪽의 시간 흐름을 보는 전통 해석이라 위 사주 점수에는 반영되지 않습니다. 건물 안전·계약은 현장과 전문가 확인이 우선입니다.</p></section>`;
   }
   function spMonthTable(Y, home) {
     const F = window.MantraFengshui, FD = window.MantraFengshuiData, T = ['입춘', '경칩', '청명', '입하', '망종', '소서', '입추', '백로', '한로', '입동', '대설', '소한'];
     const roomsAt = d => home && home.an ? ['door', 'bed', 'desk', 'stove', 'wc'].filter(k => { const x = SP_DIRS.find(q => q[0] === home.c.rooms[k]); return x && x[1] === d; }).map(k => FD.ROOM_LABEL[k]) : [];
     const rows = T.map((t, i) => { const o = F.overlay(null, Y, i + 1), d = o.cells.find(x => x.monthStar === 5).dir, r = roomsAt(d); return '<tr><td>' + (i + 1) + '월(' + t + '~)</td><td>' + o.monthCenter + '</td><td>' + esc(spD(d)) + '</td><td>' + (r.length ? '<span class="sp-b">' + esc(r.join('·')) + '</span>' : '<span class="muted">-</span>') + '</td></tr>'; }).join('');
-    return '<details class="adv"><summary>' + Y + '년 월비성 12개월 표</summary><div style="overflow-x:auto"><table class="sp-tb"><thead><tr><th>풍수 월(절기 기준)</th><th>중궁</th><th>오황 방위</th><th>내 집 해당 방</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="small muted">월은 음력·양력 달이 아니라 절기 기준입니다. 오황 방위의 방은 그 달 공사·큰 가구 이동을 미루세요. 방 배치는 공간·명당 탭에 입력한 값입니다.</p></details>';
+    return '<details class="adv"><summary>' + Y + '년 월별 조심할 방위 표 (월비성)</summary><div style="overflow-x:auto"><table class="sp-tb"><thead><tr><th>달(절기 기준)</th><th>가운데 칸 별</th><th>그 달 조심할 방위</th><th>내 집에서 해당하는 방</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="small muted">월은 음력·양력 달이 아니라 절기 기준입니다. 오황 방위의 방은 그 달 공사·큰 가구 이동을 미루세요. 방 배치는 공간·명당 탭에 입력한 값입니다.</p></details>';
   }
   const D_STAR_NAME = n => window.MantraFengshuiData.STAR[n].name + '(' + window.MantraFengshuiData.STAR[n].short + ')';
   function spTkCard(T, sd) {
