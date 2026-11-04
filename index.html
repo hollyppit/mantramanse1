@@ -766,6 +766,20 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 .phc.good { background: var(--good-soft); } .phc.bad { background: var(--bad-soft); }
 .phc .lbl { font-size: 0.74rem; color: var(--ink-3); font-weight: 700; }
 .phc b { font-size: 1rem; }
+.trc { position: relative; display: block; width: var(--w, 96px); aspect-ratio: 5 / 8.4; border: 0; padding: 0; border-radius: 10px; overflow: hidden; background: #12162a; box-shadow: 0 6px 16px -8px rgba(18,21,31,.55); cursor: zoom-in; flex: none; }
+.trc.rev { transform: rotate(180deg); }
+.trc .tc-ph { position: absolute; inset: 0; display: grid; place-items: center; padding: 8%; text-align: center; color: #f3e7c6; font-family: var(--f-display); font-size: 0.82rem; line-height: 1.3; }
+.trc .tcimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .35s; }
+.trc .tcimg.on { opacity: 1; }
+.trc .fa { position: absolute; overflow: hidden; background: #0c0f20; }
+.trc .fa .tcimg { position: absolute; inset: 0; }
+.trc .ffr { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.trc .fnm { position: absolute; display: grid; place-items: center; text-align: center; overflow: hidden; padding: 0 4%; color: #f3e7c6; font-size: 0.7rem; line-height: 1.25; letter-spacing: .03em; text-shadow: 0 1px 3px #000; }
+.trthumb { display: grid; justify-items: center; }
+.trstrip { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 8px; justify-content: center; flex-wrap: wrap; }
+.trcell { display: grid; justify-items: center; gap: 6px; }
+.trc-l { font-size: 0.74rem; font-weight: 700; color: var(--ink-3); }
+.trz { display: grid; justify-items: center; padding: 6px 0; }
 .trs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
 .trp { border-radius: 16px; box-shadow: inset 0 0 0 1px var(--line); padding: 12px; display: grid; gap: 8px; align-content: start; }
 .trp.on { background: color-mix(in srgb, var(--c) 7%, var(--surface)); box-shadow: inset 0 0 0 1.5px var(--c); }
@@ -8513,11 +8527,42 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     for (const [p] of TR_SPREAD[PK.tr.spread][1]) { let id; do id = ids[Math.floor(Math.random() * ids.length)]; while (used.has(id)); used.add(id); PK.tr.cards[p] = [id, Math.random() < 0.3]; }
     pkSave(); render();
   }
+  // ── 타로 카드 그림: 관리자 패널(타로 카드 이미지)에서 확정한 그림을 /api/free-content 에서 읽어 쓴다. 없거나 실패하면 이름 자리표시를 보여 준다 ──
+  const TRX = { img: {}, frame: null, loaded: false };
+  (function loadTarotArt() {
+    let done = false; const fin = d => { if (done) return; done = true; const t = d && d.content && d.content.tarot, f = t && t.frame; TRX.img = (t && t.images) || {}; TRX.frame = f && f.url && Array.isArray(f.win) && f.win.length === 4 ? f : null; TRX.loaded = true; if (S.tab === 'tarot') render(); };
+    setTimeout(() => fin(null), 3000);
+    try { fetch('/api/free-content').then(r => r.ok ? r.json() : null).then(fin, () => fin(null)); } catch (e) { fin(null); }
+  })();
+  const trMeta = id => (window.MantraCore.Tarot.byId || {})[id];
+  const SUIT_BG = { M: '#3b2f6b', W: '#7a3a1d', C: '#1f4f6b', S: '#3a4a5c', P: '#5a4a1d' };
+  // w: 카드 폭(px). 그림이 있으면 얹고, 없거나 깨지면 이름 자리표시가 그대로 보인다. 역방향은 카드 전체를 180° 돌린다
+  function trFace(id, rev, w, label) {
+    const m = trMeta(id), card = TR[id]; if (!card) return '';
+    const name = m ? m.nameKo : card.name, src = TRX.img[id] || (m && m.imageUrl) || '';
+    const onload = "this.classList.add('on')", onerr = "this.remove()";
+    let inner;
+    if (TRX.frame && TRX.img[id]) {
+      const f = TRX.frame, win = f.win, pc = v => (v * 100).toFixed(2) + '%', by = win[1] + win[3];
+      inner = `<div class="fa" style="left:${pc(win[0])};top:${pc(win[1])};width:${pc(win[2])};height:${pc(win[3])}"><img class="tcimg" src="${esc(src)}" alt="${esc(name)}" loading="lazy" decoding="async" onload="${onload}" onerror="${onerr}"></div><img class="ffr" src="${esc(f.url)}" alt="" decoding="async" onerror="${onerr}"><div class="fnm" style="left:${pc(win[0])};top:${pc(by)};width:${pc(win[2])};height:${pc(Math.max(0.04, 1 - by - 0.02))}"><span>${esc(name)}</span></div>`;
+    } else {
+      inner = `<div class="tc-ph" style="background:${SUIT_BG[card.suit] || '#2a2f4a'}"><span>${esc(name)}</span></div>${src ? `<img class="tcimg" src="${esc(src)}" alt="${esc(name)}" loading="lazy" decoding="async" onload="${onload}" onerror="${onerr}">` : ''}`;
+    }
+    return `<button type="button" class="trc${rev ? ' rev' : ''}" style="--w:${w}px" data-trz="${id}:${rev ? 1 : 0}" aria-label="${esc(name)}${rev ? ' 역방향' : ''} 크게 보기">${inner}</button>${label ? `<span class="trc-l">${esc(label)}</span>` : ''}`;
+  }
+  function trZoom(id, rev) {
+    const card = TR[id]; if (!card) return;
+    const bg = document.createElement('div'); bg.className = 'sheet-bg'; bg.dataset.trzbg = '1';
+    bg.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="카드 크게 보기" style="justify-items:center;text-align:center"><span class="cat">${rev ? '역방향' : '정방향'}</span><div class="trz">${trFace(id, rev, Math.min(280, window.innerWidth - 80))}</div><b>${esc(card.name)}</b><p class="small" style="color:var(--ink-2);margin:0">${esc(rev ? card.rev : card.up)}</p><button class="btn x" type="button">닫기</button></div>`;
+    bg.addEventListener('click', ev => { if (ev.target === bg || ev.target.closest('.x')) bg.remove(); });
+    document.body.appendChild(bg);
+  }
+  document.addEventListener('click', ev => { const z = ev.target.closest && ev.target.closest('[data-trz]'); if (!z || z.closest('.sheet')) return; ev.preventDefault(); const [id, r] = z.dataset.trz.split(':'); trZoom(id, r === '1'); });
   function renderTarot() {
     const T = PK.tr, [spName, pos] = TR_SPREAD[T.spread] || TR_SPREAD.three, [topicName, topicSuits] = TR_TOPIC[T.topic] || TR_TOPIC.all;
     const rows = pos.map(([k, l, w, frame]) => { const c = T.cards[k], card = c && TR[c[0]]; return card ? { k, l, w, frame, card, rev: !!c[1], sc: c[1] ? card.sr : card.su, kw: c[1] ? card.rev : card.up } : null; }).filter(Boolean);
     const dup = new Set(rows.map(r => r.card.id)).size < rows.length;
-    const slot = ([k, l]) => { const c = T.cards[k], card = c && TR[c[0]]; return `<div class="trp${card ? ` on tr-${card.suit}` : ''}"><span class="lbl">${l}</span>
+    const slot = ([k, l]) => { const c = T.cards[k], card = c && TR[c[0]]; return `<div class="trp${card ? ` on tr-${card.suit}` : ''}"><span class="lbl">${l}</span>${card ? `<div class="trthumb">${trFace(card.id, !!c[1], 96)}</div>` : ''}
       <select id="tr-c-${k}" aria-label="${l} 카드">${trOptions(card ? card.id : '')}</select>
       <div class="seg" role="group" aria-label="${l} 방향"><button type="button" data-opt="tr:rev.${k}:0" aria-pressed="${!!card && !c[1]}"${card ? '' : ' disabled'}>정방향</button><button type="button" data-opt="tr:rev.${k}:1" aria-pressed="${!!card && !!c[1]}"${card ? '' : ' disabled'}>역방향</button></div>
       ${card ? `<span class="tk">${c[1] ? card.rev : card.up}</span>` : ''}</div>`; };
@@ -8555,6 +8600,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${byK.now && byK.now !== key ? `지금은 <b>${byK.now.card.name}${byK.now.rev ? '(역)' : ''}</b>("${byK.now.kw}")의 한가운데에 있고, ` : ''}핵심 카드는 <b>${key.card.name}${key.rev ? '(역)' : ''}</b>, 키워드는 "${key.kw}"입니다. ${adv ? `조언 자리의 <b>${adv.card.name}</b>는 "${adv.rev ? adv.card.rev + '을(를) 경계하라' : adv.card.up}"고 말합니다. ` : ''}<br>${TR_ADV[T.topic][bi]}`;
     return picker + `<section class="card">
       <div class="card-h"><h2>타로 종합 풀이</h2>${rows.length < pos.length ? `<span class="note">${pos.length - rows.length}장이 비어 있어 고른 카드만으로 풀이합니다</span>` : ''}</div>
+      <div class="trstrip" aria-label="뽑은 카드">${rows.map(r => `<div class="trcell">${trFace(r.card.id, r.rev, 92, r.l)}</div>`).join('')}</div>
       <div class="sumbox">${summary}</div>
       ${notes.length ? `<ul class="pos-ul small">${notes.map(n => `<li>${n}</li>`).join('')}</ul>` : ''}
       <h3>자리별 풀이</h3>
