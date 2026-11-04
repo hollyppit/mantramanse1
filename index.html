@@ -5259,23 +5259,52 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     '천간충': ['bad', '생각·방침이 부딪쳐 말다툼이 생기기 쉬워요', '결정을 서두르지 말고 합의는 문서로 남기세요.', '충돌'],
   };
   const REL_AREA = { year: '조상·어린 시절', month: '부모·직장', day: '나·배우자', hour: '자녀·말년' };
+  // 두 자리 사이에서 실제로 무슨 일이 생기는지를 한 문장으로: 관계 종류별 문장에 자리 이름을 끼운다
+  const REL_HEAD_C = {
+    '충': w => `${w} 사이에서 정면으로 부딪쳐, 이사·이직·이별처럼 자리가 바뀌는 일이 생겨요`,
+    '형': w => `${w} 사이에서 서로 눌러, 소송·수술·마찰처럼 꼭 처리해야 할 문제가 생겨요`,
+    '파': w => `${w} 사이의 약속·계획이 자꾸 어긋나요`,
+    '해': w => `${w} 사이에 말 안 한 서운함과 오해가 쌓여요`,
+    '원진': w => `${w} 사이가 이유 없이 거슬리고 미운 정이 들어요`,
+    '귀문관': w => `${w} 때문에 예민해지고 생각이 꼬리를 물어요`,
+    '육합': w => `${w} 사이가 자연스럽게 잘 맞물려 서로 도와요`,
+    '삼합': w => `${w} 쪽이 한 방향으로 힘을 모아 크게 시너지가 나요`,
+    '반합': w => `${w} 쪽이 같은 방향으로 움직여 손발이 맞아요`,
+    '방합': w => `${w} 쪽이 같은 결로 쏠려 장점이 뚜렷해요`,
+    '천간충': w => `${w}에 대한 생각이 맞서서 말다툼이 생겨요`,
+    '천간합': w => `${w}에 대한 생각이 통해서 뜻이 잘 맞아요`,
+  };
+  // 이 관계가 언제 실제 일로 드러나는지: 같은 글자가 대운·세운으로 들어오는 가까운 해를 알려 준다
+  function relWhen(ch, r) {
+    const ids = r.members.filter(m => m !== 'luck'), isStem = r.kind === 'stem';
+    const vals = [...new Set(ids.map(k => ch.pillars[k] && (isStem ? ch.pillars[k].s : ch.pillars[k].b)).filter(v => v != null))];
+    if (!vals.length) return '';
+    const chars = vals.map(v => isStem ? M.STEM[v] : M.BR[v]).join('·');
+    const y0 = M.yearPillarAt(NOW).sajuYear, ys = [];
+    for (let Y = y0; Y < y0 + 12 && ys.length < 4; Y++) { const p = M.yearPillarOf(Y); if (vals.includes(isStem ? p.s : p.b)) ys.push(`${Y}년 ${M.gzName(p)}`); }
+    return `평소에는 성격·분위기로만 느껴지다가, 대운·세운에 <b>${chars}</b> 글자가 들어오는 해에 실제 일로 드러납니다.${ys.length ? ` 가까운 해: ${ys.join(' · ')}` : ''}`;
+  }
   const relCard = (ch, r, p, dup) => {
     const ids = r.members.slice().sort((a, b) => REL_POS.indexOf(a) - REL_POS.indexOf(b));
     const h = REL_HEAD[r.type] || ['mid', '', '', ''], strong = (REL_VERB[r.type] || [0, 2])[1];
-    const where = ids.map(k => REL_AREA[k] || '운').join(' ↔ ');
+    const names = ids.map(k => REL_AREA[k] || '운'), wa = t => { const c = t.charCodeAt(t.length - 1); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 ? '과' : '와'; };
+    const where = names.length === 2 ? `${names[0]}${wa(names[0])} ${names[1]}` : names.join(', ');
     const sub = ids.map(m => memberName(m, r.kind)).join(' ↔ ');
-    let head = h[1], tip = h[2], more = p.lines.slice();
-    if (p.flavor) {   // 천간: "갑기합(중정지합) — 설명. 부연. 대처." 를 요약·부연·대처로 나눈다
+    let head = REL_HEAD_C[r.type] ? REL_HEAD_C[r.type](where) : h[1], tip = h[2], more = p.lines.slice(), trait = '';
+    if (p.flavor) {   // 천간: "갑기합(중정지합) — 성격 설명. 부연. 대처." 를 성격·부연·대처로 나눈다
       const [fname, ...rest] = p.flavor.split(' — '), sents = rest.join(' — ').split(/(?<=\.)\s+/);
-      head = `${fname} — ${sents[0]}`;
+      trait = `${fname} — ${sents[0]}`;
       if (sents.length > 1) tip = sents[sents.length - 1];
       if (sents.length > 2) more.unshift(sents.slice(1, -1).join(' '));
     }
+    const when = relWhen(ch, r);
     return `<article class="rel-card tone-${h[0]}">
       <div class="rel-top"><span class="rel-badge">${h[3]}<small>${term(r.type)}</small></span><b class="rel-name muted">${esc(r.name)}</b><span class="rel-str" title="작용 세기">${'●'.repeat(strong)}${'○'.repeat(3 - strong)}</span></div>
-      <div class="rel-where">${where}<span class="muted"> (${sub})</span></div>
+      <div class="rel-where">${sub}<span class="muted"> (원국 안에서 맞닿은 두 자리)</span></div>
       <p class="rel-head">${head}</p>
-      ${p.place && !dup ? `<p class="rel-place"><b>내 삶에서는</b> ${p.place}</p>` : ''}
+      ${trait ? `<p class="rel-place"><b>성향으로는</b> ${trait}</p>` : ''}
+      ${p.place && !dup ? `<p class="rel-place"><b>구체적으로</b> ${p.place}</p>` : ''}
+      ${when ? `<p class="rel-place"><b>언제 드러나요</b> ${when}</p>` : ''}
       ${tip ? `<p class="rel-tip"><b>이렇게 해보세요</b> ${tip}</p>` : ''}
       ${more.length || p.notes.length ? `<details class="rel-more"><summary>더 자세히 보기</summary>${more.map(l => `<p>${l}</p>`).join('')}${p.notes.map(n => `<p class="muted">· ${n}</p>`).join('')}</details>` : ''}
     </article>`;
@@ -6289,14 +6318,73 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     // 하루짜리 일진은 무겁게 읽히지 않도록 표현을 낮춘다
     const LUCK_SOFT = { '충': ['사소한 변화나 일정 변경이 생길 수 있어요', '일정에 여유를 두세요.'], '형': ['신경 쓸 일이 하나 생길 수 있어요', '서류와 말투를 한 번 더 확인하세요.'], '파': ['작은 차질이 생길 수 있어요', '약속 시간을 넉넉히 잡으세요.'], '해': ['말 한마디에 서운함이 생길 수 있어요', '표현을 부드럽게 하세요.'], '원진': ['괜히 거슬리는 일이 있을 수 있어요', '반응을 한 박자 늦추세요.'], '귀문관': ['생각이 많아질 수 있어요', '일찍 쉬고 가볍게 산책하세요.'], '천간충': ['의견이 살짝 엇갈릴 수 있어요', '결정은 미루고 말은 짧게 하세요.'] };
     const LUCK_SPAN = { daeun: '10년 내내 배경처럼 깔려 있어요. 특정 해에 같은 글자가 오면 더 뚜렷해져요.', seun: '올해 안에 실제 일(계약·이동·관계 변화)로 드러나기 쉬워요.', wolun: '이번 달 안에 짧게 나타나요.', ilun: '오늘 하루 가볍게 스쳐 가는 정도예요.' };
+    // 운에서 들어온 글자가 원국의 어느 자리와 만나느냐에 따라 실제로 일어나는 일: [한 줄 요약, 구체적인 모습]
+    const LUCK_EVENT = {
+      good: {
+        year: ['집안·어른 쪽에서 도움이 와요', '부모 세대나 어른에게서 도움·연락이 오고, 오랜 인연이 다시 이어지거나 집안일이 순조롭게 풀립니다.'],
+        month: ['직장·사업에서 좋은 기회가 와요', '좋은 상사·거래처·협력자를 만나고, 이직 제안이나 계약·협업 기회가 생기기 쉽습니다. 부모·형제와도 사이가 좋아집니다.'],
+        day: ['연애·결혼, 가정에 좋은 움직임이 있어요', '마음 맞는 사람을 만나거나 연인·배우자와 사이가 따뜻해집니다. 내 마음도 안정됩니다.'],
+        hour: ['자녀·후배와 잘 통하고 일의 결과가 좋아요', '자녀·후배·아랫사람과 호흡이 잘 맞고, 하던 일이 좋은 결과로 맺어집니다. 노후·장기 계획이 구체화됩니다.'],
+      },
+      '충': {
+        year: ['집안·어른 쪽에 변화가 생겨요', '이사·고향 문제나 부모 세대의 일로 신경 쓸 일이 생깁니다. 어린 시절부터 이어진 환경이 바뀝니다.'],
+        month: ['직장·사업에 변동이 생겨요', '부서 이동·이직·퇴사·사업 방향 전환처럼 자리가 바뀌는 일이 잦습니다. 상사·부모와 부딪치기도 합니다.'],
+        day: ['연애·부부 관계에 큰 변화가 와요', '다툼·이별·재결합, 또는 이사·거처 변경이 일어나기 쉽습니다. 내 마음도 크게 흔들립니다.'],
+        hour: ['자녀·계획에 변경이 생겨요', '자녀나 아랫사람 문제가 생기고, 일의 결과가 뒤집히거나 노후 계획을 다시 짜게 됩니다.'],
+      },
+      '형': {
+        year: ['집안·어른과 서류·금전 문제가 얽혀요', '상속·보증·분쟁처럼 따져야 할 일이 생기니 서류를 꼼꼼히 챙기세요.'],
+        month: ['직장에서 압박과 마찰이 커져요', '상사와의 갈등, 계약 분쟁, 업무 과부하로 몸이 지치기 쉽습니다.'],
+        day: ['부부·연인 사이 날 선 말다툼, 또는 몸 문제가 생겨요', '말이 거칠어지고 서로 지적하게 됩니다. 수술·시술 같은 몸 문제가 생길 수도 있어 건강검진을 챙기세요.'],
+        hour: ['자녀·후배 일로 속을 썩여요', '자녀·아랫사람 문제로 마음이 무겁거나, 일의 마무리 단계에서 문제가 생깁니다.'],
+      },
+      '파': {
+        year: ['집안 약속이나 행사가 틀어져요', '가족 행사나 어른과의 약속이 어긋나기 쉽습니다.'],
+        month: ['직장 일정·계획이 틀어져요', '거래나 일정이 깨지거나 업무 계획을 수정하게 됩니다.'],
+        day: ['연인·배우자와 약속이 어긋나요', '약속이 취소되거나 집 안 물건·기기가 고장 나는 소소한 차질이 생깁니다.'],
+        hour: ['자녀·후배와 계획이 어긋나요', '아랫사람과의 일정이나 계획이 중간에 틀어집니다.'],
+      },
+      '해': {
+        year: ['집안 어른과 서운함이 쌓여요', '말하지 않은 서운함이 쌓여 어른과 거리가 벌어지기 쉽습니다.'],
+        month: ['직장에서 뒷말·오해가 생겨요', '믿었던 동료와 사이가 서서히 멀어지고, 내가 모르는 곳에서 말이 돕니다.'],
+        day: ['연인·배우자에게 서운함이 쌓여요', '말 못 한 서운함이 쌓여 마음이 멀어지기 쉽습니다. 그날 바로 말하세요.'],
+        hour: ['아랫사람에게 기대한 만큼 도움이 안 와요', '자녀·후배에게 서운하거나, 일의 결과가 기대에 못 미칩니다.'],
+      },
+      '원진': {
+        year: ['집안 어른과 괜히 안 맞아요', '이유 없이 어른의 말과 행동이 거슬립니다.'],
+        month: ['직장 사람이 이유 없이 거슬려요', '동료·상사와 큰 갈등은 아니어도 사소한 불편이 계속됩니다.'],
+        day: ['연인·배우자가 괜히 미워졌다 풀렸다 해요', '미운 정과 고운 정이 번갈아 커집니다. 감정 기복이 커지는 시기입니다.'],
+        hour: ['자녀·후배와 말투 때문에 자주 다퉈요', '사소한 말투와 습관 때문에 같은 다툼이 반복됩니다.'],
+      },
+      '귀문관': {
+        year: ['집안일로 생각이 많아져요', '가족 걱정이 꼬리를 물고 불안해지기 쉽습니다.'],
+        month: ['직장 스트레스로 잠을 설쳐요', '예민해지고 생각이 많아집니다. 연구·창작처럼 집중하는 일에서는 오히려 성과가 납니다.'],
+        day: ['연인·배우자 마음을 자꾸 의심해요', '직감은 좋아지지만 집착·의심으로 번지기 쉽습니다. 추측 말고 직접 물어보세요.'],
+        hour: ['자녀·미래 걱정이 꼬리를 물어요', '앞날에 대한 걱정으로 잠이 얕아지기 쉽습니다.'],
+      },
+      '천간충': {
+        year: ['집안·어른과 가치관이 부딪쳐요', '진로나 생각 차이로 어른과 말다툼이 납니다.'],
+        month: ['상사·조직과 방침이 달라 의견이 부딪쳐요', '업무 방식이나 방향을 두고 말다툼이 생기고 계획이 바뀝니다.'],
+        day: ['내 뜻과 연인·배우자의 뜻이 맞서요', '의견 충돌로 말다툼이 잦아집니다. 결정을 서두르지 마세요.'],
+        hour: ['자녀·후배와 생각이 달라 다퉈요', '세대 차이로 말다툼이 나기 쉽습니다. 지시보다 질문과 경청이 낫습니다.'],
+      },
+    };
+    const LUCK_WHEN = { daeun: '앞으로 10년 동안', seun: '올해', wolun: '이번 달', ilun: '오늘' };
+    const evKey = t => ['육합', '삼합', '반합', '방합', '천간합'].includes(t) ? 'good' : t;
     const relLine = (r, idx) => {
       const os = r.members.filter(m => m !== 'luck').sort((p, q) => REL_POS.indexOf(p) - REL_POS.indexOf(q));
       const h = (kind === 'ilun' && LUCK_SOFT[r.type]) ? [REL_HEAD[r.type][0], LUCK_SOFT[r.type][0], LUCK_SOFT[r.type][1], REL_HEAD[r.type][3]] : (REL_HEAD[r.type] || ['mid', '', '', '']), strong = kind === 'ilun' ? 1 : (REL_VERB[r.type] || [0, 2])[1];
+      const prim = ['day', 'month', 'hour', 'year'].find(k => os.includes(k)) || os[0];
+      const ev = (LUCK_EVENT[evKey(r.type)] || {})[prim];
       const area = os.map(k => REL_AREA[k]).join(' · '), pos = os.map(k => M.POS_K[k] + (r.kind === 'stem' ? '간' : '지')).join('·');
+      const when = LUCK_WHEN[kind] || '이 시기에';
+      const LIGHT = { year: '집안·어른', month: '직장·업무', day: '연인·가정', hour: '자녀·후배·일 마무리' };
+      const head = kind === 'ilun' ? `오늘은 ${LIGHT[prim] || area} 쪽에서 ${LUCK_SOFT[r.type] ? LUCK_SOFT[r.type][0] : '반가운 소식이나 작은 도움이 있을 수 있어요'}` : ev ? `${when}, ${ev[0]}` : `${area} 쪽에서 ${h[1]}`;
       return `<article class="rel-card tone-${h[0]}">
         <div class="rel-top"><span class="rel-badge">${h[3]}<small>${term(r.type)}</small></span><b class="rel-name muted">${esc(r.name)}</b><span class="rel-str" title="작용 세기">${'●'.repeat(strong)}${'○'.repeat(3 - strong)}</span></div>
-        <div class="rel-where">${kname} ↔ ${area}<span class="muted"> (원국 ${pos})</span></div>
-        <p class="rel-head">${area} 쪽에서 ${h[1]}</p>
+        <div class="rel-where">${kname}에서 들어온 글자가 내 사주의 <b>${pos}</b>(${area} 자리)${pos.endsWith('간') ? '을' : '를'} 만났어요</div>
+        <p class="rel-head">${head}</p>
+        ${ev && kind !== 'ilun' ? `<p class="rel-place"><b>구체적으로</b> ${ev[1]}</p>` : ''}
         ${idx === 0 ? `<p class="rel-place"><b>얼마나 가나요</b> ${LUCK_SPAN[kind] || ''}</p>` : ''}
         ${h[2] ? `<p class="rel-tip"><b>이렇게 해보세요</b> ${h[2]}</p>` : ''}
       </article>`;
