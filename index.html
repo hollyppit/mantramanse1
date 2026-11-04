@@ -215,6 +215,10 @@ button.pill { border: 0; cursor: pointer; font-family: inherit; }
 .easy-list { display: grid; gap: 12px; }
 .easy-row { display: grid; gap: 3px; padding: 12px 14px; border-radius: 14px; background: var(--surface-2); }
 .easy-row > b { font-size: 0.82rem; color: var(--ink-3); }
+.zr { display: grid; gap: 10px; }
+.zr-row { background: var(--surface-2); border-radius: 14px; padding: 12px 14px; display: grid; gap: 4px; }
+.zr-row > b { font-size: 0.8rem; color: var(--ink-3); }
+.zr-row p { margin: 0; font-size: 0.94rem; line-height: 1.75; color: var(--ink-2); }
 .easy-row p { margin: 0; font-size: 0.98rem; line-height: 1.7; }
 .tk-g b { color: var(--good); } .tk-b b { color: var(--bad); } .tk-g, .tk-b { line-height: 1.6; }
 /* 궁합(두 사람) */
@@ -7397,6 +7401,63 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     else if (p.good.length >= 2) t += ` 길성(${p.good.slice(0, 3).map(n => term(n)).join('·')})이 함께해 주변 도움이 따릅니다.`;
     return t;
   }
+  // ── 고른 궁을 쉽게 읽어 주는 풀이: 이 영역이 무엇인지 → 별이 말하는 것 → 도와주는·조심할 별 → 사화 → 함께 읽는 영역 → 한 줄 조언 ──
+  const PALACE_MEAN = {
+    '명궁': '나 자신의 성격과 타고난 기질, 인생을 대하는 기본 태도를 보는 자리예요. 12궁의 중심이에요.',
+    '형제궁': '형제·친구·동료처럼 가까운 또래와의 관계와 협력을 보는 자리예요.',
+    '부처궁': '연애와 결혼, 배우자(애인)의 모습과 부부 사이를 보는 자리예요.',
+    '자녀궁': '자녀와 후배·아랫사람, 그리고 창작과 연애의 결실을 보는 자리예요.',
+    '재백궁': '돈을 버는 방식, 재물이 모이고 새는 모습을 보는 자리예요.',
+    '질액궁': '타고난 체질과 건강, 몸이 약해지기 쉬운 곳을 보는 자리예요.',
+    '천이궁': '집 밖에서의 나, 이동·여행·해외, 사회에서 받는 평판을 보는 자리예요.',
+    '노복궁': '친구·동료·부하처럼 사회에서 만나는 사람과 인맥을 보는 자리예요.',
+    '관록궁': '직업과 일, 사회적 성취와 일하는 방식을 보는 자리예요.',
+    '전택궁': '집·부동산·가정 환경, 재산을 지키는 힘을 보는 자리예요.',
+    '복덕궁': '마음의 여유와 취미, 정신적 만족, 복을 누리는 힘을 보는 자리예요.',
+    '부모궁': '부모·윗사람·스승과의 관계, 문서·시험·학업 운을 보는 자리예요.',
+  };
+  const PALACE_TIP = {
+    '명궁': ['내 강점 한 가지를 정해 꾸준히 드러내세요.', '남의 눈치보다 내 기준을 먼저 세워 보세요.'],
+    '형제궁': ['가까운 사람과 일을 함께 도모해 보세요.', '친한 사이일수록 돈·역할은 미리 정해 두세요.'],
+    '부처궁': ['마음을 표현하고 만남의 기회를 적극적으로 만드세요.', '기대를 말로 확인하고, 서운함은 쌓아 두지 마세요.'],
+    '자녀궁': ['후배·자녀를 키우고 가르치는 일에서 보람을 찾으세요.', '아랫사람에게는 지시보다 질문과 경청으로 다가가세요.'],
+    '재백궁': ['수입원을 늘리거나 투자·사업을 구체적으로 검토해 보세요.', '큰 지출 전에 고정비와 새는 돈부터 점검하세요.'],
+    '질액궁': ['지금의 건강 습관을 유지하며 운동을 늘리세요.', '정기 검진과 수면·식습관을 먼저 챙기세요.'],
+    '천이궁': ['밖으로 나가 사람을 만나고 새 환경에 도전하세요.', '무리한 이동·이주는 피하고 평판 관리에 신경 쓰세요.'],
+    '노복궁': ['인맥을 넓히고 도움을 주고받는 관계를 만드세요.', '사람 때문에 지치지 않게 거리와 선을 정하세요.'],
+    '관록궁': ['직업적 도전과 승진·이직 기회를 적극 잡아 보세요.', '일의 속도를 조절하고 번아웃을 경계하세요.'],
+    '전택궁': ['집·부동산·가정 환경을 가꾸고 자산을 쌓으세요.', '이사·매매 같은 큰 결정은 서두르지 말고 비교하세요.'],
+    '복덕궁': ['취미와 쉼으로 마음을 채우는 시간을 늘리세요.', '걱정이 길어질 땐 몸을 움직이고 생각을 글로 적어 보세요.'],
+    '부모궁': ['윗사람의 조언과 공부·자격 준비를 적극 활용하세요.', '문서·계약은 한 번 더 확인하고 어른과의 의견 차이는 대화로 푸세요.'],
+  };
+  const STAR_STYLE = {
+    '자미': '중심에 서서 이끌고 존중받으려는', '천기': '머리를 쓰고 계획·분석으로 움직이는', '태양': '밝게 베풀고 드러나 인정받으려는', '무곡': '현실적이고 결단력 있게 돈과 성과를 챙기는',
+    '천동': '편안하고 부드럽게 화합하려는', '염정': '열정과 감정이 진하고 승부욕이 있는', '천부': '안정과 관리, 지키는 힘이 강한', '태음': '섬세하고 차분하게 모으고 보살피는',
+    '탐랑': '욕망과 재주가 많고 사람을 끄는', '거문': '말과 논리로 따지고 파고드는', '천상': '조율하고 돕는 보좌형의', '천량': '어른스럽고 원칙으로 지켜 주는', '칠살': '돌파하고 도전하는 강단 있는', '파군': '기존 틀을 깨고 새로 시작하는',
+  };
+  const SUB_GOOD = { '좌보': '든든한 협조자', '우필': '곁에서 돕는 사람', '문창': '글·시험·논리 능력', '문곡': '말솜씨와 예술 감각', '천괴': '윗사람의 도움', '천월': '귀인의 도움', '녹존': '안정된 수입과 지키는 힘', '천마': '움직임과 활동성' };
+  const SUB_BAD = { '경양': '날카로움과 충돌', '타라': '지연과 집착', '화성': '급한 성질과 폭발', '영성': '예민한 불안', '지공': '허무함과 비워짐', '지겁': '손실과 갑작스러운 단절' };
+  const BR_PLAIN = { '묘': '아주 밝은 자리', '왕': '아주 밝은 자리', '득': '무난하게 밝은 자리', '리': '무난하게 밝은 자리', '평': '보통인 자리', '불': '기운이 약한 자리', '함': '기운이 약한 자리' };
+  function zwReading(zw, p, sc) {
+    const dom = ZW_DOM[p.name], g = zwGrade(sc[p.b]), opp = zw.palaces[(p.b + 6) % 12], tri = [zw.palaces[(p.b + 4) % 12], zw.palaces[(p.b + 8) % 12]];
+    const borrow = !p.main.length, mains = borrow ? opp.main : p.main, rows = [];
+    rows.push(['이 영역은 뭔가요?', `<p>${PALACE_MEAN[p.name] || ''}</p>`]);
+    const starP = mains.map(n => {
+      const br = M.zwBright(n, borrow ? opp.b : p.b), st = STAR_STYLE[n], tr = GL[n] ? GL[n][1].split('. ')[0].replace(/^\S*\s*쉽게 말해\s*/, '').replace(/\.$/, '') : '';
+      const bt = br ? (BR_PLAIN[br] ? `${BR_PLAIN[br]}에 앉아 ${/밝/.test(BR_PLAIN[br]) ? '장점이 잘 드러나요' : /약/.test(BR_PLAIN[br]) ? '장점이 덜 드러나고 단점이 올라오기 쉬워요' : '장점과 단점이 반반이에요'}.` : '') : '';
+      return `<p><b>${term(n)}</b> — ${esc(tr)}. ${bt} ${st ? `그래서 ${dom} 영역에서는 <b>${st}</b> 모습이 나타나요.` : ''}</p>`;
+    }).join('');
+    rows.push(['별이 말하는 것', borrow ? `<p class="small muted">주성이 없는 공궁이라 마주 보는 ${term(opp.name)}의 별을 빌려 읽어요.</p>${starP || '<p>빌릴 주성도 없어 이 영역은 환경과 상황에 따라 모습이 크게 달라져요.</p>'}` : starP]);
+    const gl = p.good.filter(n => SUB_GOOD[n]).map(n => `<b>${term(n)}</b>(${SUB_GOOD[n]})`), bl = p.bad.filter(n => SUB_BAD[n]).map(n => `<b>${term(n)}</b>(${SUB_BAD[n]})`);
+    if (gl.length || bl.length) rows.push(['도와주는 별 · 조심할 별', (gl.length ? `<p>🟢 도와주는 별: ${gl.join(', ')}</p>` : '') + (bl.length ? `<p>🔴 조심할 별: ${bl.join(', ')} — 이 영역은 한 번 더 점검하면 좋아요.</p>` : '')]);
+    const hws = [...p.main, ...p.good, ...p.bad].filter(n => zw.sihwa[n]);
+    if (hws.length) rows.push(['타고난 사화(스위치)', hws.map(n => `<p><b>${term(n)}에 화${zw.sihwa[n]}</b> — ${ZW_HW_PLAIN[zw.sihwa[n]]}.</p>`).join('')]);
+    const near = [opp, ...tri].map(q => `${ZW_DOM[q.name]}(${zwGrade(sc[q.b])[1]})`).join(' · ');
+    rows.push(['같이 영향을 주는 영역', `<p>이 영역은 혼자 읽지 않고 마주 보는 곳과 삼합 자리의 영향을 함께 받아요: ${near}.</p>`]);
+    const tip = PALACE_TIP[p.name] || ['', ''];
+    rows.push(['한 줄 조언', `<p>${g[0] >= 3 ? '힘이 실린 영역이에요. ' + tip[0] : g[0] >= 2 ? '무난한 영역이에요. ' + tip[0] + ' ' + tip[1] : '의식해서 가꿀 영역이에요. ' + tip[1]}</p>`]);
+    return `<div class="zr">${rows.map(([t, b]) => `<div class="zr-row"><b>${t}</b>${b}</div>`).join('')}</div>`;
+  }
   function zwRadar(zw, sc, selB) {
     const W = 340, C = W / 2, R = 112, n = 12;
     const pt = (i, r) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return [(C + r * Math.cos(a)).toFixed(1), (C + r * Math.sin(a)).toFixed(1)]; };
@@ -7579,12 +7640,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <div class="li"><span class="k">${term('대한')}</span><span class="v">${per.dh ? `<b>${term(per.dh.name)}</b> ${M.STEM[per.dh.s]}${M.BR[per.dh.b]} · ${per.dh.daehan[0]}~${per.dh.daehan[1]}세 <span class="small">이 10년은 ${term(per.dh.name)} 칸이 명궁 역할을 합니다. ${term('대한 사화')}(대한 칸의 천간 ${M.STEM[per.dh.s]} 기준):</span>${sihwaWhere(per.dhSihwa)}` : '<span class="muted small">첫 대한 시작 전입니다.</span>'}</span><span></span></div>
         <div class="li"><span class="k">${term('유년')}</span><span class="v"><b>${term(liuP.name)}</b> 칸이 올해의 명궁 <span class="small">${M.BR[per.liuB]}년이라 ${M.BR[per.liuB]} 칸이 유년 명궁이 됩니다. ${term('유년 사화')}(그해 천간 ${M.STEM[per.liuS]} 기준):</span>${sihwaWhere(per.liuSihwa)}</span><span></span></div>
       </div>
+      ${per.dh ? `<p class="small" style="color:var(--ink-2)"><b>이 10년(대한)은 ${term(per.dh.name)}이 중심</b> — ${PALACE_MEAN[per.dh.name]} 올해(유년)는 <b>${term(liuP.name)}</b> — ${PALACE_MEAN[liuP.name]} 그래서 이 두 영역의 일이 올해 특히 크게 느껴져요.</p>` : ''}
       <p class="note">위 "사화 보기"에서 대한·유년 사화를 명반 위에 겹쳐 볼 수 있습니다. 생년 사화는 색칠된 배지, 대한 사화는 "대", 유년 사화는 "년"이 붙은 테두리 배지입니다.</p>
     </section>
     <section class="card">
       <div class="card-h"><h2>${term(sel.name)} <span class="muted small">${M.STEM[sel.s]}${M.BR[sel.b]} · ${sel.daehan[0]}~${sel.daehan[1]}세 대한</span></h2>${sel.shen ? `<span class="pill" style="background:var(--accent);color:#fff">${term('신궁')}</span>` : ''}</div>
       <p class="small" style="color:var(--ink-2)">${esc(glInline(sel.name))}</p>
       <div class="zq-hero"><span>${pill(sc[sel.b])} <span class="small muted">${ZW_DOM[sel.name]} 강도</span></span><span class="small">${zwPlain(zw, sel, sc)}</span></div>
+      ${zwReading(zw, sel, sc)}
       <div class="list">${sel.main.map(n => starLine(n, 'main')).join('')}${sel.good.map(n => starLine(n, 'good')).join('')}${sel.bad.map(n => starLine(n, 'bad')).join('')}${sel.adj.map(n => starLine(n, 'adj')).join('')}</div>
       ${!sel.main.length ? `<p class="small">주성이 없는 ${term('공궁')}이라 마주 보는 ${term(opp.name)}의 ${opp.main.length ? opp.main.map(n => term(n)).join('·') : '별'}을 빌려 봅니다.</p>` : ''}
       <div class="list">
