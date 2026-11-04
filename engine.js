@@ -1926,6 +1926,8 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       score: { activity: 0.38, fit: 0.28, stability: 0.34, spread: 1.5, offset: 1 },
       tags: { sudden: 55, pj: 0.3, link: 0.3, rob: 0.35, leak: 50, stable: 62 },
       sinsal: { '천을귀인': 0.5, '월덕귀인': 0.2, '천덕귀인': 0.2, '천복귀인': 0.1 },
+      // 뜻밖의 재물손실(손재) 위험: 높을수록 나쁘다. 횡재 점수와 따로 계산해 그래프에 함께 보여 준다(점수에는 섞지 않는다)
+      loss: { rob: 0.30, clash: 0.22, burden: 0.18, tension: 0.12, harm: 0.08, badFit: 0.12, baseline: 0.04, scale: 1.7, tag: 54 },
     },
   };
   Object.assign(DOMAIN_SCORE_THRESHOLDS, Object.fromEntries(SUB_DOMAIN_KEYS.map(k => [k, DOMAIN_SCORE_THRESHOLDS.love])));
@@ -2226,6 +2228,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const S = Q.stability;
     const stability = lclamp(S.base - S.rob * rob - S.clash * mo.clash - S.tension * tension - S.vol * Math.max(0, vol - S.volFrom) + S.bond * F.bond + S.seal * dRamp(F.g[4]), 0, 100);
     const volatility = lclamp(0.6 * vol + 0.4 * 100 * Math.min(1, mo.clash + 0.7 * mo.harm), 0, 100);
+    const LQ = Q.loss, lossV = 100 * lclamp(LQ.scale * (LQ.rob * rob + LQ.clash * mo.clash + LQ.burden * burden + LQ.tension * tension / 100 + LQ.harm * mo.harm + LQ.badFit * Math.max(0, -F.fit) / 100 * Math.max(wealthy, 0.3) + LQ.baseline), 0, 1);
     const why = [];
     pushR(why, 30 * pj, '편재 기운이 들어와 예상 밖의 수입·기회와 닿는 신호가 커집니다');
     pushR(why, 18 * link, '식상(재주·표현)이 재성을 낳는 흐름이라 아이디어와 재능이 돈으로 이어지기 쉽습니다');
@@ -2238,7 +2241,14 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (mo.clash > 0.3) pushR(why, 16 * mo.clash, '재물 환경(월지)이 충을 맞아 들어온 기회가 흔들리기 쉽습니다');
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 들어온 것을 지키기 어려운 요인`);
     pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
-    return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { pj, r2, link, rob, noble } };
+    const wl = [];
+    pushR(wl, 30 * rob, '비겁·겁재 기운이 들어와 돈을 나누거나 빼앗기기 쉽습니다(분탈) — 보증·동업·빌려주는 돈에 주의');
+    pushR(wl, 26 * mo.clash, '재물 환경(월지)이 충을 맞아 계획한 돈이 갑자기 어긋나기 쉽습니다');
+    pushR(wl, 22 * burden, '원국이 약한 편인데 재성이 강하게 들어와 큰돈을 감당하지 못하고 새기 쉽습니다(재다신약)');
+    pushR(wl, 14 * mo.harm, '재물 환경(월지)에 형·해·파 신호가 있어 계약·거래의 마찰이 생기기 쉽습니다');
+    if (tension > 30) pushR(wl, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 갑작스러운 지출·분쟁의 배경이 됩니다`);
+    if (F.fit < -20 && wealthy > 0.3) pushR(wl, Math.abs(F.fit) / 4, `재성이 원국에 부담(흐름 점수 ${Math.round(F.fit)})으로 작용해 들어온 돈이 오래 머물기 어렵습니다`);
+    return { comps: { activity, fit, stability, volatility, loss: lossV }, reasons: finishReasons(why), aux: { pj, r2, link, rob, noble, lossReasons: finishReasons(wl) } };
   }
   const SUB_EVAL = { job: evaluateJob, move: evaluateMove, career: evaluateCareer, business: evaluateBusiness, child: evaluateChild, marriage: evaluateMarriage, noble: evaluateNoble, study: evaluateStudy, estate: evaluateEstate, social: evaluateSocial, family: evaluateFamily, windfall: evaluateWindfall };
   const SUB_PARTS = {
@@ -2310,8 +2320,10 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   }
   function subResult(key, list, self) {
     const c = blendSub(list, key), F = self.own.F, a = self.own.sub[key].aux, score = Math.round(scoreSub(key, c)), S = SUB_CONFIG[key].score;
-    return { key, score, band: domainBand(key, score), components: c, tags: tagsSub(key, c, a, F), summary: summarySub(key, c), reasons: self.own.sub[key].reasons,
+    const out = { key, score, band: domainBand(key, score), components: c, tags: tagsSub(key, c, a, F), summary: summarySub(key, c), reasons: self.own.sub[key].reasons,
       parts: SUB_PARTS[key].map(([pk, label]) => ({ key: pk, label, v: c[pk], w: S[pk] ?? 0 })) };
+    if (key === 'windfall') { const ls = Math.round(c.loss), LQ = SUB_CONFIG.windfall.loss; out.loss = { score: ls, band: ls >= 54 ? '높음' : ls >= 39 ? '다소 높음' : ls >= 24 ? '보통' : '낮음', tags: ls >= LQ.tag ? ['손재주의'] : [], reasons: a.lossReasons || [], summary: ls >= 54 ? '뜻밖의 지출·손실 신호가 큰 시기입니다. 보증·동업·큰 지출·빌려주는 돈은 한 번 더 확인하세요.' : ls >= 39 ? '뜻밖의 지출이 평소보다 생기기 쉬운 시기입니다. 예비비를 남기고 큰 지출은 한 번 더 확인하세요.' : ls >= 24 ? '뜻밖의 지출이 생겨도 크게 흔들리지 않는 보통 수준의 시기입니다.' : '뜻밖의 재물 손실 신호는 약한 시기입니다.' }; }
+    return out;
   }
   function subOwn(own, key) { return own.sub[key] || (own.sub[key] = SUB_EVAL[key](own.F, DOMAIN_LEVEL_WEIGHTS[own.F.level].emphasis)); }
   const blendSub = (list, key) => {
