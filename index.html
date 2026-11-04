@@ -215,6 +215,8 @@ button.pill { border: 0; cursor: pointer; font-family: inherit; }
 .easy-list { display: grid; gap: 12px; }
 .easy-row { display: grid; gap: 3px; padding: 12px 14px; border-radius: 14px; background: var(--surface-2); }
 .easy-row > b { font-size: 0.82rem; color: var(--ink-3); }
+.wf-line { display: grid; gap: 4px; background: var(--accent-soft); border-radius: 12px; padding: 10px 12px; justify-items: start; }
+.wf-line p { margin: 0; color: var(--ink-2); }
 .zr { display: grid; gap: 10px; }
 .zr-row { background: var(--surface-2); border-radius: 14px; padding: 12px 14px; display: grid; gap: 4px; }
 .zr-row > b { font-size: 0.8rem; color: var(--ink-3); }
@@ -6565,9 +6567,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     estate: { name: '문서·이사', full: '문서·이사운', sub: '문서·계약·거처 이동 신호의 활성도·적합도·안정성을 종합한 지표', note: '문서·이사운은 문서(인성)·재산(재성)·거처 환경의 움직임을 명리 모델로 계산한 참고 지표이며, 계약이나 이사의 성사·결과를 예측하지 않습니다.' },
     social: { name: '대인·구설', full: '대인·구설운', sub: '교류 활성도와 마찰·구설 신호의 억제(높을수록 안정)를 종합한 지표', note: '대인·구설운은 교류와 마찰 신호를 명리 모델로 계산한 참고 지표입니다. 점수가 높을수록 마찰 신호가 적다는 뜻이며, 특정 갈등이나 구설을 예측하지 않습니다.' },
     family: { name: '부모·가족', full: '부모·가족운', sub: '인성·재성과 년주·월주 궁 신호의 활성도·적합도·가정 안정성을 종합한 지표', note: '부모·가족운은 가족 환경의 신호를 명리 모델로 계산한 참고 지표이며, 부모·가족의 건강·사건을 예측하지 않습니다.' },
+    windfall: { name: '횡재', full: '횡재운', sub: '뜻밖의 수입·기회 신호(편재·재주가 돈이 되는 흐름·귀인)와 들어온 것을 지키는 힘을 종합한 지표', note: '횡재운은 편재·식상생재·귀인 신호와 분탈(겁재) 위험을 명리 모델로 계산한 참고 지표이며, 복권·도박·투자의 당첨이나 수익을 예측하지 않습니다.' },
     child: { name: '자식', full: '자식운', sub: '자식성(남 관성·여 식상)과 자녀궁(시지) 신호의 활성도·적합도·안정성을 종합한 지표', note: '자식운은 자식성·자녀궁 신호를 명리 모델로 계산한 참고 지표이며, 출산이나 자녀의 일을 예측하지 않습니다. 출생 시각을 모르면 자녀궁 신호를 빼고 계산합니다.' },
   };
-  const DOM_SUB = ['job', 'move', 'career', 'business', 'child', 'marriage', 'noble', 'study', 'estate', 'social', 'family'];   // 엔진 M.SUB_DOMAIN_KEYS와 같은 순서
+  const DOM_SUB = ['job', 'move', 'career', 'business', 'child', 'marriage', 'noble', 'study', 'estate', 'social', 'family', 'windfall'];   // 엔진 M.SUB_DOMAIN_KEYS와 같은 순서
   // 시간 단위별 해석 범위
   const DOM_SCOPE = {
     daeun: { love: '10년 동안의 관계 환경', wealth: '10년 동안의 재정 환경', health: '10년 동안의 균형·부담 환경', accident: '10년 동안의 주의 신호 환경입니다. 10년 동안 사고가 난다는 뜻이 아닙니다', job: '10년 동안 조직과 닿는 환경', move: '10년 동안 직장 환경이 움직이는 정도', career: '10년 동안의 직업 활동 환경', business: '10년 동안의 사업 환경', child: '10년 동안의 자녀 영역 환경' },
@@ -6575,7 +6578,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     wolun: { love: '해당 달의 구체적인 관계 흐름', wealth: '해당 달의 구체적인 재정 흐름', health: '해당 달의 균형·부담 흐름', accident: '해당 달의 주의 신호입니다', job: '해당 달의 취업 활동 흐름', move: '해당 달의 이동 신호 흐름', career: '해당 달의 직업 활동 흐름', business: '해당 달의 사업 활동 흐름', child: '해당 달의 자녀 영역 흐름' },
     ilun: { love: '해당 날짜의 단기적인 관계 흐름', wealth: '해당 날짜의 단기적인 재정 흐름', health: '해당 날짜의 단기적인 균형·부담 흐름', accident: '해당 날짜의 단기적인 주의 신호입니다', job: '해당 날짜의 단기적인 취업 활동 흐름', move: '해당 날짜의 단기적인 이동 신호', career: '해당 날짜의 단기적인 직업 활동 흐름', business: '해당 날짜의 단기적인 사업 활동 흐름', child: '해당 날짜의 단기적인 자녀 영역 흐름' },
   };
-  { const T = { daeun: '10년 동안의', seun: '해당 연도의', wolun: '해당 달의', ilun: '해당 날짜의 단기적인' }; ['study', 'estate', 'social', 'family'].forEach(k => Object.keys(T).forEach(lv => { DOM_SCOPE[lv][k] = `${T[lv]} ${DOM_INFO[k].name} 영역 흐름`; })); }
+  { const T = { daeun: '10년 동안의', seun: '해당 연도의', wolun: '해당 달의', ilun: '해당 날짜의 단기적인' }; ['study', 'estate', 'social', 'family', 'windfall'].forEach(k => Object.keys(T).forEach(lv => { DOM_SCOPE[lv][k] = `${T[lv]} ${DOM_INFO[k].name} 영역 흐름`; })); }
   const DOM_LEVEL_NAME = { daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
   // ───────────── 운 신호등 ─────────────
   // 색 = 이 시기가 나에게 얼마나 유리한가: 최고(진한 초록) · 좋음(초록) · 무난(회색) · 주의(주황) · 부담(빨강).
@@ -6589,7 +6592,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     { i: 2, k: 'ok', n: '무난', c: 'var(--sg-ok)', t: 'var(--ink)', soft: 15 },
     { i: 3, k: 'warn', n: '주의', c: 'var(--sg-warn)', t: '#3A2700', soft: 30 },
     { i: 4, k: 'bad', n: '부담', c: 'var(--sg-bad)', t: '#fff', soft: 34 }];
-  const SIG_CUTS = {"love":[45,49,58,66],"wealth":[39,44,51,56],"health":[56,63,73,78],"accident":[16,23,37,50],"job":[45,50,57,63],"move":[47,51,59,67],"career":[41,49,60,66],"business":[44,50,58,64],"child":[42,46,58,67],"marriage":[39,47,62,72],"noble":[40,49,60,68],"study":[43,49,58,65],"estate":[45,51,60,66],"social":[45,51,58,63],"family":[44,49,59,66]};   // 지표별 [하위10%, 하위30%, 상위30%, 상위10%] 점수
+  const SIG_CUTS = {"love":[45,49,58,66],"wealth":[39,44,51,56],"health":[56,63,73,78],"accident":[16,23,37,50],"job":[45,50,57,63],"move":[47,51,59,67],"career":[41,49,60,66],"business":[44,50,58,64],"child":[42,46,58,67],"marriage":[39,47,62,72],"noble":[40,49,60,68],"study":[43,49,58,65],"windfall":[35,41,52,64],"estate":[45,51,60,66],"social":[45,51,58,63],"family":[44,49,59,66]};   // 지표별 [하위10%, 하위30%, 상위30%, 상위10%] 점수
   const sgVars = g => `--c:${g.c};--on:${g.t}`;
   const sgSoft = g => `color-mix(in srgb, ${g.c} ${g.soft}%, var(--surface))`;
   const sigFlow = v => { const C = M.LUCK_CFG.condition; return v >= 30 ? SIG[0] : v >= C.tailwind ? SIG[1] : v > C.caution ? SIG[2] : v > C.burden ? SIG[3] : SIG[4]; };
@@ -6623,7 +6626,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return `<div class="dom"><div class="dom-h"><b>분야별 지수</b><span class="muted small">${DOM_LEVEL_NAME[kind]} 기준 · 누르면 근거가 열립니다</span></div>
       <div class="dom-g">${DOM_ORDER.map(k => { const r = res[k];
         return `<button type="button" class="dcard" data-dom="${id}:${k}" aria-label="${DOM_INFO[k].full} ${r.score} ${sigMetric(k, r.score).n}"><span class="dn">${k === 'health' ? '건강 균형' : DOM_INFO[k].name}</span><b class="dv num" style="color:${domCol(k, r.score)}">${r.score}</b><span class="db">${sigMetric(k, r.score).n}</span>${r.tags.length ? `<span class="dt">${r.tags.join(' · ')}</span>` : ''}<span class="dbar"><i style="width:${r.score}%;background:${domCol(k, r.score)}"></i></span></button>`; }).join('')}</div>
-      <div class="dom-h dom-h2"><b>직업·가족 세부 지수</b><span class="muted small">취업 · 이직 · 직업 · 사업 · 자식 · 결혼 · 귀인 · 학업 · 문서·이사 · 대인·구설 · 부모·가족</span></div>
+      <div class="dom-h dom-h2"><b>직업·가족 세부 지수</b><span class="muted small">취업 · 이직 · 직업 · 사업 · 자식 · 결혼 · 귀인 · 학업 · 문서·이사 · 대인·구설 · 부모·가족 · 횡재</span></div>
       <div class="dom-g dom-g5">${DOM_SUB.map(k => { const r = res[k];
         return `<button type="button" class="dcard" data-dom="${id}:${k}" aria-label="${DOM_INFO[k].full} ${r.score} ${sigMetric(k, r.score).n}"><span class="dn">${DOM_INFO[k].name}</span><b class="dv num" style="color:${domCol(k, r.score)}">${r.score}</b><span class="db">${sigMetric(k, r.score).n}</span>${r.tags.length ? `<span class="dt">${r.tags.join(' · ')}</span>` : ''}<span class="dbar"><i style="width:${r.score}%;background:${domCol(k, r.score)}"></i></span></button>`; }).join('')}</div>
       <p class="small muted dom-n">${DOM_INFO.health.note} ${DOM_INFO.accident.short} 세부 지수도 사건·결과를 예측하지 않는 참고 지표입니다.</p></div>`;
@@ -6644,6 +6647,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="dparts">${rows}</div>
       <p class="small muted">${k === 'accident' ? `구성: ${weights} (신살은 보조로만, 높은 성분이 겹칠수록 배율 ${r.synergy.mult.toFixed(2)} — 성분 ${r.synergy.nHigh}개가 기준 이상)` : `구성: ${weights}${k === 'health' ? ' (변동성은 부담도에 일부만 반영)' : ' (변동성은 점수에 넣지 않고 따로 보여 줍니다)'}`}</p>
       <h4>핵심 이유</h4><ul class="pos-ul small">${r.reasons.length ? r.reasons.map(t => `<li>${esc(t)}</li>`).join('') : '<li>뚜렷한 쏠림이 없는 무난한 시기입니다.</li>'}</ul>
+      ${k === 'wealth' && res.windfall ? (() => { const w = res.windfall, g = sigMetric('windfall', w.score); return `<div class="wf-line"><div><b>횡재운</b> <span class="num">${w.score}</span> · ${g.n}${w.tags.length ? ` <span class="muted small">${w.tags.join(' · ')}</span>` : ''}</div><p class="small">${w.summary}</p><button type="button" class="btn" data-dom="${sel.id}:windfall">횡재운 자세히 ›</button></div>`; })() : ''}
       ${res.chainNote ? `<p class="small muted">${esc(res.chainNote)}</p>` : ''}
       <p class="small muted"><b>${DOM_LEVEL_NAME[kind]}에서의 의미</b> — ${DOM_SCOPE[kind][k]}</p>
       <p class="cp-disc">${I.note}</p>

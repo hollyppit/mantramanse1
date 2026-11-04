@@ -1837,7 +1837,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   //   social   대인·구설운  교류 활성도 + 식상 과다·충·형 같은 마찰 신호의 억제(높을수록 마찰·구설 신호가 적다) — 사건을 예측하지 않는다
   //   family   부모·가족운  인성(윗사람·어머니)·재성(아버지)·년주/월주 궁 신호 — 부모·가족의 일을 예측하지 않는다
   //   noble    귀인운  귀인 계열 신살(보조)·인성(윗사람의 도움)·관성(조직의 후원)·합(사람 인연)과 비겁 경쟁·충돌의 균형
-  const SUB_DOMAIN_KEYS = ['job', 'move', 'career', 'business', 'child', 'marriage', 'noble', 'study', 'estate', 'social', 'family'];
+  const SUB_DOMAIN_KEYS = ['job', 'move', 'career', 'business', 'child', 'marriage', 'noble', 'study', 'estate', 'social', 'family', 'windfall'];
   const SUB_CONFIG = {
     job: {
       activity: { officer: 0.34, seal: 0.22, output: 0.10, wealth: 0.06, month: 0.14, baseline: 0.04, scale: 1.6 },
@@ -1917,6 +1917,15 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       stability: { base: 68, hap: 14, clash: 30, harm: 18, month: 12, tension: 0.10, vol: 0.10, volFrom: 50, seal: 8 },
       score: { activity: 0.28, fit: 0.30, stability: 0.42, spread: 1.4, offset: -2 },
       tags: { support: 0.35, bond: 0.3, shake: 0.3, quiet: 38, quietStable: 55 },
+    },
+    // 횡재운: 뜻밖의 수입·기회가 들어오는 신호(편재·식상생재·귀인)와, 들어온 것을 잃지 않는 힘(겁재 분탈·재성 충)을 함께 본다. 복권·도박 결과를 뜻하지 않는다.
+    windfall: {
+      activity: { pj: 0.34, wealth: 0.10, link: 0.16, noble: 0.10, month: 0.12, baseline: 0.06, scale: 2.0 },
+      fit: { general: 0.45, own: 0.4, eokbu: 0.3, johu: 0.3, strongBonus: 12, weakBurden: 22, overload: 6 },
+      stability: { base: 64, rob: 26, tension: 0.12, clash: 20, vol: 0.12, volFrom: 50, bond: 0.10, seal: 6 },
+      score: { activity: 0.38, fit: 0.28, stability: 0.34, spread: 1.5, offset: 1 },
+      tags: { sudden: 55, pj: 0.3, link: 0.3, rob: 0.35, leak: 50, stable: 62 },
+      sinsal: { '천을귀인': 0.5, '월덕귀인': 0.2, '천덕귀인': 0.2, '천복귀인': 0.1 },
     },
   };
   Object.assign(DOMAIN_SCORE_THRESHOLDS, Object.fromEntries(SUB_DOMAIN_KEYS.map(k => [k, DOMAIN_SCORE_THRESHOLDS.love])));
@@ -2198,7 +2207,40 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
     return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { r4, r2, bond: Math.max(yr.bond, mo.bond), shake: Math.max(yr.clash, yr.harm) } };
   }
-  const SUB_EVAL = { job: evaluateJob, move: evaluateMove, career: evaluateCareer, business: evaluateBusiness, child: evaluateChild, marriage: evaluateMarriage, noble: evaluateNoble, study: evaluateStudy, estate: evaluateEstate, social: evaluateSocial, family: evaluateFamily };
+  // ── 횡재운 (뜻밖의 수입·기회 신호. 편재 + 식상이 재성을 낳는 흐름 + 귀인, 겁재 분탈·재성 충은 감점)
+  function tgPull(F, name) {                                              // 운의 천간·지지장간이 일간에게 name(십성)인 정도(0~1 안팎)
+    const d = F.ch.pillars.day.s, p = F.pillar;
+    let v = tenGod(d, p.s) === name ? 0.4 : 0;
+    for (const [hs, dd] of HIDDEN[p.b]) if (tenGod(d, hs) === name) v += 0.6 * dd / 30;
+    return v;
+  }
+  function evaluateWindfall(F, k) {
+    const Q = SUB_CONFIG.windfall, A = Q.activity, mo = F.month;
+    const tension = lclamp(F.tension * k, 0, 100), vol = lclamp(F.vol * k, 0, 100);
+    const r0 = dRamp(F.g[0]), r1 = dRamp(F.g[1]), r2 = dRamp(F.g[2]);
+    const pj = dRamp(tgPull(F, '편재')), rob = Math.max(dRamp(tgPull(F, '겁재')), 0.6 * r0), link = Math.sqrt(r1 * r2);
+    const hits = Object.entries(Q.sinsal).filter(([n]) => F.sinNames.includes(n)), noble = Math.min(1, hits.reduce((s2, [, w]) => s2 + w, 0) / 0.5);
+    const activity = 100 * lclamp(A.scale * (A.pj * pj + A.wealth * r2 + A.link * link + A.noble * noble + A.month * mo.act + A.baseline), 0, 1);
+    const wealthy = Math.max(pj, r2), burden = F.weak * wealthy;
+    const fit = lclamp(fitBase(Q.fit, F) + Q.fit.strongBonus * F.strong * wealthy - Q.fit.weakBurden * burden - Q.fit.overload * F.ovLevel, 0, 100);
+    const S = Q.stability;
+    const stability = lclamp(S.base - S.rob * rob - S.clash * mo.clash - S.tension * tension - S.vol * Math.max(0, vol - S.volFrom) + S.bond * F.bond + S.seal * dRamp(F.g[4]), 0, 100);
+    const volatility = lclamp(0.6 * vol + 0.4 * 100 * Math.min(1, mo.clash + 0.7 * mo.harm), 0, 100);
+    const why = [];
+    pushR(why, 30 * pj, '편재 기운이 들어와 예상 밖의 수입·기회와 닿는 신호가 커집니다');
+    pushR(why, 18 * link, '식상(재주·표현)이 재성을 낳는 흐름이라 아이디어와 재능이 돈으로 이어지기 쉽습니다');
+    pushR(why, 14 * r2, `재성 기운(${Math.round(F.g[2] * 100)}%)이 들어와 돈과 닿는 신호가 있습니다`);
+    if (hits.length) pushR(why, 14 * noble, `${hits.map(x => x[0]).join('·')} 신호(전통 참고)가 겹쳐 뜻밖의 도움이 따르기 쉽습니다`);
+    mo.rels.forEach(r => pushR(why, 14 * (DOMAIN_COMMON.activate[r.type] ?? 0.3) * 2, `사회·재물 환경: ${relText(r)} — 거래·기회의 환경이 움직입니다`));
+    if (F.strong > 0.3 && wealthy > 0.3) pushR(why, 12, '원국이 재성을 감당할 힘이 있어 들어온 기회를 내 것으로 만들기 좋습니다');
+    if (burden >= 0.25) pushR(why, 22 * burden, `원국이 약한 편(돕는 힘 ${Math.round(F.help)}%)인데 재성이 강하게 들어와, 들어와도 감당·유지가 어려울 수 있습니다`);
+    if (rob >= 0.35) pushR(why, 22 * rob, '비겁·겁재 기운이 함께 들어와 들어온 돈을 나누거나 빼앗길 수 있습니다(분탈)');
+    if (mo.clash > 0.3) pushR(why, 16 * mo.clash, '재물 환경(월지)이 충을 맞아 들어온 기회가 흔들리기 쉽습니다');
+    if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 들어온 것을 지키기 어려운 요인`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { pj, r2, link, rob, noble } };
+  }
+  const SUB_EVAL = { job: evaluateJob, move: evaluateMove, career: evaluateCareer, business: evaluateBusiness, child: evaluateChild, marriage: evaluateMarriage, noble: evaluateNoble, study: evaluateStudy, estate: evaluateEstate, social: evaluateSocial, family: evaluateFamily, windfall: evaluateWindfall };
   const SUB_PARTS = {
     job: [['activity', '조직 진입 활성도'], ['fit', '원국 적합도'], ['stability', '입사·적응 안정성'], ['volatility', '직장 환경 변동성(점수 미반영·참고)']],
     move: [['activity', '이동 신호 강도'], ['fit', '옮길 때 유리함'], ['stability', '옮긴 뒤 안착'], ['volatility', '환경 변동성(점수 미반영·참고)']],
@@ -2211,6 +2253,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     family: [['activity', '가족 영역 활성도'], ['fit', '원국 적합도'], ['stability', '가정 안정성'], ['volatility', '변동성(점수 미반영·참고)']],
     noble: [['activity', '도움 신호 활성도'], ['fit', '원국 적합도'], ['stability', '인연 안정성'], ['volatility', '환경 변동성(점수 미반영·참고)']],
     child: [['activity', '자녀 영역 활성도'], ['fit', '원국 적합도'], ['stability', '자녀궁 안정성'], ['volatility', '변동성(점수 미반영·참고)']],
+    windfall: [['activity', '뜻밖의 수입 신호'], ['fit', '원국 적합도'], ['stability', '잃지 않는 힘(안정성)'], ['volatility', '환경 변동성(점수 미반영·참고)']],
   };
   function tagsSub(key, c, a, F) {
     const T = SUB_CONFIG[key].tags, out = [];
@@ -2234,6 +2277,9 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       if (c.activity >= T.talk) out.push('교류활발'); if (c.stability >= T.calm && c.fit >= 50) out.push('원만'); if (a.over >= 0.25 || a.friction >= T.friction) out.push('말조심'); if (a.r0 >= T.rival) out.push('경쟁관계');
     } else if (key === 'family') {
       if (a.r4 >= T.support) out.push('보살핌신호'); if (a.bond >= T.bond) out.push('가정결속'); if (a.shake >= T.shake) out.push('가정환경변화'); if (c.activity < T.quiet && c.stability >= T.quietStable) out.push('차분한시기');
+    } else if (key === 'windfall') {
+      if (c.activity >= T.sudden && a.pj >= T.pj) out.push('뜻밖의수입'); if (a.link >= T.link) out.push('재주가돈으로'); if (a.rob >= T.rob) out.push('분탈주의');
+      if (c.activity >= 50 && c.stability < T.leak) out.push('들어와도새기쉬움'); if (c.stability >= T.stable && c.fit >= 52) out.push('안정적기회');
     } else if (key === 'marriage') {
       if (a.bond >= T.bond) out.push('결속신호'); if (c.stability >= T.settle && c.fit >= T.fitSettle) out.push('관계안정'); if (a.shake >= T.shake) out.push('배우자궁흔들림'); if (c.activity < T.quiet && c.stability >= T.quietStable) out.push('차분한시기');
     } else if (key === 'noble') {
@@ -2257,9 +2303,10 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       family: ['가족 영역의 신호가 활발하고 가정 안정성도 받쳐 주는 시기입니다.', '가정 환경이 움직이는 신호가 있어 대화와 일정에 여유를 두면 좋은 시기입니다.', '가족 영역이 조용히 이어지는 시기입니다.', '가족 영역에 뚜렷한 쏠림이 없는 무난한 시기입니다.'],
       marriage: ['결속 신호가 있고 배우자궁도 안정적으로 받쳐 주는 시기입니다.', '관계가 움직이는 신호가 크지만 배우자궁 안정성은 흔들릴 수 있어 대화와 조율에 여유를 두면 좋은 시기입니다.', '관계가 조용히 이어지는 시기입니다. 큰 변화보다 유지·다지기에 맞습니다.', '결혼 영역에 뚜렷한 쏠림이 없는 무난한 시기입니다.'],
       noble: ['도움이 되는 사람·후원의 신호가 활발하고 인연도 안정적인 시기입니다.', '도움 신호는 있지만 경쟁·긴장도 함께 있어 사람을 가려 만나면 좋은 시기입니다.', '도움 신호가 약해 스스로 준비하고 기반을 쌓는 데 맞는 시기입니다.', '귀인 영역에 뚜렷한 쏠림이 없는 무난한 시기입니다.'],
+      windfall: ['뜻밖의 수입·기회 신호가 활발하고 지키는 힘도 받쳐 주어, 들어온 기회를 내 것으로 만들기 좋은 시기입니다.', '뜻밖의 기회 신호는 크지만 나누거나 새기 쉬운 구조라, 들어와도 지키는 계획이 먼저인 시기입니다.', '뜻밖의 수입 신호가 약해 기대하기보다 꾸준한 수입을 다지는 쪽이 맞는 시기입니다.', '횡재 영역에 뚜렷한 쏠림이 없는 무난한 시기입니다.', '뜻밖의 수입을 기대하기보다 새는 곳을 막고 지키는 데 맞는 시기입니다.'],
       child: ['자녀 영역의 신호가 활발하고 안정성도 받쳐 주는 시기입니다.', '자녀 영역이 움직이는 신호가 있어 일정과 마음의 여유를 두면 좋은 시기입니다.', '자녀 영역은 조용하고 안정적으로 이어지는 시기입니다.', '자녀 영역에 뚜렷한 쏠림이 없는 무난한 시기입니다.'],
     }[key];
-    if (hiA && hiF && hiS) return T[0]; if (hiA && (loF || loS || hiV)) return T[1]; if (loA && !loS) return T[2]; return T[3];
+    if (key === 'windfall' && !hiA && loS) return T[4]; if (hiA && hiF && hiS) return T[0]; if (hiA && (loF || loS || hiV)) return T[1]; if (loA && !loS) return T[2]; return T[3];
   }
   function subResult(key, list, self) {
     const c = blendSub(list, key), F = self.own.F, a = self.own.sub[key].aux, score = Math.round(scoreSub(key, c)), S = SUB_CONFIG[key].score;

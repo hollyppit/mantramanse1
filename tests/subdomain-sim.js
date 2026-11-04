@@ -21,7 +21,7 @@ const sd = arr => { const m = mean(arr); return Math.sqrt(mean(arr.map(x => (x -
 const corr = (x, y) => { const mx = mean(x), my = mean(y); let sxy = 0, sx = 0, sy = 0; x.forEach((v, i) => { sxy += (v - mx) * (y[i] - my); sx += (v - mx) ** 2; sy += (y[i] - my) ** 2; }); return sxy / Math.sqrt(sx * sy); };
 const q = (arr, p) => arr.slice().sort((x, y) => x - y)[Math.floor(arr.length * p)];
 const OLD = M.DOMAIN_KEYS, SUB = M.SUB_DOMAIN_KEYS;
-ok(JSON.stringify(SUB) === JSON.stringify(['job', 'move', 'career', 'business', 'child', 'marriage', 'noble', 'study', 'estate', 'social', 'family']), '확장 지표 키 목록이 다름');
+ok(JSON.stringify(SUB) === JSON.stringify(['job', 'move', 'career', 'business', 'child', 'marriage', 'noble', 'study', 'estate', 'social', 'family', 'windfall']), '확장 지표 키 목록이 다름');
 ok(JSON.stringify(OLD) === JSON.stringify(['love', 'wealth', 'health', 'accident']), '기존 지표 키 목록이 바뀜');
 
 // 0. 기존 네 지수가 확장 계산 전후로 같은 값인가(읽기만 하는 계층)
