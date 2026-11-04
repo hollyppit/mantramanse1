@@ -215,6 +215,7 @@ button.pill { border: 0; cursor: pointer; font-family: inherit; }
 .easy-list { display: grid; gap: 12px; }
 .easy-row { display: grid; gap: 3px; padding: 12px 14px; border-radius: 14px; background: var(--surface-2); }
 .easy-row > b { font-size: 0.82rem; color: var(--ink-3); }
+.wf-row { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.9rem; }
 .wf-loss { display: grid; gap: 4px; background: var(--bad-soft); border-radius: 12px; padding: 10px 12px; }
 .wf-loss p { margin: 0; color: var(--ink-2); }
 .wf-loss ul { margin: 0; }
@@ -6596,6 +6597,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     { i: 3, k: 'warn', n: '주의', c: 'var(--sg-warn)', t: '#3A2700', soft: 30 },
     { i: 4, k: 'bad', n: '부담', c: 'var(--sg-bad)', t: '#fff', soft: 34 }];
   const SIG_CUTS = {"love":[45,49,58,66],"wealth":[39,44,51,56],"health":[56,63,73,78],"accident":[16,23,37,50],"job":[45,50,57,63],"move":[47,51,59,67],"career":[41,49,60,66],"business":[44,50,58,64],"child":[42,46,58,67],"marriage":[39,47,62,72],"noble":[40,49,60,68],"study":[43,49,58,65],"windfall":[35,41,52,64],"windfallLoss":[17,24,39,54],"estate":[45,51,60,66],"social":[45,51,58,63],"family":[44,49,59,66]};   // 지표별 [하위10%, 하위30%, 상위30%, 상위10%] 점수
+  const WF_ON = () => SIG_CUTS.windfall[2], LOSS_ON = () => SIG_CUTS.windfallLoss[2];   // 재물 그래프에 뜻밖의 횡재·손재를 표시하는 기준(해당 시기에만)
   const sgVars = g => `--c:${g.c};--on:${g.t}`;
   const sgSoft = g => `color-mix(in srgb, ${g.c} ${g.soft}%, var(--surface))`;
   const sigFlow = v => { const C = M.LUCK_CFG.condition; return v >= 30 ? SIG[0] : v >= C.tailwind ? SIG[1] : v > C.caution ? SIG[2] : v > C.burden ? SIG[3] : SIG[4]; };
@@ -6662,6 +6664,15 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const METRICS = [['flow', '전체 흐름'], ['love', '연애'], ['wealth', '재물'], ['health', '건강'], ['accident', '사고수']];
   const METRICS_SUB = DOM_SUB.map(k => [k, DOM_INFO[k].name]);   // 취업·이직·직업·사업·자식
   const isDomain = () => DOM_ORDER.includes(S.metric) || DOM_SUB.includes(S.metric);
+  // 재물 그래프 아래 한 줄 요약: 지금 대운·올해의 뜻밖의 재물손실 위험(횡재운 계산의 손실 쪽)
+  function wealthLossLine() {
+    try {
+      const ch = S.ch, du = M.daeunAt(ch, NOW), curY = M.yearPillarAt(NOW).sajuYear, se = M.seunRange(ch, curY, curY)[0];
+      const part = (label, x, kind) => { if (!x) return ''; const w = domOf(x, kind).windfall; if (!w || !w.loss) return ''; const g = sigMetric('windfallLoss', w.loss.score); return `<span><b>${label}</b> ${w.loss.score} · <b style="color:${g.c}">${g.n}</b></span>`; };
+      const yr = se ? domOf(se, 'seun').windfall : null;
+      return `<div class="wf-line"><div><b>뜻밖의 재물손실 위험</b> <span class="muted small">(낮을수록 좋음)</span></div><div class="wf-row">${[part('지금 대운', du, 'daeun'), part('올해', se, 'seun')].filter(Boolean).join('')}</div>${yr && yr.loss ? `<p class="small"><b>올해</b> — ${yr.loss.summary}</p>` : ''}<button type="button" class="btn" data-act="metric:windfall">횡재운·손실 위험 그래프 보기 ›</button></div>`;
+    } catch (e) { return ''; }
+  }
   function metricBar() {
     const m = S.metric || 'flow', info = DOM_INFO[m];
     return `<section class="card"><div class="card-h"><h2>그래프 지표</h2><span class="note">아래 대운·연도·월운 그래프와 일진 달력에 적용됩니다</span></div>
@@ -6669,27 +6680,30 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="cp-filters" role="group" aria-label="직업·가족 세부 지표" style="margin-top:6px">${METRICS_SUB.map(([k, l]) => `<button type="button" class="opt" data-act="metric:${k}" aria-pressed="${m === k}">${l}운</button>`).join('')}</div>
       <p class="small" style="color:var(--ink-2)">${m === 'flow' ? '전체 흐름: 원국의 불균형을 들어오는 운이 보완하는지 심화하는지를 나타내는 −100~+100의 상대 지표입니다. 막대 색은 좋고 나쁨(최고·좋음·무난·주의·부담)이고, 막대 아래 글자는 활성화되는 일입니다.' : `<b>${info.full}</b> — ${info.sub}. 0~100 눈금이며 ${m === 'accident' ? '높을수록 주의 신호가 많이 겹쳤다는 뜻입니다.' : '높을수록 그 지표의 값이 큽니다.'}`}</p>
       ${m === 'health' || m === 'accident' ? `<p class="cp-disc">${info.note}</p>` : m !== 'flow' ? `<p class="small muted">${info.note}</p>` : ''}
+      ${m === 'wealth' ? wealthLossLine() : ''}
     </section>`;
   }
-  const chartLegendInner = () => !isDomain() ? modeLegend() : `${sigLegend(metricRule(S.metric))}<div class="legend"><span>막대 높이 = ${DOM_INFO[S.metric].full} 점수(0~100) · 막대 위 글자 = 신호등 단계</span></div>${S.metric === 'windfall' ? '<div class="legend"><span><i class="sw" style="background:var(--sg-bad)"></i>아래 막대 = 뜻밖의 재물손실 위험(길수록·빨강일수록 조심, 횡재 점수와 따로 봅니다)</span></div>' : ''}`;
+  const chartLegendInner = () => !isDomain() ? modeLegend() : `${sigLegend(metricRule(S.metric))}<div class="legend"><span>막대 높이 = ${DOM_INFO[S.metric].full} 점수(0~100) · 막대 위 글자 = 신호등 단계</span></div>${S.metric === 'wealth' ? '<div class="legend"><span>아래 "횡재"(초록 계열) = 뜻밖의 수입 신호가 좋음 이상, "손재"(주황·빨강) = 뜻밖의 재물손실 위험이 주의 이상인 시기에만 표시됩니다</span></div>' : ''}${S.metric === 'windfall' ? '<div class="legend"><span><i class="sw" style="background:var(--sg-bad)"></i>아래 막대 = 뜻밖의 재물손실 위험(길수록·빨강일수록 조심, 횡재 점수와 따로 봅니다)</span></div>' : ''}`;
   const chartLegend = () => `<details class="lg-fold"${(S.lgOpen === undefined ? window.innerWidth > 640 : S.lgOpen) ? ' open' : ''}><summary>그래프 보는 법 <span class="muted small">색·막대·글자 뜻</span></summary>${chartLegendInner()}</details>`;
   document.addEventListener('toggle', ev => { if (ev.target && ev.target.classList && ev.target.classList.contains('lg-fold')) S.lgOpen = ev.target.open; }, true);
-  function domTip(title, res) { const k = S.metric, r = res[k]; return `<b>${esc(title)}</b><br>${DOM_INFO[k].full} <b>${r.score}</b> · ${sigMetric(k, r.score).n}${r.tags.length ? `<br>${r.tags.join(' · ')}` : ''}${k === 'windfall' && r.loss ? `<br>뜻밖의 재물손실 위험 <b>${r.loss.score}</b> · ${sigMetric('windfallLoss', r.loss.score).n}${r.loss.tags.length ? ' · ' + r.loss.tags.join(' · ') : ''}` : ''}<br>${r.summary}${r.reasons.slice(0, 2).map(t => `<br>· ${esc(t)}`).join('')}`; }
+  function domTip(title, res) { const k = S.metric, r = res[k]; return `<b>${esc(title)}</b><br>${DOM_INFO[k].full} <b>${r.score}</b> · ${sigMetric(k, r.score).n}${r.tags.length ? `<br>${r.tags.join(' · ')}` : ''}${k === 'wealth' && res.windfall && res.windfall.score >= WF_ON() ? `<br>뜻밖의 횡재 신호 <b>${res.windfall.score}</b> · ${sigMetric('windfall', res.windfall.score).n}` : ''}${k === 'wealth' && res.windfall && res.windfall.loss && res.windfall.loss.score >= LOSS_ON() ? `<br>뜻밖의 손재 주의 <b>${res.windfall.loss.score}</b> · ${sigMetric('windfallLoss', res.windfall.loss.score).n}` : ''}${k === 'windfall' && r.loss ? `<br>뜻밖의 재물손실 위험 <b>${r.loss.score}</b> · ${sigMetric('windfallLoss', r.loss.score).n}${r.loss.tags.length ? ' · ' + r.loss.tags.join(' · ') : ''}` : ''}<br>${r.summary}${r.reasons.slice(0, 2).map(t => `<br>· ${esc(t)}`).join('')}`; }
   // 0~100 눈금 막대(대운·월운)
   function drawDomainDiv(el, items) {
-    const k = S.metric, n = items.length, cw = el.clientWidth || 320, W = Math.max(cw, n * chartStep(cw)), H = 246, L = 34, R = 6, T = 30, B = 54, ST = k === 'windfall' ? 60 : 0;   // ST: 횡재운 그래프 아래의 손실 위험 띠 높이
+    const k = S.metric, n = items.length, cw = el.clientWidth || 320, W = Math.max(cw, n * chartStep(cw)), H = 246, L = 34, R = 6, T = 30, B = 54, ST = k === 'windfall' ? 60 : k === 'wealth' ? 30 : 0;   // ST: 횡재운 그래프 아래의 손실 위험 띠 높이
     const step = (W - L - R) / n, bw = Math.min(30, step * 0.58), y = v => T + (100 - v) / 100 * (H - T - B);
     let s = svgEl(W, H + ST);
     s += metricZones(k, y, L, W - R);
     for (const g of [0, 25, 50, 75, 100]) s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'};stroke-width:1" ${g && g !== 100 ? 'stroke-dasharray="3 3"' : ''}/><text x="${L - 6}" y="${y(g) + 3.5}" text-anchor="end" style="fill:var(--ink-3);font-size:10px">${g}</text>`;
-    if (ST) s += `<text x="${L - 6}" y="${y(0) + 20}" text-anchor="end" style="fill:var(--bad);font-size:9px;font-weight:800">손실</text><text x="${L - 6}" y="${y(0) + 30}" text-anchor="end" style="fill:var(--bad);font-size:9px;font-weight:800">위험</text>`;
+    if (k === 'wealth') s += `<text x="${L - 6}" y="${y(0) + 24}" text-anchor="end" style="fill:var(--ink-3);font-size:9px;font-weight:800">뜻밖</text>`;
+    if (k === 'windfall') s += `<text x="${L - 6}" y="${y(0) + 20}" text-anchor="end" style="fill:var(--bad);font-size:9px;font-weight:800">손실</text><text x="${L - 6}" y="${y(0) + 30}" text-anchor="end" style="fill:var(--bad);font-size:9px;font-weight:800">위험</text>`;
     items.forEach((it, i) => {
       const cx = L + step * (i + 0.5), h = Math.max(2, y(0) - y(it.v)), top = y(it.v), x0 = cx - bw / 2, r = Math.min(4, h / 2);
       s += `<path d="M${x0},${y(0)} V${top + r} Q${x0},${top} ${x0 + r},${top} H${x0 + bw - r} Q${x0 + bw},${top} ${x0 + bw},${top + r} V${y(0)} Z" style="fill:${domCol(k, it.v)};${it.sel ? 'stroke:var(--ink);stroke-width:2' : ''}"/>`;
       s += `<text x="${cx}" y="${top - 5}" text-anchor="middle" style="fill:var(--ink-2);font-size:10px;font-weight:700">${it.v}</text>`;
       { const g = sigMetric(k, it.v), by = top - 22; s += `<rect x="${cx - 14}" y="${by}" width="28" height="12" rx="6" style="fill:${g.c}"/><text x="${cx}" y="${by + 9}" text-anchor="middle" style="fill:${g.t};font-size:9px;font-weight:800">${g.n}</text>`; }
       if (it.cur) s += `<circle cx="${cx}" cy="${T - 12}" r="3" style="fill:var(--seal)"/>`;
-      if (ST && it.loss != null) { const sy = y(0) + 8, lh = Math.max(2, it.loss / 100 * (ST - 28)), lc = sigMetric('windfallLoss', it.loss).c; s += `<rect x="${cx - bw / 2}" y="${sy}" width="${bw}" height="${lh}" rx="3" style="fill:${lc}"/><text x="${cx}" y="${sy + lh + 11}" text-anchor="middle" style="fill:var(--ink-2);font-size:9px;font-weight:700">${it.loss}</text>`; }
+      if (k === 'windfall' && it.loss != null) { const sy = y(0) + 8, lh = Math.max(2, it.loss / 100 * (ST - 28)), lc = sigMetric('windfallLoss', it.loss).c; s += `<rect x="${cx - bw / 2}" y="${sy}" width="${bw}" height="${lh}" rx="3" style="fill:${lc}"/><text x="${cx}" y="${sy + lh + 11}" text-anchor="middle" style="fill:var(--ink-2);font-size:9px;font-weight:700">${it.loss}</text>`; }
+      if (k === 'wealth') { const sy = y(0) + 8; let oy = sy; if (it.wf != null && it.wf >= WF_ON()) { s += `<rect x="${cx - 15}" y="${oy}" width="30" height="12" rx="6" style="fill:${sigMetric('windfall', it.wf).c}"/><text x="${cx}" y="${oy + 9}" text-anchor="middle" style="fill:#fff;font-size:9px;font-weight:800">횡재</text>`; oy += 15; } if (it.loss != null && it.loss >= LOSS_ON()) s += `<rect x="${cx - 15}" y="${oy}" width="30" height="12" rx="6" style="fill:${sigMetric('windfallLoss', it.loss).c}"/><text x="${cx}" y="${oy + 9}" text-anchor="middle" style="fill:#fff;font-size:9px;font-weight:800">손재</text>`; }
       s += `<text x="${cx}" y="${H - B + ST + 18}" text-anchor="middle" style="fill:var(--ink);font-size:14px;font-weight:${it.sel ? 900 : 700};font-family:var(--f-display)">${it.label}</text>`;
       s += `<text x="${cx}" y="${H - B + ST + 33}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${it.sub}</text>`;
       if (it.sub2) s += `<text x="${cx}" y="${H - B + ST + 45}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${it.sub2}</text>`;
@@ -6712,6 +6726,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     data.forEach(d => { const v = d.res[k].score, top = y(v), h = Math.max(1.5, y(0) - top); s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${top.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${domCol(k, v)}"/>`;
       if (k === 'windfall' && d.res.windfall.loss) { const lv = d.res.windfall.loss.score, lh = Math.max(1.5, lv / 100 * 24); s += `<rect x="${(x(d.year) - bw / 2).toFixed(1)}" y="${(y(0) + 4).toFixed(1)}" width="${bw.toFixed(1)}" height="${lh.toFixed(1)}" rx="${Math.min(2, bw / 2)}" style="fill:${sigMetric('windfallLoss', lv).c}"/>`; } });
     if (k === 'windfall') s += `<text x="${L - 6}" y="${y(0) + 14}" text-anchor="end" style="fill:var(--bad);font-size:9px;font-weight:800">손실</text>`;
+    if (k === 'wealth') { s += `<text x="${L - 6}" y="${y(0) + 17}" text-anchor="end" style="fill:var(--ink-3);font-size:9px;font-weight:800">뜻밖</text>`; data.forEach(d => { const w = d.res.windfall, cx = x(d.year); if (w.score >= WF_ON()) s += `<circle cx="${cx.toFixed(1)}" cy="${(y(0) + 9).toFixed(1)}" r="${Math.max(2, Math.min(3.2, bw))}" style="fill:${sigMetric('windfall', w.score).c}"/>`; if (w.loss && w.loss.score >= LOSS_ON()) s += `<circle cx="${cx.toFixed(1)}" cy="${(y(0) + 20).toFixed(1)}" r="${Math.max(2, Math.min(3.2, bw))}" style="fill:${sigMetric('windfallLoss', w.loss.score).c}"/>`; }); }
     const curY = M.yearPillarAt(NOW).sajuYear;
     if (curY >= y0 && curY <= y1) s += `<line x1="${x(curY)}" x2="${x(curY)}" y1="${T}" y2="${H - B}" style="stroke:var(--seal);stroke-width:1.5" stroke-dasharray="4 3"/><text x="${x(curY) + 4}" y="${T + 11}" style="fill:var(--seal);font-size:10px;font-weight:700">올해</text>`;
     const sel = S.sel && S.sel.kind === 'seun' ? S.sel.Y : null;
@@ -6731,10 +6746,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const ch = S.ch, m = S.metric;
     if (k === 'daeun') {
       const cur = M.daeunAt(ch, NOW);
-      drawDomainDiv(el, ch.daeun.list.map((d, i) => { const r = domOf(d, 'daeun'); return { v: r[m].score, loss: m === 'windfall' ? r.windfall.loss.score : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: domTip(`${d.startAge}세 대운 ${M.gzName(d)}`, r) }; }));
+      drawDomainDiv(el, ch.daeun.list.map((d, i) => { const r = domOf(d, 'daeun'); return { v: r[m].score, wf: m === 'wealth' ? r.windfall.score : null, loss: m === 'windfall' || m === 'wealth' ? r.windfall.loss.score : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: domTip(`${d.startAge}세 대운 ${M.gzName(d)}`, r) }; }));
     } else if (k === 'wolun') {
       const ms = M.wolun(ch, S.selYear);
-      drawDomainDiv(el, ms.map((x, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity, r = domOf(x, 'wolun'); return { v: r[m].score, loss: m === 'windfall' ? r.windfall.loss.score : null, label: M.gzName(x), sub: x.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: NOW >= x.startMs && NOW < nx, tip: domTip(`${x.termName}~ ${M.gzName(x)}`, r) }; }));
+      drawDomainDiv(el, ms.map((x, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity, r = domOf(x, 'wolun'); return { v: r[m].score, wf: m === 'wealth' ? r.windfall.score : null, loss: m === 'windfall' || m === 'wealth' ? r.windfall.loss.score : null, label: M.gzName(x), sub: x.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: NOW >= x.startMs && NOW < nx, tip: domTip(`${x.termName}~ ${M.gzName(x)}`, r) }; }));
     } else if (k === 'life') drawDomainLife(el);
   }
 
