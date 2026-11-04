@@ -186,6 +186,100 @@ button.pill { border: 0; cursor: pointer; font-family: inherit; }
 .li .k { font-size: 0.8rem; font-weight: 600; color: var(--ink-2); }
 .li .v { min-width: 0; }
 .li .v .small { display: block; }
+.rel-body .card { align-content: start; }
+.rel-sum { display: grid; gap: 6px; }
+.rel-sum-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.rel-sum-chips .chip { font-size: 0.78rem; padding: 3px 10px; font-weight: 600; }
+.rel-sum-chips .chip.good { background: var(--good-soft); color: var(--good); }
+.rel-sum-line { margin: 0; font-size: 0.92rem; line-height: 1.6; }
+.rel-list { display: grid; gap: 12px; }
+.rel-card { border: 1px solid var(--line); border-left: 4px solid var(--mid); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; background: var(--surface); }
+.rel-card.tone-bad { border-left-color: var(--bad); } .rel-card.tone-good { border-left-color: var(--good); }
+.rel-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rel-badge { display: inline-flex; align-items: baseline; gap: 5px; font-weight: 700; font-size: 0.8rem; padding: 2px 9px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); }
+.rel-badge small { font-size: 0.7rem; font-weight: 500; }
+.tone-bad .rel-badge { background: var(--bad-soft); color: var(--bad); } .tone-good .rel-badge { background: var(--good-soft); color: var(--good); }
+.rel-name { font-size: 0.9rem; font-weight: 600; }
+@media (max-width: 520px) { .rel-card { padding: 11px 11px; } .rel-str { margin-left: 0; } .rel-head { font-size: 0.94rem; } .rel-tip { padding: 6px 8px; } }
+.rel-str { margin-left: auto; font-size: 0.62rem; letter-spacing: 1px; color: var(--ink-3); }
+.rel-where { font-size: 0.8rem; color: var(--ink-2); }
+.rel-head { margin: 2px 0 0; font-size: 0.98rem; font-weight: 700; line-height: 1.5; }
+.rel-place, .rel-tip { margin: 0; font-size: 0.88rem; line-height: 1.65; color: var(--ink-2); }
+.rel-place b, .rel-tip b { display: inline-block; margin-right: 6px; font-size: 0.74rem; padding: 0 7px; border-radius: 6px; background: var(--surface-2); color: var(--ink); }
+.rel-tip { background: var(--accent-soft); border-radius: 8px; padding: 7px 10px; }
+.rel-tip b { background: var(--surface); color: var(--accent); }
+.rel-more { font-size: 0.84rem; color: var(--ink-2); }
+.rel-more summary { cursor: pointer; color: var(--ink-3); font-size: 0.8rem; }
+.rel-more p { margin: 6px 0 0; line-height: 1.65; }
+.rel-more summary { padding: 6px 0; }
+/* 소제목 접고 펴기 */
+.fold-h { position: relative; cursor: pointer; padding-right: 32px; -webkit-tap-highlight-color: transparent; user-select: none; }
+.fold-h:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+.fold-chev { position: absolute; right: 4px; top: 50%; width: 26px; height: 26px; margin-top: -13px; border-radius: 50%; background: var(--surface-2); }
+.fold-chev::after { content: ''; position: absolute; left: 9px; top: 7px; width: 6px; height: 6px; border-right: 2px solid var(--ink-2); border-bottom: 2px solid var(--ink-2); transform: rotate(45deg); transition: transform .15s; }
+.fold-h.closed .fold-chev::after { transform: rotate(-45deg); top: 9px; left: 7px; }
+.cb { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; }
+.cb2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; min-width: 0; margin-top: 6px; }
+.fold-h.closed + .cb, .fold-h.closed + .cb2 { display: none; }
+.xs .fold-h.closed + .cb, .xs .fold-h.closed + .cb2 { display: grid; }
+.xs .fold-chev, .xs .chart-hint { display: none; }
+h3.fold-h, h4.fold-h { min-height: 32px; padding-block: 4px; }
+.fold-all { display: flex; justify-content: flex-end; gap: 6px; margin: 0 0 10px; }
+.fold-all button { border: 0; background: var(--surface); box-shadow: var(--shadow); border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 0.8rem; font-weight: 700; color: var(--ink-2); cursor: pointer; }
+.chart { -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+.chart-hint { margin: 0; font-size: 0.76rem; color: var(--ink-3); text-align: center; }
+.lg-fold { border-radius: 12px; background: var(--surface-2); padding: 0 12px; }
+.lg-fold > summary { cursor: pointer; padding: 10px 0; font-weight: 700; font-size: 0.86rem; list-style: none; }
+.lg-fold > summary::-webkit-details-marker { display: none; }
+.lg-fold > summary::before { content: '▸ '; } .lg-fold[open] > summary::before { content: '▾ '; }
+.lg-fold[open] { padding-bottom: 10px; }
+/* 모바일: 위쪽 제목·버튼은 스크롤과 함께 올라가고, 탭 막대만 화면 위에 남긴다(고정 헤더가 화면의 1/3을 차지하던 문제) */
+@media (max-width: 640px) {
+  .top { display: contents; }
+  .top-in { margin: 0 0 8px; gap: 8px; }
+  /* 1줄: 로고 + 사주 입력 버튼 / 2줄: 출생 정보 + 내보내기 */
+  .top-in .brand { flex: 1 1 auto; order: 1; }
+  .top-in > .btn[data-act="edit"] { order: 2; }
+  .top-in .who { flex: 1 1 100%; min-width: 0; order: 3; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .top-in .xp { order: 4; }
+  .top-in .admin-badge, .top-in [data-act="admin-out"] { order: 5; }
+  .top-in .mt-cta { display: none; }
+  .detail { scroll-margin-top: 72px; }
+  /* 입력 폼: 만세력 보기 버튼을 화면 아래에 붙여 스크롤 없이 누를 수 있게 */
+  .form-submit { position: sticky; bottom: 0; z-index: 6; margin: 0 -8px -8px; padding: 10px 8px calc(10px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to bottom, color-mix(in srgb, var(--surface) 0%, transparent), var(--surface) 28%); }
+  .form-submit .btn { flex: 1 1 100%; min-height: 48px; font-size: 1rem; }
+  .form input, .form select { min-height: 46px; font-size: 16px; }
+  .tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; margin: 0 -4px 10px; scroll-snap-type: x proximity; }
+  .tab { padding: 10px 14px; scroll-snap-align: center; }
+  .rel-more summary { padding: 10px 0; }
+  .rel-list { gap: 10px; }
+  /* 하단 내비가 탭을 맡으므로 위쪽 탭 막대는 숨기고, 화면 폭을 조금 더 쓴다 */
+  .tabs { display: none; }
+  body { padding: 0 10px 84px; }
+  .card { padding: 16px 14px; }
+  .note, .small { font-size: 0.88rem; }
+  .bnav { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: color-mix(in srgb, var(--surface) 94%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid var(--line); padding: 0 4px env(safe-area-inset-bottom, 0px); box-shadow: 0 -6px 18px -12px rgba(18,21,31,.25); }
+  .bn { border: 0; background: none; font: inherit; font-size: 0.82rem; font-weight: 700; color: var(--ink-3); min-height: 56px; padding: 8px 2px; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent; }
+  .bn.on { color: var(--accent); }
+  .bn.on::before { content: ''; position: absolute; top: 0; left: 22%; right: 22%; height: 3px; border-radius: 0 0 3px 3px; background: var(--accent); }
+  .more-pop { position: fixed; left: 10px; right: 10px; bottom: calc(66px + env(safe-area-inset-bottom, 0px)); z-index: 31; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 16px 40px -12px rgba(18,21,31,.4); }
+  .more-pop > * { display: grid; place-items: center; min-height: 46px; border: 0; border-radius: 12px; background: var(--surface-2); font: inherit; font-size: 0.9rem; font-weight: 700; color: var(--ink-2); text-decoration: none; cursor: pointer; }
+  .more-pop > .on { background: var(--ink); color: #fff; }
+  .to-top { display: none; position: fixed; right: 12px; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); z-index: 29; width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--ink); color: #fff; font-size: 1.2rem; box-shadow: var(--shadow); cursor: pointer; place-items: center; }
+  html.scrolled .to-top { display: grid; }
+  .form-submit { bottom: 0; }
+  /* 선택지가 5개 이상인 알약 선택(택일 목적 등)은 글자가 세로로 깨지지 않게 3열 격자로 */
+  .seg:has(> button:nth-child(5)) { display: grid; grid-template-columns: repeat(3, 1fr); border-radius: 16px; }
+  .seg:has(> button:nth-child(5)) > button { white-space: nowrap; min-height: 40px; padding-inline: 4px; }
+  /* 눌러야 하는 작은 글자·버튼은 터치 영역만 넓힌다(보이는 크기는 그대로) */
+  .term { padding: 5px 3px; margin: -5px -3px; }
+  .opt { min-height: 40px; }
+  details > summary { padding-block: 10px; }
+  .card-h.fold-h, h2.fold-h { padding-block: 10px; }
+  /* 너무 작던 글자(10px 안팎)를 읽을 수 있는 크기로 */
+  .chip, .lt-ev .chip, .lt-us, .lt-g i, .zc-adj .term, .zs .term, .rl .term, .cp-gz .k, .cp-gz .ty, .cp-gz .co, .dmn, .ld, .zm-c small, .zc-dh, .ovb, .ovm, .son, .rel-str, .gs { font-size: 0.72rem !important; }
+}
+@media (min-width: 641px) { .bnav, .more-pop, .to-top { display: none !important; } }
 table.dt { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
 table.dt th, table.dt td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: left; }
 table.dt th { font-size: 0.76rem; color: var(--ink-3); font-weight: 600; }
@@ -4886,6 +4980,15 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const d = `${i.calendar === 'lunar' ? '음력' + (i.leap ? '(윤)' : '') : '양력'} ${i.year}.${pad(i.month)}.${pad(i.day)} ${i.hourUnknown ? '시간 모름' : pad(i.hour) + ':' + pad(i.minute)}`;
     return `${S.isExample ? '<b style="color:var(--seal)">예시</b> · ' : ''}${nm}${i.gender === 'M' ? '남' : '여'} · ${d} · ${esc(i.city === '직접 입력' ? '경도 ' + i.lon + '°' : i.city)}${ch ? ' · ' + ['year', 'month', 'day', 'hour'].map(k => ch.pillars[k] ? M.gzName(ch.pillars[k]) : '').join(' ') : ''}`;
   }
+  // 모바일 하단 내비: 자주 쓰는 4개 탭 + 더보기(나머지 탭), 오른쪽 아래에 맨 위로 버튼
+  const BN_MAIN = [['wonguk', '원국'], ['ohaeng', '오행'], ['yong', '용신'], ['luck', '운세 흐름']];
+  function bottomNav(tabs) {
+    const main = BN_MAIN.map(([k]) => k), rest = tabs.filter(([k]) => !main.includes(k));
+    const moreOn = rest.some(([k]) => k === S.tab);
+    return `<nav class="bnav" aria-label="주요 메뉴">${BN_MAIN.map(([k, l]) => `<button type="button" class="bn${S.tab === k ? ' on' : ''}" data-tab="${k}"${S.tab === k ? ' aria-current="page"' : ''}>${l}</button>`).join('')}<button type="button" class="bn${moreOn || S.more ? ' on' : ''}" data-act="more-tabs" aria-expanded="${!!S.more}">더보기</button></nav>
+    ${S.more ? `<div class="more-pop" role="menu">${rest.map(([k, l]) => `<button type="button" role="menuitem" class="${S.tab === k ? 'on' : ''}" data-tab="${k}">${l}</button>`).join('')}<a href="/report/" role="menuitem">무빙툰 ›</a></div>` : ''}
+    <button type="button" class="to-top" data-act="to-top" aria-label="맨 위로">↑</button>`;
+  }
   function renderTop() {
     const tabs = [['wonguk', '원국'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ['tk', '택일'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ['fs', '풍수'], ['tarot', '타로'], ['iching', '주역'], ['gl', '용어']];
     return `<header class="top"><div class="top-in">
@@ -4896,7 +4999,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <a class="btn mt-cta" href="/report/">무빙툰 보기 ›</a>
       <button class="btn${S.editing ? '' : ' primary'}" data-act="edit">${S.editing ? '입력 닫기' : '사주 입력'}</button>
     </div>
-    <nav class="tabs" role="tablist"><a class="tab tab-link" href="/report/" title="내 사주를 영화처럼 보는 무빙툰으로 이동">무빙툰 ›</a>${tabs.map(([k, l]) => `<button class="tab" role="tab" data-tab="${k}" aria-selected="${S.tab === k}">${l}</button>`).join('')}</nav></header>`;
+    <nav class="tabs" role="tablist"><a class="tab tab-link" href="/report/" title="내 사주를 영화처럼 보는 무빙툰으로 이동">무빙툰 ›</a>${tabs.map(([k, l]) => `<button class="tab" role="tab" data-tab="${k}" aria-selected="${S.tab === k}">${l}</button>`).join('')}</nav></header>${S.editing ? '' : bottomNav(tabs)}`;
   }
 
   function renderAdminLogin() {
@@ -4938,8 +5041,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         ${i.city === '직접 입력' ? `<label class="field"><span>동경 (°)</span><input id="f-lon" type="number" step="0.01" value="${esc(i.lon)}"></label>` : ''}
         ${regFormBlock()}
       </div>
-      <div class="frow"><label class="field"><span>합에 따른 오행 변화 적용</span><select id="f-combination"><option value="auto" ${i.combinationMode !== 'off' ? 'selected' : ''}>자동 적용</option><option value="off" ${i.combinationMode === 'off' ? 'selected' : ''}>미적용</option></select></label><label class="field"><span>조후와 궁성에 따른 보정</span><select id="f-climate-palace"><option value="auto" ${i.climatePalaceMode !== 'off' ? 'selected' : ''}>자동 적용</option><option value="off" ${i.climatePalaceMode === 'off' ? 'selected' : ''}>미적용</option></select></label></div><p class="note">합이 성립하는 조건과 태어난 계절·글자의 자리를 살펴 오행 비중을 보정합니다. 선택한 기준은 무빙툰 풀이에도 이어집니다.</p>
-      <details class="adv"${S.advOpen ? ' open' : ''}><summary>계산 기준 설정</summary>
+      <details class="adv"${S.advOpen ? ' open' : ''}><summary>계산 기준 설정 <span class="muted small">(보통은 그대로 두세요)</span></summary>
+        <div class="frow"><label class="field"><span>합에 따른 오행 변화 적용</span><select id="f-combination"><option value="auto" ${i.combinationMode !== 'off' ? 'selected' : ''}>자동 적용</option><option value="off" ${i.combinationMode === 'off' ? 'selected' : ''}>미적용</option></select></label><label class="field"><span>조후와 궁성에 따른 보정</span><select id="f-climate-palace"><option value="auto" ${i.climatePalaceMode !== 'off' ? 'selected' : ''}>자동 적용</option><option value="off" ${i.climatePalaceMode === 'off' ? 'selected' : ''}>미적용</option></select></label></div><p class="note">합이 성립하는 조건과 태어난 계절·글자의 자리를 살펴 오행 비중을 보정합니다. 선택한 기준은 무빙툰 풀이에도 이어집니다.</p>
         <div class="adv-grid">
           <label class="field"><span>시간 기준 · ${term('진태양시', '설명')}</span><select id="f-tm">${Object.entries(M.TIME_MODES).map(([k, l]) => `<option value="${k}" ${i.timeMode === k ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
           <label class="field"><span>밤 11시 처리 · ${term('자시', '설명')}</span><select id="f-js"><option value="jeong" ${i.jasi === 'jeong' ? 'selected' : ''}>정자시 (23시 날짜 변경)</option><option value="ya" ${i.jasi === 'ya' ? 'selected' : ''}>야자시 (자정 날짜 변경)</option></select></label>
@@ -4947,7 +5050,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         </div>
         <p class="note" style="margin-top:10px">오행 계산 모델과 용신 학파는 각 탭에서 바로 바꿀 수 있습니다.</p>
       </details>
-      <div class="frow"><button class="btn primary" type="submit">만세력 보기</button>${S.err ? `<span class="err">${esc(S.err)}</span>` : ''}</div>
+      <div class="frow form-submit"><button class="btn primary" type="submit">만세력 보기</button>${S.err ? `<span class="err">${esc(S.err)}</span>` : ''}</div>
     </form>`;
   }
   function readForm() {
@@ -5080,9 +5183,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     let place = '';
     if (ids.length === 2) {
       const key = ids.join('-'), pair = REL_PAIR[key];
-      if (pair) place = `<b>${pair[0]}</b> — ${bad ? pair[1] : good ? pair[2] : '이 두 자리에서 예민함과 직관이 함께 드러납니다.'} ${REL_ADJ.includes(key) ? '이웃한 자리라 일상에서 바로 체감되는 편입니다.' : '떨어진 자리라 평소엔 잘 느껴지지 않다가, 대운·세운에서 관련 글자가 올 때 뚜렷해집니다.'}`;
+      if (pair) place = `${bad ? pair[1] : good ? pair[2] : '이 두 자리에서 예민함과 직관이 함께 드러납니다.'} ${REL_ADJ.includes(key) ? '이웃한 자리라 일상에서 바로 체감되는 편입니다.' : '떨어진 자리라 평소엔 잘 느껴지지 않다가, 대운·세운에서 관련 글자가 올 때 뚜렷해집니다.'}`;
     } else {
-      place = `<b>${ids.map(k => M.POS_K[k] + '지').join('·')}</b> 세 자리가 함께 얽혀 있습니다 — ${bad ? '같은 종류의 긴장이 여러 영역에 겹쳐, 한 곳의 문제가 다른 곳으로 번지기 쉽습니다. 한 영역을 먼저 정리하면 나머지도 풀리는 편입니다.' : good ? `이 세 자리의 영역이 ${r.el != null ? M.EL[r.el] + ' 기운으로 ' : ''}한 방향으로 움직여, 해당 영역의 일이 같은 방식으로 풀리는 경향이 있습니다.` : ''}`;
+      place = `세 자리가 함께 얽혀 있습니다 — ${bad ? '같은 종류의 긴장이 여러 영역에 겹쳐, 한 곳의 문제가 다른 곳으로 번지기 쉽습니다. 한 영역을 먼저 정리하면 나머지도 풀리는 편입니다.' : good ? `이 세 자리의 영역이 ${r.el != null ? M.EL[r.el] + ' 기운으로 ' : ''}한 방향으로 움직여, 해당 영역의 일이 같은 방식으로 풀리는 경향이 있습니다.` : ''}`;
     }
     const notes = [];
     if (r.type === '형' && ids.length === 2 && ch.pillars[ids[0]].b === ch.pillars[ids[1]].b) notes.push('같은 글자가 스스로 부딪치는 자형이라, 자신을 몰아붙이거나 같은 문제를 되풀이하기 쉽습니다.');
@@ -5092,7 +5195,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const strongBad = o => ['충', '형'].includes(o.type), strongGood = o => ['육합', '삼합', '방합'].includes(o.type);
     const opp = all.filter(o => o !== r && o.members.some(m => r.members.includes(m)) && ((strongBad(r) && strongGood(o)) || (strongGood(r) && strongBad(o)))).slice(0, 2);
     if (opp.length) notes.push(`같은 글자가 ${opp.map(o => o.name).join(', ')}과도 얽힌 합충 구조라, ${strongBad(r) ? '합이 충을 달래' : '충·형이 합을 흔들어'} 작용이 줄어들 수 있습니다.`);
-    return `${skipPlace ? '' : `<span class="small" style="color:var(--ink-2);margin-top:3px">${place}</span>`}${verb ? `<span class="small" style="color:var(--ink-2)${skipPlace ? ';margin-top:3px' : ''}">${verb[0]}</span>` : ''}${notes.map(n => `<span class="small muted">· ${n}</span>`).join('')}`;
+    return { place, lines: verb ? [verb[0]] : [], notes };
   }
   function relSummary(ch, rels, suf = '지') {
     if (!rels.length) return '';
@@ -5100,14 +5203,54 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const top = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0];
     const nb = rels.filter(r => REL_BAD.includes(r.type) || r.type === '천간충').length, ng = rels.filter(r => REL_GOOD.includes(r.type) || r.type === '천간합').length;
     const mix = nb && ng ? '합과 충이 함께 있어 안정과 변화가 번갈아 오는 구조입니다.' : nb ? '부딪치는 관계 위주라 변화와 긴장이 잦은 구조입니다.' : ng ? '합치는 관계 위주라 안정적으로 묶이는 구조입니다.' : '';
-    return `<p class="small" style="margin:0 0 6px"><b>종합</b> — 합 ${ng}개 · 충돌 계열 ${nb}개. ${mix} 관계가 가장 많이 모인 자리는 <b>${M.POS_K[top[0]]}${suf}(${SS_AREA[top[0]]})</b>로 ${top[1]}개입니다. 원국의 관계는 평소엔 성향으로 나타나고, 대운·세운에서 같은 글자가 들어오는 해에 실제 사건(이사·이직·계약·관계 변동)으로 드러나기 쉽습니다.</p>`;
+    return `<div class="rel-sum"><div class="rel-sum-chips"><span class="chip good">합치는 관계 ${ng}개</span><span class="chip bad">부딪치는 관계 ${nb}개</span></div>
+      <p class="rel-sum-line">${mix} 관계가 가장 많이 모인 곳은 <b>${SS_AREA[top[0]]}(${M.POS_K[top[0]]}${suf})</b>입니다.</p>
+      <p class="small muted" style="margin:0">평소엔 성향으로 나타나고, 대운·세운에서 같은 글자가 오는 해에 이사·이직·계약·관계 변동 같은 사건으로 드러나기 쉽습니다.</p></div>`;
   }
+  // 관계 카드: 한 줄 요약 → 내 삶에서는 → 대처 → (접이식) 자세히
+  // [톤, 한 줄 요약, 대처 한마디, 쉬운 이름]
+  const REL_HEAD = {
+    '충': ['bad', '환경이 확 바뀌는 일(이사·이직·이별)이 생기기 쉬워요', '큰 결정은 서두르지 말고 미리 계획해 충격을 줄이세요.', '부딪침'],
+    '형': ['bad', '서로 눌러서 꼭 처리해야 할 문제(소송·수술·마찰)가 생기기 쉬워요', '서류·계약은 꼼꼼히 확인하고 건강검진을 미루지 마세요.', '압박'],
+    '파': ['bad', '약속·계획이 소소하게 틀어지기 쉬워요', '일정에 여유를 두면 대부분 넘길 수 있어요.', '어긋남'],
+    '해': ['bad', '말은 안 해도 오해와 서운함이 쌓이기 쉬워요', '서운한 점은 쌓지 말고 바로 확인하고, 중요한 합의는 기록해 두세요.', '방해'],
+    '원진': ['bad', '딱히 이유 없이 서로 거슬리는 일이 반복돼요', '원인을 따지기보다 거리를 두고 역할을 나누는 쪽이 효과적이에요.', '미운 정'],
+    '귀문관': ['mid', '잠이 얕아지고 생각이 꼬리를 물기 쉬워요', '잠과 휴식을 챙기세요. 깊은 집중이 필요한 일에서는 오히려 장점이에요.', '예민함'],
+    '육합': ['good', '잘 맞는 짝으로 묶여 협력하기 쉬워요', '그 짝에만 쏠려 다른 관계·기회를 놓치지 않게 하세요.', '짝 맺음'],
+    '삼합': ['good', '세 가지가 한 방향으로 모여 힘이 아주 강해요', '운에서 충이 오는 해에는 결속이 흔들릴 수 있으니 미리 점검하세요.', '힘 모음'],
+    '반합': ['good', '같은 방향으로 힘이 쏠리지만 아직 덜 완성된 상태예요', '빠진 한 글자가 오는 해를 기회로 보세요.', '반쪽 결합'],
+    '방합': ['good', '한쪽 기운으로 크게 쏠려 장단점이 뚜렷해요', '부족한 오행은 직업 선택이나 생활 습관으로 보완하세요.', '쏠림'],
+    '천간합': ['good', '생각과 뜻이 통해 끌리고 협력하기 쉬워요', '서로에게 묶여 내 판단이 흐려지지 않게 하세요.', '끌림'],
+    '천간충': ['bad', '생각·방침이 부딪쳐 말다툼이 생기기 쉬워요', '결정을 서두르지 말고 합의는 문서로 남기세요.', '충돌'],
+  };
+  const REL_AREA = { year: '조상·어린 시절', month: '부모·직장', day: '나·배우자', hour: '자녀·말년' };
+  const relCard = (ch, r, p, dup) => {
+    const ids = r.members.slice().sort((a, b) => REL_POS.indexOf(a) - REL_POS.indexOf(b));
+    const h = REL_HEAD[r.type] || ['mid', '', '', ''], strong = (REL_VERB[r.type] || [0, 2])[1];
+    const where = ids.map(k => REL_AREA[k] || '운').join(' ↔ ');
+    const sub = ids.map(m => memberName(m, r.kind)).join(' ↔ ');
+    let head = h[1], tip = h[2], more = p.lines.slice();
+    if (p.flavor) {   // 천간: "갑기합(중정지합) — 설명. 부연. 대처." 를 요약·부연·대처로 나눈다
+      const [fname, ...rest] = p.flavor.split(' — '), sents = rest.join(' — ').split(/(?<=\.)\s+/);
+      head = `${fname} — ${sents[0]}`;
+      if (sents.length > 1) tip = sents[sents.length - 1];
+      if (sents.length > 2) more.unshift(sents.slice(1, -1).join(' '));
+    }
+    return `<article class="rel-card tone-${h[0]}">
+      <div class="rel-top"><span class="rel-badge">${h[3]}<small>${term(r.type)}</small></span><b class="rel-name muted">${esc(r.name)}</b><span class="rel-str" title="작용 세기">${'●'.repeat(strong)}${'○'.repeat(3 - strong)}</span></div>
+      <div class="rel-where">${where}<span class="muted"> (${sub})</span></div>
+      <p class="rel-head">${head}</p>
+      ${p.place && !dup ? `<p class="rel-place"><b>내 삶에서는</b> ${p.place}</p>` : ''}
+      ${tip ? `<p class="rel-tip"><b>이렇게 해보세요</b> ${tip}</p>` : ''}
+      ${more.length || p.notes.length ? `<details class="rel-more"><summary>더 자세히 보기</summary>${more.map(l => `<p>${l}</p>`).join('')}${p.notes.map(n => `<p class="muted">· ${n}</p>`).join('')}</details>` : ''}
+    </article>`;
+  };
   function relListBranch(ch, rels) {
     if (!rels.length) return '<p class="muted small">원국 안에 해당 관계가 없습니다.</p>';
     // 같은 두 자리에 같은 성격(충돌 계열/합)의 작용이 겹치면 자리 설명은 처음 한 번만 보여 준다
     const seen = new Set();
     const placeKey = r => r.members.slice().sort((a, b) => REL_POS.indexOf(a) - REL_POS.indexOf(b)).join('-') + (REL_BAD.includes(r.type) ? ':bad' : REL_GOOD.includes(r.type) ? ':good' : ':etc');
-    return relSummary(ch, rels) + `<div class="list">${rels.map(r => { const pk = placeKey(r), dup = seen.has(pk); seen.add(pk); return `<div class="li"><span class="k">${term(r.type)}</span><span class="v"><b>${esc(r.name)}</b><span class="small muted">${r.members.map(m => memberName(m, r.kind)).join(' ↔ ')}</span>${relNote(ch, r, rels, dup)}</span><span></span></div>`; }).join('')}</div>`;
+    return relSummary(ch, rels) + `<div class="rel-list">${rels.map(r => { const pk = placeKey(r), dup = seen.has(pk); seen.add(pk); return relCard(ch, r, relNote(ch, r, rels), dup); }).join('')}</div>`;
   }
   // ── 천간 관계 해석: 천간은 겉으로 드러나는 생각·의지·사회적 모습 ──
   const REL_PAIR_S = {
@@ -5137,11 +5280,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function relNoteStem(ch, r, all) {
     const ids = r.members.slice().sort((a, b) => REL_POS.indexOf(a) - REL_POS.indexOf(b));
     const isHap = r.type === '천간합', key = ids.join('-'), pair = REL_PAIR_S[key];
-    const place = pair ? `<b>${pair[0]}</b> — ${isHap ? pair[2] : pair[1]} ${REL_ADJ.includes(key) ? '이웃한 자리라 일상에서 바로 체감되는 편입니다.' : '떨어진 자리라 평소엔 잘 느껴지지 않다가, 대운·세운에서 관련 글자가 올 때 뚜렷해집니다.'}` : '';
+    const place = pair ? `${isHap ? pair[2] : pair[1]} ${REL_ADJ.includes(key) ? '이웃한 자리라 일상에서 바로 체감되는 편입니다.' : '떨어진 자리라 평소엔 잘 느껴지지 않다가, 대운·세운에서 관련 글자가 올 때 뚜렷해집니다.'}` : '';
     const ss = ids.map(k => ch.pillars[k].s), fk = Math.min(...ss) + '-' + Math.max(...ss);
-    const lines = [];
-    if (REL_STEM_FLAVOR[fk]) lines.push(REL_STEM_FLAVOR[fk]);
-    lines.push(REL_VERB_S[r.type][0]);
+    const lines = [REL_VERB_S[r.type][0]];
     const notes = [];
     const tgOf = k => (ch.cells[k] && ch.cells[k].stemTG) || '';
     const me = ids.includes('day');
@@ -5159,11 +5300,11 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     }
     const opp = all.filter(o => o !== r && o.type !== r.type && o.members.some(m => r.members.includes(m))).slice(0, 2);
     if (opp.length) notes.push(`같은 글자가 ${opp.map(o => o.name).join(', ')}과도 얽힌 합충 구조라, ${isHap ? '충이 합을 흔들어' : '합이 충을 달래'} 작용이 줄어들 수 있습니다.`);
-    return `<span class="small" style="color:var(--ink-2);margin-top:3px">${place}</span>${lines.map(l => `<span class="small" style="color:var(--ink-2)">${l}</span>`).join('')}${notes.map(n => `<span class="small muted">· ${n}</span>`).join('')}`;
+    return { place, lines, notes, flavor: REL_STEM_FLAVOR[fk] || '' };
   }
   function relListStem(ch, rels) {
     if (!rels.length) return '<p class="muted small">원국 안에 해당 관계가 없습니다.</p>';
-    return relSummary(ch, rels, '간') + `<div class="list">${rels.map(r => `<div class="li"><span class="k">${term(r.type)}</span><span class="v"><b>${esc(r.name)}</b><span class="small muted">${r.members.map(m => memberName(m, r.kind)).join(' ↔ ')}</span>${relNoteStem(ch, r, rels)}</span><span></span></div>`).join('')}</div>`;
+    return relSummary(ch, rels, '간') + `<div class="rel-list">${rels.map(r => relCard(ch, r, relNoteStem(ch, r, rels), false)).join('')}</div>`;
   }
   function relList(rels) {
     if (!rels.length) return '<p class="muted small">원국 안에 해당 관계가 없습니다.</p>';
@@ -6110,11 +6251,20 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const role = e => y && y.roles ? ` <span class="muted small" style="display:inline">(${y.roles[e]})</span>` : '';
     const hid = M.HIDDEN[x.b].map(([hs]) => `<span class="eltxt ${ECLS[M.stemEl(hs)]}">${M.STEM[hs]}</span>`).join('');
     const { rels, sinsal } = M.luckRelations(ch, x);
-    const relLine = r => {
-      const o = r.members.find(m => m !== 'luck'), where = o ? `${term(M.POS_K[o] + '주')}(${POS_AREA[o]})` : '';
-      const tone = relTone(r.type);
-      const what = tone === 'bad' ? '부딪쳐 변화·갈등이 생기기 쉽습니다' : tone === 'good' ? '묶여 힘을 합칩니다' : '미묘하게 어긋납니다';
-      return `<div class="li"><span class="k"><span class="chip ${tone}">${term(r.type)}</span></span><span class="v"><b>${esc(r.name)}</b><span class="small" style="color:var(--ink-2)">${when} 들어온 글자가 ${where}와 ${what}</span></span><span></span></div>`;
+    // 하루짜리 일진은 무겁게 읽히지 않도록 표현을 낮춘다
+    const LUCK_SOFT = { '충': ['사소한 변화나 일정 변경이 생길 수 있어요', '일정에 여유를 두세요.'], '형': ['신경 쓸 일이 하나 생길 수 있어요', '서류와 말투를 한 번 더 확인하세요.'], '파': ['작은 차질이 생길 수 있어요', '약속 시간을 넉넉히 잡으세요.'], '해': ['말 한마디에 서운함이 생길 수 있어요', '표현을 부드럽게 하세요.'], '원진': ['괜히 거슬리는 일이 있을 수 있어요', '반응을 한 박자 늦추세요.'], '귀문관': ['생각이 많아질 수 있어요', '일찍 쉬고 가볍게 산책하세요.'], '천간충': ['의견이 살짝 엇갈릴 수 있어요', '결정은 미루고 말은 짧게 하세요.'] };
+    const LUCK_SPAN = { daeun: '10년 내내 배경처럼 깔려 있어요. 특정 해에 같은 글자가 오면 더 뚜렷해져요.', seun: '올해 안에 실제 일(계약·이동·관계 변화)로 드러나기 쉬워요.', wolun: '이번 달 안에 짧게 나타나요.', ilun: '오늘 하루 가볍게 스쳐 가는 정도예요.' };
+    const relLine = (r, idx) => {
+      const os = r.members.filter(m => m !== 'luck').sort((p, q) => REL_POS.indexOf(p) - REL_POS.indexOf(q));
+      const h = (kind === 'ilun' && LUCK_SOFT[r.type]) ? [REL_HEAD[r.type][0], LUCK_SOFT[r.type][0], LUCK_SOFT[r.type][1], REL_HEAD[r.type][3]] : (REL_HEAD[r.type] || ['mid', '', '', '']), strong = kind === 'ilun' ? 1 : (REL_VERB[r.type] || [0, 2])[1];
+      const area = os.map(k => REL_AREA[k]).join(' · '), pos = os.map(k => M.POS_K[k] + (r.kind === 'stem' ? '간' : '지')).join('·');
+      return `<article class="rel-card tone-${h[0]}">
+        <div class="rel-top"><span class="rel-badge">${h[3]}<small>${term(r.type)}</small></span><b class="rel-name muted">${esc(r.name)}</b><span class="rel-str" title="작용 세기">${'●'.repeat(strong)}${'○'.repeat(3 - strong)}</span></div>
+        <div class="rel-where">${kname} ↔ ${area}<span class="muted"> (원국 ${pos})</span></div>
+        <p class="rel-head">${area} 쪽에서 ${h[1]}</p>
+        ${idx === 0 ? `<p class="rel-place"><b>얼마나 가나요</b> ${LUCK_SPAN[kind] || ''}</p>` : ''}
+        ${h[2] ? `<p class="rel-tip"><b>이렇게 해보세요</b> ${h[2]}</p>` : ''}
+      </article>`;
     };
     return `<div class="fx">
       <h4>${when} 들어오는 오행</h4>
@@ -6125,7 +6275,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <span class="small">지지 <b class="eltxt ${ECLS[be]}">${elLabel(be)}</b>${role(be)} · ${term(x.branchTG)} · 속 글자 ${hid}<br><span class="muted">${TG_KW[x.branchTG] || ''}</span></span>
       </div>
       <h4>원국과 만나 생기는 작용</h4>
-      ${rels.length ? `<div class="list">${rels.map(relLine).join('')}</div>` : `<p class="small muted">${kname} 글자가 원국과 합·충·형을 만들지 않습니다.</p>`}
+      ${rels.length ? `<div class="rel-list">${rels.map((r, i) => relLine(r, i)).join('')}</div>` : `<p class="small muted">${kname} 글자가 원국과 합·충·형을 만들지 않습니다.</p>`}
       <h4>함께 오는 신살</h4>
       <div>${[`<span class="chip">${term(x.sinsal12)}</span>`, ...sinsal.map(q => `<span class="chip ${q.good ? 'good' : 'bad'}">${term(q.name)} <span class="muted">${esc(q.basis)}</span></span>`)].join('')}</div>
       <p class="small muted">간지 ${gzBtn(x, kind)}를 누르면 이 간지의 성질과 ${kname}으로 들어올 때의 뜻을 볼 수 있습니다.</p>
@@ -6248,11 +6398,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${m === 'health' || m === 'accident' ? `<p class="cp-disc">${info.note}</p>` : m !== 'flow' ? `<p class="small muted">${info.note}</p>` : ''}
     </section>`;
   }
-  const chartLegend = () => !isDomain() ? modeLegend() : `${sigLegend(metricRule(S.metric))}<div class="legend"><span>막대 높이 = ${DOM_INFO[S.metric].full} 점수(0~100) · 막대 위 글자 = 신호등 단계</span></div>`;
+  const chartLegendInner = () => !isDomain() ? modeLegend() : `${sigLegend(metricRule(S.metric))}<div class="legend"><span>막대 높이 = ${DOM_INFO[S.metric].full} 점수(0~100) · 막대 위 글자 = 신호등 단계</span></div>`;
+  const chartLegend = () => `<details class="lg-fold"${(S.lgOpen === undefined ? window.innerWidth > 640 : S.lgOpen) ? ' open' : ''}><summary>그래프 보는 법 <span class="muted small">색·막대·글자 뜻</span></summary>${chartLegendInner()}</details>`;
+  document.addEventListener('toggle', ev => { if (ev.target && ev.target.classList && ev.target.classList.contains('lg-fold')) S.lgOpen = ev.target.open; }, true);
   function domTip(title, res) { const k = S.metric, r = res[k]; return `<b>${esc(title)}</b><br>${DOM_INFO[k].full} <b>${r.score}</b> · ${sigMetric(k, r.score).n}${r.tags.length ? `<br>${r.tags.join(' · ')}` : ''}<br>${r.summary}${r.reasons.slice(0, 2).map(t => `<br>· ${esc(t)}`).join('')}`; }
   // 0~100 눈금 막대(대운·월운)
   function drawDomainDiv(el, items) {
-    const k = S.metric, n = items.length, cw = el.clientWidth || 320, W = Math.max(cw, n * 40), H = 246, L = 34, R = 6, T = 30, B = 54;
+    const k = S.metric, n = items.length, cw = el.clientWidth || 320, W = Math.max(cw, n * chartStep(cw)), H = 246, L = 34, R = 6, T = 30, B = 54;
     const step = (W - L - R) / n, bw = Math.min(30, step * 0.58), y = v => T + (100 - v) / 100 * (H - T - B);
     let s = svgEl(W, H);
     s += metricZones(k, y, L, W - R);
@@ -6269,11 +6421,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       s += `<rect class="hit" x="${cx - step / 2}" y="0" width="${step}" height="${H}" style="fill:transparent" data-pick="${it.pick}" data-tip="${esc(it.tip)}"/>`;
     });
     el.innerHTML = s + '</svg>';
+    { const q = items.findIndex(t => t.sel); chartFit(el, W, q >= 0 ? L + step * (q + 0.5) : null); }
   }
   // 0~100 눈금 막대(연도별 90년)
   function drawDomainLife(el) {
     const ch = S.ch, k = S.metric, y0 = ch.solar.y, y1 = Math.min(y0 + 90, M.MAX_Y - 1), data = M.seunRange(ch, y0, y1).map(x => ({ year: x.year, age: x.age, x, res: domOf(x, 'seun') }));
-    const cw = el.clientWidth || 320, W = Math.max(cw, 320), H = 270, L = 34, R = 18, T = 26, B = 46;
+    const cw = el.clientWidth || 320, W = cw < 520 ? Math.max(cw, (y1 - y0 + 1) * 7 + 52) : Math.max(cw, 320), H = 270, L = 34, R = 18, T = 26, B = 46;
     const x = Y => L + (Y - y0) / (y1 - y0) * (W - L - R), y = v => T + (100 - v) / 100 * (H - T - B);
     let s = svgEl(W, H);
     s += metricZones(k, y, L, W - R);
@@ -6288,6 +6441,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (sel && sel >= y0 && sel <= y1) { const d = data.find(q => q.year === sel); if (d) s += `<circle cx="${x(sel)}" cy="${y(d.res[k].score)}" r="4.5" style="fill:var(--ink);stroke:var(--surface);stroke-width:2"/>`; }
     s += `<line class="xh" x1="0" x2="0" y1="${T}" y2="${H - B}" style="stroke:var(--ink);stroke-width:1;opacity:0"/><circle class="xd" r="4" style="fill:var(--ink);opacity:0"/><rect class="hit ov" x="${L}" y="0" width="${W - L - R}" height="${H}" style="fill:transparent"/>`;
     el.innerHTML = s + '</svg>';
+    { const sy = S.sel && S.sel.kind === 'seun' ? S.sel.Y : null; chartFit(el, W, x(sy && sy >= y0 && sy <= y1 ? sy : curY)); }
     const svg = el.querySelector('svg'), ov = el.querySelector('.ov'), xh = el.querySelector('.xh'), xd = el.querySelector('.xd');
     const nearest = ev => { const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) * (W / r.width), Y = Math.round(y0 + (px - L) / (W - L - R) * (y1 - y0)); return data.find(d => d.year === Math.max(y0, Math.min(y1, Y))); };
     ov.addEventListener('mousemove', ev => { const d = nearest(ev); if (!d) return; xh.setAttribute('x1', x(d.year)); xh.setAttribute('x2', x(d.year)); xh.style.opacity = .35; xd.setAttribute('cx', x(d.year)); xd.setAttribute('cy', y(d.res[k].score)); xd.style.opacity = 1; showTip(ev, domTip(`${d.year}년 (만 ${d.age}세) ${M.gzName(d.x)}`, d.res)); });
@@ -8431,9 +8585,19 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // ───────────── 차트 ─────────────
   const NS = 'http://www.w3.org/2000/svg';
   function svgEl(W, H) { return `<svg xmlns="${NS}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img">`; }
+  // 모바일: 막대 하나를 손가락으로 누를 만큼 넓게 그리고, 화면보다 넓으면 좌우로 밀어 보게 한다(선택·현재 항목이 가운데 오도록)
+  const chartStep = cw => cw < 520 ? 54 : 40;
+  function chartFit(el, W, fx) {
+    const cw = el.clientWidth || 0, prev = el.previousElementSibling;
+    if (prev && prev.classList.contains('chart-hint')) prev.remove();
+    if (cw && W > cw + 4) {
+      el.insertAdjacentHTML('beforebegin', '<p class="chart-hint">↔ 좌우로 밀어서 더 보기 · 막대를 누르면 자세히 나와요</p>');
+      if (fx != null) el.scrollLeft = Math.max(0, fx - cw / 2);
+    }
+  }
   function drawDiv(el, items, opt = {}) {
     const n = items.length; const cw = el.clientWidth || 320;
-    const W = Math.max(cw, n * 40), H = 276, L = 34, R = 6, T = 30, B = 72;
+    const W = Math.max(cw, n * chartStep(cw)), H = 276, L = 34, R = 6, T = 30, B = 72;
     const step = (W - L - R) / n, bw = Math.min(30, step * 0.58);
     const RG = 60, y = v => T + (RG - Math.max(-RG, Math.min(RG, v))) / (2 * RG) * (H - T - B);   // 점수 대부분이 ±40 안이라 세로축은 ±60
     let s = svgEl(W, H);
@@ -8463,11 +8627,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       s += `<rect class="hit" x="${cx - step / 2}" y="0" width="${step}" height="${H}" style="fill:transparent" data-pick="${it.pick}" data-tip="${esc(it.tip)}"/>`;
     });
     el.innerHTML = s + '</svg>';
+    { let k = items.findIndex(q => q.sel); if (k < 0) k = items.findIndex(q => q.cur); chartFit(el, W, k >= 0 ? L + step * (k + 0.5) : null); }
   }
   function drawLife(el) {
     const ch = S.ch; const y0 = ch.solar.y, y1 = Math.min(y0 + 90, M.MAX_Y - 1);
     const data = M.seunRange(ch, y0, y1);
-    const cw = el.clientWidth || 320, W = Math.max(cw, 320), H = 270, L = 34, R = 18, T = 26, B = 46;
+    const cw = el.clientWidth || 320, W = cw < 520 ? Math.max(cw, (y1 - y0 + 1) * 7 + 52) : Math.max(cw, 320), H = 270, L = 34, R = 18, T = 26, B = 46;
     const x = Y => L + (Y - y0) / (y1 - y0) * (W - L - R);
     const RG = 60, y = v => T + (RG - Math.max(-RG, Math.min(RG, v))) / (2 * RG) * (H - T - B);
     let s = svgEl(W, H);
@@ -8497,6 +8662,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       s += `<g class="term sj" data-term="${sj.stage}"><title>${sj.stage}</title><rect x="${bx.toFixed(1)}" y="${by}" width="${bwid.toFixed(1)}" height="12" rx="2.5" style="fill:var(--d-chg);opacity:.85"/>${stepX >= 8 ? `<text x="${x(d.year).toFixed(1)}" y="${by + 9}" text-anchor="middle" style="fill:#fff;font-size:8px;font-weight:700">${sj.stage[0]}</text>` : ''}</g>`;
     });
     el.innerHTML = s + '</svg>';
+    chartFit(el, W, x(sel && sel >= y0 && sel <= y1 ? sel : curY));
     const svg = el.querySelector('svg'), ov = el.querySelector('.ov'), xh = el.querySelector('.xh'), xd = el.querySelector('.xd');
     const nearest = ev => { const r = svg.getBoundingClientRect(); const px = (ev.clientX - r.left) * (W / r.width); const Y = Math.round(y0 + (px - L) / (W - L - R) * (y1 - y0)); return data.find(d => d.year === Math.max(y0, Math.min(y1, Y))); };
     ov.addEventListener('mousemove', ev => {
@@ -8691,8 +8857,53 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     else if (S.tab === 'zw') body = S.ch.ziwei ? renderZiwei() : renderWonguk();
     else body = renderGl();
     root.innerHTML = renderTop() + `<main class="wrap" style="padding-top:16px">${renderAdminLogin()}${renderForm()}${body}${adminPw ? '' : '<div class="admin-link-row"><a class="admin-link" href="#admin" onclick="setTimeout(()=>scrollTo(0,0),0)">관리자</a></div>'}</main>`;
+    enhanceFold();
     drawCharts();
     renderSheet();
+  }
+  // ── 소제목 접고 펴기: 카드 제목(h2·.card-h)과 그 안의 소제목(h3·h4)을 눌러 아래 내용을 접는다. 상태는 탭·제목별로 기억한다 ──
+  const FOLD = new Set();
+  function enhanceFold() {
+    const main = root.querySelector('main.wrap'); if (!main) return;
+    const seen = {};
+    const keyOf = (h, lv) => { const t = (h.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 28), k = `${S.tab}|${lv}|${t}`; seen[k] = (seen[k] || 0) + 1; return `${k}|${seen[k]}`; };
+    const hasInline = els => els.some(e => e.nodeType === 3 ? e.textContent.trim() : /^inline/.test(getComputedStyle(e).display));
+    const fold = (h, lv, cls) => {
+      const sibs = []; let n = h.nextSibling;
+      while (n) { if (n.nodeType === 1 && (lv === 1 ? n.matches('.card-h,h2') : /^H[2-4]$/.test(n.tagName) && +n.tagName[1] <= +h.tagName[1])) break; sibs.push(n); n = n.nextSibling; }
+      const els = sibs.filter(e => e.nodeType === 1 || e.textContent.trim());
+      if (!els.length || hasInline(els)) return;
+      const wrap = document.createElement('div'); wrap.className = cls;
+      h.after(wrap); sibs.forEach(e => wrap.appendChild(e));
+      const key = keyOf(h, lv);
+      h.classList.add('fold-h'); h.dataset.fold = key; h.setAttribute('role', 'button'); h.setAttribute('tabindex', '0');
+      const closed = FOLD.has(key); h.classList.toggle('closed', closed); h.setAttribute('aria-expanded', String(!closed));
+      h.insertAdjacentHTML('beforeend', '<span class="fold-chev" aria-hidden="true"></span>');
+    };
+    main.querySelectorAll('section.card').forEach(c => { if (!c.classList.contains('form')) [...c.children].filter(e => e.matches('.card-h,h2')).forEach(h => fold(h, 1, 'cb')); });
+    main.querySelectorAll('h3,h4').forEach(h => { if (!h.closest('.fold-h') && !h.closest('details') && !h.closest('.form') && !h.closest('.card-h')) fold(h, 2, 'cb2'); });
+    // 접을 수 있는 카드가 여럿이면 한 번에 접고 펴는 버튼을 맨 위에 둔다
+    const n = main.querySelectorAll('.fold-h').length;
+    if (n >= 4 && !main.querySelector('.fold-all') && !main.querySelector('form.form')) main.insertAdjacentHTML('afterbegin', '<div class="fold-all"><button type="button" data-foldall="close">모두 접기</button><button type="button" data-foldall="open">모두 펴기</button></div>');
+  }
+  document.addEventListener('click', ev => {
+    const all = ev.target.closest && ev.target.closest('[data-foldall]');
+    if (all) {
+      const close = all.dataset.foldall === 'close';
+      document.querySelectorAll('main.wrap .fold-h').forEach(h => { h.classList.toggle('closed', close); h.setAttribute('aria-expanded', String(!close)); close ? FOLD.add(h.dataset.fold) : FOLD.delete(h.dataset.fold); });
+      if (!close) drawCharts();
+      return;
+    }
+    const h = ev.target.closest && ev.target.closest('.fold-h'); if (!h) return;
+    if (ev.target.closest('button,a,select,input,textarea,label,.term,.seg,[data-act],[data-pick]')) return;
+    toggleFold(h);
+  });
+  document.addEventListener('keydown', ev => { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList && ev.target.classList.contains('fold-h')) { ev.preventDefault(); toggleFold(ev.target); } });
+  function toggleFold(h) {
+    const closed = !h.classList.contains('closed');
+    h.classList.toggle('closed', closed); h.setAttribute('aria-expanded', String(!closed));
+    closed ? FOLD.add(h.dataset.fold) : FOLD.delete(h.dataset.fold);
+    if (!closed) drawCharts();
   }
   function renderSheet() {
     let sh = document.getElementById('sheet');
@@ -8762,7 +8973,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     else if (k === 'wolun') { const m = M.wolun(S.ch, S.selYear)[+v]; const d = kstYMD(m.startMs); S.selYM = [d[0], d[1]]; S.sel = { kind: 'wolun', i: +v }; }
     else if (k === 'ilun') S.sel = { kind: 'ilun', d: +v };
     render();
+    // 모바일: 그래프·타일을 눌렀는데 풀이가 화면 밖 아래에 열리면 그 자리로 부드럽게 이동한다
+    if (window.innerWidth <= 640) setTimeout(() => { const d = document.querySelector('.detail'); if (!d) return; const r = d.getBoundingClientRect(); if (r.top < 70 || r.top > window.innerHeight * 0.6) scrollToEl(d); }, 40);
   }
+  // 부드럽게 이동하되, 이동하지 않는 환경(동작 줄이기 설정 등)에서는 바로 이동한다
+  function scrollToEl(el) { const y0 = window.scrollY; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(() => { if (Math.abs(window.scrollY - y0) < 2) el.scrollIntoView({ block: 'start' }); }, 700); }
+  // 탭을 바꾸거나 입력을 마치면 새 내용의 맨 앞(탭 막대 바로 아래)에서 시작한다
+  function scrollToContentTop() { const t = document.querySelector('.top-in'); if (!t) return; const top = t.getBoundingClientRect().bottom + window.scrollY; if (window.scrollY > top) window.scrollTo(0, top); }
   document.addEventListener('click', ev => {
     const t = ev.target;
     const cpb = t.closest('[data-cp]');
@@ -8793,6 +9010,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (a.startsWith('pk-reset:')) { const k = a.slice(9); if (k === 'tr') PK.tr.cards = {}; else PK[k] = {}; pkSave(); render(); return; }
       if (a === 'tr-draw') { trDraw(); return; }
       if (a.startsWith('ic-')) { icAct(a); return; }
+      if (a === 'more-tabs') { S.more = !S.more; render(); return; }
+      if (a === 'to-top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
       if (a === 'edit') { if (S.editing) readForm(); S.editing = !S.editing; render(); return; }
       if (a.startsWith('year:')) { const d = +a.slice(5); S.selYear = d === 0 ? M.yearPillarAt(NOW).sajuYear : Math.max(M.MIN_Y, Math.min(M.MAX_Y - 2, S.selYear + d)); if (S.sel && S.sel.kind === 'wolun') S.sel = null; render(); return; }
       if (a.startsWith('zwy:')) { const d = +a.slice(4); S.zwY = d === 0 ? zwNowY() : Math.max(S.ch.ziwei.lunar.y, (S.zwY ?? zwNowY()) + d); render(); return; }
@@ -8801,7 +9020,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const tkb = t.closest('[data-tk]');
     if (tkb) { const [k, v] = tkb.dataset.tk.split(':'); const T = tkState(); T[k] = k === 'days' ? +v : v; render(); return; }
     const tb = t.closest('[data-tab]');
-    if (tb) { if (S.editing) readForm(); S.tab = tb.dataset.tab; try { localStorage.setItem(STORE + '-tab', S.tab); } catch (e) { } render(); return; }
+    if (tb) { if (S.editing) readForm(); S.more = false; S.tab = tb.dataset.tab; try { localStorage.setItem(STORE + '-tab', S.tab); } catch (e) { } render(); scrollToContentTop(); return; }
     const op = t.closest('[data-opt]');
     if (op) {
       const [sys, k, v] = op.dataset.opt.split(':');
@@ -8841,10 +9060,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     run();
     if (!S.err) { S.isExample = false; S.editing = false; S.sel = null; S.zwSel = null; S.zwY = null; save(); }
     render();
+    if (!S.err) window.scrollTo(0, 0);
   });
   document.addEventListener('input', ev => { if (ev.target.id === 'gl-q') { S.glq = ev.target.value; document.getElementById('gl-list').innerHTML = glList(); } });
   document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && (S.cpSheet || S.domSheet || S.crSheet) && !S.sheet) { S.cpSheet = null; S.domSheet = null; S.crSheet = null; renderSheet(); } if (ev.key === 'Escape' && S.sheet) { const ta = document.getElementById('gl-edit'); if (!ta || ta.value === GL[S.sheet][1]) { S.sheet = null; renderSheet(); } } if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('.nowc')) { ev.preventDefault(); pick(ev.target.dataset.pick); }
     if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('[data-zw]')) { ev.preventDefault(); S.zwSel = +ev.target.dataset.zw; render(); } });
+  document.addEventListener('click', ev => { if (S.more && !(ev.target.closest && ev.target.closest('.more-pop,[data-act="more-tabs"]'))) { S.more = false; render(); } });
+  window.addEventListener('scroll', () => { document.documentElement.classList.toggle('scrolled', window.scrollY > 700); }, { passive: true });
   let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(drawCharts, 150); });
 
   async function adminLogin(pw) {
