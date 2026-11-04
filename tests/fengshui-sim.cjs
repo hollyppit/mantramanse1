@@ -101,6 +101,14 @@ for (const f of Object.values(D.FORM)) for (const o of Object.values(f.opts)) te
 texts.push(...Object.values(D.REMEDY), ...Object.values(D.HAZARD).map(h => h[2]));
 texts.forEach(t => { ok(!D.BAN.test(t), '금지 표현: ' + t); ok(/(니다|세요|요)[.!]?$|니다\.$/.test(t.trim()), '존댓말 아님: ' + t); });
 ok(texts.length >= 100, '문구 수 ' + texts.length);
+// 물·길·산 방위 활용
+const c8 = F.xuankong({ facingDeg: 180, builtYear: 2030, evalYear: 2030 });
+const goodX = c8.palaces.filter(p => p.idx < 8 && p.xiangTone >= 1.5)[0], badX = c8.palaces.filter(p => p.idx < 8 && p.xiangTone <= -1)[0];
+ok(F.landUse(c8, { openDir: goodX.key }).items[0].tone === 1, '향성 길한 방위의 물·길은 긍정');
+ok(F.landUse(c8, { openDir: badX.key }).items[0].tone === -1, '흉성 방위의 물·길은 부정');
+eq(F.landUse(c8, {}).given, 0, '방위 미입력 시 판단 없음');
+ok(F.analyze({ facingDeg: 180, builtYear: 2030, openDir: goodX.key }).land.given === 1, '종합에 land 포함');
+ok(D.HOME_METRICS.length === 6, '거주지 지표');
 ok(net === 0, '네트워크 호출 없음');
 
 console.log('패턴 분포(9운×24좌향):', JSON.stringify(counts));

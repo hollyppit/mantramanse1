@@ -144,13 +144,13 @@
   function overlay(c, Y, mIdx) {
     var yc = yearCenter(Y), yb = fly(yc, 1), mc = mIdx ? monthCenter(Y, mIdx) : null, mb = mc ? fly(mc, 1) : null, p = periodOfYear(Y);
     var sam = SAMSAL_DIR[SAMSAL_GROUP[yearBranch(Y)]], tdeg = yearBranch(Y) * 30;
-    var base = c ? c.palaces : P.map(function (q, k) { return { idx: k, key: q.key, dir: q.dir, shan: 0, xiang: 0 }; });   // 건물 없이(c=null) 연·월 흐름만 볼 수도 있다
+    var base = c ? c.palaces : P.map(function (q, k) { return { idx: k, key: q.key, dir: q.dir, shan: 0, xiang: 0 }; }).concat([{ idx: 8, key: 'C', dir: '중앙', shan: 0, xiang: 0 }]);   // 중궁(별이 중앙에 놓이는 경우)도 포함   // 건물 없이(c=null) 연·월 흐름만 볼 수도 있다
     var cells = base.map(function (pl) {
       var i = pl.idx, y = yb[i], m = mb ? mb[i] : null, notes = [];
       if (y === 5) notes.push({ id: 'y5', tone: -2, text: '올해 오황이 들어온 방위입니다. 공사·큰 가구 이동·소음을 삼가고 오래 머무는 자리로 쓰지 마세요.' });
       if (y === 2) notes.push({ id: 'y2', tone: -1, text: '올해 이흑이 들어온 방위입니다. 건강 관리에 신경 쓰고 자주 환기하세요.' });
       if (y === 8 || y === 9 || y === 1) notes.push({ id: 'y' + y, tone: 1, text: '올해 길한 별(' + D.STAR[y].name + ')이 들어온 방위입니다. 밝고 깨끗하게 쓰면 좋습니다.' });
-      if (m === 5 && i < 8) notes.push({ id: 'm5', tone: -1, text: '이번 달 오황이 들어온 방위입니다. 한 달 동안 공사·이동을 미루세요.' });
+      if (m === 5) notes.push({ id: 'm5', tone: -1, text: '이번 달 오황이 들어온 방위입니다. 한 달 동안 공사·이동을 미루세요.' });
       if (i < 8 && (pl.shan === 5 || pl.xiang === 5) && y === 5) notes.push({ id: 'c5', tone: -2, text: '건물의 오황 자리에 올해 오황까지 겹쳐 특히 조심해야 하는 해입니다.' });
       return { idx: i, key: pl.key, dir: pl.dir, yearStar: y, monthStar: m, notes: notes };
     });
@@ -208,6 +208,24 @@
     return { items: items, hazards: hz, score: tone === 'unknown' ? null : score, tone: tone, label: label, given: given, total: keys.length, verdict: verdict, pros: known.filter(function (x) { return x.score > 0; }), cons: known.filter(function (x) { return x.score < 0; }).concat(hz) };
   }
 
+  // ───────────── 물·큰길·산(높은 건물) 방위 활용 ─────────────
+  // 전통 현공: 향성이 길한 방위는 트이고 물·큰길이 있어야 힘을 받고, 산성이 길한 방위는 산·높은 건물이 받쳐야 힘을 받는다. 반대로 흉성 방위에 물·길이 닿거나 길한 향성 방위가 막히면 불리하게 본다.
+  function landUse(c, o) {
+    o = o || {}; var out = [], open = o.openDir, high = o.highDir, idx = function (k) { for (var i = 0; i < 8; i++) if (P[i].key === k) return i; return -1; };
+    var oi = idx(open), hi = idx(high), pals = c.palaces;
+    if (oi >= 0) { var p = pals[oi];
+      if (p.xiangTone >= 1.5) out.push({ tone: 1, dir: p.dir, text: p.dir + '쪽(향성 ' + p.xiang + ')에 물·큰길·트인 공간이 있어, 재물과 사회운의 별이 힘을 받는 배치로 봅니다. 이쪽 창과 문을 시원하게 쓰세요.' });
+      else if (p.xiangTone <= -1) out.push({ tone: -1, dir: p.dir, text: p.dir + '쪽(향성 ' + p.xiang + ')의 조심할 별 방위에 물·큰길이 닿아 있습니다. 이쪽은 창을 가리거나 문을 줄여 기운이 들어오는 양을 줄이는 방식으로 보완하세요.' });
+      else out.push({ tone: 0, dir: p.dir, text: p.dir + '쪽의 물·큰길은 향성 ' + p.xiang + '과 만나 특별한 장단점이 두드러지지 않습니다.' });
+      if (p.shanTone >= 1.5 && p.xiangTone < 1.5) out.push({ tone: -1, dir: p.dir, text: p.dir + '쪽은 산성(' + p.shan + ')이 좋은 방위인데 물·길이 닿아 사람·건강의 별이 흩어진다고 봅니다. 이쪽에 높은 가구나 화분으로 받침을 만들어 보세요.' }); }
+    if (hi >= 0) { var q = pals[hi];
+      if (q.shanTone >= 1.5) out.push({ tone: 1, dir: q.dir, text: q.dir + '쪽(산성 ' + q.shan + ')에 산이나 높은 건물이 받쳐 사람·건강의 별이 힘을 받는 배치로 봅니다. 이쪽 방은 침실·서재로 쓰기 좋습니다.' });
+      else if (q.xiangTone >= 1.5) out.push({ tone: -1, dir: q.dir, text: q.dir + '쪽(향성 ' + q.xiang + ')은 재물의 별이 좋은 방위인데 높은 건물·산이 가로막고 있습니다. 거실 창과 조명을 밝게 해 막힌 느낌을 줄이세요.' });
+      else if (q.shanTone <= -1) out.push({ tone: -1, dir: q.dir, text: q.dir + '쪽(산성 ' + q.shan + ')의 조심할 별 방위에 높은 건물·산이 있어 압박감이 커질 수 있습니다. 이쪽 방은 짧게 쓰는 용도로 돌리세요.' });
+      else out.push({ tone: 0, dir: q.dir, text: q.dir + '쪽의 높은 건물·산은 특별한 장단점이 두드러지지 않습니다.' }); }
+    return { items: out, given: (oi >= 0 ? 1 : 0) + (hi >= 0 ? 1 : 0) };
+  }
+
   // ───────────── 사주 연결 (읽기만) ─────────────
   // 방위 오행이 이 사주에서 어떤 역할인지. 억부와 조후를 따로 보여 주고, 서로 다르면 갈린다고 표시한다.
   var EL5 = ['목', '화', '토', '금', '수'], ROLEV = { 용신: 2, 희신: 1, 한신: 0, 구신: -1, 기신: -2 };
@@ -263,6 +281,7 @@
     var birthYear = o.birthYear || (o.ch ? birthYearFromChart(o.ch) : null), gender = o.gender || (o.ch && o.ch.gender) || 'M';
     out.bazhai = bazhai({ facingDeg: o.facingDeg, birthYear: birthYear, gender: gender });
     out.form = form(o.form);
+    out.land = landUse(out.xuankong, { openDir: o.openDir, highDir: o.highDir });
     out.saju = o.ch ? [0, 1, 2, 3, 4, 5, 6, 7].map(function (i) { return Object.assign({ idx: i, dir: P[i].dir }, sajuFit(o.ch, i)); }) : null;
     out.warnings = out.xuankong.warnings.concat(out.bazhai.warnings, out.form.tone === 'unknown' ? ['형세 항목 입력이 부족합니다.'] : []);
     out.theories = [
@@ -332,5 +351,5 @@
 
   G.MantraFengshui = { VERSION: VERSION, SCHOOL: SCHOOL, EXCEPTIONS: EXCEPTIONS, MOUNTAINS: MTS, mountainAt: mountainAt, lichunYear: lichunYear, periodOfYear: periodOfYear, yuanOfYear: yuanOfYear, periodRange: periodRange, fly: fly, stateOf: stateOf, toneOf: toneOf,
     xuankong: xuankong, restate: restate, yearCenter: yearCenter, yearBranch: yearBranch, monthCenter: monthCenter, monthIndexFromBranch: monthIndexFromBranch, overlay: overlay,
-    kuaOf: kuaOf, eightStars: eightStars, bazhai: bazhai, birthYearFromChart: birthYearFromChart, form: form, sajuFit: sajuFit, judgePlacement: judgePlacement, suggestRoles: suggestRoles, analyze: analyze, dirName: dirName, RULES: RULES, validateText: validateText, listTexts: listTexts, lintTexts: lintTexts, textHash: textHash, applyPublished: applyPublished, resetPublished: resetPublished };
+    kuaOf: kuaOf, eightStars: eightStars, bazhai: bazhai, birthYearFromChart: birthYearFromChart, form: form, sajuFit: sajuFit, judgePlacement: judgePlacement, suggestRoles: suggestRoles, analyze: analyze, dirName: dirName, RULES: RULES, validateText: validateText, landUse: landUse, listTexts: listTexts, lintTexts: lintTexts, textHash: textHash, applyPublished: applyPublished, resetPublished: resetPublished };
 })(typeof window !== 'undefined' ? window : globalThis);

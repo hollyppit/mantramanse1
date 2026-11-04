@@ -153,6 +153,15 @@
     { id: 'media', name: '방송·공연·마케팅', el: 1, sub: 0, note: '불·나무 기운 업종. 사람의 시선이 모이는 밝은 자리가 중요합니다.' },
     { id: 'lodging', name: '숙박·휴게', el: 2, sub: 4, note: '토·물 기운 업종. 쉼의 질과 청결이 중요합니다.' },
   ];
+  // 거주지 환경 지표: 앱이 외부 데이터를 가져오지 않으므로 직접 조사한 값을 입력받아 후보끼리 비교만 한다 (1~5점은 5가 좋음)
+  var HOME_METRICS = [
+    { id: 'noise', name: '소음(5=조용함)', unit: '1~5점', help: '낮·밤 방문해 직접 평가해 주세요.' },
+    { id: 'sun', name: '일조·채광', unit: '1~5점', help: '오전·오후 방문해 확인해 주세요.' },
+    { id: 'flood', name: '침수·습기 안전', unit: '1~5점', help: '구청 침수 이력과 1층·반지하 여부를 확인해 주세요.' },
+    { id: 'air', name: '공기·냄새', unit: '1~5점', help: '인근 공장·도로·쓰레기 시설을 확인해 주세요.' },
+    { id: 'transit', name: '대중교통 접근', unit: '1~5점', help: '' },
+    { id: 'price', name: '매매·전세·월세 가격', unit: '만원', help: '실제 조건을 입력해 주세요.' },
+  ];
   var BIZ_METRICS = [
     { id: 'foot', name: '유동인구', unit: '명/일', help: '현장 조사·공공 상권분석 자료를 직접 입력해 주세요.' },
     { id: 'access', name: '접근성', unit: '1~5점', help: '대중교통·주차·도보 접근성을 직접 평가해 주세요.' },
@@ -166,5 +175,5 @@
   var BAN = /반드시|무조건|확실히|틀림없이|100%|보장|예언|절대|망합니다|저주/;
 
   G.MantraFengshuiData = { VERSION: VERSION, STAR: STAR, STAR_TXT: STAR_TXT, STATE_LABEL: STATE_LABEL, STATE_TONE: STATE_TONE, REMEDY: REMEDY, PALACE: PALACE, BAZHAI: BAZHAI, GUA_NAME: GUA_NAME,
-    ROOM_USE: ROOM_USE, ROOM_LABEL: ROOM_LABEL, ROOM_KIND: ROOM_KIND, FORM: FORM, HAZARD: HAZARD, INDUSTRY: INDUSTRY, BIZ_METRICS: BIZ_METRICS, DISCLAIMER: DISCLAIMER, DATA_LIMITS: DATA_LIMITS, BAN: BAN };
+    HOME_METRICS: HOME_METRICS, ROOM_USE: ROOM_USE, ROOM_LABEL: ROOM_LABEL, ROOM_KIND: ROOM_KIND, FORM: FORM, HAZARD: HAZARD, INDUSTRY: INDUSTRY, BIZ_METRICS: BIZ_METRICS, DISCLAIMER: DISCLAIMER, DATA_LIMITS: DATA_LIMITS, BAN: BAN };
 })(typeof window !== 'undefined' ? window : globalThis);
