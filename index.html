@@ -7537,7 +7537,25 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">내 명반의 별들이 얼마나 밝은 자리에 앉아 있는지의 비율입니다. 초록이 많을수록 별의 좋은 성질이 잘 드러나고, 빨강이 많으면 약점이 드러나기 쉬워 신경 쓸 영역이 늘어납니다. ${term('별의 밝기')}는 유파마다 조금씩 다릅니다.</p>
     </section>`;
 
-    return `${overview}<section class="card">
+    // 어려운 용어 없이 먼저 보는 쉬운 풀이: 영역 이름은 ZW_DOM(생활 영역)으로, 사화는 한 줄 뜻으로 풀어 쓴다
+    const HW_PLAIN = { '록': ['화록', '이득과 인연이 따라오는', '이 영역에서는 노력한 만큼 얻고 도와주는 사람이 생겨요.'], '권': ['화권', '내가 주도하고 힘이 실리는', '이 영역에서는 내가 이끌고 결정할 때 잘 풀려요.'], '과': ['화과', '평판과 인정이 따르는', '이 영역에서는 실력과 이미지로 인정받기 쉬워요.'], '기': ['화기', '마음이 걸리고 막히기 쉬운', '이 영역은 서두르지 말고 한 번 더 점검하세요. 걱정이 앞서기 쉬워요.'] };
+    const hwOf = k => { const e = Object.entries(zw.sihwa).find(([, h]) => h === k); return e ? zw.palaces[zw.pos[e[0]]] : null; };
+    const doms = ps => ps.map(p => '<b>' + ZW_DOM[p.name] + '</b>').join(' · ');
+    const dhP = per.dh, easyRows = [];
+    easyRows.push(['나는 이런 사람이에요', mMain.length ? mMain.map(n => '<b>' + term(n) + '</b> — ' + esc(GL[n][1].split('. ')[0].replace(/^\S*\s*쉽게 말해\s*/, '').replace(/\.$/, '') + '.')).join('<br>') : '명궁이 비어 있어 마주 보는 천이궁의 별을 빌려 봐요. 환경과 사람에 따라 모습이 달라지는 유연한 타입이에요.']);
+    easyRows.push(['타고나길 잘 풀리는 영역', doms(best) + '<br><span class="muted small">별이 밝고 도와주는 별이 많아서, 이 영역에서 힘을 얻고 자신감이 붙어요.</span>']);
+    easyRows.push(['의식해서 챙기면 좋은 영역', doms(worst) + '<br><span class="muted small">별이 약하거나 부딪치는 별이 겹쳐 있어요. 약점이 아니라 "신경 써서 가꿀 곳"으로 보세요.</span>']);
+    const luckLines = [];
+    [['록', '평생 이득이 따라오는 곳'], ['기', '평생 마음이 걸리기 쉬운 곳']].forEach(([k, lab]) => { const p = hwOf(k); if (p) luckLines.push('<b>' + lab + ' — ' + ZW_DOM[p.name] + '</b><br><span class="small muted">' + HW_PLAIN[k][2] + '</span>'); });
+    if (luckLines.length) easyRows.push(['타고난 행운과 걸림돌', luckLines.join('<br>')]);
+    if (dhP) easyRows.push(['지금 걷는 10년 (' + dhP.daehan[0] + '~' + dhP.daehan[1] + '세)', '인생의 무대가 <b>' + ZW_DOM[dhP.name] + '</b> 쪽으로 옮겨 와 있어요. 이 영역의 힘은 <b>' + zwGrade(sc[dhP.b])[1] + '</b>(' + sc[dhP.b] + '점). ' + (sc[dhP.b] >= 60 ? '이 10년은 이 영역에 적극적으로 힘을 써 볼 만해요.' : sc[dhP.b] >= 45 ? '무난하게 흘러가니 꾸준함이 중요해요.' : '이 10년은 무리하지 말고 기반을 다지는 시기로 쓰세요.')]);
+    easyRows.push([Y + '년, 올해의 초점', '올해는 <b>' + ZW_DOM[liuP.name] + '</b>에 이슈가 몰려요. 이 영역의 힘은 <b>' + zwGrade(sc[liuP.b])[1] + '</b>(' + sc[liuP.b] + '점). ' + (sc[liuP.b] >= 60 ? '올해 이 분야는 기회로 보고 움직여도 좋아요.' : sc[liuP.b] >= 45 ? '큰 변화보다 꾸준히 이어 가는 해예요.' : '올해 이 분야는 확장보다 점검과 정리가 어울려요.')]);
+    const easyCard = `<section class="card easy">
+      <div class="card-h"><h2>자미두수 쉽게 보기</h2><span class="note">별 이름·궁 이름 없이 먼저 요약해 드려요</span></div>
+      <div class="easy-list">${easyRows.map(([t, b]) => `<div class="easy-row"><b>${t}</b><p>${b}</p></div>`).join('')}</div>
+      <p class="note">아래 명반의 칸을 누르면 그 영역의 자세한 풀이가 열려요. 점수는 좋고 나쁨의 판정이 아니라 내 명반 안에서 비교한 상대 지표예요.</p>
+    </section>`;
+    return `${easyCard}<section class="card">
       <div class="card-h"><h2>${term('자미두수')} ${term('명반', '명반')}</h2>
         <span class="seg" role="group" aria-label="보는 해"><button data-act="zwy:-1" aria-label="이전 해">‹</button><button data-act="zwy:0">${Y}년 · ${per.age}세</button><button data-act="zwy:1" aria-label="다음 해">›</button></span></div>
       <div class="frow" style="gap:8px 14px">
@@ -7569,6 +7587,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       </div>
       <p class="small">${term('삼방사정')}: ${term(opp.name)}(마주 봄, ${opp.main.map(n => term(n)).join('·') || '공궁'}) · ${tri.map(p => `${term(p.name)}(${p.main.map(n => term(n)).join('·') || '공궁'})`).join(' · ')}</p>
     </section>
+    ${overview}
     <p class="note">명반은 삼합파의 일반적인 배치 규칙으로 계산합니다. 음력 날짜와 시진은 사주와 같은 시간 기준(${M.TIME_MODES[ch.timeMode]}, ${ch.jasi === 'jeong' ? '정자시' : '야자시'})을 따릅니다. 윤달생은 15일까지 그 달, 16일부터 다음 달로 봅니다. 사화·밝기·잡성은 유파마다 조금씩 다를 수 있습니다(예: 경년 화과를 천부로 보는 유파도 있습니다).</p>`;
   }
 
@@ -9365,7 +9384,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   // ── 소제목 접고 펴기: 카드 제목(h2·.card-h)과 그 안의 소제목(h3·h4)을 눌러 아래 내용을 접는다. 상태는 탭·제목별로 기억한다 ──
   const FOLD = new Set(), FOLD_SEEN = new Set();
-  const FOLD_EXPERT = /학파|병약|종격|격국|통근|한난조습|조후론 vs|판단 기준|시간 기준별|12운성 에너지|근거 보기/;
+  const FOLD_EXPERT = /사화 지도|별의 힘 분포|학파|병약|종격|격국|통근|한난조습|조후론 vs|판단 기준|시간 기준별|12운성 에너지|근거 보기/;
   function enhanceFold() {
     const main = root.querySelector('main.wrap'); if (!main) return;
     const seen = {};
