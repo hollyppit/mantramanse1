@@ -775,6 +775,12 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 .trc .fa .tcimg { position: absolute; inset: 0; }
 .trc .ffr { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .trc .fnm { position: absolute; display: grid; place-items: center; text-align: center; overflow: hidden; padding: 0 4%; color: #f3e7c6; font-size: 0.7rem; line-height: 1.25; letter-spacing: .03em; text-shadow: 0 1px 3px #000; }
+.tr-story { background: linear-gradient(160deg, var(--accent-soft), var(--surface-2)); border-radius: 14px; padding: 14px 16px; display: grid; gap: 6px; }
+.tr-story > b { font-size: 0.8rem; color: var(--accent); }
+.tr-story p { margin: 0; font-size: 0.96rem; line-height: 1.8; color: var(--ink); }
+.tr-actbox { background: var(--surface-2); border-radius: 12px; padding: 10px 12px; display: grid; gap: 4px; }
+.tr-actbox > b { font-size: 0.78rem; color: var(--ink-3); }
+.tr-actbox .tr-act { margin: 0; }
 .tr-reads { display: grid; gap: 14px; }
 .tr-read { border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 8px; background: var(--surface); }
 .tr-read p { margin: 0; font-size: 0.92rem; line-height: 1.75; color: var(--ink-2); }
@@ -8602,33 +8608,90 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     '구신': '내 사주에 부담이 되는 기운이에요. 이 카드가 말하는 일은 속도를 조절하며 천천히 하세요.',
     '기신': '내 사주에 가장 조심할 기운이에요. 이 카드가 말하는 일은 과하게 밀어붙이지 마세요.',
   };
-  function trReadings(rows, topic) {
-    const Tarot = window.MantraCore.Tarot, FC = window.FreeCore, mode = TR_MODE[topic] || 'today';
+  // ── 자리별 풀이: 같은 카드라도 놓인 자리(과거·현재·미래 / 상황·장애물·조언·결과 / 원 카드)에 따라 던지는 질문과 읽는 방식이 다르다 ──
+  // parts: [종류, 이 자리에서 붙일 이름]. 종류: sum 요약 · det 해석 · flow 지금의 흐름 · opp 기회 · caut 조심할 점 · act 행동 · cls 마무리
+  const TR_POS = {
+    msg: { lens: '이 질문에 대한 카드의 답', lead: kw => `이 질문에 카드가 주는 답은 "${kw}"입니다.`, parts: [['sum', ''], ['det', ''], ['flow', '지금의 흐름'], ['opp', '기회'], ['caut', '조심할 점'], ['act', '이렇게 해보세요'], ['cls', '']] },
+    past: { lens: '이 일의 뿌리 — 지금까지 남은 영향', lead: kw => `지금 상황의 뿌리에는 "${kw}"의 흐름이 있었습니다.`, parts: [['sum', ''], ['caut', '지금까지 남은 영향'], ['cls', '여기서 배울 점']] },
+    now: { lens: '지금 놓인 상태', lead: kw => `지금은 "${kw}"의 한가운데에 있습니다.`, parts: [['sum', ''], ['flow', '지금의 흐름'], ['opp', '기회'], ['caut', '조심할 점']] },
+    fut: { lens: '이대로 가면 향하는 곳 (바꿀 수 있는 부분 포함)', lead: kw => `이 흐름대로 가면 "${kw}" 쪽으로 향합니다.`, parts: [['sum', ''], ['opp', '열려 있는 길'], ['act', '미래를 내 쪽으로 당기려면'], ['cls', '']] },
+    sit: { lens: '지금 놓인 판 전체', lead: kw => `지금 판 전체의 분위기는 "${kw}"입니다.`, parts: [['sum', ''], ['det', ''], ['flow', '지금의 흐름']] },
+    obs: { lens: '앞을 가로막는 것 — 넘어야 할 숙제', lead: (kw, rev) => `앞을 가로막는 것은 "${kw}"입니다. ${rev ? '역방향이라 걸림돌이 바깥보다 마음·습관 같은 안쪽에 있습니다.' : '정방향이라 걸림돌이 바깥 상황이나 사람에게서 옵니다.'}`, parts: [['caut', '넘어야 할 숙제'], ['act2', '넘는 방법']] },
+    adv: { lens: '해 볼 것 — 카드의 조언', lead: kw => `카드의 조언은 "${kw}"을 기억하며 움직이라는 것입니다.`, parts: [['act', '이렇게 해보세요'], ['opp', '이렇게 하면 열리는 길'], ['cls', '']] },
+    res: { lens: '이대로 가면 맞이할 결말', lead: kw => `이 흐름의 끝에는 "${kw}"이 기다립니다.`, parts: [['sum', ''], ['opp', '결말을 살리는 것'], ['caut', '결말을 해치는 것'], ['cls', '']] },
+  };
+  // 같은 풀이 안에서 이미 나온 문장은 다시 쓰지 않는다: 시드를 바꿔 가며 겹침이 가장 적은 조합을 고른다
+  function trCompose(FC, Tarot, r, mode, spread, used) {
+    let best = null, bestHit = 1e9;
+    for (let i = 0; i < 8; i++) {
+      let fx = null; try { fx = FC.composeTarot(Tarot, r.card.id, r.rev, mode, spread + r.k + r.card.id + (i ? '#' + i : ''), TRX.content); } catch (e) { return null; }
+      if (!fx) return null;
+      const texts = [fx.headline, fx.summary, ...fx.detail, fx.currentFlow, fx.opportunity, fx.caution, ...fx.actions, fx.closing];
+      const hit = texts.filter(t => used.has(t)).length;
+      if (hit < bestHit) { best = fx; bestHit = hit; if (!hit) break; }
+    }
+    [best.headline, best.summary, ...best.detail, best.currentFlow, best.opportunity, best.caution, ...best.actions, best.closing].forEach(t => used.add(t));
+    return best;
+  }
+  function trReadings(rows, topic, spread) {
+    const Tarot = window.MantraCore.Tarot, FC = window.FreeCore, mode = TR_MODE[topic] || 'today', used = new Set();
     // 하루짜리 문구(오늘의 카드)를 만세력에서는 '요즘' 기준으로 읽히게 바꾼다
     const tw = t => mode === 'today' ? String(t).replace(/오늘 하루/g, '요즘').replace(/오늘은/g, '지금은').replace(/오늘/g, '지금') : t;
     return rows.map(r => {
-      let fx = null; try { fx = FC && FC.composeTarot(Tarot, r.card.id, r.rev, mode, r.k + r.card.id, TRX.content); } catch (e) { fx = null; }
-      const suit = r.card.suit === 'M' ? '메이저' : TR_SUIT.find(x => x[0] === r.card.suit)[2];
-      const head = `<div class="tr-read-h">${trFace(r.card.id, r.rev, 64)}<div><span class="muted small">${r.l} · ${r.k === 'adv' && r.rev ? '경계할 것' : r.frame}</span><b>${esc(r.card.name)}</b><span class="muted small">${r.rev ? '역방향' : '정방향'} · ${suit}</span></div><span class="chip ${r.sc > 0 ? 'good' : r.sc < 0 ? 'bad' : ''}">${r.sc > 0 ? '긍정' : r.sc < 0 ? '주의' : '중립'}</span></div>`;
-      if (!fx) return `<article class="tr-read">${head}<p>"${esc(r.kw)}"의 기운이 이 자리에 놓여 있습니다.</p></article>`;
+      const fx = FC ? trCompose(FC, Tarot, r, mode, spread || '', used) : null;
+      const suit = r.card.suit === 'M' ? '메이저' : TR_SUIT.find(x => x[0] === r.card.suit)[2], P = TR_POS[r.k] || TR_POS.msg;
+      const head = `<div class="tr-read-h">${trFace(r.card.id, r.rev, 64)}<div><span class="muted small">${r.l} · ${P.lens}</span><b>${esc(r.card.name)}</b><span class="muted small">${r.rev ? '역방향' : '정방향'} · ${suit}</span></div><span class="chip ${r.sc > 0 ? 'good' : r.sc < 0 ? 'bad' : ''}">${r.sc > 0 ? '긍정' : r.sc < 0 ? '주의' : '중립'}</span></div>`;
+      const lead = P.lead(r.kw, r.rev);
+      if (!fx) return `<article class="tr-read">${head}<p class="tr-hl">${esc(lead)}</p></article>`;
       const el = SUIT_EL[r.card.suit], role = el != null && S.ch && S.ch.yong && S.ch.yong.roles ? S.ch.yong.roles[el] : null;
       const saju = role ? `<b>내 사주와 연결</b> 이 카드는 <b class="eltxt ${ECLS[el]}">${M.EL[el]}(${M.EL_K[el]})</b> 기운이에요. ${TR_ROLE_TXT[role]}` : (r.card.suit === 'M' ? '<b>내 사주와 연결</b> 메이저 카드는 오행과 상관없이 인생의 큰 흐름과 전환점을 말해요.' : '');
+      const cell = (label, txt) => `<div><b>${label}</b>${esc(tw(txt))}</div>`;
+      const out = [], cells = [];
+      for (const [kind, label] of P.parts) {
+        if (kind === 'sum') out.push(`<p>${esc(tw(fx.summary))}</p>`);
+        else if (kind === 'det') fx.detail.forEach(t => out.push(`<p>${esc(tw(t))}</p>`));
+        else if (kind === 'flow') cells.push(cell(label, fx.currentFlow));
+        else if (kind === 'opp') cells.push(cell(label, fx.opportunity));
+        else if (kind === 'caut') cells.push(cell(label, fx.caution));
+        else if (kind === 'act' || kind === 'act2') {
+          if (cells.length) { out.push(`<div class="tr-grid">${cells.splice(0).join('')}</div>`); }
+          const list = kind === 'act2' ? fx.actions.slice(0, 2) : fx.actions;
+          out.push(`<div class="tr-actbox"><b>${label}</b><ul class="tr-act">${list.map(t => `<li>${esc(tw(t))}</li>`).join('')}</ul></div>`);
+        } else if (kind === 'cls') { if (cells.length) out.push(`<div class="tr-grid">${cells.splice(0).join('')}</div>`); out.push(`<p class="muted small">${label ? `<b>${label}</b> ` : ''}${esc(tw(fx.closing))}</p>`); }
+      }
+      if (cells.length) out.push(`<div class="tr-grid">${cells.join('')}</div>`);
       return `<article class="tr-read">${head}
-        <p class="tr-hl">${esc(tw(fx.headline))}</p>
-        <p>${esc(tw(fx.summary))}</p>
-        <details open><summary>자세한 풀이</summary>
-          ${fx.detail.map(t => `<p>${esc(tw(t))}</p>`).join('')}
-          <div class="tr-grid">
-            <div><b>지금의 흐름</b>${esc(tw(fx.currentFlow))}</div>
-            <div><b>기회</b>${esc(tw(fx.opportunity))}</div>
-            <div><b>조심할 점</b>${esc(tw(fx.caution))}</div>
-          </div>
-          <ul class="tr-act">${fx.actions.map(t => `<li>${esc(tw(t))}</li>`).join('')}</ul>
-          ${saju ? `<p class="tr-saju">${saju}</p>` : ''}
-          <p class="muted small">${esc(tw(fx.closing))}</p>
-        </details>
+        <p class="tr-hl">${esc(lead)}</p>
+        <details open><summary>자세한 풀이</summary>${out.join('')}${saju ? `<p class="tr-saju">${saju}</p>` : ''}</details>
       </article>`;
     }).join('');
+  }
+  // 카드들을 하나의 이야기로 잇는다: 점수 흐름(좋아지는지·식는지)과 카드 오행의 상생·상극을 문장으로 풀어 준다
+  function trStory(rows, spread, topicName) {
+    const by = Object.fromEntries(rows.map(r => [r.k, r])), nm = r => `<b>${esc(r.card.name)}${r.rev ? '(역)' : ''}</b>`, kw = r => `"${esc(r.kw)}"`, ck = r => `${nm(r)} ${kw(r)}`;
+    const step = (x, y) => y.sc - x.sc >= 0.5 ? '막혀 있던 흐름이 풀려 가는' : x.sc - y.sc >= 0.5 ? '기세가 가라앉는' : '비슷한 결이 이어지는';
+    const tone = r => r.sc > 0.4 ? '밝은' : r.sc < -0.4 ? '조심스러운' : '조율이 필요한';
+    const elOf = r => SUIT_EL[r.card.suit];
+    const sameSuit = (x, y) => x.card.suit !== 'M' && x.card.suit === y.card.suit;
+    let t = '';
+    if (spread === 'one' || rows.length === 1) {
+      const r = rows[0]; t = `${topicName} 질문에 대한 카드의 답은 ${ck(r)}입니다. 전체 분위기는 ${tone(r)} 쪽이고, 아래 풀이의 결론 → 이유 → 행동 순서로 읽으면 됩니다.`;
+    } else if (by.past && by.now && by.fut) {
+      const s1 = step(by.past, by.now), s2 = step(by.now, by.fut);
+      t = `과거 ${ck(by.past)} → 현재 ${ck(by.now)} → 미래 ${ck(by.fut)}로 이어지는 이야기입니다. `
+        + (s1 === s2 ? `과거에서 미래까지 내내 <b>${s1}</b> 흐름입니다. ` : `과거에서 현재로는 <b>${s1}</b> 흐름이고, 현재에서 미래로는 <b>${s2}</b> 흐름입니다. `)
+        + (sameSuit(by.past, by.now) && sameSuit(by.now, by.fut) ? '세 장이 같은 기운이라 한 가지 주제가 계속 반복되고 있습니다. ' : sameSuit(by.past, by.now) || sameSuit(by.now, by.fut) ? '이웃한 카드가 같은 기운이라 이야기가 끊기지 않고 이어집니다. ' : '')
+        + (by.fut.sc > by.now.sc + 0.4 ? '지금이 가장 어려운 고비이고 이후로 나아집니다.' : by.fut.sc < by.now.sc - 0.4 ? '지금의 기세를 살려 두지 않으면 식을 수 있으니 미리 방향을 잡아 두세요.' : '큰 반전보다는 지금의 방식을 꾸준히 이어 가는 쪽이 맞습니다.');
+    } else if (by.sit && by.obs && by.adv && by.res) {
+      const a = elOf(by.adv), o = elOf(by.obs), rel = a != null && o != null ? ((o - a) % 5 + 5) % 5 : -1;
+      const pair = rel === 2 ? `조언 카드의 ${M.EL_K[a]} 기운이 장애물의 ${M.EL_K[o]} 기운을 눌러 줘서, 조언을 따르면 실제로 막힌 곳이 풀립니다.`
+        : rel === 4 ? `장애물의 ${M.EL_K[o]} 기운이 조언의 ${M.EL_K[a]} 기운을 돕는 조합이라, 걸림돌이 오히려 해법의 재료가 됩니다.`
+        : rel === 3 ? `장애물의 ${M.EL_K[o]} 기운이 조언의 ${M.EL_K[a]} 기운을 누르는 조합이라, 조언을 실천하는 데 평소보다 힘이 듭니다.`
+        : by.adv.sc >= by.obs.sc ? '조언 카드가 장애물보다 힘이 세서 충분히 풀 수 있는 숙제입니다.' : '장애물의 힘이 더 커서 조언을 한 번이 아니라 꾸준히 지켜야 합니다.';
+      t = `상황은 ${ck(by.sit)}, 앞을 가로막는 것은 ${ck(by.obs)}, 카드의 조언은 ${ck(by.adv)}, 이대로 가면 맞이할 결말은 ${ck(by.res)}입니다. ${pair} `
+        + (by.res.sc > 0.4 ? '결말은 밝은 쪽입니다.' : by.res.sc < -0.4 ? '결말이 무거운 쪽이라 조언을 미루지 않는 것이 중요합니다.' : '결말은 내가 어떻게 움직이느냐에 따라 달라지는 열린 상태입니다.');
+    } else return '';
+    return `<div class="tr-story"><b>카드로 읽는 하나의 이야기</b><p>${t}</p></div>`;
   }
   function renderTarot() {
     const T = PK.tr, [spName, pos] = TR_SPREAD[T.spread] || TR_SPREAD.three, [topicName, topicSuits] = TR_TOPIC[T.topic] || TR_TOPIC.all;
@@ -8673,10 +8736,11 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return picker + `<section class="card">
       <div class="card-h"><h2>타로 종합 풀이</h2>${rows.length < pos.length ? `<span class="note">${pos.length - rows.length}장이 비어 있어 고른 카드만으로 풀이합니다</span>` : ''}</div>
       <div class="trstrip" aria-label="뽑은 카드">${rows.map(r => `<div class="trcell">${trFace(r.card.id, r.rev, 92, r.l)}</div>`).join('')}</div>
+      ${trStory(rows, T.spread, topicName)}
       <div class="sumbox">${summary}</div>
       ${notes.length ? `<ul class="pos-ul small">${notes.map(n => `<li>${n}</li>`).join('')}</ul>` : ''}
       <h3>자리별 풀이</h3>
-      <div class="tr-reads">${trReadings(rows, T.topic)}</div>
+      <div class="tr-reads">${trReadings(rows, T.topic, T.spread)}</div>
       <p class="note">타로는 지금의 마음과 흐름을 비추는 거울입니다. 결과는 고정된 미래가 아니라 선택에 따라 달라질 수 있는 가능성으로 읽으세요.</p>
     </section>`;
   }
