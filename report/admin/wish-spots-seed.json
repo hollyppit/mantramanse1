@@ -348,8 +348,8 @@
   ],
   "source": {
    "name": "위키백과 충주 탄금대",
-   "url": "https://ko.wikipedia.org/wiki/%EC%B6%A9%EC%A3%BC_%ED%83%84%EA%B8%88%EB%8C%80",
-   "checked": "2026-11-02"
+   "url": "https://ko.wikipedia.org/wiki/%ED%83%84%EA%B8%88%EB%8C%80",
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -1451,6 +1451,186 @@
    "checked": "2026-11-05"
   },
   "note": "유네스코 세계유산.",
+  "on": true
+ },
+ {
+  "id": "seed-83",
+  "name": "성균관·문묘",
+  "lat": 37.5856,
+  "lon": 126.9958,
+  "type": "shrine",
+  "tags": [
+   "study",
+   "career",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 성균관",
+   "url": "https://ko.wikipedia.org/wiki/%EC%84%B1%EA%B7%A0%EA%B4%80",
+   "checked": "2026-11-05"
+  },
+  "note": "조선 시대 최고 교육기관과 공자를 모신 문묘. 학업·시험 기원 장소로 알려져 있습니다.",
+  "on": true
+ },
+ {
+  "id": "seed-84",
+  "name": "해동 용궁사",
+  "lat": 35.1881,
+  "lon": 129.2231,
+  "type": "temple",
+  "tags": [
+   "wealth",
+   "health",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 해동용궁사",
+   "url": "https://ko.wikipedia.org/wiki/%ED%95%B4%EB%8F%99%EC%9A%A9%EA%B6%81%EC%82%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "바닷가 사찰로 소원 성취 기도처로 알려져 있습니다.",
+  "on": true
+ },
+ {
+  "id": "seed-85",
+  "name": "월정사",
+  "lat": 37.7316,
+  "lon": 128.5926,
+  "type": "temple",
+  "tags": [
+   "health",
+   "general"
+  ],
+  "source": {
+   "name": "Wikipedia Woljeongsa",
+   "url": "https://en.wikipedia.org/wiki/Woljeongsa",
+   "checked": "2026-11-05"
+  },
+  "note": "오대산 소재 사찰. 전나무 숲길로 유명합니다.",
+  "on": true
+ },
+ {
+  "id": "seed-86",
+  "name": "신흥사(설악산)",
+  "lat": 38.1756,
+  "lon": 128.4844,
+  "type": "temple",
+  "tags": [
+   "general",
+   "health"
+  ],
+  "source": {
+   "name": "위키백과 신흥사 (속초시)",
+   "url": "https://ko.wikipedia.org/wiki/%EC%8B%A0%ED%9D%A5%EC%82%AC_(%EC%86%8D%EC%B4%88%EC%8B%9C)",
+   "checked": "2026-11-05"
+  },
+  "note": "설악산 소재 사찰.",
+  "on": true
+ },
+ {
+  "id": "seed-87",
+  "name": "대흥사(해남)",
+  "lat": 34.4766,
+  "lon": 126.6168,
+  "type": "temple",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 대흥사",
+   "url": "https://ko.wikipedia.org/wiki/%EB%8C%80%ED%9D%A5%EC%82%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "해남 두륜산 소재 사찰.",
+  "on": true
+ },
+ {
+  "id": "seed-88",
+  "name": "금오산",
+  "lat": 36.0881,
+  "lon": 128.3058,
+  "type": "mountain",
+  "tags": [
+   "career",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 금오산 (경북)",
+   "url": "https://ko.wikipedia.org/wiki/%EA%B8%88%EC%98%A4%EC%82%B0_(%EA%B2%BD%EB%B6%81)",
+   "checked": "2026-11-05"
+  },
+  "note": "구미 소재 도립공원.",
+  "on": true
+ },
+ {
+  "id": "seed-89",
+  "name": "정방 폭포",
+  "lat": 33.2446,
+  "lon": 126.5717,
+  "type": "spring",
+  "tags": [
+   "health",
+   "general"
+  ],
+  "source": {
+   "name": "Wikipedia Jeongbang Waterfall",
+   "url": "https://en.wikipedia.org/wiki/Jeongbang_Waterfall",
+   "checked": "2026-11-05"
+  },
+  "note": "서귀포 소재 폭포.",
+  "on": true
+ },
+ {
+  "id": "seed-90",
+  "name": "쌍계사(하동)",
+  "lat": 35.2325,
+  "lon": 127.645,
+  "type": "temple",
+  "tags": [
+   "general",
+   "health"
+  ],
+  "source": {
+   "name": "위키백과 쌍계사",
+   "url": "https://ko.wikipedia.org/wiki/%EC%8C%8D%EA%B3%84%EC%82%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "지리산 남쪽 자락의 사찰.",
+  "on": true
+ },
+ {
+  "id": "seed-91",
+  "name": "대둔산",
+  "lat": 36.12,
+  "lon": 127.3233,
+  "type": "mountain",
+  "tags": [
+   "health",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 대둔산 (충남/전북)",
+   "url": "https://ko.wikipedia.org/wiki/%EB%8C%80%EB%91%94%EC%82%B0_%EB%8F%84%EB%A6%BD%EA%B3%B5%EC%9B%90",
+   "checked": "2026-11-05"
+  },
+  "note": "완주·논산 소재 도립공원.",
+  "on": true
+ },
+ {
+  "id": "seed-92",
+  "name": "선릉과 정릉",
+  "lat": 37.5089,
+  "lon": 127.0492,
+  "type": "shrine",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 선정릉",
+   "url": "https://ko.wikipedia.org/wiki/%EC%84%A0%EC%A0%95%EB%A6%89",
+   "checked": "2026-11-05"
+  },
+  "note": "서울 강남의 조선 왕릉.",
   "on": true
  }
 ]
