@@ -877,6 +877,8 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="region-reading-data.js"></script>
 <script src="region-reading.js"></script>
 <script src="wish-spots.js"></script>
+<script src="fengshui-data.js"></script>
+<script src="fengshui-engine.js"></script>
 <script src="health-body.js"></script>
 <script src="accident-hint.js"></script>
 <script src="byeongyak.js"></script>
@@ -5084,7 +5086,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     <button type="button" class="to-top" data-act="to-top" aria-label="맨 위로">↑</button>`;
   }
   function renderTop() {
-    const tabs = [['wonguk', '원국'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ['pair', '궁합'], ['tk', '택일'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ['fs', '풍수'], ['tarot', '타로'], ['iching', '주역'], ['gl', '용어']];
+    const tabs = [['wonguk', '원국'], ['ohaeng', '오행·강약'], ['yong', '용신'], ['luck', '운세 흐름'], ...(spOn() ? [['space', '공간·명당']] : []), ['pair', '궁합'], ['tk', '택일'], ...(S.ch && S.ch.ziwei ? [['zw', '자미두수']] : []), ['face', '관상'], ...(spOn() ? [] : [['fs', '풍수']]), ['tarot', '타로'], ['iching', '주역'], ['gl', '용어']];
     return `<header class="top"><div class="top-in">
       <div class="brand"><div class="seal" aria-hidden="true">萬<br>歲</div><h1>만트라 만세력</h1></div>
       <div class="who">${whoLine()}</div>
@@ -5659,6 +5661,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     </section>
     <section class="card"><div class="card-h"><h2>추천 날짜</h2><span class="note">${PU[T.purpose].label} · 점수 높은 순</span></div>${best.length ? `<div class="list">${best.map(row).join('')}</div>` : '<p class="muted small">이 기간에는 길일 등급인 날이 없습니다. 기간을 늘려 보세요.</p>'}</section>
     <section class="card"><div class="card-h"><h2>피하면 좋은 날</h2><span class="note">충·형 등 내 사주와 부딪치는 날</span></div>${worst.length ? `<div class="list">${worst.map(row).join('')}</div>` : '<p class="muted small">뚜렷하게 피할 날이 없습니다.</p>'}</section>
+    ${spTkCard(T, sd)}
     <section class="card">
       <details><summary><b>${T.days}일 전체 보기</b></summary>
       <div class="tbl-wrap"><table class="dt"><thead><tr><th>날짜</th><th>일진</th><th>건제</th><th>등급</th><th>근거</th></tr></thead><tbody>${list.map(r => `<tr><td class="num">${fmt(r)}</td><td class="gz">${M.gzName(r.pillar)}</td><td>${r.jian}</td><td><span class="chip ${r.grade === '길일' ? 'good' : r.grade === '피할 날' ? 'bad' : ''}">${r.grade} ${r.score}</span></td><td class="small">${rs(r, 3)}</td></tr>`).join('')}</tbody></table></div></details>
@@ -6411,7 +6414,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const y = ch.yong;
     const order = ['용신', '희신', '한신', '구신', '기신'];
     const elOf = r => +Object.keys(y.roles).find(e => y.roles[e] === r);
-    return `${renderYongEasy()}
+    return `${renderYongEasy()}${spYongCard()}
     <section class="card">
       <div class="card-h"><h2>${term('용신')} · 희신 · 기신</h2>${seg('school', Object.entries(M.SCHOOLS).map(([k, l]) => [k, l.split(' ')[0]]), ch.school)}</div>
       ${!chosen.applicable ? `<div class="warn"><b>${M.SCHOOLS[ch.school]} 해당 없음</b><span>${esc(chosen.log[chosen.log.length - 1])}</span><span>아래 역할과 운세 그래프는 억부 기준으로 표시합니다.</span></div>` : ''}
@@ -7033,6 +7036,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const WSEL_KEY = 'mantra-wish-v1';
   const WSEL = (() => { try { const v = JSON.parse(localStorage.getItem(WSEL_KEY) || '{}'); return { wish: typeof v.wish === 'string' ? v.wish : 'wealth' }; } catch (e) { return { wish: 'wealth' }; } })();
   let wsSpots = null, wsLoaded = false;
+  // 공간·명당: 관리자 스위치/게시 문구(/api/fengshui)가 켜져 있으면 탭이 보인다 (주소 스위치 space 와 별개)
+  (function fsLoad() { try { fetch('/api/fengshui').then(r => r.ok ? r.json() : null).then(d => { if (!d || !d.enabled || !window.MantraFengshui) return; window.MantraFengshui.applyPublished(d.pub); window.MANTRA_FLAGS.space = true; render(); }).catch(() => { }); } catch (e) { } })();
   function wsLoad() {
     if (wsLoaded || !window.MantraWishSpots) return; wsLoaded = true;
     try { fetch('/api/wish-spots').then(r => r.ok ? r.json() : null).then(d => { if (!d || !d.enabled) return; wsSpots = Array.isArray(d.spots) ? d.spots : []; window.MANTRA_FLAGS.wishSpots = true; render(); }).catch(() => { }); } catch (e) { }
@@ -7334,6 +7339,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const tint = v => { const a = Math.min(100, Math.abs(v)) * 0.6; return v >= 0 ? `color-mix(in srgb, var(--good) ${a}%, var(--surface-2))` : `color-mix(in srgb, var(--bad) ${a}%, var(--surface-2))`; };
     return `
     ${carCard(ch, du, se, curM, il)}
+    ${spFlowCard(curY, curM)}
     ${renderIkd(ch)}
     ${ch.yongFallback ? `<div class="warn"><b>용신 기준</b><span>${M.SCHOOLS[ch.school]}이 이 사주에 해당하지 않아 억부 기준 용신을 표시합니다. 흐름 점수는 억부·조후를 자동 가중해 계산합니다.</span></div>` : ''}
     <section class="card">
@@ -8610,6 +8616,212 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     </section>`;
   }
 
+  // ───────────── 공간·명당 (fengshui-engine.js) ─────────────
+  // 현공비성·팔택·형세를 각각 독립 계산해 나란히 보여 준다. 점수를 합산하지 않는다. 스위치 MANTRA_FLAGS.space(기본 꺼짐)가 켜지면 '풍수' 탭이 '공간·명당'으로 바뀐다.
+  const spOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.space === true && window.MantraFengshui);
+  const SP_KEY = 'mantra-space-v1';
+  const spBlank = n => ({ name: n, facing: '', built: '', reno: '', form: {}, hazards: [], rooms: {}, m: {} });
+  const SP = (() => { try { const v = JSON.parse(localStorage.getItem(SP_KEY) || '{}'); const l = a => Array.isArray(a) && a.length ? a.slice(0, 3) : null; return { sec: ['home', 'biz', 'wish', 'fs'].includes(v.sec) ? v.sec : 'home', home: l(v.home) || [spBlank('후보 1')], biz: l(v.biz) || [spBlank('후보 1')], sel: v.sel || { home: 0, biz: 0 }, ind: v.ind || 'food', mv: typeof v.mv === 'string' ? v.mv : '' }; } catch (e) { return { sec: 'home', home: [spBlank('후보 1')], biz: [spBlank('후보 1')], sel: { home: 0, biz: 0 }, ind: 'food', mv: '' }; } })();
+  const spSave = () => { try { localStorage.setItem(SP_KEY, JSON.stringify(SP)); } catch (e) { } };
+  const SP_DIRS = [['N', '북', 0], ['NE', '북동', 45], ['E', '동', 90], ['SE', '남동', 135], ['S', '남', 180], ['SW', '남서', 225], ['W', '서', 270], ['NW', '북서', 315]];
+  const SP_HOME_ROOMS = ['door', 'bed', 'desk', 'stove', 'wc'], SP_BIZ_ROOMS = ['door', 'owner', 'cashier', 'consult', 'work'];
+  const SP_EL = ['목', '화', '토', '금', '수'];
+  const spCls = v => v >= 1.2 ? 'sp-g' : v <= -1 ? 'sp-b' : 'sp-n';
+  const spLv = v => v == null ? '<span class="sp-n">판단 보류</span>' : v > 0 ? '<span class="sp-g">좋음</span>' : v < 0 ? '<span class="sp-b">주의</span>' : '<span class="sp-n">무난</span>';
+  const spState = s => ({ wang: '당령', sheng: '생기', tui: '퇴기', sha: '쇠·살' }[s] || s);
+  const spVal = (c, key) => { const p = key.split('.'); return p.length === 2 ? (c[p[0]] || {})[p[1]] : c[key]; };
+  function spField(kind, i, key, label, type, extra) {
+    const v = spVal(SP[kind][i], key);
+    return `<label class="field"><span class="small">${label}</span><input type="${type || 'text'}" data-sp="${kind}:${i}:${key}" value="${esc(v == null ? '' : v)}" ${extra || ''}></label>`;
+  }
+  function spSelect(kind, i, key, label, opts) {
+    const v = spVal(SP[kind][i], key);
+    return `<label class="field"><span class="small">${label}</span><select data-sp="${kind}:${i}:${key}"><option value="">모름·입력 안 함</option>${opts.map(([val, t]) => `<option value="${val}"${v === val ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></label>`;
+  }
+  function spInputs(kind, i) {
+    const FD = window.MantraFengshuiData, c = SP[kind][i], isHome = kind === 'home';
+    const dirOpts = SP_DIRS.map(([k, n]) => [k, n + '쪽']);
+    let h = `<div class="frow">${spField(kind, i, 'name', '이름', 'text', 'maxlength="20"')}${spField(kind, i, 'facing', '건물이 바라보는 방향(향) 각도 0~359°', 'number', 'min="0" max="359" step="1" inputmode="numeric"')}
+      <label class="field"><span class="small">방향 바로 고르기</span><select data-sp-dir="${kind}:${i}"><option value="">—</option>${SP_DIRS.map(([k, n, d]) => `<option value="${d}">${n}향(${d}°)</option>`).join('')}</select></label>
+      ${spField(kind, i, 'built', '준공(입주) 연도', 'number', 'min="1864" max="2103" inputmode="numeric"')}${spField(kind, i, 'reno', '전면 개축·대수리 연도(선택)', 'number', 'min="1864" max="2103" inputmode="numeric"')}</div>
+      <p class="small muted">향은 현관이 아니라 <b>거실(또는 매장) 큰 창이 바라보는 쪽</b>을 나침반 앱으로 재세요. 모르면 비워 두면 해당 분석을 건너뜁니다.</p>`;
+    h += '<details class="adv"><summary>주변 형세 입력(선택)</summary><div class="frow">' + Object.entries(FD.FORM).map(([k, f]) => spSelect(kind, i, 'form.' + k, f.label, Object.entries(f.opts).map(([v, o]) => [v, o[1].split('.')[0].slice(0, 30)]))).join('') + '</div>'
+      + '<div class="small">' + Object.entries(FD.HAZARD).map(([k, d]) => `<label class="spchk"><input type="checkbox" data-sp-hz="${kind}:${i}:${k}"${c.hazards.includes(k) ? ' checked' : ''}> ${esc(d[0])}</label>`).join('') + '</div></details>';
+    h += '<details class="adv"><summary>실내 배치 입력(선택)</summary><div class="frow">' + (isHome ? SP_HOME_ROOMS : SP_BIZ_ROOMS).map(r => spSelect(kind, i, 'rooms.' + r, FD.ROOM_LABEL[r] + ' 위치', dirOpts)).join('') + '</div></details>';
+    if (!isHome) h += '<details class="adv"><summary>상권·사업성 지표(직접 입력)</summary><div class="frow">' + FD.BIZ_METRICS.map(m => spField(kind, i, 'm.' + m.id, m.name + ' (' + m.unit + ')', 'number', 'step="any"')).join('') + '</div><p class="small muted">이 앱은 상권·유동인구·임대료 데이터를 자동으로 가져오지 않습니다. 직접 조사한 값을 입력하면 후보끼리 비교해 보여 드립니다.</p></details>';
+    return h;
+  }
+  function spRun(kind, i) {
+    const F = window.MantraFengshui, c = SP[kind][i];
+    if (c.facing === '' || !isFinite(+c.facing)) return null;
+    const form = Object.assign({}, c.form, { hazards: c.hazards });
+    return F.analyze({ ch: S.ch, facingDeg: +c.facing, builtYear: c.built || null, renovationYear: c.reno || null, evalYear: new Date().getFullYear(), form });
+  }
+  function spGrid(xk) {
+    const cell = k => { const p = xk.palaces.find(x => x.key === k), c = k === 'C'; return `<div class="sp-c${c ? ' sp-ctr' : ''}"><b>${p.dir}${c ? '' : ' · ' + p.gua}</b><span class="sp-s">운 ${p.yun}</span><span class="sp-s ${spCls(p.shanTone)}" title="${esc(p.shanText)}">산 ${p.shan}</span><span class="sp-s ${spCls(p.xiangTone)}" title="${esc(p.xiangText)}">향 ${p.xiang}</span>${p.notes.length ? '<em>' + p.notes.map(n => esc(n.text.split(' — ')[0].split('(')[0])).join('·') + '</em>' : ''}</div>`; };
+    return `<div class="sp-grid" role="group" aria-label="현공비성 9궁">${['SE', 'S', 'SW', 'E', 'C', 'W', 'NE', 'N', 'NW'].map(cell).join('')}</div><p class="small muted">위쪽이 남쪽인 전통 배치입니다. 산성은 사람·건강, 향성은 재물·사회운을 뜻합니다. 초록=힘을 받는 별, 빨강=조심할 별.</p>`;
+  }
+  function spResult(kind, i, an) {
+    const F = window.MantraFengshui, FD = window.MantraFengshuiData, xk = an.xuankong, bz = an.bazhai, fm = an.form, c = SP[kind][i];
+    let h = `<section class="card"><div class="card-h"><h2>현공비성 · ${esc(xk.pattern.name)}</h2><span class="note">${xk.period}운 건물 · 지금 ${xk.nowPeriod}운</span></div>
+      <div class="sumbox">${esc(xk.pattern.text)} 향은 <b>${esc(xk.facing.mt.label)}</b>${xk.facing.kim ? '(겸향)' : ''}, 좌는 <b>${esc(xk.sitting.mt.label)}</b>입니다.</div>
+      ${an.warnings.length ? '<ul class="pos-ul small">' + an.warnings.map(w => `<li>${esc(w)}</li>`).join('') + '</ul>' : ''}${xk.assumptions.length ? '<ul class="pos-ul small muted">' + xk.assumptions.map(w => `<li>${esc(w)}</li>`).join('') + '</ul>' : ''}${spGrid(xk)}
+      <details class="adv"><summary>방위별 해석 보기</summary><div class="list">${xk.palaces.filter(p => p.idx < 8).map(p => `<div class="li"><span class="k">${p.dir}</span><span class="v small"><b>산성 ${p.shan}</b> ${esc(spState(p.shanState))} — ${esc(p.shanText)}<br><b>향성 ${p.xiang}</b> ${esc(spState(p.xiangState))} — ${esc(p.xiangText)}${p.notes.map(n => '<br>' + esc(n.text)).join('')}${p.remedy ? '<br><i>보완: ' + esc(p.remedy) + '</i>' : ''}</span><span></span></div>`).join('')}</div></details></section>`;
+    if (bz.house || bz.person) {
+      h += `<section class="card"><div class="card-h"><h2>팔택(八宅)</h2><span class="note">${bz.person ? esc(bz.person.groupName) + ' · 본명괘 ' + esc(bz.person.gua) : ''}</span></div>${bz.matchText ? `<div class="sumbox">${esc(bz.matchText)}</div>` : ''}${bz.warnings.map(w => `<p class="small muted">${esc(w)}</p>`).join('')}
+        ${bz.personStars ? `<h3>내 길흉 방위</h3><div class="sp-chips">${bz.personStars.map(s => `<span class="chip ${s.good ? 'sp-gc' : 'sp-bc'}" title="${esc(s.topic + ' — ' + s.tip)}">${s.dir} ${s.name}</span>`).join('')}</div>` : ''}
+        ${bz.person && bz.person.note ? `<p class="small muted">${esc(bz.person.note)}</p>` : ''}</section>`;
+    }
+    h += `<section class="card"><div class="card-h"><h2>형세풍수</h2><span class="note">${fm.given}/${fm.total} 항목 입력</span></div><div class="sumbox">${esc(fm.verdict)}</div>
+      ${fm.cons.length ? '<h3>보완이 필요한 점</h3><ul class="pos-ul small">' + fm.cons.map(x => `<li><b>${esc(x.label)}</b> — ${esc(x.text)}</li>`).join('') + '</ul>' : ''}${fm.pros.length ? '<h3>좋은 점</h3><ul class="pos-ul small">' + fm.pros.map(x => `<li><b>${esc(x.label)}</b> — ${esc(x.text)}</li>`).join('') + '</ul>' : ''}</section>`;
+    if (an.saju) {
+      h += `<section class="card"><div class="card-h"><h2>내 사주와 이 공간</h2></div><p class="small">사주는 <b>나에게 필요한 기운</b>을, 풍수는 <b>이 건물이 가진 조건</b>을 말합니다. 서로 다른 기준이라 점수를 합치지 않고 방위마다 나란히 놓았습니다.</p>
+        <div class="list">${an.saju.map(s => { const p = xk.palaces[s.idx], b = bz.personStars ? bz.personStars[s.idx] : null, lv = v => v >= 1 ? 1 : v <= -1 ? -1 : 0; return `<div class="li"><span class="k">${s.dir}</span><span class="v small">사주: ${spLv(s.level)} ${esc(s.text)}<br>현공: 산 ${spLv(lv(p.shanTone))} · 향 ${spLv(lv(p.xiangTone))}${b ? ' · 팔택: ' + spLv(b.good ? 1 : -1) + ' ' + esc(b.name) : ''}</span><span></span></div>`; }).join('')}</div></section>`;
+    }
+    const roles = kind === 'home' ? SP_HOME_ROOMS : SP_BIZ_ROOMS, placed = roles.filter(r => c.rooms[r]);
+    if (placed.length) {
+      h += `<section class="card"><div class="card-h"><h2>입력하신 배치 점검</h2></div>${placed.map(r => { const idx = SP_DIRS.findIndex(d => d[0] === c.rooms[r]); const j = F.judgePlacement({ chart: xk, bazhai: bz, ch: S.ch, role: r === 'door' && kind === 'biz' ? 'entrance' : r, idx }); return `<div style="border-top:1px solid var(--line);padding:8px 0"><b>${esc(j.roleLabel)} · ${j.dir}쪽</b> — ${esc(j.verdictText)}<div class="small">현공 ${spLv(j.xuankong.level)} · 팔택 ${spLv(j.bazhai.level)} · 사주 ${spLv(j.saju ? j.saju.level : null)}</div><div class="small muted">${esc(j.xuankong.text)}${j.bazhai.text ? '<br>' + esc(j.bazhai.text) : ''}</div></div>`; }).join('')}</section>`;
+    }
+    const want = kind === 'home' ? ['bed', 'desk', 'door'] : ['owner', 'cashier', 'consult'];
+    const sg = F.suggestRoles({ chart: xk, bazhai: bz, ch: S.ch, roles: want });
+    h += `<section class="card"><div class="card-h"><h2>${kind === 'home' ? '방 쓰임 추천' : '사업장 자리 배치 제안'}</h2></div><p class="small muted">이론마다 기준이 달라 점수를 합치지 않고, 몇 가지 기준이 같은 쪽을 가리키는지로 정렬했습니다.</p>${want.map(r => `<div style="border-top:1px solid var(--line);padding:8px 0"><b>${esc(FD.ROOM_LABEL[r])}</b> 후보: ${sg[r].slice(0, 2).map(j => `<span class="chip">${j.dir}쪽 · ${esc(j.verdictText.slice(0, 22))}</span>`).join(' ')}<div class="small muted">피할 자리: ${sg[r].slice(-1).map(j => j.dir + '쪽').join('')}</div></div>`).join('')}</section>`;
+    const y0 = new Date().getFullYear();
+    h += `<section class="card"><div class="card-h"><h2>연도별 변화(연비성)</h2></div>${[y0, y0 + 1, y0 + 2].map(y => { const o = F.overlay(xk, y, null); const bad = o.cells.filter(x => x.notes.some(n => n.tone < 0)); return `<div style="border-top:1px solid var(--line);padding:8px 0"><b>${y}년</b> 중궁 ${o.yearCenter} · ${esc(o.samsal.text)}<div class="small">${bad.map(x => x.dir + '쪽: ' + esc(x.notes.filter(n => n.tone < 0)[0].text)).join('<br>') || '특별히 조심할 방위가 두드러지지 않습니다.'}</div></div>`; }).join('')}</section>`;
+    h += `<p class="note">${esc(an.disclaimer)}</p><details class="adv"><summary>계산 기준과 예외</summary><ul class="pos-ul small"><li>${esc(an.school.name)}</li><li>${esc(an.school.periodBoundary)}</li><li>${esc(an.school.chartBasis)}</li>${an.exceptions.map(e => `<li>${esc(e)}</li>`).join('')}</ul><p class="small muted">${esc(an.limits)}</p></details>`;
+    return h;
+  }
+  function spCompare(kind) {
+    const list = SP[kind]; if (list.length < 2) return '';
+    const FD = window.MantraFengshuiData, rows = list.map((c, i) => { let an = null; try { an = spRun(kind, i); } catch (e) { } return { c, an }; });
+    const metric = id => rows.map(r => `<td>${r.c.m && r.c.m[id] !== undefined && r.c.m[id] !== '' ? esc(r.c.m[id]) : '<span class="muted">미입력</span>'}</td>`).join('');
+    return `<section class="card"><div class="card-h"><h2>후보 비교</h2></div><div style="overflow-x:auto"><table class="sp-tb"><thead><tr><th></th>${rows.map(r => `<th>${esc(r.c.name)}</th>`).join('')}</tr></thead><tbody>
+      <tr><td>현공비성</td>${rows.map(r => `<td>${r.an ? esc(r.an.xuankong.pattern.name) : '<span class="muted">향 미입력</span>'}</td>`).join('')}</tr>
+      <tr><td>건물 운</td>${rows.map(r => `<td>${r.an ? r.an.xuankong.period + '운' : '-'}</td>`).join('')}</tr>
+      <tr><td>팔택 택명상배</td>${rows.map(r => `<td>${r.an && r.an.bazhai.match ? (r.an.bazhai.match === 'match' ? '<span class="sp-g">맞음</span>' : '<span class="sp-b">맞지 않음</span>') : '-'}</td>`).join('')}</tr>
+      <tr><td>형세</td>${rows.map(r => `<td>${r.an ? esc(r.an.form.label) : '-'}</td>`).join('')}</tr>
+      ${kind === 'biz' ? FD.BIZ_METRICS.map(m => `<tr><td>${m.name}</td>${metric(m.id)}</tr>`).join('') : ''}</tbody></table></div><p class="small muted">후보별 판정을 한 점수로 합치지 않습니다. 장단점이 갈리는 항목을 보고 직접 우선순위를 정하세요.</p></section>`;
+  }
+  function spCandidates(kind) {
+    const list = SP[kind], i = Math.min(SP.sel[kind], list.length - 1);
+    return `<section class="card"><div class="card-h"><h2>${kind === 'home' ? '살펴볼 집' : '살펴볼 사업장'}</h2><span class="note">최대 3곳까지 비교</span></div>
+      <div class="seg" role="tablist">${list.map((c, k) => `<button type="button" class="${k === i ? 'on' : ''}" data-sp-pick="${kind}:${k}">${esc(c.name || '후보 ' + (k + 1))}</button>`).join('')}${list.length < 3 ? `<button type="button" data-sp-add="${kind}">+ 후보 추가</button>` : ''}${list.length > 1 ? `<button type="button" data-sp-del="${kind}:${i}">이 후보 삭제</button>` : ''}</div>${spInputs(kind, i)}</section>`;
+  }
+  function spBizHead() {
+    const FD = window.MantraFengshuiData, ind = FD.INDUSTRY.find(x => x.id === SP.ind) || FD.INDUSTRY[0], roles = S.ch.yongAll.eokbu.roles;
+    const r1 = roles[ind.el], r2 = roles[ind.sub];
+    const verdict = ['용신', '희신'].includes(r1) ? '업종의 주 기운이 이 사주에 필요한 쪽이라 결이 잘 맞는 편입니다.' : ['기신', '구신'].includes(r1) ? '업종의 주 기운이 이 사주에서는 부담이 되는 쪽이라, 운영 방식(소규모 시작·역할 분담 등)으로 보완해 보세요.' : '업종의 주 기운이 이 사주에 특별히 돕지도 해치지도 않는 쪽입니다.';
+    return `<section class="card"><div class="card-h"><h2>내 사주와 업종</h2></div><label class="field"><span class="small">업종</span><select data-sp-ind="1">${FD.INDUSTRY.map(x => `<option value="${x.id}"${x.id === SP.ind ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
+      <div class="sumbox">${esc(ind.name)}은 ${SP_EL[ind.el]}(주)·${SP_EL[ind.sub]}(보조) 기운 업종으로 분류합니다. 이 사주에서 ${SP_EL[ind.el]}은 억부 ${r1}, ${SP_EL[ind.sub]}은 ${r2}입니다. ${verdict}</div><p class="small">${esc(ind.note)}</p>
+      <p class="small muted">업종 오행 분류는 전통 분류에 따른 참고용이며, 실제 사업성은 상권 지표와 현장 조사가 더 중요합니다. 직업 적성 풀이는 ‘원국’·‘용신’ 탭을 보세요.</p></section>`;
+  }
+  function spRegion() {
+    const RG = window.MantraRegion, RR = window.MantraRegionReading, RD = window.MantraRegionReadingData; if (!RG || !RR || !RD) return '';
+    const P = window.MantraFengshuiData.PALACE, home = RG.get(REG.home), ch = S.ch, adv = M.methodAdvice(ch), mode = adv.verdict === '병행' ? 'both' : adv.verdict === '조후' ? 'johu' : 'eokbu';
+    const rows = P.map(p => { const t = RR.toneOfElement(M, ch, SP_EL[p.el], mode); return `<span class="chip" title="${p.dir}쪽 지역(${SP_EL[p.el]} 기운)">${p.dir}쪽 · ${esc((RD.TONE_LABEL || {})[t.tone] || t.tone)}</span>`; }).join(' ');
+    return `<section class="card"><div class="card-h"><h2>내 사주에 맞는 지역</h2><span class="note">${home ? esc(home.name) + ' 기준' : '기준 지역 미선택'}</span></div><p class="small">현재 거주지에서 어느 방향의 지역이 사주의 억부·조후와 어울리는지입니다. 구체적인 시·군·구 후보와 비교는 <b>운세 흐름</b> 탭의 지역 카드에서 고를 수 있습니다.</p><div class="sp-chips">${rows}</div><p class="small muted">${home ? '' : '운세 흐름 탭에서 현재 거주지를 고르면 방향별 시·군·구가 연결됩니다. '}기후·지형·소음·침수 같은 환경 지표는 이 앱에 자동 연결되어 있지 않아 직접 확인이 필요합니다.</p></section>`;
+  }
+  function spWish() {
+    const RG = window.MantraRegion, home = RG && RG.get(REG.home), birthReg = RG && RG.REGIONS.find(r => r.name === S.inp.city), baseReg = REG.base === 'birth' && birthReg ? birthReg : home;
+    return `<section class="card"><div class="card-h"><h2>나의 소원성취 명당</h2></div><p class="small">관리자가 <b>출처와 확인 날짜를 붙여 등록한 장소</b>만 보여 드립니다. 위치가 확인되지 않았거나 출처가 없는 곳은 나오지 않습니다. 유형은 <b>자연 명소</b>(산·바다·계곡), <b>기도 명소</b>(사찰·성당·교회), <b>전통 명당</b>(사당·유적·기타)으로 나눠 읽어 주세요.</p>${wsBlock(baseReg, baseReg === birthReg && birthReg ? '출생지(' + birthReg.name + ')' : (home ? home.name : ''))}
+      <p class="small muted">장소는 지도 위 점이 아니라 방위·거리와 함께 목록으로 보여 드립니다. 지도 좌표 표시는 다음 단계입니다.</p></section>`;
+  }
+  // ───────────── 공간·명당 연동: 운세 흐름(삼원구운·연비성·월비성) · 택일(이사·개업) · 용신 ─────────────
+  // 기존 대운·세운·월운·일진·택일 점수·용신 계산은 건드리지 않고, 아래 카드를 덧붙여 참고 정보로만 보여 준다. 스위치 space 가 꺼져 있으면 아무것도 나오지 않는다.
+  function spHomeAn(kind) { try { const c = SP[kind || 'home'][Math.min(SP.sel[kind || 'home'], SP[kind || 'home'].length - 1)]; if (!c || c.facing === '' || !isFinite(+c.facing)) return null; return { c, an: spRun(kind || 'home', Math.min(SP.sel[kind || 'home'], SP[kind || 'home'].length - 1)) }; } catch (e) { return null; } }
+  function spStarDirs(o, stars) { return o.cells.filter(x => stars.includes(x.yearStar)).map(x => x.dir + '쪽'); }
+  function spFlowCard(curY, curM) {
+    if (!spOn()) return '';
+    const F = window.MantraFengshui, FD = window.MantraFengshuiData, p = F.periodOfYear(curY), r = F.periodRange(p), nxt = p === 9 ? 1 : p + 1;
+    const mIdx = curM && curM.b != null ? F.monthIndexFromBranch(curM.b) : null, o = F.overlay(null, curY, mIdx);
+    const five = o.cells.filter(x => x.yearStar === 5).map(x => x.dir)[0], two = o.cells.filter(x => x.yearStar === 2).map(x => x.dir)[0], good = spStarDirs(o, [8, 9, 1]);
+    const m5 = mIdx ? o.cells.filter(x => x.monthStar === 5).map(x => x.dir)[0] : null;
+    const home = spHomeAn('home'); let link = '';
+    if (home && home.an) {
+      const roomsAt = d => ['door', 'bed', 'desk', 'stove', 'wc'].filter(k => home.c.rooms[k] && SP_DIRS.find(x => x[0] === home.c.rooms[k]) && SP_DIRS.find(x => x[0] === home.c.rooms[k])[1] === d).map(k => FD.ROOM_LABEL[k]);
+      const a = roomsAt(five), b = m5 ? roomsAt(m5) : [];
+      link = `<p class="small"><b>${esc(home.c.name)}</b>(${home.an.xuankong.period}운 건물) 기준: 올해 오황 방위 ${esc(five)}쪽에는 ${a.length ? '<b>' + a.join('·') + '</b>이(가) 있어 공사·소음·큰 가구 이동을 특히 삼가세요.' : '입력하신 방 배치 중 해당하는 곳이 없습니다.'}${m5 ? ' 이번 달 오황은 ' + esc(m5) + '쪽' + (b.length ? '이며 ' + b.join('·') + '이(가) 있습니다.' : '입니다.') : ''}</p>`;
+    } else link = '<p class="small muted">‘공간·명당’ 탭에서 집의 향과 방 배치를 입력하면 올해·이번 달 별이 내 집 어느 방에 닿는지 이어서 보여 드립니다.</p>';
+    return `<section class="card"><div class="card-h"><h2>공간의 흐름 (풍수)</h2><span class="note">삼원구운·연비성·월비성 · 참고</span></div>
+      <p class="small">지금은 <b>${p}운</b>(${F.yuanOfYear(curY)} · ${r[0]}~${r[1]}년)이며 ${nxt}운은 ${p === 9 ? r[1] + 1 : r[1] + 1}년부터입니다. ${p}운에는 ${D_STAR_NAME(p)} 기운이 가장 힘을 받습니다.</p>
+      <div class="list"><div class="li"><span class="k">${curY}년 연비성</span><span class="v small">중궁 ${o.yearCenter}. 오황 ${esc(five)}쪽 · 이흑 ${esc(two)}쪽 · 길한 별(8·9·1)은 ${esc(good.join(', '))}.<br>${esc(o.samsal.text)}<br>${esc(o.taesae.text)}</span><span></span></div>
+      ${mIdx ? `<div class="li"><span class="k">이번 달 월비성</span><span class="v small">중궁 ${o.monthCenter}. 오황은 ${esc(m5)}쪽입니다. 월비성은 절기(${esc(curM.termName)}) 기준으로 바뀝니다.</span><span></span></div>` : ''}</div>${link}
+      <p class="note">풍수 흐름은 사주의 대운·세운·월운 계산과 별개로 건물 쪽의 시간 흐름을 보는 참고 정보이며, 위 사주 점수에는 반영되지 않습니다. ${esc(window.MantraFengshuiData.DISCLAIMER)}</p></section>`;
+  }
+  const D_STAR_NAME = n => window.MantraFengshuiData.STAR[n].name + '(' + window.MantraFengshuiData.STAR[n].short + ')';
+  function spTkCard(T, sd) {
+    if (!spOn() || !['move', 'contract'].includes(T.purpose)) return '';
+    const F = window.MantraFengshui, FD = window.MantraFengshuiData, isMove = T.purpose === 'move', kind = isMove ? 'home' : 'biz';
+    const Y = F.lichunYear(sd[0], sd[1], sd[2]); let mIdx = null, mTerm = '';
+    try { const ms = Date.UTC(sd[0], sd[1] - 1, sd[2]) - 9 * 3600e3, wl = M.wolun(S.ch, Y); let cur = wl[0]; wl.forEach(m => { if (m.startMs <= ms) cur = m; }); mIdx = F.monthIndexFromBranch(cur.b); mTerm = cur.termName; } catch (e) { }
+    const o = F.overlay(null, Y, mIdx), five = o.cells.find(x => x.yearStar === 5).dir, m5 = mIdx ? o.cells.find(x => x.monthStar === 5).dir : null;
+    const dirs = SP_DIRS.map(([k, n]) => n);
+    const warn = []; const mv = SP.mv;
+    if (isMove && mv) {
+      if (o.samsal.dir === mv) warn.push('이사 가는 방향(' + mv + '쪽)이 올해 삼살 방위입니다. 전통에서는 이사·문 내기를 피하는 방향입니다.');
+      if (o.taesae.dir === mv) warn.push('이사 가는 방향이 올해 태세 방위입니다. 땅을 파거나 큰 공사를 하는 일은 피합니다.');
+      if (o.sepa.dir === mv) warn.push('이사 가는 방향이 올해 세파 방위(태세의 맞은편)입니다.');
+      if (five === mv) warn.push('이사 가는 방향이 올해 오황 방위입니다.');
+      if (m5 === mv) warn.push('이사 가는 방향이 해당 월의 오황 방위입니다. 날짜를 월 바깥으로 옮기는 방법을 고려하세요.');
+    }
+    const h = spHomeAn(kind); let bld = '';
+    if (h && h.an) {
+      const xk = h.an.xuankong, door = h.c.rooms.door, dp = door ? SP_DIRS.find(x => x[0] === door) : null, pal = dp ? xk.palaces.find(p => p.key === door) : null;
+      bld = `<p class="small"><b>${esc(h.c.name)}</b>: ${xk.period}운 건물 · ${esc(xk.pattern.name)}.${pal ? ` 출입문(${dp[1]}쪽) 별은 산 ${pal.shan}·향 ${pal.xiang}, 올해 별은 ${o.cells.find(x => x.key === door).yearStar}입니다.` : ' 출입문 위치를 입력하면 문 자리 별과 올해 별을 함께 보여 드립니다.'}${xk.fuyin ? ' 복음(伏吟) 배치라 입주 전 점검이 필요합니다.' : ''}</p>`;
+    } else bld = `<p class="small muted">‘공간·명당’ 탭의 ${isMove ? '거주지' : '사업장'}에 후보를 입력하면 건물 분석 요약이 여기에 붙습니다.</p>`;
+    return `<section class="card"><div class="card-h"><h2>${isMove ? '이사·입주' : '개업·계약'} — 공간 참고 정보</h2><span class="note">${Y}년${mIdx ? ' · ' + esc(mTerm) + '월' : ''} 기준</span></div>
+      ${isMove ? `<label class="field"><span class="small">이사 가는 방향(지금 집 기준)</span><select data-sp-mv="1"><option value="">입력 안 함</option>${dirs.map(d => `<option value="${d}"${mv === d ? ' selected' : ''}>${d}쪽</option>`).join('')}</select></label>` : ''}
+      <ul class="pos-ul small"><li>${esc(o.samsal.text)}</li><li>${esc(o.taesae.text)}</li><li>${Y}년 오황은 ${esc(five)}쪽${m5 ? ', 이 달 오황은 ' + esc(m5) + '쪽' : ''}입니다. 그쪽 방의 공사·큰 가구 이동은 미루세요.</li></ul>
+      ${warn.length ? `<ul class="pos-ul small">${warn.map(w => `<li class="sp-b">${esc(w)}</li>`).join('')}</ul>` : (isMove && mv ? '<p class="small sp-g">입력하신 방향은 올해 삼살·태세·세파·오황에 걸리지 않습니다.</p>' : '')}${bld}
+      <p class="note">위 내용은 날짜 점수에 더해지지 않는 참고 정보입니다. 추천 날짜는 사주와의 맞음 기준 그대로이며, 풍수상 조심할 점이 있으면 날짜·방향 중 하나를 조정하는 식으로 활용하세요. 계약·등기·안전 점검은 현장과 전문가 확인이 우선입니다.</p></section>`;
+  }
+  function spYongCard() {
+    if (!spOn()) return '';
+    const F = window.MantraFengshui, FD = window.MantraFengshuiData, ch = S.ch, y = ch.yong, P = FD.PALACE;
+    const elOf = r => +Object.keys(y.roles).find(e => y.roles[e] === r), ye = elOf('용신'), he = elOf('희신');
+    const dirsOf = e => P.filter(p => p.el === e).map(p => p.dir + '쪽').join('·');
+    const h = spHomeAn('home');
+    let cmp = '<p class="small muted">‘공간·명당’ 탭에서 집의 향·건축연도를 입력하면, 내게 필요한 방향이 이 집에서는 어떤 별을 만나는지 이어서 비교해 드립니다.</p>';
+    if (h && h.an) {
+      const xk = h.an.xuankong, bz = h.an.bazhai, rows = P.filter(p => p.el === ye || p.el === he).map(pp => { const pal = xk.palaces[P.indexOf(pp)], b = bz.personStars ? bz.personStars[P.indexOf(pp)] : null; const bad = pal.shanTone <= -1 || pal.xiangTone <= -1 || (b && !b.good); return `<li><b>${pp.dir}쪽(${['목', '화', '토', '금', '수'][pp.el]}${pp.el === ye ? ' · 용신' : ' · 희신'})</b>: 이 집에서는 산 ${pal.shan}(${spState(pal.shanState)})·향 ${pal.xiang}(${spState(pal.xiangState)})${b ? ' · 팔택 ' + esc(b.name) : ''}. ${bad ? '<span class="sp-b">사주에는 맞는 방향이지만 이 집의 조건은 조심할 쪽입니다. 오래 머무는 방보다 짧게 쓰는 용도나 보완을 권합니다.</span>' : '<span class="sp-g">사주와 이 집의 조건이 크게 어긋나지 않습니다.</span>'}</li>`; });
+      cmp = `<h3>${esc(h.c.name)}에서 비교</h3><ul class="pos-ul small">${rows.join('')}</ul>`;
+    }
+    return `<section class="card"><div class="card-h"><h2>용신 방향과 건물 풍수는 다릅니다</h2><button class="btn" data-tab="space">공간·명당 ›</button></div>
+      <p class="small">내 사주가 필요로 하는 기운은 <b>용신 ${elLabel(ye)}</b>(${esc(dirsOf(ye))}), <b>희신 ${elLabel(he)}</b>(${esc(dirsOf(he))}) 방향입니다. 이것은 <b>나에게 필요한 방향</b>이지 특정 건물의 길흉이 아닙니다. 건물의 길흉은 좌향·건축 시기·주변 형세로 따로 정해지며, 두 기준이 다르면 한쪽으로 단정하지 않고 방마다 쓰임을 나누어 활용하세요.</p>${cmp}</section>`;
+  }
+  document.addEventListener('change', ev => { const t = ev.target; if (!t || !t.dataset || t.dataset.spMv === undefined) return; SP.mv = t.value; spSave(); render(); });
+
+  function renderSpace(force) {
+    if (force) SP.sec = force;
+    const secs = [['home', '내 사주에 맞는 거주지'], ['biz', '내 사주에 맞는 사업장'], ['wish', '나의 소원성취 명당'], ['fs', '우리 집·사업장 풍수']];
+    let body = '';
+    if (SP.sec === 'fs') body = renderFs();
+    else if (SP.sec === 'wish') body = spWish();
+    else {
+      const kind = SP.sec, i = Math.min(SP.sel[kind], SP[kind].length - 1);
+      body = (kind === 'home' ? spRegion() : spBizHead()) + spCandidates(kind);
+      let an = null; try { an = spRun(kind, i); } catch (e) { body += `<section class="card"><p class="err small">${esc(e.message)}</p></section>`; }
+      body += an ? spResult(kind, i, an) : '<section class="card"><p class="muted small">향(방향)을 입력하면 현공비성·팔택·형세 분석이 나타납니다.</p></section>';
+      body += spCompare(kind);
+    }
+    return `<section class="card"><nav class="seg sp-nav" role="tablist" aria-label="공간·명당 메뉴">${secs.map(([k, l]) => `<button type="button" class="${SP.sec === k ? 'on' : ''}" data-sp-sec="${k}">${l}</button>`).join('')}</nav></section>${body}`;
+  }
+  document.addEventListener('click', ev => {
+    const t = ev.target.closest && ev.target.closest('[data-sp-sec],[data-sp-pick],[data-sp-add],[data-sp-del]'); if (!t) return;
+    if (t.dataset.spSec) SP.sec = t.dataset.spSec;
+    else if (t.dataset.spPick) { const [k, i] = t.dataset.spPick.split(':'); SP.sel[k] = +i; }
+    else if (t.dataset.spAdd) { const k = t.dataset.spAdd; SP[k].push(spBlank('후보 ' + (SP[k].length + 1))); SP.sel[k] = SP[k].length - 1; }
+    else if (t.dataset.spDel) { const [k, i] = t.dataset.spDel.split(':'); SP[k].splice(+i, 1); SP.sel[k] = 0; }
+    spSave(); render();
+  });
+  document.addEventListener('change', ev => {
+    const t = ev.target; if (!t || !t.dataset) return;
+    if (t.dataset.sp) { const [k, i, key] = t.dataset.sp.split(':'), c = SP[k][+i], p = key.split('.'); if (p.length === 2) { c[p[0]] = c[p[0]] || {}; if (t.value === '') delete c[p[0]][p[1]]; else c[p[0]][p[1]] = t.value; } else c[key] = t.value; spSave(); render(); }
+    else if (t.dataset.spDir !== undefined) { const [k, i] = t.dataset.spDir.split(':'); if (t.value !== '') SP[k][+i].facing = t.value; spSave(); render(); }
+    else if (t.dataset.spHz) { const [k, i, h] = t.dataset.spHz.split(':'), c = SP[k][+i]; c.hazards = c.hazards.filter(x => x !== h); if (t.checked) c.hazards.push(h); spSave(); render(); }
+    else if (t.dataset.spInd) { SP.ind = t.value; spSave(); render(); }
+  });
+  { const st = document.createElement('style'); st.textContent = '.sp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}.sp-c{border:1px solid var(--line);border-radius:10px;padding:6px;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;min-height:92px;font-size:.78rem}.sp-c b{width:100%;font-size:.8rem}.sp-ctr{background:var(--accent-soft)}.sp-s{padding:1px 6px;border-radius:8px;border:1px solid var(--line)}.sp-c em{width:100%;font-style:normal;color:#b3402f;font-size:.72rem}.sp-g{color:#2e7d4f;font-weight:600}.sp-b{color:#b3402f;font-weight:600}.sp-n{color:var(--ink-2)}.sp-s.sp-g{border-color:#2e7d4f}.sp-s.sp-b{border-color:#b3402f}.sp-chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.sp-gc{border-color:#2e7d4f}.sp-bc{border-color:#b3402f}.sp-nav{flex-wrap:wrap}.spchk{display:inline-block;margin:4px 10px 4px 0}.sp-tb{border-collapse:collapse;width:100%;font-size:.85rem}.sp-tb th,.sp-tb td{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}@media(max-width:480px){.sp-c{font-size:.72rem;padding:4px}}'; document.head.appendChild(st); }
+
   function renderFs() {
     const sel = PK.fs, { sum, picked } = pkSum(FS, sel);
     const picker = `<section class="card">${pkHead('풍수 — 우리 집 살펴보기', picked.length, FS.length, 'fs')}
@@ -9471,7 +9683,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     let body = '';
     // 관상·풍수·타로는 사주 계산 없이도 볼 수 있다 (풍수의 용신 연결만 사주가 있을 때)
     if (S.tab === 'face') body = renderFace();
-    else if (S.tab === 'fs') body = renderFs();
+    else if (S.tab === 'fs') body = spOn() ? renderSpace('fs') : renderFs();
+    else if (S.tab === 'space') body = spOn() ? renderSpace() : renderFs();
     else if (S.tab === 'tarot') body = renderTarot();
     else if (S.tab === 'iching') body = renderIching();
     else if (!S.ch) body = `<section class="card"><p class="err">${esc(S.err || '입력값을 확인하세요')}</p></section>`;
