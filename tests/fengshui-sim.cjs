@@ -109,6 +109,24 @@ ok(F.landUse(c8, { openDir: badX.key }).items[0].tone === -1, '흉성 방위의 
 eq(F.landUse(c8, {}).given, 0, '방위 미입력 시 판단 없음');
 ok(F.analyze({ facingDeg: 180, builtYear: 2030, openDir: goodX.key }).land.given === 1, '종합에 land 포함');
 ok(D.HOME_METRICS.length === 6, '거주지 지표');
+// H. 무작위 사주 × 좌향 × 건축연도 견고성 (예외·NaN·빈 값 없음, 판정 분포 편향 확인)
+{ let seed = 7; const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff, ri = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+  let n = 0, errs = 0, verd = {}, fit = { '-1': 0, 0: 0, 1: 0 };
+  for (let k = 0; k < 400; k++) {
+    try {
+      const c = M.compute({ year: ri(1940, 2005), month: ri(1, 12), day: ri(1, 28), hour: ri(0, 23), minute: 0, gender: rnd() < .5 ? 'M' : 'F', calendar: 'solar', school: 'eokbu' });
+      const an = F.analyze({ ch: c, facingDeg: rnd() * 360, builtYear: ri(1950, 2040), renovationYear: rnd() < .3 ? ri(1990, 2040) : null, evalYear: ri(2024, 2043), openDir: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][ri(0, 7)], highDir: null, form: { back: 'mountain', front: 'open', left: 'level', right: 'lower' } });
+      ok(an.saju.length === 8 && an.xuankong.palaces.length === 9 && an.bazhai.personStars.length === 8, '구조');
+      an.saju.forEach(s => { fit[s.level]++; ok(s.text && !/undefined|NaN/.test(s.text), '사주 연결 문구'); });
+      an.xuankong.palaces.forEach(p => ok(p.shanText && p.xiangText && isFinite(p.shanTone + p.xiangTone), '궁 문구'));
+      for (const role of ['bed', 'door', 'wc', 'owner', 'cashier']) { const j = F.judgePlacement({ chart: an.xuankong, bazhai: an.bazhai, ch: c, role, idx: ri(0, 7) }); ok(j.verdictText && !/undefined/.test(j.verdictText), '배치 판정'); verd[j.verdict] = (verd[j.verdict] || 0) + 1; }
+      const ov = F.overlay(an.xuankong, ri(2024, 2043), ri(1, 12)); ok(ov.cells.some(x => x.yearStar === 5) && ov.cells.some(x => x.monthStar === 5), '오황 위치');
+      n++;
+    } catch (e) { errs++; fails.push('무작위 실패: ' + e.message); }
+  }
+  ok(n === 400 && errs === 0, '무작위 400건 처리 ' + n);
+  const tot = fit[-1] + fit[0] + fit[1]; ok(fit[-1] / tot > .1 && fit[1] / tot > .1, '사주 연결 판정이 한쪽으로 쏠림');
+  console.log('H. 무작위 400건 · 배치 판정 분포', JSON.stringify(verd), '· 사주 연결 적합/무난/주의 비율', [1, 0, -1].map(k => Math.round(fit[k] / tot * 100) + '%').join('/')); }
 ok(net === 0, '네트워크 호출 없음');
 
 console.log('패턴 분포(9운×24좌향):', JSON.stringify(counts));
