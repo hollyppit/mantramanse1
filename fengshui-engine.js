@@ -301,9 +301,36 @@
     return n > 0;
   }
   function listTexts() { return textRefs().map(function (r) { return { id: r.id, group: r.group, label: r.label, text: r.get() }; }); }
+  // 문구 점검: error 는 저장 불가 수준, warn 은 검수자가 판단할 사항
+  var ABSTRACT = /대길|대흉|길합니다|흉합니다|나쁩니다|운이 좋|운이 나|복이 옵|재앙/;
+  var CONCRETE = /방|침대|책상|문|주방|계산|상담|소품|조명|환기|공사|가구|서류|현금|통장|색|화분|커튼|창|거실|출입|청소|정리|점검|확인|보완|배치|자리|건강|공부|재물|관계|지출|계약|소음|습기|안전|수입|투자|결정|휴식/;
+  var GOODSTATE = /^star\.\d\.(san|hyang)\.(wang|sheng)$/, BADSTATE = /^star\.\d\.(san|hyang)\.(tui|sha)$/;
+  function lintOne(id, t, group) {
+    var out = [], x = String(t || '').trim();
+    var e = validateText(x); if (e) out.push({ lv: 'error', msg: e });
+    if (x.length > 110) out.push({ lv: 'warn', msg: '문장이 깁니다(' + x.length + '자). 한두 문장으로 줄이면 읽기 쉽습니다' });
+    if (x.length < 22) out.push({ lv: 'warn', msg: '너무 짧아 생활 속 활용법이 빠졌을 수 있습니다' });
+    if (ABSTRACT.test(x)) out.push({ lv: 'warn', msg: '추상적인 길흉 표현이 있습니다. 어떤 생활 장면에서 어떻게 달라지는지로 바꿔 보세요' });
+    if (!CONCRETE.test(x)) out.push({ lv: 'warn', msg: '구체적인 생활 장면·사용 방법이 보이지 않습니다' });
+    if (GOODSTATE.test(id) && /피하|권하지 않|조심해야/.test(x)) out.push({ lv: 'warn', msg: '힘을 받는 상태의 문구인데 부정적 권고가 들어 있어 방향이 엇갈려 보입니다' });
+    if (BADSTATE.test(id) && !/세요|권|주의|유의|점검|피|삼가|줄|보완|낫|좋습니다|하시|안전|않는 편|돌리/.test(x)) out.push({ lv: 'warn', msg: '조심할 상태인데 대처 방법이 없습니다' });
+    if (/[?？]/.test(x)) out.push({ lv: 'warn', msg: '의문문입니다. 평서문으로 안내해 주세요' });
+    return out;
+  }
+  function lintTexts(override) {   // override: { id: text } 가 있으면 그 문구로 점검(게시본·초안 점검용)
+    var list = listTexts().map(function (t) { return { id: t.id, group: t.group, text: override && override[t.id] != null ? override[t.id] : t.text }; }), seen = {}, head = {};
+    list.forEach(function (t) { (seen[t.text] = seen[t.text] || []).push(t.id); var h = t.text.slice(0, 10); (head[h] = head[h] || []).push(t.id); });
+    return list.map(function (t) {
+      var is = lintOne(t.id, t.text, t.group);
+      if (seen[t.text].length > 1) is.push({ lv: 'warn', msg: '다른 문구와 내용이 같습니다(' + seen[t.text].filter(function (i) { return i !== t.id; }).slice(0, 3).join(', ') + ')' });
+      var hh = head[t.text.slice(0, 10)]; if (hh.length > 4) is.push({ lv: 'warn', msg: '같은 시작 표현이 ' + hh.length + '개 문구에 반복됩니다("' + t.text.slice(0, 10) + '…")' });
+      return { id: t.id, group: t.group, issues: is };
+    });
+  }
+  function textHash(t) { var h = 5381, s = String(t || '').trim(); for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
   resetPublished();
 
   G.MantraFengshui = { VERSION: VERSION, SCHOOL: SCHOOL, EXCEPTIONS: EXCEPTIONS, MOUNTAINS: MTS, mountainAt: mountainAt, lichunYear: lichunYear, periodOfYear: periodOfYear, yuanOfYear: yuanOfYear, periodRange: periodRange, fly: fly, stateOf: stateOf, toneOf: toneOf,
     xuankong: xuankong, restate: restate, yearCenter: yearCenter, yearBranch: yearBranch, monthCenter: monthCenter, monthIndexFromBranch: monthIndexFromBranch, overlay: overlay,
-    kuaOf: kuaOf, eightStars: eightStars, bazhai: bazhai, birthYearFromChart: birthYearFromChart, form: form, sajuFit: sajuFit, judgePlacement: judgePlacement, suggestRoles: suggestRoles, analyze: analyze, dirName: dirName, RULES: RULES, validateText: validateText, listTexts: listTexts, applyPublished: applyPublished, resetPublished: resetPublished };
+    kuaOf: kuaOf, eightStars: eightStars, bazhai: bazhai, birthYearFromChart: birthYearFromChart, form: form, sajuFit: sajuFit, judgePlacement: judgePlacement, suggestRoles: suggestRoles, analyze: analyze, dirName: dirName, RULES: RULES, validateText: validateText, listTexts: listTexts, lintTexts: lintTexts, textHash: textHash, applyPublished: applyPublished, resetPublished: resetPublished };
 })(typeof window !== 'undefined' ? window : globalThis);

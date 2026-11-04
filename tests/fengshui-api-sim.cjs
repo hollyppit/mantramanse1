@@ -47,5 +47,12 @@ const root = path.join(__dirname, '..');
   ok(kv.m.get('overrides') === '{"keep":1}', '다른 KV 키 불간섭');
   const all = await (await mod.onRequestGet({ request: rq('GET', null, 'pw-test', 'https://x/api/fengshui?all=1'), env })).json();
   ok(all.base.texts.length >= 100 && all.base.rules.length === 2, '관리자 조회 구성');
+  // 검수 표시: 완료 → 문구 변경 시 자동 무효 → 오류 문구는 거부 → 해제
+  let rv = await put({ kind: 'review', ids: [id], ok: true, note: '확인' }); ok(rv.s === 200 && rv.j.done === 1, '검수 완료 표시');
+  let a2 = await (await mod.onRequestGet({ request: rq('GET', null, 'pw-test', 'https://x/api/fengshui?all=1'), env })).json(); ok(a2.reviews[id] && a2.reviews[id].valid === true && Array.isArray(a2.lint) && a2.lint.length >= 100, '검수 상태·점검 결과 조회');
+  await put({ kind: 'flag', enabled: true }); await put({ kind: 'text', id, action: 'save', fields: { text: '재물과 저축 흐름이 쌓이는 자리라 금고나 통장을 두기 좋습니다, 수정본입니다.' } }); await put({ kind: 'text', id, action: 'approve_publish' });
+  a2 = await (await mod.onRequestGet({ request: rq('GET', null, 'pw-test', 'https://x/api/fengshui?all=1'), env })).json(); ok(a2.reviews[id].valid === false, '문구가 바뀌면 검수가 무효가 되어야 함');
+  ok((await put({ kind: 'review', ids: ['nope.x'], ok: true })).s === 404, '없는 ID 검수'); ok((await put({ kind: 'review', ids: [], ok: true })).s === 400, '빈 ids'); ok((await put({ kind: 'review', ids: [id], ok: 'y' })).s === 400, 'ok 형식');
+  ok((await put({ kind: 'review', ids: [id], ok: false })).j.done === 1, '검수 해제'); ok((await put({ kind: 'review', ids: [id], ok: true }, 'bad')).s === 401, '검수 인증');
   console.log(`API 검증 실패 ${fails.length}건`); if (fails.length) { console.log(fails.join('\n')); process.exit(1); } console.log('통과');
 })();

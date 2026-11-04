@@ -6,7 +6,7 @@
   var pw = '', root, F = window.MantraFengshui;
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var $ = function (s) { return root.querySelector(s); }, $$ = function (s) { return [].slice.call(root.querySelectorAll(s)); };
-  var S = { doc: null, base: null, tab: 'flag', f: { group: '', st: '', q: '' }, sim: { facing: 180, built: 2010, eval: new Date().getFullYear() } };
+  var S = { doc: null, base: null, reviews: {}, lint: [], rv: { group: '', f: 'todo', q: '' }, tab: 'flag', f: { group: '', st: '', q: '' }, sim: { facing: 180, built: 2010, eval: new Date().getFullYear() } };
   var ST = { draft: '초안', reviewed: '승인(미게시)', published: '게시됨', none: '기본값' };
   function call(method, qs, body) {
     var who = ''; try { who = localStorage.getItem('iching_reviewer') || ''; } catch (e) { }
@@ -14,7 +14,7 @@
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); });
   }
   function msg(t, bad) { var m = $('#fsMsg'); if (m) { m.textContent = t; m.style.color = bad ? '#FF8A78' : '#62C2AE'; } }
-  function load(note) { return call('GET', '?all=1').then(function (d) { if (!d._ok) { root.innerHTML = '<div class="card"><p class="muted">' + esc(d.error || '불러오지 못했습니다') + '</p></div>'; return; } S.doc = d.doc; S.base = d.base; draw(); if (note) msg(note); }); }
+  function load(note) { return call('GET', '?all=1').then(function (d) { if (!d._ok) { root.innerHTML = '<div class="card"><p class="muted">' + esc(d.error || '불러오지 못했습니다') + '</p></div>'; return; } S.doc = d.doc; S.base = d.base; S.reviews = d.reviews || {}; S.lint = d.lint || []; draw(); if (note) msg(note); }); }
   var item = function (kind, id) { return (kind === 'text' ? S.doc.texts : S.doc.rules)[id] || null; };
   var stOf = function (kind, id) { var it = item(kind, id); return it ? it.status : 'none'; };
   var fail = function (d) { msg(d.error || '실패했습니다', true); };
@@ -24,11 +24,11 @@
   }
   function bindRestore() { $$('[data-rs]').forEach(function (b) { b.onclick = function () { call('PUT', '', { kind: b.dataset.k, id: b.dataset.i, action: 'restore', v: +b.dataset.rs }).then(function (d) { d._ok ? load('이전 버전을 초안으로 불러왔습니다') : fail(d); }); }; }); }
   function draw() {
-    var tabs = [['flag', '공개 스위치'], ['rule', '계산 규칙'], ['text', '해석 문구'], ['basis', '계산 기준·예외'], ['sim', '미리보기']];
+    var tabs = [['flag', '공개 스위치'], ['rule', '계산 규칙'], ['review', '문구 검수'], ['text', '해석 문구'], ['basis', '계산 기준·예외'], ['sim', '미리보기']];
     root.innerHTML = '<div class="card"><h3 style="margin:0 0 6px;color:var(--gold)">공간·명당 풍수 관리</h3><p class="muted" style="margin:0 0 8px">현공비성·팔택·형세 풍수의 해석 문구와 계산 규칙을 수정·게시합니다. 문구는 존댓말이어야 하고 단정·공포 표현은 저장되지 않습니다.</p>' +
       '<div class="row" style="gap:6px;flex-wrap:wrap">' + tabs.map(function (t) { return '<button class="btn" data-tab="' + t[0] + '"' + (S.tab === t[0] ? ' style="outline:2px solid var(--gold)"' : '') + '>' + t[1] + '</button>'; }).join('') + '</div><p id="fsMsg" style="margin:8px 0 0;min-height:1.2em"></p></div><div id="fsBody"></div>';
     $$('[data-tab]').forEach(function (b) { b.onclick = function () { S.tab = b.dataset.tab; draw(); }; });
-    ({ flag: drawFlag, rule: drawRule, text: drawText, basis: drawBasis, sim: drawSim })[S.tab]();
+    ({ flag: drawFlag, rule: drawRule, review: drawReview, text: drawText, basis: drawBasis, sim: drawSim })[S.tab]();
   }
   function drawFlag() {
     var on = S.doc.enabled === true, n = function (o) { return Object.keys(o || {}).filter(function (k) { return o[k].status === 'published'; }).length; };
@@ -63,6 +63,35 @@
     $$('[data-tp]').forEach(function (b) { b.onclick = function () { call('PUT', '', { kind: 'text', id: b.dataset.tp, action: 'approve_publish' }).then(function (d) { d._ok ? load('게시했습니다') : fail(d); }); }; });
     $$('[data-tu]').forEach(function (b) { b.onclick = function () { call('PUT', '', { kind: 'text', id: b.dataset.tu, action: 'unpublish' }).then(function (d) { d._ok ? load('게시를 취소했습니다') : fail(d); }); }; });
     bindRestore();
+  }
+  function drawReview() {
+    var lint = {}; S.lint.forEach(function (x) { lint[x.id] = x.issues; });
+    var all = S.base.texts, ok = function (id) { return S.reviews[id] && S.reviews[id].valid; }, nErr = 0, nWarn = 0, nDone = 0;
+    all.forEach(function (t) { var is = lint[t.id] || []; if (is.some(function (i) { return i.lv === 'error'; })) nErr++; else if (is.length) nWarn++; if (ok(t.id)) nDone++; });
+    var groups = []; all.forEach(function (t) { if (groups.indexOf(t.group) < 0) groups.push(t.group); });
+    var f = S.rv, list = all.filter(function (t) { var is = lint[t.id] || [], d = ok(t.id); return (!f.group || t.group === f.group) && (f.f === 'all' || (f.f === 'todo' && !d) || (f.f === 'warn' && is.length) || (f.f === 'done' && d)) && (!f.q || (t.id + t.label + t.text).indexOf(f.q) >= 0); });
+    var pct = Math.round(nDone / all.length * 100);
+    $('#fsBody').innerHTML = '<div class="card"><h3 style="margin:0 0 6px;color:var(--gold)">문구 검수 현황</h3><div style="height:10px;border-radius:6px;background:var(--line);overflow:hidden"><div style="height:100%;width:' + pct + '%;background:#62C2AE"></div></div>' +
+      '<p style="margin:8px 0">검수 완료 <b>' + nDone + '</b> / ' + all.length + '건 (' + pct + '%) · 오류 <b style="color:#FF8A78">' + nErr + '</b> · 경고 <b style="color:#E8B64A">' + nWarn + '</b></p>' +
+      '<p class="muted" style="margin:0 0 8px">검수 완료는 그 문구 내용에 대한 표시입니다. 문구를 고치면 자동으로 미검수로 돌아갑니다. 검수 기준: 존댓말 · 단정·공포 표현 없음 · 추상적 길흉이 아니라 생활 장면과 활용법 · 힘받는 별은 긍정, 조심할 별은 대처법 포함.</p>' +
+      '<div class="row" style="gap:6px;flex-wrap:wrap"><select id="rvG"><option value="">분류 전체</option>' + groups.map(function (g) { return '<option' + (f.group === g ? ' selected' : '') + '>' + esc(g) + '</option>'; }).join('') + '</select>' +
+      '<select id="rvF">' + [['todo', '미검수'], ['warn', '경고·오류 있음'], ['done', '검수 완료'], ['all', '전체']].map(function (o) { return '<option value="' + o[0] + '"' + (f.f === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select><input id="rvQ" placeholder="검색" value="' + esc(f.q) + '">' +
+      '<button class="btn" id="rvAll">경고 없는 표시 항목 모두 검수 완료</button></div></div>' +
+      list.slice(0, 30).map(function (t) {
+        var is = lint[t.id] || [], rv = S.reviews[t.id], badge = ok(t.id) ? '<span style="color:#62C2AE">검수 완료 · ' + esc(rv.by || '') + ' ' + esc((rv.at || '').slice(0, 10)) + '</span>' : (rv && !rv.valid ? '<span style="color:#E8B64A">문구가 바뀌어 재검수 필요</span>' : '<span class="muted">미검수</span>');
+        var it = S.doc.texts[t.id], cur = it && it.status === 'published' && it.fields && it.fields.text ? it.fields.text : t.text;
+        return '<div class="card"><b>' + esc(t.label) + '</b> <span class="muted">' + esc(t.id) + '</span> · ' + badge + '<p style="margin:8px 0">' + esc(cur) + '</p>' +
+          (is.length ? '<ul style="margin:0 0 8px 18px">' + is.map(function (i) { return '<li style="color:' + (i.lv === 'error' ? '#FF8A78' : '#E8B64A') + '">' + (i.lv === 'error' ? '오류' : '경고') + ' — ' + esc(i.msg) + '</li>'; }).join('') + '</ul>' : '<p class="muted" style="margin:0 0 8px">점검 항목 없음</p>') +
+          '<div class="row" style="gap:6px;flex-wrap:wrap"><input data-rn="' + esc(t.id) + '" placeholder="검수 메모(선택)" value="' + esc(rv && rv.note || '') + '" style="flex:1;min-width:140px"><button class="btn" data-ok="' + esc(t.id) + '">' + (ok(t.id) ? '검수 취소' : '검수 완료') + '</button><button class="btn" data-ed="' + esc(t.id) + '">문구 수정으로</button></div></div>';
+      }).join('') + (list.length > 30 ? '<p class="muted">처음 30건만 보입니다. 검수 완료하면 다음 항목이 나타납니다. (표시 ' + list.length + '건)</p>' : (list.length ? '' : '<p class="muted">조건에 맞는 문구가 없습니다.</p>'));
+    $('#rvG').onchange = function () { S.rv.group = this.value; drawReview(); }; $('#rvF').onchange = function () { S.rv.f = this.value; drawReview(); }; $('#rvQ').onchange = function () { S.rv.q = this.value; drawReview(); };
+    $$('[data-ok]').forEach(function (b) { b.onclick = function () { var id = b.dataset.ok, note = ($('[data-rn="' + id + '"]') || {}).value || ''; call('PUT', '', { kind: 'review', ids: [id], ok: !ok(id), note: note }).then(function (d) { d._ok ? (d.blocked && d.blocked.length ? (msg('오류가 있는 문구는 검수 완료할 수 없습니다', true)) : load(ok(id) ? '검수를 취소했습니다' : '검수 완료로 표시했습니다')) : fail(d); }); }; });
+    $$('[data-ed]').forEach(function (b) { b.onclick = function () { S.tab = 'text'; S.f = { group: '', st: '', q: b.dataset.ed }; draw(); }; });
+    $('#rvAll').onclick = function () {
+      var ids = list.filter(function (t) { return !(lint[t.id] || []).length && !ok(t.id); }).map(function (t) { return t.id; }); if (!ids.length) return msg('경고 없는 미검수 항목이 없습니다', true);
+      if (!confirm('표시된 항목 중 경고·오류가 없는 ' + ids.length + '건을 검수 완료로 표시할까요? 문구를 직접 읽어 본 뒤에만 눌러 주세요.')) return;
+      call('PUT', '', { kind: 'review', ids: ids.slice(0, 400), ok: true }).then(function (d) { d._ok ? load(d.done + '건을 검수 완료로 표시했습니다') : fail(d); });
+    };
   }
   function drawBasis() {
     var sc = S.base.school;

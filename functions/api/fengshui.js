@@ -13,7 +13,7 @@ import '../../fengshui-engine.js';
 const KEY = 'fengshui:doc', MAX_HIST = 30;
 const safeDecode = s => { try { return decodeURIComponent(s); } catch { return ''; } };
 const FS = () => globalThis.MantraFengshui;
-const empty = () => ({ version: 0, enabled: false, texts: {}, rules: {} });
+const empty = () => ({ version: 0, enabled: false, texts: {}, rules: {}, reviews: {} });
 
 export function validateFields(kind, id, f) {
   if (kind === 'text') {
@@ -68,7 +68,9 @@ export async function onRequestGet({ request, env }) {
     if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
     if (!env.GLOSSARY_KV) return json({ error: 'KV 바인딩이 없습니다' }, 500);
     const doc = await load(env);
-    return json({ version: doc.version, enabled: doc.enabled, doc, base: { texts: FS().listTexts(), rules: FS().RULES, exceptions: FS().EXCEPTIONS, school: FS().SCHOOL } });
+    const eff = {}; for (const t of FS().listTexts()) { const it = doc.texts[t.id]; eff[t.id] = it && it.status === 'published' && it.fields && it.fields.text ? it.fields.text : t.text; }
+    const reviews = {}; for (const [id, r] of Object.entries(doc.reviews || {})) reviews[id] = { ...r, valid: eff[id] != null && r.h === FS().textHash(eff[id]) };
+    return json({ version: doc.version, enabled: doc.enabled, doc, reviews, lint: FS().lintTexts(eff), base: { texts: FS().listTexts(), rules: FS().RULES, exceptions: FS().EXCEPTIONS, school: FS().SCHOOL } });
   }
   let doc = empty(); try { if (env.GLOSSARY_KV) doc = await load(env); } catch { doc = empty(); }
   return new Response(JSON.stringify({ version: doc.version, enabled: doc.enabled === true, pub: doc.enabled === true ? publishedView(doc) : null }), { status: 200, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=60' } });
@@ -83,6 +85,22 @@ export async function onRequestPut({ request, env }) {
     if (typeof body.enabled !== 'boolean') return json({ error: 'enabled 는 true/false 여야 합니다' }, 400);
     doc.enabled = body.enabled; doc.version += 1; doc.flagAt = at; doc.flagBy = by;
     await env.GLOSSARY_KV.put(KEY, JSON.stringify(doc)); return json({ ok: true, version: doc.version, enabled: doc.enabled });
+  }
+  if (body.kind === 'review') {   // 검수 완료/해제: 해당 시점 문구의 해시와 함께 기록 → 문구가 바뀌면 자동으로 미검수로 돌아간다
+    if (!Array.isArray(body.ids) || !body.ids.length || body.ids.length > 400 || !body.ids.every(i => typeof i === 'string')) return json({ error: 'ids는 1~400개의 문구 ID여야 합니다' }, 400);
+    if (typeof body.ok !== 'boolean') return json({ error: 'ok 는 true/false 여야 합니다' }, 400);
+    const note = typeof body.note === 'string' ? body.note.slice(0, 200) : '', eff = {}, all = new Set(FS().listTexts().map(t => t.id));
+    for (const t of FS().listTexts()) { const it = doc.texts[t.id]; eff[t.id] = it && it.status === 'published' && it.fields && it.fields.text ? it.fields.text : t.text; }
+    const lint = Object.fromEntries(FS().lintTexts(eff).map(x => [x.id, x.issues]));
+    doc.reviews = doc.reviews || {}; let done = 0; const blocked = [];
+    for (const id of [...new Set(body.ids)]) {
+      if (!all.has(id)) return json({ error: '알 수 없는 문구 ID: ' + id }, 404);
+      if (!body.ok) { delete doc.reviews[id]; done++; continue; }
+      if ((lint[id] || []).some(i => i.lv === 'error')) { blocked.push(id); continue; }
+      doc.reviews[id] = { ok: true, h: FS().textHash(eff[id]), by, at, note }; done++;
+    }
+    if (done) { doc.version += 1; await env.GLOSSARY_KV.put(KEY, JSON.stringify(doc)); }
+    return json({ ok: true, version: doc.version, done, blocked });
   }
   const r = transition(doc, body, at, by);
   if (r.error) return json({ error: r.error }, r.status);
