@@ -46,6 +46,7 @@ globalThis.window = globalThis; globalThis.document = { createElement() { return
 globalThis.location = { hostname: 'x', search: '', hash: '' };
 globalThis.MantraCore = Core;
 vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'hub', 'free-core.js'), 'utf8'), { filename: 'free-core.js' });
+vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'hub', 'tarot-read.js'), 'utf8'), { filename: 'tarot-read.js' });
 for (const f of ['hub', 'hub-tarot', 'hub-saju']) vm.runInThisContext(fs.readFileSync(path.join(root, 'report', 'hub', f + '.js'), 'utf8'), { filename: f + '.js' });
 const M = globalThis.Manse, H = globalThis.Hub;
 ['', 'tarot', 'tarot/play', 'input', 'today', 'awaken', 'my', 'go'].forEach(r => ok(typeof H.routes[r] === 'function', '라우트 ' + r));

@@ -147,8 +147,16 @@
     }).join('') + '</div>';
     h += '<div class="verdict ' + (rs.bandClass === 'good' ? 'YES' : rs.bandClass === 'bad' ? 'NO' : 'MAYBE') + rv + '"' + d(1.0) + '>' + esc(rs.band) + '</div>' +
       '<p class="rhead' + rv + '"' + d(1.2) + '>“' + esc(rs.oneLine) + '”</p><p class="rsum' + rv + '"' + d(1.4) + '>' + esc(mode.name) + ' · ' + esc(rs.spreadName) + ' — 전체 기운은 ' + esc(rs.band) + '입니다. ' + esc(rs.trend) + (rs.nowRow ? ' 지금은 ' + esc(rs.nowRow.card.nameKo) + (rs.nowRow.rev ? '(역)' : '') + '(“' + esc(rs.nowRow.kw) + '”)의 한가운데에 있고,' : '') + ' 핵심 카드는 ' + esc(rs.keyRow.card.nameKo) + (rs.keyRow.rev ? '(역)' : '') + ', 키워드는 “' + esc(rs.keyRow.kw) + '”입니다.' + (rs.advRow ? ' 조언 자리의 ' + esc(rs.advRow.card.nameKo) + '는 “' + esc(rs.advRow.rev ? rs.advRow.card.reversed + '을(를) 경계하라' : rs.advRow.card.upright) + '”고 말합니다.' : '') + '</p>';
+    var TR = root.TarotRead, list = TR && root.FreeCore ? TR.readings(rs.rows, { FC: root.FreeCore, Tarot: Tarot, mode: st.m, spread: st.spread, seed: st.seed || '', ov: ov, plain: false }) : null;
+    if (list) { var sty = TR.story(rs.rows, st.spread, rs.topicName); if (sty) h += sec('카드로 읽는 하나의 이야기', '<p>' + sty + '</p>', 'one'); }
     if (rs.notes.length) h += sec('카드들이 함께 말하는 것', '<ul class="dl">' + rs.notes.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>');
-    rs.rows.forEach(function (r) {
+    var blk = function (b) { return b.t === 'p' ? '<p>' + esc(b.text) + '</p>' : b.t === 'cells' ? '<ul class="dl">' + b.items.map(function (c) { return '<li><b>' + esc(c.label) + '</b> ' + esc(c.text) + '</li>'; }).join('') + '</ul>' : b.t === 'acts' ? '<p><b>' + esc(b.label) + '</b></p><ul class="dl">' + b.items.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '<p class="note">' + (b.label ? '<b>' + esc(b.label) + '</b> ' : '') + esc(b.text) + '</p>'; };
+    if (list) list.forEach(function (x) {
+      var r = x.row, title = esc(r.label) + ' · ' + esc(r.card.nameKo) + (r.rev ? ' (역방향)' : '');
+      var body = '<p class="note">' + esc(x.lens) + '</p><p><b>' + esc(x.lead) + '</b></p>' + (x.headline ? '<p>' + esc(x.headline) + '</p>' : '');
+      if (x.blocks.length) body += '<details class="tdet"><summary>자세한 풀이 보기</summary>' + x.blocks.map(blk).join('') + '</details>';
+      h += sec(title, body);
+    }); else rs.rows.forEach(function (r) {
       var c = root.FreeCore ? root.FreeCore.composeTarot(Tarot, r.card.id, r.rev, st.m, (st.seed || r.card.id) + r.k, ov) : null;
       var body = c ? '<p><b>' + esc(c.headline) + '</b></p><p>' + esc(c.summary) + '</p><p>' + esc(r.rev ? c.caution : c.opportunity) + '</p>' : '<p>“' + esc(r.kw) + '”의 기운이 이 자리에 놓여 있습니다.</p>';
       h += sec(esc(r.label) + ' · ' + esc(r.card.nameKo) + (r.rev ? ' (역방향)' : ''), '<p class="note">' + esc(r.frame) + '을 비추는 카드</p>' + body);
