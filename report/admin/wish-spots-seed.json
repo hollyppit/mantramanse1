@@ -12,7 +12,7 @@
   "source": {
    "name": "위키백과 지리산",
    "url": "https://ko.wikipedia.org/wiki/%EC%A7%80%EB%A6%AC%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -30,7 +30,7 @@
   "source": {
    "name": "위키백과 한라산",
    "url": "https://ko.wikipedia.org/wiki/%ED%95%9C%EB%9D%BC%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -48,7 +48,7 @@
   "source": {
    "name": "위키백과 낙산사",
    "url": "https://ko.wikipedia.org/wiki/%EB%82%99%EC%82%B0%EC%82%AC",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -56,8 +56,8 @@
  {
   "id": "seed-04",
   "name": "해인사",
-  "lat": 35.8011,
-  "lon": 128.0983,
+  "lat": 35.8,
+  "lon": 128.1,
   "type": "temple",
   "tags": [
    "study",
@@ -66,7 +66,7 @@
   "source": {
    "name": "위키백과 해인사",
    "url": "https://ko.wikipedia.org/wiki/%ED%95%B4%EC%9D%B8%EC%82%AC",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -84,7 +84,7 @@
   "source": {
    "name": "위키백과 불국사",
    "url": "https://ko.wikipedia.org/wiki/%EB%B6%88%EA%B5%AD%EC%82%AC",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -101,7 +101,7 @@
   "source": {
    "name": "위키백과 석굴암",
    "url": "https://ko.wikipedia.org/wiki/%EC%84%9D%EA%B5%B4%EC%95%94",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -109,8 +109,8 @@
  {
   "id": "seed-07",
   "name": "향일암",
-  "lat": 34.5914,
-  "lon": 127.8028,
+  "lat": 34.5916,
+  "lon": 127.8039,
   "type": "temple",
   "tags": [
    "wealth",
@@ -119,7 +119,7 @@
   "source": {
    "name": "위키백과 향일암",
    "url": "https://ko.wikipedia.org/wiki/%ED%96%A5%EC%9D%BC%EC%95%94",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -127,8 +127,8 @@
  {
   "id": "seed-08",
   "name": "법주사",
-  "lat": 36.5425,
-  "lon": 127.8339,
+  "lat": 36.5415,
+  "lon": 127.833,
   "type": "temple",
   "tags": [
    "general"
@@ -136,7 +136,7 @@
   "source": {
    "name": "위키백과 법주사",
    "url": "https://ko.wikipedia.org/wiki/%EB%B2%95%EC%A3%BC%EC%82%AC",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -144,8 +144,8 @@
  {
   "id": "seed-09",
   "name": "통도사",
-  "lat": 35.4878,
-  "lon": 129.0644,
+  "lat": 35.4881,
+  "lon": 129.0647,
   "type": "temple",
   "tags": [
    "general",
@@ -154,7 +154,7 @@
   "source": {
    "name": "위키백과 통도사",
    "url": "https://ko.wikipedia.org/wiki/%ED%86%B5%EB%8F%84%EC%82%AC",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -162,8 +162,8 @@
  {
   "id": "seed-10",
   "name": "금산사",
-  "lat": 35.7228,
-  "lon": 127.0533,
+  "lat": 35.7227,
+  "lon": 127.053,
   "type": "temple",
   "tags": [
    "wealth",
@@ -172,7 +172,7 @@
   "source": {
    "name": "위키백과 금산사",
    "url": "https://ko.wikipedia.org/wiki/%EA%B8%88%EC%82%B0%EC%82%AC",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -190,7 +190,7 @@
   "source": {
    "name": "위키백과 부석사",
    "url": "https://ko.wikipedia.org/wiki/%EB%B6%80%EC%84%9D%EC%82%AC",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -208,7 +208,7 @@
   "source": {
    "name": "위키백과 명동성당",
    "url": "https://ko.wikipedia.org/wiki/%EB%AA%85%EB%8F%99%EC%84%B1%EB%8B%B9",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -225,7 +225,7 @@
   "source": {
    "name": "위키백과 약현성당",
    "url": "https://ko.wikipedia.org/wiki/%EC%95%BD%ED%98%84%EC%84%B1%EB%8B%B9",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -243,7 +243,7 @@
   "source": {
    "name": "위키백과 호미곶",
    "url": "https://ko.wikipedia.org/wiki/%ED%98%B8%EB%AF%B8%EA%B3%B6",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -261,7 +261,7 @@
   "source": {
    "name": "위키백과 변산반도",
    "url": "https://ko.wikipedia.org/wiki/%EB%B3%80%EC%82%B0%EB%B0%98%EB%8F%84",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -279,7 +279,7 @@
   "source": {
    "name": "위키백과 금산 (경남)",
    "url": "https://ko.wikipedia.org/wiki/%EA%B8%88%EC%82%B0_(%EA%B2%BD%EB%82%A8)",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -297,7 +297,7 @@
   "source": {
    "name": "위키백과 안동 도산서원",
    "url": "https://ko.wikipedia.org/wiki/%EC%95%88%EB%8F%99_%EB%8F%84%EC%82%B0%EC%84%9C%EC%9B%90",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -305,8 +305,8 @@
  {
   "id": "seed-18",
   "name": "병산서원",
-  "lat": 36.5405,
-  "lon": 128.546,
+  "lat": 36.5403,
+  "lon": 128.5528,
   "type": "shrine",
   "tags": [
    "study"
@@ -314,7 +314,7 @@
   "source": {
    "name": "위키백과 안동 병산서원",
    "url": "https://ko.wikipedia.org/wiki/%EC%95%88%EB%8F%99_%EB%B3%91%EC%82%B0%EC%84%9C%EC%9B%90",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -332,7 +332,7 @@
   "source": {
    "name": "위키백과 강화 참성단",
    "url": "https://ko.wikipedia.org/wiki/%EA%B0%95%ED%99%94_%EC%B0%B8%EC%84%B1%EB%8B%A8",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -357,8 +357,8 @@
  {
   "id": "seed-21",
   "name": "죽서루",
-  "lat": 37.4417,
-  "lon": 129.1603,
+  "lat": 37.4408,
+  "lon": 129.1583,
   "type": "shrine",
   "tags": [
    "create"
@@ -366,7 +366,7 @@
   "source": {
    "name": "위키백과 삼척 죽서루",
    "url": "https://ko.wikipedia.org/wiki/%EC%82%BC%EC%B2%99_%EC%A3%BD%EC%84%9C%EB%A3%A8",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -375,7 +375,7 @@
   "id": "seed-22",
   "name": "경포대",
   "lat": 37.795,
-  "lon": 128.8967,
+  "lon": 128.8944,
   "type": "shrine",
   "tags": [
    "create",
@@ -384,7 +384,7 @@
   "source": {
    "name": "위키백과 경포대",
    "url": "https://ko.wikipedia.org/wiki/%EA%B2%BD%ED%8F%AC%EB%8C%80",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -402,7 +402,7 @@
   "source": {
    "name": "위키백과 소쇄원",
    "url": "https://ko.wikipedia.org/wiki/%EC%86%8C%EC%87%84%EC%9B%90",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -410,8 +410,8 @@
  {
   "id": "seed-24",
   "name": "외암민속마을",
-  "lat": 36.7306,
-  "lon": 127.0158,
+  "lat": 36.7311,
+  "lon": 127.0136,
   "type": "other",
   "tags": [
    "health"
@@ -419,7 +419,7 @@
   "source": {
    "name": "위키백과 외암마을",
    "url": "https://ko.wikipedia.org/wiki/%EC%99%B8%EC%95%94%EB%A7%88%EC%9D%84",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -437,7 +437,7 @@
   "source": {
    "name": "위키백과 팔공산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%ED%8C%94%EA%B3%B5%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -455,7 +455,7 @@
   "source": {
    "name": "위키백과 마니산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EB%A7%88%EB%8B%88%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -473,7 +473,7 @@
   "source": {
    "name": "위키백과 태백산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%ED%83%9C%EB%B0%B1%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -491,7 +491,7 @@
   "source": {
    "name": "위키백과 계룡산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EA%B3%84%EB%A3%A1%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -509,7 +509,7 @@
   "source": {
    "name": "위키백과 설악산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EC%84%A4%EC%95%85%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -526,7 +526,7 @@
   "source": {
    "name": "위키백과 속리산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EC%86%8D%EB%A6%AC%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -543,7 +543,7 @@
   "source": {
    "name": "위키백과 월출산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EC%9B%94%EC%B6%9C%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -561,7 +561,7 @@
   "source": {
    "name": "위키백과 북한산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EB%B6%81%ED%95%9C%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -579,7 +579,7 @@
   "source": {
    "name": "위키백과 모악산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EB%AA%A8%EC%95%85%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -597,7 +597,7 @@
   "source": {
    "name": "위키백과 보문사 (강화군) (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EB%B3%B4%EB%AC%B8%EC%82%AC_(%EA%B0%95%ED%99%94%EA%B5%B0)",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -615,7 +615,7 @@
   "source": {
    "name": "위키백과 송광사 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EC%86%A1%EA%B4%91%EC%82%AC",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -633,7 +633,7 @@
   "source": {
    "name": "위키백과 선암사 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EC%84%A0%EC%95%94%EC%82%AC",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -651,7 +651,7 @@
   "source": {
    "name": "위키백과 정동진 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EC%A0%95%EB%8F%99%EC%A7%84",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -669,7 +669,7 @@
   "source": {
    "name": "위키백과 해운대 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%ED%95%B4%EC%9A%B4%EB%8C%80",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -687,7 +687,7 @@
   "source": {
    "name": "위키백과 산방산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EC%82%B0%EB%B0%A9%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -705,7 +705,7 @@
   "source": {
    "name": "위키백과 오대산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EC%98%A4%EB%8C%80%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -723,7 +723,7 @@
   "source": {
    "name": "위키백과 치악산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EC%B9%98%EC%95%85%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -740,7 +740,7 @@
   "source": {
    "name": "위키백과 덕유산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EB%8D%95%EC%9C%A0%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -758,7 +758,7 @@
   "source": {
    "name": "위키백과 내장산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EB%82%B4%EC%9E%A5%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -776,7 +776,7 @@
   "source": {
    "name": "위키백과 가야산 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%EA%B0%80%EC%95%BC%EC%82%B0",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -793,7 +793,7 @@
   "source": {
    "name": "위키백과 현충사 (좌표: 위키데이터)",
    "url": "https://ko.wikipedia.org/wiki/%ED%98%84%EC%B6%A9%EC%82%AC",
-   "checked": "2026-11-02"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -810,7 +810,7 @@
   "source": {
    "name": "위키백과 경산 팔공산 관봉 석조여래좌상",
    "url": "https://ko.wikipedia.org/wiki/%EA%B2%BD%EC%82%B0_%ED%8C%94%EA%B3%B5%EC%82%B0_%EA%B4%80%EB%B4%89_%EC%84%9D%EC%A1%B0%EC%97%AC%EB%9E%98%EC%A2%8C%EC%83%81",
-   "checked": "2026-11-03"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -828,7 +828,7 @@
   "source": {
    "name": "위키백과 보리암 (남해군)",
    "url": "https://ko.wikipedia.org/wiki/%EB%B3%B4%EB%A6%AC%EC%95%94_(%EB%82%A8%ED%95%B4%EA%B5%B0)",
-   "checked": "2026-11-03"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -836,8 +836,8 @@
  {
   "id": "seed-48",
   "name": "사직단",
-  "lat": 37.5756,
-  "lon": 126.9678,
+  "lat": 37.5757,
+  "lon": 126.968,
   "type": "shrine",
   "tags": [
    "general",
@@ -846,7 +846,7 @@
   "source": {
    "name": "위키백과 서울 사직단",
    "url": "https://ko.wikipedia.org/wiki/%EC%84%9C%EC%9A%B8_%EC%82%AC%EC%A7%81%EB%8B%A8",
-   "checked": "2026-11-03"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -863,7 +863,7 @@
   "source": {
    "name": "위키백과 독립기념관 (대한민국)",
    "url": "https://ko.wikipedia.org/wiki/%EB%8F%85%EB%A6%BD%EA%B8%B0%EB%85%90%EA%B4%80_(%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD)",
-   "checked": "2026-11-03"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -881,7 +881,7 @@
   "source": {
    "name": "위키백과 성산일출봉",
    "url": "https://ko.wikipedia.org/wiki/%EC%84%B1%EC%82%B0%EC%9D%BC%EC%B6%9C%EB%B4%89",
-   "checked": "2026-11-03"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -899,7 +899,7 @@
   "source": {
    "name": "위키백과 종묘",
    "url": "https://ko.wikipedia.org/wiki/%EC%A2%85%EB%AC%98",
-   "checked": "2026-11-03"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -916,7 +916,7 @@
   "source": {
    "name": "위키백과 수원 화성",
    "url": "https://ko.wikipedia.org/wiki/%EC%88%98%EC%9B%90_%ED%99%94%EC%84%B1",
-   "checked": "2026-11-03"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -933,7 +933,7 @@
   "source": {
    "name": "위키백과 안동 하회마을",
    "url": "https://ko.wikipedia.org/wiki/%EC%95%88%EB%8F%99_%ED%95%98%ED%9A%8C%EB%A7%88%EC%9D%84",
-   "checked": "2026-11-03"
+   "checked": "2026-11-05"
   },
   "note": "",
   "on": true
@@ -950,9 +950,507 @@
   "source": {
    "name": "위키백과 서울 양화나루와 잠두봉 유적",
    "url": "https://ko.wikipedia.org/wiki/%EC%84%9C%EC%9A%B8_%EC%96%91%ED%99%94%EB%82%98%EB%A3%A8%EC%99%80_%EC%9E%A0%EB%91%90%EB%B4%89_%EC%9C%A0%EC%A0%81",
-   "checked": "2026-11-03"
+   "checked": "2026-11-05"
   },
   "note": "",
+  "on": true
+ },
+ {
+  "id": "seed-55",
+  "name": "옥산서원",
+  "lat": 36.0119,
+  "lon": 129.1636,
+  "type": "shrine",
+  "tags": [
+   "study",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 경주 옥산서원",
+   "url": "https://ko.wikipedia.org/wiki/%EC%98%A5%EC%82%B0%EC%84%9C%EC%9B%90",
+   "checked": "2026-11-05"
+  },
+  "note": "경주 소재 유네스코 세계유산 한국의 서원. 학문 정신이 깃든 곳입니다.",
+  "on": true
+ },
+ {
+  "id": "seed-56",
+  "name": "소수서원",
+  "lat": 36.9256,
+  "lon": 128.58,
+  "type": "shrine",
+  "tags": [
+   "study",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 영주 소수서원",
+   "url": "https://ko.wikipedia.org/wiki/%EC%86%8C%EC%88%98%EC%84%9C%EC%9B%90",
+   "checked": "2026-11-05"
+  },
+  "note": "영주 소재 우리나라 최초의 서원. 학업·진학 기원 장소로 알려져 있습니다.",
+  "on": true
+ },
+ {
+  "id": "seed-57",
+  "name": "화엄사",
+  "lat": 35.2583,
+  "lon": 127.4914,
+  "type": "temple",
+  "tags": [
+   "general",
+   "health"
+  ],
+  "source": {
+   "name": "위키백과 화엄사",
+   "url": "https://ko.wikipedia.org/wiki/%ED%99%94%EC%97%84%EC%82%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "지리산 자락의 대사찰.",
+  "on": true
+ },
+ {
+  "id": "seed-58",
+  "name": "직지사",
+  "lat": 36.1161,
+  "lon": 128.004,
+  "type": "temple",
+  "tags": [
+   "study",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 직지사",
+   "url": "https://ko.wikipedia.org/wiki/%EC%A7%81%EC%A7%80%EC%82%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "김천 소재 사찰.",
+  "on": true
+ },
+ {
+  "id": "seed-59",
+  "name": "수덕사",
+  "lat": 36.6633,
+  "lon": 126.622,
+  "type": "temple",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 수덕사",
+   "url": "https://ko.wikipedia.org/wiki/%EC%88%98%EB%8D%95%EC%82%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "예산 소재 사찰.",
+  "on": true
+ },
+ {
+  "id": "seed-60",
+  "name": "봉정사",
+  "lat": 36.6533,
+  "lon": 128.662,
+  "type": "temple",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 봉정사",
+   "url": "https://ko.wikipedia.org/wiki/%EB%B4%89%EC%A0%95%EC%82%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "안동 소재 유네스코 세계유산 산사.",
+  "on": true
+ },
+ {
+  "id": "seed-61",
+  "name": "선운사",
+  "lat": 35.4969,
+  "lon": 126.579,
+  "type": "temple",
+  "tags": [
+   "general",
+   "health"
+  ],
+  "source": {
+   "name": "위키백과 선운사",
+   "url": "https://ko.wikipedia.org/wiki/%EC%84%A0%EC%9A%B4%EC%82%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "고창 소재 사찰.",
+  "on": true
+ },
+ {
+  "id": "seed-62",
+  "name": "백양사",
+  "lat": 35.4392,
+  "lon": 126.883,
+  "type": "temple",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 백양사",
+   "url": "https://ko.wikipedia.org/wiki/%EB%B0%B1%EC%96%91%EC%82%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "장성 소재 사찰.",
+  "on": true
+ },
+ {
+  "id": "seed-63",
+  "name": "용주사",
+  "lat": 37.2122,
+  "lon": 127.005,
+  "type": "temple",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 용주사",
+   "url": "https://ko.wikipedia.org/wiki/%EC%9A%A9%EC%A3%BC%EC%82%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "화성 소재 사찰.",
+  "on": true
+ },
+ {
+  "id": "seed-64",
+  "name": "봉은사",
+  "lat": 37.515,
+  "lon": 127.0578,
+  "type": "temple",
+  "tags": [
+   "wealth",
+   "career",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 봉은사",
+   "url": "https://ko.wikipedia.org/wiki/%EB%B4%89%EC%9D%80%EC%82%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "서울 강남의 사찰.",
+  "on": true
+ },
+ {
+  "id": "seed-65",
+  "name": "조계사",
+  "lat": 37.5739,
+  "lon": 126.9819,
+  "type": "temple",
+  "tags": [
+   "general",
+   "career"
+  ],
+  "source": {
+   "name": "위키백과 조계사",
+   "url": "https://ko.wikipedia.org/wiki/%EC%A1%B0%EA%B3%84%EC%82%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "서울 도심의 대한불교조계종 총본산.",
+  "on": true
+ },
+ {
+  "id": "seed-66",
+  "name": "신륵사",
+  "lat": 37.2975,
+  "lon": 127.6614,
+  "type": "temple",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 신륵사",
+   "url": "https://ko.wikipedia.org/wiki/%EC%8B%A0%EB%A5%B5%EC%82%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "여주 남한강변 사찰.",
+  "on": true
+ },
+ {
+  "id": "seed-67",
+  "name": "간절곶",
+  "lat": 35.3597,
+  "lon": 129.3616,
+  "type": "sea",
+  "tags": [
+   "wealth",
+   "career",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 간절곶",
+   "url": "https://ko.wikipedia.org/wiki/%EA%B0%84%EC%A0%88%EA%B3%B6",
+   "checked": "2026-11-05"
+  },
+  "note": "한반도에서 가장 먼저 해가 뜬다고 알려진 곳. 새 출발 기원 장소.",
+  "on": true
+ },
+ {
+  "id": "seed-68",
+  "name": "마이산",
+  "lat": 35.7611,
+  "lon": 127.4122,
+  "type": "mountain",
+  "tags": [
+   "love",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 마이산",
+   "url": "https://ko.wikipedia.org/wiki/%EB%A7%88%EC%9D%B4%EC%82%B0",
+   "checked": "2026-11-05"
+  },
+  "note": "진안 소재. 두 봉우리가 나란한 모양으로 부부산이라 불립니다.",
+  "on": true
+ },
+ {
+  "id": "seed-69",
+  "name": "주왕산",
+  "lat": 36.3892,
+  "lon": 129.1626,
+  "type": "mountain",
+  "tags": [
+   "health",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 주왕산",
+   "url": "https://ko.wikipedia.org/wiki/%EC%A3%BC%EC%99%95%EC%82%B0",
+   "checked": "2026-11-05"
+  },
+  "note": "청송 소재 국립공원.",
+  "on": true
+ },
+ {
+  "id": "seed-70",
+  "name": "무등산",
+  "lat": 35.1342,
+  "lon": 126.9889,
+  "type": "mountain",
+  "tags": [
+   "health",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 무등산",
+   "url": "https://ko.wikipedia.org/wiki/%EB%AC%B4%EB%93%B1%EC%82%B0",
+   "checked": "2026-11-05"
+  },
+  "note": "광주 소재 국립공원.",
+  "on": true
+ },
+ {
+  "id": "seed-71",
+  "name": "두륜산",
+  "lat": 34.4728,
+  "lon": 126.6378,
+  "type": "mountain",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 두륜산",
+   "url": "https://ko.wikipedia.org/wiki/%EB%91%90%EB%A5%9C%EC%82%B0",
+   "checked": "2026-11-05"
+  },
+  "note": "해남 소재 산.",
+  "on": true
+ },
+ {
+  "id": "seed-72",
+  "name": "소백산",
+  "lat": 36.96,
+  "lon": 128.4847,
+  "type": "mountain",
+  "tags": [
+   "health",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 소백산",
+   "url": "https://ko.wikipedia.org/wiki/%EC%86%8C%EB%B0%B1%EC%82%B0",
+   "checked": "2026-11-05"
+  },
+  "note": "충북·경북에 걸친 국립공원.",
+  "on": true
+ },
+ {
+  "id": "seed-73",
+  "name": "천지연 폭포",
+  "lat": 33.2469,
+  "lon": 126.5544,
+  "type": "spring",
+  "tags": [
+   "health",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 천지연폭포",
+   "url": "https://ko.wikipedia.org/wiki/%EC%B2%9C%EC%A7%80%EC%97%B0_%ED%8F%AD%ED%8F%AC",
+   "checked": "2026-11-05"
+  },
+  "note": "서귀포 소재 폭포.",
+  "on": true
+ },
+ {
+  "id": "seed-74",
+  "name": "경복궁",
+  "lat": 37.5786,
+  "lon": 126.9772,
+  "type": "shrine",
+  "tags": [
+   "career",
+   "wealth",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 경복궁",
+   "url": "https://ko.wikipedia.org/wiki/%EA%B2%BD%EB%B3%B5%EA%B6%81",
+   "checked": "2026-11-05"
+  },
+  "note": "조선 왕조의 법궁. 전통 풍수에서 북악산을 주산으로 한 터로 알려져 있습니다.",
+  "on": true
+ },
+ {
+  "id": "seed-75",
+  "name": "창덕궁",
+  "lat": 37.5795,
+  "lon": 126.9912,
+  "type": "shrine",
+  "tags": [
+   "career",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 창덕궁",
+   "url": "https://ko.wikipedia.org/wiki/%EC%B0%BD%EB%8D%95%EA%B6%81",
+   "checked": "2026-11-05"
+  },
+  "note": "유네스코 세계유산. 자연 지형을 살린 궁궐.",
+  "on": true
+ },
+ {
+  "id": "seed-76",
+  "name": "영릉(세종대왕릉)",
+  "lat": 37.3064,
+  "lon": 127.6097,
+  "type": "shrine",
+  "tags": [
+   "career",
+   "study",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 영릉 (조선 세종)",
+   "url": "https://ko.wikipedia.org/wiki/%EC%98%81%EB%A6%89_(%EC%84%B8%EC%A2%85)",
+   "checked": "2026-11-05"
+  },
+  "note": "여주 소재. 전통 풍수에서 명당으로 거론되는 능입니다.",
+  "on": true
+ },
+ {
+  "id": "seed-77",
+  "name": "건원릉",
+  "lat": 37.6253,
+  "lon": 127.1314,
+  "type": "shrine",
+  "tags": [
+   "career",
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 건원릉",
+   "url": "https://ko.wikipedia.org/wiki/%EA%B1%B4%EC%9B%90%EB%A6%89",
+   "checked": "2026-11-05"
+  },
+  "note": "구리 동구릉 소재 태조 이성계의 능.",
+  "on": true
+ },
+ {
+  "id": "seed-78",
+  "name": "융릉과 건릉",
+  "lat": 37.2122,
+  "lon": 126.991,
+  "type": "shrine",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 융건릉",
+   "url": "https://ko.wikipedia.org/wiki/%EC%9C%B5%EB%A6%89",
+   "checked": "2026-11-05"
+  },
+  "note": "화성 소재 사도세자(장조)의 능.",
+  "on": true
+ },
+ {
+  "id": "seed-79",
+  "name": "경주 양동마을",
+  "lat": 35.9997,
+  "lon": 129.2544,
+  "type": "other",
+  "tags": [
+   "general",
+   "study"
+  ],
+  "source": {
+   "name": "위키백과 경주 양동마을",
+   "url": "https://ko.wikipedia.org/wiki/%EC%96%91%EB%8F%99%EB%A7%88%EC%9D%84",
+   "checked": "2026-11-05"
+  },
+  "note": "유네스코 세계유산 한국의 역사마을.",
+  "on": true
+ },
+ {
+  "id": "seed-80",
+  "name": "낙안읍성",
+  "lat": 34.9061,
+  "lon": 127.3358,
+  "type": "other",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 순천 낙안읍성",
+   "url": "https://ko.wikipedia.org/wiki/%EB%82%99%EC%95%88%EC%9D%8D%EC%84%B1",
+   "checked": "2026-11-05"
+  },
+  "note": "순천 소재 조선 시대 읍성 마을.",
+  "on": true
+ },
+ {
+  "id": "seed-81",
+  "name": "해미읍성",
+  "lat": 36.7128,
+  "lon": 126.5486,
+  "type": "other",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 서산 해미읍성",
+   "url": "https://ko.wikipedia.org/wiki/%ED%95%B4%EB%AF%B8%EC%9D%8D%EC%84%B1",
+   "checked": "2026-11-05"
+  },
+  "note": "서산 소재 읍성이자 천주교 순교 성지.",
+  "on": true
+ },
+ {
+  "id": "seed-82",
+  "name": "남한산성",
+  "lat": 37.478,
+  "lon": 127.1842,
+  "type": "other",
+  "tags": [
+   "general"
+  ],
+  "source": {
+   "name": "위키백과 남한산성",
+   "url": "https://ko.wikipedia.org/wiki/%EB%82%A8%ED%95%9C%EC%82%B0%EC%84%B1",
+   "checked": "2026-11-05"
+  },
+  "note": "유네스코 세계유산.",
   "on": true
  }
 ]

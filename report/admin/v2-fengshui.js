@@ -66,32 +66,46 @@
   }
   function drawReview() {
     var lint = {}; S.lint.forEach(function (x) { lint[x.id] = x.issues; });
-    var all = S.base.texts, ok = function (id) { return S.reviews[id] && S.reviews[id].valid; }, nErr = 0, nWarn = 0, nDone = 0;
-    all.forEach(function (t) { var is = lint[t.id] || []; if (is.some(function (i) { return i.lv === 'error'; })) nErr++; else if (is.length) nWarn++; if (ok(t.id)) nDone++; });
+    var all = S.base.texts, ok = function (id) { return S.reviews[id] && S.reviews[id].valid; }, hasErr = function (id) { return (lint[id] || []).some(function (i) { return i.lv === 'error'; }); }, nErr = 0, nWarn = 0, nDone = 0;
+    all.forEach(function (t) { var is = lint[t.id] || []; if (hasErr(t.id)) nErr++; else if (is.length) nWarn++; if (ok(t.id)) nDone++; });
     var groups = []; all.forEach(function (t) { if (groups.indexOf(t.group) < 0) groups.push(t.group); });
     var f = S.rv, list = all.filter(function (t) { var is = lint[t.id] || [], d = ok(t.id); return (!f.group || t.group === f.group) && (f.f === 'all' || (f.f === 'todo' && !d) || (f.f === 'warn' && is.length) || (f.f === 'done' && d)) && (!f.q || (t.id + t.label + t.text).indexOf(f.q) >= 0); });
-    var pct = Math.round(nDone / all.length * 100);
+    var lim = f.lim || 30, pct = Math.round(nDone / all.length * 100), pick = S.pick = S.pick || {};
+    var shown = list.slice(0, lim), nPick = Object.keys(pick).filter(function (k) { return pick[k]; }).length;
     $('#fsBody').innerHTML = '<div class="card"><h3 style="margin:0 0 6px;color:var(--gold)">문구 검수 현황</h3><div style="height:10px;border-radius:6px;background:var(--line);overflow:hidden"><div style="height:100%;width:' + pct + '%;background:#62C2AE"></div></div>' +
       '<p style="margin:8px 0">검수 완료 <b>' + nDone + '</b> / ' + all.length + '건 (' + pct + '%) · 오류 <b style="color:#FF8A78">' + nErr + '</b> · 경고 <b style="color:#E8B64A">' + nWarn + '</b></p>' +
       '<p class="muted" style="margin:0 0 8px">검수 완료는 그 문구 내용에 대한 표시입니다. 문구를 고치면 자동으로 미검수로 돌아갑니다. 검수 기준: 존댓말 · 단정·공포 표현 없음 · 추상적 길흉이 아니라 생활 장면과 활용법 · 힘받는 별은 긍정, 조심할 별은 대처법 포함.</p>' +
       '<div class="row" style="gap:6px;flex-wrap:wrap"><select id="rvG"><option value="">분류 전체</option>' + groups.map(function (g) { return '<option' + (f.group === g ? ' selected' : '') + '>' + esc(g) + '</option>'; }).join('') + '</select>' +
-      '<select id="rvF">' + [['todo', '미검수'], ['warn', '경고·오류 있음'], ['done', '검수 완료'], ['all', '전체']].map(function (o) { return '<option value="' + o[0] + '"' + (f.f === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select><input id="rvQ" placeholder="검색" value="' + esc(f.q) + '">' +
-      '<button class="btn" id="rvAll">경고 없는 표시 항목 모두 검수 완료</button></div></div>' +
-      list.slice(0, 30).map(function (t) {
+      '<select id="rvF">' + [['todo', '미검수'], ['warn', '경고·오류 있음'], ['done', '검수 완료'], ['all', '전체']].map(function (o) { return '<option value="' + o[0] + '"' + (f.f === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select><input id="rvQ" placeholder="검색" value="' + esc(f.q) + '"></div></div>' +
+      '<div class="card"><h3 style="margin:0 0 6px;color:var(--gold)">일괄 검수</h3><p class="muted" style="margin:0 0 8px">현재 필터에 해당하는 <b>' + list.length + '건</b> 기준입니다. 오류가 있는 문구는 일괄 처리에서도 제외됩니다. 문구를 직접 읽어 본 뒤에 눌러 주세요.</p>' +
+      '<div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn" id="rvSelShown">보이는 ' + shown.length + '건 선택</button><button class="btn" id="rvSelAll">필터 전체 ' + list.length + '건 선택</button><button class="btn" id="rvSelNone">선택 해제</button>' +
+      '<button class="btn" id="rvDoSel"' + (nPick ? '' : ' disabled') + '>선택 ' + nPick + '건 검수 완료</button><button class="btn" id="rvUndoSel"' + (nPick ? '' : ' disabled') + '>선택 ' + nPick + '건 검수 취소</button></div>' +
+      '<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px"><button class="btn" id="rvAllClean">경고 없는 미검수 전체 일괄 완료</button><button class="btn" id="rvAllNoErr">오류만 없으면 미검수 전체 일괄 완료(경고 포함)</button></div></div>' +
+      shown.map(function (t) {
         var is = lint[t.id] || [], rv = S.reviews[t.id], badge = ok(t.id) ? '<span style="color:#62C2AE">검수 완료 · ' + esc(rv.by || '') + ' ' + esc((rv.at || '').slice(0, 10)) + '</span>' : (rv && !rv.valid ? '<span style="color:#E8B64A">문구가 바뀌어 재검수 필요</span>' : '<span class="muted">미검수</span>');
         var it = S.doc.texts[t.id], cur = it && it.status === 'published' && it.fields && it.fields.text ? it.fields.text : t.text;
-        return '<div class="card"><b>' + esc(t.label) + '</b> <span class="muted">' + esc(t.id) + '</span> · ' + badge + '<p style="margin:8px 0">' + esc(cur) + '</p>' +
+        return '<div class="card"><label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" data-pk="' + esc(t.id) + '"' + (pick[t.id] ? ' checked' : '') + ' style="margin-top:4px"><span><b>' + esc(t.label) + '</b> <span class="muted">' + esc(t.id) + '</span> · ' + badge + '</span></label><p style="margin:8px 0">' + esc(cur) + '</p>' +
           (is.length ? '<ul style="margin:0 0 8px 18px">' + is.map(function (i) { return '<li style="color:' + (i.lv === 'error' ? '#FF8A78' : '#E8B64A') + '">' + (i.lv === 'error' ? '오류' : '경고') + ' — ' + esc(i.msg) + '</li>'; }).join('') + '</ul>' : '<p class="muted" style="margin:0 0 8px">점검 항목 없음</p>') +
           '<div class="row" style="gap:6px;flex-wrap:wrap"><input data-rn="' + esc(t.id) + '" placeholder="검수 메모(선택)" value="' + esc(rv && rv.note || '') + '" style="flex:1;min-width:140px"><button class="btn" data-ok="' + esc(t.id) + '">' + (ok(t.id) ? '검수 취소' : '검수 완료') + '</button><button class="btn" data-ed="' + esc(t.id) + '">문구 수정으로</button></div></div>';
-      }).join('') + (list.length > 30 ? '<p class="muted">처음 30건만 보입니다. 검수 완료하면 다음 항목이 나타납니다. (표시 ' + list.length + '건)</p>' : (list.length ? '' : '<p class="muted">조건에 맞는 문구가 없습니다.</p>'));
-    $('#rvG').onchange = function () { S.rv.group = this.value; drawReview(); }; $('#rvF').onchange = function () { S.rv.f = this.value; drawReview(); }; $('#rvQ').onchange = function () { S.rv.q = this.value; drawReview(); };
+      }).join('') + (list.length > lim ? '<div class="card"><button class="btn" id="rvMore">더 보기 (' + (list.length - lim) + '건 남음)</button></div>' : (list.length ? '' : '<p class="muted">조건에 맞는 문구가 없습니다.</p>'));
+    $('#rvG').onchange = function () { S.rv.group = this.value; S.rv.lim = 30; drawReview(); }; $('#rvF').onchange = function () { S.rv.f = this.value; S.rv.lim = 30; drawReview(); }; $('#rvQ').onchange = function () { S.rv.q = this.value; S.rv.lim = 30; drawReview(); };
+    if ($('#rvMore')) $('#rvMore').onclick = function () { S.rv.lim = lim + 60; drawReview(); };
+    $$('[data-pk]').forEach(function (c) { c.onchange = function () { S.pick[c.dataset.pk] = c.checked; drawReview(); }; });
+    var sel = function (arr) { S.pick = {}; arr.forEach(function (t) { S.pick[t.id] = true; }); drawReview(); };
+    $('#rvSelShown').onclick = function () { sel(shown); }; $('#rvSelAll').onclick = function () { sel(list); }; $('#rvSelNone').onclick = function () { S.pick = {}; drawReview(); };
+    var bulk = function (ids, okv, label) {
+      if (!ids.length) return msg('처리할 항목이 없습니다', true);
+      if (!confirm(label + ' ' + ids.length + '건을 ' + (okv ? '검수 완료' : '검수 취소') + '로 표시할까요?' + (okv ? ' 문구를 직접 읽어 본 뒤에만 진행해 주세요.' : ''))) return;
+      var chunks = [], i; for (i = 0; i < ids.length; i += 400) chunks.push(ids.slice(i, i + 400)); var done = 0, blocked = 0;
+      chunks.reduce(function (p, c) { return p.then(function (r) { if (r && !r._ok) return r; return call('PUT', '', { kind: 'review', ids: c, ok: okv }).then(function (d) { if (d._ok) { done += d.done || 0; blocked += (d.blocked || []).length; } return d; }); }); }, Promise.resolve(null)).then(function (d) { S.pick = {}; if (d && !d._ok) return fail(d); load(done + '건을 ' + (okv ? '검수 완료' : '검수 취소') + '로 표시했습니다' + (blocked ? ' (오류 ' + blocked + '건 제외)' : '')); });
+    };
+    var picked = function () { return Object.keys(S.pick).filter(function (k) { return S.pick[k]; }); };
+    $('#rvDoSel').onclick = function () { bulk(picked().filter(function (id) { return !hasErr(id); }), true, '선택한'); };
+    $('#rvUndoSel').onclick = function () { bulk(picked(), false, '선택한'); };
+    $('#rvAllClean').onclick = function () { bulk(all.filter(function (t) { return !ok(t.id) && !(lint[t.id] || []).length; }).map(function (t) { return t.id; }), true, '경고 없는 미검수'); };
+    $('#rvAllNoErr').onclick = function () { bulk(all.filter(function (t) { return !ok(t.id) && !hasErr(t.id); }).map(function (t) { return t.id; }), true, '오류 없는 미검수(경고 포함)'); };
     $$('[data-ok]').forEach(function (b) { b.onclick = function () { var id = b.dataset.ok, note = ($('[data-rn="' + id + '"]') || {}).value || ''; call('PUT', '', { kind: 'review', ids: [id], ok: !ok(id), note: note }).then(function (d) { d._ok ? (d.blocked && d.blocked.length ? (msg('오류가 있는 문구는 검수 완료할 수 없습니다', true)) : load(ok(id) ? '검수를 취소했습니다' : '검수 완료로 표시했습니다')) : fail(d); }); }; });
     $$('[data-ed]').forEach(function (b) { b.onclick = function () { S.tab = 'text'; S.f = { group: '', st: '', q: b.dataset.ed }; draw(); }; });
-    $('#rvAll').onclick = function () {
-      var ids = list.filter(function (t) { return !(lint[t.id] || []).length && !ok(t.id); }).map(function (t) { return t.id; }); if (!ids.length) return msg('경고 없는 미검수 항목이 없습니다', true);
-      if (!confirm('표시된 항목 중 경고·오류가 없는 ' + ids.length + '건을 검수 완료로 표시할까요? 문구를 직접 읽어 본 뒤에만 눌러 주세요.')) return;
-      call('PUT', '', { kind: 'review', ids: ids.slice(0, 400), ok: true }).then(function (d) { d._ok ? load(d.done + '건을 검수 완료로 표시했습니다') : fail(d); });
-    };
   }
   function drawBasis() {
     var sc = S.base.school;
