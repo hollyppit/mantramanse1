@@ -775,6 +775,20 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 .trc .fa .tcimg { position: absolute; inset: 0; }
 .trc .ffr { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .trc .fnm { position: absolute; display: grid; place-items: center; text-align: center; overflow: hidden; padding: 0 4%; color: #f3e7c6; font-size: 0.7rem; line-height: 1.25; letter-spacing: .03em; text-shadow: 0 1px 3px #000; }
+.tr-reads { display: grid; gap: 14px; }
+.tr-read { border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 8px; background: var(--surface); }
+.tr-read p { margin: 0; font-size: 0.92rem; line-height: 1.75; color: var(--ink-2); }
+.tr-read-h { display: flex; gap: 12px; align-items: center; }
+.tr-read-h > div { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.tr-read-h b { font-size: 1.05rem; color: var(--ink); }
+.tr-read p.tr-hl { font-weight: 800; font-size: 1.02rem; color: var(--ink); }
+.tr-read details > summary { cursor: pointer; font-weight: 700; font-size: 0.86rem; color: var(--ink-3); padding: 6px 0; }
+.tr-read details > p, .tr-read details > .tr-grid, .tr-read details > ul { margin-top: 8px; }
+.tr-grid { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.tr-grid > div { background: var(--surface-2); border-radius: 12px; padding: 10px 12px; font-size: 0.88rem; line-height: 1.65; color: var(--ink-2); }
+.tr-grid > div > b { display: block; font-size: 0.76rem; color: var(--ink-3); margin-bottom: 2px; }
+.tr-act { padding-left: 1.1em; display: grid; gap: 4px; font-size: 0.9rem; line-height: 1.65; color: var(--ink-2); }
+.tr-read p.tr-saju { background: var(--accent-soft); border-radius: 10px; padding: 8px 10px; }
 .trthumb { display: grid; justify-items: center; }
 .trstrip { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 8px; justify-content: center; flex-wrap: wrap; }
 .trcell { display: grid; justify-items: center; gap: 6px; }
@@ -850,6 +864,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="glossary-sections-3.js"></script>
 <script src="report/iching/hexagrams.js"></script><script src="report/iching/engine.js"></script>
 <script src="shared-core.js"></script>
+<script src="/report/hub/free-core.js"></script>
 <script src="report/v2/saju-data.js"></script>
 <script>
 
@@ -8528,9 +8543,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     pkSave(); render();
   }
   // ── 타로 카드 그림: 관리자 패널(타로 카드 이미지)에서 확정한 그림을 /api/free-content 에서 읽어 쓴다. 없거나 실패하면 이름 자리표시를 보여 준다 ──
-  const TRX = { img: {}, frame: null, loaded: false };
+  const TRX = { img: {}, frame: null, loaded: false, content: null };
   (function loadTarotArt() {
-    let done = false; const fin = d => { if (done) return; done = true; const t = d && d.content && d.content.tarot, f = t && t.frame; TRX.img = (t && t.images) || {}; TRX.frame = f && f.url && Array.isArray(f.win) && f.win.length === 4 ? f : null; TRX.loaded = true; if (S.tab === 'tarot') render(); };
+    let done = false; const fin = d => { if (done) return; done = true; const t = d && d.content && d.content.tarot, f = t && t.frame; TRX.content = d && d.content || null; TRX.img = (t && t.images) || {}; TRX.frame = f && f.url && Array.isArray(f.win) && f.win.length === 4 ? f : null; TRX.loaded = true; if (S.tab === 'tarot') render(); };
     setTimeout(() => fin(null), 3000);
     try { fetch('/api/free-content').then(r => r.ok ? r.json() : null).then(fin, () => fin(null)); } catch (e) { fin(null); }
   })();
@@ -8558,6 +8573,44 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     document.body.appendChild(bg);
   }
   document.addEventListener('click', ev => { const z = ev.target.closest && ev.target.closest('[data-trz]'); if (!z || z.closest('.sheet')) return; ev.preventDefault(); const [id, r] = z.dataset.trz.split(':'); trZoom(id, r === '1'); });
+  // ── 자리별 자세한 풀이: 무료 타로(/report/hub/)와 같은 FreeCore 문장 조합 + 내 사주(용신 오행)와의 연결 ──
+  const TR_MODE = { all: 'today', love: 'love', money: 'money', work: 'work', health: 'today', people: 'love' };
+  const SUIT_EL = { W: 1, C: 4, S: 3, P: 2 };   // 완드=화 · 컵=수 · 소드=금 · 펜타클=토 (메이저는 오행과 무관)
+  const TR_ROLE_TXT = {
+    '용신': '내 사주에 가장 필요한 기운이에요. 이 카드의 메시지를 적극적으로 받아들이세요.',
+    '희신': '내 사주에 도움이 되는 기운이에요. 이 카드의 흐름을 타면 수월하게 풀려요.',
+    '한신': '내 사주에는 중립인 기운이에요. 카드 본래의 뜻대로 읽으면 돼요.',
+    '구신': '내 사주에 부담이 되는 기운이에요. 이 카드가 말하는 일은 속도를 조절하며 천천히 하세요.',
+    '기신': '내 사주에 가장 조심할 기운이에요. 이 카드가 말하는 일은 과하게 밀어붙이지 마세요.',
+  };
+  function trReadings(rows, topic) {
+    const Tarot = window.MantraCore.Tarot, FC = window.FreeCore, mode = TR_MODE[topic] || 'today';
+    // 하루짜리 문구(오늘의 카드)를 만세력에서는 '요즘' 기준으로 읽히게 바꾼다
+    const tw = t => mode === 'today' ? String(t).replace(/오늘 하루/g, '요즘').replace(/오늘은/g, '지금은').replace(/오늘/g, '지금') : t;
+    return rows.map(r => {
+      let fx = null; try { fx = FC && FC.composeTarot(Tarot, r.card.id, r.rev, mode, r.k + r.card.id, TRX.content); } catch (e) { fx = null; }
+      const suit = r.card.suit === 'M' ? '메이저' : TR_SUIT.find(x => x[0] === r.card.suit)[2];
+      const head = `<div class="tr-read-h">${trFace(r.card.id, r.rev, 64)}<div><span class="muted small">${r.l} · ${r.k === 'adv' && r.rev ? '경계할 것' : r.frame}</span><b>${esc(r.card.name)}</b><span class="muted small">${r.rev ? '역방향' : '정방향'} · ${suit}</span></div><span class="chip ${r.sc > 0 ? 'good' : r.sc < 0 ? 'bad' : ''}">${r.sc > 0 ? '긍정' : r.sc < 0 ? '주의' : '중립'}</span></div>`;
+      if (!fx) return `<article class="tr-read">${head}<p>"${esc(r.kw)}"의 기운이 이 자리에 놓여 있습니다.</p></article>`;
+      const el = SUIT_EL[r.card.suit], role = el != null && S.ch && S.ch.yong && S.ch.yong.roles ? S.ch.yong.roles[el] : null;
+      const saju = role ? `<b>내 사주와 연결</b> 이 카드는 <b class="eltxt ${ECLS[el]}">${M.EL[el]}(${M.EL_K[el]})</b> 기운이에요. ${TR_ROLE_TXT[role]}` : (r.card.suit === 'M' ? '<b>내 사주와 연결</b> 메이저 카드는 오행과 상관없이 인생의 큰 흐름과 전환점을 말해요.' : '');
+      return `<article class="tr-read">${head}
+        <p class="tr-hl">${esc(tw(fx.headline))}</p>
+        <p>${esc(tw(fx.summary))}</p>
+        <details open><summary>자세한 풀이</summary>
+          ${fx.detail.map(t => `<p>${esc(tw(t))}</p>`).join('')}
+          <div class="tr-grid">
+            <div><b>지금의 흐름</b>${esc(tw(fx.currentFlow))}</div>
+            <div><b>기회</b>${esc(tw(fx.opportunity))}</div>
+            <div><b>조심할 점</b>${esc(tw(fx.caution))}</div>
+          </div>
+          <ul class="tr-act">${fx.actions.map(t => `<li>${esc(tw(t))}</li>`).join('')}</ul>
+          ${saju ? `<p class="tr-saju">${saju}</p>` : ''}
+          <p class="muted small">${esc(tw(fx.closing))}</p>
+        </details>
+      </article>`;
+    }).join('');
+  }
   function renderTarot() {
     const T = PK.tr, [spName, pos] = TR_SPREAD[T.spread] || TR_SPREAD.three, [topicName, topicSuits] = TR_TOPIC[T.topic] || TR_TOPIC.all;
     const rows = pos.map(([k, l, w, frame]) => { const c = T.cards[k], card = c && TR[c[0]]; return card ? { k, l, w, frame, card, rev: !!c[1], sc: c[1] ? card.sr : card.su, kw: c[1] ? card.rev : card.up } : null; }).filter(Boolean);
@@ -8604,7 +8657,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="sumbox">${summary}</div>
       ${notes.length ? `<ul class="pos-ul small">${notes.map(n => `<li>${n}</li>`).join('')}</ul>` : ''}
       <h3>자리별 풀이</h3>
-      <div class="list">${rows.map(r => `<div class="li"><span class="k">${r.l}</span><span class="v"><b>${r.card.name}</b> <span class="muted small" style="display:inline">${r.rev ? '역방향' : '정방향'} · ${r.card.suit === 'M' ? '메이저' : TR_SUIT.find(s => s[0] === r.card.suit)[2]}</span><span class="small" style="color:var(--ink-2)">${r.k === 'adv' && r.rev ? '경계할 것' : r.frame} — ${r.kw}</span></span><span class="chip ${r.sc > 0 ? 'good' : r.sc < 0 ? 'bad' : ''}">${r.sc > 0 ? '긍정' : r.sc < 0 ? '주의' : '중립'}</span></div>`).join('')}</div>
+      <div class="tr-reads">${trReadings(rows, T.topic)}</div>
       <p class="note">타로는 지금의 마음과 흐름을 비추는 거울입니다. 결과는 고정된 미래가 아니라 선택에 따라 달라질 수 있는 가능성으로 읽으세요.</p>
     </section>`;
   }
