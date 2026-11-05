@@ -885,6 +885,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="jonggyeok.js"></script>
 <script src="gyeokguk.js"></script>
 <script src="glossary-cases.js"></script>
+<script src="glossary-overlap.js"></script>
 <script src="glossary-sections.js"></script>
 <script src="glossary-sections-2.js"></script>
 <script src="glossary-sections-3.js"></script>
@@ -4817,6 +4818,16 @@ Object.assign(GLOSSARY, {
   add('충', [JU + list(CHUNG, 'b') + '. 정반대(6칸 떨어진) 지지끼리입니다. 사주의 지지 중 이 쌍이 있으면 성립하고, 운에서 한 글자가 오면 원국의 나머지 한 글자와 충이 됩니다.']);
 })(GLOSSARY);
 
+/* 병존 용어: 같은 글자가 둘 이상 있을 때를 가리키는 말. 용어별 병존·간여지동 읽기는 glossary-overlap.js가 각 용어 뒤에 붙인다. 점수·판정에는 쓰이지 않는다. */
+(function (GL) {
+  if (GL['병존']) return;
+  GL['병존'] = ['관계', '같은 천간이나 같은 지지가 원국에 둘 이상 있는 경우입니다. 예: 월간·일간이 모두 갑이면 천간 병존, 일지·시지가 모두 오이면 지지 병존입니다. 간지 전체가 같으면(예: 병오·병오) 간지 병존이라고 합니다.\n\n' + [
+    '(읽는 법) 같은 글자가 겹친 만큼 그 글자의 성질과 십성이 두 배로 선명해진다고 봄. 붙어 있는 기둥(년·월, 월·일, 일·시)일수록 강하고 떨어져 있으면 약하게 읽음.',
+    '(관련) 진진·오오·유유·해해의 지지 병존은 그 자체로 자형이고, 같은 천간 둘이 하나와 합하려 하면 쟁합으로 읽음. 십성·합·충·12운성 용어에 "같은 기운이 겹칠 때" 항목이 따로 있음.',
+    '(활용) 겹친 글자가 용신이면 힘이 넉넉하고, 기신이면 부담이 커지니 어떤 글자가 겹쳤는지부터 확인하기.'
+  ].map(s => '-. ' + s).join('\n')];
+})(GLOSSARY);
+
 /* 용어 본문 정리: 운·자리·조합·원리 줄을 ■ 제목 아래로 묶어 읽기 쉽게 보여 준다. 줄 내용은 바꾸지 않고 순서와 제목만 정리한다. */
 (function (GL) {
   const SECTIONS = [['run', '■ 운에서 들어올 때 (대운·세운)'], ['pos', '■ 사주 속 자리별'], ['combo', '■ 다른 글자와 함께 있을 때'], ['why', '■ 왜 이렇게 읽나요 (원리)']];
@@ -4897,7 +4908,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     });
     return parts.length ? '\n\n' + parts.join('\n\n') : '';
   };
-  const glFull = (k, t) => { const s = glSectionsText(k, t); return glHtml(t + s + glCasesText(k, t + s)); };
+  // "같은 기운이 겹칠 때(병존·간여지동)" 보강(glossary-overlap.js): 기본 문구든 관리자가 고친 문구든 뒤에 붙이고, 이미 같은 제목이 있으면 붙이지 않는다.
+  const glOverlapText = (k, t) => {
+    const o = window.GLOSSARY_OVERLAP && window.GLOSSARY_OVERLAP[k], H = window.GLOSSARY_OVERLAP_HEAD, L = window.GLOSSARY_OVERLAP_LABEL;
+    if (!o || String(t).includes(H)) return '';
+    return '\n\n' + [H, ...(o.intro ? [o.intro] : []), ...['dup', 'gyd'].filter(f => o[f]).map(f => `-. (${L[f]}) ${o[f]}`)].join('\n');
+  };
+  const glFull = (k, t) => { const s = glSectionsText(k, t) + glOverlapText(k, t); return glHtml(t + s + glCasesText(k, t + s)); };
   const glInline = k => { const e = GL[k]; if (!e) return ''; const t = e[1], para = t.split('\n\n')[0]; if (e[0] !== '육십갑자') return para; const bul = t.split('\n').filter(l => /^-\. (성향|장점|단점·주의|어울리는 직군|연애·관계|조언):/.test(l)); return bul.length ? para + '\n' + bul.join('\n') : para; };
   const term = (t, label) => GL[t] ? `<button type="button" class="term" data-term="${esc(t)}">${esc(label ?? t)}</button>` : esc(label ?? t);
   const patTerm = n => GL[n] ? n : (/결핍/.test(n) ? '오행 결핍' : n);
@@ -9166,7 +9183,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function glList() {
     const q = S.glq.trim();
     const cats = {};
-    for (const [k, [c, t]] of Object.entries(GL)) { if (q && !k.includes(q) && !(t + glSectionsText(k, t) + glCasesText(k, t)).includes(q)) continue; (cats[c] ||= []).push([k, t]); }
+    for (const [k, [c, t]] of Object.entries(GL)) { if (q && !k.includes(q) && !(t + glSectionsText(k, t) + glOverlapText(k, t) + glCasesText(k, t)).includes(q)) continue; (cats[c] ||= []).push([k, t]); }
     const keys = Object.keys(cats);
     if (!keys.length) return '<p class="muted small">찾는 용어가 없습니다.</p>';
     return keys.map(c => `<div class="gl-cat"><h3>${c}</h3>${cats[c].map(([k, t]) => `<div class="gl-item"><span>${term(k)}${adminPw && k in OVR ? ' <span class="chip edited">수정됨</span>' : ''}</span><p>${glFull(k, t)}</p></div>`).join('')}</div>`).join('');
