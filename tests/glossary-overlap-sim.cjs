@@ -27,6 +27,18 @@ for (const [k, o] of Object.entries(O)) {
   ok(o.dup !== o.gyd, `${k}: 두 줄이 같음`);
 }
 
+// 자리별 4줄: 모든 용어에 년·월·일·시가 있고, 십성 10개는 용어마다 문장이 다르다
+const TEN = ['비견', '겁재', '식신', '상관', '편재', '정재', '편관', '정관', '편인', '정인'];
+for (const [k, o] of Object.entries(O)) {
+  ok(Array.isArray(o.pos) && o.pos.length === 4 && o.pos.map(r => r[0]).join('') === '년월일시', `${k}: 자리별 년·월·일·시 4줄이 아님`);
+  for (const [l, t] of (o.pos || [])) { ok(t.length >= 25 && t.length <= 300, `${k}.pos.${l}: 길이 ${t.length}`); ok(!/\n/.test(t) && !FORBID.test(t), `${k}.pos.${l}: 줄바꿈·단정 표현`); }
+}
+for (const k of TEN) ok(O[k].pos !== O['충'].pos, `${k}: 공통 문장을 씀(용어별 문장 필요)`);
+ok(new Set(TEN.flatMap(k => O[k].pos.map(r => r[1]))).size === 40, '십성 자리별 문장 40개가 서로 다르지 않음');
+ok(ctx.window.GLOSSARY_OVERLAP_POS_INTRO && /월지가 가장 힘이 큽니다/.test(ctx.window.GLOSSARY_OVERLAP_POS_INTRO), '자리별 안내문이 없음');
+// 기둥 설명은 자리별 줄에만 둔다(병존·간여지동 줄에 "월주면/시주면" 같은 중복 설명 금지)
+for (const k of TEN) for (const f of ['dup', 'gyd']) ok(!/(년주|월주|시주)면/.test(O[k][f]), `${k}.${f}: 기둥 설명이 자리별과 중복`);
+
 // 일주 간여지동 목록이 계산과 맞는지: 일지 본기가 일간과 같은 오행인 12개, 그중 건록·제왕·비견·겁재 구분
 const ST = '갑을병정무기경신임계', BR = '자축인묘진사오미신유술해';
 const SE = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4], BE = [4, 2, 0, 0, 2, 1, 1, 2, 3, 3, 2, 4];
@@ -51,6 +63,7 @@ ok(s > 0 && e > s, 'index.html에서 glOverlapText를 찾지 못함');
 const run = vm.runInContext('(function(window){' + html.slice(s, e) + ';return glOverlapText;})', ctx)(ctx.window);
 const out = run('비견', GL['비견'][1]);
 ok(out.startsWith('\n\n' + HEAD) && /-\. \(병존일 때\) /.test(out) && /-\. \(간여지동일 때\) /.test(out), '비견: 보강 모양이 다름');
+ok(/-\. \(년주\) /.test(out) && /-\. \(시주\) /.test(out) && out.indexOf('(간여지동일 때)') < out.indexOf('(년주)'), '비견: 자리별 줄이 화면 문구에 붙지 않음');
 ok(run('비견', '관리자 문구\n\n' + HEAD + '\n-. x') === '', '이미 같은 제목이 있는데도 다시 붙음');
 ok(run('비견', '관리자가 고친 문구') === out, '관리자가 고친 문구 뒤에도 똑같이 붙어야 함');
 ok(run('없는용어', 'x') === '', '보강이 없는 용어에 붙음');

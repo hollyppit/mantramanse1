@@ -4912,7 +4912,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const glOverlapText = (k, t) => {
     const o = window.GLOSSARY_OVERLAP && window.GLOSSARY_OVERLAP[k], H = window.GLOSSARY_OVERLAP_HEAD, L = window.GLOSSARY_OVERLAP_LABEL;
     if (!o || String(t).includes(H)) return '';
-    return '\n\n' + [H, ...(o.intro ? [o.intro] : []), ...['dup', 'gyd'].filter(f => o[f]).map(f => `-. (${L[f]}) ${o[f]}`)].join('\n');
+    return '\n\n' + [H, ...(o.intro ? [o.intro] : []), ...['dup', 'gyd'].filter(f => o[f]).map(f => `-. (${L[f]}) ${o[f]}`), ...(o.pos ? [window.GLOSSARY_OVERLAP_POS_INTRO, ...o.pos.map(([l, x]) => `-. (${l}주) ${x}`)] : [])].join('\n');
   };
   const glFull = (k, t) => { const s = glSectionsText(k, t) + glOverlapText(k, t); return glHtml(t + s + glCasesText(k, t + s)); };
   const glInline = k => { const e = GL[k]; if (!e) return ''; const t = e[1], para = t.split('\n\n')[0]; if (e[0] !== '육십갑자') return para; const bul = t.split('\n').filter(l => /^-\. (성향|장점|단점·주의|어울리는 직군|연애·관계|조언):/.test(l)); return bul.length ? para + '\n' + bul.join('\n') : para; };
