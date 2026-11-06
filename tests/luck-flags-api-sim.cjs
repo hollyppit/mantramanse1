@@ -26,6 +26,13 @@ const root = path.join(__dirname, '..');
   r = await put({ on: false }); ok(r.j.timelineCopy === true && none(r.j), '모두 끄기는 timelineCopy 를 건드리지 않음');
   r = await put({ flags: { timelineCopy: false } }); ok(r.j.timelineCopy === false, 'timelineCopy 따로 끄기');
   ok(/timelineCopy: false/.test(fs.readFileSync(path.join(root, 'feature-flags.js'), 'utf8')), 'feature-flags.js timelineCopy 기본 꺼짐');
+  // topicDeep(무빙툰 주제 심화): 같은 규칙 — 기본 꺼짐, 모두 켜기에 묶이지 않음, flags 로만
+  ok((await get()).j.topicDeep === false, 'topicDeep 기본 꺼짐');
+  r = await put({ on: true }); ok(r.j.topicDeep === false, '모두 켜기는 topicDeep 를 켜지 않음');
+  r = await put({ flags: { topicDeep: true } }); ok(r.j.topicDeep === true && r.j.timelineCopy === false, 'topicDeep 따로 켜기');
+  r = await put({ on: false }); ok(r.j.topicDeep === true, '모두 끄기는 topicDeep 를 건드리지 않음');
+  r = await put({ flags: { topicDeep: false } }); ok(r.j.topicDeep === false, 'topicDeep 따로 끄기');
+  ok(/topicDeep: false/.test(fs.readFileSync(path.join(root, 'feature-flags.js'), 'utf8')), 'feature-flags.js topicDeep 기본 꺼짐');
   const before = JSON.stringify((await get()).j); await put({ flags: { evil: true } }); ok(JSON.stringify((await get()).j) === before, '거부된 요청은 저장하지 않음');
   r = await put({ on: true }, 'pw-test', { 'x-reviewer': '%E0%A4%A' }); ok(r.s === 200, '잘못된 x-reviewer 헤더');
   // 저장소 오류·오염된 값은 꺼짐으로 취급

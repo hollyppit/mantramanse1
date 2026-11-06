@@ -87,13 +87,14 @@ function lateLuck(H){var D=R.Deep,dw=((H.sd&&H.sd.daewoon)||[]).filter(function(
  return '<section class="dp-embed dp"><div class="cap">'+esc('50대 이후 대운 · 나이대별 흐름')+'</div><p class="dp-lead2">'+esc('말년의 흐름은 한 줄로 정해지지 않고, 10년 단위 대운이 바뀌며 달라져요. 엔진이 계산한 대운의 계절과 십성을 나이대별로 풀었어요. 건강·수명을 말하는 표가 아니라 생활의 분위기를 보는 참고예요.')+'</p><ul class="dp-ul">'+dw.map(function(x){return '<li><b>'+esc(D.ageSpan(x.startAge,x.startAge+9))+' · '+esc(x.ganzhi)+' 대운</b> — '+esc((D.TG_DO[x.stemTG]||'새 흐름을 맞는')+' 시기')+(D.SEA_MOOD[x.season]?esc(' · 전체 분위기는 '+D.SEA_MOOD[x.season]+' 쪽이에요'):'')+'</li>';}).join('')+'</ul></section>';}
 function embed(html){return String(html||'').replace(/^<section class="scene rv dp/,'<section class="dp-embed dp');}
 function build(c){var f=c&&c.readingFeature,id=c&&(c.editorialContractId||c.id),spec=SPEC[id],D=R.Deep;if(!f||!f.sd||!spec||!D||!D.SECTIONS)return null;
- var key=id+':'+Object.keys(f.assets||{}).length;if(c.__rfCache&&c.__rfCache.key===key)return c.__rfCache.out;
+ var key=id+':'+Object.keys(f.assets||{}).length+':'+(R.TopicDeep?R.TopicDeep.rev:0);   // TopicDeep(주제 심화 2차)이 늦게 준비되면 다시 만든다if(c.__rfCache&&c.__rfCache.key===key)return c.__rfCache.out;
  var scenes=[];
  spec.parts.forEach(function(part){try{
   if(part.custom==='places'){var p=placeRank(f);if(p)scenes.push(p);return;}
   if(part.custom==='rank'){var rk=rankBlock(id,f);if(rk)scenes.push(rk);return;}
   if(part.custom==='late'){var lt=lateLuck(f);if(lt)scenes.push(lt);return;}
   if(part.custom==='timing'){var t=timingRank(f,part.kind,part.scope);if(t)scenes.push(t);return;}
+  if(part.custom&&R.TopicDeep&&R.TopicDeep.has(part.custom)){var td=R.TopicDeep.render(part,f,id);if(td)scenes.push(td);return;}   // topic-deep.js(스위치 topicDeep)
   var fn=D.SECTIONS[part.sec];if(!fn)return;var list=(fn(f).scenes||[]).map(function(s){return embed(s.html);});
   if(part.take)list=part.take.map(function(i){return list[i];}).filter(Boolean);
   if(part.match)list=list.filter(function(h){return part.match.test(h.replace(/<[^>]+>/g,' '));});

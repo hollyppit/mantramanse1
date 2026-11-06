@@ -6,7 +6,7 @@
 //   { on } "모두 켜기/끄기"는 원래 세 기능(ALL_ON)에만 적용해, 다른 기능을 켜다가 이 문안이 같이 공개되지 않게 한다.
 import { json, isAdmin, configError } from '../_lib.js';
 
-const KEY = 'luckenv:flags', ALL_ON = ['interpret', 'timeline', 'region'], NAMES = ALL_ON.concat(['timelineCopy']);
+const KEY = 'luckenv:flags', ALL_ON = ['interpret', 'timeline', 'region'], NAMES = ALL_ON.concat(['timelineCopy', 'topicDeep']);   // topicDeep(2026-11-06): 무빙툰 주제 심화 블록(report/v2/topic-deep.js), 따로 켠다
 const safeDecode = s => { try { return decodeURIComponent(s); } catch { return ''; } };
 const clean = doc => { const o = { version: (doc && Number.isInteger(doc.version)) ? doc.version : 0 }; NAMES.forEach(k => { o[k] = !!(doc && doc[k] === true); }); return o; };
 

@@ -49,7 +49,10 @@
       // 타임라인 카드 문안은 [모두 켜기]에 묶지 않고 따로 켠다(functions/api/luck-flags.js ALL_ON)
       '<hr style="border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0"><p style="margin:0 0 8px"><b>운명의 타임라인 카드 문안</b> — 현재: <b style="color:' + (fl && fl.timelineCopy ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.timelineCopy ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leTC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.timelineCopy ? '타임라인 문안 끄기' : '타임라인 문안 켜기') + '</button></div>' +
-      '<p class="muted" style="margin:8px 0 0">켜면 운명의 타임라인 카드(대운·세운·월운) 맨 위에 시기 첫 문장·설명·할 일·함정이 <b>약 1분 안에</b> 나타납니다. 아래 목록에서 유형 "시기 첫 문장 / 시기 설명 / 시기 할 일 / 시기 함정"으로 걸러 먼저 검수·게시하세요. [모두 켜기·끄기]와는 따로 움직입니다.</p></div>';
+      '<p class="muted" style="margin:8px 0 0">켜면 운명의 타임라인 카드(대운·세운·월운) 맨 위에 시기 첫 문장·설명·할 일·함정이 <b>약 1분 안에</b> 나타납니다. 아래 목록에서 유형 "시기 첫 문장 / 시기 설명 / 시기 할 일 / 시기 함정"으로 걸러 먼저 검수·게시하세요. [모두 켜기·끄기]와는 따로 움직입니다.</p>' +
+      '<hr style="border:0;border-top:1px solid rgba(255,255,255,.1);margin:12px 0"><p style="margin:0 0 8px"><b>무빙툰 주제 심화 블록</b> — 현재: <b style="color:' + (fl && fl.topicDeep ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.topicDeep ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leTD"' + (fl ? '' : ' disabled') + '>' + (fl && fl.topicDeep ? '주제 심화 끄기' : '주제 심화 켜기') + '</button></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 무빙툰 재물운·커리어운·인연운·개운법 장에 그래프 지표(횡재·사업·이직·결혼 등) 10년 그래프, 직업 TOP 10·업종·수익 유형 순위, 궁합(저장한 상대), 거주·사업장 방향과 지역 TOP 5, 우리 집 현공풍수, 소원성취 명당 순위가 <b>약 1분 안에</b> 붙습니다.</p></div>';
     root.innerHTML = flagBox + '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">운세 환경 문구 게시</h3>' +
       '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 12px;margin:0 0 8px;line-height:1.7"><b>사용법</b><br>① 목록의 문구를 읽어 봅니다.<br>② 괜찮으면 체크하고 <b>[선택 게시]</b>, 전부 괜찮으면 <b>[목록 전체 게시]</b>를 누릅니다.<br>③ 고치려면 문구를 눌러 본문을 수정한 뒤 <b>[저장하고 게시]</b>를 누릅니다.</div>' +
       '<p class="muted" style="margin:0 0 8px">게시한 문구만 사용자 화면에 반영되고, 수정하면 게시본에서 빠집니다(사용자에게는 기본 문구). 단정·반말 표현이나 같은 문구는 저장되지 않습니다. 운세 환경 해석 기능이 꺼져 있으면 게시해도 아직 사용자에게 보이지 않습니다. <b>전체 ' + S.phrases.length + '건 · 게시됨 ' + c.published + ' · 미게시 ' + c.unpub + '</b></p>' +
@@ -70,6 +73,14 @@
         .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '켰습니다(약 1분 안에 반영)' : '껐습니다(약 1분 안에 반영)'); });
     }
     $('#leFOn').onclick = function () { setFlags(true); }; $('#leFOff').onclick = function () { setFlags(false); };
+    $('#leTD').onclick = function () {   // 무빙툰 주제 심화 블록 스위치(따로 켜고 끈다)
+      var v = !(S.flags && S.flags.topicDeep);
+      if (v && !confirm('무빙툰 주제 심화 블록(그래프 지표·직업 순위·궁합·풍수·명당)을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
+      var who = ''; try { who = localStorage.getItem('iching_reviewer') || ''; } catch (e) { }
+      fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { topicDeep: v } }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
+        .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '주제 심화 블록을 켰습니다(약 1분 안에 반영)' : '주제 심화 블록을 껐습니다(약 1분 안에 반영)'); });
+    };
     $('#leTC').onclick = function () {   // 타임라인 카드 문안 스위치(따로 켜고 끈다)
       var v = !(S.flags && S.flags.timelineCopy);
       if (v && !confirm('운명의 타임라인 카드 문안을 모든 사용자에게 공개합니다.\n게시한 문구는 게시본으로, 나머지는 기본 문구로 보입니다.\n켜시겠습니까?')) return;
