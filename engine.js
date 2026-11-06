@@ -297,6 +297,11 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       if (ROK[d] === b) add('건록', true, '일간 기준');
       if (YANGIN[d] === b) add('양인살', false, '일간 기준(양간)');
       if (HONGYEOM[d] === b) add('홍염살', false, '일간 기준');
+      { // 도화살=12신살의 연살, 화개살=12신살의 화개살. 12신살과 같은 기준(년지/일지 설정)을 따른다.
+        const base12 = ch.sinsalBase === 'day' ? db : yb, bn = ch.sinsalBase === 'day' ? '일지' : '년지', n12 = sinsal12(base12, b);
+        if (n12 === '연살') add('도화살', false, bn + ' 기준(연살)');
+        if (n12 === '화개살') add('화개살', true, bn + ' 기준');
+      }
       const cd = CHEONDUK[mb]; if (cd[0] === 'b' && cd[1] === b) add('천덕귀인', true, '월지 기준');
       const [gs, gw] = GOSIN(yb);
       if (gs === b) add('고신살', false, '년지 기준');
