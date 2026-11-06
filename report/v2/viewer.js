@@ -914,7 +914,7 @@
     pinTo(i);
     if(R.FullReading && S.rep.chapters[i])R.FullReading.prioritize(S.rep.chapters[i].id);
     if (S.readerWorld && S.wmap && S.wmap.idx[i] && S.wmap.idx[i] !== S.readerWorld) { enterFromHome(i); return; }
-    var el = $('#chapter .chap[data-ch="' + i + '"]'); if (!el || !S.mv) return;enterChapter(S.rep.chapters[i],i);if(R.SealReader&&el.querySelector('.seal-gate,h2')){S.mv.pause();el.querySelector('.seal-gate,h2').scrollIntoView({block:'start',behavior:instant||reduce?'auto':'smooth'});}else S.mv.gotoEl(el, instant, resume);
+    var el = $('#chapter .chap[data-ch="' + i + '"]'); if (!el || !S.mv) return;enterChapter(S.rep.chapters[i],i);if(R.SealReader&&el.querySelector('.seal-gate,h2')){S.mv.pause();el.querySelector('.seal-gate,h2').scrollIntoView({block:'start',behavior:instant||reduce||R.SealReader.focus?'auto':'smooth'});}else S.mv.gotoEl(el, instant, resume);
   }
   function onSection(sec) { // 현재 읽고 있는 섹션이 바뀔 때(자동 진행·직접 스크롤 모두)
     var ci = +sec.dataset.ch, c = S.rep.chapters[ci]; if (!c) return;
@@ -926,6 +926,7 @@
     if (S.pin) { if (Date.now() < S.pin.until && ci !== S.pin.idx) return; if(Date.now()>=S.pin.until)S.pin=null; } // 이동 중 앞·뒤 챕터 감지가 선택을 덮어쓰지 않게 한다.
     var rep = S.rep, n = rep.chapters.length, prev = S.cur ? rep.chapters[S.idx] : null, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}; S.idx = ci; S.cur = true; if(R.FullReading && R.FullReading.prioritize)R.FullReading.prioritize(c.id);
     if(S.wmap){S.sealTopicLast=S.sealTopicLast||{};S.sealTopicLast[S.wmap.idx[ci]]=ci;}barLabel(ci); saveReadingSession(c.id);if(R.SealReader)mountSealBook();
+    if(R.SealReader&&R.SealReader.focus&&prev!==c){R.SealReader.focus($('#chapter'),ci);if(S.mv&&S.mv.measure)S.mv.measure();}   // 한 번에 한 장만 보이게(2026-11-06 읽기 흐름 정리)
     if (prev && prev.act !== c.act && !S.visited[c.id]) { T('act_completed', { act: prev.act }); var a = rep.acts.filter(function (x) { return x.id === prev.act; })[0]; if (a && a.pdfDone) toast(a.pdfDone, 3800); }
     if (!S.visited[c.id]) { S.visited[c.id] = 1; T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if ((c.base || c.id) === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {}); }
     if (R.Bgm && R.Bgm.has()) { var mo = c.scenes.filter(function (s) { return s.sceneType === 'insight' || s.sceneType === 'chapterIntro'; })[0]; R.Bgm.play(mo ? R.Cinema.resolve(mo, layersOf(mo)).bgmMood : 'minimal'); } // 챕터 분위기에 맞는 BGM
