@@ -111,7 +111,7 @@
   function fieldScores(M, ch, p, level, ctx, top) {
     var out = { money: null, love: null, career: null };
     try { var dm = M.evaluateDomainLuck(ch, p, level, ctx || {}); out.money = { score: dm.wealth.score, band: dm.wealth.band }; out.love = { score: dm.love.score, band: dm.love.band }; } catch (e) { }
-    try { if (top && top.length) { var a = M.careerLuckActivation(ch, p), s = Math.round(top.reduce(function (x, k) { return x + (a[k] || 0); }, 0) / top.length); out.career = { score: s, band: levelWord(s) }; } } catch (e) { }
+    try { if (top && top.length) { var a = M.careerLuckActivation(ch, p), s = Math.round(top.reduce(function (x, k) { return x + (a[k] || 0); }, 0) / top.length); out.career = { score: s, band: M.domainBand ? M.domainBand('careerActivation', s) : levelWord(s) }; } } catch (e) { }
     return out;
   }
   var ageOf = function (ch, Y) { return Y - ch.solar.y; }; // 연 나이(엔진 seunRange 와 같은 기준)

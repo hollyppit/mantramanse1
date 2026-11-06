@@ -29,17 +29,37 @@
     });
   }
 
+  // 카드 첫머리 문안(6분류 × 대운·세운·월운, luck-interpret.js SIX) — 스위치 timelineCopy 가 켜졌을 때만 쓴다(기본 꺼짐).
+  //   켜는 곳: 관리자 운세 환경 탭(/api/luck-flags timelineCopy) 또는 로컬·미리보기 주소 ?mantraFlags=timelineCopy(feature-flags.js).
+  //   무엇이든 실패하거나 4초 안에 답이 없으면 null → 예전 카드 그대로. 게시된 문구(/api/luck-phrases)가 있으면 기본 문구 대신 쓴다.
+  var copyP = null;
+  function script(src) { return new Promise(function (ok, no) { var s = DOC.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; DOC.head.appendChild(s); }); }
+  function getJson(u, ms) { return new Promise(function (ok) { var done = false, fin = function (v) { if (!done) { done = true; ok(v); } }; setTimeout(function () { fin(null); }, ms); try { fetch(u).then(function (r) { return r.ok ? r.json() : null; }).then(fin, function () { fin(null); }); } catch (e) { fin(null); } }); }
+  function loadCopy() {
+    if (copyP) return copyP;
+    copyP = Promise.all([root.MANTRA_FLAGS ? Promise.resolve() : script('/feature-flags.js').catch(function () { }), getJson('/api/luck-flags', 4000)]).then(function (r) {
+      var on = !!(root.MANTRA_FLAGS && root.MANTRA_FLAGS.timelineCopy === true) || !!(r[1] && r[1].timelineCopy === true);
+      if (!on) return null;
+      return (root.MantraLuckInterpret ? Promise.resolve() : script('/luck-interpret.js')).then(function () { return getJson('/api/luck-phrases', 4000); }).then(function (d) {
+        var LI = root.MantraLuckInterpret; if (!LI || !LI.sixCopy) return null;
+        if (d && d.published) try { LI.applyPublished(d.published); } catch (e) { }
+        return LI;
+      });
+    }).catch(function () { return null; });
+    return copyP;
+  }
+
   H.route('timeline', function (q, ctx) {
     var PREVIEW = !!Ob.preview;
     if (!P.has() && !PREVIEW) return H.replace('#/welcome');
     H.view('<p class="pend">운명의 타임라인을 펼치는 중…</p>');
     Ob.config().then(function (cfg) {
       if (!cfg.timeline || cfg.timeline.enabled === false) return H.replace('#/');
-      return Promise.all([H.sajuKit(), PREVIEW ? H.engine().then(function (M) { return M.compute(SAMPLE); }) : H.chart(), loadTl().then(loadWorlds)]).then(function (r) { if (H.alive(ctx)) draw(q, ctx, cfg, r[0], r[1], PREVIEW, root.ReportV2.Explore.mergeWorlds(r[2])); });
+      return Promise.all([H.sajuKit(), PREVIEW ? H.engine().then(function (M) { return M.compute(SAMPLE); }) : H.chart(), loadTl().then(loadWorlds), loadCopy()]).then(function (r) { if (H.alive(ctx)) draw(q, ctx, cfg, r[0], r[1], PREVIEW, root.ReportV2.Explore.mergeWorlds(r[2]), r[3]); });
     }).catch(function () { if (!H.alive(ctx)) return; H.view('<p class="pend">타임라인을 불러오지 못했습니다.<br><br><button type="button" class="btn ghost" id="rt">다시 시도</button><br><br><a class="btn ghost sm" href="#/">홈으로</a></p>'); $('#rt').onclick = function () { H.render(); }; });
   });
 
-  function draw(q, ctx, cfg, kit, ch, PREVIEW, worlds) {
+  function draw(q, ctx, cfg, kit, ch, PREVIEW, worlds, CP) {
     var M = kit.M, T = kit.T, R = root.ReportV2, TL = R.Timeline, L = R.Luck6, TC = cfg.timeline, G = TC.graph, nm = PREVIEW ? '미리보기' : P.name(), mobile = (root.innerWidth || 1024) < 768;
     var now = Date.now(), nowY = new Date(now + 9 * 3600e3).getUTCFullYear(), day = ch.pillars.day, stemK = M.STEM_K[day.s], ju = M.gzNameK(day), g = ch.gender;
     var ig = T.ilganCard(stemK, nm), jc = T.ijuCard(ju, nm, g), S5 = (T.DATA.S || {})[stemK] || {};
@@ -69,7 +89,11 @@
     function detail(it, title, lvl) { // 한 시기의 상세 카드(엔진의 6분류·판정 근거·분야 점수) + 근거 보기
       var ov = it.overlays && (it.overlays.volatility || it.overlays.defense) ? '<p class="tq-ov">' + (it.overlays.volatility ? '<i>변동 신호</i>' : '') + (it.overlays.defense ? '<i>방어 신호</i>' : '') + '</p>' : '';
       var open = st.ev === lvl + ':' + (it.idx != null ? it.idx : it.year != null ? it.year : it.month);
-      return '<article class="tq-card ' + KEYC(it) + '"><p class="tq-ct">' + esc(title) + '</p><h3>' + esc(it.six) + '<small>' + esc(it.meaning) + '</small></h3><p class="tq-rule"><b>이렇게 판정했어요</b> ' + esc(it.rule) + '</p>' + ov + fieldBars(it) +
+      // 스위치가 켜졌으면 6분류 한 줄 대신 시기 첫 문장(제목)·설명·할 일·함정을 보여 준다. 6분류 이름은 색 범례와 맞추려고 작은 글씨로 남긴다.
+      var cp = CP && CP.sixCopy(it.six, lvl), head = cp
+        ? '<h3>' + esc(cp.hook) + '<small>' + esc(it.six) + ' · ' + esc(it.meaning) + '</small></h3><p class="tq-copy">' + esc(cp.body) + '</p><ul class="tq-copy-l"><li><b>해 볼 것</b>' + esc(cp.do) + '</li><li><b>조심할 것</b>' + esc(cp.trap) + '</li></ul>'
+        : '<h3>' + esc(it.six) + '<small>' + esc(it.meaning) + '</small></h3>';
+      return '<article class="tq-card ' + KEYC(it) + (cp ? ' has-copy' : '') + '"><p class="tq-ct">' + esc(title) + '</p>' + head + '<p class="tq-rule"><b>이렇게 판정했어요</b> ' + esc(it.rule) + '</p>' + ov + fieldBars(it) +
         '<p class="tq-sc">흐름 점수 ' + it.scores.fit + ' · 작용 강도 ' + it.scores.intensity + ' · 변동성 ' + it.scores.volatility + (it.condition ? ' · 상태 ' + esc(it.condition) : '') + '</p>' +
         '<div class="tq-card-acts"><button type="button" class="tq-lnk" data-ev="' + lvl + '" aria-expanded="' + open + '">' + (open ? '근거 닫기' : '자세한 근거 보기') + '</button><a class="tq-lnk" href="#/go?to=future" data-track="timeline_topic_click" data-p="detail_' + lvl + '">이 시기 상세 풀이 →</a></div>' +
         (open ? '<div class="tq-evbox">' + TL.evidenceHtml(TL.evidence(M, ch, it)) + '</div>' : '') + '</article>';

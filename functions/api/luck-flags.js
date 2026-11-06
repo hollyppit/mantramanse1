@@ -2,15 +2,17 @@
 // GET /api/luck-flags — { interpret, timeline, region, version } (공개, 60초 캐시). 저장된 값이 없으면 모두 false
 // PUT /api/luck-flags — { on: true|false } 세 기능을 한 번에, 또는 { flags: { interpret?, timeline?, region? } } 일부만 (관리자)
 // 저장은 KV 키 luckenv:flags 하나만 쓴다. 기본값은 모두 꺼짐이며, 값이 없거나 읽기에 실패하면 꺼진 것으로 본다.
+// timelineCopy(2026-11-06): 운명의 타임라인(#/timeline) 카드 첫머리 문안(luck-interpret.js SIX). { flags: { timelineCopy } }로만 켜고 끈다 —
+//   { on } "모두 켜기/끄기"는 원래 세 기능(ALL_ON)에만 적용해, 다른 기능을 켜다가 이 문안이 같이 공개되지 않게 한다.
 import { json, isAdmin, configError } from '../_lib.js';
 
-const KEY = 'luckenv:flags', NAMES = ['interpret', 'timeline', 'region'];
+const KEY = 'luckenv:flags', ALL_ON = ['interpret', 'timeline', 'region'], NAMES = ALL_ON.concat(['timelineCopy']);
 const safeDecode = s => { try { return decodeURIComponent(s); } catch { return ''; } };
 const clean = doc => { const o = { version: (doc && Number.isInteger(doc.version)) ? doc.version : 0 }; NAMES.forEach(k => { o[k] = !!(doc && doc[k] === true); }); return o; };
 
 export function applyFlags(doc, body, at, by) {
   const next = { ...clean(doc), at, by };
-  if (typeof body.on === 'boolean') NAMES.forEach(k => { next[k] = body.on; });
+  if (typeof body.on === 'boolean') ALL_ON.forEach(k => { next[k] = body.on; });
   else if (body.flags && typeof body.flags === 'object') {
     for (const k of Object.keys(body.flags)) { if (!NAMES.includes(k) || typeof body.flags[k] !== 'boolean') return { error: '알 수 없는 스위치이거나 true/false가 아닙니다: ' + k }; }
     for (const k of Object.keys(body.flags)) next[k] = body.flags[k];

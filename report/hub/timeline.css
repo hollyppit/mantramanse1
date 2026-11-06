@@ -66,6 +66,10 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 #hub .tq-card{ margin-top: 14px; border: 1px solid var(--line); border-top: 3px solid var(--kc, var(--gold)); border-radius: 14px; background: rgba(19, 24, 39, .85); padding: 16px 16px 12px; }
 #hub .tq-ct{ font-size: .76rem; letter-spacing: .06em; color: var(--ink-3); }
 #hub .tq-card h3{ font-size: 1.28rem; margin: 2px 0 8px; color: var(--ink); } #hub .tq-card h3::before{ content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: var(--kc); margin-right: 8px; } #hub .tq-card h3 small{ display: block; font-family: var(--f-sans); font-weight: 400; font-size: .84rem; color: var(--ink-2); margin-top: 2px; }
+/* 카드 첫머리 문안(스위치 timelineCopy) */
+#hub .tq-card.has-copy h3{ line-height: 1.4; } #hub .tq-card.has-copy h3 small{ font-size: .76rem; color: var(--ink-3); margin-top: 6px; }
+#hub .tq-copy{ font-size: .92rem; line-height: 1.75; color: var(--ink-2); margin: 0 0 10px; word-break: keep-all; }
+#hub .tq-copy-l{ list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 6px; } #hub .tq-copy-l li{ font-size: .86rem; line-height: 1.65; color: var(--ink-2); padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,.04); word-break: keep-all; } #hub .tq-copy-l b{ display: block; font-size: .72rem; font-weight: 600; color: var(--kc, var(--gold)); margin-bottom: 2px; }
 #hub .tq-rule{ font-size: .8rem; color: var(--ink-3); line-height: 1.7; } #hub .tq-rule b{ color: var(--ink-2); font-weight: 500; margin-right: 6px; }
 #hub .tq-ov{ display: flex; gap: 6px; margin: 6px 0; } #hub .tq-ov i{ font-style: normal; font-size: .7rem; border: 1px solid var(--line); border-radius: 999px; padding: 1px 9px; color: var(--ink-2); }
 #hub .tq-fs{ display: grid; gap: 7px; margin: 12px 0 8px; } #hub .tq-f{ display: grid; grid-template-columns: 70px 1fr 74px; gap: 10px; align-items: center; font-size: .8rem; } #hub .tq-f > span{ color: var(--ink-2); }

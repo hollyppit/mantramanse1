@@ -19,6 +19,13 @@ const root = path.join(__dirname, '..');
   r = await put({ flags: { region: true } }); ok(r.j.region === true && r.j.interpret === false && r.j.timeline === false, '일부만 켜기');
   r = await put({ flags: { timeline: true } }); ok(r.j.region === true && r.j.timeline === true && r.j.interpret === false, '이전 값 유지하며 추가');
   for (const [m, b] of [['알 수 없는 스위치', { flags: { evil: true } }], ['문자열 값', { flags: { region: 'yes' } }], ['형식 없음', {}], ['on이 불리언 아님', { on: 'true' }], ['상속 이름', { flags: { constructor: true } }]]) ok((await put(b)).s === 400, m + ' 거부 안 됨');
+  // timelineCopy(타임라인 카드 문안): 기본 꺼짐, [모두 켜기/끄기]에 묶이지 않고 flags 로만 켜고 끈다
+  ok((await get()).j.timelineCopy === false, 'timelineCopy 기본 꺼짐');
+  r = await put({ on: true }); ok(r.j.timelineCopy === false && all(r.j), '모두 켜기는 timelineCopy 를 켜지 않음');
+  r = await put({ flags: { timelineCopy: true } }); ok(r.j.timelineCopy === true && all(r.j), 'timelineCopy 따로 켜기');
+  r = await put({ on: false }); ok(r.j.timelineCopy === true && none(r.j), '모두 끄기는 timelineCopy 를 건드리지 않음');
+  r = await put({ flags: { timelineCopy: false } }); ok(r.j.timelineCopy === false, 'timelineCopy 따로 끄기');
+  ok(/timelineCopy: false/.test(fs.readFileSync(path.join(root, 'feature-flags.js'), 'utf8')), 'feature-flags.js timelineCopy 기본 꺼짐');
   const before = JSON.stringify((await get()).j); await put({ flags: { evil: true } }); ok(JSON.stringify((await get()).j) === before, '거부된 요청은 저장하지 않음');
   r = await put({ on: true }, 'pw-test', { 'x-reviewer': '%E0%A4%A' }); ok(r.s === 200, '잘못된 x-reviewer 헤더');
   // 저장소 오류·오염된 값은 꺼짐으로 취급

@@ -123,7 +123,7 @@
     return {
       y: y, mo: mo, d: d, dow: DOW[k.getUTCDay()], gz: M.gzName(il), score: clamp((ev.fitScore + 100) / 2), flowKey: key, phase: ev.phase, flowLabel: M.flowLabel(ev, { overlay: 'top' }), cond: cond,
       line: FLOW_LINE[key] || '', notes: note, todo: mode[2] || '', meaning: mode[1] || '',
-      fields: { money: { s: dm.wealth.score, b: dm.wealth.band }, work: career == null ? null : { s: career, b: career >= 70 ? '높음' : career >= 55 ? '무난' : career >= 40 ? '다소 낮음' : '낮음' }, love: { s: dm.love.score, b: dm.love.band }, health: { s: dm.health.score, b: dm.health.band } },
+      fields: { money: { s: dm.wealth.score, b: dm.wealth.band }, work: career == null ? null : { s: career, b: M.domainBand('careerActivation', career) }, love: { s: dm.love.score, b: dm.love.band }, health: { s: dm.health.score, b: dm.health.band } },
       // 근거 표시용(엔진이 이미 계산한 값을 옮겨 담기만 함)
       ev: { gz: M.gzNameK ? M.gzNameK(il) : '', stemTG: il.stemTG, branchTG: il.branchTG, flows: f.flows || {}, secondary: f.secondaryFlow, reasons: (f.reasons || []).slice(0, 6), relations: (ev.relations || []).slice(0, 8),
         volatile: !!f.overlays.volatility.active, defense: !!f.overlays.defense.active, domain: { money: { summary: dm.wealth.summary, reasons: (dm.wealth.reasons || []).slice(0, 4) }, love: { summary: dm.love.summary, reasons: (dm.love.reasons || []).slice(0, 4) }, health: { summary: dm.health.summary, reasons: (dm.health.reasons || []).slice(0, 4) } } },

@@ -1639,9 +1639,16 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     wolun: { self: 0.60, chain: { daeun: 0.15, seun: 0.25 }, emphasis: 1.05 },
     ilun: { self: 0.60, chain: { daeun: 0.08, seun: 0.12, wolun: 0.20 }, emphasis: 1.15 },
   };
+  // 등급 구간은 분야마다 점수 분포가 달라 따로 둔다(docs/FIELD_BAND_REVIEW_2026-11-06.md, 2026-11-06 재조정).
+  //  목표 비율: 매우 높음 ~3% · 높음 ~15% · 무난 ~55% · 다소 낮음 ~20% · 낮음 ~7% (대운·세운·월운 표본 기준). 점수는 그대로, 등급 글자만 정한다.
+  //  재물은 중앙 47·폭 좁음, 애정은 중앙 53·위로 긺. 예전 공통 구간 85/70/55/40은 보통인 시기를 "다소 낮음"으로 표시했다(재물 69%).
+  const BAND5_LEGACY = [[85, '매우 높음'], [70, '높음'], [55, '무난'], [40, '다소 낮음'], [0, '낮음']];   // 하위 분야(SUB_DOMAIN_KEYS)는 분포를 따로 재기 전까지 예전 구간 유지
   const DOMAIN_SCORE_THRESHOLDS = {
-    love: [[85, '매우 높음'], [70, '높음'], [55, '무난'], [40, '다소 낮음'], [0, '낮음']],
-    wealth: [[85, '매우 높음'], [70, '높음'], [55, '무난'], [40, '다소 낮음'], [0, '낮음']],
+    love: [[76, '매우 높음'], [64, '높음'], [48, '무난'], [43, '다소 낮음'], [0, '낮음']],
+    wealth: [[65, '매우 높음'], [55, '높음'], [44, '무난'], [37, '다소 낮음'], [0, '낮음']],
+    // 직업 활성도(careerLuckActivation): 좋고 나쁨이 아니라 그 사람의 상위 직업 성향이 이 운에서 얼마나 쓰이는지. 0~100으로 넓게 퍼진다.
+    // 하위 분야 'career'(evaluateSubDomain)와 이름이 겹치지 않게 careerActivation 으로 둔다.
+    careerActivation: [[80, '매우 높음'], [62, '높음'], [30, '무난'], [15, '다소 낮음'], [0, '낮음']],
     health: [[85, '안정도 매우 높음'], [70, '안정도 높음'], [55, '무난'], [40, '관리'], [25, '부담 높음'], [0, '부담 매우 높음']],
     accident: [[85, '주의 신호 매우 높음'], [70, '주의 높음'], [55, '주의'], [40, '보통'], [25, '약간 있음'], [0, '낮음']],
   };
@@ -1935,7 +1942,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       loss: { rob: 0.30, clash: 0.22, burden: 0.18, tension: 0.12, harm: 0.08, badFit: 0.12, baseline: 0.04, scale: 1.7, tag: 54 },
     },
   };
-  Object.assign(DOMAIN_SCORE_THRESHOLDS, Object.fromEntries(SUB_DOMAIN_KEYS.map(k => [k, DOMAIN_SCORE_THRESHOLDS.love])));
+  Object.assign(DOMAIN_SCORE_THRESHOLDS, Object.fromEntries(SUB_DOMAIN_KEYS.map(k => [k, BAND5_LEGACY])));
   const PAT_GROUP = { '관살혼잡': 3, '관살과다': 3, '상관견관': 1, '군겁쟁재': 0, '재다신약': 2, '식상과다(설기)': 1 };
   const patAdj = (F, table, hit) => Object.entries(table).reduce((s, [n, v]) => s + (F.patterns.includes(n) && F.g[PAT_GROUP[n]] >= hit ? v : 0), 0);
   const fitBase = (Q, F) => 50 + Q.general * 0.5 * (Q.own * F.fit + Q.eokbu * F.eokbu + Q.johu * F.johu);
