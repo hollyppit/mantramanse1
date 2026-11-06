@@ -187,7 +187,7 @@
     var g = function (id) { return $('#' + id).value; }, out = $('#smOut');
     try {
       var h = g('smH'); S.sim = { year: +g('smY'), month: +g('smM'), day: +g('smD'), hour: h === '' ? null : +h, minute: +g('smMi'), gender: g('smG'), draft: $('#smDr').checked };
-      var ch = M.compute({ year: S.sim.year, month: S.sim.month, day: S.sim.day, hour: S.sim.hour, minute: S.sim.hour == null ? null : S.sim.minute, gender: S.sim.gender, calendar: 'solar', school: 'eokbu' });
+      var ch = M.compute({ year: S.sim.year, month: S.sim.month, day: S.sim.day, hour: S.sim.hour, minute: S.sim.hour == null ? null : S.sim.minute, gender: S.sim.gender, calendar: 'solar', school: 'auto' });
       W.applyPublished(pubView(S.sim.draft)); var r = W.build(M, ch, {}), pubIds = {}; W.applyPublished(null);
       var stOfId = function (id) { var s = stOf('phrase', id); return s === 'none' ? '기본' : ST[s]; };
       var li = function (a) { return a.length ? '<ul style="margin:2px 0 6px 18px">' + a.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' : '<p class="muted" style="margin:2px 0 6px">없음</p>'; };

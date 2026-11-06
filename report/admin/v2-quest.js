@@ -189,7 +189,7 @@
     var need = []; if (!window.Manse) need.push({ g: 'Manse', src: '/engine.js' }); if (!(window.ReportV2 && window.ReportV2.Timeline)) V2L.forEach(function (n) { need.push({ g: '__x' + n, src: '/report/v2/' + n + '.js' }); });
     loadScripts(need).then(function () {
       var rows = [], R = window.ReportV2, M = window.Manse, ok = function (c, a, b) { rows.push('<tr><td>' + a + '</td><td><span class="ob-st ' + (c ? 'ok' : 'bad') + '">' + (c ? '연결됨' : '실패') + '</span> ' + esc(b || '') + '</td></tr>'); };
-      var ch = null; try { ch = M.compute({ year: 1992, month: 6, day: 23, hour: 7, minute: 30, calendar: 'solar', leap: false, gender: 'M', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' }); } catch (e) { }
+      var ch = null; try { ch = M.compute({ year: 1992, month: 6, day: 23, hour: 7, minute: 30, calendar: 'solar', leap: false, gender: 'M', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto' }); } catch (e) { }
       ok(!!ch && !!ch.pillars, '만세력 엔진 (원국·오행·십성·자미두수)', ch ? '사주 원국 · 자미두수 ' + (ch.ziwei ? '명반 생성' : '시각 미상') : '');
       var dl = null, ys = null, ms = null; try { dl = R.Timeline.daeun(M, ch, Date.now()); ys = R.Timeline.years(M, ch, dl.filter(function (x) { return !x.pre; })[0].startYear, Date.now()); ms = R.Timeline.months(M, ch, new Date().getFullYear(), Date.now()); } catch (e) { }
       ok(!!dl, '대운 (엔진 → 6분류)', dl ? dl.filter(function (x) { return !x.pre; }).length + '개 구간' : ''); ok(!!ys && ys.length === 10, '세운', ys ? ys.length + '개 해' : ''); ok(!!ms && ms.length === 12, '월운', ms ? ms.length + '개월' : '');

@@ -143,7 +143,7 @@
     var g = function (id) { return $('#' + id).value; }, out = $('#sOut');
     try {
       SIM = { year: +g('sY'), month: +g('sM'), day: +g('sD'), hour: +g('sH'), minute: +g('sMi'), gender: g('sG'), lon: +g('sL'), level: g('sLv'), Y: +g('sPY'), m: +g('sPM'), d: +g('sPD'), region: g('sRg') };
-      var ch = M.compute({ year: SIM.year, month: SIM.month, day: SIM.day, hour: SIM.hour, minute: SIM.minute, calendar: 'solar', leap: false, gender: SIM.gender, lon: SIM.lon, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' });
+      var ch = M.compute({ year: SIM.year, month: SIM.month, day: SIM.day, hour: SIM.hour, minute: SIM.minute, calendar: 'solar', leap: false, gender: SIM.gender, lon: SIM.lon, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto' });
       var x;
       if (SIM.level === 'daeun') x = M.daeunAt(ch, Date.UTC(SIM.Y, Math.max(0, SIM.m - 1), SIM.d || 1, 3));
       else if (SIM.level === 'seun') x = M.seunRange(ch, SIM.Y, SIM.Y)[0];

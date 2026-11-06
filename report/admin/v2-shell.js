@@ -237,7 +237,7 @@
         var sd = a[1]; return awakeningFor(sd).then(function (aw) {
           var d = TS.date.split('-').map(Number), t = (TS.time || '12:00').split(':').map(Number);
           var m = { type: 'mt-v2-preview', chapter: chapterId, project: projectId || 'full', content: content(), media: ST.media, awk: aw.awk, now: new Date(TS.now + 'T12:00:00+09:00').getTime(),
-            input: { year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: TS.gender, lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' } };
+            input: { year: d[0], month: d[1], day: d[2], hour: t[0], minute: t[1], calendar: 'solar', leap: false, gender: TS.gender, lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto' } };
           P.last = m; if (P.ready) P.send(m); else P.pending = m; msg.textContent = '';
         });
       }).catch(function (e) { msg.textContent = e.message; });

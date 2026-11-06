@@ -349,7 +349,7 @@
   function toProfile(d, place) {
     var unknown = !!d.hourUnknown || d.hour === '' || d.hour == null;
     return { name: String(d.name || '').trim().slice(0, 20), gender: d.gender, calendar: d.calendar === 'lunar' ? 'lunar' : 'solar', leap: d.calendar === 'lunar' && !!d.leap, year: +d.year, month: +d.month, day: +d.day,
-      hour: unknown ? 12 : +d.hour, minute: unknown ? 0 : (+d.minute || 0), hourUnknown: unknown, city: place ? place.name : '서울', lon: place ? +place.lon : 126.98, country: d.country || 'KR', timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu', combinationMode:d.combinationMode==='off'?'off':'auto', climatePalaceMode:d.climatePalaceMode==='off'?'off':'auto' };
+      hour: unknown ? 12 : +d.hour, minute: unknown ? 0 : (+d.minute || 0), hourUnknown: unknown, city: place ? place.name : '서울', lon: place ? +place.lon : 126.98, country: d.country || 'KR', timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto', combinationMode:d.combinationMode==='off'?'off':'auto', climatePalaceMode:d.climatePalaceMode==='off'?'off':'auto' };
   }
 
   // 한국 지역(시·도 대표 도시) — 기존 입력 화면과 같은 경도 값. 엔진은 한국 표준시 기준이라 국내 출생을 기본으로 한다.

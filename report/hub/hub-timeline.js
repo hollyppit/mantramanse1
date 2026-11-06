@@ -11,7 +11,7 @@
   var EL_COL = ['#5E9E78', '#D0634A', '#BC9C62', '#AEB9C6', '#4A7AB5'], GROUPS5 = ['비겁', '식상', '재성', '관성', '인성'], EL_HJ = ['木', '火', '土', '金', '水'];
   var clamp = function (v) { return Math.max(0, Math.min(100, Math.round(v))); };
   var pct = function (fit) { return clamp((fit + 100) / 2); };
-  var SAMPLE = { year: 1992, month: 6, day: 23, hour: 7, minute: 30, calendar: 'solar', leap: false, gender: 'M', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' };
+  var SAMPLE = { year: 1992, month: 6, day: 23, hour: 7, minute: 30, calendar: 'solar', leap: false, gender: 'M', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto' };
 
   // 무빙툰 뷰어의 시간 모듈(대운·세운·월운 + 6분류)은 이 화면에서만 필요하므로 처음 열 때 순서대로 불러온다(내려받기는 동시에, 실행은 순서대로).
   var tlP = null;

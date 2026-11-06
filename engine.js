@@ -1105,8 +1105,13 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     ch.strength = strength(ch, ch.weights);
     ch.strengthAll = Object.fromEntries(Object.keys(MODELS).map(m => [m, strength(ch, ch.weightsAll[m])]));
     ch.climate = climate(ch);
-    ch.school = inp.school || 'eokbu';
+    // 용신 기준(학파): 'auto'(기본·값 없음)면 이 사주의 판정(methodAdvice)으로 고른다 — 조후가 우선이거나 병행인 사주는 조후, 억부가 우선인 사주(조후가 해당하지 않음 포함)는 억부.
+    //  '병행'(두 기준이 같은 방향이거나 서로 부딪힘)도 조후를 기본으로 둔다. 사용자가 억부·조후·통관을 직접 고르면 그대로 쓴다. (2026-11-07)
+    const schoolReq = inp.school && (inp.school === 'auto' || SCHOOLS[inp.school]) ? inp.school : 'auto';
+    ch.school = schoolReq === 'auto' ? 'eokbu' : schoolReq;   // 아래 판정 전까지의 임시값(yongsin 은 학파를 인자로 받아 영향 없음)
     ch.yongAll = Object.fromEntries(Object.keys(SCHOOLS).map(s => [s, yongsin(ch, ch.weights, ch.strength, s)]));
+    ch.schoolAuto = schoolReq === 'auto';
+    if (ch.schoolAuto) { const adv = methodAdvice(ch); ch.schoolAdvice = adv.verdict; ch.school = (adv.verdict === '조후' || adv.verdict === '병행') && ch.yongAll.johu.applicable ? 'johu' : 'eokbu'; }   // 병행도 조후(2026-11-07 사용자 결정)
     ch.yong = ch.yongAll[ch.school].applicable ? ch.yongAll[ch.school] : ch.yongAll.eokbu;
     ch.yongFallback = !ch.yongAll[ch.school].applicable;
     ch.patterns = patterns(ch, ch.weights, ch.strength);

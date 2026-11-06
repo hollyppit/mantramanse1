@@ -5065,9 +5065,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return body;
   }
 
-  const EXAMPLE = { name: '', gender: 'F', calendar: 'solar', leap: false, year: 1990, month: 3, day: 15, hour: 14, minute: 30, hourUnknown: false, city: '서울', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu', combinationMode:'auto', climatePalaceMode:'auto' };
+  const EXAMPLE = { name: '', gender: 'F', calendar: 'solar', leap: false, year: 1990, month: 3, day: 15, hour: 14, minute: 30, hourUnknown: false, city: '서울', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto', combinationMode:'auto', climatePalaceMode:'auto' };
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) { saved = null; }
+  if (saved && !saved.schoolPicked) saved.school = 'auto';   // 용신 기준을 직접 고른 적 없으면 자동(조후가 우선인 사주는 조후). 2026-11-07
   const S = { inp: Object.assign({}, EXAMPLE, saved || {}), isExample: !saved, editing: !saved, tab: 'wonguk', ch: null, err: null, sheet: null, sel: null, selYear: null, selYM: null, glq: '' };
   try { const t = localStorage.getItem(STORE + '-tab'); if (t) S.tab = t === 'rel' ? 'wonguk' : t; } catch (e) { }
   const NOW = Date.now();
@@ -6434,7 +6435,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const elOf = r => +Object.keys(y.roles).find(e => y.roles[e] === r);
     return `${renderYongEasy()}${spYongCard()}
     <section class="card">
-      <div class="card-h"><h2>${term('용신')} · 희신 · 기신</h2>${seg('school', Object.entries(M.SCHOOLS).map(([k, l]) => [k, l.split(' ')[0]]), ch.school)}</div>
+      <div class="card-h"><h2>${term('용신')} · 희신 · 기신</h2>${seg('school', [['auto', '자동']].concat(Object.entries(M.SCHOOLS).map(([k, l]) => [k, l.split(' ')[0]])), ch.schoolAuto ? 'auto' : ch.school)}</div>
+      ${ch.schoolAuto ? `<p class="small muted" style="margin:-4px 0 10px">자동 — 이 사주는 <b>${ch.schoolAdvice === '병행' && ch.school === 'johu' ? '억부·조후를 함께 봐야 하는 사주' : ch.school === 'johu' ? '조후가 우선인 사주' : '억부가 우선인 사주'}</b>라 ${M.SCHOOLS[ch.school].split(' ')[0]} 기준 용신을 기본으로 보여 드립니다.</p>` : ''}
       ${!chosen.applicable ? `<div class="warn"><b>${M.SCHOOLS[ch.school]} 해당 없음</b><span>${esc(chosen.log[chosen.log.length - 1])}</span><span>아래 역할과 운세 그래프는 억부 기준으로 표시합니다.</span></div>` : ''}
       <div class="roles">${order.map(r => { const e = elOf(r); return `<div class="role ${ECLS[e]}${r === '용신' ? ' main' : ''}"><span class="rn">${term(r)}</span><span class="rg">${M.EL[e]}</span><span class="rp">${M.EL_K[e]} · ${M.TG_GROUP[(e - dEl + 5) % 5]}</span><span class="rp num">원국 ${ch.weights.pct[e].toFixed(0)}%</span></div>`; }).join('')}</div>
       <div><h3 style="margin-bottom:8px">판단 근거 · ${M.SCHOOLS[y.school]}</h3><ol class="log">${y.log.map(l => `<li>${esc(jgLog(l))}</li>`).join('')}</ol></div>
@@ -9891,7 +9893,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   document.addEventListener('click', ev => {
     const t = ev.target && ev.target.closest ? ev.target.closest('[data-prof]') : null; if (!t) return;
     const [a, v] = t.dataset.prof.split(':');
-    if (a === 'load') { const p = PROFS[+v]; if (!p) return; S.inp = Object.assign({}, EXAMPLE, p); S.isExample = false; S.editing = false; S.sel = null; S.zwSel = null; S.zwY = null; S.err = null; run(); if (!S.err) { save(); profUpsert(); } render(); window.scrollTo(0, 0); return; }
+    if (a === 'load') { const p = PROFS[+v]; if (!p) return; S.inp = Object.assign({}, EXAMPLE, p, p.schoolPicked ? {} : { school: 'auto' }); S.isExample = false; S.editing = false; S.sel = null; S.zwSel = null; S.zwY = null; S.err = null; run(); if (!S.err) { save(); profUpsert(); } render(); window.scrollTo(0, 0); return; }
     if (a === 'del') { const p = PROFS[+v]; if (!p || !window.confirm(`"${profLabel(p)}"의 저장된 정보를 지울까요?`)) return; const wasCur = profId(p) === profId(S.inp); PROFS.splice(+v, 1); profStore(PROFS); if (wasCur) { try { localStorage.removeItem(STORE); } catch (e) { } } render(); return; }
     if (a === 'clear') { if (window.confirm('저장된 모든 사람의 정보(내 사주·궁합 상대)를 이 기기에서 지울까요? 되돌릴 수 없어요.')) profClearAll(); return; }
   });
@@ -9964,6 +9966,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (st) {
       const [k, v] = st.dataset.set.split(':');
       if (S.editing) readForm();
+      if (k === 'school') S.inp.schoolPicked = v !== 'auto';
       if (k === 'model' || k === 'school') { S.inp[k] = v; run(); save(); render(); return; }
       S.inp[k] = v; if (k === 'calendar') S.inp.leap = false; render(); return;
     }

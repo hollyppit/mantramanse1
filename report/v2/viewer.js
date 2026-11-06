@@ -35,7 +35,7 @@
     if (!window.Manse) { msg.textContent = '분석 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.'; return; }
     if (!F.gender.value) { msg.textContent = '성별을 선택해 주세요.'; return; }
     var t = F.time.value, hasT = !F.unknown.checked && /^\d\d:\d\d$/.test(t);
-    var inp = { year: +F.year.value, month: +F.month.value, day: +F.day.value, hour: hasT ? +t.slice(0, 2) : null, minute: hasT ? +t.slice(3) : 0, calendar: F.calendar.value, leap: F.calendar.value === 'lunar' && F.leap.checked, gender: F.gender.value, lon: +F.city.value, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu', combinationMode:F.combinationMode.value, climatePalaceMode:F.climatePalaceMode.value };
+    var inp = { year: +F.year.value, month: +F.month.value, day: +F.day.value, hour: hasT ? +t.slice(0, 2) : null, minute: hasT ? +t.slice(3) : 0, calendar: F.calendar.value, leap: F.calendar.value === 'lunar' && F.leap.checked, gender: F.gender.value, lon: +F.city.value, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto', combinationMode:F.combinationMode.value, climatePalaceMode:F.climatePalaceMode.value };
     var ch; try { ch = window.Manse.compute(inp); } catch (err) { msg.textContent = (err && err.message) || '입력을 확인해 주세요.'; return; }
     S.name = String(F.name.value || '').trim().slice(0, 20); S.ch = ch; start(ch, inp.gender);
   });

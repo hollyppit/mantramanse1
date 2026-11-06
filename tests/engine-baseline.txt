@@ -1,4 +1,4 @@
-전체 c44e381d3ec0
+전체 187c59cc0f99
   pillars   077b8bd01c31
   weights   08a4c53ee7ea
   strength  11a8f65ab1ab
@@ -9,6 +9,6 @@
   wolun     137009bfbf71
   ilun      6d059127ed93
   samjae    651aab616fb5
-  domain    a427a9c1ea2f
+  domain    e1e423a6248b
   career    3d70a753d256
   root      e62acd6216d5

@@ -263,7 +263,7 @@
           if (!M()) { msg.textContent = '분석 엔진을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.'; return; }
           var t = f.time.value, hasT = !f.unknown.checked && /^\d\d:\d\d$/.test(t);
           if (!f.gender.value) { msg.textContent = '성별을 선택해 주세요.'; return; }
-          var inp = { year: +f.year.value, month: +f.month.value, day: +f.day.value, hour: hasT ? +t.slice(0, 2) : null, minute: hasT ? +t.slice(3) : 0, calendar: f.calendar.value, leap: f.calendar.value === 'lunar' && f.leap.checked, gender: f.gender.value, lon: +f.city.value, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu', combinationMode:f.combinationMode.value, climatePalaceMode:f.climatePalaceMode.value };
+          var inp = { year: +f.year.value, month: +f.month.value, day: +f.day.value, hour: hasT ? +t.slice(0, 2) : null, minute: hasT ? +t.slice(3) : 0, calendar: f.calendar.value, leap: f.calendar.value === 'lunar' && f.leap.checked, gender: f.gender.value, lon: +f.city.value, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto', combinationMode:f.combinationMode.value, climatePalaceMode:f.climatePalaceMode.value };
           var ch;
           try { ch = M().compute(inp); } catch (err) { msg.textContent = (err && err.message) || '입력을 확인해 주세요.'; return; }
           S.chart = ch; S.name = String(f.name.value || '').trim().slice(0, 20);
@@ -849,7 +849,7 @@
   var PREVIEW = DOC && /[?&]preview=1\b/.test(location.search); // 관리자 미리보기: 보내 주는 내용으로 다시 그리고, 모든 단계를 펼쳐 보여 준다
   var host0 = null, started = false;
   function sample() { // 미리보기용 예시 사주 (분석 후 화면까지 보이도록)
-    if (!M()) return; try { S.chart = M().compute({ year: 1990, month: 5, day: 15, hour: 14, minute: 0, calendar: 'solar', gender: 'F', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' }); S.flowOpen = true; S.name = '예시'; } catch (e) { }
+    if (!M()) return; try { S.chart = M().compute({ year: 1990, month: 5, day: 15, hour: 14, minute: 0, calendar: 'solar', gender: 'F', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto' }); S.flowOpen = true; S.name = '예시'; } catch (e) { }
     loadClips().then(function () { if (started) paint('FreeResult'); });
   }
   function render() {

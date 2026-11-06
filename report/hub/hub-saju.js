@@ -72,7 +72,7 @@
       if (!f.gender.value) { fail('성별을 선택해 주세요.', f.querySelector('[name=gender]')); return; }
       if (!f.unknown.checked && !/^\d\d:\d\d$/.test(f.time.value)) { fail('태어난 시간을 입력하거나 ‘시간을 몰라요’를 선택해 주세요.', f.time); return; }
       var t = f.time.value, hasT = !f.unknown.checked && /^\d\d:\d\d$/.test(t), city = CITIES.filter(function (c) { return String(c[1]) === f.city.value; })[0];
-      var saved = { name: String(f.name.value || '').trim().slice(0, 20), gender: f.gender.value, calendar: f.calendar.value, leap: f.calendar.value === 'lunar' && f.leap.checked, year: +f.year.value, month: +f.month.value, day: +f.day.value, hour: hasT ? +t.slice(0, 2) : 12, minute: hasT ? +t.slice(3) : 0, hourUnknown: !hasT, city: city ? city[0] : '서울', lon: +f.city.value, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu', combinationMode:f.combinationMode.value, climatePalaceMode:f.climatePalaceMode.value };
+      var saved = { name: String(f.name.value || '').trim().slice(0, 20), gender: f.gender.value, calendar: f.calendar.value, leap: f.calendar.value === 'lunar' && f.leap.checked, year: +f.year.value, month: +f.month.value, day: +f.day.value, hour: hasT ? +t.slice(0, 2) : 12, minute: hasT ? +t.slice(3) : 0, hourUnknown: !hasT, city: city ? city[0] : '서울', lon: +f.city.value, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto', combinationMode:f.combinationMode.value, climatePalaceMode:f.climatePalaceMode.value };
       busy = true; submit.disabled = true; submit.textContent = '분석 준비 중…'; f.setAttribute('aria-busy', 'true');
       H.engine().then(function (M) {
         if (!H.alive(ctx)) return;

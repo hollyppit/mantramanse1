@@ -129,7 +129,7 @@
     var g = function (id) { return $('#' + id).value; }, out = $('#rsOut');
     try {
       S.sim = { year: +g('rsY'), month: +g('rsM'), day: +g('rsD'), hour: +g('rsH'), minute: 0, gender: g('rsG'), region: g('rsR'), mode: g('rsM2'), draft: $('#rsDr').checked };
-      var ch = M.compute({ year: S.sim.year, month: S.sim.month, day: S.sim.day, hour: S.sim.hour, minute: 0, gender: S.sim.gender, calendar: 'solar', school: 'eokbu' });
+      var ch = M.compute({ year: S.sim.year, month: S.sim.month, day: S.sim.day, hour: S.sim.hour, minute: 0, gender: S.sim.gender, calendar: 'solar', school: 'auto' });
       RR.applyPublished(pubView(S.sim.draft));
       var r = RG.get(S.sim.region), tr = RG.tradition(r), d = RR.read(M, ch, tr, { region: r.name, mode: S.sim.mode }), els = RR.EL5.map(function (e) { var a = RR.analyze(M, ch, RR.EL5.indexOf(e), S.sim.mode); return { e: e, a: a }; }), iss = RR.check(d), phStatus = {};
       RR.phrases().forEach(function (p) { phStatus[p.id] = (S.doc.phrases[p.id] || S.doc.custom[p.id] || {}).status || 'none'; });

@@ -65,7 +65,7 @@ const c1 = mk(1990, 5, 15, 14, 'M'); ok(JSON.stringify(H.Saju.todayData(c1)) ===
 // 저장 정보 → 엔진 입력 변환(만세력 앱과 같은 모양)
 const store = {}; globalThis.localStorage = { getItem: k => store[k] || null, setItem: (k, v) => { store[k] = v; } };
 H.profile.save({ name: '테스트', gender: 'M', calendar: 'solar', leap: false, year: 1990, month: 5, day: 15, hour: 12, minute: 0, hourUnknown: true, lon: 126.98 });
-const pin = H.profile.toInput(); ok(pin.hour === null && pin.year === 1990 && pin.school === 'eokbu', '시간 모름 → hour null');
+const pin = H.profile.toInput(); ok(pin.hour === null && pin.year === 1990 && pin.school === 'auto', '시간 모름 → hour null · 용신 기준은 직접 고르지 않았으면 자동');
 ok(H.profile.has() && H.profile.name() === '테스트', '프로필 저장/읽기');
 H.profile.save({ name: '테스트', year: 1990 }); ok(JSON.parse(store['mantra-manse-v1']).gender === 'M', '저장은 병합(다른 필드 보존)');
 ok(!H.profile.awakened(), '처음에는 각성 전'); H.profile.markAwakened(); ok(H.profile.awakened(), '각성 표시'); H.profile.save({ day: 16 }); ok(!H.profile.awakened(), '생일이 바뀌면 다시 각성');
