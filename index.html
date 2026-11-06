@@ -886,6 +886,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="gyeokguk.js"></script>
 <script src="glossary-cases.js"></script>
 <script src="glossary-overlap.js"></script>
+<script src="compass.js"></script>
 <script src="glossary-sections.js"></script>
 <script src="glossary-sections-2.js"></script>
 <script src="glossary-sections-3.js"></script>
@@ -8660,6 +8661,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const dirOpts = SP_DIRS.map(([k, n]) => [k, n + '쪽']);
     let h = `<div class="frow">${spField(kind, i, 'name', '이름', 'text', 'maxlength="20"')}${spField(kind, i, 'facing', '건물이 바라보는 방향(향) 각도 0~359°', 'number', 'min="0" max="359" step="1" inputmode="numeric"')}
       <label class="field"><span class="small">방향 바로 고르기</span><select data-sp-dir="${kind}:${i}"><option value="">—</option>${SP_DIRS.map(([k, n, d]) => `<option value="${d}">${n}향(${d}°)</option>`).join('')}</select></label>
+      ${window.MantraCompass && window.MantraCompass.supported() ? `<div class="field"><span class="small">휴대폰 센서로 재기</span><button type="button" class="btn" data-compass="${kind}:${i}">나침반으로 재기</button></div>` : ''}
       ${spField(kind, i, 'built', '준공(입주) 연도', 'number', 'min="1864" max="2103" inputmode="numeric"')}${spField(kind, i, 'reno', '전면 개축·대수리 연도(선택)', 'number', 'min="1864" max="2103" inputmode="numeric"')}</div>
       <p class="small muted">향은 현관이 아니라 <b>거실(또는 매장) 큰 창이 바라보는 쪽</b>을 나침반 앱으로 재세요. 모르면 비워 두면 해당 분석을 건너뜁니다.</p>`;
     h += '<details class="adv"><summary>주변 형세 입력(선택)</summary><div class="frow">' + Object.entries(FD.FORM).map(([k, f]) => spSelect(kind, i, 'form.' + k, f.label, Object.entries(f.opts).map(([v, o]) => [v, o[1].split('.')[0].slice(0, 30)]))).join('') + spSelect(kind, i, 'openDir', '물·큰길·트인 공간 방위', SP_DIRS.map(([k, n]) => [k, n + '쪽'])) + spSelect(kind, i, 'highDir', '산·높은 건물 방위', SP_DIRS.map(([k, n]) => [k, n + '쪽'])) + '</div>'
@@ -8872,6 +8874,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     else if (t.dataset.spDir !== undefined) { const [k, i] = t.dataset.spDir.split(':'); if (t.value !== '') SP[k][+i].facing = t.value; spSave(); render(); }
     else if (t.dataset.spHz) { const [k, i, h] = t.dataset.spHz.split(':'), c = SP[k][+i]; c.hazards = c.hazards.filter(x => x !== h); if (t.checked) c.hazards.push(h); spSave(); render(); }
     else if (t.dataset.spInd) { SP.ind = t.value; spSave(); render(); }
+  });
+  // "나침반으로 재기": 휴대폰 방향 센서로 읽은 각도를 향 입력칸에 채운다(compass.js). 센서가 없으면 버튼이 보이지 않는다.
+  document.addEventListener('click', ev => {
+    const b = ev.target.closest && ev.target.closest('[data-compass]'); if (!b || !window.MantraCompass) return;
+    const [k, i] = b.dataset.compass.split(':');
+    window.MantraCompass.open(deg => { if (SP[k] && SP[k][+i]) { SP[k][+i].facing = String(deg); spSave(); render(); } });
   });
   { const st = document.createElement('style'); st.textContent = '.sp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}.sp-c{border:1px solid var(--line);border-radius:10px;padding:6px;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;min-height:92px;font-size:.78rem}.sp-c b{width:100%;font-size:.8rem}.sp-ctr{background:var(--accent-soft)}.sp-s{padding:1px 6px;border-radius:8px;border:1px solid var(--line)}.sp-c em{width:100%;font-style:normal;color:#b3402f;font-size:.72rem}.sp-g{color:#2e7d4f;font-weight:600}.sp-b{color:#b3402f;font-weight:600}.sp-n{color:var(--ink-2)}.sp-s.sp-g{border-color:#2e7d4f}.sp-s.sp-b{border-color:#b3402f}.sp-chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.sp-gc{border-color:#2e7d4f}.sp-bc{border-color:#b3402f}.spw{stroke:#fff;stroke-width:1.5}.spw.natural{fill:#2e7d4f}.spw.prayer{fill:#7a4fc0}.spw.trad{fill:#c27a1e}.spw.me{fill:none;stroke:var(--ink);stroke-width:2.5}.sp-nav{flex-wrap:wrap}.spchk{display:inline-block;margin:4px 10px 4px 0}.sp-tb{border-collapse:collapse;width:100%;font-size:.85rem}.sp-tb th,.sp-tb td{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}@media(max-width:480px){.sp-c{font-size:.72rem;padding:4px}}'; document.head.appendChild(st); }
 
