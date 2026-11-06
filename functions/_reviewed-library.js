@@ -8,6 +8,7 @@ import {isCompound,COMPOUND_VERSION} from './_reading-compound-copy.js';
 import {plainText,isTechnical} from './_plain-copy.js';
 import {Polite,politeText} from './_polite.js';
 import {deriveFacts,cleanConds,evalConds,BANNED_RE} from './_ik.js';
+import {personalLine} from './_reading-personal.js';
 import {PROHIBITED_RE} from './_style.js';
 import {similarity} from './_chapter-policy.js';
 import {digest} from './_reading-blocks.js';
@@ -84,12 +85,13 @@ export function composeReviewed({clean,contract,analysis,library,adviceHistory=[
   const guide=selected.filter(b=>!isFlow(b)&&!isCompound(b)&&b.role===role&&b.kind==='guide'&&canSelect(b)).sort((a,b)=>(a.composition||b.composition?specificity(b)-specificity(a)||(b.composition?.priority||0)-(a.composition?.priority||0):0)||Number(b.id.startsWith('bundle-focus-'))-Number(a.id.startsWith('bundle-focus-'))||Object.keys(b.when).length-Object.keys(a.when).length)[0];
   const authored=selected.find(b=>b.kind!=='guide'&&b.role===role&&!used.has(b.id)&&canSelect(b)&&(!b.composition||!repeats(b.text))&&(!['practice','reinforce'].includes(role)||(!repeats(b.text)&&!priorKeys.has(b.adviceKey||b.id))))||(['why','practice','reinforce'].includes(role)&&guide&&!priorKeys.has(guide.adviceKey||guide.id)?guide:null);
   if(authored&&['practice','reinforce'].includes(role)){const key=authored.adviceKey||authored.id;priorKeys.add(key);adviceKeys.push(key);}
-  if(authored){chosen.push(authored);used.add(authored.id);text=authored.text;refs=authored.ruleIds;claim_ids=refs.map(id=>claims.find(c=>c.knowledge_id===id).claim_id);contentKind=authored.kind==='guide'&&Object.keys(authored.when).length?'conditional-guide':authored.kind;blocks.push({id:authored.id,version:library.version});if(authored.kind==='general')text='일반 실천 점검: '+text;}
+  if(authored){chosen.push(authored);used.add(authored.id);text=authored.text;refs=authored.ruleIds;claim_ids=refs.map(id=>claims.find(c=>c.knowledge_id===id).claim_id);contentKind=authored.kind==='guide'&&Object.keys(authored.when).length?'conditional-guide':authored.kind;blocks.push({id:authored.id,version:library.version});if(authored.kind==='general')text='일반 실천 점검: '+text;
+   if(['why','evidence'].includes(role)&&authored.when&&Object.keys(authored.when).length){const line=personalLine(evalConds(authored.when,facts).rows,clean.sd);if(line)text=line+'\n'+text;}}   // 근거 앞에 이 사주의 실제 값(2026-11-07)
   else if(contract.topicId==='creative'){pending.push(role);text='「'+contract.title+'」에 사용할 검수된 창작 문장을 준비하고 있습니다. 실제 전생이나 개인의 과거를 확인한 내용으로 제공하지 않습니다.';}
   else if(role==='evidence'){
    text=claims.length?claims.slice(0,3).map(c=>(c.traditional_rules||[]).map(r=>politeText(r.principle)).join(' ')).join('\n')+'\n적용 조건이 충족된 전통 해석입니다. 실제 경험과 다르면 그 차이를 우선 확인합니다.':guide?.text||'이 질문에 적용할 검수 근거가 아직 충분하지 않습니다. 출생 시간이 없으면 시주를 근거로 한 판단은 제공하지 않습니다.';
    if(!claims.length&&guide)contentKind=Object.keys(guide.when).length?'conditional-guide':'guide';
-   if(guide&&Object.keys(guide.when).length){const evaluated=evalConds(guide.when,facts);text+='\n'+evaluated.rows.map(r=>r.label+': '+r.have).join(' · ');}
+   if(guide&&Object.keys(guide.when).length){const evaluated=evalConds(guide.when,facts),line=personalLine(evaluated.rows,clean.sd);text=line?line+'\n'+text:text+'\n'+evaluated.rows.map(r=>r.label+': '+r.have).join(' · ');}
    refs=claims.slice(0,3).map(c=>c.knowledge_id);claim_ids=claims.slice(0,3).map(c=>c.claim_id);
   }else if(guide&&['title','reality','strength','risk','reinforce','practice'].includes(role)){text=guide.text;contentKind=Object.keys(guide.when).length?'conditional-guide':'guide';blocks.push({id:guide.id,version:library.version});
   }else{

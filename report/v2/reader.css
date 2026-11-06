@@ -311,3 +311,5 @@ body #wstrip button{max-width:none;text-overflow:clip}
 @media(max-width:600px){.reading-compat .rc-tiles.n5,.reading-compat .rc-tiles.n3{grid-template-columns:repeat(2,minmax(0,1fr))}}
 /* 챕터 후킹 아래 보조 줄: 신강·신약 한 줄 + 이 장의 은유 질문 */
 #chapter .text-reading-section p.reading-hook-sub,.text-reading-section p.reading-hook-sub{font-size:clamp(16px,2.2vw,19px);line-height:1.7;color:var(--ink2,#c3c0b9);margin:-10px 0 24px;text-wrap:pretty;word-break:keep-all}
+/* 2026-11-07 근거 맨 앞 '내 사주에서는' — 이 사주의 실제 값(서버 _reading-personal.js) */
+.reading-mine{margin:0 0 12px;padding:10px 14px;border-radius:12px;background:rgba(213,185,127,.12);border-left:3px solid #D5B97F;line-height:1.7;word-break:keep-all}.reading-mine b{display:block;font-size:.78em;letter-spacing:.04em;color:#D5B97F;margin-bottom:2px}
