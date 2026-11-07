@@ -6,6 +6,7 @@ import {loadServiceRules,blockedDocs} from '../_ikstore.js';
 import {loadEditorial,contractDomains,contractFor} from '../_editorial.js';
 import {readLibrary,libraryKey,libraryRevision,validatePassages,normalizePassages,selectPassages,LIBRARY_VERSION} from '../_reviewed-library.js';
 import {prepareReviewed} from '../_reviewed-reading.js';
+import {historyKey,parseHistory,pushHistory,findVersion,historyList} from '../_library-history.js';
 const fail=(error,status=400,extra={})=>json({error,...extra},status);
 export async function onRequest({request,env}){
  if(!isAdmin(request,env))return fail('unauthorized',401);
@@ -26,9 +27,11 @@ export async function onRequest({request,env}){
   }
   const contract=catalog.chapters.find(c=>c.id===chapter);if(!contract)return fail('unknown-chapter',404);
   stage='chapter-library';const library=await readLibrary(kv,chapter),revision=await libraryRevision(library);
+  // 이전 버전은 별도 키에 있다. 본 행에 예전 history 배열이 남아 있으면 함께 읽고, 다음 저장 때 별도 키로 옮긴다.
+  const historyBefore=await kv.get(historyKey(chapter)),history=parseHistory(historyBefore?JSON.parse(historyBefore):null,library.history),view={...library,history:historyList(history)};
   stage='chapter-rules';const items=await loadServiceRules(kv,contract.sourceRuleIds,contractDomains(catalog,contract)),linked=items.filter(r=>contract.sourceRuleIds.includes(r.id));
   const suggested=linked.filter(r=>r.status==='published'&&r.reviewed).flatMap(r=>[['title',r.interpretation],['strength',r.strengths?.[0]],['risk',r.risks?.[0]],['practice',r.actions?.[0]]].filter(([,t])=>typeof t==='string'&&t.length>=30&&t.length<=1000&&!/[<>{}]/.test(t)).map(([role,text])=>({id:r.id+'-'+role,role,kind:'personal',text,ruleIds:[r.id],when:{},unless:{},adviceKey:r.id+'-'+role}))).slice(0,60);
-  stage='chapter-response';if(request.method==='GET')return json({ok:true,contract,library,revision,suggested,compiledPassages:seedPassages(contract),conditionFields,rules:linked.map(r=>({id:r.id,title:r.title,interpretation:r.interpretation,principle:r.principle,evidence:r.evidence||[],conditions:r.conditions,exclusions:r.exclusions,status:r.status,reviewed:r.reviewed,version:r.version})),scope:'approved-rules-plus-published-passages'});
+  stage='chapter-response';if(request.method==='GET')return json({ok:true,contract,library:view,revision,suggested,compiledPassages:seedPassages(contract),conditionFields,rules:linked.map(r=>({id:r.id,title:r.title,interpretation:r.interpretation,principle:r.principle,evidence:r.evidence||[],conditions:r.conditions,exclusions:r.exclusions,status:r.status,reviewed:r.reviewed,version:r.version})),scope:'approved-rules-plus-published-passages'});
   if(request.method!=='POST')return fail('method-not-allowed',405);
   const raw=await request.text();if(raw.length>900000)return fail('too-large',413);let b;try{b=JSON.parse(raw);}catch{return fail('invalid-json');}
   if(!['save','check','publish','preview','restore'].includes(b.action))return fail('invalid-action');
@@ -46,7 +49,7 @@ export async function onRequest({request,env}){
    if(preview.libraryVersion!==library.version)return fail('version-conflict',409);
    return json({...preview,previewEdition:published?'published':'draft',passageAudit:auditPassages(passages,previewContract,{claims:preview.claims},b.sample.sd,preview)});
   }
-  const historical=b.action==='restore'?library.history.find(h=>h.version===b.restoreVersion):null;
+  const historical=b.action==='restore'?findVersion(history,b.restoreVersion):null;
   let passages=b.action==='restore'?(historical?.draft||historical?.published):b.passages;
   if(!Array.isArray(passages))return fail('invalid-passages');passages=normalizePassages(passages);
   const issues=validatePassages(passages,contract,items),blocked=await blockedDocs(kv);
@@ -76,9 +79,12 @@ export async function onRequest({request,env}){
    next.published=passages.map(p=>({...p,sourceVersions:Object.fromEntries(p.ruleIds.map(id=>[id,items.find(r=>r.id===id).version||0]))}));
    next.review={at:next.updatedAt,scenarios,engine:LIBRARY_VERSION,human:true};
   }
-  next.history=[{version:library.version,published:library.published,draft:library.draft,scenarios:library.scenarios||[],at:next.updatedAt},...library.history].slice(0,15);
+  delete next.history;
+  const nextHistory=pushHistory(history,{version:library.version,published:library.published,draft:library.draft,scenarios:library.scenarios||[],review:library.review,at:next.updatedAt});
   const key=libraryKey(chapter),before=await kv.get(key);if(before&&await libraryRevision(JSON.parse(before))!==revision)return fail('version-conflict',409);
+  // 이력을 먼저 쓴다. 본 행 쓰기가 실패해도 이력에는 현재 버전 사본만 남고, 다음 저장 때 같은 버전으로 덮인다.
+  if(!await kv.readingCAS(historyKey(chapter),historyBefore,JSON.stringify(nextHistory)))return fail('version-conflict',409);
   if(!await kv.readingCAS(key,before,JSON.stringify(next)))return fail('version-conflict',409);
-  return json({ok:true,library:next,revision:await libraryRevision(next),scenarios,providerCallCount:0});
+  return json({ok:true,library:{...next,history:historyList(nextHistory)},revision:await libraryRevision(next),scenarios,providerCallCount:0});
  }catch(e){return fail(['invalid-chart','invalid-distribution','unknown-hour-has-pillar'].includes(e.message)?e.message:'library-unavailable',503,{stage});}
 }

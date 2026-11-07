@@ -124,4 +124,5 @@ export function composeReviewed({clean,contract,analysis,library,adviceHistory=[
  });
  return {selectionTrace,luckExplanation:LuckReading.context(contract.id,clean.sd),result:{paragraphs},blocks,adviceKeys,pending:[...new Set(pending)],claims,libraryVersion:library.version,engine:LIBRARY_VERSION,contentSignature:null};
 }
-export async function libraryRevision(library){return digest(library);}
+// 이전 버전은 별도 키(_library-history.js)에 있으므로 리비전은 본 행의 현재 상태만으로 정한다.
+export async function libraryRevision(library){const {history,...current}=library||{};return digest(current);}

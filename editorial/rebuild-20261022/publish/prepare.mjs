@@ -8,6 +8,7 @@ import crypto from 'node:crypto';
 import {allEntries,chapterPassages,loadService,ROOT} from './convert.mjs';
 import {loadEngine} from '../admin/sim.mjs';
 import {deriveFacts,evalConds} from '../../../functions/_ik.js';
+import {HIST_DECL,loadHistory,put,finishHistory,entryScenarios,writeBoth} from './history-sql.mjs';
 
 export const OUT=path.join(ROOT,'output',process.env.PREPARE_OUT||'rebuild-publication-20261023');
 const md5=x=>crypto.createHash('md5').update(x).digest('hex'),byId=(a,b)=>a.id<b.id?-1:a.id>b.id?1:0;
@@ -53,14 +54,15 @@ export function chooseScenarios(L,contract,passages,pools){
 const q=x=>'$j$'+x+'$j$';
 const HASH_SQL=x=>`(select md5(string_agg((p->>'id')||chr(31)||(p->>'text'),chr(30) order by (p->>'id') collate "C")) from jsonb_array_elements(${x}) p)`;
 const NOW=`to_jsonb(to_char(clock_timestamp() at time zone 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'))`;
-const CAP=x=>`(select coalesce(jsonb_agg(x order by n),'[]'::jsonb) from (select x,n from jsonb_array_elements(${x}) with ordinality t(x,n) order by n limit 14) s)`;
+// The state being replaced goes into the separate history key (history-sql.mjs); the main row drops any inline history.
+const CURRENT=`jsonb_build_object('version',v,'draft',old->'draft','published',old->'published','scenarios',coalesce(old->'scenarios','[]'::jsonb),'review',coalesce(old->'review','null'::jsonb),'at',stamp)`;
 
 export function sqlFor({chapter,incoming,newHash,obs,mode}){
- const key='ik:blocks:chapter:library.'+chapter;
- const head=`-- ${chapter}: ${mode==='apply'?'APPLY':'READ-ONLY DRY RUN (no write statement)'} rebuild-20261022 drafts. Guards: draft==published, version ${obs.v}, published text hash ${obs.h}.
-do $run$ declare prior text; old jsonb; v int; next jsonb; stamp jsonb; incoming jsonb:=${q(JSON.stringify(incoming))}::jsonb; passages jsonb:=incoming->'passages'; scenarios jsonb;
+ const key='ik:blocks:chapter:library.'+chapter,lock=mode==='apply';
+ const head=`-- ${chapter}: ${mode==='apply'?'APPLY':'READ-ONLY DRY RUN (no write statement)'} rebuild-20261022 drafts. Guards: draft==published, version ${obs.v}, published text hash ${obs.h}. Previous version goes to ${key}:history.
+do $run$ declare prior text; old jsonb; v int; next jsonb; stamp jsonb; cur jsonb; incoming jsonb:=${q(JSON.stringify(incoming))}::jsonb; passages jsonb:=incoming->'passages'; scenarios jsonb; ${HIST_DECL}
 begin
-select value into prior from public.kv where key='${key}'${mode==='apply'?' for update':''};
+select value into prior from public.kv where key='${key}'${lock?' for update':''};
 if prior is null then raise exception 'library missing';end if;
 old:=prior::jsonb;
 if old->'draft' is distinct from old->'published' then raise exception 'unpublished administrator edits';end if;
@@ -71,34 +73,37 @@ scenarios:=(select jsonb_agg(s||jsonb_build_object('forbiddenPassageIds',(select
 if jsonb_array_length(scenarios)<2 or jsonb_array_length(scenarios)>${MAX_SCENARIOS} then raise exception 'scenario count';end if;
 if exists(select 1 from jsonb_array_elements(scenarios) s where s->'sd' ? 'birth' or s->'sd' ? 'name') then raise exception 'scenario is not anonymous';end if;
 if exists(select 1 from jsonb_array_elements(passages) p where p->'when'<>'{}'::jsonb and (not exists(select 1 from jsonb_array_elements(scenarios) s where (s->'expectedPassageIds') ? (p->>'id')) or not exists(select 1 from jsonb_array_elements(scenarios) s where (s->'forbiddenPassageIds') ? (p->>'id')))) then raise exception 'missing positive or counterexample';end if;
+v:=(old->>'version')::int;stamp:=${NOW};
+${loadHistory(key,lock)}cur:=${CURRENT};
+${put('cur')}
+${finishHistory()}next:=(old-'history')||jsonb_build_object('version',v+1,'draft',passages,'published',passages,'scenarios',scenarios,'review',(incoming->'review')||jsonb_build_object('at',stamp),'updatedAt',stamp);
+if octet_length(next::text)>7000000 then raise exception 'library row too large: % bytes',octet_length(next::text);end if;
 `;
- if(mode==='dry')return head+`raise exception 'DRYRUN-OK % passages %, scenarios %, current version %',${q(chapter)},jsonb_array_length(passages),jsonb_array_length(scenarios),(old->>'version');
+ if(mode==='dry')return head+`raise exception 'DRYRUN-OK % passages %, scenarios %, current version %, row % bytes, history % entries % bytes',${q(chapter)},jsonb_array_length(passages),jsonb_array_length(scenarios),(old->>'version'),octet_length(next::text),jsonb_array_length(hdoc->'entries'),octet_length(hdoc::text);
 end $run$;
 `;
- return head+`v:=(old->>'version')::int;stamp:=${NOW};
-next:=old||jsonb_build_object('version',v+1,'draft',passages,'published',passages,'scenarios',scenarios,'review',(incoming->'review')||jsonb_build_object('at',stamp),'updatedAt',stamp,
- 'history',jsonb_build_array(jsonb_build_object('version',v,'draft',old->'draft','published',old->'published','scenarios',coalesce(old->'scenarios','[]'::jsonb),'review',coalesce(old->'review','null'::jsonb),'at',stamp))||${CAP("coalesce(old->'history','[]'::jsonb)")});
-if not public.reading_compare_and_swap('${key}',prior,next::text,null) then raise exception 'concurrent edit';end if;
+ return head+`${writeBoth(key)}
 end $run$;
 `;
 }
 export function rollbackSqlFor({chapter,newHash,obs}){
  const key='ik:blocks:chapter:library.'+chapter;
- return `-- ${chapter}: ROLLBACK to the library that rebuild-20261022 replaced (history[0]). Aborts if anything changed after the upgrade.
-do $rollback$ declare prior text; old jsonb; prev jsonb; v int; next jsonb; stamp jsonb;
+ return `-- ${chapter}: ROLLBACK to the library that rebuild-20261022 replaced (newest entry of ${key}:history). Aborts if anything changed after the upgrade.
+do $rollback$ declare prior text; old jsonb; prev jsonb; v int; next jsonb; stamp jsonb; cur jsonb; ${HIST_DECL}
 begin
 select value into prior from public.kv where key='${key}' for update;
 if prior is null then raise exception 'library missing';end if;
 old:=prior::jsonb;
 if old->'draft' is distinct from old->'published' then raise exception 'unpublished administrator edits';end if;
 if ${HASH_SQL("old->'published'")} is distinct from '${newHash}' then raise exception 'published text changed after the upgrade';end if;
-v:=(old->>'version')::int;prev:=old->'history'->0;
+v:=(old->>'version')::int;stamp:=${NOW};
+${loadHistory(key,true)}${finishHistory()}prev:=hdoc->'entries'->0;
 if prev is null or (prev->>'version')::int is distinct from v-1 then raise exception 'history does not hold the previous version';end if;
-if ${HASH_SQL("prev->'published'")} is distinct from '${obs.h}' then raise exception 'history[0] is not the observed backup';end if;
-stamp:=${NOW};
-next:=old||jsonb_build_object('version',v+1,'draft',prev->'published','published',prev->'published','scenarios',coalesce(prev->'scenarios','[]'::jsonb),'review',coalesce(prev->'review','null'::jsonb),'updatedAt',stamp,
- 'history',jsonb_build_array(jsonb_build_object('version',v,'draft',old->'draft','published',old->'published','scenarios',coalesce(old->'scenarios','[]'::jsonb),'review',coalesce(old->'review','null'::jsonb),'at',stamp))||${CAP("old->'history'")});
-if not public.reading_compare_and_swap('${key}',prior,next::text,null) then raise exception 'concurrent edit';end if;
+if ${HASH_SQL("prev->'published'")} is distinct from '${obs.h}' then raise exception 'history entry is not the observed backup';end if;
+next:=(old-'history')||jsonb_build_object('version',v+1,'draft',prev->'published','published',prev->'published','scenarios',${entryScenarios('prev')},'review',coalesce(prev->'review','null'::jsonb),'updatedAt',stamp);
+cur:=${CURRENT};
+${put('cur')}
+${finishHistory()}${writeBoth(key)}
 end $rollback$;
 `;
 }
