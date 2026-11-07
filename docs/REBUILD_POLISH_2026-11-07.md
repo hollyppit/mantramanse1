@@ -41,6 +41,12 @@
 - `node tests/rebuild-polish-sim.mjs` — 비는 필드·조사 깨짐 없음, 대표 내부 설명 문장 제거, 멱등, notice 보존
 - 풀이 관련 기존 테스트(reading-text, reader-continuity, frank-reading, everyday-scenes, focus-eight, seal-reader, seal-all-topics, rebuild-pilot) 통과. rebuild-compose·complete-reading-library·coherent-reading-flow·narrative-reading 실패는 변경 전과 같은 출력.
 
-## 5. 운영 반영 순서
-1. 코드 배포(main 푸시) — ①의 '내 사주에서는' 줄이 바로 나와요. 문안 DB 와 무관.
-2. 문안 재게시(DB) — ②가 반영돼요. 기존 게시 경로(`editorial/rebuild-20261022/publish`, apply-runner)로, 사용자 승인 후에만.
+## 5. 운영 반영 (완료)
+1. **코드 배포** — 커밋 `c442ed0` main 푸시, Cloudflare production 배포 성공(2026-11-07). ①의 '내 사주에서는' 줄이 적용됨.
+2. **문안 재게시(DB)** — 2026-11-07 사용자 승인 후 게시 완료.
+   - 준비 폴더: `output/rebuild-publication-20261107-polish/` (observed-prod.json · plan.json · payload · sql/{apply,dry,rollback} · prepare.log · apply.log)
+   - 게시 전 읽기 전용 조회로 107개 행이 모두 2026-11-02 게시본 그대로임을 확인(버전·본문 해시·draft==published) → 이후 다른 수정이 없어 덮어쓰기 안전.
+   - 100개 장 갱신(7개 장은 다듬기 결과가 기존과 같아 건너뜀). 읽기 전용 드라이런 100/100 `DRYRUN-OK` → self_24 1개 먼저 적용·확인 → 나머지 99개 적용.
+   - 행 크기 7.5MB 한도 때문에 이력 보관 수를 줄인 장: career_01 13, career_12 9, self_01 3, self_03 3, self_05 9, self_20 8(롤백 SQL 은 각 1 적게).
+   - 게시 후 확인(읽기 전용): 107/107 본문 해시 일치, draft==published, 최대 행 7.04MB(self_20 — 다음 게시 때 이력 한도를 더 줄여야 함).
+   - 되돌리기: 같은 폴더 `sql/rollback/<장>.sql`(게시 후 다른 변경이 있으면 멈춤), `node editorial/rebuild-20261022/publish/run-sql.mjs rebuild-publication-20261107-polish rollback <장>`.
