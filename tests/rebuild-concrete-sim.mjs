@@ -21,7 +21,7 @@ for (const [id, x] of Object.entries(CONCRETE_ALL)) {
     assert(t.length >= 40 && t.length <= 400, `${id}.${f} length ${t.length}`);
   }
 }
-const wealth = Object.entries(bundles).filter(([b]) => b !== 'pilot').flatMap(([, l]) => l).filter(e => /timeline_(?:wealth|love|career)_/.test(e.chapters?.[0] || ''));   // 다시 쓰기를 마친 주제
+const wealth = Object.entries(bundles).filter(([b]) => b !== 'pilot').flatMap(([, l]) => l).filter(e => /timeline_(?:wealth|love|career|creative)_/.test(e.chapters?.[0] || ''));   // 다시 쓰기를 마친 주제
 const abs = new Set(); for (const e of wealth) for (const f of ['example', 'positive', 'negative', 'advice']) { const t = String(e[f] || '').trim(); if (t && !LIFE.test(t)) abs.add(e.id + '.' + f); }
-assert.equal(abs.size, 0, 'wealth/love/career abstract: ' + [...abs].join(', '));
+assert.equal(abs.size, 0, 'wealth/love/career/creative abstract: ' + [...abs].join(', '));
 console.log(JSON.stringify({ passed: true, ids: Object.keys(CONCRETE_ALL).length, fields, doneTopicsAbstract: abs.size }));

@@ -29,53 +29,53 @@
   },
   "example": {
    "n": 1019,
-   "chars": 88243,
+   "chars": 88274,
    "meta": 4,
    "jargon": 44,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 0,
-   "noLife": 107,
+   "noLife": 86,
    "empty": 0,
    "ban": 1
   },
   "positive": {
    "n": 1019,
-   "chars": 107656,
+   "chars": 107681,
    "meta": 4,
    "jargon": 88,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 2,
-   "noLife": 248,
+   "noLife": 211,
    "empty": 0,
    "ban": 0
   },
   "negative": {
    "n": 1019,
-   "chars": 116693,
+   "chars": 116640,
    "meta": 0,
    "jargon": 61,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 11,
-   "noLife": 212,
+   "noLife": 165,
    "empty": 0,
    "ban": 0
   },
   "advice": {
    "n": 1019,
-   "chars": 136944,
+   "chars": 136812,
    "meta": 0,
-   "jargon": 133,
+   "jargon": 134,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 0,
-   "noLife": 108,
+   "noLife": 79,
    "empty": 0,
    "ban": 1
   },
@@ -116,7 +116,7 @@
   },
   "creative": {
    "n": 80,
-   "flagged": 69
+   "flagged": 40
   },
   "health": {
    "n": 81,
@@ -751,11 +751,6 @@
      "negative",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -801,11 +796,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -824,11 +814,6 @@
     ],
     [
      "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
      "abstract",
      ""
     ],
@@ -2356,11 +2341,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -3348,11 +3328,6 @@
      "3개"
     ],
     [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
      "abstract",
      ""
@@ -4008,11 +3983,6 @@
      "3개"
     ],
     [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
      "advice",
      "abstract",
      ""
@@ -4268,11 +4238,6 @@
      "5개"
     ],
     [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
      "abstract",
      ""
@@ -4356,11 +4321,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -4544,11 +4504,6 @@
    "issues": [
     [
      "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -4819,11 +4774,6 @@
    "issues": [
     [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -6169,11 +6119,6 @@
      "example",
      "abstract",
      ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -6259,11 +6204,6 @@
      "positive",
      "meta",
      "검수"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ],
     [
      "advice",
@@ -6361,11 +6301,6 @@
    ],
    "issues": [
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
      "abstract",
      ""
@@ -6457,11 +6392,6 @@
     ],
     [
      "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
      "abstract",
      ""
     ]
@@ -6642,11 +6572,6 @@
     ],
     [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -7460,11 +7385,6 @@
     "daewoonChangeIn"
    ],
    "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
     [
      "negative",
      "abstract",
@@ -8673,11 +8593,6 @@
      "10개"
     ],
     [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
      "abstract",
      ""
@@ -8902,21 +8817,6 @@
    ]
   },
   {
-   "id": "cr01-bigeop-follow",
-   "chapter": "timeline_creative_01",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "cr01-siksang-lead",
    "chapter": "timeline_creative_01",
    "when": [
@@ -8928,31 +8828,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr01-siksang-follow",
-   "chapter": "timeline_creative_01",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8968,16 +8843,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8993,11 +8858,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9013,41 +8873,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr01-inseong-follow",
-   "chapter": "timeline_creative_01",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9063,46 +8888,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr02-bigeop-follow",
-   "chapter": "timeline_creative_02",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9118,16 +8903,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9143,16 +8918,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9168,11 +8933,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9188,56 +8948,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr02-inseong-follow",
-   "chapter": "timeline_creative_02",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9257,21 +8967,6 @@
    ]
   },
   {
-   "id": "cr03-bigeop-follow",
-   "chapter": "timeline_creative_03",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "cr03-siksang-lead",
    "chapter": "timeline_creative_03",
    "when": [
@@ -9283,31 +8978,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr03-siksang-follow",
-   "chapter": "timeline_creative_03",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9327,31 +8997,6 @@
    ]
   },
   {
-   "id": "cr03-jaeseong-follow",
-   "chapter": "timeline_creative_03",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "cr03-gwanseong-lead",
    "chapter": "timeline_creative_03",
    "when": [
@@ -9367,21 +9012,6 @@
    ]
   },
   {
-   "id": "cr03-gwanseong-follow",
-   "chapter": "timeline_creative_03",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "cr03-inseong-lead",
    "chapter": "timeline_creative_03",
    "when": [
@@ -9393,36 +9023,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr03-inseong-follow",
-   "chapter": "timeline_creative_03",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9438,26 +9038,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr04-bigeop-follow",
-   "chapter": "timeline_creative_04",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9477,26 +9057,6 @@
    ]
   },
   {
-   "id": "cr04-siksang-follow",
-   "chapter": "timeline_creative_04",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "cr04-jaeseong-lead",
    "chapter": "timeline_creative_04",
    "when": [
@@ -9508,11 +9068,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9528,11 +9083,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9548,41 +9098,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr04-inseong-follow",
-   "chapter": "timeline_creative_04",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9598,31 +9113,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr05-bigeop-follow",
-   "chapter": "timeline_creative_05",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9638,36 +9128,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr05-siksang-follow",
-   "chapter": "timeline_creative_05",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9683,31 +9143,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr05-jaeseong-follow",
-   "chapter": "timeline_creative_05",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9723,36 +9158,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr05-gwanseong-follow",
-   "chapter": "timeline_creative_05",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9768,36 +9173,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr05-inseong-follow",
-   "chapter": "timeline_creative_05",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9817,31 +9192,6 @@
    ]
   },
   {
-   "id": "cr06-bigeop-follow",
-   "chapter": "timeline_creative_06",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "cr06-siksang-lead",
    "chapter": "timeline_creative_06",
    "when": [
@@ -9853,31 +9203,6 @@
      "basis",
      "jargon",
      "5개"
-    ]
-   ]
-  },
-  {
-   "id": "cr06-siksang-follow",
-   "chapter": "timeline_creative_06",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9923,41 +9248,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr06-inseong-follow",
-   "chapter": "timeline_creative_06",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9977,26 +9267,6 @@
    ]
   },
   {
-   "id": "cr07-bigeop-follow",
-   "chapter": "timeline_creative_07",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "cr07-siksang-lead",
    "chapter": "timeline_creative_07",
    "when": [
@@ -10008,41 +9278,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr07-siksang-follow",
-   "chapter": "timeline_creative_07",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -10058,31 +9293,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr07-jaeseong-follow",
-   "chapter": "timeline_creative_07",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -10102,21 +9312,6 @@
    ]
   },
   {
-   "id": "cr07-gwanseong-follow",
-   "chapter": "timeline_creative_07",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "cr07-inseong-lead",
    "chapter": "timeline_creative_07",
    "when": [
@@ -10128,16 +9323,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -10153,51 +9338,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr08-bigeop-follow",
-   "chapter": "timeline_creative_08",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -10217,36 +9357,6 @@
    ]
   },
   {
-   "id": "cr08-siksang-follow",
-   "chapter": "timeline_creative_08",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "cr08-jaeseong-lead",
    "chapter": "timeline_creative_08",
    "when": [
@@ -10258,41 +9368,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr08-jaeseong-follow",
-   "chapter": "timeline_creative_08",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -10308,31 +9383,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr08-gwanseong-follow",
-   "chapter": "timeline_creative_08",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -10348,16 +9398,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
