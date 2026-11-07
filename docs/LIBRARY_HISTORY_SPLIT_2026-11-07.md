@@ -42,6 +42,17 @@
    - 이전 전과 같은 published_digest
 - 되돌리기: `sql/rollback/<장>.sql`(펼친 이력을 본 행에 다시 넣음, 7.5MB 넘으면 멈춤)
 
+## 운영 반영 (완료, 2026-11-07)
+1. 코드 커밋 `0ed5ea7` main 푸시 → Cloudflare production `deploy/success`(https://df648757.mantramanse.pages.dev)
+2. 이전
+   - timeline_self_36 하나를 먼저 적용해 확인했습니다: 본 행 history 없음, 투영 일치, 서버 모듈 `parseHistory`·`findVersion` 으로 읽힘.
+   - 이어서 나머지 106개를 적용했습니다(실패 0). 기록: `output/library-history-split-20261107/apply.log`
+3. 검증(읽기 전용), `verify-before.txt` → `verify-after.txt`
+   - 107행 모두 분리됨, projection_ok 107, 이력 키 107(형식 일치)
+   - 가장 큰 행 7,043,273 → 1,795,351바이트, 가장 큰 이력 키 4,282,997바이트
+   - 이력 버전 수 합계 1,192 → 1,192(잘림 0)
+   - published_digest `f39a62f32c90d0897b644d302c7a4b3f` 이전 전후 동일
+
 ## 검사
 - `node tests/library-history-split-sim.mjs` — 형식·중복 제거·한도·예전 행 합치기·리비전·생성 SQL·관리자 API 저장/복원
 - 기존 통과 유지: reading-library-batch(이력 키 기대로 수정), editorial-manuscript-review, reading-focus-eight, admin-adjustment-comparison, conditional-reading-library, reading-public-projection, luck-everyday
