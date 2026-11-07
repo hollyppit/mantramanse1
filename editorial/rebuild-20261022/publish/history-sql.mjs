@@ -27,7 +27,7 @@ export const put = e => `href:='m'||md5(coalesce(${e}->'scenarios','[]'::jsonb):
 // Newest first, at most HISTORY_CAP entries, drop unreferenced scenario sets, then drop oldest entries while over the byte budget.
 export const finishHistory = () => `hdoc:=jsonb_set(hdoc,'{entries}',(select coalesce(jsonb_agg(y order by (y->>'version')::int desc),'[]'::jsonb) from (select y from jsonb_array_elements(hdoc->'entries') y order by (y->>'version')::int desc limit ${HISTORY_CAP}) s));
 loop
- hdoc:=jsonb_set(hdoc,'{scenarios}',(select coalesce(jsonb_object_agg(k,v),'{}'::jsonb) from jsonb_each(hdoc->'scenarios') e(k,v) where exists(select 1 from jsonb_array_elements(hdoc->'entries') y where y->>'scenariosRef'=k)));
+ hdoc:=jsonb_set(hdoc,'{scenarios}',(select coalesce(jsonb_object_agg(sk,sv),'{}'::jsonb) from jsonb_each(hdoc->'scenarios') se(sk,sv) where exists(select 1 from jsonb_array_elements(hdoc->'entries') y where y->>'scenariosRef'=sk)));
  exit when octet_length(hdoc::text)<=${HISTORY_MAX_BYTES} or jsonb_array_length(hdoc->'entries')<=1;
  hdoc:=jsonb_set(hdoc,'{entries}',(hdoc->'entries')-(jsonb_array_length(hdoc->'entries')-1));
 end loop;

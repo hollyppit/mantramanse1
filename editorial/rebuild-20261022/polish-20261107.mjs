@@ -9,6 +9,8 @@ const DROP = [
   /서로 다른 조건이라 함께 확인했어요/, /^이 장은 /, /^이 장에서는 /, /기준이 같은 (?:용신 )?오행을 가리킬 때만 쓰는 풀이/, /(?:으로|로) 읽는 (?:경향|성향|틀)이(?:에요|고)/,
   /둘로 나눠 풀었어요/, /겉과 속의 차이로 풀었어요/, /전통적인 (?:주제 )?읽기예요/, /원국에 아예 없는 경우와는 구분해요/, /비용이 들지 않는 기록과 소규모 실행으로만 구성했어요/,
   /상대적 분류/, /높고 낮음은 원국 글자 비중/, /^최고와 최악은 /, /운을 지킨다는 말은/,
+  // 2차(2026-11-07): 근거 문단에 남은 엔진·계산 범위 설명
+  /엔진(?:의 계산 결과| ?값)/, /^이 해석은 /, /이 해석은 엔진/, /조건이라 함께 확인했어요/,
 ];
 // 받침 유무로 "이에요/예요"를 고른다. 단어 끝이 한글이 아니면(괄호 등) "이에요".
 const batchim = w => { const ch = String(w).slice(-1), c = ch.charCodeAt(0) - 0xAC00; if (c < 0 || c > 11171) return true; return c % 28 !== 0; };
@@ -16,8 +18,29 @@ const copula = w => w + (batchim(w) ? '이에요' : '예요');
 // "X으로/X로 + 동사" 에서 X 를 정확히 떼어 낸다: X 가 받침으로 끝나면 '으로', 아니면 '로'(ㄹ받침은 '로').
 const STEM = /([가-힣A-Za-z)]+?)(으로|로) /;
 function nounBefore(word, particle) { return particle === '으로' || !batchim(word) || /[ㄹ]$/.test(word) ? word : word; }
-function rewrite(s) {
+// 2차 규칙: 근거 문단의 "…계산됐어요/계산돼서" 틀을 "…있어요/…이라"로. 1차 규칙보다 먼저 적용한다.
+function rewrite2(s) {
   let t = s;
+  t = t.replace(/^통근 모델 구간이 (.+?)(?:으로|로) 계산돼서, 위기에서 버티는 방식을 (.+?) 쪽으로 따로 풀었어요\./, (m, band, way) => `땅에 내린 뿌리(통근)가 ${/약한|없/.test(band) ? '얕은' : '단단한'} 편이라, 위기에서 ${way} 쪽으로 버텨요.`);
+  t = t.replace(/올해 세운 흐름을 엔진이 ([가-힣]+?)으?로 분류했고 /g, '올해는 $1에 해당하고 ');
+  t = t.replace(/(?:으로|로) 엔진에서 계산됐고,?/g, '이고,').replace(/엔진 기준으로 /g, '');
+  t = t.replace(/이라는 점을 함께 봤고,/g, '이고,');
+  t = t.replace(/(았|었)다고 계산됐어요\./g, '$1어요.');
+  t = t.replace(/(은|는|이|가) (높게|낮게) 계산됐어요\./g, (m, p, h) => `${p} ${h === '높게' ? '높은' : '낮은'} 편이에요.`);
+  t = t.replace(/(은|는|이|가) (높게|낮게) 계산됐고,?/g, (m, p, h) => `${p} ${h === '높게' ? '높은' : '낮은'} 편이고,`);
+  t = t.replace(/모두 높게 계산됐고,?/g, '모두 큰 편이고,');
+  t = t.replace(/(이|가) 높게, /g, '$1 높고 ');
+  t = t.replace(/^원국에서 (.+?)(이|가) 계산됐/, '원국에 $1$2 있');
+  t = t.replace(/ 유형이 계산됐어요\./g, '이 있어요.');
+  t = t.replace(/(이|가) 계산됐어요\./g, '$1 있어요.').replace(/(이|가) 계산됐고,?/g, '$1 있고,');
+  t = t.replace(/(?:으로|로) 계산돼서,?/g, '이라');
+  // 조사: 받침 없는 말 뒤 "으로" → "로", 나열 끝 "편재이 있" → "편재가 있"
+  t = t.replace(/([가-힣])으로/g, (m, c) => batchim(c) ? m : c + '로');
+  t = t.replace(/(·[가-힣]+?)이 (있|없)/g, (m, w, v) => batchim(w) ? m : w + '가 ' + v);
+  return t;
+}
+function rewrite(s) {
+  let t = rewrite2(s);
   t = t.replace(/^\[(.+?)\] 조합으로 계산됐고,\s*/, (m, a) => a + ' 조합이라 ');
   t = t.replace(/의 세력이 높게 계산됐고,?/g, '의 힘이 큰 편이고,').replace(/의 세력이 낮게 계산됐고,?/g, '의 힘이 약한 편이고,');
   t = t.replace(/세력이 높게 계산됐/g, '힘이 큰 편이었').replace(/세력이 낮게 계산됐/g, '힘이 약한 편이었');
@@ -42,7 +65,10 @@ function polishText(text) {
   if (!src.trim()) return src;
   const sents = src.split(/(?<=[.!?])\s+/), kept = sents.filter(s => !DROP.some(re => re.test(s))).map(rewrite).filter(Boolean);
   const out = kept.join(' ').trim();
-  return out.length >= 15 ? out : src;
+  if (out.length >= 15) return out;
+  // 지우고 나면 너무 짧은 문단은 지우지 않고 말투만 바꾼다(2차). 그래도 짧으면 원문.
+  const soft = sents.map(rewrite).join(' ').replace(/\s{2,}/g, ' ').trim();
+  return soft.length >= 15 ? soft : src;
 }
 export function applyPolish(entries) {
   return entries.map(e => {
@@ -52,5 +78,5 @@ export function applyPolish(entries) {
     return o;
   });
 }
-export const POLISH_VERSION = 'polish-20261107-2';
+export const POLISH_VERSION = 'polish-20261107-3';
 export { polishText, rewrite };
