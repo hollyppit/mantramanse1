@@ -48,7 +48,7 @@ function rewrite(s) {
   // 같은 절 안에 목적어(…을/를)가 있으면 "…을 …으로 풀었어요"처럼 동사가 필요하므로 바꾸지 않는다.
   //  단, "…하는 쪽/구조/구도/모습/상징/흐름/편/사람"처럼 꾸밈을 받는 명사로 끝나면 목적어는 꾸밈말 안에 있으므로 언제나 바꿔도 된다.
   const HEAD = /(?:쪽|구조|구도|모습|상징|흐름|편|사람|경향|성향|단계|자리|타입|유형|인물|조합|해|구간|시기|시점)$/;
-  const hasObject = (str, at, w) => { if (HEAD.test(w || '')) return false; const clause = str.slice(0, at).split(/[,·]/).pop(); return /[가-힣][을를]\s/.test(clause); };
+  const hasObject = (str, at, w) => { if (HEAD.test(w || '')) return false; const clause = str.slice(0, at).split(/[,·]/).pop(); return /[가-힣][을를]\s|(?:^|\s)[그이저]?걸\s/.test(clause); };
   t = t.replace(/([가-힣A-Za-z)]+?)(으로|로) 계산됐어요\./g, (m, w, p, at, str) => hasObject(str, at, w) ? m : copula(nounBefore(w, p)) + '.');
   t = t.replace(/(?:으로|로) 계산됐고,?/g, '이고,');
   // "…쪽으로/구도로/구조로/모습으로/상징으로 읽어요·풀어요·풀었어요." → "…쪽이에요."

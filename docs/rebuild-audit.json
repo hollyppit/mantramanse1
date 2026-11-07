@@ -29,53 +29,53 @@
   },
   "example": {
    "n": 1019,
-   "chars": 87420,
+   "chars": 88068,
    "meta": 4,
-   "jargon": 46,
+   "jargon": 44,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 0,
-   "noLife": 272,
+   "noLife": 155,
    "empty": 0,
    "ban": 1
   },
   "positive": {
    "n": 1019,
-   "chars": 107563,
+   "chars": 107632,
    "meta": 4,
-   "jargon": 95,
+   "jargon": 89,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
-   "hedgeHeavy": 3,
-   "noLife": 405,
+   "hedgeHeavy": 2,
+   "noLife": 306,
    "empty": 0,
    "ban": 0
   },
   "negative": {
    "n": 1019,
-   "chars": 117275,
+   "chars": 116760,
    "meta": 0,
-   "jargon": 64,
+   "jargon": 60,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
-   "hedgeHeavy": 12,
-   "noLife": 351,
+   "hedgeHeavy": 11,
+   "noLife": 263,
    "empty": 0,
    "ban": 0
   },
   "advice": {
    "n": 1019,
-   "chars": 137682,
+   "chars": 137247,
    "meta": 0,
-   "jargon": 133,
+   "jargon": 134,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 0,
-   "noLife": 229,
+   "noLife": 144,
    "empty": 0,
    "ban": 1
   },
@@ -96,7 +96,7 @@
  "byTopic": {
   "self": {
    "n": 370,
-   "flagged": 340
+   "flagged": 336
   },
   "wealth": {
    "n": 114,
@@ -108,7 +108,7 @@
   },
   "love": {
    "n": 156,
-   "flagged": 141
+   "flagged": 104
   },
   "remedy": {
    "n": 78,
@@ -116,7 +116,7 @@
   },
   "creative": {
    "n": 80,
-   "flagged": 72
+   "flagged": 70
   },
   "health": {
    "n": 81,
@@ -177,11 +177,6 @@
     "rootLevel"
    ],
    "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
     [
      "positive",
      "abstract",
@@ -368,11 +363,6 @@
      "3회"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
      "abstract",
      ""
@@ -456,11 +446,6 @@
      "basis",
      "hedge",
      "3회"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ],
     [
      "positive",
@@ -818,11 +803,6 @@
      "3개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
@@ -941,11 +921,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ],
     [
      "positive",
@@ -1166,11 +1141,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ],
     [
      "advice",
@@ -1413,11 +1383,6 @@
    ],
    "issues": [
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
@@ -1437,16 +1402,6 @@
     "yongEl"
    ],
    "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
     [
      "advice",
      "abstract",
@@ -1491,16 +1446,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -1516,26 +1461,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -1566,21 +1491,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -1596,21 +1506,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -1626,11 +1521,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -1646,16 +1536,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -1701,146 +1581,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l14-pre",
-   "chapter": "timeline_love_14",
-   "when": [
-    "gender",
-    "strength"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l15-wood",
-   "chapter": "timeline_love_15",
-   "when": [
-    "strength",
-    "yongEl"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l15-fire",
-   "chapter": "timeline_love_15",
-   "when": [
-    "strength",
-    "yongEl"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l15-metal",
-   "chapter": "timeline_love_15",
-   "when": [
-    "strength",
-    "yongEl"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l15-water",
-   "chapter": "timeline_love_15",
-   "when": [
-    "strength",
-    "yongEl"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -1871,11 +1611,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -1918,22 +1653,7 @@
      "5개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -1971,11 +1691,6 @@
      "positive",
      "abstract",
      ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -1991,11 +1706,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ],
     [
      "negative",
@@ -2118,31 +1828,6 @@
      "5개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "self01-mu-balanced",
-   "chapter": "timeline_self_01",
-   "when": [
-    "dayMaster",
-    "strength"
-   ],
-   "issues": [
-    [
      "negative",
      "abstract",
      ""
@@ -2161,26 +1846,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -2221,11 +1886,6 @@
      "positive",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -2244,11 +1904,6 @@
     ],
     [
      "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -2283,22 +1938,12 @@
    ],
    "issues": [
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
     ],
     [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -2316,11 +1961,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -2339,26 +1979,6 @@
     ],
     [
      "example",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "self01-sin-balanced",
-   "chapter": "timeline_self_01",
-   "when": [
-    "dayMaster",
-    "strength"
-   ],
-   "issues": [
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -2426,11 +2046,6 @@
      "negative",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -2446,16 +2061,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -2473,17 +2078,7 @@
      "5개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -2521,11 +2116,6 @@
      "positive",
      "abstract",
      ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -2554,11 +2144,6 @@
     ],
     [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -2746,11 +2331,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -2856,11 +2436,6 @@
      "negative",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -2886,11 +2461,6 @@
      "positive",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -2911,11 +2481,6 @@
      "positive",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -2931,11 +2496,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -2976,11 +2536,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -2996,21 +2551,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -3136,16 +2676,6 @@
      "positive",
      "abstract",
      ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -3161,11 +2691,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -3191,11 +2716,6 @@
      "negative",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -3214,11 +2734,6 @@
     ],
     [
      "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
      "abstract",
      ""
     ]
@@ -3288,17 +2803,7 @@
      "4개"
     ],
     [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -3421,11 +2926,6 @@
      "negative",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -3496,11 +2996,6 @@
      "negative",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -3529,11 +3024,6 @@
     ],
     [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -3581,16 +3071,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -3608,22 +3088,7 @@
      "5개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -3706,11 +3171,6 @@
      "positive",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -3726,11 +3186,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ],
     [
      "advice",
@@ -3771,11 +3226,6 @@
      "positive",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -3791,11 +3241,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -3814,11 +3259,6 @@
     ],
     [
      "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -3851,11 +3291,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -3981,11 +3416,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -4718,11 +4148,6 @@
      "3개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
@@ -4855,21 +4280,6 @@
    ]
   },
   {
-   "id": "self07-siksang-weak-steady",
-   "chapter": "timeline_self_07",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "self07-siksang-weak-low",
    "chapter": "timeline_self_07",
    "when": [
@@ -4978,11 +4388,6 @@
    ],
    "issues": [
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
@@ -5073,11 +4478,6 @@
      "5개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
@@ -5101,11 +4501,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ],
     [
      "positive",
@@ -5163,11 +4558,6 @@
      "5개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
@@ -5201,11 +4591,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ],
     [
      "positive",
@@ -5477,11 +4862,6 @@
     "el"
    ],
    "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
     [
      "negative",
      "abstract",
@@ -5818,11 +5198,6 @@
    ],
    "issues": [
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
@@ -5880,11 +5255,6 @@
     "group"
    ],
    "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
     [
      "positive",
      "abstract",
@@ -6003,11 +5373,6 @@
     ],
     [
      "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -6229,21 +5594,6 @@
      "basis",
      "jargon",
      "9개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -6287,22 +5637,12 @@
      "10개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
     ],
     [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -6324,11 +5664,6 @@
     ],
     [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -6599,11 +5934,6 @@
      "negative",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -6653,21 +5983,6 @@
    ]
   },
   {
-   "id": "self15-gwanseong-rooted",
-   "chapter": "timeline_self_15",
-   "when": [
-    "group",
-    "rootLevel"
-   ],
-   "issues": [
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "self15-gwanseong-shaky",
    "chapter": "timeline_self_15",
    "when": [
@@ -6702,11 +6017,6 @@
     ],
     [
      "example",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -6817,11 +6127,6 @@
     ],
     [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ],
@@ -7474,11 +6779,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8499,11 +7799,6 @@
      "positive",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8679,11 +7974,6 @@
      "basis",
      "jargon",
      "12개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ],
     [
      "positive",
@@ -9515,11 +8805,6 @@
    ],
    "issues": [
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
@@ -10098,11 +9383,6 @@
      "positive",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -10121,26 +9401,6 @@
     ],
     [
      "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr01-gwanseong-follow",
-   "chapter": "timeline_creative_01",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
      "abstract",
      ""
     ]
@@ -10166,11 +9426,6 @@
     ],
     [
      "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -10226,11 +9481,6 @@
     ],
     [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -10326,11 +9576,6 @@
     ],
     [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -10448,11 +9693,6 @@
      "negative",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -10494,16 +9734,6 @@
     "group"
    ],
    "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
     [
      "negative",
      "abstract",
@@ -10590,16 +9820,6 @@
    ],
    "issues": [
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
      "abstract",
      ""
@@ -10645,16 +9865,6 @@
    ],
    "issues": [
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
      "abstract",
      ""
@@ -10673,16 +9883,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ],
     [
      "negative",
@@ -10718,11 +9918,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -10763,11 +9958,6 @@
      "negative",
      "abstract",
      ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -10785,37 +9975,7 @@
      "5개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "cr04-gwanseong-follow",
-   "chapter": "timeline_creative_04",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "positive",
      "abstract",
      ""
     ]
@@ -10925,11 +10085,6 @@
      "5개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
@@ -10944,11 +10099,6 @@
     "group"
    ],
    "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
     [
      "positive",
      "abstract",
@@ -10980,11 +10130,6 @@
      "5개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
      "abstract",
      ""
@@ -10999,11 +10144,6 @@
     "group"
    ],
    "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
     [
      "positive",
      "abstract",
@@ -11030,11 +10170,6 @@
      "5개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
@@ -11059,11 +10194,6 @@
     "group"
    ],
    "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
     [
      "positive",
      "abstract",
@@ -11110,11 +10240,6 @@
    ],
    "issues": [
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
@@ -11149,11 +10274,6 @@
     "group"
    ],
    "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
     [
      "positive",
      "abstract",
@@ -11194,11 +10314,6 @@
     "group"
    ],
    "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
     [
      "positive",
      "abstract",
@@ -11300,11 +10415,6 @@
    ],
    "issues": [
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
      "abstract",
      ""
@@ -11365,11 +10475,6 @@
      "5개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "abstract",
      ""
@@ -11418,11 +10523,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ],
     [
      "positive",
@@ -11493,11 +10593,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ],
     [
      "positive",
@@ -12980,11 +12075,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13000,11 +12090,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13020,11 +12105,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13040,11 +12120,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13060,11 +12135,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13080,11 +12150,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13100,11 +12165,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13120,16 +12180,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13145,194 +12195,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l02-bigyeon",
-   "chapter": "timeline_love_02",
-   "when": [
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l02-geopjae",
-   "chapter": "timeline_love_02",
-   "when": [
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l02-siksin",
-   "chapter": "timeline_love_02",
-   "when": [
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l02-jeonggwan",
-   "chapter": "timeline_love_02",
-   "when": [
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l02-pyeongwan",
-   "chapter": "timeline_love_02",
-   "when": [
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l02-jeongin",
-   "chapter": "timeline_love_02",
-   "when": [
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l02-pyeonin",
-   "chapter": "timeline_love_02",
-   "when": [
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13348,51 +12210,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l03-hap-low",
-   "chapter": "timeline_love_03",
-   "when": [
-    "strength",
-    "relation"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13408,21 +12225,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13438,26 +12240,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13473,46 +12255,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l03-fric-low",
-   "chapter": "timeline_love_03",
-   "when": [
-    "strength",
-    "relation"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13543,21 +12285,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13573,11 +12300,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13593,21 +12315,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13623,21 +12330,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13653,11 +12345,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13673,11 +12360,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13693,21 +12375,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13723,26 +12390,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13758,16 +12405,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13788,22 +12425,6 @@
    ]
   },
   {
-   "id": "l05-m-pyeonjae-low",
-   "chapter": "timeline_love_05",
-   "when": [
-    "gender",
-    "strength",
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "l05-m-jeongjae-steady",
    "chapter": "timeline_love_05",
    "when": [
@@ -13820,22 +12441,6 @@
    ]
   },
   {
-   "id": "l05-m-jeongjae-low",
-   "chapter": "timeline_love_05",
-   "when": [
-    "gender",
-    "strength",
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "l05-m-weak-steady",
    "chapter": "timeline_love_05",
    "when": [
@@ -13848,32 +12453,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l05-m-weak-low",
-   "chapter": "timeline_love_05",
-   "when": [
-    "gender",
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13890,32 +12469,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l05-f-pyeongwan-low",
-   "chapter": "timeline_love_05",
-   "when": [
-    "gender",
-    "strength",
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13932,42 +12485,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l05-f-jeonggwan-low",
-   "chapter": "timeline_love_05",
-   "when": [
-    "gender",
-    "strength",
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -13984,104 +12501,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l05-f-weak-low",
-   "chapter": "timeline_love_05",
-   "when": [
-    "gender",
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l06-silent",
-   "chapter": "timeline_love_06",
-   "when": [
-    "group"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l06-blunt",
-   "chapter": "timeline_love_06",
-   "when": [
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l06-lean",
-   "chapter": "timeline_love_06",
-   "when": [
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14092,16 +12511,6 @@
     "group"
    ],
    "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ],
     [
      "apps",
      "hedge",
@@ -14120,64 +12529,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l06-possess",
-   "chapter": "timeline_love_06",
-   "when": [
-    "group"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l06-imagine",
-   "chapter": "timeline_love_06",
-   "when": [
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14190,129 +12541,9 @@
    ],
    "issues": [
     [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
      "hedge",
      "2회"
-    ]
-   ]
-  },
-  {
-   "id": "l07-m-star-mid",
-   "chapter": "timeline_love_07",
-   "when": [
-    "gender",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l07-m-star-weak",
-   "chapter": "timeline_love_07",
-   "when": [
-    "gender",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l07-f-star-strong",
-   "chapter": "timeline_love_07",
-   "when": [
-    "gender",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l07-f-star-mid",
-   "chapter": "timeline_love_07",
-   "when": [
-    "gender",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l07-f-star-weak",
-   "chapter": "timeline_love_07",
-   "when": [
-    "gender",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14328,11 +12559,6 @@
      "basis",
      "jargon",
      "10개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14348,26 +12574,6 @@
      "basis",
      "jargon",
      "7개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14383,21 +12589,6 @@
      "basis",
      "jargon",
      "10개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14413,16 +12604,6 @@
      "basis",
      "jargon",
      "7개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14438,16 +12619,6 @@
      "basis",
      "jargon",
      "10개"
-    ],
-    [
-     "negative",
-     "hedge",
-     "2회"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14463,11 +12634,6 @@
      "basis",
      "jargon",
      "7개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14483,16 +12649,6 @@
      "basis",
      "jargon",
      "10개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14508,16 +12664,6 @@
      "basis",
      "jargon",
      "7개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14533,21 +12679,6 @@
      "basis",
      "jargon",
      "10개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14563,26 +12694,6 @@
      "basis",
      "jargon",
      "8개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14599,11 +12710,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14620,11 +12726,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14641,16 +12742,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14667,26 +12758,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "hedge",
-     "2회"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14703,11 +12774,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14724,21 +12790,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14756,19 +12807,9 @@
      "8개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "positive",
      "hedge",
      "2회"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14784,16 +12825,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14809,16 +12840,6 @@
      "basis",
      "jargon",
      "9개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14834,11 +12855,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14854,11 +12870,6 @@
      "basis",
      "jargon",
      "8개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14874,11 +12885,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14899,11 +12905,6 @@
      "basis",
      "jargon",
      "9개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14919,16 +12920,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14944,11 +12935,6 @@
      "basis",
      "jargon",
      "9개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ],
     [
      "apps",
@@ -14969,11 +12955,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -14989,11 +12970,6 @@
      "basis",
      "jargon",
      "8개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15009,26 +12985,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15044,16 +13000,6 @@
      "basis",
      "jargon",
      "10개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15069,26 +13015,6 @@
      "basis",
      "jargon",
      "7개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15104,11 +13030,6 @@
      "basis",
      "jargon",
      "8개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15126,94 +13047,9 @@
      "5개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
      "apps",
      "hedge",
      "3회"
-    ]
-   ]
-  },
-  {
-   "id": "l09-m-strong",
-   "chapter": "timeline_love_09",
-   "when": [
-    "gender",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l09-m-weak",
-   "chapter": "timeline_love_09",
-   "when": [
-    "gender",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l09-f-weak",
-   "chapter": "timeline_love_09",
-   "when": [
-    "gender",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15234,16 +13070,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15264,11 +13090,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15459,11 +13280,6 @@
      "basis",
      "jargon",
      "7개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15479,11 +13295,6 @@
      "basis",
      "jargon",
      "10개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15649,36 +13460,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l12-bigeop-low",
-   "chapter": "timeline_love_12",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15694,21 +13475,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15724,46 +13490,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l12-jaeseong-low",
-   "chapter": "timeline_love_12",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15779,36 +13505,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l12-gwanseong-low",
-   "chapter": "timeline_love_12",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15824,46 +13520,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "l12-inseong-low",
-   "chapter": "timeline_love_12",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -15887,11 +13543,6 @@
     ],
     [
      "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -16031,11 +13682,6 @@
      ""
     ],
     [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
      "apps",
      "meta",
      "검수"
@@ -16066,11 +13712,6 @@
      ""
     ],
     [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
      "advice",
      "abstract",
      ""
@@ -16097,11 +13738,6 @@
     ],
     [
      "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
      "abstract",
      ""
     ]
@@ -16179,11 +13815,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -16254,11 +13885,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -16374,11 +14000,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
