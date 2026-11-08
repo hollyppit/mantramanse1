@@ -19,7 +19,10 @@
   var CHAPTERS = { timeline_self_20: 'life', timeline_self_03: 'life', timeline_wealth_02: 'wealth', timeline_love_04: 'love', timeline_career_07: 'career',
     // 3단계 1묶음(종합풀이 12장). '운이 바꾸는 것'은 data 의 CH_LUCK(장마다 고유 문장)으로 쓴다
     timeline_self_18: 'life', timeline_self_22: 'life', timeline_self_24: 'life', timeline_self_25: 'life', timeline_self_26: 'career', timeline_self_27: 'love', timeline_self_29: 'love',
-    timeline_self_30: 'wealth', timeline_self_31: 'wealth', timeline_self_33: 'life', timeline_self_34: 'life', timeline_self_37: 'life' };
+    timeline_self_30: 'wealth', timeline_self_31: 'wealth', timeline_self_33: 'life', timeline_self_34: 'life', timeline_self_37: 'life',
+    // 3단계 2묶음(재물운 심화 14장)
+    timeline_wealth_01: 'wealth', timeline_wealth_03: 'wealth', timeline_wealth_04: 'wealth', timeline_wealth_05: 'wealth', timeline_wealth_06: 'wealth', timeline_wealth_07: 'wealth', timeline_wealth_08: 'wealth',
+    timeline_wealth_09: 'wealth', timeline_wealth_10: 'wealth', timeline_wealth_11: 'wealth', timeline_wealth_12: 'wealth', timeline_wealth_13: 'wealth', timeline_wealth_14: 'wealth', timeline_wealth_15: 'wealth' };
   var LENS_WORD = { life: '삶', wealth: '돈', love: '관계', career: '일' };
   var STAGE = { core: '핵심 성향', life: '실제 생활에서는', conflict: '갈등과 약점', luck: '운이 바꾸는 것', advice: '현실적인 조언' };
   var norm = function (t) { return String(t || '').replace(/[\s.,!?·—'"‘’“”()]/g, ''); };
@@ -176,7 +179,34 @@
     var cur = ps[ci], next = ps[ci + 1];
     out.push('지금 지나는 ' + ageTxt(cur) + ' 구간(' + cur.gz + ' 대운)을 ' + eye + ', 흐름이 ' + COND_W[cur.tone] + ' 때예요. ' + line(cur));
     // 다음 대운 문장은 그 장의 고유 문장과 한 문장으로 묶는다(시점만 같은 문장이 여러 장에서 반복되지 않게)
-    if (next) out.push(next.year0 + '년 무렵(' + ageTxt(next) + ')부터는 흐름이 ' + COND_W[next.tone] + ' 쪽으로 바뀌' + (next.group !== cur.group ? '고, ' + g[next.group] : '지만, ' + eye + ' 지금과 같은 숙제가 이어져요.'));
+    if (next && !spec.months) out.push(next.year0 + '년 무렵(' + ageTxt(next) + ')부터는 흐름이 ' + COND_W[next.tone] + ' 쪽으로 바뀌' + (next.group !== cur.group ? '고, ' + g[next.group] : '지만, ' + eye + ' 지금과 같은 숙제가 이어져요.'));
+    // 재물 시기 장 세 개는 시간 단위가 서로 다르다: bigYears(앞으로 10년의 해) · decades(남은 대운) · months(가까운 12개월)
+    var wBonus = function (top) { return top === 2 ? 30 : top === 1 ? 14 : 0; };
+    if (spec.bigYears) {
+      try {
+        var Yb = new Date(now).getUTCFullYear(), yl = M.seunRange(ch, Yb, Yb + 9).map(function (x) { var pu = pullOf(M, ch, x); return { y: x.year, gz: M.STEM[x.s] + M.BR[x.b], s: x.ev.fitScore + wBonus(pu.top), fit: x.ev.fitScore, money: pu.top === 2 || pu.top === 1 }; });
+        var big = yl.filter(function (x) { return x.money && x.s > 10; }).sort(function (a, b) { return b.s - a.s; }).slice(0, 3).sort(function (a, b) { return a.y - b.y; });
+        out.push(big.length ? josa('앞으로 10년 중 큰돈과 만날 기회가 커지는 해는 ' + big.map(function (x) { return x.y + '년(' + x.gz + ')'; }).join(' · '), '이에요/예요') + '. 이 해에는 거래와 계약을 미루지 마세요.' : '앞으로 10년 안에는 돈의 기운이 크게 몰리는 해가 뚜렷하지 않아요. 큰 한 방보다 꾸준히 쌓는 쪽이 맞는 10년이에요.');
+        var yw = yl.slice().sort(function (a, b) { return a.fit - b.fit; })[0]; if (yw && yw.fit < -15 && !big.some(function (x) { return x.y === yw.y; })) out.push(josa(yw.y + '년(' + yw.gz + ')', '은/는') + ' 흐름이 가장 무거운 해라, 큰돈이 걸린 결정은 피하는 편이 좋아요.');
+      } catch (e) { }
+    }
+    if (spec.decades) {
+      var fut = ps.filter(function (p) { return p.tense !== 'past' && p.age0 < 80; }).map(function (p) { return { p: p, s: p.fit + wBonus(p.group) }; });
+      if (fut.length) {
+        var best2 = fut.slice().sort(function (a, b) { return b.s - a.s; }).slice(0, 2).sort(function (a, b) { return a.p.age0 - b.p.age0; });
+        var bl = best2.map(function (x) { return ageTxt(x.p) + '(' + x.p.year0 + '년~)'; }); out.push('남은 인생에서 재물에 힘이 가장 실리는 10년은 ' + (bl.length > 1 ? josa(bl[0], '과/와') + ' ' + bl[1] : bl[0]) + ' 구간이에요.');
+        var low = fut.slice().sort(function (a, b) { return a.s - b.s; })[0]; if (low && !best2.some(function (x) { return x.p === low.p; })) out.push(josa(ageTxt(low.p) + '(' + low.p.year0 + '년~)', '은/는') + ' 재물 면에서 넓히기보다 지키는 데 집중해야 하는 10년이에요.');
+      }
+    }
+    if (spec.months) {
+      try {
+        var Ym = M.yearPillarAt(now).sajuYear, all = M.wolun(ch, Ym).concat(M.wolun(ch, Ym + 1)), mi = 0; all.forEach(function (m, i) { if (m.startMs <= now) mi = i; });
+        var ml = all.slice(mi, mi + 12).map(function (m) { var dd = new Date(m.startMs + 9 * 3600e3), pu = pullOf(M, ch, m); return { t: m.startMs, label: dd.getUTCFullYear() + '년 ' + (dd.getUTCMonth() + 1) + '월', s: m.ev.fitScore + wBonus(pu.top), fit: m.ev.fitScore }; });
+        var top3 = ml.slice().sort(function (a, b) { return b.s - a.s; }).slice(0, 3).sort(function (a, b) { return a.t - b.t; }), mw = ml.slice().sort(function (a, b) { return a.fit - b.fit; })[0];
+        out.push('가까운 12개월 중 돈의 판단에 힘이 실리는 달은 ' + top3.map(function (x) { return x.label; }).join(' · ') + '이에요. 달은 절기로 바뀌어서 그달 초순(5~8일 무렵)부터예요.');
+        if (mw && mw.fit < -12 && !top3.some(function (x) { return x.t === mw.t; })) out.push(josa(mw.label, '은/는') + ' 흐름이 가장 무거운 달이라 큰 지출과 계약을 피하세요.');
+      } catch (e) { }
+    }
     if (spec.spouse) {
       var sg = ch.gender === 'F' ? 3 : 2, comes = ps.filter(function (p) { return p.tense !== 'past' && p.group === sg && p.age0 < 60; }).slice(0, 2);
       out.push(comes.length ? josa('앞으로 배우자 인연을 뜻하는 기운이 대운으로 들어오는 때는 ' + comes.map(function (p) { return ageTxt(p) + '(' + p.year0 + '년~)'; }).join(', '), '이에요/예요') + '. 이 시기에는 만남의 자리를 일부러 늘리세요.' : '앞으로 남은 대운 중 배우자 인연을 뜻하는 기운이 직접 들어오는 구간은 없어서, 그 기운이 해마다 들어오는 해를 노리는 쪽이 현실적이에요.');
