@@ -29,53 +29,53 @@
   },
   "example": {
    "n": 1019,
-   "chars": 88274,
+   "chars": 88332,
    "meta": 4,
    "jargon": 44,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 0,
-   "noLife": 86,
+   "noLife": 71,
    "empty": 0,
    "ban": 1
   },
   "positive": {
    "n": 1019,
-   "chars": 107681,
+   "chars": 107756,
    "meta": 4,
-   "jargon": 88,
+   "jargon": 85,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 2,
-   "noLife": 211,
+   "noLife": 187,
    "empty": 0,
    "ban": 0
   },
   "negative": {
    "n": 1019,
-   "chars": 116640,
+   "chars": 116440,
    "meta": 0,
    "jargon": 61,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 11,
-   "noLife": 165,
+   "noLife": 135,
    "empty": 0,
    "ban": 0
   },
   "advice": {
    "n": 1019,
-   "chars": 136812,
+   "chars": 136746,
    "meta": 0,
    "jargon": 134,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 0,
-   "noLife": 79,
+   "noLife": 65,
    "empty": 0,
    "ban": 1
   },
@@ -112,7 +112,7 @@
   },
   "remedy": {
    "n": 78,
-   "flagged": 63
+   "flagged": 45
   },
   "creative": {
    "n": 80,
@@ -120,7 +120,7 @@
   },
   "health": {
    "n": 81,
-   "flagged": 63
+   "flagged": 62
   }
  },
  "issues": [
@@ -439,11 +439,6 @@
     ],
     [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -836,11 +831,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ],
     [
      "positive",
@@ -3981,11 +3971,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -4239,11 +4224,6 @@
     ],
     [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -6206,11 +6186,6 @@
      "검수"
     ],
     [
-     "advice",
-     "abstract",
-     ""
-    ],
-    [
      "apps",
      "meta",
      "검수"
@@ -6366,11 +6341,6 @@
      "6개"
     ],
     [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
      "negative",
      "abstract",
      ""
@@ -6417,11 +6387,6 @@
     ],
     [
      "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
@@ -6962,11 +6927,6 @@
     ],
     [
      "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
      "abstract",
      ""
     ]
@@ -7584,11 +7544,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -7604,16 +7559,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -7644,11 +7589,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -7679,11 +7619,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -7699,11 +7634,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -7719,11 +7649,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -7739,11 +7664,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -7778,21 +7698,6 @@
    ]
   },
   {
-   "id": "r02-jaeseong-low",
-   "chapter": "timeline_remedy_02",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "r02-gwanseong-steady",
    "chapter": "timeline_remedy_02",
    "when": [
@@ -7804,41 +7709,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "r02-gwanseong-low",
-   "chapter": "timeline_remedy_02",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -7869,16 +7739,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -7894,36 +7754,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "r03-siksang-low",
-   "chapter": "timeline_remedy_03",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -7948,26 +7778,6 @@
    ]
   },
   {
-   "id": "r03-gwanseong-low",
-   "chapter": "timeline_remedy_03",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "r03-jaeseong-steady",
    "chapter": "timeline_remedy_03",
    "when": [
@@ -7979,31 +7789,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "r03-jaeseong-low",
-   "chapter": "timeline_remedy_03",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8023,86 +7808,6 @@
    ]
   },
   {
-   "id": "r03-bigeop-low",
-   "chapter": "timeline_remedy_03",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "r04-spring-low",
-   "chapter": "timeline_remedy_04",
-   "when": [
-    "strength",
-    "season"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "r04-summer-steady",
-   "chapter": "timeline_remedy_04",
-   "when": [
-    "strength",
-    "season"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "r04-autumn-steady",
-   "chapter": "timeline_remedy_04",
-   "when": [
-    "strength",
-    "season"
-   ],
-   "issues": [
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "r04-autumn-low",
-   "chapter": "timeline_remedy_04",
-   "when": [
-    "strength",
-    "season"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "r05-wood-steady",
    "chapter": "timeline_remedy_05",
    "when": [
@@ -8114,21 +7819,6 @@
      "basis",
      "jargon",
      "7개"
-    ]
-   ]
-  },
-  {
-   "id": "r05-wood-low",
-   "chapter": "timeline_remedy_05",
-   "when": [
-    "dayMaster",
-    "strength"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8163,21 +7853,6 @@
    ]
   },
   {
-   "id": "r05-earth-low",
-   "chapter": "timeline_remedy_05",
-   "when": [
-    "dayMaster",
-    "strength"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "r05-metal-steady",
    "chapter": "timeline_remedy_05",
    "when": [
@@ -8208,140 +7883,6 @@
    ]
   },
   {
-   "id": "r06-bigyeon",
-   "chapter": "timeline_remedy_06",
-   "when": [
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "r06-siksin",
-   "chapter": "timeline_remedy_06",
-   "when": [
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "r06-jeonggwan",
-   "chapter": "timeline_remedy_06",
-   "when": [
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "r06-pyeongwan",
-   "chapter": "timeline_remedy_06",
-   "when": [
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "r06-jeongin",
-   "chapter": "timeline_remedy_06",
-   "when": [
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "r06-pyeonin",
-   "chapter": "timeline_remedy_06",
-   "when": [
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "r07-bigeop-steady",
    "chapter": "timeline_remedy_07",
    "when": [
@@ -8353,11 +7894,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8373,16 +7909,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8428,11 +7954,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8478,11 +7999,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8498,11 +8014,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8518,11 +8029,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8539,16 +8045,6 @@
      "basis",
      "jargon",
      "10개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8565,16 +8061,6 @@
      "basis",
      "jargon",
      "8개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8591,11 +8077,6 @@
      "basis",
      "jargon",
      "10개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8612,11 +8093,6 @@
      "basis",
      "jargon",
      "7개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8633,11 +8109,6 @@
      "basis",
      "jargon",
      "10개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8654,16 +8125,6 @@
      "basis",
      "jargon",
      "7개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8680,16 +8141,6 @@
      "basis",
      "jargon",
      "10개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8722,16 +8173,6 @@
      "basis",
      "jargon",
      "10개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8748,11 +8189,6 @@
      "basis",
      "jargon",
      "8개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8768,16 +8204,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8793,11 +8219,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9449,21 +8870,6 @@
    ]
   },
   {
-   "id": "h01-summer-heat",
-   "chapter": "timeline_health_01",
-   "when": [
-    "season",
-    "el"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "h01-winter-cold",
    "chapter": "timeline_health_01",
    "when": [
@@ -9473,11 +8879,6 @@
    "issues": [
     [
      "example",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
      "abstract",
      ""
     ]
