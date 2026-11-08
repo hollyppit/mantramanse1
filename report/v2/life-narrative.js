@@ -1,0 +1,249 @@
+/* 운명의 타임라인 서사 엔진 — 1단계(2026-11-08, 스위치 lifeNarrative 기본 꺼짐).
+   계획: docs/LIFE_NARRATIVE_PLAN_2026-11-08.md
+   · profile(M, ch, now): 사주당 한 번 계산하는 공통 분석. 억부·조후는 engine.js 통합 판단(ch.unified)을 그대로 쓰고(독립 평가 + 공통 결과),
+     강약·통근·격국·십성 묶음·구조 패턴·조습·원국 합충·일지 십성·배우자 기운을 근거 문장이 붙은 태그로 만든다.
+   · lifeStory(...): 실제 대운 시작 시각(startMs)으로 만 나이 구간을 잡고, 대운마다 끌어오는 십성·통합 역할·흐름 점수·일지/월지 충합으로
+     시기 이야기를 만든다. 전체 모양은 실제 점수로 분류(늦게 피는 상승·앞이 강한 하강·중반 정점·V자 반전·굴곡·잔잔함·물결) — 고정 틀 없음.
+     지나온 시기는 맞춰 보기 문형, 지금·앞으로는 준비 문형으로 나눈다.
+   · compose(...): 장의 복합 규칙(조건 2개 이상)을 고르고 '핵심 성향 → 생활 → 갈등과 약점 → 운의 변화 → 조언'으로 엮는다.
+     리포트 단위로 쓴 규칙·문장을 기록해 장 사이 중복 문장과 상충 규칙을 막는다. 맞는 규칙이 없으면 null(기존 DB 문안 그대로).
+   · forChapter(c): reading-text.js 가 부른다. 스위치가 꺼져 있거나 시범 장이 아니면 null. */
+(function (root) {
+  'use strict';
+  var R = root.ReportV2 = root.ReportV2 || {};
+  var VERSION = 'life-narrative-20261108-1';
+  var D = function () { return root.MantraLifeNarrativeData; };
+  var YEAR = 365.2422 * 86400000;
+  var GN = ['bi', 'sik', 'jae', 'gwan', 'in'], GK = ['비겁', '식상', '재성', '관성', '인성'];
+  // 시범 장 → 렌즈
+  var CHAPTERS = { timeline_self_20: 'life', timeline_self_03: 'life', timeline_wealth_02: 'wealth', timeline_love_04: 'love', timeline_career_07: 'career' };
+  var LENS_WORD = { life: '삶', wealth: '돈', love: '관계', career: '일' };
+  var STAGE = { core: '핵심 성향', life: '실제 생활에서는', conflict: '갈등과 약점', luck: '운이 바꾸는 것', advice: '현실적인 조언' };
+  var norm = function (t) { return String(t || '').replace(/[\s.,!?·—'"‘’“”()]/g, ''); };
+  var sentences = function (t) { return String(t || '').split(/(?<=[.!?])\s+/).map(function (x) { return x.trim(); }).filter(Boolean); };
+  var mod5 = function (x) { return ((x % 5) + 5) % 5; };
+  // 조사: 마지막 한글 음절의 받침으로 고른다(괄호 속은 건너뜀)
+  function josa(w, pair) { w = String(w); var c = null; for (var i = w.length - 1; i >= 0; i--) { var k = w.charCodeAt(i); if (k >= 0xAC00 && k <= 0xD7A3) { c = k; break; } if (w[i] === ')') { var o = w.lastIndexOf('(', i); if (o > 0) { i = o; continue; } } } var p = pair.split('/'), j = c == null ? 0 : (c - 0xAC00) % 28; return w + (j ? p[0] : p[1]); }
+
+  // ───────── 공통 분석 ─────────
+  // 태그: str:weak|mid|strong(+veryweak|verystrong) · root:none|weak|firm · g:<묶음>:heavy|some|light|none · dom:<묶음> · pat:<구조 패턴>
+  //       gk:<격 묶음> + gk:seong|part|pa · u:<통합 판단 방식> · u:prim:<주 기준> · yong:<묶음> · yong:absent · cl:hot|cold|wet|dry|even
+  //       rel:dm-clash|day-clash|hyeong|wonjin|day-hap|stem-hap · dj:<일지 십성 묶음> · spouse:heavy|none|mix · tg:pyeonjae:high|jeongjae:high · sex:M|F
+  var _profile = new WeakMap();
+  function profile(M, ch) {
+    var hit = _profile.get(ch); if (hit) return hit;
+    var tags = {}, add = function (t, why) { if (!tags[t]) tags[t] = why; };
+    var st = ch.strength, help = st.help, G = ch.weights.groups, tg = ch.weights.tgPct || {}, dEl = M.stemEl(ch.pillars.day.s);
+    var pc = function (v) { return Math.round(v) + '%'; };
+    add(help < 42 ? 'str:weak' : help > 58 ? 'str:strong' : 'str:mid', '나를 돕는 힘 ' + pc(help) + '(' + st.zone + ')');
+    if (help < 30) add('str:veryweak', '나를 돕는 힘 ' + pc(help)); if (help >= 70) add('str:verystrong', '나를 돕는 힘 ' + pc(help));
+    var rs = 0; try { rs = M.analyzeNatalRoot(ch).natalRootScore; } catch (e) { }
+    if (rs === 0) add('root:none', '일간의 뿌리(통근) 없음'); else if (rs < 30) add('root:weak', '일간의 뿌리(통근) ' + rs + '점'); else if (rs >= 60) add('root:firm', '일간의 뿌리(통근) ' + rs + '점');
+    var dom = 0;
+    G.forEach(function (v, i) {
+      var n = GN[i], k = GK[i] + ' ' + pc(v); if (v > G[dom]) dom = i;
+      if (v >= 30) add('g:' + n + ':heavy', k); if (v >= 10) add('g:' + n + ':some', k); if (v < 10) add('g:' + n + ':light', k); if (v < 3) add('g:' + n + ':none', k);
+    });
+    add('dom:' + GN[dom], '가장 큰 묶음 ' + GK[dom] + ' ' + pc(G[dom]));
+    (ch.patterns && ch.patterns.list || []).forEach(function (p) { if (p.level !== '참고') add('pat:' + p.name, p.name + ' — ' + p.basis); });
+    try {
+      var gc = M.gyeokCore(ch), GKEY = { 정관: 'gwan', 편관: 'gwan', 정재: 'jae', 편재: 'jae', 식신: 'sik', 상관: 'sik', 정인: 'in', 편인: 'in', wolgeop: 'bi' };
+      add('gk:' + GKEY[gc.key], gc.kind); if (gc.status === 'seong' || gc.status === 'part' || gc.status === 'pa') add('gk:' + gc.status, gc.kind + ' ' + ({ seong: '성격', part: '부분 성격', pa: '파격' })[gc.status]);
+    } catch (e) { }
+    var u = ch.unified;
+    if (u) {
+      add('u:' + u.mode, '통합 판단 ' + u.headline); add('u:prim:' + u.primary, '주 기준 ' + u.primaryName);
+      add('yong:' + GN[mod5(u.yong - dEl)], '용신 ' + M.EL_K[u.yong]); if ((ch.weights.pct[u.yong] || 0) < 5) add('yong:absent', '용신이 원국에 ' + pc(ch.weights.pct[u.yong] || 0));
+    }
+    var c = ch.climate, any = false;
+    if (c.temp >= 0.6) { add('cl:hot', '원국 온도 +' + c.temp.toFixed(2)); any = true; }
+    if (c.temp <= -0.6) { add('cl:cold', '원국 온도 ' + c.temp.toFixed(2)); any = true; }
+    if (c.hum >= 0.8) { add('cl:wet', '원국 습도 +' + c.hum.toFixed(2)); any = true; }
+    if (c.hum <= -0.8) { add('cl:dry', '원국 습도 ' + c.hum.toFixed(2)); any = true; }
+    if (!any) add('cl:even', '온도·습도 고름');
+    (ch.relations || []).forEach(function (r) {
+      var m = r.members || [], day = m.indexOf('day') >= 0, mon = m.indexOf('month') >= 0, nm = r.name || r.type;
+      if (r.kind === 'branch') {
+        if (r.type === '충' && day && mon) add('rel:dm-clash', '일지·월지 ' + nm);
+        if (r.type === '충' && day) add('rel:day-clash', '일지 ' + nm);
+        if (r.type === '형' && (day || mon)) add('rel:hyeong', nm);
+        if ((r.type === '원진' || r.type === '귀문관') && day) add('rel:wonjin', '일지 ' + nm);
+        if (/합/.test(r.type) && day) add('rel:day-hap', '일지 ' + nm);
+      } else if (r.type === '천간합' && day) add('rel:stem-hap', '일간 ' + nm);
+    });
+    var djg = mod5(M.stemEl(M.mainHidden(ch.pillars.day.b)) - dEl); add('dj:' + GN[djg], '일지 ' + M.BR[ch.pillars.day.b] + '(' + GK[djg] + ')');
+    var F = ch.gender === 'F', sg = F ? 3 : 2, a = F ? '정관' : '정재', b = F ? '편관' : '편재';
+    if (G[sg] >= 25) add('spouse:heavy', (F ? '관성' : '재성') + ' ' + pc(G[sg])); if (G[sg] < 3) add('spouse:none', (F ? '관성' : '재성') + ' ' + pc(G[sg]));
+    if ((tg[a] || 0) >= 8 && (tg[b] || 0) >= 8) add('spouse:mix', a + ' ' + pc(tg[a] || 0) + ' · ' + b + ' ' + pc(tg[b] || 0));
+    if ((tg['편재'] || 0) >= 15) add('tg:pyeonjae:high', '편재 ' + pc(tg['편재'])); if ((tg['정재'] || 0) >= 15) add('tg:jeongjae:high', '정재 ' + pc(tg['정재']));
+    add('sex:' + (F ? 'F' : 'M'), F ? '여성' : '남성');
+    var res = { version: VERSION, tags: tags, has: function (t) { return Object.prototype.hasOwnProperty.call(tags, t); }, dEl: dEl };
+    _profile.set(ch, res); return res;
+  }
+
+  // ───────── 대운 서사 ─────────
+  function pullOf(M, ch, p) {
+    var dEl = M.stemEl(ch.pillars.day.s), g = [0, 0, 0, 0, 0];
+    g[mod5(M.stemEl(p.s) - dEl)] += 0.4; M.HIDDEN[p.b].forEach(function (h) { g[mod5(M.stemEl(h[0]) - dEl)] += 0.6 * h[1] / 30; });
+    var top = 0; g.forEach(function (v, i) { if (v > g[top]) top = i; }); return { g: g, top: top };
+  }
+  var toneOf = function (fit) { return fit >= 18 ? 'good' : fit > -12 ? 'mixed' : 'hard'; };
+  function periods(M, ch, now) {
+    var list = ch.daeun.list, out = [];
+    list.forEach(function (x, i) {
+      var next = list[i + 1], start = x.startMs, end = next ? next.startMs : start + 10 * YEAR;
+      var a0 = (start - ch.utc) / YEAR, a1 = (end - ch.utc) / YEAR; if (a0 > 85) return;
+      var ev = x.ev || {}, fit = typeof ev.fitScore === 'number' ? ev.fitScore : 0, pull = pullOf(M, ch, x), rels = [];
+      try { rels = M.luckRelations(ch, x).rels; } catch (e) { }
+      var ev2 = { dayClash: rels.some(function (r) { return r.type === '충' && r.members.indexOf('day') >= 0; }), monthClash: rels.some(function (r) { return r.type === '충' && r.members.indexOf('month') >= 0; }), dayHap: rels.some(function (r) { return /합/.test(r.type) && r.kind === 'branch' && r.members.indexOf('day') >= 0; }) };
+      var el = mod5(M.stemEl(ch.pillars.day.s) + pull.top);
+      out.push({ female: ch.gender === 'F', i: i, gz: M.STEM[x.s] + M.BR[x.b], start: start, end: end, age0: a0, age1: a1, year0: new Date(start).getUTCFullYear(), fit: fit, tone: toneOf(fit), group: pull.top, role: ch.unified ? ch.unified.roles[el] : '', events: ev2, tense: end <= now ? 'past' : start <= now ? 'current' : 'future' });
+    });
+    return out;
+  }
+  // 전체 모양: 실제 흐름 점수로 분류. 한 가지 모양이 과반이 되지 않는지는 tests/life-narrative-sim.cjs 가 확인한다.
+  function arcOf(ps) {
+    var v = ps.filter(function (p) { return p.age0 < 80; }).map(function (p) { return p.fit; });
+    if (v.length < 3) return 'flat';
+    var max = Math.max.apply(null, v), min = Math.min.apply(null, v), range = max - min;
+    if (range < 30) return 'flat';
+    var turns = 0, dir = 0; for (var i = 1; i < v.length; i++) { var d = v[i] - v[i - 1]; if (Math.abs(d) < 12) continue; var s = d > 0 ? 1 : -1; if (dir && s !== dir) turns++; dir = s; }
+    var third = Math.max(1, Math.floor(v.length / 3)), mean = function (a) { return a.reduce(function (x, y) { return x + y; }, 0) / a.length; };
+    var head = mean(v.slice(0, third)), tail = mean(v.slice(-third)), pi = v.indexOf(max), ti = v.indexOf(min), mid = function (k) { return k > 0 && k < v.length - 1; };
+    if (turns >= 3) return 'wave';
+    if (mid(pi) && max - head >= 18 && max - tail >= 18) return 'peak';
+    if (mid(ti) && head - min >= 18 && tail - min >= 18) return 'valley';
+    if (tail - head >= 15) return 'rise';
+    if (head - tail >= 15) return 'fall';
+    return 'swing';
+  }
+  var ageTxt = function (p) { return '만 ' + Math.max(0, Math.floor(p.age0)) + '~' + Math.floor(p.age1) + '세'; };
+  function transition(prev, p) {
+    if (!prev) return '';
+    var d = p.fit - prev.fit;
+    if (prev.fit >= 0 && p.fit < -12) return '잘 굴러가던 흐름이 한 번 꺾이는 구간이에요.';
+    if (prev.fit < -12 && p.fit >= 0) return '막혀 있던 흐름이 뒤집히는 구간이에요.';
+    if (d >= 20) return '앞 10년보다 확실히 숨통이 트여요.';
+    if (d <= -20) return '앞 10년보다 무게가 늘어나요.';
+    return '';
+  }
+  function periodText(D0, st, lens, p, prev) {
+    var youth = p.age0 < 16 && p.tense === 'past', Y = D0.YOUTH;
+    var outs = youth ? Y.out[p.tone] : D0.OUT[lens][p.tone][p.tense === 'past' ? 'past' : 'future'], key = (youth ? 'youth' : lens) + p.tone + (p.tense === 'past' ? 'p' : 'f');
+    var k = st.variant[key] || 0; st.variant[key] = k + 1;
+    var parts = [];
+    var tr = transition(prev, p); if (tr) parts.push(tr);
+    if (youth) parts.push(Y.env[p.group]);
+    else if (prev && prev.group === p.group) { var ck = 'cont' + lens, cv = st.variant[ck] || 0; st.variant[ck] = cv + 1; parts.push(D0.CONT[lens][cv % D0.CONT[lens].length]); }
+    else parts.push(D0.ENV[lens][p.group]);
+    parts.push(outs[k % outs.length]);
+    var ev = p.events, E = youth ? Y.event : { dayClash: D0.EVENT.dayClash[lens], dayHap: D0.EVENT.dayHap[lens], monthClash: D0.EVENT.monthClash[lens] };
+    if (lens === 'love' && p.group === (p.female ? 3 : 2)) parts.push(p.tense === 'past' ? '배우자 인연을 뜻하는 기운이 들어온 시기라, 진지한 만남이나 관계의 결정이 이때 있었을 수 있어요.' : '배우자 인연을 뜻하는 기운이 들어오는 시기라, 진지한 만남이나 관계의 결정이 움직이기 쉬워요.');
+    var evs = [];
+    if (ev.dayClash) evs.push(E.dayClash); else if (ev.dayHap) evs.push(E.dayHap); if (ev.monthClash) evs.push(E.monthClash);
+    // 지나온 대운의 사건 신호는 과거형으로 바꿔 맞춰 보기 문형을 지킨다
+    if (p.tense === 'past' && !youth) evs = evs.map(function (t) { return t.replace(/겹쳐요/g, '겹쳤어요').replace(/있어요/g, '있었어요').replace(/쉬워요\./g, '쉬웠어요.'); });
+    return parts.concat(evs).join(' ');
+  }
+  function seunLine(M, ch, now, lens) {
+    var Y = new Date(now).getUTCFullYear(), list; try { list = M.seunRange(ch, Y, Y + 4); } catch (e) { return ''; }
+    if (!list || !list.length) return '';
+    var want = lens === 'wealth' ? [2, 1] : lens === 'career' ? [3, 1] : lens === 'love' ? (ch.gender === 'F' ? [3, 4] : [2, 4]) : null;
+    var scored = list.map(function (x) { var pu = pullOf(M, ch, x), s = x.ev.fitScore + (want ? (pu.top === want[0] ? 30 : pu.top === want[1] ? 14 : 0) : 0); return { y: x.year, gz: M.STEM[x.s] + M.BR[x.b], s: s, fit: x.ev.fitScore, clash: (x.ev.triggers || []).some(function (t) { return /충/.test(t); }) }; });
+    var best = scored.slice().sort(function (a, b) { return b.s - a.s; })[0], worst = scored.slice().sort(function (a, b) { return a.fit - b.fit; })[0];
+    var out = '앞으로 5년 중 ' + LENS_WORD[lens] + ' 쪽으로 힘이 가장 실리는 해는 ' + best.y + '년(' + best.gz + ')이에요.';
+    if (worst && worst.y !== best.y && worst.fit < -12) out += ' ' + worst.y + '년(' + worst.gz + ')은 흐름이 무거운 해라' + (worst.clash ? ' 부딪히는 글자까지 겹쳐' : '') + ' 큰 결정을 피하는 편이 좋아요.';
+    return out;
+  }
+  // 장 하나에 넣는 '운이 바꾸는 것' 단계: 지금 대운 + 다음 대운(+지난 대운 한 줄) + 앞으로 5년 세운
+  // 운 단계: 시점 문장(렌즈별로 다름)은 중복 제거에서 빼고 본문만 중복 제거한다
+  var LENS_EYE = { life: '삶 전체로 보면', wealth: '돈의 흐름으로 보면', love: '관계의 눈으로 보면', career: '일의 흐름으로 보면' };
+  function luckStage(M, ch, now, lens, st) {
+    var D0 = D(), ps = periods(M, ch, now), ci = ps.findIndex(function (p) { return p.tense === 'current'; });
+    if (ci < 0) return '';
+    var cur = ps[ci], next = ps[ci + 1], prev = ps[ci - 1], out = [];
+    out.push('지금 지나는 ' + ageTxt(cur) + ' 구간(' + cur.gz + ' 대운)을 ' + LENS_EYE[lens] + ' — ' + dedupe(st, periodText(D0, st, lens, cur, prev)));
+    if (next) { var nb = dedupe(st, periodText(D0, st, lens, next, cur)); if (nb) out.push(next.year0 + '년 무렵(' + ageTxt(next) + ')부터는 — ' + nb); }
+    var sl = dedupe(st, seunLine(M, ch, now, lens)); if (sl) out.push(sl);
+    return out.join('\n\n');
+  }
+
+  // ───────── 규칙 선택·조합 ─────────
+  function matches(rule, P) {
+    if (rule.all.some(function (t) { return !P.has(t); })) return false;
+    if (rule.any.some(function (grp) { return !grp.some(function (t) { return P.has(t); }); })) return false;
+    if (rule.none.some(function (t) { return P.has(t); })) return false;
+    return true;
+  }
+  var condCount = function (rule) { return rule.all.length + rule.any.length; };
+  var _state = new WeakMap();
+  function stateOf(ch) { var s = _state.get(ch); if (!s) _state.set(ch, s = { rules: new Set(), sentences: new Set(), variant: {}, cache: {} }); return s; }
+  function dedupe(st, text) {
+    return String(text || '').split(/\n{2,}/).map(function (para) {
+      return sentences(para).filter(function (s) { var k = norm(s); if (k.length < 8) return true; if (st.sentences.has(k)) return false; st.sentences.add(k); return true; }).join(' ');
+    }).filter(Boolean).join('\n\n');
+  }
+  function evidenceRows(P, rule, D0, extra) {
+    var conds = rule ? rule.all.concat(rule.any.map(function (g) { return g.find(function (t) { return P.has(t); }); })).filter(Boolean) : [];
+    var lines = [];
+    if (rule) lines.push(rule.basis);
+    if (conds.length) lines.push('이 사주에서 확인된 조건: ' + conds.map(function (t) { return P.tags[t]; }).join(' · ') + '.');
+    (extra || []).forEach(function (x) { lines.push(x); });
+    var terms = (rule ? rule.terms : []).concat(['대운', '세운']).filter(function (t, i, a) { return a.indexOf(t) === i && D0.TERMS[t]; });
+    return { lines: lines, terms: terms.map(function (t) { return { term: t, text: D0.TERMS[t] }; }), conds: conds };
+  }
+  var TIME_NOTE = '지나온 시기의 문장은 원국과 대운으로 맞춰 본 해석이라 실제 기억과 비교해 보시면 되고, 지금과 앞으로의 문장은 사건 예언이 아니라 준비할 방향이에요.';
+  function compose(M, ch, now, chapterId) {
+    var lens = CHAPTERS[chapterId], D0 = D(); if (!lens || !D0 || !ch || !ch.unified || !ch.daeun) return null;
+    var st = stateOf(ch); if (st.cache[chapterId] !== undefined) return st.cache[chapterId];
+    var P = profile(M, ch), res = null, trace = [];
+    if (chapterId === 'timeline_self_20') res = composeLife(M, ch, now, P, st, D0);
+    else {
+      var cands = D0.RULES.filter(function (r) { return r.chapter === chapterId; }).sort(function (a, b) { return b.priority - a.priority || condCount(b) - condCount(a) || (a.id < b.id ? -1 : 1); });
+      var pick = null;
+      cands.forEach(function (r) {
+        var ok = matches(r, P), why = !ok ? '조건 불일치' : condCount(r) < 2 ? '복합 조건 아님' : pick ? '더 높은 우선순위 규칙 선택됨' : r.opposes.some(function (id) { return st.rules.has(id); }) ? '이미 나온 규칙과 상충' : 'selected';
+        trace.push({ id: r.id, result: why });
+        if (why === 'selected') pick = r;
+      });
+      if (pick) {
+        st.rules.add(pick.id);
+        var rows = [{ stage: 'core', text: dedupe(st, pick.core) }, { stage: 'life', text: dedupe(st, pick.life) }, { stage: 'conflict', text: dedupe(st, pick.conflict) }, { stage: 'luck', text: luckStage(M, ch, now, lens, st) }, { stage: 'advice', text: dedupe(st, pick.advice) }].filter(function (r) { return r.text; });
+        var evd = evidenceRows(P, pick, D0, [pick.conf === 'moderate' ? '근거 강도: 보통 — 구조 하나가 아니라 기운의 비율로 읽은 해석이라, 맞지 않는 부분은 걸러 읽어 주세요.' : '근거 강도: 높음 — 원국의 구조(격국·강약·십성 배치)에서 직접 나온 해석이에요.', TIME_NOTE]);
+        res = { chapterId: chapterId, lens: lens, rule: pick.id, hook: pick.hook, rows: rows.map(function (r) { return { stage: r.stage, label: STAGE[r.stage], text: r.text }; }), evidence: evd, trace: trace, version: VERSION };
+      }
+    }
+    if (res && !res.trace.length) res.trace = trace;
+    st.cache[chapterId] = res; return res;
+  }
+  function composeLife(M, ch, now, P, st, D0) {
+    var ps = periods(M, ch, now); if (ps.length < 3) return null;
+    var arc = arcOf(ps), A = D0.ARC[arc], hookS = sentences(A.hook), past = ps.filter(function (p) { return p.tense === 'past'; }), cur = ps.find(function (p) { return p.tense === 'current'; }), fut = ps.filter(function (p) { return p.tense === 'future' && p.age0 < 80; });
+    var line = function (p, prev) { return ageTxt(p) + ' · ' + p.gz + ' 대운 (' + p.year0 + '년~) — ' + periodText(D0, st, 'life', p, prev); };
+    var rows = [];
+    rows.push({ stage: 'core', label: '내 인생의 모양: ' + A.name, text: hookS.slice(1).join(' ') + (cur ? ' 지금은 ' + ageTxt(cur) + ' 구간을 지나고 있어요.' : '') });
+    if (past.length) rows.push({ stage: 'life', label: '지나온 시기 — 맞춰 보기', text: past.map(function (p) { return line(p, ps[p.i - 1 - ps[0].i]); }).join('\n\n') });
+    var hardest = ps.filter(function (p) { return p.age1 > 18 && p.age0 < 80; }).sort(function (a, b) { return a.fit - b.fit; })[0] || ps[0];
+    var best = ps.filter(function (p) { return p.tense !== 'past' && p.age0 < 80; }).sort(function (a, b) { return b.fit - a.fit; })[0] || null;
+    rows.push({ stage: 'conflict', label: '인생에서 가장 버거운 구간', text: josa(ageTxt(hardest) + '(' + hardest.gz + ' 대운)', '이/가') + ' 흐름 점수가 가장 낮은 구간이에요. ' + (hardest.tense === 'past' ? '이미 지나온 시기라면, 그때 잃은 것보다 그때 생긴 버릇(지나친 경계·포기·무리)이 지금까지 남아 있는지 돌아볼 만해요.' : '아직 오지 않은 시기라면, 그 전 구간에서 비상금·건강·한두 명의 믿을 사람을 미리 준비해 두는 것이 가장 확실한 대비예요.') });
+    if (cur || fut.length) rows.push({ stage: 'luck', label: '지금과 앞으로 — 준비하기', text: [cur ? '지금 · ' + line(cur, ps[cur.i - 1 - ps[0].i]) : ''].concat(fut.slice(0, 3).map(function (p) { return line(p, ps[p.i - 1 - ps[0].i]); })).filter(Boolean).join('\n\n') });
+    rows.push({ stage: 'advice', label: '흐름을 내 편으로 쓰는 법', text: A.tip + ' 앞으로 남은 시기 중에는 ' + (best ? josa(ageTxt(best) + '(' + best.gz + ' 대운)', '이/가') + ' 가장 힘이 실리는 구간이니 큰 움직임은 그 구간에 맞추세요.' : '가장 좋았던 구간이 이미 지나갔으니, 그때 만든 것을 지키고 다듬는 쪽이 남은 시기의 핵심이에요.') });
+    rows.forEach(function (r) { r.text = dedupe(st, r.text); });
+    var evd = evidenceRows(P, null, D0, ['대운은 ' + (ch.daeun.forward ? '순행' : '역행') + '이며, 첫 대운은 실제로 만 ' + (ps[0].age0).toFixed(1) + '세에 시작해요(대운수 ' + ch.daeun.num + '). 나이 구간은 대운이 바뀌는 실제 시각으로 계산했어요.', '인생의 모양은 대운마다의 흐름 점수(통합 용신·관계·구조)를 이어 분류했어요: ' + ps.filter(function (p) { return p.age0 < 80; }).map(function (p) { return Math.floor(p.age0) + '세 ' + Math.round(p.fit); }).join(' · ') + '.', TIME_NOTE]);
+    return { chapterId: 'timeline_self_20', lens: 'life', rule: 'arc:' + arc, arc: arc, hook: hookS[0], rows: rows.filter(function (r) { return r.text; }), evidence: evd, trace: [], version: VERSION };
+  }
+
+  // ───────── 스위치 ─────────
+  var remoteOn = null;
+  function localFlag() { try { var f = root.MANTRA_FLAGS; if (f && f.lifeNarrative === true) return true; var h = root.location && root.location.hostname || ''; if (/^(localhost|127\.0\.0\.1)$/.test(h) || /^[a-z0-9][a-z0-9-]*\.mantramanse\.pages\.dev$/i.test(h)) return /[?&]mantraFlags=[A-Za-z,]*\blifeNarrative\b/.test(root.location.search || ''); } catch (e) { } return false; }
+  function enabled() { return localFlag() || remoteOn === true; }
+  try { if (root.fetch && root.location && !localFlag()) root.fetch('/api/luck-flags', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { remoteOn = !!(d && d.lifeNarrative === true); }).catch(function () { remoteOn = false; }); } catch (e) { }
+  function forChapter(c) {
+    if (!enabled()) return null;
+    var id = c && (c.editorialContractId || c.id), f = c && c.readingFeature; if (!CHAPTERS[id] || !f || !f.M || !f.ch) return null;
+    try { return compose(f.M, f.ch, f.now || Date.now(), id); } catch (e) { return null; }
+  }
+  var api = { version: VERSION, CHAPTERS: CHAPTERS, profile: profile, periods: periods, arcOf: arcOf, compose: compose, forChapter: forChapter, enabled: enabled, _reset: function (ch) { _state.delete(ch); } };
+  R.LifeNarrative = api; root.MantraLifeNarrative = api;
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+})(typeof window !== 'undefined' ? window : globalThis);
