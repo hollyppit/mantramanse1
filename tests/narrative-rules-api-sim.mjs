@@ -1,0 +1,31 @@
+// /api/narrative-rules 상태 전이 검증:  node tests/narrative-rules-api-sim.mjs
+// 초안 저장 → 게시 → 게시 취소 → 이력 되돌리기 → 새 규칙 → 삭제, 잘못된 문안 거부, 기본 규칙 장 변경·삭제 거부, 게시본만 공개
+import { transition, publishedView, check } from '../functions/api/narrative-rules.js';
+const L = globalThis.MantraLifeNarrative, D = globalThis.MantraLifeNarrativeData;
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); };
+const doc = { version: 0, rules: {} }, at = '2026-11-08T00:00:00Z', by = 'test';
+const T = b => transition(doc, b, at, by);
+ok(D.RULES.every(r => !check(r.id, {}, false).length), '기본 규칙 검사 실패');
+ok(T({ id: 's03-gwan-pressure', action: 'publish' }).error, '바뀐 것 없이 게시됨');
+ok(!T({ id: 's03-gwan-pressure', action: 'save', fields: { priority: 130 } }).error, '저장 실패');
+ok(doc.rules['s03-gwan-pressure'].status === 'draft', '저장 후 초안 아님');
+ok(T({ id: 's03-gwan-pressure', action: 'save', fields: { core: '무조건 신약이라 버거워요. 일부러 틀리게 쓴 문장이에요.' } }).error, '금지어·용어 문안이 저장됨');
+ok(T({ id: 's03-gwan-pressure', action: 'save', fields: { chapter: 'timeline_love_04' } }).error, '기본 규칙 장 변경이 허용됨');
+ok(T({ id: 's03-gwan-pressure', action: 'save', fields: { all: ['str:weak'], any: [] } }).error, '단일 조건이 저장됨');
+ok(T({ id: 's03-gwan-pressure', action: 'save', fields: { all: ['str:weak', 'unknown:tag'] } }).error, '알 수 없는 조건이 저장됨');
+ok(publishedView(doc).length === 0, '초안이 공개됨');
+ok(!T({ id: 's03-gwan-pressure', action: 'publish' }).error && publishedView(doc).length === 1 && publishedView(doc)[0].priority === 130, '게시 실패');
+ok(!T({ id: 's03-gwan-pressure', action: 'unpublish' }).error && publishedView(doc).length === 0, '게시 취소 실패');
+ok(!T({ id: 's03-gwan-pressure', action: 'save', fields: { priority: 140 } }).error, '두 번째 저장 실패');
+const v = doc.rules['s03-gwan-pressure'].history.find(h => h.fields.priority === 130).v;
+ok(!T({ id: 's03-gwan-pressure', action: 'restore', v }).error && doc.rules['s03-gwan-pressure'].fields.priority === 130 && doc.rules['s03-gwan-pressure'].status === 'draft', '이력 되돌리기 실패');
+ok(T({ id: 's03-gwan-pressure', action: 'delete' }).error, '기본 규칙이 삭제됨');
+const nw = { chapter: 'timeline_career_07', all: ['str:weak', 'cl:cold'], any: [], none: [], priority: 70, conf: 'moderate', terms: ['신약'], basis: '일간의 힘이 약하고 원국이 차가운 사주예요. 조직에서 시동이 늦고 압박에 쉽게 움츠러드는 구조로 읽어요.', hook: '회의에서 할 말을 늘 회의가 끝난 뒤에 떠올리지 않나요?', core: '당신은 조직에서 생각이 정리된 뒤에야 말하는 사람이에요. 그래서 좋은 생각이 늦게 나와요.', life: '회의 중에는 듣기만 하다가 퇴근길 지하철에서 그때 했어야 할 말을 정리해요.', conflict: '말이 늦으니 아이디어가 다른 사람 이름으로 올라가는 일이 생겨요.', advice: '회의 전날 밤에 할 말 한 줄을 미리 적어 두고, 회의 첫 10분 안에 말하세요.' };
+ok(!T({ id: 'c07-slow-voice', action: 'create', fields: nw }).error, '새 규칙 생성 실패');
+ok(T({ id: 'c07-slow-voice', action: 'create', fields: nw }).error, '같은 ID 중복 생성됨');
+ok(!T({ id: 'c07-slow-voice', action: 'publish' }).error, '새 규칙 게시 실패');
+const merged = L.mergeRules(D.RULES, publishedView(doc));
+ok(merged.some(r => r.id === 'c07-slow-voice' && r.chapter === 'timeline_career_07'), '새 규칙이 엔진에 병합되지 않음');
+ok(!T({ id: 'c07-slow-voice', action: 'delete' }).error && !doc.rules['c07-slow-voice'], '직접 추가한 규칙 삭제 실패');
+console.log(fails.length ? `실패 ${fails.length}건\n` + fails.map(f => '  ✗ ' + f).join('\n') : '서사 규칙 API 전이 검증 통과 (버전 ' + doc.version + ')');
+process.exit(fails.length ? 1 : 0);

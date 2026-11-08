@@ -1,12 +1,13 @@
 /* 관리자 메뉴의 단일 기준: 영역·순서·표시명·담당 작업 */
 (function(root){
   'use strict';
-  var groups = [['dash','현황',['dash']],['make','무빙툰 제작',['v2proj','v2chap','v2story','v2world','editorial']],['media','영상·이미지',['v2clip','v2intro','panelart']],['content','콘텐츠·온보딩',['onboard','freec']],['ai','AI 풀이',['readinglibrary','ichingreview','luckenv','wealthcareer','regionreading','wishspots','fengshui','ikdoc','ikknow','ikdesign','ikrules','iklab','agentic','stylecfg']],['qa','점검·테스트',['research','v2quality','check','v2test']],['set','운영·설정',['ops','v2set']]];
+  var groups = [['dash','현황',['dash']],['make','무빙툰 제작',['v2proj','v2chap','v2story','v2world','editorial']],['media','영상·이미지',['v2clip','v2intro','panelart']],['content','콘텐츠·온보딩',['onboard','freec']],['ai','AI 풀이',['readinglibrary','ichingreview','luckenv','wealthcareer','narrative','regionreading','wishspots','fengshui','ikdoc','ikknow','ikdesign','ikrules','iklab','agentic','stylecfg']],['qa','점검·테스트',['research','v2quality','check','v2test']],['set','운영·설정',['ops','v2set']]];
   var pages = {
     fengshui:{label:'공간·명당 풍수',hint:'현공비성·팔택·형세 풍수의 해석 문구와 계산 규칙(겸향·공망 기준)을 수정·게시하고 이전 버전으로 되돌립니다. 건물의 좌향과 건축 연도로 9궁 배치를 미리 확인하고, 공개 스위치로 사용자 화면의 ‘공간·명당’ 탭 노출을 제어합니다.'},
     wishspots:{label:'소원 성취 명당',hint:'나의 운명 지도의 소원 성취 명당에 쓸 장소를 출처·확인일과 함께 등록·검수·게시하고 이전 버전으로 되돌립니다. 사주·기준 지역·소원 분야를 넣어 점수 순위를 미리 보고, 공개 스위치로 사용자 화면 노출을 제어합니다.'},
     regionreading:{label:'지역 방위 해석',hint:'지역의 방위오행이 사주에 어떻게 작용하는지(월령·조후·억부·십성·상생상극) 풀어 주는 해석 규칙 수치와 사전 문구를 수정·게시하고 이전 버전으로 되돌립니다. 사주와 지역을 넣어 오행별 판정 근거와 적용된 문구 ID를 확인하고, 공개 스위치로 사용자 화면 반영을 제어합니다.'},
     wealthcareer:{label:'직업·돈 버는 방식',hint:'직업·활동 적성의 4개 섹션(돈 버는 방식·업무 환경·직업·약점)에 쓰이는 사전 문구·직업·수익 유형·취약점을 조건·우선순위와 함께 수정·게시하고 이전 버전으로 되돌립니다. 사주를 넣어 판정 근거와 적용된 문구 ID를 확인하고, 공개 스위치로 사용자 화면 노출을 제어합니다.'},
+    narrative:{label:'타임라인 서사 규칙',hint:'운명의 타임라인 서사 엔진의 복합 규칙(조건·우선순위·근거·후킹·핵심 성향·생활 사례·갈등·조언)을 고치고 초안→게시→이력 되돌리기로 관리합니다. 사주를 넣어 시범 5장의 서사·대운 이야기·근거·중복 문장을 미리 보고, 300명 적용률을 점검합니다.'},
     luckenv:{label:'운세 환경 문구',hint:'운세 환경 해석 문구를 수정·승인·게시하고 이전 본문으로 되돌립니다. 통합 시뮬레이터로 테스트 사주의 해석과 적용·배제된 규칙을 추적합니다.'},
     regiondata:{label:'지역 데이터',hint:'나의 운명 지도의 지역 환경 항목을 출처·기준일과 함께 등록하고 변경 이력에서 되돌립니다. 등록하지 않은 항목은 자료 부족으로 표시됩니다.'},
     ichingreview:{label:'주역 검수',hint:'주역 64괘 원문·현대어·분야 해석을 검수·수정·승인하고 게시본을 점검·롤백합니다. 승인한 문구만 게시되며 게시 전에는 사용자에게 보이지 않습니다.'},

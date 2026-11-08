@@ -569,6 +569,8 @@
     });
     if(!PREVIEW&&R.PeakReading)S.rep=R.PeakReading.add(S.rep,S.sd,S.name);
     if (!PREVIEW) S.rep.readingPrefetch = true;
+    // 서사 엔진(life-narrative.js) 스위치·게시 규칙이 본문보다 늦게 도착하면, 이미 그려진 시범 장만 다시 그린다
+    if(!PREVIEW&&R.LifeNarrative&&window.addEventListener)window.addEventListener('mantra:life-narrative',function(){(S.rep&&S.rep.chapters||[]).forEach(function(c,ci){var id=c.editorialContractId||c.id,article=document.getElementById('ch-'+c.id);if(!R.LifeNarrative.CHAPTERS[id]||!article||!c.readingCore||!c.readingFeature||!R.ReadingText)return;try{var f=R.SealReader&&R.SealReader.capture(article);if(R.SealReader)R.SealReader.unmount(article);if(R.ReadingMedia)R.ReadingMedia.unmount(article);R.ReadingText.update(article,c,ci);mountSeal(article,c,ci);if(R.SealReader)R.SealReader.restoreFocus(article,f);if(R.ReadingMedia)R.ReadingMedia.mount(article,{reduce:reduce,saveData:saveData});linkBasisReferences(article);}catch(e){elog('caught','life-narrative.rerender');}});});
     var reading = !PREVIEW && R.FullReading ? R.FullReading.prepare(S.rep, S.sd, S.name, function (c, job, result) {
       var liveChapter=S.rep.chapters.find(function(item){return item.id===c.id;});
       if(liveChapter && liveChapter!==c){Object.keys(c).forEach(function(k){if(/^reading/.test(k)||['scenes','headline','chapterHook','chapterQuality','interpretationAnalysis','writingQuality','hookName'].indexOf(k)>=0)liveChapter[k]=c[k];});}

@@ -83,6 +83,14 @@ function render(flag) {
 const off = render(false), on = render(true);
 ok(off.includes('기존 문안 생활 장면') && !off.includes('운이 바꾸는 것'), '스위치 꺼짐인데 화면이 바뀜');
 ok(!on.includes('기존 문안 생활 장면') && on.includes('운이 바꾸는 것') && on.includes('명리 근거 펼쳐보기') && on.includes('reading-hook'), '스위치 켜짐인데 서사가 화면에 안 나옴');
+// ⑥ 2단계: 규칙 검증·게시본 병합(엔진) — 기본 규칙은 모두 통과, 나쁜 게시본은 버리고 기본 유지, on:false 는 제외
+D.RULES.forEach(r => { const iss = L.validateRule(r); ok(!iss.length, '기본 규칙이 검증을 통과하지 못함 ' + r.id + ': ' + iss.join(' / ')); });
+const merged = L.mergeRules(D.RULES, [{ id: 's03-gwan-pressure', priority: 150 }, { id: 's03-bi-stubborn', core: '무조건 고집이 세요. 신강이라서 그래요. 일부러 틀린 문장이에요.' }, { id: 'w02-steady-saver', on: false }]);
+ok(merged.find(r => r.id === 's03-gwan-pressure').priority === 150, '게시본 우선순위가 반영되지 않음');
+ok(merged.find(r => r.id === 's03-bi-stubborn').core === D.RULES.find(r => r.id === 's03-bi-stubborn').core, '검증 실패한 게시본이 반영됨');
+const chOff = M.compute({ year: 1980, month: 5, day: 5, hour: 9, gender: 'F' });
+for (let i = 0; i < 400; i++) { let c; try { c = M.compute({ year: 1950 + i % 60, month: 1 + i % 12, day: 1 + (i * 7) % 28, hour: (i * 5) % 24, gender: i % 2 ? 'M' : 'F' }); } catch (e) { continue; } const r = L.compose(M, c, NOW, 'timeline_wealth_02', { rules: merged, state: L.newState() }); ok(!r || r.rule !== 'w02-steady-saver', '사용 끈 규칙이 선택됨'); }
+ok(L.compose(M, chOff, NOW, 'timeline_self_20', { state: L.newState() }) !== null, '미리보기 상태로 조합 실패');
 console.log(`서사 엔진 검증 — 사주 ${n}개`);
 console.log('  장별 적용률', Object.entries(cover).map(([k, v]) => k.replace('timeline_', '') + ' ' + (100 * v / n).toFixed(0) + '%').join(' · '));
 console.log('  인생 모양', Object.entries(arcs).sort((a, b) => b[1] - a[1]).map(([k, v]) => D.ARC[k].name + ' ' + (100 * v / arcTotal).toFixed(0) + '%').join(' · '));

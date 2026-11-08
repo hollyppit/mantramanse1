@@ -177,7 +177,7 @@
   }
   var condCount = function (rule) { return rule.all.length + rule.any.length; };
   var _state = new WeakMap();
-  function stateOf(ch) { var s = _state.get(ch); if (!s) _state.set(ch, s = { rules: new Set(), sentences: new Set(), variant: {}, cache: {} }); return s; }
+  function stateOf(ch) { var s = _state.get(ch); if (!s) _state.set(ch, s = { rules: new Set(), sentences: new Set(), variant: {}, cache: {}, gen: GEN }); return s; }
   function dedupe(st, text) {
     return String(text || '').split(/\n{2,}/).map(function (para) {
       return sentences(para).filter(function (s) { var k = norm(s); if (k.length < 8) return true; if (st.sentences.has(k)) return false; st.sentences.add(k); return true; }).join(' ');
@@ -193,13 +193,16 @@
     return { lines: lines, terms: terms.map(function (t) { return { term: t, text: D0.TERMS[t] }; }), conds: conds };
   }
   var TIME_NOTE = '지나온 시기의 문장은 원국과 대운으로 맞춰 본 해석이라 실제 기억과 비교해 보시면 되고, 지금과 앞으로의 문장은 사건 예언이 아니라 준비할 방향이에요.';
-  function compose(M, ch, now, chapterId) {
+  // opts.rules: 미리보기용 규칙 목록(관리자 초안 포함), opts.state: 미리보기마다 새 상태(운영 화면의 중복 기록과 섞지 않는다)
+  function compose(M, ch, now, chapterId, opts) {
+    opts = opts || {};
     var lens = CHAPTERS[chapterId], D0 = D(); if (!lens || !D0 || !ch || !ch.unified || !ch.daeun) return null;
-    var st = stateOf(ch); if (st.cache[chapterId] !== undefined) return st.cache[chapterId];
+    var st = opts.state || stateOf(ch); if (st.gen !== GEN && !opts.state) { st.rules = new Set(); st.sentences = new Set(); st.variant = {}; st.cache = {}; st.gen = GEN; }
+    if (st.cache[chapterId] !== undefined) return st.cache[chapterId];
     var P = profile(M, ch), res = null, trace = [];
     if (chapterId === 'timeline_self_20') res = composeLife(M, ch, now, P, st, D0);
     else {
-      var cands = D0.RULES.filter(function (r) { return r.chapter === chapterId; }).sort(function (a, b) { return b.priority - a.priority || condCount(b) - condCount(a) || (a.id < b.id ? -1 : 1); });
+      var cands = (opts.rules || rules()).filter(function (r) { return r.chapter === chapterId && r.on !== false; }).sort(function (a, b) { return b.priority - a.priority || condCount(b) - condCount(a) || (a.id < b.id ? -1 : 1); });
       var pick = null;
       cands.forEach(function (r) {
         var ok = matches(r, P), why = !ok ? '조건 불일치' : condCount(r) < 2 ? '복합 조건 아님' : pick ? '더 높은 우선순위 규칙 선택됨' : r.opposes.some(function (id) { return st.rules.has(id); }) ? '이미 나온 규칙과 상충' : 'selected';
@@ -233,17 +236,75 @@
     return { chapterId: 'timeline_self_20', lens: 'life', rule: 'arc:' + arc, arc: arc, hook: hookS[0], rows: rows.filter(function (r) { return r.text; }), evidence: evd, trace: [], version: VERSION };
   }
 
-  // ───────── 스위치 ─────────
+  // ───────── 규칙 검증·게시본 병합 (관리자 화면·API·테스트가 같은 함수를 쓴다) ─────────
+  var BAN = /반드시|무조건|100%|보장|틀림없이|대박|성공할 거예요|다 잘될|걱정하지 마세요|운명이 정해|확실히 (?:성공|부자)/;
+  var JARGON = /신약|신강|관성|재성|인성|식상|비겁|정관|편관|정재|편재|식신|상관(?!없)|비견|겁재|(?<!당신 |내 )편인|정인|용신|기신|희신|격국|조후|억부|통근|일간|일지|월지|십성|오행|합충/;
+  var TAG_RE = /^(str:(weak|mid|strong|veryweak|verystrong)|root:(none|weak|firm)|g:(bi|sik|jae|gwan|in):(heavy|some|light|none)|dom:(bi|sik|jae|gwan|in)|pat:[가-힣()]{2,12}|gk:(bi|sik|jae|gwan|in|seong|part|pa)|u:(single|agree|conflict|bridge|jong|forced|prim:(eokbu|johu|tonggwan|gyeok|jehwa|jong))|yong:(bi|sik|jae|gwan|in|absent)|cl:(hot|cold|wet|dry|even)|rel:(dm-clash|day-clash|hyeong|wonjin|day-hap|stem-hap)|dj:(bi|sik|jae|gwan|in)|spouse:(heavy|none|mix)|tg:(pyeonjae|jeongjae):high|sex:[MF])$/;
+  var TEXT_KEYS = ['hook', 'core', 'life', 'conflict', 'advice'];
+  // 문제 목록을 돌려준다(빈 목록 = 통과). 사용자에게 보이는 말로 쓴다.
+  function validateRule(r) {
+    var out = [], add = function (t) { out.push(t); };
+    if (!r || typeof r !== 'object') return ['규칙 형식이 아닙니다'];
+    if (!/^[a-z0-9][a-z0-9._-]{2,59}$/.test(r.id || '')) add('ID는 영문 소문자·숫자·._- 3~60자입니다');
+    if (!CHAPTERS[r.chapter] || r.chapter === 'timeline_self_20') add('적용 장은 시범 장(기질·돈 버는 방식·사랑할 때·조직생활) 중 하나여야 합니다');
+    var all = r.all || [], any = r.any || [], none = r.none || [];
+    if (!Array.isArray(all) || !Array.isArray(any) || !Array.isArray(none) || any.some(function (g) { return !Array.isArray(g) || !g.length; })) add('조건 형식이 올바르지 않습니다');
+    else {
+      if (all.length + any.length < 2) add('조건이 2개 이상이어야 합니다(복합 규칙)');
+      all.concat(none, [].concat.apply([], any)).forEach(function (t) { if (!TAG_RE.test(t)) add('알 수 없는 조건: ' + t); });
+      if (all.length + any.length + none.length > 12) add('조건은 12개 이하입니다');
+    }
+    if (!Number.isInteger(r.priority) || r.priority < 0 || r.priority > 200) add('우선순위는 0~200 사이 정수입니다');
+    if (['strong', 'moderate'].indexOf(r.conf) < 0) add('근거 강도는 strong 또는 moderate 입니다');
+    if (typeof r.basis !== 'string' || r.basis.length < 40 || r.basis.length > 500) add('명리 근거는 40~500자입니다');
+    if (!Array.isArray(r.terms) || r.terms.some(function (t) { return typeof t !== 'string'; })) add('용어 목록이 올바르지 않습니다');
+    TEXT_KEYS.forEach(function (k) {
+      var t = r[k], nm = { hook: '후킹', core: '핵심 성향', life: '생활 사례', conflict: '갈등과 약점', advice: '조언' }[k];
+      var min = k === 'hook' ? 15 : 25; if (typeof t !== 'string' || t.trim().length < min || t.length > 700) { add(nm + ' 문장은 ' + min + '~700자입니다'); return; }
+      if (BAN.test(t)) add(nm + '에 금지 표현: ' + t.match(BAN)[0]);
+      if (JARGON.test(t)) add(nm + '에 명리 용어(근거 펼쳐보기에서만 씁니다): ' + t.match(JARGON)[0]);
+      if (/[<>{}]/.test(t)) add(nm + '에 쓸 수 없는 기호(< > { })가 있습니다');
+    });
+    if (typeof r.hook === 'string' && !/[?？]$/.test(r.hook.trim())) add('후킹은 질문으로 끝나야 합니다');
+    return out;
+  }
+  var GEN = 1, published = null;
+  // 기본 규칙(data) 위에 게시본을 덮는다. items: [{ id, ...fields }] — 기본 id 면 필드 덮어쓰기, 새 id 면 추가, on:false 면 끔
+  function mergeRules(base, items) {
+    var by = {}, order = [];
+    base.forEach(function (r) { by[r.id] = Object.assign({}, r); order.push(r.id); });
+    (items || []).forEach(function (it) {
+      if (!it || !it.id) return;
+      var next = Object.assign({ all: [], any: [], none: [], opposes: [], terms: [] }, by[it.id] || {}, it);
+      if (validateRule(next).length) return;   // 검증을 통과하지 못한 게시본은 쓰지 않는다(기본 규칙 유지)
+      if (!by[it.id]) order.push(it.id); by[it.id] = next;
+    });
+    return order.map(function (id) { return by[id]; });
+  }
+  function rules() { var D0 = D(); return published ? published : D0 ? D0.RULES : []; }
+  function setPublished(items) { published = items && items.length ? mergeRules(D().RULES, items) : null; GEN++; }
+
+  // ───────── 스위치 · 게시 규칙 받기 ─────────
   var remoteOn = null;
   function localFlag() { try { var f = root.MANTRA_FLAGS; if (f && f.lifeNarrative === true) return true; var h = root.location && root.location.hostname || ''; if (/^(localhost|127\.0\.0\.1)$/.test(h) || /^[a-z0-9][a-z0-9-]*\.mantramanse\.pages\.dev$/i.test(h)) return /[?&]mantraFlags=[A-Za-z,]*\blifeNarrative\b/.test(root.location.search || ''); } catch (e) { } return false; }
   function enabled() { return localFlag() || remoteOn === true; }
-  try { if (root.fetch && root.location && !localFlag()) root.fetch('/api/luck-flags', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { remoteOn = !!(d && d.lifeNarrative === true); }).catch(function () { remoteOn = false; }); } catch (e) { }
+  // 스위치와 게시 규칙을 받은 뒤 이미 그려진 시범 장이 있으면 다시 그리게 알린다(viewer.js 가 듣는다)
+  try {
+    if (root.fetch && root.location && root.document) {
+      var getJ = function (u) { return root.fetch(u, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); };
+      Promise.all([localFlag() ? Promise.resolve(null) : getJ('/api/luck-flags'), getJ('/api/narrative-rules')]).then(function (x) {
+        if (x[0]) remoteOn = x[0].lifeNarrative === true;
+        if (x[1] && Array.isArray(x[1].pub) && x[1].pub.length) setPublished(x[1].pub);
+        if (enabled() && root.dispatchEvent && root.CustomEvent) root.dispatchEvent(new root.CustomEvent('mantra:life-narrative'));
+      });
+    }
+  } catch (e) { }
   function forChapter(c) {
     if (!enabled()) return null;
     var id = c && (c.editorialContractId || c.id), f = c && c.readingFeature; if (!CHAPTERS[id] || !f || !f.M || !f.ch) return null;
     try { return compose(f.M, f.ch, f.now || Date.now(), id); } catch (e) { return null; }
   }
-  var api = { version: VERSION, CHAPTERS: CHAPTERS, profile: profile, periods: periods, arcOf: arcOf, compose: compose, forChapter: forChapter, enabled: enabled, _reset: function (ch) { _state.delete(ch); } };
+  var api = { version: VERSION, CHAPTERS: CHAPTERS, STAGE: STAGE, profile: profile, periods: periods, arcOf: arcOf, compose: compose, forChapter: forChapter, enabled: enabled, validateRule: validateRule, mergeRules: mergeRules, rules: rules, setPublished: setPublished, TAG_RE: TAG_RE, newState: function () { return { rules: new Set(), sentences: new Set(), variant: {}, cache: {}, gen: GEN }; }, _reset: function (ch) { _state.delete(ch); } };
   R.LifeNarrative = api; root.MantraLifeNarrative = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

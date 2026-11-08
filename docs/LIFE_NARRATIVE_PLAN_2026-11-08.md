@@ -55,3 +55,9 @@
 - 인생 모양 분포: 굴곡 37% · 중반 정점 27% · 늦게 피는 상승 13% · V자 반전 13% · 앞이 강한 하강 7% · 잔잔함 2% · 물결 2%.
 - 미리보기: `node tools/life-narrative-preview.cjs [YYYY-MM-DD HH:MM M|F]` → `output/life-narrative-preview/index.html`.
 - 알려진 한계: 60세 이후 대운의 커리어·인연 문장이 나이를 덜 반영함(3단계에서 연령대 문안 추가), 운영 스위치는 페이지를 연 뒤 약 1초 안에 받아오므로 그 전에 그려진 장은 기존 문안으로 보일 수 있음(2단계에서 렌더 전 대기 처리).
+
+## 7. 2단계 결과 (2026-11-08, 로컬 · 미커밋)
+- API `functions/api/narrative-rules.js`: KV `narrative:rules` 한 키(기존 라이브러리와 분리). 공개 GET은 게시본만, 관리자 GET `?all=1`, PUT `save · create · publish · unpublish · restore(v) · delete(직접 추가한 규칙만)`. 검증은 엔진의 `validateRule` 하나를 화면·API·테스트가 함께 씀(복합 조건 2개 이상, 알려진 태그만, 근거 40~500자, 후킹은 질문, 본문 금지어·명리 용어 금지).
+- 엔진: `mergeRules`(기본 규칙 위에 게시본, 검증 실패한 게시본은 버리고 기본 유지, `on:false`는 제외), `compose(..., {rules, state})`(미리보기는 운영 상태와 분리), 스위치·게시 규칙을 받은 뒤 `mantra:life-narrative` 이벤트 → viewer.js가 이미 그려진 시범 장만 다시 그림(1단계의 '늦은 스위치' 한계 해결).
+- 관리자 `타임라인 서사 규칙` 탭(`report/admin/v2-narrative.js`): 규칙 목록·필터, 편집(조건·우선순위·근거 강도·사용 여부·5단계 문안·근거·용어) + 저장 전 즉시 검사, 초안→게시→게시 취소→이력 되돌리기, 복제해서 새 규칙, 사주별 미리보기(초안 포함 선택, 태그·5단계·대운 이야기·근거·규칙 선택 기록·장 사이 중복 표시), 무작위 300명 적용률 점검(장별 적용률·많이 쓰인 규칙·안 쓰인 규칙·인생 모양·중복 문장 수).
+- 검증: `node tests/narrative-rules-api-sim.mjs`(상태 전이·거부 규칙), `node tests/life-narrative-sim.cjs`(병합·사용 끔·미리보기 상태 추가). 브라우저에서 관리자 탭 목록·검사·저장·게시·미리보기·점검 동작 확인(API는 메모리 흉내). 전체 테스트 새 실패 0.
