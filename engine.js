@@ -620,7 +620,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       daeun: { stemW: 0.4, parent: 0, mul: { eokbu: 1, johu: 1, relation: 0.8, structure: 1.2 } },
       seun: { stemW: 0.5, parent: 0.4, mul: { eokbu: 1, johu: 1, relation: 1, structure: 1 } },
       wolun: { stemW: 0.5, parent: 0.4, mul: { eokbu: 1, johu: 1, relation: 1.1, structure: 0.9 } },
-      ilun: { stemW: 0.5, parent: 0, mul: { eokbu: 0.8, johu: 0.8, relation: 1.4, structure: 0.7 } },
+      ilun: { stemW: 0.5, parent: 0.25, mul: { eokbu: 0.8, johu: 0.8, relation: 1.4, structure: 0.7 } },   // 일진도 월운(→세운→대운)을 이어받는다(2026-11-08)
       sijin: { stemW: 0.5, parent: 0, mul: { eokbu: 0.8, johu: 0.8, relation: 1.4, structure: 0.7 } },
     },
     // 성분 가중치: 사주 상태(강약 치우침·기후 치우침)에 따라 동적으로 정하고 합이 1이 되게 정규화한다
@@ -791,6 +791,10 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
         parts.push({ label: `${x.name} — 일간이 묶임(합화 ${roleTxt(x.el)})`, v: r(x.el) * 3 });
       } else if (x.type === '천간충' && other === 'day') {
         parts.push({ label: `${x.name} — 일간 충돌`, v: -5 });
+      } else if (x.type === '천간합' && other !== 'day' && ch.pillars[other]) {
+        // 합거: 운의 천간이 원국 천간을 합으로 묶으면 그 글자의 작용이 줄어든다(용신이면 부담, 기신이면 도움)
+        const ne = stemEl(ch.pillars[other].s), rv = r(ne);
+        if (Math.abs(rv) >= 1) parts.push({ label: `${x.name} — ${POS_K[other]}간 ${STEM[ch.pillars[other].s]}(${roleTxt(ne)})이 합으로 묶임`, v: -rv * 1.5 * w });
       }
     }
     if (CHEONEUL[ch.pillars.day.s].includes(p.b)) parts.push({ label: '천을귀인 운', v: 5 });
@@ -900,14 +904,10 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const eok = elementFit(ch.yongAll.eokbu, p, stemW, '억부');
     const jo = johuFit(ch, p, stemW);
     const ton = W.tonggwan > 0 ? elementFit(ch.yongAll.tonggwan, p, stemW, '통관') : null;
-    // 관계 성분의 오행 역할은 억부·조후(·통관) 가중치대로 섞는다. 조후는 연속값이라 온도 기준 역할값으로 환산한다.
-    const yw = W.eokbu + W.tonggwan + W.johu;
-    const rBlend = e => {
-      const eokR = ROLE_V[ch.yongAll.eokbu.roles[e]], tonR = ton ? ROLE_V[ch.yongAll.tonggwan.roles[e]] : 0;
-      const jy = ch.yongAll.johu, joR = jy.applicable ? ROLE_V[jy.roles[e]] : 0;
-      return (W.eokbu * eokR + W.tonggwan * tonR + W.johu * joR) / yw;
-    };
-    const roleTxt = e => { const a = ch.yongAll.eokbu.roles[e], jy = ch.yongAll.johu; return jy.applicable && jy.roles[e] !== a ? `억부 ${a}·조후 ${jy.roles[e]}` : a; };
+    // 통합 판단(ch.unified): 오행 역할(조건부 포함)·천간 통근·글자별 조습·격국을 한 번에 본 용신 부합도. 관계 성분도 같은 역할값을 쓴다.
+    const U = ch.unified, uni = unifiedLuckFit(ch, p, stemW, jo.v);
+    const rBlend = e => U.roleV[e] * 2;
+    const roleTxt = e => (U.conditions[e] && (U.roles[e] === '기신' || U.roles[e] === '구신') ? '조건부 ' : '') + U.roles[e];
     const relP = relationParts(ch, p, rels, rBlend, roleTxt);
     const relRaw = relP.reduce((a, x) => a + x.v, 0);
     const relationScore = lclamp(relRaw * C.relationScale, -100, 100);
@@ -930,9 +930,13 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const structureScore = lclamp(structRaw * 100 * S.scale + patAdj, -100, 100);
     const structLabel = `십성 균형 — 원국 ${TG_GROUP[top]} ${G[top].toFixed(0)}%에 ${TG_GROUP[top]} 기운이 ${G[top] < S.neutralPct ? '채워짐' : '더해짐'}`;
     // 종합
-    const ownFit = lclamp(W.eokbu * eok.v + W.johu * jo.v + W.relation * relationScore + W.structure * structureScore + (ton ? W.tonggwan * ton.v : 0), -100, 100);
+    // 용신 성분(억부·조후·통관 몫)은 통합 판단 하나로 평가한다. 억부·조후 단독 점수는 비교용(eokbuScore·johuScore·흐린 막대)으로만 남긴다.
+    const yongW = W.eokbu + W.johu + W.tonggwan;
+    const ownFit = lclamp(yongW * uni.v + W.relation * relationScore + W.structure * structureScore, -100, 100);
     const parent = opts.parent && L.parent ? opts.parent : null;
-    const fitScore = parent ? lclamp((1 - L.parent) * ownFit + L.parent * parent.fitScore, -100, 100) : ownFit;
+    // 대운→세운→월운→일진: 상위 운의 흐름을 섞고, 상위 운 기둥과 이번 운 기둥이 만드는 합·충을 따로 더한다
+    const chain = parent && parent.p ? chainLink(ch, parent.p, parent, p, level) : null;
+    const fitScore = parent ? lclamp((1 - L.parent) * ownFit + L.parent * parent.fitScore + (chain ? chain.v : 0), -100, 100) : ownFit;
     // 변화·강도
     const vol = calculateVolatility(ch, rels), volatilityScore = vol.score;
     const I = C.intensity, conc = lramp(Math.max(...g), I.conc[0], I.conc[1]);
@@ -966,13 +970,16 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (overlays.defense.active) ovWhy.push(`방어 — 부담도 ${overlays.defense.score}: 흐름 점수 ${Math.round(fitScore)}, 작용 강도 ${Math.round(intensityScore)}${volatilityScore >= 50 && fitScore < 0 ? ', 변화 신호와 부적합이 겹침' : ''}`);
     const tendency = activityType + ' 성향' + (overlays.volatility.active ? ' + 변동' : '') + (overlays.defense.active ? ' + 방어' : '') + (condition === '주의' || condition === '부담' ? ` · ${condition}` : '');
     // 근거 문장: 흐름 판정 이유 + overlay 이유 + 기여가 큰 성분 2~3개
-    const parts = [{ label: eok.label, v: W.eokbu * eok.v, comp: 'eokbu' }, { label: jo.label, v: W.johu * jo.v, comp: 'johu' }];
-    if (ton) parts.push({ label: ton.label, v: W.tonggwan * ton.v, comp: 'tonggwan' });
+    const se = stemEl(p.s);
+    const parts = [{ label: `통합 용신 부합 (${U.primaryName}${U.secondaryName ? '·' + U.secondaryName : ''} 기준 · 천간 ${STEM[p.s]}:${U.roles[se]}, 지지 ${BR[p.b]}:지장간 가중${uni.kJ ? ' · 글자별 조습' : ''}${uni.kG ? ' · 격국' : ''})`, v: yongW * uni.v, comp: 'unified' }];
+    const theoryImpact = theoryImpacts(ch, eok.v, jo.v, uni.gyeok);
+    if (chain) chain.links.forEach(x => parts.push({ label: x.text, v: x.v, comp: 'chain' }));
     relP.forEach(x => parts.push({ label: x.label, v: W.relation * C.relationScale * x.v, comp: 'relation' }));
     parts.push({ label: structLabel, v: W.structure * structureScore - structP.reduce((a, x) => a + x.v, 0) * W.structure, comp: 'structure' });
     structP.forEach(x => parts.push({ label: x.label, v: W.structure * x.v, comp: 'structure' }));
     const phrase = v => v >= 6 ? '보완' : v <= -6 ? '부담을 높임' : '영향 작음';
-    const reasons = [why, ...ovWhy, ...[...parts].sort((a, b) => Math.abs(b.v) - Math.abs(a.v)).slice(0, 3).filter(x => Math.abs(x.v) >= 1).map(x => `${x.label} → ${phrase(x.v)}`)].slice(0, 6);
+    const chainTxt = chain ? chainNote(chain, condition) : '';
+    const reasons = [why, ...ovWhy, ...[...parts].sort((a, b) => Math.abs(b.v) - Math.abs(a.v)).slice(0, 3).filter(x => Math.abs(x.v) >= 1).map(x => `${x.label} → ${phrase(x.v)}`), ...(chainTxt ? [chainTxt] : [])].slice(0, 6);
     // 동반 신호: 주 흐름이 아닌 다른 흐름 중 기준 이상인 것(변동·방어는 overlay로 따로 표시)
     const OP = C.opportunity, companions = [];
     const compText = { opportunity: v => `기회 활성도 높음(${v})`, expansion: v => `기존 활동·역할 확대 신호 높음(${v})`, harvest: v => `재물·결과 회수 활동 높음(${v})`, accumulation: v => `기반·역량 축적 신호 높음(${v})` };
@@ -983,8 +990,9 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (W.ghost) { const own = W.ghost === 'johu' ? jo.v : eok.v; alt = { school: W.ghost, value: parent && parent.alt ? (1 - L.parent) * own + L.parent * parent.alt.value : own }; }
     const flow = { flows, primaryFlow, secondaryFlow, overlays, topOverlay, condition: { name: condition, fitScore }, reasons, defenseParts: defParts };
     return {
-      level, fitScore, ownFit, eokbuScore: eok.v, johuScore: jo.v, relationScore, structureScore, tonggwanScore: ton ? ton.v : null,
-      weights: { eokbu: W.eokbu, johu: W.johu, relation: W.relation, structure: W.structure, tonggwan: W.tonggwan },
+      level, p: { s: p.s, b: p.b }, fitScore, ownFit, unifiedScore: uni.v, eokbuScore: eok.v, johuScore: jo.v, relationScore, structureScore, tonggwanScore: ton ? ton.v : null, gyeokScore: uni.gyeok,
+      weights: { eokbu: W.eokbu, johu: W.johu, relation: W.relation, structure: W.structure, tonggwan: W.tonggwan, unified: yongW },
+      theoryImpact, unifiedNotes: uni.notes, chain: chain ? { ...chain, note: chainTxt } : null,
       volatilityScore, volatilityBand: vol.band, volatilitySignals: vol.signals.map(g => ({ text: g.text, means: g.means, pts: g.pts, type: g.type, core: g.core })), volatilityOverlap: vol.nCore, intensityScore, defenseLoad, activityType, primaryFlow, secondaryFlow, overlays, topOverlay, flow, tendency, dominantTenGodGroup: TG_GROUP[top], grp: top,
       opportunityActivation: flows.opportunity, opportunityType: opp.types.map(t => t.name), opportunityReasons: opp.reasons, opportunityComponents: opp.comps,
       phaseScores: { ...flows, volatility: Math.round(volatilityScore), defense: Math.round(defenseLoad), fit: Math.round(fitScore), intensity: Math.round(intensityScore) }, companions,
@@ -1111,10 +1119,17 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     ch.school = schoolReq === 'auto' ? 'eokbu' : schoolReq;   // 아래 판정 전까지의 임시값(yongsin 은 학파를 인자로 받아 영향 없음)
     ch.yongAll = Object.fromEntries(Object.keys(SCHOOLS).map(s => [s, yongsin(ch, ch.weights, ch.strength, s)]));
     ch.schoolAuto = schoolReq === 'auto';
-    if (ch.schoolAuto) { const adv = methodAdvice(ch); ch.schoolAdvice = adv.verdict; ch.school = (adv.verdict === '조후' || adv.verdict === '병행') && ch.yongAll.johu.applicable ? 'johu' : 'eokbu'; }   // 병행도 조후(2026-11-07 사용자 결정)
-    ch.yong = ch.yongAll[ch.school].applicable ? ch.yongAll[ch.school] : ch.yongAll.eokbu;
-    ch.yongFallback = !ch.yongAll[ch.school].applicable;
     ch.patterns = patterns(ch, ch.weights, ch.strength);
+    // 통합 판단(2026-11-08): 자동이면 억부·조후·격국·통관·제화·종격을 규칙 순서로 종합한 결과를 용신으로 쓴다(병행이라고 조후를 강제하지 않는다).
+    //  사용자가 학파를 직접 고르면 그 학파를 주 기준으로 두고 나머지는 조건으로만 반영한다. 운세 흐름·궁합도 같은 ch.unified 를 쓴다.
+    ch.schoolAdvice = methodAdvice(ch).verdict;
+    ch.unified = integrateYongsin(ch, ch.schoolAuto ? null : ch.school);
+    if (ch.schoolAuto) { ch.school = ch.unified.schoolKey; ch.yong = unifiedAsYong(ch.unified); ch.yongFallback = false; }
+    else {
+      ch.yong = ch.yongAll[ch.school].applicable ? ch.yongAll[ch.school] : ch.yongAll.eokbu;
+      ch.yongFallback = !ch.yongAll[ch.school].applicable;
+      if (ch.yongFallback) ch.unified = integrateYongsin(ch, 'eokbu');
+    }
     ch.saryeong = saryeong(ch);
     ch.daeun = daeun(ch);
     ch.ziwei = ziwei(ch, P);
@@ -1265,6 +1280,441 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     else { verdict = '병행'; why = `기후도 치우쳤고(조후 ${EL_K[jo.yong]} 필요) 강약도 치우쳤는데(${st.zone}), 조후 용신이 억부 기준으로는 ${joRole}이라 두 기준이 부딪칩니다. 두 그래프를 함께 보고, 두 기준이 모두 좋은 시기를 가장 좋게 봅니다.`; }
     return { verdict, why, clim, skew, agree, joRole, eokYong: eok.yong, joYong: jo.applicable ? jo.yong : null };
   }
+  // ───────────── 통합 용신 판단 엔진 (2026-11-08) ─────────────
+  // 억부·조후·격국·통관·제화를 각각 따로 판정해 근거와 필요도(해당 없음·참고·필요·급함)를 남기고,
+  // 정해진 규칙 순서로 주 기준·보조 기준을 고른다. 점수를 평균 내서 용신을 정하지 않는다.
+  //   ① 종격이 충족되면 세력을 따르는 배치를 쓴다(조후는 보조 조건).
+  //   ② 조후가 해당 없으면 억부가 기준. 강약이 중화에 가까우면 성격된 격국의 상신·통관을 앞세울 수 있다.
+  //   ③ 조후 용신이 억부로도 용신·희신이면 같은 방향 — 더 급한 쪽이 주 기준, 다른 쪽이 희신을 정한다.
+  //   ④ 두 기준이 부딪치면: 한쪽만 급하면 그쪽, 둘 다 급하면 두 기준을 모두 만족하는 오행(겸용) → 월령이 한난의 근원이면 조후
+  //      → 일간 뿌리가 약한 신약이면 억부 → 치우침이 더 큰 쪽(각 기준선 대비 배수 비교).
+  //   ⑤ 주 기준이 아닌 이론이 필요로 하는 오행은 기신·구신이라도 '조건부'로 세기를 줄이고 이유를 남긴다(무조건 기신으로 단정하지 않는다).
+  // 결과 ch.unified 는 원국 용신(자동일 때 ch.yong)·운세 흐름(evaluateLuck)·궁합(cpElParts·unifiedSupport)이 함께 쓴다.
+  const UNIFIED_CFG = {
+    version: 'unified-yongsin-20261108-1',
+    eokbu: { need: 8, urgent: 20 },            // |돕는 힘 − 50| (%p): 8 미만 참고, 20 이상 급함
+    johu: { urgent: 1.6, season: 1.2 },        // 기후 치우침(기준 대비 배수): 1.6 이상, 또는 월령이 한난의 근원이고 1.2 이상이면 급함
+    tonggwan: { urgent: 32 },                  // 대립하는 두 오행이 모두 이 비율 이상이고 한쪽이 일간 오행이면 급함
+    rootWeak: 30,                              // 일간 통근 점수가 이보다 낮으면 뿌리가 약하다고 본다
+    coldMonths: [11, 0, 1], hotMonths: [5, 6, 7],   // 亥子丑 / 巳午未
+    soften: { gi: -0.5, gu: -0.25, yong: 0.8, hee: 0.4 },   // 조건부일 때의 역할값(기본 용 1 · 희 0.5 · 한 0 · 구 −0.5 · 기 −1)
+    luck: { johuK: 0.3, gyeokK: [0, 0.06, 0.12, 0.15], rootUp: 0.2, floatDown: 0.3 },
+    chain: { combo: 8, pair: 5, clashGood: -5, clashBad: 3, stem: 2 },
+  };
+  const URGENCY = ['해당 없음', '참고', '필요', '급함'];
+  function josa(word, pair) {
+    const w = String(word); let c = null;
+    for (let i = w.length - 1; i >= 0; i--) { const k = w.charCodeAt(i); if (k >= 0xAC00 && k <= 0xD7A3) { c = k; break; } if (w[i] === ')') { const o = w.lastIndexOf('(', i); if (o > 0) { i = o; continue; } } }
+    const [a, b] = pair.split('/'), jong = c == null ? 0 : (c - 0xAC00) % 28;
+    if (a === '으로') return w + (jong === 0 || jong === 8 ? '로' : '으로');
+    return w + (jong ? a : b);
+  }
+  const ROLE_BASE = { '용신': 1, '희신': 0.5, '한신': 0, '구신': -0.5, '기신': -1 };
+  const elName = e => `${EL_K[e]}(${EL[e]})`;
+  const elJ = (e, a, b) => josa(elName(e), a + '/' + b);
+  const GOF_TG = { 비견: 0, 겁재: 0, 식신: 1, 상관: 1, 편재: 2, 정재: 2, 편관: 3, 정관: 3, 편인: 4, 정인: 4 };
+
+  // 격국 핵심 판정 — gyeokguk.js(화면 설명용)와 같은 규칙. 통합 엔진이 engine.js 하나로 돌도록 판정 부분만 옮겨 왔다(tests/unified-yongsin-sim.cjs 가 두 결과를 대조한다).
+  const _gyeokCore = new WeakMap();
+  function gyeokCore(ch) {
+    let res = _gyeokCore.get(ch); if (res) return res;
+    const d = ch.pillars.day.s, dEl = stemEl(d), mb = ch.pillars.month.b, H = HIDDEN[mb], hasHour = ch.hourKnown !== false && !!ch.pillars.hour;
+    const PW = { year: 0.6, month: 1, day: 0.9, hour: 0.7 }, SW = { year: 0.8, month: 1, hour: 0.8 }, HW = { main: 1, mid: 0.55, res: 0.35 };
+    const per = {}; TG.forEach(t => per[t] = { vis: 0, hid: 0, touched: false });
+    const monthMain = tenGod(d, mainHidden(mb));
+    ['year', 'month', 'hour'].forEach(k => { const p = ch.pillars[k]; if (p) per[tenGod(d, p.s)].vis += SW[k]; });
+    POS.forEach(k => { const p = ch.pillars[k]; if (!p) return; const h = HIDDEN[p.b]; h.forEach((x, i) => { const role = i === h.length - 1 ? 'main' : (i === 0 && h.length === 3 ? 'res' : 'mid'); per[tenGod(d, x[0])].hid += PW[k] * HW[role]; }); });
+    const lvl = {}; TG.forEach(t => { const p = per[t], touched = p.vis > 0, rooted = p.hid >= 0.5; let v = touched && rooted ? 3 : (!touched && monthMain === t) ? 3 : (touched || p.hid >= 0.9) ? 2 : p.hid > 0 ? 1 : 0; if (v > 1 && ch.weights.tgPct[t] < 3) v = 1; lvl[t] = v; p.touched = touched; });
+    const L = t => lvl[t], gl = g => Math.max(...TG.filter(t => GOF_TG[t] === g).map(L));
+    const stemAt = {}; ['year', 'month', 'hour'].forEach(k => { const p = ch.pillars[k]; if (p) stemAt[k] = p.s; });
+    const order = H.map((x, i) => ({ stem: x[0], role: i === H.length - 1 ? '정기' : (i === 0 && H.length === 3 ? '여기' : '중기') })).reverse();
+    const shown = s => Object.keys(stemAt).filter(k => stemAt[k] === s);
+    let pick = order.find(o => shown(o.stem).length) || order[0];
+    const tg = tenGod(d, pick.stem), g = GOF_TG[tg];
+    let kind, key, wolgeopUse = null;
+    if (g === 0) { kind = tg === '비견' ? '건록격' : (d % 2 === 0 ? '양인격' : '월겁격'); key = 'wolgeop'; wolgeopUse = ['정관', '편관', '정재', '편재', '식신', '상관'].filter(t => per[t].touched).sort((a, b) => L(b) - L(a))[0] || null; }
+    else { kind = tg + '격'; key = tg; }
+    const jaeP = gl(2) >= 2, inP = gl(4) >= 2, gwanP = gl(3) >= 2, sikP = gl(1) >= 2, biP = gl(0) >= 2;
+    const chung = (ch.relations || []).some(r => r.kind === 'branch' && (r.type === '충' || (r.type === '형' && !/자형/.test(r.name || ''))) && r.members && r.members.includes('month'));
+    // sang: [설명, 성립, 십성 묶음]  pa: [설명, 성립, 원인 묶음(null=충), 구응 [설명, 성립, 묶음] | null]
+    const sang = [], pa = [];
+    if (key === '정관') { sang.push(['재성이 관을 낳아 줌(재생관)', jaeP, 2], ['인성이 관을 지켜 줌(관인상생)', inP, 4]); pa.push(['상관이 정관을 해침(상관견관)', L('상관') >= 2, 1, ['인성이 상관을 눌러 줌(상관패인)', inP, 4]], ['편관이 섞여 관살혼잡', L('편관') >= 2, 3, ['식신이 편관을 눌러 줌(식신제살)', L('식신') >= 2, 1]], ['월지가 충·형을 받음', chung, null, null]); }
+    else if (key === '편관') { sang.push(['식신이 칠살을 제어함(식신제살)', L('식신') >= 2, 1], ['인성이 칠살을 받아 풀어 줌(살인상생)', inP, 4]); pa.push(['재성이 칠살을 키우는데 제어가 없음(재자약살)', gl(2) >= 3 && L('식신') < 2, 2, ['인성이 살을 받아 줌', inP, 4]], ['정관이 섞여 관살혼잡', L('정관') >= 2, 3, ['식신이 칠살을 눌러 줌(식신제살)', L('식신') >= 2, 1]], ['편인이 식신을 가로막음(효신탈식)', L('편인') >= 2 && L('식신') >= 2, 4, ['재성이 편인을 눌러 줌(재제효)', jaeP, 2]]); }
+    else if (key === '정재' || key === '편재') { sang.push(['관성이 재를 받아 줌(재생관)', gwanP, 3], ['식상이 재를 낳아 줌(식상생재)', sikP, 1]); pa.push(['비겁이 재를 빼앗음(비겁탈재)', biP, 0, ['관성이 비겁을 눌러 줌', gwanP, 3]], ['월지가 충·형을 받음', chung, null, null]); }
+    else if (key === '식신') { sang.push(['재성으로 식신의 기운을 이어 줌(식신생재)', jaeP, 2], ['편관을 식신이 제어함(식신제살)', L('편관') >= 2, 3]); pa.push(['편인이 식신을 가로막음(효신탈식)', L('편인') >= 2, 4, ['재성이 편인을 눌러 줌(재제효)', jaeP, 2]]); }
+    else if (key === '상관') { sang.push(['재성으로 상관의 기운을 이어 줌(상관생재)', jaeP, 2], ['인성이 상관을 다듬어 줌(상관패인)', inP, 4]); pa.push(['정관을 상관이 해침(상관견관)', L('정관') >= 2, 3, ['인성이 상관을 눌러 줌(상관패인)', inP, 4]]); }
+    else if (key === '정인') { sang.push(['관성이 인성을 낳아 줌(관인상생)', gwanP, 3]); pa.push(['재성이 인성을 깨뜨림(재파인)', gl(2) >= 3, 2, ['비겁이 재성을 막아 줌', biP, 0]], ['인성이 지나치게 많음(인다)', gl(4) >= 3 && ch.weights.groups[4] >= 35, 4, ['재성이 인성을 눌러 줌', jaeP, 2]]); }
+    else if (key === '편인') { sang.push(['편관을 편인이 받아 풀어 줌(살인상생)', L('편관') >= 2, 3], ['재성이 편인을 눌러 줌(재제효)', jaeP, 2]); pa.push(['식신이 편인에게 막힘(도식)', L('식신') >= 2, 1, ['재성이 편인을 눌러 줌(재제효)', jaeP, 2]]); }
+    else { sang.push(['관성이 월겁을 제어함', gwanP, 3], ['재성으로 월겁의 힘을 쓰게 함', jaeP, 2], ['식상으로 월겁의 기운을 풀어 줌', sikP, 1]); pa.push(['쓸 재·관·식상이 천간에 드러나지 않음', !wolgeopUse, null, null]); if (kind === '양인격') pa.push(['양인을 제어할 관살이 없음', !gwanP, null, null]); }
+    let rescued = 0, unrescued = 0;
+    pa.forEach(p => { if (!p[1]) return; if (p[3] && p[3][1]) rescued++; else unrescued++; });
+    const sangOn = sang.filter(s => s[1]);
+    let status = key === 'wolgeop' && !wolgeopUse ? 'none' : unrescued ? 'pa' : rescued ? 'part' : sangOn.length ? 'seong' : 'part';
+    const statusRaw = status; if (!hasHour) status = 'hold';
+    res = { kind, key, group: g, el: elOfGroup(dEl, g), status, statusRaw, hasHour, wolgeopUse,
+      sang: sang.map(s => ({ text: s[0], on: !!s[1], group: s[2], el: elOfGroup(dEl, s[2]) })),
+      pa: pa.map(p => ({ text: p[0], on: !!p[1], group: p[2], el: p[2] == null ? null : elOfGroup(dEl, p[2]), rescue: p[3] ? { text: p[3][0], on: !!p[3][1], group: p[3][2], el: elOfGroup(dEl, p[3][2]) } : null })) };
+    _gyeokCore.set(ch, res); return res;
+  }
+
+  // 종격·전왕격 핵심 판정 — jonggyeok.js(화면 설명용)와 같은 규칙과 기준값
+  const JONG_CFG = { weakMax: 30, strongMin: 70, helpFull: 20, helpPart: 25, rootFull: 15, rootPart: 30, rootBlock: 50, biFull: 8, biPart: 12, biBlock: 15, inFull: 12, inPart: 16, inBlock: 20, followFull: 45, followPart: 38, lead: 12,
+    helpStrongFull: 80, helpStrongPart: 72, rootStrongFull: 70, rootStrongPart: 50, leakFull: 12, leakPart: 18, domFull: 40, domPart: 32 };
+  const JONG_PLAN = { 1: ['종아격', [1, 2, 0, 3, 4]], 2: ['종재격', [2, 1, 3, 0, 4]], 3: ['종살격', [3, 2, 0, 1, 4]], 0: ['종왕격', [0, 4, 1, 2, 3]], 4: ['종강격', [4, 0, 3, 1, 2]] };
+  const _jongCore = new WeakMap();
+  function jongCore(ch) {
+    let res = _jongCore.get(ch); if (res) return res;
+    const C = JONG_CFG, st = ch.strength, g = ch.weights.groups, help = st.help, d = ch.pillars.day.s, dEl = stemEl(d);
+    const rs = analyzeNatalRoot(ch).natalRootScore, hasHour = ch.hourKnown !== false && !!ch.pillars.hour;
+    const lv = (v, full, part, rev) => rev ? (v <= full ? 1 : v <= part ? 0.5 : 0) : (v >= full ? 1 : v >= part ? 0.5 : 0);
+    const touched = grp => ['year', 'month', 'hour'].filter(k => ch.pillars[k] && groupOfEl(dEl, stemEl(ch.pillars[k].s)) === grp).length;
+    const side = help < C.weakMax ? 'weak' : help >= C.strongMin ? 'strong' : 'mid';
+    let status = 'none', follow = null;
+    if (side === 'weak') {
+      const lead = [1, 2, 3].map(k => ({ k, v: g[k] })).sort((a, b) => b.v - a.v), top = lead[0], sec = lead[1], tb = touched(0), ti = touched(4);
+      const L = [lv(help, C.helpFull, C.helpPart, true), lv(rs, C.rootFull, C.rootPart, true), st.deukryeong ? 0 : 1,
+        tb ? Math.min(0.5, lv(g[0], C.biFull, C.biPart, true)) : lv(g[0], C.biFull, C.biPart, true),
+        ti ? Math.min(0.5, lv(g[4], C.inFull, C.inPart, true)) : lv(g[4], C.inFull, C.inPart, true),
+        Math.min(lv(top.v, C.followFull, C.followPart), (top.v - sec.v) >= C.lead ? 1 : 0.5)];
+      follow = top.k;
+      const block = g[4] >= C.inBlock || g[0] >= C.biBlock || rs >= C.rootBlock, S = L.reduce((a, b) => a + b, 0);
+      status = block ? 'none' : (L.every(x => x >= 0.5) && S >= 5.5) ? 'jin' : (S >= 4.5 && L[0] >= 0.5 && L[5] >= 0.5 ? 'ga' : 'none');
+    } else if (side === 'strong') {
+      const dom = g[0] >= g[4] ? 0 : 4, leak = g[1] + g[2] + g[3];
+      const L = [lv(help, C.helpStrongFull, C.helpStrongPart), lv(rs, C.rootStrongFull, C.rootStrongPart), st.deukryeong ? 1 : 0, lv(leak, C.leakFull, C.leakPart, true), lv(g[dom], C.domFull, C.domPart)];
+      follow = dom;
+      const S = L.reduce((a, b) => a + b, 0);
+      status = leak >= 26 ? 'none' : (L.every(x => x >= 0.5) && S >= 4.5) ? 'jin' : (S >= 4 && L[0] >= 0.5 && L[3] >= 0.5 ? 'ga' : 'none');
+    }
+    const statusRaw = status; if (!hasHour && (status === 'jin' || status === 'ga')) status = 'hold';
+    res = { side, status, statusRaw, follow, kind: follow == null ? null : JONG_PLAN[follow][0], rootScore: rs };
+    if (follow != null) { const plan = JONG_PLAN[follow][1], names = ['용신', '희신', '한신', '구신', '기신']; res.roles = {}; plan.forEach((grp, i) => res.roles[elOfGroup(dEl, grp)] = names[i]); res.yong = elOfGroup(dEl, plan[0]); res.hee = elOfGroup(dEl, plan[1]); }
+    _jongCore.set(ch, res); return res;
+  }
+
+  // ── 이론별 판정: 각각 { key, name, applicable, urgency(0~3), yong, hee, roles, favor[], avoid[], why } ──
+  const favorOf = roles => [0, 1, 2, 3, 4].filter(e => roles[e] === '용신' || roles[e] === '희신');
+  const avoidOf = roles => [0, 1, 2, 3, 4].filter(e => roles[e] === '기신' || roles[e] === '구신');
+  function theoryEokbu(ch) {
+    const st = ch.strength, y = ch.yongAll.eokbu, C = UNIFIED_CFG.eokbu, skew = Math.abs(st.help - 50), weak = st.help < 50;
+    const urgency = skew >= C.urgent ? 3 : skew >= C.need ? 2 : 1;
+    const why = `나를 돕는 힘이 ${st.help.toFixed(0)}%로 ${st.zone}입니다. ` + (urgency === 1 ? `강약이 중간에 가까워 억부로 급히 고칠 것은 적고, 굳이 고르면 ${elJ(y.yong, '이', '가')} 균형을 잡아 줍니다.`
+      : weak ? `힘이 모자란 쪽이라 ${elJ(y.yong, '으로', '로')} 일간을 받쳐 주는 것이 ${urgency === 3 ? '급합니다' : '좋습니다'}.` : `힘이 남는 쪽이라 ${elJ(y.yong, '으로', '로')} 넘치는 힘을 덜거나 쓰게 하는 것이 ${urgency === 3 ? '급합니다' : '좋습니다'}.`);
+    return { key: 'eokbu', name: '억부', applicable: true, urgency, yong: y.yong, hee: y.hee, roles: y.roles, favor: favorOf(y.roles), avoid: avoidOf(y.roles), skew, why };
+  }
+  function theoryJohu(ch) {
+    const c = ch.climate, jo = ch.yongAll.johu, C = UNIFIED_CFG.johu, clim = Math.max(Math.abs(c.temp) / 0.6, Math.abs(c.hum) / 0.8);
+    if (!jo.applicable) return { key: 'johu', name: '조후', applicable: false, urgency: 0, yong: null, hee: null, roles: null, favor: [], avoid: [], clim, season: false, why: '온도·습도가 크게 치우치지 않아 기후를 맞출 급한 오행이 없습니다.' };
+    const mb = ch.pillars.month.b, U = UNIFIED_CFG;
+    const season = (c.temp <= -0.6 && U.coldMonths.includes(mb)) || (c.temp >= 0.6 && U.hotMonths.includes(mb));
+    const urgency = clim >= C.urgent || (season && clim >= C.season) ? 3 : 2;
+    const feel = c.temp >= 0.6 ? '덥습니다' : c.temp <= -0.6 ? '춥습니다' : c.hum <= -0.8 ? '메말라 있습니다' : '눅눅합니다';
+    const fix = c.temp >= 0.6 ? '식혀' : c.temp <= -0.6 ? '데워' : c.hum <= -0.8 ? '적셔' : '말려';
+    const why = `원국이 ${feel}${season ? `(태어난 달 ${BR[mb]}월이 한${c.temp < 0 ? '겨울' : '여름'}이라 기후가 계절에서 나옵니다)` : ''}. ${elJ(jo.yong, '으로', '로')} ${fix} 주는 것이 ${urgency === 3 ? '급합니다' : '필요합니다'}.`;
+    return { key: 'johu', name: '조후', applicable: true, urgency, yong: jo.yong, hee: jo.hee, roles: jo.roles, favor: favorOf(jo.roles), avoid: avoidOf(jo.roles), clim, season, why };
+  }
+  function theoryTonggwan(ch) {
+    const t = ch.yongAll.tonggwan, p = ch.weights.pct, dEl = stemEl(ch.pillars.day.s);
+    if (!t.applicable) return { key: 'tonggwan', name: '통관', applicable: false, urgency: 0, yong: null, hee: null, roles: null, favor: [], avoid: [], why: '서로 극하는 두 오행이 맞서는 구도가 없어 통관이 필요하지 않습니다.' };
+    const a = t.hee, b = controls(a), urgent = Math.min(p[a], p[b]) >= UNIFIED_CFG.tonggwan.urgent && (a === dEl || b === dEl);
+    return { key: 'tonggwan', name: '통관', applicable: true, urgency: urgent ? 3 : 2, yong: t.yong, hee: t.hee, roles: t.roles, favor: [t.yong], avoid: [], a, b,
+      why: `${elJ(a, '이', '가')} ${josa(elName(b), '을/를')} 극하며 맞서고 있어(${p[a].toFixed(0)}% 대 ${p[b].toFixed(0)}%), 둘 사이를 이어 주는 ${elJ(t.yong, '이', '가')} 다툼을 풀어 줍니다.` };
+  }
+  function theoryGyeok(ch) {
+    const k = gyeokCore(ch), status = k.status === 'hold' ? k.statusRaw : k.status, hold = k.status === 'hold';
+    const base = { key: 'gyeok', name: '격국', kind: k.kind, status: k.status, roles: null, hee: null };
+    if (status === 'none') return { ...base, applicable: false, urgency: 0, yong: null, favor: [], avoid: [], harm: [], sangEls: [], rescueEls: [], why: `${k.kind}이지만 격을 쓰게 해 줄 재·관·식상이 천간에 드러나지 않아 격국으로 용신을 정하기 어렵습니다.` };
+    const sangOn = k.sang.filter(s => s.on).map(s => s.el), sangAll = k.sang.map(s => s.el);
+    const active = k.pa.filter(p => p.on), broken = active.filter(p => !(p.rescue && p.rescue.on));
+    const rescueEls = broken.filter(p => p.rescue).map(p => p.rescue.el);
+    const harm = k.pa.filter(p => p.el != null && p.group !== k.group).map(p => p.el);   // 운에서 들어오면 격을 깨는 오행(격 자신의 오행은 제외)
+    let urgency, favor, why;
+    if (status === 'pa') { urgency = rescueEls.length ? 2 : 1; favor = rescueEls.length ? rescueEls : sangOn; why = `${k.kind}을 ${broken.map(p => p.text).join(', ')} 쪽이 깨고 있습니다(파격).` + (rescueEls.length ? ` ${josa(rescueEls.map(e => elName(e)).filter((v, i, a) => a.indexOf(v) === i).join('·'), '이/가')} 들어오면 격이 회복됩니다.` : ' 막아 줄 기운이 정해져 있지 않아 참고로만 봅니다.'); }
+    else if (status === 'seong') { urgency = 2; favor = sangOn; why = `${k.kind}이 ${k.sang.filter(s => s.on).map(s => s.text).join(', ')} 덕분에 잘 짜여 있습니다(성격). 이 상신을 지켜 주는 것이 좋습니다.`; }
+    else { urgency = 1; favor = sangOn.length ? sangOn : sangAll.slice(0, 1); why = `${k.kind}은 크게 깨지지 않았지만(부분 성격) 격을 돕는 기운이 뚜렷하지 않아 참고로 봅니다.`; }
+    if (hold) { urgency = Math.min(urgency, 1); why += ' 태어난 시간을 몰라 격의 성패는 참고로만 씁니다.'; }
+    favor = favor.filter((v, i, a) => a.indexOf(v) === i);
+    return { ...base, applicable: favor.length > 0, urgency: favor.length ? urgency : 0, yong: favor[0] ?? null, favor, avoid: broken.filter(p => p.el != null).map(p => p.el), harm, sangEls: sangAll, rescueEls, why };
+  }
+  const JEHWA = {
+    '관살과다': { harm: 3, cure: (st, G) => st.help < 50 ? [4, '인성이 관살의 압박을 받아 나에게 넘겨줌(살인상생)'] : [1, '식상이 관살을 눌러 줌(식신제살)'] },
+    '관살혼잡': { harm: 3, cure: (st, G) => st.help < 50 ? [4, '인성이 섞인 관살을 받아 풀어 줌(살인상생)'] : [1, '식상이 편관을 눌러 정관만 남김(식신제살)'] },
+    '재다신약': { harm: 2, cure: () => [0, '비겁이 많은 재를 나눠 감당함(비겁분재)'] },
+    '식상과다(설기)': { harm: 1, cure: () => [4, '인성이 식상을 눌러 기운이 새지 않게 함(인수제식)'] },
+    '상관견관': { harm: 1, cure: st => st.help < 50 ? [4, '인성이 상관을 눌러 정관을 지킴(상관패인)'] : [2, '재성이 상관의 기운을 관으로 이어 줌(상관생재)'] },
+    '군겁쟁재': { harm: 0, cure: (st, G) => G[3] >= 10 ? [3, '관성이 비겁을 눌러 재를 지킴(관제비겁)'] : [1, '식상이 비겁의 기운을 재로 이어 줌(식상생재)'] },
+    '효신탈식(도식)': { harm: 4, cure: () => [2, '재성이 편인을 눌러 식신을 살림(재제효)'] },
+    '인성과다': { harm: 4, cure: st => st.help >= 50 ? [2, '재성이 넘치는 인성을 눌러 줌(재극인)'] : [0, '비겁이 인성의 기운을 받아 씀'] },
+  };
+  function theoryJehwa(ch) {
+    const st = ch.strength, G = ch.weights.groups, dEl = stemEl(ch.pillars.day.s);
+    const list = ch.patterns.list.filter(p => JEHWA[p.name] && p.level !== '참고').sort((a, b) => (a.level === '강' ? 0 : 1) - (b.level === '강' ? 0 : 1));
+    if (!list.length) return { key: 'jehwa', name: '제화', applicable: false, urgency: 0, yong: null, hee: null, roles: null, favor: [], avoid: [], why: '원국에 눌러 주거나(제) 풀어 주어야(화) 할 뚜렷한 십성 충돌이 없습니다.' };
+    const pt = list[0], J = JEHWA[pt.name], [cg, how] = J.cure(st, G), yong = elOfGroup(dEl, cg), harmEl = elOfGroup(dEl, J.harm);
+    return { key: 'jehwa', name: '제화', applicable: true, urgency: pt.level === '강' ? 2 : 1, yong, hee: null, roles: null, favor: [yong], avoid: [harmEl], pattern: pt.name,
+      why: `${pt.name} 구조(${pt.basis})가 있어, ${josa(how, '이/가')} 문제를 풀어 줍니다. 제(制)는 눌러 주는 것, 화(化)는 기운을 다른 곳으로 흘려 보내는 것입니다.` };
+  }
+
+  // 오행 e의 글자별 차이(조습·한난): 같은 오행이라도 어떤 글자로 오느냐에 따라 기후 효과가 다르다
+  const ELEMENT_GLYPHS = e => ({ stems: [e * 2, e * 2 + 1], branches: BR_EL.map((x, b) => x === e ? b : -1).filter(b => b >= 0) });
+  function climateNeed(c) { return { t: Math.abs(c.temp) >= 0.3 ? lclamp(-c.temp / 0.6, -1.5, 1.5) : 0, h: Math.abs(c.hum) >= 0.4 ? lclamp(-c.hum / 0.8, -1.5, 1.5) : 0 }; }
+  const glyphClimate = (need, t, h) => (need.t * t + need.h * h) / 2;   // 대략 −2~+2: 이 글자가 원국의 기후 치우침을 푸는(+) 정도
+
+  function integrateYongsin(ch, force) {
+    const U = UNIFIED_CFG, st = ch.strength, dEl = stemEl(ch.pillars.day.s);
+    const T = { eokbu: theoryEokbu(ch), johu: theoryJohu(ch), tonggwan: theoryTonggwan(ch), gyeok: theoryGyeok(ch), jehwa: theoryJehwa(ch) };
+    const E = T.eokbu, J = T.johu, Z = jongCore(ch), root = analyzeNatalRoot(ch);
+    const steps = [], conflicts = [];
+    const bad = (t, e) => !!(t.roles && (t.roles[e] === '기신' || t.roles[e] === '구신'));
+    let mode, primary, secondary = null, yong, heeCand = null, jongRoles = null;
+    if (force && T[force] && T[force].applicable) {
+      mode = 'forced'; primary = force; yong = T[force].yong;
+      steps.push(`직접 고른 ${T[force].name} 기준을 주 기준으로 둡니다. 다른 이론의 판단은 아래 '조건'으로만 반영합니다.`);
+    } else if (Z.status === 'jin') {
+      mode = 'jong'; primary = 'jong'; yong = Z.yong; heeCand = Z.hee; jongRoles = Z.roles;
+      steps.push(`일간이 ${Z.side === 'weak' ? '홀로 서기 어려울 만큼 약하고' : '꺾기 어려울 만큼 강하고'} 종격 조건이 충족되어(${Z.kind}) 가장 센 세력을 따르는 배치를 씁니다.`);
+      steps.push('이때는 억부의 판단이 정반대가 될 수 있어 억부는 쓰지 않고, 조후는 세력을 해치지 않는 범위의 보조 조건으로 봅니다.');
+      if (J.applicable && Z.roles[J.yong] !== '용신' && Z.roles[J.yong] !== '희신') conflicts.push({ a: 'jong', b: 'johu', text: `조후로는 ${elJ(J.yong, '이', '가')} 필요하지만 종격 배치에서는 ${Z.roles[J.yong]}이라 서로 다릅니다. 세력을 따르는 쪽을 앞세웁니다.` });
+    } else if (!J.applicable) {
+      const K = T.gyeok, TG2 = T.tonggwan;
+      if (E.urgency === 1 && K.urgency >= 2 && K.yong != null && !bad(E, K.yong)) { mode = 'single'; primary = 'gyeok'; secondary = 'eokbu'; yong = K.yong; heeCand = E.yong;
+        steps.push('기후는 고르고 강약도 중간에 가까워, 억부보다 격국(월지에서 드러난 격을 살리는 상신)을 앞세웁니다.'); }
+      else if (E.urgency === 1 && TG2.urgency >= 2 && !bad(E, TG2.yong)) { mode = 'single'; primary = 'tonggwan'; secondary = 'eokbu'; yong = TG2.yong; heeCand = E.yong;
+        steps.push('기후는 고르고 강약도 중간에 가까운데 두 오행이 크게 맞서 있어, 다툼을 이어 주는 통관을 앞세웁니다.'); }
+      else { mode = 'single'; primary = 'eokbu'; yong = E.yong;
+        steps.push('기후는 고른 편이라 조후로 급히 맞출 것이 없어, 강약 균형(억부)을 주 기준으로 둡니다.'); }
+    } else {
+      const joRole = E.roles[J.yong];
+      if (joRole === '용신' || joRole === '희신') {
+        mode = 'agree';
+        primary = J.urgency >= E.urgency ? 'johu' : 'eokbu'; secondary = primary === 'johu' ? 'eokbu' : 'johu';
+        yong = T[primary].yong; heeCand = T[secondary].yong !== yong ? T[secondary].yong : T[secondary].hee;
+        steps.push(`조후로 필요한 ${elJ(J.yong, '이', '가')} 억부로도 ${joRole}이라 두 기준이 같은 방향을 가리킵니다.`);
+        steps.push(`${josa(T[primary].name, '이/가')} ${URGENCY[T[primary].urgency] === '급함' ? '더 급해' : '조금 더 앞서'} 주 기준이 되고, ${josa(T[secondary].name, '은/는')} 희신을 정하는 보조 기준이 됩니다.`);
+        if (!J.favor.includes(yong)) steps.push(`다만 억부 용신 ${josa(elName(yong), '은/는')} 기후를 맞추는 데는 도움이 적어, 조후 용신 ${josa(elName(J.yong), '을/를')} 희신으로 두어 함께 챙깁니다.`);
+      } else {
+        mode = 'conflict';
+        conflicts.push({ a: 'johu', b: 'eokbu', text: `조후로는 ${elJ(J.yong, '이', '가')} 필요하지만, 억부로는 ${elJ(J.yong, '이', '가')} ${joRole}이라 두 기준이 부딪칩니다.` });
+        const bridge = [0, 1, 2, 3, 4].filter(e => E.favor.includes(e) && J.favor.includes(e));
+        if (E.urgency === 1) { primary = 'johu'; steps.push('강약은 중간에 가깝고 기후만 치우쳐 있어 조후를 앞세웁니다.'); }
+        else if (J.urgency > E.urgency) { primary = 'johu'; steps.push(`기후 치우침이 ${URGENCY[J.urgency]} 단계로 강약(${URGENCY[E.urgency]})보다 급해 조후를 앞세웁니다.`); }
+        else if (E.urgency > J.urgency) { primary = 'eokbu'; steps.push(`강약 치우침이 ${URGENCY[E.urgency]} 단계로 기후(${URGENCY[J.urgency]})보다 급해 억부를 앞세웁니다.`); }
+        else if (bridge.length) {
+          mode = 'bridge'; const x = bridge.find(e => E.roles[e] === '용신' || J.roles[e] === '용신') ?? bridge[0];
+          primary = E.roles[x] === '용신' ? 'eokbu' : 'johu'; yong = x;
+          steps.push(`두 기준이 똑같이 ${URGENCY[E.urgency]} 단계라, 두 기준을 모두 만족하는 ${elJ(x, '을', '를')} 함께 쓰는 오행(겸용)으로 고릅니다. 억부로는 ${E.roles[x]}, 조후로는 ${J.roles[x]}입니다.`);
+        } else if (J.season) { primary = 'johu'; steps.push(`두 기준이 똑같이 ${URGENCY[E.urgency]} 단계인데, 태어난 달 자체가 한${ch.climate.temp < 0 ? '겨울' : '여름'}이라 기후가 원국 전체를 지배합니다. 계절을 먼저 맞춰야 다른 기운도 제 역할을 하므로 조후를 앞세웁니다.`); }
+        else if (st.help < 50 && root.natalRootScore < U.rootWeak) { primary = 'eokbu'; steps.push(`두 기준이 똑같이 ${URGENCY[E.urgency]} 단계인데, 일간의 뿌리(통근 ${root.natalRootScore}점)가 약한 신약이라 먼저 힘을 받아야 기후를 맞추는 기운도 쓸 수 있어 억부를 앞세웁니다.`); }
+        else { const rJ = J.clim / U.johu.urgent, rE = E.skew / U.eokbu.urgent; primary = rJ >= rE ? 'johu' : 'eokbu';
+          steps.push(`두 기준이 똑같이 ${URGENCY[E.urgency]} 단계라, 각 기준선 대비 치우침을 견줘(기후 ${rJ.toFixed(2)}배 · 강약 ${rE.toFixed(2)}배) 더 많이 벗어난 ${josa(T[primary].name, '을/를')} 앞세웁니다.`); }
+        secondary = primary === 'johu' ? 'eokbu' : 'johu';
+        if (yong == null) yong = T[primary].yong;
+        const sy = T[secondary].yong;
+        heeCand = sy !== yong && sy !== controllerOf(yong) && sy !== controls(yong) ? sy : null;
+        steps.push(`${T[secondary].name} 기준이 필요로 하는 ${elJ(sy, '은', '는')} 버리지 않고 '조건부'로 남겨, 운에서 그 기운이 올 때 무조건 나쁘게 보지 않습니다.`);
+      }
+      if (Z.status === 'ga' || Z.status === 'hold') conflicts.push({ a: 'jong', b: primary, text: `종격 가능성(${Z.kind})이 있어, 종격이 맞다면 억부의 판단이 정반대가 될 수 있습니다. 확인 전까지 보통 기준을 씁니다.` });
+    }
+    if (mode === 'single' && (Z.status === 'ga' || Z.status === 'hold')) conflicts.push({ a: 'jong', b: primary, text: `종격 가능성(${Z.kind})이 있어, 종격이 맞다면 억부의 판단이 정반대가 될 수 있습니다. 확인 전까지 보통 기준을 씁니다.` });
+    // ── 역할 배치: 희신은 용신을 낳거나 용신이 낳는 오행만(용신을 극하는 오행은 희신이 될 수 없다) ──
+    let roles;
+    if (jongRoles) roles = { ...jongRoles };
+    else if (mode === 'forced') roles = { ...T[primary].roles };
+    else {
+      const okHee = h => h != null && (h === generates(yong) || h === generatorOf(yong));
+      const prim = T[primary];
+      const hee = okHee(heeCand) ? heeCand : okHee(prim.hee) ? prim.hee : generatorOf(yong);
+      roles = rolesFrom(yong, hee);
+    }
+    const elOfRole = r => +Object.keys(roles).find(e => roles[e] === r);
+    // ── 조건부 역할: 주 기준이 아닌 이론이 필요로 하거나 꺼리는 오행 ──
+    const roleV = [0, 1, 2, 3, 4].map(e => ROLE_BASE[roles[e]]);
+    const conditions = {}, addCond = (e, txt) => (conditions[e] = conditions[e] || []).push(txt);
+    for (const key of ['eokbu', 'johu', 'tonggwan', 'gyeok', 'jehwa']) {
+      const t = T[key]; if (!t.applicable || key === primary || mode === 'jong' && key === 'eokbu') continue;
+      for (const e of t.favor) {
+        const r = roles[e];
+        if (r === '기신' || r === '구신') {
+          if (t.urgency >= 2) { roleV[e] = Math.max(roleV[e], r === '기신' ? U.soften.gi : U.soften.gu); addCond(e, `${josa(t.name, '으로/로')}는 필요한 기운이라 ${r}이지만 조건부로 봅니다 — ${t.why}`); }
+          else addCond(e, `${josa(t.name, '으로/로')}는 쓰임이 있는 기운이지만 필요도가 낮아(${URGENCY[t.urgency]}) ${r}으로 둡니다.`);
+          if (t.urgency >= 2 && !conflicts.some(c => c.b === key || c.a === key)) conflicts.push({ a: primary, b: key, text: `${josa(t.name, '으로/로')} 필요한 ${elJ(e, '이', '가')} 통합 판단에서는 ${r}입니다.` });
+        }
+      }
+      for (const e of (t.avoid || [])) {
+        const r = roles[e];
+        if ((r === '용신' || r === '희신') && t.urgency >= 2) { roleV[e] = Math.min(roleV[e], r === '용신' ? U.soften.yong : U.soften.hee); addCond(e, `${josa(t.name, '으로/로')}는 ${key === 'gyeok' ? '격을 흔드는' : '부담이 되는'} 기운이라, ${r}이라도 지나치게 많아지면 부담이 됩니다.`); }
+      }
+    }
+    // ── 원국 안에서 용신의 상태: 통근·노출·합충 ──
+    const notes = [], yongPct = ch.weights.pct[yong];
+    const stemsOf = e => ['year', 'month', 'hour'].filter(k => ch.pillars[k] && stemEl(ch.pillars[k].s) === e);
+    const rootsOf = e => POS.filter(k => ch.pillars[k] && HIDDEN[ch.pillars[k].b].some(([hs]) => stemEl(hs) === e));
+    const ys = stemsOf(yong), yr = rootsOf(yong);
+    if (yongPct < 5) notes.push(`용신 ${elJ(yong, '이', '가')} 원국에 거의 없어(${yongPct.toFixed(0)}%) 평소에는 힘이 약하고, 운에서 들어올 때 제 역할을 합니다.`);
+    else if (ys.length && !yr.length) notes.push(`용신 ${elJ(yong, '이', '가')} ${ys.map(k => POS_K[k] + '간').join('·')}에 드러나 있지만 지지에 뿌리가 없어 쉽게 흔들립니다. 운에서 뿌리(지지)가 들어오는 때가 가장 좋습니다.`);
+    else if (ys.length && yr.length) notes.push(`용신 ${elJ(yong, '이', '가')} 천간(${ys.map(k => POS_K[k] + '간').join('·')})에 드러나고 지지(${yr.map(k => POS_K[k] + '지').join('·')})에 뿌리도 있어 실제로 쓸 수 있는 힘이 있습니다.`);
+    else notes.push(`용신 ${elJ(yong, '이', '가')} 지지(${yr.map(k => POS_K[k] + '지').join('·')}) 속에만 있어 겉으로 드러나지 않습니다. 운에서 천간으로 드러날 때 쓰임이 커집니다.`);
+    for (const r of ch.relations) {
+      if (r.type === '충' && r.members.some(k => ch.pillars[k] && BR_EL[ch.pillars[k].b] === yong)) notes.push(`용신의 자리(${r.members.map(k => POS_K[k] + '지').join('·')})가 충(${r.name})을 받아 뿌리가 흔들릴 수 있습니다.`);
+      if (r.type === '천간합' && r.members.some(k => ch.pillars[k] && stemEl(ch.pillars[k].s) === yong && k !== 'day')) notes.push(`용신 글자가 ${r.name}으로 다른 글자와 묶여 있어(합) 힘이 덜 나올 수 있습니다.`);
+    }
+    // ── 같은 오행이라도 글자마다 기후 효과가 다르다(조습) ──
+    const glyphNotes = [], need = climateNeed(ch.climate);
+    if (J.applicable) for (let e = 0; e < 5; e++) {
+      const G = ELEMENT_GLYPHS(e), list = [...G.stems.map(s => ({ n: STEM[s], v: glyphClimate(need, STEM_TEMP[s], STEM_HUM[s]) })), ...G.branches.map(b => ({ n: BR[b], v: glyphClimate(need, BR_TEMP[b], BR_HUM[b]) }))];
+      const good = list.filter(x => x.v >= 0.35), poor = list.filter(x => x.v <= -0.35);
+      if (good.length && poor.length) glyphNotes.push(`같은 ${josa(EL_K[e], '이라도/라도')} ${good.map(x => x.n).join('·')} 글자는 원국의 기후를 풀어 주고, ${poor.map(x => x.n).join('·')} 글자는 오히려 치우침을 키웁니다. 그래서 ${elJ(e, '을', '를')} 한 가지로 좋다·나쁘다 단정하지 않습니다.`);
+    }
+    // ── 이론별 결과 표 ──
+    const verdictOf = key => {
+      const t = T[key];
+      if (!t.applicable) return '해당 없음';
+      if (key === primary) return '주 기준';
+      if (key === secondary) return '보조 기준';
+      if (mode === 'jong' && key === 'eokbu') return '적용 안 함(종격)';
+      if (t.yong != null && (roles[t.yong] === '용신' || roles[t.yong] === '희신')) return '같은 방향';
+      if (t.yong != null && (roles[t.yong] === '기신' || roles[t.yong] === '구신')) return t.urgency >= 2 ? '충돌 · 조건부 반영' : '충돌 · 참고';
+      return '참고';
+    };
+    const theories = {};
+    for (const key of Object.keys(T)) { const t = T[key]; theories[key] = { key, name: t.name, applicable: t.applicable, urgency: t.urgency, urgencyLabel: URGENCY[t.urgency], yong: t.yong, favor: t.favor, avoid: t.avoid || [], why: t.why, verdict: verdictOf(key), ...(key === 'gyeok' ? { kind: t.kind, status: t.status, harm: t.harm, sangEls: t.sangEls, rescueEls: t.rescueEls } : {}), ...(key === 'johu' ? { season: t.season, clim: t.clim } : {}) }; }
+    const PNAME = { eokbu: '억부', johu: '조후', tonggwan: '통관', gyeok: '격국', jehwa: '제화', jong: '종격' };
+    const hee = elOfRole('희신'), gi = elOfRole('기신'), gu = elOfRole('구신'), han = elOfRole('한신');
+    const headline = `${PNAME[primary]}${secondary ? ' 우선 · ' + PNAME[secondary] + ' 보조' : ' 기준'} — 용신 ${elName(yong)}, 희신 ${elName(hee)}`;
+    const condEls = Object.keys(conditions).map(Number).filter(e => roles[e] === '기신' || roles[e] === '구신');
+    const summary = [
+      mode === 'agree' ? `이 사주는 ${josa(PNAME[primary], '과/와')} ${josa(PNAME[secondary], '이/가')} 같은 방향을 가리켜, ${elJ(yong, '을', '를')} 용신으로 두고 ${elJ(hee, '으로', '로')} 돕습니다.`
+        : mode === 'conflict' ? `이 사주는 ${PNAME.johu}와 ${PNAME.eokbu}가 서로 다른 오행을 원합니다. 지금 더 급한 ${josa(PNAME[primary], '을/를')} 앞세워 ${elJ(yong, '을', '를')} 용신으로 두고, ${josa(PNAME[secondary], '이/가')} 원하는 기운은 조건부로 남겨 둡니다.`
+          : mode === 'bridge' ? `이 사주는 조후와 억부가 부딪치지만, 두 기준을 모두 만족하는 ${elJ(yong, '을', '를')} 용신으로 골라 양쪽을 함께 챙깁니다.`
+            : mode === 'jong' ? `이 사주는 ${Z.kind}으로 읽혀, 일간을 돕는 대신 가장 센 기운인 ${elJ(yong, '을', '를')} 따르는 것이 순리입니다.`
+              : mode === 'forced' ? `직접 고른 ${PNAME[primary]} 기준으로 ${elJ(yong, '을', '를')} 용신으로 둡니다.`
+                : `이 사주는 ${PNAME[primary]} 기준으로 ${elJ(yong, '을', '를')} 용신, ${elJ(hee, '을', '를')} 희신으로 봅니다.`,
+      condEls.length ? `${josa(condEls.map(e => elName(e)).join('·'), '은/는')} 표에서는 ${condEls.map(e => roles[e]).join('·')}이지만 다른 기준으로는 필요한 기운이라, 무조건 나쁘다고 보지 않고 들어오는 글자와 때를 따져 봅니다.` : '',
+    ].filter(Boolean).join(' ');
+    const log = [...steps, ...notes, ...glyphNotes];
+    return {
+      version: U.version, mode, primary, primaryName: PNAME[primary], secondary, secondaryName: secondary ? PNAME[secondary] : null, forced: mode === 'forced',
+      yong, hee, gi, gu, han, roles, roleV, conditions, conflicts, steps, notes, glyphNotes, theories, headline, summary, log,
+      jong: { status: Z.status, kind: Z.kind }, gyeok: { kind: T.gyeok.kind, status: T.gyeok.status },
+      schoolKey: ['eokbu', 'johu', 'tonggwan'].includes(primary) ? primary : 'eokbu',
+    };
+  }
+  // ch.yong 과 같은 모양(화면·다른 모듈 호환): { school, applicable, yong, hee, roles, log } + unified 표시
+  function unifiedAsYong(u) { return { school: u.schoolKey, applicable: true, yong: u.yong, hee: u.hee, roles: { ...u.roles }, log: u.log.slice(), unified: true, label: '통합 판단' }; }
+
+  // ── 운 글자 하나(천간 s·지지 b)를 통합 판단으로 평가 ──
+  // 원국 역할값(조건부 포함) + 천간의 통근·뜬 글자 + 글자별 조습 + 격국(상신·구응 / 격을 깨는 기운)을 함께 본다.
+  // 60갑자 평균을 빼서, 조건부 역할·뿌리 보정 때문에 어떤 사주의 흐름 점수가 평균적으로 한쪽으로 치우치지 않게 한다(조후 점수의 climateBase 와 같은 방식)
+  const _ub = new WeakMap();
+  function unifiedBase(ch, stemW) {
+    let m = _ub.get(ch); if (!m) _ub.set(ch, m = {});
+    if (m[stemW] == null) { let sum = 0; for (let i = 0; i < 60; i++) { const r = unifiedLuckRaw(ch, gz(i), stemW); sum += (1 - r.kJ - r.kG) * r.roleFit + r.kG * r.gyeok; } m[stemW] = sum / 60; }
+    return m[stemW];
+  }
+  function unifiedLuckFit(ch, p, stemW, johuV) {
+    const r = unifiedLuckRaw(ch, p, stemW);
+    r.v = lclamp((1 - r.kJ - r.kG) * r.roleFit + r.kJ * johuV + r.kG * r.gyeok - unifiedBase(ch, stemW), -100, 100);
+    return r;
+  }
+  function unifiedLuckRaw(ch, p, stemW) {
+    const u = ch.unified, U = UNIFIED_CFG.luck, rv = e => u.roleV[e], dEl = stemEl(ch.pillars.day.s), se = stemEl(p.s);
+    const notes = [];
+    // 천간의 힘: 같은 오행의 뿌리가 운의 지지나 원국 지지에 있으면 실하고, 없으면 뜬 글자라 약하다
+    const rootedOwn = HIDDEN[p.b].some(([hs]) => stemEl(hs) === se);
+    const rootedNatal = POS.some(k => ch.pillars[k] && HIDDEN[ch.pillars[k].b].some(([hs]) => stemEl(hs) === se));
+    const sMul = rootedOwn ? 1 + U.rootUp : rootedNatal ? 1 : 1 - U.floatDown;
+    let sv = rv(se) * sMul;
+    if (Math.abs(rv(se)) >= 0.5) notes.push(rootedOwn ? `천간 ${STEM[p.s]}(${u.roles[se]})이 같은 기둥의 지지에 뿌리를 두어 힘이 실림` : rootedNatal ? `천간 ${STEM[p.s]}(${u.roles[se]})이 원국 지지에 뿌리를 둠` : `천간 ${STEM[p.s]}(${u.roles[se]})은 뿌리가 없어 작용이 약함`);
+    let bv = 0; for (const [hs, dd] of HIDDEN[p.b]) bv += rv(stemEl(hs)) * dd / 30;
+    const roleFit = lclamp((stemW * sv + (1 - stemW) * bv) * 100, -100, 100);
+    // 격국: 상신·구응을 데려오면 +, 격을 깨는 기운이면 −
+    const K = u.theories.gyeok, g = groupPull(dEl, p);
+    let gy = 0;
+    if (K.applicable) {
+      const grpOf = e => groupOfEl(dEl, e);
+      const good = new Set([...(K.sangEls || []), ...(K.rescueEls || [])].map(grpOf)), harmful = new Set((K.harm || []).map(grpOf));
+      for (let i = 0; i < 5; i++) { if (good.has(i)) gy += g[i]; if (harmful.has(i) && !good.has(i)) gy -= g[i]; }
+      gy = lclamp(gy * 160, -100, 100);
+    }
+    const kJ = u.theories.johu.applicable ? U.johuK * (u.primary === 'johu' || u.secondary === 'johu' ? 1 : 0.5) : 0;
+    const kG = U.gyeokK[K.applicable ? K.urgency : 0];
+    return { roleFit, gyeok: gy, kJ, kG, notes };
+  }
+  const impactWord = v => v >= 15 ? '도움' : v >= 5 ? '약간 도움' : v <= -15 ? '부담' : v <= -5 ? '약간 부담' : '영향 적음';
+  function theoryImpacts(ch, eokV, johuV, gyV) {
+    const u = ch.unified, out = [];
+    out.push({ key: 'eokbu', v: eokV, text: `억부(강약) — ${impactWord(eokV)}` });
+    if (u.theories.johu.applicable) out.push({ key: 'johu', v: johuV, text: `조후(온도·습도) — ${impactWord(johuV)}` });
+    if (u.theories.gyeok.applicable) out.push({ key: 'gyeok', v: gyV, text: `격국(${u.theories.gyeok.kind}) — ${gyV >= 5 ? '격을 돕는 기운이 들어옴' : gyV <= -5 ? '격을 흔드는 기운이 들어옴' : '영향 적음'}` });
+    return out;
+  }
+
+  // ── 운의 층 사이 연결: 상위 운(대운→세운→월운) 기둥과 이번 운 기둥이 만드는 합·충 ──
+  function chainLink(ch, up, upEv, p, level) {
+    if (!up || !upEv) return null;
+    const C = UNIFIED_CFG.chain, u = ch.unified, rv = e => u.roleV[e], NAME = { daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
+    const upName = { seun: '대운', wolun: '세운', ilun: '월운' }[level] || '상위 운', me = NAME[level] || '이번 운';
+    const natal = POS.filter(k => ch.pillars[k]).map(k => ({ id: k, s: ch.pillars[k].s, b: ch.pillars[k].b }));
+    const rels = relationsAmong([...natal, { id: 'up', s: up.s, b: up.b }, { id: 'luck', s: p.s, b: p.b }]).filter(r => r.members.includes('up') && r.members.includes('luck'));
+    const links = []; let v = 0;
+    for (const r of rels) {
+      let d = 0, text = '';
+      if ((r.type === '삼합' || r.type === '방합') && r.el != null) { d = rv(r.el) * C.combo; text = `${upName}·${me}${r.members.length > 2 ? '·원국' : ''}이 ${r.name}으로 ${elName(r.el)} 기운을 크게 모음 → ${u.roles[r.el]}${d > 0 ? '이라 힘이 됨' : d < 0 ? '이라 부담' : ''}`; }
+      else if ((r.type === '육합' || r.type === '반합') && r.el != null && r.members.length === 2) { d = rv(r.el) * C.pair; text = `${josa(upName, '과/와')} ${josa(me, '이/가')} ${r.name}으로 묶여 ${elName(r.el)} 기운이 생김 → ${u.roles[r.el]}`; }
+      else if (r.type === '충' && r.members.length === 2) { const good = upEv.fitScore > 0; d = good ? C.clashGood : C.clashBad; text = good ? `${josa(me, '이/가')} 좋은 ${upName}의 지지를 충(${r.name})으로 흔듦 → 큰 흐름이 잠시 흔들림` : `${josa(me, '이/가')} 부담스러운 ${upName}의 지지를 충(${r.name})으로 흔듦 → 막힌 흐름에 변화가 생김`; }
+      else if (r.type === '천간합' && r.members.length === 2) { d = r.el != null ? rv(r.el) * C.stem : 0; text = `${josa(upName, '과/와')} ${me}의 천간이 합(${r.name})으로 묶임`; }
+      else if (r.type === '천간충' && r.members.length === 2) { d = -C.stem; text = `${josa(upName, '과/와')} ${me}의 천간이 부딪침(${r.name})`; }
+      if (text) { links.push({ type: r.type, name: r.name, v: d, text }); v += d; }
+    }
+    const upCond = conditionOf(upEv.fitScore);
+    return { level, upName, upCondition: upCond, upFit: upEv.fitScore, links, v: lclamp(v, -12, 12) };
+  }
+  function chainNote(chain, ownCond) {
+    if (!chain) return '';
+    const up = chain.upCondition, good = c => c === '순풍', badC = c => c === '주의' || c === '부담';
+    if (good(up) && badC(ownCond)) return `큰 흐름(${chain.upName})은 순풍이지만 이 시기 자체는 ${ownCond}입니다. 방향은 유지하고 속도만 늦추세요.`;
+    if (badC(up) && good(ownCond)) return `큰 흐름(${chain.upName})은 ${up}이지만 이 시기는 순풍이라, 숨을 돌리고 준비해 둔 일을 진행하기 좋습니다.`;
+    if (good(up) && good(ownCond)) return `큰 흐름(${chain.upName})과 이 시기가 모두 순풍이라 힘이 겹칩니다.`;
+    if (badC(up) && badC(ownCond)) return `큰 흐름(${chain.upName})과 이 시기가 모두 ${ownCond}라 무리하지 않는 편이 좋습니다.`;
+    return `큰 흐름(${chain.upName})은 ${up}, 이 시기는 ${ownCond}입니다.`;
+  }
+
+  // ── 궁합: B의 원국이 A에게 주는 보완(통합 판단 기준) ──
+  // 상대의 용신 오행 비율이나 일간 하나로 정하지 않고, 상대의 여덟 글자(지장간 포함)·조습·일간의 뿌리와 일간끼리의 합을 함께 본다.
+  function unifiedSupport(A, B, names) {
+    const me = (names && names.self) || '나', you = (names && names.other) || '상대', meTo = me === '나' ? '나에게' : me + '에게';
+    const u = A.unified, PWS = { year: 0.6, month: 0.9, day: 1.2, hour: 0.7 }, PWB = { year: 0.6, month: 1.1, day: 1.2, hour: 0.7 };
+    let sum = 0, wsum = 0; const share = [0, 0, 0, 0, 0];
+    for (const k of POS) { const p = B.pillars[k]; if (!p) continue;
+      const se = stemEl(p.s); share[se] += PWS[k]; sum += PWS[k] * u.roleV[se]; wsum += PWS[k];
+      for (const [hs, dd] of HIDDEN[p.b]) { const e = stemEl(hs), w = PWB[k] * dd / 30; share[e] += w; sum += w * u.roleV[e]; wsum += w; } }
+    const roleFit = sum / wsum;   // −1~+1
+    // 조후 보완: 상대의 기후가 내 원국의 치우침을 얼마나 풀어 주는가(섞었을 때 치우침이 줄면 +)
+    const a = A.climate, b = B.climate, dev = (x, k) => Math.max(0, Math.abs(x) / k - 0.3);
+    const mt = 0.7 * a.temp + 0.3 * b.temp, mh = 0.7 * a.hum + 0.3 * b.hum;
+    const climateFit = lclamp((dev(a.temp, 0.6) - dev(mt, 0.6) + dev(a.hum, 0.8) - dev(mh, 0.8)) / 0.5, -1, 1);
+    // 상대 일간: 역할값 + 뿌리 + 일간끼리의 합 + 그 글자의 조습
+    const ds = B.pillars.day.s, dEl = stemEl(ds), myD = A.pillars.day.s, reasons = [];
+    const rooted = POS.some(k => B.pillars[k] && HIDDEN[B.pillars[k].b].some(([hs]) => stemEl(hs) === dEl));
+    let dayV = u.roleV[dEl] * (rooted ? 1 : 0.7);
+    const need = climateNeed(a), dayClim = lclamp(glyphClimate(need, STEM_TEMP[ds], STEM_HUM[ds]) / 2, -1, 1);
+    if (u.theories.johu.applicable) dayV = lclamp(dayV + 0.3 * dayClim, -1, 1);
+    const hap = relationsAmong([{ id: 'a', s: myD }, { id: 'b', s: ds }]).find(r => r.type === '천간합');
+    if (hap && u.roles[dEl] !== '용신' && u.roles[dEl] !== '희신') { dayV = Math.max(dayV, hap.el != null ? 0.3 * u.roleV[hap.el] + 0.1 : 0); reasons.push(`${josa(you + '의 일간(' + STEM[ds] + ')', '은/는')} ${meTo} ${u.roles[dEl]} 오행이지만, ${me === '나' ? '내' : me + '의'} 일간과 합(${hap.name})으로 묶여 정이 생기므로 부담이 줄어듭니다.`); }
+    const f = 0.45 * roleFit + 0.25 * climateFit + 0.3 * dayV;
+    const score = Math.round(lclamp(43 + f * 75, 8, 98));   // 무작위 600쌍에서 옛 오행 보완 점수와 같은 분포(중앙 49·상하위 10% 28~70)가 되게 맞춤
+    let top = null;
+    for (let e = 0; e < 5; e++) if (u.roleV[e] > 0) { const c = share[e] / wsum * u.roleV[e]; if (!top || c > top.c) top = { e, c, role: u.roles[e], pct: B.weights.pct[e] || 0 }; }
+    if (top && top.pct >= 8) reasons.unshift(`${you} 사주에 ${meTo} 필요한 ${elName(top.e)} 기운(${u.roles[top.e]})이 ${Math.round(top.pct)}% 있습니다.`);
+    let worst = null; for (let e = 0; e < 5; e++) if (u.roleV[e] < 0) { const c = share[e] / wsum * -u.roleV[e]; if (!worst || c > worst.c) worst = { e, c, pct: B.weights.pct[e] || 0 }; }
+    if (worst && worst.pct >= 15 && roleFit < 0.1) reasons.push(`다만 ${you} 사주에는 ${meTo} 부담이 되는 ${elName(worst.e)} 기운(${u.roles[worst.e]}${u.conditions[worst.e] ? ', 조건부' : ''})이 ${Math.round(worst.pct)}% 있어 보완 효과를 깎습니다.`);
+    const natW = cpNatalWord(a);
+    const mine = me === '나' ? '내' : me + '의';
+    if (natW && Math.abs(climateFit) >= 0.25) reasons.push(climateFit > 0 ? `${natW} ${mine} 원국의 온도·습도를 ${you}의 기운이 맞춰 줍니다.` : `${you}의 기운이 ${natW} ${mine} 원국의 치우침을 더 키웁니다.`);
+    if (u.conditions[dEl] && (u.roles[dEl] === '기신' || u.roles[dEl] === '구신')) reasons.push(`${you} 일간의 오행(${elName(dEl)})은 ${me === '나' ? '내' : me + '의'} 용신표에서 ${u.roles[dEl]}이지만 다른 기준으로는 필요한 기운이라 조건부로 봅니다.`);
+    else if (!rooted && Math.abs(u.roleV[dEl]) >= 0.5) reasons.push(`${josa(you + ' 일간(' + STEM[ds] + ')', '은/는')} 뿌리가 약해 ${u.roleV[dEl] > 0 ? '도움' : '부담'}의 세기가 덜합니다.`);
+    return { score, top, dayEl: dEl, dayRole: u.roles[dEl], bad: u.roleV[dEl] < 0 && !hap, roleFit, climateFit, dayFit: dayV, reasons };
+  }
   function daeunAt(ch, ms) { let cur = null; for (const x of ch.daeun.list) if (x.startMs <= ms) cur = x; return cur; }
   function seunRange(ch, fromY, toY) {
     const out = [];
@@ -1280,14 +1730,35 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     }
     return out;
   }
+  // 상위 운 평가를 사주·연도별로 한 번만 계산해 둔다(대운→세운→월운→일진 연계용)
+  const _seunEv = new WeakMap(), _wolunEv = new WeakMap();
+  function seunEvOf(ch, Y) {
+    let m = _seunEv.get(ch); if (!m) _seunEv.set(ch, m = {});
+    if (!(Y in m)) { if (Y < MIN_Y || Y > MAX_Y - 1) m[Y] = null; else { const mid = termsOf(Y)[2] + 180 * 86400000, du = daeunAt(ch, mid); m[Y] = luckItem(ch, yearPillarOf(Y), 'seun', du && du.ev).ev; } }
+    return m[Y];
+  }
+  function wolunEvsOf(ch, Y) {
+    let m = _wolunEv.get(ch); if (!m) _wolunEv.set(ch, m = {});
+    if (!(Y in m)) { const se = seunEvOf(ch, Y); m[Y] = monthsOfYear(Y).map(mo => { const du = daeunAt(ch, mo.startMs); return { startMs: mo.startMs, ev: luckItem(ch, mo, 'wolun', se || (du && du.ev)).ev }; }); }
+    return m[Y];
+  }
+  // 월운은 그해 세운(대운을 이미 품은)을 상위 운으로 받는다
   function wolun(ch, Y) {
-    return monthsOfYear(Y).map(m => { const du = daeunAt(ch, m.startMs); return luckItem(ch, m, "wolun", du && du.ev); });
+    const se = seunEvOf(ch, Y);
+    return monthsOfYear(Y).map(m => { const du = daeunAt(ch, m.startMs); return luckItem(ch, m, "wolun", se || (du && du.ev)); });
+  }
+  function wolunEvAt(ch, ms) {
+    const Y = yearPillarAt(ms).sajuYear; let hit = null;
+    if (Y >= MIN_Y && Y <= MAX_Y - 1) for (const x of wolunEvsOf(ch, Y)) if (x.startMs <= ms) hit = x;
+    if (!hit && Y - 1 >= MIN_Y) { const prev = wolunEvsOf(ch, Y - 1); hit = prev[prev.length - 1]; }
+    return hit ? hit.ev : null;
   }
   function ilun(ch, y, m) {
     const days = new Date(Date.UTC(y, m, 0)).getUTCDate(); const out = [];
     for (let d = 1; d <= days; d++) {
       const J = jdnFromYMD(y, m, d);
-      const it = luckItem(ch, dayPillarOfJdn(J), "ilun");
+      let parent = null; try { parent = wolunEvAt(ch, Date.UTC(y, m - 1, d, 3)); } catch (e) { parent = null; }   // 그날이 속한 월운(KST 정오 기준)
+      const it = luckItem(ch, dayPillarOfJdn(J), "ilun", parent);
       it.date = [y, m, d];
       it.lunar = solarToLunar(y, m, d);
       out.push(it);
@@ -1356,7 +1827,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const s = lclamp((50 - st.help) / C.eokbuMix.weakCenter, -1, 1);
     const weak = [1, -0.5, -0.7, -0.8, 1], strong = [-1, 0.8, 0.8, 1, -0.8];
     const struct = s >= 0 ? weak[g] * s : strong[g] * -s;
-    const eokbu = lclamp(C.eokbuMix.struct * struct + C.eokbuMix.role * ROLE_V[ch.yongAll.eokbu.roles[e]] / 2, -1, 1);
+    const eokbu = lclamp(C.eokbuMix.struct * struct + C.eokbuMix.role * (ch.unified ? ch.unified.roleV[e] : ROLE_V[ch.yongAll.eokbu.roles[e]] / 2), -1, 1);   // 역할값은 통합 판단(조건부 포함)
     // 조후: 원국의 한난조습 치우침을 줄이는지 (다섯 오행 평균을 빼서 상대 비교)
     const K = C.climateModel, c = ch.climate, dev = (x, k) => Math.max(0, Math.abs(x) / k - K.comfort);
     const gain = el => { const nt = (1 - K.share) * c.temp + K.share * CP_EL_TEMP[el], nh = (1 - K.share) * c.hum + K.share * CP_EL_HUM[el]; return dev(c.temp, K.tempK) - dev(nt, K.tempK) + dev(c.hum, K.humK) - dev(nh, K.humK); };
@@ -2972,7 +3443,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
 
   G.Manse = {
     pickDays, TAEK_PURPOSE, JIAN12, gongmangFxOf,
-    compute, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, SUB_DOMAIN_KEYS, SUB_CONFIG, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
+    compute, integrateYongsin, unifiedLuckFit, unifiedSupport, gyeokCore, jongCore, chainLink, UNIFIED_CFG, josa, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, SUB_DOMAIN_KEYS, SUB_CONFIG, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, mainHidden, yang, gzName, gzNameK,

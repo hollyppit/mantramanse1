@@ -4964,7 +4964,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const e = x.ev, w = e.weights, c = (k, sc) => signed(w[k] * sc), f = e.flow, o = e.overlays;
     return `<b>${esc(title)}</b><br>흐름 <b>${esc(M.flowLabel(e))}</b> · 흐름 적합도 <b>${signed(luckV(x))}</b>`
       + `<br>주도 십성 ${e.dominantTenGodGroup} (${e.tendency})`
-      + `<br>억부 영향 ${c('eokbu', e.eokbuScore)} · 조후 영향 ${c('johu', e.johuScore)} · 관계 ${c('relation', e.relationScore)} · 구조 ${c('structure', e.structureScore)}`
+      + (e.unifiedScore != null ? `<br>통합 용신 ${c('unified', e.unifiedScore)} · 관계 ${c('relation', e.relationScore)} · 구조 ${c('structure', e.structureScore)} <span style="opacity:.7">(단독 비교: 억부 ${signed(e.eokbuScore)} · 조후 ${signed(e.johuScore)})</span>` : `<br>억부 영향 ${c('eokbu', e.eokbuScore)} · 조후 영향 ${c('johu', e.johuScore)} · 관계 ${c('relation', e.relationScore)} · 구조 ${c('structure', e.structureScore)}`)
       + `<br>활성도 기회 ${f.flows.opportunity} · 확장 ${f.flows.expansion} · 수확 ${f.flows.harvest} · 축적 ${f.flows.accumulation}${f.secondaryFlow ? ` (동반: ${M.flowName(f.secondaryFlow)})` : ''}`
       + `<br>변동성 ${o.volatility.score}(${o.volatility.band}) · 부담도 ${o.defense.score}(${o.defense.band}) · 작용 강도 ${Math.round(e.intensityScore)}`
       + (e.opportunityType.length && e.opportunityActivation >= 40 ? `<br>주요 기회: ${e.opportunityType.join('·')}` : '')
@@ -5788,7 +5788,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const order = Object.keys(by).sort((x, y) => by[y].length - by[x].length), top = by[order[0]].length, n = votes.length;
     const cons = j.status === 'jin' ? '종격이 충족되면 일간을 돕는 방향(억부·병약)과 세력을 따르는 방향(종격)이 반대가 되므로, 위 오행들을 하나로 모아 합의로 읽을 수 없습니다. 종격 해석을 기준으로 보세요.' : top >= 3 ? `${n}개 관점 중 ${top}개가 같은 오행(${chip(+order[0])})을 가리켜 방향이 비교적 모입니다.` : top === 2 ? `${n}개 관점 중 2개가 같은 오행(${chip(+order[0])})을 가리키지만 나머지는 다릅니다.` : `${n}개 관점이 서로 다른 오행을 가리켜 한 가지로 단정하기 어렵습니다.`;
     const jong = (j.status === 'jin' || j.status === 'ga') ? `<div class="warn"><b>${esc(j.headline)}</b><span>${j.status === 'jin' ? '위 억부·조후 판정보다 종격을 먼저 읽는 해석이 맞을 수 있습니다.' : '종격 가능성이 있어 위 억부·조후 판정을 그대로 받아들이기 전에 확인이 필요합니다.'} ${esc((j.text.relation[0] || ''))}</span></div>` : (j.status === 'hold' ? `<div class="warn"><span>종격 후보이나 시주를 몰라 보류 중입니다. 시주를 확인한 뒤 아래 종격·전왕격 판단을 보세요.</span></div>` : '');
-    return `${jong}<div class="ib-k">다른 관점의 의견 <span class="muted small">표시용 · 흐름 점수에는 반영되지 않음</span></div>
+    return `${jong}<div class="ib-k">다른 관점의 의견 <span class="muted small">병약은 표시용 · 격국·종격은 위 통합 판단에 반영</span></div>
       <div class="list">
         <div class="li"><span class="k">${term('병약용신', '병약')}</span><span class="v small">${esc(b.headline)}</span><span></span></div>
         <div class="li"><span class="k">${term('격국')}</span><span class="v small">${esc(k.headline)}</span><span></span></div>
@@ -5802,13 +5802,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return `<div class="advice">
       <div class="adv-opts">${opts.map(([k, l]) => `<span class="adv-o${k === a.verdict ? ' on' : ''}">${l}</span>`).join('')}</div>
       <p class="small">${esc(a.why)}</p>
+      ${ch.unified ? `<p class="small"><b>통합 판정</b> ${esc(ch.unified.headline)} — ${esc(ch.unified.steps[0] || '')}</p>` : ''}
       <div class="list">
         <div class="li"><span class="k">기후 치우침</span><span class="v small">${climateWords(ch.climate)} · 균형 기준의 <b class="num">${a.clim.toFixed(2)}배</b> ${a.clim >= 1 ? '(조후 필요)' : '(조후 불필요)'}</span><span></span></div>
         <div class="li"><span class="k">강약 치우침</span><span class="v small">${term(st.zone)} · 나를 돕는 힘 <b class="num">${st.help.toFixed(1)}%</b> (중간 50%에서 ${a.skew.toFixed(0)}%p)</span><span></span></div>
         <div class="li"><span class="k">두 기준의 용신</span><span class="v small">${term('억부')} <b class="eltxt ${ECLS[a.eokYong]}">${elLabel(a.eokYong)}</b>${a.joYong != null ? ` · ${term('조후')} <b class="eltxt ${ECLS[a.joYong]}">${elLabel(a.joYong)}</b> (억부 기준으로는 ${a.joRole})` : ' · 조후 용신 없음'}</span><span></span></div>
       </div>
       ${compact ? '' : adviceExtra(ch)}
-      ${compact ? '' : `<p class="note">운세 흐름의 흐름 점수는 억부·조후를 이 사주의 치우침에 맞춰 섞어 계산하고, 덜 앞세운 기준을 단독으로 본 값이 흐린 막대로 함께 보입니다. 병행이면 두 기준이 모두 보완되는 시기에 흐름 점수가 가장 높아집니다.${ch.school !== want && a.verdict !== '병행' ? ` <button type="button" class="btn" data-set="school:${want}">${a.verdict} 기준으로 보기</button>` : ''}</p>`}
+      ${compact ? '' : `<p class="note">운세 흐름의 흐름 점수는 통합 판단의 용신 배치로 계산하고, 덜 앞세운 기준을 단독으로 본 값이 흐린 막대로 함께 보입니다. 병행이라고 조후를 강제하지 않고, 더 급한 기준을 앞세운 뒤 다른 기준이 원하는 오행은 조건부로 반영합니다.${ch.school !== want && a.verdict !== '병행' ? ` <button type="button" class="btn" data-set="school:${want}">${a.verdict} 기준으로 보기</button>` : ''}</p>`}
     </div>`;
   }
   function climateCard(ch) {
@@ -6427,20 +6428,40 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${r.caveat.map(t => `<div class="warn"><span>${esc(t)}</span></div>`).join('')}
       <p class="note">병약은 억부·조후와 따로 보는 관점이며, 용신 계산·흐름 점수·다른 탭의 해석에는 더해지지 않습니다. 표의 병약 행은 용신=약, 희신=보조 약, 기신=병, 구신=병을 키우는 오행입니다. 전통 해석이며 결과를 보장하지 않습니다.</p></section>`;
   }
+  // 통합 판단 카드: 주 기준·보조 기준, 판단 순서, 이론별 판정, 조건부 오행, 글자별 차이
+  function unifiedCard(ch) {
+    const u = ch.unified; if (!u) return '';
+    const chip = e => `<b class="eltxt ${ECLS[e]}">${elLabel(e)}</b>`;
+    const row = t => `<tr class="${t.verdict === '주 기준' ? 'cur' : ''}"><td>${term(t.name)}</td><td class="small">${esc(t.verdict)}</td><td class="small">${t.urgencyLabel}</td><td>${t.yong != null ? chip(t.yong) : '<span class="muted small">—</span>'}</td><td class="small">${esc(t.why)}</td></tr>`;
+    const conds = Object.keys(u.conditions).map(Number).map(e => `<li>${chip(e)} <span class="muted">(${u.roles[e]})</span> — ${u.conditions[e].map(esc).join(' ')}</li>`).join('');
+    return `<section class="card">
+      <div class="card-h"><h2>통합 판단</h2><span class="note">억부·조후·격국·통관·제화를 함께 본 결과</span></div>
+      <p><b>${esc(u.headline)}</b></p>
+      <p class="small">${esc(u.summary)}</p>
+      <div class="ib-k">이렇게 판단했어요</div>
+      <ol class="log">${u.steps.map(t => `<li>${esc(t)}</li>`).join('')}</ol>
+      ${u.conflicts.length ? `<div class="ib-k">기준끼리 부딪치는 곳</div><ul class="ib-ul">${u.conflicts.map(c => `<li>${esc(c.text)}</li>`).join('')}</ul>` : ''}
+      <div class="tbl-wrap" style="margin-top:10px"><table class="dt"><thead><tr><th>기준</th><th>결과</th><th>필요도</th><th>가리키는 오행</th><th>근거</th></tr></thead><tbody>${['eokbu', 'johu', 'gyeok', 'tonggwan', 'jehwa'].map(k => row(u.theories[k])).join('')}</tbody></table></div>
+      ${conds ? `<div class="ib-k">조건부로 보는 오행</div><ul class="ib-ul">${conds}</ul>` : ''}
+      ${u.notes.length || u.glyphNotes.length ? `<div class="ib-k">용신의 실제 상태 · 글자별 차이</div><ul class="ib-ul">${[...u.notes, ...u.glyphNotes].map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+      ${u.jong.status === 'ga' || u.jong.status === 'hold' ? `<div class="warn"><span>종격 가능성(${esc(u.jong.kind || '')})이 있어, 종격이 맞다면 억부 판단이 정반대가 될 수 있습니다. 아래 종격·전왕격 판단을 함께 보세요.</span></div>` : ''}
+      <p class="note">운세 흐름 점수와 궁합의 오행 보완 점수도 이 통합 판단(조건부 역할 포함)을 그대로 씁니다. 필요도는 기준마다 따로 매기며, 점수를 평균 내서 용신을 정하지 않습니다.${u.forced ? ' 지금은 직접 고른 기준을 주 기준으로 두었습니다. [자동]을 누르면 통합 판단으로 돌아갑니다.' : ''}</p>
+    </section>`;
+  }
   function renderYong() {
     const ch = S.ch, dEl = M.stemEl(ch.pillars.day.s);
     const chosen = ch.yongAll[ch.school];
     const y = ch.yong;
     const order = ['용신', '희신', '한신', '구신', '기신'];
     const elOf = r => +Object.keys(y.roles).find(e => y.roles[e] === r);
-    return `${renderYongEasy()}${spYongCard()}
+    return `${renderYongEasy()}${spYongCard()}${unifiedCard(ch)}
     <section class="card">
       <div class="card-h"><h2>${term('용신')} · 희신 · 기신</h2>${seg('school', [['auto', '자동']].concat(Object.entries(M.SCHOOLS).map(([k, l]) => [k, l.split(' ')[0]])), ch.schoolAuto ? 'auto' : ch.school)}</div>
-      ${ch.schoolAuto ? `<p class="small muted" style="margin:-4px 0 10px">자동 — 이 사주는 <b>${ch.schoolAdvice === '병행' && ch.school === 'johu' ? '억부·조후를 함께 봐야 하는 사주' : ch.school === 'johu' ? '조후가 우선인 사주' : '억부가 우선인 사주'}</b>라 ${M.SCHOOLS[ch.school].split(' ')[0]} 기준 용신을 기본으로 보여 드립니다.</p>` : ''}
+      ${ch.schoolAuto ? `<p class="small muted" style="margin:-4px 0 10px">자동 — 통합 판단 결과입니다: <b>${esc(ch.unified ? ch.unified.headline : '')}</b>. 근거는 위 '통합 판단'에 있습니다.</p>` : ''}
       ${!chosen.applicable ? `<div class="warn"><b>${M.SCHOOLS[ch.school]} 해당 없음</b><span>${esc(chosen.log[chosen.log.length - 1])}</span><span>아래 역할과 운세 그래프는 억부 기준으로 표시합니다.</span></div>` : ''}
       <div class="roles">${order.map(r => { const e = elOf(r); return `<div class="role ${ECLS[e]}${r === '용신' ? ' main' : ''}"><span class="rn">${term(r)}</span><span class="rg">${M.EL[e]}</span><span class="rp">${M.EL_K[e]} · ${M.TG_GROUP[(e - dEl + 5) % 5]}</span><span class="rp num">원국 ${ch.weights.pct[e].toFixed(0)}%</span></div>`; }).join('')}</div>
-      <div><h3 style="margin-bottom:8px">판단 근거 · ${M.SCHOOLS[y.school]}</h3><ol class="log">${y.log.map(l => `<li>${esc(jgLog(l))}</li>`).join('')}</ol></div>
-      <p class="note">선택한 학파는 흐름 점수에서 해당 기준의 가중치를 높입니다. 강약·기후 치우침이 크면 학파와 관계없이 억부·조후 비중이 자동으로 조정되고, 합충·십성 균형도 함께 반영됩니다.</p>
+      <div><h3 style="margin-bottom:8px">판단 근거 · ${y.unified ? '통합 판단' : M.SCHOOLS[y.school]}</h3><ol class="log">${y.log.map(l => `<li>${esc(jgLog(l))}</li>`).join('')}</ol></div>
+      <p class="note">흐름 점수는 이 용신 배치(조건부 역할 포함)로 운의 천간·지지를 평가하고, 합충·십성 균형도 함께 반영합니다. 학파를 직접 고르면 그 학파가 주 기준이 되고 나머지 기준은 조건으로만 반영됩니다.</p>
     </section>
     <section class="card"><div class="card-h"><h2>조후론 vs 억부론</h2><span class="note">근거는 바로 아래 한난조습</span></div>${adviceCard(ch)}</section>
     ${climateCard(ch)}
@@ -7200,8 +7221,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function detailHTML(title, x, extra = '', kind = '', banner = '') {
     if (!x || !x.ev) return '';
     const e = x.ev, w = e.weights;
-    const comps = [['억부', 'eokbu', e.eokbuScore], ['조후', 'johu', e.johuScore], ['관계', 'relation', e.relationScore], ['구조', 'structure', e.structureScore]];
-    if (e.tonggwanScore != null) comps.splice(2, 0, ['통관', 'tonggwan', e.tonggwanScore]);
+    const comps = e.unifiedScore != null ? [['통합 용신', 'unified', e.unifiedScore], ['관계', 'relation', e.relationScore], ['구조', 'structure', e.structureScore]] : [['억부', 'eokbu', e.eokbuScore], ['조후', 'johu', e.johuScore], ['관계', 'relation', e.relationScore], ['구조', 'structure', e.structureScore]];
+    if (e.unifiedScore == null && e.tonggwanScore != null) comps.splice(2, 0, ['통관', 'tonggwan', e.tonggwanScore]);
+    const impact = (e.theoryImpact || []).map(t => `<span class="chip ${t.v >= 5 ? 'ib-g' : t.v <= -5 ? 'ib-b' : ''}">${esc(t.text)}</span>`).join(' ');
+    const chainLine = e.chain && e.chain.links.length ? `<div class="small" style="margin-top:4px"><b>${esc(M.josa(e.chain.upName, '과/와'))}의 연결</b> ${e.chain.links.map(l => esc(l.text)).join(' · ')}</div>` : '';
     return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${condTag(e.condition)} <b class="num">${signed(luckV(x))}</b></span></div>
       ${banner}
       ${kind ? interpBox(x, kind) : ''}
@@ -7209,7 +7232,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="small" style="color:var(--ink-2)">${luckCells(x)}</div>
       ${kind ? (kind === 'ilun' ? dayBox(x) : phaseBox(x, kind)) + domainBox(x, kind, title) + rootBox(x, kind) + luckEffects(x, kind) : ''}
       <h4 style="margin:4px 0 0">${term('흐름 점수')} 근거</h4>
-      <div class="small muted">${comps.map(([n, k, v]) => `${n} ${signed(v)} × ${Math.round(w[k] * 100)}%`).join(' · ')} — 가중치는 이 사주의 강약·기후 치우침에 따라 정해집니다.</div>
+      <div class="small muted">${comps.map(([n, k, v]) => `${n} ${signed(v)} × ${Math.round(w[k] * 100)}%`).join(' · ')} — 가중치는 이 사주의 강약·기후 치우침에 따라 정해집니다.${e.unifiedScore != null ? ` 통합 용신은 원국의 통합 판단(${esc(S.ch.unified ? S.ch.unified.primaryName : '')} 기준)으로 천간 뿌리·글자별 조습·격국까지 함께 본 값입니다.` : ''}</div>
+      ${impact ? `<div class="small" style="margin-top:4px">이 운이 각 기준에 주는 영향: ${impact}</div>` : ''}${chainLine}
       <ul class="small" style="margin:4px 0 0;padding-left:18px">${e.reasons.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
       <div class="parts">${e.parts.map(p => `<div class="part"><span>${esc(p.label)}</span><span class="pv ${p.v > 0.5 ? 'pos' : p.v < -0.5 ? 'neg' : ''}">${signed(p.v)}</span></div>`).join('')}</div>${extra}</div>`;
   }
@@ -9672,8 +9696,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const tp = n => n === '나' ? '<b>나</b>는' : `<b>${esc(n)}</b>${jong(n) ? '은' : '는'}`;
     const elTxt = e => `${M.EL_K[e]}(${M.EL[e]})`;
     const elLine = (who, other, g) => {
-      const t = g.top;
-      return `<li>${sj(other)} <b>${esc(who)}</b>에게 채워 주는 정도 <b class="num">${g.score}점</b> — ${t ? `${esc(who)}에게 필요한 ${esc(t.role)} ${elTxt(t.e)} 기운을 ${other === '나' ? '내가' : esc(other) + (jong(other) ? '이' : '가')} ${Math.round(t.pct)}% 가지고 있습니다.` : `${esc(who)}에게 필요한 기운을 ${tp(other)} 거의 가지고 있지 않습니다.`} ${esc(other)}의 일간은 ${elTxt(g.dayEl)} 기운으로, ${esc(who)}에게는 <b>${g.dayRole}</b>(${({ '용신': '가장 필요한', '희신': '도움이 되는', '한신': '돕지도 해치지도 않는', '구신': '부담이 되는', '기신': '가장 해로운' })[g.dayRole] || ''} 기운)입니다.</li>`;
+      const t = g.top, rs = (g.reasons || []).slice(t && t.pct >= 8 ? 1 : 0), why = rs.length ? `<br><span class="small muted">${rs.map(esc).join(' ')}</span>` : '';   // 첫 이유(필요한 기운 비율)는 앞 문장과 같아 뺀다
+      return `<li>${sj(other)} <b>${esc(who)}</b>에게 채워 주는 정도 <b class="num">${g.score}점</b> — ${t ? `${esc(who)}에게 필요한 ${esc(t.role)} ${elTxt(t.e)} 기운을 ${other === '나' ? '내가' : esc(other) + (jong(other) ? '이' : '가')} ${Math.round(t.pct)}% 가지고 있습니다.` : `${esc(who)}에게 필요한 기운을 ${tp(other)} 거의 가지고 있지 않습니다.`} ${esc(other)}의 일간은 ${elTxt(g.dayEl)} 기운으로, ${esc(who)}에게는 <b>${g.dayRole}</b>(${({ '용신': '가장 필요한', '희신': '도움이 되는', '한신': '돕지도 해치지도 않는', '구신': '부담이 되는', '기신': '부담이 되기 쉬운' })[g.dayRole] || ''} 기운)입니다.${why}</li>`;
     };
     const tgLine = (who, other, tg) => `<li><b>${esc(other)}</b>의 일간은 <b>${esc(who)}</b>에게 <b>${tg}</b> — ${TG_KW[tg] || ''}</li>`;
     const goods = R.relations.filter(x => x.tone === 'good'), bads = R.relations.filter(x => x.tone === 'bad');
@@ -9697,11 +9721,11 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="pr-parts">${rows}</div>
     </section>
     <section class="card">
-      <div class="card-h"><h2>서로의 기운 · 성향</h2><span class="note">오행 보완과 일간(나 자신)을 비교합니다</span></div>
-      <h3 class="cp-h3">오행 보완</h3>
+      <div class="card-h"><h2>서로의 기운 · 성향</h2><span class="note">오행·조후 보완과 일간(나 자신)을 비교합니다</span></div>
+      <h3 class="cp-h3">오행·조후 보완</h3>
       <ul class="pr-list">${elLine(a, b, R.element.aGets)}${elLine(b, a, R.element.bGets)}</ul>
       <h3 class="cp-h3">일간으로 본 서로의 자리</h3>
-      <ul class="pr-list">${tgLine(a, b, R.stems.aSeesB)}${tgLine(b, a, R.stems.bSeesA)}${R.stems.hap ? '<li><b>일간끼리 천간합</b> — 마음이 쉽게 끌리는 인연입니다.</li>' : ''}${R.stems.chung ? '<li><b>일간끼리 천간충</b> — 생각이 정면으로 맞서 말다툼이 잦습니다.</li>' : ''}<li>강약: ${esc(a)} ${R.strength.a} · ${esc(b)} ${R.strength.b}</li></ul>
+      <ul class="pr-list">${tgLine(a, b, R.stems.aSeesB)}${tgLine(b, a, R.stems.bSeesA)}${R.stems.hap ? '<li><b>일간끼리 천간합</b> — 마음이 쉽게 끌리는 인연입니다.</li>' : ''}${R.stems.chung ? '<li><b>일간끼리 천간충</b> — 생각이 정면으로 맞서 말다툼이 잦습니다.</li>' : ''}<li>강약: ${esc(a)} ${R.strength.a} · ${esc(b)} ${R.strength.b}</li>${(R.balanceNotes || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul>
     </section>
     <section class="card">
       <div class="card-h"><h2>두 사람의 간지 관계</h2><span class="note">영향이 큰 순서 · 위쪽이 더 중요합니다</span></div>

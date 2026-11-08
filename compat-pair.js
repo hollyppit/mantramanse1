@@ -15,7 +15,7 @@
     friend: { label: '친구', w: { yong: 25, dayStem: 20, dayBranch: 15, harmony: 25, balance: 15 } },
     family: { label: '가족', w: { yong: 30, dayStem: 25, dayBranch: 10, harmony: 20, balance: 15 } },
   };
-  const PART_LABEL = { yong: '오행 보완', dayStem: '일간 궁합', dayBranch: '일지(마음자리)', harmony: '간지 조화', balance: '강약 균형' };
+  const PART_LABEL = { yong: '오행·조후 보완', dayStem: '일간 궁합', dayBranch: '일지(마음자리)', harmony: '간지 조화', balance: '강약·기후 균형' };
 
   const GRADES = [
     [90, '천생연분', 'top'], [80, '아주 좋음', 'good'], [70, '좋음', 'good'], [60, '무난', 'mid'], [50, '노력 필요', 'warn'], [0, '상극 주의', 'bad'],
@@ -71,8 +71,10 @@
     const nm = Object.assign({ a: '나', b: '상대' }, names || {});
     const dA = A.pillars.day, dB = B.pillars.day;
 
-    // 1) 오행 보완 — 서로의 용신·희신을 상대의 오행이 얼마나 채워 주는가
-    const fitA = elementFit(M, A, B), fitB = elementFit(M, B, A);
+    // 1) 오행·조후 보완 — 엔진의 통합 판단(M.unifiedSupport)으로 상대의 여덟 글자·조습·일간의 뿌리·일간끼리의 합을 함께 본다.
+    //    통합 판단이 없는 옛 엔진에서는 예전 방식(용신 역할 × 상대 오행 비율 + 상대 일간 역할)으로 계산한다.
+    const sup = (x, y, self, other) => (M.unifiedSupport && x.unified ? M.unifiedSupport(x, y, { self, other }) : elementFit(M, x, y));
+    const fitA = sup(A, B, nm.a, nm.b), fitB = sup(B, A, nm.b, nm.a);
     const yong = Math.round((fitA.score + fitB.score) / 2);
 
     // 2) 일간 — 천간합·충, 서로가 서로에게 무엇인가(십성)
@@ -115,7 +117,19 @@
     if (hA * hB < 0) balance = 72 + Math.min(24, Math.abs(hA - hB) * 0.6);
     else if (Math.abs(hA) < 6 || Math.abs(hB) < 6) balance = 70;
     else balance = 66 - Math.min(26, Math.min(Math.abs(hA), Math.abs(hB)) * 0.8);
-    balance = Math.round(clamp(balance, 20, 96));
+    // 기후(조후)도 함께 본다: 한쪽이 덥고 한쪽이 차면(또는 건조·습함) 서로 맞춰 주고, 같은 쪽으로 치우치면 같은 약점이 겹친다
+    const balanceNotes = [], cA = A.climate || { temp: 0, hum: 0 }, cB = B.climate || { temp: 0, hum: 0 };
+    const tilt = c => ({ t: c.temp >= 0.6 ? 1 : c.temp <= -0.6 ? -1 : 0, h: c.hum >= 0.8 ? 1 : c.hum <= -0.8 ? -1 : 0 });
+    const tA = tilt(cA), tB = tilt(cB);
+    let climAdj = 0;
+    if (tA.t && tA.t === -tB.t) { climAdj += 8; balanceNotes.push(`${tA.t > 0 ? nm.a : nm.b}의 더운 기운과 ${tA.t > 0 ? nm.b : nm.a}의 차가운 기운이 서로를 식히고 데워 줍니다.`); }
+    else if (tA.t && tA.t === tB.t) { climAdj -= 8; balanceNotes.push(`두 사람 모두 ${tA.t > 0 ? '더운' : '추운'} 사주라 같은 쪽으로 치우친 기운이 겹칩니다.`); }
+    if (tA.h && tA.h === -tB.h) { climAdj += 5; balanceNotes.push('한쪽의 건조함과 다른 쪽의 습함이 서로를 맞춰 줍니다.'); }
+    else if (tA.h && tA.h === tB.h) { climAdj -= 5; balanceNotes.push(`두 사람 모두 ${tA.h > 0 ? '습한' : '건조한'} 쪽이라 같은 약점이 겹칩니다.`); }
+    if (Math.abs(hA) < 8 && Math.abs(hB) < 8) balanceNotes.unshift('두 사람 모두 강약이 중간에 가까워 어느 한쪽이 크게 기울지 않습니다.');
+    else if (hA * hB < 0) balanceNotes.unshift('한 사람은 힘이 남고 한 사람은 모자라 서로 기대기 좋은 강약입니다.');
+    else if (Math.abs(hA) >= 6 && Math.abs(hB) >= 6) balanceNotes.unshift(`두 사람 모두 ${hA > 0 ? '힘이 남는' : '힘이 모자란'} 쪽이라 같은 약점이 함께 드러나기 쉽습니다.`);
+    balance = Math.round(clamp(balance + climAdj, 20, 96));
 
     const parts = ['yong', 'dayStem', 'dayBranch', 'harmony', 'balance'].map(k => ({ key: k, label: PART_LABEL[k], score: { yong, dayStem, dayBranch, harmony, balance }[k], weight: cfg.w[k] }));
     // 항목 가중 평균은 56~60 근처에 몰려 변별력이 낮으므로, 무작위 사주 600쌍 분포(중앙 60, 상위 10% 71)를 기준으로 폭을 넓힌다
@@ -130,14 +144,15 @@
     return {
       rel, relLabel: cfg.label, names: nm, score, grade, parts,
       element: {
-        aGets: { score: fitA.score, top: fitA.top, dayEl: fitA.dayEl, dayRole: fitA.dayRole },   // 상대가 나에게 채워 주는 것
-        bGets: { score: fitB.score, top: fitB.top, dayEl: fitB.dayEl, dayRole: fitB.dayRole },   // 내가 상대에게 채워 주는 것
+        aGets: { score: fitA.score, top: fitA.top, dayEl: fitA.dayEl, dayRole: fitA.dayRole, reasons: fitA.reasons || [] },   // 상대가 나에게 채워 주는 것
+        bGets: { score: fitB.score, top: fitB.top, dayEl: fitB.dayEl, dayRole: fitB.dayRole, reasons: fitB.reasons || [] },   // 내가 상대에게 채워 주는 것
+        unified: !!(fitA.reasons),
       },
       stems: { aSeesB: tgAB, bSeesA: tgBA, hap: stemRel.some(r => r.type === '천간합'), chung: stemRel.some(r => r.type === '천간충') },
       dayBranch: { rels: dayBranchRels.map(r => r.type), same: sameBranch },
       relations: items,
       best, worst,
-      strength: { a: A.strength.zone, b: B.strength.zone },
+      strength: { a: A.strength.zone, b: B.strength.zone }, balanceNotes,
     };
   }
 

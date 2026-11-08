@@ -32,7 +32,7 @@
   }
 
   /* ── 근거: 원국(바탕) · 대운 · 세운 · 월운의 영향을 나눠서 보여 준다. 값은 모두 엔진(evaluateLuck·evaluateDomainLuck)에서 읽는다. ── */
-  var COMP = { eokbu: '억부(강약 균형)', johu: '조후(차고 더움)', relation: '합충·관계', structure: '십성 구조', tonggwan: '통관' };
+  var COMP = { unified: '통합 용신(억부·조후·격국)', eokbu: '억부(강약 균형)', johu: '조후(차고 더움)', relation: '합충·관계', structure: '십성 구조', tonggwan: '통관' };
   var EL = ['목', '화', '토', '금', '수'], LEVEL_KO = { daeun: '대운', seun: '세운', wolun: '월운' };
   // 관계 한 줄이 계산에서 어떻게 쓰였는지 나눈다(엔진 값만 읽음, 새 계산 없음):
   //  score — 흐름 점수의 "합충·관계" 성분에 점수로 들어간 관계(충·합·천간충/합 일부). parts 라벨이 "관계이름 — …" 로 남는다.
@@ -50,7 +50,7 @@
   function evidence(M, ch, item) {
     var r = item && item._ref; if (!r) return null; var ev = r.p.ev, chain = [], note = '';
     try { var d = M.evaluateDomainLuck(ch, r.p, r.level, r.ctx); chain = d.chain.map(function (c) { return { level: c.level, name: LEVEL_KO[c.level] || c.level, ganzhi: c.ganzhi, weight: Math.round(c.weight * 100) }; }); note = d.chainNote || ''; } catch (e) { chain = [{ level: r.level, name: LEVEL_KO[r.level], ganzhi: item.ganzhi, weight: 100 }]; }
-    var W = ev.weights || {}, comps = [['eokbu', ev.eokbuScore], ['johu', ev.johuScore], ['relation', ev.relationScore], ['structure', ev.structureScore], ['tonggwan', ev.tonggwanScore]]
+    var W = ev.weights || {}, comps = (ev.unifiedScore != null ? [['unified', ev.unifiedScore], ['relation', ev.relationScore], ['structure', ev.structureScore]] : [['eokbu', ev.eokbuScore], ['johu', ev.johuScore], ['relation', ev.relationScore], ['structure', ev.structureScore], ['tonggwan', ev.tonggwanScore]])
       .filter(function (c) { return c[1] != null && (W[c[0]] || 0) > 0; }).map(function (c) { return { key: c[0], name: COMP[c[0]], score: Math.round(c[1]), weight: Math.round(W[c[0]] * 100), contrib: Math.round(W[c[0]] * c[1] * 10) / 10 }; });
     var y = ch.yong || {}, natal = {
       day: M.gzNameK ? M.gzNameK(ch.pillars.day) : '', zone: ch.strength && ch.strength.zone, help: ch.strength ? Math.round(ch.strength.help) : null,
