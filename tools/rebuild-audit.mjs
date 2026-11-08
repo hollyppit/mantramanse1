@@ -15,7 +15,14 @@ const SENT = s => s.split(/(?<=[.!?])\s+/).map(x => x.trim()).filter(Boolean);
 
 // 검사 규칙
 const META = /엔진|계산한|계산값|이 장은|이 장에서|원국의 성향으로|문안|검수|학파|해석 범위|조건(?:을|이|에)? ?(?:충족|맞춰)|판정했|기준으로 읽|로 읽어요|라고 읽|읽습니다|단정하지|확정하지|정해진 (?:것|일)은 아니|가능성이지/;
-const JARGON = /비견|겁재|식신|상관|편재|정재|편관|정관|편인|정인|비겁|식상|재성|관성|인성|신강|신약|중화|통근|무근|용신|희신|기신|구신|한신|억부|조후|일간|월지|일지|시지|년지|천간|지지|합충|육합|삼합|방합|원진|귀문|형살|충|대운|세운|월운|격국|십성|오행/g;
+// 2026-11-08: '충분·충돌'의 충, '상관없이', '지지해 주는'의 지지, '스스로 세운'은 용어가 아니므로 뺀다.
+const JARGON = /비견|겁재|식신|상관(?!없)|편재|정재|편관|정관|편인|정인|비겁|식상|재성|관성|인성|신강|신약|중화|통근|무근|용신|희신|기신|구신|한신|억부|조후|일간|월지|일지|시지|년지|천간|지지(?!하|해|받|를 받|가 있|를 해)|합충|육합|삼합|방합|원진|귀문|형살|(?<![가-힣])충(?![분돌격전동실족])|대운|세운(?=이|은|의|에|과|도| 흐름| 천간| 십성| 분류)|월운|격국|십성|오행/g;
+// 설명이 붙지 않은 용어만 센다: 바로 뒤에 "(쉬운 뜻)"이 있거나 괄호 안에 있는 용어는 설명된 것으로 본다.
+function unexplained(t) {
+  let n = 0, m; JARGON.lastIndex = 0;
+  while ((m = JARGON.exec(t))) { const end = m.index + m[0].length; let d = 0; for (let i = 0; i < m.index; i++) { if (t[i] === '(') d++; else if (t[i] === ')') d--; } if (t[end] !== '(' && d <= 0) n++; }
+  return n;
+}
 const HEDGE = /(?:수 있어요|수 있습니다|쉬워요|쉽습니다|편이에요|편입니다)/g;
 const FORMAL = /(?:습니다|입니다|됩니다|합니다|십시오)[.!?]?$/;
 const POLITE = /(?:요|죠|세요)[.!?]?$/;
@@ -36,7 +43,7 @@ for (const e of E) {
     const t = textOf(e, f).replace(/\s+/g, ' ').trim(), R = byRole[f];
     if (!t) { R.empty++; if (f !== 'apps') mine.push([f, 'empty', '']); continue; }
     R.n++; R.chars += t.length;
-    const ss = SENT(t), j = (t.match(JARGON) || []).length, h = (t.match(HEDGE) || []).length;
+    const ss = SENT(t), j = unexplained(t), h = (t.match(HEDGE) || []).length;
     if (META.test(t)) { R.meta++; mine.push([f, 'meta', (t.match(META) || [])[0]]); }
     if (j) R.jargon++;
     if (j / Math.max(1, t.length / 100) >= 2.5) { R.jargonHeavy++; mine.push([f, 'jargon', j + '개']); }

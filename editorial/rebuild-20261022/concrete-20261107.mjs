@@ -1562,8 +1562,17 @@ export const CONCRETE15 = {
   negative: '기세로 시작한 부업이나 사업은 모아 둔 돈, 사람, 기술 같은 바탕이 얕아서 상황이 바뀌면 한꺼번에 흔들려요. 중간에 의욕이 꺼져 접고 나면 같은 실수를 반복하면서 시작 자체가 두려워질 수 있어요.',
  },
 };
+// ── 근거(basis) 용어 정리 — 용어가 문장마다 반복되던 6곳(2026-11-08). 사주 정보는 그대로 두고 쉬운 말로 풀었다. ──
+export const BASIS_PLAIN = {
+ 's28-wood': { basis: '태어난 날의 글자(일간)가 갑·을, 곧 나무 기운이라 이 성향에 맞춰 봤어요. 갑은 기(己)와, 을은 경(庚)과 짝이 되는 합이라 서로 안정감을 주거나 부족한 점을 채워 주기 쉬워요. 임·계(물) 날에 태어난 사람은 나무를 키워 주는 쪽이라 편하게 느껴져요. 반대로 갑은 경(庚), 을은 신(辛)과 부딪히는 사이라 말투와 방식에서 긴장이 생기기 쉬워요. 태어난 날의 아래 글자끼리 자-오, 축-미, 인-신, 묘-유, 진-술, 사-해로 맞부딪히는 조합도 가까워질수록 부딪히기 쉬운 쪽으로 같이 봐요.' },
+ 's28-fire': { basis: '태어난 날의 글자(일간)가 병·정, 곧 불 기운이라 이 성향에 맞춰 봤어요. 병은 신(辛)과, 정은 임(壬)과 짝이 되는 합이라 서로 끌리거나 보완하기 쉬워요. 갑·을(나무) 날에 태어난 사람은 불을 키워 주는 쪽이라 마음이 편해져요. 반대로 병은 임(壬), 정은 계(癸)와 부딪히는 사이라 한쪽이 식히려 들면 다른 쪽은 꺼지는 느낌을 받기 쉬워요. 태어난 날의 아래 글자끼리 자-오, 축-미, 인-신, 묘-유, 진-술, 사-해로 맞부딪히는 조합도 가까워질수록 부딪히기 쉬운 쪽으로 같이 봐요.' },
+ 's28-earth': { basis: '태어난 날의 글자(일간)가 무·기, 곧 흙 기운이라 이 성향에 맞춰 봤어요. 무는 계(癸)와, 기는 갑(甲)과 짝이 되는 합이라 서로 부드럽게 맞물리거나 자극과 안정을 주고받기 쉬워요. 병·정(불) 날에 태어난 사람은 흙을 데워 주는 쪽이라 편하게 느껴져요. 반대로 무와 갑(甲)처럼 나무가 흙을 뚫고 나오는 사이는 갈등이 있는 편이고, 태어난 날의 아래 글자가 축-미, 진-술로 부딪히는 조합은 가까워질수록 고집이 맞서기 쉬워요. 자-오, 인-신, 묘-유, 사-해로 맞부딪히는 조합도 같이 봐요.' },
+ 's28-metal': { basis: '태어난 날의 글자(일간)가 경·신, 곧 쇠 기운이라 이 성향에 맞춰 봤어요. 경은 을(乙)과, 신은 병(丙)과 짝이 되는 합이라 날카로움과 유연함이 맞아 들거나 서로 끌리기 쉬워요. 무·기(흙) 날에 태어난 사람은 쇠를 받쳐 주는 쪽이라 마음이 놓여요. 반대로 경은 갑(甲), 신은 을(乙)과 부딪히는 사이라 말이 날카로워지기 쉬워요. 태어난 날의 아래 글자끼리 자-오, 축-미, 인-신, 묘-유, 진-술, 사-해로 맞부딪히는 조합도 가까워질수록 부딪히기 쉬운 쪽으로 같이 봐요.' },
+ 's28-water': { basis: '태어난 날의 글자(일간)가 임·계, 곧 물 기운이라 이 성향에 맞춰 봤어요. 임은 정(丁)과, 계는 무(戊)와 짝이 되는 합이라 서로 끌리거나 안정감을 주고받기 쉬워요. 경·신(쇠) 날에 태어난 사람은 물을 만들어 주는 쪽이라 편하게 느껴져요. 반대로 임은 병(丙), 계는 정(丁)과 부딪히는 사이라 속도와 온도 차이로 오해가 생기기 쉬워요. 태어난 날의 아래 글자끼리 자-오, 축-미, 인-신, 묘-유, 진-술, 사-해로 맞부딪히는 조합도 가까워질수록 부딪히기 쉬운 쪽으로 같이 봐요.' },
+ 'self22-strong-rooted': { basis: '타고난 힘(일간의 힘)이 센 편(신강)이고, 땅에 내린 뿌리(통근)도 단단한 편이라 힘도 크고 뿌리도 있어요. 그래서 그 힘을 쓸 곳이 없으면 엉뚱한 곳으로 새는 쪽이에요.' },
+};
 export const CONCRETE_ALL = {};
-for (const table of [CONCRETE, CONCRETE2, CONCRETE3, CONCRETE4, CONCRETE5, CONCRETE6, CONCRETE7, CONCRETE8, CONCRETE9, CONCRETE10, CONCRETE11, CONCRETE12, CONCRETE13, CONCRETE14, CONCRETE15]) for (const [id, x] of Object.entries(table)) CONCRETE_ALL[id] = { ...(CONCRETE_ALL[id] || {}), ...x };
+for (const table of [CONCRETE, CONCRETE2, CONCRETE3, CONCRETE4, CONCRETE5, CONCRETE6, CONCRETE7, CONCRETE8, CONCRETE9, CONCRETE10, CONCRETE11, CONCRETE12, CONCRETE13, CONCRETE14, CONCRETE15, BASIS_PLAIN]) for (const [id, x] of Object.entries(table)) CONCRETE_ALL[id] = { ...(CONCRETE_ALL[id] || {}), ...x };
 export function applyConcrete(entries) {
  return entries.map(e => { const x = CONCRETE_ALL[e.id]; if (!x) return e; const o = { ...e }; for (const f of FIELDS) if (typeof x[f] === 'string') o[f] = x[f]; return o; });
 }

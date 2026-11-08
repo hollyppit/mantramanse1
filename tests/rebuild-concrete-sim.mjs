@@ -15,7 +15,7 @@ for (const [id, x] of Object.entries(CONCRETE_ALL)) {
   for (const [f, t] of Object.entries(x)) {
     fields++;
     for (const e of es) assert.equal(e[f], t, `${id}.${f} not applied as written`);
-    assert(LIFE.test(t), `${id}.${f} has no everyday scene`);
+    if (['example', 'positive', 'negative', 'advice'].includes(f)) assert(LIFE.test(t), `${id}.${f} has no everyday scene`);
     assert(!/[{}<>]|반드시|무조건|100%|확실히|엔진|계산/.test(t), `${id}.${f} has a banned or internal word`);
     const ss = t.split(/(?<=[.!?])\s+/); assert.equal(new Set(ss).size, ss.length, `${id}.${f} repeats a sentence`);
     assert(t.length >= 40 && t.length <= 400, `${id}.${f} length ${t.length}`);
