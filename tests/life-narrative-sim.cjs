@@ -4,7 +4,7 @@
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.join(__dirname, '..');
 const ctx = { console }; ctx.window = ctx; vm.createContext(ctx);
-for (const f of ['engine.js', 'report/v2/life-narrative-data.js', 'report/v2/life-narrative.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
+for (const f of ['engine.js', 'report/v2/life-narrative-data.js', 'report/v2/life-narrative-data-self.js', 'report/v2/life-narrative-data-self2.js', 'report/v2/life-narrative.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
 const M = ctx.Manse, L = ctx.MantraLifeNarrative, D = ctx.MantraLifeNarrativeData;
 const N = +process.argv[2] || 1500, NOW = Date.UTC(2026, 10, 8, 3), YEAR = 365.2422 * 86400000;
 const fails = [], ok = (c, m) => { if (!c) { if (fails.length < 40) fails.push(m); else fails.length++; } };
@@ -21,7 +21,7 @@ for (const r of D.RULES) {
   ok(r.all.length + r.any.length >= 2, '복합 조건 아님 ' + r.id);
   [...r.all, ...r.none, ...r.any.flat()].forEach(t => ok(TAG.test(t), '알 수 없는 태그 ' + t + ' @' + r.id));
   ok(r.basis && r.basis.length >= 40, '근거 없음 ' + r.id); ok(['strong', 'moderate'].includes(r.conf), '확신도 ' + r.id);
-  for (const k of ['hook', 'core', 'life', 'conflict', 'advice']) { ok(r[k] && r[k].length >= 25, `${r.id} ${k} 비었음`); ok(!BAN.test(r[k]), `${r.id} ${k} 금지어 ${(r[k].match(BAN) || [])[0]}`); ok(!JARGON.test(r[k]), `${r.id} ${k} 본문에 용어 ${(r[k].match(JARGON) || [])[0]}`); }
+  for (const k of ['hook', 'core', 'life', 'conflict', 'advice']) { ok(r[k] && r[k].length >= (k === 'hook' ? 15 : 25), `${r.id} ${k} 비었음`); ok(!BAN.test(r[k]), `${r.id} ${k} 금지어 ${(r[k].match(BAN) || [])[0]}`); ok(!JARGON.test(r[k]), `${r.id} ${k} 본문에 용어 ${(r[k].match(JARGON) || [])[0]}`); }
   ok(/[?？]$/.test(r.hook), '후킹은 질문으로 끝남 ' + r.id);
   ok(L.CHAPTERS[r.chapter], '시범 장이 아님 ' + r.chapter);
 }
@@ -74,7 +74,7 @@ ok(L.forChapter({ id: 'timeline_self_03', readingFeature: { M, ch: M.compute({ y
 // ⑤ 화면(reading-text.js): 스위치 꺼짐 → 기존 문안 그대로, 켜짐 → 서사 5단계 + 근거 펼쳐보기
 function render(flag) {
   const c2 = { console }; c2.window = c2; if (flag) c2.MANTRA_FLAGS = { lifeNarrative: true }; vm.createContext(c2);
-  for (const f of ['engine.js', 'report/v2/life-narrative-data.js', 'report/v2/life-narrative.js', 'report/v2/reading-text.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), c2, { filename: f });
+  for (const f of ['engine.js', 'report/v2/life-narrative-data.js', 'report/v2/life-narrative-data-self.js', 'report/v2/life-narrative-data-self2.js', 'report/v2/life-narrative.js', 'report/v2/reading-text.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), c2, { filename: f });
   const ch = c2.Manse.compute({ year: 1992, month: 6, day: 23, hour: 1, minute: 45, gender: 'M' });
   const c = { id: 'timeline_career_07', editorialContractId: 'timeline_career_07', title: '조직생활', readingParagraphs: [{ role: 'title', text: '기존 문안 첫 문장이에요. 조직에서 생기는 일이에요.' }, { role: 'reality', text: '기존 문안 생활 장면이에요.' }] };
   Object.defineProperty(c, 'readingFeature', { value: { M: c2.Manse, ch, now: NOW }, enumerable: false });

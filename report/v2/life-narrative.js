@@ -16,7 +16,10 @@
   var YEAR = 365.2422 * 86400000;
   var GN = ['bi', 'sik', 'jae', 'gwan', 'in'], GK = ['비겁', '식상', '재성', '관성', '인성'];
   // 시범 장 → 렌즈
-  var CHAPTERS = { timeline_self_20: 'life', timeline_self_03: 'life', timeline_wealth_02: 'wealth', timeline_love_04: 'love', timeline_career_07: 'career' };
+  var CHAPTERS = { timeline_self_20: 'life', timeline_self_03: 'life', timeline_wealth_02: 'wealth', timeline_love_04: 'love', timeline_career_07: 'career',
+    // 3단계 1묶음(종합풀이 12장). '운이 바꾸는 것'은 data 의 CH_LUCK(장마다 고유 문장)으로 쓴다
+    timeline_self_18: 'life', timeline_self_22: 'life', timeline_self_24: 'life', timeline_self_25: 'life', timeline_self_26: 'career', timeline_self_27: 'love', timeline_self_29: 'love',
+    timeline_self_30: 'wealth', timeline_self_31: 'wealth', timeline_self_33: 'life', timeline_self_34: 'life', timeline_self_37: 'life' };
   var LENS_WORD = { life: '삶', wealth: '돈', love: '관계', career: '일' };
   var STAGE = { core: '핵심 성향', life: '실제 생활에서는', conflict: '갈등과 약점', luck: '운이 바꾸는 것', advice: '현실적인 조언' };
   var norm = function (t) { return String(t || '').replace(/[\s.,!?·—'"‘’“”()]/g, ''); };
@@ -158,7 +161,37 @@
   // 장 하나에 넣는 '운이 바꾸는 것' 단계: 지금 대운 + 다음 대운(+지난 대운 한 줄) + 앞으로 5년 세운
   // 운 단계: 시점 문장(렌즈별로 다름)은 중복 제거에서 빼고 본문만 중복 제거한다
   var LENS_EYE = { life: '삶 전체로 보면', wealth: '돈의 흐름으로 보면', love: '관계의 눈으로 보면', career: '일의 흐름으로 보면' };
-  function luckStage(M, ch, now, lens, st) {
+  // 장마다 고유한 '운이 바꾸는 것'(data CH_LUCK): 지금·다음 대운 + (말년 장) 50세 이후 대운 + (시기 장) 5년 세운 + (배우자 장) 배우자 기운이 오는 때
+  var COND_W = { good: '받쳐 주는', mixed: '엇갈리는', hard: '무거운' };
+  function chapterLuck(M, ch, now, spec, st) {
+    var ps = periods(M, ch, now), ci = ps.findIndex(function (p) { return p.tense === 'current'; }), out = [];
+    var eye = spec.eye, g = spec.g, line = function (p) { return dedupe(st, g[p.group]); };
+    if (spec.late) {
+      var late = ps.filter(function (p) { return p.age0 >= 50 && p.age0 < 85; }).slice(0, 3);
+      late.forEach(function (p, k) { var sameAsPrev = k > 0 && late[k - 1].group === p.group; out.push(josa(ageTxt(p) + '(' + p.gz + ' 대운, ' + p.year0 + '년~)', '은/는') + ' ' + (p.tense === 'past' ? '이미 지나온 시기로, 흐름이 ' + COND_W[p.tone] + ' 구간이었어요.' : p.tense === 'current' ? '지금 지나는 시기로, 흐름이 ' + COND_W[p.tone] + ' 구간이에요.' : '흐름이 ' + COND_W[p.tone] + ' 구간이에요.') + ' ' + (sameAsPrev ? (k === 1 || late[0].group !== p.group ? '말년의 앞 구간과 같은 성격의 기운이 이어져서, 그때 만든 생활 방식이 그대로 굳어지기 쉬워요.' : '말년 내내 같은 성격의 기운이 이어지는 드문 흐름이라, 50대에 만든 습관이 남은 인생의 모습을 거의 정해요.') : line(p))); });
+      if (!late.length) out.push('말년에 해당하는 대운 정보가 충분하지 않아요.');
+      return out.join('\n\n');
+    }
+    if (ci < 0) return '';
+    var cur = ps[ci], next = ps[ci + 1];
+    out.push('지금 지나는 ' + ageTxt(cur) + ' 구간(' + cur.gz + ' 대운)을 ' + eye + ', 흐름이 ' + COND_W[cur.tone] + ' 때예요. ' + line(cur));
+    // 다음 대운 문장은 그 장의 고유 문장과 한 문장으로 묶는다(시점만 같은 문장이 여러 장에서 반복되지 않게)
+    if (next) out.push(next.year0 + '년 무렵(' + ageTxt(next) + ')부터는 흐름이 ' + COND_W[next.tone] + ' 쪽으로 바뀌' + (next.group !== cur.group ? '고, ' + g[next.group] : '지만, ' + eye + ' 지금과 같은 숙제가 이어져요.'));
+    if (spec.spouse) {
+      var sg = ch.gender === 'F' ? 3 : 2, comes = ps.filter(function (p) { return p.tense !== 'past' && p.group === sg && p.age0 < 60; }).slice(0, 2);
+      out.push(comes.length ? josa('앞으로 배우자 인연을 뜻하는 기운이 대운으로 들어오는 때는 ' + comes.map(function (p) { return ageTxt(p) + '(' + p.year0 + '년~)'; }).join(', '), '이에요/예요') + '. 이 시기에는 만남의 자리를 일부러 늘리세요.' : '앞으로 남은 대운 중 배우자 인연을 뜻하는 기운이 직접 들어오는 구간은 없어서, 그 기운이 해마다 들어오는 해를 노리는 쪽이 현실적이에요.');
+      try { var Y = new Date(now).getUTCFullYear(), ys = M.seunRange(ch, Y, Y + 9).filter(function (x) { return pullOf(M, ch, x).top === sg; }).slice(0, 3); if (ys.length) out.push('앞으로 10년 중 그 기운이 들어오는 해: ' + ys.map(function (x) { return x.year + '년'; }).join(' · ') + '.'); } catch (e) { }
+    }
+    if (spec.seun) {
+      try {
+        var Y2 = new Date(now).getUTCFullYear(), list = M.seunRange(ch, Y2, Y2 + 4), mv = list.filter(function (x) { return x.ev.fitScore >= 18; }).map(function (x) { return x.year + '년'; }), wt = list.filter(function (x) { return x.ev.fitScore <= -12; }).map(function (x) { return x.year + '년'; });
+        out.push(mv.length || wt.length ? '앞으로 5년 중 ' + (mv.length ? '움직이기 좋은 해는 ' + mv.join('·') + (wt.length ? '이고, ' : '이에요.') : '') + (wt.length ? '기다리는 게 나은 해는 ' + wt.join('·') + '이에요.' : '') : '앞으로 5년은 크게 튀는 해 없이 고른 편이라, 시기보다 준비된 정도로 결정하는 게 맞아요.');
+      } catch (e) { }
+    }
+    return out.join('\n\n');
+  }
+  function luckStage(M, ch, now, lens, st, chapterId) {
+    var spec = D().CH_LUCK && D().CH_LUCK[chapterId]; if (spec) return chapterLuck(M, ch, now, spec, st);
     var D0 = D(), ps = periods(M, ch, now), ci = ps.findIndex(function (p) { return p.tense === 'current'; });
     if (ci < 0) return '';
     var cur = ps[ci], next = ps[ci + 1], prev = ps[ci - 1], out = [];
@@ -211,7 +244,7 @@
       });
       if (pick) {
         st.rules.add(pick.id);
-        var rows = [{ stage: 'core', text: dedupe(st, pick.core) }, { stage: 'life', text: dedupe(st, pick.life) }, { stage: 'conflict', text: dedupe(st, pick.conflict) }, { stage: 'luck', text: luckStage(M, ch, now, lens, st) }, { stage: 'advice', text: dedupe(st, pick.advice) }].filter(function (r) { return r.text; });
+        var rows = [{ stage: 'core', text: dedupe(st, pick.core) }, { stage: 'life', text: dedupe(st, pick.life) }, { stage: 'conflict', text: dedupe(st, pick.conflict) }, { stage: 'luck', text: luckStage(M, ch, now, lens, st, chapterId) }, { stage: 'advice', text: dedupe(st, pick.advice) }].filter(function (r) { return r.text; });
         var evd = evidenceRows(P, pick, D0, [pick.conf === 'moderate' ? '근거 강도: 보통 — 구조 하나가 아니라 기운의 비율로 읽은 해석이라, 맞지 않는 부분은 걸러 읽어 주세요.' : '근거 강도: 높음 — 원국의 구조(격국·강약·십성 배치)에서 직접 나온 해석이에요.', TIME_NOTE]);
         res = { chapterId: chapterId, lens: lens, rule: pick.id, hook: pick.hook, rows: rows.map(function (r) { return { stage: r.stage, label: STAGE[r.stage], text: r.text }; }), evidence: evd, trace: trace, version: VERSION };
       }
@@ -246,7 +279,7 @@
     var out = [], add = function (t) { out.push(t); };
     if (!r || typeof r !== 'object') return ['규칙 형식이 아닙니다'];
     if (!/^[a-z0-9][a-z0-9._-]{2,59}$/.test(r.id || '')) add('ID는 영문 소문자·숫자·._- 3~60자입니다');
-    if (!CHAPTERS[r.chapter] || r.chapter === 'timeline_self_20') add('적용 장은 시범 장(기질·돈 버는 방식·사랑할 때·조직생활) 중 하나여야 합니다');
+    if (!CHAPTERS[r.chapter] || r.chapter === 'timeline_self_20') add('적용 장은 서사 엔진이 맡은 장이어야 합니다(전체 인생 흐름 장은 규칙 없이 대운으로 만들어요)');
     var all = r.all || [], any = r.any || [], none = r.none || [];
     if (!Array.isArray(all) || !Array.isArray(any) || !Array.isArray(none) || any.some(function (g) { return !Array.isArray(g) || !g.length; })) add('조건 형식이 올바르지 않습니다');
     else {

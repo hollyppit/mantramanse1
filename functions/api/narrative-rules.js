@@ -9,6 +9,8 @@
 // 스위치(lifeNarrative)가 꺼져 있으면 게시해도 화면은 그대로다. 검증은 엔진의 validateRule 하나를 같이 쓴다.
 import { json, isAdmin, configError } from '../_lib.js';
 import '../../report/v2/life-narrative-data.js';
+import '../../report/v2/life-narrative-data-self.js';
+import '../../report/v2/life-narrative-data-self2.js';
 import '../../report/v2/life-narrative.js';
 
 const KEY = 'narrative:rules', MAX_HIST = 30;

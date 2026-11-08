@@ -11,7 +11,7 @@
   var $ = function (s) { return root.querySelector(s); };
   var S = { doc: null, base: [], cur: null, f: { ch: '', st: '', q: '' }, sim: { year: 1992, month: 6, day: 23, hour: 1, minute: 45, gender: 'M', draft: true }, simOut: '', cov: '' };
   var ST = { none: '기본값', draft: '초안', published: '게시됨' };
-  var CHN = { timeline_self_03: '종합 · 타고난 기질', timeline_wealth_02: '재물 · 돈 버는 방식', timeline_love_04: '인연 · 사랑할 때', timeline_career_07: '커리어 · 조직생활' };
+  var CHN = Object.assign({ timeline_self_03: '종합 · 타고난 기질', timeline_wealth_02: '재물 · 돈 버는 방식', timeline_love_04: '인연 · 사랑할 때', timeline_career_07: '커리어 · 조직생활' }, (D && D.CH_TITLE) || {});
   var TXT = [['hook', '후킹(질문)'], ['core', '핵심 성향'], ['life', '생활 사례'], ['conflict', '갈등과 약점'], ['advice', '현실적인 조언'], ['basis', '명리 근거(펼쳐보기)']];
   var TAG_HELP = 'str:weak|mid|strong|veryweak|verystrong 강약 · root:none|weak|firm 통근 · g:<bi|sik|jae|gwan|in>:heavy(30%↑)|some(10%↑)|light(10%↓)|none(3%↓) 십성 묶음 · dom:<묶음> 가장 큰 묶음 · pat:<관살혼잡·상관견관·재다신약·관살과다·식상과다(설기)·군겁쟁재·효신탈식(도식)·인성과다> · gk:<격 묶음> + gk:seong|part|pa 격국 성패 · u:single|agree|conflict|bridge|jong 통합 판단 방식 · u:prim:eokbu|johu|… 주 기준 · yong:<묶음>|absent 용신 · cl:hot|cold|wet|dry|even 조습 · rel:dm-clash|day-clash|hyeong|wonjin|day-hap|stem-hap 원국 합충 · dj:<묶음> 일지 십성 · spouse:heavy|none|mix 배우자 기운 · tg:pyeonjae:high|jeongjae:high · sex:M|F';
 
