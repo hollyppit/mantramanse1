@@ -58,6 +58,9 @@ for (const e of E) {
   if (mine.length) { T.flagged++; issues.push({ id: e.id, chapter: e.chapters[0], when: Object.keys(e.when || {}), issues: mine }); }
 }
 const dups = [...sentIndex.entries()].filter(([, ids]) => new Set(ids).size >= 3).sort((a, b) => b[1].length - a[1].length);
+// 여러 장에 걸친 반복만 한 사람에게 두 번 이상 보일 수 있다(같은 장 안의 반복은 조건이 달라 한 사람에게 하나만 보임).
+const chapterOf = new Map(E.map(e => [e.id, e.chapters[0]]));
+const crossDups = dups.filter(([, ids]) => new Set(ids.map(id => chapterOf.get(id))).size > 1);
 const count = k => issues.reduce((n, x) => n + x.issues.filter(i => i[1] === k).length, 0);
 const pct = (a, b) => (b ? (100 * a / b).toFixed(0) : 0) + '%';
 
@@ -75,7 +78,7 @@ W(`| 생활 장면 없이 추상적인 장면·강점·위험·실천 | ${count(
 W(`| 제목(후킹) 첫 문장이 60자 넘음 | ${count('long-hook')}곳 |`);
 W(`| 단정·공포 표현 | ${count('ban')}곳 |`);
 W(`| 비어 있는 역할 | ${count('empty')}곳 |`);
-W(`| 3개 이상 문안에 똑같이 들어간 문장 | ${dups.length}개 |`);
+W(`| 3개 이상 문안에 똑같이 들어간 문장 | ${dups.length}개 (여러 장에 걸친 것 ${crossDups.length}개, 나머지는 같은 장 안의 조건별 공유) |`);
 W(`| 사주 값(간지·오행·연도)을 직접 넣는 자리 | **0개** — 모든 문장이 고정이라, 사람마다 달라지는 건 "어느 문안이 뽑히는가"뿐 |`);
 W('');
 W('## 2. 역할별'); W('');
@@ -95,4 +98,4 @@ issues.filter(x => x.issues.some(i => i[1] === 'meta')).slice(0, 20).forEach(x =
 W('');
 fs.writeFileSync(path.join(root, 'docs/REBUILD_AUDIT_2026-11-07.md'), out.join('\n') + '\n');
 fs.writeFileSync(path.join(root, 'docs/rebuild-audit.json'), JSON.stringify({ total: E.length, byRole, byTopic, issues, dups: dups.map(([s, ids]) => ({ s, n: new Set(ids).size })) }, null, 1));
-console.log(`문안 ${E.length} · 문제 ${issues.length} · 내부설명 ${count('meta')} · 용어과다 ${count('jargon')} · 톤섞임 ${count('mixed-tone')} · 흐릿함 ${count('hedge')} · 추상 ${count('abstract')} · 반복문장 ${dups.length}`);
+console.log(`문안 ${E.length} · 문제 ${issues.length} · 내부설명 ${count('meta')} · 용어과다 ${count('jargon')} · 톤섞임 ${count('mixed-tone')} · 흐릿함 ${count('hedge')} · 추상 ${count('abstract')} · 반복문장 ${dups.length}(여러 장 ${crossDups.length})`);

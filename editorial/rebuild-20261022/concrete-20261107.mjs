@@ -1573,6 +1573,38 @@ export const BASIS_PLAIN = {
 };
 export const CONCRETE_ALL = {};
 for (const table of [CONCRETE, CONCRETE2, CONCRETE3, CONCRETE4, CONCRETE5, CONCRETE6, CONCRETE7, CONCRETE8, CONCRETE9, CONCRETE10, CONCRETE11, CONCRETE12, CONCRETE13, CONCRETE14, CONCRETE15, BASIS_PLAIN]) for (const [id, x] of Object.entries(table)) CONCRETE_ALL[id] = { ...(CONCRETE_ALL[id] || {}), ...x };
+// ── 여러 장에 걸쳐 한 사람에게 반복해 보이던 근거 문장 정리(2026-11-08) ──
+// 창작운 8개 장은 같은 사람에게 이어서 보이는데, 근거 문단이 8장 모두 같은 문장이었다. 1장만 전체 설명을 두고 2~8장은 그 장에서 고른 것만 말한다.
+const CR_LINE = { bigeop: '사람들과 함께 길을 여는', siksang: '재주로 사람을 모으는', jaeseong: '거래로 길을 만드는', gwanseong: '질서와 책임을 지키는', inseong: '배우고 기록하는' };
+const CR_TERM = { bigeop: '비겁', siksang: '식상', jaeseong: '재성', gwanseong: '관성', inseong: '인성' };
+const CR_CHAPTER = {
+ // 게시 도구(convert.mjs)는 같은 장 안에서 두 문안 이상이 쓰는 근거 문장을 템플릿으로 보고 지운다. 그래서 문장마다 기질(g)과 이끄는/받치는(lead) 조합이 모두 들어가야 한다.
+ 2: (g, lead) => `${CR_TERM[g]}이 큰 사주라, '${CR_LINE[g]} 이야기'에서 ${lead ? '앞장서는 사람' : '곁에서 배우는 사람'}이 자랄 만한 시대와 마을을 이번 장면의 배경으로 골랐어요.`,
+ 3: (g, lead) => `이번 장면의 역할은 ${CR_LINE[g]} 기질에 맞춰 ${lead ? '앞에서 이끄는' : '곁에서 받치며 배우는'} 자리로 정했어요.`,
+ 4: (g, lead) => `이번 장면에서 곁의 인물과는 ${CR_LINE[g]} 일을 두고 ${lead ? '내가 이끌고 상대가 지켜봐 주는' : '상대가 이끌고 내가 곁에서 배우는'} 사이로 그렸어요.`,
+ 5: (g, lead) => `이번 장면의 절정은 ${CR_LINE[g]} 힘이 ${lead ? '앞에 선 내 손에서' : '곁에서 받치던 내 손에서'} 가장 크게 드러나는 장면으로 골랐어요.`,
+ 6: (g, lead) => `이번 장면의 전환점은 ${CR_LINE[g]} 힘이 ${lead ? '앞서 나가다 지나칠 때' : '기대다가 스스로 서야 할 때'} 생기는 일로 그렸어요.`,
+ 7: (g, lead) => `이번 장면의 아쉬움은 ${CR_LINE[g]} 길에서 ${lead ? '앞만 보고 가느라' : '기다리고 기대느라'} 놓친 것으로 그렸어요.`,
+ 8: (g, lead) => `마지막 장면의 편지는 ${CR_LINE[g]} 기질을 ${lead ? '앞에 서는 사람' : '곁에서 받치는 사람'}의 지금 생활로 옮기는 말로 맺었어요.`,
+};
+// 재물·커리어·연애 13장(나를 채워 주는 사람)과 14장(첫 대운 전)은 세 주제가 같은 문장을 썼다. 주제에 맞는 말로 바꾼다.
+const TOPIC13 = { w: '돈 이야기를 함께할 사람을 고를 때 이 기운을 가진 사람이 균형을 잡아 주고, 이미 넘치는 기운을 더 키우는 사람과는 손발이 어긋나기 쉬워요.', c: '일을 함께할 사람을 고를 때 이 기운을 가진 동료가 균형을 잡아 주고, 이미 넘치는 기운을 더 키우는 사람과는 업무에서 부딪히기 쉬워요.', l: '곁에 둘 사람을 고를 때 이 기운을 가진 사람이 마음의 균형을 잡아 주고, 이미 넘치는 기운을 더 키우는 사람과는 다투기 쉬워요.' };
+const TOPIC14 = { w: '돈이 들어오기 좋은 해와 달은 위 그래프에서 확인할 수 있어요.', c: '일이 잘 풀리는 해와 달은 위 그래프에서 확인할 수 있어요.', l: '인연이 가까워지기 쉬운 해와 달은 위 그래프에서 확인할 수 있어요.' };
+function varyBasis(e) {
+ let t = e.basis; if (typeof t !== 'string') return t;
+ let m = e.id.match(/^cr0([2-8])-(bigeop|siksang|jaeseong|gwanseong|inseong)-(lead|follow)$/);
+ if (m) return t.replace(/^[^.]*주인공의 성격으로 옮겼어요\./, CR_CHAPTER[+m[1]](m[2], m[3] === 'lead'));
+ m = e.id.match(/^([wcl])13-/);
+ if (m) return t.replace('위 그래프에서 표시된 "나를 채워 주는 기운"이 이 오행이고, 이미 넘치는 기운을 더 키우는 사람과는 부딪히기 쉬워요.', TOPIC13[m[1]]);
+ m = e.id.match(/^([wcl])14-pre$/);
+ if (m) return t.replace('연도별 흐름과 힘이 실리는 달은 위 그래프에 표시돼요.', TOPIC14[m[1]]);
+ return t;
+}
 export function applyConcrete(entries) {
- return entries.map(e => { const x = CONCRETE_ALL[e.id]; if (!x) return e; const o = { ...e }; for (const f of FIELDS) if (typeof x[f] === 'string') o[f] = x[f]; return o; });
+ return entries.map(e => {
+  const x = CONCRETE_ALL[e.id], o = { ...e };
+  if (x) for (const f of FIELDS) if (typeof x[f] === 'string') o[f] = x[f];
+  o.basis = varyBasis(o);
+  return o;
+ });
 }
