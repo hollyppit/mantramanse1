@@ -29,53 +29,53 @@
   },
   "example": {
    "n": 1019,
-   "chars": 88332,
+   "chars": 88401,
    "meta": 4,
-   "jargon": 44,
+   "jargon": 45,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 0,
-   "noLife": 71,
+   "noLife": 60,
    "empty": 0,
    "ban": 1
   },
   "positive": {
    "n": 1019,
-   "chars": 107756,
+   "chars": 107610,
    "meta": 4,
-   "jargon": 85,
+   "jargon": 83,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 2,
-   "noLife": 187,
+   "noLife": 157,
    "empty": 0,
    "ban": 0
   },
   "negative": {
    "n": 1019,
-   "chars": 116440,
+   "chars": 116404,
    "meta": 0,
    "jargon": 61,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 11,
-   "noLife": 135,
+   "noLife": 126,
    "empty": 0,
    "ban": 0
   },
   "advice": {
    "n": 1019,
-   "chars": 136746,
+   "chars": 136606,
    "meta": 0,
    "jargon": 134,
    "jargonHeavy": 0,
    "formal": 0,
    "mixed": 0,
    "hedgeHeavy": 0,
-   "noLife": 65,
+   "noLife": 57,
    "empty": 0,
    "ban": 1
   },
@@ -120,7 +120,7 @@
   },
   "health": {
    "n": 81,
-   "flagged": 62
+   "flagged": 47
   }
  },
  "issues": [
@@ -8823,83 +8823,6 @@
    ]
   },
   {
-   "id": "h01-wood-over-earth",
-   "chapter": "timeline_health_01",
-   "when": [
-    "el"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h01-earth-over-water",
-   "chapter": "timeline_health_01",
-   "when": [
-    "el"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h01-metal-over-wood",
-   "chapter": "timeline_health_01",
-   "when": [
-    "el"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h01-winter-cold",
-   "chapter": "timeline_health_01",
-   "when": [
-    "season",
-    "el"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h01-summer-cool",
-   "chapter": "timeline_health_01",
-   "when": [
-    "season",
-    "el"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
    "id": "h02-siksang-steady",
    "chapter": "timeline_health_02",
    "when": [
@@ -8926,11 +8849,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8946,11 +8864,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8966,11 +8879,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -8986,11 +8894,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9006,11 +8909,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9041,11 +8939,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9061,56 +8954,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h03-eat",
-   "chapter": "timeline_health_03",
-   "when": [
-    "group",
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h03-spend-talk",
-   "chapter": "timeline_health_03",
-   "when": [
-    "group",
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h03-endure",
-   "chapter": "timeline_health_03",
-   "when": [
-    "group",
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9156,31 +8999,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h04-please-B",
-   "chapter": "timeline_health_04",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9241,11 +9059,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9276,11 +9089,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9326,26 +9134,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9361,16 +9149,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9386,11 +9164,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9421,16 +9194,6 @@
      "basis",
      "jargon",
      "7개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9461,11 +9224,6 @@
      "basis",
      "meta",
      "엔진"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9481,11 +9239,6 @@
      "basis",
      "meta",
      "엔진"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9506,21 +9259,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9536,16 +9274,6 @@
      "basis",
      "meta",
      "엔진"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9566,16 +9294,6 @@
      "basis",
      "jargon",
      "5개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9616,26 +9334,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h08-indulge",
-   "chapter": "timeline_health_08",
-   "when": [
-    "group",
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9651,76 +9349,6 @@
      "basis",
      "jargon",
      "3개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h08-duty-over",
-   "chapter": "timeline_health_08",
-   "when": [
-    "strength",
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h08-alone",
-   "chapter": "timeline_health_08",
-   "when": [
-    "group",
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h08-face",
-   "chapter": "timeline_health_08",
-   "when": [
-    "group",
-    "tenGod"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ],
-    [
-     "advice",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9751,11 +9379,6 @@
      "basis",
      "jargon",
      "4개"
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9876,11 +9499,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9911,26 +9529,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h10-gwanseong-low",
-   "chapter": "timeline_health_10",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
@@ -9946,41 +9544,6 @@
      "basis",
      "jargon",
      "6개"
-    ],
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
-    ],
-    [
-     "negative",
-     "abstract",
-     ""
-    ]
-   ]
-  },
-  {
-   "id": "h10-inseong-low",
-   "chapter": "timeline_health_10",
-   "when": [
-    "strength",
-    "group"
-   ],
-   "issues": [
-    [
-     "example",
-     "abstract",
-     ""
-    ],
-    [
-     "positive",
-     "abstract",
-     ""
     ]
    ]
   },
