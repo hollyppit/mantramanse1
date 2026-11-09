@@ -199,3 +199,17 @@
 .fx-mt.is-hi i em { background: #f2f4f8; } .fx-mt.is-lo i em { background: #c23a2e; }
 .fx-mt strong { text-align: right; font: 700 14px ui-monospace, monospace; color: #dfe3ea; }
 @media (max-width: 480px) { .fx-mt { grid-template-columns: minmax(0, 1fr) 3em; } .fx-mt i { grid-column: 1 / -1; grid-row: 2; } }
+/* 4단계(fate-blocks-4.js): 해마다의 바람 칸 · 교운기 알림 */
+.fx-yr { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; margin: 0 0 14px; }
+.fx-yr span { display: grid; justify-items: center; gap: 1px; padding: 8px 2px; border: 1px solid var(--ln); border-radius: 3px; background: #0f1729; }
+.fx-yr b { font: 700 12px ui-monospace, monospace; color: #dfe3ea; } .fx-yr small { font: 500 12px "Noto Serif KR", serif; color: var(--mu); }
+.fx-yr .is-good { border-color: #8fb0e8; background: #8fb0e81c; } .fx-yr .is-good small { color: #cfe0ff; }
+.fx-yr .is-bad { border-color: #c23a2e; background: #c23a2e1c; } .fx-yr .is-bad small { color: #ffb4a8; }
+.fx-cross { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; padding: 16px; border: 1px solid var(--ln); border-radius: 4px; background: #0f1729; margin-bottom: 12px; }
+.fx-cross > div small { display: block; font: 11px ui-monospace, monospace; letter-spacing: .1em; color: var(--mu); }
+.fx-cross > div b { display: block; margin: 2px 0; font: 700 18px "Noto Serif KR", serif; color: #f2f4f8; }
+.fx-cross > div span { font-size: 12.5px; color: #b9c6dc; line-height: 1.5; }
+.fx-cross > i { font-style: normal; font-size: 20px; color: var(--bl); }
+.fx-left { grid-column: 1 / -1; margin: 6px 0 0; padding-top: 10px; border-top: 1px dashed var(--ln); text-align: right; font-size: 13px; color: var(--mu); }
+.fx-left strong { font: 800 22px "Noto Serif KR", serif; color: #ffd6cf; margin-right: 4px; }
+@media (max-width: 560px) { .fx-yr { grid-template-columns: repeat(5, minmax(0, 1fr)); } }

@@ -13,13 +13,14 @@
   /* ── 기운 계기판: 십성 다섯 무리를 주제의 말로 바꿔 막대로 ── */
   var METER = {
     wealth: { title: '내 재물 계기판', lead: '돈과 관련된 다섯 가지 힘이 내 사주에 얼마나 있는지 보여 줘요. 길수록 많이 가진 힘이에요.', names: { 비겁: ['경쟁·지출 압력', '돈을 같이 쓰고 나누는 힘'], 식상: ['버는 통로', '재능을 돈으로 바꾸는 힘'], 재성: ['재물 자체', '돈을 알아보고 쥐는 힘'], 관성: ['지키는 힘', '규칙으로 돈을 묶어 두는 힘'], 인성: ['받는 복', '문서·자격·도움으로 들어오는 힘'] } },
+    bowl: { title: '내 재물 그릇 사양표', lead: '그릇은 크기만이 아니라 입구·바닥·뚜껑이 함께 있어야 돈이 담겨요. 내 그릇의 부품별 크기예요.', names: { 비겁: ['그릇의 금', '같이 쓰고 나누면서 새어 나가는 정도'], 식상: ['그릇의 입구', '돈이 들어오는 통로의 넓이'], 재성: ['그릇의 크기', '담을 수 있는 재물 자체'], 관성: ['그릇의 뚜껑', '규칙과 책임으로 지키는 힘'], 인성: ['그릇의 바닥', '문서·자격·도움으로 받치는 힘'] } },
     career: { title: '내 일하는 힘 계기판', lead: '일할 때 쓰는 다섯 가지 힘이 내 사주에 얼마나 있는지 보여 줘요. 길수록 타고난 힘이에요.', names: { 비겁: ['추진력', '혼자서도 밀고 나가는 힘'], 식상: ['실행·표현', '만들고 보여 주는 힘'], 재성: ['성과 감각', '결과와 숫자를 챙기는 힘'], 관성: ['조직력', '책임과 규칙 속에서 버티는 힘'], 인성: ['학습력', '배우고 정리하는 힘'] } }
   };
   FB.add('fx:meter', function (H, part) {
     var sd = H.sd, g = sd.groups || {}, m = METER[part.set] || METER.wealth, keys = ['비겁', '식상', '재성', '관성', '인성'], max = Math.max.apply(null, keys.map(function (k) { return +g[k] || 0; })) || 1;
     var top = keys.slice().sort(function (a, b) { return (g[b] || 0) - (g[a] || 0); }), hi = top[0], lo = top[4];
     var rows = keys.map(function (k) { var v = Math.round(+g[k] || 0); return '<div class="fx-mt' + (k === hi ? ' is-hi' : k === lo ? ' is-lo' : '') + '"><span><b>' + esc(m.names[k][0]) + '</b><small>' + esc(k + ' · ' + m.names[k][1]) + '</small></span><i><em style="width:' + clamp(Math.round(v / max * 100), 3, 100) + '%"></em></i><strong>' + v + '%</strong></div>'; }).join('');
-    return '<section class="dp-embed dp fx">' + head('命簿 · 계기판', m.title, m.lead) + '<div class="fx-meter">' + rows + '</div><p class="fx-rx-f">' + esc('가장 센 힘은 ' + m.names[hi][0] + '(' + hi + '), 가장 약한 힘은 ' + m.names[lo][0] + '(' + lo + ')예요. 약한 쪽은 사람·도구·습관으로 빌려 쓰면 돼요.') + '</p></section>';
+    return '<section class="dp-embed dp fx">' + head('命簿 · 계기판', m.title, m.lead) + '<div class="fx-meter">' + rows + '</div><p class="fx-rx-f">' + esc((part.set === 'bowl' ? '가장 큰 부품은 ' : '가장 센 힘은 ') + m.names[hi][0] + '(' + hi + '), ' + (part.set === 'bowl' ? '가장 작은 부품은 ' : '가장 약한 힘은 ') + m.names[lo][0] + '(' + lo + ')' + jo(lo, '이에요', '예요').slice(lo.length) + '. ' + (part.set === 'bowl' ? '작은 부품은 저축 규칙·자동이체 같은 장치로 보강하면 돼요.' : '약한 쪽은 사람·도구·습관으로 빌려 쓰면 돼요.')) + '</p></section>';
   });
 
   /* ── 가족 자리도: 네 기둥이 가리키는 가족 자리와 그 자리의 십성 ── */

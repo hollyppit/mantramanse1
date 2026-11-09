@@ -80,7 +80,8 @@
 - 완료: 위 11장에 fx:scenario · fx:people · fx:rx · fx:letter 블록을 기존 순위·순서 블록 앞에 붙임. 검사 tests/fate-blocks-sim.cjs
 - 2단계 완료(fate-blocks-2.js, 18장): 점검표 fx:check(career_10·07·09, love_06, wealth_09) · 저울 fx:vs(career_03·04, wealth_04·08) · 인물/재능 카드 fx:profile(love_01·04, career_02) · 두 얼굴 fx:likes(love_02) · 곁에 둘 사람 fx:people(love_03) · 업종 fx:fit(career_05) · 10년 로드맵 fx:road(career_12, wealth_12) · 최고 vs 최악 fx:scenario self(self_18). 주제 심화(topicDeep) 스위치가 꺼져 있어 +td 장도 실제로는 순위 블록 하나뿐이었음.
 - 3단계 완료(fate-blocks-3.js + 새 묶음, 14장): 계기판 fx:meter(self_30 재물, career_01 일하는 힘) · 가족 자리도 fx:family(love_10) · 환경 fx:env(career_06) · 끌림과 맞음 fx:pair(love_05) · 점검표(wealth_03 돈 새는 곳, wealth_07 돈 선택, love_09 결혼 갈등, self_35 생활 안전) · 저울(wealth_05 모으기/쓰기) · 카드(love_07 배우자 성향, wealth_02 버는 방식, self_25 나라는 사람) · 업종(self_26).
-- 남은 장: 타이밍 그래프 장(career_08·14, love_14, self_24, wealth_06·10·14), 깊이 풀이가 넉넉한 장(self_02·20·28·31~34, wealth_01, love_08·11, self_03·27·37). 필요하면 4단계로.
+- 4단계 완료(fate-blocks-4.js, 9장): 움직일 해·기다릴 해 fx:years(wealth_10, career_08) · 준비 달력 fx:actcal(wealth_06, love_08) · 교운기 알림 fx:cross(wealth_14, career_14, love_14) · 재물 그릇 사양표 fx:meter bowl(wealth_01) · 부모가 된 나 fx:profile parent(love_11). 시기 장은 기존 흐름 그래프 뒤에 붙임. 이로써 재물·커리어·인연 심화 45장 전부 보강.
+- 남은 장(종합풀이): self_02·20·24·27·28·31~34·37 — 깊이 풀이·그래프가 넉넉한 장.
 
 ## 검사
 
