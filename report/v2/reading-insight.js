@@ -124,38 +124,38 @@ function facts(sd){var f={},P=sd.pillars||{};
 // 자리 설명은 같은 관점에서 자리마다 세 가지 표현을 돌려 쓰고, 한 문단 묶음 안에서 같은 자리를 다시 말할 때는 생략한다. 다 쓰고 나면 생략한다.
 function pillarLine(lens,pillar,opt){if(opt.skipPillar)return '';var d=D(),arr=d.PILLAR&&d.PILLAR[lens]&&d.PILLAR[lens][pillar];if(!arr||!arr.length)return '';var i=opt.pv||0;return i<arr.length?arr[i]+' ':'';}
 // 관점(lens)·요소·값에 맞는 문단 하나. 없으면 ''.
-function text(lens,slot,v,opt){var d=D(),t,x;opt=opt||{};
- if(slot==='pair'){t=d.PAIR&&d.PAIR[lens]&&d.PAIR[lens][v.s+'|'+v.w];return t?'가장 큰 기운 '+v.s+'('+GLOSS[v.s]+')과 가장 작은 기운 '+v.w+'('+GLOSS[v.w]+')의 조합이에요. '+t:'';}
- if(slot==='pat1'||slot==='pat2'){t=d.PATTERN&&d.PATTERN[lens]&&d.PATTERN[lens][v.name];var pl=d.PATTERN&&d.PATTERN.PLAIN&&d.PATTERN.PLAIN[v.name];return t&&pl?'이 사주는 '+pl+'예요('+v.name+'). '+t:'';}
- if(slot==='lack'){t=d.LACK&&d.LACK[lens]&&d.LACK[lens][v.el];return t?'원국에 '+v.el+'('+EL_GLOSS[v.el]+') 기운이 거의 없어요. '+t:'';}
- if(slot==='clim'){t=d.CLIMATE&&d.CLIMATE[lens]&&d.CLIMATE[lens][v.key];var lb=d.CLIMATE&&d.CLIMATE.LABEL&&d.CLIMATE.LABEL[v.key];return t&&lb?'사주 전체의 기후는 '+lb+josa(lb,'이에요','예요')+'. '+t:'';}
+function text(lens,slot,v,opt){var d=D(),t,x;opt=opt||{};var J=function(lead,rest){return opt.noIntro?rest:lead+rest;};
+ if(slot==='pair'){t=d.PAIR&&d.PAIR[lens]&&d.PAIR[lens][v.s+'|'+v.w];return t?J('가장 큰 기운 '+v.s+'('+GLOSS[v.s]+')과 가장 작은 기운 '+v.w+'('+GLOSS[v.w]+')의 조합이에요. ',t):'';}
+ if(slot==='pat1'||slot==='pat2'){t=d.PATTERN&&d.PATTERN[lens]&&d.PATTERN[lens][v.name];var pl=d.PATTERN&&d.PATTERN.PLAIN&&d.PATTERN.PLAIN[v.name];return t&&pl?J('이 사주는 '+pl+'예요('+v.name+'). ',t):'';}
+ if(slot==='lack'){t=d.LACK&&d.LACK[lens]&&d.LACK[lens][v.el];return t?J('원국에 '+v.el+'('+EL_GLOSS[v.el]+') 기운이 거의 없어요. ',t):'';}
+ if(slot==='clim'){t=d.CLIMATE&&d.CLIMATE[lens]&&d.CLIMATE[lens][v.key];var lb=d.CLIMATE&&d.CLIMATE.LABEL&&d.CLIMATE.LABEL[v.key];return t&&lb?J('사주 전체의 기후는 '+lb+josa(lb,'이에요','예요')+'. ',t):'';}
  if(/^st_/.test(slot)){t=d.STAGE&&d.STAGE[lens]&&d.STAGE[lens][v.stage];var nm=PILLAR_NAME[v.pillar]+'주';
-  return t?nm+'의 12운성은 ‘'+v.stage+'’'+josa(v.stage,'이에요','예요')+'. '+pillarLine(lens,v.pillar,opt)+t:'';}
+  return t?J(nm+'의 12운성은 ‘'+v.stage+'’'+josa(v.stage,'이에요','예요')+'. '+pillarLine(lens,v.pillar,opt),t):'';}
  if(/^tg_/.test(slot)){var tgm=d.TG&&d.TG[lens]&&d.TG[lens][v.tg];var pos=PILLAR_NAME[v.pillar]+(v.stem?'간':'지');
-  return tgm?pos+'에 '+v.tg+josa(v.tg,'이','가')+' 놓여 있어요. '+pillarLine(lens,v.pillar,opt)+tgm:'';}
+  return tgm?J(pos+'에 '+v.tg+josa(v.tg,'이','가')+' 놓여 있어요. '+pillarLine(lens,v.pillar,opt),tgm):'';}
  if(slot==='rel1'||slot==='rel2'||slot==='rel3'){var key=REL_TYPE_KEY[v.type],tm=d.RELTYPE&&d.RELTYPE[lens]&&d.RELTYPE[lens][key],pm=d.RELPAIR&&d.RELPAIR[lens]&&d.RELPAIR[lens][v.pair];
-  return tm&&pm?relPlace(v.type,v.members)+' 사이에 '+v.type+josa(v.type,'이','가')+' 걸려 있어요. '+pm+' '+tm:'';}
+  return tm&&pm?J(relPlace(v.type,v.members)+' 사이에 '+v.type+josa(v.type,'이','가')+' 걸려 있어요. '+pm+' ',tm):'';}
  if(slot==='dwg'){t=d.DWG&&d.DWG[lens]&&d.DWG[lens][v.group+'|'+v.state];return t||'';}
- if(slot==='dwy'){t=d.DWY&&d.DWY[lens]&&d.DWY[lens][v.role];var rl=d.DWY&&d.DWY.ROLE&&d.DWY.ROLE[v.role];return t&&rl?'지금 대운의 천간은 '+v.el+'이고, 내 사주에서 '+v.el+josa(v.el,'은','는')+' '+v.role+'에 해당해요. '+t:'';}
- if(slot==='seg'){t=d.SEG&&d.SEG[lens]&&d.SEG[lens][v.group];return t?v.year+'년 세운의 천간은 '+v.group+'('+GLOSS[v.group]+') 기운이에요. '+t:'';}
- if(slot==='bandg'){t=d.BANDG&&d.BANDG[lens]&&d.BANDG[lens][v.band+'|'+v.g];var pb=d.BANDG&&d.BANDG.PLAIN&&d.BANDG.PLAIN[v.band];return t&&pb?pb+'이고, 가장 큰 기운은 '+v.g+'('+GLOSS[v.g]+')이에요. '+t:'';}
- if(slot==='dwn'){t=d.DWN&&d.DWN[lens]&&d.DWN[lens][v.group];return t?v.year+'년부터는 '+v.group+'('+GLOSS[v.group]+') 기운의 대운으로 바뀌어요. '+t:'';}
- if(slot==='sen'){t=d.SEN&&d.SEN[lens]&&d.SEN[lens][v.group];return t?v.year+'년 세운의 천간은 '+v.group+'('+GLOSS[v.group]+') 기운이에요. '+t:'';}
+ if(slot==='dwy'){t=d.DWY&&d.DWY[lens]&&d.DWY[lens][v.role];var rl=d.DWY&&d.DWY.ROLE&&d.DWY.ROLE[v.role];return t&&rl?J('지금 대운의 천간은 '+v.el+'이고, 내 사주에서 '+v.el+josa(v.el,'은','는')+' '+v.role+'에 해당해요. ',t):'';}
+ if(slot==='seg'){t=d.SEG&&d.SEG[lens]&&d.SEG[lens][v.group];return t?J(v.year+'년 세운의 천간은 '+v.group+'('+GLOSS[v.group]+') 기운이에요. ',t):'';}
+ if(slot==='bandg'){t=d.BANDG&&d.BANDG[lens]&&d.BANDG[lens][v.band+'|'+v.g];var pb=d.BANDG&&d.BANDG.PLAIN&&d.BANDG.PLAIN[v.band];return t&&pb?J(pb+'이고, 가장 큰 기운은 '+v.g+'('+GLOSS[v.g]+')이에요. ',t):'';}
+ if(slot==='dwn'){t=d.DWN&&d.DWN[lens]&&d.DWN[lens][v.group];return t?J(v.year+'년부터는 '+v.group+'('+GLOSS[v.group]+') 기운의 대운으로 바뀌어요. ',t):'';}
+ if(slot==='sen'){t=d.SEN&&d.SEN[lens]&&d.SEN[lens][v.group];return t?J(v.year+'년 세운의 천간은 '+v.group+'('+GLOSS[v.group]+') 기운이에요. ',t):'';}
  if(slot==='dwr'){var k3=SEUN_TYPE_KEY[v.type],p3=d.DWR&&d.DWR.POS&&d.DWR.POS[lens]&&d.DWR.POS[lens][v.place],t3=d.DWR&&d.DWR.TYPE&&d.DWR.TYPE[lens]&&d.DWR.TYPE[lens][k3];
-  return p3&&t3?'지금 대운의 지지는 내 '+(v.place==='day'?'일지':'월지')+'와 '+v.type+josa(v.type,'이','가')+' 걸려 있어요. '+p3+' '+t3:'';}
+  return p3&&t3?J('지금 대운의 지지는 내 '+(v.place==='day'?'일지':'월지')+'와 '+v.type+josa(v.type,'이','가')+' 걸려 있어요. '+p3+' ',t3):'';}
  if(slot==='ser'){var key2=SEUN_TYPE_KEY[v.type],ps=d.SER&&d.SER.POS&&d.SER.POS[lens]&&d.SER.POS[lens][v.place],ty=d.SER&&d.SER.TYPE&&d.SER.TYPE[lens]&&d.SER.TYPE[lens][key2];
-  return ps&&ty?v.year+'년 세운의 지지는 내 '+(v.place==='day'?'일지':'월지')+'와 '+v.type+josa(v.type,'이','가')+' 걸려요. '+ps+' '+ty:'';}
+  return ps&&ty?J(v.year+'년 세운의 지지는 내 '+(v.place==='day'?'일지':'월지')+'와 '+v.type+josa(v.type,'이','가')+' 걸려요. '+ps+' ',ty):'';}
  return '';}
 // 사주 하나에 대해 장마다 쓸 요소를 정한다. 같은 사주면 언제나 같은 결과이고, 한 번 계산한 뒤 보관한다.
 var CACHE=typeof WeakMap==='function'?new WeakMap():null;
 function assign(sd){if(CACHE&&CACHE.has(sd))return CACHE.get(sd);
- var f=facts(sd),out={},used={self:{},wealth:{},career:{},love:{}},pcount={self:{},wealth:{},career:{},love:{}};
- function take(lens,id,list,limit){var got=out[id]||(out[id]=[]);for(var i=0;i<list.length&&got.length<limit;i++){var s=list[i];if(used[lens][s]||!f[s])continue;var pil=f[s].pillar,same=!!pil&&got.some(function(g){return g.pillar===pil;});var t=text(lens,s,f[s],{pv:pil?(pcount[lens][pil]||0):0,skipPillar:same});if(!t)continue;used[lens][s]=1;if(pil&&!same)pcount[lens][pil]=(pcount[lens][pil]||0)+1;got.push({key:s,text:t,pillar:pil||null});}}
+ var f=facts(sd),out={},used={self:{},wealth:{},career:{},love:{}},pcount={self:{},wealth:{},career:{},love:{}},introSeen={},usedText={};
+ function take(lens,id,list,limit){var got=out[id]||(out[id]=[]);for(var i=0;i<list.length&&got.length<limit;i++){var s=list[i];if(used[lens][s]||!f[s])continue;var pil=f[s].pillar,same=!!pil&&got.some(function(g){return g.pillar===pil;});var fk=s==='bandg'?'strong:'+f[s].g:s==='seg'||s==='sen'?'seun:'+f[s].year:s+':'+JSON.stringify(f[s]),noIntro=!!introSeen[fk];var t=text(lens,s,f[s],{pv:pil?(pcount[lens][pil]||0):0,skipPillar:same||noIntro,noIntro:noIntro});if(!t||usedText[t])continue;usedText[t]=1;if(!noIntro)introSeen[fk]=1;var tShort=t&&!noIntro?text(lens,s,f[s],{pv:0,skipPillar:true,noIntro:true}):t;if(!t)continue;used[lens][s]=1;if(pil&&!same)pcount[lens][pil]=(pcount[lens][pil]||0)+1;got.push({key:s,text:t,short:tShort,fk:fk,pillar:pil||null});}}
  PLAN.forEach(function(p){take(p[1],p[0],p[2].concat(SPARE),1);});
  PLAN.forEach(function(p){take(p[1],p[0],p[2].concat(SPARE),2);});
  if(CACHE)CACHE.set(sd,out);return out;}
 function paragraphs(c,sd){var id=c&&(c.editorialContractId||c.id);if(!id||!sd||!sd.dayMaster||!PLAN_BY_ID[id])return [];
- var a=assign(sd);return (a[id]||[]).map(function(x){return {key:x.key,text:x.text};});}
+ var a=assign(sd),FO=R.FactOnce;return (a[id]||[]).map(function(x){var t=FO&&x.fk&&x.short&&!FO.own(sd,x.fk,id)?x.short:x.text;return {key:x.key,text:FO&&FO.uniq?FO.uniq(sd,t,id):t};}).filter(function(p){return p.text;});}
 function html(c,esc){var sd=c&&c.readingVisualData,ps=paragraphs(c,sd);if(!ps.length)return '';
  return '<div class="reading-insight"><h3>이 사주에서만 읽히는 포인트</h3>'+ps.map(function(p){return '<p class="lead" data-reading-role="insight" data-insight-key="'+p.key+'">'+esc(p.text)+'</p>';}).join('')+'</div>';}
 R.ReadingInsightData=R.ReadingInsightData||{};

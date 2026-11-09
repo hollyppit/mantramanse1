@@ -21,12 +21,14 @@ function pickWeakest(sd){var g=sd.groups||{},best=null;GROUPS.forEach(function(k
 // 한 장에 붙일 문단: [{key,text}]. 데이터가 없는 값은 건너뛰고, 사주 값이 없으면 빈 배열.
 function paragraphs(c,sd){var id=c&&(c.editorialContractId||c.id),d=R.ReadingDepthData&&R.ReadingDepthData[id];if(!d||!sd)return [];var out=[];
  var top=pickStrongest(sd),weak=pickWeakest(sd),band=sd.strength&&sd.strength.band,yong=sd.usefulElements&&sd.usefulElements.yong,dw=sd.currentDaewoon,tg=dw&&TG_GROUP[dw.stemTG],nowY=sd.nowYear;
- var ti=GROUPS.indexOf(top),wi=GROUPS.indexOf(weak),bi=BANDS.indexOf(band),yi=ELS.indexOf(yong);
- if(ti>=0&&d.g&&d.g[ti])out.push({key:'strong',text:lead(LEAD_STRONG,id,0,'{g}',top+'('+GLOSS[top]+')')+' '+d.g[ti]});
- if(wi>=0&&d.w&&d.w[wi]&&weak!==top)out.push({key:'weak',text:lead(LEAD_WEAK,id,1,'{g}',weak+'('+GLOSS[weak]+')')+' '+d.w[wi]});
- if(bi>=0&&d.b&&d.b[bi])out.push({key:'band',text:BAND_LEADS[band][hashId(id)%BAND_LEADS[band].length]+' '+trimBand(d.b[bi])});
- if(yi>=0&&d.y&&d.y[yi])out.push({key:'yong',text:lead(LEAD_YONG,id,2,'{e}',yong+'('+EL_GLOSS[yong]+')')+' '+trimYong(d.y[yi])});
- if(d.t&&tg&&dw&&(!nowY||(dw.startYear<=nowY&&nowY<=dw.endYear))){var ki=GROUPS.indexOf(tg);if(ki>=0&&d.t[ki])out.push({key:'luck',text:lead(LEAD_LUCK,id,3,'{g}',tg+'('+GLOSS[tg]+')')+' '+d.t[ki]});}
+ var ti=GROUPS.indexOf(top),wi=GROUPS.indexOf(weak),bi=BANDS.indexOf(band),yi=ELS.indexOf(yong),FO=R.FactOnce,first=function(k){return !FO||FO.own(sd,k,id);};
+ if(ti>=0&&d.g&&d.g[ti])out.push({key:'strong',text:(first('strong:'+top)?lead(LEAD_STRONG,id,0,'{g}',top+'('+GLOSS[top]+')')+' ':'')+d.g[ti]});
+ if(wi>=0&&d.w&&d.w[wi]&&weak!==top)out.push({key:'weak',text:(first('weak:'+weak)?lead(LEAD_WEAK,id,1,'{g}',weak+'('+GLOSS[weak]+')')+' ':'')+d.w[wi]});
+ if(bi>=0&&d.b&&d.b[bi])out.push({key:'band',text:first('band:'+band)?BAND_LEADS[band][hashId(id)%BAND_LEADS[band].length]+' '+trimBand(d.b[bi]):d.b[bi]});
+ if(yi>=0&&d.y&&d.y[yi])out.push({key:'yong',text:first('yong:'+yong)?lead(LEAD_YONG,id,2,'{e}',yong+'('+EL_GLOSS[yong]+')')+' '+trimYong(d.y[yi]):d.y[yi]});
+ if(d.t&&tg&&dw&&(!nowY||(dw.startYear<=nowY&&nowY<=dw.endYear))){var ki=GROUPS.indexOf(tg);if(ki>=0&&d.t[ki])out.push({key:'luck',text:(first('luck:'+tg+':'+dw.ganzhi)?lead(LEAD_LUCK,id,3,'{g}',tg+'('+GLOSS[tg]+')')+' ':'')+d.t[ki]});}
+ // 다른 장에서 이미 보여 준 문장은 뺀다(같은 데이터 문장이 여러 장에 실린 경우).
+ if(FO&&FO.uniq)out=out.map(function(p){return {key:p.key,text:FO.uniq(sd,p.text,id)};}).filter(function(p){return p.text;});
  return out;}
 function html(c,esc){var sd=c&&c.readingVisualData,ps=paragraphs(c,sd);if(!ps.length)return '';
  return '<div class="reading-depth"><h3>내 사주로 더 깊게 보면</h3>'+ps.map(function(p){return '<p class="lead" data-reading-role="depth" data-depth-key="'+p.key+'">'+esc(p.text)+'</p>';}).join('')+'</div>';}
