@@ -187,7 +187,7 @@
     var cur = ps[ci], next = ps[ci + 1];
     out.push('지금 지나는 ' + ageTxt(cur) + ' 구간(' + cur.gz + ' 대운)을 ' + eye + ', 흐름이 ' + COND_W[cur.tone] + ' 때예요. ' + line(cur));
     // 다음 대운 문장은 그 장의 고유 문장과 한 문장으로 묶는다(시점만 같은 문장이 여러 장에서 반복되지 않게)
-    if (next && !spec.months) out.push(next.year0 + '년 무렵(' + ageTxt(next) + ')부터는 흐름이 ' + COND_W[next.tone] + ' 쪽으로 바뀌' + (next.group !== cur.group ? '고, ' + g[next.group] : '지만, ' + eye + ' 지금과 같은 숙제가 이어져요.'));
+    if (next && !spec.months && !(spec.young && next.age0 >= 20)) out.push(next.year0 + '년 무렵(' + ageTxt(next) + ')부터는 흐름이 ' + COND_W[next.tone] + ' 쪽으로 바뀌' + (next.group !== cur.group ? '고, ' + g[next.group] : '지만, ' + eye + ' 지금과 같은 숙제가 이어져요.'));
     // 재물 시기 장 세 개는 시간 단위가 서로 다르다: bigYears(앞으로 10년의 해) · decades(남은 대운) · months(가까운 12개월)
     var wBonus = function (top) { return top === 2 ? 30 : top === 1 ? 14 : 0; }, cBonus = function (top) { return top === 3 ? 30 : top === 1 ? 14 : 0; };
     if (spec.bigYears) {
@@ -270,6 +270,8 @@
   function luckStage(M, ch, now, lens, st, chapterId) {
     // 은퇴 이후(만 65세 이상)는 커리어 장의 운 단계를 일의 형태·역할·생활 리듬으로 읽는 문장으로 바꾼다
     var sspec = D().CH_LUCK_SENIOR && D().CH_LUCK_SENIOR[chapterId]; if (sspec && profile(M, ch, now).has('age:senior')) return chapterLuck(M, ch, now, Object.assign({ senior: true }, sspec), st);
+    // 만 20세 미만은 결혼생활·자식·조직·이직·사업 장의 운 단계를 가족·학교·진로의 흐름으로 읽는다
+    var yspec = D().CH_LUCK_YOUNG && D().CH_LUCK_YOUNG[chapterId]; if (yspec && profile(M, ch, now).has('age:young')) return chapterLuck(M, ch, now, Object.assign({ young: true }, yspec), st);
     var spec = D().CH_LUCK && D().CH_LUCK[chapterId]; if (spec) return chapterLuck(M, ch, now, spec, st);
     var D0 = D(), ps = periods(M, ch, now), ci = ps.findIndex(function (p) { return p.tense === 'current'; });
     if (ci < 0) return '';
@@ -304,7 +306,26 @@
     var terms = (rule ? rule.terms : []).concat(['대운', '세운']).filter(function (t, i, a) { return a.indexOf(t) === i && D0.TERMS[t]; });
     return { lines: lines, terms: terms.map(function (t) { return { term: t, text: D0.TERMS[t] }; }), conds: conds };
   }
-  var TIME_NOTE = '지나온 시기의 문장은 원국과 대운으로 맞춰 본 해석이라 실제 기억과 비교해 보시면 되고, 지금과 앞으로의 문장은 사건 예언이 아니라 준비할 방향이에요.';
+  // 만 20세 미만: 일반 규칙의 '어른 생활을 이미 겪었다'는 문장(직장·결혼·자녀·계약 + ~있을 거예요)은 빼고,
+  // 어른 생활 이야기가 남으면 그 장 첫머리에 '미리 보기'라는 한 문장을 붙인다(장 제목을 넣어 장마다 다른 문장)
+  var ADULT_RE = /회사|직장|출근|퇴근|연봉|이직|퇴사|승진|상사|동료|부서|사업|창업|대출|월급|결혼생활|결혼|배우자|남편|아내|아이가|아이를|아이와|부부|시댁|처가|보증|계약|연차|육아|자녀|전세|할부|투자|거래처|납품|팀장/;
+  var PAST_CLAIM_RE = /있을 거예요|했을 거예요|었을 거예요|았을 거예요|봤을 거예요|왔을 거예요|적이 있|해 왔|해 봤/;
+  function youngView(rows, chapterId, D0) {
+    var sents = function (t) { return String(t).split(/(?<=[.!?])\s+/); };
+    var t = ((D0.CH_TITLE || {})[chapterId] || '').replace(' · ', '의 ');
+    var out = rows.map(function (r) {
+      if (r.stage === 'luck') return r;
+      var keep = sents(r.text).filter(function (s) { return !(ADULT_RE.test(s) && PAST_CLAIM_RE.test(s)); }).join(' ');
+      // '생활 장면' 단계가 통째로 빠지면, 지금 나이에서 확인할 수 있는 장면으로 바꿔 단계 수를 지킨다
+      if (!keep && r.stage === 'life' && t) keep = '‘' + t + '’ 이야기와 비슷한 모습은 지금 친구나 가족 사이에서 먼저 보이니, 비슷한 버릇이 있는지 떠올려 보세요.';
+      return { stage: r.stage, text: keep || (r.stage === 'core' ? r.text : '') };
+    }).filter(function (r) { return r.text; });
+    if (out.some(function (r) { return r.stage !== 'luck' && ADULT_RE.test(r.text); }) && out[0] && out[0].stage === 'core') {
+      if (t) out[0] = { stage: 'core', text: '‘' + t + '’ 이야기는 아직 겪기 전일 수 있으니, 어른이 되었을 때의 모습을 미리 보는 셈으로 읽어 주세요. ' + out[0].text };
+    }
+    return out;
+  }
+  var TIME_NOTE ='지나온 시기의 문장은 원국과 대운으로 맞춰 본 해석이라 실제 기억과 비교해 보시면 되고, 지금과 앞으로의 문장은 사건 예언이 아니라 준비할 방향이에요.';
   // opts.rules: 미리보기용 규칙 목록(관리자 초안 포함), opts.state: 미리보기마다 새 상태(운영 화면의 중복 기록과 섞지 않는다)
   function compose(M, ch, now, chapterId, opts) {
     opts = opts || {};
@@ -324,6 +345,7 @@
       if (pick) {
         st.rules.add(pick.id);
         var rows = [{ stage: 'core', text: dedupe(st, pick.core) }, { stage: 'life', text: dedupe(st, pick.life) }, { stage: 'conflict', text: dedupe(st, pick.conflict) }, { stage: 'luck', text: luckStage(M, ch, now, lens, st, chapterId) }, { stage: 'advice', text: dedupe(st, pick.advice) }].filter(function (r) { return r.text; });
+        if (P.has('age:young') && pick.all.indexOf('age:young') < 0) rows = youngView(rows, chapterId, D0);
         var evd = evidenceRows(P, pick, D0, [pick.conf === 'moderate' ? '근거 강도: 보통 — 구조 하나가 아니라 기운의 비율로 읽은 해석이라, 맞지 않는 부분은 걸러 읽어 주세요.' : '근거 강도: 높음 — 원국의 구조(격국·강약·십성 배치)에서 직접 나온 해석이에요.', TIME_NOTE]);
         res = { chapterId: chapterId, lens: lens, rule: pick.id, hook: pick.hook, rows: rows.map(function (r) { return { stage: r.stage, label: STAGE[r.stage], text: r.text }; }), evidence: evd, trace: trace, version: VERSION };
       }

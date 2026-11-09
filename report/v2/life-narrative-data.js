@@ -391,6 +391,6 @@
     대운: '10년마다 바뀌는 큰 운의 흐름이에요. 실제 시작 시점은 태어난 날과 절기 사이의 거리로 정해져요.',
     세운: '해마다 들어오는 운이에요. 대운이라는 큰 무대 위에서 그해의 사건을 만드는 기운으로 봐요.',
   };
-  root.MantraLifeNarrativeData = { RULES: RULES, ENV: ENV, OUT: OUT, EVENT: EVENT, ARC: ARC, TERMS: TERMS, CONT: CONT, YOUTH: YOUTH, version: 'life-narrative-data-20261108-1' };
+  root.MantraLifeNarrativeData = { RULES: RULES, ENV: ENV, OUT: OUT, EVENT: EVENT, ARC: ARC, TERMS: TERMS, CONT: CONT, YOUTH: YOUTH, CH_TITLE: { timeline_self_03: '종합 · 타고난 기질', timeline_wealth_02: '재물 · 돈 버는 방식', timeline_love_04: '인연 · 사랑할 때', timeline_career_07: '커리어 · 조직생활' }, version: 'life-narrative-data-20261108-1' };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.MantraLifeNarrativeData;
 })(typeof window !== 'undefined' ? window : globalThis);

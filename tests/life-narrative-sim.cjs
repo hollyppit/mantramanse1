@@ -59,6 +59,11 @@ for (let i = 0; i < N; i++) {
     } }
   // 나이: 만 65세 이상에게 커리어 장이 이직·면접·이력서 같은 구직 문장을 보여 주면 안 된다
   if ((NOW - ch.utc) / YEAR >= 65) for (const id of Object.keys(out)) if (/career/.test(id) && out[id]) out[id].rows.forEach(r => ok(!/이직|승진|사표|퇴사|면접|이력서|입사|신입|포트폴리오/.test(r.text), `만 65세 이상에게 구직 문장 ${tag} ${id}: ${(r.text.match(/[^.]*(이직|승진|사표|퇴사|면접|이력서|입사|신입|포트폴리오)[^.]*/) || [''])[0].slice(0, 60)}`));
+  // 나이: 만 20세 미만에게 '어른 생활을 이미 겪었다'는 문장(직장·결혼·자녀·계약 + ~있을 거예요)을 보여 주면 안 되고,
+  //  결혼생활·부모·자식운·조직생활·이직·사업 장은 20세 미만 규칙으로 읽어야 한다
+  if ((NOW - ch.utc) / YEAR < 20) for (const id of Object.keys(out)) { const r = out[id]; if (!r || id === 'timeline_self_20') continue;
+    if (['timeline_love_09', 'timeline_love_11', 'timeline_self_34', 'timeline_career_07', 'timeline_career_08', 'timeline_career_09'].includes(id)) ok(/young/.test(r.rule), `만 20세 미만인데 어른 규칙 ${tag} ${id}: ${r.rule}`);
+    else r.rows.filter(x => x.stage !== 'luck').forEach(x => sent(x.text).forEach(s => ok(!(/회사|직장|출근|퇴근|연봉|이직|퇴사|승진|상사|동료|사업|창업|대출|월급|결혼|배우자|남편|아내|아이가|아이를|부부|자녀|보증|계약|전세|할부|투자/.test(s) && /있을 거예요|했을 거예요|었을 거예요|았을 거예요|봤을 거예요|적이 있/.test(s)), `만 20세 미만에게 어른 경험 문장 ${tag} ${id}: ${s.slice(0, 60)}`))); }
   // 인생 흐름 장: 항상 나오고, 실제 대운 시작 나이·과거/미래 문형 분리·어린 시절
   const life = out.timeline_self_20;
   ok(life, '전체 인생 흐름 장이 비었음 ' + tag);
