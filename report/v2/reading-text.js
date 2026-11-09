@@ -72,11 +72,14 @@
   if(want&&g===want[0])out+=' '+TOPIC_LABEL[topic]+((TOPIC_LABEL[topic].charCodeAt(TOPIC_LABEL[topic].length-1)-0xAC00)%28?'과':'와')+' 가장 직접 닿는 기운이라 점수를 더했어요.';
   if(hasClash(p))out+=' 원래 사주와 부딪히는 글자가 있어 변동이 섞여요.';
   return out;}
- // 타이밍 장 그래프: 대운(10년)·세운(해마다)·월운(달마다) 세 층. 막대 색은 그 시기 천간의 오행(원색)이고, 점수는 읽기용 지표예요(확률 아님).
- var STEM_EL={갑:'목',을:'목',병:'화',정:'화',무:'토',기:'토',경:'금',신:'금',임:'수',계:'수'},TIMING_COLOR={목:'#2fcf6b',화:'#ff3b30',토:'#ffd60a',금:'#f4f4f6',수:'#2f8bff'};
+ // 타이밍 장 그래프: 대운(10년)·세운(해마다)·월운(달마다) 세 층. 만세력 운세 흐름 그래프처럼 가운데 선(50점=보통)에서 위(힘이 실림)·아래(조심)로 막대를 그린다.
+ // 막대 색 = 점수 단계(최고·좋음·무난·주의·부담), 오행은 간지 옆 작은 점으로만 보여 준다. 점수는 읽기용 지표예요(확률 아님).
+ var STEM_EL={갑:'목',을:'목',병:'화',정:'화',무:'토',기:'토',경:'금',신:'금',임:'수',계:'수'},TIMING_COLOR={목:'#6fae7f',화:'#c8705f',토:'#c4a65e',금:'#cfcabd',수:'#6f8fc4'};
+ var TIERS=[{k:'best',n:'최고',min:80},{k:'good',n:'좋음',min:65},{k:'ok',n:'무난',min:45},{k:'warn',n:'주의',min:35},{k:'bad',n:'부담',min:-1}],SEASON_KW={opportunity:'기회',expansion:'확장',harvest:'수확',accumulation:'축적',transition:'전환',defense:'방어'};
+ function tierOf(n){for(var i=0;i<TIERS.length;i++)if(n>=TIERS[i].min)return TIERS[i];return TIERS[4];}
  function stemEl(gz){return STEM_EL[String(gz||'').charAt(0)]||'';}
  function colorOf(gz){return TIMING_COLOR[stemEl(gz)]||'#d5b97f';}
- function legendHtml(){return '<div class="rt-legend" aria-label="막대 색은 그 시기 천간의 오행이에요">'+['목','화','토','금','수'].map(function(el){return '<span><i style="background:'+TIMING_COLOR[el]+'"></i>'+el+'</span>';}).join('')+'<small>막대 색 = 그 시기의 오행</small></div>';}
+ function legendHtml(){return '<div class="rt-legend" aria-label="막대 색은 그 시기에 힘이 실리는 정도예요">'+TIERS.map(function(t){return '<span class="t-'+t.k+'"><i></i>'+t.n+'</span>';}).join('')+'<small>가운데 선 = 보통(50점) · 위로 길수록 힘이 실리고, 아래로 길수록 조심할 때예요 · 글자 옆 점 = 그 시기의 오행</small></div>';}
  function luckScore(x,topic,gender){var want=timingWant(topic,gender),sg=TG_GROUP[x.stemTG],bg=TG_GROUP[x.branchTG],cond=({순풍:8,보통:0,주의:-8,부담:-12}[x.condition]||0),n;
   if(!want)n=50+cond*1.6+({opportunity:6,expansion:7,harvest:7,accumulation:3}[x.season]||0);
   else n=50+(sg===want[0]?25:sg===want[1]?12:0)+(bg===want[0]?12:bg===want[1]?6:0)+cond;
@@ -85,20 +88,23 @@
   if(x.stemTG)out+=(x.ganzhi?x.ganzhi+'('+el+') ':'')+x.stemTG+'의 '+(unit==='해'?'해라 ':'달이라 ')+(m||'새로운 기운')+'이 들어와요.';
   if(x.condition)out+=' '+(COND_TEXT[x.condition]||'원래 사주와의 관계는 보통이에요')+'.';
   if(hasClash(x))out+=' 부딪히는 글자가 있어 서두르지 않는 게 좋아요.';return out;}
- function bars(items,aria){return '<div class="rt-flow" role="img" aria-label="'+esc(aria)+'">'+items.map(function(x){return '<div class="rt-col'+(x.cur?' is-current':'')+(x.past?' is-past':'')+'" style="--c:'+colorOf(x.gz)+'"><b>'+x.n+'</b><i style="height:'+x.n+'%"></i><small>'+x.label+'</small></div>';}).join('')+'</div>';}
- function rankList(items,cls){return items.length?'<ol class="rt-rank'+(cls?' '+cls:'')+'">'+items.map(function(x,i){return '<li style="--c:'+colorOf(x.gz)+'"><span class="rt-no">'+(i+1)+'위</span><div><strong><i class="rt-dot"></i>'+x.title+'</strong><em>'+x.n+'점</em><p>'+esc(x.reason)+'</p></div></li>';}).join('')+'</ol>':'';}
+ function bars(items,aria){var dense=items.length>10?' rt-dense':'';return '<div class="rt-flow'+dense+'" role="img" aria-label="'+esc(aria)+'"><div class="rt-bands" aria-hidden="true"><span>50</span></div>'+items.map(function(x){var t=tierOf(x.n),v=Math.max(-50,Math.min(50,x.n-50)),up=v>=0;return '<div class="rt-col t-'+t.k+(up?' is-up':' is-down')+(x.cur?' is-current':'')+(x.past?' is-past':'')+'" style="--v:'+(Math.abs(v)/50).toFixed(3)+'" title="'+esc(String(x.title||'').replace(/<[^>]+>/g,''))+' '+x.n+'점 · '+t.n+'"><div class="rt-plot"><i class="rt-bar"></i><span class="rt-tag"><b>'+x.n+'</b><em>'+t.n+'</em></span></div><small class="rt-lab">'+x.label+'</small></div>';}).join('')+'</div>';}
+ function rankList(items,cls){return items.length?'<ol class="rt-rank'+(cls?' '+cls:'')+'">'+items.map(function(x,i){var t=tierOf(x.n);return '<li class="t-'+t.k+'"><span class="rt-no">'+(i+1)+'위</span><div><strong><i class="rt-dot" style="--e:'+colorOf(x.gz)+'"></i>'+x.title+'</strong><em>'+x.n+'점 <span class="rt-pill">'+t.n+'</span></em><p>'+esc(x.reason)+'</p></div></li>';}).join('')+'</ol>':'';}
+ function gzHtml(gz){return '<b class="rt-dw"><i class="rt-dot" style="--e:'+colorOf(gz)+'"></i>'+esc(gz||'')+'</b>';}
+ function kwHtml(x){var k=SEASON_KW[x&&x.season];return k?'<span class="rt-kw">'+k+'</span>':'';}
  function topOf(items,k){return items.filter(function(x){return !x.past;}).slice().sort(function(a,b){return b.n-a.n||a.ord-b.ord;}).slice(0,k);}
  function rankedTiming(periods,now,topic,gender,monthly,withMonths,annual){
   var rows=(periods||[]).filter(function(p){return Number.isFinite(p.startYear)&&Number.isFinite(p.endYear)&&Number.isFinite(p.startAge)&&p.startAge<90;});if(!rows.length)return '';
-  var dw=rows.map(function(p){var cur=p.startYear<=now&&now<=p.endYear;return {p:p,n:timingScore(p,topic,gender),cur:cur,past:p.endYear<now,gz:p.ganzhi,ord:p.startYear,label:'<b class="rt-dw">'+esc(p.ganzhi||'')+'</b><small class="rt-dwk">대운</small><span class="rt-age">'+Math.floor(p.startAge)+'~'+(Math.floor(p.startAge)+10)+'세</span>'+(cur?'<em class="rt-now">지금</em>':''),title:esc(p.ganzhi||'')+' 대운 · 만 '+Math.floor(p.startAge)+'~'+(Math.floor(p.startAge)+10)+'세 ('+p.startYear+'~'+p.endYear+'년)'+(cur?' · 지금':''),reason:timingReason(p,topic,gender)};});
+  var curIdx=-1;rows.forEach(function(p,i){if(p.startYear<=now&&now<=p.endYear)curIdx=i;});
+  var dw=rows.map(function(p,i){var cur=i===curIdx;return {p:p,n:timingScore(p,topic,gender),cur:cur,past:curIdx>=0?i<curIdx:p.endYear<now,gz:p.ganzhi,ord:p.startYear,label:gzHtml(p.ganzhi)+'<span class="rt-age">'+Math.floor(p.startAge)+'<span class="rt-age2">~'+(Math.floor(p.startAge)+10)+'</span>세</span>'+kwHtml(p)+(cur?'<em class="rt-now">지금</em>':''),title:esc(p.ganzhi||'')+' 대운 · 만 '+Math.floor(p.startAge)+'~'+(Math.floor(p.startAge)+10)+'세 ('+p.startYear+'~'+p.endYear+'년)'+(cur?' · 지금':''),reason:timingReason(p,topic,gender)};});
   var out='<figure class="reading-overview reading-timing-rank" data-reading-chart data-chart-kind="timing-rank"><figcaption>'+esc(TOPIC_LABEL[topic])+' 흐름 한눈에 보기</figcaption>'+legendHtml();
   out+='<p class="rt-sub">10년 단위 · 대운</p>'+bars(dw,TOPIC_LABEL[topic]+' 대운 흐름 그래프');
   var tp=topOf(dw,3);if(tp.length)out+='<p class="rt-sub">앞으로 힘이 실리는 시기 순위</p>'+rankList(tp);
   if(withMonths&&annual&&annual.length){
-   var yr=annual.filter(function(y){return Number.isFinite(y.year);}).map(function(y){var n=luckScore(y,topic,gender);return {n:n,gz:y.ganzhi,cur:!!y.isNow,past:false,ord:y.year,label:String(y.year).slice(2)+'년<br>'+esc(y.ganzhi||'')+(y.isNow?'<br>올해':''),title:y.year+'년 ('+esc(y.ganzhi||'')+')'+(y.isNow?' · 올해':''),reason:luckReason(y,topic,'해')};});
+   var yr=annual.filter(function(y){return Number.isFinite(y.year);}).map(function(y){var n=luckScore(y,topic,gender);return {n:n,gz:y.ganzhi,cur:!!y.isNow,past:false,ord:y.year,label:gzHtml(y.ganzhi)+'<span class="rt-age">'+y.year+'</span>'+kwHtml(y)+(y.isNow?'<em class="rt-now">올해</em>':''),title:y.year+'년 ('+esc(y.ganzhi||'')+')'+(y.isNow?' · 올해':''),reason:luckReason(y,topic,'해')};});
    if(yr.length)out+='<p class="rt-sub">해마다 · 세운 (앞으로 10년)</p>'+bars(yr,TOPIC_LABEL[topic]+' 세운 흐름 그래프')+'<p class="rt-sub">힘이 실리는 해 순위</p>'+rankList(topOf(yr,3));}
   if(withMonths&&monthly&&monthly.length){
-   var mo=monthly.filter(function(m){return Number.isFinite(m.year)&&Number.isFinite(m.month);}).map(function(m,i){var n=luckScore(m,topic,gender);return {n:n,gz:m.ganzhi,cur:!!m.isNow,past:false,ord:m.year*12+m.month,label:m.month+'월'+(m.isNow?'<br>이번 달':''),title:m.year+'년 '+m.month+'월'+(m.term?' ('+esc(m.term)+' 무렵부터)':''),reason:luckReason(m,topic,'달')};});
+   var mo=monthly.filter(function(m){return Number.isFinite(m.year)&&Number.isFinite(m.month);}).map(function(m,i){var n=luckScore(m,topic,gender);return {n:n,gz:m.ganzhi,cur:!!m.isNow,past:false,ord:m.year*12+m.month,label:'<b class="rt-dw rt-mo">'+m.month+'월</b><span class="rt-age"><i class="rt-dot" style="--e:'+colorOf(m.ganzhi)+'"></i>'+esc(m.ganzhi||'')+'</span>'+kwHtml(m)+(m.isNow?'<em class="rt-now">이번 달</em>':''),title:m.year+'년 '+m.month+'월'+(m.term?' ('+esc(m.term)+' 무렵부터)':''),reason:luckReason(m,topic,'달')};});
    if(mo.length)out+='<p class="rt-sub">달마다 · 월운 (가까운 12개월)</p>'+bars(mo,TOPIC_LABEL[topic]+' 월운 흐름 그래프')+'<p class="rt-sub">힘이 실리는 달 순위</p>'+rankList(topOf(mo,3),'rt-months');}
   return out+'</figure>';}
  function elementRoleChart(sd,id){var f=sd.fiveElements,roles=sd.usefulElements&&sd.usefulElements.roles;if(!f||!roles)return '';var tag={용신:'나를 채워 주는 기운',희신:'나를 돕는 기운',한신:'중간 기운',구신:'부딪히기 쉬운 기운',기신:'부딪히기 쉬운 기운'};

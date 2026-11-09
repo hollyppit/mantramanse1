@@ -282,23 +282,48 @@ body #wstrip button{max-width:none;text-overflow:clip}
 @media(max-width:600px){#chapter .text-reading-media .reading-panel{aspect-ratio:4/5}}
 
 /* 타이밍 장: 흐름 그래프 + 순위 */
-.reading-timing-rank .rt-flow{display:flex;align-items:flex-end;gap:6px;height:180px;margin:12px 0 4px;padding-top:18px}
-.reading-timing-rank .rt-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:12px}
-.reading-timing-rank .rt-col i{display:block;width:100%;max-width:38px;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,var(--c,#d5b97f),color-mix(in srgb,var(--c,#d5b97f) 62%,#000))}
-.reading-timing-rank .rt-col b{font-size:12px;margin-bottom:4px;color:var(--c,#d5b97f);text-shadow:0 0 6px #000a}
-.reading-timing-rank .rt-col small{margin-top:6px;opacity:.75;text-align:center;line-height:1.3}
-.reading-timing-rank .rt-col.is-past{opacity:.38}
-.reading-timing-rank .rt-col.is-current i{box-shadow:0 0 0 2px #fff,0 0 12px var(--c,#f3d58f)}.reading-timing-rank .rt-col.is-current small{opacity:1;font-weight:700}
-.reading-timing-rank .rt-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:6px 0 2px;font-size:12px}.reading-timing-rank .rt-legend span{display:inline-flex;align-items:center;gap:5px}.reading-timing-rank .rt-legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid #ffffff55}.reading-timing-rank .rt-legend small{opacity:.7;margin-left:auto}
-.reading-timing-rank .rt-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;background:var(--c,#d5b97f);border:1px solid #ffffff66}.reading-timing-rank .rt-rank li{border-left:4px solid var(--c,#ffffff1f)}
+/* 타이밍 그래프(운명의 타임라인 대운·세운·월운): 가운데 선 50점 기준 위·아래 막대, 색 = 점수 단계, 오행은 간지 옆 점 */
+.reading-timing-rank{--rt-h:190px;--rt-max:.34;--rt-ink:#e9e4d8;--rt-gold:#d5b97f}
+.reading-timing-rank .t-best{--t:#7cc497}.reading-timing-rank .t-good{--t:#4f8d6b}.reading-timing-rank .t-ok{--t:#7f8696}.reading-timing-rank .t-warn{--t:#c99447}.reading-timing-rank .t-bad{--t:#b9605a}
+.reading-timing-rank .rt-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:4px 0 2px;font-size:12px;color:#cfc9bb}
+.reading-timing-rank .rt-legend span{display:inline-flex;align-items:center;gap:5px}
+.reading-timing-rank .rt-legend span i{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--t)}
+.reading-timing-rank .rt-legend small{flex-basis:100%;font-size:11px;line-height:1.5;opacity:.7}
 .reading-timing-rank .rt-sub{margin:18px 0 8px;font-weight:700}
+.reading-timing-rank .rt-flow{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;margin:10px 0 4px;padding:0 0 0 18px}
+.reading-timing-rank .rt-bands{position:absolute;left:0;right:0;top:0;height:var(--rt-h);border-radius:6px;pointer-events:none;background:linear-gradient(180deg,rgba(124,196,151,.11) 0,rgba(124,196,151,.11) 29.6%,rgba(124,196,151,.05) 29.6%,rgba(124,196,151,.05) 39.8%,rgba(255,255,255,.015) 39.8%,rgba(255,255,255,.015) 53.4%,rgba(201,148,71,.07) 53.4%,rgba(201,148,71,.07) 60.2%,rgba(185,96,90,.07) 60.2%,rgba(185,96,90,.07) 100%)}
+.reading-timing-rank .rt-bands::after{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px solid #d5b97f66}
+.reading-timing-rank .rt-bands span{position:absolute;left:2px;top:50%;transform:translateY(-50%);font-size:9px;line-height:1;color:#d5b97fb0}
+.reading-timing-rank .rt-col{position:relative;min-width:0;display:flex;flex-direction:column;align-items:center;border-radius:8px;padding-bottom:6px}
+.reading-timing-rank .rt-plot{position:relative;width:100%;height:var(--rt-h)}
+.reading-timing-rank .rt-bar{position:absolute;left:50%;transform:translateX(-50%);width:62%;max-width:30px;min-height:3px;height:calc(var(--v) * var(--rt-max) * 100%)}
+.reading-timing-rank .is-up .rt-bar{bottom:50%;border-radius:5px 5px 1px 1px;background:linear-gradient(180deg,var(--t),color-mix(in srgb,var(--t) 45%,transparent))}
+.reading-timing-rank .is-down .rt-bar{top:50%;border-radius:1px 1px 5px 5px;background:linear-gradient(0deg,var(--t),color-mix(in srgb,var(--t) 45%,transparent))}
+.reading-timing-rank .rt-tag{position:absolute;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;white-space:nowrap}
+.reading-timing-rank .is-up .rt-tag{bottom:calc(50% + var(--v) * var(--rt-max) * 100% + 4px)}
+.reading-timing-rank .is-down .rt-tag{top:calc(50% + var(--v) * var(--rt-max) * 100% + 4px);flex-direction:column-reverse}
+.reading-timing-rank .rt-tag b{font-size:11px;line-height:1;font-weight:700;color:var(--rt-ink);opacity:.85}
+.reading-timing-rank .rt-tag em{font-size:10px;line-height:1.2;font-weight:700;font-style:normal;padding:2px 5px;border-radius:999px;color:var(--t);background:color-mix(in srgb,var(--t) 16%,#0b0d14);border:1px solid color-mix(in srgb,var(--t) 50%,transparent)}
+.reading-timing-rank .t-best .rt-tag em{color:#0b1a12;background:var(--t);border-color:var(--t)}
+.reading-timing-rank .rt-lab{display:grid;justify-items:center;gap:2px;margin-top:6px;text-align:center;line-height:1.15;font-size:10px;color:#cfc9bb}
+.reading-timing-rank .rt-dw{display:inline-flex;align-items:center;gap:3px;font:800 14px/1.1 "Noto Serif KR",serif;color:var(--rt-ink);white-space:nowrap}
+.reading-timing-rank .rt-dw.rt-mo{font-size:13px}
+.reading-timing-rank .rt-dot{display:inline-block;flex:0 0 auto;width:6px;height:6px;border-radius:50%;background:var(--e,#d5b97f);vertical-align:middle;margin-right:2px}
+.reading-timing-rank .rt-age{opacity:.65;white-space:nowrap}
+.reading-timing-rank .rt-kw{color:#d9cfb4;font-weight:600}
+.reading-timing-rank .rt-now{margin-top:2px;padding:1px 6px;border-radius:999px;background:var(--rt-gold);color:#14110a;font-size:10px;line-height:1.4;font-weight:800;font-style:normal;white-space:nowrap}
+.reading-timing-rank .rt-col.is-current{background:linear-gradient(180deg,rgba(213,185,127,.13),rgba(213,185,127,.04))}
+.reading-timing-rank .rt-col.is-current .rt-bar{outline:1.5px dashed var(--rt-gold);outline-offset:2px}
+.reading-timing-rank .rt-col.is-past .rt-plot,.reading-timing-rank .rt-col.is-past .rt-lab{opacity:.38;filter:saturate(.4)}
 .reading-timing-rank .rt-rank{list-style:none;padding:0;margin:0;display:grid;gap:10px}
-.reading-timing-rank .rt-rank li{display:flex;gap:12px;align-items:flex-start;border:1px solid #ffffff1f;border-radius:12px;padding:12px 14px}
-.reading-timing-rank .rt-no{flex:0 0 auto;font-weight:800;color:#d5b97f;min-width:34px}
+.reading-timing-rank .rt-rank li{display:flex;gap:12px;align-items:flex-start;border:1px solid #ffffff1a;border-left:3px solid var(--t);border-radius:10px;padding:12px 14px;background:color-mix(in srgb,var(--t) 6%,transparent)}
+.reading-timing-rank .rt-no{flex:0 0 auto;font-weight:800;color:var(--rt-gold);min-width:34px}
 .reading-timing-rank .rt-rank strong{display:inline-block;margin-right:8px}
-.reading-timing-rank .rt-rank em{font-style:normal;font-weight:800;color:#f3d58f}
+.reading-timing-rank .rt-rank strong .rt-dot{width:8px;height:8px;margin-right:6px}
+.reading-timing-rank .rt-rank em{font-style:normal;font-weight:800;color:var(--t)}
+.reading-timing-rank .rt-pill{display:inline-block;margin-left:4px;padding:1px 7px;border-radius:999px;font-size:11px;color:var(--t);border:1px solid color-mix(in srgb,var(--t) 55%,transparent);vertical-align:1px}
 .reading-timing-rank .rt-rank p{margin:6px 0 0;opacity:.85;line-height:1.6}
-@media(max-width:600px){.reading-timing-rank .rt-flow{height:150px;gap:3px}.reading-timing-rank .rt-col{font-size:10px}.reading-timing-rank .rt-col b{font-size:10px}.reading-timing-rank .rt-legend small{margin-left:0;width:100%}}
+@media(max-width:600px){.reading-timing-rank{--rt-h:160px}.reading-timing-rank .rt-flow{gap:2px;padding-left:14px}.reading-timing-rank .rt-dw{font-size:12px;gap:2px}.reading-timing-rank .rt-dot{width:5px;height:5px;margin-right:1px}.reading-timing-rank .rt-tag em{font-size:9px;padding:1px 3px}.reading-timing-rank .rt-tag b{font-size:10px}.reading-timing-rank .rt-lab{font-size:9px}.reading-timing-rank .rt-bar{width:70%}.reading-timing-rank .rt-dense .rt-tag b{display:none}.reading-timing-rank .rt-dense .rt-dw.rt-mo{font-size:11px}.reading-timing-rank .rt-rank li{padding:10px 12px;gap:8px}.reading-timing-rank .rt-flow{padding-left:12px}.reading-timing-rank .rt-bands span{font-size:8px;left:1px}.reading-timing-rank .rt-dw{font-size:11px}.reading-timing-rank .rt-age2{display:none}.reading-timing-rank .rt-dense .rt-dot{display:none}.reading-timing-rank .rt-dense .rt-dw.rt-mo{font-size:10.5px}.reading-timing-rank .rt-dense .rt-tag em{padding:1px 2px}}
 
 /* 대인관계 궁합: 엔진 궁합 일주 카드 */
 .reading-compat h3{margin:0 0 6px;font-size:18px}.reading-compat h4{margin:20px 0 8px;font-size:15px}.reading-compat h4 small{font-weight:400;opacity:.65;margin-left:6px}.reading-compat .rc-note{font-size:14px;line-height:1.7;opacity:.8;margin:6px 0}
@@ -340,11 +365,3 @@ body #wstrip button{max-width:none;text-overflow:clip}
 @media(max-width:480px){.og-grid{gap:6px}.og-col{padding:10px 3px}.og-tg{font-size:11px}}
 
 /* 2026-11-09 대운 그래프 아래 이름: '乙未 대운'을 크게, 나이는 구간으로 작게 */
-.reading-timing-rank .rt-col small{display:grid;justify-items:center;gap:1px;line-height:1.15}
-.reading-timing-rank .rt-col small .rt-dw{font:800 15px/1.1 "Noto Serif KR",serif;color:var(--c,#e9e4d8);letter-spacing:.02em}
-.reading-timing-rank .rt-col small .rt-dwk{font-size:10px;opacity:.75}
-.reading-timing-rank .rt-col small .rt-age{font-size:10px;opacity:.6;margin-top:2px}
-.reading-timing-rank .rt-col small .rt-now{margin-top:3px;padding:1px 6px;border-radius:999px;background:#b3261e;color:#fff;font:700 10px/1.4 inherit;font-style:normal}
-.reading-timing-rank .rt-col.is-past small .rt-dw{opacity:.55}
-@media(max-width:600px){.reading-timing-rank .rt-col small .rt-dw{font-size:12px}}
-.reading-timing-rank .rt-flow{height:230px}.reading-timing-rank .rt-col small{opacity:1}@media(max-width:600px){.reading-timing-rank .rt-flow{height:200px}}
