@@ -41,11 +41,11 @@ function make(id,sd){
  if(data&&data.p&&data.p[ORDER.indexOf(stem)]){
   var line=data.p[ORDER.indexOf(stem)],bi=BANDS.indexOf(band),
    chapterFrames=[s[1]+' 일간인 '+name+', '+line+'.',name+'은 '+s[0]+' 같은 '+s[1]+' 일간이에요. '+line+'.',name+'은 '+s[1]+'('+s[0]+') 일간이에요. '+line+'.'];
-  return {main:chapterFrames[hash(id)%3],tail:(bi>=0&&data.t&&data.t[bi])||'',family:fam,chapter:true};
+  return {main:chapterFrames[hash(id)%3],line:line,tail:(bi>=0&&data.t&&data.t[bi])||'',family:fam,chapter:true};
  }
  var phrase=P[fam][stem],
   frames=[s[0]+' 같은 '+s[1]+', '+name+'은 '+phrase+'.',name+'은 '+s[0]+' 같은 '+s[1]+' 일간이에요. '+phrase+'.',s[1]+' 일간답게 '+name+'은 '+phrase+'.'];
- return {main:frames[hash(id)%3],tail:(BAND[fam][band]||''),family:fam};
+ return {main:frames[hash(id)%3],line:phrase,tail:(BAND[fam][band]||''),family:fam};
 }
 root.MantraPersonalHook=make;
 if(typeof module!=='undefined'&&module.exports)module.exports={make:make,family:family};
