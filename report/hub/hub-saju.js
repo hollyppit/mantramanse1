@@ -222,19 +222,34 @@
     if (jc) steps.push({ ms: 6500, vid: 'iju', html: '<p class="film aw-in">' + br(jc.film) + '</p><p class="ttl aw-in">' + esc(jc.title) + '</p><p class="trait aw-in">' + br(jc.trait) + '</p>' });
     steps.push({ ms: 2600, vid: 'iju', html: '<p class="film aw-in">이제,<br>당신의 이야기를 시작합니다.</p>' });
     var host = document.createElement('div'); host.id = 'awk'; host.setAttribute('role', 'dialog'); host.setAttribute('aria-label', '일주 각성');
-    host.innerHTML = '<div class="fb" id="awFb" hidden></div><video class="vid" muted playsinline loop preload="auto" hidden></video><div class="shade"></div><div class="stage" id="awStage" aria-live="polite"></div><button type="button" class="skip" id="awSkip">건너뛰기 ›</button><div class="tap" aria-hidden="true">TAP</div><p class="fbn" id="awFbn" hidden>이 일주의 각성 영상은 아직 준비되지 않았습니다.</p>';
+    host.innerHTML = '<div class="fb" id="awFb" hidden></div><video class="vid" data-k="ilgan" muted playsinline loop preload="auto" hidden></video><video class="vid" data-k="iju" muted playsinline loop preload="auto" hidden></video><div class="shade"></div><div class="stage" id="awStage" aria-live="polite"></div><button type="button" class="skip" id="awSkip">건너뛰기 ›</button><div class="tap" aria-hidden="true">TAP</div><p class="fbn" id="awFbn" hidden>이 일주의 각성 영상은 아직 준비되지 않았습니다.</p>';
     document.body.appendChild(host);
-    var stage = $('#awStage', host), vid = $('.vid', host), timer = 0, i = -1, done = false, clips = null;
+    var stage = $('#awStage', host), vids = { ilgan: $('.vid[data-k="ilgan"]', host), iju: $('.vid[data-k="iju"]', host) }, cur = null, want = '', timer = 0, i = -1, done = false, clips = null;
     // 영상이 없을 때(등록 전·불러오기 실패): 기록의 문 풍경 이미지와 안내를 보여 준다. 이미지 주소는 인터랙티브 스토리 설정(portal 에셋)을 따른다.
     function showFallback() {
       var fb = $('#awFb', host), n = $('#awFbn', host), Qt = root.Quest, url = Qt && Qt.assetUrl && H.Onboard && H.Onboard.cfg ? Qt.assetUrl(H.Onboard.cfg(), 'portal', (root.innerWidth || 1024) < 768) : '/report/hub/quest/portal.webp';
-      if (!fb || vid.classList.contains('on')) return; fb.style.backgroundImage = 'url("' + url + '")'; fb.hidden = false; n.hidden = false;
+      if (!fb || cur) return; fb.style.backgroundImage = 'url("' + url + '")'; fb.hidden = false; n.hidden = false;
     }
-    function setVideo(kind) { // 있을 때만: 일간 영상 → 일주 변신 영상
-      var c = clips && (kind === 'iju' ? (clips.video || clips.fallback) : clips.ilgan); var u = c && (c.videoUrl || c.videoWebm);
-      if (!u) { vid.classList.remove('on'); return; }
-      if (vid.getAttribute('data-k') === kind) return; vid.setAttribute('data-k', kind);
-      vid.hidden = false; if (c.posterUrl) vid.poster = c.posterUrl; vid.src = u; vid.onerror = function () { vid.classList.remove('on'); vid.hidden = true; showFallback(); }; vid.oncanplay = function () { vid.classList.add('on'); }; var p = vid.play(); if (p && p.catch) p.catch(function () { });
+    // 일간 영상 → 일주 변신 영상. 두 영상을 미리 따로 불러 두고, 다음 영상이 실제로 재생되기 시작한 뒤에 위로 겹쳐 띄운다.
+    // 다음 영상이 아직 준비되지 않았으면 지금 영상을 계속 반복한다(사이에 포스터·빈 화면이 끼지 않게). 포스터는 처음 보이는 영상에만 쓴다.
+    var clipOf = function (kind) { return clips && (kind === 'iju' ? (clips.video || clips.fallback) : clips.ilgan); };
+    var urlOf = function (kind) { var c = clipOf(kind); return c && (c.videoUrl || c.videoWebm); };
+    function prepare(kind) {
+      var v = vids[kind], u = urlOf(kind); if (!u || v.getAttribute('src') === u) return;
+      v.onerror = function () { v.classList.remove('on'); v.hidden = true; if (cur === v) cur = null; if (!cur) showFallback(); };
+      v.hidden = false; v.src = u; v.load(); // 투명(.on 전)한 채로 미리 받아 둔다
+    }
+    function reveal(v) {
+      var prev = cur; cur = v; v.classList.add('on');
+      if (prev && prev !== v) setTimeout(function () { if (cur !== prev) { prev.classList.remove('on'); prev.pause(); } }, 1300);
+    }
+    function setVideo(kind) {
+      want = kind; var v = vids[kind]; if (!urlOf(kind)) return; // 이 단계 영상이 없으면 지금 영상을 그대로 둔다
+      prepare(kind); if (cur === v) return;
+      var c = clipOf(kind); if (!cur && c.posterUrl && !v.poster) v.poster = c.posterUrl;
+      var go = function () { if (done || want !== kind || cur === v) return; reveal(v); };
+      v.onplaying = go; var p = v.play(); if (p && p.catch) p.catch(function () { });
+      if (!v.paused && v.readyState >= 3) go();
     }
     function show() {
       clearTimeout(timer); i++; if (i >= steps.length) return finish(false);
@@ -248,7 +263,7 @@
     H.cleanup = function () { done = true; clearTimeout(timer); };
     host.onclick = function (e) { if (e.target.id === 'awSkip') finish(true); else show(); };
     H.track('ilju_awakening_start', { replay: replay ? 1 : 0 }); show();
-    if (!(navigator.connection && navigator.connection.saveData)) fetch('/api/awakening?pillar=' + encodeURIComponent(ju) + '&gender=' + g).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (d && !done) { clips = d; if (steps[i]) setVideo(steps[i].vid); var has = function (c) { return c && (c.videoUrl || c.videoWebm); }; if (!has(d.video) && !has(d.fallback) && !has(d.ilgan)) showFallback(); } else if (!d && !done) showFallback(); }).catch(function () { if (!done) showFallback(); });
+    if (!(navigator.connection && navigator.connection.saveData)) fetch('/api/awakening?pillar=' + encodeURIComponent(ju) + '&gender=' + g).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (d && !done) { clips = d; if (steps[i]) setVideo(steps[i].vid); prepare('ilgan'); prepare('iju'); var has = function (c) { return c && (c.videoUrl || c.videoWebm); }; if (!has(d.video) && !has(d.fallback) && !has(d.ilgan)) showFallback(); } else if (!d && !done) showFallback(); }).catch(function () { if (!done) showFallback(); });
   }
 
   /* ───────── MY 운명 홈 ───────── */
