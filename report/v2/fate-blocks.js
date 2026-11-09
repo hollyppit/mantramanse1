@@ -42,6 +42,7 @@
   var SCN = {
     wealth: { best: '돈이 모이는 그림', worst: '돈이 새는 그림', bestDo: function (b) { return ACT[b.yong] + '에서 수입이 붙어요. ' + (b.yongG ? grpTxt(b.yongG) + ' 쪽 기운을 쓸 때 돈이 남아요.' : ''); }, worstDo: function (b) { return TRAP[b.gi] + ' 쪽으로 돈이 흘러가요. ' + (b.giG ? grpTxt(b.giG) + ' 쪽 결정을 서두를 때 손해가 커져요.' : ''); } },
     career: { best: '일이 풀리는 그림', worst: '일이 막히는 그림', bestDo: function (b) { return jo(ACT[b.yong], '을', '를') + ' 맡을 때 실력이 드러나요. ' + (b.yongG ? grpTxt(b.yongG) + ' 쪽 역할에서 평가가 올라가요.' : ''); }, worstDo: function (b) { return TRAP[b.gi] + ' 방식으로 일하면 성과가 흩어져요. ' + (b.giG ? grpTxt(b.giG) + ' 쪽 압박이 겹칠 때 지치기 쉬워요.' : ''); } },
+    self: { best: '내가 가장 빛나는 그림', worst: '내가 가장 무너지는 그림', bestDo: function (b) { return jo(ACT[b.yong], '을', '를') + ' 할 때 표정부터 달라져요. ' + (b.yongG ? grpTxt(b.yongG) + ' 쪽 힘을 쓸 때 내 장점이 가장 잘 보여요.' : ''); }, worstDo: function (b) { return TRAP[b.gi] + ' 모습이 반복될 때 스스로 지쳐 가요. ' + (b.giG ? grpTxt(b.giG) + ' 쪽 압박이 겹치면 날카로워져요.' : ''); } },
     love: { best: '관계가 깊어지는 그림', worst: '관계가 식는 그림', bestDo: function (b) { return jo(ACT[b.yong], '을', '를') + ' 함께할 때 마음이 가까워져요. ' + (b.yongG ? grpTxt(b.yongG) + ' 쪽 기운을 나눌 때 관계가 단단해져요.' : ''); }, worstDo: function (b) { return TRAP[b.gi] + ' 모습이 관계에서도 드러나요. ' + (b.giG ? grpTxt(b.giG) + ' 쪽 다툼이 반복되면 거리가 생겨요.' : ''); } }
   };
   function scenario(H, part) {
@@ -102,7 +103,8 @@
   R.FateBlocks = {
     has: function (k) { return !!RENDER[k]; },
     render: function (part, H) { try { return H && H.sd ? RENDER[part.custom](H, part) : null; } catch (e) { return null; } },
-    base: base
+    base: base, esc: esc, jo: jo, who: who, EL_HJ: EL_HJ, STEMS_OF: STEMS_OF, GRP_MEAN: GRP_MEAN, ACT: ACT, REM: REM, WARN: WARN, TRAP: TRAP,
+    add: function (k, fn) { RENDER[k] = fn; }
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = R.FateBlocks;
 })(typeof window !== 'undefined' ? window : globalThis);

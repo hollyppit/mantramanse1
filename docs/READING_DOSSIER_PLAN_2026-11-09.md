@@ -78,7 +78,8 @@
 - 개운법(wealth_15·career_15·love_15·self_37) — F 추가
 - 최종 사용설명서(self_22) — G 추가
 - 완료: 위 11장에 fx:scenario · fx:people · fx:rx · fx:letter 블록을 기존 순위·순서 블록 앞에 붙임. 검사 tests/fate-blocks-sim.cjs
-- 다음: 종합풀이·심화 장 중 순위 블록 하나뿐인 장을 골라 A·C·E 블록을 섞는다.
+- 2단계 완료(fate-blocks-2.js, 18장): 점검표 fx:check(career_10·07·09, love_06, wealth_09) · 저울 fx:vs(career_03·04, wealth_04·08) · 인물/재능 카드 fx:profile(love_01·04, career_02) · 두 얼굴 fx:likes(love_02) · 곁에 둘 사람 fx:people(love_03) · 업종 fx:fit(career_05) · 10년 로드맵 fx:road(career_12, wealth_12) · 최고 vs 최악 fx:scenario self(self_18). 주제 심화(topicDeep) 스위치가 꺼져 있어 +td 장도 실제로는 순위 블록 하나뿐이었음.
+- 다음: love_07·love_10·self_30 등 남은 단일 블록 장, deep_* 하나뿐인 장(self_02·20·25·26·28·31~35, wealth_01~03·05·07)에 다른 모양 하나씩.
 
 ## 검사
 

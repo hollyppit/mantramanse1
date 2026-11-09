@@ -161,3 +161,33 @@
 .fx-from { position: relative; text-align: right; color: var(--bl) !important; margin: 6px 0 0 !important; padding-right: 58px; }
 .fx-from .fx-stamp { top: -6px; right: 0; width: 42px; height: 42px; font-size: 16px; }
 @media (max-width: 560px) { .fx-two, .fx-steps { grid-template-columns: 1fr; } .fx-rx-m { grid-template-columns: 1fr; } }
+/* 2단계 블록(fate-blocks-2.js): 점검표 · 저울 · 인물/재능 카드 · 두 얼굴 · 업종 · 10년 로드맵 */
+.fx-check { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.fx-check li { padding: 12px 14px; border: 1px solid var(--ln); border-radius: 4px; background: #0f1729; }
+.fx-check li.is-hot { border-left: 2px solid var(--rd); }
+.fx-check label { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 15px; line-height: 1.6; color: #f2f4f8; }
+.fx-check input { flex: none; width: 18px; height: 18px; margin-top: 3px; accent-color: #c23a2e; }
+.fx-check input:checked + span { color: #ffd6cf; }
+.fx-check small { display: block; margin: 4px 0 0 28px; font: 11px/1.5 ui-monospace, monospace; letter-spacing: .04em; color: var(--mu); }
+.fx-scale { margin: 0 0 14px; padding: 16px; border: 1px solid var(--ln); border-radius: 4px; background: #0f1729; }
+.fx-scale-l { display: flex; justify-content: space-between; font: 700 15px "Noto Serif KR", serif; } .fx-scale-l b { color: var(--bl); } .fx-scale-l span { color: #ff9a8f; }
+.fx-bar { position: relative; height: 6px; margin: 12px 0 10px; background: linear-gradient(90deg, #8fb0e8, #2a3550 50%, #c23a2e); border-radius: 3px; }
+.fx-bar i { position: absolute; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px #0c1220, 0 0 0 4px #ffffff66; }
+.fx-lean { margin: 0; text-align: center; font-size: 13.5px; color: #dfe3ea; }
+.fx-ul { margin: 0; padding: 0 0 0 18px; display: grid; gap: 6px; font-size: 14px; line-height: 1.65; color: #dfe3ea; }
+.fx-ul small { display: block; font: 11px ui-monospace, monospace; color: var(--mu); margin-top: 2px; }
+.fx-note { margin: 10px 0 0; font-size: 12.5px; line-height: 1.6; color: var(--mu); }
+.fx-list { list-style: none; margin: 0; padding: 0; }
+.fx-list li { display: grid; grid-template-columns: 2.2em minmax(0, 1fr); column-gap: 10px; padding: 12px 0; border-bottom: 1px solid #1c2540; }
+.fx-list li i { grid-row: 1 / 4; font: 500 15px "Noto Serif KR", serif; font-style: normal; color: var(--bl); }
+.fx-list li b { font: 600 12px/1.5 ui-monospace, monospace; letter-spacing: .1em; color: var(--mu); }
+.fx-list li span { font-size: 15px; line-height: 1.7; color: #f2f4f8; }
+.fx-list li em { font: 11px ui-monospace, monospace; font-style: normal; color: #5f6c88; margin-top: 2px; }
+.fx-prof .fd-card { margin-bottom: 14px; }
+.fx-road { list-style: none; margin: 0; padding: 0 0 0 4px; position: relative; display: grid; gap: 14px; }
+.fx-road::before { content: ""; position: absolute; left: 19px; top: 8px; bottom: 8px; width: 1px; background: var(--ln); }
+.fx-road li { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; }
+.fx-road-n { position: relative; z-index: 1; display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--bl); border-radius: 50%; background: #0c1220; font: 500 14px "Noto Serif KR", serif; color: var(--bl); }
+.fx-road small { display: block; font: 11px ui-monospace, monospace; letter-spacing: .1em; color: var(--mu); }
+.fx-road b { display: block; margin: 2px 0 4px; font: 700 16px "Noto Serif KR", serif; color: #f2f4f8; }
+.fx-road p { margin: 0; font-size: 14px; line-height: 1.7; color: #cfd8e8; }
