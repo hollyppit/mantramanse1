@@ -896,7 +896,7 @@
       h += (c.legacyIds || []).filter(function(id){return id!==c.id;}).map(function(id){return '<span id="ch-'+esc(id)+'" aria-hidden="true"></span>';}).join('');
       h += '<article class="chap" id="ch-' + esc(c.id) + '" data-ch="' + ci + '" aria-label="' + esc(c.title) + '">' + main + '</article>';
     });
-    if(S.sd.elementAdjustments)h='<aside class="card" aria-label="원국 계산 기준"><p>'+esc(S.sd.elementAdjustments.summary)+'</p></aside>'+h;
+    // 2026-11-09 장 위 '원국 계산 기준'(합·조후 보정) 안내 상자는 읽는 흐름을 끊어 보이지 않게 한다. 계산값(S.sd.elementAdjustments)은 그대로 쓴다.
     if(R.SealReader)R.SealReader.unmountBook($('#chapter'));if(R.SealReader)$('#chapter').querySelectorAll('.chap').forEach(function(a){R.SealReader.unmount(a);});if(R.ReadingMedia)R.ReadingMedia.unmount($('#chapter'));$('#chapter').innerHTML = h; if(R.SealReader)S.rep.chapters.forEach(function(c,ci){var a=document.getElementById('ch-'+c.id);if(a)mountSeal(a,c,ci);}); if(R.SealReader)mountSealBook(); chapterTags(); linkBasisReferences($('#chapter')); try { emphasize($('#chapter')); } catch (e) { /* 강조가 실패해도 본문은 그대로 */ }
     rep.chapters.forEach(function (c) { if (c.kind === 'monthly') { var cur = (c.items || []).findIndex(function (x) { return x.isNow; }); moDetail(c, Math.max(0, cur)); } });
   }

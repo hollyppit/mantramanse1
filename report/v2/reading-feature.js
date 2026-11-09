@@ -44,18 +44,19 @@ var SPEC={
 var PLACE_EL={class:'목',nature:'목',intro:'토',event:'화',online:'수',work:'토',local:'토',gym:'금',trip:'수',bar:'화'};
 var GEN={목:'화',화:'토',토:'금',금:'수',수:'목'};
 var EL_HJ={목:'木',화:'火',토:'土',금:'金',수:'水'};
+var EL_MOOD={목:'자라고 배우는',화:'밝고 들뜬',토:'편안하고 믿음 가는',금:'정돈되고 분명한',수:'흐르고 넓게 이어지는'};
 function hasDohwa(sd){var s=sd.sinsal12||{};return s.day==='연살'||s.hour==='연살'||(sd.specialStars||[]).some(function(x){return x.name==='홍염살'&&(x.pillar==='day'||x.pillar==='hour');});}
 function placeRank(H){var D=R.Deep,L=R.DeepLove;if(!D||!L||!L.PLACES)return null;var sd=H.sd,P=L.partnerOf(sd),band=sd.strength&&sd.strength.band,ds=hasDohwa(sd),pct=Math.round(P.pct||0),rows=Object.keys(PLACE_EL).map(function(k,i){
   var el=PLACE_EL[k],score=38,why=[];
-  if(el===P.el){score+=30;why.push('이 자리의 기운('+el+EL_HJ[el]+')이 '+P.grp+'(배우자성)의 기운과 같아서 마음이 잘 맞는 사람을 만나기 쉬워요');}
-  else if(GEN[el]===P.el){score+=20;why.push('이 자리의 '+el+EL_HJ[el]+' 기운이 배우자성 '+P.el+EL_HJ[P.el]+' 기운을 키워 줘요');}
-  else if(GEN[P.el]===el){score+=8;why.push('배우자성 '+P.el+EL_HJ[P.el]+' 기운이 자연스럽게 흘러가는 자리예요');}
-  if(ds&&(k==='event'||k==='bar')){score+=12;why.push('도화·홍염 기운이 있어 눈에 띄는 자리에서 인연이 붙기 쉬워요');}
+  if(el===P.el){score+=30;why.push('이곳은 '+EL_MOOD[el]+' '+el+'('+EL_HJ[el]+') 기운의 자리예요. 내 사주에서 배우자를 뜻하는 기운(배우자성)도 '+el+'이라, 이런 곳에서 결이 맞는 사람을 만나기 쉬워요');}
+  else if(GEN[el]===P.el){score+=20;why.push('이곳의 '+el+'('+EL_HJ[el]+') 기운은 배우자를 뜻하는 '+P.el+'('+EL_HJ[P.el]+') 기운을 키워 주는 관계(상생)라, 인연의 기운이 살아나는 자리예요');}
+  else if(GEN[P.el]===el){score+=8;why.push('배우자를 뜻하는 '+P.el+'('+EL_HJ[P.el]+') 기운이 이곳의 '+el+' 기운으로 자연스럽게 흘러가서(상생), 무리 없이 마음을 열기 좋아요');}
+  if(ds&&(k==='event'||k==='bar')){score+=12;why.push('사주에 사람의 눈길을 끄는 기운(도화·홍염)이 있어서, 사람 많고 화려한 자리에서 인연이 붙기 쉬워요');}
   if(band==='신약'&&(k==='intro'||k==='local'||k==='work')){score+=k==='intro'?8:5;why.push('힘이 여린 사주라 믿을 만한 사람을 통해 천천히 알아 가는 자리가 안전해요');}
   if(band==='신강'&&(k==='event'||k==='trip'||k==='gym')){score+=k==='trip'?6:5;why.push('힘이 센 사주라 내가 먼저 움직이는 자리에서 더 잘 풀려요');}
-  if(pct<10&&(k==='online'||k==='class'||k==='intro')){score+=5;why.push('배우자성이 적은 편(약 '+pct+'%)이라 만날 기회를 직접 만드는 자리가 유리해요');}
+  if(pct<10&&(k==='online'||k==='class'||k==='intro')){score+=5;why.push('배우자를 뜻하는 기운이 사주에 약 '+pct+'%로 적은 편이라, 만날 기회를 직접 만드는 자리가 유리해요');}
   return {k:k,i:i,score:Math.max(20,Math.min(96,score)),why:why};}).sort(function(a,b){return b.score-a.score||a.i-b.i;}).slice(0,5);
- var out='<section class="dp-embed dp"><div class="cap">'+esc('인연이 열리기 쉬운 곳 TOP 5')+'</div><p class="lead">'+esc((D.who(H))+'의 '+(P.male?'아내':'남편')+'별은 ')+'<b>'+esc(P.grp+'('+P.el+EL_HJ[P.el]+')')+'</b>'+esc('이에요. 이 기운과 장소 10곳의 궁합을 점수로 옮겼어요. 만날 사람을 맞히는 점수가 아니라 "어느 자리에서 인연이 열리기 편한가"의 순위예요.')+(ds?esc(' 도화 기운이 있어 사람이 모이는 자리도 함께 올렸어요.'):'')+'</p></section>';
+ var out='<section class="dp-embed dp"><div class="cap">'+esc('인연이 열리기 쉬운 곳 TOP 5')+'</div><p class="lead">'+esc((D.who(H))+'의 사주에서 '+(P.male?'아내':'남편')+'를 뜻하는 기운(배우자성)은 ')+'<b>'+esc(P.grp+' · '+P.el+'('+EL_HJ[P.el]+')')+'</b>'+esc('이에요. 그래서 '+EL_MOOD[P.el]+' 분위기의 자리일수록 인연이 편하게 열려요. 자주 가는 장소 10곳을 이 기준으로 견줘 순서를 매겼어요. 누구를 만날지 맞히는 점수가 아니라, 어디서 마음이 잘 열리는지 보는 순위예요.')+(ds?esc(' 도화 기운이 있어 사람이 모이는 자리도 함께 올렸어요.'):'')+'</p></section>';
  rows.forEach(function(r,n){var p=L.PLACES[r.k];out+='<section class="dp-embed dp dp-job"><div class="dp-jobrow">'+D.fig(H,'place:'+r.k,'place',p[0],'dp-thumb')+'<div class="dp-jobtxt"><small>'+(n+1)+'순위</small><h4>'+esc(p[0])+'</h4><div class="dp-meter"><span>인연 열림 <b>'+r.score+'점</b></span>'+D.bar('',r.score,{cls:'dp-slim',color:'#D9869A',text:''})+'</div><p class="dp-tlb">'+esc(p[1])+'</p></div></div><p class="dp-pl">＋ '+esc(p[2])+'</p>'+(r.why.length?whyLine(r.why):'')+'</section>';});
  return out;}
 /* ───── 앞으로 10년 시기 순위·그래프 ─────

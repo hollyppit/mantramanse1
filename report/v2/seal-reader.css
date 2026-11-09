@@ -63,3 +63,31 @@
 @media(max-width:560px){.mb-skin .mb-row{grid-template-columns:34px minmax(0,1fr);gap:10px}.mb-skin .mb-no{font-size:15px;letter-spacing:.2em}}
 @media(prefers-reduced-motion:reduce){.mb-skin .mb-key::after{display:none}.mb-skin .mb-no{opacity:1}}
 @media print{.mb-skin .mb-key::after{display:none}.mb-skin .mb-no{opacity:1}}
+/* 2026-11-09 명부 장 머리 바로잡기: 기존 봉인 카드(테두리·배경·이중 도장 테두리)를 걷고 명부 바탕 위에 바로 앉힌다. */
+.seal-shell.mb-skin{padding-top:6px}
+.seal-shell.mb-skin .seal-head.seal-gate{background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:26px 74px 22px 0!important;margin:0;border-bottom:1px solid #2a3550!important}
+.seal-shell.mb-skin .seal-gate::before,.seal-shell.mb-skin .seal-gate::after{display:none!important}
+.seal-shell.mb-skin .seal-kicker{display:flex;flex-direction:column;gap:3px;padding:0;margin:0 0 12px;font:500 12px/1.5 "Noto Serif KR",serif;letter-spacing:.06em;color:#8f9bb3}
+.seal-shell.mb-skin .seal-kicker span+span{font-size:11px;color:#6f7b93}
+.seal-shell.mb-skin .seal-gate h2{margin:0;font:500 clamp(26px,4.6vw,36px)/1.35 "Noto Serif KR",serif;color:#f2f4f8;max-width:none}
+.seal-shell.mb-skin .seal-editorial-hook{margin:12px 0 0;font-size:15px;line-height:1.8;color:#b9c6dc}
+.seal-shell.mb-skin .seal-gate .mb-seal{position:absolute;right:0;top:24px;width:54px;height:54px;margin:0;outline:0!important;border:2px solid #c23a2e!important;color:#c23a2e!important;font:500 13px/1.15 "Noto Serif KR",serif;transform:rotate(-6deg)!important;transform-origin:center}
+.seal-shell.mb-skin .seal-lead-panel{padding-top:20px!important}
+.seal-shell.mb-skin .seal-stage-nav{display:none}
+@media(max-width:560px){.seal-shell.mb-skin .seal-head.seal-gate{padding-right:62px!important}.seal-shell.mb-skin .seal-gate .mb-seal{width:46px;height:46px;font-size:11px}}
+/* 2026-11-09 명부 조항 등장 애니메이션(슬라이드형): 조항 전체가 왼쪽에서 미끄러져 들어오고 → 第N條가 위에서 내려앉고 →
+   핵심 문장이 왼쪽부터 쓸려 나타나며 붉은 밑줄이 그어지고 → 나머지 문장이 아래에서 떠오른다. */
+.mb-skin .mb-row{opacity:0;transform:translateX(-32px);transition:opacity .6s ease,transform .85s cubic-bezier(.16,.84,.24,1)}
+.mb-skin .mb-row.mb-on{opacity:1;transform:none}
+.mb-skin .mb-no{transform:translateY(-18px);transition:opacity .5s ease .15s,transform .7s cubic-bezier(.16,.84,.24,1) .15s}
+.mb-skin .mb-row.mb-on .mb-no{transform:none}
+.mb-skin .mb-col p[data-reading-role] .mb-key{clip-path:inset(0 100% 0 0);transform:translateX(14px);transition:clip-path 1s cubic-bezier(.65,0,.25,1) .3s,transform 1s cubic-bezier(.16,.84,.24,1) .3s}
+.mb-skin .mb-row.mb-on p[data-reading-role] .mb-key{clip-path:inset(-4px -4px -6px -4px);transform:none}
+.mb-skin .mb-key::after{top:auto!important;bottom:-4px!important;left:0!important;right:auto!important;width:56px;height:2px;background:#c23a2e!important;transform:scaleX(0)!important;transform-origin:left!important;transition:transform .6s cubic-bezier(.65,0,.25,1) 1.15s!important}
+.mb-skin .mb-ill .mb-key::after{background:#f6d98f!important}
+.mb-skin .mb-row.mb-on .mb-key::after{transform:scaleX(1)!important}
+.mb-skin .mb-col>*:not(.seal-role-label):not(h3:first-child){opacity:0;transform:translateY(10px);transition:opacity .6s ease .75s,transform .7s cubic-bezier(.16,.84,.24,1) .75s}
+.mb-skin .mb-row.mb-on .mb-col>*{opacity:1;transform:none}
+.mb-skin .mb-col>p[data-reading-role]:first-of-type{transition-delay:.25s,.25s}
+@media(prefers-reduced-motion:reduce){.mb-skin .mb-row,.mb-skin .mb-no,.mb-skin .mb-col>*,.mb-skin .mb-col p[data-reading-role] .mb-key{opacity:1!important;transform:none!important;clip-path:none!important;transition:none!important}.mb-skin .mb-key::after{transform:scaleX(1)!important;transition:none!important}}
+@media print{.mb-skin .mb-row,.mb-skin .mb-no,.mb-skin .mb-col>*,.mb-skin .mb-col p[data-reading-role] .mb-key{opacity:1!important;transform:none!important;clip-path:none!important}}

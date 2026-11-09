@@ -12,7 +12,7 @@
     var p = M.careerProfile(ch), top = (p.top || []).slice(0, 3).map(function (c) { return c.category; });
     var jobs = p.categories.slice().sort(function (a, b) { return b.score - a.score; }).map(function (c, i) {
       return { key: c.category, name: c.name, score: c.score, band: c.band, activity: c.activity, fit: c.fit, sustainability: c.sustainability, overload: c.overload, burden: c.burden,
-        strengths: (c.strengths || []).slice(0, 4), cautions: (c.cautions || []).slice(0, 4), examples: (c.examples || []).slice(0, 6), rank: i + 1, isTop: top.indexOf(c.category) >= 0 };
+        strengths: (c.strengths || []).slice(0, 4).map(function (x) { return R.Deep && R.Deep.plainCareer ? R.Deep.plainCareer(x) : x; }), cautions: (c.cautions || []).slice(0, 4).map(function (x) { return R.Deep && R.Deep.plainCareer ? R.Deep.plainCareer(x) : x; }), examples: (c.examples || []).slice(0, 6), rank: i + 1, isTop: top.indexOf(c.category) >= 0 };
     });
     var style = AXIS_ORDER.filter(function (k) { return p.workStyle && p.workStyle[k]; }).map(function (k) { var a = p.workStyle[k]; return { key: k, left: a.left, right: a.right, value: a.value, other: a.other, drivers: (a.drivers || []).slice(0, 3).map(function (d) { return d.label; }) }; });
     var envs = (p.burdenEnvs || p.envs || []).slice(0, 3).map(function (e) { return { name: e.name, desc: e.desc, burden: e.burden, why: (e.why || []).slice(0, 3) }; });

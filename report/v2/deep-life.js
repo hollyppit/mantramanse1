@@ -5,6 +5,32 @@
   var S = D.SECTIONS, esc = D.esc, scene = D.scene, sec = D.sec, cap = D.cap, bar = D.bar, fig = D.fig, chip = D.chip, nz = D.nz, who = D.who, clamp = D.clamp;
   var BR_K = '자축인묘진사오미신유술해', EL_HJ = D.EL_HJ;
 
+
+  // 2026-11-09 직업 근거 쉬운 말: 엔진의 계산 근거 문장을 생활 말로 풀고, 명리 용어는 괄호 속에만 남긴다.
+  var GRP_MEAN = { 비겁: '내 힘·고집', 식상: '표현·솜씨', 재성: '돈·현실 감각', 관성: '규칙·책임감', 인성: '배움·보살핌' };
+  var ZONE_MEAN = { 극약: '기운이 아주 여린 사주', 태약: '기운이 많이 여린 사주', 신약: '기운이 여린 사주', 중화: '기운이 고른 사주', 신강: '기운이 센 사주', 태강: '기운이 많이 센 사주', 극왕: '기운이 아주 센 사주' };
+  var job = function (t) { return String(t || '').replace(/활동/g, '쪽'); };
+  var pctTxt = function (n) { return +n >= 25 ? n + '%나 돼요' : n + '%예요'; };
+  var pole = function (t) { return "'" + String(t || '').replace(/\s*\d+(\.\d+)?\s*$/, '').trim() + "'"; };
+  var grp = function (g, el) { return g + ' 기운(' + [GRP_MEAN[g], el].filter(Boolean).join(' · ') + ')'; };
+  function plainCareer(t) {
+    t = String(t || '').trim(); var m;
+    if ((m = /^(\S+?)\((.)\) 기운이 (\d+)%로 (.+)의 원천이 되는 구조$/.exec(t))) return grp(m[1], m[2]) + '이 사주의 ' + pctTxt(m[3]) + '. 이 힘이 ' + job(m[4]) + '에 그대로 쓰여서 잘 맞아요.';
+    if ((m = /^(\S+?)\((.)\) 기운이 (\d+)%로 적어 (.+)을 자연스럽게 끌어내는 힘은 약한 편$/.exec(t))) return '이 일에 쓰이는 기운이 내 사주에는 적은 편이에요. ' + job(m[4]) + '은 저절로 되기보다 연습으로 익혀야 해요.';
+    if ((m = /^(\S+?)\((.)\) 기운이 (\d+)%로 과다해/.exec(t))) return grp(m[1], m[2]) + '이 ' + m[3] + '%로 많이 몰려 있어요. 처음엔 힘이 넘쳐도 오래 가면 지치기 쉬우니, 속도를 나눠 쓰세요.';
+    if ((m = /^'(.+)' 쪽 방식이 이 분야와 조화됨 \(내 성향 (.+)\)$/.exec(t))) return "이 일은 '" + m[1] + "' 쪽으로 일하는 방식을 원하는데, 내 성향도 그쪽이라 손에 잘 붙어요.";
+    if ((m = /^'(.+)' 쪽 방식이 이 분야의 요구인데 내 성향은 (.+)$/.exec(t))) return "이 일은 '" + m[1] + "' 쪽 방식을 원하는데, 내 성향은 " + pole(m[2]) + ' 쪽이라 맞추는 데 힘이 들어요.';
+    if ((m = /^(\S+) 원국이라 이 활동에 쓰는 기운을 원국이 뒷받침함\(억부\)$/.exec(t))) return (ZONE_MEAN[m[1]] || m[1] + ' 사주') + '(' + m[1] + ')라, 이 일에 쓰는 힘을 타고난 사주가 받쳐 줘요(억부).';
+    if ((m = /^(\S+) 원국에서는 이 활동이 기운을 많이 소모시킴\(억부\)$/.exec(t))) return (ZONE_MEAN[m[1]] || m[1] + ' 사주') + '(' + m[1] + ')라, 이 일은 기운을 많이 써요. 쉬는 시간을 일정에 먼저 넣어 두세요(억부).';
+    if (/한난조습 치우침을 덜어 줌/.test(t)) return '이 일의 기운이 내 사주의 덥고 차고 마르고 습한 치우침을 덜어 줘서, 하다 보면 오히려 몸과 마음이 편해져요(조후).';
+    if (/한난조습 치우침을 키움/.test(t)) return '이 일의 기운이 내 사주의 덥고 차고 마르고 습한 치우침을 더 키워서, 오래 하면 쉽게 지칠 수 있어요(조후).';
+    if (/과부하가 낮음/.test(t)) return '이 일에 쓰는 기운이 한쪽으로 넘치지 않아 오래 해도 무리가 적어요.';
+    if ((m = /^(.+) 기운이 약해 구조화·지속성은 따로 보완하는 편이 유리함$/.exec(t))) return m[1].split('·').map(function (g) { return GRP_MEAN[g] ? g + '(' + GRP_MEAN[g] + ')' : g; }).join(' · ') + ' 기운이 약한 편이라, 일을 정리하고 꾸준히 이어 가는 힘은 따로 챙겨야 해요.';
+    if ((m = /^원국에 충·형이 (\d+)개 있어/.exec(t))) return '사주에 서로 부딪히는 글자(충·형)가 ' + m[1] + '개 있어서, 매일 같은 일을 되풀이하는 환경에서는 마음이 흔들릴 수 있어요.';
+    if ((m = /^(.+) 기운의 비율이 극단으로 치우치지 않아 구조가 무난함$/.exec(t))) return '일에 쓰는 기운(' + m[1] + ')이 한쪽으로 크게 치우치지 않아 무리 없이 해낼 수 있어요.';
+    return t;
+  }
+  D.plainCareer = plainCareer;
   // ───────── 직업 후보 ─────────
   var CAT_HJ = { creative: '創', planning: '策', research: '究', education: '敎', business: '商', sales: '販', management: '營', organization: '統', technical: '技', communication: '話', asset: '財', public: '公' };
   S.deep_jobs = function (H) {
@@ -12,7 +38,7 @@
     out.push(scene(sec('', cap('직업 후보 · 나에게 맞는 일의 방향') + '<p class="lead">' + esc(who(H)) + '의 사주에서 <b>잘 쓰이는 기운</b>과 <b>일하는 방식(성향)</b>을 겹쳐 12가지 직군의 적합도를 계산했습니다. 점수가 높다고 그 일을 해야 하는 건 아니고, "힘이 덜 드는 방향"을 보여 주는 지도입니다.</p>' +
       '<div class="dp-bars">' + cats.slice(0, 8).map(function (c, i) { return bar(c.name, c.score, { text: c.score + '점', color: i < 3 ? '#D5B97F' : '' }); }).join('') + '</div>')));
     top.forEach(function (c, i) {
-      var ex = (c.examples || []).slice(0, 6), st = (c.strengths || [])[0] || '', ca = (c.cautions || [])[0] || '';
+      var ex = (c.examples || []).slice(0, 6), st = plainCareer((c.strengths || [])[0] || ''), ca = plainCareer((c.cautions || [])[0] || '');
       out.push(scene(sec('dp-job', '<div class="dp-jobrow">' + fig(H, 'career:' + c.category, 'career', c.name, 'dp-thumb') + '<div class="dp-jobtxt"><small>추천 ' + (i + 1) + '순위</small><h4>' + esc(c.name) + '</h4><div class="dp-meter"><span>적합도 <b>' + c.score + '</b></span>' + bar('', c.score, { cls: 'dp-slim', text: '' }) + '<span>부담도 <b>' + c.burden + '</b></span>' + bar('', c.burden, { cls: 'dp-slim dp-warnbar', text: '' }) + '</div></div></div>' +
         '<div class="dp-tags">' + ex.map(function (x) { return chip(x); }).join('') + '</div>' + (st ? '<p class="dp-pl">＋ ' + esc(st) + '</p>' : '') + (ca ? '<p class="dp-mi">－ ' + esc(ca) + '</p>' : ''))));
     });
