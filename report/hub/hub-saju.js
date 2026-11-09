@@ -243,7 +243,7 @@
     function finish(skipped) {
       if (done) return; done = true; clearTimeout(timer); host.remove(); H.cleanup = null;
       if (!replay) P.markAwakened(); H.track('ilju_awakening_complete', { skipped: skipped ? 1 : 0, replay: replay ? 1 : 0 });
-      var to = H.ctx && H.ctx.q && H.ctx.q.to; H.replace(to === 'home' ? '#/' : to === 'timeline' ? '#/timeline' : '#/my'); // 새 홈에서 온 경우 홈으로, 인터랙티브 스토리에서 온 경우 운명의 타임라인으로
+      var aq = (H.ctx && H.ctx.q) || {}, to = aq.to; H.replace(to === 'home' ? '#/' : to === 'timeline' ? '#/timeline?aw=1' + (aq.z ? '&z=' + encodeURIComponent(aq.z) : '') : '#/my'); // 새 홈에서 온 경우 홈으로, 인터랙티브 스토리에서 온 경우 운명의 타임라인으로
     }
     H.cleanup = function () { done = true; clearTimeout(timer); };
     host.onclick = function (e) { if (e.target.id === 'awSkip') finish(true); else show(); };

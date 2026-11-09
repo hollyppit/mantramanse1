@@ -52,6 +52,11 @@
   H.route('timeline', function (q, ctx) {
     var PREVIEW = !!Ob.preview;
     if (!P.has() && !PREVIEW) return H.replace('#/welcome');
+    // 들어올 때 일주 각성 영상(#/awaken)을 먼저 보여 준다. 탭(세션)마다 한 번: 풀이를 보고 돌아올 때는 다시 틀지 않는다. 각성이 끝나면 이 화면(같은 z)으로 돌아온다.
+    if (!PREVIEW && !q.aw) {
+      var awk = 'mt_tl_awk', seen = false; try { seen = sessionStorage.getItem(awk) === P.sig(); sessionStorage.setItem(awk, P.sig()); } catch (e) { seen = true; }
+      if (!seen) return H.replace('#/awaken?to=timeline' + (P.awakened() ? '&replay=1' : '') + (q.z ? '&z=' + encodeURIComponent(q.z) : ''));
+    }
     H.view('<p class="pend">운명의 타임라인을 펼치는 중…</p>');
     Ob.config().then(function (cfg) {
       if (!cfg.timeline || cfg.timeline.enabled === false) return H.replace('#/');
