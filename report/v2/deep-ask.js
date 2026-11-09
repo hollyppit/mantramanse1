@@ -46,7 +46,7 @@
     try {
       if (!sd || !sd.dayMaster || !sd.strength) return null;
       return { dayMaster: { stem: sd.dayMaster.stem, el: sd.dayMaster.el }, strength: { band: sd.strength.band }, nowYear: sd.nowYear || new Date().getFullYear(),
-        daewoon: (sd.daewoon || []).map(function (x) { return { startYear: x.startYear, endYear: x.endYear, ganzhi: x.ganzhi, season: x.seasonName || x.season }; }) };
+        daewoon: (sd.daewoon || []).map(function (x) { return { startYear: x.startYear, endYear: x.endYear, ganzhi: x.ganzhi, season: x.seasonName || x.season, current: x === sd.currentDaewoon || undefined }; }) };
     } catch (e) { return null; }
   }
   function restore(wid) { var raw = store.get(LAST + wid); if (!raw) return null; try { var o = JSON.parse(raw); return o && o.picks && Date.now() - o.at < DAY ? o : null; } catch (e) { return null; } }

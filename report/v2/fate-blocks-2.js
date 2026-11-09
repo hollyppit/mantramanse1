@@ -124,10 +124,10 @@
   var ROAD = { career: ['일', ['기반 다지기', '실력 드러내기', '자리 굳히기']], wealth: ['돈', ['새는 곳 막기', '굴리는 법 익히기', '불리고 지키기']] };
   FB.add('fx:road', function (H, part) {
     var sd = H.sd, dw = sd.daewoon || [], now = sd.nowYear || new Date().getFullYear(), r = ROAD[part.topic] || ROAD.career, b = FB.base(H);
-    var cur = dw.filter(function (x) { return x.startYear <= now && now <= x.endYear; })[0], next = dw.filter(function (x) { return x.startYear > now; })[0];
+    var cur = sd.currentDaewoon || dw.filter(function (x) { return x.startYear <= now && now <= x.endYear; })[0], next = (cur && dw[dw.indexOf(cur) + 1]) || dw.filter(function (x) { return x.startYear > now; })[0], sh = sd.daewoonShift;
     var first = part.topic === 'wealth' ? '고정 지출을 정리하고 생활비 3개월분을 따로 떼어 두기' : '지금 자리에서 이름을 걸 대표 성과 하나 만들기', second = part.topic === 'wealth' ? ACT[b.yong] + '로 수입 통로를 하나 더 만들기' : jo(ACT[b.yong], '을', '를') + ' 맡는 역할로 넓히기';
     var steps = [[now + '~' + (now + 2) + '년', r[1][0], first], [(now + 3) + '~' + (now + 6) + '년', r[1][1], second], [(now + 7) + '~' + (now + 10) + '년', r[1][2], next ? next.ganzhi + ' 대운(' + next.startYear + '년~)에 맞춰 판을 다시 짜기' : '지금 흐름을 지키며 쌓은 것을 굳히기']];
-    return '<section class="dp-embed dp fx">' + head('命簿 · 십년 지도', '앞으로 10년, ' + r[0] + '의 로드맵', cur ? '지금은 ' + cur.ganzhi + ' 대운(' + cur.startYear + '~' + cur.endYear + '년)이에요. 세 구간으로 나눠 할 일을 정했어요.' : '세 구간으로 나눠 할 일을 정했어요.') +
+    return '<section class="dp-embed dp fx">' + head('命簿 · 십년 지도', '앞으로 10년, ' + r[0] + '의 로드맵', cur ? '지금은 ' + cur.ganzhi + ' 대운(' + cur.startYear + '~' + cur.endYear + '년)이에요. ' + (sh && sh.phase === 'ending' && sh.to ? sh.date.slice(0, 4) + '년 ' + Number(sh.date.slice(5, 7)) + '월에 ' + sh.to.ganzhi + ' 대운으로 바뀌는 교운기라, 바뀐 뒤의 흐름을 기준으로 ' : '') + '세 구간으로 나눠 할 일을 정했어요.' : '세 구간으로 나눠 할 일을 정했어요.') +
       '<ol class="fx-road">' + steps.map(function (s, i) { return '<li><span class="fx-road-n">' + HZ[i] + '</span><div><small>' + esc(s[0]) + '</small><b>' + esc(s[1]) + '</b><p>' + esc(s[2]) + '</p></div></li>'; }).join('') + '</ol></section>';
   });
 })(typeof window !== 'undefined' ? window : globalThis);

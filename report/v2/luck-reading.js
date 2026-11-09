@@ -29,9 +29,16 @@ function validYear(v){return Number.isInteger(v)&&v>=1900&&v<=2200;}
 function selected(id){return ids.indexOf(id)>=0;}
 function context(id,sd){
  if(!selected(id)||!sd||!validYear(sd.nowYear))return null;
- var lines=[],basis=[],dw=sd.currentDaewoon,sy=sd.sewoon,longFirst=id==='timeline_self_20'||id==='timeline_self_peak',annual=sy&&sy.year===sd.nowYear&&gods[sy.stemTG],decade=dw&&validYear(dw.startYear)&&validYear(dw.endYear)&&dw.startYear<=sd.nowYear&&sd.nowYear<=dw.endYear&&gods[dw.stemTG];
+ var lines=[],basis=[],dw=sd.currentDaewoon,sy=sd.sewoon,shift=(function(s,c){if(!s||!s.from||!s.to||!c)return null;var same=function(a){return a&&a.ganzhi===c.ganzhi&&a.startYear===c.startYear;};return same(s.from)||same(s.to)?s:null;})(sd.daewoonShift,sd.currentDaewoon),longFirst=id==='timeline_self_20'||id==='timeline_self_peak',annual=sy&&sy.year===sd.nowYear&&gods[sy.stemTG],decade=dw&&validYear(dw.startYear)&&validYear(dw.endYear)&&dw.startYear<=sd.nowYear&&sd.nowYear<=dw.endYear&&gods[dw.stemTG];
  function explain(p,scope){var g=gods[p.stemTG];if(!g)return;var example=g[topicIndex(id)];var lead=scope==='annual'?p.year+'년은 \''+p.stemTG+'\'의 해예요.':p.startYear+'~'+p.endYear+'년은 10년 단위로 \''+p.stemTG+'\'의 흐름이 들어와요.';lines.push(lead+' '+g[0]+' '+example);if(flows[p.season])lines.push('내 사주와 겹쳐 보면 '+flows[p.season][topicIndex(id)-1]);basis.push({scope:scope,path:scope==='annual'?'sewoon.stemTG':'currentDaewoon.stemTG',tenGod:p.stemTG,branchTenGod:gods[p.branchTG]?p.branchTG:null,ganzhi:p.ganzhi||null,year:p.year||null,startYear:p.startYear||null,endYear:p.endYear||null,flow:p.season||null,source:'existing-manse-engine'});}
- if(longFirst&&decade)explain(dw,'decade');if(annual)explain(sy,'annual');if(!longFirst&&!annual&&decade)explain(dw,'decade');
+ function ym(d){return Number(d.slice(0,4))+'년 '+Number(d.slice(5,7))+'월';}
+ function explainShift(sh){var a=sh.from,b=sh.to,ga=gods[a.stemTG],gb=gods[b.stemTG];if(!gb)return false;var ending=sh.phase==='ending';
+  lines.push('지금은 10년 단위 흐름(대운)이 바뀌는 교운기예요. '+ym(sh.date)+(ending?'에 ':' 무렵 ')+(ga?'\''+a.stemTG+'\'의 흐름('+a.ganzhi+' 대운)이 '+(ending?'끝나고 ':'끝났고 '):'')+'\''+b.stemTG+'\'의 흐름('+b.ganzhi+' 대운, '+b.startYear+'~'+b.endYear+'년)이 '+(ending?'시작돼요.':'막 시작됐어요.'));
+  lines.push((ga?'지난 10년은 '+ga[0].replace(/시기예요.$/,'시기였어요.')+' ':'')+'앞으로 10년은 '+gb[0]+' '+gb[topicIndex(id)]);
+  if(flows[b.season])lines.push('새 흐름을 내 사주와 겹쳐 보면 '+flows[b.season][topicIndex(id)-1]+' 바뀌는 앞뒤 1년쯤은 일과 생활의 틀이 흔들리기 쉬운 때라, 큰 결정은 한 번에 내리기보다 새 흐름이 자리 잡는 것을 보며 나눠서 하세요.');
+  [a,b].forEach(function(p,k){basis.push({scope:'decade',path:k?'daewoonShift.to':'daewoonShift.from',tenGod:p.stemTG,ganzhi:p.ganzhi||null,startYear:p.startYear||null,endYear:p.endYear||null,flow:p.season||null,shiftDate:sh.date,phase:sh.phase,source:'existing-manse-engine'});});
+  return true;}
+ if(longFirst&&shift)explainShift(shift);else if(longFirst&&decade)explain(dw,'decade');if(annual)explain(sy,'annual');if(!longFirst&&!annual&&shift)explainShift(shift);else if(!longFirst&&!annual&&decade)explain(dw,'decade');
  // Only luck/natal clashes copied from the engine are eligible. Natal-only clashes cannot become a dated claim.
  var candidates=[];if(annual)candidates.push({p:sy,scope:'annual',label:sy.year+'년'});
  (sd.monthlyLuck||[]).forEach(function(p){if(!p||!/^\d{4}-\d{2}-\d{2}$/.test(p.startDate||'')||!validYear(p.year)||p.year<sd.nowYear||p.year>sd.nowYear+1||Number(p.startDate.slice(0,4))!==p.year||Number(p.startDate.slice(5,7))!==p.month)return;var asOf=sd.currentRoots&&sd.currentRoots.asOfDate;if(asOf&&p.endBefore&&p.endBefore<=asOf)return;candidates.push({p:p,scope:'month',label:p.year+'년 '+p.month+'월'+(p.term?' '+p.term+' 무렵':'')});});

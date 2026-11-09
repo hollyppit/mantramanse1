@@ -166,11 +166,11 @@
   function lifeMap(Mn, ch, now) {
     var Y = Mn.yearPillarAt(now).sajuYear, top = careerTop(Mn, ch), by = ch.solar.y, list = ch.daeun.list, out = [];
     var first = list[0].startYear;
-    if (first > by) out.push({ pre: true, startYear: by, endYear: first - 1, startAge: 0, endAge: first - by - 1, season: null, tag: '대운이 시작되기 전의 시기', fields: {}, isCurrent: Y < first });
+    if (first > by) out.push({ pre: true, startYear: by, endYear: first - 1, startAge: 0, endAge: first - by - 1, season: null, tag: '대운이 시작되기 전의 시기', fields: {}, isCurrent: now < list[0].startMs });
     list.forEach(function (x, i) {
       var sea = seasonOf(x.ev), end = x.startYear + 9, f = fieldScores(Mn, ch, x, 'daeun', {}, top);
       out.push({ pre: false, idx: i, ganzhi: Mn.gzNameK(x), startYear: x.startYear, endYear: end, startAge: x.startYear - by, endAge: end - by, season: sea, tag: sea ? SEASON[sea].tag : '', seasonName: sea ? SEA[sea] : '', condition: x.ev.flow.condition.name, fit: x.ev.fitScore,
-        fields: { all: { season: sea, fit: x.ev.fitScore }, money: f.money, career: f.career, love: f.love }, isCurrent: Y >= x.startYear && Y <= end, stemTG: x.stemTG, branchTG: x.branchTG });
+        fields: { all: { season: sea, fit: x.ev.fitScore }, money: f.money, career: f.career, love: f.love }, isCurrent: x.startMs <= now && (!list[i + 1] || now < list[i + 1].startMs), stemTG: x.stemTG, branchTG: x.branchTG });
     });
     return out;
   }

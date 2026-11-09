@@ -9,7 +9,7 @@ var SPEC={
  timeline_self_02:{title:'내 차의 사양 · 부품별 점검',parts:[{sec:'deep_car',take:[1,2,3,4]}]},
  timeline_self_20:{title:'내 에너지의 리듬 · 12운성',parts:[{sec:'deep_stages',take:[0,1,2]}]},
  timeline_self_25:{title:'솔직하게 · 장점과 단점',parts:[{sec:'deep_proscons'}]},
- timeline_self_26:{title:'나에게 맞는 일 · 점수 순위',parts:[{sec:'deep_jobs',skip:/일하는 방식의 성향|솔직하게, 힘들 수 있는 일/}]},
+ timeline_self_26:{title:'타고난 강점과 맞는 일',parts:[{custom:'talent'},{sec:'deep_jobs',skip:/일하는 방식의 성향|솔직하게, 힘들 수 있는 일/}]},
  timeline_self_27:{title:'인연이 열리는 곳 · 순위',parts:[{custom:'places'},{sec:'deep_love',match:/인연이 붙는 추천 행동|만남이 이뤄질 것 같은 (해|달)/}]},
  timeline_self_28:{title:'맞는 일주 · 끌리는 일주 · 부딪히는 일주',parts:[{sec:'deep_ilju',skip:/서로 끌리는 일주 TOP 5/}]},
  timeline_self_29:{title:'미래 배우자 더 자세히',lead:1,parts:[{sec:'dossier_spouse'},{sec:'deep_spouse',skip:/미래 연인 · 배우자 추정/}]},
@@ -17,7 +17,7 @@ var SPEC={
  timeline_self_31:{title:'내 재물 그릇 자세히 보기',lead:1,parts:[{sec:'deep_wealth',match:/MY WEALTH BOWL|② 재물의 성질|④ 재물 인연/}]},
  timeline_self_32:{title:'돈 버는 방식 · 점수표',parts:[{sec:'deep_wealth',match:/나에게 유리한 돈 버는 방식/}]},
  timeline_self_34:{title:'내 자식 자리 자세히 보기',lead:1,parts:[{sec:'deep_children',take:[0,1,2]}]},
- timeline_self_35:{title:'몸과 일상을 챙길 타이밍',parts:[{sec:'deep_health'}]},
+ timeline_self_35:{title:'몸과 일상을 챙길 타이밍',parts:[{custom:'healthmap'},{sec:'deep_health',skip:/내 생활에 해당하는 예방 행동/}]},
  timeline_self_37:{title:'생활 속 개운법 · 근거',parts:[{sec:'deep_remedy'}]},
  timeline_self_24:{title:'움직이기 좋은 달 TOP 3',parts:[{custom:'timing',kind:'career',scope:'month'}]},
  timeline_self_33:{title:'50대 이후 대운 · 말년의 흐름',parts:[{custom:'late'}]},
@@ -89,6 +89,77 @@ function rankBlock(id,H){var D=R.Deep,data=root.MantraFeatureData&&root.MantraFe
 /* 말년: 50세 이후 대운을 나이대별로 보여 준다(엔진이 계산한 대운 계절·십성만 읽는다). */
 function lateLuck(H){var D=R.Deep,dw=((H.sd&&H.sd.daewoon)||[]).filter(function(x){return x.startAge>=50&&x.startAge<=75;}).slice(0,4);if(!D||!dw.length)return null;
  return '<section class="dp-embed dp"><div class="cap">'+esc('50대 이후 대운 · 나이대별 흐름')+'</div><p class="dp-lead2">'+esc('말년의 흐름은 한 줄로 정해지지 않고, 10년 단위 대운이 바뀌며 달라져요. 엔진이 계산한 대운의 계절과 십성을 나이대별로 풀었어요. 건강·수명을 말하는 표가 아니라 생활의 분위기를 보는 참고예요.')+'</p><ul class="dp-ul">'+dw.map(function(x){return '<li><b>'+esc(D.ageSpan(x.startAge,x.startAge+9))+' · '+esc(x.ganzhi)+' 대운</b> — '+esc((D.TG_DO[x.stemTG]||'새 흐름을 맞는')+' 시기')+(D.SEA_MOOD[x.season]?esc(' · 전체 분위기는 '+D.SEA_MOOD[x.season]+' 쪽이에요'):'')+'</li>';}).join('')+'</ul></section>';}
+/* ───── 타고난 강점 분야 ─────
+   원국의 십성 비율(엔진 weights.tgPct = sd.tenGods)에서 가장 큰 두 십성과 월지 십성(사회에서 쓰는 자리)을 읽어, 어떤 분야에서 강점이 드러나기 쉬운지 풀어 준다. 점수를 새로 만들지 않는다. */
+var TALENT={
+ 비견:['내 영역을 직접 꾸리는 일','스스로 정한 기준대로 끝까지 밀고 가는 힘','1인 사업·프리랜서','운동·코칭','전문 기술 자영업'],
+ 겁재:['경쟁과 협업 속에서 성과를 내는 일','사람을 모으고 승부처에서 버티는 힘','영업·세일즈','공동 창업·팀 프로젝트','스포츠·현장 리더'],
+ 식신:['한 가지 기술을 꾸준히 다듬는 일','익숙한 것을 깊게 파서 품질로 보여 주는 힘','요리·제조·공예','교육·콘텐츠 연재','기술 전문직'],
+ 상관:['말과 표현으로 바꾸고 고치는 일','남이 못 본 문제를 짚고 더 나은 방법을 내놓는 힘','기획·마케팅','방송·작가·강연','컨설팅·변론'],
+ 편재:['사람과 기회를 넓게 굴리는 일','흐름을 빨리 읽고 판을 키우는 힘','영업·유통·무역','사업 개발·투자','이벤트·중개'],
+ 정재:['숫자와 살림을 꼼꼼히 관리하는 일','들어오고 나가는 것을 정확히 맞추는 힘','재무·회계','구매·운영 관리','안정적인 장사·관리직'],
+ 편관:['급한 문제를 맡아 해결하는 일','압박 속에서도 결단하고 책임지는 힘','군경·보안·응급','현장 관리·문제 해결','감사·위기 대응'],
+ 정관:['조직과 규칙 안에서 신뢰를 쌓는 일','맡은 역할을 지키며 차근차근 올라가는 힘','공공기관·대기업','법무·인사·행정','관리직·품질 관리'],
+ 편인:['남다른 관점과 전문 지식을 쓰는 일','깊이 파고들어 나만의 해석을 만드는 힘','연구·IT·데이터','심리·상담','디자인·특수 기술'],
+ 정인:['배우고 가르치며 자격으로 인정받는 일','배운 것을 정리해 믿을 만한 답을 내는 힘','교육·학술','자격 전문직(의료·법·회계)','문서·출판·인증']
+};
+var TG_KEYS=['비견','겁재','식신','상관','편재','정재','편관','정관','편인','정인'];
+function ig(w){var c=String(w).charCodeAt(String(w).length-1)-0xAC00;return w+(c>=0&&c%28?'이':'가');}
+function talentBlock(H){var sd=H&&H.sd,tg=sd&&sd.tenGods;if(!tg)return null;
+ var rows=TG_KEYS.map(function(k,i){return {k:k,i:i,v:+tg[k]||0};}).filter(function(r){return r.v>0;}).sort(function(a,b){return b.v-a.v||a.i-b.i;});if(!rows.length)return null;
+ var top=rows.slice(0,2),mon=sd.pillars&&sd.pillars.month&&sd.pillars.month.branchTG,band=sd.strength&&sd.strength.band,nm=R.Deep&&R.Deep.who?R.Deep.who(H):'내';
+ var out='<section class="dp-embed dp dp-talents"><div class="cap">'+esc('타고난 강점 · 어떤 분야에서 드러날까')+'</div><p class="lead">'+esc(nm+'의 사주 여덟 글자를 열 가지 성향(십성)으로 나눠 보면, 가장 크게 자리 잡은 성향은 ')+'<b>'+esc(top.map(function(r){return r.k+' '+Math.round(r.v)+'%';}).join(' · '))+'</b>'+esc('예요. 많이 가진 성향일수록 애쓰지 않아도 손에 익어서, 그 성향을 쓰는 분야에서 강점이 먼저 드러나요.')+'</p>';
+ top.forEach(function(r,n){var t=TALENT[r.k];out+='<div class="dp-talent"><h4>'+(n+1)+'. '+esc(t[0])+' <small>'+esc(r.k+' '+Math.round(r.v)+'%')+'</small></h4><p>'+esc('타고난 무기는 '+t[1]+'이에요. 이런 분야에서 남보다 빨리 인정받기 쉬워요.')+'</p><div class="dp-tags">'+t.slice(2).map(function(x){return '<span class="dp-chip">'+esc(x)+'</span>';}).join('')+'</div></div>';});
+ if(mon&&TALENT[mon])out+='<p class="dp-pl">＋ '+esc(top.some(function(r){return r.k===mon;})?'태어난 달(사회에 나가 쓰는 자리)에도 '+ig(mon)+' 있어서, 이 강점이 일터에서 특히 잘 보여요.':'태어난 달(사회에 나가 쓰는 자리)에는 '+ig(mon)+' 있어요. 일터에서는 '+TALENT[mon][1]+'도 함께 쓰게 돼요. '+TALENT[mon].slice(2,4).join(', ')+' 같은 쪽이에요.')+'</p>';
+ if(band)out+='<p class="dp-mi">'+esc(band==='신강'?'힘이 센 사주라 이 강점을 혼자 밀고 나가도 잘 버텨요. 다만 내 방식만 고집하지 않도록 함께 일하는 사람의 속도도 챙기세요.':band==='신약'?'힘이 여린 사주라 이 강점은 받쳐 주는 조직·스승·동료가 있을 때 더 크게 드러나요. 혼자 다 하려 하기보다 기댈 곳을 먼저 만드세요.':'힘이 중간인 사주라 이 강점을 혼자서도, 조직 안에서도 쓸 수 있어요. 지금 환경에서 더 자주 쓰이는 쪽을 골라 키우세요.')+'</p>';
+ return out+'</section>';}
+/* ───── 건강·사고수 달력 ─────
+   원국의 약한 오행·넘치는 오행(sd.weakestEl·dominantEl)을 몸의 부위로, 세운·월운의 십성과 원국과의 충·형(엔진 luckRelations)을 사고·사기 신호로 읽는다.
+   전통 오행-장부 대응과 십성 의미를 생활 언어로 옮긴 해석이다. 점수를 새로 계산하지 않고 엔진이 준 십성·관계만 센다. */
+var HB_STEM={갑:'목',을:'목',병:'화',정:'화',무:'토',기:'토',경:'금',신:'금',임:'수',계:'수'},HB_BR={자:'수',축:'토',인:'목',묘:'목',진:'토',사:'화',오:'화',미:'토',신:'금',유:'금',술:'토',해:'수'};
+var HB_KE={목:'토',화:'금',토:'수',금:'목',수:'화'};
+var HB_ORG={목:'간·쓸개·눈·근육·힘줄',화:'심장·혈압·혈관',토:'위장·소화기·비장',금:'폐·기관지·대장·피부',수:'신장·방광·허리·생식기'};
+var HB_CARE={목:'눈을 혹사하지 말고, 근육·관절에 무리가 가는 운동은 강도를 낮추세요.',화:'혈압을 재 두고, 과로와 과음은 이때만큼은 끊으세요.',토:'폭식·야식을 끊고, 미뤄 둔 위 내시경을 받아 두세요.',금:'담배를 끊고, 기침이 2주 넘게 가면 바로 검사받으세요.',수:'허리를 아끼고 물을 자주 마시세요. 건강검진에서 신장 수치를 꼭 확인하세요.'};
+var HB_POS={year:'태어난 해',month:'태어난 달',day:'태어난 날',hour:'태어난 시간'};
+// seen: 같은 목록 안에서 같은 신호가 다시 나오면 다른 부위·다른 문장으로 쓴다(해마다 같은 문장 반복 방지).
+function hbSignals(p,sd,seen){
+ seen=seen||{};var nth=function(k){seen[k]=(seen[k]||0)+1;return seen[k]-1;};
+ var gz=String(p.ganzhi||''),se=HB_STEM[gz.charAt(0)],be=HB_BR[gz.charAt(1)],weak=sd.weakestEl,strong=sd.dominantEl,out={body:null,accident:null,fraud:null,score:0};
+ var els=[se,be].filter(Boolean);
+ var press=els.filter(function(e){return HB_KE[e]===weak;})[0];
+ if(weak&&press){var bn=nth('bw'),parts=HB_ORG[weak].split('·'),fo=parts[bn%parts.length];out.body={el:weak,w:2,text:bn?[jhb(press)+' 기운이 다시 '+weak+'을 눌러요. 이번에는 '+hbj(fo,'이','가')+' 먼저 신호를 보내요. 무리했다 싶으면 그날 바로 쉬세요.',fo+' 쪽이 약해지는 때예요. 미뤄 둔 검진이 있다면 이때 받으세요.',hbj(fo,'이','가')+' 피로를 먼저 드러내요. 이 시기엔 일정을 한 칸 비워 두세요.'][(bn-1)%3]:jhb(press)+' 기운이 강해져 원래 약한 '+weak+'('+HB_ORG[weak]+') 쪽을 누르는 때예요. '+fo+'부터 탈이 나요. '+HB_CARE[weak]};}
+ else if(strong&&els.indexOf(strong)>=0){var sn=nth('bs');out.body={el:strong,w:1,text:sn?'넘치는 '+strong+' 기운이 또 쌓여요. '+HB_ORG[strong].split('·')[sn%HB_ORG[strong].split('·').length]+' 쪽 검사를 이때 받아 두세요.':'원래 넘치는 '+strong+' 기운이 더 쌓이는 때라 '+hbj(HB_ORG[strong],'이','가')+' 과열돼요. '+HB_CARE[strong]};}
+ var rel=p.relations||[],hit=function(type){return rel.filter(function(r){return r&&r.type===type&&Array.isArray(r.members)&&r.members.indexOf('luck')>=0;}).map(function(r){return r.members.filter(function(k){return HB_POS[k];})[0];}).filter(Boolean);};
+ var ch=hit('충'),hy=hit('형');
+ var an=(ch.length||p.stemTG==='편관'||p.branchTG==='편관'||hy.length)?nth('acc'):0;
+ if(an&&(ch.length||p.stemTG==='편관'||p.branchTG==='편관'))out.accident={w:ch.indexOf('day')>=0?3:2,text:ch.length?['또 한 번 사주와 부딪히는 글자(충)가 들어와요. 이동이 잦아지니 차량 점검과 보험을 미리 챙기고, 낯선 길 운전은 피하세요.','충이 다시 걸리는 때예요. 계단·욕실·빙판처럼 미끄러운 곳에서 넘어지기 쉬워요.','부딪히는 글자가 또 들어와요. 급하게 서두르다 다치는 때라 약속 시간을 넉넉히 잡으세요.'][(an-1)%3]:['다시 몸을 몰아붙이는 편관이 들어와요. 이때 다치는 건 대부분 피곤할 때예요. 수면 시간부터 지키세요.','편관이 또 들어와 몸이 혹사당해요. 무거운 짐·높은 곳 작업은 남에게 맡기세요.','편관의 압박이 다시 와요. 화가 난 상태로 운전하거나 운동하지 마세요.'][(an-1)%3]};
+ else if(ch.indexOf('day')>=0)out.accident={w:3,text:'들어오는 운이 태어난 날의 글자와 정면으로 부딪혀요(충). 몸을 다치기 쉬운 때라 교통사고·낙상을 조심하고, 고를 수 있다면 수술·시술 날짜는 이때를 피하세요.'};
+ else if(ch.length)out.accident={w:2,text:'들어오는 운이 '+HB_POS[ch[0]]+'의 글자와 부딪혀요(충). 이사·이동·출장이 늘고 그 길에서 사고가 나기 쉬워요. 운전은 평소보다 천천히, 장거리는 쉬어 가며 하세요.'};
+ else if(p.stemTG==='편관'||p.branchTG==='편관')out.accident={w:2,text:'몸과 마음을 몰아붙이는 편관이 들어와요. 무리한 운동·위험한 작업·밤샘 운전에서 다치기 쉬워요. 피곤한 날은 운전대를 잡지 마세요.'};
+ else if(hy.length)out.accident={w:1,text:'형(刑)이 걸려 수술·시술이나 법적 다툼이 생기기 쉬운 때예요. 계약서와 몸 상태 둘 다 미리 점검하세요.'};
+ var fn=(p.stemTG==='겁재'||p.branchTG==='겁재'||p.stemTG==='비견'||p.branchTG==='비견')?nth('fr'):0;
+ if(fn&&(p.stemTG==='겁재'||p.branchTG==='겁재'))out.fraud={w:2,text:['또 겁재가 들어와요. 이번엔 지인·가족을 통한 돈 부탁이 많아져요. 거절하는 게 관계를 지키는 길이에요.','겁재가 다시 들어와 "확실한 정보"라는 말에 흔들리기 쉬워요. 남이 권하는 투자는 하루 자고 결정하세요.','돈이 새는 겁재의 때가 또 와요. 중고거래·온라인 결제는 직접 확인한 곳에서만 하세요.'][(fn-1)%3]};
+ else if(fn&&(p.stemTG==='비견'||p.branchTG==='비견'))out.fraud={w:1,text:['가까운 사람과 돈을 섞는 일이 다시 생겨요. 빌려준 돈은 돌려받지 못한다고 생각하고 결정하세요.','친한 사이의 동업·공동 투자 이야기가 나와요. 지분과 정산을 글로 남기지 않으면 하지 마세요.','내 돈을 남이 대신 관리하게 두지 마세요. 통장·카드는 내가 직접 챙기세요.'][(fn-1)%3]};
+ else if(p.stemTG==='겁재'||p.branchTG==='겁재')out.fraud={w:2,text:'겁재가 들어와 내 돈을 노리는 사람이 다가와요. 돈 빌려 달라는 부탁, 동업 제안, 고수익 투자 권유는 이때 들어오는 것일수록 거절하세요.'};
+ else if(p.stemTG==='비견'||p.branchTG==='비견')out.fraud={w:1,text:'가까운 사람과 돈이 엮이기 쉬워요. 보증·공동 명의·돈 빌려주기는 이때 하지 마세요.'};
+ else if(p.stemTG==='편인')out.fraud={w:1,text:'문서와 계약에서 속기 쉬운 때예요. 도장 찍기 전에 조건을 한 번 더 읽고, 급하게 재촉하는 계약은 미루세요.'};
+ out.score=(out.body?out.body.w:0)+(out.accident?out.accident.w:0)+(out.fraud?out.fraud.w:0);
+ return out;}
+function hbj(w,a,b){var t=String(w).replace(/\([^)]*\)$/,''),c=t.charCodeAt(t.length-1)-0xAC00;return w+(c>=0&&c%28?a:b);}
+function jhb(el){var hj={목:'木',화:'火',토:'土',금:'金',수:'水'}[el];return el+'('+hj+')';}
+function hbItem(label,s){var lines=[];if(s.body)lines.push(['몸',s.body.text]);if(s.accident)lines.push(['사고',s.accident.text]);if(s.fraud)lines.push(['사기',s.fraud.text]);
+ return '<li class="hb-item"><b>'+esc(label)+'</b>'+lines.map(function(l){return '<p><span class="hb-k hb-'+(l[0]==='몸'?'body':l[0]==='사고'?'acc':'fraud')+'">'+l[0]+'</span>'+esc(l[1])+'</p>';}).join('')+'</li>';}
+function healthMap(H){var sd=H&&H.sd;if(!sd||!sd.weakestEl)return null;
+ var yrs=(sd.annualLuck||[]).map(function(p){return {p:p,s:hbSignals(p,sd)};}).filter(function(x){return x.s.score>=2;}).sort(function(a,b){return b.s.score-a.s.score||a.p.year-b.p.year;}).slice(0,4).sort(function(a,b){return a.p.year-b.p.year;});
+ var mos=(sd.monthlyLuck||[]).map(function(p){return {p:p,s:hbSignals(p,sd)};}).filter(function(x){return x.s.score>=2;}).sort(function(a,b){return b.s.score-a.s.score||a.p.startDate.localeCompare(b.p.startDate);}).slice(0,3).sort(function(a,b){return a.p.startDate.localeCompare(b.p.startDate);});
+ var sy={},sm={};yrs.forEach(function(x){x.s=hbSignals(x.p,sd,sy);});mos.forEach(function(x){x.s=hbSignals(x.p,sd,sy);});
+ var weak=sd.weakestEl,strong=sd.dominantEl,nm=R.Deep&&R.Deep.who?R.Deep.who(H):'내';
+ var out='<section class="dp-embed dp hb"><div class="cap">'+esc('건강·사고수 달력 · 언제, 무엇을 조심할까')+'</div>'+
+  '<p class="lead">'+esc(nm+'의 사주에서 가장 약한 기운은 '+hbj(jhb(weak),'이라','라')+' '+hbj(HB_ORG[weak],'이','가')+' 타고난 약점이에요. ')+(strong&&strong!==weak?esc('반대로 '+jhb(strong)+' 기운은 넘쳐서 '+hbj(HB_ORG[strong],'이','가')+' 쉽게 과열돼요. '):'')+esc('운에서 이 두 곳을 건드리는 때, 사주와 부딪히는 글자(충·형)가 들어오는 때, 내 돈을 노리는 기운(겁재)이 들어오는 때를 골랐어요.')+'</p>';
+ out+='<h4 class="hb-h">앞으로 10년, 조심할 해</h4>'+(yrs.length?'<ul class="hb-list">'+yrs.map(function(x){return hbItem(x.p.year+'년 ('+x.p.ganzhi+')',x.s);}).join('')+'</ul>':'<p>'+esc('앞으로 10년 안에 몸·사고·사기 신호가 겹치는 해는 없어요. 위의 타고난 약점만 꾸준히 챙기면 돼요.')+'</p>');
+ out+='<h4 class="hb-h">앞으로 12개월, 조심할 달</h4>'+(mos.length?'<ul class="hb-list">'+mos.map(function(x){return hbItem(x.p.year+'년 '+x.p.month+'월'+(x.p.term?' ('+x.p.term+'부터)':''),x.s);}).join('')+'</ul>':'<p>'+esc('앞으로 12개월 안에는 신호가 겹치는 달이 없어요.')+'</p>');
+ out+='<p class="dp-note">'+esc('오행과 장부를 잇는 전통 해석이에요. 몸에 이상이 느껴지면 시기와 상관없이 병원부터 가세요.')+'</p>';
+ return out+'</section>';}
 function embed(html){return String(html||'').replace(/^<section class="scene rv dp/,'<section class="dp-embed dp');}
 function build(c){var f=c&&c.readingFeature,id=c&&(c.editorialContractId||c.id),spec=SPEC[id],D=R.Deep;if(!f||!f.sd||!spec||!D||!D.SECTIONS)return null;
  var key=id+':'+Object.keys(f.assets||{}).length+':'+(R.TopicDeep?R.TopicDeep.rev:0);   // TopicDeep(주제 심화 2차)이 늦게 준비되면 다시 만든다if(c.__rfCache&&c.__rfCache.key===key)return c.__rfCache.out;
@@ -96,6 +167,8 @@ function build(c){var f=c&&c.readingFeature,id=c&&(c.editorialContractId||c.id),
  spec.parts.forEach(function(part){try{
   if(part.custom==='places'){var p=placeRank(f);if(p)scenes.push(p);return;}
   if(part.custom==='rank'){var rk=rankBlock(id,f);if(rk)scenes.push(rk);return;}
+  if(part.custom==='healthmap'){var hm=healthMap(f);if(hm)scenes.push(hm);return;}
+  if(part.custom==='talent'){var tb=talentBlock(f);if(tb)scenes.push(tb);return;}
   if(part.custom==='late'){var lt=lateLuck(f);if(lt)scenes.push(lt);return;}
   if(part.custom==='timing'){var t=timingRank(f,part.kind,part.scope);if(t)scenes.push(t);return;}
   if(part.custom&&R.FateBlocks&&R.FateBlocks.has(part.custom)){var fb=R.FateBlocks.render(part,f,id);if(fb)scenes.push(fb);return;}   // fate-blocks.js(구성 다양화)
@@ -112,6 +185,6 @@ function build(c){var f=c&&c.readingFeature,id=c&&(c.editorialContractId||c.id),
 Object.keys(root.MantraFeatureData||{}).forEach(function(k){if(!SPEC[k])SPEC[k]={title:root.MantraFeatureData[k].title,parts:[{custom:'rank'}]};});
 // 2026-11-09 구성 다양화: 순위·순서 블록만 있던 장 앞에 모양이 다른 블록을 하나씩(fate-blocks.js). 모듈이 없으면 조용히 빠진다.
 [['timeline_wealth_11',{custom:'fx:scenario',topic:'wealth'}],['timeline_career_11',{custom:'fx:scenario',topic:'career'}],['timeline_love_12',{custom:'fx:scenario',topic:'love'}],['timeline_wealth_13',{custom:'fx:people',topic:'wealth'}],['timeline_career_13',{custom:'fx:people',topic:'career'}],['timeline_love_13',{custom:'fx:people',topic:'love'}],['timeline_wealth_15',{custom:'fx:rx',topic:'wealth'}],['timeline_career_15',{custom:'fx:rx',topic:'career'}],['timeline_love_15',{custom:'fx:rx',topic:'love'}],['timeline_self_37',{custom:'fx:rx',topic:'self'}],['timeline_self_22',{custom:'fx:letter'}],['timeline_self_18',{custom:'fx:scenario',topic:'self'}],['timeline_career_10',{custom:'fx:check',set:'habit'}],['timeline_love_06',{custom:'fx:check',set:'loveErr'}],['timeline_career_07',{custom:'fx:check',set:'org'}],['timeline_career_09',{custom:'fx:check',set:'biz'}],['timeline_wealth_09',{custom:'fx:check',set:'moneyPpl'}],['timeline_career_03',{custom:'fx:vs',set:'job'}],['timeline_career_04',{custom:'fx:vs',set:'lead'}],['timeline_wealth_04',{custom:'fx:vs',set:'salary'}],['timeline_wealth_08',{custom:'fx:vs',set:'invest'}],['timeline_love_01',{custom:'fx:profile',set:'relate'}],['timeline_love_04',{custom:'fx:profile',set:'love'}],['timeline_career_02',{custom:'fx:profile',set:'talent'}],['timeline_love_02',{custom:'fx:likes'}],['timeline_love_03',{custom:'fx:people',topic:'love'}],['timeline_career_05',{custom:'fx:fit'}],['timeline_career_12',{custom:'fx:road',topic:'career'}],['timeline_wealth_12',{custom:'fx:road',topic:'wealth'}],['timeline_love_07',{custom:'fx:profile',set:'spouse'}],['timeline_love_10',{custom:'fx:family'}],['timeline_self_30',{custom:'fx:meter',set:'wealth'}],['timeline_career_01',{custom:'fx:meter',set:'career'}],['timeline_self_25',{custom:'fx:profile',set:'self'}],['timeline_self_26',{custom:'fx:fit'}],['timeline_career_06',{custom:'fx:env'}],['timeline_wealth_03',{custom:'fx:check',set:'leak'}],['timeline_wealth_05',{custom:'fx:vs',set:'saveSpend'}],['timeline_wealth_07',{custom:'fx:check',set:'moneyChoice'}],['timeline_wealth_02',{custom:'fx:profile',set:'earn'}],['timeline_love_09',{custom:'fx:check',set:'marriage'}],['timeline_love_05',{custom:'fx:pair'}],['timeline_self_35',{custom:'fx:check',set:'safety'}],['timeline_wealth_06',{custom:'fx:actcal',topic:'wealth'}],['timeline_wealth_10',{custom:'fx:years',topic:'wealth'}],['timeline_wealth_14',{custom:'fx:cross',topic:'wealth'}],['timeline_career_08',{custom:'fx:years',topic:'career'}],['timeline_career_14',{custom:'fx:cross',topic:'career'}],['timeline_love_08',{custom:'fx:actcal',topic:'love'}],['timeline_love_14',{custom:'fx:cross',topic:'love'}],['timeline_wealth_01',{custom:'fx:meter',set:'bowl'}],['timeline_love_11',{custom:'fx:profile',set:'parent'}]].forEach(function(x){var sp=SPEC[x[0]];if(sp&&!sp.parts.some(function(p){return p.custom===x[1].custom;}))sp.parts=/^fx:(years|actcal|cross)$/.test(x[1].custom)?sp.parts.concat([x[1]]):[x[1]].concat(sp.parts);});   // 시기 장은 흐름 그래프를 앞에 두고 새 블록을 뒤에
-R.ReadingFeature={build:build,placeRank:placeRank,timingRank:timingRank,SPEC:SPEC};
+R.ReadingFeature={build:build,talentBlock:talentBlock,healthMap:healthMap,placeRank:placeRank,timingRank:timingRank,SPEC:SPEC};
 if(typeof module!=='undefined'&&module.exports)module.exports=R.ReadingFeature;
 })(typeof window!=='undefined'?window:globalThis);

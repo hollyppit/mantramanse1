@@ -85,18 +85,21 @@
       '<p class="fx-rx-f">' + esc(b.gi + '(' + EL_HJ[b.gi] + ') 기운이 강해지는 ' + (REM[b.gi] ? REM[b.gi].time : '') + '에는 큰 결정을 미루세요.') + '</p><span class="fx-stamp" aria-hidden="true">處方</span></div></section>';
   }
 
-  /* ④ 사주가 보내는 편지 */
+  /* ④ 미래의 내가 보내는 편지 — 사주 값(가장 큰 십성군·약한 십성군·용신·지금 대운)을 미래의 내가 돌아보며 말해 주는 형식 */
   var ENGINE = { 비겁: '버티는 힘', 식상: '표현하는 힘', 재성: '현실을 다루는 힘', 관성: '책임을 지는 힘', 인성: '배우고 품는 힘' };
   var BRAKE = { 비겁: '네 편을 믿고 기대는 일', 식상: '하고 싶은 말을 밖으로 꺼내는 일', 재성: '내 몫을 챙기고 계산하는 일', 관성: '스스로 정한 규칙을 지키는 일', 인성: '쉬면서 채우는 일' };
   function letter(H) {
-    var b = base(H), r = REM[b.yong] || REM.토, cur = b.cur, name = H.name ? H.name : '나';
+    var b = base(H), r = REM[b.yong] || REM.토, cur = b.cur, sh = H.sd && H.sd.daewoonShift, name = H.name ? H.name : '나';
     var paras = [
       '너는 ' + jo(ENGINE[b.top] || '너만의 힘', '을', '를') + ' 가장 크게 가지고 태어났어. 힘들 때 결국 너를 일으켜 세운 것도 그 힘이었지.',
       b.low ? '그런데 ' + jo(BRAKE[b.low] || '쉬는 일', '은', '는') + ' 늘 서툴렀어. 그건 약점이 아니라 아직 덜 써 본 근육이야. 조금씩 쓰면 돼.' : '',
       '너를 돕는 기운은 ' + b.yong + '(' + EL_HJ[b.yong] + ')' + (jo(b.yong, '이', '') === b.yong + '이' ? '이야. ' : '야. ') + r.time + '에, ' + r.place.split('·')[0] + ' 같은 곳에서, ' + jo(ACT[b.yong], '을', '를') + ' 해 봐. 생각보다 빨리 숨이 트일 거야.',
-      cur ? '지금 너는 ' + cur.ganzhi + ' 대운(' + cur.startYear + '~' + cur.endYear + '년)을 지나고 있어. 서두르지 않아도 돼. 이 10년이 끝날 때 남길 것 하나만 정하자.' : ''
+      sh && sh.phase === 'ending' && sh.to ? '지금 너는 ' + cur.ganzhi + ' 대운(' + cur.startYear + '~' + cur.endYear + '년)의 끝자락에 있어. ' + Number(sh.date.slice(0, 4)) + '년 ' + Number(sh.date.slice(5, 7)) + '월부터는 ' + sh.to.ganzhi + ' 대운이 시작돼. 끝내는 10년에서 남길 것 하나, 새 10년에 시작할 것 하나만 정하자.'
+        : sh && sh.phase === 'starting' && sh.from ? '지금 너는 ' + sh.from.ganzhi + ' 대운을 막 지나 ' + cur.ganzhi + ' 대운(' + cur.startYear + '~' + cur.endYear + '년)에 들어섰어. 바뀐 흐름이 몸에 붙는 데 1년쯤 걸리니 서두르지 않아도 돼. 이 10년에 남길 것 하나만 정하자.'
+        : cur ? '지금 너는 ' + cur.ganzhi + ' 대운(' + cur.startYear + '~' + cur.endYear + '년)을 지나고 있어. 서두르지 않아도 돼. 이 10년이 끝날 때 남길 것 하나만 정하자.' : '',
+      '나는 그 길을 먼저 지나왔어. 돌아보면 그때 정한 그 하나가 제일 고마웠어.'
     ].filter(Boolean);
-    return '<section class="dp-embed dp fx"><p class="fx-kick">命簿 · 봉투 속 편지</p><div class="fx-letter"><p class="fx-to">' + esc(name + '에게') + '</p>' + paras.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') + '<p class="fx-from">— 네 사주가<span class="fx-stamp" aria-hidden="true">命</span></p></div></section>';
+    return '<section class="dp-embed dp fx"><p class="fx-kick">命簿 · 미래의 내가 보낸 편지</p><div class="fx-letter"><p class="fx-to">' + esc(name + '에게') + '</p>' + paras.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') + '<p class="fx-from">— 미래의 네가<span class="fx-stamp" aria-hidden="true">命</span></p></div></section>';
   }
 
   var RENDER = { 'fx:scenario': scenario, 'fx:people': people, 'fx:rx': prescription, 'fx:letter': letter };

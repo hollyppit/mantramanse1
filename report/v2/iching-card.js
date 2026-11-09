@@ -28,7 +28,7 @@
     try {
       if (!sd || !sd.dayMaster || !sd.strength) return null;
       return { dayMaster: { stem: sd.dayMaster.stem, el: sd.dayMaster.el }, strength: { band: sd.strength.band }, nowYear: sd.nowYear || new Date().getFullYear(),
-        daewoon: (sd.daewoon || []).map(function (x) { return { startYear: x.startYear, endYear: x.endYear, ganzhi: x.ganzhi, season: x.season }; }), annual: sd.sewoon ? { year: sd.sewoon.year, ganzhi: sd.sewoon.ganzhi } : undefined };
+        daewoon: (sd.daewoon || []).map(function (x) { return { startYear: x.startYear, endYear: x.endYear, ganzhi: x.ganzhi, season: x.season, current: x === sd.currentDaewoon || undefined }; }), annual: sd.sewoon ? { year: sd.sewoon.year, ganzhi: sd.sewoon.ganzhi } : undefined };
     } catch (e) { return null; }
   }
   function restore(wid) {

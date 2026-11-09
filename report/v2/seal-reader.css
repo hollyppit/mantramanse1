@@ -92,3 +92,10 @@
 .mb-skin .mb-col>p[data-reading-role]:first-of-type{transition-delay:.25s,.25s}
 @media(prefers-reduced-motion:reduce){.mb-skin .mb-row,.mb-skin .mb-no,.mb-skin .mb-col>*,.mb-skin .mb-col p[data-reading-role] .mb-key{opacity:1!important;transform:none!important;clip-path:none!important;transition:none!important}.mb-skin .mb-key::after{transform:scaleX(1)!important;transition:none!important}}
 @media print{.mb-skin .mb-row,.mb-skin .mb-no,.mb-skin .mb-col>*,.mb-skin .mb-col p[data-reading-role] .mb-key{opacity:1!important;transform:none!important;clip-path:none!important}}
+
+/* 2026-11-10 읽기 편하게: 배경 세로줄 제거, 기준 없이 붙던 첫 글자 밑줄 제거, 후킹 문구는 모두 빨간색(--hook-red) */
+.seal-shell.mb-skin::before{display:none!important}
+.mb-skin .mb-key::after,.mb-skin .mb-ill .mb-key::after,.mb-skin .mb-row.mb-on .mb-key::after{display:none!important}
+:root{--hook-red:#ea6b5f}
+#chapter .text-reading-section h3.reading-hook,.text-reading-section h3.reading-hook,.reading-hook,#chapter .text-reading-section p.reading-hook-sub,.text-reading-section p.reading-hook-sub,.seal-shell.mb-skin .seal-editorial-hook,.mb-skin .seal-editorial-hook,.seal-editorial-hook,.nexthook{color:var(--hook-red)!important}
+.nexthook small{color:var(--hook-red)!important;opacity:.8}

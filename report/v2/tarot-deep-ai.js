@@ -25,7 +25,8 @@
     var dm = s.dayMaster || {}, st = s.strength || {}, stem = str(dm.stem, 2), el = str(dm.el, 2), band = str(st.band, 4);
     if (!stem || !/^[가-힣]{1,4}$/.test(band)) return null;
     var now = Number.isFinite(+s.nowYear) ? Math.round(+s.nowYear) : null, cur = null;
-    (Array.isArray(s.daewoon) ? s.daewoon.slice(0, 12) : []).forEach(function (d) { if (d && now && +d.startYear <= now && now <= +d.endYear) cur = { ganzhi: str(d.ganzhi, 4), years: (+d.startYear) + '~' + (+d.endYear), period: str(d.six || d.season, 12) }; });
+    var dl = Array.isArray(s.daewoon) ? s.daewoon.slice(0, 12) : [], marked = dl.some(function (d) { return d && d.current === true; });
+    dl.forEach(function (d) { if (d && (marked ? d.current === true : !cur && now && +d.startYear <= now && now <= +d.endYear)) cur = { ganzhi: str(d.ganzhi, 4), years: (+d.startYear) + '~' + (+d.endYear), period: str(d.six || d.season, 12) }; });
     return { day_master: stem + (el ? '(' + el + ')' : ''), strength: band, current_10y: cur, topic_band: str(s.topicBand, 8) || null };
   }
   // rs: MantraCore.Tarot.readSpread 결과(서버가 다시 계산). 반환: AI 에 보낼 입력.

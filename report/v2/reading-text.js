@@ -92,11 +92,16 @@
  function rankList(items,cls){return items.length?'<ol class="rt-rank'+(cls?' '+cls:'')+'">'+items.map(function(x,i){var t=tierOf(x.n);return '<li class="t-'+t.k+'"><span class="rt-no">'+(i+1)+'위</span><div><strong><i class="rt-dot" style="--e:'+colorOf(x.gz)+'"></i>'+x.title+'</strong><em>'+x.n+'점 <span class="rt-pill">'+t.n+'</span></em><p>'+esc(x.reason)+'</p></div></li>';}).join('')+'</ol>':'';}
  function gzHtml(gz){return '<b class="rt-dw"><i class="rt-dot" style="--e:'+colorOf(gz)+'"></i>'+esc(gz||'')+'</b>';}
  function kwHtml(x){var k=SEASON_KW[x&&x.season];return k?'<span class="rt-kw">'+k+'</span>':'';}
- function topOf(items,k){return items.filter(function(x){return !x.past;}).slice().sort(function(a,b){return b.n-a.n||a.ord-b.ord;}).slice(0,k);}
+ function topOf(items,k){return items.filter(function(x){return !x.past&&!x.endingSoon&&!x.late;}).slice().sort(function(a,b){return b.n-a.n||a.ord-b.ord;}).slice(0,k);}
+ // 지금 대운: 날짜(startDate~endBefore)가 있으면 오늘 날짜로, 없으면 연도로 고른다. 연도만 보면 대운이 바뀌는 해에 두 대운이 겹쳐 풀이(날짜 기준)와 어긋난다.
+ function todayKst(){return new Date(Date.now()+9*3600e3).toISOString().slice(0,10);}
+ function currentIndex(rows,now){var td=todayKst(),k=-1;if(rows.some(function(p){return p.startDate;})){rows.forEach(function(p,i){if(p.startDate&&p.startDate<=td&&(!p.endBefore||td<p.endBefore))k=i;});if(k>=0)return k;}rows.forEach(function(p,i){if(k<0&&p.startYear<=now&&now<=p.endYear)k=i;});return k;}
  function rankedTiming(periods,now,topic,gender,monthly,withMonths,annual){
   var rows=(periods||[]).filter(function(p){return Number.isFinite(p.startYear)&&Number.isFinite(p.endYear)&&Number.isFinite(p.startAge)&&p.startAge<90;});if(!rows.length)return '';
-  var curIdx=-1;rows.forEach(function(p,i){if(p.startYear<=now&&now<=p.endYear)curIdx=i;});
-  var dw=rows.map(function(p,i){var cur=i===curIdx;return {p:p,n:timingScore(p,topic,gender),cur:cur,past:curIdx>=0?i<curIdx:p.endYear<now,gz:p.ganzhi,ord:p.startYear,label:gzHtml(p.ganzhi)+'<span class="rt-age">'+Math.floor(p.startAge)+'<span class="rt-age2">~'+(Math.floor(p.startAge)+10)+'</span>세</span>'+kwHtml(p)+(cur?'<em class="rt-now">지금</em>':''),title:esc(p.ganzhi||'')+' 대운 · 만 '+Math.floor(p.startAge)+'~'+(Math.floor(p.startAge)+10)+'세 ('+p.startYear+'~'+p.endYear+'년)'+(cur?' · 지금':''),reason:timingReason(p,topic,gender)};});
+  var curIdx=currentIndex(rows,now),soonIdx=-1;
+  // 교운기: 지금 대운이 12개월 안에 끝나면 다음 대운에 '곧' 표시(풀이의 교운기 문장과 같은 기준).
+  if(curIdx>=0&&rows[curIdx+1]&&rows[curIdx].endBefore){var td=todayKst(),eb=rows[curIdx].endBefore,mm=(+eb.slice(0,4)-+td.slice(0,4))*12+(+eb.slice(5,7))-(+td.slice(5,7));if(mm<=12)soonIdx=curIdx+1;}
+  var dw=rows.map(function(p,i){var cur=i===curIdx;return {p:p,n:timingScore(p,topic,gender),cur:cur,endingSoon:cur&&soonIdx>=0,late:p.startAge>=80||p.condition==='주의'||p.condition==='부담'||!!(p.assessment&&p.assessment.defense),past:curIdx>=0?i<curIdx:p.endYear<now,gz:p.ganzhi,ord:p.startYear,label:gzHtml(p.ganzhi)+'<span class="rt-age">'+Math.floor(p.startAge)+'<span class="rt-age2">~'+(Math.floor(p.startAge)+10)+'</span>세</span>'+kwHtml(p)+(cur?'<em class="rt-now">지금</em>':i===soonIdx?'<em class="rt-now rt-soon">곧</em>':''),title:esc(p.ganzhi||'')+' 대운 · 만 '+Math.floor(p.startAge)+'~'+(Math.floor(p.startAge)+10)+'세 ('+p.startYear+'~'+p.endYear+'년)'+(cur?' · 지금':''),reason:timingReason(p,topic,gender)};});
   var out='<figure class="reading-overview reading-timing-rank" data-reading-chart data-chart-kind="timing-rank"><figcaption>'+esc(TOPIC_LABEL[topic])+' 흐름 한눈에 보기</figcaption>'+legendHtml();
   out+='<p class="rt-sub">10년 단위 · 대운</p>'+bars(dw,TOPIC_LABEL[topic]+' 대운 흐름 그래프');
   var tp=topOf(dw,3);if(tp.length)out+='<p class="rt-sub">앞으로 힘이 실리는 시기 순위</p>'+rankList(tp);
@@ -175,6 +180,6 @@
  }
  function update(article,c,ci){var opened=!!article.querySelector('.text-reading-basis[open]');article.innerHTML=html(c,ci);if(opened){var d=article.querySelector('.text-reading-basis');if(d)d.open=true;}}
  function stripVisuals(markup){if(!root.document)return String(markup).replace(/<(img|video|picture|figure|svg|canvas|iframe)\b[^>]*>[\s\S]*?<\/\1>/gi,'').replace(/<img\b[^>]*>/gi,'');var box=root.document.createElement('div');box.innerHTML=markup;box.querySelectorAll('img,video,picture,figure,svg,canvas,iframe').forEach(function(n){n.remove();});box.querySelectorAll('[style]').forEach(function(n){if(/url\(/i.test(n.getAttribute('style')))n.style.backgroundImage='none';});return box.innerHTML;}
- R.ReadingText={concise:concise,readingParagraphs:readingParagraphs,organize:organize,html:html,update:update,edit:edit,TECH:TECH,stripVisuals:stripVisuals,overview:overview,groupElement:groupElement,personalOpening:personalOpening};
+ R.ReadingText={timingScore:timingScore,tierOf:tierOf,currentIndex:currentIndex,concise:concise,readingParagraphs:readingParagraphs,organize:organize,html:html,update:update,edit:edit,TECH:TECH,stripVisuals:stripVisuals,overview:overview,groupElement:groupElement,personalOpening:personalOpening};
  if(typeof module!=='undefined'&&module.exports)module.exports=R.ReadingText;
 })(typeof window!=='undefined'?window:globalThis);

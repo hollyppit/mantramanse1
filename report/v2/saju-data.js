@@ -100,6 +100,14 @@
     sd.nowYear = Y;
     var active=M.daeunAt(ch,now),cur=null;sd.daewoon.forEach(function(x){if(active&&x.startDate===luckDateKst(active.startMs))cur=x;});
     sd.currentDaewoon = cur;
+    // 교운기: 지금 대운이 1년 안에 끝나거나 시작된 지 1년이 안 됐으면, 바뀌는 앞뒤 대운과 날짜를 함께 둔다(풀이·그래프가 같은 기준을 쓰게).
+    sd.daewoonShift = null;
+    if (cur) {
+      var di = sd.daewoon.indexOf(cur), nxt = sd.daewoon[di + 1], prv = sd.daewoon[di - 1], today = luckDateKst(now);
+      var mBetween = function (a, b) { return (Number(b.slice(0, 4)) - Number(a.slice(0, 4))) * 12 + Number(b.slice(5, 7)) - Number(a.slice(5, 7)); };
+      if (nxt && cur.endBefore && mBetween(today, cur.endBefore) <= 12) sd.daewoonShift = { phase: 'ending', from: cur, to: nxt, date: cur.endBefore, months: Math.max(0, mBetween(today, cur.endBefore)) };
+      else if (prv && cur.startDate && mBetween(cur.startDate, today) < 12) sd.daewoonShift = { phase: 'starting', from: prv, to: cur, date: cur.startDate, months: Math.max(0, mBetween(cur.startDate, today)) };
+    }
     if (!cur) un.push('currentDaewoon');
     try {
       var se = M.seunRange(ch, Y, Y)[0], dom = null;

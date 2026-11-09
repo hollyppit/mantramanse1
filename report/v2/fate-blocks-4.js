@@ -53,7 +53,7 @@
   };
   FB.add('fx:cross', function (H, part) {
     var sd = H.sd, dw = sd.daewoon || [], now = sd.nowYear || new Date().getFullYear(), roles = (sd.usefulElements && sd.usefulElements.roles) || {};
-    var cur = sd.currentDaewoon || dw.filter(function (x) { return x.startYear <= now && now <= x.endYear; })[0], next = dw.filter(function (x) { return x.startYear > now; })[0];
+    var cur = sd.currentDaewoon || dw.filter(function (x) { return x.startYear <= now && now <= x.endYear; })[0], next = (cur && dw[dw.indexOf(cur) + 1]) || dw.filter(function (x) { return x.startYear > now; })[0];
     if (!cur || !next) return null;
     var ce = STEM_EL_K[String(cur.ganzhi).charAt(0)], ne = STEM_EL_K[String(next.ganzhi).charAt(0)], cv = ROLE_V[roles[ce]] || 0, nv = ROLE_V[roles[ne]] || 0, up = nv >= cv, left = Math.max(0, next.startYear - now), c = CROSS[part.topic] || CROSS.wealth;
     return '<section class="dp-embed dp fx">' + head('命簿 · 교운기 알림', '다음 대운이 바뀌는 때', '') +

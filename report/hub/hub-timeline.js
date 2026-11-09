@@ -84,6 +84,15 @@
     var A = function () { return O.addr(nm, cfg); };
     var asset = function (key) { return Q.assetUrl(cfg, key, mobile); };
 
+    // 지금 보고 있는 사주의 출생정보 한 줄 + 바꾸기(언제든 수정 화면으로). 미리보기에서는 표본이라 숨긴다.
+    var EDIT = '#/begin?edit=1';
+    var birthLine = function () {
+      var s = PREVIEW ? null : P.get(); if (!s) return '';
+      var hm = s.hourUnknown || s.hour == null || s.hour === '' ? '시각 모름' : ('0' + s.hour).slice(-2) + ':' + ('0' + (+s.minute || 0)).slice(-2);
+      var txt = s.year + '.' + ('0' + s.month).slice(-2) + '.' + ('0' + s.day).slice(-2) + ' ' + (s.calendar === 'lunar' ? '음력' + (s.leap ? '(윤달)' : '') : '양력') + ' · ' + hm + ' · ' + (s.gender === 'F' ? '여' : '남');
+      return '<p class="tq-birth"><span>' + esc(txt) + '</span><a href="' + EDIT + '" data-track="profile_edit" data-p="timeline_hero">바꾸기</a></p>';
+    };
+
     /* ── 공통 조각 ── */
     var tip = function (w) { var t = O.TERMS[w]; return t ? '<span class="tip" tabindex="0" role="button" aria-label="' + esc(w + ': ' + t) + '" data-tip="' + esc(t) + '">' + esc(w) + '</span>' : esc(w); };
     var KEYC = function (it) { return 'k-' + esc(it.key || 'pre'); };
@@ -183,10 +192,10 @@
     var secs = TC.sections.filter(function (s) { return s.enabled !== false; });
     var builders = { birth: birthHtml, flow: flowHtml, now: nowHtml, themes: themesHtml };
     var heroBg = asset('archive'), pos = Q.assetFocus(cfg, 'archive', mobile);
-    var html = '<div class="tq" id="tq"><header class="tq-hero" style="--hero:url(\'' + esc(heroBg) + '\');--pos:' + esc(pos) + '"><p class="kick">MANTRA · FATE TIMELINE</p><h1>운명의 타임라인</h1>' + (nm ? '<p class="tq-who">' + esc(A()) + '</p>' : '') + '<p class="tq-intro">' + esc(O.fill(TC.texts.intro, nm, cfg)) + '</p></header>' +
-      '<nav class="tq-nav" id="tqNav" aria-label="타임라인 영역">' + secs.map(function (s, i) { return '<a href="#tq-' + s.id + '" data-z="' + s.id + '"><i>' + (i + 1) + '</i>' + esc(s.title) + '</a>'; }).join('') + '</nav>' +
+    var html = '<div class="tq" id="tq"><header class="tq-hero" style="--hero:url(\'' + esc(heroBg) + '\');--pos:' + esc(pos) + '"><p class="kick">MANTRA · FATE TIMELINE</p><h1>운명의 타임라인</h1>' + (nm ? '<p class="tq-who">' + esc(A()) + '</p>' : '') + birthLine() + '<p class="tq-intro">' + esc(O.fill(TC.texts.intro, nm, cfg)) + '</p></header>' +
+      '<nav class="tq-nav" id="tqNav" aria-label="타임라인 영역">' + secs.map(function (s, i) { return '<a href="#tq-' + s.id + '" data-z="' + s.id + '"><i>' + (i + 1) + '</i>' + esc(s.title) + '</a>'; }).join('') + (PREVIEW ? '' : '<a class="tq-edit" href="' + EDIT + '" data-track="profile_edit" data-p="timeline_nav" aria-label="사주 정보(출생정보) 바꾸기">✎ 정보 바꾸기</a>') + '</nav>' +
       secs.map(function (s, i) { return '<section class="tq-sec" id="tq-' + s.id + '" data-z="' + s.id + '"><div class="tq-sech"><span>' + (i + 1) + '</span><div><h2>' + esc(s.title) + '</h2>' + (s.sub ? '<p>' + esc(s.sub) + '</p>' : '') + '</div></div><div class="tq-body" id="tqb-' + s.id + '">' + builders[s.id]() + '</div></section>'; }).join('') +
-      '<footer class="tq-foot"><div class="tq-acts"><a class="btn" href="#/" data-track="fortune_content_click" data-p="timeline_home">내 홈으로 가기</a><a class="btn ghost sm" href="#/my?s=1" data-track="fortune_content_click" data-p="timeline_my">MY 운명 홈</a><a class="btn ghost sm" href="#/begin?edit=1">출생정보 수정</a><button type="button" class="btn ghost sm" data-guide-open>안내자 변경</button></div><p class="dis">' + esc(TC.texts.notice) + '</p></footer></div>';
+      '<footer class="tq-foot"><div class="tq-acts"><a class="btn" href="#/" data-track="fortune_content_click" data-p="timeline_home">내 홈으로 가기</a><a class="btn ghost sm" href="#/my?s=1" data-track="fortune_content_click" data-p="timeline_my">MY 운명 홈</a><a class="btn ghost sm" href="' + EDIT + '" data-track="profile_edit" data-p="timeline_foot">출생정보 수정</a><button type="button" class="btn ghost sm" data-guide-open>안내자 변경</button></div><p class="dis">' + esc(TC.texts.notice) + '</p></footer></div>';
     var el = H.view(html);
     DOC.body.classList.add('tq-wide'); var prevClean = H.cleanup; H.cleanup = function () { DOC.body.classList.remove('tq-wide'); if (io) io.disconnect(); if (prevClean) prevClean(); };
     var root0 = $('#tq', el);

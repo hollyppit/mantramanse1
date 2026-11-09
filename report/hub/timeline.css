@@ -17,6 +17,9 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 #hub .tq-nav a{ flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; min-height: 40px; border: 1px solid var(--line); border-radius: 999px; background: rgba(19, 24, 39, .85); color: var(--ink-2); text-decoration: none; font-size: .82rem; white-space: nowrap; }
 #hub .tq-nav a i{ font-style: normal; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: .7rem; background: rgba(205,178,122,.15); color: var(--gold); }
 #hub .tq-nav a.on{ border-color: var(--gold); color: var(--gold-l); } #hub .tq-nav a:hover{ color: var(--gold-l); }
+#hub .tq-birth{ display: inline-flex; align-items: center; gap: 10px; margin: 2px auto 10px; padding: 4px 4px 4px 14px; border: 1px solid rgba(205,178,122,.35); border-radius: 999px; background: rgba(8,10,17,.55); font-size: .84rem; color: var(--ink-2); }
+#hub .tq-birth a{ display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: 999px; background: rgba(205,178,122,.16); color: var(--gold-l); text-decoration: none; font-weight: 600; }
+#hub .tq-nav a.tq-edit{ position: sticky; right: 0; margin-left: auto; border-color: rgba(205,178,122,.55); background: #1a1f30; color: var(--gold-l); box-shadow: -14px 0 14px var(--bg); }
 
 #hub .tq-sec{ padding: 34px 0 10px; scroll-margin-top: calc(var(--top) + 54px); }
 #hub .tq-sech{ display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }

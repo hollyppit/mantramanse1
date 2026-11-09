@@ -12,7 +12,7 @@ var TRAIT={
  love:{신강:'관계에서도 주도권을 쥐려는 마음이 커지기 쉬운 구조입니다.',신약:'상대에게 맞추다 내 마음을 놓치기 쉬운 구조입니다.',중화:'서로 속도를 맞추는 데 능한 구조입니다.'}
 };
 var CAT_KO={general:'전반',wealth:'재물',career:'커리어',love:'인연'};
-function period(s){var d=(s.daewoon||[]).filter(function(p){return p.startYear<=s.nowYear&&s.nowYear<=p.endYear;})[0];return d||null;}
+function period(s){var l=s.daewoon||[],m=l.filter(function(p){return p&&p.current===true;})[0];if(m)return m;var d=l.filter(function(p){return p.startYear<=s.nowYear&&s.nowYear<=p.endYear;})[0];return d||null;}
 function valid(s){return !!(s&&s.dayMaster&&s.dayMaster.stem&&s.strength&&s.strength.band&&Number.isFinite(s.nowYear));}
 // direction: 주역 판단 방향(없으면 null), category: general|wealth|career|love
 function build(saju,category,direction){

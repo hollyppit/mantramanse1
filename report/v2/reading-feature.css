@@ -12,3 +12,18 @@
 .reading-feature-lead .dp-hero{text-align:center}
 .reading-feature-lead .dp-fig{margin:0 auto 14px;max-width:340px}
 @media(max-width:560px){.dp-embed .dp-ilju{grid-template-columns:5.6em 1fr}}
+
+/* 타고난 강점 분야(reading-feature.js talentBlock) */
+.dp-talent{margin:12px 0;padding:12px 14px;border:1px solid rgba(213,185,127,.3);border-radius:12px;background:rgba(255,255,255,.03)}
+.dp-talent h4{margin:0 0 6px;font-size:1rem;color:var(--gold-l,#F0DFB2)}
+.dp-talent h4 small{margin-left:6px;font-size:.74rem;color:var(--gold,#D5B97F);font-weight:500}
+.dp-talent p{margin:0 0 8px;line-height:1.65}
+
+/* 건강·사고수 달력(reading-feature.js healthMap) */
+.hb-h{margin:18px 0 8px;font-size:.98rem;color:var(--gold-l,#F0DFB2)}
+.hb-list{list-style:none;margin:0;padding:0}
+.hb-item{margin:0 0 12px;padding:12px 14px;border:1px solid rgba(213,185,127,.28);border-radius:12px;background:rgba(255,255,255,.03)}
+.hb-item>b{display:block;margin-bottom:6px;color:var(--gold-l,#F0DFB2)}
+.hb-item p{margin:6px 0 0;line-height:1.7}
+.hb-k{display:inline-block;min-width:34px;margin-right:8px;padding:1px 8px;border-radius:99px;font-size:.74rem;font-weight:700;text-align:center}
+.hb-body{background:rgba(111,174,127,.18);color:#9fd6ae}.hb-acc{background:rgba(234,107,95,.18);color:#f19a90}.hb-fraud{background:rgba(230,184,102,.18);color:#efcf8e}
