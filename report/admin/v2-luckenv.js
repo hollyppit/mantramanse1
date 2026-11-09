@@ -54,9 +54,9 @@
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leTD"' + (fl ? '' : ' disabled') + '>' + (fl && fl.topicDeep ? '주제 심화 끄기' : '주제 심화 켜기') + '</button></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 무빙툰 재물운·커리어운·인연운·개운법 장에 그래프 지표(횡재·사업·이직·결혼 등) 10년 그래프, 직업 TOP 10·업종·수익 유형 순위, 궁합(저장한 상대), 거주·사업장 방향과 지역 TOP 5, 우리 집 현공풍수, 소원성취 명당 순위가 <b>약 1분 안에</b> 붙습니다.</p></div>';
     // 운명의 타임라인 서사 엔진(report/v2/life-narrative.js) 스위치 — 따로 켜고 끈다. 사주별 미리보기·검수는 tools/life-narrative-preview.cjs
-    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 서사 엔진(31장)</b> — 현재: <b style="color:' + (fl && fl.lifeNarrative ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.lifeNarrative ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 서사 엔진(45장)</b> — 현재: <b style="color:' + (fl && fl.lifeNarrative ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.lifeNarrative ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leLN"' + (fl ? '' : ' disabled') + '>' + (fl && fl.lifeNarrative ? '서사 엔진 끄기' : '서사 엔진 켜기') + '</button></div>' +
-      '<p class="muted" style="margin:8px 0 0">켜면 종합풀이 14장(기질·인생 흐름·최고와 최악·사용설명서·움직일 때·강점과 약점·맞는 업·인연운·배우자·재물운·재물 그릇·말년운·자식운·개운법), 재물운 심화 15장 전체, 인연운 \'사랑할 때\', 커리어운 \'조직생활\' 장의 본문이 복합 규칙 서사(핵심 성향→생활→갈등→운의 변화→조언)로 바뀝니다. 맞는 규칙이 없는 사주는 기존 문안 그대로입니다. 끄면 약 1분 안에 원래대로 돌아갑니다(DB 변경 없음).</p></div>';
+      '<p class="muted" style="margin:8px 0 0">켜면 종합풀이 14장(기질·인생 흐름·최고와 최악·사용설명서·움직일 때·강점과 약점·맞는 업·인연운·배우자·재물운·재물 그릇·말년운·자식운·개운법), 재물운 심화 15장 전체, 인연운 심화 15장 전체, 커리어운 \'조직생활\' 장의 본문이 복합 규칙 서사(핵심 성향→생활→갈등→운의 변화→조언)로 바뀝니다. 맞는 규칙이 없는 사주는 기존 문안 그대로입니다. 끄면 약 1분 안에 원래대로 돌아갑니다(DB 변경 없음).</p></div>';
     root.innerHTML = flagBox + '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">운세 환경 문구 게시</h3>' +
       '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 12px;margin:0 0 8px;line-height:1.7"><b>사용법</b><br>① 목록의 문구를 읽어 봅니다.<br>② 괜찮으면 체크하고 <b>[선택 게시]</b>, 전부 괜찮으면 <b>[목록 전체 게시]</b>를 누릅니다.<br>③ 고치려면 문구를 눌러 본문을 수정한 뒤 <b>[저장하고 게시]</b>를 누릅니다.</div>' +
       '<p class="muted" style="margin:0 0 8px">게시한 문구만 사용자 화면에 반영되고, 수정하면 게시본에서 빠집니다(사용자에게는 기본 문구). 단정·반말 표현이나 같은 문구는 저장되지 않습니다. 운세 환경 해석 기능이 꺼져 있으면 게시해도 아직 사용자에게 보이지 않습니다. <b>전체 ' + S.phrases.length + '건 · 게시됨 ' + c.published + ' · 미게시 ' + c.unpub + '</b></p>' +
@@ -87,7 +87,7 @@
     };
     $('#leLN').onclick = function () {   // 타임라인 서사 엔진 스위치
       var v = !(S.flags && S.flags.lifeNarrative);
-      if (v && !confirm('운명의 타임라인 서사 엔진(31장)을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
+      if (v && !confirm('운명의 타임라인 서사 엔진(45장)을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
       var who = ''; try { who = localStorage.getItem('iching_reviewer') || ''; } catch (e) { }
       fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { lifeNarrative: v } }) })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })

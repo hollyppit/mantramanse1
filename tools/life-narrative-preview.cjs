@@ -5,7 +5,7 @@
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.join(__dirname, '..'), outDir = path.join(root, 'output', 'life-narrative-preview');
 const ctx = { console }; ctx.window = ctx; vm.createContext(ctx);
-for (const f of ['engine.js', 'report/v2/life-narrative-data.js', 'report/v2/life-narrative-data-self.js', 'report/v2/life-narrative-data-self2.js', 'report/v2/life-narrative-data-wealth.js', 'report/v2/life-narrative-data-wealth2.js', 'report/v2/life-narrative.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
+for (const f of ['engine.js', 'report/v2/life-narrative-data.js', 'report/v2/life-narrative-data-self.js', 'report/v2/life-narrative-data-self2.js', 'report/v2/life-narrative-data-wealth.js', 'report/v2/life-narrative-data-wealth2.js', 'report/v2/life-narrative-data-love.js', 'report/v2/life-narrative-data-love2.js', 'report/v2/life-narrative.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
 const M = ctx.Manse, L = ctx.MantraLifeNarrative, NOW = Date.now();
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const [d, t, g] = process.argv.slice(2);

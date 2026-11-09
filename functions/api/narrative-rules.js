@@ -13,6 +13,8 @@ import '../../report/v2/life-narrative-data-self.js';
 import '../../report/v2/life-narrative-data-self2.js';
 import '../../report/v2/life-narrative-data-wealth.js';
 import '../../report/v2/life-narrative-data-wealth2.js';
+import '../../report/v2/life-narrative-data-love.js';
+import '../../report/v2/life-narrative-data-love2.js';
 import '../../report/v2/life-narrative.js';
 
 const KEY = 'narrative:rules', MAX_HIST = 30;
