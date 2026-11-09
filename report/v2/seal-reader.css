@@ -86,7 +86,8 @@
 .mb-skin .mb-key::after{top:auto!important;bottom:-4px!important;left:0!important;right:auto!important;width:56px;height:2px;background:#c23a2e!important;transform:scaleX(0)!important;transform-origin:left!important;transition:transform .6s cubic-bezier(.65,0,.25,1) 1.15s!important}
 .mb-skin .mb-ill .mb-key::after{background:#f6d98f!important}
 .mb-skin .mb-row.mb-on .mb-key::after{transform:scaleX(1)!important}
-.mb-skin .mb-col>*:not(.seal-role-label):not(h3:first-child){opacity:0;transform:translateY(10px);transition:opacity .6s ease .75s,transform .7s cubic-bezier(.16,.84,.24,1) .75s}
+/* :where()로 우선순위를 낮춰 아래 .mb-on 규칙이 반드시 이기게 한다(이전엔 :not() 때문에 본문이 계속 투명했음). */
+.mb-skin .mb-col>:where(:not(.seal-role-label):not(h3:first-child)){opacity:0;transform:translateY(10px);transition:opacity .6s ease .75s,transform .7s cubic-bezier(.16,.84,.24,1) .75s}
 .mb-skin .mb-row.mb-on .mb-col>*{opacity:1;transform:none}
 .mb-skin .mb-col>p[data-reading-role]:first-of-type{transition-delay:.25s,.25s}
 @media(prefers-reduced-motion:reduce){.mb-skin .mb-row,.mb-skin .mb-no,.mb-skin .mb-col>*,.mb-skin .mb-col p[data-reading-role] .mb-key{opacity:1!important;transform:none!important;clip-path:none!important;transition:none!important}.mb-skin .mb-key::after{transform:scaleX(1)!important;transition:none!important}}

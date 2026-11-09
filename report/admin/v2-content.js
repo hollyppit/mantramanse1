@@ -23,7 +23,16 @@
 
   function api(path, opt) {
     opt = opt || {}; opt.headers = Object.assign({ authorization: 'Bearer ' + PW }, opt.headers || {});
-    return fetch(path, opt).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(d.error || ('오류 ' + r.status)); return d; }); });
+    // 2026-11-09: 성공 응답(200)의 본문이 네트워크 끊김(QUIC 오류 등)으로 중간에 잘리면 예전엔 {} 로 넘겨 화면이 'Cannot convert undefined or null to object' 로 깨졌다.
+    //  이제 GET 은 한 번 다시 받고, 그래도 안 되면 알아볼 수 있는 오류를 낸다. 빈 본문(204 등)은 그대로 {}.
+    var get = !opt.method || String(opt.method).toUpperCase() === 'GET', CUT = '응답을 끝까지 받지 못했습니다(네트워크가 잠시 끊김). 다시 불러와 주세요.';
+    function once(retry) {
+      return fetch(path, opt).then(function (r) {
+        return r.text().then(function (t) { if (!t) return {}; try { return JSON.parse(t); } catch (e) { if (r.ok) throw new Error(CUT); return {}; } }, function () { if (r.ok) throw new Error(CUT); return {}; })
+          .then(function (d) { if (!r.ok) throw new Error(d.error || ('오류 ' + r.status)); return d; });
+      }).catch(function (e) { if (retry && get && (e.message === CUT || e instanceof TypeError)) return once(false); throw e; });
+    }
+    return once(true);
   }
   function toast(msg, bad) {
     var t = document.createElement('div'); t.textContent = msg; t.setAttribute('role', 'status');
