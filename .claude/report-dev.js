@@ -7,13 +7,22 @@ const ikMem = new Map(), ikEnv = { ADMIN_PASSWORD: 'test', ERRLOG_ON:process.env
 // 로컬 확인용 가짜 AI(Anthropic): 구간의 첫 긴 문장을 원문 인용으로 삼아 키워드로 조건을 읽어 후보 1개를 돌려준다
 const r2mem = new Map(),r2meta=new Map(); ikEnv.ANTHROPIC_API_KEY='mock';
   function r2head(k){if(!r2mem.has(k))return null;const bytes=r2mem.get(k),hash=require('crypto').createHash('sha256').update(bytes).digest();return {key:k,size:bytes.length,etag:hash.toString('hex'),checksums:{sha256:hash},uploaded:new Date(0),httpMetadata:r2meta.get(k)?.httpMetadata||{contentType:'application/octet-stream'},customMetadata:r2meta.get(k)?.customMetadata||{}};}
-  ikEnv.CLIPS_R2={put:async(k,v,o={})=>{if(o.onlyIf?.get?.('if-none-match')==='*'&&r2mem.has(k))return null;const bytes=v instanceof ReadableStream?Buffer.from(await new Response(v).arrayBuffer()):Buffer.from(v);if(o.sha256&&require('crypto').createHash('sha256').update(bytes).digest('hex')!==o.sha256)throw Error('checksum mismatch');r2mem.set(k,bytes);r2meta.set(k,o);return r2head(k)},get:async(k,o)=>{const h=r2head(k);if(!h)return null;return {...h,body:o?.onlyIf?.etagMatches&&o.onlyIf.etagMatches!==h.etag?null:r2mem.get(k)}},head:async k=>r2head(k),delete:async k=>{r2mem.delete(k);r2meta.delete(k)},list:async o=>{const keys=[...r2mem.keys()].sort(),offset=Number(o?.cursor||0),limit=o?.limit||200;return {objects:keys.slice(offset,offset+limit).map(r2head),truncated:offset+limit<keys.length,cursor:String(offset+limit)}}};
+  ikEnv.CLIPS_R2={put:async(k,v,o={})=>{if(o.onlyIf?.get?.('if-none-match')==='*'&&r2mem.has(k))return null;const bytes=v instanceof ReadableStream?Buffer.from(await new Response(v).arrayBuffer()):Buffer.from(v);if(o.sha256&&require('crypto').createHash('sha256').update(bytes).digest('hex')!==o.sha256)throw Error('checksum mismatch');r2mem.set(k,bytes);r2meta.set(k,o);return r2head(k)},get:async(k,o)=>{const h=r2head(k);if(!h)return null;return {...h,arrayBuffer:async()=>{const b=r2mem.get(k);return b.buffer.slice(b.byteOffset,b.byteOffset+b.length)},body:o?.onlyIf?.etagMatches&&o.onlyIf.etagMatches!==h.etag?null:r2mem.get(k)}},head:async k=>r2head(k),delete:async k=>{r2mem.delete(k);r2meta.delete(k)},list:async o=>{const keys=[...r2mem.keys()].sort(),offset=Number(o?.cursor||0),limit=o?.limit||200;return {objects:keys.slice(offset,offset+limit).map(r2head),truncated:offset+limit<keys.length,cursor:String(offset+limit)}}};
 const realFetch = global.fetch;
 global.fetch = async (u, o) => {
+  if (String(u).includes('klingai.com') || String(u).startsWith('https://mock.kling.local/')) { // 로컬 확인용 가짜 Kling(시네마틱 온보딩 영상): 제출 → 바로 완료 → 작은 가짜 mp4
+    if (String(u).startsWith('https://mock.kling.local/')) return new Response(Buffer.from('mock-mp4-' + Date.now()), { status: 200, headers: { 'content-type': 'video/mp4' } });
+    if (o && o.method === 'POST') return new Response(JSON.stringify({ code: 0, data: { id: 'mock-task' } }), { status: 200 });
+    return new Response(JSON.stringify({ code: 0, data: [{ status: 'succeeded', outputs: [{ type: 'video', url: 'https://mock.kling.local/v.mp4' }] }] }), { status: 200 });
+  }
   if (String(u).includes('api.openai.com/v1/images')) { // 로컬 확인용 가짜 이미지 생성: 색만 다른 작은 PNG
     const c = [[120, 90, 60], [60, 110, 140], [140, 70, 90], [70, 130, 90]][Math.floor(Math.random() * 4)], zlib = require('zlib'), W = 64, Hh = 96, raw = Buffer.alloc((W * 3 + 1) * Hh); for (let y = 0; y < Hh; y++) { raw[y * (W * 3 + 1)] = 0; for (let x = 0; x < W; x++) { const k = y * (W * 3 + 1) + 1 + x * 3, f = 0.4 + 0.6 * y / Hh; raw[k] = c[0] * f; raw[k + 1] = c[1] * f; raw[k + 2] = c[2] * f; } }
     const crc = b => { let t = ~0; for (const x of b) { t ^= x; for (let i = 0; i < 8; i++) t = (t >>> 1) ^ (0xEDB88320 & -(t & 1)); } return ~t >>> 0; }, chunk = (t, d) => { const l = Buffer.alloc(4); l.writeUInt32BE(d.length); const td = Buffer.concat([Buffer.from(t), d]), cc = Buffer.alloc(4); cc.writeUInt32BE(crc(td)); return Buffer.concat([l, td, cc]); }, ih = Buffer.alloc(13); ih.writeUInt32BE(W, 0); ih.writeUInt32BE(Hh, 4); ih[8] = 8; ih[9] = 2;
     const png = Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ih), chunk('IDAT', zlib.deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]); return new Response(JSON.stringify({ data: [{ b64_json: png.toString('base64') }] }), { status: 200 });
+  }
+  if (String(u).includes('api.anthropic.com') && o && typeof o.body === 'string' && o.body.includes('[시네마틱 온보딩 장면 연출]')) { // 로컬 확인용 가짜 장면 연출: 독백 첫 줄로 PC·모바일 연출을 만든다
+    const m = JSON.parse(o.body).messages[0].content, first = ((m.split('독백:\n')[1] || '').split('\n')[0] || '').replace(/^\d+\. /, '');
+    return new Response(JSON.stringify({ content: [{ type: 'text', text: JSON.stringify({ core: '[가짜 연출] ' + first, pc: '[가짜 PC] 넓은 방 위쪽 가운데에 "' + first + '"를 떠올리게 하는 장면, 아래는 어두운 마루.', mobile: '[가짜 모바일] 같은 장면을 세로로 더 가까이, 위쪽 40%에 핵심.', motion: 'Candle flame flickers softly.' }) }], model: 'mock' }), { status: 200 });
   }
   if (!String(u).includes('api.anthropic.com')) return realFetch(u, o);
   const msg = JSON.parse(o.body).messages[0].content, body = (msg.split('[원문]\n')[1] || '').split('[원문 끝]')[0], sents = body.replace(/^#.*$/gm, '').split(/(?<=[.다])\s+/).map(x => x.trim()).filter(x => x.length >= 20 && !/^\[\d+쪽\]/.test(x) && !/^#/.test(x)), claim = sents[0];
@@ -57,9 +66,9 @@ http.createServer(async (q, r) => {
     const res = await fn({ env: ikEnv, request: new Request('http://' + (q.headers.host || 'x') + q.url, { method: q.method, headers: hd, body: buf }) });
     r.statusCode = res.status; if (res.headers.get('x-errlog')) r.setHeader('x-errlog', res.headers.get('x-errlog')); r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(Buffer.from(await res.arrayBuffer()));
   }
-  const IMG = { '/api/assets': 'assets', '/api/asset-art': 'asset-art', '/api/panel-art': 'panel-art', '/api/tarot-art': 'tarot-art' };
+  const IMG = { '/api/assets': 'assets', '/api/asset-art': 'asset-art', '/api/panel-art': 'panel-art', '/api/tarot-art': 'tarot-art', '/api/onboard-art': 'onboard-art' };
   if (IMG[p]) { // 이미지 생성 API 4종을 메모리 KV·R2 로 실행(가짜 이미지 모델)
-    ikEnv.OPENAI_API_KEY = 'mock'; const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/' + IMG[p] + '.js')).href), fn = mod['onRequest' + q.method[0] + q.method.slice(1).toLowerCase()], buf = /^(POST|PUT)$/.test(q.method) ? await body(q) : undefined;
+    ikEnv.OPENAI_API_KEY = 'mock'; if (p === '/api/onboard-art') ikEnv.KLING_API_KEY = 'mock'; const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/' + IMG[p] + '.js')).href), fn = mod['onRequest' + q.method[0] + q.method.slice(1).toLowerCase()], buf = /^(POST|PUT)$/.test(q.method) ? await body(q) : undefined;
     if (!fn) return send(r, 405, { error: 'method' }); const res = await fn({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': 'application/json' }, body: buf }) });
     r.statusCode = res.status; r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(await res.text());
   }
@@ -154,7 +163,7 @@ http.createServer(async (q, r) => {
     if (q.method === 'POST') {
       if (!authed(q)) return send(r, 401, { error: '관리자 인증이 필요합니다' });
       const key = 'm' + Date.now().toString(36) + '.' + (u.searchParams.get('name') || 'x.mp4').split('.').pop();
-      files[key] = await body(q); return send(r, 200, { ok: true, key });
+      files[key] = await body(q); if (typeof r2mem !== 'undefined') { r2mem.set(key, files[key]); r2meta.set(key, { httpMetadata: { contentType: q.headers['content-type'] || '' } }); } return send(r, 200, { ok: true, key });
     }
     const f = files[u.searchParams.get('k')] || r2mem.get(u.searchParams.get('k')); if (!f) { r.statusCode = 404; return r.end('nf'); }
     const kk = u.searchParams.get('k') || ''; if (/.(wav|mp3|ogg|m4a)$/.test(kk)) { r.setHeader('content-type', kk.endsWith('.wav') ? 'audio/wav' : 'audio/mpeg'); return r.end(f); }
