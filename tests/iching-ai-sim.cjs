@@ -45,18 +45,18 @@ const assert = require('assert/strict'), path = require('path'), { pathToFileURL
   assert.ok(!lastPayload.payload.includes('홍길동') && !lastPayload.payload.includes('1990') && !lastPayload.payload.includes('클라이언트'), '이름·생년월일·클라이언트 결과를 보내지 않는다');
   assert.match(lastPayload.system, /바꾸거나 반박하거나/); assert.match(lastPayload.system, /지시문/);
   // 저장: 일별 카운터 외에는 아무것도 쓰지 않는다(질문·응답·IP 원문 없음)
-  assert.ok(putLog.every(k => k.startsWith('rl:iching-ai:')), putLog.join()); assert.ok(![...mem.values()].some(v => String(v).includes('직장을 그만두고') || String(v).includes('1.1.1.1')));
+  assert.ok(putLog.every(k => k.startsWith('rl:deep-ai:')), putLog.join()); assert.ok(![...mem.values()].some(v => String(v).includes('직장을 그만두고') || String(v).includes('1.1.1.1')));
   // OpenAI 키가 있으면 OpenAI 우선
   outputs = [GOOD]; await AI.detail(kv, { ...E, OPENAI_API_KEY: 'o' }, body(), { generate: gen, ip: '2.2.2.2' }); assert.equal(lastPayload.provider, 'openai');
 
   // ── 사주 정보: 입력에 있을 때만 saju_note 허용 ──
   const saju = { dayMaster: { stem: '경', el: '금' }, strength: { band: '신약' }, nowYear: 2026, daewoon: [{ startYear: 2017, endYear: 2026, ganzhi: '기유', season: 'accumulation' }] };
-  mem.delete('rl:iching-ai:' + new Date().toISOString().slice(0, 10) + ':all'); // 일일 한도 초기화(테스트용)
+  for (const k of [...mem.keys()]) if (k.startsWith('rl:deep-ai:')) mem.delete(k); // 일일 한도 초기화(테스트용)
   outputs = [{ ...GOOD, saju_note: '사주 쪽에서는 지금이 실력을 쌓는 구간이라 주역의 방향과 같은 쪽을 가리킵니다.' }]; r = await AI.detail(kv, E, body({ saju }), { generate: gen, ip: '3.3.3.3' }); assert.equal(r.ok, true, JSON.stringify(r)); assert.ok(JSON.parse(lastPayload.payload).saju.luck_context.length > 0); assert.ok(r.detail.saju_note);
   outputs = [{ ...GOOD, saju_note: '사주 이야기' }, { ...GOOD, saju_note: '사주 이야기' }]; r = await AI.detail(kv, E, body(), { generate: gen, ip: '4.4.4.4' }); assert.equal(r.error, 'ai-invalid', '사주 정보가 없는데 saju_note 를 쓰면 거부');
 
   // ── 출력 검증: 규칙 위반은 거부, 1회 재시도, 재시도 문구에 위반 사유가 들어감 ──
-  const resetAll = () => { for (const k of [...mem.keys()]) if (k.startsWith('rl:iching-ai:')) mem.delete(k); };
+  const resetAll = () => { for (const k of [...mem.keys()]) if (k.startsWith('rl:deep-ai:')) mem.delete(k); };
   const bads = [
     [{ ...GOOD, answer: '성공 확률은 80% 입니다. 지금 시작하십시오.' }, /퍼센트/],
     [{ ...GOOD, answer: '반드시 성공합니다. 지금 시작하십시오.' }, /확정/],
@@ -81,13 +81,23 @@ const assert = require('assert/strict'), path = require('path'), { pathToFileURL
   // 공급자 오류 → 502, 내용 노출 없음
   resetAll(); outputs = [new Error('provider down: secret-detail')]; r = await AI.detail(kv, E, body(), { generate: gen, ip: 'p' }); assert.equal(r.error, 'ai-failed'); assert.equal(JSON.stringify(r).includes('secret-detail'), false);
 
-  // ── 횟수 제한(IP·일일), 시도마다 카운트 ──
+  // ── 횟수 제한: 기기당 하루 2회(받은 풀이만 차감) · 같은 IP 한도 · 하루 전체(시도마다) ──
   resetAll(); outputs = [GOOD, GOOD, GOOD, GOOD];
-  assert.equal((await AI.detail(kv, E, body(), { generate: gen, ip: 'Z' })).ok, true); assert.equal((await AI.detail(kv, E, body(), { generate: gen, ip: 'Z' })).ok, true);
-  assert.equal((await AI.detail(kv, E, body(), { generate: gen, ip: 'Z' })).error, 'ip-limit');
-  assert.equal((await AI.detail(kv, E, body(), { generate: gen, ip: 'Y' })).ok, true); // 일일 3회째
-  assert.equal((await AI.detail(kv, E, body(), { generate: gen, ip: 'X' })).error, 'daily-limit');
+  const D1 = 'a'.repeat(20), D2 = 'b'.repeat(20);
+  let q1 = await AI.detail(kv, E, body({ device: D1 }), { generate: gen, ip: 'Z' }); assert.equal(q1.ok, true); assert.deepEqual(q1.quota, { left: 1, limit: 2 });
+  assert.equal((await AI.detail(kv, E, body({ device: D1 }), { generate: gen, ip: 'Z' })).quota.left, 0);
+  assert.equal((await AI.detail(kv, E, body({ device: D1 }), { generate: gen, ip: 'Z' })).error, 'device-limit', '같은 기기 3번째는 막힌다');
+  assert.equal((await AI.detail(kv, E, body({ device: D2 }), { generate: gen, ip: 'Z' })).error, 'ip-limit', '같은 IP 한도(2)'); // perIpLimit 2
+  await adm('a=ai', { enabled: true, dailyLimit: 3, perIpLimit: 6, maxOutputTokens: 1000 });
+  assert.equal((await AI.detail(kv, E, body({ device: D2 }), { generate: gen, ip: 'Z' })).ok, true, '같은 IP 라도 다른 기기는 된다(일일 3회째)');
+  assert.equal((await AI.detail(kv, E, body({ device: 'c'.repeat(20) }), { generate: gen, ip: 'X' })).error, 'daily-limit');
   assert.equal((await admGet('a=ai')).b.usedToday, 3);
+  // 실패한 시도는 사람 횟수를 깎지 않는다(하루 전체만 센다)
+  resetAll(); await adm('a=ai', { enabled: true, dailyLimit: 100, perIpLimit: 6, maxOutputTokens: 1000 }); outputs = ['x', 'x', GOOD, GOOD];
+  assert.equal((await AI.detail(kv, E, body({ device: D1 }), { generate: gen, ip: 'F' })).error, 'ai-invalid');
+  assert.equal((await AI.detail(kv, E, body({ device: D1 }), { generate: gen, ip: 'F' })).quota.left, 1, '실패 뒤에도 2회가 그대로 남아 있었다');
+  // 하루는 한국 시간 자정 기준
+  const Q = await imp('functions/_deep-quota.js'); assert.equal(Q.kstDay(Date.UTC(2026, 10, 9, 15, 30)), '2026-11-10'); assert.equal(Q.kstDay(Date.UTC(2026, 10, 9, 14, 59)), '2026-11-09');
   assert.equal((await adm('a=ai', { enabled: true, dailyLimit: 0, perIpLimit: 5 })).b.config.dailyLimit, 0); assert.equal((await AI.detail(kv, E, body(), { generate: gen, ip: 'new' })).error, 'daily-limit');
   await adm('a=ai', { enabled: true, dailyLimit: 100, perIpLimit: 100, maxOutputTokens: 1000 });
 

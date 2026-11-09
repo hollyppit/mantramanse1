@@ -1,4 +1,4 @@
-/* 주제별 풀이 중간의 "주역 점괘" 카드. 종합풀이·재물운 심화·커리어운 심화·인연운 심화를 읽다가 중간에서 점괘를 칠 수 있게 한다(선택, 건너뛰기 가능).
+/* 주제별 풀이 끝 "마지막 질문" 카드(deep-ask.js)의 주역 탭. (2026-11-09 전에는 풀이 중간에 따로 있었다) 종합풀이·재물운 심화·커리어운 심화·인연운 심화를 읽다가 중간에서 점괘를 칠 수 있게 한다(선택, 건너뛰기 가능).
    · 카드는 읽기 문서 안의 한 섹션이다. 선택형 추가 풀이(.rd-answer)와 같은 방식으로 자동 진행을 멈추고(.vd), "이어 읽기"를 누르면 같은 자리에서 다시 재생한다.
    · 점괘 계산은 report/iching/engine.js(세 동전), 해석은 /api/iching(관리자가 승인·게시한 문구만, 개방 전에는 카드가 아예 나오지 않는다).
    · AI 상세 풀이가 켜져 있으면 기본 결과 화면이 된다: 시작할 때 한 번 동의하면 점괘 직후 자동으로 요청하고, 꺼져 있거나 실패하면 검수된 풀이를 펼쳐 보여 준다.
@@ -76,12 +76,12 @@
   function view(wid) {
     var s = stateOf(wid), cat = CAT[wid], ko = CAT_KO[cat], aiOn = !!(STATUS && STATUS.ai && STATUS.ai.enabled);
     if (s.phase === 'offer' || s.phase === 'err') {
-      return '<p class="lead rd-answer-question">잠깐, ' + esc(ko) + ' 주제로 주역 점괘를 쳐 볼까요?</p><p class="faint">여기까지 읽은 내용과 별개로, 지금 마음에 걸리는 ' + esc(ko) + ' 문제를 하나 떠올려 보세요. 세 동전으로 괘를 얻고 검수된 해석으로 풀어 드립니다. 건너뛰고 이어 읽어도 됩니다.</p>' +
+      return '<p class="lead rd-answer-question">' + esc(ko) + ' 주제로 주역 점괘를 쳐 볼까요?</p><p class="faint">지금 마음에 걸리는 ' + esc(ko) + ' 문제를 하나 떠올려 보세요. 세 동전으로 괘를 얻고 검수된 해석으로 풀어 드립니다. 건너뛰고 이어 읽어도 됩니다.</p>' +
         '<div class="rdic-hints">' + HINT[cat].map(function (q) { return '<button type="button" class="chipbtn" data-ic-q="' + esc(q) + '">' + esc(q) + '</button>'; }).join('') + '</div>' +
         '<input class="rdic-q" type="text" maxlength="200" data-ic-input placeholder="질문 (선택, 최대 200자)" value="' + esc(s.q || '') + '" aria-label="점괘 질문">' +
-        '<p class="rdic-small">질문의 글자를 분석해서 답하지는 않습니다. 선택한 주제와 나온 괘를 기준으로 풀이합니다. 질문은 서버에 저장되지 않습니다.' + (aiOn ? '<br><b>AI 상세 풀이가 함께 제공됩니다.</b> 시작하면 질문과 풀이 내용이 AI 서비스(OpenAI 또는 Anthropic)로 전송됩니다. 이름·생년월일·출생지는 보내지 않으며, AI가 쓴 글은 관리자 검수를 거치지 않습니다. 하루 이용 횟수에 제한이 있습니다.' : '') + '</p>' +
+        '<p class="rdic-small">기본 풀이는 선택한 주제와 나온 괘를 기준으로 합니다. 질문은 서버에 저장되지 않습니다.' + (aiOn ? ' 결과가 나온 뒤 원하면 "내 사주와 엮어 깊이 읽기"(AI, 하루 횟수 제한)를 받을 수 있어요.' : '') + '</p>' +
         (s.err ? '<p class="rdic-err">' + esc(s.err) + '</p>' : '') +
-        '<div class="vd rd-answer-choices" role="group" aria-label="주역 점괘 선택"><button type="button" class="chipbtn rdic-go" data-ic-start>' + (aiOn ? '동의하고 점괘 보기' : '점괘 보기') + '</button><button type="button" class="chipbtn" data-ic-skip>건너뛰고 이어 읽기</button></div>';
+        '<div class="vd rd-answer-choices" role="group" aria-label="주역 점괘 선택"><button type="button" class="chipbtn rdic-go" data-ic-start>' + '점괘 보기' + '</button><button type="button" class="chipbtn" data-ic-skip>건너뛰고 이어 읽기</button></div>';
     }
     if (s.phase === 'casting' || s.phase === 'loading') {
       var n = (s.values || []).length, last = n ? s.coins[n - 1].reduce(function (a, b) { return a + b; }, 0) : 0;
@@ -90,10 +90,10 @@
     // 결과: AI 풀이가 있으면 그것을 앞에, 검수된 풀이는 접어 둔다. AI 가 없거나 실패하면 검수된 풀이를 펼친다.
     var r = s.result, tr = r.transformed_hexagram, hasAi = !!(s.ai && (s.ai.phase === 'done' || s.ai.phase === 'loading'));
     return '<div class="rdic-head">' + fig(r.hexagram.values) + '<div><p class="rdic-small">' + esc(ko) + ' 점괘' + (r.question ? ' · ' + esc(r.question) : '') + '</p><p class="rdic-name">제' + r.hexagram.num + '괘 ' + esc(r.hexagram.ko) + '(' + esc(r.hexagram.hanja) + ')' + (tr ? ' → ' + esc(tr.ko) : '') + '</p><p><span class="rdic-tag">' + esc(r.conclusion.direction) + '</span></p><p>' + esc(r.conclusion.summary) + '</p></div></div>' +
-      aiBlock(s) + (s.ai && s.ai.phase === 'err' ? '<p class="rdic-small rdic-err">' + esc(s.ai.err) + ' 검수된 풀이를 아래에 펼쳤습니다. <button type="button" class="chipbtn" data-ic-ai>AI 풀이 다시 요청</button></p>' : '') +
+      aiBlock(s) + (s.ai && s.ai.phase === 'err' ? '<p class="rdic-small rdic-err">' + esc(s.ai.err) + '</p>' : '') + (aiOn && !(s.ai && (s.ai.phase === 'done' || s.ai.phase === 'loading')) ? (R.DeepAsk ? R.DeepAsk.aiButton('data-ic-ai') : '<button type="button" class="chipbtn" data-ic-ai>내 사주와 엮어 깊이 읽기</button>') : '') +
       '<details class="rdic-more"' + (hasAi ? '' : ' open') + '><summary>검수된 풀이 전체 보기 (8단계)</summary>' + reviewed(r) + '</details>' +
       '<p class="rdic-small">점괘는 미래를 확정하는 도구가 아니라, 지금의 선택을 돌아보게 하는 참고 자료입니다.</p>' +
-      '<div class="vd rd-answer-choices" role="group" aria-label="점괘 이후"><button type="button" class="chipbtn rdic-go" data-ic-continue>읽던 곳으로 돌아가 이어 읽기</button><button type="button" class="chipbtn" data-ic-again>새 질문으로 다시 보기</button></div>';
+      '<div class="vd rd-answer-choices" role="group" aria-label="점괘 이후"><button type="button" class="chipbtn rdic-go" data-ic-continue>이어 읽기</button><button type="button" class="chipbtn" data-ic-again>새 질문으로 다시 보기</button></div>';
   }
   function html(wid) {
     return '<div class="rd-answer rd-iching" data-ic-panel="' + esc(wid) + '" data-completed="0" aria-live="polite">' + view(wid) + '</div>';
@@ -104,11 +104,11 @@
   function fail(panel, wid, o, msg) { var s = ST[wid]; s.phase = 'err'; s.err = msg; paint(panel, wid, o); }
   function askAi(panel, wid, o) {
     var s = ST[wid], r = s.result; s.ai = { phase: 'loading' }; paint(panel, wid, o);
-    root.fetch('/api/iching?a=detail', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: r.question, category: r.question_category, values: r.hexagram.values, saju: s.saju || null, consent: true }) })
+    root.fetch('/api/iching?a=detail', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ question: r.question, category: r.question_category, values: r.hexagram.values, saju: s.saju || null, consent: true, device: R.DeepAsk ? R.DeepAsk.device() : undefined }) })
       .then(function (x) { return x.json().then(function (d) { return { s: x.status, d: d }; }); }).catch(function () { return { s: 0, d: {} }; }).then(function (z) {
         if (ST[wid] !== s || !panel.isConnected) return;
-        if (z.s === 200 && z.d.ok) { s.ai = { phase: 'done', detail: z.d.detail }; saveResult(wid, s, o.sd); if (o.onTrack) o.onTrack('iching_ai_done', { world: wid }); }
-        else s.ai = { phase: 'err', err: AI_ERR[z.d && z.d.error] || 'AI 풀이를 받지 못했습니다.' };
+        if (z.s === 200 && z.d.ok) { s.ai = { phase: 'done', detail: z.d.detail }; if (R.DeepAsk) R.DeepAsk.setQuota(z.d.quota); saveResult(wid, s, o.sd); if (o.onTrack) o.onTrack('iching_ai_done', { world: wid }); }
+        else { var ek = z.d && z.d.error; s.ai = { phase: 'err', err: (R.DeepAsk && R.DeepAsk.ERR[ek]) || AI_ERR[ek] || 'AI 풀이를 받지 못했습니다. 횟수는 차감되지 않았어요.' }; if (/limit/.test(ek || '') && R.DeepAsk) R.DeepAsk.setQuota({ left: 0, limit: R.DeepAsk.quota().limit }); }
         paint(panel, wid, o);
       });
   }
@@ -121,7 +121,7 @@
         if (z.s === 200 && z.d.ok) {
           s.result = z.d.result; s.phase = 'result'; s.ai = null; saveResult(wid, s, o.sd); panel.dataset.completed = '1';
           if (o.onTrack) o.onTrack('iching_completed', { world: wid, hexagram: z.d.result.hexagram.num, changing: z.d.result.changing_lines.length });
-          if (STATUS && STATUS.ai && STATUS.ai.enabled) askAi(panel, wid, o); else paint(panel, wid, o);
+          paint(panel, wid, o); // AI 는 "깊이 읽기" 버튼을 눌렀을 때만(하루 횟수 제한)
         } else fail(panel, wid, o, z.s === 403 || z.s === 503 ? '점괘 풀이가 아직 준비되지 않았습니다. 건너뛰고 이어 읽어 주세요.' : '점괘를 보지 못했습니다. 잠시 뒤 다시 시도해 주세요.');
       });
   }

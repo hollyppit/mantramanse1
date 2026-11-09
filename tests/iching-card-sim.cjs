@@ -29,10 +29,10 @@ assert.match(h, /class="rd-answer rd-iching"/); assert.match(h, /data-completed=
 assert.match(h, /data-ic-start/); assert.match(h, /data-ic-skip/); assert.match(h, /건너뛰고 이어 읽기/); assert.match(h, /재물 주제로 주역 점괘/);
 assert.ok(!/AI 상세 풀이가 함께/.test(h), 'AI 가 꺼져 있으면 AI 고지를 보이지 않는다'); assert.match(h, />점괘 보기</);
 assert.equal((h.match(/data-ic-q=/g) || []).length, 3, '재물 분야 추천 질문 3개');
-// AI 가 켜져 있으면 전송 고지와 "동의하고" 버튼
+// AI 가 켜져 있어도 시작 화면에서는 AI 를 부르지 않는다(결과 뒤 "깊이 읽기" 버튼으로만, 하루 횟수 제한)
 Card._setStatus({ open: true, categories: ['wealth'], ai: { enabled: true } }); delete require.cache[require.resolve('../report/v2/iching-card.js')];
 const Card2 = require('../report/v2/iching-card.js'); Card2._setStatus({ open: true, categories: ['wealth', 'career'], ai: { enabled: true } });
-h = Card2.html('w7'); assert.match(h, /동의하고 점괘 보기/); assert.match(h, /OpenAI 또는 Anthropic/); assert.match(h, /이름·생년월일·출생지는 보내지 않으며/); assert.match(h, /관리자 검수를 거치지 않습니다/); assert.match(h, /커리어 주제/);
+h = Card2.html('w7'); assert.match(h, />점괘 보기</); assert.ok(!/동의하고/.test(h)); assert.match(h, /깊이 읽기/); assert.match(h, /커리어 주제/);
 // 질문 입력은 이스케이프된다
 Card2._state.w7.q = '"><script>alert(1)</script>'; h = Card2.html('w7'); assert.ok(!h.includes('<script>'), '질문이 HTML 로 해석되지 않는다'); assert.match(h, /&lt;script&gt;/);
 
@@ -46,13 +46,13 @@ Card2._state.w2 = { phase: 'result', result, ai: { phase: 'done', detail: AI }, 
 h = Card2.html('w2');
 assert.match(h, /제5괘 수\(需\)/); assert.match(h, /→ 절/); assert.match(h, /AI 상세 풀이/); assert.match(h, /AI 작성/); assert.match(h, /관리자가 한 줄씩 검수한 문장은 아닙니다/); assert.match(h, /손실 한도를 먼저 정하는/);
 assert.ok(/<details class="rdic-more">/.test(h) && !/<details class="rdic-more" open>/.test(h), 'AI 풀이가 있으면 검수된 풀이는 접어 둔다');
-assert.match(h, /data-ic-continue/); assert.match(h, /data-ic-again/); assert.match(h, /읽던 곳으로 돌아가 이어 읽기/); assert.match(h, /class="vd rd-answer-choices"/);
+assert.match(h, /data-ic-continue/); assert.match(h, /data-ic-again/); assert.match(h, />이어 읽기</); assert.match(h, /class="vd rd-answer-choices"/);
 assert.ok(h.includes('有孚，光亨') || h.includes('rdic-orig'), '괘사 원문이 검수된 풀이 안에 있다');
 for (const must of ['핵심 결론', '현재 상황', '변효와 변괘', '사주와 주역을 함께 보면', '최선과 최악의 시나리오', '현실적인 행동 처방', '최종 한마디']) assert.ok(h.includes(must), must);
 assert.equal((h.match(/rdic-ln on/g) || []).length, 6, '여섯 효가 모두 그려진다'); assert.equal((h.match(/rdic-ln on chg/g) || []).length, 1, '변효 하나가 표시된다');
 // AI 가 없거나 실패하면 검수된 풀이가 펼쳐진다
-Card2._state.w2.ai = null; h = Card2.html('w2'); assert.match(h, /<details class="rdic-more" open>/, 'AI 가 없으면 검수된 풀이를 펼친다');
-Card2._state.w2.ai = { phase: 'err', err: 'AI 서비스에 연결하지 못했습니다.' }; h = Card2.html('w2'); assert.match(h, /<details class="rdic-more" open>/); assert.match(h, /AI 서비스에 연결하지 못했습니다/); assert.match(h, /data-ic-ai/); assert.match(h, /AI 풀이 다시 요청/);
+Card2._state.w2.ai = null; h = Card2.html('w2'); assert.match(h, /<details class="rdic-more" open>/, 'AI 가 없으면 검수된 풀이를 펼친다'); assert.match(h, /data-ic-ai/, 'AI 가 켜져 있으면 결과 뒤에 깊이 읽기 버튼');
+Card2._state.w2.ai = { phase: 'err', err: 'AI 서비스에 연결하지 못했습니다.' }; h = Card2.html('w2'); assert.match(h, /<details class="rdic-more" open>/); assert.match(h, /AI 서비스에 연결하지 못했습니다/); assert.match(h, /data-ic-ai/); assert.match(h, /깊이 읽기/);
 Card2._state.w2.ai = { phase: 'loading' }; h = Card2.html('w2'); assert.match(h, /풀이를 쓰는 중/);
 // AI 응답의 HTML 은 이스케이프된다
 Card2._state.w2.ai = { phase: 'done', detail: { ...AI, answer: '<img src=x onerror=alert(1)>' } }; h = Card2.html('w2'); assert.ok(!h.includes('<img src=x'), 'AI 출력도 이스케이프'); assert.match(h, /&lt;img/);
@@ -73,8 +73,8 @@ store.set('mt_iching_last_w1', '{깨진 JSON'); delete Card2._state.w1; assert.m
 
 // ── 읽기 문서 연결: viewer.js 가 카드를 넣고 클릭을 넘기는지(정적 확인) ──
 const fs = require('fs'), v = fs.readFileSync(require('path').join(__dirname, '../report/v2/viewer.js'), 'utf8'), idx = fs.readFileSync(require('path').join(__dirname, '../report/v2/index.html'), 'utf8');
-assert.ok(v.includes('R.IchingCard.offered(S.readerWorld)') && v.includes('R.IchingCard.anchorFor(S.wmap.by[S.readerWorld])'), '세계 읽기에서만 카드를 넣는다');
-assert.ok(v.includes('R.IchingCard.handleClick(e.target,') && v.includes('onContinue: function () { if (S.mv) S.mv.play(); }'), '이어 읽기는 같은 자리에서 재생을 다시 시작한다');
+assert.ok(v.includes('R.DeepAsk.offered(S.readerWorld)') && v.includes('R.DeepAsk.anchorFor(S.wmap.by[S.readerWorld])'), '세계 읽기 끝에서만 마지막 질문 카드를 넣는다');
+assert.ok(v.includes('R.IchingCard.handleClick(e.target, dkOpt)') && v.includes('R.DeepAsk.handleClick(e.target, dkOpt)') && v.includes("closest('.rd-deep'); if (w) w.dataset.completed = '1';"), '이어 읽기는 카드를 끝난 것으로 표시하고 같은 자리에서 다시 재생한다');
 assert.ok(v.includes('R.IchingCard.init()'));
 ['iching-card.css', '/report/iching/hexagrams.js', '/report/iching/engine.js', 'iching-card.js'].forEach(f => assert.ok(idx.includes(f), f + ' 가 report/v2/index.html 에 없습니다'));
 assert.ok(idx.indexOf('iching-card.js') < idx.indexOf('viewer.js'), '카드 모듈은 뷰어보다 먼저 로드');

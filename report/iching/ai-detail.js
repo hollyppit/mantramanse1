@@ -51,7 +51,7 @@ function validate(d,input,result){
   // 입력에 없는 다른 괘 이름을 끌어들이면 거부(○○괘 형태). 본괘·변괘·일반어(본괘·변괘·상괘·하괘 등)는 허용.
   var allowed={};allowed[result.hexagram.ko]=1;if(result.transformed_hexagram)allowed[result.transformed_hexagram.ko]=1;
   var m,re=/([가-힣]{1,3})괘/g,names={};H.HEXAGRAMS.forEach(function(h){names[h.ko]=1;});
-  while((m=re.exec(t))){var nm=m[1];if(allowed[nm]||GENERIC.indexOf(nm)>=0||!names[nm])continue;if(/^(이|그|저|어느|각|한|두|세|해당)$/.test(nm))continue;e.push('다른 괘 이름 "'+nm+'괘"를 언급함');}
+  while((m=re.exec(t))){var nm=m[1];if(allowed[nm]||GENERIC.indexOf(nm)>=0||!names[nm])continue;if(/^(이|그|저|어느|각|한|두|세|해당|점)$/.test(nm))continue;/* '점괘'는 '점친 괘'라는 일반어다(제53괘 점(漸)과 글자가 같아 막히던 문제). 프롬프트도 '이 점괘는…'으로 시작하라고 한다 */e.push('다른 괘 이름 "'+nm+'괘"를 언급함');}
  });
  // 같은 문장 반복
  var seen={};texts.forEach(function(t){t.split(/(?<=[.!?])\s+/).forEach(function(s){var n=s.replace(/[\s.,!?'"()·:]/g,'');if(n.length<12)return;if(seen[n])e.push('같은 문장 반복');seen[n]=1;});});
