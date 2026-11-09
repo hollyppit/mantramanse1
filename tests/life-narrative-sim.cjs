@@ -4,7 +4,7 @@
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.join(__dirname, '..');
 const ctx = { console }; ctx.window = ctx; vm.createContext(ctx);
-for (const f of ['engine.js', 'report/v2/life-narrative-data.js', 'report/v2/life-narrative-data-self.js', 'report/v2/life-narrative-data-self2.js', 'report/v2/life-narrative-data-wealth.js', 'report/v2/life-narrative-data-wealth2.js', 'report/v2/life-narrative-data-love.js', 'report/v2/life-narrative-data-love2.js', 'report/v2/life-narrative.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
+for (const f of ['engine.js', 'report/v2/life-narrative-data.js', 'report/v2/life-narrative-data-self.js', 'report/v2/life-narrative-data-self2.js', 'report/v2/life-narrative-data-wealth.js', 'report/v2/life-narrative-data-wealth2.js', 'report/v2/life-narrative-data-love.js', 'report/v2/life-narrative-data-love2.js', 'report/v2/life-narrative-data-career.js', 'report/v2/life-narrative-data-career2.js', 'report/v2/life-narrative.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
 const M = ctx.Manse, L = ctx.MantraLifeNarrative, D = ctx.MantraLifeNarrativeData;
 const N = +process.argv[2] || 1500, NOW = Date.UTC(2026, 10, 8, 3), YEAR = 365.2422 * 86400000;
 const fails = [], ok = (c, m) => { if (!c) { if (fails.length < 40) fails.push(m); else fails.length++; } };
@@ -74,7 +74,7 @@ ok(L.forChapter({ id: 'timeline_self_03', readingFeature: { M, ch: M.compute({ y
 // ⑤ 화면(reading-text.js): 스위치 꺼짐 → 기존 문안 그대로, 켜짐 → 서사 5단계 + 근거 펼쳐보기
 function render(flag) {
   const c2 = { console }; c2.window = c2; if (flag) c2.MANTRA_FLAGS = { lifeNarrative: true }; vm.createContext(c2);
-  for (const f of ['engine.js', 'report/v2/life-narrative-data.js', 'report/v2/life-narrative-data-self.js', 'report/v2/life-narrative-data-self2.js', 'report/v2/life-narrative-data-wealth.js', 'report/v2/life-narrative-data-wealth2.js', 'report/v2/life-narrative-data-love.js', 'report/v2/life-narrative-data-love2.js', 'report/v2/life-narrative.js', 'report/v2/reading-text.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), c2, { filename: f });
+  for (const f of ['engine.js', 'report/v2/life-narrative-data.js', 'report/v2/life-narrative-data-self.js', 'report/v2/life-narrative-data-self2.js', 'report/v2/life-narrative-data-wealth.js', 'report/v2/life-narrative-data-wealth2.js', 'report/v2/life-narrative-data-love.js', 'report/v2/life-narrative-data-love2.js', 'report/v2/life-narrative-data-career.js', 'report/v2/life-narrative-data-career2.js', 'report/v2/life-narrative.js', 'report/v2/reading-text.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), c2, { filename: f });
   const ch = c2.Manse.compute({ year: 1992, month: 6, day: 23, hour: 1, minute: 45, gender: 'M' });
   const c = { id: 'timeline_career_07', editorialContractId: 'timeline_career_07', title: '조직생활', readingParagraphs: [{ role: 'title', text: '기존 문안 첫 문장이에요. 조직에서 생기는 일이에요.' }, { role: 'reality', text: '기존 문안 생활 장면이에요.' }] };
   Object.defineProperty(c, 'readingFeature', { value: { M: c2.Manse, ch, now: NOW }, enumerable: false });
