@@ -347,3 +347,23 @@
 /* Compact birth entry: one form, native mobile pickers. */
 .ob-compact{max-width:540px;margin:0 auto;padding:28px 20px 44px}.ob-compact h1{font-size:26px;margin:8px 0 12px}.ob-compact .ob-form{padding:0}.ob-compact .ob-gender{display:flex;gap:10px;margin:10px 0 20px}.ob-compact .ob-gender button{flex:1;min-height:48px}.ob-compact .f{margin:16px 0}.ob-compact select,.ob-compact input{min-height:46px;font-size:16px}.ob-compact .row3{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px}.ob-compact .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ob-compact .row3>span,.ob-compact .row2>span{grid-column:1/-1}.ob-compact details{margin:22px 0}.ob-compact summary{cursor:pointer;padding:10px 0}.ob-compact #obOk{width:100%;min-height:52px;font-size:17px}.ob-compact .ob-priv{font-size:12px;line-height:1.6}.ob-compact [hidden]{display:none!important}.ob-compact-page .ob-wrap{max-width:600px}.ob-compact-page{padding-top:12px}
 #hub .ob-compact .ob-form{display:block}#hub .ob-compact .ob-form>.f{margin:14px 0}#hub .ob-compact .ob-gender{margin:8px 0 16px}#hub .ob-compact .ob-gender button{padding:12px;min-height:48px;font-size:17px}#hub .ob-compact .ob-form select,#hub .ob-compact .ob-form input[type=number],#hub .ob-compact .ob-form input[type=text]{min-height:46px;padding:9px 12px}#hub .ob-compact .ob-form>p{margin:12px 0 6px}#hub .ob-compact .ob-form>.seg{margin:12px 0}#hub .ob-compact .ob-form .seg i{padding:10px}#hub .ob-compact .chk{margin:10px 0}#hub .ob-compact .msg:empty{display:none}#hub .ob-compact .ob-form>.row3{grid-template-columns:1.3fr 1fr 1fr}
+/* 한 장짜리 입력 폼 + 입력 공통 루프 영상(hub-onboard.js compactVideo). 모바일·태블릿: 위쪽 영상, 그 아래로 폼이 겹쳐 올라온다. PC: 왼쪽 영상(입력 구역 안에서 화면 높이로 따라옴) · 오른쪽 폼. */
+#obcVid{position:absolute;top:0;left:0;right:0;height:min(58svh,560px);z-index:0;pointer-events:none;opacity:0;transition:opacity .9s ease;overflow:hidden}
+#obcVid.on{opacity:1}
+#obcVid[hidden]{display:none}
+#obcVid .obc-st{position:relative;width:100%;height:100%}
+#obcVid video{display:block;width:100%;height:100%;object-fit:cover;object-position:center 18%}
+#obcVid i{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(8,11,15,.55) 0,rgba(8,11,15,.08) 22%,rgba(8,11,15,.25) 58%,#080b0f 100%)}
+body.obc-on #hub #screen{z-index:1}
+body.obc-on #hub .ob-compact{padding-top:calc(min(58svh,560px) - 150px)}
+body.obc-on #hub .ob-compact .ob-kick,body.obc-on #hub .ob-compact h1,body.obc-on #hub .ob-compact h1+.note{text-shadow:0 2px 14px rgba(0,0,0,.85)}
+@media (min-width:1024px){
+  body.obc-on{--obcF:max(520px,44vw)}
+  #obcVid{bottom:0;right:auto;width:calc(100% - var(--obcF));height:auto;overflow:visible}
+  #obcVid .obc-st{position:sticky;top:0;height:100vh;overflow:hidden}
+  #obcVid video{object-position:center 30%}
+  #obcVid i{background:linear-gradient(to right,rgba(8,11,15,0) 62%,#080b0f 100%),linear-gradient(to bottom,rgba(8,11,15,.6) 0,rgba(8,11,15,0) 18%,rgba(8,11,15,0) 80%,rgba(8,11,15,.6) 100%)}
+  body.obc-on #hub #screen{max-width:none;width:var(--obcF);margin:0 0 0 auto;box-sizing:border-box;padding-left:clamp(20px,3vw,48px);padding-right:clamp(20px,4vw,64px)}
+  body.obc-on #hub .ob-compact{padding-top:28px;margin:0}
+}
+@media (prefers-reduced-motion:reduce){#obcVid{transition:none}}

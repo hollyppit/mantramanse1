@@ -331,8 +331,32 @@
       }
       function placeChips(f) { f = String(f || '').trim(); return O.PLACES.filter(function (p) { return !f || p.name.indexOf(f) >= 0; }).map(function (p) { return '<button type="button" role="option" aria-selected="' + (p.name === d.place) + '" class="' + (p.name === d.place ? 'on' : '') + '" data-p="' + esc(p.name) + '">' + esc(p.name) + '</button>'; }).join('') || '<p class="note">검색 결과가 없습니다. "해외·기타"를 선택해 주세요.</p>'; }
 
+      /* 한 장짜리 입력 폼 뒤에 관리자 '입력 공통 루프 영상'을 무음 반복 재생한다.
+         PC(1024px 이상): 왼쪽 영상 · 오른쪽 폼 / 모바일: 위쪽 영상 · 아래 폼이 겹쳐 올라옴. 영상이 없거나 실패하면 예전 화면 그대로. */
+      function compactVideo() {
+        var Q = root.Quest; if (!Q || !Q.inputLoopUrl || document.getElementById('obcVid')) return;
+        var mob = function () { return (root.innerWidth || 1024) < 768; }, guide = Q.guide ? Q.guide() : 'male', mobNow = mob();
+        var url = function () { return Q.inputLoopUrl(CFG, guide, mobNow); };
+        if (!url()) return;
+        var host = document.getElementById('hub') || document.body, w = document.createElement('div');
+        w.id = 'obcVid'; w.setAttribute('aria-hidden', 'true');
+        w.innerHTML = '<div class="obc-st"><video muted loop playsinline autoplay preload="auto" disablepictureinpicture></video><i></i></div>';
+        host.insertBefore(w, host.firstChild);
+        var v = w.querySelector('video'), cls = document.body.classList;
+        var reduce = root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var fail = function () { cls.remove('obc-on'); w.hidden = true; };
+        var play = function () { if (reduce || document.hidden) return; var p = v.play(); if (p && p.catch) p.catch(function () { }); };
+        var load = function () { v.muted = true; v.src = url(); if (reduce) v.removeAttribute('autoplay'); play(); };
+        v.onerror = fail; v.onloadeddata = function () { w.classList.add('on'); if (reduce) v.pause(); };
+        cls.add('obc-on'); load();
+        var onVis = function () { if (document.hidden) v.pause(); else play(); };
+        var onRs = function () { var m = mob(); if (m !== mobNow) { mobNow = m; w.classList.remove('on'); w.hidden = false; cls.add('obc-on'); load(); } };
+        document.addEventListener('visibilitychange', onVis); root.addEventListener('resize', onRs);
+        onLeave(function () { document.removeEventListener('visibilitychange', onVis); root.removeEventListener('resize', onRs); v.pause(); v.removeAttribute('src'); v.load(); if (w.parentNode) w.parentNode.removeChild(w); cls.remove('obc-on'); });
+      }
       function renderCompact() {
-        var el=paint('<div class="ob-compact"><p class="ob-kick">MANTRA · 운명의 기록</p><h1>출생정보를 알려 주세요</h1><p class="note">한 번 입력하면 바로 사주를 볼 수 있어요.</p><div id="obForm" class="ob-form"><p>성별</p>'+fieldHtml({field:'gender'})+fieldHtml({field:'date'})+fieldHtml({field:'time'})+'<details><summary>이름 · 출생지역 · 추가 설정</summary>'+fieldHtml({field:'name'})+fieldHtml({field:'place'})+O.adjustmentFields(d)+'</details></div><p id="obMsg" class="msg err" role="alert"></p><button id="obBack" hidden></button><button type="button" class="btn" id="obOk">내 사주 보기</button><p class="note ob-priv">출생정보는 이 기기에만 저장돼요. 기본 출생지역은 서울이며, 추가 설정에서 변경할 수 있어요.</p></div>','ob-compact-page');
+        var el=paint('<div class="ob-compact"><p class="ob-kick">MANTRA · 운명의 기록</p><h1>출생정보를 알려 주세요</h1><p class="note">한 번 입력하면 바로 사주를 볼 수 있어요.</p><div id="obForm" class="ob-form"><p>성별</p>'+fieldHtml({field:'gender'})+fieldHtml({field:'date'})+fieldHtml({field:'time'})+'<details open><summary>이름 · 출생지역 · 추가 설정</summary>'+fieldHtml({field:'name'})+fieldHtml({field:'place'})+O.adjustmentFields(d)+'</details></div><p id="obMsg" class="msg err" role="alert"></p><button id="obBack" hidden></button><button type="button" class="btn" id="obOk">내 사주 보기</button><p class="note ob-priv">출생정보는 이 기기에만 저장돼요. 기본 출생지역은 서울이며, 추가 설정에서 변경할 수 있어요.</p></div>','ob-compact-page');
+        compactVideo();
         var quick=el.querySelector('#fQuick');if(quick)quick.closest('label').hidden=true;
         ['name','gender','date','time','place'].forEach(function(f){bind(el,{field:f,lines:[]},false);});O.bindAdjustments(el,d,save);
         function submitCompact(){msg('');H.engine().then(function(M){var r=O.validateDate(M,d),t=O.validateTime(d);if(!d.gender)return msg('성별을 선택해 주세요.');if(!r.ok)return msg(r.msg);if(!t.ok)return msg(t.msg);calc();}).catch(function(){msg('계산 엔진을 불러오지 못했습니다. 다시 시도해 주세요.');});}
