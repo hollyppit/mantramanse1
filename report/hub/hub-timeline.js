@@ -8,7 +8,7 @@
   var H = root.Hub, Ob = H.Onboard, O = root.Onboard, Q = root.Quest, P = H.profile, esc = H.esc, DOC = document;
   var $ = H.$, $$ = H.$$;
   var V2 = ['chapters', 'saju-data', 'rules', 'narrator', 'content', 'content-pro', 'content-pro2', 'topics', 'story-director', 'luck6', 'timeline', 'explore'];
-  var EL_COL = ['#5E9E78', '#D0634A', '#BC9C62', '#AEB9C6', '#4A7AB5'], GROUPS5 = ['비겁', '식상', '재성', '관성', '인성'], EL_HJ = ['木', '火', '土', '金', '水'];
+  var EL_COL = ['#5E9E78', '#D0634A', '#BC9C62', '#AEB9C6', '#4A7AB5'], GROUPS5 = ['비겁', '식상', '재성', '관성', '인성'], GROUP_MEAN = { 비겁: '나·동료·자존심', 식상: '표현·재능·활동', 재성: '돈·현실 감각', 관성: '직장·책임·규칙', 인성: '배움·도움·생각' }, EL_HJ = ['木', '火', '土', '金', '水'];
   var clamp = function (v) { return Math.max(0, Math.min(100, Math.round(v))); };
   var pct = function (fit) { return clamp((fit + 100) / 2); };
   var SAMPLE = { year: 1992, month: 6, day: 23, hour: 7, minute: 30, calendar: 'solar', leap: false, gender: 'M', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto' };
@@ -87,19 +87,25 @@
     /* ── 공통 조각 ── */
     var tip = function (w) { var t = O.TERMS[w]; return t ? '<span class="tip" tabindex="0" role="button" aria-label="' + esc(w + ': ' + t) + '" data-tip="' + esc(t) + '">' + esc(w) + '</span>' : esc(w); };
     var KEYC = function (it) { return 'k-' + esc(it.key || 'pre'); };
+    // 분야 점수는 분야마다 분포가 달라(재물은 좁게, 직업은 넓게) 같은 숫자가 다른 등급이 된다(engine.js DOMAIN_SCORE_THRESHOLDS).
+    // 숫자를 나란히 보여 주면 "직업 34 무난 · 재물 45 다소 낮음"처럼 앞뒤가 안 맞아 보여서, 막대 길이와 표시는 등급 기준으로 맞춘다.
+    var BAND_W = { '낮음': 16, '다소 낮음': 34, '무난': 55, '높음': 76, '매우 높음': 94 };
     function fieldBars(it) {
       var f = it.fields || {}, names = { money: '재물', career: '직업', love: '애정·인연' };
-      return '<div class="tq-fs">' + ['money', 'career', 'love'].filter(function (k) { return f[k]; }).map(function (k) { var v = f[k]; return '<div class="tq-f"><span>' + names[k] + '</span><div class="tq-fb" role="img" aria-label="' + names[k] + ' ' + v.score + '점, ' + esc(v.band) + '"><i style="width:' + Math.max(2, Math.min(100, v.score)) + '%"></i></div><b>' + v.score + '<small>' + esc(v.band) + '</small></b></div>'; }).join('') + '</div>';
+      return '<div class="tq-fs">' + ['money', 'career', 'love'].filter(function (k) { return f[k]; }).map(function (k) { var v = f[k], w = BAND_W[v.band] || Math.max(2, Math.min(100, v.score)); return '<div class="tq-f"><span>' + names[k] + '</span><div class="tq-fb" role="img" aria-label="' + names[k] + ' ' + esc(v.band) + '"><i style="width:' + w + '%"></i></div><b><small>' + esc(v.band) + '</small></b></div>'; }).join('') + '</div>';
     }
     function detail(it, title, lvl) { // 한 시기의 상세 카드(엔진의 6분류·판정 근거·분야 점수) + 근거 보기
       var ov = it.overlays && (it.overlays.volatility || it.overlays.defense) ? '<p class="tq-ov">' + (it.overlays.volatility ? '<i>변동 신호</i>' : '') + (it.overlays.defense ? '<i>방어 신호</i>' : '') + '</p>' : '';
       var open = st.ev === lvl + ':' + (it.idx != null ? it.idx : it.year != null ? it.year : it.month);
       // 스위치가 켜졌으면 6분류 한 줄 대신 시기 첫 문장(제목)·설명·할 일·함정을 보여 준다. 6분류 이름은 색 범례와 맞추려고 작은 글씨로 남긴다.
-      var cp = CP && CP.sixCopy(it.six, lvl), head = cp
+      var cp = CP && CP.sixCopy(it.six, lvl);
+      // 문안은 "올해는…", "이번 달은…"으로 쓰여 있다. 지금이 아닌 해·달을 눌렀을 때는 "이 해", "이 달"로 바꿔 읽히게 한다.
+      if (cp && !(it.isNow || it.isCurrent)) { var rel = function (t) { return String(t || '').replace(/올해도/g, '이 해에도').replace(/올해/g, '이 해').replace(/이번 달/g, '이 달'); }; cp = { hook: rel(cp.hook), body: rel(cp.body), do: rel(cp.do), trap: rel(cp.trap) }; }
+      var head = cp
         ? '<h3>' + esc(cp.hook) + '<small>' + esc(it.six) + ' · ' + esc(it.meaning) + '</small></h3><p class="tq-copy">' + esc(cp.body) + '</p><ul class="tq-copy-l"><li><b>해 볼 것</b>' + esc(cp.do) + '</li><li><b>조심할 것</b>' + esc(cp.trap) + '</li></ul>'
         : '<h3>' + esc(it.six) + '<small>' + esc(it.meaning) + '</small></h3>';
       return '<article class="tq-card ' + KEYC(it) + (cp ? ' has-copy' : '') + '"><p class="tq-ct">' + esc(title) + '</p>' + head + '<p class="tq-rule"><b>이렇게 판정했어요</b> ' + esc(it.rule) + '</p>' + ov + fieldBars(it) +
-        '<p class="tq-sc">흐름 점수 ' + pct(it.scores.fit) + ' · 작용 강도 ' + it.scores.intensity + ' · 변동성 ' + it.scores.volatility + (it.condition ? ' · 상태 ' + esc(it.condition) : '') + '</p>' +
+        '<p class="tq-sc">흐름 점수 ' + pct(it.scores.fit) + ' · 운의 세기 ' + it.scores.intensity + ' · 변화 신호 ' + it.scores.volatility + (it.condition ? ' · 상태 ' + esc(it.condition) : '') + '</p>' +
         '<div class="tq-card-acts"><button type="button" class="tq-lnk" data-ev="' + lvl + '" aria-expanded="' + open + '">' + (open ? '근거 닫기' : '자세한 근거 보기') + '</button><a class="tq-lnk" href="#/go?to=future" data-track="timeline_topic_click" data-p="detail_' + lvl + '">이 시기 상세 풀이 →</a></div>' +
         (open ? '<div class="tq-evbox">' + TL.evidenceHtml(TL.evidence(M, ch, it)) + '</div>' : '') + '</article>';
     }
@@ -123,7 +129,7 @@
       }).join('');
       var pc = (ch.weights && ch.weights.pct) || [], gr = (ch.weights && ch.weights.groups) || [], mi = 0; for (var i = 1; i < gr.length; i++) if (gr[i] > gr[mi]) mi = i;
       var els = G.elements ? '<div class="tq-box"><h4>오행 · 십성</h4><div class="tq-els">' + M.EL_K.map(function (e, i) { var v = Math.round(pc[i] || 0); return '<div class="tq-el"><span style="color:' + EL_COL[i] + '">' + EL_HJ[i] + ' ' + e + '</span><div class="tq-eb"><i style="width:' + Math.max(2, Math.min(100, v * 2)) + '%;background:' + EL_COL[i] + '"></i></div><b>' + v + '%</b></div>'; }).join('') + '</div>' +
-        '<div class="tq-gr">' + GROUPS5.map(function (n, i) { var v = Math.round(gr[i] || 0); return '<span class="' + (i === mi ? 'big' : '') + '">' + esc(n) + ' <b>' + v + '%</b></span>'; }).join('') + '</div><p class="tq-sub">가장 큰 비중은 <b>' + GROUPS5[mi] + '</b>입니다. ' + tip('십성') + ' 분포는 일간을 기준으로 한 다섯 묶음입니다.</p></div>' : '';
+        '<div class="tq-gr">' + GROUPS5.map(function (n, i) { var v = Math.round(gr[i] || 0); return '<span class="' + (i === mi ? 'big' : '') + '">' + esc(n) + ' <b>' + v + '%</b></span>'; }).join('') + '</div><p class="tq-sub">가장 큰 비중은 <b>' + GROUPS5[mi] + '</b>이에요(' + GROUP_MEAN[GROUPS5[mi]] + '). ' + tip('십성') + '은 나(일간)와 다른 글자의 관계를 다섯 묶음으로 나눈 것이에요: ' + GROUPS5.map(function (n) { return n + ' ' + GROUP_MEAN[n]; }).join(' · ') + '.</p></div>' : '';
       var z = ch.ziwei, zw = '';
       if (G.ziwei) {
         if (z) { var mp = z.palaces.filter(function (p) { return p.name === '명궁'; })[0], sp = z.palaces.filter(function (p) { return p.shen; })[0]; zw = '<div class="tq-box"><h4>자미두수 명반 요약</h4><dl class="tq-dl"><div><dt>명궁 주성</dt><dd>' + esc(mp && mp.main.length ? mp.main.join(' · ') : '주성 없음') + '</dd></div><div><dt>오행국</dt><dd>' + esc(z.gukEl) + ' (' + z.guk + '국)</dd></div><div><dt>명주 · 신주</dt><dd>' + esc(z.mingju + ' · ' + z.shinju) + '</dd></div>' + (sp ? '<div><dt>신궁</dt><dd>' + esc(sp.name) + '</dd></div>' : '') + '</dl><p class="tq-sub">삼합파 기준 명반입니다. 생일은 음력으로 바꿔 계산하며, 태어난 시각이 정확할수록 잘 맞습니다.</p></div>'; }
@@ -146,7 +152,7 @@
           body += '<h4 class="tq-h4">이 10년 안의 해</h4><p class="tq-sub">해를 누르면 아래 “지금과 앞으로”에서 그 해의 세운과 월운이 열립니다.</p>' + barChart(ys, { label: sel.ganzhi + ' 대운 안의 해별 흐름', cls: 'seun', attr: function (it) { return 'data-y="' + it.year + '"'; }, sel: function (it) { return st.y === it.year; }, now: function (it) { return !!it.isNow; }, name: function (it) { return it.year + '년 ' + it.ganzhi + ' 세운'; }, top: function (it) { return String(it.year).slice(2) + '년'; }, sub: function (it) { return it.age + '세'; } });
         }
       }
-      return '<p class="tq-sub">막대 높이는 흐름 점수(0~100), 색과 이름은 6분류입니다. 막대를 누르면 그 시기의 상세가 열립니다.</p>' + graph + legend + body;
+      return '<p class="tq-sub">막대가 높을수록 내 사주에 잘 맞는 시기예요(흐름 점수 0~100, 50이 보통). 색과 이름은 그 시기의 성격 6가지 중 하나예요. 막대를 누르면 자세한 풀이가 열려요.</p>' + graph + legend + body;
     }
 
     /* ── 영역 3: 지금과 앞으로 ── */

@@ -62,12 +62,12 @@
   function evidenceHtml(e) {
     if (!e) return '';
     var C = L().CONFIG, h = '<div class="ev"><h3>' + E(e.title) + ' · 근거</h3>';
-    h += '<section><h4>① 분류는 이렇게 나왔어요</h4><p><b>' + E(e.six) + '</b> — ' + E(e.meaning) + '</p><p class="ev-s">' + E(e.rule) + '. 기준: 방어기 = 흐름 점수 ' + C.defenseHard.fit + ' 이하이고 작용 강도 ' + C.defenseHard.intensity + ' 이상(또는 ' + C.defenseSoft.fit + ' 이하·' + C.defenseSoft.intensity + ' 이상), 변동기 = 변동성 ' + C.volatility + ' 이상.</p></section>';
+    h += '<section><h4>① 분류는 이렇게 나왔어요</h4><p><b>' + E(e.six) + '</b> — ' + E(e.meaning) + '</p><p class="ev-s">' + E(e.rule) + '.</p><p class="ev-s">판정 순서: ① 흐름 점수 ' + P(C.defenseHard.fit) + ' 이하이면서 운의 세기 ' + C.defenseHard.intensity + ' 이상 → 방어기 ② 변화 신호 ' + C.volatility + ' 이상 → 변동기 ③ 흐름 점수 ' + P(C.defenseSoft.fit) + ' 이하이면서 운의 세기 ' + C.defenseSoft.intensity + ' 이상 → 방어기 ④ 그 밖에는 기회·확장·수확·축적 중 힘이 가장 큰 쪽.</p></section>';
     h += '<section><h4>② 어느 운이 얼마나 영향을 줬나</h4><ul class="ev-l"><li><b>원국</b> 모든 운의 바탕 · 일주 ' + E(e.natal.day) + (e.natal.zone ? ' · ' + E(e.natal.zone) + '(돕는 힘 ' + e.natal.help + '%)' : '') + (e.natal.yong ? ' · 용신 ' + E(e.natal.yong) + (e.natal.hee ? '·희신 ' + E(e.natal.hee) : '') : '') + '</li>';
     e.chain.forEach(function (c) { h += '<li><b>' + E(c.name) + '</b> ' + E(c.ganzhi) + ' · 영향 비중 ' + c.weight + '%</li>'; });
-    h += '</ul><p class="ev-s">' + (e.chain.length > 1 ? '이 시기 자체 점수 ' + e.own + '가 상위 운과 합쳐져 최종 흐름 점수 ' + e.fit + '이 됩니다.' : '이 시기 자체 점수가 곧 흐름 점수 ' + e.fit + '입니다.') + (e.note ? ' ' + E(e.note) : '') + '</p></section>';
-    h += '<section><h4>③ 흐름 점수를 이루는 성분</h4><table class="ev-t"><thead><tr><th>성분</th><th>점수(-100~100)</th><th>반영 비중</th><th>기여</th></tr></thead><tbody>' +
-      e.comps.map(function (c) { return '<tr><td>' + E(c.name) + '</td><td>' + c.score + '</td><td>' + c.weight + '%</td><td>' + (c.contrib > 0 ? '+' : '') + c.contrib + '</td></tr>'; }).join('') + '</tbody></table>' +
+    h += '</ul><p class="ev-s">' + (e.chain.length > 1 ? '이 시기만 보면 ' + P(e.own) + '점이고, 위의 큰 운과 합치면 최종 흐름 점수는 ' + P(e.fit) + '점이에요.' : '이 시기만 본 점수가 곧 흐름 점수(' + P(e.fit) + '점)예요.') + (e.note ? ' ' + E(e.note) : '') + '</p></section>';
+    h += '<section><h4>③ 흐름 점수를 이루는 성분</h4><table class="ev-t"><thead><tr><th>성분</th><th>점수(-100~+100)</th><th>반영 비중</th><th>기여</th></tr></thead><tbody>' +
+      e.comps.map(function (c) { return '<tr><td>' + E(c.name) + '</td><td>' + c.score + '</td><td>' + c.weight + '%</td><td>' + (c.contrib > 0 ? '+' : '') + c.contrib + '</td></tr>'; }).join('') + '</tbody></table><p class="ev-s">성분 점수와 기여는 -100~+100 계산 값이에요. 기여를 모두 더한 값을 0~100으로 옮긴 것이 위의 흐름 점수예요(0이면 50).</p>' +
       (e.parts.length ? '<ul class="ev-l">' + e.parts.map(function (p) { return '<li>' + E(p.label) + ' <i>' + (p.v > 0 ? '+' : '') + p.v + '</i></li>'; }).join('') + '</ul>' : '') + '</section>';
     if (e.relations.length || e.triggers.length) {
       var G = { score: [], volat: [], ref: [] }; (e.relInfo || e.relations.map(function (x) { return { text: x, use: 'ref' }; })).forEach(function (r) { G[r.use].push(r.text); });
@@ -84,6 +84,7 @@
   }
 
   /* ── 화면 ── */
+  var P = function (fit) { return L().pct ? L().pct(fit) : Math.round((fit + 100) / 2); }; // 화면용 흐름 점수 0~100
   var E = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   function bar(name, f) {
     if (!f) return '';
@@ -94,7 +95,7 @@
     h += '<p class="tl-rule"><b>이렇게 판정했어요</b> ' + E(it.rule) + '</p>';
     if (it.overlays && (it.overlays.volatility || it.overlays.defense)) h += '<p class="tl-ov">' + (it.overlays.volatility ? '<i>변동 신호</i>' : '') + (it.overlays.defense ? '<i>방어 신호</i>' : '') + '</p>';
     h += '<div class="tl-fs">' + bar(FIELD_NAME.money, it.fields && it.fields.money) + bar(FIELD_NAME.career, it.fields && it.fields.career) + bar(FIELD_NAME.love, it.fields && it.fields.love) + '</div>';
-    h += '<p class="tl-sc">흐름 점수 ' + it.scores.fit + ' · 작용 강도 ' + it.scores.intensity + ' · 변동성 ' + it.scores.volatility + (it.condition ? ' · 상태 ' + E(it.condition) : '') + '</p>';
+    h += '<p class="tl-sc">흐름 점수 ' + P(it.scores.fit) + ' · 운의 세기 ' + it.scores.intensity + ' · 변화 신호 ' + it.scores.volatility + (it.condition ? ' · 상태 ' + E(it.condition) : '') + '</p>';
     if (it._ref) h += '<button type="button" class="tl-ev" data-tle="' + it._ref.level + '">자세한 근거 · 원국/대운/세운 구분</button>';
     if (it.reasons && it.reasons.length) h += '<details class="tl-why"><summary>근거 보기</summary><ul>' + it.reasons.map(function (r) { return '<li>' + E(r) + '</li>'; }).join('') + '</ul></details>';
     return h + '</div>';
@@ -124,7 +125,7 @@
     var cm = st.m != null && st.months ? st.months.filter(function (m) { return m.month === st.m; })[0] : null;
     if (cm) h += card(cm, '월운 ' + cm.ganzhi + ' · ' + st.y + '년 ' + cm.month + '월(' + cm.term + ' 이후)');
     h += '<div class="tl-legend"><b>읽는 법</b><ul>' + L().NAMES.map(function (n) { return '<li><i class="k-' + L().KEY[n] + '"></i><b>' + n + '</b> ' + E(L().MEANING[n]) + '</li>'; }).join('') + '</ul>' +
-      '<p>분야 막대는 0~100점이며 55 이상이면 무난, 70 이상이면 해당 분야의 활동·적합 신호가 강한 시기입니다. 점수는 명리 모델 안의 상대적 지표입니다. ' + E(BASIS) + '</p></div></section>';
+      '<p>분야 막대 옆 글자(낮음·다소 낮음·무난·높음·매우 높음)는 분야마다 기준을 따로 맞춘 등급이에요. 그래서 숫자보다 등급 글자로 비교하세요. 점수는 명리 모델 안의 상대적 지표입니다. ' + E(BASIS) + '</p></div></section>';
     return h;
   }
 

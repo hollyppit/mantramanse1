@@ -23,14 +23,17 @@
   };
   var KEY = { '기회기': 'opportunity', '확장기': 'expansion', '수확기': 'harvest', '축적기': 'accumulation', '변동기': 'volatility', '방어기': 'defense' };
   var r0 = function (v) { return Math.round(v); };
+  // 화면에 보이는 흐름 점수는 0~100(그래프 막대와 같은 값)이다. 엔진 값(-100~100)을 그대로 쓰면 막대 52와 문장 "흐름 점수 4"가 서로 달라 보인다.
+  var pct = function (fit) { return Math.max(0, Math.min(100, Math.round((fit + 100) / 2))); };
+  var FLOW_WORD = { '기회기': '기회', '확장기': '확장', '수확기': '수확', '축적기': '축적' };
 
   /** ev(엔진 evaluateLuck 결과) → { label, key, meaning, rule, scores } — 결정론적. 같은 ev 는 항상 같은 값. */
   function of(ev) {
     var C = CONFIG, fit = ev.fitScore, inten = ev.intensityScore, vol = ev.volatilityScore, label, rule;
-    if (fit <= C.defenseHard.fit && inten >= C.defenseHard.intensity) { label = '방어기'; rule = '흐름 점수 ' + r0(fit) + '(≤ ' + C.defenseHard.fit + ')이고 작용 강도 ' + r0(inten) + '(≥ ' + C.defenseHard.intensity + ')'; }
-    else if (vol >= C.volatility) { label = '변동기'; rule = '변동성 ' + r0(vol) + '(≥ ' + C.volatility + ')'; }
-    else if (fit <= C.defenseSoft.fit && inten >= C.defenseSoft.intensity) { label = '방어기'; rule = '흐름 점수 ' + r0(fit) + '(≤ ' + C.defenseSoft.fit + ')이고 작용 강도 ' + r0(inten) + '(≥ ' + C.defenseSoft.intensity + ')'; }
-    else { label = FLOW_NAME[ev.primaryFlow] || ev.phase || '축적기'; rule = '네 활동 흐름 중 ' + label.replace('기', '') + ' 활성도가 가장 높음'; }
+    if (fit <= C.defenseHard.fit && inten >= C.defenseHard.intensity) { label = '방어기'; rule = '흐름 점수 ' + pct(fit) + '(기준 ' + pct(C.defenseHard.fit) + ' 이하)로 매우 낮고, 운의 세기 ' + r0(inten) + '(기준 ' + C.defenseHard.intensity + ' 이상)도 실려 있어요'; }
+    else if (vol >= C.volatility) { label = '변동기'; rule = '변화 신호 ' + r0(vol) + '로 기준(' + C.volatility + ' 이상)을 넘었어요'; }
+    else if (fit <= C.defenseSoft.fit && inten >= C.defenseSoft.intensity) { label = '방어기'; rule = '흐름 점수 ' + pct(fit) + '(기준 ' + pct(C.defenseSoft.fit) + ' 이하)로 낮은데, 운의 세기 ' + r0(inten) + '(기준 ' + C.defenseSoft.intensity + ' 이상)는 강해요'; }
+    else { label = FLOW_NAME[ev.primaryFlow] || ev.phase || '축적기'; rule = '기회·확장·수확·축적 네 흐름 중 ‘' + (FLOW_WORD[label] || label) + '’ 쪽 힘이 가장 커요'; } // 예전 label.replace('기','')는 기회기를 "회기"로 잘랐다
     return {
       label: label, key: KEY[label], meaning: MEANING[label], rule: rule,
       scores: { fit: r0(fit), intensity: r0(inten), volatility: r0(vol), flows: ev.phaseScores ? { opportunity: ev.phaseScores.opportunity, expansion: ev.phaseScores.expansion, harvest: ev.phaseScores.harvest, accumulation: ev.phaseScores.accumulation } : null },
@@ -38,5 +41,5 @@
     };
   }
 
-  R.Luck6 = { CONFIG: CONFIG, NAMES: NAMES, MEANING: MEANING, KEY: KEY, of: of };
+  R.Luck6 = { CONFIG: CONFIG, NAMES: NAMES, MEANING: MEANING, KEY: KEY, of: of, pct: pct };
 })(typeof window !== 'undefined' ? window : globalThis);
