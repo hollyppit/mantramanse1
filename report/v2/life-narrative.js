@@ -40,9 +40,9 @@
   // ───────── 공통 분석 ─────────
   // 태그: str:weak|mid|strong(+veryweak|verystrong) · root:none|weak|firm · g:<묶음>:heavy|some|light|none · dom:<묶음> · pat:<구조 패턴>
   //       gk:<격 묶음> + gk:seong|part|pa · u:<통합 판단 방식> · u:prim:<주 기준> · yong:<묶음> · yong:absent · cl:hot|cold|wet|dry|even
-  //       rel:dm-clash|day-clash|hyeong|wonjin|day-hap|stem-hap · dj:<일지 십성 묶음> · spouse:heavy|none|mix · tg:pyeonjae:high|jeongjae:high · sex:M|F
+  //       rel:dm-clash|day-clash|hyeong|wonjin|day-hap|stem-hap · dj:<일지 십성 묶음> · spouse:heavy|none|mix · tg:pyeonjae:high|jeongjae:high · sex:M|F · age:senior|young
   var _profile = new WeakMap();
-  function profile(M, ch) {
+  function profile(M, ch, now) {
     var hit = _profile.get(ch); if (hit) return hit;
     var tags = {}, add = function (t, why) { if (!tags[t]) tags[t] = why; };
     var st = ch.strength, help = st.help, G = ch.weights.groups, tg = ch.weights.tgPct || {}, dEl = M.stemEl(ch.pillars.day.s);
@@ -89,6 +89,8 @@
     if ((tg[a] || 0) >= 8 && (tg[b] || 0) >= 8) add('spouse:mix', a + ' ' + pc(tg[a] || 0) + ' · ' + b + ' ' + pc(tg[b] || 0));
     if ((tg['편재'] || 0) >= 15) add('tg:pyeonjae:high', '편재 ' + pc(tg['편재'])); if ((tg['정재'] || 0) >= 15) add('tg:jeongjae:high', '정재 ' + pc(tg['정재']));
     add('sex:' + (F ? 'F' : 'M'), F ? '여성' : '남성');
+    // 나이: 은퇴 이후(만 65세 이상)·학생 시기(만 20세 미만)는 같은 사주라도 일의 장면이 다르다(커리어 장의 이직·이력서 문장을 막는다)
+    var age = ((now || Date.now()) - ch.utc) / YEAR; if (age >= 65) add('age:senior', '현재 만 ' + Math.floor(age) + '세'); if (age < 20) add('age:young', '현재 만 ' + Math.floor(age) + '세');
     var res = { version: VERSION, tags: tags, has: function (t) { return Object.prototype.hasOwnProperty.call(tags, t); }, dEl: dEl };
     _profile.set(ch, res); return res;
   }
@@ -192,10 +194,12 @@
       try {
         var car = spec.bigYears === 'career', yb = car ? cBonus : wBonus;
         var Yb = new Date(now).getUTCFullYear(), yl = M.seunRange(ch, Yb, Yb + 9).map(function (x) { var pu = pullOf(M, ch, x); return { y: x.year, gz: M.STEM[x.s] + M.BR[x.b], s: x.ev.fitScore + yb(pu.top), fit: x.ev.fitScore, money: car ? pu.top === 3 || pu.top === 1 : pu.top === 2 || pu.top === 1 }; });
-        var big = yl.filter(function (x) { return x.money && x.s > 10; }).sort(function (a, b) { return b.s - a.s; }).slice(0, 3).sort(function (a, b) { return a.y - b.y; });
-        if (car) out.push(big.length ? josa('앞으로 10년 중 일에서 한 단계 올라설 기회가 커지는 해는 ' + big.map(function (x) { return x.y + '년(' + x.gz + ')'; }).join(' · '), '이에요/예요') + '. 이 해에 맞춰 자격·이력·포트폴리오를 미리 준비해 두세요.' : '앞으로 10년 안에는 일의 자리가 크게 바뀌는 해가 뚜렷하지 않아요. 한 번의 도약보다 해마다 한 칸씩 쌓는 전략이 맞는 10년이에요.');
+        // 흐름이 무거운 해(-12 이하, '움직일 때' 장의 기다릴 해 기준)는 기회의 해로 꼽지 않는다(장 사이 엇갈림 방지)
+        var big = yl.filter(function (x) { return x.money && x.s > 10 && x.fit > -12; }).sort(function (a, b) { return b.s - a.s; }).slice(0, 3).sort(function (a, b) { return a.y - b.y; });
+        if (car && spec.senior) out.push(big.length ? josa('앞으로 10년 중 새 역할을 맡거나 활동을 넓히기 좋은 해는 ' + big.map(function (x) { return x.y + '년(' + x.gz + ')'; }).join(' · '), '이에요/예요') + '. 이 해에 맞춰 배움이나 모임 자리를 미리 알아 두세요.' : '앞으로 10년 안에는 활동의 판이 크게 바뀌는 해가 뚜렷하지 않아요. 해마다 한 가지씩 꾸준히 이어 가는 쪽이 맞아요.');
+        else if (car) out.push(big.length ? josa('앞으로 10년 중 일에서 한 단계 올라설 기회가 커지는 해는 ' + big.map(function (x) { return x.y + '년(' + x.gz + ')'; }).join(' · '), '이에요/예요') + '. 이 해에 맞춰 자격·이력·포트폴리오를 미리 준비해 두세요.' : '앞으로 10년 안에는 일의 자리가 크게 바뀌는 해가 뚜렷하지 않아요. 한 번의 도약보다 해마다 한 칸씩 쌓는 전략이 맞는 10년이에요.');
         else out.push(big.length ? josa('앞으로 10년 중 큰돈과 만날 기회가 커지는 해는 ' + big.map(function (x) { return x.y + '년(' + x.gz + ')'; }).join(' · '), '이에요/예요') + '. 이 해에는 거래와 계약을 미루지 마세요.' : '앞으로 10년 안에는 돈의 기운이 크게 몰리는 해가 뚜렷하지 않아요. 큰 한 방보다 꾸준히 쌓는 쪽이 맞는 10년이에요.');
-        var yw = yl.slice().sort(function (a, b) { return a.fit - b.fit; })[0]; if (yw && yw.fit < -15 && !big.some(function (x) { return x.y === yw.y; })) out.push(josa(yw.y + '년(' + yw.gz + ')', '은/는') + (car ? ' 일의 흐름이 가장 무거운 해라, 이직·독립 같은 큰 결정보다 지금 자리를 다지는 데 쓰세요.' : ' 흐름이 가장 무거운 해라, 큰돈이 걸린 결정은 피하는 편이 좋아요.'));
+        var yw = yl.slice().sort(function (a, b) { return a.fit - b.fit; })[0]; if (yw && yw.fit < -15 && !big.some(function (x) { return x.y === yw.y; })) out.push(josa(yw.y + '년(' + yw.gz + ')', '은/는') + (car && spec.senior ? ' 흐름이 가장 무거운 해라, 새 일을 벌이기보다 건강과 생활 리듬을 지키는 데 쓰세요.' : car ? ' 일의 흐름이 가장 무거운 해라, 이직·독립 같은 큰 결정보다 지금 자리를 다지는 데 쓰세요.' : ' 흐름이 가장 무거운 해라, 큰돈이 걸린 결정은 피하는 편이 좋아요.'));
       } catch (e) { }
     }
     // 이직·독립(career_08): 앞으로 10년 중 일터 자리(월지)를 흔드는 해·자리 기운이 들어오는 해(이직) / 독립의 기운이 실리는 해, 가장 무거운 해는 버티기
@@ -203,14 +207,17 @@
       try {
         var Yv = new Date(now).getUTCFullYear(), vrows = M.seunRange(ch, Yv, Yv + 9).map(function (x) {
           var rels = M.luckRelations(ch, x).rels, mclash = rels.some(function (r) { return r.type === '충' && r.members.indexOf('month') >= 0; }), mhap = rels.some(function (r) { return r.kind === 'branch' && /합/.test(r.type) && r.members.indexOf('month') >= 0; }), top = pullOf(M, ch, x).top;
-          var why = mclash ? '일터 자리를 흔드는 해' : top === 3 ? '새 자리의 기운이 들어옴' : mhap ? '일터 자리와 합' : '';
+          var why = mclash ? (spec.senior ? '하던 일을 흔드는 해' : '일터 자리를 흔드는 해') : top === 3 ? (spec.senior ? '새 역할의 기운이 들어옴' : '새 자리의 기운이 들어옴') : mhap ? (spec.senior ? '하던 일과 합' : '일터 자리와 합') : '';
           return { y: x.year, gz: M.STEM[x.s] + M.BR[x.b], why: why, indep: (top === 0 || top === 1) && x.ev.fitScore >= 0, s: (mclash ? 2 : 0) + (top === 3 ? 1.5 : 0) + (mhap ? 1 : 0) + x.ev.fitScore / 100, fit: x.ev.fitScore };
         });
         var mv2 = vrows.filter(function (x) { return x.why; }).sort(function (a, b) { return b.s - a.s; }).slice(0, 3).sort(function (a, b) { return a.y - b.y; });
-        out.push(mv2.length ? josa('앞으로 10년 중 이직·자리 이동이 움직이기 쉬운 해는 ' + mv2.map(function (x) { return x.y + '년(' + x.why + ')'; }).join(', '), '이에요/예요') + '.' : '앞으로 10년 안에는 일터를 크게 흔드는 해가 뚜렷하지 않아요. 떠밀려 옮길 일이 적은 만큼, 옮길지는 스스로 정한 기준으로 판단하세요.');
-        var ind = vrows.filter(function (x) { return x.indep && !mv2.some(function (m) { return m.y === x.y; }); }).sort(function (a, b) { return b.fit - a.fit; }).slice(0, 2).sort(function (a, b) { return a.y - b.y; });
-        if (ind.length) out.push('독립이나 내 일을 시험해 보기 좋은 해는 ' + ind.map(function (x) { return x.y + '년'; }).join('·') + '이에요. 회사를 다니며 작게 먼저 해 보세요.');
-        var vw = vrows.slice().sort(function (a, b) { return a.fit - b.fit; })[0]; if (vw && vw.fit < -15) out.push(josa(vw.y + '년', '은/는') + ' 흐름이 가장 무거운 해라, 이 해의 이직이나 퇴사는 다음 자리를 확정한 뒤에만 하세요.');
+        if (spec.senior) out.push(mv2.length ? josa('앞으로 10년 중 일의 형태가 바뀌기 쉬운 해는 ' + mv2.map(function (x) { return x.y + '년(' + x.why + ')'; }).join(', '), '이에요/예요') + '.' : '앞으로 10년 안에는 하던 일을 크게 흔드는 해가 뚜렷하지 않아요. 일을 줄이거나 넘기는 때는 스스로 정한 기준으로 고르세요.');
+        else out.push(mv2.length ? josa('앞으로 10년 중 이직·자리 이동이 움직이기 쉬운 해는 ' + mv2.map(function (x) { return x.y + '년(' + x.why + ')'; }).join(', '), '이에요/예요') + '.' : '앞으로 10년 안에는 일터를 크게 흔드는 해가 뚜렷하지 않아요. 떠밀려 옮길 일이 적은 만큼, 옮길지는 스스로 정한 기준으로 판단하세요.');
+        var heavyMv = mv2.filter(function (x) { return x.fit <= -12; }).map(function (x) { return x.y + '년'; });
+        if (heavyMv.length) out.push('다만 ' + heavyMv.join('·') + '은 전체 흐름이 무거운 해라, 움직일 일이 생겨도 조건을 확인한 뒤 천천히 정하세요.');
+        var ind = vrows.filter(function (x) { return x.indep &&!mv2.some(function (m) { return m.y === x.y; }); }).sort(function (a, b) { return b.fit - a.fit; }).slice(0, 2).sort(function (a, b) { return a.y - b.y; });
+        if (ind.length) out.push((spec.senior ? '새 활동을 시험해 보기 좋은 해는 ' : '독립이나 내 일을 시험해 보기 좋은 해는 ') + ind.map(function (x) { return x.y + '년'; }).join('·') + (spec.senior ? '이에요. 큰돈 없이 작게 먼저 해 보세요.' : '이에요. 회사를 다니며 작게 먼저 해 보세요.'));
+        var vw = vrows.slice().sort(function (a, b) { return a.fit - b.fit; })[0]; if (vw && vw.fit < -15) out.push(josa(vw.y + '년', '은/는') + (spec.senior ? ' 흐름이 가장 무거운 해라, 이 해에는 일을 늘리거나 목돈을 넣는 결정을 피하세요.' : ' 흐름이 가장 무거운 해라, 이 해의 이직이나 퇴사는 다음 자리를 확정한 뒤에만 하세요.'));
       } catch (e) { }
     }
     if (spec.decades) {
@@ -228,8 +235,8 @@
         var Ym = M.yearPillarAt(now).sajuYear, all = M.wolun(ch, Ym).concat(M.wolun(ch, Ym + 1)), mi = 0; all.forEach(function (m, i) { if (m.startMs <= now) mi = i; });
         var ml = all.slice(mi, mi + 12).map(function (m) { var dd = new Date(m.startMs + 9 * 3600e3), pu = pullOf(M, ch, m); return { t: m.startMs, label: dd.getUTCFullYear() + '년 ' + (dd.getUTCMonth() + 1) + '월', s: m.ev.fitScore + bon(pu.top), fit: m.ev.fitScore }; });
         var top3 = ml.slice().sort(function (a, b) { return b.s - a.s; }).slice(0, 3).sort(function (a, b) { return a.t - b.t; }), mw = ml.slice().sort(function (a, b) { return a.fit - b.fit; })[0];
-        out.push('가까운 12개월 중 ' + (love ? '인연이 움직이기 쉬운 달은 ' : work ? '일에 힘이 실리는 달은 ' : '돈의 판단에 힘이 실리는 달은 ') + top3.map(function (x) { return x.label; }).join(' · ') + (love ? '이에요. 인연의 달도 절기로 바뀌어서, 그달 초순(5~8일 무렵)부터 기운이 들어와요.' : work ? '이에요. 일의 달은 절기 기준이라, 그달 5~8일 무렵부터 힘이 실린다고 보세요.' : '이에요. 달은 절기로 바뀌어서 그달 초순(5~8일 무렵)부터예요.'));
-        if (mw && mw.fit < -12 && !top3.some(function (x) { return x.t === mw.t; })) out.push(josa(mw.label, '은/는') + ' 흐름이 가장 무거운 달이라 ' + (love ? '고백·동거·이별 같은 관계의 큰 결정을 미루세요.' : work ? '이직·퇴사·큰 제안 수락 같은 결정을 미루세요.' : '큰 지출과 계약을 피하세요.'));
+        out.push('가까운 12개월 중 ' + (love ? '인연이 움직이기 쉬운 달은 ' : work && spec.senior ? '새 활동에 힘이 실리는 달은 ' : work ? '일에 힘이 실리는 달은 ' : '돈의 판단에 힘이 실리는 달은 ') + top3.map(function (x) { return x.label; }).join(' · ') + (love ? '이에요. 인연의 달도 절기로 바뀌어서, 그달 초순(5~8일 무렵)부터 기운이 들어와요.' : work && spec.senior ? '이에요. 활동의 달도 절기로 나뉘어서, 그달 5~8일 무렵부터 기운이 바뀌어요.' : work ? '이에요. 일의 달은 절기 기준이라, 그달 5~8일 무렵부터 힘이 실린다고 보세요.' : '이에요. 달은 절기로 바뀌어서 그달 초순(5~8일 무렵)부터예요.'));
+        if (mw && mw.fit < -12 && !top3.some(function (x) { return x.t === mw.t; })) out.push(josa(mw.label, '은/는') + ' 흐름이 가장 무거운 달이라 ' + (love ? '고백·동거·이별 같은 관계의 큰 결정을 미루세요.' : work && spec.senior ? '새 일·큰 약속·투자 권유 같은 결정을 미루세요.' : work ? '이직·퇴사·큰 제안 수락 같은 결정을 미루세요.' : '큰 지출과 계약을 피하세요.'));
       } catch (e) { }
     }
     // 결혼운(love_08): 앞으로 10년 중 배우자 기운이 들어오는 해 + 배우자 자리(일지)와 합을 이루는 해, 일지를 충하는 해는 주의
@@ -237,10 +244,12 @@
       try {
         var Yr = new Date(now).getUTCFullYear(), mrows = M.seunRange(ch, Yr, Yr + 9).map(function (x) {
           var rels = M.luckRelations(ch, x).rels, hap = rels.some(function (r) { return r.kind === 'branch' && /합/.test(r.type) && r.members.indexOf('day') >= 0; }), clash = rels.some(function (r) { return r.type === '충' && r.members.indexOf('day') >= 0; }), sp = pullOf(M, ch, x).top === sgL;
-          return { y: x.year, gz: M.STEM[x.s] + M.BR[x.b], why: sp && hap ? '배우자 기운과 배우자 자리의 합이 겹침' : sp ? '배우자 기운이 들어옴' : hap ? '배우자 자리와 합' : '', s: (sp ? 2 : 0) + (hap ? 1.5 : 0) + x.ev.fitScore / 100, clash: clash };
+          return { y: x.year, gz: M.STEM[x.s] + M.BR[x.b], why: sp && hap ? '배우자 기운과 배우자 자리의 합이 겹침' : sp ? '배우자 기운이 들어옴' : hap ? '배우자 자리와 합' : '', s: (sp ? 2 : 0) + (hap ? 1.5 : 0) + x.ev.fitScore / 100, fit: x.ev.fitScore, clash: clash };
         });
         var good = mrows.filter(function (x) { return x.why; }).sort(function (a, b) { return b.s - a.s; }).slice(0, 4).sort(function (a, b) { return a.y - b.y; });
         out.push(good.length ? josa('앞으로 10년 중 결혼 이야기가 움직이기 쉬운 해는 ' + good.map(function (x) { return x.y + '년(' + x.why + ')'; }).join(', '), '이에요/예요') + '.' : '앞으로 10년 안에는 결혼을 끌어당기는 해가 뚜렷하지 않아요. 날을 기다리기보다 관계의 준비가 된 해에 스스로 정하는 쪽이 맞아요.');
+        var heavyM = good.filter(function (x) { return x.fit <= -12; }).map(function (x) { return x.y + '년'; });
+        if (heavyM.length) out.push(heavyM.join('·') + '은 인연의 기운은 들어오지만 전체 흐름은 무거운 해라, 이야기가 오가도 결정은 서두르지 마세요.');
         var cl = mrows.filter(function (x) { return x.clash; }).map(function (x) { return x.y + '년'; }).slice(0, 2);
         if (cl.length) out.push(cl.join('·') + '은 배우자 자리를 흔드는 해라, 결혼이나 이별 같은 큰 결정은 한 계절 더 확인하고 내리세요.');
       } catch (e) { }
@@ -259,6 +268,8 @@
     return out.join('\n\n');
   }
   function luckStage(M, ch, now, lens, st, chapterId) {
+    // 은퇴 이후(만 65세 이상)는 커리어 장의 운 단계를 일의 형태·역할·생활 리듬으로 읽는 문장으로 바꾼다
+    var sspec = D().CH_LUCK_SENIOR && D().CH_LUCK_SENIOR[chapterId]; if (sspec && profile(M, ch, now).has('age:senior')) return chapterLuck(M, ch, now, Object.assign({ senior: true }, sspec), st);
     var spec = D().CH_LUCK && D().CH_LUCK[chapterId]; if (spec) return chapterLuck(M, ch, now, spec, st);
     var D0 = D(), ps = periods(M, ch, now), ci = ps.findIndex(function (p) { return p.tense === 'current'; });
     if (ci < 0) return '';
@@ -300,7 +311,7 @@
     var lens = CHAPTERS[chapterId], D0 = D(); if (!lens || !D0 || !ch || !ch.unified || !ch.daeun) return null;
     var st = opts.state || stateOf(ch); if (st.gen !== GEN && !opts.state) { st.rules = new Set(); st.sentences = new Set(); st.variant = {}; st.cache = {}; st.gen = GEN; }
     if (st.cache[chapterId] !== undefined) return st.cache[chapterId];
-    var P = profile(M, ch), res = null, trace = [];
+    var P = profile(M, ch, now), res = null, trace = [];
     if (chapterId === 'timeline_self_20') res = composeLife(M, ch, now, P, st, D0);
     else {
       var cands = (opts.rules || rules()).filter(function (r) { return r.chapter === chapterId && r.on !== false; }).sort(function (a, b) { return b.priority - a.priority || condCount(b) - condCount(a) || (a.id < b.id ? -1 : 1); });
@@ -340,7 +351,7 @@
   // ───────── 규칙 검증·게시본 병합 (관리자 화면·API·테스트가 같은 함수를 쓴다) ─────────
   var BAN = /반드시|무조건|100%|보장|틀림없이|대박|성공할 거예요|다 잘될|걱정하지 마세요|운명이 정해|확실히 (?:성공|부자)/;
   var JARGON = /신약|신강|관성|재성|인성|식상|비겁|정관|편관|정재|편재|식신|상관(?!없)|비견|겁재|(?<!당신 |내 )편인|정인|용신|기신|희신|격국|조후|억부|통근|일간|일지|월지|십성|오행|합충/;
-  var TAG_RE = /^(str:(weak|mid|strong|veryweak|verystrong)|root:(none|weak|firm)|g:(bi|sik|jae|gwan|in):(heavy|some|light|none)|dom:(bi|sik|jae|gwan|in)|pat:[가-힣()]{2,12}|gk:(bi|sik|jae|gwan|in|seong|part|pa)|u:(single|agree|conflict|bridge|jong|forced|prim:(eokbu|johu|tonggwan|gyeok|jehwa|jong))|yong:(bi|sik|jae|gwan|in|absent)|cl:(hot|cold|wet|dry|even)|rel:(dm-clash|day-clash|hyeong|wonjin|day-hap|stem-hap)|dj:(bi|sik|jae|gwan|in)|spouse:(heavy|none|mix)|tg:(pyeonjae|jeongjae):high|sex:[MF])$/;
+  var TAG_RE = /^(str:(weak|mid|strong|veryweak|verystrong)|root:(none|weak|firm)|g:(bi|sik|jae|gwan|in):(heavy|some|light|none)|dom:(bi|sik|jae|gwan|in)|pat:[가-힣()]{2,12}|gk:(bi|sik|jae|gwan|in|seong|part|pa)|u:(single|agree|conflict|bridge|jong|forced|prim:(eokbu|johu|tonggwan|gyeok|jehwa|jong))|yong:(bi|sik|jae|gwan|in|absent)|cl:(hot|cold|wet|dry|even)|rel:(dm-clash|day-clash|hyeong|wonjin|day-hap|stem-hap)|dj:(bi|sik|jae|gwan|in)|spouse:(heavy|none|mix)|tg:(pyeonjae|jeongjae):high|sex:[MF]|age:(senior|young))$/;
   var TEXT_KEYS = ['hook', 'core', 'life', 'conflict', 'advice'];
   // 문제 목록을 돌려준다(빈 목록 = 통과). 사용자에게 보이는 말로 쓴다.
   function validateRule(r) {

@@ -14,7 +14,7 @@ const BAD_JOSA = /세\([^)]*\)이 |년\([^)]*\)가 /;   // 괄호 앞 낱말의 
 const norm = t => String(t).replace(/[\s.,!?·—'"‘’“”()]/g, '');
 const sent = t => String(t).split(/(?<=[.!?])\s+/).map(x => x.trim()).filter(Boolean);
 // ① 규칙 형식
-const TAG = /^(str:(weak|mid|strong|veryweak|verystrong)|root:(none|weak|firm)|g:(bi|sik|jae|gwan|in):(heavy|some|light|none)|dom:(bi|sik|jae|gwan|in)|pat:.+|gk:(bi|sik|jae|gwan|in|seong|part|pa)|u:[a-z:]+|yong:[a-z]+|cl:(hot|cold|wet|dry|even)|rel:(dm-clash|day-clash|hyeong|wonjin|day-hap|stem-hap)|dj:(bi|sik|jae|gwan|in)|spouse:(heavy|none|mix)|tg:(pyeonjae|jeongjae):high|sex:[MF])$/;
+const TAG = /^(str:(weak|mid|strong|veryweak|verystrong)|root:(none|weak|firm)|g:(bi|sik|jae|gwan|in):(heavy|some|light|none)|dom:(bi|sik|jae|gwan|in)|pat:.+|gk:(bi|sik|jae|gwan|in|seong|part|pa)|u:[a-z:]+|yong:[a-z]+|cl:(hot|cold|wet|dry|even)|rel:(dm-clash|day-clash|hyeong|wonjin|day-hap|stem-hap)|dj:(bi|sik|jae|gwan|in)|spouse:(heavy|none|mix)|tg:(pyeonjae|jeongjae):high|sex:[MF]|age:(senior|young))$/;
 const ids = new Set();
 for (const r of D.RULES) {
   ok(!ids.has(r.id), '규칙 id 중복 ' + r.id); ids.add(r.id);
@@ -50,6 +50,15 @@ for (let i = 0; i < N; i++) {
       for (const s of sent(row.text)) { const k = norm(s); if (k.length < 12) continue; if (seen.has(k)) ok(false, `장 사이 문장 중복 ${tag}: ${seen.get(k)} ↔ ${id}: ${s.slice(0, 50)}`); else seen.set(k, id); }
     }
   }
+  // 장 사이 시기 엇갈림: '움직일 때' 장의 기다릴 해가 다른 장에서 기회의 해로 나오면, 그 장에 주의 문장이 함께 있어야 한다
+  { const lk = id => ((out[id] && out[id].rows.find(r => r.stage === 'luck')) || {}).text || '', yrs = t => [...String(t).matchAll(/(20\d\d)년/g)].map(m => +m[1]);
+    const waits = yrs((lk('timeline_self_24').match(/기다리는 게 나은 해는 ([^이]+)/) || [])[1] || '');
+    for (const [id, re, warn] of [['timeline_career_12', /올라설 기회가 커지는 해는 [^.]+/, null], ['timeline_wealth_06', /큰돈과 만날 기회가 커지는 해는 [^.]+/, null], ['timeline_career_08', /이직·자리 이동이 움직이기 쉬운 해는 [^.]+/, /[^.]*천천히 정하세요/], ['timeline_love_08', /결혼 이야기가 움직이기 쉬운 해는 [^.]+/, /[^.]*서두르지 마세요/]]) {
+      const t = lk(id), w = warn ? (t.match(warn) || [''])[0] : '';
+      yrs((t.match(re) || [''])[0]).filter(y => waits.includes(y)).forEach(y => ok(w.includes(y + '년'), `시기 엇갈림 ${tag} ${id}: ${y}년이 기다릴 해인데 기회의 해로 나옴`));
+    } }
+  // 나이: 만 65세 이상에게 커리어 장이 이직·면접·이력서 같은 구직 문장을 보여 주면 안 된다
+  if ((NOW - ch.utc) / YEAR >= 65) for (const id of Object.keys(out)) if (/career/.test(id) && out[id]) out[id].rows.forEach(r => ok(!/이직|승진|사표|퇴사|면접|이력서|입사|신입|포트폴리오/.test(r.text), `만 65세 이상에게 구직 문장 ${tag} ${id}: ${(r.text.match(/[^.]*(이직|승진|사표|퇴사|면접|이력서|입사|신입|포트폴리오)[^.]*/) || [''])[0].slice(0, 60)}`));
   // 인생 흐름 장: 항상 나오고, 실제 대운 시작 나이·과거/미래 문형 분리·어린 시절
   const life = out.timeline_self_20;
   ok(life, '전체 인생 흐름 장이 비었음 ' + tag);
