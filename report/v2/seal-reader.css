@@ -29,3 +29,37 @@
 .seal-shell button.seal-next[data-seal-next]:active{transform:translateY(1px)}
 .seal-shell button.seal-next[data-seal-next]:focus-visible{outline:3px solid #ffd2cf;outline-offset:3px}
 #chapter .seal-lead-panel{margin-top:0!important;padding-top:0!important}#chapter .seal-lead-panel .reading-panel{margin-bottom:28px}
+
+/* 2026-11-09 명부(冥府 命簿) 연출 — seal-reader.js myeongbu() */
+.seal-shell.mb-skin{--mb-ink:#0c1220;--mb-line:#2a3550;--mb-blue:#8fb0e8;--mb-red:#c23a2e;position:relative;background:var(--mb-ink);border-radius:16px;padding:0 clamp(16px,3vw,28px) 28px;isolation:isolate}
+.seal-shell.mb-skin::before{content:"";position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(90deg,#9fb3d612 0 1px,#0000 1px 56px);pointer-events:none;z-index:-1}
+.mb-skin .seal-head{position:relative;padding:28px 0 18px}
+.mb-skin .seal-kicker{display:flex;flex-direction:column;gap:2px;font:11px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em;color:#7f8ba3;padding-right:70px}
+.mb-skin .seal-head h2{font-family:"Noto Serif KR",serif;color:#f2f4f8}
+.mb-skin .seal-editorial-hook{color:#b9c6dc}
+.mb-skin .mb-seal{position:absolute;right:0;top:26px;width:54px;height:54px;border:2px solid var(--mb-red);color:var(--mb-red);display:grid;place-items:center;font:500 13px/1.1 "Noto Serif KR",serif;text-align:center;transform:rotate(-6deg)!important;background:transparent;opacity:.9}
+.mb-skin .mb-row{display:grid!important;grid-template-columns:52px minmax(0,1fr);gap:14px;padding:22px 0!important;border-top:1px solid var(--mb-line);background:none}
+.mb-skin .mb-row.mb-ill{background:linear-gradient(90deg,#c23a2e16,#0000 70%)}
+.mb-skin .mb-no{writing-mode:vertical-rl;justify-self:center;font:500 19px/1 "Noto Serif KR",serif;letter-spacing:.3em;color:var(--mb-blue);opacity:0;transition:opacity .6s ease}
+.mb-skin .mb-ill .mb-no{color:#e0605a}
+.mb-skin .mb-col>.seal-role-label,.mb-skin .mb-col>h3:first-child{font:11px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em;color:#7f8ba3;margin:0 0 10px;font-weight:400}
+.mb-skin .mb-col>h3:not(:first-child){font-size:15px;color:#cfd8e8;margin:4px 0 10px}
+.mb-ban{display:inline-block;margin-left:8px;padding:1px 7px;border:1px solid var(--mb-red,#c23a2e);color:#e0605a;font:11px ui-monospace,monospace;letter-spacing:.12em;vertical-align:1px}
+.mb-skin .mb-key{position:relative;display:inline;font:500 clamp(19px,2.4vw,22px)/1.55 "Noto Serif KR",serif;color:#fff}
+.mb-skin .mb-ill .mb-key{color:#ffb4a8}
+.mb-skin .mb-key::after{content:"";position:absolute;left:-2px;right:-2px;top:3px;bottom:0;background:#05070c;transform-origin:right;transition:transform .9s cubic-bezier(.7,0,.2,1) .3s}
+.mb-skin .mb-row.mb-on .mb-key::after{transform:scaleX(0)}
+.mb-skin .mb-row.mb-on .mb-no{opacity:1}
+.mb-skin .mb-col p[data-reading-role]{color:#aeb7c8}
+.mb-skin .mb-col p[data-reading-role] .mb-key{display:block;margin-bottom:10px}
+.mb-sign{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:0;padding:16px 0 0;border-top:1px solid #2a3550;font:11px ui-monospace,monospace;color:#7f8ba3;letter-spacing:.14em}
+.mb-sign b{font:500 15px "Noto Serif KR",serif;color:#c23a2e;letter-spacing:0}
+.mb-skin .seal-end{margin-top:12px}
+.mb-skin button.seal-next[data-seal-next]{border-radius:2px;border:1px solid var(--mb-red);background:#7d1a14;box-shadow:none;clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,0 100%);position:relative}
+.mb-skin button.seal-next[data-seal-next]::after{content:"";position:absolute;right:0;top:0;width:24px;height:24px;background:#e8a29a}
+.mb-skin .seal-next small{color:#f4c6bf;font-family:ui-monospace,monospace}
+.mb-skin .seal-next i{background:transparent;border:1px solid #ffffff44}
+.mb-skin .reading-panel,.mb-skin .reading-overview{border-radius:4px}
+@media(max-width:560px){.mb-skin .mb-row{grid-template-columns:34px minmax(0,1fr);gap:10px}.mb-skin .mb-no{font-size:15px;letter-spacing:.2em}}
+@media(prefers-reduced-motion:reduce){.mb-skin .mb-key::after{display:none}.mb-skin .mb-no{opacity:1}}
+@media print{.mb-skin .mb-key::after{display:none}.mb-skin .mb-no{opacity:1}}
