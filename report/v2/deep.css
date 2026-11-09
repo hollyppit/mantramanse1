@@ -79,3 +79,85 @@
 .dp-ifam-sep { color: var(--ink3); }
 @media (max-width: 420px) { .dp-ilju .dp-ifam { grid-template-columns: 1fr; gap: 2px; } }/* 2026-11-09 순위 이유: '근거 ·' 조각 대신 끝맺은 문장 + 작은 꼬리표 */
 .dp-mi { color: #e9dcc4; } .dp-why-k { display: inline-block; margin-right: 8px; padding: 1px 8px; border-radius: 999px; border: 1px solid #ffc48a66; color: #ffc48a; font-size: .74rem; font-weight: 700; vertical-align: 1px; }
+
+/* 2026-11-09 운명 기록 카드(dossier) — deep-life.js dossier_spouse / dossier_past
+   구성만 참고 화면을 따르고, 색·선·글꼴은 사이트의 명부(冥府 命簿) 톤에 맞춘다: 남색 바탕 · 장부선 · 푸른 먹빛 · 붉은 도장. */
+.fd { --ln: #2a3550; --bl: #8fb0e8; --rd: #c23a2e; --tx: #dfe3ea; --mu: #7f8ba3; position: relative; padding: 24px clamp(14px, 3vw, 24px) 22px; border-top: 1px solid var(--ln); border-bottom: 1px solid var(--ln); text-align: left; color: var(--tx); }
+.fd-kick { margin: 0; font: 11px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .18em; color: var(--mu); }
+.fd-title { margin: 4px 0 0; font: 700 clamp(24px, 4.4vw, 30px)/1.3 "Noto Serif KR", serif; color: #f2f4f8; }
+.fd-eng { margin: 2px 0 18px; font: 11px/1 ui-monospace, monospace; letter-spacing: .24em; color: #5f6c88; }
+.fd-card { position: relative; margin: 0 0 22px; padding: 18px 16px 16px; border: 1px solid var(--ln); border-radius: 4px; background: #0f1729; }
+.fd-card::after { content: "命"; position: absolute; right: 14px; top: 14px; width: 34px; height: 34px; border: 1.5px solid var(--rd); color: var(--rd); display: grid; place-items: center; font: 500 15px "Noto Serif KR", serif; transform: rotate(-6deg); opacity: .85; }
+.fd-k { margin: 0; font: 11px/1 ui-monospace, monospace; letter-spacing: .2em; color: var(--mu); }
+.fd-ilju { margin: 10px 0 2px; display: flex; align-items: baseline; gap: 10px; }
+.fd-ilju b { font: 800 clamp(34px, 6.5vw, 44px)/1 "Noto Serif KR", serif; color: #fff; letter-spacing: .04em; }
+.fd-ilju span { font: 600 15px "Noto Serif KR", serif; color: var(--bl); }
+.fd-sub { margin: 2px 0 16px; font-size: 12.5px; color: var(--mu); }
+.fd-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; max-width: 440px; margin: 0 0 14px; }
+.fd-col { display: grid; gap: 4px; justify-items: center; padding: 8px 2px; border: 1px solid var(--ln); border-radius: 4px; background: #0c1220; }
+.fd-col.is-day { border-color: var(--bl); box-shadow: 0 0 0 1px #8fb0e833 inset; }
+.fd-col.is-none { opacity: .45; }
+.fd-col p { margin: 0; font-size: 11px; color: var(--mu); }
+.fd-gz { display: grid; justify-items: center; }
+.fd-gz small { font-size: 10px; color: #6f7b93; min-height: 1.2em; }
+.fd-gz b { font: 700 clamp(22px, 5vw, 28px)/1.1 "Noto Serif KR", serif; color: var(--c); }
+.fd-col em { font-style: normal; font-size: 10.5px; color: #6f7b93; }
+.fd-facts { display: grid; gap: 4px; margin: 0; font-size: 12.5px; }
+.fd-facts div { display: grid; grid-template-columns: 4.5em minmax(0, 1fr); gap: 8px; }
+.fd-facts dt { color: var(--mu); font-family: ui-monospace, monospace; font-size: 11.5px; letter-spacing: .06em; } .fd-facts dd { margin: 0; color: #cfd8e8; }
+.fd-line { margin: 14px 0 0 !important; padding-top: 12px; border-top: 1px solid var(--ln); font-size: 13.5px !important; line-height: 1.7 !important; color: #b9c6dc; }
+.fd-story { margin: 0 0 18px; padding: 2px 0 2px 16px; border-left: 2px solid var(--bl); font: 15.5px/1.95 "Noto Serif KR", serif; color: #e8ecf3; }
+.fd-oracle { margin: 0 0 20px; padding: 14px 16px; border: 1px solid #5e1d19; border-radius: 2px; background: linear-gradient(90deg, #c23a2e14, transparent 75%); }
+.fd-oracle p { margin: 0; font: 15px/1.85 "Noto Serif KR", serif; color: #ffd6cf; }
+.fd-oracle .fd-ok { font: 11px/1.4 ui-monospace, monospace; letter-spacing: .16em; color: #e0605a; margin-bottom: 6px; }
+.fd .fd-fig { max-width: 320px; margin: 0 auto 16px; border: 1px solid var(--ln); border-radius: 4px; overflow: hidden; }
+.fd .fd-fig img, .fd .fd-fig video { display: block; width: 100%; height: auto; }
+.fd-head { margin: 0 0 12px; padding: 10px 0; border-top: 1px solid var(--ln); border-bottom: 1px solid var(--ln); font: 600 14.5px/1.6 "Noto Serif KR", serif; color: #f2f4f8; }
+.fd-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: fd; }
+.fd-list li { counter-increment: fd; display: grid; grid-template-columns: 2.4em minmax(0, 1fr); column-gap: 10px; padding: 12px 0; border-bottom: 1px solid #1c2540; }
+.fd-list li::before { content: counter(fd, cjk-ideographic); grid-row: 1 / 3; font: 500 15px "Noto Serif KR", serif; color: var(--bl); padding-top: 1px; }
+.fd-list li b { font: 600 12px/1.5 ui-monospace, monospace; letter-spacing: .1em; color: var(--mu); }
+.fd-list li span { font-size: 14.5px; line-height: 1.75; color: #dfe3ea; }
+.fd-score { margin: 18px 0 0; padding: 14px 16px; border: 1px solid var(--ln); border-radius: 4px; background: #0f1729; }
+.fd-score p { margin: 0; } .fd-score b { font: 600 12px ui-monospace, monospace; letter-spacing: .1em; color: var(--mu); }
+.fd-num { margin: 4px 0 8px !important; color: var(--mu); font-size: 13px; } .fd-num strong { font: 800 28px "Noto Serif KR", serif; color: #fff; margin-right: 4px; }
+.fd-track { display: block; height: 4px; background: #1c2540; overflow: hidden; } .fd-track i { display: block; height: 100%; background: var(--rd); }
+.fd-score small { display: block; margin-top: 10px; font-size: 12px; line-height: 1.6; color: var(--mu); }
+.fd-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; } .fd-tags span { padding: 2px 9px; border: 1px solid var(--ln); font: 11.5px ui-monospace, monospace; letter-spacing: .06em; color: var(--bl); }
+@media (max-width: 480px) { .fd-grid { gap: 5px; } .fd-card::after { width: 28px; height: 28px; font-size: 12px; } }
+
+/* 2026-11-09 구성 다양화 블록(fate-blocks.js) — 명부 톤: 남색 바탕 · 장부선 · 푸른 먹빛 · 붉은 도장 */
+.fx { --ln: #2a3550; --bl: #8fb0e8; --rd: #c23a2e; --tx: #dfe3ea; --mu: #7f8ba3; position: relative; padding: 22px 0 20px; border-top: 1px solid var(--ln); border-bottom: 1px solid var(--ln); color: var(--tx); }
+.fx-kick { margin: 0; font: 11px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .18em; color: var(--mu); }
+.fx-title { margin: 4px 0 8px; font: 700 clamp(21px, 3.8vw, 26px)/1.35 "Noto Serif KR", serif; color: #f2f4f8; }
+.fx-lead { margin: 0 0 16px; font-size: 14.5px; line-height: 1.8; color: #b9c6dc; }
+.fx-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.fx-side, .fx-person { position: relative; padding: 16px 14px 14px; border: 1px solid var(--ln); border-radius: 4px; background: #0f1729; }
+.fx-best { border-top: 2px solid var(--bl); }
+.fx-worst { border-top: 2px solid var(--rd); background: linear-gradient(180deg, #c23a2e10, #0f1729 60%); }
+.fx-side.is-now { box-shadow: 0 0 0 1px currentColor inset; }
+.fx-sk { margin: 0 0 6px; font: 11px ui-monospace, monospace; letter-spacing: .16em; color: var(--mu); }
+.fx-best .fx-sk { color: var(--bl); } .fx-worst .fx-sk { color: #e0605a; }
+.fx-side h4, .fx-person h4 { margin: 0 0 12px; font: 700 16.5px/1.45 "Noto Serif KR", serif; color: #f2f4f8; }
+.fx-two dl { margin: 0; display: grid; gap: 10px; }
+.fx-two dt { font: 11px ui-monospace, monospace; letter-spacing: .1em; color: var(--mu); margin-bottom: 2px; }
+.fx-two dd { margin: 0; font-size: 14px; line-height: 1.75; color: #dfe3ea; }
+.fx-now { margin: 12px 0 0; padding-top: 10px; border-top: 1px dashed var(--ln); font-size: 12.5px; color: #ffd6cf; }
+.fx-best .fx-now { color: #cfe0ff; }
+.fx-rx { position: relative; padding: 16px; border: 1px solid var(--ln); border-radius: 4px; background: #0f1729; }
+.fx-rx-h { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--ln); font-size: 13px; padding-right: 64px; }
+.fx-rx-h span { font: 11px ui-monospace, monospace; letter-spacing: .1em; color: var(--mu); padding-top: 2px; } .fx-rx-h b { font-weight: 600; color: #f2f4f8; }
+.fx-steps { list-style: none; margin: 0 0 14px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.fx-steps li { padding: 12px; border: 1px solid var(--ln); border-radius: 4px; background: #0c1220; }
+.fx-steps small { display: block; font: 11px ui-monospace, monospace; letter-spacing: .1em; color: var(--bl); margin-bottom: 6px; }
+.fx-steps p { margin: 0; font-size: 14px; line-height: 1.7; color: #f2f4f8; }
+.fx-rx-m { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; font-size: 13.5px; }
+.fx-rx-m dt { font: 11px ui-monospace, monospace; letter-spacing: .1em; color: var(--mu); } .fx-rx-m dd { margin: 2px 0 0; color: #dfe3ea; line-height: 1.6; }
+.fx-rx-f { margin: 14px 0 0; padding-top: 10px; border-top: 1px dashed var(--ln); font-size: 13px; color: #ffd6cf; }
+.fx-stamp { position: absolute; right: 14px; top: 14px; width: 46px; height: 46px; border: 2px solid var(--rd); color: var(--rd); display: grid; place-items: center; font: 500 13px/1.1 "Noto Serif KR", serif; transform: rotate(-7deg); opacity: .88; }
+.fx-letter { position: relative; margin-top: 6px; padding: 22px 20px 20px; border: 1px solid var(--ln); border-radius: 2px; background: repeating-linear-gradient(180deg, #0f1729 0 33px, #2a355055 33px 34px); }
+.fx-letter p { margin: 0 0 14px; font: 15.5px/2.15 "Noto Serif KR", serif; color: #e8ecf3; }
+.fx-to { font-weight: 700; color: #fff !important; }
+.fx-from { position: relative; text-align: right; color: var(--bl) !important; margin: 6px 0 0 !important; padding-right: 58px; }
+.fx-from .fx-stamp { top: -6px; right: 0; width: 42px; height: 42px; font-size: 16px; }
+@media (max-width: 560px) { .fx-two, .fx-steps { grid-template-columns: 1fr; } .fx-rx-m { grid-template-columns: 1fr; } }

@@ -74,7 +74,7 @@
     var yrs = []; try { M.seunRange(H.ch, H.sd.nowYear, H.sd.nowYear + 9).forEach(function (x) { var d; try { d = M.evaluateDomainLuck(H.ch, x, 'seun'); } catch (e) { } if (d && d.love) yrs.push({ y: x.year, gz: M.gzNameK(x), s: d.love.score, band: d.love.band, sum: d.love.summary }); }); } catch (e) { }
     yrs.sort(function (a, b) { return b.s - a.s; });
     if (yrs.length) out.push(scene(sec('', cap('인연이 움직이는 시기 후보') + '<p class="dp-lead2">앞으로 10년 중 연애 지수(관계 활동·궁합 적합도·안정성을 합친 값)가 높은 해입니다. 만나는 해이기도 하고, 이미 있는 관계가 깊어지는 해이기도 합니다.</p><div class="dp-bars">' + yrs.slice(0, 3).map(function (y, i) { return bar((i + 1) + '순위 · ' + y.y + '년 ' + y.gz, y.s, { text: y.s + '점', color: '#D9869A' }); }).join('') + '</div><ul class="dp-ul">' + yrs.slice(0, 3).map(function (y) { return '<li><b>' + y.y + '년</b> — ' + esc(y.sum || y.band) + '</li>'; }).join('') + '</ul>')));
-    out.push(scene(sec('', cap('솔직하게, 부딪힐 수 있는 부분') + '<div class="dp-pc"><div class="dp-con" style="grid-column:1/-1"><h4>이 사람과 갈등이 생기기 쉬운 점</h4><ul><li><span>' + esc(t[1] + '는 면이 있어, ' + (P.male ? '당신이 ' : '당신이 ') + '섭섭함을 쌓아 두면 한 번에 터지기 쉽습니다') + '</span><em>근거 · 일지 ' + esc(P.br) + ' (' + esc(P.tg) + ')</em></li><li><span>배우자 자리(일지)와 다른 글자 사이에 ' + ((sd.clashes || []).some(function (c) { return c.members.indexOf('day') >= 0; }) ? '충·형이 있어 관계에 변화·긴장이 반복될 수 있습니다' : '큰 충돌은 없지만 서로 다른 속도 때문에 서운함이 생길 수 있습니다') + '</span><em>근거 · 원국의 합충</em></li></ul></div></div><p class="dp-note">내가 먼저 할 일: 서운함을 "그때그때 한 문장"으로 말하는 습관이 이 관계를 오래 가게 합니다.</p>')));
+    out.push(scene(sec('', cap('솔직하게, 부딪힐 수 있는 부분') + '<div class="dp-pc"><div class="dp-con" style="grid-column:1/-1"><h4>이 사람과 갈등이 생기기 쉬운 점</h4><ul><li><span>' + esc(soft(t[1]).replace(/[.]$/, '') + '. 이런 면 때문에 섭섭함을 쌓아 두면 한 번에 터지기 쉬워요.') + '</span><em>근거 · 일지 ' + esc(P.br) + ' (' + esc(P.tg) + ')</em></li><li><span>배우자 자리(일지)와 다른 글자 사이에 ' + ((sd.clashes || []).some(function (c) { return c.members.indexOf('day') >= 0; }) ? '충·형이 있어 관계에 변화·긴장이 반복될 수 있습니다' : '큰 충돌은 없지만 서로 다른 속도 때문에 서운함이 생길 수 있습니다') + '</span><em>근거 · 원국의 합충</em></li></ul></div></div><p class="dp-note">내가 먼저 할 일: 서운함을 "그때그때 한 문장"으로 말하는 습관이 이 관계를 오래 가게 합니다.</p>')));
     return { title: '미래 연인 · 배우자 추정', sub: P.face[0] + ' · ' + vibe[0], scenes: out };
   };
 
@@ -185,4 +185,74 @@
       scene(sec('', cap('결말과 이번 생에 남길 질문') + '<p class="lead">' + esc(ending) + '</p><p class="lead">' + esc('이 장면을 지금의 삶에 겹쳐 보면, ' + (HOMEWORK[top] || '균형을 찾는 일') + '이라는 질문이 남습니다. 닮은 장면이 있다면 이번에는 어떤 선택을 해 보고 싶은가요?') + '</p>'))];
     return { title: '전생의 모습', sub: role + '의 드라마', scenes: out };
   };
+
+  /* ═════ 2026-11-09 운명 기록 카드(dossier): 미래 배우자 · 전생 ═════
+     구성: 일주 카드(한자·납음·네 기둥·핵심 사실) → 서사 한 단락 → 운명의 말 → (초상) → 첫 장면 한 줄 → ✦ 항목 목록 → 점수 막대 → 태그.
+     값은 모두 사주(일지·배우자성·가장 큰 십성·12운성·신살)에서 규칙으로 고른 상징 해석이다. 실존 인물(연예인 닮은꼴 등)은 쓰지 않는다. */
+  var FD_COLOR = D.EL_COLOR || { 목: '#5E9E78', 화: '#D0634A', 토: '#BC9C62', 금: '#AEB9C6', 수: '#4A7AB5' };
+  var GZ_S = '甲乙丙丁戊己庚辛壬癸', GZ_B = '子丑寅卯辰巳午未申酉戌亥';
+  var NAEUM = ['해중금 海中金', '노중화 爐中火', '대림목 大林木', '노방토 路傍土', '검봉금 劍鋒金', '산두화 山頭火', '간하수 澗下水', '성두토 城頭土', '백랍금 白蠟金', '양류목 楊柳木', '천중수 泉中水', '옥상토 屋上土', '벽력화 霹靂火', '송백목 松柏木', '장류수 長流水', '사중금 沙中金', '산하화 山下火', '평지목 平地木', '벽상토 壁上土', '금박금 金箔金', '복등화 覆燈火', '천하수 天河水', '대역토 大驛土', '차천금 釵釧金', '상자목 桑柘木', '대계수 大溪水', '사중토 沙中土', '천상화 天上火', '석류목 石榴木', '대해수 大海水'];
+  var ANIMAL = ['쥐', '소', '호랑이', '토끼', '용', '뱀', '말', '양', '원숭이', '닭', '개', '돼지'], STEM_COLOR = ['푸른', '푸른', '붉은', '붉은', '누런', '누런', '하얀', '하얀', '검은', '검은'];
+  var CH_EL = { '甲': '목', '乙': '목', '丙': '화', '丁': '화', '戊': '토', '己': '토', '庚': '금', '辛': '금', '壬': '수', '癸': '수', '寅': '목', '卯': '목', '巳': '화', '午': '화', '辰': '토', '戌': '토', '丑': '토', '未': '토', '申': '금', '酉': '금', '亥': '수', '子': '수' };
+  function gzInfo(hz) { var s = GZ_S.indexOf(hz.charAt(0)), b = GZ_B.indexOf(hz.charAt(1)); if (s < 0 || b < 0) return null; var i = ((6 * s - 5 * b) % 60 + 60) % 60; return { naeum: NAEUM[i >> 1], animal: STEM_COLOR[s] + ' ' + ANIMAL[b] }; }
+  function jo(w, a, b) { w = String(w || ''); var ch = w.replace(/[^가-힣]+$/, '').slice(-1); if (!ch) return w + a; return w + (((ch.charCodeAt(0) - 0xAC00) % 28) ? a : b); }
+  function firstSentence(s) { s = String(s || ''); var m = /^.*?[.!?](?=\s|$)/.exec(s); return m ? m[0] : s; }
+  function dayCard(H, line) {
+    var sd = H.sd, P = sd.pillars || {}, d = P.day || {}, hz = String(d.hanja || ''), info = gzInfo(hz) || {}, ts = sd.twelveStages || {}, ss = sd.sinsal12 || {};
+    var cols = [['hour', '시주'], ['day', '일주'], ['month', '월주'], ['year', '연주']].map(function (k) {
+      var p = P[k[0]], h = p && p.hanja ? String(p.hanja) : '';
+      var cell = function (ch, tg) { return '<div class="fd-gz" style="--c:' + (FD_COLOR[CH_EL[ch]] || '#777') + '"><small>' + esc(tg || '') + '</small><b>' + esc(ch || '?') + '</b></div>'; };
+      return '<div class="fd-col' + (k[0] === 'day' ? ' is-day' : '') + (p ? '' : ' is-none') + '"><p>' + k[1] + '</p>' + cell(h.charAt(0), k[0] === 'day' ? '일간(나)' : p && p.stemTG) + cell(h.charAt(1), p && p.branchTG) + '<em>' + esc(p ? (ts[k[0]] || '') : '시각 미상') + '</em></div>';
+    }).join('');
+    var hid = (d.hidden || []).map(function (x) { return x.stem + '(' + x.tg + ')'; }).join(' · '), stars = (sd.specialStars || []).filter(function (x) { return x.pillar === 'day'; }).map(function (x) { return x.name; });
+    var dm = sd.dayMaster || {}, facts = [['일간', dm.stem ? dm.stem + '(' + dm.hanja + ') · ' + dm.el + '(' + EL_HJ[dm.el] + ')' : ''], ['일지', d.ko ? d.ko.charAt(1) + ' · ' + (d.branchTG || '') : ''], ['지장간', hid], ['12운성', ts.day || ''], ['신살', [ss.day].concat(stars).filter(function (x, i, a) { return x && a.indexOf(x) === i; }).join(' · ')]].filter(function (x) { return x[1]; });
+    return '<div class="fd-card"><p class="fd-k">나의 일주 · DAY PILLAR</p><h3 class="fd-ilju"><b>' + esc(hz) + '</b><span>' + esc((d.ko || '') + '일주') + '</span></h3><p class="fd-sub">' + esc([info.animal, info.naeum].filter(Boolean).join(' · ')) + '</p>' +
+      '<div class="fd-grid">' + cols + '</div><dl class="fd-facts">' + facts.map(function (x) { return '<div><dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd></div>'; }).join('') + '</dl>' + (line ? '<p class="fd-line">' + esc(line) + '</p>' : '') + '</div>';
+  }
+  function dossier(o) {
+    return '<div class="fd"><p class="fd-kick">' + esc(o.kicker) + '</p><h3 class="fd-title">' + esc(o.title) + '</h3><p class="fd-eng">' + esc(o.eng) + '</p>' + o.card +
+      (o.story ? '<blockquote class="fd-story">' + esc(o.story) + '</blockquote>' : '') + (o.oracle ? '<div class="fd-oracle"><p class="fd-ok">운명의 말</p><p>' + esc(o.oracle) + '</p></div>' : '') + (o.figure || '') +
+      (o.headline ? '<p class="fd-head">' + esc(o.headline) + '</p>' : '') + '<ul class="fd-list">' + o.items.filter(function (x) { return x[1]; }).map(function (x) { return '<li><b>' + esc(x[0]) + '</b><span>' + esc(x[1]) + '</span></li>'; }).join('') + '</ul>' +
+      (o.score ? '<div class="fd-score"><p><b>' + esc(o.score.label) + '</b></p><p class="fd-num"><strong>' + o.score.value + '</strong> / 100</p><span class="fd-track"><i style="width:' + o.score.value + '%"></i></span>' + (o.score.note ? '<small>' + esc(o.score.note) + '</small>' : '') + '</div>' : '') +
+      (o.tags && o.tags.length ? '<div class="fd-tags">' + o.tags.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>' : '') + '</div>';
+  }
+  var BODY_EL = { 목: '키가 크고 길쭉한 선, 마른 듯 단단한 체형', 화: '중간 키에 탄력 있는 체형, 움직임이 경쾌한 편', 토: '평균 키에 어깨와 골격이 듬직한 체형', 금: '군살 없이 반듯한 체형, 자세가 곧은 편', 수: '부드러운 곡선의 유연한 체형, 손끝이 고운 편' };
+  var OMEN_EL = { 목: '새로 배우기 시작한 일이나 모임이 생겨요', 화: '사람 만날 일이 갑자기 늘고 연락이 잦아져요', 토: '오래 알던 사람에게서 소개 이야기가 나와요', 금: '미뤄 둔 정리가 끝나고 생활이 한결 단정해져요', 수: '이동·여행 계획이 생기고 낯선 곳에 갈 일이 늘어요' };
+  var HOBBY_EL = { 목: '산책·식물 가꾸기·독서 모임처럼 천천히 자라는 취미', 화: '공연·사진·SNS처럼 보여 주고 나누는 취미', 토: '요리·캠핑·집 꾸미기처럼 생활을 채우는 취미', 금: '운동 기록·정리·악기처럼 실력이 쌓이는 취미', 수: '여행·영화·음악처럼 감정을 흘려보내는 취미' };
+  var GIFT_EL = { 목: '책이나 화분, 손편지', 화: '함께 갈 공연 티켓이나 향수', 토: '직접 만든 음식이나 오래 쓸 생활용품', 금: '시계·액세서리처럼 단정한 물건', 수: '여행지에서 고른 작은 기념품이나 음반' };
+  var SEASON_EL = { 목: '봄 · 새잎이 돋고 바람이 맑은 날', 화: '초여름 · 해가 길고 저녁이 따뜻한 날', 토: '환절기 · 날씨가 바뀌는 즈음의 포근한 날', 금: '가을 · 하늘이 높고 공기가 서늘한 날', 수: '겨울 · 비나 눈이 오는 조용한 날' };
+  var WED_TG = { 비견: '친구처럼 동등하게, 각자 몫을 나누는 결혼', 겁재: '함께 도전하며 키워 가는, 활동적인 결혼', 식신: '먹고 쉬는 일상을 아끼는, 편안한 결혼', 상관: '대화가 많고 표현이 솔직한, 생동감 있는 결혼', 편재: '함께 벌고 쓰며 넓게 사는, 실속 있는 결혼', 정재: '계획을 세워 차곡차곡 쌓는, 안정적인 결혼', 편관: '서로를 지키며 버티는, 단단한 결혼', 정관: '약속과 역할이 분명한, 반듯한 결혼', 편인: '각자의 시간을 존중하는, 거리감 있는 결혼', 정인: '서로 돌보고 배우는, 따뜻한 결혼' };
+  var EL_WORD = { 목: '청록', 화: '주홍', 토: '황토', 금: '은백', 수: '먹빛 남색' };
+  var endS = function (t) { t = String(t || '').trim(); if (!t || /[.!?]$/.test(t)) return t; return jo(t, '이에요.', '예요.'); };
+  var VIBE_WORD = { 목: '청량', 화: '화사', 토: '듬직', 금: '단정', 수: '깊은 감성' };
+  var soft = function (t) { return String(t || '').replace(/하신 편입니다\./g, '한 편이에요.').replace(/으신 편입니다\./g, '은 편이에요.').replace(/편입니다\./g, '편이에요.').replace(/습니다\./g, '어요.').replace(/하시고/g, '하고').replace(/세시고/g, '세고').replace(/있으시고/g, '있고'); };
+  S.dossier_spouse = function (H) {
+    var P = partnerOf(H), sd = H.sd, t = BR_TRAIT[P.br] || BR_TRAIT.자, vibe = VIBE[P.el] || VIBE.토, meet = (MEET[P.el] || MEET.토)[0], tg = P.tg || '';
+    var dayClash = (sd.clashes || []).some(function (c) { return (c.members || []).indexOf('day') >= 0; }), dayHap = (sd.combinations || []).some(function (c) { return (c.members || []).indexOf('day') >= 0; });
+    var score = clamp(Math.round(62 + Math.min(P.share || 0, 30) * 0.6 + (dayHap ? 6 : 0) - (dayClash ? 8 : 0)), 52, 92), wed = WED_TG[tg] || WED_TG.정재;
+    var line = '배우자 자리(일지 ' + P.br + ')에 ' + jo(tg || '기운', '이', '가') + ' 앉아 있고, 배우자를 뜻하는 기운은 ' + P.grp + '(' + jo(P.el, '이에요', '예요').replace(/(이에요|예요)$/, ')$1') + '.';
+    var story = '미래의 배우자는 ' + P.face[1] + '이에요. ' + vibe[1] + '이에요. 성격은 ' + endS(soft(t[0])) + ' 두 사람의 관계는 ' + wed + '으로 이어지기 쉬워요.';
+    var oracle = who(H) + '의 인연은 ' + vibe[0] + '를 가진 사람이에요. ' + meet.replace(/\(.*\)/, '') + '에서 시작되기 쉽고, 서로 다른 점을 고칠 것이 아니라 배울 것으로 볼 때 오래 가요.';
+    var items = [['외모 묘사', P.face[1]], ['키·체형', BODY_EL[P.el]], ['동물상', P.face[0]], ['풍기는 분위기', vibe[0]], ['예상 직업군', (JOBS_BY_EL[P.el] || []).join(' · ')], ['만나기 전 징조', OMEN_EL[P.el]], ['성격 특징', endS(soft(t[0])) + ' 다만 ' + endS(soft(t[1]))], ['취미와 관심사', HOBBY_EL[P.el]], ['받을 법한 선물', GIFT_EL[P.el]], ['만나는 계절과 날씨', SEASON_EL[P.el]], ['예상 결혼 스타일', wed]];
+    var html = dossier({ kicker: '冥府 命簿 · 인연의 장', title: '미래 배우자', eng: 'DESTINED PARTNER', card: dayCard(H, line), story: story, oracle: oracle, figure: fig(H, P.slot, 'spouse', P.face[0], 'fd-fig'), headline: '첫 만남 · ' + meet, items: items,
+      score: { label: '사주 궁합 점수', value: score, note: '배우자를 뜻하는 기운의 비중과 배우자 자리의 안정(합·충)으로 본 참고 점수예요. 실제 상대와의 궁합은 두 사람의 사주를 함께 봐야 해요.' }, tags: [VIBE_WORD[P.el] || P.el, P.face[0], SEASON_EL[P.el].split(' ')[0], P.el + '(' + EL_HJ[P.el] + ')'] });
+    return { title: '미래 배우자 · 인연 기록', sub: P.face[0], scenes: [scene(sec('fd-sec', html))] };
+  };
+  var ERA_EL = { 목: '조선 초기', 화: '조선 후기', 토: '고려 말', 금: '조선 중기', 수: '삼국 시대' };
+  var CLASS_G = { 비겁: '평민 · 무리를 이끌던 삶', 식상: '평민 · 솜씨로 먹고살던 삶', 재성: '중인 · 장사로 일군 삶', 관성: '하급 관리 · 책임을 진 삶', 인성: '중인 · 글과 앎을 다루던 삶' };
+  var BOND_G = { 비겁: '함께 버티던 동료. 서로 의지했지만 끝내 각자의 길로 흩어졌어요.', 식상: '그의 솜씨를 아껴 주던 단골. 끝내 마음을 다 전하지 못했어요.', 재성: '함께 장사를 일구던 동업자. 셈이 엇갈려 멀어졌어요.', 관성: '그가 지키려던 고을 사람들. 규칙과 사정 사이에서 마음이 오래 아팠어요.', 인성: '그에게 글을 배우던 제자. 떠나보낸 뒤에야 고마움을 알았어요.' };
+  var TALENT_G = { 비겁: '사람을 모으고 끝까지 버티게 하는 힘', 식상: '손과 말로 없던 것을 만들어 내는 재주', 재성: '물건과 기회의 값을 알아보는 눈', 관성: '흔들리는 자리에서 질서를 세우는 힘', 인성: '남들이 지나친 것을 읽고 기억하는 머리' };
+  var TRACE_EL = { 목: '그가 심은 나무 몇 그루와 고쳐 쓴 책', 화: '밤마다 밝혀 둔 등과 사람들이 기억하는 노래', 토: '오래 쓰인 돌담과 그릇 몇 점', 금: '손수 벼린 연장과 지켜 낸 성문', 수: '그가 남긴 뱃길과 전해 내려온 이야기' };
+  var WAKE_G = { 비겁: '혼자 다 떠안고 버티다 누군가 손을 내밀어 줄 때', 식상: '내가 만든 것을 보고 누군가 진심으로 웃을 때', 재성: '돈보다 사람이 남았다는 걸 느낄 때', 관성: '규칙을 내려놓고 사정을 먼저 들어 줄 때', 인성: '머릿속에만 두던 것을 처음 행동으로 옮길 때' };
+  S.dossier_past = function (H) {
+    var sd = H.sd, g = sd.groups, top = Object.keys(g).sort(function (a, b) { return g[b] - g[a]; })[0], el = sd.dayMaster.el, ts = sd.twelveStages || {};
+    var role = (ROLE[top] || ROLE.비겁)[el] || '이름 없는 사람', setting = PAST_SCENE[el] || PAST_SCENE.토, plot = PAST_PLOT[top] || PAST_PLOT.비겁;
+    var line = '태어난 날의 기운 ' + sd.dayMaster.stem + '(' + el + ')이 배경을, 가장 큰 기운 ' + top + '(' + Math.round(g[top] || 0) + '%)이 주인공의 삶을 정했어요.';
+    var ending = /장생|태|양/.test(ts.hour || '') ? '새로 온 이에게 자리를 내어 주며, 처음 배우던 날을 떠올렸어요.' : /건록|제왕|관대/.test(ts.hour || '') ? '마지막까지 자기 일을 하며, 곁에 선 사람들의 걸음에 속도를 맞췄어요.' : '오래 쓰던 물건을 정리하며, 혼자 남지 않으려 애썼던 날들을 떠올렸어요.';
+    var items = [['사주 근거', '일간 ' + sd.dayMaster.stem + '(' + el + ') · 가장 큰 기운 ' + top + ' · 일지 12운성 ' + (ts.day || '-')], ['흐르던 생의 기록', soft(firstSentence(plot[0]) + ' ' + firstSentence(plot[1]))], ['얽매인 전생의 인연', BOND_G[top]], ['생의 마감과 마지막 감정', ending], ['현생으로 이어진 업보', HOMEWORK[top] + '이 이번 생의 숙제로 남았어요.'], ['전생의 재능', TALENT_G[top] + '. 지금도 ' + (POWER[top] || '') + '으로 남아 있어요.'], ['가장 큰 시련과 배움', LESSON[top] + '예요.'], ['후세에 남긴 흔적', TRACE_EL[el]], ['전생을 상징하는 색', EL_WORD[el] + ' · ' + el + '(' + EL_HJ[el] + ')의 빛'], ['전생이 깨어나는 순간', WAKE_G[top]]];
+    var html = dossier({ kicker: '冥府 命簿 · 전생의 장', title: '전생 모습 보기', eng: 'PAST LIFE VISION', card: dayCard(H, line), story: setting[1] + ', ' + setting[0] + '에 ' + jo(role, '이', '가') + ' 살았어요. ' + soft(firstSentence(plot[0])), oracle: '이 이야기는 ' + LESSON[top] + '예요. 닮은 장면이 지금의 삶에 있다면, 이번에는 다른 선택을 해 볼 차례예요.',
+      headline: ERA_EL[el] + ' · ' + setting[0] + ' · ' + role + ' (' + CLASS_G[top] + ')', items: items, tags: [top, el + '(' + EL_HJ[el] + ')', ERA_EL[el], ts.day || ''].filter(Boolean) });
+    return { title: '전생 모습 보기', sub: role, scenes: [scene(sec('fd-sec', html))] };
+  };
+  D.dossier = dossier; D.dayCard = dayCard;
 })(typeof window !== 'undefined' ? window : globalThis);

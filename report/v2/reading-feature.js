@@ -12,7 +12,8 @@ var SPEC={
  timeline_self_26:{title:'나에게 맞는 일 · 점수 순위',parts:[{sec:'deep_jobs',skip:/일하는 방식의 성향|솔직하게, 힘들 수 있는 일/}]},
  timeline_self_27:{title:'인연이 열리는 곳 · 순위',parts:[{custom:'places'},{sec:'deep_love',match:/인연이 붙는 추천 행동|만남이 이뤄질 것 같은 (해|달)/}]},
  timeline_self_28:{title:'맞는 일주 · 끌리는 일주 · 부딪히는 일주',parts:[{sec:'deep_ilju',skip:/서로 끌리는 일주 TOP 5/}]},
- timeline_self_29:{title:'미래 배우자 한눈에 보기',lead:1,parts:[{sec:'deep_spouse'}]},
+ timeline_self_29:{title:'미래 배우자 더 자세히',lead:1,parts:[{sec:'dossier_spouse'},{sec:'deep_spouse',skip:/미래 연인 · 배우자 추정/}]},
+ timeline_self_36:{title:'전생 이야기 · 네 장면',lead:1,parts:[{sec:'dossier_past'},{sec:'deep_past',skip:/전생 · 이걸 드라마로/}]},
  timeline_self_31:{title:'내 재물 그릇 자세히 보기',lead:1,parts:[{sec:'deep_wealth',match:/MY WEALTH BOWL|② 재물의 성질|④ 재물 인연/}]},
  timeline_self_32:{title:'돈 버는 방식 · 점수표',parts:[{sec:'deep_wealth',match:/나에게 유리한 돈 버는 방식/}]},
  timeline_self_34:{title:'내 자식 자리 자세히 보기',lead:1,parts:[{sec:'deep_children',take:[0,1,2]}]},
@@ -97,6 +98,7 @@ function build(c){var f=c&&c.readingFeature,id=c&&(c.editorialContractId||c.id),
   if(part.custom==='rank'){var rk=rankBlock(id,f);if(rk)scenes.push(rk);return;}
   if(part.custom==='late'){var lt=lateLuck(f);if(lt)scenes.push(lt);return;}
   if(part.custom==='timing'){var t=timingRank(f,part.kind,part.scope);if(t)scenes.push(t);return;}
+  if(part.custom&&R.FateBlocks&&R.FateBlocks.has(part.custom)){var fb=R.FateBlocks.render(part,f,id);if(fb)scenes.push(fb);return;}   // fate-blocks.js(구성 다양화)
   if(part.custom&&R.TopicDeep&&R.TopicDeep.has(part.custom)){var td=R.TopicDeep.render(part,f,id);if(td)scenes.push(td);return;}   // topic-deep.js(스위치 topicDeep)
   var fn=D.SECTIONS[part.sec];if(!fn)return;var list=(fn(f).scenes||[]).map(function(s){return embed(s.html);});
   if(part.take)list=part.take.map(function(i){return list[i];}).filter(Boolean);
@@ -108,6 +110,8 @@ function build(c){var f=c&&c.readingFeature,id=c&&(c.editorialContractId||c.id),
  try{Object.defineProperty(c,'__rfCache',{value:{key:key,out:out},writable:true,configurable:true,enumerable:false});}catch(e){}
  return out;}
 Object.keys(root.MantraFeatureData||{}).forEach(function(k){if(!SPEC[k])SPEC[k]={title:root.MantraFeatureData[k].title,parts:[{custom:'rank'}]};});
+// 2026-11-09 구성 다양화: 순위·순서 블록만 있던 장 앞에 모양이 다른 블록을 하나씩(fate-blocks.js). 모듈이 없으면 조용히 빠진다.
+[['timeline_wealth_11',{custom:'fx:scenario',topic:'wealth'}],['timeline_career_11',{custom:'fx:scenario',topic:'career'}],['timeline_love_12',{custom:'fx:scenario',topic:'love'}],['timeline_wealth_13',{custom:'fx:people',topic:'wealth'}],['timeline_career_13',{custom:'fx:people',topic:'career'}],['timeline_love_13',{custom:'fx:people',topic:'love'}],['timeline_wealth_15',{custom:'fx:rx',topic:'wealth'}],['timeline_career_15',{custom:'fx:rx',topic:'career'}],['timeline_love_15',{custom:'fx:rx',topic:'love'}],['timeline_self_37',{custom:'fx:rx',topic:'self'}],['timeline_self_22',{custom:'fx:letter'}]].forEach(function(x){var sp=SPEC[x[0]];if(sp&&!sp.parts.some(function(p){return p.custom===x[1].custom;}))sp.parts=[x[1]].concat(sp.parts);});
 R.ReadingFeature={build:build,placeRank:placeRank,timingRank:timingRank,SPEC:SPEC};
 if(typeof module!=='undefined'&&module.exports)module.exports=R.ReadingFeature;
 })(typeof window!=='undefined'?window:globalThis);

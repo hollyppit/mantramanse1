@@ -15,7 +15,7 @@ const mk=(y,m,d,h,g)=>M.compute({year:y,month:m,day:d,hour:h,minute:0,calendar:'
 const everyAsset=new Proxy({},{get:(t,k)=>typeof k==='string'?'/asset/'+encodeURIComponent(k)+'.webp':undefined,has:()=>true,ownKeys:()=>[]});
 const withFeature=(c,H)=>{Object.defineProperty(c,'readingFeature',{value:H,writable:true,configurable:true,enumerable:false});return c;};
 const ids=Object.keys(FEAT.SPEC);
-ok(ids.length===65-2,'장 수 63: '+ids.length);
+ok(ids.length===65-1,'장 수 64(전생 장 운명 기록 카드 포함): '+ids.length);
 
 births.forEach(b=>{
  const ch=mk(...b),sd=R.SajuData.build(ch,{now}),tag=b.join('-');
@@ -30,7 +30,7 @@ births.forEach(b=>{
    ok(!/class="scene rv dp/.test(all),tag+' '+id+' 바깥 scene 래퍼 남음');
    if(withImg&&/self_(26|27|29|31|34)$/.test(id)&&!(/self_34$/.test(id)&&b[3]==null))ok(/<img /.test(all),tag+' '+id+' 이미지 자산이 있는데 <img> 없음');
    if(!withImg)ok(!/<img /.test(all),tag+' '+id+' 자산이 없는데 <img>');
-   if(/self_(29|31|34)$/.test(id))ok(o.lead&&o.rest,tag+' '+id+' 대표 이미지(lead)와 본문(rest)이 나뉘어야 함');
+   if(/self_(29|31|34|36)$/.test(id))ok(o.lead&&o.rest,tag+' '+id+' 대표 이미지(lead)와 본문(rest)이 나뉘어야 함');
    else ok(!o.lead&&o.rest,tag+' '+id+' lead 가 없어야 함');
   });
  });
@@ -64,7 +64,7 @@ births.forEach(b=>{
  ok(iHook>=0&&iLead>iHook&&(iBody<0||iLead<iBody),'대표 이미지는 후킹 바로 아래: hook '+iHook+' lead '+iLead+' body '+iBody);
  ok(iRest>iLead&&iRest>(iBody<0?0:iBody),'나머지 블록은 첫 풀이 문단 뒤');
  ok(/data-slot="spouse:오:F"/.test(withF)||/data-slot="spouse:[^"]+:F"/.test(withF),'배우자 인상 이미지 슬롯');
- const other=T.html(withFeature({...base,id:'timeline_self_36',editorialContractId:'timeline_self_36'},H),0);
+ const other=T.html(withFeature({...base,id:'timeline_creative_01',editorialContractId:'timeline_creative_01'},H),0);
  ok(!/data-reading-feature/.test(other),'대상이 아닌 장에는 붙지 않음');
 }
 // 순위·순서 블록(MantraFeatureData): 형식·점수·근거, 그리고 사주마다 순서가 달라지는지
