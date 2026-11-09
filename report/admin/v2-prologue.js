@@ -20,6 +20,11 @@
     box.innerHTML = '<div class="card"><b style="color:var(--gold)">프롤로그 영상</b><p class="muted" style="margin:6px 0 10px">운명 감찰관·명운 해독관 영상을 각각 올리세요. 공통 프롤로그는 무음으로, 시작 0.6초 페이드인·마지막 0.6초 페이드아웃으로 재생됩니다. 영상이 끝나거나 건너뛰면 본문이 시작됩니다. 파일은 90MB 이하 mp4·webm·mov입니다. 업로드와 영상 빼기는 자동 저장됩니다.</p>' +
       '<label class="muted" style="display:flex;gap:6px;align-items:center;margin-bottom:10px"><input type="checkbox" id="prOn"' + (G.d.on ? ' checked' : '') + '> 전체 프롤로그 영상 사용</label>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:12px">' + slot('M', esc(label) + ' · 운명 감찰관') + slot('F', esc(label) + ' · 명운 해독관') + '</div></div>';
+    [].forEach.call(box.querySelectorAll('video'), function (v) { // 올린 영상이 실제로 재생되는지 표시(해상도·길이, 실패 시 이유)
+      var st = document.createElement('p'); st.className = 'muted'; st.style.cssText = 'font-size:.8rem;margin:0 0 4px'; st.textContent = '영상 확인 중…'; v.insertAdjacentElement('afterend', st);
+      v.addEventListener('loadedmetadata', function () { st.style.color = '#7FE0BC'; st.textContent = '✓ 재생 가능 · ' + v.videoWidth + '×' + v.videoHeight + ' · ' + (isFinite(v.duration) ? v.duration.toFixed(1) + '초' : '길이 알 수 없음'); });
+      v.addEventListener('error', function () { st.style.color = '#FF9C8C'; st.textContent = '✕ 불러오기 실패 — 확인 중…'; var u = v.getAttribute('src'); (window.fetch ? fetch(u, { headers: { range: 'bytes=0-1' }, cache: 'no-store' }).then(function (r) { return r.status; }, function () { return 0; }) : Promise.resolve(0)).then(function (s) { st.textContent = '✕ 불러오기 실패 — ' + (s === 404 ? '파일이 저장소에 없습니다 (404)' : s && s < 300 ? '이 브라우저에서 재생할 수 없는 형식입니다 (코덱 확인)' : s ? '서버 응답 ' + s : '주소에 접근할 수 없습니다'); }); });
+    });
     [].forEach.call(box.querySelectorAll('video'), function (v) { v.muted = true; v.defaultMuted = true; v.volume = 0; v.onvolumechange = function () { if (!v.muted) v.muted = true; if (v.volume !== 0) v.volume = 0; }; });
     box.querySelector('#prOn').onchange = function () { G.d.on = this.checked; save('').catch(function () { }); };
     [].forEach.call(box.querySelectorAll('[data-up]'), function (i) { i.onchange = function () { if (i.files[0]) upload(box, i.dataset.up, i.files[0]); }; });
