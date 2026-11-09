@@ -62,6 +62,7 @@ for (let i = 0; i < N; i++) {
   // 나이: 만 20세 미만에게 '어른 생활을 이미 겪었다'는 문장(직장·결혼·자녀·계약 + ~있을 거예요)을 보여 주면 안 되고,
   //  결혼생활·부모·자식운·조직생활·이직·사업 장은 20세 미만 규칙으로 읽어야 한다
   if ((NOW - ch.utc) / YEAR < 20) for (const id of Object.keys(out)) { const r = out[id]; if (!r || id === 'timeline_self_20') continue;
+    if (!/young/.test(r.rule) && /회사|직장|출근|퇴근|연봉|이직|승진|상사|동료|사업|대출|월급|결혼|배우자|아이(?!디어)|부부|자녀|보증|계약|투자|명함|직함|직급|회의|통장/.test(r.hook)) ok(r.hook === (D.YOUNG_HOOK || {})[id], `만 20세 미만에게 어른 상황 후킹 ${tag} ${id}: ${r.hook.slice(0, 50)}`);
     if (['timeline_love_09', 'timeline_love_11', 'timeline_self_34', 'timeline_career_07', 'timeline_career_08', 'timeline_career_09'].includes(id)) ok(/young/.test(r.rule), `만 20세 미만인데 어른 규칙 ${tag} ${id}: ${r.rule}`);
     else r.rows.filter(x => x.stage !== 'luck').forEach(x => sent(x.text).forEach(s => ok(!(/회사|직장|출근|퇴근|연봉|이직|퇴사|승진|상사|동료|사업|창업|대출|월급|결혼|배우자|남편|아내|아이가|아이를|부부|자녀|보증|계약|전세|할부|투자/.test(s) && /있을 거예요|했을 거예요|었을 거예요|았을 거예요|봤을 거예요|적이 있/.test(s)), `만 20세 미만에게 어른 경험 문장 ${tag} ${id}: ${s.slice(0, 60)}`))); }
   // 인생 흐름 장: 항상 나오고, 실제 대운 시작 나이·과거/미래 문형 분리·어린 시절

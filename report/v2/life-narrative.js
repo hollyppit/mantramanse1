@@ -325,7 +325,10 @@
     }
     return out;
   }
-  var TIME_NOTE ='지나온 시기의 문장은 원국과 대운으로 맞춰 본 해석이라 실제 기억과 비교해 보시면 되고, 지금과 앞으로의 문장은 사건 예언이 아니라 준비할 방향이에요.';
+  // 만 20세 미만: 일반 규칙의 후킹 질문이 어른 생활을 물으면 장별 질문(YOUNG_HOOK)으로 바꾼다
+  var HOOK_ADULT_RE = /회사|직장|출근|퇴근|연봉|이직|퇴사|승진|상사|동료|부서|사업|창업|대출|월급|결혼|배우자|남편|아내|아이(?!디어)|부부|시댁|처가|보증|계약|연차|육아|자녀|전세|할부|투자|거래처|납품|팀장|명함|직함|직급|회의|월세|집값|통장|카드값/;
+  function youngHook(P, pick, chapterId, D0) { return P.has('age:young') && pick.all.indexOf('age:young') < 0 && HOOK_ADULT_RE.test(pick.hook) && D0.YOUNG_HOOK && D0.YOUNG_HOOK[chapterId] || pick.hook; }
+  var TIME_NOTE = '지나온 시기의 문장은 원국과 대운으로 맞춰 본 해석이라 실제 기억과 비교해 보시면 되고, 지금과 앞으로의 문장은 사건 예언이 아니라 준비할 방향이에요.';
   // opts.rules: 미리보기용 규칙 목록(관리자 초안 포함), opts.state: 미리보기마다 새 상태(운영 화면의 중복 기록과 섞지 않는다)
   function compose(M, ch, now, chapterId, opts) {
     opts = opts || {};
@@ -347,7 +350,7 @@
         var rows = [{ stage: 'core', text: dedupe(st, pick.core) }, { stage: 'life', text: dedupe(st, pick.life) }, { stage: 'conflict', text: dedupe(st, pick.conflict) }, { stage: 'luck', text: luckStage(M, ch, now, lens, st, chapterId) }, { stage: 'advice', text: dedupe(st, pick.advice) }].filter(function (r) { return r.text; });
         if (P.has('age:young') && pick.all.indexOf('age:young') < 0) rows = youngView(rows, chapterId, D0);
         var evd = evidenceRows(P, pick, D0, [pick.conf === 'moderate' ? '근거 강도: 보통 — 구조 하나가 아니라 기운의 비율로 읽은 해석이라, 맞지 않는 부분은 걸러 읽어 주세요.' : '근거 강도: 높음 — 원국의 구조(격국·강약·십성 배치)에서 직접 나온 해석이에요.', TIME_NOTE]);
-        res = { chapterId: chapterId, lens: lens, rule: pick.id, hook: pick.hook, rows: rows.map(function (r) { return { stage: r.stage, label: STAGE[r.stage], text: r.text }; }), evidence: evd, trace: trace, version: VERSION };
+        res = { chapterId: chapterId, lens: lens, rule: pick.id, hook: youngHook(P, pick, chapterId, D0), rows: rows.map(function (r) { return { stage: r.stage, label: STAGE[r.stage], text: r.text }; }), evidence: evd, trace: trace, version: VERSION };
       }
     }
     if (res && !res.trace.length) res.trace = trace;
