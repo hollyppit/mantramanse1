@@ -44,6 +44,11 @@ const imp = f => import(require('url').pathToFileURL(path.join(__dirname, '..', 
   r = await call('Post', 'POST', '', { scene: SC, brief: 'save', core: '고친 핵심', pc: '고친 PC', mobile: '고친 모바일' }); ok(r.d.brief.by === 'admin' && r.d.brief.pc === '고친 PC', '관리자가 고친 연출 저장');
   r = await call('Post', 'POST', '', { scene: SC, brief: 'save', core: 'x' }); ok(r.s === 400, '빈 연출 저장 거부');
 
+  console.log('1c. 그림 안 글자 금지(독백은 자막으로 따로 나온다)');
+  for (const o of ['pc', 'mobile']) { r = await call('Post', 'POST', '', { scene: SC, orient: o, promptOnly: true }); ok(/^절대 규칙: 이 그림에는 어떤 글자도 없다/.test(r.d.prompt.split('\n').pop()), o + ' 이미지 프롬프트 맨 끝에 글자 금지 규칙'); }
+  r = await call('Post', 'POST', '', { scene: SC, orient: 'pc', prompt: '직접 쓴 프롬프트: 빈 무대' }); ok(r.s === 200 && /직접 쓴 프롬프트/.test(lastImg.prompt) && /어떤 글자도 없다/.test(lastImg.prompt), '직접 고친 프롬프트에도 글자 금지가 붙는다');
+  r = await call('Post', 'POST', '', { scene: SC, orient: 'pc', promptOnly: true }); ok(/Chinese characters/.test(r.d.motion.negative) && /No text/.test(r.d.motion.prompt), '영상에도 글자 금지');
+
   console.log('2. 이미지 생성');
   r = await call('Post', 'POST', '', { scene: SC, orient: 'pc' }); ok(r.s === 200 && /^onbart-cinema-luck-pc-/.test(r.d.key) && r2.has(r.d.key) && lastImg.size === '1536x1024' && /고친 PC/.test(lastImg.prompt) && r.d.briefUsed, 'PC 이미지 1536x1024 · 저장한 연출 반영');
   const before = briefCalls; let r9 = await call('Post', 'POST', '', { scene: { ...SC, id: 'cinema-two' }, orient: 'pc' });

@@ -38,6 +38,8 @@ const FRAME = {
   mobile: '세로 9:16 휴대폰 전체 화면 구도. 문구가 왼쪽 정렬로 높이 45% 아래부터 여러 줄 올라오므로, 중심 피사체와 장면의 핵심은 화면 위쪽 40% 안에 크게 둔다. 아래쪽 60%는 어둡고 단순하게(바닥·그림자·안개) 이어지게 해서 글자가 읽히게 한다. 가로 화면보다 피사체에 더 가까이 다가간 세로 프레이밍으로, 위아래 높이(올려다봄·내려다봄)를 살린다.'
 };
 // styleOf 는 세로 패널용 문장(세로 구도·아래 30% 비움)으로 끝난다 → 그 부분만 빼고 화면별 구도를 붙인다.
+// 글자 금지 — 독백은 화면에 따로 자막으로 나오므로 그림 안에는 어떤 글자도 없어야 한다. 모델이 끝 문장을 강하게 따르므로 프롬프트 맨 끝에 둔다.
+export const NO_TEXT = '절대 규칙: 이 그림에는 어떤 글자도 없다. 독백은 화면에 자막으로 따로 나오므로 그림 안에 독백·제목을 쓰지 않는다. 한글·한자·영문·숫자·서예 글씨·부적의 글자·간판·현판·책 표지 제목·종이 위 문장·말풍선·자막·로고·워터마크를 모두 넣지 않는다. 종이·책·부적·현판·두루마리가 나오면 비어 있거나 글자로 읽히지 않는 흐릿한 얼룩·무늬로만 그린다.';
 const styleBase = dir => styleOf(dir).replace(/ ?세로 구도, 아래쪽 30%는 비교적 어둡고 단순하게 비워 둔다\(글자가 올라갈 자리\)\./, '');
 
 export function scenePrompt(scene, dir, orient, brief) {
@@ -48,8 +50,8 @@ export function scenePrompt(scene, dir, orient, brief) {
     '\n이 그림은 사주 서비스 첫 화면의 자동 재생 시네마틱 온보딩' + (s.index >= 0 ? ' ' + (s.index + 1) + '번째' : '') + ' 장면의 전체 화면 배경이다. 이 그림 위로 아래 독백이 한 줄씩 흐르므로, 보는 사람이 문구를 읽으며 "이 장면이 바로 그 이야기"라고 느끼도록 독백의 내용(누가·어디서·무엇을·어떤 감정)을 구체적인 장면으로 옮긴다.' +
     (s.title ? '\n장면 제목: ' + s.title + '.' : '') +
     (b.core ? '\n장면의 핵심: ' + b.core + '.' : '') +
-    (mono ? '\n함께 나오는 독백(그림 안에 글자로 쓰지 않는다): ' + mono : '') + direct +
-    '\n한 장면 안에 한 가지 중심 이미지만 둔다. 독백과 상관없는 장식(무관한 부적·해골·괴물·과한 공포 연출)은 넣지 않는다. 영상의 첫 프레임으로도 쓰이므로 은은하게 움직일 수 있는 요소(안개, 빛줄기, 흩날리는 종이, 촛불, 물결, 연기) 하나를 둔다.';
+    (mono ? '\n함께 나오는 독백(뜻만 장면으로 옮기고, 이 문장을 그림 안에 글자로 쓰지 않는다): ' + mono : '') + direct +
+    '\n한 장면 안에 한 가지 중심 이미지만 둔다. 독백과 상관없는 장식(무관한 부적·해골·괴물·과한 공포 연출)은 넣지 않는다. 영상의 첫 프레임으로도 쓰이므로 은은하게 움직일 수 있는 요소(안개, 빛줄기, 흩날리는 빈 종이, 촛불, 물결, 연기) 하나를 둔다.\n' + NO_TEXT;
 }
 
 // 장면 연출을 짜는 AI 지시문 — 비주얼 디렉션 문장을 같이 넘겨 세계관을 맞춘다.
@@ -61,7 +63,7 @@ export const BRIEF_SYSTEM = `[시네마틱 온보딩 장면 연출]
 - 독백이 여러 문장이면 전체를 아우르는 하나의 장면을 고르고, 마지막 문장의 감정이 화면의 분위기가 되게 한다.
 - 화자 "저"는 서비스 제작자다. 얼굴을 특정하지 말고 뒷모습·옆모습·손·실루엣으로 보여 준다. 실존 인물을 닮게 하지 않는다.
 - 사주·운·명리 이야기는 한국적인 소재(서책, 붓, 먹, 한지, 만세력, 별자리판, 기와, 문턱, 창호, 등불 등)로 은은하게 드러낸다. 과한 공포·괴물·해골은 쓰지 않는다.
-- 그림 안에 글자·숫자·로고는 없다.
+- 그림 안에는 어떤 글자도 없다(독백은 화면에 자막으로 따로 나온다). 연출에 간판·현판·책 제목·편지 내용·부적 글씨처럼 글자가 보이는 것을 적지 말고, 종이·책·부적은 "빈" 또는 "글자 없는"이라고 적는다. 독백 문장을 따옴표로 옮겨 적지 않는다.
 - pc: 가로 16:9 데스크톱. 문구가 화면 가운데 정렬로 높이 45% 아래에 나온다 → 핵심은 위쪽 45%·가운데, 아래쪽은 어둡고 단순하게. 넓은 공간감.
 - mobile: 세로 9:16 휴대폰. 문구가 왼쪽 정렬로 높이 45% 아래에 여러 줄 나온다 → 핵심은 위쪽 40%, 아래 60%는 어둡고 단순하게. 같은 장면·같은 인물·같은 빛이지만 더 가까이, 세로로 다시 잡은 구도.
 - motion: 이 그림을 영상으로 만들 때의 느린 움직임 한두 문장(영어). 카메라는 아주 느리게, 움직이는 것은 장면 속 요소(촛불, 안개, 종이, 빗물 등).
@@ -84,7 +86,7 @@ export function sceneMotion(scene, orient, brief) {
   const s = cleanScene(scene), b = cleanBrief(brief);
   return {
     prompt: (b.motion ? b.motion.replace(/\s*$/, ' ') : '') + 'Slow, atmospheric cinematic motion on the first-frame image for a full-screen ' + (orient === 'mobile' ? 'vertical 9:16 mobile' : 'horizontal 16:9 desktop') + ' onboarding scene' + (s.title ? ' titled "' + s.title.replace(/"/g, '') + '"' : '') +
-      '. The camera does a very slow push-in. Only ambient elements move gently. Keep the subject, composition, colors and art style exactly as in the image. Keep the lower part of the frame dark and calm. The motion should loop smoothly and feel mysterious and quiet.',
-    negative: 'text, letters, subtitles, watermark, logo, sudden cuts, fast camera moves, morphing faces, distorted hands, extra people appearing, flashing lights, jump scare'
+      '. The camera does a very slow push-in. Only ambient elements move gently. Keep the subject, composition, colors and art style exactly as in the image. Keep the lower part of the frame dark and calm. No text or writing ever appears in the frame. The motion should loop smoothly and feel mysterious and quiet.',
+    negative: 'text, letters, subtitles, captions, Korean characters, Chinese characters, calligraphy, writing on paper, signboards, watermark, logo, sudden cuts, fast camera moves, morphing faces, distorted hands, extra people appearing, flashing lights, jump scare'
   };
 }

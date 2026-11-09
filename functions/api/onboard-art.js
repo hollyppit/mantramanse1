@@ -11,7 +11,7 @@ import { deleteDerivedFile, putDerivedFile } from '../_original-assets.js';
 // 필요: GLOSSARY_KV · CLIPS_R2 · ADMIN_PASSWORD · (OPENAI_API_KEY 또는 GEMINI_API_KEY) · 영상은 KLING_API_KEY(또는 KLING_ACCESS_KEY+KLING_SECRET_KEY)
 import { json, isAdmin, configError } from '../_lib.js';
 import { generate, cleanDirection, REF_USE, REF_OK } from '../_panelart.js';
-import { ORIENT, orientOf, cleanScene, scenePrompt, sceneMotion, srcOf, cleanBrief, BRIEF_SYSTEM, briefUser, parseBrief } from '../_onboardart.js';
+import { ORIENT, orientOf, cleanScene, scenePrompt, sceneMotion, srcOf, cleanBrief, BRIEF_SYSTEM, briefUser, parseBrief, NO_TEXT } from '../_onboardart.js';
 import { aiFetch } from '../_ai-cost.js';
 import { klingEnabled, KLING_ENV_HELP, klingSubmit, klingQuery, toB64 } from '../_kling.js';
 
@@ -108,6 +108,7 @@ export async function onRequestPost({ request, env }) {
   let use = fresh, auto = false; if (!custom && !use && hasAI(env)) { try { use = await saveBrief(env, scene, await askBrief(env, scene, dir), 'ai'); auto = true; } catch { use = null; } } // 연출이 없거나 문구가 바뀌었으면 먼저 짠다(실패하면 독백만으로)
   let prompt = custom ? b.prompt.trim().slice(0, 3000) : scenePrompt(scene, dir, orient, use);
   if (typeof b.extra === 'string' && b.extra.trim()) prompt += '\n추가 요청: ' + b.extra.trim().slice(0, 500);
+  if (!prompt.includes(NO_TEXT)) prompt += '\n' + NO_TEXT; // 직접 고친 프롬프트에서 빠져도 글자 금지는 항상 붙는다(독백은 화면 자막으로 따로 나온다)
   const refs = b.useRefs === false ? [] : await refsOf(env, dir); if (refs.length) prompt = REF_USE[dir.refUse][1] + '\n' + prompt;
   let g; try { g = await generate(env, prompt, only, refs.length ? refs : null, { size: ORIENT[orient].size, aspect: ORIENT[orient].aspect }); } catch (e) { return json({ error: e.message }, 502); }
   const key = 'onbart-' + scene.id + '-' + orient + '-' + rnd(4) + '.' + g.ext;
