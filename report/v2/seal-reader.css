@@ -17,3 +17,15 @@
 .seal-memo summary{cursor:pointer;font-size:14px;opacity:.75;min-height:32px}.seal-memo textarea{width:100%;box-sizing:border-box;margin-top:8px;padding:10px;border-radius:10px;border:1px solid #5d5442;background:#141a22;color:inherit;font:inherit;font-size:15px}
 .seal-why{margin-top:4px}.seal-why>summary{cursor:pointer;font-size:14px;color:var(--seal-topic-accent,#e6c58d);min-height:36px;list-style:none}.seal-why>summary::before{content:'ⓘ ';}.seal-why[open]>summary{margin-bottom:6px}
 .seal-shell{padding-bottom:calc(var(--rd-dock-h,72px) + 12px)}
+/* 2026-11-09 장 끝: 메모 없음 · 다음 장은 붉은 큰 버튼(작은 '다음 장' + 장 제목 + 화살표) */
+.seal-end{background:transparent;border:0;padding:8px 0 0;margin:36px 0 0}
+.seal-next-row{justify-content:stretch}
+.seal-shell button.seal-next[data-seal-next]{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-items:center;column-gap:16px;width:100%;min-height:84px;padding:16px 22px 16px 24px;border-radius:16px;border:1px solid #e0605a;background:linear-gradient(135deg,#b3261e 0%,#8e1b15 100%);color:#fff;text-align:left;box-shadow:0 10px 28px rgba(179,38,30,.35);transition:transform .15s ease,box-shadow .15s ease,filter .15s ease}
+.seal-next small{grid-column:1;font:600 12px/1.2 inherit;letter-spacing:.12em;opacity:.82}
+.seal-next b{grid-column:1;font:800 18px/1.35 inherit;margin-top:4px;word-break:keep-all}
+.seal-next i{grid-column:2;grid-row:1/3;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.16);font-style:normal;font-size:22px;transition:transform .15s ease}
+.seal-shell button.seal-next[data-seal-next]:hover{filter:brightness(1.08);box-shadow:0 14px 34px rgba(179,38,30,.45)}
+.seal-shell button.seal-next[data-seal-next]:hover i{transform:translateX(4px)}
+.seal-shell button.seal-next[data-seal-next]:active{transform:translateY(1px)}
+.seal-shell button.seal-next[data-seal-next]:focus-visible{outline:3px solid #ffd2cf;outline-offset:3px}
+#chapter .seal-lead-panel{margin-top:0!important;padding-top:0!important}#chapter .seal-lead-panel .reading-panel{margin-bottom:28px}

@@ -43,7 +43,7 @@ births.forEach(b=>{
  ok(cards.length===5,'장소 5곳: '+cards.length);
  ok(scores.every((s,i)=>!i||scores[i-1]>=s),'장소 점수가 내림차순이 아님: '+scores);
  ok(new Set(slots).size===5,'장소 중복: '+slots);
- ok(cards.every(x=>/근거 ·/.test(x)||/＋/.test(x)),'장소마다 이유가 있어야 함');
+ ok(cards.every(x=>/이 순위인 이유/.test(x)||/＋/.test(x)),'장소마다 이유가 있어야 함');
  ok(/1순위/.test(html)&&/5순위/.test(html),'순위 표기');
 }
 // 궁합 일주: 얼굴 이미지 슬롯(spouse:<일지>:<상대 성별>)과 쉬운 일주 설명, 점수
@@ -77,7 +77,7 @@ births.forEach(b=>{
  births.concat([[1985,5,5,10,'M'],[1996,2,14,18,'F'],[1980,9,30,3,'F'],[1970,7,7,12,'M']]).forEach(b=>{const ch=mk(...b),sd=R.SajuData.build(ch,{now}),H={M,ch,sd,now,name:'',assets:{},videos:{}};
   keys.forEach(k=>{const o=FEAT.build(withFeature({id:k},H));ok(o&&o.rest,k+' '+b.join('-')+' 블록 없음');if(!o)return;blocks++;const txt=strip(o.rest);ok(!/undefined|NaN/.test(txt),k+' undefined');
    const names=[...txt.matchAll(/(?:d순위|먼저 d) ([^ ].*?) (?:어울림|기질|[가-힣 ]*?d+점|[A-Z]|$)/g)];const order=DATA[k].items.map(i=>i.n).filter(n=>txt.includes(n)).sort((x,y)=>txt.indexOf(x)-txt.indexOf(y)).join('>');orders[k].add(order);
-   ok(DATA[k].items.every(i=>txt.includes(i.n)),k+' 항목이 모두 보여야 함');ok(/근거 ·/.test(txt),k+' 근거');
+   ok(DATA[k].items.every(i=>txt.includes(i.n)),k+' 항목이 모두 보여야 함');ok(!/근거 ·|기본 순서로 놓았어요/.test(txt),k+' 순위 이유는 끝맺은 문장, 빈 안내 없음');
    if(DATA[k].mode==='rank'){const sc=[...txt.matchAll(/(d+)점/g)].map(m=>+m[1]);ok(sc.every((v,i)=>!i||sc[i-1]>=v),k+' 점수 내림차순: '+sc);}});});
  const varied=keys.filter(k=>orders[k].size>1).length;ok(varied>=keys.length*0.9,'사주마다 순서가 달라지는 장 '+varied+'/'+keys.length);
  console.log('순위 블록 '+keys.length+'장 × 10개 사주 = '+blocks+'개, 순서가 달라지는 장 '+varied);

@@ -174,6 +174,10 @@
   var LENS_EYE = { life: '삶 전체로 보면', wealth: '돈의 흐름으로 보면', love: '관계의 눈으로 보면', career: '일의 흐름으로 보면' };
   // 장마다 고유한 '운이 바꾸는 것'(data CH_LUCK): 지금·다음 대운 + (말년 장) 50세 이후 대운 + (시기 장) 5년 세운 + (배우자 장) 배우자 기운이 오는 때
   var COND_W = { good: '받쳐 주는', mixed: '엇갈리는', hard: '무거운' };
+  var CROSS_YEARS = 1.5;
+  function crossing(cur, next, now) { return !!(cur && next && cur.end - now < CROSS_YEARS * YEAR); }
+  function crossLead(cur, next) { return '지금은 ' + cur.gz + ' 대운이 저물고 ' + next.gz + ' 대운으로 넘어가는 교운기예요(' + next.year0 + '년 무렵 바뀌어요). 끝나 가는 10년보다 새로 들어오는 ' + next.gz + ' 대운을 기준으로 보는 게 맞아요.'; }
+  var CROSS_TIP = '대운이 바뀌는 앞뒤 1~2년은 일·관계·생활의 판이 흔들리기 쉬워요. 지난 10년의 방식을 정리하고, 큰 결정은 바뀐 흐름이 자리 잡는지 확인한 뒤에 내리세요.';
   function chapterLuck(M, ch, now, spec, st) {
     var ps = periods(M, ch, now), ci = ps.findIndex(function (p) { return p.tense === 'current'; }), out = [];
     var eye = spec.eye, g = spec.g, line = function (p) { return dedupe(st, g[p.group]); };
@@ -185,7 +189,8 @@
     }
     if (ci < 0) return '';
     var cur = ps[ci], next = ps[ci + 1];
-    out.push('지금 지나는 ' + ageTxt(cur) + ' 구간(' + cur.gz + ' 대운)을 ' + eye + ', 흐름이 ' + COND_W[cur.tone] + ' 때예요. ' + line(cur));
+    if (crossing(cur, next, now)) { out.push([dedupe(st, crossLead(cur, next)), '곧 들어올 ' + ageTxt(next) + ' ' + next.gz + ' 대운을 ' + eye + ', 흐름이 ' + COND_W[next.tone] + ' 쪽이에요. ' + line(next)].filter(Boolean).join(' ')); var ct = dedupe(st, CROSS_TIP); if (ct) out.push(ct); var nn = ps[ci + 2]; if (nn && !spec.months && !(spec.young && nn.age0 >= 20)) out.push(nn.year0 + '년 무렵(' + ageTxt(nn) + ')부터는 흐름이 ' + COND_W[nn.tone] + ' 쪽으로 바뀌' + (nn.group !== next.group ? '고, ' + g[nn.group] : '지만, ' + eye + ' 같은 숙제가 이어져요.')); next = null; }
+    else out.push('지금 지나는 ' + ageTxt(cur) + ' 구간(' + cur.gz + ' 대운)을 ' + eye + ', 흐름이 ' + COND_W[cur.tone] + ' 때예요. ' + line(cur));
     // 다음 대운 문장은 그 장의 고유 문장과 한 문장으로 묶는다(시점만 같은 문장이 여러 장에서 반복되지 않게)
     if (next && !spec.months && !(spec.young && next.age0 >= 20)) out.push(next.year0 + '년 무렵(' + ageTxt(next) + ')부터는 흐름이 ' + COND_W[next.tone] + ' 쪽으로 바뀌' + (next.group !== cur.group ? '고, ' + g[next.group] : '지만, ' + eye + ' 지금과 같은 숙제가 이어져요.'));
     // 재물 시기 장 세 개는 시간 단위가 서로 다르다: bigYears(앞으로 10년의 해) · decades(남은 대운) · months(가까운 12개월)
@@ -276,7 +281,8 @@
     var D0 = D(), ps = periods(M, ch, now), ci = ps.findIndex(function (p) { return p.tense === 'current'; });
     if (ci < 0) return '';
     var cur = ps[ci], next = ps[ci + 1], prev = ps[ci - 1], out = [];
-    out.push('지금 지나는 ' + ageTxt(cur) + ' 구간(' + cur.gz + ' 대운)을 ' + LENS_EYE[lens] + ' — ' + dedupe(st, periodText(D0, st, lens, cur, prev)));
+    if (crossing(cur, next, now)) { out.push([dedupe(st, crossLead(cur, next)), '곧 들어올 ' + ageTxt(next) + ' ' + next.gz + ' 대운을 ' + LENS_EYE[lens] + ' — ' + dedupe(st, periodText(D0, st, lens, next, cur))].filter(Boolean).join(' ')); var ct2 = dedupe(st, CROSS_TIP); if (ct2) out.push(ct2); prev = cur; cur = next; next = ps[ci + 2]; }
+    else out.push('지금 지나는 ' + ageTxt(cur) + ' 구간(' + cur.gz + ' 대운)을 ' + LENS_EYE[lens] + ' — ' + dedupe(st, periodText(D0, st, lens, cur, prev)));
     if (next) { var nb = dedupe(st, periodText(D0, st, lens, next, cur)); if (nb) out.push(next.year0 + '년 무렵(' + ageTxt(next) + ')부터는 — ' + nb); }
     var sl = dedupe(st, seunLine(M, ch, now, lens)); if (sl) out.push(sl);
     return out.join('\n\n');

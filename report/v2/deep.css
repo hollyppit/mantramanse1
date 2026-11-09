@@ -77,4 +77,5 @@
 .dp-ifam-names { color: var(--ink2); font-size: .84rem; font-weight: 400; }
 .dp-ifam-person { display: inline-block; }
 .dp-ifam-sep { color: var(--ink3); }
-@media (max-width: 420px) { .dp-ilju .dp-ifam { grid-template-columns: 1fr; gap: 2px; } }
+@media (max-width: 420px) { .dp-ilju .dp-ifam { grid-template-columns: 1fr; gap: 2px; } }/* 2026-11-09 순위 이유: '근거 ·' 조각 대신 끝맺은 문장 + 작은 꼬리표 */
+.dp-mi { color: #e9dcc4; } .dp-why-k { display: inline-block; margin-right: 8px; padding: 1px 8px; border-radius: 999px; border: 1px solid #ffc48a66; color: #ffc48a; font-size: .74rem; font-weight: 700; vertical-align: 1px; }
