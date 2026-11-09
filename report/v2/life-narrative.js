@@ -131,7 +131,8 @@
     if (head - tail >= 15) return 'fall';
     return 'swing';
   }
-  var ageTxt = function (p) { return '만 ' + Math.max(0, Math.floor(p.age0)) + '~' + Math.floor(p.age1) + '세'; };
+  // 끝 나이는 다음 대운 시작 전 해까지로 적는다(타임라인의 '33~42세'와 같은 방식, 다음 구간과 겹쳐 보이지 않게)
+  var ageTxt = function (p) { var a0 = Math.max(0, Math.floor(p.age0)); return '만 ' + a0 + '~' + Math.max(a0, Math.floor(p.age1) - 1) + '세'; };
   function transition(prev, p) {
     if (!prev) return '';
     var d = p.fit - prev.fit;

@@ -185,9 +185,12 @@
   /** 연도 → 12개월(월운). */
   function monthsOf(Mn, ch, Y, now) {
     var top = careerTop(Mn, ch);
-    return Mn.wolun(ch, Y).map(function (it) {
+    var list = Mn.wolun(ch, Y);
+    return list.map(function (it, i) {
       var sea = seasonOf(it.ev), f = fieldScores(Mn, ch, it, 'wolun', { ms: it.startMs }, top), d = new Date(it.startMs + 9 * 3600e3);
-      return { month: d.getUTCMonth() + 1, term: it.termName, ganzhi: Mn.gzNameK(it), season: sea, seasonName: sea ? SEA[sea] : '', fields: { all: { season: sea, fit: it.ev.fitScore }, money: f.money, career: f.career, love: f.love }, isNow: now >= it.startMs && now < it.startMs + 33 * 86400000 };
+      // 이번 달 = 이 절기 시작 ~ 다음 절기 시작 전. (예전 '시작+33일'은 새 절기 직후 며칠 동안 지난달도 '지금'으로 겹쳤다)
+      var end = list[i + 1] ? list[i + 1].startMs : it.startMs + 31 * 86400000;
+      return { month: d.getUTCMonth() + 1, term: it.termName, ganzhi: Mn.gzNameK(it), season: sea, seasonName: sea ? SEA[sea] : '', fields: { all: { season: sea, fit: it.ev.fitScore }, money: f.money, career: f.career, love: f.love }, isNow: now >= it.startMs && now < end };
     });
   }
 

@@ -93,7 +93,7 @@
 
   /* ───────── 오늘의 운세 ───────── */
   var FLD = [['money', '재물운', 'MONEY'], ['work', '일·사업운', 'WORK'], ['love', '연애운', 'LOVE'], ['health', '컨디션', 'BODY']];
-  var tags = function (a) { return a.map(function (x) { return '<i>#' + esc(String(x).replace(/\s+/g, '')) + '</i>'; }).join(''); };
+  var tags = function (a) { return a.map(function (x) { return '<i>' + esc(String(x).trim()) + '</i>'; }).join(''); }; // 띄어쓰기를 지운 해시태그(#협력할사람에게연락하기)는 읽기 어려워 문장 그대로 칩으로 보여 준다
   var lis = function (a) { return '<ul class="dl">' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
   // Calendar presentation policy: suitability sets height; burden takes priority in classification.
   // Read thresholds from the engine so monthly and daily caution cannot drift apart.
@@ -217,8 +217,8 @@
     try { var gr = ch.weights.groups, mi = 0; for (var i = 1; i < 5; i++) if (gr[i] > gr[mi]) mi = i; pot = { group: GROUPS5[mi], name: POTENTIAL[GROUPS5[mi]] }; } catch (e) { }
     var steps = [];
     if (nm) steps.push({ ms: 2300, vid: 'ilgan', html: '<div class="nm aw-in">' + esc(nm) + '.</div>' });
-    steps.push({ ms: 4200, vid: 'ilgan', html: '<p class="a1 aw-in">당신의 중심은</p><div class="big aw-in">' + esc(ig ? ig.title.split(' · ')[0] : M.STEM[day.s]) + '</div>' + (ig ? '<p class="a1 aw-in">' + br(ig.line) + '</p>' : '') });
-    steps.push({ ms: 3200, vid: 'iju', html: '<p class="a1 aw-in">그리고 당신이 태어난 날은</p><div class="big aw-in">' + esc(M.gzName(day)) + '</div>' });
+    steps.push({ ms: 4200, vid: 'ilgan', html: '<p class="a1 aw-in">당신의 중심은</p><div class="big aw-in">' + esc(ig ? ig.title.split(' · ')[0] : M.STEM[day.s]) + '</div>' + (ig && ig.title.split(' · ')[1] ? '<p class="rd aw-in">' + esc(ig.title.split(' · ')[1]) + '</p>' : '') + (ig ? '<p class="a1 aw-in">' + br(ig.line) + '</p>' : '') });
+    steps.push({ ms: 3200, vid: 'iju', html: '<p class="a1 aw-in">그리고 당신이 태어난 날은</p><div class="big aw-in">' + esc(M.gzName(day)) + '</div><p class="rd aw-in">' + esc(ju) + '일주</p>' });
     if (jc) steps.push({ ms: 6500, vid: 'iju', html: '<p class="film aw-in">' + br(jc.film) + '</p><p class="ttl aw-in">' + esc(jc.title) + '</p><p class="trait aw-in">' + br(jc.trait) + '</p>' });
     steps.push({ ms: 2600, vid: 'iju', html: '<p class="film aw-in">이제,<br>당신의 이야기를 시작합니다.</p>' });
     var host = document.createElement('div'); host.id = 'awk'; host.setAttribute('role', 'dialog'); host.setAttribute('aria-label', '일주 각성');
@@ -228,7 +228,7 @@
     // 영상이 없을 때(등록 전·불러오기 실패): 기록의 문 풍경 이미지와 안내를 보여 준다. 이미지 주소는 인터랙티브 스토리 설정(portal 에셋)을 따른다.
     function showFallback() {
       var fb = $('#awFb', host), n = $('#awFbn', host), Qt = root.Quest, url = Qt && Qt.assetUrl && H.Onboard && H.Onboard.cfg ? Qt.assetUrl(H.Onboard.cfg(), 'portal', (root.innerWidth || 1024) < 768) : '/report/hub/quest/portal.webp';
-      if (!fb || cur) return; fb.style.backgroundImage = 'url("' + url + '")'; fb.hidden = false; n.hidden = false;
+      if (!fb || cur) return; fb.style.backgroundImage = 'url("' + url + '")'; fb.hidden = false; void n; // "영상 준비 안 됨" 안내는 운영 사정이라 고객 화면에는 띄우지 않는다(풍경 이미지만 보여 준다)
     }
     // 일간 영상 → 일주 변신 영상. 두 영상을 미리 따로 불러 두고, 다음 영상이 실제로 재생되기 시작한 뒤에 위로 겹쳐 띄운다.
     // 다음 영상이 아직 준비되지 않았으면 지금 영상을 계속 반복한다(사이에 포스터·빈 화면이 끼지 않게). 포스터는 처음 보이는 영상에만 쓴다.

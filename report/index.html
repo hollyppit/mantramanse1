@@ -42,6 +42,8 @@ html.hub-on #story { display: none; }
 .top a, .top button { color: var(--ink-3); text-decoration: none; background: none; border: 0; font: inherit; letter-spacing: .06em; cursor: pointer; padding: 6px 4px; }
 .top a:hover, .top button:hover { color: var(--gold); }
 .top .brand { font-family: var(--f-serif); letter-spacing: .14em; color: var(--ink-2); }
+/* 허브 화면(입력·결과)에서는 글 위로 막대가 겹쳐 지나가므로 반투명 바탕을 깐다 */
+html.hub-on .top { background: rgba(8, 10, 17, .82); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line-2); }
 
 /* 블록 공통 */
 #story { max-width: 760px; margin: 0 auto; padding: 0 24px 40px; }

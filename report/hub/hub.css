@@ -165,6 +165,7 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 #awk .stage{ position: relative; z-index: 2; padding: 0 28px; text-align: center; max-width: 520px; width: 100%; }
 #awk .a1{ font-family: var(--f-serif); font-size: clamp(1.1rem, 4.6vw, 1.35rem); color: var(--ink-2); letter-spacing: .06em; line-height: 1.9; }
 #awk .big{ font-family: var(--f-serif); font-size: clamp(3.6rem, 22vw, 6rem); color: var(--gold-l); letter-spacing: .08em; text-shadow: 0 0 40px rgba(205, 178, 122, .5); line-height: 1.2; margin: 6px 0; }
+#awk .rd{ margin: -2px 0 8px; font-family: var(--f-serif); font-size: 1.05rem; letter-spacing: .3em; color: var(--ink-2); text-shadow: 0 2px 12px rgba(0,0,0,.8); }
 #awk .nm{ font-family: var(--f-serif); font-size: clamp(1.8rem, 8vw, 2.6rem); }
 #awk .film{ font-family: var(--f-serif); font-size: clamp(1.15rem, 4.8vw, 1.5rem); line-height: 1.8; color: var(--ink); margin: 6px 0; }
 #awk .ttl{ color: var(--gold); letter-spacing: .12em; margin-top: 10px; font-size: .95rem; }

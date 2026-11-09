@@ -78,3 +78,6 @@ html.mc-active,html.mc-active body{overflow:hidden!important}.mc{z-index:1000}.m
 
 /* Small home link to the research onboarding. */
 .mc .mc-header-actions{display:flex;align-items:center;gap:16px;flex-shrink:0}.mc .mc-home{display:inline-flex;align-items:center;min-height:36px;padding:0 10px;border:1px solid rgba(208,183,130,.4);border-radius:4px;background:rgba(8,11,16,.55);color:#e6d6b5;font-size:12px;letter-spacing:0;text-decoration:none}.mc .mc-home:hover{background:rgba(208,183,130,.15)}.mc .mc-home:focus-visible{outline:2px solid #d0b782;outline-offset:3px}@media(max-width:720px){.mc .mc-header-actions{gap:10px}.mc .mc-home{font-size:11px;padding:0 8px}}
+/* 부적이 단추 글자 한가운데를 가리지 않게 오른쪽 끝으로 */
+.mc .mc-seal b{left:auto;right:clamp(14px,4%,40px)}
+.mc .mc-seal .mc-fragment{left:auto;right:calc(clamp(14px,4%,40px) + 16px)}

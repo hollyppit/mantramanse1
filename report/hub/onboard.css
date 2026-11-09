@@ -367,3 +367,5 @@ body.obc-on #hub .ob-compact .ob-kick,body.obc-on #hub .ob-compact h1,body.obc-o
   body.obc-on #hub .ob-compact{padding-top:28px;margin:0}
 }
 @media (prefers-reduced-motion:reduce){#obcVid{transition:none}}
+/* 저장된 정보로 바로 보기(출생정보 수정 화면) */
+#hub .ob-compact .ob-saved-go{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin:14px 0 6px;font-size:17px;text-decoration:none}

@@ -355,7 +355,9 @@
         onLeave(function () { document.removeEventListener('visibilitychange', onVis); root.removeEventListener('resize', onRs); v.pause(); v.removeAttribute('src'); v.load(); if (w.parentNode) w.parentNode.removeChild(w); cls.remove('obc-on'); });
       }
       function renderCompact() {
-        var el=paint('<div class="ob-compact"><p class="ob-kick">MANTRA · 운명의 기록</p><h1>출생정보를 알려 주세요</h1><p class="note">한 번 입력하면 바로 사주를 볼 수 있어요.</p><div id="obForm" class="ob-form"><p>성별</p>'+fieldHtml({field:'gender'})+fieldHtml({field:'date'})+fieldHtml({field:'time'})+'<details open><summary>이름 · 출생지역 · 추가 설정</summary>'+fieldHtml({field:'name'})+fieldHtml({field:'place'})+O.adjustmentFields(d)+'</details></div><p id="obMsg" class="msg err" role="alert"></p><button id="obBack" hidden></button><button type="button" class="btn" id="obOk">내 사주 보기</button><p class="note ob-priv">출생정보는 이 기기에만 저장돼요. 기본 출생지역은 서울이며, 추가 설정에서 변경할 수 있어요.</p></div>','ob-compact-page');
+        // 저장된 정보가 있는 사람(재방문·출생정보 수정)은 폼을 다시 제출하지 않고 바로 결과로 갈 수 있게 한다.
+        var editing=!!(q.edit&&P.has()),head=editing?'<h1>저장된 출생정보예요</h1><p class="note">바뀐 것이 없다면 바로 결과로 가세요. 고칠 곳이 있으면 아래에서 수정한 뒤 "수정한 정보로 보기"를 누르세요.</p><a class="btn ob-saved-go" href="'+esc(root.Quest?root.Quest.completionRoute(CFG,true):'#/timeline')+'" data-track="saved_profile_go">저장된 정보로 바로 보기</a>':'<h1>출생정보를 알려 주세요</h1><p class="note">한 번 입력하면 바로 사주를 볼 수 있어요.</p>';
+        var el=paint('<div class="ob-compact"><p class="ob-kick">MANTRA · 운명의 기록</p>'+head+'<div id="obForm" class="ob-form"><p>성별</p>'+fieldHtml({field:'gender'})+fieldHtml({field:'date'})+fieldHtml({field:'time'})+'<details open><summary>이름 · 출생지역 · 추가 설정</summary>'+fieldHtml({field:'name'})+fieldHtml({field:'place'})+O.adjustmentFields(d)+'</details></div><p id="obMsg" class="msg err" role="alert"></p><button id="obBack" hidden></button><button type="button" class="btn'+(editing?' ghost':'')+'" id="obOk">'+(editing?'수정한 정보로 보기':'내 사주 보기')+'</button><p class="note ob-priv">출생정보는 이 기기에만 저장돼요. 기본 출생지역은 서울이며, 추가 설정에서 변경할 수 있어요.</p></div>','ob-compact-page');
         compactVideo();
         var quick=el.querySelector('#fQuick');if(quick)quick.closest('label').hidden=true;
         ['name','gender','date','time','place'].forEach(function(f){bind(el,{field:f,lines:[]},false);});O.bindAdjustments(el,d,save);
@@ -478,7 +480,7 @@
   });
   function renderHome(q, ctx) {
     var nm = P.name();
-    H.view('<section class="hhome"><p class="kick">MANTRA FORTUNE</p><h1 class="h1">' + esc(A(nm)) + ',<br>오늘의 흐름을 펼칩니다</h1><p class="pend">명식을 불러오는 중…</p></section>');
+    H.view('<section class="hhome"><p class="kick">MANTRA FORTUNE</p><h1 class="h1">' + (nm ? esc(A(nm)) + ',<br>' : '') + '오늘의 흐름을 펼칩니다</h1><p class="pend">명식을 불러오는 중…</p></section>');
     Ob.config().then(function () { return H.sajuKit(); }).then(function (kit) { return H.chart().then(function (ch) { return { kit: kit, ch: ch }; }); }).then(function (o) {
       if (!H.alive(ctx)) return;
       var M = o.kit.M, T = o.kit.T, ch = o.ch, t = H.Saju.todayData(ch), day = ch.pillars.day, ju = M.gzNameK(day), now = Date.now();
@@ -489,7 +491,7 @@
       var trait = (jc && jc.trait) || '', flowSub = t.flowLabel && String(t.flowLabel).indexOf(String(t.phase || '').replace(/기$/, '')) < 0 ? t.flowLabel : ''; // 같은 말이 겹치면(축적운 · 축적) 한 번만
       var flowLine = cur ? '지금은 <b>' + esc(M.gzNameK(cur)) + ' 대운</b>(' + cur.startYear + '년~) 안에 있고, 오늘의 흐름은 <b>' + esc(flow || t.cond) + '</b>' + (flowSub ? ' · ' + esc(flowSub) : '') + '입니다.' : '대운이 시작되기 전의 시기입니다. 오늘의 흐름은 <b>' + esc(flow || t.cond) + '</b>입니다.';
       var el = H.view(
-        '<section class="hhome"><div class="hh-top"><p class="kick">MANTRA FORTUNE</p><a class="hh-me" href="#/me" data-track="profile_open">' + esc(A(nm)) + ' ›</a></div>' +
+        '<section class="hhome"><div class="hh-top"><p class="kick">MANTRA FORTUNE</p><a class="hh-me" href="#/me" data-track="profile_open">' + esc(nm ? A(nm) : '내 정보') + ' ›</a></div>' +
         '<div class="hh-guide"><div class="gav">' + avatar('greet', (CFG.scenes[0] || {}).image) + '</div><p>' + esc(F('{이름귀인}, 오늘의 흐름을 함께 살펴보겠습니다.', nm)) + '</p></div>' +
         // 1·2. 타고난 기질 한 문장 / 지금의 운 흐름 — 용어를 몰라도 읽히도록 쉬운 말을 먼저, 용어는 눌러서 설명
         '<section class="hh-core" aria-label="나의 기질과 지금의 흐름">' +

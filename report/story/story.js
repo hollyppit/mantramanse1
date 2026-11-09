@@ -723,8 +723,29 @@
     cover();
     if (bn) bn.innerHTML = esc(S1.brandName || '').split(String.fromCharCode(10)).join('<br>');
     if (root.Ambient) root.Ambient.apply(S1.ambient);
-    if (skip) { var sl = S1.skipLink || {}; skip.textContent = sl.text || ''; skip.hidden = !sl.text; skip.onclick = function () { if (hubUrl() && !PREVIEW) { track('quick_analyze_click', null, true); location.hash = '#/input?next=my'; hubScroll(); return; } scrollToId(sl.target || 'sajuInput'); }; }
-    if (S1.pageTitle) { document.title = S1.pageTitle; var t = document.querySelector('meta[property="og:title"]'); if (t) t.setAttribute('content', S1.pageTitle); }
+    if (skip) {
+      var sl = S1.skipLink || {};
+      // 위쪽 단추는 화면에 따라 바뀐다: 입력 화면에서는 숨기고(이미 입력 중), 사주를 저장한 사람에게는 "내 사주 보기"로 결과에 바로 간다.
+      var skipSync = function () {
+        var hub = hubUrl() && !PREVIEW, H = root.Hub, path = (location.hash.replace(/^#\/?/, '').split('?')[0] || '');
+        var saved = hub && H && H.profile && H.profile.has();
+        if (!sl.text || (hub && /^(begin|input)$/.test(path)) || (saved && path === 'timeline')) { skip.hidden = true; return; }
+        skip.hidden = false; skip.textContent = saved ? '내 사주 보기' : sl.text;
+      };
+      skip.onclick = function () {
+        if (hubUrl() && !PREVIEW) {
+          var H = root.Hub, saved = H && H.profile && H.profile.has();
+          track(saved ? 'my_saju_click' : 'quick_analyze_click', null, true); location.hash = saved ? '#/timeline' : '#/input?next=my'; hubScroll(); return;
+        }
+        scrollToId(sl.target || 'sajuInput');
+      };
+      skipSync(); if (!skip.bound) { skip.bound = true; root.addEventListener('hashchange', skipSync); }
+    }
+    if (S1.pageTitle) {
+      // 관리자에서 저장된 제목에 앞머리 "·"나 같은 조각이 겹쳐 들어간 경우("· A· B · A")를 정리한다.
+      var seenT = {}, cleanT = String(S1.pageTitle).split(/\s*·\s*/).map(function (x) { return x.trim(); }).reverse().filter(function (x) { if (!x || seenT[x]) return false; seenT[x] = 1; return true; }).reverse().join(' · ');
+      if (cleanT) S1 = Object.assign({}, S1, { pageTitle: cleanT });
+      document.title = S1.pageTitle; var t = document.querySelector('meta[property="og:title"]'); if (t) t.setAttribute('content', S1.pageTitle); }
     if (S1.pageDesc) { ['meta[name=description]', 'meta[property="og:description"]'].forEach(function (q) { var m = document.querySelector(q); if (m) m.setAttribute('content', S1.pageDesc); }); }
   }
 
