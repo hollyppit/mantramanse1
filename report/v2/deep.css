@@ -191,3 +191,11 @@
 .fx-road small { display: block; font: 11px ui-monospace, monospace; letter-spacing: .1em; color: var(--mu); }
 .fx-road b { display: block; margin: 2px 0 4px; font: 700 16px "Noto Serif KR", serif; color: #f2f4f8; }
 .fx-road p { margin: 0; font-size: 14px; line-height: 1.7; color: #cfd8e8; }
+/* 3단계(fate-blocks-3.js): 기운 계기판 */
+.fx-meter { display: grid; gap: 10px; padding: 14px 16px; border: 1px solid var(--ln); border-radius: 4px; background: #0f1729; }
+.fx-mt { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 3.2em; align-items: center; gap: 10px; }
+.fx-mt span b { display: block; font: 700 14px "Noto Serif KR", serif; color: #f2f4f8; } .fx-mt span small { display: block; font-size: 11.5px; color: var(--mu); line-height: 1.4; }
+.fx-mt i { display: block; height: 6px; background: #1c2540; border-radius: 3px; overflow: hidden; } .fx-mt i em { display: block; height: 100%; background: #8fb0e8; }
+.fx-mt.is-hi i em { background: #f2f4f8; } .fx-mt.is-lo i em { background: #c23a2e; }
+.fx-mt strong { text-align: right; font: 700 14px ui-monospace, monospace; color: #dfe3ea; }
+@media (max-width: 480px) { .fx-mt { grid-template-columns: minmax(0, 1fr) 3em; } .fx-mt i { grid-column: 1 / -1; grid-row: 2; } }

@@ -79,7 +79,8 @@
 - 최종 사용설명서(self_22) — G 추가
 - 완료: 위 11장에 fx:scenario · fx:people · fx:rx · fx:letter 블록을 기존 순위·순서 블록 앞에 붙임. 검사 tests/fate-blocks-sim.cjs
 - 2단계 완료(fate-blocks-2.js, 18장): 점검표 fx:check(career_10·07·09, love_06, wealth_09) · 저울 fx:vs(career_03·04, wealth_04·08) · 인물/재능 카드 fx:profile(love_01·04, career_02) · 두 얼굴 fx:likes(love_02) · 곁에 둘 사람 fx:people(love_03) · 업종 fx:fit(career_05) · 10년 로드맵 fx:road(career_12, wealth_12) · 최고 vs 최악 fx:scenario self(self_18). 주제 심화(topicDeep) 스위치가 꺼져 있어 +td 장도 실제로는 순위 블록 하나뿐이었음.
-- 다음: love_07·love_10·self_30 등 남은 단일 블록 장, deep_* 하나뿐인 장(self_02·20·25·26·28·31~35, wealth_01~03·05·07)에 다른 모양 하나씩.
+- 3단계 완료(fate-blocks-3.js + 새 묶음, 14장): 계기판 fx:meter(self_30 재물, career_01 일하는 힘) · 가족 자리도 fx:family(love_10) · 환경 fx:env(career_06) · 끌림과 맞음 fx:pair(love_05) · 점검표(wealth_03 돈 새는 곳, wealth_07 돈 선택, love_09 결혼 갈등, self_35 생활 안전) · 저울(wealth_05 모으기/쓰기) · 카드(love_07 배우자 성향, wealth_02 버는 방식, self_25 나라는 사람) · 업종(self_26).
+- 남은 장: 타이밍 그래프 장(career_08·14, love_14, self_24, wealth_06·10·14), 깊이 풀이가 넉넉한 장(self_02·20·28·31~34, wealth_01, love_08·11, self_03·27·37). 필요하면 4단계로.
 
 ## 검사
 
