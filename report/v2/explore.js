@@ -151,7 +151,7 @@
         (nx ? '<div class="xp-cta xp-cta-top"><button type="button" class="btn big xp-red" data-xgo="' + nx.index + '">' + (g.done ? '이어서 읽기' : '읽기 시작하기') + '</button></div>' : '') +
         (w.desc ? '<p class="xp-desc">' + esc(w.desc) + '</p>' : '') + (w.notice ? '<p class="xp-note" role="note">' + esc(w.notice) + '</p>' : '') + (m.widget || '') +
         '<p class="xp-pn">' + g.done + ' / ' + g.total + '개 챕터 읽음 · 위쪽 탭에서 챕터를 바로 고를 수 있습니다</p>';
-      h += '<ol class="xp-chapters" aria-label="챕터 목록">'+g.items.map(function(x,i){return '<li><button type="button" data-xgo="'+x.index+'"><span>'+String(i+1).padStart(2,'0')+'</span> '+esc(x.title)+'</button></li>';}).join('')+'</ol>';
+      h += '<ol class="xp-chapters" aria-label="챕터 목록">'+g.items.map(function(x,i){return '<li><button type="button" data-xgo="'+x.index+'"><span>'+String(i+1).padStart(2,'0')+'</span> '+esc(x.title)+(R.Paywall&&R.Paywall.lockedIndex(x.index)?'<span class="xp-lock" role="img" aria-label="구매 후 열림">🔒</span>':'')+'</button></li>';}).join('')+'</ol>';
       return h + '</section></div>';
     }
     h += '<p class="kicker">運路 · WORLD MAP</p><h2 class="xp-h">' + nm + '</h2><p class="xp-sum">가고 싶은 세계를 골라 탐험하세요. 순서는 정해져 있지 않습니다.</p>' +

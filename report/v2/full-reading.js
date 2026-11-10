@@ -164,7 +164,7 @@
       var deadline = new Promise(function(resolve,reject){timer=root.setTimeout(function(){if(ctl)ctl.abort();var e=new Error('reading timeout');e.name='AbortError';reject(e);},90000);});
       if (ctl) session.controllers.push(ctl);
       try {
-        var response = await Promise.race([readingResponse({ method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ realityContext:R.Editorial?R.Editorial.cleanContext(rep.realityContext):{}, guide: guide, directnessConsent: root.document && root.document.getElementById("directnessConsent") && root.document.getElementById("directnessConsent").checked ? 5 : null, sd: safe, outline: outline, chapter: job.chapter, usedAdviceKeys: chapters.filter(function(c){return c.id!==item.c.id;}).flatMap(function(c){return c.readingAdviceKeys||[];}).slice(-512), adviceHistory: adviceHistory(chapters,item.c.id,name), previous: Array.from(acceptedTexts.entries()).filter(function(x){var prior=chapters.find(function(c){return c.id===x[1];});return prior && (!item.c.editorialTopicId || prior.editorialTopicId===item.c.editorialTopicId) && !(prior.readingParagraphs || []).some(function(p){return p.text===x[0] && p.role==='evidence';});}).slice(-8).map(function(x){return {text:redactReader(x[0],name),chapter:x[1],title:(chapters.find(function(c){return c.id===x[1];}) || {}).title || ''};}) }), signal: ctl && ctl.signal },session,item.c),deadline]);
+        var response = await Promise.race([readingResponse({ method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, R.Paywall ? R.Paywall.headers() : {}), body: JSON.stringify({ realityContext:R.Editorial?R.Editorial.cleanContext(rep.realityContext):{}, guide: guide, directnessConsent: root.document && root.document.getElementById("directnessConsent") && root.document.getElementById("directnessConsent").checked ? 5 : null, sd: safe, outline: outline, chapter: job.chapter, usedAdviceKeys: chapters.filter(function(c){return c.id!==item.c.id;}).flatMap(function(c){return c.readingAdviceKeys||[];}).slice(-512), adviceHistory: adviceHistory(chapters,item.c.id,name), previous: Array.from(acceptedTexts.entries()).filter(function(x){var prior=chapters.find(function(c){return c.id===x[1];});return prior && (!item.c.editorialTopicId || prior.editorialTopicId===item.c.editorialTopicId) && !(prior.readingParagraphs || []).some(function(p){return p.text===x[0] && p.role==='evidence';});}).slice(-8).map(function(x){return {text:redactReader(x[0],name),chapter:x[1],title:(chapters.find(function(c){return c.id===x[1];}) || {}).title || ''};}) }), signal: ctl && ctl.signal },session,item.c),deadline]);
         var r=response.r;
         var d=response.d;
         if(session.cancelled)return;
@@ -190,7 +190,8 @@
           if(d.style){item.c.readingStyle=d.style;rep.readingStyle=rep.readingStyle || d.style;}
           remember(d.result,acceptedTexts,item.c.id);status.completed++;
           if(onReady)onReady(item.c,job,d.result);
-        } else defer(item,d,d && d.ok?'client-validation-failed':'server-communication-failed');
+        } else if (d && d.error === 'locked') { item.c.readingLocked = true; status.skipped = (status.skipped || 0) + 1; }   // 유료 잠금: 오류로 다루지 않는다(화면은 paywall.js 가 가린다)
+        else defer(item,d,d && d.ok?'client-validation-failed':'server-communication-failed');
       } catch (e) { if(!session.cancelled)defer(item,null,e && e.name==='AbortError'?'server-timeout':e instanceof SyntaxError?'server-response-invalid':'server-communication-failed'); }
       finally {root.clearTimeout(timer);if(ctl)session.controllers=session.controllers.filter(function(c){return c!==ctl;});}
     }

@@ -39,6 +39,19 @@ import(url.pathToFileURL(path.join(__dirname, '..', 'functions/_middleware.js'))
   // 오픈 리다이렉트 방지
   for (const bad of ['//evil.com', 'https://evil.com', '/\\evil.com', '/__gate']) { r = await run(B + '/__gate', ENV, form('open-sesame', bad)); ok(r.headers.get('location') === '/', '안전하지 않은 next 는 / 로: ' + bad); }
 
+  // 무빙툰만 공개(SITE_GATE_REPORT_PUBLIC=1): /report/·API·정적 파일은 통과, 만세력 화면·관리자는 잠금, 루트는 /report/ 로
+  const PUB = { ...ENV, SITE_GATE_REPORT_PUBLIC: '1' };
+  for (const p of ['/report/', '/report', '/report/v2/viewer.js', '/report/hub/quest/archive.webp', '/api/movingtoon-reading', '/engine.js', '/feature-flags.js']) { nexted = 0; r = await run(B + p, PUB); ok(nexted === 1, '공개 모드 통과: ' + p); }
+  nexted = 0; r = await run(B + '/index.html', PUB); ok(r.status === 302 && nexted === 0, '공개 모드 /index.html 도 /report/ 로');
+  nexted = 0; r = await run(B + '/', PUB, { method: 'POST' }); ok(r.status === 401 && nexted === 0, '루트 POST 는 리다이렉트 없이 잠금');
+  for (const p of ['/report/admin/', '/report/admin', '/something', '/x.html']) { nexted = 0; r = await run(B + p, PUB); ok(r.status === 401 && nexted === 0, '공개 모드에서도 잠금: ' + p); }
+  nexted = 0; r = await run(B + '/', PUB); ok(r.status === 302 && r.headers.get('location') === '/report/' && nexted === 0, '공개 모드 루트는 /report/ 로');
+  nexted = 0; r = await run(B + '/', PUB, { headers: { cookie } }); ok(nexted === 1, '공개 모드에서도 비밀번호 쿠키가 있으면 만세력 열림');
+  nexted = 0; r = await run(B + '/report/admin/', PUB, { headers: { cookie } }); ok(nexted === 1, '공개 모드 관리자 화면은 쿠키로 열림');
+  nexted = 0; r = await run(B + '//report/admin/', PUB); ok(r.status === 401 && nexted === 0, '슬래시 겹친 관리자 경로도 잠금');
+  r = await run(B + '/__gate', PUB, form('open-sesame')); ok(r.status === 303, '공개 모드에서도 /__gate 로그인 동작');
+  for (const v of ['0', '', 'no']) { nexted = 0; r = await run(B + '/report/', { ...ENV, SITE_GATE_REPORT_PUBLIC: v }); ok(r.status === 401 && nexted === 0, '공개 변수가 꺼진 값이면 전체 잠금: ' + JSON.stringify(v)); }
+
   // http(로컬)에서는 Secure 없이 쿠키
   r = await run('http://localhost:8788/__gate', ENV, form('open-sesame')); ok(!/Secure/.test(r.headers.get('set-cookie') || '') && r.status === 303, '로컬 http 쿠키');
 }).catch(e => ok(false, '실행 오류: ' + e.message)).then(() => {

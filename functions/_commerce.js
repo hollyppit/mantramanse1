@@ -1,0 +1,145 @@
+// 무빙툰(/report/) 회원 결제 공용 모듈. 파일명이 _ 로 시작해 라우트로 노출되지 않는다.
+// 계획: docs/PAYMENT_PLAN_2026-11-10.md · 테이블: supabase/migrations/20261110_commerce.sql
+//
+// 잠금 규칙(한 곳):
+//   1) 세계(world)가 관리자 세계 설정에서 '유료'(access: 'paid')일 때만 잠근다. 저장본이 없거나 '무료'면 아무것도 잠그지 않는다.
+//   2) 장 → 세계는 서버 카탈로그의 topicId 로 정한다(브라우저가 보낸 값은 믿지 않는다). TOPIC_WORLD 참고.
+//   3) 각 세계의 무료 장 = 그 주제의 활성 장 중 order 가 가장 작은 장.
+//   4) 관리자(Authorization: Bearer 관리자 비밀번호)는 잠금 없이 본다. 단 x-view-as: free 를 보내면 무료 사용자처럼 본다.
+//   5) 회원은 x-member-token(Supabase 로그인 토큰)으로 확인하고, 회원 × 사주 × 세계 구매 권한이 있으면 연다.
+//
+// 필요한 환경변수: SUPABASE_URL, SUPABASE_SERVICE_KEY(서버 전용), SUPABASE_ANON_KEY(공개, 브라우저 로그인용),
+//                 TOSS_SECRET_KEY(서버 전용), TOSS_CLIENT_KEY(공개, 결제창용). 키가 없으면 결제 API 는 'not-configured' 를 돌려준다.
+import { json, isAdmin } from './_lib.js';
+import { kvOf } from './_store.js';
+import { loadEditorial } from './_editorial.js';
+
+export const TOPIC_WORLD = { self: 'w1', timing: 'w1', health: 'w1', creative: 'w1', remedy: 'w1', wealth: 'w2', career: 'w7', love: 'w3', relationships: 'w3' };
+export const PRODUCTS_KEY = 'commerce:products';
+export const WORLDS_KEY = 'worlds:config';
+// 상품 기본값: 가격 0 은 '판매 안 함'. 관리자 화면에서 가격을 넣어야 판매된다.
+export const DEFAULT_PRODUCTS = [
+  { id: 'w1', name: '종합풀이', kind: 'world', worlds: ['w1'], price: 0, active: true, order: 1 },
+  { id: 'w2', name: '재물운 심화', kind: 'world', worlds: ['w2'], price: 0, active: true, order: 2 },
+  { id: 'w7', name: '커리어운 심화', kind: 'world', worlds: ['w7'], price: 0, active: true, order: 3 },
+  { id: 'w3', name: '인연운 심화', kind: 'world', worlds: ['w3'], price: 0, active: true, order: 4 },
+  { id: 'bundle', name: '전체 열기', kind: 'bundle', worlds: [], price: 0, active: true, order: 0 },   // worlds 는 구매 시점의 유료 세계로 채운다
+];
+const MAX_PRICE = 1000000;
+
+// ── 사주 식별값: 원국 네 기둥(한자)·성별의 해시. 출생일·이름 원문은 쓰지 않는다. 시간을 모르면 시주 자리를 '-' 로 둔다.
+export async function sajuKey(sd) {
+  const p = sd && sd.pillars; if (!p || !p.year || !p.month || !p.day) return null;
+  const pil = k => (p[k] && typeof p[k].hanja === 'string' && /^[一-鿿]{2}$/.test(p[k].hanja)) ? p[k].hanja : '-';
+  if ([pil('year'), pil('month'), pil('day')].includes('-')) return null;
+  const g = sd.gender === 'F' || sd.gender === 'female' || sd.gender === '여' ? 'F' : sd.gender === 'M' || sd.gender === 'male' || sd.gender === '남' ? 'M' : '-';
+  const raw = `saju:v1:${pil('year')}|${pil('month')}|${pil('day')}|${pil('hour')}|${g}`;
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+  return 'sj_' + [...new Uint8Array(buf)].slice(0, 16).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ── Supabase
+export const supabaseReady = env => !!(env && env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY);
+const base = env => String(env.SUPABASE_URL).replace(/\/+$/, '');
+export async function sbRest(env, path, init = {}) {
+  const r = await fetch(base(env) + '/rest/v1/' + path, { ...init, signal: AbortSignal.timeout(10000), headers: { apikey: env.SUPABASE_SERVICE_KEY, authorization: 'Bearer ' + env.SUPABASE_SERVICE_KEY, 'content-type': 'application/json', ...(init.headers || {}) } });
+  const txt = await r.text();
+  if (!r.ok) throw new Error('supabase-' + r.status + ':' + txt.slice(0, 160));
+  return txt ? JSON.parse(txt) : null;
+}
+// 회원 토큰 확인: Supabase 가 발급한 로그인 토큰을 Supabase 에 물어 사용자 id 를 받는다(서명 검증을 직접 하지 않는다).
+export async function memberOf(request, env) {
+  const tok = (request.headers.get('x-member-token') || '').trim();
+  if (!tok || tok.length > 4096 || !supabaseReady(env)) return null;
+  try {
+    const r = await fetch(base(env) + '/auth/v1/user', { headers: { apikey: env.SUPABASE_ANON_KEY || env.SUPABASE_SERVICE_KEY, authorization: 'Bearer ' + tok }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return null;
+    const u = await r.json();
+    return u && typeof u.id === 'string' ? { id: u.id, email: u.email || '', provider: (u.app_metadata && u.app_metadata.provider) || '' } : null;
+  } catch { return null; }
+}
+
+// ── 세계 유료 여부 · 무료 장
+export async function worldAccess(env) {
+  const kv = kvOf(env); let saved = null;
+  try { saved = kv ? await kv.get(WORLDS_KEY, 'json') : null; } catch { saved = null; }
+  const out = {}; (saved && Array.isArray(saved.worlds) ? saved.worlds : []).forEach(w => { if (w && w.id) out[w.id] = { paid: w.access === 'paid', enabled: w.enabled !== false, name: w.name || '' }; });
+  return out;
+}
+export async function freeChapters(env) {
+  let catalog = null; try { catalog = await loadEditorial(kvOf(env)); } catch { catalog = null; }
+  const first = {};
+  for (const c of (catalog && catalog.chapters) || []) {
+    if (c.state !== 'active' || !catalog.topics.some(t => t.id === c.topicId && t.enabled)) continue;
+    const w = TOPIC_WORLD[c.topicId] || 'w1', o = Number.isFinite(+c.order) ? +c.order : 999;
+    // 세계 하나에 주제가 여럿(w1·w3)일 수 있다: 세계 안에서 주제 순서 → 장 순서로 첫 장을 고른다
+    const t = catalog.topics.findIndex(x => x.id === c.topicId), rank = t * 1000 + o;
+    if (!first[w] || rank < first[w].rank) first[w] = { id: c.id, rank };
+  }
+  return Object.fromEntries(Object.entries(first).map(([w, v]) => [w, v.id]));
+}
+
+export async function ownedWorlds(env, userId, key) {
+  if (!userId || !key || !supabaseReady(env)) return [];
+  const rows = await sbRest(env, `commerce_entitlements?select=world&user_id=eq.${encodeURIComponent(userId)}&saju_key=eq.${encodeURIComponent(key)}&revoked_at=is.null`);
+  return [...new Set((rows || []).map(r => r.world))];
+}
+
+// 장 하나를 열어도 되는가. 반환: { ok: true } 또는 { ok: false, world, reason: 'login'|'purchase', freeChapter }
+export async function chapterGate(request, env, { topicId, chapterId, sd }) {
+  const world = TOPIC_WORLD[topicId] || 'w1';
+  const admin = isAdmin(request, env), viewAsFree = admin && (request.headers.get('x-view-as') || '') === 'free';
+  if (admin && !viewAsFree) return { ok: true, world, admin: true };
+  const access = await worldAccess(env);
+  if (!access[world] || !access[world].paid) return { ok: true, world };
+  const free = await freeChapters(env);
+  if (free[world] === chapterId) return { ok: true, world, free: true };
+  if (viewAsFree) return { ok: false, world, reason: 'purchase', freeChapter: free[world] || null, viewAsFree: true };
+  const member = await memberOf(request, env);
+  if (!member) return { ok: false, world, reason: 'login', freeChapter: free[world] || null };
+  const key = await sajuKey(sd);
+  let owned = []; try { owned = await ownedWorlds(env, member.id, key); } catch { return { ok: false, world, reason: 'unavailable' }; }
+  return owned.includes(world) ? { ok: true, world, owned: true } : { ok: false, world, reason: 'purchase', freeChapter: free[world] || null };
+}
+export const lockedResponse = g => json({ ok: false, error: g.reason === 'unavailable' ? 'commerce-unavailable' : 'locked', locked: { world: g.world, reason: g.reason, freeChapter: g.freeChapter || null } }, g.reason === 'unavailable' ? 503 : g.reason === 'login' ? 401 : 402);
+
+// ── 상품표 (KV): 관리자만 고친다
+export function cleanProducts(list) {
+  const by = Object.fromEntries(DEFAULT_PRODUCTS.map(p => [p.id, { ...p }]));
+  for (const p of Array.isArray(list) ? list : []) {
+    if (!p || !by[p.id]) continue;   // 상품 종류는 코드가 정한다(세계 4개 + 묶음). 이름·가격·판매 여부·순서만 고친다
+    const b = by[p.id];
+    if (typeof p.name === 'string' && p.name.trim()) b.name = p.name.trim().slice(0, 40);
+    if (Number.isInteger(+p.price) && +p.price >= 0 && +p.price <= MAX_PRICE) b.price = +p.price;
+    if (typeof p.active === 'boolean') b.active = p.active;
+    if (Number.isFinite(+p.order)) b.order = Math.max(0, Math.min(99, Math.round(+p.order)));
+  }
+  return Object.values(by).sort((a, b) => a.order - b.order);
+}
+export async function loadProducts(env) {
+  const kv = kvOf(env); let saved = null;
+  try { saved = kv ? await kv.get(PRODUCTS_KEY, 'json') : null; } catch { saved = null; }
+  return cleanProducts(saved && saved.products);
+}
+// 구매 시점에 이 상품이 여는 세계: 세계 상품은 자기 세계, 묶음은 지금 켜져 있고 유료인 세계 전부
+export async function productWorlds(env, product) {
+  if (product.kind === 'world') return product.worlds.slice();
+  const access = await worldAccess(env);
+  return Object.keys(access).filter(id => access[id].enabled && access[id].paid).sort();
+}
+
+// 주문 하나의 세계별 구매 권한을 넣는다(같은 주문·세계는 중복으로 넣지 않는다)
+export async function grantOrder(env, order, by) {
+  const rows = order.worlds.map(w => ({ user_id: order.user_id, saju_key: order.saju_key, world: w, order_id: order.order_id, granted_by: by }));
+  await sbRest(env, 'commerce_entitlements?on_conflict=user_id,saju_key,world,order_id', { method: 'POST', headers: { prefer: 'resolution=ignore-duplicates,return=minimal' }, body: JSON.stringify(rows) });
+}
+
+// ── 토스페이먼츠
+export const tossReady = env => !!(env && env.TOSS_SECRET_KEY);
+export async function tossCall(env, path, body) {
+  const auth = 'Basic ' + btoa(env.TOSS_SECRET_KEY + ':');
+  const r = await fetch('https://api.tosspayments.com/v1/' + path, { method: 'POST', headers: { authorization: auth, 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(20000) });
+  let d = null; try { d = await r.json(); } catch { d = null; }
+  return { ok: r.ok, status: r.status, data: d };
+}
+export const newOrderId = () => 'mt_' + Date.now().toString(36) + '_' + [...crypto.getRandomValues(new Uint8Array(9))].map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 14);

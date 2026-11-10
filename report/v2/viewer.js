@@ -66,6 +66,8 @@
     show(); tick = setInterval(show, 1100);
     var sd; try { sd = R.SajuData.build(ch, { now: Date.now() }); } catch (e) { elog('caught', 'sd.build'); clearInterval(tick); view('input'); $('#msg').textContent = '계산 결과를 정리하지 못했습니다.'; return; }
     S.sd = sd; S.birth = birthOf(ch); if (R.IchingCard) R.IchingCard.init(); if (R.DeepAsk) R.DeepAsk.init(); var t0 = Date.now();
+    // 유료 잠금(paywall.js): 잠금 정보는 늦게 와도 된다. 오기 전에는 아무것도 잠그지 않고, 도착하면 세계 화면의 자물쇠만 다시 그린다
+    if (R.Paywall && !PREVIEW) R.Paywall.init(sd, { chapters: function () { return (S.rep && S.rep.chapters) || []; }, onChange: function () { if (S.view === 'home' && S.rep && S.xp) showHome(S.xpWorld || undefined); } });
     // 서버 저장본(콘텐츠·미디어·일간 소개 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
     Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story'), getJson('/api/assets'), getJson('/api/prologue'), getJson('/api/seal-scenes')]).then(function (a) {
       S.sealPresentations=(a[6]&&a[6].chapters)||[]; S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
@@ -345,7 +347,7 @@
     n.addEventListener('click', function (e) {
       var b = e.target.closest('[data-ws]'); if (!b) return; var k = b.dataset.ws, vw = $('#app').dataset.view, wid = S.wmap && (vw === 'reader' ? S.wmap.idx[pinned() != null ? pinned() : S.idx] : S.xpWorld);
       if (k === 'toon') { openWorldToon(wid); } else if (k === 'resume') { resumeReader(); } else if (k === 'map') { if (S.mv) S.mv.pause(); showHome(); } else if (k === 'tool') { if (S.mv) S.mv.pause(); showHome(wid); }
-      else if (k === 'go') { var i = +b.dataset.i; if (vw === 'reader') { pinTo(i); renderStrip(); gotoChapter(i, false, !!(S.mv && S.mv.state() === 'PLAYING')); T('strip_go', { index: i }); } else enterFromHome(i); }
+      else if (k === 'go') { var i = +b.dataset.i; var lc = S.rep && S.rep.chapters[i]; if (R.Paywall && !PREVIEW && lc && R.Paywall.lockOf(lc)) { R.Paywall.show(lc, { worldName: paywallWorldName(i), who: S.name }); return; } if (vw === 'reader') { pinTo(i); renderStrip(); gotoChapter(i, false, !!(S.mv && S.mv.state() === 'PLAYING')); T('strip_go', { index: i }); } else enterFromHome(i); }
     });
   }
   // 읽기 화면 상단 바: 세계 지도로 들어온 흐름에서는 막(ACT II · 財·業·緣)이 아니라 지금 있는 세계 이름을 보여 준다.
@@ -536,7 +538,9 @@
     if (b.dataset.tld != null) { T0.d = +b.dataset.tld; T0.y = null; T0.m = null; } else if (b.dataset.tly != null) { T0.y = +b.dataset.tly; T0.m = null; } else { T0.m = +b.dataset.tlm; }
     var y = window.scrollY; showHome('w1'); window.scrollTo(0, y); T('timeline_select', { level: b.dataset.tld != null ? 'daeun' : b.dataset.tly != null ? 'year' : 'month' });
   });
+  function paywallWorldName(ci) { var wid = S.wmap && S.wmap.idx[ci], w = (S.xpWorlds || []).filter(function (x) { return x.id === wid; })[0]; return w ? w.name : ''; }
   function enterFromHome(idx, navigation) {
+    var lockC = S.rep && S.rep.chapters[idx]; if (R.Paywall && !PREVIEW && lockC && R.Paywall.lockOf(lockC)) { R.Paywall.show(lockC, { worldName: paywallWorldName(idx), who: S.name }); return; }
     var targetWorld=S.wmap&&S.wmap.idx[idx];if(R.SealReader&&targetWorld&&!(navigation&&navigation.history===false)){var targetUrl=new URL(location.href);if(targetUrl.searchParams.get('world')!==targetWorld){targetUrl.searchParams.set('world',targetWorld);targetUrl.hash='';history.pushState({sealWorld:targetWorld},'',targetUrl.href);}}
 
     if(R.FullReading&&R.FullReading.cancelMany)R.FullReading.cancelMany();
@@ -925,6 +929,8 @@
     if (!(R.SealReader&&c.readingCore) && sec.classList.contains('s-end') && !c.readingDeferred && !S.ended[c.id]) { S.ended[c.id] = 1; T('chapter_completed', { chapter: c.id }); checkUnlock(); if (EXPLORE) { xpSave(); if (c.id === 'c-char' && !S.homeShown && !S.readerWorld) { S.homeShown = 1; setTimeout(function () { if(S.view!=='reader'||S.readerWorld||!S.rep.chapters[S.idx]||S.rep.chapters[S.idx].id!==c.id)return; if (S.mv) S.mv.pause(); showHome(); }, 900); } } }
   }
   function enterChapter(c, ci) {
+    // 잠긴 장으로 넘어가려 하면 구매 창을 띄우고, 화면은 지금 장에 그대로 둔다(첫 장 다음에서 멈춤)
+    if (R.Paywall && !PREVIEW && R.Paywall.lockOf(c)) { if (!document.getElementById('pw-sheet')) R.Paywall.show(c, { worldName: paywallWorldName(ci), who: S.name, onClose: function () { showHome(S.wmap && S.wmap.idx[ci]); } }); return; }
     if (S.pin) { if (Date.now() < S.pin.until && ci !== S.pin.idx) return; if(Date.now()>=S.pin.until)S.pin=null; } // 이동 중 앞·뒤 챕터 감지가 선택을 덮어쓰지 않게 한다.
     var rep = S.rep, n = rep.chapters.length, prev = S.cur ? rep.chapters[S.idx] : null, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}; S.idx = ci; S.cur = true; if(R.FullReading && R.FullReading.prioritize)R.FullReading.prioritize(c.id);
     if(S.wmap){S.sealTopicLast=S.sealTopicLast||{};S.sealTopicLast[S.wmap.idx[ci]]=ci;}barLabel(ci); saveReadingSession(c.id);if(R.SealReader)mountSealBook();
