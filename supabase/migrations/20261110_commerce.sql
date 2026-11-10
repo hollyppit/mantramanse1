@@ -36,6 +36,7 @@ create table if not exists public.commerce_entitlements (
   unique (user_id, saju_key, world, order_id)
 );
 create index if not exists commerce_entitlements_active_idx on public.commerce_entitlements (user_id, saju_key) where revoked_at is null;
+create index if not exists commerce_entitlements_order_idx on public.commerce_entitlements (order_id);   -- 환불 시 주문번호로 권한 회수
 
 -- 회원이 저장한 사주(다른 기기에서 다시 열기용). 출생 정보는 회원 본인 열람에만 쓴다.
 create table if not exists public.member_sajus (
