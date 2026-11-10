@@ -633,7 +633,14 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     },
     climate: { share: 0.25, comfort: 0.5, full: 1.2 },  // 운이 원국 기후를 움직이는 비율 / 무시할 편차 / 만점 개선폭
     relationScale: 4,      // 관계 합산(대략 ±15)을 ±100 축으로
-    structure: { neutralPct: 20, scale: 0.8, pattern: { '관살혼잡': -12, '상관견관': -10, '군겁쟁재': -12, '효신탈식(도식)': -8 } },
+    structure: { neutralPct: 20, scale: 0.8, pattern: { '관살혼잡': -12, '상관견관': -10, '군겁쟁재': -12, '효신탈식(도식)': -8 },
+      // 운 글자와 원국이 함께 만드는 구조(luckStructures). formed = 운이 와서 새로 생기는 약점, good = 좋은 구조, rescue = 원국 약점을 운이 풀어 줌
+      // branchMul 지지 정기에서 온 글자의 반영 비율 / ease 해소 글자가 있을 때 약점을 줄이는 비율 / groupMin 원국에 그 묶음이 있다고 볼 최소 %
+      // cap 한 운에서 이 구조들의 합계 한도(여러 구조가 겹쳐 점수가 튀지 않게). 값은 통합 용신과 겹치는 몫을 감안해 2026-11-10 2배로 올린 크기
+      luck: { branchMul: 0.8, ease: 0.5, groupMin: 10, heavy: 20, cap: 25,
+        formed: { '관살혼잡': -20, '상관견관': -20, '군겁쟁재': -20, '군겁쟁재(재 유입)': -16, '효신탈식(도식)': -16 },
+        good: { '식신제살': 16, '식신제살(강한 살)': 24, '살인상생': 16, '살인상생(관 유입)': 8, '상관패인': 12 },
+        rescue: { '관제비겁': 16, '식상 통관': 12, '재제효': 12, '제살(혼잡 해소)': 12, '화살(혼잡 해소)': 12, '상관패인(견관 해소)': 20 } } },
     condition: { tailwind: 18, caution: -12, burden: -35 },   // 흐름 점수 → 순풍 / 보통 / 주의 / 부담
     intensity: { conc: [0.3, 0.6], gap: 25, relLoad: 20, w: [0.4, 0.3, 0.3] },
     attackNorm: 0.65,        // (주도 십성 top을 정하는 보조 계산) 비겁+식상 두 묶음을 다른 묶음과 공정하게 비교하기 위한 보정
@@ -896,6 +903,126 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const topOverlay = !on.volatility && !on.defense ? null : ex('defense') >= ex('volatility') ? 'defense' : 'volatility';
     return { primaryFlow, secondaryFlow, on, topOverlay, condition: conditionOf(fit) };
   }
+  // 운 글자(천간·지지 정기)의 십성과 원국 십성이 함께 만드는 구조. 원국에 이미 있는 약점 자극(structure.pattern)과 따로,
+  // 운이 와서 새로 생기는 약점(formed), 좋은 구조(good: 식신제살·살인상생·상관패인), 원국 약점의 해소(rescue)를 판정한다.
+  // 반환: [{ name, kind, v, label }] — v는 구조 성분(−100~+100) 단위 가감점
+  function luckStructures(ch, p) {
+    const S = LUCK_CFG.structure.luck, d = ch.pillars.day.s, G = ch.weights.groups, help = ch.strength.help;
+    const natalNames = new Set(ch.patterns.list.map(x => x.name));
+    const nS = [], nB = [];
+    ['year', 'month', 'hour'].forEach(k => { const q = ch.pillars[k]; if (q) nS.push(tenGod(d, q.s)); });
+    POS.forEach(k => { const q = ch.pillars[k]; if (q) nB.push(tenGod(d, mainHidden(q.b))); });
+    const N = t => nS.includes(t) || nB.includes(t), NS = t => nS.includes(t);
+    const lt = [{ tg: tenGod(d, p.s), m: 1, at: `운 천간 ${STEM[p.s]}` }, { tg: tenGod(d, mainHidden(p.b)), m: S.branchMul, at: `운 지지 ${BR[p.b]}` }];
+    const has = (...ts) => lt.filter(x => ts.includes(x.tg));   // 이 운이 가져오는 해당 십성(천간·지지)
+    const grp = { 비겁: ['비견', '겁재'], 식상: ['식신', '상관'], 재성: ['편재', '정재'], 관성: ['편관', '정관'], 인성: ['편인', '정인'] };
+    const hits = new Map();
+    // key: 같은 작용(예: 식신이 편관을 누름)을 좋은 구조·해소 양쪽에서 두 번 세지 않도록 묶는 이름. 큰 쪽 하나만 남긴다
+    const add = (kind, name, base, src, why, ease = 1, key = name) => {
+      if (!src.length) return;
+      const m = Math.max(...src.map(x => x.m)), v = base * m * ease, at = src.map(x => x.at).join('·');
+      const label = `${at}(${src.map(x => x.tg).join('·')}) — ${why}${ease < 1 ? ' (해소 글자가 있거나 이 사주에 덜 중요한 글자라 약하게 반영)' : ''}`;
+      const prev = hits.get(key), rescues = kind === 'rescue' || !!prev?.rescues;   // 원국 약점을 푸는 작용이면 어느 쪽이 남든 표시해 둔다(사고수에서 씀)
+      if (!prev || Math.abs(v) > Math.abs(prev.v)) hits.set(key, { name, kind, v, label, rescues }); else prev.rescues = rescues;
+    };
+    // 십성 묶음 i의 오행이 이 사주에 쓸모 있는가(통합 용신 역할값 > 0). 상관견관·도식은 다치는 글자가 쓸모 있을 때만 온전한 약점이다
+    const dEl = stemEl(d), useful = i => (ch.unified?.roleV?.[mod(dEl + i, 5)] ?? 1) > 0;
+    const F = S.formed, Gd = S.good, R = S.rescue, gm = S.groupMin;
+    // ── 운이 새로 만드는 약점 (원국에 같은 이름의 구조가 이미 있으면 기존 규칙이 다룬다)
+    if (!natalNames.has('관살혼잡')) {
+      const src = [...(N('편관') ? has('정관') : []), ...(N('정관') ? has('편관') : [])];
+      add('formed', '관살혼잡', F['관살혼잡'], src, '원국의 관성과 섞여 관살혼잡이 생김', N('식신') || (help < 50 && G[4] >= gm) ? S.ease : 1);
+    }
+    if (!natalNames.has('상관견관')) {
+      const src = [...(N('정관') ? has('상관') : []), ...(N('상관') ? has('정관') : [])];
+      add('formed', '상관견관', F['상관견관'], src, '상관과 정관이 마주쳐 상관견관이 생김', N('정인') || !useful(3) || G[3] >= 30 ? S.ease : 1);
+    }
+    if (!natalNames.has('군겁쟁재') && G[2] >= gm && G[0] >= 25)
+      add('formed', '군겁쟁재', F['군겁쟁재'], has(...grp.비겁), `원국 비겁 ${G[0].toFixed(0)}%에 비겁이 더해져 재성을 나눠 가짐(군겁쟁재)`, G[3] >= gm || G[1] >= gm ? S.ease : 1);
+    if (natalNames.has('군겁쟁재'))
+      add('formed', '군겁쟁재(재 유입)', F['군겁쟁재(재 유입)'], has(...grp.재성), '비겁이 많은 원국에 재성이 들어와 다툼이 생김(군겁쟁재)', G[3] >= gm || G[1] >= gm ? S.ease : 1);
+    if (!natalNames.has('효신탈식(도식)')) {
+      const src = [...(N('식신') ? has('편인').filter(x => x.m === 1) : []), ...(NS('편인') ? has('식신') : [])];
+      add('formed', '효신탈식(도식)', F['효신탈식(도식)'], src, '편인이 식신을 가로막는 도식이 생김', G[2] >= gm || !useful(1) ? S.ease : 1);
+    }
+    // ── 좋은 구조
+    const dosik = NS('편인') && G[2] < gm ? S.ease : 1;   // 도식이 걸려 있으면 식신의 제살이 약하다
+    const sik = [...(N('편관') ? has('식신') : []), ...(N('식신') && G[1] >= gm ? has('편관') : [])];
+    add('good', '식신제살', G[3] >= S.heavy ? Gd['식신제살(강한 살)'] : Gd['식신제살'], sik, G[3] >= S.heavy ? `강한 편관(관성 ${G[3].toFixed(0)}%)을 식신이 제어함(식신제살)` : '식신이 편관을 제어함(식신제살)', dosik);
+    if (help < 50) {
+      add('good', '살인상생', Gd['살인상생'], G[3] >= 15 ? has(...grp.인성) : [], `원국 관성 ${G[3].toFixed(0)}%의 압박을 인성이 받아 나에게 넘김(살인상생)`);
+      add('good', '살인상생(관 유입)', Gd['살인상생(관 유입)'], G[4] >= 15 ? has(...grp.관성) : [], `들어온 관성을 원국 인성 ${G[4].toFixed(0)}%가 받아 줌(살인상생)`);
+    }
+    if (!natalNames.has('상관견관'))
+      add('good', '상관패인', Gd['상관패인'], [...(N('상관') ? has('정인') : []), ...(N('정인') ? has('상관') : [])], '정인이 상관을 다듬어 줌(상관패인)');
+    // ── 원국 약점을 운이 풀어 줌
+    if (natalNames.has('군겁쟁재')) {
+      add('rescue', '관제비겁', R['관제비겁'], has(...grp.관성), '관성이 많은 비겁을 눌러 재를 지킴(관제비겁)');
+      add('rescue', '식상 통관', R['식상 통관'], has(...grp.식상), '식상이 비겁의 기운을 재로 이어 줌(식상생재 통관)');
+    }
+    if (natalNames.has('효신탈식(도식)')) add('rescue', '재제효', R['재제효'], has(...grp.재성), '재성이 편인을 눌러 식신을 살림(재제효)');
+    if (natalNames.has('관살혼잡')) {
+      add('rescue', '제살(혼잡 해소)', R['제살(혼잡 해소)'], has('식신'), '식신이 편관을 눌러 관살혼잡을 풂(식신제살)', 1, '식신제살');
+      if (help < 50) add('rescue', '화살(혼잡 해소)', R['화살(혼잡 해소)'], has(...grp.인성), '인성이 섞인 관살을 받아 풂(살인상생)', 1, '살인상생');
+    }
+    if (natalNames.has('상관견관')) add('rescue', '상관패인(견관 해소)', R['상관패인(견관 해소)'], has('정인'), '정인이 상관을 눌러 정관을 지킴(상관패인)', 1, '상관패인');
+    return [...hits.values()];
+  }
+  // ───────────── 오행 흐름 (표시 전용) ─────────────
+  // 운 오행(천간·지지 정기)이 원국 오행과 만드는 생·극 연결을 따라가 한 줄 판정을 낸다. 흐름 점수에는 넣지 않는다(근거·그림용).
+  //   verdict: 순생(생이 기신을 거치지 않고 일간·용신까지 이어짐) · 통관(맞서던 두 오행을 이어 줌) · 제압(넘치는 기신을 누름)
+  //            · 극(용신을 누르거나 인성 없이 약한 일간을 누름) · 설기(일간 힘만 빠짐) · 막힘(생이 끊김) · 보통 · 엇갈림(천간·지지 판정이 좋고 나쁨으로 갈림)
+  //   links: 이 운 때문에 생기는 화살표 [{ from, to, type: '생'|'극', good(true·false·null), text }] — 오각형 그림에 그대로 쓴다
+  const ELEMENT_FLOW_CFG = { present: 8, clash: 15, heavy: 25, maxHops: 4 };   // heavy: 이 % 이상인 기신·구신을 운이 누르면 제압
+  const EF_TONE = { 순생: 'good', 통관: 'good', 제압: 'good', 극: 'bad', 설기: 'bad', 막힘: 'bad', 보통: '' };
+  function elementFlow(ch, p, level = '') {
+    const C = ELEMENT_FLOW_CFG, pct = ch.weights.pct, u = ch.unified || {}, rv = e => u.roleV?.[e] ?? 0, role = e => u.roles?.[e] || '';
+    const dEl = stemEl(ch.pillars.day.s), gen = e => (e + 1) % 5, ctl = e => (e + 2) % 5, on = e => pct[e] >= C.present || e === dEl;
+    const nm = e => `${EL_K[e]}(${EL[e]})`, tag = e => e === dEl ? `${nm(e)}·일간` : role(e) ? `${nm(e)}·${role(e)}` : nm(e);
+    const yongEl = [0, 1, 2, 3, 4].find(e => role(e) === '용신'), tg = ch.yongAll && ch.yongAll.tonggwan, eun = e => josa(nm(e), '은/는').slice(nm(e).length);
+    const se = stemEl(p.s), be = stemEl(mainHidden(p.b));
+    const dz = level === 'daeun', lucks = [{ e: se, at: `천간 ${STEM[p.s]}${dz && be !== se ? '(앞 5년)' : ''}`, half: dz && be !== se ? '전반' : '' }, ...(be !== se ? [{ e: be, at: `지지 ${BR[p.b]}${dz ? '(뒤 5년)' : ''}`, half: dz ? '후반' : '' }] : [])];
+    const links = [], seen = new Set();
+    const link = (from, to, type, text) => { const k = from + type + to; if (seen.has(k)) return; seen.add(k); links.push({ from, to, type, good: Math.abs(rv(to)) < 0.01 ? null : type === '생' ? rv(to) > 0 : rv(to) < 0, text }); };   // good: true 도움 · false 부담 · null 받는 쪽이 한신이라 영향 작음
+    const out = [];
+    for (const L of lucks) {
+      const e = L.e;
+      // 생의 사슬: 운 오행에서 원국에 있는 오행을 따라 생으로 이어 간다
+      const path = [e]; let cur = e;
+      for (let i = 0; i < C.maxHops; i++) { const n = gen(cur); if (!on(n) || path.includes(n)) break; path.push(n); cur = n; if (n === dEl) break; }
+      for (let i = 1; i < path.length; i++) link(path[i - 1], path[i], '생', `${tag(path[i - 1])} → ${tag(path[i])} 생`);
+      if (on(ctl(e)) && pct[ctl(e)] >= C.present) link(e, ctl(e), '극', `${tag(e)} → ${tag(ctl(e))} 극`);
+      const feeder = (e + 4) % 5; if (pct[feeder] >= C.present) link(feeder, e, '생', `원국 ${josa(tag(feeder), '이/가')} 운 ${josa(nm(e), '을/를')} 생함`);
+      const hitter = (e + 3) % 5; if (pct[hitter] >= C.clash) link(hitter, e, '극', `원국 ${josa(tag(hitter), '이/가')} 운 ${josa(nm(e), '을/를')} 누름`);
+      // 판정
+      const a = (e + 4) % 5, b = gen(e);   // e가 a→(e)→b 를 잇는다. 원국의 통관 판단(맞서는 두 오행과 그 사이 오행)과 같을 때만 통관으로 본다
+      const reachDay = e !== dEl && path.includes(dEl) && path.length > 1, reachYong = yongEl != null && path.slice(1).includes(yongEl);
+      const midBad = path.slice(1, -1).some(x => rv(x) < 0);   // 사슬이 기신·구신을 거치면 그 오행만 키우고 끝날 수 있어 순생으로 보지 않는다
+      const X = ctl(e), sealEl = (dEl + 4) % 5;
+      let v;
+      if (tg && tg.applicable && tg.yong === e && pct[a] >= C.clash && pct[b] >= C.clash) v = { verdict: '통관', text: `${L.at} ${josa(nm(e), '이/가')} 서로 부딪치던 ${josa(nm(a), '과/와')} ${nm(b)} 사이를 이어 줍니다(${nm(a)} → ${nm(e)} → ${nm(b)})` };
+      else if (e === dEl) v = rv(e) > 0 ? { verdict: '순생', text: `${L.at} ${josa(nm(e), '이/가')} 일간과 같은 오행이라 일간을 직접 받쳐 줍니다` } : { verdict: '보통', text: `${L.at} ${josa(nm(e), '이/가')} 일간과 같은 오행이라 이미 강한 힘을 더 보탭니다` };
+      else if ((reachDay || reachYong) && !midBad && (rv(e) > 0 || (rv(e) >= 0 && reachYong))) v = { verdict: '순생', text: `${L.at} ${josa(path.map(nm).join(' → '), '으로')} 생이 이어져 ${reachDay && reachYong ? '용신을 거쳐 일간' : reachDay ? '일간' : '용신'}까지 닿습니다` };
+      else if (rv(e) >= 0 && rv(X) < 0 && pct[X] >= C.heavy) v = { verdict: '제압', text: `${L.at} ${josa(nm(e), '이/가')} 원국에 넘치는 ${nm(X)}(${Math.round(pct[X])}%·${role(X)})${josa(nm(X), '을/를').slice(nm(X).length)} 눌러 균형을 잡아 줍니다` };
+      else if (yongEl != null && X === yongEl && pct[yongEl] >= C.present) v = { verdict: '극', text: `${L.at} ${josa(nm(e), '이/가')} 이 사주의 용신 ${josa(nm(yongEl), '을/를')} 누릅니다` };
+      else if (X === dEl && ch.strength.help < 50 && pct[sealEl] < C.present) v = { verdict: '극', text: `${L.at} ${josa(nm(e), '이/가')} 약한 일간을 직접 누르는데, 받아 넘겨 줄 ${josa(nm(sealEl), '이/가')} 원국에 거의 없습니다` };
+      else if (e === gen(dEl) && rv(e) <= 0) v = { verdict: '설기', text: `${L.at} ${josa(nm(e), '이/가')} 일간의 힘을 빼 가기만 하고 되돌려 주지 않습니다` };
+      else if (path.length === 1 && rv(e) < 0) v = { verdict: '막힘', text: `${L.at} ${nm(e)}의 기운을 받아 줄 ${josa(nm(gen(e)), '이/가')} 원국에 없어 흐름이 고입니다` };
+      else v = { verdict: '보통', text: `${L.at} ${nm(e)}${path.length > 1 ? `${eun(e)} ${josa(path.map(nm).join(' → '), '으로')} 이어지지만 ${midBad ? '중간에 이 사주에 부담인 오행을 거쳐' : ''} 일간·용신까지 힘이 온전히 닿지는 않습니다`.replace('  ', ' ') : `${eun(e)} 원국과 크게 이어지거나 부딪치지 않습니다`}` };
+      out.push({ ...v, tone: EF_TONE[v.verdict], el: e, at: L.at, half: L.half, path, w: L.half === '후반' ? 0.8 : 1 });
+    }
+    // 대운은 천간이 전반 5년, 지지가 후반 5년을 주로 맡는다고 본다. 두 판정의 성격이 엇갈리면 하나로 덮지 않고 '엇갈림'으로 둔다
+    const RANK = { 통관: 0, 순생: 1, 제압: 2, 극: 3, 막힘: 4, 설기: 5, 보통: 6 };
+    const tones = new Set(out.map(x => x.tone).filter(Boolean));
+    let main;
+    if (tones.size > 1) {
+      const [x1, x2] = out, who = x => x.half ? (x.half === '전반' ? '앞 5년' : '뒤 5년') : x.at.split(' ')[0], word = x => ({ good: '도움', bad: '부담' }[x.tone] || '보통');
+      const part = x => `${josa(who(x), '은/는')} ${x.verdict}(${word(x)})`;
+      main = { verdict: '엇갈림', text: `${part(x1)}, ${part(x2)}입니다. 좋은 흐름과 부담이 한 운 안에 함께 있어${x1.half ? ' 시기를 나눠 보는 것이 좋습니다(천간은 앞 5년, 지지는 뒤 5년에 더 크게 작용)' : ' 어느 쪽이 먼저 드러날지는 세운이 정합니다'}` };
+    } else main = [...out].sort((x, y) => RANK[x.verdict] - RANK[y.verdict] || y.w - x.w)[0];
+    const tone = main.verdict === '엇갈림' ? 'mixed' : EF_TONE[main.verdict];
+    return { verdict: main.verdict, tone, text: main.text, items: out, links, luckEls: lucks.map(l => l.e), dayEl: dEl, yongEl: yongEl ?? null, pct: pct.slice() };
+  }
   function evaluateLuck(ch, p, level = 'ilun', opts = {}) {
     const C = LUCK_CFG, L = C.levels[level] || C.levels.ilun, stemW = opts.stemW ?? L.stemW;
     const W = luckWeights(ch, level), dEl = stemEl(ch.pillars.day.s), G = ch.weights.groups;
@@ -927,6 +1054,10 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       const hit = (pt.name === '관살혼잡' && g[3] >= 0.4) || (pt.name === '상관견관' && g[1] >= 0.4) || (pt.name === '군겁쟁재' && g[0] >= 0.4) || (pt.name === '효신탈식(도식)' && g[4] >= 0.4);
       if (hit) { patAdj += adj; structP.push({ label: `${pt.name} 구조에 ${TG_GROUP[top]} 기운이 겹침`, v: adj }); }
     }
+    const luckPat = luckStructures(ch, p);
+    // 합계가 cap을 넘으면 각 항목을 같은 비율로 줄여 근거 막대와 점수가 맞게 한다
+    const lpSum = luckPat.reduce((s, x) => s + x.v, 0), lpK = Math.abs(lpSum) > S.luck.cap ? S.luck.cap / Math.abs(lpSum) : 1;
+    for (const x of luckPat) { const v = x.v * lpK; patAdj += v; structP.push({ label: x.label, v }); }
     const structureScore = lclamp(structRaw * 100 * S.scale + patAdj, -100, 100);
     const structLabel = `십성 균형 — 원국 ${TG_GROUP[top]} ${G[top].toFixed(0)}%에 ${TG_GROUP[top]} 기운이 ${G[top] < S.neutralPct ? '채워짐' : '더해짐'}`;
     // 종합
@@ -992,7 +1123,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     return {
       level, p: { s: p.s, b: p.b }, fitScore, ownFit, unifiedScore: uni.v, eokbuScore: eok.v, johuScore: jo.v, relationScore, structureScore, tonggwanScore: ton ? ton.v : null, gyeokScore: uni.gyeok,
       weights: { eokbu: W.eokbu, johu: W.johu, relation: W.relation, structure: W.structure, tonggwan: W.tonggwan, unified: yongW },
-      theoryImpact, unifiedNotes: uni.notes, chain: chain ? { ...chain, note: chainTxt } : null,
+      luckStructures: luckPat, theoryImpact, unifiedNotes: uni.notes, chain: chain ? { ...chain, note: chainTxt } : null,
       volatilityScore, volatilityBand: vol.band, volatilitySignals: vol.signals.map(g => ({ text: g.text, means: g.means, pts: g.pts, type: g.type, core: g.core })), volatilityOverlap: vol.nCore, intensityScore, defenseLoad, activityType, primaryFlow, secondaryFlow, overlays, topOverlay, flow, tendency, dominantTenGodGroup: TG_GROUP[top], grp: top,
       opportunityActivation: flows.opportunity, opportunityType: opp.types.map(t => t.name), opportunityReasons: opp.reasons, opportunityComponents: opp.comps,
       phaseScores: { ...flows, volatility: Math.round(volatilityScore), defense: Math.round(defenseLoad), fit: Math.round(fitScore), intensity: Math.round(intensityScore) }, companions,
@@ -2104,7 +2235,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     synergy: { from: 55, gain: 0.18, solo: 0.95, none: 0.85, soft: 8 },   // 높은 성분이 겹칠수록 배율↑, 하나만 높거나 없으면 배율↓. soft: 기준 ±soft 구간에서 성분을 0~1로 걸쳐 세어 배율이 계단 없이 이어진다
     conflict: { posW: { day: 1, month: 0.9, hour: 0.55, year: 0.35 }, stack: 0.7, sat: 1.2, overlapBonus: 0.15 },
     overload: { element: 0.6, strength: 0.4, newSkew: 0.15 },
-    instability: { misfit: 0.55, pattern: 0.25, climate: 0.20, misfitFrom: 10, misfitTo: 70, patternHit: 0.35,
+    instability: { misfit: 0.55, pattern: 0.25, climate: 0.20, misfitFrom: 10, misfitTo: 70, patternHit: 0.35, rescueEase: 0.5,   // rescueEase: 운이 원국 약점을 풀어 줄 때 약점 자극을 덜어 내는 비율
       patterns: ['관살혼잡', '상관견관', '군겁쟁재', '재다신약', '관살과다'] },
     sinsal: { '양인살': 0.45, '백호대살': 0.40, '괴강살': 0.30, '공망': 0.15 },   // 전통적으로 주의 신호로 읽는 것만, 보조로만 사용
   };
@@ -2177,7 +2308,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       pillar: pp, level, ev, rels, sinsal, sinNames, g, G, pct, after, elv, balanceGain, ovEl, ovLevel, newSkew, filled, jo, extremity,
       fit: ev.ownFit, eokbu: ev.eokbuScore, johu: ev.johuScore, vol: ev.volatilityScore, volSignals: ev.volatilitySignals, help: st.help, zone: st.zone, weak: wk, strong: sg,
       tension, bond, tensionRels, bondRels, spouse: sp, month: mo, stemHap: dayStem.some(r => r.type === '천간합'), stemClash: dayStem.some(r => r.type === '천간충'),
-      dohwa: sinsal12(base, pp.b) === '연살', coreN, patterns: ch.patterns.list.map(x => x.name), gender: ch.gender === 'F' ? 'F' : 'M',
+      dohwa: sinsal12(base, pp.b) === '연살', coreN, patterns: ch.patterns.list.map(x => x.name), luckPat: ev.luckStructures || [], gender: ch.gender === 'F' ? 'F' : 'M',
       // 확장 지표(취업·이직·직업·사업·자식)용: 시지=자녀궁, 역마, 원국 직업 적성을 읽는 통로
       hour: palace('hour'), year: palace('year'), hasHour: !!ch.hourKnown && !!ch.pillars.hour, yeokma: sinsal12(base, pp.b) === '역마살', ch,
     };
@@ -2287,7 +2418,11 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const nCore = F.rels.filter(r => DOMAIN_COMMON.tension[r.type] != null && posOf(r).some(o => o === 'day' || o === 'month') && DOMAIN_COMMON.tension[r.type] >= DOMAIN_COMMON.coreMin).length;
     const conflict = lclamp(relSignal(F.tensionRels, DOMAIN_COMMON.tension, Ccf.posW, Ccf.stack, Ccf.sat, nCore >= 2 ? Ccf.overlapBonus * (nCore - 1) : 0) * k, 0, 100);
     const O = Q.overload, overload = 100 * lclamp(O.element * F.ovLevel + O.strength * hp.skewN * hp.exN + O.newSkew * (F.newSkew ? 1 : 0), 0, 1);
-    const I = Q.instability, patHit = Q.instability.patterns.some(name => F.patterns.includes(name) && ({ '관살혼잡': F.g[3], '상관견관': F.g[1], '군겁쟁재': F.g[0], '재다신약': F.g[2], '관살과다': F.g[3] }[name] >= I.patternHit)) ? 1 : 0;
+    const I = Q.instability, patHit0 = Q.instability.patterns.some(name => F.patterns.includes(name) && ({ '관살혼잡': F.g[3], '상관견관': F.g[1], '군겁쟁재': F.g[0], '재다신약': F.g[2], '관살과다': F.g[3] }[name] >= I.patternHit)) ? 1 : 0;
+    // 운이 새로 만든 약점은 크기에 비례해, 운이 원국 약점을 풀어 주면 그만큼 덜어 낸다(좋은 구조는 사고수를 낮추지 않는다: 변동 신호와 다른 축)
+    const lp = F.luckPat || [], formedHit = lclamp(lp.filter(x => x.kind === 'formed').reduce((s, x) => s - x.v, 0) / 20, 0, 1);   // 온전한 약점 하나(−20)면 1
+    const rescued = lp.some(x => x.rescues) ? I.rescueEase : 1;
+    const patHit = lclamp(Math.max(patHit0 * rescued, formedHit), 0, 1);
     const instability = 100 * lclamp(I.misfit * lramp(-F.fit, I.misfitFrom, I.misfitTo) + I.pattern * patHit + I.climate * Math.max(0, -F.jo), 0, 1);
     const sinsalHits = Object.entries(Q.sinsal).filter(([n]) => F.sinNames.includes(n));
     const sinsal = 100 * Math.min(1, sinsalHits.reduce((s, [, w]) => s + w, 0));
@@ -2298,7 +2433,9 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (F.ovLevel > 0.25) pushR(why, 24 * F.ovLevel, `${EL_K[F.ovEl]} 오행이 원국에서 더 쏠려 과부하 신호가 있습니다`);
     if (hp.skewN * hp.exN > 0.3) pushR(why, 22 * hp.skewN * hp.exN, '원국의 강약 치우침을 운이 더 키워 구조 부담이 커집니다');
     if (F.fit < -20) pushR(why, -F.fit / 3, `원국 적합도가 낮아(흐름 점수 ${Math.round(F.fit)}) 구조가 불안정합니다`);
-    if (patHit) pushR(why, 18, '원국의 구조적 약점(관살혼잡·군겁쟁재 등)을 운이 자극합니다');
+    if (patHit0 && rescued === 1) pushR(why, 18, '원국의 구조적 약점(관살혼잡·군겁쟁재 등)을 운이 자극합니다');
+    lp.filter(x => x.kind === 'formed').forEach(x => pushR(why, -x.v * 0.8, `${x.label}`));
+    if (patHit0 && rescued < 1) pushR(why, 8, `원국의 구조적 약점을 ${lp.filter(x => x.rescues).map(x => x.name).join('·')}로 운이 덜어 줍니다`);
     if (sinsalHits.length) pushR(why, 10, `${sinsalHits.map(x => x[0]).join('·')} 신호(전통 참고 — 점수 기여는 최대 ${Math.round(Q.weights.sinsal * 100)}%로 제한)`);
     return { comps: { volatility: vol, conflict, overload, instability, sinsal }, reasons: finishReasons(why), aux: { nCore } };
   }
@@ -3443,7 +3580,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
 
   G.Manse = {
     pickDays, TAEK_PURPOSE, JIAN12, gongmangFxOf,
-    compute, integrateYongsin, unifiedLuckFit, unifiedSupport, gyeokCore, jongCore, chainLink, UNIFIED_CFG, josa, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, SUB_DOMAIN_KEYS, SUB_CONFIG, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
+    compute, elementFlow, ELEMENT_FLOW_CFG, luckStructures, integrateYongsin, unifiedLuckFit, unifiedSupport, gyeokCore, jongCore, chainLink, UNIFIED_CFG, josa, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, SUB_DOMAIN_KEYS, SUB_CONFIG, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, mainHidden, yang, gzName, gzNameK,
