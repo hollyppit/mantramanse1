@@ -21,6 +21,10 @@ for (let i = 0; i < 250; i++) {
   nf.items.forEach(it => ok(it.text && !badJosa.test(it.text) && !/\)\(\d+%\)/.test(it.text), `원국 문장 이상: ${it.text}`));
   nf.items.filter(it => it.kind === 'break').forEach(it => { const e = '木火土金水'.indexOf(it.text.match(/\((.)\)/)[1]); ok(ch.weights.pct[e] < M.NATAL_FLOW_CFG.present, `끊김인데 비율이 충분함: ${it.text}`); });
   ok(!(nf.items.some(x => x.kind === 'cycle') && nf.items.some(x => x.kind === 'break')), '순환과 끊김이 함께 나옴');
+  // 쉬운 말: 모든 문장에 있고, 십성·일간 같은 명리 용어가 없고, 해요체로 끝나고, 조사가 맞는다
+  ok(typeof nf.headline === 'string' && nf.headline.length > 0, '쉬운 제목 없음');
+  nf.items.forEach(it => ok(it.plain && !/(비겁|식상|재성|관성|인성|일간|용신|통관|木|火|土|金|水)/.test(it.plain) && /요\.?$/.test(it.plain.trim()) && !/[가-힣]\(\d+%\)가 /.test(it.plain.replace(/움\(\d+%\)이/g, '')) && !/움\(\d+%\)가 /.test(it.plain), `쉬운 문장 이상: ${it.plain}`));
+  if (nf.items.length) ok(({ '한쪽으로 치우침': 'press', '생이 끊김': 'break', '통관 필요': 'tonggwan', '한 바퀴 순환': 'cycle' }[nf.verdict] || nf.items[0].kind) === nf.items[0].kind, '제목과 맞는 문장이 맨 앞이 아님');
   for (let Y = 1984; Y < 2044; Y++) {
     const p = M.yearPillarOf(Y), f = M.elementFlow(ch, p, 'daeun'); n++;
     cnt[f.verdict] = (cnt[f.verdict] || 0) + 1;

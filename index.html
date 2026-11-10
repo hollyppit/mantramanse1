@@ -5728,11 +5728,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function natalFlowBox(ch) {
     let f; try { f = M.natalFlow && M.natalFlow(ch); } catch (e) { f = null; } if (!f) return '';
     const tc = t => t === 'good' ? 'ib-g' : t === 'bad' ? 'ib-b' : '';
-    const chips = f.chips.map(c => `<span class="chip ${c.good ? 'ib-g' : c.level === '참고' ? '' : 'ib-b'}" title="${esc(c.basis || '')}">${esc(c.name)}</span>`).join(' ');
+    // 쉬운 말이 먼저(해요체·생활 장면), 명리 용어 문장은 '명리 용어로 보기'에 접어 둔다
+    const pats = f.chips.filter(c => c.plain);
+    const patList = pats.length ? `<div class="ib-k" style="margin-top:10px">이 사주에서 보이는 패턴</div><ul class="ib-ul">${pats.map(c => `<li><span class="${c.good ? 'ib-g' : ''}">${esc(c.plain)}</span> <span class="muted small" style="display:inline">· ${esc(c.name)}</span></li>`).join('')}</ul>` : '';
     let now = '';
-    if (efOn()) { try { const du = M.daeunAt(ch, NOW); if (du) { const g = M.elementFlow(ch, du, 'daeun'); now = `<div class="small" style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span>지금 대운 <b>${M.gzName(du)}</b>: <b class="${g.tone === 'mixed' ? '' : tc(g.tone)}">${esc(g.verdict)}</b></span><button type="button" class="btn" data-tab="luck">운세 흐름에서 보기 ›</button></div>`; } } catch (e) { } }
-    return `<div class="ib" style="margin:0 0 10px"><div class="ib-k">원국 오행 흐름</div><p style="margin:2px 0;font-size:1rem"><b class="${tc(f.tone)}">${esc(f.verdict)}</b></p>
-      <ul class="ib-ul">${f.items.map(i => `<li class="${tc(i.tone)}">${esc(i.text)}</li>`).join('')}</ul>${chips ? `<div class="small" style="margin-top:6px">원국 구조: ${chips}</div>` : ''}${now}</div>`;
+    if (efOn()) { try { const du = M.daeunAt(ch, NOW); if (du) { const g = M.elementFlow(ch, du, 'daeun'); now = `<div class="small" style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span>지금 10년(${M.gzName(du)} 대운): <b class="${g.tone === 'mixed' ? '' : tc(g.tone)}">${esc(({ 순생: '기운이 잘 이어지는 시기예요', 통관: '막혔던 곳이 풀리는 시기예요', 제압: '넘치던 기운이 눌려 균형이 잡히는 시기예요', 보통: '큰 변화 없이 무난한 시기예요', 설기: '힘이 빠져나가기 쉬운 시기예요', 막힘: '흐름이 고이기 쉬운 시기예요', 극: '필요한 기운이 눌리는 시기예요', 엇갈림: '도움과 부담이 함께 오는 시기예요' })[g.verdict] || g.verdict)}</b></span><button type="button" class="btn" data-tab="luck">운세 흐름에서 보기 ›</button></div>`; } } catch (e) { } }
+    const terms = `<details class="lg-fold" style="margin-top:10px"><summary>명리 용어로 보기</summary><p class="small" style="margin:4px 0"><b>${esc(f.verdict)}</b></p><ul class="ib-ul small">${f.items.map(i => `<li>${esc(i.text)}</li>`).join('')}</ul>${f.chips.length ? `<p class="small muted" style="margin:6px 0 0">원국 구조: ${f.chips.map(c => esc(c.name) + (c.basis ? ` (${esc(c.basis)})` : '')).join(' · ')}</p>` : ''}</details>`;
+    return `<div class="ib" style="margin:0 0 10px"><div class="ib-k">내 사주의 기운 흐름</div><p style="margin:2px 0 6px;font-size:1.05rem"><b class="${tc(f.tone)}">${esc(f.headline || f.verdict)}</b></p>
+      <ul class="ib-ul" style="line-height:1.65">${f.items.map(i => `<li>${esc(i.plain || i.text)}</li>`).join('')}</ul>${patList}${now}${terms}</div>`;
   }
   // 오행 오각형: 바깥 실선 = 생(도와줌), 안쪽 점선 별 = 극(누름). 원 크기 = 비율
   function ohaengPentagon(ch) {

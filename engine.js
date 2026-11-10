@@ -1028,39 +1028,56 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   //   verdict: 한 바퀴 순환 · 생이 끊김 · 한쪽으로 치우침 · 통관 필요 · 대체로 고름 / tone: good · bad · ''(중립)
   //   items: [{ kind: 'cycle'|'break'|'press'|'tonggwan', tone, text }] / chips: 원국 구조(식신제살·관살혼잡 등, 무○·결핍 제외)
   const NATAL_FLOW_CFG = { present: 8, heavy: 35 };
+  // 쉬운 말(일간 기준 십성 묶음 0 비겁 1 식상 2 재성 3 관성 4 인성). 화면은 이 말을 먼저 보이고 명리 문장은 접어 둔다
+  const NATAL_PLAIN = {
+    g: ['내 힘', '표현·재능', '돈·성과', '일·책임', '배움·도움'],
+    // 비어 있는 기운별 생활 장면과 할 일(끊김)
+    gap: [
+      '혼자 끝까지 밀어붙이는 힘이 약해, 도움을 받아도 내 것으로 만들기까지 오래 걸려요. 작은 일이라도 직접 끝내 보는 경험을 쌓아 보세요.',
+      '생각은 많은데 밖으로 꺼내 보여 주는 게 어려워요. 머릿속 계획을 글·말·결과물로 꺼내는 습관이 흐름을 이어 줘요.',
+      '재주와 노력은 있는데 그게 통장 잔고로 잘 안 바뀌는 느낌, 익숙하지 않나요? 만든 것에 값을 매기고 정산하는 단계를 일부러 챙겨 보세요.',
+      '들어온 것을 지켜 줄 울타리(규칙·소속)가 약해 돈과 시간이 체계 없이 새기 쉬워요. 고정 지출·저축 규칙부터 세워 두세요.',
+      '해야 할 일은 계속 오는데 쉬고 배우며 채울 틈이 부족해요. 일정표에 쉬는 칸을 먼저 넣어 두세요.'],
+    head: { '한 바퀴 순환': '기운이 막힘 없이 돌아요', '생이 끊김': '기운이 한 군데서 끊겨 있어요', '한쪽으로 치우침': '한 가지 기운이 유난히 세요', '통관 필요': '부딪치는 두 기운 사이에 다리가 필요해요', '대체로 고름': '기운이 대체로 고르게 흘러요' },
+    chip: { '관살혼잡': '책임·압박이 여러 갈래로 섞여 들어와요', '관살과다': '해야 할 일과 압박이 많은 편이에요', '식신제살': '재능과 손재주로 압박을 다스려요', '살인상생': '압박을 배움·도움으로 바꿔 내 힘으로 만들어요', '상관견관': '하고 싶은 말이 규칙·윗사람과 부딪치기 쉬워요', '상관패인': '배움이 거친 말과 행동을 다듬어 줘요', '군겁쟁재': '돈·기회를 두고 경쟁이 생기기 쉬워요', '재다신약': '돈과 일은 많은데 감당할 힘이 부족해요', '식상과다(설기)': '표현·일에 힘을 많이 써서 쉽게 지쳐요', '인성과다': '생각과 준비가 많아 실행이 늦어지기 쉬워요', '효신탈식(도식)': '생각이 많아 표현과 실행이 막히기 쉬워요' },
+  };
   function natalFlow(ch) {
     const C = NATAL_FLOW_CFG, pct = ch.weights.pct, u = ch.unified || {}, rv = e => u.roleV?.[e] ?? 0;
     const dEl = stemEl(ch.pillars.day.s), gen = e => (e + 1) % 5, ctl = e => (e + 2) % 5, on = e => pct[e] >= C.present;
     const nm = e => `${EL_K[e]}(${EL[e]})`, p0 = e => `${Math.round(pct[e])}%`;
+    const G = e => NATAL_PLAIN.g[(e - dEl + 5) % 5], gi = e => (e - dEl + 5) % 5;
     const items = [];
     // 1) 생의 사슬이 끊기는 곳: 앞뒤 오행은 있는데 가운데가 비어 있다
     for (let e = 0; e < 5; e++) {
       if (on(e) || e === dEl) continue;
       const prev = (e + 4) % 5, next = gen(e);
-      if (on(prev) && on(next)) items.push({ kind: 'break', tone: rv(e) > 0 || rv(next) > 0 ? 'bad' : '', text: `${josa(nm(e), '이/가')} ${p0(e)}라 ${nm(prev)} → ${nm(e)} → ${josa(nm(next), '으로')} 이어지는 생이 끊겨 있습니다` });
+      if (on(prev) && on(next)) items.push({ kind: 'break', tone: rv(e) > 0 || rv(next) > 0 ? 'bad' : '', plain: `${G(e)} 기운이 비어 있어서, ${josa(G(prev), '이/가')} ${G(next)}까지 바로 이어지지 않아요. ${NATAL_PLAIN.gap[gi(e)]}`, text: `${josa(nm(e), '이/가')} ${p0(e)}라 ${nm(prev)} → ${nm(e)} → ${josa(nm(next), '으로')} 이어지는 생이 끊겨 있습니다` });
     }
     // 2) 넘치는 오행이 누르는 곳과, 그 힘을 받아 넘겨 줄 오행(관인상생·통관 길)
     const X = [0, 1, 2, 3, 4].reduce((a, e) => pct[e] > pct[a] ? e : a, 0), T = ctl(X), relay = gen(X);
     if (pct[X] >= C.heavy && X !== dEl) {
-      if (T === dEl) items.push({ kind: 'press', tone: on(relay) ? '' : 'bad', text: `${nm(X)} ${josa(p0(X), '이/가')} 일간 ${josa(nm(dEl), '을/를')} 직접 누릅니다. ` + (on(relay) ? `${nm(relay)} ${josa(p0(relay), '이/가')} 그 힘을 받아 일간으로 넘겨 줘 압박이 덜어집니다(${nm(X)} → ${nm(relay)} → ${nm(dEl)})` : `받아 넘겨 줄 ${josa(nm(relay), '이/가')} 거의 없어 압박이 그대로 옵니다`) });
-      else if (on(T)) items.push({ kind: 'press', tone: rv(T) > 0 ? 'bad' : rv(T) < 0 ? 'good' : '', text: `${nm(X)} ${josa(p0(X), '이/가')} ${nm(T)} 쪽(원국 ${p0(T)})을 강하게 누릅니다${rv(T) > 0 ? '. 이 사주에 필요한 기운이 눌리는 구도입니다' : rv(T) < 0 ? '. 이 사주에 부담인 기운을 눌러 주는 구도입니다' : ''}` });
-    } else if (pct[X] >= C.heavy && X === dEl) items.push({ kind: 'press', tone: '', text: `일간과 같은 ${josa(nm(X), '이/가')} ${p0(X)}로 많아 ${josa(nm(T), '을/를')} 누르고 ${nm(gen(X))} 쪽으로 힘을 쏟아 내야 균형이 맞습니다` });
+      if (T === dEl) items.push({ kind: 'press', tone: on(relay) ? '' : 'bad', plain: `${G(X)} 기운이 ${p0(X)}로 아주 세요. 해야 할 일과 책임, 눈치 볼 일이 늘 많은 편이에요. ` + (on(relay) ? `다행히 ${josa(`${G(relay)}(${p0(relay)})`, '이/가')} 그 압박을 받아 내 힘으로 바꿔 줘요. 힘들 때 혼자 버티기보다 배우고 도움을 청하면 압박이 실력으로 바뀌어요.` : `그 압박을 받아 줄 쿠션(${G(relay)})이 거의 없어 쉽게 지칠 수 있어요. 기댈 사람과 쉴 시간을 의식적으로 만들어 두세요.`), text: `${nm(X)} ${josa(p0(X), '이/가')} 일간 ${josa(nm(dEl), '을/를')} 직접 누릅니다. ` + (on(relay) ? `${nm(relay)} ${josa(p0(relay), '이/가')} 그 힘을 받아 일간으로 넘겨 줘 압박이 덜어집니다(${nm(X)} → ${nm(relay)} → ${nm(dEl)})` : `받아 넘겨 줄 ${josa(nm(relay), '이/가')} 거의 없어 압박이 그대로 옵니다`) });
+      else if (on(T)) items.push({ kind: 'press', tone: rv(T) > 0 ? 'bad' : rv(T) < 0 ? 'good' : '', plain: `${G(X)} 기운이 ${p0(X)}로 세서 ${G(T)} 쪽이 눌리기 쉬워요.` + (rv(T) > 0 ? ` 그런데 이 사주엔 ${josa(G(T), '이/가')} 꼭 필요한 기운이라, 일부러 챙겨 줘야 해요.` : rv(T) < 0 ? ` 다행히 그쪽은 넘치면 오히려 부담이 되는 기운이라, 이 눌림이 균형을 잡아 줘요.` : ''), text: `${nm(X)} ${josa(p0(X), '이/가')} ${nm(T)} 쪽(원국 ${p0(T)})을 강하게 누릅니다${rv(T) > 0 ? '. 이 사주에 필요한 기운이 눌리는 구도입니다' : rv(T) < 0 ? '. 이 사주에 부담인 기운을 눌러 주는 구도입니다' : ''}` });
+    } else if (pct[X] >= C.heavy && X === dEl) items.push({ kind: 'press', tone: '', plain: `내 힘(고집·자기 기준)이 ${p0(X)}로 강해요. 혼자 쥐고 있으면 답답해지고, ${G(gen(X))} 쪽으로 쏟아 낼 때 가장 잘 풀려요. 하고 싶은 걸 말하고, 만들고, 보여 주세요.`, text: `일간과 같은 ${josa(nm(X), '이/가')} ${p0(X)}로 많아 ${josa(nm(T), '을/를')} 누르고 ${nm(gen(X))} 쪽으로 힘을 쏟아 내야 균형이 맞습니다` });
     // 3) 통관: 원국의 통관 판단(맞서는 두 오행과 사이 오행)을 그대로 읽는다
     const tg = ch.yongAll && ch.yongAll.tonggwan;
     const dupPress = items.some(x => x.kind === 'press') && tg && tg.yong === relay && T === dEl;   // 누름 문장이 이미 같은 사슬(X → 사이 오행 → 일간)을 말했으면 통관 문장은 빼고 판정만 남긴다
     if (tg && tg.applicable && tg.yong != null && !dupPress) {
       const a = (tg.yong + 4) % 5, b = gen(tg.yong);
-      items.push({ kind: 'tonggwan', tone: on(tg.yong) ? '' : 'bad', text: `${josa(nm(a), '과/와')} ${josa(nm(b), '이/가')} 맞서 있어 그 사이를 잇는 ${josa(nm(tg.yong), '이/가')} 중요합니다(원국 ${p0(tg.yong)})${on(tg.yong) ? '' : '. 원국에는 거의 없어 운에서 들어올 때 풀립니다'}` });
+      items.push({ kind: 'tonggwan', tone: on(tg.yong) ? '' : 'bad', plain: `${josa(G(a), '과/와')} ${josa(G(b), '이/가')} 서로 부딪치고 있어요. 둘 사이를 이어 주는 ${josa(G(tg.yong), '이/가')} 있어야 싸움이 협력으로 바뀌어요.` + (on(tg.yong) ? '' : ' 지금은 그 다리가 거의 없어서, 그 기운이 들어오는 시기에 일이 잘 풀려요.'), text: `${josa(nm(a), '과/와')} ${josa(nm(b), '이/가')} 맞서 있어 그 사이를 잇는 ${josa(nm(tg.yong), '이/가')} 중요합니다(원국 ${p0(tg.yong)})${on(tg.yong) ? '' : '. 원국에는 거의 없어 운에서 들어올 때 풀립니다'}` });
     }
     // 4) 다섯 오행이 모두 있으면 한 바퀴 순환
     const all = [0, 1, 2, 3, 4].every(on);
-    if (all) items.unshift({ kind: 'cycle', tone: 'good', text: '다섯 오행이 모두 있어 생이 한 바퀴 이어집니다' });
+    if (all) items.unshift({ kind: 'cycle', tone: 'good', plain: '다섯 기운이 다 갖춰져 있어서, 한 곳이 막혀도 다른 길로 돌아가는 사주예요. 힘든 일이 와도 회복이 빠른 편이에요.', text: '다섯 오행이 모두 있어 생이 한 바퀴 이어집니다' });
     const has = k => items.find(x => x.kind === k);
     const pressDay = items.find(x => x.kind === 'press' && x.tone === 'bad');
     const [verdict, tone] = pressDay ? ['한쪽으로 치우침', 'bad'] : has('break') ? ['생이 끊김', has('break').tone || ''] : has('tonggwan') ? ['통관 필요', ''] : has('press') ? ['한쪽으로 치우침', has('press').tone] : all ? ['한 바퀴 순환', 'good'] : ['대체로 고름', ''];
     const GOOD = ['식신제살', '살인상생', '상관패인'];
-    const chips = ch.patterns.list.filter(x => !/^무/.test(x.name) && !/결핍/.test(x.name)).map(x => ({ name: x.name, level: x.level, good: GOOD.includes(x.name), basis: x.basis }));
-    return { verdict, tone, items, chips, dayEl: dEl };
+    const chips = ch.patterns.list.filter(x => !/^무/.test(x.name) && !/결핍/.test(x.name)).map(x => ({ name: x.name, level: x.level, good: GOOD.includes(x.name), basis: x.basis, plain: NATAL_PLAIN.chip[x.name] || '' }));
+    // 쉬운 말은 '세다'처럼 세기를 말하는 문장이 먼저 오게: 누름 → 끊김 → 다리 → 순환
+    const RANK = { press: 0, break: 1, tonggwan: 2, cycle: 3 }, lead = { '한쪽으로 치우침': 'press', '생이 끊김': 'break', '통관 필요': 'tonggwan', '한 바퀴 순환': 'cycle' }[verdict];   // 제목과 맞는 문장을 맨 앞에
+    items.sort((a, b) => (b.kind === lead) - (a.kind === lead) || RANK[a.kind] - RANK[b.kind]);
+    return { verdict, headline: NATAL_PLAIN.head[verdict], tone, items, chips, dayEl: dEl };
   }
   function evaluateLuck(ch, p, level = 'ilun', opts = {}) {
     const C = LUCK_CFG, L = C.levels[level] || C.levels.ilun, stemW = opts.stemW ?? L.stemW;
