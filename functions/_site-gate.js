@@ -44,6 +44,8 @@ export async function siteGate(request, env) {
   const url = new URL(request.url);
   const token = await tokenFor(pw);
   const reportPublic = reportPublicOn(env);
+  // 약관·개인정보처리방침·환불정책(/report/legal/)은 사이트가 잠겨 있어도 언제나 공개(결제사·로그인 심사가 볼 수 있게)
+  if (/^\/report\/legal\/[\w.-]*$/.test(url.pathname)) return null;
   if (reportPublic && url.pathname !== LOGIN_PATH && publicPath(url.pathname)) return null;
 
   if (url.pathname === LOGIN_PATH && request.method === 'POST') {

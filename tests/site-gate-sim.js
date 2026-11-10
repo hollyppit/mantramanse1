@@ -52,6 +52,10 @@ import(url.pathToFileURL(path.join(__dirname, '..', 'functions/_middleware.js'))
   r = await run(B + '/__gate', PUB, form('open-sesame')); ok(r.status === 303, '공개 모드에서도 /__gate 로그인 동작');
   for (const v of ['0', '', 'no']) { nexted = 0; r = await run(B + '/report/', { ...ENV, SITE_GATE_REPORT_PUBLIC: v }); ok(r.status === 401 && nexted === 0, '공개 변수가 꺼진 값이면 전체 잠금: ' + JSON.stringify(v)); }
 
+  // 약관·정책 페이지는 잠금 중에도 공개(공개 모드 변수 없이도), 그 밖의 /report/ 는 그대로 잠금
+  for (const p of ['/report/legal/terms.html', '/report/legal/privacy.html', '/report/legal/refund.html', '/report/legal/business.js', '/report/legal/legal.css', '/report/legal/']) { nexted = 0; r = await run(B + p, ENV); ok(nexted === 1, '정책 페이지는 잠금 중에도 공개: ' + p); }
+  for (const p of ['/report/legal/../admin/', '/report/legal/x/y.html', '/report/legalx.html']) { nexted = 0; r = await run(B + p, ENV); ok(r.status === 401 && nexted === 0, '정책 폴더 밖은 잠금: ' + p); }
+
   // http(로컬)에서는 Secure 없이 쿠키
   r = await run('http://localhost:8788/__gate', ENV, form('open-sesame')); ok(!/Secure/.test(r.headers.get('set-cookie') || '') && r.status === 303, '로컬 http 쿠키');
 }).catch(e => ok(false, '실행 오류: ' + e.message)).then(() => {
