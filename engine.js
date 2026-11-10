@@ -1023,6 +1023,45 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const tone = main.verdict === '엇갈림' ? 'mixed' : EF_TONE[main.verdict];
     return { verdict: main.verdict, tone, text: main.text, items: out, links, luckEls: lucks.map(l => l.e), dayEl: dEl, yongEl: yongEl ?? null, pct: pct.slice() };
   }
+  // ───────────── 원국 오행 흐름 (표시 전용) ─────────────
+  // 운 없이 원국만 보고, 오행의 생이 한 바퀴 이어지는지·어디서 끊기는지·넘치는 오행이 무엇을 누르는지·통관이 필요한지를 문장으로 낸다.
+  //   verdict: 한 바퀴 순환 · 생이 끊김 · 한쪽으로 치우침 · 통관 필요 · 대체로 고름 / tone: good · bad · ''(중립)
+  //   items: [{ kind: 'cycle'|'break'|'press'|'tonggwan', tone, text }] / chips: 원국 구조(식신제살·관살혼잡 등, 무○·결핍 제외)
+  const NATAL_FLOW_CFG = { present: 8, heavy: 35 };
+  function natalFlow(ch) {
+    const C = NATAL_FLOW_CFG, pct = ch.weights.pct, u = ch.unified || {}, rv = e => u.roleV?.[e] ?? 0;
+    const dEl = stemEl(ch.pillars.day.s), gen = e => (e + 1) % 5, ctl = e => (e + 2) % 5, on = e => pct[e] >= C.present;
+    const nm = e => `${EL_K[e]}(${EL[e]})`, p0 = e => `${Math.round(pct[e])}%`;
+    const items = [];
+    // 1) 생의 사슬이 끊기는 곳: 앞뒤 오행은 있는데 가운데가 비어 있다
+    for (let e = 0; e < 5; e++) {
+      if (on(e) || e === dEl) continue;
+      const prev = (e + 4) % 5, next = gen(e);
+      if (on(prev) && on(next)) items.push({ kind: 'break', tone: rv(e) > 0 || rv(next) > 0 ? 'bad' : '', text: `${josa(nm(e), '이/가')} ${p0(e)}라 ${nm(prev)} → ${nm(e)} → ${josa(nm(next), '으로')} 이어지는 생이 끊겨 있습니다` });
+    }
+    // 2) 넘치는 오행이 누르는 곳과, 그 힘을 받아 넘겨 줄 오행(관인상생·통관 길)
+    const X = [0, 1, 2, 3, 4].reduce((a, e) => pct[e] > pct[a] ? e : a, 0), T = ctl(X), relay = gen(X);
+    if (pct[X] >= C.heavy && X !== dEl) {
+      if (T === dEl) items.push({ kind: 'press', tone: on(relay) ? '' : 'bad', text: `${nm(X)} ${josa(p0(X), '이/가')} 일간 ${josa(nm(dEl), '을/를')} 직접 누릅니다. ` + (on(relay) ? `${nm(relay)} ${josa(p0(relay), '이/가')} 그 힘을 받아 일간으로 넘겨 줘 압박이 덜어집니다(${nm(X)} → ${nm(relay)} → ${nm(dEl)})` : `받아 넘겨 줄 ${josa(nm(relay), '이/가')} 거의 없어 압박이 그대로 옵니다`) });
+      else if (on(T)) items.push({ kind: 'press', tone: rv(T) > 0 ? 'bad' : rv(T) < 0 ? 'good' : '', text: `${nm(X)} ${josa(p0(X), '이/가')} ${nm(T)} 쪽(원국 ${p0(T)})을 강하게 누릅니다${rv(T) > 0 ? '. 이 사주에 필요한 기운이 눌리는 구도입니다' : rv(T) < 0 ? '. 이 사주에 부담인 기운을 눌러 주는 구도입니다' : ''}` });
+    } else if (pct[X] >= C.heavy && X === dEl) items.push({ kind: 'press', tone: '', text: `일간과 같은 ${josa(nm(X), '이/가')} ${p0(X)}로 많아 ${josa(nm(T), '을/를')} 누르고 ${nm(gen(X))} 쪽으로 힘을 쏟아 내야 균형이 맞습니다` });
+    // 3) 통관: 원국의 통관 판단(맞서는 두 오행과 사이 오행)을 그대로 읽는다
+    const tg = ch.yongAll && ch.yongAll.tonggwan;
+    const dupPress = items.some(x => x.kind === 'press') && tg && tg.yong === relay && T === dEl;   // 누름 문장이 이미 같은 사슬(X → 사이 오행 → 일간)을 말했으면 통관 문장은 빼고 판정만 남긴다
+    if (tg && tg.applicable && tg.yong != null && !dupPress) {
+      const a = (tg.yong + 4) % 5, b = gen(tg.yong);
+      items.push({ kind: 'tonggwan', tone: on(tg.yong) ? '' : 'bad', text: `${josa(nm(a), '과/와')} ${josa(nm(b), '이/가')} 맞서 있어 그 사이를 잇는 ${josa(nm(tg.yong), '이/가')} 중요합니다(원국 ${p0(tg.yong)})${on(tg.yong) ? '' : '. 원국에는 거의 없어 운에서 들어올 때 풀립니다'}` });
+    }
+    // 4) 다섯 오행이 모두 있으면 한 바퀴 순환
+    const all = [0, 1, 2, 3, 4].every(on);
+    if (all) items.unshift({ kind: 'cycle', tone: 'good', text: '다섯 오행이 모두 있어 생이 한 바퀴 이어집니다' });
+    const has = k => items.find(x => x.kind === k);
+    const pressDay = items.find(x => x.kind === 'press' && x.tone === 'bad');
+    const [verdict, tone] = pressDay ? ['한쪽으로 치우침', 'bad'] : has('break') ? ['생이 끊김', has('break').tone || ''] : has('tonggwan') ? ['통관 필요', ''] : has('press') ? ['한쪽으로 치우침', has('press').tone] : all ? ['한 바퀴 순환', 'good'] : ['대체로 고름', ''];
+    const GOOD = ['식신제살', '살인상생', '상관패인'];
+    const chips = ch.patterns.list.filter(x => !/^무/.test(x.name) && !/결핍/.test(x.name)).map(x => ({ name: x.name, level: x.level, good: GOOD.includes(x.name), basis: x.basis }));
+    return { verdict, tone, items, chips, dayEl: dEl };
+  }
   function evaluateLuck(ch, p, level = 'ilun', opts = {}) {
     const C = LUCK_CFG, L = C.levels[level] || C.levels.ilun, stemW = opts.stemW ?? L.stemW;
     const W = luckWeights(ch, level), dEl = stemEl(ch.pillars.day.s), G = ch.weights.groups;
@@ -3586,7 +3625,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
 
   G.Manse = {
     pickDays, TAEK_PURPOSE, JIAN12, gongmangFxOf,
-    compute, elementFlow, ELEMENT_FLOW_CFG, luckStructures, integrateYongsin, unifiedLuckFit, unifiedSupport, gyeokCore, jongCore, chainLink, UNIFIED_CFG, josa, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, SUB_DOMAIN_KEYS, SUB_CONFIG, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
+    compute, elementFlow, ELEMENT_FLOW_CFG, natalFlow, NATAL_FLOW_CFG, luckStructures, integrateYongsin, unifiedLuckFit, unifiedSupport, gyeokCore, jongCore, chainLink, UNIFIED_CFG, josa, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, SUB_DOMAIN_KEYS, SUB_CONFIG, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, mainHidden, yang, gzName, gzNameK,

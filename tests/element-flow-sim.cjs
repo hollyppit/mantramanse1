@@ -15,6 +15,12 @@ let n = 0;
 for (let i = 0; i < 250; i++) {
   let ch; try { ch = M.compute({ year: 1940 + Math.floor(rnd() * 70), month: 1 + Math.floor(rnd() * 12), day: 1 + Math.floor(rnd() * 28), hour: Math.floor(rnd() * 24), minute: 0, gender: rnd() < .5 ? 'M' : 'F', calendar: 'solar', school: 'eokbu' }); } catch (e) { continue; }
   const dEl = '木火土金水'.indexOf('木火土金水'[[0, 0, 1, 1, 2, 2, 3, 3, 4, 4][ch.pillars.day.s]]);
+  // 원국 오행 흐름(natalFlow): 판정 값, 문장 조사, 끊김 문장은 실제로 0%대 오행에만, 같은 사슬을 두 번 말하지 않음
+  const nf = M.natalFlow(ch);
+  ok(['한 바퀴 순환', '생이 끊김', '한쪽으로 치우침', '통관 필요', '대체로 고름'].includes(nf.verdict) && ['good', 'bad', ''].includes(nf.tone), `원국 판정 값 이상 ${nf.verdict}`);
+  nf.items.forEach(it => ok(it.text && !badJosa.test(it.text) && !/\)\(\d+%\)/.test(it.text), `원국 문장 이상: ${it.text}`));
+  nf.items.filter(it => it.kind === 'break').forEach(it => { const e = '木火土金水'.indexOf(it.text.match(/\((.)\)/)[1]); ok(ch.weights.pct[e] < M.NATAL_FLOW_CFG.present, `끊김인데 비율이 충분함: ${it.text}`); });
+  ok(!(nf.items.some(x => x.kind === 'cycle') && nf.items.some(x => x.kind === 'break')), '순환과 끊김이 함께 나옴');
   for (let Y = 1984; Y < 2044; Y++) {
     const p = M.yearPillarOf(Y), f = M.elementFlow(ch, p, 'daeun'); n++;
     cnt[f.verdict] = (cnt[f.verdict] || 0) + 1;
