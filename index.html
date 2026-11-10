@@ -7169,8 +7169,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const LVL_CLS = { '강조': 'good', '보통': '', '약함': '' };
   // 관리자 화면의 [모두 켜기]로 켠 신기능 스위치를 한 번 받아 반영한다(켜진 것만 반영, 실패하면 기본값 꺼짐 그대로).
   (function remoteFlags() {
-    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region)) return;
-    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
+    // elementFlow(오행 흐름 상자)는 [모두 켜기]와 따로 관리자 스위치로 켠다(functions/api/luck-flags.js)
+    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow)) return;
+    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
   })();
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
   let phrLoaded = false;

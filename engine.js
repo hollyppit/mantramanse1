@@ -2216,7 +2216,9 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   const WEALTH_CONFIG = {
     activity: { earn: 0.30, produce: 0.18, link: 0.24, peers: 0.10, officer: 0.06, monthPalace: 0.06, baseline: 0.04, scale: 1.6 },
     fit: { general: 0.5, own: 0.4, eokbu: 0.3, johu: 0.3, weakBurden: 30, strongBonus: 16, support: 10, overload: 6, patternHit: 0.4,
-      pattern: { '재다신약': -10, '군겁쟁재': -10, '식상과다(설기)': -6 } },
+      pattern: { '재다신약': -10, '군겁쟁재': -10, '식상과다(설기)': -6 },
+      // 운+원국 구조(luckStructures) 중 재물과 직결된 것: 운이 만든 군겁쟁재는 감점, 원국 군겁쟁재를 관성·식상이 풀면 가점. 값 = 구조 점수(±16~20) × 배율
+      luckPat: { '군겁쟁재': 0.6, '군겁쟁재(재 유입)': 0.6, '관제비겁': 0.5, '식상 통관': 0.6 }, luckStab: { '군겁쟁재': 0.4, '군겁쟁재(재 유입)': 0.4 } },
     stability: { base: 70, vol: 0.12, volFrom: 40, tension: 0.08, monthClash: 22, burden: 22, peers: 16, accumulate: 14, bond: 0.10 },
     volatility: { vol: 0.6, month: 0.25, peers: 0.15 },
     score: { activity: 0.30, fit: 0.40, stability: 0.30, spread: 1.5 },
@@ -2362,9 +2364,12 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     let adj = -Q.fit.weakBurden * burden + Q.fit.strongBonus * F.strong * Math.max(link, 0.5 * r2) + Q.fit.support * F.weak * r4 - Q.fit.overload * F.ovLevel;
     const gi = { '재다신약': 2, '군겁쟁재': 0, '식상과다(설기)': 1 };
     for (const [name, val] of Object.entries(Q.fit.pattern)) if (F.patterns.includes(name) && F.g[gi[name]] >= Q.fit.patternHit) adj += val;
+    const lpW = (F.luckPat || []).filter(x => Q.fit.luckPat[x.name] != null);
+    lpW.forEach(x => { adj += x.v * Q.fit.luckPat[x.name]; });
+    const lpStab = lpW.reduce((s, x) => s + (Q.fit.luckStab[x.name] ? x.v * Q.fit.luckStab[x.name] : 0), 0);   // 다툼으로 돈이 새는 구조는 안정성도 깎는다
     const fit = lclamp(fitBase + adj, 0, 100);
     const S = Q.stability, monthClash = Math.max(mo.clash, mo.harm * 0.6);
-    const stability = lclamp(S.base - S.vol * Math.max(0, vol - S.volFrom) - S.tension * tension - S.monthClash * monthClash - S.burden * burden - S.peers * r0 + S.accumulate * r4 + S.bond * F.bond, 0, 100);
+    const stability = lclamp(S.base - S.vol * Math.max(0, vol - S.volFrom) - S.tension * tension - S.monthClash * monthClash - S.burden * burden - S.peers * r0 + S.accumulate * r4 + S.bond * F.bond + lpStab, 0, 100);
     const V = Q.volatility, monthChange = Math.min(1, mo.clash + 0.7 * mo.harm + 0.5 * mo.complete);
     const volatility = lclamp(V.vol * vol + V.month * 100 * monthChange + V.peers * 100 * r0, 0, 100);
     const why = [];
@@ -2375,6 +2380,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (burden >= 0.25) pushR(why, 24 * burden, `원국이 약한 편(돕는 힘 ${Math.round(F.help)}%)인데 재성이 강하게 들어와 재정 부담이 커집니다(적합도 하락)`);
     if (F.strong > 0.3 && link > 0.3) pushR(why, 12, '원국이 재성을 감당할 힘이 있고 식상→재성 흐름이 있어 재정적으로 유리합니다');
     if (F.weak > 0.3 && r4 > 0.3) pushR(why, 8, '인성 기운이 약한 원국을 받쳐 재정 부담을 덜어 줍니다');
+    lpW.forEach(x => pushR(why, Math.abs(x.v * Q.fit.luckPat[x.name]) * 1.6, x.v < 0 ? `${x.label} — 벌어도 나눠 가지거나 새기 쉬운 재물 구조입니다` : `${x.label} — 재물을 두고 다투던 구조가 풀립니다`));
     if (F.ovLevel > 0.3) pushR(why, 12 * F.ovLevel, `${EL_K[F.ovEl]} 오행이 원국에서 더 쏠립니다(오행 과잉)`);
     pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 재정 안정성 하락 요인`);
