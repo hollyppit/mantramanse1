@@ -1045,7 +1045,8 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const C = NATAL_FLOW_CFG, pct = ch.weights.pct, u = ch.unified || {}, rv = e => u.roleV?.[e] ?? 0;
     const dEl = stemEl(ch.pillars.day.s), gen = e => (e + 1) % 5, ctl = e => (e + 2) % 5, on = e => pct[e] >= C.present;
     const nm = e => `${EL_K[e]}(${EL[e]})`, p0 = e => `${Math.round(pct[e])}%`;
-    const G = e => NATAL_PLAIN.g[(e - dEl + 5) % 5], gi = e => (e - dEl + 5) % 5;
+    // 생활 뜻 + 오행 이름을 함께: "돈·성과(수·水)". 비율을 같이 쓸 때는 "배움·도움(화·火, 10%)"
+    const gi = e => (e - dEl + 5) % 5, G = e => `${NATAL_PLAIN.g[gi(e)]}(${EL_K[e]}·${EL[e]})`, Gp = e => `${NATAL_PLAIN.g[gi(e)]}(${EL_K[e]}·${EL[e]}, ${p0(e)})`;
     const items = [];
     // 1) 생의 사슬이 끊기는 곳: 앞뒤 오행은 있는데 가운데가 비어 있다
     for (let e = 0; e < 5; e++) {
@@ -1056,9 +1057,9 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     // 2) 넘치는 오행이 누르는 곳과, 그 힘을 받아 넘겨 줄 오행(관인상생·통관 길)
     const X = [0, 1, 2, 3, 4].reduce((a, e) => pct[e] > pct[a] ? e : a, 0), T = ctl(X), relay = gen(X);
     if (pct[X] >= C.heavy && X !== dEl) {
-      if (T === dEl) items.push({ kind: 'press', tone: on(relay) ? '' : 'bad', plain: `${G(X)} 기운이 ${p0(X)}로 아주 세요. 해야 할 일과 책임, 눈치 볼 일이 늘 많은 편이에요. ` + (on(relay) ? `다행히 ${josa(`${G(relay)}(${p0(relay)})`, '이/가')} 그 압박을 받아 내 힘으로 바꿔 줘요. 힘들 때 혼자 버티기보다 배우고 도움을 청하면 압박이 실력으로 바뀌어요.` : `그 압박을 받아 줄 쿠션(${G(relay)})이 거의 없어 쉽게 지칠 수 있어요. 기댈 사람과 쉴 시간을 의식적으로 만들어 두세요.`), text: `${nm(X)} ${josa(p0(X), '이/가')} 일간 ${josa(nm(dEl), '을/를')} 직접 누릅니다. ` + (on(relay) ? `${nm(relay)} ${josa(p0(relay), '이/가')} 그 힘을 받아 일간으로 넘겨 줘 압박이 덜어집니다(${nm(X)} → ${nm(relay)} → ${nm(dEl)})` : `받아 넘겨 줄 ${josa(nm(relay), '이/가')} 거의 없어 압박이 그대로 옵니다`) });
+      if (T === dEl) items.push({ kind: 'press', tone: on(relay) ? '' : 'bad', plain: `${G(X)} 기운이 ${p0(X)}로 아주 세요. 해야 할 일과 책임, 눈치 볼 일이 늘 많은 편이에요. ` + (on(relay) ? `다행히 ${josa(Gp(relay), '이/가')} 그 압박을 받아 내 힘으로 바꿔 줘요. 힘들 때 혼자 버티기보다 배우고 도움을 청하면 압박이 실력으로 바뀌어요.` : `그 압박을 받아 줄 쿠션(${G(relay)})이 거의 없어 쉽게 지칠 수 있어요. 기댈 사람과 쉴 시간을 의식적으로 만들어 두세요.`), text: `${nm(X)} ${josa(p0(X), '이/가')} 일간 ${josa(nm(dEl), '을/를')} 직접 누릅니다. ` + (on(relay) ? `${nm(relay)} ${josa(p0(relay), '이/가')} 그 힘을 받아 일간으로 넘겨 줘 압박이 덜어집니다(${nm(X)} → ${nm(relay)} → ${nm(dEl)})` : `받아 넘겨 줄 ${josa(nm(relay), '이/가')} 거의 없어 압박이 그대로 옵니다`) });
       else if (on(T)) items.push({ kind: 'press', tone: rv(T) > 0 ? 'bad' : rv(T) < 0 ? 'good' : '', plain: `${G(X)} 기운이 ${p0(X)}로 세서 ${G(T)} 쪽이 눌리기 쉬워요.` + (rv(T) > 0 ? ` 그런데 이 사주엔 ${josa(G(T), '이/가')} 꼭 필요한 기운이라, 일부러 챙겨 줘야 해요.` : rv(T) < 0 ? ` 다행히 그쪽은 넘치면 오히려 부담이 되는 기운이라, 이 눌림이 균형을 잡아 줘요.` : ''), text: `${nm(X)} ${josa(p0(X), '이/가')} ${nm(T)} 쪽(원국 ${p0(T)})을 강하게 누릅니다${rv(T) > 0 ? '. 이 사주에 필요한 기운이 눌리는 구도입니다' : rv(T) < 0 ? '. 이 사주에 부담인 기운을 눌러 주는 구도입니다' : ''}` });
-    } else if (pct[X] >= C.heavy && X === dEl) items.push({ kind: 'press', tone: '', plain: `내 힘(고집·자기 기준)이 ${p0(X)}로 강해요. 혼자 쥐고 있으면 답답해지고, ${G(gen(X))} 쪽으로 쏟아 낼 때 가장 잘 풀려요. 하고 싶은 걸 말하고, 만들고, 보여 주세요.`, text: `일간과 같은 ${josa(nm(X), '이/가')} ${p0(X)}로 많아 ${josa(nm(T), '을/를')} 누르고 ${nm(gen(X))} 쪽으로 힘을 쏟아 내야 균형이 맞습니다` });
+    } else if (pct[X] >= C.heavy && X === dEl) items.push({ kind: 'press', tone: '', plain: `${josa(G(X), '이/가')} ${p0(X)}로 강해요. 고집과 자기 기준이 뚜렷한 편이라 혼자 쥐고 있으면 답답해지고, ${G(gen(X))} 쪽으로 쏟아 낼 때 가장 잘 풀려요. 하고 싶은 걸 말하고, 만들고, 보여 주세요.`, text: `일간과 같은 ${josa(nm(X), '이/가')} ${p0(X)}로 많아 ${josa(nm(T), '을/를')} 누르고 ${nm(gen(X))} 쪽으로 힘을 쏟아 내야 균형이 맞습니다` });
     // 3) 통관: 원국의 통관 판단(맞서는 두 오행과 사이 오행)을 그대로 읽는다
     const tg = ch.yongAll && ch.yongAll.tonggwan;
     const dupPress = items.some(x => x.kind === 'press') && tg && tg.yong === relay && T === dEl;   // 누름 문장이 이미 같은 사슬(X → 사이 오행 → 일간)을 말했으면 통관 문장은 빼고 판정만 남긴다
