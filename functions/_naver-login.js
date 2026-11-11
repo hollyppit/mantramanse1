@@ -60,6 +60,10 @@ export async function supabaseSession(env, profile) {
   const meta = { provider: 'naver', email: profile.email || null, name: profile.name || null };
   const c = await admin(env, 'users', { email, email_confirm: true, user_metadata: meta, app_metadata: { provider: 'naver', providers: ['naver'] } });
   if (!c.ok && c.status !== 422 && c.status !== 400) throw new Error('supabase-create:' + c.status);   // 422/400: 이미 있는 회원
+  return sessionForEmail(env, email);
+}
+// 이미 있는 회원의 이메일로 세션을 만든다(메일은 보내지 않는다). 네이버 로그인·로그인 방법 연결 공용
+export async function sessionForEmail(env, email) {
   const g = await admin(env, 'generate_link', { type: 'magiclink', email });
   const gj = await g.json().catch(() => null);
   const hashed = gj && (gj.hashed_token || (gj.properties && gj.properties.hashed_token));
@@ -71,9 +75,23 @@ export async function supabaseSession(env, profile) {
   return { access_token: vj.access_token, refresh_token: vj.refresh_token };
 }
 
+// 네이버 회원 키(내부 주소의 해시 부분): 로그인 방법 연결표(member_naver_links)의 열쇠
+export const naverKeyOf = async naverId => (await internalEmail(naverId)).slice(6, 38);
+// 이 네이버 계정이 다른 회원(카카오·구글로 가입한 회원)에 연결돼 있으면 그 회원의 이메일
+async function linkedEmail(env, naverId) {
+  const key = await naverKeyOf(naverId);
+  const r = await fetch(sbBase(env) + '/rest/v1/member_naver_links?select=user_id&naver_key=eq.' + key, { headers: { apikey: env.SUPABASE_SERVICE_KEY, authorization: 'Bearer ' + env.SUPABASE_SERVICE_KEY }, signal: AbortSignal.timeout(8000) });
+  const rows = r.ok ? await r.json().catch(() => []) : [];
+  if (!rows.length) return null;
+  const u = await fetch(sbBase(env) + '/auth/v1/admin/users/' + rows[0].user_id, { headers: { apikey: env.SUPABASE_SERVICE_KEY, authorization: 'Bearer ' + env.SUPABASE_SERVICE_KEY }, signal: AbortSignal.timeout(8000) });
+  const uj = u.ok ? await u.json().catch(() => null) : null;
+  return uj && uj.email ? uj.email : null;
+}
 export async function finishLogin(env, request, code, state) {
   const profile = await naverProfile(env, request, code, state);
-  const session = await supabaseSession(env, profile);
+  // 연결된 회원이 있으면 그 회원으로, 없으면 네이버 회원(없으면 새로 만든다)으로 들어간다
+  const linked = await linkedEmail(env, profile.id);
+  const session = linked ? await sessionForEmail(env, linked) : await supabaseSession(env, profile);
   const key = randomHex(24);
   const kv = kvOf(env); if (!kv) throw new Error('kv-missing');
   await kv.put('naverlogin:' + key, JSON.stringify(session), { expirationTtl: 60 });

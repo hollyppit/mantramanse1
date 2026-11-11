@@ -11,15 +11,17 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   const store = new Map();
   const KV = { async get(k, t) { const v = store.has(k) ? store.get(k) : null; return v == null ? null : t === 'json' ? JSON.parse(v) : v; }, async put(k, v, o) { store.set(k, v); store.set('__ttl:' + k, o && o.expirationTtl); }, async delete(k) { store.delete(k); }, async list() { return { keys: [] }; } };
   const env = { GLOSSARY_KV: KV, NAVER_CLIENT_ID: 'nv-id', NAVER_CLIENT_SECRET: 'nv-secret', SUPABASE_URL: 'https://sb.test', SUPABASE_SERVICE_KEY: 'svc', SUPABASE_ANON_KEY: 'anon' };
-  let calls = [], mode = { token: 'ok', create: 200 };
+  let calls = [], mode = { token: 'ok', create: 200 }; const links = {};   // 네이버 키 → 연결된 회원
   const res = (d, s = 200) => new Response(JSON.stringify(d), { status: s });
   global.fetch = async (u, init = {}) => {
     u = String(u); const body = init.body ? JSON.parse(init.body) : null; calls.push({ u, body, headers: init.headers || {} });
     if (u.startsWith('https://nid.naver.com/oauth2.0/token')) return mode.token === 'ok' ? res({ access_token: 'nv-at', token_type: 'bearer' }) : res({ error: 'invalid_request' });
     if (u === 'https://openapi.naver.com/v1/nid/me') return res({ resultcode: '00', response: { id: 'NAVER_UID_123', email: 'buyer@naver.com', nickname: '구매자' } });
     if (u === 'https://sb.test/auth/v1/admin/users') return mode.create === 200 ? res({ id: 'u1' }) : res({ msg: 'already registered' }, mode.create);
-    if (u === 'https://sb.test/auth/v1/admin/generate_link') return res({ id: 'u1', hashed_token: 'hash-abc', action_link: 'x' });
-    if (u === 'https://sb.test/auth/v1/verify') return body && body.token_hash === 'hash-abc' ? res({ access_token: 'sb-at', refresh_token: 'sb-rt', user: { id: 'u1' } }) : res({ msg: 'bad' }, 400);
+    if (u.startsWith('https://sb.test/rest/v1/member_naver_links')) { const k = /naver_key=eq.([0-9a-f]+)/.exec(u)[1]; return res(links[k] ? [{ user_id: links[k] }] : []); }
+    if (u === 'https://sb.test/auth/v1/admin/users/g-user') return res({ id: 'g-user', email: 'me@gmail.com' });
+    if (u === 'https://sb.test/auth/v1/admin/generate_link') return res({ id: 'u1', hashed_token: body.email === 'me@gmail.com' ? 'hash-g' : 'hash-abc', action_link: 'x' });
+    if (u === 'https://sb.test/auth/v1/verify') return body && body.token_hash === 'hash-abc' ? res({ access_token: 'sb-at', refresh_token: 'sb-rt', user: { id: 'u1' } }) : body && body.token_hash === 'hash-g' ? res({ access_token: 'g-at', refresh_token: 'g-rt', user: { id: 'g-user' } }) : res({ msg: 'bad' }, 400);
     if (u === 'https://sb.test/auth/v1/user') return res({ id: 'u1', email: 'naver-x@users.mantrafortune.com', user_metadata: { provider: 'naver', email: 'buyer@naver.com' }, app_metadata: { provider: 'email' } });
     throw new Error('unexpected fetch ' + u);
   };
@@ -64,6 +66,13 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
 
   // ── 이미 있는 회원(422)도 로그인
   mode.create = 422; r = await get(cb, '/api/auth/naver/callback?code=c2&state=' + state, stateCookie); ok(new URL(r.headers.get('location')).searchParams.get('naver_login') === '1', '이미 있는 네이버 회원도 로그인'); mode.create = 200;
+
+  // ── 연결된 네이버 계정: 구글 회원으로 들어가고 새 네이버 회원을 만들지 않음
+  links[await N.naverKeyOf('NAVER_UID_123')] = 'g-user'; calls = []; store.clear();
+  r = await get(cb, '/api/auth/naver/callback?code=c3&state=' + state, stateCookie); const ck = cookieOf(r, N.CLAIM_COOKIE).split(';')[0];
+  r = await cl(ck); const gs = await r.json();
+  ok(gs.access_token === 'g-at' && !calls.some(c => c.u.endsWith('/admin/users')), '연결된 네이버: 구글 회원 세션, 새 회원 안 만듦');
+  delete links[await N.naverKeyOf('NAVER_UID_123')];
 
   // ── 결제 쪽 회원 표시: 내부 주소 대신 네이버 이메일
   const m = await C.memberOf(new Request(B + '/', { headers: { 'x-member-token': 'sb-at' } }), env);

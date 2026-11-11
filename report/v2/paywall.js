@@ -86,9 +86,11 @@
     var fine = '<p class="pw-fine">이 사주(' + esc(opts.who || '지금 보고 있는 사주') + ')에만 열리고, 결제 즉시 기간 제한 없이 볼 수 있습니다. 디지털 콘텐츠 특성상 열람을 시작하면 청약 철회가 제한될 수 있습니다. 구매 후 7일 이내·유료 장 미열람 시 전액 환불. <a href="/report/legal/products.html" target="_blank" rel="noopener">상품 안내</a> · <a href="/report/legal/refund.html" target="_blank" rel="noopener">환불정책</a> · <a href="/report/legal/terms.html" target="_blank" rel="noopener">이용약관</a></p>';
     if (!products.length || !canPay) body = '<p class="pw-note">지금은 결제를 준비하고 있습니다. 조금만 기다려 주세요.</p>';
     else if (!logged) body = list(false) + '<p class="pw-note">구매하려면 먼저 로그인해 주세요. 구매한 내용은 계정에 저장되어 다른 기기에서도 다시 볼 수 있어요.</p>' +
-      (canLogin ? '<div class="pw-login"><button type="button" class="pw-btn pw-kakao" data-pw-login="kakao">카카오로 시작하기</button><button type="button" class="pw-btn pw-google" data-pw-login="google">구글로 시작하기</button>' + (d.configured.naver ? '<button type="button" class="pw-btn pw-naver" data-pw-login="naver">네이버로 시작하기</button>' : '<button type="button" class="pw-btn" disabled title="준비 중">네이버(준비 중)</button>') + '</div>' : '<p class="pw-note">로그인을 준비하고 있습니다.</p>') + fine;
+      (canLogin ? '<div class="pw-login">' + loginBtn('kakao') + loginBtn('google') + (d.configured.naver ? loginBtn('naver') : '<button type="button" class="pw-btn" disabled title="준비 중">네이버(준비 중)</button>') + '</div>' +
+        (lastLogin() ? '<p class="pw-fine">구매한 계정과 <b>같은 방법</b>으로 로그인해야 구매한 주제가 열려요. 이 기기에서는 지난번에 <b>' + LN[lastLogin()] + '</b>로 로그인했어요.</p>' : '') : '<p class="pw-note">로그인을 준비하고 있습니다.</p>') + fine;
     else body = list(true) + fine +
-      '<p class="pw-fine">' + esc(d.member.email || '') + ' 로그인 중 · <a href="/report/my/" target="_blank" rel="noopener">내 구매 내역</a> · <button type="button" class="pw-link" data-pw-logout>로그아웃</button></p>';
+      '<p class="pw-buyer">' + (LN[lastLogin()] ? '<b>' + LN[lastLogin()] + ' 계정</b>' : '<b>지금 로그인한 계정</b>') + '(' + esc(d.member.email || '') + ')으로 구매됩니다.</p><div id="pw-hint"></div>' +
+      '<p class="pw-fine"><a href="/report/my/" target="_blank" rel="noopener">내 구매 내역</a> · <button type="button" class="pw-link" data-pw-logout>로그아웃</button></p>';
     var el = document.createElement('div'); el.id = 'pw-sheet'; el.className = 'pw-sheet'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '구매 안내');
     el.innerHTML = '<div class="pw-card"><button type="button" class="pw-x" data-pw-close aria-label="닫기">×</button><p class="pw-k">🔒 잠긴 장</p><h3>' + esc(worldName) + '의 다음 이야기는 구매 후 이어집니다</h3><p class="pw-sub">첫 장은 무료로 볼 수 있어요. 지금 고른 장: ' + esc(c.title || '') + '</p>' + body + '</div>';
     el.addEventListener('click', function (e) {
@@ -98,12 +100,28 @@
       if (e.target.closest('[data-pw-logout]')) { logout(); }
     });
     document.body.appendChild(el); track('paywall_view', { world: lk.world, chapter: c.id, logged: logged });
+    if (logged && products.length && canPay) loginHint(el.querySelector('#pw-hint'));
     var first = el.querySelector('.pw-btn:not([disabled])'); if (first) first.focus();
     return true;
   }
 
+  // 로그인 방법 헷갈림 막기: 이 기기에서 마지막으로 쓴 방법 표시, 구매 내역이 없으면 같은 이메일의 다른 가입 계정 안내
+  var LN = { kakao: '카카오', google: '구글', naver: '네이버' };
+  function lastLogin() { var v = ls('mt_last_login'); return LN[v] ? v : ''; }
+  function loginBtn(p) { return '<button type="button" class="pw-btn pw-' + p + '" data-pw-login="' + p + '">' + LN[p] + '로 시작하기' + (lastLogin() === p ? '<small class="pw-last">지난번에 쓴 방법</small>' : '') + '</button>'; }
+  function loginHint(box) {
+    if (!box) return;
+    fetch('/api/account/logins', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, headers()), body: '{}' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || d.hasPurchases || !box.isConnected) return;
+        if (d.suggest && d.linked.indexOf(d.suggest.provider) < 0) box.innerHTML = '<p class="pw-hint"><b>' + LN[d.suggest.provider] + '로 가입한 계정' + (d.suggest.hasPurchases ? '에 구매 내역이 있어요.' : '이 있어요.') + '</b> 같은 분이라면 <a href="/report/my/" target="_blank" rel="noopener">내 구매 내역</a>에서 두 계정을 합칠 수 있어요.</p>';
+        else box.innerHTML = '<p class="pw-hint">전에 산 주제가 안 보이나요? 다른 방법(카카오·구글·네이버)으로 산 적이 있다면 그 방법으로 로그인하거나 <a href="/report/my/" target="_blank" rel="noopener">내 구매 내역</a>에서 계정을 연결하세요.</p>';
+      }).catch(function () { });
+  }
   function login(provider) {
     track('login_start', { provider: provider });
+    try { root.localStorage.setItem('mt_last_login', provider); } catch (e) { }
     saveResume();
     // 네이버는 Supabase 기본 로그인이 아니라 서버가 처리한다(functions/_naver-login.js): 돌아오면 ?naver_login=1 로 세션을 받아 간다
     if (provider === 'naver') { root.location.href = '/api/auth/naver/start?next=' + encodeURIComponent(root.location.pathname + root.location.search + root.location.hash); return; }
@@ -216,6 +234,7 @@
       '.pw-login{display:grid;gap:8px;margin-top:10px}.pw-btn{border:0;border-radius:12px;padding:12px 14px;font:inherit;font-weight:700;cursor:pointer;background:#2A3047;color:#F3EEDF}.pw-btn[disabled]{opacity:.45;cursor:default}' +
       '.pw-kakao{background:#FEE500;color:#191600}.pw-naver{background:#03C75A;color:#fff}.pw-google{background:#fff;color:#1f1f1f}.pw-buy{background:#C8442F;color:#fff;white-space:nowrap}' +
       '.pw-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}.pw-list li{display:flex;gap:10px;align-items:center;justify-content:space-between;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 12px}.pw-list small{display:block;color:#B9B3A4;font-size:.76rem}' +
+      '.pw-last{display:block;font-size:.72rem;font-weight:500;opacity:.8;margin-top:2px}.pw-buyer{margin:10px 0 0;color:#DCD5C4;font-size:.84rem}.pw-hint{margin:8px 0 0;padding:8px 10px;border:1px solid rgba(213,185,127,.4);border-radius:10px;color:#DCD5C4;font-size:.8rem;line-height:1.5}.pw-hint a{color:#D5B97F}' +
       '.pw-own{color:#7FD1A8;font-weight:700;font-size:.86rem}.pw-price{color:#F3EEDF;font-weight:700;white-space:nowrap}.pw-fine{margin:10px 0 0;color:#8F8A7E;font-size:.74rem;line-height:1.5}.pw-fine a,.pw-link{color:#D5B97F;background:none;border:0;padding:0;font:inherit;cursor:pointer;text-decoration:underline}' +
       '.pw-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:10000;background:#141826;color:#F3EEDF;border-radius:12px;padding:12px 16px;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:90vw;font-size:.9rem}' +
       '.xp-lock{margin-left:6px;font-size:.8em;opacity:.8}';
