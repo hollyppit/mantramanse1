@@ -86,7 +86,7 @@
     var fine = '<p class="pw-fine">이 사주(' + esc(opts.who || '지금 보고 있는 사주') + ')에만 열리고, 결제 즉시 기간 제한 없이 볼 수 있습니다. 디지털 콘텐츠 특성상 열람을 시작하면 청약 철회가 제한될 수 있습니다. 구매 후 7일 이내·유료 장 미열람 시 전액 환불. <a href="/report/legal/products.html" target="_blank" rel="noopener">상품 안내</a> · <a href="/report/legal/refund.html" target="_blank" rel="noopener">환불정책</a> · <a href="/report/legal/terms.html" target="_blank" rel="noopener">이용약관</a></p>';
     if (!products.length || !canPay) body = '<p class="pw-note">지금은 결제를 준비하고 있습니다. 조금만 기다려 주세요.</p>';
     else if (!logged) body = list(false) + '<p class="pw-note">구매하려면 먼저 로그인해 주세요. 구매한 내용은 계정에 저장되어 다른 기기에서도 다시 볼 수 있어요.</p>' +
-      (canLogin ? '<div class="pw-login"><button type="button" class="pw-btn pw-kakao" data-pw-login="kakao">카카오로 시작하기</button><button type="button" class="pw-btn pw-google" data-pw-login="google">구글로 시작하기</button><button type="button" class="pw-btn" disabled title="준비 중">네이버(준비 중)</button></div>' : '<p class="pw-note">로그인을 준비하고 있습니다.</p>') + fine;
+      (canLogin ? '<div class="pw-login"><button type="button" class="pw-btn pw-kakao" data-pw-login="kakao">카카오로 시작하기</button><button type="button" class="pw-btn pw-google" data-pw-login="google">구글로 시작하기</button>' + (d.configured.naver ? '<button type="button" class="pw-btn pw-naver" data-pw-login="naver">네이버로 시작하기</button>' : '<button type="button" class="pw-btn" disabled title="준비 중">네이버(준비 중)</button>') + '</div>' : '<p class="pw-note">로그인을 준비하고 있습니다.</p>') + fine;
     else body = list(true) + fine +
       '<p class="pw-fine">' + esc(d.member.email || '') + ' 로그인 중 · <a href="/report/my/" target="_blank" rel="noopener">내 구매 내역</a> · <button type="button" class="pw-link" data-pw-logout>로그아웃</button></p>';
     var el = document.createElement('div'); el.id = 'pw-sheet'; el.className = 'pw-sheet'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '구매 안내');
@@ -105,6 +105,8 @@
   function login(provider) {
     track('login_start', { provider: provider });
     saveResume();
+    // 네이버는 Supabase 기본 로그인이 아니라 서버가 처리한다(functions/_naver-login.js): 돌아오면 ?naver_login=1 로 세션을 받아 간다
+    if (provider === 'naver') { root.location.href = '/api/auth/naver/start?next=' + encodeURIComponent(root.location.pathname + root.location.search + root.location.hash); return; }
     sbClient().then(function (sb) { return sb.auth.signInWithOAuth({ provider: provider, options: { redirectTo: root.location.href } }); })
       .catch(function () { dropResume(); alert('로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.'); });
   }
@@ -190,6 +192,19 @@
       // 구매가 끝나면 열려 있던 잠금 창을 닫고, 사려던 장으로 이어 간다(viewer 가 onPurchased 를 넘긴다)
       .then(function (x) { clearUrl(); return finishPurchase(x, oid); }).catch(function () { toast('결제 확인 중 연결이 끊겼습니다. 새로고침하면 다시 확인합니다.'); });
   }
+  // 네이버 로그인에서 돌아온 페이지: 서버가 잠깐 맡아 둔 세션을 받아 Supabase 로그인 상태로 만든다(쿠키 열쇠, 한 번만)
+  function handleNaver() {
+    var u = new URL(root.location.href), v = u.searchParams.get('naver_login'); if (!v) return Promise.resolve();
+    var clean = function () { u.searchParams.delete('naver_login'); try { root.history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch (e) { } };
+    if (v !== '1') { clean(); if (v === 'fail') toast('네이버 로그인을 마치지 못했습니다. 다시 시도해 주세요.'); return Promise.resolve(); }
+    var claim = function (n) { return fetch('/api/auth/naver/claim', { method: 'POST', credentials: 'same-origin' }).then(function (r) { if (r.ok) return r.json(); if (n < 2) return new Promise(function (ok) { setTimeout(ok, 700); }).then(function () { return claim(n + 1); }); return null; }); };
+    return claim(0).then(function (s) {
+      clean();
+      if (!s || !s.access_token) { toast('네이버 로그인을 마치지 못했습니다. 다시 시도해 주세요.'); return; }
+      return sbClient().then(function (sb) { return sb.auth.setSession({ access_token: s.access_token, refresh_token: s.refresh_token }); })
+        .then(function () { P.token = s.access_token; track('login_done', { provider: 'naver' }); return refresh(); });
+    }).catch(function () { clean(); });
+  }
   function toast(t) { if (R.toast) { R.toast(t, 5000); return; } var el = document.createElement('div'); el.className = 'pw-toast'; el.textContent = t; document.body.appendChild(el); setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 5000); }
 
   (function css() {
@@ -199,7 +214,7 @@
       '.pw-card h3{margin:4px 0 6px;font-size:1.12rem;line-height:1.45}.pw-k{margin:0;color:#D5B97F;font-size:.8rem;font-weight:700;letter-spacing:.04em}.pw-sub{margin:0 0 12px;color:#B9B3A4;font-size:.86rem}' +
       '.pw-x{position:absolute;top:8px;right:10px;border:0;background:none;color:#B9B3A4;font-size:1.6rem;cursor:pointer;line-height:1}.pw-note{color:#DCD5C4;font-size:.9rem;line-height:1.6}' +
       '.pw-login{display:grid;gap:8px;margin-top:10px}.pw-btn{border:0;border-radius:12px;padding:12px 14px;font:inherit;font-weight:700;cursor:pointer;background:#2A3047;color:#F3EEDF}.pw-btn[disabled]{opacity:.45;cursor:default}' +
-      '.pw-kakao{background:#FEE500;color:#191600}.pw-google{background:#fff;color:#1f1f1f}.pw-buy{background:#C8442F;color:#fff;white-space:nowrap}' +
+      '.pw-kakao{background:#FEE500;color:#191600}.pw-naver{background:#03C75A;color:#fff}.pw-google{background:#fff;color:#1f1f1f}.pw-buy{background:#C8442F;color:#fff;white-space:nowrap}' +
       '.pw-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}.pw-list li{display:flex;gap:10px;align-items:center;justify-content:space-between;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 12px}.pw-list small{display:block;color:#B9B3A4;font-size:.76rem}' +
       '.pw-own{color:#7FD1A8;font-weight:700;font-size:.86rem}.pw-price{color:#F3EEDF;font-weight:700;white-space:nowrap}.pw-fine{margin:10px 0 0;color:#8F8A7E;font-size:.74rem;line-height:1.5}.pw-fine a,.pw-link{color:#D5B97F;background:none;border:0;padding:0;font:inherit;cursor:pointer;text-decoration:underline}' +
       '.pw-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:10000;background:#141826;color:#F3EEDF;border-radius:12px;padding:12px 16px;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:90vw;font-size:.9rem}' +
@@ -210,7 +225,7 @@
   R.Paywall = {
     TOPIC_WORLD: TOPIC_WORLD,
     // viewer 가 사주 데이터와 장 목록 읽는 함수를 넘긴다
-    init: function (sd, opts) { P.sd = sd; opts = opts || {}; if (opts.chapters) P.chapters = opts.chapters; if (opts.onChange) P.onChange = opts.onChange; if (opts.resume) P.resume = opts.resume; if (opts.onPurchased) P.onPurchased = opts.onPurchased; return (P.early || Promise.resolve()).then(refresh).then(handleReturn); },
+    init: function (sd, opts) { P.sd = sd; opts = opts || {}; if (opts.chapters) P.chapters = opts.chapters; if (opts.onChange) P.onChange = opts.onChange; if (opts.resume) P.resume = opts.resume; if (opts.onPurchased) P.onPurchased = opts.onPurchased; return (P.early || Promise.resolve()).then(refresh).then(handleNaver).then(handleReturn); },
     refresh: refresh, headers: headers, lockOf: lockOf, lockedIndex: lockedIndex, show: show, close: close, info: function () { return P.info; },
     _state: P,
   };

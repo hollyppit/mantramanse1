@@ -56,7 +56,9 @@ export async function memberOf(request, env) {
     const r = await fetch(base(env) + '/auth/v1/user', { headers: { apikey: env.SUPABASE_ANON_KEY || env.SUPABASE_SERVICE_KEY, authorization: 'Bearer ' + tok }, signal: AbortSignal.timeout(8000) });
     if (!r.ok) return null;
     const u = await r.json();
-    return u && typeof u.id === 'string' ? { id: u.id, email: u.email || '', provider: (u.app_metadata && u.app_metadata.provider) || '' } : null;
+    if (!u || typeof u.id !== 'string') return null;
+    const um = u.user_metadata || {}, naver = um.provider === 'naver';   // 네이버 회원은 내부용 주소 대신 네이버가 준 이메일을 보여 준다(functions/_naver-login.js)
+    return { id: u.id, email: (naver ? um.email || um.name || '네이버 회원' : u.email) || '', provider: naver ? 'naver' : (u.app_metadata && u.app_metadata.provider) || '' };
   } catch { return null; }
 }
 
