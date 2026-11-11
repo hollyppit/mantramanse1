@@ -7,7 +7,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
 (async () => {
   const C = await imp('functions/_commerce.js');
   const access = await imp('functions/api/commerce/access.js'), order = await imp('functions/api/commerce/order.js');
-  const confirm = await imp('functions/api/commerce/confirm.js'), admin = await imp('functions/api/commerce/admin.js');
+  const confirm = await imp('functions/api/commerce/confirm.js'), admin = await imp('functions/api/commerce/admin.js'), webhook = await imp('functions/api/commerce/webhook.js');
   const { Editorial } = await imp('functions/_editorial.js');
 
   // ── 메모리 KV + 활성 카탈로그(재물 주제 장 15개 중 order 가 가장 작은 장이 무료)
@@ -20,6 +20,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
 
   // ── 가짜 Supabase · 토스
   const db = { orders: [], ent: [] }; let tossCalls = [], tossMode = 'done';
+  const po = {}; let poCalls = [];   // 가짜 포트원: 결제 id → 결제 객체
   const USERS = { 'tok-a': { id: '00000000-0000-0000-0000-00000000000a', email: 'a@x.test' }, 'tok-b': { id: '00000000-0000-0000-0000-00000000000b', email: 'b@x.test' } };
   const q = (u, k) => { const m = new RegExp('[?&]' + k + '=([^&]+)').exec(u); return m ? decodeURIComponent(m[1]) : null; };
   const eqv = v => v && v.startsWith('eq.') ? v.slice(3) : null;
@@ -31,6 +32,12 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
       tossCalls.push({ u, body });
       if (u.endsWith('/payments/confirm')) return tossMode === 'done' ? res({ status: 'DONE', method: '카드', approvedAt: '2026-11-10T00:00:00+09:00' }) : res({ code: 'REJECT_CARD_PAYMENT', message: '거절' }, 400);
       if (u.includes('/cancel')) return res({ status: 'CANCELED' });
+    }
+    if (u.startsWith('https://api.portone.io/')) {
+      poCalls.push({ u, body, auth: init.headers.authorization });
+      const m = /payments\/([^/?]+)(\/cancel)?/.exec(u), id = m && decodeURIComponent(m[1]);
+      if (m && m[2]) { if (po[id]) po[id].status = 'CANCELLED'; return res({ cancellation: { status: 'SUCCEEDED' } }); }
+      return po[id] ? res(po[id]) : res({ type: 'PAYMENT_NOT_FOUND' }, 404);
     }
     if (u.includes('/rest/v1/kv')) return res([]);
     if (u.includes('/rest/v1/commerce_orders')) {
@@ -125,6 +132,57 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   ok(!(await gate({ tok: 'tok-a' })).ok, '취소 후 다시 잠김');
   r = await admin.onRequestPost({ request: req('/api/commerce/admin', { adminPw: 'adm', body: { action: 'regrant', orderId: oid3 } }), env }); ok(r.status === 409, '취소된 주문은 권한 다시 주기 거부');
   r = await admin.onRequestPost({ request: req('/api/commerce/admin', { body: { action: 'cancel', orderId: oid3 } }), env }); ok(r.status === 401, '비관리자 취소 거부');
+
+  // ── 포트원: 결제창 복귀 확인·금액 위조·대기·웹훅·취소
+  const penv = { ...env, PORTONE_STORE_ID: 'store-x', PORTONE_CHANNEL_KEY: 'channel-key-x', PORTONE_API_SECRET: 'po-secret-x' };
+  ok(C.payProvider(penv) === 'portone' && C.payProvider(env) === 'toss' && C.payProvider({ ...penv, PAY_PROVIDER: 'toss' }) === 'toss' && C.payProvider({ ...env, PAY_PROVIDER: 'portone' }) === null, '결제사 고르기: 포트원 우선·고정값');
+  r = await access.onRequestPost({ request: req('/api/commerce/access', { tok: 'tok-a', body: { sd } }), env: penv }); d = await r.json();
+  ok(d.keys.provider === 'portone' && d.keys.portone.storeId === 'store-x' && d.keys.portone.channelKey === 'channel-key-x' && !d.keys.tossClientKey && !JSON.stringify(d).includes('po-secret-x'), '포트원 공개 값만 내려 보냄');
+  const poOrder = async () => { const x = await order.onRequestPost({ request: req('/api/commerce/order', { tok: 'tok-a', body: { productId: 'bundle', sd } }), env: penv }); return x.json(); };
+  let o = await poOrder(); ok(o.provider === 'portone' && o.amount === 19900, '포트원 주문: 서버 가격');
+  const P1 = o.orderId;
+  r = await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-a', body: { paymentId: P1 } }), env: penv }); ok(r.status === 502, '포트원에 결제가 없으면 다시 시도(502)');
+  po[P1] = { id: P1, status: 'READY', amount: { total: 19900 }, currency: 'KRW', storeId: 'store-x' };
+  r = await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-a', body: { paymentId: P1 } }), env: penv }); ok(r.status === 202 && db.orders.find(x => x.order_id === P1).status === 'pending', '결제 대기: 202·주문 그대로');
+  r = await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-b', body: { paymentId: P1 } }), env: penv }); ok(r.status === 404, '포트원: 남의 주문 거부');
+  Object.assign(po[P1], { status: 'PAID', paidAt: '2026-11-11T00:00:00Z', method: { type: 'PaymentMethodCard' } }); poCalls = [];
+  r = await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-a', body: { paymentId: P1, amount: 1 } }), env: penv }); d = await r.json();
+  const op1 = db.orders.find(x => x.order_id === P1), ents = () => db.ent.filter(e => e.order_id === P1 && !e.revoked_at).map(e => e.world).sort().join();
+  ok(r.status === 200 && d.ok && op1.status === 'paid' && op1.payment_key === 'portone:' + P1 && op1.method === '카드' && ents() === 'w2,w7', '포트원 결제 완료: 묶음 권한 2건');
+  ok(poCalls[0].auth === 'PortOne po-secret-x' && poCalls[0].u.includes('storeId=store-x'), '포트원 조회: 시크릿 머리글·상점 ID');
+  r = await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-a', body: { paymentId: P1 } }), env: penv }); d = await r.json(); ok(d.ok && d.already && ents() === 'w2,w7', '포트원 재확인: 중복 없음');
+  // 금액 바꿔 치기: 결제창에서 100원만 결제 → 자동 취소·실패
+  db.ent.forEach(e => { if (e.order_id === P1) e.revoked_at = 'x'; }); op1.status = 'canceled';
+  o = await poOrder(); const P2 = o.orderId; po[P2] = { id: P2, status: 'PAID', amount: { total: 100 }, currency: 'KRW', storeId: 'store-x' }; poCalls = [];
+  r = await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-a', body: { paymentId: P2 } }), env: penv }); d = await r.json();
+  ok(r.status === 400 && d.error === 'amount-mismatch' && db.orders.find(x => x.order_id === P2).status === 'failed' && poCalls.some(c => c.u.includes('/cancel')) && !db.ent.some(e => e.order_id === P2), '포트원 금액 위조: 자동 취소·권한 없음');
+  // 다른 상점의 결제
+  o = await poOrder(); const P3 = o.orderId; po[P3] = { id: P3, status: 'PAID', amount: { total: 19900 }, currency: 'KRW', storeId: 'store-other' };
+  r = await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-a', body: { paymentId: P3 } }), env: penv }); ok(r.status === 400 && !db.ent.some(e => e.order_id === P3), '다른 상점 결제는 거부');
+  // 웹훅: 창을 닫아 복귀 확인이 없어도 결제 완료 처리
+  o = await poOrder(); const P4 = o.orderId; po[P4] = { id: P4, status: 'PAID', amount: { total: 19900 }, currency: 'KRW', storeId: 'store-x', method: { type: 'PaymentMethodEasyPay', provider: 'KAKAOPAY' } };
+  const hook = (body, headers = {}, e = penv) => webhook.onRequestPost({ request: new Request('https://x.test/api/commerce/webhook', { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body) }), env: e });
+  r = await hook({ type: 'Transaction.Paid', data: { paymentId: P4, storeId: 'store-x' } }); d = await r.json();
+  ok(r.status === 200 && d.result === 'paid' && db.orders.find(x => x.order_id === P4).status === 'paid' && db.orders.find(x => x.order_id === P4).method === '간편결제(KAKAOPAY)', '웹훅: 결제 완료·권한');
+  r = await hook({ type: 'Transaction.Paid', data: { paymentId: 'other_1' } }); d = await r.json(); ok(r.status === 200 && d.ignored, '웹훅: 우리 주문 아님은 무시');
+  r = await hook({ type: 'Transaction.Cancelled', data: { paymentId: P4 } }); d = await r.json(); ok(d.ignored && db.orders.find(x => x.order_id === P4).status === 'paid', '위조 취소 알림은 무시(포트원 조회 기준)');
+  // 서명
+  const secret = 'whsec_' + Buffer.from('hook-secret-0123456789').toString('base64'), senv = { ...penv, PORTONE_WEBHOOK_SECRET: secret };
+  const wbody = { type: 'Transaction.Paid', data: { paymentId: P4 } }, ts = String(Math.floor(Date.now() / 1000));
+  const sig = require('crypto').createHmac('sha256', Buffer.from('hook-secret-0123456789')).update('msg_1.' + ts + '.' + JSON.stringify(wbody)).digest('base64');
+  r = await hook(wbody, {}, senv); ok(r.status === 401, '웹훅 서명 없음 거절');
+  r = await hook(wbody, { 'webhook-id': 'msg_1', 'webhook-timestamp': ts, 'webhook-signature': 'v1,' + (sig[0] === 'A' ? 'B' : 'A') + sig.slice(1) }, senv); ok(r.status === 401, '웹훅 틀린 서명 거절');
+  r = await hook(wbody, { 'webhook-id': 'msg_1', 'webhook-timestamp': String(+ts - 1000), 'webhook-signature': 'v1,' + sig }, senv); ok(r.status === 401, '오래된 웹훅 거절');
+  r = await hook(wbody, { 'webhook-id': 'msg_1', 'webhook-timestamp': ts, 'webhook-signature': 'v0,xx v1,' + sig }, senv); ok(r.status === 200, '웹훅 맞는 서명 통과');
+  // 관리자 취소: 포트원 주문은 포트원으로 취소
+  poCalls = [];
+  r = await admin.onRequestPost({ request: req('/api/commerce/admin', { adminPw: 'adm', body: { action: 'cancel', orderId: P4, reason: '테스트' } }), env: penv });
+  ok(r.status === 200 && db.orders.find(x => x.order_id === P4).status === 'canceled' && poCalls.some(c => c.u.endsWith('/payments/' + P4 + '/cancel') && c.body.storeId === 'store-x') && !db.ent.some(e => e.order_id === P4 && !e.revoked_at), '관리자 취소: 포트원 취소·권한 회수');
+  r = await admin.onRequestGet({ request: req('/api/commerce/admin', { adminPw: 'adm', method: 'GET' }), env: penv }); d = await r.json(); ok(d.configured.provider === 'portone' && d.configured.portone && !d.configured.portoneWebhook, '관리자 준비 상태: 포트원');
+  // 포트원 콘솔에서 취소한 결제: 웹훅 취소 알림으로 권한 회수
+  o = await poOrder(); const P5 = o.orderId; po[P5] = { id: P5, status: 'PAID', amount: { total: 19900 }, currency: 'KRW', storeId: 'store-x' };
+  await hook({ type: 'Transaction.Paid', data: { paymentId: P5 } }); po[P5].status = 'CANCELLED';
+  r = await hook({ type: 'Transaction.Cancelled', data: { paymentId: P5 } }); d = await r.json(); ok(d.canceled && db.orders.find(x => x.order_id === P5).status === 'canceled' && !db.ent.some(e => e.order_id === P5 && !e.revoked_at), '웹훅 취소: 권한 회수');
 
   // ── 키가 없으면 결제 API 는 'not-configured'
   const bare = { GLOSSARY_KV: KV, ADMIN_PASSWORD: 'adm' };

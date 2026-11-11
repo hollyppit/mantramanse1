@@ -56,6 +56,8 @@ import(url.pathToFileURL(path.join(__dirname, '..', 'functions/_middleware.js'))
   for (const p of ['/report/legal/terms.html', '/report/legal/privacy.html', '/report/legal/refund.html', '/report/legal/business.js', '/report/legal/legal.css', '/report/legal/']) { nexted = 0; r = await run(B + p, ENV); ok(nexted === 1, '정책 페이지는 잠금 중에도 공개: ' + p); }
   nexted = 0; r = await run(B + '/api/commerce/access', ENV, { method: 'POST', body: '{}' }); ok(nexted === 1, '상품 가격 API(POST)는 잠금 중에도 공개');
   nexted = 0; r = await run(B + '/api/commerce/access', ENV); ok(r.status === 401 && nexted === 0, '상품 가격 API GET 은 잠금');
+  nexted = 0; r = await run(B + '/api/commerce/webhook', ENV, { method: 'POST', body: '{}' }); ok(nexted === 1, '포트원 웹훅(POST)은 잠금 중에도 받음');
+  nexted = 0; r = await run(B + '/api/commerce/webhook', ENV); ok(r.status === 401 && nexted === 0, '웹훅 GET 은 잠금');
   for (const p of ['/api/commerce/order', '/api/commerce/admin', '/api/commerce/confirm']) { nexted = 0; r = await run(B + p, ENV, { method: 'POST', body: '{}' }); ok(r.status === 401 && nexted === 0, '다른 결제 API 는 잠금: ' + p); }
   for (const p of ['/report/legal/../admin/', '/report/legal/x/y.html', '/report/legalx.html']) { nexted = 0; r = await run(B + p, ENV); ok(r.status === 401 && nexted === 0, '정책 폴더 밖은 잠금: ' + p); }
 

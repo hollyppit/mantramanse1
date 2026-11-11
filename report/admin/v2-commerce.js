@@ -22,8 +22,13 @@
     var html = '<div class="card"><h3 style="margin:0 0 6px;color:var(--gold)">결제 준비 상태</h3><ul style="margin:0;padding-left:18px;line-height:1.8">' +
       cfRow(cf.supabase, '회원·주문 저장소(Supabase)', 'Cloudflare 환경변수 SUPABASE_URL·SUPABASE_SERVICE_KEY') +
       cfRow(cf.anon, '로그인(Supabase 공개 키)', '환경변수 SUPABASE_ANON_KEY') +
-      cfRow(cf.toss, '결제 승인(토스 시크릿 키)', '환경변수 TOSS_SECRET_KEY') +
-      cfRow(cf.tossClient, '결제창(토스 클라이언트 키)', '환경변수 TOSS_CLIENT_KEY') + '</ul>' +
+      '<li><b>지금 쓰는 결제사: ' + (cf.provider === 'portone' ? '포트원' : cf.provider === 'toss' ? '토스페이먼츠' : '없음(결제 준비 중)') + '</b> <span class="muted">— 포트원 값 3개가 다 있으면 포트원, 아니면 토스. 환경변수 PAY_PROVIDER=portone|toss 로 고정 가능</span></li>' +
+      cfRow(cf.portoneStore, '포트원 상점 ID', '환경변수 PORTONE_STORE_ID') +
+      cfRow(cf.portoneChannel, '포트원 채널 키(결제대행사)', '환경변수 PORTONE_CHANNEL_KEY') +
+      cfRow(cf.portoneSecret, '포트원 API 시크릿(서버 전용)', '환경변수 PORTONE_API_SECRET') +
+      cfRow(cf.portoneWebhook, '포트원 웹훅 서명 확인(선택)', '환경변수 PORTONE_WEBHOOK_SECRET') +
+      cfRow(cf.toss, '토스 시크릿 키(이전 결제 취소용)', '환경변수 TOSS_SECRET_KEY') +
+      cfRow(cf.tossClient, '토스 클라이언트 키', '환경변수 TOSS_CLIENT_KEY') + '</ul>' +
       '<p class="muted" style="margin:8px 0 0">유료 세계: <b>' + (paidWorlds.length ? paidWorlds.map(function (k) { return esc(d.worlds[k].name || k); }).join(' · ') : '없음') + '</b> — 세계를 유료로 바꾸는 곳은 <b>주제·표지 설정</b>의 "이용 권한"입니다. 유료 세계가 없으면 아무것도 잠기지 않습니다. 유료 세계는 첫 장만 무료로 보입니다.</p></div>';
     html += '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">상품과 가격</h3><p class="muted" style="margin:0 0 8px">가격이 0원이면 판매하지 않습니다. 가격을 바꿔도 이미 끝난 주문에는 영향이 없습니다. 전체 열기는 구매 시점의 유료 세계만 엽니다.</p>' +
       '<table class="tbl" style="width:100%"><thead><tr><th>상품</th><th>이름</th><th>가격(원)</th><th>판매</th></tr></thead><tbody>' +

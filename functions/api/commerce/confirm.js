@@ -1,20 +1,32 @@
-// POST /api/commerce/confirm — 토스 결제창이 성공 주소로 돌아온 뒤 서버에서 결제를 승인하고 구매 권한을 준다(회원 전용).
-// 요청: { paymentKey, orderId, amount } + 헤더 x-member-token
-// 확인 순서: 내 주문인가 → 대기 상태인가 → 금액이 주문과 같은가 → 토스 승인(시크릿 키) → 주문 '결제 완료' + 세계별 권한 추가
-// 같은 주문을 두 번 승인하려 하면 이미 결제된 주문으로 보고 권한만 다시 확인해 돌려준다(새로고침 대비).
+// POST /api/commerce/confirm — 결제창에서 돌아온 뒤 서버에서 결제를 확인하고 구매 권한을 준다(회원 전용).
+// 포트원: { paymentId }            → 포트원 API 로 결제를 조회해 '결제 완료'·금액이 주문과 같을 때만 권한(settlePortone)
+// 토스:   { paymentKey, orderId, amount } → 금액 확인 → 토스 승인(시크릿 키) → 권한
+// 공통: 내 주문인가 → 대기 상태인가. 이미 결제된 주문이면 권한만 다시 확인해 성공으로 돌려준다(새로고침 대비).
 import { json } from '../../_lib.js';
-import { memberOf, sbRest, tossCall, supabaseReady, tossReady, grantOrder } from '../../_commerce.js';
+import { memberOf, sbRest, tossCall, supabaseReady, tossReady, portoneReady, grantOrder, settlePortone } from '../../_commerce.js';
 
 const enc = encodeURIComponent;
 export async function onRequestPost({ request, env }) {
-  if (!supabaseReady(env) || !tossReady(env)) return json({ error: 'not-configured' }, 503);
-  const member = await memberOf(request, env); if (!member) return json({ error: 'login-required' }, 401);
+  if (!supabaseReady(env)) return json({ error: 'not-configured' }, 503);
   let b; try { b = await request.json(); } catch { return json({ error: 'bad-payload' }, 400); }
-  const paymentKey = typeof b.paymentKey === 'string' ? b.paymentKey.slice(0, 200) : '', orderId = typeof b.orderId === 'string' ? b.orderId.slice(0, 64) : '', amount = +b.amount;
-  if (!paymentKey || !/^mt_[\w]+$/.test(orderId) || !Number.isInteger(amount)) return json({ error: 'bad-payload' }, 400);
+  const isPortone = b && typeof b.paymentId === 'string';
+  if (isPortone ? !portoneReady(env) : !tossReady(env)) return json({ error: 'not-configured' }, 503);
+  const member = await memberOf(request, env); if (!member) return json({ error: 'login-required' }, 401);
+  const orderId = String(isPortone ? b.paymentId : b.orderId || '').slice(0, 64);
+  if (!/^mt_[\w]+$/.test(orderId)) return json({ error: 'bad-payload' }, 400);
   let order;
   try { order = (await sbRest(env, `commerce_orders?select=*&order_id=eq.${enc(orderId)}&user_id=eq.${enc(member.id)}`))[0]; } catch { return json({ error: 'commerce-unavailable' }, 503); }
   if (!order) return json({ error: 'unknown-order' }, 404);
+
+  if (isPortone) {
+    let r; try { r = await settlePortone(env, order); } catch { return json({ error: 'commerce-unavailable' }, 503); }
+    if (r.ok) return json({ ok: true, already: !!r.already, worlds: r.worlds });
+    const status = r.error === 'grant-failed' ? 500 : r.pending ? 202 : r.retry ? 502 : /^order-/.test(r.error) ? 409 : 400;
+    return json({ error: r.error, code: r.code || null, orderId: r.orderId || undefined }, status);
+  }
+
+  const paymentKey = typeof b.paymentKey === 'string' ? b.paymentKey.slice(0, 200) : '', amount = +b.amount;
+  if (!paymentKey || !Number.isInteger(amount)) return json({ error: 'bad-payload' }, 400);
   if (order.status === 'paid') { try { await grantOrder(env, order, 'payment'); } catch { } return json({ ok: true, already: true, worlds: order.worlds }); }
   if (order.status !== 'pending') return json({ error: 'order-' + order.status }, 409);
   if (order.amount !== amount) {

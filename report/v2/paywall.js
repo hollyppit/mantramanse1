@@ -2,7 +2,7 @@
    - 서버가 장 본문(검수 풀이)을 잠그고, 이 파일은 같은 규칙으로 화면에서 잠긴 장을 가리고 구매 창을 띄운다.
    - 장 → 세계: 장의 카탈로그 주제(editorialTopicId)로 정한다(서버 TOPIC_WORLD 와 같은 표). 주제가 없는 장은 잠그지 않는다.
    - 세계의 무료 장: 서버가 알려 준 freeChapter(카탈로그 id)와 장의 editorialContractId(없으면 id)가 같으면 무료.
-   - 로그인: Supabase(카카오·구글). 결제: 토스페이먼츠 결제창(카드·간편결제). 키가 없으면 '준비 중'으로 보이고 잠금은 그대로다.
+   - 로그인: Supabase(카카오·구글). 결제: 서버가 고른 결제사(keys.provider) — 포트원 V2 결제창(PG 는 채널 키가 정함) 또는 토스페이먼츠 결제창. 키가 없으면 '준비 중'으로 보이고 잠금은 그대로다.
    - 관리자: 같은 브라우저 탭의 관리자 비밀번호(sessionStorage mt_pw)가 있으면 서버가 잠그지 않는다. '무료 사용자로 보기'(localStorage mt_view_as_free=1)면 무료처럼 본다. */
 (function (root) {
   'use strict';
@@ -10,6 +10,8 @@
   var TOPIC_WORLD = { self: 'w1', timing: 'w1', health: 'w1', creative: 'w1', remedy: 'w1', wealth: 'w2', career: 'w7', love: 'w3', relationships: 'w3' };
   var SB_SDK = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
   var TOSS_SDK = 'https://js.tosspayments.com/v2/standard';
+  var PORTONE_SDK = 'https://cdn.portone.io/v2/browser-sdk.js';
+  var PAY_KEYS = ['pay', 'paymentKey', 'orderId', 'amount', 'code', 'message', 'paymentType', 'paymentId', 'txId', 'transactionType', 'pgCode', 'pgMessage'];
   var P = { info: null, sd: null, sb: null, token: '', loading: null, chapters: function () { return []; }, onChange: null };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var won = function (n) { return (+n || 0).toLocaleString('ko-KR') + '원'; };
@@ -114,9 +116,10 @@
     fetch('/api/commerce/order', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, headers()), body: JSON.stringify({ productId: productId, sd: safeSd(P.sd), label: who || null }) })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'order'); return j; }); })
       .then(function (o) {
+        if (o.provider === 'portone' || (!o.provider && d.keys.provider === 'portone')) return payPortone(o);
         return (root.TossPayments ? Promise.resolve() : script(TOSS_SDK)).then(function () {
           var back = root.location.origin + root.location.pathname;
-          var keep = new URLSearchParams(root.location.search); ['pay', 'paymentKey', 'orderId', 'amount', 'code', 'message', 'paymentType'].forEach(function (k) { keep.delete(k); });
+          var keep = new URLSearchParams(root.location.search); PAY_KEYS.forEach(function (k) { keep.delete(k); });
           keep.set('pay', 'success'); var ok = back + '?' + keep.toString() + root.location.hash; keep.set('pay', 'fail'); var no = back + '?' + keep.toString() + root.location.hash;
           var pay = root.TossPayments(d.keys.tossClientKey).payment({ customerKey: o.customerKey });
           saveResume();
@@ -127,9 +130,41 @@
         dropResume();   // 결제창을 닫았거나 실패: 페이지를 떠나지 않았으므로 저장한 이어 읽기 값을 지운다
         if (btn) { btn.disabled = false; btn.textContent = '다시 시도'; }
         var m = { 'already-owned': '이미 구매한 상품입니다.', 'login-required': '로그인이 풀렸습니다. 다시 로그인해 주세요.', 'not-configured': '결제를 준비하고 있습니다.' }[e && e.message];
-        if (e && e.code === 'USER_CANCEL') return;
-        alert(m || '결제를 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        if (e && (e.code === 'USER_CANCEL' || e.message === 'user-cancel')) return;
+        alert(m || (e && e.portone ? '결제가 완료되지 않았습니다: ' + e.message : '결제를 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.'));
       });
+  }
+
+  // 포트원 결제창: PC 는 같은 페이지에서 창이 떴다가 결과를 돌려주고, 모바일은 redirectUrl 로 페이지를 옮겼다가 돌아온다(handleReturn).
+  // 결제 id 는 서버 주문번호를 그대로 쓴다. 서버가 포트원에 결제를 다시 조회해 금액을 확인한 뒤에만 권한을 준다.
+  function payPortone(o) {
+    var k = P.info.keys.portone || {};
+    return (root.PortOne ? Promise.resolve() : script(PORTONE_SDK)).then(function () {
+      var u = new URL(root.location.href); PAY_KEYS.forEach(function (x) { u.searchParams.delete(x); }); u.searchParams.set('pay', 'portone');
+      var cust = { customerId: o.customerKey }; if (P.info.member && P.info.member.email) cust.email = P.info.member.email;
+      saveResume();
+      return root.PortOne.requestPayment({ storeId: k.storeId, channelKey: k.channelKey, paymentId: o.orderId, orderName: o.orderName, totalAmount: o.amount, currency: 'CURRENCY_KRW', payMethod: 'CARD', redirectUrl: u.toString(), customer: cust });
+    }).then(function (res) {
+      dropResume();   // 여기까지 오면 PC 결제창: 페이지를 떠나지 않았다
+      if (!res) return;   // 모바일: 이미 다른 페이지로 이동 중
+      if (res.code != null) { var e = new Error(/취소/.test(res.message || '') ? 'user-cancel' : (res.message || res.code)); e.portone = true; throw e; }
+      return confirmPortone(o.orderId);
+    });
+  }
+  // 서버 확인: 결제사 승인이 막 끝나 '처리 중'이면 잠깐 기다렸다 두 번 더 묻는다
+  function confirmPortone(paymentId, tries) {
+    tries = tries || 0;
+    return fetch('/api/commerce/confirm', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, headers()), body: JSON.stringify({ paymentId: paymentId }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }); })
+      .then(function (x) {
+        if ((x.status === 202 || x.status === 502) && tries < 2) return new Promise(function (ok) { setTimeout(ok, 2000); }).then(function () { return confirmPortone(paymentId, tries + 1); });
+        return finishPurchase(x, paymentId);
+      });
+  }
+  function finishPurchase(x, oid) {
+    if (x.ok && x.j.ok) { track('purchase_done', { order: oid }); toast('구매가 완료되었습니다. 이어서 읽어 보세요.'); }
+    else toast(x.j.error === 'grant-failed' ? '결제는 되었지만 열람 권한 기록에 실패했습니다. 문의해 주시면 바로 열어 드립니다(주문번호 ' + oid + ').' : x.status === 202 ? '결제를 확인하고 있습니다. 잠시 후 새로고침해 주세요.' : '결제를 확인하지 못했습니다: ' + (x.j.message || x.j.error || ''));
+    return refresh().then(function () { if (x.ok && x.j.ok) { close(); if (P.onPurchased) { try { P.onPurchased(); } catch (e) { } } } });
   }
 
   // 결제창에서 돌아왔을 때: 성공이면 서버 승인 → 잠금 정보 다시 받기. 주소의 결제 값은 바로 지운다.
@@ -137,18 +172,19 @@
     var u = new URL(root.location.href), st = u.searchParams.get('pay'); if (!st) return Promise.resolve(null);
     var pk = u.searchParams.get('paymentKey'), oid = u.searchParams.get('orderId'), amt = u.searchParams.get('amount'), msg = u.searchParams.get('message');
     // 주소의 결제 값은 서버가 확실한 답을 준 뒤에 지운다(연결이 끊기면 남겨 두어 새로고침으로 다시 승인할 수 있게)
-    var clearUrl = function () { ['pay', 'paymentKey', 'orderId', 'amount', 'code', 'message', 'paymentType'].forEach(function (k) { u.searchParams.delete(k); }); try { root.history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch (e) { } };
+    var clearUrl = function () { PAY_KEYS.forEach(function (k) { u.searchParams.delete(k); }); try { root.history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch (e) { } };
+    var getToken = function () { return (P.loading || Promise.resolve()).then(function () { return P.token ? null : sbClient().then(function (sb) { return sb.auth.getSession(); }).then(function (r) { P.token = r && r.data && r.data.session && r.data.session.access_token || ''; }).catch(function () { }); }); };
+    if (st === 'portone') {   // 포트원 모바일 복귀: ?pay=portone&paymentId=…(&code=…&message=… 이면 실패·취소)
+      var pid = u.searchParams.get('paymentId'), code = u.searchParams.get('code');
+      if (!pid || code) { clearUrl(); if (code && !/취소/.test(msg || '')) toast('결제가 완료되지 않았습니다: ' + (msg || code)); return Promise.resolve(null); }
+      return getToken().then(function () { return confirmPortone(pid); }).then(clearUrl).catch(function () { toast('결제 확인 중 연결이 끊겼습니다. 새로고침하면 다시 확인합니다.'); });
+    }
     if (st !== 'success' || !pk || !oid) { clearUrl(); if (st === 'fail' && msg) toast('결제가 완료되지 않았습니다: ' + msg); return Promise.resolve(null); }
-    return (P.loading || Promise.resolve()).then(function () { return P.token ? null : sbClient().then(function (sb) { return sb.auth.getSession(); }).then(function (r) { P.token = r && r.data && r.data.session && r.data.session.access_token || ''; }).catch(function () { }); })
+    return getToken()
       .then(function () { return fetch('/api/commerce/confirm', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, headers()), body: JSON.stringify({ paymentKey: pk, orderId: oid, amount: +amt }) }); })
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (x) {
-        clearUrl();
-        if (x.ok && x.j.ok) { track('purchase_done', { order: oid }); toast('구매가 완료되었습니다. 이어서 읽어 보세요.'); }
-        else toast(x.j.error === 'grant-failed' ? '결제는 되었지만 열람 권한 기록에 실패했습니다. 문의해 주시면 바로 열어 드립니다(주문번호 ' + oid + ').' : '결제를 확인하지 못했습니다: ' + (x.j.message || x.j.error || ''));
-        // 구매가 끝나면 열려 있던 잠금 창을 닫고, 사려던 장으로 이어 간다(viewer 가 onPurchased 를 넘긴다)
-        return refresh().then(function () { if (x.ok && x.j.ok) { close(); if (P.onPurchased) { try { P.onPurchased(); } catch (e) { } } } });
-      }).catch(function () { toast('결제 확인 중 연결이 끊겼습니다. 새로고침하면 다시 확인합니다.'); });
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }); })
+      // 구매가 끝나면 열려 있던 잠금 창을 닫고, 사려던 장으로 이어 간다(viewer 가 onPurchased 를 넘긴다)
+      .then(function (x) { clearUrl(); return finishPurchase(x, oid); }).catch(function () { toast('결제 확인 중 연결이 끊겼습니다. 새로고침하면 다시 확인합니다.'); });
   }
   function toast(t) { if (R.toast) { R.toast(t, 5000); return; } var el = document.createElement('div'); el.className = 'pw-toast'; el.textContent = t; document.body.appendChild(el); setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 5000); }
 
@@ -175,5 +211,5 @@
     _state: P,
   };
   // 결제창에서 돌아온 페이지: 사주 입력·계산을 기다리지 않고 바로 서버 승인을 시작한다(토스는 승인이 늦으면 결제를 자동 취소한다).
-  if (/[?&]pay=(success|fail)/.test(root.location.search || '')) P.early = refresh().then(handleReturn).catch(function () { });
+  if (/[?&]pay=(success|fail|portone)/.test(root.location.search || '')) P.early = refresh().then(handleReturn).catch(function () { });
 })(typeof window !== 'undefined' ? window : globalThis);

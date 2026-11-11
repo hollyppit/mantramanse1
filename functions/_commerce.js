@@ -9,7 +9,8 @@
 //   5) 회원은 x-member-token(Supabase 로그인 토큰)으로 확인하고, 회원 × 사주 × 세계 구매 권한이 있으면 연다.
 //
 // 필요한 환경변수: SUPABASE_URL, SUPABASE_SERVICE_KEY(서버 전용), SUPABASE_ANON_KEY(공개, 브라우저 로그인용),
-//                 TOSS_SECRET_KEY(서버 전용), TOSS_CLIENT_KEY(공개, 결제창용). 키가 없으면 결제 API 는 'not-configured' 를 돌려준다.
+//                 결제사 하나: 포트원(PORTONE_STORE_ID·PORTONE_CHANNEL_KEY·PORTONE_API_SECRET) 또는 토스(TOSS_SECRET_KEY·TOSS_CLIENT_KEY).
+//                 PAY_PROVIDER 로 고르고, 비면 포트원 우선. 키가 없으면 결제 API 는 'not-configured' 를 돌려준다.
 import { json, isAdmin } from './_lib.js';
 import { kvOf } from './_store.js';
 import { loadEditorial } from './_editorial.js';
@@ -153,4 +154,68 @@ export async function tossCall(env, path, body) {
   let d = null; try { d = await r.json(); } catch { d = null; }
   return { ok: r.ok, status: r.status, data: d };
 }
-export const newOrderId = () => 'mt_' + Date.now().toString(36) + '_' + [...crypto.getRandomValues(new Uint8Array(9))].map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 14);
+
+// ── 포트원 V2 (결제대행사: 한국결제네트웍스 등. 어느 PG 로 결제할지는 채널 키가 정한다)
+// 환경변수: PORTONE_STORE_ID·PORTONE_CHANNEL_KEY(공개, 결제창용), PORTONE_API_SECRET(서버 전용), PORTONE_WEBHOOK_SECRET(선택, 웹훅 서명 확인)
+// 어느 결제사를 쓸지: PAY_PROVIDER=portone|toss. 비어 있으면 포트원 값이 다 있으면 포트원, 아니면 토스.
+export const portoneReady = env => !!(env && env.PORTONE_STORE_ID && env.PORTONE_CHANNEL_KEY && env.PORTONE_API_SECRET);
+export function payProvider(env) {
+  const want = String((env && env.PAY_PROVIDER) || '').trim().toLowerCase();
+  if (want === 'portone') return portoneReady(env) ? 'portone' : null;
+  if (want === 'toss') return tossReady(env) && env.TOSS_CLIENT_KEY ? 'toss' : null;
+  return portoneReady(env) ? 'portone' : tossReady(env) && env.TOSS_CLIENT_KEY ? 'toss' : null;
+}
+export const payReady = env => !!payProvider(env) && supabaseReady(env);
+export async function portoneCall(env, path, init = {}) {
+  const r = await fetch('https://api.portone.io/' + path, { ...init, headers: { authorization: 'PortOne ' + env.PORTONE_API_SECRET, 'content-type': 'application/json' }, signal: AbortSignal.timeout(20000) });
+  let d = null; try { d = await r.json(); } catch { d = null; }
+  return { ok: r.ok, status: r.status, data: d };
+}
+// 주문의 결제 키: 토스는 paymentKey 그대로, 포트원은 'portone:' + 결제 id(= 주문번호)
+export const PORTONE_PREFIX = 'portone:';
+const encU = encodeURIComponent;
+const patchOrder = (env, orderId, fields) => sbRest(env, `commerce_orders?order_id=eq.${encU(orderId)}&status=eq.pending`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify(fields) });
+const methodOf = m => !m ? null : m.type === 'PaymentMethodEasyPay' ? '간편결제' + (m.provider ? '(' + m.provider + ')' : '') : m.type === 'PaymentMethodCard' ? '카드' : String(m.type || '').replace(/^PaymentMethod/, '') || null;
+// 포트원 결제를 서버에서 조회해 주문을 정리한다(결제창 복귀·웹훅 공용). 브라우저가 보낸 금액·상태는 쓰지 않는다.
+// 반환: { ok, already?, pending?, error?, worlds? }
+export async function settlePortone(env, order) {
+  if (order.status === 'paid') { try { await grantOrder(env, order, 'payment'); } catch { } return { ok: true, already: true, worlds: order.worlds }; }
+  if (order.status !== 'pending') return { ok: false, error: 'order-' + order.status };
+  const t = await portoneCall(env, `payments/${encU(order.order_id)}?storeId=${encU(env.PORTONE_STORE_ID)}`);
+  if (!t.ok || !t.data) return { ok: false, error: t.status === 404 ? 'payment-not-found' : 'portone-' + t.status, retry: true };
+  const p = t.data;
+  if (p.status === 'READY' || p.status === 'PAY_PENDING' || p.status === 'VIRTUAL_ACCOUNT_ISSUED') return { ok: false, pending: true, error: 'payment-pending' };
+  if (p.status !== 'PAID') {
+    await patchOrder(env, order.order_id, { status: 'failed', failure: String('portone-' + p.status).slice(0, 80) }).catch(() => { });
+    return { ok: false, error: 'payment-failed', code: p.status };
+  }
+  const total = p.amount && +p.amount.total, cur = p.currency;
+  if (total !== order.amount || (cur && cur !== 'KRW') || (p.storeId && p.storeId !== env.PORTONE_STORE_ID)) {
+    // 결제창 금액을 바꿔 치기한 결제: 돈은 돌려주고 주문은 실패로 남긴다
+    const c = await portoneCall(env, `payments/${encU(order.order_id)}/cancel`, { method: 'POST', body: JSON.stringify({ storeId: env.PORTONE_STORE_ID, reason: '결제 금액 불일치' }) });
+    await patchOrder(env, order.order_id, { status: 'failed', failure: 'amount-mismatch' + (c.ok ? '' : ':cancel-failed') }).catch(() => { });
+    return { ok: false, error: 'amount-mismatch' };
+  }
+  try {
+    await patchOrder(env, order.order_id, { status: 'paid', payment_key: PORTONE_PREFIX + order.order_id, method: methodOf(p.method), paid_at: p.paidAt || new Date().toISOString() });
+    // 웹훅·복귀가 동시에 와도 '대기' 상태일 때만 바뀐다. 권한은 같은 주문·세계 중복을 막는다
+    await grantOrder(env, order, 'payment');
+  } catch { return { ok: false, error: 'grant-failed', orderId: order.order_id }; }
+  return { ok: true, worlds: order.worlds };
+}
+export async function cancelPortone(env, orderId, reason) {
+  const t = await portoneCall(env, `payments/${encU(orderId)}/cancel`, { method: 'POST', body: JSON.stringify({ storeId: env.PORTONE_STORE_ID, reason }) });
+  const st = t.data && t.data.cancellation && t.data.cancellation.status;
+  return { ok: t.ok && st !== 'FAILED', message: (t.data && t.data.message) || (st === 'FAILED' ? '취소 실패' : '') || String(t.status) };
+}
+// 포트원 웹훅 서명(Standard Webhooks): v1,base64(HMAC-SHA256(시크릿, id.timestamp.body)). 5분 넘은 요청은 거절.
+export async function verifyPortoneWebhook(secret, headers, body, now = Date.now()) {
+  const id = headers.get('webhook-id'), ts = headers.get('webhook-timestamp'), sig = headers.get('webhook-signature') || '';
+  if (!id || !ts || !sig || !/^\d+$/.test(ts) || Math.abs(now / 1000 - +ts) > 300) return false;
+  let raw; try { raw = Uint8Array.from(atob(String(secret).replace(/^whsec_/, '')), c => c.charCodeAt(0)); } catch { raw = new TextEncoder().encode(String(secret)); }
+  const key = await crypto.subtle.importKey('raw', raw, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const mac = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${id}.${ts}.${body}`)));
+  const want = btoa(String.fromCharCode(...mac));
+  return sig.split(' ').some(s => { const v = s.startsWith('v1,') ? s.slice(3) : ''; if (v.length !== want.length) return false; let d = 0; for (let i = 0; i < v.length; i++) d |= v.charCodeAt(i) ^ want.charCodeAt(i); return d === 0; });
+}
+export const newOrderId =() => 'mt_' + Date.now().toString(36) + '_' + [...crypto.getRandomValues(new Uint8Array(9))].map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 14);

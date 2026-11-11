@@ -48,6 +48,8 @@ export async function siteGate(request, env) {
   if (/^\/report\/legal\/[\w.-]*$/.test(url.pathname)) return null;
   // 상품 안내 페이지가 가격을 읽는 공개 API(판매 상품·가격·설정 여부만 돌려준다)도 잠금 중 공개
   if (url.pathname === '/api/commerce/access' && request.method === 'POST') return null;
+  // 포트원 결제 알림(웹훅)은 포트원 서버가 보내므로 쿠키가 없다: 잠금 중에도 받는다(본문은 믿지 않고 포트원에 다시 조회)
+  if (url.pathname === '/api/commerce/webhook' && request.method === 'POST') return null;
   if (reportPublic && url.pathname !== LOGIN_PATH && publicPath(url.pathname)) return null;
 
   if (url.pathname === LOGIN_PATH && request.method === 'POST') {

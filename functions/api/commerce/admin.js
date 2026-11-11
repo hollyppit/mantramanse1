@@ -1,11 +1,11 @@
 // 관리자 전용 결제 관리. Authorization: Bearer <관리자 비밀번호>
 // GET  /api/commerce/admin                      → { products, worlds, orders(최근 100), configured }
 // PUT  /api/commerce/admin  { products: [...] } → 상품 이름·가격·판매 여부·순서 저장(KV commerce:products)
-// POST /api/commerce/admin  { action: 'cancel', orderId, reason }  → 토스 결제 취소(전액) + 권한 회수
+// POST /api/commerce/admin  { action: 'cancel', orderId, reason }  → 결제 취소(전액, 포트원·토스) + 권한 회수
 // POST /api/commerce/admin  { action: 'regrant', orderId }         → 결제 완료 주문의 권한을 다시 넣는다(기록 실패 복구용)
 import { json, isAdmin, configError } from '../../_lib.js';
 import { kvOf } from '../../_store.js';
-import { loadProducts, cleanProducts, PRODUCTS_KEY, worldAccess, sbRest, tossCall, supabaseReady, tossReady, grantOrder } from '../../_commerce.js';
+import { loadProducts, cleanProducts, PRODUCTS_KEY, worldAccess, sbRest, tossCall, supabaseReady, tossReady, grantOrder, portoneReady, payProvider, cancelPortone, PORTONE_PREFIX } from '../../_commerce.js';
 
 const enc = encodeURIComponent;
 const who = request => { try { return decodeURIComponent(request.headers.get('x-reviewer') || '').slice(0, 30) || 'admin'; } catch { return 'admin'; } };
@@ -15,7 +15,7 @@ export async function onRequestGet({ request, env }) {
   const [products, worlds] = await Promise.all([loadProducts(env), worldAccess(env)]);
   let orders = [], ordersError = null;
   if (supabaseReady(env)) { try { orders = await sbRest(env, 'commerce_orders?select=order_id,user_id,saju_label,product_id,product_name,worlds,amount,status,method,failure,created_at,paid_at,canceled_at,cancel_reason&order=created_at.desc&limit=100'); } catch (e) { ordersError = 'commerce-unavailable'; } }
-  return json({ products, worlds, orders, ordersError, configured: { supabase: supabaseReady(env), toss: tossReady(env), tossClient: !!env.TOSS_CLIENT_KEY, anon: !!env.SUPABASE_ANON_KEY } });
+  return json({ products, worlds, orders, ordersError, configured: { supabase: supabaseReady(env), toss: tossReady(env), tossClient: !!env.TOSS_CLIENT_KEY, anon: !!env.SUPABASE_ANON_KEY, portone: portoneReady(env), portoneStore: !!env.PORTONE_STORE_ID, portoneChannel: !!env.PORTONE_CHANNEL_KEY, portoneSecret: !!env.PORTONE_API_SECRET, portoneWebhook: !!env.PORTONE_WEBHOOK_SECRET, provider: payProvider(env) } });
 }
 
 export async function onRequestPut({ request, env }) {
@@ -43,10 +43,17 @@ export async function onRequestPost({ request, env }) {
   }
   if (b.action === 'cancel') {
     if (order.status !== 'paid') return json({ error: '결제 완료 주문만 취소할 수 있습니다' }, 409);
-    if (!tossReady(env)) return json({ error: 'not-configured' }, 503);
     const reason = (typeof b.reason === 'string' && b.reason.trim().slice(0, 100)) || '관리자 취소';
-    const t = await tossCall(env, `payments/${enc(order.payment_key)}/cancel`, { cancelReason: reason });
-    if (!t.ok) return json({ error: '토스 취소 실패: ' + ((t.data && t.data.message) || t.status) }, 400);
+    // 결제한 결제사로 취소한다: payment_key 가 'portone:' 으로 시작하면 포트원, 아니면 토스
+    if (String(order.payment_key || '').startsWith(PORTONE_PREFIX)) {
+      if (!portoneReady(env)) return json({ error: 'not-configured' }, 503);
+      const c = await cancelPortone(env, order.order_id, reason);
+      if (!c.ok) return json({ error: '포트원 취소 실패: ' + c.message }, 400);
+    } else {
+      if (!tossReady(env)) return json({ error: 'not-configured' }, 503);
+      const t = await tossCall(env, `payments/${enc(order.payment_key)}/cancel`, { cancelReason: reason });
+      if (!t.ok) return json({ error: '토스 취소 실패: ' + ((t.data && t.data.message) || t.status) }, 400);
+    }
     const at = new Date().toISOString();
     await sbRest(env, `commerce_orders?order_id=eq.${enc(orderId)}`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ status: 'canceled', canceled_at: at, cancel_reason: reason }) });
     await sbRest(env, `commerce_entitlements?order_id=eq.${enc(orderId)}&revoked_at=is.null`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ revoked_at: at }) });
