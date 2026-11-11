@@ -2,11 +2,13 @@
 // 요청: { productId, sd, label? } + 헤더 x-member-token
 // 응답: { orderId, amount, orderName, customerKey, worlds, provider } (포트원은 orderId 를 결제 id(paymentId)로 쓴다) — 금액은 서버 상품표로만 정한다(브라우저 금액을 믿지 않음)
 import { json } from '../../_lib.js';
-import { sajuKey, memberOf, loadProducts, productWorlds, ownedWorlds, sbRest, payReady, payProvider, newOrderId } from '../../_commerce.js';
+import { sajuKey, memberOf, loadProducts, productWorlds, ownedWorlds, sbRest, payReady, payProvider, newOrderId, expirePending } from '../../_commerce.js';
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   if (!payReady(env)) return json({ error: 'not-configured' }, 503);
   const member = await memberOf(request, env); if (!member) return json({ error: 'login-required' }, 401);
+  // 이 회원의 30분 넘은 결제 대기 주문을 응답과 따로 정리한다(결제창을 닫고 다시 사는 경우가 많다)
+  const sweep = expirePending(env, { userId: member.id, limit: 10 }).catch(() => null); if (typeof waitUntil === 'function') waitUntil(sweep);
   let body; try { body = await request.json(); } catch { return json({ error: 'bad-payload' }, 400); }
   const key = await sajuKey(body && body.sd); if (!key) return json({ error: 'invalid-saju' }, 400);
   const product = (await loadProducts(env)).find(p => p.id === (body && body.productId));

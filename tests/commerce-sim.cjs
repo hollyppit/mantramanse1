@@ -42,7 +42,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
     if (u.includes('/rest/v1/kv')) return res([]);
     if (u.includes('/rest/v1/commerce_orders')) {
       if (method === 'POST') { db.orders.push({ status: 'pending', ...body }); return res(null, 201); }
-      const rows = db.orders.filter(o => (!q(u, 'order_id') || o.order_id === eqv(q(u, 'order_id'))) && (!q(u, 'user_id') || o.user_id === eqv(q(u, 'user_id'))) && (!q(u, 'status') || o.status === eqv(q(u, 'status'))));
+      const lt = q(u, 'created_at'), rows = db.orders.filter(o => (!q(u, 'order_id') || o.order_id === eqv(q(u, 'order_id'))) && (!q(u, 'user_id') || o.user_id === eqv(q(u, 'user_id'))) && (!q(u, 'status') || o.status === eqv(q(u, 'status'))) && (!lt || (o.created_at && o.created_at < lt.slice(3))));
       if (method === 'PATCH') { rows.forEach(o => Object.assign(o, body)); return res(null, 204); }
       return res(rows);
     }
@@ -183,6 +183,28 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   o = await poOrder(); const P5 = o.orderId; po[P5] = { id: P5, status: 'PAID', amount: { total: 19900 }, currency: 'KRW', storeId: 'store-x' };
   await hook({ type: 'Transaction.Paid', data: { paymentId: P5 } }); po[P5].status = 'CANCELLED';
   r = await hook({ type: 'Transaction.Cancelled', data: { paymentId: P5 } }); d = await r.json(); ok(d.canceled && db.orders.find(x => x.order_id === P5).status === 'canceled' && !db.ent.some(e => e.order_id === P5 && !e.revoked_at), '웹훅 취소: 권한 회수');
+
+  // ── 오래된 결제 대기 주문 정리
+  const ago = m => new Date(Date.now() - m * 60000).toISOString(), UA = USERS['tok-a'].id, UB = USERS['tok-b'].id;
+  const mk = (id, min, user = UA) => db.orders.push({ order_id: id, user_id: user, saju_key: k1, product_id: 'w2', product_name: '재물운 심화', worlds: ['w2'], amount: 7800, status: 'pending', created_at: ago(min) });
+  mk('mtoldnone1', 120); mk('mtoldready1', 120); mk('mtoldpaid1', 120); mk('mt_old_toss1', 120); mk('mtfresh1', 5); mk('mtoldb1', 120, UB);
+  po.mtoldready1 = { id: 'mtoldready1', status: 'READY', amount: { total: 7800 }, currency: 'KRW', storeId: 'store-x' };
+  po.mtoldpaid1 = { id: 'mtoldpaid1', status: 'PAID', amount: { total: 7800 }, currency: 'KRW', storeId: 'store-x', method: { type: 'PaymentMethodCard' } };
+  const od = id => db.orders.find(x => x.order_id === id);
+  let sw = await C.expirePending(penv, { userId: UA });
+  ok(sw.checked === 4 && sw.expired === 3 && sw.paid === 1, '정리: 이 회원의 30분 넘은 대기 주문만(' + JSON.stringify(sw) + ')');
+  ok(od('mtoldnone1').status === 'failed' && od('mtoldnone1').failure === 'expired' && od('mtoldready1').failure === 'expired' && od('mt_old_toss1').failure === 'expired', '결제 없는 주문·결제창만 연 주문·토스 주문은 만료');
+  ok(od('mtoldpaid1').status === 'paid' && db.ent.some(e => e.order_id === 'mtoldpaid1' && e.world === 'w2'), '뒤늦게 결제된 포트원 주문은 완료 처리·권한');
+  ok(od('mtfresh1').status === 'pending' && od('mtoldb1').status === 'pending', '30분 안 된 주문·다른 회원 주문은 그대로');
+  sw = await C.expirePending(penv); ok(sw.expired === 1 && od('mtoldb1').failure === 'expired' && od('mtfresh1').status === 'pending', '관리자 정리: 모든 회원');
+  // 만료 뒤에 결제가 들어오면(웹훅) 다시 살려 권한을 준다
+  Object.assign(po.mtoldready1, { status: 'PAID', method: { type: 'PaymentMethodCard' } });
+  r = await hook({ type: 'Transaction.Paid', data: { paymentId: 'mtoldready1' } }); d = await r.json();
+  ok(d.result === 'paid' && od('mtoldready1').status === 'paid' && od('mtoldready1').failure === null && db.ent.some(e => e.order_id === 'mtoldready1'), '만료 주문에 늦게 온 결제: 완료로 되살림');
+  r = await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-a', body: { paymentId: 'mtoldnone1' } }), env: penv }); ok(r.status === 502 && od('mtoldnone1').failure === 'expired', '결제 없는 만료 주문 확인 요청은 그대로');
+  po.mtoldnone1 = { id: 'mtoldnone1', status: 'FAILED', amount: { total: 7800 }, currency: 'KRW', storeId: 'store-x' };
+  r = await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-a', body: { paymentId: 'mtoldnone1' } }), env: penv }); ok(r.status === 400 && od('mtoldnone1').failure === 'expired', '실패 결제는 만료 표시 유지');
+  r = await admin.onRequestGet({ request: req('/api/commerce/admin', { adminPw: 'adm', method: 'GET' }), env: penv }); d = await r.json(); ok(d.sweep && typeof d.sweep.checked === 'number', '관리자 목록이 정리 결과를 돌려줌');
 
   // ── 키가 없으면 결제 API 는 'not-configured'
   const bare = { GLOSSARY_KV: KV, ADMIN_PASSWORD: 'adm' };

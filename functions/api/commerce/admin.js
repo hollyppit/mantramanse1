@@ -5,7 +5,7 @@
 // POST /api/commerce/admin  { action: 'regrant', orderId }         → 결제 완료 주문의 권한을 다시 넣는다(기록 실패 복구용)
 import { json, isAdmin, configError } from '../../_lib.js';
 import { kvOf } from '../../_store.js';
-import { loadProducts, cleanProducts, PRODUCTS_KEY, worldAccess, sbRest, tossCall, supabaseReady, tossReady, grantOrder, portoneReady, payProvider, cancelPortone, PORTONE_PREFIX } from '../../_commerce.js';
+import { loadProducts, cleanProducts, PRODUCTS_KEY, worldAccess, sbRest, tossCall, supabaseReady, tossReady, grantOrder, portoneReady, payProvider, cancelPortone, PORTONE_PREFIX, expirePending } from '../../_commerce.js';
 
 const enc = encodeURIComponent;
 const who = request => { try { return decodeURIComponent(request.headers.get('x-reviewer') || '').slice(0, 30) || 'admin'; } catch { return 'admin'; } };
@@ -13,9 +13,11 @@ const who = request => { try { return decodeURIComponent(request.headers.get('x-
 export async function onRequestGet({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   const [products, worlds] = await Promise.all([loadProducts(env), worldAccess(env)]);
-  let orders = [], ordersError = null;
+  let orders = [], ordersError = null, sweep = null;
+  // 관리자 화면을 열 때마다 30분 넘은 결제 대기 주문을 정리한다(포트원 결제는 실제 결제 여부를 확인한 뒤)
+  if (supabaseReady(env)) { try { sweep = await expirePending(env, { limit: 20 }); } catch { sweep = null; } }
   if (supabaseReady(env)) { try { orders = await sbRest(env, 'commerce_orders?select=order_id,user_id,saju_label,product_id,product_name,worlds,amount,status,method,failure,created_at,paid_at,canceled_at,cancel_reason&order=created_at.desc&limit=100'); } catch (e) { ordersError = 'commerce-unavailable'; } }
-  return json({ products, worlds, orders, ordersError, configured: { supabase: supabaseReady(env), toss: tossReady(env), tossClient: !!env.TOSS_CLIENT_KEY, anon: !!env.SUPABASE_ANON_KEY, portone: portoneReady(env), portoneStore: !!env.PORTONE_STORE_ID, portoneChannel: !!env.PORTONE_CHANNEL_KEY, portoneSecret: !!env.PORTONE_API_SECRET, portoneWebhook: !!env.PORTONE_WEBHOOK_SECRET, provider: payProvider(env) } });
+  return json({ products, worlds, orders, ordersError, sweep, configured: { supabase: supabaseReady(env), toss: tossReady(env), tossClient: !!env.TOSS_CLIENT_KEY, anon: !!env.SUPABASE_ANON_KEY, portone: portoneReady(env), portoneStore: !!env.PORTONE_STORE_ID, portoneChannel: !!env.PORTONE_CHANNEL_KEY, portoneSecret: !!env.PORTONE_API_SECRET, portoneWebhook: !!env.PORTONE_WEBHOOK_SECRET, provider: payProvider(env) } });
 }
 
 export async function onRequestPut({ request, env }) {

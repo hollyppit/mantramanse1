@@ -174,34 +174,60 @@ export async function portoneCall(env, path, init = {}) {
 // 주문의 결제 키: 토스는 paymentKey 그대로, 포트원은 'portone:' + 결제 id(= 주문번호)
 export const PORTONE_PREFIX = 'portone:';
 const encU = encodeURIComponent;
-const patchOrder = (env, orderId, fields) => sbRest(env, `commerce_orders?order_id=eq.${encU(orderId)}&status=eq.pending`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify(fields) });
+// 주문 상태는 '지금 상태(from)'일 때만 바꾼다: 복귀 확인·웹훅·정리가 동시에 와도 한 번만 바뀐다
+const patchOrder = (env, orderId, fields, from = 'pending') => sbRest(env, `commerce_orders?order_id=eq.${encU(orderId)}&status=eq.${from}`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify(fields) });
+// 오래된 '결제 대기' 주문을 정리할 때 붙이는 표시. 이 표시가 있는 실패 주문은 뒤늦게 결제가 확인되면 다시 살린다
+export const EXPIRED = 'expired';
+const revivable = o => o.status === 'failed' && o.failure === EXPIRED;
 const methodOf = m => !m ? null : m.type === 'PaymentMethodEasyPay' ? '간편결제' + (m.provider ? '(' + m.provider + ')' : '') : m.type === 'PaymentMethodCard' ? '카드' : String(m.type || '').replace(/^PaymentMethod/, '') || null;
 // 포트원 결제를 서버에서 조회해 주문을 정리한다(결제창 복귀·웹훅 공용). 브라우저가 보낸 금액·상태는 쓰지 않는다.
 // 반환: { ok, already?, pending?, error?, worlds? }
 export async function settlePortone(env, order) {
   if (order.status === 'paid') { try { await grantOrder(env, order, 'payment'); } catch { } return { ok: true, already: true, worlds: order.worlds }; }
-  if (order.status !== 'pending') return { ok: false, error: 'order-' + order.status };
+  if (order.status !== 'pending' && !revivable(order)) return { ok: false, error: 'order-' + order.status };
+  const from = order.status;   // 'pending', 또는 정리로 만료된 주문('failed' + expired)
   const t = await portoneCall(env, `payments/${encU(order.order_id)}?storeId=${encU(env.PORTONE_STORE_ID)}`);
   if (!t.ok || !t.data) return { ok: false, error: t.status === 404 ? 'payment-not-found' : 'portone-' + t.status, retry: true };
   const p = t.data;
   if (p.status === 'READY' || p.status === 'PAY_PENDING' || p.status === 'VIRTUAL_ACCOUNT_ISSUED') return { ok: false, pending: true, error: 'payment-pending' };
   if (p.status !== 'PAID') {
-    await patchOrder(env, order.order_id, { status: 'failed', failure: String('portone-' + p.status).slice(0, 80) }).catch(() => { });
+    if (from === 'pending') await patchOrder(env, order.order_id, { status: 'failed', failure: String('portone-' + p.status).slice(0, 80) }).catch(() => { });
     return { ok: false, error: 'payment-failed', code: p.status };
   }
   const total = p.amount && +p.amount.total, cur = p.currency;
   if (total !== order.amount || (cur && cur !== 'KRW') || (p.storeId && p.storeId !== env.PORTONE_STORE_ID)) {
     // 결제창 금액을 바꿔 치기한 결제: 돈은 돌려주고 주문은 실패로 남긴다
     const c = await portoneCall(env, `payments/${encU(order.order_id)}/cancel`, { method: 'POST', body: JSON.stringify({ storeId: env.PORTONE_STORE_ID, reason: '결제 금액 불일치' }) });
-    await patchOrder(env, order.order_id, { status: 'failed', failure: 'amount-mismatch' + (c.ok ? '' : ':cancel-failed') }).catch(() => { });
+    await patchOrder(env, order.order_id, { status: 'failed', failure: 'amount-mismatch' + (c.ok ? '' : ':cancel-failed') }, from).catch(() => { });
     return { ok: false, error: 'amount-mismatch' };
   }
   try {
-    await patchOrder(env, order.order_id, { status: 'paid', payment_key: PORTONE_PREFIX + order.order_id, method: methodOf(p.method), paid_at: p.paidAt || new Date().toISOString() });
+    await patchOrder(env, order.order_id, { status: 'paid', payment_key: PORTONE_PREFIX + order.order_id, method: methodOf(p.method), paid_at: p.paidAt || new Date().toISOString(), failure: null }, from);
     // 웹훅·복귀가 동시에 와도 '대기' 상태일 때만 바뀐다. 권한은 같은 주문·세계 중복을 막는다
     await grantOrder(env, order, 'payment');
   } catch { return { ok: false, error: 'grant-failed', orderId: order.order_id }; }
   return { ok: true, worlds: order.worlds };
+}
+// ── 오래된 '결제 대기' 주문 정리
+// 결제창을 닫았거나 실패해 남은 대기 주문을 olderMin 분이 지나면 '실패(expired)'로 바꾼다.
+// 포트원 주문(밑줄 없는 영문·숫자 주문번호)은 먼저 포트원에 물어 실제로 결제됐으면 결제 완료로 처리한다(웹훅을 놓친 경우 복구).
+// 토스 주문(mt_…_…)은 승인 요청 없이 남은 결제를 토스가 자동 취소하므로 그대로 만료 처리한다.
+export const isPortoneOrder = id => /^mt[a-z0-9]+$/i.test(String(id || ''));
+export async function expirePending(env, { userId = null, olderMin = 30, limit = 20, now = Date.now() } = {}) {
+  const out = { checked: 0, expired: 0, paid: 0, failed: 0, skipped: 0 };
+  if (!supabaseReady(env)) return out;
+  const cutoff = new Date(now - olderMin * 60000).toISOString();
+  const rows = await sbRest(env, `commerce_orders?select=*&status=eq.pending&created_at=lt.${encU(cutoff)}${userId ? '&user_id=eq.' + encU(userId) : ''}&order=created_at.asc&limit=${Math.max(1, Math.min(50, limit))}`);
+  for (const o of rows || []) {
+    out.checked++;
+    if (isPortoneOrder(o.order_id) && portoneReady(env)) {
+      let r; try { r = await settlePortone(env, o); } catch { out.skipped++; continue; }
+      if (r.ok) { out.paid++; continue; }
+      if (!(r.pending || r.error === 'payment-not-found')) { if (r.retry || r.error === 'grant-failed') out.skipped++; else out.failed++; continue; }
+    }
+    try { await patchOrder(env, o.order_id, { status: 'failed', failure: EXPIRED }); out.expired++; } catch { out.skipped++; }
+  }
+  return out;
 }
 export async function cancelPortone(env, orderId, reason) {
   const t = await portoneCall(env, `payments/${encU(orderId)}/cancel`, { method: 'POST', body: JSON.stringify({ storeId: env.PORTONE_STORE_ID, reason }) });
