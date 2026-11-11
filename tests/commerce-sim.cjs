@@ -69,6 +69,14 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   ok((await gate({ adminPw: 'adm' })).ok, '관리자는 열림');
   g = await gate({ adminPw: 'adm', viewAsFree: true }); ok(!g.ok && g.reason === 'purchase' && g.viewAsFree, '관리자 무료 사용자로 보기: 잠김');
   ok(!(await gate({ adminPw: 'wrong', viewAsFree: true })).ok, '틀린 관리자 비밀번호는 잠김');
+  // 운영 모니터 열쇠: 맞으면 통과, 틀리거나 짧은 열쇠·설정 없음은 잠김
+  const MK = 'm'.repeat(40), menv = { ...env, MONITOR_READING_KEY: MK };
+  const mreq = k => new Request('https://x.test/', { method: 'POST', headers: k ? { 'x-monitor-key': k } : {} });
+  ok((await C.chapterGate(mreq(MK), menv, { topicId: 'wealth', chapterId: PAID, sd })).ok, '모니터 열쇠: 잠긴 장 통과');
+  ok(!(await C.chapterGate(mreq(MK + 'x'), menv, { topicId: 'wealth', chapterId: PAID, sd })).ok, '틀린 모니터 열쇠: 잠김');
+  ok(!(await C.chapterGate(mreq(''), menv, { topicId: 'wealth', chapterId: PAID, sd })).ok, '열쇠 없음: 잠김');
+  ok(!(await C.chapterGate(mreq('short'), { ...env, MONITOR_READING_KEY: 'short' }, { topicId: 'wealth', chapterId: PAID, sd })).ok, '짧은 열쇠는 쓰지 않음');
+  ok(!(await C.chapterGate(mreq(MK), env, { topicId: 'wealth', chapterId: PAID, sd })).ok, '서버에 열쇠 설정이 없으면 잠김');
   const lr = C.lockedResponse({ ok: false, world: 'w2', reason: 'purchase', freeChapter: FREE }); ok(lr.status === 402 && (await lr.json()).locked.world === 'w2', '잠금 응답 402');
 
   // ── 상품: 가격 0 은 판매 안 함, 관리자만 저장

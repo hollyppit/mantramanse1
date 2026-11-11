@@ -85,9 +85,20 @@ export async function ownedWorlds(env, userId, key) {
   return [...new Set((rows || []).map(r => r.world))];
 }
 
+// 운영 모니터(workers/production-monitor.js) 전용 열쇠: 헤더 x-monitor-key 가 환경변수 MONITOR_READING_KEY 와 같으면 잠금을 건너뛴다.
+// 관리자 비밀번호를 모니터에 주지 않으려고 따로 둔 값이다(장 본문 읽기 외의 권한은 없다). 32자 미만이면 쓰지 않는다. 상수 시간 비교.
+export function isMonitor(request, env) {
+  const want = env && typeof env.MONITOR_READING_KEY === 'string' ? env.MONITOR_READING_KEY : '';
+  if (want.length < 32) return false;
+  const got = request.headers.get('x-monitor-key') || '';
+  const a = new TextEncoder().encode(got), b = new TextEncoder().encode(want);
+  let diff = a.length ^ b.length; for (let i = 0; i < b.length; i++) diff |= (a[i] ?? 0) ^ b[i];
+  return diff === 0;
+}
 // 장 하나를 열어도 되는가. 반환: { ok: true } 또는 { ok: false, world, reason: 'login'|'purchase', freeChapter }
 export async function chapterGate(request, env, { topicId, chapterId, sd }) {
   const world = TOPIC_WORLD[topicId] || 'w1';
+  if (isMonitor(request, env)) return { ok: true, world, monitor: true };
   const admin = isAdmin(request, env), viewAsFree = admin && (request.headers.get('x-view-as') || '') === 'free';
   if (admin && !viewAsFree) return { ok: true, world, admin: true };
   const access = await worldAccess(env);
