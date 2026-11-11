@@ -228,6 +228,7 @@ export async function settlePortone(env, order) {
   const t = await portoneCall(env, `payments/${encU(order.order_id)}?storeId=${encU(env.PORTONE_STORE_ID)}`);
   if (!t.ok || !t.data) return { ok: false, error: t.status === 404 ? 'payment-not-found' : 'portone-' + t.status, retry: true };
   const p = t.data;
+  await noteSignal(env, 'portone-channel', { type: (p.channel && p.channel.type) || null, pg: (p.channel && p.channel.pgProvider) || null, name: (p.channel && p.channel.name) || null, status: p.status || null });
   if (p.status === 'READY' || p.status === 'PAY_PENDING' || p.status === 'VIRTUAL_ACCOUNT_ISSUED') return { ok: false, pending: true, error: 'payment-pending' };
   if (p.status !== 'PAID') {
     if (from === 'pending') await patchOrder(env, order.order_id, { status: 'failed', failure: String('portone-' + p.status).slice(0, 80) }).catch(() => { });
@@ -310,5 +311,15 @@ export function refundCheck(order, viewedAt, now = Date.now()) {
   if (!(now - paid <= REFUND_DAYS * 86400000)) return { ok: false, reason: 'over-7-days' };
   if (viewedAt) return { ok: false, reason: 'viewed' };
   return { ok: true };
+}
+// ── 판매 준비 점검 신호(KV, 30일): 마지막 포트원 채널 종류·마지막 웹훅 수신 등. 값은 비밀이 아닌 정보만
+export const SIGNAL_PREFIX = 'commerce:signal:';
+export async function noteSignal(env, name, data) {
+  const kv = kvOf(env); if (!kv) return;
+  try { await kv.put(SIGNAL_PREFIX + name, JSON.stringify({ at: new Date().toISOString(), ...data }), { expirationTtl: 30 * 86400 }); } catch { }
+}
+export async function readSignal(env, name) {
+  const kv = kvOf(env); if (!kv) return null;
+  try { return await kv.get(SIGNAL_PREFIX + name, 'json'); } catch { return null; }
 }
 export const newOrderId = () => 'mt' + Date.now().toString(36) + [...crypto.getRandomValues(new Uint8Array(12))].map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 16);

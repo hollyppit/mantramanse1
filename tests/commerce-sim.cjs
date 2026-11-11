@@ -269,6 +269,21 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   const old = db.orders.find(x => x.order_id === P4); // 관리자 취소도 같은 함수(이미 취소된 주문은 거부)
   r = await admin.onRequestPost({ request: req('/api/commerce/admin', { adminPw: 'adm', body: { action: 'cancel', orderId: P4 } }), env: penv }); ok(r.status === 409 && old.status === 'canceled', '관리자: 취소된 주문 재취소 거부');
 
+  // ── 판매 준비 점검: 마지막 결제의 채널 종류·웹훅 수신을 신호로
+  po[PV].channel = { type: 'TEST', pgProvider: 'KPN' };
+  o = await (await order.onRequestPost({ request: req('/api/commerce/order', { tok: 'tok-b', body: { productId: 'bundle', sd } }), env: penv })).json();
+  const PS = o.orderId; po[PS] = { id: PS, status: 'PAID', amount: { total: 19900 }, currency: 'KRW', storeId: 'store-x', channel: { type: 'TEST', pgProvider: 'PG_PROVIDER_KPN', name: 'KPN 테스트' }, method: { type: 'PaymentMethodCard' } };
+  await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-b', body: { paymentId: PS } }), env: penv });
+  r = await admin.onRequestGet({ request: req('/api/commerce/admin', { adminPw: 'adm', method: 'GET' }), env: penv }); d = await r.json();
+  const rd = Object.fromEntries(d.readiness.map(x => [x.id, x]));
+  ok(rd.provider.ok === true && rd['live-channel'].ok === false && /TEST/.test(rd['live-channel'].note) && rd.products.ok === true && rd.worlds.ok === true, '판매 준비 점검: 테스트 채널이면 실연동 경고');
+  ok(rd.webhook.ok === true && rd['webhook-secret'].ok === false, '웹훅 수신 기록(앞선 웹훅 시험)·서명 시크릿 미설정 표시');
+  po[PS].channel.type = 'LIVE'; o = await (await order.onRequestPost({ request: req('/api/commerce/order', { tok: 'tok-b', body: { productId: 'w2', sd: { ...sd, gender: 'F' } } }), env: penv })).json();
+  po[o.orderId] = { ...po[PS], id: o.orderId, amount: { total: 9900 } }; await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-b', body: { paymentId: o.orderId } }), env: penv });
+  d = await (await admin.onRequestGet({ request: req('/api/commerce/admin', { adminPw: 'adm', method: 'GET' }), env: penv })).json();
+  ok(d.readiness.find(x => x.id === 'live-channel').ok === true, '실연동 결제가 확인되면 ✅');
+  ok(!JSON.stringify(d.readiness).includes('po-secret-x'), '점검 결과에 비밀값 없음');
+
   // ── 키가 없으면 결제 API 는 'not-configured'
   const bare = { GLOSSARY_KV: KV, ADMIN_PASSWORD: 'adm' };
   r = await order.onRequestPost({ request: req('/api/commerce/order', { tok: 'tok-a', body: { productId: 'w2', sd } }), env: bare }); ok(r.status === 503, '키 없음: 주문 503');

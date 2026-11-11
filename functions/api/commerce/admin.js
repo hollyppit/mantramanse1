@@ -5,7 +5,8 @@
 // POST /api/commerce/admin  { action: 'regrant', orderId }         → 결제 완료 주문의 권한을 다시 넣는다(기록 실패 복구용)
 import { json, isAdmin, configError } from '../../_lib.js';
 import { kvOf } from '../../_store.js';
-import { loadProducts, cleanProducts, PRODUCTS_KEY, worldAccess, sbRest, tossCall, supabaseReady, tossReady, grantOrder, portoneReady, payProvider, cancelPortone, PORTONE_PREFIX, expirePending, viewedByOrder, cancelOrder } from '../../_commerce.js';
+import { loadProducts, cleanProducts, PRODUCTS_KEY, worldAccess, sbRest, tossCall, supabaseReady, tossReady, grantOrder, portoneReady, payProvider, cancelPortone, PORTONE_PREFIX, expirePending, viewedByOrder, cancelOrder, readSignal } from '../../_commerce.js';
+import { naverReady } from '../../_naver-login.js';
 
 const enc = encodeURIComponent;
 const who = request => { try { return decodeURIComponent(request.headers.get('x-reviewer') || '').slice(0, 30) || 'admin'; } catch { return 'admin'; } };
@@ -18,7 +19,22 @@ export async function onRequestGet({ request, env }) {
   if (supabaseReady(env)) { try { sweep = await expirePending(env, { limit: 20 }); } catch { sweep = null; } }
   if (supabaseReady(env)) { try { orders = await sbRest(env, 'commerce_orders?select=order_id,user_id,saju_label,product_id,product_name,worlds,amount,status,method,failure,created_at,paid_at,canceled_at,cancel_reason&order=created_at.desc&limit=100'); } catch (e) { ordersError = 'commerce-unavailable'; } }
   try { const v = await viewedByOrder(env, (orders || []).map(o => o.order_id)); (orders || []).forEach(o => { o.viewed_at = v[o.order_id] || null; }); } catch { }
-  return json({ products, worlds, orders, ordersError, sweep, configured: { supabase: supabaseReady(env), toss: tossReady(env), tossClient: !!env.TOSS_CLIENT_KEY, anon: !!env.SUPABASE_ANON_KEY, portone: portoneReady(env), portoneStore: !!env.PORTONE_STORE_ID, portoneChannel: !!env.PORTONE_CHANNEL_KEY, portoneSecret: !!env.PORTONE_API_SECRET, portoneWebhook: !!env.PORTONE_WEBHOOK_SECRET, provider: payProvider(env) } });
+  // 판매 준비 점검(실판매 전환 체크리스트): 각 항목 { ok: true|false|null(확인 불가), note }
+  const [channel, hook] = await Promise.all([readSignal(env, 'portone-channel'), readSignal(env, 'portone-webhook')]);
+  const forSale = products.filter(p => p.active && p.price > 0), paidWorlds = Object.values(worlds).filter(w => w.enabled && w.paid);
+  const lastPaid = (orders || []).find(o => o.status === 'paid' && String(o.order_id).startsWith('mt') && !String(o.order_id).includes('_'));
+  const readiness = [
+    { id: 'provider', label: '결제사: 포트원', ok: payProvider(env) === 'portone', note: payProvider(env) === 'portone' ? '포트원으로 결제창을 엽니다' : '지금 결제사: ' + (payProvider(env) || '없음') },
+    { id: 'live-channel', label: '실연동 채널(실제 돈이 오가는 채널)', ok: channel ? channel.type === 'LIVE' : null, note: channel ? '마지막 결제의 채널: ' + (channel.type || '?') + (channel.pg ? ' · ' + channel.pg : '') + ' (' + String(channel.at).slice(0, 16).replace('T', ' ') + ')' + (channel.type === 'LIVE' ? '' : ' → KPN 승인 뒤 PORTONE_CHANNEL_KEY 를 실연동 채널 키로 바꾸고 재배포, 소액 결제로 확인') : '아직 포트원 결제 기록이 없습니다' },
+    { id: 'webhook', label: '포트원 웹훅 수신', ok: hook ? true : null, note: hook ? '마지막 수신 ' + String(hook.at).slice(0, 16).replace('T', ' ') + (hook.type ? ' · ' + hook.type : '') : '받은 적 없음 → 포트원 콘솔 결제알림(Webhook)에 https://mantrafortune.com/api/commerce/webhook 등록(실연동 탭에도)' },
+    { id: 'webhook-secret', label: '웹훅 서명 확인(권장)', ok: !!env.PORTONE_WEBHOOK_SECRET, note: env.PORTONE_WEBHOOK_SECRET ? (hook && hook.signed === false ? '⚠ 마지막 웹훅 서명이 맞지 않았습니다(시크릿 값 확인)' : '설정됨') : '선택: 포트원 웹훅 시크릿을 PORTONE_WEBHOOK_SECRET 에 넣으면 서명까지 확인' },
+    { id: 'products', label: '판매 상품·가격', ok: forSale.length > 0, note: forSale.map(p => p.name + ' ' + p.price.toLocaleString('ko-KR') + '원').join(' · ') || '판매 중인 상품이 없습니다' },
+    { id: 'worlds', label: '유료 주제', ok: paidWorlds.length > 0, note: paidWorlds.map(w => w.name).join(' · ') || '유료로 설정된 주제가 없습니다(주제·표지 설정 → 이용 권한)' },
+    { id: 'login', label: '로그인(카카오·구글·네이버)', ok: !!(env.SUPABASE_URL && env.SUPABASE_ANON_KEY), note: '카카오·구글 켜짐' + (naverReady(env) ? ' · 네이버 켜짐(네이버 검수 승인 전에는 등록된 아이디만)' : ' · 네이버 꺼짐') },
+    { id: 'refund', label: '환불(바로 환불·관리자 취소)', ok: true, note: '7일 이내·미열람 주문은 고객이 내 구매 내역에서 바로 환불' },
+    { id: 'last-paid', label: '최근 결제 확인', ok: lastPaid ? true : null, note: lastPaid ? lastPaid.product_name + ' ' + (lastPaid.amount || 0).toLocaleString('ko-KR') + '원 · ' + String(lastPaid.paid_at || '').slice(0, 16).replace('T', ' ') : '결제 완료 주문이 없습니다' },
+  ];
+  return json({ products, worlds, orders, ordersError, sweep, readiness, configured: { supabase: supabaseReady(env), toss: tossReady(env), tossClient: !!env.TOSS_CLIENT_KEY, anon: !!env.SUPABASE_ANON_KEY, portone: portoneReady(env), portoneStore: !!env.PORTONE_STORE_ID, portoneChannel: !!env.PORTONE_CHANNEL_KEY, portoneSecret: !!env.PORTONE_API_SECRET, portoneWebhook: !!env.PORTONE_WEBHOOK_SECRET, provider: payProvider(env) } });
 }
 
 export async function onRequestPut({ request, env }) {

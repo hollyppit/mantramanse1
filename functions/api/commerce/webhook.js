@@ -3,13 +3,16 @@
 // 본문의 내용은 믿지 않는다: 결제 id(= 주문번호)만 꺼내 포트원 API 로 다시 조회한다(settlePortone).
 // PORTONE_WEBHOOK_SECRET 이 있으면 서명도 확인한다(없으면 조회 방식만으로도 위조 결제는 통과하지 못한다).
 import { json } from '../../_lib.js';
-import { sbRest, supabaseReady, portoneReady, settlePortone, verifyPortoneWebhook, portoneCall } from '../../_commerce.js';
+import { sbRest, supabaseReady, portoneReady, settlePortone, verifyPortoneWebhook, portoneCall, noteSignal } from '../../_commerce.js';
 
 export async function onRequestPost({ request, env }) {
   if (!supabaseReady(env) || !portoneReady(env)) return json({ error: 'not-configured' }, 503);
   const raw = await request.text(); if (raw.length > 20000) return json({ error: 'too-large' }, 413);
-  if (env.PORTONE_WEBHOOK_SECRET && !(await verifyPortoneWebhook(env.PORTONE_WEBHOOK_SECRET, request.headers, raw))) return json({ error: 'bad-signature' }, 401);
-  let b; try { b = JSON.parse(raw); } catch { return json({ error: 'bad-payload' }, 400); }
+  const signed = env.PORTONE_WEBHOOK_SECRET ? await verifyPortoneWebhook(env.PORTONE_WEBHOOK_SECRET, request.headers, raw) : null;
+  let b; try { b = JSON.parse(raw); } catch { b = null; }
+  await noteSignal(env, 'portone-webhook', { type: (b && String(b.type || '').slice(0, 40)) || null, signed });   // 판매 준비 점검: 웹훅이 실제로 오는지
+  if (signed === false) return json({ error: 'bad-signature' }, 401);
+  if (!b) return json({ error: 'bad-payload' }, 400);
   const paymentId = b && b.data && typeof b.data.paymentId === 'string' ? b.data.paymentId : '';
   // 우리 주문이 아닌 결제·결제 외 알림(빌링키 등)은 받았다고만 답한다(포트원이 재전송하지 않게)
   if (!/^mt\w{6,62}$/.test(paymentId) || !/^Transaction\./.test(String(b.type || ''))) return json({ ok: true, ignored: true });

@@ -19,7 +19,12 @@
     if (!d) { root.innerHTML = '<div class="card"><p class="muted">불러오는 중…</p></div>'; return; }
     var cf = d.configured || {}, paidWorlds = Object.keys(d.worlds || {}).filter(function (k) { return d.worlds[k].paid; });
     var cfRow = function (on, label, hint) { return '<li>' + (on ? '✅' : '⬜') + ' ' + label + (on ? '' : ' <span class="muted">— ' + hint + '</span>') + '</li>'; };
-    var html = '<div class="card"><h3 style="margin:0 0 6px;color:var(--gold)">결제 준비 상태</h3><ul style="margin:0;padding-left:18px;line-height:1.8">' +
+    // 판매 준비 점검(실판매 전환 체크리스트): 서버가 실제 신호(마지막 결제의 채널 종류·웹훅 수신 등)로 판단한다
+    var rd = d.readiness || [], rdIcon = function (ok) { return ok === true ? '✅' : ok === false ? '⚠️' : '⬜'; };
+    var rdDone = rd.filter(function (x) { return x.ok === true; }).length;
+    var readyHtml = rd.length ? '<div class="card"><h3 style="margin:0 0 6px;color:var(--gold)">판매 준비 점검 <span class="muted" style="font-size:.85rem">' + rdDone + ' / ' + rd.length + '</span></h3><p class="muted" style="margin:0 0 8px">실제 판매를 시작하기 전에 모두 ✅ 가 되는지 확인하세요. ⬜ 는 아직 확인할 신호가 없는 항목입니다.</p><ul style="margin:0;padding-left:4px;list-style:none;line-height:1.7">' +
+      rd.map(function (x) { return '<li>' + rdIcon(x.ok) + ' <b>' + esc(x.label) + '</b> <span class="muted">— ' + esc(x.note || '') + '</span></li>'; }).join('') + '</ul></div>' : '';
+    var html = readyHtml + '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">결제 준비 상태</h3><ul style="margin:0;padding-left:18px;line-height:1.8">' +
       cfRow(cf.supabase, '회원·주문 저장소(Supabase)', 'Cloudflare 환경변수 SUPABASE_URL·SUPABASE_SERVICE_KEY') +
       cfRow(cf.anon, '로그인(Supabase 공개 키)', '환경변수 SUPABASE_ANON_KEY') +
       '<li><b>지금 쓰는 결제사: ' + (cf.provider === 'portone' ? '포트원' : cf.provider === 'toss' ? '토스페이먼츠' : '없음(결제 준비 중)') + '</b> <span class="muted">— 포트원 값 3개가 다 있으면 포트원, 아니면 토스. 환경변수 PAY_PROVIDER=portone|toss 로 고정 가능</span></li>' +
