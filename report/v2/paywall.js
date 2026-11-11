@@ -89,6 +89,7 @@
       (canLogin ? '<div class="pw-login">' + loginBtn('kakao') + loginBtn('google') + (d.configured.naver ? loginBtn('naver') : '<button type="button" class="pw-btn" disabled title="준비 중">네이버(준비 중)</button>') + '</div>' +
         (lastLogin() ? '<p class="pw-fine">구매한 계정과 <b>같은 방법</b>으로 로그인해야 구매한 주제가 열려요. 이 기기에서는 지난번에 <b>' + LN[lastLogin()] + '</b>로 로그인했어요.</p>' : '') : '<p class="pw-note">로그인을 준비하고 있습니다.</p>') + fine;
     else body = list(true) + fine +
+      '<label class="pw-save"><input type="checkbox" id="pw-save"> <span>이 사주의 출생 정보(생년월일·시각·성별)를 내 계정에 저장해 <b>다른 기기에서도 바로 열기</b> <small>(선택 · 내 구매 내역에서 언제든 삭제)</small></span></label>' +
       '<p class="pw-buyer">' + (LN[lastLogin()] ? '<b>' + LN[lastLogin()] + ' 계정</b>' : '<b>지금 로그인한 계정</b>') + '(' + esc(d.member.email || '') + ')으로 구매됩니다.</p><div id="pw-hint"></div>' +
       '<p class="pw-fine"><a href="/report/my/" target="_blank" rel="noopener">내 구매 내역</a> · <button type="button" class="pw-link" data-pw-logout>로그아웃</button></p>';
     var el = document.createElement('div'); el.id = 'pw-sheet'; el.className = 'pw-sheet'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '구매 안내');
@@ -133,7 +134,7 @@
   function buy(productId, who, btn) {
     if (btn) { btn.disabled = true; btn.textContent = '결제 준비 중…'; }
     var d = P.info; track('purchase_start', { product: productId });
-    fetch('/api/commerce/order', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, headers()), body: JSON.stringify({ productId: productId, sd: safeSd(P.sd), label: who || null }) })
+    fetch('/api/commerce/order', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, headers()), body: JSON.stringify({ productId: productId, sd: safeSd(P.sd), label: who || null, birth: (function () { try { var box = document.getElementById('pw-save'); if (!box || !box.checked) return null; var v = P.resume && P.resume(); return v && v.inp || null; } catch (e) { return null; } })() }) })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'order'); return j; }); })
       .then(function (o) {
         if (o.provider === 'portone' || (!o.provider && d.keys.provider === 'portone')) return payPortone(o);
@@ -234,6 +235,7 @@
       '.pw-login{display:grid;gap:8px;margin-top:10px}.pw-btn{border:0;border-radius:12px;padding:12px 14px;font:inherit;font-weight:700;cursor:pointer;background:#2A3047;color:#F3EEDF}.pw-btn[disabled]{opacity:.45;cursor:default}' +
       '.pw-kakao{background:#FEE500;color:#191600}.pw-naver{background:#03C75A;color:#fff}.pw-google{background:#fff;color:#1f1f1f}.pw-buy{background:#C8442F;color:#fff;white-space:nowrap}' +
       '.pw-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}.pw-list li{display:flex;gap:10px;align-items:center;justify-content:space-between;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 12px}.pw-list small{display:block;color:#B9B3A4;font-size:.76rem}' +
+      '.pw-save{display:flex;gap:8px;align-items:flex-start;margin:10px 0 0;color:#DCD5C4;font-size:.8rem;line-height:1.45;cursor:pointer}.pw-save input{margin-top:3px}.pw-save small{color:#8F8A7E}' +
       '.pw-last{display:block;font-size:.72rem;font-weight:500;opacity:.8;margin-top:2px}.pw-buyer{margin:10px 0 0;color:#DCD5C4;font-size:.84rem}.pw-hint{margin:8px 0 0;padding:8px 10px;border:1px solid rgba(213,185,127,.4);border-radius:10px;color:#DCD5C4;font-size:.8rem;line-height:1.5}.pw-hint a{color:#D5B97F}' +
       '.pw-own{color:#7FD1A8;font-weight:700;font-size:.86rem}.pw-price{color:#F3EEDF;font-weight:700;white-space:nowrap}.pw-fine{margin:10px 0 0;color:#8F8A7E;font-size:.74rem;line-height:1.5}.pw-fine a,.pw-link{color:#D5B97F;background:none;border:0;padding:0;font:inherit;cursor:pointer;text-decoration:underline}' +
       '.pw-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:10000;background:#141826;color:#F3EEDF;border-radius:12px;padding:12px 16px;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:90vw;font-size:.9rem}' +

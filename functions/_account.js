@@ -28,7 +28,7 @@ export async function withdraw(env, userId, { unlinkKakao = true } = {}) {
   const enc = encodeURIComponent(userId), at = new Date().toISOString();
   // 1) 주문 기록 분리(결제 대기 주문은 실패로 닫는다: 탈퇴 뒤 결제가 이어지지 않게)
   await sbRest(env, `commerce_orders?user_id=eq.${enc}&status=eq.pending`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ status: 'failed', failure: 'withdrawn' }) });
-  const moved = await sbRest(env, `commerce_orders?user_id=eq.${enc}`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify({ user_id: null, withdrawn_at: at }) });
+  const moved = await sbRest(env, `commerce_orders?user_id=eq.${enc}`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify({ user_id: null, withdrawn_at: at, birth: null }) });
   // 2) 회원 삭제(구매 권한·저장한 사주는 cascade 로 함께 삭제)
   const d = await fetch(base(env) + '/auth/v1/admin/users/' + enc, { method: 'DELETE', headers: { apikey: env.SUPABASE_SERVICE_KEY, authorization: 'Bearer ' + env.SUPABASE_SERVICE_KEY }, signal: AbortSignal.timeout(10000) });
   if (!d.ok && d.status !== 404) return { ok: false, error: 'delete-failed:' + d.status };

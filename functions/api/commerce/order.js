@@ -2,7 +2,7 @@
 // 요청: { productId, sd, label? } + 헤더 x-member-token
 // 응답: { orderId, amount, orderName, customerKey, worlds, provider } (포트원은 orderId 를 결제 id(paymentId)로 쓴다) — 금액은 서버 상품표로만 정한다(브라우저 금액을 믿지 않음)
 import { json } from '../../_lib.js';
-import { sajuKey, memberOf, loadProducts, productWorlds, ownedWorlds, sbRest, payReady, payProvider, newOrderId, expirePending } from '../../_commerce.js';
+import { sajuKey, memberOf, loadProducts, productWorlds, ownedWorlds, sbRest, payReady, payProvider, newOrderId, expirePending, cleanBirth } from '../../_commerce.js';
 
 export async function onRequestPost({ request, env, waitUntil }) {
   if (!payReady(env)) return json({ error: 'not-configured' }, 503);
@@ -18,7 +18,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (worlds.every(w => owned.includes(w))) return json({ error: 'already-owned' }, 409);
   const orderId = newOrderId(), label = typeof body.label === 'string' ? body.label.trim().slice(0, 30) : null;
   try {
-    await sbRest(env, 'commerce_orders', { method: 'POST', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ order_id: orderId, user_id: member.id, saju_key: key, saju_label: label, product_id: product.id, product_name: product.name, worlds, amount: product.price }) });
+    await sbRest(env, 'commerce_orders', { method: 'POST', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ order_id: orderId, user_id: member.id, saju_key: key, saju_label: label, product_id: product.id, product_name: product.name, worlds, amount: product.price, birth: cleanBirth(body.birth) }) });
   } catch { return json({ error: 'commerce-unavailable' }, 503); }
   return json({ orderId, amount: product.price, orderName: product.name, customerKey: member.id, worlds, provider: payProvider(env) });
 }

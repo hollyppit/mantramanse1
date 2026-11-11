@@ -40,6 +40,13 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
       return po[id] ? res(po[id]) : res({ type: 'PAYMENT_NOT_FOUND' }, 404);
     }
     if (u.includes('/rest/v1/kv')) return res([]);
+    if (u.includes('/rest/v1/member_sajus')) {
+      db.sajus = db.sajus || [];
+      if (method === 'POST') { for (const r of body) { const ex = db.sajus.find(x => x.user_id === r.user_id && x.saju_key === r.saju_key); if (ex) Object.assign(ex, r); else db.sajus.push({ ...r }); } return res(null, 201); }
+      const rows = db.sajus.filter(x => (!q(u, 'user_id') || x.user_id === eqv(q(u, 'user_id'))) && (!q(u, 'saju_key') || x.saju_key === eqv(q(u, 'saju_key'))));
+      if (method === 'DELETE') { db.sajus = db.sajus.filter(x => !rows.includes(x)); return res(null, 204); }
+      return res(rows);
+    }
     if (u.includes('/rest/v1/commerce_orders')) {
       if (method === 'POST') { db.orders.push({ status: 'pending', ...body }); return res(null, 201); }
       const lt = q(u, 'created_at'), rows = db.orders.filter(o => (!q(u, 'order_id') || o.order_id === eqv(q(u, 'order_id'))) && (!q(u, 'user_id') || o.user_id === eqv(q(u, 'user_id'))) && (!q(u, 'status') || o.status === eqv(q(u, 'status'))) && (!lt || (o.created_at && o.created_at < lt.slice(3))));
@@ -48,9 +55,13 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
     }
     if (u.includes('/rest/v1/commerce_entitlements')) {
       if (method === 'POST') { for (const r of body) if (!db.ent.some(e => e.user_id === r.user_id && e.saju_key === r.saju_key && e.world === r.world && e.order_id === r.order_id)) db.ent.push({ ...r, revoked_at: null }); return res(null, 201); }
-      const rows = db.ent.filter(e => (!q(u, 'user_id') || e.user_id === eqv(q(u, 'user_id'))) && (!q(u, 'saju_key') || e.saju_key === eqv(q(u, 'saju_key'))) && (!q(u, 'order_id') || e.order_id === eqv(q(u, 'order_id'))) && (q(u, 'revoked_at') !== 'is.null' || e.revoked_at == null));
+      const oid = q(u, 'order_id'), inList = oid && oid.startsWith('in.(') ? oid.slice(4, -1).split(',') : null, fv = q(u, 'first_viewed_at');
+      const rows = db.ent.filter(e => (!q(u, 'user_id') || e.user_id === eqv(q(u, 'user_id'))) && (!q(u, 'saju_key') || e.saju_key === eqv(q(u, 'saju_key'))) && (!q(u, 'world') || e.world === eqv(q(u, 'world')))
+        && (!oid || (inList ? inList.includes(e.order_id) : e.order_id === eqv(oid))) && (q(u, 'revoked_at') !== 'is.null' || e.revoked_at == null)
+        && (!fv || (fv === 'is.null' ? !e.first_viewed_at : !!e.first_viewed_at)));
       if (method === 'PATCH') { rows.forEach(e => Object.assign(e, body)); return res(null, 204); }
-      return res(rows.map(e => ({ world: e.world })));
+      if ((q(u, 'select') || '').includes('first_viewed_at')) return res(rows.map(e => ({ order_id: e.order_id, first_viewed_at: e.first_viewed_at })));
+      return res(rows.map(e => ({ world: e.world, saju_key: e.saju_key })));
     }
     throw new Error('unexpected fetch ' + u);
   };
@@ -215,6 +226,32 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   ok(d.orders.every(o => all.some(a => a.order_id === o.order_id)) && !ids.includes('mtoldb1'), '본인 주문만');
   ok(d.orders.every(o => ['paid', 'canceled', 'partial_canceled', 'pending'].includes(o.status)) && !ids.includes('mtoldnone1') && ids.includes('mtfreshmine1') && ids.includes('mtoldpaid1'), '실패·만료 주문은 숨기고 결제 완료·최근 대기는 보임');
   ok(!JSON.stringify(d).includes(k1) && !JSON.stringify(d).includes('saju_key') && !JSON.stringify(d).includes(UA), '사주 식별값·회원 id 는 내려 보내지 않음');
+
+  // ── 열람 기록·구매한 사주 저장
+  const mineMod = await imp('functions/api/commerce/mine.js');
+  const clean = C.cleanBirth({ year: 1992, month: 6, day: 23, hour: 14, minute: 5, gender: 'M', calendar: 'solar', name: '비밀', phone: '010', lon: 127.1 });
+  ok(clean && clean.year === 1992 && clean.hour === 14 && !('name' in clean) && !('phone' in clean) && clean.lon === 127.1, '출생 입력 정리: 계산 칸만');
+  ok(C.cleanBirth({ year: 'x' }) === null && C.cleanBirth(null) === null, '잘못된 출생 입력은 저장 안 함');
+  o = await (await order.onRequestPost({ request: req('/api/commerce/order', { tok: 'tok-a', body: { productId: 'bundle', sd, label: '홍길동', birth: { year: 1992, month: 6, day: 23, hour: 14, gender: 'M', name: '빼야 함' } } }), env: penv })).json();
+  const PV = o.orderId; po[PV] = { id: PV, status: 'PAID', amount: { total: 19900 }, currency: 'KRW', storeId: 'store-x', method: { type: 'PaymentMethodCard' } };
+  ok(db.orders.find(x => x.order_id === PV).birth.year === 1992 && !('name' in db.orders.find(x => x.order_id === PV).birth), '주문에 정리된 출생 입력');
+  r = await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-a', body: { paymentId: PV } }), env: penv });
+  ok((db.sajus || []).some(x => x.user_id === UA && x.saju_key === k1 && x.birth.year === 1992 && x.label === '홍길동'), '결제가 끝나면 구매한 사주 저장');
+  let mm = await (await mineMod.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-a', body: {} }), env: penv })).json();
+  const pv = mm.orders.find(x => x.order_id === PV);
+  ok(pv && pv.viewed_at === null && mm.sajus.length === 1 && mm.sajus[0].birth.year === 1992 && mm.sajus[0].worlds.includes('w2') && !JSON.stringify(mm).includes(k1), '내 구매 내역: 미열람·구매한 사주(식별값 없이)');
+  // 유료 장을 열면 첫 열람 시각이 남고, 두 번째부터는 바뀌지 않음
+  ok((await gate({ tok: 'tok-a' })).ok, '구매한 유료 장 열림');
+  const firstView = db.ent.find(e => e.order_id === PV && e.world === 'w2').first_viewed_at;
+  ok(!!firstView && !db.ent.find(e => e.order_id === PV && e.world === 'w7').first_viewed_at, '연 주제(w2)에만 첫 열람 기록');
+  mm = await (await mineMod.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-a', body: {} }), env: penv })).json();
+  ok(mm.orders.find(x => x.order_id === PV).viewed_at === firstView, '묶음은 한 주제만 열어도 열람');
+  r = await admin.onRequestGet({ request: req('/api/commerce/admin', { adminPw: 'adm', method: 'GET' }), env: penv }); d = await r.json();
+  ok(d.orders.find(x => x.order_id === PV).viewed_at === firstView, '관리자 주문 목록에 열람 시각');
+  // 저장 삭제: 저장본·주문의 출생 입력 삭제, 구매는 유지
+  r = await mineMod.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-a', body: { action: 'forget', ref: mm.sajus[0].ref } }), env: penv });
+  ok(r.status === 200 && !(db.sajus || []).some(x => x.user_id === UA) && db.orders.find(x => x.order_id === PV).birth === null && (await gate({ tok: 'tok-a' })).ok, '저장 삭제: 출생 정보만 지우고 구매 유지');
+  r = await mineMod.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-b', body: { action: 'forget', ref: 'deadbeef' } }), env: penv }); ok(r.status === 404, '남의 저장은 못 지움');
 
   // ── 키가 없으면 결제 API 는 'not-configured'
   const bare = { GLOSSARY_KV: KV, ADMIN_PASSWORD: 'adm' };

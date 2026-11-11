@@ -113,7 +113,9 @@ export async function chapterGate(request, env, { topicId, chapterId, sd }) {
   if (!member) return { ok: false, world, reason: 'login', freeChapter: free[world] || null };
   const key = await sajuKey(sd);
   let owned = []; try { owned = await ownedWorlds(env, member.id, key); } catch { return { ok: false, world, reason: 'unavailable' }; }
-  return owned.includes(world) ? { ok: true, world, owned: true } : { ok: false, world, reason: 'purchase', freeChapter: free[world] || null };
+  if (!owned.includes(world)) return { ok: false, world, reason: 'purchase', freeChapter: free[world] || null };
+  await markViewed(env, member.id, key, world);   // 유료 장을 처음 연 시각(환불 판단 근거)
+  return { ok: true, world, owned: true };
 }
 export const lockedResponse = g => json({ ok: false, error: g.reason === 'unavailable' ? 'commerce-unavailable' : 'locked', locked: { world: g.world, reason: g.reason, freeChapter: g.freeChapter || null } }, g.reason === 'unavailable' ? 503 : g.reason === 'login' ? 401 : 402);
 
@@ -146,6 +148,41 @@ export async function productWorlds(env, product) {
 export async function grantOrder(env, order, by) {
   const rows = order.worlds.map(w => ({ user_id: order.user_id, saju_key: order.saju_key, world: w, order_id: order.order_id, granted_by: by }));
   await sbRest(env, 'commerce_entitlements?on_conflict=user_id,saju_key,world,order_id', { method: 'POST', headers: { prefer: 'resolution=ignore-duplicates,return=minimal' }, body: JSON.stringify(rows) });
+  // 구매한 사주를 회원 계정에 저장(다른 기기에서 '이 사주로 바로 읽기'). 저장 실패는 구매를 막지 않는다
+  if (order.birth && order.user_id) {
+    try { await sbRest(env, 'member_sajus?on_conflict=user_id,saju_key', { method: 'POST', headers: { prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ user_id: order.user_id, saju_key: order.saju_key, label: order.saju_label || null, birth: order.birth }]) }); } catch { }
+  }
+}
+
+// ── 유료 장 열람 기록: 회원 × 사주 × 세계의 구매 권한 중 아직 열람 시각이 없는 것에만 첫 열람 시각을 적는다
+//    (기억해 두고 건너뛰지 않는다: 같은 사주·주제를 취소 뒤 다시 사면 새 구매 권한에도 적어야 한다)
+export async function markViewed(env, userId, key, world) {
+  try {
+    await sbRest(env, `commerce_entitlements?user_id=eq.${encodeURIComponent(userId)}&saju_key=eq.${encodeURIComponent(key)}&world=eq.${encodeURIComponent(world)}&revoked_at=is.null&first_viewed_at=is.null`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ first_viewed_at: new Date().toISOString() }) });
+  } catch { }
+}
+// 주문별 첫 열람 시각(주문의 구매 권한 중 가장 이른 열람). 묶음은 하나라도 열면 열람
+export async function viewedByOrder(env, orderIds) {
+  const ids = [...new Set(orderIds.filter(id => /^mt\w{6,62}$/.test(id)))]; if (!ids.length) return {};
+  const rows = await sbRest(env, `commerce_entitlements?select=order_id,first_viewed_at&first_viewed_at=not.is.null&order_id=in.(${ids.join(',')})`);
+  const out = {}; for (const r of rows || []) if (!out[r.order_id] || r.first_viewed_at < out[r.order_id]) out[r.order_id] = r.first_viewed_at;
+  return out;
+}
+// 출생 입력 정리: 만세력 계산에 쓰는 칸만, 타입을 확인해 남긴다(이름 등 다른 값은 버린다)
+export function cleanBirth(b) {
+  if (!b || typeof b !== 'object') return null;
+  const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi ? v : undefined;
+  const out = { year: int(b.year, 1800, 2200), month: int(b.month, 1, 12), day: int(b.day, 1, 31) };
+  if (out.year === undefined || out.month === undefined || out.day === undefined) return null;
+  const hour = int(b.hour, 0, 23), minute = int(b.minute, 0, 59); if (hour !== undefined) out.hour = hour; if (minute !== undefined) out.minute = minute;
+  if (b.gender === 'M' || b.gender === 'F') out.gender = b.gender;
+  if (b.calendar === 'solar' || b.calendar === 'lunar') out.calendar = b.calendar;
+  if (typeof b.leap === 'boolean') out.leap = b.leap;
+  if (b.jasi === 'jeong' || b.jasi === 'ya') out.jasi = b.jasi;
+  if (typeof b.timeMode === 'string' && /^[a-z_]{1,20}$/i.test(b.timeMode)) out.timeMode = b.timeMode;
+  if (typeof b.lon === 'number' && isFinite(b.lon) && Math.abs(b.lon) <= 180) out.lon = b.lon;
+  if (b.hour === null) out.hour = null;   // 태어난 시각 모름
+  return out;
 }
 
 // ── 토스페이먼츠
