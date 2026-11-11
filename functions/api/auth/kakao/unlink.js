@@ -2,9 +2,12 @@
 // 사용자가 카카오에서 우리 서비스 연결을 끊거나 카카오계정을 탈퇴하면 카카오가 보낸다(app_id, user_id, referrer_type).
 // 확인: Authorization 이 'KakaoAK <대표 어드민 키>'(KAKAO_ADMIN_KEY)인지, app_id 가 KAKAO_APP_ID(있으면)와 같은지.
 // 카카오는 3초 안에 200 을 기다리므로 바로 200 을 돌려주고 탈퇴 처리는 뒤에서 한다. 회원이 없어도 200.
+// 점검 기록: 최근 받은 알림 10건을 KV 'diag:kakao-unlink' 에 남긴다(시각·키 일치·앱 ID 일치·회원 여부·결과, 7일). 키 값·회원번호는 남기지 않는다.
 import { kakaoAuthOk, userByIdentity, withdraw } from '../../../_account.js';
 import { supabaseReady } from '../../../_commerce.js';
+import { kvOf } from '../../../_store.js';
 
+export const DIAG_KEY = 'diag:kakao-unlink';
 async function params(request) {
   const u = new URL(request.url), p = new URLSearchParams(u.search);
   if (request.method === 'POST') {
@@ -12,19 +15,32 @@ async function params(request) {
   }
   return p;
 }
+async function note(env, entry) {
+  const kv = kvOf(env); if (!kv) return;
+  try {
+    const list = (await kv.get(DIAG_KEY, 'json')) || [];
+    list.unshift({ at: new Date().toISOString(), ...entry });
+    await kv.put(DIAG_KEY, JSON.stringify(list.slice(0, 10)), { expirationTtl: 7 * 86400 });
+  } catch { }
+}
 async function handle({ request, env, waitUntil }) {
-  if (!kakaoAuthOk(request, env)) return new Response('unauthorized', { status: 401 });
-  const p = await params(request), userId = p.get('user_id') || '', appId = p.get('app_id') || '';
-  if (env.KAKAO_APP_ID && appId !== String(env.KAKAO_APP_ID)) return new Response('ok', { status: 200 });   // 다른 앱 알림은 무시
-  if (!/^\d+$/.test(userId) || !supabaseReady(env)) return new Response('ok', { status: 200 });
+  const later = job => { if (typeof waitUntil === 'function') waitUntil(job); else return job; };
+  const authOk = kakaoAuthOk(request, env);
+  const p = await params(request), userId = p.get('user_id') || '', appId = p.get('app_id') || '', referrer = (p.get('referrer_type') || '').slice(0, 40);
+  const base = { method: request.method, authOk, keySet: !!env.KAKAO_ADMIN_KEY, appOk: env.KAKAO_APP_ID ? appId === String(env.KAKAO_APP_ID) : null, referrer };
+  if (!authOk) { await later(note(env, { ...base, result: 'rejected-401' })); return new Response('unauthorized', { status: 401 }); }
+  if (base.appOk === false) { await later(note(env, { ...base, result: 'other-app' })); return new Response('ok', { status: 200 }); }   // 다른 앱 알림은 무시
+  if (!/^\d+$/.test(userId) || !supabaseReady(env)) { await later(note(env, { ...base, result: 'ignored' })); return new Response('ok', { status: 200 }); }
   const job = (async () => {
+    let result = 'not-member';
     try {
       const uid = await userByIdentity(env, 'kakao', userId);
       // 카카오 쪽은 이미 끊겼으므로 다시 끊지 않는다
-      if (uid) { const r = await withdraw(env, uid, { unlinkKakao: false }); console.log('[kakao-unlink]', p.get('referrer_type') || '', r.ok ? 'withdrawn' : r.error); }
-    } catch (e) { console.log('[kakao-unlink] error', String(e && e.message || e).slice(0, 120)); }
+      if (uid) { const r = await withdraw(env, uid, { unlinkKakao: false }); result = r.ok ? 'withdrawn' : 'withdraw-failed'; console.log('[kakao-unlink]', referrer, result); }
+    } catch (e) { result = 'error'; console.log('[kakao-unlink] error', String(e && e.message || e).slice(0, 120)); }
+    await note(env, { ...base, result });
   })();
-  if (typeof waitUntil === 'function') waitUntil(job); else await job;
+  await later(job);
   return new Response('ok', { status: 200 });
 }
 export const onRequestGet = handle;

@@ -80,6 +80,14 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   ok(r.status === 200 && !users[UA] && db.orders.find(o => o.order_id === 'mto1').user_id === null && kakaoCalls.length === 0, 'POST 알림: 탈퇴 처리, 카카오에 다시 끊기 요청 안 함');
   reset(); r = await hook('GET', { app_id: '1646155', user_id: '4242', referrer_type: 'ACCOUNT_DELETE' }); ok(r.status === 200 && !users[UA], 'GET 알림도 처리');
   ok(A.kakaoAuthOk(new Request('https://x.test', { headers: { authorization: 'KakaoAK kadmin' } }), {}) === false, '키 설정 없으면 알림 거부');
+  // 점검 기록: 최근 알림을 KV 에 남기되 키 값·회원번호는 남기지 않음
+  const store = new Map(); const KV = { async get(k, t) { const v = store.get(k); return v == null ? null : t === 'json' ? JSON.parse(v) : v; }, async put(k, v) { store.set(k, v); } };
+  const kenv = { ...env, GLOSSARY_KV: KV };
+  const hk = (params, auth) => unlink.onRequestPost({ request: new Request('https://x.test/api/auth/kakao/unlink', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', ...(auth ? { authorization: auth } : {}) }, body: new URLSearchParams(params).toString() }), env: kenv });
+  reset(); await hk({ app_id: '1646155', user_id: '777', referrer_type: 'ACCOUNT_DELETE' }, 'KakaoAK kadmin'); await hk({ app_id: '1646155', user_id: '4242' }, 'KakaoAK nope');
+  const diag = JSON.parse(store.get('diag:kakao-unlink') || '[]');
+  ok(diag.length === 2 && diag[0].result === 'rejected-401' && diag[0].authOk === false && diag[1].result === 'not-member' && diag[1].authOk === true && diag[1].appOk === true, '점검 기록: 결과·키 일치 여부');
+  ok(!JSON.stringify(diag).includes('kadmin') && !JSON.stringify(diag).includes('777') && !JSON.stringify(diag).includes('4242'), '점검 기록에 키·회원번호 없음');
 })().catch(e => ok(false, '실행 오류: ' + (e.stack || e.message))).then(() => {
   if (fails.length) { console.log('실패 ' + fails.length + '건\n' + fails.map(f => ' ✗ ' + f).join('\n')); process.exit(1); }
   console.log('회원 탈퇴 검증 통과');
