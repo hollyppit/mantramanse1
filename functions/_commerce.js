@@ -284,4 +284,31 @@ export async function verifyPortoneWebhook(secret, headers, body, now = Date.now
   return sig.split(' ').some(s => { const v = s.startsWith('v1,') ? s.slice(3) : ''; if (v.length !== want.length) return false; let d = 0; for (let i = 0; i < v.length; i++) d |= v.charCodeAt(i) ^ want.charCodeAt(i); return d === 0; });
 }
 // 주문번호 = 포트원 결제 id: 포트원(KPN)은 영문·숫자만 받는다(밑줄 불가). 예전 토스 주문은 'mt_…_…' 형식으로 남아 있어 검사식은 둘 다 받는다
+// ── 결제 취소(관리자 취소·고객 바로 환불 공용): 결제한 결제사로 전액 취소 → 주문 '취소' → 구매 권한 회수
+// payment_key 가 'portone:' 으로 시작하면 포트원, 아니면 토스(예전 주문). 반환 { ok, error? }
+export async function cancelOrder(env, order, reason) {
+  if (order.status !== 'paid') return { ok: false, error: 'not-paid' };
+  if (String(order.payment_key || '').startsWith(PORTONE_PREFIX)) {
+    if (!portoneReady(env)) return { ok: false, error: 'not-configured' };
+    const c = await cancelPortone(env, order.order_id, reason);
+    if (!c.ok) return { ok: false, error: 'pg-cancel-failed', message: '포트원 취소 실패: ' + c.message };
+  } else {
+    if (!tossReady(env)) return { ok: false, error: 'not-configured' };
+    const t = await tossCall(env, `payments/${encodeURIComponent(order.payment_key)}/cancel`, { cancelReason: reason });
+    if (!t.ok) return { ok: false, error: 'pg-cancel-failed', message: '토스 취소 실패: ' + ((t.data && t.data.message) || t.status) };
+  }
+  const at = new Date().toISOString(), id = encodeURIComponent(order.order_id);
+  await sbRest(env, `commerce_orders?order_id=eq.${id}&status=eq.paid`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ status: 'canceled', canceled_at: at, cancel_reason: reason }) });
+  await sbRest(env, `commerce_entitlements?order_id=eq.${id}&revoked_at=is.null`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ revoked_at: at }) });
+  return { ok: true, at };
+}
+// 고객 바로 환불 조건(환불정책): 결제 완료 · 결제 후 7일 이내 · 유료 장 미열람
+export const REFUND_DAYS = 7;
+export function refundCheck(order, viewedAt, now = Date.now()) {
+  if (order.status !== 'paid') return { ok: false, reason: 'not-paid' };
+  const paid = Date.parse(order.paid_at || order.created_at);
+  if (!(now - paid <= REFUND_DAYS * 86400000)) return { ok: false, reason: 'over-7-days' };
+  if (viewedAt) return { ok: false, reason: 'viewed' };
+  return { ok: true };
+}
 export const newOrderId = () => 'mt' + Date.now().toString(36) + [...crypto.getRandomValues(new Uint8Array(12))].map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 16);

@@ -5,13 +5,28 @@
 // sajus: 구매한 사주의 출생 입력(회원 본인이 구매할 때 입력한 값) — '이 사주로 바로 읽기'에 쓴다. 본인 토큰으로만 받는다.
 // 주문마다 viewed_at(첫 유료 장 열람 시각)을 붙인다: 환불정책 '7일 이내·미열람' 판단.
 import { json } from '../../_lib.js';
-import { memberOf, sbRest, supabaseReady, worldAccess, viewedByOrder } from '../../_commerce.js';
+import { memberOf, sbRest, supabaseReady, worldAccess, viewedByOrder, cancelOrder, refundCheck } from '../../_commerce.js';
 
 const SHOWN = ['paid', 'canceled', 'partial_canceled'];
 export async function onRequestPost({ request, env }) {
   if (!supabaseReady(env)) return json({ error: 'not-configured' }, 503);
   const member = await memberOf(request, env); if (!member) return json({ error: 'login-required' }, 401);
   let body = {}; try { body = await request.json(); } catch { body = {}; }
+  // 바로 환불: 본인 주문 · 결제 완료 · 7일 이내 · 유료 장 미열람이면 결제사로 즉시 전액 취소(환불정책 1항)
+  if (body && body.action === 'refund') {
+    const orderId = typeof body.orderId === 'string' && /^mt\w{6,62}$/.test(body.orderId) ? body.orderId : '';
+    if (!orderId) return json({ error: 'bad-order' }, 400);
+    try {
+      const order = ((await sbRest(env, `commerce_orders?select=*&order_id=eq.${encodeURIComponent(orderId)}&user_id=eq.${encodeURIComponent(member.id)}`)) || [])[0];
+      if (!order) return json({ error: 'not-found' }, 404);
+      const viewed = (await viewedByOrder(env, [orderId]))[orderId] || null;
+      const chk = refundCheck(order, viewed);
+      if (!chk.ok) return json({ error: 'not-refundable', reason: chk.reason }, 409);
+      const c = await cancelOrder(env, order, '고객 바로 환불(7일 이내·미열람)');
+      if (!c.ok) return json({ error: c.error === 'not-configured' ? 'not-configured' : 'refund-failed' }, 502);
+      return json({ ok: true, canceled_at: c.at });
+    } catch { return json({ error: 'commerce-unavailable' }, 503); }
+  }
   // 저장한 사주 지우기: 회원의 저장본과, 그 사주로 한 주문에 남은 출생 입력을 지운다(구매 권한은 그대로)
   if (body && body.action === 'forget') {
     if (!/^[0-9a-f]{8}$/.test(body.ref || '')) return json({ error: 'bad-ref' }, 400);

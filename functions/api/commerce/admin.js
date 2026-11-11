@@ -5,7 +5,7 @@
 // POST /api/commerce/admin  { action: 'regrant', orderId }         → 결제 완료 주문의 권한을 다시 넣는다(기록 실패 복구용)
 import { json, isAdmin, configError } from '../../_lib.js';
 import { kvOf } from '../../_store.js';
-import { loadProducts, cleanProducts, PRODUCTS_KEY, worldAccess, sbRest, tossCall, supabaseReady, tossReady, grantOrder, portoneReady, payProvider, cancelPortone, PORTONE_PREFIX, expirePending, viewedByOrder } from '../../_commerce.js';
+import { loadProducts, cleanProducts, PRODUCTS_KEY, worldAccess, sbRest, tossCall, supabaseReady, tossReady, grantOrder, portoneReady, payProvider, cancelPortone, PORTONE_PREFIX, expirePending, viewedByOrder, cancelOrder } from '../../_commerce.js';
 
 const enc = encodeURIComponent;
 const who = request => { try { return decodeURIComponent(request.headers.get('x-reviewer') || '').slice(0, 30) || 'admin'; } catch { return 'admin'; } };
@@ -47,19 +47,8 @@ export async function onRequestPost({ request, env }) {
   if (b.action === 'cancel') {
     if (order.status !== 'paid') return json({ error: '결제 완료 주문만 취소할 수 있습니다' }, 409);
     const reason = (typeof b.reason === 'string' && b.reason.trim().slice(0, 100)) || '관리자 취소';
-    // 결제한 결제사로 취소한다: payment_key 가 'portone:' 으로 시작하면 포트원, 아니면 토스
-    if (String(order.payment_key || '').startsWith(PORTONE_PREFIX)) {
-      if (!portoneReady(env)) return json({ error: 'not-configured' }, 503);
-      const c = await cancelPortone(env, order.order_id, reason);
-      if (!c.ok) return json({ error: '포트원 취소 실패: ' + c.message }, 400);
-    } else {
-      if (!tossReady(env)) return json({ error: 'not-configured' }, 503);
-      const t = await tossCall(env, `payments/${enc(order.payment_key)}/cancel`, { cancelReason: reason });
-      if (!t.ok) return json({ error: '토스 취소 실패: ' + ((t.data && t.data.message) || t.status) }, 400);
-    }
-    const at = new Date().toISOString();
-    await sbRest(env, `commerce_orders?order_id=eq.${enc(orderId)}`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ status: 'canceled', canceled_at: at, cancel_reason: reason }) });
-    await sbRest(env, `commerce_entitlements?order_id=eq.${enc(orderId)}&revoked_at=is.null`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ revoked_at: at }) });
+    const c = await cancelOrder(env, order, reason);   // 결제한 결제사(포트원·토스)로 취소 + 권한 회수
+    if (!c.ok) return json({ error: c.message || c.error }, c.error === 'not-configured' ? 503 : 400);
     return json({ ok: true });
   }
   return json({ error: '알 수 없는 작업입니다' }, 400);

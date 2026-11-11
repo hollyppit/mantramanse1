@@ -253,6 +253,22 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   ok(r.status === 200 && !(db.sajus || []).some(x => x.user_id === UA) && db.orders.find(x => x.order_id === PV).birth === null && (await gate({ tok: 'tok-a' })).ok, '저장 삭제: 출생 정보만 지우고 구매 유지');
   r = await mineMod.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-b', body: { action: 'forget', ref: 'deadbeef' } }), env: penv }); ok(r.status === 404, '남의 저장은 못 지움');
 
+  // ── 고객 바로 환불: 본인·결제 완료·7일 이내·미열람만, 결제사 취소 + 권한 회수
+  ok(C.refundCheck({ status: 'paid', paid_at: new Date().toISOString() }, null).ok && C.refundCheck({ status: 'paid', paid_at: new Date(Date.now() - 8 * 86400000).toISOString() }, null).reason === 'over-7-days'
+    && C.refundCheck({ status: 'paid', paid_at: new Date().toISOString() }, '2026-11-11T00:00:00Z').reason === 'viewed' && C.refundCheck({ status: 'canceled' }, null).reason === 'not-paid', '환불 조건 판단');
+  const ref = (tok, orderId) => mineMod.onRequestPost({ request: req('/api/commerce/mine', { tok, body: { action: 'refund', orderId } }), env: penv });
+  r = await ref('tok-a', PV); d = await r.json(); ok(r.status === 409 && d.reason === 'viewed', '열람한 주문은 바로 환불 안 됨');
+  o = await (await order.onRequestPost({ request: req('/api/commerce/order', { tok: 'tok-b', body: { productId: 'w2', sd } }), env: penv })).json();
+  const PR = o.orderId; po[PR] = { id: PR, status: 'PAID', amount: { total: 9900 }, currency: 'KRW', storeId: 'store-x', method: { type: 'PaymentMethodCard' } };
+  await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-b', body: { paymentId: PR } }), env: penv });
+  db.ent.filter(e => e.order_id === PR).forEach(e => { e.first_viewed_at = null; });
+  r = await ref('tok-a', PR); ok(r.status === 404, '남의 주문은 환불 못 함');
+  poCalls = []; r = await ref('tok-b', PR); d = await r.json();
+  ok(r.status === 200 && d.ok && db.orders.find(x => x.order_id === PR).status === 'canceled' && poCalls.some(c => c.u.endsWith('/payments/' + PR + '/cancel')) && !db.ent.some(e => e.order_id === PR && !e.revoked_at), '미열람·7일 이내: 바로 환불(포트원 취소·권한 회수)');
+  r = await ref('tok-b', PR); d = await r.json(); ok(r.status === 409 && d.reason === 'not-paid', '이미 환불한 주문은 다시 안 됨');
+  const old = db.orders.find(x => x.order_id === P4); // 관리자 취소도 같은 함수(이미 취소된 주문은 거부)
+  r = await admin.onRequestPost({ request: req('/api/commerce/admin', { adminPw: 'adm', body: { action: 'cancel', orderId: P4 } }), env: penv }); ok(r.status === 409 && old.status === 'canceled', '관리자: 취소된 주문 재취소 거부');
+
   // ── 키가 없으면 결제 API 는 'not-configured'
   const bare = { GLOSSARY_KV: KV, ADMIN_PASSWORD: 'adm' };
   r = await order.onRequestPost({ request: req('/api/commerce/order', { tok: 'tok-a', body: { productId: 'w2', sd } }), env: bare }); ok(r.status === 503, '키 없음: 주문 503');
