@@ -7,7 +7,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
 (async () => {
   const C = await imp('functions/_commerce.js');
   const access = await imp('functions/api/commerce/access.js'), order = await imp('functions/api/commerce/order.js');
-  const confirm = await imp('functions/api/commerce/confirm.js'), admin = await imp('functions/api/commerce/admin.js'), webhook = await imp('functions/api/commerce/webhook.js');
+  const confirm = await imp('functions/api/commerce/confirm.js'), admin = await imp('functions/api/commerce/admin.js'), webhook = await imp('functions/api/commerce/webhook.js'), mine = await imp('functions/api/commerce/mine.js');
   const { Editorial } = await imp('functions/_editorial.js');
 
   // ── 메모리 KV + 활성 카탈로그(재물 주제 장 15개 중 order 가 가장 작은 장이 무료)
@@ -205,6 +205,16 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   po.mtoldnone1 = { id: 'mtoldnone1', status: 'FAILED', amount: { total: 7800 }, currency: 'KRW', storeId: 'store-x' };
   r = await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-a', body: { paymentId: 'mtoldnone1' } }), env: penv }); ok(r.status === 400 && od('mtoldnone1').failure === 'expired', '실패 결제는 만료 표시 유지');
   r = await admin.onRequestGet({ request: req('/api/commerce/admin', { adminPw: 'adm', method: 'GET' }), env: penv }); d = await r.json(); ok(d.sweep && typeof d.sweep.checked === 'number', '관리자 목록이 정리 결과를 돌려줌');
+
+  // ── 내 구매 내역: 본인 주문만, 결제 완료·취소·30분 안 된 대기만, 사주 식별값은 내려 보내지 않음
+  r = await mine.onRequestPost({ request: req('/api/commerce/mine', { body: {} }), env: penv }); ok(r.status === 401, '내 구매 내역: 비회원 401');
+  mk('mtfreshmine1', 3);
+  r = await mine.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-a', body: {} }), env: penv }); d = await r.json();
+  const ids = d.orders.map(o => o.order_id), all = db.orders.filter(o => o.user_id === UA);
+  ok(r.status === 200 && d.member.email === 'a@x.test' && d.orders.length > 0, '내 구매 내역: 회원 200');
+  ok(d.orders.every(o => all.some(a => a.order_id === o.order_id)) && !ids.includes('mtoldb1'), '본인 주문만');
+  ok(d.orders.every(o => ['paid', 'canceled', 'partial_canceled', 'pending'].includes(o.status)) && !ids.includes('mtoldnone1') && ids.includes('mtfreshmine1') && ids.includes('mtoldpaid1'), '실패·만료 주문은 숨기고 결제 완료·최근 대기는 보임');
+  ok(!JSON.stringify(d).includes(k1) && !JSON.stringify(d).includes('saju_key') && !JSON.stringify(d).includes(UA), '사주 식별값·회원 id 는 내려 보내지 않음');
 
   // ── 키가 없으면 결제 API 는 'not-configured'
   const bare = { GLOSSARY_KV: KV, ADMIN_PASSWORD: 'adm' };

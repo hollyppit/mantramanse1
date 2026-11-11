@@ -88,7 +88,7 @@
     else if (!logged) body = list(false) + '<p class="pw-note">구매하려면 먼저 로그인해 주세요. 구매한 내용은 계정에 저장되어 다른 기기에서도 다시 볼 수 있어요.</p>' +
       (canLogin ? '<div class="pw-login"><button type="button" class="pw-btn pw-kakao" data-pw-login="kakao">카카오로 시작하기</button><button type="button" class="pw-btn pw-google" data-pw-login="google">구글로 시작하기</button><button type="button" class="pw-btn" disabled title="준비 중">네이버(준비 중)</button></div>' : '<p class="pw-note">로그인을 준비하고 있습니다.</p>') + fine;
     else body = list(true) + fine +
-      '<p class="pw-fine">' + esc(d.member.email || '') + ' 로그인 중 · <button type="button" class="pw-link" data-pw-logout>로그아웃</button></p>';
+      '<p class="pw-fine">' + esc(d.member.email || '') + ' 로그인 중 · <a href="/report/my/" target="_blank" rel="noopener">내 구매 내역</a> · <button type="button" class="pw-link" data-pw-logout>로그아웃</button></p>';
     var el = document.createElement('div'); el.id = 'pw-sheet'; el.className = 'pw-sheet'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '구매 안내');
     el.innerHTML = '<div class="pw-card"><button type="button" class="pw-x" data-pw-close aria-label="닫기">×</button><p class="pw-k">🔒 잠긴 장</p><h3>' + esc(worldName) + '의 다음 이야기는 구매 후 이어집니다</h3><p class="pw-sub">첫 장은 무료로 볼 수 있어요. 지금 고른 장: ' + esc(c.title || '') + '</p>' + body + '</div>';
     el.addEventListener('click', function (e) {
