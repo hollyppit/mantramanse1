@@ -50,6 +50,8 @@ export async function siteGate(request, env) {
   if (url.pathname === '/api/commerce/access' && request.method === 'POST') return null;
   // 포트원 결제 알림(웹훅)은 포트원 서버가 보내므로 쿠키가 없다: 잠금 중에도 받는다(본문은 믿지 않고 포트원에 다시 조회)
   if (url.pathname === '/api/commerce/webhook' && request.method === 'POST') return null;
+  // 카카오 연결 해제 알림도 카카오 서버가 보낸다(어드민 키 머리글로 확인)
+  if (url.pathname === '/api/auth/kakao/unlink') return null;
   if (reportPublic && url.pathname !== LOGIN_PATH && publicPath(url.pathname)) return null;
 
   if (url.pathname === LOGIN_PATH && request.method === 'POST') {
