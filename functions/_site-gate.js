@@ -46,6 +46,8 @@ export async function siteGate(request, env) {
   const reportPublic = reportPublicOn(env);
   // 약관·개인정보처리방침·환불정책(/report/legal/)은 사이트가 잠겨 있어도 언제나 공개(결제사·로그인 심사가 볼 수 있게)
   if (/^\/report\/legal\/[\w.-]*$/.test(url.pathname)) return null;
+  // 상품 안내 페이지가 가격을 읽는 공개 API(판매 상품·가격·설정 여부만 돌려준다)도 잠금 중 공개
+  if (url.pathname === '/api/commerce/access' && request.method === 'POST') return null;
   if (reportPublic && url.pathname !== LOGIN_PATH && publicPath(url.pathname)) return null;
 
   if (url.pathname === LOGIN_PATH && request.method === 'POST') {

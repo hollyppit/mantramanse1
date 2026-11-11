@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>상품 안내 · 만트라 사주 무빙툰</title>
+<link rel="stylesheet" href="legal.css">
+<style>
+  .grid { display: grid; gap: 12px; margin: 12px 0; }
+  .prod { border: 1px solid var(--line); border-radius: 14px; padding: 16px; background: var(--bg); }
+  .prod.best { border-color: var(--accent); }
+  .prod h3 { margin: 0 0 4px; font-size: 1.05rem; display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .price { color: var(--accent); font-size: 1.15rem; white-space: nowrap; }
+  .prod p { margin: 4px 0; color: var(--ink-2); font-size: 14px; }
+  .tag { display: inline-block; font-size: 12px; border: 1px solid var(--accent); color: var(--accent); border-radius: 999px; padding: 1px 8px; margin-left: 6px; vertical-align: 2px; }
+  .cta { display: inline-block; margin-top: 14px; padding: 12px 18px; border-radius: 12px; background: var(--accent); color: #fff; text-decoration: none; font-weight: 700; }
+  .muted { color: var(--ink-2); font-size: 13px; }
+</style>
+</head>
+<body data-legal-footer>
+<div class="wrap">
+  <div class="top"><a href="/report/">← 무빙툰으로 돌아가기</a>
+    <nav class="tabs" aria-label="약관과 정책"><a href="products.html" aria-current="page">상품 안내</a><a href="terms.html">이용약관</a><a href="privacy.html">개인정보처리방침</a><a href="refund.html">환불정책</a></nav></div>
+  <article>
+    <h1>상품 안내</h1>
+    <p class="meta"><span data-biz="service"></span> · <span data-biz="name"></span></p>
+    <p>생년월일로 계산한 사주 풀이를 글·그림·영상으로 보여 주는 <b>디지털 콘텐츠</b>입니다. 주제별로 한 번 결제하면 바로 열립니다.</p>
+
+    <h2>판매 상품</h2>
+    <div class="grid" id="products" aria-live="polite"><p class="muted">상품 정보를 불러오는 중입니다…</p></div>
+    <p class="muted">가격은 부가세 포함입니다. 각 주제의 <b>첫 장은 결제 없이 무료로</b> 읽어 볼 수 있습니다.</p>
+
+    <h2>이용 방법</h2>
+    <ol>
+      <li>무빙툰에서 생년월일·태어난 시각·성별을 입력합니다.</li>
+      <li>보고 싶은 주제의 첫 장을 무료로 읽습니다.</li>
+      <li>다음 장을 열면 구매 창이 나타납니다. 카카오 또는 구글 계정으로 로그인한 뒤 상품을 고릅니다.</li>
+      <li>카드 또는 간편결제(카카오페이·토스페이 등)로 결제하면 <b>바로</b> 나머지 장이 열립니다.</li>
+    </ol>
+
+    <h2>제공 방식</h2>
+    <div class="tbl-wrap"><table>
+      <tr><th>제공 형태</th><td>웹사이트에서 바로 보는 디지털 콘텐츠(배송 없음)</td></tr>
+      <tr><th>제공 시점</th><td>결제 승인 즉시</td></tr>
+      <tr><th>이용 기간</th><td>서비스를 운영하는 동안 기간 제한 없이 다시 볼 수 있음</td></tr>
+      <tr><th>이용 범위</th><td>구매할 때 보고 있던 <b>사주 1개</b>에 한해 열림. 다른 사람의 사주는 따로 구매</td></tr>
+      <tr><th>결제 방식</th><td>한 번 결제(정기 결제·자동 갱신·포인트 충전 없음)</td></tr>
+      <tr><th>결제 수단</th><td>신용·체크카드, 간편결제</td></tr>
+      <tr><th>성격</th><td>전통 명리학에 바탕을 둔 참고용 콘텐츠이며 미래를 단정하지 않습니다. 상담·예약 서비스는 제공하지 않습니다.</td></tr>
+    </table></div>
+
+    <h2>환불</h2>
+    <p>구매 후 <b>7일 이내</b>이고 산 주제의 <b>유료 장을 한 번도 열지 않았다면</b> 전액 환불합니다. 유료 장을 열어 디지털 콘텐츠 제공이 시작된 뒤에는 환불이 제한되며, 콘텐츠가 열리지 않는 등 회사 잘못이 있으면 기간·열람과 상관없이 전액 환불합니다. 자세한 내용은 <a href="refund.html">환불정책</a>을 확인해 주세요.</p>
+
+    <h2>문의</h2>
+    <p><span data-biz="name"></span> · 전화 <span data-biz="phone"></span> · 이메일 <span data-biz="email"></span></p>
+
+    <a class="cta" href="/report/">무빙툰 시작하기</a>
+  </article>
+</div>
+<script src="business.js"></script>
+<script>
+/* 상품·가격은 관리자 화면(결제·상품)에서 정한 값을 그대로 보여 준다(/api/commerce/access). 판매 중인 상품만 나온다.
+   주제 설명은 무빙툰 세계 소개 문구와 같다(report/v2/explore.js DEFAULT_WORLDS). */
+(function () {
+  var DESC = {
+    w1: ['종합풀이', '타고난 기질과 인생 흐름, 강점과 약점, 일·인연·재물·건강, 개운법까지 내 사주 전체를 한 번에 읽습니다.'],
+    w2: ['재물운 심화', '돈을 버는 성향, 수입과 지출, 재물 관리와 시기별 재물 흐름을 읽습니다.'],
+    w7: ['커리어운 심화', '직업 적성, 잘 맞는 일의 방식, 업종 선택과 독립, 커리어 변화와 성공 방향을 읽습니다.'],
+    w3: ['인연운 심화', '연애 성향, 결혼과 배우자, 대인관계, 가족과 자녀, 궁합을 읽습니다.']
+  };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var won = function (n) { return (+n || 0).toLocaleString('ko-KR') + '원'; };
+  var box = document.getElementById('products');
+  function render(list) {
+    if (!list.length) { box.innerHTML = '<p class="muted">지금은 판매 중인 상품이 없습니다. 무빙툰의 모든 장을 무료로 볼 수 있습니다.</p>'; return; }
+    var ORDER = ['bundle', 'w1', 'w2', 'w7', 'w3'], rank = function (p) { var i = ORDER.indexOf(p.id); return i < 0 ? 99 : i; };
+    var sorted = list.slice().sort(function (a, b) { return rank(a) - rank(b); });   // 묶음 → 종합 → 재물 → 커리어 → 인연(무빙툰 세계 순서)
+    box.innerHTML = sorted.map(function (p) {
+      var names = p.worlds.map(function (w) { return DESC[w] ? DESC[w][0] : w; });
+      var body = p.kind === 'bundle'
+        ? '<p>판매 중인 유료 주제 ' + p.worlds.length + '개(' + esc(names.join(' · ')) + ')를 한 번에 엽니다. 구매 시점에 판매 중인 주제만 포함되며, 이후 새로 추가되는 주제는 포함되지 않습니다.</p>'
+        : '<p>' + esc((DESC[p.worlds[0]] || ['', ''])[1]) + '</p>';
+      return '<div class="prod' + (p.kind === 'bundle' ? ' best' : '') + '"><h3><span>' + esc(p.name) + (p.kind === 'bundle' ? '<span class="tag">묶음</span>' : '') + '</span><span class="price">' + won(p.price) + '</span></h3>' + body + '</div>';
+    }).join('');
+  }
+  fetch('/api/commerce/access', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"sd":null}' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) { render(d && Array.isArray(d.products) ? d.products : []); })
+    .catch(function () { box.innerHTML = '<p class="muted">상품 정보를 불러오지 못했습니다. 잠시 후 다시 열어 주세요.</p>'; });
+})();
+</script>
+</body>
+</html>
