@@ -32,7 +32,7 @@ export async function onRequestPost({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   if (!supabaseReady(env)) return json({ error: 'not-configured' }, 503);
   let b; try { b = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); }
-  const orderId = typeof b.orderId === 'string' && /^mt_[\w]+$/.test(b.orderId) ? b.orderId : '';
+  const orderId = typeof b.orderId === 'string' && /^mt\w{6,62}$/.test(b.orderId) ? b.orderId : '';
   if (!orderId) return json({ error: '주문번호가 올바르지 않습니다' }, 400);
   const order = (await sbRest(env, `commerce_orders?select=*&order_id=eq.${enc(orderId)}`))[0];
   if (!order) return json({ error: '주문을 찾을 수 없습니다' }, 404);

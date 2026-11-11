@@ -12,7 +12,7 @@ export async function onRequestPost({ request, env }) {
   let b; try { b = JSON.parse(raw); } catch { return json({ error: 'bad-payload' }, 400); }
   const paymentId = b && b.data && typeof b.data.paymentId === 'string' ? b.data.paymentId : '';
   // 우리 주문이 아닌 결제·결제 외 알림(빌링키 등)은 받았다고만 답한다(포트원이 재전송하지 않게)
-  if (!/^mt_[\w]+$/.test(paymentId) || !/^Transaction\./.test(String(b.type || ''))) return json({ ok: true, ignored: true });
+  if (!/^mt\w{6,62}$/.test(paymentId) || !/^Transaction\./.test(String(b.type || ''))) return json({ ok: true, ignored: true });
   let order;
   try { order = (await sbRest(env, `commerce_orders?select=*&order_id=eq.${encodeURIComponent(paymentId)}`))[0]; } catch { return json({ error: 'commerce-unavailable' }, 503); }
   if (!order) return json({ ok: true, ignored: true });

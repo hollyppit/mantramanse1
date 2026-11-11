@@ -131,7 +131,11 @@
         if (btn) { btn.disabled = false; btn.textContent = '다시 시도'; }
         var m = { 'already-owned': '이미 구매한 상품입니다.', 'login-required': '로그인이 풀렸습니다. 다시 로그인해 주세요.', 'not-configured': '결제를 준비하고 있습니다.' }[e && e.message];
         if (e && (e.code === 'USER_CANCEL' || e.message === 'user-cancel')) return;
-        alert(m || (e && e.portone ? '결제가 완료되지 않았습니다: ' + e.message : '결제를 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.'));
+        // 포트원 SDK 가 결제창을 열기 전에 거절하면(잘못된 값 등) 그 이유를 그대로 보여 준다: 문의받을 때 원인을 바로 알 수 있게
+        var why = e && (e.portone || (e.code && e.message)) ? '결제가 완료되지 않았습니다: ' + e.message : '';
+        if (!m && !why && e && e.message && !/^[a-z-]+$/.test(e.message)) why = '결제를 시작하지 못했습니다: ' + String(e.message).slice(0, 120);
+        alert(m || why || '결제를 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        if (root.console) console.warn('[paywall] 결제 시작 실패', e);
       });
   }
 
@@ -143,7 +147,7 @@
       var u = new URL(root.location.href); PAY_KEYS.forEach(function (x) { u.searchParams.delete(x); }); u.searchParams.set('pay', 'portone');
       var cust = { customerId: o.customerKey }; if (P.info.member && P.info.member.email) cust.email = P.info.member.email;
       saveResume();
-      return root.PortOne.requestPayment({ storeId: k.storeId, channelKey: k.channelKey, paymentId: o.orderId, orderName: o.orderName, totalAmount: o.amount, currency: 'CURRENCY_KRW', payMethod: 'CARD', redirectUrl: u.toString(), customer: cust });
+      return root.PortOne.requestPayment({ storeId: k.storeId, channelKey: k.channelKey, paymentId: o.orderId, orderName: o.orderName, totalAmount: o.amount, currency: 'KRW', payMethod: 'CARD', redirectUrl: u.toString(), customer: cust });
     }).then(function (res) {
       dropResume();   // 여기까지 오면 PC 결제창: 페이지를 떠나지 않았다
       if (!res) return;   // 모바일: 이미 다른 페이지로 이동 중

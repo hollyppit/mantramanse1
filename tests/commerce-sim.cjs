@@ -101,7 +101,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   r = await order.onRequestPost({ request: req('/api/commerce/order', { body: { productId: 'w2', sd } }), env }); ok(r.status === 401, '비회원 주문 거부');
   r = await order.onRequestPost({ request: req('/api/commerce/order', { tok: 'tok-a', body: { productId: 'w1', sd } }), env }); ok(r.status === 400, '판매 안 하는 상품 거부');
   r = await order.onRequestPost({ request: req('/api/commerce/order', { tok: 'tok-a', body: { productId: 'w2', sd, amount: 1 } }), env }); d = await r.json();
-  ok(r.status === 200 && d.amount === 9900 && /^mt_/.test(d.orderId) && db.orders[0].amount === 9900 && db.orders[0].saju_key === k1, '주문 생성: 서버 가격');
+  ok(r.status === 200 && d.amount === 9900 && /^mt[a-z0-9]{20,}$/.test(d.orderId) && db.orders[0].amount === 9900 && db.orders[0].saju_key === k1, '주문 생성: 서버 가격');
   const oid = d.orderId;
 
   // ── 승인: 남의 주문·금액 위조·실패·성공·재시도

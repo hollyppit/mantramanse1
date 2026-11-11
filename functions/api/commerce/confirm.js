@@ -13,7 +13,7 @@ export async function onRequestPost({ request, env }) {
   if (isPortone ? !portoneReady(env) : !tossReady(env)) return json({ error: 'not-configured' }, 503);
   const member = await memberOf(request, env); if (!member) return json({ error: 'login-required' }, 401);
   const orderId = String(isPortone ? b.paymentId : b.orderId || '').slice(0, 64);
-  if (!/^mt_[\w]+$/.test(orderId)) return json({ error: 'bad-payload' }, 400);
+  if (!/^mt\w{6,62}$/.test(orderId)) return json({ error: 'bad-payload' }, 400);
   let order;
   try { order = (await sbRest(env, `commerce_orders?select=*&order_id=eq.${enc(orderId)}&user_id=eq.${enc(member.id)}`))[0]; } catch { return json({ error: 'commerce-unavailable' }, 503); }
   if (!order) return json({ error: 'unknown-order' }, 404);

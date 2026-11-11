@@ -218,4 +218,5 @@ export async function verifyPortoneWebhook(secret, headers, body, now = Date.now
   const want = btoa(String.fromCharCode(...mac));
   return sig.split(' ').some(s => { const v = s.startsWith('v1,') ? s.slice(3) : ''; if (v.length !== want.length) return false; let d = 0; for (let i = 0; i < v.length; i++) d |= v.charCodeAt(i) ^ want.charCodeAt(i); return d === 0; });
 }
-export const newOrderId =() => 'mt_' + Date.now().toString(36) + '_' + [...crypto.getRandomValues(new Uint8Array(9))].map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 14);
+// 주문번호 = 포트원 결제 id: 포트원(KPN)은 영문·숫자만 받는다(밑줄 불가). 예전 토스 주문은 'mt_…_…' 형식으로 남아 있어 검사식은 둘 다 받는다
+export const newOrderId = () => 'mt' + Date.now().toString(36) + [...crypto.getRandomValues(new Uint8Array(12))].map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 16);
