@@ -85,8 +85,8 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   const kenv = { ...env, GLOSSARY_KV: KV };
   const hk = (params, auth) => unlink.onRequestPost({ request: new Request('https://x.test/api/auth/kakao/unlink', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', ...(auth ? { authorization: auth } : {}) }, body: new URLSearchParams(params).toString() }), env: kenv });
   reset(); await hk({ app_id: '1646155', user_id: '777', referrer_type: 'ACCOUNT_DELETE' }, 'KakaoAK kadmin'); await hk({ app_id: '1646155', user_id: '4242' }, 'KakaoAK nope');
-  const diag = JSON.parse(store.get('diag:kakao-unlink') || '[]');
-  ok(diag.length === 2 && diag[0].result === 'rejected-401' && diag[0].authOk === false && diag[1].result === 'not-member' && diag[1].authOk === true && diag[1].appOk === true, '점검 기록: 결과·키 일치 여부');
+  const diag = [...store.keys()].filter(k => k.startsWith('diag:kakao-unlink:')).map(k => JSON.parse(store.get(k))).sort((x, y) => x.result < y.result ? 1 : -1);
+  ok(diag.length === 2 && diag.some(d => d.result === 'rejected-401' && d.authOk === false) && diag.some(d => d.result === 'received-200' && d.done === 'not-member' && d.authOk === true && d.appOk === true), '점검 기록: 알림마다 따로, 결과·키 일치 여부');
   ok(!JSON.stringify(diag).includes('kadmin') && !JSON.stringify(diag).includes('777') && !JSON.stringify(diag).includes('4242'), '점검 기록에 키·회원번호 없음');
 })().catch(e => ok(false, '실행 오류: ' + (e.stack || e.message))).then(() => {
   if (fails.length) { console.log('실패 ' + fails.length + '건\n' + fails.map(f => ' ✗ ' + f).join('\n')); process.exit(1); }
