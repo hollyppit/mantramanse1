@@ -10,7 +10,6 @@ export async function onRequestPost({ request, env }) {
   const raw = await request.text(); if (raw.length > 20000) return json({ error: 'too-large' }, 413);
   const signed = env.PORTONE_WEBHOOK_SECRET ? await verifyPortoneWebhook(env.PORTONE_WEBHOOK_SECRET, request.headers, raw) : null;
   let b; try { b = JSON.parse(raw); } catch { b = null; }
-  await noteSignal(env, 'portone-webhook', { type: (b && String(b.type || '').slice(0, 40)) || null, signed });   // 판매 준비 점검: 웹훅이 실제로 오는지
   if (signed === false) return json({ error: 'bad-signature' }, 401);
   if (!b) return json({ error: 'bad-payload' }, 400);
   const paymentId = b && b.data && typeof b.data.paymentId === 'string' ? b.data.paymentId : '';
@@ -19,6 +18,8 @@ export async function onRequestPost({ request, env }) {
   let order;
   try { order = (await sbRest(env, `commerce_orders?select=*&order_id=eq.${encodeURIComponent(paymentId)}`))[0]; } catch { return json({ error: 'commerce-unavailable' }, 503); }
   if (!order) return json({ ok: true, ignored: true });
+  // 판매 준비 점검: 우리 주문에 대한 알림일 때만 '웹훅 수신'으로 기록(다른 요청으로 점검표가 속지 않게)
+  await noteSignal(env, 'portone-webhook', { type: String(b.type || '').slice(0, 40) || null, signed });
   // 취소 알림: 관리자 화면 밖(포트원 콘솔)에서 취소한 결제도 권한을 회수한다
   if (b.type === 'Transaction.Cancelled' && order.status === 'paid') {
     const t = await portoneCall(env, `payments/${encodeURIComponent(paymentId)}?storeId=${encodeURIComponent(env.PORTONE_STORE_ID)}`);

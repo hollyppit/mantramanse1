@@ -278,6 +278,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   const rd = Object.fromEntries(d.readiness.map(x => [x.id, x]));
   ok(rd.provider.ok === true && rd['live-channel'].ok === false && /TEST/.test(rd['live-channel'].note) && rd.products.ok === true && rd.worlds.ok === true, '판매 준비 점검: 테스트 채널이면 실연동 경고');
   ok(rd.webhook.ok === true && rd['webhook-secret'].ok === false, '웹훅 수신 기록(앞선 웹훅 시험)·서명 시크릿 미설정 표시');
+  { const kvKey = 'commerce:signal:portone-webhook'; const before = store.get(kvKey); store.delete(kvKey); await hook({ type: 'Transaction.Paid', data: { paymentId: 'mtnotours12345' } }); ok(!store.has(kvKey), '우리 주문이 아닌 알림은 웹훅 수신으로 안 셈'); if (before) store.set(kvKey, before); }
   po[PS].channel.type = 'LIVE'; o = await (await order.onRequestPost({ request: req('/api/commerce/order', { tok: 'tok-b', body: { productId: 'w2', sd: { ...sd, gender: 'F' } } }), env: penv })).json();
   po[o.orderId] = { ...po[PS], id: o.orderId, amount: { total: 9900 } }; await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-b', body: { paymentId: o.orderId } }), env: penv });
   d = await (await admin.onRequestGet({ request: req('/api/commerce/admin', { adminPw: 'adm', method: 'GET' }), env: penv })).json();
