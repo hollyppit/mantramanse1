@@ -11,7 +11,7 @@
     bizNo: '775-24-01924',
     mailOrderNo: '제2026-전주덕진-0195호',
     address: '전북특별자치도 전주시 덕진구 만성중앙로 53-44, 3층 A-2호(만성동)',
-    phone: '010-5114-7238',
+    phone: '070-4519-6416',
     email: 'critical5114@naver.com',
     privacyOfficer: '백진우',
     effective: '2026년 11월 10일',
