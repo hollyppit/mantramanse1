@@ -59,11 +59,17 @@
   }
   function lockedIndex(i) { var c = P.chapters()[i]; return !!(c && lockOf(c)); }
 
+  // ── 결제창·로그인으로 페이지를 떠났다 돌아와도 읽던 사주·장으로 바로 이어지게: 떠나기 직전 viewer 의 이어 읽기 값(mt_v2_input)을 저장한다.
+  //    viewer.js handoff() 가 돌아온 페이지에서 이 값을 한 번 꺼내 입력창 없이 시작하고, 그 장(resumeChapter)으로 들어간다.
+  function saveResume() { try { if (P.resume) { var v = P.resume(P.current && P.current.id); if (v) root.sessionStorage.setItem('mt_v2_input', JSON.stringify(v)); } } catch (e) { } }
+  function dropResume() { try { root.sessionStorage.removeItem('mt_v2_input'); } catch (e) { } }
+
   // ── 잠금 창
   function close() { var el = document.getElementById('pw-sheet'); if (el) el.parentNode.removeChild(el); }
   function show(c, opts) {
     opts = opts || {}; close();
     var lk = lockOf(c); if (!lk) return false;
+    P.current = c;
     var d = P.info, worldName = (opts.worldName || '').trim() || '이 주제';
     var products = (d.products || []).filter(function (p) { return p.worlds.indexOf(lk.world) >= 0; });
     var logged = !!(d.member), canPay = d.configured && d.configured.pay, canLogin = d.configured && d.configured.login;
@@ -90,8 +96,9 @@
 
   function login(provider) {
     track('login_start', { provider: provider });
+    saveResume();
     sbClient().then(function (sb) { return sb.auth.signInWithOAuth({ provider: provider, options: { redirectTo: root.location.href } }); })
-      .catch(function () { alert('로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.'); });
+      .catch(function () { dropResume(); alert('로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.'); });
   }
   function logout() { sbClient().then(function (sb) { return sb.auth.signOut(); }).then(function () { P.token = ''; close(); refresh(); }).catch(function () { }); }
 
@@ -106,10 +113,12 @@
           var keep = new URLSearchParams(root.location.search); ['pay', 'paymentKey', 'orderId', 'amount', 'code', 'message', 'paymentType'].forEach(function (k) { keep.delete(k); });
           keep.set('pay', 'success'); var ok = back + '?' + keep.toString() + root.location.hash; keep.set('pay', 'fail'); var no = back + '?' + keep.toString() + root.location.hash;
           var pay = root.TossPayments(d.keys.tossClientKey).payment({ customerKey: o.customerKey });
+          saveResume();
           return pay.requestPayment({ method: 'CARD', amount: { currency: 'KRW', value: o.amount }, orderId: o.orderId, orderName: o.orderName, successUrl: ok, failUrl: no, card: { flowMode: 'DEFAULT' } });
         });
       })
       .catch(function (e) {
+        dropResume();   // 결제창을 닫았거나 실패: 페이지를 떠나지 않았으므로 저장한 이어 읽기 값을 지운다
         if (btn) { btn.disabled = false; btn.textContent = '다시 시도'; }
         var m = { 'already-owned': '이미 구매한 상품입니다.', 'login-required': '로그인이 풀렸습니다. 다시 로그인해 주세요.', 'not-configured': '결제를 준비하고 있습니다.' }[e && e.message];
         if (e && e.code === 'USER_CANCEL') return;
@@ -121,16 +130,18 @@
   function handleReturn() {
     var u = new URL(root.location.href), st = u.searchParams.get('pay'); if (!st) return Promise.resolve(null);
     var pk = u.searchParams.get('paymentKey'), oid = u.searchParams.get('orderId'), amt = u.searchParams.get('amount'), msg = u.searchParams.get('message');
-    ['pay', 'paymentKey', 'orderId', 'amount', 'code', 'message', 'paymentType'].forEach(function (k) { u.searchParams.delete(k); });
-    try { root.history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch (e) { }
-    if (st !== 'success' || !pk || !oid) { if (st === 'fail' && msg) toast('결제가 완료되지 않았습니다: ' + msg); return Promise.resolve(null); }
+    // 주소의 결제 값은 서버가 확실한 답을 준 뒤에 지운다(연결이 끊기면 남겨 두어 새로고침으로 다시 승인할 수 있게)
+    var clearUrl = function () { ['pay', 'paymentKey', 'orderId', 'amount', 'code', 'message', 'paymentType'].forEach(function (k) { u.searchParams.delete(k); }); try { root.history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch (e) { } };
+    if (st !== 'success' || !pk || !oid) { clearUrl(); if (st === 'fail' && msg) toast('결제가 완료되지 않았습니다: ' + msg); return Promise.resolve(null); }
     return (P.loading || Promise.resolve()).then(function () { return P.token ? null : sbClient().then(function (sb) { return sb.auth.getSession(); }).then(function (r) { P.token = r && r.data && r.data.session && r.data.session.access_token || ''; }).catch(function () { }); })
       .then(function () { return fetch('/api/commerce/confirm', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, headers()), body: JSON.stringify({ paymentKey: pk, orderId: oid, amount: +amt }) }); })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (x) {
+        clearUrl();
         if (x.ok && x.j.ok) { track('purchase_done', { order: oid }); toast('구매가 완료되었습니다. 이어서 읽어 보세요.'); }
         else toast(x.j.error === 'grant-failed' ? '결제는 되었지만 열람 권한 기록에 실패했습니다. 문의해 주시면 바로 열어 드립니다(주문번호 ' + oid + ').' : '결제를 확인하지 못했습니다: ' + (x.j.message || x.j.error || ''));
-        return refresh();
+        // 구매가 끝나면 열려 있던 잠금 창을 닫고, 사려던 장으로 이어 간다(viewer 가 onPurchased 를 넘긴다)
+        return refresh().then(function () { if (x.ok && x.j.ok) { close(); if (P.onPurchased) { try { P.onPurchased(); } catch (e) { } } } });
       }).catch(function () { toast('결제 확인 중 연결이 끊겼습니다. 새로고침하면 다시 확인합니다.'); });
   }
   function toast(t) { if (R.toast) { R.toast(t, 5000); return; } var el = document.createElement('div'); el.className = 'pw-toast'; el.textContent = t; document.body.appendChild(el); setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 5000); }
@@ -153,8 +164,10 @@
   R.Paywall = {
     TOPIC_WORLD: TOPIC_WORLD,
     // viewer 가 사주 데이터와 장 목록 읽는 함수를 넘긴다
-    init: function (sd, opts) { P.sd = sd; opts = opts || {}; if (opts.chapters) P.chapters = opts.chapters; if (opts.onChange) P.onChange = opts.onChange; return refresh().then(handleReturn); },
+    init: function (sd, opts) { P.sd = sd; opts = opts || {}; if (opts.chapters) P.chapters = opts.chapters; if (opts.onChange) P.onChange = opts.onChange; if (opts.resume) P.resume = opts.resume; if (opts.onPurchased) P.onPurchased = opts.onPurchased; return (P.early || Promise.resolve()).then(refresh).then(handleReturn); },
     refresh: refresh, headers: headers, lockOf: lockOf, lockedIndex: lockedIndex, show: show, close: close, info: function () { return P.info; },
     _state: P,
   };
+  // 결제창에서 돌아온 페이지: 사주 입력·계산을 기다리지 않고 바로 서버 승인을 시작한다(토스는 승인이 늦으면 결제를 자동 취소한다).
+  if (/[?&]pay=(success|fail)/.test(root.location.search || '')) P.early = refresh().then(handleReturn).catch(function () { });
 })(typeof window !== 'undefined' ? window : globalThis);

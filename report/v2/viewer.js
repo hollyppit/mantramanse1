@@ -67,7 +67,11 @@
     var sd; try { sd = R.SajuData.build(ch, { now: Date.now() }); } catch (e) { elog('caught', 'sd.build'); clearInterval(tick); view('input'); $('#msg').textContent = '계산 결과를 정리하지 못했습니다.'; return; }
     S.sd = sd; S.birth = birthOf(ch); if (R.IchingCard) R.IchingCard.init(); if (R.DeepAsk) R.DeepAsk.init(); var t0 = Date.now();
     // 유료 잠금(paywall.js): 잠금 정보는 늦게 와도 된다. 오기 전에는 아무것도 잠그지 않고, 도착하면 세계 화면의 자물쇠만 다시 그린다
-    if (R.Paywall && !PREVIEW) R.Paywall.init(sd, { chapters: function () { return (S.rep && S.rep.chapters) || []; }, onChange: function () { if (S.view === 'home' && S.rep && S.xp) showHome(S.xpWorld || undefined); } });
+    if (R.Paywall && !PREVIEW) R.Paywall.init(sd, { chapters: function () { return (S.rep && S.rep.chapters) || []; }, onChange: function () { if (S.view === 'home' && S.rep && S.xp) showHome(S.xpWorld || undefined); },
+      // 결제창·로그인으로 떠나기 직전 저장할 이어 읽기 값(handoff 가 돌아온 페이지에서 한 번 쓴다)
+      resume: function (chapterId) { var c = S.rep && S.rep.chapters[S.idx]; return { inp: S.ch.input, name: S.name, interest: S.interest || '', realityContext: S.realityContext || {}, guide: S.guide, resumeChapter: chapterId || (c && c.id) || null }; },
+      // 구매가 끝나면 사려던 장으로 바로 들어간다. 본문이 아직 준비되지 않았으면 세계에 들어갈 때 guideResume 이 대신 이어 준다
+      onPurchased: function () { var id = S.payResume; if (!id || !S.rep) return; S.payResume = null; var i = S.rep.chapters.map(function (c) { return c.id; }).indexOf(id); if (i >= 0) enterFromHome(i); } });
     // 서버 저장본(콘텐츠·미디어·일간 소개 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
     Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story'), getJson('/api/assets'), getJson('/api/prologue'), getJson('/api/seal-scenes')]).then(function (a) {
       S.sealPresentations=(a[6]&&a[6].chapters)||[]; S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
@@ -1013,7 +1017,7 @@
       if (navigation && navigation.type === 'reload' && restored && JSON.parse(restored).scope === location.search) raw = restored;
     } catch (e) { } }
     if (!raw || !window.Manse) return; try { sessionStorage.removeItem('mt_v2_input'); } catch (e) { }
-    try { var h = JSON.parse(raw), ch = window.Manse.compute(h.inp); S.ch = ch; S.name = String(h.name || '').slice(0, 20); S.interest = h.interest || ''; S.realityContext=R.Editorial?R.Editorial.cleanContext(h.realityContext):{}; S.guide = h.guide; S.guideResume = h.resumeChapter || null; setTimeout(function () { start(ch, h.inp.gender); }, 0); } catch (e) { /* 입력이 올바르지 않으면 폼을 그대로 보여 준다 */ }
+    try { var h = JSON.parse(raw), ch = window.Manse.compute(h.inp); S.ch = ch; S.name = String(h.name || '').slice(0, 20); S.interest = h.interest || ''; S.realityContext=R.Editorial?R.Editorial.cleanContext(h.realityContext):{}; S.guide = h.guide; S.guideResume = h.resumeChapter || null; S.payResume = h.resumeChapter || null; setTimeout(function () { start(ch, h.inp.gender); }, 0); } catch (e) { /* 입력이 올바르지 않으면 폼을 그대로 보여 준다 */ }
   })();
   window.addEventListener('mantra:guide-change', function (e) {
     S.guide = e.detail.guide;
