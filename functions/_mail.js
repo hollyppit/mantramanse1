@@ -55,12 +55,12 @@ export function refundMail(order, canceledAt) {
   return { subject: `[${BIZ.service}] 환불이 완료되었습니다 · ${order.product_name}`, html: layout('환불이 완료되었습니다', rows, note), text };
 }
 
-async function send(env, to, mail, tag) {
+async function send(env, to, mail, tag, replyTo) {
   try {
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST', signal: AbortSignal.timeout(10000),
       headers: { authorization: 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
-      body: JSON.stringify({ from: env.MAIL_FROM || '만트라 사주 무빙툰 <noreply@mantrafortune.com>', to: [to], reply_to: BIZ.email, subject: mail.subject, html: mail.html, text: mail.text, tags: [{ name: 'kind', value: tag }] }),
+      body: JSON.stringify({ from: env.MAIL_FROM || '만트라 사주 무빙툰 <noreply@mantrafortune.com>', to: [to], reply_to: replyTo || BIZ.email, subject: mail.subject, html: mail.html, text: mail.text, tags: [{ name: 'kind', value: tag }] }),
     });
     if (!r.ok) console.log('[mail]', tag, 'failed', r.status);
     return r.ok;
@@ -109,4 +109,37 @@ export async function mailAdmin(env, kind, order, extra = {}) {
   const mail = adminAlertMail(kind, order, extra);
   let ok = true; for (const to of adminAlertTo(env)) ok = (await send(env, to, mail, 'admin-' + kind)) && ok;
   return ok;
+}
+
+// ── 1:1 문의(마이페이지, functions/api/account/inquiry.js) 2026-11-13
+// 관리자에게: ADMIN_ALERT_EMAIL 로 보내고 회신 주소를 회원 이메일로 둔다 → 메일 앱에서 '답장'하면 회원에게 바로 간다.
+// 회원에게: 접수 확인 메일(답장은 관리자 메일 주소에서 온다는 안내). 출생 정보는 넣지 않는다.
+export const INQ_CAT = { payment: '결제', refund: '환불', content: '풀이·콘텐츠', account: '계정·로그인', etc: '기타' };
+const pre = s => esc(s).replace(/\r?\n/g, '<br>');
+const okMail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e || '') && !/@users\.mantrafortune\.com$/i.test(e);
+export function inquiryAdminMail(q) {
+  const rows = [['문의 번호', q.id ? '#' + esc(q.id) : '(저장 실패 · 메일로만 접수)'], ['분류', esc(INQ_CAT[q.category] || q.category)], ['제목', esc(q.subject)], ['회원 이메일', esc(q.email)], ['로그인', esc(q.provider || '-')]];
+  if (q.order_id) rows.push(['주문번호', esc(q.order_id)]);
+  rows.push(['내용', pre(q.body)]);
+  const note = okMail(q.email)
+    ? '<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#9b3b2a"><b>답변 방법</b><br>이 메일에 <b>답장</b>하면 회원(' + esc(q.email) + ')에게 바로 갑니다.</p>'
+    : '<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#9b3b2a"><b>답변 방법</b><br>이 회원은 답장 받을 이메일이 확인되지 않았습니다. 회원 이메일 칸을 확인해 직접 연락해 주세요.</p>';
+  const html = layout('새 1:1 문의', rows, note).replace(`${SITE}/report/my/" style="display:inline-block`, `${SITE}/report/admin/" style="display:inline-block`).replace('내 구매 내역 보기', '관리자 화면 열기');
+  const text = `새 1:1 문의${q.id ? ' #' + q.id : ''}\n분류: ${INQ_CAT[q.category] || q.category}\n제목: ${q.subject}\n회원 이메일: ${q.email}${q.order_id ? '\n주문번호: ' + q.order_id : ''}\n\n${q.body}\n\n이 메일에 답장하면 회원에게 바로 갑니다.`;
+  return { subject: `[1:1 문의${q.id ? ' #' + q.id : ''}] ${INQ_CAT[q.category] || ''} · ${q.subject}`, html, text };
+}
+export function inquiryUserMail(q) {
+  const rows = [['문의 번호', q.id ? '#' + esc(q.id) : '-'], ['분류', esc(INQ_CAT[q.category] || q.category)], ['제목', esc(q.subject)], ['내용', pre(q.body)]];
+  const note = '<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a">문의를 잘 받았습니다. 영업일 기준 1~2일 안에 <b>이 메일 주소로 답장</b>을 드립니다. 추가로 알려 주실 내용이 있으면 이 메일에 답장해 주세요.</p>';
+  const text = `[${BIZ.service}] 1:1 문의가 접수되었습니다${q.id ? ' (#' + q.id + ')' : ''}\n제목: ${q.subject}\n\n${q.body}\n\n영업일 기준 1~2일 안에 이 메일 주소로 답장을 드립니다.\n${BIZ.name} · ${BIZ.phone} · ${BIZ.email}`;
+  return { subject: `[${BIZ.service}] 1:1 문의가 접수되었습니다 · ${q.subject}`, html: layout('1:1 문의가 접수되었습니다', rows, note), text };
+}
+export const inquiryReady = env => alertReady(env);
+// 반환: 관리자 메일이 한 통이라도 갔는지. 회원 확인 메일은 실패해도 접수에 영향 없음
+export async function mailInquiry(env, q) {
+  if (!inquiryReady(env)) return false;
+  const mail = inquiryAdminMail(q), reply = okMail(q.email) ? q.email : undefined; let any = false;
+  for (const to of adminAlertTo(env)) any = (await send(env, to, mail, 'inquiry-admin', reply)) || any;
+  if (reply) await send(env, reply, inquiryUserMail(q), 'inquiry-user');
+  return any;
 }

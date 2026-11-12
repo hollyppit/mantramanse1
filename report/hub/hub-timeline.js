@@ -98,7 +98,7 @@
     var asset = function (key) { return Q.assetUrl(cfg, key, mobile); };
 
     // 지금 보고 있는 사주의 출생정보 한 줄 + 바꾸기(언제든 수정 화면으로). 미리보기에서는 표본이라 숨긴다.
-    var EDIT = '#/begin?edit=1';
+    var EDIT = '#/begin?edit=1', ME_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
     var birthLine = function () {
       var s = PREVIEW ? null : P.get(); if (!s) return '';
       var hm = s.hourUnknown || s.hour == null || s.hour === '' ? '시각 모름' : ('0' + s.hour).slice(-2) + ':' + ('0' + (+s.minute || 0)).slice(-2);
@@ -325,20 +325,23 @@
         '</div><p class="tq-fh">오늘의 분야별 흐름</p><div class="tq-fchips">' +
         chip('money', '재물운', 'today_money') + chip('work', '일·사업운', 'today_work') + chip('love', '연애운', 'today_love') + chip('health', '컨디션', 'today_health') + chip('action', '오늘의 행동 가이드', 'today_action') + '</div>';
     }
-    /* ── 맨 아래: 내 정보 (예전 홈의 "내 정보 · 더 보기") ── */
+    /* ── 맨 아래: 내 정보 → 마이페이지 입구 (2026-11-13). 출생정보 수정·안내자 변경·온보딩·삭제는 마이페이지(#/me, hub-me.js) 안으로 옮겼다.
+       로그인 여부는 네트워크 없이 이 기기의 Supabase 세션 키로만 본다(H.Auth.peek). 실제 확인은 마이페이지가 한다. */
     function mineHtml() {
       if (PREVIEW) return '<p class="tq-sub">미리보기에서는 내 정보 메뉴를 숨깁니다.</p>';
-      return '<div class="tq-acts"><a class="btn ghost sm" href="' + EDIT + '" data-track="profile_edit" data-p="timeline_foot">출생정보 수정</a><button type="button" class="btn ghost sm" id="tqDel">내 정보 삭제</button></div>' +
-        '<p class="tq-sub">출생정보는 이 기기에만 저장되며 서버로 보내지 않습니다. 삭제하면 저장된 정보와 입력 중이던 초안이 모두 지워집니다.</p>';
+      var me = H.Auth && H.Auth.peek ? H.Auth.peek() : null;
+      return '<a class="tq-me" href="#/me" data-track="mypage_open" data-p="timeline_foot"><span class="tq-me-ic" aria-hidden="true">' + ME_ICON + '</span><div><b>' + (me ? '마이페이지' : '로그인하고 마이페이지 보기') + '</b><small>' +
+        (me ? esc(me.email ? me.email + ' 로그인 중 · ' : '') + '이용 중인 주제 · 결제 기록 · 1:1 문의 · 내 사주 관리' : '구매한 주제·결제 기록을 어느 기기에서든 한 곳에서 확인') + '</small></div><span class="tq-me-go">›</span></a>' +
+        '<p class="tq-sub">출생정보 수정·안내자 변경·이 기기에서 삭제는 마이페이지에서 할 수 있습니다. 출생정보는 이 기기에만 저장되며 서버로 보내지 않습니다.</p>';
     }
 
     function avatarHtml() { return '<a class="tq-ava" id="tqAva" href="#/awaken?replay=1&to=timeline" data-track="fortune_content_click" data-p="ilju_avatar" aria-label="' + esc(ju + '일주 각성 영상 다시 보기') + '"><span class="tq-ava-ring"><img alt="" decoding="async"></span><b>' + esc(M.gzName(day)) + ' · ' + esc(ju) + '일주</b><small>눌러서 일주 영상 보기</small></a>'; }
     /* ── 화면 조립 ── */
-    var secs = [{ id: 'free', title: '오늘 · 무료 콘텐츠', sub: '오늘의 일진과 바로 볼 수 있는 무료 풀이' }].concat(TC.sections.filter(function (s) { return s.enabled !== false && s.id !== 'free' && s.id !== 'mine'; })).concat([{ id: 'mine', title: '내 정보', sub: '출생정보 수정 · 삭제' }]);
+    var secs = [{ id: 'free', title: '오늘 · 무료 콘텐츠', sub: '오늘의 일진과 바로 볼 수 있는 무료 풀이' }].concat(TC.sections.filter(function (s) { return s.enabled !== false && s.id !== 'free' && s.id !== 'mine'; })).concat([{ id: 'mine', title: '내 정보', sub: '마이페이지 · 출생정보 관리' }]);
     var builders = { free: freeHtml, birth: birthHtml, flow: flowHtml, now: nowHtml, themes: themesHtml, mine: mineHtml };
     var heroBg = asset('archive'), pos = Q.assetFocus(cfg, 'archive', mobile);
     var html = '<div class="tq" id="tq"><header class="tq-hero" style="--hero:url(\'' + esc(heroBg) + '\');--pos:' + esc(pos) + '"><p class="kick">MANTRA · FATE TIMELINE</p><h1>운명의 타임라인</h1>' + (nm ? '<p class="tq-who">' + esc(A()) + '</p>' : '') + birthLine() + '<p class="tq-intro">' + esc(O.fill(TC.texts.intro, nm, cfg)) + '</p></header>' +
-      '<nav class="tq-nav" id="tqNav" aria-label="타임라인 영역">' + secs.map(function (s, i) { return '<a href="#tq-' + s.id + '" data-z="' + s.id + '"><i>' + (i + 1) + '</i>' + esc(s.title) + '</a>'; }).join('') + (PREVIEW ? '' : '<a class="tq-edit" href="' + EDIT + '" data-track="profile_edit" data-p="timeline_nav" aria-label="사주 정보(출생정보) 바꾸기">✎ 정보 바꾸기</a>') + '</nav>' +
+      '<nav class="tq-nav" id="tqNav" aria-label="타임라인 영역">' + secs.map(function (s, i) { return '<a href="#tq-' + s.id + '" data-z="' + s.id + '"><i>' + (i + 1) + '</i>' + esc(s.title) + '</a>'; }).join('') + (PREVIEW ? '' : '<a class="tq-edit" href="#/me" data-track="mypage_open" data-p="timeline_nav" aria-label="마이페이지">' + ME_ICON + ' 마이페이지</a>') + '</nav>' +
       secs.map(function (s, i) { return '<section class="tq-sec" id="tq-' + s.id + '" data-z="' + s.id + '">' + (s.id === 'birth' && !PREVIEW ? avatarHtml() : '') + '<div class="tq-sech"><span>' + (i + 1) + '</span><div><h2>' + esc(s.title) + '</h2>' + (s.sub ? '<p>' + esc(s.sub) + '</p>' : '') + '</div></div><div class="tq-body" id="tqb-' + s.id + '">' + builders[s.id]() + '</div></section>'; }).join('') +
       '<footer class="tq-foot"><p class="dis">' + esc(TC.texts.notice) + '</p></footer></div>';
     var el = H.view(html);
@@ -348,7 +351,6 @@
     function redraw(id) { var b = $('#tqb-' + id, root0); if (b) { var y = root.scrollY; b.innerHTML = builders[id](); root.scrollTo(0, y); } }
     root0.addEventListener('click', function (e) {
       var t = e.target, b;
-      if (t.closest('#tqDel')) { if (root.confirm('저장된 출생정보를 이 기기에서 삭제할까요? 되돌릴 수 없습니다.')) { if (Ob.clear) Ob.clear(); H.toast('삭제했습니다.'); H.replace('#/welcome'); } return; }
       if ((b = t.closest('[data-topic-slide]'))) {
         var track = $('.tq-topics', root0), first = track && $('.tq-topic', track);
         if (first) track.scrollBy({ left: (+b.getAttribute('data-topic-slide')) * (first.getBoundingClientRect().width + 16), behavior: H.reduce ? 'auto' : 'smooth' });

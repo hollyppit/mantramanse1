@@ -535,8 +535,7 @@
       Ob.track('home_view', { daeun: cur ? 1 : 0 }, true);
     }).catch(function () { if (!H.alive(ctx)) return; H.view('<p class="pend">홈을 불러오지 못했습니다.<br><br><button type="button" class="btn ghost" id="rt">다시 시도</button><br><br><a class="btn ghost sm" href="#/welcome?replay=1">온보딩 다시 보기</a></p>'); $('#rt').onclick = function () { H.render(); }; });
   }
-  // 내 정보: 홈 상단 링크 → 같은 홈의 접힌 영역으로
-  H.route('me', function () { if (!(CFG && CFG.timeline && CFG.timeline.enabled === false)) return H.replace('#/timeline?z=mine'); H.replace('#/?home=1'); setTimeout(function () { var d = H.$('.hh-more'); if (d) { d.open = true; d.scrollIntoView({ behavior: H.reduce ? 'auto' : 'smooth', block: 'center' }); } }, 400); });
+  // 내 정보(#/me)는 마이페이지 화면(hub-me.js)이 맡는다(2026-11-13)
   Ob.clear = function () { try { localStorage.removeItem('mantra-manse-v1'); localStorage.removeItem('mt_hub_awk'); localStorage.removeItem('mt_daily_v1'); localStorage.removeItem(DRAFT); localStorage.removeItem(SEEN); localStorage.removeItem('mt_quest_draft'); localStorage.removeItem('mt_guide'); } catch (e) { } H.afterInput(); };
 
   // 기존 입력 화면(#/input)은 온보딩 슬라이드 툰으로 대체한다. 옛 폼이 필요하면 #/input?classic=1
