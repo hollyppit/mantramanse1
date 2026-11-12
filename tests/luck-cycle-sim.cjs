@@ -68,8 +68,22 @@ function spanChecks(ch, s, L, Y0) {
   const rv = u.roleV[s.mainEl], av = s.avg;
   if (rv < 0 && (av > 0 || nG) && s.helpEl != null && s.helpEl !== s.mainEl) { ok(s.steps.impact.includes('끌어올린 쪽은'), '기신이 많은데 오른 이유 설명 없음'); cover.lift++; }
   if (rv > 0 && (av < 0 || nB) && s.dragEl != null && s.dragEl !== s.mainEl) { ok(s.steps.impact.includes('끌어내린 쪽은'), '용신이 많은데 내린 이유 설명 없음'); cover.drag++; }
-  if (Math.abs(s.parts.yong) >= 5 && Math.abs(av) >= 5 && (s.parts.yong > 0) !== (av > 0)) { ok(s.steps.impact.includes('역할(용신·기신)과 최종 평가가 다른 이유'), '십성·관계가 뒤집은 이유 설명 없음'); cover.part++; }
-  if ((rv < 0 && av >= 5) || (rv > 0 && av <= -5)) ok(/끌어올린 쪽은|끌어내린 쪽은|최종 평가가 다른 이유/.test(s.steps.impact), '대표 오행 역할과 최종 평가가 반대인데 이유 설명 없음');
+  if (Math.abs(s.parts.yong) >= 5 && Math.abs(av) >= 5 && (s.parts.yong > 0) !== (av > 0)) { ok(s.steps.impact.includes('실제 운의 평가가 다르게 나오는 이유'), '십성·관계가 뒤집은 이유 설명 없음'); cover.part++; }
+  if ((rv < 0 && av >= 5) || (rv > 0 && av <= -5)) ok(/끌어올린 쪽은|끌어내린 쪽은|평가가 다르게 나오는 이유/.test(s.steps.impact), '대표 오행 역할과 최종 평가가 반대인데 이유 설명 없음');
+  // (g) 사용자용 해석: 핵심 결론, 기본 해석에 점수 숫자 없음, 어린 시절에 어른 전략 없음, 지나온·앞으로 구분
+  const ADULT = /이직|창업|사업|투자|대출|보증|동업|직장|직책|연봉|승진|노후|저축/, NUM = /[+−]d|ds*%|d+s*점/;
+  ok(typeof s.steps.summary === 'string' && s.steps.summary.length > 20 && s.steps.summary.includes(s.startAge + '~' + s.endAge + '세'), '핵심 결론 없음');
+  [s.steps.summary, s.steps.trait, s.steps.impact, s.steps.strategy, s.opp, s.risk].forEach(t => ok(!NUM.test(t), '기본 해석에 점수 숫자: ' + t));
+  s.decades.filter(d => d.stage === 'teen' && d.when !== 'past').forEach(d => {
+    ok(!ADULT.test(d.text), '어린 시절 10년에 어른 전략: ' + d.text);
+    const tag = '(' + d.startAge + '~' + d.endAge + '세)';
+    if (s.opp.includes(tag)) ok(!ADULT.test(s.opp), '어린 시절 기회 문장에 어른 전략: ' + s.opp);
+    if (s.risk.includes(tag)) ok(!ADULT.test(s.risk), '어린 시절 위험 문장에 어른 전략: ' + s.risk);
+  });
+  if (s.youth && s.when !== 'past') [s.steps.summary, s.steps.impact, s.steps.strategyLead].forEach(t => ok(!ADULT.test(t), '어린 시절 구간에 어른 전략: ' + t));
+  if (s.when === 'past') { ok(s.steps.summary.startsWith('지나온') && s.opp.startsWith('돌아보면') && s.risk.startsWith('돌아보면') && !s.trace.some(t => /^lc.(stage|act|trend|roleFx|roleYouth)./.test(t) || t === 'lc.trendYouth'), '지나온 30년이 경험 중심이 아님'); cover.past = (cover.past || 0) + 1; }
+  else s.decades.forEach(d => ok(d.when === 'past' ? !/^지나온/.test(d.text) === false : /^지나온/.test(d.text) === false, '지나온·앞으로 10년 문구가 섞임'));
+  if (s.youth) cover.youth = (cover.youth || 0) + 1;
   // (e) 전환점 누락: 구간 안 경계 중 기준을 넘는 것은 모두 있어야 한다
   for (let j = s.idx[0] + 1; j <= s.idx[n - 1]; j++) {
     const dv = L[j].ev.fitScore - L[j - 1].ev.fitScore, cond = L[j].ev.condition !== L[j - 1].ev.condition;
@@ -103,9 +117,9 @@ if (!useJ(ch)) cover.johuNA++; if (u.mode === 'conflict') cover.conflict++;
     ok(['rise', 'fall', 'peak', 'valley', 'flat', 'short', 'lateDrop'].includes(s.trend) && (s.trend === 'short') === (s.idx.length < 3), '흐름 모양 값');
     ok(['good', 'mid', 'bad', 'mixed'].includes(s.tone) && s.mainEl >= 0 && s.mainEl < 5, '성격·오행 값');
     spanChecks(ch, s, L, Y0);
-    const all = [s.hook, s.steps.trait, s.steps.impact, s.steps.strategy, s.opp, s.risk, ...s.basis, ...s.turns.map(t => t.text)];
+    const all = [s.hook, s.steps.summary, s.steps.trait, s.steps.impact, s.steps.strategy, s.opp, s.risk, ...s.basis, ...s.turns.map(t => t.text)];
     all.forEach(t => { ok(typeof t === 'string' && t.length > 4 && !badText(t), `빈 문장/값 이상: ${t}`); ok(!badJosa.test(t), `조사 오류: ${t}`); });
-    [s.steps.trait, s.steps.impact, s.steps.strategy, s.opp, s.risk].forEach(t => ok(!notPolite(t), `해요체 아님: ${t}`));
+    [s.steps.summary, s.steps.trait, s.steps.impact, s.steps.strategy, s.opp, s.risk].forEach(t => ok(!notPolite(t), `해요체 아님: ${t}`));
     ok(['오행 비중', '도움·부담 오행', '십성', '합충형해', '통합 용신', '점수 구성', '흐름 점수'].every(k2 => s.basis.some(x => x.startsWith(k2))), '근거 항목 빠짐');
     ok(s.basis.some(x => x.startsWith('억부(')) === useE(ch), '억부 줄이 적용 여부와 다름');
     ok(s.basis.some(x => x.startsWith('조후')) === useJ(ch) && (useJ(ch) || !s.trace.some(t => t.startsWith('lc.bal.johu'))), '적용되지 않는 조후의 점수·문구가 나옴');

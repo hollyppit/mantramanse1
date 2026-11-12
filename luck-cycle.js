@@ -8,7 +8,7 @@
    · 화면 스위치: MANTRA_FLAGS.luckCycle(기본 꺼짐, 관리자 화면 /api/luck-flags luckCycle) */
 (function (G) {
   'use strict';
-  var VERSION = 'luck-cycle-20261113-1', PHRASE_VERSION = 2;
+  var VERSION = 'luck-cycle-20261113-2', PHRASE_VERSION = 3;
 
   // ───────────── 사전 문구 ─────────────
   // ① 오행의 일반적인 특징 (scope: span = 30년, pair = 2년)
@@ -105,12 +105,12 @@
   // ── 30년 구간 개선(2026-11-13): 우세 오행·도움 오행 분리, 복합 오행, 역할과 점수가 다른 이유, 연령별 전략
   // {이름} 자리는 계산값으로 채운다(fill). 문구 자체는 관리자 화면에서 고칠 수 있다.
   var SPAN2 = {
-    'mix': '이 30년은 한 가지 기운이 뚜렷하게 앞서지 않고 {Awa} {Bga} 비슷한 비중으로 섞여 있어요({pa}% · {pb}%). 한 오행의 성격으로 단정하기보다 두 기운이 번갈아 나타난다고 보세요.',
-    'mix3': '이 30년은 세 가지 이상의 기운이 고르게 섞여 있어(가장 많은 {A}도 {pa}%), 특정 오행의 시기라고 부르기 어려워요.',
+    'mix': '이 30년은 {Awa} {Bga} 비슷하게 섞여 있어서, 한 가지 오행의 성격보다 두 기운이 번갈아 나타난다고 보는 게 맞아요.',
+    'mix3': '이 30년은 여러 기운이 고르게 섞여 있어서 한 가지 오행의 시기라고 보기 어려워요. 그중 조금 더 많은 건 {Aieyo}.',
     'cond': '다만 {th} 기준에서는 쓰임이 있는 기운이라 조건부로 봐요. 어떤 글자로, 언제 들어오느냐에 따라 부담이 줄어들 수 있어요.',
-    'why.lift': '이 구간에 가장 많은 기운은 {A}({ra})이지만, 흐름 점수를 끌어올린 쪽은 {B}({rb}) 기운이에요. 그래서 {ra} 기운이 많아도 운세가 오를 수 있어요.',
-    'why.drag': '이 구간에 가장 많은 기운은 {A}({ra})이지만, 흐름 점수를 끌어내린 쪽은 {B}({rb}) 기운이에요. 필요한 기운이 많아도 다른 글자가 발목을 잡을 수 있어요.',
-    'why.part': '용신 판단만으로는 평균 {yv}점인데, {what} {ov}점을 더해 최종 흐름 점수는 평균 {fv}점이에요. 역할(용신·기신)과 최종 평가가 다른 이유예요.',
+    'why.lift': '기운이 많다고 결과가 정해지는 건 아니에요. 이 30년에는 {Aga} 가장 많지만, 실제로 흐름을 끌어올린 쪽은 이 사주에 필요한 {B} 기운이에요. 그래서 {Aeun} 부담이 되는 기운이어도 운은 나아질 수 있어요.',
+    'why.drag': '기운이 많다고 결과가 정해지는 건 아니에요. 이 30년에는 이 사주에 필요한 {Aga} 가장 많지만, 실제로 흐름을 끌어내린 쪽은 부담이 되는 {B} 기운이에요. 그래서 좋은 기운이 많아도 중간중간 발목을 잡히는 때가 있어요.',
+    'why.part': '글자만 보면 {d1}이 되는 기운인데, {what} 실제 흐름은 {d2} 쪽으로 기울었어요. 오행의 좋고 나쁨과 실제 운의 평가가 다르게 나오는 이유예요.',
     'hook.risk': '{a}~{b}세는 조심',
     'hook.opp': '{a}~{b}세가 기회',
     'hook.even': '큰 굴곡 없이 고른 편',
@@ -125,9 +125,30 @@
     mature: { name: '장년', good: '쌓아 온 것을 거두는 때예요. 경험을 자산·자격·사람으로 바꿔 두면 오래 쓰여요.', mid: '정리와 준비의 때예요. 노후 자금과 건강 습관을 숫자로 점검해 두세요.', bad: '무리하면 몸과 돈이 같이 새는 때예요. 새 사업·투자보다 건강과 지출 관리를 앞에 두세요.' },
     senior: { name: '노년', good: '여유가 생기는 때예요. 배움·취미·사람을 넓히고, 가진 것을 나누는 일에 힘이 실려요.', mid: '편안한 리듬을 지키는 때예요. 규칙적인 운동과 가까운 관계를 꾸준히 챙기세요.', bad: '건강과 안전이 먼저인 때예요. 큰돈 결정은 가족과 함께하고, 몸이 보내는 신호를 미루지 마세요.' },
   };
-  var PAST = { good: '지나온 10년이에요. 이때 쌓은 것이 지금의 밑천이에요.', mid: '지나온 10년이에요. 이때 생긴 습관이 지금까지 이어지고 있을 수 있어요.', bad: '지나온 10년이에요. 이때 생긴 부담이 남아 있다면 지금 정리해 두세요.' };
+  var PAST = { good: '지나온 10년이에요. 일이나 관계에서 노력한 만큼 결과가 남았던 때예요. 그때의 방식이 지금의 밑천이에요.', mid: '지나온 10년이에요. 큰 굴곡보다 자리를 지키며 보낸 때예요. 그때 생긴 습관이 지금까지 이어지고 있을 수 있어요.', bad: '지나온 10년이에요. 책임이나 환경의 압박이 컸던 때예요. 그때 생긴 부담이 남아 있다면 지금 정리해 두세요.' };
   Object.keys(STAGE).forEach(function (s) { ['good', 'mid', 'bad'].forEach(function (t) { reg('lc.stage.' + s + '.' + t, 'stage', STAGE[s][t]); }); });
   Object.keys(PAST).forEach(function (t) { reg('lc.past.' + t, 'stage', PAST[t]); });
+  // 2026-11-13 사용자용 해석 보완: 쉬운 역할 이름, 시점(지나온·지금·앞으로)과 나이(어린 시절)에 맞는 문구, 핵심 결론
+  var ROLE_PLAIN = { 용신: '이 사주에 가장 필요한 기운', 희신: '필요한 기운을 돕는 기운', 한신: '좋지도 나쁘지도 않은 기운', 구신: '부담을 거드는 기운', 기신: '이 사주에 부담이 되는 기운' };
+  var ROLE_FX = { 용신: '그동안 혼자 힘으로 밀던 일이 비교적 수월하게 굴러가고, 같은 노력에도 결과가 잘 남는 편이에요.', 희신: '큰 한 방보다는 도와주는 사람·조건이 조금씩 쌓이는 느낌에 가까워요.', 한신: '결과는 운보다 내가 무엇을 고르고 얼마나 꾸준한지에 더 크게 달려요.', 기신: '같은 일을 해도 피로가 더 쌓이고, 무리한 선택이 뒤늦게 청구서로 돌아오기 쉬워요.', 구신: '사소한 일이 생각보다 커지거나, 정리가 한 박자씩 늦어지기 쉬워요.' };
+  var ROLE_PAST = { 용신: '돌아보면 같은 노력에도 결과가 잘 남고, 도와주는 사람이나 환경을 만나기 쉬웠던 시기예요.', 희신: '돌아보면 큰 한 방보다 주변의 도움과 조건이 조금씩 쌓였던 시기예요.', 한신: '돌아보면 운보다는 내가 고른 길과 꾸준함이 결과를 정했던 시기예요.', 기신: '돌아보면 같은 일을 해도 더 지치고, 환경이 버겁게 느껴졌을 수 있는 시기예요.', 구신: '돌아보면 작은 일이 생각보다 커지거나, 정리가 한 박자씩 늦어졌을 수 있는 시기예요.' };
+  var ROLE_YOUTH = { 용신: '배움과 성장에 힘이 붙고, 도와주는 어른을 만나기 쉬운 편이에요.', 희신: '주변의 도움이 조금씩 쌓이며 자라는 편이에요.', 한신: '타고난 운보다 생활 습관과 집안 환경이 더 크게 작용해요.', 기신: '마음이나 몸이 쉽게 지치거나, 환경이 버겁게 느껴질 수 있어요.', 구신: '작은 어려움이 생각보다 크게 느껴질 수 있어요.' };
+  var GRP_YOUTH = ['친구·형제 사이에서 내 자리를 찾고, 고집과 독립심이 자라는 일이 중심이 돼요.', '말하고 그리고 만드는 재능, 하고 싶은 것을 표현하는 일이 눈에 띄어요.', '물건·용돈을 다루는 현실 감각, 눈에 보이는 결과를 좋아하는 성향이 드러나요.', '규칙·학교생활·평가처럼 지켜야 할 틀이 크게 느껴져요.', '공부·책, 그리고 나를 돌봐 주는 어른과 집안 환경이 중요해져요.'];
+  var PAST_TEEN = { good: '지나온 어린 시절이에요. 집과 학교 환경이 비교적 순탄했을 가능성이 커요.', mid: '지나온 어린 시절이에요. 큰 사건보다 평범한 일상이 이어진 때예요.', bad: '지나온 어린 시절이에요. 집안 사정이나 환경 변화로 마음고생이 있었을 수 있어요.' };
+  var SUM = {
+    'shape': '{a}~{b}세({y1}~{y2}년)는 {headIeyo}.', 'shape.past': '지나온 {a}~{b}세({y1}~{y2}년)는 {headIeotta}.',
+    'el': '이 시기에 가장 많은 기운은 {Xieyo}.', 'el.mix3': '이 시기에는 여러 기운이 고르게 섞여 있어요.',
+    'both': '{Hga} 힘이 되고, {Dga} 부담이 되는 시기예요.', 'help': '{Hga} 힘이 되는 시기예요.', 'drag': '{Dga} 부담이 되는 시기예요.', 'none': '크게 돕거나 누르는 기운 없이 고르게 흘러가는 시기예요.',
+    'both.past': '{Hga} 힘이 되고, {Dga} 부담이 됐던 시기예요.', 'help.past': '{Hga} 힘이 됐던 시기예요.', 'drag.past': '{Dga} 부담이 됐던 시기예요.', 'none.past': '크게 돕거나 누르는 기운 없이 고르게 흘러간 시기였어요.',
+    'risk': '특히 {a}~{b}세는 조심할 10년이에요.', 'opp': '{a}~{b}세가 가장 좋은 기회예요.', 'risk.past': '{a}~{b}세가 가장 무거웠던 때예요.',
+  };
+  Object.keys(ROLE_FX).forEach(function (r) { reg('lc.roleFx.' + r, 'impact', ROLE_FX[r]); reg('lc.rolePast.' + r, 'impact', ROLE_PAST[r]); reg('lc.roleYouth.' + r, 'impact', ROLE_YOUTH[r]); });
+  GRP_YOUTH.forEach(function (t, i) { reg('lc.grpYouth.' + i, 'scene', t); });
+  Object.keys(PAST_TEEN).forEach(function (t) { reg('lc.pastTeen.' + t, 'stage', PAST_TEEN[t]); });
+  Object.keys(SUM).forEach(function (k) { reg('lc.sum.' + k, 'summary', SUM[k]); });
+  reg('lc.span.pastLead', 'strategy', '지나간 30년은 바꿀 수 없지만, 이때 생긴 습관·관계·자산이 지금의 바탕이에요. 좋았던 때의 방식은 이어 가고, 힘들었던 때의 원인은 정리해 두세요.');
+  reg('lc.rel.clashYouth', 'relation', '부딪히고 흔들리는 작용이 겹쳐 이사·전학처럼 주변 환경이 바뀌는 일이 생기기 쉬워요.');
+  reg('lc.trendYouth', 'trend', '어린 시절의 운은 가족과 환경의 영향이 커요. 흐름이 무거운 때일수록 성적보다 생활 리듬과 마음을 먼저 챙겨 주세요.');
   var J =function (w, pair) { w = String(w); var c = null; for (var i = w.length - 1; i >= 0; i--) { var k = w.charCodeAt(i); if (k >= 0xAC00 && k <= 0xD7A3) { c = k; break; } if (w[i] === ')') { var o = w.lastIndexOf('(', i); if (o > 0) { i = o; continue; } } } var ab = pair.split('/'), jong = c == null ? 0 : (c - 0xAC00) % 28; return w + (jong ? ab[0] : ab[1]); };
   var T = function (id, trace) { if (trace) trace.push(id); return PH[id].text; };
   // {키} 자리를 값으로 채운다. 값이 없으면 빈칸이 아니라 키를 그대로 남겨 테스트가 잡게 한다
@@ -222,7 +243,7 @@
     return { share: share, contrib: contrib, parts: parts, uniCheck: r ? r.v : null, kJ: r ? r.kJ : 0, kG: r ? r.kG : 0 };
   }
   var dTone = function (c) { return c === '순풍' ? 'good' : c === '보통' ? 'mid' : 'bad'; };
-  var stageOf = function (startAge) { var m = startAge + 5; return m < 20 ? 'teen' : m < 35 ? 'young' : m < 50 ? 'mid' : m < 65 ? 'mature' : 'senior'; };
+  var stageOf = function (startAge) { var m = startAge + 5; return m < 22 ? 'teen' : m < 35 ? 'young' : m < 50 ? 'mid' : m < 65 ? 'mature' : 'senior'; };
   // 30년 전체 성격: 세 대운의 상태(순풍·보통·주의·부담)로 정한다. 순풍과 주의·부담이 함께 있으면 'mixed'(한 가지 길흉으로 단정하지 않음)
   function spanToneOf(items, avgFit) {
     var nG = 0, nB = 0; items.forEach(function (x) { var t = dTone(x.ev.condition); if (t === 'good') nG++; else if (t === 'bad') nB++; });
@@ -280,46 +301,65 @@
       var dir = t.delta >= 10 ? '흐름이 크게 올라가요' : t.delta <= -10 ? '흐름이 크게 내려가요' : t.delta > 0 ? '흐름이 조금 나아져요' : '흐름이 조금 무거워져요';
       t.text = t.year + '년(' + t.age + '세) ' + t.gz + ' 대운' + (t.outside ? '(다음 구간 첫 대운)' : t.entering ? '(이 구간 첫 대운)' : '') + '으로 넘어가며 ' + dir + ' (' + sg(t.from) + ' → ' + sg(t.to) + (t.cond ? ', ' + t.fromCond + ' → ' + t.toCond : '') + ').';
     });
-    // ── 기회·위험
-    var bestI = scores.indexOf(Math.max.apply(null, scores)), worstI = scores.indexOf(Math.min.apply(null, scores));
-    var best = items[bestI], worst = items[worstI];
-    var rel = relSplit([].concat.apply([], items.map(function (x) { return x.ev.relations || []; })));
-    var opp = scores[bestI] >= CC.tailwind
-      ? best.startYear + '~' + (best.startYear + 9) + '년(' + best.startAge + '세~) ' + M.gzName(best) + ' 대운이 이 구간의 기회예요 (' + sg(scores[bestI]) + '). ' + GRP[grpOf(M, ch, M.stemEl(best.s))].plain + ' 쪽에서 결과를 만들기 쉬워요.'
-      : scores[bestI] >= 0 ? '뚜렷하게 치고 올라가는 대운은 없지만, ' + best.startYear + '년(' + best.startAge + '세~) ' + M.gzName(best) + ' 대운이 상대적으로 가장 수월해요 (' + sg(scores[bestI]) + '). 큰 결정은 이 10년에 두세요.'
-        : (span3 ? '30년' : '이 구간') + ' 내내 운이 크게 밀어 주지는 않아요. 그중 ' + best.startYear + '년(' + best.startAge + '세~) ' + M.gzName(best) + ' 대운이 가장 덜 무거워요 (' + sg(scores[bestI]) + ').';
-    var risk = scores[worstI] <= CC.caution
-      ? worst.startYear + '~' + (worst.startYear + 9) + '년(' + worst.startAge + '세~) ' + M.gzName(worst) + ' 대운이 가장 조심할 10년이에요 (' + sg(scores[worstI]) + ', ' + worst.ev.condition + '). ' + GRP[grpOf(M, ch, M.stemEl(worst.s))].plain + ' 쪽 무리를 줄이세요.'
-      : '크게 꺾이는 대운은 없어요. 가장 낮은 때는 ' + worst.startYear + '년(' + worst.startAge + '세~) ' + M.gzName(worst) + ' 대운 (' + sg(scores[worstI]) + ')이에요.';
-    if (rel.clash.length >= 2) risk += ' ' + T('lc.rel.clash', trace);
-    // ── ① 오행의 특징(우세 오행, 섞여 있으면 복합으로)
-    var seq = items.map(function (x) { return EK[M.stemEl(x.s)] + '·' + EK[M.BR_EL[x.b]]; }).join(' → ');
-    var nm = function (e) { return EL_TRAIT[e].name; };
-    var mixTxt = mix === 2 ? fill('lc.span.mix', { Awa: J(nm(main), '과/와'), Bga: J(nm(second), '이/가'), pa: r1(share[main]), pb: r1(share[second]) }, trace) + ' '
-      : mix === 3 ? fill('lc.span.mix3', { A: nm(main), pa: r1(share[main]) }, trace) + ' ' : '';
-    var trait = mixTxt + T('lc.el.' + main + '.span', trace) + (bh ? ' 이 구간은 대운 지지가 ' + bh.name + '의 세 글자를 모두 지나서, 그 계절 기운이 30년 내내 이어져요.' : '');
-    // ── ② 나에게 미치는 영향: 우세 오행의 역할 + 역할과 최종 점수가 다를 때 그 이유
-    var why = [];
-    var nG = items.filter(function (x) { return dTone(x.ev.condition) === 'good'; }).length, nB = items.filter(function (x) { return dTone(x.ev.condition) === 'bad'; }).length;
-    if (rvm < 0 && (fitAvg > 0 || nG) && help != null && help !== main) why.push(fill('lc.span.why.lift', { A: nm(main), ra: role, B: nm(help), rb: roleOf(ch, help) }, trace));
-    else if (rvm > 0 && (fitAvg < 0 || nB) && drag != null && drag !== main) why.push(fill('lc.span.why.drag', { A: nm(main), ra: role, B: nm(drag), rb: roleOf(ch, drag) }, trace));
-    var other = P.relation + P.structure;
-    var roleVsScore = (rvm < 0 && fitAvg >= IMPACT_MIN) || (rvm > 0 && fitAvg <= -IMPACT_MIN);   // 역할 방향과 최종 평균이 반대
-    if ((Math.abs(P.yong) >= IMPACT_MIN && Math.abs(fitAvg) >= IMPACT_MIN && (P.yong > 0) !== (fitAvg > 0)) || (roleVsScore && !why.length))
-      why.push(fill('lc.span.why.part', { yv: sg(P.yong), what: Math.abs(P.structure) >= Math.abs(P.relation) ? '십성 균형(십성 묶음 치우침)이' : '합충 관계가', ov: sg(other), fv: sg(fitAvg) }, trace));
-    var impact = '이 사주에서 ' + J(nm(main), '은/는') + ' ' + role + '이에요. ' + T('lc.role.' + role, trace) + condRoleNote(ch, main, trace)
-      + (mix >= 2 ? ' 함께 많은 ' + J(nm(second), '은/는') + ' ' + roleOf(ch, second) + '이에요.' : '')
-      + ' 생활에서는 ' + GRP[gi].plain + '(' + GRP[gi].name + ') 주제로 나타나요 — ' + T('lc.grp.' + gi, trace)
-      + (why.length ? ' ' + why.join(' ') : '') + balNote(eokA, joA, tone === 'mixed' ? 'mid' : tone, trace, ch);
-    // ── ③ 대응 전략: (한 가지 성격일 때만) 구간 전략 + 흐름 모양 + 10년마다 나이에 맞는 전략
+    // ── 시점: 이 구간이 지나온 30년인지, 지금 지나는 중인지, 앞으로 올 30년인지(opts.year 기준). 나이대: 대운 가운데 나이
+    var bestI = scores.indexOf(Math.max.apply(null, scores)), worstI = scores.indexOf(Math.min.apply(null, scores));   // 첫 문구·근거용(30년 전체)
     var decades = items.map(function (x, j) {
       var t = dTone(x.ev.condition), st = stageOf(x.startAge), when = Y == null ? 'future' : x.startYear + 9 < Y ? 'past' : x.startYear <= Y ? 'now' : 'future';
-      var text = when === 'past' ? T('lc.past.' + t, trace) : T('lc.stage.' + st + '.' + t, trace);
-      return { i: a + j, startAge: x.startAge, endAge: x.startAge + 9, startYear: x.startYear, gz: M.gzName(x), cond: x.ev.condition, score: fit(x), tone: t, stage: st, when: when, text: text,
+      var text = when === 'past' ? T((st === 'teen' ? 'lc.pastTeen.' : 'lc.past.') + t, trace) : T('lc.stage.' + st + '.' + t, trace);
+      return { i: a + j, j: j, startAge: x.startAge, endAge: x.startAge + 9, startYear: x.startYear, gz: M.gzName(x), cond: x.ev.condition, score: fit(x), tone: t, stage: st, when: when, text: text,
         head: x.startAge + '~' + (x.startAge + 9) + '세 ' + M.gzName(x) + ' 대운', meta: x.ev.condition + (when === 'now' ? ' · 지금' : '') + ', ' + STAGE[st].name,
         line: x.startAge + '~' + (x.startAge + 9) + '세 ' + M.gzName(x) + ' 대운(' + x.ev.condition + (when === 'now' ? ' · 지금' : '') + ', ' + STAGE[st].name + '): ' + text };
     });
-    var strategyLead = (tone !== 'mixed' ? T('lc.act.' + tone + '.' + gi, trace) + ' ' : '') + T('lc.trend.' + trend, trace);   // 화면은 이 문단 + 10년별 목록(decades)으로 나눠 그린다
+    var spanWhen = decades.every(function (d) { return d.when === 'past'; }) ? 'past' : decades.some(function (d) { return d.when === 'now'; }) ? 'now' : decades.some(function (d) { return d.when === 'past'; }) ? 'now' : 'future';
+    var past = spanWhen === 'past';
+    // 해석에 쓰는 10년: 지나온 30년이면 전부, 아니면 아직 지나지 않은 10년만(이미 지난 10년의 기회·위험은 전략으로 말하지 않는다)
+    var relD = past ? decades : decades.filter(function (d) { return d.when !== 'past'; });
+    var youth = relD.filter(function (d) { return d.stage === 'teen'; }).length * 2 > relD.length;   // 해석할 10년의 절반 넘게 성장기면 어린 시절 문구
+    // ── 기회·위험(점수 숫자는 판단 근거에만 둔다)
+    var pickBy = function (cmp) { return relD.reduce(function (m, d) { return m == null || cmp(d.score, m.score) ? d : m; }, null); };
+    var bD = pickBy(function (x, y) { return x > y; }), wD = pickBy(function (x, y) { return x < y; });
+    var best = items[bD.j], worst = items[wD.j];
+    var rel = relSplit([].concat.apply([], items.map(function (x) { return x.ev.relations || []; })));
+    var when10 = function (d) { return d.startYear + '~' + (d.startYear + 9) + '년(' + d.startAge + '~' + d.endAge + '세) ' + d.gz + ' 대운'; };
+    var grpPlain = function (x) { return GRP[grpOf(M, ch, M.stemEl(x.s))].plain; };
+    var opp, risk;
+    if (past) {
+      opp = '돌아보면 ' + J(when10(bD), '이/가') + ' 가장 수월했던 10년이에요.';
+      risk = wD.score <= CC.caution ? '돌아보면 ' + J(when10(wD), '이/가') + ' 가장 무거웠던 10년이에요(' + wD.cond + '). 그때 생긴 부담이 남아 있다면 지금 정리해 두세요.' : '돌아보면 크게 꺾였던 10년은 없었어요.';
+    } else {
+      var bTeen = bD.stage === 'teen', wTeen = wD.stage === 'teen';
+      opp = bD.score >= CC.tailwind ? J(when10(bD), '이/가') + ' 이 구간의 기회예요. ' + (bTeen ? '이때 익힌 것이 오래 남아요.' : grpPlain(best) + ' 쪽에서 결과를 만들기 쉬워요.')
+        : bD.score >= 0 ? '뚜렷하게 치고 올라가는 대운은 없지만, ' + J(when10(bD), '이/가') + ' 상대적으로 가장 수월해요.' + (bTeen ? '' : ' 큰 결정은 이 10년에 두세요.')
+          : '운이 크게 밀어 주지는 않아요. 그중 ' + J(when10(bD), '이/가') + ' 가장 덜 무거워요.';
+      risk = wD.score <= CC.caution ? J(when10(wD), '이/가') + ' 가장 조심할 10년이에요(' + wD.cond + '). ' + (wTeen ? '건강과 생활 리듬, 마음 상태를 먼저 챙겨 주세요.' : grpPlain(worst) + ' 쪽 무리를 줄이세요.')
+        : '크게 꺾이는 대운은 없어요. 가장 낮은 때는 ' + when10(wD) + '이에요.';
+      if (rel.clash.length >= 2) risk += ' ' + T(wTeen ? 'lc.rel.clashYouth' : 'lc.rel.clash', trace);
+    }
+    // ── ① 오행의 특징(우세 오행, 섞여 있으면 복합으로) — 비중(%)은 판단 근거에만
+    var seq = items.map(function (x) { return EK[M.stemEl(x.s)] + '·' + EK[M.BR_EL[x.b]]; }).join(' → ');
+    var nm = function (e) { return EL_TRAIT[e].name; };
+    var mixTxt = mix === 2 ? fill('lc.span.mix', { Awa: J(nm(main), '과/와'), Bga: J(nm(second), '이/가') }, trace) + ' '
+      : mix === 3 ? fill('lc.span.mix3', { Aieyo: J(nm(main), '이에요/예요') }, trace) + ' ' : '';
+    var trait = mixTxt + T('lc.el.' + main + '.span', trace) + (bh ? ' 이 구간은 대운 지지가 ' + bh.name + '의 세 글자를 모두 지나서, 그 계절 기운이 30년 내내 이어져요.' : '');
+    // ── ② 나에게 미치는 영향: 우세 오행의 역할(쉬운 말 + 괄호 용어) + 역할과 실제 흐름이 다를 때 그 이유(숫자 없이)
+    var why = [];
+    var nG = items.filter(function (x) { return dTone(x.ev.condition) === 'good'; }).length, nB = items.filter(function (x) { return dTone(x.ev.condition) === 'bad'; }).length;
+    if (rvm < 0 && (fitAvg > 0 || nG) && help != null && help !== main) why.push(fill('lc.span.why.lift', { Aga: J(nm(main), '이/가'), Aeun: J(nm(main), '은/는'), B: nm(help) }, trace));
+    else if (rvm > 0 && (fitAvg < 0 || nB) && drag != null && drag !== main) why.push(fill('lc.span.why.drag', { Aga: J(nm(main), '이/가'), B: nm(drag) }, trace));
+    var roleVsScore = (rvm < 0 && fitAvg >= IMPACT_MIN) || (rvm > 0 && fitAvg <= -IMPACT_MIN);   // 역할 방향과 최종 평균이 반대
+    if ((Math.abs(P.yong) >= IMPACT_MIN && Math.abs(fitAvg) >= IMPACT_MIN && (P.yong > 0) !== (fitAvg > 0)) || (roleVsScore && !why.length))
+      why.push(fill('lc.span.why.part', { d1: P.yong > 0 || (P.yong === 0 && rvm > 0) ? '도움' : '부담', what: Math.abs(P.structure) >= Math.abs(P.relation) ? '원국에 모자란 부분을 채우거나 넘치는 부분을 키우는 작용 때문에' : '원국과 부딪치거나 묶이는 작용(합·충) 때문에', d2: fitAvg > 0 ? '좋은' : '무거운' }, trace));
+    var r2 = roleOf(ch, second);
+    var scene = youth ? '어린 시절에는 ' + T('lc.grpYouth.' + gi, trace)
+      : past ? '그 시기에는 ' + GRP[gi].plain + ' 주제가 컸을 거예요 — ' + T('lc.grp.' + gi, trace)
+        : '생활에서는 ' + GRP[gi].plain + ' 주제로 나타나요 — ' + T('lc.grp.' + gi, trace);
+    var impact = '이 사주에서 ' + J(nm(main), '은/는') + ' ' + ROLE_PLAIN[role] + '(' + role + ')이에요. ' + T((past ? 'lc.rolePast.' : youth ? 'lc.roleYouth.' : 'lc.roleFx.') + role, trace) + condRoleNote(ch, main, trace)
+      + (mix >= 2 ? ' 함께 많은 ' + J(nm(second), '은/는') + ' ' + ROLE_PLAIN[r2] + '(' + r2 + ')이에요.' : '')
+      + ' ' + scene + (why.length ? ' ' + why.join(' ') : '') + (past ? '' : balNote(eokA, joA, tone === 'mixed' ? 'mid' : tone, trace, ch));
+    // ── ③ 대응 전략: 지나온 30년은 돌아보기, 아니면 (어른 나이·한 가지 성격일 때만) 구간 전략 + 흐름 모양 + 10년별 나이에 맞는 전략
+    var firstTeen = relD.length && relD[0].stage === 'teen';
+    var strategyLead = past ? T('lc.span.pastLead', trace)
+      : (tone !== 'mixed' && !firstTeen ? T('lc.act.' + tone + '.' + gi, trace) + ' ' : '') + T(youth ? 'lc.trendYouth' : 'lc.trend.' + trend, trace);   // 화면은 이 문단 + 10년별 목록(decades)으로 나눠 그린다
     var strategy = strategyLead + ' ' + decades.map(function (x) { return x.line; }).join(' ');
     // ── 판단 근거
     var ER = function (e) { return nm(e) + '(' + roleLabel(ch, e) + ')'; };
@@ -347,13 +387,21 @@
     });
     if (!tail.length) tail.push(T('lc.span.hook.even', trace));
     var hook = head + ' — ' + tail.join(', ');
+    // ── 핵심 결론(숫자 없이): 흐름 모양 → 가장 많은 기운 → 힘이 되는·부담이 되는 기운 → (앞으로의) 기회·조심 10년
+    var sum = [fill(past ? 'lc.sum.shape.past' : 'lc.sum.shape', { a: first.startAge, b: endAge, y1: first.startYear, y2: endYear, headIeyo: J(head, '이에요/예요'), headIeotta: J(head, '이었어요/였어요') }, trace)];
+    sum.push(mix === 3 ? T('lc.sum.el.mix3', trace) : fill('lc.sum.el', { Xieyo: J(mix === 2 ? nm(main) + '·' + nm(second) : nm(main), '이에요/예요') }, trace));
+    var hd = help != null && drag != null ? 'both' : help != null ? 'help' : drag != null ? 'drag' : 'none';
+    sum.push(fill('lc.sum.' + hd + (past ? '.past' : ''), { Hga: help != null ? J(nm(help), '이/가') : '', Dga: drag != null ? J(nm(drag), '이/가') : '' }, trace));
+    if (past) { if (wD.score <= CC.caution) sum.push(fill('lc.sum.risk.past', { a: wD.startAge, b: wD.endAge }, trace)); }
+    else { if (bD.score >= CC.tailwind) sum.push(fill('lc.sum.opp', { a: bD.startAge, b: bD.endAge }, trace)); if (wD.score <= CC.caution) sum.push(fill('lc.sum.risk', { a: wD.startAge, b: wD.endAge }, trace)); }
+    var summary = sum.join(' ');
     return {
       kind: 'span', type: '장기 분석 구간', k: k, label: '장기 분석 구간 ' + (k + 1), idx: idx, items: items,
       startAge: first.startAge, endAge: endAge, startYear: first.startYear, endYear: endYear, years: items.length * 10,
       mainEl: main, subEl: sub, elLabel: elLabel, mix: mix, share: share, contrib: contrib, helpEl: help, dragEl: drag, parts: P,
       elCount: cnt, banghap: bh ? bh.name : null, role: role, roleLabel: roleLabel(ch, main), tone: tone, grp: gi, seq: seq,
       scores: scores, avg: fitAvg, min: scores[worstI], max: scores[bestI], trend: trend, trendWord: trendWord, turns: turns, opp: opp, risk: risk, decades: decades,
-      hook: hook, steps: { trait: trait, impact: impact, strategy: strategy, strategyLead: strategyLead }, basis: basis, trace: trace, _el: EA,
+      hook: hook, when: spanWhen, youth: youth, steps: { summary: summary, trait: trait, impact: impact, strategy: strategy, strategyLead: strategyLead }, basis: basis, trace: trace, _el: EA,
     };
   }
 
