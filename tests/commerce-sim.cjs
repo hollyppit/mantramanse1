@@ -52,9 +52,18 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
       if (method === 'DELETE') { db.sajus = db.sajus.filter(x => !rows.includes(x)); return res(null, 204); }
       return res(rows);
     }
+    if (u.includes('/rest/v1/rpc/commerce_funnel_counts')) {
+      const agg = {}; for (const f of db.funnel || []) if (f.day >= body.from_day && f.day <= body.to_day) { const k = f.day + '|' + f.step; agg[k] = (agg[k] || 0) + 1; }
+      return res(Object.entries(agg).map(([k, n]) => ({ day: k.split('|')[0], step: k.split('|')[1], n })));
+    }
+    if (u.includes('/rest/v1/commerce_funnel')) {
+      db.funnel = db.funnel || [];
+      if (method === 'POST') { for (const r of body) if (!db.funnel.some(f => f.day === r.day && f.step === r.step && f.vid === r.vid)) db.funnel.push({ ...r }); return res(null, 201); }
+      if (method === 'DELETE') { const c = (q(u, 'day') || '').slice(3); db.funnel = db.funnel.filter(f => !(f.day < c)); return res(null, 204); }
+    }
     if (u.includes('/rest/v1/commerce_orders')) {
-      if (method === 'POST') { db.orders.push({ status: 'pending', ...body }); return res(null, 201); }
-      const lt = q(u, 'created_at'), rows = db.orders.filter(o => (!q(u, 'order_id') || o.order_id === eqv(q(u, 'order_id'))) && (!q(u, 'user_id') || o.user_id === eqv(q(u, 'user_id'))) && (!q(u, 'status') || o.status === eqv(q(u, 'status'))) && (!lt || (o.created_at && o.created_at < lt.slice(3))) && inRange(u, 'paid_at', o.paid_at) && inRange(u, 'canceled_at', o.canceled_at) && testOk(u, o));
+      if (method === 'POST') { db.orders.push({ status: 'pending', created_at: new Date().toISOString(), ...body }); return res(null, 201); }
+      const lt = (q(u, 'created_at') || '').startsWith('lt.') ? q(u, 'created_at') : null, rows = db.orders.filter(o => (!q(u, 'order_id') || o.order_id === eqv(q(u, 'order_id'))) && (!q(u, 'user_id') || o.user_id === eqv(q(u, 'user_id'))) && (!q(u, 'status') || o.status === eqv(q(u, 'status'))) && (!lt || (o.created_at && o.created_at < lt.slice(3))) && inRange(u, 'paid_at', o.paid_at) && inRange(u, 'canceled_at', o.canceled_at) && inRange(u, 'created_at', o.created_at) && testOk(u, o));
       if (method === 'PATCH') { rows.forEach(o => Object.assign(o, body)); return ((init.headers && init.headers.prefer) || '').includes('representation') ? res(rows) : res(null, 204); }
       return res(rows);
     }
@@ -334,6 +343,22 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   ok(gf.length === 2 && gf[0].subject.includes('권한 기록 실패') && gf[0].subject.startsWith('[관리자] [테스트] ') && gf[0].html.includes('권한 다시 주기'), '실패 경보: 할 일 안내·테스트 표시, 같은 주문은 하루 한 번');
   d = await (await admin.onRequestGet({ request: req('/api/commerce/admin', { adminPw: 'adm', method: 'GET' }), env: alertEnv })).json();
   ok(d.readiness.find(x => x.id === 'admin-alert').ok === true && !JSON.stringify(d.readiness).includes('boss@x.test'), '점검표: 관리자 알림 켜짐(주소는 안 보임)');
+
+  // ── 구매 전환 측정
+  const funnelApi = await imp('functions/api/commerce/funnel.js'), FN = await imp('functions/_funnel.js');
+  const fpost = (b, origin = 'https://x.test', ip = '1.1.1.1') => funnelApi.onRequestPost({ request: new Request('https://x.test/api/commerce/funnel', { method: 'POST', headers: { 'content-type': 'application/json', origin, 'cf-connecting-ip': ip }, body: JSON.stringify(b) }), env: penv });
+  const V1 = '11111111-1111-4111-8111-111111111111', V2 = '22222222-2222-4222-8222-222222222222';
+  for (const [s, v] of [['read', V1], ['read', V1], ['read', V2], ['gate', V1], ['gate', V2], ['login_start', V1], ['gate_logged', V1], ['checkout', V1], ['paid', V1]]) { r = await fpost({ step: s, vid: v }); if (r.status !== 204) ok(false, '단계 기록 실패 ' + s + ' ' + r.status); }
+  ok((await fpost({ step: 'read', vid: V1 }, 'https://evil.test')).status === 403, '다른 사이트에서 온 기록은 거부');
+  ok((await fpost({ step: 'hack', vid: V1 })).status === 400 && (await fpost({ step: 'read', vid: 'abc' })).status === 400, '모르는 단계·잘못된 id 거부');
+  ok(db.funnel.length === 8 && !db.funnel.some(f => 'ip' in f || 'user_id' in f), '같은 날 같은 단계는 한 번만, IP·회원 정보 없음');
+  { const fr = await FN.funnelReport(penv, 14), t = fr.total.steps, today = fr.days[0];
+    ok(t.read === 2 && t.gate === 2 && t.login_start === 1 && t.gate_logged === 1 && t.checkout === 1 && t.paid === 1 && fr.days.length === 14 && today.day === FN.kstDate(), '전환 집계: 단계별 인원·14일');
+    const realPaid = db.orders.filter(o => !o.is_test && o.paid_at && FN.kstDate(Date.parse(o.paid_at)) >= fr.from).length;
+    ok(fr.total.paidOrders === realPaid && fr.total.orders >= 1, '주문표 기준 주문·결제(테스트 제외) 함께'); }
+  db.funnel.push({ day: '2020-01-01', step: 'read', vid: V2 }); await FN.purgeFunnel(penv); ok(!db.funnel.some(f => f.day === '2020-01-01') && db.funnel.length === 8, '180일 지난 기록 지움');
+  d = await (await admin.onRequestGet({ request: req('/api/commerce/admin', { adminPw: 'adm', method: 'GET' }), env: penv })).json();
+  ok(d.funnel && d.funnel.total.steps.read === 2 && d.funnel.labels.gate, '관리자 화면에 구매 전환');
 
   // ── 테스트 주문 표시·매출 요약·CSV
   const SL = await imp('functions/_sales.js');

@@ -38,7 +38,25 @@
         '<label class="muted" style="font-size:.85rem"><input type="checkbox" id="cmWithTest"> 테스트 포함</label><button class="btn" id="cmCsv">CSV 내려받기</button></div>' +
         '<p class="muted" style="margin:6px 0 0;font-size:.82rem">그 기간에 결제되었거나 환불된 주문. 공급가액 = 금액 ÷ 1.1(반올림), 부가세 = 나머지. 엑셀에서 바로 열립니다.</p></div>';
     }
-    var html = readyHtml + salesHtml + '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">결제 준비 상태</h3><ul style="margin:0;padding-left:18px;line-height:1.8">' +
+    // 구매 전환(최근 14일, 방문자 = 브라우저 수): 단계별 인원과 바로 앞 단계 대비 비율, 날짜별 표
+    var fn = d.funnel, funnelHtml = '';
+    if (fn && fn.steps) {
+      var pct = function (a, b) { return b ? Math.round(a / b * 1000) / 10 + '%' : '-'; };
+      var tot = fn.total.steps, prev = null;
+      var rows = fn.steps.map(function (s) {
+        var n = tot[s], r = '<tr><td>' + esc(fn.labels[s] || s) + '</td><td style="text-align:right"><b>' + n.toLocaleString('ko-KR') + '</b></td><td class="muted" style="text-align:right">' + (prev == null ? '' : pct(n, tot[prev])) + '</td><td class="muted" style="text-align:right">' + (s === 'read' ? '' : pct(n, tot.read)) + '</td></tr>';
+        prev = s; return r;
+      }).join('');
+      var dayRows = fn.days.map(function (x) {
+        return '<tr><td>' + esc(x.day.slice(5)) + '</td>' + fn.steps.map(function (s) { return '<td style="text-align:right">' + (x.steps[s] || '<span class="muted">0</span>') + '</td>'; }).join('') + '<td style="text-align:right">' + x.orders + '</td><td style="text-align:right">' + x.paidOrders + '</td></tr>';
+      }).join('');
+      funnelHtml = '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">구매 전환 <span class="muted" style="font-size:.85rem">최근 14일 · ' + esc(fn.from) + ' ~ ' + esc(fn.to) + ' · 한국 시간</span></h3>' +
+        '<p class="muted" style="margin:0 0 8px;font-size:.84rem">숫자는 그날 그 단계까지 온 브라우저 수(같은 날 여러 번 해도 한 번). 관리자 브라우저·미리보기는 세지 않습니다. 가장 크게 줄어드는 단계가 손볼 곳입니다.</p>' +
+        '<table class="tbl" style="width:100%;font-size:.88rem"><thead><tr><th>단계</th><th style="text-align:right">인원</th><th style="text-align:right">앞 단계 대비</th><th style="text-align:right">읽은 사람 대비</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+        '<p class="muted" style="margin:8px 0 0;font-size:.84rem">주문표 기준(테스트 제외): 주문 생성 <b>' + fn.total.orders + '</b>건 · 결제 완료 <b>' + fn.total.paidOrders + '</b>건</p>' +
+        '<details style="margin-top:8px"><summary class="muted">날짜별 보기</summary><div style="overflow-x:auto"><table class="tbl" style="width:100%;font-size:.8rem;margin-top:6px"><thead><tr><th>날짜</th>' + fn.steps.map(function (s) { return '<th style="text-align:right">' + esc(fn.labels[s] || s) + '</th>'; }).join('') + '<th style="text-align:right">주문</th><th style="text-align:right">결제</th></tr></thead><tbody>' + dayRows + '</tbody></table></div></details></div>';
+    }
+    var html = readyHtml + salesHtml + funnelHtml +'<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">결제 준비 상태</h3><ul style="margin:0;padding-left:18px;line-height:1.8">' +
       cfRow(cf.supabase, '회원·주문 저장소(Supabase)', 'Cloudflare 환경변수 SUPABASE_URL·SUPABASE_SERVICE_KEY') +
       cfRow(cf.anon, '로그인(Supabase 공개 키)', '환경변수 SUPABASE_ANON_KEY') +
       '<li><b>지금 쓰는 결제사: ' + (cf.provider === 'portone' ? '포트원' : cf.provider === 'toss' ? '토스페이먼츠' : '없음(결제 준비 중)') + '</b> <span class="muted">— 포트원 값 3개가 다 있으면 포트원, 아니면 토스. 환경변수 PAY_PROVIDER=portone|toss 로 고정 가능</span></li>' +

@@ -11,6 +11,7 @@ import { loadProducts, cleanProducts, PRODUCTS_KEY, worldAccess, sbRest, tossCal
 import { naverReady } from '../../_naver-login.js';
 import { summaryAll, salesCsv, kstDay } from '../../_sales.js';
 import { alertReady } from '../../_mail.js';
+import { funnelReport, purgeFunnel } from '../../_funnel.js';
 
 const enc = encodeURIComponent;
 const who = request => { try { return decodeURIComponent(request.headers.get('x-reviewer') || '').slice(0, 30) || 'admin'; } catch { return 'admin'; } };
@@ -50,7 +51,9 @@ export async function onRequestGet({ request, env }) {
     { id: 'last-paid', label: '최근 결제 확인', ok: lastPaid ? true : null, note: lastPaid ? lastPaid.product_name + ' ' + (lastPaid.amount || 0).toLocaleString('ko-KR') + '원 · ' + String(lastPaid.paid_at || '').slice(0, 16).replace('T', ' ') : '결제 완료 주문이 없습니다' },
   ];
   let sales = null; if (supabaseReady(env)) { try { sales = await summaryAll(env); } catch { sales = null; } }   // 매출 요약(테스트 주문 제외)
-  return json({ products, worlds, orders, ordersError, sweep, readiness, sales, configured: { supabase: supabaseReady(env), toss: tossReady(env), tossClient: !!env.TOSS_CLIENT_KEY, anon: !!env.SUPABASE_ANON_KEY, portone: portoneReady(env), portoneStore: !!env.PORTONE_STORE_ID, portoneChannel: !!env.PORTONE_CHANNEL_KEY, portoneSecret: !!env.PORTONE_API_SECRET, portoneWebhook: !!env.PORTONE_WEBHOOK_SECRET, provider: payProvider(env) } });
+  // 구매 전환(최근 14일): 단계별 방문자 수 + 주문표 기준 주문·결제. 180일 지난 기록은 이때 지운다
+  let funnel = null; if (supabaseReady(env)) { try { funnel = await funnelReport(env, 14); await purgeFunnel(env).catch(() => { }); } catch { funnel = null; } }
+  return json({ products, worlds, orders, ordersError, sweep, readiness, sales, funnel, configured: { supabase: supabaseReady(env), toss: tossReady(env), tossClient: !!env.TOSS_CLIENT_KEY, anon: !!env.SUPABASE_ANON_KEY, portone: portoneReady(env), portoneStore: !!env.PORTONE_STORE_ID, portoneChannel: !!env.PORTONE_CHANNEL_KEY, portoneSecret: !!env.PORTONE_API_SECRET, portoneWebhook: !!env.PORTONE_WEBHOOK_SECRET, provider: payProvider(env) } });
 }
 
 export async function onRequestPut({ request, env }) {

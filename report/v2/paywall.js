@@ -18,7 +18,35 @@
   var ls = function (k) { try { return root.localStorage.getItem(k); } catch (e) { return null; } };
   var adminPw = function () { try { return root.sessionStorage.getItem('mt_pw') || ''; } catch (e) { return ''; } };
   function script(src) { return new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = function () { no(new Error('load ' + src)); }; document.head.appendChild(s); }); }
-  function track(ev, d) { try { if (R.track) R.track(ev, d); } catch (e) { } }
+  function track(ev, d) {
+    try { if (R.track) R.track(ev, d); } catch (e) { }
+    // 구매 전환 측정(관리자 결제·상품 탭): 화면 이벤트 → 단계
+    if (ev === 'paywall_view') { funnel('gate'); if (d && d.logged) funnel('gate_logged'); }
+    else if (ev === 'login_start') funnel('login_start');
+    else if (ev === 'purchase_start') funnel('checkout');
+    else if (ev === 'purchase_done') funnel('paid');
+  }
+  // 브라우저마다 무작위 id 하나(개인정보 아님). 같은 날 같은 단계는 한 번만 보낸다. 관리자·미리보기·추적 거부 브라우저는 세지 않는다.
+  var FUNNEL_SENT = {};
+  function funnelVid() {
+    var v = ls('mt_vid'); if (v && /^[0-9a-f-]{36}$/.test(v)) return v;
+    try { v = root.crypto && root.crypto.randomUUID ? root.crypto.randomUUID() : null; if (v) root.localStorage.setItem('mt_vid', v); } catch (e) { }
+    return v;
+  }
+  function funnel(step) {
+    try {
+      if (adminPw() || /[?&]preview=1/.test(root.location.search) || root.navigator.doNotTrack === '1') return;
+      var day = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10), key = day + ':' + step;
+      if (FUNNEL_SENT[key]) return; FUNNEL_SENT[key] = 1;
+      var once = 'mt_funnel:' + key; try { if (root.sessionStorage.getItem(once)) return; root.sessionStorage.setItem(once, '1'); } catch (e) { }
+      var vid = funnelVid(); if (!vid) return;
+      var body = JSON.stringify({ step: step, vid: vid });
+      if (root.navigator.sendBeacon && root.navigator.sendBeacon('/api/commerce/funnel', new Blob([body], { type: 'application/json' }))) return;
+      fetch('/api/commerce/funnel', { method: 'POST', headers: { 'content-type': 'application/json' }, body: body, keepalive: true }).catch(function () { });
+    } catch (e) { }
+  }
+  // 장을 읽음: 무빙툰의 장 열람 이벤트(analytics.js 가 보내는 mt:track)
+  try { root.addEventListener('mt:track', function (e) { if (e && e.detail && e.detail.name === 'chapter_viewed') funnel('read'); }); } catch (e) { }
 
   // 서버 요청에 붙일 머리글: 회원 토큰·관리자 비밀번호·무료 사용자로 보기
   function headers() {
