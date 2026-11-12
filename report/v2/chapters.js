@@ -51,21 +51,12 @@
   var ROMAN = ['ACT I', 'ACT II', 'ACT III', 'ACT IV', 'ACT V', 'ACT VI', 'ACT VII', 'ACT VIII', 'ACT IX'];
   var clone = function (o) { return JSON.parse(JSON.stringify(o)); };
   var PROJECTS = [
-    { id: 'full', name: '종합 운세', desc: '타고난 나부터 운의 흐름, 개운법까지 20챕터 전체', enabled: true, accessLevel: 'free', requiredCompletionRate: null, chapters: null, needTags: [],
+    { id: 'full', name: '종합 운세', desc: '타고난 나부터 운의 흐름, 개운법까지 전체', enabled: true, accessLevel: 'free', requiredCompletionRate: null, chapters: null, needTags: [],
       acts: ACTS.map(function (a) { return { title: a.title, line: a.line, pdfDone: a.pdfDone }; }) },
-    { id: 'love', name: '애정운 특화', desc: '연애 성향·결혼·관계 유형과 올해의 인연 흐름', enabled: true, accessLevel: 'free', requiredCompletionRate: null, chapters: null, needTags: ['connection', 'listening', 'support', 'reflection'],
-      acts: [{ title: '타고난 연애 기질', line: '당신이 사랑하는 방식부터 들여다봅니다.', pdfDone: '나의 연애 기질 분석이 리포트에 기록되었습니다.' }, { title: '관계 속의 나', line: '그 기질은 사람들 사이에서 어떻게 드러날까요?', pdfDone: '결혼·관계 분석이 추가되었습니다.' },
-        { title: '올해의 인연 흐름', line: '지금의 시간과 앞으로의 흐름을 봅니다.', pdfDone: '인연 흐름 분석이 추가되었습니다.' }, { title: '사랑을 쓰는 법', line: '알게 된 것을 어떻게 쓸지 정리합니다.', pdfDone: '당신의 연애 사용설명서가 완성되었습니다.' }] },
-    { id: 'wealth', name: '재물운 특화', desc: '돈을 대하는 행동 성향과 올해의 재물 전략', enabled: true, accessLevel: 'free', requiredCompletionRate: null, chapters: null, needTags: ['organize', 'reinvest', 'protect', 'accumulate'],
-      acts: [{ title: '타고난 그릇', line: '돈과 일을 대하는 타고난 힘을 봅니다.', pdfDone: '나의 기질 분석이 리포트에 기록되었습니다.' }, { title: '돈을 쓰는 방식', line: '그 힘은 일과 재물에서 어떻게 쓰일까요?', pdfDone: '직업·재물 분석이 추가되었습니다.' },
-        { title: '재물의 계절', line: '지금 어느 계절에 서 있는지 봅니다.', pdfDone: '재물 흐름 분석이 추가되었습니다.' }, { title: '재물 전략', line: '행동으로 옮길 전략을 정리합니다.', pdfDone: '당신의 재물 사용설명서가 완성되었습니다.' }] },
-    { id: 'newyear', name: '신년 운세', desc: '올해의 흐름과 앞으로 12개월, 이번 해의 행동 전략', enabled: true, accessLevel: 'free', requiredCompletionRate: null, chapters: null, needTags: ['organize', 'reflection', 'opportunity'],
-      acts: [{ title: '나의 바탕', line: '올해를 보기 전에 나의 바탕부터 봅니다.', pdfDone: '나의 바탕 분석이 리포트에 기록되었습니다.' }, { title: '올해의 흐름', line: '지금 서 있는 계절과 올해, 달마다의 흐름을 봅니다.', pdfDone: '올해 흐름 분석이 추가되었습니다.' }, { title: '올해를 쓰는 법', line: '올해 어떻게 움직일지 정리합니다.', pdfDone: '당신의 올해 사용설명서가 완성되었습니다.' }] },
   ];
-  // 기본 시드: 종합은 c01~c20, 나머지 상품은 필요한 챕터를 "자기 몫으로 복제"한 독립 챕터(id = 프로젝트_원본, 예: love_c09)를 가진다.
-  var SEED = { love: [['c01', 1], ['c03', 1], ['c09', 1], ['c10', 2], ['c11', 2], ['c12', 2], ['c13', 2], ['c16', 3], ['c17', 3], ['c18', 3], ['c19', 4], ['c20', 4]],
-    wealth: [['c01', 1], ['c02', 1], ['c04', 1], ['c06', 2], ['c07', 2], ['c08', 2], ['c16', 3], ['c17', 3], ['c18', 3], ['c19', 4], ['c20', 4]],
-    newyear: [['c01', 1], ['c16', 2], ['c17', 2], ['c18', 2], ['c19', 3], ['c20', 3]] };
+  // 기본 시드: 종합은 c00~c20. 예전에는 다른 상품이 필요한 챕터를 "자기 몫으로 복제"한 독립 챕터(id = 프로젝트_원본, 예: love_c09)를 가졌다.
+  // 2026-11-12: 애정운·재물운·신년 운세 프로젝트를 지웠다(사용자 화면 기준은 게시 목차의 네 주제). 종합(full)만 남는다.
+  var SEED = {};
   var ALL = CHAPTERS.slice();
   Object.keys(SEED).forEach(function (pid) {
     SEED[pid].forEach(function (x, i) { var b = CHAPTERS.filter(function (c) { return c.id === x[0]; })[0], c = clone(b); c.id = pid + '_' + x[0]; c.project = pid; c.base = x[0]; c.act = x[1]; c.order = i + 1; c.no = i + 1; ALL.push(c); });

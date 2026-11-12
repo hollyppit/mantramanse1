@@ -440,7 +440,7 @@
   try {
     if (root.fetch && root.location && root.document) {
       var getJ = function (u) { return root.fetch(u, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); };
-      Promise.all([localFlag() ? Promise.resolve(null) : getJ('/api/luck-flags'), getJ('/api/narrative-rules')]).then(function (x) {
+      Promise.all([localFlag() ? Promise.resolve(null) : (root.MantraLastGood ? root.MantraLastGood.json('/api/luck-flags', 5000, function (d) { return !!(d && typeof d === 'object' && Number.isInteger(d.version)); }) : getJ('/api/luck-flags')), getJ('/api/narrative-rules')]).then(function (x) {
         if (x[0]) remoteOn = x[0].lifeNarrative === true;
         if (x[1] && Array.isArray(x[1].pub) && x[1].pub.length) setPublished(x[1].pub);
         if (enabled() && root.dispatchEvent && root.CustomEvent) root.dispatchEvent(new root.CustomEvent('mantra:life-narrative'));

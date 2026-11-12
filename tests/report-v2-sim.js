@@ -22,16 +22,16 @@ ok(cc.chapters.length === 21 && !cc.chapters.some(c => c.id === 'c05') && cc.cha
 console.log('1b. 프로젝트(챕터는 한 프로젝트에만 속함)');
 const lib0 = R.Chapters.libraryOf(null), ids0 = lib0.map(c => c.id);
 ok(new Set(ids0).size === ids0.length && lib0.every(c => typeof c.project === 'string' && c.base), '챕터 id 유일 · 소속 프로젝트 1개 · base 있음');
-const per = {}; lib0.forEach(c => { per[c.project] = (per[c.project] || 0) + 1; }); ok(per.full === 21 && per.love === 12 && per.wealth === 11 && per.newyear === 6, '프로젝트별 챕터 수 ' + JSON.stringify(per));
+const per = {}; lib0.forEach(c => { per[c.project] = (per[c.project] || 0) + 1; }); ok(per.full === 21 && Object.keys(per).join() === 'full', '프로젝트별 챕터 수(2026-11-12 종합만 남김) ' + JSON.stringify(per));
 ok(lib0.filter(c => c.project === 'love').every(c => c.id === 'love_' + c.base), '다른 상품 챕터는 독립된 복제본');
 const mg = R.Chapters.libraryOf({ projects: [{ id: 'mine', chapters: [{ id: 'c01', act: 1 }, { id: 'c02', act: 2 }] }] });
 ok(mg.filter(c => c.project === 'mine').map(c => c.id).join() === 'mine_c01,mine_c02' && mg.find(c => c.id === 'c01').project === 'full', '예전 공유 목록 저장본 → 소유 구조로 이전(원본은 종합에 그대로)');
-const PJ = R.Chapters.projects(null); ok(PJ.length === 4 && PJ.map(p => p.id).join() === 'full,love,wealth,newyear', '기본 프로젝트 4종');
+const PJ = R.Chapters.projects(null); ok(PJ.length === 1 && PJ[0].id === 'full', '기본 프로젝트는 종합 하나(애정·재물·신년 2026-11-12 삭제)');
 const fl = R.Chapters.forProject(null, 'full'); ok(fl.chapters.length === 21 && fl.acts.length === 5, 'full = 20챕터·5막');
 for (const p of ['love', 'wealth', 'newyear']) { const x = R.Chapters.forProject(null, p); ok(x.chapters.every((c, i) => c.no === i + 1) && x.acts.every((a, i) => a.id === i + 1 && a.roman) && x.chapters.every(c => c.act >= 1 && c.act <= x.acts.length), p + ' 번호·ACT 재부여'); console.log('   ' + p + ': ' + x.chapters.length + '챕터 ' + x.acts.length + 'ACT'); }
 ok(R.Chapters.forProject(null, 'nope').project.id === 'full', '없는 프로젝트는 full');
 ok(R.Chapters.forProject({ projects: [{ id: 'love', enabled: false }] }, 'love').project.id === 'full', '비활성 프로젝트는 full');
-ok(R.Chapters.projects({ projects: [{ id: 'mine', name: '내 프로젝트', chapters: [{ id: 'c01', act: 1 }] }] }).length === 5, '새 프로젝트 추가');
+ok(R.Chapters.projects({ projects: [{ id: 'mine', name: '내 프로젝트', chapters: [{ id: 'c01', act: 1 }] }] }).length === 2, '새 프로젝트 추가');
 console.log('2. 샘플 사주 리포트');
 const ch = mk(1990, 5, 15, 14, 'M'), sd = R.SajuData.build(ch, { now });
 console.log('   일주', sd.dayPillar.ko, '· 신강약', sd.strength.zone, '· 용신', sd.usefulElements && sd.usefulElements.yong, '· 현재 대운', sd.currentDaewoon && sd.currentDaewoon.ganzhi, R.SajuData.SEASONS[sd.currentDaewoon.season], '· 올해', R.SajuData.SEASONS[sd.sewoon.season], '· unavailable', sd.unavailable.join(',') || '-');
@@ -58,16 +58,11 @@ ok(R.Compose.aiPayload(rep).chapters.length === 21, 'AI payload');
 console.log('   샘플:', rep.chapters[0].headline, '|', rep.plan.strategy.map(s => s.label).join('→'));
 console.log('   개운:', Object.entries(rep.remedies).map(([t, a]) => t + ':' + a.map(x => x.item.title).join('/')).join('  '));
 
-for (const pid of ['love', 'wealth', 'newyear']) { const pk = R.Compose.fromSaved({}, [], pid), r3 = R.Compose.build(sd, pk.lib, pk.cfg); ok(r3.chapters.length === pk.cfg.chapters.length && r3.chapters.every(c => c.headline && c.scenes.length >= 3) && r3.plan.strategy.length === 4, pid + ' 리포트 생성'); }
 console.log('2b. 프로젝트별 개운법');
-const remOf = pid => { const pk = R.Compose.fromSaved({}, [], pid), r = R.Compose.build(sd, pk.lib, pk.cfg); return { ids: Object.values(r.remedies).flat().map(x => x.item.id), intro: r.chapters.find(c => c.base === 'c19'), plan: r.plan }; };
-const rF = remOf('full'), rL = remOf('love'), rW = remOf('wealth'), rN = remOf('newyear');
-ok(rL.ids.filter(i => /^love_/.test(i)).length >= 4 && !rL.ids.some(i => /^wealth_|^ny_/.test(i)), '애정운: 애정 전용 개운법 우선, 다른 상품 전용 항목 없음 ' + rL.ids.filter(i => /^love_/.test(i)).length + '개');
-ok(rW.ids.filter(i => /^wealth_/.test(i)).length >= 4 && !rW.ids.some(i => /^love_|^ny_/.test(i)), '재물운: 재물 전용 개운법 우선 ' + rW.ids.filter(i => /^wealth_/.test(i)).length + '개');
-ok(rN.ids.filter(i => /^ny_/.test(i)).length >= 2 && !rN.ids.some(i => /^love_|^wealth_/.test(i)), '신년운세: 신년 전용 개운법');
+const remOf = pid => { const pk = R.Compose.fromSaved({}, [], pid), r = R.Compose.build(sd, pk.lib, pk.cfg); return { ids: Object.values(r.remedies).flat().map(x => x.item.id), intro: r.chapters.find(c => c.base === 'c19'), plan: r.plan, project: pk.cfg.project && pk.cfg.project.id }; };
+const rF = remOf('full'), rL = remOf('love');
 ok(!rF.ids.some(i => /^(love|wealth|ny)_/.test(i)), '종합: 상품 전용 항목은 쓰지 않음(공통만)');
-ok(rL.intro.headline === '사랑을 쓰는 개운법' && rW.intro.headline === '재물을 다루는 개운법' && rN.intro.headline === '올해를 쓰는 개운법' && rF.intro.headline !== rL.intro.headline, '개운법 장 첫 문장이 상품별로 다름');
-console.log('   애정:', rL.ids.slice(0, 5).join(', '), '| 재물:', rW.ids.slice(0, 5).join(', '));
+ok(rL.project === 'full' && rL.ids.join() === rF.ids.join(), '지운 프로젝트 주소(?project=love)는 종합으로 열림');
 console.log('3. 커버리지 (무작위 사주 600개)');
 let seed = 7; const rnd = n => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) % n;
 const empties = {}, seasons = {}, unav = {}; let thin = 0, groupsSeen = {};

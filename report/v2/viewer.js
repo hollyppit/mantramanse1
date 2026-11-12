@@ -59,8 +59,18 @@
     if (!S.ch || S.guideResume) return;
     ss('mt_v2_restore', JSON.stringify({ inp:S.ch.input, name:S.name, interest:S.interest || '', guide:S.guide, realityContext:S.realityContext || {}, resumeChapter:chapter || null, scope:location.search }));
   }
+  // 게시 목차(/api/reading-editorial)는 사주 계산·프롤로그와 겹치게 미리 받아 둔다. 같은 약속을 beginReader 가 기다린다.
+  var editorialValid=function(d){return !!(d&&Number.isInteger(d.version)&&d.version>0&&Array.isArray(d.chapters)&&Array.isArray(d.topics));};
+  function editorialCatalogP(){
+    if(S.editorialP)return S.editorialP;
+    S.editorialP=(window.MantraLastGood?window.MantraLastGood.load('/api/reading-editorial',{timeout:6000,coldTimeout:15000,valid:editorialValid}):
+      fetch('/api/reading-editorial',{signal:AbortSignal.timeout(15000)}).then(function(r){return r.ok?r.json():null;}).then(function(d){return {data:editorialValid(d)?d:null,source:'network'};}))
+      .catch(function(){return {data:null,source:'none'};});
+    return S.editorialP;
+  }
   function start(ch, gender) {
     saveReadingSession();
+    if(!PREVIEW && R.Editorial)editorialCatalogP();
     view('load'); var tx = $('#loadText'), i = 0, tick;
     function show() { tx.style.opacity = 0; setTimeout(function () { tx.textContent = STAGES[Math.min(i, STAGES.length - 1)]; tx.style.opacity = 1; i++; }, 250); }
     show(); tick = setInterval(show, 1100);
@@ -564,7 +574,9 @@
   async function beginReader() {
     if(!PREVIEW && R.Editorial && !S.editorialLoaded){
       S.editorialLoaded=true;
-      try{var editorialResponse=await fetch('/api/reading-editorial',{signal:AbortSignal.timeout(3500)});if(editorialResponse.ok)S.editorialCatalog=await editorialResponse.json();}catch(e){}
+      // 게시 목차가 늦으면(운영 1~30초) 예전에는 3.5초 뒤 기본 목차(옛 107장 구성)로 그려 새로 고칠 때마다 버전이 바뀌었다.
+      // 이제 처음 방문은 15초, 저장된 목차가 있으면 6초까지 기다리고, 그래도 늦으면 이 기기에 저장된 마지막 게시 목차를 쓴다(report/last-good.js).
+      try{var editorialLoaded=await editorialCatalogP();S.editorialCatalog=editorialLoaded.data||undefined;S.editorialSource=editorialLoaded.source;if(!S.editorialCatalog)elog('caught','editorial.unavailable');}catch(e){}
     }
     if (!PREVIEW && !EXPLORE && R.ReadingFlow && projectId() === "full") {
       S.rep = R.ReadingFlow.build(S.rep, S.sd, { M: window.Manse, ch: S.ch });

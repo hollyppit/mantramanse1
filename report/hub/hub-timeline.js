@@ -35,9 +35,11 @@
   var copyP = null;
   function script(src) { return new Promise(function (ok, no) { var s = DOC.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; DOC.head.appendChild(s); }); }
   function getJson(u, ms) { return new Promise(function (ok) { var done = false, fin = function (v) { if (!done) { done = true; ok(v); } }; setTimeout(function () { fin(null); }, ms); try { fetch(u).then(function (r) { return r.ok ? r.json() : null; }).then(fin, function () { fin(null); }); } catch (e) { fin(null); } }); }
+  // 스위치가 4초 안에 안 오면 예전에는 꺼진 문안으로 그렸다. 이제 이 기기에 저장된 마지막 스위치 값을 쓴다(report/last-good.js).
+  function flagsJson() { var LG = root.MantraLastGood; return LG ? LG.load('/api/luck-flags', { timeout: 4000, coldTimeout: 8000, valid: function (d) { return !!(d && typeof d === 'object' && Number.isInteger(d.version)); } }).then(function (x) { return x.data; }) : getJson('/api/luck-flags', 4000); }
   function loadCopy() {
     if (copyP) return copyP;
-    copyP = Promise.all([root.MANTRA_FLAGS ? Promise.resolve() : script('/feature-flags.js').catch(function () { }), getJson('/api/luck-flags', 4000)]).then(function (r) {
+    copyP = Promise.all([root.MANTRA_FLAGS ? Promise.resolve() : script('/feature-flags.js').catch(function () { }), flagsJson()]).then(function (r) {
       var on = !!(root.MANTRA_FLAGS && root.MANTRA_FLAGS.timelineCopy === true) || !!(r[1] && r[1].timelineCopy === true);
       if (!on) return null;
       return (root.MantraLuckInterpret ? Promise.resolve() : script('/luck-interpret.js')).then(function () { return getJson('/api/luck-phrases', 4000); }).then(function (d) {

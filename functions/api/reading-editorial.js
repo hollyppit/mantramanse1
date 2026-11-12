@@ -3,10 +3,22 @@ import {kvOf} from '../_store.js';
 import {loadAll,blockedDocs} from '../_ikstore.js';
 import {loadSourceIndex} from '../_interpretation-store.js';
 import {Editorial,DRAFT_KEY,PUBLISHED_KEY,HISTORY_KEY,loadEditorial,validateEditorial,publicationIssues} from '../_editorial.js';
+// 공개 응답 모양(관리자 전용 sourceRuleIds 는 빼고, 보관 장은 연결 정보만).
+export const publicCatalog=catalog=>({version:catalog.version,topics:catalog.topics,chapters:catalog.chapters.filter(c=>['active','archived'].includes(c.state)).map(c=>c.state==='archived'?{id:c.id,legacyIds:c.legacyIds,topicId:c.topicId,state:c.state}:Object.fromEntries(Object.entries(c).filter(([k])=>k!=='sourceRuleIds')))});
+export const EDGE_TTL=60;
+const edgeKey=url=>new Request(url.origin+'/api/reading-editorial?edge=public');
+const edgeCache=()=>{try{return typeof caches!=='undefined'&&caches.default||null;}catch{return null;}};
+async function edgeGet(url){const c=edgeCache();if(!c)return null;try{const r=await c.match(edgeKey(url));if(!r)return null;const h=new Headers(r.headers);h.set('cache-control','no-store');h.set('x-editorial-cache','hit');return new Response(r.body,{status:200,headers:h});}catch{return null;}}
+async function edgePut(url,body){const text=JSON.stringify(body),c=edgeCache();
+ // 게시본이 아직 없는 기본 목차(version 0)는 보관하지 않는다(게시 직후 바로 보이게).
+ if(c&&body.version>0){try{await c.put(edgeKey(url),new Response(text,{headers:{'content-type':'application/json; charset=utf-8','cache-control':'public, max-age='+EDGE_TTL}}));}catch{}}
+ return new Response(text,{status:200,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-editorial-cache':'miss'}});}
 export async function onRequest({request,env}){
  const admin=isAdmin(request,env),kv=kvOf(env),url=new URL(request.url);
  if(request.method==='GET'&&url.searchParams.get('view')!=='admin'){
-  try{const catalog=await loadEditorial(kv);return json({version:catalog.version,topics:catalog.topics,chapters:catalog.chapters.filter(c=>['active','archived'].includes(c.state)).map(c=>c.state==='archived'?{id:c.id,legacyIds:c.legacyIds,topicId:c.topicId,state:c.state}:Object.fromEntries(Object.entries(c).filter(([k])=>k!=='sourceRuleIds')))});}catch{return json({error:'storage-unavailable'},503);}
+  // 2026-11-12: 저장소 읽기가 1~30초로 들쭉날쭉해 화면이 기본 목차로 넘어가곤 했다. 공개 게시본은 모두에게 같으므로 엣지에 60초 보관한다.
+  const hit=await edgeGet(url);if(hit)return hit;
+  try{const catalog=await loadEditorial(kv);return await edgePut(url,publicCatalog(catalog));}catch{return json({error:'storage-unavailable'},503);}
  }
  if(!admin)return json({error:'unauthorized'},401);
  if(!kv)return json({error:'storage-unavailable'},503);
@@ -37,6 +49,7 @@ export async function onRequest({request,env}){
   await kv.put(HISTORY_KEY,JSON.stringify([{at:next.updatedAt,action:b.action,catalog:current},...history].slice(0,15)));
   await kv.put(DRAFT_KEY,JSON.stringify(next));
   if(b.action==='publish')await kv.put(PUBLISHED_KEY,JSON.stringify(next));
+  if(b.action==='publish'){const c=edgeCache();if(c)try{await c.delete(edgeKey(url));}catch{}}
   return json({ok:true,catalog:next,published:b.action==='publish',publishedVersion:b.action==='publish'?next.version:published?.version||0});
  }catch{return json({error:'editorial-unavailable'},503);}
 }

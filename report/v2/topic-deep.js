@@ -44,7 +44,7 @@
   function init() {
     if (!DOC || typeof fetch === 'undefined') return;
     var local = flagLocal();
-    (local ? Promise.resolve(true) : getJson('/api/luck-flags', 4000).then(function (d) { return !!(d && d.topicDeep === true); })).then(function (v) {
+    (local ? Promise.resolve(true) : (root.MantraLastGood ? root.MantraLastGood.json('/api/luck-flags', 5000, function (d) { return !!(d && typeof d === 'object' && Number.isInteger(d.version)); }) : getJson('/api/luck-flags', 4000)).then(function (d) { return !!(d && d.topicDeep === true); })).then(function (v) {
       if (!v) return; on = true;
       return Promise.all([loadScripts(), getJson('/api/wish-spots', 4000).then(function (d) { spots = d && d.enabled && Array.isArray(d.spots) ? d.spots : null; })]).then(function () { ready = true; rev++; waiters.splice(0).forEach(function (f) { try { f(); } catch (e) { } }); });
     });
