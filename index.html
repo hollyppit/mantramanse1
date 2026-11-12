@@ -392,7 +392,8 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 
 /* 운 */
 .now { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-@media (max-width: 620px) { .now { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* 2026-11-12: 지금의 운은 요약 네비게이터 — 모바일에서도 2×2로 크게 펼치지 않고 한 줄 4칸으로 줄인다 */
+@media (max-width: 620px) { .now { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; } .now .nowc { padding: 8px 6px; border-radius: 12px; gap: 1px; } .now .nowc .gzb { font-size: 1.12rem; } .now .nowc .tgs { font-size: 0.66rem; } .now .nowc > span:last-child { font-size: 0.66rem; line-height: 1.3; } .now .nowc > span:last-child .muted { display: block; } .now .nowc > span:last-child > :not(.muted) { font-size: 0.6rem; padding: 0 4px; margin: 1px 1px 0 0; line-height: 1.5; } }
 .nowc { border: 0; box-shadow: inset 0 0 0 1px var(--line); border-radius: 16px; padding: 10px 12px; display: grid; gap: 2px; cursor: pointer; text-align: left; background: var(--surface); }
 .nowc:hover { box-shadow: inset 0 0 0 2px var(--accent); }
 .nowc .lbl { font-size: 0.74rem; color: var(--ink-3); font-weight: 600; }
@@ -9919,6 +9920,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   // ── 소제목 접고 펴기: 카드 제목(h2·.card-h)과 그 안의 소제목(h3·h4)을 눌러 아래 내용을 접는다. 상태는 탭·제목별로 기억한다 ──
   const FOLD = new Set(), FOLD_SEEN = new Set();
+  // 처음부터 접어 두는 카드(모든 기기): 운세 흐름 탭 맨 위 방위운(참고용)
+  const FOLD_DEFAULT = /우리 집 방위 운/;
   const FOLD_EXPERT = /사화 지도|별의 힘 분포|학파|병약|종격|격국|통근|한난조습|조후론 vs|판단 기준|시간 기준별|12운성 에너지|근거 보기/;
   // 모바일에서만 처음부터 접어 두는 카드(원국 탭의 천간·지지 관계: 길고 자주 안 보는 목록)
   const FOLD_MOBILE = /^(천간 관계|지지 관계)/;
@@ -9937,7 +9940,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       h.after(wrap); sibs.forEach(e => wrap.appendChild(e));
       const key = keyOf(h, lv);
       h.classList.add('fold-h'); h.dataset.fold = key; h.setAttribute('role', 'button'); h.setAttribute('tabindex', '0');
-      if (!FOLD_SEEN.has(key)) { FOLD_SEEN.add(key); if (FOLD_EXPERT.test(h.textContent || '') || (mobile && FOLD_MOBILE.test((h.textContent || '').trim()))) FOLD.add(key); }
+      if (!FOLD_SEEN.has(key)) { FOLD_SEEN.add(key); if (FOLD_EXPERT.test(h.textContent || '') || (lv === 1 && FOLD_DEFAULT.test(h.textContent || '')) || (mobile && FOLD_MOBILE.test((h.textContent || '').trim()))) FOLD.add(key); }
       const closed = FOLD.has(key); h.classList.toggle('closed', closed); h.setAttribute('aria-expanded', String(!closed));
       h.insertAdjacentHTML('beforeend', '<span class="fold-chev" aria-hidden="true"></span>');
     };
