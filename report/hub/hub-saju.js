@@ -40,7 +40,7 @@
     if (next === 'today') return '#/today';
     if (next === 'life') return '#/go?to=life';
     if (next === 'deep') return '#/go?to=deep';
-    if (next === 'my') return P.awakened() ? '#/my' : '#/awaken';
+    if (next === 'my') return P.awakened() ? '#/timeline' : '#/awaken';
     return '#/awaken';
   }
   H.route('input', function (q, ctx) {
@@ -258,7 +258,7 @@
     function finish(skipped) {
       if (done) return; done = true; clearTimeout(timer); host.remove(); H.cleanup = null;
       if (!replay) P.markAwakened(); H.track('ilju_awakening_complete', { skipped: skipped ? 1 : 0, replay: replay ? 1 : 0 });
-      var aq = (H.ctx && H.ctx.q) || {}, to = aq.to; H.replace(to === 'home' ? '#/' : to === 'timeline' ? '#/timeline?aw=1' + (aq.z ? '&z=' + encodeURIComponent(aq.z) : '') : '#/my'); // 새 홈에서 온 경우 홈으로, 인터랙티브 스토리에서 온 경우 운명의 타임라인으로
+      var aq = (H.ctx && H.ctx.q) || {}; try { sessionStorage.setItem('mt_tl_awk', P.sig()); } catch (e) { } H.replace('#/timeline?aw=1' + (aq.z ? '&z=' + encodeURIComponent(aq.z) : '')); // 2026-11-12: 홈·MY 홈을 타임라인으로 모아, 각성 뒤에는 항상 타임라인으로 간다(이번 탭에서 각성을 다시 틀지 않게 표시) // 새 홈에서 온 경우 홈으로, 인터랙티브 스토리에서 온 경우 운명의 타임라인으로
     }
     H.cleanup = function () { done = true; clearTimeout(timer); };
     host.onclick = function (e) { if (e.target.id === 'awSkip') finish(true); else show(); };
@@ -268,8 +268,10 @@
 
   /* ───────── MY 운명 홈 ───────── */
   var tile = function (title, small, href, p, extra) { return '<a class="tile' + (extra ? ' ' + extra : '') + '" href="' + href + '" data-track="fortune_content_click" data-p="' + p + '"><b>' + title + '</b><small>' + small + '</small></a>'; };
+  // 2026-11-12: MY 운명 홈은 운명의 타임라인으로 합쳤다(오늘의 흐름·분야별 운·무료 콘텐츠·내 정보). 옛 화면은 #/my?old=1 로만 열린다.
   H.route('my', function (q, ctx) {
     if (!P.has()) return H.replace('#/input?next=my');
+    if (!q.old) return H.replace('#/timeline' + (q.z ? '?z=' + encodeURIComponent(q.z) : ''));
     if (!P.awakened() && !q.s) return H.replace('#/awaken'); // 첫 방문: 일주 각성을 먼저 거친다
     needSaju(ctx, 'my', function (ch, kit) {
       var M = kit.M, T = kit.T, nm = P.name(), day = ch.pillars.day, t = Saju.todayData(ch), stemK = M.STEM_K[day.s], S = T.DATA.S[stemK] || {};

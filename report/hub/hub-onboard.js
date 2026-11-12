@@ -473,11 +473,17 @@
     }
     var shown = false; try { shown = sessionStorage.getItem('mt_onb_shown') === '1'; } catch (e) { }
     if (!shown && !q.nogate) {
-      Ob.config().then(function () { if (!H.alive(ctx)) return; if (CFG.forceOnboarding) { if (H.embed) welcome({ replay: 1 }, ctx); else H.replace('#/welcome?replay=1'); } else renderHome(q, ctx); });
+      Ob.config().then(function () { if (!H.alive(ctx)) return; if (CFG.forceOnboarding) { if (H.embed) welcome({ replay: 1 }, ctx); else H.replace('#/welcome?replay=1'); } else goHome(q, ctx); });
       return;
     }
-    renderHome(q, ctx);
+    goHome(q, ctx);
   });
+  // 2026-11-12: 사주가 저장된 방문자의 홈은 운명의 타임라인이다(무료 콘텐츠·오늘의 흐름·내 정보를 모두 담는다).
+  // 타임라인을 관리자에서 껐거나 ?home=1 이면 예전 개인화 홈을 그린다(타임라인이 꺼졌을 때 서로 넘기며 맴돌지 않게).
+  function goHome(q, ctx) {
+    if (q.home) return renderHome(q, ctx);
+    Ob.config().then(function () { if (!H.alive(ctx)) return; if (CFG.timeline && CFG.timeline.enabled === false) renderHome(q, ctx); else H.replace('#/timeline'); }, function () { if (H.alive(ctx)) renderHome(q, ctx); });
+  }
   function renderHome(q, ctx) {
     var nm = P.name();
     H.view('<section class="hhome"><p class="kick">MANTRA FORTUNE</p><h1 class="h1">' + (nm ? esc(A(nm)) + ',<br>' : '') + '오늘의 흐름을 펼칩니다</h1><p class="pend">명식을 불러오는 중…</p></section>');
@@ -520,7 +526,7 @@
         '<p class="hh-line">' + (nm ? esc(nm) + '님, ' : '') + esc(t.line || '') + (jc ? '<br><span>' + esc(jc.trait) + '</span>' : '') + '</p></section>' +
         '<details class="hh-more"><summary>내 정보 · 더 보기</summary><div class="hh-acts">' +
         '<a href="#/begin?edit=1" data-track="profile_edit">출생정보 수정</a><a href="#/welcome?replay=1" data-track="onboarding_replay">온보딩 다시 보기</a><a href="#/my?s=1" data-track="fortune_content_click" data-p="my_home">MY 운명 홈</a>' +
-        '<a href="/index.html" data-track="fortune_content_click" data-p="manse_app">만세력 원국 보기</a><button type="button" id="hhDel">내 정보 삭제</button></div>' +
+        '<button type="button" id="hhDel">내 정보 삭제</button></div>' +
         '<p class="note">출생정보는 이 기기에만 저장되며 서버로 보내지 않습니다. 삭제하면 저장된 정보와 입력 중이던 초안이 모두 지워집니다.</p></details>' +
         '<p class="dis">사주는 전통 해석에 바탕한 참고용 콘텐츠이며 미래를 단정하지 않습니다. 컨디션·주의 표시는 의학적 진단이나 사고 확률이 아닙니다.</p></section>');
       $$('.tip', el).forEach(function (n) { n.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); var open = n.classList.contains('open'); $$('.tip.open', el).forEach(function (x) { x.classList.remove('open'); }); if (!open) n.classList.add('open'); }); });
@@ -530,7 +536,7 @@
     }).catch(function () { if (!H.alive(ctx)) return; H.view('<p class="pend">홈을 불러오지 못했습니다.<br><br><button type="button" class="btn ghost" id="rt">다시 시도</button><br><br><a class="btn ghost sm" href="#/welcome?replay=1">온보딩 다시 보기</a></p>'); $('#rt').onclick = function () { H.render(); }; });
   }
   // 내 정보: 홈 상단 링크 → 같은 홈의 접힌 영역으로
-  H.route('me', function () { H.replace('#/'); setTimeout(function () { var d = H.$('.hh-more'); if (d) { d.open = true; d.scrollIntoView({ behavior: H.reduce ? 'auto' : 'smooth', block: 'center' }); } }, 400); });
+  H.route('me', function () { if (!(CFG && CFG.timeline && CFG.timeline.enabled === false)) return H.replace('#/timeline?z=mine'); H.replace('#/?home=1'); setTimeout(function () { var d = H.$('.hh-more'); if (d) { d.open = true; d.scrollIntoView({ behavior: H.reduce ? 'auto' : 'smooth', block: 'center' }); } }, 400); });
   Ob.clear = function () { try { localStorage.removeItem('mantra-manse-v1'); localStorage.removeItem('mt_hub_awk'); localStorage.removeItem('mt_daily_v1'); localStorage.removeItem(DRAFT); localStorage.removeItem(SEEN); localStorage.removeItem('mt_quest_draft'); localStorage.removeItem('mt_guide'); } catch (e) { } H.afterInput(); };
 
   // 기존 입력 화면(#/input)은 온보딩 슬라이드 툰으로 대체한다. 옛 폼이 필요하면 #/input?classic=1

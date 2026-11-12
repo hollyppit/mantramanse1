@@ -63,7 +63,7 @@
     Ob.config().then(function (cfg) {
       if (!cfg.timeline || cfg.timeline.enabled === false) return H.replace('#/');
       return Promise.all([H.sajuKit(), PREVIEW ? H.engine().then(function (M) { return M.compute(SAMPLE); }) : H.chart(), loadTl().then(loadWorlds), loadCopy()]).then(function (r) { if (H.alive(ctx)) draw(q, ctx, cfg, r[0], r[1], PREVIEW, root.ReportV2.Explore.mergeWorlds(r[2]), r[3]); });
-    }).catch(function () { if (!H.alive(ctx)) return; H.view('<p class="pend">타임라인을 불러오지 못했습니다.<br><br><button type="button" class="btn ghost" id="rt">다시 시도</button><br><br><a class="btn ghost sm" href="#/">홈으로</a></p>'); $('#rt').onclick = function () { H.render(); }; });
+    }).catch(function () { if (!H.alive(ctx)) return; H.view('<p class="pend">타임라인을 불러오지 못했습니다.<br><br><button type="button" class="btn ghost" id="rt">다시 시도</button><br><br><a class="btn ghost sm" href="#/?home=1">홈으로</a></p>'); $('#rt').onclick = function () { H.render(); }; });
   });
 
   function draw(q, ctx, cfg, kit, ch, PREVIEW, worlds, CP) {
@@ -173,9 +173,7 @@
       var seun = yi ? detail(yi, '세운 ' + yi.ganzhi + ' · ' + yi.year + '년' + (yi.age != null ? ' (' + yi.age + '세)' : ''), 'seun') : '';
       var mon = G.wolun ? '<h4 class="tq-h4">월별 흐름 (절기 기준)</h4>' + barChart(ms, { label: st.y + '년 월별 흐름', cls: 'wolun', attr: function (it) { return 'data-m="' + it.month + '"'; }, sel: function (it) { return st.m === it.month; }, now: function (it) { return !!it.isNow; }, name: function (it) { return st.y + '년 ' + it.month + '월 ' + it.ganzhi + ' 월운'; }, top: function (it) { return it.month + '월'; }, sub: function (it) { return it.ganzhi; } }) : '';
       var cm = st.m != null ? ms.filter(function (x) { return x.month === st.m; })[0] : null, monthCard = cm ? detail(cm, '월운 ' + cm.ganzhi + ' · ' + st.y + '년 ' + cm.month + '월 (' + cm.term + ' 이후)', 'wolun') : '';
-      var today = '';
-      if (G.today && isThis && H.Saju && H.Saju.todayData) { try { var t = H.Saju.todayData(ch); today = '<a class="tq-today" href="#/today" data-track="fortune_content_click" data-p="today_card"><div class="ring" style="--p:' + t.score + '"><b>' + t.score + '</b></div><div><small>TODAY · 오늘의 일진 ' + esc(t.gz) + '日</small><h4>' + esc(t.cond) + '의 날</h4><p>' + esc(t.line || '') + '</p><span>일진 캘린더 열기 →</span></div></a>'; } catch (e) { } }
-      return yr + today + seun + mon + monthCard + '<p class="tq-sub">월운은 절기를 기준으로 하며, 1월 막대는 소한 이후입니다. 일별 흐름과 택일은 일진 캘린더에서 볼 수 있습니다.</p>';
+      return yr + seun + mon + monthCard + '<p class="tq-sub">월운은 절기를 기준으로 하며, 1월 막대는 소한 이후입니다. 일별 흐름과 택일은 일진 캘린더에서 볼 수 있습니다.</p>';
     }
 
     /* ── 영역 4: 인생의 주요 주제 = 운명 세계 ──
@@ -190,14 +188,35 @@
       }).join('') + '</div></div><p class="tq-sub">카드를 누르면 해당 주제의 풀이가 열립니다.</p>';
     }
 
+    /* ── 맨 위: 오늘 · 무료 콘텐츠 (2026-11-12, 예전 홈·MY 운명 홈의 무료 콘텐츠를 여기로 모음) ── */
+    function freeHtml() {
+      var today = '';
+      if (!PREVIEW && H.Saju && H.Saju.todayData) { try { var t = H.Saju.todayData(ch), ph = String(t.phase || '').replace(/기$/, '운'); today = '<a class="tq-today" href="#/today" data-track="fortune_content_click" data-p="today_card"><div class="ring" style="--p:' + t.score + '"><b>' + t.score + '</b></div><div><small>TODAY · 오늘의 일진 ' + esc(t.gz) + '日' + (ph ? ' · ' + esc(ph) : '') + '</small><h4>' + esc(t.cond) + '의 날</h4><p>' + esc(t.line || '') + '</p><span>일진 캘린더 열기 →</span></div></a>'; } catch (e) { } }
+      var card = function (href, p, kick, title, line, go) { return '<a class="tq-fc" href="' + href + '" data-track="fortune_content_click" data-p="' + p + '"><small>' + kick + '</small><h4>' + title + '</h4><p>' + line + '</p><span>' + go + ' →</span></a>'; };
+      var chip = function (f, label, p) { return '<a class="tq-fchip" href="#/today?f=' + f + '" data-track="fortune_content_click" data-p="' + p + '">' + label + '</a>'; };
+      return today +
+        '<div class="tq-fcs">' +
+        card('#/today', 'calendar', 'CALENDAR · 무료', '일진 캘린더', '월운 그래프와 날짜별 일진, 내 일정에 맞는 날 고르기', '캘린더 열기') +
+        card('#/tarot', 'tarot', 'FREE TAROT · 무료', '무료 타로', '마음속 질문 하나, 카드 한 장으로 가볍게 확인합니다', '카드 뽑기') +
+        card('#/awaken?replay=1&to=timeline', 'ilju_replay', 'ILJU · 무료', '일주 각성 영상 다시 보기', esc(ju) + '일주 · 타고난 기질과 강점을 영상으로 다시 만납니다', '영상 보기') +
+        '</div><p class="tq-fh">오늘의 분야별 흐름</p><div class="tq-fchips">' +
+        chip('money', '재물운', 'today_money') + chip('work', '일·사업운', 'today_work') + chip('love', '연애운', 'today_love') + chip('health', '컨디션', 'today_health') + chip('action', '오늘의 행동 가이드', 'today_action') + '</div>';
+    }
+    /* ── 맨 아래: 내 정보 (예전 홈의 "내 정보 · 더 보기") ── */
+    function mineHtml() {
+      if (PREVIEW) return '<p class="tq-sub">미리보기에서는 내 정보 메뉴를 숨깁니다.</p>';
+      return '<div class="tq-acts"><a class="btn ghost sm" href="' + EDIT + '" data-track="profile_edit" data-p="timeline_foot">출생정보 수정</a><a class="btn ghost sm" href="#/welcome?replay=1" data-track="onboarding_replay">온보딩 다시 보기</a><button type="button" class="btn ghost sm" data-guide-open>안내자 변경</button><button type="button" class="btn ghost sm" id="tqDel">내 정보 삭제</button></div>' +
+        '<p class="tq-sub">출생정보는 이 기기에만 저장되며 서버로 보내지 않습니다. 삭제하면 저장된 정보와 입력 중이던 초안이 모두 지워집니다.</p>';
+    }
+
     /* ── 화면 조립 ── */
-    var secs = TC.sections.filter(function (s) { return s.enabled !== false; });
-    var builders = { birth: birthHtml, flow: flowHtml, now: nowHtml, themes: themesHtml };
+    var secs = [{ id: 'free', title: '오늘 · 무료 콘텐츠', sub: '오늘의 일진과 바로 볼 수 있는 무료 풀이' }].concat(TC.sections.filter(function (s) { return s.enabled !== false && s.id !== 'free' && s.id !== 'mine'; })).concat([{ id: 'mine', title: '내 정보', sub: '출생정보 수정 · 온보딩 · 안내자 · 삭제' }]);
+    var builders = { free: freeHtml, birth: birthHtml, flow: flowHtml, now: nowHtml, themes: themesHtml, mine: mineHtml };
     var heroBg = asset('archive'), pos = Q.assetFocus(cfg, 'archive', mobile);
     var html = '<div class="tq" id="tq"><header class="tq-hero" style="--hero:url(\'' + esc(heroBg) + '\');--pos:' + esc(pos) + '"><p class="kick">MANTRA · FATE TIMELINE</p><h1>운명의 타임라인</h1>' + (nm ? '<p class="tq-who">' + esc(A()) + '</p>' : '') + birthLine() + '<p class="tq-intro">' + esc(O.fill(TC.texts.intro, nm, cfg)) + '</p></header>' +
       '<nav class="tq-nav" id="tqNav" aria-label="타임라인 영역">' + secs.map(function (s, i) { return '<a href="#tq-' + s.id + '" data-z="' + s.id + '"><i>' + (i + 1) + '</i>' + esc(s.title) + '</a>'; }).join('') + (PREVIEW ? '' : '<a class="tq-edit" href="' + EDIT + '" data-track="profile_edit" data-p="timeline_nav" aria-label="사주 정보(출생정보) 바꾸기">✎ 정보 바꾸기</a>') + '</nav>' +
       secs.map(function (s, i) { return '<section class="tq-sec" id="tq-' + s.id + '" data-z="' + s.id + '"><div class="tq-sech"><span>' + (i + 1) + '</span><div><h2>' + esc(s.title) + '</h2>' + (s.sub ? '<p>' + esc(s.sub) + '</p>' : '') + '</div></div><div class="tq-body" id="tqb-' + s.id + '">' + builders[s.id]() + '</div></section>'; }).join('') +
-      '<footer class="tq-foot"><div class="tq-acts"><a class="btn" href="#/" data-track="fortune_content_click" data-p="timeline_home">내 홈으로 가기</a><a class="btn ghost sm" href="#/my?s=1" data-track="fortune_content_click" data-p="timeline_my">MY 운명 홈</a><a class="btn ghost sm" href="' + EDIT + '" data-track="profile_edit" data-p="timeline_foot">출생정보 수정</a><button type="button" class="btn ghost sm" data-guide-open>안내자 변경</button></div><p class="dis">' + esc(TC.texts.notice) + '</p></footer></div>';
+      '<footer class="tq-foot"><p class="dis">' + esc(TC.texts.notice) + '</p></footer></div>';
     var el = H.view(html);
     DOC.body.classList.add('tq-wide'); var prevClean = H.cleanup; H.cleanup = function () { DOC.body.classList.remove('tq-wide'); if (io) io.disconnect(); if (prevClean) prevClean(); };
     var root0 = $('#tq', el);
@@ -205,6 +224,7 @@
     function redraw(id) { var b = $('#tqb-' + id, root0); if (b) { var y = root.scrollY; b.innerHTML = builders[id](); root.scrollTo(0, y); } }
     root0.addEventListener('click', function (e) {
       var t = e.target, b;
+      if (t.closest('#tqDel')) { if (root.confirm('저장된 출생정보를 이 기기에서 삭제할까요? 되돌릴 수 없습니다.')) { if (Ob.clear) Ob.clear(); H.toast('삭제했습니다.'); H.replace('#/welcome'); } return; }
       if ((b = t.closest('[data-topic-slide]'))) {
         var track = $('.tq-topics', root0), first = track && $('.tq-topic', track);
         if (first) track.scrollBy({ left: (+b.getAttribute('data-topic-slide')) * (first.getBoundingClientRect().width + 16), behavior: H.reduce ? 'auto' : 'smooth' });

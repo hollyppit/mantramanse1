@@ -91,7 +91,8 @@
   function reveal(el) { H.$$('.hero, .cards > *, .more, .grp, .todaycard, .myhead', el).forEach(function (n) { n.classList.add('rvl'); if (io) io.observe(n); else n.classList.add('in'); }); }
   // 허브 홈이 아닌 모든 화면에 "홈화면으로 가기"를 둔다(위쪽 링크 + 결과·운세·MY 화면은 아래쪽 버튼도). 랜딩에 끼워 넣은 모드에는 위쪽 막대가 없어 꼭 필요하다.
   var HOME_BOTTOM = { 'tarot/play': 1, today: 1, my: 1 };
-  function withHome(html) { var p = H.ctx.path; if (!p) return html; return '<a class="homebar" href="#/" data-track="hub_home_click">‹ 홈화면으로 가기</a>' + html + (HOME_BOTTOM[p] ? '<a class="btn ghost sm homebtn" href="#/" data-track="hub_home_click">홈화면으로 가기</a>' : ''); }
+  // 2026-11-12: 홈·MY 운명 홈을 운명의 타임라인 하나로 모았다. 사주가 저장돼 있으면 "홈으로"는 타임라인으로 간다.
+  function withHome(html) { var p = H.ctx.path; if (!p || p === 'timeline') return html; var tl = P.has(), href = tl ? '#/timeline' : '#/', lb = tl ? '운명의 타임라인으로' : '홈화면으로 가기'; return '<a class="homebar" href="' + href + '" data-track="hub_home_click">‹ ' + lb + '</a>' + html + (HOME_BOTTOM[p] ? '<a class="btn ghost sm homebtn" href="' + href + '" data-track="hub_home_click">' + lb + '</a>' : ''); }
   H.view = function (html, o) { // 화면 교체: 위로 스크롤 + 부드러운 등장
     var el = H.$('#screen'); el.className = ''; el.innerHTML = withHome(html); void el.offsetWidth; el.className = 'fx'; if (!(o && o.keepScroll)) toTop(); reveal(el); return el;
   };
