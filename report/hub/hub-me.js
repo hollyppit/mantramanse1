@@ -2,7 +2,7 @@
 //   · 로그인은 무빙툰 구매 창(report/v2/paywall.js)·내 구매 내역(/report/my/)과 같은 Supabase 세션을 쓴다(같은 주소라 로그인 상태가 이어진다).
 //   · 서버·DB 변경 없음: 기존 API 만 부른다 — POST /api/commerce/access(공개 키), /api/commerce/mine(내 주문·저장한 사주), /api/account/logins(연결된 로그인 방법).
 //   · 출생정보는 지금처럼 이 기기(localStorage)에만 둔다. 계정에 남는 사주는 구매할 때 '계정에 저장'을 고른 것뿐이다(member_sajus).
-//   · 전체 결제 기록·영수증·바로 환불·로그인 연결·회원 탈퇴는 /report/my/ 에 그대로 두고, 여기서는 요약과 링크만 보여 준다.
+//   · 전체 결제 기록·영수증·바로 환불·로그인 연결은 /report/my/ 에 두고 요약과 링크만 보여 준다. 회원 탈퇴는 여기서 바로 한다(/api/account/withdraw).
 //   · 비로그인: 로그인 안내 + 이 기기 정보 수정·삭제(삭제는 로그인과 상관없이 할 수 있어야 한다).
 (function (root) {
   'use strict';
@@ -148,6 +148,32 @@
       (off ? '<p class="me-muted">지금은 로그인을 준비하고 있습니다. 잠시 후 다시 열어 주세요.</p>' : loginButtons(d) + '<p class="me-note">구매한 적이 있다면 그때 쓴 로그인 방법을 골라 주세요. 로그인하지 않아도 운명의 타임라인과 무료 콘텐츠는 그대로 볼 수 있어요.</p>') +
       '</section>' + deviceHtml(false);
   }
+  // 회원 탈퇴(마이페이지에서 바로): 접어 두고, '탈퇴'를 직접 입력해야 진행. 서버 POST /api/account/withdraw(처리 내용 functions/_account.js) — /report/my/ 와 같은 API
+  function withdrawHtml(orders) {
+    var refundable = orders.some(function (o) { return o.status === 'paid' && !o.viewed_at && (Date.now() - Date.parse(o.paid_at || o.created_at)) / 86400000 <= 7; });
+    return '<details class="me-wd"><summary>회원 탈퇴</summary>' +
+      '<ul class="me-why"><li>로그인 정보(이메일·이름·소셜 계정 연결)와 계정에 저장한 사주가 <b>바로 삭제</b>됩니다.</li>' +
+      '<li>구매한 주제는 <b>더 이상 열리지 않습니다.</b> 같은 계정으로 다시 가입해도 되살아나지 않습니다.</li>' +
+      '<li>주문·결제 기록은 전자상거래법에 따라 5년, 1:1 문의 기록은 3년간 회원 정보와 분리해 보관한 뒤 파기합니다.</li>' +
+      '<li>이 기기에 저장된 출생정보는 그대로 남습니다. 지우려면 위 <b>이 기기에서 삭제</b>를 눌러 주세요.</li>' +
+      (refundable ? '<li class="me-warn"><b>환불받을 수 있는 구매가 있습니다.</b> 환불을 원하면 탈퇴하기 전에 <a href="/report/my/">구매 내역</a>에서 <b>바로 환불</b>을 먼저 눌러 주세요.</li>' : '') + '</ul>' +
+      '<p class="me-muted">계속하려면 아래 칸에 <b>탈퇴</b>라고 입력해 주세요.</p>' +
+      '<div class="me-acts me-wd-row"><input id="meWdIn" type="text" autocomplete="off" placeholder="탈퇴" aria-label="확인 문구 입력"><button type="button" class="btn ghost sm me-danger" data-me="withdraw" disabled>회원 탈퇴</button></div>' +
+      '<p class="me-msg" id="meWdMsg" role="status" aria-live="polite"></p></details>';
+  }
+  function withdraw(btn) {
+    var msg = $('#meWdMsg'), tok = $('#screen') && $('#screen').__token;
+    if (!root.confirm('정말 탈퇴할까요? 구매한 주제가 더 이상 열리지 않으며 되돌릴 수 없습니다.')) return;
+    btn.disabled = true; if (msg) msg.textContent = '탈퇴 처리 중입니다…';
+    post('/api/account/withdraw', tok, { confirm: '탈퇴' }).then(function (x) {
+      if (!x.ok || !x.j.ok) { btn.disabled = false; if (msg) msg.textContent = x.status === 401 ? '로그인이 만료됐습니다. 다시 로그인한 뒤 시도해 주세요.' : '탈퇴하지 못했습니다. 잠시 후 다시 시도하거나 고객센터로 알려 주세요.'; return; }
+      A.setUnread(0); H.track('account_withdraw', {});
+      return A.logout().then(function () {
+        H.view('<div class="me">' + head('') + '<section class="me-card"><h2>탈퇴가 완료되었습니다</h2><p class="me-muted">그동안 이용해 주셔서 감사합니다. 로그인 정보는 삭제되었고, 결제 기록은 법정 기간 동안 분리 보관한 뒤 파기합니다.</p>' +
+          '<div class="me-acts"><a class="btn ghost sm" href="#/timeline">운명의 타임라인으로</a></div></section>' + deviceHtml(false) + '</div>');
+      });
+    }).catch(function () { btn.disabled = false; if (msg) msg.textContent = '연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.'; });
+  }
   function memberHtml(sess, mine, logins) {
     var m = (mine && mine.member) || {}, email = m.email || (sess.user && sess.user.email) || '', s = P.get();
     var names = Object.assign({}, WORLD, (mine && mine.worldNames) || {}), nm = function (w) { return names[w] || w; };
@@ -179,7 +205,7 @@
     h += inquiryHtml(email, orders);
     h += deviceHtml(true);
     h += '<section class="me-card"><h2>계정</h2><div class="me-acts"><a class="btn ghost sm" href="/report/my/" data-track="mypage_click" data-p="logins">로그인 방법 연결</a><button type="button" class="btn ghost sm" data-me="logout">로그아웃</button></div>' +
-      '<p class="me-note">회원 탈퇴는 <a href="/report/my/">구매 내역</a> 화면 맨 아래에서 할 수 있습니다. 환불받을 구매가 있다면 탈퇴 전에 먼저 환불해 주세요.</p></section>';
+      withdrawHtml(orders) + '</section>';
     return h;
   }
 
@@ -269,11 +295,12 @@
       if (a === 'del') { if (root.confirm('저장된 출생정보를 이 기기에서 삭제할까요? 되돌릴 수 없습니다. (로그인 계정과 구매한 주제는 그대로 남습니다.)')) { if (H.Onboard && H.Onboard.clear) H.Onboard.clear(); H.toast('삭제했습니다.'); H.replace('#/welcome'); } return; }
       if (a === 'logout') { b.disabled = true; A.logout().then(function () { H.toast('로그아웃했습니다.'); H.render(); }); return; }
       if (a === 'retry') H.render();
+      if (a === 'withdraw') { withdraw(b); return; }
       if (a === 'inq-open' || a === 'inq-close') { var fm = $('#meInqForm'), ob = $('[data-me="inq-open"]'); if (!fm) return; fm.hidden = a === 'inq-close' ? true : !fm.hidden; if (ob) ob.setAttribute('aria-expanded', String(!fm.hidden)); if (!fm.hidden) fm.elements.subject.focus(); }
     };
     root.document.addEventListener('click', onClick);
     var onSubmit = function (e) { if (e.target && e.target.id === 'meInqForm') { e.preventDefault(); inquirySubmit(e.target, el.__token, el.__email); } };
-    var onInput = function (e) { if (e.target && e.target.name === 'body' && e.target.closest('#meInqForm')) { var c = e.target.parentNode.querySelector('.me-count'); if (c) c.textContent = e.target.value.length + ' / 2000'; } };
+    var onInput = function (e) { if (e.target && e.target.id === 'meWdIn') { var wb = $('[data-me="withdraw"]'); if (wb) wb.disabled = e.target.value.trim() !== '탈퇴'; return; } if (e.target && e.target.name === 'body' && e.target.closest('#meInqForm')) { var c = e.target.parentNode.querySelector('.me-count'); if (c) c.textContent = e.target.value.length + ' / 2000'; } };
     root.document.addEventListener('submit', onSubmit); root.document.addEventListener('input', onInput);
     // 안내자를 바꾸면(guide-control.js) 이름 표시를 고친다
     var onGuide = function () { $$('[data-guide-open] small').forEach(function (n) { n.textContent = guideName(); }); };

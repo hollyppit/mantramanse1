@@ -237,3 +237,10 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 /* 1:1 문의 새 답변 표시 */
 #hub .me-new{ display: inline-flex; align-items: center; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #D0634A; color: #fff; font-size: .7rem; font-weight: 700; letter-spacing: 0; line-height: 1.6; vertical-align: 1px; font-family: inherit; }
 #hub .me-inq.is-new > summary{ border: 1px solid rgba(208,99,74,.6); }
+/* 마이페이지 회원 탈퇴 */
+#hub .me-wd{ margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+#hub .me-wd > summary{ cursor: pointer; color: var(--ink-2); font-size: .9rem; min-height: 32px; display: flex; align-items: center; }
+#hub .me-wd[open] > summary{ color: #e3a593; margin-bottom: 8px; }
+#hub .me-wd .me-why{ font-size: .86rem; line-height: 1.7; } #hub .me-warn{ color: #e3a593; } #hub .me-warn a{ color: var(--gold-l); }
+#hub .me-wd-row input{ width: 120px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(8,10,17,.7); color: var(--ink); font: inherit; font-size: 16px; }
+#hub .me-wd-row .btn{ flex: 0 1 auto; }
