@@ -7324,26 +7324,26 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // ── 오행 사이클 (스위치 MANTRA_FLAGS.luckCycle, 기본 꺼짐): 대운 3개 = 장기 분석 구간(30년), 천간 오행이 같은 세운 2년 = 천간 오행 구간.
   //    계산·문장은 luck-cycle.js(사전 문구 조합, AI 없음). 표시 전용이라 흐름 점수·그래프 막대는 그대로다. 월운·일진은 묶지 않는다.
   const lcOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.luckCycle === true && window.MantraLuckCycle);
-  const LC_CACHE = new WeakMap(), LC_ECLS = ['wood', 'fire', 'earth', 'metal', 'water'], LC_TONE = { good: 'ib-g', mid: '', bad: 'ib-b' };
-  const lcSpans = ch => { let v = LC_CACHE.get(ch); if (!v) { v = window.MantraLuckCycle.daeunSpans(M, ch); LC_CACHE.set(ch, v); } return v; };
+  const LC_CACHE = new WeakMap(), LC_ECLS = ['wood', 'fire', 'earth', 'metal', 'water'], LC_TONE = { good: 'ib-g', mid: '', bad: 'ib-b', mixed: '' };
+  const lcSpans = ch => { let v = LC_CACHE.get(ch); if (!v) { v = window.MantraLuckCycle.daeunSpans(M, ch, { year: new Date(NOW).getFullYear() }); LC_CACHE.set(ch, v); } return v; };
   // 보여 줄 구간: 대운을 골랐으면 그 대운의 구간, 구간 버튼을 눌렀으면 그 구간, 아니면 지금 대운의 구간
   function lcSpanSel(ch, sp) {
     const LC = window.MantraLuckCycle, du = M.daeunAt(ch, NOW), curK = LC.spanIndexOf(sp, du ? ch.daeun.list.indexOf(du) : -1);
     let k = S.sel && S.sel.kind === 'daeun' ? LC.spanIndexOf(sp, S.sel.i) : S.lcSpan && S.lcSpan.ch === ch && sp[S.lcSpan.k] ? S.lcSpan.k : curK;
     return { k: k < 0 ? 0 : k, curK };
   }
-  const lcSteps = r => `<ol class="lc-steps"><li><b>① 오행의 특징</b>${esc(r.steps.trait)}</li><li><b>② 나에게 미치는 영향</b>${esc(r.steps.impact)}</li><li><b>③ 추천 전략</b>${esc(r.steps.strategy)}</li></ol>`;
+  const lcSteps = r => `<ol class="lc-steps"><li><b>① 오행의 특징</b>${esc(r.steps.trait)}</li><li><b>② 나에게 미치는 영향</b>${esc(r.steps.impact)}</li><li><b>③ 추천 전략</b>${esc(r.steps.strategyLead || r.steps.strategy)}${r.decades ? `<ul class="ib-ul small lc-dec">${r.decades.map(d => `<li><b>${esc(d.head)}</b> (${esc(d.meta)}) ${esc(d.text)}</li>`).join('')}</ul>` : ''}</li></ol>`;
   const lcBasis = r => `<details class="adv lc-basis"><summary>판단 근거 보기 (억부·조후·십성·합충형해)</summary><ul class="ib-ul small">${r.basis.map(b => `<li>${esc(b)}</li>`).join('')}</ul><p class="note">미리 써 둔 풀이 문구를 이 사주의 계산값으로 골라 조합했습니다(AI 미사용). 흐름 점수는 기존 계산 그대로이며, 묶음 해석은 점수를 바꾸지 않습니다.</p></details>`;
   function lcDaeunHTML(ch) {
     if (!lcOn() || !ch.daeun.list.length) return '';
     let sp; try { sp = lcSpans(ch); } catch (e) { return ''; }
     const { k, curK } = lcSpanSel(ch, sp), r = sp[k];
-    const tabs = sp.map((s, i) => `<button type="button" data-act="lc:${i}" aria-pressed="${i === k}" class="lc-tab e-${LC_ECLS[s.mainEl]}${i === k ? ' on' : ''}">${i === curK ? '<i class="lc-now">지금</i>' : ''}<b>구간 ${i + 1}</b><span>${s.startAge}~${s.endAge}세</span><span class="lc-el">${M.EL_K[s.mainEl]}(${M.EL[s.mainEl]}) · ${esc(s.trendWord)}</span></button>`).join('');
+    const tabs = sp.map((s, i) => `<button type="button" data-act="lc:${i}" aria-pressed="${i === k}" class="lc-tab e-${LC_ECLS[s.mainEl]}${i === k ? ' on' : ''}">${i === curK ? '<i class="lc-now">지금</i>' : ''}<b>구간 ${i + 1}</b><span>${s.startAge}~${s.endAge}세</span><span class="lc-el">${esc(s.elLabel || (M.EL_K[s.mainEl] + '(' + M.EL[s.mainEl] + ')'))} · ${esc(s.trendWord)}</span></button>`).join('');
     const turns = r.turns.length ? `<ul class="ib-ul">${r.turns.map(t => `<li class="${t.delta >= 0 ? 'ib-g' : 'ib-b'}">${esc(t.text)}</li>`).join('')}</ul>` : '<p class="small muted">구간 안에서 흐름이 크게 꺾이는 대운 경계는 없어요.</p>';
     return `<div class="ib lc"><div class="ib-k">장기 분석 구간 · 대운 3개(30년) 묶음</div>
       <div class="lc-tabs" role="group" aria-label="장기 분석 구간 고르기">${tabs}</div>
       <p class="lc-hook"><b class="${LC_TONE[r.tone]}">${esc(r.hook)}</b></p>
-      <p class="small muted">${esc(r.label)} · ${r.startYear}~${r.endYear}년 · ${r.startAge}~${r.endAge}세 · 오행 ${esc(r.seq)}${r.banghap ? ' · ' + esc(r.banghap) + ' 방합' : ''} · 흐름 ${r.scores.map(v => signed(v)).join(' → ')}(${esc(r.trendWord)})</p>
+      <p class="small muted">${esc(r.label)} · ${r.startYear}~${r.endYear}년 · ${r.startAge}~${r.endAge}세 · 오행 ${esc(r.seq)}${r.banghap ? ' · ' + esc(r.banghap) + ' 계절' : ''}${r.helpEl != null ? ' · 도운 기운 ' + M.EL_K[r.helpEl] : ''}${r.dragEl != null ? ' · 누른 기운 ' + M.EL_K[r.dragEl] : ''} · 흐름 ${r.scores.map(v => signed(v)).join(' → ')}(${esc(r.trendWord)})</p>
       ${lcSteps(r)}
       <div class="ib-cols"><div><div class="ib-k">기회</div><p class="small">${esc(r.opp)}</p></div><div><div class="ib-k">위험</div><p class="small">${esc(r.risk)}</p></div></div>
       <div class="ib-k">핵심 전환점</div>${turns}
@@ -7368,7 +7368,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${lcSteps(r)}${lcBasis(r)}
       <p class="note">해마다의 좋고 나쁨은 타일·그래프 점수 그대로입니다. 이 상자는 두 해에 공통인 천간 오행만 묶어 2년 전략을 보여 줍니다. 해를 누르면 그해 근거가 열립니다.</p></div>`;
   }
-  { const st = document.createElement('style'); st.textContent = '.lc-tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(112px,1fr);gap:6px;overflow-x:auto;padding:10px 2px 6px}.lc-tab{position:relative;border:0;border-top:4px solid var(--c);box-shadow:inset 0 0 0 1px var(--line);background:var(--surface);border-radius:12px;padding:8px 6px;display:grid;gap:2px;justify-items:center;cursor:pointer;font:inherit;color:var(--ink)}.lc-tab span{font-size:.76rem;color:var(--ink-2)}.lc-tab.on{box-shadow:inset 0 0 0 2px var(--ink);background:var(--surface-2)}.lc-now{position:absolute;top:-9px;right:6px;font-style:normal;font-size:.66rem;font-weight:800;background:var(--seal);color:#fff;border-radius:8px;padding:1px 6px}.lc-hook{font-size:1rem;margin:8px 0 2px;line-height:1.5}.lc-steps{margin:8px 0;padding-left:0;list-style:none;font-size:.9rem;line-height:1.7}.lc-steps li{margin:8px 0}.lc-steps b{display:block;font-size:.76rem;color:var(--ink-2)}.lc-yrs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}.lc-yr{border:0;box-shadow:inset 0 0 0 1px var(--line);border-radius:12px;background:var(--surface);padding:8px 10px;display:grid;gap:4px;justify-items:start;text-align:left;cursor:pointer;font:inherit;color:var(--ink)}.lc-yr.on{box-shadow:inset 0 0 0 2px var(--ink)}.ib.lc-pair{border-left:4px solid var(--c)}.lts.lc-strip{grid-auto-columns:minmax(92px,1fr)}.lcp{display:grid;gap:4px;align-content:start;border-radius:18px;padding:4px;background:color-mix(in srgb,var(--c) 16%,transparent)}.lcp-h{font-size:.72rem;font-weight:800;color:var(--ink);text-align:center;padding-top:2px}.lcp-t{display:grid;gap:4px}.lc-basis summary{cursor:pointer;font-size:.85rem;color:var(--ink-2);margin-top:8px}'; document.head.appendChild(st); }
+  { const st = document.createElement('style'); st.textContent = '.lc-tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(112px,1fr);gap:6px;overflow-x:auto;padding:10px 2px 6px}.lc-tab{position:relative;border:0;border-top:4px solid var(--c);box-shadow:inset 0 0 0 1px var(--line);background:var(--surface);border-radius:12px;padding:8px 6px;display:grid;gap:2px;justify-items:center;cursor:pointer;font:inherit;color:var(--ink)}.lc-tab span{font-size:.76rem;color:var(--ink-2)}.lc-tab.on{box-shadow:inset 0 0 0 2px var(--ink);background:var(--surface-2)}.lc-now{position:absolute;top:-9px;right:6px;font-style:normal;font-size:.66rem;font-weight:800;background:var(--seal);color:#fff;border-radius:8px;padding:1px 6px}.lc-hook{font-size:1rem;margin:8px 0 2px;line-height:1.5}.lc-steps{margin:8px 0;padding-left:0;list-style:none;font-size:.9rem;line-height:1.7}.lc-steps li{margin:8px 0}.lc-steps b{display:block;font-size:.76rem;color:var(--ink-2)}.lc-steps .lc-dec{margin:6px 0 0;padding-left:16px;list-style:disc}.lc-steps .lc-dec li{margin:5px 0}.lc-steps .lc-dec b{display:inline;font-size:inherit;color:inherit}.lc-yrs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}.lc-yr{border:0;box-shadow:inset 0 0 0 1px var(--line);border-radius:12px;background:var(--surface);padding:8px 10px;display:grid;gap:4px;justify-items:start;text-align:left;cursor:pointer;font:inherit;color:var(--ink)}.lc-yr.on{box-shadow:inset 0 0 0 2px var(--ink)}.ib.lc-pair{border-left:4px solid var(--c)}.lts.lc-strip{grid-auto-columns:minmax(92px,1fr)}.lcp{display:grid;gap:4px;align-content:start;border-radius:18px;padding:4px;background:color-mix(in srgb,var(--c) 16%,transparent)}.lcp-h{font-size:.72rem;font-weight:800;color:var(--ink);text-align:center;padding-top:2px}.lcp-t{display:grid;gap:4px}.lc-basis summary{cursor:pointer;font-size:.85rem;color:var(--ink-2);margin-top:8px}'; document.head.appendChild(st); }
   function detailHTML(title, x, extra = '', kind = '', banner = '') {
     if (!x || !x.ev) return '';
     const e = x.ev, w = e.weights;
@@ -9672,7 +9672,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (!lcOn()) return {};
     try {
       const sp = lcSpans(ch), { k } = lcSpanSel(ch, sp);
-      return { spans: sp.map((s, i) => ({ a: s.idx[0], b: s.idx[s.idx.length - 1], k: i, el: s.mainEl, on: i === k, label: (s.idx.length === 3 ? `30년 구간 ${i + 1}` : `구간 ${i + 1}`) + ` · ${M.EL_K[s.mainEl]}`, tip: `${s.label} ${s.startAge}~${s.endAge}세 · ${s.hook}` })) };
+      return { spans: sp.map((s, i) => ({ a: s.idx[0], b: s.idx[s.idx.length - 1], k: i, el: s.mainEl, on: i === k, label: (s.idx.length === 3 ? `30년 구간 ${i + 1}` : `구간 ${i + 1}`) + ` · ${s.mix === 3 ? "혼재" : s.mix === 2 ? M.EL_K[s.mainEl] + "·" + M.EL_K[s.subEl] : M.EL_K[s.mainEl]}`, tip: `${s.label} ${s.startAge}~${s.endAge}세 · ${s.elLabel || M.EL_K[s.mainEl]} · ${s.hook}` })) };
     } catch (e) { return {}; }
   }
   function drawCharts() {

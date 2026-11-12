@@ -57,7 +57,7 @@
     if (graphP) return graphP;
     graphP = Promise.all([root.MantraTLGraph ? Promise.resolve() : H.load('/report/hub/timeline-graph.js?v=20261113-zw').catch(function () { }), flagsJson(), root.MantraNatal ? Promise.resolve() : H.load('/report/natal-table.js?v=20261113-natal').catch(function () { })]).then(function (r) {
       var F = root.MANTRA_FLAGS || {}, f = r[1] || {}, lc = F.luckCycle === true || f.luckCycle === true, ef = F.elementFlow === true || f.elementFlow === true;
-      return (lc && !root.MantraLuckCycle ? H.load('/luck-cycle.js?v=20261112-graph').catch(function () { }) : Promise.resolve()).then(function () { return { lc: lc && !!root.MantraLuckCycle, ef: ef }; });
+      return (lc && !root.MantraLuckCycle ? H.load('/luck-cycle.js?v=20261113-span').catch(function () { }) : Promise.resolve()).then(function () { return { lc: lc && !!root.MantraLuckCycle, ef: ef }; });
     }).catch(function () { return { lc: false, ef: false }; });
     return graphP;
   }

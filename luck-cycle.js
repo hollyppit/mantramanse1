@@ -8,7 +8,7 @@
    · 화면 스위치: MANTRA_FLAGS.luckCycle(기본 꺼짐, 관리자 화면 /api/luck-flags luckCycle) */
 (function (G) {
   'use strict';
-  var VERSION = 'luck-cycle-20261112-1', PHRASE_VERSION = 1;
+  var VERSION = 'luck-cycle-20261113-1', PHRASE_VERSION = 2;
 
   // ───────────── 사전 문구 ─────────────
   // ① 오행의 일반적인 특징 (scope: span = 30년, pair = 2년)
@@ -102,8 +102,36 @@
     'eokbu.good': '힘의 균형으로 보면 이 기운이 모자란 쪽을 채워 줘서, 버티는 힘은 생겨요.',
   };
   Object.keys(BAL).forEach(function (k) { reg('lc.bal.' + k, 'balance', BAL[k]); });
-  var J = function (w, pair) { w = String(w); var c = null; for (var i = w.length - 1; i >= 0; i--) { var k = w.charCodeAt(i); if (k >= 0xAC00 && k <= 0xD7A3) { c = k; break; } if (w[i] === ')') { var o = w.lastIndexOf('(', i); if (o > 0) { i = o; continue; } } } var ab = pair.split('/'), jong = c == null ? 0 : (c - 0xAC00) % 28; return w + (jong ? ab[0] : ab[1]); };
+  // ── 30년 구간 개선(2026-11-13): 우세 오행·도움 오행 분리, 복합 오행, 역할과 점수가 다른 이유, 연령별 전략
+  // {이름} 자리는 계산값으로 채운다(fill). 문구 자체는 관리자 화면에서 고칠 수 있다.
+  var SPAN2 = {
+    'mix': '이 30년은 한 가지 기운이 뚜렷하게 앞서지 않고 {Awa} {Bga} 비슷한 비중으로 섞여 있어요({pa}% · {pb}%). 한 오행의 성격으로 단정하기보다 두 기운이 번갈아 나타난다고 보세요.',
+    'mix3': '이 30년은 세 가지 이상의 기운이 고르게 섞여 있어(가장 많은 {A}도 {pa}%), 특정 오행의 시기라고 부르기 어려워요.',
+    'cond': '다만 {th} 기준에서는 쓰임이 있는 기운이라 조건부로 봐요. 어떤 글자로, 언제 들어오느냐에 따라 부담이 줄어들 수 있어요.',
+    'why.lift': '이 구간에 가장 많은 기운은 {A}({ra})이지만, 흐름 점수를 끌어올린 쪽은 {B}({rb}) 기운이에요. 그래서 {ra} 기운이 많아도 운세가 오를 수 있어요.',
+    'why.drag': '이 구간에 가장 많은 기운은 {A}({ra})이지만, 흐름 점수를 끌어내린 쪽은 {B}({rb}) 기운이에요. 필요한 기운이 많아도 다른 글자가 발목을 잡을 수 있어요.',
+    'why.part': '용신 판단만으로는 평균 {yv}점인데, {what} {ov}점을 더해 최종 흐름 점수는 평균 {fv}점이에요. 역할(용신·기신)과 최종 평가가 다른 이유예요.',
+    'hook.risk': '{a}~{b}세는 조심',
+    'hook.opp': '{a}~{b}세가 기회',
+    'hook.even': '큰 굴곡 없이 고른 편',
+  };
+  Object.keys(SPAN2).forEach(function (k) { reg('lc.span.' + k, 'span', SPAN2[k]); });
+  reg('lc.trend.lateDrop', 'trend', '마지막 10년이 크게 꺾이는 흐름이에요. 평균이 괜찮아 보여도, 끝 10년이 오기 전에 지출·건강·책임의 크기를 미리 줄여 두는 게 핵심이에요.');
+  // 연령대 × 그 10년의 상태(good 순풍 / mid 보통 / bad 주의·부담). 나이는 그 대운의 가운데 나이로 고른다
+  var STAGE = {
+    teen: { name: '성장기', good: '배움에 속도가 붙는 때예요. 잘하는 것 하나를 골라 깊게 파 두면 나중의 무기가 돼요.', mid: '기초를 꾸준히 다지는 때예요. 남과 비교하기보다 잠·공부 시간 같은 생활 리듬을 지키는 게 남아요.', bad: '마음이 흔들리기 쉬운 때예요. 성적보다 건강과, 믿고 기댈 어른 한 명을 곁에 두는 게 먼저예요.' },
+    young: { name: '사회 초년', good: '진로와 자리를 넓혀도 되는 때예요. 이직·창업·자격처럼 이름이 남는 선택을 이 10년에 두세요.', mid: '방향을 좁혀 가는 때예요. 여러 개를 벌이기보다 한 분야에서 경력을 쌓는 쪽이 이득이에요.', bad: '시행착오가 많은 때예요. 큰 대출·보증·충동 이직은 피하고, 실패해도 다시 설 수 있는 크기로만 움직이세요.' },
+    mid: { name: '중년', good: '일과 자산을 키울 때예요. 책임 있는 자리와 수입 확대를 피하지 말고, 늘어난 만큼 저축 비율을 정해 두세요.', mid: '지키면서 다듬는 때예요. 일·가정의 고정 비용과 역할을 한 번 정리해 두면 체감이 달라져요.', bad: '책임이 무거워지는 때예요. 일을 늘리기보다 건강검진·보험·비상금부터 챙기고, 큰 결정은 나눠서 하세요.' },
+    mature: { name: '장년', good: '쌓아 온 것을 거두는 때예요. 경험을 자산·자격·사람으로 바꿔 두면 오래 쓰여요.', mid: '정리와 준비의 때예요. 노후 자금과 건강 습관을 숫자로 점검해 두세요.', bad: '무리하면 몸과 돈이 같이 새는 때예요. 새 사업·투자보다 건강과 지출 관리를 앞에 두세요.' },
+    senior: { name: '노년', good: '여유가 생기는 때예요. 배움·취미·사람을 넓히고, 가진 것을 나누는 일에 힘이 실려요.', mid: '편안한 리듬을 지키는 때예요. 규칙적인 운동과 가까운 관계를 꾸준히 챙기세요.', bad: '건강과 안전이 먼저인 때예요. 큰돈 결정은 가족과 함께하고, 몸이 보내는 신호를 미루지 마세요.' },
+  };
+  var PAST = { good: '지나온 10년이에요. 이때 쌓은 것이 지금의 밑천이에요.', mid: '지나온 10년이에요. 이때 생긴 습관이 지금까지 이어지고 있을 수 있어요.', bad: '지나온 10년이에요. 이때 생긴 부담이 남아 있다면 지금 정리해 두세요.' };
+  Object.keys(STAGE).forEach(function (s) { ['good', 'mid', 'bad'].forEach(function (t) { reg('lc.stage.' + s + '.' + t, 'stage', STAGE[s][t]); }); });
+  Object.keys(PAST).forEach(function (t) { reg('lc.past.' + t, 'stage', PAST[t]); });
+  var J =function (w, pair) { w = String(w); var c = null; for (var i = w.length - 1; i >= 0; i--) { var k = w.charCodeAt(i); if (k >= 0xAC00 && k <= 0xD7A3) { c = k; break; } if (w[i] === ')') { var o = w.lastIndexOf('(', i); if (o > 0) { i = o; continue; } } } var ab = pair.split('/'), jong = c == null ? 0 : (c - 0xAC00) % 28; return w + (jong ? ab[0] : ab[1]); };
   var T = function (id, trace) { if (trace) trace.push(id); return PH[id].text; };
+  // {키} 자리를 값으로 채운다. 값이 없으면 빈칸이 아니라 키를 그대로 남겨 테스트가 잡게 한다
+  var fill = function (id, vars, trace) { return T(id, trace).replace(/\{(\w+)\}/g, function (m, k) { return vars[k] != null ? String(vars[k]) : m; }); };
 
   // ───────────── 공통 도우미 ─────────────
   var r1 = function (v) { return Math.round(v); };
@@ -116,10 +144,13 @@
     var rv = (ch.unified && ch.unified.roleV && ch.unified.roleV[e]) || 0, v = rv + avgFit / 20;
     return v >= 0.5 ? 'good' : v <= -0.5 ? 'bad' : 'mid';
   }
-  function balNote(eok, jo, tone, trace) {
-    var c = [];
-    if (jo <= -40 && tone !== 'bad') c.push(['johu.bad', -jo]); if (jo >= 40 && tone !== 'good') c.push(['johu.good', jo]);
-    if (eok <= -40 && tone !== 'bad') c.push(['eokbu.bad', -eok]); if (eok >= 40 && tone !== 'good') c.push(['eokbu.good', eok]);
+  // 이 사주에 적용되는 이론인가: 조후는 통합 판단에서 '해당 없음'이면 점수에 0으로 들어가므로 문구도 내지 않는다. 억부는 종격이면 쓰지 않는다
+  function useJohu(ch) { var t = ch.unified && ch.unified.theories && ch.unified.theories.johu; return !ch.unified ? true : !!(t && t.applicable); }
+  function useEokbu(ch) { var u = ch.unified; if (!u) return true; var t = u.theories && u.theories.eokbu; return !!(t && t.applicable) && u.mode !== 'jong'; }
+  function balNote(eok, jo, tone, trace, ch) {
+    var c = [], uj = !ch || useJohu(ch), ue = !ch || useEokbu(ch);
+    if (uj && jo <= -40 && tone !== 'bad') c.push(['johu.bad', -jo]); if (uj && jo >= 40 && tone !== 'good') c.push(['johu.good', jo]);
+    if (ue && eok <= -40 && tone !== 'bad') c.push(['eokbu.bad', -eok]); if (ue && eok >= 40 && tone !== 'good') c.push(['eokbu.good', eok]);
     if (!c.length) return '';
     c.sort(function (x, y) { return y[1] - x[1]; });
     return ' ' + T('lc.bal.' + c[0][0], trace);
@@ -137,13 +168,13 @@
     var st = ch.strength || {}, strong = (st.help == null ? 50 : st.help) >= 50;
     var who = (st.zone ? st.zone + ', ' : '') + (strong ? '내 힘이 센 편' : '내 힘이 약한 편');
     var how = v >= 8 ? (strong ? '넘치는 힘을 덜어 주는 쪽' : '부족한 힘을 채워 주는 쪽') : v <= -8 ? (strong ? '이미 센 힘을 더 키우는 쪽' : '약한 힘을 더 빼는 쪽') : '강약 균형에는 큰 영향이 없는 쪽';
-    return '억부(힘의 균형): 이 사주는 ' + who + '이고, 이 기운은 ' + how + '이에요 (억부 성분 ' + sg(v) + ').';
+    return '억부(힘의 균형): 이 사주는 ' + who + '이고, 이 기운은 ' + how + '이에요 (억부만 따로 본 성분 ' + sg(v) + ').';
   }
   function johuLine(ch, v) {
     var c = ch.climate || { temp: 0, hum: 0 };
     var t = Math.abs(c.temp) < 0.3 && Math.abs(c.hum) < 0.3 ? '사주 온도·습도가 고른 편' : (c.temp >= 0.3 ? '더운' : c.temp <= -0.3 ? '차가운' : '') + (Math.abs(c.temp) >= 0.3 && Math.abs(c.hum) >= 0.3 ? '·' : '') + (c.hum >= 0.3 ? '습한' : c.hum <= -0.3 ? '건조한' : '') + ' 사주';
     var how = v >= 8 ? '온도·습도를 맞춰 줘요' : v <= -8 ? '치우친 온도·습도를 더 키워요' : '온도·습도에는 큰 영향이 없어요';
-    return '조후(온도·습도): ' + t.replace(/^ /, '') + '에서 이 기운은 ' + how + ' (조후 성분 ' + sg(v) + ').';
+    return '조후(온도·습도): ' + t.replace(/^ /, '') + '에서 이 기운은 ' + how + ' (조후만 따로 본 성분 ' + sg(v) + ').';
   }
   function relLine(rels, label) {
     var r = relSplit(rels), out = [];
@@ -155,43 +186,102 @@
 
   // ───────────── 대운 30년: 장기 분석 구간 ─────────────
   // 대운 목록을 앞에서부터 3개씩 묶는다(0~2, 3~5, 6~8, 남는 것). 경계가 사람마다 바뀌지 않도록 고정 분할을 쓴다.
-  function daeunSpans(M, ch) {
-    var L = (ch && ch.daeun && ch.daeun.list) || [], out = [];
-    for (var i = 0; i < L.length; i += 3) out.push(buildSpan(M, ch, L, i, Math.min(L.length, i + 3), out.length));
+  // opts.year(선택): 이 해를 기준으로 '지나온 10년 · 지금 10년 · 앞으로의 10년'을 나눠 전략 문장을 고른다.
+  function daeunSpans(M, ch, opts) {
+    var L = (ch && ch.daeun && ch.daeun.list) || [], out = [], Y = opts && opts.year != null ? +opts.year : null;
+    for (var i = 0; i < L.length; i += 3) out.push(buildSpan(M, ch, L, i, Math.min(L.length, i + 3), out.length, Y));
     return out;
   }
   function spanIndexOf(spans, daeunIdx) { for (var k = 0; k < spans.length; k++) if (spans[k].idx.indexOf(daeunIdx) >= 0) return k; return -1; }
-  function buildSpan(M, ch, L, a, b, k) {
-    var trace = [], items = L.slice(a, b), idx = items.map(function (_, j) { return a + j; });
-    var last = items[items.length - 1], first = items[0];
-    var scores = items.map(fit);
-    // 오행 구성: 천간 오행·지지 오행을 하나씩 센다. 같으면 지지(계절) 쪽을 앞세운다
-    var cnt = [0, 0, 0, 0, 0], brCnt = [0, 0, 0, 0, 0];
-    items.forEach(function (x) { cnt[M.stemEl(x.s)]++; cnt[M.BR_EL[x.b]]++; brCnt[M.BR_EL[x.b]]++; });
+  var E5 = [0, 1, 2, 3, 4];
+  var ROLE_BASE = { 용신: 1, 희신: 0.5, 한신: 0, 구신: -0.5, 기신: -1 };
+  var IMPACT_MIN = 5;   // 엔진 impactWord 의 '약간 도움/약간 부담' 경계(±5점)와 같은 값
+  function sum(a) { return a.reduce(function (s, v) { return s + v; }, 0); }
+  // 대운 하나의 오행 분석 — 엔진이 흐름 점수를 낼 때 쓰는 비율만 그대로 쓴다(새 가중치 없음).
+  //  · 비중(share, 합 1): 천간 stemW(대운 0.4) × 통근 배율(같은 기둥 뿌리 1+rootUp · 원국 뿌리 1 · 뿌리 없음 1−floatDown)
+  //                       + 지지 (1−stemW) × 지장간 일수/30
+  //  · 기여(contrib, 점): 위 비중 × 통합 용신 역할값을 엔진 unifiedLuckFit 과 같은 식으로 흐름 점수 단위로 옮긴 오행별 몫.
+  //    오행별 몫의 합 + 조후·격국·기준선 몫(rest) = 용신 성분(parts.yong). 여기에 관계·구조 성분을 더하면 흐름 점수다.
+  function daeunElements(M, ch, x) {
+    var U = M.UNIFIED_CFG.luck, stemW = M.LUCK_CFG.levels.daeun.stemW, u = ch.unified, ev = x.ev, H = M.HIDDEN, se = M.stemEl(x.s);
+    var rootIn = function (b) { return H[b].some(function (h) { return M.stemEl(h[0]) === se; }); };
+    var rootedOwn = rootIn(x.b), rootedNatal = M.POS.some(function (k) { return ch.pillars[k] && rootIn(ch.pillars[k].b); });
+    var sMul = rootedOwn ? 1 + U.rootUp : rootedNatal ? 1 : 1 - U.floatDown;
+    var rv = function (e) { return u && u.roleV ? u.roleV[e] : 0; };
+    var pres = [0, 0, 0, 0, 0], raw = [0, 0, 0, 0, 0];
+    pres[se] += stemW * sMul; raw[se] += stemW * sMul * rv(se) * 100;
+    H[x.b].forEach(function (h) { var e = M.stemEl(h[0]), w = (1 - stemW) * h[1] / 30; pres[e] += w; raw[e] += w * rv(e) * 100; });
+    var tot = sum(pres), share = pres.map(function (v) { return v / tot; });
+    var r = u && M.unifiedLuckFit ? M.unifiedLuckFit(ch, x, stemW, ev.johuScore) : null;
+    var rs = sum(raw), scale = r && Math.abs(rs) > 1e-9 ? r.roleFit / rs : 1;   // roleFit 이 ±100에서 잘렸을 때만 1과 다르다
+    var w = ev.weights || { unified: 0, relation: 0, structure: 0 }, kRole = r ? 1 - r.kJ - r.kG : 1;
+    var contrib = raw.map(function (v) { return w.unified * kRole * v * scale; });
+    var parts = { yong: w.unified * ev.unifiedScore, relation: w.relation * ev.relationScore, structure: w.structure * ev.structureScore };
+    parts.johu = r ? w.unified * r.kJ * ev.johuScore : 0;
+    parts.rest = parts.yong - sum(contrib);
+    return { share: share, contrib: contrib, parts: parts, uniCheck: r ? r.v : null, kJ: r ? r.kJ : 0, kG: r ? r.kG : 0 };
+  }
+  var dTone = function (c) { return c === '순풍' ? 'good' : c === '보통' ? 'mid' : 'bad'; };
+  var stageOf = function (startAge) { var m = startAge + 5; return m < 20 ? 'teen' : m < 35 ? 'young' : m < 50 ? 'mid' : m < 65 ? 'mature' : 'senior'; };
+  // 30년 전체 성격: 세 대운의 상태(순풍·보통·주의·부담)로 정한다. 순풍과 주의·부담이 함께 있으면 'mixed'(한 가지 길흉으로 단정하지 않음)
+  function spanToneOf(items, avgFit) {
+    var nG = 0, nB = 0; items.forEach(function (x) { var t = dTone(x.ev.condition); if (t === 'good') nG++; else if (t === 'bad') nB++; });
+    if (nG && nB) return 'mixed';
+    if (nG >= 2 || (nG === 1 && avgFit >= 0)) return 'good';
+    if (nB >= 2 || (nB === 1 && avgFit < 0)) return 'bad';
+    return 'mid';
+  }
+  function condRoleNote(ch, e, trace) {
+    var u = ch.unified; if (!u || !u.conditions || !u.conditions[e]) return '';
+    var r = u.roles[e]; if (r !== '기신' && r !== '구신') return '';
+    if (u.roleV[e] === ROLE_BASE[r]) return '';   // 필요도가 낮아 완화되지 않은 경우는 그대로 둔다
+    var th = Object.keys(u.theories || {}).filter(function (k) { var t = u.theories[k]; return t.applicable && k !== u.primary && (t.favor || []).indexOf(e) >= 0; }).map(function (k) { return u.theories[k].name; });
+    return ' ' + fill('lc.span.cond', { th: th.length ? th.join('·') : '다른' }, trace);
+  }
+  function roleLabel(ch, e) { var u = ch.unified, r = roleOf(ch, e); return u && u.conditions && u.conditions[e] && (r === '기신' || r === '구신') && u.roleV[e] !== ROLE_BASE[r] ? '조건부 ' + r : r; }
+  function buildSpan(M, ch, L, a, b, k, Y) {
+    var trace = [], items = L.slice(a, b), idx = items.map(function (_, j) { return a + j; }), u = ch.unified;
+    var last = items[items.length - 1], first = items[0], n = items.length, span3 = n === 3;
+    var scores = items.map(fit), fitAvg = avg(scores), CC = M.LUCK_CFG.condition, EK = M.EL_K;
+    // (참고용) 예전 방식의 글자 수: 천간·지지 본기 1:1
+    var cnt = [0, 0, 0, 0, 0]; items.forEach(function (x) { cnt[M.stemEl(x.s)]++; cnt[M.BR_EL[x.b]]++; });
     var bh = null;
-    if (items.length === 3) BANGHAP.forEach(function (h) { var bs = items.map(function (x) { return x.b; }); if (h.br.every(function (q) { return bs.indexOf(q) >= 0; })) bh = h; });
-    var main = bh ? bh.el : [0, 1, 2, 3, 4].reduce(function (m, e) { return cnt[e] > cnt[m] || (cnt[e] === cnt[m] && brCnt[e] > brCnt[m]) ? e : m; }, 0);
-    var sub = [0, 1, 2, 3, 4].filter(function (e) { return e !== main && cnt[e] >= 2; }).sort(function (x, y) { return cnt[y] - cnt[x]; })[0];
-    var role = roleOf(ch, main), tone = toneOf(ch, main, avg(scores)), gi = grpOf(M, ch, main), span3 = items.length === 3;
+    if (span3) BANGHAP.forEach(function (h) { var bs = items.map(function (x) { return x.b; }); if (h.br.every(function (q) { return bs.indexOf(q) >= 0; })) bh = h; });
+    // ── 우세 오행(얼마나 많은가)과 도움·부담 오행(점수를 얼마나 움직였나)을 따로 계산
+    var EA = items.map(function (x) { return daeunElements(M, ch, x); });
+    var share = E5.map(function (e) { return avg(EA.map(function (z) { return z.share[e]; })) * 100; });
+    var contrib = E5.map(function (e) { return avg(EA.map(function (z) { return z.contrib[e]; })); });
+    var order = E5.slice().sort(function (x, y) { return share[y] - share[x] || x - y; });
+    var gapMin = (M.ELEMENT_FLOW_CFG && M.ELEMENT_FLOW_CFG.present) || 8;   // 엔진이 '그 오행이 있다'고 보는 최소 비중(%)을 '앞선다'의 최소 차이로 쓴다
+    var main = order[0], second = order[1], gap12 = share[main] - share[second];
+    var mix = gap12 >= gapMin ? 1 : share[main] - share[order[2]] >= gapMin ? 2 : 3;
+    var sub = second;
+    var elLabel = mix === 1 ? EK[main] + '(' + M.EL[main] + ')' : mix === 2 ? EK[main] + '·' + EK[second] + ' 복합' : EK[main] + '·' + EK[second] + '·' + EK[order[2]] + ' 혼재';
+    var hi = E5.reduce(function (m, e) { return contrib[e] > contrib[m] ? e : m; }, 0), lo = E5.reduce(function (m, e) { return contrib[e] < contrib[m] ? e : m; }, 0);
+    var help = contrib[hi] >= IMPACT_MIN ? hi : null, drag = contrib[lo] <= -IMPACT_MIN ? lo : null;
+    var P = { yong: avg(EA.map(function (z) { return z.parts.yong; })), relation: avg(EA.map(function (z) { return z.parts.relation; })), structure: avg(EA.map(function (z) { return z.parts.structure; })), johu: avg(EA.map(function (z) { return z.parts.johu; })) };
+    var role = roleOf(ch, main), rvm = u && u.roleV ? u.roleV[main] : 0, gi = grpOf(M, ch, main);
+    var tone = spanToneOf(items, fitAvg);
     var eokA = avg(items.map(function (x) { return x.ev.eokbuScore; })), joA = avg(items.map(function (x) { return x.ev.johuScore; }));
-    // 흐름 모양
-    var d = scores.length >= 3 ? scores[2] - scores[0] : 0, mid = scores.length >= 3 ? scores[1] - (scores[0] + scores[2]) / 2 : 0;
-    var trend = scores.length < 3 ? 'short' : mid >= 10 && scores[1] - Math.max(scores[0], scores[2]) >= 4 ? 'peak' : mid <= -10 && Math.min(scores[0], scores[2]) - scores[1] >= 4 ? 'valley' : d >= 10 ? 'rise' : d <= -10 ? 'fall' : 'flat';
-    var trendWord = { rise: '상승', fall: '하락', peak: '가운데 정점', valley: '가운데 저점', flat: '평탄', short: '짧은 구간' }[trend];
-    // 전환점: 구간 안팎의 대운 경계 중 점수 변화가 크거나 상태(순풍·보통·주의·부담)가 바뀌는 곳
+    // ── 흐름 모양: 마지막 10년이 크게 꺾이면(주의 이하로 10점 넘게, 또는 30점 넘게) 다른 모양보다 먼저 잡는다
+    var s0 = scores[0], s1 = scores[1], s2 = scores[2];
+    var d = n >= 3 ? s2 - s0 : 0, mid = n >= 3 ? s1 - (s0 + s2) / 2 : 0, endDrop = n >= 3 ? s2 - Math.max(s0, s1) : 0;
+    var trend = n < 3 ? 'short' : (s2 <= CC.caution && endDrop <= -10) || endDrop <= -30 ? 'lateDrop' : mid >= 10 && s1 - Math.max(s0, s2) >= 4 ? 'peak' : mid <= -10 && Math.min(s0, s2) - s1 >= 4 ? 'valley' : d >= 10 ? 'rise' : d <= -10 ? 'fall' : 'flat';
+    var trendWord = { rise: '상승', fall: '하락', peak: '가운데 정점', valley: '가운데 저점', flat: '평탄', short: '짧은 구간', lateDrop: '끝 10년 하락' }[trend];
+    // ── 전환점: 구간 안 경계는 기준(점수 차 10 이상 또는 상태 변화)을 넘으면 모두, 구간 밖 경계(들어오는·나가는)는 그다음 큰 순서로 채워 최대 4개
     var turns = [];
     for (var j = Math.max(1, a); j < b + (b < L.length ? 1 : 0); j++) {
       var p = L[j - 1], q = L[j], dv = fit(q) - fit(p), cond = p.ev.condition !== q.ev.condition;
-      if (Math.abs(dv) >= 10 || cond) turns.push({ i: j, year: q.startYear, age: q.startAge, from: fit(p), to: fit(q), delta: dv, cond: cond, fromCond: p.ev.condition, toCond: q.ev.condition, outside: j >= b, gz: M.gzName(q), elChange: M.stemEl(p.s) !== M.stemEl(q.s) });
+      if (Math.abs(dv) >= 10 || cond) turns.push({ i: j, year: q.startYear, age: q.startAge, from: fit(p), to: fit(q), delta: dv, cond: cond, fromCond: p.ev.condition, toCond: q.ev.condition, outside: j >= b, entering: j === a, gz: M.gzName(q), elChange: M.stemEl(p.s) !== M.stemEl(q.s) });
     }
-    turns.sort(function (x, y) { return Math.abs(y.delta) - Math.abs(x.delta); });
-    turns = turns.slice(0, 3).sort(function (x, y) { return x.i - y.i; });
+    var inner = turns.filter(function (t) { return !t.outside && !t.entering; }), outer = turns.filter(function (t) { return t.outside || t.entering; }).sort(function (x, y) { return Math.abs(y.delta) - Math.abs(x.delta); });
+    turns = inner.concat(outer.slice(0, Math.max(0, 4 - inner.length))).sort(function (x, y) { return x.i - y.i; });
     turns.forEach(function (t) {
       var dir = t.delta >= 10 ? '흐름이 크게 올라가요' : t.delta <= -10 ? '흐름이 크게 내려가요' : t.delta > 0 ? '흐름이 조금 나아져요' : '흐름이 조금 무거워져요';
-      t.text = t.year + '년(' + t.age + '세) ' + t.gz + ' 대운' + (t.outside ? '(다음 구간 첫 대운)' : '') + '으로 넘어가며 ' + dir + ' (' + sg(t.from) + ' → ' + sg(t.to) + (t.cond ? ', ' + t.fromCond + ' → ' + t.toCond : '') + ').';
+      t.text = t.year + '년(' + t.age + '세) ' + t.gz + ' 대운' + (t.outside ? '(다음 구간 첫 대운)' : t.entering ? '(이 구간 첫 대운)' : '') + '으로 넘어가며 ' + dir + ' (' + sg(t.from) + ' → ' + sg(t.to) + (t.cond ? ', ' + t.fromCond + ' → ' + t.toCond : '') + ').';
     });
-    // 기회·위험
-    var CC = M.LUCK_CFG.condition, bestI = scores.indexOf(Math.max.apply(null, scores)), worstI = scores.indexOf(Math.min.apply(null, scores));
+    // ── 기회·위험
+    var bestI = scores.indexOf(Math.max.apply(null, scores)), worstI = scores.indexOf(Math.min.apply(null, scores));
     var best = items[bestI], worst = items[worstI];
     var rel = relSplit([].concat.apply([], items.map(function (x) { return x.ev.relations || []; })));
     var opp = scores[bestI] >= CC.tailwind
@@ -202,26 +292,68 @@
       ? worst.startYear + '~' + (worst.startYear + 9) + '년(' + worst.startAge + '세~) ' + M.gzName(worst) + ' 대운이 가장 조심할 10년이에요 (' + sg(scores[worstI]) + ', ' + worst.ev.condition + '). ' + GRP[grpOf(M, ch, M.stemEl(worst.s))].plain + ' 쪽 무리를 줄이세요.'
       : '크게 꺾이는 대운은 없어요. 가장 낮은 때는 ' + worst.startYear + '년(' + worst.startAge + '세~) ' + M.gzName(worst) + ' 대운 (' + sg(scores[worstI]) + ')이에요.';
     if (rel.clash.length >= 2) risk += ' ' + T('lc.rel.clash', trace);
-    // 세 단계 해석
-    var seq = items.map(function (x) { return M.EL_K[M.stemEl(x.s)] + '·' + M.EL_K[M.BR_EL[x.b]]; }).join(' → ');
-    var trait = T('lc.el.' + main + '.span', trace) + (bh ? ' 이 구간은 대운 지지가 ' + bh.name + '의 세 글자를 모두 지나서, 그 기운이 30년 내내 크게 모여요.' : '');
-    var impact = '이 사주에서 ' + J(EL_TRAIT[main].name, '은/는') + ' ' + role + '이에요. ' + T('lc.role.' + role, trace) + ' 생활에서는 ' + GRP[gi].plain + '(' + GRP[gi].name + ') 주제로 나타나요 — ' + T('lc.grp.' + gi, trace) + balNote(eokA, joA, tone, trace);
-    var strategy = T('lc.act.' + tone + '.' + gi, trace) + ' ' + T('lc.trend.' + trend, trace);
-    // 판단 근거
-    var basis = [eokbuLine(ch, eokA), johuLine(ch, joA)];
+    // ── ① 오행의 특징(우세 오행, 섞여 있으면 복합으로)
+    var seq = items.map(function (x) { return EK[M.stemEl(x.s)] + '·' + EK[M.BR_EL[x.b]]; }).join(' → ');
+    var nm = function (e) { return EL_TRAIT[e].name; };
+    var mixTxt = mix === 2 ? fill('lc.span.mix', { Awa: J(nm(main), '과/와'), Bga: J(nm(second), '이/가'), pa: r1(share[main]), pb: r1(share[second]) }, trace) + ' '
+      : mix === 3 ? fill('lc.span.mix3', { A: nm(main), pa: r1(share[main]) }, trace) + ' ' : '';
+    var trait = mixTxt + T('lc.el.' + main + '.span', trace) + (bh ? ' 이 구간은 대운 지지가 ' + bh.name + '의 세 글자를 모두 지나서, 그 계절 기운이 30년 내내 이어져요.' : '');
+    // ── ② 나에게 미치는 영향: 우세 오행의 역할 + 역할과 최종 점수가 다를 때 그 이유
+    var why = [];
+    var nG = items.filter(function (x) { return dTone(x.ev.condition) === 'good'; }).length, nB = items.filter(function (x) { return dTone(x.ev.condition) === 'bad'; }).length;
+    if (rvm < 0 && (fitAvg > 0 || nG) && help != null && help !== main) why.push(fill('lc.span.why.lift', { A: nm(main), ra: role, B: nm(help), rb: roleOf(ch, help) }, trace));
+    else if (rvm > 0 && (fitAvg < 0 || nB) && drag != null && drag !== main) why.push(fill('lc.span.why.drag', { A: nm(main), ra: role, B: nm(drag), rb: roleOf(ch, drag) }, trace));
+    var other = P.relation + P.structure;
+    var roleVsScore = (rvm < 0 && fitAvg >= IMPACT_MIN) || (rvm > 0 && fitAvg <= -IMPACT_MIN);   // 역할 방향과 최종 평균이 반대
+    if ((Math.abs(P.yong) >= IMPACT_MIN && Math.abs(fitAvg) >= IMPACT_MIN && (P.yong > 0) !== (fitAvg > 0)) || (roleVsScore && !why.length))
+      why.push(fill('lc.span.why.part', { yv: sg(P.yong), what: Math.abs(P.structure) >= Math.abs(P.relation) ? '십성 균형(십성 묶음 치우침)이' : '합충 관계가', ov: sg(other), fv: sg(fitAvg) }, trace));
+    var impact = '이 사주에서 ' + J(nm(main), '은/는') + ' ' + role + '이에요. ' + T('lc.role.' + role, trace) + condRoleNote(ch, main, trace)
+      + (mix >= 2 ? ' 함께 많은 ' + J(nm(second), '은/는') + ' ' + roleOf(ch, second) + '이에요.' : '')
+      + ' 생활에서는 ' + GRP[gi].plain + '(' + GRP[gi].name + ') 주제로 나타나요 — ' + T('lc.grp.' + gi, trace)
+      + (why.length ? ' ' + why.join(' ') : '') + balNote(eokA, joA, tone === 'mixed' ? 'mid' : tone, trace, ch);
+    // ── ③ 대응 전략: (한 가지 성격일 때만) 구간 전략 + 흐름 모양 + 10년마다 나이에 맞는 전략
+    var decades = items.map(function (x, j) {
+      var t = dTone(x.ev.condition), st = stageOf(x.startAge), when = Y == null ? 'future' : x.startYear + 9 < Y ? 'past' : x.startYear <= Y ? 'now' : 'future';
+      var text = when === 'past' ? T('lc.past.' + t, trace) : T('lc.stage.' + st + '.' + t, trace);
+      return { i: a + j, startAge: x.startAge, endAge: x.startAge + 9, startYear: x.startYear, gz: M.gzName(x), cond: x.ev.condition, score: fit(x), tone: t, stage: st, when: when, text: text,
+        head: x.startAge + '~' + (x.startAge + 9) + '세 ' + M.gzName(x) + ' 대운', meta: x.ev.condition + (when === 'now' ? ' · 지금' : '') + ', ' + STAGE[st].name,
+        line: x.startAge + '~' + (x.startAge + 9) + '세 ' + M.gzName(x) + ' 대운(' + x.ev.condition + (when === 'now' ? ' · 지금' : '') + ', ' + STAGE[st].name + '): ' + text };
+    });
+    var strategyLead = (tone !== 'mixed' ? T('lc.act.' + tone + '.' + gi, trace) + ' ' : '') + T('lc.trend.' + trend, trace);   // 화면은 이 문단 + 10년별 목록(decades)으로 나눠 그린다
+    var strategy = strategyLead + ' ' + decades.map(function (x) { return x.line; }).join(' ');
+    // ── 판단 근거
+    var ER = function (e) { return nm(e) + '(' + roleLabel(ch, e) + ')'; };
+    var basis = [];
+    basis.push('오행 비중: ' + order.filter(function (e) { return share[e] >= 0.5; }).map(function (e) { return EK[e] + ' ' + r1(share[e]) + '%'; }).join(' · ')
+      + ' — 천간 40%·지지 60%, 지장간 일수와 천간의 뿌리를 흐름 점수와 같은 비율로 반영. ' + (mix === 1 ? '우세 ' + nm(main) + ' (2위와 ' + r1(gap12) + '%p 차이).' : mix === 2 ? '1·2위 차이가 ' + r1(gap12) + '%p로 ' + gapMin + '%p보다 작아 복합으로 봐요.' : '1~3위가 ' + gapMin + '%p 안이라 혼재로 봐요.'));
+    basis.push('도움·부담 오행: ' + (help != null ? '가장 크게 도운 오행 ' + ER(help) + ' 평균 ' + sg(contrib[help]) + '점' : '뚜렷하게 도운 오행 없음') + ' · ' + (drag != null ? '가장 크게 누른 오행 ' + ER(drag) + ' 평균 ' + sg(contrib[drag]) + '점' : '뚜렷하게 누른 오행 없음') + ' (통합 용신 역할값 × 오행 비중을 흐름 점수로 옮긴 몫).');
+    var ue = useEokbu(ch), uj = useJohu(ch);
+    if (ue) basis.push(eokbuLine(ch, eokA));
+    if (uj) basis.push(johuLine(ch, joA));
+    if (ue && uj && ((eokA >= 8 && joA <= -8) || (eokA <= -8 && joA >= 8)))
+      basis.push('억부·조후 충돌: 억부만 보면 ' + (eokA > 0 ? '유리' : '불리') + '(' + sg(eokA) + '), 조후만 보면 ' + (joA > 0 ? '유리' : '불리') + '(' + sg(joA) + ')해요. 최종 판단은 ' + ((u && u.primaryName) || '억부') + ' 우선 — ' + ((u && u.steps && u.steps[0]) || '') );
     basis.push('십성: ' + items.map(function (x) { return M.gzName(x) + ' ' + x.stemTG + '/' + x.branchTG; }).join(' · ') + ' — 중심은 ' + GRP[gi].name + '(' + GRP[gi].plain + ')이에요.');
     basis = basis.concat(relLine(rel.clash.concat(rel.harmony), span3 ? '이 30년 동안' : '이 구간 동안'));
-    basis.push('통합 용신: ' + (ch.unified && ch.unified.primaryName ? ch.unified.primaryName + ' 기준, ' : '') + '중심 오행 ' + EL_TRAIT[main].name + ' = ' + role + (sub != null ? ', 함께 많은 ' + EL_TRAIT[sub].name + ' = ' + roleOf(ch, sub) : '') + '.');
-    basis.push('흐름 점수(기존 계산 그대로): ' + items.map(function (x) { return x.startAge + '세 ' + sg(fit(x)); }).join(' · ') + ' · 평균 ' + sg(avg(scores)) + '.');
+    basis.push('통합 용신: ' + (u && u.primaryName ? u.primaryName + ' 기준, ' : '') + '우세 오행 ' + nm(main) + ' = ' + roleLabel(ch, main) + (mix >= 2 ? ', 함께 많은 ' + nm(second) + ' = ' + roleLabel(ch, second) : '') + '.');
+    basis.push('점수 구성(평균): 용신 판단 ' + sg(P.yong) + (uj ? '(그중 조후 몫 ' + sg(P.johu) + ')' : '') + ' · 합충 관계 ' + sg(P.relation) + ' · 십성 균형 ' + sg(P.structure) + ' → 흐름 점수 ' + sg(fitAvg) + '.');
+    basis.push('흐름 점수(기존 계산 그대로): ' + items.map(function (x) { return x.startAge + '세 ' + sg(fit(x)) + ' ' + x.ev.condition; }).join(' · ') + ' · 평균 ' + sg(fitAvg) + ' · 최저 ' + sg(scores[worstI]) + '.');
+    // ── 첫 문구: 흐름 모양 + 기회·조심 10년(평균이 높아도 주의 이하 대운이 있으면 반드시 넣는다)
     var endAge = last.startAge + 9, endYear = last.startYear + 9;
-    var head = { rise: '갈수록 풀리는 30년', fall: '앞에서 벌어 두는 30년', peak: '가운데 10년이 승부인 30년', valley: '버티고 다시 올라서는 30년', flat: '꾸준함이 결과가 되는 30년', short: '마지막 구간' }[trend];
-    var hook = head + ' — ' + J(EL_TRAIT[main].name, '이/가') + ' ' + (tone === 'good' ? '이 사주를 밀어 줘요' : tone === 'bad' ? '이 사주에는 버거운 기운이에요' : '무난하게 흘러요');
+    var head = { rise: '갈수록 풀리는 30년', fall: '앞에서 벌어 두는 30년', peak: '가운데 10년이 승부인 30년', valley: '버티고 다시 올라서는 30년', flat: '꾸준함이 결과가 되는 30년', short: '마지막 구간', lateDrop: '끝 10년이 꺾이는 30년' }[trend];
+    var tail = [];
+    items.forEach(function (x, j) {
+      if (scores[j] >= CC.tailwind && j === bestI) tail.push(fill('lc.span.hook.opp', { a: x.startAge, b: x.startAge + 9 }, trace));
+      if (scores[j] <= CC.caution && (j === worstI || (trend === 'lateDrop' && j === n - 1))) tail.push(fill('lc.span.hook.risk', { a: x.startAge, b: x.startAge + 9 }, trace));
+    });
+    if (!tail.length) tail.push(T('lc.span.hook.even', trace));
+    var hook = head + ' — ' + tail.join(', ');
     return {
       kind: 'span', type: '장기 분석 구간', k: k, label: '장기 분석 구간 ' + (k + 1), idx: idx, items: items,
       startAge: first.startAge, endAge: endAge, startYear: first.startYear, endYear: endYear, years: items.length * 10,
-      mainEl: main, subEl: sub == null ? null : sub, elCount: cnt, banghap: bh ? bh.name : null, role: role, tone: tone, grp: gi, seq: seq,
-      scores: scores, avg: avg(scores), trend: trend, trendWord: trendWord, turns: turns, opp: opp, risk: risk,
-      hook: hook, steps: { trait: trait, impact: impact, strategy: strategy }, basis: basis, trace: trace,
+      mainEl: main, subEl: sub, elLabel: elLabel, mix: mix, share: share, contrib: contrib, helpEl: help, dragEl: drag, parts: P,
+      elCount: cnt, banghap: bh ? bh.name : null, role: role, roleLabel: roleLabel(ch, main), tone: tone, grp: gi, seq: seq,
+      scores: scores, avg: fitAvg, min: scores[worstI], max: scores[bestI], trend: trend, trendWord: trendWord, turns: turns, opp: opp, risk: risk, decades: decades,
+      hook: hook, steps: { trait: trait, impact: impact, strategy: strategy, strategyLead: strategyLead }, basis: basis, trace: trace, _el: EA,
     };
   }
 
@@ -245,9 +377,9 @@
       diff += ' 천간은 같은 오행이라, 차이는 주로 지지에서 와요: ' + A.year + '년 ' + A.gz.slice(1) + '(' + EL_TRAIT[A.branchEl].name + '·' + A.branchRole + ') / ' + B.year + '년 ' + B.gz.slice(1) + '(' + EL_TRAIT[B.branchEl].name + '·' + B.branchRole + ').';
     }
     var trait = T('lc.el.' + e + '.pair', trace) + ' ' + T('lc.yinyang', trace);
-    var impact = '이 사주에서 ' + J(EL_TRAIT[e].name, '은/는') + ' ' + role + '이에요. ' + T('lc.role.' + role, trace) + ' 2년 동안 ' + GRP[gi].plain + '(' + years.map(function (y) { return y.stemTG; }).join('·') + ') 주제가 이어져요 — ' + T('lc.grp.' + gi, trace) + balNote(eokA, joA, tone, trace);
+    var impact = '이 사주에서 ' + J(EL_TRAIT[e].name, '은/는') + ' ' + role + '이에요. ' + T('lc.role.' + role, trace) + ' 2년 동안 ' + GRP[gi].plain + '(' + years.map(function (y) { return y.stemTG; }).join('·') + ') 주제가 이어져요 — ' + T('lc.grp.' + gi, trace) + balNote(eokA, joA, tone, trace, ch);
     var strategy = T('lc.act.' + tone + '.' + gi, trace);
-    var basis = [eokbuLine(ch, eokA), johuLine(ch, joA)];
+    var basis = [].concat(useEokbu(ch) ? [eokbuLine(ch, eokA)] : [], useJohu(ch) ? [johuLine(ch, joA)] : []);   // 적용되지 않는 이론은 줄을 내지 않는다
     basis.push('십성: ' + years.map(function (y) { return y.year + ' ' + y.gz + ' ' + y.stemTG + '/' + y.branchTG; }).join(' · ') + '.');
     years.forEach(function (y) { basis = basis.concat(relLine(y.clash.concat(y.harmony), y.year + '년')); });
     basis.push('흐름 점수(기존 계산 그대로, 대운 40% + 세운 60%): ' + years.map(function (y) { return y.year + ' ' + sg(y.score) + ' ' + y.cond; }).join(' · ') + '.');
