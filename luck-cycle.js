@@ -235,10 +235,10 @@
     var tot = sum(pres), share = pres.map(function (v) { return v / tot; });
     var r = u && M.unifiedLuckFit ? M.unifiedLuckFit(ch, x, stemW, ev.johuScore) : null;
     var rs = sum(raw), scale = r && Math.abs(rs) > 1e-9 ? r.roleFit / rs : 1;   // roleFit 이 ±100에서 잘렸을 때만 1과 다르다
-    var w = ev.weights || { unified: 0, relation: 0, structure: 0 }, kRole = r ? 1 - r.kJ - r.kG : 1;
+    var w = ev.weights || { unified: 0, relation: 0, structure: 0 }, kRole = r ? (r.roleW != null ? r.roleW : 1 - r.kJ - r.kG) : 1;   // 엔진의 역할점수 비중(조후 중복 제거 시 1−kG)
     var contrib = raw.map(function (v) { return w.unified * kRole * v * scale; });
     var parts = { yong: w.unified * ev.unifiedScore, relation: w.relation * ev.relationScore, structure: w.structure * ev.structureScore };
-    parts.johu = r ? w.unified * r.kJ * ev.johuScore : 0;
+    parts.johu = r ? w.unified * (r.johuTerm != null ? r.johuTerm : r.kJ * ev.johuScore) : 0;
     parts.rest = parts.yong - sum(contrib);
     return { share: share, contrib: contrib, parts: parts, uniCheck: r ? r.v : null, kJ: r ? r.kJ : 0, kG: r ? r.kG : 0 };
   }

@@ -633,7 +633,9 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     },
     climate: { share: 0.25, comfort: 0.5, full: 1.2 },  // 운이 원국 기후를 움직이는 비율 / 무시할 편차 / 만점 개선폭
     relationScale: 4,      // 관계 합산(대략 ±15)을 ±100 축으로
-    structure: { neutralPct: 20, scale: 0.8, pattern: { '관살혼잡': -12, '상관견관': -10, '군겁쟁재': -12, '효신탈식(도식)': -8 },
+    // roleGate(2026-11-13 S3안): 십성 균형 보상(모자란 묶음 채움 +, 넘치는 묶음 키움 −)은 그 묶음 오행의 통합 용신 역할과 방향이 같은 몫만 인정한다.
+    //   기신 묶음이 원국에 모자라다고 +를 주거나 용신 묶음이 넘친다고 −를 주지 않는다. false면 이전 계산. 근거: docs/LUCK_SCORE_ENGINE_REVIEW_2026-11-13.md
+    structure: { roleGate: true, neutralPct: 20, scale: 0.8, pattern: { '관살혼잡': -12, '상관견관': -10, '군겁쟁재': -12, '효신탈식(도식)': -8 },
       // 운 글자와 원국이 함께 만드는 구조(luckStructures). formed = 운이 와서 새로 생기는 약점, good = 좋은 구조, rescue = 원국 약점을 운이 풀어 줌
       // branchMul 지지 정기에서 온 글자의 반영 비율 / ease 해소 글자가 있을 때 약점을 줄이는 비율 / groupMin 원국에 그 묶음이 있다고 볼 최소 %
       // cap 한 운에서 이 구조들의 합계 한도(여러 구조가 겹쳐 점수가 튀지 않게). 값은 통합 용신과 겹치는 몫을 감안해 2026-11-10 2배로 올린 크기
@@ -1104,7 +1106,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const pullType = Object.keys(act).reduce((a, k) => act[k] > act[a] ? k : a, '기회');
     const top = pullType === '기회' ? (g[0] >= g[1] ? 0 : 1) : { '확장': 3, '수확': 2, '축적': 4 }[pullType];
     const need = G.map(pc => (S.neutralPct - pc) / S.neutralPct);
-    let structRaw = 0; g.forEach((v, i) => structRaw += v * need[i]);
+    let structRaw = 0; g.forEach((v, i) => { const c = v * need[i]; if (!S.roleGate || !U || c * U.roleV[(dEl + i) % 5] >= 0) structRaw += c; });
     const structP = [];
     let patAdj = 0;
     for (const pt of ch.patterns.list) {
@@ -1480,14 +1482,16 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   //   ⑤ 주 기준이 아닌 이론이 필요로 하는 오행은 기신·구신이라도 '조건부'로 세기를 줄이고 이유를 남긴다(무조건 기신으로 단정하지 않는다).
   // 결과 ch.unified 는 원국 용신(자동일 때 ch.yong)·운세 흐름(evaluateLuck)·궁합(cpElParts·unifiedSupport)이 함께 쓴다.
   const UNIFIED_CFG = {
-    version: 'unified-yongsin-20261108-1',
+    version: 'unified-yongsin-20261113-1',
     eokbu: { need: 8, urgent: 20 },            // |돕는 힘 − 50| (%p): 8 미만 참고, 20 이상 급함
     johu: { urgent: 1.6, season: 1.2 },        // 기후 치우침(기준 대비 배수): 1.6 이상, 또는 월령이 한난의 근원이고 1.2 이상이면 급함
     tonggwan: { urgent: 32 },                  // 대립하는 두 오행이 모두 이 비율 이상이고 한쪽이 일간 오행이면 급함
     rootWeak: 30,                              // 일간 통근 점수가 이보다 낮으면 뿌리가 약하다고 본다
     coldMonths: [11, 0, 1], hotMonths: [5, 6, 7],   // 亥子丑 / 巳午未
     soften: { gi: -0.5, gu: -0.25, yong: 0.8, hee: 0.4 },   // 조건부일 때의 역할값(기본 용 1 · 희 0.5 · 한 0 · 구 −0.5 · 기 −1)
-    luck: { johuK: 0.3, gyeokK: [0, 0.06, 0.12, 0.15], rootUp: 0.2, floatDown: 0.3 },
+    // johuDedup(2026-11-13 C안): 조후가 주 기준이면 역할표가 이미 조후 용신으로 짜였으므로, 조후 성분 중 역할점수로 설명되는 몫(60갑자 회귀)을 빼고
+    //   남은 몫(같은 오행이라도 글자마다 다른 조습 차이)만 kJ로 더하고, 역할점수 비중은 (1−kG)로 둔다. false면 이전 계산. 근거: docs/LUCK_SCORE_ENGINE_REVIEW_2026-11-13.md
+    luck: { johuK: 0.3, gyeokK: [0, 0.06, 0.12, 0.15], rootUp: 0.2, floatDown: 0.3, johuDedup: true },
     chain: { combo: 8, pair: 5, clashGood: -5, clashBad: 3, stem: 2 },
   };
   const URGENCY = ['해당 없음', '참고', '필요', '급함'];
@@ -1797,12 +1801,26 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   const _ub = new WeakMap();
   function unifiedBase(ch, stemW) {
     let m = _ub.get(ch); if (!m) _ub.set(ch, m = {});
-    if (m[stemW] == null) { let sum = 0; for (let i = 0; i < 60; i++) { const r = unifiedLuckRaw(ch, gz(i), stemW); sum += (1 - r.kJ - r.kG) * r.roleFit + r.kG * r.gyeok; } m[stemW] = sum / 60; }
+    if (m[stemW] == null) { let sum = 0; for (let i = 0; i < 60; i++) { const r = unifiedLuckRaw(ch, gz(i), stemW); sum += r.roleW * r.roleFit + r.kG * r.gyeok; } m[stemW] = sum / 60; }
+    return m[stemW];
+  }
+  // 조후 성분을 역할점수로 설명하는 직선(60갑자 회귀): johuDedup 일 때 이 몫을 빼고 남은 몫만 더한다
+  const _jr = new WeakMap();
+  function johuRoleLine(ch, stemW) {
+    let m = _jr.get(ch); if (!m) _jr.set(ch, m = {});
+    if (m[stemW] == null) {
+      const R = [], Y = []; for (let i = 0; i < 60; i++) { const p = gz(i); R.push(unifiedLuckRaw(ch, p, stemW).roleFit); Y.push(johuFit(ch, p, stemW).v); }
+      const mR = R.reduce((a, b) => a + b, 0) / 60, mY = Y.reduce((a, b) => a + b, 0) / 60; let sxy = 0, sxx = 0;
+      R.forEach((x, i) => { sxy += (x - mR) * (Y[i] - mY); sxx += (x - mR) ** 2; });
+      const beta = sxx > 1e-9 ? sxy / sxx : 0; m[stemW] = { beta, alpha: mY - beta * mR };
+    }
     return m[stemW];
   }
   function unifiedLuckFit(ch, p, stemW, johuV) {
     const r = unifiedLuckRaw(ch, p, stemW);
-    r.v = lclamp((1 - r.kJ - r.kG) * r.roleFit + r.kJ * johuV + r.kG * r.gyeok - unifiedBase(ch, stemW), -100, 100);
+    let jo = johuV; if (r.johuDedup) { const L = johuRoleLine(ch, stemW); jo = johuV - (L.alpha + L.beta * r.roleFit); }
+    r.johuTerm = r.kJ * jo;
+    r.v = lclamp(r.roleW * r.roleFit + r.johuTerm + r.kG * r.gyeok - unifiedBase(ch, stemW), -100, 100);
     return r;
   }
   function unifiedLuckRaw(ch, p, stemW) {
@@ -1827,7 +1845,8 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     }
     const kJ = u.theories.johu.applicable ? U.johuK * (u.primary === 'johu' || u.secondary === 'johu' ? 1 : 0.5) : 0;
     const kG = U.gyeokK[K.applicable ? K.urgency : 0];
-    return { roleFit, gyeok: gy, kJ, kG, notes };
+    const johuDedup = !!(U.johuDedup && u.primary === 'johu' && kJ > 0), roleW = johuDedup ? 1 - kG : 1 - kJ - kG;
+    return { roleFit, gyeok: gy, kJ, kG, roleW, johuDedup, notes };
   }
   const impactWord = v => v >= 15 ? '도움' : v >= 5 ? '약간 도움' : v <= -15 ? '부담' : v <= -5 ? '약간 부담' : '영향 적음';
   function theoryImpacts(ch, eokV, johuV, gyV) {

@@ -58,13 +58,15 @@ function structParts(ch, ev) {
   }
   const lp = M.luckStructures(ch, p), lpSum = lp.reduce((s, x) => s + x.v, 0), lpK = Math.abs(lpSum) > SC.luck.cap ? SC.luck.cap / Math.abs(lpSum) : 1;
   patAdj += lpSum * lpK;
-  const clamped = Math.abs(raw * 100 * SC.scale + patAdj) > 100;
-  const check = clamped ? 0 : Math.abs(clamp(raw * 100 * SC.scale + patAdj, -100, 100) - ev.structureScore);
+  const used = SC.roleGate ? gated : raw;   // 지금 엔진이 쓰는 균형 보상(역할 방향 조건이 켜졌으면 gated)
+  const clamped = Math.abs(used * 100 * SC.scale + patAdj) > 100;
+  const check = clamped ? 0 : Math.abs(clamp(used * 100 * SC.scale + patAdj, -100, 100) - ev.structureScore);
   return { g, raw, gated, against, patAdj, clamped, check };
 }
 // ── 대안 하나로 자기 운의 점수(ownFit) 다시 합성
 function ownAlt(ch, ctx, ev, level, jm, sm, keep) {
   const sw = LC.levels[level].stemW, c = ctx[sw], u = ch.unified, w = ev.weights;
+  if (jm === 'J0' && UL.johuDedup) jm = 'C';   // 지금 엔진이 C안이면 기준선도 C
   const r = M.unifiedLuckFit(ch, ev.p, sw, ev.johuScore);
   let kJ = r.kJ, kE = 0, jo = ev.johuScore; const kG = r.kG;
   if (jm === 'A' && u.primary === 'johu') kJ = 0;
@@ -80,7 +82,7 @@ function ownAlt(ch, ctx, ev, level, jm, sm, keep) {
   else if (sm === 'S2') sp = w.structure * clamp(st.patAdj, -100, 100);
   else sp = w.structure * clamp(st.gated * 100 * SC.scale + st.patAdj, -100, 100);
   const own = clamp(w.unified * uni + w.relation * ev.relationScore + sp, -100, 100);
-  if (keep) Object.assign(keep, { roleFit: r.roleFit, kJ, kE, kG, uni, sp, st, base });
+  if (keep) Object.assign(keep, { roleFit: r.roleFit, kJ, kE, kG, uni, sp, st, base, roleW, jo });
   return own;
 }
 const fitOf = (ev, level, own, parentFit) => { const P = LC.levels[level].parent; return P && parentFit != null ? clamp((1 - P) * own + P * parentFit + (ev.chain ? ev.chain.v : 0), -100, 100) : own; };
@@ -122,7 +124,7 @@ for (const c of inputs) {
     const fb = fitOf(ev, level, ev.ownFit, parentFitBase);
     maxErrFit = Math.max(maxErrFit, Math.abs(fb - ev.fitScore), Math.abs(alt['J0+S0'] - ev.fitScore));
     // 엔진 기준선과 같은지: uni = (1−kJ−kG)·role + kJ·jo + kG·gy − base
-    const k = keepBase, rawU = (1 - k.kJ - k.kG) * k.roleFit + k.kJ * ev.johuScore + k.kG * ev.gyeokScore - k.base;
+    const k = keepBase, rawU = k.roleW * k.roleFit + k.kJ * k.jo + k.kG * ev.gyeokScore - k.base;
     if (Math.abs(rawU) < 99.9) maxErrBase = Math.max(maxErrBase, Math.abs(rawU - ev.unifiedScore));
     if (k.st.clamped) nClamped++; maxErrStruct = Math.max(maxErrStruct, k.st.check);
     const rec = { chart: info, level, ev, roleFit: k.roleFit, st: k.st, keep: k, alt, ...extra };
@@ -214,3 +216,6 @@ for (const c of pick.filter(Boolean)) {
   });
 }
 if (mdPath) { fs.writeFileSync(path.join(root, mdPath), out.join('\n') + '\n'); console.log('\n저장: ' + mdPath); }
+// --dump 파일: 운 평가마다 엔진 흐름 점수와 각 대안 점수를 저장(엔진 변경 전 예측값과 변경 후 실제값을 맞춰 보는 용도)
+const dumpAt = process.argv.indexOf('--dump');
+if (dumpAt > 0) { fs.writeFileSync(process.argv[dumpAt + 1], JSON.stringify({ n: recs.length, keys: recs.map(r => [r.chart.inp.year, r.chart.inp.month, r.chart.inp.day, r.chart.inp.hour, r.level, r.gz]), fit: recs.map(r => r.ev.fitScore), cond: recs.map(r => r.ev.condition), alt: Object.fromEntries(METHODS.map(m => [mkey(m), recs.map(r => r.alt[mkey(m)])])) })); console.log('dump: ' + recs.length); }
