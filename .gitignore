@@ -7,3 +7,4 @@ output/
 !.env.example
 .dev.vars
 .dev.vars.*
+.awk-compress/

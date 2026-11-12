@@ -289,17 +289,22 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 
 #awk .vid{ object-fit: contain; }
 #awk .vid.on{ opacity: 1; }
-#awk .shade{ display: none; }
-#awk .stage{ position: absolute; left: 50%; bottom: max(64px, calc(env(safe-area-inset-bottom) + 48px)); transform: translateX(-50%); width: min(92%, 640px); max-width: none; padding: 0; background: none; }
-#awk .stage :is(.a1, .big, .nm, .film, .ttl, .trait){ color: #F6E9C0; -webkit-text-stroke: .1em #0a0805; paint-order: stroke fill; text-shadow: none; }
-#awk .stage .a1{ -webkit-text-stroke-width: 5px; font-weight: 600; }
-#awk .stage .big{ -webkit-text-stroke-width: 8px; font-size: clamp(3rem, 16vw, 5rem); margin: 2px 0; }
-#awk .stage .nm{ -webkit-text-stroke-width: 6px; }
-#awk .stage .film{ -webkit-text-stroke-width: 5px; font-weight: 600; }
-#awk .stage .ttl{ -webkit-text-stroke-width: 4px; color: #D9C28E; font-weight: 700; }
-#awk .stage .trait{ -webkit-text-stroke-width: 4px; font-weight: 600; }
-#awk .skip{ color: #F6E9C0; border-color: #D9C28E; background: rgba(0, 0, 0, .55); }
-#awk .tap{ color: #F6E9C0; -webkit-text-stroke: 3px #0a0805; paint-order: stroke fill; }
+/* 각성 자막: 검은 외곽선 대신 화면 아래 어둠 그라데이션 + 부드러운 그림자. 한글은 Pretendard(산세리프), 큰 한자만 명조로 남긴다. */
+#awk{ --aw-sans: 'Pretendard Variable', Pretendard, 'Noto Sans KR', -apple-system, sans-serif; }
+#awk .shade{ display: block; z-index: 1; background: linear-gradient(180deg, rgba(4, 5, 10, 0) 45%, rgba(4, 5, 10, .55) 68%, rgba(4, 5, 10, .9) 100%); pointer-events: none; }
+#awk .stage{ position: absolute; left: 50%; bottom: max(70px, calc(env(safe-area-inset-bottom) + 54px)); transform: translateX(-50%); width: min(90%, 600px); max-width: none; padding: 0; background: none; }
+#awk .stage :is(.a1, .nm, .film, .ttl, .trait, .rd){ font-family: var(--aw-sans); color: #FBF6EA; -webkit-text-stroke: 0; text-shadow: 0 1px 2px rgba(0, 0, 0, .7), 0 2px 18px rgba(0, 0, 0, .55); word-break: keep-all; text-wrap: balance; }
+#awk .stage .a1{ font-size: clamp(1rem, 4.2vw, 1.25rem); font-weight: 500; letter-spacing: -.01em; line-height: 1.6; color: rgba(251, 246, 234, .82); }
+#awk .stage .big{ -webkit-text-stroke: 0; color: #F3E3B5; font-weight: 600; font-size: clamp(3rem, 16vw, 5rem); letter-spacing: .04em; margin: 4px 0 2px; text-shadow: 0 2px 6px rgba(0, 0, 0, .6), 0 0 36px rgba(217, 194, 142, .45); }
+#awk .stage .rd{ font-size: .82rem; font-weight: 600; letter-spacing: .32em; color: #D9C28E; margin: 0 0 14px; }
+#awk .stage .nm{ font-weight: 700; letter-spacing: -.02em; }
+#awk .stage .film{ font-size: clamp(1.2rem, 4.9vw, 1.6rem); font-weight: 700; letter-spacing: -.025em; line-height: 1.5; margin: 0 0 10px; }
+#awk .stage .ttl{ display: inline-block; margin: 6px 0 0; padding: 5px 14px; border-radius: 999px; background: rgba(217, 194, 142, .16); border: 1px solid rgba(217, 194, 142, .45); color: #EBD7A4; font-size: .82rem; font-weight: 600; letter-spacing: .04em; text-shadow: none; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+#awk .stage .trait{ font-size: clamp(.92rem, 3.7vw, 1.02rem); font-weight: 500; letter-spacing: -.01em; line-height: 1.65; color: rgba(251, 246, 234, .86); margin-top: 12px; }
+#awk .skip{ font-family: var(--aw-sans); font-weight: 500; color: #FBF6EA; border-color: rgba(255, 255, 255, .28); background: rgba(10, 10, 14, .45); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+#awk .tap{ font-family: var(--aw-sans); font-weight: 600; color: rgba(251, 246, 234, .55); -webkit-text-stroke: 0; text-shadow: none; animation: awTap 2.4s ease-in-out infinite; }
+@keyframes awTap{ 50%{ opacity: .35; } }
+@media (prefers-reduced-motion: reduce){ #awk .tap{ animation: none; } }
 /* Fortune dashboard: quiet surfaces, vivid data and clear interaction states. */
 .fortune-panel {
   --opportunity: #73d8ae;
