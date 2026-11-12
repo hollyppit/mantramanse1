@@ -5,7 +5,8 @@
 // sajus: 구매한 사주의 출생 입력(회원 본인이 구매할 때 입력한 값) — '이 사주로 바로 읽기'에 쓴다. 본인 토큰으로만 받는다.
 // 주문마다 viewed_at(첫 유료 장 열람 시각)을 붙인다: 환불정책 '7일 이내·미열람' 판단.
 import { json } from '../../_lib.js';
-import { memberOf, sbRest, supabaseReady, worldAccess, viewedByOrder, cancelOrder, refundCheck } from '../../_commerce.js';
+import { memberOf, sbRest, supabaseReady, worldAccess, viewedByOrder, cancelOrder, refundCheck, portoneCall, portoneReady, PORTONE_PREFIX } from '../../_commerce.js';
+import { safeHttps } from '../../_mail.js';
 
 const SHOWN = ['paid', 'canceled', 'partial_canceled'];
 export async function onRequestPost({ request, env }) {
@@ -27,6 +28,19 @@ export async function onRequestPost({ request, env }) {
       return json({ ok: true, canceled_at: c.at });
     } catch { return json({ error: 'commerce-unavailable' }, 503); }
   }
+  // 영수증(카드 매출전표): 본인 포트원 주문만. 결제사에 그때그때 물어 주소를 받는다(저장하지 않음)
+  if (body && body.action === 'receipt') {
+    const orderId = typeof body.orderId === 'string' && /^mt\w{6,62}$/.test(body.orderId) ? body.orderId : '';
+    if (!orderId) return json({ error: 'bad-order' }, 400);
+    try {
+      const order = ((await sbRest(env, `commerce_orders?select=order_id,status,payment_key&order_id=eq.${encodeURIComponent(orderId)}&user_id=eq.${encodeURIComponent(member.id)}`)) || [])[0];
+      if (!order || !SHOWN.includes(order.status)) return json({ error: 'not-found' }, 404);
+      if (!String(order.payment_key || '').startsWith(PORTONE_PREFIX) || !portoneReady(env)) return json({ error: 'no-receipt' }, 404);
+      const t = await portoneCall(env, `payments/${encodeURIComponent(orderId)}?storeId=${encodeURIComponent(env.PORTONE_STORE_ID)}`);
+      const url = t.ok && t.data ? safeHttps(t.data.receiptUrl) : null;
+      return url ? json({ ok: true, url }) : json({ error: 'no-receipt' }, t.ok ? 404 : 502);
+    } catch { return json({ error: 'commerce-unavailable' }, 503); }
+  }
   // 저장한 사주 지우기: 회원의 저장본과, 그 사주로 한 주문에 남은 출생 입력을 지운다(구매 권한은 그대로)
   if (body && body.action === 'forget') {
     if (!/^[0-9a-f]{8}$/.test(body.ref || '')) return json({ error: 'bad-ref' }, 400);
@@ -41,11 +55,11 @@ export async function onRequestPost({ request, env }) {
   }
   let rows;
   try {
-    rows = await sbRest(env, `commerce_orders?select=order_id,product_name,saju_label,worlds,amount,status,method,created_at,paid_at,canceled_at&user_id=eq.${encodeURIComponent(member.id)}&order=created_at.desc&limit=100`);
+    rows = await sbRest(env, `commerce_orders?select=order_id,product_name,saju_label,worlds,amount,status,method,payment_key,created_at,paid_at,canceled_at&user_id=eq.${encodeURIComponent(member.id)}&order=created_at.desc&limit=100`);
   } catch { return json({ error: 'commerce-unavailable' }, 503); }
   const fresh = Date.now() - 30 * 60000;
   // 고객 화면에 필요한 칸만 골라 담는다(조회식이 바뀌어도 사주 식별값·회원 id 가 새지 않게)
-  const pick = o => ({ order_id: o.order_id, product_name: o.product_name, saju_label: o.saju_label, worlds: o.worlds, amount: o.amount, status: o.status, method: o.method, created_at: o.created_at, paid_at: o.paid_at, canceled_at: o.canceled_at });   // viewed_at 은 아래에서 붙인다
+  const pick = o => ({ order_id: o.order_id, product_name: o.product_name, saju_label: o.saju_label, worlds: o.worlds, amount: o.amount, status: o.status, method: o.method, created_at: o.created_at, paid_at: o.paid_at, canceled_at: o.canceled_at, receipt: String(o.payment_key || '').startsWith(PORTONE_PREFIX) });   // receipt: 영수증 버튼 표시(결제 키 자체는 내려 보내지 않는다). viewed_at 은 아래에서 붙인다
   const orders = (rows || []).filter(o => SHOWN.includes(o.status) || (o.status === 'pending' && Date.parse(o.created_at) > fresh)).slice(0, 50).map(pick);
   // 주문별 첫 유료 장 열람 시각(환불 가능 여부 판단)
   let viewed = {}; try { viewed = await viewedByOrder(env, orders.map(o => o.order_id)); } catch { viewed = {}; }

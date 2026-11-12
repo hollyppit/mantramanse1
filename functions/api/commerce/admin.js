@@ -10,6 +10,7 @@ import { kvOf } from '../../_store.js';
 import { loadProducts, cleanProducts, PRODUCTS_KEY, worldAccess, sbRest, tossCall, supabaseReady, tossReady, grantOrder, portoneReady, payProvider, cancelPortone, PORTONE_PREFIX, expirePending, viewedByOrder, cancelOrder, readSignal } from '../../_commerce.js';
 import { naverReady } from '../../_naver-login.js';
 import { summaryAll, salesCsv, kstDay } from '../../_sales.js';
+import { alertReady } from '../../_mail.js';
 
 const enc = encodeURIComponent;
 const who = request => { try { return decodeURIComponent(request.headers.get('x-reviewer') || '').slice(0, 30) || 'admin'; } catch { return 'admin'; } };
@@ -42,7 +43,8 @@ export async function onRequestGet({ request, env }) {
     { id: 'webhook-secret', label: '웹훅 서명 확인(권장)', ok: !!env.PORTONE_WEBHOOK_SECRET, note: env.PORTONE_WEBHOOK_SECRET ? (hook && hook.signed === false ? '⚠ 마지막 웹훅 서명이 맞지 않았습니다(시크릿 값 확인)' : '설정됨') : '선택: 포트원 웹훅 시크릿을 PORTONE_WEBHOOK_SECRET 에 넣으면 서명까지 확인' },
     { id: 'products', label: '판매 상품·가격', ok: forSale.length > 0, note: forSale.map(p => p.name + ' ' + p.price.toLocaleString('ko-KR') + '원').join(' · ') || '판매 중인 상품이 없습니다' },
     { id: 'worlds', label: '유료 주제', ok: paidWorlds.length > 0, note: paidWorlds.map(w => w.name).join(' · ') || '유료로 설정된 주제가 없습니다(주제·표지 설정 → 이용 권한)' },
-    { id: 'login', label: '로그인(카카오·구글·네이버)', ok: !!(env.SUPABASE_URL && env.SUPABASE_ANON_KEY), note: '카카오·구글 켜짐' + (naverReady(env) ? ' · 네이버 켜짐(네이버 검수 승인 전에는 등록된 아이디만)' : ' · 네이버 꺼짐') },
+    { id: 'login', label: '로그인(카카오·구글·네이버)', ok: !!(env.SUPABASE_URL && env.SUPABASE_ANON_KEY), note: '카카오·구글 켜짐' + (naverReady(env) ? ' · 네이버 켜짐(검수 통과·서비스 적용)' : ' · 네이버 꺼짐') },
+    { id: 'admin-alert', label: '관리자 알림 메일(결제·환불·실패)', ok: alertReady(env), note: alertReady(env) ? '켜짐 · 받는 주소 ' + String(env.ADMIN_ALERT_EMAIL).split(',').length + '개' : 'Cloudflare 환경변수 ADMIN_ALERT_EMAIL 에 받을 주소를 넣고 재배포(RESEND_API_KEY 도 필요)' },
     { id: 'mail', label: '구매 확인·환불 메일(Resend)', ok: !!env.RESEND_API_KEY, note: env.RESEND_API_KEY ? '켜짐 · 보내는 주소 ' + (env.MAIL_FROM || 'noreply@mantrafortune.com') : 'RESEND_API_KEY 를 넣으면 결제·환불 때 자동 발송(Resend 도메인 인증 필요)' },
     { id: 'refund', label: '환불(바로 환불·관리자 취소)', ok: true, note: '7일 이내·미열람 주문은 고객이 내 구매 내역에서 바로 환불' },
     { id: 'last-paid', label: '최근 결제 확인', ok: lastPaid ? true : null, note: lastPaid ? lastPaid.product_name + ' ' + (lastPaid.amount || 0).toLocaleString('ko-KR') + '원 · ' + String(lastPaid.paid_at || '').slice(0, 16).replace('T', ' ') : '결제 완료 주문이 없습니다' },

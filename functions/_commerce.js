@@ -14,7 +14,7 @@
 import { json, isAdmin } from './_lib.js';
 import { kvOf } from './_store.js';
 import { loadEditorial } from './_editorial.js';
-import { mailPurchase, mailRefund } from './_mail.js';
+import { mailPurchase, mailRefund, mailAdmin, safeHttps } from './_mail.js';
 
 export const TOPIC_WORLD = { self: 'w1', timing: 'w1', health: 'w1', creative: 'w1', remedy: 'w1', wealth: 'w2', career: 'w7', love: 'w3', relationships: 'w3' };
 export const PRODUCTS_KEY = 'commerce:products';
@@ -246,11 +246,14 @@ export async function settlePortone(env, order) {
     const paidFields = { status: 'paid', payment_key: PORTONE_PREFIX + order.order_id, method: methodOf(p.method), paid_at: p.paidAt || new Date().toISOString(), failure: null, is_test: !!(p.channel && p.channel.type === 'TEST') };   // 테스트 채널 결제는 매출에서 뺀다
     // 이번 요청이 실제로 '결제 완료'로 바꿨을 때만 구매 확인 메일(복귀 확인과 웹훅이 겹쳐도 한 번)
     const changed = await sbRest(env, `commerce_orders?order_id=eq.${encU(order.order_id)}&status=eq.${from}`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify(paidFields) });
-    order.__mail = Array.isArray(changed) && changed.length ? { ...order, ...paidFields } : null;
+    order.__mail = Array.isArray(changed) && changed.length ? { ...order, ...paidFields, receipt_url: safeHttps(p.receiptUrl) } : null;
     // 웹훅·복귀가 동시에 와도 '대기' 상태일 때만 바뀐다. 권한은 같은 주문·세계 중복을 막는다
     await grantOrder(env, order, 'payment');
-    if (order.__mail) await mailPurchase(env, order.__mail);   // 구매 확인 메일(실패해도 결제는 완료)
-  } catch { return { ok: false, error: 'grant-failed', orderId: order.order_id }; }
+    if (order.__mail) { await mailPurchase(env, order.__mail); await mailAdmin(env, 'paid', order.__mail); }   // 구매 확인·관리자 알림 메일(실패해도 결제는 완료)
+  } catch (e) {
+    await mailAdmin(env, 'grant-failed', { ...order, method: methodOf(p.method), is_test: !!(p.channel && p.channel.type === 'TEST') }, { detail: String((e && e.message) || e).slice(0, 120) }).catch(() => { });
+    return { ok: false, error: 'grant-failed', orderId: order.order_id };
+  }
   return { ok: true, worlds: order.worlds };
 }
 // ── 오래된 '결제 대기' 주문 정리
@@ -297,16 +300,16 @@ export async function cancelOrder(env, order, reason) {
   if (String(order.payment_key || '').startsWith(PORTONE_PREFIX)) {
     if (!portoneReady(env)) return { ok: false, error: 'not-configured' };
     const c = await cancelPortone(env, order.order_id, reason);
-    if (!c.ok) return { ok: false, error: 'pg-cancel-failed', message: '포트원 취소 실패: ' + c.message };
+    if (!c.ok) { await mailAdmin(env, 'refund-failed', order, { reason, detail: '포트원 취소 실패: ' + c.message }).catch(() => { }); return { ok: false, error: 'pg-cancel-failed', message: '포트원 취소 실패: ' + c.message }; }
   } else {
     if (!tossReady(env)) return { ok: false, error: 'not-configured' };
     const t = await tossCall(env, `payments/${encodeURIComponent(order.payment_key)}/cancel`, { cancelReason: reason });
-    if (!t.ok) return { ok: false, error: 'pg-cancel-failed', message: '토스 취소 실패: ' + ((t.data && t.data.message) || t.status) };
+    if (!t.ok) { const m = '토스 취소 실패: ' + ((t.data && t.data.message) || t.status); await mailAdmin(env, 'refund-failed', order, { reason, detail: m }).catch(() => { }); return { ok: false, error: 'pg-cancel-failed', message: m }; }
   }
   const at = new Date().toISOString(), id = encodeURIComponent(order.order_id);
   const changed = await sbRest(env, `commerce_orders?order_id=eq.${id}&status=eq.paid`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify({ status: 'canceled', canceled_at: at, cancel_reason: reason }) });
   await sbRest(env, `commerce_entitlements?order_id=eq.${id}&revoked_at=is.null`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ revoked_at: at }) });
-  if (Array.isArray(changed) && changed.length) await mailRefund(env, order, at);   // 환불 완료 메일(이번 요청이 취소로 바꿨을 때만)
+  if (Array.isArray(changed) && changed.length) { await mailRefund(env, order, at); await mailAdmin(env, 'refund', order, { reason }); }   // 환불 완료·관리자 알림 메일(이번 요청이 취소로 바꿨을 때만)
   return { ok: true, at };
 }
 // 고객 바로 환불 조건(환불정책): 결제 완료 · 결제 후 7일 이내 · 유료 장 미열람

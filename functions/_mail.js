@@ -10,6 +10,8 @@ const BIZ = {
 const SITE = 'https://mantrafortune.com';
 const WORLD = { w1: '종합풀이', w2: '재물운 심화', w7: '커리어운 심화', w3: '인연운 심화' };
 export const mailReady = env => !!(env && env.RESEND_API_KEY);
+// 결제사가 준 영수증(카드 매출전표) 주소: https 만 쓴다
+export const safeHttps = u => { try { const x = new URL(String(u || '')); return x.protocol === 'https:' ? x.href : null; } catch { return null; } };
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const won = n => (+n || 0).toLocaleString('ko-KR') + '원';
 const kst = t => { try { return new Date(t).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { return String(t || ''); } };
@@ -40,8 +42,10 @@ export function purchaseMail(order) {
   const worlds = (order.worlds || []).map(w => WORLD[w] || w).join(' · ');
   const rows = [['상품', esc(order.product_name)], ['결제 금액', '<b>' + won(order.amount) + '</b>'], ['결제 일시', esc(kst(order.paid_at))], ['결제 수단', esc(order.method || '-')],
     ['사주', esc(order.saju_label || '-')], ['열리는 주제', esc(worlds)], ['이용 기간', '결제 즉시 · 서비스 운영 기간 동안 제한 없이 다시 보기'], ['주문번호', esc(order.order_id)]];
+  const receipt = safeHttps(order.receipt_url);
+  if (receipt) rows.push(['영수증', `<a href="${esc(receipt)}" style="color:#9b3b2a">카드 매출전표 보기</a> <span style="color:#8a8577">(내 구매 내역에서도 볼 수 있습니다)</span>`]);
   const note = `<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a"><b>환불 안내</b><br>구매 후 7일 이내이고 산 주제의 유료 장을 열지 않았다면, <a href="${SITE}/report/my/" style="color:#9b3b2a">내 구매 내역</a>의 <b>바로 환불</b>로 즉시 전액 환불됩니다. 유료 장을 열어 디지털 콘텐츠 제공이 시작된 뒤에는 환불이 제한되며(전자상거래법 제17조 제2항 제5호), 콘텐츠가 열리지 않는 등 회사 잘못이 있으면 기간·열람과 관계없이 전액 환불합니다. 자세한 기준: <a href="${SITE}/report/legal/refund.html" style="color:#9b3b2a">환불정책</a> · <a href="${SITE}/report/legal/terms.html" style="color:#9b3b2a">이용약관</a></p>`;
-  const text = `[${BIZ.service}] 구매가 완료되었습니다\n상품: ${order.product_name}\n결제 금액: ${won(order.amount)}\n결제 일시: ${kst(order.paid_at)}\n사주: ${order.saju_label || '-'}\n열리는 주제: ${worlds}\n주문번호: ${order.order_id}\n\n구매 후 7일 이내·유료 장 미열람이면 내 구매 내역(${SITE}/report/my/)에서 바로 환불할 수 있습니다. 환불정책: ${SITE}/report/legal/refund.html\n\n${BIZ.name} · 사업자등록번호 ${BIZ.bizNo} · ${BIZ.phone} · ${BIZ.email}`;
+  const text = `[${BIZ.service}] 구매가 완료되었습니다\n상품: ${order.product_name}\n결제 금액: ${won(order.amount)}\n결제 일시: ${kst(order.paid_at)}\n사주: ${order.saju_label || '-'}\n열리는 주제: ${worlds}\n주문번호: ${order.order_id}\n${receipt ? '영수증: ' + receipt + '\n' : ''}\n구매 후 7일 이내·유료 장 미열람이면 내 구매 내역(${SITE}/report/my/)에서 바로 환불할 수 있습니다. 환불정책: ${SITE}/report/legal/refund.html\n\n${BIZ.name} · 사업자등록번호 ${BIZ.bizNo} · ${BIZ.phone} · ${BIZ.email}`;
   return { subject: `[${BIZ.service}] 구매가 완료되었습니다 · ${order.product_name}`, html: layout('구매가 완료되었습니다', rows, note), text };
 }
 export function refundMail(order, canceledAt) {
@@ -72,4 +76,37 @@ export async function mailRefund(env, order, canceledAt) {
   if (!mailReady(env)) return false;
   const to = await recipientOf(env, order.user_id); if (!to) return false;
   return send(env, to, refundMail(order, canceledAt), 'refund');
+}
+
+// ── 관리자 알림 메일: 결제·환불이 생길 때, 그리고 사람이 손봐야 하는 실패(결제됐는데 권한 기록 실패·환불 취소 실패)
+// 받는 주소: 환경변수 ADMIN_ALERT_EMAIL(쉼표로 여러 개). 없으면 보내지 않는다. 고객 이메일·출생 정보는 넣지 않는다.
+// 같은 주문의 같은 실패 경보는 하루 한 번만(결제사가 웹훅을 여러 번 다시 보내도).
+const ALERT = {
+  paid: { title: '새 결제', urgent: false },
+  refund: { title: '환불', urgent: false },
+  'grant-failed': { title: '⚠ 결제됐는데 권한 기록 실패', urgent: true, todo: '관리자 → 결제·상품 → 이 주문의 "권한 다시 주기"를 눌러 주세요. 고객은 돈을 냈지만 아직 열람이 안 될 수 있습니다.' },
+  'refund-failed': { title: '⚠ 환불(결제 취소) 실패', urgent: true, todo: '결제사 취소가 실패했습니다. 포트원 콘솔에서 결제 상태를 확인하고, 필요하면 관리자 화면에서 다시 취소해 주세요.' },
+};
+export const alertReady = env => mailReady(env) && adminAlertTo(env).length > 0;
+function adminAlertTo(env) { return String((env && env.ADMIN_ALERT_EMAIL) || '').split(',').map(s => s.trim()).filter(s => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)).slice(0, 5); }
+export function adminAlertMail(kind, order, extra = {}) {
+  const a = ALERT[kind] || { title: kind }, test = order.is_test ? ' [테스트]' : '';
+  const rows = [['상품', esc(order.product_name)], ['금액', '<b>' + won(order.amount) + '</b>'], ['주문번호', esc(order.order_id)], ['결제 수단', esc(order.method || '-')], ['사주 이름표', esc(order.saju_label || '-')]];
+  if (extra.reason) rows.push(['사유', esc(extra.reason)]);
+  if (extra.detail) rows.push(['자세히', esc(extra.detail)]);
+  if (order.is_test) rows.push(['테스트', '예 (매출 요약에서 빠짐)']);
+  const note = a.todo ? `<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#9b3b2a"><b>할 일</b><br>${esc(a.todo)}</p>` : '';
+  const html = layout(a.title + test, rows, note).replace(`${SITE}/report/my/" style="display:inline-block`, `${SITE}/report/admin/" style="display:inline-block`).replace('내 구매 내역 보기', '관리자 화면 열기');
+  const text = `${a.title}${test}\n상품: ${order.product_name}\n금액: ${won(order.amount)}\n주문번호: ${order.order_id}${extra.reason ? '\n사유: ' + extra.reason : ''}${extra.detail ? '\n자세히: ' + extra.detail : ''}${a.todo ? '\n\n할 일: ' + a.todo : ''}\n\n${SITE}/report/admin/`;
+  return { subject: `[관리자]${test} ${a.title} · ${order.product_name} ${won(order.amount)}`, html, text };
+}
+export async function mailAdmin(env, kind, order, extra = {}) {
+  if (!alertReady(env) || !order) return false;
+  if (ALERT[kind] && ALERT[kind].urgent && env.GLOSSARY_KV) {   // 실패 경보는 주문마다 하루 한 번
+    const k = `commerce:alert:${kind}:${order.order_id}`;
+    try { if (await env.GLOSSARY_KV.get(k)) return false; await env.GLOSSARY_KV.put(k, '1', { expirationTtl: 86400 }); } catch { }
+  }
+  const mail = adminAlertMail(kind, order, extra);
+  let ok = true; for (const to of adminAlertTo(env)) ok = (await send(env, to, mail, 'admin-' + kind)) && ok;
+  return ok;
 }

@@ -222,6 +222,19 @@
           }).catch(function () { b.disabled = false; b.textContent = '바로 환불'; alert('연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.'); });
       };
     });
+    // 영수증: 팝업 차단을 피하려고 누르는 순간 새 창을 먼저 열고, 서버가 결제사에서 받은 주소로 보낸다
+    app.querySelectorAll('[data-receipt]').forEach(function (b) {
+      b.onclick = function () {
+        var w = window.open('', '_blank'); b.disabled = true;
+        fetch('/api/commerce/mine', { method: 'POST', headers: { 'content-type': 'application/json', 'x-member-token': TOKEN }, body: JSON.stringify({ action: 'receipt', orderId: b.dataset.receipt }) })
+          .then(function (r) { return r.json().catch(function () { return {}; }); })
+          .then(function (j) {
+            b.disabled = false;
+            if (j && j.url) { if (w) w.location.href = j.url; else location.href = j.url; return; }
+            if (w) w.close(); alert('영수증을 불러오지 못했습니다. 잠시 후 다시 시도하거나 문의해 주세요.');
+          }).catch(function () { b.disabled = false; if (w) w.close(); alert('연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.'); });
+      };
+    });
     app.querySelectorAll('[data-ask]').forEach(function (b) { b.onclick = function () { var box = app.querySelector('[data-askbox="' + b.dataset.ask + '"]'); if (box) box.hidden = !box.hidden; }; });
     app.querySelectorAll('[data-copytext]').forEach(function (b) { b.onclick = function () { var t = b.dataset.copytext; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { b.textContent = '복사됨'; }).catch(function () { prompt('이메일 주소', t); }); }; });
     app.querySelectorAll('[data-forget]').forEach(function (b) {
@@ -268,6 +281,7 @@
   function orderHtml(o) {
     var paidAt = o.paid_at || o.created_at, days = (Date.now() - Date.parse(paidAt)) / 86400000;
     var acts = '<button type="button" class="btn" data-copy="' + esc(o.order_id) + '">주문번호 복사</button>';
+    if (o.receipt && o.status !== 'pending') acts += '<button type="button" class="btn" data-receipt="' + esc(o.order_id) + '">영수증</button>';   // 카드 매출전표(결제사 화면)
     // 7일 이내·유료 장 미열람이면 바로 환불(서버가 조건을 다시 확인하고 결제사로 즉시 취소). 그 밖에는 문의(회사 잘못은 기간·열람과 상관없이 환불)
     var refundable = o.status === 'paid' && days <= 7 && !o.viewed_at;
     if (o.status === 'paid') acts += refundable ? '<button type="button" class="btn main" data-refund="' + esc(o.order_id) + '">바로 환불</button>' : '<button type="button" class="btn" data-ask="' + esc(o.order_id) + '">문의하기</button>';

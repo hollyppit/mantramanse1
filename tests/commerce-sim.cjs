@@ -305,6 +305,36 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   const rm = mails.filter(m => m.kind === 'refund');
   ok(rm.length === 1 && rm[0].to === 'b@x.test' && rm[0].subject.includes('환불') && rm[0].html.includes('3~7'), '환불 완료 메일 한 번');
 
+  // ── 영수증·관리자 알림 메일
+  ok(!mails.some(m => m.kind.startsWith('admin-')), '관리자 주소가 없으면 관리자 알림 안 보냄');
+  const MAIL = await imp('functions/_mail.js');
+  const alertEnv = { ...penv, RESEND_API_KEY: 're_test', ADMIN_ALERT_EMAIL: 'boss@x.test, ops@x.test' };
+  o = await (await order.onRequestPost({ request: req('/api/commerce/order', { tok: 'tok-b', body: { productId: 'w2', sd: { ...sd, pillars: { ...sd.pillars, hour: { hanja: '丙寅' } } }, label: '알림' } }), env: alertEnv })).json();
+  const PA = o.orderId; po[PA] = { id: PA, status: 'PAID', amount: { total: o.amount || db.orders.find(x => x.order_id === PA).amount }, currency: 'KRW', storeId: 'store-x', channel: { type: 'LIVE' }, method: { type: 'PaymentMethodCard' }, receiptUrl: 'https://receipt.portone.test/r/' + PA };
+  const nMail = mails.length;
+  await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-b', body: { paymentId: PA } }), env: alertEnv });
+  await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-b', body: { paymentId: PA } }), env: alertEnv });
+  const after = mails.slice(nMail), buy = after.find(m => m.kind === 'purchase'), adm = after.filter(m => m.kind === 'admin-paid');
+  ok(buy && buy.html.includes('https://receipt.portone.test/r/' + PA) && buy.html.includes('카드 매출전표'), '구매 확인 메일에 영수증 링크');
+  ok(adm.length === 2 && adm.map(m => m.to).sort().join() === 'boss@x.test,ops@x.test' && adm[0].subject.includes('새 결제') && adm[0].html.includes(PA) && !adm[0].html.includes('b@x.test') && adm[0].html.includes('/report/admin/'), '관리자 결제 알림: 주소마다 한 번(확인 두 번 와도), 고객 이메일 없음');
+  r = await mine.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-b', body: {} }), env: alertEnv }); d = await r.json();
+  { const mo = d.orders.find(x => x.order_id === PA); ok(mo && mo.receipt === true && !('payment_key' in mo), '내 구매 내역: 영수증 표시(결제 키는 안 내려감)'); }
+  r = await mine.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-b', body: { action: 'receipt', orderId: PA } }), env: alertEnv }); d = await r.json();
+  ok(r.status === 200 && d.url === 'https://receipt.portone.test/r/' + PA, '영수증 주소 받기');
+  r = await mine.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-a', body: { action: 'receipt', orderId: PA } }), env: alertEnv }); ok(r.status === 404, '남의 주문 영수증은 안 됨');
+  po[PA].receiptUrl = 'javascript:alert(1)'; r = await mine.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-b', body: { action: 'receipt', orderId: PA } }), env: alertEnv }); ok(r.status === 404, 'https 가 아닌 영수증 주소는 버림');
+  ok(MAIL.safeHttps('http://x.test') === null && MAIL.safeHttps('https://x.test/a') === 'https://x.test/a', 'https 만 허용');
+  const nM2 = mails.length;
+  await mine.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-b', body: { action: 'refund', orderId: PA } }), env: alertEnv });
+  const admR = mails.slice(nM2).filter(m => m.kind === 'admin-refund');
+  ok(admR.length === 2 && admR[0].subject.includes('환불') && admR[0].html.includes('고객 바로 환불'), '관리자 환불 알림(사유 포함)');
+  const nM3 = mails.length, fake = { order_id: 'mtfail1234567', product_name: '재물운 심화', amount: 9900, is_test: true };
+  await MAIL.mailAdmin(alertEnv, 'grant-failed', fake, { detail: 'x' }); await MAIL.mailAdmin(alertEnv, 'grant-failed', fake, { detail: 'x' });
+  const gf = mails.slice(nM3);
+  ok(gf.length === 2 && gf[0].subject.includes('권한 기록 실패') && gf[0].subject.startsWith('[관리자] [테스트] ') && gf[0].html.includes('권한 다시 주기'), '실패 경보: 할 일 안내·테스트 표시, 같은 주문은 하루 한 번');
+  d = await (await admin.onRequestGet({ request: req('/api/commerce/admin', { adminPw: 'adm', method: 'GET' }), env: alertEnv })).json();
+  ok(d.readiness.find(x => x.id === 'admin-alert').ok === true && !JSON.stringify(d.readiness).includes('boss@x.test'), '점검표: 관리자 알림 켜짐(주소는 안 보임)');
+
   // ── 테스트 주문 표시·매출 요약·CSV
   const SL = await imp('functions/_sales.js');
   ok(db.orders.find(x => x.order_id === PS).is_test === true, '포트원 테스트 채널 결제는 테스트 주문으로 자동 표시');
