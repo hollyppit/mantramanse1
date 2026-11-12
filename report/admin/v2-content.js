@@ -32,6 +32,15 @@
           .then(function (d) { if (!r.ok) throw new Error(d.error || ('오류 ' + r.status)); return d; });
       }).catch(function (e) { if (retry && get && (e.message === CUT || e instanceof TypeError)) return once(false); throw e; });
     }
+    // 영상 업로드는 올리기 전에 브라우저에서 720p mp4 로 압축한다(video-optimizer.js). 실패하면 원본 그대로.
+    var VO = window.AdminVideoOptimizer;
+    if (VO && /^\/api\/clipfile\?name=/.test(path) && opt.body instanceof Blob && VO.isVideo(opt.body)) {
+      var orig = opt.body;
+      return VO.prepare(orig).then(function (f) {
+        if (f !== orig) { path = path.replace(/\.(mov|m4v|mp4)(?=$|&)/i, '.mp4'); opt.body = f; opt.headers['content-type'] = 'video/mp4'; }
+        return once(true);
+      });
+    }
     return once(true);
   }
   function toast(msg, bad) {

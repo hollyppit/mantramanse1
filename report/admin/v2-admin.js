@@ -21,6 +21,11 @@
 
   /* ── 업로드: 진행률 표시 XHR. 서버가 영상 90MB·이미지 15MB 로 제한 ───────────────────── */
   function upload(file, name, onProg) {
+    var VO = window.AdminVideoOptimizer; // 영상은 올리기 전에 브라우저에서 720p mp4 로 압축(실패하면 원본)
+    if (VO && VO.isVideo(file) && !file._optimized) return VO.prepare(file).then(function (f) {
+      if (f !== file) name = (name || file.name).replace(/\.(mov|m4v|mp4)$/i, '.mp4');
+      f._optimized = true; return upload(f, name, onProg);
+    });
     return new Promise(function (res, rej) {
       var x = new XMLHttpRequest(); x.open('POST', '/api/clipfile?name=' + encodeURIComponent(name || file.name)); x.setRequestHeader('authorization', 'Bearer ' + PW);
       x.upload.onprogress = function (e) { if (onProg && e.lengthComputable) onProg(e.loaded / e.total); };
