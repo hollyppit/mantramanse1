@@ -6,6 +6,7 @@
 // POST /api/commerce/admin  { action: 'set-test', orderId, isTest } → 테스트 주문 표시(매출 요약·CSV 에서 뺀다)
 // POST /api/commerce/admin  { action: 'inquiry-status', id, status: 'received'|'answered'|'closed' } → 1:1 문의 상태(답변 완료 표시). 답변 자체는 알림 메일에 답장해서 보낸다
 // POST /api/commerce/admin  { action: 'inquiry-answer', id, answer } → 답변 저장(answer) + 회원에게 답변 메일 + 답변 완료. 마이페이지 문의 내역에 보인다
+// GET  /api/commerce/admin?inquiries=waiting → { waiting, latest } 관리자 메뉴 '새 문의' 배지용
 // GET  /api/commerce/admin?export=csv&from=YYYY-MM-DD&to=YYYY-MM-DD → 기간 매출·환불 CSV(한국 시간, 테스트 제외. &test=1 이면 포함)
 import { json, isAdmin, configError } from '../../_lib.js';
 import { kvOf } from '../../_store.js';
@@ -22,6 +23,14 @@ export async function onRequestGet({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   // CSV 내려받기: ?export=csv&from=YYYY-MM-DD&to=YYYY-MM-DD(&test=1 이면 테스트 주문 포함). 날짜는 한국 시간
   const u = new URL(request.url);
+  // 새 문의 표시(관리자 메뉴 배지, report/admin/inquiry-badge.js): 답변 대기 문의 수와 가장 최근 문의 번호만 가볍게 돌려준다
+  if (u.searchParams.get('inquiries') === 'waiting') {
+    if (!supabaseReady(env)) return json({ waiting: 0, latest: 0 });
+    try {
+      const rows = (await sbRest(env, 'support_inquiries?select=id&status=eq.received&order=id.desc&limit=100')) || [];
+      return json({ waiting: rows.length, latest: rows.length ? rows[0].id : 0 });
+    } catch { return json({ waiting: 0, latest: 0, error: 'unavailable' }); }
+  }
   if (u.searchParams.get('export') === 'csv') {
     if (!supabaseReady(env)) return json({ error: 'not-configured' }, 503);
     const from = kstDay(u.searchParams.get('from')), to = kstDay(u.searchParams.get('to'), true);

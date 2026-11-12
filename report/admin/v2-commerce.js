@@ -126,6 +126,7 @@
         b.disabled = true; b.textContent = '보내는 중…';
         api('POST', { action: 'inquiry-answer', id: id, answer: text }).then(function (r) {
           (S.data.inquiries || []).forEach(function (x, i) { if (x.id === id) S.data.inquiries[i] = Object.assign({}, x, r.inquiry); });
+          try { window.dispatchEvent(new CustomEvent('mantra:inquiry-change')); } catch (e) { }
           msg('#' + id + ' 답변을 저장했습니다' + (r.mailed ? '. 회원에게 메일을 보냈습니다.' : '. 메일은 보내지 못했습니다(메일 설정·회원 이메일 확인). 마이페이지에는 보입니다.'), !r.mailed);
         }).catch(function (e) { b.disabled = false; b.textContent = '답변 보내기'; msg(e.message, true); });
       };
@@ -135,7 +136,7 @@
         var id = +b.dataset.inq, st = b.dataset.st; b.disabled = true;
         api('POST', { action: 'inquiry-status', id: id, status: st }).then(function (r) {
           (S.data.inquiries || []).forEach(function (q) { if (q.id === id) { q.status = r.inquiry.status; q.answered_at = r.inquiry.answered_at; } });
-          msg('#' + id + ' 문의를 ' + (INQ_ST[st] || st) + '로 바꿨습니다');
+          msg('#' + id + ' 문의를 ' + (INQ_ST[st] || st) + '로 바꿨습니다'); try { window.dispatchEvent(new CustomEvent('mantra:inquiry-change')); } catch (e) { }
         }).catch(function (e) { b.disabled = false; msg(e.message, true); });
       };
     });
