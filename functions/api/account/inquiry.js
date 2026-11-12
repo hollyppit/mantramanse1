@@ -1,7 +1,7 @@
 // POST /api/account/inquiry — 마이페이지 1:1 문의(로그인 회원만, 헤더 x-member-token). 2026-11-13
 //   { action: 'send', category, subject, body, orderId? } → 저장(support_inquiries) + 관리자 알림 메일(회신 주소 = 회원 이메일) + 회원 접수 확인 메일
-//   { action: 'list' } → 내 문의 목록(최근 20건)
-// 답변은 관리자가 알림 메일에 '답장'해서 회원에게 바로 보낸다(functions/_mail.js mailInquiry). 테이블: supabase/migrations/20261113_support_inquiries.sql
+//   { action: 'list' } → 내 문의 목록(최근 20건, 문의 본문·관리자 답변 포함)
+// 답변은 관리자 화면(결제·상품 → 1:1 문의)에서 써서 회원에게 메일로 보내고 answer 칸에 남긴다(functions/api/commerce/admin.js inquiry-answer). 테이블: supabase/migrations/20261113_support_inquiries.sql
 // 저장이 실패해도(테이블이 아직 없을 때 등) 메일이 갔으면 접수로 본다. 저장·메일이 둘 다 안 되면 실패를 돌려준다.
 import { json } from '../../_lib.js';
 import { memberOf, supabaseReady, sbRest } from '../../_commerce.js';
@@ -19,8 +19,9 @@ export async function onRequestPost({ request, env }) {
 
   if (b.action === 'list') {
     let rows = null;
-    try { rows = await sbRest(env, `support_inquiries?select=id,category,subject,status,created_at,answered_at&user_id=eq.${uid}&order=created_at.desc&limit=20`); } catch { return json({ ok: true, items: [], stored: false }); }
-    return json({ ok: true, items: rows || [], stored: true, mail: inquiryReady(env) });
+    try { rows = await sbRest(env, `support_inquiries?select=*&user_id=eq.${uid}&order=created_at.desc&limit=20`); } catch { return json({ ok: true, items: [], stored: false }); }
+    const items = (rows || []).map(r => ({ id: r.id, category: r.category, subject: r.subject, body: r.body, status: r.status, created_at: r.created_at, answered_at: r.answered_at, answer: r.answer || null }));   // 본인 문의만(회원 이메일·관리자 이름은 내려 보내지 않는다)
+    return json({ ok: true, items, stored: true, mail: inquiryReady(env) });
   }
   if (b.action !== 'send') return json({ error: 'bad-action' }, 400);
 

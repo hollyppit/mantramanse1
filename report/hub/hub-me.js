@@ -159,7 +159,7 @@
     var opts = Object.keys(CAT).map(function (k) { return '<option value="' + k + '">' + CAT[k] + '</option>'; }).join('');
     var ord = orders.filter(function (o) { return o.status !== 'pending'; }).slice(0, 10);
     return '<section class="me-card" id="meInq"><h2>1:1 문의</h2>' +
-      '<p class="me-muted">결제·환불·풀이 내용 등 궁금한 점을 남겨 주세요. 답변은 메일로 보내 드립니다(받는 주소 <b>' + esc(email || '로그인한 계정 이메일') + '</b> · 영업일 기준 1~2일).</p>' +
+      '<p class="me-muted">결제·환불·풀이 내용 등 궁금한 점을 남겨 주세요. 답변은 메일과 문의 내역으로 보내 드립니다(받는 주소 <b>' + esc(email || '로그인한 계정 이메일') + '</b> · 영업일 기준 1~2일).</p>' +
       '<div class="me-acts"><button type="button" class="btn sm" data-me="inq-open" aria-expanded="false" aria-controls="meInqForm">문의하기</button></div>' +
       '<form class="me-form" id="meInqForm" hidden novalidate>' +
       '<label><span>분류</span><select name="category">' + opts + '</select></label>' +
@@ -174,7 +174,12 @@
     if (!box) return;
     post('/api/account/inquiry', token, { action: 'list' }).then(function (x) {
       var items = (x.ok && x.j.items) || []; if (!box.isConnected) return;
-      box.innerHTML = items.length ? '<h3 class="me-h3">내 문의 내역</h3><div class="me-list">' + items.map(function (q) { return '<div class="me-row"><div><b>' + esc(q.subject) + '</b><small>' + esc((CAT[q.category] || '') + ' · ' + day(q.created_at)) + '</small></div><span class="me-st ' + esc(q.status) + '">' + esc(IST[q.status] || q.status) + '</span></div>'; }).join('') + '</div><p class="me-note">답변은 메일로 보내 드립니다. 메일이 보이지 않으면 스팸함도 확인해 주세요.</p>' : '';
+      box.innerHTML = items.length ? '<h3 class="me-h3">내 문의 내역</h3><div class="me-list">' + items.map(function (q, i) {
+        var st = q.answer ? 'answered' : q.status;
+        return '<details class="me-inq"' + (q.answer && i === 0 ? ' open' : '') + '><summary class="me-row"><div><b>' + esc(q.subject) + '</b><small>' + esc((CAT[q.category] || '') + ' · ' + day(q.created_at)) + '</small></div><span class="me-st ' + esc(st) + '">' + esc(IST[st] || st) + '</span></summary>' +
+          '<div class="me-qa">' + (q.body ? '<p class="me-q">' + esc(q.body) + '</p>' : '') +
+          (q.answer ? '<div class="me-a"><small>만트라 답변' + (q.answered_at ? ' · ' + esc(day(q.answered_at)) : '') + '</small><p>' + esc(q.answer) + '</p></div>' : '<p class="me-muted">' + (q.status === 'answered' ? '답변을 메일로 보내 드렸습니다. 메일함을 확인해 주세요.' : q.status === 'closed' ? '처리가 끝난 문의입니다.' : '확인 중입니다. 답변이 등록되면 메일로도 알려 드려요.') + '</p>') + '</div></details>';
+      }).join('') + '</div><p class="me-note">답변은 메일과 이 내역으로 보내 드립니다. 메일이 보이지 않으면 스팸함도 확인해 주세요.</p>' : '';
     }).catch(function () { });
   }
   function inquirySubmit(form, token, email) {
@@ -188,7 +193,7 @@
       if (x.ok && x.j.ok) {
         var cat = f.category.value; form.reset(); msg.textContent = ''; form.hidden = true; var ob = $('[data-me="inq-open"]'); if (ob) ob.setAttribute('aria-expanded', 'false');
         H.toast('문의를 보냈습니다.', 3500);
-        var sec = $('#meInq'); if (sec) { var p = sec.querySelector('.me-sent') || sec.insertBefore(root.document.createElement('p'), $('#meInqList')); p.className = 'me-sent'; p.textContent = '문의를 접수했습니다' + (x.j.id ? '(#' + x.j.id + ')' : '') + '. 답변은 메일로 보내 드립니다(받는 주소 ' + (x.j.email || email || '계정 이메일') + ').'; }
+        var sec = $('#meInq'); if (sec) { var p = sec.querySelector('.me-sent') || sec.insertBefore(root.document.createElement('p'), $('#meInqList')); p.className = 'me-sent'; p.textContent = '문의를 접수했습니다' + (x.j.id ? '(#' + x.j.id + ')' : '') + '. 답변은 메일과 아래 문의 내역으로 보내 드립니다(받는 주소 ' + (x.j.email || email || '계정 이메일') + ').'; }
         H.track('inquiry_send', { category: cat });
         inquiryList($('#meInqList'), token); return;
       }

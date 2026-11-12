@@ -227,3 +227,10 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 #hub .me-sent{ margin: 12px 0 0; padding: 10px 14px; border: 1px solid var(--gold); border-radius: 12px; color: var(--gold-l); font-size: .88rem; }
 #hub .me-h3{ font-size: .95rem; color: var(--ink); margin: 18px 0 8px; }
 #hub .me-st{ flex: 0 0 auto; font-size: .75rem; border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; color: var(--ink-2); } #hub .me-st.answered{ border-color: #5E9E78; color: #8fd0a8; }
+/* 문의 내역: 펼치면 내 문의·답변 */
+#hub .me-inq > summary{ list-style: none; cursor: pointer; } #hub .me-inq > summary::-webkit-details-marker{ display: none; }
+#hub .me-inq[open] > summary{ border-radius: 12px 12px 0 0; }
+#hub .me-qa{ padding: 10px 14px 14px; background: rgba(8,10,17,.55); border-radius: 0 0 12px 12px; border-top: 1px solid var(--line); }
+#hub .me-q{ margin: 0 0 10px; white-space: pre-wrap; color: var(--ink-2); font-size: .88rem; line-height: 1.7; }
+#hub .me-a{ border-left: 3px solid var(--gold); padding: 8px 12px; background: rgba(205,178,122,.08); border-radius: 0 10px 10px 0; }
+#hub .me-a small{ display: block; color: var(--gold); font-size: .76rem; margin-bottom: 4px; } #hub .me-a p{ margin: 0; white-space: pre-wrap; color: var(--ink); font-size: .92rem; line-height: 1.75; }

@@ -64,16 +64,18 @@
       var waiting = iq.filter(function (q) { return q.status === 'received'; });
       var list = S.inqAll ? iq : waiting;
       inqHtml = '<div class="card" style="margin-top:12px" id="cmInq"><h3 style="margin:0 0 6px;color:var(--gold)">1:1 문의 <span class="muted" style="font-size:.85rem">답변 대기 ' + waiting.length + '건 · 최근 ' + iq.length + '건</span></h3>' +
-        '<p class="muted" style="margin:0 0 8px;font-size:.84rem">답변은 관리자 알림 메일(ADMIN_ALERT_EMAIL)에 <b>답장</b>해서 보냅니다. 답장한 뒤 <b>답변 완료</b>를 눌러 주세요. 회원 마이페이지의 문의 내역에 그대로 표시됩니다.</p>' +
+        '<p class="muted" style="margin:0 0 8px;font-size:.84rem">아래 칸에 답변을 쓰고 <b>답변 보내기</b>를 누르면 회원에게 메일로 가고, 회원 마이페이지 문의 내역에도 답변이 보입니다. 메일 앱으로 직접 답장한 경우에는 내용이 남지 않으니 <b>답변 완료</b>만 눌러 주세요.</p>' +
         '<label class="muted" style="font-size:.85rem"><input type="checkbox" id="cmInqAll"' + (S.inqAll ? ' checked' : '') + '> 답변 완료·종료도 보기</label>' +
         (list.length ? '<div style="display:grid;gap:8px;margin-top:8px">' + list.map(function (q) {
           var st = q.status, color = st === 'received' ? '#E8B04B' : st === 'answered' ? '#7FD1A8' : 'var(--muted, #999)';
+          var ansHtml = q.answer ? '<div style="margin:6px 0;padding:8px 10px;border-left:3px solid #7FD1A8;background:rgba(127,209,168,.08);border-radius:6px"><div class="muted" style="font-size:.8rem">보낸 답변' + (q.answered_by ? ' · ' + esc(q.answered_by) : '') + (q.answered_at ? ' · ' + esc(kstAt(q.answered_at)) : '') + (q.answer_mailed ? ' · 메일 보냄' : ' · <span style="color:#E8B04B">메일 발송 안 됨</span>') + '</div><div style="white-space:pre-wrap">' + esc(q.answer) + '</div></div>' : '';
+          var form = st !== 'closed' ? '<textarea data-ans="' + q.id + '" rows="4" maxlength="4000" placeholder="' + (q.answer ? '답변을 고쳐 다시 보내려면 여기에 쓰세요' : '회원에게 보낼 답변') + '" style="width:100%;box-sizing:border-box;margin:6px 0">' + '</textarea><div class="row" style="gap:6px;margin-bottom:6px"><button class="btn" data-ans-send="' + q.id + '">' + (q.answer ? '답변 다시 보내기' : '답변 보내기') + '</button></div>' : '';
           var acts = st === 'received' ? '<button class="btn" data-inq="' + q.id + '" data-st="answered">답변 완료</button> <button class="btn" data-inq="' + q.id + '" data-st="closed">종료(답변 없이)</button>'
             : '<button class="btn" data-inq="' + q.id + '" data-st="received">답변 대기로 되돌리기</button>' + (st === 'answered' ? ' <button class="btn" data-inq="' + q.id + '" data-st="closed">종료</button>' : '');
           var mailto = 'mailto:' + encodeURIComponent(q.email || '') + '?subject=' + encodeURIComponent('Re: [1:1 문의 #' + q.id + '] ' + (q.subject || ''));
           return '<details style="border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 12px"' + (st === 'received' ? ' open' : '') + '><summary style="cursor:pointer"><b>#' + q.id + ' ' + esc(q.subject) + '</b> <span style="color:' + color + ';font-size:.85rem">· ' + esc(INQ_ST[st] || st) + '</span> <span class="muted" style="font-size:.82rem">' + esc(INQ_CAT[q.category] || q.category) + ' · ' + esc(kstAt(q.created_at)) + '</span></summary>' +
             '<div style="margin-top:8px;font-size:.88rem;line-height:1.6"><div class="muted">회원 ' + esc(q.email) + (q.order_id ? ' · 주문 ' + esc(q.order_id) : '') + (q.mailed ? '' : ' · <span style="color:#E8B04B">알림 메일 발송 실패</span>') + (q.answered_at ? ' · 답변 ' + esc(kstAt(q.answered_at)) : '') + '</div>' +
-            '<div style="white-space:pre-wrap;margin:6px 0;padding:8px 10px;background:rgba(0,0,0,.25);border-radius:8px">' + esc(q.body) + '</div>' +
+            '<div style="white-space:pre-wrap;margin:6px 0;padding:8px 10px;background:rgba(0,0,0,.25);border-radius:8px">' + esc(q.body) + '</div>' + ansHtml + form +
             '<div class="row" style="gap:6px;flex-wrap:wrap">' + acts + ' <a class="btn" href="' + esc(mailto) + '">메일로 답장 쓰기</a></div></div></details>';
         }).join('') + '</div>' : '<p class="muted" style="margin:8px 0 0">' + (S.inqAll ? '문의가 없습니다.' : '답변을 기다리는 문의가 없습니다.') + '</p>') + '</div>';
     }
@@ -115,6 +117,19 @@
     root.querySelectorAll('[data-test]').forEach(function (b) { b.onclick = function () { var on = b.dataset.on === '1'; post({ action: 'set-test', orderId: b.dataset.test, isTest: on }, on ? '테스트 주문으로 표시했습니다(매출에서 빠집니다)' : '테스트 표시를 해제했습니다(매출에 들어갑니다)'); }; });
     var csvBtn = root.querySelector('#cmCsv'); if (csvBtn) csvBtn.onclick = downloadCsv;
     var inqAll = root.querySelector('#cmInqAll'); if (inqAll) inqAll.onchange = function () { S.inqAll = inqAll.checked; draw(); };
+    root.querySelectorAll('[data-ans-send]').forEach(function (b) {
+      b.onclick = function () {
+        var id = +b.dataset.ansSend, ta = root.querySelector('[data-ans="' + id + '"]'), text = (ta && ta.value || '').trim();
+        if (text.length < 2) { msg('답변 내용을 적어 주세요', true); if (ta) ta.focus(); return; }
+        var q = (S.data.inquiries || []).filter(function (x) { return x.id === id; })[0];
+        if (!confirm('#' + id + ' 문의에 이 답변을 ' + (q && q.email ? q.email + '(으)로 ' : '') + '메일로 보냅니다. 계속할까요?')) return;
+        b.disabled = true; b.textContent = '보내는 중…';
+        api('POST', { action: 'inquiry-answer', id: id, answer: text }).then(function (r) {
+          (S.data.inquiries || []).forEach(function (x, i) { if (x.id === id) S.data.inquiries[i] = Object.assign({}, x, r.inquiry); });
+          msg('#' + id + ' 답변을 저장했습니다' + (r.mailed ? '. 회원에게 메일을 보냈습니다.' : '. 메일은 보내지 못했습니다(메일 설정·회원 이메일 확인). 마이페이지에는 보입니다.'), !r.mailed);
+        }).catch(function (e) { b.disabled = false; b.textContent = '답변 보내기'; msg(e.message, true); });
+      };
+    });
     root.querySelectorAll('[data-inq]').forEach(function (b) {
       b.onclick = function () {
         var id = +b.dataset.inq, st = b.dataset.st; b.disabled = true;

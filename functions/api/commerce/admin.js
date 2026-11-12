@@ -5,13 +5,14 @@
 // POST /api/commerce/admin  { action: 'regrant', orderId }         → 결제 완료 주문의 권한을 다시 넣는다(기록 실패 복구용)
 // POST /api/commerce/admin  { action: 'set-test', orderId, isTest } → 테스트 주문 표시(매출 요약·CSV 에서 뺀다)
 // POST /api/commerce/admin  { action: 'inquiry-status', id, status: 'received'|'answered'|'closed' } → 1:1 문의 상태(답변 완료 표시). 답변 자체는 알림 메일에 답장해서 보낸다
+// POST /api/commerce/admin  { action: 'inquiry-answer', id, answer } → 답변 저장(answer) + 회원에게 답변 메일 + 답변 완료. 마이페이지 문의 내역에 보인다
 // GET  /api/commerce/admin?export=csv&from=YYYY-MM-DD&to=YYYY-MM-DD → 기간 매출·환불 CSV(한국 시간, 테스트 제외. &test=1 이면 포함)
 import { json, isAdmin, configError } from '../../_lib.js';
 import { kvOf } from '../../_store.js';
 import { loadProducts, cleanProducts, PRODUCTS_KEY, worldAccess, sbRest, tossCall, supabaseReady, tossReady, grantOrder, portoneReady, payProvider, cancelPortone, PORTONE_PREFIX, expirePending, viewedByOrder, cancelOrder, readSignal } from '../../_commerce.js';
 import { naverReady } from '../../_naver-login.js';
 import { summaryAll, salesCsv, kstDay } from '../../_sales.js';
-import { alertReady } from '../../_mail.js';
+import { alertReady, mailInquiryAnswer } from '../../_mail.js';
 import { funnelReport, purgeFunnel } from '../../_funnel.js';
 
 const enc = encodeURIComponent;
@@ -55,7 +56,7 @@ export async function onRequestGet({ request, env }) {
   // 구매 전환(최근 14일): 단계별 방문자 수 + 주문표 기준 주문·결제. 180일 지난 기록은 이때 지운다
   let funnel = null; if (supabaseReady(env)) { try { funnel = await funnelReport(env, 14); await purgeFunnel(env).catch(() => { }); } catch { funnel = null; } }
   // 1:1 문의(support_inquiries, 최근 50건). 답변 완료 버튼은 상태만 바꾼다(회원 마이페이지 '내 문의 내역'에 그대로 보인다)
-  let inquiries = null; if (supabaseReady(env)) { try { inquiries = await sbRest(env, 'support_inquiries?select=id,email,category,subject,body,order_id,status,mailed,created_at,answered_at&order=created_at.desc&limit=50'); } catch { inquiries = null; } }
+  let inquiries = null; if (supabaseReady(env)) { try { inquiries = await sbRest(env, 'support_inquiries?select=*&order=created_at.desc&limit=50'); } catch { inquiries = null; } }
   return json({ products, worlds, orders, ordersError, sweep, readiness, sales, funnel, inquiries, configured: { supabase: supabaseReady(env), toss: tossReady(env), tossClient: !!env.TOSS_CLIENT_KEY, anon: !!env.SUPABASE_ANON_KEY, portone: portoneReady(env), portoneStore: !!env.PORTONE_STORE_ID, portoneChannel: !!env.PORTONE_CHANNEL_KEY, portoneSecret: !!env.PORTONE_API_SECRET, portoneWebhook: !!env.PORTONE_WEBHOOK_SECRET, provider: payProvider(env) } });
 }
 
@@ -73,6 +74,17 @@ export async function onRequestPost({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
   if (!supabaseReady(env)) return json({ error: 'not-configured' }, 503);
   let b; try { b = await request.json(); } catch { return json({ error: '잘못된 요청 형식입니다' }, 400); }
+  if (b && b.action === 'inquiry-answer') {
+    const id = Number.isInteger(b.id) && b.id > 0 ? b.id : 0, answer = String(b.answer || '').replace(/\r\n?/g, '\n').trim().slice(0, 4000);
+    if (!id) return json({ error: '문의 번호가 올바르지 않습니다' }, 400);
+    if (answer.length < 2) return json({ error: '답변 내용을 적어 주세요' }, 400);
+    const q = (await sbRest(env, `support_inquiries?select=*&id=eq.${id}`))[0]; if (!q) return json({ error: '문의를 찾을 수 없습니다' }, 404);
+    const at = new Date().toISOString();
+    const rows = await sbRest(env, `support_inquiries?id=eq.${id}`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify({ answer, status: 'answered', answered_at: at, answered_by: who(request), answer_mailed: false }) });
+    const mailed = b.mail === false ? false : await mailInquiryAnswer(env, { ...q, answer });
+    if (mailed) { try { await sbRest(env, `support_inquiries?id=eq.${id}`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ answer_mailed: true }) }); } catch { } }
+    return json({ ok: true, mailed, inquiry: { ...(rows && rows[0] || q), answer, status: 'answered', answered_at: at, answer_mailed: mailed } });
+  }
   if (b && b.action === 'inquiry-status') {
     const id = Number.isInteger(b.id) && b.id > 0 ? b.id : 0, status = ['received', 'answered', 'closed'].includes(b.status) ? b.status : '';
     if (!id || !status) return json({ error: '문의 번호나 상태가 올바르지 않습니다' }, 400);
