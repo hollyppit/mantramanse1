@@ -1,7 +1,18 @@
 /* 관리자 메뉴의 단일 기준: 영역·순서·표시명·담당 작업 */
 (function(root){
   'use strict';
-  var groups = [['dash','현황',['dash']],['make','무빙툰 제작',['v2proj','v2chap','v2story','v2world','editorial']],['media','영상·이미지',['v2clip','v2intro','panelart']],['content','콘텐츠·온보딩',['onboard','freec']],['ai','AI 풀이',['readinglibrary','ichingreview','luckenv','wealthcareer','narrative','regionreading','wishspots','fengshui','ikdoc','ikknow','ikdesign','ikrules','iklab','agentic','stylecfg']],['qa','점검·테스트',['research','v2quality','check','v2test']],['set','운영·설정',['ops','commerce','v2set']]];
+  // 2026-11-12 정리: 하는 일 기준 8개 영역(영역당 최대 7개). 옛 구성 화면은 지우지 않고 맨 끝 "옛 화면(보관)"으로 옮겼다
+  //   (게시된 장이 원본 장 c00~c20 의 장면·문장을 재료로 쓰므로 고칠 곳은 남겨 둔다).
+  var groups = [
+    ['dash','현황',['dash']],
+    ['sell','판매·타임라인',['commerce','v2world','v2proj']],
+    ['media','첫 화면·영상',['onboard','freec','v2intro','v2clip','panelart']],
+    ['copy','풀이 본문',['readinglibrary','editorial','narrative','luckenv','ichingreview']],
+    ['map','운명 지도·환경',['wealthcareer','regionreading','regiondata','fengshui','wishspots']],
+    ['ai','AI 풀이 엔진(고급)',['ikdoc','ikknow','ikdesign','ikrules','stylecfg','agentic','research']],
+    ['qa','점검·운영',['v2quality','check','iklab','ops','v2set']],
+    ['legacy','옛 화면(보관)',['v2chap','v2story','v2test']]
+  ];
   var pages = {
     fengshui:{label:'공간·명당 풍수',hint:'현공비성·팔택·형세 풍수의 해석 문구와 계산 규칙(겸향·공망 기준)을 수정·게시하고 이전 버전으로 되돌립니다. 건물의 좌향과 건축 연도로 9궁 배치를 미리 확인하고, 공개 스위치로 사용자 화면의 ‘공간·명당’ 탭 노출을 제어합니다.'},
     wishspots:{label:'소원 성취 명당',hint:'나의 운명 지도의 소원 성취 명당에 쓸 장소를 출처·확인일과 함께 등록·검수·게시하고 이전 버전으로 되돌립니다. 사주·기준 지역·소원 분야를 넣어 점수 순위를 미리 보고, 공개 스위치로 사용자 화면 노출을 제어합니다.'},
@@ -18,8 +29,8 @@
     editorial:{label:'챕터 계약·현실 사례',hint:'7개 주제·84개 챕터의 질문·근거·중복 방지 규칙 및 현실 사례를 편집하고 검사 후 게시합니다.'},
     ops:{label:'운영 관리',hint:'영상120칸 연결, AI, 데이터 백업과 복구를 한곳에서 관리합니다.',related:['v2intro','v2quality','ikrules']},
     v2proj:{label:'타임라인 구성',hint:'운명의 타임라인 주제를 기준으로 실제 챕터와 공개 여부·제목·순서를 관리합니다.'},
-    v2chap:{label:'주제별 챕터·해석',hint:'타임라인과 같은 주제별 실제 목차에서 내용·원본 편집·프롤로그로 이동합니다.'},
-    v2story:{label:'종합 스토리 흐름',hint:'종합 풀이의 이야기 전개를 관리합니다. 주제별 목차는 타임라인 구성에서 관리합니다.'},
+    v2chap:{label:'주제별 챕터·해석',hint:'옛 화면(보관) — 사용자 화면에 그대로 나오지 않는 원본 재료입니다. 최종 장 구성은 "판매·타임라인 > 타임라인 구성"에서 바꾸세요. 타임라인과 같은 주제별 실제 목차에서 내용·원본 편집·프롤로그로 이동합니다.'},
+    v2story:{label:'종합 스토리 흐름',hint:'옛 화면(보관) — 사용자 화면에 그대로 나오지 않는 원본 재료입니다. 최종 장 구성은 "판매·타임라인 > 타임라인 구성"에서 바꾸세요. 종합 풀이의 이야기 전개를 관리합니다. 주제별 목차는 타임라인 구성에서 관리합니다.'},
     v2world:{label:'주제·표지 설정',hint:'타임라인 주제의 이름·소개·표지·공개 여부와 순서를 관리합니다.'},
     v2clip:{label:'클립 라이브러리',hint:'챕터가 사용하는 공통 영상과 이미지를 등록하고 연결 상태를 확인합니다.'},
     v2intro:{label:'프롤로그·일간·일주 영상',hint:'일간·일주 소개와 프롤로그 영상을 관리합니다.'},
@@ -29,8 +40,13 @@
     ikrules:{label:'AI·서비스 연결',hint:'지식 서비스 사용 여부, 본문 대체와 합성 깊이를 관리합니다. 표현 강도는 풀이 문체에서 관리합니다.',related:['stylecfg','iklab','v2quality']},
     stylecfg:{label:'풀이 문체',hint:'AI 풀이의 표현 강도를 분야별로 관리합니다. 화면 글꼴·크기·위치와 고정 문구는 조합 테스트에서 편집합니다.',related:['ikrules','iklab','v2test']},
     iklab:{label:'풀이 테스트',hint:'실제 계산 근거와 게시된 지식이 선택되는지 검사합니다. 화면·영상 조합은 조합 테스트에서 검사합니다.',related:['ikknow','v2test','v2quality']},
-    v2test:{label:'조합·텍스트 편집',hint:'챕터 문장과 영상, 글꼴·배치를 함께 확인하고 편집합니다. 개별 사주마다 바뀌는 문장 원문은 챕터·해석에서 수정합니다.',related:['v2chap','v2clip','stylecfg','v2quality']},
+    v2test:{label:'조합·텍스트 편집',hint:'옛 화면(보관) — 사용자 화면에 그대로 나오지 않는 원본 재료입니다. 최종 장 구성은 "판매·타임라인 > 타임라인 구성"에서 바꾸세요. 챕터 문장과 영상, 글꼴·배치를 함께 확인하고 편집합니다. 개별 사주마다 바뀌는 문장 원문은 챕터·해석에서 수정합니다.',related:['v2chap','v2clip','stylecfg','v2quality']},
     v2quality:{label:'시스템·서비스 점검',hint:'저장된 상품 구성과 자료·지식·AI·문체 연결 상태를 점검합니다.',related:['v2test','iklab','onboard']},
+    dash:{label:'현황',hint:'방문·결제·풀이 생성 현황을 한눈에 봅니다.'},
+    freec:{label:'무료 콘텐츠',hint:'무료 타로·일진 캘린더 등 무료 콘텐츠의 문구와 이미지를 관리합니다.'},
+    panelart:{label:'패널 이미지',hint:'무빙툰 장면 패널 이미지·영상을 만들고 연결합니다.'},
+    check:{label:'정합성 검사',hint:'테스트 사주로 무빙툰 전체 문서를 만들어 계산값과 문장이 어긋나는 곳·중복 문장을 찾습니다(AI 호출 없음).'},
+    v2set:{label:'설정',hint:'입장 인트로 등 화면 공통 설정을 관리합니다.'},
     onboard:{label:'온보딩',hint:'첫 화면부터 출생정보 입력, 각성, 결과까지 한 곳에서 초안을 편집하고 게시합니다.'}
   };
   var nav = {groups:groups,pages:pages,resolve:function(t,also){return t === 'home' || (t === 'v2set' && also === 'home') ? {tab:'onboard',also:'home'} : {tab:t,also:also};}};
