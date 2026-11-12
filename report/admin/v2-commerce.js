@@ -7,6 +7,8 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var won = function (n) { return (+n || 0).toLocaleString('ko-KR') + '원'; };
   var who = function () { try { return localStorage.getItem('iching_reviewer') || ''; } catch (e) { return ''; } };
+  var INQ_CAT = { payment: '결제', refund: '환불', content: '풀이·콘텐츠', account: '계정·로그인', etc: '기타' }, INQ_ST = { received: '답변 대기', answered: '답변 완료', closed: '종료' };
+  var kstAt = function (t) { if (!t) return ''; var d = new Date(Date.parse(t) + 9 * 3600000); return isNaN(d) ? '' : d.toISOString().slice(0, 16).replace('T', ' '); };   // 한국 시간
   var STATUS = { pending: '결제 대기', paid: '결제 완료', failed: '실패', canceled: '취소', partial_canceled: '부분 취소' };
   function api(method, body) {
     return fetch('/api/commerce/admin', { method: method, headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who()) }, body: body ? JSON.stringify(body) : undefined })
@@ -56,7 +58,26 @@
         '<p class="muted" style="margin:8px 0 0;font-size:.84rem">주문표 기준(테스트 제외): 주문 생성 <b>' + fn.total.orders + '</b>건 · 결제 완료 <b>' + fn.total.paidOrders + '</b>건</p>' +
         '<details style="margin-top:8px"><summary class="muted">날짜별 보기</summary><div style="overflow-x:auto"><table class="tbl" style="width:100%;font-size:.8rem;margin-top:6px"><thead><tr><th>날짜</th>' + fn.steps.map(function (s) { return '<th style="text-align:right">' + esc(fn.labels[s] || s) + '</th>'; }).join('') + '<th style="text-align:right">주문</th><th style="text-align:right">결제</th></tr></thead><tbody>' + dayRows + '</tbody></table></div></details></div>';
     }
-    var html = readyHtml + salesHtml + funnelHtml +'<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">결제 준비 상태</h3><ul style="margin:0;padding-left:18px;line-height:1.8">' +
+    // 1:1 문의(마이페이지): 답변은 알림 메일에 답장해서 보내고, 여기서는 '답변 완료'로 표시만 한다(회원 마이페이지 문의 내역에 보인다)
+    var iq = d.inquiries, inqHtml = '';
+    if (iq) {
+      var waiting = iq.filter(function (q) { return q.status === 'received'; });
+      var list = S.inqAll ? iq : waiting;
+      inqHtml = '<div class="card" style="margin-top:12px" id="cmInq"><h3 style="margin:0 0 6px;color:var(--gold)">1:1 문의 <span class="muted" style="font-size:.85rem">답변 대기 ' + waiting.length + '건 · 최근 ' + iq.length + '건</span></h3>' +
+        '<p class="muted" style="margin:0 0 8px;font-size:.84rem">답변은 관리자 알림 메일(ADMIN_ALERT_EMAIL)에 <b>답장</b>해서 보냅니다. 답장한 뒤 <b>답변 완료</b>를 눌러 주세요. 회원 마이페이지의 문의 내역에 그대로 표시됩니다.</p>' +
+        '<label class="muted" style="font-size:.85rem"><input type="checkbox" id="cmInqAll"' + (S.inqAll ? ' checked' : '') + '> 답변 완료·종료도 보기</label>' +
+        (list.length ? '<div style="display:grid;gap:8px;margin-top:8px">' + list.map(function (q) {
+          var st = q.status, color = st === 'received' ? '#E8B04B' : st === 'answered' ? '#7FD1A8' : 'var(--muted, #999)';
+          var acts = st === 'received' ? '<button class="btn" data-inq="' + q.id + '" data-st="answered">답변 완료</button> <button class="btn" data-inq="' + q.id + '" data-st="closed">종료(답변 없이)</button>'
+            : '<button class="btn" data-inq="' + q.id + '" data-st="received">답변 대기로 되돌리기</button>' + (st === 'answered' ? ' <button class="btn" data-inq="' + q.id + '" data-st="closed">종료</button>' : '');
+          var mailto = 'mailto:' + encodeURIComponent(q.email || '') + '?subject=' + encodeURIComponent('Re: [1:1 문의 #' + q.id + '] ' + (q.subject || ''));
+          return '<details style="border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 12px"' + (st === 'received' ? ' open' : '') + '><summary style="cursor:pointer"><b>#' + q.id + ' ' + esc(q.subject) + '</b> <span style="color:' + color + ';font-size:.85rem">· ' + esc(INQ_ST[st] || st) + '</span> <span class="muted" style="font-size:.82rem">' + esc(INQ_CAT[q.category] || q.category) + ' · ' + esc(kstAt(q.created_at)) + '</span></summary>' +
+            '<div style="margin-top:8px;font-size:.88rem;line-height:1.6"><div class="muted">회원 ' + esc(q.email) + (q.order_id ? ' · 주문 ' + esc(q.order_id) : '') + (q.mailed ? '' : ' · <span style="color:#E8B04B">알림 메일 발송 실패</span>') + (q.answered_at ? ' · 답변 ' + esc(kstAt(q.answered_at)) : '') + '</div>' +
+            '<div style="white-space:pre-wrap;margin:6px 0;padding:8px 10px;background:rgba(0,0,0,.25);border-radius:8px">' + esc(q.body) + '</div>' +
+            '<div class="row" style="gap:6px;flex-wrap:wrap">' + acts + ' <a class="btn" href="' + esc(mailto) + '">메일로 답장 쓰기</a></div></div></details>';
+        }).join('') + '</div>' : '<p class="muted" style="margin:8px 0 0">' + (S.inqAll ? '문의가 없습니다.' : '답변을 기다리는 문의가 없습니다.') + '</p>') + '</div>';
+    }
+    var html = readyHtml + inqHtml + salesHtml + funnelHtml +'<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">결제 준비 상태</h3><ul style="margin:0;padding-left:18px;line-height:1.8">' +
       cfRow(cf.supabase, '회원·주문 저장소(Supabase)', 'Cloudflare 환경변수 SUPABASE_URL·SUPABASE_SERVICE_KEY') +
       cfRow(cf.anon, '로그인(Supabase 공개 키)', '환경변수 SUPABASE_ANON_KEY') +
       '<li><b>지금 쓰는 결제사: ' + (cf.provider === 'portone' ? '포트원' : cf.provider === 'toss' ? '토스페이먼츠' : '없음(결제 준비 중)') + '</b> <span class="muted">— 포트원 값 3개가 다 있으면 포트원, 아니면 토스. 환경변수 PAY_PROVIDER=portone|toss 로 고정 가능</span></li>' +
@@ -93,6 +114,16 @@
     root.querySelectorAll('[data-regrant]').forEach(function (b) { b.onclick = function () { post({ action: 'regrant', orderId: b.dataset.regrant }, '권한을 다시 넣었습니다'); }; });
     root.querySelectorAll('[data-test]').forEach(function (b) { b.onclick = function () { var on = b.dataset.on === '1'; post({ action: 'set-test', orderId: b.dataset.test, isTest: on }, on ? '테스트 주문으로 표시했습니다(매출에서 빠집니다)' : '테스트 표시를 해제했습니다(매출에 들어갑니다)'); }; });
     var csvBtn = root.querySelector('#cmCsv'); if (csvBtn) csvBtn.onclick = downloadCsv;
+    var inqAll = root.querySelector('#cmInqAll'); if (inqAll) inqAll.onchange = function () { S.inqAll = inqAll.checked; draw(); };
+    root.querySelectorAll('[data-inq]').forEach(function (b) {
+      b.onclick = function () {
+        var id = +b.dataset.inq, st = b.dataset.st; b.disabled = true;
+        api('POST', { action: 'inquiry-status', id: id, status: st }).then(function (r) {
+          (S.data.inquiries || []).forEach(function (q) { if (q.id === id) { q.status = r.inquiry.status; q.answered_at = r.inquiry.answered_at; } });
+          msg('#' + id + ' 문의를 ' + (INQ_ST[st] || st) + '로 바꿨습니다');
+        }).catch(function (e) { b.disabled = false; msg(e.message, true); });
+      };
+    });
   }
   // 오늘(한국 시간)·이번 달 1일
   function kstToday() { return new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10); }
