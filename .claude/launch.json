@@ -53,6 +53,17 @@
       }
     },
     {
+      "name": "cycle-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        ".claude/report-dev.js"
+      ],
+      "port": 8797,
+      "env": {
+        "PORT": "8797"
+      }
+    },
+    {
       "name": "rebuild-admin",
       "runtimeExecutable": "node",
       "runtimeArgs": [

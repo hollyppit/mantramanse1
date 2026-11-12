@@ -40,7 +40,15 @@ const root = path.join(__dirname, '..');
   r = await put({ on: false }); ok(r.j.elementFlow === true, '모두 끄기는 elementFlow 를 건드리지 않음');
   r = await put({ flags: { elementFlow: false } }); ok(r.j.elementFlow === false, 'elementFlow 따로 끄기');
   ok(/elementFlow: false/.test(fs.readFileSync(path.join(root, 'feature-flags.js'), 'utf8')), 'feature-flags.js elementFlow 기본 꺼짐');
-  ok(/'elementFlow'].forEach/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')), '사용자 화면이 관리자 스위치 elementFlow 를 읽음');
+  ok(/'elementFlow'(, '[a-zA-Z]+')*\].forEach/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')), '사용자 화면이 관리자 스위치 elementFlow 를 읽음');
+  // luckCycle(운세 흐름 오행 사이클: 대운 30년·세운 2년 묶음): 같은 규칙 — 기본 꺼짐, 모두 켜기에 묶이지 않음, flags 로만
+  ok((await get()).j.luckCycle === false, 'luckCycle 기본 꺼짐');
+  r = await put({ on: true }); ok(r.j.luckCycle === false, '모두 켜기는 luckCycle 를 켜지 않음');
+  r = await put({ flags: { luckCycle: true } }); ok(r.j.luckCycle === true && r.j.elementFlow === false, 'luckCycle 따로 켜기');
+  r = await put({ on: false }); ok(r.j.luckCycle === true, '모두 끄기는 luckCycle 를 건드리지 않음');
+  r = await put({ flags: { luckCycle: false } }); ok(r.j.luckCycle === false, 'luckCycle 따로 끄기');
+  ok(/luckCycle: false/.test(fs.readFileSync(path.join(root, 'feature-flags.js'), 'utf8')), 'feature-flags.js luckCycle 기본 꺼짐');
+  ok(/'luckCycle'\].forEach/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')), '사용자 화면이 관리자 스위치 luckCycle 를 읽음');
   const before = JSON.stringify((await get()).j); await put({ flags: { evil: true } }); ok(JSON.stringify((await get()).j) === before, '거부된 요청은 저장하지 않음');
   r = await put({ on: true }, 'pw-test', { 'x-reviewer': '%E0%A4%A' }); ok(r.s === 200, '잘못된 x-reviewer 헤더');
   // 저장소 오류·오염된 값은 꺼짐으로 취급

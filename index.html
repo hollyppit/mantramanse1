@@ -872,6 +872,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="compat-pair.js"></script>
 <script src="engine.js"></script>
 <script src="luck-interpret.js"></script>
+<script src="luck-cycle.js"></script>
 <script src="wealth-career-data.js"></script>
 <script src="wealth-career-data-2.js"></script>
 <script src="wealth-career-data-3.js"></script>
@@ -7189,8 +7190,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 관리자 화면의 [모두 켜기]로 켠 신기능 스위치를 한 번 받아 반영한다(켜진 것만 반영, 실패하면 기본값 꺼짐 그대로).
   (function remoteFlags() {
     // elementFlow(오행 흐름 상자)는 [모두 켜기]와 따로 관리자 스위치로 켠다(functions/api/luck-flags.js)
-    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow)) return;
-    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
+    // luckCycle(오행 사이클: 대운 30년·세운 2년 묶음)도 따로 켠다
+    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle)) return;
+    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'luckCycle'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
   })();
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
   let phrLoaded = false;
@@ -7279,6 +7281,54 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
           <p class="note" style="margin-top:6px">파란 테두리 = 이 운에 들어온 오행 · 실선 화살표 = 생, 점선 화살표 = 극(오행 비율 그림과 같은 규칙) · 초록은 이 사주에 도움, 빨강은 부담, 회색은 영향이 작은 연결입니다. 이 판정은 설명용이며 흐름 점수는 바꾸지 않습니다.</p>
         </div></div></div>`;
   }
+  // ── 오행 사이클 (스위치 MANTRA_FLAGS.luckCycle, 기본 꺼짐): 대운 3개 = 장기 분석 구간(30년), 천간 오행이 같은 세운 2년 = 천간 오행 구간.
+  //    계산·문장은 luck-cycle.js(사전 문구 조합, AI 없음). 표시 전용이라 흐름 점수·그래프 막대는 그대로다. 월운·일진은 묶지 않는다.
+  const lcOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.luckCycle === true && window.MantraLuckCycle);
+  const LC_CACHE = new WeakMap(), LC_ECLS = ['wood', 'fire', 'earth', 'metal', 'water'], LC_TONE = { good: 'ib-g', mid: '', bad: 'ib-b' };
+  const lcSpans = ch => { let v = LC_CACHE.get(ch); if (!v) { v = window.MantraLuckCycle.daeunSpans(M, ch); LC_CACHE.set(ch, v); } return v; };
+  // 보여 줄 구간: 대운을 골랐으면 그 대운의 구간, 구간 버튼을 눌렀으면 그 구간, 아니면 지금 대운의 구간
+  function lcSpanSel(ch, sp) {
+    const LC = window.MantraLuckCycle, du = M.daeunAt(ch, NOW), curK = LC.spanIndexOf(sp, du ? ch.daeun.list.indexOf(du) : -1);
+    let k = S.sel && S.sel.kind === 'daeun' ? LC.spanIndexOf(sp, S.sel.i) : S.lcSpan && S.lcSpan.ch === ch && sp[S.lcSpan.k] ? S.lcSpan.k : curK;
+    return { k: k < 0 ? 0 : k, curK };
+  }
+  const lcSteps = r => `<ol class="lc-steps"><li><b>① 오행의 특징</b>${esc(r.steps.trait)}</li><li><b>② 나에게 미치는 영향</b>${esc(r.steps.impact)}</li><li><b>③ 추천 전략</b>${esc(r.steps.strategy)}</li></ol>`;
+  const lcBasis = r => `<details class="adv lc-basis"><summary>판단 근거 보기 (억부·조후·십성·합충형해)</summary><ul class="ib-ul small">${r.basis.map(b => `<li>${esc(b)}</li>`).join('')}</ul><p class="note">미리 써 둔 풀이 문구를 이 사주의 계산값으로 골라 조합했습니다(AI 미사용). 흐름 점수는 기존 계산 그대로이며, 묶음 해석은 점수를 바꾸지 않습니다.</p></details>`;
+  function lcDaeunHTML(ch) {
+    if (!lcOn() || !ch.daeun.list.length) return '';
+    let sp; try { sp = lcSpans(ch); } catch (e) { return ''; }
+    const { k, curK } = lcSpanSel(ch, sp), r = sp[k];
+    const tabs = sp.map((s, i) => `<button type="button" data-act="lc:${i}" aria-pressed="${i === k}" class="lc-tab e-${LC_ECLS[s.mainEl]}${i === k ? ' on' : ''}">${i === curK ? '<i class="lc-now">지금</i>' : ''}<b>구간 ${i + 1}</b><span>${s.startAge}~${s.endAge}세</span><span class="lc-el">${M.EL_K[s.mainEl]}(${M.EL[s.mainEl]}) · ${esc(s.trendWord)}</span></button>`).join('');
+    const turns = r.turns.length ? `<ul class="ib-ul">${r.turns.map(t => `<li class="${t.delta >= 0 ? 'ib-g' : 'ib-b'}">${esc(t.text)}</li>`).join('')}</ul>` : '<p class="small muted">구간 안에서 흐름이 크게 꺾이는 대운 경계는 없어요.</p>';
+    return `<div class="ib lc"><div class="ib-k">장기 분석 구간 · 대운 3개(30년) 묶음</div>
+      <div class="lc-tabs" role="group" aria-label="장기 분석 구간 고르기">${tabs}</div>
+      <p class="lc-hook"><b class="${LC_TONE[r.tone]}">${esc(r.hook)}</b></p>
+      <p class="small muted">${esc(r.label)} · ${r.startYear}~${r.endYear}년 · ${r.startAge}~${r.endAge}세 · 오행 ${esc(r.seq)}${r.banghap ? ' · ' + esc(r.banghap) + ' 방합' : ''} · 흐름 ${r.scores.map(v => signed(v)).join(' → ')}(${esc(r.trendWord)})</p>
+      ${lcSteps(r)}
+      <div class="ib-cols"><div><div class="ib-k">기회</div><p class="small">${esc(r.opp)}</p></div><div><div class="ib-k">위험</div><p class="small">${esc(r.risk)}</p></div></div>
+      <div class="ib-k">핵심 전환점</div>${turns}
+      ${lcBasis(r)}</div>`;
+  }
+  // 세운 10년 타일을 천간 오행이 같은 2년씩 묶어 그린다(타일 자체는 기존 luckTile 그대로)
+  function lcStrip(ys, curY) {
+    return `<div class="lts lc-strip">${window.MantraLuckCycle.pairGroups(ys.map(q => q.year)).map(g => {
+      const qs = g.years.map(Y => ys.find(q => q.year === Y)), e = M.stemEl(qs[0].s);
+      return `<div class="lcp e-${LC_ECLS[e]}" style="grid-column:span ${qs.length}"><span class="lcp-h">${M.EL_K[e]}(${M.EL[e]}) ${g.start}–${String(g.start + 1).slice(2)}</span><div class="lcp-t" style="grid-template-columns:repeat(${qs.length},minmax(0,1fr))">${qs.map(q => luckTile(q, `${q.year} · ${q.age}세`, 'seun:' + q.year, S.sel && S.sel.kind === 'seun' && S.sel.Y === q.year, q.year === curY)).join('')}</div></div>`;
+    }).join('')}</div>`;
+  }
+  function lcSeunHTML(Y) {
+    if (!lcOn()) return '';
+    let r; try { r = window.MantraLuckCycle.seunPair(M, S.ch, Y); } catch (e) { return ''; }
+    if (!r) return '';
+    const yrs = r.years.map(y => { const g = sigFlow(y.score); return `<button type="button" class="lc-yr${S.sel && S.sel.kind === 'seun' && S.sel.Y === y.year ? ' on' : ''}" data-pick="seun:${y.year}"><b>${y.year} ${y.gz} <span class="small muted">${y.age}세</span></b><span class="small">${esc(y.stemTG)}/${esc(y.branchTG)}</span><span><span class="sgchip" style="${sgVars(g)}">${g.n} ${signed(y.score)}</span> ${pill(y.cond)}</span>${y.clash.length || y.harmony.length ? `<span class="small muted">${esc((y.clash[0] || y.harmony[0]))}</span>` : ''}</button>`; }).join('');
+    return `<div class="ib lc lc-pair e-${LC_ECLS[r.el]}"><div class="ib-k">천간 오행 구간 · ${r.start}~${r.end}년 ${M.EL_K[r.el]}(${M.EL[r.el]}) 2년</div>
+      <p class="lc-hook"><b class="${LC_TONE[r.tone]}">${esc(r.hook)}</b></p>
+      <div class="lc-yrs">${yrs}</div>
+      <p class="small">${esc(r.diff)}</p>
+      ${lcSteps(r)}${lcBasis(r)}
+      <p class="note">해마다의 좋고 나쁨은 타일·그래프 점수 그대로입니다. 이 상자는 두 해에 공통인 천간 오행만 묶어 2년 전략을 보여 줍니다. 해를 누르면 그해 근거가 열립니다.</p></div>`;
+  }
+  { const st = document.createElement('style'); st.textContent = '.lc-tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(112px,1fr);gap:6px;overflow-x:auto;padding:10px 2px 6px}.lc-tab{position:relative;border:0;border-top:4px solid var(--c);box-shadow:inset 0 0 0 1px var(--line);background:var(--surface);border-radius:12px;padding:8px 6px;display:grid;gap:2px;justify-items:center;cursor:pointer;font:inherit;color:var(--ink)}.lc-tab span{font-size:.76rem;color:var(--ink-2)}.lc-tab.on{box-shadow:inset 0 0 0 2px var(--ink);background:var(--surface-2)}.lc-now{position:absolute;top:-9px;right:6px;font-style:normal;font-size:.66rem;font-weight:800;background:var(--seal);color:#fff;border-radius:8px;padding:1px 6px}.lc-hook{font-size:1rem;margin:8px 0 2px;line-height:1.5}.lc-steps{margin:8px 0;padding-left:0;list-style:none;font-size:.9rem;line-height:1.7}.lc-steps li{margin:8px 0}.lc-steps b{display:block;font-size:.76rem;color:var(--ink-2)}.lc-yrs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}.lc-yr{border:0;box-shadow:inset 0 0 0 1px var(--line);border-radius:12px;background:var(--surface);padding:8px 10px;display:grid;gap:4px;justify-items:start;text-align:left;cursor:pointer;font:inherit;color:var(--ink)}.lc-yr.on{box-shadow:inset 0 0 0 2px var(--ink)}.ib.lc-pair{border-left:4px solid var(--c)}.lts.lc-strip{grid-auto-columns:minmax(92px,1fr)}.lcp{display:grid;gap:4px;align-content:start;border-radius:18px;padding:4px;background:color-mix(in srgb,var(--c) 16%,transparent)}.lcp-h{font-size:.72rem;font-weight:800;color:var(--ink);text-align:center;padding-top:2px}.lcp-t{display:grid;gap:4px}.lc-basis summary{cursor:pointer;font-size:.85rem;color:var(--ink-2);margin-top:8px}'; document.head.appendChild(st); }
   function detailHTML(title, x, extra = '', kind = '', banner = '') {
     if (!x || !x.ev) return '';
     const e = x.ev, w = e.weights;
@@ -7367,7 +7417,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const best = [...ys].sort((a, b) => b.combined - a.combined).filter(q => q.combined >= CC.tailwind).slice(0, 3);
     const worst = [...ys].sort((a, b) => a.combined - b.combined).filter(q => q.combined <= CC.caution).slice(0, 3);
     const btn = q => `<button type="button" class="chip ${q.combined >= 0 ? 'good' : 'bad'}" data-pick="seun:${q.year}" style="border:0;cursor:pointer">${q.year} ${M.gzName(q)} ${signed(q.combined)}</button>`;
-    const strip = `<div class="lts">${ys.map(q => luckTile(q, `${q.year} · ${q.age}세`, 'seun:' + q.year, S.sel && S.sel.kind === 'seun' && S.sel.Y === q.year, q.year === curY)).join('')}</div>`;
+    const strip = lcOn() ? lcStrip(ys, curY) : `<div class="lts">${ys.map(q => luckTile(q, `${q.year} · ${q.age}세`, 'seun:' + q.year, S.sel && S.sel.kind === 'seun' && S.sel.Y === q.year, q.year === curY)).join('')}</div>`;
     return `<div><h3 style="margin-bottom:8px">앞으로 10년</h3>${strip}</div>
       <div class="list">
         <div class="li"><span class="k">좋은 해</span><span class="v">${best.length ? best.map(btn).join('') : `<span class="muted small">+${CC.tailwind} 이상인 해가 없습니다</span>`}</span><span></span></div>
@@ -7463,6 +7513,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${chartLegend()}
       <div class="chart" data-chart="daeun"></div>
       <div class="lts">${ch.daeun.list.map((x, i) => luckTile(x, `${x.startAge}세 · ${x.startYear}`, 'daeun:' + i, sel.kind === 'daeun' && sel.i === i, du === x)).join('')}</div>
+      ${lcDaeunHTML(ch)}
       ${unDaeunHTML(ch, du)}
       ${daeunDetail || '<p class="note">막대 높이는 흐름 적합도, 색은 좋고 나쁨(최고·좋음·무난·주의·부담), 막대 아래 글자는 주 흐름(기회·확장·수확·축적), 변동·방어는 테두리와 아래 글자(변·방)입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
     </section>
@@ -7471,6 +7522,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${chartLegend()}
       <div class="chart" data-chart="life"></div>
       ${yearSummary(curY)}
+      ${lcSeunHTML(sel.kind === 'seun' ? sel.Y : curY)}
       ${envTimeline('seun')}
       ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 좋고 나쁨(최고·좋음·무난·주의·부담), 테두리·아래 글자는 변동·방어 상태입니다. 순풍·보통·주의·부담 같은 상태는 툴팁과 타일 배지로 따로 보입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
     </section>
@@ -9407,10 +9459,17 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   function drawDiv(el, items, opt = {}) {
     const n = items.length; const cw = el.clientWidth || 320;
-    const W = Math.max(cw, n * chartStep(cw)), H = 276, L = 34, R = 6, T = 30, B = 72;
+    const SP = opt.spans && opt.spans.length ? 22 : 0;   // 오행 사이클: 30년 묶음 괄호 줄을 위에 더한다(막대 영역 높이는 그대로)
+    const W = Math.max(cw, n * chartStep(cw)), H = 276 + SP, L = 34, R = 6, T = 30 + SP, B = 72;
     const step = (W - L - R) / n, bw = Math.min(30, step * 0.58);
     const RG = 60, y = v => T + (RG - Math.max(-RG, Math.min(RG, v))) / (2 * RG) * (H - T - B);   // 점수 대부분이 ±40 안이라 세로축은 ±60
     let s = svgEl(W, H);
+    if (SP) opt.spans.forEach(sp => {
+      const x0 = L + step * sp.a + 3, x1 = L + step * (sp.b + 1) - 3, col = `var(--${LC_ECLS[sp.el]}-ink)`;
+      if (sp.on) s += `<rect x="${x0}" y="${T}" width="${x1 - x0}" height="${H - T - B}" rx="6" style="fill:var(--${LC_ECLS[sp.el]});opacity:.1"/>`;
+      s += `<g data-act="lc:${sp.k}" style="cursor:pointer"><title>${esc(sp.tip)}</title><path d="M${x0},${SP + 6} V${SP} H${x1} V${SP + 6}" style="fill:none;stroke:${col};stroke-width:${sp.on ? 2.5 : 1.5}"/>`
+        + `<rect x="${x0}" y="0" width="${x1 - x0}" height="${SP + 8}" style="fill:transparent"/><text x="${(x0 + x1) / 2}" y="${SP - 6}" text-anchor="middle" style="fill:${col};font-size:11px;font-weight:${sp.on ? 900 : 700}">${esc(sp.label)}</text></g>`;
+    });
     s += flowZones(y, L, W - R, RG);
     for (const g of [60, 30, 0, -30, -60]) {
       s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" style="stroke:${g === 0 ? 'var(--ink-3)' : 'var(--line)'};stroke-width:1" ${g && Math.abs(g) !== RG ? 'stroke-dasharray="3 3"' : ''}/>`;
@@ -9434,7 +9493,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (it.sub2) s += `<text x="${cx}" y="${H - B + 45}" text-anchor="middle" style="fill:var(--ink-3);font-size:10px">${it.sub2}</text>`;
       if (it.ph) s += `<text x="${cx}" y="${H - B + 58}" text-anchor="middle" style="fill:${m6Col(it.ph)};font-size:10px;font-weight:800">${flowTxt(it.ph)}</text>`;
       if (it.sel) s += `<text x="${cx}" y="${v >= 0 ? top - 18 : top + h + 27}" text-anchor="middle" style="fill:var(--ink);font-size:11px;font-weight:700">${signed(v)}</text>`;
-      s += `<rect class="hit" x="${cx - step / 2}" y="0" width="${step}" height="${H}" style="fill:transparent" data-pick="${it.pick}" data-tip="${esc(it.tip)}"/>`;
+      s += `<rect class="hit" x="${cx - step / 2}" y="${SP ? SP + 8 : 0}" width="${step}" height="${H - (SP ? SP + 8 : 0)}" style="fill:transparent" data-pick="${it.pick}" data-tip="${esc(it.tip)}"/>`;
     });
     el.innerHTML = s + '</svg>';
     { let k = items.findIndex(q => q.sel); if (k < 0) k = items.findIndex(q => q.cur); chartFit(el, W, k >= 0 ? L + step * (k + 0.5) : null); }
@@ -9484,6 +9543,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     ov.addEventListener('mouseleave', () => { xh.style.opacity = 0; xd.style.opacity = 0; hideTip(); });
     ov.addEventListener('click', ev => { const d = nearest(ev); if (d) pick('seun:' + d.year); });
   }
+  // 대운 그래프 위 30년 묶음 괄호(오행 사이클 스위치가 켜졌을 때만). 막대·점수는 그대로
+  function lcChartSpans(ch) {
+    if (!lcOn()) return {};
+    try {
+      const sp = lcSpans(ch), { k } = lcSpanSel(ch, sp);
+      return { spans: sp.map((s, i) => ({ a: s.idx[0], b: s.idx[s.idx.length - 1], k: i, el: s.mainEl, on: i === k, label: (s.idx.length === 3 ? `30년 구간 ${i + 1}` : `구간 ${i + 1}`) + ` · ${M.EL_K[s.mainEl]}`, tip: `${s.label} ${s.startAge}~${s.endAge}세 · ${s.hook}` })) };
+    } catch (e) { return {}; }
+  }
   function drawCharts() {
     const ch = S.ch; if (!ch) return;
     const curMs = NOW;
@@ -9492,7 +9559,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (isDomain()) { drawDomainChart(el, k); return; }
       if (k === 'daeun') {
         const cur = M.daeunAt(ch, curMs);
-        drawDiv(el, ch.daeun.list.map((d, i) => ({ v: luckV(d), cond: d.ev.condition, ph: luckMode(d).mode, ov: d.ev.overlays, alt: showGhost() ? altOf(d) : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: luckTip(`${d.startAge}세 대운 ${M.gzName(d)} (${d.stemTG}/${d.branchTG})`, d) })));
+        drawDiv(el, ch.daeun.list.map((d, i) => ({ v: luckV(d), cond: d.ev.condition, ph: luckMode(d).mode, ov: d.ev.overlays, alt: showGhost() ? altOf(d) : null, label: M.gzName(d), sub: `${d.startAge}세`, sub2: d.startYear, pick: 'daeun:' + i, sel: S.sel && S.sel.kind === 'daeun' && S.sel.i === i, cur: cur === d, tip: luckTip(`${d.startAge}세 대운 ${M.gzName(d)} (${d.stemTG}/${d.branchTG})`, d) })), lcChartSpans(ch));
       } else if (k === 'wolun') {
         const ms = M.wolun(ch, S.selYear);
         drawDiv(el, ms.map((m, i) => { const nx = ms[i + 1] ? ms[i + 1].startMs : Infinity; return { v: luckV(m), cond: m.ev.condition, ph: luckMode(m).mode, ov: m.ev.overlays, alt: showGhost() ? altOf(m) : null, label: M.gzName(m), sub: m.termName, pick: 'wolun:' + i, sel: S.sel && S.sel.kind === 'wolun' && S.sel.i === i, cur: curMs >= m.startMs && curMs < nx, tip: luckTip(`${m.termName}~ ${M.gzName(m)} (${m.stemTG}/${m.branchTG})`, m) }; }));
@@ -10058,6 +10125,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (a === 'more-tabs') { S.more = !S.more; render(); return; }
       if (a === 'to-top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
       if (a === 'edit') { if (S.editing) readForm(); S.editing = !S.editing; render(); return; }
+      if (a.startsWith('lc:')) { S.lcSpan = { ch: S.ch, k: +a.slice(3) }; if (S.sel && S.sel.kind === 'daeun') S.sel = null; render(); return; }
       if (a.startsWith('year:')) { const d = +a.slice(5); S.selYear = d === 0 ? M.yearPillarAt(NOW).sajuYear : Math.max(M.MIN_Y, Math.min(M.MAX_Y - 2, S.selYear + d)); if (S.sel && S.sel.kind === 'wolun') S.sel = null; render(); return; }
       if (a.startsWith('zwy:')) { const d = +a.slice(4); S.zwY = d === 0 ? zwNowY() : Math.max(S.ch.ziwei.lunar.y, (S.zwY ?? zwNowY()) + d); render(); return; }
       if (a.startsWith('ym:')) { const d = +a.slice(3); if (d === 0) S.selYM = [TODAY[0], TODAY[1]]; else { let [y, m] = S.selYM; m += d; if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; } S.selYM = [y, m]; } if (S.sel && S.sel.kind === 'ilun') S.sel = null; render(); return; }
