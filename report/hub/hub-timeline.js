@@ -51,6 +51,16 @@
     return copyP;
   }
 
+  // 그래프 지표 계산 모듈(timeline-graph.js)과 30년·2년 구간(luck-cycle.js, 스위치 luckCycle)·오행 흐름(스위치 elementFlow)을 불러온다. 실패해도 예전 그래프로 그린다.
+  var graphP = null;
+  function loadGraph() {
+    if (graphP) return graphP;
+    graphP = Promise.all([root.MantraTLGraph ? Promise.resolve() : H.load('/report/hub/timeline-graph.js?v=20261112-graph').catch(function () { }), flagsJson()]).then(function (r) {
+      var F = root.MANTRA_FLAGS || {}, f = r[1] || {}, lc = F.luckCycle === true || f.luckCycle === true, ef = F.elementFlow === true || f.elementFlow === true;
+      return (lc && !root.MantraLuckCycle ? H.load('/luck-cycle.js?v=20261112-graph').catch(function () { }) : Promise.resolve()).then(function () { return { lc: lc && !!root.MantraLuckCycle, ef: ef }; });
+    }).catch(function () { return { lc: false, ef: false }; });
+    return graphP;
+  }
   H.route('timeline', function (q, ctx) {
     var PREVIEW = !!Ob.preview;
     if (!P.has() && !PREVIEW) return H.replace('#/welcome');
@@ -62,17 +72,18 @@
     H.view('<p class="pend">운명의 타임라인을 펼치는 중…</p>');
     Ob.config().then(function (cfg) {
       if (!cfg.timeline || cfg.timeline.enabled === false) return H.replace('#/');
-      return Promise.all([H.sajuKit(), PREVIEW ? H.engine().then(function (M) { return M.compute(SAMPLE); }) : H.chart(), loadTl().then(loadWorlds), loadCopy()]).then(function (r) { if (H.alive(ctx)) draw(q, ctx, cfg, r[0], r[1], PREVIEW, root.ReportV2.Explore.mergeWorlds(r[2]), r[3]); });
+      return Promise.all([H.sajuKit(), PREVIEW ? H.engine().then(function (M) { return M.compute(SAMPLE); }) : H.chart(), loadTl().then(loadWorlds), loadCopy(), loadGraph()]).then(function (r) { if (H.alive(ctx)) draw(q, ctx, cfg, r[0], r[1], PREVIEW, root.ReportV2.Explore.mergeWorlds(r[2]), r[3], r[4]); });
     }).catch(function () { if (!H.alive(ctx)) return; H.view('<p class="pend">타임라인을 불러오지 못했습니다.<br><br><button type="button" class="btn ghost" id="rt">다시 시도</button><br><br><a class="btn ghost sm" href="#/?home=1">홈으로</a></p>'); $('#rt').onclick = function () { H.render(); }; });
   });
 
-  function draw(q, ctx, cfg, kit, ch, PREVIEW, worlds, CP) {
+  function draw(q, ctx, cfg, kit, ch, PREVIEW, worlds, CP, GF) {
     var M = kit.M, T = kit.T, R = root.ReportV2, TL = R.Timeline, L = R.Luck6, TC = cfg.timeline, G = TC.graph, nm = PREVIEW ? '미리보기' : P.name(), mobile = (root.innerWidth || 1024) < 768;
     var now = Date.now(), nowY = new Date(now + 9 * 3600e3).getUTCFullYear(), day = ch.pillars.day, stemK = M.STEM_K[day.s], ju = M.gzNameK(day), g = ch.gender;
     var ig = T.ilganCard(stemK, nm), jc = T.ijuCard(ju, nm, g), S5 = (T.DATA.S || {})[stemK] || {};
     var dl = TL.daeun(M, ch, now), real = dl.filter(function (x) { return !x.pre; });
     var cur = real.filter(function (x) { return x.isCurrent; })[0] || real[0];
-    var st = { d: cur ? cur.idx : null, y: nowY, m: null, ev: null };
+    var st = { d: cur ? cur.idx : null, y: nowY, m: null, ev: null, metric: 'flow' };
+    try { var sm = sessionStorage.getItem('mt_tl_metric'); if (sm && root.MantraTLGraph && root.MantraTLGraph.NAME[sm]) st.metric = sm; } catch (e) { }
     if (q.y && +q.y >= 1901 && +q.y <= 2098) st.y = +q.y;
     var dOf = function (y) { return real.filter(function (x) { return x.startYear <= y && y <= x.endYear; })[0] || null; };
     var d0 = dOf(st.y); if (d0 && q.y) st.d = d0.idx;
@@ -115,17 +126,95 @@
       var head = cp
         ? '<h3>' + esc(cp.hook) + '<small>' + esc(it.six) + ' · ' + esc(it.meaning) + '</small></h3><p class="tq-copy">' + esc(cp.body) + '</p><ul class="tq-copy-l"><li><b>해 볼 것</b>' + esc(cp.do) + '</li><li><b>조심할 것</b>' + esc(cp.trap) + '</li></ul>'
         : '<h3>' + esc(it.six) + '<small>' + esc(it.meaning) + '</small></h3>';
-      return '<article class="tq-card ' + KEYC(it) + (cp ? ' has-copy' : '') + '"><p class="tq-ct">' + esc(title) + '</p>' + head + '<p class="tq-rule"><b>이렇게 판정했어요</b> ' + esc(it.rule) + '</p>' + ov + fieldBars(it) +
+      return '<article class="tq-card ' + KEYC(it) + (cp ? ' has-copy' : '') + '"><p class="tq-ct">' + esc(title) + '</p>' + head + '<p class="tq-rule"><b>이렇게 판정했어요</b> ' + esc(it.rule) + '</p>' + ov + (TG && it._ref ? domHtml(it, lvl) + structHtml(it, lvl) : fieldBars(it)) +
         '<p class="tq-sc">흐름 점수 ' + pct(it.scores.fit) + ' · 운의 세기 ' + it.scores.intensity + ' · 변화 신호 ' + it.scores.volatility + (it.condition ? ' · 상태 ' + esc(it.condition) : '') + '</p>' +
         '<div class="tq-card-acts"><button type="button" class="tq-lnk" data-ev="' + lvl + '" aria-expanded="' + open + '">' + (open ? '근거 닫기' : '자세한 근거 보기') + '</button><a class="tq-lnk" href="#/go?to=future" data-track="timeline_topic_click" data-p="detail_' + lvl + '">이 시기 상세 풀이 →</a></div>' +
         (open ? '<div class="tq-evbox">' + TL.evidenceHtml(TL.evidence(M, ch, it)) + '</div>' : '') + '</article>';
     }
-    function barChart(items, o) { // 막대 그래프: 버튼 하나가 막대 하나. 높이 = 흐름 점수, 색 = 6분류(이름 글자도 함께 표시 — 색에만 의존하지 않는다)
+    /* ── 그래프 지표(2026-11-12, 만세력 운세 흐름 탭과 같은 기준): 전체 흐름 · 연애 · 재물 · 건강 · 사고수 · 직업·가족 세부.
+          막대 높이 = 고른 지표 점수(0~100), 막대 색·위 글자 = 신호등 단계(최고·좋음·무난·주의·부담), 아래 작은 글자 = 그 시기의 성격(6분류).
+          계산은 timeline-graph.js(엔진 값 그대로). 모듈을 못 불러오면 예전처럼 흐름 점수·6분류 색으로 그린다. ── */
+    var TG = root.MantraTLGraph || null;
+    var metric = function () { return TG ? st.metric : 'flow'; };
+    var mName = function () { return TG ? TG.NAME[metric()] : '전체 흐름'; };
+    var valOf = function (it) { var r = it && it._ref, v = TG && r ? TG.value(M, ch, r.p, r.level, metric()) : null; return v || { v: pct(it.scores.fit), sig: null, tags: [], summary: '' }; };
+    var sgChip = function (sg) { return sg ? '<i class="tq-sgb" style="background:' + sg.c + ';color:' + sg.t + '">' + sg.n + '</i>' : ''; };
+    function metricBar(compact) {
+      if (!TG) return '';
+      if (compact) return '<div class="tq-metric compact" role="group" aria-label="그래프 지표"><div class="tq-mchips">' + TG.METRICS.map(function (x) { return '<button type="button" class="tq-mchip' + (metric() === x[0] ? ' on' : '') + '" data-metric="' + x[0] + '" aria-pressed="' + (metric() === x[0]) + '">' + esc(x[1]) + '</button>'; }).join('') + '</div></div>';
+      var m = metric(), btn = function (x, suf) { return '<button type="button" class="tq-mchip' + (m === x[0] ? ' on' : '') + '" data-metric="' + x[0] + '" aria-pressed="' + (m === x[0]) + '">' + esc(x[1]) + (suf || '') + '</button>'; };
+      var note = TG.NOTE[m] || TG.NOTE.sub;
+      var legendTxt = (m === 'flow' ? '색 = 이 시기가 나에게 얼마나 유리한가(흐름 점수 기준)' : '색 = 이 사주의 평소 수준보다 얼마나 좋은가' + (m === 'accident' ? '(사고수는 낮을수록 좋음)' : '')) + ' · 막대 높이 = ' + mName() + ' 점수(0~100) · 막대 아래 작은 글자 = 그 시기의 성격(기회·확장·수확·축적·변동·방어)';
+      return '<div class="tq-metric" role="group" aria-label="그래프 지표"><p class="tq-mh"><b>그래프 지표</b><span>인생 전체·대운·해·달 그래프에 함께 적용돼요</span></p>' +
+        '<div class="tq-mchips">' + TG.METRICS.map(function (x) { return btn(x); }).join('') + '</div>' +
+        '<p class="tq-sub">' + esc(note) + '</p>' +
+        '<details class="tq-how"' + (mobile ? '' : ' open') + '><summary>그래프 보는 법</summary><p class="tq-sgleg">' + TG.SIG.map(function (g) { return sgChip(g); }).join('') + '</p><p class="tq-sub">' + esc(legendTxt) + '</p></details></div>';
+    }
+    function barChart(items, o) { // 막대 그래프: 버튼 하나가 막대 하나. 높이 = 고른 지표 점수, 색·위 글자 = 신호등 단계, 아래 글자 = 6분류(색에만 의존하지 않는다)
       return '<div class="tq-chart ' + (o.cls || '') + '" role="group" aria-label="' + esc(o.label) + '">' + items.map(function (it, i) {
         if (it.pre) return '<span class="tq-bar pre" aria-label="' + esc(it.startAge + '~' + it.endAge + '세 대운 전') + '"><b>—</b><u></u><span>' + esc(it.startAge) + '세</span><small>대운 전</small></span>';
-        var sc = pct(it.scores.fit), sel = o.sel(it), now = o.now(it);
-        return '<button type="button" class="tq-bar ' + KEYC(it) + (sel ? ' sel' : '') + (now ? ' now' : '') + '" ' + o.attr(it) + ' aria-pressed="' + sel + '" aria-label="' + esc(o.name(it) + ', ' + it.six + ', 흐름 ' + sc + (now ? ', 지금' : '')) + '"><b>' + sc + '</b><u><i style="height:' + sc + '%"></i></u><span>' + esc(o.top(it)) + '</span><small>' + esc(o.sub(it)) + '</small><em>' + esc(it.six) + '</em>' + (now ? '<s>지금</s>' : '') + '</button>';
+        var vv = valOf(it), sc = vv.v, sg = vv.sig, sel = o.sel(it), now = o.now(it);
+        return '<button type="button" class="tq-bar ' + KEYC(it) + (sg ? ' sg' : '') + (sel ? ' sel' : '') + (now ? ' now' : '') + '" ' + o.attr(it) + (sg ? ' style="--bc:' + sg.c + '"' : '') + ' aria-pressed="' + sel + '" aria-label="' + esc(o.name(it) + ', ' + mName() + ' ' + sc + (sg ? ' ' + sg.n : '') + ', ' + it.six + (now ? ', 지금' : '')) + '"><b>' + sc + sgChip(sg) + '</b><u><i style="height:' + sc + '%"></i></u><span>' + esc(o.top(it)) + '</span><small>' + esc(o.sub(it)) + '</small><em>' + esc(it.six) + '</em>' + (now ? '<s>지금</s>' : '') + '</button>';
       }).join('') + '</div>';
+    }
+    // 인생 전체(태어난 해부터 90년) 연도별 막대 — 대운 구간은 배경 띠, 해를 누르면 그 해의 세운·월운이 열린다
+    function lifeHtml() {
+      if (!TG) return '';
+      var data; try { data = TG.life(M, ch, metric(), 90); } catch (e) { return ''; }
+      if (!data.length) return '';
+      var n = data.length, step = 8, L0 = 30, R0 = 8, T0 = 14, B0 = 30, H0 = 170, W = L0 + R0 + n * step, y = function (v) { return T0 + (100 - v) / 100 * (H0 - T0 - B0); };
+      var s = '<svg class="tq-lifesvg" viewBox="0 0 ' + W + ' ' + H0 + '" width="' + W + '" height="' + H0 + '" role="img" aria-label="' + esc('인생 전체 ' + mName() + ' 그래프') + '">';
+      real.forEach(function (d, i) { var a = Math.max(0, d.startYear - data[0].year), b = Math.min(n, d.endYear - data[0].year + 1); if (b <= a) return; s += '<rect x="' + (L0 + a * step) + '" y="' + T0 + '" width="' + ((b - a) * step) + '" height="' + (H0 - T0 - B0) + '" fill="' + (i % 2 ? 'rgba(255,255,255,.035)' : 'rgba(205,178,122,.05)') + '"/><text x="' + (L0 + a * step + 3) + '" y="' + (T0 + 10) + '" font-size="9" fill="#8a8f9c">' + esc(d.ganzhi) + '</text>'; });
+      [0, 50, 100].forEach(function (g) { s += '<line x1="' + L0 + '" x2="' + (W - R0) + '" y1="' + y(g) + '" y2="' + y(g) + '" stroke="rgba(255,255,255,' + (g === 50 ? '.18' : '.08') + ')" ' + (g === 50 ? 'stroke-dasharray="3 3"' : '') + '/><text x="' + (L0 - 5) + '" y="' + (y(g) + 3) + '" font-size="9" text-anchor="end" fill="#8a8f9c">' + g + '</text>'; });
+      data.forEach(function (q, i) {
+        var x = L0 + i * step, h = Math.max(2, y(0) - y(q.v)), on = q.year === st.y, isNow = q.year === nowY;
+        s += '<rect data-y="' + q.year + '" x="' + (x + 1) + '" y="' + (y(0) - h) + '" width="' + (step - 2) + '" height="' + h + '" rx="1.5" fill="' + q.sig.c + '"' + (on ? ' stroke="#fff" stroke-width="1.5"' : '') + ' style="cursor:pointer"><title>' + esc(q.year + '년 ' + q.gz + ' · ' + q.age + '세 · ' + mName() + ' ' + q.v + ' ' + q.sig.n) + '</title></rect>';
+        if (isNow) s += '<text x="' + (x + step / 2) + '" y="' + (y(0) - h - 4) + '" font-size="9" text-anchor="middle" fill="#cdb27a">지금</text>';
+        if (q.age % 10 === 0) s += '<text x="' + (x + step / 2) + '" y="' + (H0 - B0 + 13) + '" font-size="9" text-anchor="middle" fill="#8a8f9c">' + q.age + '세</text><text x="' + (x + step / 2) + '" y="' + (H0 - B0 + 24) + '" font-size="8" text-anchor="middle" fill="#6c7180">' + q.year + '</text>';
+      });
+      s += '</svg>';
+      return '<h4 class="tq-h4">인생 전체 · ' + esc(mName()) + '</h4><p class="tq-sub">태어난 해부터 90년을 한 해씩 막대로 그렸어요. 배경 띠는 대운 10년 구간이에요. 막대를 누르면 아래 "지금과 앞으로"에서 그 해가 열려요.</p><div class="tq-life">' + s + '</div>';
+    }
+    // 30년 장기 구간(대운 3개 묶음)·2년 천간 오행 구간 — luck-cycle.js(사전 문구 조합, 스위치 luckCycle)
+    var LCm = function () { return GF && GF.lc && root.MantraLuckCycle ? root.MantraLuckCycle : null; }, lcSpans = null;
+    function lcSteps(r) { return '<ol class="tq-lc-steps"><li><b>오행의 특징</b>' + esc(r.steps.trait) + '</li><li><b>나에게 미치는 영향</b>' + esc(r.steps.impact) + '</li><li><b>추천 전략</b>' + esc(r.steps.strategy) + '</li></ol>' + (r.basis && r.basis.length ? '<details class="tq-how"><summary>판단 근거 보기</summary><ul class="tq-lc-basis">' + r.basis.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul><p class="tq-sub">미리 써 둔 문구를 이 사주의 계산값으로 골라 조합했어요(AI 미사용). 흐름 점수는 바꾸지 않아요.</p></details>' : ''); }
+    function spanHtml() {
+      var LC = LCm(); if (!LC || st.d == null) return '';
+      try { lcSpans = lcSpans || LC.daeunSpans(M, ch); var k = LC.spanIndexOf(lcSpans, st.d), sp = lcSpans[k]; if (!sp) return '';
+        return '<div class="tq-lc"><p class="tq-lc-k">30년 장기 구간 · ' + esc(sp.startAge + '~' + sp.endAge + '세 (' + sp.startYear + '~' + sp.endYear + ')') + '</p><div class="tq-lc-bar">' + lcSpans.map(function (x, i) { return '<span class="' + (i === k ? 'on' : '') + '">' + esc(x.startAge + '~' + x.endAge + '세') + '</span>'; }).join('') + '</div><h4>' + esc(sp.hook) + '</h4>' + lcSteps(sp) + '</div>';
+      } catch (e) { return ''; }
+    }
+    function pairHtml() {
+      var LC = LCm(); if (!LC) return '';
+      try { var r = LC.seunPair(M, ch, st.y); if (!r) return ''; return '<div class="tq-lc"><p class="tq-lc-k">' + esc(r.label + ' · ' + r.start + '~' + r.end + '년') + '</p><h4>' + esc(r.hook) + '</h4>' + lcSteps(r) + '</div>'; } catch (e) { return ''; }
+    }
+    // 상세 카드 보강: 고른 지표 점수·신호, 분야별 지수, 운+원국 구조·오행 흐름
+    function domHtml(it, lvl) {
+      if (!TG || !it._ref) return '';
+      var r; try { r = TG.domainOf(M, ch, it._ref.p, lvl); } catch (e) { return ''; }
+      var cell = function (k, label) { var x = r[k]; if (!x) return ''; var sg = TG.sigMetric(k, x.score); return '<div class="tq-dc"><span>' + label + '</span><b>' + Math.round(x.score) + '</b>' + sgChip(sg) + '</div>'; };
+      var m = metric(), sel = m !== 'flow' && r[m] ? r[m] : null;
+      var top = sel ? '<p class="tq-dsel"><b>' + esc(mName()) + ' ' + Math.round(sel.score) + '</b> ' + sgChip(TG.sigMetric(m, sel.score)) + (sel.tags && sel.tags.length ? ' <span>' + esc(sel.tags.join(' · ')) + '</span>' : '') + '</p>' + (sel.summary ? '<p class="tq-sub">' + esc(sel.summary) + '</p>' : '') : '';
+      var loss = (m === 'wealth' || m === 'windfall') && r.windfall && r.windfall.loss ? '<p class="tq-sub">뜻밖의 재물손실 위험 <b>' + Math.round(r.windfall.loss.score) + '</b> ' + sgChip(TG.sigMetric('windfallLoss', r.windfall.loss.score)) + ' (낮을수록 좋음)</p>' : '';
+      return '<div class="tq-dom">' + top + loss + '<div class="tq-dg">' + cell('love', '인연') + cell('wealth', '재물') + cell('career', '직업') + '</div></div>';
+    }
+    function structHtml(it, lvl) {
+      if (!TG || !it._ref) return '';
+      var s = TG.structure(M, ch, it._ref.p, lvl); if (!GF || !GF.ef) s.flow = null;
+      if (!s.flow && !s.patterns.length) return '';
+      return '<div class="tq-st">' + (s.flow ? '<p><b>오행 흐름 · ' + esc(s.flow.verdict) + '</b> <span>' + esc(s.flow.word) + '</span></p><p class="tq-sub">' + esc(s.flow.text) + '</p>' : '') +
+        (s.patterns.length ? '<p class="tq-sub">이 운이 원국과 만드는 구조: ' + s.patterns.map(function (p) { return '<i class="tq-pat ' + (p.good ? 'g' : 'b') + '" title="' + esc(p.label || '') + '">' + esc(p.name) + '</i>'; }).join(' ') + '</p>' : '') + '</div>';
+    }
+    // 지금과 앞으로 맨 위: 앞으로 10년의 좋은 해·조심할 해(고른 지표 기준) + 삼재
+    function tenHtml() {
+      if (!TG) return '';
+      var t; try { t = TG.tenYears(M, ch, nowY, metric()); } catch (e) { return ''; }
+      var chip = function (q) { return '<button type="button" class="tq-ychip' + (q.year === st.y ? ' on' : '') + '" data-y="' + q.year + '" style="--bc:' + q.sig.c + '">' + q.year + ' ' + esc(q.gz) + ' <b>' + q.v + '</b></button>'; };
+      var sj = TG.samjae(M, ch, st.y);
+      return '<div class="tq-ten"><p class="tq-mh"><b>앞으로 10년 · ' + esc(mName()) + '</b><span>' + nowY + '~' + (nowY + 9) + '년</span></p>' +
+        '<p class="tq-trow"><span>좋은 해</span>' + (t.good.length ? t.good.map(chip).join('') : '<em>뚜렷이 좋은 해가 없어요</em>') + '</p>' +
+        '<p class="tq-trow"><span>조심할 해</span>' + (t.bad.length ? t.bad.map(chip).join('') : '<em>뚜렷이 조심할 해가 없어요</em>') + '</p></div>' +
+        (sj ? '<p class="tq-sj"><b>' + st.y + '년 삼재 · ' + esc(sj.stage || '') + '</b> <span>' + esc(sj.group || '') + ' · 전통 민속 참고 신호이며 흐름 점수에는 넣지 않아요.</span></p>' : '');
     }
     var legend = '<ul class="tq-leg" aria-label="운의 6분류">' + L.NAMES.map(function (n) { return '<li class="k-' + L.KEY[n] + '"><i></i><b>' + n + '</b><span>' + esc(L.MEANING[n]) + '</span></li>'; }).join('') + '</ul>';
 
@@ -163,6 +252,7 @@
           body += '<h4 class="tq-h4">이 10년 안의 해</h4><p class="tq-sub">해를 누르면 아래 “지금과 앞으로”에서 그 해의 세운과 월운이 열립니다.</p>' + barChart(ys, { label: sel.ganzhi + ' 대운 안의 해별 흐름', cls: 'seun', attr: function (it) { return 'data-y="' + it.year + '"'; }, sel: function (it) { return st.y === it.year; }, now: function (it) { return !!it.isNow; }, name: function (it) { return it.year + '년 ' + it.ganzhi + ' 세운'; }, top: function (it) { return String(it.year).slice(2) + '년'; }, sub: function (it) { return it.age + '세'; } });
         }
       }
+      if (TG) return metricBar() + lifeHtml() + '<h4 class="tq-h4">대운 10년 · ' + esc(mName()) + '</h4><p class="tq-sub">막대가 높을수록 ' + (metric() === 'accident' ? '주의 신호가 많은 시기예요(사고수는 낮을수록 좋음)' : '나에게 유리한 시기예요') + '. 막대 위 글자는 좋고 나쁨 단계, 아래 작은 글자는 그 시기의 성격이에요. 막대를 누르면 자세한 풀이가 열려요.</p>' + graph + spanHtml() + body;
       return '<p class="tq-sub">막대가 높을수록 내 사주에 잘 맞는 시기예요(흐름 점수 0~100, 50이 보통). 색과 이름은 그 시기의 성격 6가지 중 하나예요. 막대를 누르면 자세한 풀이가 열려요.</p>' + graph + legend + body;
     }
 
@@ -173,7 +263,7 @@
       var seun = yi ? detail(yi, '세운 ' + yi.ganzhi + ' · ' + yi.year + '년' + (yi.age != null ? ' (' + yi.age + '세)' : ''), 'seun') : '';
       var mon = G.wolun ? '<h4 class="tq-h4">월별 흐름 (절기 기준)</h4>' + barChart(ms, { label: st.y + '년 월별 흐름', cls: 'wolun', attr: function (it) { return 'data-m="' + it.month + '"'; }, sel: function (it) { return st.m === it.month; }, now: function (it) { return !!it.isNow; }, name: function (it) { return st.y + '년 ' + it.month + '월 ' + it.ganzhi + ' 월운'; }, top: function (it) { return it.month + '월'; }, sub: function (it) { return it.ganzhi; } }) : '';
       var cm = st.m != null ? ms.filter(function (x) { return x.month === st.m; })[0] : null, monthCard = cm ? detail(cm, '월운 ' + cm.ganzhi + ' · ' + st.y + '년 ' + cm.month + '월 (' + cm.term + ' 이후)', 'wolun') : '';
-      return yr + seun + mon + monthCard + '<p class="tq-sub">월운은 절기를 기준으로 하며, 1월 막대는 소한 이후입니다. 일별 흐름과 택일은 일진 캘린더에서 볼 수 있습니다.</p>';
+      return (TG ? metricBar(true) + tenHtml() : '') + yr + seun + pairHtml() + mon + monthCard + '<p class="tq-sub">월운은 절기를 기준으로 하며, 1월 막대는 소한 이후입니다. 일별 흐름과 택일은 일진 캘린더에서 볼 수 있습니다.</p>';
     }
 
     /* ── 영역 4: 인생의 주요 주제 = 운명 세계 ──
@@ -231,6 +321,7 @@
         return;
       }
       if ((b = t.closest('[data-d]'))) { st.d = +b.getAttribute('data-d'); st.ev = null; redraw('flow'); return; }
+      if ((b = t.closest('[data-metric]'))) { st.metric = b.getAttribute('data-metric'); st.ev = null; try { sessionStorage.setItem('mt_tl_metric', st.metric); } catch (e) { } Ob.track('timeline_metric_select', { m: st.metric }); redraw('flow'); redraw('now'); return; }
       if ((b = t.closest('[data-y]'))) { st.y = +b.getAttribute('data-y'); st.m = null; st.ev = null; Ob.track('timeline_year_select', {}); redraw('flow'); if ($('#tqb-now', root0)) { redraw('now'); var s3 = $('#tq-now', root0); if (s3) s3.scrollIntoView({ behavior: H.reduce ? 'auto' : 'smooth', block: 'start' }); } return; }
       if ((b = t.closest('[data-yy]'))) { st.y = Math.max(1901, Math.min(2098, st.y + (+b.getAttribute('data-yy')))); st.m = null; st.ev = null; var dd = dOf(st.y); if (dd) st.d = dd.idx; redraw('now'); redraw('flow'); return; }
       if ((b = t.closest('[data-m]'))) { var mm = +b.getAttribute('data-m'); st.m = st.m === mm ? null : mm; st.ev = null; redraw('now'); return; }

@@ -122,3 +122,34 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
   #hub .tq-topic{ flex-basis: 72%; max-width: 280px; } #hub .tq-topic > div{ left: 16px; right: 16px; bottom: 20px; } #hub .tq-topic h3{ font-size: 1.15rem; } #hub .tq-topic p{ font-size: .8rem; }
 }
 @media (prefers-reduced-motion: reduce){ #hub .tq *{ transition: none !important; } }
+
+/* 2026-11-12 그래프 업그레이드(만세력 운세 흐름 기준): 지표 칩·신호등 단계·인생 90년·30년 구간·상세 보강 */
+#hub .tq-metric{ margin: 4px 0 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: rgba(19,24,39,.6); }
+#hub .tq-metric.compact{ padding: 8px 10px; margin-bottom: 10px; }
+#hub .tq-mh{ display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; margin-bottom: 8px; } #hub .tq-mh b{ font-size: .9rem; color: var(--ink); } #hub .tq-mh span{ font-size: .74rem; color: var(--ink-3); }
+#hub .tq-mchips{ display: flex; flex-wrap: wrap; gap: 6px; }
+#hub .tq-mchip{ min-height: 36px; padding: 6px 13px; border: 1px solid var(--line); border-radius: 999px; background: rgba(8,10,17,.5); color: var(--ink-2); font: inherit; font-size: .82rem; cursor: pointer; }
+#hub .tq-mchip.on{ border-color: var(--gold); color: #141109; background: var(--gold); font-weight: 700; }
+#hub .tq-how{ margin-top: 8px; } #hub .tq-how > summary{ cursor: pointer; font-size: .78rem; color: var(--gold); }
+#hub .tq-sgleg{ display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+#hub .tq-sgb{ display: inline-block; font-style: normal; font-size: .62rem; font-weight: 700; line-height: 1; padding: 3px 6px; border-radius: 999px; vertical-align: middle; }
+#hub .tq-bar b .tq-sgb{ display: block; margin: 3px auto 0; width: max-content; }
+#hub .tq-bar.sg u i{ background: var(--bc); }
+#hub .tq-bar.sg em{ color: var(--ink-3); }
+#hub .tq-life{ overflow-x: auto; margin: 6px 0 14px; padding-bottom: 4px; scrollbar-width: thin; }
+#hub .tq-lifesvg{ display: block; }
+#hub .tq-lc{ margin: 12px 0; padding: 14px 16px; border: 1px solid rgba(205,178,122,.35); border-radius: 14px; background: rgba(205,178,122,.06); }
+#hub .tq-lc-k{ font-size: .74rem; color: var(--gold); letter-spacing: .04em; } #hub .tq-lc h4{ font-family: var(--f-serif); font-size: 1.02rem; margin: 6px 0; color: var(--ink); }
+#hub .tq-lc-bar{ display: flex; gap: 4px; margin: 8px 0 4px; } #hub .tq-lc-bar span{ flex: 1; text-align: center; font-size: .7rem; padding: 4px 2px; border-radius: 6px; background: rgba(255,255,255,.05); color: var(--ink-3); } #hub .tq-lc-bar span.on{ background: rgba(205,178,122,.25); color: var(--gold-l); }
+#hub .tq-lc-steps{ margin: 6px 0 0 18px; padding: 0; } #hub .tq-lc-steps li{ font-size: .84rem; color: var(--ink-2); margin: 4px 0; } #hub .tq-lc-steps b{ display: block; font-size: .74rem; color: var(--gold); }
+#hub .tq-lc-basis{ margin: 6px 0 0 18px; font-size: .78rem; color: var(--ink-3); }
+#hub .tq-dom{ margin: 10px 0; } #hub .tq-dsel{ font-size: .9rem; color: var(--ink); } #hub .tq-dsel span{ font-size: .76rem; color: var(--ink-3); }
+#hub .tq-dg{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+#hub .tq-dc{ display: grid; justify-items: center; gap: 2px; padding: 8px 4px; border-radius: 10px; background: rgba(255,255,255,.04); } #hub .tq-dc span{ font-size: .7rem; color: var(--ink-3); } #hub .tq-dc b{ font: 600 1rem Georgia, serif; color: var(--ink); }
+#hub .tq-st{ margin: 10px 0; padding: 10px 12px; border-left: 2px solid rgba(205,178,122,.5); background: rgba(255,255,255,.03); border-radius: 0 10px 10px 0; } #hub .tq-st p b{ font-size: .86rem; color: var(--ink); } #hub .tq-st p span{ font-size: .76rem; color: var(--ink-3); }
+#hub .tq-pat{ display: inline-block; font-style: normal; font-size: .72rem; padding: 2px 8px; border-radius: 999px; margin: 2px 2px 0 0; } #hub .tq-pat.g{ background: rgba(47,191,113,.18); color: #8fe0b2; } #hub .tq-pat.b{ background: rgba(235,107,91,.18); color: #f3a59a; }
+#hub .tq-ten{ margin: 0 0 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: rgba(19,24,39,.6); }
+#hub .tq-trow{ display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; } #hub .tq-trow > span{ width: 64px; font-size: .76rem; color: var(--ink-3); } #hub .tq-trow em{ font-style: normal; font-size: .78rem; color: var(--ink-3); }
+#hub .tq-ychip{ min-height: 34px; padding: 4px 10px; border: 1px solid var(--bc); border-radius: 999px; background: color-mix(in srgb, var(--bc) 14%, transparent); color: var(--ink); font: inherit; font-size: .78rem; cursor: pointer; } #hub .tq-ychip.on{ background: color-mix(in srgb, var(--bc) 32%, transparent); }
+#hub .tq-sj{ margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; background: rgba(242,165,65,.1); border: 1px solid rgba(242,165,65,.35); font-size: .84rem; color: var(--ink); } #hub .tq-sj span{ font-size: .74rem; color: var(--ink-3); }
+@media (max-width: 720px){ #hub .tq-trow > span{ width: 100%; } }
