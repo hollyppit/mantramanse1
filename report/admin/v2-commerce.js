@@ -24,7 +24,21 @@
     var rdDone = rd.filter(function (x) { return x.ok === true; }).length;
     var readyHtml = rd.length ? '<div class="card"><h3 style="margin:0 0 6px;color:var(--gold)">판매 준비 점검 <span class="muted" style="font-size:.85rem">' + rdDone + ' / ' + rd.length + '</span></h3><p class="muted" style="margin:0 0 8px">실제 판매를 시작하기 전에 모두 ✅ 가 되는지 확인하세요. ⬜ 는 아직 확인할 신호가 없는 항목입니다.</p><ul style="margin:0;padding-left:4px;list-style:none;line-height:1.7">' +
       rd.map(function (x) { return '<li>' + rdIcon(x.ok) + ' <b>' + esc(x.label) + '</b> <span class="muted">— ' + esc(x.note || '') + '</span></li>'; }).join('') + '</ul></div>' : '';
-    var html = readyHtml + '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">결제 준비 상태</h3><ul style="margin:0;padding-left:18px;line-height:1.8">' +
+    // 매출 요약(테스트 주문 제외, 한국 시간) + 기간 CSV 내려받기(부가세 신고·정산 대조용)
+    var sl = d.sales, salesHtml = '';
+    if (sl) {
+      var col = function (s) {
+        var prods = Object.keys(s.products || {}).map(function (k) { var p = s.products[k]; return esc(p.name) + ' ' + p.count + '건'; }).join(' · ');
+        return '<td style="vertical-align:top"><div class="muted" style="font-size:.82rem">' + esc(s.label) + '</div><div style="font-size:1.25rem;font-weight:700">' + won(s.net) + '</div>' +
+          '<div class="muted" style="font-size:.8rem;line-height:1.5">매출 ' + won(s.gross) + ' (' + s.orders + '건)<br>환불 ' + won(s.refundAmount) + ' (' + s.refunds + '건)' + (prods ? '<br>' + prods : '') + '</div></td>';
+      };
+      salesHtml = '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">매출 요약 <span class="muted" style="font-size:.85rem">실매출 = 매출 − 환불 · 테스트 주문 제외 · 한국 시간</span></h3>' +
+        '<table style="width:100%;table-layout:fixed"><tr>' + col(sl.today) + col(sl.week) + col(sl.month) + '</tr></table>' +
+        '<div class="row" style="margin-top:10px;gap:6px;flex-wrap:wrap;align-items:center"><span class="muted">CSV 내려받기</span><input type="date" id="cmFrom" value="' + esc(S.from) + '"> ~ <input type="date" id="cmTo" value="' + esc(S.to) + '">' +
+        '<label class="muted" style="font-size:.85rem"><input type="checkbox" id="cmWithTest"> 테스트 포함</label><button class="btn" id="cmCsv">CSV 내려받기</button></div>' +
+        '<p class="muted" style="margin:6px 0 0;font-size:.82rem">그 기간에 결제되었거나 환불된 주문. 공급가액 = 금액 ÷ 1.1(반올림), 부가세 = 나머지. 엑셀에서 바로 열립니다.</p></div>';
+    }
+    var html = readyHtml + salesHtml + '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">결제 준비 상태</h3><ul style="margin:0;padding-left:18px;line-height:1.8">' +
       cfRow(cf.supabase, '회원·주문 저장소(Supabase)', 'Cloudflare 환경변수 SUPABASE_URL·SUPABASE_SERVICE_KEY') +
       cfRow(cf.anon, '로그인(Supabase 공개 키)', '환경변수 SUPABASE_ANON_KEY') +
       '<li><b>지금 쓰는 결제사: ' + (cf.provider === 'portone' ? '포트원' : cf.provider === 'toss' ? '토스페이먼츠' : '없음(결제 준비 중)') + '</b> <span class="muted">— 포트원 값 3개가 다 있으면 포트원, 아니면 토스. 환경변수 PAY_PROVIDER=portone|toss 로 고정 가능</span></li>' +
@@ -49,6 +63,8 @@
         var days = o.paid_at ? (Date.now() - Date.parse(o.paid_at)) / 86400000 : 0;
         var refund = o.status !== 'paid' ? '' : o.viewed_at ? ' <span class="muted">· 열람함(' + esc(String(o.viewed_at).slice(5, 16).replace('T', ' ')) + ') 환불 제한</span>' : days > 7 ? ' <span class="muted">· 7일 지남</span>' : ' <span style="color:#7FD1A8">· 환불 가능(미열람·7일 이내)</span>';
         var act = o.status === 'paid' ? '<button class="btn" data-cancel="' + esc(o.order_id) + '">결제 취소</button> <button class="btn" data-regrant="' + esc(o.order_id) + '">권한 다시 주기</button>' : '';
+        if (o.status === 'paid' || o.status === 'canceled' || o.status === 'partial_canceled') act += ' <button class="btn" data-test="' + esc(o.order_id) + '" data-on="' + (o.is_test ? '0' : '1') + '">' + (o.is_test ? '테스트 해제' : '테스트로 표시') + '</button>';
+        if (o.is_test) refund += ' <span style="color:#E8B04B">· 테스트(매출 제외)</span>';
         return '<tr><td>' + esc((o.created_at || '').slice(0, 16).replace('T', ' ')) + '</td><td>' + esc(o.product_name) + (o.saju_label ? ' <span class="muted">' + esc(o.saju_label) + '</span>' : '') + '</td><td>' + won(o.amount) + '</td><td>' + (o.status === 'failed' && o.failure === 'expired' ? '만료 <span class="muted">결제 안 함(30분 경과)</span>' : esc(STATUS[o.status] || o.status) + (o.failure ? ' <span class="muted">' + esc(o.failure) + '</span>' : '')) + (o.cancel_reason ? ' <span class="muted">' + esc(o.cancel_reason) + '</span>' : '') + refund + '</td><td class="muted" style="font-size:.76rem">' + esc(o.order_id) + '</td><td>' + act + '</td></tr>';
       }).join('') + '</tbody></table>' : '<p class="muted">아직 주문이 없습니다.</p>') + '</div>';
     if (S.msg) html = '<p class="' + (S.err ? 'err' : 'ok') + '" style="margin:0 0 8px">' + esc(S.msg) + '</p>' + html;
@@ -57,6 +73,20 @@
     root.querySelector('#cmView').onclick = function () { try { localStorage.setItem('mt_view_as_free', viewAsFree() ? '0' : '1'); } catch (e) { } msg(viewAsFree() ? '무료 사용자로 보기를 켰습니다. 무빙툰을 새로 열면 적용됩니다.' : '무료 사용자로 보기를 껐습니다.'); };
     root.querySelectorAll('[data-cancel]').forEach(function (b) { b.onclick = function () { var reason = prompt('취소 사유(고객에게 보이지 않음)', '고객 요청 환불'); if (reason == null) return; if (!confirm('이 주문을 전액 취소하고 열람 권한을 회수합니다. 되돌릴 수 없습니다. 계속할까요?')) return; post({ action: 'cancel', orderId: b.dataset.cancel, reason: reason }, '취소했습니다'); }; });
     root.querySelectorAll('[data-regrant]').forEach(function (b) { b.onclick = function () { post({ action: 'regrant', orderId: b.dataset.regrant }, '권한을 다시 넣었습니다'); }; });
+    root.querySelectorAll('[data-test]').forEach(function (b) { b.onclick = function () { var on = b.dataset.on === '1'; post({ action: 'set-test', orderId: b.dataset.test, isTest: on }, on ? '테스트 주문으로 표시했습니다(매출에서 빠집니다)' : '테스트 표시를 해제했습니다(매출에 들어갑니다)'); }; });
+    var csvBtn = root.querySelector('#cmCsv'); if (csvBtn) csvBtn.onclick = downloadCsv;
+  }
+  // 오늘(한국 시간)·이번 달 1일
+  function kstToday() { return new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10); }
+  S.to = kstToday(); S.from = S.to.slice(0, 8) + '01';
+  function downloadCsv() {
+    var from = root.querySelector('#cmFrom').value, to = root.querySelector('#cmTo').value, t = root.querySelector('#cmWithTest').checked;
+    if (!from || !to || from > to) { msg('기간을 올바르게 골라 주세요', true); return; }
+    S.from = from; S.to = to;
+    fetch('/api/commerce/admin?export=csv&from=' + from + '&to=' + to + (t ? '&test=1' : ''), { headers: { authorization: 'Bearer ' + pw } })
+      .then(function (r) { if (!r.ok) return r.json().catch(function () { return {}; }).then(function (d) { throw new Error(d.error || ('오류 ' + r.status)); }); return r.blob(); })
+      .then(function (blob) { var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'sales_' + from + '_' + to + '.csv'; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000); })
+      .catch(function (e) { msg('CSV 를 받지 못했습니다: ' + e.message, true); });
   }
   function msg(t, err) { S.msg = t; S.err = !!err; draw(); }
   function save() {

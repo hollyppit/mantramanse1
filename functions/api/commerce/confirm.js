@@ -43,7 +43,7 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'payment-failed', code, message: (t.data && t.data.message) || '' }, 400);
   }
   try {
-    const paidFields = { status: 'paid', payment_key: paymentKey, method: t.data.method || null, paid_at: t.data.approvedAt || new Date().toISOString() };
+    const paidFields = { status: 'paid', payment_key: paymentKey, method: t.data.method || null, paid_at: t.data.approvedAt || new Date().toISOString(), is_test: /^test_/.test(String(env.TOSS_SECRET_KEY || '')) };
     const changed = await sbRest(env, `commerce_orders?order_id=eq.${enc(orderId)}&status=eq.pending`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify(paidFields) });
     await grantOrder(env, order, 'payment');
     if (Array.isArray(changed) && changed.length) await mailPurchase(env, { ...order, ...paidFields });

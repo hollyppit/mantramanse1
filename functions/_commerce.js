@@ -243,7 +243,7 @@ export async function settlePortone(env, order) {
     return { ok: false, error: 'amount-mismatch' };
   }
   try {
-    const paidFields = { status: 'paid', payment_key: PORTONE_PREFIX + order.order_id, method: methodOf(p.method), paid_at: p.paidAt || new Date().toISOString(), failure: null };
+    const paidFields = { status: 'paid', payment_key: PORTONE_PREFIX + order.order_id, method: methodOf(p.method), paid_at: p.paidAt || new Date().toISOString(), failure: null, is_test: !!(p.channel && p.channel.type === 'TEST') };   // 테스트 채널 결제는 매출에서 뺀다
     // 이번 요청이 실제로 '결제 완료'로 바꿨을 때만 구매 확인 메일(복귀 확인과 웹훅이 겹쳐도 한 번)
     const changed = await sbRest(env, `commerce_orders?order_id=eq.${encU(order.order_id)}&status=eq.${from}`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify(paidFields) });
     order.__mail = Array.isArray(changed) && changed.length ? { ...order, ...paidFields } : null;

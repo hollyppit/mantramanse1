@@ -24,6 +24,9 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   const USERS = { 'tok-a': { id: '00000000-0000-0000-0000-00000000000a', email: 'a@x.test' }, 'tok-b': { id: '00000000-0000-0000-0000-00000000000b', email: 'b@x.test' } };
   const q = (u, k) => { const m = new RegExp('[?&]' + k + '=([^&]+)').exec(u); return m ? decodeURIComponent(m[1]) : null; };
   const eqv = v => v && v.startsWith('eq.') ? v.slice(3) : null;
+  const allq = (u, k) => [...u.matchAll(new RegExp('[?&]' + k + '=([^&]+)', 'g'))].map(m => decodeURIComponent(m[1]));
+  const inRange = (u, k, v) => allq(u, k).every(c => c.startsWith('gte.') ? (v != null && v >= c.slice(4)) : c.startsWith('lt.') && k !== 'created_at' ? (v != null && v < c.slice(3)) : true);
+  const testOk = (u, o) => { const t = q(u, 'is_test'); return !t || String(!!o.is_test) === eqv(t); };
   global.fetch = async (u, init = {}) => {
     u = String(u); const method = (init.method || 'GET').toUpperCase(), body = init.body ? JSON.parse(init.body) : null;
     const res = (d, s = 200) => new Response(d == null ? null : JSON.stringify(d), { status: s });
@@ -51,7 +54,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
     }
     if (u.includes('/rest/v1/commerce_orders')) {
       if (method === 'POST') { db.orders.push({ status: 'pending', ...body }); return res(null, 201); }
-      const lt = q(u, 'created_at'), rows = db.orders.filter(o => (!q(u, 'order_id') || o.order_id === eqv(q(u, 'order_id'))) && (!q(u, 'user_id') || o.user_id === eqv(q(u, 'user_id'))) && (!q(u, 'status') || o.status === eqv(q(u, 'status'))) && (!lt || (o.created_at && o.created_at < lt.slice(3))));
+      const lt = q(u, 'created_at'), rows = db.orders.filter(o => (!q(u, 'order_id') || o.order_id === eqv(q(u, 'order_id'))) && (!q(u, 'user_id') || o.user_id === eqv(q(u, 'user_id'))) && (!q(u, 'status') || o.status === eqv(q(u, 'status'))) && (!lt || (o.created_at && o.created_at < lt.slice(3))) && inRange(u, 'paid_at', o.paid_at) && inRange(u, 'canceled_at', o.canceled_at) && testOk(u, o));
       if (method === 'PATCH') { rows.forEach(o => Object.assign(o, body)); return ((init.headers && init.headers.prefer) || '').includes('representation') ? res(rows) : res(null, 204); }
       return res(rows);
     }
@@ -301,6 +304,39 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   r = await mineMod.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-b', body: { action: 'refund', orderId: PM } }), env: mailEnv });
   const rm = mails.filter(m => m.kind === 'refund');
   ok(rm.length === 1 && rm[0].to === 'b@x.test' && rm[0].subject.includes('환불') && rm[0].html.includes('3~7'), '환불 완료 메일 한 번');
+
+  // ── 테스트 주문 표시·매출 요약·CSV
+  const SL = await imp('functions/_sales.js');
+  ok(db.orders.find(x => x.order_id === PS).is_test === true, '포트원 테스트 채널 결제는 테스트 주문으로 자동 표시');
+  const liveO = db.orders.find(x => String(x.payment_key || '').startsWith('portone:') && x.is_test === false && x.status === 'paid');
+  ok(!!liveO, '실연동 채널 결제는 테스트 아님');
+  ok(db.orders.filter(x => String(x.payment_key || '').startsWith('pk') || (x.payment_key && !String(x.payment_key).startsWith('portone:'))).every(x => x.is_test === true), '토스 테스트 키 결제는 테스트 주문');
+  { const kr = SL.kstRanges(Date.parse('2026-11-12T16:00:00Z'));   // 한국 시간 11-13(금) 01:00
+    ok(kr.today.from === '2026-11-12T15:00:00.000Z' && kr.week.from === '2026-11-08T15:00:00.000Z' && kr.week.to === '2026-11-15T15:00:00.000Z' && kr.month.from === '2026-10-31T15:00:00.000Z' && kr.month.to === '2026-11-30T15:00:00.000Z', '한국 시간 오늘·이번 주(월요일)·이번 달 범위');
+    ok(SL.kstDay('2026-11-01') === '2026-10-31T15:00:00.000Z' && SL.kstDay('2026-11-30', true) === '2026-11-30T15:00:00.000Z' && SL.kstDay('2026/11/01') === null, '날짜 입력(KST) 변환'); }
+  const ALL = [SL.kstDay('2000-01-01'), SL.kstDay('2100-12-31', true)];
+  const want = () => { const real = db.orders.filter(x => !x.is_test); return { gross: real.filter(x => x.paid_at).reduce((a, x) => a + x.amount, 0), refund: real.filter(x => x.canceled_at).reduce((a, x) => a + x.amount, 0), n: real.filter(x => x.paid_at).length }; };
+  let sm = await SL.summarize(penv, ...ALL), w = want();
+  ok(sm.gross === w.gross && sm.refundAmount === w.refund && sm.net === w.gross - w.refund && sm.orders === w.n && w.n > 0, '매출 요약: 테스트 제외 매출·환불·실매출');
+  ok(Object.values(sm.products).reduce((a, p) => a + p.count, 0) === sm.orders, '상품별 건수 합 = 매출 건수');
+  r = await admin.onRequestPost({ request: req('/api/commerce/admin', { adminPw: 'adm', body: { action: 'set-test', orderId: liveO.order_id, isTest: true } }), env: penv });
+  ok(r.status === 200 && liveO.is_test === true, '관리자: 테스트로 표시');
+  const sm2 = await SL.summarize(penv, ...ALL); ok(sm2.gross === sm.gross - liveO.amount, '테스트로 표시하면 매출에서 빠짐');
+  await admin.onRequestPost({ request: req('/api/commerce/admin', { adminPw: 'adm', body: { action: 'set-test', orderId: liveO.order_id, isTest: false } }), env: penv });
+  ok(liveO.is_test === false && (await SL.summarize(penv, ...ALL)).gross === sm.gross, '테스트 해제하면 다시 매출');
+  d = await (await admin.onRequestGet({ request: req('/api/commerce/admin', { adminPw: 'adm', method: 'GET' }), env: penv })).json();
+  ok(d.sales && d.sales.today && d.sales.week && d.sales.month && d.sales.month.label === '이번 달' && d.orders.some(x => 'is_test' in x), '관리자 화면: 오늘·이번 주·이번 달 요약과 테스트 표시');
+  r = await admin.onRequestGet({ request: req('/api/commerce/admin?export=csv&from=2000-01-01&to=2100-12-31', { adminPw: 'adm', method: 'GET' }), env: penv });
+  const csvBytes = new Uint8Array(await r.arrayBuffer()); let csv = '﻿' + new TextDecoder('utf-8', { ignoreBOM: false }).decode(csvBytes);
+  ok(csvBytes[0] === 0xef && csvBytes[1] === 0xbb && csvBytes[2] === 0xbf, 'CSV 첫 바이트가 BOM(엑셀 한글)');
+  ok(r.status === 200 && r.headers.get('content-type').includes('text/csv') && /attachment; filename="sales_2000-01-01_2100-12-31.csv"/.test(r.headers.get('content-disposition')), 'CSV 응답 머리');
+  ok(csv.charCodeAt(0) === 0xfeff && csv.includes('주문번호,결제 일시(KST),상품,결제 금액,공급가액,부가세'), 'CSV: 엑셀용 BOM·머리줄');
+  ok(csv.includes(liveO.order_id) && csv.includes(',9900,9000,900,') && !csv.includes(PS), 'CSV: 공급가액·부가세, 테스트 주문 제외');
+  ok(csv.includes('환불(취소)') && csv.includes('포트원'), 'CSV: 환불 주문·결제사');
+  csv = await (await admin.onRequestGet({ request: req('/api/commerce/admin?export=csv&from=2000-01-01&to=2100-12-31&test=1', { adminPw: 'adm', method: 'GET' }), env: penv })).text();
+  ok(csv.includes(PS) && csv.includes(',예\r\n'), 'CSV: 테스트 포함 선택');
+  r = await admin.onRequestGet({ request: req('/api/commerce/admin?export=csv&from=2026-11-30&to=2026-11-01', { adminPw: 'adm', method: 'GET' }), env: penv }); ok(r.status === 400, 'CSV: 기간이 거꾸로면 거부');
+  r = await admin.onRequestGet({ request: req('/api/commerce/admin?export=csv&from=2000-01-01&to=2100-12-31', { method: 'GET' }), env: penv }); ok(r.status === 401, 'CSV: 관리자만');
 
   // ── 키가 없으면 결제 API 는 'not-configured'
   const bare = { GLOSSARY_KV: KV, ADMIN_PASSWORD: 'adm' };
