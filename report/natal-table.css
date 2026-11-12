@@ -1,0 +1,25 @@
+/* 사주 원국 자세히(공용, 2026-11-13) — report/natal-table.js 의 표. 운명의 타임라인과 주제별 풀이에서 .mt-natal 안에 쓴다. 어두운 화면 기준 */
+.mt-natal{ --nt-ink: var(--ink, #E9E4D8); --nt-ink2: var(--ink-2, #C9C2B2); --nt-ink3: var(--ink-3, #8A8F9C); --nt-gold: var(--gold, #CDB27A); --nt-goldl: var(--gold-l, #E6D3A6); }
+/* 원국 자세히(2026-11-13): 천간·지지·십성·지장간·12운성·12신살·신살 */
+.mt-natal .tq-nt{ display: grid; grid-template-columns: 64px repeat(4, minmax(0, 1fr)); gap: 4px 6px; align-items: stretch; margin-top: 4px; }
+.mt-natal .tq-nt-l{ display: flex; align-items: center; font-size: .74rem; color: var(--nt-ink3); }
+.mt-natal .tq-nt-c{ display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; padding: 4px 2px; border-radius: 10px; min-width: 0; }
+.mt-natal .tq-nt-c.me{ background: rgba(205,178,122,.07); }
+.mt-natal .tq-nt-c.hd b{ font-size: .86rem; color: var(--nt-ink); font-weight: 600; } .mt-natal .tq-nt-c.hd small{ font-size: .7rem; color: var(--nt-ink3); }
+.mt-natal .tq-nt-c.hd.me b{ color: var(--nt-goldl); }
+.mt-natal .tq-nt-c.gz{ padding: 0; }
+.mt-natal .tq-nt-g{ width: 100%; display: grid; justify-items: center; padding: 8px 2px 6px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--ec) 55%, transparent); background: color-mix(in srgb, var(--ec) 18%, rgba(10,12,20,.85)); }
+.mt-natal .tq-nt-c.me .tq-nt-g{ box-shadow: 0 0 0 2px var(--nt-gold), 0 0 24px rgba(205,178,122,.18); }
+.mt-natal .tq-nt-g b{ font-family: var(--f-serif, "Noto Serif KR", serif); font-weight: 500; font-size: clamp(1.7rem, 5vw, 2.5rem); line-height: 1.1; color: color-mix(in srgb, var(--ec) 70%, #fff); }
+.mt-natal .tq-nt-g small{ font-size: .66rem; color: var(--nt-ink2); }
+.mt-natal .tq-nt-t{ font-size: .8rem; color: var(--nt-ink); } .mt-natal .tq-nt-s{ font-size: .68rem; color: var(--nt-ink3); }
+.mt-natal .tq-nt-h{ display: inline-flex; align-items: center; gap: 4px; font-size: .74rem; color: var(--nt-ink2); line-height: 1.5; }
+.mt-natal .tq-nt-h i{ font-style: normal; font-family: var(--f-serif, "Noto Serif KR", serif); font-size: .8rem; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 5px; background: color-mix(in srgb, var(--ec) 35%, rgba(10,12,20,.9)); color: #fff; }
+.mt-natal .tq-nt-ss{ display: inline-block; font-style: normal; font-size: .66rem; padding: 2px 7px; border-radius: 999px; margin: 1px; }
+.mt-natal .tq-nt-ss.g{ background: rgba(47,191,113,.16); color: #8fe0b2; } .mt-natal .tq-nt-ss.b{ background: rgba(235,107,91,.16); color: #f3a59a; } .mt-natal .tq-nt-ss.gm{ background: #e9e4d8; color: #141109; font-weight: 700; }
+.mt-natal .tq-nt-c.none{ opacity: .5; }
+@media (max-width: 720px){ .mt-natal .tq-nt{ grid-template-columns: 40px repeat(4, minmax(0, 1fr)); gap: 3px 3px; } .mt-natal .tq-nt-l{ font-size: .62rem; } .mt-natal .tq-nt-h{ flex-direction: column; gap: 0; font-size: .64rem; } .mt-natal .tq-nt-t{ font-size: .72rem; } .mt-natal .tq-nt-ss{ font-size: .6rem; padding: 1px 5px; } }
+.mt-natal .tq-sub{ font-size: .8rem; color: var(--nt-ink3); line-height: 1.6; margin-top: 8px; }
+.mt-natal .tq-unk{ font-size: .78rem; color: var(--nt-ink3); padding: 18px 0; }
+.mt-natal.rd .tip{ border-bottom: 1px dotted currentColor; cursor: help; position: relative; }
+.mt-natal.rd .tip.open::after, .mt-natal.rd .tip:focus::after{ content: attr(data-tip); position: absolute; left: 0; top: 130%; z-index: 20; width: min(260px, 70vw); padding: 8px 10px; border-radius: 10px; background: #1b2030; color: #E9E4D8; font-size: .76rem; line-height: 1.5; box-shadow: 0 6px 20px rgba(0,0,0,.4); white-space: normal; }

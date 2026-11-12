@@ -1,0 +1,20 @@
+// 2026-11-13 주제별 풀이 첫 장 원국표 검사: 각 주제의 첫 장에서 한 번만, 자세한 원국표(report/natal-table.js)로.
+const assert = require('assert/strict'), fs = require('fs'), vm = require('vm'), path = require('path');
+const ROOT = path.join(__dirname, '..'); global.window = globalThis;
+for (const f of ['engine.js', 'report/natal-table.js', 'report/v2/reading-text.js']) vm.runInThisContext(fs.readFileSync(path.join(ROOT, f), 'utf8'), { filename: f });
+const M = globalThis.Manse, RT = globalThis.ReportV2.ReadingText, N = globalThis.MantraNatal;
+const ch = M.compute({ year: 1985, month: 1, day: 23, hour: 7, minute: 45, calendar: 'lunar', gender: 'F', city: '서울' });
+const vd = { pillars: { day: { hanja: '壬子' } } }, mk = (id, seq) => { const c = { id: 'x', editorialContractId: id, editorialSequence: seq, readingVisualData: vd }; Object.defineProperty(c, 'readingFeature', { value: { M, ch }, enumerable: false }); return c; };
+for (const id of ['timeline_self_03', 'timeline_wealth_01', 'timeline_career_01', 'timeline_love_01']) assert.ok(RT.isOriginChapter(mk(id, 0)), id);
+for (const [id, seq] of [['timeline_self_02', 1], ['timeline_wealth_02', 1], ['timeline_self_18', 4], ['timeline_love_07', 6]]) assert.ok(!RT.isOriginChapter(mk(id, seq)), id);
+assert.ok(RT.isOriginChapter(mk('timeline_wealth_09', 0)), '게시 목차에서 순서가 바뀌어도 주제 첫 장이면 원국표');
+assert.ok(!RT.isOriginChapter({ editorialContractId: 'timeline_wealth_01', editorialSequence: 0 }), '원국 값이 없으면 표시하지 않음');
+console.log('  ok 주제별 첫 장(종합·재물·커리어·인연)에서만 원국표');
+const h = RT.originHtml(mk('timeline_wealth_01', 0));
+assert.match(h, /reading-origin-full/); for (const w of ['지장간', '12운성', '12신살', '신살', '壬']) assert.ok(h.includes(w), w);
+assert.equal((h.match(/class="tq-nt"/g) || []).length, 1, '표는 하나');
+console.log('  ok 자세한 원국표(지장간·12운성·12신살·신살)');
+const tl = fs.readFileSync(path.join(ROOT, 'report/hub/hub-timeline.js'), 'utf8'); assert.ok(tl.includes('root.MantraNatal.html('), '타임라인도 같은 공용 표');
+const rt = fs.readFileSync(path.join(ROOT, 'report/v2/reading-text.js'), 'utf8'); assert.ok(rt.includes("var chart=(c.editorialContractId||c.id)==='timeline_self_03'?'':overview(c);"), '종합풀이 1장은 예전 간단한 표를 다시 그리지 않음');
+console.log('  ok 타임라인과 같은 공용 표, 종합풀이 1장 중복 없음');
+console.log('PASS natal-origin-sim');
