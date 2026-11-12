@@ -330,8 +330,8 @@
     function mineHtml() {
       if (PREVIEW) return '<p class="tq-sub">미리보기에서는 내 정보 메뉴를 숨깁니다.</p>';
       var me = H.Auth && H.Auth.peek ? H.Auth.peek() : null;
-      return '<a class="tq-me" href="#/me" data-track="mypage_open" data-p="timeline_foot"><span class="tq-me-ic" aria-hidden="true">' + ME_ICON + '</span><div><b>' + (me ? '마이페이지' : '로그인하고 마이페이지 보기') + '</b><small>' +
-        (me ? esc(me.email ? me.email + ' 로그인 중 · ' : '') + '이용 중인 주제 · 결제 기록 · 1:1 문의 · 내 사주 관리' : '구매한 주제·결제 기록을 어느 기기에서든 한 곳에서 확인') + '</small></div><span class="tq-me-go">›</span></a>' +
+      return '<a class="tq-mypage" href="#/me" data-track="mypage_open" data-p="timeline_foot"><span class="tq-mypage-ic" aria-hidden="true">' + ME_ICON + '</span><div><b>' + (me ? '마이페이지' : '로그인하고 마이페이지 보기') + '</b><small>' +
+        (me ? esc(me.email ? me.email + ' 로그인 중 · ' : '') + '이용 중인 주제 · 결제 기록 · 1:1 문의 · 내 사주 관리' : '구매한 주제·결제 기록을 어느 기기에서든 한 곳에서 확인') + '</small></div><span class="tq-mypage-go">›</span></a>' +
         '<p class="tq-sub">출생정보 수정·안내자 변경·이 기기에서 삭제는 마이페이지에서 할 수 있습니다. 출생정보는 이 기기에만 저장되며 서버로 보내지 않습니다.</p>';
     }
 
@@ -347,6 +347,7 @@
     var el = H.view(html);
     DOC.body.classList.add('tq-wide'); var prevClean = H.cleanup; H.cleanup = function () { DOC.body.classList.remove('tq-wide'); if (io) io.disconnect(); if (prevClean) prevClean(); };
     var root0 = $('#tq', el);
+    if (!PREVIEW && H.Auth && H.Auth.badge) H.Auth.badge(root0);   // 1:1 문의 새 답변 표시(hub-me.js)
 
     function redraw(id) { var b = $('#tqb-' + id, root0); if (b) { var y = root.scrollY; b.innerHTML = builders[id](); root.scrollTo(0, y); } }
     root0.addEventListener('click', function (e) {

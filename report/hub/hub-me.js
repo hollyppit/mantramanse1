@@ -77,6 +77,35 @@
     } catch (e) { }
     return null;
   };
+  // 새 답변 알림(사이트 안): 이 기기의 로그인 토큰(만료 전)으로 안 본 답변 수를 묻는다. SDK 를 불러오지 않는다. 1분 동안은 이 탭에 저장한 값을 쓴다
+  A.token = function () {
+    try {
+      for (var i = 0; i < root.localStorage.length; i++) {
+        var k = root.localStorage.key(i); if (!/^sb-.+-auth-token$/.test(k)) continue;
+        var s = JSON.parse(root.localStorage.getItem(k) || 'null');
+        if (s && s.access_token && (!s.expires_at || s.expires_at * 1000 > Date.now() + 30000)) return s.access_token;
+      }
+    } catch (e) { }
+    return '';
+  };
+  var UNREAD = 'mt_inq_unread';
+  A.setUnread = function (n) { try { sessionStorage.setItem(UNREAD, JSON.stringify({ n: n, at: Date.now() })); } catch (e) { } };
+  A.unread = function () {
+    var c = null; try { c = JSON.parse(sessionStorage.getItem(UNREAD) || 'null'); } catch (e) { }
+    if (c && Date.now() - c.at < 60000) return Promise.resolve(c.n || 0);
+    var tok = A.token(); if (!tok) return Promise.resolve(0);
+    return post('/api/account/inquiry', tok, { action: 'unread' }).then(function (x) { var n = x.ok ? +x.j.unread || 0 : 0; A.setUnread(n); return n; }).catch(function () { return 0; });
+  };
+  // 타임라인(상단 '마이페이지' 버튼·6번 입구 카드)에 새 답변 표시. hub-timeline.js 가 화면을 그린 뒤 부른다
+  A.badge = function (box) {
+    if (!box || !A.peek()) return;
+    A.unread().then(function (n) {
+      if (!n || !box.isConnected) return;
+      var dot = '<span class="me-new" aria-label="새 답변 ' + n + '개">새 답변 ' + n + '</span>';
+      $$('.tq-edit[href="#/me"]', box).forEach(function (a) { if (!a.querySelector('.me-new')) { a.insertAdjacentHTML('beforeend', dot); a.setAttribute('href', '#/me?inq=list'); } });
+      $$('.tq-mypage', box).forEach(function (a) { var b = a.querySelector('b'); if (b && !a.querySelector('.me-new')) { b.insertAdjacentHTML('beforeend', ' ' + dot); a.setAttribute('href', '#/me?inq=list'); } });
+    });
+  };
   A.login = function (provider) {
     try { root.localStorage.setItem('mt_last_login', provider); } catch (e) { }
     H.track('login_start', { provider: provider, from: 'mypage' });
@@ -174,9 +203,10 @@
     if (!box) return;
     post('/api/account/inquiry', token, { action: 'list' }).then(function (x) {
       var items = (x.ok && x.j.items) || []; if (!box.isConnected) return;
-      box.innerHTML = items.length ? '<h3 class="me-h3">내 문의 내역</h3><div class="me-list">' + items.map(function (q, i) {
+      var fresh = items.filter(function (q) { return q.isNew; }).length; A.setUnread(0);
+      box.innerHTML = items.length ? '<h3 class="me-h3">내 문의 내역' + (fresh ? ' <span class="me-new">새 답변 ' + fresh + '</span>' : '') + '</h3><div class="me-list">' + items.map(function (q, i) {
         var st = q.answer ? 'answered' : q.status;
-        return '<details class="me-inq"' + (q.answer && i === 0 ? ' open' : '') + '><summary class="me-row"><div><b>' + esc(q.subject) + '</b><small>' + esc((CAT[q.category] || '') + ' · ' + day(q.created_at)) + '</small></div><span class="me-st ' + esc(st) + '">' + esc(IST[st] || st) + '</span></summary>' +
+        return '<details class="me-inq' + (q.isNew ? ' is-new' : '') + '"' + (q.isNew || (q.answer && i === 0 && !fresh) ? ' open' : '') + '><summary class="me-row"><div><b>' + (q.isNew ? '<span class="me-new">새 답변</span> ' : '') + esc(q.subject) + '</b><small>' + esc((CAT[q.category] || '') + ' · ' + day(q.created_at)) + '</small></div><span class="me-st ' + esc(st) + '">' + esc(IST[st] || st) + '</span></summary>' +
           '<div class="me-qa">' + (q.body ? '<p class="me-q">' + esc(q.body) + '</p>' : '') +
           (q.answer ? '<div class="me-a"><small>만트라 답변' + (q.answered_at ? ' · ' + esc(day(q.answered_at)) : '') + '</small><p>' + esc(q.answer) + '</p></div>' : '<p class="me-muted">' + (q.status === 'answered' ? '답변을 메일로 보내 드렸습니다. 메일함을 확인해 주세요.' : q.status === 'closed' ? '처리가 끝난 문의입니다.' : '확인 중입니다. 답변이 등록되면 메일로도 알려 드려요.') + '</p>') + '</div></details>';
       }).join('') + '</div><p class="me-note">답변은 메일과 이 내역으로 보내 드립니다. 메일이 보이지 않으면 스팸함도 확인해 주세요.</p>' : '';
@@ -218,7 +248,8 @@
           paint(memberHtml(sess, rs[0].ok ? rs[0].j : null, rs[1] && rs[1].ok ? rs[1].j : null) + (rs[0].ok ? '' : '<p class="me-muted">구매 정보를 불러오지 못했습니다. 잠시 후 다시 열어 주세요.</p>'));
           el.__mine = rs[0].ok ? rs[0].j : null; el.__token = sess.access_token; el.__email = (rs[0].ok && rs[0].j.member && rs[0].j.member.email) || (sess.user && sess.user.email) || '';
           inquiryList($('#meInqList'), sess.access_token);
-          if (q.inq) { var io = $('[data-me="inq-open"]'); if (io) { io.click(); $('#meInq').scrollIntoView({ block: 'start' }); } }
+          if (q.inq === 'list') setTimeout(function () { var s = $('#meInq'); if (s) s.scrollIntoView({ block: 'start', behavior: H.reduce ? 'auto' : 'smooth' }); }, 500);
+          if (q.inq && q.inq !== 'list') { var io = $('[data-me="inq-open"]'); if (io) { io.click(); $('#meInq').scrollIntoView({ block: 'start' }); } }
           H.track('mypage_view', { logged: 1 });
         });
       });

@@ -80,7 +80,7 @@ export async function onRequestPost({ request, env }) {
     if (answer.length < 2) return json({ error: '답변 내용을 적어 주세요' }, 400);
     const q = (await sbRest(env, `support_inquiries?select=*&id=eq.${id}`))[0]; if (!q) return json({ error: '문의를 찾을 수 없습니다' }, 404);
     const at = new Date().toISOString();
-    const rows = await sbRest(env, `support_inquiries?id=eq.${id}`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify({ answer, status: 'answered', answered_at: at, answered_by: who(request), answer_mailed: false }) });
+    const rows = await sbRest(env, `support_inquiries?id=eq.${id}`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify({ answer, status: 'answered', answered_at: at, answered_by: who(request), answer_mailed: false, answer_seen_at: null }) });
     const mailed = b.mail === false ? false : await mailInquiryAnswer(env, { ...q, answer });
     if (mailed) { try { await sbRest(env, `support_inquiries?id=eq.${id}`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ answer_mailed: true }) }); } catch { } }
     return json({ ok: true, mailed, inquiry: { ...(rows && rows[0] || q), answer, status: 'answered', answered_at: at, answer_mailed: mailed } });

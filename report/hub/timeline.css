@@ -184,11 +184,11 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 
 /* ── 마이페이지 입구(타임라인 6번 영역·상단 메뉴) · 마이페이지(#/me, hub-me.js) 2026-11-13 ── */
 #hub .tq-nav a.tq-edit svg{ flex: 0 0 auto; }
-#hub .tq-me{ display: flex; align-items: center; gap: 14px; padding: 16px 18px; min-height: 64px; border: 1px solid rgba(205,178,122,.5); border-radius: 14px; background: rgba(19,24,39,.85); color: inherit; text-decoration: none; margin: 4px 0 12px; }
-#hub .tq-me:hover{ border-color: var(--gold); }
-#hub .tq-me-ic{ flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: rgba(205,178,122,.14); color: var(--gold-l); }
-#hub .tq-me div{ flex: 1; min-width: 0; } #hub .tq-me b{ display: block; font-size: 1rem; color: var(--ink); } #hub .tq-me small{ display: block; font-size: .8rem; color: var(--ink-2); margin-top: 2px; overflow-wrap: anywhere; }
-#hub .tq-me-go{ font-size: 1.4rem; color: var(--gold); }
+#hub .tq-mypage{ display: flex; align-items: center; gap: 14px; padding: 16px 18px; min-height: 64px; border: 1px solid rgba(205,178,122,.5); border-radius: 14px; background: rgba(19,24,39,.85); color: inherit; text-decoration: none; margin: 4px 0 12px; }
+#hub .tq-mypage:hover{ border-color: var(--gold); }
+#hub .tq-mypage-ic{ flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: rgba(205,178,122,.14); color: var(--gold-l); }
+#hub .tq-mypage div{ flex: 1; min-width: 0; } #hub .tq-mypage b{ display: block; font-size: 1rem; color: var(--ink); } #hub .tq-mypage small{ display: block; font-size: .8rem; color: var(--ink-2); margin-top: 2px; overflow-wrap: anywhere; }
+#hub .tq-mypage-go{ font-size: 1.4rem; color: var(--gold); }
 #hub .me{ max-width: 720px; margin: 0 auto; padding-bottom: 12px; }
 #hub .me-head{ margin: 8px 0 18px; } #hub .me-head .kick{ font-size: .72rem; letter-spacing: .18em; color: var(--gold); margin: 0 0 4px; }
 #hub .me-head h1{ font-family: var(--f-serif); font-size: 1.9rem; color: var(--ink); margin: 0; } #hub .me-sub{ color: var(--ink-2); margin: 6px 0 0; font-size: .92rem; }
@@ -234,3 +234,6 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 #hub .me-q{ margin: 0 0 10px; white-space: pre-wrap; color: var(--ink-2); font-size: .88rem; line-height: 1.7; }
 #hub .me-a{ border-left: 3px solid var(--gold); padding: 8px 12px; background: rgba(205,178,122,.08); border-radius: 0 10px 10px 0; }
 #hub .me-a small{ display: block; color: var(--gold); font-size: .76rem; margin-bottom: 4px; } #hub .me-a p{ margin: 0; white-space: pre-wrap; color: var(--ink); font-size: .92rem; line-height: 1.75; }
+/* 1:1 문의 새 답변 표시 */
+#hub .me-new{ display: inline-flex; align-items: center; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #D0634A; color: #fff; font-size: .7rem; font-weight: 700; letter-spacing: 0; line-height: 1.6; vertical-align: 1px; font-family: inherit; }
+#hub .me-inq.is-new > summary{ border: 1px solid rgba(208,99,74,.6); }

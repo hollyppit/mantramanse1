@@ -1,6 +1,7 @@
 // POST /api/account/inquiry — 마이페이지 1:1 문의(로그인 회원만, 헤더 x-member-token). 2026-11-13
 //   { action: 'send', category, subject, body, orderId? } → 저장(support_inquiries) + 관리자 알림 메일(회신 주소 = 회원 이메일) + 회원 접수 확인 메일
-//   { action: 'list' } → 내 문의 목록(최근 20건, 문의 본문·관리자 답변 포함)
+//   { action: 'list' } → 내 문의 목록(최근 20건, 문의 본문·관리자 답변 포함). 새 답변(isNew)은 이때 읽음 처리
+//   { action: 'unread' } → 아직 안 본 답변 수(타임라인·마이페이지 '새 답변' 표시)
 // 답변은 관리자 화면(결제·상품 → 1:1 문의)에서 써서 회원에게 메일로 보내고 answer 칸에 남긴다(functions/api/commerce/admin.js inquiry-answer). 테이블: supabase/migrations/20261113_support_inquiries.sql
 // 저장이 실패해도(테이블이 아직 없을 때 등) 메일이 갔으면 접수로 본다. 저장·메일이 둘 다 안 되면 실패를 돌려준다.
 import { json } from '../../_lib.js';
@@ -20,8 +21,15 @@ export async function onRequestPost({ request, env }) {
   if (b.action === 'list') {
     let rows = null;
     try { rows = await sbRest(env, `support_inquiries?select=*&user_id=eq.${uid}&order=created_at.desc&limit=20`); } catch { return json({ ok: true, items: [], stored: false }); }
-    const items = (rows || []).map(r => ({ id: r.id, category: r.category, subject: r.subject, body: r.body, status: r.status, created_at: r.created_at, answered_at: r.answered_at, answer: r.answer || null }));   // 본인 문의만(회원 이메일·관리자 이름은 내려 보내지 않는다)
+    const items = (rows || []).map(r => ({ id: r.id, category: r.category, subject: r.subject, body: r.body, status: r.status, created_at: r.created_at, answered_at: r.answered_at, answer: r.answer || null, isNew: !!(r.answer && !r.answer_seen_at) }));   // 본인 문의만(회원 이메일·관리자 이름은 내려 보내지 않는다)
+    // 목록을 열었으면 새 답변을 읽음으로 처리한다(이번 응답에는 isNew 를 그대로 실어 화면이 '새 답변'을 한 번 보여 준다)
+    if (items.some(x => x.isNew)) { try { await sbRest(env, `support_inquiries?user_id=eq.${uid}&answer=not.is.null&answer_seen_at=is.null`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ answer_seen_at: new Date().toISOString() }) }); } catch { } }
     return json({ ok: true, items, stored: true, mail: inquiryReady(env) });
+  }
+  if (b.action === 'unread') {   // 새 답변 수(사이트 안 알림 표시용). 실패하면 0
+    let n = 0;
+    try { n = ((await sbRest(env, `support_inquiries?select=id&user_id=eq.${uid}&answer=not.is.null&answer_seen_at=is.null&limit=20`)) || []).length; } catch { n = 0; }
+    return json({ ok: true, unread: n });
   }
   if (b.action !== 'send') return json({ error: 'bad-action' }, 400);
 

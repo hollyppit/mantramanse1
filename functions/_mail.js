@@ -136,9 +136,9 @@ export function inquiryUserMail(q) {
 }
 export function inquiryAnswerMail(q) {
   const rows = [['문의 번호', '#' + esc(q.id)], ['문의 제목', esc(q.subject)], ['문의 내용', '<span style="color:#6b6b6b">' + pre(q.body) + '</span>'], ['답변', '<b>' + pre(q.answer) + '</b>']];
-  const note = '<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a">답변은 <a href="' + SITE + '/report/#/me" style="color:#9b3b2a">마이페이지 → 1:1 문의</a>에서도 다시 볼 수 있습니다. 더 궁금한 점이 있으면 이 메일에 답장하거나 마이페이지에서 새 문의를 남겨 주세요.</p>';
-  const text = `[${BIZ.service}] 1:1 문의(#${q.id})에 답변드립니다\n문의 제목: ${q.subject}\n\n[답변]\n${q.answer}\n\n[문의 내용]\n${q.body}\n\n마이페이지에서도 다시 볼 수 있습니다: ${SITE}/report/#/me\n${BIZ.name} · ${BIZ.phone} · ${BIZ.email}`;
-  return { subject: `[${BIZ.service}] 1:1 문의에 답변드립니다 · ${q.subject}`, html: layout('1:1 문의 답변', rows, note).replace(`${SITE}/report/my/" style="display:inline-block`, `${SITE}/report/#/me" style="display:inline-block`).replace('내 구매 내역 보기', '마이페이지에서 보기'), text };
+  const note = '<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a">답변은 <a href="' + SITE + '/report/#/me?inq=list" style="color:#9b3b2a">마이페이지 → 1:1 문의</a>에서도 다시 볼 수 있습니다. 더 궁금한 점이 있으면 이 메일에 답장하거나 마이페이지에서 새 문의를 남겨 주세요.</p>';
+  const text = `[${BIZ.service}] 1:1 문의(#${q.id})에 답변드립니다\n문의 제목: ${q.subject}\n\n[답변]\n${q.answer}\n\n[문의 내용]\n${q.body}\n\n마이페이지에서도 다시 볼 수 있습니다: ${SITE}/report/#/me?inq=list\n${BIZ.name} · ${BIZ.phone} · ${BIZ.email}`;
+  return { subject: `[${BIZ.service}] 1:1 문의에 답변드립니다 · ${q.subject}`, html: layout('1:1 문의 답변', rows, note).replace(`${SITE}/report/my/" style="display:inline-block`, `${SITE}/report/#/me?inq=list" style="display:inline-block`).replace('내 구매 내역 보기', '마이페이지에서 보기'), text };
 }
 // 관리자 화면에서 쓴 답변을 회원에게 보낸다(회신 주소 = 고객센터 메일)
 export async function mailInquiryAnswer(env, q) {
