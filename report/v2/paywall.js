@@ -125,7 +125,8 @@
     try { root.localStorage.setItem('mt_last_login', provider); } catch (e) { }
     saveResume();
     // 네이버는 Supabase 기본 로그인이 아니라 서버가 처리한다(functions/_naver-login.js): 돌아오면 ?naver_login=1 로 세션을 받아 간다
-    if (provider === 'naver') { root.location.href = '/api/auth/naver/start?next=' + encodeURIComponent(root.location.pathname + root.location.search + root.location.hash); return; }
+    // 네이버, 그리고 서버 구글 로그인이 켜져 있으면 구글도 우리 서버가 처리(돌아오면 ?naver_login=1 / ?google_login=1 로 세션을 받아 간다)
+    if (provider === 'naver' || (provider === 'google' && P.info && P.info.configured && P.info.configured.googleServer)) { root.location.href = '/api/auth/' + provider + '/start?next=' + encodeURIComponent(root.location.pathname + root.location.search + root.location.hash); return; }
     sbClient().then(function (sb) { return sb.auth.signInWithOAuth({ provider: provider, options: { redirectTo: root.location.href } }); })
       .catch(function () { dropResume(); alert('로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.'); });
   }
@@ -212,18 +213,21 @@
       .then(function (x) { clearUrl(); return finishPurchase(x, oid); }).catch(function () { toast('결제 확인 중 연결이 끊겼습니다. 새로고침하면 다시 확인합니다.'); });
   }
   // 네이버 로그인에서 돌아온 페이지: 서버가 잠깐 맡아 둔 세션을 받아 Supabase 로그인 상태로 만든다(쿠키 열쇠, 한 번만)
-  function handleNaver() {
-    var u = new URL(root.location.href), v = u.searchParams.get('naver_login'); if (!v) return Promise.resolve();
-    var clean = function () { u.searchParams.delete('naver_login'); try { root.history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch (e) { } };
-    if (v !== '1') { clean(); if (v === 'fail') toast('네이버 로그인을 마치지 못했습니다. 다시 시도해 주세요.'); return Promise.resolve(); }
-    var claim = function (n) { return fetch('/api/auth/naver/claim', { method: 'POST', credentials: 'same-origin' }).then(function (r) { if (r.ok) return r.json(); if (n < 2) return new Promise(function (ok) { setTimeout(ok, 700); }).then(function () { return claim(n + 1); }); return null; }); };
+  // 서버 로그인(네이버·구글)에서 돌아온 페이지: 서버가 잠깐 맡아 둔 세션을 받아 Supabase 로그인 상태로 만든다(쿠키 열쇠, 한 번만)
+  function handleServerLogin(provider) {
+    var param = provider + '_login', name = provider === 'google' ? '구글' : '네이버';
+    var u = new URL(root.location.href), v = u.searchParams.get(param); if (!v) return Promise.resolve();
+    var clean = function () { u.searchParams.delete(param); try { root.history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch (e) { } };
+    if (v !== '1') { clean(); if (v === 'fail') toast(name + ' 로그인을 마치지 못했습니다. 다시 시도해 주세요.'); return Promise.resolve(); }
+    var claim = function (n) { return fetch('/api/auth/' + provider + '/claim', { method: 'POST', credentials: 'same-origin' }).then(function (r) { if (r.ok) return r.json(); if (n < 2) return new Promise(function (ok) { setTimeout(ok, 700); }).then(function () { return claim(n + 1); }); return null; }); };
     return claim(0).then(function (s) {
       clean();
-      if (!s || !s.access_token) { toast('네이버 로그인을 마치지 못했습니다. 다시 시도해 주세요.'); return; }
+      if (!s || !s.access_token) { toast(name + ' 로그인을 마치지 못했습니다. 다시 시도해 주세요.'); return; }
       return sbClient().then(function (sb) { return sb.auth.setSession({ access_token: s.access_token, refresh_token: s.refresh_token }); })
-        .then(function () { P.token = s.access_token; track('login_done', { provider: 'naver' }); return refresh(); });
+        .then(function () { P.token = s.access_token; track('login_done', { provider: provider }); return refresh(); });
     }).catch(function () { clean(); });
   }
+  function handleNaver() { return handleServerLogin('naver').then(function () { return handleServerLogin('google'); }); }
   function toast(t) { if (R.toast) { R.toast(t, 5000); return; } var el = document.createElement('div'); el.className = 'pw-toast'; el.textContent = t; document.body.appendChild(el); setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 5000); }
 
   (function css() {

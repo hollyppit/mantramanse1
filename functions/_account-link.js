@@ -26,6 +26,7 @@ export async function adminUser(env, id) {
 export async function loginsOf(env, user) {
   const out = new Set();
   for (const i of await identitiesOf(env, user.id)) if (i.provider === 'kakao' || i.provider === 'google') out.add(i.provider);
+  try { if (((await sbRest(env, `member_google_links?select=google_sub&user_id=eq.${enc(user.id)}&limit=1`)) || []).length) out.add('google'); } catch { }   // 서버 구글 로그인 회원
   if (NAVER_EMAIL.test(user.email || '') || (user.user_metadata && user.user_metadata.provider === 'naver')) out.add('naver');
   else {
     try { if (((await sbRest(env, `member_naver_links?select=naver_key&user_id=eq.${enc(user.id)}&limit=1`)) || []).length) out.add('naver'); } catch { }
@@ -70,6 +71,7 @@ export async function mergeMembers(env, fromUser, toUser) {
   const m = NAVER_EMAIL.exec(fromUser.email || '');
   if (m) await sbRest(env, 'member_naver_links?on_conflict=naver_key', { method: 'POST', headers: { prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify([{ naver_key: m[1], user_id: to }]) });
   await sbRest(env, `member_naver_links?user_id=eq.${enc(from)}`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ user_id: to }) });
+  await sbRest(env, `member_google_links?user_id=eq.${enc(from)}`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ user_id: to }) });
   // 2) 주문·구매 권한·저장한 사주
   await sbRest(env, `commerce_orders?user_id=eq.${enc(from)}`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ user_id: to }) });
   const ents = (await sbRest(env, `commerce_entitlements?select=saju_key,world,order_id,granted_at,granted_by,revoked_at&user_id=eq.${enc(from)}`)) || [];

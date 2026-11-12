@@ -9,7 +9,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   const L = await imp('functions/_account-link.js');
   const A = '00000000-0000-0000-0000-00000000000a', B = '00000000-0000-0000-0000-00000000000b', C = '00000000-0000-0000-0000-00000000000c', D = '00000000-0000-0000-0000-00000000000d';
   const NK = 'ab'.repeat(16);
-  let users, ids, orders, ents, sajus, nlinks;
+  let users, ids, orders, ents, sajus, nlinks, glinks;
   const reset = () => {
     users = {
       [A]: { id: A, email: 'a@gmail.com', user_metadata: {}, app_metadata: { provider: 'google' } },
@@ -21,7 +21,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
     orders = [{ order_id: 'oA', user_id: A }, { order_id: 'oB', user_id: B }];
     ents = [{ user_id: A, saju_key: 's1', world: 'w1', order_id: 'oA', revoked_at: null }, { user_id: B, saju_key: 's2', world: 'w2', order_id: 'oB', revoked_at: null }, { user_id: D, saju_key: 's9', world: 'w3', order_id: 'oD', revoked_at: null }];
     sajus = [{ user_id: B, saju_key: 's2', label: '홍길동', birth: {} }];
-    nlinks = [];
+    nlinks = []; glinks = [];
   };
   reset();
   const TOK = { 'tok-a': A, 'tok-b': B, 'tok-c': C, 'tok-d': D };
@@ -43,6 +43,12 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
       const e = body.p_email.toLowerCase();
       return res(Object.values(users).filter(x => x.email.toLowerCase() === e || (x.user_metadata.provider === 'naver' && (x.user_metadata.email || '').toLowerCase() === e))
         .map(x => ({ user_id: x.id, providers: [...new Set(ids.filter(i => i.user_id === x.id).map(i => i.provider))], naver: x.user_metadata.provider === 'naver' || nlinks.some(l => l.user_id === x.id) })));
+    }
+    if (u.includes('/rest/v1/member_google_links')) {
+      glinks = glinks || [];
+      const uid = eqv(q(u, 'user_id')); const rows = glinks.filter(l => !uid || l.user_id === uid);
+      if (method === 'PATCH') { rows.forEach(l => Object.assign(l, body)); return res(null, 204); }
+      return res(rows.map(l => ({ google_sub: l.google_sub, user_id: l.user_id })));
     }
     if (u.includes('/rest/v1/member_naver_links')) {
       if (method === 'POST') { for (const r of body) { const ex = nlinks.find(l => l.naver_key === r.naver_key); if (ex) ex.user_id = r.user_id; else nlinks.push({ ...r }); } return res(null, 201); }
@@ -96,6 +102,13 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   ok(d.ok && !users[C] && nlinks.some(l => l.naver_key === NK && l.user_id === A), '네이버 회원 합침: 연결표 생성, C 삭제');
   r = await call(logins, 'tok-a'); d = await r.json();
   ok(d.linked.join() === 'google,naver' && d.hasPurchases, '로그인 방법 목록: 구글+네이버');
+
+  // ── 서버 구글 로그인 회원(연결표만 있음): 로그인 방법에 구글, 합치면 연결표가 A 로
+  reset(); ids = ids.filter(i => i.user_id !== A); glinks.push({ google_sub: '999999', user_id: A });
+  ok(await L.loginsOf(env, users[A]).then(x => x.join()) === 'google', '연결표만 있는 구글 회원도 구글로 표시');
+  r = await call(link, 'tok-b', { action: 'start', provider: 'google' }); const t5 = (await r.json()).ticket;
+  r = await call(link, 'tok-a', { action: 'finish', ticket: t5 }); d = await r.json();
+  ok(d.ok && !users[A] && glinks.some(l => l.google_sub === '999999' && l.user_id === B), '구글 회원을 합치면 구글 연결표도 옮김');
 
   // ── 안내: 구매 없는 네이버 회원 C 와 같은 이메일의 구글 회원 D(구매 있음)
   reset();

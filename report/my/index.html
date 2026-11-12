@@ -63,7 +63,7 @@
   var when = function (t) { if (!t) return ''; try { return new Date(t).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return t; } };
   var DEF = { w1: '종합풀이', w2: '재물운 심화', w7: '커리어운 심화', w3: '인연운 심화' }, NAMES = DEF;
   var ST = { paid: '결제 완료', canceled: '환불(취소) 완료', partial_canceled: '부분 환불', pending: '결제 확인 중' };
-  var sb = null, NAVER = false, TOKEN = '', FLASH = '';
+  var sb = null, NAVER = false, GSERVER = false, TOKEN = '', FLASH = '';
   var LN = { kakao: '카카오', google: '구글', naver: '네이버' };
   // 이 기기에서 마지막으로 쓴 로그인 방법(구매한 계정을 헷갈리지 않게 버튼에 표시)
   var lastLogin = function () { try { return localStorage.getItem('mt_last_login') || ''; } catch (e) { return ''; } };
@@ -77,7 +77,7 @@
     .then(function (d) {
       var k = d && d.keys;
       if (!d || !d.configured || !d.configured.login || !k || !k.supabaseUrl) return fail('지금은 로그인을 준비하고 있습니다.');
-      NAVER = !!d.configured.naver;
+      NAVER = !!d.configured.naver; GSERVER = !!d.configured.googleServer;
       return (window.supabase ? Promise.resolve() : script(SB_SDK)).then(function () {
         sb = window.supabase.createClient(k.supabaseUrl, k.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } });
         return naverReturn().then(function () { return sb.auth.getSession(); });
@@ -101,7 +101,7 @@
   function loginWith(p, linkMode) {
     setLast(p);
     var path = location.pathname + (linkMode ? '?link=1' : '');
-    if (p === 'naver') { location.href = '/api/auth/naver/start?next=' + encodeURIComponent(path); return; }
+    if (p === 'naver' || (p === 'google' && GSERVER)) { location.href = '/api/auth/' + p + '/start?next=' + encodeURIComponent(path); return; }   // 서버 로그인(우리 주소로만 돌아옴)
     sb.auth.signInWithOAuth({ provider: p, options: { redirectTo: location.origin + path } }).catch(function () { sessionStorage.removeItem('mt_link'); alert('로그인을 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.'); });
   }
   // 로그인 방법 연결: 지금 회원(A)에 연결표를 만들고 그 방법(B)으로 로그인 → 돌아와서 finishLinkIfAny 가 B 를 A 에 합친다
@@ -135,13 +135,15 @@
       }).catch(function () { FLASH = '연결 중 연결이 끊겼어요. 다시 시도해 주세요.'; return s.access_token; });
   }
   // 네이버 로그인에서 돌아왔으면(?naver_login=1) 서버가 맡아 둔 세션을 받아 로그인 상태로 만든다
-  function naverReturn() {
-    var u = new URL(location.href), v = u.searchParams.get('naver_login'); if (!v) return Promise.resolve();
-    u.searchParams.delete('naver_login'); try { history.replaceState(null, '', u.pathname + u.search); } catch (e) { }
+  function serverReturn(provider) {
+    var param = provider + '_login', u = new URL(location.href), v = u.searchParams.get(param); if (!v) return Promise.resolve();
+    u.searchParams.delete(param); try { history.replaceState(null, '', u.pathname + u.search); } catch (e) { }
     if (v !== '1') return Promise.resolve();
-    var claim = function (n) { return fetch('/api/auth/naver/claim', { method: 'POST', credentials: 'same-origin' }).then(function (r) { if (r.ok) return r.json(); if (n < 2) return new Promise(function (ok) { setTimeout(ok, 700); }).then(function () { return claim(n + 1); }); return null; }); };
+    var claim = function (n) { return fetch('/api/auth/' + provider + '/claim', { method: 'POST', credentials: 'same-origin' }).then(function (r) { if (r.ok) return r.json(); if (n < 2) return new Promise(function (ok) { setTimeout(ok, 700); }).then(function () { return claim(n + 1); }); return null; }); };
     return claim(0).then(function (s) { if (s && s.access_token) return sb.auth.setSession({ access_token: s.access_token, refresh_token: s.refresh_token }); }).catch(function () { });
   }
+  // 네이버·구글(서버 로그인)에서 돌아왔으면 서버가 맡아 둔 세션을 받아 로그인 상태로 만든다
+  function naverReturn() { return serverReturn('naver').then(function () { return serverReturn('google'); }); }
   function load(token) {
     TOKEN = token;
     return fetch('/api/commerce/mine', { method: 'POST', headers: { 'content-type': 'application/json', 'x-member-token': token }, body: '{}' })
