@@ -1,0 +1,75 @@
+// 거래 메일(구매 확인·환불 완료). 발송: Resend(https://resend.com). 전자상거래법상 계약 내용(상품·금액·환불 조건·판매자 정보)을 전자문서로 알린다.
+// 환경변수: RESEND_API_KEY(비밀). 선택: MAIL_FROM(기본 '만트라 사주 무빙툰 <noreply@mantrafortune.com>').
+// 키가 없으면 아무것도 보내지 않는다(결제·환불은 그대로 진행). 발송 실패도 결제·환불을 막지 않는다.
+// 같은 주문으로 두 번 보내지 않도록, 부르는 쪽이 '이번 요청이 상태를 실제로 바꿨을 때'만 부른다.
+// 판매자 정보는 report/legal/business.js 와 같아야 한다(주소·전화가 바뀌면 둘 다 고친다).
+const BIZ = {
+  service: '만트라 사주 무빙툰', name: '만트라 스튜디오', ceo: '백진우', bizNo: '775-24-01924', mailOrderNo: '제2026-전주덕진-0195호',
+  address: '전북특별자치도 전주시 덕진구 만성중앙로 53-44, 3층 A-2호(만성동)', phone: '070-4519-6416', email: 'critical5114@naver.com',
+};
+const SITE = 'https://mantrafortune.com';
+const WORLD = { w1: '종합풀이', w2: '재물운 심화', w7: '커리어운 심화', w3: '인연운 심화' };
+export const mailReady = env => !!(env && env.RESEND_API_KEY);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const won = n => (+n || 0).toLocaleString('ko-KR') + '원';
+const kst = t => { try { return new Date(t).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { return String(t || ''); } };
+
+// 주문의 회원 이메일(네이버 회원은 네이버가 준 이메일). 내부용 주소면 보내지 않는다
+async function recipientOf(env, userId) {
+  if (!userId) return null;
+  try {
+    const r = await fetch(String(env.SUPABASE_URL).replace(/\/+$/, '') + '/auth/v1/admin/users/' + encodeURIComponent(userId), { headers: { apikey: env.SUPABASE_SERVICE_KEY, authorization: 'Bearer ' + env.SUPABASE_SERVICE_KEY }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return null;
+    const u = await r.json(), m = u.user_metadata || {};
+    const email = m.provider === 'naver' ? m.email : u.email;
+    return email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && !/@users\.mantrafortune\.com$/i.test(email) ? email : null;
+  } catch { return null; }
+}
+
+function layout(title, rows, note) {
+  const table = rows.map(([k, v]) => `<tr><td style="padding:6px 12px 6px 0;color:#6b6b6b;white-space:nowrap;vertical-align:top">${esc(k)}</td><td style="padding:6px 0;color:#1c1b18">${v}</td></tr>`).join('');
+  return `<!doctype html><html lang="ko"><body style="margin:0;background:#f7f5ef;font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif">
+<div style="max-width:560px;margin:0 auto;padding:24px 16px"><div style="background:#fff;border:1px solid #e4dfd3;border-radius:14px;padding:22px 20px">
+<p style="margin:0 0 4px;color:#9b3b2a;font-weight:700;font-size:13px">${esc(BIZ.service)}</p><h1 style="margin:0 0 14px;font-size:20px;color:#1c1b18">${esc(title)}</h1>
+<table style="border-collapse:collapse;font-size:14px;line-height:1.5">${table}</table>${note}
+<p style="margin:18px 0 0"><a href="${SITE}/report/my/" style="display:inline-block;background:#9b3b2a;color:#fff;text-decoration:none;padding:10px 16px;border-radius:10px;font-weight:700">내 구매 내역 보기</a></p></div>
+<p style="margin:14px 4px 0;color:#8a8577;font-size:12px;line-height:1.7">${esc(BIZ.name)} · 대표 ${esc(BIZ.ceo)} · 사업자등록번호 ${esc(BIZ.bizNo)} · 통신판매업 신고 ${esc(BIZ.mailOrderNo)}<br>${esc(BIZ.address)}<br>고객 문의 ${esc(BIZ.phone)} · ${esc(BIZ.email)}<br>이 메일은 구매·환불 내역을 알려 드리는 거래 안내 메일로, 수신 동의와 관계없이 발송됩니다.</p></div></body></html>`;
+}
+
+export function purchaseMail(order) {
+  const worlds = (order.worlds || []).map(w => WORLD[w] || w).join(' · ');
+  const rows = [['상품', esc(order.product_name)], ['결제 금액', '<b>' + won(order.amount) + '</b>'], ['결제 일시', esc(kst(order.paid_at))], ['결제 수단', esc(order.method || '-')],
+    ['사주', esc(order.saju_label || '-')], ['열리는 주제', esc(worlds)], ['이용 기간', '결제 즉시 · 서비스 운영 기간 동안 제한 없이 다시 보기'], ['주문번호', esc(order.order_id)]];
+  const note = `<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a"><b>환불 안내</b><br>구매 후 7일 이내이고 산 주제의 유료 장을 열지 않았다면, <a href="${SITE}/report/my/" style="color:#9b3b2a">내 구매 내역</a>의 <b>바로 환불</b>로 즉시 전액 환불됩니다. 유료 장을 열어 디지털 콘텐츠 제공이 시작된 뒤에는 환불이 제한되며(전자상거래법 제17조 제2항 제5호), 콘텐츠가 열리지 않는 등 회사 잘못이 있으면 기간·열람과 관계없이 전액 환불합니다. 자세한 기준: <a href="${SITE}/report/legal/refund.html" style="color:#9b3b2a">환불정책</a> · <a href="${SITE}/report/legal/terms.html" style="color:#9b3b2a">이용약관</a></p>`;
+  const text = `[${BIZ.service}] 구매가 완료되었습니다\n상품: ${order.product_name}\n결제 금액: ${won(order.amount)}\n결제 일시: ${kst(order.paid_at)}\n사주: ${order.saju_label || '-'}\n열리는 주제: ${worlds}\n주문번호: ${order.order_id}\n\n구매 후 7일 이내·유료 장 미열람이면 내 구매 내역(${SITE}/report/my/)에서 바로 환불할 수 있습니다. 환불정책: ${SITE}/report/legal/refund.html\n\n${BIZ.name} · 사업자등록번호 ${BIZ.bizNo} · ${BIZ.phone} · ${BIZ.email}`;
+  return { subject: `[${BIZ.service}] 구매가 완료되었습니다 · ${order.product_name}`, html: layout('구매가 완료되었습니다', rows, note), text };
+}
+export function refundMail(order, canceledAt) {
+  const rows = [['상품', esc(order.product_name)], ['환불 금액', '<b>' + won(order.amount) + '</b>'], ['환불 일시', esc(kst(canceledAt || order.canceled_at))], ['결제 수단', esc(order.method || '-')], ['주문번호', esc(order.order_id)]];
+  const note = `<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a">결제 취소를 요청했습니다. 카드사·결제 수단에 따라 실제 반영까지 영업일 기준 3~7일이 걸릴 수 있습니다. 이 주문으로 열렸던 주제는 다시 잠깁니다.</p>`;
+  const text = `[${BIZ.service}] 환불이 완료되었습니다\n상품: ${order.product_name}\n환불 금액: ${won(order.amount)}\n주문번호: ${order.order_id}\n카드사·결제 수단에 따라 반영까지 영업일 기준 3~7일이 걸릴 수 있습니다.\n\n${BIZ.name} · ${BIZ.phone} · ${BIZ.email}`;
+  return { subject: `[${BIZ.service}] 환불이 완료되었습니다 · ${order.product_name}`, html: layout('환불이 완료되었습니다', rows, note), text };
+}
+
+async function send(env, to, mail, tag) {
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST', signal: AbortSignal.timeout(10000),
+      headers: { authorization: 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
+      body: JSON.stringify({ from: env.MAIL_FROM || '만트라 사주 무빙툰 <noreply@mantrafortune.com>', to: [to], reply_to: BIZ.email, subject: mail.subject, html: mail.html, text: mail.text, tags: [{ name: 'kind', value: tag }] }),
+    });
+    if (!r.ok) console.log('[mail]', tag, 'failed', r.status);
+    return r.ok;
+  } catch (e) { console.log('[mail]', tag, 'error', String(e && e.message || e).slice(0, 80)); return false; }
+}
+// 주문 하나에 대한 메일. order 는 결제 완료(또는 취소) 뒤의 값(paid_at·method·canceled_at 포함)
+export async function mailPurchase(env, order) {
+  if (!mailReady(env)) return false;
+  const to = await recipientOf(env, order.user_id); if (!to) return false;
+  return send(env, to, purchaseMail(order), 'purchase');
+}
+export async function mailRefund(env, order, canceledAt) {
+  if (!mailReady(env)) return false;
+  const to = await recipientOf(env, order.user_id); if (!to) return false;
+  return send(env, to, refundMail(order, canceledAt), 'refund');
+}

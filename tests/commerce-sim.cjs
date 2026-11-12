@@ -20,13 +20,15 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
 
   // ── 가짜 Supabase · 토스
   const db = { orders: [], ent: [] }; let tossCalls = [], tossMode = 'done';
-  const po = {}; let poCalls = [];   // 가짜 포트원: 결제 id → 결제 객체
+  const po = {}; let poCalls = []; const mails = [];   // 가짜 포트원: 결제 id → 결제 객체
   const USERS = { 'tok-a': { id: '00000000-0000-0000-0000-00000000000a', email: 'a@x.test' }, 'tok-b': { id: '00000000-0000-0000-0000-00000000000b', email: 'b@x.test' } };
   const q = (u, k) => { const m = new RegExp('[?&]' + k + '=([^&]+)').exec(u); return m ? decodeURIComponent(m[1]) : null; };
   const eqv = v => v && v.startsWith('eq.') ? v.slice(3) : null;
   global.fetch = async (u, init = {}) => {
     u = String(u); const method = (init.method || 'GET').toUpperCase(), body = init.body ? JSON.parse(init.body) : null;
     const res = (d, s = 200) => new Response(d == null ? null : JSON.stringify(d), { status: s });
+    if (u.startsWith('https://api.resend.com/')) { mails.push({ to: body.to[0], subject: body.subject, html: body.html, kind: body.tags[0].value, auth: init.headers.authorization }); return res({ id: 'm' + mails.length }); }
+    { const m = /\/auth\/v1\/admin\/users\/([0-9a-f-]+)$/.exec(u); if (m) { const uu = Object.values(USERS).find(x => x.id === m[1]); return uu ? res(uu) : res({}, 404); } }
     if (u.includes('/auth/v1/user')) { const t = (init.headers.authorization || '').slice(7); return USERS[t] ? res(USERS[t]) : res({ msg: 'bad' }, 401); }
     if (u.includes('api.tosspayments.com')) {
       tossCalls.push({ u, body });
@@ -50,7 +52,7 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
     if (u.includes('/rest/v1/commerce_orders')) {
       if (method === 'POST') { db.orders.push({ status: 'pending', ...body }); return res(null, 201); }
       const lt = q(u, 'created_at'), rows = db.orders.filter(o => (!q(u, 'order_id') || o.order_id === eqv(q(u, 'order_id'))) && (!q(u, 'user_id') || o.user_id === eqv(q(u, 'user_id'))) && (!q(u, 'status') || o.status === eqv(q(u, 'status'))) && (!lt || (o.created_at && o.created_at < lt.slice(3))));
-      if (method === 'PATCH') { rows.forEach(o => Object.assign(o, body)); return res(null, 204); }
+      if (method === 'PATCH') { rows.forEach(o => Object.assign(o, body)); return ((init.headers && init.headers.prefer) || '').includes('representation') ? res(rows) : res(null, 204); }
       return res(rows);
     }
     if (u.includes('/rest/v1/commerce_entitlements')) {
@@ -284,6 +286,21 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   d = await (await admin.onRequestGet({ request: req('/api/commerce/admin', { adminPw: 'adm', method: 'GET' }), env: penv })).json();
   ok(d.readiness.find(x => x.id === 'live-channel').ok === true, '실연동 결제가 확인되면 ✅');
   ok(!JSON.stringify(d.readiness).includes('po-secret-x'), '점검 결과에 비밀값 없음');
+
+  // ── 거래 메일(Resend): 결제 완료·환불 때 한 번씩, 키 없으면 안 보냄
+  ok(mails.length === 0, '메일 키가 없으면 보내지 않음');
+  const mailEnv = { ...penv, RESEND_API_KEY: 're_test' };
+  o = await (await order.onRequestPost({ request: req('/api/commerce/order', { tok: 'tok-b', body: { productId: 'w2', sd: { ...sd, pillars: { ...sd.pillars, hour: { hanja: '甲子' } } }, label: '테스트' } }), env: mailEnv })).json();
+  const PM = o.orderId; po[PM] = { id: PM, status: 'PAID', amount: { total: 9900 }, currency: 'KRW', storeId: 'store-x', method: { type: 'PaymentMethodCard' }, paidAt: '2026-11-12T01:00:00Z' };
+  await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-b', body: { paymentId: PM } }), env: mailEnv });
+  await confirm.onRequestPost({ request: req('/api/commerce/confirm', { tok: 'tok-b', body: { paymentId: PM } }), env: mailEnv });
+  await webhook.onRequestPost({ request: new Request('https://x.test/api/commerce/webhook', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'Transaction.Paid', data: { paymentId: PM } }) }), env: mailEnv });
+  const pm = mails.filter(m => m.kind === 'purchase');
+  ok(pm.length === 1 && pm[0].to === 'b@x.test' && pm[0].auth === 'Bearer re_test' && pm[0].subject.includes('재물운 심화') && pm[0].html.includes(PM) && pm[0].html.includes('9,900원') && pm[0].html.includes('775-24-01924') && pm[0].html.includes('바로 환불'), '구매 확인 메일 한 번(확인 두 번·웹훅 겹쳐도)');
+  r = await mineMod.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-b', body: { action: 'refund', orderId: PM } }), env: mailEnv });
+  r = await mineMod.onRequestPost({ request: req('/api/commerce/mine', { tok: 'tok-b', body: { action: 'refund', orderId: PM } }), env: mailEnv });
+  const rm = mails.filter(m => m.kind === 'refund');
+  ok(rm.length === 1 && rm[0].to === 'b@x.test' && rm[0].subject.includes('환불') && rm[0].html.includes('3~7'), '환불 완료 메일 한 번');
 
   // ── 키가 없으면 결제 API 는 'not-configured'
   const bare = { GLOSSARY_KV: KV, ADMIN_PASSWORD: 'adm' };

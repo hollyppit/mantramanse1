@@ -3,6 +3,7 @@
 // 토스:   { paymentKey, orderId, amount } → 금액 확인 → 토스 승인(시크릿 키) → 권한
 // 공통: 내 주문인가 → 대기 상태인가. 이미 결제된 주문이면 권한만 다시 확인해 성공으로 돌려준다(새로고침 대비).
 import { json } from '../../_lib.js';
+import { mailPurchase } from '../../_mail.js';
 import { memberOf, sbRest, tossCall, supabaseReady, tossReady, portoneReady, grantOrder, settlePortone } from '../../_commerce.js';
 
 const enc = encodeURIComponent;
@@ -42,8 +43,10 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'payment-failed', code, message: (t.data && t.data.message) || '' }, 400);
   }
   try {
-    await sbRest(env, `commerce_orders?order_id=eq.${enc(orderId)}&status=eq.pending`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ status: 'paid', payment_key: paymentKey, method: t.data.method || null, paid_at: t.data.approvedAt || new Date().toISOString() }) });
+    const paidFields = { status: 'paid', payment_key: paymentKey, method: t.data.method || null, paid_at: t.data.approvedAt || new Date().toISOString() };
+    const changed = await sbRest(env, `commerce_orders?order_id=eq.${enc(orderId)}&status=eq.pending`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify(paidFields) });
     await grantOrder(env, order, 'payment');
+    if (Array.isArray(changed) && changed.length) await mailPurchase(env, { ...order, ...paidFields });
   } catch {
     // 결제는 됐는데 기록이 실패: 주문번호로 관리자 화면에서 '권한 다시 주기'를 할 수 있게 오류를 돌려준다(돈은 이미 빠져나갔다)
     return json({ error: 'grant-failed', orderId }, 500);

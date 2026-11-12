@@ -14,6 +14,7 @@
 import { json, isAdmin } from './_lib.js';
 import { kvOf } from './_store.js';
 import { loadEditorial } from './_editorial.js';
+import { mailPurchase, mailRefund } from './_mail.js';
 
 export const TOPIC_WORLD = { self: 'w1', timing: 'w1', health: 'w1', creative: 'w1', remedy: 'w1', wealth: 'w2', career: 'w7', love: 'w3', relationships: 'w3' };
 export const PRODUCTS_KEY = 'commerce:products';
@@ -242,9 +243,13 @@ export async function settlePortone(env, order) {
     return { ok: false, error: 'amount-mismatch' };
   }
   try {
-    await patchOrder(env, order.order_id, { status: 'paid', payment_key: PORTONE_PREFIX + order.order_id, method: methodOf(p.method), paid_at: p.paidAt || new Date().toISOString(), failure: null }, from);
+    const paidFields = { status: 'paid', payment_key: PORTONE_PREFIX + order.order_id, method: methodOf(p.method), paid_at: p.paidAt || new Date().toISOString(), failure: null };
+    // 이번 요청이 실제로 '결제 완료'로 바꿨을 때만 구매 확인 메일(복귀 확인과 웹훅이 겹쳐도 한 번)
+    const changed = await sbRest(env, `commerce_orders?order_id=eq.${encU(order.order_id)}&status=eq.${from}`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify(paidFields) });
+    order.__mail = Array.isArray(changed) && changed.length ? { ...order, ...paidFields } : null;
     // 웹훅·복귀가 동시에 와도 '대기' 상태일 때만 바뀐다. 권한은 같은 주문·세계 중복을 막는다
     await grantOrder(env, order, 'payment');
+    if (order.__mail) await mailPurchase(env, order.__mail);   // 구매 확인 메일(실패해도 결제는 완료)
   } catch { return { ok: false, error: 'grant-failed', orderId: order.order_id }; }
   return { ok: true, worlds: order.worlds };
 }
@@ -299,8 +304,9 @@ export async function cancelOrder(env, order, reason) {
     if (!t.ok) return { ok: false, error: 'pg-cancel-failed', message: '토스 취소 실패: ' + ((t.data && t.data.message) || t.status) };
   }
   const at = new Date().toISOString(), id = encodeURIComponent(order.order_id);
-  await sbRest(env, `commerce_orders?order_id=eq.${id}&status=eq.paid`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ status: 'canceled', canceled_at: at, cancel_reason: reason }) });
+  const changed = await sbRest(env, `commerce_orders?order_id=eq.${id}&status=eq.paid`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify({ status: 'canceled', canceled_at: at, cancel_reason: reason }) });
   await sbRest(env, `commerce_entitlements?order_id=eq.${id}&revoked_at=is.null`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ revoked_at: at }) });
+  if (Array.isArray(changed) && changed.length) await mailRefund(env, order, at);   // 환불 완료 메일(이번 요청이 취소로 바꿨을 때만)
   return { ok: true, at };
 }
 // 고객 바로 환불 조건(환불정책): 결제 완료 · 결제 후 7일 이내 · 유료 장 미열람
