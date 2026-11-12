@@ -568,6 +568,25 @@ tr.row-g-avoid td { background: color-mix(in srgb, var(--bad) 7%, transparent); 
 @media (max-width: 560px) { .zq-grid { grid-template-columns: 1fr; } }
 .zq-box { border-radius: 12px; background: var(--surface-2); padding: 10px 12px; display: grid; gap: 6px; align-content: start; }
 .zq-box h4 { margin: 0; font-size: 0.82rem; color: var(--ink-3); }
+.zq-hero small { font-size: 0.78rem; font-weight: 700; }
+.zq-now { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .zq-now { grid-template-columns: 1fr; } }
+.zq-tile { display: grid; gap: 4px; justify-items: start; text-align: left; padding: 12px 14px; border: 0; border-radius: 14px; background: color-mix(in srgb, var(--good) 10%, var(--surface-2)); color: var(--ink); font: inherit; cursor: pointer; }
+.zq-tile.yr { background: color-mix(in srgb, var(--seal) 10%, var(--surface-2)); }
+.zq-tile small { font-size: 0.78rem; font-weight: 700; color: var(--ink-3); }
+.zq-tile b { font-size: 1.1rem; }
+.zq-say { font-size: 0.88rem; line-height: 1.6; color: var(--ink-2); }
+.zq-dom, .zq-hw { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 0.92rem; text-align: left; cursor: pointer; }
+.zq-dom { justify-content: space-between; }
+.zq-dom:hover, .zq-hw:hover, .zq-tile:hover { box-shadow: inset 0 0 0 2px var(--line); }
+.zq-box > small { font-size: 0.78rem; line-height: 1.5; }
+.zq-hw { align-items: flex-start; }
+.zq-hw .hw { display: inline-grid; place-items: center; width: 22px; height: 22px; margin-top: 1px; border-radius: 6px; font-size: 0.76rem; font-weight: 800; color: #fff; flex: none; }
+.zq-hw > span:last-child { display: grid; gap: 2px; }
+.zq-hw small { font-size: 0.8rem; line-height: 1.5; color: var(--ink-2); }
+.zw-hint { margin: 0 0 8px; padding: 8px 12px; border-radius: 10px; background: var(--surface-2); font-size: 0.86rem; color: var(--ink-2); }
+.zc-dom { align-self: end; justify-self: start; font-size: 0.66rem; font-weight: 800; line-height: 1.3; padding: 1px 6px; border-radius: 6px; background: var(--surface); color: var(--accent-2); }
+#zw-detail details.adv, .card details.adv#zw-yrpro, .card details.adv#zw-adv { margin-top: 12px; }
 .zq-row { display: flex; gap: 8px; align-items: baseline; font-size: 0.86rem; color: var(--ink-2); flex-wrap: wrap; }
 .zq-row .hw { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; font-size: 0.7rem; font-weight: 800; color: #fff; flex: none; }
 .zq-row b { color: var(--ink); }
@@ -581,9 +600,10 @@ tr.row-g-avoid td { background: color-mix(in srgb, var(--bad) 7%, transparent); 
 .zg-rl { font-size: 10.5px; font-weight: 700; fill: var(--ink-2); cursor: pointer; }
 .zg-rl.sel { fill: var(--ink); font-weight: 900; }
 .zg-bars { display: grid; gap: 4px; }
-.zg-b { display: grid; grid-template-columns: 40px 1fr 30px; gap: 8px; align-items: center; font-size: 0.8rem; cursor: pointer; border-radius: 8px; padding: 2px 4px; }
+.zg-b { display: grid; grid-template-columns: 104px 1fr 30px; gap: 8px; align-items: center; font-size: 0.8rem; cursor: pointer; border-radius: 8px; padding: 2px 4px; }
 .zg-b:hover, .zg-b.sel { background: var(--surface-2); }
-.zg-b .n { font-weight: 700; color: var(--ink-2); }
+.zg-b .n { font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+.zg-b .n small { margin-left: 5px; font-size: 0.72rem; font-weight: 500; color: var(--ink-3); }
 .zg-b.sel .n { color: var(--ink); font-weight: 900; }
 .zg-b .t { height: 10px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
 .zg-b.sel .t { background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
@@ -830,6 +850,25 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 .trp .lbl { font-size: 0.76rem; font-weight: 800; color: var(--ink-3); }
 .trp select { width: 100%; }
 .trp .tk { font-size: 0.8rem; color: var(--ink-2); }
+.trp.tgt { box-shadow: inset 0 0 0 2px var(--accent); background: var(--accent-soft); }
+.tgt-b { margin-left: 4px; font-size: 0.68rem; font-weight: 800; padding: 1px 6px; border-radius: 99px; background: var(--accent); color: #fff; }
+.tr-empty { display: grid; place-items: center; min-height: 110px; border-radius: 10px; border: 1.5px dashed var(--line); font-size: 0.78rem; color: var(--ink-3); text-align: center; padding: 8px; }
+.trp .btn.sm { justify-self: start; font-size: 0.76rem; padding: 4px 10px; min-height: 0; }
+.trdeck-w { display: grid; gap: 8px; margin-top: 14px; padding: 12px; border-radius: 16px; background: var(--surface-2); }
+.trdeck-h { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.trdeck { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 6px; max-height: 440px; overflow-y: auto; padding: 4px 2px; }
+.trdeck.up { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }
+.tdk { position: relative; aspect-ratio: 5 / 8.4; border: 0; padding: 0; border-radius: 7px; overflow: hidden; cursor: pointer; background: radial-gradient(circle at 50% 50%, #5a4a9a 0 18%, transparent 19%), repeating-linear-gradient(45deg, #2b2357 0 6px, #3b2f6b 6px 12px); box-shadow: inset 0 0 0 2px rgba(201,166,90,.55), 0 3px 8px -4px rgba(0,0,0,.5); transition: transform .12s, opacity .12s; }
+.tdk::after { content: '✦'; position: absolute; inset: 0; display: grid; place-items: center; color: #e7cf8a; font-size: 0.9rem; }
+.trdeck.up .tdk::after, .tdk.used::after { content: none; }
+.tdk:hover:not(:disabled) { transform: translateY(-4px); }
+.tdk:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tdk:disabled { cursor: default; opacity: .55; }
+.tdk.used { opacity: 1; box-shadow: 0 0 0 2px var(--accent); }
+.tdk .tm-ph { position: absolute; inset: 0; display: grid; place-items: center; padding: 4px; text-align: center; color: #f3e7c6; font-size: 0.56rem; line-height: 1.2; }
+.tdk img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tdk .tn { position: absolute; left: 0; right: 0; bottom: 0; padding: 1px 2px; font-size: 0.56rem; line-height: 1.3; color: #fff; background: rgba(0,0,0,.6); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tdk .tu { position: absolute; left: 0; right: 0; top: 0; padding: 1px 2px; font-size: 0.6rem; font-weight: 800; color: #fff; background: var(--accent); text-align: center; }
 .tr-W { --c: var(--fire); } .tr-C { --c: var(--water); } .tr-S { --c: var(--metal); } .tr-P { --c: var(--earth); } .tr-M { --c: var(--accent-2); }
 @media (max-width: 520px) { .phase3 { gap: 4px; } .phc { padding: 8px; } .pkbars .bar { grid-template-columns: 64px 1fr 60px; } }
 @media (max-width: 520px) {
@@ -7553,6 +7592,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const inn = zw.palaces.flatMap(q => q.fly.filter(f => f.to === p.b && q.b !== p.b).map(f => `<span class="chip">${term(q.name)}에서 <span class="hw ${HWA[f.hw][1]}">${f.hw}</span> ${term(f.star)}</span>`)).join('');
     return { out, inn };
   }
+  // 고른 영역 풀이 카드가 화면 밖이면 부드럽게 그 카드로 이동
+  function zwToDetail() {
+    const el = document.getElementById('zw-detail'); if (!el) return;
+    const top = el.getBoundingClientRect().top;
+    if (top < 60 || top > window.innerHeight - 120) window.scrollTo({ top: window.scrollY + top - 80, behavior: 'smooth' });
+  }
+  document.addEventListener('toggle', ev => { const d = ev.target; if (d && d.id && /^zw-(adv|pro|yrpro)$/.test(d.id)) { S.zwOpen = S.zwOpen || {}; S.zwOpen[d.id] = d.open; } }, true);
   const zwNowY = () => M.solarToLunar(TODAY[0], TODAY[1], TODAY[2]).y; // 지금의 음력 해
   // 별 하나: 이름, 밝기, 생년 사화(채운 배지), 보기 설정에 따라 대한 사화(대)·유년 사화(년) 배지
   function zwStar(n, cls, b, per) {
@@ -7568,6 +7614,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
 
   // 궁 강도 점수: 주성 밝기·길성·살성·사화를 합산해 0~100(50 = 보통)으로 만들고, 삼방사정을 섞어 최종 점수를 낸다.
+  const ZW_SHORT = { '명궁': '나', '형제궁': '형제·친구', '부처궁': '연애·결혼', '자녀궁': '자녀', '재백궁': '돈', '질액궁': '건강', '천이궁': '바깥 활동', '노복궁': '인맥', '관록궁': '일', '전택궁': '집', '복덕궁': '마음', '부모궁': '부모·문서' };
   const ZW_DOM = { '명궁': '나 자신·성격', '형제궁': '형제·친구', '부처궁': '연애·결혼', '자녀궁': '자녀·후배', '재백궁': '돈·재물', '질액궁': '건강', '천이궁': '밖에서의 활동', '노복궁': '사람 인연', '관록궁': '직업·성취', '전택궁': '집·부동산', '복덕궁': '마음의 여유', '부모궁': '부모·윗사람·문서' };
   const ZW_HW_PLAIN = { '록': '잘 풀리고 이득이 생김', '권': '내가 주도하고 힘이 실림', '과': '인정받고 도움을 받음', '기': '막히기 쉽고 신경 쓸 일이 많음' };
   const ZW_BR_W = { '묘': 4, '왕': 3, '득': 2, '리': 1, '평': 0, '불': -1, '함': -2 };
@@ -7739,8 +7786,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       return `<div class="zc${p.b === zw.ming ? ' ming' : ''}${p.b === selB ? ' sel' : ''}${isDh ? ' curdh' : ''}" style="grid-area:${r}/${c}" data-zw="${p.b}" role="button" tabindex="0">
         <div class="zc-main">${p.main.length ? p.main.map(n => zwStar(n, 'main', p.b, per)).join('') : `<span class="muted small">${term('공궁', '공궁')}</span>`}</div>
         <div class="zc-sub">${p.good.map(n => zwStar(n, 'good', p.b, per)).join('')}${p.bad.map(n => zwStar(n, 'bad', p.b, per)).join('')}</div>
-        ${S.zwAdj !== false ? `<div class="zc-adj">${p.adj.map(n => term(n)).join('')}</div>` : ''}
+        ${S.zwAdj === true ? `<div class="zc-adj">${p.adj.map(n => term(n)).join('')}</div>` : ''}
         ${S.zwG12 ? `<div class="zc-g12">${G12_FAM.map(([f]) => g12Term(p.g12[f], f)).join('')}</div>` : ''}
+        <div class="zc-dom">${ZW_SHORT[p.name]}</div>
         <div class="zc-foot"><span class="zc-name">${term(p.name)}${p.shen ? ` <span class="zc-tag">${term('신궁', '身')}</span>` : ''}${p.b === per.liuB ? ` <span class="zc-tag zc-yr">${term('유년', '유년')}</span>` : ''}</span>
           <span class="zc-gz">${M.STEM[p.s]}${M.BR[p.b]}</span></div>
         <i class="zc-heat" style="background:${zwGradeCol(sc[p.b])};width:${sc[p.b]}%"></i>
@@ -7765,101 +7813,122 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const best = order.slice(0, 3), worst = order.slice(-3).reverse();
     const mp = zw.palaces[zw.ming], mMain = mp.main.length ? mp.main : zw.palaces[(zw.ming + 6) % 12].main;
     const pill = v => `<span class="zq-pill s${zwGrade(v)[0]}">${zwGrade(v)[1]} ${v}</span>`;
-    const prow = p => `<div class="zq-row"><b>${term(p.name)}</b><span>${ZW_DOM[p.name]}</span>${pill(sc[p.b])}</div>`;
-    const hwRows = Object.entries(zw.sihwa).map(([n, h]) => { const p = zw.palaces[zw.pos[n]]; return `<div class="zq-row"><span class="hw ${HWA[h][1]}">${h}</span><span>${term(n)}이(가) <b>${term(p.name)}</b>(${ZW_DOM[p.name]})에 있어, 이 영역은 <b>${ZW_HW_PLAIN[h]}</b></span></div>`; }).join('');
-    const overview = `<section class="card">
-      <div class="card-h"><h2>한눈에 보기</h2><span class="muted small">점수 = 별 밝기·길성·살성·사화를 합쳐 내 명반 안에서 비교한 상대 지표 (50 = 내 평균)</span></div>
+    const starGist = n => esc(GL[n] ? GL[n][1].split('. ')[0].replace(/^\S*\s*쉽게 말해\s*/, '').replace(/\.$/, '') + '.' : '');
+    const zwOpen = id => S.zwOpen && S.zwOpen[id] ? ' open' : '';
+    const tone = (v, hi, mid, lo) => v >= 60 ? hi : v >= 45 ? mid : lo;
+
+    // ── 1. 쉽게 보기: 나는 이런 사람 → 지금 10년·올해 → 강한·약한 영역 → 평생 네 가지 흐름 (누르면 그 영역 풀이로) ──
+    const domBtn = p => `<button type="button" class="zq-dom" data-zw="${p.b}"><b>${ZW_DOM[p.name]}</b>${pill(sc[p.b])}</button>`;
+    const HW_EASY = { '록': ['이득이 따라오는 곳', '노력한 만큼 얻고, 도와주는 사람이 생겨요.'], '권': ['내가 주도하면 풀리는 곳', '남에게 맡기기보다 내가 이끌고 결정할 때 힘이 실려요.'], '과': ['인정받기 쉬운 곳', '실력과 이미지로 평판이 차곡차곡 쌓여요.'], '기': ['마음이 자주 걸리는 곳', '걱정이 앞서기 쉬워요. 서두르지 말고 한 번 더 점검하세요.'] };
+    const hwEasy = ['록', '권', '과', '기'].map(k => {
+      const e = Object.entries(zw.sihwa).find(([, h]) => h === k); if (!e) return '';
+      const p = zw.palaces[zw.pos[e[0]]];
+      return `<button type="button" class="zq-hw" data-zw="${p.b}"><span class="hw ${HWA[k][1]}">${k}</span><span><b>${HW_EASY[k][0]} — ${ZW_DOM[p.name]}</b><small>${HW_EASY[k][1]}</small></span></button>`;
+    }).join('');
+    const dhP = per.dh;
+    const nowTiles = `<div class="zq-now">
+      ${dhP ? `<button type="button" class="zq-tile" data-zw="${dhP.b}"><small>지금 걷는 10년 · ${dhP.daehan[0]}~${dhP.daehan[1]}세</small><b>${ZW_DOM[dhP.name]}</b>${pill(sc[dhP.b])}<span class="zq-say">${tone(sc[dhP.b], '이 영역에 적극적으로 힘을 써 볼 만한 10년이에요.', '크게 출렁이지 않아요. 꾸준함이 이기는 10년이에요.', '판을 키우기보다 기반을 다지는 10년으로 쓰세요.')}</span></button>`
+        : `<div class="zq-tile"><small>지금 걷는 10년</small><b>첫 10년 흐름 전</b><span class="zq-say">아직 첫 대한이 시작되기 전이에요.</span></div>`}
+      <button type="button" class="zq-tile yr" data-zw="${liuP.b}"><small>${Y}년 올해의 초점 · ${per.age}세</small><b>${ZW_DOM[liuP.name]}</b>${pill(sc[liuP.b])}<span class="zq-say">${tone(sc[liuP.b], '올해 이 분야는 기회로 보고 움직여도 좋아요.', '큰 변화보다 하던 걸 꾸준히 이어 가는 해예요.', '확장보다 점검과 정리가 어울리는 해예요.')}</span></button>
+    </div>`;
+    const easyCard = `<section class="card easy">
+      <div class="card-h"><h2>자미두수 쉽게 보기</h2><span class="note">어려운 별 이름은 빼고, 내 인생 지도를 먼저 요약해 드려요</span></div>
       <div class="zq">
-        <div class="zq-hero"><b>타고난 나의 별: ${mMain.length ? mMain.map(n => term(n)).join(' · ') : '주성 없음(공궁)'}</b>
-          <span class="small" style="color:var(--ink-2)">${mMain.length ? mMain.map(n => esc(GL[n][1].split('. ')[0].replace(/\.$/, '') + '.')).join(' ') : '명궁이 비어 있어 마주 보는 천이궁의 별을 빌려 봅니다.'}</span></div>
+        <div class="zq-hero"><small class="muted">나는 이런 사람이에요</small><b>${mMain.length ? mMain.map(n => term(n)).join(' · ') + ' 타입' : '환경 따라 달라지는 유연한 타입'}</b>
+          <span class="small" style="color:var(--ink-2)">${mMain.length ? mMain.map(starGist).join(' ') : '명궁이 비어 있어 마주 보는 자리의 별을 빌려 봐요. 만나는 사람과 환경에 따라 모습이 크게 달라져요.'}</span></div>
+        ${nowTiles}
         <div class="zq-grid">
-          <div class="zq-box"><h4>💪 특히 힘이 실린 영역</h4>${best.map(prow).join('')}</div>
-          <div class="zq-box"><h4>🔍 상대적으로 힘이 약한 영역 (보완 포인트)</h4>${worst.map(prow).join('')}</div>
+          <div class="zq-box"><h4>💪 타고나길 잘 풀리는 영역</h4>${best.map(domBtn).join('')}<small class="muted">별이 밝고 도와주는 별이 많아서 자신감이 붙는 곳이에요.</small></div>
+          <div class="zq-box"><h4>🌱 의식해서 챙길 영역</h4>${worst.map(domBtn).join('')}<small class="muted">약점이라기보다 "신경 써서 가꾸면 달라지는 곳"이에요.</small></div>
         </div>
-        <div class="zq-box"><h4>🎯 태어난 해의 핵심 사화 4가지 (평생 바탕)</h4>${hwRows}</div>
+        <div class="zq-box"><h4>🎯 평생 따라다니는 네 가지 흐름</h4>${hwEasy}</div>
       </div>
-    </section>
-    <section class="card">
-      <div class="card-h"><h2>12궁 강도 그래프</h2><span class="muted small">이름을 누르면 아래에서 자세히</span></div>
+      <p class="note">영역을 누르면 아래에 그 영역 풀이가 열려요. 점수는 좋고 나쁨의 판정이 아니라 내 명반 안에서 비교한 상대 지표예요(50 = 내 평균).</p>
+    </section>`;
+
+    // ── 2. 명반: 칸마다 생활 영역 이름, 전문가 옵션은 접어 둔다 ──
+    const board = `<section class="card">
+      <div class="card-h"><h2>${term('자미두수')} ${term('명반', '명반')}</h2>
+        <span class="seg" role="group" aria-label="보는 해"><button data-act="zwy:-1" aria-label="이전 해">‹</button><button data-act="zwy:0">${Y}년 · ${per.age}세</button><button data-act="zwy:1" aria-label="다음 해">›</button></span></div>
+      <p class="zw-hint">👆 칸을 누르면 바로 아래에 그 영역 풀이가 열려요. 칸마다 <b>무슨 영역인지</b> 작게 적어 두었어요.</p>
+      <div class="zw">${zw.palaces.map(cell).join('')}${center}</div>
+      <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>명궁(나)</span><span><i class="sw" style="background:var(--good)"></i>지금 걷는 10년</span><span><span class="zc-tag zc-yr">유년</span> ${Y}년 올해의 초점</span><span>칸 아래 막대 = 그 영역의 힘</span><span>칸 아래 숫자 = 그 10년의 나이</span></div>
+      <details class="adv" id="zw-adv"${zwOpen('zw-adv')}><summary>보기 설정 (전문가용)</summary>
+        <div class="frow" style="gap:8px 14px;margin-top:8px">
+          <div class="field"><span>사화 보기</span>${seg('zwHw', [['birth', '생년만'], ['dh', '+ 대한'], ['yr', '+ 대한 + 유년']], S.inp.zwHw || 'birth')}</div>
+          <label class="check"><input type="checkbox" id="zw-adj" ${S.zwAdj === true ? 'checked' : ''}> ${term('잡성', '잡성')} 표시</label>
+          <label class="check"><input type="checkbox" id="zw-g12" ${S.zwG12 ? 'checked' : ''}> ${term('12신', '12신')} 표시</label>
+        </div>
+        <p class="note">대한·유년 사화를 명반 위에 겹쳐 볼 수 있어요. 생년 사화는 색칠된 배지, 대한 사화는 "대", 유년 사화는 "년"이 붙은 테두리 배지예요. 별 옆 작은 글자는 ${term('별의 밝기', '밝기')}예요.</p>
+      </details>
+    </section>`;
+
+    // ── 3. 고른 영역 풀이: 쉬운 풀이 먼저, 전문 정보는 접기 ──
+    const detail = `<section class="card" id="zw-detail">
+      <div class="card-h"><h2>${term(sel.name)} · ${ZW_DOM[sel.name]} <span class="muted small">${sel.daehan[0]}~${sel.daehan[1]}세의 10년</span></h2>${sel.shen ? `<span class="pill" style="background:var(--accent);color:#fff">${term('신궁')}</span>` : ''}</div>
+      <div class="zq-hero"><span>${pill(sc[sel.b])} <span class="small muted">이 영역의 힘</span></span><span class="small">${zwPlain(zw, sel, sc)}</span></div>
+      ${zwReading(zw, sel, sc)}
+      <details class="adv" id="zw-pro"${zwOpen('zw-pro')}><summary>전문가용 자세히 (별 목록·12신·비성 사화·삼방사정)</summary>
+        <p class="small" style="color:var(--ink-2)">${esc(glInline(sel.name))} · ${M.STEM[sel.s]}${M.BR[sel.b]}</p>
+        <div class="list">${sel.main.map(n => starLine(n, 'main')).join('')}${sel.good.map(n => starLine(n, 'good')).join('')}${sel.bad.map(n => starLine(n, 'bad')).join('')}${sel.adj.map(n => starLine(n, 'adj')).join('')}</div>
+        ${!sel.main.length ? `<p class="small">주성이 없는 ${term('공궁')}이라 마주 보는 ${term(opp.name)}의 ${opp.main.length ? opp.main.map(n => term(n)).join('·') : '별'}을 빌려 봅니다.</p>` : ''}
+        <div class="list">
+          <div class="li"><span class="k">${term('12신')}</span><span class="v small">${G12_FAM.map(([f, l]) => `${term(l)} ${g12Term(sel.g12[f], f)}`).join(' · ')}</span><span></span></div>
+          <div class="li"><span class="k">${term('비성 사화')}</span><span class="v"><span class="small">이 칸의 천간 ${M.STEM[sel.s]}로 날리는 사화</span>${flyHTML(zw, sel).out}</span><span></span></div>
+          <div class="li"><span class="k">들어오는 사화</span><span class="v">${flyHTML(zw, sel).inn || '<span class="small muted">다른 칸에서 이 칸으로 날아오는 사화가 없습니다.</span>'}</span><span></span></div>
+        </div>
+        <p class="small">${term('삼방사정')}: ${term(opp.name)}(마주 봄, ${opp.main.map(n => term(n)).join('·') || '공궁'}) · ${tri.map(p => `${term(p.name)}(${p.main.map(n => term(n)).join('·') || '공궁'})`).join(' · ')}</p>
+      </details>
+    </section>`;
+
+    // ── 4. 그해 운: 쉬운 문장 먼저, 사화 칩은 접기 ──
+    const liuAt = k => { const e = Object.entries(per.liuSihwa).find(([, h]) => h === k); return e ? zw.palaces[zw.pos[e[0]]] : null; };
+    const lLu = liuAt('록'), lGi = liuAt('기');
+    const yrCard = `<section class="card">
+      <div class="card-h"><h2>${Y}년 운 <span class="muted small">세는나이 ${per.age}세</span></h2></div>
+      <div class="easy-list">
+        ${dhP ? `<div class="easy-row"><b>이 10년(${dhP.daehan[0]}~${dhP.daehan[1]}세)의 무대</b><p><b>${ZW_DOM[dhP.name]}</b> — ${PALACE_MEAN[dhP.name]}</p></div>` : ''}
+        <div class="easy-row"><b>${Y}년 올해의 무대</b><p><b>${ZW_DOM[liuP.name]}</b> — ${PALACE_MEAN[liuP.name]} ${dhP && dhP.b === liuP.b ? '10년의 무대와 올해의 무대가 겹쳐서, 이 영역의 일이 유난히 크게 느껴질 수 있어요.' : dhP ? `그래서 올해는 <b>${ZW_DOM[dhP.name]}</b>와 <b>${ZW_DOM[liuP.name]}</b>, 이 두 영역의 일이 특히 크게 느껴져요.` : ''}</p></div>
+        ${lLu || lGi ? `<div class="easy-row"><b>올해 들어오는 것과 걸리는 것</b><p>${lLu ? `🟢 이득이 들어오는 곳: <b>${ZW_DOM[lLu.name]}</b>` : ''}${lLu && lGi ? '<br>' : ''}${lGi ? `🔴 마음이 걸리는 곳: <b>${ZW_DOM[lGi.name]}</b> <span class="muted small">— 이 분야는 결정 전에 한 번 더 확인하세요.</span>` : ''}</p></div>` : ''}
+      </div>
+      <details class="adv" id="zw-yrpro"${zwOpen('zw-yrpro')}><summary>전문가용 자세히 (대한·유년 사화)</summary>
+        <div class="list">
+          <div class="li"><span class="k">${term('대한')}</span><span class="v">${dhP ? `<b>${term(dhP.name)}</b> ${M.STEM[dhP.s]}${M.BR[dhP.b]} · ${dhP.daehan[0]}~${dhP.daehan[1]}세 <span class="small">이 10년은 ${term(dhP.name)} 칸이 명궁 역할을 합니다. ${term('대한 사화')}(대한 칸의 천간 ${M.STEM[dhP.s]} 기준):</span>${sihwaWhere(per.dhSihwa)}` : '<span class="muted small">첫 대한 시작 전입니다.</span>'}</span><span></span></div>
+          <div class="li"><span class="k">${term('유년')}</span><span class="v"><b>${term(liuP.name)}</b> 칸이 올해의 명궁 <span class="small">${M.STEM[per.liuS]}${M.BR[per.liuB]}년이라 ${M.BR[per.liuB]} 칸이 유년 명궁이 됩니다. ${term('유년 사화')}(그해 천간 ${M.STEM[per.liuS]} 기준):</span>${sihwaWhere(per.liuSihwa)}</span><span></span></div>
+        </div>
+      </details>
+    </section>`;
+
+    // ── 5. 그래프: 12궁 강도 → 대한 → 유년 → 사화 지도·별의 힘(전문가용, 기본 접힘) ──
+    const graphs = `<section class="card">
+      <div class="card-h"><h2>12궁 강도 그래프</h2><span class="muted small">영역을 누르면 위에서 자세히</span></div>
       <div class="zg-two">${zwRadar(zw, sc, selB)}
-        <div class="zg-bars">${M.ZW_PALACE.map(nm => { const p = zw.palaces.find(q => q.name === nm); return `<div class="zg-b${p.b === selB ? ' sel' : ''}" data-zw="${p.b}"><span class="n">${nm.replace('궁', '')}</span><span class="t"><i style="width:${sc[p.b]}%;background:${zwGradeCol(sc[p.b])}"></i></span><span class="v">${sc[p.b]}</span></div>`; }).join('')}</div>
+        <div class="zg-bars">${M.ZW_PALACE.map(nm => { const p = zw.palaces.find(q => q.name === nm); return `<div class="zg-b${p.b === selB ? ' sel' : ''}" data-zw="${p.b}"><span class="n">${nm.replace('궁', '')}<small>${ZW_SHORT[nm]}</small></span><span class="t"><i style="width:${sc[p.b]}%;background:${zwGradeCol(sc[p.b])}"></i></span><span class="v">${sc[p.b]}</span></div>`; }).join('')}</div>
       </div>
-      <p class="note">레이더는 바깥으로 갈수록 강합니다. 각 궁 점수는 그 칸 50% + 마주 보는 궁 25% + 삼합 두 궁 25%를 섞은 ${term('삼방사정')} 기준입니다. 점수는 좋고 나쁨의 판정이 아니라 그 영역에 힘이 실린 정도이며, 낮은 궁은 노력으로 보완할 지점입니다.</p>
+      <p class="note">바깥으로 갈수록(막대가 길수록) 그 영역에 힘이 실려 있어요. 각 점수는 그 칸 50% + 마주 보는 칸 25% + 삼합 두 칸 25%를 섞은 ${term('삼방사정')} 기준이에요. 낮은 영역은 "나쁜 곳"이 아니라 노력으로 보완할 곳이에요.</p>
     </section>
     <section class="card">
-      <div class="card-h"><h2>10년 ${term('대한')} 흐름 그래프</h2><span class="muted small">나이순 · 막대 = 그 10년 동안 명궁 역할을 하는 칸의 강도</span></div>
+      <div class="card-h"><h2>10년 ${term('대한')} 흐름 그래프</h2><span class="muted small">나이순 · 막대 = 그 10년의 중심 영역이 가진 힘</span></div>
       ${zwDaehanChart(zw, sc, per, selB)}
-      <p class="note">막대 하나가 10년입니다. 초록 배경이 지금 걷는 대한이며, 막대가 높을수록 그 10년은 해당 영역을 중심으로 힘이 실린다고 읽습니다.</p>
+      <p class="note">막대 하나가 10년이에요. 초록 배경이 지금 걷는 10년이고, 막대가 높을수록 그 10년은 해당 영역을 중심으로 힘이 실려요.</p>
     </section>
     <section class="card">
       <div class="card-h"><h2>${term('유년')} 흐름 그래프 <span class="muted small">앞으로 10년</span></h2></div>
       ${zwLiuChart(zw, sc, Y)}
-      <p class="note">막대는 그해 명궁 역할을 하는 칸의 강도, 아래 글자는 그해 화록(초록)·화기(빨강)가 떨어지는 궁입니다. 해를 누르면 아래 명반과 운이 그해로 바뀝니다.</p>
+      <p class="note">막대는 그해 중심 영역의 힘, 아래 글자는 그해 이득(록·초록)과 걸림(기·빨강)이 떨어지는 영역이에요. 해를 누르면 위 명반과 운이 그해로 바뀌어요.</p>
     </section>
     <section class="card">
       <div class="card-h"><h2>${term('사화')} 지도 <span class="muted small">이득·힘·인정·막힘이 어디로 가나</span></h2></div>
       ${zwSihwaMap(zw, per)}
-      <p class="note">가로줄은 시기(평생 바탕 → 지금 10년 → 올해), 세로줄은 네 가지 스위치입니다. 칸을 누르면 그 궁의 풀이로 이동합니다. 같은 궁에 록과 기가 겹치면 "기회와 걱정이 함께 있는 영역"으로 읽습니다.</p>
+      <p class="note">가로줄은 시기(평생 바탕 → 지금 10년 → 올해), 세로줄은 네 가지 스위치예요. 칸을 누르면 그 영역 풀이로 이동해요. 같은 영역에 록과 기가 겹치면 "기회와 걱정이 함께 있는 영역"으로 읽어요.</p>
     </section>
     <section class="card">
       <div class="card-h"><h2>별의 힘 분포 <span class="muted small">${bd.tot}개 별</span></h2></div>
       ${bd.html}
-      <p class="note">내 명반의 별들이 얼마나 밝은 자리에 앉아 있는지의 비율입니다. 초록이 많을수록 별의 좋은 성질이 잘 드러나고, 빨강이 많으면 약점이 드러나기 쉬워 신경 쓸 영역이 늘어납니다. ${term('별의 밝기')}는 유파마다 조금씩 다릅니다.</p>
+      <p class="note">내 명반의 별들이 얼마나 밝은 자리에 앉아 있는지의 비율이에요. 초록이 많을수록 별의 좋은 성질이 잘 드러나고, 빨강이 많으면 약점이 드러나기 쉬워 신경 쓸 영역이 늘어나요. ${term('별의 밝기')}는 유파마다 조금씩 달라요.</p>
     </section>`;
 
-    // 어려운 용어 없이 먼저 보는 쉬운 풀이: 영역 이름은 ZW_DOM(생활 영역)으로, 사화는 한 줄 뜻으로 풀어 쓴다
-    const HW_PLAIN = { '록': ['화록', '이득과 인연이 따라오는', '이 영역에서는 노력한 만큼 얻고 도와주는 사람이 생겨요.'], '권': ['화권', '내가 주도하고 힘이 실리는', '이 영역에서는 내가 이끌고 결정할 때 잘 풀려요.'], '과': ['화과', '평판과 인정이 따르는', '이 영역에서는 실력과 이미지로 인정받기 쉬워요.'], '기': ['화기', '마음이 걸리고 막히기 쉬운', '이 영역은 서두르지 말고 한 번 더 점검하세요. 걱정이 앞서기 쉬워요.'] };
-    const hwOf = k => { const e = Object.entries(zw.sihwa).find(([, h]) => h === k); return e ? zw.palaces[zw.pos[e[0]]] : null; };
-    const doms = ps => ps.map(p => '<b>' + ZW_DOM[p.name] + '</b>').join(' · ');
-    const dhP = per.dh, easyRows = [];
-    easyRows.push(['나는 이런 사람이에요', mMain.length ? mMain.map(n => '<b>' + term(n) + '</b> — ' + esc(GL[n][1].split('. ')[0].replace(/^\S*\s*쉽게 말해\s*/, '').replace(/\.$/, '') + '.')).join('<br>') : '명궁이 비어 있어 마주 보는 천이궁의 별을 빌려 봐요. 환경과 사람에 따라 모습이 달라지는 유연한 타입이에요.']);
-    easyRows.push(['타고나길 잘 풀리는 영역', doms(best) + '<br><span class="muted small">별이 밝고 도와주는 별이 많아서, 이 영역에서 힘을 얻고 자신감이 붙어요.</span>']);
-    easyRows.push(['의식해서 챙기면 좋은 영역', doms(worst) + '<br><span class="muted small">별이 약하거나 부딪치는 별이 겹쳐 있어요. 약점이 아니라 "신경 써서 가꿀 곳"으로 보세요.</span>']);
-    const luckLines = [];
-    [['록', '평생 이득이 따라오는 곳'], ['기', '평생 마음이 걸리기 쉬운 곳']].forEach(([k, lab]) => { const p = hwOf(k); if (p) luckLines.push('<b>' + lab + ' — ' + ZW_DOM[p.name] + '</b><br><span class="small muted">' + HW_PLAIN[k][2] + '</span>'); });
-    if (luckLines.length) easyRows.push(['타고난 행운과 걸림돌', luckLines.join('<br>')]);
-    if (dhP) easyRows.push(['지금 걷는 10년 (' + dhP.daehan[0] + '~' + dhP.daehan[1] + '세)', '인생의 무대가 <b>' + ZW_DOM[dhP.name] + '</b> 쪽으로 옮겨 와 있어요. 이 영역의 힘은 <b>' + zwGrade(sc[dhP.b])[1] + '</b>(' + sc[dhP.b] + '점). ' + (sc[dhP.b] >= 60 ? '이 10년은 이 영역에 적극적으로 힘을 써 볼 만해요.' : sc[dhP.b] >= 45 ? '무난하게 흘러가니 꾸준함이 중요해요.' : '이 10년은 무리하지 말고 기반을 다지는 시기로 쓰세요.')]);
-    easyRows.push([Y + '년, 올해의 초점', '올해는 <b>' + ZW_DOM[liuP.name] + '</b>에 이슈가 몰려요. 이 영역의 힘은 <b>' + zwGrade(sc[liuP.b])[1] + '</b>(' + sc[liuP.b] + '점). ' + (sc[liuP.b] >= 60 ? '올해 이 분야는 기회로 보고 움직여도 좋아요.' : sc[liuP.b] >= 45 ? '큰 변화보다 꾸준히 이어 가는 해예요.' : '올해 이 분야는 확장보다 점검과 정리가 어울려요.')]);
-    const easyCard = `<section class="card easy">
-      <div class="card-h"><h2>자미두수 쉽게 보기</h2><span class="note">별 이름·궁 이름 없이 먼저 요약해 드려요</span></div>
-      <div class="easy-list">${easyRows.map(([t, b]) => `<div class="easy-row"><b>${t}</b><p>${b}</p></div>`).join('')}</div>
-      <p class="note">아래 명반의 칸을 누르면 그 영역의 자세한 풀이가 열려요. 점수는 좋고 나쁨의 판정이 아니라 내 명반 안에서 비교한 상대 지표예요.</p>
-    </section>`;
-    return `${easyCard}<section class="card">
-      <div class="card-h"><h2>${term('자미두수')} ${term('명반', '명반')}</h2>
-        <span class="seg" role="group" aria-label="보는 해"><button data-act="zwy:-1" aria-label="이전 해">‹</button><button data-act="zwy:0">${Y}년 · ${per.age}세</button><button data-act="zwy:1" aria-label="다음 해">›</button></span></div>
-      <div class="frow" style="gap:8px 14px">
-        <div class="field"><span>사화 보기</span>${seg('zwHw', [['birth', '생년만'], ['dh', '+ 대한'], ['yr', '+ 대한 + 유년']], S.inp.zwHw || 'birth')}</div>
-        <label class="check"><input type="checkbox" id="zw-adj" ${S.zwAdj !== false ? 'checked' : ''}> ${term('잡성', '잡성')} 표시</label>
-        <label class="check"><input type="checkbox" id="zw-g12" ${S.zwG12 ? 'checked' : ''}> ${term('12신', '12신')} 표시</label>
-      </div>
-      <div class="zw">${zw.palaces.map(cell).join('')}${center}</div>
-      <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>명궁</span><span><i class="sw" style="background:var(--good)"></i>${Y}년의 ${term('대한')}</span><span><span class="zc-tag zc-yr">유년</span> ${Y}년 ${term('유년')} 명궁</span><span>별 옆 작은 글자 = ${term('별의 밝기', '밝기')}</span><span>칸 아래 숫자 = 대한 나이(세는나이)</span></div>
-    </section>
-    <section class="card">
-      <div class="card-h"><h2>${Y}년 운 <span class="muted small">세는나이 ${per.age}세 · ${M.STEM[per.liuS]}${M.BR[per.liuB]}년</span></h2></div>
-      <div class="list">
-        <div class="li"><span class="k">${term('대한')}</span><span class="v">${per.dh ? `<b>${term(per.dh.name)}</b> ${M.STEM[per.dh.s]}${M.BR[per.dh.b]} · ${per.dh.daehan[0]}~${per.dh.daehan[1]}세 <span class="small">이 10년은 ${term(per.dh.name)} 칸이 명궁 역할을 합니다. ${term('대한 사화')}(대한 칸의 천간 ${M.STEM[per.dh.s]} 기준):</span>${sihwaWhere(per.dhSihwa)}` : '<span class="muted small">첫 대한 시작 전입니다.</span>'}</span><span></span></div>
-        <div class="li"><span class="k">${term('유년')}</span><span class="v"><b>${term(liuP.name)}</b> 칸이 올해의 명궁 <span class="small">${M.BR[per.liuB]}년이라 ${M.BR[per.liuB]} 칸이 유년 명궁이 됩니다. ${term('유년 사화')}(그해 천간 ${M.STEM[per.liuS]} 기준):</span>${sihwaWhere(per.liuSihwa)}</span><span></span></div>
-      </div>
-      ${per.dh ? `<p class="small" style="color:var(--ink-2)"><b>이 10년(대한)은 ${term(per.dh.name)}이 중심</b> — ${PALACE_MEAN[per.dh.name]} 올해(유년)는 <b>${term(liuP.name)}</b> — ${PALACE_MEAN[liuP.name]} 그래서 이 두 영역의 일이 올해 특히 크게 느껴져요.</p>` : ''}
-      <p class="note">위 "사화 보기"에서 대한·유년 사화를 명반 위에 겹쳐 볼 수 있습니다. 생년 사화는 색칠된 배지, 대한 사화는 "대", 유년 사화는 "년"이 붙은 테두리 배지입니다.</p>
-    </section>
-    <section class="card">
-      <div class="card-h"><h2>${term(sel.name)} <span class="muted small">${M.STEM[sel.s]}${M.BR[sel.b]} · ${sel.daehan[0]}~${sel.daehan[1]}세 대한</span></h2>${sel.shen ? `<span class="pill" style="background:var(--accent);color:#fff">${term('신궁')}</span>` : ''}</div>
-      <p class="small" style="color:var(--ink-2)">${esc(glInline(sel.name))}</p>
-      <div class="zq-hero"><span>${pill(sc[sel.b])} <span class="small muted">${ZW_DOM[sel.name]} 강도</span></span><span class="small">${zwPlain(zw, sel, sc)}</span></div>
-      ${zwReading(zw, sel, sc)}
-      <div class="list">${sel.main.map(n => starLine(n, 'main')).join('')}${sel.good.map(n => starLine(n, 'good')).join('')}${sel.bad.map(n => starLine(n, 'bad')).join('')}${sel.adj.map(n => starLine(n, 'adj')).join('')}</div>
-      ${!sel.main.length ? `<p class="small">주성이 없는 ${term('공궁')}이라 마주 보는 ${term(opp.name)}의 ${opp.main.length ? opp.main.map(n => term(n)).join('·') : '별'}을 빌려 봅니다.</p>` : ''}
-      <div class="list">
-        <div class="li"><span class="k">${term('12신')}</span><span class="v small">${G12_FAM.map(([f, l]) => `${term(l)} ${g12Term(sel.g12[f], f)}`).join(' · ')}</span><span></span></div>
-        <div class="li"><span class="k">${term('비성 사화')}</span><span class="v"><span class="small">이 칸의 천간 ${M.STEM[sel.s]}로 날리는 사화</span>${flyHTML(zw, sel).out}</span><span></span></div>
-        <div class="li"><span class="k">들어오는 사화</span><span class="v">${flyHTML(zw, sel).inn || '<span class="small muted">다른 칸에서 이 칸으로 날아오는 사화가 없습니다.</span>'}</span><span></span></div>
-      </div>
-      <p class="small">${term('삼방사정')}: ${term(opp.name)}(마주 봄, ${opp.main.map(n => term(n)).join('·') || '공궁'}) · ${tri.map(p => `${term(p.name)}(${p.main.map(n => term(n)).join('·') || '공궁'})`).join(' · ')}</p>
-    </section>
-    ${overview}
+    return `${easyCard}${board}${detail}${yrCard}${graphs}
     <p class="note">명반은 삼합파의 일반적인 배치 규칙으로 계산합니다. 음력 날짜와 시진은 사주와 같은 시간 기준(${M.TIME_MODES[ch.timeMode]}, ${ch.jasi === 'jeong' ? '정자시' : '야자시'})을 따릅니다. 윤달생은 15일까지 그 달, 16일부터 다음 달로 봅니다. 사화·밝기·잡성은 유파마다 조금씩 다를 수 있습니다(예: 경년 화과를 천부로 보는 유파도 있습니다).</p>`;
   }
 
@@ -9082,6 +9151,57 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     for (const [p] of TR_SPREAD[PK.tr.spread][1]) { let id; do id = ids[Math.floor(Math.random() * ids.length)]; while (used.has(id)); used.add(id); PK.tr.cards[p] = [id, Math.random() < 0.3]; }
     pkSave(); render();
   }
+  // ── 78장 전체 덱: 뒤집어 놓고 직접 뽑기(방향은 무작위) 또는 앞면을 보고 고르기. 고른 카드는 '다음 자리'에 차례로 들어간다 ──
+  const trAllIds = () => [...TR_MAJ.map((_, i) => 'M' + i), ...TR_SUIT.flatMap(([k]) => TR_RANK.map((_, i) => k + (i + 1)))].filter(id => TR[id]);
+  function trShuffle() {
+    const d = trAllIds();
+    for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+    PK.tr.deck = d; return d;
+  }
+  function trDeckOrder() {
+    const all = trAllIds(), d = PK.tr.deck;
+    return Array.isArray(d) && d.length === all.length && d.every(id => TR[id]) ? d : trShuffle();
+  }
+  // 다음 카드가 들어갈 자리: 직접 고른 자리 → 첫 빈자리
+  function trTarget(pos) {
+    const C = PK.tr.cards;
+    if (S.trSlot && pos.some(([p]) => p === S.trSlot)) return S.trSlot;
+    const e = pos.find(([p]) => !C[p]); return e ? e[0] : null;
+  }
+  function trPick(id) {
+    const pos = (TR_SPREAD[PK.tr.spread] || TR_SPREAD.three)[1], C = PK.tr.cards;
+    const had = Object.keys(C).find(p => C[p] && C[p][0] === id);
+    if (had) { delete C[had]; S.trSlot = had; pkSave(); render(); return; }   // 이미 고른 카드를 다시 누르면 내려놓기
+    const k = trTarget(pos); if (!k) return;
+    C[k] = [id, S.trFace === 'up' ? false : Math.random() < 0.3];
+    S.trSlot = null;
+    pkSave(); render();
+  }
+  function trMini(id) {
+    const m = trMeta(id), card = TR[id], name = m ? m.nameKo : card.name, src = TRX.img[id] || (m && m.imageUrl) || '';
+    return `<span class="tm-ph" style="background:${SUIT_BG[card.suit] || '#2a2f4a'}">${esc(name)}</span>${src ? `<img src="${esc(src)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ''}<span class="tn">${esc(name)}</span>`;
+  }
+  function trDeckHTML(pos) {
+    const C = PK.tr.cards, up = S.trFace === 'up', suitF = S.trSuit || 'all';
+    const usedBy = {}; pos.forEach(([k, l]) => { if (C[k]) usedBy[C[k][0]] = l; });
+    const tgt = trTarget(pos), tgtL = tgt ? pos.find(([p]) => p === tgt)[1] : '';
+    let ids = up ? trAllIds() : trDeckOrder();
+    if (up && suitF !== 'all') ids = ids.filter(id => TR[id].suit === suitF);
+    const cardBtn = (id, i) => {
+      const used = usedBy[id];
+      const lab = used ? `${used}에 놓인 카드 — 누르면 내려놓기` : up ? `${TR[id].name} 고르기` : `뒤집힌 카드 ${i + 1}번 뽑기`;
+      return `<button type="button" class="tdk${used ? ' used' : ''}" data-act="tr-pick:${id}" aria-label="${esc(lab)}"${!used && !tgt ? ' disabled' : ''}>${up || used ? trMini(id) : ''}${used ? `<span class="tu">${esc(used)}</span>` : ''}</button>`;
+    };
+    const suitChips = up ? `<div class="pkc-o">${[['all', '전체 78'], ['M', '메이저 22'], ...TR_SUIT.map(([k, n]) => [k, n + ' 14'])].map(([k, n]) => `<button type="button" class="opt" data-act="tr-suit:${k}" aria-pressed="${suitF === k}">${n}</button>`).join('')}</div>` : '';
+    return `<div class="trdeck-w">
+      <div class="trdeck-h"><b>78장 전체 덱</b>
+        <span class="seg" role="group" aria-label="덱 보기"><button type="button" data-act="tr-face:down" aria-pressed="${!up}">뒤집어서 뽑기</button><button type="button" data-act="tr-face:up" aria-pressed="${up}">앞면 보고 고르기</button></span>
+        ${up ? '' : '<button type="button" class="btn" data-act="tr-shuffle">다시 섞기</button>'}</div>
+      <p class="small" style="color:var(--ink-2);margin:0">${tgt ? `마음이 가는 카드를 누르면 <b>${esc(tgtL)}</b> 자리에 놓여요.` : '자리가 다 찼어요. 바꾸고 싶은 자리의 "다시 고르기"를 누르거나, 놓인 카드를 눌러 내려놓으세요.'} ${up ? '앞면을 보고 고르면 정방향으로 놓이고, 방향은 아래에서 바꿀 수 있어요.' : '뒤집어 뽑으면 방향(정·역)도 무작위로 정해져요.'}</p>
+      ${suitChips}
+      <div class="trdeck${up ? ' up' : ''}">${ids.map(cardBtn).join('')}</div>
+    </div>`;
+  }
   // ── 타로 카드 그림: 관리자 패널(타로 카드 이미지)에서 확정한 그림을 /api/free-content 에서 읽어 쓴다. 없거나 실패하면 이름 자리표시를 보여 준다 ──
   const TRX = { img: {}, frame: null, loaded: false, content: null };
   (function loadTarotArt() {
@@ -9153,18 +9273,21 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const T = PK.tr, [spName, pos] = TR_SPREAD[T.spread] || TR_SPREAD.three, [topicName, topicSuits] = TR_TOPIC[T.topic] || TR_TOPIC.all;
     const rows = pos.map(([k, l, w, frame]) => { const c = T.cards[k], card = c && TR[c[0]]; return card ? { k, l, w, frame, card, rev: !!c[1], sc: c[1] ? card.sr : card.su, kw: c[1] ? card.rev : card.up } : null; }).filter(Boolean);
     const dup = new Set(rows.map(r => r.card.id)).size < rows.length;
-    const slot = ([k, l]) => { const c = T.cards[k], card = c && TR[c[0]]; return `<div class="trp${card ? ` on tr-${card.suit}` : ''}"><span class="lbl">${l}</span>${card ? `<div class="trthumb">${trFace(card.id, !!c[1], 96)}</div>` : ''}
+    const tgt = trTarget(pos);
+    const slot = ([k, l]) => { const c = T.cards[k], card = c && TR[c[0]]; return `<div class="trp${card ? ` on tr-${card.suit}` : ''}${k === tgt ? ' tgt' : ''}"><span class="lbl">${l}${k === tgt ? ' <span class="tgt-b">다음에 놓일 자리</span>' : ''}</span>${card ? `<div class="trthumb">${trFace(card.id, !!c[1], 96)}</div>` : '<div class="tr-empty">덱에서 카드를 골라 주세요</div>'}
       <select id="tr-c-${k}" aria-label="${l} 카드">${trOptions(card ? card.id : '')}</select>
       <div class="seg" role="group" aria-label="${l} 방향"><button type="button" data-opt="tr:rev.${k}:0" aria-pressed="${!!card && !c[1]}"${card ? '' : ' disabled'}>정방향</button><button type="button" data-opt="tr:rev.${k}:1" aria-pressed="${!!card && !!c[1]}"${card ? '' : ' disabled'}>역방향</button></div>
-      ${card ? `<span class="tk">${c[1] ? card.rev : card.up}</span>` : ''}</div>`; };
+      ${card ? `<span class="tk">${c[1] ? card.rev : card.up}</span>` : ''}
+      ${card && k !== tgt ? `<button type="button" class="btn sm" data-act="tr-slot:${k}">이 자리 다시 고르기</button>` : ''}</div>`; };
     const picker = `<section class="card">
       <div class="card-h"><h2>타로 — 카드 고르기</h2><span class="note num">${rows.length}/${pos.length}장</span></div>
       <div class="frow" style="gap:8px 14px">
         <div class="field"><span>질문 주제</span><div class="pkc-o">${Object.entries(TR_TOPIC).map(([k, [n]]) => `<button type="button" class="opt" data-opt="tr:topic:${k}" aria-pressed="${T.topic === k}">${n}</button>`).join('')}</div></div>
         <div class="field"><span>배열</span><div class="pkc-o">${Object.entries(TR_SPREAD).map(([k, [n]]) => `<button type="button" class="opt" data-opt="tr:spread:${k}" aria-pressed="${T.spread === k}">${n}</button>`).join('')}</div></div>
       </div>
-      <p class="small" style="color:var(--ink-2)">실제 덱에서 뽑은 카드를 자리마다 고르고 방향을 정하세요. 덱이 없다면 무작위로 뽑을 수 있습니다.</p>
+      <p class="small" style="color:var(--ink-2)">아래 78장 덱에서 직접 고르거나, 실제 덱에서 뽑은 카드를 자리마다 목록에서 고르세요. 한 번에 정하고 싶다면 "무작위로 뽑기"를 누르세요.</p>
       <div class="trs">${pos.map(slot).join('')}</div>
+      ${trDeckHTML(pos)}
       <div class="frow"><button class="btn primary" data-act="tr-draw">무작위로 뽑기</button>${rows.length ? '<button class="btn" data-act="pk-reset:tr">카드 지우기</button>' : ''}${dup ? '<span class="err">같은 카드가 두 자리에 있습니다</span>' : ''}</div>
     </section>`;
     if (!rows.length) return picker + `<section class="card"><p class="muted small">카드를 고르면 자리별 풀이와 종합 풀이가 나타납니다.</p></section>`;
@@ -10123,7 +10246,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       if (a === 'ikd-ai') { ikdAll(); return; }
       if (a === 'ikd-plain') { ikdLoad(IKD.dom, 'plain'); return; }
       if (a.startsWith('pk-reset:')) { const k = a.slice(9); if (k === 'tr') PK.tr.cards = {}; else PK[k] = {}; pkSave(); render(); return; }
-      if (a === 'tr-draw') { trDraw(); return; }
+      if (a === 'tr-draw') { S.trSlot = null; trDraw(); return; }
+      if (a.startsWith('tr-pick:')) { trPick(a.slice(8)); return; }
+      if (a.startsWith('tr-slot:')) { const k = a.slice(8); delete PK.tr.cards[k]; S.trSlot = k; pkSave(); render(); return; }
+      if (a.startsWith('tr-face:')) { S.trFace = a.slice(8) === 'up' ? 'up' : 'down'; render(); return; }
+      if (a.startsWith('tr-suit:')) { S.trSuit = a.slice(8); render(); return; }
+      if (a === 'tr-shuffle') { trShuffle(); pkSave(); render(); return; }
       if (a.startsWith('ic-')) { icAct(a); return; }
       if (a === 'more-tabs') { S.more = !S.more; render(); return; }
       if (a === 'to-top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
@@ -10159,7 +10287,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const zy = t.closest('[data-zwy]');
     if (zy) { S.zwY = +zy.dataset.zwy; render(); return; }
     const zc = t.closest('[data-zw]');
-    if (zc) { S.zwSel = +zc.dataset.zw; render(); }
+    if (zc) { S.zwSel = +zc.dataset.zw; render(); zwToDetail(); }
   });
   document.addEventListener('change', ev => {
     const id = ev.target.id;
@@ -10182,7 +10310,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   });
   document.addEventListener('input', ev => { if (ev.target.id === 'gl-q') { S.glq = ev.target.value; document.getElementById('gl-list').innerHTML = glList(); } });
   document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && (S.cpSheet || S.domSheet || S.crSheet) && !S.sheet) { S.cpSheet = null; S.domSheet = null; S.crSheet = null; renderSheet(); } if (ev.key === 'Escape' && S.sheet) { const ta = document.getElementById('gl-edit'); if (!ta || ta.value === GL[S.sheet][1]) { S.sheet = null; renderSheet(); } } if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('.nowc')) { ev.preventDefault(); pick(ev.target.dataset.pick); }
-    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('[data-zw]')) { ev.preventDefault(); S.zwSel = +ev.target.dataset.zw; render(); } });
+    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.matches && ev.target.matches('[data-zw]')) { ev.preventDefault(); S.zwSel = +ev.target.dataset.zw; render(); zwToDetail(); } });
   document.addEventListener('click', ev => { if (S.more && !(ev.target.closest && ev.target.closest('.more-pop,[data-act="more-tabs"]'))) { S.more = false; render(); } });
   window.addEventListener('scroll', () => { document.documentElement.classList.toggle('scrolled', window.scrollY > 700); }, { passive: true });
   let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(drawCharts, 150); });
