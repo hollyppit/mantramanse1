@@ -16,7 +16,7 @@
   var YEAR = 365.2422 * 86400000;
   var GN = ['bi', 'sik', 'jae', 'gwan', 'in'], GK = ['비겁', '식상', '재성', '관성', '인성'];
   // 시범 장 → 렌즈
-  var CHAPTERS = { timeline_self_20: 'life', timeline_self_03: 'life', timeline_wealth_02: 'wealth', timeline_love_04: 'love', timeline_career_07: 'career',
+  var CHAPTERS = { timeline_self_20: 'life', timeline_self_03: 'life', timeline_self_02: 'life', timeline_wealth_02: 'wealth', timeline_love_04: 'love', timeline_career_07: 'career',
     // 3단계 1묶음(종합풀이 12장). '운이 바꾸는 것'은 data 의 CH_LUCK(장마다 고유 문장)으로 쓴다
     timeline_self_18: 'life', timeline_self_22: 'life', timeline_self_24: 'life', timeline_self_25: 'life', timeline_self_26: 'career', timeline_self_27: 'love', timeline_self_29: 'love',
     timeline_self_30: 'wealth', timeline_self_31: 'wealth', timeline_self_33: 'life', timeline_self_34: 'life', timeline_self_37: 'life',

@@ -6,7 +6,7 @@ const root = path.join(__dirname, '..');
 const eng = fs.readFileSync(path.join(root, 'engine.js'), 'utf8'); const ea = eng.indexOf('var MANSE_DATA'), eb = eng.indexOf('})(typeof window', ea);
 vm.runInThisContext(eng.slice(ea, eng.indexOf('\n', eb))); const M = globalThis.Manse;
 globalThis.MANTRA_FLAGS = { lifeNarrative: true };
-['life-narrative-data', 'life-narrative-data-self', 'life-narrative-data-self2', 'life-narrative-data-wealth', 'life-narrative-data-wealth2', 'life-narrative-data-love', 'life-narrative-data-love2', 'life-narrative-data-career', 'life-narrative-data-career2', 'life-narrative-data-extra', 'life-narrative'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8')));
+['life-narrative-data', 'life-narrative-data-self', 'life-narrative-data-self2', 'life-narrative-data-wealth', 'life-narrative-data-wealth2', 'life-narrative-data-love', 'life-narrative-data-love2', 'life-narrative-data-career', 'life-narrative-data-career2', 'life-narrative-data-self3', 'life-narrative-data-extra', 'life-narrative'].forEach(f => vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2', f + '.js'), 'utf8')));
 const D = globalThis.MantraLifeNarrativeData, LN = globalThis.MantraLifeNarrative;
 const fails = [], ok = (c, m) => { if (!c) fails.push(m); };
 const BAN = /반드시|무조건|100%|보장|틀림없이|대박|성공할 거예요|다 잘될|걱정하지 마세요|운명이 정해|확실히 (?:성공|부자)/;
