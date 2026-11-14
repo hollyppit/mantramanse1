@@ -65,6 +65,10 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운세 흐름 오행 사이클(30년·2년 묶음)</b> — 현재: <b style="color:' + (fl && fl.luckCycle ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.luckCycle ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leLC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.luckCycle ? '오행 사이클 끄기' : '오행 사이클 켜기') + '</button></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 운세 흐름 탭의 대운 그래프에 30년 묶음(장기 분석 구간) 표시와 요약 카드(오행 변화·상승 하락·전환점·기회와 위험·대응 전략), 세운 10년 타일에 천간 오행이 같은 2년 묶음(천간 오행 구간)과 2년 전략 카드가 <b>약 1분 안에</b> 나타납니다. 월운·일진은 그대로입니다. 문장은 사전 문구 조합(AI 없음)이고 점수는 바뀌지 않습니다.</p></div>';
+    // 운명의 타임라인 건강·사고수 상세 장(report/v2/health-chapters.js) 스위치 — 엔진 값으로 만든 장 6개. 표시 전용
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 건강·사고수 장(6장)</b> — 현재: <b style="color:' + (fl && fl.healthChapters ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.healthChapters ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leHC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.healthChapters ? '건강·사고수 장 끄기' : '건강·사고수 장 켜기') + '</button><a class="btn" href="/report/v2/?mantraFlags=healthChapters" target="_blank" rel="noopener">미리보기 주소</a></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 종합풀이 \'건강 및 사고수\' 장 바로 뒤에 \'내 몸의 오행 지도\'·\'나는 언제 쉽게 지칠까?\'·\'스트레스가 몸으로 오는 길\'·\'올해·이번 달 몸 챙길 때\'·\'사고수 신호 읽기\'·\'앞으로 10년 안전 흐름과 삼재\' 6장이 <b>약 1분 안에</b> 나타납니다. 건강 지도·사고수 참고·건강/사고 지수·삼재 계산으로 만든 문장(AI·DB 문안 없음)이고, 장마다 의학적 진단·사고 예측이 아니라는 안내가 붙습니다. 점수는 바뀌지 않습니다.</p></div>';
     // 운명의 타임라인 오행 흐름·격국 상세 풀이 장(report/v2/flow-chapters.js) 스위치 — 엔진 값으로 만든 장 5개. 표시 전용
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 오행 흐름·격국 장(5장)</b> — 현재: <b style="color:' + (fl && fl.flowChapters ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.flowChapters ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leFC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.flowChapters ? '흐름·격국 장 끄기' : '흐름·격국 장 켜기') + '</button><a class="btn" href="/report/v2/?mantraFlags=flowChapters" target="_blank" rel="noopener">미리보기 주소</a></div>' +
@@ -120,6 +124,14 @@
       fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { luckCycle: v } }) })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
         .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '오행 사이클을 켰습니다(약 1분 안에 반영)' : '오행 사이클을 껐습니다(약 1분 안에 반영)'); });
+    };
+    $('#leHC').onclick = function () {   // 운명의 타임라인 건강·사고수 장 스위치(따로 켜고 끈다)
+      var v = !(S.flags && S.flags.healthChapters);
+      if (v && !confirm('운명의 타임라인 종합풀이에 건강·사고수 상세 장 6개를 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
+      var who = ''; try { who = localStorage.getItem('iching_reviewer') || ''; } catch (e) { }
+      fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { healthChapters: v } }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
+        .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '건강·사고수 장을 켰습니다(약 1분 안에 반영)' : '건강·사고수 장을 껐습니다(약 1분 안에 반영)'); });
     };
     $('#leFC').onclick = function () {   // 운명의 타임라인 오행 흐름·격국 장 스위치(따로 켜고 끈다)
       var v = !(S.flags && S.flags.flowChapters);
