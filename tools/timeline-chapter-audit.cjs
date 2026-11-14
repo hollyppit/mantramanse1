@@ -80,9 +80,10 @@ let seed = 20261115; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4
   }
 
   // ── 브라우저 층(운영 /report/v2/index.html 과 같은 순서로 필요한 것만) ──
-  const V2 = ['ilju-data', 'deep', 'deep-life', 'deep-time', 'deep-wealth', 'deep-love', 'polite-text', 'plain-copy', 'reading-media', 'everyday-reading', 'fact-once', 'age-fit', 'luck-reading', 'signature-data', 'reading-plus', 'chapter-hooks', 'chapter-hooks-personal-data-1', 'chapter-hooks-personal-data-2', 'chapter-hooks-personal', 'reading-depth', 'reading-depth-data-1', 'reading-depth-data-2', 'reading-depth-data-3', 'reading-depth-data-4', 'reading-depth-data-5', 'reading-insight-data-1', 'reading-insight-data-2', 'reading-insight-data-3', 'reading-insight-data-4', 'reading-insight', 'reading-feature-data-1', 'reading-feature-data-2', 'reading-feature', 'topic-deep', 'fate-blocks', 'fate-blocks-2', 'fate-blocks-3', 'fate-blocks-4', 'life-narrative-data', 'life-narrative-data-self', 'life-narrative-data-self2', 'life-narrative-data-wealth', 'life-narrative-data-wealth2', 'life-narrative-data-love', 'life-narrative-data-love2', 'life-narrative-data-career', 'life-narrative-data-career2', 'life-narrative', '../natal-table', 'reading-text', 'reading-peak'];
+  const V2 = ['ilju-data', 'deep', 'deep-life', 'deep-time', 'deep-wealth', 'deep-love', 'polite-text', 'plain-copy', 'reading-media', 'everyday-reading', 'fact-once', 'age-fit', 'engine-blocks', 'luck-reading', 'signature-data', 'reading-plus', 'chapter-hooks', 'chapter-hooks-personal-data-1', 'chapter-hooks-personal-data-2', 'chapter-hooks-personal', 'reading-depth', 'reading-depth-data-1', 'reading-depth-data-2', 'reading-depth-data-3', 'reading-depth-data-4', 'reading-depth-data-5', 'reading-insight-data-1', 'reading-insight-data-2', 'reading-insight-data-3', 'reading-insight-data-4', 'reading-insight', 'reading-feature-data-1', 'reading-feature-data-2', 'reading-feature', 'topic-deep', 'fate-blocks', 'fate-blocks-2', 'fate-blocks-3', 'fate-blocks-4', 'life-narrative-data', 'life-narrative-data-self', 'life-narrative-data-self2', 'life-narrative-data-wealth', 'life-narrative-data-wealth2', 'life-narrative-data-love', 'life-narrative-data-love2', 'life-narrative-data-career', 'life-narrative-data-career2', 'life-narrative', '../natal-table', 'reading-text', 'reading-peak'];
   const loadFail = [];
   for (const f of V2) { const p = path.join(root, 'report/v2', f + '.js'); try { vm.runInThisContext(fs.readFileSync(p, 'utf8'), { filename: p }); } catch (e) { loadFail.push(f + ': ' + e.message.slice(0, 80)); } }
+  for (const f of ['luck-cycle', 'gyeok-structure']) { const p = path.join(root, f + '.js'); try { vm.runInThisContext(fs.readFileSync(p, 'utf8'), { filename: p }); } catch (e) { loadFail.push(f + ': ' + e.message.slice(0, 80)); } }   // engine-blocks 가 쓰는 루트 모듈
   const M = globalThis.Manse, R = globalThis.ReportV2, RT = R.ReadingText, LN = R.LifeNarrative, RF = R.ReadingFeature, TD = R.TopicDeep;
   // 타임라인 화면(/report/v2/index.html)에 실제로 로드되는 루트 모듈
   const v2html = fs.readFileSync(path.join(root, 'report/v2/index.html'), 'utf8'), v2Scripts = [...v2html.matchAll(/src="([^"]+\.js)/g)].map(m => m[1].replace(/^.*\//, ''));
@@ -116,7 +117,7 @@ let seed = 20261115; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4
     const chRaw = M.compute(b), sdRaw = R.SajuData.build(chRaw, { now: NOW }), age = nowYear - b.year;
     const vdRaw = Object.assign({}, sdRaw, { name: '' }), chP = spy(chRaw, 'ch'), sdP = spy(sdRaw, 'sd'), vdP = spy(vdRaw, 'sd');
     const H = { M, ch: chP, sd: sdP, now: NOW, name: '', interest: '', assets: {}, videos: {} };
-    R.FactOnce && R.FactOnce.reset();
+    R.FactOnce && R.FactOnce.reset(); R.EngineBlocks && R.EngineBlocks.set(M, chRaw);
     // 이 사람의 값(근거 문장에 실제 값이 들어갔는지 볼 때)
     const P = sdRaw.pillars || {}, mineTok = [P.day && P.day.ko, P.day && P.day.hanja, sdRaw.dayMaster && (sdRaw.dayMaster.stem + sdRaw.dayMaster.el), sdRaw.currentDaewoon && sdRaw.currentDaewoon.ganzhi].filter(Boolean);
     const mineRe = new RegExp('\\d+(?:\\.\\d+)?%|(?:19|20)\\d\\d년|\\d+세|' + mineTok.map(t => t.replace(/[()]/g, '')).join('|'));

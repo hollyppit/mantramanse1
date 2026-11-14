@@ -23,7 +23,7 @@
    "narrative": 0.6916666666666667,
    "narrRuleKinds": 12,
    "thin": 0,
-   "avgChars": 2387,
+   "avgChars": 2615,
    "avgBody": 895,
    "layerShare": {
     "head": 1,
@@ -32,6 +32,7 @@
     "db": 0.308,
     "why": 1,
     "feature": 1,
+    "engine": 1,
     "insight": 1,
     "basis": 0.308,
     "narrative": 0.692
@@ -43,14 +44,15 @@
     "db": 877,
     "why": 399,
     "feature": 718,
+    "engine": 226,
     "insight": 208,
     "basis": 187,
     "narrative": 896
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.1793329453657428,
-   "fixedShare": 0.18137162289816738,
+   "jaccard": 0.18797168636478956,
+   "fixedShare": 0.20387295784302525,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -109,7 +111,7 @@
    "narrative": 0,
    "narrRuleKinds": 0,
    "thin": 0.26666666666666666,
-   "avgChars": 3003,
+   "avgChars": 3247,
    "avgBody": 812,
    "layerShare": {
     "head": 1,
@@ -119,6 +121,7 @@
     "why": 0.733,
     "feature": 1,
     "depth": 1,
+    "engine": 1,
     "insight": 1,
     "basis": 1
    },
@@ -130,13 +133,14 @@
     "why": 178,
     "feature": 1292,
     "depth": 391,
+    "engine": 242,
     "insight": 173,
     "basis": 293
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.19539849679353782,
-   "fixedShare": 0.1717336497108112,
+   "jaccard": 0.19613943501293837,
+   "fixedShare": 0.17642998481432057,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -193,7 +197,7 @@
    "narrative": 1,
    "narrRuleKinds": 7,
    "thin": 0,
-   "avgChars": 4523,
+   "avgChars": 5224,
    "avgBody": 1473,
    "layerShare": {
     "head": 1,
@@ -204,6 +208,7 @@
     "plus": 1,
     "feature": 1,
     "depth": 1,
+    "engine": 1,
     "insight": 1
    },
    "layerAvg": {
@@ -215,17 +220,19 @@
     "plus": 225,
     "feature": 661,
     "depth": 419,
+    "engine": 700,
     "insight": 165
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.15500322828863383,
-   "fixedShare": 0.1480605901409684,
+   "jaccard": 0.14932016121198044,
+   "fixedShare": 0.1608548931383577,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
+    "필요한 기운(용신) 소개": 0.63,
     "지금 대운 소개": 0.03
    },
    "evidMine": 0.14722222222222223,
@@ -6776,7 +6783,7 @@
   {
    "file": "luck-cycle.js",
    "what": "대운 30년·세운 2년 오행 사이클",
-   "timelineLoaded": false,
+   "timelineLoaded": true,
    "mainApp": true,
    "admin": false,
    "topicDeepOff": [],
@@ -7748,13 +7755,13 @@
    "avgChapters": 4.2,
    "max": 6
   },
+  "필요한 기운(용신) 소개": {
+   "avgChapters": 14.5,
+   "max": 25
+  },
   "지금 대운 소개": {
    "avgChapters": 3.5,
    "max": 8
-  },
-  "필요한 기운(용신) 소개": {
-   "avgChapters": 13.9,
-   "max": 25
   },
   "힘의 세기(신강·신약) 소개": {
    "avgChapters": 18.2,
@@ -7770,12 +7777,12 @@
    "n": 19,
    "thin": 0.024415204678362584,
    "same": 0.0027777777777777627,
-   "jac": 0.1980277158110642,
+   "jac": 0.19822227434484285,
    "rep": 0,
    "evid": 0.11753020805280143,
    "narr": 0.6967836257309942,
    "fb": 0.014035087719298246,
-   "chars": 2831
+   "chars": 2893
   },
   "wealth": {
    "n": 15,
