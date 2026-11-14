@@ -81,8 +81,16 @@
       groups[wid].push({ chapter: setting.title ? Object.assign({}, c, { title: setting.title }) : c, order: setting.order == null ? i : +setting.order, index: i });
     });
     var out = [];
-    worlds.forEach(function (w) { groups[w.id].sort(function (a,b) { return a.order-b.order || a.index-b.index; }).forEach(function (x) { out.push(x.chapter); }); });
+    worlds.forEach(function (w) { placeAfter(groups[w.id].sort(function (a,b) { return a.order-b.order || a.index-b.index; }).map(function (x) { return x.chapter; })).forEach(function (c) { out.push(c); }); });
     return out;
+  }
+  // 엔진으로 만든 장(flow-chapters.js 등)은 관리자 순서 설정이 없으니, c.placeAfter 에 적힌 장 바로 뒤로 옮긴다(그 장이 같은 세계에 있을 때만)
+  function placeAfter(arr) {
+    var moved = arr.filter(function (c) { return c.placeAfter && arr.some(function (o) { return o.id === c.placeAfter; }); });
+    if (!moved.length) return arr;
+    var rest = arr.filter(function (c) { return moved.indexOf(c) < 0; });
+    moved.forEach(function (c) { var k = rest.findIndex(function (o) { return o.id === c.placeAfter; }); rest.splice(k + 1, 0, c); });
+    return rest;
   }
 
   // 합쳐진 세계(건강·전생·개운법)로 가던 예전 문서의 챕터는 종합풀이로 보낸다.

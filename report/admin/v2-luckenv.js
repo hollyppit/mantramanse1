@@ -65,6 +65,10 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운세 흐름 오행 사이클(30년·2년 묶음)</b> — 현재: <b style="color:' + (fl && fl.luckCycle ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.luckCycle ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leLC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.luckCycle ? '오행 사이클 끄기' : '오행 사이클 켜기') + '</button></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 운세 흐름 탭의 대운 그래프에 30년 묶음(장기 분석 구간) 표시와 요약 카드(오행 변화·상승 하락·전환점·기회와 위험·대응 전략), 세운 10년 타일에 천간 오행이 같은 2년 묶음(천간 오행 구간)과 2년 전략 카드가 <b>약 1분 안에</b> 나타납니다. 월운·일진은 그대로입니다. 문장은 사전 문구 조합(AI 없음)이고 점수는 바뀌지 않습니다.</p></div>';
+    // 운명의 타임라인 오행 흐름·격국 상세 풀이 장(report/v2/flow-chapters.js) 스위치 — 엔진 값으로 만든 장 5개. 표시 전용
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 오행 흐름·격국 장(5장)</b> — 현재: <b style="color:' + (fl && fl.flowChapters ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.flowChapters ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leFC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.flowChapters ? '흐름·격국 장 끄기' : '흐름·격국 장 켜기') + '</button><a class="btn" href="/report/v2/?mantraFlags=flowChapters" target="_blank" rel="noopener">미리보기 주소</a></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 종합풀이 \'나의 타고난 기질\' 뒤에 \'내 사주의 기운은 어떻게 흐를까?\'·\'내 사주의 뼈대, 격국과 주요 구조\', 재물운·커리어운·인연운 심화 첫 장 뒤에 각 주제의 \'○○의 기운은 어떻게 흐를까?\' 장이 <b>약 1분 안에</b> 나타납니다. 만세력의 오행 흐름·격국 판정 값으로 만든 문장(AI·DB 문안 없음)이고 점수·용신은 바뀌지 않습니다. 미리보기 주소는 로컬·미리보기 배포에서만 스위치 없이 켜집니다.</p></div>';
     root.innerHTML = flagBox + '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">운세 환경 문구 게시</h3>' +
       '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 12px;margin:0 0 8px;line-height:1.7"><b>사용법</b><br>① 목록의 문구를 읽어 봅니다.<br>② 괜찮으면 체크하고 <b>[선택 게시]</b>, 전부 괜찮으면 <b>[목록 전체 게시]</b>를 누릅니다.<br>③ 고치려면 문구를 눌러 본문을 수정한 뒤 <b>[저장하고 게시]</b>를 누릅니다.</div>' +
       '<p class="muted" style="margin:0 0 8px">게시한 문구만 사용자 화면에 반영되고, 수정하면 게시본에서 빠집니다(사용자에게는 기본 문구). 단정·반말 표현이나 같은 문구는 저장되지 않습니다. 운세 환경 해석 기능이 꺼져 있으면 게시해도 아직 사용자에게 보이지 않습니다. <b>전체 ' + S.phrases.length + '건 · 게시됨 ' + c.published + ' · 미게시 ' + c.unpub + '</b></p>' +
@@ -116,6 +120,14 @@
       fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { luckCycle: v } }) })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
         .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '오행 사이클을 켰습니다(약 1분 안에 반영)' : '오행 사이클을 껐습니다(약 1분 안에 반영)'); });
+    };
+    $('#leFC').onclick = function () {   // 운명의 타임라인 오행 흐름·격국 장 스위치(따로 켜고 끈다)
+      var v = !(S.flags && S.flags.flowChapters);
+      if (v && !confirm('운명의 타임라인에 오행 흐름·격국 상세 풀이 장 5개를 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
+      var who = ''; try { who = localStorage.getItem('iching_reviewer') || ''; } catch (e) { }
+      fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { flowChapters: v } }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
+        .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '흐름·격국 장을 켰습니다(약 1분 안에 반영)' : '흐름·격국 장을 껐습니다(약 1분 안에 반영)'); });
     };
     $('#leTC').onclick = function () {   // 타임라인 카드 문안 스위치(따로 켜고 끈다)
       var v = !(S.flags && S.flags.timelineCopy);
