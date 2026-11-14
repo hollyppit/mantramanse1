@@ -190,6 +190,8 @@
   if((c.editorialContractId||c.id)==='timeline_self_28'&&!out.creative&&!out.education&&!(feat&&feat.rest)){var cph=compatHtml(c);if(cph)h+=section(c,ci,'compat',cph,'text-reading-compat');}
   if(R.ReadingDepth&&!out.creative&&!out.education){var depth=R.ReadingDepth.html(c,esc);if(depth)h+=section(c,ci,'depth',depth,'text-reading-depth');}
   if(R.ReadingInsight&&!out.creative&&!out.education){var insight=R.ReadingInsight.html(c,esc);if(insight)h+=section(c,ci,'insight',insight,'text-reading-insight');}
+  // 장 사이 사실 소개 반복(fact-once.js trimIntro): 근거 상자를 붙이기 전에, 이 장이 처음 소개하는 장이 아니면 소개 구절을 걷는다
+  if(R.FactOnce&&R.FactOnce.trimIntro&&!out.creative&&!out.education)h=R.FactOnce.trimIntro(c.readingVisualData,h,c.editorialContractId||c.id);
   var body=chapterFacts(c)+basisGroup('evidence');
   var claims=(c.interpretationAnalysis||{}).claims||[],sources=[],conditions=[];
   claims.forEach(function(cl){(cl.elements||[]).forEach(function(e){var value=e.have!==undefined?e.have:e.value;if(value==null||typeof value==='object')return;var line=(e.label||e.key)+': '+value;if(conditions.indexOf(line)<0)conditions.push(line);});(cl.evidence||[]).forEach(function(e){var name=(e.title||e.docId)+(e.pageStart?' · '+e.pageStart+'쪽':'');if(sources.indexOf(name)<0)sources.push(name);});});

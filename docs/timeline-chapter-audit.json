@@ -109,7 +109,7 @@
    "narrative": 0,
    "narrRuleKinds": 0,
    "thin": 0.26666666666666666,
-   "avgChars": 3008,
+   "avgChars": 3003,
    "avgBody": 812,
    "layerShare": {
     "head": 1,
@@ -129,9 +129,9 @@
     "chart": 238,
     "why": 178,
     "feature": 1292,
-    "depth": 395,
+    "depth": 391,
     "insight": 173,
-    "basis": 290
+    "basis": 293
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
@@ -142,15 +142,14 @@
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 0.53,
     "힘의 세기(신강·신약) 소개": 0.71
    },
-   "evidMine": 0,
-   "evidHas": 0,
+   "evidMine": 0.20701552616446234,
+   "evidHas": 1,
    "evidThin": 0,
    "chartCaption": 1,
-   "evidNone": 0.044444444444444446,
-   "evidPerPerson": 1.8305555555555555,
+   "evidNone": 0,
+   "evidPerPerson": 4.830555555555556,
    "ban": 0,
    "banEx": {},
    "svcBan": 0,
@@ -173,10 +172,8 @@
     "strength": 12,
     "group": 12
    },
-   "v": "보완",
-   "why": [
-    "근거에 내 사주 값 줄 0%"
-   ]
+   "v": "유지",
+   "why": []
   },
   {
    "id": "timeline_self_20",
@@ -196,7 +193,7 @@
    "narrative": 1,
    "narrRuleKinds": 7,
    "thin": 0,
-   "avgChars": 4529,
+   "avgChars": 4523,
    "avgBody": 1473,
    "layerShare": {
     "head": 1,
@@ -217,7 +214,7 @@
     "why": 394,
     "plus": 225,
     "feature": 661,
-    "depth": 425,
+    "depth": 419,
     "insight": 165
    },
    "sameText": 0.002777777777777763,
@@ -229,7 +226,6 @@
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "힘의 세기(신강·신약) 소개": 0.59,
     "지금 대운 소개": 0.03
    },
    "evidMine": 0.14722222222222223,
@@ -282,7 +278,7 @@
    "narrative": 0.9666666666666667,
    "narrRuleKinds": 7,
    "thin": 0.008333333333333333,
-   "avgChars": 3010,
+   "avgChars": 3008,
    "avgBody": 590,
    "layerShare": {
     "head": 1,
@@ -300,11 +296,11 @@
    "layerAvg": {
     "head": 18,
     "hook": 86,
-    "narrative": 577,
+    "narrative": 576,
     "chart": 1496,
     "why": 436,
     "feature": 259,
-    "depth": 396,
+    "depth": 394,
     "insight": 178,
     "db": 805,
     "luck": 61,
@@ -312,15 +308,14 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.1622799424363181,
-   "fixedShare": 0.09370119729307652,
+   "jaccard": 0.16236926137529228,
+   "fixedShare": 0.09373372678354452,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "지금 대운 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.25
+    "지금 대운 소개": 1
    },
    "evidMine": 0.1018202502844141,
    "evidHas": 0.9666666666666667,
@@ -372,7 +367,7 @@
    "narrative": 0.9611111111111111,
    "narrRuleKinds": 7,
    "thin": 0.008333333333333333,
-   "avgChars": 2409,
+   "avgChars": 2403,
    "avgBody": 594,
    "layerShare": {
     "head": 1,
@@ -392,7 +387,7 @@
     "narrative": 574,
     "chart": 159,
     "why": 445,
-    "feature": 1018,
+    "feature": 1012,
     "depth": 319,
     "insight": 200,
     "db": 992,
@@ -408,7 +403,7 @@
    "repeatEx": [],
    "facts": {
     "필요한 기운(용신) 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.59
+    "힘의 세기(신강·신약) 소개": 0.12
    },
    "evidMine": 0.10033821871476889,
    "evidHas": 0.9611111111111111,
@@ -460,8 +455,8 @@
    "narrative": 0.9611111111111111,
    "narrRuleKinds": 7,
    "thin": 0.008333333333333333,
-   "avgChars": 2407,
-   "avgBody": 535,
+   "avgChars": 2390,
+   "avgBody": 534,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -480,22 +475,21 @@
     "narrative": 522,
     "chart": 160,
     "why": 448,
-    "feature": 1118,
-    "depth": 298,
+    "feature": 1104,
+    "depth": 297,
     "insight": 185,
-    "db": 745,
+    "db": 744,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.12449665256691951,
-   "fixedShare": 0.06683375104427736,
+   "jaccard": 0.12451389647220439,
+   "fixedShare": 0.06683995544002971,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 1,
     "필요한 기운(용신) 소개": 1,
     "힘의 세기(신강·신약) 소개": 0.59
    },
@@ -550,7 +544,7 @@
    "narrative": 0.9583333333333334,
    "narrRuleKinds": 7,
    "thin": 0.011111111111111112,
-   "avgChars": 3146,
+   "avgChars": 3133,
    "avgBody": 503,
    "layerShare": {
     "head": 1,
@@ -570,23 +564,23 @@
     "narrative": 486,
     "chart": 156,
     "why": 431,
-    "feature": 1960,
-    "depth": 332,
+    "feature": 1953,
+    "depth": 326,
     "insight": 89,
     "db": 794,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.17356800756739926,
-   "fixedShare": 0.1487630386106712,
+   "jaccard": 0.17349990390444592,
+   "fixedShare": 0.14879554268858908,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
     "필요한 기운(용신) 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.59
+    "힘의 세기(신강·신약) 소개": 0.29
    },
    "evidMine": 0.09652836579170194,
    "evidHas": 0.9222222222222223,
@@ -638,7 +632,7 @@
    "narrative": 0.9583333333333334,
    "narrRuleKinds": 6,
    "thin": 0.008333333333333333,
-   "avgChars": 3724,
+   "avgChars": 3712,
    "avgBody": 541,
    "layerShare": {
     "head": 1,
@@ -654,12 +648,12 @@
    },
    "layerAvg": {
     "head": 6,
-    "hook": 108,
+    "hook": 107,
     "narrative": 528,
     "chart": 153,
     "why": 443,
-    "feature": 2491,
-    "depth": 337,
+    "feature": 2481,
+    "depth": 335,
     "insight": 89,
     "db": 745,
     "basis": 137
@@ -730,7 +724,7 @@
    "narrative": 0,
    "narrRuleKinds": 0,
    "thin": 0,
-   "avgChars": 3075,
+   "avgChars": 3063,
    "avgBody": 630,
    "layerShare": {
     "head": 1,
@@ -745,14 +739,14 @@
    },
    "layerAvg": {
     "head": 7,
-    "hook": 96,
+    "hook": 90,
     "db": 625,
     "chart": 154,
     "why": 262,
     "feature": 1749,
-    "depth": 335,
+    "depth": 330,
     "insight": 107,
-    "basis": 424
+    "basis": 428
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
@@ -762,15 +756,13 @@
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
-   "facts": {
-    "힘의 세기(신강·신약) 소개": 0.59
-   },
-   "evidMine": 0,
-   "evidHas": 0,
+   "facts": {},
+   "evidMine": 0.10302409021014865,
+   "evidHas": 1,
    "evidThin": 1,
    "chartCaption": 1,
    "evidNone": 0,
-   "evidPerPerson": 6.838888888888889,
+   "evidPerPerson": 10.838888888888889,
    "ban": 0,
    "banEx": {},
    "svcBan": 0,
@@ -795,7 +787,6 @@
    },
    "v": "보완",
    "why": [
-    "근거에 내 사주 값 줄 0%",
     "'검수 근거 부족' 안내 100%"
    ]
   },
@@ -818,7 +809,7 @@
    "narrative": 0.9666666666666667,
    "narrRuleKinds": 7,
    "thin": 0.005555555555555556,
-   "avgChars": 3066,
+   "avgChars": 3060,
    "avgBody": 656,
    "layerShare": {
     "head": 1,
@@ -834,29 +825,26 @@
    },
    "layerAvg": {
     "head": 10,
-    "hook": 116,
+    "hook": 115,
     "feature": 1723,
     "narrative": 645,
     "chart": 157,
     "why": 457,
-    "depth": 327,
+    "depth": 321,
     "insight": 83,
-    "db": 837,
+    "db": 836,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.12548381030688677,
-   "fixedShare": 0.10147032129243057,
-   "repeat": 0.002777777777777778,
-   "repeatSame": 0.002777777777777778,
-   "repeatAvg": 0.002777777777777778,
-   "repeatEx": [
-    "비슷한 버릇이 있는지 떠올려 보세요. ← self_25 (1명)"
-   ],
+   "jaccard": 0.1254967152801585,
+   "fixedShare": 0.10147646133365605,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
     "가장 큰 기운 소개": 0.13,
-    "힘의 세기(신강·신약) 소개": 0.59,
     "지금 대운 소개": 0.01
    },
    "evidMine": 0.09490986214209968,
@@ -909,7 +897,7 @@
    "narrative": 0.9583333333333334,
    "narrRuleKinds": 7,
    "thin": 0.008333333333333333,
-   "avgChars": 2257,
+   "avgChars": 2247,
    "avgBody": 529,
    "layerShare": {
     "head": 1,
@@ -925,30 +913,27 @@
    },
    "layerAvg": {
     "head": 6,
-    "hook": 101,
+    "hook": 100,
     "narrative": 514,
     "chart": 153,
     "why": 429,
-    "feature": 960,
-    "depth": 419,
+    "feature": 953,
+    "depth": 417,
     "insight": 89,
-    "db": 788,
+    "db": 787,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.24703885189640065,
-   "fixedShare": 0.2531052261542067,
-   "repeat": 0.002777777777777778,
-   "repeatSame": 0.002777777777777778,
-   "repeatAvg": 0.002777777777777778,
-   "repeatEx": [
-    "비슷한 버릇이 있는지 떠올려 보세요. ← self_25 (1명)"
-   ],
+   "jaccard": 0.2470610959093752,
+   "fixedShare": 0.2531200562489014,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
     "가장 큰 기운 소개": 1,
-    "지금 대운 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.76
+    "힘의 세기(신강·신약) 소개": 0.48
    },
    "evidMine": 0.10371019573473561,
    "evidHas": 0.9583333333333334,
@@ -1085,8 +1070,8 @@
    "narrative": 0,
    "narrRuleKinds": 0,
    "thin": 0,
-   "avgChars": 1779,
-   "avgBody": 793,
+   "avgChars": 1766,
+   "avgBody": 792,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -1100,36 +1085,30 @@
    },
    "layerAvg": {
     "head": 15,
-    "hook": 106,
-    "db": 788,
+    "hook": 100,
+    "db": 787,
     "chart": 162,
     "why": 134,
     "feature": 249,
-    "depth": 338,
+    "depth": 333,
     "insight": 125,
-    "basis": 226
+    "basis": 229
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.29521356953698513,
-   "fixedShare": 0.1472056296538745,
-   "repeat": 0.013888888888888888,
-   "repeatSame": 0.013888888888888888,
-   "repeatAvg": 0.013888888888888888,
-   "repeatEx": [
-    "비슷한 버릇이 있는지 떠올려 보세요. ← self_26 (2명)",
-    "비슷한 버릇이 있는지 떠올려 보세요. ← self_24 (2명)",
-    "비슷한 버릇이 있는지 떠올려 보세요. ← self_25 (1명)"
-   ],
-   "facts": {
-    "힘의 세기(신강·신약) 소개": 0.59
-   },
-   "evidMine": 0,
-   "evidHas": 0,
+   "jaccard": 0.29559462183571616,
+   "fixedShare": 0.14747110418886794,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {},
+   "evidMine": 0.5,
+   "evidHas": 1,
    "evidThin": 1,
    "chartCaption": 1,
    "evidNone": 0,
-   "evidPerPerson": 1,
+   "evidPerPerson": 4,
    "ban": 0,
    "banEx": {},
    "svcBan": 0,
@@ -1154,7 +1133,6 @@
    },
    "v": "보완",
    "why": [
-    "근거에 내 사주 값 줄 0%",
     "'검수 근거 부족' 안내 100%"
    ]
   },
@@ -1176,8 +1154,8 @@
    "narrative": 0.9666666666666667,
    "narrRuleKinds": 7,
    "thin": 0,
-   "avgChars": 1783,
-   "avgBody": 612,
+   "avgChars": 1778,
+   "avgBody": 610,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -1193,29 +1171,24 @@
    "layerAvg": {
     "head": 6,
     "hook": 102,
-    "narrative": 600,
+    "narrative": 599,
     "chart": 153,
     "why": 408,
     "feature": 339,
-    "depth": 410,
+    "depth": 406,
     "insight": 162,
     "db": 831,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.20688585857328248,
-   "fixedShare": 0.18481409001956947,
-   "repeat": 0.03611111111111111,
-   "repeatSame": 0.03611111111111111,
-   "repeatAvg": 0.03611111111111111,
-   "repeatEx": [
-    "비슷한 버릇이 있는지 떠올려 보세요. ← self_32 (13명)"
-   ],
-   "facts": {
-    "지금 대운 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.38
-   },
+   "jaccard": 0.2072529020049122,
+   "fixedShare": 0.1851764705882353,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {},
    "evidMine": 0.1108359133126935,
    "evidHas": 0.9666666666666667,
    "evidThin": 0.03333333333333333,
@@ -1305,7 +1278,6 @@
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "힘의 세기(신강·신약) 소개": 0.04,
     "지금 대운 소개": 0.01
    },
    "evidMine": 0.10570071258907364,
@@ -1358,7 +1330,7 @@
    "narrative": 0,
    "narrRuleKinds": 0,
    "thin": 0,
-   "avgChars": 5130,
+   "avgChars": 5116,
    "avgBody": 798,
    "layerShare": {
     "head": 1,
@@ -1372,33 +1344,31 @@
    },
    "layerAvg": {
     "head": 8,
-    "hook": 127,
+    "hook": 122,
     "db": 793,
     "chart": 155,
     "why": 172,
-    "feature": 3627,
-    "depth": 418,
-    "basis": 228
+    "feature": 3622,
+    "depth": 416,
+    "basis": 231
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.28895605902631827,
-   "fixedShare": 0.3175557966012556,
+   "jaccard": 0.28938807368911157,
+   "fixedShare": 0.318361563303236,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 0.66,
-    "지금 대운 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.71
+    "힘의 세기(신강·신약) 소개": 0.38
    },
    "evidMine": 0,
    "evidHas": 0,
    "evidThin": 1,
    "chartCaption": 1,
    "evidNone": 0,
-   "evidPerPerson": 3,
+   "evidPerPerson": 6,
    "ban": 0,
    "banEx": {},
    "svcBan": 0.12222222222222222,
@@ -1445,7 +1415,7 @@
    "narrative": 0,
    "narrRuleKinds": 0,
    "thin": 0,
-   "avgChars": 3077,
+   "avgChars": 3056,
    "avgBody": 913,
    "layerShare": {
     "head": 1,
@@ -1458,8 +1428,8 @@
    },
    "layerAvg": {
     "head": 5,
-    "hook": 111,
-    "feature": 1897,
+    "hook": 106,
+    "feature": 1881,
     "db": 908,
     "chart": 152,
     "why": 140,
@@ -1474,8 +1444,7 @@
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.59
+    "가장 큰 기운 소개": 1
    },
    "evidMine": 0,
    "evidHas": 0,
@@ -1625,7 +1594,7 @@
    "narrative": 0.9722222222222222,
    "narrRuleKinds": 7,
    "thin": 0.008333333333333333,
-   "avgChars": 2219,
+   "avgChars": 2213,
    "avgBody": 548,
    "layerShare": {
     "head": 1,
@@ -1645,7 +1614,7 @@
     "narrative": 529,
     "chart": 163,
     "why": 443,
-    "feature": 932,
+    "feature": 926,
     "depth": 362,
     "insight": 113,
     "db": 1052,
@@ -1653,17 +1622,14 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.2666141165054439,
-   "fixedShare": 0.27377824487651076,
-   "repeat": 0.002777777777777778,
-   "repeatSame": 0.002777777777777778,
-   "repeatAvg": 0.002777777777777778,
-   "repeatEx": [
-    "비슷한 버릇이 있는지 떠올려 보세요. ← self_24 (1명)"
-   ],
+   "jaccard": 0.26664617509013416,
+   "fixedShare": 0.2737926322980714,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
     "일간 소개": 0.06,
-    "힘의 세기(신강·신약) 소개": 0.59,
     "필요한 기운(용신) 소개": 0.03
    },
    "evidMine": 0.0897936419408812,
@@ -1809,7 +1775,7 @@
    "narrative": 0.7833333333333333,
    "narrRuleKinds": 9,
    "thin": 0.12222222222222222,
-   "avgChars": 2376,
+   "avgChars": 2366,
    "avgBody": 813,
    "layerShare": {
     "head": 1,
@@ -1825,11 +1791,11 @@
    },
    "layerAvg": {
     "head": 17,
-    "hook": 110,
-    "narrative": 806,
+    "hook": 109,
+    "narrative": 805,
     "chart": 173,
     "why": 437,
-    "feature": 835,
+    "feature": 827,
     "depth": 304,
     "insight": 138,
     "db": 822,
@@ -1837,14 +1803,13 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.185175300630041,
-   "fixedShare": 0.18164276066122081,
+   "jaccard": 0.18521474270487323,
+   "fixedShare": 0.1817011967571741,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 1,
     "필요한 기운(용신) 소개": 1,
     "지금 대운 소개": 0.09,
     "힘의 세기(신강·신약) 소개": 0.59
@@ -1905,7 +1870,7 @@
    "narrative": 0.975,
    "narrRuleKinds": 7,
    "thin": 0.030555555555555555,
-   "avgChars": 1607,
+   "avgChars": 1594,
    "avgBody": 504,
    "layerShare": {
     "head": 1,
@@ -1925,8 +1890,8 @@
     "narrative": 488,
     "chart": 171,
     "why": 430,
-    "feature": 322,
-    "depth": 307,
+    "feature": 310,
+    "depth": 305,
     "insight": 191,
     "db": 994,
     "basis": 140
@@ -1940,7 +1905,6 @@
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 0.7,
     "지금 대운 소개": 0.21,
     "힘의 세기(신강·신약) 소개": 0.59,
     "필요한 기운(용신) 소개": 0.03
@@ -1998,8 +1962,8 @@
    "narrative": 0.9555555555555556,
    "narrRuleKinds": 7,
    "thin": 0.08888888888888889,
-   "avgChars": 2133,
-   "avgBody": 514,
+   "avgChars": 2113,
+   "avgBody": 512,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -2014,11 +1978,11 @@
    },
    "layerAvg": {
     "head": 19,
-    "hook": 126,
-    "narrative": 492,
+    "hook": 125,
+    "narrative": 491,
     "chart": 175,
     "why": 438,
-    "feature": 863,
+    "feature": 844,
     "depth": 324,
     "insight": 140,
     "db": 884,
@@ -2026,16 +1990,13 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.23117053651937094,
-   "fixedShare": 0.21080026024723486,
-   "repeat": 0.013888888888888888,
-   "repeatSame": 0.013888888888888888,
-   "repeatAvg": 0.013888888888888888,
-   "repeatEx": [
-    "이번 달 쓴 돈을 한 번 적어 보세요. ← wealth_02 (5명)"
-   ],
+   "jaccard": 0.2315228143089379,
+   "fixedShare": 0.21117121814508244,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 1,
     "일간 소개": 0.13,
     "힘의 세기(신강·신약) 소개": 0.59,
     "지금 대운 소개": 0.3
@@ -2099,7 +2060,7 @@
    "narrRuleKinds": 7,
    "thin": 0.13055555555555556,
    "avgChars": 1459,
-   "avgBody": 462,
+   "avgBody": 461,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -2126,14 +2087,12 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.1286288871908681,
-   "fixedShare": 0.035856573705179286,
-   "repeat": 0.008333333333333333,
-   "repeatSame": 0.008333333333333333,
-   "repeatAvg": 0.008333333333333333,
-   "repeatEx": [
-    "이번 달 쓴 돈을 한 번 적어 보세요. ← wealth_04 (3명)"
-   ],
+   "jaccard": 0.12868403057730501,
+   "fixedShare": 0.03587086488640893,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
     "힘의 세기(신강·신약) 소개": 0.59
    },
@@ -2190,7 +2149,7 @@
    "narrative": 0.9555555555555556,
    "narrRuleKinds": 6,
    "thin": 0.05,
-   "avgChars": 3284,
+   "avgChars": 3281,
    "avgBody": 580,
    "layerShare": {
     "head": 1,
@@ -2207,12 +2166,12 @@
    },
    "layerAvg": {
     "head": 16,
-    "hook": 94,
+    "hook": 93,
     "narrative": 561,
     "chart": 1522,
     "why": 429,
     "feature": 540,
-    "depth": 392,
+    "depth": 390,
     "insight": 152,
     "db": 703,
     "luck": 192,
@@ -2220,17 +2179,14 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.15452039719362828,
-   "fixedShare": 0.10808549478968586,
-   "repeat": 0.011111111111111112,
-   "repeatSame": 0.011111111111111112,
-   "repeatAvg": 0.011111111111111112,
-   "repeatEx": [
-    "이번 달 쓴 돈을 한 번 적어 보세요. ← wealth_04 (4명)"
-   ],
+   "jaccard": 0.15454449997421268,
+   "fixedShare": 0.10811839001749982,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
-    "지금 대운 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.04,
+    "지금 대운 소개": 0.39,
     "필요한 기운(용신) 소개": 0.04
    },
    "evidMine": 0.10125858123569793,
@@ -2284,8 +2240,8 @@
    "narrative": 0.975,
    "narrRuleKinds": 7,
    "thin": 0.05,
-   "avgChars": 1621,
-   "avgBody": 491,
+   "avgChars": 1610,
+   "avgBody": 490,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -2300,11 +2256,11 @@
    },
    "layerAvg": {
     "head": 18,
-    "hook": 104,
+    "hook": 103,
     "narrative": 476,
     "chart": 174,
     "why": 440,
-    "feature": 440,
+    "feature": 430,
     "depth": 307,
     "insight": 104,
     "db": 899,
@@ -2312,16 +2268,13 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.13707627115855883,
-   "fixedShare": 0.041100582258248655,
-   "repeat": 0.002777777777777778,
-   "repeatSame": 0.002777777777777778,
-   "repeatAvg": 0.002777777777777778,
-   "repeatEx": [
-    "이번 달 쓴 돈을 한 번 적어 보세요. ← wealth_04 (1명)"
-   ],
+   "jaccard": 0.13708474516032143,
+   "fixedShare": 0.041105275176981045,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 0.66,
     "힘의 세기(신강·신약) 소개": 0.59,
     "일간 소개": 0.03
    },
@@ -2378,8 +2331,8 @@
    "narrative": 0.9861111111111112,
    "narrRuleKinds": 7,
    "thin": 0.09722222222222222,
-   "avgChars": 2068,
-   "avgBody": 473,
+   "avgChars": 2058,
+   "avgBody": 471,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -2395,10 +2348,10 @@
    "layerAvg": {
     "head": 22,
     "hook": 107,
-    "narrative": 461,
+    "narrative": 460,
     "chart": 178,
     "why": 441,
-    "feature": 888,
+    "feature": 881,
     "depth": 326,
     "insight": 91,
     "db": 981,
@@ -2406,15 +2359,12 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.22247875937107764,
-   "fixedShare": 0.21032780139898505,
-   "repeat": 0.05277777777777778,
-   "repeatSame": 0.05277777777777778,
-   "repeatAvg": 0.05277777777777778,
-   "repeatEx": [
-    "이번 달 쓴 돈을 한 번 적어 보세요. ← wealth_04 (18명)",
-    "이번 달 쓴 돈을 한 번 적어 보세요. ← wealth_02 (1명)"
-   ],
+   "jaccard": 0.22302687546500152,
+   "fixedShare": 0.21097888147485727,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
     "힘의 세기(신강·신약) 소개": 0.59,
     "일간 소개": 0.12
@@ -2479,7 +2429,7 @@
    "narrative": 0.9833333333333333,
    "narrRuleKinds": 7,
    "thin": 0.05,
-   "avgChars": 1974,
+   "avgChars": 1953,
    "avgBody": 495,
    "layerShare": {
     "head": 1,
@@ -2499,7 +2449,7 @@
     "narrative": 484,
     "chart": 173,
     "why": 439,
-    "feature": 787,
+    "feature": 767,
     "depth": 337,
     "insight": 79,
     "db": 937,
@@ -2507,16 +2457,15 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.21744070590026524,
-   "fixedShare": 0.1842374616171955,
+   "jaccard": 0.21745948895787648,
+   "fixedShare": 0.18439923898726768,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 0.87,
-    "일간 소개": 0.32,
-    "힘의 세기(신강·신약) 소개": 0.57,
+    "힘의 세기(신강·신약) 소개": 0.38,
+    "일간 소개": 0.11,
     "필요한 기운(용신) 소개": 0.02
    },
    "evidMine": 0.09931787175989086,
@@ -2572,8 +2521,8 @@
    "narrative": 0.9555555555555556,
    "narrRuleKinds": 6,
    "thin": 0.022222222222222223,
-   "avgChars": 3469,
-   "avgBody": 580,
+   "avgChars": 3467,
+   "avgBody": 578,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -2588,32 +2537,29 @@
    },
    "layerAvg": {
     "head": 15,
-    "hook": 98,
-    "narrative": 555,
+    "hook": 97,
+    "narrative": 554,
     "chart": 1522,
     "why": 425,
     "feature": 730,
     "depth": 378,
     "insight": 157,
-    "db": 1017,
+    "db": 1006,
     "basis": 186
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.12550484327005457,
-   "fixedShare": 0.08769080870412471,
-   "repeat": 0.075,
-   "repeatSame": 0.075,
-   "repeatAvg": 0.08611111111111111,
+   "jaccard": 0.12564448353061455,
+   "fixedShare": 0.0877906031539587,
+   "repeat": 0.03888888888888889,
+   "repeatSame": 0.03888888888888889,
+   "repeatAvg": 0.04722222222222222,
    "repeatEx": [
-    "유리한지는 적합도와 안정성을 함께 보세요. ← wealth_06 (17명)",
-    "이번 달 쓴 돈을 한 번 적어 보세요. ← wealth_04 (8명)",
-    "이번 달 쓴 돈을 한 번 적어 보세요. ← wealth_08 (5명)"
+    "유리한지는 적합도와 안정성을 함께 보세요. ← wealth_06 (17명)"
    ],
    "facts": {
-    "지금 대운 소개": 1,
+    "지금 대운 소개": 0.49,
     "필요한 기운(용신) 소개": 0.21,
-    "힘의 세기(신강·신약) 소개": 0.04,
     "일간 소개": 0.04
    },
    "evidMine": 0.10201729106628242,
@@ -2668,7 +2614,7 @@
    "narrative": 0.9583333333333334,
    "narrRuleKinds": 6,
    "thin": 0.030555555555555555,
-   "avgChars": 2049,
+   "avgChars": 2027,
    "avgBody": 506,
    "layerShare": {
     "head": 1,
@@ -2684,30 +2630,27 @@
    },
    "layerAvg": {
     "head": 26,
-    "hook": 126,
+    "hook": 125,
     "narrative": 487,
     "chart": 182,
     "why": 430,
-    "feature": 842,
-    "depth": 296,
+    "feature": 825,
+    "depth": 293,
     "insight": 92,
     "db": 852,
     "basis": 148
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.22101399265774346,
-   "fixedShare": 0.19161676646706588,
-   "repeat": 0.016666666666666666,
-   "repeatSame": 0.016666666666666666,
-   "repeatAvg": 0.016666666666666666,
-   "repeatEx": [
-    "이번 달 쓴 돈을 한 번 적어 보세요. ← wealth_02 (5명)",
-    "이번 달 쓴 돈을 한 번 적어 보세요. ← wealth_04 (1명)"
-   ],
+   "jaccard": 0.2194245897015762,
+   "fixedShare": 0.19343139230304252,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
-    "일간 소개": 0.28,
-    "힘의 세기(신강·신약) 소개": 0.59
+    "일간 소개": 0.12,
+    "힘의 세기(신강·신약) 소개": 0.13
    },
    "evidMine": 0.10209951107276388,
    "evidHas": 0.9583333333333334,
@@ -2761,7 +2704,7 @@
    "narrative": 1,
    "narrRuleKinds": 7,
    "thin": 0.027777777777777776,
-   "avgChars": 1942,
+   "avgChars": 1936,
    "avgBody": 494,
    "layerShare": {
     "head": 1,
@@ -2779,24 +2722,20 @@
     "narrative": 490,
     "chart": 174,
     "why": 442,
-    "feature": 769,
+    "feature": 763,
     "depth": 311,
     "insight": 88
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.24952334298870923,
-   "fixedShare": 0.23659746977004265,
-   "repeat": 0.008333333333333333,
-   "repeatSame": 0.008333333333333333,
-   "repeatAvg": 0.008333333333333333,
-   "repeatEx": [
-    "이번 달 쓴 돈을 한 번 적어 보세요. ← wealth_02 (2명)",
-    "이번 달 쓴 돈을 한 번 적어 보세요. ← wealth_04 (1명)"
-   ],
+   "jaccard": 0.24953971406233877,
+   "fixedShare": 0.23664709172259507,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
-    "일간 소개": 0.09,
-    "힘의 세기(신강·신약) 소개": 0.59
+    "힘의 세기(신강·신약) 소개": 0.2
    },
    "evidMine": 0.10065111231687467,
    "evidHas": 1,
@@ -2849,7 +2788,7 @@
    "narrative": 0.9583333333333334,
    "narrRuleKinds": 6,
    "thin": 0.06666666666666667,
-   "avgChars": 2205,
+   "avgChars": 2190,
    "avgBody": 494,
    "layerShare": {
     "head": 1,
@@ -2865,28 +2804,27 @@
    },
    "layerAvg": {
     "head": 24,
-    "hook": 127,
+    "hook": 126,
     "narrative": 473,
     "chart": 110,
     "why": 442,
-    "feature": 1083,
-    "depth": 316,
+    "feature": 1077,
+    "depth": 307,
     "insight": 84,
     "db": 875,
     "basis": 86
    },
    "sameText": 0.0027932098765431944,
    "uniqueTexts": 359,
-   "jaccard": 0.2752178977504848,
-   "fixedShare": 0.26349496797804206,
+   "jaccard": 0.27508440120976024,
+   "fixedShare": 0.2656826568265683,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
     "필요한 기운(용신) 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.59,
-    "일간 소개": 0.1
+    "일간 소개": 0
    },
    "evidMine": 0.10122611919019105,
    "evidHas": 0.9583333333333334,
@@ -2938,7 +2876,7 @@
    "narrative": 0.9611111111111111,
    "narrRuleKinds": 6,
    "thin": 0.008333333333333333,
-   "avgChars": 3091,
+   "avgChars": 3090,
    "avgBody": 563,
    "layerShare": {
     "head": 1,
@@ -2954,14 +2892,14 @@
    },
    "layerAvg": {
     "head": 17,
-    "hook": 96,
+    "hook": 95,
     "narrative": 547,
     "chart": 1522,
     "why": 429,
     "feature": 368,
     "depth": 320,
     "insight": 218,
-    "db": 842,
+    "db": 840,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
@@ -2973,8 +2911,7 @@
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "지금 대운 소개": 0.17,
-    "힘의 세기(신강·신약) 소개": 0.04
+    "지금 대운 소개": 0.13
    },
    "evidMine": 0.10067873303167421,
    "evidHas": 0.9611111111111111,
@@ -3029,7 +2966,7 @@
    "narrative": 0.975,
    "narrRuleKinds": 6,
    "thin": 0.08333333333333333,
-   "avgChars": 1669,
+   "avgChars": 1662,
    "avgBody": 457,
    "layerShare": {
     "head": 1,
@@ -3049,7 +2986,7 @@
     "narrative": 444,
     "chart": 110,
     "why": 435,
-    "feature": 651,
+    "feature": 645,
     "depth": 294,
     "insight": 68,
     "db": 798,
@@ -3057,16 +2994,13 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.23862096385921888,
-   "fixedShare": 0.20955315870570107,
+   "jaccard": 0.2387079702046685,
+   "fixedShare": 0.20966622986202113,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
-   "facts": {
-    "일간 소개": 0.09,
-    "힘의 세기(신강·신약) 소개": 0.59
-   },
+   "facts": {},
    "evidMine": 0.09895833333333333,
    "evidHas": 0.975,
    "evidThin": 0.025,
@@ -3118,7 +3052,7 @@
    "narrative": 0.9694444444444444,
    "narrRuleKinds": 9,
    "thin": 0.008333333333333333,
-   "avgChars": 2232,
+   "avgChars": 2231,
    "avgBody": 537,
    "layerShare": {
     "head": 1,
@@ -3135,7 +3069,7 @@
    },
    "layerAvg": {
     "head": 16,
-    "hook": 108,
+    "hook": 107,
     "chart": 629,
     "narrative": 516,
     "why": 431,
@@ -3210,7 +3144,7 @@
    "narrative": 0.9666666666666667,
    "narrRuleKinds": 9,
    "thin": 0.011111111111111112,
-   "avgChars": 2097,
+   "avgChars": 2072,
    "avgBody": 515,
    "layerShare": {
     "head": 1,
@@ -3230,7 +3164,7 @@
     "narrative": 492,
     "chart": 168,
     "why": 432,
-    "feature": 864,
+    "feature": 840,
     "depth": 312,
     "insight": 125,
     "db": 1070,
@@ -3238,17 +3172,15 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.19914537299728297,
-   "fixedShare": 0.1743100228263125,
+   "jaccard": 0.200211967467839,
+   "fixedShare": 0.17524339360222532,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 1,
     "필요한 기운(용신) 소개": 1,
-    "일간 소개": 0.51,
-    "힘의 세기(신강·신약) 소개": 0.25
+    "일간 소개": 0.19
    },
    "evidMine": 0.10452554744525547,
    "evidHas": 0.9666666666666667,
@@ -3308,8 +3240,8 @@
    "narrative": 0.9722222222222222,
    "narrRuleKinds": 9,
    "thin": 0.016666666666666666,
-   "avgChars": 2029,
-   "avgBody": 538,
+   "avgChars": 2019,
+   "avgBody": 537,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -3325,10 +3257,10 @@
    "layerAvg": {
     "head": 20,
     "hook": 115,
-    "narrative": 522,
+    "narrative": 521,
     "chart": 172,
     "why": 441,
-    "feature": 771,
+    "feature": 762,
     "depth": 304,
     "insight": 124,
     "db": 942,
@@ -3336,15 +3268,15 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.20193502944853162,
-   "fixedShare": 0.20830234602122913,
+   "jaccard": 0.20217052654181497,
+   "fixedShare": 0.20855614973262032,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
     "힘의 세기(신강·신약) 소개": 0.59,
-    "일간 소개": 0.37,
+    "일간 소개": 0.19,
     "필요한 기운(용신) 소개": 0.03
    },
    "evidMine": 0.09749062590135564,
@@ -3405,7 +3337,7 @@
    "narrative": 0.9666666666666667,
    "narrRuleKinds": 9,
    "thin": 0.08611111111111111,
-   "avgChars": 1994,
+   "avgChars": 1985,
    "avgBody": 493,
    "layerShare": {
     "head": 1,
@@ -3421,11 +3353,11 @@
    },
    "layerAvg": {
     "head": 15,
-    "hook": 108,
+    "hook": 107,
     "narrative": 480,
     "chart": 167,
     "why": 436,
-    "feature": 762,
+    "feature": 754,
     "depth": 329,
     "insight": 131,
     "db": 752,
@@ -3433,15 +3365,15 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.20291864473015578,
-   "fixedShare": 0.21317241379310345,
+   "jaccard": 0.20309267841774784,
+   "fixedShare": 0.21355534061075032,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "일간 소개": 0.42,
-    "힘의 세기(신강·신약) 소개": 0.59
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "일간 소개": 0.14
    },
    "evidMine": 0.10721772985923929,
    "evidHas": 0.9666666666666667,
@@ -3493,7 +3425,7 @@
    "narrative": 0.9777777777777777,
    "narrRuleKinds": 9,
    "thin": 0.008333333333333333,
-   "avgChars": 1885,
+   "avgChars": 1882,
    "avgBody": 524,
    "layerShare": {
     "head": 1,
@@ -3513,7 +3445,7 @@
     "narrative": 508,
     "chart": 173,
     "why": 430,
-    "feature": 625,
+    "feature": 623,
     "depth": 320,
     "insight": 121,
     "db": 1047,
@@ -3521,16 +3453,13 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.21296455078600324,
-   "fixedShare": 0.21454293628808865,
+   "jaccard": 0.2137544427088364,
+   "fixedShare": 0.21555802950180908,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
-   "facts": {
-    "일간 소개": 0.09,
-    "힘의 세기(신강·신약) 소개": 0.23
-   },
+   "facts": {},
    "evidMine": 0.10700561631687851,
    "evidHas": 0.9777777777777777,
    "evidThin": 0,
@@ -3581,8 +3510,8 @@
    "narrative": 0.9888888888888889,
    "narrRuleKinds": 9,
    "thin": 0.011111111111111112,
-   "avgChars": 1730,
-   "avgBody": 505,
+   "avgChars": 1729,
+   "avgBody": 504,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -3598,7 +3527,7 @@
    "layerAvg": {
     "head": 19,
     "hook": 112,
-    "narrative": 497,
+    "narrative": 496,
     "chart": 171,
     "why": 438,
     "feature": 528,
@@ -3609,17 +3538,15 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.15208520329986447,
-   "fixedShare": 0.07492195629552549,
-   "repeat": 0.019444444444444445,
-   "repeatSame": 0.019444444444444445,
-   "repeatAvg": 0.019444444444444445,
-   "repeatEx": [
-    "내가 자주 맡는 역할을 떠올려 보세요. ← career_03 (7명)"
-   ],
+   "jaccard": 0.15229779834911503,
+   "fixedShare": 0.07503908285565399,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
     "필요한 기운(용신) 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.01
+    "힘의 세기(신강·신약) 소개": 0
    },
    "evidMine": 0.10256410256410256,
    "evidHas": 0.9888888888888889,
@@ -3680,7 +3607,7 @@
    "narrative": 0.7527777777777778,
    "narrRuleKinds": 12,
    "thin": 0.09722222222222222,
-   "avgChars": 2147,
+   "avgChars": 2124,
    "avgBody": 679,
    "layerShare": {
     "head": 1,
@@ -3696,11 +3623,11 @@
    },
    "layerAvg": {
     "head": 17,
-    "hook": 105,
+    "hook": 104,
     "db": 911,
     "chart": 169,
     "why": 389,
-    "feature": 763,
+    "feature": 741,
     "depth": 349,
     "insight": 78,
     "basis": 136,
@@ -3715,9 +3642,9 @@
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 0.71,
-    "일간 소개": 0.62,
-    "힘의 세기(신강·신약) 소개": 0.59
+    "일간 소개": 0.25,
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "가장 큰 기운 소개": 0.08
    },
    "evidMine": 0.09673873213631366,
    "evidHas": 0.7138888888888889,
@@ -3774,8 +3701,8 @@
    "narrative": 0.9694444444444444,
    "narrRuleKinds": 11,
    "thin": 0.008333333333333333,
-   "avgChars": 3492,
-   "avgBody": 676,
+   "avgChars": 3488,
+   "avgBody": 675,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -3796,23 +3723,22 @@
     "chart": 1506,
     "why": 430,
     "feature": 642,
-    "depth": 409,
+    "depth": 405,
     "insight": 161,
-    "db": 997,
+    "db": 986,
     "luck": 195,
     "basis": 258
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.09721460933975071,
-   "fixedShare": 0.03221764811168785,
+   "jaccard": 0.09709468557900583,
+   "fixedShare": 0.032441200324412,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "지금 대운 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.03
+    "지금 대운 소개": 0.4
    },
    "evidMine": 0.10677314404022478,
    "evidHas": 0.9694444444444444,
@@ -3871,7 +3797,7 @@
    "narrative": 0.9833333333333333,
    "narrRuleKinds": 11,
    "thin": 0.019444444444444445,
-   "avgChars": 1921,
+   "avgChars": 1901,
    "avgBody": 507,
    "layerShare": {
     "head": 1,
@@ -3891,7 +3817,7 @@
     "narrative": 499,
     "chart": 172,
     "why": 444,
-    "feature": 721,
+    "feature": 701,
     "depth": 321,
     "insight": 94,
     "db": 790,
@@ -3906,9 +3832,7 @@
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 0.83,
-    "일간 소개": 0.79,
-    "힘의 세기(신강·신약) 소개": 0.23,
+    "힘의 세기(신강·신약) 소개": 0.21,
     "필요한 기운(용신) 소개": 0.02
    },
    "evidMine": 0.10681884694176177,
@@ -3963,8 +3887,8 @@
    "narrative": 0.9666666666666667,
    "narrRuleKinds": 9,
    "thin": 0.03611111111111111,
-   "avgChars": 1896,
-   "avgBody": 497,
+   "avgChars": 1876,
+   "avgBody": 496,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -3983,7 +3907,7 @@
     "narrative": 480,
     "chart": 166,
     "why": 439,
-    "feature": 723,
+    "feature": 703,
     "depth": 331,
     "insight": 77,
     "db": 861,
@@ -3991,19 +3915,15 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.20932192588467194,
-   "fixedShare": 0.21249398666758298,
-   "repeat": 0.011111111111111112,
-   "repeatSame": 0.011111111111111112,
-   "repeatAvg": 0.011111111111111112,
-   "repeatEx": [
-    "내가 자주 맡는 역할을 떠올려 보세요. ← career_03 (3명)",
-    "내가 자주 맡는 역할을 떠올려 보세요. ← career_06 (1명)"
-   ],
+   "jaccard": 0.20942723171869504,
+   "fixedShare": 0.2125670287364224,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 1,
-    "일간 소개": 0.63,
-    "힘의 세기(신강·신약) 소개": 0.59
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "일간 소개": 0.03
    },
    "evidMine": 0.10440361621463984,
    "evidHas": 0.9666666666666667,
@@ -4055,7 +3975,7 @@
    "narrative": 0.9777777777777777,
    "narrRuleKinds": 8,
    "thin": 0.08888888888888889,
-   "avgChars": 1963,
+   "avgChars": 1954,
    "avgBody": 490,
    "layerShare": {
     "head": 1,
@@ -4071,11 +3991,11 @@
    },
    "layerAvg": {
     "head": 28,
-    "hook": 119,
+    "hook": 118,
     "narrative": 472,
     "chart": 180,
     "why": 419,
-    "feature": 762,
+    "feature": 753,
     "depth": 337,
     "insight": 72,
     "db": 1085,
@@ -4089,10 +4009,7 @@
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
-   "facts": {
-    "일간 소개": 0.29,
-    "힘의 세기(신강·신약) 소개": 0.59
-   },
+   "facts": {},
    "evidMine": 0.11039951204635559,
    "evidHas": 0.9777777777777777,
    "evidThin": 0,
@@ -4144,8 +4061,8 @@
    "narrative": 0.9722222222222222,
    "narrRuleKinds": 8,
    "thin": 0.011111111111111112,
-   "avgChars": 3542,
-   "avgBody": 625,
+   "avgChars": 3533,
+   "avgBody": 624,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -4161,31 +4078,26 @@
    "layerAvg": {
     "head": 18,
     "hook": 112,
-    "narrative": 610,
+    "narrative": 609,
     "chart": 1506,
     "why": 427,
-    "feature": 736,
-    "depth": 413,
+    "feature": 730,
+    "depth": 411,
     "insight": 145,
     "db": 982,
     "basis": 187
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.20031810265485686,
-   "fixedShare": 0.1867821623355791,
-   "repeat": 0.019444444444444445,
-   "repeatSame": 0.019444444444444445,
-   "repeatAvg": 0.019444444444444445,
-   "repeatEx": [
-    "내가 자주 맡는 역할을 떠올려 보세요. ← career_06 (6명)",
-    "내가 자주 맡는 역할을 떠올려 보세요. ← career_10 (1명)"
-   ],
+   "jaccard": 0.20051605422105198,
+   "fixedShare": 0.18695009954402414,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
-    "지금 대운 소개": 1,
-    "일간 소개": 0.1,
-    "힘의 세기(신강·신약) 소개": 0.59,
-    "필요한 기운(용신) 소개": 0.13
+    "필요한 기운(용신) 소개": 0.13,
+    "지금 대운 소개": 0.02
    },
    "evidMine": 0.10692010692010692,
    "evidHas": 0.9722222222222222,
@@ -4241,8 +4153,8 @@
    "narrative": 0.9694444444444444,
    "narrRuleKinds": 8,
    "thin": 0.008333333333333333,
-   "avgChars": 1944,
-   "avgBody": 520,
+   "avgChars": 1932,
+   "avgBody": 519,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -4258,31 +4170,24 @@
    "layerAvg": {
     "head": 25,
     "hook": 136,
-    "narrative": 508,
+    "narrative": 507,
     "chart": 110,
     "why": 430,
-    "feature": 799,
+    "feature": 790,
     "depth": 315,
     "insight": 71,
-    "db": 773,
+    "db": 771,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.23986062834114083,
-   "fixedShare": 0.24658979046547602,
-   "repeat": 0.058333333333333334,
-   "repeatSame": 0.058333333333333334,
-   "repeatAvg": 0.058333333333333334,
-   "repeatEx": [
-    "내가 자주 맡는 역할을 떠올려 보세요. ← career_03 (15명)",
-    "내가 자주 맡는 역할을 떠올려 보세요. ← career_06 (3명)",
-    "내가 자주 맡는 역할을 떠올려 보세요. ← career_12 (2명)"
-   ],
-   "facts": {
-    "일간 소개": 0.49,
-    "힘의 세기(신강·신약) 소개": 0.59
-   },
+   "jaccard": 0.24034653065022918,
+   "fixedShare": 0.24702401915897726,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {},
    "evidMine": 0.10719617796357121,
    "evidHas": 0.9694444444444444,
    "evidThin": 0.030555555555555555,
@@ -4356,23 +4261,18 @@
     "feature": 326,
     "depth": 311,
     "insight": 138,
-    "db": 777,
+    "db": 773,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.15066421439641106,
-   "fixedShare": 0.11207803385292149,
-   "repeat": 0.002777777777777778,
-   "repeatSame": 0.002777777777777778,
-   "repeatAvg": 0.002777777777777778,
-   "repeatEx": [
-    "내가 자주 맡는 역할을 떠올려 보세요. ← career_13 (1명)"
-   ],
-   "facts": {
-    "힘의 세기(신강·신약) 소개": 0.03,
-    "지금 대운 소개": 0.03
-   },
+   "jaccard": 0.15067933513176623,
+   "fixedShare": 0.11208875286916603,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {},
    "evidMine": 0.10457325953976114,
    "evidHas": 0.9694444444444444,
    "evidThin": 0.030555555555555555,
@@ -4426,8 +4326,8 @@
    "narrative": 0.9777777777777777,
    "narrRuleKinds": 9,
    "thin": 0.12777777777777777,
-   "avgChars": 1661,
-   "avgBody": 446,
+   "avgChars": 1651,
+   "avgBody": 444,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -4442,29 +4342,25 @@
    },
    "layerAvg": {
     "head": 15,
-    "hook": 101,
-    "narrative": 435,
+    "hook": 100,
+    "narrative": 433,
     "chart": 110,
     "why": 424,
-    "feature": 613,
+    "feature": 605,
     "depth": 296,
     "insight": 92,
-    "db": 745,
+    "db": 742,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.2041463144462159,
-   "fixedShare": 0.20816420310944322,
-   "repeat": 0.002777777777777778,
-   "repeatSame": 0.002777777777777778,
-   "repeatAvg": 0.002777777777777778,
-   "repeatEx": [
-    "내가 자주 맡는 역할을 떠올려 보세요. ← career_13 (1명)"
-   ],
+   "jaccard": 0.20418431618039337,
+   "fixedShare": 0.20835569183595248,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
-    "힘의 세기(신강·신약) 소개": 0.59,
-    "일간 소개": 0.28,
     "필요한 기운(용신) 소개": 0.09
    },
    "evidMine": 0.10697399527186761,
@@ -4517,8 +4413,8 @@
    "narrative": 0.9805555555555555,
    "narrRuleKinds": 6,
    "thin": 0.044444444444444446,
-   "avgChars": 2650,
-   "avgBody": 484,
+   "avgChars": 2622,
+   "avgBody": 483,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -4534,30 +4430,29 @@
    },
    "layerAvg": {
     "head": 19,
-    "hook": 114,
+    "hook": 113,
     "chart": 631,
-    "narrative": 469,
+    "narrative": 468,
     "why": 434,
     "plus": 96,
-    "feature": 867,
-    "depth": 311,
+    "feature": 843,
+    "depth": 307,
     "insight": 141,
     "db": 1021,
     "basis": 142
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.18545269730208963,
-   "fixedShare": 0.1890567860346374,
+   "jaccard": 0.1859803320826532,
+   "fixedShare": 0.19013253764485463,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 1,
     "필요한 기운(용신) 소개": 1,
-    "일간 소개": 0.82,
-    "힘의 세기(신강·신약) 소개": 0.59
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "일간 소개": 0.02
    },
    "evidMine": 0.10268741159830269,
    "evidHas": 0.9805555555555555,
@@ -4614,8 +4509,8 @@
    "narrative": 0.9777777777777777,
    "narrRuleKinds": 6,
    "thin": 0.011111111111111112,
-   "avgChars": 2096,
-   "avgBody": 537,
+   "avgChars": 2067,
+   "avgBody": 536,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -4631,10 +4526,10 @@
    "layerAvg": {
     "head": 22,
     "hook": 119,
-    "narrative": 524,
+    "narrative": 523,
     "chart": 173,
     "why": 426,
-    "feature": 821,
+    "feature": 793,
     "depth": 324,
     "insight": 118,
     "db": 949,
@@ -4642,19 +4537,13 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.2089912981101725,
-   "fixedShare": 0.20930232558139536,
-   "repeat": 0.013888888888888888,
-   "repeatSame": 0.013888888888888888,
-   "repeatAvg": 0.013888888888888888,
-   "repeatEx": [
-    "마음을 표현하는 내 방식을 떠올려 보세요. ← love_01 (5명)"
-   ],
-   "facts": {
-    "가장 큰 기운 소개": 1,
-    "일간 소개": 0.81,
-    "힘의 세기(신강·신약) 소개": 0.59
-   },
+   "jaccard": 0.2091599041474882,
+   "fixedShare": 0.20950118764845604,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {},
    "evidMine": 0.10414269275028769,
    "evidHas": 0.9777777777777777,
    "evidThin": 0,
@@ -4705,8 +4594,8 @@
    "narrative": 0.9583333333333334,
    "narrRuleKinds": 6,
    "thin": 0.09166666666666666,
-   "avgChars": 1947,
-   "avgBody": 467,
+   "avgChars": 1938,
+   "avgBody": 466,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -4721,11 +4610,11 @@
    },
    "layerAvg": {
     "head": 19,
-    "hook": 119,
-    "narrative": 441,
+    "hook": 118,
+    "narrative": 439,
     "chart": 178,
     "why": 433,
-    "feature": 770,
+    "feature": 763,
     "depth": 315,
     "insight": 98,
     "db": 982,
@@ -4733,17 +4622,13 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.24832908930368788,
-   "fixedShare": 0.23512507347658546,
-   "repeat": 0.013888888888888888,
-   "repeatSame": 0.013888888888888888,
-   "repeatAvg": 0.013888888888888888,
-   "repeatEx": [
-    "마음을 표현하는 내 방식을 떠올려 보세요. ← love_02 (5명)"
-   ],
+   "jaccard": 0.24880907504442276,
+   "fixedShare": 0.23557126030624265,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
-    "일간 소개": 0.71,
-    "힘의 세기(신강·신약) 소개": 0.26,
     "필요한 기운(용신) 소개": 0.04
    },
    "evidMine": 0.09963513892786978,
@@ -4796,7 +4681,7 @@
    "narrative": 0.825,
    "narrRuleKinds": 8,
    "thin": 0.011111111111111112,
-   "avgChars": 2359,
+   "avgChars": 2341,
    "avgBody": 812,
    "layerShare": {
     "head": 1,
@@ -4812,11 +4697,11 @@
    },
    "layerAvg": {
     "head": 19,
-    "hook": 103,
+    "hook": 102,
     "db": 983,
     "chart": 170,
     "why": 439,
-    "feature": 876,
+    "feature": 860,
     "depth": 306,
     "insight": 86,
     "basis": 141,
@@ -4824,15 +4709,14 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.18545544099864128,
-   "fixedShare": 0.16484506365601728,
+   "jaccard": 0.1855603796338456,
+   "fixedShare": 0.16499368876600348,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 1,
-    "일간 소개": 0.83,
+    "일간 소개": 0.17,
     "힘의 세기(신강·신약) 소개": 0.59
    },
    "evidMine": 0.08487696986452861,
@@ -4886,7 +4770,7 @@
    "narrative": 0.9666666666666667,
    "narrRuleKinds": 6,
    "thin": 0.05277777777777778,
-   "avgChars": 2042,
+   "avgChars": 2034,
    "avgBody": 498,
    "layerShare": {
     "head": 1,
@@ -4902,11 +4786,11 @@
    },
    "layerAvg": {
     "head": 21,
-    "hook": 123,
+    "hook": 122,
     "narrative": 476,
     "chart": 172,
     "why": 448,
-    "feature": 829,
+    "feature": 821,
     "depth": 307,
     "insight": 109,
     "db": 1022,
@@ -4914,15 +4798,15 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.2326155527511468,
-   "fixedShare": 0.22105263157894736,
+   "jaccard": 0.23279575151814758,
+   "fixedShare": 0.22128556375131717,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.04
+    "힘의 세기(신강·신약) 소개": 0.01,
+    "가장 큰 기운 소개": 0.01
    },
    "evidMine": 0.09662618083670715,
    "evidHas": 0.9666666666666667,
@@ -4976,7 +4860,7 @@
    "narrative": 0.9805555555555555,
    "narrRuleKinds": 6,
    "thin": 0.12222222222222222,
-   "avgChars": 1870,
+   "avgChars": 1851,
    "avgBody": 439,
    "layerShare": {
     "head": 1,
@@ -4996,7 +4880,7 @@
     "narrative": 428,
     "chart": 166,
     "why": 427,
-    "feature": 741,
+    "feature": 723,
     "depth": 332,
     "insight": 88,
     "db": 757,
@@ -5011,9 +4895,7 @@
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 1,
     "힘의 세기(신강·신약) 소개": 0.59,
-    "일간 소개": 0.58,
     "필요한 기운(용신) 소개": 0.02
    },
    "evidMine": 0.10268741159830269,
@@ -5065,7 +4947,7 @@
    "narrative": 0.9666666666666667,
    "narrRuleKinds": 7,
    "thin": 0.008333333333333333,
-   "avgChars": 2151,
+   "avgChars": 2133,
    "avgBody": 539,
    "layerShare": {
     "head": 1,
@@ -5085,7 +4967,7 @@
     "narrative": 519,
     "chart": 167,
     "why": 427,
-    "feature": 931,
+    "feature": 913,
     "depth": 325,
     "insight": 76,
     "db": 976,
@@ -5093,17 +4975,16 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.22029954410455727,
-   "fixedShare": 0.20767426019828955,
+   "jaccard": 0.22053032512351503,
+   "fixedShare": 0.2079575596816976,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 1,
     "필요한 기운(용신) 소개": 1,
-    "일간 소개": 0.73,
-    "힘의 세기(신강·신약) 소개": 0.59
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "일간 소개": 0.03
    },
    "evidMine": 0.10187820147979511,
    "evidHas": 0.9666666666666667,
@@ -5200,8 +5081,7 @@
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "지금 대운 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.04
+    "지금 대운 소개": 0.03
    },
    "evidMine": 0.09918744746427571,
    "evidHas": 0.9555555555555556,
@@ -5257,7 +5137,7 @@
    "narrative": 0.9611111111111111,
    "narrRuleKinds": 8,
    "thin": 0.016666666666666666,
-   "avgChars": 2564,
+   "avgChars": 2551,
    "avgBody": 503,
    "layerShare": {
     "head": 1,
@@ -5273,11 +5153,11 @@
    },
    "layerAvg": {
     "head": 19,
-    "hook": 118,
+    "hook": 117,
     "narrative": 479,
     "chart": 170,
     "why": 434,
-    "feature": 1299,
+    "feature": 1287,
     "depth": 408,
     "insight": 76,
     "db": 1007,
@@ -5292,8 +5172,6 @@
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 0.87,
-    "지금 대운 소개": 1,
     "힘의 세기(신강·신약) 소개": 0.59,
     "필요한 기운(용신) 소개": 0.04
    },
@@ -5312,7 +5190,7 @@
    "youngEx": {
     "feature · 결혼 생활": {
      "n": 31,
-     "ex": "결혼 생활의 약한 고리와 예방 命簿 · 점검표 결혼생활 갈등 점검표 집안일·돈 역할을 말로만 정해요 가장 큰 기운이 비겁(내 힘·고집) · 가능성 높음 내 방식이"
+     "ex": "결혼 생활의 약한 고리와 예방 命簿 · 점검표 결혼생활 갈등 점검표 집안일·돈 역할을 말로만 정해요 비겁(내 힘·고집) · 가능성 높음 내 방식이 맞다고 끝까지 "
     },
     "feature · 배우자": {
      "n": 1,
@@ -5367,7 +5245,7 @@
    "narrative": 0.9555555555555556,
    "narrRuleKinds": 6,
    "thin": 0.03888888888888889,
-   "avgChars": 2169,
+   "avgChars": 2160,
    "avgBody": 509,
    "layerShare": {
     "head": 1,
@@ -5383,11 +5261,11 @@
    },
    "layerAvg": {
     "head": 16,
-    "hook": 110,
+    "hook": 109,
     "narrative": 480,
     "chart": 167,
     "why": 432,
-    "feature": 981,
+    "feature": 973,
     "depth": 327,
     "insight": 74,
     "db": 1029,
@@ -5395,17 +5273,15 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.2572809187556819,
-   "fixedShare": 0.26764378994165045,
-   "repeat": 0.011111111111111112,
-   "repeatSame": 0.011111111111111112,
-   "repeatAvg": 0.011111111111111112,
-   "repeatEx": [
-    "마음을 표현하는 내 방식을 떠올려 보세요. ← love_01 (4명)"
-   ],
+   "jaccard": 0.2574285023448218,
+   "fixedShare": 0.26779260494856827,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
    "facts": {
-    "일간 소개": 0.79,
-    "힘의 세기(신강·신약) 소개": 0.27
+    "힘의 세기(신강·신약) 소개": 0.01,
+    "일간 소개": 0.04
    },
    "evidMine": 0.1,
    "evidHas": 0.9555555555555556,
@@ -5459,7 +5335,7 @@
    "narrative": 0.9583333333333334,
    "narrRuleKinds": 8,
    "thin": 0.041666666666666664,
-   "avgChars": 2098,
+   "avgChars": 2090,
    "avgBody": 498,
    "layerShare": {
     "head": 1,
@@ -5475,11 +5351,11 @@
    },
    "layerAvg": {
     "head": 21,
-    "hook": 120,
+    "hook": 119,
     "narrative": 474,
     "chart": 172,
     "why": 433,
-    "feature": 938,
+    "feature": 930,
     "depth": 298,
     "insight": 72,
     "db": 956,
@@ -5494,7 +5370,6 @@
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "가장 큰 기운 소개": 1,
     "필요한 기운(용신) 소개": 1,
     "힘의 세기(신강·신약) 소개": 0.59
    },
@@ -5551,7 +5426,7 @@
    "narrative": 0.9666666666666667,
    "narrRuleKinds": 6,
    "thin": 0.008333333333333333,
-   "avgChars": 1927,
+   "avgChars": 1923,
    "avgBody": 509,
    "layerShare": {
     "head": 1,
@@ -5567,11 +5442,11 @@
    },
    "layerAvg": {
     "head": 26,
-    "hook": 116,
+    "hook": 115,
     "narrative": 487,
     "chart": 177,
     "why": 442,
-    "feature": 742,
+    "feature": 738,
     "depth": 310,
     "insight": 68,
     "db": 1026,
@@ -5579,16 +5454,15 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.2317354452782725,
-   "fixedShare": 0.2007959479015919,
+   "jaccard": 0.2318107885354806,
+   "fixedShare": 0.20088316200955553,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "힘의 세기(신강·신약) 소개": 0.06,
     "필요한 기운(용신) 소개": 0.03,
-    "일간 소개": 0.41
+    "힘의 세기(신강·신약) 소개": 0.03
    },
    "evidMine": 0.09725618038576474,
    "evidHas": 0.9666666666666667,
@@ -5641,7 +5515,7 @@
    "narrative": 0.9805555555555555,
    "narrRuleKinds": 6,
    "thin": 0.03888888888888889,
-   "avgChars": 1783,
+   "avgChars": 1771,
    "avgBody": 487,
    "layerShare": {
     "head": 1,
@@ -5661,7 +5535,7 @@
     "narrative": 477,
     "chart": 110,
     "why": 436,
-    "feature": 646,
+    "feature": 634,
     "depth": 317,
     "insight": 91,
     "db": 779,
@@ -5669,16 +5543,15 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.22831306574820445,
-   "fixedShare": 0.23137108792846497,
+   "jaccard": 0.22891253596933556,
+   "fixedShare": 0.23195876288659795,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "일간 소개": 0.79,
-    "힘의 세기(신강·신약) 소개": 0.59,
-    "필요한 기운(용신) 소개": 0.19
+    "필요한 기운(용신) 소개": 0.19,
+    "힘의 세기(신강·신약) 소개": 0.01
    },
    "evidMine": 0.10262934690415607,
    "evidHas": 0.9805555555555555,
@@ -5731,7 +5604,7 @@
    "narrRuleKinds": 6,
    "thin": 0.008333333333333333,
    "avgChars": 3001,
-   "avgBody": 555,
+   "avgBody": 554,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -5753,7 +5626,7 @@
     "feature": 364,
     "depth": 316,
     "insight": 147,
-    "db": 787,
+    "db": 785,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
@@ -5765,8 +5638,7 @@
    "repeatAvg": 0,
    "repeatEx": [],
    "facts": {
-    "지금 대운 소개": 1,
-    "힘의 세기(신강·신약) 소개": 0.04
+    "지금 대운 소개": 0.39
    },
    "evidMine": 0.102475532527346,
    "evidHas": 0.9611111111111111,
@@ -5819,7 +5691,7 @@
    "narrative": 0.9805555555555555,
    "narrRuleKinds": 6,
    "thin": 0.08611111111111111,
-   "avgChars": 1681,
+   "avgChars": 1675,
    "avgBody": 448,
    "layerShare": {
     "head": 1,
@@ -5839,7 +5711,7 @@
     "narrative": 439,
     "chart": 110,
     "why": 419,
-    "feature": 594,
+    "feature": 588,
     "depth": 324,
     "insight": 95,
     "db": 710,
@@ -5853,10 +5725,7 @@
    "repeatSame": 0,
    "repeatAvg": 0,
    "repeatEx": [],
-   "facts": {
-    "일간 소개": 0.49,
-    "힘의 세기(신강·신약) 소개": 0.23
-   },
+   "facts": {},
    "evidMine": 0.10242663656884876,
    "evidHas": 0.9805555555555555,
    "evidThin": 0.019444444444444445,
@@ -7876,24 +7745,24 @@
  },
  "factSpread": {
   "가장 큰 기운 소개": {
-   "avgChapters": 22,
-   "max": 24
+   "avgChapters": 4.2,
+   "max": 6
   },
   "지금 대운 소개": {
-   "avgChapters": 11.9,
-   "max": 14
+   "avgChapters": 3.5,
+   "max": 8
   },
   "필요한 기운(용신) 소개": {
    "avgChapters": 13.9,
    "max": 25
   },
   "힘의 세기(신강·신약) 소개": {
-   "avgChapters": 31,
-   "max": 63
+   "avgChapters": 18.2,
+   "max": 30
   },
   "일간 소개": {
-   "avgChapters": 12.9,
-   "max": 21
+   "avgChapters": 1.8,
+   "max": 12
   }
  },
  "topicSum": {
@@ -7901,45 +7770,45 @@
    "n": 19,
    "thin": 0.024415204678362584,
    "same": 0.0027777777777777627,
-   "jac": 0.19796004332972758,
-   "rep": 0.003070175438596491,
-   "evid": 0.07489654403308507,
+   "jac": 0.1980277158110642,
+   "rep": 0,
+   "evid": 0.11753020805280143,
    "narr": 0.6967836257309942,
    "fb": 0.014035087719298246,
-   "chars": 2839
+   "chars": 2831
   },
   "wealth": {
    "n": 15,
    "thin": 0.05870370370370371,
    "same": 0.0027788065843621255,
-   "jac": 0.18964630784478104,
-   "rep": 0.012592592592592591,
+   "jac": 0.1896174050026121,
+   "rep": 0.0025925925925925925,
    "evid": 0.09968606112486121,
    "narr": 0.9568518518518518,
    "fb": 0.2577777777777778,
-   "chars": 2260
+   "chars": 2251
   },
   "career": {
    "n": 15,
    "thin": 0.037592592592592594,
    "same": 0.002777777777777763,
-   "jac": 0.1876892420574502,
-   "rep": 0.0075925925925925935,
+   "jac": 0.18790264010022414,
+   "rep": 0,
    "evid": 0.10511554750032757,
    "narr": 0.9587037037037037,
    "fb": 0.15814814814814812,
-   "chars": 2230
+   "chars": 2220
   },
   "love": {
    "n": 15,
    "thin": 0.03944444444444444,
    "same": 0.002777777777777763,
-   "jac": 0.20131764014392445,
-   "rep": 0.0025925925925925925,
+   "jac": 0.2014852762804082,
+   "rep": 0,
    "evid": 0.10002692228274288,
    "narr": 0.9583333333333334,
    "fb": 0.09166666666666669,
-   "chars": 2270
+   "chars": 2258
   }
  }
 }
