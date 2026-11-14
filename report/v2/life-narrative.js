@@ -358,7 +358,8 @@
       });
       if (pick) {
         st.rules.add(pick.id);
-        var rows = [{ stage: 'core', text: dedupe(st, pick.core) }, { stage: 'life', text: dedupe(st, pick.life) }, { stage: 'conflict', text: dedupe(st, pick.conflict) }, { stage: 'luck', text: luckStage(M, ch, now, lens, st, chapterId) }, { stage: 'advice', text: dedupe(st, pick.advice) }].filter(function (r) { return r.text; });
+        var X = (D0.EXTRA || {})[pick.id] || {}, plus = function (t, x) { return x ? t + ' ' + x : t; };   // 얇은 장 보강(life-narrative-data-extra.js): 단계마다 덧붙이는 생활 장면 문장
+        var rows = [{ stage: 'core', text: dedupe(st, pick.core) }, { stage: 'life', text: dedupe(st, plus(pick.life, X.life)) }, { stage: 'conflict', text: dedupe(st, plus(pick.conflict, X.conflict)) }, { stage: 'luck', text: luckStage(M, ch, now, lens, st, chapterId) }, { stage: 'advice', text: dedupe(st, plus(pick.advice, X.advice)) }].filter(function (r) { return r.text; });
         if (P.has('age:young') && pick.all.indexOf('age:young') < 0) rows = youngView(rows, chapterId, D0);
         var evd = evidenceRows(P, pick, D0, [pick.conf === 'moderate' ? '근거 강도: 보통 — 구조 하나가 아니라 기운의 비율로 읽은 해석이라, 맞지 않는 부분은 걸러 읽어 주세요.' : '근거 강도: 높음 — 원국의 구조(격국·강약·십성 배치)에서 직접 나온 해석이에요.', TIME_NOTE]);
         res = { chapterId: chapterId, lens: lens, rule: pick.id, hook: youngHook(P, pick, chapterId, D0), rows: rows.map(function (r) { return { stage: r.stage, label: STAGE[r.stage], text: r.text }; }), evidence: evd, trace: trace, version: VERSION };
