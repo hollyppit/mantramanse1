@@ -192,7 +192,7 @@ L(t) = 십성 힘 단계, gl(g) = 묶음 단계, G = 묶음 비율, help = 돕�
 
 ## 10. 공개·관리
 - 스위치 `gyeokAnalysis`(feature-flags.js, 기본 꺼짐). 미리보기: `?mantraFlags=gyeokAnalysis`. 운영: 관리자 스위치(`/api/luck-flags` `gyeokAnalysis`).
-- 관리자 '점검·운영 > 격국 판정 확인': 사주 입력 → 전체 판정 근거·점검표·기존 격국(gyeokCore)과 비교, 300명 분포 점검, 공개 스위치.
+- 관리자 '풀이 본문 > 격국 판정 확인': 사주 입력 → 전체 판정 근거·점검표·기존 격국(gyeokCore)과 비교, 300명 분포 점검, 공개 스위치.
 - 테스트: `tests/gyeok-structure-sim.cjs`(경계 사례 + 무작위 사주 + 금지 표현 + 점수 불변 + 화면 연결).
 
 ## 11. 구현 결과(2026-11-15)
@@ -202,7 +202,7 @@ L(t) = 십성 힘 단계, gl(g) = 묶음 단계, G = 묶음 비율, help = 돕�
 | `gyeok-structure.js` | 독립 판정 모듈(표시 전용). 규칙 수치는 `CFG` 한 곳 |
 | `index.html` | `renderGyeokAnalysis(ch)` — 오행·강약 탭 십성 분포·신강신약 바로 아래. CSS `.gx-*`(600px 이하 1열). 공통 접기 규칙 `FOLD_EXPERT` 의 '격국'을 '격국 판단'으로 좁혀 새 카드가 처음부터 접히지 않게 함 |
 | `feature-flags.js` · `functions/api/luck-flags.js` | 스위치 `gyeokAnalysis`(기본 꺼짐, '모두 켜기'에 묶이지 않음) |
-| `report/admin/v2-gyeok.js` · `navigation.js` · `index.html` | 관리자 '점검·운영 > 격국 판정 확인' |
+| `report/admin/v2-gyeok.js` · `navigation.js` · `index.html` | 관리자 '풀이 본문 > 격국 판정 확인' |
 | `tests/gyeok-structure-sim.cjs` | 경계 사례 27건 + 무작위 600명 불변식 + 엔진 기준선 |
 
 무작위 600명(시간 모름 1/9 포함) 결과: 엔진 gyeokCore 와 정격 이름 일치 594명(차이는 합거·사령 기준에서 나옴), 판정 유보 111명(대부분 시간 모름·투출 없는 월지 충·격용 없는 월겁), 복수 후보 51명, 특수격 대표 10명, 성립한 주요 구조 없음 66명.

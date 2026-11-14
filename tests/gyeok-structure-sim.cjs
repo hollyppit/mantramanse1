@@ -138,7 +138,7 @@ ok(/gyeokAnalysis: false/.test(fs.readFileSync(path.join(root, 'feature-flags.js
 ok(/'gyeokAnalysis'/.test(fs.readFileSync(path.join(root, 'functions/api/luck-flags.js'), 'utf8')), '관리자 스위치 API 에 gyeokAnalysis 없음');
 const adm = fs.readFileSync(path.join(root, 'report/admin/index.html'), 'utf8'), nav = require(path.join(root, 'report/admin/navigation.js'));
 ok(adm.includes('data-t="gyeokcheck"') && adm.includes('id="t-gyeokcheck"') && adm.includes('src="/gyeok-structure.js"') && adm.includes('src="v2-gyeok.js"') && /V2Gyeok\.open/.test(adm), '관리자 화면 연결 누락');
-ok(nav.groups.find(g => g[0] === 'qa')[2].includes('gyeokcheck') && nav.pages.gyeokcheck && nav.pages.gyeokcheck.label, '관리자 메뉴에 격국 판정 확인 없음');
+ok(nav.groups.find(g => g[0] === 'copy')[2].includes('gyeokcheck') && !nav.groups.find(g => g[0] === 'qa')[2].includes('gyeokcheck') && nav.pages.gyeokcheck && nav.pages.gyeokcheck.label, '관리자 메뉴에 격국 판정 확인 없음');
 ok(fs.existsSync(path.join(root, 'docs/GYEOK_ANALYSIS_DESIGN_2026-11-15.md')), '설계 문서 없음');
 
 if (fails.length) { console.log(`gyeok-structure-sim 실패 ${fails.length}건`); fails.slice(0, 40).forEach(f => console.log(' - ' + f)); process.exit(1); }

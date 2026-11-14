@@ -7,10 +7,10 @@
     ['dash','현황',['dash']],
     ['sell','판매·타임라인',['commerce','v2world','v2proj']],
     ['media','첫 화면·영상',['onboard','freec','v2intro','v2clip','panelart']],
-    ['copy','풀이 본문',['readinglibrary','editorial','narrative','luckenv','ichingreview']],
+    ['copy','풀이 본문',['readinglibrary','editorial','narrative','luckenv','ichingreview','gyeokcheck']],
     ['map','운명 지도·환경',['wealthcareer','regionreading','regiondata','fengshui','wishspots']],
     ['ai','AI 풀이 엔진(고급)',['ikdoc','ikknow','ikdesign','ikrules','stylecfg','agentic','research']],
-    ['qa','점검·운영',['v2quality','check','gyeokcheck','iklab','ops','v2set']],
+    ['qa','점검·운영',['v2quality','check','iklab','ops','v2set']],
     ['legacy','옛 화면(보관)',['v2chap','v2story','v2test']]
   ];
   var pages = {
