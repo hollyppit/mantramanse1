@@ -21,35 +21,37 @@
     return a;
   }
   function band(sd, now) { var a = ageOf(sd, now); return a == null ? '' : a < 20 ? 'young' : a >= 65 ? 'senior' : ''; }
-  function odd(s, b) {
+  // scene: 문단 제목이 '실제 생활에서는'·'실제로는 이래요'처럼 지금 겪는 장면을 뜻하면, 문형과 상관없이 어른 낱말 문장을 지금 겪는 일로 본다
+  function odd(s, b, scene) {
     if (!b || NEGATED.test(s)) return false;
-    if (b === 'young') return ADULT.test(s) && NOW_EXP.test(s) && !FUTURE.test(s);
+    if (b === 'young') return ADULT.test(s) && (scene || NOW_EXP.test(s)) && !FUTURE.test(s);
     if (b === 'senior') return SENIOR_ODD.test(s);
     return false;
   }
   var split = function (t) { return String(t || '').split(/(?<=[.!?。])\s+/); };
   // 문단 하나: 어색한 문장만 빼고 나머지를 이어 붙인다(문단 사이 빈 줄은 지킨다)
-  function text(t, b) {
+  function text(t, b, scene) {
     if (!b || !t) return t || '';
-    return String(t).split(/\n{2,}/).map(function (p) { return split(p).filter(function (s) { return !odd(s, b); }).join(' ').trim(); }).filter(Boolean).join('\n\n');
+    return String(t).split(/\n{2,}/).map(function (p) { return split(p).filter(function (s) { return !odd(s, b, scene); }).join(' ').trim(); }).filter(Boolean).join('\n\n');
   }
-  function hits(t, b) { return split(t).filter(function (s) { return odd(s, b); }); }
+  function hits(t, b, scene) { return split(t).filter(function (s) { return odd(s, b, scene); }); }
   // 나이대별 대체 문장: 문단이 통째로 빠졌을 때 쓰는, 지금 나이에서 확인할 수 있는 장면(주제별)
   var FILL = {
     young: {
-      self: '지금 나이에서는 학교나 친구 사이, 가족과 지내는 모습에서 이 성향이 먼저 보여요. 비슷한 버릇이 있는지 떠올려 보세요.',
-      wealth: '지금 나이에서는 용돈이나 아르바이트 돈을 모으고 쓰는 방식에서 이 결이 먼저 보여요. 이번 달 쓴 돈을 한 번 적어 보세요.',
-      career: '지금 나이에서는 공부하는 방식이나 동아리·모둠 활동에서 맡는 역할에 이 결이 먼저 보여요. 내가 자주 맡는 역할을 떠올려 보세요.',
-      love: '지금 나이에서는 친구 사이나 좋아하는 사람 앞에서의 모습에 이 결이 먼저 보여요. 마음을 표현하는 내 방식을 떠올려 보세요.',
+      self: '학교나 친구 사이, 가족과 지내는 모습에서 이 성향이 먼저 보여요. 비슷한 버릇이 있는지 떠올려 보세요.',
+      wealth: '용돈이나 아르바이트 돈을 모으고 쓰는 방식에서 이 결이 먼저 보여요. 이번 달 쓴 돈을 한 번 적어 보세요.',
+      career: '공부하는 방식이나 동아리·모둠 활동에서 맡는 역할에 이 결이 먼저 보여요. 내가 자주 맡는 역할을 떠올려 보세요.',
+      love: '친구 사이나 좋아하는 사람 앞에서의 모습에 이 결이 먼저 보여요. 마음을 표현하는 내 방식을 떠올려 보세요.',
     },
     senior: {
-      self: '지금 나이에서는 가족·이웃과 지내는 방식과 하루를 쓰는 습관에서 이 성향이 드러나요.',
-      wealth: '지금 나이에서는 모아 둔 것을 지키고 나누는 방식, 생활비를 꾸리는 습관에서 이 결이 드러나요.',
-      career: '지금 나이에서는 맡고 있는 역할(가족·모임·봉사·소일거리)을 어떻게 해내는지에서 이 결이 드러나요.',
-      love: '지금 나이에서는 오래 함께한 사람과의 대화와 새로 맺는 인연 모두에서 이 결이 드러나요.',
+      self: '가족·이웃과 지내는 방식과 하루를 쓰는 습관에서 이 성향이 드러나요.',
+      wealth: '모아 둔 것을 지키고 나누는 방식, 생활비를 꾸리는 습관에서 이 결이 드러나요.',
+      career: '맡고 있는 역할(가족·모임·봉사·소일거리)을 어떻게 해내는지에서 이 결이 드러나요.',
+      love: '오래 함께한 사람과의 대화와 새로 맺는 인연 모두에서 이 결이 드러나요.',
     },
   };
-  function fill(b, topic) { return FILL[b] && (FILL[b][topic] || FILL[b].self) || ''; }
+  // title 을 넣어 장마다 다른 문장이 되게 한다(장 사이 같은 문장 반복 방지)
+  function fill(b, topic, title) { var f = FILL[b] && (FILL[b][topic] || FILL[b].self) || ''; return f && title ? '‘' + String(title).replace(/[?？]$/, '') + '’ 이야기를 지금 나이에 빗대 보면, ' + f : '지금 나이에서는 ' + f; }
   R.AgeFit = { set: set, ageOf: ageOf, band: band, odd: odd, text: text, hits: hits, fill: fill, ADULT: ADULT, NOW_EXP: NOW_EXP, SENIOR_ODD: SENIOR_ODD, NEGATED: NEGATED };
   if (typeof module !== 'undefined' && module.exports) module.exports = R.AgeFit;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -49,8 +49,8 @@
    },
    "sameText": 0.002793209876543195,
    "uniqueTexts": 359,
-   "jaccard": 0.17975120206507114,
-   "fixedShare": 0.18112068423369598,
+   "jaccard": 0.17975922378542164,
+   "fixedShare": 0.1811320754716981,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -70,15 +70,11 @@
    "svcBan": 0,
    "youngN": 38,
    "youngAny": 0.631578947368421,
-   "youngBad": 0.23684210526315788,
+   "youngBad": 0.21052631578947367,
    "youngEx": {
     "narrative · 상사": {
      "n": 7,
      "ex": "실제 생활에서는 상사가 엉성한 계획을 내놓으면 “그건 이렇게 하면 안 돼요”가 바로 나가요."
-    },
-    "db · 직장": {
-     "n": 1,
-     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 위기 상황에서 내가 해결하고 나면 그다음에도 늘 내 몫이 돼요."
     },
     "narrative · 이직": {
      "n": 1,
@@ -122,8 +118,8 @@
    "narrative": 0,
    "narrRuleKinds": 0,
    "thin": 0.26666666666666666,
-   "avgChars": 3010,
-   "avgBody": 813,
+   "avgChars": 3009,
+   "avgBody": 812,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -138,7 +134,7 @@
    "layerAvg": {
     "head": 16,
     "hook": 93,
-    "db": 808,
+    "db": 807,
     "chart": 238,
     "why": 178,
     "feature": 1292,
@@ -148,8 +144,8 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.19536607844392317,
-   "fixedShare": 0.17166576073528686,
+   "jaccard": 0.1953821218508678,
+   "fixedShare": 0.17169969851233133,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -169,13 +165,8 @@
    "svcBan": 0,
    "youngN": 38,
    "youngAny": 1,
-   "youngBad": 0.10526315789473684,
-   "youngEx": {
-    "db · 직장": {
-     "n": 4,
-     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 상사의 부탁이 이어질 때 내 일정표를 보여 주면서 \"오늘 이 세 가지를 하고 있어요, 어떤 걸 먼저 할까요?\"라고 물어보세요"
-    }
-   },
+   "youngBad": 0,
+   "youngEx": {},
    "seniorN": 118,
    "seniorBad": 0,
    "seniorEx": {},
@@ -401,7 +392,7 @@
    "narrative": 0.9611111111111111,
    "narrRuleKinds": 7,
    "thin": 0.008333333333333333,
-   "avgChars": 2411,
+   "avgChars": 2410,
    "avgBody": 595,
    "layerShare": {
     "head": 1,
@@ -424,13 +415,13 @@
     "feature": 1018,
     "depth": 319,
     "insight": 200,
-    "db": 995,
+    "db": 992,
     "basis": 128
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
    "jaccard": 0.19929598499799586,
-   "fixedShare": 0.1602994929843179,
+   "fixedShare": 0.16030894404811036,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -458,13 +449,8 @@
     }
    },
    "seniorN": 118,
-   "seniorBad": 0.00847457627118644,
-   "seniorEx": {
-    "db · 입사": {
-     "n": 1,
-     "ex": "입사 후 한 해를 좌우하는 건 업무 내용보다 피드백 분위기일 때가 많아요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 0,
    "graphBad": 0,
    "graphEx": [],
@@ -589,7 +575,7 @@
    "narrative": 0.9583333333333334,
    "narrRuleKinds": 7,
    "thin": 0.011111111111111112,
-   "avgChars": 3149,
+   "avgChars": 3148,
    "avgBody": 505,
    "layerShare": {
     "head": 1,
@@ -612,13 +598,13 @@
     "feature": 1960,
     "depth": 332,
     "insight": 89,
-    "db": 806,
+    "db": 794,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.17453905744493178,
-   "fixedShare": 0.14854400698004144,
+   "jaccard": 0.1745858739241085,
+   "fixedShare": 0.14863316418399083,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -638,7 +624,7 @@
    "svcBan": 0,
    "youngN": 38,
    "youngAny": 1,
-   "youngBad": 0.6578947368421053,
+   "youngBad": 0.631578947368421,
    "youngEx": {
     "narrative · 부서": {
      "n": 20,
@@ -647,24 +633,11 @@
     "narrative · 직장": {
      "n": 4,
      "ex": "실제 생활에서는 직장 안에서도 새 제품이나 콘텐츠를 맡을 때 눈빛이 달라지고, 관리나 보고만 하는 자리에 앉으면 금방 무기력해져요."
-    },
-    "db · 직장": {
-     "n": 1,
-     "ex": "새 직장이나 프로젝트를 고를 때 연봉 이전에 평소 하루 일과와 회의 횟수를 물어보세요."
     }
    },
    "seniorN": 118,
-   "seniorBad": 0.0847457627118644,
-   "seniorEx": {
-    "db · 입사": {
-     "n": 4,
-     "ex": "조건을 미리 알고 고르면 입사 후의 후회가 많이 줄어요."
-    },
-    "insight · 승진": {
-     "n": 6,
-     "ex": "승진이나 역할 확대의 기회를 차분히 준비하세요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 0,
    "graphBad": 0,
    "graphEx": [],
@@ -679,7 +652,7 @@
    },
    "v": "보완",
    "why": [
-    "20세 미만 어른 장면 66%"
+    "20세 미만 어른 장면 63%"
    ]
   },
   {
@@ -904,13 +877,13 @@
     "why": 457,
     "depth": 327,
     "insight": 83,
-    "db": 835,
+    "db": 836,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.1254967152801585,
-   "fixedShare": 0.10147646133365605,
+   "jaccard": 0.12548381030688677,
+   "fixedShare": 0.10147032129243057,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -931,13 +904,8 @@
    "svcBan": 0,
    "youngN": 38,
    "youngAny": 1,
-   "youngBad": 0.02631578947368421,
-   "youngEx": {
-    "db · 퇴근": {
-     "n": 1,
-     "ex": "퇴근하고 말없이 앉아 있을 때 \"오늘 힘들었어?\" 하고 물어봐 주는 사람이 곁에 있으면 하루의 피로가 풀려요."
-    }
-   },
+   "youngBad": 0,
+   "youngEx": {},
    "seniorN": 118,
    "seniorBad": 0,
    "seniorEx": {},
@@ -975,7 +943,7 @@
    "narrative": 0.9583333333333334,
    "narrRuleKinds": 7,
    "thin": 0.008333333333333333,
-   "avgChars": 2259,
+   "avgChars": 2258,
    "avgBody": 531,
    "layerShare": {
     "head": 1,
@@ -992,19 +960,19 @@
    "layerAvg": {
     "head": 6,
     "hook": 101,
-    "narrative": 516,
+    "narrative": 515,
     "chart": 153,
     "why": 429,
     "feature": 960,
     "depth": 419,
     "insight": 89,
-    "db": 791,
+    "db": 786,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.24706266043242955,
-   "fixedShare": 0.2529570207284225,
+   "jaccard": 0.2470847866446361,
+   "fixedShare": 0.25298664792691494,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -1025,19 +993,11 @@
    "svcBan": 0.06944444444444445,
    "youngN": 38,
    "youngAny": 1,
-   "youngBad": 0.2894736842105263,
+   "youngBad": 0.23684210526315788,
    "youngEx": {
     "narrative · 연봉": {
      "n": 9,
      "ex": "실제 생활에서는 연봉보다 일의 의미로 직장을 골랐는데, 몇 년 뒤 그 경력이 생각보다 큰 수입으로 이어졌을 수 있어요."
-    },
-    "db · 직장": {
-     "n": 1,
-     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 월급에서 일정액을 먼저 저축하는 습관이 이미 있다면 그 위에 업무 관련 공부 비용을 한 항목으로 넣어 보세요."
-    },
-    "narrative · 노후": {
-     "n": 1,
-     "ex": "가족·지인의 급한 사정에 손을 대다가 정작 내 노후 준비가 늘 뒤로 밀려요."
     }
    },
    "seniorN": 118,
@@ -1188,12 +1148,14 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.29559462183571616,
-   "fixedShare": 0.14747110418886794,
-   "repeat": 0,
-   "repeatSame": 0,
-   "repeatAvg": 0,
-   "repeatEx": [],
+   "jaccard": 0.2953216478662428,
+   "fixedShare": 0.1473503153411418,
+   "repeat": 0.002777777777777778,
+   "repeatSame": 0.002777777777777778,
+   "repeatAvg": 0.002777777777777778,
+   "repeatEx": [
+    "비슷한 버릇이 있는지 떠올려 보세요. ← self_29 (1명)"
+   ],
    "facts": {
     "힘의 세기(신강·신약) 소개": 0.59
    },
@@ -1208,13 +1170,8 @@
    "svcBan": 0,
    "youngN": 38,
    "youngAny": 1,
-   "youngBad": 0.2631578947368421,
-   "youngEx": {
-    "db · 거래처": {
-     "n": 10,
-     "ex": "한 거래처에서 몇 년째 같은 일을 맡으며 \"믿고 맡길 사람\"이라는 말을 듣고, 새 거래처를 개척하는 일은 늘 미루게 돼요."
-    }
-   },
+   "youngBad": 0,
+   "youngEx": {},
    "seniorN": 118,
    "seniorBad": 0,
    "seniorEx": {},
@@ -1271,7 +1228,7 @@
    "layerAvg": {
     "head": 6,
     "hook": 102,
-    "narrative": 598,
+    "narrative": 599,
     "chart": 153,
     "why": 408,
     "feature": 339,
@@ -1282,8 +1239,8 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.2072085329552268,
-   "fixedShare": 0.1851474278544542,
+   "jaccard": 0.20690572065564458,
+   "fixedShare": 0.18482855800845469,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -1302,16 +1259,12 @@
    "banEx": {},
    "svcBan": 0,
    "youngN": 38,
-   "youngAny": 1,
-   "youngBad": 0.6842105263157895,
+   "youngAny": 0.8947368421052632,
+   "youngBad": 0.05263157894736842,
    "youngEx": {
-    "narrative · 은퇴": {
-     "n": 24,
-     "ex": "실제 생활에서는 지금도 은퇴 후를 막연히 걱정하기보다, 어디서 무엇을 하며 살지 구체적인 그림을 그리고 있을 가능성이 커요."
-    },
-    "narrative · 노후": {
+    "narrative · 투자": {
      "n": 1,
-     "ex": "실제 생활에서는 지금도 노후 자산 계획을 은근히 계산해 보고 있을 거예요."
+     "ex": "실제 생활에서는 연금, 집, 투자 중 무엇이 얼마나 될지 숫자로 그려 보면 마음이 놓여요."
     },
     "hook · 노후": {
      "n": 1,
@@ -1333,10 +1286,8 @@
     "strength": 3,
     "rootLevel": 3
    },
-   "v": "보완",
-   "why": [
-    "20세 미만 어른 장면 68%"
-   ]
+   "v": "유지",
+   "why": []
   },
   {
    "id": "timeline_self_34",
@@ -1356,7 +1307,7 @@
    "narrative": 0.9583333333333334,
    "narrRuleKinds": 8,
    "thin": 0.008333333333333333,
-   "avgChars": 1784,
+   "avgChars": 1783,
    "avgBody": 496,
    "layerShare": {
     "head": 1,
@@ -1379,13 +1330,13 @@
     "why": 424,
     "depth": 325,
     "insight": 76,
-    "db": 745,
+    "db": 736,
     "basis": 120
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.18640829858832972,
-   "fixedShare": 0.17115229653505237,
+   "jaccard": 0.1863903403308892,
+   "fixedShare": 0.1712074802514912,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -1408,13 +1359,8 @@
    "youngBad": 0,
    "youngEx": {},
    "seniorN": 118,
-   "seniorBad": 0.03389830508474576,
-   "seniorEx": {
-    "db · 육아": {
-     "n": 4,
-     "ex": "사업에서는 사업과 육아를 함께 챙기다 보면 몸이 먼저 지쳐요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 0,
    "graphBad": 0,
    "graphEx": [],
@@ -1835,13 +1781,13 @@
     "feature": 1098,
     "depth": 326,
     "insight": 157,
-    "db": 1019,
+    "db": 1010,
     "basis": 150
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.16999313047569062,
-   "fixedShare": 0.14429683921209344,
+   "jaccard": 0.17001400932086433,
+   "fixedShare": 0.14431336616653304,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -1871,13 +1817,8 @@
     }
    },
    "seniorN": 118,
-   "seniorBad": 0.01694915254237288,
-   "seniorEx": {
-    "db · 승진": {
-     "n": 2,
-     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 승진이나 인상이 있으면 새 월급 기준으로 고정비를 다시 짜서, 오른 금액의 절반은 저축으로 먼저 보내세요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 0,
    "graphBad": 0,
    "graphEx": [],
@@ -1913,8 +1854,8 @@
    "narrative": 0.7833333333333333,
    "narrRuleKinds": 9,
    "thin": 0.12222222222222222,
-   "avgChars": 2380,
-   "avgBody": 817,
+   "avgChars": 2376,
+   "avgBody": 814,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -1930,19 +1871,19 @@
    "layerAvg": {
     "head": 17,
     "hook": 110,
-    "narrative": 810,
+    "narrative": 806,
     "chart": 173,
     "why": 437,
     "feature": 835,
     "depth": 304,
     "insight": 138,
-    "db": 825,
+    "db": 823,
     "basis": 137
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.1852342014481903,
-   "fixedShare": 0.1812463898337719,
+   "jaccard": 0.18506669193257622,
+   "fixedShare": 0.181596038839946,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -1984,21 +1925,8 @@
     }
    },
    "seniorN": 118,
-   "seniorBad": 0.19491525423728814,
-   "seniorEx": {
-    "narrative · 승진": {
-     "n": 16,
-     "ex": "월급, 승진, 계약처럼 소속에서 나오는 돈이 중심이 돼요."
-    },
-    "narrative · 이직 준비": {
-     "n": 6,
-     "ex": "나를 키우는 데 드는 돈(교육·건강·이직 준비)까지 아끼다 수입이 오를 기회를 놓치고, 안전한 곳에만 넣어 두다 물가에 밀려요."
-    },
-    "db · 승진": {
-     "n": 1,
-     "ex": "공공기관, 대기업, 전문직 조직처럼 직급 체계가 분명한 곳에서 승진과 경력으로 수입이 오르고, 직접 장사를 하거나 협상하는 일에는 서툴러요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 73,
    "graphBad": 0.0958904109589041,
    "graphEx": [
@@ -2017,10 +1945,8 @@
     "tenGod": 5,
     "strength": 2
    },
-   "v": "보완",
-   "why": [
-    "65세+ 어색한 장면 19%"
-   ]
+   "v": "유지",
+   "why": []
   },
   {
    "id": "timeline_wealth_03",
@@ -2133,9 +2059,9 @@
    "dbTopShare": 0.14166666666666666,
    "narrative": 0.9555555555555556,
    "narrRuleKinds": 7,
-   "thin": 0.06388888888888888,
-   "avgChars": 2135,
-   "avgBody": 516,
+   "thin": 0.08888888888888889,
+   "avgChars": 2132,
+   "avgBody": 512,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -2151,7 +2077,7 @@
    "layerAvg": {
     "head": 19,
     "hook": 126,
-    "narrative": 494,
+    "narrative": 490,
     "chart": 175,
     "why": 438,
     "feature": 863,
@@ -2162,8 +2088,8 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.23200755960977176,
-   "fixedShare": 0.2102803738317757,
+   "jaccard": 0.2320439065051102,
+   "fixedShare": 0.21100618690980136,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -2197,13 +2123,8 @@
     }
    },
    "seniorN": 118,
-   "seniorBad": 0.3983050847457627,
-   "seniorEx": {
-    "narrative · 승진": {
-     "n": 47,
-     "ex": "이직이나 승진으로 수입 단위를 올리세요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 0,
    "graphBad": 0,
    "graphEx": [],
@@ -2219,8 +2140,7 @@
    },
    "v": "보완",
    "why": [
-    "20세 미만 어른 장면 74%",
-    "65세+ 어색한 장면 40%"
+    "20세 미만 어른 장면 74%"
    ]
   },
   {
@@ -2242,8 +2162,8 @@
    "narrative": 0.9722222222222222,
    "narrRuleKinds": 7,
    "thin": 0.13055555555555556,
-   "avgChars": 1461,
-   "avgBody": 464,
+   "avgChars": 1458,
+   "avgBody": 461,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -2259,7 +2179,7 @@
    "layerAvg": {
     "head": 24,
     "hook": 111,
-    "narrative": 446,
+    "narrative": 443,
     "chart": 180,
     "why": 418,
     "feature": 292,
@@ -2270,8 +2190,8 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.1288750233465698,
-   "fixedShare": 0.03578173143822681,
+   "jaccard": 0.12868136872799407,
+   "fixedShare": 0.03586729102321411,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -2298,13 +2218,8 @@
     }
    },
    "seniorN": 118,
-   "seniorBad": 0.2033898305084746,
-   "seniorEx": {
-    "narrative · 이직 준비": {
-     "n": 24,
-     "ex": "건강, 공부, 이직 준비처럼 나를 키우는 지출까지 아끼다 더 큰 기회를 놓쳐요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 0,
    "graphBad": 0,
    "graphEx": [],
@@ -2319,10 +2234,8 @@
     "strength": 4,
     "pattern": 2
    },
-   "v": "보완",
-   "why": [
-    "65세+ 어색한 장면 20%"
-   ]
+   "v": "유지",
+   "why": []
   },
   {
    "id": "timeline_wealth_06",
@@ -2344,8 +2257,8 @@
    "narrative": 0.9555555555555556,
    "narrRuleKinds": 6,
    "thin": 0.03888888888888889,
-   "avgChars": 3300,
-   "avgBody": 586,
+   "avgChars": 3293,
+   "avgBody": 583,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -2362,11 +2275,11 @@
    "layerAvg": {
     "head": 16,
     "hook": 94,
-    "narrative": 568,
+    "narrative": 564,
     "chart": 1522,
     "why": 429,
     "feature": 546,
-    "depth": 396,
+    "depth": 392,
     "insight": 152,
     "db": 706,
     "luck": 192,
@@ -2374,8 +2287,8 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.15709114379871836,
-   "fixedShare": 0.10748865355521936,
+   "jaccard": 0.1566835761748901,
+   "fixedShare": 0.10789673500379651,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -2396,15 +2309,11 @@
    "svcBan": 0.125,
    "youngN": 38,
    "youngAny": 1,
-   "youngBad": 0.2631578947368421,
+   "youngBad": 0.10526315789473684,
    "youngEx": {
     "narrative · 투자": {
      "n": 4,
      "ex": "특정한 해에 거래, 투자, 사업 기회가 겹치면서 평소의 몇 배가 한꺼번에 움직여요."
-    },
-    "depth · 승진": {
-     "n": 6,
-     "ex": "승진이나 새 역할에 따라오는 수입 변화를 눈여겨보고, 책임이 늘 때 보상 조건도 함께 확인하세요."
     }
    },
    "seniorN": 118,
@@ -2572,13 +2481,13 @@
     "feature": 888,
     "depth": 326,
     "insight": 91,
-    "db": 1014,
+    "db": 1001,
     "basis": 150
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
    "jaccard": 0.22282241525307223,
-   "fixedShare": 0.21061667353385524,
+   "fixedShare": 0.21063113797129318,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -2744,7 +2653,7 @@
    "narrative": 0.9555555555555556,
    "narrRuleKinds": 6,
    "thin": 0.030555555555555555,
-   "avgChars": 3468,
+   "avgChars": 3464,
    "avgBody": 577,
    "layerShare": {
     "head": 1,
@@ -2765,15 +2674,15 @@
     "chart": 1522,
     "why": 425,
     "feature": 728,
-    "depth": 382,
+    "depth": 378,
     "insight": 157,
     "db": 1017,
     "basis": 186
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.12608137906577682,
-   "fixedShare": 0.08759124087591241,
+   "jaccard": 0.12596356394312694,
+   "fixedShare": 0.0877906031539587,
    "repeat": 0.03888888888888889,
    "repeatSame": 0.03888888888888889,
    "repeatAvg": 0.04722222222222222,
@@ -2797,29 +2706,16 @@
    "svcBan": 0,
    "youngN": 38,
    "youngAny": 1,
-   "youngBad": 0.47368421052631576,
+   "youngBad": 0.3684210526315789,
    "youngEx": {
     "narrative · 투자": {
      "n": 14,
      "ex": "실제 생활에서는 돈에 관심이 없던 사람이 어느 시기부터 투자나 부업에 눈을 뜨고, 그 시기에 실제로 자산이 크게 늘어나는 식이에요."
-    },
-    "depth · 승진": {
-     "n": 4,
-     "ex": "승진이나 이직 같은 기회를 이 시기에 맞춰 보고, 평소에 성과를 기록해 두면 협상에서 힘이 돼요."
     }
    },
    "seniorN": 118,
-   "seniorBad": 0.1864406779661017,
-   "seniorEx": {
-    "narrative · 승진": {
-     "n": 15,
-     "ex": "실제 생활에서는 직장 생활에서 유독 승진과 연봉 협상이 잘 풀렸던 몇 년이 있었을 거예요."
-    },
-    "depth · 승진": {
-     "n": 7,
-     "ex": "승진이나 이직 같은 기회를 이 시기에 맞춰 보고, 평소에 성과를 기록해 두면 협상에서 힘이 돼요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 0,
    "graphBad": 0,
    "graphEx": [],
@@ -2836,8 +2732,7 @@
    },
    "v": "보완",
    "why": [
-    "20세 미만 어른 장면 47%",
-    "65세+ 어색한 장면 19%"
+    "20세 미만 어른 장면 37%"
    ]
   },
   {
@@ -2859,8 +2754,8 @@
    "narrative": 0.9583333333333334,
    "narrRuleKinds": 6,
    "thin": 0.030555555555555555,
-   "avgChars": 2053,
-   "avgBody": 511,
+   "avgChars": 2052,
+   "avgBody": 510,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -2876,7 +2771,7 @@
    "layerAvg": {
     "head": 26,
     "hook": 126,
-    "narrative": 492,
+    "narrative": 491,
     "chart": 182,
     "why": 430,
     "feature": 842,
@@ -2887,8 +2782,8 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.22159131462752296,
-   "fixedShare": 0.19129857190302224,
+   "jaccard": 0.22163144650310973,
+   "fixedShare": 0.1913748421822048,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -3171,13 +3066,13 @@
     "feature": 368,
     "depth": 320,
     "insight": 218,
-    "db": 856,
+    "db": 845,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.18177137660789439,
-   "fixedShare": 0.14623032311516157,
+   "jaccard": 0.18179263931559062,
+   "fixedShare": 0.1462666777160852,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -3200,13 +3095,8 @@
    "youngBad": 0,
    "youngEx": {},
    "seniorN": 118,
-   "seniorBad": 0.025423728813559324,
-   "seniorEx": {
-    "db · 승진": {
-     "n": 3,
-     "ex": "승진, 계약, 직책처럼 책임이 커지는 일이 생기고, 그에 따라 안정적인 수입이 자리를 잡아요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 0,
    "graphBad": 0,
    "graphEx": [],
@@ -3363,8 +3253,8 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.14612064443122455,
-   "fixedShare": 0.09177430319510536,
+   "jaccard": 0.14615818874829897,
+   "fixedShare": 0.09179770505737357,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -3384,14 +3274,9 @@
    "banEx": {},
    "svcBan": 0,
    "youngN": 38,
-   "youngAny": 0.42105263157894735,
-   "youngBad": 0.07894736842105263,
-   "youngEx": {
-    "narrative · 동료": {
-     "n": 3,
-     "ex": "동료들이 막힐 때 “그건 이렇게 된 거야”라고 설명해 주는 사람이 늘 당신이에요."
-    }
-   },
+   "youngAny": 0.34210526315789475,
+   "youngBad": 0,
+   "youngEx": {},
    "seniorN": 118,
    "seniorBad": 0,
    "seniorEx": {},
@@ -3532,8 +3417,8 @@
    "narrative": 0.9722222222222222,
    "narrRuleKinds": 9,
    "thin": 0.016666666666666666,
-   "avgChars": 2030,
-   "avgBody": 539,
+   "avgChars": 2029,
+   "avgBody": 538,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -3549,7 +3434,7 @@
    "layerAvg": {
     "head": 20,
     "hook": 115,
-    "narrative": 523,
+    "narrative": 522,
     "chart": 172,
     "why": 441,
     "feature": 771,
@@ -3560,8 +3445,8 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.2021846166010353,
-   "fixedShare": 0.2082741837355506,
+   "jaccard": 0.20198240818004,
+   "fixedShare": 0.2081334864554482,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -3582,19 +3467,15 @@
    "svcBan": 0,
    "youngN": 38,
    "youngAny": 1,
-   "youngBad": 0.9473684210526315,
+   "youngBad": 0.39473684210526316,
    "youngEx": {
-    "narrative · 직장": {
-     "n": 16,
-     "ex": "실제 생활에서는 직장에서는 상사나 동료와 주도권 다툼이 반복되고, 동업이나 공동 프로젝트에서는 누가 결정하느냐를 두고 자주 부딪혀요."
-    },
     "narrative · 회사": {
      "n": 13,
      "ex": "실제 생활에서는 회사 일을 하면서도 개인 작업이나 부업을 따로 하고 있거나, 하고 싶어 해요."
     },
     "narrative · 출근": {
-     "n": 7,
-     "ex": "실제 생활에서는 출근해서 오늘 할 일을 확인하고, 마감에 맞춰 정확히 끝내는 하루가 가장 편해요."
+     "n": 2,
+     "ex": "실제 생활에서는 출근해서 해야 할 일이 분명하고, 내 결과가 위로 올라가 평가받는 흐름 속에서 집중이 가장 잘 돼요."
     }
    },
    "seniorN": 118,
@@ -3614,7 +3495,7 @@
    },
    "v": "보완",
    "why": [
-    "20세 미만 어른 장면 95%"
+    "20세 미만 어른 장면 39%"
    ]
   },
   {
@@ -3637,7 +3518,7 @@
    "narrative": 0.9666666666666667,
    "narrRuleKinds": 9,
    "thin": 0.08611111111111111,
-   "avgChars": 1995,
+   "avgChars": 1994,
    "avgBody": 493,
    "layerShare": {
     "head": 1,
@@ -3659,14 +3540,14 @@
     "why": 436,
     "feature": 762,
     "depth": 329,
-    "insight": 132,
+    "insight": 131,
     "db": 752,
     "basis": 136
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.20275116556004563,
-   "fixedShare": 0.2130108193784026,
+   "jaccard": 0.20289296728425743,
+   "fixedShare": 0.21311362382790955,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -3685,20 +3566,12 @@
    "banEx": {},
    "svcBan": 0,
    "youngN": 38,
-   "youngAny": 0.7894736842105263,
-   "youngBad": 0.2894736842105263,
+   "youngAny": 0.7105263157894737,
+   "youngBad": 0.10526315789473684,
    "youngEx": {
-    "insight · 상사": {
-     "n": 6,
-     "ex": "이 사주에서만 읽히는 포인트 윗선과 평가 기준이 두 갈래로 섞여 들어오는 구조라서, 상사가 둘이거나 기준이 자주 바뀌는 환경에서 마음이 흔들리기 쉬워요."
-    },
     "narrative · 동료": {
      "n": 4,
      "ex": "실제 생활에서는 동료들이 막히면 당신을 찾아오고, 회의에서는 결정보다 근거를 제시하는 역할을 해요."
-    },
-    "narrative · 팀장": {
-     "n": 1,
-     "ex": "팀장이 아니어도 이미 팀의 정신적 중심 역할을 해요."
     }
    },
    "seniorN": 118,
@@ -3738,7 +3611,7 @@
    "narrative": 0.9777777777777777,
    "narrRuleKinds": 9,
    "thin": 0.008333333333333333,
-   "avgChars": 1893,
+   "avgChars": 1886,
    "avgBody": 525,
    "layerShare": {
     "head": 1,
@@ -3759,15 +3632,15 @@
     "chart": 173,
     "why": 430,
     "feature": 625,
-    "depth": 328,
+    "depth": 320,
     "insight": 121,
     "db": 1054,
     "basis": 140
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.2137255864815234,
-   "fixedShare": 0.21386165953334255,
+   "jaccard": 0.21287889331666277,
+   "fixedShare": 0.21448352256992523,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -3790,13 +3663,8 @@
    "youngBad": 0,
    "youngEx": {},
    "seniorN": 118,
-   "seniorBad": 0.3559322033898305,
-   "seniorEx": {
-    "depth · 입사": {
-     "n": 42,
-     "ex": "압박이 강한 업종은 오래 버티기 어려우니 입사 전 문화를 확인해 보고, 퇴사율이나 근속 연수 같은 정보도 참고하세요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 0,
    "graphBad": 0,
    "graphEx": [],
@@ -3809,10 +3677,8 @@
     "strength": 10,
     "el": 10
    },
-   "v": "보완",
-   "why": [
-    "65세+ 어색한 장면 36%"
-   ]
+   "v": "유지",
+   "why": []
   },
   {
    "id": "timeline_career_06",
@@ -3833,7 +3699,7 @@
    "narrative": 0.9888888888888889,
    "narrRuleKinds": 9,
    "thin": 0.011111111111111112,
-   "avgChars": 1731,
+   "avgChars": 1729,
    "avgBody": 505,
    "layerShare": {
     "head": 1,
@@ -3854,15 +3720,15 @@
     "chart": 171,
     "why": 438,
     "feature": 528,
-    "depth": 330,
+    "depth": 328,
     "insight": 89,
     "db": 891,
     "basis": 144
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.15233342187894192,
-   "fixedShare": 0.07482851797963001,
+   "jaccard": 0.1522589854786298,
+   "fixedShare": 0.075,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -3898,13 +3764,8 @@
     }
    },
    "seniorN": 118,
-   "seniorBad": 0.1864406779661017,
-   "seniorEx": {
-    "depth · 승진": {
-     "n": 22,
-     "ex": "체계가 안정된 조직에서 평판이 쌓이고 승진 흐름도 안정적이에요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 0,
    "graphBad": 0,
    "graphEx": [],
@@ -3920,8 +3781,7 @@
    },
    "v": "보완",
    "why": [
-    "20세 미만 어른 장면 47%",
-    "65세+ 어색한 장면 19%"
+    "20세 미만 어른 장면 47%"
    ]
   },
   {
@@ -4038,7 +3898,7 @@
    "narrative": 0.9694444444444444,
    "narrRuleKinds": 11,
    "thin": 0.008333333333333333,
-   "avgChars": 3494,
+   "avgChars": 3492,
    "avgBody": 676,
    "layerShare": {
     "head": 1,
@@ -4060,7 +3920,7 @@
     "chart": 1506,
     "why": 430,
     "feature": 641,
-    "depth": 412,
+    "depth": 409,
     "insight": 161,
     "db": 997,
     "luck": 195,
@@ -4068,8 +3928,8 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.09725691208227272,
-   "fixedShare": 0.0321285140562249,
+   "jaccard": 0.09721460933975071,
+   "fixedShare": 0.03221764811168785,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -4142,7 +4002,7 @@
    "narrative": 0.9833333333333333,
    "narrRuleKinds": 11,
    "thin": 0.019444444444444445,
-   "avgChars": 1922,
+   "avgChars": 1921,
    "avgBody": 507,
    "layerShare": {
     "head": 1,
@@ -4164,14 +4024,14 @@
     "why": 444,
     "feature": 721,
     "depth": 321,
-    "insight": 95,
+    "insight": 94,
     "db": 790,
     "basis": 137
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.19326495351848674,
-   "fixedShare": 0.20001470155836518,
+   "jaccard": 0.19344906118657207,
+   "fixedShare": 0.2001176730161065,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -4193,17 +4053,8 @@
    "svcBan": 0,
    "youngN": 38,
    "youngAny": 1,
-   "youngBad": 0.18421052631578946,
-   "youngEx": {
-    "insight · 상사": {
-     "n": 4,
-     "ex": "이 사주에서만 읽히는 포인트 윗선과 평가 기준이 두 갈래로 섞여 들어오는 구조라서, 상사가 둘이거나 기준이 자주 바뀌는 환경에서 마음이 흔들리기 쉬워요."
-    },
-    "insight · 직장": {
-     "n": 3,
-     "ex": "이 사주에서만 읽히는 포인트 직장의 책임과 평가의 무게는 큰데 받쳐 줄 내 힘은 작아서, 늘 시험대에 서 있는 긴장이 깔려 있어요."
-    }
-   },
+   "youngBad": 0,
+   "youngEx": {},
    "seniorN": 118,
    "seniorBad": 0,
    "seniorEx": {},
@@ -4271,8 +4122,8 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.20936634912031168,
-   "fixedShare": 0.21249398666758298,
+   "jaccard": 0.20937157991075112,
+   "fixedShare": 0.21247938427707533,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -4293,7 +4144,7 @@
    "svcBan": 0,
    "youngN": 38,
    "youngAny": 0.42105263157894735,
-   "youngBad": 0.23684210526315788,
+   "youngBad": 0.18421052631578946,
    "youngEx": {
     "narrative · 이직": {
      "n": 3,
@@ -4302,20 +4153,11 @@
     "narrative · 상사": {
      "n": 4,
      "ex": "실제 생활에서는 보고서를 완성해 놓고 상사의 반응을 상상하며 몇 번씩 고쳐요."
-    },
-    "narrative · 승진": {
-     "n": 2,
-     "ex": "실제 생활에서는 조직에서 성실하다는 평은 늘 듣는데, 승진이나 중요한 프로젝트는 먼저 손을 든 사람에게 가요."
     }
    },
    "seniorN": 118,
-   "seniorBad": 0.00847457627118644,
-   "seniorEx": {
-    "insight · 승진": {
-     "n": 1,
-     "ex": "승진이나 역할 확대의 기회를 차분히 준비하세요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 0,
    "graphBad": 0,
    "graphEx": [],
@@ -4446,7 +4288,7 @@
    "narrative": 0.9722222222222222,
    "narrRuleKinds": 8,
    "thin": 0.011111111111111112,
-   "avgChars": 3542,
+   "avgChars": 3541,
    "avgBody": 624,
    "layerShare": {
     "head": 1,
@@ -4468,14 +4310,14 @@
     "why": 427,
     "feature": 736,
     "depth": 413,
-    "insight": 147,
+    "insight": 145,
     "db": 989,
     "basis": 187
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.20068887500937352,
-   "fixedShare": 0.1868061348905859,
+   "jaccard": 0.20070074994712395,
+   "fixedShare": 0.18693809401489853,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -4509,13 +4351,8 @@
     }
    },
    "seniorN": 118,
-   "seniorBad": 0.09322033898305085,
-   "seniorEx": {
-    "insight · 승진": {
-     "n": 11,
-     "ex": "이직, 승진, 새 프로젝트 같은 도전을 이 흐름에 올려 보세요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 930,
    "graphBad": 0,
    "graphEx": [],
@@ -4579,13 +4416,13 @@
     "feature": 799,
     "depth": 315,
     "insight": 71,
-    "db": 771,
+    "db": 769,
     "basis": 86
    },
-   "sameText": 0.0027932098765431944,
-   "uniqueTexts": 359,
-   "jaccard": 0.24091535747826645,
-   "fixedShare": 0.24702401915897726,
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.24088494380836853,
+   "fixedShare": 0.2470066206507959,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -4605,7 +4442,7 @@
    "svcBan": 0,
    "youngN": 38,
    "youngAny": 1,
-   "youngBad": 0.6578947368421053,
+   "youngBad": 0.631578947368421,
    "youngEx": {
     "narrative · 상사": {
      "n": 9,
@@ -4614,10 +4451,6 @@
     "narrative · 동료": {
      "n": 15,
      "ex": "실제 생활에서는 꼼꼼한 실무형 동료와 짝이 됐을 때 프로젝트가 가장 잘 굴러갔을 거예요."
-    },
-    "db · 팀장": {
-     "n": 1,
-     "ex": "\"이번 건 네가 리드해 볼래?\"라고 말해 주는 팀장 밑에서는 1년 만에 역할이 커지고, 매번 같은 일만 맡기는 사람 밑에서는 이력서에 쓸 게 늘지 않아요."
     }
    },
    "seniorN": 118,
@@ -4637,7 +4470,7 @@
    },
    "v": "보완",
    "why": [
-    "20세 미만 어른 장면 66%"
+    "20세 미만 어른 장면 63%"
    ]
   },
   {
@@ -4772,14 +4605,14 @@
     "why": 424,
     "feature": 613,
     "depth": 296,
-    "insight": 93,
+    "insight": 92,
     "db": 741,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.20407787862047583,
-   "fixedShare": 0.20803673938002296,
+   "jaccard": 0.20415186794492007,
+   "fixedShare": 0.20818014705882354,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -4803,13 +4636,8 @@
    "youngBad": 0,
    "youngEx": {},
    "seniorN": 118,
-   "seniorBad": 0.07627118644067797,
-   "seniorEx": {
-    "insight · 승진": {
-     "n": 9,
-     "ex": "이직, 승진, 새 프로젝트 같은 도전을 이 흐름에 올려 보세요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 0,
    "graphBad": 0,
    "graphEx": [],
@@ -4845,7 +4673,7 @@
    "narrRuleKinds": 6,
    "thin": 0.044444444444444446,
    "avgChars": 2650,
-   "avgBody": 484,
+   "avgBody": 483,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -4863,19 +4691,19 @@
     "head": 19,
     "hook": 114,
     "chart": 631,
-    "narrative": 469,
+    "narrative": 468,
     "why": 434,
     "plus": 96,
     "feature": 867,
     "depth": 311,
     "insight": 141,
-    "db": 1035,
+    "db": 1027,
     "basis": 142
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.18551249037575224,
-   "fixedShare": 0.1890567860346374,
+   "jaccard": 0.18553633794029917,
+   "fixedShare": 0.18910897922561942,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -4896,20 +4724,12 @@
    "banEx": {},
    "svcBan": 0,
    "youngN": 38,
-   "youngAny": 0.8947368421052632,
-   "youngBad": 0.39473684210526316,
+   "youngAny": 0.8421052631578947,
+   "youngBad": 0.2894736842105263,
    "youngEx": {
     "feature · 동료": {
      "n": 6,
      "ex": "관계를 맺는 방식 · 순위 命簿 · 관계 대장 내가 관계를 맺는 방식 己巳 기사일주 시주 식신 辛 비견 未 관대 일주 일간(나) 己 정인 巳 제왕 월주 정관 甲 "
-    },
-    "db · 직장": {
-     "n": 1,
-     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 점심을 늘 같이 먹는 동료가 휴가일 때를 대비해 다른 팀 한 사람과도 인사를 트고 지내세요."
-    },
-    "narrative · 동료": {
-     "n": 3,
-     "ex": "실제 생활에서는 친구의 연애 상담, 동료의 고민, 가족의 하소연을 늘 들어 주는 쪽이에요."
     },
     "narrative · 직장": {
      "n": 5,
@@ -4931,10 +4751,8 @@
     "strength": 10,
     "group": 10
    },
-   "v": "보완",
-   "why": [
-    "20세 미만 어른 장면 39%"
-   ]
+   "v": "유지",
+   "why": []
   },
   {
    "id": "timeline_love_02",
@@ -5148,7 +4966,7 @@
    "narrRuleKinds": 8,
    "thin": 0.011111111111111112,
    "avgChars": 2360,
-   "avgBody": 814,
+   "avgBody": 813,
    "layerShare": {
     "head": 1,
     "hook": 1,
@@ -5164,7 +4982,7 @@
    "layerAvg": {
     "head": 19,
     "hook": 103,
-    "db": 990,
+    "db": 988,
     "chart": 170,
     "why": 439,
     "feature": 876,
@@ -5175,8 +4993,8 @@
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.1853564883364653,
-   "fixedShare": 0.1647362419732341,
+   "jaccard": 0.18536274538768072,
+   "fixedShare": 0.1647461289160965,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -5205,12 +5023,8 @@
     }
    },
    "seniorN": 118,
-   "seniorBad": 0.059322033898305086,
+   "seniorBad": 0.05084745762711865,
    "seniorEx": {
-    "db · 이직 준비": {
-     "n": 1,
-     "ex": "상대가 이직 준비로 힘들 때 밥을 챙기고 면접 날 데려다주는 식의 현실적인 성실함이, 시간이 지날수록 믿음으로 쌓여요."
-    },
     "db · 연애를 시작": {
      "n": 6,
      "ex": "연애를 시작해도 내 일정과 취향은 그대로고, 연락을 자꾸 확인하는 사람 앞에서는 숨이 막혀요."
@@ -5251,7 +5065,7 @@
    "narrative": 0.9666666666666667,
    "narrRuleKinds": 6,
    "thin": 0.05277777777777778,
-   "avgChars": 2043,
+   "avgChars": 2042,
    "avgBody": 498,
    "layerShare": {
     "head": 1,
@@ -5274,13 +5088,13 @@
     "feature": 829,
     "depth": 307,
     "insight": 109,
-    "db": 1026,
+    "db": 1022,
     "basis": 163
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.23259685706878108,
-   "fixedShare": 0.22103324269800895,
+   "jaccard": 0.2326155527511468,
+   "fixedShare": 0.22105263157894736,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -5303,13 +5117,8 @@
    "youngBad": 0,
    "youngEx": {},
    "seniorN": 118,
-   "seniorBad": 0.00847457627118644,
-   "seniorEx": {
-    "db · 연애를 시작": {
-     "n": 1,
-     "ex": "이게 내 무기예요 혼자 시간을 충분히 가져야 마음이 정리되는 사람이라, 연애를 시작하면 신중하고 깊게 이어 가요."
-    }
-   },
+   "seniorBad": 0,
+   "seniorEx": {},
    "graphChecked": 0,
    "graphBad": 0,
    "graphEx": [],
@@ -5458,13 +5267,13 @@
     "feature": 931,
     "depth": 325,
     "insight": 76,
-    "db": 983,
+    "db": 980,
     "basis": 144
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.22027015575548384,
-   "fixedShare": 0.20764283011729096,
+   "jaccard": 0.22028464258246555,
+   "fixedShare": 0.20765854396851824,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -5486,15 +5295,11 @@
    "svcBan": 0,
    "youngN": 38,
    "youngAny": 1,
-   "youngBad": 0.3157894736842105,
+   "youngBad": 0.2894736842105263,
    "youngEx": {
     "feature · 배우자": {
      "n": 11,
      "ex": "걸음을 맞출 배우자의 성향 · 순위 命簿 · 짝 대장 나에게 잘 맞는 배우자의 성향 己巳 기사일주 시주 식신 辛 비견 未 관대 일주 일간(나) 己 정인 巳 제왕 "
-    },
-    "db · 배우자": {
-     "n": 1,
-     "ex": "좋은 배우자라는 이미지보다 함께 정하는 방식을 봤나요?"
     }
    },
    "seniorN": 118,
@@ -5514,10 +5319,8 @@
     "strength": 10,
     "positionTG": 10
    },
-   "v": "보완",
-   "why": [
-    "20세 미만 어른 장면 32%"
-   ]
+   "v": "유지",
+   "why": []
   },
   {
    "id": "timeline_love_08",
@@ -5563,14 +5366,14 @@
     "feature": 852,
     "depth": 392,
     "insight": 159,
-    "db": 922,
+    "db": 919,
     "luck": 204,
     "basis": 258
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.11166800569498832,
-   "fixedShare": 0.05518510002299379,
+   "jaccard": 0.11167238949684048,
+   "fixedShare": 0.055189330062854515,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -5590,15 +5393,11 @@
    "svcBan": 0.05277777777777778,
    "youngN": 38,
    "youngAny": 1,
-   "youngBad": 0.6842105263157895,
+   "youngBad": 0.6578947368421053,
    "youngEx": {
     "narrative · 배우자": {
      "n": 25,
      "ex": "독립적인 성향이 강해서 평소엔 결혼이 급하지 않지만, 배우자 기운이 들어오는 해에는 함께하고 싶은 마음이 커져요."
-    },
-    "db · 동료": {
-     "n": 1,
-     "ex": "신뢰하는 동료에게 오늘 컨디션이 안 좋다고 한마디 해 두는 것도 도움이 돼요."
     }
    },
    "seniorN": 118,
@@ -5622,7 +5421,7 @@
    },
    "v": "보완",
    "why": [
-    "20세 미만 어른 장면 68%"
+    "20세 미만 어른 장면 66%"
    ]
   },
   {
@@ -5777,13 +5576,13 @@
     "feature": 981,
     "depth": 327,
     "insight": 74,
-    "db": 1032,
+    "db": 1029,
     "basis": 146
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.25733448531389785,
-   "fixedShare": 0.26769957618286666,
+   "jaccard": 0.2572809187556819,
+   "fixedShare": 0.26764378994165045,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -5803,17 +5602,8 @@
    "svcBan": 0,
    "youngN": 38,
    "youngAny": 1,
-   "youngBad": 0.13157894736842105,
-   "youngEx": {
-    "db · 직장": {
-     "n": 1,
-     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 가족의 급한 일과 회사 업무가 부딪히는 날의 우선순위를 평소에 정해 두세요."
-    },
-    "narrative · 직장": {
-     "n": 4,
-     "ex": "실제 생활에서는 부모님이 원하는 학과나 직장을 골랐거나, 집안의 도리 때문에 내 일정을 늘 뒤로 미뤘을 수 있어요."
-    }
-   },
+   "youngBad": 0,
+   "youngEx": {},
    "seniorN": 118,
    "seniorBad": 0,
    "seniorEx": {},
@@ -6236,13 +6026,13 @@
     "feature": 594,
     "depth": 324,
     "insight": 95,
-    "db": 716,
+    "db": 710,
     "basis": 86
    },
    "sameText": 0.002777777777777763,
    "uniqueTexts": 360,
-   "jaccard": 0.24955779745334156,
-   "fixedShare": 0.2194380069524913,
+   "jaccard": 0.24956918044078386,
+   "fixedShare": 0.21945390019555297,
    "repeat": 0,
    "repeatSame": 0,
    "repeatAvg": 0,
@@ -6261,14 +6051,9 @@
    "banEx": {},
    "svcBan": 0,
    "youngN": 38,
-   "youngAny": 0.10526315789473684,
-   "youngBad": 0.02631578947368421,
-   "youngEx": {
-    "db · 직장": {
-     "n": 1,
-     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 주말 중 하루는 평소와 다른 장소에서 함께 시간을 보내세요."
-    }
-   },
+   "youngAny": 0.07894736842105263,
+   "youngBad": 0,
+   "youngEx": {},
    "seniorN": 118,
    "seniorBad": 0,
    "seniorEx": {},
@@ -7324,7 +7109,7 @@
   {
    "file": "gyeok-structure.js",
    "what": "격국 분석 카드(정격·특수격·십성 작용)",
-   "timelineLoaded": false,
+   "timelineLoaded": true,
    "mainApp": true,
    "admin": true,
    "topicDeepOff": [],
@@ -8300,45 +8085,45 @@
    "n": 19,
    "thin": 0.024415204678362584,
    "same": 0.002778589993502259,
-   "jac": 0.19811696687960648,
-   "rep": 0,
+   "jac": 0.19808993310691755,
+   "rep": 0.00014619883040935673,
    "evid": 0.07489654403308507,
    "narr": 0.6967836257309942,
    "fb": 0.014035087719298246,
-   "chars": 2840
+   "chars": 2839
   },
   "wealth": {
    "n": 15,
-   "thin": 0.056851851851851855,
+   "thin": 0.058518518518518525,
    "same": 0.0027788065843621255,
-   "jac": 0.19000056337652954,
+   "jac": 0.18994936827273798,
    "rep": 0.0025925925925925925,
    "evid": 0.09968606112486121,
    "narr": 0.9568518518518518,
    "fb": 0.2577777777777778,
-   "chars": 2262
+   "chars": 2261
   },
   "career": {
    "n": 15,
    "thin": 0.037592592592592594,
-   "same": 0.0027788065843621255,
-   "jac": 0.18786473150439698,
+   "same": 0.002777777777777763,
+   "jac": 0.18781529779529155,
    "rep": 0,
    "evid": 0.10511554750032757,
    "narr": 0.9587037037037037,
    "fb": 0.15814814814814812,
-   "chars": 2231
+   "chars": 2230
   },
   "love": {
    "n": 15,
    "thin": 0.03944444444444444,
    "same": 0.002777777777777763,
-   "jac": 0.20142008778873394,
+   "jac": 0.2014217869458132,
    "rep": 0,
    "evid": 0.10002692228274288,
    "narr": 0.9583333333333334,
    "fb": 0.09166666666666669,
-   "chars": 2271
+   "chars": 2270
   }
  }
 }

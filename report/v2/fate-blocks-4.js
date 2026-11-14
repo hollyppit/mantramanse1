@@ -24,11 +24,20 @@
     career: { word: '일', go: '이직·독립·승진 같은 움직임을 걸어 볼 해', wait: '자리를 지키며 실력과 이력을 쌓는 게 나은 해', before: '이력과 포트폴리오를 정리하고 사람을 만나 두기', on: '옮기거나 독립하는 결정을 실행하기', after: '새 자리에서 기준을 세우고 성과 하나를 만들기' },
     love: { word: '인연', go: '만남을 넓히고 관계를 한 단계 올리기 좋은 해', wait: '관계를 다지고 큰 약속은 서두르지 않는 게 나은 해', before: '나에게 맞는 사람의 조건을 정리하고 생활을 가다듬기', on: '진지한 대화와 약속(결혼·동거 이야기)을 꺼내기', after: '함께 사는 규칙과 돈 기준을 같이 정하기' }
   };
+  // 나이대(age-fit.js)별 문구: 20세 미만은 진로·용돈·친구, 65세 이상은 활동·생활 정리 쪽으로 말한다(이직·승진·첫 연애 장면을 피함)
+  var TOPIC_AGE = {
+    young: { wealth: { go: '용돈·아르바이트처럼 내 손으로 버는 경험을 늘려 볼 해', wait: '쓰는 습관을 점검하고 모아 두는 게 나은 해', before: '용돈 기록을 시작하고 갖고 싶은 것의 우선순위 정하기', on: '모아 둔 돈으로 미뤄 둔 계획 하나를 실행하기', after: '쓴 돈을 돌아보고 다음 목표 정하기' },
+      career: { go: '진로를 정하고 새로 배우는 일을 걸어 볼 해', wait: '기초 실력을 다지며 준비하는 게 나은 해', before: '관심 분야를 좁히고 필요한 공부 목록 만들기', on: '원하는 학교·활동·자격에 도전하기', after: '도전한 결과를 정리하고 다음 목표 세우기' },
+      love: { go: '친구 관계를 넓히고 마음을 표현해 보기 좋은 해', wait: '지금 관계를 다지며 서두르지 않는 게 나은 해', before: '내가 편한 사람의 모습을 떠올려 정리하기', on: '고마운 마음과 좋아하는 마음을 말로 전하기', after: '함께 지키고 싶은 약속을 정하기' } },
+    senior: { wealth: { go: '모아 둔 것을 지키며 필요한 큰 결정을 내리기 좋은 해', wait: '지출을 줄이고 큰 거래·투자를 미루는 게 나은 해', before: '생활비와 병원비를 따로 떼어 두기', on: '미뤄 둔 정리(집·재산 정리)를 실행하기', after: '정리한 것을 가족과 나누고 점검하기' },
+      career: { go: '새 역할·모임·봉사처럼 활동을 걸어 볼 해', wait: '하던 일을 지키며 건강과 생활을 다지는 게 나은 해', before: '하고 싶은 활동 목록을 정리하고 사람을 만나 두기', on: '새 모임이나 역할을 시작하기', after: '시작한 활동을 생활 리듬에 맞게 다듬기' } }
+  };
+  function topicFor(H, k) { var base = TOPIC[k] || TOPIC.wealth, AF = R.AgeFit, b = AF ? AF.band(H && H.sd) : '', o = b && TOPIC_AGE[b] && TOPIC_AGE[b][k]; return o ? Object.assign({}, base, o) : base; }
   var roleTxt = function (r) { return r === '용신' ? '나를 채워 주는 기운' : r === '희신' ? '나를 돕는 기운' : r === '기신' ? '부딪히는 기운' : r === '구신' ? '부담이 되는 기운' : '중간 기운'; };
 
   /* ── 움직일 해 · 기다릴 해 ── */
   FB.add('fx:years', function (H, part) {
-    var t = TOPIC[part.topic] || TOPIC.wealth, ys = years(H, 10), go = ys.filter(function (x) { return x.s >= 2; }).sort(function (a, b) { return b.s - a.s || a.y - b.y; }).slice(0, 3), wait = ys.filter(function (x) { return x.s <= -2; }).sort(function (a, b) { return a.s - b.s || a.y - b.y; }).slice(0, 3);
+    var t = topicFor(H, part.topic), ys = years(H, 10), go = ys.filter(function (x) { return x.s >= 2; }).sort(function (a, b) { return b.s - a.s || a.y - b.y; }).slice(0, 3), wait = ys.filter(function (x) { return x.s <= -2; }).sort(function (a, b) { return a.s - b.s || a.y - b.y; }).slice(0, 3);
     var chip = '<div class="fx-yr">' + ys.map(function (x) { return '<span class="is-' + tone(x.s) + '"><b>' + x.y + '</b><small>' + esc(x.gz) + '</small></span>'; }).join('') + '</div>';
     var list = function (arr, good) { return arr.length ? arr.map(function (x) { return '<li><b>' + x.y + '년 ' + esc(x.gz) + '</b><small>' + esc('천간 ' + x.se + ' · ' + roleTxt(x.sr) + ' / 지지 ' + x.be + ' · ' + roleTxt(x.br)) + '</small></li>'; }).join('') : '<li>' + (good ? '앞으로 10년 안에 뚜렷한 순풍 해는 없어요. 해마다 조금씩 쌓는 쪽이 맞아요.' : '앞으로 10년 안에 크게 막히는 해는 없어요.') + '</li>'; };
     return '<section class="dp-embed dp fx">' + head('命簿 · 해마다의 바람', '앞으로 10년, 움직일 해와 기다릴 해', '그해 들어오는 천간·지지 오행이 내 사주에 필요한 기운인지로 나눴어요. 밝은 칸은 순풍, 붉은 칸은 맞바람이에요.') + chip +
@@ -37,7 +46,7 @@
 
   /* ── 기회의 해 준비 달력 ── */
   FB.add('fx:actcal', function (H, part) {
-    var t = TOPIC[part.topic] || TOPIC.wealth, ys = years(H, 10), best = ys.slice(1).sort(function (a, b) { return b.s - a.s || a.y - b.y; })[0] || ys[0];
+    var t = topicFor(H, part.topic), ys = years(H, 10), best = ys.slice(1).sort(function (a, b) { return b.s - a.s || a.y - b.y; })[0] || ys[0];
     var cells = [[best.y - 1, '準 · 준비하는 해', t.before], [best.y, '行 · 실행하는 해', t.on], [best.y + 1, '守 · 지키는 해', t.after]];
     return '<section class="dp-embed dp fx">' + head('命簿 · 준비 달력', t.word + ' 기회의 해, 세 해로 준비하기', '앞으로 10년 중 ' + best.y + '년(' + best.gz + ')이 ' + t.word + ' 쪽 바람이 가장 좋아요. 기회는 그해 하루에 오지 않으니, 앞뒤 해까지 묶어 준비해요.') +
       '<ol class="fx-steps">' + cells.map(function (c) { return '<li><small>' + esc(c[0] + '년 · ' + c[1]) + '</small><p>' + esc(c[2]) + '</p></li>'; }).join('') + '</ol>' +
