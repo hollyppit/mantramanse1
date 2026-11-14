@@ -588,6 +588,8 @@
       var c=S.rep && S.rep.chapters[S.idx];sessionStorage.setItem('mt_v2_input',JSON.stringify({inp:S.ch.input,name:S.name,interest:S.interest || '',guide:S.guide,resumeChapter:c && c.id,realityContext:context}));location.reload();
     });
     if(!PREVIEW&&R.PeakReading)S.rep=R.PeakReading.add(S.rep,S.sd,S.name);
+    // 오행 흐름·격국 상세 풀이 장(flow-chapters.js, 스위치 flowChapters): 종합풀이 기질 장 뒤 2장, 재물·커리어·인연 첫 장 뒤 1장씩
+    if(!PREVIEW&&R.FlowChapters){try{if(await R.FlowChapters.readyWithin(2500))S.rep=R.FlowChapters.add(S.rep,S.sd,S.name,window.Manse,S.ch);}catch(e){elog('caught','flow.chapters');}}
     if (!PREVIEW) S.rep.readingPrefetch = true;
     // 서사 엔진(life-narrative.js) 스위치·게시 규칙이 본문보다 늦게 도착하면, 이미 그려진 시범 장만 다시 그린다
     if(!PREVIEW&&R.LifeNarrative&&window.addEventListener)window.addEventListener('mantra:life-narrative',function(){(S.rep&&S.rep.chapters||[]).forEach(function(c,ci){var id=c.editorialContractId||c.id,article=document.getElementById('ch-'+c.id);if(!R.LifeNarrative.CHAPTERS[id]||!article||!c.readingCore||!c.readingFeature||!R.ReadingText)return;try{var f=R.SealReader&&R.SealReader.capture(article);if(R.SealReader)R.SealReader.unmount(article);if(R.ReadingMedia)R.ReadingMedia.unmount(article);R.ReadingText.update(article,c,ci);mountSeal(article,c,ci);if(R.SealReader)R.SealReader.restoreFocus(article,f);if(R.ReadingMedia)R.ReadingMedia.mount(article,{reduce:reduce,saveData:saveData});linkBasisReferences(article);}catch(e){elog('caught','life-narrative.rerender');}});});
