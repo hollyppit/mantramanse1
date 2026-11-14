@@ -10071,6 +10071,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const FOLD_EXPERT = /사화 지도|별의 힘 분포|학파|병약|종격|격국|통근|한난조습|조후론 vs|판단 기준|시간 기준별|근거 보기/;
   // 모바일에서만 처음부터 접어 두는 카드(원국 탭의 천간·지지 관계: 길고 자주 안 보는 목록)
   const FOLD_MOBILE = /^(천간 관계|지지 관계)/;
+  // 모바일에서 카드를 모두 접은 채로 시작하는 탭(운세 흐름: 카드가 많아 펼쳐 두면 너무 길다). 제목을 누른 카드만 펼친다
+  const FOLD_MOBILE_TABS = /^luck$/;
   const isMobile = () => { try { return matchMedia('(max-width: 640px)').matches; } catch (e) { return false; } };
   function enhanceFold() {
     const main = root.querySelector('main.wrap'); if (!main) return;
@@ -10086,7 +10088,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       h.after(wrap); sibs.forEach(e => wrap.appendChild(e));
       const key = keyOf(h, lv);
       h.classList.add('fold-h'); h.dataset.fold = key; h.setAttribute('role', 'button'); h.setAttribute('tabindex', '0');
-      if (!FOLD_SEEN.has(key)) { FOLD_SEEN.add(key); if (FOLD_EXPERT.test(h.textContent || '') || (lv === 1 && FOLD_DEFAULT.test(h.textContent || '')) || (mobile && FOLD_MOBILE.test((h.textContent || '').trim()))) FOLD.add(key); }
+      if (!FOLD_SEEN.has(key)) { FOLD_SEEN.add(key); if (FOLD_EXPERT.test(h.textContent || '') || (lv === 1 && FOLD_DEFAULT.test(h.textContent || '')) || (mobile && FOLD_MOBILE.test((h.textContent || '').trim())) || (mobile && lv === 1 && FOLD_MOBILE_TABS.test(S.tab))) FOLD.add(key); }
       const closed = FOLD.has(key); h.classList.toggle('closed', closed); h.setAttribute('aria-expanded', String(!closed));
       h.insertAdjacentHTML('beforeend', '<span class="fold-chev" aria-hidden="true"></span>');
     };
