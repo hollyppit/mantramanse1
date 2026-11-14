@@ -6,7 +6,7 @@
 //   { on } "모두 켜기/끄기"는 원래 세 기능(ALL_ON)에만 적용해, 다른 기능을 켜다가 이 문안이 같이 공개되지 않게 한다.
 import { json, isAdmin, configError } from '../_lib.js';
 
-const KEY = 'luckenv:flags', ALL_ON = ['interpret', 'timeline', 'region'], NAMES = ALL_ON.concat(['timelineCopy', 'topicDeep', 'lifeNarrative', 'elementFlow', 'luckCycle']);   // luckCycle(2026-11-12): 운세 흐름 대운 30년(장기 분석 구간)·세운 2년(천간 오행 구간) 오행 사이클(luck-cycle.js), 따로 켠다   // elementFlow(2026-11-10): 운세 흐름 대운·세운 상세의 오행 흐름 상자(engine.js elementFlow), 따로 켠다   // lifeNarrative(2026-11-08): 타임라인 서사 엔진(report/v2/life-narrative.js)   // topicDeep(2026-11-06): 무빙툰 주제 심화 블록(report/v2/topic-deep.js), 따로 켠다
+const KEY = 'luckenv:flags', ALL_ON = ['interpret', 'timeline', 'region'], NAMES = ALL_ON.concat(['timelineCopy', 'topicDeep', 'lifeNarrative', 'elementFlow', 'luckCycle', 'gyeokAnalysis']);   // gyeokAnalysis(2026-11-15): 오행·강약 탭 '사주 격국 분석' 카드(gyeok-structure.js), 따로 켠다   // luckCycle(2026-11-12): 운세 흐름 대운 30년(장기 분석 구간)·세운 2년(천간 오행 구간) 오행 사이클(luck-cycle.js), 따로 켠다   // elementFlow(2026-11-10): 운세 흐름 대운·세운 상세의 오행 흐름 상자(engine.js elementFlow), 따로 켠다   // lifeNarrative(2026-11-08): 타임라인 서사 엔진(report/v2/life-narrative.js)   // topicDeep(2026-11-06): 무빙툰 주제 심화 블록(report/v2/topic-deep.js), 따로 켠다
 const safeDecode = s => { try { return decodeURIComponent(s); } catch { return ''; } };
 const clean = doc => { const o = { version: (doc && Number.isInteger(doc.version)) ? doc.version : 0 }; NAMES.forEach(k => { o[k] = !!(doc && doc[k] === true); }); return o; };
 

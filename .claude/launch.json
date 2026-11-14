@@ -74,6 +74,17 @@
         "localdevtoken0123456789abcdef0123"
       ],
       "port": 4789
+    },
+    {
+      "name": "gyeok-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        ".claude/report-dev.js"
+      ],
+      "port": 8798,
+      "env": {
+        "PORT": "8798"
+      }
     }
   ]
 }

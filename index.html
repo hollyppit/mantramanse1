@@ -989,6 +989,42 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 .ic-final { font-size: 1.05rem; font-weight: 700; line-height: 1.6; }
 @media (max-width: 560px) { .ic-two, .ic-card .ic-two:has(h4) { grid-template-columns: 1fr; } .ic-fig { width: 140px; } }
 @media (prefers-reduced-motion: reduce) { .ic-ln.on, .ic-coin, .ic-card { animation: none; } }
+/* 사주 격국 분석(gyeok-structure.js) — 대표 격국 → 주요 구조 → 종합 해석 → 상세 판정 근거 */
+.gx { gap: 12px; }
+.gx details > summary { list-style: none; cursor: pointer; } .gx details > summary::-webkit-details-marker { display: none; }
+.gx-hero { border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(135deg, var(--accent-soft), var(--surface) 70%); padding: 16px 18px; }
+.gx-hero > summary { display: grid; gap: 6px; }
+.gx-kick { font-size: .74rem; font-weight: 700; letter-spacing: .04em; color: var(--ink-2); }
+.gx-name { font-size: 1.75rem; font-weight: 800; line-height: 1.2; color: var(--ink); letter-spacing: -.01em; }
+.gx-name small { font-size: .9rem; font-weight: 600; color: var(--ink-2); margin-left: 6px; }
+.gx-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.gx-easy { font-size: .95rem; color: var(--ink); line-height: 1.6; }
+.gx-more { font-size: .76rem; color: var(--accent); font-weight: 700; } details[open] > summary .gx-more { display: none; }
+.gx-body { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
+.gx-body h4 { margin: 0 0 4px; font-size: .78rem; color: var(--ink-2); letter-spacing: .03em; } .gx-body p { margin: 0; font-size: .88rem; line-height: 1.6; }
+.gx-body ul { margin: 0; padding-left: 18px; font-size: .88rem; line-height: 1.6; } .gx-body li { margin: 2px 0; }
+.gx-rel { border-radius: 12px; padding: 10px 12px; background: var(--surface-2); font-size: .86rem; line-height: 1.6; }
+.gx-k { font-size: .8rem; font-weight: 800; color: var(--ink-2); letter-spacing: .04em; margin-top: 4px; }
+.gx-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.gx-item { border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; background: var(--surface); }
+.gx-item[open] { grid-column: 1 / -1; }
+.gx-item > summary { display: grid; gap: 4px; } .gx-item .gx-iname { font-size: 1.05rem; font-weight: 800; color: var(--ink); }
+.gx-item .gx-iname em { font-style: normal; font-size: .8rem; font-weight: 600; color: var(--ink-3); margin-left: 4px; }
+.gx-item .gx-ieasy { font-size: .86rem; color: var(--ink-2); line-height: 1.55; }
+.gx-sum { border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: grid; gap: 8px; }
+.gx-sum > p { margin: 0; font-size: .92rem; line-height: 1.7; }
+.gx-gc { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.gx-gc > div { border-radius: 12px; padding: 10px 12px; } .gx-gc .gx-gh { margin: 0 0 4px; font-size: .8rem; font-weight: 800; }
+.gx-gc .g { background: var(--good-soft); } .gx-gc .g .gx-gh { color: var(--good); } .gx-gc .b { background: var(--bad-soft); } .gx-gc .b .gx-gh { color: var(--bad); }
+.gx-gc ul { margin: 0; padding-left: 18px; font-size: .86rem; line-height: 1.6; color: var(--ink); }
+.gx-detail { border-top: 1px solid var(--line); padding-top: 10px; } .gx-detail > summary { font-weight: 700; font-size: .9rem; color: var(--ink-2); }
+.gx-detail > summary::after { content: ' ▾'; } .gx-detail[open] > summary::after { content: ' ▴'; }
+.gx-dsec { margin-top: 12px; } .gx-dsec h4 { margin: 0 0 6px; font-size: .84rem; }
+.gx-dsec ul { margin: 0; padding-left: 18px; font-size: .84rem; line-height: 1.6; }
+.gx-chk { border-top: 1px solid var(--line); padding: 7px 0; font-size: .84rem; } .gx-chk:first-of-type { border-top: 0; }
+.gx-chk .why { color: var(--ink-2); font-size: .8rem; margin-top: 3px; line-height: 1.55; }
+.gx-ok { color: var(--good); font-weight: 700; } .gx-no { color: var(--ink-3); }
+@media (max-width: 600px) { .gx-body, .gx-gc { grid-template-columns: 1fr; } .gx-name { font-size: 1.45rem; } .gx-hero { padding: 14px; } }
 </style>
 </head>
 <body>
@@ -1016,6 +1052,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="byeongyak.js"></script>
 <script src="jonggyeok.js"></script>
 <script src="gyeokguk.js"></script>
+<script src="gyeok-structure.js"></script>
 <script src="glossary-cases.js"></script>
 <script src="glossary-overlap.js"></script>
 <script src="compass.js"></script>
@@ -6420,6 +6457,59 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">용신을 정하는 방법은 학파마다 달라서, 이 앱은 기본으로 억부(강약 균형)를 쓰고 조후(계절 온도)를 함께 살펴요. 자세한 근거는 아래에 있어요.</p>
     </section>`;
   }
+  // ───────────── 사주 격국 분석: gyeok-structure.js (표시 전용 — 신강신약·용신·오행 비율·운세 점수에 더해지지 않음) ─────────────
+  // 스위치 MANTRA_FLAGS.gyeokAnalysis(기본 꺼짐). 순서: 대표 격국 → 주요 구조 → 종합 해석 → 상세 판정 근거. 설계: docs/GYEOK_ANALYSIS_DESIGN_2026-11-15.md
+  const gxOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.gyeokAnalysis === true && window.MantraGyeokStructure);
+  const GX_EST = { firm: 'good', weak: 'mid', multi: 'hold', hold: 'hold' }, GX_STAB = { seong: 'good', rescued: 'mid', plain: '', pa: 'bad', hold: 'hold' }, GX_SP = { jin: 'good', ga: 'hold', hold: 'hold', none: '' };
+  const gxUl = a => a && a.length ? `<ul>${a.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '<p class="muted">해당 없음</p>';
+  const gxFour = (why, act, good, bad) => `<div class="gx-body"><div><h4>성립 근거</h4>${gxUl(why)}</div><div><h4>원국에서의 작용</h4><p>${esc(act)}</p></div><div><h4>유리한 조건</h4>${gxUl(good)}</div><div><h4>불리한 조건</h4>${gxUl(bad)}</div></div>`;
+  function renderGyeokAnalysis(ch) {
+    if (!gxOn()) return '';
+    let r; try { r = window.MantraGyeokStructure.analyze(M, ch); } catch (e) { return ''; }
+    const rep = r.rep, j = r.jeong, st = j.stability;
+    // 1. 대표 격국
+    const stabTxt = rep.type === 'jeong' ? [st.sang.filter(x => x.on).length ? '격을 돕는 기운: ' + st.sang.filter(x => x.on).map(x => x.text).join(', ') : '', ...st.pa.filter(x => x.on).map(x => '격을 흔드는 요인: ' + x.text + (x.rescue ? (x.rescue.on ? ' → 막아 주는 기운: ' + x.rescue.text : ' → 막아 줄 기운 없음') : ''))].filter(Boolean) : [];
+    const heroGood = rep.txt.good.concat(rep.type === 'jeong' ? st.sang.filter(x => x.on).map(x => '원국에 이미 있음 — ' + x.text) : []);
+    const heroBad = rep.txt.bad.concat(rep.type === 'jeong' ? st.pa.filter(x => x.on && !(x.rescue && x.rescue.on)).map(x => '원국에 있음 — ' + x.text) : []);
+    const heroAct = rep.txt.act + (rep.type === 'jeong' && st.status !== 'hold' ? ` 구조의 안정성은 ‘${st.label}’입니다.` : '');
+    const kick = rep.type === 'special' ? `대표 격국 · 특수격(${esc(rep.family)})` : rep.type === 'hold' ? '대표 격국 · 정격' : '대표 격국 · 정격(기본 격국)';
+    const hero = `<details class="gx-hero"><summary>
+      <span class="gx-kick">${kick}</span>
+      <span class="gx-name">${esc(rep.name)}${rep.sub ? `<small>${esc(rep.sub)}</small>` : ''}</span>
+      <span class="gx-chips"><span class="wc-chip ${rep.type === 'special' ? 'good' : GX_EST[rep.establish]}">${esc(rep.establishLabel)}</span>${rep.type === 'special' ? `<span class="wc-chip">정격 참고: ${esc(j.name)}</span>` : `<span class="wc-chip ${GX_STAB[rep.stability] || ''}">안정성 · ${esc(rep.stabilityLabel)}</span>`}</span>
+      <span class="gx-easy">${esc(rep.easy)}</span><span class="gx-more">눌러서 성립 근거·작용·유리/불리 조건 보기</span></summary>
+      ${gxFour(rep.why.concat(stabTxt), heroAct, heroGood, heroBad)}</details>`;
+    const rel = rep.type === 'special' ? `<div class="gx-rel"><b>특수격 우선 적용</b> — ${esc(rep.relation)}</div>`
+      : r.special.possible ? `<div class="gx-rel"><b>${esc(r.special.possible.name)}</b> <span class="wc-chip hold">${esc(r.special.possible.statusLabel)}</span> 특수격 조건 일부가 보이지만 모두 갖춰지지 않아 정격을 대표로 둡니다. 특수격을 억지로 붙이지 않습니다.</div>` : '';
+    // 2. 주요 구조(성립한 것만 1~3개, 없으면 출력하지 않음)
+    const major = r.major.length ? `<div class="gx-k">주요 구조</div><div class="gx-grid">${r.major.map(o => `<details class="gx-item"><summary>
+      <span class="gx-chips"><span class="wc-chip">${o.kind === 'oheng' ? '특수 오행 구조' : '십성 작용'}</span><span class="wc-chip ${o.pol === 'flow' ? 'good' : 'bad'}">${o.pol === 'flow' ? '흐름' : '주의'}</span></span>
+      <span class="gx-iname">${esc(o.name)}<em>${esc(o.txt.short)}</em></span><span class="gx-ieasy">${esc(o.txt.easy)}</span><span class="gx-more">눌러서 자세히</span></summary>
+      ${gxFour(o.why.filter(w => !/^미충족/.test(w)), o.txt.act, o.txt.good, o.txt.bad)}</details>`).join('')}</div>` : '';
+    // 3. 종합 해석
+    const sum = `<div class="gx-k">종합 해석</div><div class="gx-sum">${r.summary.body.map(t => `<p>${esc(t)}</p>`).join('')}
+      <div class="gx-gc"><div class="g"><div class="gx-gh">유리한 조건</div><ul>${r.summary.good.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div><div class="b"><div class="gx-gh">주의할 조건</div><ul>${r.summary.care.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div></div></div>`;
+    // 4. 상세 판정 근거
+    const ord = `<table class="dt"><thead><tr><th>지장간</th><th>역할</th><th>십성</th><th>투출</th><th>비고</th></tr></thead><tbody>${j.order.map(o => `<tr><td>${esc(o.stem)}</td><td>${esc(o.role)}</td><td>${esc(o.tg)}</td><td>${o.exposedAt.length ? esc(o.exposedAt.join('·')) : '—'}</td><td class="small">${[o.hapGeo ? '합거' : '', o.saryeong ? '사령' : ''].filter(Boolean).join('·') || ''}</td></tr>`).join('')}</tbody></table>`;
+    const chk = (name, chip, cls, why) => `<div class="gx-chk"><b>${esc(name)}</b> <span class="wc-chip ${cls}">${esc(chip)}</span><div class="why">${why.map(esc).join('<br>')}</div></div>`;
+    const spList = r.special.checks.map(c => chk(c.name + ' · ' + c.family, c.statusLabel, GX_SP[c.status], c.conds.map(x => `${x.ok ? '충족' : '미충족'} · ${x.label} (${x.detail})`).concat(c.note ? [c.note] : [])));
+    const items = r.items.slice().sort((a, b) => (b.on - a.on) || (b.score - a.score)).map(o => chk(`${o.name} · ${o.kind === 'oheng' ? '특수 오행 구조' : '십성 작용'}`, o.on ? `성립 · 점수 ${o.score}` : o.suppressed ? '제외' : '불성립', o.on ? (o.pol === 'flow' ? 'good' : 'bad') : '', o.why));
+    const detail = `<details class="gx-detail"><summary>상세 판정 근거</summary>
+      <div class="gx-dsec"><h4>1. 기본 격국 — 격 정하기 (${esc(j.establishLabel)})</h4><div class="tbl-wrap">${ord}</div><ul>${j.basis.concat(j.reasons).map(t => `<li>${esc(t)}</li>`).join('')}</ul>
+        ${j.candidates.length ? `<ul>${j.candidates.map(c => `<li>후보 ${esc(c.name)} — ${esc(c.why)}</li>`).join('')}</ul>` : ''}</div>
+      <div class="gx-dsec"><h4>2. 기본 격국 — 구조의 안정성 (${esc(st.label)})</h4><ul>${st.sang.map(x => `<li><span class="${x.on ? 'gx-ok' : 'gx-no'}">${x.on ? '있음' : '없음'}</span> · 상신 · ${esc(x.text)}</li>`).join('')}${st.pa.map(x => `<li><span class="${x.on ? 'gx-ok' : 'gx-no'}">${x.on ? '있음' : '없음'}</span> · 파격 요인 · ${esc(x.text)}${x.on && x.rescue ? ` → 구응 ${x.rescue.on ? '있음' : '없음'}: ${esc(x.rescue.text)}` : ''}</li>`).join('')}${st.notes.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>
+      <div class="gx-dsec"><h4>3. 특수격 점검 (우선순위: 화격 → 전왕 1행격 → 종격)</h4>${spList.join('') || '<p class="note">점검 대상 없음</p>'}</div>
+      <div class="gx-dsec"><h4>4. 특수 오행 구조 · 십성 작용 점검</h4>${items.join('')}</div>
+      <div class="gx-dsec"><h4>판정 기준</h4><ul><li>취격은 월지 지장간의 투출 우선(정기→중기→여기), 투출이 없으면 정기입니다. 붙어 있는 자리의 천간합으로 묶인 글자(합거)는 다음 후보로 넘깁니다.</li><li>기준이 갈리면 ‘복수 후보’, 근거가 부족하면 ‘판정 유보’로 표시합니다. 성립과 안정성(성격·패격)은 따로 판정합니다.</li><li>양신성상격 등 나머지 외격은 판정하지 않습니다.</li>${r.engineGyeok ? `<li>용신 탭의 격국 판단(용신 계산용)은 ${esc(r.engineGyeok.kind)}입니다. 이 카드는 표시 전용이라 용신·점수에 더해지지 않습니다.</li>` : ''}</ul></div>
+    </details>`;
+    return `<section class="card gx" id="gyeokAnalysis">
+      <div class="card-h"><h2>사주 ${term('격국')} 분석</h2><span class="note">월령에서 정한 격과 원국의 짜임새</span></div>
+      ${hero}${rel}${major}${sum}
+      ${r.caveats.map(t => `<p class="note">${esc(t)}</p>`).join('')}
+      ${detail}
+      <p class="note">${esc(r.disclaimer)}</p>
+    </section>`;
+  }
   function renderOhaeng() {
     const ch = S.ch, w = ch.weights, st = ch.strength, dEl = M.stemEl(ch.pillars.day.s);
     const models = Object.entries(M.MODELS);
@@ -6459,6 +6549,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">득령·득지·득세는 전통적인 세 가지 점검입니다. 비율과 방향이 다르면 판단이 애매한 사주입니다.</p>
     </section>
     </div>
+    ${renderGyeokAnalysis(ch)}
     ${renderCompat(ch)}
     ${renderCareer(ch)}`;
   }
@@ -7317,8 +7408,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   (function remoteFlags() {
     // elementFlow(오행 흐름 상자)는 [모두 켜기]와 따로 관리자 스위치로 켠다(functions/api/luck-flags.js)
     // luckCycle(오행 사이클: 대운 30년·세운 2년 묶음)도 따로 켠다
-    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle)) return;
-    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'luckCycle'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
+    // gyeokAnalysis(오행·강약 탭 '사주 격국 분석' 카드, gyeok-structure.js)도 따로 켠다
+    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis)) return;
+    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
   })();
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
   let phrLoaded = false;
@@ -10068,7 +10160,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const FOLD = new Set(), FOLD_SEEN = new Set();
   // 처음부터 접어 두는 카드(모든 기기): 운세 흐름 탭 맨 위 방위운(참고용), 원국 탭의 내 사주의 12운성(눌러야 펼침)
   const FOLD_DEFAULT = /우리 집 방위 운|내 사주의 12운성/;
-  const FOLD_EXPERT = /사화 지도|별의 힘 분포|학파|병약|종격|격국|통근|한난조습|조후론 vs|판단 기준|시간 기준별|근거 보기/;
+  const FOLD_EXPERT = /사화 지도|별의 힘 분포|학파|병약|종격|격국 판단|통근|한난조습|조후론 vs|판단 기준|시간 기준별|근거 보기/;
   // 모바일에서만 처음부터 접어 두는 카드(원국 탭의 천간·지지 관계: 길고 자주 안 보는 목록)
   const FOLD_MOBILE = /^(천간 관계|지지 관계)/;
   // 모바일에서 카드를 모두 접은 채로 시작하는 탭(운세 흐름: 카드가 많아 펼쳐 두면 너무 길다). 제목을 누른 카드만 펼친다

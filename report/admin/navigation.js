@@ -10,7 +10,7 @@
     ['copy','풀이 본문',['readinglibrary','editorial','narrative','luckenv','ichingreview']],
     ['map','운명 지도·환경',['wealthcareer','regionreading','regiondata','fengshui','wishspots']],
     ['ai','AI 풀이 엔진(고급)',['ikdoc','ikknow','ikdesign','ikrules','stylecfg','agentic','research']],
-    ['qa','점검·운영',['v2quality','check','iklab','ops','v2set']],
+    ['qa','점검·운영',['v2quality','check','gyeokcheck','iklab','ops','v2set']],
     ['legacy','옛 화면(보관)',['v2chap','v2story','v2test']]
   ];
   var pages = {
@@ -45,6 +45,7 @@
     dash:{label:'현황',hint:'방문·결제·풀이 생성 현황을 한눈에 봅니다.'},
     freec:{label:'무료 콘텐츠',hint:'무료 타로·일진 캘린더 등 무료 콘텐츠의 문구와 이미지를 관리합니다.'},
     panelart:{label:'패널 이미지',hint:'무빙툰 장면 패널 이미지·영상을 만들고 연결합니다.'},
+    gyeokcheck:{label:'격국 판정 확인',hint:'오행·강약 탭 사주 격국 분석 카드의 판정 근거(격 정하기·성립·안정성·특수격·오행 구조·십성 작용)를 사주별로 확인하고, 용신 계산용 격국과 비교하며, 300명 분포를 점검합니다. 공개 스위치로 카드 노출을 제어합니다. 표시 전용이라 점수·용신은 바뀌지 않습니다.'},
     check:{label:'정합성 검사',hint:'테스트 사주로 무빙툰 전체 문서를 만들어 계산값과 문장이 어긋나는 곳·중복 문장을 찾습니다(AI 호출 없음).'},
     v2set:{label:'설정',hint:'입장 인트로 등 화면 공통 설정을 관리합니다.'},
     onboard:{label:'온보딩',hint:'첫 화면부터 출생정보 입력, 각성, 결과까지 한 곳에서 초안을 편집하고 게시합니다.'}
