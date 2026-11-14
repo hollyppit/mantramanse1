@@ -75,7 +75,7 @@
     function show() { tx.style.opacity = 0; setTimeout(function () { tx.textContent = STAGES[Math.min(i, STAGES.length - 1)]; tx.style.opacity = 1; i++; }, 250); }
     show(); tick = setInterval(show, 1100);
     var sd; try { sd = R.SajuData.build(ch, { now: Date.now() }); } catch (e) { elog('caught', 'sd.build'); clearInterval(tick); view('input'); $('#msg').textContent = '계산 결과를 정리하지 못했습니다.'; return; }
-    S.sd = sd; S.birth = birthOf(ch); if (R.IchingCard) R.IchingCard.init(); if (R.DeepAsk) R.DeepAsk.init(); var t0 = Date.now();
+    S.sd = sd; S.birth = birthOf(ch); if (R.AgeFit) R.AgeFit.set(sd); if (R.IchingCard) R.IchingCard.init(); if (R.DeepAsk) R.DeepAsk.init(); var t0 = Date.now();
     // 유료 잠금(paywall.js): 잠금 정보는 늦게 와도 된다. 오기 전에는 아무것도 잠그지 않고, 도착하면 세계 화면의 자물쇠만 다시 그린다
     if (R.Paywall && !PREVIEW) R.Paywall.init(sd, { chapters: function () { return (S.rep && S.rep.chapters) || []; }, onChange: function () { if (S.view === 'home' && S.rep && S.xp) showHome(S.xpWorld || undefined); },
       // 결제창·로그인으로 떠나기 직전 저장할 이어 읽기 값(handoff 가 돌아온 페이지에서 한 번 쓴다)

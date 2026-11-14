@@ -156,7 +156,7 @@ function assign(sd){if(CACHE&&CACHE.has(sd))return CACHE.get(sd);
  if(CACHE)CACHE.set(sd,out);return out;}
 function paragraphs(c,sd){var id=c&&(c.editorialContractId||c.id);if(!id||!sd||!sd.dayMaster||!PLAN_BY_ID[id])return [];
  var a=assign(sd),FO=R.FactOnce;return (a[id]||[]).map(function(x){var t=FO&&x.fk&&x.short&&!FO.own(sd,x.fk,id)?x.short:x.text;return {key:x.key,text:FO&&FO.uniq?FO.uniq(sd,t,id):t};}).filter(function(p){return p.text;});}
-function html(c,esc){var sd=c&&c.readingVisualData,ps=paragraphs(c,sd);if(!ps.length)return '';
+function html(c,esc){var sd=c&&c.readingVisualData,ps=paragraphs(c,sd),AF=R.AgeFit,ab=AF?AF.band(sd):'';if(ab)ps=ps.map(function(p){return {key:p.key,text:AF.text(p.text,ab)};}).filter(function(p){return p.text;});if(!ps.length)return '';
  return '<div class="reading-insight"><h3>이 사주에서만 읽히는 포인트</h3>'+ps.map(function(p){return '<p class="lead" data-reading-role="insight" data-insight-key="'+p.key+'">'+esc(p.text)+'</p>';}).join('')+'</div>';}
 R.ReadingInsightData=R.ReadingInsightData||{};
 R.ReadingInsight={paragraphs:paragraphs,html:html,facts:facts,assign:assign,PLAN:PLAN,SPARE:SPARE};

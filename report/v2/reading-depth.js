@@ -30,7 +30,7 @@ function paragraphs(c,sd){var id=c&&(c.editorialContractId||c.id),d=R.ReadingDep
  // 다른 장에서 이미 보여 준 문장은 뺀다(같은 데이터 문장이 여러 장에 실린 경우).
  if(FO&&FO.uniq)out=out.map(function(p){return {key:p.key,text:FO.uniq(sd,p.text,id)};}).filter(function(p){return p.text;});
  return out;}
-function html(c,esc){var sd=c&&c.readingVisualData,ps=paragraphs(c,sd);if(!ps.length)return '';
+function html(c,esc){var sd=c&&c.readingVisualData,ps=paragraphs(c,sd),AF=R.AgeFit,ab=AF?AF.band(sd):'';if(ab)ps=ps.map(function(p){return {key:p.key,text:AF.text(p.text,ab)};}).filter(function(p){return p.text;});if(!ps.length)return '';
  return '<div class="reading-depth"><h3>내 사주로 더 깊게 보면</h3>'+ps.map(function(p){return '<p class="lead" data-reading-role="depth" data-depth-key="'+p.key+'">'+esc(p.text)+'</p>';}).join('')+'</div>';}
 R.ReadingDepthData=R.ReadingDepthData||{};
 R.ReadingDepth={paragraphs:paragraphs,html:html,GROUPS:GROUPS,BANDS:BANDS,ELS:ELS};
