@@ -164,7 +164,7 @@
   if(id==='timeline_self_32'){lines.push(['식상','재성','관성'].map(gl).join(' · '));if(ue.yong||band)lines.push((ue.yong?'사주에 필요한 기운(용신) '+ue.yong:'')+(ue.yong&&band?' · ':'')+(band?'강약 '+band:''));if(sd.dominantGroup)lines.push('가장 큰 기운 '+gl(sd.dominantGroup));}
   if(id==='timeline_self_35'){lines.push('오행 비율 '+['목','화','토','금','수'].map(function(e){return e+' '+r1(fe[e])+'%';}).join(' · '));lines.push('가장 많은 기운 '+(sd.dominantEl||'')+(sd.lackEl?' · 없거나 가장 적은 기운 '+sd.lackEl:'')+' · 원국의 온도 '+clTxt);if(ue.yong)lines.push('균형을 잡아 주는 기운(용신) '+ue.yong);}
   lines=lines.filter(function(t){return t&&!/undefined|NaN|null/.test(t);});if(!lines.length)return '';
-  return '<div class="reading-basis-group reading-facts"><h3>이 사주에서 확인된 조건</h3>'+lines.map(function(t){return '<p class="reading-mine" data-reading-role="evidence"><b>내 사주에서는</b> '+esc(t)+'</p>';}).join('')+'</div>';}
+  return '<div class="reading-basis-group reading-facts"><h3>이 사주에서 확인된 조건</h3>'+lines.map(function(t){return '<p class="reading-mine" data-reading-role="evidence"><b>내 사주에서는</b> '+esc(t)+'.</p>';}).join('')+'</div>';}
  function compatHtml(c){var sd=c&&c.readingVisualData,cp=sd&&sd.compat;if(!cp||!(cp.good||[]).length)return '';
   return '<div class="reading-compat"><h3>만세력이 계산한 나의 궁합 일주</h3><p class="rc-note">내 원국의 억부·조후·오행 균형을 기준으로 60일주를 하나씩 비교한 값이에요. 상대의 전체 사주가 아니라 일주 두 글자만 가정한 참고라서, 두 사람의 전체 사주를 보면 달라질 수 있어요.</p>'
    +cpList('나와 잘 맞는 일주','보완도가 높은 순',cp.good,true,'reasons',5)
