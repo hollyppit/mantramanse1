@@ -5,10 +5,19 @@
   var state = { worlds: [], chapters: [], selected: 'w1', dirty: false, loaded: false, generation: 0 };
   (window.AdminDirty = window.AdminDirty || {})['타임라인 구성'] = function () { return state.dirty; };
   function settings(w, id) { w.chapterSettings = w.chapterSettings || {}; return w.chapterSettings[id] || (w.chapterSettings[id] = {}); }
-  function list(w) { return state.chapters.filter(function (c) { return X.worldFor(c, state.worlds) === w.id; }).sort(function (a,b) {
+  function list(w) { return placeAfter(state.chapters.filter(function (c) { return X.worldFor(c, state.worlds) === w.id; }).sort(function (a,b) {
     var sa = (w.chapterSettings || {})[a.id] || {}, sb = (w.chapterSettings || {})[b.id] || {};
     return (sa.order == null ? state.chapters.indexOf(a) : sa.order) - (sb.order == null ? state.chapters.indexOf(b) : sb.order);
-  }); }
+  })); }
+  // 엔진으로 만든 장(flow-chapters.js: 오행 흐름·격국)은 사용자 화면(explore.js placeAfter)처럼 지정한 장 바로 뒤에 고정한다
+  function placeAfter(arr) {
+    var moved = arr.filter(function (c) { return c.placeAfter && arr.some(function (o) { return o.id === c.placeAfter; }); });
+    if (!moved.length) return arr;
+    var rest = arr.filter(function (c) { return moved.indexOf(c) < 0; });
+    moved.forEach(function (c) { var k = rest.findIndex(function (o) { return o.id === c.placeAfter; }); rest.splice(k + 1, 0, c); });
+    return rest;
+  }
+  function titleOf(id) { var c = state.chapters.find(function (x) { return x.id === id; }); return c ? c.title : id; }
   function build(box) {
     var token = ++state.generation;
     box.querySelector('[data-document]').textContent = '사용자 화면과 같은 목차를 구성하는 중…';
@@ -31,13 +40,15 @@
         }
         if(token!==state.generation)return;
         var catalog=null;if(R.Editorial){try{catalog=await C.api('/api/reading-editorial');}catch(e){}if(token!==state.generation)return;doc=R.Editorial.prepare(doc,catalog,sd);}
+        // 사용자 화면(viewer.js)과 같이 오행 흐름·격국 장(flow-chapters.js)을 끼운다. 스위치가 꺼져 있어도 위치를 보여 주고 상태를 표시한다
+        state.flowOn=null;if(R.FlowChapters){try{state.flowOn=await R.FlowChapters.ready();doc=R.FlowChapters.add(doc,sd,'',M,ch);}catch(e){}}if(token!==state.generation)return;
         state.sd=sd; state.past=null; state.chapters=doc.chapters; draw(box);
       });
     }).catch(function(e){ if(token===state.generation) box.querySelector('[data-document]').textContent='목차를 구성하지 못했습니다: '+e.message; });
   }
   function draw(box) {
     var host=box.querySelector('[data-document]'), w=state.worlds.find(function(w){return w.id===state.selected;}) || state.worlds[0]; state.selected=w.id;
-    host.innerHTML='<div class="cols"><div class="card">'+state.worlds.map(function(topic){var items=list(topic);return '<button type="button" class="pjc'+(topic.id===w.id?' on':'')+'" style="width:100%;text-align:left" data-topic="'+esc(topic.id)+'"><b>'+esc(topic.name)+'</b><small>'+esc(topic.line || '')+'</small><span>'+items.length+'개 챕터'+(topic.enabled===false?' · 비공개':'')+'</span></button>';}).join('')+'</div><div class="card"><h3>'+esc(w.name)+'</h3><p>'+esc(w.desc || '')+'</p><div class="row"><a class="btn" target="_blank" rel="noopener" href="/report/v2/?from=hub&amp;world='+esc(w.id)+'">사용자 화면 열기 ↗</a><button type="button" data-prologue>이 주제 프롤로그</button><button type="button" data-world>이름·이미지·주제 순서</button></div><p class="muted">아래는 선택한 테스트 사주로 조립한 실제 목차입니다. 제목·노출·순서를 저장하면 새로 여는 사용자 화면에 적용됩니다. 원본의 문구·모듈은 원본 편집에서, 생성 풀이의 근거는 풀이 지식에서 관리합니다.</p>'+list(w).map(function(c,i){var s=(w.chapterSettings || {})[c.id] || {}, base=c.base || c.id;return '<div class="card" style="margin:8px 0;padding:12px" data-chapter="'+esc(c.id)+'"><div class="row"><label><input type="checkbox" data-visible'+(s.enabled!==false?' checked':'')+'> 노출</label><b>'+(i+1)+'</b><input data-title aria-label="챕터 제목" value="'+esc(s.title || c.title)+'" style="flex:1;min-width:160px"><button type="button" data-move="-1"'+(i===0?' disabled':'')+'>↑</button><button type="button" data-move="1"'+(i===list(w).length-1?' disabled':'')+'>↓</button></div><small class="muted">'+esc(c.id)+' · '+(/^life_|^deep_|^c-char/.test(c.id)?'주제별 조립 챕터':'원본 연결 챕터')+'</small><div class="row" style="margin-top:8px"><button type="button" data-preview>내용 확인</button><button type="button" data-source="'+esc(base)+'">원본 편집</button></div><div data-body hidden></div></div>';}).join('')+'</div></div>';
+    host.innerHTML='<div class="cols"><div class="card">'+state.worlds.map(function(topic){var items=list(topic);return '<button type="button" class="pjc'+(topic.id===w.id?' on':'')+'" style="width:100%;text-align:left" data-topic="'+esc(topic.id)+'"><b>'+esc(topic.name)+'</b><small>'+esc(topic.line || '')+'</small><span>'+items.length+'개 챕터'+(topic.enabled===false?' · 비공개':'')+'</span></button>';}).join('')+'</div><div class="card"><h3>'+esc(w.name)+'</h3><p>'+esc(w.desc || '')+'</p><div class="row"><a class="btn" target="_blank" rel="noopener" href="/report/v2/?from=hub&amp;world='+esc(w.id)+'">사용자 화면 열기 ↗</a><button type="button" data-prologue>이 주제 프롤로그</button><button type="button" data-world>이름·이미지·주제 순서</button></div><p class="muted">아래는 선택한 테스트 사주로 조립한 실제 목차입니다. 제목·노출·순서를 저장하면 새로 여는 사용자 화면에 적용됩니다. 원본의 문구·모듈은 원본 편집에서, 생성 풀이의 근거는 풀이 지식에서 관리합니다.</p>'+list(w).map(function(c,i){var s=(w.chapterSettings || {})[c.id] || {}, base=c.base || c.id;return '<div class="card" style="margin:8px 0;padding:12px" data-chapter="'+esc(c.id)+'"><div class="row"><label><input type="checkbox" data-visible'+(s.enabled!==false?' checked':'')+'> 노출</label><b>'+(i+1)+'</b><input data-title aria-label="챕터 제목" value="'+esc(s.title || c.title)+'" style="flex:1;min-width:160px"><button type="button" data-move="-1"'+(i===0||c.flowChapter?' disabled':'')+'>↑</button><button type="button" data-move="1"'+(i===list(w).length-1||c.flowChapter?' disabled':'')+'>↓</button></div><small class="muted">'+esc(c.id)+' · '+(c.flowChapter?'엔진 조립 장(오행 흐름·격국) · 위치 고정: “'+esc(titleOf(c.placeAfter))+'” 바로 뒤 · 스위치 flowChapters '+(state.flowOn?'<b style="color:#62C2AE">켜짐</b>':'<b style="color:#E0BC74">꺼짐 — 사용자 화면에 안 보임</b>'):(/^life_|^deep_|^c-char/.test(c.id)?'주제별 조립 챕터':'원본 연결 챕터'))+'</small><div class="row" style="margin-top:8px"><button type="button" data-preview>내용 확인</button>'+(c.flowChapter?'':'<button type="button" data-source="'+esc(base)+'">원본 편집</button>')+'</div><div data-body hidden></div></div>';}).join('')+'</div></div>';
     var right=host.querySelector('.cols > .card:last-child'), preview=document.createElement('div'); preview.innerHTML=storyPreview(w); right.insertBefore(preview,right.children[2]);
     box.querySelector('[data-save]').disabled=!state.dirty;
   }
@@ -67,9 +78,9 @@
       }
       var row=b.closest('[data-chapter]');if(!row)return;
       var w=state.worlds.find(function(w){return w.id===state.selected;}),items=list(w),at=items.findIndex(function(c){return c.id===row.dataset.chapter;}),c=items[at];
-      if(b.hasAttribute('data-move')){var to=at+(+b.dataset.move);if(to<0 || to>=items.length)return;var old=items[at];items[at]=items[to];items[to]=old;items.forEach(function(c,i){settings(w,c.id).order=i;});state.dirty=true;draw(box);return;}
+      if(b.hasAttribute('data-move')){items=items.filter(function(x){return !x.flowChapter;});at=items.findIndex(function(x){return x.id===row.dataset.chapter;});if(at<0)return;var to=at+(+b.dataset.move);if(to<0 || to>=items.length)return;var old=items[at];items[at]=items[to];items[to]=old;items.forEach(function(c,i){settings(w,c.id).order=i;});state.dirty=true;draw(box);return;}
       if(b.hasAttribute('data-source')){var source=R.Chapters.libraryOf(C.ST.saved).find(function(x){return x.project==='full' && (x.id===c.id || x.base===b.dataset.source || x.id===b.dataset.source);});if(source)window.AdminShowTab('v2chap',{source:source.id});else window.AdminShowTab('ikknow');return;}
-      if(b.hasAttribute('data-preview')){var body=row.querySelector('[data-body]');body.hidden=!body.hidden;if(!body.hidden){var scratch=document.createElement('div');scratch.innerHTML=(c.scenes || []).map(function(s){return s.html || s.body || s.narration || s.text || '';}).join('\n');body.textContent=scratch.textContent || c.meaning || '도표·영상 중심 챕터입니다. 사용자 화면에서 확인하세요.';body.style.cssText='white-space:pre-wrap;line-height:1.8;padding:16px 0;max-height:400px;overflow:auto';} }
+      if(b.hasAttribute('data-preview')){var body=row.querySelector('[data-body]');body.hidden=!body.hidden;if(!body.hidden){var scratch=document.createElement('div');scratch.innerHTML=(c.scenes || []).map(function(s){return s.html || s.body || s.narration || s.text || '';}).join('\n');body.textContent=scratch.textContent || (c.readingParagraphs || []).map(function(p){return p.text;}).filter(Boolean).join('\n\n') || c.meaning || '도표·영상 중심 챕터입니다. 사용자 화면에서 확인하세요.';body.style.cssText='white-space:pre-wrap;line-height:1.8;padding:16px 0;max-height:400px;overflow:auto';} }
     };
   }
   window.V2Timeline={open:open};
