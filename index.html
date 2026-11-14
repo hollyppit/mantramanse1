@@ -10066,8 +10066,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   // ── 소제목 접고 펴기: 카드 제목(h2·.card-h)과 그 안의 소제목(h3·h4)을 눌러 아래 내용을 접는다. 상태는 탭·제목별로 기억한다 ──
   const FOLD = new Set(), FOLD_SEEN = new Set();
-  // 처음부터 접어 두는 카드(모든 기기): 운세 흐름 탭 맨 위 방위운(참고용)
-  const FOLD_DEFAULT = /우리 집 방위 운/;
+  // 처음부터 접어 두는 카드(모든 기기): 운세 흐름 탭 맨 위 방위운(참고용), 원국 탭의 내 사주의 12운성(눌러야 펼침)
+  const FOLD_DEFAULT = /우리 집 방위 운|내 사주의 12운성/;
   const FOLD_EXPERT = /사화 지도|별의 힘 분포|학파|병약|종격|격국|통근|한난조습|조후론 vs|판단 기준|시간 기준별|근거 보기/;
   // 모바일에서만 처음부터 접어 두는 카드(원국 탭의 천간·지지 관계: 길고 자주 안 보는 목록)
   const FOLD_MOBILE = /^(천간 관계|지지 관계)/;
