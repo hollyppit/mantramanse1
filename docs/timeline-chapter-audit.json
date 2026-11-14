@@ -1,0 +1,8344 @@
+{
+ "generated": "2026-11-15",
+ "N": 360,
+ "now": "2026-11-15T03:00:00.000Z",
+ "catalogVersion": 15,
+ "loadFail": [],
+ "rows": [
+  {
+   "id": "timeline_self_03",
+   "short": "self_03",
+   "title": "나의 타고난 기질은?",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 30편)",
+    "서사 엔진(life)",
+    "feature rank"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 25,
+   "dbTopEntry": "self03-siksin-strong",
+   "dbTopShare": 0.08888888888888889,
+   "narrative": 0.6916666666666667,
+   "narrRuleKinds": 12,
+   "thin": 0,
+   "avgChars": 2390,
+   "avgBody": 897,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "chart": 1,
+    "db": 0.308,
+    "why": 1,
+    "feature": 1,
+    "insight": 1,
+    "basis": 0.308,
+    "narrative": 0.692
+   },
+   "layerAvg": {
+    "head": 11,
+    "hook": 101,
+    "chart": 462,
+    "db": 879,
+    "why": 399,
+    "feature": 718,
+    "insight": 208,
+    "basis": 187,
+    "narrative": 899
+   },
+   "sameText": 0.002793209876543195,
+   "uniqueTexts": 359,
+   "jaccard": 0.17975120206507114,
+   "fixedShare": 0.18112068423369598,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.06947890818858561,
+   "evidHas": 0.6055555555555555,
+   "evidThin": 0,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 8.955555555555556,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.631578947368421,
+   "youngBad": 0.23684210526315788,
+   "youngEx": {
+    "narrative · 상사": {
+     "n": 7,
+     "ex": "실제 생활에서는 상사가 엉성한 계획을 내놓으면 “그건 이렇게 하면 안 돼요”가 바로 나가요."
+    },
+    "db · 직장": {
+     "n": 1,
+     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 위기 상황에서 내가 해결하고 나면 그다음에도 늘 내 몫이 돼요."
+    },
+    "narrative · 이직": {
+     "n": 1,
+     "ex": "실제 생활에서는 이사나 이직을 할 때마다 가족과 한바탕 부딪혀요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "tenGod": 30,
+    "positionTG": 30
+   },
+   "v": "보완",
+   "why": [
+    "근거에 내 사주 값 줄 61%"
+   ]
+  },
+  {
+   "id": "timeline_self_02",
+   "short": "self_02",
+   "title": "내 사주를 자동차로 비유하면?",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 12편)",
+    "Deep.deep_car"
+   ],
+   "dbFallback": 0.26666666666666666,
+   "dbPending": 0,
+   "dbEntryKinds": 11,
+   "dbTopEntry": "self02-weak-overload",
+   "dbTopShare": 0.13055555555555556,
+   "narrative": 0,
+   "narrRuleKinds": 0,
+   "thin": 0.26666666666666666,
+   "avgChars": 3010,
+   "avgBody": 813,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "db": 1,
+    "chart": 1,
+    "why": 0.733,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "basis": 1
+   },
+   "layerAvg": {
+    "head": 16,
+    "hook": 93,
+    "db": 808,
+    "chart": 238,
+    "why": 178,
+    "feature": 1292,
+    "depth": 395,
+    "insight": 173,
+    "basis": 127
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.19536607844392317,
+   "fixedShare": 0.17166576073528686,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 0.53,
+    "힘의 세기(신강·신약) 소개": 0.71
+   },
+   "evidMine": 0,
+   "evidHas": 0,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.044444444444444446,
+   "evidPerPerson": 1.8305555555555555,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.10526315789473684,
+   "youngEx": {
+    "db · 직장": {
+     "n": 4,
+     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 상사의 부탁이 이어질 때 내 일정표를 보여 주면서 \"오늘 이 세 가지를 하고 있어요, 어떤 걸 먼저 할까요?\"라고 물어보세요"
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 12,
+    "group": 12
+   },
+   "v": "보완",
+   "why": [
+    "근거에 내 사주 값 줄 0%"
+   ]
+  },
+  {
+   "id": "timeline_self_20",
+   "short": "self_20",
+   "title": "전체 인생 흐름",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 20편)",
+    "서사 엔진(life)",
+    "Deep.deep_stages"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 15,
+   "dbTopEntry": "self20-bigeop-mid",
+   "dbTopShare": 0.10833333333333334,
+   "narrative": 1,
+   "narrRuleKinds": 7,
+   "thin": 0,
+   "avgChars": 4529,
+   "avgBody": 1473,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 1,
+    "chart": 1,
+    "why": 1,
+    "plus": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1
+   },
+   "layerAvg": {
+    "head": 8,
+    "hook": 79,
+    "narrative": 1469,
+    "chart": 1496,
+    "why": 394,
+    "plus": 225,
+    "feature": 661,
+    "depth": 425,
+    "insight": 165
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.15500322828863383,
+   "fixedShare": 0.1480605901409684,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "지금 대운 소개": 0.03
+   },
+   "evidMine": 0.14722222222222223,
+   "evidHas": 1,
+   "evidThin": 0,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 7,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.8157894736842105,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "group": 15,
+    "daewoonStemTG": 20,
+    "seunStemTG": 5
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_self_24",
+   "short": "self_24",
+   "title": "움직여야 될 때와 기다려야 할 때",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 3편)",
+    "서사 엔진(life)",
+    "feature timing"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 3,
+   "dbTopEntry": "s24-read",
+   "dbTopShare": 0.4111111111111111,
+   "narrative": 0.9666666666666667,
+   "narrRuleKinds": 7,
+   "thin": 0.008333333333333333,
+   "avgChars": 3013,
+   "avgBody": 593,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.967,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.033,
+    "luck": 0.033,
+    "basis": 0.033
+   },
+   "layerAvg": {
+    "head": 18,
+    "hook": 86,
+    "narrative": 579,
+    "chart": 1496,
+    "why": 436,
+    "feature": 259,
+    "depth": 396,
+    "insight": 178,
+    "db": 805,
+    "luck": 61,
+    "basis": 152
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.16275591782422014,
+   "fixedShare": 0.09355509355509356,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "지금 대운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.25
+   },
+   "evidMine": 0.1018202502844141,
+   "evidHas": 0.9666666666666667,
+   "evidThin": 0.03333333333333333,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.766666666666667,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.9210526315789473,
+   "youngBad": 0.6842105263157895,
+   "youngEx": {
+    "narrative · 창업": {
+     "n": 17,
+     "ex": "실제 생활에서는 경기가 나쁘다는데도 창업을 하거나, 다들 이직하는 시기에 오히려 남는 선택을 해요."
+    },
+    "narrative · 이직": {
+     "n": 9,
+     "ex": "실제 생활에서는 마음에 드는 집, 괜찮은 이직 자리, 좋은 사람이 나타나도 \"좀 더 알아보고\"가 먼저 나와요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 948,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 3,
+    "rootLevel": 3
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 68%"
+   ]
+  },
+  {
+   "id": "timeline_self_18",
+   "short": "self_18",
+   "title": "최고의 나와 최악의 나",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 8편)",
+    "서사 엔진(life)",
+    "fate-blocks fx:scenario",
+    "feature rank"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 8,
+   "dbTopEntry": "self18-summer-steady",
+   "dbTopShare": 0.18611111111111112,
+   "narrative": 0.9611111111111111,
+   "narrRuleKinds": 7,
+   "thin": 0.008333333333333333,
+   "avgChars": 2411,
+   "avgBody": 595,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.961,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.039,
+    "basis": 0.039
+   },
+   "layerAvg": {
+    "head": 12,
+    "hook": 115,
+    "narrative": 575,
+    "chart": 159,
+    "why": 445,
+    "feature": 1018,
+    "depth": 319,
+    "insight": 200,
+    "db": 995,
+    "basis": 128
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.19929598499799586,
+   "fixedShare": 0.1602994929843179,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "필요한 기운(용신) 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.10033821871476889,
+   "evidHas": 0.9611111111111111,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.005555555555555556,
+   "evidPerPerson": 9.855555555555556,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.21052631578947367,
+   "youngBad": 0.02631578947368421,
+   "youngEx": {
+    "narrative · 회사": {
+     "n": 1,
+     "ex": "실제 생활에서는 친구의 연애 상담이나 회사 동료의 고민엔 누구보다 정확한 답을 줘요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0.00847457627118644,
+   "seniorEx": {
+    "db · 입사": {
+     "n": 1,
+     "ex": "입사 후 한 해를 좌우하는 건 업무 내용보다 피드백 분위기일 때가 많아요."
+    }
+   },
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 8,
+    "season": 8
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_self_25",
+   "short": "self_25",
+   "title": "나의 타고난 강점과 약점",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 3편)",
+    "서사 엔진(life)",
+    "fate-blocks fx:profile",
+    "Deep.deep_proscons"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 3,
+   "dbTopEntry": "s25-weaver",
+   "dbTopShare": 0.4111111111111111,
+   "narrative": 0.9611111111111111,
+   "narrRuleKinds": 7,
+   "thin": 0.008333333333333333,
+   "avgChars": 2407,
+   "avgBody": 534,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.961,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.039,
+    "basis": 0.039
+   },
+   "layerAvg": {
+    "head": 13,
+    "hook": 106,
+    "narrative": 522,
+    "chart": 160,
+    "why": 448,
+    "feature": 1118,
+    "depth": 298,
+    "insight": 185,
+    "db": 743,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.12451389647220439,
+   "fixedShare": 0.06683995544002971,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "필요한 기운(용신) 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.102475532527346,
+   "evidHas": 0.9611111111111111,
+   "evidThin": 0.03888888888888889,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.65,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.5,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 3,
+    "rootLevel": 3
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_self_26",
+   "short": "self_26",
+   "title": "나와 잘 맞는 업",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 3편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:fit",
+    "feature talent",
+    "Deep.deep_jobs"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 3,
+   "dbTopEntry": "s26-coordinate",
+   "dbTopShare": 0.4111111111111111,
+   "narrative": 0.9583333333333334,
+   "narrRuleKinds": 7,
+   "thin": 0.011111111111111112,
+   "avgChars": 3149,
+   "avgBody": 505,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.958,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.042,
+    "basis": 0.042
+   },
+   "layerAvg": {
+    "head": 9,
+    "hook": 102,
+    "narrative": 488,
+    "chart": 156,
+    "why": 431,
+    "feature": 1960,
+    "depth": 332,
+    "insight": 89,
+    "db": 806,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.17453905744493178,
+   "fixedShare": 0.14854400698004144,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "필요한 기운(용신) 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.09652836579170194,
+   "evidHas": 0.9222222222222223,
+   "evidThin": 0.041666666666666664,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.841666666666667,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.6578947368421053,
+   "youngEx": {
+    "narrative · 부서": {
+     "n": 20,
+     "ex": "실제 생활에서는 조직에 있어도 독립 부서나 현장을 맡을 때 성과가 좋아요."
+    },
+    "narrative · 직장": {
+     "n": 4,
+     "ex": "실제 생활에서는 직장 안에서도 새 제품이나 콘텐츠를 맡을 때 눈빛이 달라지고, 관리나 보고만 하는 자리에 앉으면 금방 무기력해져요."
+    },
+    "db · 직장": {
+     "n": 1,
+     "ex": "새 직장이나 프로젝트를 고를 때 연봉 이전에 평소 하루 일과와 회의 횟수를 물어보세요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0.0847457627118644,
+   "seniorEx": {
+    "db · 입사": {
+     "n": 4,
+     "ex": "조건을 미리 알고 고르면 입사 후의 후회가 많이 줄어요."
+    },
+    "insight · 승진": {
+     "n": 6,
+     "ex": "승진이나 역할 확대의 기회를 차분히 준비하세요."
+    }
+   },
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 3,
+    "rootLevel": 3
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 66%"
+   ]
+  },
+  {
+   "id": "timeline_self_27",
+   "short": "self_27",
+   "title": "전체 인연운",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 3편)",
+    "서사 엔진(love)",
+    "feature places",
+    "Deep.deep_love"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 3,
+   "dbTopEntry": "s27-wide",
+   "dbTopShare": 0.4111111111111111,
+   "narrative": 0.9583333333333334,
+   "narrRuleKinds": 6,
+   "thin": 0.008333333333333333,
+   "avgChars": 3724,
+   "avgBody": 541,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.958,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.042,
+    "basis": 0.042
+   },
+   "layerAvg": {
+    "head": 6,
+    "hook": 108,
+    "narrative": 528,
+    "chart": 153,
+    "why": 443,
+    "feature": 2491,
+    "depth": 337,
+    "insight": 89,
+    "db": 745,
+    "basis": 137
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.13968931849787944,
+   "fixedShare": 0.11994283743162668,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.09894091415830546,
+   "evidHas": 0.9583333333333334,
+   "evidThin": 0.041666666666666664,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.966666666666667,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 1,
+   "youngEx": {
+    "feature · 배우자": {
+     "n": 38,
+     "ex": "12월 연애 지수 64 2순위 · 경자 무난 관계 활동 활발 근거 · 배우자궁 (일지) 일지 申子 반합水 — 결속 신호로 관계 활동이 움직입니다 / 일간과 운 천"
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 3,
+    "rootLevel": 3
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 100%"
+   ]
+  },
+  {
+   "id": "timeline_self_28",
+   "short": "self_28",
+   "title": "대인관계 궁합",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 5편)",
+    "Deep.deep_ilju"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 5,
+   "dbTopEntry": "s28-wood",
+   "dbTopShare": 0.225,
+   "narrative": 0,
+   "narrRuleKinds": 0,
+   "thin": 0,
+   "avgChars": 3075,
+   "avgBody": 630,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "db": 1,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.997,
+    "basis": 1
+   },
+   "layerAvg": {
+    "head": 7,
+    "hook": 96,
+    "db": 625,
+    "chart": 154,
+    "why": 262,
+    "feature": 1749,
+    "depth": 335,
+    "insight": 107,
+    "basis": 243
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.19849257099343975,
+   "fixedShare": 0.1606425702811245,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0,
+   "evidHas": 0,
+   "evidThin": 1,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 6.838888888888889,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "dayMaster": 5,
+    "strength": 5
+   },
+   "v": "보완",
+   "why": [
+    "근거에 내 사주 값 줄 0%",
+    "'검수 근거 부족' 안내 100%"
+   ]
+  },
+  {
+   "id": "timeline_self_29",
+   "short": "self_29",
+   "title": "내 미래 배우자는?",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 3편)",
+    "서사 엔진(love)",
+    "Deep.dossier_spouse",
+    "Deep.deep_spouse"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 3,
+   "dbTopEntry": "s29-partner",
+   "dbTopShare": 0.4111111111111111,
+   "narrative": 0.9666666666666667,
+   "narrRuleKinds": 7,
+   "thin": 0.005555555555555556,
+   "avgChars": 3066,
+   "avgBody": 656,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "feature": 1,
+    "narrative": 0.967,
+    "chart": 1,
+    "why": 1,
+    "depth": 1,
+    "insight": 0.989,
+    "db": 0.033,
+    "basis": 0.033
+   },
+   "layerAvg": {
+    "head": 10,
+    "hook": 116,
+    "feature": 1723,
+    "narrative": 645,
+    "chart": 157,
+    "why": 457,
+    "depth": 327,
+    "insight": 83,
+    "db": 835,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.1254967152801585,
+   "fixedShare": 0.10147646133365605,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 0.13,
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "지금 대운 소개": 0.01
+   },
+   "evidMine": 0.09490986214209968,
+   "evidHas": 0.9666666666666667,
+   "evidThin": 0.03333333333333333,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 10.477777777777778,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.02631578947368421,
+   "youngEx": {
+    "db · 퇴근": {
+     "n": 1,
+     "ex": "퇴근하고 말없이 앉아 있을 때 \"오늘 힘들었어?\" 하고 물어봐 주는 사람이 곁에 있으면 하루의 피로가 풀려요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 3,
+    "rootLevel": 3
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_self_30",
+   "short": "self_30",
+   "title": "전체 재물운",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 3편)",
+    "서사 엔진(wealth)",
+    "fate-blocks fx:meter",
+    "feature rank"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 3,
+   "dbTopEntry": "s30-even",
+   "dbTopShare": 0.4111111111111111,
+   "narrative": 0.9583333333333334,
+   "narrRuleKinds": 7,
+   "thin": 0.008333333333333333,
+   "avgChars": 2259,
+   "avgBody": 531,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.958,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.042,
+    "basis": 0.042
+   },
+   "layerAvg": {
+    "head": 6,
+    "hook": 101,
+    "narrative": 516,
+    "chart": 153,
+    "why": 429,
+    "feature": 960,
+    "depth": 419,
+    "insight": 89,
+    "db": 791,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.24706266043242955,
+   "fixedShare": 0.2529570207284225,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "지금 대운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.76
+   },
+   "evidMine": 0.10371019573473561,
+   "evidHas": 0.9583333333333334,
+   "evidThin": 0.041666666666666664,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.508333333333333,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0.06944444444444445,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.2894736842105263,
+   "youngEx": {
+    "narrative · 연봉": {
+     "n": 9,
+     "ex": "실제 생활에서는 연봉보다 일의 의미로 직장을 골랐는데, 몇 년 뒤 그 경력이 생각보다 큰 수입으로 이어졌을 수 있어요."
+    },
+    "db · 직장": {
+     "n": 1,
+     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 월급에서 일정액을 먼저 저축하는 습관이 이미 있다면 그 위에 업무 관련 공부 비용을 한 항목으로 넣어 보세요."
+    },
+    "narrative · 노후": {
+     "n": 1,
+     "ex": "가족·지인의 급한 사정에 손을 대다가 정작 내 노후 준비가 늘 뒤로 밀려요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 3,
+    "rootLevel": 3
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_self_31",
+   "short": "self_31",
+   "title": "나의 재물 그릇은?",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 3편)",
+    "서사 엔진(wealth)",
+    "Deep.deep_wealth"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 3,
+   "dbTopEntry": "s31-balanced",
+   "dbTopShare": 0.4111111111111111,
+   "narrative": 0.9583333333333334,
+   "narrRuleKinds": 6,
+   "thin": 0.008333333333333333,
+   "avgChars": 1879,
+   "avgBody": 518,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "feature": 1,
+    "narrative": 0.958,
+    "chart": 1,
+    "why": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.042,
+    "basis": 0.042
+   },
+   "layerAvg": {
+    "head": 10,
+    "hook": 109,
+    "feature": 608,
+    "narrative": 503,
+    "chart": 157,
+    "why": 433,
+    "depth": 353,
+    "insight": 129,
+    "db": 778,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.1563771253462279,
+   "fixedShare": 0.10089112746997288,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "필요한 기운(용신) 소개": 1,
+    "힘의 세기(신강·신약) 소개": 1
+   },
+   "evidMine": 0.10002817695125388,
+   "evidHas": 0.9583333333333334,
+   "evidThin": 0.041666666666666664,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.858333333333333,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 1,
+   "youngN": 38,
+   "youngAny": 0.868421052631579,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 3,
+    "rootLevel": 3
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_self_32",
+   "short": "self_32",
+   "title": "내 사주와 맞는 돈 버는 법",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 3편)",
+    "Deep.deep_wealth"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 3,
+   "dbTopEntry": "s32-mixed",
+   "dbTopShare": 0.4111111111111111,
+   "narrative": 0,
+   "narrRuleKinds": 0,
+   "thin": 0,
+   "avgChars": 1777,
+   "avgBody": 791,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "db": 1,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "basis": 1
+   },
+   "layerAvg": {
+    "head": 15,
+    "hook": 106,
+    "db": 786,
+    "chart": 162,
+    "why": 134,
+    "feature": 249,
+    "depth": 338,
+    "insight": 125,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.29559462183571616,
+   "fixedShare": 0.14747110418886794,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0,
+   "evidHas": 0,
+   "evidThin": 1,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 1,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.2631578947368421,
+   "youngEx": {
+    "db · 거래처": {
+     "n": 10,
+     "ex": "한 거래처에서 몇 년째 같은 일을 맡으며 \"믿고 맡길 사람\"이라는 말을 듣고, 새 거래처를 개척하는 일은 늘 미루게 돼요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 3,
+    "rootLevel": 3
+   },
+   "v": "보완",
+   "why": [
+    "근거에 내 사주 값 줄 0%",
+    "'검수 근거 부족' 안내 100%"
+   ]
+  },
+  {
+   "id": "timeline_self_33",
+   "short": "self_33",
+   "title": "나의 말년운",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 3편)",
+    "서사 엔진(life)",
+    "feature late"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 3,
+   "dbTopEntry": "s33-steady",
+   "dbTopShare": 0.4111111111111111,
+   "narrative": 0.9666666666666667,
+   "narrRuleKinds": 7,
+   "thin": 0,
+   "avgChars": 1782,
+   "avgBody": 610,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.967,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.033,
+    "basis": 0.033
+   },
+   "layerAvg": {
+    "head": 6,
+    "hook": 102,
+    "narrative": 598,
+    "chart": 153,
+    "why": 408,
+    "feature": 339,
+    "depth": 410,
+    "insight": 162,
+    "db": 831,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.2072085329552268,
+   "fixedShare": 0.1851474278544542,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "지금 대운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.38
+   },
+   "evidMine": 0.1108359133126935,
+   "evidHas": 0.9666666666666667,
+   "evidThin": 0.03333333333333333,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 8.972222222222221,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.6842105263157895,
+   "youngEx": {
+    "narrative · 은퇴": {
+     "n": 24,
+     "ex": "실제 생활에서는 지금도 은퇴 후를 막연히 걱정하기보다, 어디서 무엇을 하며 살지 구체적인 그림을 그리고 있을 가능성이 커요."
+    },
+    "narrative · 노후": {
+     "n": 1,
+     "ex": "실제 생활에서는 지금도 노후 자산 계획을 은근히 계산해 보고 있을 거예요."
+    },
+    "hook · 노후": {
+     "n": 1,
+     "ex": "노후 준비, 해야 한다는 건 아는데 늘 다음 달로 미루고 있지 않나요?"
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 3,
+    "rootLevel": 3
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 68%"
+   ]
+  },
+  {
+   "id": "timeline_self_34",
+   "short": "self_34",
+   "title": "나의 자식운",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 3편)",
+    "서사 엔진(life)",
+    "Deep.deep_children"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 3,
+   "dbTopEntry": "s34-friend",
+   "dbTopShare": 0.4111111111111111,
+   "narrative": 0.9583333333333334,
+   "narrRuleKinds": 8,
+   "thin": 0.008333333333333333,
+   "avgChars": 1784,
+   "avgBody": 496,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "feature": 1,
+    "narrative": 0.958,
+    "chart": 1,
+    "why": 1,
+    "depth": 1,
+    "insight": 0.975,
+    "db": 0.042,
+    "basis": 0.042
+   },
+   "layerAvg": {
+    "head": 6,
+    "hook": 105,
+    "feature": 624,
+    "narrative": 481,
+    "chart": 153,
+    "why": 424,
+    "depth": 325,
+    "insight": 76,
+    "db": 745,
+    "basis": 120
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.18640829858832972,
+   "fixedShare": 0.17115229653505237,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "힘의 세기(신강·신약) 소개": 0.04,
+    "지금 대운 소개": 0.01
+   },
+   "evidMine": 0.10570071258907364,
+   "evidHas": 0.9583333333333334,
+   "evidThin": 0.041666666666666664,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.355555555555556,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.02631578947368421,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0.03389830508474576,
+   "seniorEx": {
+    "db · 육아": {
+     "n": 4,
+     "ex": "사업에서는 사업과 육아를 함께 챙기다 보면 몸이 먼저 지쳐요."
+    }
+   },
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 3,
+    "rootLevel": 3
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_self_35",
+   "short": "self_35",
+   "title": "건강 및 사고수",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 3편)",
+    "fate-blocks fx:check",
+    "feature healthmap",
+    "Deep.deep_health"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 3,
+   "dbTopEntry": "s35-rhythm",
+   "dbTopShare": 0.4111111111111111,
+   "narrative": 0,
+   "narrRuleKinds": 0,
+   "thin": 0,
+   "avgChars": 5130,
+   "avgBody": 798,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "db": 1,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "basis": 1
+   },
+   "layerAvg": {
+    "head": 8,
+    "hook": 127,
+    "db": 793,
+    "chart": 155,
+    "why": 172,
+    "feature": 3627,
+    "depth": 418,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.28895605902631827,
+   "fixedShare": 0.3175557966012556,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 0.66,
+    "지금 대운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.71
+   },
+   "evidMine": 0,
+   "evidHas": 0,
+   "evidThin": 1,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 3,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0.12222222222222222,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 3,
+    "rootLevel": 3
+   },
+   "v": "보완",
+   "why": [
+    "근거에 내 사주 값 줄 0%",
+    "'검수 근거 부족' 안내 100%"
+   ]
+  },
+  {
+   "id": "timeline_self_36",
+   "short": "self_36",
+   "title": "전생의 나",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 3편)",
+    "Deep.dossier_past",
+    "Deep.deep_past"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 3,
+   "dbTopEntry": "s36-ferry",
+   "dbTopShare": 0.4111111111111111,
+   "narrative": 0,
+   "narrRuleKinds": 0,
+   "thin": 0,
+   "avgChars": 3079,
+   "avgBody": 915,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "feature": 1,
+    "db": 1,
+    "chart": 1,
+    "why": 1,
+    "basis": 1
+   },
+   "layerAvg": {
+    "head": 5,
+    "hook": 111,
+    "feature": 1897,
+    "db": 910,
+    "chart": 152,
+    "why": 140,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.21684511103117016,
+   "fixedShare": 0.09449900768408732,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0,
+   "evidHas": 0,
+   "evidThin": 1,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 2,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.5526315789473685,
+   "youngEx": {
+    "feature · 동료": {
+     "n": 21,
+     "ex": "지금도 나와 같은 힘(자존심·동료)으로 남아 있어요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 3,
+    "rootLevel": 3
+   },
+   "v": "보완",
+   "why": [
+    "근거에 내 사주 값 줄 0%",
+    "'검수 근거 부족' 안내 100%",
+    "20세 미만 어른 장면 55%"
+   ]
+  },
+  {
+   "id": "timeline_self_37",
+   "short": "self_37",
+   "title": "개운법",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 5편)",
+    "서사 엔진(life)",
+    "fate-blocks fx:rx",
+    "Deep.deep_remedy"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 5,
+   "dbTopEntry": "s37-fire",
+   "dbTopShare": 0.3055555555555556,
+   "narrative": 0.9611111111111111,
+   "narrRuleKinds": 7,
+   "thin": 0.11388888888888889,
+   "avgChars": 3267,
+   "avgBody": 456,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.961,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.039,
+    "basis": 0.039
+   },
+   "layerAvg": {
+    "head": 3,
+    "hook": 107,
+    "narrative": 437,
+    "chart": 150,
+    "why": 431,
+    "feature": 2058,
+    "depth": 333,
+    "insight": 160,
+    "db": 818,
+    "basis": 135
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.2439315382521725,
+   "fixedShare": 0.2822651065316102,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "필요한 기운(용신) 소개": 1,
+    "힘의 세기(신강·신약) 소개": 1,
+    "지금 대운 소개": 0.01
+   },
+   "evidMine": 0.1012514220705347,
+   "evidHas": 0.9611111111111111,
+   "evidThin": 0.03888888888888889,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.766666666666667,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0.125,
+   "youngN": 38,
+   "youngAny": 0.02631578947368421,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 5,
+    "yongEl": 5
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_self_22",
+   "short": "self_22",
+   "title": "나라는 사람의 최종 사용설명서",
+   "topic": "self",
+   "layers": [
+    "DB 게시본(rebuild 6편)",
+    "서사 엔진(life)",
+    "fate-blocks fx:letter",
+    "feature rank"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 6,
+   "dbTopEntry": "self22-balanced-rooted",
+   "dbTopShare": 0.26944444444444443,
+   "narrative": 0.9722222222222222,
+   "narrRuleKinds": 7,
+   "thin": 0.008333333333333333,
+   "avgChars": 2221,
+   "avgBody": 550,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.972,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.028,
+    "basis": 0.028
+   },
+   "layerAvg": {
+    "head": 16,
+    "hook": 96,
+    "narrative": 532,
+    "chart": 163,
+    "why": 443,
+    "feature": 932,
+    "depth": 362,
+    "insight": 113,
+    "db": 1056,
+    "basis": 130
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.26693445293647394,
+   "fixedShare": 0.27346210371614527,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "일간 소개": 0.06,
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "필요한 기운(용신) 소개": 0.03
+   },
+   "evidMine": 0.0897936419408812,
+   "evidHas": 0.8638888888888889,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.005555555555555556,
+   "evidPerPerson": 9.96111111111111,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.6052631578947368,
+   "youngBad": 0.02631578947368421,
+   "youngEx": {
+    "narrative · 아내": {
+     "n": 1,
+     "ex": "실제 생활에서는 응원해 주는 팀에서는 기대 이상으로 해내지만, 깎아내리는 상사 밑에서는 실력의 절반도 못 써요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0.09166666666666666,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 6,
+    "rootLevel": 6
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_wealth_01",
+   "short": "wealth_01",
+   "title": "내 재물 그릇은 얼마나 클까?",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 12편)",
+    "서사 엔진(wealth)",
+    "fate-blocks fx:meter",
+    "Deep.deep_wealth"
+   ],
+   "dbFallback": 0.05,
+   "dbPending": 0,
+   "dbEntryKinds": 6,
+   "dbTopEntry": "w01-bowl-mid-steady",
+   "dbTopShare": 0.3,
+   "narrative": 0.9583333333333334,
+   "narrRuleKinds": 7,
+   "thin": 0.022222222222222223,
+   "avgChars": 2960,
+   "avgBody": 532,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "chart": 1,
+    "narrative": 0.958,
+    "why": 1,
+    "plus": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.042,
+    "basis": 0.042
+   },
+   "layerAvg": {
+    "head": 16,
+    "hook": 115,
+    "chart": 633,
+    "narrative": 507,
+    "why": 438,
+    "plus": 92,
+    "feature": 1098,
+    "depth": 326,
+    "insight": 157,
+    "db": 1019,
+    "basis": 150
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.16999313047569062,
+   "fixedShare": 0.14429683921209344,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "필요한 기운(용신) 소개": 1,
+    "힘의 세기(신강·신약) 소개": 1,
+    "일간 소개": 0.04,
+    "지금 대운 소개": 0.03
+   },
+   "evidMine": 0.09763476347634764,
+   "evidHas": 0.9583333333333334,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.002777777777777778,
+   "evidPerPerson": 10.1,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0.18333333333333332,
+   "youngN": 38,
+   "youngAny": 0.8947368421052632,
+   "youngBad": 0.15789473684210525,
+   "youngEx": {
+    "narrative · 대출": {
+     "n": 6,
+     "ex": "실제 생활에서는 대출 한도, 카드 한도, 연봉이 경력과 함께 올라가는 걸 체감해요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0.01694915254237288,
+   "seniorEx": {
+    "db · 승진": {
+     "n": 2,
+     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 승진이나 인상이 있으면 새 월급 기준으로 고정비를 다시 짜서, 오른 금액의 절반은 저축으로 먼저 보내세요."
+    }
+   },
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 12,
+    "group": 6,
+    "positionTG": 6
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_wealth_02",
+   "short": "wealth_02",
+   "title": "나는 어떤 방식으로 돈을 벌까?",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 8편)",
+    "서사 엔진(wealth)",
+    "fate-blocks fx:profile",
+    "Deep.deep_wealth"
+   ],
+   "dbFallback": 0.48055555555555557,
+   "dbPending": 0,
+   "dbEntryKinds": 8,
+   "dbTopEntry": "w02-mixed",
+   "dbTopShare": 0.14444444444444443,
+   "narrative": 0.7833333333333333,
+   "narrRuleKinds": 9,
+   "thin": 0.12222222222222222,
+   "avgChars": 2380,
+   "avgBody": 817,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.783,
+    "chart": 1,
+    "why": 0.881,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.989,
+    "db": 0.217,
+    "basis": 0.217
+   },
+   "layerAvg": {
+    "head": 17,
+    "hook": 110,
+    "narrative": 810,
+    "chart": 173,
+    "why": 437,
+    "feature": 835,
+    "depth": 304,
+    "insight": 138,
+    "db": 825,
+    "basis": 137
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.1852342014481903,
+   "fixedShare": 0.1812463898337719,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "필요한 기운(용신) 소개": 1,
+    "지금 대운 소개": 0.09,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.09214263174502998,
+   "evidHas": 0.7833333333333333,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.03888888888888889,
+   "evidPerPerson": 8.802777777777777,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.2631578947368421,
+   "youngEx": {
+    "narrative · 퇴근": {
+     "n": 4,
+     "ex": "실제 생활에서는 퇴근 뒤 외주나 판매를 해 보면 생각보다 반응이 빨리 와요."
+    },
+    "narrative · 투자": {
+     "n": 1,
+     "ex": "실제 생활에서는 지인이 좋은 투자처라며 이야기를 꺼내면 그날 밤 계산기를 두드려요."
+    },
+    "narrative · 출근": {
+     "n": 3,
+     "ex": "실제 생활에서는 야근과 주말 출근으로 프로젝트를 살려 놓고도 성과급 이야기 앞에서는 말을 아껴요."
+    },
+    "narrative · 연봉": {
+     "n": 2,
+     "ex": "실제 생활에서는 연봉 협상이나 승진 시즌에 가장 크게 움직이는 사람이에요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0.19491525423728814,
+   "seniorEx": {
+    "narrative · 승진": {
+     "n": 16,
+     "ex": "월급, 승진, 계약처럼 소속에서 나오는 돈이 중심이 돼요."
+    },
+    "narrative · 이직 준비": {
+     "n": 6,
+     "ex": "나를 키우는 데 드는 돈(교육·건강·이직 준비)까지 아끼다 수입이 오를 기회를 놓치고, 안전한 곳에만 넣어 두다 물가에 밀려요."
+    },
+    "db · 승진": {
+     "n": 1,
+     "ex": "공공기관, 대기업, 전문직 조직처럼 직급 체계가 분명한 곳에서 승진과 경력으로 수입이 오르고, 직접 장사를 하거나 협상하는 일에는 서툴러요."
+    }
+   },
+   "graphChecked": 73,
+   "graphBad": 0.0958904109589041,
+   "graphEx": [
+    "2026년(wealth 그래프 2위/10) 조심: 2026년(병오)은 흐름이 무거운 해라 큰 결정을 피하는 편이 좋아요.",
+    "2030년(wealth 그래프 8위/10) 좋다: 2030년 무렵(만 32~42세) 임술 대운으로 넘어가면 재주가 수입으로 바뀌는 길이 열리는 시기예요.",
+    "2030년(wealth 그래프 10위/10) 좋다: 2030년 무렵(만 63~73세) 정유 대운으로 넘어가면 재주가 수입으로 바뀌는 길이 열리는 시기예요.",
+    "2029년(wealth 그래프 8위/10) 좋다: 2029년 무렵(만 18~28세) 임오 대운으로 넘어가면 재주가 수입으로 바뀌는 길이 열리는 시기예요."
+   ],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "group": 7,
+    "tenGod": 5,
+    "strength": 2
+   },
+   "v": "보완",
+   "why": [
+    "65세+ 어색한 장면 19%"
+   ]
+  },
+  {
+   "id": "timeline_wealth_03",
+   "short": "wealth_03",
+   "title": "돈이 들어와도 왜 남지 않을까?",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 7편)",
+    "서사 엔진(wealth)",
+    "fate-blocks fx:check",
+    "Deep.deep_wealth"
+   ],
+   "dbFallback": 0.4166666666666667,
+   "dbPending": 0,
+   "dbEntryKinds": 7,
+   "dbTopEntry": "w03-share",
+   "dbTopShare": 0.1361111111111111,
+   "narrative": 0.975,
+   "narrRuleKinds": 7,
+   "thin": 0.030555555555555555,
+   "avgChars": 1608,
+   "avgBody": 505,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.975,
+    "chart": 1,
+    "why": 0.997,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.997,
+    "db": 0.025,
+    "basis": 0.025
+   },
+   "layerAvg": {
+    "head": 17,
+    "hook": 109,
+    "narrative": 488,
+    "chart": 171,
+    "why": 430,
+    "feature": 322,
+    "depth": 307,
+    "insight": 191,
+    "db": 1006,
+    "basis": 140
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.10665992493679964,
+   "fixedShare": 0.033714178685147034,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 0.7,
+    "지금 대운 소개": 0.21,
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "필요한 기운(용신) 소개": 0.03
+   },
+   "evidMine": 0.10036141228801779,
+   "evidHas": 0.975,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.002777777777777778,
+   "evidPerPerson": 9.991666666666667,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.8421052631578947,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "group": 7,
+    "tenGod": 4,
+    "strength": 1
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_wealth_04",
+   "short": "wealth_04",
+   "title": "월급형 인간일까, 사업형 인간일까?",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 7편)",
+    "서사 엔진(wealth)",
+    "fate-blocks fx:vs",
+    "feature rank",
+    "topic-deep td:income(꺼짐)",
+    "topic-deep td:sub(꺼짐)"
+   ],
+   "dbFallback": 0.4361111111111111,
+   "dbPending": 0,
+   "dbEntryKinds": 7,
+   "dbTopEntry": "w04-biz-B",
+   "dbTopShare": 0.14166666666666666,
+   "narrative": 0.9555555555555556,
+   "narrRuleKinds": 7,
+   "thin": 0.06388888888888888,
+   "avgChars": 2135,
+   "avgBody": 516,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.956,
+    "chart": 1,
+    "why": 0.981,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.911,
+    "db": 0.044,
+    "basis": 0.044
+   },
+   "layerAvg": {
+    "head": 19,
+    "hook": 126,
+    "narrative": 494,
+    "chart": 175,
+    "why": 438,
+    "feature": 863,
+    "depth": 324,
+    "insight": 140,
+    "db": 893,
+    "basis": 141
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.23200755960977176,
+   "fixedShare": 0.2102803738317757,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "일간 소개": 0.13,
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "지금 대운 소개": 0.3
+   },
+   "evidMine": 0.09893795416433762,
+   "evidHas": 0.9555555555555556,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.005555555555555556,
+   "evidPerPerson": 9.938888888888888,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.7368421052631579,
+   "youngEx": {
+    "narrative · 회사": {
+     "n": 20,
+     "ex": "실제 생활에서는 회사 일보다 퇴근 후 개인 작업에 더 열정이 생기고, 외주나 의뢰를 받으면 월급 받을 때보다 뿌듯해요."
+    },
+    "narrative · 창업": {
+     "n": 8,
+     "ex": "실제 생활에서는 주변에서 창업 이야기가 나오면 관심은 가지만, 수입이 들쭉날쭉한 생활을 상상하면 잠이 안 와요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0.3983050847457627,
+   "seniorEx": {
+    "narrative · 승진": {
+     "n": 47,
+     "ex": "이직이나 승진으로 수입 단위를 올리세요."
+    }
+   },
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 3,
+    "group": 6,
+    "tenGod": 3
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 74%",
+    "65세+ 어색한 장면 40%"
+   ]
+  },
+  {
+   "id": "timeline_wealth_05",
+   "short": "wealth_05",
+   "title": "나는 돈을 모으는 사람일까, 쓰는 사람일까?",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 9편)",
+    "서사 엔진(wealth)",
+    "fate-blocks fx:vs",
+    "Deep.deep_wealth"
+   ],
+   "dbFallback": 0.19722222222222222,
+   "dbPending": 0,
+   "dbEntryKinds": 8,
+   "dbTopEntry": "w05-low-interest",
+   "dbTopShare": 0.23055555555555557,
+   "narrative": 0.9722222222222222,
+   "narrRuleKinds": 7,
+   "thin": 0.13055555555555556,
+   "avgChars": 1461,
+   "avgBody": 464,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.972,
+    "chart": 1,
+    "why": 0.994,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.931,
+    "db": 0.028,
+    "basis": 0.028
+   },
+   "layerAvg": {
+    "head": 24,
+    "hook": 111,
+    "narrative": 446,
+    "chart": 180,
+    "why": 418,
+    "feature": 292,
+    "depth": 320,
+    "insight": 97,
+    "db": 937,
+    "basis": 147
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.1288750233465698,
+   "fixedShare": 0.03578173143822681,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.10373325733827302,
+   "evidHas": 0.9722222222222222,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.002777777777777778,
+   "evidPerPerson": 9.747222222222222,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.9473684210526315,
+   "youngBad": 0.10526315789473684,
+   "youngEx": {
+    "narrative · 투자": {
+     "n": 4,
+     "ex": "실제 생활에서는 여윳돈이 생기면 바로 투자처를 찾고, 예금 이자만 받는 걸 손해처럼 느껴요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0.2033898305084746,
+   "seniorEx": {
+    "narrative · 이직 준비": {
+     "n": 24,
+     "ex": "건강, 공부, 이직 준비처럼 나를 키우는 지출까지 아끼다 더 큰 기회를 놓쳐요."
+    }
+   },
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "group": 7,
+    "tenGod": 4,
+    "strength": 4,
+    "pattern": 2
+   },
+   "v": "보완",
+   "why": [
+    "65세+ 어색한 장면 20%"
+   ]
+  },
+  {
+   "id": "timeline_wealth_06",
+   "short": "wealth_06",
+   "title": "큰돈을 만날 기회는 언제일까?",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 7편)",
+    "서사 엔진(wealth)",
+    "feature timing",
+    "fate-blocks fx:actcal",
+    "topic-deep td:sub(꺼짐)"
+   ],
+   "dbFallback": 0.6666666666666666,
+   "dbPending": 0,
+   "dbEntryKinds": 6,
+   "dbTopEntry": "w06-daewoon-mid",
+   "dbTopShare": 0.08888888888888889,
+   "narrative": 0.9555555555555556,
+   "narrRuleKinds": 6,
+   "thin": 0.03888888888888889,
+   "avgChars": 3300,
+   "avgBody": 586,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.956,
+    "chart": 1,
+    "why": 0.969,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.044,
+    "luck": 0.044,
+    "basis": 0.044
+   },
+   "layerAvg": {
+    "head": 16,
+    "hook": 94,
+    "narrative": 568,
+    "chart": 1522,
+    "why": 429,
+    "feature": 546,
+    "depth": 396,
+    "insight": 152,
+    "db": 706,
+    "luck": 192,
+    "basis": 276
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.15709114379871836,
+   "fixedShare": 0.10748865355521936,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "지금 대운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.04,
+    "필요한 기운(용신) 소개": 0.04
+   },
+   "evidMine": 0.10125858123569793,
+   "evidHas": 0.9555555555555556,
+   "evidThin": 0,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.71111111111111,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0.125,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.2631578947368421,
+   "youngEx": {
+    "narrative · 투자": {
+     "n": 4,
+     "ex": "특정한 해에 거래, 투자, 사업 기회가 겹치면서 평소의 몇 배가 한꺼번에 움직여요."
+    },
+    "depth · 승진": {
+     "n": 6,
+     "ex": "승진이나 새 역할에 따라오는 수입 변화를 눈여겨보고, 책임이 늘 때 보상 조건도 함께 확인하세요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0.1864406779661017,
+   "seniorEx": {
+    "narrative · 승진": {
+     "n": 22,
+     "ex": "승진, 이직, 큰 계약처럼 공식적인 변화가 있는 해에 수입의 단위가 한 번에 올라가요."
+    }
+   },
+   "graphChecked": 1023,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "group": 6,
+    "daewoonStemTG": 4,
+    "seunStemTG": 4
+   },
+   "v": "보완",
+   "why": [
+    "65세+ 어색한 장면 19%"
+   ]
+  },
+  {
+   "id": "timeline_wealth_07",
+   "short": "wealth_07",
+   "title": "돈 때문에 가장 조심해야 할 선택",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 8편)",
+    "서사 엔진(wealth)",
+    "fate-blocks fx:check",
+    "Deep.deep_wealth"
+   ],
+   "dbFallback": 0.32222222222222224,
+   "dbPending": 0,
+   "dbEntryKinds": 8,
+   "dbTopEntry": "w07-partner-A",
+   "dbTopShare": 0.15555555555555556,
+   "narrative": 0.975,
+   "narrRuleKinds": 7,
+   "thin": 0.05,
+   "avgChars": 1621,
+   "avgBody": 490,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.975,
+    "chart": 1,
+    "why": 0.989,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.967,
+    "db": 0.025,
+    "basis": 0.025
+   },
+   "layerAvg": {
+    "head": 18,
+    "hook": 104,
+    "narrative": 476,
+    "chart": 174,
+    "why": 440,
+    "feature": 440,
+    "depth": 307,
+    "insight": 104,
+    "db": 899,
+    "basis": 141
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.13708474516032143,
+   "fixedShare": 0.041105275176981045,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 0.66,
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "일간 소개": 0.03
+   },
+   "evidMine": 0.09912136188907193,
+   "evidHas": 0.975,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.002777777777777778,
+   "evidPerPerson": 10.116666666666667,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0.175,
+   "youngN": 38,
+   "youngAny": 0.6842105263157895,
+   "youngBad": 0.02631578947368421,
+   "youngEx": {
+    "narrative · 대출": {
+     "n": 1,
+     "ex": "실제 생활에서는 수익이 난 직후에 더 큰 대출로 다음 투자를 하거나, 사업이 잘될 때 무리하게 매장을 늘리는 식이에요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "group": 5,
+    "tenGod": 5,
+    "strength": 3,
+    "pattern": 3
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_wealth_08",
+   "short": "wealth_08",
+   "title": "나는 투자와 재테크에 어울리는 성향일까?",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 7편)",
+    "서사 엔진(wealth)",
+    "fate-blocks fx:vs",
+    "feature rank",
+    "topic-deep td:sub(꺼짐)"
+   ],
+   "dbFallback": 0.3194444444444444,
+   "dbPending": 0,
+   "dbEntryKinds": 7,
+   "dbTopEntry": "w08-aggressive-B",
+   "dbTopShare": 0.16666666666666666,
+   "narrative": 0.9861111111111112,
+   "narrRuleKinds": 7,
+   "thin": 0.09722222222222222,
+   "avgChars": 2066,
+   "avgBody": 471,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.986,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.014,
+    "basis": 0.014
+   },
+   "layerAvg": {
+    "head": 22,
+    "hook": 107,
+    "narrative": 459,
+    "chart": 178,
+    "why": 441,
+    "feature": 888,
+    "depth": 326,
+    "insight": 91,
+    "db": 1014,
+    "basis": 150
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.22282241525307223,
+   "fixedShare": 0.21061667353385524,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "일간 소개": 0.12
+   },
+   "evidMine": 0.09715198296513175,
+   "evidHas": 0.9861111111111112,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 10.436111111111112,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 1,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.8947368421052632,
+   "youngEx": {
+    "narrative · 투자": {
+     "n": 33,
+     "ex": "실제 생활에서는 예금과 적금, 연금처럼 결과가 예측되는 곳을 선호하고, 주변의 투자 성공담을 들으면 부러우면서도 따라 하진 않아요."
+    },
+    "db · 동료": {
+     "n": 1,
+     "ex": "친구나 동료가 수익을 냈다는 얘기를 들으면 같은 종목에 들어가고, 이미 오른 뒤에 진입하는 사람이에요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "group": 5,
+    "tenGod": 4,
+    "strength": 2
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 89%"
+   ]
+  },
+  {
+   "id": "timeline_wealth_09",
+   "short": "wealth_09",
+   "title": "사람 때문에 돈을 잃기 쉬울까?",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 8편)",
+    "서사 엔진(wealth)",
+    "fate-blocks fx:check",
+    "feature rank",
+    "topic-deep td:sub(꺼짐)",
+    "topic-deep td:compat(꺼짐)"
+   ],
+   "dbFallback": 0.5111111111111111,
+   "dbPending": 0,
+   "dbEntryKinds": 8,
+   "dbTopEntry": "w09-family",
+   "dbTopShare": 0.11388888888888889,
+   "narrative": 0.9833333333333333,
+   "narrRuleKinds": 7,
+   "thin": 0.05,
+   "avgChars": 1974,
+   "avgBody": 495,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.983,
+    "chart": 1,
+    "why": 0.994,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.828,
+    "db": 0.017,
+    "basis": 0.017
+   },
+   "layerAvg": {
+    "head": 17,
+    "hook": 111,
+    "narrative": 484,
+    "chart": 173,
+    "why": 439,
+    "feature": 787,
+    "depth": 337,
+    "insight": 79,
+    "db": 950,
+    "basis": 137
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.2174256351272311,
+   "fixedShare": 0.1842239929819431,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 0.87,
+    "일간 소개": 0.32,
+    "힘의 세기(신강·신약) 소개": 0.57,
+    "필요한 기운(용신) 소개": 0.02
+   },
+   "evidMine": 0.09931787175989086,
+   "evidHas": 0.9833333333333333,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.002777777777777778,
+   "evidPerPerson": 10.180555555555555,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 2,
+    "positionTG": 3,
+    "group": 6,
+    "pattern": 1,
+    "tenGod": 1
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_wealth_10",
+   "short": "wealth_10",
+   "title": "나에게 유리한 재물운의 시기",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 9편)",
+    "서사 엔진(wealth)",
+    "feature timing",
+    "fate-blocks fx:years"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 6,
+   "dbTopEntry": "w10-good-steady",
+   "dbTopShare": 0.26944444444444443,
+   "narrative": 0.9555555555555556,
+   "narrRuleKinds": 6,
+   "thin": 0.030555555555555555,
+   "avgChars": 3468,
+   "avgBody": 577,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.956,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.044,
+    "basis": 0.044
+   },
+   "layerAvg": {
+    "head": 15,
+    "hook": 98,
+    "narrative": 552,
+    "chart": 1522,
+    "why": 425,
+    "feature": 728,
+    "depth": 382,
+    "insight": 157,
+    "db": 1017,
+    "basis": 186
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.12608137906577682,
+   "fixedShare": 0.08759124087591241,
+   "repeat": 0.03888888888888889,
+   "repeatSame": 0.03888888888888889,
+   "repeatAvg": 0.04722222222222222,
+   "repeatEx": [
+    "유리한지는 적합도와 안정성을 함께 보세요. ← wealth_06 (17명)"
+   ],
+   "facts": {
+    "지금 대운 소개": 1,
+    "필요한 기운(용신) 소개": 0.21,
+    "힘의 세기(신강·신약) 소개": 0.04,
+    "일간 소개": 0.04
+   },
+   "evidMine": 0.10201729106628242,
+   "evidHas": 0.9555555555555556,
+   "evidThin": 0,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.63888888888889,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.47368421052631576,
+   "youngEx": {
+    "narrative · 투자": {
+     "n": 14,
+     "ex": "실제 생활에서는 돈에 관심이 없던 사람이 어느 시기부터 투자나 부업에 눈을 뜨고, 그 시기에 실제로 자산이 크게 늘어나는 식이에요."
+    },
+    "depth · 승진": {
+     "n": 4,
+     "ex": "승진이나 이직 같은 기회를 이 시기에 맞춰 보고, 평소에 성과를 기록해 두면 협상에서 힘이 돼요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0.1864406779661017,
+   "seniorEx": {
+    "narrative · 승진": {
+     "n": 15,
+     "ex": "실제 생활에서는 직장 생활에서 유독 승진과 연봉 협상이 잘 풀렸던 몇 년이 있었을 거예요."
+    },
+    "depth · 승진": {
+     "n": 7,
+     "ex": "승진이나 이직 같은 기회를 이 시기에 맞춰 보고, 평소에 성과를 기록해 두면 협상에서 힘이 돼요."
+    }
+   },
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 6,
+    "daewoonSeason": 6,
+    "seunSeason": 3,
+    "seunStemTG": 3
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 47%",
+    "65세+ 어색한 장면 19%"
+   ]
+  },
+  {
+   "id": "timeline_wealth_11",
+   "short": "wealth_11",
+   "title": "최고의 재물 시나리오 vs 최악의 재물 시나리오",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 7편)",
+    "서사 엔진(wealth)",
+    "fate-blocks fx:scenario",
+    "feature rank"
+   ],
+   "dbFallback": 0.4166666666666667,
+   "dbPending": 0,
+   "dbEntryKinds": 7,
+   "dbTopEntry": "w11-share-A",
+   "dbTopShare": 0.2611111111111111,
+   "narrative": 0.9583333333333334,
+   "narrRuleKinds": 6,
+   "thin": 0.030555555555555555,
+   "avgChars": 2053,
+   "avgBody": 511,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.958,
+    "chart": 1,
+    "why": 0.978,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.992,
+    "db": 0.042,
+    "basis": 0.042
+   },
+   "layerAvg": {
+    "head": 26,
+    "hook": 126,
+    "narrative": 492,
+    "chart": 182,
+    "why": 430,
+    "feature": 842,
+    "depth": 296,
+    "insight": 92,
+    "db": 852,
+    "basis": 148
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.22159131462752296,
+   "fixedShare": 0.19129857190302224,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "일간 소개": 0.28,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.10209951107276388,
+   "evidHas": 0.9583333333333334,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.002777777777777778,
+   "evidPerPerson": 9.658333333333333,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.6578947368421053,
+   "youngBad": 0.6578947368421053,
+   "youngEx": {
+    "narrative · 투자": {
+     "n": 19,
+     "ex": "실제 생활에서는 최고의 시나리오: 실력 있고 정직한 파트너를 만나 역할을 나누고, 혼자서는 못 했을 크기로 사업이나 투자를 키워요."
+    },
+    "narrative · 은퇴": {
+     "n": 6,
+     "ex": "실제 생활에서는 최고의 시나리오: 신용이 높은 재직 기간에 자산과 기술을 쌓아서, 은퇴 뒤에도 수입이 끊기지 않는 구조를 갖춰요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 5,
+    "pattern": 7,
+    "group": 2
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 66%"
+   ]
+  },
+  {
+   "id": "timeline_wealth_12",
+   "short": "wealth_12",
+   "title": "내 재산을 키우기 위한 현실 전략",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 9편)",
+    "서사 엔진(wealth)",
+    "fate-blocks fx:road",
+    "feature rank",
+    "topic-deep td:sub(꺼짐)"
+   ],
+   "dbFallback": 0.05,
+   "dbPending": 0,
+   "dbEntryKinds": 9,
+   "dbTopEntry": "w12-balanced-mid",
+   "dbTopShare": 0.21666666666666667,
+   "narrative": 1,
+   "narrRuleKinds": 7,
+   "thin": 0.027777777777777776,
+   "avgChars": 1942,
+   "avgBody": 494,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 1,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.961
+   },
+   "layerAvg": {
+    "head": 18,
+    "hook": 105,
+    "narrative": 490,
+    "chart": 174,
+    "why": 442,
+    "feature": 769,
+    "depth": 311,
+    "insight": 88
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.24953971406233877,
+   "fixedShare": 0.23664709172259507,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "일간 소개": 0.09,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.10065111231687467,
+   "evidHas": 1,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 10.238888888888889,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.07894736842105263,
+   "youngEx": {
+    "narrative · 투자": {
+     "n": 1,
+     "ex": "실제 생활에서는 경제 뉴스와 투자 책은 꾸준히 보는데, 실제 자산 구성은 몇 년째 그대로일 수 있어요."
+    },
+    "narrative · 직장": {
+     "n": 2,
+     "ex": "실제 생활에서는 꾸준한 직장 생활 덕에 대출 조건이 좋고, 정해진 금액을 오래 넣는 데 강해요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 9,
+    "group": 9
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_wealth_13",
+   "short": "wealth_13",
+   "title": "재물운에서 나와 맞는 사람과 피해야 할 사람",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 5편)",
+    "서사 엔진(wealth)",
+    "fate-blocks fx:people",
+    "feature rank",
+    "topic-deep td:compatRank(꺼짐)"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 5,
+   "dbTopEntry": "w13-fire",
+   "dbTopShare": 0.3055555555555556,
+   "narrative": 0.9583333333333334,
+   "narrRuleKinds": 6,
+   "thin": 0.06666666666666667,
+   "avgChars": 2205,
+   "avgBody": 494,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.958,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.839,
+    "db": 0.042,
+    "basis": 0.042
+   },
+   "layerAvg": {
+    "head": 24,
+    "hook": 127,
+    "narrative": 473,
+    "chart": 110,
+    "why": 442,
+    "feature": 1083,
+    "depth": 316,
+    "insight": 84,
+    "db": 875,
+    "basis": 86
+   },
+   "sameText": 0.0027932098765431944,
+   "uniqueTexts": 359,
+   "jaccard": 0.27520992326882604,
+   "fixedShare": 0.26347889729202245,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "필요한 기운(용신) 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "일간 소개": 0.1
+   },
+   "evidMine": 0.10122611919019105,
+   "evidHas": 0.9583333333333334,
+   "evidThin": 0.041666666666666664,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.741666666666667,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.02631578947368421,
+   "youngEx": {
+    "narrative · 동료": {
+     "n": 1,
+     "ex": "기회는 이미 넘치니, 함께 관리하고 실행하며 일을 덜어 줄 동료가 재물운을 살려요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 5,
+    "yongEl": 5
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_wealth_14",
+   "short": "wealth_14",
+   "title": "재물운 타이밍: 힘이 실리는 때",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 6편)",
+    "서사 엔진(wealth)",
+    "feature timing",
+    "fate-blocks fx:cross"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 5,
+   "dbTopEntry": "w14-bigeop",
+   "dbTopShare": 0.21666666666666667,
+   "narrative": 0.9611111111111111,
+   "narrRuleKinds": 6,
+   "thin": 0.008333333333333333,
+   "avgChars": 3091,
+   "avgBody": 563,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.961,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.039,
+    "basis": 0.039
+   },
+   "layerAvg": {
+    "head": 17,
+    "hook": 96,
+    "narrative": 547,
+    "chart": 1522,
+    "why": 429,
+    "feature": 368,
+    "depth": 320,
+    "insight": 218,
+    "db": 856,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.18177137660789439,
+   "fixedShare": 0.14623032311516157,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "지금 대운 소개": 0.17,
+    "힘의 세기(신강·신약) 소개": 0.04
+   },
+   "evidMine": 0.10067873303167421,
+   "evidHas": 0.9611111111111111,
+   "evidThin": 0.03888888888888889,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.822222222222223,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.868421052631579,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0.025423728813559324,
+   "seniorEx": {
+    "db · 승진": {
+     "n": 3,
+     "ex": "승진, 계약, 직책처럼 책임이 커지는 일이 생기고, 그에 따라 안정적인 수입이 자리를 잡아요."
+    }
+   },
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 6,
+    "daewoonStemTG": 5,
+    "gender": 1
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_wealth_15",
+   "short": "wealth_15",
+   "title": "재물운을 끌어올리는 개운법",
+   "topic": "wealth",
+   "layers": [
+    "DB 게시본(rebuild 5편)",
+    "서사 엔진(wealth)",
+    "fate-blocks fx:rx",
+    "feature rank",
+    "topic-deep td:wish(꺼짐)",
+    "topic-deep td:dirs(꺼짐)"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 5,
+   "dbTopEntry": "w15-fire",
+   "dbTopShare": 0.3055555555555556,
+   "narrative": 0.975,
+   "narrRuleKinds": 6,
+   "thin": 0.08333333333333333,
+   "avgChars": 1669,
+   "avgBody": 457,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.975,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.772,
+    "db": 0.025,
+    "basis": 0.025
+   },
+   "layerAvg": {
+    "head": 14,
+    "hook": 99,
+    "narrative": 444,
+    "chart": 110,
+    "why": 435,
+    "feature": 651,
+    "depth": 294,
+    "insight": 68,
+    "db": 798,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.23862096385921888,
+   "fixedShare": 0.20955315870570107,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "일간 소개": 0.09,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.09895833333333333,
+   "evidHas": 0.975,
+   "evidThin": 0.025,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 10.133333333333333,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 5,
+    "yongEl": 5
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_career_01",
+   "short": "career_01",
+   "title": "나는 어떤 일을 해야 잘할까?",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 10편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:meter",
+    "Deep.deep_jobs",
+    "topic-deep td:jobs(꺼짐)"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 10,
+   "dbTopEntry": "c01-metal-steady",
+   "dbTopShare": 0.14166666666666666,
+   "narrative": 0.9694444444444444,
+   "narrRuleKinds": 9,
+   "thin": 0.008333333333333333,
+   "avgChars": 2232,
+   "avgBody": 537,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "chart": 1,
+    "narrative": 0.969,
+    "why": 1,
+    "plus": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.031,
+    "basis": 0.031
+   },
+   "layerAvg": {
+    "head": 16,
+    "hook": 108,
+    "chart": 629,
+    "narrative": 516,
+    "why": 431,
+    "plus": 82,
+    "feature": 407,
+    "depth": 309,
+    "insight": 152,
+    "db": 1080,
+    "basis": 143
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.14612064443122455,
+   "fixedShare": 0.09177430319510536,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 1,
+    "일간 소개": 0.03
+   },
+   "evidMine": 0.10713219934347956,
+   "evidHas": 0.9694444444444444,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.002777777777777778,
+   "evidPerPerson": 9.308333333333334,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.42105263157894735,
+   "youngBad": 0.07894736842105263,
+   "youngEx": {
+    "narrative · 동료": {
+     "n": 3,
+     "ex": "동료들이 막힐 때 “그건 이렇게 된 거야”라고 설명해 주는 사람이 늘 당신이에요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "dayMaster": 10,
+    "strength": 10
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_career_02",
+   "short": "career_02",
+   "title": "내가 가진 가장 돈 되는 재능",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 10편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:profile",
+    "feature rank",
+    "topic-deep td:income(꺼짐)"
+   ],
+   "dbFallback": 0.1527777777777778,
+   "dbPending": 0,
+   "dbEntryKinds": 10,
+   "dbTopEntry": "c02-jeonggwan",
+   "dbTopShare": 0.14166666666666666,
+   "narrative": 0.9666666666666667,
+   "narrRuleKinds": 9,
+   "thin": 0.011111111111111112,
+   "avgChars": 2098,
+   "avgBody": 516,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.967,
+    "chart": 1,
+    "why": 0.997,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.033,
+    "basis": 0.033
+   },
+   "layerAvg": {
+    "head": 16,
+    "hook": 108,
+    "narrative": 493,
+    "chart": 168,
+    "why": 432,
+    "feature": 864,
+    "depth": 312,
+    "insight": 125,
+    "db": 1070,
+    "basis": 137
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.19920314871924613,
+   "fixedShare": 0.17422566371681417,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "필요한 기운(용신) 소개": 1,
+    "일간 소개": 0.51,
+    "힘의 세기(신강·신약) 소개": 0.25
+   },
+   "evidMine": 0.10452554744525547,
+   "evidHas": 0.9666666666666667,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.002777777777777778,
+   "evidPerPerson": 9.51388888888889,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.4473684210526316,
+   "youngBad": 0.07894736842105263,
+   "youngEx": {
+    "feature · 투자": {
+     "n": 1,
+     "ex": "내 재능의 값 · 순위 命簿 · 재주 대장 돈이 되는 내 재능 己丑 기축일주 시주 상관 庚 편인 午 건록 일주 일간(나) 己 비견 丑 묘 월주 정관 甲 편재 子 "
+    },
+    "narrative · 동료": {
+     "n": 2,
+     "ex": "실제 생활에서는 친구나 동료가 계약서, 서류, 공부 방법을 당신에게 먼저 물어봐요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 5,
+    "tenGod": 10,
+    "group": 5
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_career_03",
+   "short": "career_03",
+   "title": "직장인과 사업가, 어느 쪽이 맞을까?",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 10편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:vs",
+    "feature rank",
+    "topic-deep td:env(꺼짐)",
+    "topic-deep td:sub(꺼짐)"
+   ],
+   "dbFallback": 0.3416666666666667,
+   "dbPending": 0,
+   "dbEntryKinds": 10,
+   "dbTopEntry": "c03-honjap-A",
+   "dbTopShare": 0.125,
+   "narrative": 0.9722222222222222,
+   "narrRuleKinds": 9,
+   "thin": 0.016666666666666666,
+   "avgChars": 2030,
+   "avgBody": 539,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.972,
+    "chart": 1,
+    "why": 0.992,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.028,
+    "basis": 0.028
+   },
+   "layerAvg": {
+    "head": 20,
+    "hook": 115,
+    "narrative": 523,
+    "chart": 172,
+    "why": 441,
+    "feature": 771,
+    "depth": 304,
+    "insight": 124,
+    "db": 948,
+    "basis": 140
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.2021846166010353,
+   "fixedShare": 0.2082741837355506,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "일간 소개": 0.37,
+    "필요한 기운(용신) 소개": 0.03
+   },
+   "evidMine": 0.09749062590135564,
+   "evidHas": 0.9083333333333333,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.002777777777777778,
+   "evidPerPerson": 9.630555555555556,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.9473684210526315,
+   "youngEx": {
+    "narrative · 직장": {
+     "n": 16,
+     "ex": "실제 생활에서는 직장에서는 상사나 동료와 주도권 다툼이 반복되고, 동업이나 공동 프로젝트에서는 누가 결정하느냐를 두고 자주 부딪혀요."
+    },
+    "narrative · 회사": {
+     "n": 13,
+     "ex": "실제 생활에서는 회사 일을 하면서도 개인 작업이나 부업을 따로 하고 있거나, 하고 싶어 해요."
+    },
+    "narrative · 출근": {
+     "n": 7,
+     "ex": "실제 생활에서는 출근해서 오늘 할 일을 확인하고, 마감에 맞춰 정확히 끝내는 하루가 가장 편해요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 10,
+    "pattern": 10
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 95%"
+   ]
+  },
+  {
+   "id": "timeline_career_04",
+   "short": "career_04",
+   "title": "나는 리더일까, 전문가일까?",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 8편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:vs",
+    "feature rank",
+    "topic-deep td:env(꺼짐)"
+   ],
+   "dbFallback": 0.6472222222222223,
+   "dbPending": 0,
+   "dbEntryKinds": 6,
+   "dbTopEntry": "c04-leader",
+   "dbTopShare": 0.1361111111111111,
+   "narrative": 0.9666666666666667,
+   "narrRuleKinds": 9,
+   "thin": 0.08611111111111111,
+   "avgChars": 1995,
+   "avgBody": 493,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.967,
+    "chart": 1,
+    "why": 0.972,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.033,
+    "basis": 0.033
+   },
+   "layerAvg": {
+    "head": 15,
+    "hook": 108,
+    "narrative": 480,
+    "chart": 167,
+    "why": 436,
+    "feature": 762,
+    "depth": 329,
+    "insight": 132,
+    "db": 752,
+    "basis": 136
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.20275116556004563,
+   "fixedShare": 0.2130108193784026,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "일간 소개": 0.42,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.10721772985923929,
+   "evidHas": 0.9666666666666667,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.002777777777777778,
+   "evidPerPerson": 9.275,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.7894736842105263,
+   "youngBad": 0.2894736842105263,
+   "youngEx": {
+    "insight · 상사": {
+     "n": 6,
+     "ex": "이 사주에서만 읽히는 포인트 윗선과 평가 기준이 두 갈래로 섞여 들어오는 구조라서, 상사가 둘이거나 기준이 자주 바뀌는 환경에서 마음이 흔들리기 쉬워요."
+    },
+    "narrative · 동료": {
+     "n": 4,
+     "ex": "실제 생활에서는 동료들이 막히면 당신을 찾아오고, 회의에서는 결정보다 근거를 제시하는 역할을 해요."
+    },
+    "narrative · 팀장": {
+     "n": 1,
+     "ex": "팀장이 아니어도 이미 팀의 정신적 중심 역할을 해요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "group": 8
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_career_05",
+   "short": "career_05",
+   "title": "나에게 잘 맞는 업종과 맞지 않는 업종",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 10편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:fit",
+    "feature rank",
+    "topic-deep td:industry(꺼짐)"
+   ],
+   "dbFallback": 0.058333333333333334,
+   "dbPending": 0,
+   "dbEntryKinds": 10,
+   "dbTopEntry": "c05-earth-steady",
+   "dbTopShare": 0.21666666666666667,
+   "narrative": 0.9777777777777777,
+   "narrRuleKinds": 9,
+   "thin": 0.008333333333333333,
+   "avgChars": 1893,
+   "avgBody": 525,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.978,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.022,
+    "basis": 0.022
+   },
+   "layerAvg": {
+    "head": 21,
+    "hook": 117,
+    "narrative": 508,
+    "chart": 173,
+    "why": 430,
+    "feature": 625,
+    "depth": 328,
+    "insight": 121,
+    "db": 1054,
+    "basis": 140
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.2137255864815234,
+   "fixedShare": 0.21386165953334255,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "일간 소개": 0.09,
+    "힘의 세기(신강·신약) 소개": 0.23
+   },
+   "evidMine": 0.10700561631687851,
+   "evidHas": 0.9777777777777777,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.397222222222222,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.7631578947368421,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0.3559322033898305,
+   "seniorEx": {
+    "depth · 입사": {
+     "n": 42,
+     "ex": "압박이 강한 업종은 오래 버티기 어려우니 입사 전 문화를 확인해 보고, 퇴사율이나 근속 연수 같은 정보도 참고하세요."
+    }
+   },
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 10,
+    "el": 10
+   },
+   "v": "보완",
+   "why": [
+    "65세+ 어색한 장면 36%"
+   ]
+  },
+  {
+   "id": "timeline_career_06",
+   "short": "career_06",
+   "title": "나는 어떤 직장 환경에서 성공할까?",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 8편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:env",
+    "Deep.deep_jobs"
+   ],
+   "dbFallback": 0.19166666666666668,
+   "dbPending": 0,
+   "dbEntryKinds": 8,
+   "dbTopEntry": "c06-team",
+   "dbTopShare": 0.17222222222222222,
+   "narrative": 0.9888888888888889,
+   "narrRuleKinds": 9,
+   "thin": 0.011111111111111112,
+   "avgChars": 1731,
+   "avgBody": 505,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.989,
+    "chart": 1,
+    "why": 0.997,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.906,
+    "db": 0.011,
+    "basis": 0.011
+   },
+   "layerAvg": {
+    "head": 19,
+    "hook": 112,
+    "narrative": 496,
+    "chart": 171,
+    "why": 438,
+    "feature": 528,
+    "depth": 330,
+    "insight": 89,
+    "db": 891,
+    "basis": 144
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.15233342187894192,
+   "fixedShare": 0.07482851797963001,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "필요한 기운(용신) 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.01
+   },
+   "evidMine": 0.10256410256410256,
+   "evidHas": 0.9888888888888889,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.966666666666667,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.47368421052631576,
+   "youngEx": {
+    "narrative · 퇴근": {
+     "n": 12,
+     "ex": "실제 생활에서는 자율 근무나 재택이 가능한 조직에서는 성과가 좋고, 출퇴근 기록과 보고서를 매일 확인하는 조직에서는 사소한 지적이 쌓여 마찰로 번져요."
+    },
+    "narrative · 직장": {
+     "n": 3,
+     "ex": "실제 생활에서는 좋은 멘토를 만난 직장에서는 몇 년 만에 크게 성장했고, 배울 사람이 없는 곳에서는 일이 익숙해지는 순간 의욕이 꺼졌을 거예요."
+    },
+    "narrative · 부서": {
+     "n": 3,
+     "ex": "실제 생활에서는 스타트업이나 신규 부서처럼 정해진 게 적은 곳에서 오히려 편하게 일해요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0.1864406779661017,
+   "seniorEx": {
+    "depth · 승진": {
+     "n": 22,
+     "ex": "체계가 안정된 조직에서 평판이 쌓이고 승진 흐름도 안정적이에요."
+    }
+   },
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 2,
+    "group": 8,
+    "tenGod": 2
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 47%",
+    "65세+ 어색한 장면 19%"
+   ]
+  },
+  {
+   "id": "timeline_career_07",
+   "short": "career_07",
+   "title": "조직생활에서 내가 부딪히는 문제",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 8편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:check",
+    "feature rank",
+    "topic-deep td:weak(꺼짐)"
+   ],
+   "dbFallback": 0.28055555555555556,
+   "dbPending": 0,
+   "dbEntryKinds": 8,
+   "dbTopEntry": "c07-obey",
+   "dbTopShare": 0.1527777777777778,
+   "narrative": 0.7527777777777778,
+   "narrRuleKinds": 12,
+   "thin": 0.09722222222222222,
+   "avgChars": 2147,
+   "avgBody": 679,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "db": 0.247,
+    "chart": 1,
+    "why": 0.919,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.997,
+    "basis": 0.247,
+    "narrative": 0.753
+   },
+   "layerAvg": {
+    "head": 17,
+    "hook": 105,
+    "db": 911,
+    "chart": 169,
+    "why": 389,
+    "feature": 763,
+    "depth": 349,
+    "insight": 78,
+    "basis": 136,
+    "narrative": 597
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.1852017958841848,
+   "fixedShare": 0.18047068001560265,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 0.71,
+    "일간 소개": 0.62,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.09673873213631366,
+   "evidHas": 0.7138888888888889,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.030555555555555555,
+   "evidPerPerson": 7.580555555555556,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 15,
+   "graphBad": 0.13333333333333333,
+   "graphEx": [
+    "2032년(career 그래프 9위/10) 좋다: 2032년 무렵(만 39~49세) 정미 대운으로 넘어가면 결과물로 승부하는 시기예요.",
+    "2030년(career 그래프 8위/10) 좋다: 2030년 무렵(만 63~73세) 정유 대운으로 넘어가면 결과물로 승부하는 시기예요."
+   ],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 2,
+    "tenGod": 4,
+    "group": 7
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_career_08",
+   "short": "career_08",
+   "title": "이직과 독립, 언제 움직이는 게 좋을까?",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 13편)",
+    "서사 엔진(career)",
+    "feature timing",
+    "fate-blocks fx:years",
+    "topic-deep td:sub(꺼짐)"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 10,
+   "dbTopEntry": "c08-gwanseong-steady",
+   "dbTopShare": 0.13333333333333333,
+   "narrative": 0.9694444444444444,
+   "narrRuleKinds": 11,
+   "thin": 0.008333333333333333,
+   "avgChars": 3494,
+   "avgBody": 676,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.969,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.031,
+    "luck": 0.031,
+    "basis": 0.031
+   },
+   "layerAvg": {
+    "head": 22,
+    "hook": 93,
+    "narrative": 655,
+    "chart": 1506,
+    "why": 430,
+    "feature": 641,
+    "depth": 412,
+    "insight": 161,
+    "db": 997,
+    "luck": 195,
+    "basis": 258
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.09725691208227272,
+   "fixedShare": 0.0321285140562249,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "지금 대운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.03
+   },
+   "evidMine": 0.10677314404022478,
+   "evidHas": 0.9694444444444444,
+   "evidThin": 0,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.391666666666667,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0.4861111111111111,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 1,
+   "seniorEx": {
+    "feature · 승진": {
+     "n": 118,
+     "ex": "일의 흐름이 좋은 해 TOP 3 앞으로 10년 중 일에 힘이 실리는 해 1순위 · 2026년 병오 98점 2순위 · 2027년 정미 91점 3순위 · 2035년 "
+    }
+   },
+   "graphChecked": 385,
+   "graphBad": 0.005194805194805195,
+   "graphEx": [
+    "2031년(career 그래프 8위/10) 좋다: 독립이나 내 일을 시험해 보기 좋은 해는 2030년·2031년이에요.",
+    "2028년(career 그래프 8위/10) 좋다: 독립이나 내 일을 시험해 보기 좋은 해는 2028년·2031년이에요."
+   ],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 10,
+    "daewoonStemTG": 10,
+    "seunSeason": 3,
+    "seunStemTG": 3
+   },
+   "v": "보완",
+   "why": [
+    "65세+ 어색한 장면 100%"
+   ]
+  },
+  {
+   "id": "timeline_career_09",
+   "short": "career_09",
+   "title": "창업과 사업에서 내가 조심해야 할 것",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 9편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:check",
+    "feature rank",
+    "topic-deep td:sub(꺼짐)",
+    "topic-deep td:dirs(꺼짐)"
+   ],
+   "dbFallback": 0.475,
+   "dbPending": 0,
+   "dbEntryKinds": 9,
+   "dbTopEntry": "c09-expand",
+   "dbTopShare": 0.13055555555555556,
+   "narrative": 0.9833333333333333,
+   "narrRuleKinds": 11,
+   "thin": 0.019444444444444445,
+   "avgChars": 1922,
+   "avgBody": 507,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.983,
+    "chart": 1,
+    "why": 0.989,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.986,
+    "db": 0.017,
+    "basis": 0.017
+   },
+   "layerAvg": {
+    "head": 20,
+    "hook": 103,
+    "narrative": 499,
+    "chart": 172,
+    "why": 444,
+    "feature": 721,
+    "depth": 321,
+    "insight": 95,
+    "db": 790,
+    "basis": 137
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.19326495351848674,
+   "fixedShare": 0.20001470155836518,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 0.83,
+    "일간 소개": 0.79,
+    "힘의 세기(신강·신약) 소개": 0.23,
+    "필요한 기운(용신) 소개": 0.02
+   },
+   "evidMine": 0.10681884694176177,
+   "evidHas": 0.9833333333333333,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.491666666666667,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.18421052631578946,
+   "youngEx": {
+    "insight · 상사": {
+     "n": 4,
+     "ex": "이 사주에서만 읽히는 포인트 윗선과 평가 기준이 두 갈래로 섞여 들어오는 구조라서, 상사가 둘이거나 기준이 자주 바뀌는 환경에서 마음이 흔들리기 쉬워요."
+    },
+    "insight · 직장": {
+     "n": 3,
+     "ex": "이 사주에서만 읽히는 포인트 직장의 책임과 평가의 무게는 큰데 받쳐 줄 내 힘은 작아서, 늘 시험대에 서 있는 긴장이 깔려 있어요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "group": 7,
+    "strength": 3,
+    "pattern": 2,
+    "tenGod": 2
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_career_10",
+   "short": "career_10",
+   "title": "성공을 가로막는 나의 습관",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 10편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:check",
+    "feature rank"
+   ],
+   "dbFallback": 0.16666666666666666,
+   "dbPending": 0,
+   "dbEntryKinds": 10,
+   "dbTopEntry": "c10-goegang-steady",
+   "dbTopShare": 0.19444444444444445,
+   "narrative": 0.9666666666666667,
+   "narrRuleKinds": 9,
+   "thin": 0.03611111111111111,
+   "avgChars": 1896,
+   "avgBody": 497,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.967,
+    "chart": 1,
+    "why": 0.983,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.917,
+    "db": 0.033,
+    "basis": 0.033
+   },
+   "layerAvg": {
+    "head": 14,
+    "hook": 104,
+    "narrative": 480,
+    "chart": 166,
+    "why": 439,
+    "feature": 723,
+    "depth": 331,
+    "insight": 77,
+    "db": 861,
+    "basis": 135
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.20936634912031168,
+   "fixedShare": 0.21249398666758298,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "일간 소개": 0.63,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.10440361621463984,
+   "evidHas": 0.9666666666666667,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.002777777777777778,
+   "evidPerPerson": 9.525,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.42105263157894735,
+   "youngBad": 0.23684210526315788,
+   "youngEx": {
+    "narrative · 이직": {
+     "n": 3,
+     "ex": "실제 생활에서는 이직, 창업, 큰 프로젝트 앞에서 가족이나 선배의 의견을 먼저 듣고, 그 의견이 반대면 하고 싶은 일도 접어요."
+    },
+    "narrative · 상사": {
+     "n": 4,
+     "ex": "실제 생활에서는 보고서를 완성해 놓고 상사의 반응을 상상하며 몇 번씩 고쳐요."
+    },
+    "narrative · 승진": {
+     "n": 2,
+     "ex": "실제 생활에서는 조직에서 성실하다는 평은 늘 듣는데, 승진이나 중요한 프로젝트는 먼저 손을 든 사람에게 가요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0.00847457627118644,
+   "seniorEx": {
+    "insight · 승진": {
+     "n": 1,
+     "ex": "승진이나 역할 확대의 기회를 차분히 준비하세요."
+    }
+   },
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 10,
+    "star": 10
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_career_11",
+   "short": "career_11",
+   "title": "최고의 커리어 시나리오 vs 최악의 커리어 시나리오",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 10편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:scenario",
+    "feature rank"
+   ],
+   "dbFallback": 0.058333333333333334,
+   "dbPending": 0,
+   "dbEntryKinds": 10,
+   "dbTopEntry": "c11-bigeop-steady",
+   "dbTopShare": 0.4305555555555556,
+   "narrative": 0.9777777777777777,
+   "narrRuleKinds": 8,
+   "thin": 0.08888888888888889,
+   "avgChars": 1966,
+   "avgBody": 493,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.978,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.022,
+    "basis": 0.022
+   },
+   "layerAvg": {
+    "head": 28,
+    "hook": 119,
+    "narrative": 475,
+    "chart": 180,
+    "why": 419,
+    "feature": 762,
+    "depth": 337,
+    "insight": 72,
+    "db": 1091,
+    "basis": 147
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.22020093204880065,
+   "fixedShare": 0.21853770094840924,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "일간 소개": 0.29,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.11039951204635559,
+   "evidHas": 0.9777777777777777,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.002777777777777778,
+   "evidPerPerson": 9.108333333333333,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.8947368421052632,
+   "youngBad": 0.7105263157894737,
+   "youngEx": {
+    "narrative · 동료": {
+     "n": 27,
+     "ex": "실제 생활에서는 그 흐름에서는 경쟁심이 동료가 아닌 시장을 향해요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 10,
+    "group": 10
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 71%"
+   ]
+  },
+  {
+   "id": "timeline_career_12",
+   "short": "career_12",
+   "title": "앞으로 10년, 나의 커리어 전략",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 18편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:road",
+    "feature rank",
+    "topic-deep td:sub(꺼짐)"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 15,
+   "dbTopEntry": "c12-siksang-mid",
+   "dbTopShare": 0.08611111111111111,
+   "narrative": 0.9722222222222222,
+   "narrRuleKinds": 8,
+   "thin": 0.011111111111111112,
+   "avgChars": 3542,
+   "avgBody": 624,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.972,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.028,
+    "basis": 0.028
+   },
+   "layerAvg": {
+    "head": 18,
+    "hook": 112,
+    "narrative": 609,
+    "chart": 1506,
+    "why": 427,
+    "feature": 736,
+    "depth": 413,
+    "insight": 147,
+    "db": 989,
+    "basis": 187
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.20068887500937352,
+   "fixedShare": 0.1868061348905859,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "지금 대운 소개": 1,
+    "일간 소개": 0.1,
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "필요한 기운(용신) 소개": 0.14
+   },
+   "evidMine": 0.10692010692010692,
+   "evidHas": 0.9722222222222222,
+   "evidThin": 0,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.352777777777778,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.6578947368421053,
+   "youngBad": 0.3684210526315789,
+   "youngEx": {
+    "narrative · 회사": {
+     "n": 13,
+     "ex": "실제 생활에서는 지금까지 만든 기획, 작품, 글이 회사나 남의 이름으로 흩어져 있다면, 다음 10년은 그걸 내 이름의 포트폴리오로 모으는 시기예요."
+    },
+    "narrative · 투자": {
+     "n": 1,
+     "ex": "실제 생활에서는 지금까지 현장과 실적으로 인정받았다면, 다음 10년은 그 경험으로 관리·기획·투자 판단을 맡는 쪽으로 옮겨 가는 시기예요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0.09322033898305085,
+   "seniorEx": {
+    "insight · 승진": {
+     "n": 11,
+     "ex": "이직, 승진, 새 프로젝트 같은 도전을 이 흐름에 올려 보세요."
+    }
+   },
+   "graphChecked": 930,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "daewoonNextStemTG": 10,
+    "daewoonChangeIn": 18,
+    "daewoonStemTG": 5,
+    "seunSeason": 3
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 37%"
+   ]
+  },
+  {
+   "id": "timeline_career_13",
+   "short": "career_13",
+   "title": "커리어운에서 나와 맞는 사람과 피해야 할 사람",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 5편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:people",
+    "feature rank",
+    "topic-deep td:sub(꺼짐)",
+    "topic-deep td:compatRank(꺼짐)"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 5,
+   "dbTopEntry": "c13-fire",
+   "dbTopShare": 0.3055555555555556,
+   "narrative": 0.9694444444444444,
+   "narrRuleKinds": 8,
+   "thin": 0.008333333333333333,
+   "avgChars": 1940,
+   "avgBody": 517,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.969,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.814,
+    "db": 0.031,
+    "basis": 0.031
+   },
+   "layerAvg": {
+    "head": 25,
+    "hook": 136,
+    "narrative": 504,
+    "chart": 110,
+    "why": 430,
+    "feature": 799,
+    "depth": 315,
+    "insight": 71,
+    "db": 771,
+    "basis": 86
+   },
+   "sameText": 0.0027932098765431944,
+   "uniqueTexts": 359,
+   "jaccard": 0.24091535747826645,
+   "fixedShare": 0.24702401915897726,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "일간 소개": 0.49,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.10719617796357121,
+   "evidHas": 0.9694444444444444,
+   "evidThin": 0.030555555555555555,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.302777777777777,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.6578947368421053,
+   "youngEx": {
+    "narrative · 상사": {
+     "n": 9,
+     "ex": "실제 생활에서는 지시가 분명한 상사와 일할 때는 실수 없이 성과를 냈고, 이 말 저 말 하는 상사나 여러 사람의 요구가 겹친 프로젝트에서는 크게 지쳤을 거예요."
+    },
+    "narrative · 동료": {
+     "n": 15,
+     "ex": "실제 생활에서는 꼼꼼한 실무형 동료와 짝이 됐을 때 프로젝트가 가장 잘 굴러갔을 거예요."
+    },
+    "db · 팀장": {
+     "n": 1,
+     "ex": "\"이번 건 네가 리드해 볼래?\"라고 말해 주는 팀장 밑에서는 1년 만에 역할이 커지고, 매번 같은 일만 맡기는 사람 밑에서는 이력서에 쓸 게 늘지 않아요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 5,
+    "yongEl": 5
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 66%"
+   ]
+  },
+  {
+   "id": "timeline_career_14",
+   "short": "career_14",
+   "title": "커리어운 타이밍: 힘이 실리는 때",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 6편)",
+    "서사 엔진(career)",
+    "feature timing",
+    "fate-blocks fx:cross"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 5,
+   "dbTopEntry": "c14-bigeop",
+   "dbTopShare": 0.21666666666666667,
+   "narrative": 0.9694444444444444,
+   "narrRuleKinds": 8,
+   "thin": 0.025,
+   "avgChars": 2921,
+   "avgBody": 537,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.969,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.031,
+    "basis": 0.031
+   },
+   "layerAvg": {
+    "head": 18,
+    "hook": 97,
+    "narrative": 525,
+    "chart": 1506,
+    "why": 427,
+    "feature": 326,
+    "depth": 311,
+    "insight": 138,
+    "db": 773,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.15067933513176623,
+   "fixedShare": 0.11208875286916603,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "힘의 세기(신강·신약) 소개": 0.03,
+    "지금 대운 소개": 0.03
+   },
+   "evidMine": 0.10457325953976114,
+   "evidHas": 0.9694444444444444,
+   "evidThin": 0.030555555555555555,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.536111111111111,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.23684210526315788,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 6,
+    "daewoonStemTG": 5,
+    "gender": 1
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_career_15",
+   "short": "career_15",
+   "title": "커리어운을 끌어올리는 개운법",
+   "topic": "career",
+   "layers": [
+    "DB 게시본(rebuild 5편)",
+    "서사 엔진(career)",
+    "fate-blocks fx:rx",
+    "feature rank",
+    "topic-deep td:wish(꺼짐)",
+    "topic-deep td:regions(꺼짐)"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 5,
+   "dbTopEntry": "c15-fire",
+   "dbTopShare": 0.3055555555555556,
+   "narrative": 0.9777777777777777,
+   "narrRuleKinds": 9,
+   "thin": 0.12777777777777777,
+   "avgChars": 1661,
+   "avgBody": 445,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.978,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.997,
+    "db": 0.022,
+    "basis": 0.022
+   },
+   "layerAvg": {
+    "head": 15,
+    "hook": 101,
+    "narrative": 435,
+    "chart": 110,
+    "why": 424,
+    "feature": 613,
+    "depth": 296,
+    "insight": 93,
+    "db": 741,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.20407787862047583,
+   "fixedShare": 0.20803673938002296,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "일간 소개": 0.28,
+    "필요한 기운(용신) 소개": 0.09
+   },
+   "evidMine": 0.10697399527186761,
+   "evidHas": 0.9777777777777777,
+   "evidThin": 0.022222222222222223,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.4,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0.07627118644067797,
+   "seniorEx": {
+    "insight · 승진": {
+     "n": 9,
+     "ex": "이직, 승진, 새 프로젝트 같은 도전을 이 흐름에 올려 보세요."
+    }
+   },
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 5,
+    "yongEl": 5
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_love_01",
+   "short": "love_01",
+   "title": "나는 사람들과 어떤 관계를 맺을까?",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 10편)",
+    "서사 엔진(love)",
+    "fate-blocks fx:profile",
+    "feature rank"
+   ],
+   "dbFallback": 0.058333333333333334,
+   "dbPending": 0,
+   "dbEntryKinds": 10,
+   "dbTopEntry": "l01-bigeop-steady",
+   "dbTopShare": 0.4305555555555556,
+   "narrative": 0.9805555555555555,
+   "narrRuleKinds": 6,
+   "thin": 0.044444444444444446,
+   "avgChars": 2650,
+   "avgBody": 484,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "chart": 1,
+    "narrative": 0.981,
+    "why": 1,
+    "plus": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.019,
+    "basis": 0.019
+   },
+   "layerAvg": {
+    "head": 19,
+    "hook": 114,
+    "chart": 631,
+    "narrative": 469,
+    "why": 434,
+    "plus": 96,
+    "feature": 867,
+    "depth": 311,
+    "insight": 141,
+    "db": 1035,
+    "basis": 142
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.18551249037575224,
+   "fixedShare": 0.1890567860346374,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "필요한 기운(용신) 소개": 1,
+    "일간 소개": 0.82,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.10268741159830269,
+   "evidHas": 0.9805555555555555,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.005555555555555556,
+   "evidPerPerson": 9.819444444444445,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.8947368421052632,
+   "youngBad": 0.39473684210526316,
+   "youngEx": {
+    "feature · 동료": {
+     "n": 6,
+     "ex": "관계를 맺는 방식 · 순위 命簿 · 관계 대장 내가 관계를 맺는 방식 己巳 기사일주 시주 식신 辛 비견 未 관대 일주 일간(나) 己 정인 巳 제왕 월주 정관 甲 "
+    },
+    "db · 직장": {
+     "n": 1,
+     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 점심을 늘 같이 먹는 동료가 휴가일 때를 대비해 다른 팀 한 사람과도 인사를 트고 지내세요."
+    },
+    "narrative · 동료": {
+     "n": 3,
+     "ex": "실제 생활에서는 친구의 연애 상담, 동료의 고민, 가족의 하소연을 늘 들어 주는 쪽이에요."
+    },
+    "narrative · 직장": {
+     "n": 5,
+     "ex": "실제 생활에서는 직장 동료와는 몇 년을 함께해도 사적인 이야기를 잘 안 하고, 친구 사이에서도 실수할까 봐 말을 아껴요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 10,
+    "group": 10
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 39%"
+   ]
+  },
+  {
+   "id": "timeline_love_02",
+   "short": "love_02",
+   "title": "사람들이 나를 좋아하거나 불편해하는 이유",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 10편)",
+    "서사 엔진(love)",
+    "fate-blocks fx:likes",
+    "feature rank"
+   ],
+   "dbFallback": 0.24444444444444444,
+   "dbPending": 0,
+   "dbEntryKinds": 10,
+   "dbTopEntry": "l02-bigyeon",
+   "dbTopShare": 0.14722222222222223,
+   "narrative": 0.9777777777777777,
+   "narrRuleKinds": 6,
+   "thin": 0.011111111111111112,
+   "avgChars": 2095,
+   "avgBody": 536,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.978,
+    "chart": 1,
+    "why": 0.997,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.022,
+    "basis": 0.022
+   },
+   "layerAvg": {
+    "head": 22,
+    "hook": 119,
+    "narrative": 522,
+    "chart": 173,
+    "why": 426,
+    "feature": 821,
+    "depth": 324,
+    "insight": 118,
+    "db": 949,
+    "basis": 158
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.20925391284061634,
+   "fixedShare": 0.20950118764845604,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "일간 소개": 0.81,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.10414269275028769,
+   "evidHas": 0.9777777777777777,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.655555555555555,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.39473684210526316,
+   "youngBad": 0.3684210526315789,
+   "youngEx": {
+    "narrative · 동료": {
+     "n": 14,
+     "ex": "실제 생활에서는 회의에서 할 말을 해서 동료들의 박수를 받는 날도 있지만, 같은 말투로 상사나 연장자에게 말해서 분위기가 얼어붙는 날도 있어요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "tenGod": 10
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 37%"
+   ]
+  },
+  {
+   "id": "timeline_love_03",
+   "short": "love_03",
+   "title": "내 곁에 남는 사람과 멀어지는 사람",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 6편)",
+    "서사 엔진(love)",
+    "fate-blocks fx:people",
+    "feature rank",
+    "topic-deep td:sub(꺼짐)"
+   ],
+   "dbFallback": 0.011111111111111112,
+   "dbPending": 0,
+   "dbEntryKinds": 6,
+   "dbTopEntry": "l03-chung-steady",
+   "dbTopShare": 0.37222222222222223,
+   "narrative": 0.9583333333333334,
+   "narrRuleKinds": 6,
+   "thin": 0.09166666666666666,
+   "avgChars": 1945,
+   "avgBody": 465,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.958,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.944,
+    "db": 0.042,
+    "basis": 0.042
+   },
+   "layerAvg": {
+    "head": 19,
+    "hook": 119,
+    "narrative": 438,
+    "chart": 178,
+    "why": 433,
+    "feature": 770,
+    "depth": 315,
+    "insight": 98,
+    "db": 982,
+    "basis": 149
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.24904784547788078,
+   "fixedShare": 0.23538642604943116,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "일간 소개": 0.71,
+    "힘의 세기(신강·신약) 소개": 0.26,
+    "필요한 기운(용신) 소개": 0.04
+   },
+   "evidMine": 0.09963513892786978,
+   "evidHas": 0.9583333333333334,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.005555555555555556,
+   "evidPerPerson": 9.897222222222222,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.47368421052631576,
+   "youngBad": 0.4473684210526316,
+   "youngEx": {
+    "narrative · 동료": {
+     "n": 17,
+     "ex": "실제 생활에서는 같은 분야에서 경쟁하게 된 친구, 몫을 나누다 다툰 동료와는 자연스럽게 멀어졌을 거예요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 6,
+    "relation": 6
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 45%"
+   ]
+  },
+  {
+   "id": "timeline_love_04",
+   "short": "love_04",
+   "title": "나는 사랑할 때 어떤 사람이 될까?",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 10편)",
+    "서사 엔진(love)",
+    "fate-blocks fx:profile",
+    "feature rank"
+   ],
+   "dbFallback": 0.058333333333333334,
+   "dbPending": 0,
+   "dbEntryKinds": 10,
+   "dbTopEntry": "l04-bigeop-steady",
+   "dbTopShare": 0.4305555555555556,
+   "narrative": 0.825,
+   "narrRuleKinds": 8,
+   "thin": 0.011111111111111112,
+   "avgChars": 2360,
+   "avgBody": 814,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "db": 0.175,
+    "chart": 1,
+    "why": 0.992,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "basis": 0.175,
+    "narrative": 0.825
+   },
+   "layerAvg": {
+    "head": 19,
+    "hook": 103,
+    "db": 990,
+    "chart": 170,
+    "why": 439,
+    "feature": 876,
+    "depth": 306,
+    "insight": 86,
+    "basis": 141,
+    "narrative": 771
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.1853564883364653,
+   "fixedShare": 0.1647362419732341,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "일간 소개": 0.83,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.08487696986452861,
+   "evidHas": 0.825,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.05277777777777778,
+   "evidPerPerson": 10.047222222222222,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.6842105263157895,
+   "youngBad": 0.10526315789473684,
+   "youngEx": {
+    "narrative · 퇴근": {
+     "n": 4,
+     "ex": "실제 생활에서는 연인의 끼니, 출퇴근, 돈 쓰는 습관까지 자연스럽게 챙겨요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0.059322033898305086,
+   "seniorEx": {
+    "db · 이직 준비": {
+     "n": 1,
+     "ex": "상대가 이직 준비로 힘들 때 밥을 챙기고 면접 날 데려다주는 식의 현실적인 성실함이, 시간이 지날수록 믿음으로 쌓여요."
+    },
+    "db · 연애를 시작": {
+     "n": 6,
+     "ex": "연애를 시작해도 내 일정과 취향은 그대로고, 연락을 자꾸 확인하는 사람 앞에서는 숨이 막혀요."
+    }
+   },
+   "graphChecked": 25,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 10,
+    "group": 10
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_love_05",
+   "short": "love_05",
+   "title": "내가 끌리는 사람과 실제 잘 맞는 사람",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 12편)",
+    "서사 엔진(love)",
+    "fate-blocks fx:pair",
+    "Deep.deep_ilju",
+    "topic-deep td:compat(꺼짐)"
+   ],
+   "dbFallback": 0.18333333333333332,
+   "dbPending": 0,
+   "dbEntryKinds": 12,
+   "dbTopEntry": "l05-m-weak-steady",
+   "dbTopShare": 0.13055555555555556,
+   "narrative": 0.9666666666666667,
+   "narrRuleKinds": 6,
+   "thin": 0.05277777777777778,
+   "avgChars": 2043,
+   "avgBody": 498,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.967,
+    "chart": 1,
+    "why": 0.997,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.033,
+    "basis": 0.033
+   },
+   "layerAvg": {
+    "head": 21,
+    "hook": 123,
+    "narrative": 476,
+    "chart": 172,
+    "why": 448,
+    "feature": 829,
+    "depth": 307,
+    "insight": 109,
+    "db": 1026,
+    "basis": 163
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.23259685706878108,
+   "fixedShare": 0.22103324269800895,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.04
+   },
+   "evidMine": 0.09662618083670715,
+   "evidHas": 0.9666666666666667,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 10.291666666666666,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0.00847457627118644,
+   "seniorEx": {
+    "db · 연애를 시작": {
+     "n": 1,
+     "ex": "이게 내 무기예요 혼자 시간을 충분히 가져야 마음이 정리되는 사람이라, 연애를 시작하면 신중하고 깊게 이어 가요."
+    }
+   },
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "gender": 12,
+    "strength": 12,
+    "tenGod": 8,
+    "group": 4
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_love_06",
+   "short": "love_06",
+   "title": "연애에서 반복하기 쉬운 실수",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 8편)",
+    "서사 엔진(love)",
+    "fate-blocks fx:check",
+    "feature rank"
+   ],
+   "dbFallback": 0.5222222222222223,
+   "dbPending": 0,
+   "dbEntryKinds": 8,
+   "dbTopEntry": "l06-endure",
+   "dbTopShare": 0.11388888888888889,
+   "narrative": 0.9805555555555555,
+   "narrRuleKinds": 6,
+   "thin": 0.12222222222222222,
+   "avgChars": 1870,
+   "avgBody": 439,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.981,
+    "chart": 1,
+    "why": 0.986,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.986,
+    "db": 0.019,
+    "basis": 0.019
+   },
+   "layerAvg": {
+    "head": 15,
+    "hook": 100,
+    "narrative": 428,
+    "chart": 166,
+    "why": 427,
+    "feature": 741,
+    "depth": 332,
+    "insight": 88,
+    "db": 757,
+    "basis": 138
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.21199199609059388,
+   "fixedShare": 0.20548972551372433,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "일간 소개": 0.58,
+    "필요한 기운(용신) 소개": 0.02
+   },
+   "evidMine": 0.10268741159830269,
+   "evidHas": 0.9805555555555555,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.005555555555555556,
+   "evidPerPerson": 9.819444444444445,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.6578947368421053,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "group": 8
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_love_07",
+   "short": "love_07",
+   "title": "나에게 잘 맞는 배우자의 성향",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 16편)",
+    "서사 엔진(love)",
+    "fate-blocks fx:profile",
+    "feature rank"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 12,
+   "dbTopEntry": "l07-m-star-mid",
+   "dbTopShare": 0.22777777777777777,
+   "narrative": 0.9666666666666667,
+   "narrRuleKinds": 7,
+   "thin": 0.008333333333333333,
+   "avgChars": 2151,
+   "avgBody": 539,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.967,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.033,
+    "basis": 0.033
+   },
+   "layerAvg": {
+    "head": 16,
+    "hook": 109,
+    "narrative": 519,
+    "chart": 167,
+    "why": 427,
+    "feature": 931,
+    "depth": 325,
+    "insight": 76,
+    "db": 983,
+    "basis": 144
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.22027015575548384,
+   "fixedShare": 0.20764283011729096,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "필요한 기운(용신) 소개": 1,
+    "일간 소개": 0.73,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.10187820147979511,
+   "evidHas": 0.9666666666666667,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.761111111111111,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.3157894736842105,
+   "youngEx": {
+    "feature · 배우자": {
+     "n": 11,
+     "ex": "걸음을 맞출 배우자의 성향 · 순위 命簿 · 짝 대장 나에게 잘 맞는 배우자의 성향 己巳 기사일주 시주 식신 辛 비견 未 관대 일주 일간(나) 己 정인 巳 제왕 "
+    },
+    "db · 배우자": {
+     "n": 1,
+     "ex": "좋은 배우자라는 이미지보다 함께 정하는 방식을 봤나요?"
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "gender": 6,
+    "group": 6,
+    "strength": 10,
+    "positionTG": 10
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 32%"
+   ]
+  },
+  {
+   "id": "timeline_love_08",
+   "short": "love_08",
+   "title": "결혼운은 언제 강해질까?",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 14편)",
+    "서사 엔진(love)",
+    "Deep.deep_marriage",
+    "fate-blocks fx:actcal",
+    "topic-deep td:sub(꺼짐)"
+   ],
+   "dbFallback": 0.18055555555555555,
+   "dbPending": 0,
+   "dbEntryKinds": 14,
+   "dbTopEntry": "l08-daewoon-day-fric-steady",
+   "dbTopShare": 0.1638888888888889,
+   "narrative": 0.9555555555555556,
+   "narrRuleKinds": 6,
+   "thin": 0.011111111111111112,
+   "avgChars": 3722,
+   "avgBody": 688,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.956,
+    "chart": 1,
+    "why": 0.997,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.044,
+    "luck": 0.044,
+    "basis": 0.044
+   },
+   "layerAvg": {
+    "head": 13,
+    "hook": 105,
+    "narrative": 663,
+    "chart": 1520,
+    "why": 434,
+    "feature": 852,
+    "depth": 392,
+    "insight": 159,
+    "db": 922,
+    "luck": 204,
+    "basis": 258
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.11166800569498832,
+   "fixedShare": 0.05518510002299379,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "지금 대운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.04
+   },
+   "evidMine": 0.09918744746427571,
+   "evidHas": 0.9555555555555556,
+   "evidThin": 0,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.91388888888889,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0.05277777777777778,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.6842105263157895,
+   "youngEx": {
+    "narrative · 배우자": {
+     "n": 25,
+     "ex": "독립적인 성향이 강해서 평소엔 결혼이 급하지 않지만, 배우자 기운이 들어오는 해에는 함께하고 싶은 마음이 커져요."
+    },
+    "db · 동료": {
+     "n": 1,
+     "ex": "신뢰하는 동료에게 오늘 컨디션이 안 좋다고 한마디 해 두는 것도 도움이 돼요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "gender": 6,
+    "group": 6,
+    "daewoonStemTG": 6,
+    "strength": 8,
+    "daewoonDayRelation": 4,
+    "seunDayRelation": 4
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 68%"
+   ]
+  },
+  {
+   "id": "timeline_love_09",
+   "short": "love_09",
+   "title": "결혼생활에서 가장 조심해야 할 갈등",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 14편)",
+    "서사 엔진(love)",
+    "fate-blocks fx:check",
+    "Deep.deep_marriage"
+   ],
+   "dbFallback": 0.058333333333333334,
+   "dbPending": 0,
+   "dbEntryKinds": 12,
+   "dbTopEntry": "l09-day-friction-steady",
+   "dbTopShare": 0.26944444444444443,
+   "narrative": 0.9611111111111111,
+   "narrRuleKinds": 8,
+   "thin": 0.016666666666666666,
+   "avgChars": 2564,
+   "avgBody": 503,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.961,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.814,
+    "db": 0.039,
+    "basis": 0.039
+   },
+   "layerAvg": {
+    "head": 19,
+    "hook": 118,
+    "narrative": 479,
+    "chart": 170,
+    "why": 434,
+    "feature": 1299,
+    "depth": 408,
+    "insight": 76,
+    "db": 1007,
+    "basis": 148
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.1488704329402785,
+   "fixedShare": 0.1223545423613474,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 0.87,
+    "지금 대운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "필요한 기운(용신) 소개": 0.04
+   },
+   "evidMine": 0.1014781125639568,
+   "evidHas": 0.9611111111111111,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.772222222222222,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.868421052631579,
+   "youngEx": {
+    "feature · 결혼 생활": {
+     "n": 31,
+     "ex": "결혼 생활의 약한 고리와 예방 命簿 · 점검표 결혼생활 갈등 점검표 집안일·돈 역할을 말로만 정해요 가장 큰 기운이 비겁(내 힘·고집) · 가능성 높음 내 방식이"
+    },
+    "feature · 배우자": {
+     "n": 1,
+     "ex": "근거 · 배우자궁(일지)이 편관 자리 이렇게 예방하세요 \"하지 마\" 대신 \"이렇게 해 주면 좋겠어\"로 말하세요 각자 혼자 쉬는 시간을 보장하세요 2 위험 요소 눈"
+    },
+    "feature · 아내": {
+     "n": 1,
+     "ex": "근거 · 원국 일지 子卯형(무례지형)(형) 이렇게 예방하세요 서운한 일은 그날 한 문장으로 말하세요 월 1회 서로의 서운함을 쏟아내는 시간을 정해 두세요 4 위험"
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 8,
+    "natalDayRelation": 10,
+    "gender": 4,
+    "group": 4,
+    "daewoonDayRelation": 1,
+    "seunDayRelation": 1
+   },
+   "v": "보완",
+   "why": [
+    "20세 미만 어른 장면 87%"
+   ]
+  },
+  {
+   "id": "timeline_love_10",
+   "short": "love_10",
+   "title": "나의 가족운과 부모·형제 관계",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 12편)",
+    "서사 엔진(love)",
+    "fate-blocks fx:family",
+    "feature rank",
+    "topic-deep td:sub(꺼짐)"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 10,
+   "dbTopEntry": "l10-parent-bigeop-steady",
+   "dbTopShare": 0.16666666666666666,
+   "narrative": 0.9555555555555556,
+   "narrRuleKinds": 6,
+   "thin": 0.03888888888888889,
+   "avgChars": 2168,
+   "avgBody": 509,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.956,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.953,
+    "db": 0.044,
+    "basis": 0.044
+   },
+   "layerAvg": {
+    "head": 16,
+    "hook": 110,
+    "narrative": 480,
+    "chart": 167,
+    "why": 432,
+    "feature": 981,
+    "depth": 327,
+    "insight": 74,
+    "db": 1032,
+    "basis": 146
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.25733448531389785,
+   "fixedShare": 0.26769957618286666,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "일간 소개": 0.79,
+    "힘의 세기(신강·신약) 소개": 0.27
+   },
+   "evidMine": 0.1,
+   "evidHas": 0.9555555555555556,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.005555555555555556,
+   "evidPerPerson": 9.86111111111111,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 1,
+   "youngBad": 0.13157894736842105,
+   "youngEx": {
+    "db · 직장": {
+     "n": 1,
+     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 가족의 급한 일과 회사 업무가 부딪히는 날의 우선순위를 평소에 정해 두세요."
+    },
+    "narrative · 직장": {
+     "n": 4,
+     "ex": "실제 생활에서는 부모님이 원하는 학과나 직장을 골랐거나, 집안의 도리 때문에 내 일정을 늘 뒤로 미뤘을 수 있어요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 10,
+    "positionTG": 10,
+    "group": 2
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_love_11",
+   "short": "love_11",
+   "title": "나의 자식운과 부모가 되었을 때의 모습",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 18편)",
+    "서사 엔진(love)",
+    "fate-blocks fx:profile",
+    "Deep.deep_children",
+    "topic-deep td:sub(꺼짐)"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 12,
+   "dbTopEntry": "l11-f-child-mid",
+   "dbTopShare": 0.2611111111111111,
+   "narrative": 0.9583333333333334,
+   "narrRuleKinds": 8,
+   "thin": 0.041666666666666664,
+   "avgChars": 2098,
+   "avgBody": 498,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.958,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.936,
+    "db": 0.042,
+    "basis": 0.042
+   },
+   "layerAvg": {
+    "head": 21,
+    "hook": 120,
+    "narrative": 474,
+    "chart": 172,
+    "why": 433,
+    "feature": 938,
+    "depth": 298,
+    "insight": 72,
+    "db": 956,
+    "basis": 173
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.13071587479607719,
+   "fixedShare": 0.08540249881385419,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "가장 큰 기운 소개": 1,
+    "필요한 기운(용신) 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.59
+   },
+   "evidMine": 0.10241657077100115,
+   "evidHas": 0.9583333333333334,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0,
+   "evidPerPerson": 9.655555555555555,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "gender": 8,
+    "group": 6,
+    "strength": 10,
+    "positionTG": 10,
+    "daewoonStemTG": 2
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_love_12",
+   "short": "love_12",
+   "title": "최고의 인연 시나리오 vs 최악의 인연 시나리오",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 10편)",
+    "서사 엔진(love)",
+    "fate-blocks fx:scenario",
+    "feature rank"
+   ],
+   "dbFallback": 0.058333333333333334,
+   "dbPending": 0,
+   "dbEntryKinds": 10,
+   "dbTopEntry": "l12-bigeop-steady",
+   "dbTopShare": 0.4305555555555556,
+   "narrative": 0.9666666666666667,
+   "narrRuleKinds": 6,
+   "thin": 0.008333333333333333,
+   "avgChars": 1927,
+   "avgBody": 509,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.967,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.033,
+    "basis": 0.033
+   },
+   "layerAvg": {
+    "head": 26,
+    "hook": 116,
+    "narrative": 487,
+    "chart": 177,
+    "why": 442,
+    "feature": 742,
+    "depth": 310,
+    "insight": 68,
+    "db": 1029,
+    "basis": 158
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.2317354452782725,
+   "fixedShare": 0.20078141957890167,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "힘의 세기(신강·신약) 소개": 0.06,
+    "필요한 기운(용신) 소개": 0.03,
+    "일간 소개": 0.41
+   },
+   "evidMine": 0.09725618038576474,
+   "evidHas": 0.9666666666666667,
+   "evidThin": 0,
+   "chartCaption": 1,
+   "evidNone": 0.002777777777777778,
+   "evidPerPerson": 10.225,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.21052631578947367,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 10,
+    "group": 10
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_love_13",
+   "short": "love_13",
+   "title": "인연운에서 나와 맞는 사람과 피해야 할 사람",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 5편)",
+    "서사 엔진(love)",
+    "fate-blocks fx:people",
+    "feature rank",
+    "topic-deep td:compatRank(꺼짐)"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 5,
+   "dbTopEntry": "l13-fire",
+   "dbTopShare": 0.3055555555555556,
+   "narrative": 0.9805555555555555,
+   "narrRuleKinds": 6,
+   "thin": 0.03888888888888889,
+   "avgChars": 1783,
+   "avgBody": 487,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.981,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.019,
+    "basis": 0.019
+   },
+   "layerAvg": {
+    "head": 24,
+    "hook": 128,
+    "narrative": 477,
+    "chart": 110,
+    "why": 436,
+    "feature": 646,
+    "depth": 317,
+    "insight": 91,
+    "db": 779,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.22831306574820445,
+   "fixedShare": 0.23137108792846497,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "일간 소개": 0.79,
+    "힘의 세기(신강·신약) 소개": 0.59,
+    "필요한 기운(용신) 소개": 0.19
+   },
+   "evidMine": 0.10262934690415607,
+   "evidHas": 0.9805555555555555,
+   "evidThin": 0.019444444444444445,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.825,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.18421052631578946,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 5,
+    "yongEl": 5
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_love_14",
+   "short": "love_14",
+   "title": "인연운 타이밍: 힘이 실리는 때",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 6편)",
+    "서사 엔진(love)",
+    "feature timing",
+    "fate-blocks fx:cross"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 5,
+   "dbTopEntry": "l14-bigeop",
+   "dbTopShare": 0.21666666666666667,
+   "narrative": 0.9611111111111111,
+   "narrRuleKinds": 6,
+   "thin": 0.008333333333333333,
+   "avgChars": 3001,
+   "avgBody": 555,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.961,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 1,
+    "db": 0.039,
+    "basis": 0.039
+   },
+   "layerAvg": {
+    "head": 17,
+    "hook": 93,
+    "narrative": 541,
+    "chart": 1520,
+    "why": 420,
+    "feature": 364,
+    "depth": 316,
+    "insight": 147,
+    "db": 787,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.1690764636603756,
+   "fixedShare": 0.12483462483462483,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "지금 대운 소개": 1,
+    "힘의 세기(신강·신약) 소개": 0.04
+   },
+   "evidMine": 0.102475532527346,
+   "evidHas": 0.9611111111111111,
+   "evidThin": 0.03888888888888889,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.65,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.21052631578947367,
+   "youngBad": 0,
+   "youngEx": {},
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 6,
+    "daewoonStemTG": 5,
+    "gender": 1
+   },
+   "v": "유지",
+   "why": []
+  },
+  {
+   "id": "timeline_love_15",
+   "short": "love_15",
+   "title": "인연운을 끌어올리는 개운법",
+   "topic": "love",
+   "layers": [
+    "DB 게시본(rebuild 5편)",
+    "서사 엔진(love)",
+    "fate-blocks fx:rx",
+    "feature rank"
+   ],
+   "dbFallback": 0,
+   "dbPending": 0,
+   "dbEntryKinds": 5,
+   "dbTopEntry": "l15-fire",
+   "dbTopShare": 0.3055555555555556,
+   "narrative": 0.9805555555555555,
+   "narrRuleKinds": 6,
+   "thin": 0.08611111111111111,
+   "avgChars": 1681,
+   "avgBody": 448,
+   "layerShare": {
+    "head": 1,
+    "hook": 1,
+    "narrative": 0.981,
+    "chart": 1,
+    "why": 1,
+    "feature": 1,
+    "depth": 1,
+    "insight": 0.997,
+    "db": 0.019,
+    "basis": 0.019
+   },
+   "layerAvg": {
+    "head": 14,
+    "hook": 106,
+    "narrative": 439,
+    "chart": 110,
+    "why": 419,
+    "feature": 594,
+    "depth": 324,
+    "insight": 95,
+    "db": 716,
+    "basis": 86
+   },
+   "sameText": 0.002777777777777763,
+   "uniqueTexts": 360,
+   "jaccard": 0.24955779745334156,
+   "fixedShare": 0.2194380069524913,
+   "repeat": 0,
+   "repeatSame": 0,
+   "repeatAvg": 0,
+   "repeatEx": [],
+   "facts": {
+    "일간 소개": 0.49,
+    "힘의 세기(신강·신약) 소개": 0.23
+   },
+   "evidMine": 0.10242663656884876,
+   "evidHas": 0.9805555555555555,
+   "evidThin": 0.019444444444444445,
+   "chartCaption": 0,
+   "evidNone": 0,
+   "evidPerPerson": 9.844444444444445,
+   "ban": 0,
+   "banEx": {},
+   "svcBan": 0,
+   "youngN": 38,
+   "youngAny": 0.10526315789473684,
+   "youngBad": 0.02631578947368421,
+   "youngEx": {
+    "db · 직장": {
+     "n": 1,
+     "ex": "이렇게 쓰면 더 잘 풀려요 직장에서는 주말 중 하루는 평소와 다른 장소에서 함께 시간을 보내세요."
+    }
+   },
+   "seniorN": 118,
+   "seniorBad": 0,
+   "seniorEx": {},
+   "graphChecked": 0,
+   "graphBad": 0,
+   "graphEx": [],
+   "dwBad": 0,
+   "ageBad": 0,
+   "ageEx": [],
+   "errors": 0,
+   "errEx": "",
+   "dbWhenKeys": {
+    "strength": 5,
+    "yongEl": 5
+   },
+   "v": "유지",
+   "why": []
+  }
+ ],
+ "hiddenRows": [
+  {
+   "id": "timeline_health_01",
+   "short": "health_01",
+   "topic": "health",
+   "entries": 9,
+   "dbFallback": 0.38333333333333336,
+   "kinds": 9,
+   "title": "내 사주에서 보는 건강의 기본 균형"
+  },
+  {
+   "id": "timeline_health_02",
+   "short": "health_02",
+   "topic": "health",
+   "entries": 10,
+   "dbFallback": 0.058333333333333334,
+   "kinds": 10,
+   "title": "나는 어떤 상황에서 쉽게 지칠까?"
+  },
+  {
+   "id": "timeline_health_03",
+   "short": "health_03",
+   "topic": "health",
+   "entries": 8,
+   "dbFallback": 0.3972222222222222,
+   "kinds": 8,
+   "title": "스트레스가 쌓일 때 나타나는 생활 패턴"
+  },
+  {
+   "id": "timeline_health_04",
+   "short": "health_04",
+   "topic": "health",
+   "entries": 6,
+   "dbFallback": 0.18611111111111112,
+   "kinds": 6,
+   "title": "내가 무리하기 쉬운 순간"
+  },
+  {
+   "id": "timeline_health_05",
+   "short": "health_05",
+   "topic": "health",
+   "entries": 8,
+   "dbFallback": 0,
+   "kinds": 8,
+   "title": "내 생활 리듬에서 조심할 점"
+  },
+  {
+   "id": "timeline_health_06",
+   "short": "health_06",
+   "topic": "health",
+   "entries": 8,
+   "dbFallback": 0.18333333333333332,
+   "kinds": 8,
+   "title": "전통 명리학에서 보는 사고수란?"
+  },
+  {
+   "id": "timeline_health_07",
+   "short": "health_07",
+   "topic": "health",
+   "entries": 7,
+   "dbFallback": 0.31666666666666665,
+   "kinds": 7,
+   "title": "사고수와 주의 시기를 어떻게 해석할까?"
+  },
+  {
+   "id": "timeline_health_08",
+   "short": "health_08",
+   "topic": "health",
+   "entries": 8,
+   "dbFallback": 0.3472222222222222,
+   "kinds": 8,
+   "title": "무리한 선택이 위험을 키우는 상황"
+  },
+  {
+   "id": "timeline_health_09",
+   "short": "health_09",
+   "topic": "health",
+   "entries": 7,
+   "dbFallback": 0,
+   "kinds": 7,
+   "title": "건강과 안전을 지키는 생활 습관"
+  },
+  {
+   "id": "timeline_health_10",
+   "short": "health_10",
+   "topic": "health",
+   "entries": 10,
+   "dbFallback": 0.058333333333333334,
+   "kinds": 10,
+   "title": "최고의 건강관리 시나리오 vs 최악의 관리 시나리오"
+  },
+  {
+   "id": "timeline_creative_01",
+   "short": "creative_01",
+   "topic": "creative",
+   "entries": 10,
+   "dbFallback": 0.058333333333333334,
+   "kinds": 10,
+   "title": "전생의 문이 열리다"
+  },
+  {
+   "id": "timeline_creative_02",
+   "short": "creative_02",
+   "topic": "creative",
+   "entries": 10,
+   "dbFallback": 0.058333333333333334,
+   "kinds": 10,
+   "title": "나는 어떤 시대에 살았을까?"
+  },
+  {
+   "id": "timeline_creative_03",
+   "short": "creative_03",
+   "topic": "creative",
+   "entries": 10,
+   "dbFallback": 0.058333333333333334,
+   "kinds": 10,
+   "title": "전생의 나는 어떤 신분이었을까?"
+  },
+  {
+   "id": "timeline_creative_04",
+   "short": "creative_04",
+   "topic": "creative",
+   "entries": 10,
+   "dbFallback": 0.058333333333333334,
+   "kinds": 10,
+   "title": "전생에서 가장 중요했던 사람"
+  },
+  {
+   "id": "timeline_creative_05",
+   "short": "creative_05",
+   "topic": "creative",
+   "entries": 10,
+   "dbFallback": 0.058333333333333334,
+   "kinds": 10,
+   "title": "전생에서 가장 빛났던 순간"
+  },
+  {
+   "id": "timeline_creative_06",
+   "short": "creative_06",
+   "topic": "creative",
+   "entries": 10,
+   "dbFallback": 0.058333333333333334,
+   "kinds": 10,
+   "title": "전생에서 저질렀던 가장 큰 실수"
+  },
+  {
+   "id": "timeline_creative_07",
+   "short": "creative_07",
+   "topic": "creative",
+   "entries": 10,
+   "dbFallback": 0.058333333333333334,
+   "kinds": 10,
+   "title": "끝내 이루지 못한 소망"
+  },
+  {
+   "id": "timeline_creative_08",
+   "short": "creative_08",
+   "topic": "creative",
+   "entries": 10,
+   "dbFallback": 0.058333333333333334,
+   "kinds": 10,
+   "title": "전생의 나에게서 받는 마지막 메시지"
+  },
+  {
+   "id": "timeline_remedy_01",
+   "short": "remedy_01",
+   "topic": "remedy",
+   "entries": 8,
+   "dbFallback": 0.19444444444444445,
+   "kinds": 8,
+   "title": "내 운을 바꾸는 첫 번째 습관"
+  },
+  {
+   "id": "timeline_remedy_02",
+   "short": "remedy_02",
+   "topic": "remedy",
+   "entries": 10,
+   "dbFallback": 0.058333333333333334,
+   "kinds": 10,
+   "title": "나에게 맞는 운동과 생활 리듬"
+  },
+  {
+   "id": "timeline_remedy_03",
+   "short": "remedy_03",
+   "topic": "remedy",
+   "entries": 10,
+   "dbFallback": 0.058333333333333334,
+   "kinds": 10,
+   "title": "나에게 잘 맞는 공부와 자기계발"
+  },
+  {
+   "id": "timeline_remedy_04",
+   "short": "remedy_04",
+   "topic": "remedy",
+   "entries": 8,
+   "dbFallback": 0,
+   "kinds": 8,
+   "title": "나를 회복시키는 환경과 공간"
+  },
+  {
+   "id": "timeline_remedy_05",
+   "short": "remedy_05",
+   "topic": "remedy",
+   "entries": 10,
+   "dbFallback": 0,
+   "kinds": 10,
+   "title": "나에게 어울리는 행운의 장소"
+  },
+  {
+   "id": "timeline_remedy_06",
+   "short": "remedy_06",
+   "topic": "remedy",
+   "entries": 10,
+   "dbFallback": 0.24444444444444444,
+   "kinds": 10,
+   "title": "돈과 인간관계에서 운을 지키는 방법"
+  },
+  {
+   "id": "timeline_remedy_07",
+   "short": "remedy_07",
+   "topic": "remedy",
+   "entries": 10,
+   "dbFallback": 0.058333333333333334,
+   "kinds": 10,
+   "title": "앞으로 30일, 나만의 개운 프로젝트"
+  },
+  {
+   "id": "timeline_remedy_08",
+   "short": "remedy_08",
+   "topic": "remedy",
+   "entries": 12,
+   "dbFallback": 0,
+   "kinds": 12,
+   "title": "내 인생을 더 좋은 방향으로 이끄는 최종 전략"
+  }
+ ],
+ "overlapPairs": [],
+ "sameQuestion": [
+  [
+   "self_26",
+   "career_01",
+   "맞는 일"
+  ],
+  [
+   "self_30",
+   "wealth_01",
+   "재물 전체·그릇"
+  ],
+  [
+   "self_31",
+   "wealth_01",
+   "재물 그릇"
+  ],
+  [
+   "self_32",
+   "wealth_02",
+   "돈 버는 방식"
+  ],
+  [
+   "self_27",
+   "love_01",
+   "인연 전체"
+  ],
+  [
+   "self_29",
+   "love_07",
+   "배우자"
+  ],
+  [
+   "self_34",
+   "love_11",
+   "자식운"
+  ],
+  [
+   "self_24",
+   "career_08",
+   "움직일 때"
+  ],
+  [
+   "self_37",
+   "wealth_15",
+   "개운법"
+  ],
+  [
+   "self_37",
+   "career_15",
+   "개운법"
+  ],
+  [
+   "self_37",
+   "love_15",
+   "개운법"
+  ],
+  [
+   "self_18",
+   "wealth_11",
+   "최고·최악"
+  ],
+  [
+   "wealth_06",
+   "wealth_10",
+   "재물 시기"
+  ],
+  [
+   "wealth_10",
+   "wealth_14",
+   "재물 시기"
+  ],
+  [
+   "career_08",
+   "career_14",
+   "커리어 시기"
+  ],
+  [
+   "love_08",
+   "love_14",
+   "인연 시기"
+  ]
+ ],
+ "engineMap": [
+  {
+   "label": "ch.unified (통합 용신: 억부·조후·격국·통관·제화·종격)",
+   "keys": [
+    "ch.unified"
+   ],
+   "chapters": [
+    "self_03",
+    "self_02",
+    "self_20",
+    "self_24",
+    "self_18",
+    "self_25",
+    "self_26",
+    "self_27",
+    "self_29",
+    "self_30",
+    "self_31",
+    "self_33",
+    "self_34",
+    "self_35",
+    "self_37",
+    "self_22",
+    "wealth_01",
+    "wealth_02",
+    "wealth_03",
+    "wealth_04",
+    "wealth_05",
+    "wealth_06",
+    "wealth_07",
+    "wealth_08",
+    "wealth_09",
+    "wealth_10",
+    "wealth_11",
+    "wealth_12",
+    "wealth_13",
+    "wealth_14",
+    "wealth_15",
+    "career_01",
+    "career_02",
+    "career_03",
+    "career_04",
+    "career_05",
+    "career_06",
+    "career_07",
+    "career_08",
+    "career_09",
+    "career_10",
+    "career_11",
+    "career_12",
+    "career_13",
+    "career_14",
+    "career_15",
+    "love_01",
+    "love_02",
+    "love_03",
+    "love_04",
+    "love_05",
+    "love_06",
+    "love_07",
+    "love_08",
+    "love_09",
+    "love_10",
+    "love_11",
+    "love_12",
+    "love_13",
+    "love_14",
+    "love_15"
+   ],
+   "offOnly": []
+  },
+  {
+   "label": "ch.daeun / 대운 목록",
+   "keys": [
+    "ch.daeun",
+    "sd.daewoon",
+    "sd.currentDaewoon",
+    "Manse.daeunAt"
+   ],
+   "chapters": [
+    "self_03",
+    "self_02",
+    "self_20",
+    "self_24",
+    "self_18",
+    "self_25",
+    "self_26",
+    "self_27",
+    "self_29",
+    "self_30",
+    "self_31",
+    "self_33",
+    "self_34",
+    "self_35",
+    "self_37",
+    "self_22",
+    "wealth_01",
+    "wealth_02",
+    "wealth_03",
+    "wealth_04",
+    "wealth_05",
+    "wealth_06",
+    "wealth_07",
+    "wealth_08",
+    "wealth_09",
+    "wealth_10",
+    "wealth_11",
+    "wealth_12",
+    "wealth_13",
+    "wealth_14",
+    "wealth_15",
+    "career_01",
+    "career_02",
+    "career_03",
+    "career_04",
+    "career_05",
+    "career_06",
+    "career_07",
+    "career_08",
+    "career_09",
+    "career_10",
+    "career_11",
+    "career_12",
+    "career_13",
+    "career_14",
+    "career_15",
+    "love_01",
+    "love_02",
+    "love_03",
+    "love_04",
+    "love_05",
+    "love_06",
+    "love_07",
+    "love_08",
+    "love_09",
+    "love_10",
+    "love_11",
+    "love_12",
+    "love_13",
+    "love_14",
+    "love_15",
+    "self_28",
+    "self_32"
+   ],
+   "offOnly": [
+    "remedy_05"
+   ]
+  },
+  {
+   "label": "세운·월운(seunRange·wolun·monthsOfYear)",
+   "keys": [
+    "Manse.seunRange",
+    "Manse.wolun",
+    "Manse.monthsOfYear",
+    "Manse.yearPillarOf",
+    "sd.sewoon"
+   ],
+   "chapters": [
+    "self_24",
+    "self_27",
+    "self_29",
+    "self_30",
+    "wealth_02",
+    "wealth_06",
+    "wealth_14",
+    "career_08",
+    "career_12",
+    "career_14",
+    "love_08",
+    "love_09",
+    "love_14",
+    "love_04",
+    "self_03",
+    "career_07",
+    "self_35",
+    "wealth_10",
+    "self_02",
+    "self_20"
+   ],
+   "offOnly": [
+    "wealth_04",
+    "wealth_09",
+    "wealth_12",
+    "career_03",
+    "career_09",
+    "career_13",
+    "love_03",
+    "love_10",
+    "love_11",
+    "remedy_05",
+    "wealth_08"
+   ]
+  },
+  {
+   "label": "운 점수(evaluateLuck·luckItem)",
+   "keys": [
+    "Manse.evaluateLuck",
+    "Manse.luckItem"
+   ],
+   "chapters": [],
+   "offOnly": []
+  },
+  {
+   "label": "분야 지수(evaluateDomainLuck: 재물·인연·건강·사고·확장 12종)",
+   "keys": [
+    "Manse.evaluateDomainLuck"
+   ],
+   "chapters": [
+    "self_27",
+    "self_29",
+    "self_30",
+    "self_35",
+    "wealth_02",
+    "wealth_06",
+    "wealth_10",
+    "wealth_14",
+    "love_08",
+    "love_09",
+    "love_14",
+    "love_04"
+   ],
+   "offOnly": [
+    "wealth_04",
+    "wealth_08",
+    "wealth_09",
+    "wealth_12",
+    "career_03",
+    "career_08",
+    "career_09",
+    "career_12",
+    "career_13",
+    "love_03",
+    "love_10",
+    "love_11",
+    "remedy_05"
+   ]
+  },
+  {
+   "label": "합충·관계(luckRelations·relationsAmong)",
+   "keys": [
+    "Manse.luckRelations",
+    "Manse.relationsAmong",
+    "sd.relations"
+   ],
+   "chapters": [
+    "self_20",
+    "self_24",
+    "self_18",
+    "self_25",
+    "self_26",
+    "self_27",
+    "self_29",
+    "self_30",
+    "self_31",
+    "self_33",
+    "self_34",
+    "self_37",
+    "self_22",
+    "wealth_01",
+    "wealth_02",
+    "wealth_03",
+    "wealth_04",
+    "wealth_05",
+    "wealth_06",
+    "wealth_07",
+    "wealth_08",
+    "wealth_09",
+    "wealth_10",
+    "wealth_11",
+    "wealth_12",
+    "wealth_13",
+    "wealth_14",
+    "wealth_15",
+    "career_01",
+    "career_02",
+    "career_03",
+    "career_04",
+    "career_05",
+    "career_06",
+    "career_08",
+    "career_09",
+    "career_10",
+    "career_11",
+    "career_12",
+    "career_13",
+    "career_14",
+    "career_15",
+    "love_01",
+    "love_02",
+    "love_03",
+    "love_05",
+    "love_06",
+    "love_07",
+    "love_08",
+    "love_09",
+    "love_10",
+    "love_11",
+    "love_12",
+    "love_13",
+    "love_14",
+    "love_15",
+    "career_07",
+    "love_04",
+    "self_03"
+   ],
+   "offOnly": [
+    "remedy_05"
+   ]
+  },
+  {
+   "label": "12운성(Manse.unseong 함수 호출 — 기둥 값 sd.pillars.*.unseong 은 deep-time·deep-life·reading-insight 가 직접 읽음)",
+   "keys": [
+    "Manse.unseong",
+    "sd.unseong"
+   ],
+   "chapters": [],
+   "offOnly": []
+  },
+  {
+   "label": "12신살·특수 신살·공망",
+   "keys": [
+    "Manse.sinsal12",
+    "Manse.gongmangOf",
+    "sd.sinsal12",
+    "sd.specialStars",
+    "sd.gongmang"
+   ],
+   "chapters": [
+    "self_03",
+    "self_20",
+    "self_25",
+    "self_27",
+    "self_29",
+    "self_36",
+    "wealth_01",
+    "wealth_02",
+    "career_01",
+    "career_02",
+    "love_01",
+    "love_04",
+    "love_07",
+    "love_08",
+    "love_09",
+    "love_11"
+   ],
+   "offOnly": []
+  },
+  {
+   "label": "직업 엔진(engine.js careerProfile·careerWorkStyle·evaluateCareerCategory)",
+   "keys": [
+    "Manse.careerProfile",
+    "Manse.careerWorkStyle",
+    "Manse.evaluateCareerCategory",
+    "Manse.evaluateCareerEnvironment",
+    "Manse.careerLuckActivation"
+   ],
+   "chapters": [
+    "self_26",
+    "career_01",
+    "career_06"
+   ],
+   "offOnly": [
+    "wealth_04",
+    "remedy_05"
+   ]
+  },
+  {
+   "label": "궁합(compatDayPillars·compatAttraction·evaluateDayPillarCompatibility)",
+   "keys": [
+    "Manse.compatDayPillars",
+    "Manse.compatAttraction",
+    "Manse.evaluateDayPillarCompatibility",
+    "Manse.evaluateAttraction",
+    "Manse.evaluateCompatibleElement"
+   ],
+   "chapters": [
+    "self_28",
+    "love_05"
+   ],
+   "offOnly": [
+    "remedy_05"
+   ]
+  },
+  {
+   "label": "삼재(getSamjae)",
+   "keys": [
+    "Manse.getSamjae"
+   ],
+   "chapters": [],
+   "offOnly": []
+  },
+  {
+   "label": "변동성(calculateVolatility)",
+   "keys": [
+    "Manse.calculateVolatility",
+    "Manse.volatilityNote"
+   ],
+   "chapters": [],
+   "offOnly": []
+  },
+  {
+   "label": "뿌리·통근(analyzeNatalRoot·analyzeLuckRootSupport)",
+   "keys": [
+    "Manse.analyzeNatalRoot",
+    "Manse.analyzeLuckRootSupport",
+    "Manse.evaluateCurrentRootState",
+    "Manse.rootSummary"
+   ],
+   "chapters": [
+    "self_03"
+   ],
+   "offOnly": [
+    "remedy_05"
+   ]
+  },
+  {
+   "label": "조후(ch.climate 한난조습·Manse.climate·conditionOf)",
+   "keys": [
+    "ch.climate",
+    "Manse.climate",
+    "Manse.conditionOf"
+   ],
+   "chapters": [
+    "self_03",
+    "self_02",
+    "self_24",
+    "self_26",
+    "self_27",
+    "self_28",
+    "self_29",
+    "self_35",
+    "self_37",
+    "wealth_02",
+    "wealth_06",
+    "wealth_10",
+    "wealth_14",
+    "career_08",
+    "career_12",
+    "career_14",
+    "love_08",
+    "love_09",
+    "love_14",
+    "love_04",
+    "career_07"
+   ],
+   "offOnly": [
+    "wealth_04",
+    "wealth_08",
+    "wealth_09",
+    "wealth_12",
+    "wealth_15",
+    "career_03",
+    "career_09",
+    "career_13",
+    "career_15",
+    "love_03",
+    "love_10",
+    "love_11",
+    "remedy_04",
+    "remedy_05"
+   ]
+  },
+  {
+   "label": "자미두수(ziweiPeriod·zwBright)",
+   "keys": [
+    "Manse.ziweiPeriod",
+    "Manse.zwBright"
+   ],
+   "chapters": [],
+   "offOnly": [
+    "remedy_05"
+   ]
+  },
+  {
+   "label": "오행 분포·십성 묶음(sd.fiveElements·groupEl·dominantGroup)",
+   "keys": [
+    "sd.fiveElements",
+    "sd.groupEl",
+    "sd.dominantGroup",
+    "sd.weakestGroup",
+    "sd.tenGods"
+   ],
+   "chapters": [
+    "self_31",
+    "self_32",
+    "wealth_01",
+    "wealth_02",
+    "wealth_03",
+    "wealth_05",
+    "wealth_07",
+    "wealth_13",
+    "wealth_15",
+    "career_13",
+    "career_15",
+    "love_13",
+    "love_15",
+    "self_18",
+    "self_25",
+    "self_26",
+    "self_27",
+    "self_29",
+    "self_35",
+    "self_37",
+    "self_22",
+    "wealth_09",
+    "wealth_11",
+    "wealth_12",
+    "career_02",
+    "career_05",
+    "career_06",
+    "career_07",
+    "career_09",
+    "career_10",
+    "career_11",
+    "career_12",
+    "love_01",
+    "love_02",
+    "love_03",
+    "love_04",
+    "love_05",
+    "love_06",
+    "love_07",
+    "love_08",
+    "love_09",
+    "love_11",
+    "love_12",
+    "self_03",
+    "self_02",
+    "self_20",
+    "self_24",
+    "self_28",
+    "self_30",
+    "self_33",
+    "self_34",
+    "wealth_04",
+    "wealth_06",
+    "wealth_08",
+    "wealth_10",
+    "wealth_14",
+    "career_01",
+    "career_03",
+    "career_04",
+    "career_08",
+    "career_14",
+    "love_10",
+    "love_14"
+   ],
+   "offOnly": []
+  },
+  {
+   "label": "신강·신약(sd.strength)",
+   "keys": [
+    "sd.strength"
+   ],
+   "chapters": [
+    "self_03",
+    "self_02",
+    "self_20",
+    "self_24",
+    "self_18",
+    "self_25",
+    "self_26",
+    "self_27",
+    "self_28",
+    "self_29",
+    "self_30",
+    "self_31",
+    "self_32",
+    "self_33",
+    "self_34",
+    "self_35",
+    "self_36",
+    "self_37",
+    "self_22",
+    "wealth_01",
+    "wealth_02",
+    "wealth_03",
+    "wealth_04",
+    "wealth_05",
+    "wealth_06",
+    "wealth_07",
+    "wealth_08",
+    "wealth_09",
+    "wealth_10",
+    "wealth_11",
+    "wealth_12",
+    "wealth_13",
+    "wealth_14",
+    "wealth_15",
+    "career_01",
+    "career_02",
+    "career_03",
+    "career_04",
+    "career_05",
+    "career_06",
+    "career_07",
+    "career_08",
+    "career_09",
+    "career_10",
+    "career_11",
+    "career_12",
+    "career_13",
+    "career_14",
+    "career_15",
+    "love_01",
+    "love_02",
+    "love_03",
+    "love_04",
+    "love_05",
+    "love_06",
+    "love_07",
+    "love_08",
+    "love_09",
+    "love_10",
+    "love_11",
+    "love_12",
+    "love_13",
+    "love_14",
+    "love_15"
+   ],
+   "offOnly": []
+  },
+  {
+   "label": "용신 오행(sd.usefulElements)",
+   "keys": [
+    "sd.usefulElements"
+   ],
+   "chapters": [
+    "self_03",
+    "self_02",
+    "self_20",
+    "self_24",
+    "self_18",
+    "self_25",
+    "self_26",
+    "self_27",
+    "self_28",
+    "self_29",
+    "self_30",
+    "self_31",
+    "self_32",
+    "self_33",
+    "self_34",
+    "self_35",
+    "self_37",
+    "self_22",
+    "wealth_01",
+    "wealth_02",
+    "wealth_03",
+    "wealth_04",
+    "wealth_05",
+    "wealth_06",
+    "wealth_07",
+    "wealth_08",
+    "wealth_09",
+    "wealth_10",
+    "wealth_11",
+    "wealth_12",
+    "wealth_13",
+    "wealth_14",
+    "wealth_15",
+    "career_01",
+    "career_02",
+    "career_03",
+    "career_04",
+    "career_05",
+    "career_06",
+    "career_07",
+    "career_08",
+    "career_09",
+    "career_10",
+    "career_11",
+    "career_12",
+    "career_13",
+    "career_14",
+    "career_15",
+    "love_01",
+    "love_02",
+    "love_03",
+    "love_04",
+    "love_05",
+    "love_06",
+    "love_07",
+    "love_08",
+    "love_09",
+    "love_10",
+    "love_11",
+    "love_12",
+    "love_13",
+    "love_14",
+    "love_15"
+   ],
+   "offOnly": []
+  }
+ ],
+ "modMap": [
+  {
+   "file": "luck-cycle.js",
+   "what": "대운 30년·세운 2년 오행 사이클",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": false,
+   "topicDeepOff": [],
+   "load": "7개 함수"
+  },
+  {
+   "file": "unseong-cycle.js",
+   "what": "12운성 생명주기 해석",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": false,
+   "topicDeepOff": [],
+   "load": "12개 함수"
+  },
+  {
+   "file": "gyeok-structure.js",
+   "what": "격국 분석 카드(정격·특수격·십성 작용)",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": true,
+   "topicDeepOff": [],
+   "load": "1개 함수"
+  },
+  {
+   "file": "wealth-career.js",
+   "what": "돈 버는 방식·업무 환경·직업·약점 4섹션",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": true,
+   "topicDeepOff": [
+    "wealth_04"
+   ],
+   "load": "13개 함수"
+  },
+  {
+   "file": "health-body.js",
+   "what": "오행 건강 지도(장부·체질)",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": false,
+   "topicDeepOff": [],
+   "load": "1개 함수"
+  },
+  {
+   "file": "accident-hint.js",
+   "what": "사고수 신호(충·형·백호·양인 등)",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": false,
+   "topicDeepOff": [],
+   "load": "1개 함수"
+  },
+  {
+   "file": "region-reading.js",
+   "what": "지역 방위 해석(월령·조후·충돌 이유)",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": true,
+   "topicDeepOff": [
+    "wealth_15",
+    "career_09",
+    "career_15",
+    "remedy_04",
+    "remedy_05"
+   ],
+   "load": "12개 함수"
+  },
+  {
+   "file": "compat-pair.js",
+   "what": "두 사람 궁합",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": false,
+   "topicDeepOff": [],
+   "load": "2개 함수"
+  },
+  {
+   "file": "luck-interpret.js",
+   "what": "운세 환경 해석",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": true,
+   "topicDeepOff": [],
+   "load": "5개 함수"
+  },
+  {
+   "file": "byeongyak.js",
+   "what": "병약(病藥) 판정",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": false,
+   "topicDeepOff": [],
+   "load": "1개 함수"
+  },
+  {
+   "file": "jonggyeok.js",
+   "what": "종격 판정",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": false,
+   "topicDeepOff": [],
+   "load": "1개 함수"
+  },
+  {
+   "file": "gyeokguk.js",
+   "what": "격국 판정",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": true,
+   "topicDeepOff": [],
+   "load": "1개 함수"
+  },
+  {
+   "file": "fengshui-engine.js",
+   "what": "현공·팔택 풍수",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": true,
+   "topicDeepOff": [
+    "wealth_15",
+    "career_09",
+    "remedy_04"
+   ],
+   "load": "32개 함수"
+  },
+  {
+   "file": "wish-spots.js",
+   "what": "소원성취 명당",
+   "timelineLoaded": false,
+   "mainApp": true,
+   "admin": true,
+   "topicDeepOff": [],
+   "load": "3개 함수"
+  }
+ ],
+ "chapterEngine": {
+  "self_03": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "뿌리·통근",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_02": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_20": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_24": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "합충·관계",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_18": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_25": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_26": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "직업 엔진",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_27": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "분야 지수",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_28": [
+   "ch.daeun / 대운 목록",
+   "궁합",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_29": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "분야 지수",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_30": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "분야 지수",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_31": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_32": [
+   "ch.daeun / 대운 목록",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_33": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_34": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_35": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "분야 지수",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_36": [
+   "12신살·특수 신살·공망",
+   "신강·신약"
+  ],
+  "self_37": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "self_22": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_01": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_02": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "분야 지수",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_03": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_04": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_05": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_06": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "분야 지수",
+   "합충·관계",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_07": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_08": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_09": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_10": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "분야 지수",
+   "합충·관계",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_11": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_12": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_13": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_14": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "분야 지수",
+   "합충·관계",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "wealth_15": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_01": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "직업 엔진",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_02": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_03": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_04": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_05": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_06": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "직업 엔진",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_07": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "합충·관계",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_08": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "합충·관계",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_09": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_10": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_11": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_12": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "합충·관계",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_13": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_14": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "합충·관계",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "career_15": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_01": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_02": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_03": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_04": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "분야 지수",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_05": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "궁합",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_06": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_07": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_08": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "분야 지수",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_09": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "분야 지수",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_10": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_11": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "12신살·특수 신살·공망",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_12": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_13": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_14": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "세운·월운",
+   "분야 지수",
+   "합충·관계",
+   "조후",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ],
+  "love_15": [
+   "ch.unified",
+   "ch.daeun / 대운 목록",
+   "합충·관계",
+   "오행 분포·십성 묶음",
+   "신강·신약",
+   "용신 오행"
+  ]
+ },
+ "deepBy": {
+  "Deep.deep_car": [
+   "self_02"
+  ],
+  "Deep.deep_stages": [
+   "self_20"
+  ],
+  "FateBlocks.fx:scenario": [
+   "self_18",
+   "wealth_11",
+   "career_11",
+   "love_12"
+  ],
+  "FateBlocks.fx:profile": [
+   "self_25",
+   "wealth_02",
+   "career_02",
+   "love_01",
+   "love_04",
+   "love_07",
+   "love_11"
+  ],
+  "Deep.deep_proscons": [
+   "self_25"
+  ],
+  "FateBlocks.fx:fit": [
+   "self_26",
+   "career_05"
+  ],
+  "Deep.deep_jobs": [
+   "self_26",
+   "career_01",
+   "career_06"
+  ],
+  "Deep.deep_love": [
+   "self_27"
+  ],
+  "Deep.deep_ilju": [
+   "self_28",
+   "love_05"
+  ],
+  "Deep.dossier_spouse": [
+   "self_29"
+  ],
+  "Deep.deep_spouse": [
+   "self_29"
+  ],
+  "FateBlocks.fx:meter": [
+   "self_30",
+   "wealth_01",
+   "career_01"
+  ],
+  "Deep.deep_wealth": [
+   "self_31",
+   "self_32",
+   "wealth_01",
+   "wealth_02",
+   "wealth_03",
+   "wealth_05",
+   "wealth_07"
+  ],
+  "Deep.deep_children": [
+   "self_34",
+   "love_11"
+  ],
+  "FateBlocks.fx:check": [
+   "self_35",
+   "wealth_03",
+   "wealth_07",
+   "wealth_09",
+   "career_07",
+   "career_09",
+   "career_10",
+   "love_06",
+   "love_09"
+  ],
+  "Deep.deep_health": [
+   "self_35"
+  ],
+  "Deep.dossier_past": [
+   "self_36"
+  ],
+  "Deep.deep_past": [
+   "self_36"
+  ],
+  "FateBlocks.fx:rx": [
+   "self_37",
+   "wealth_15",
+   "career_15",
+   "love_15"
+  ],
+  "Deep.deep_remedy": [
+   "self_37"
+  ],
+  "FateBlocks.fx:letter": [
+   "self_22"
+  ],
+  "FateBlocks.fx:vs": [
+   "wealth_04",
+   "wealth_05",
+   "wealth_08",
+   "career_03",
+   "career_04"
+  ],
+  "FateBlocks.fx:actcal": [
+   "wealth_06",
+   "love_08"
+  ],
+  "FateBlocks.fx:years": [
+   "wealth_10",
+   "career_08"
+  ],
+  "FateBlocks.fx:road": [
+   "wealth_12",
+   "career_12"
+  ],
+  "FateBlocks.fx:people": [
+   "wealth_13",
+   "career_13",
+   "love_03",
+   "love_13"
+  ],
+  "FateBlocks.fx:cross": [
+   "wealth_14",
+   "career_14",
+   "love_14"
+  ],
+  "FateBlocks.fx:env": [
+   "career_06"
+  ],
+  "FateBlocks.fx:likes": [
+   "love_02"
+  ],
+  "FateBlocks.fx:pair": [
+   "love_05"
+  ],
+  "Deep.deep_marriage": [
+   "love_08",
+   "love_09"
+  ],
+  "FateBlocks.fx:family": [
+   "love_10"
+  ]
+ },
+ "topicDeep": {
+  "measured": true,
+  "perChapter": {
+   "wealth_04": {
+    "rendered": 1,
+    "avgChars": 1032
+   },
+   "wealth_06": {
+    "rendered": 1,
+    "avgChars": 820
+   },
+   "wealth_08": {
+    "rendered": 1,
+    "avgChars": 794
+   },
+   "wealth_09": {
+    "rendered": 1,
+    "avgChars": 824
+   },
+   "wealth_12": {
+    "rendered": 1,
+    "avgChars": 705
+   },
+   "wealth_13": {
+    "rendered": 1,
+    "avgChars": 151
+   },
+   "wealth_15": {
+    "rendered": 1,
+    "avgChars": 699
+   },
+   "career_01": {
+    "rendered": 1,
+    "avgChars": 2326
+   },
+   "career_02": {
+    "rendered": 1,
+    "avgChars": 371
+   },
+   "career_03": {
+    "rendered": 1,
+    "avgChars": 1893
+   },
+   "career_04": {
+    "rendered": 1,
+    "avgChars": 1235
+   },
+   "career_05": {
+    "rendered": 1,
+    "avgChars": 745
+   },
+   "career_07": {
+    "rendered": 1,
+    "avgChars": 633
+   },
+   "career_08": {
+    "rendered": 1,
+    "avgChars": 691
+   },
+   "career_09": {
+    "rendered": 1,
+    "avgChars": 1360
+   },
+   "career_12": {
+    "rendered": 1,
+    "avgChars": 1382
+   },
+   "career_13": {
+    "rendered": 1,
+    "avgChars": 824
+   },
+   "career_15": {
+    "rendered": 1,
+    "avgChars": 891
+   },
+   "love_03": {
+    "rendered": 1,
+    "avgChars": 658
+   },
+   "love_05": {
+    "rendered": 1,
+    "avgChars": 151
+   },
+   "love_08": {
+    "rendered": 1,
+    "avgChars": 657
+   },
+   "love_10": {
+    "rendered": 1,
+    "avgChars": 669
+   },
+   "love_11": {
+    "rendered": 1,
+    "avgChars": 657
+   },
+   "love_13": {
+    "rendered": 1,
+    "avgChars": 151
+   },
+   "remedy_04": {
+    "rendered": 1,
+    "avgChars": 833
+   },
+   "remedy_05": {
+    "rendered": 1,
+    "avgChars": 891
+   }
+  }
+ },
+ "factSpread": {
+  "가장 큰 기운 소개": {
+   "avgChapters": 22,
+   "max": 24
+  },
+  "지금 대운 소개": {
+   "avgChapters": 11.9,
+   "max": 14
+  },
+  "필요한 기운(용신) 소개": {
+   "avgChapters": 13.9,
+   "max": 25
+  },
+  "힘의 세기(신강·신약) 소개": {
+   "avgChapters": 31,
+   "max": 63
+  },
+  "일간 소개": {
+   "avgChapters": 12.9,
+   "max": 21
+  }
+ },
+ "topicSum": {
+  "self": {
+   "n": 19,
+   "thin": 0.024415204678362584,
+   "same": 0.002778589993502259,
+   "jac": 0.19811696687960648,
+   "rep": 0,
+   "evid": 0.07489654403308507,
+   "narr": 0.6967836257309942,
+   "fb": 0.014035087719298246,
+   "chars": 2840
+  },
+  "wealth": {
+   "n": 15,
+   "thin": 0.056851851851851855,
+   "same": 0.0027788065843621255,
+   "jac": 0.19000056337652954,
+   "rep": 0.0025925925925925925,
+   "evid": 0.09968606112486121,
+   "narr": 0.9568518518518518,
+   "fb": 0.2577777777777778,
+   "chars": 2262
+  },
+  "career": {
+   "n": 15,
+   "thin": 0.037592592592592594,
+   "same": 0.0027788065843621255,
+   "jac": 0.18786473150439698,
+   "rep": 0,
+   "evid": 0.10511554750032757,
+   "narr": 0.9587037037037037,
+   "fb": 0.15814814814814812,
+   "chars": 2231
+  },
+  "love": {
+   "n": 15,
+   "thin": 0.03944444444444444,
+   "same": 0.002777777777777763,
+   "jac": 0.20142008778873394,
+   "rep": 0,
+   "evid": 0.10002692228274288,
+   "narr": 0.9583333333333334,
+   "fb": 0.09166666666666669,
+   "chars": 2271
+  }
+ }
+}

@@ -1,0 +1,611 @@
+# 운명의 타임라인 챕터 전수 감사 — 장별 성적표 (2026-11-15)
+
+가상 사주 **360명** × 공개 **64장**(운영 게시 목차 v15: 종합풀이 19 · 재물운 15 · 커리어운 15 · 인연운 15) + 비공개 주제 재료 26장. 기준 시각 2026-11-15.
+
+다시 만들기:
+```bash
+node tools/timeline-chapter-audit.cjs 360
+```
+```bash
+node tools/timeline-chapter-audit-report.cjs
+```
+
+측정 방식: 운영과 같은 순서로 **오프라인 조립**했습니다. ① DB 게시본 층은 원고(`editorial/rebuild-20261022`)를 게시 변환(`publish/convert.mjs`)한 뒤 운영 서버 조립기(`functions/_reviewed-library.js` composeReviewed)로, ② 브라우저 층은 `report/v2/reading-text.js` html()을 그대로 불러 서사 엔진·후킹·심화 블록·깊이 풀이·포인트·운 흐름까지 실제 화면 HTML을 만든 뒤 글만 뽑아 쟀습니다. 스위치는 운영 상태(서사 엔진 켜짐, topicDeep 꺼짐)입니다. 네트워크·DB·AI 호출은 없습니다.
+
+주의: 운영 DB 게시본은 이 원고를 변환해 올린 것이라 같지만, 관리자에서 따로 게시한 서사 규칙(narrative:rules)이 있으면 운영은 그것을 씁니다. 사용자 이름은 빈 값(“당신”)으로 조립했습니다.
+
+## 0. 한눈에 보기
+
+| 지표 | 전체 평균 | 종합풀이 | 재물운 | 커리어운 | 인연운 |
+|---|---:|---:|---:|---:|---:|
+| DB 문안이 하나도 안 걸림 | 12% | 1% | 26% | 16% | 9% |
+| 서사 엔진이 본문을 대신함 | 88% | 70% | 96% | 96% | 96% |
+| 얇은 장(본문 400자 미만 또는 문안 없음) | 4% | 2% | 6% | 4% | 4% |
+| 평균 글자 수(그래프 포함 읽는 글) | 2,428자 | 2,840자 | 2,262자 | 2,231자 | 2,271자 |
+| 두 사람이 똑같은 글을 받을 확률 | 0% | 0% | 0% | 0% | 0% |
+| 두 사람 사이 문장 겹침(자카드) | 19% | 20% | 19% | 19% | 20% |
+| 절반 넘는 사람에게 똑같이 나오는 문장 비중 | 17% | 17% | 15% | 17% | 18% |
+| 앞 장 문장이 다시 나옴(사람 비율) | 0% | 0% | 0% | 0% | 0% |
+| 근거 상자에 “내 사주 값” 줄 있음 | 88% | 68% | 96% | 95% | 96% |
+| 근거 문장 중 실제 값이 든 문장 | 9% | 7% | 10% | 11% | 10% |
+| 근거 상자에 '검수 근거 부족' 안내 | 7% | 23% | 1% | 1% | 1% |
+| 단정 표현(사람 비율) | 0% | 0% | 0% | 0% | 0% |
+| 20세 미만에게 어른 장면 | 24% | 24% | 25% | 27% | 22% |
+| 65세 이상에게 어색한 장면 | 5% | 1% | 8% | 11% | 0% |
+| 그래프 순위와 본문 연도 어긋남(연도 언급 대비) | 0% | 0% | 1% | 1% | 0% |
+
+**핵심 발견**
+
+- 서사 엔진이 공개 64장 중 59장의 본문을 대부분(재물·커리어·인연 96%) 대신 씁니다. DB 원고가 화면 본문으로 보이는 곳은 서사 없는 5장(전부)과 서사 규칙이 일부만 맞는 4장(self_03·wealth_02·career_07·love_04, 17~31%)이고, 나머지 장에서는 3~4% 사람에게만 보입니다(근거 상자도 서사 것으로 바뀜).
+- 사람마다 글은 충분히 다릅니다(같은 글 0%, 문장 겹침 19%). 장 사이 같은 문장 반복도 0%로 fact-once 가 제 몫을 합니다. 대신 “힘이 센/여린 사주”, “가장 큰 기운” 같은 소개 문형이 한 사람에게 22~31장씩 나옵니다.
+- 가장 약한 곳은 서사가 없는 종합풀이 5장(self_02·28·32·35·36): 근거 상자에 내 사주 값 줄 0%, 그중 4장은 “검수 근거 부족” 안내가 100%입니다.
+- 20세 미만 독자에게 “실제 생활에서는 상사가…”처럼 어른 경험을 지금 일로 말하는 문장이 20장에서 30% 넘게 나옵니다. 65세 이상에게는 커리어 장에 승진·입사 문장이 남습니다(career_08 100%).
+- 만세력 앱 쪽 별도 엔진 14개(운세 사이클·12운성 생명주기·격국 분석·직업·건강·사고·지역·궁합·풍수 등)는 타임라인 화면에 로드조차 되지 않습니다. 그중 5개는 이미 만든 topic-deep(꺼짐)에만 연결돼 있습니다.
+- 단정 표현·지난 나이를 앞날로 말하는 문장·조립 오류는 0건, 그래프 순위와 본문 연도 어긋남은 3장 소수입니다.
+
+판정: **보완 27장** · **유지 30장** · **통합 후보 7장** (판정 규칙은 5절)
+
+## 1. 지금 챕터가 조립되는 방식
+
+한 장의 화면은 위에서 아래로 이렇게 쌓입니다(`reading-text.js` html()).
+
+| 순서 | 층 | 파일 | 붙는 조건 | 운영 스위치 |
+|---|---|---|---|---|
+| 1 | 제목·후킹 | chapter-hooks.js(장 고정 문장) + chapter-hooks-personal(일간 10 × 장) + reading-feature teaser | 65장 전부 | 항상 |
+| 2 | 본문 5단계 | life-narrative.js + life-narrative-data-*.js (규칙 433개) | 서사 엔진 59장, 맞는 규칙이 있을 때 | lifeNarrative 켜짐(2026-11-09) |
+| 2′ | 본문(대체) | DB 게시본 `library.timeline_*` ← editorial/rebuild-20261022 (서버 composeReviewed) | 서사가 없거나 규칙이 안 맞을 때 | 항상 |
+| 3 | 운 흐름 한 줄 | luck-reading.js | DB 본문일 때 12장 안팎 | 항상 |
+| 4 | 그래프 | reading-text overview / 원국표 / 대운 그래프 | 대부분 장(십성 구성 막대) · 시기 장(대운 그래프) | 항상 |
+| 5 | 근거 펼쳐보기 | 서사 evidence 또는 DB why·evidence + `이 사주:` 실제 값 줄(_reading-personal.js) | 모든 장 | 항상 |
+| 6 | 심화 블록 | reading-feature.js SPEC → deep-*.js SECTIONS · fate-blocks*.js(fx:*) · 순위·시기 그래프 | 64장 중 SPEC 있는 장 | 항상 |
+| 6′ | 주제 심화 | topic-deep.js(td:*) — wealth-career·compat-pair·region-reading·fengshui·wish-spots | 25장 | **topicDeep 꺼짐** |
+| 7 | 깊이 풀이 | reading-depth.js(+data 1~5) | 대부분 장 | 항상 |
+| 8 | 이 사주 포인트 | reading-insight.js(+data 1~4) | 대부분 장 | 항상 |
+| – | 사실 한 번 | fact-once.js — 사실 소개·문장을 처음 장에서만 | 깊이·포인트·운 흐름·심화 안내 문장 | 항상 |
+
+### 1-1. 장 단위 층 지도
+
+“층별 평균 글자”는 실제로 그려진 사람 기준 평균입니다. 서사 비율이 100%면 DB 문안은 화면에 나오지 않습니다(근거 상자만 서사 것으로 바뀜).
+
+| 장 | 제목 | DB 원고 수 | 서사 | 심화 블록 출처 | 층별 평균 글자 |
+|---|---|---:|---:|---|---|
+| self_03 | 나의 타고난 기질은? | 30 | 69% | feature rank | 서사 엔진 899(69%) · DB 문안 879(31%) · 심화 블록 718 · 이 사주 포인트 208 · 그래프 462 |
+| self_02 | 내 사주를 자동차로 비유하면? | 12 | - | Deep.deep_car | DB 문안 808 · 심화 블록 1292 · 깊이 풀이 395 · 이 사주 포인트 173 · 그래프 238 |
+| self_20 | 전체 인생 흐름 | 20 | 100% | Deep.deep_stages | 서사 엔진 1469 · 심화 블록 661 · 깊이 풀이 425 · 이 사주 포인트 165 · 시그니처 225 · 그래프 1496 |
+| self_24 | 움직여야 될 때와 기다려야 할 때 | 3 | 97% | feature timing | 서사 엔진 579 · 심화 블록 259 · 깊이 풀이 396 · 이 사주 포인트 178 · 그래프 1496 |
+| self_18 | 최고의 나와 최악의 나 | 8 | 96% | fate-blocks fx:scenario, feature rank | 서사 엔진 575 · 심화 블록 1018 · 깊이 풀이 319 · 이 사주 포인트 200 · 그래프 159 |
+| self_25 | 나의 타고난 강점과 약점 | 3 | 96% | fate-blocks fx:profile, Deep.deep_proscons | 서사 엔진 522 · 심화 블록 1118 · 깊이 풀이 298 · 이 사주 포인트 185 · 그래프 160 |
+| self_26 | 나와 잘 맞는 업 | 3 | 96% | fate-blocks fx:fit, feature talent, Deep.deep_jobs | 서사 엔진 488 · 심화 블록 1960 · 깊이 풀이 332 · 이 사주 포인트 89 · 그래프 156 |
+| self_27 | 전체 인연운 | 3 | 96% | feature places, Deep.deep_love | 서사 엔진 528 · 심화 블록 2491 · 깊이 풀이 337 · 이 사주 포인트 89 · 그래프 153 |
+| self_28 | 대인관계 궁합 | 5 | - | Deep.deep_ilju | DB 문안 625 · 심화 블록 1749 · 깊이 풀이 335 · 이 사주 포인트 107 · 그래프 154 |
+| self_29 | 내 미래 배우자는? | 3 | 97% | Deep.dossier_spouse, Deep.deep_spouse | 서사 엔진 645 · 심화 블록 1723 · 깊이 풀이 327 · 이 사주 포인트 83 · 그래프 157 |
+| self_30 | 전체 재물운 | 3 | 96% | fate-blocks fx:meter, feature rank | 서사 엔진 516 · 심화 블록 960 · 깊이 풀이 419 · 이 사주 포인트 89 · 그래프 153 |
+| self_31 | 나의 재물 그릇은? | 3 | 96% | Deep.deep_wealth | 서사 엔진 503 · 심화 블록 608 · 깊이 풀이 353 · 이 사주 포인트 129 · 그래프 157 |
+| self_32 | 내 사주와 맞는 돈 버는 법 | 3 | - | Deep.deep_wealth | DB 문안 786 · 심화 블록 249 · 깊이 풀이 338 · 이 사주 포인트 125 · 그래프 162 |
+| self_33 | 나의 말년운 | 3 | 97% | feature late | 서사 엔진 598 · 심화 블록 339 · 깊이 풀이 410 · 이 사주 포인트 162 · 그래프 153 |
+| self_34 | 나의 자식운 | 3 | 96% | Deep.deep_children | 서사 엔진 481 · 심화 블록 624 · 깊이 풀이 325 · 이 사주 포인트 76 · 그래프 153 |
+| self_35 | 건강 및 사고수 | 3 | - | fate-blocks fx:check, feature healthmap, Deep.deep_health | DB 문안 793 · 심화 블록 3627 · 깊이 풀이 418 · 그래프 155 |
+| self_36 | 전생의 나 | 3 | - | Deep.dossier_past, Deep.deep_past | DB 문안 910 · 심화 블록 1897 · 그래프 152 |
+| self_37 | 개운법 | 5 | 96% | fate-blocks fx:rx, Deep.deep_remedy | 서사 엔진 437 · 심화 블록 2058 · 깊이 풀이 333 · 이 사주 포인트 160 · 그래프 150 |
+| self_22 | 나라는 사람의 최종 사용설명서 | 6 | 97% | fate-blocks fx:letter, feature rank | 서사 엔진 532 · 심화 블록 932 · 깊이 풀이 362 · 이 사주 포인트 113 · 그래프 163 |
+| wealth_01 | 내 재물 그릇은 얼마나 클까? | 12 | 96% | fate-blocks fx:meter, Deep.deep_wealth | 서사 엔진 507 · 심화 블록 1098 · 깊이 풀이 326 · 이 사주 포인트 157 · 시그니처 92 · 그래프 633 |
+| wealth_02 | 나는 어떤 방식으로 돈을 벌까? | 8 | 78% | fate-blocks fx:profile, Deep.deep_wealth | 서사 엔진 810(78%) · DB 문안 825(22%) · 심화 블록 835 · 깊이 풀이 304 · 이 사주 포인트 138 · 그래프 173 |
+| wealth_03 | 돈이 들어와도 왜 남지 않을까? | 7 | 98% | fate-blocks fx:check, Deep.deep_wealth | 서사 엔진 488 · 심화 블록 322 · 깊이 풀이 307 · 이 사주 포인트 191 · 그래프 171 |
+| wealth_04 | 월급형 인간일까, 사업형 인간일까? | 7 | 96% | fate-blocks fx:vs, feature rank, topic-deep td:income(꺼짐), topic-deep td:sub(꺼짐) | 서사 엔진 494 · 심화 블록 863 · 깊이 풀이 324 · 이 사주 포인트 140(91%) · 그래프 175 |
+| wealth_05 | 나는 돈을 모으는 사람일까, 쓰는 사람일까? | 9 | 97% | fate-blocks fx:vs, Deep.deep_wealth | 서사 엔진 446 · 심화 블록 292 · 깊이 풀이 320 · 이 사주 포인트 97(93%) · 그래프 180 |
+| wealth_06 | 큰돈을 만날 기회는 언제일까? | 7 | 96% | feature timing, fate-blocks fx:actcal, topic-deep td:sub(꺼짐) | 서사 엔진 568 · 심화 블록 546 · 깊이 풀이 396 · 이 사주 포인트 152 · 그래프 1522 |
+| wealth_07 | 돈 때문에 가장 조심해야 할 선택 | 8 | 98% | fate-blocks fx:check, Deep.deep_wealth | 서사 엔진 476 · 심화 블록 440 · 깊이 풀이 307 · 이 사주 포인트 104 · 그래프 174 |
+| wealth_08 | 나는 투자와 재테크에 어울리는 성향일까? | 7 | 99% | fate-blocks fx:vs, feature rank, topic-deep td:sub(꺼짐) | 서사 엔진 459 · 심화 블록 888 · 깊이 풀이 326 · 이 사주 포인트 91 · 그래프 178 |
+| wealth_09 | 사람 때문에 돈을 잃기 쉬울까? | 8 | 98% | fate-blocks fx:check, feature rank, topic-deep td:sub(꺼짐), topic-deep td:compat(꺼짐) | 서사 엔진 484 · 심화 블록 787 · 깊이 풀이 337 · 이 사주 포인트 79(83%) · 그래프 173 |
+| wealth_10 | 나에게 유리한 재물운의 시기 | 9 | 96% | feature timing, fate-blocks fx:years | 서사 엔진 552 · 심화 블록 728 · 깊이 풀이 382 · 이 사주 포인트 157 · 그래프 1522 |
+| wealth_11 | 최고의 재물 시나리오 vs 최악의 재물 시나리오 | 7 | 96% | fate-blocks fx:scenario, feature rank | 서사 엔진 492 · 심화 블록 842 · 깊이 풀이 296 · 이 사주 포인트 92 · 그래프 182 |
+| wealth_12 | 내 재산을 키우기 위한 현실 전략 | 9 | 100% | fate-blocks fx:road, feature rank, topic-deep td:sub(꺼짐) | 서사 엔진 490 · 심화 블록 769 · 깊이 풀이 311 · 이 사주 포인트 88 · 그래프 174 |
+| wealth_13 | 재물운에서 나와 맞는 사람과 피해야 할 사람 | 5 | 96% | fate-blocks fx:people, feature rank, topic-deep td:compatRank(꺼짐) | 서사 엔진 473 · 심화 블록 1083 · 깊이 풀이 316 · 이 사주 포인트 84(84%) · 그래프 110 |
+| wealth_14 | 재물운 타이밍: 힘이 실리는 때 | 6 | 96% | feature timing, fate-blocks fx:cross | 서사 엔진 547 · 심화 블록 368 · 깊이 풀이 320 · 이 사주 포인트 218 · 그래프 1522 |
+| wealth_15 | 재물운을 끌어올리는 개운법 | 5 | 98% | fate-blocks fx:rx, feature rank, topic-deep td:wish(꺼짐), topic-deep td:dirs(꺼짐) | 서사 엔진 444 · 심화 블록 651 · 깊이 풀이 294 · 이 사주 포인트 68(77%) · 그래프 110 |
+| career_01 | 나는 어떤 일을 해야 잘할까? | 10 | 97% | fate-blocks fx:meter, Deep.deep_jobs, topic-deep td:jobs(꺼짐) | 서사 엔진 516 · 심화 블록 407 · 깊이 풀이 309 · 이 사주 포인트 152 · 시그니처 82 · 그래프 629 |
+| career_02 | 내가 가진 가장 돈 되는 재능 | 10 | 97% | fate-blocks fx:profile, feature rank, topic-deep td:income(꺼짐) | 서사 엔진 493 · 심화 블록 864 · 깊이 풀이 312 · 이 사주 포인트 125 · 그래프 168 |
+| career_03 | 직장인과 사업가, 어느 쪽이 맞을까? | 10 | 97% | fate-blocks fx:vs, feature rank, topic-deep td:env(꺼짐), topic-deep td:sub(꺼짐) | 서사 엔진 523 · 심화 블록 771 · 깊이 풀이 304 · 이 사주 포인트 124 · 그래프 172 |
+| career_04 | 나는 리더일까, 전문가일까? | 8 | 97% | fate-blocks fx:vs, feature rank, topic-deep td:env(꺼짐) | 서사 엔진 480 · 심화 블록 762 · 깊이 풀이 329 · 이 사주 포인트 132 · 그래프 167 |
+| career_05 | 나에게 잘 맞는 업종과 맞지 않는 업종 | 10 | 98% | fate-blocks fx:fit, feature rank, topic-deep td:industry(꺼짐) | 서사 엔진 508 · 심화 블록 625 · 깊이 풀이 328 · 이 사주 포인트 121 · 그래프 173 |
+| career_06 | 나는 어떤 직장 환경에서 성공할까? | 8 | 99% | fate-blocks fx:env, Deep.deep_jobs | 서사 엔진 496 · 심화 블록 528 · 깊이 풀이 330 · 이 사주 포인트 89(91%) · 그래프 171 |
+| career_07 | 조직생활에서 내가 부딪히는 문제 | 8 | 75% | fate-blocks fx:check, feature rank, topic-deep td:weak(꺼짐) | 서사 엔진 597(75%) · DB 문안 911(25%) · 심화 블록 763 · 깊이 풀이 349 · 이 사주 포인트 78 · 그래프 169 |
+| career_08 | 이직과 독립, 언제 움직이는 게 좋을까? | 13 | 97% | feature timing, fate-blocks fx:years, topic-deep td:sub(꺼짐) | 서사 엔진 655 · 심화 블록 641 · 깊이 풀이 412 · 이 사주 포인트 161 · 그래프 1506 |
+| career_09 | 창업과 사업에서 내가 조심해야 할 것 | 9 | 98% | fate-blocks fx:check, feature rank, topic-deep td:sub(꺼짐), topic-deep td:dirs(꺼짐) | 서사 엔진 499 · 심화 블록 721 · 깊이 풀이 321 · 이 사주 포인트 95 · 그래프 172 |
+| career_10 | 성공을 가로막는 나의 습관 | 10 | 97% | fate-blocks fx:check, feature rank | 서사 엔진 480 · 심화 블록 723 · 깊이 풀이 331 · 이 사주 포인트 77(92%) · 그래프 166 |
+| career_11 | 최고의 커리어 시나리오 vs 최악의 커리어 시나리오 | 10 | 98% | fate-blocks fx:scenario, feature rank | 서사 엔진 475 · 심화 블록 762 · 깊이 풀이 337 · 이 사주 포인트 72 · 그래프 180 |
+| career_12 | 앞으로 10년, 나의 커리어 전략 | 18 | 97% | fate-blocks fx:road, feature rank, topic-deep td:sub(꺼짐) | 서사 엔진 609 · 심화 블록 736 · 깊이 풀이 413 · 이 사주 포인트 147 · 그래프 1506 |
+| career_13 | 커리어운에서 나와 맞는 사람과 피해야 할 사람 | 5 | 97% | fate-blocks fx:people, feature rank, topic-deep td:sub(꺼짐), topic-deep td:compatRank(꺼짐) | 서사 엔진 504 · 심화 블록 799 · 깊이 풀이 315 · 이 사주 포인트 71(81%) · 그래프 110 |
+| career_14 | 커리어운 타이밍: 힘이 실리는 때 | 6 | 97% | feature timing, fate-blocks fx:cross | 서사 엔진 525 · 심화 블록 326 · 깊이 풀이 311 · 이 사주 포인트 138 · 그래프 1506 |
+| career_15 | 커리어운을 끌어올리는 개운법 | 5 | 98% | fate-blocks fx:rx, feature rank, topic-deep td:wish(꺼짐), topic-deep td:regions(꺼짐) | 서사 엔진 435 · 심화 블록 613 · 깊이 풀이 296 · 이 사주 포인트 93 · 그래프 110 |
+| love_01 | 나는 사람들과 어떤 관계를 맺을까? | 10 | 98% | fate-blocks fx:profile, feature rank | 서사 엔진 469 · 심화 블록 867 · 깊이 풀이 311 · 이 사주 포인트 141 · 시그니처 96 · 그래프 631 |
+| love_02 | 사람들이 나를 좋아하거나 불편해하는 이유 | 10 | 98% | fate-blocks fx:likes, feature rank | 서사 엔진 522 · 심화 블록 821 · 깊이 풀이 324 · 이 사주 포인트 118 · 그래프 173 |
+| love_03 | 내 곁에 남는 사람과 멀어지는 사람 | 6 | 96% | fate-blocks fx:people, feature rank, topic-deep td:sub(꺼짐) | 서사 엔진 438 · 심화 블록 770 · 깊이 풀이 315 · 이 사주 포인트 98(94%) · 그래프 178 |
+| love_04 | 나는 사랑할 때 어떤 사람이 될까? | 10 | 83% | fate-blocks fx:profile, feature rank | 서사 엔진 771(83%) · DB 문안 990(18%) · 심화 블록 876 · 깊이 풀이 306 · 이 사주 포인트 86 · 그래프 170 |
+| love_05 | 내가 끌리는 사람과 실제 잘 맞는 사람 | 12 | 97% | fate-blocks fx:pair, Deep.deep_ilju, topic-deep td:compat(꺼짐) | 서사 엔진 476 · 심화 블록 829 · 깊이 풀이 307 · 이 사주 포인트 109 · 그래프 172 |
+| love_06 | 연애에서 반복하기 쉬운 실수 | 8 | 98% | fate-blocks fx:check, feature rank | 서사 엔진 428 · 심화 블록 741 · 깊이 풀이 332 · 이 사주 포인트 88 · 그래프 166 |
+| love_07 | 나에게 잘 맞는 배우자의 성향 | 16 | 97% | fate-blocks fx:profile, feature rank | 서사 엔진 519 · 심화 블록 931 · 깊이 풀이 325 · 이 사주 포인트 76 · 그래프 167 |
+| love_08 | 결혼운은 언제 강해질까? | 14 | 96% | Deep.deep_marriage, fate-blocks fx:actcal, topic-deep td:sub(꺼짐) | 서사 엔진 663 · 심화 블록 852 · 깊이 풀이 392 · 이 사주 포인트 159 · 그래프 1520 |
+| love_09 | 결혼생활에서 가장 조심해야 할 갈등 | 14 | 96% | fate-blocks fx:check, Deep.deep_marriage | 서사 엔진 479 · 심화 블록 1299 · 깊이 풀이 408 · 이 사주 포인트 76(81%) · 그래프 170 |
+| love_10 | 나의 가족운과 부모·형제 관계 | 12 | 96% | fate-blocks fx:family, feature rank, topic-deep td:sub(꺼짐) | 서사 엔진 480 · 심화 블록 981 · 깊이 풀이 327 · 이 사주 포인트 74 · 그래프 167 |
+| love_11 | 나의 자식운과 부모가 되었을 때의 모습 | 18 | 96% | fate-blocks fx:profile, Deep.deep_children, topic-deep td:sub(꺼짐) | 서사 엔진 474 · 심화 블록 938 · 깊이 풀이 298 · 이 사주 포인트 72(94%) · 그래프 172 |
+| love_12 | 최고의 인연 시나리오 vs 최악의 인연 시나리오 | 10 | 97% | fate-blocks fx:scenario, feature rank | 서사 엔진 487 · 심화 블록 742 · 깊이 풀이 310 · 이 사주 포인트 68 · 그래프 177 |
+| love_13 | 인연운에서 나와 맞는 사람과 피해야 할 사람 | 5 | 98% | fate-blocks fx:people, feature rank, topic-deep td:compatRank(꺼짐) | 서사 엔진 477 · 심화 블록 646 · 깊이 풀이 317 · 이 사주 포인트 91 · 그래프 110 |
+| love_14 | 인연운 타이밍: 힘이 실리는 때 | 6 | 96% | feature timing, fate-blocks fx:cross | 서사 엔진 541 · 심화 블록 364 · 깊이 풀이 316 · 이 사주 포인트 147 · 그래프 1520 |
+| love_15 | 인연운을 끌어올리는 개운법 | 5 | 98% | fate-blocks fx:rx, feature rank | 서사 엔진 439 · 심화 블록 594 · 깊이 풀이 324 · 이 사주 포인트 95 · 그래프 110 |
+
+## 2. 엔진 활용 지도
+
+각 계산 결과를 **어느 장이 실제로 읽었는지** 조립 중에 호출을 기록해 만들었습니다(사람 한 명이라도 그 장에서 읽으면 표시). DB 층(서버 조건 계산 deriveFacts)은 모든 장이 같은 사실 묶음을 쓰므로 따로 2-3에 적었습니다.
+
+### 2-1. engine.js 계산 결과
+
+| 계산 결과 | 쓰는 장 수 | 쓰는 장 | 꺼진 층(topicDeep)에서만 |
+|---|---:|---|---|
+| ch.unified (통합 용신: 억부·조후·격국·통관·제화·종격) | 61 | 61장(거의 전부) | - |
+| ch.daeun / 대운 목록 | 63 | 63장(거의 전부) | remedy_05 |
+| 세운·월운(seunRange·wolun·monthsOfYear) | 20 | self_24, self_27, self_29, self_30, wealth_02, wealth_06, wealth_14, career_08, career_12, career_14, love_08, love_09, love_14, love_04, self_03, career_07, self_35, wealth_10, self_02, self_20 | wealth_04, wealth_09, wealth_12, career_03, career_09, career_13, love_03, love_10, love_11, remedy_05, wealth_08 |
+| 운 점수(evaluateLuck·luckItem) | 0 | **안 씀** | - |
+| 분야 지수(evaluateDomainLuck: 재물·인연·건강·사고·확장 12종) | 12 | self_27, self_29, self_30, self_35, wealth_02, wealth_06, wealth_10, wealth_14, love_08, love_09, love_14, love_04 | wealth_04, wealth_08, wealth_09, wealth_12, career_03, career_08, career_09, career_12, career_13, love_03, love_10, love_11, remedy_05 |
+| 합충·관계(luckRelations·relationsAmong) | 59 | 59장(거의 전부) | remedy_05 |
+| 12운성(Manse.unseong 함수 호출 — 기둥 값 sd.pillars.*.unseong 은 deep-time·deep-life·reading-insight 가 직접 읽음) | 0 | **안 씀** | - |
+| 12신살·특수 신살·공망 | 16 | self_03, self_20, self_25, self_27, self_29, self_36, wealth_01, wealth_02, career_01, career_02, love_01, love_04, love_07, love_08, love_09, love_11 | - |
+| 직업 엔진(engine.js careerProfile·careerWorkStyle·evaluateCareerCategory) | 3 | self_26, career_01, career_06 | wealth_04, remedy_05 |
+| 궁합(compatDayPillars·compatAttraction·evaluateDayPillarCompatibility) | 2 | self_28, love_05 | remedy_05 |
+| 삼재(getSamjae) | 0 | **안 씀** | - |
+| 변동성(calculateVolatility) | 0 | **안 씀** | - |
+| 뿌리·통근(analyzeNatalRoot·analyzeLuckRootSupport) | 1 | self_03 | remedy_05 |
+| 조후(ch.climate 한난조습·Manse.climate·conditionOf) | 21 | self_03, self_02, self_24, self_26, self_27, self_28, self_29, self_35, self_37, wealth_02, wealth_06, wealth_10, wealth_14, career_08, career_12, career_14, love_08, love_09, love_14, love_04, career_07 | wealth_04, wealth_08, wealth_09, wealth_12, wealth_15, career_03, career_09, career_13, career_15, love_03, love_10, love_11, remedy_04, remedy_05 |
+| 자미두수(ziweiPeriod·zwBright) | 0 | **안 씀** | remedy_05 |
+| 오행 분포·십성 묶음(sd.fiveElements·groupEl·dominantGroup) | 63 | 63장(거의 전부) | - |
+| 신강·신약(sd.strength) | 64 | 64장(거의 전부) | - |
+| 용신 오행(sd.usefulElements) | 63 | 63장(거의 전부) | - |
+
+### 2-2. 별도 엔진 모듈(만세력 앱 쪽)
+
+타임라인 화면(`report/v2/index.html`)에 실제로 로드되는지와, 꺼진 topic-deep 이 켜졌을 때 읽는 장입니다.
+
+| 모듈 | 무엇을 계산 | 타임라인에 로드 | 만세력 앱 | 관리자 | topicDeep 켜면 쓰는 장 |
+|---|---|:-:|:-:|:-:|---|
+| luck-cycle.js | 대운 30년·세운 2년 오행 사이클 | **아니오** | 예 | - | - |
+| unseong-cycle.js | 12운성 생명주기 해석 | **아니오** | 예 | - | - |
+| gyeok-structure.js | 격국 분석 카드(정격·특수격·십성 작용) | **아니오** | 예 | 예 | - |
+| wealth-career.js | 돈 버는 방식·업무 환경·직업·약점 4섹션 | **아니오** | 예 | 예 | wealth_04 |
+| health-body.js | 오행 건강 지도(장부·체질) | **아니오** | 예 | - | - |
+| accident-hint.js | 사고수 신호(충·형·백호·양인 등) | **아니오** | 예 | - | - |
+| region-reading.js | 지역 방위 해석(월령·조후·충돌 이유) | **아니오** | 예 | 예 | wealth_15, career_09, career_15, remedy_04, remedy_05 |
+| compat-pair.js | 두 사람 궁합 | **아니오** | 예 | - | - |
+| luck-interpret.js | 운세 환경 해석 | **아니오** | 예 | 예 | - |
+| byeongyak.js | 병약(病藥) 판정 | **아니오** | 예 | - | - |
+| jonggyeok.js | 종격 판정 | **아니오** | 예 | - | - |
+| gyeokguk.js | 격국 판정 | **아니오** | 예 | 예 | - |
+| fengshui-engine.js | 현공·팔택 풍수 | **아니오** | 예 | 예 | wealth_15, career_09, remedy_04 |
+| wish-spots.js | 소원성취 명당 | **아니오** | 예 | 예 | - |
+
+→ **타임라인 64장은 위 14개 모듈을 하나도 쓰지 않습니다.** topic-deep 이 켜지면 wealth-career·compat-pair·region-reading·fengshui·wish-spots 5개만 붙고, luck-cycle·unseong-cycle·gyeok-structure·health-body·accident-hint·luck-interpret·byeongyak·jonggyeok·gyeokguk 9개는 어떤 장에도 연결돼 있지 않습니다. (ch.unified 안에 격국·종격·병약 판정 결과가 들어 있어 서사 엔진이 간접으로는 씁니다.)
+
+### 2-3. DB 문안이 거는 조건(원고 when 키)
+
+| 조건 키 | 원고 수(64장 합) |
+|---|---:|
+| strength | 335 |
+| group | 204 |
+| tenGod | 92 |
+| positionTG | 69 |
+| daewoonStemTG | 62 |
+| rootLevel | 42 |
+| gender | 39 |
+| yongEl | 35 |
+| pattern | 25 |
+| daewoonChangeIn | 18 |
+| seunStemTG | 15 |
+| dayMaster | 15 |
+| el | 10 |
+| star | 10 |
+| daewoonNextStemTG | 10 |
+| natalDayRelation | 10 |
+| seunSeason | 9 |
+| season | 8 |
+| daewoonSeason | 6 |
+| relation | 6 |
+| daewoonDayRelation | 5 |
+| seunDayRelation | 5 |
+
+### 2-4. 심화 블록 출처 → 장
+
+| 블록 | 장 |
+|---|---|
+| Deep.deep_car | self_02 |
+| Deep.deep_children | self_34, love_11 |
+| Deep.deep_health | self_35 |
+| Deep.deep_ilju | self_28, love_05 |
+| Deep.deep_jobs | self_26, career_01, career_06 |
+| Deep.deep_love | self_27 |
+| Deep.deep_marriage | love_08, love_09 |
+| Deep.deep_past | self_36 |
+| Deep.deep_proscons | self_25 |
+| Deep.deep_remedy | self_37 |
+| Deep.deep_spouse | self_29 |
+| Deep.deep_stages | self_20 |
+| Deep.deep_wealth | self_31, self_32, wealth_01, wealth_02, wealth_03, wealth_05, wealth_07 |
+| Deep.dossier_past | self_36 |
+| Deep.dossier_spouse | self_29 |
+| FateBlocks.fx:actcal | wealth_06, love_08 |
+| FateBlocks.fx:check | self_35, wealth_03, wealth_07, wealth_09, career_07, career_09, career_10, love_06, love_09 |
+| FateBlocks.fx:cross | wealth_14, career_14, love_14 |
+| FateBlocks.fx:env | career_06 |
+| FateBlocks.fx:family | love_10 |
+| FateBlocks.fx:fit | self_26, career_05 |
+| FateBlocks.fx:letter | self_22 |
+| FateBlocks.fx:likes | love_02 |
+| FateBlocks.fx:meter | self_30, wealth_01, career_01 |
+| FateBlocks.fx:pair | love_05 |
+| FateBlocks.fx:people | wealth_13, career_13, love_03, love_13 |
+| FateBlocks.fx:profile | self_25, wealth_02, career_02, love_01, love_04, love_07, love_11 |
+| FateBlocks.fx:road | wealth_12, career_12 |
+| FateBlocks.fx:rx | self_37, wealth_15, career_15, love_15 |
+| FateBlocks.fx:scenario | self_18, wealth_11, career_11, love_12 |
+| FateBlocks.fx:vs | wealth_04, wealth_05, wealth_08, career_03, career_04 |
+| FateBlocks.fx:years | wealth_10, career_08 |
+
+## 3. 장별 성적표
+
+| 장 | DB 없음 | 서사 | 얇음 | 글자 | 같은 글 | 문장 겹침 | 고정 문장 | 앞 장 반복 | 근거 값 줄 | 근거 부족 | 단정 | 20세↓ | 65세↑ | 그래프 어긋남 | 판정 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| self_03 | - | 69% | - | 2,390 | 0% | 18% | 18% | - | 61% | - | - | 24% | - | - | 보완 |
+| self_02 | 27% | - | 27% | 3,010 | 0% | 20% | 17% | - | 0% | - | - | 11% | - | - | 보완 |
+| self_20 | - | 100% | - | 4,529 | 0% | 16% | 15% | - | 100% | - | - | - | - | - | 유지 |
+| self_24 | - | 97% | 1% | 3,013 | 0% | 16% | 9% | - | 97% | 3% | - | 68% | - | - (948) | 보완 |
+| self_18 | - | 96% | 1% | 2,411 | 0% | 20% | 16% | - | 96% | - | - | 3% | 1% | - | 유지 |
+| self_25 | - | 96% | 1% | 2,407 | 0% | 12% | 7% | - | 96% | 4% | - | - | - | - | 유지 |
+| self_26 | - | 96% | 1% | 3,149 | 0% | 17% | 15% | - | 92% | 4% | - | 66% | 8% | - | 보완 |
+| self_27 | - | 96% | 1% | 3,724 | 0% | 14% | 12% | - | 96% | 4% | - | 100% | - | - | 보완 |
+| self_28 | - | - | - | 3,075 | 0% | 20% | 16% | - | 0% | 100% | - | - | - | - | 보완 |
+| self_29 | - | 97% | 1% | 3,066 | 0% | 13% | 10% | - | 97% | 3% | - | 3% | - | - | 유지 |
+| self_30 | - | 96% | 1% | 2,259 | 0% | 25% | 25% | - | 96% | 4% | - | 29% | - | - | 유지 |
+| self_31 | - | 96% | 1% | 1,879 | 0% | 16% | 10% | - | 96% | 4% | - | - | - | - | 유지 |
+| self_32 | - | - | - | 1,777 | 0% | 30% | 15% | - | 0% | 100% | - | 26% | - | - | 보완 |
+| self_33 | - | 97% | - | 1,782 | 0% | 21% | 19% | - | 97% | 3% | - | 68% | - | - | 보완 |
+| self_34 | - | 96% | 1% | 1,784 | 0% | 19% | 17% | - | 96% | 4% | - | - | 3% | - | 유지 |
+| self_35 | - | - | - | 5,130 | 0% | 29% | 32% | - | 0% | 100% | - | - | - | - | 보완 |
+| self_36 | - | - | - | 3,079 | 0% | 22% | 9% | - | 0% | 100% | - | 55% | - | - | 보완 |
+| self_37 | - | 96% | 11% | 3,267 | 0% | 24% | 28% | - | 96% | 4% | - | - | - | - | 유지 |
+| self_22 | - | 97% | 1% | 2,221 | 0% | 27% | 27% | - | 86% | - | - | 3% | - | - | 유지 |
+| wealth_01 | 5% | 96% | 2% | 2,960 | 0% | 17% | 14% | - | 96% | - | - | 16% | 2% | - | 유지 |
+| wealth_02 | 48% | 78% | 12% | 2,380 | 0% | 19% | 18% | - | 78% | - | - | 26% | 19% | 10% (73) | 보완 |
+| wealth_03 | 42% | 98% | 3% | 1,608 | 0% | 11% | 3% | - | 98% | - | - | - | - | - | 유지 |
+| wealth_04 | 44% | 96% | 6% | 2,135 | 0% | 23% | 21% | - | 96% | - | - | 74% | 40% | - | 보완 |
+| wealth_05 | 20% | 97% | 13% | 1,461 | 0% | 13% | 4% | - | 97% | - | - | 11% | 20% | - | 보완 |
+| wealth_06 | 67% | 96% | 4% | 3,300 | 0% | 16% | 11% | - | 96% | - | - | 26% | 19% | - (1023) | 보완 |
+| wealth_07 | 32% | 98% | 5% | 1,621 | 0% | 14% | 4% | - | 98% | - | - | 3% | - | - | 유지 |
+| wealth_08 | 32% | 99% | 10% | 2,066 | 0% | 22% | 21% | - | 99% | - | - | 89% | - | - | 보완 |
+| wealth_09 | 51% | 98% | 5% | 1,974 | 0% | 22% | 18% | - | 98% | - | - | - | - | - | 유지 |
+| wealth_10 | - | 96% | 3% | 3,468 | 0% | 13% | 9% | 4% | 96% | - | - | 47% | 19% | - | 보완 |
+| wealth_11 | 42% | 96% | 3% | 2,053 | 0% | 22% | 19% | - | 96% | - | - | 66% | - | - | 보완 |
+| wealth_12 | 5% | 100% | 3% | 1,942 | 0% | 25% | 24% | - | 100% | - | - | 8% | - | - | 유지 |
+| wealth_13 | - | 96% | 7% | 2,205 | 0% | 28% | 26% | - | 96% | 4% | - | 3% | - | - | 유지 |
+| wealth_14 | - | 96% | 1% | 3,091 | 0% | 18% | 15% | - | 96% | 4% | - | - | 3% | - | 유지 |
+| wealth_15 | - | 98% | 8% | 1,669 | 0% | 24% | 21% | - | 98% | 3% | - | - | - | - | 유지 |
+| career_01 | - | 97% | 1% | 2,232 | 0% | 15% | 9% | - | 97% | - | - | 8% | - | - | 유지 |
+| career_02 | 15% | 97% | 1% | 2,098 | 0% | 20% | 17% | - | 97% | - | - | 8% | - | - | 유지 |
+| career_03 | 34% | 97% | 2% | 2,030 | 0% | 20% | 21% | - | 91% | - | - | 95% | - | - | 보완 |
+| career_04 | 65% | 97% | 9% | 1,995 | 0% | 20% | 21% | - | 97% | - | - | 29% | - | - | 유지 |
+| career_05 | 6% | 98% | 1% | 1,893 | 0% | 21% | 21% | - | 98% | - | - | - | 36% | - | 보완 |
+| career_06 | 19% | 99% | 1% | 1,731 | 0% | 15% | 7% | - | 99% | - | - | 47% | 19% | - | 보완 |
+| career_07 | 28% | 75% | 10% | 2,147 | 0% | 19% | 18% | - | 71% | - | - | - | - | 13% (15) | 유지 |
+| career_08 | - | 97% | 1% | 3,494 | 0% | 10% | 3% | - | 97% | - | - | - | 100% | 1% (385) | 보완 |
+| career_09 | 48% | 98% | 2% | 1,922 | 0% | 19% | 20% | - | 98% | - | - | 18% | - | - | 유지 |
+| career_10 | 17% | 97% | 4% | 1,896 | 0% | 21% | 21% | - | 97% | - | - | 24% | 1% | - | 유지 |
+| career_11 | 6% | 98% | 9% | 1,966 | 0% | 22% | 22% | - | 98% | - | - | 71% | - | - | 보완 |
+| career_12 | - | 97% | 1% | 3,542 | 0% | 20% | 19% | - | 97% | - | - | 37% | 9% | - (930) | 보완 |
+| career_13 | - | 97% | 1% | 1,940 | 0% | 24% | 25% | - | 97% | 3% | - | 66% | - | - | 보완 |
+| career_14 | - | 97% | 3% | 2,921 | 0% | 15% | 11% | - | 97% | 3% | - | - | - | - | 유지 |
+| career_15 | - | 98% | 13% | 1,661 | 0% | 20% | 21% | - | 98% | 2% | - | - | 8% | - | 유지 |
+| love_01 | 6% | 98% | 4% | 2,650 | 0% | 19% | 19% | - | 98% | - | - | 39% | - | - | 보완 |
+| love_02 | 24% | 98% | 1% | 2,095 | 0% | 21% | 21% | - | 98% | - | - | 37% | - | - | 보완 |
+| love_03 | 1% | 96% | 9% | 1,945 | 0% | 25% | 24% | - | 96% | - | - | 45% | - | - | 보완 |
+| love_04 | 6% | 83% | 1% | 2,360 | 0% | 19% | 16% | - | 83% | - | - | 11% | 6% | - (25) | 유지 |
+| love_05 | 18% | 97% | 5% | 2,043 | 0% | 23% | 22% | - | 97% | - | - | - | 1% | - | 유지 |
+| love_06 | 52% | 98% | 12% | 1,870 | 0% | 21% | 21% | - | 98% | - | - | - | - | - | 유지 |
+| love_07 | - | 97% | 1% | 2,151 | 0% | 22% | 21% | - | 97% | - | - | 32% | - | - | 보완 |
+| love_08 | 18% | 96% | 1% | 3,722 | 0% | 11% | 6% | - | 96% | - | - | 68% | - | - | 보완 |
+| love_09 | 6% | 96% | 2% | 2,564 | 0% | 15% | 12% | - | 96% | - | - | 87% | - | - | 보완 |
+| love_10 | - | 96% | 4% | 2,168 | 0% | 26% | 27% | - | 96% | - | - | 13% | - | - | 유지 |
+| love_11 | - | 96% | 4% | 2,098 | 0% | 13% | 9% | - | 96% | - | - | - | - | - | 유지 |
+| love_12 | 6% | 97% | 1% | 1,927 | 0% | 23% | 20% | - | 97% | - | - | - | - | - | 유지 |
+| love_13 | - | 98% | 4% | 1,783 | 0% | 23% | 23% | - | 98% | 2% | - | - | - | - | 유지 |
+| love_14 | - | 96% | 1% | 3,001 | 0% | 17% | 12% | - | 96% | 4% | - | - | - | - | 유지 |
+| love_15 | - | 98% | 9% | 1,681 | 0% | 25% | 22% | - | 98% | 2% | - | 3% | - | - | 유지 |
+
+열 설명: **DB 없음** 맞는 DB 문안이 없어 기본 문구로 떨어진 비율 · **서사** 서사 엔진이 본문을 쓴 비율 · **얇음** 본문 400자 미만 또는 DB·서사 모두 없음 · **같은 글** 무작위 두 사람이 문장 집합까지 똑같은 글을 받을 확률 · **문장 겹침** 두 사람 문장 집합의 자카드 평균(높을수록 비슷) · **고정 문장** 절반 넘는 사람에게 똑같이 나오는 문장의 비중 · **앞 장 반복** 같은 사람의 앞 장에 이미 나온 14자 이상 문장이 다시 나온 사람 비율(그래프 라벨 제외) · **근거 값 줄** 근거 상자에 그 사람의 실제 값(%·연도·나이·일주·일간·대운 간지)이 든 문장이 있는 비율 · **근거 부족** “이 질문에 적용할 검수 근거가 아직 충분하지 않습니다” 안내가 나온 비율 · **20세↓/65세↑** 그 나이대 사람 중 어른 장면(직장·결혼·대출 등)/어색한 장면(취업·입사·출산 등)이 나온 비율 · **그래프 어긋남** 본문이 “좋은 해”라 한 해가 그 장 그래프 10년 중 하위 3위, “조심할 해”라 한 해가 상위 2위인 경우(괄호는 검사한 연도 언급 수).
+
+### 3-1. 주제별 요약
+
+| 주제 | 장 | 얇음 | 같은 글 | 문장 겹침 | 앞 장 반복 | 근거 값 줄 | 서사 | 평균 글자 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 종합풀이 | 19 | 2% | 0% | 20% | 0% | 7% | 70% | 2,840 |
+| 재물운 | 15 | 6% | 0% | 19% | 0% | 10% | 96% | 2,262 |
+| 커리어운 | 15 | 4% | 0% | 19% | 0% | 11% | 96% | 2,231 |
+| 인연운 | 15 | 4% | 0% | 20% | 0% | 10% | 96% | 2,271 |
+
+### 3-2. 같은 사실을 여러 장에서 소개하는 정도
+
+한 사람의 64장 가운데 그 사실을 소개하는 문형이 나온 장 수입니다(fact-once.js 가 막는 층 밖 — 서사·DB 본문 — 에서 주로 생김).
+
+| 사실 소개 문형 | 한 사람당 평균 장 수 | 최대 |
+|---|---:|---:|
+| 가장 큰 기운 소개 | 22 | 24 |
+| 지금 대운 소개 | 11.9 | 14 |
+| 필요한 기운(용신) 소개 | 13.9 | 25 |
+| 힘의 세기(신강·신약) 소개 | 31 | 63 |
+| 일간 소개 | 12.9 | 21 |
+
+## 4. 문제 예시
+
+### 장 사이 반복 문장 상위 (0장)
+
+해당 없음.
+
+### 그래프와 본문 연도 어긋남 (3장)
+
+- **wealth_02** 10% — 2026년(wealth 그래프 2위/10) 조심: 2026년(병오)은 흐름이 무거운 해라 큰 결정을 피하는 편이 좋아요. / 2030년(wealth 그래프 8위/10) 좋다: 2030년 무렵(만 32~42세) 임술 대운으로 넘어가면 재주가 수입으로 바뀌는 길이 열리는 시기예요.
+- **career_07** 13% — 2032년(career 그래프 9위/10) 좋다: 2032년 무렵(만 39~49세) 정미 대운으로 넘어가면 결과물로 승부하는 시기예요. / 2030년(career 그래프 8위/10) 좋다: 2030년 무렵(만 63~73세) 정유 대운으로 넘어가면 결과물로 승부하는 시기예요.
+- **career_08** 1% — 2031년(career 그래프 8위/10) 좋다: 독립이나 내 일을 시험해 보기 좋은 해는 2030년·2031년이에요. / 2028년(career 그래프 8위/10) 좋다: 독립이나 내 일을 시험해 보기 좋은 해는 2028년·2031년이에요.
+
+### 단정 표현 (0장)
+
+해당 없음.
+
+### 20세 미만 어른 장면 (27장)
+
+- **self_03** 24% (38명 중) — narrative · 상사 [object Object], db · 직장 [object Object], narrative · 이직 [object Object]
+- **self_24** 68% (38명 중) — narrative · 창업 [object Object], narrative · 이직 [object Object]
+- **self_26** 66% (38명 중) — narrative · 부서 [object Object], narrative · 직장 [object Object], db · 직장 [object Object]
+- **self_27** 100% (38명 중) — feature · 배우자 [object Object]
+- **self_30** 29% (38명 중) — narrative · 연봉 [object Object], db · 직장 [object Object], narrative · 노후 [object Object]
+- **self_32** 26% (38명 중) — db · 거래처 [object Object]
+- **self_33** 68% (38명 중) — narrative · 은퇴 [object Object], narrative · 노후 [object Object], hook · 노후 [object Object]
+- **self_36** 55% (38명 중) — feature · 동료 [object Object]
+- **wealth_02** 26% (38명 중) — narrative · 퇴근 [object Object], narrative · 투자 [object Object], narrative · 출근 [object Object], narrative · 연봉 [object Object]
+- **wealth_04** 74% (38명 중) — narrative · 회사 [object Object], narrative · 창업 [object Object]
+- **wealth_06** 26% (38명 중) — narrative · 투자 [object Object], depth · 승진 [object Object]
+- **wealth_08** 89% (38명 중) — narrative · 투자 [object Object], db · 동료 [object Object]
+- **wealth_10** 47% (38명 중) — narrative · 투자 [object Object], depth · 승진 [object Object]
+- **wealth_11** 66% (38명 중) — narrative · 투자 [object Object], narrative · 은퇴 [object Object]
+- **career_03** 95% (38명 중) — narrative · 직장 [object Object], narrative · 회사 [object Object], narrative · 출근 [object Object]
+- **career_04** 29% (38명 중) — insight · 상사 [object Object], narrative · 동료 [object Object], narrative · 팀장 [object Object]
+- **career_06** 47% (38명 중) — narrative · 퇴근 [object Object], narrative · 직장 [object Object], narrative · 부서 [object Object]
+- **career_10** 24% (38명 중) — narrative · 이직 [object Object], narrative · 상사 [object Object], narrative · 승진 [object Object]
+- **career_11** 71% (38명 중) — narrative · 동료 [object Object]
+- **career_12** 37% (38명 중) — narrative · 회사 [object Object], narrative · 투자 [object Object]
+- **career_13** 66% (38명 중) — narrative · 상사 [object Object], narrative · 동료 [object Object], db · 팀장 [object Object]
+- **love_01** 39% (38명 중) — feature · 동료 [object Object], db · 직장 [object Object], narrative · 동료 [object Object], narrative · 직장 [object Object]
+- **love_02** 37% (38명 중) — narrative · 동료 [object Object]
+- **love_03** 45% (38명 중) — narrative · 동료 [object Object]
+- **love_07** 32% (38명 중) — feature · 배우자 [object Object], db · 배우자 [object Object]
+- **love_08** 68% (38명 중) — narrative · 배우자 [object Object], db · 동료 [object Object]
+- **love_09** 87% (38명 중) — feature · 결혼 생활 [object Object], feature · 배우자 [object Object], feature · 아내 [object Object]
+
+### 65세 이상 어색한 장면 (12장)
+
+- **self_26** 8% (118명 중) — db · 입사 [object Object], insight · 승진 [object Object]
+- **wealth_02** 19% (118명 중) — narrative · 승진 [object Object], narrative · 이직 준비 [object Object], db · 승진 [object Object]
+- **wealth_04** 40% (118명 중) — narrative · 승진 [object Object]
+- **wealth_05** 20% (118명 중) — narrative · 이직 준비 [object Object]
+- **wealth_06** 19% (118명 중) — narrative · 승진 [object Object]
+- **wealth_10** 19% (118명 중) — narrative · 승진 [object Object], depth · 승진 [object Object]
+- **career_05** 36% (118명 중) — depth · 입사 [object Object]
+- **career_06** 19% (118명 중) — depth · 승진 [object Object]
+- **career_08** 100% (118명 중) — feature · 승진 [object Object]
+- **career_12** 9% (118명 중) — insight · 승진 [object Object]
+- **career_15** 8% (118명 중) — insight · 승진 [object Object]
+- **love_04** 6% (118명 중) — db · 이직 준비 [object Object], db · 연애를 시작 [object Object]
+
+### 이미 지난 나이를 앞날로 말함 (0장)
+
+해당 없음.
+
+### 조립 오류 (0장)
+
+해당 없음.
+
+## 5. 장별 제안 (유지 / 보완 / 통합 / 신설 후보)
+
+자동 판정 규칙: 얇음 30%↑, DB 없음 30%↑(서사 대체 50% 미만), 같은 글 20%↑, 문장 겹침 45%↑, 앞 장 반복 30%↑, 그래프 어긋남 15%↑(연도 언급 20회↑), 근거 값 줄 70% 미만, 근거 부족 안내 30%↑, 단정 2%↑, 20세 미만 어른 장면 30%↑, 65세↑ 어색 10%↑ 중 하나라도 걸리면 **보완**, 얇음·DB 없음·같은 글·오류 중 두 개 이상이면 **보완(우선)**. **통합**은 아래 6절의 같은 질문 장에서 사람이 판단한 것입니다.
+
+| 장 | 제목 | 제안 | 근거 |
+|---|---|---|---|
+| self_03 | 나의 타고난 기질은? | 보완 | 근거에 내 사주 값 줄 61% |
+| self_02 | 내 사주를 자동차로 비유하면? | 보완 | 근거에 내 사주 값 줄 0% |
+| self_20 | 전체 인생 흐름 | 유지 | 기준 통과 |
+| self_24 | 움직여야 될 때와 기다려야 할 때 | 유지 | 20세 미만 어른 장면 68% · career_08과 겹치지만 종합 관점의 “움직일 때” 장으로 서사 규칙·달 순위가 따로 있음 |
+| self_18 | 최고의 나와 최악의 나 | 유지 | 기준 통과 |
+| self_25 | 나의 타고난 강점과 약점 | 유지 | 기준 통과 |
+| self_26 | 나와 잘 맞는 업 | 통합 후보 | 20세 미만 어른 장면 66% · career_01(나는 어떤 일을 해야 잘할까)과 같은 질문 — 종합풀이는 요약 + 커리어운 안내로 줄이는 안 |
+| self_27 | 전체 인연운 | 통합 후보 | 20세 미만 어른 장면 100% · love_01(관계)·love_14(인연 시기)와 겹침 — 종합 요약으로 줄이는 안 |
+| self_28 | 대인관계 궁합 | 보완 | 근거에 내 사주 값 줄 0% · '검수 근거 부족' 안내 100% |
+| self_29 | 내 미래 배우자는? | 유지 | love_07(배우자 성향)과 질문은 같지만 운명 기록 카드(dossier)가 이 장에만 있음 |
+| self_30 | 전체 재물운 | 통합 후보 | wealth_01과 같은 질문(재물 전체·그릇) — self_31과 한 장으로 합치는 안 |
+| self_31 | 나의 재물 그릇은? | 통합 후보 | wealth_01(내 재물 그릇)과 제목까지 같은 질문 |
+| self_32 | 내 사주와 맞는 돈 버는 법 | 통합 후보 | 근거에 내 사주 값 줄 0% · '검수 근거 부족' 안내 100% · wealth_02(어떤 방식으로 돈을 벌까)와 같은 질문 + 서사 없음·근거 부족 100% |
+| self_33 | 나의 말년운 | 보완 | 20세 미만 어른 장면 68% |
+| self_34 | 나의 자식운 | 통합 후보 | love_11(자식운)과 같은 질문, deep_children 조각을 두 장이 나눠 씀 |
+| self_35 | 건강 및 사고수 | 보완 | 근거에 내 사주 값 줄 0% · '검수 근거 부족' 안내 100% |
+| self_36 | 전생의 나 | 보완 | 근거에 내 사주 값 줄 0% · '검수 근거 부족' 안내 100% · 20세 미만 어른 장면 55% |
+| self_37 | 개운법 | 보완 | wealth_15·career_15·love_15 개운법과 질문이 같음 — 종합 개운은 세 주제의 처방을 묶는 장으로 역할을 나눌 것 |
+| self_22 | 나라는 사람의 최종 사용설명서 | 유지 | 기준 통과 |
+| wealth_01 | 내 재물 그릇은 얼마나 클까? | 유지 | 기준 통과 |
+| wealth_02 | 나는 어떤 방식으로 돈을 벌까? | 보완 | 65세+ 어색한 장면 19% |
+| wealth_03 | 돈이 들어와도 왜 남지 않을까? | 유지 | 기준 통과 |
+| wealth_04 | 월급형 인간일까, 사업형 인간일까? | 보완 | 20세 미만 어른 장면 74% · 65세+ 어색한 장면 40% |
+| wealth_05 | 나는 돈을 모으는 사람일까, 쓰는 사람일까? | 보완 | 65세+ 어색한 장면 20% |
+| wealth_06 | 큰돈을 만날 기회는 언제일까? | 보완 | 65세+ 어색한 장면 19% |
+| wealth_07 | 돈 때문에 가장 조심해야 할 선택 | 유지 | 기준 통과 |
+| wealth_08 | 나는 투자와 재테크에 어울리는 성향일까? | 보완 | 20세 미만 어른 장면 89% |
+| wealth_09 | 사람 때문에 돈을 잃기 쉬울까? | 유지 | 기준 통과 |
+| wealth_10 | 나에게 유리한 재물운의 시기 | 통합 후보 | 20세 미만 어른 장면 47% · 65세+ 어색한 장면 19% · wealth_06(큰돈 기회)·wealth_14(재물 타이밍)와 시기 장 셋이 이어짐 — 해(06)·달(10)·10년(14)로 역할을 제목에 드러내거나 둘로 합치는 안 |
+| wealth_11 | 최고의 재물 시나리오 vs 최악의 재물 시나리오 | 보완 | 20세 미만 어른 장면 66% |
+| wealth_12 | 내 재산을 키우기 위한 현실 전략 | 유지 | 기준 통과 |
+| wealth_13 | 재물운에서 나와 맞는 사람과 피해야 할 사람 | 유지 | 기준 통과 |
+| wealth_14 | 재물운 타이밍: 힘이 실리는 때 | 유지 | 기준 통과 |
+| wealth_15 | 재물운을 끌어올리는 개운법 | 유지 | 기준 통과 |
+| career_01 | 나는 어떤 일을 해야 잘할까? | 유지 | 기준 통과 |
+| career_02 | 내가 가진 가장 돈 되는 재능 | 유지 | 기준 통과 |
+| career_03 | 직장인과 사업가, 어느 쪽이 맞을까? | 보완 | 20세 미만 어른 장면 95% |
+| career_04 | 나는 리더일까, 전문가일까? | 유지 | 기준 통과 |
+| career_05 | 나에게 잘 맞는 업종과 맞지 않는 업종 | 보완 | 65세+ 어색한 장면 36% |
+| career_06 | 나는 어떤 직장 환경에서 성공할까? | 보완 | 20세 미만 어른 장면 47% · 65세+ 어색한 장면 19% |
+| career_07 | 조직생활에서 내가 부딪히는 문제 | 유지 | 기준 통과 |
+| career_08 | 이직과 독립, 언제 움직이는 게 좋을까? | 보완 | 65세+ 어색한 장면 100% |
+| career_09 | 창업과 사업에서 내가 조심해야 할 것 | 유지 | 기준 통과 |
+| career_10 | 성공을 가로막는 나의 습관 | 유지 | 기준 통과 |
+| career_11 | 최고의 커리어 시나리오 vs 최악의 커리어 시나리오 | 보완 | 20세 미만 어른 장면 71% |
+| career_12 | 앞으로 10년, 나의 커리어 전략 | 보완 | 20세 미만 어른 장면 37% |
+| career_13 | 커리어운에서 나와 맞는 사람과 피해야 할 사람 | 보완 | 20세 미만 어른 장면 66% |
+| career_14 | 커리어운 타이밍: 힘이 실리는 때 | 유지 | 기준 통과 |
+| career_15 | 커리어운을 끌어올리는 개운법 | 유지 | 기준 통과 |
+| love_01 | 나는 사람들과 어떤 관계를 맺을까? | 보완 | 20세 미만 어른 장면 39% |
+| love_02 | 사람들이 나를 좋아하거나 불편해하는 이유 | 보완 | 20세 미만 어른 장면 37% |
+| love_03 | 내 곁에 남는 사람과 멀어지는 사람 | 보완 | 20세 미만 어른 장면 45% |
+| love_04 | 나는 사랑할 때 어떤 사람이 될까? | 유지 | 기준 통과 |
+| love_05 | 내가 끌리는 사람과 실제 잘 맞는 사람 | 유지 | 기준 통과 |
+| love_06 | 연애에서 반복하기 쉬운 실수 | 유지 | 기준 통과 |
+| love_07 | 나에게 잘 맞는 배우자의 성향 | 보완 | 20세 미만 어른 장면 32% |
+| love_08 | 결혼운은 언제 강해질까? | 보완 | 20세 미만 어른 장면 68% |
+| love_09 | 결혼생활에서 가장 조심해야 할 갈등 | 보완 | 20세 미만 어른 장면 87% |
+| love_10 | 나의 가족운과 부모·형제 관계 | 유지 | 기준 통과 |
+| love_11 | 나의 자식운과 부모가 되었을 때의 모습 | 유지 | 기준 통과 |
+| love_12 | 최고의 인연 시나리오 vs 최악의 인연 시나리오 | 유지 | 기준 통과 |
+| love_13 | 인연운에서 나와 맞는 사람과 피해야 할 사람 | 유지 | 기준 통과 |
+| love_14 | 인연운 타이밍: 힘이 실리는 때 | 보완 | love_08(결혼운 시기)과 시기 장이 둘 — 결혼 시기와 만남 시기로 제목·블록을 가를 것 |
+| love_15 | 인연운을 끌어올리는 개운법 | 유지 | 기준 통과 |
+
+## 6. 통합 후보 — 같은 질문을 두 번 묻는 장
+
+종합풀이 19장 중 상당수가 주제 장과 같은 질문입니다. 아래 “실측 겹침”은 같은 사람의 두 장 문장 중 겹치는 비율(작은 쪽 기준)이고, 낮으면 글은 달라도 질문이 같아 읽는 사람에게는 중복으로 느껴질 수 있습니다.
+
+| 장 A | 장 B | 같은 질문 | 실측 문장 겹침 |
+|---|---|---|---:|
+| self_26 나와 잘 맞는 업 | career_01 나는 어떤 일을 해야 잘할까? | 맞는 일 | 8% 미만 |
+| self_30 전체 재물운 | wealth_01 내 재물 그릇은 얼마나 클까? | 재물 전체·그릇 | 8% 미만 |
+| self_31 나의 재물 그릇은? | wealth_01 내 재물 그릇은 얼마나 클까? | 재물 그릇 | 8% 미만 |
+| self_32 내 사주와 맞는 돈 버는 법 | wealth_02 나는 어떤 방식으로 돈을 벌까? | 돈 버는 방식 | 8% 미만 |
+| self_27 전체 인연운 | love_01 나는 사람들과 어떤 관계를 맺을까? | 인연 전체 | 8% 미만 |
+| self_29 내 미래 배우자는? | love_07 나에게 잘 맞는 배우자의 성향 | 배우자 | 8% 미만 |
+| self_34 나의 자식운 | love_11 나의 자식운과 부모가 되었을 때의 모습 | 자식운 | 8% 미만 |
+| self_24 움직여야 될 때와 기다려야 할 때 | career_08 이직과 독립, 언제 움직이는 게 좋을까? | 움직일 때 | 8% 미만 |
+| self_37 개운법 | wealth_15 재물운을 끌어올리는 개운법 | 개운법 | 8% 미만 |
+| self_37 개운법 | career_15 커리어운을 끌어올리는 개운법 | 개운법 | 8% 미만 |
+| self_37 개운법 | love_15 인연운을 끌어올리는 개운법 | 개운법 | 8% 미만 |
+| self_18 최고의 나와 최악의 나 | wealth_11 최고의 재물 시나리오 vs 최악의 재물 시나리오 | 최고·최악 | 8% 미만 |
+| wealth_06 큰돈을 만날 기회는 언제일까? | wealth_10 나에게 유리한 재물운의 시기 | 재물 시기 | 8% 미만 |
+| wealth_10 나에게 유리한 재물운의 시기 | wealth_14 재물운 타이밍: 힘이 실리는 때 | 재물 시기 | 8% 미만 |
+| career_08 이직과 독립, 언제 움직이는 게 좋을까? | career_14 커리어운 타이밍: 힘이 실리는 때 | 커리어 시기 | 8% 미만 |
+| love_08 결혼운은 언제 강해질까? | love_14 인연운 타이밍: 힘이 실리는 때 | 인연 시기 | 8% 미만 |
+
+## 7. 비공개 3주제를 채울 후보 장
+
+지금 공개 목차에서는 종합풀이 안의 한 장(self_35 건강 및 사고수 · self_36 전생의 나 · self_37 개운법)으로만 나옵니다. 아래는 이미 있는 재료와 엔진으로 만들 수 있는 후보입니다. “DB 재료”는 rebuild 원고가 이미 있는 옛 장(비공개)이고, “맞는 문안 없음”은 그 원고를 지금 조립기로 돌렸을 때 기본 문구로 떨어지는 비율입니다.
+
+| 옛 장(비공개) | 제목 | 원고 수 | 맞는 문안 없음 |
+|---|---|---:|---:|
+| health_01 | 내 사주에서 보는 건강의 기본 균형 | 9 | 38% |
+| health_02 | 나는 어떤 상황에서 쉽게 지칠까? | 10 | 6% |
+| health_03 | 스트레스가 쌓일 때 나타나는 생활 패턴 | 8 | 40% |
+| health_04 | 내가 무리하기 쉬운 순간 | 6 | 19% |
+| health_05 | 내 생활 리듬에서 조심할 점 | 8 | 0% |
+| health_06 | 전통 명리학에서 보는 사고수란? | 8 | 18% |
+| health_07 | 사고수와 주의 시기를 어떻게 해석할까? | 7 | 32% |
+| health_08 | 무리한 선택이 위험을 키우는 상황 | 8 | 35% |
+| health_09 | 건강과 안전을 지키는 생활 습관 | 7 | 0% |
+| health_10 | 최고의 건강관리 시나리오 vs 최악의 관리 시나리오 | 10 | 6% |
+| creative_01 | 전생의 문이 열리다 | 10 | 6% |
+| creative_02 | 나는 어떤 시대에 살았을까? | 10 | 6% |
+| creative_03 | 전생의 나는 어떤 신분이었을까? | 10 | 6% |
+| creative_04 | 전생에서 가장 중요했던 사람 | 10 | 6% |
+| creative_05 | 전생에서 가장 빛났던 순간 | 10 | 6% |
+| creative_06 | 전생에서 저질렀던 가장 큰 실수 | 10 | 6% |
+| creative_07 | 끝내 이루지 못한 소망 | 10 | 6% |
+| creative_08 | 전생의 나에게서 받는 마지막 메시지 | 10 | 6% |
+| remedy_01 | 내 운을 바꾸는 첫 번째 습관 | 8 | 19% |
+| remedy_02 | 나에게 맞는 운동과 생활 리듬 | 10 | 6% |
+| remedy_03 | 나에게 잘 맞는 공부와 자기계발 | 10 | 6% |
+| remedy_04 | 나를 회복시키는 환경과 공간 | 8 | 0% |
+| remedy_05 | 나에게 어울리는 행운의 장소 | 10 | 0% |
+| remedy_06 | 돈과 인간관계에서 운을 지키는 방법 | 10 | 24% |
+| remedy_07 | 앞으로 30일, 나만의 개운 프로젝트 | 10 | 6% |
+| remedy_08 | 내 인생을 더 좋은 방향으로 이끄는 최종 전략 | 12 | 0% |
+
+### 건강·사고수 (신설 후보 1순위 — 엔진·재료가 가장 많음)
+
+지금은 종합풀이 self_35 한 장(DB 본문 + 건강 지도 블록 + 안전 점검표)뿐이고, 서사 엔진 규칙이 없어 근거 상자 “검수 근거 부족” 100%입니다. 만세력 앱에는 건강 지도(health-body.js)와 사고수 신호(accident-hint.js)가 이미 있는데 타임라인에는 로드조차 되지 않습니다. 의료 예측이 아니라 “생활 리듬·조심할 장면” 톤을 유지합니다(rebuild health 원고의 안전 문구 그대로).
+
+| 후보 장 | 쓰는 엔진 | 있는 재료 | 그래프·블록 |
+|---|---|---|---|
+| 내 몸의 오행 지도 — 타고난 약한 곳과 쏠리는 곳 | health-body.js read(원국) · sd.fiveElements · Manse.climate(조열·한습) | health_01(원고 9) · self_35 건강 지도 | 장부 막대 · 약한 곳 TOP 3 |
+| 나는 언제 쉽게 지칠까 — 힘의 세기와 회복 리듬 | sd.strength · 12운성(unseong-cycle.js) · ch.unified 조후 | health_02·04·05(원고 24) | 에너지 리듬(12운성 그림) |
+| 스트레스가 몸으로 오는 길 | 십성 묶음(관성·식상 과다) · 일지 합충 | health_03(원고 8) | 점검표(fx:check) |
+| 올해·이번 달 몸 챙길 때 | evaluateDomainLuck health 지수 · health-body read(세운·월운) | self_35 healthmap | 12개월 그래프 · 조심할 달 TOP 3 |
+| 사고수 신호 읽기 — 조심할 장면 7가지 | accident-hint.js(충·형·백호·양인·괴강) · evaluateDomainLuck accident | health_06·07(원고 15) | 장면 카드 · 장소(기둥별) |
+| 앞으로 10년 안전 흐름 + 삼재 | seunRange × accident 지수 · getSamjae(지금 어떤 장에도 안 씀) | - | 10년 막대 |
+| 무리한 선택이 위험을 키우는 때 | calculateVolatility(지금 안 씀) · 대운 교운기 | health_08(원고 8) | 저울(fx:vs) |
+| 최고의 관리 vs 최악의 관리 | fate-blocks fx:scenario · fx:rx | health_09·10(원고 17) | 두 갈래 · 처방전 |
+
+### 전생 (창작 주제 — 사실 단정 금지 안내 유지)
+
+지금은 self_36 한 장(DB 본문 + 운명 기록 카드 dossier_past + deep_past)이고 서사 엔진·근거 값 줄이 없습니다. 원고(creative 01~08, 80편)는 그대로 있고 지금 조립기로 돌리면 94%가 문안을 받습니다. AI 단편(past-story.js, /api/past-story)도 이미 있습니다.
+
+| 후보 장 | 쓰는 엔진 | 있는 재료 | 그래프·블록 |
+|---|---|---|---|
+| 전생의 문이 열리다 — 일주로 본 전생의 얼굴 | 일주(ilju-data) · 일간 오행 | creative_01(원고 10) | 운명 기록 카드 |
+| 어떤 시대·신분이었을까 | 년주(조상 자리) · 격국(ch.unified) · 가장 큰 십성 | creative_02·03(원고 20) | 시대 카드 |
+| 전생에서 가장 중요했던 사람 | 배우자성·인성 · 일지 합충 | creative_04(원고 10) | 인물 카드(fx:profile) |
+| 가장 빛났던 순간과 가장 큰 실수 | 12운성 제왕·사·묘(unseong-cycle.js) · 기신 | creative_05·06(원고 20) | 두 얼굴(fx:scenario) |
+| 끝내 이루지 못한 소망 — 이번 생의 숙제 | 공망(gongmangOf) · 용신 | creative_07·08(원고 20) | 편지(fx:letter) |
+| 전생 단편 이야기 | past-story.js(AI, 검토 통과 단편) | - | 네 장면 |
+
+### 개운법
+
+지금은 종합풀이 self_37 + 주제별 개운 장 3개(wealth_15·career_15·love_15)로 흩어져 있고, 풍수·지역·명당 엔진은 topic-deep(꺼짐) 안에만 연결돼 있습니다. remedy.js(7유형 추천)와 원고 remedy 01~08(78편)이 있습니다.
+
+| 후보 장 | 쓰는 엔진 | 있는 재료 | 그래프·블록 |
+|---|---|---|---|
+| 내 운을 바꾸는 첫 번째 습관 | sd.usefulElements · ch.unified · remedy.js(action) | remedy_01(원고 8) | 처방전(fx:rx) |
+| 나에게 맞는 운동과 생활 리듬 | 조후(climate) · 신강·신약 · remedy.js(exercise) | remedy_02(원고 10) | 주간 리듬표 |
+| 나에게 맞는 공부·자기계발 | 인성·식상 비중 · 세운 학업 지수(evaluateDomainLuck study) | remedy_03(원고 10) | 10년 공부운 막대 |
+| 나를 회복시키는 공간과 방향 | fengshui-engine.js 팔택·현공(topic-deep td:dirs/td:house) | remedy_04(원고 8) | 방향 나침반 |
+| 행운의 지역과 명당 | region-reading.js · wish-spots.js | remedy_05(원고 10) | 지역 순위 |
+| 언제 무엇을 — 30년 개운 지도 | luck-cycle.js 대운 30년·세운 2년 묶음(지금 타임라인 안 씀) | - | 30년 띠 그래프 |
+| 앞으로 30일 개운 프로젝트 | wolun · ilun(일진) · luck-interpret.js | remedy_07(원고 10) | 30일 달력 |
+| 돈·사람에서 운을 지키는 법 / 최종 전략 | remedy.js(people) · 기신 오행 | remedy_06·08(원고 22) | 점검표·편지 |
+
+## 8. 우선순위 제안 (10개 이내)
+
+1. **서사 엔진이 가린 DB 원고의 역할 정하기** — 서사 엔진이 59장 중 대부분에서 본문의 96~100%를 대신해, DB 원고(925편)는 화면 본문에 거의 나오지 않습니다. 화면에 DB 본문이 그대로 나오는 장은 self_02·28·32·35·36 다섯 장과, 서사 규칙이 일부만 맞는 self_03·wealth_02·career_07·love_04뿐입니다.
+   - 할 일: DB 원고를 “서사 규칙이 안 맞을 때의 대체 본문”으로만 쓸지 정하고, 검수·게시 대상을 위 9장으로 줄입니다. 나머지 장은 원고를 손대지 않아도 화면이 바뀌지 않습니다.
+2. **서사가 없는 5장의 근거 상자 보강 (self_02·28·32·35·36)** — 근거 상자에 내 사주 값 줄이 0%이고, self_28·32·35·36은 “이 질문에 적용할 검수 근거가 아직 충분하지 않습니다” 안내가 100% 나옵니다. 64장 중 가장 약합니다.
+   - 할 일: life-narrative 규칙을 이 5장에 추가하거나(브라우저 층, 장 단위 스위치), 최소한 근거 상자에 서사 엔진과 같은 “이 사주에서 확인된 조건” 줄을 붙입니다.
+3. **20세 미만 독자에게 어른 경험 문장** — “실제 생활에서는 상사가…”, “퇴근 뒤 외주…”처럼 지금 겪는 일로 말하는 문장이 20세 미만에게 그대로 나옵니다. 30% 넘는 장 20개(self_27 100%, career_03 95%, wealth_08 89%, love_09 87%, wealth_04 74%). 서사 엔진의 youngView는 일부 장만 처리합니다.
+   - 할 일: youngView(어른 경험 문장 → 미리 보기 문장) 적용을 서사 59장 전부로 넓히고, 규칙의 life 단계에 age:young 대체 문장을 둡니다.
+4. **65세 이상 독자에게 승진·입사 문장** — career_08 100%(일의 흐름 TOP3 블록의 승진 문구), wealth_04 40%, career_05 36%(입사 전 문화 확인), wealth_02·05·06·10, career_06 약 20%.
+   - 할 일: 깊이 풀이(reading-depth)·포인트(reading-insight)·시기 블록에도 서사 엔진처럼 age:senior 분기를 둡니다.
+5. **같은 사실을 수십 장에서 다시 소개** — 문장은 장 사이에 한 번도 겹치지 않지만(fact-once 효과), 소개 문형은 남습니다. 한 사람이 64장 동안 “힘이 센/여린 사주” 문형을 평균 31장, “가장 큰 기운”을 22장, “필요한 기운”을 14장에서 읽습니다.
+   - 할 일: 심화 블록의 “이 순위인 이유”·점검표 근거 줄에서 강약·가장 큰 기운 소개를 FactOnce.own 으로 첫 장 한 번만 두고, 이후 장은 결론만 말하게 합니다.
+6. **종합풀이와 주제 장의 같은 질문 정리** — 종합풀이 19장 중 9장이 재물·커리어·인연 장과 같은 질문입니다(self_26↔career_01, self_31↔wealth_01, self_32↔wealth_02, self_34↔love_11 등). 문장은 달라도 같은 질문을 두 번 읽습니다.
+   - 할 일: 6절 통합 후보 중 합칠 장을 고르고, 남길 종합풀이 장은 “요약 + 주제 장 안내”로 짧게 바꿉니다.
+7. **topic-deep 켜기 검토** — 이미 만든 주제 심화 블록 25장이 꺼져 있습니다. 켜면 장마다 평균 150~2,300자가 붙고 직업(wealth-career)·궁합(compat-pair)·풍수·지역·명당 엔진이 처음으로 타임라인에 들어옵니다.
+   - 할 일: 관리자 운세 환경 탭에서 스위치만 켜면 됩니다(코드 변경 없음). 켜기 전 25장 화면 검수가 필요합니다.
+8. **안 쓰는 엔진을 맞는 장에 연결** — luck-cycle(30년 사이클)·unseong-cycle(12운성 생명주기)·gyeok-structure(격국 분석)·health-body·accident-hint는 타임라인에 로드조차 안 되고, engine.js의 삼재(getSamjae)·변동성(calculateVolatility)·운 점수(evaluateLuck)·자미두수도 어떤 장도 읽지 않습니다.
+   - 할 일: luck-cycle → self_20·self_33(인생·말년 흐름), unseong-cycle → self_20 에너지 리듬, gyeok-structure → self_03·self_02(기질·사양표), health-body·accident-hint → self_35(신설 건강 주제의 바탕).
+9. **얇은 장 보강 (10% 이상)** — 본문 400자 미만이거나 DB·서사 둘 다 없는 경우가 self_02 27%, wealth_05·career_15 13%, wealth_02·love_06 12%, self_37 11%.
+   - 할 일: 해당 장 서사 규칙의 조건 폭을 넓히거나 넓은 조건의 바탕 규칙을 하나씩 추가합니다.
+10. **비공개 3주제 중 건강·사고수부터 신설** — 엔진(건강 지도·사고수 신호·분야 지수 health/accident·삼재)과 원고(health 01~10, 81편)가 가장 많이 준비돼 있습니다.
+   - 할 일: 7절 후보 8장을 life-narrative 규칙 + fate-blocks 방식으로 브라우저 층에 만들고, 장 단위 스위치로 공개합니다.
+
+## 9. 이 감사가 못 보는 것
+
+- 운영 DB 에 관리자가 직접 고친 문안·규칙(narrative:rules 게시본)은 반영하지 않았습니다. 원고·로컬 규칙 기준입니다.
+- 사용자 이름이 들어간 문장은 이름을 비운 채로 쟀습니다(이름 때문에 생기는 차이는 개인화로 세지 않음).
+- 그림·영상·카드 디자인은 보지 않고 글만 쟀습니다.
+- “그래프 어긋남”은 연도가 직접 나오는 문장만 검사합니다. “올해는 좋아요”처럼 연도 없이 말한 문장은 세지 않습니다.
+- 금지 표현·나이대 검사는 낱말 검사라 문맥상 괜찮은 경우(예: “반드시 그렇진 않아요”)도 걸릴 수 있습니다. 4절 예시로 확인해 주세요.
