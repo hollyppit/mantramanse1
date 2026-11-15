@@ -2,7 +2,7 @@
 // GET  ?year=2027            → 연도 목록·공개 설정·상품(가격은 결제·상품 화면에서)·검수 현황·괘/블록 목록·최근 이력
 // GET  ?year=2027&gua=163    → 괘 하나: 원문(규장각본 또는 보충본)·현대어 초안·수정값·합친 결과·상태
 // GET  ?block=total.stem.정관.up → 사주 블록 하나: 초안·수정값·상태
-// POST { action:'config', year, visibility, teaser, intro, contentMode }
+// POST { action:'config', year, visibility, teaser, intro, contentMode, entry?, media? }   (보낸 칸만 바뀐다)
 // POST { action:'modern', gua, status?, edits?, rev }   (status: reviewed|draft, edits: null 이면 수정값 지움)
 // POST { action:'block', id, status?, edits?, rev }
 // POST { action:'bulk', kind:'modern'|'blocks', ids, status, rev }
@@ -59,7 +59,7 @@ export async function onRequestPost({ request, env }) {
     if (!YEARS().includes(+year)) return json({ error: 'unknown-year' }, 404);
     const kv = kvOf(env); if (!kv) return json({ error: 'kv-unavailable' }, 503);
     const cur = await loadNewyearConfig(env);
-    const next = cleanNewyearConfig({ years: { ...cur.years, [year]: { ...yearConfig(cur, year), ...pick(body, ['visibility', 'teaser', 'intro', 'contentMode', 'entry']) } } });
+    const next = cleanNewyearConfig({ years: { ...cur.years, [year]: { ...yearConfig(cur, year), ...pick(body, ['visibility', 'teaser', 'intro', 'contentMode', 'entry', 'media']) } } });
     await kv.put(NEWYEAR_KEY, JSON.stringify(next));
     return json({ ok: true, config: next.years[year] });
   }

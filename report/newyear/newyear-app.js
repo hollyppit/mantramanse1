@@ -69,6 +69,7 @@
   // ── 시작·불러오기
   function start(b, idx) {
     S.birth = b; S.idx = idx || 0; S.month = 0;
+    try { if (root.NewyearLook) root.NewyearLook.setPerson(sdOf(b).pillars.day.hanja.charAt(0), b.gender); } catch (e) { }   // 패널 이미지: 일간 오행·성별
     lsSet(LS_KEY, S.remember ? { birth: b, idx: S.idx } : null);
     var pw = PW();
     if (pw && !S.pwReady) S.pwReady = pw.init(sdOf(b), { chapters: function () { return []; }, resume: function () { return { inp: S.birth, __ny: true }; }, onPurchased: function () { load(); } }).catch(function () { });
@@ -87,7 +88,8 @@
       return fetch('/api/newyear/reading', { method: 'POST', headers: headers(), body: JSON.stringify({ birth: S.birth, year: YEAR }) })
         .then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); });
     };
-    (S.pwReady || Promise.resolve()).then(go).then(function (x) {
+    var panels = root.NewyearLook ? root.NewyearLook.loadPanels().catch(function () { }) : Promise.resolve();
+    (S.pwReady || Promise.resolve()).then(go).then(function (x) { return panels.then(function () { return x; }); }).then(function (x) {
       if (x.status === 400) return msg('출생 정보를 확인해 주세요', x.j.message || '입력한 날짜로 계산하지 못했어요.', false);
       if (!x.j.ok) return msg('풀이를 불러오지 못했어요', '잠시 후 다시 시도해 주세요.', true);
       if (x.j.access.state === 'closed') return msg('2027 신년운세는 곧 열려요', '지금은 준비 중이에요. 공개되면 이 화면에서 바로 볼 수 있어요.', false);
@@ -134,14 +136,17 @@
       (m.hook ? '<p class="ny-p hook">' + esc(m.hook) + '</p>' : '') + paras(m.paras) + '</div>';
     return (ch.note ? '<p class="ny-p note">' + esc(ch.note) + '</p>' : '') + chips + card;
   }
+  function panel(ch, slot) { return root.NewyearLook ? root.NewyearLook.panelHtml(ch.id, slot) : ''; }   // 관리자 패널 이미지에서 고른 삽화(없으면 빈 문자열)
   function renderChapter(ch) {
     var html = '<p class="ny-ch-k">CHAPTER ' + (S.idx + 1) + '</p><h2 class="ny-ch-t">' + esc(ch.title) + '</h2>';
+    if (!(ch.locked && !(ch.sections && ch.sections.length))) html += panel(ch, 0);
     if (ch.id === 'open') return html + renderOpen(ch);
     if (ch.id === 'months') return html + renderMonths(ch);
     if (ch.locked && !(ch.sections && ch.sections.length)) return html + lockCard(ch);
     if (ch.score != null) html += '<div class="ny-score">지수 <b>' + esc(ch.score) + '</b> ' + esc(ch.band || '') + '</div>';
     html += paras(ch.paras);
-    (ch.sections || []).forEach(function (s) {
+    (ch.sections || []).forEach(function (s, si, all) {
+      if (si === 2 && all.length >= 3) html += panel(ch, 1);
       html += '<section class="ny-sec"><h3 class="ny-sec-t">' + esc(s.title) + (s.compare && CMP[s.compare.kind] ? '<span class="ny-cmp ' + s.compare.kind + '">' + CMP[s.compare.kind] + '</span>' : '') + '</h3>' + paras(s.paras) + '</section>';
     });
     if (ch.locked) html += lockCard(ch);
@@ -213,6 +218,7 @@
 
   // ── 시작: 넘겨받기(내 구매 내역·로그인/결제 복귀) → 이 기기 이어보기 → 입력
   (function boot() {
+    if (root.NewyearLook) root.NewyearLook.boot(YEAR);   // 관리자 화면 꾸미기: 배경 이미지·진입 프롤로그(같은 탭 한 번)
     try { var v2 = JSON.parse(root.sessionStorage.getItem('mt_v2_input') || 'null'); if (v2 && v2.__ny) root.sessionStorage.removeItem('mt_v2_input'); } catch (e) { }   // 구매 창이 남긴 무빙툰용 값은 지운다
     var h = ssTake(HANDOFF), saved = lsGet(LS_KEY);
     if (h && h.birth) { S.remember = h.remember !== false; writeForm(h.birth); return start(h.birth, h.idx || 0); }

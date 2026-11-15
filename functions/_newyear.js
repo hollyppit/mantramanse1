@@ -7,7 +7,14 @@ import { memberOf, sajuKey, ownedWorlds, markViewed, isMonitor, loadProducts, pa
 export const NEWYEAR_KEY = 'newyear:config';
 export const VISIBILITY = ['closed', 'free', 'paid'];
 export const DEFAULT_ENTRY = { show: true, kick: '', title: '', line: '', go: '' };   // 타임라인 입구 카드(빈 칸 = 기본 문구, entryOf 참고)
-export const DEFAULT_YEAR_CONFIG = { visibility: 'closed', teaser: ['open', 'total.core'], intro: '', contentMode: 'public', entry: { ...DEFAULT_ENTRY } };
+// 화면 꾸미기(관리자 › 신년운세 › 화면 꾸미기): 배경 이미지(PC·모바일), 진입 프롤로그(영상·이미지, 이미지 시간), 패널 이미지 섞기(미디어 라이브러리 panel-<오행>-<주제>)
+export const DEFAULT_MEDIA = { bg: '', bgMobile: '', proOn: true, proVideo: '', proVideoMobile: '', proImage: '', proImageMobile: '', proSec: 6, panels: true };
+const MEDIA_URL = /^(\/api\/clipfile\?k=[\w.-]{1,120}|https:\/\/[^\s"'<>]{1,500})$/;
+export function cleanMedia(m) {
+  m = m && typeof m === 'object' ? m : {}; const u = v => (typeof v === 'string' && MEDIA_URL.test(v.trim()) ? v.trim() : ''), sec = Math.round(+m.proSec);
+  return { bg: u(m.bg), bgMobile: u(m.bgMobile), proOn: m.proOn !== false, proVideo: u(m.proVideo), proVideoMobile: u(m.proVideoMobile), proImage: u(m.proImage), proImageMobile: u(m.proImageMobile), proSec: sec >= 2 && sec <= 30 ? sec : 6, panels: m.panels !== false };
+}
+export const DEFAULT_YEAR_CONFIG = { visibility: 'closed', teaser: ['open', 'total.core'], intro: '', contentMode: 'public', entry: { ...DEFAULT_ENTRY }, media: { ...DEFAULT_MEDIA } };
 
 export async function loadNewyearConfig(env) {
   let saved = null; try { const kv = kvOf(env); saved = kv ? await kv.get(NEWYEAR_KEY, 'json') : null; } catch { saved = null; }
@@ -25,11 +32,12 @@ export function cleanNewyearConfig(raw) {
     if (v.contentMode === 'public' || v.contentMode === 'preview') c.contentMode = v.contentMode;   // preview = 검수 전 문구도 보여 줌(운영에서는 쓰지 않는다)
     const e = v.entry && typeof v.entry === 'object' ? v.entry : {}, one = (x, n) => (typeof x === 'string' ? x.replace(/\s+/g, ' ').trim().slice(0, n) : '');
     c.entry = { show: e.show !== false, kick: one(e.kick, 40), title: one(e.title, 40), line: one(e.line, 120), go: one(e.go, 20) };
+    c.media = cleanMedia(v.media);
     out.years[y] = c;
   }
   return out;
 }
-export const yearConfig = (cfg, y) => (cfg.years && cfg.years[y]) || { ...DEFAULT_YEAR_CONFIG, entry: { ...DEFAULT_ENTRY } };
+export const yearConfig = (cfg, y) => (cfg.years && cfg.years[y]) || { ...DEFAULT_YEAR_CONFIG, entry: { ...DEFAULT_ENTRY }, media: { ...DEFAULT_MEDIA } };
 
 // 운명의 타임라인 입구 카드(report/hub/hub-timeline.js 가 /api/newyear/entry 로 받는다).
 // 공개 범위가 비공개거나 관리자가 '카드 보이기'를 끄면 null. 여러 해가 공개 중이면 가장 늦은 해 하나만.

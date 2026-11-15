@@ -27,3 +27,9 @@ const assert = require('assert'), fs = require('fs'), vm = require('vm'), path =
   assert(/function hasProVideo\(\) \{ return !PREVIEW && !!\(S\.proVid \|\| S\.proImg\); \}/.test(src));
   console.log('prologue-guide-image-sim PASS: w8·두 자리 주제, 이미지 슬롯·시간, 예전 저장 보존, 주소 검증, 안내자별 이미지 선택');
 })().catch(e => { console.error(e); process.exit(1); });
+// 결제 이후에만: 주제 프롤로그는 잠긴 장이 있으면 띄우지 않는다(뷰어 소스 검사)
+{ const src = require('fs').readFileSync('report/v2/viewer.js', 'utf8'); const assert = require('assert');
+  assert(/function worldPrologue\(wid, next\)[\s\S]{0,900}PW\.lockOf\(c\)[\s\S]{0,200}if \(locked\)/.test(src), '잠긴 주제는 프롤로그 보류');
+  assert(src.includes("worldPrologue(S.wmap && S.wmap.idx[resumeIndex]") && src.includes('worldPrologue(g.world.id') && src.includes('worldPrologue(S.wmap.idx[ci]'), '주제 진입·결제 후 복귀·같은 화면 결제 완료 세 곳');
+  assert(src.includes("if(R.ReadingText){if(LIFE)lifeBegin();else beginReader();return;}"), '첫 진입(startGate)에서는 주제 프롤로그를 띄우지 않음');
+  console.log('prologue paid-gate checks PASS'); }

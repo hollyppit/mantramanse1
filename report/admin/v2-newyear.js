@@ -39,6 +39,28 @@
       '<label style="display:block;margin:4px 0"><input type="checkbox" id="nyEntryShow"' + (e.show !== false ? ' checked' : '') + '> 타임라인에 카드 보이기</label>' +
       f('nyEntryKick', 'kick', '윗줄(작은 글씨)', 40) + f('nyEntryTitle', 'title', '제목', 40) + f('nyEntryLine', 'line', '설명', 120) + f('nyEntryGo', 'go', '버튼 글', 20) + '</div>';
   }
+  // 화면 꾸미기(2026-11-16): 배경 이미지(PC·모바일), 진입 프롤로그(영상·이미지), 패널 이미지 섞기. 서버 functions/_newyear.js cleanMedia, 공개 API /api/newyear/look
+  var NYM = [['bg', '배경 이미지 · PC', 'img'], ['bgMobile', '배경 이미지 · 모바일(비우면 PC)', 'img'], ['proVideo', '프롤로그 영상 · PC', 'vid'], ['proVideoMobile', '프롤로그 영상 · 모바일(비우면 PC)', 'vid'], ['proImage', '프롤로그 이미지 · PC', 'img'], ['proImageMobile', '프롤로그 이미지 · 모바일(비우면 PC)', 'img']];
+  function mediaHtml(c) {
+    var m = c.media || {}, slot = function (x) { var u = m[x[0]] || '', prev = !u ? '<div class="muted" style="height:96px;display:grid;place-items:center;border:1px dashed #444;border-radius:8px;font-size:.8rem">없음</div>' : x[2] === 'vid' ? '<video src="' + esc(u) + '" muted controls playsinline preload="metadata" style="display:block;width:100%;max-height:160px;background:#000;border-radius:8px"></video>' : '<img src="' + esc(u) + '" alt="" style="display:block;width:100%;max-height:160px;object-fit:contain;background:#000;border-radius:8px">';
+      return '<div style="padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:8px;min-width:0"><b style="font-size:.88rem">' + x[1] + '</b><div style="margin:6px 0">' + prev + '</div><input type="file" style="max-width:100%" data-nyup="' + x[0] + '" accept="' + (x[2] === 'vid' ? 'video/mp4,video/webm,video/quicktime' : 'image/png,image/jpeg,image/webp,image/avif') + '"> <button class="btn" data-nyrm="' + x[0] + '"' + (u ? '' : ' disabled') + '>빼기</button><p class="muted" data-nymsg="' + x[0] + '" style="font-size:.78rem;margin:4px 0 0"></p></div>'; };
+    return '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">화면 꾸미기 — 배경·프롤로그·패널 이미지</h3>' +
+      '<p class="muted" style="margin:0 0 10px;font-size:.85rem">배경 이미지를 올리면 기본 배경(달·양 그림) 대신 쓰여요. 프롤로그는 신년운세에 들어올 때 한 번(같은 탭에서는 한 번만) 나오고, 영상이 있으면 영상(이미지는 포스터), 이미지만 있으면 정한 시간 동안 보여요. 패널 이미지는 <b>첫 화면·영상 › 패널 이미지</b>에서 만든 삽화(오행 × 주제) 중 사용자 일간·성별과 장 주제에 맞는 것을 골라 장 사이사이에 넣어요. 올리기·빼기는 바로 저장돼요(운영에 1분 안에 반영). 영상 90MB, 이미지 15MB 이하.</p>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:8px">' + NYM.map(slot).join('') + '</div>' +
+      '<div class="row" style="gap:16px;flex-wrap:wrap;margin-top:10px;align-items:center"><label style="display:inline-flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="nyProOn"' + (m.proOn !== false ? ' checked' : '') + '> 프롤로그 사용</label><label style="display:inline-flex;gap:6px;align-items:center;margin:0">이미지 프롤로그 시간 <input type="number" id="nyProSec" min="2" max="30" value="' + esc(m.proSec || 6) + '" style="width:60px">초</label><label style="display:inline-flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="nyPanels"' + (m.panels !== false ? ' checked' : '') + '> 풀이 사이에 패널 이미지 넣기</label><button class="btn main" id="nySaveMedia">꾸미기 설정 저장</button></div></div>';
+  }
+  function curMedia() { var m = Object.assign({}, (S.data && S.data.config && S.data.config.media) || {}); return m; }
+  function saveMedia(m, done) { return post({ action: 'config', year: S.year, media: m }, done); }
+  function onChange(e) {
+    var i = e.target; if (!root || !root.contains(i) || !i.dataset || !i.dataset.nyup || !i.files || !i.files[0]) return;
+    var k = i.dataset.nyup, file = i.files[0], vid = /^proVideo/.test(k), out = root.querySelector('[data-nymsg="' + k + '"]');
+    if (vid ? (file.size > 90 * 1048576 || !/\.(mp4|webm|mov)$/i.test(file.name)) : (file.size > 15 * 1048576 || !/\.(png|jpe?g|webp|avif)$/i.test(file.name))) { out.textContent = vid ? '90MB 이하 mp4·webm·mov 영상을 골라 주세요.' : '15MB 이하 png·jpg·webp·avif 이미지를 골라 주세요.'; return; }
+    out.textContent = '올리는 중… (' + Math.max(1, Math.round(file.size / 1048576)) + 'MB)';
+    fetch('/api/clipfile?name=' + encodeURIComponent('newyear-' + S.year + '-' + k + '-' + file.name), { method: 'POST', headers: { authorization: 'Bearer ' + pw, 'content-type': file.type || (vid ? 'video/mp4' : 'image/webp') }, body: file })
+      .then(function (r) { return r.json().then(function (d) { if (!r.ok || !d.key) throw new Error(d.error || ('오류 ' + r.status)); return d.key; }); })
+      .then(function (key) { var m = curMedia(); m[k] = '/api/clipfile?k=' + key; return saveMedia(m, '화면 꾸미기 파일을 저장했어요.'); })
+      .catch(function (err) { out.textContent = '실패: ' + err.message; });
+  }
   function draw() {
     if (!root) return;
     var d = S.data;
@@ -58,6 +80,7 @@
       '<label style="display:block;margin:8px 0"><input type="checkbox" id="nyPreviewMode"' + (c.contentMode === 'preview' ? ' checked' : '') + '> 관리자 화면에서 검수 전 문구까지 보기(사용자에게는 영향 없음)</label>' +
       entryHtml(c, d) +
       '<button class="btn main" id="nySaveCfg">공개 설정 저장</button></div>';
+    h += mediaHtml(c);
     // 상품
     h += '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">상품</h3>' + (p ? '<p style="margin:0">' + esc(p.name) + ' · <b>' + (p.price > 0 ? won(p.price) : '가격 미정(판매 안 함)') + '</b> · ' + (p.onSale ? '✅ 판매 중' : '⬜ 판매 전') + '</p><p class="muted" style="margin:4px 0 0">가격·판매 여부는 <b>판매·타임라인 › 결제·상품</b> 화면의 ' + esc(p.id) + ' 줄에서 바꿔요. 주문·환불도 그 화면에서 확인해요.</p>' : '<p class="muted">상품 정보가 없습니다.</p>') + '</div>';
     // 검수 현황
@@ -157,6 +180,8 @@
       return post({ action: 'config', year: S.year, visibility: vis, teaser: teaser, intro: root.querySelector('#nyIntro').value, contentMode: root.querySelector('#nyPreviewMode').checked ? 'preview' : 'public',
         entry: { show: root.querySelector('#nyEntryShow').checked, kick: root.querySelector('#nyEntryKick').value, title: root.querySelector('#nyEntryTitle').value, line: root.querySelector('#nyEntryLine').value, go: root.querySelector('#nyEntryGo').value } }, '공개 설정을 저장했어요.');
     }
+    if (q('[data-nyrm]')) { var rk = q('[data-nyrm]').dataset.nyrm, rm = curMedia(); if (!confirm('이 파일 연결을 뺄까요? (파일 자체는 지우지 않아요)')) return; rm[rk] = ''; return saveMedia(rm, '파일 연결을 뺐어요.'); }
+    if (id === 'nySaveMedia') { var sm2 = curMedia(), sec = Math.round(+root.querySelector('#nyProSec').value); if (!(sec >= 2 && sec <= 30)) return msg('이미지 프롤로그 시간은 2~30초로 넣어 주세요.', true); sm2.proSec = sec; sm2.proOn = root.querySelector('#nyProOn').checked; sm2.panels = root.querySelector('#nyPanels').checked; return saveMedia(sm2, '화면 꾸미기 설정을 저장했어요.'); }
     if (id === 'nyBulkModern' || id === 'nyBulkBlocks') {
       var kind = id === 'nyBulkModern' ? 'modern' : 'blocks';
       var ids = kind === 'modern' ? S.data.modern.filter(function (m) { return S.filter === 'all' || (S.filter === 'todo' ? m.status !== 'reviewed' && m.inYear : m.inYear); }).map(function (m) { return m.gua; })
@@ -176,6 +201,6 @@
     if (id === 'nyBClose') { S.block = null; return draw(); }
     if (id === 'nyPv') return preview();
   }
-  document.addEventListener('click', onClick);
+  document.addEventListener('click', onClick); document.addEventListener('change', onChange);
   window.V2Newyear = { open: function (password) { pw = password; root = document.getElementById('t-newyear'); if (!root) return; S.msg = ''; draw(); load(); } };
 })();

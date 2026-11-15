@@ -81,11 +81,11 @@
       // 결제창·로그인으로 떠나기 직전 저장할 이어 읽기 값(handoff 가 돌아온 페이지에서 한 번 쓴다)
       resume: function (chapterId) { var c = S.rep && S.rep.chapters[S.idx]; return { inp: S.ch.input, name: S.name, interest: S.interest || '', realityContext: S.realityContext || {}, guide: S.guide, resumeChapter: chapterId || (c && c.id) || null }; },
       // 구매가 끝나면 사려던 장으로 바로 들어간다. 본문이 아직 준비되지 않았으면 세계에 들어갈 때 guideResume 이 대신 이어 준다
-      onPurchased: function () { var id = S.payResume; if (!id || !S.rep) return; S.payResume = null; var i = S.rep.chapters.map(function (c) { return c.id; }).indexOf(id); if (i >= 0) enterFromHome(i); } });
+      onPurchased: function () { var cur = R.Paywall && R.Paywall._state && R.Paywall._state.current, ci = cur && S.rep ? S.rep.chapters.indexOf(cur) : -1; if (!S.payResume && ci >= 0 && S.wmap) { worldPrologue(S.wmap.idx[ci], function () { enterFromHome(ci); }); return; } var id = S.payResume; if (!id || !S.rep) return; S.payResume = null; var i = S.rep.chapters.map(function (c) { return c.id; }).indexOf(id); if (i >= 0) enterFromHome(i); } });
     // 서버 저장본(콘텐츠·미디어·일간 소개 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
     Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story'), getJson('/api/assets'), getJson('/api/prologue'), getJson('/api/seal-scenes')]).then(function (a) {
       S.sealPresentations=(a[6]&&a[6].chapters)||[]; S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
-      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.assets = (a[4] && a[4].assets) || {}; S.assetVideos = (a[4] && a[4].videos) || {}; S.proVid = prologueUrl(a[5], WORLD, selectedGuide()); S.proImg = prologueImage(a[5], WORLD, selectedGuide()); S.proSec = (a[5] && +a[5].imgSec) || 6;
+      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.assets = (a[4] && a[4].assets) || {}; S.assetVideos = (a[4] && a[4].videos) || {}; S.proVid = prologueUrl(a[5], WORLD, selectedGuide()); S.proImg = prologueImage(a[5], WORLD, selectedGuide()); S.proSec = (a[5] && +a[5].imgSec) || 6; S.proCfg = a[5] || null;
       if (R.Deep && S.ch && !PREVIEW) { try { R.Deep.augment(S.rep, { M: window.Manse, ch: S.ch, sd: sd, now: Date.now(), name: S.name, assets: S.assets, videos: S.assetVideos }); } catch (e) { elog('caught', 'deep.augment'); /* 깊이 풀이가 실패해도 기본 리포트는 그대로 */ } S.repPdf = plainRep(S.rep); } // 자동차 비유·장단점·12운성·직업·배우자·일주·전생·대운/세운/월운·개운 근거·명소 챕터를 끼운다
       S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null, textOnly: !!(a[2] && a[2].textOnly) }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
       if (LIFE && S.ch && R.IKDeep) S.ikP = R.IKDeep.load(window.Manse, S.ch, sd, 16000); // AI 합성과 나란히 먼저 시작
@@ -221,16 +221,28 @@
     return (topic && topic[g]) || config[g] || '';
   }
   function hasProVideo() { return !PREVIEW && !!(S.proVid || S.proImg); }
-  function proVideo(next) {
+  /* 2026-11-16 주제(세계) 프롤로그: 고른 안내자의 프롤로그(관리자 > 프롤로그 영상 업로드: 주제 → 공통, 영상 또는 이미지).
+     유료 주제는 결제(열람 권한)가 확인된 뒤에만 보인다. 잠긴 장이 하나라도 있으면 아직 안 산 것으로 보고 띄우지 않는다(산 직후 다시 판단).
+     같은 탭에서는 주제마다 한 번만(sessionStorage mt_pro_seen:<세계>). 무료 주제는 들어갈 때 바로 보인다. */
+  function worldPrologue(wid, next) {
+    if (PREVIEW || !wid || !S.proCfg) { next(); return; }
+    var guide = selectedGuide(), vid = prologueUrl(S.proCfg, wid, guide), img = prologueImage(S.proCfg, wid, guide), key = 'mt_pro_seen:' + wid;
+    if (!(vid || img) || sg(key) === '1') { next(); return; }
+    var PW = R.Paywall, wait = PW && PW._state && PW._state.loading ? Promise.race([PW._state.loading.catch(function () { }), new Promise(function (ok) { setTimeout(ok, 3000); })]) : Promise.resolve();
+    wait.then(function () {
+      var idxs = (S.wmap && S.wmap.by[wid]) || [], locked = !!(PW && PW.lockOf && idxs.some(function (i) { var c = S.rep.chapters[i]; return c && PW.lockOf(c); }));
+      if (locked) { T('prologue_waiting_purchase', { world: wid }); next(); return; }
+      ss(key, '1'); proVideo(function () { next(); }, { vid: vid, img: img });
+    });
+  }
+  function proVideo(next, src) {
+    if (src) { var keep = { v: S.proVid, i: S.proImg }; S.proVid = src.vid || ''; S.proImg = src.img || ''; var done0 = next; next = function (p) { S.proVid = keep.v; S.proImg = keep.i; done0(p); }; }
     if (!hasProVideo()) { next(false); return; }
     var bb = $('#bgmBtn'); if (bb) bb.hidden = true; // 영상 동안은 ♪ 버튼도 숨겨 배경음악이 끼어들지 않게
     T('prologue_started', { video: 1 }); playStage({ kind: 'prologue', clip: { videoUrl: S.proVid, posterUrl: S.proImg }, stillImage: !S.proVid && S.proImg, stillMs: S.proSec * 1000, noCap: true, onDone: function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', { video: 1 }); if (bb && R.Bgm && R.Bgm.has()) bb.hidden = false; try { if (R.Bgm) R.Bgm.play('cinematic'); } catch (e) { } try { next(true); } catch (e) { if (window.console) console.error('prologue→next', e); try { beginReader(); } catch (e2) { toast('화면을 여는 중 문제가 생겼습니다. 새로고침해 주세요.'); } } } });
   }
   function startGate() {
-    if(R.ReadingText){var goRead=function(){if(LIFE)lifeBegin();else beginReader();};
-      /* 2026-11-16: 유료 주제(world)로 들어오면 고른 안내자의 프롤로그(관리자 > 프롤로그 영상 업로드: 주제 → 공통, 영상 또는 이미지)를 먼저 보여 준다. 같은 탭에서는 주제마다 한 번만. */
-      var proKey='mt_pro_seen:'+WORLD;if(WORLD&&!S.guideResume&&hasProVideo()&&sg(proKey)!=='1'){ss(proKey,'1');proVideo(goRead);return;}
-      goRead();return;}
+    if(R.ReadingText){if(LIFE)lifeBegin();else beginReader();return;}
     if (S.guideResume) { if (LIFE) lifeBegin(); else beginReader(); return; }
     if (MAPQ) { if (LIFE) lifeBegin(); else beginReader(); return; }
     if (HUB) { hubStart(); return; }
@@ -330,11 +342,11 @@
       if (S.guideResume && !PREVIEW) {
         var resumeId = S.guideResume; S.guideResume = null;
         var resumeIndex = S.rep.chapters.findIndex(function (c) { return c.id === resumeId; });
-        if (resumeIndex >= 0) { enterFromHome(resumeIndex); return; }
+        if (resumeIndex >= 0) { worldPrologue(S.wmap && S.wmap.idx[resumeIndex], function () { enterFromHome(resumeIndex); }); return; }
       }
       if (!WORLD || PREVIEW || S.deepWorld) return; S.deepWorld = 1;
       var g = R.Explore.worldsModel(S.rep.chapters, S.xpWorlds, S.ended, S.idx).filter(function (x) { return x.world.id === WORLD; })[0];
-      if (g) worldIntro(g, function () { enterWorld(g.world.id); });
+      if (g) worldPrologue(g.world.id, function () { worldIntro(g, function () { enterWorld(g.world.id); }); });
     });
   }
   /* ── 챕터 탭 줄: 지금 읽는 챕터가 속한 세계의 챕터를 가로로 늘어놓는다. 읽는 중·세계 도구 화면 어디서든 바로 이동. ── */
