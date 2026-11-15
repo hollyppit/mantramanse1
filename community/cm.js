@@ -1,4 +1,4 @@
-/* 운명의 광장(3단계 MVP, 디자인 v2 "Soft Bloom" 2026-11-16) — 한 페이지 화면. 서버: /api/community/{posts,post,comments,react,report,block,me}, /api/account/profile
+/* 운명의 광장(3단계 MVP, 디자인 v3 "월하연(月下緣)" 2026-11-16: 달빛·벚꽃·붉은 실·한지·인장) — 한 페이지 화면. 서버: /api/community/{posts,post,comments,react,report,block,me}, /api/account/profile
    주소(#):  #/ 홈 피드 · #/today 오늘의 운테크·기록(4단계) · #/records 회고 · #/search 검색 · #/groups 모임 · #/g/ilju/<갑자>·#/g/ilgan/<갑> 모임 피드 · #/p/<id> 글 · #/write · #/edit/<id> · #/me 나
    로그인은 심층 분석과 같은 Supabase 세션(localStorage sb-*-auth-token)을 읽어 x-member-token 으로 보낸다. 출생 정보는 저장하지 않는다(일주 확인 때 서버로 보내 계산만). */
 (function () {
@@ -6,7 +6,8 @@
   var $ = function (s, r) { return (r || document).querySelector(s); }, $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var CATS = { wealth: '재물', love: '연애', work: '직장', people: '인간관계', daily: '일상' };
-  var CAT_EMO = { wealth: '💰', love: '💗', work: '💼', people: '🤝', daily: '☕' };
+  var CAT_HJ = { wealth: '財', love: '戀', work: '業', people: '人', daily: '日' };   // 게시판 인장
+  var HJ = { '갑': '甲', '을': '乙', '병': '丙', '정': '丁', '무': '戊', '기': '己', '경': '庚', '신': '辛', '임': '壬', '계': '癸' };
   var REASONS = { spam: '광고·도배', abuse: '욕설·비방', sexual: '음란·불쾌', privacy: '개인정보 노출', scam: '사기·금전 요구', etc: '기타' };
   var STEMS = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계'];
   var EL = { '갑': 'wood', '을': 'wood', '병': 'fire', '정': 'fire', '무': 'earth', '기': 'earth', '경': 'metal', '신': 'metal', '임': 'water', '계': 'water' };
@@ -16,7 +17,7 @@
   try { localStorage.setItem('mt_last_service', 'community'); } catch (e) { }
 
   var ICON = {
-    heart: '<svg class="i" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
+    heart: '<svg class="i" viewBox="0 0 24 24"><path d="M12 11.5C9.6 8 5 8.4 5 11.2s4.4 3.3 7 .3c2.6 3 7 2.5 7-.3S14.4 8 12 11.5z"/><path d="M12 11.5c-.6 2.6-2.2 5.6-4.6 8M12 11.5c.6 2.6 2.2 5.6 4.6 8"/></svg>',   // 매듭(공감)
     chat: '<svg class="i" viewBox="0 0 24 24"><path d="M20 12a7.5 7.5 0 0 1-11 6.6L4 20l1.4-4.6A7.5 7.5 0 1 1 20 12z"/></svg>',
     save: '<svg class="i" viewBox="0 0 24 24"><path d="M6 4h12v16l-6-4-6 4z"/></svg>',
     flag: '<svg class="i" viewBox="0 0 24 24"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg>',
@@ -71,7 +72,7 @@
   /* ── 처음 설정: 닉네임 ── */
   function setupView(next) {
     var p = (ME && ME.profile) || {};
-    paint('<div class="hero"><span class="kick">WELCOME</span><h1>광장에서 쓸<br><em>이름</em>을 정해 주세요</h1><p>글과 댓글에는 닉네임만 보여요. 생년월일·이메일은 다른 회원에게 보이지 않습니다.</p></div>' +
+    paint('<div class="hero"><span class="kick">月下緣</span><h1>광장에서 쓸<br><em>이름</em>을 정해 주세요</h1><p>글과 댓글에는 닉네임만 보여요. 생년월일·이메일은 다른 회원에게 보이지 않습니다.</p></div>' +
       '<form class="form panel" id="setupForm"><label>닉네임 <span class="muted" style="font-weight:500">2~12자 · 한글·영문·숫자·밑줄</span><input name="nickname" maxlength="12" required autocomplete="nickname" value="' + esc(p.nickname || '') + '"></label>' +
       '<label class="check"><input type="checkbox" name="showIlju"' + (p.showIlju ? ' checked' : '') + '> 내 글에 일주 보이기 (예: 갑자)</label>' +
       '<label class="check"><input type="checkbox" name="showIlgan"' + (p.showIlgan ? ' checked' : '') + '> 내 글에 일간 보이기 (예: 갑목)</label>' +
@@ -88,9 +89,9 @@
   /* ── 홈 피드 ── */
   function stories() {
     var g = (ME && ME.groups) || {}, out = '';
-    if (g.ilju) out += '<a class="story mine el-' + EL[g.ilju.key.charAt(0)] + '" href="#/g/ilju/' + encodeURIComponent(g.ilju.key) + '"><div class="ring"><span>' + esc(g.ilju.key) + '</span></div><small>내 일주</small></a>';
-    else if (ME && ME.member) out += '<a class="story" href="#/me?ilju=1"><div class="ring"><span>＋</span></div><small>일주 찾기</small></a>';
-    STEMS.forEach(function (s) { var mine = g.ilgan && g.ilgan.key === s; out += '<a class="story el-' + EL[s] + (mine ? ' mine' : '') + '" href="#/g/ilgan/' + encodeURIComponent(s) + '"><div class="ring"><span>' + s + '</span></div><small>' + s + EL_KO[EL[s]] + (mine ? ' · 나' : '') + '</small></a>'; });
+    if (g.ilju) out += '<a class="story mine el-' + EL[g.ilju.key.charAt(0)] + '" href="#/g/ilju/' + encodeURIComponent(g.ilju.key) + '"><div class="ring"><span class="ko">' + esc(g.ilju.key) + '</span></div><small>내 일주</small></a>';
+    else if (ME && ME.member) out += '<a class="story" href="#/me?ilju=1"><div class="ring"><span class="ko">＋</span></div><small>일주 찾기</small></a>';
+    STEMS.forEach(function (s) { var mine = g.ilgan && g.ilgan.key === s; out += '<a class="story el-' + EL[s] + (mine ? ' mine' : '') + '" href="#/g/ilgan/' + encodeURIComponent(s) + '"><div class="ring"><span>' + HJ[s] + '</span></div><small>' + s + EL_KO[EL[s]] + (mine ? ' · 나' : '') + '</small></a>'; });
     return '<div class="stories" aria-label="일간 모임">' + out + '</div>';
   }
   function feedView(q, group) {
@@ -103,11 +104,11 @@
       head = '<a class="back" href="#/groups">' + ICON.back + '모임</a><div class="gh el-' + el + '"><div class="gem">' + esc(group.key) + '</div><h1>' + esc(label) + ' 모임</h1><p class="lead">' + (mine ? '나와 같은 ' + (group.kind === 'ilju' ? '일주' : '일간') + '를 타고난 사람들의 이야기' : '읽기는 누구나, 글은 ' + esc(label) + '인 분들이 올려요') + '</p>' +
         (g && mine && g.gathering ? '<p class="note pink" style="margin-top:12px">아직 모이는 중이에요 · ' + (ME.minGroup || 5) + '명이 모이면 모임이 열려요. 그동안 모임 글은 홈에서도 함께 보여요.</p>' : '') + '</div>';
     } else {
-      head = '<section class="hero"><canvas id="petals" aria-hidden="true"></canvas><span class="kick">PLAZA OF FATE</span><h1>같은 기운,<br><em>다른 이야기</em></h1><p>같은 일주·일간을 타고난 사람들과 오늘을 나눠요.</p></section>' + stories();
+      head = '<section class="hero"><canvas id="petals" aria-hidden="true"></canvas><svg class="thread" viewBox="0 0 400 60" preserveAspectRatio="none" aria-hidden="true"><path d="M-10 44 C 70 14, 130 58, 205 34 S 330 6, 410 26"/><circle cx="205" cy="34" r="3.5"/></svg><span class="kick">月下緣</span><h1>보이지 않는 실로<br><em>이어진 인연</em>들</h1><p>같은 일주·일간을 타고난 사람들이 달빛 아래 모여 오늘의 이야기를 나누는 곳이에요.</p></section>' + stories();
     }
     paint(head +
       '<div class="bar"><nav class="seg" aria-label="정렬"><a href="' + link({ tab: '' }) + '"' + (tab === 'latest' ? ' aria-current="page"' : '') + '>최신</a><a href="' + link({ tab: 'popular' }) + '"' + (tab === 'popular' ? ' aria-current="page"' : '') + '>인기</a></nav></div>' +
-      '<div class="chips" role="group" aria-label="게시판"><a class="chip' + (!q.cat ? ' on' : '') + '" href="' + link({ cat: '' }) + '">전체</a>' + Object.keys(CATS).map(function (k) { return '<a class="chip' + (q.cat === k ? ' on' : '') + '" href="' + link({ cat: k }) + '"><span aria-hidden="true">' + CAT_EMO[k] + '</span>' + CATS[k] + '</a>'; }).join('') + '</div>' +
+      '<div class="chips" role="group" aria-label="게시판"><a class="chip' + (!q.cat ? ' on' : '') + '" href="' + link({ cat: '' }) + '">전체</a>' + Object.keys(CATS).map(function (k) { return '<a class="chip' + (q.cat === k ? ' on' : '') + '" href="' + link({ cat: k }) + '"><span class="hj" aria-hidden="true">' + CAT_HJ[k] + '</span>' + CATS[k] + '</a>'; }).join('') + '</div>' +
       (q.tag ? '<p class="muted" style="margin:0 0 10px">#' + esc(q.tag) + ' 글만 보는 중 · <a href="' + link({ tag: '' }) + '">해제</a></p>' : '') +
       '<div id="list" aria-live="polite"><div class="skel"></div><div class="skel"></div></div><div id="more"></div>', group ? 'groups' : 'home');
     var wl = $('.tabbar [data-tab="write"]'); if (wl) wl.href = '#/write' + (group ? qs({ group: group.kind }) : q.cat ? qs({ cat: q.cat }) : '');
@@ -124,10 +125,10 @@
     paint('<h1 style="margin:6px 2px 4px">모임</h1><p class="lead" style="margin:0 2px 16px">같은 기운을 타고난 사람들끼리 모여요</p>' +
       (g.ilju ? '<div class="grid2" style="margin-bottom:18px"><a class="group-card el-' + EL[g.ilju.key.charAt(0)] + '" href="#/g/ilju/' + encodeURIComponent(g.ilju.key) + '"><span class="gem">' + esc(g.ilju.key) + '</span><span><b>내 일주</b><small>' + (g.ilju.gathering ? '모이는 중' : g.ilju.size + '명') + '</small></span></a><a class="group-card el-' + EL[g.ilgan.key] + '" href="#/g/ilgan/' + encodeURIComponent(g.ilgan.key) + '"><span class="gem">' + esc(g.ilgan.key) + '</span><span><b>내 일간</b><small>' + (g.ilgan.gathering ? '모이는 중' : g.ilgan.size + '명') + '</small></span></a></div>'
         : '<a class="panel" href="#/me?ilju=1" style="display:block;text-decoration:none"><b>내 일주 모임 찾기 →</b><p class="muted" style="margin:4px 0 0">생년월일로 일주를 확인하면 내 모임이 열려요</p></a>') +
-      '<div class="sec-h"><h2>일간 모임 10</h2></div><div class="grid2">' + STEMS.map(function (s) { return '<a class="group-card el-' + EL[s] + '" href="#/g/ilgan/' + encodeURIComponent(s) + '"><span class="gem">' + s + '</span><span><b>' + s + EL_KO[EL[s]] + '</b><small>' + ({ wood: '나무의 기운', fire: '불의 기운', earth: '흙의 기운', metal: '쇠의 기운', water: '물의 기운' })[EL[s]] + '</small></span></a>'; }).join('') + '</div>', 'groups');
+      '<div class="sec-h"><h2>일간 모임 10</h2></div><div class="grid2">' + STEMS.map(function (s) { return '<a class="group-card el-' + EL[s] + '" href="#/g/ilgan/' + encodeURIComponent(s) + '"><span class="gem">' + HJ[s] + '</span><span><b>' + s + EL_KO[EL[s]] + '</b><small>' + ({ wood: '나무의 기운', fire: '불의 기운', earth: '흙의 기운', metal: '쇠의 기운', water: '물의 기운' })[EL[s]] + '</small></span></a>'; }).join('') + '</div>', 'groups');
   }
   function card(p) {
-    return '<a class="card" href="#/p/' + p.id + '"><div class="head">' + ava(p.author) + '<div class="meta">' + who(p.author) + '<div class="sub"><span>' + when(p.at) + '</span>·<span class="badge cat-' + esc(p.category) + '">' + esc(p.catLabel) + '</span>' + (p.group ? '<span class="badge pink">' + esc(p.group.key) + (p.group.kind === 'ilju' ? ' 일주' : ' 일간') + '</span>' : '') + '</div></div></div>' +
+    return '<a class="card" href="#/p/' + p.id + '"><div class="head">' + ava(p.author) + '<div class="meta">' + who(p.author) + '<div class="sub"><span>' + when(p.at) + '</span>·<span class="badge cat-' + esc(p.category) + '"><span class="hj" aria-hidden="true">' + (CAT_HJ[p.category] || '') + '</span>' + esc(p.catLabel) + '</span>' + (p.group ? '<span class="badge pink">' + esc(p.group.key) + (p.group.kind === 'ilju' ? ' 일주' : ' 일간') + '</span>' : '') + '</div></div></div>' +
       '<h3>' + esc(p.title) + '</h3><p class="ex">' + esc(p.excerpt) + '</p>' + (p.tags && p.tags.length ? '<div class="tags">' + p.tags.slice(0, 3).map(function (t) { return '<span class="tag">#' + esc(t) + '</span>'; }).join('') + '</div>' : '') +
       '<div class="foot"><span class="' + (p.liked ? 'on' : '') + '">' + ICON.heart + p.likes + '</span><span>' + ICON.chat + p.comments + '</span><span class="save ' + (p.saved ? 'on' : '') + '" aria-label="' + (p.saved ? '저장함' : '') + '">' + ICON.save + '</span></div></a>';
   }
@@ -150,7 +151,7 @@
       var p = d.post, mine = p.author && p.author.mine;
       paint('<a class="back" href="javascript:history.back()">' + ICON.back + '뒤로</a><article class="post"><div class="head">' + ava(p.author) + '<div style="min-width:0;flex:1">' + who(p.author) + '<div class="sub"><span>' + when(p.at) + (p.edited ? ' · 수정됨' : '') + '</span>·<a class="badge cat-' + esc(p.category) + '" href="#/' + qs({ cat: p.category }) + '">' + esc(p.catLabel) + '</a>' + (p.group ? '<a class="badge pink" href="#/g/' + p.group.kind + '/' + encodeURIComponent(p.group.key) + '">' + esc(p.group.key) + (p.group.kind === 'ilju' ? ' 일주' : ' 일간') + ' 모임</a>' : '') + '</div></div></div>' +
         '<h1>' + esc(p.title) + '</h1><div class="body">' + esc(p.body) + '</div>' + (p.tags.length ? '<p class="tags" style="display:flex;gap:8px;flex-wrap:wrap">' + p.tags.map(function (t) { return '<a class="tag" href="#/' + qs({ tag: t }) + '">#' + esc(t) + '</a>'; }).join('') + '</p>' : '') +
-        '<div class="acts">' + (mine ? '<span class="act" style="cursor:default">' + ICON.heart + '<b>' + p.likes + '</b></span>' : '<button class="act" data-like aria-pressed="' + p.liked + '" aria-label="좋아요">' + ICON.heart + '<b>' + p.likes + '</b></button>') + '<span class="act" style="cursor:default">' + ICON.chat + '<b id="cmtN">' + p.comments + '</b></span><button class="act icon" data-save aria-pressed="' + p.saved + '" aria-label="저장">' + ICON.save + '</button>' +
+        '<div class="acts">' + (mine ? '<span class="act" style="cursor:default">' + ICON.heart + '<b>' + p.likes + '</b></span>' : '<button class="act" data-like aria-pressed="' + p.liked + '" aria-label="공감">' + ICON.heart + '<b>' + p.likes + '</b></button>') + '<span class="act" style="cursor:default">' + ICON.chat + '<b id="cmtN">' + p.comments + '</b></span><button class="act icon" data-save aria-pressed="' + p.saved + '" aria-label="저장">' + ICON.save + '</button>' +
         (mine ? '<a class="act right icon" href="#/edit/' + p.id + '" aria-label="고치기">' + ICON.edit + '</a><button class="act icon" data-del aria-label="지우기">' + ICON.trash + '</button>' : '<button class="act right icon" data-report="post" aria-label="신고">' + ICON.flag + '</button>' + (p.author && !p.author.gone ? '<button class="act icon" data-block aria-label="차단">' + ICON.block + '</button>' : '')) + '</div></article>' +
         '<section class="cmts" aria-label="댓글"><div class="sec-h" style="margin-top:0"><h2>댓글</h2></div><div id="cmtList"></div>' +
         '<form class="composer" id="cmtForm"><span class="reply" id="replyTo" hidden></span><div class="in"><textarea name="body" rows="1" maxlength="1000" placeholder="따뜻한 한마디를 남겨 주세요" aria-label="댓글"></textarea><input type="hidden" name="parent"><button class="send" type="submit" aria-label="댓글 보내기" disabled>' + ICON.send + '</button></div><p class="msg" id="cmtMsg" role="status" hidden></p></form></section>', '');
@@ -180,7 +181,7 @@
   function needWriteGate(write) {
     if (!ME || !ME.member) { toast('로그인한 회원만 할 수 있어요'); return true; }
     if (write && (!ME.profile || !ME.profile.nickname)) { location.hash = '#/me?setup=1'; return true; }
-    if (write && ME.sanction) { toast(ME.sanction.kind === 'ban' ? '이용이 정지된 계정이에요' : '지금은 글·댓글·좋아요를 쓸 수 없어요'); return true; }
+    if (write && ME.sanction) { toast(ME.sanction.kind === 'ban' ? '이용이 정지된 계정이에요' : '지금은 글·댓글·공감을 남길 수 없어요'); return true; }
     return false;
   }
   function loadComments(p) {
@@ -247,9 +248,9 @@
     var draw = function (p) {
       p = p || { category: q.cat || '', title: '', body: '', tags: [] };
       var pick = function (name, opts, cur) { return '<div class="picker" role="radiogroup">' + opts.map(function (o) { return '<label><input type="radio" name="' + name + '" value="' + esc(o[0]) + '"' + (cur === o[0] ? ' checked' : '') + '><span>' + o[1] + '</span></label>'; }).join('') + '</div>'; };
-      var groupOpts = [['', '🌸 전체 광장']].concat(g.ilju ? [['ilju', esc(g.ilju.key) + ' 일주 모임']] : []).concat(g.ilgan ? [['ilgan', esc(g.ilgan.label) + ' 일간 모임']] : []);
+      var groupOpts = [['', '전체 광장']].concat(g.ilju ? [['ilju', esc(g.ilju.key) + ' 일주 모임']] : []).concat(g.ilgan ? [['ilgan', esc(g.ilgan.label) + ' 일간 모임']] : []);
       paint('<a class="back" href="' + (editId ? '#/p/' + editId : '#/') + '">' + ICON.back + '돌아가기</a><h1 style="margin:4px 2px 16px">' + (editId ? '글 고치기' : '어떤 이야기를 나눌까요?') + '</h1>' +
-        '<form class="form" id="wf"><div><p class="muted" style="margin:0 0 8px;font-weight:600">게시판</p>' + pick('category', Object.keys(CATS).map(function (k) { return [k, CAT_EMO[k] + ' ' + CATS[k]]; }), p.category) + '</div>' +
+        '<form class="form" id="wf"><div><p class="muted" style="margin:0 0 8px;font-weight:600">게시판</p>' + pick('category', Object.keys(CATS).map(function (k) { return [k, '<span class="hj" aria-hidden="true">' + CAT_HJ[k] + '</span>' + CATS[k]]; }), p.category) + '</div>' +
         (editId ? '' : '<div><p class="muted" style="margin:0 0 8px;font-weight:600">올릴 곳 <span style="font-weight:400">(모임 글은 홈에도 보여요)</span></p>' + pick('group', groupOpts, q.group || '') + '</div>') +
         '<label>제목<input name="title" maxlength="60" required value="' + esc(p.title) + '" placeholder="한 줄로 요약해 주세요"></label>' +
         '<label>내용<textarea name="body" rows="9" maxlength="5000" required placeholder="경험·고민·소소한 이야기 모두 좋아요">' + esc(p.body) + '</textarea><span class="count" id="cnt">' + p.body.length + ' / 5000</span></label>' +
@@ -324,7 +325,7 @@
   /* ── 오늘(운테크 + 운명의 기록 + 같은 일주 익명 통계, 4단계) ── */
   var MOOD = { 5: ['🤩', '아주 좋음'], 4: ['🙂', '좋음'], 3: ['😐', '보통'], 2: ['😕', '별로'], 1: ['😣', '힘듦'] };
   function needIlju(tab) {
-    paint('<div class="hero"><span class="kick">TODAY</span><h1>내 일주를 알면<br><em>오늘이 보여요</em></h1><p>일주를 확인하면 오늘 일진과 내 일주가 만나는 하루 카드와 운명의 기록을 쓸 수 있어요.</p><div class="cta"><a class="btn pink" href="#/me?ilju=1">내 일주 확인하기</a></div></div>', tab);
+    paint('<div class="hero"><span class="kick">今日</span><h1>내 일주를 알면<br><em>오늘이 보여요</em></h1><p>일주를 확인하면 오늘 일진과 내 일주가 만나는 하루 카드와 운명의 기록을 쓸 수 있어요.</p><div class="cta"><a class="btn pink" href="#/me?ilju=1">내 일주 확인하기</a></div></div>', tab);
   }
   function todayView() {
     if (!ME || !ME.member) { needSetup('#/today'); return; }
@@ -342,7 +343,7 @@
       paint('<p class="muted" style="margin:4px 2px 8px;font-weight:600">' + esc(date) + '</p>' +
         '<section class="today el-' + EL[c.dayPillar.charAt(0)] + '"><div class="t-top"><span class="gz">' + esc(c.dayPillar) + '<small>일진</small></span><span class="kick">' + esc(c.tenGod) + ' · ' + esc(c.key) + '</span></div>' +
         '<h1>' + esc(c.head) + '</h1><p class="t-body">' + esc(c.body) + '</p>' +
-        '<div class="t-grid"><div class="t-cell"><b>💰 오늘의 운테크</b><p>' + esc(c.money) + '</p></div><div class="t-cell"><b>🤝 사람</b><p>' + esc(c.people) + '</p></div></div>' +
+        '<div class="t-grid"><div class="t-cell"><b><span class="hj" aria-hidden="true">財</span>오늘의 운테크</b><p>' + esc(c.money) + '</p></div><div class="t-cell"><b><span class="hj" aria-hidden="true">人</span>사람</b><p>' + esc(c.people) + '</p></div></div>' +
         '<div class="t-do"><span class="ok">해 보면 좋은 것<b>' + esc(c.do) + '</b></span><span class="no">피하면 좋은 것<b>' + esc(c.avoid) + '</b></span></div>' +
         (c.relKey ? '<p class="t-rel"><b>' + esc(c.relKey) + '</b> ' + esc(c.relLine) + '</p>' : '') +
         '<p class="t-basis">' + esc(c.basis) + '</p></section>' +
@@ -415,12 +416,12 @@
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var ctx = cv.getContext('2d'), dpr = Math.min(2, window.devicePixelRatio || 1), W = 0, H = 0, ps = [], raf = 0, prev = 0, vis = true, dead = false;
     var size = function () { var r = cv.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
-    var mk = function (top) { return { x: Math.random() * W, y: top ? -12 : Math.random() * H, s: 4 + Math.random() * 5, vx: 10 + Math.random() * 14, vy: 8 + Math.random() * 12, r: Math.random() * 6.28, vr: (Math.random() - .5) * 1.6, a: .45 + Math.random() * .45 }; };
+    var mk = function (top) { return { x: Math.random() * W, y: top ? -12 : Math.random() * H, s: 4 + Math.random() * 5, vx: 10 + Math.random() * 14, vy: 8 + Math.random() * 12, r: Math.random() * 6.28, vr: (Math.random() - .5) * 1.6, a: .35 + Math.random() * .4 }; };
     size(); for (var i = 0; i < Math.round(Math.max(8, Math.min(16, W / 40))); i++) ps.push(mk(false));
     var tick = function (t) {
       raf = 0; if (!vis || dead) return; var dt = prev ? Math.min(.05, (t - prev) / 1000) : 0; prev = t; ctx.clearRect(0, 0, W, H);
       ps.forEach(function (p, i) { p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt; if (p.y > H + 12 || p.x > W + 12) { ps[i] = mk(true); ps[i].x = Math.random() * W * .8; }
-        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.globalAlpha = p.a; ctx.fillStyle = '#F4B6C2'; ctx.beginPath(); ctx.moveTo(0, -p.s); ctx.quadraticCurveTo(p.s, -p.s * .2, 0, p.s); ctx.quadraticCurveTo(-p.s, -p.s * .2, 0, -p.s); ctx.fill(); ctx.restore(); });
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.globalAlpha = p.a; ctx.fillStyle = '#F3CDD3'; ctx.beginPath(); ctx.moveTo(0, -p.s); ctx.quadraticCurveTo(p.s, -p.s * .2, 0, p.s); ctx.quadraticCurveTo(-p.s, -p.s * .2, 0, -p.s); ctx.fill(); ctx.restore(); });
       raf = requestAnimationFrame(tick);
     };
     var go = function () { if (!raf && vis && !dead) { prev = 0; raf = requestAnimationFrame(tick); } };
