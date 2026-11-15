@@ -26,7 +26,7 @@ function cond(row, expr) {
 function test(row, col, op, v) {
   const val = row[col];
   switch (op) {
-    case 'eq': return String(val) === v; case 'neq': return String(val) !== v; case 'lt': return +val < +v; case 'gte': return String(val) >= v;
+    case 'eq': return String(val) === v; case 'neq': return String(val) !== v; case 'lt': return +val < +v; case 'gte': return String(val) >= v; case 'lte': return String(val) <= v;
     case 'is': return v === 'null' ? val == null : v === 'true' ? val === true : val === false;
     case 'in': return v.replace(/^\(|\)$/g, '').split(',').includes(String(val));
     case 'not.in': return !v.replace(/^\(|\)$/g, '').split(',').includes(String(val));
@@ -222,7 +222,43 @@ const ENV = { ADMIN_PASSWORD: 'adm-pw', SUPABASE_URL: 'https://sb.local', SUPABA
   await acc.withdraw(ENV, U('b'), { unlinkKakao: false }).catch(() => null);
   ok(bPosts.every(p => p.status === 'deleted') && T.cm_comments.filter(c => c.author_id === U('b')).every(c => c.status === 'deleted'), '탈퇴하면 그 회원의 글·댓글은 지운 상태로');
 
-  // 12) 파일 점검
+  // 12) 4단계: 오늘의 운테크·운명의 기록·익명 통계
+  const D = await imp('functions/_daily.js'), today = await imp('functions/api/community/today.js'), records = await imp('functions/api/community/records.js');
+  T.cm_logs = [];
+  const tcall = async (mod, method, tok, q = '', body) => { const r = await mod['onRequest' + method[0] + method.slice(1).toLowerCase()]({ request: new Request(B + '/api/community/x' + q, { method, headers: { 'content-type': 'application/json', ...(tok ? { 'x-member-token': tok } : {}) }, body: body ? JSON.stringify(body) : undefined }), env: ENV }); return { s: r.status, d: await r.json() }; };
+  ok(D.kstDay(Date.UTC(2026, 10, 15, 15, 30)) === '2026-11-16' && D.kstDay(Date.UTC(2026, 10, 15, 14, 59)) === '2026-11-15', '날짜는 한국 시간 자정 기준');
+  ok(D.dayPillar('2026-11-16').name === '갑오', '2026-11-16 일진 = 갑오');
+  let card = D.todayCard('갑자', '2026-11-16'); ok(card.tenGod === '비견' && card.relation === 'chung' && /참고용/.test(card.basis) && card.money && card.do, '갑자 일주 × 갑오 날 = 비견·자오충 카드');
+  ok(D.todayCard('경자', '2026-11-16').tenGod === '편재' && D.branchRel('자', '축') === 'hap' && D.branchRel('오', '오') === 'same' && D.branchRel('자', '인') === 'none', '십성·육합·충·같은 글자 판정');
+  ok(D.todayCard('가나') === null, '잘못된 일주는 카드 없음');
+  ok(Object.keys(D.TG_COPY).length === 10 && Object.values(D.TG_COPY).every(c => c.head.length === 2 && c.body && c.money && c.people && c.do && c.avoid), '십성 10개 문안이 모두 채워짐');
+  const g19 = D.groupStats(Array.from({ length: 19 }, () => ({ mood: 5, tags: [] }))); ok(g19.open === false && !('goodPct' in g19), '19명은 통계 닫힘(숫자 노출 없음)');
+  const rows = [...Array(12).fill({ mood: 5, tags: ['work'] }), ...Array(9).fill({ mood: 3, tags: ['money'] }), ...Array(2).fill({ mood: 1, tags: [] })];
+  const g = D.groupStats(rows); const m5 = g.moods.find(x => x.mood === 5), m3 = g.moods.find(x => x.mood === 3), m1 = g.moods.find(x => x.mood === 1);
+  ok(g.open && g.size === '20명 이상' && m5.pct === 50 && m3.pct === null && m1.pct === null, '20명 이상만 열림·10명 미만 칸 숨김·5% 단위(12/23→50%)');
+  ok(g.tags.length === 1 && g.tags[0].tag === 'work' && g.goodPct % 5 === 0, '10명 미만 키워드도 숨김');
+  const rf = D.reflect([{ mood: 5, ten_god: '식신', tags: ['rest'] }, { mood: 5, ten_god: '식신', tags: [] }, { mood: 2, ten_god: '편관', tags: ['work'] }, { mood: 1, ten_god: '편관', tags: ['work'] }, { mood: 3, ten_god: '정재', tags: [] }]);
+  ok(rf.count === 5 && rf.avg === 3.2 && /식신 날/.test(rf.insight) && /편관 날/.test(rf.insight) && rf.topTags[0].tag === 'work', '회고: 평균·자주 고른 키워드·십성별 패턴');
+  x = await tcall(today, 'GET', null); ok(x.s === 401, '오늘: 비로그인 401');
+  x = await tcall(today, 'GET', 'tok-x'); ok(x.s === 409 && x.d.need === 'consent', '오늘: 동의 전 409');
+  x = await tcall(today, 'GET', 'tok-r0'); ok(x.s === 409 && x.d.need === 'ilju', '오늘: 일주 확인 전 409');
+  x = await tcall(today, 'GET', 'tok-a'); ok(x.s === 200 && x.d.card.dayPillar && x.d.log === null && x.d.stats.ilju.key === '갑자' && x.d.stats.ilju.open === false, '오늘 카드·기록 없음·통계 닫힘');
+  x = await tcall(today, 'POST', 'tok-a', '', { mood: 9 }); ok(x.s === 400, '기분 값 검사');
+  x = await tcall(today, 'POST', 'tok-a', '', { mood: 4, note: '연락처 010-1234-5678' }); ok(x.s === 400, '메모에 전화번호 거절');
+  x = await tcall(today, 'POST', 'tok-a', '', { mood: 4, tags: ['work', 'money', 'bad', 'work'], note: '좋은 하루 https://blog.example 참고' }); ok(x.s === 200, '기록 저장(나만 보는 메모라 링크 허용)');
+  const lg = T.cm_logs.find(l => l.user_id === U('a'));
+  ok(lg && lg.ilju === '갑자' && lg.ilgan === '갑' && lg.ten_god && JSON.stringify(lg.tags) === '["work","money"]', '기록에 그날 일주·일간·십성을 함께 저장, 잘못된 키워드 제거');
+  await tcall(today, 'POST', 'tok-a', '', { mood: 2 }); ok(T.cm_logs.filter(l => l.user_id === U('a')).length === 1 && T.cm_logs.find(l => l.user_id === U('a')).mood === 2, '하루 한 행(다시 보내면 고침)');
+  for (let i = 0; i < 24; i++) T.cm_logs.push({ user_id: 'z' + i, day: D.kstDay(), mood: i < 14 ? 5 : 3, tags: ['love'], ilju: '갑자', ilgan: '갑' });
+  x = await tcall(today, 'GET', 'tok-a'); ok(x.d.stats.ilju.open && x.d.log.mood === 2 && x.d.stats.ilju.moods.every(m => m.pct === null || m.pct % 5 === 0), '20명 이상이면 같은 일주 통계 열림');
+  ok(!JSON.stringify(x.d.stats).includes('z1') && !JSON.stringify(x.d.stats).includes(U('a')), '통계에 회원 id 없음');
+  x = await tcall(records, 'GET', 'tok-a', '?range=week'); ok(x.s === 200 && x.d.logs.length === 1 && x.d.summary.count === 1 && !JSON.stringify(x.d).includes('z1'), '회고: 내 기록만');
+  x = await tcall(records, 'DELETE', 'tok-a', '?day=' + D.kstDay()); ok(!T.cm_logs.some(l => l.user_id === U('a')), '기록 지우기');
+  x = await tcall(records, 'DELETE', 'tok-a', '?day=bad'); ok(x.s === 400, '잘못된 날짜 거절');
+  const sql4 = read('supabase/migrations/20261116_records_stage4.sql');
+  ok(/alter table public\.cm_logs enable row level security/.test(sql4) && /revoke all on public\.cm_logs from anon, authenticated/.test(sql4) && /on delete cascade/.test(sql4), '기록 표: RLS·권한 회수·탈퇴 시 삭제');
+
+  // 13) 파일 점검
   const sql = read('supabase/migrations/20261116_plaza_stage3.sql');
   const tbls = ['cm_posts', 'cm_comments', 'cm_reactions', 'cm_reports', 'cm_blocks', 'cm_sanctions'];
   ok(tbls.every(t => new RegExp('alter table public\\.' + t + '\\s+enable row level security').test(sql)), '새 표 6개 RLS 켬');

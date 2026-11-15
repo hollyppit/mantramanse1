@@ -1,5 +1,5 @@
 /* 운명의 광장(3단계 MVP, 디자인 v2 "Soft Bloom" 2026-11-16) — 한 페이지 화면. 서버: /api/community/{posts,post,comments,react,report,block,me}, /api/account/profile
-   주소(#):  #/ 홈 피드 · #/search 검색 · #/groups 모임 · #/g/ilju/<갑자>·#/g/ilgan/<갑> 모임 피드 · #/p/<id> 글 · #/write · #/edit/<id> · #/me 나
+   주소(#):  #/ 홈 피드 · #/today 오늘의 운테크·기록(4단계) · #/records 회고 · #/search 검색 · #/groups 모임 · #/g/ilju/<갑자>·#/g/ilgan/<갑> 모임 피드 · #/p/<id> 글 · #/write · #/edit/<id> · #/me 나
    로그인은 심층 분석과 같은 Supabase 세션(localStorage sb-*-auth-token)을 읽어 x-member-token 으로 보낸다. 출생 정보는 저장하지 않는다(일주 확인 때 서버로 보내 계산만). */
 (function () {
   'use strict';
@@ -321,6 +321,71 @@
     });
   }
 
+  /* ── 오늘(운테크 + 운명의 기록 + 같은 일주 익명 통계, 4단계) ── */
+  var MOOD = { 5: ['🤩', '아주 좋음'], 4: ['🙂', '좋음'], 3: ['😐', '보통'], 2: ['😕', '별로'], 1: ['😣', '힘듦'] };
+  function needIlju(tab) {
+    paint('<div class="hero"><span class="kick">TODAY</span><h1>내 일주를 알면<br><em>오늘이 보여요</em></h1><p>일주를 확인하면 오늘 일진과 내 일주가 만나는 하루 카드와 운명의 기록을 쓸 수 있어요.</p><div class="cta"><a class="btn pink" href="#/me?ilju=1">내 일주 확인하기</a></div></div>', tab);
+  }
+  function todayView() {
+    if (!ME || !ME.member) { needSetup('#/today'); return; }
+    paint('<div class="skel" style="height:300px"></div><div class="skel"></div>', 'today');
+    api('/api/community/today').then(function (d) {
+      if (!d._ok) { if (d.need === 'ilju') return needIlju('today'); if (d.need === 'login' || d.need === 'consent') return needSetup('#/today'); paint('<p class="msg err">' + esc(d.error || '불러오지 못했습니다.') + '</p>', 'today'); return; }
+      var c = d.card, lg = d.log, dt = new Date(d.day + 'T00:00:00+09:00');
+      var date = dt.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', weekday: 'long' });
+      var statBox = function (s, label) {
+        if (!s.open) return '<div class="stat"><b>' + esc(label) + '</b><p class="muted">오늘 기록한 사람이 ' + s.need + '명 이상 모이면 보여 드려요. (누구인지 알 수 없도록 적은 인원은 숨겨요)</p></div>';
+        return '<div class="stat"><b>' + esc(label) + ' · ' + esc(s.size) + '</b><p class="big"><em>' + s.goodPct + '%</em>가 오늘 기분 좋음</p>' +
+          '<div class="bars">' + s.moods.map(function (m) { return '<div class="barrow"><span>' + MOOD[m.mood][0] + '</span><i style="--w:' + (m.pct == null ? 0 : m.pct) + '%"></i><small>' + (m.pct == null ? '—' : m.pct + '%') + '</small></div>'; }).join('') + '</div>' +
+          (s.tags.length ? '<p class="muted" style="margin:8px 0 0">많이 고른 키워드 · ' + s.tags.map(function (t) { return esc(t.label) + ' ' + t.pct + '%'; }).join(' · ') + '</p>' : '') + '</div>';
+      };
+      paint('<p class="muted" style="margin:4px 2px 8px;font-weight:600">' + esc(date) + '</p>' +
+        '<section class="today el-' + EL[c.dayPillar.charAt(0)] + '"><div class="t-top"><span class="gz">' + esc(c.dayPillar) + '<small>일진</small></span><span class="kick">' + esc(c.tenGod) + ' · ' + esc(c.key) + '</span></div>' +
+        '<h1>' + esc(c.head) + '</h1><p class="t-body">' + esc(c.body) + '</p>' +
+        '<div class="t-grid"><div class="t-cell"><b>💰 오늘의 운테크</b><p>' + esc(c.money) + '</p></div><div class="t-cell"><b>🤝 사람</b><p>' + esc(c.people) + '</p></div></div>' +
+        '<div class="t-do"><span class="ok">해 보면 좋은 것<b>' + esc(c.do) + '</b></span><span class="no">피하면 좋은 것<b>' + esc(c.avoid) + '</b></span></div>' +
+        (c.relKey ? '<p class="t-rel"><b>' + esc(c.relKey) + '</b> ' + esc(c.relLine) + '</p>' : '') +
+        '<p class="t-basis">' + esc(c.basis) + '</p></section>' +
+        '<section class="panel" id="logBox"><h2>운명의 기록</h2><p class="muted" style="margin:4px 0 12px">오늘 하루 어땠나요? 기록은 나만 볼 수 있어요.' + (lg ? ' (오늘 기록함 · 다시 고를 수 있어요)' : '') + '</p>' +
+        '<form class="form" id="logF"><div class="moods" role="radiogroup" aria-label="오늘 기분">' + [5, 4, 3, 2, 1].map(function (m) { return '<label><input type="radio" name="mood" value="' + m + '"' + (lg && lg.mood === m ? ' checked' : '') + '><span><em aria-hidden="true">' + MOOD[m][0] + '</em>' + MOOD[m][1] + '</span></label>'; }).join('') + '</div>' +
+        '<div class="picker" aria-label="오늘의 키워드">' + Object.keys(d.tags).map(function (t) { return '<label><input type="checkbox" name="tags" value="' + t + '"' + (lg && lg.tags.indexOf(t) >= 0 ? ' checked' : '') + '><span>' + esc(d.tags[t]) + '</span></label>'; }).join('') + '</div>' +
+        '<label>한 줄 메모 <span class="muted" style="font-weight:400">선택 · 나만 봐요</span><textarea name="note" rows="2" maxlength="500" placeholder="오늘 있었던 일, 느낀 점">' + esc(lg ? lg.note : '') + '</textarea></label>' +
+        '<button class="btn pink block" type="submit"' + (lg ? '' : ' disabled') + '>' + (lg ? '기록 고치기' : '기록하기') + '</button><p class="msg" id="logMsg" role="status"></p></form>' +
+        '<a class="btn ghost block sm" href="#/records" style="margin-top:10px">지난 기록·회고 보기</a></section>' +
+        '<div class="sec-h"><h2>오늘, 같은 기운의 사람들은</h2></div><div class="stats2">' + statBox(d.stats.ilju, d.stats.ilju.key + ' 일주') + statBox(d.stats.ilgan, d.stats.ilgan.key + ' 일간') + '</div>' +
+        '<p class="muted" style="margin:10px 2px 0">통계는 오늘 기록한 회원만 모아 비율로만 보여 주며, 누가 어떻게 답했는지는 알 수 없어요.</p>', 'today');
+      var f = $('#logF'), btn = f.querySelector('[type=submit]');
+      f.onchange = function () { btn.disabled = !f.querySelector('input[name=mood]:checked'); };
+      f.onsubmit = function (e) {
+        e.preventDefault(); var m = $('#logMsg'), mood = f.querySelector('input[name=mood]:checked'); if (!mood) return;
+        var tags = $('input[name=tags]:checked', f).map(function (x) { return x.value; });
+        if (tags.length > 4) { m.className = 'msg err'; m.textContent = '키워드는 4개까지 고를 수 있어요'; return; }
+        btn.disabled = true; m.className = 'msg'; m.textContent = '저장하는 중입니다…';
+        api('/api/community/today', { method: 'POST', body: { mood: +mood.value, tags: tags, note: f.elements.note.value } }).then(function (r) {
+          btn.disabled = false; if (!r._ok) { m.className = 'msg err'; m.textContent = r.error || '저장하지 못했습니다.'; return; }
+          toast('오늘을 기록했어요'); track('plaza_log', { mood: +mood.value }); todayView();
+        });
+      };
+    });
+  }
+  function recordsView(q) {
+    if (!ME || !ME.member) { needSetup('#/records'); return; }
+    var range = q.range === 'month' ? 'month' : 'week';
+    paint('<a class="back" href="#/today">' + ICON.back + '오늘</a><h1 style="margin:4px 2px 12px">운명의 기록</h1><div class="bar"><nav class="seg"><a href="#/records"' + (range === 'week' ? ' aria-current="page"' : '') + '>최근 7일</a><a href="#/records?range=month"' + (range === 'month' ? ' aria-current="page"' : '') + '>최근 30일</a></nav></div><div id="rec"><div class="skel"></div></div>', 'today');
+    api('/api/community/records?range=' + range).then(function (d) {
+      var box = $('#rec'); if (!box) return;
+      if (!d._ok) { box.innerHTML = '<p class="msg err">' + esc(d.error || '불러오지 못했습니다.') + '</p>'; return; }
+      var s = d.summary;
+      if (!s.count) { box.innerHTML = empty('아직 기록이 없어요', '오늘 탭에서 하루를 기록해 보세요'); return; }
+      box.innerHTML = '<section class="panel"><div class="kpis"><div><b>' + s.count + '<small>일</small></b><span>기록한 날</span></div><div><b>' + s.avg + '<small>/5</small></b><span>평균 기분</span></div><div><b>' + s.good + '<small>일</small></b><span>좋았던 날</span></div></div>' +
+        (s.topTags.length ? '<p class="muted" style="margin:12px 0 0">자주 고른 키워드 · ' + s.topTags.map(function (t) { return esc(t.label) + ' ' + t.n + '번'; }).join(' · ') + '</p>' : '') +
+        '<p class="note pink" style="margin-top:12px">' + esc(s.insight) + '</p>' +
+        (s.byTenGod.length ? '<div class="bars" style="margin-top:14px">' + s.byTenGod.map(function (t) { return '<div class="barrow"><span style="width:44px">' + esc(t.tenGod) + '</span><i style="--w:' + Math.round(t.avg / 5 * 100) + '%"></i><small>' + t.avg + '</small></div>'; }).join('') + '</div><p class="muted" style="margin:6px 0 0">십성별 평균 기분(두 번 이상 기록된 날만)</p>' : '') + '</section>' +
+        d.logs.map(function (l) { return '<div class="card logrow"><span class="lm" aria-hidden="true">' + MOOD[l.mood][0] + '</span><div style="flex:1;min-width:0"><b>' + esc(new Date(l.day + 'T00:00:00+09:00').toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', weekday: 'short' })) + ' · ' + esc(MOOD[l.mood][1]) + '</b><div class="sub">' + (l.tenGod ? esc(l.tenGod) + ' 날' : '') + (l.tags.length ? ' · ' + l.tags.map(function (t) { return esc(({ work: '일', money: '돈', love: '연애', people: '사람', health: '몸', rest: '쉼', study: '배움', family: '가족' })[t] || t); }).join(', ') : '') + '</div>' + (l.note ? '<p class="ex" style="margin-top:4px">' + esc(l.note) + '</p>' : '') + '</div><button class="act icon" data-ldel="' + esc(l.day) + '" aria-label="기록 지우기">' + ICON.trash + '</button></div>'; }).join('');
+      $('[data-ldel]', box).forEach(function (b) { b.onclick = function () { confirmSheet('이 날의 기록을 지울까요?', '지우면 되돌릴 수 없어요.', '지우기', function () { api('/api/community/records?day=' + encodeURIComponent(b.dataset.ldel), { method: 'DELETE' }).then(function () { recordsView(q); }); }); }; });
+    });
+  }
+
   /* ── 라우터 ── */
   function route() {
     var h = parseHash(), p = h.parts;
@@ -332,6 +397,8 @@
       if (p[0] === 'edit' && /^\d+$/.test(p[1] || '')) return writeView(h.q, p[1]);
       if (p[0] === 'search') return searchView(h.q);
       if (p[0] === 'groups') return groupsView();
+      if (p[0] === 'today') return todayView();
+      if (p[0] === 'records') return recordsView(h.q);
       if (p[0] === 'g' && (p[1] === 'ilju' || p[1] === 'ilgan') && p[2]) return feedView(h.q, { kind: p[1], key: p[2] });
       if (p[0] === 'me') return meView(h.q);
       return feedView(h.q);

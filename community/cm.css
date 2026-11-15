@@ -215,5 +215,46 @@ a.card:hover { transform: translateY(-1px); box-shadow: 0 2px 4px rgba(28,26,25,
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 @media (min-width: 640px) { .sheet { align-items: center; } .sheet-box { border-radius: var(--r-l); } .sheet-box::before { display: none; } }
 @media (max-width: 380px) { .stories { gap: 10px; } .story { width: 58px; } .story .ring { width: 56px; height: 56px; } }
+/* ── 오늘(4단계): 운테크 카드·기록·익명 통계 ── */
+.today { --c: var(--blush); position: relative; overflow: hidden; border-radius: var(--r-l); padding: 20px 18px 16px; margin-bottom: 16px; background: linear-gradient(160deg, color-mix(in srgb, var(--c) 26%, #fff), #fff 62%); box-shadow: var(--sh-2); }
+.today .t-top { display: flex; align-items: center; gap: 10px; }
+.today .gz { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 20px; color: #fff; font-weight: 800; font-size: 1.2rem; line-height: 1.1; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 50%, #fff)); }
+.today .gz small { font-size: .62rem; font-weight: 600; opacity: .9; }
+.today .kick { font-size: .78rem; font-weight: 700; color: var(--sumi-2); background: rgba(255,255,255,.8); padding: 5px 11px; border-radius: 999px; }
+.today h1 { font-size: 1.32rem; margin: 14px 0 6px; }
+.today .t-body { margin: 0; color: var(--sumi-2); font-size: .95rem; }
+.today .t-grid { display: grid; gap: 10px; margin-top: 14px; }
+.today .t-cell { background: rgba(255,255,255,.75); border-radius: var(--r-m); padding: 12px 14px; }
+.today .t-cell b { font-size: .86rem; } .today .t-cell p { margin: 4px 0 0; font-size: .9rem; color: var(--sumi-2); }
+.today .t-do { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.today .t-do span { border-radius: var(--r-m); padding: 10px 12px; font-size: .74rem; font-weight: 700; }
+.today .t-do b { display: block; font-size: .9rem; margin-top: 2px; color: var(--sumi); font-weight: 650; }
+.today .t-do .ok { background: var(--jade-l); color: var(--jade-d); } .today .t-do .no { background: var(--blush-l); color: var(--blush-d); }
+.today .t-rel { margin: 12px 0 0; font-size: .88rem; color: var(--sumi-2); } .today .t-rel b { color: var(--sumi); }
+.today .t-basis { margin: 12px 0 0; font-size: .74rem; color: var(--sumi-3); }
+@media (min-width: 560px) { .today .t-grid { grid-template-columns: 1fr 1fr; } }
+.moods { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.moods label { position: relative; display: block; }
+.form .moods input { position: absolute; left: 0; top: 0; width: 1px; height: 1px; min-height: 0; padding: 0; opacity: 0; }
+.moods span { display: grid; justify-items: center; gap: 2px; padding: 10px 2px; border-radius: var(--r-m); background: var(--rice); box-shadow: inset 0 0 0 1px var(--line); font-size: .7rem; font-weight: 600; color: var(--sumi-2); cursor: pointer; }
+.moods em { font-style: normal; font-size: 1.5rem; line-height: 1.2; }
+.moods input:checked + span { background: linear-gradient(135deg, #FFF0F3, #F3ECFF); box-shadow: inset 0 0 0 2px var(--blush-d); color: var(--sumi); }
+.moods input:focus-visible + span { outline: 2px solid var(--blush-d); outline-offset: 2px; }
+.stats2 { display: grid; gap: 10px; }
+@media (min-width: 560px) { .stats2 { grid-template-columns: 1fr 1fr; } }
+.stat { background: var(--paper); border-radius: var(--r-m); padding: 14px 16px; box-shadow: var(--sh-1); }
+.stat b { font-size: .9rem; } .stat p { margin: 6px 0 0; }
+.stat .big { font-size: .92rem; color: var(--sumi-2); } .stat .big em { font-style: normal; font-size: 1.5rem; font-weight: 800; color: var(--blush-d); }
+.bars { display: grid; gap: 6px; margin-top: 10px; }
+.barrow { display: flex; align-items: center; gap: 8px; font-size: .8rem; }
+.barrow span { width: 22px; flex: none; font-weight: 600; color: var(--sumi-2); }
+.barrow i { flex: 1; height: 8px; border-radius: 4px; background: rgba(28,26,25,.06); position: relative; overflow: hidden; }
+.barrow i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--w); border-radius: 4px; background: linear-gradient(90deg, #E9668A, #9A6BD8); }
+.barrow small { width: 34px; text-align: right; color: var(--sumi-3); font-weight: 600; }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
+.kpis b { display: block; font-size: 1.6rem; font-weight: 800; letter-spacing: -.03em; } .kpis b small { font-size: .8rem; color: var(--sumi-3); margin-left: 2px; }
+.kpis span { font-size: .76rem; color: var(--sumi-3); font-weight: 600; }
+.logrow { display: flex; gap: 12px; align-items: flex-start; }
+.logrow .lm { font-size: 1.6rem; line-height: 1; padding-top: 2px; }
 /* 오행 색은 맨 끝에 둔다(.ava·.group-card·.gh 의 기본 --c 보다 나중이어야 이긴다) */
 .el-wood { --c: var(--el-wood); } .el-fire { --c: var(--el-fire); } .el-earth { --c: var(--el-earth); } .el-metal { --c: var(--el-metal); } .el-water { --c: var(--el-water); }

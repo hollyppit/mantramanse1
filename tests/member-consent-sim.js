@@ -160,7 +160,8 @@ const ENV = { ADMIN_PASSWORD: 'adm-pw', SUPABASE_URL: 'https://sb.local', SUPABA
   ok(/H\.MeConsent\.mount\(sess\.access_token, ctx\)/.test(me) && /id=\\?"meConsent\\?"/.test(me), '마이페이지에 수신 설정 카드');
   ok(/communityOpen/.test(me) && /채널을 추가해도 광고 수신에 동의한 것으로 보지 않습니다/.test(me), '광장 프로필은 입장 가능한 회원만·채널 추가 ≠ 광고 동의 안내');
   ok(!/checked'?\s*:\s*''\)\s*\+\s*' checked/.test(me) && /처음에는 모두 <b>받지 않음<\/b>/.test(me), '기본 받지 않음 안내');
-  ok(read('report/hub/index.html').includes('hub-me.js?v=20261116-cs') && read('report/story/story.js').includes("HV = '?v=20261116-cs'"), '허브 캐시 버전 올림');
+  const hv = (read('report/story/story.js').match(/HV = '\?v=(\d{8})/) || [])[1] || '', mv = (read('report/hub/index.html').match(/hub-me\.js\?v=(\d{8})/) || [])[1] || '';
+  ok(hv >= '20261116' && mv >= '20261116', '허브 캐시 버전 올림(2026-11-16 이후 값)');
   const gate = read('gate/gate.js');
   ok(/function showRequired/.test(gate) && /\[필수\]/.test(gate) && /type="submit" disabled>동의하고 들어가기/.test(gate), '처음 화면 필수 동의 시트(체크 전 버튼 꺼짐)');
 
