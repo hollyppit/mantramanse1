@@ -85,7 +85,7 @@
     // 서버 저장본(콘텐츠·미디어·일간 소개 영상)은 필요한 것만 요청한다. 실패해도 기본 시드로 계속 진행한다.
     Promise.all([getJson('/api/report-content'), getJson('/api/media'), getJson('/api/awakening?pillar=' + encodeURIComponent(sd.dayPillar.ko) + '&gender=' + sd.gender), getJson('/api/story'), getJson('/api/assets'), getJson('/api/prologue'), getJson('/api/seal-scenes')]).then(function (a) {
       S.sealPresentations=(a[6]&&a[6].chapters)||[]; S.media = a[1].media || []; S.pack = R.Compose.fromSaved(a[0].content, S.media, projectId()); S.ts = S.pack.textStyles;
-      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.assets = (a[4] && a[4].assets) || {}; S.assetVideos = (a[4] && a[4].videos) || {}; S.proVid = prologueUrl(a[5], WORLD, selectedGuide());
+      S.rep = R.Compose.build(sd, S.pack.lib, S.pack.cfg, { name: S.name }); S.assets = (a[4] && a[4].assets) || {}; S.assetVideos = (a[4] && a[4].videos) || {}; S.proVid = prologueUrl(a[5], WORLD, selectedGuide()); S.proImg = prologueImage(a[5], WORLD, selectedGuide()); S.proSec = (a[5] && +a[5].imgSec) || 6;
       if (R.Deep && S.ch && !PREVIEW) { try { R.Deep.augment(S.rep, { M: window.Manse, ch: S.ch, sd: sd, now: Date.now(), name: S.name, assets: S.assets, videos: S.assetVideos }); } catch (e) { elog('caught', 'deep.augment'); /* 깊이 풀이가 실패해도 기본 리포트는 그대로 */ } S.repPdf = plainRep(S.rep); } // 자동차 비유·장단점·12운성·직업·배우자·일주·전생·대운/세운/월운·개운 근거·명소 챕터를 끼운다
       S.awk = { video: (a[2] && a[2].video) || null, ilgan: (a[2] && a[2].ilgan) || null, fallback: (a[2] && a[2].fallback) || null, textOnly: !!(a[2] && a[2].textOnly) }; S.story = a[3] && a[3].story; if (R.Bgm) R.Bgm.init(S.pack.bgm); // 배경 음악(있을 때만)
       if (LIFE && S.ch && R.IKDeep) S.ikP = R.IKDeep.load(window.Manse, S.ch, sd, 16000); // AI 합성과 나란히 먼저 시작
@@ -127,6 +127,15 @@
     txApply(cap, '_', true); // 자막 스타일(영상 단계)
     var url = clip && (clip.videoUrl || clip.videoWebm);
     if (cfg.cardOnly) { box.innerHTML = ''; still(); return; }
+    if (!url && cfg.stillImage) { // 이미지 프롤로그: 서서히 나타나 천천히 다가오고(움직임 줄이기면 정지), 정해진 시간 뒤 서서히 사라진다
+      var im = new Image(), rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches, hold = Math.max(2000, cfg.stillMs || 6000), tA = 0, tB = 0;
+      im.alt = ''; im.decoding = 'async'; im.src = cfg.stillImage; im.style.cssText = 'width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1);transition:opacity .9s ease' + (rm ? '' : ',transform ' + (hold + 1500) / 1000 + 's linear');
+      box.innerHTML = ''; box.appendChild(im); T(ev + '_video_started', { image: 1 });
+      var show = function () { if (done) return; void im.offsetWidth; im.style.opacity = 1; if (!rm) im.style.transform = 'scale(1.06)'; tA = setTimeout(function () { im.style.opacity = 0; tB = setTimeout(function () { finish('completed'); }, 900); }, hold); };
+      if (im.complete && im.naturalWidth) show(); else { im.onload = show; im.onerror = function () { elog('asset', 'asset.image'); still(); }; }
+      skip.onclick = function () { clearTimeout(tA); clearTimeout(tB); finish('skipped'); };
+      return;
+    }
     if (!url && cfg.textOnly && (title || sub)) { // 영상이 없어도 문구 화면(설정 "영상 없어도 문구만 보여 주기"): 포스터가 있으면 배경으로, 몇 초 뒤 자동으로 넘어간다
       box.innerHTML = poster ? '<img alt="" src="' + esc(poster) + '" style="width:100%;height:100%;object-fit:cover">' : ''; var tm = setTimeout(function () { finish('completed'); }, cfg.capMs ? cfg.capMs + 600 : 7000);
       skip.onclick = function () { clearTimeout(tm); finish('skipped'); };
@@ -206,14 +215,22 @@
     var g = guide === 'female' ? 'F' : 'M', topic = config.worlds && config.worlds[world];
     return (topic && topic[g]) || config[g] || '';
   }
-  function hasProVideo() { return !PREVIEW && !!S.proVid; }
+  function prologueImage(config, world, guide) { // 관리자 > 프롤로그: 안내자별 이미지(주제 → 공통). 영상이 있으면 포스터, 영상이 없으면 이미지 프롤로그
+    if (!config || config.on === false) return '';
+    var g = guide === 'female' ? 'FI' : 'MI', topic = config.worlds && config.worlds[world];
+    return (topic && topic[g]) || config[g] || '';
+  }
+  function hasProVideo() { return !PREVIEW && !!(S.proVid || S.proImg); }
   function proVideo(next) {
     if (!hasProVideo()) { next(false); return; }
     var bb = $('#bgmBtn'); if (bb) bb.hidden = true; // 영상 동안은 ♪ 버튼도 숨겨 배경음악이 끼어들지 않게
-    T('prologue_started', { video: 1 }); playStage({ kind: 'prologue', clip: { videoUrl: S.proVid }, noCap: true, onDone: function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', { video: 1 }); if (bb && R.Bgm && R.Bgm.has()) bb.hidden = false; try { if (R.Bgm) R.Bgm.play('cinematic'); } catch (e) { } try { next(true); } catch (e) { if (window.console) console.error('prologue→next', e); try { beginReader(); } catch (e2) { toast('화면을 여는 중 문제가 생겼습니다. 새로고침해 주세요.'); } } } });
+    T('prologue_started', { video: 1 }); playStage({ kind: 'prologue', clip: { videoUrl: S.proVid, posterUrl: S.proImg }, stillImage: !S.proVid && S.proImg, stillMs: S.proSec * 1000, noCap: true, onDone: function (kind) { T(kind === 'skipped' ? 'prologue_skipped' : 'prologue_completed', { video: 1 }); if (bb && R.Bgm && R.Bgm.has()) bb.hidden = false; try { if (R.Bgm) R.Bgm.play('cinematic'); } catch (e) { } try { next(true); } catch (e) { if (window.console) console.error('prologue→next', e); try { beginReader(); } catch (e2) { toast('화면을 여는 중 문제가 생겼습니다. 새로고침해 주세요.'); } } } });
   }
   function startGate() {
-    if(R.ReadingText){if(LIFE)lifeBegin();else beginReader();return;}
+    if(R.ReadingText){var goRead=function(){if(LIFE)lifeBegin();else beginReader();};
+      /* 2026-11-16: 유료 주제(world)로 들어오면 고른 안내자의 프롤로그(관리자 > 프롤로그 영상 업로드: 주제 → 공통, 영상 또는 이미지)를 먼저 보여 준다. 같은 탭에서는 주제마다 한 번만. */
+      var proKey='mt_pro_seen:'+WORLD;if(WORLD&&!S.guideResume&&hasProVideo()&&sg(proKey)!=='1'){ss(proKey,'1');proVideo(goRead);return;}
+      goRead();return;}
     if (S.guideResume) { if (LIFE) lifeBegin(); else beginReader(); return; }
     if (MAPQ) { if (LIFE) lifeBegin(); else beginReader(); return; }
     if (HUB) { hubStart(); return; }

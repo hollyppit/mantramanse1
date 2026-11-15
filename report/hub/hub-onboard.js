@@ -354,6 +354,16 @@
         document.addEventListener('visibilitychange', onVis); root.addEventListener('resize', onRs);
         onLeave(function () { document.removeEventListener('visibilitychange', onVis); root.removeEventListener('resize', onRs); v.pause(); v.removeAttribute('src'); v.load(); if (w.parentNode) w.parentNode.removeChild(w); cls.remove('obc-on'); });
       }
+      /* 2026-11-16 복구: 한 장짜리 입력 폼(compact) 앞에 남·여 안내자 선택. 11-02 이후 입력이 퀘스트를 건너뛰면서 사라졌던 단계.
+         관리자 퀘스트 단계 'guide'(문구·켜기/끄기)와 안내자 이름·소개·이미지를 그대로 쓴다. 출생정보 수정(재방문)에서는 건너뛴다. 고른 안내자는 입력 배경 영상·타임라인 말투에 쓰인다. */
+      var guidePicked=false;
+      function guideStep(){var Q=root.Quest,qc=CFG.quest;if(!Q||!qc||qc.enabled===false||!qc.guides||!qc.guides.male||!qc.guides.female)return null;if(q.edit&&P.has()&&qc.skipReturning!==false)return null;var st=(qc.steps||[]).filter(function(x){return x.id==='guide';})[0];return st&&st.enabled!==false?st:null;}
+      function renderGuide(st){
+        var Q=root.Quest,qc=CFG.quest,mob=(root.innerWidth||1024)<768;
+        var card=function(k){var o=qc.guides[k];return '<button type="button" class="ob-guide '+(k==='male'?'m':'f')+'" data-guide="'+k+'" aria-label="'+esc(o.name+' — '+o.tag)+'"><img src="'+esc(Q.guideImage(CFG,k,mob))+'" alt="" decoding="async"><strong>'+esc(o.name)+'</strong><small>'+esc(o.tag)+'</small></button>';};
+        var el=paint('<div class="ob-guidepick"><p class="ob-kick">MANTRA · 운명의 기록</p><h1>'+esc(st.head||'누가 안내해 드릴까요?').replace(/\n/g,'<br>')+'</h1><p class="note">'+esc(st.hint||'')+'</p><div class="ob-guides" role="group" aria-label="안내자 선택">'+card('male')+card('female')+'</div></div>','ob-guide-screen');
+        el.querySelectorAll('[data-guide]').forEach(function(b){b.onclick=function(){var g=b.getAttribute('data-guide');lset('mt_guide',g);Ob.track('quest_guide_pick',{case:g});guidePicked=true;render();};});
+      }
       function renderCompact() {
         // 저장된 정보가 있는 사람(재방문·출생정보 수정)은 폼을 다시 제출하지 않고 바로 결과로 갈 수 있게 한다.
         var editing=!!(q.edit&&P.has()),head=editing?'<h1>저장된 출생정보예요</h1><p class="note">바뀐 것이 없다면 바로 결과로 가세요. 고칠 곳이 있으면 아래에서 수정한 뒤 "수정한 정보로 보기"를 누르세요.</p><a class="btn ob-saved-go" href="'+esc(root.Quest?root.Quest.completionRoute(CFG,true):'#/timeline')+'" data-track="saved_profile_go">저장된 정보로 바로 보기</a>':'<h1>출생정보를 알려 주세요</h1><p class="note">한 번 입력하면 바로 사주를 볼 수 있어요.</p>';
@@ -365,7 +375,7 @@
         $('#obOk',el).onclick=submitCompact;el.querySelectorAll('input').forEach(function(i){i.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();submitCompact();}};});save();
       }
       function render() {
-        if(q.compact)return renderCompact();
+        if(q.compact){var gs=!guidePicked&&guideStep();return gs?renderGuide(gs):renderCompact();}
         var s = scenes[step], last = step === scenes.length - 1, nm = d.name;
         var lines = (s.field === 'time' && d.hourUnknown && s.unknownLines && s.unknownLines.length ? s.unknownLines : s.lines).map(function (t) { return F(t, nm); });
         var el = paintFs('<div class="ob-prog" role="progressbar" aria-valuemin="1" aria-valuemax="' + scenes.length + '" aria-valuenow="' + (step + 1) + '"><i style="width:' + Math.round((step + 1) / scenes.length * 100) + '%"></i><span>' + esc(String(CFG.progressLabel || '{n} / {total} · {title}').replace(/{n}/g, step + 1).replace(/{total}/g, scenes.length).replace(/{title}/g, s.title)) + '</span></div>' +

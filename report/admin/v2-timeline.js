@@ -74,7 +74,7 @@
       if(b.hasAttribute('data-rebuild')){build(box);return;}
       if(b.hasAttribute('data-world')){window.AdminShowTab('v2world');return;}
       if(b.hasAttribute('data-legacy')){window.AdminShowTab('v2proj','legacy');return;}
-      if(b.hasAttribute('data-prologue')){window.AdminShowTab('v2chap',{source:'intro:prologue',world:state.selected});return;}
+      if(b.hasAttribute('data-prologue')){window.AdminShowTab('v2intro',{world:state.selected});return;}
       if(b.hasAttribute('data-save')){
         b.disabled=true;C.api('/api/worlds',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({worlds:state.worlds})}).then(function(){state.dirty=false;box.querySelector('[data-status]').textContent='저장했습니다. 타임라인과 사용자 본문에 같은 설정을 적용합니다.';}).catch(function(err){b.disabled=false;C.toast(err.message,true);});return;
       }
