@@ -322,6 +322,8 @@
         card('#/today', 'calendar', 'CALENDAR · 무료', '일진 캘린더', '월운 그래프와 날짜별 일진, 내 일정에 맞는 날 고르기', '캘린더 열기') +
         card('#/tarot', 'tarot', 'FREE TAROT · 무료', '무료 타로', '마음속 질문 하나, 카드 한 장으로 가볍게 확인합니다', '카드 뽑기') +
         card('#/awaken?replay=1&to=timeline', 'ilju_replay', 'ILJU · 무료', '일주 각성 영상 다시 보기', esc(ju) + '일주 · 타고난 기질과 강점을 영상으로 다시 만납니다', '영상 보기') +
+        // 신년운세(별도 연도 상품, /report/newyear/) 입구. 누르면 지금 사주를 넘겨 바로 풀이가 열린다(아래 [data-ny-go] 처리).
+        (PREVIEW ? '' : '<a class="tq-fc tq-ny" href="/report/newyear/?from=timeline" data-ny-go="2027" data-track="fortune_content_click" data-p="newyear_2027" style="grid-column:1/-1;border-color:rgba(214,90,70,.55);background:linear-gradient(120deg,rgba(150,40,30,.28),rgba(0,0,0,0) 70%)"><small>NEW YEAR · 2027 정미년</small><h4>2027 토정비결 신년운세</h4><p>토정비결 괘와 내 사주로 읽는 한 해 · 총운·재물·직업·연애·건강·12개월</p><span>신년운세 보기 →</span></a>') +
         '</div><p class="tq-fh">오늘의 분야별 흐름</p><div class="tq-fchips">' +
         chip('money', '재물운', 'today_money') + chip('work', '일·사업운', 'today_work') + chip('love', '연애운', 'today_love') + chip('health', '컨디션', 'today_health') + chip('action', '오늘의 행동 가이드', 'today_action') + '</div>';
     }
@@ -352,6 +354,16 @@
     function redraw(id) { var b = $('#tqb-' + id, root0); if (b) { var y = root.scrollY; b.innerHTML = builders[id](); root.scrollTo(0, y); } }
     root0.addEventListener('click', function (e) {
       var t = e.target, b;
+      if ((b = t.closest('[data-ny-go]'))) {   // 신년운세로 지금 사주 넘기기(report/newyear/newyear-app.js 가 mt_ny_input 을 읽는다)
+        var s = P.get();
+        if (s) {
+          var nb = { year: +s.year, month: +s.month, day: +s.day, calendar: s.calendar === 'lunar' ? 'lunar' : 'solar', gender: s.gender, hour: null };
+          if (nb.calendar === 'lunar' && s.leap) nb.leap = true;
+          if (!s.hourUnknown && s.hour != null && s.hour !== '') { nb.hour = +s.hour; nb.minute = +s.minute || 0; }
+          try { sessionStorage.setItem('mt_ny_input', JSON.stringify({ birth: nb, year: +b.getAttribute('data-ny-go') })); } catch (er) { }
+        }
+        return;   // 링크 이동은 그대로(넘기기에 실패하면 신년운세 화면에서 입력)
+      }
       if ((b = t.closest('[data-topic-slide]'))) {
         var track = $('.tq-topics', root0), first = track && $('.tq-topic', track);
         if (first) track.scrollBy({ left: (+b.getAttribute('data-topic-slide')) * (first.getBoundingClientRect().width + 16), behavior: H.reduce ? 'auto' : 'smooth' });
