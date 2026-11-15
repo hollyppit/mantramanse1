@@ -189,7 +189,8 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 #hub .tq-mypage-ic{ flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: rgba(205,178,122,.14); color: var(--gold-l); }
 #hub .tq-mypage div{ flex: 1; min-width: 0; } #hub .tq-mypage b{ display: block; font-size: 1rem; color: var(--ink); } #hub .tq-mypage small{ display: block; font-size: .8rem; color: var(--ink-2); margin-top: 2px; overflow-wrap: anywhere; }
 #hub .tq-mypage-go{ font-size: 1.4rem; color: var(--gold); }
-#hub .me{ max-width: 720px; margin: 0 auto; padding-bottom: 12px; }
+/* .me 는 마이페이지 바깥 틀. 원국 표의 일주 칸(.tq-nt-c.me)에 걸리면 그 칸만 좁아지므로 뺀다(2026-11-16) */
+#hub .me:not(.tq-nt-c):not(.tq-pl){ max-width: 720px; margin: 0 auto; padding-bottom: 12px; }
 #hub .me-head{ margin: 8px 0 18px; } #hub .me-head .kick{ font-size: .72rem; letter-spacing: .18em; color: var(--gold); margin: 0 0 4px; }
 #hub .me-head h1{ font-family: var(--f-serif); font-size: 1.9rem; color: var(--ink); margin: 0; } #hub .me-sub{ color: var(--ink-2); margin: 6px 0 0; font-size: .92rem; }
 #hub .me-card{ border: 1px solid var(--line); border-radius: 16px; background: rgba(19,24,39,.8); padding: 18px; margin: 0 0 14px; }
@@ -250,3 +251,87 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 #hub .me-form .me-opt input{ width: 22px; min-height: 0; height: 22px; margin: 1px 0 0; padding: 0; flex: none; accent-color: var(--gold); }
 #hub .me-opt > span{ display: grid; gap: 2px; font-size: inherit; } #hub .me-opt b{ color: var(--ink); font-size: .95rem; font-weight: 600; } #hub .me-opt small{ color: var(--ink-3); font-size: .8rem; }
 #hub .me-form label[hidden]{ display: none; }
+
+/* ═══ 2026-11-16 한국형 초현실 오컬트 톤(운명의 타임라인 전체) ═══
+   먹빛 바탕 · 한지 결 · 낡은 금 테두리 · 붉은 인주 인장 · 달빛. 동작·구조는 그대로 두고 겉모습만 바꾼다. */
+#hub .tq{
+  --seal: #B8342A; --seal-l: #E0574A; --moon: 232, 220, 190;
+  --hanji: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85 .35' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .9 0 0 0 0 .82 0 0 0 0 .66 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --paper: var(--hanji), linear-gradient(165deg, rgba(31,31,29,.92), rgba(13,15,17,.95));
+  --frame: inset 0 0 0 3px rgba(6,8,10,.55), inset 0 0 0 4px rgba(217,196,158,.07), 0 12px 32px rgba(0,0,0,.35);
+}
+/* 머리: 달빛 원과 먹 안개 */
+#hub .tq-hero::after{ background: radial-gradient(36% 46% at 50% 4%, rgba(var(--moon), .22), rgba(var(--moon), .05) 55%, transparent 72%), linear-gradient(180deg, rgba(8,10,12,.5), rgba(8,10,12,.15) 42%, var(--bg)); }
+#hub .tq-hero h1{ letter-spacing: .06em; color: #F3EBDA; text-shadow: 0 0 28px rgba(var(--moon), .28), 0 4px 24px #000; }
+#hub .tq-hero .kick{ letter-spacing: .32em; color: rgba(var(--moon), .8); }
+/* 영역 바로가기: 지금 영역은 붉은 인장 번호 */
+#hub .tq-nav{ background: linear-gradient(180deg, var(--bg) 72%, rgba(8,11,15,0)); }
+#hub .tq-nav a{ border-radius: 4px; background: rgba(14,16,18,.92); border-color: rgba(217,196,158,.22); }
+#hub .tq-nav a i{ border-radius: 3px; background: rgba(217,196,158,.12); }
+#hub .tq-nav a.on{ border-color: rgba(217,196,158,.7); background: rgba(30,28,24,.96); }
+#hub .tq-nav a.on i{ background: var(--seal); color: #FBEDE2; }
+#hub .tq-nav a.tq-edit{ border-radius: 4px; background: #16181a; }
+/* 영역 머리: 숫자를 비스듬한 붉은 인장으로, 영역 사이에 먹선 */
+#hub .tq-sec + .tq-sec{ background: linear-gradient(90deg, transparent, rgba(217,196,158,.22) 18%, rgba(184,52,42,.45) 50%, rgba(217,196,158,.22) 82%, transparent) top center / 100% 1px no-repeat; }
+#hub .tq-sech > span{ width: 40px; height: 40px; border: 0; border-radius: 5px; background: radial-gradient(120% 120% at 30% 25%, var(--seal-l), var(--seal) 55%, #7d1f18); color: #FBEDE2; font-family: var(--f-serif); font-weight: 700; font-size: 1.05rem; transform: rotate(-4deg); box-shadow: inset 0 0 0 2px rgba(251,237,226,.35), 0 4px 14px rgba(184,52,42,.3); }
+#hub .tq-sech h2{ letter-spacing: .02em; color: #F3EBDA; }
+#hub .tq-h4{ color: #EADCC2; }
+/* 상자·카드: 한지 결 + 이중 테두리, 모서리는 거의 직각 */
+#hub .tq-box, #hub .tq-metric, #hub .tq-ten, #hub .tq-fc, #hub .tq-today, #hub .tq-mypage, #hub .tq .mt-natal{ background: var(--paper); border: 1px solid rgba(217,196,158,.22); border-radius: 6px; box-shadow: var(--frame); }
+#hub .tq-card{ background: var(--paper); border-left-color: rgba(217,196,158,.22); border-right-color: rgba(217,196,158,.22); border-bottom-color: rgba(217,196,158,.22); border-radius: 6px; box-shadow: var(--frame); }
+#hub .tq-car, #hub .tq-lc{ border-radius: 6px; background: var(--hanji), rgba(217,196,158,.05); }
+#hub .tq-box > h4{ display: flex; align-items: center; gap: 8px; letter-spacing: .03em; }
+#hub .tq-box > h4::before{ content: ''; flex: 0 0 auto; width: 7px; height: 7px; background: var(--seal-l); transform: rotate(45deg); box-shadow: 0 0 8px rgba(224,87,74,.6); }
+#hub .tq-fc:hover, #hub .tq-today:hover, #hub .tq-mypage:hover{ border-color: rgba(217,196,158,.6); }
+#hub .tq-fchip, #hub .tq-mchip, #hub .tq-chip, #hub .tq-ychip{ border-radius: 4px; }
+#hub .tq-yrnav button{ border-radius: 6px; background: rgba(14,16,18,.9); }
+
+/* 일주 프로필: 훨씬 크게, 달무리와 붉은 결계 */
+#hub .tq-ava{ gap: 10px; margin: 6px auto 26px; }
+#hub .tq-ava-ring{ position: relative; width: clamp(210px, 58vw, 300px); padding: 6px; box-shadow: 0 0 0 1px rgba(184,52,42,.55), 0 0 0 9px rgba(8,10,12,.6), 0 0 0 10px rgba(184,52,42,.35), 0 0 70px rgba(var(--moon), .28); }
+#hub .tq-ava:hover .tq-ava-ring{ box-shadow: 0 0 0 1px rgba(224,87,74,.8), 0 0 0 9px rgba(8,10,12,.6), 0 0 0 10px rgba(224,87,74,.55), 0 0 90px rgba(var(--moon), .4); }
+#hub .tq-ava-ring img{ border-width: 3px; }
+#hub .tq-ava b{ font-size: clamp(1.25rem, 4.4vw, 1.6rem); letter-spacing: .06em; color: #F0E2C4; margin-top: 6px; }
+#hub .tq-ava small{ display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; min-height: 34px; border: 1px solid rgba(217,196,158,.4); border-radius: 4px; background: rgba(14,16,18,.85); font-size: .8rem; color: #EADCC2; }
+#hub .tq-ava small::before{ content: '▶'; font-size: .62rem; color: var(--seal-l); }
+
+/* 사주 원국 표: 네 기둥 같은 너비, 오행 원색, 큰 글자, 줄마다 먹선 */
+#hub .tq .mt-natal{ padding: 16px 14px 12px; margin-bottom: 4px; }
+#hub .tq .mt-natal .tq-nt{ grid-template-columns: 64px repeat(4, minmax(0, 1fr)); gap: 0 10px; }
+#hub .tq .mt-natal .tq-nt > *{ margin: 0; max-width: none; }
+#hub .tq .mt-natal .tq-nt-l{ font-size: .78rem; color: #BDB4A2; letter-spacing: .04em; }
+#hub .tq .mt-natal .tq-nt-l, #hub .tq .mt-natal .tq-nt-c:not(.gz){ padding-top: 8px; padding-bottom: 8px; border-bottom: 1px dashed rgba(217,196,158,.12); border-radius: 0; }
+#hub .tq .mt-natal .tq-nt-c.gz{ padding: 5px 0; }
+#hub .tq .mt-natal .tq-nt-c.me{ background: linear-gradient(180deg, rgba(var(--moon), .09), rgba(var(--moon), .04)); }
+#hub .tq .mt-natal .tq-nt-c.hd b{ font-family: var(--f-serif); font-size: 1rem; letter-spacing: .08em; }
+#hub .tq .mt-natal .tq-nt-c.hd small{ font-size: .76rem; }
+#hub .tq .mt-natal .tq-nt-c.hd.me b{ color: #FBEDE2; background: var(--seal); padding: 1px 10px; border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(251,237,226,.3); }
+#hub .tq .mt-natal .tq-nt-g{ padding: 10px 2px 8px; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--ec) 70%, transparent); border-top-width: 3px; background: radial-gradient(90% 80% at 50% 0%, color-mix(in srgb, var(--ec) 26%, transparent), transparent 70%), color-mix(in srgb, var(--ec) 10%, #0b0d0f); }
+#hub .tq .mt-natal .tq-nt-g b{ font-size: clamp(2.2rem, 6.4vw, 3.3rem); font-weight: 600; color: color-mix(in srgb, var(--ec) 85%, #fff); text-shadow: 0 0 18px color-mix(in srgb, var(--ec) 45%, transparent); }
+#hub .tq .mt-natal .tq-nt-g small{ font-size: .76rem; font-weight: 600; color: color-mix(in srgb, var(--ec) 65%, #fff); letter-spacing: .04em; }
+#hub .tq .mt-natal .tq-nt-c.me .tq-nt-g{ box-shadow: 0 0 0 2px #E6CF9E, 0 0 26px rgba(var(--moon), .3); }
+#hub .tq .mt-natal .tq-nt-t{ font-size: .92rem; font-weight: 600; color: #F1EADB; }
+#hub .tq .mt-natal .tq-nt-s{ font-size: .72rem; }
+#hub .tq .mt-natal .tq-nt-h{ font-size: .8rem; }
+#hub .tq .mt-natal .tq-nt-h i{ width: 20px; height: 20px; border-radius: 3px; font-size: .84rem; background: color-mix(in srgb, var(--ec) 60%, #0b0d0f); }
+#hub .tq .mt-natal .tq-nt-ss{ border-radius: 3px; font-size: .7rem; }
+@media (max-width: 720px){
+  #hub .tq .mt-natal{ padding: 12px 8px 10px; }
+  #hub .tq .mt-natal .tq-nt{ grid-template-columns: 34px repeat(4, minmax(0, 1fr)); gap: 0 4px; }
+  #hub .tq .mt-natal .tq-nt-l{ font-size: .62rem; letter-spacing: 0; word-break: keep-all; }
+  #hub .tq .mt-natal .tq-nt-c.hd b{ font-size: .86rem; letter-spacing: .02em; } #hub .tq .mt-natal .tq-nt-c.hd.me b{ padding: 1px 6px; }
+  #hub .tq .mt-natal .tq-nt-g b{ font-size: 2rem; } #hub .tq .mt-natal .tq-nt-g small{ font-size: .64rem; letter-spacing: 0; }
+  #hub .tq .mt-natal .tq-nt-t{ font-size: .76rem; } #hub .tq .mt-natal .tq-nt-h{ font-size: .64rem; }
+  #hub .tq .mt-natal .tq-nt-h i{ width: 17px; height: 17px; font-size: .72rem; }
+}
+
+/* 그래프: 오행·신호 색을 또렷하게(원색 막대 + 빛) */
+#hub .tq-eb{ height: 12px; border-radius: 2px; background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px rgba(217,196,158,.1); }
+#hub .tq .tq-eb i{ border-radius: 2px; background-image: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,0) 60%) !important; box-shadow: 0 0 10px rgba(255,255,255,.12); }
+#hub .tq-el{ grid-template-columns: 62px 1fr 44px; font-size: .86rem; } #hub .tq-el > span{ font-family: var(--f-serif); font-weight: 700; }
+#hub .tq .tq-bar u{ width: 18px; border-radius: 3px; background: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1px rgba(217,196,158,.1); }
+#hub .tq .tq-bar u i{ border-radius: 3px; background-image: linear-gradient(90deg, rgba(255,255,255,.28), rgba(255,255,255,0) 55%); box-shadow: 0 0 12px color-mix(in srgb, var(--bc, var(--kc, #888)) 55%, transparent); }
+#hub .tq .tq-bar.sel{ background: rgba(var(--moon), .06); border-radius: 6px; }
+#hub .tq .tq-bar.now u{ box-shadow: inset 0 0 0 1px rgba(224,87,74,.6); }
+#hub .tq-bar s{ border-radius: 3px; background: var(--seal); color: #FBEDE2; }
+#hub .tq-bar small .tq-gzc{ font-style: normal; font-family: var(--f-serif); font-weight: 700; font-size: .82rem; }

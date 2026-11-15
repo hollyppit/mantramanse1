@@ -8,7 +8,7 @@
   var H = root.Hub, Ob = H.Onboard, O = root.Onboard, Q = root.Quest, P = H.profile, esc = H.esc, DOC = document;
   var $ = H.$, $$ = H.$$;
   var V2 = ['chapters', 'saju-data', 'rules', 'narrator', 'content', 'content-pro', 'content-pro2', 'topics', 'story-director', 'luck6', 'timeline', 'explore'];
-  var EL_COL = ['#5E9E78', '#D0634A', '#BC9C62', '#AEB9C6', '#4A7AB5'], GROUPS5 = ['비겁', '식상', '재성', '관성', '인성'], GROUP_MEAN = { 비겁: '나·동료·자존심', 식상: '표현·재능·활동', 재성: '돈·현실 감각', 관성: '직장·책임·규칙', 인성: '배움·도움·생각' }, EL_HJ = ['木', '火', '土', '金', '水'];
+  var EL_COL = ['#34C26B', '#F0483E', '#E8B23A', '#E6EAF0', '#3B7FF0'], GROUPS5 = ['비겁', '식상', '재성', '관성', '인성'], GROUP_MEAN = { 비겁: '나·동료·자존심', 식상: '표현·재능·활동', 재성: '돈·현실 감각', 관성: '직장·책임·규칙', 인성: '배움·도움·생각' }, EL_HJ = ['木', '火', '土', '金', '水'];
   var clamp = function (v) { return Math.max(0, Math.min(100, Math.round(v))); };
   var pct = function (fit) { return clamp((fit + 100) / 2); };
   var SAMPLE = { year: 1992, month: 6, day: 23, hour: 7, minute: 30, calendar: 'solar', leap: false, gender: 'M', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'auto' };
@@ -70,7 +70,7 @@
   var graphP = null;
   function loadGraph() {
     if (graphP) return graphP;
-    graphP = Promise.all([root.MantraTLGraph ? Promise.resolve() : H.load('/report/hub/timeline-graph.js?v=20261113-zw').catch(function () { }), flagsJson(), root.MantraNatal ? Promise.resolve() : H.load('/report/natal-table.js?v=20261113-natal').catch(function () { })]).then(function (r) {
+    graphP = Promise.all([root.MantraTLGraph ? Promise.resolve() : H.load('/report/hub/timeline-graph.js?v=20261116-occ').catch(function () { }), flagsJson(), root.MantraNatal ? Promise.resolve() : H.load('/report/natal-table.js?v=20261116-occ').catch(function () { })]).then(function (r) {
       var F = root.MANTRA_FLAGS || {}, f = r[1] || {}, lc = F.luckCycle === true || f.luckCycle === true, ef = F.elementFlow === true || f.elementFlow === true;
       return (lc && !root.MantraLuckCycle ? H.load('/luck-cycle.js?v=20261113-span').catch(function () { }) : Promise.resolve()).then(function () { return { lc: lc && !!root.MantraLuckCycle, ef: ef }; });
     }).catch(function () { return { lc: false, ef: false }; });
@@ -124,6 +124,7 @@
     /* ── 공통 조각 ── */
     var TL_TERMS = Object.assign({}, root.MantraNatal ? root.MantraNatal.TERMS : {}, { '천간': '기둥 위쪽 글자. 겉으로 드러나는 기운이에요(갑을병정무기경신임계).', '지지': '기둥 아래쪽 글자. 바탕·환경이 되는 기운이에요(자축인묘…).', '십성': '나(일간)와 다른 글자의 관계를 열 가지로 나눈 것이에요. 비겁·식상·재성·관성·인성 다섯 묶음으로 봐요.', '지장간': '지지 속에 숨어 있는 천간이에요. 겉으로는 안 보여도 때가 되면 드러나는 잠재된 기운이에요.', '12운성': '일간의 힘이 그 자리에서 어느 단계인지(태어남·자람·전성·쇠퇴…)를 열두 단계로 본 것이에요. "좌"는 그 기둥 천간 자신의 기준이에요.', '12신살': '연지(또는 일지) 기준으로 각 자리에 붙는 열두 가지 신호예요. 길흉을 단정하지 않는 참고 표시예요.', '신살': '특정 글자 조합에 붙는 별칭이에요. 초록은 도움이 되는 신호, 붉은색은 주의 신호이며 참고용이에요.', '원국': '태어난 순간의 네 기둥(연·월·일·시)으로 이루어진 타고난 구조예요.', '세운': '해마다 들어오는 운. 그해의 날씨 같은 1년 단위 환경이에요.', '월운': '달마다 들어오는 운. 이번 달의 노면 같은 환경이에요.', '일진': '그날의 간지. 오늘 직접 마주치는 짧은 흐름이에요.' });
     var tip = function (w) { var t = O.TERMS[w] || TL_TERMS[w]; return t ? '<span class="tip" tabindex="0" role="button" aria-label="' + esc(w + ': ' + t) + '" data-tip="' + esc(t) + '">' + esc(w) + '</span>' : esc(w); };
+    var gzc = function (gz) { gz = String(gz || ''); if (gz.length !== 2) return esc(gz); var si = M.STEM_K.indexOf(gz[0]), bi = M.BR_K.indexOf(gz[1]); if (si < 0) si = M.STEM.indexOf(gz[0]); if (bi < 0) bi = M.BR.indexOf(gz[1]); if (si < 0 || bi < 0) return esc(gz); return '<i class="tq-gzc" style="color:' + EL_COL[M.stemEl(si)] + '">' + esc(gz[0]) + '</i><i class="tq-gzc" style="color:' + EL_COL[M.BR_EL[bi]] + '">' + esc(gz[1]) + '</i>'; }; // 2026-11-16: 간지 글자를 오행 원색으로
     var KEYC = function (it) { return 'k-' + esc(it.key || 'pre'); };
     // 분야 점수는 분야마다 분포가 달라(재물은 좁게, 직업은 넓게) 같은 숫자가 다른 등급이 된다(engine.js DOMAIN_SCORE_THRESHOLDS).
     // 숫자를 나란히 보여 주면 "직업 34 무난 · 재물 45 다소 낮음"처럼 앞뒤가 안 맞아 보여서, 막대 길이와 표시는 등급 기준으로 맞춘다.
@@ -170,7 +171,7 @@
       return '<div class="tq-chart ' + (o.cls || '') + '" role="group" aria-label="' + esc(o.label) + '">' + items.map(function (it, i) {
         if (it.pre) return '<span class="tq-bar pre" aria-label="' + esc(it.startAge + '~' + it.endAge + '세 대운 전') + '"><b>—</b><u></u><span>' + esc(it.startAge) + '세</span><small>대운 전</small></span>';
         var vv = valOf(it), sc = vv.v, sg = vv.sig, sel = o.sel(it), now = o.now(it);
-        return '<button type="button" class="tq-bar ' + KEYC(it) + (sg ? ' sg' : '') + (sel ? ' sel' : '') + (now ? ' now' : '') + '" ' + o.attr(it) + (sg ? ' style="--bc:' + sg.c + '"' : '') + ' aria-pressed="' + sel + '" aria-label="' + esc(o.name(it) + ', ' + mName() + ' ' + sc + (sg ? ' ' + sg.n : '') + ', ' + it.six + (now ? ', 지금' : '')) + '"><b>' + sc + sgChip(sg) + '</b><u><i style="height:' + sc + '%"></i></u><span>' + esc(o.top(it)) + '</span><small>' + esc(o.sub(it)) + '</small><em>' + esc(it.six) + '</em>' + (now ? '<s>지금</s>' : '') + '</button>';
+        return '<button type="button" class="tq-bar ' + KEYC(it) + (sg ? ' sg' : '') + (sel ? ' sel' : '') + (now ? ' now' : '') + '" ' + o.attr(it) + (sg ? ' style="--bc:' + sg.c + '"' : '') + ' aria-pressed="' + sel + '" aria-label="' + esc(o.name(it) + ', ' + mName() + ' ' + sc + (sg ? ' ' + sg.n : '') + ', ' + it.six + (now ? ', 지금' : '')) + '"><b>' + sc + sgChip(sg) + '</b><u><i style="height:' + sc + '%"></i></u><span>' + esc(o.top(it)) + '</span><small>' + gzc(o.sub(it)) + '</small><em>' + esc(it.six) + '</em>' + (now ? '<s>지금</s>' : '') + '</button>';
       }).join('') + '</div>';
     }
     // "운은 어떻게 작동하나요?" — 만세력 운세 흐름 탭의 자동차 비유. 지금의 대운·세운·월운·일진을 그대로 넣는다(timeline-graph.js nowChain)
@@ -193,9 +194,10 @@
       if (!TG) return '';
       var data; try { data = TG.life(M, ch, metric(), 90); } catch (e) { return ''; }
       if (!data.length) return '';
+      var dEl = function (d) { var g = String(d.ganzhi || ''), si = M.STEM_K.indexOf(g[0]); if (si < 0) si = M.STEM.indexOf(g[0]); return si < 0 ? '#8a8f9c' : EL_COL[M.stemEl(si)]; };
       var n = data.length, step = 8, L0 = 30, R0 = 8, T0 = 14, B0 = 30, H0 = 170, W = L0 + R0 + n * step, y = function (v) { return T0 + (100 - v) / 100 * (H0 - T0 - B0); };
       var s = '<svg class="tq-lifesvg" viewBox="0 0 ' + W + ' ' + H0 + '" width="' + W + '" height="' + H0 + '" role="img" aria-label="' + esc('인생 전체 ' + mName() + ' 그래프') + '">';
-      real.forEach(function (d, i) { var a = Math.max(0, d.startYear - data[0].year), b = Math.min(n, d.endYear - data[0].year + 1); if (b <= a) return; s += '<rect x="' + (L0 + a * step) + '" y="' + T0 + '" width="' + ((b - a) * step) + '" height="' + (H0 - T0 - B0) + '" fill="' + (i % 2 ? 'rgba(255,255,255,.035)' : 'rgba(205,178,122,.05)') + '"/><text x="' + (L0 + a * step + 3) + '" y="' + (T0 + 10) + '" font-size="9" fill="#8a8f9c">' + esc(d.ganzhi) + '</text>'; });
+      real.forEach(function (d, i) { var a = Math.max(0, d.startYear - data[0].year), b = Math.min(n, d.endYear - data[0].year + 1); if (b <= a) return; s += '<rect x="' + (L0 + a * step) + '" y="' + T0 + '" width="' + ((b - a) * step) + '" height="' + (H0 - T0 - B0) + '" fill="' + dEl(d) + '" fill-opacity="' + (i % 2 ? '.07' : '.11') + '"/><text x="' + (L0 + a * step + 3) + '" y="' + (T0 + 10) + '" font-size="9.5" font-weight="700" fill="' + dEl(d) + '">' + esc(d.ganzhi) + '</text>'; });
       [0, 50, 100].forEach(function (g) { s += '<line x1="' + L0 + '" x2="' + (W - R0) + '" y1="' + y(g) + '" y2="' + y(g) + '" stroke="rgba(255,255,255,' + (g === 50 ? '.18' : '.08') + ')" ' + (g === 50 ? 'stroke-dasharray="3 3"' : '') + '/><text x="' + (L0 - 5) + '" y="' + (y(g) + 3) + '" font-size="9" text-anchor="end" fill="#8a8f9c">' + g + '</text>'; });
       data.forEach(function (q, i) {
         var x = L0 + i * step, h = Math.max(2, y(0) - y(q.v)), on = q.year === st.y, isNow = q.year === nowY;
