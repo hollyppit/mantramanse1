@@ -1,0 +1,367 @@
+/* 운명의 광장(3단계 MVP, 디자인 v2 "Soft Bloom" 2026-11-16) — 한 페이지 화면. 서버: /api/community/{posts,post,comments,react,report,block,me}, /api/account/profile
+   주소(#):  #/ 홈 피드 · #/search 검색 · #/groups 모임 · #/g/ilju/<갑자>·#/g/ilgan/<갑> 모임 피드 · #/p/<id> 글 · #/write · #/edit/<id> · #/me 나
+   로그인은 심층 분석과 같은 Supabase 세션(localStorage sb-*-auth-token)을 읽어 x-member-token 으로 보낸다. 출생 정보는 저장하지 않는다(일주 확인 때 서버로 보내 계산만). */
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); }, $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var CATS = { wealth: '재물', love: '연애', work: '직장', people: '인간관계', daily: '일상' };
+  var CAT_EMO = { wealth: '💰', love: '💗', work: '💼', people: '🤝', daily: '☕' };
+  var REASONS = { spam: '광고·도배', abuse: '욕설·비방', sexual: '음란·불쾌', privacy: '개인정보 노출', scam: '사기·금전 요구', etc: '기타' };
+  var STEMS = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계'];
+  var EL = { '갑': 'wood', '을': 'wood', '병': 'fire', '정': 'fire', '무': 'earth', '기': 'earth', '경': 'metal', '신': 'metal', '임': 'water', '계': 'water' };
+  var EL_KO = { wood: '목', fire: '화', earth: '토', metal: '금', water: '수' };
+  var view = $('#view'), ME = null, mePromise = null;
+  var track = function (n, p) { try { if (window.gtag) window.gtag('event', n, p || {}); } catch (e) { } };
+  try { localStorage.setItem('mt_last_service', 'community'); } catch (e) { }
+
+  var ICON = {
+    heart: '<svg class="i" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
+    chat: '<svg class="i" viewBox="0 0 24 24"><path d="M20 12a7.5 7.5 0 0 1-11 6.6L4 20l1.4-4.6A7.5 7.5 0 1 1 20 12z"/></svg>',
+    save: '<svg class="i" viewBox="0 0 24 24"><path d="M6 4h12v16l-6-4-6 4z"/></svg>',
+    flag: '<svg class="i" viewBox="0 0 24 24"><path d="M5 21V4h11l-1.5 4L16 12H5"/></svg>',
+    block: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="m6.5 6.5 11 11"/></svg>',
+    edit: '<svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+    trash: '<svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+    back: '<svg class="i" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></svg>',
+    send: '<svg class="i" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg>',
+    search: '<svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  };
+
+  function token() {
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i); if (!/^sb-[\w-]+-auth-token$/.test(k)) continue;
+        var s = JSON.parse(localStorage.getItem(k) || 'null'), t = s && (s.access_token || (s.currentSession && s.currentSession.access_token));
+        var exp = s && (s.expires_at || (s.currentSession && s.currentSession.expires_at));
+        if (t && (!exp || exp * 1000 > Date.now() + 30000)) return t;
+      }
+    } catch (e) { }
+    return '';
+  }
+  function api(path, opt) {
+    opt = opt || {}; var h = { 'content-type': 'application/json' }, t = token(); if (t) h['x-member-token'] = t;
+    return fetch(path, { method: opt.method || 'GET', headers: h, body: opt.body ? JSON.stringify(opt.body) : undefined, credentials: 'same-origin', cache: 'no-store' })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._s = r.status; d._ok = r.ok; if (d.error === 'community-closed') location.href = '/gate/?community=closed'; return d; }); })
+      .catch(function () { return { _s: 0, _ok: false, error: '인터넷 연결을 확인해 주세요' }; });
+  }
+  function toast(t) { var e = document.createElement('div'); e.className = 'toast'; e.setAttribute('role', 'status'); e.textContent = t; document.body.appendChild(e); setTimeout(function () { e.remove(); }, 2600); }
+  function when(t) {
+    var d = Date.parse(t); if (!d) return ''; var s = (Date.now() - d) / 1000;
+    if (s < 60) return '방금'; if (s < 3600) return Math.floor(s / 60) + '분'; if (s < 86400) return Math.floor(s / 3600) + '시간'; if (s < 86400 * 7) return Math.floor(s / 86400) + '일';
+    return new Date(d).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric' });
+  }
+  // 아바타: 닉네임 첫 글자 + 공개한 일주·일간의 오행 색(없으면 기본 분홍)
+  function elOf(a) { var k = a && (a.ilju || a.ilgan); return k ? EL[k.charAt(0)] : ''; }
+  function ava(a, sm) { if (!a || a.gone) return '<span class="ava gone' + (sm ? ' sm' : '') + '" aria-hidden="true"><span>·</span></span>'; var e = elOf(a); return '<span class="ava' + (sm ? ' sm' : '') + (e ? ' el-' + e : '') + '" aria-hidden="true"><span>' + esc(String(a.name || '?').charAt(0)) + '</span></span>'; }
+  function who(a) { if (!a) return ''; if (a.gone) return '<span class="who" style="color:var(--sumi-3)">탈퇴한 회원</span>'; return '<span class="who"><b>' + esc(a.name) + '</b>' + (a.ilju ? '<span class="pill">' + esc(a.ilju) + '</span>' : '') + (a.ilgan ? '<span class="pill">' + esc(a.ilgan) + '</span>' : '') + '</span>'; }
+  function me() { if (!mePromise) mePromise = api('/api/community/me').then(function (d) { ME = d; return d; }); return mePromise; }
+  function refreshMe() { mePromise = null; return me(); }
+  function paint(html, tab) { view.innerHTML = html; window.scrollTo(0, 0); $$('.tabbar a').forEach(function (a) { if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); }); var h = $('h1', view); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } }
+  function parseHash() { var h = location.hash.replace(/^#/, '') || '/', i = h.indexOf('?'), path = i >= 0 ? h.slice(0, i) : h, q = {}; if (i >= 0) h.slice(i + 1).split('&').forEach(function (kv) { var p = kv.split('='); if (p[0]) q[decodeURIComponent(p[0])] = decodeURIComponent(p[1] || ''); }); return { parts: path.split('/').filter(Boolean).map(decodeURIComponent), q: q }; }
+  function qs(o) { var s = Object.keys(o).filter(function (k) { return o[k]; }).map(function (k) { return encodeURIComponent(k) + '=' + encodeURIComponent(o[k]); }).join('&'); return s ? '?' + s : ''; }
+  var empty = function (title, sub) { return '<div class="empty"><div class="art"></div><b>' + esc(title) + '</b>' + esc(sub || '') + '</div>'; };
+
+  function needSetup(why) {
+    if (!ME || !ME.member) { paint('<div class="panel"><h1>로그인이 필요해요</h1><p class="lead">운명의 광장은 심층 분석과 같은 계정으로 이용합니다. 로그인한 뒤 다시 들어와 주세요.</p><p style="margin-top:16px"><a class="btn" href="/report/#/me">로그인하러 가기</a></p></div>', 'me'); return true; }
+    if (!ME.profile || !ME.profile.nickname) { setupView(why); return true; }
+    return false;
+  }
+
+  /* ── 처음 설정: 닉네임 ── */
+  function setupView(next) {
+    var p = (ME && ME.profile) || {};
+    paint('<div class="hero"><span class="kick">WELCOME</span><h1>광장에서 쓸<br><em>이름</em>을 정해 주세요</h1><p>글과 댓글에는 닉네임만 보여요. 생년월일·이메일은 다른 회원에게 보이지 않습니다.</p></div>' +
+      '<form class="form panel" id="setupForm"><label>닉네임 <span class="muted" style="font-weight:500">2~12자 · 한글·영문·숫자·밑줄</span><input name="nickname" maxlength="12" required autocomplete="nickname" value="' + esc(p.nickname || '') + '"></label>' +
+      '<label class="check"><input type="checkbox" name="showIlju"' + (p.showIlju ? ' checked' : '') + '> 내 글에 일주 보이기 (예: 갑자)</label>' +
+      '<label class="check"><input type="checkbox" name="showIlgan"' + (p.showIlgan ? ' checked' : '') + '> 내 글에 일간 보이기 (예: 갑목)</label>' +
+      '<button class="btn pink block" type="submit">시작하기</button><p class="msg" id="setupMsg" role="status"></p></form>', 'me');
+    $('#setupForm').onsubmit = function (e) {
+      e.preventDefault(); var f = e.target.elements, m = $('#setupMsg'); m.className = 'msg'; m.textContent = '저장하는 중입니다…';
+      api('/api/account/profile', { method: 'POST', body: { action: 'save', nickname: f.nickname.value.trim(), bio: '', visibility: 'members', showIlju: f.showIlju.checked, showIlgan: f.showIlgan.checked } }).then(function (d) {
+        if (!d._ok) { m.className = 'msg err'; m.textContent = d.error || '저장하지 못했습니다.'; return; }
+        track('plaza_setup'); refreshMe().then(function () { if (ME.profile && !ME.profile.ilju) location.hash = '#/me?ilju=1'; else location.hash = next || '#/'; route(); });
+      });
+    };
+  }
+
+  /* ── 홈 피드 ── */
+  function stories() {
+    var g = (ME && ME.groups) || {}, out = '';
+    if (g.ilju) out += '<a class="story mine el-' + EL[g.ilju.key.charAt(0)] + '" href="#/g/ilju/' + encodeURIComponent(g.ilju.key) + '"><div class="ring"><span>' + esc(g.ilju.key) + '</span></div><small>내 일주</small></a>';
+    else if (ME && ME.member) out += '<a class="story" href="#/me?ilju=1"><div class="ring"><span>＋</span></div><small>일주 찾기</small></a>';
+    STEMS.forEach(function (s) { var mine = g.ilgan && g.ilgan.key === s; out += '<a class="story el-' + EL[s] + (mine ? ' mine' : '') + '" href="#/g/ilgan/' + encodeURIComponent(s) + '"><div class="ring"><span>' + s + '</span></div><small>' + s + EL_KO[EL[s]] + (mine ? ' · 나' : '') + '</small></a>'; });
+    return '<div class="stories" aria-label="일간 모임">' + out + '</div>';
+  }
+  function feedView(q, group) {
+    var tab = q.tab === 'popular' ? 'popular' : 'latest', base = group ? '#/g/' + group.kind + '/' + encodeURIComponent(group.key) : '#/';
+    var link = function (o) { return base + qs(Object.assign({ tab: tab === 'popular' ? 'popular' : '', cat: q.cat || '', tag: q.tag || '' }, o)); };
+    var head;
+    if (group) {
+      var g = ME && ME.groups && ME.groups[group.kind], mine = g && g.key === group.key, el = EL[group.key.charAt(0)];
+      var label = group.kind === 'ilju' ? group.key + ' 일주' : group.key + EL_KO[el] + ' 일간';
+      head = '<a class="back" href="#/groups">' + ICON.back + '모임</a><div class="gh el-' + el + '"><div class="gem">' + esc(group.key) + '</div><h1>' + esc(label) + ' 모임</h1><p class="lead">' + (mine ? '나와 같은 ' + (group.kind === 'ilju' ? '일주' : '일간') + '를 타고난 사람들의 이야기' : '읽기는 누구나, 글은 ' + esc(label) + '인 분들이 올려요') + '</p>' +
+        (g && mine && g.gathering ? '<p class="note pink" style="margin-top:12px">아직 모이는 중이에요 · ' + (ME.minGroup || 5) + '명이 모이면 모임이 열려요. 그동안 모임 글은 홈에서도 함께 보여요.</p>' : '') + '</div>';
+    } else {
+      head = '<section class="hero"><canvas id="petals" aria-hidden="true"></canvas><span class="kick">PLAZA OF FATE</span><h1>같은 기운,<br><em>다른 이야기</em></h1><p>같은 일주·일간을 타고난 사람들과 오늘을 나눠요.</p></section>' + stories();
+    }
+    paint(head +
+      '<div class="bar"><nav class="seg" aria-label="정렬"><a href="' + link({ tab: '' }) + '"' + (tab === 'latest' ? ' aria-current="page"' : '') + '>최신</a><a href="' + link({ tab: 'popular' }) + '"' + (tab === 'popular' ? ' aria-current="page"' : '') + '>인기</a></nav></div>' +
+      '<div class="chips" role="group" aria-label="게시판"><a class="chip' + (!q.cat ? ' on' : '') + '" href="' + link({ cat: '' }) + '">전체</a>' + Object.keys(CATS).map(function (k) { return '<a class="chip' + (q.cat === k ? ' on' : '') + '" href="' + link({ cat: k }) + '"><span aria-hidden="true">' + CAT_EMO[k] + '</span>' + CATS[k] + '</a>'; }).join('') + '</div>' +
+      (q.tag ? '<p class="muted" style="margin:0 0 10px">#' + esc(q.tag) + ' 글만 보는 중 · <a href="' + link({ tag: '' }) + '">해제</a></p>' : '') +
+      '<div id="list" aria-live="polite"><div class="skel"></div><div class="skel"></div></div><div id="more"></div>', group ? 'groups' : 'home');
+    var wl = $('.tabbar [data-tab="write"]'); if (wl) wl.href = '#/write' + (group ? qs({ group: group.kind }) : q.cat ? qs({ cat: q.cat }) : '');
+    loadList({ tab: tab === 'popular' ? 'popular' : '', cat: q.cat || '', tag: q.tag || '', group: group ? group.kind + ':' + group.key : '' }, true);
+    if (!group) petals();
+  }
+  function searchView(q) {
+    paint('<h1 style="margin:6px 2px 14px">검색</h1><form class="search" id="srch" role="search" style="margin-bottom:14px">' + ICON.search + '<input name="q" type="search" placeholder="제목·내용 검색 (2자 이상)" value="' + esc(q.q || '') + '" aria-label="글 검색" autofocus></form><div id="list">' + (q.q ? '<div class="skel"></div>' : empty('무엇이 궁금하세요?', '예: 이직, 대운, 도화살')) + '</div><div id="more"></div>', '');
+    $('#srch').onsubmit = function (e) { e.preventDefault(); var v = e.target.elements.q.value.trim(); if (v.length >= 2) location.hash = '#/search' + qs({ q: v }); };
+    if (q.q) loadList({ q: q.q }, true);
+  }
+  function groupsView() {
+    var g = (ME && ME.groups) || {};
+    paint('<h1 style="margin:6px 2px 4px">모임</h1><p class="lead" style="margin:0 2px 16px">같은 기운을 타고난 사람들끼리 모여요</p>' +
+      (g.ilju ? '<div class="grid2" style="margin-bottom:18px"><a class="group-card el-' + EL[g.ilju.key.charAt(0)] + '" href="#/g/ilju/' + encodeURIComponent(g.ilju.key) + '"><span class="gem">' + esc(g.ilju.key) + '</span><span><b>내 일주</b><small>' + (g.ilju.gathering ? '모이는 중' : g.ilju.size + '명') + '</small></span></a><a class="group-card el-' + EL[g.ilgan.key] + '" href="#/g/ilgan/' + encodeURIComponent(g.ilgan.key) + '"><span class="gem">' + esc(g.ilgan.key) + '</span><span><b>내 일간</b><small>' + (g.ilgan.gathering ? '모이는 중' : g.ilgan.size + '명') + '</small></span></a></div>'
+        : '<a class="panel" href="#/me?ilju=1" style="display:block;text-decoration:none"><b>내 일주 모임 찾기 →</b><p class="muted" style="margin:4px 0 0">생년월일로 일주를 확인하면 내 모임이 열려요</p></a>') +
+      '<div class="sec-h"><h2>일간 모임 10</h2></div><div class="grid2">' + STEMS.map(function (s) { return '<a class="group-card el-' + EL[s] + '" href="#/g/ilgan/' + encodeURIComponent(s) + '"><span class="gem">' + s + '</span><span><b>' + s + EL_KO[EL[s]] + '</b><small>' + ({ wood: '나무의 기운', fire: '불의 기운', earth: '흙의 기운', metal: '쇠의 기운', water: '물의 기운' })[EL[s]] + '</small></span></a>'; }).join('') + '</div>', 'groups');
+  }
+  function card(p) {
+    return '<a class="card" href="#/p/' + p.id + '"><div class="head">' + ava(p.author) + '<div class="meta">' + who(p.author) + '<div class="sub"><span>' + when(p.at) + '</span>·<span class="badge cat-' + esc(p.category) + '">' + esc(p.catLabel) + '</span>' + (p.group ? '<span class="badge pink">' + esc(p.group.key) + (p.group.kind === 'ilju' ? ' 일주' : ' 일간') + '</span>' : '') + '</div></div></div>' +
+      '<h3>' + esc(p.title) + '</h3><p class="ex">' + esc(p.excerpt) + '</p>' + (p.tags && p.tags.length ? '<div class="tags">' + p.tags.slice(0, 3).map(function (t) { return '<span class="tag">#' + esc(t) + '</span>'; }).join('') + '</div>' : '') +
+      '<div class="foot"><span class="' + (p.liked ? 'on' : '') + '">' + ICON.heart + p.likes + '</span><span>' + ICON.chat + p.comments + '</span><span class="save ' + (p.saved ? 'on' : '') + '" aria-label="' + (p.saved ? '저장함' : '') + '">' + ICON.save + '</span></div></a>';
+  }
+  function loadList(params, first, extra) {
+    var box = $('#list'), more = $('#more'); if (!box) return;
+    api('/api/community/posts' + qs(Object.assign({}, params, extra || {}))).then(function (d) {
+      if (!d._ok) { box.innerHTML = '<p class="msg err">' + esc(d.error || '불러오지 못했습니다.') + '</p>'; return; }
+      var html = d.items.map(card).join('');
+      if (first) box.innerHTML = html || (params.q ? empty('검색 결과가 없어요', '다른 낱말로 찾아보세요') : params.saved ? empty('저장한 글이 없어요', '마음에 드는 글을 저장해 보세요') : empty('아직 조용해요', '첫 이야기를 남겨 주세요')); else box.insertAdjacentHTML('beforeend', html);
+      more.innerHTML = d.more ? '<button class="btn ghost block" type="button">더 보기</button>' : '';
+      if (d.more) more.firstChild.onclick = function () { more.innerHTML = '<div class="skel"></div>'; loadList(params, false, d.next); };
+    });
+  }
+
+  /* ── 글 ── */
+  function postView(id) {
+    paint('<div class="skel" style="height:260px"></div>', '');
+    api('/api/community/post?id=' + encodeURIComponent(id)).then(function (d) {
+      if (!d._ok) { paint(empty(d.error || '글을 찾을 수 없어요', '') + '<p style="text-align:center"><a class="btn ghost sm" href="#/">홈으로</a></p>', ''); return; }
+      var p = d.post, mine = p.author && p.author.mine;
+      paint('<a class="back" href="javascript:history.back()">' + ICON.back + '뒤로</a><article class="post"><div class="head">' + ava(p.author) + '<div style="min-width:0;flex:1">' + who(p.author) + '<div class="sub"><span>' + when(p.at) + (p.edited ? ' · 수정됨' : '') + '</span>·<a class="badge cat-' + esc(p.category) + '" href="#/' + qs({ cat: p.category }) + '">' + esc(p.catLabel) + '</a>' + (p.group ? '<a class="badge pink" href="#/g/' + p.group.kind + '/' + encodeURIComponent(p.group.key) + '">' + esc(p.group.key) + (p.group.kind === 'ilju' ? ' 일주' : ' 일간') + ' 모임</a>' : '') + '</div></div></div>' +
+        '<h1>' + esc(p.title) + '</h1><div class="body">' + esc(p.body) + '</div>' + (p.tags.length ? '<p class="tags" style="display:flex;gap:8px;flex-wrap:wrap">' + p.tags.map(function (t) { return '<a class="tag" href="#/' + qs({ tag: t }) + '">#' + esc(t) + '</a>'; }).join('') + '</p>' : '') +
+        '<div class="acts">' + (mine ? '<span class="act" style="cursor:default">' + ICON.heart + '<b>' + p.likes + '</b></span>' : '<button class="act" data-like aria-pressed="' + p.liked + '" aria-label="좋아요">' + ICON.heart + '<b>' + p.likes + '</b></button>') + '<span class="act" style="cursor:default">' + ICON.chat + '<b id="cmtN">' + p.comments + '</b></span><button class="act icon" data-save aria-pressed="' + p.saved + '" aria-label="저장">' + ICON.save + '</button>' +
+        (mine ? '<a class="act right icon" href="#/edit/' + p.id + '" aria-label="고치기">' + ICON.edit + '</a><button class="act icon" data-del aria-label="지우기">' + ICON.trash + '</button>' : '<button class="act right icon" data-report="post" aria-label="신고">' + ICON.flag + '</button>' + (p.author && !p.author.gone ? '<button class="act icon" data-block aria-label="차단">' + ICON.block + '</button>' : '')) + '</div></article>' +
+        '<section class="cmts" aria-label="댓글"><div class="sec-h" style="margin-top:0"><h2>댓글</h2></div><div id="cmtList"></div>' +
+        '<form class="composer" id="cmtForm"><span class="reply" id="replyTo" hidden></span><div class="in"><textarea name="body" rows="1" maxlength="1000" placeholder="따뜻한 한마디를 남겨 주세요" aria-label="댓글"></textarea><input type="hidden" name="parent"><button class="send" type="submit" aria-label="댓글 보내기" disabled>' + ICON.send + '</button></div><p class="msg" id="cmtMsg" role="status" hidden></p></form></section>', '');
+      var like = $('[data-like]'), save = $('[data-save]');
+      if (like) like.onclick = function () { react(p, 'like', like); };
+      save.onclick = function () { react(p, 'bookmark', save); };
+      var del = $('[data-del]'); if (del) del.onclick = function () { confirmSheet('이 글을 지울까요?', '지우면 되돌릴 수 없어요.', '지우기', function () { api('/api/community/post?id=' + p.id, { method: 'DELETE' }).then(function (r) { if (r._ok) { toast('지웠어요'); location.hash = '#/'; } else toast(r.error || '지우지 못했습니다.'); }); }); };
+      var rep = $('[data-report]'); if (rep) rep.onclick = function () { reportSheet('post', p.id); };
+      var blk = $('[data-block]'); if (blk) blk.onclick = function () { blockSheet({ post: p.id }, p.author.name); };
+      var f = $('#cmtForm'), ta = f.elements.body, sb = f.querySelector('.send');
+      ta.oninput = function () { sb.disabled = !ta.value.trim(); ta.style.height = 'auto'; ta.style.height = Math.min(140, ta.scrollHeight) + 'px'; };
+      f.onsubmit = function (e) { e.preventDefault(); sendComment(p, f); };
+      loadComments(p);
+    });
+  }
+  function react(p, kind, btn) {
+    var on = btn.getAttribute('aria-pressed') !== 'true';
+    if (needWriteGate(kind === 'like')) return;
+    btn.disabled = true;
+    api('/api/community/react', { method: 'POST', body: { post: p.id, kind: kind, on: on } }).then(function (d) {
+      btn.disabled = false; if (!d._ok) { toast(d.error || '잠시 후 다시 시도해 주세요.'); return; }
+      btn.setAttribute('aria-pressed', String(on));
+      if (kind === 'like') btn.querySelector('b').textContent = d.likes; else toast(on ? '저장했어요' : '저장을 취소했어요');
+      track('plaza_react', { kind: kind, on: on ? 1 : 0 });
+    });
+  }
+  function needWriteGate(write) {
+    if (!ME || !ME.member) { toast('로그인한 회원만 할 수 있어요'); return true; }
+    if (write && (!ME.profile || !ME.profile.nickname)) { location.hash = '#/me?setup=1'; return true; }
+    if (write && ME.sanction) { toast(ME.sanction.kind === 'ban' ? '이용이 정지된 계정이에요' : '지금은 글·댓글·좋아요를 쓸 수 없어요'); return true; }
+    return false;
+  }
+  function loadComments(p) {
+    var box = $('#cmtList'); if (!box) return;
+    api('/api/community/comments?post=' + p.id).then(function (d) {
+      if (!d._ok) { box.innerHTML = '<p class="msg err">' + esc(d.error || '댓글을 불러오지 못했습니다.') + '</p>'; return; }
+      $('#cmtN').textContent = d.items.filter(function (c) { return !c.deleted && !c.blocked; }).length;
+      box.innerHTML = d.items.map(function (c) {
+        var gone = c.deleted || c.blocked, mine = c.author && c.author.mine;
+        return '<div class="cmt' + (c.parent ? ' re' : '') + (gone ? ' gone' : '') + (mine ? ' mine' : '') + '" id="c' + c.id + '">' + (gone ? ava(null, 1) : ava(c.author, 1)) + '<div class="bub"><div class="bub-in">' + (gone ? '' : '<b>' + esc(c.author.name) + (c.author.ilju ? '<small>' + esc(c.author.ilju) + '</small>' : '') + '</b>') + '<p>' + esc(c.body) + '</p></div>' +
+          (gone ? '' : '<div class="row"><span>' + when(c.at) + '</span><button type="button" data-reply="' + c.id + '" data-name="' + esc(c.author.name) + '">답글</button>' + (mine ? '<button type="button" data-cdel="' + c.id + '">지우기</button>' : '<button type="button" data-crep="' + c.id + '">신고</button><button type="button" data-cblk="' + c.id + '" data-name="' + esc(c.author.name) + '">차단</button>') + '</div>') + '</div></div>';
+      }).join('') || '<p class="muted" style="text-align:center;padding:14px 0">첫 댓글을 남겨 주세요 ✿</p>';
+      $$('[data-reply]', box).forEach(function (b) { b.onclick = function () { var f = $('#cmtForm'); f.elements.parent.value = b.dataset.reply; var r = $('#replyTo'); r.hidden = false; r.innerHTML = '<b>' + esc(b.dataset.name) + '</b>님에게 답글 · <a href="#" id="noReply">취소</a>'; $('#noReply').onclick = function (e) { e.preventDefault(); f.elements.parent.value = ''; r.hidden = true; }; f.elements.body.focus(); }; });
+      $$('[data-cdel]', box).forEach(function (b) { b.onclick = function () { confirmSheet('이 댓글을 지울까요?', '', '지우기', function () { api('/api/community/comments?id=' + b.dataset.cdel, { method: 'DELETE' }).then(function () { loadComments(p); }); }); }; });
+      $$('[data-crep]', box).forEach(function (b) { b.onclick = function () { reportSheet('comment', +b.dataset.crep); }; });
+      $$('[data-cblk]', box).forEach(function (b) { b.onclick = function () { blockSheet({ comment: +b.dataset.cblk }, b.dataset.name); }; });
+    });
+  }
+  function sendComment(p, f) {
+    var m = $('#cmtMsg'), body = f.elements.body.value.trim(); if (!body) return;
+    if (needWriteGate(true)) return;
+    var btn = f.querySelector('.send'); btn.disabled = true; m.hidden = true;
+    api('/api/community/comments', { method: 'POST', body: { post: p.id, parent: f.elements.parent.value ? +f.elements.parent.value : null, body: body } }).then(function (d) {
+      if (!d._ok) { btn.disabled = false; m.hidden = false; m.className = 'msg err'; m.textContent = d.error || '쓰지 못했습니다.'; return; }
+      f.reset(); f.elements.body.style.height = ''; $('#replyTo').hidden = true; track('plaza_comment'); loadComments(p);
+    });
+  }
+
+  /* ── 시트: 신고·차단·확인 ── */
+  function sheet(html) {
+    var s = document.createElement('div'); s.className = 'sheet'; s.setAttribute('role', 'dialog'); s.setAttribute('aria-modal', 'true');
+    s.innerHTML = '<div class="sheet-bg" data-x></div><section class="sheet-box">' + html + '</section>'; document.body.appendChild(s);
+    var last = document.activeElement, close = function () { s.remove(); document.removeEventListener('keydown', key); if (last && last.focus) last.focus(); };
+    var key = function (e) { if (e.key === 'Escape') close(); }; document.addEventListener('keydown', key);
+    s.addEventListener('click', function (e) { if (e.target.hasAttribute('data-x')) close(); });
+    var f = s.querySelector('input,button,textarea'); if (f) f.focus();
+    return { el: s, close: close };
+  }
+  function confirmSheet(title, sub, yes, fn) {
+    var s = sheet('<h2>' + esc(title) + '</h2>' + (sub ? '<p class="muted" style="margin:6px 0 0">' + esc(sub) + '</p>' : '') + '<div class="grid2" style="margin-top:18px"><button class="btn ghost" data-x>취소</button><button class="btn" id="yes">' + esc(yes) + '</button></div>');
+    $('#yes', s.el).onclick = function () { s.close(); fn(); };
+  }
+  function reportSheet(type, id) {
+    if (!ME || !ME.member) { toast('로그인한 회원만 신고할 수 있어요'); return; }
+    var s = sheet('<h2>신고하기</h2><p class="muted" style="margin:6px 0 8px">운영진만 확인하고, 누가 신고했는지는 알리지 않아요. 여러 분이 신고한 글은 확인 전까지 가려져요.</p><form class="form" id="repF">' +
+      '<div>' + Object.keys(REASONS).map(function (k) { return '<label class="radio"><input type="radio" name="reason" value="' + k + '"> ' + REASONS[k] + '</label>'; }).join('') + '</div>' +
+      '<label>자세한 내용 (선택)<textarea name="detail" rows="2" maxlength="300"></textarea></label><div class="grid2"><button class="btn ghost" type="button" data-x>취소</button><button class="btn pink" type="submit" disabled>신고하기</button></div><p class="msg" role="status"></p></form>');
+    var f = $('#repF', s.el), b = f.querySelector('[type=submit]');
+    f.onchange = function () { b.disabled = !f.elements.reason.value; };
+    f.onsubmit = function (e) { e.preventDefault(); b.disabled = true; api('/api/community/report', { method: 'POST', body: { type: type, id: id, reason: f.elements.reason.value, detail: f.elements.detail.value } }).then(function (d) { if (d._ok) { s.close(); toast('신고를 접수했어요. 확인 후 조치할게요'); track('plaza_report', { type: type }); } else { b.disabled = false; f.querySelector('.msg').className = 'msg err'; f.querySelector('.msg').textContent = d.error || '접수하지 못했습니다.'; } }); };
+  }
+  function blockSheet(target, name) {
+    if (!ME || !ME.member) { toast('로그인한 회원만 차단할 수 있어요'); return; }
+    confirmSheet(name + '님을 차단할까요?', '서로의 글·댓글이 보이지 않게 돼요. 나 화면에서 언제든 풀 수 있어요.', '차단하기', function () {
+      api('/api/community/block', { method: 'POST', body: target }).then(function (d) { if (d._ok) { toast('차단했어요'); track('plaza_block'); location.hash = '#/'; } else toast(d.error || '차단하지 못했습니다.'); });
+    });
+  }
+
+  /* ── 글쓰기·고치기 ── */
+  function writeView(q, editId) {
+    if (needSetup(location.hash)) return;
+    if (ME.sanction) { paint('<div class="panel"><h1>지금은 글을 쓸 수 없어요</h1><p class="lead">' + (ME.sanction.kind === 'ban' ? '운영 정책 위반으로 이용이 정지된 계정입니다.' : '운영 정책 위반으로 ' + (ME.sanction.until ? new Date(ME.sanction.until).toLocaleDateString('ko-KR') + '까지 ' : '') + '글·댓글을 쓸 수 없습니다.') + ' 문의는 마이페이지 1:1 문의로 남겨 주세요.</p></div>', 'write'); return; }
+    var g = ME.groups || {};
+    var draw = function (p) {
+      p = p || { category: q.cat || '', title: '', body: '', tags: [] };
+      var pick = function (name, opts, cur) { return '<div class="picker" role="radiogroup">' + opts.map(function (o) { return '<label><input type="radio" name="' + name + '" value="' + esc(o[0]) + '"' + (cur === o[0] ? ' checked' : '') + '><span>' + o[1] + '</span></label>'; }).join('') + '</div>'; };
+      var groupOpts = [['', '🌸 전체 광장']].concat(g.ilju ? [['ilju', esc(g.ilju.key) + ' 일주 모임']] : []).concat(g.ilgan ? [['ilgan', esc(g.ilgan.label) + ' 일간 모임']] : []);
+      paint('<a class="back" href="' + (editId ? '#/p/' + editId : '#/') + '">' + ICON.back + '돌아가기</a><h1 style="margin:4px 2px 16px">' + (editId ? '글 고치기' : '어떤 이야기를 나눌까요?') + '</h1>' +
+        '<form class="form" id="wf"><div><p class="muted" style="margin:0 0 8px;font-weight:600">게시판</p>' + pick('category', Object.keys(CATS).map(function (k) { return [k, CAT_EMO[k] + ' ' + CATS[k]]; }), p.category) + '</div>' +
+        (editId ? '' : '<div><p class="muted" style="margin:0 0 8px;font-weight:600">올릴 곳 <span style="font-weight:400">(모임 글은 홈에도 보여요)</span></p>' + pick('group', groupOpts, q.group || '') + '</div>') +
+        '<label>제목<input name="title" maxlength="60" required value="' + esc(p.title) + '" placeholder="한 줄로 요약해 주세요"></label>' +
+        '<label>내용<textarea name="body" rows="9" maxlength="5000" required placeholder="경험·고민·소소한 이야기 모두 좋아요">' + esc(p.body) + '</textarea><span class="count" id="cnt">' + p.body.length + ' / 5000</span></label>' +
+        '<label>해시태그 <span class="muted" style="font-weight:400">최대 5개</span><input name="tags" placeholder="예: 이직고민 대운" value="' + esc((p.tags || []).join(' ')) + '"></label>' +
+        '<p class="note">전화번호·이메일·오픈채팅·링크는 올릴 수 없어요. 서로의 사주를 존중하는 이야기를 부탁드려요. 운세는 참고용이며 중요한 결정은 스스로 내려 주세요.</p>' +
+        '<button class="btn pink block" type="submit">' + (editId ? '고친 내용 저장' : '올리기') + '</button><p class="msg" id="wMsg" role="status"></p></form>', 'write');
+      if (!editId && !q.group) { var r0 = $('#wf input[name=group][value=""]'); if (r0) r0.checked = true; }
+      var f = $('#wf'); f.elements.body.oninput = function () { $('#cnt').textContent = f.elements.body.value.length + ' / 5000'; };
+      f.onsubmit = function (e) {
+        e.preventDefault(); var el = f.elements, m = $('#wMsg'), b = f.querySelector('[type=submit]');
+        if (!el.category.value) { m.className = 'msg err'; m.textContent = '게시판을 골라 주세요'; return; }
+        b.disabled = true; m.className = 'msg'; m.textContent = '올리는 중입니다…';
+        var body = { category: el.category.value, title: el.title.value, body: el.body.value, tags: el.tags.value.split(/[\s,]+/).filter(Boolean) };
+        if (editId) body.id = +editId; else body.group = (el.group && el.group.value) || null;
+        api('/api/community/' + (editId ? 'post' : 'posts'), { method: editId ? 'PATCH' : 'POST', body: body }).then(function (d) {
+          b.disabled = false; if (!d._ok) { m.className = 'msg err'; m.textContent = d.error || '올리지 못했습니다.'; if (d.need === 'profile') location.hash = '#/me?setup=1'; return; }
+          track(editId ? 'plaza_edit' : 'plaza_post', { cat: body.category }); location.hash = '#/p/' + d.id;
+        });
+      };
+    };
+    if (editId) api('/api/community/post?id=' + encodeURIComponent(editId)).then(function (d) { if (!d._ok || !d.post.author.mine) { paint(empty('고칠 수 없는 글이에요', ''), 'write'); return; } draw(d.post); });
+    else draw();
+  }
+
+  /* ── 나 ── */
+  function meView(q) {
+    if (needSetup('#/me')) return;
+    if (q.setup) { setupView('#/me'); return; }
+    var p = ME.profile, tab = q.tab || '';
+    paint('<div class="prof">' + ava({ name: p.nickname, ilju: p.ilju }) + '<div><h1>' + esc(p.nickname) + '</h1><div class="stats">' + (p.ilju ? '<span><b>' + esc(p.ilju) + '</b> 일주</span><span><b>' + esc(p.ilganLabel) + '</b> 일간</span>' : '<span>아직 일주를 확인하지 않았어요</span>') + '</div></div></div>' +
+      '<div class="grid2" style="margin-bottom:6px"><a class="btn ghost sm" href="#/me?setup=1">프로필 편집</a><a class="btn ghost sm" href="#/me?ilju=1">' + (p.ilju ? '일주 다시 확인' : '내 일주 확인') + '</a></div>' +
+      (q.ilju ? '<div class="panel" style="margin-top:14px" id="iljuBox"><h2>내 일주 확인</h2>' + iljuForm(!!p.ilju) + '</div>' : '') +
+      '<nav class="tabs" aria-label="내 기록"><a href="#/me" ' + (!tab ? 'aria-current="page"' : '') + '>내 글</a><a href="#/me?tab=saved" ' + (tab === 'saved' ? 'aria-current="page"' : '') + '>저장</a><a href="#/me?tab=blocks" ' + (tab === 'blocks' ? 'aria-current="page"' : '') + '>차단</a></nav><div id="list"><div class="skel"></div></div><div id="more"></div>', tab === 'saved' ? 'saved' : 'me');
+    if (q.ilju) bindIlju();
+    if (tab === 'blocks') loadBlocks(); else loadList(tab === 'saved' ? { saved: '1' } : { mine: '1' }, true);
+  }
+  function deviceBirth() { try { var s = JSON.parse(localStorage.getItem('mantra-manse-v1') || 'null'); if (!s || !s.year || !s.month || !s.day) return null; var b = { year: +s.year, month: +s.month, day: +s.day, calendar: s.calendar || 'solar', leap: !!s.leap }; if (!s.hourUnknown && s.hour !== '' && s.hour != null) { b.hour = +s.hour; b.minute = +s.minute || 0; } if (s.jasi) b.jasi = s.jasi; if (s.timeMode) b.timeMode = s.timeMode; return b; } catch (e) { return null; } }
+  function iljuForm(has) {
+    var dev = deviceBirth();
+    return '<p class="muted" style="margin:6px 0 12px">생년월일로 일주를 계산해 <b>일주·일간 이름만</b> 저장해요. 생년월일은 서버에 남기지 않습니다.' + (has ? ' 다시 확인하면 모임이 바뀔 수 있어요.' : '') + '</p>' +
+      (dev ? '<button class="btn pink block" type="button" id="useDev">이 기기에 저장된 사주로 확인</button><p class="muted" style="margin:12px 0 8px;text-align:center">또는 직접 입력</p>' : '') +
+      '<form class="form" id="iljuF"><div class="grid2"><label>생년월일<input name="date" type="date" min="1900-01-01" max="2100-12-31" required></label><label>달력<select name="cal"><option value="solar">양력</option><option value="lunar">음력</option><option value="leap">음력(윤달)</option></select></label></div>' +
+      '<label>태어난 시각 <span class="muted" style="font-weight:400">모르면 비워 두세요 · 밤 11시 이후 출생은 일주가 달라질 수 있어요</span><input name="time" type="time"></label><button class="btn ghost block" type="submit">일주 확인</button><p class="msg" id="iljuMsg" role="status"></p></form>';
+  }
+  function bindIlju() {
+    var send = function (birth) {
+      var m = $('#iljuMsg'); m.className = 'msg'; m.textContent = '계산하는 중입니다…';
+      api('/api/community/me', { method: 'POST', body: { action: 'ilju', birth: birth } }).then(function (d) {
+        if (!d._ok) { m.className = 'msg err'; m.textContent = d.error || '확인하지 못했습니다.'; return; }
+        toast(d.ilju + ' 일주 · ' + d.ilganLabel + ' 일간이에요'); track('plaza_ilju'); refreshMe().then(function () { location.hash = '#/g/ilju/' + encodeURIComponent(d.ilju); });
+      });
+    };
+    var u = $('#useDev'); if (u) u.onclick = function () { var b = deviceBirth(); if (b) send(b); };
+    $('#iljuF').onsubmit = function (e) {
+      e.preventDefault(); var el = e.target.elements, d = (el.date.value || '').split('-'), t = (el.time.value || '').split(':');
+      if (d.length !== 3) return;
+      var b = { year: +d[0], month: +d[1], day: +d[2], calendar: el.cal.value === 'solar' ? 'solar' : 'lunar', leap: el.cal.value === 'leap' };
+      if (t.length === 2 && t[0] !== '') { b.hour = +t[0]; b.minute = +t[1]; }
+      send(b);
+    };
+    setTimeout(function () { var bx = $('#iljuBox'); if (bx) bx.scrollIntoView({ block: 'start' }); }, 50);
+  }
+  function loadBlocks() {
+    var box = $('#list');
+    api('/api/community/block').then(function (d) {
+      if (!d._ok) { box.innerHTML = '<p class="msg err">' + esc(d.error || '불러오지 못했습니다.') + '</p>'; return; }
+      box.innerHTML = d.items.length ? d.items.map(function (x) { return '<div class="card" style="display:flex;align-items:center;gap:10px">' + ava({ name: x.name }, 1) + '<b style="flex:1">' + esc(x.name) + '</b><button class="btn ghost sm" data-unb="' + esc(x.handle) + '">차단 풀기</button></div>'; }).join('') : empty('차단한 회원이 없어요', '');
+      $$('[data-unb]', box).forEach(function (b) { b.onclick = function () { api('/api/community/block?handle=' + encodeURIComponent(b.dataset.unb), { method: 'DELETE' }).then(function () { toast('차단을 풀었어요'); loadBlocks(); }); }; });
+    });
+  }
+
+  /* ── 라우터 ── */
+  function route() {
+    var h = parseHash(), p = h.parts;
+    stopPetals();
+    me().then(function () {
+      var wl = $('.tabbar [data-tab="write"]'); if (wl) wl.href = '#/write';
+      if (p[0] === 'p' && /^\d+$/.test(p[1] || '')) return postView(p[1]);
+      if (p[0] === 'write') return writeView(h.q);
+      if (p[0] === 'edit' && /^\d+$/.test(p[1] || '')) return writeView(h.q, p[1]);
+      if (p[0] === 'search') return searchView(h.q);
+      if (p[0] === 'groups') return groupsView();
+      if (p[0] === 'g' && (p[1] === 'ilju' || p[1] === 'ilgan') && p[2]) return feedView(h.q, { kind: p[1], key: p[2] });
+      if (p[0] === 'me') return meView(h.q);
+      return feedView(h.q);
+    });
+  }
+  window.addEventListener('hashchange', route);
+  $('#leave').onclick = function () { fetch('/api/community/enter', { method: 'DELETE', credentials: 'same-origin' }).finally(function () { location.href = '/gate/'; }); };
+
+  /* ── 히어로 벚꽃잎(캔버스 1개, 홈에서만). 움직임 줄이기면 그리지 않고, 화면 밖·탭 숨김이면 멈춘다 ── */
+  var PET = null;
+  function stopPetals() { if (PET) { PET.stop(); PET = null; } }
+  function petals() {
+    var cv = $('#petals'); if (!cv || !cv.getContext) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var ctx = cv.getContext('2d'), dpr = Math.min(2, window.devicePixelRatio || 1), W = 0, H = 0, ps = [], raf = 0, prev = 0, vis = true, dead = false;
+    var size = function () { var r = cv.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+    var mk = function (top) { return { x: Math.random() * W, y: top ? -12 : Math.random() * H, s: 4 + Math.random() * 5, vx: 10 + Math.random() * 14, vy: 8 + Math.random() * 12, r: Math.random() * 6.28, vr: (Math.random() - .5) * 1.6, a: .45 + Math.random() * .45 }; };
+    size(); for (var i = 0; i < Math.round(Math.max(8, Math.min(16, W / 40))); i++) ps.push(mk(false));
+    var tick = function (t) {
+      raf = 0; if (!vis || dead) return; var dt = prev ? Math.min(.05, (t - prev) / 1000) : 0; prev = t; ctx.clearRect(0, 0, W, H);
+      ps.forEach(function (p, i) { p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt; if (p.y > H + 12 || p.x > W + 12) { ps[i] = mk(true); ps[i].x = Math.random() * W * .8; }
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.globalAlpha = p.a; ctx.fillStyle = '#F4B6C2'; ctx.beginPath(); ctx.moveTo(0, -p.s); ctx.quadraticCurveTo(p.s, -p.s * .2, 0, p.s); ctx.quadraticCurveTo(-p.s, -p.s * .2, 0, -p.s); ctx.fill(); ctx.restore(); });
+      raf = requestAnimationFrame(tick);
+    };
+    var go = function () { if (!raf && vis && !dead) { prev = 0; raf = requestAnimationFrame(tick); } };
+    var io = window.IntersectionObserver ? new IntersectionObserver(function (es) { vis = es[0].isIntersecting && !document.hidden; go(); }) : null; if (io) io.observe(cv);
+    var onVis = function () { vis = !document.hidden; go(); };
+    document.addEventListener('visibilitychange', onVis); window.addEventListener('resize', size);
+    PET = { stop: function () { dead = true; if (raf) cancelAnimationFrame(raf); if (io) io.disconnect(); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('resize', size); } };
+    go();
+  }
+  route();
+})();
