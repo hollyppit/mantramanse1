@@ -25,7 +25,7 @@ html.mc-active,html.mc-active body{overflow:hidden!important}.mc{z-index:1000}.m
 }
 .mc .mc-copy small { display: inline-block; font-size: 12px; color: #d8bd84; letter-spacing: .16em; }
 .mc .mc-copy h1 { display: inline; margin: 0 0 0 14px; font-size: 17px; color: #ddd5c6; font-weight: 500; }
-.mc .mc-copy p {
+.mc .mc-copy p, .mc .mc-copy .mc-ghost {
   margin: 22px auto 0; max-width: 26em;
   font-family: var(--f-sans, 'Noto Sans KR', sans-serif);
   font-size: clamp(30px, 3.2vw, 48px); font-weight: 500;
@@ -107,17 +107,21 @@ html.mc-active,html.mc-active body{overflow:hidden!important}.mc{z-index:1000}.m
 /* 소제목 없이, 작은 명조 자막이 한 줄씩 나타났다 사라진다 */
 .mc .mc-sr { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; display: block; }
 .mc .mc-copy { text-align: center; padding: 12px 8px 4px; }
-.mc .mc-copy p {
+.mc .mc-copy p, .mc .mc-copy .mc-ghost {
   margin: 0 auto; max-width: 30em;
   font-family: var(--f-serif, 'Noto Serif KR', serif);
   font-size: clamp(18px, 1.55vw, 26px); font-weight: 400;
   line-height: 1.85; letter-spacing: -.005em; color: #f4ecdc;
   text-shadow: 0 1px 2px rgba(0,0,0,.9), 0 0 22px rgba(0,0,0,.75);
-  animation: mc-sub 1.1s cubic-bezier(.2,.6,.2,1) both;
-  transition: opacity .55s ease, filter .55s ease, transform .55s ease;
+  animation: mc-sub 1.5s cubic-bezier(.22,.61,.36,1) backwards;
+  transition: none;
 }
-.mc .mc-copy p.leaving { opacity: 0; filter: blur(3px); transform: translateY(-4px); }
-@keyframes mc-sub { from { opacity: 0; filter: blur(5px); transform: translateY(8px); } to { opacity: 1; filter: none; transform: none; } }
+/* 자막: 1.5초 동안 떠오르고, 끝나기 1.1초 전부터 가라앉듯 사라진다(전환 대신 애니메이션: 떠오르는 중에 붙어도 끊기지 않게). 직접 넘기면 이전 자막이 겹치며 사라진다(.mc-ghost). */
+.mc .mc-copy p.leaving { animation: mc-leave 1.1s cubic-bezier(.45,0,.55,1) forwards; }
+@keyframes mc-leave { to { opacity: 0; transform: translateY(-3px); } }
+.mc .mc-copy .mc-ghost { position: absolute; left: 0; right: 0; margin: 0 auto; pointer-events: none; animation: mc-ghost .7s cubic-bezier(.45,0,.55,1) forwards; }
+@keyframes mc-ghost { from { opacity: 1; } to { opacity: 0; transform: translateY(-3px); } }
+@keyframes mc-sub { 0% { opacity: 0; transform: translateY(7px); filter: blur(1.5px); } 55% { filter: blur(0); } 100% { opacity: 1; transform: none; filter: none; } }
 /* 조작 UI는 작게, 가만히 있으면 사라진다 */
 .mc .mc-header, .mc .mc-controls, .mc .mc-arrow { transition: opacity .9s ease; }
 .mc.idle .mc-header, .mc.idle .mc-controls, .mc.idle .mc-arrow { opacity: 0; }
@@ -133,24 +137,30 @@ html.mc-active,html.mc-active body{overflow:hidden!important}.mc{z-index:1000}.m
 .mc .mc-progress i { background: rgba(219,101,96,.85); }
 .mc .mc-seal { max-width: 460px; height: 56px; font-family: var(--f-serif, serif); font-size: 16px; font-weight: 600; letter-spacing: .12em; transition: box-shadow .6s; }
 .mc.mc-last .mc-seal { box-shadow: 0 0 0 1px #db6560, 0 0 40px rgba(173,41,39,.45); }
-.mc .mc-seal b { width: 34px; height: 70px; top: -10px; }
+/* 부적: 원래 비율(약 1:2)을 지키고, 글씨는 한 줄 세로쓰기로 가운데 고정(좁아지면 두 줄로 깨지던 문제) */
+.mc .mc-seal b { width: 40px; height: 82px; top: -13px; }
+.mc .mc-seal b:after { content: "命運"; inset: 0; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; font-family: var(--f-serif, serif); font-size: 17px; font-weight: 700; line-height: 1; letter-spacing: .28em; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
 .mc { grid-template-rows: auto minmax(0, 1fr) auto 44px 56px; row-gap: 18px; }
 @media (min-width: 1500px) and (min-height: 850px) { .mc { grid-template-rows: auto minmax(0, 1fr) auto 44px 56px; row-gap: 22px; } }
 @media (max-width: 720px) {
   .mc { --mc-bar: clamp(18px, 6vh, 64px); grid-template-rows: auto minmax(0, 1fr) auto 44px 54px; row-gap: 14px; }
   .mc .mc-shade { background: linear-gradient(180deg, rgba(4,6,10,.4) 0%, rgba(4,6,10,0) 20%, rgba(4,6,10,0) 42%, rgba(4,6,10,.7) 64%, rgba(4,6,10,.95) 100%); }
   .mc .mc-copy { text-align: center; padding: 8px 4px 2px; }
-  .mc .mc-copy p { font-size: clamp(16px, 4.5vw, 19px); line-height: 1.85; font-weight: 400; }
+  .mc .mc-copy :is(p, .mc-ghost) { font-size: clamp(16px, 4.5vw, 19px); line-height: 1.85; font-weight: 400; }
   .mc .mc-seal { height: 54px; font-size: 14px !important; letter-spacing: .06em; }
-  .mc .mc-seal b { height: 62px; top: -6px; }
+  .mc .mc-seal b { width: 34px; height: 70px; top: -8px; }
+  .mc .mc-seal b:after { font-size: 15px; }
 }
 @media (max-height: 650px) {
   .mc { grid-template-rows: auto minmax(0,1fr) auto 44px 50px; row-gap: 10px; }
-  .mc .mc-copy p { font-size: clamp(15px, 2.4vw, 20px); line-height: 1.6; }
+  .mc .mc-copy :is(p, .mc-ghost) { font-size: clamp(15px, 2.4vw, 20px); line-height: 1.6; }
   .mc .mc-seal { height: 50px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mc .mc-grain { display: none; }
-  .mc .mc-copy p.leaving { opacity: 1; filter: none; transform: none; }
+  .mc .mc-copy p.leaving { animation: none; opacity: 1; }
+  .mc .mc-copy .mc-ghost { display: none; }
   .mc.idle .mc-header, .mc.idle .mc-controls, .mc.idle .mc-arrow { opacity: 1; }
 }
+.mc .mc-seal.has-art b:after { content: none; }
+.mc .mc-seal.has-art b { background-color: transparent; background-size: cover; background-position: center; }
