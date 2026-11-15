@@ -364,14 +364,27 @@
     var box = document.getElementById('t-ikdesign'); PANE = box; if (unsaved.design && box.querySelector('#dzSave')) return; box.innerHTML = '<p class="muted">불러오는 중…</p>'; PANE = box;
     Promise.all([G.meta ? 0 : loadMeta(), loadItems()]).then(drawDesign).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
-  function curDesign(d) { if (!G.design[d] || !G.design[d].sections || !G.design[d].sections.length) unsaved.design = true; G.design[d] = clone(G.meta.defaultDesign[d]); return G.design[d]; }
+  function curDesign(d) { if (!G.design[d] || !G.design[d].sections || !G.design[d].sections.length) { unsaved.design = true; G.design[d] = clone(G.meta.defaultDesign[d]); } return G.design[d]; }   // 2026-11-15: 중괄호가 빠져 저장한 구성이 화면을 열 때마다 기본값으로 덮이던 문제
+  // 이 분야와 짝이 되는 운명의 타임라인 장(표시 전용, report/v2/ik-timeline-map.js). 2026-11-15
+  function tlPair(d) {
+    var M = window.ReportV2 && window.ReportV2.IKTimelineMap, DC = window.ReportV2 && window.ReportV2.DerivedChapters; if (!M || !M.MAP[d]) return '';
+    var cat = null; try { cat = window.MantraEditorial && window.MantraEditorial.defaults(); } catch (e) { }
+    var TOP = { self: '종합풀이', wealth: '재물운 심화', career: '커리어운 심화', love: '인연운 심화' };
+    var info = function (id) { var c = cat && cat.chapters.find(function (x) { return x.id === id; }); if (c) return { title: c.title, topic: c.topicId, off: c.state === 'archived' }; var x = DC && DC.byId(id); return x ? { title: x.title, topic: x.topic, flag: x.flag } : { title: id.replace('timeline_', ''), topic: '' }; };
+    var rows = M.MAP[d].chapters.map(function (id) { var x = info(id); return { id: id, x: x }; }), byT = {};
+    rows.forEach(function (r) { (byT[r.x.topic] = byT[r.x.topic] || []).push(r); });
+    return '<details class="card" style="margin:8px 0;padding:10px 12px"><summary><b>운명의 타임라인 짝 장</b> <span class="muted">· ' + rows.length + '장 · ' + esc(Object.keys(byT).map(function (t) { return TOP[t] || t; }).join(', ')) + '</span></summary>' +
+      '<p class="muted" style="margin:8px 0;font-size:.82rem">' + esc(M.STATUS) + '</p>' +
+      Object.keys(byT).map(function (t) { return '<p style="margin:8px 0 2px"><b>' + esc(TOP[t] || t) + '</b></p><ul style="margin:0 0 0 18px;font-size:.84rem">' + byT[t].map(function (r) { return '<li>' + esc(r.x.title) + ' <small class="muted">' + esc(r.id.replace('timeline_', '')) + (r.x.off ? ' · 보관' : '') + (r.x.flag ? ' · 엔진 장(스위치 ' + esc(r.x.flag) + ')' : r.x.flag === null ? ' · 엔진 장' : '') + '</small></li>'; }).join('') + '</ul>'; }).join('') +
+      '<p class="muted" style="margin:8px 0 0;font-size:.8rem">장 문안은 풀이 본문 › 챕터 계약, 순서는 판매·타임라인 › 타임라인 구성에서 고쳐요.</p></details>';
+  }
   function drawDesign() {
     var box = document.getElementById('t-ikdesign'), d = G.dDomain, dz = curDesign(d), drag = null, cov = G.stats.coverage[d]; PANE = box;
     var count = function (sid) { return G.items.filter(function (x) { return x.domain === d && x.subDomain === sid && x.status === 'published' && x.reviewed; }).length; };
     box.innerHTML = '<div class="card"><p class="muted" style="margin:0 0 10px">분야별로 “이 풀이에서 무엇을 분석해 보여 줄지”를 정합니다. 풀이의 풍부함은 글자 수가 아니라 <b>답하는 항목의 수</b>로 정해지고, 근거가 되는 풀이 지식이 없는 항목은 억지로 채우지 않고 비워 둡니다.</p>' +
       '<div class="ik-bar">' + DOM_ORDER.map(function (x) { return '<button class="ik-chipbtn' + (x === d ? ' on' : '') + '" data-d="' + x + '">' + esc(dko(x)) + '</button>'; }).join('') + '</div>' +
       '<p style="margin:6px 0"><b style="color:var(--gold)">' + esc(dko(d)) + ' 풀이 커버리지 ' + cov.pct + '%</b> <span class="muted">(' + esc(cov.label) + ' · 켜 둔 ' + cov.total + '개 항목 중 ' + cov.covered + '개에 공개된 풀이 지식이 있음)</span></p>' +
-      '<div class="ik-sec">풀이 항목<small>끌어서 순서를 바꾸고, 켜기/끄기·필수/선택을 정합니다. 숫자가 0인 항목은 풀이에서 비워집니다.</small></div><div id="dzList"></div><div class="ik-bar"><button id="dzAdd">+ 분석 항목 추가</button><span style="flex:1"></span><button id="dzReset">기본값으로 되돌리기</button><button class="pri" id="dzSave">구성 저장</button></div>' +
+      tlPair(d) + '<div class="ik-sec">풀이 항목<small>끌어서 순서를 바꾸고, 켜기/끄기·필수/선택을 정합니다. 숫자가 0인 항목은 풀이에서 비워집니다.</small></div><div id="dzList"></div><div class="ik-bar"><button id="dzAdd">+ 분석 항목 추가</button><span style="flex:1"></span><button id="dzReset">기본값으로 되돌리기</button><button class="pri" id="dzSave">구성 저장</button></div>' +
       '<details style="margin-top:14px"><summary class="muted">분석에 쓰는 명리 요소(안내용)</summary><div class="ik-opts" style="margin-top:8px">' + ANALYSIS.map(function (a) { var cur = dz.required.indexOf(a) >= 0 ? 'r' : dz.optional.indexOf(a) >= 0 ? 'o' : ''; return '<label style="font-size:.84rem">' + a + ' <select data-an="' + a + '" style="width:auto"><option value="">안 봄</option><option value="r"' + (cur === 'r' ? ' selected' : '') + '>필수</option><option value="o"' + (cur === 'o' ? ' selected' : '') + '>선택</option></select></label>'; }).join(' ') + '</div></details></div>';
     $$('[data-d]', box).forEach(function (b) { b.onclick = function () { G.dDomain = b.dataset.d; drawDesign(); }; });
     $$('[data-an]', box).forEach(function (s) { s.onchange = function () { dz.required = dz.required.filter(function (x) { return x !== s.dataset.an; }); dz.optional = dz.optional.filter(function (x) { return x !== s.dataset.an; }); if (s.value === 'r') dz.required.push(s.dataset.an); if (s.value === 'o') dz.optional.push(s.dataset.an); }; });

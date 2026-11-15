@@ -37,5 +37,19 @@ for (const [file, pat, msg] of [
 const audit = JSON.parse(read('report/admin/data/timeline-chapter-audit.json'));
 ok(audit.rows.filter(r => r.derived).length === DC.LIST.length && audit.rows.length === 64 + DC.LIST.length, `감사 결과에 엔진 장이 다 들어 있지 않음(${audit.rows.filter(r => r.derived).length}/${DC.LIST.length})`);
 
+// 4. AI 풀이 엔진 분야 ↔ 타임라인 장 짝(표시 전용)
+globalThis.window = globalThis; require(path.join(root, 'report/v2/reading-catalog.js'));
+const IKM = require(path.join(root, 'report/v2/ik-timeline-map.js'));
+const cat = MantraEditorial.defaults(), live = cat.chapters.filter(c => c.state !== 'archived' && ['self', 'wealth', 'career', 'love'].includes(c.topicId));
+const known = new Set(cat.chapters.map(c => c.id).concat(DC.LIST.map(d => d.id)));
+IKM.DOMAINS.forEach(d => { ok(IKM.MAP[d] && IKM.MAP[d].chapters.length && IKM.NAME[d], 'AI 분야 짝 없음: ' + d); IKM.MAP[d].chapters.forEach(id => ok(known.has(id), 'AI 분야 짝에 없는 장: ' + d + ' ' + id)); });
+live.concat(DC.LIST).forEach(c => ok(IKM.domainsOf(c.id).length >= 1, '짝 분야가 없는 타임라인 장: ' + c.id + ' ' + c.title));
+for (const [file, pat, msg] of [
+  ['report/admin/index.html', '<script src="../v2/ik-timeline-map.js', '관리자 화면이 AI 분야 짝 목록을 불러오지 않음'],
+  ['report/admin/v2-ik.js', 'tlPair(d) + \'<div class="ik-sec">풀이 항목', '풀이 구성 탭에 타임라인 짝 장 카드가 없음'],
+  ['report/admin/v2-ik.js', 'sections.length) { unsaved.design = true; G.design[d] = clone', '풀이 구성이 저장값을 기본값으로 덮음'],
+  ['report/admin/v2-editorial.js', 'ikPair(row&&row.id)', '챕터 계약 탭에 AI 분야 짝 표시가 없음'],
+  ['report/admin/v2-editorial.js', 'ikPair(d.id,true)', '챕터 계약 탭 엔진 장에 AI 분야 짝 표시가 없음']]) ok(read(file).includes(pat), msg);
+
 if (fails.length) { console.log('실패 ' + fails.length + '건\n - ' + fails.join('\n - ')); process.exit(1); }
-console.log(`모두 통과 · 엔진 장 ${DC.LIST.length}개 제목·모듈·스위치·자리 일치 · 타임라인 구성·챕터 계약·감사 성적표·감사 도구 연동`);
+console.log(`모두 통과 · 엔진 장 ${DC.LIST.length}개 제목·모듈·스위치·자리 일치 · 타임라인 구성·챕터 계약·감사 성적표·감사 도구 연동 · AI 풀이 분야 8개 ↔ 타임라인 ${live.length + DC.LIST.length}장 짝`);
