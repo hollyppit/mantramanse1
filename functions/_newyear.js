@@ -6,7 +6,8 @@ import { memberOf, sajuKey, ownedWorlds, markViewed, isMonitor, loadProducts, pa
 
 export const NEWYEAR_KEY = 'newyear:config';
 export const VISIBILITY = ['closed', 'free', 'paid'];
-export const DEFAULT_YEAR_CONFIG = { visibility: 'closed', teaser: ['open', 'total.core'], intro: '', contentMode: 'public' };
+export const DEFAULT_ENTRY = { show: true, kick: '', title: '', line: '', go: '' };   // 타임라인 입구 카드(빈 칸 = 기본 문구, entryOf 참고)
+export const DEFAULT_YEAR_CONFIG = { visibility: 'closed', teaser: ['open', 'total.core'], intro: '', contentMode: 'public', entry: { ...DEFAULT_ENTRY } };
 
 export async function loadNewyearConfig(env) {
   let saved = null; try { const kv = kvOf(env); saved = kv ? await kv.get(NEWYEAR_KEY, 'json') : null; } catch { saved = null; }
@@ -22,11 +23,34 @@ export function cleanNewyearConfig(raw) {
     if (Array.isArray(v.teaser)) c.teaser = v.teaser.filter(t => typeof t === 'string' && /^[a-z]+(\.[a-z]+)?$/.test(t)).slice(0, 6);
     if (typeof v.intro === 'string') c.intro = v.intro.slice(0, 600);
     if (v.contentMode === 'public' || v.contentMode === 'preview') c.contentMode = v.contentMode;   // preview = 검수 전 문구도 보여 줌(운영에서는 쓰지 않는다)
+    const e = v.entry && typeof v.entry === 'object' ? v.entry : {}, one = (x, n) => (typeof x === 'string' ? x.replace(/\s+/g, ' ').trim().slice(0, n) : '');
+    c.entry = { show: e.show !== false, kick: one(e.kick, 40), title: one(e.title, 40), line: one(e.line, 120), go: one(e.go, 20) };
     out.years[y] = c;
   }
   return out;
 }
-export const yearConfig = (cfg, y) => (cfg.years && cfg.years[y]) || { ...DEFAULT_YEAR_CONFIG };
+export const yearConfig = (cfg, y) => (cfg.years && cfg.years[y]) || { ...DEFAULT_YEAR_CONFIG, entry: { ...DEFAULT_ENTRY } };
+
+// 운명의 타임라인 입구 카드(report/hub/hub-timeline.js 가 /api/newyear/entry 로 받는다).
+// 공개 범위가 비공개거나 관리자가 '카드 보이기'를 끄면 null. 여러 해가 공개 중이면 가장 늦은 해 하나만.
+const STEMS = '갑을병정무기경신임계', BRANCHES = '자축인묘진사오미신유술해';
+export const yearGz = y => STEMS[((y - 4) % 10 + 10) % 10] + BRANCHES[((y - 4) % 12 + 12) % 12];
+export function entryOf(cfg, productOf) {
+  const ys = Object.keys((cfg && cfg.years) || {}).map(Number).sort((a, b) => b - a);
+  for (const y of ys) {
+    const c = cfg.years[y], e = c.entry || DEFAULT_ENTRY;
+    if (c.visibility === 'closed' || e.show === false) continue;
+    const paid = c.visibility === 'paid', p = productOf ? productOf(y) : null;
+    return {
+      year: y, paid, price: paid && p && p.price > 0 ? p.price : 0,
+      kick: e.kick || ('NEW YEAR · ' + y + ' ' + yearGz(y) + '년' + (paid ? '' : ' · 무료')),
+      title: e.title || (y + ' 토정비결 신년운세'),
+      line: e.line || '토정비결 괘와 내 사주로 읽는 한 해 · 총운·재물·직업·연애·건강·12개월',
+      go: e.go || '신년운세 보기',
+    };
+  }
+  return null;
+}
 
 // 사주 식별값: _commerce.sajuKey 와 같은 규칙(원국 네 기둥 한자 + 성별). 서버가 출생 입력으로 직접 계산한다.
 export async function sajuKeyOfBirth(Manse, birth) {

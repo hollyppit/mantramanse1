@@ -171,5 +171,18 @@ const imp = p => import(url.pathToFileURL(path.join(root, p)).href);
   const cl = NYG.cleanNewyearConfig({ years: { 2027: { visibility: 'open-all', teaser: ['open', 'x;drop'], intro: 'a'.repeat(900) }, abc: { visibility: 'free' } } });
   assert.equal(cl.years[2027].visibility, 'closed'); assert.deepEqual(cl.years[2027].teaser, ['open']); assert.equal(cl.years[2027].intro.length, 600); assert.ok(!cl.years.abc);
 
-  console.log('newyear-api-sim ok: 서버 엔진 로드·관리자 검수(수정·승인·금지 표현·rev 충돌·이력)·closed/free/paid·맛보기 비노출·회원×사주 권한·첫 열람 기록·연도 상품 분리');
+  // 12) 타임라인 입구 카드(/api/newyear/entry): 비공개 숨김 · 무료 기본 문구 · 유료 가격 · 관리자 문구·끄기
+  const entryApi = await imp('functions/api/newyear/entry.js');
+  const ent = async () => (await (await entryApi.onRequestGet({ env, request: new Request('https://x.test/api/newyear/entry') })).json()).entry;
+  setCfg('closed'); assert.equal(await ent(), null, '비공개면 카드 없음');
+  setCfg('free'); let en = await ent();
+  assert.equal(en.year, 2027); assert.ok(/정미년 · 무료/.test(en.kick)); assert.equal(en.title, '2027 토정비결 신년운세'); assert.equal(en.paid, false);
+  setCfg('paid'); setPrice(19800); en = await ent(); assert.equal(en.paid, true); assert.equal(en.price, 19800); assert.ok(!/무료/.test(en.kick));
+  P = await admCall('POST', '', { action: 'config', year: 2027, visibility: 'free', entry: { show: true, title: '  새해 운세\n보기 ', line: '<b>x</b>', go: '열기' } });
+  en = await ent(); assert.equal(en.title, '새해 운세 보기'); assert.equal(en.go, '열기'); assert.equal(en.line, '<b>x</b>', '문자 그대로 저장(화면에서 이스케이프)');
+  assert.equal((await admCall('GET', '?year=2027')).body.config.entry.title, '새해 운세 보기', '관리자 GET 에 입구 설정');
+  P = await admCall('POST', '', { action: 'config', year: 2027, visibility: 'free', entry: { show: false } });
+  assert.equal(await ent(), null, '카드 끄면 숨김');
+
+  console.log('newyear-api-sim ok: 입구 카드 ·서버 엔진 로드·관리자 검수(수정·승인·금지 표현·rev 충돌·이력)·closed/free/paid·맛보기 비노출·회원×사주 권한·첫 열람 기록·연도 상품 분리');
 })().catch(e => { console.error(e); process.exit(1); });

@@ -21,6 +21,21 @@
     return tlP;
   }
 
+  // 신년운세 입구 카드 설정(/api/newyear/entry, 관리자 › 신년운세). undefined = 아직 안 받음, null = 숨김. 못 받으면 숨긴다.
+  var NYE, nyP = null;
+  function loadNyEntry() {
+    if (!nyP) nyP = new Promise(function (ok) {
+      var done = false, fin = function (v) { if (!done) { done = true; NYE = v; ok(v); } }; setTimeout(function () { fin(null); }, 5000);
+      try { fetch('/api/newyear/entry').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { fin(d && d.entry ? d.entry : null); }).catch(function () { fin(null); }); } catch (e) { fin(null); }
+    });
+    return nyP;
+  }
+  function nyEntryHtml() {
+    var e = NYE; if (!e || !e.year) return '';
+    var won = e.paid && e.price > 0 ? ' · ' + (+e.price).toLocaleString('ko-KR') + '원' : '';
+    return '<a class="tq-fc tq-ny" href="/report/newyear/?from=timeline" data-ny-go="' + (+e.year) + '" data-track="fortune_content_click" data-p="newyear_' + (+e.year) + '" style="grid-column:1/-1;border-color:rgba(214,90,70,.55);background:linear-gradient(120deg,rgba(150,40,30,.28),rgba(0,0,0,0) 70%)"><small>' + esc(e.kick) + esc(won) + '</small><h4>' + esc(e.title) + '</h4><p>' + esc(e.line) + '</p><span>' + esc(e.go) + ' →</span></a>';
+  }
+
   // 관리자가 저장한 세계 정의(/api/worlds). 4초 안에 못 받으면 코드 기본 6개 세계로 간다(운명 세계 지도와 같은 규칙).
   function loadWorlds() {
     return new Promise(function (ok) {
@@ -322,8 +337,9 @@
         card('#/today', 'calendar', 'CALENDAR · 무료', '일진 캘린더', '월운 그래프와 날짜별 일진, 내 일정에 맞는 날 고르기', '캘린더 열기') +
         card('#/tarot', 'tarot', 'FREE TAROT · 무료', '무료 타로', '마음속 질문 하나, 카드 한 장으로 가볍게 확인합니다', '카드 뽑기') +
         card('#/awaken?replay=1&to=timeline', 'ilju_replay', 'ILJU · 무료', '일주 각성 영상 다시 보기', esc(ju) + '일주 · 타고난 기질과 강점을 영상으로 다시 만납니다', '영상 보기') +
-        // 신년운세(별도 연도 상품, /report/newyear/) 입구. 누르면 지금 사주를 넘겨 바로 풀이가 열린다(아래 [data-ny-go] 처리).
-        (PREVIEW ? '' : '<a class="tq-fc tq-ny" href="/report/newyear/?from=timeline" data-ny-go="2027" data-track="fortune_content_click" data-p="newyear_2027" style="grid-column:1/-1;border-color:rgba(214,90,70,.55);background:linear-gradient(120deg,rgba(150,40,30,.28),rgba(0,0,0,0) 70%)"><small>NEW YEAR · 2027 정미년</small><h4>2027 토정비결 신년운세</h4><p>토정비결 괘와 내 사주로 읽는 한 해 · 총운·재물·직업·연애·건강·12개월</p><span>신년운세 보기 →</span></a>') +
+        // 신년운세(별도 연도 상품, /report/newyear/) 입구. 보이기·문구는 관리자 › 신년운세 › 공개 범위에서 정하고 /api/newyear/entry 로 받는다(nyEntryHtml).
+        // 누르면 지금 사주를 넘겨 바로 풀이가 열린다(아래 [data-ny-go] 처리).
+        (PREVIEW ? '' : '<div id="tqNy" style="display:contents">' + nyEntryHtml() + '</div>') +
         '</div><p class="tq-fh">오늘의 분야별 흐름</p><div class="tq-fchips">' +
         chip('money', '재물운', 'today_money') + chip('work', '일·사업운', 'today_work') + chip('love', '연애운', 'today_love') + chip('health', '컨디션', 'today_health') + chip('action', '오늘의 행동 가이드', 'today_action') + '</div>';
     }
@@ -350,6 +366,7 @@
     DOC.body.classList.add('tq-wide'); var prevClean = H.cleanup; H.cleanup = function () { DOC.body.classList.remove('tq-wide'); if (io) io.disconnect(); if (prevClean) prevClean(); };
     var root0 = $('#tq', el);
     if (!PREVIEW && H.Auth && H.Auth.badge) H.Auth.badge(root0);   // 1:1 문의 새 답변 표시(hub-me.js)
+    if (!PREVIEW) loadNyEntry().then(function () { var s = $('#tqNy', root0); if (s && H.alive(ctx)) s.innerHTML = nyEntryHtml(); });   // 신년운세 입구 카드(관리자 설정)
 
     function redraw(id) { var b = $('#tqb-' + id, root0); if (b) { var y = root.scrollY; b.innerHTML = builders[id](); root.scrollTo(0, y); } }
     root0.addEventListener('click', function (e) {

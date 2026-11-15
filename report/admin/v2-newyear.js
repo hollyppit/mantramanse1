@@ -27,6 +27,18 @@
   }
 
   // ── 그리기
+  // 운명의 타임라인 '오늘 · 무료 콘텐츠' 칸의 입구 카드(서버 functions/_newyear.js entryOf, 공개 API /api/newyear/entry). 빈 칸은 기본 문구.
+  var GZ = function (y) { return '갑을병정무기경신임계'[((y - 4) % 10 + 10) % 10] + '자축인묘진사오미신유술해'[((y - 4) % 12 + 12) % 12] + '년'; };
+  function entryHtml(c, d) {
+    var e = c.entry || { show: true }, paid = c.visibility === 'paid';
+    var def = { kick: 'NEW YEAR · ' + d.year + ' ' + GZ(d.year) + (paid ? '' : ' · 무료'), title: d.year + ' 토정비결 신년운세', line: '토정비결 괘와 내 사주로 읽는 한 해 · 총운·재물·직업·연애·건강·12개월', go: '신년운세 보기' };
+    var f = function (id, k, label, n) { return '<label style="display:block;margin:4px 0"><span class="muted" style="display:inline-block;width:92px">' + label + '</span><input id="' + id + '" maxlength="' + n + '" style="width:calc(100% - 100px)" value="' + esc(e[k] || '') + '" placeholder="' + esc(def[k]) + '"></label>'; };
+    var state = c.visibility === 'closed' ? '숨김 — 공개 범위가 비공개라 카드가 나오지 않아요' : e.show === false ? '숨김 — 카드 보이기가 꺼져 있어요' : '보임' + (paid ? ' — 누르면 맛보기·구매 화면' : ' — 누르면 전체 무료 풀이');
+    return '<div style="margin:12px 0;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:8px"><b>운명의 타임라인 입구 카드</b> <span class="muted" style="font-size:.85rem">· 지금 상태: ' + esc(state) + '</span>' +
+      '<p class="muted" style="margin:4px 0 8px;font-size:.85rem">타임라인 맨 위 \'오늘 · 무료 콘텐츠\' 칸에 나오는 카드예요. 누르면 그 사람의 사주로 신년운세가 바로 열려요. 빈 칸은 회색 기본 문구가 쓰여요. 공개 설정 저장 뒤 1분 안에 반영돼요.</p>' +
+      '<label style="display:block;margin:4px 0"><input type="checkbox" id="nyEntryShow"' + (e.show !== false ? ' checked' : '') + '> 타임라인에 카드 보이기</label>' +
+      f('nyEntryKick', 'kick', '윗줄(작은 글씨)', 40) + f('nyEntryTitle', 'title', '제목', 40) + f('nyEntryLine', 'line', '설명', 120) + f('nyEntryGo', 'go', '버튼 글', 20) + '</div>';
+  }
   function draw() {
     if (!root) return;
     var d = S.data;
@@ -44,6 +56,7 @@
       TEASER.map(function (t) { return '<label style="margin-right:12px"><input type="checkbox" name="nyTeaser" value="' + t[0] + '"' + (c.teaser.indexOf(t[0]) >= 0 ? ' checked' : '') + '> ' + t[1] + '</label>'; }).join('') +
       '<p class="muted" style="margin:10px 0 4px">화면 첫머리 소개(비우면 기본 소개)</p><textarea id="nyIntro" rows="3" style="width:100%" maxlength="600">' + esc(c.intro || '') + '</textarea>' +
       '<label style="display:block;margin:8px 0"><input type="checkbox" id="nyPreviewMode"' + (c.contentMode === 'preview' ? ' checked' : '') + '> 관리자 화면에서 검수 전 문구까지 보기(사용자에게는 영향 없음)</label>' +
+      entryHtml(c, d) +
       '<button class="btn main" id="nySaveCfg">공개 설정 저장</button></div>';
     // 상품
     h += '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">상품</h3>' + (p ? '<p style="margin:0">' + esc(p.name) + ' · <b>' + (p.price > 0 ? won(p.price) : '가격 미정(판매 안 함)') + '</b> · ' + (p.onSale ? '✅ 판매 중' : '⬜ 판매 전') + '</p><p class="muted" style="margin:4px 0 0">가격·판매 여부는 <b>판매·타임라인 › 결제·상품</b> 화면의 ' + esc(p.id) + ' 줄에서 바꿔요. 주문·환불도 그 화면에서 확인해요.</p>' : '<p class="muted">상품 정보가 없습니다.</p>') + '</div>';
@@ -141,7 +154,8 @@
       var vis = (root.querySelector('input[name=nyVis]:checked') || {}).value, teaser = [].map.call(root.querySelectorAll('input[name=nyTeaser]:checked'), function (x) { return x.value; });
       if (vis === 'paid' && !(S.data.product && S.data.product.price > 0) && !confirm('가격이 0원이라 유료로 바꾸면 아무도 구매할 수 없어요. 그래도 저장할까요?')) return;
       if (vis !== 'closed' && S.data.summary.modern.reviewedInYear === 0 && !confirm('승인한 토정 현대어가 아직 없어요. 공개 화면에는 원문만 나가요. 그래도 공개할까요?')) return;
-      return post({ action: 'config', year: S.year, visibility: vis, teaser: teaser, intro: root.querySelector('#nyIntro').value, contentMode: root.querySelector('#nyPreviewMode').checked ? 'preview' : 'public' }, '공개 설정을 저장했어요.');
+      return post({ action: 'config', year: S.year, visibility: vis, teaser: teaser, intro: root.querySelector('#nyIntro').value, contentMode: root.querySelector('#nyPreviewMode').checked ? 'preview' : 'public',
+        entry: { show: root.querySelector('#nyEntryShow').checked, kick: root.querySelector('#nyEntryKick').value, title: root.querySelector('#nyEntryTitle').value, line: root.querySelector('#nyEntryLine').value, go: root.querySelector('#nyEntryGo').value } }, '공개 설정을 저장했어요.');
     }
     if (id === 'nyBulkModern' || id === 'nyBulkBlocks') {
       var kind = id === 'nyBulkModern' ? 'modern' : 'blocks';

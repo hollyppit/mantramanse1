@@ -78,6 +78,12 @@ http.createServer(async (q, r) => {
     const res = await fn({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'x-reviewer': q.headers['x-reviewer'] || '', 'content-type': 'application/json' }, body: buf && buf.length ? buf : undefined }) });
     r.statusCode = res.status; r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(await res.text());
   }
+  if (p === '/api/newyear/entry') { // 타임라인 입구 카드(메모리 KV — 관리자 탭에서 저장한 값, 처음엔 NY_VIS 기본 paid)
+    if (!ikMem.has('newyear:config')) ikMem.set('newyear:config', JSON.stringify({ years: { 2027: { visibility: process.env.NY_VIS || 'paid' } } }));
+    const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/newyear/entry.js')).href);
+    const res = await mod.onRequestGet({ env: ikEnv, request: new Request('http://x' + q.url) });
+    r.statusCode = res.status; r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(await res.text());
+  }
   if (p === '/api/newyear/reading' || p === '/api/commerce/access') { // 신년운세 화면 확인용: 실제 함수를 메모리 KV 로 실행. 공개 범위는 NY_VIS(기본 paid), 관리자 비밀번호 test
     if (!ikMem.has('newyear:config')) ikMem.set('newyear:config', JSON.stringify({ years: { 2027: { visibility: process.env.NY_VIS || 'paid' } } }));
     if (!ikMem.has('commerce:products')) ikMem.set('commerce:products', JSON.stringify({ products: [{ id: 'tj2027', price: 19800, active: true }] }));
