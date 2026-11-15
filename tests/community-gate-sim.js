@@ -7,7 +7,9 @@ const B = 'https://mantramanse.pages.dev';
 
 // ── 가짜 Supabase
 const USERS = { 'tok-tester': { id: '11111111-1111-4111-8111-111111111111', email: 'tester@example.com' }, 'tok-beta': { id: '22222222-2222-4222-8222-222222222222', email: 'beta@example.com' }, 'tok-plain': { id: '33333333-3333-4333-8333-333333333333', email: 'plain@example.com' } };
-const T = { community_access: [], launch_alerts: [], admin_audit_log: [] }; let seq = 1; const mails = [];
+// 2단계부터 회원 입장에는 필수 동의(이용약관·개인정보)가 필요하다 → 테스터·베타 회원은 동의를 마친 상태로 둔다(동의 규칙 자체는 tests/member-consent-sim.js)
+const agreed = id => ['terms', 'privacy'].map(kind => ({ user_id: id, kind, agreed: true, version: '2026-11-10', granted_at: '2026-11-16T00:00:00Z' }));
+const T = { community_access: [], launch_alerts: [], admin_audit_log: [], member_consents: [...agreed(USERS['tok-tester'].id), ...agreed(USERS['tok-beta'].id)] }; let seq = 1; const mails = [];
 function match(row, qs) { for (const [k, v] of qs) { if (['select', 'order', 'limit', 'on_conflict'].includes(k)) continue; if (v === 'is.null') { if (row[k] != null) return false; } else if (v.startsWith('eq.')) { if (String(row[k]) !== decodeURIComponent(v.slice(3))) return false; } } return true; }
 global.fetch = async (u, o = {}) => {
   u = String(u); const m = o.method || 'GET', body = o.body ? JSON.parse(o.body) : null, res = (d, s = 200) => new Response(d == null ? null : JSON.stringify(d), { status: s });
@@ -35,6 +37,7 @@ const ENV = { ADMIN_PASSWORD: 'adm-pw', SUPABASE_URL: 'https://sb.local', SUPABA
   const H = (h = {}) => ({ 'content-type': 'application/json', ...h });
   const admin = { authorization: 'Bearer adm-pw', 'x-reviewer': encodeURIComponent('검수자') };
   const setStage = async s => { kvMem.set('community:stage', JSON.stringify({ stage: s })); };
+  let d0;
   const cookieOf = r => ((r.headers.get('set-cookie') || '').match(/mt_cm=([^;]*)/) || [])[1] || '';
 
   // 1) 기본 = 개발 중(값 없음·깨진 값·모르는 값도 닫힘)
@@ -76,6 +79,7 @@ const ENV = { ADMIN_PASSWORD: 'adm-pw', SUPABASE_URL: 'https://sb.local', SUPABA
 
   const enterAs = async tok => enter.onRequestPost({ request: req('/api/community/enter', { method: 'POST', headers: { 'x-member-token': tok } }), env: ENV });
   r = await enterAs('tok-tester'); const testerCookie = cookieOf(r); ok(r.status === 200 && (await r.json()).role === 'tester', '테스터는 개발 중 입장');
+  const keep = T.member_consents.splice(0, 2); r = await enterAs('tok-tester'); d0 = await r.json(); ok(r.status === 409 && d0.need === 'consent' && d0.docs.length === 2 && !cookieOf(r), '필수 동의 전 테스터 → 동의 요청(쿠키 없음)'); T.member_consents.unshift(...keep);
   r = await enterAs('tok-beta'); ok(r.status === 403, '베타 회원은 개발 중 입장 불가');
   await setStage('beta');
   r = await enterAs('tok-beta'); const betaCookie = cookieOf(r); ok(r.status === 200, '베타 단계에서 베타 회원 입장');

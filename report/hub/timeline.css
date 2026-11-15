@@ -244,3 +244,9 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 #hub .me-wd .me-why{ font-size: .86rem; line-height: 1.7; } #hub .me-warn{ color: #e3a593; } #hub .me-warn a{ color: var(--gold-l); }
 #hub .me-wd-row input{ width: 120px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(8,10,17,.7); color: var(--ink); font: inherit; font-size: 16px; }
 #hub .me-wd-row .btn{ flex: 0 1 auto; }
+
+/* 마이페이지 수신 설정·광장 프로필(2026-11-16) */
+#hub .me-form .me-opt{ display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 12px; background: rgba(8,10,17,.55); cursor: pointer; }
+#hub .me-form .me-opt input{ width: 22px; min-height: 0; height: 22px; margin: 1px 0 0; padding: 0; flex: none; accent-color: var(--gold); }
+#hub .me-opt > span{ display: grid; gap: 2px; font-size: inherit; } #hub .me-opt b{ color: var(--ink); font-size: .95rem; font-weight: 600; } #hub .me-opt small{ color: var(--ink-3); font-size: .8rem; }
+#hub .me-form label[hidden]{ display: none; }

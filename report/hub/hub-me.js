@@ -4,6 +4,7 @@
 //   · 출생정보는 지금처럼 이 기기(localStorage)에만 둔다. 계정에 남는 사주는 구매할 때 '계정에 저장'을 고른 것뿐이다(member_sajus).
 //   · 전체 결제 기록·영수증·바로 환불·로그인 연결은 /report/my/ 에 두고 요약과 링크만 보여 준다. 회원 탈퇴는 여기서 바로 한다(/api/account/withdraw).
 //   · 비로그인: 로그인 안내 + 이 기기 정보 수정·삭제(삭제는 로그인과 상관없이 할 수 있어야 한다).
+//   · 2026-11-16(통합 플랫폼 2단계): 광고성 정보 수신 설정 카드(/api/account/consent)와, 운명의 광장에 들어갈 수 있는 회원에게만 광장 프로필 카드(/api/account/profile). 맨 아래 MeConsent 묶음
 (function (root) {
   'use strict';
   var H = root.Hub; if (!H) return;
@@ -202,6 +203,7 @@
         (pend ? '<p class="me-note">‘결제 확인 중’ 주문은 결제가 끝나지 않은 것입니다. 실제로 결제했다면 잠시 후 결제 완료로 바뀌고, 그렇지 않으면 자동으로 정리됩니다.</p>' : '')
       : '<p class="me-muted">결제 기록이 없습니다.</p>') +
       '<div class="me-acts"><a class="btn ghost sm" href="/report/my/" data-track="mypage_click" data-p="orders">전체 구매 내역 · 영수증 · 환불 →</a></div></section>';
+    h += '<section class="me-card" id="meConsent" aria-live="polite"><h2>혜택·소식 받기 설정</h2><p class="me-muted">불러오는 중입니다…</p></section><div id="meProfile"></div>';
     h += inquiryHtml(email, orders);
     h += deviceHtml(true);
     h += '<section class="me-card"><h2>계정</h2><div class="me-acts"><a class="btn ghost sm" href="/report/my/" data-track="mypage_click" data-p="logins">로그인 방법 연결</a><button type="button" class="btn ghost sm" data-me="logout">로그아웃</button></div>' +
@@ -274,6 +276,7 @@
           paint(memberHtml(sess, rs[0].ok ? rs[0].j : null, rs[1] && rs[1].ok ? rs[1].j : null) + (rs[0].ok ? '' : '<p class="me-muted">구매 정보를 불러오지 못했습니다. 잠시 후 다시 열어 주세요.</p>'));
           el.__mine = rs[0].ok ? rs[0].j : null; el.__token = sess.access_token; el.__email = (rs[0].ok && rs[0].j.member && rs[0].j.member.email) || (sess.user && sess.user.email) || '';
           inquiryList($('#meInqList'), sess.access_token);
+          if (H.MeConsent) H.MeConsent.mount(sess.access_token, ctx);
           if (q.inq === 'list') setTimeout(function () { var s = $('#meInq'); if (s) s.scrollIntoView({ block: 'start', behavior: H.reduce ? 'auto' : 'smooth' }); }, 500);
           if (q.inq && q.inq !== 'list') { var io = $('[data-me="inq-open"]'); if (io) { io.click(); $('#meInq').scrollIntoView({ block: 'start' }); } }
           H.track('mypage_view', { logged: 1 });
@@ -307,4 +310,103 @@
     root.addEventListener('mantra:guide-change', onGuide);
     var prev = H.cleanup; H.cleanup = function () { root.document.removeEventListener('click', onClick); root.document.removeEventListener('submit', onSubmit); root.document.removeEventListener('input', onInput); root.removeEventListener('mantra:guide-change', onGuide); if (prev) prev(); };
   });
+})(window);
+
+// ── 광고성 정보 수신 설정 · 운명의 광장 프로필(2026-11-16, 통합 플랫폼 2단계)
+//   서버: POST /api/account/consent {action:'get'|'set'}, POST /api/account/profile {action:'get'|'save'} — 규칙은 functions/_consent.js
+//   기본은 모두 '받지 않음'. 채널마다 따로 고르고, 바꾸면 서버가 처리 결과를 계정 이메일로 알린다. 휴대폰 번호는 문자·카카오톡을 고를 때만 받는다.
+(function (root) {
+  'use strict';
+  var H = root.Hub; if (!H) return;
+  var esc = H.esc, $ = H.$;
+  var day = function (t) { try { return t ? new Date(t).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric' }) : ''; } catch (e) { return ''; } };
+  var post = function (url, token, body) {
+    return fetch(url, { method: 'POST', headers: { 'content-type': 'application/json', 'x-member-token': token }, body: JSON.stringify(body || {}) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { j._status = r.status; j._ok = r.ok; return j; }); })
+      .catch(function () { return { _status: 0, _ok: false, error: '연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.' }; });
+  };
+  var VIS = { members: '회원에게만', public: '모두에게', private: '나만 보기' };
+
+  function consentHtml(d) {
+    var docs = d.docs || [], st = d.state || {};
+    var opt = docs.filter(function (x) { return !x.required && !x.night; }), night = docs.filter(function (x) { return x.night; })[0];
+    var reqLine = d.requiredOk
+      ? '이용약관·개인정보 수집·이용: 동의함' + (st.terms && st.terms.at ? '(' + esc(day(st.terms.at)) + ')' : '')
+      : '이용약관·개인정보 수집·이용 동의는 운명의 광장에 처음 들어가실 때 받습니다.';
+    var row = function (x, cls) { var on = st[x.kind] && st[x.kind].agreed; return '<label class="me-opt' + (cls || '') + '"><input type="checkbox" name="' + esc(x.kind) + '"' + (on ? ' checked' : '') + '><span><b>' + esc(x.title) + '</b><small>' + (on && st[x.kind].at ? esc(day(st[x.kind].at)) + ' 동의' : '받지 않음') + '</small></span></label>'; };
+    var anyPhone = opt.some(function (x) { return x.phone && st[x.kind] && st[x.kind].agreed; });
+    return '<h2>혜택·소식 받기 설정</h2>' +
+      '<p class="me-muted">새 풀이·할인 같은 소식을 받을 방법을 골라 주세요. 방법마다 따로 고를 수 있고, 처음에는 모두 <b>받지 않음</b>입니다.</p>' +
+      '<form class="me-form" id="meConsentForm">' + opt.map(function (x) { return row(x); }).join('') +
+      '<label id="mePhoneRow"' + (anyPhone ? '' : ' hidden') + '><span>휴대폰 번호 <small>문자·카카오톡으로 받을 때만 씁니다' + (d.phone ? ' · 지금 ' + esc(d.phone) : '') + '</small></span><input name="phone" inputmode="numeric" autocomplete="tel" maxlength="13" placeholder="' + (d.phone ? '바꾸실 때만 적어 주세요' : '01012345678') + '"></label>' +
+      (night ? row(night, ' me-night') : '') +
+      '<div class="me-acts"><button class="btn sm" type="submit" disabled>설정 저장</button></div><p class="me-msg" role="status"></p></form>' +
+      (d.kakaoChannel ? '<div class="me-acts"><a class="btn ghost sm" href="' + esc(d.kakaoChannel) + '" target="_blank" rel="noopener" data-track="kakao_channel">카카오톡 채널 추가하기</a></div><p class="me-note">채널을 추가해도 광고 수신에 동의한 것으로 보지 않습니다. 카카오톡으로 소식을 받으시려면 위에서 따로 골라 주세요.</p>' : '') +
+      '<p class="me-note">설정을 바꾸면 처리 결과를 계정 이메일로 알려 드립니다. 동의하신 뒤에도 2년마다 계속 받으실지 다시 여쭙니다. 밤 9시~아침 8시에는 따로 동의하신 경우에만 보냅니다. ' + reqLine + ' · <a href="/report/legal/privacy.html" target="_blank" rel="noopener">개인정보처리방침</a></p>';
+  }
+  function profileHtml(p) {
+    var x = p.profile || {};
+    return '<section class="me-card" id="meProfileCard"><h2>운명의 광장 프로필</h2>' +
+      (p.requiredOk ? '' : '<p class="me-muted">운명의 광장에 처음 들어가실 때 이용 동의를 받은 뒤 프로필을 만들 수 있습니다.</p>') +
+      '<form class="me-form" id="meProfileForm"' + (p.requiredOk ? '' : ' hidden') + '>' +
+      '<label><span>닉네임 <small>2~12자 · 한글·영문·숫자·밑줄</small></span><input name="nickname" maxlength="12" autocomplete="nickname" value="' + esc(x.nickname) + '" required></label>' +
+      '<label><span>한 줄 소개 <small>160자까지 · 링크·전화번호는 넣을 수 없습니다</small></span><textarea name="bio" rows="2" maxlength="160">' + esc(x.bio) + '</textarea></label>' +
+      '<label><span>프로필 공개 범위</span><select name="visibility">' + Object.keys(VIS).map(function (k) { return '<option value="' + k + '"' + (x.visibility === k ? ' selected' : '') + '>' + VIS[k] + '</option>'; }).join('') + '</select></label>' +
+      '<label class="me-opt"><input type="checkbox" name="showIlgan"' + (x.showIlgan ? ' checked' : '') + '><span><b>프로필에 일간 보이기</b><small>예: 갑목 · 기본은 숨김</small></span></label>' +
+      '<label class="me-opt"><input type="checkbox" name="showIlju"' + (x.showIlju ? ' checked' : '') + '><span><b>프로필에 일주 보이기</b><small>예: 갑자 일주 · 기본은 숨김</small></span></label>' +
+      '<div class="me-acts"><button class="btn sm" type="submit">프로필 저장</button></div><p class="me-msg" role="status"></p></form>' +
+      '<p class="me-note">생년월일·태어난 시간은 프로필에 올라가지 않습니다.</p></section>';
+  }
+  function bindConsent(sec, token, d) {
+    var form = $('#meConsentForm'); if (!form) return;
+    var btn = form.querySelector('[type=submit]'), msg = form.querySelector('.me-msg'), phoneRow = $('#mePhoneRow');
+    var phoneKinds = (d.docs || []).filter(function (x) { return x.phone; }).map(function (x) { return x.kind; });
+    var diff = function () { var c = {}, v = {}; (d.docs || []).forEach(function (x) { var el = form.elements[x.kind]; if (!el) return; var was = !!(d.state[x.kind] && d.state[x.kind].agreed); if (el.checked !== was) { c[x.kind] = el.checked; v[x.kind] = x.version; } }); return { c: c, v: v }; };
+    var sync = function () {
+      var wantPhone = phoneKinds.some(function (k) { return form.elements[k] && form.elements[k].checked; });
+      phoneRow.hidden = !wantPhone;
+      btn.disabled = !(Object.keys(diff().c).length || (wantPhone && form.elements.phone.value.trim()));
+      msg.textContent = '';
+    };
+    form.addEventListener('change', sync); form.addEventListener('input', sync);
+    form.addEventListener('submit', function (e) {
+      e.preventDefault(); var x = diff(), ph = form.elements.phone.value.trim(), body = { action: 'set', changes: x.c, versions: x.v, via: 'mypage' };
+      if (ph && !phoneRow.hidden) body.phone = ph;
+      btn.disabled = true; msg.textContent = '저장하는 중입니다…';
+      post('/api/account/consent', token, body).then(function (r) {
+        if (!r._ok) { btn.disabled = false; msg.textContent = r._status === 401 ? '로그인이 만료됐습니다. 다시 로그인해 주세요.' : (r.error || '저장하지 못했습니다.'); if (r.needPhone) form.elements.phone.focus(); return; }
+        paintConsent(sec, token, r);
+        H.toast('수신 설정을 저장했습니다.' + (r.mailed ? ' 처리 결과를 메일로 보내 드렸어요.' : ''), 4000);
+        H.track('consent_change', { n: (r.changed || []).length });
+      });
+    });
+  }
+  function paintConsent(sec, token, d) { sec.innerHTML = consentHtml(d); bindConsent(sec, token, d); }
+  function bindProfile(token) {
+    var form = $('#meProfileForm'); if (!form) return;
+    var msg = form.querySelector('.me-msg'), btn = form.querySelector('[type=submit]');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault(); var f = form.elements;
+      btn.disabled = true; msg.textContent = '저장하는 중입니다…';
+      post('/api/account/profile', token, { action: 'save', nickname: f.nickname.value.trim(), bio: f.bio.value, visibility: f.visibility.value, showIlgan: f.showIlgan.checked, showIlju: f.showIlju.checked }).then(function (r) {
+        btn.disabled = false;
+        if (!r._ok) { msg.textContent = r.error || '저장하지 못했습니다.'; if (r.field === 'nickname') f.nickname.focus(); return; }
+        msg.textContent = ''; H.toast('프로필을 저장했습니다.', 3000); H.track('profile_save', {});
+      });
+    });
+  }
+  H.MeConsent = {
+    mount: function (token, ctx) {
+      var sec = $('#meConsent'); if (!sec) return;
+      post('/api/account/consent', token, { action: 'get' }).then(function (d) {
+        if (ctx && !H.alive(ctx)) return;
+        if (!d._ok) { sec.innerHTML = '<h2>혜택·소식 받기 설정</h2><p class="me-muted">' + (d._status === 503 ? '지금은 설정을 불러올 수 없습니다.' : '설정을 불러오지 못했습니다. 잠시 후 다시 열어 주세요.') + '</p>'; return; }
+        paintConsent(sec, token, d);
+      });
+      post('/api/account/profile', token, { action: 'get' }).then(function (p) {
+        if ((ctx && !H.alive(ctx)) || !p._ok || !p.communityOpen) return;   // 운명의 광장에 들어갈 수 있는 회원에게만
+        var box = $('#meProfile'); if (!box) return; box.innerHTML = profileHtml(p); bindProfile(token);
+      });
+    },
+  };
 })(window);

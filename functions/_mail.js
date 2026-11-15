@@ -168,3 +168,19 @@ export async function mailLaunchAlert(env, to, revokeUrl) {
   if (!mailReady(env) || !okMail(to)) return false;
   return send(env, to, launchAlertMail(revokeUrl), 'launch-alert');
 }
+
+// 광고성 정보 수신 동의·철회 처리 결과 통지(정보통신망법 제50조 제8항: 전송자 명칭·처리 일자·처리 결과). 광고가 아닌 법정 안내 메일이다.
+// items: [{ title, action:'grant'|'revoke' }]
+export function consentResultMail(items, at) {
+  const rows = [['보낸 곳', `${BIZ.name}(${BIZ.service})`], ['처리 일시', kst(at)]].concat(items.map(i => [i.title, i.action === 'grant' ? '수신 동의' : '수신 거부(철회)']));
+  const note = '<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a">요청하신 광고성 정보 수신 설정이 위와 같이 처리되었습니다. 설정은 마이페이지에서 언제든 바꿀 수 있습니다. 직접 바꾸지 않으셨다면 마이페이지에서 다시 설정하고 고객 문의로 알려 주세요.</p>';
+  const text = `[${BIZ.service}] 광고성 정보 수신 설정 처리 결과\n보낸 곳: ${BIZ.name}\n처리 일시: ${kst(at)}\n` + items.map(i => `${i.title}: ${i.action === 'grant' ? '수신 동의' : '수신 거부(철회)'}`).join('\n') + `\n설정 변경: ${SITE}/report/#/me\n${BIZ.name} · ${BIZ.email}`;
+  const html = layout('수신 설정이 처리되었습니다', rows.map(([k, v]) => [k, esc(v)]), note)
+    .replace(`${SITE}/report/my/" style="display:inline-block`, `${SITE}/report/#/me" style="display:inline-block`).replace('>내 구매 내역 보기<', '>마이페이지에서 설정 보기<')
+    .replace('이 메일은 구매·환불 내역을 알려 드리는 거래 안내 메일로, 수신 동의와 관계없이 발송됩니다.', '이 메일은 수신 설정 처리 결과를 알려 드리는 법정 안내 메일로, 수신 동의와 관계없이 발송됩니다.');
+  return { subject: `[${BIZ.service}] 광고성 정보 수신 설정 처리 결과 안내`, html, text };
+}
+export async function mailConsentResult(env, to, items, at) {
+  if (!items || !items.length || !mailReady(env) || !okMail(to)) return false;
+  return send(env, to, consentResultMail(items, at), 'consent-result');
+}

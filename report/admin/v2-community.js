@@ -3,6 +3,8 @@
    ② 접근 권한(/api/community/access): 테스터(개발 중에도 입장)·베타 회원(비공개 베타부터 입장) 주기·회수. 가입한 회원의 이메일로 찾는다.
    ③ 출시 알림 현황(/api/community/alert GET): 신청자 수·회원/비회원·최근 신청(이메일 가림).
    ④ 관리자 입장(/api/community/enter): 이 브라우저에 입장 쿠키를 받아 /community/ 를 연다.
+   ⑤ 회원 동의 현황(/api/account/consent GET, 2단계): 항목별 동의 수·2년 재확인 대상·최근 변경(회원 id 없이).
+   ⑥ 감사 로그(/api/community/audit): 관리자 작업 최근 50건.
    모든 변경은 서버가 감사 로그(admin_audit_log)에 작업자 이름과 함께 남긴다. */
 (function () {
   'use strict';
@@ -55,6 +57,26 @@
     }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
 
+  var KIND = { terms: '이용약관(필수)', privacy: '개인정보 수집·이용(필수)', marketing_email: '광고 · 이메일', marketing_sms: '광고 · 문자', marketing_kakao: '광고 · 카카오톡', marketing_night: '광고 · 야간 수신' };
+  var VIA = { mypage: '마이페이지', gate: '처음 화면', community: '광장', signup: '가입', admin: '관리자', system: '자동' };
+  function loadConsents() {
+    var box = $('#cmConsent'); if (!box) return;
+    call('/api/account/consent').then(function (d) {
+      var ks = Object.keys(KIND);
+      box.innerHTML = '<table class="tbl"><thead><tr><th>항목</th><th>동의 중</th><th>지금 문구 버전</th><th>2년 재확인 대상</th></tr></thead><tbody>' +
+        ks.map(function (k) { var b = d.byKind[k] || {}; return '<tr><td>' + esc(KIND[k]) + '</td><td>' + (b.agreed || 0) + '</td><td>' + (b.current || 0) + '</td><td>' + (k.indexOf('marketing_') === 0 ? (b.renewDue || 0) : '—') + '</td></tr>'; }).join('') + '</tbody></table>' +
+        '<p class="muted" style="margin:8px 0 4px">최근 변경(누구인지는 표시하지 않습니다)</p>' +
+        (d.recent.length ? '<table class="tbl"><thead><tr><th>시각</th><th>항목</th><th>처리</th><th>경로</th></tr></thead><tbody>' + d.recent.map(function (r) { return '<tr><td>' + when(r.at) + '</td><td>' + esc(KIND[r.kind] || r.kind) + '</td><td>' + (r.action === 'grant' ? '동의' : '철회') + '</td><td>' + esc(VIA[r.via] || r.via || '') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">아직 변경 기록이 없습니다.</p>');
+    }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
+  }
+  var ACT = { 'community.stage': '공개 단계 변경', 'community.access.grant': '권한 주기', 'community.access.revoke': '권한 회수' };
+  function loadAudit() {
+    var box = $('#cmAudit'); if (!box) return;
+    call('/api/community/audit?limit=50').then(function (d) {
+      box.innerHTML = d.items.length ? '<table class="tbl"><thead><tr><th>시각</th><th>작업자</th><th>작업</th><th>대상</th><th>내용</th></tr></thead><tbody>' + d.items.map(function (r) { return '<tr><td>' + when(r.at) + '</td><td>' + esc(r.actor) + '</td><td>' + esc(ACT[r.action] || r.action) + '</td><td>' + esc(r.target || '') + '</td><td class="muted">' + esc(JSON.stringify(r.detail || {})).slice(0, 160) + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">아직 기록이 없습니다.</p>';
+    }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
+  }
+
   function draw() {
     root.innerHTML =
       '<div class="card"><h3 style="margin:0 0 8px">① 공개 단계</h3><div id="cmStage"><p class="muted">불러오는 중…</p></div>' +
@@ -64,14 +86,17 @@
       '<div class="row"><input type="email" id="cmEmail" placeholder="회원 이메일" style="min-width:220px"><select id="cmRole"><option value="beta">베타 회원</option><option value="tester">테스터</option></select><input type="text" id="cmNote" placeholder="메모(선택)" maxlength="80"><button class="btn" id="cmGrant">권한 주기</button><span class="muted" id="cmGrantMsg"></span></div>' +
       '<div id="cmAccList" style="margin-top:10px"></div></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">③ 출시 알림 신청</h3><div id="cmAlert"><p class="muted">불러오는 중…</p></div>' +
-      '<p class="muted" style="margin:8px 0 0">출시 알림은 광고성 정보 수신 동의와 별개입니다. 정식 공개 때 출시 소식 1회만 보낼 수 있습니다.</p></div>';
+      '<p class="muted" style="margin:8px 0 0">출시 알림은 광고성 정보 수신 동의와 별개입니다. 정식 공개 때 출시 소식 1회만 보낼 수 있습니다.</p></div>' +
+      '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">④ 회원 동의 현황</h3><div id="cmConsent"><p class="muted">불러오는 중…</p></div>' +
+      '<p class="muted" style="margin:8px 0 0">광고 발송 기능은 아직 없습니다. 보낼 때는 동의 중인 채널로만, 앞에 (광고)·보낸 곳·무료 수신 거부 방법을 넣고, 밤 9시~아침 8시에는 야간 수신 동의자에게만 보냅니다.</p></div>' +
+      '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑤ 관리자 작업 기록</h3><div id="cmAudit"><p class="muted">불러오는 중…</p></div></div>';
     $('#cmGrant').onclick = function () {
       var em = $('#cmEmail').value.trim(); if (!em) { msg('cmGrantMsg', '이메일을 입력해 주세요', true); return; }
-      call('/api/community/access', { method: 'POST', body: { email: em, role: $('#cmRole').value, note: $('#cmNote').value.trim() } }).then(function () { msg('cmGrantMsg', '권한을 주었습니다'); $('#cmEmail').value = ''; $('#cmNote').value = ''; loadAccess(); }).catch(function (e) { msg('cmGrantMsg', e.message, true); });
+      call('/api/community/access', { method: 'POST', body: { email: em, role: $('#cmRole').value, note: $('#cmNote').value.trim() } }).then(function () { msg('cmGrantMsg', '권한을 주었습니다'); $('#cmEmail').value = ''; $('#cmNote').value = ''; loadAccess(); loadAudit(); }).catch(function (e) { msg('cmGrantMsg', e.message, true); });
     };
     $('#cmEnter').onclick = function () { call('/api/community/enter', { method: 'POST' }).then(function (d) { window.open(d.to || '/community/', '_blank', 'noopener'); msg('cmEnterMsg', '새 탭에서 열었습니다(12시간 유효)'); }).catch(function (e) { msg('cmEnterMsg', e.message, true); }); };
     fetch('/api/community/status', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(drawStage).catch(function () { drawStage({ stage: 'dev' }); });
-    loadAccess(); loadAlerts();
+    loadAccess(); loadAlerts(); loadConsents(); loadAudit();
   }
   window.V2Community = { open: function (p) { pw = p || ''; root = document.getElementById('t-community'); if (root) draw(); } };
 })();

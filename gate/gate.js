@@ -107,11 +107,34 @@
       enter.disabled = true;
       api('/api/community/enter', { method: 'POST' }).then(function (d) {
         if (d.ok) { lsSet(LAST, 'community'); location.href = d.to || '/community/'; return; }
+        if (d.need === 'consent') { showRequired(d.docs || []); return; }
         enter.disabled = false; msg.className = 'msg err';
         msg.textContent = d.need === 'login' ? '로그인이 만료되었습니다. 심층 분석에서 다시 로그인해 주세요.' : (d.error || '아직 초대되지 않은 계정입니다.');
       });
     };
     refreshMine();
+  }
+  // 필수 동의(운명의 광장 입장 조건): 두 항목을 각각 체크해야 버튼이 켜진다. 동의 기록은 서버(/api/account/consent)에 이력으로 남는다
+  function showRequired(docs) {
+    var link = { terms: '/report/legal/terms.html', privacy: '/report/legal/privacy.html' };
+    openSheet('<h3 id="shTitle">운명의 광장 이용 동의</h3><p class="lead">처음 들어가실 때 한 번만 여쭙니다. 두 항목 모두 필수이며, 광고성 정보 수신은 마이페이지에서 따로 고르실 수 있습니다(기본은 받지 않음).</p>' +
+      '<form id="reqForm">' + docs.map(function (d) { return '<label class="agree"><input type="checkbox" data-kind="' + esc(d.kind) + '" data-ver="' + esc(d.version) + '"><span>[필수] ' + esc(d.title) + '에 동의합니다 · <a href="' + (link[d.kind] || '#') + '" target="_blank" rel="noopener">전문 보기</a></span></label>'; }).join('') +
+      '<button class="btn" type="submit" disabled>동의하고 들어가기</button><p class="msg" id="reqMsg" role="status"></p></form>');
+    var form = $('#reqForm'), boxes = form.querySelectorAll('input[type=checkbox]'), btn = form.querySelector('.btn'), m = $('#reqMsg');
+    var all = function () { return [].every.call(boxes, function (b) { return b.checked; }); };
+    form.onchange = function () { btn.disabled = !all(); };
+    form.onsubmit = function (e) {
+      e.preventDefault(); if (!all()) return; btn.disabled = true; m.className = 'msg'; m.textContent = '저장하는 중입니다…';
+      var changes = {}, versions = {}; [].forEach.call(boxes, function (b) { changes[b.dataset.kind] = true; versions[b.dataset.kind] = b.dataset.ver; });
+      api('/api/account/consent', { method: 'POST', body: { action: 'set', changes: changes, versions: versions, via: 'gate' } }).then(function (d) {
+        if (!d.ok) { btn.disabled = false; m.className = 'msg err'; m.textContent = d._status === 401 ? '로그인이 만료되었습니다. 심층 분석에서 다시 로그인해 주세요.' : (d.error || '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.'); return; }
+        track('community_consent', { via: 'gate' });
+        return api('/api/community/enter', { method: 'POST' }).then(function (x) {
+          if (x.ok) { lsSet(LAST, 'community'); location.href = x.to || '/community/'; return; }
+          btn.disabled = false; m.className = 'msg err'; m.textContent = x.error || '아직 초대되지 않은 계정입니다.';
+        });
+      });
+    };
   }
   // 로그인 회원: 이미 신청했는지 보여 주고 철회 버튼 제공
   function refreshMine() {
