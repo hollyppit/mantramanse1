@@ -1,4 +1,4 @@
-// 회원 프로필(2단계) — 운명의 광장에서 보이는 이름·소개·공개 범위. 표: member_profiles(supabase/migrations/20261116_member_stage2.sql)
+// 회원 프로필(2단계) — 인연의 광장에서 보이는 이름·소개·공개 범위. 표: member_profiles(supabase/migrations/20261116_member_stage2.sql)
 // POST { action:'get' }  → { profile, requiredOk, communityOpen }
 // POST { action:'save', nickname, bio, visibility, showIlgan, showIlju }
 //   · 필수 동의(이용약관·개인정보)를 마친 회원만 저장할 수 있다

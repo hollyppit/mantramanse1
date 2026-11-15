@@ -4,7 +4,7 @@
 //   · 출생정보는 지금처럼 이 기기(localStorage)에만 둔다. 계정에 남는 사주는 구매할 때 '계정에 저장'을 고른 것뿐이다(member_sajus).
 //   · 전체 결제 기록·영수증·바로 환불·로그인 연결은 /report/my/ 에 두고 요약과 링크만 보여 준다. 회원 탈퇴는 여기서 바로 한다(/api/account/withdraw).
 //   · 비로그인: 로그인 안내 + 이 기기 정보 수정·삭제(삭제는 로그인과 상관없이 할 수 있어야 한다).
-//   · 2026-11-16(통합 플랫폼 2단계): 광고성 정보 수신 설정 카드(/api/account/consent)와, 운명의 광장에 들어갈 수 있는 회원에게만 광장 프로필 카드(/api/account/profile). 맨 아래 MeConsent 묶음
+//   · 2026-11-16(통합 플랫폼 2단계): 광고성 정보 수신 설정 카드(/api/account/consent)와, 인연의 광장에 들어갈 수 있는 회원에게만 광장 프로필 카드(/api/account/profile). 맨 아래 MeConsent 묶음
 (function (root) {
   'use strict';
   var H = root.Hub; if (!H) return;
@@ -312,7 +312,7 @@
   });
 })(window);
 
-// ── 광고성 정보 수신 설정 · 운명의 광장 프로필(2026-11-16, 통합 플랫폼 2단계)
+// ── 광고성 정보 수신 설정 · 인연의 광장 프로필(2026-11-16, 통합 플랫폼 2단계)
 //   서버: POST /api/account/consent {action:'get'|'set'}, POST /api/account/profile {action:'get'|'save'} — 규칙은 functions/_consent.js
 //   기본은 모두 '받지 않음'. 채널마다 따로 고르고, 바꾸면 서버가 처리 결과를 계정 이메일로 알린다. 휴대폰 번호는 문자·카카오톡을 고를 때만 받는다.
 (function (root) {
@@ -332,7 +332,7 @@
     var opt = docs.filter(function (x) { return !x.required && !x.night; }), night = docs.filter(function (x) { return x.night; })[0];
     var reqLine = d.requiredOk
       ? '이용약관·개인정보 수집·이용: 동의함' + (st.terms && st.terms.at ? '(' + esc(day(st.terms.at)) + ')' : '')
-      : '이용약관·개인정보 수집·이용 동의는 운명의 광장에 처음 들어가실 때 받습니다.';
+      : '이용약관·개인정보 수집·이용 동의는 인연의 광장에 처음 들어가실 때 받습니다.';
     var row = function (x, cls) { var on = st[x.kind] && st[x.kind].agreed; return '<label class="me-opt' + (cls || '') + '"><input type="checkbox" name="' + esc(x.kind) + '"' + (on ? ' checked' : '') + '><span><b>' + esc(x.title) + '</b><small>' + (on && st[x.kind].at ? esc(day(st[x.kind].at)) + ' 동의' : '받지 않음') + '</small></span></label>'; };
     var anyPhone = opt.some(function (x) { return x.phone && st[x.kind] && st[x.kind].agreed; });
     return '<h2>혜택·소식 받기 설정</h2>' +
@@ -346,8 +346,8 @@
   }
   function profileHtml(p) {
     var x = p.profile || {};
-    return '<section class="me-card" id="meProfileCard"><h2>운명의 광장 프로필</h2>' +
-      (p.requiredOk ? '' : '<p class="me-muted">운명의 광장에 처음 들어가실 때 이용 동의를 받은 뒤 프로필을 만들 수 있습니다.</p>') +
+    return '<section class="me-card" id="meProfileCard"><h2>인연의 광장 프로필</h2>' +
+      (p.requiredOk ? '' : '<p class="me-muted">인연의 광장에 처음 들어가실 때 이용 동의를 받은 뒤 프로필을 만들 수 있습니다.</p>') +
       '<form class="me-form" id="meProfileForm"' + (p.requiredOk ? '' : ' hidden') + '>' +
       '<label><span>닉네임 <small>2~12자 · 한글·영문·숫자·밑줄</small></span><input name="nickname" maxlength="12" autocomplete="nickname" value="' + esc(x.nickname) + '" required></label>' +
       '<label><span>한 줄 소개 <small>160자까지 · 링크·전화번호는 넣을 수 없습니다</small></span><textarea name="bio" rows="2" maxlength="160">' + esc(x.bio) + '</textarea></label>' +
@@ -404,7 +404,7 @@
         paintConsent(sec, token, d);
       });
       post('/api/account/profile', token, { action: 'get' }).then(function (p) {
-        if ((ctx && !H.alive(ctx)) || !p._ok || !p.communityOpen) return;   // 운명의 광장에 들어갈 수 있는 회원에게만
+        if ((ctx && !H.alive(ctx)) || !p._ok || !p.communityOpen) return;   // 인연의 광장에 들어갈 수 있는 회원에게만
         var box = $('#meProfile'); if (!box) return; box.innerHTML = profileHtml(p); bindProfile(token);
       });
     },

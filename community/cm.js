@@ -1,4 +1,4 @@
-/* 운명의 광장(3단계 MVP, 디자인 v3 "월하연(月下緣)" 2026-11-16: 달빛·벚꽃·붉은 실·한지·인장) — 한 페이지 화면. 서버: /api/community/{posts,post,comments,react,report,block,me}, /api/account/profile
+/* 인연의 광장(3단계 MVP, 디자인 v3 "월하연(月下緣)" 2026-11-16: 달빛·벚꽃·붉은 실·한지·인장) — 한 페이지 화면. 서버: /api/community/{posts,post,comments,react,report,block,me}, /api/account/profile
    주소(#):  #/ 오늘의 인연(5단계, 홈) · #/match/inbox 인연함 · #/match/edit 인연 프로필 · #/verify 성인 본인확인 · #/chat 대화 목록 · #/chat/<방> 대화 · #/plaza 광장 피드 · #/today 오늘의 운테크·기록(4단계) · #/records 회고 · #/search 검색 · #/groups 모임 · #/g/ilju/<갑자>·#/g/ilgan/<갑> 모임 피드 · #/p/<id> 글 · #/write · #/edit/<id> · #/me 나
    로그인은 심층 분석과 같은 Supabase 세션(localStorage sb-*-auth-token)을 읽어 x-member-token 으로 보낸다. 출생 정보는 저장하지 않는다(일주 확인 때 서버로 보내 계산만). */
 (function () {
@@ -64,7 +64,7 @@
   var empty = function (title, sub) { return '<div class="empty"><div class="art"></div><b>' + esc(title) + '</b>' + esc(sub || '') + '</div>'; };
 
   function needSetup(why) {
-    if (!ME || !ME.member) { paint('<div class="panel"><h1>로그인이 필요해요</h1><p class="lead">운명의 광장은 심층 분석과 같은 계정으로 이용합니다. 로그인한 뒤 다시 들어와 주세요.</p><p style="margin-top:16px"><a class="btn" href="/report/#/me">로그인하러 가기</a></p></div>', 'me'); return true; }
+    if (!ME || !ME.member) { paint('<div class="panel"><h1>로그인이 필요해요</h1><p class="lead">인연의 광장은 심층 분석과 같은 계정으로 이용합니다. 로그인한 뒤 다시 들어와 주세요.</p><p style="margin-top:16px"><a class="btn" href="/report/#/me">로그인하러 가기</a></p></div>', 'me'); return true; }
     if (!ME.profile || !ME.profile.nickname) { setupView(why); return true; }
     return false;
   }

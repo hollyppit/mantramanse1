@@ -1,4 +1,4 @@
-// 운명의 광장 피드·글쓰기. 공용: functions/_plaza.js
+// 인연의 광장 피드·글쓰기. 공용: functions/_plaza.js
 // GET  ?tab=latest|popular &cat=wealth.. &group=ilju:갑자|ilgan:갑 &q=검색어 &tag=해시태그 &mine=1 &saved=1 &before=<글 id>(최신 이어 보기) &page=<n>(인기 이어 보기)
 //      → { items:[{ id, category, title, excerpt, tags, group, likes, comments, at, edited, author, liked, saved }], more, next }
 //      차단한 회원의 글은 빼고, 숨김·삭제된 글은 보이지 않는다. 인기 = 최근 14일 좋아요·댓글 순

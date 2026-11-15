@@ -1,4 +1,4 @@
-// 운명의 광장 신고. POST { type:'post'|'comment', id, reason, detail? } → { ok }
+// 인연의 광장 신고. POST { type:'post'|'comment', id, reason, detail? } → { ok }
 //   같은 사람이 같은 대상을 두 번 신고해도 같은 응답(한 건만 남음). 하루 20건.
 //   서로 다른 회원 5명이 신고하면 관리자 확인 전까지 자동으로 숨긴다(관리자 화면에서 되살리거나 확정)
 import { json, sbRest, supabaseReady, viewer, overLimit, okId, readBody, REASONS } from '../../_plaza.js';

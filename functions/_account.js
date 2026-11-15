@@ -31,10 +31,12 @@ export async function withdraw(env, userId, { unlinkKakao = true } = {}) {
   const moved = await sbRest(env, `commerce_orders?user_id=eq.${enc}`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify({ user_id: null, withdrawn_at: at, birth: null }) });
   // 1-1) 회원 계정으로 신청한 커뮤니티 출시 알림은 지운다(2026-11-15, 표가 아직 없으면 건너뜀). 커뮤니티 접근 권한은 아래 회원 삭제 때 cascade
   try { await sbRest(env, `launch_alerts?user_id=eq.${enc}`, { method: 'DELETE', headers: { prefer: 'return=minimal' } }); } catch { }
-  // 1-2) 운명의 광장 글·댓글은 지운 상태로 바꾼다(다른 회원에게 보이지 않음, 답글 흐름만 '삭제된 댓글입니다'로 남음). 반응·차단·제재는 회원 삭제 때 cascade
+  // 1-2) 인연의 광장 글·댓글은 지운 상태로 바꾼다(다른 회원에게 보이지 않음, 답글 흐름만 '삭제된 댓글입니다'로 남음). 반응·차단·제재는 회원 삭제 때 cascade
   for (const t of ['cm_posts', 'cm_comments']) { try { await sbRest(env, `${t}?author_id=eq.${enc}&status=neq.deleted`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ status: 'deleted' }) }); } catch { } }
-  // 1-3) 운명의 광장 프로필 사진(R2) 지우기 — 프로필 행은 회원 삭제 때 cascade 로 지워지지만 사진 파일은 따로 지워야 한다
+  // 1-3) 인연의 광장 프로필 사진(R2) 지우기 — 프로필 행은 회원 삭제 때 cascade 로 지워지지만 사진 파일은 따로 지워야 한다
   try { const pr = await sbRest(env, `member_profiles?user_id=eq.${enc}&select=avatar_path`); const k = Array.isArray(pr) && pr[0] && pr[0].avatar_path; if (k && /^cm-av\/[0-9a-f]{32}\.(webp|jpg|png)$/.test(k) && env.CLIPS_R2) await env.CLIPS_R2.delete(k); } catch { }
+  // 1-4) 인연 대화방은 지금 끝난 것으로 표시 → 90일 뒤 자동 파기(supabase/migrations/20261116_chat_purge.sql, 매일 새벽 pg_cron)
+  try { await sbRest(env, `cm_rooms?or=(a_id.eq.${enc},b_id.eq.${enc})&status=eq.open`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ status: 'closed', closed_by: userId, closed_at: at }) }); } catch { }
   // 2) 회원 삭제(구매 권한·저장한 사주는 cascade 로 함께 삭제)
   const d = await fetch(base(env) + '/auth/v1/admin/users/' + enc, { method: 'DELETE', headers: { apikey: env.SUPABASE_SERVICE_KEY, authorization: 'Bearer ' + env.SUPABASE_SERVICE_KEY }, signal: AbortSignal.timeout(10000) });
   if (!d.ok && d.status !== 404) return { ok: false, error: 'delete-failed:' + d.status };

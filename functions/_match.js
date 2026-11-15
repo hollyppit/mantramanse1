@@ -92,4 +92,4 @@ export function flagOf(s) {
   if (/(송금|입금|계좌|코인|투자\s*(해|하자|방)|리딩방|대출|선물\s*거래|USDT|비트코인)/i.test(s)) return 'money';
   return null;
 }
-export const FLAG_TIP = { contact: '처음 만난 사이에서 외부 연락처로 옮기자는 대화는 사기일 수 있어요. 충분히 알아본 뒤 정해 주세요.', money: '돈·투자·송금 이야기가 나왔어요. 운명의 광장에서 만난 사람에게 돈을 보내지 마세요.' };
+export const FLAG_TIP = { contact: '처음 만난 사이에서 외부 연락처로 옮기자는 대화는 사기일 수 있어요. 충분히 알아본 뒤 정해 주세요.', money: '돈·투자·송금 이야기가 나왔어요. 인연의 광장에서 만난 사람에게 돈을 보내지 마세요.' };

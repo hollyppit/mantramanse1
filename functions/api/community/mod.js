@@ -1,4 +1,4 @@
-// 운명의 광장 운영(관리자만). 모든 처리는 감사 로그(admin_audit_log)에 작업자 이름과 함께 남긴다.
+// 인연의 광장 운영(관리자만). 모든 처리는 감사 로그(admin_audit_log)에 작업자 이름과 함께 남긴다.
 // GET  ?view=reports(기본)|hidden|sanctions
 //      reports: 처리 안 된 신고를 대상별로 묶어 { target, reasons, count, preview, status }
 // POST { action:'hide'|'restore'|'delete', type:'post'|'comment', id }       글·댓글 숨김/되살리기/삭제(관련 신고는 처리됨으로)

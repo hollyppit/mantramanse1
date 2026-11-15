@@ -1,4 +1,4 @@
-// 운명의 광장 MVP 검증(통합 플랫폼 3단계):  node tests/plaza-sim.js
+// 인연의 광장 MVP 검증(통합 플랫폼 3단계):  node tests/plaza-sim.js
 // 가짜 Supabase(메모리 표 + PostgREST 거르기 문법 일부 + 숫자 트리거 흉내)·가짜 KV 로 실제 functions 코드를 돌린다. 네트워크 없음.
 const path = require('path'), url = require('url'), fs = require('fs');
 const fails = []; let n = 0; const ok = (c, m) => { n++; if (!c) fails.push(m); };

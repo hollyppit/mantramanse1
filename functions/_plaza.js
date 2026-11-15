@@ -1,4 +1,4 @@
-// 운명의 광장(3단계) 서버 공용. 표: supabase/migrations/20261116_plaza_stage3.sql
+// 인연의 광장(3단계) 서버 공용. 표: supabase/migrations/20261116_plaza_stage3.sql
 //   · 모든 /api/community/* (status·alert·enter 제외)는 미들웨어의 커뮤니티 잠금(functions/_community.js)을 먼저 통과한 요청만 온다
 //   · 쓰기(글·댓글·반응·신고·차단)는 로그인 회원 + 필수 동의 + 닉네임(프로필) + 제재 없음
 //   · 작성자 표시: 닉네임, 그리고 본인이 공개를 켠 경우에만 일간·일주. 탈퇴한 회원은 '탈퇴한 회원'
@@ -42,7 +42,7 @@ export function iljuOfBirth(birth) {
 
 // 글·댓글 내용 검사(개인정보·외부 연락 유도·외부 링크). 문제가 있으면 안내 문구, 없으면 null
 export function badText(s) {
-  if (/01[016789][\s.-]?\d{3,4}[\s.-]?\d{4}/.test(s)) return '전화번호는 올릴 수 없습니다. 개인정보는 운명의 광장에서 주고받지 말아 주세요';
+  if (/01[016789][\s.-]?\d{3,4}[\s.-]?\d{4}/.test(s)) return '전화번호는 올릴 수 없습니다. 개인정보는 인연의 광장에서 주고받지 말아 주세요';
   if (/[\w.+-]+@[\w-]+\.[\w.]+/.test(s)) return '이메일 주소는 올릴 수 없습니다';
   if (/(open\.kakao\.com|t\.me\/|카톡\s*아이디|오픈\s*채팅|텔레그램|라인\s*아이디)/i.test(s)) return '외부 연락처·오픈채팅 안내는 올릴 수 없습니다';
   if (/(https?:\/\/|www\.)\S+/i.test(s)) return '지금은 링크를 올릴 수 없습니다';

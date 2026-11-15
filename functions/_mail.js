@@ -157,12 +157,12 @@ export async function mailInquiry(env, q) {
 
 // 커뮤니티 출시 알림 신청 확인(2026-11-15). 철회 링크는 이 메일에만 담기고 서버에는 토큰 해시만 남는다.
 export function launchAlertMail(revokeUrl) {
-  const rows = [['신청 내용', '운명의 광장(커뮤니티) 출시 알림'], ['받는 방법', '이 이메일 주소로 출시 소식 1회'], ['보유 기간', '출시 알림 발송 또는 철회 시까지']];
+  const rows = [['신청 내용', '인연의 광장(커뮤니티) 출시 알림'], ['받는 방법', '이 이메일 주소로 출시 소식 1회'], ['보유 기간', '출시 알림 발송 또는 철회 시까지']];
   const note = '<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a">출시 알림을 신청해 주셔서 감사합니다. 이 알림은 광고성 정보 수신 동의와 별개이며, 출시 소식 외의 광고는 보내지 않습니다. 직접 신청하지 않으셨다면 아래 버튼으로 바로 철회해 주세요.</p>';
-  const text = `[${BIZ.service}] 운명의 광장 출시 알림을 신청하셨습니다.\n출시 소식을 이 이메일로 한 번 보내 드립니다. 광고성 정보 수신 동의와는 별개입니다.\n철회: ${revokeUrl}\n${BIZ.name} · ${BIZ.email}`;
+  const text = `[${BIZ.service}] 인연의 광장 출시 알림을 신청하셨습니다.\n출시 소식을 이 이메일로 한 번 보내 드립니다. 광고성 정보 수신 동의와는 별개입니다.\n철회: ${revokeUrl}\n${BIZ.name} · ${BIZ.email}`;
   const html = layout('출시 알림 신청이 완료되었습니다', rows.map(([k, v]) => [k, esc(v)]), note)
     .replace(`${SITE}/report/my/" style="display:inline-block`, `${esc(revokeUrl)}" style="display:inline-block`).replace('>내 구매 내역 보기<', '>출시 알림 철회하기<');
-  return { subject: `[${BIZ.service}] 운명의 광장 출시 알림 신청 완료`, html, text };
+  return { subject: `[${BIZ.service}] 인연의 광장 출시 알림 신청 완료`, html, text };
 }
 export async function mailLaunchAlert(env, to, revokeUrl) {
   if (!mailReady(env) || !okMail(to)) return false;

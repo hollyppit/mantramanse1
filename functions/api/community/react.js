@@ -1,4 +1,4 @@
-// 운명의 광장 좋아요·북마크. POST { post, kind:'like'|'bookmark', on:true|false } → { ok, on, likes }
+// 인연의 광장 좋아요·북마크. POST { post, kind:'like'|'bookmark', on:true|false } → { ok, on, likes }
 //   좋아요 수는 DB 트리거가 맞춘다(supabase/migrations/20261116_plaza_stage3.sql). 제재 중이어도 북마크는 된다(남에게 보이지 않음)
 import { json, sbRest, supabaseReady, viewer, writer, okId, readBody } from '../../_plaza.js';
 

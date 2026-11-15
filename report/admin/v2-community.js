@@ -1,4 +1,4 @@
-/* 관리자 "커뮤니티 공개·베타" 탭 — 운명의 광장 1단계 운영.
+/* 관리자 "커뮤니티 공개·베타" 탭 — 인연의 광장 1단계 운영.
    ① 공개 단계(/api/community/status PUT): 개발 중 → 비공개 베타 → 정식 공개. 정식 공개는 확인 문구를 직접 입력해야 한다.
    ② 접근 권한(/api/community/access): 테스터(개발 중에도 입장)·베타 회원(비공개 베타부터 입장) 주기·회수. 가입한 회원의 이메일로 찾는다.
    ③ 출시 알림 현황(/api/community/alert GET): 신청자 수·회원/비회원·최근 신청(이메일 가림).
@@ -34,7 +34,7 @@
     [].forEach.call(box.querySelectorAll('[data-stage]'), function (b) {
       b.onclick = function () {
         var to = b.getAttribute('data-stage'), body = { stage: to };
-        if (to === 'public') { var c = prompt('운명의 광장을 모든 방문자에게 공개합니다. 계속하려면 "정식 공개"라고 입력해 주세요.'); if (c !== '정식 공개') return; body.confirm = c; }
+        if (to === 'public') { var c = prompt('인연의 광장을 모든 방문자에게 공개합니다. 계속하려면 "정식 공개"라고 입력해 주세요.'); if (c !== '정식 공개') return; body.confirm = c; }
         else if (!confirm('공개 단계를 "' + LABEL[to] + '"(으)로 바꿉니다. 계속할까요?')) return;
         call('/api/community/status', { method: 'PUT', body: body }).then(function (d) { drawStage(d); msg('cmStageMsg', '바뀌었습니다' + (d.audited ? '(감사 로그 기록됨)' : '(감사 로그 기록 실패 — Supabase 표 확인)')); }).catch(function (e) { msg('cmStageMsg', e.message, true); });
       };
@@ -71,7 +71,7 @@
         (d.recent.length ? '<table class="tbl"><thead><tr><th>시각</th><th>항목</th><th>처리</th><th>경로</th></tr></thead><tbody>' + d.recent.map(function (r) { return '<tr><td>' + when(r.at) + '</td><td>' + esc(KIND[r.kind] || r.kind) + '</td><td>' + (r.action === 'grant' ? '동의' : '철회') + '</td><td>' + esc(VIA[r.via] || r.via || '') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">아직 변경 기록이 없습니다.</p>');
     }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
-  var ACT = { 'community.stage': '공개 단계 변경', 'community.access.grant': '권한 주기', 'community.access.revoke': '권한 회수', 'community.mod.hide': '글 숨김', 'community.mod.restore': '글 되살림', 'community.mod.delete': '글 삭제', 'community.mod.dismiss': '신고 기각', 'community.sanction.warn': '경고', 'community.sanction.mute': '쓰기 정지', 'community.sanction.ban': '이용 정지', 'community.sanction.lift': '제재 해제', 'community.mod.avatar': '프로필 사진 지움', 'community.verify.manual': '성인 확인(수동)' };
+  var ACT = { 'community.stage': '공개 단계 변경', 'community.access.grant': '권한 주기', 'community.access.revoke': '권한 회수', 'community.mod.hide': '글 숨김', 'community.mod.restore': '글 되살림', 'community.mod.delete': '글 삭제', 'community.mod.dismiss': '신고 기각', 'community.sanction.warn': '경고', 'community.sanction.mute': '쓰기 정지', 'community.sanction.ban': '이용 정지', 'community.sanction.lift': '제재 해제', 'community.mod.avatar': '프로필 사진 지움', 'community.verify.manual': '성인 확인(수동)', 'community.chat.purge': '대화 자동 파기(90일)' };
   var SK = { warn: '경고', mute: '쓰기 정지', ban: '이용 정지' };
   var modView = 'reports';
   function loadMod() {

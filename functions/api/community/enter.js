@@ -13,7 +13,7 @@ export async function onRequestPost({ request, env }) {
   if (!roleAllowed(who.role, stage)) return json({ error: `커뮤니티는 지금 ${STAGE_LABEL[stage]} 단계라 초대된 분만 들어갈 수 있습니다`, stage, reason: 'not-invited' }, 403);
   if (who.role !== 'admin') {
     let ok = false; try { ok = requiredOk(await readConsents(env, who.who)); } catch { ok = false; }
-    if (!ok) return json({ error: '운명의 광장을 이용하려면 이용약관과 개인정보 수집·이용에 동의해 주세요', need: 'consent', stage, docs: docsPublic().filter(d => d.required) }, 409);
+    if (!ok) return json({ error: '인연의 광장을 이용하려면 이용약관과 개인정보 수집·이용에 동의해 주세요', need: 'consent', stage, docs: docsPublic().filter(d => d.required) }, 409);
   }
   const value = await makeCookie(env, who.role, who.who);
   if (!value) return json({ error: '입장 열쇠를 만들 수 없습니다(서버 설정 확인 필요)' }, 500);

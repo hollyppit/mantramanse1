@@ -1,4 +1,4 @@
-// 커뮤니티(운명의 광장) 공개 단계와 접근 잠금 — 한 곳에서만 판단한다.
+// 커뮤니티(인연의 광장) 공개 단계와 접근 잠금 — 한 곳에서만 판단한다.
 // 계획: docs/PLATFORM_EXPANSION_PLAN_2026-11-15.md · 테이블: supabase/migrations/20261115_community_stage1.sql
 //
 // 공개 단계(KV 'community:stage' 의 stage):

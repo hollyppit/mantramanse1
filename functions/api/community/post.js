@@ -1,4 +1,4 @@
-// 운명의 광장 글 하나. 공용: functions/_plaza.js
+// 인연의 광장 글 하나. 공용: functions/_plaza.js
 // GET    ?id=  → { post:{ id, category, title, body, tags, group, likes, comments, at, edited, author, liked, saved } }
 //        숨김·삭제된 글, 내가 차단한 회원의 글은 404(관리자는 볼 수 있음)
 // PATCH  { id, title, body, category, tags } → 본인 글만, 모임은 바꾸지 않는다

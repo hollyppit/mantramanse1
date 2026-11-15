@@ -1,5 +1,5 @@
 /* 통합 첫 화면: 왼쪽(모바일은 위) 심층 분석 = 한국형 초현실 오컬트(먹색·남색·고금색, 안개·빛)
-                 오른쪽(모바일은 아래) 운명의 광장 = 벚꽃이 흩날리는 동양풍(미색·연분홍·옥색·먹색, 한지·여백·처마) */
+                 오른쪽(모바일은 아래) 인연의 광장 = 벚꽃이 흩날리는 동양풍(미색·연분홍·옥색·먹색, 한지·여백·처마) */
 :root {
   --ink: #0B0D16; --navy: #121A33; --gold: #CDB27A; --gold-l: #EBD9AA; --gold-d: #8E7849; --bone: #E9E4D8; --bone-2: #B1ACA0;
   --rice: #F6F0E3; --rice-2: #EFE6D3; --blush: #E9B9BF; --blush-d: #B86A78; --jade: #6E9F90; --jade-d: #3F6F62; --sumi: #2B2723; --sumi-2: #5E574F;
@@ -51,7 +51,7 @@ a { color: inherit; }
 .deep .go { background: linear-gradient(180deg, #D9C08A, #A88D57); color: #17130B; box-shadow: 0 10px 34px rgba(205,178,122,.18); }
 .deep .last { background: rgba(205,178,122,.16); color: var(--gold-l); border: 1px solid rgba(205,178,122,.4); }
 
-/* ② 운명의 광장: 한지(미세한 결) 위 따뜻한 햇살, 처마 선, 벚꽃잎 */
+/* ② 인연의 광장: 한지(미세한 결) 위 따뜻한 햇살, 처마 선, 벚꽃잎 */
 .plaza { background-color: var(--rice); color: var(--sumi);
   background-image:
     radial-gradient(110% 70% at 20% 0%, rgba(255,247,226,.95) 0%, rgba(246,240,227,0) 60%),

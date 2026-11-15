@@ -1,4 +1,4 @@
-// 운명의 광장 '나'. 공용: functions/_plaza.js
+// 인연의 광장 '나'. 공용: functions/_plaza.js
 // GET  → { member, requiredOk, profile:{ nickname, ilju, ilgan, ilganLabel, showIlju, showIlgan, visibility, avatar, avatarKind, posterGender }, groups:{ ilju:{ key, size, gathering }, ilgan:{…} }, sanction }
 //        avatar = 내 사진(직접 올린 것) 또는 내 일간 포스터(본인 화면이라 공개 여부와 상관없이)
 //        gathering = 모임 인원이 MIN_GROUP 명보다 적다(모임 화면에 '아직 모이는 중' 안내, 글은 전체 피드에도 보인다)

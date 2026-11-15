@@ -41,7 +41,7 @@
     if (!card) return;
     card.querySelector('.last').hidden = false;
     var r = $('#resume'); r.hidden = false; document.body.classList.add('has-resume');
-    r.textContent = (last === 'deep' ? '심층 분석' : '운명의 광장') + '으로 바로 가기 →';
+    r.textContent = (last === 'deep' ? '심층 분석' : '인연의 광장') + '으로 바로 가기 →';
     r.href = last === 'deep' ? '/report/' : '/community/';
     r.onclick = function (e) { track('gate_resume', { svc: last }); if (last === 'community') { e.preventDefault(); openCommunity(); } };
   }
@@ -50,7 +50,7 @@
   $('#goDeep').addEventListener('click', function () { lsSet(LAST, 'deep'); track('gate_select', { svc: 'deep' }); });
   $('#goPlaza').addEventListener('click', function (e) { e.preventDefault(); track('gate_select', { svc: 'community' }); openCommunity(); });
 
-  var statusP = api('/api/community/status').then(function (d) { status = d && d.stage ? d : { stage: 'dev', label: '개발 중', inside: false }; if (status.inside) $('#plazaGo').textContent = '운명의 광장 들어가기 →'; return status; });
+  var statusP = api('/api/community/status').then(function (d) { status = d && d.stage ? d : { stage: 'dev', label: '개발 중', inside: false }; if (status.inside) $('#plazaGo').textContent = '인연의 광장 들어가기 →'; return status; });
 
   function openCommunity() {
     statusP.then(function (s) {
@@ -70,14 +70,14 @@
     var tok = memberToken();
     openSheet(
       '<span class="stage">' + esc(s.label || '개발 중') + '</span>' +
-      '<h3 id="shTitle">운명의 광장을 준비하고 있습니다</h3>' +
+      '<h3 id="shTitle">인연의 광장을 준비하고 있습니다</h3>' +
       '<p>같은 일주를 타고난 사람들이 경험을 나누고, 사주로 이어지는 인연을 만나는 공간입니다. 문을 여는 날 가장 먼저 알려 드릴게요.</p>' +
       '<form id="alertForm" novalidate>' +
       (tok ? '<p class="sep">로그인한 계정의 이메일로 알려 드립니다.</p>' :
         '<label class="fld" for="alEmail">알림 받을 이메일</label><input type="email" id="alEmail" name="email" autocomplete="email" inputmode="email" placeholder="name@example.com" required>') +
       '<input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">' +
       '<dl class="notice" aria-label="출시 알림 개인정보 안내">' +
-      '<dt>목적</dt><dd>운명의 광장 출시 소식 1회 안내</dd>' +
+      '<dt>목적</dt><dd>인연의 광장 출시 소식 1회 안내</dd>' +
       '<dt>수집 항목</dt><dd>이메일 주소' + (tok ? '(로그인 계정)' : '') + ', 신청 일시</dd>' +
       '<dt>보유 기간</dt><dd>출시 알림 발송 또는 철회 시까지</dd>' +
       '<dt>철회 방법</dt><dd>확인 메일의 철회 버튼(로그인 회원은 이 화면에서도). 철회하면 바로 지웁니다</dd>' +
@@ -114,10 +114,10 @@
     };
     refreshMine();
   }
-  // 필수 동의(운명의 광장 입장 조건): 두 항목을 각각 체크해야 버튼이 켜진다. 동의 기록은 서버(/api/account/consent)에 이력으로 남는다
+  // 필수 동의(인연의 광장 입장 조건): 두 항목을 각각 체크해야 버튼이 켜진다. 동의 기록은 서버(/api/account/consent)에 이력으로 남는다
   function showRequired(docs) {
     var link = { terms: '/report/legal/terms.html', privacy: '/report/legal/privacy.html' };
-    openSheet('<h3 id="shTitle">운명의 광장 이용 동의</h3><p class="lead">처음 들어가실 때 한 번만 여쭙니다. 두 항목 모두 필수이며, 광고성 정보 수신은 마이페이지에서 따로 고르실 수 있습니다(기본은 받지 않음).</p>' +
+    openSheet('<h3 id="shTitle">인연의 광장 이용 동의</h3><p class="lead">처음 들어가실 때 한 번만 여쭙니다. 두 항목 모두 필수이며, 광고성 정보 수신은 마이페이지에서 따로 고르실 수 있습니다(기본은 받지 않음).</p>' +
       '<form id="reqForm">' + docs.map(function (d) { return '<label class="agree"><input type="checkbox" data-kind="' + esc(d.kind) + '" data-ver="' + esc(d.version) + '"><span>[필수] ' + esc(d.title) + '에 동의합니다 · <a href="' + (link[d.kind] || '#') + '" target="_blank" rel="noopener">전문 보기</a></span></label>'; }).join('') +
       '<button class="btn" type="submit" disabled>동의하고 들어가기</button><p class="msg" id="reqMsg" role="status"></p></form>');
     var form = $('#reqForm'), boxes = form.querySelectorAll('input[type=checkbox]'), btn = form.querySelector('.btn'), m = $('#reqMsg');
@@ -148,7 +148,7 @@
 
   // ── 메일 속 철회 링크(?alert=revoke&t=…): 링크를 여는 것만으로는 철회하지 않고(메일 보안 검사기가 링크를 미리 열 수 있다) 버튼을 눌러야 한다
   function showRevoke(token) {
-    openSheet('<h3 id="shTitle">출시 알림 철회</h3><p>운명의 광장 출시 알림을 더 이상 받지 않으시겠어요? 철회하면 출시 소식을 보내 드리지 않습니다.</p>' +
+    openSheet('<h3 id="shTitle">출시 알림 철회</h3><p>인연의 광장 출시 알림을 더 이상 받지 않으시겠어요? 철회하면 출시 소식을 보내 드리지 않습니다.</p>' +
       '<button class="btn" type="button" id="rvBtn">출시 알림 철회하기</button><div class="msg" id="rvMsg" role="status" aria-live="polite"></div>');
     $('#rvBtn').onclick = function () {
       var b = $('#rvBtn'), m = $('#rvMsg'); b.disabled = true;

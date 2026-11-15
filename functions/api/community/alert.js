@@ -1,4 +1,4 @@
-// 커뮤니티(운명의 광장) 출시 알림 — 잠금 중에도 열려 있는 공개 API. 표: launch_alerts(supabase/migrations/20261115_community_stage1.sql)
+// 커뮤니티(인연의 광장) 출시 알림 — 잠금 중에도 열려 있는 공개 API. 표: launch_alerts(supabase/migrations/20261115_community_stage1.sql)
 // POST { consent:true, consentVersion, email?, source?, website } 신청
 //        회원(x-member-token): 계정 이메일로 신청(email 무시) · 비회원: email 필수
 //        website 는 봇 함정 칸(채워지면 성공한 척만 한다). 같은 IP 는 1시간 20회까지.

@@ -1,4 +1,4 @@
-// 운명의 광장 댓글·답글(한 단계까지). 공용: functions/_plaza.js
+// 인연의 광장 댓글·답글(한 단계까지). 공용: functions/_plaza.js
 // GET    ?post=  → { items:[{ id, parent, body, at, author, deleted }] } — 지워진 댓글은 답글이 있을 때만 '삭제된 댓글입니다'로 자리만 남긴다
 // POST   { post, parent?, body } → 쓰기 조건 + 하루 60개 + 내용 검사. 답글의 답글은 같은 댓글 아래로 붙인다
 // DELETE ?id=  → 본인 댓글 지우기
