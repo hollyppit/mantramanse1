@@ -1,0 +1,71 @@
+{
+  "663": {
+    "front": ["九秋霜菊", "勝於牧丹", "種竹成林", "生涯為主", "春日梔花", "郁郁青青", "虎入荒山", "兔狸來侵"],
+    "back": ["老人來氣", "年運可益", "如恨早榮", "晩成可取", "九月之數", "千人仰視", "若非財敗", "應有人謀", "千里遠出", "拜別父母", "財可如意", "事無諧和", "今年之運", "大通成交"]
+  },
+  "711": {
+    "front": ["尋常春日", "却見開花", "商山老翁", "圍棋消日", "順風加帆", "欸乃一聲", "月下鳴琴", "間士高亭"],
+    "back": ["身旺四季", "危哉居卯", "亥子二月", "內外皆宜", "申酉三月", "子丑大吉", "基地文土", "無害子孫", "以前七年", "本人相沖"]
+  },
+  "862": {
+    "front": ["一聲砲放", "禽獸同驚", "負薪入火", "結開何害", "身依北斗", "半笑半哭", "馬躍草場", "聲振四海"],
+    "back": ["一聲放砲", "百獸盡驚", "負薪入火", "結綢何解", "身藏北斗", "半笑半哭", "馬躍草場", "聲振四海"]
+  },
+  "863": {
+    "front": ["東風和暢", "春花富貴", "梅得雪月", "琢石得玉", "花爛春城", "萬化方暢", "聲聞高閣", "喜事滿庭"],
+    "back": ["黃氏佳約", "美人相招", "外富內貧", "稱在得失", "申酉三月", "青天小雨", "財是隱財", "福是隱福"]
+  },
+  "uncertain": [
+    { "gua": 663, "part": "front", "index": 1, "pos": 3, "read": "於", "candidates": ["於", "扵(필사 모양)"] },
+    { "gua": 663, "part": "front", "index": 4, "pos": 3, "read": "梔", "candidates": ["梔", "栀"] },
+    { "gua": 663, "part": "front", "index": 7, "pos": 1, "read": "兔", "candidates": ["兔", "兎(필사 모양)"] },
+    { "gua": 663, "part": "back", "index": 0, "pos": 4, "read": "氣", "candidates": ["氣", "気", "色"] },
+    { "gua": 663, "part": "back", "index": 1, "pos": 2, "read": "運", "candidates": ["運", "連"] },
+    { "gua": 663, "part": "back", "index": 2, "pos": 1, "read": "如", "candidates": ["如", "初"] },
+    { "gua": 663, "part": "back", "index": 6, "pos": 4, "read": "敗", "candidates": ["敗", "改", "政"] },
+    { "gua": 663, "part": "back", "index": 7, "pos": 1, "read": "應", "candidates": ["應", "産", "座"] },
+    { "gua": 663, "part": "back", "index": 8, "pos": 4, "read": "出", "candidates": ["出", "行", "由"] },
+    { "gua": 663, "part": "back", "index": 11, "pos": 3, "read": "諧", "candidates": ["諧", "諸"] },
+    { "gua": 663, "part": "back", "index": 11, "pos": 4, "read": "和", "candidates": ["和", "本", "禾"] },
+    { "gua": 663, "part": "back", "index": 13, "pos": 3, "read": "成", "candidates": ["成", "戌", "民"] },
+    { "gua": 663, "part": "back", "index": 13, "pos": 4, "read": "交", "candidates": ["交", "亥"] },
+    { "gua": 711, "part": "front", "index": 5, "pos": 1, "read": "欸", "candidates": ["欸", "款"] },
+    { "gua": 711, "part": "front", "index": 7, "pos": 1, "read": "間", "candidates": ["間", "閒", "閑"] },
+    { "gua": 711, "part": "back", "index": 0, "pos": 1, "read": "身", "candidates": ["身", "尊"] },
+    { "gua": 711, "part": "back", "index": 1, "pos": 3, "read": "居", "candidates": ["居", "吾", "岳"] },
+    { "gua": 711, "part": "back", "index": 1, "pos": 4, "read": "卯", "candidates": ["卯", "仰", "卬"] },
+    { "gua": 711, "part": "back", "index": 2, "pos": 3, "read": "二", "candidates": ["二", "三"] },
+    { "gua": 711, "part": "back", "index": 4, "pos": 3, "read": "三", "candidates": ["三", "二", "之"] },
+    { "gua": 711, "part": "back", "index": 5, "pos": 4, "read": "吉", "candidates": ["吉", "市"] },
+    { "gua": 711, "part": "back", "index": 6, "pos": 1, "read": "基", "candidates": ["基", "墓"] },
+    { "gua": 711, "part": "back", "index": 6, "pos": 3, "read": "文", "candidates": ["文", "丈"] },
+    { "gua": 711, "part": "back", "index": 6, "pos": 4, "read": "土", "candidates": ["土", "上"] },
+    { "gua": 711, "part": "back", "index": 8, "pos": 1, "read": "以", "candidates": ["以", "小"] },
+    { "gua": 711, "part": "back", "index": 8, "pos": 2, "read": "前", "candidates": ["前", "肖", "當"] },
+    { "gua": 711, "part": "back", "index": 8, "pos": 3, "read": "七", "candidates": ["七", "亡"] },
+    { "gua": 711, "part": "back", "index": 9, "pos": 4, "read": "沖", "candidates": ["沖", "冲", "坤"] },
+    { "gua": 862, "part": "front", "index": 0, "pos": 2, "read": "聲", "candidates": ["聲", "拜"] },
+    { "gua": 862, "part": "front", "index": 1, "pos": 2, "read": "獸", "candidates": ["獸", "數"] },
+    { "gua": 862, "part": "front", "index": 3, "pos": 2, "read": "開", "candidates": ["開", "閑", "関"] },
+    { "gua": 862, "part": "front", "index": 4, "pos": 4, "read": "斗", "candidates": ["斗", "半"] },
+    { "gua": 862, "part": "front", "index": 5, "pos": 1, "read": "半", "candidates": ["半", "斗"] },
+    { "gua": 862, "part": "front", "index": 5, "pos": 3, "read": "半", "candidates": ["半", "斗"] },
+    { "gua": 862, "part": "front", "index": 5, "pos": 4, "read": "哭", "candidates": ["哭", "笑"] },
+    { "gua": 862, "part": "front", "index": 6, "pos": 3, "read": "草", "candidates": ["草", "昔", "苔"] },
+    { "gua": 862, "part": "front", "index": 7, "pos": 1, "read": "聲", "candidates": ["聲", "拜"] },
+    { "gua": 862, "part": "back", "index": 0, "pos": 2, "read": "聲", "candidates": ["聲", "拜"] },
+    { "gua": 862, "part": "back", "index": 1, "pos": 2, "read": "獸", "candidates": ["獸", "戰"] },
+    { "gua": 862, "part": "back", "index": 3, "pos": 2, "read": "綢", "candidates": ["綢", "網", "絅"] },
+    { "gua": 862, "part": "back", "index": 4, "pos": 2, "read": "藏", "candidates": ["藏", "臧"] },
+    { "gua": 862, "part": "back", "index": 5, "pos": 4, "read": "哭", "candidates": ["哭", "笑"] },
+    { "gua": 862, "part": "back", "index": 7, "pos": 1, "read": "聲", "candidates": ["聲", "拜"] },
+    { "gua": 863, "part": "front", "index": 3, "pos": 4, "read": "玉", "candidates": ["玉", "王(점 없이 씀)"] },
+    { "gua": 863, "part": "front", "index": 6, "pos": 1, "read": "聲", "candidates": ["聲", "拜"] },
+    { "gua": 863, "part": "back", "index": 0, "pos": 2, "read": "氏", "candidates": ["氏", "民"] },
+    { "gua": 863, "part": "back", "index": 0, "pos": 3, "read": "佳", "candidates": ["佳", "隹", "住"] },
+    { "gua": 863, "part": "back", "index": 3, "pos": 1, "read": "稱", "candidates": ["稱", "秤", "稍"] },
+    { "gua": 863, "part": "back", "index": 4, "pos": 3, "read": "三", "candidates": ["三", "二", "之"] },
+    { "gua": 863, "part": "back", "index": 5, "pos": 4, "read": "雨", "candidates": ["雨", "兩"] }
+  ],
+  "notes": "index는 0부터, pos는 1부터 셈. 각 단(段)은 오른쪽 줄 → 왼쪽 줄 순서로 넣음. (1) p56: 六六三 번호 아래 두 줄(老人來氣…拜別父母) 왼쪽에, 七一一 번호보다 오른쪽에 번호 없는 두 줄(財可如意/事無諧和, 今年之運/大通成交)이 위쪽 두 단만 있고 아래는 비어 있음. 괘 번호 위치 기준으로 七一一 번호 앞(오른쪽)에 있으므로 663 back 끝(index 10~13)에 넣었음. 711 것일 가능성도 있음. 711 back은 七一一 번호 바로 아래 두 줄 5단(10구)만 넣음. (2) p60 862·863 뒷부분은 앞부분과 거의 같은 구(一聲放砲, 負薪入火, 身藏北斗, 馬躍草場, 聲振四海 / 花爛·聲聞 대신 黃氏佳約·外富內貧 등)로 되어 있음; 뒷부분에 「○月之數」는 없고 863에 申酉三月만 있음. (3) 862·863·663의 '聲/拜' 자는 같은 필사 모양(扌+丰 꼴)이라 앞뒤 문맥 없이 모양만으로는 拜에 가까움; 663 拜別父母도 같은 모양. 711 front의 欸乃一聲의 聲은 정자로 씀. (4) 711 back 申酉·863 back 申酉의 숫자는 짧은 획+긴 획 초서라 三/二/之 구분이 어려움. (5) 663 front 牧丹은 쓰인 대로 牧."
+}

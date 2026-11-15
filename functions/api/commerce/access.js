@@ -21,8 +21,10 @@ export async function onRequestPost({ request, env }) {
     worlds[id] = { paid: a.paid, owned: open || owned.includes(id), freeChapter: a.paid ? free[id] || null : null };
   }
   const forSale = [];
+  const annual = [];   // 연도 상품(신년운세): 무빙툰 세계 구매 창에는 넣지 않고 따로 알린다(상품 안내 페이지·신년운세 화면용)
   for (const p of products) {
     if (!p.active || !(p.price > 0)) continue;
+    if (p.kind === 'annual') { annual.push({ id: p.id, name: p.name, kind: p.kind, year: p.year || null, price: p.price, owned: !!(owned && owned.includes(p.worlds[0])) }); continue; }
     const ws = await productWorlds(env, p);
     if (!ws.length || ws.every(w => !worlds[w] || !worlds[w].paid)) continue;   // 잠긴 세계가 없는 상품은 팔지 않는다
     forSale.push({ id: p.id, name: p.name, kind: p.kind, price: p.price, worlds: ws, owned: ws.every(w => worlds[w] && worlds[w].owned) });
@@ -31,6 +33,6 @@ export async function onRequestPost({ request, env }) {
     configured: { login: !!(env.SUPABASE_URL && env.SUPABASE_ANON_KEY), naver: naverReady(env), googleServer: googleReady(env), pay: payReady(env) },
     keys: { supabaseUrl: env.SUPABASE_URL || '', supabaseAnonKey: env.SUPABASE_ANON_KEY || '', provider: payProvider(env), tossClientKey: payProvider(env) === 'toss' ? env.TOSS_CLIENT_KEY : '', portone: payProvider(env) === 'portone' ? { storeId: env.PORTONE_STORE_ID, channelKey: env.PORTONE_CHANNEL_KEY } : null },
     member: member ? { id: member.id, email: member.email, provider: member.provider } : null,
-    sajuKey: key, worlds, products: forSale, admin: admin ? { viewAsFree } : null,
+    sajuKey: key, worlds, products: forSale, annual, admin: admin ? { viewAsFree } : null,
   });
 }

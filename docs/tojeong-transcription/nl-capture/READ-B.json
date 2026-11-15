@@ -1,0 +1,56 @@
+{
+  "663": {
+    "front": ["九秋霜菊", "勝於牧丹", "種竹成林", "生涯爲主", "春日梅花", "郁郁青青", "虎入荒山", "兔狸來侵"],
+    "back": ["老人來氣", "年運可益", "財可如意", "事如諧本", "勿恨早榮", "晩成可取", "今年之運", "大通戌亥", "九月之數", "千人仰視", "若非財改", "應有人謀", "千里遠出", "拜別父母"]
+  },
+  "711": {
+    "front": ["尋常春日", "却見開花", "商山老翁", "圍棋消日", "順風加帆", "欸乃一聲", "月下鳴琴", "間士高亭"],
+    "back": ["身旺四季", "危哉辰卯", "亥子三月", "內外皆宜", "申酉三月", "子丑大吉", "基地文土", "安善子孫", "以情七年", "本人相冲"]
+  },
+  "862": {
+    "front": ["一擧砲放", "禽獸同驚", "負薪入火", "結閑何害", "身依北斗", "手笑斗笑", "馬躍苦場", "擧振四海"],
+    "back": ["一擧放砲", "百獸盡驚", "負薪入火", "結網何解", "身藏北斗", "手笑半笑", "馬躍草場", "擧振四海"]
+  },
+  "863": {
+    "front": ["東風和暢", "春花富貴", "梅得雪月", "琢石得玉", "花爛春城", "萬化方暢", "擧聞高閣", "喜事滿庭"],
+    "back": ["萬民星約", "美人相招", "外富內貧", "利在得失", "申酉三月", "青天小雨", "財是隱財", "福是隱福"]
+  },
+  "uncertain": [
+    { "gua": 663, "part": "front", "index": 1, "pos": 2, "read": "於", "candidates": ["於"], "note": "扵 꼴로 씀" },
+    { "gua": 663, "part": "front", "index": 4, "pos": 3, "read": "梅", "candidates": ["梅", "梩"], "note": "木+里 꼴에 가까움" },
+    { "gua": 663, "part": "front", "index": 7, "pos": 1, "read": "兔", "candidates": ["兔", "免"] },
+    { "gua": 663, "part": "back", "index": 0, "pos": 4, "read": "氣", "candidates": ["氣", "危", "㐫"], "note": "초서, 气 꼴" },
+    { "gua": 663, "part": "back", "index": 1, "pos": 2, "read": "運", "candidates": ["運", "連"] },
+    { "gua": 663, "part": "back", "index": 3, "pos": 2, "read": "如", "candidates": ["如", "必"] },
+    { "gua": 663, "part": "back", "index": 3, "pos": 4, "read": "本", "candidates": ["本", "和"] },
+    { "gua": 663, "part": "back", "index": 4, "pos": 1, "read": "勿", "candidates": ["勿", "如"] },
+    { "gua": 663, "part": "back", "index": 5, "pos": 4, "read": "取", "candidates": ["取", "敢"], "note": "耳+攵 꼴" },
+    { "gua": 663, "part": "back", "index": 7, "pos": 3, "read": "戌", "candidates": ["戌", "成"] },
+    { "gua": 663, "part": "back", "index": 9, "pos": 3, "read": "仰", "candidates": ["仰", "佇"] },
+    { "gua": 663, "part": "back", "index": 10, "pos": 4, "read": "改", "candidates": ["改", "敗"], "note": "己/巳+攵 꼴" },
+    { "gua": 711, "part": "front", "index": 5, "pos": 1, "read": "欸", "candidates": ["欸", "款"], "note": "欵 꼴" },
+    { "gua": 711, "part": "front", "index": 7, "pos": 1, "read": "間", "candidates": ["間", "閒"] },
+    { "gua": 711, "part": "back", "index": 1, "pos": 3, "read": "辰", "candidates": ["辰", "□"], "note": "厂 안에 云 비슷한 초서" },
+    { "gua": 711, "part": "back", "index": 5, "pos": 4, "read": "吉", "candidates": ["吉", "示", "未"], "note": "示/未 꼴로 보임" },
+    { "gua": 711, "part": "back", "index": 6, "pos": 4, "read": "土", "candidates": ["土", "士"] },
+    { "gua": 711, "part": "back", "index": 7, "pos": 1, "read": "安", "candidates": ["安", "世", "苗"] },
+    { "gua": 711, "part": "back", "index": 8, "pos": 1, "read": "以", "candidates": ["以", "必"] },
+    { "gua": 711, "part": "back", "index": 8, "pos": 2, "read": "情", "candidates": ["情", "清"] },
+    { "gua": 711, "part": "back", "index": 9, "pos": 4, "read": "冲", "candidates": ["冲", "沖", "仲"] },
+    { "gua": 862, "part": "front", "index": 0, "pos": 2, "read": "擧", "candidates": ["擧", "聲"], "note": "같은 글자꼴이 862 front 7·863 front 6·862 back 0·7 에도 나옴" },
+    { "gua": 862, "part": "front", "index": 3, "pos": 2, "read": "閑", "candidates": ["閑", "網", "關"] },
+    { "gua": 862, "part": "front", "index": 3, "pos": 4, "read": "害", "candidates": ["害", "解"] },
+    { "gua": 862, "part": "front", "index": 5, "pos": 1, "read": "手", "candidates": ["手", "斗", "丰"] },
+    { "gua": 862, "part": "front", "index": 5, "pos": 3, "read": "斗", "candidates": ["斗", "半"] },
+    { "gua": 862, "part": "front", "index": 5, "pos": 4, "read": "笑", "candidates": ["笑", "□"], "note": "罒+友 꼴, 판독 어려움" },
+    { "gua": 862, "part": "front", "index": 6, "pos": 3, "read": "苦", "candidates": ["苦", "草"] },
+    { "gua": 862, "part": "back", "index": 3, "pos": 2, "read": "網", "candidates": ["網", "絅"] },
+    { "gua": 862, "part": "back", "index": 5, "pos": 1, "read": "手", "candidates": ["手", "斗"] },
+    { "gua": 863, "part": "front", "index": 3, "pos": 4, "read": "玉", "candidates": ["玉", "王"], "note": "점 없는 王 꼴" },
+    { "gua": 863, "part": "front", "index": 6, "pos": 1, "read": "擧", "candidates": ["擧", "聲"] },
+    { "gua": 863, "part": "back", "index": 0, "pos": 3, "read": "星", "candidates": ["星", "皇", "皆"] },
+    { "gua": 863, "part": "back", "index": 0, "pos": 4, "read": "約", "candidates": ["約", "納", "紛"] },
+    { "gua": 863, "part": "back", "index": 6, "pos": 3, "read": "隱", "candidates": ["隱"], "note": "흐림" }
+  ],
+  "notes": "앞부분은 각 괘 두 줄을 한 단씩(오른쪽 줄→왼쪽 줄) 위에서 아래로 4단. p56 663 블록은 오른쪽 두 줄이 5단(老人來氣/年運可益 … 千里遠出/拜別父母), 왼쪽 두 줄(財可如意/事如諧本, 今年之運/大通戌亥)은 위 2단만 있음 — 지침의 '위 단 오른쪽→왼쪽 모두' 규칙대로 1단 4구, 2단 4구, 그 뒤 오른쪽 두 줄 3~5단 순으로 넣음. 왼쪽 두 줄이 663 머리(六六三)와 711 머리(七一一) 사이에 있어 663으로 봄. 711 뒷부분은 두 줄 5단. 862·863 뒷부분(p60)은 각 두 줄 4단. 862 front index 5와 back index 5는 글자꼴이 서로 달라 각각 따로 읽음."
+}

@@ -1,0 +1,75 @@
+// 신년운세(연도 상품) 공개·잠금 규칙 한 곳. 결제·회원·권한은 _commerce.js 를 그대로 쓴다(회원 × 사주 × 'tj'+연도).
+// 공개 범위(관리자 설정, KV 'newyear:config'): closed(관리자만·기본값) | free(누구나 무료) | paid(구매 회원만, 맛보기는 누구나)
+import { isAdmin } from './_lib.js';
+import { kvOf } from './_store.js';
+import { memberOf, sajuKey, ownedWorlds, markViewed, isMonitor, loadProducts, payReady, ANNUAL_WORLD } from './_commerce.js';
+
+export const NEWYEAR_KEY = 'newyear:config';
+export const VISIBILITY = ['closed', 'free', 'paid'];
+export const DEFAULT_YEAR_CONFIG = { visibility: 'closed', teaser: ['open', 'total.core'], intro: '', contentMode: 'public' };
+
+export async function loadNewyearConfig(env) {
+  let saved = null; try { const kv = kvOf(env); saved = kv ? await kv.get(NEWYEAR_KEY, 'json') : null; } catch { saved = null; }
+  return cleanNewyearConfig(saved);
+}
+export function cleanNewyearConfig(raw) {
+  const out = { years: {} };
+  const ys = raw && raw.years && typeof raw.years === 'object' ? raw.years : {};
+  for (const [y, v] of Object.entries(ys)) {
+    if (!/^20\d\d$/.test(y) || !v || typeof v !== 'object') continue;
+    const c = { ...DEFAULT_YEAR_CONFIG };
+    if (VISIBILITY.includes(v.visibility)) c.visibility = v.visibility;
+    if (Array.isArray(v.teaser)) c.teaser = v.teaser.filter(t => typeof t === 'string' && /^[a-z]+(\.[a-z]+)?$/.test(t)).slice(0, 6);
+    if (typeof v.intro === 'string') c.intro = v.intro.slice(0, 600);
+    if (v.contentMode === 'public' || v.contentMode === 'preview') c.contentMode = v.contentMode;   // preview = 검수 전 문구도 보여 줌(운영에서는 쓰지 않는다)
+    out.years[y] = c;
+  }
+  return out;
+}
+export const yearConfig = (cfg, y) => (cfg.years && cfg.years[y]) || { ...DEFAULT_YEAR_CONFIG };
+
+// 사주 식별값: _commerce.sajuKey 와 같은 규칙(원국 네 기둥 한자 + 성별). 서버가 출생 입력으로 직접 계산한다.
+export async function sajuKeyOfBirth(Manse, birth) {
+  const inp = { year: birth.year, month: birth.month, day: birth.day, calendar: birth.calendar === 'lunar' ? 'lunar' : 'solar', leap: !!birth.leap };
+  if (Number.isInteger(birth.hour)) { inp.hour = birth.hour; inp.minute = Number.isInteger(birth.minute) ? birth.minute : 0; }
+  ['jasi', 'timeMode', 'lon'].forEach(k => { if (birth[k] != null) inp[k] = birth[k]; });
+  const ch = Manse.compute(inp);
+  const P = ch.pillars, h = p => (p ? { hanja: Manse.gzName(p) } : null);
+  return sajuKey({ pillars: { year: h(P.year), month: h(P.month), day: h(P.day), hour: ch.hourKnown ? h(P.hour) : null }, gender: birth.gender });
+}
+
+// 그해 신년운세를 열어도 되는가. 반환 { state: 'open'|'teaser'|'closed', reason, product, admin }
+export async function newyearGate(request, env, { year, birth, Manse }) {
+  const world = ANNUAL_WORLD(year);
+  const products = await loadProducts(env), product = products.find(p => p.id === world) || null;
+  const sale = product ? { id: product.id, name: product.name, price: product.price, active: product.active, onSale: !!(product.active && product.price > 0 && payReady(env)) } : null;
+  if (isMonitor(request, env)) return { state: 'open', reason: 'monitor', product: sale };
+  const admin = isAdmin(request, env), viewAsFree = admin && (request.headers.get('x-view-as') || '') === 'free';
+  if (admin && !viewAsFree) return { state: 'open', reason: 'admin', product: sale, admin: true };
+  const cfg = yearConfig(await loadNewyearConfig(env), year);
+  if (cfg.visibility === 'closed') return { state: 'closed', reason: 'not-released', product: sale };
+  if (cfg.visibility === 'free') return { state: 'open', reason: 'free', product: sale, teaser: cfg.teaser };
+  // paid
+  if (viewAsFree) return { state: 'teaser', reason: 'purchase', product: sale, teaser: cfg.teaser, viewAsFree: true };
+  const member = await memberOf(request, env);
+  if (!member) return { state: 'teaser', reason: 'login', product: sale, teaser: cfg.teaser };
+  const key = await sajuKeyOfBirth(Manse, birth);
+  let owned = []; try { owned = await ownedWorlds(env, member.id, key); } catch { return { state: 'teaser', reason: 'unavailable', product: sale, teaser: cfg.teaser }; }
+  if (!owned.includes(world)) return { state: 'teaser', reason: 'purchase', product: sale, teaser: cfg.teaser, member: { id: member.id } };
+  await markViewed(env, member.id, key, world);   // 처음 연 시각(환불 판단 근거: 7일 이내·미열람)
+  return { state: 'open', reason: 'owned', product: sale, member: { id: member.id } };
+}
+
+// 맛보기: 정해진 장·절만 남기고 나머지는 제목만(본문 비움). 서버에서 잘라 보내므로 유료 문구가 브라우저로 가지 않는다.
+export function teaserOf(reading, teaser) {
+  const keep = new Set(teaser || DEFAULT_YEAR_CONFIG.teaser);
+  return {
+    ...reading,
+    teaser: true,
+    chapters: reading.chapters.map(c => {
+      if (keep.has(c.id)) return c;
+      const secs = (c.sections || []).filter(s => keep.has(c.id + '.' + s.id));
+      return { id: c.id, title: c.title, locked: true, sections: secs.length ? secs : undefined, months: c.months ? c.months.map(m => ({ lunarMonth: m.lunarMonth, label: m.label, solar: m.solar, locked: true })) : undefined };
+    }),
+  };
+}

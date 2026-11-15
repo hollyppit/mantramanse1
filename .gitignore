@@ -8,3 +8,5 @@ output/
 .dev.vars
 .dev.vars.*
 .awk-compress/
+# 토정비결 보충본 판독용 사진(국립중앙도서관 화면 촬영본·변환본): 판독 결과 JSON 만 저장소에 둔다
+docs/tojeong-transcription/nl-capture/*/

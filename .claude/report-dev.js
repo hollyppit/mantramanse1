@@ -72,6 +72,21 @@ http.createServer(async (q, r) => {
     if (!fn) return send(r, 405, { error: 'method' }); const res = await fn({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'content-type': 'application/json' }, body: buf }) });
     r.statusCode = res.status; r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(await res.text());
   }
+  if (p === '/api/newyear/admin') { // 신년운세 관리자(메모리 KV, 비밀번호 test)
+    const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/newyear/admin.js')).href), buf = q.method === 'POST' ? await body(q) : undefined;
+    const fn = { GET: mod.onRequestGet, POST: mod.onRequestPost }[q.method]; if (!fn) return send(r, 405, { error: 'method' });
+    const res = await fn({ env: ikEnv, request: new Request('http://x' + q.url, { method: q.method, headers: { authorization: q.headers.authorization || '', 'x-reviewer': q.headers['x-reviewer'] || '', 'content-type': 'application/json' }, body: buf && buf.length ? buf : undefined }) });
+    r.statusCode = res.status; r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(await res.text());
+  }
+  if (p === '/api/newyear/reading' || p === '/api/commerce/access') { // 신년운세 화면 확인용: 실제 함수를 메모리 KV 로 실행. 공개 범위는 NY_VIS(기본 paid), 관리자 비밀번호 test
+    if (!ikMem.has('newyear:config')) ikMem.set('newyear:config', JSON.stringify({ years: { 2027: { visibility: process.env.NY_VIS || 'paid' } } }));
+    if (!ikMem.has('commerce:products')) ikMem.set('commerce:products', JSON.stringify({ products: [{ id: 'tj2027', price: 19800, active: true }] }));
+    const mod = await import(require('url').pathToFileURL(path.join(root, 'functions' + p + '.js')).href), buf = q.method === 'POST' ? await body(q) : undefined;
+    if (!mod.onRequestPost) return send(r, 405, { error: 'method' });
+    const h = {}; ['authorization', 'x-member-token', 'x-view-as', 'x-content-mode'].forEach(k => { if (q.headers[k]) h[k] = q.headers[k]; });
+    const res = await mod.onRequestPost({ env: ikEnv, request: new Request('http://x' + q.url, { method: 'POST', headers: { ...h, 'content-type': 'application/json' }, body: buf && buf.length ? buf : '{}' }) });
+    r.statusCode = res.status; r.setHeader('content-type', 'application/json; charset=utf-8'); return r.end(await res.text());
+  }
   if (p === '/api/luck-flags' || p === '/api/luck-phrases' || p === '/api/region' || p === '/api/wealth-career' || p === '/api/region-reading' || p === '/api/wish-spots') { // 실제 함수를 메모리 KV 로 실행(운세 환경 스위치·문구 관리자 확인용, 관리자 비밀번호 test)
     const mod = await import(require('url').pathToFileURL(path.join(root, 'functions' + p + '.js')).href), buf = (q.method === 'PUT' || q.method === 'POST') ? await body(q) : undefined;
     const fn = { GET: mod.onRequestGet, PUT: mod.onRequestPut }[q.method];

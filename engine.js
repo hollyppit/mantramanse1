@@ -4,7 +4,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
    순수 함수. 브라우저·Node 공용. MANSE_DATA(data.js)가 먼저 로드되어야 함. */
 (function (G) {
   'use strict';
-  const D = G.MANSE_DATA;
+  const D = G.MANSE_DATA || (typeof MANSE_DATA !== 'undefined' ? MANSE_DATA : undefined);   // 서버 import(모듈 범위 var)도 지원
   const EPOCH = Date.UTC(1900, 0, 1);
   const Y0 = D.y0;
   const TERMS = D.terms.split(';').map(r => r.split(',').map(s => EPOCH + parseInt(s, 36) * 60000));

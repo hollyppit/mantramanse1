@@ -67,7 +67,8 @@
     w1: ['종합풀이', '타고난 기질과 인생 흐름, 강점과 약점, 일·인연·재물·건강, 개운법까지 내 사주 전체를 한 번에 읽습니다.'],
     w2: ['재물운 심화', '돈을 버는 성향, 수입과 지출, 재물 관리와 시기별 재물 흐름을 읽습니다.'],
     w7: ['커리어운 심화', '직업 적성, 잘 맞는 일의 방식, 업종 선택과 독립, 커리어 변화와 성공 방향을 읽습니다.'],
-    w3: ['인연운 심화', '연애 성향, 결혼과 배우자, 대인관계, 가족과 자녀, 궁합을 읽습니다.']
+    w3: ['인연운 심화', '연애 성향, 결혼과 배우자, 대인관계, 가족과 자녀, 궁합을 읽습니다.'],
+    tj2027: ['2027 정미년 토정비결 신년운세', '토정비결 괘(규장각본 원문)와 사주로 2027년 총운, 재물·직업·인연·건강, 음력 12개월 흐름, 결정적 시기와 행동 지침을 읽습니다. 구매한 사주로 2027년 안에 다시 볼 수 있습니다.']
   };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var won = function (n) { return (+n || 0).toLocaleString('ko-KR') + '원'; };
@@ -86,7 +87,7 @@
   }
   fetch('/api/commerce/access', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"sd":null}' })
     .then(function (r) { return r.ok ? r.json() : null; })
-    .then(function (d) { render(d && Array.isArray(d.products) ? d.products : []); })
+    .then(function (d) { render((d && Array.isArray(d.products) ? d.products : []).concat(d && Array.isArray(d.annual) ? d.annual.map(function (p) { return Object.assign({ worlds: [p.id] }, p); }) : [])); })
     .catch(function () { box.innerHTML = '<p class="muted">상품 정보를 불러오지 못했습니다. 잠시 후 다시 열어 주세요.</p>'; });
 })();
 </script>

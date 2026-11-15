@@ -280,6 +280,8 @@
     // viewer 가 사주 데이터와 장 목록 읽는 함수를 넘긴다
     init: function (sd, opts) { P.sd = sd; opts = opts || {}; if (opts.chapters) P.chapters = opts.chapters; if (opts.onChange) P.onChange = opts.onChange; if (opts.resume) P.resume = opts.resume; if (opts.onPurchased) P.onPurchased = opts.onPurchased; return (P.early || Promise.resolve()).then(refresh).then(handleNaver).then(handleReturn); },
     refresh: refresh, headers: headers, lockOf: lockOf, lockedIndex: lockedIndex, show: show, close: close, info: function () { return P.info; },
+    // 신년운세 화면(report/newyear/)처럼 세계 장이 없는 화면이 같은 로그인·결제 흐름을 쓰도록 꺼내 둔다(기존 무빙툰 동작은 그대로)
+    login: login, logout: logout, buy: buy, toast: toast,
     _state: P,
   };
   // 결제창에서 돌아온 페이지: 사주 입력·계산을 기다리지 않고 바로 서버 승인을 시작한다(토스는 승인이 늦으면 결제를 자동 취소한다).

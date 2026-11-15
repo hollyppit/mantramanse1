@@ -170,7 +170,7 @@
       h += '<h2>구매한 사주</h2><div class="owned">' + saved.map(function (s, i) {
         var b = s.birth || {}, when = b.year ? b.year + '년 ' + b.month + '월 ' + b.day + '일' + (b.calendar === 'lunar' ? '(음력)' : '') + (Number.isInteger(b.hour) ? ' ' + b.hour + '시' : ' · 시각 모름') : '';
         return '<div class="row"><b>' + esc(s.label || '이름 없는 사주') + '</b><span class="muted">' + esc(when) + (b.gender ? ' · ' + (b.gender === 'F' ? '여' : '남') : '') + '</span><div class="chips">' + (s.worlds || []).map(function (w) { return '<span class="chip">' + esc(nm(w)) + '</span>'; }).join('') + '</div>' +
-          '<div class="acts"><button type="button" class="btn main" data-open="' + i + '">이 사주로 바로 읽기</button><button type="button" class="btn" data-forget="' + i + '">저장 삭제</button></div></div>';
+          '<div class="acts">' + ((s.worlds || []).filter(function (w) { return /^tjd{4}$/.test(w); }).map(function (w) { return '<button type="button" class="btn main" data-newyear="' + i + '" data-year="' + w.slice(2) + '">' + w.slice(2) + ' 신년운세 보기</button>'; }).join('')) + ((s.worlds || []).some(function (w) { return !/^tjd{4}$/.test(w); }) ? '<button type="button" class="btn main" data-open="' + i + '">이 사주로 바로 읽기</button>' : '')<button type="button" class="btn" data-forget="' + i + '">저장 삭제</button></div></div>';
       }).join('') + '</div><p class="muted">다른 기기에서도 이 버튼으로 출생 정보를 다시 입력하지 않고 바로 열 수 있어요. 저장을 지워도 구매한 주제는 그대로이며, 무빙툰에서 출생 정보를 입력하면 열립니다.</p>';
     }
     h += '<h2>' + (saved.length ? '열려 있는 주제(주문별)' : '지금 열려 있는 주제') + '</h2>';
@@ -243,6 +243,14 @@
         fetch('/api/commerce/mine', { method: 'POST', headers: { 'content-type': 'application/json', 'x-member-token': TOKEN }, body: JSON.stringify({ action: 'forget', ref: s.ref }) })
           .then(function (r) { if (!r.ok) throw new Error(); FLASH = '저장된 출생 정보를 지웠어요.'; return load(TOKEN); })
           .catch(function () { alert('지우지 못했습니다. 잠시 후 다시 시도해 주세요.'); });
+      };
+    });
+    app.querySelectorAll('[data-newyear]').forEach(function (b) {
+      b.onclick = function () {
+        var s = saved[+b.dataset.newyear]; if (!s || !s.birth) return;
+        // 신년운세 화면이 시작할 때 읽는 넘겨받기 값(report/newyear/newyear-app.js)
+        try { sessionStorage.setItem('mt_ny_input', JSON.stringify({ birth: s.birth, year: +b.dataset.year })); } catch (e) { alert('이 브라우저에서는 바로 열 수 없어요. 신년운세 화면에서 출생 정보를 입력해 주세요.'); }
+        location.href = '/report/newyear/?from=my';
       };
     });
     app.querySelectorAll('[data-open]').forEach(function (b) {

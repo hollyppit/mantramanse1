@@ -26,7 +26,11 @@ export const DEFAULT_PRODUCTS = [
   { id: 'w7', name: '커리어운 심화', kind: 'world', worlds: ['w7'], price: 0, active: true, order: 3 },
   { id: 'w3', name: '인연운 심화', kind: 'world', worlds: ['w3'], price: 0, active: true, order: 4 },
   { id: 'bundle', name: '전체 열기', kind: 'bundle', worlds: [], price: 0, active: true, order: 0 },   // worlds 는 구매 시점의 유료 세계로 채운다
+  // 연도 상품(신년운세): 무빙툰 세계와 따로 판다. 권한 이름(world 칸)은 'tj' + 연도. 묶음(전체 열기)에는 들어가지 않는다(productWorlds 는 세계 설정의 유료 세계만 모음).
+  { id: 'tj2027', name: '2027 정미년 토정비결 신년운세', kind: 'annual', year: 2027, worlds: ['tj2027'], price: 0, active: true, order: 10 },
 ];
+export const ANNUAL_WORLD = y => 'tj' + y;
+export const isAnnualWorld = w => /^tjd{4}$/.test(String(w || ''));
 const MAX_PRICE = 1000000;
 
 // ── 사주 식별값: 원국 네 기둥(한자)·성별의 해시. 출생일·이름 원문은 쓰지 않는다. 시간을 모르면 시주 자리를 '-' 로 둔다.
@@ -140,7 +144,7 @@ export async function loadProducts(env) {
 }
 // 구매 시점에 이 상품이 여는 세계: 세계 상품은 자기 세계, 묶음은 지금 켜져 있고 유료인 세계 전부
 export async function productWorlds(env, product) {
-  if (product.kind === 'world') return product.worlds.slice();
+  if (product.kind === 'world' || product.kind === 'annual') return product.worlds.slice();
   const access = await worldAccess(env);
   return Object.keys(access).filter(id => access[id].enabled && access[id].paid).sort();
 }

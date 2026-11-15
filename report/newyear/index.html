@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>2027 정미년 토정비결 신년운세 · 만트라</title>
+<meta name="description" content="토정비결 괘(규장각본 원문)와 사주로 읽는 2027 정미년 — 총운, 재물·직업·인연·건강, 음력 12개월, 결정적 시기와 행동 지침.">
+<meta name="theme-color" content="#0B0710">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="newyear.css?v=20261115">
+</head>
+<body>
+<noscript><p style="padding:30vh 20px;color:#EDE8DC">이 페이지는 자바스크립트가 필요합니다.</p></noscript>
+<div class="ny-sky" aria-hidden="true"><i class="ny-moon"></i><i class="ny-embers"></i><i class="ny-ridge"></i><i class="ny-sheep"></i></div>
+
+<main id="ny" data-view="input">
+  <!-- 입력 -->
+  <section id="v-input" class="ny-view" aria-label="출생 정보 입력">
+    <p class="ny-kick">MANTRA · 丁未 · 2027</p>
+    <h1 class="ny-title">정미년,<br>붉은 양의 해를<br>미리 걸어 봅니다</h1>
+    <p class="ny-sub">토정비결의 옛 괘와 사주를 각각 계산해, 두 풀이가 같은 말을 하는지 다른 말을 하는지까지 짚어 드려요. 풀이는 미리 쓴 문장을 조합하며 AI를 부르지 않아요.</p>
+    <form id="ny-form" novalidate autocomplete="off">
+      <div class="ny-f ny-seg" role="radiogroup" aria-label="달력"><span>달력</span>
+        <label><input type="radio" name="calendar" value="solar" checked><i>양력</i></label>
+        <label><input type="radio" name="calendar" value="lunar"><i>음력</i></label>
+        <label class="ny-leap"><input type="checkbox" name="leap"><i>윤달</i></label>
+      </div>
+      <div class="ny-f ny-row3"><span>생년월일</span>
+        <select name="year" aria-label="년"></select><select name="month" aria-label="월"></select><select name="day" aria-label="일"></select>
+      </div>
+      <div class="ny-f"><span>태어난 시간 <small>(사주 풀이에만 써요. 모르면 비워 두세요)</small></span>
+        <div class="ny-inl"><input type="time" name="time" value="12:00"><label class="ny-chk"><input type="checkbox" name="unknown"><i>모릅니다</i></label></div>
+      </div>
+      <div class="ny-f ny-seg" role="radiogroup" aria-label="성별"><span>성별</span>
+        <label><input type="radio" name="gender" value="F"><i>여</i></label>
+        <label><input type="radio" name="gender" value="M"><i>남</i></label>
+      </div>
+      <label class="ny-chk ny-remember"><input type="checkbox" name="remember" checked><i>이 기기에서 이어보기(출생 정보는 이 브라우저에만 저장, 서버에는 저장하지 않아요)</i></label>
+      <p class="ny-err" id="ny-form-err" role="alert" hidden></p>
+      <button class="ny-go" type="submit">2027년 풀이 펼치기</button>
+    </form>
+    <p class="ny-fine"><a href="/report/legal/products.html">상품 안내</a> · <a href="/report/legal/refund.html">환불 정책</a> · <a href="/report/my/">내 구매 내역</a></p>
+  </section>
+
+  <!-- 불러오는 중 -->
+  <section id="v-loading" class="ny-view" aria-live="polite" hidden>
+    <div class="ny-lantern" aria-hidden="true"></div>
+    <p class="ny-loading-t">괘를 짓고 사주를 펼치는 중이에요…</p>
+  </section>
+
+  <!-- 아직 공개 전·오류 -->
+  <section id="v-msg" class="ny-view" hidden>
+    <h2 class="ny-msg-t" id="ny-msg-t"></h2>
+    <p class="ny-sub" id="ny-msg-b"></p>
+    <div class="ny-actions"><button type="button" class="ny-btn" id="ny-retry">다시 시도</button><button type="button" class="ny-btn ghost" id="ny-back">입력으로</button></div>
+  </section>
+
+  <!-- 읽기 -->
+  <section id="v-read" class="ny-view" hidden>
+    <header class="ny-bar">
+      <button type="button" class="ny-ico" id="ny-home" aria-label="입력으로 돌아가기">←</button>
+      <div class="ny-prog" aria-hidden="true"><i id="ny-prog-i"></i></div>
+      <span class="ny-count" id="ny-count"></span>
+      <button type="button" class="ny-ico" id="ny-toc-btn" aria-label="목차">☰</button>
+      <button type="button" class="ny-ico" id="ny-pdf" aria-label="PDF로 저장">PDF</button>
+    </header>
+    <nav class="ny-toc" id="ny-toc" hidden></nav>
+    <article class="ny-stage" id="ny-stage" tabindex="-1"></article>
+    <footer class="ny-nav">
+      <button type="button" class="ny-btn ghost" id="ny-prev">이전 장</button>
+      <button type="button" class="ny-btn" id="ny-next">다음 장</button>
+    </footer>
+  </section>
+</main>
+
+<!-- PDF(인쇄) 전용: 모든 장을 한 번에 펼친다 -->
+<div id="ny-print" class="ny-print" aria-hidden="true"></div>
+
+<script src="/engine.js"></script>
+<script src="/report/v2/paywall.js?v=20261115-ny"></script>
+<script src="newyear-app.js?v=20261115"></script>
+</body>
+</html>

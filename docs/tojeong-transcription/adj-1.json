@@ -1,0 +1,506 @@
+[
+ {
+  "side": "002b",
+  "key": "b1.m3.0",
+  "value": "山生水踈",
+  "pick": "A",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "003b",
+  "key": "b0.m12.0",
+  "value": "吉方何處",
+  "pick": "A",
+  "confidence": "high",
+  "note": "왼쪽 줄은 덧댄 종이에 가려 안 보임"
+ },
+ {
+  "side": "003b",
+  "key": "b0.m12.1",
+  "value": "□□□□",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "덧댄 종이에 가려 판독 불가"
+ },
+ {
+  "side": "003b",
+  "key": "b1.m12.1",
+  "value": "貴人來助",
+  "pick": "B",
+  "confidence": "medium",
+  "note": "종이에 반쯤 가림, 남은 획이 貴·來·助와 맞음"
+ },
+ {
+  "side": "003b",
+  "key": "b2.m12.1",
+  "value": "□有損害",
+  "pick": "B",
+  "confidence": "medium",
+  "note": "첫 글자 가림"
+ },
+ {
+  "side": "004a",
+  "key": "b1.guaci0.0",
+  "value": "勿爲移徙",
+  "pick": "B",
+  "confidence": "medium",
+  "note": "오른쪽 끝 종이에 반쯤 가림, 왼쪽 획으로 판독"
+ },
+ {
+  "side": "004a",
+  "key": "b1.guaci2.0",
+  "value": "福空祿虛",
+  "pick": "A",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "004b",
+  "key": "b1.guaci2.0",
+  "value": "事在烙眉",
+  "pick": "A",
+  "confidence": "high",
+  "note": "오른쪽이 各 → 烙"
+ },
+ {
+  "side": "004b",
+  "key": "b1.m12.1",
+  "value": "疾病窺身",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "왼쪽 일부 가림, 見 부분 보임"
+ },
+ {
+  "side": "005b",
+  "key": "b2.guaci2.1",
+  "value": "近遠咸新",
+  "pick": "A",
+  "confidence": "high",
+  "note": "안에 口 있음 → 咸"
+ },
+ {
+  "side": "006a",
+  "key": "b0.guaci2.1",
+  "value": "來住他人",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "왼쪽 변이 한 획(亻)으로 보임 → 住"
+ },
+ {
+  "side": "007a",
+  "key": "b0.m1.1",
+  "value": "襄姓可知",
+  "pick": "B",
+  "confidence": "medium",
+  "note": ""
+ },
+ {
+  "side": "007a",
+  "key": "b0.m10.1",
+  "value": "啼雁何去",
+  "pick": "A",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "008b",
+  "key": "b1.m12.1",
+  "value": "預撰其心",
+  "pick": "B",
+  "confidence": "high",
+  "note": "扌+巽"
+ },
+ {
+  "side": "009a",
+  "key": "b0.m9.1",
+  "value": "必有喜事",
+  "pick": "B",
+  "confidence": "medium",
+  "note": "번진 事"
+ },
+ {
+  "side": "009b",
+  "key": "b1.m2.1",
+  "value": "閙事多端",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "門 안이 市 모양"
+ },
+ {
+  "side": "011a",
+  "key": "b1.m12.0",
+  "value": "富貴常前",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "흐림, 아래가 巾 모양"
+ },
+ {
+  "side": "013a",
+  "key": "b0.guaci1.0",
+  "value": "三春己過",
+  "pick": "B",
+  "confidence": "medium",
+  "note": "왼쪽 세로획이 가운데 획부터 시작 → 己 모양"
+ },
+ {
+  "side": "013a",
+  "key": "b0.m3.0",
+  "value": "辰已之月",
+  "pick": "B",
+  "confidence": "low",
+  "note": "왼쪽 위가 살짝 트임 → 已 모양, 巳와 구분 어려움"
+ },
+ {
+  "side": "013a",
+  "key": "b1.guaci2.0",
+  "value": "一夫當關",
+  "pick": "B",
+  "confidence": "high",
+  "note": "앞 구(오른쪽 줄)가 一夫當關"
+ },
+ {
+  "side": "013a",
+  "key": "b1.guaci2.1",
+  "value": "萬夫莫開",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "013a",
+  "key": "b1.m8.0",
+  "value": "心有苦憫",
+  "pick": "B",
+  "confidence": "high",
+  "note": "忄+門"
+ },
+ {
+  "side": "013a",
+  "key": "b2.m7.1",
+  "value": "遲不如初",
+  "pick": "A",
+  "confidence": "low",
+  "note": "辶 아래 획이 거의 안 보여 氵처럼 보임, 안쪽은 犀 모양"
+ },
+ {
+  "side": "015a",
+  "key": "b0.m9.0",
+  "value": "頭揷桂花",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "세로획이 臼를 뚫고 내려감 → 揷"
+ },
+ {
+  "side": "015b",
+  "key": "b0.m6.0",
+  "value": "商路得財",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "015b",
+  "key": "b1.guaci2.1",
+  "value": "孤鶯獨啼",
+  "pick": "B",
+  "confidence": "medium",
+  "note": "위가 火火+冖 → 鶯"
+ },
+ {
+  "side": "017a",
+  "key": "b1.m11.1",
+  "value": "必有狠狽",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "艮 위 점 없음 → 狠"
+ },
+ {
+  "side": "017b",
+  "key": "b0.m8.1",
+  "value": "必是狠狽",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "艮 위 점 없음 → 狠"
+ },
+ {
+  "side": "017b",
+  "key": "b2.guaci1.1",
+  "value": "終見亨通",
+  "pick": "B",
+  "confidence": "medium",
+  "note": "亠口了 → 亨"
+ },
+ {
+  "side": "018a",
+  "key": "b0.m9.1",
+  "value": "飮酒自樂",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "왼쪽 食 아래가 퍼진 모양"
+ },
+ {
+  "side": "018a",
+  "key": "b0.m11.0",
+  "value": "運數亨通",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "018b",
+  "key": "b0.m1.0",
+  "value": "先嚬後笑",
+  "pick": "B",
+  "confidence": "high",
+  "note": "頻 붙은 嚬"
+ },
+ {
+  "side": "018b",
+  "key": "b0.m11.0",
+  "value": "諸事亨通",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "018b",
+  "key": "b2.m2.0",
+  "value": "凶化爲吉",
+  "pick": "B",
+  "confidence": "medium",
+  "note": "마지막 글자 번졌으나 吉"
+ },
+ {
+  "side": "019a",
+  "key": "b0.guaci2.0",
+  "value": "青山霽月",
+  "pick": "B",
+  "confidence": "medium",
+  "note": "雨+齊"
+ },
+ {
+  "side": "019a",
+  "key": "b0.m12.0",
+  "value": "必有亨通",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "019a",
+  "key": "b1.guaci1.1",
+  "value": "終見亨通",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "019a",
+  "key": "b2.m9.1",
+  "value": "次次亨通",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "019b",
+  "key": "b2.guaci2.0",
+  "value": "旱天甘雨",
+  "pick": "B",
+  "confidence": "medium",
+  "note": "둘째 글자 획 일부 빠짐"
+ },
+ {
+  "side": "019b",
+  "key": "b2.guaci2.1",
+  "value": "時霑新苗",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "雨+氵占"
+ },
+ {
+  "side": "019b",
+  "key": "b2.m9.0",
+  "value": "雖有得材",
+  "pick": "A",
+  "confidence": "high",
+  "note": "木+才 → 材"
+ },
+ {
+  "side": "020a",
+  "key": "b0.guaci2.1",
+  "value": "先醉其顔",
+  "pick": "B",
+  "confidence": "low",
+  "note": "彦 위가 立 모양으로 보이나 작아서 불확실"
+ },
+ {
+  "side": "020a",
+  "key": "b0.m1.0",
+  "value": "有恨自嘆",
+  "pick": "A",
+  "confidence": "high",
+  "note": "안에 획 둘, 위 점 → 自"
+ },
+ {
+  "side": "020a",
+  "key": "b0.m3.0",
+  "value": "前程亨通",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "020a",
+  "key": "b0.m8.0",
+  "value": "勿發虛慾",
+  "pick": "A",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "020a",
+  "key": "b2.m8.0",
+  "value": "財數己回",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "020b",
+  "key": "b0.m5.0",
+  "value": "幸運己回",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "020b",
+  "key": "b1.m8.1",
+  "value": "利在其中",
+  "pick": "B",
+  "confidence": "medium",
+  "note": "中 안에 잉크 번짐"
+ },
+ {
+  "side": "020b",
+  "key": "b2.guaci0.0",
+  "value": "吉運己回",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "021a",
+  "key": "b1.m7.0",
+  "value": "事有頭緒",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "者 위 점 안 보임"
+ },
+ {
+  "side": "021b",
+  "key": "guaxiang.0",
+  "value": "方病大瘇",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "疒+重, 月 변 없음"
+ },
+ {
+  "side": "021b",
+  "key": "b0.guaci0.0",
+  "value": "方病大瘇",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "疒+重, 月 변 없음"
+ },
+ {
+  "side": "022a",
+  "key": "b2.m2.0",
+  "value": "吉運己回",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "022a",
+  "key": "b2.m10.0",
+  "value": "心有煩憫",
+  "pick": "B",
+  "confidence": "high",
+  "note": "忄+門"
+ },
+ {
+  "side": "023a",
+  "key": "b1.m12.1",
+  "value": "勿貪虛慾",
+  "pick": "other",
+  "confidence": "medium",
+  "note": "둘째는 今+貝 → 貪, 셋째는 虛"
+ },
+ {
+  "side": "024a",
+  "key": "b0.m11.1",
+  "value": "晚得其魚",
+  "pick": "A",
+  "confidence": "low",
+  "note": "晚/晩 자형 차이가 인쇄에서 구분 안 됨"
+ },
+ {
+  "side": "024a",
+  "key": "b1.guaci0.1",
+  "value": "晚時生光",
+  "pick": "A",
+  "confidence": "low",
+  "note": "晚/晩 자형 차이가 인쇄에서 구분 안 됨"
+ },
+ {
+  "side": "024a",
+  "key": "b1.m10.0",
+  "value": "逢秋菫花",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "흐림, 勹 없이 艹+堇 모양"
+ },
+ {
+  "side": "025a",
+  "key": "b0.m12.0",
+  "value": "譽高四方",
+  "pick": "B",
+  "confidence": "high",
+  "note": "아래 言 → 譽"
+ },
+ {
+  "side": "026a",
+  "key": "b0.m7.0",
+  "value": "若非移舍",
+  "pick": "B",
+  "confidence": "low",
+  "note": "왼쪽이 깨져 舎·舍 구분 어려움"
+ },
+ {
+  "side": "026b",
+  "key": "b0.m1.1",
+  "value": "花楊設宴",
+  "pick": "A",
+  "confidence": "medium",
+  "note": "木+昜"
+ },
+ {
+  "side": "026b",
+  "key": "b1.m11.1",
+  "value": "可得千金",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ },
+ {
+  "side": "026b",
+  "key": "b2.guaci2.1",
+  "value": "可得千金",
+  "pick": "B",
+  "confidence": "high",
+  "note": ""
+ }
+]
