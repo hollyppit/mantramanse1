@@ -1,0 +1,110 @@
+/* 통합 첫 화면: 왼쪽(모바일은 위) 심층 분석 = 한국형 초현실 오컬트(먹색·남색·고금색, 안개·빛)
+                 오른쪽(모바일은 아래) 운명의 광장 = 벚꽃이 흩날리는 동양풍(미색·연분홍·옥색·먹색, 한지·여백·처마) */
+:root {
+  --ink: #0B0D16; --navy: #121A33; --gold: #CDB27A; --gold-l: #EBD9AA; --gold-d: #8E7849; --bone: #E9E4D8; --bone-2: #B1ACA0;
+  --rice: #F6F0E3; --rice-2: #EFE6D3; --blush: #E9B9BF; --blush-d: #B86A78; --jade: #6E9F90; --jade-d: #3F6F62; --sumi: #2B2723; --sumi-2: #5E574F;
+  --f-serif: "Noto Serif KR", "Nanum Myeongjo", serif; --f-sans: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; min-height: 100%; }
+body { background: var(--ink); color: var(--bone); font-family: var(--f-sans); word-break: keep-all; overflow-wrap: break-word; -webkit-font-smoothing: antialiased; }
+h2, p, ul { margin: 0; padding: 0; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+/* 상단 브랜드: 두 세계 경계 위에 떠 있다 */
+.brand { position: fixed; top: 0; left: 0; right: 0; z-index: 5; text-align: center; padding: 18px 16px 0; pointer-events: none; }
+.brand .mark, .brand .tag { display: table; margin: 0 auto; background: rgba(11,13,22,.72); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.brand .mark { font-family: var(--f-serif); letter-spacing: .42em; font-size: .86rem; color: var(--gold-l); padding: 6px 10px 6px 16px; border-radius: 999px 999px 0 0; }
+.brand .tag { font-size: .76rem; color: var(--bone); letter-spacing: .06em; padding: 0 14px 6px; border-radius: 0 0 12px 12px; }
+.resume { pointer-events: auto; display: inline-block; margin-top: 10px; padding: 8px 16px; border-radius: 999px; font-size: .82rem; text-decoration: none; background: rgba(11,13,22,.72); border: 1px solid rgba(205,178,122,.45); color: var(--gold-l); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.resume:hover { border-color: var(--gold); }
+
+.worlds { display: grid; grid-template-columns: 1fr; min-height: 100svh; }
+@media (min-width: 860px) { .worlds { grid-template-columns: 1fr 1fr; } }
+
+.world { position: relative; overflow: hidden; display: flex; align-items: flex-end; min-height: 50svh; padding: 112px 24px 40px; text-decoration: none; isolation: isolate; transition: filter .5s ease; }
+@media (min-width: 860px) { .world { min-height: 100svh; padding: 120px 56px 72px; align-items: center; } }
+.world .inner { position: relative; z-index: 2; max-width: 420px; }
+.world .kick { font-family: var(--f-serif); font-size: .7rem; letter-spacing: .34em; margin-bottom: 14px; }
+.world h2 { font-family: var(--f-serif); font-weight: 700; font-size: clamp(2rem, 7.4vw, 3.1rem); line-height: 1.25; letter-spacing: .02em; }
+.world .desc { margin-top: 14px; font-size: 1rem; line-height: 1.85; }
+.world .chips { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; }
+.world .chips li { font-size: .76rem; padding: 4px 10px; border-radius: 999px; }
+.world .go { display: inline-block; margin-top: 24px; font-size: .95rem; font-weight: 500; padding: 12px 20px; border-radius: 12px; transition: transform .3s ease; }
+.world:hover .go, .world:focus-visible .go { transform: translateX(4px); }
+.world .last { display: inline-block; margin-bottom: 14px; font-size: .72rem; padding: 4px 10px; border-radius: 999px; letter-spacing: .04em; }
+.has-resume .world.deep { padding-top: 168px; }
+
+/* ① 심층 분석: 먹색·남색 밤하늘, 위에서 내려오는 금빛, 낮게 깔린 안개 */
+.deep { background: radial-gradient(120% 80% at 70% 0%, #1B2547 0%, var(--navy) 38%, var(--ink) 78%); color: var(--bone); }
+.deep .halo { position: absolute; z-index: 0; width: 70vmax; height: 70vmax; right: -24vmax; top: -34vmax; border-radius: 50%; background: radial-gradient(circle, rgba(235,217,170,.22) 0%, rgba(205,178,122,.08) 38%, transparent 66%); animation: breathe 9s ease-in-out infinite; }
+.deep .fog { position: absolute; inset: auto 0 0 0; height: 60%; z-index: 1; pointer-events: none; }
+.deep .fog i { position: absolute; left: -20%; right: -20%; height: 60%; bottom: 0; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(177,172,160,.16), transparent 70%); filter: blur(18px); animation: drift 26s linear infinite; }
+.deep .fog i:nth-child(2) { bottom: 18%; opacity: .7; animation-duration: 38s; animation-direction: reverse; }
+.deep .fog i:nth-child(3) { bottom: 36%; opacity: .45; animation-duration: 52s; }
+.deep .kick { color: var(--gold); }
+.deep h2 { background: linear-gradient(180deg, var(--gold-l), var(--gold-d)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+.deep .desc { color: var(--bone-2); }
+.deep .chips li { border: 1px solid rgba(205,178,122,.32); color: var(--gold-l); }
+.deep .go { background: linear-gradient(180deg, #D9C08A, #A88D57); color: #17130B; box-shadow: 0 10px 34px rgba(205,178,122,.18); }
+.deep .last { background: rgba(205,178,122,.16); color: var(--gold-l); border: 1px solid rgba(205,178,122,.4); }
+
+/* ② 운명의 광장: 한지(미세한 결) 위 따뜻한 햇살, 처마 선, 벚꽃잎 */
+.plaza { background-color: var(--rice); color: var(--sumi);
+  background-image:
+    radial-gradient(110% 70% at 20% 0%, rgba(255,247,226,.95) 0%, rgba(246,240,227,0) 60%),
+    radial-gradient(80% 60% at 100% 100%, rgba(233,185,191,.32), transparent 70%),
+    radial-gradient(70% 50% at 0% 100%, rgba(110,159,144,.16), transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .3 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.plaza .eave { position: absolute; z-index: 1; left: -6%; right: -6%; top: 0; height: 84px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(43,39,35,.10), transparent); border-bottom: 2px solid rgba(43,39,35,.14); border-radius: 0 0 50% 50% / 0 0 26px 26px; }
+.plaza .petals { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+.plaza .kick { color: var(--jade-d); }
+.plaza h2 { color: var(--sumi); }
+.plaza h2::after { content: ""; display: block; width: 44px; height: 2px; margin-top: 14px; background: linear-gradient(90deg, var(--blush-d), transparent); }
+.plaza .desc { color: var(--sumi-2); }
+.plaza .chips li { background: rgba(255,255,255,.55); border: 1px solid rgba(110,159,144,.35); color: var(--jade-d); }
+.plaza .go { background: var(--sumi); color: var(--rice); box-shadow: 0 10px 28px rgba(43,39,35,.16); }
+.plaza .last { background: rgba(233,185,191,.42); color: #6E3442; border: 1px solid rgba(184,106,120,.4); }
+
+/* 다른 세계에 마우스를 올리면 반대쪽은 살짝 가라앉는다(PC) */
+@media (hover: hover) and (min-width: 860px) { .worlds:hover .world:not(:hover) { filter: saturate(.7) brightness(.86); } }
+
+.foot { position: relative; z-index: 2; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 10px; padding: 18px 16px 26px; font-size: .76rem; background: var(--ink); color: var(--bone-2); }
+.foot a { color: var(--bone-2); text-decoration: none; }
+.foot a:hover { color: var(--gold); }
+
+@keyframes breathe { 0%, 100% { opacity: .75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.06); } }
+@keyframes drift { from { transform: translateX(-8%); } to { transform: translateX(8%); } }
+@media (prefers-reduced-motion: reduce) { .deep .halo, .deep .fog i { animation: none; } .world, .world .go { transition: none; } }
+
+/* 준비 중·출시 알림 시트(광장 색) */
+.sheet { position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end; justify-content: center; }
+@media (min-width: 640px) { .sheet { align-items: center; } }
+.sheet-bg { position: absolute; inset: 0; background: rgba(11,13,22,.55); }
+.sheet-box { position: relative; width: min(480px, 100%); max-height: 92svh; overflow: auto; background: var(--rice); color: var(--sumi); border-radius: 20px 20px 0 0; padding: 28px 22px calc(24px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 40px rgba(0,0,0,.25); }
+@media (min-width: 640px) { .sheet-box { border-radius: 20px; } }
+.sheet-box .x { position: absolute; top: 10px; right: 12px; width: 40px; height: 40px; border: 0; background: none; font-size: 1.6rem; color: var(--sumi-2); cursor: pointer; }
+.sheet h3 { margin: 0 0 6px; font-family: var(--f-serif); font-size: 1.35rem; }
+.sheet .stage { display: inline-block; font-size: .72rem; padding: 3px 9px; border-radius: 999px; background: rgba(110,159,144,.16); color: var(--jade-d); margin-bottom: 12px; }
+.sheet p { font-size: .93rem; line-height: 1.8; color: var(--sumi-2); }
+.sheet form { margin-top: 18px; }
+.sheet label.fld { display: block; font-size: .85rem; font-weight: 500; margin-bottom: 6px; }
+.sheet input[type=email] { width: 100%; padding: 13px 14px; font-size: 16px; border: 1px solid #D8CDB6; border-radius: 12px; background: #fff; color: var(--sumi); }
+.sheet .notice { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,.6); border: 1px solid #E5DAC4; font-size: .8rem; line-height: 1.75; color: var(--sumi-2); }
+.sheet .notice dt { font-weight: 700; color: var(--sumi); float: left; width: 5.2em; }
+.sheet .notice dd { margin: 0 0 2px 5.2em; }
+.sheet .agree { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; font-size: .88rem; line-height: 1.6; cursor: pointer; }
+.sheet .agree input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--jade-d); flex: none; }
+.sheet .sep { font-size: .78rem; color: var(--sumi-2); margin-top: 8px; }
+.sheet .btn { display: block; width: 100%; margin-top: 16px; padding: 14px; border: 0; border-radius: 12px; background: var(--sumi); color: var(--rice); font: 500 1rem var(--f-sans); cursor: pointer; text-align: center; text-decoration: none; }
+.sheet .btn:disabled { opacity: .45; cursor: default; }
+.sheet .btn.ghost { background: transparent; color: var(--sumi); border: 1px solid #CFC3AA; }
+.sheet .msg { margin-top: 12px; font-size: .88rem; min-height: 1.4em; }
+.sheet .msg.err { color: #A33B3B; }
+.sheet .msg.ok { color: var(--jade-d); }
+.sheet .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.sheet .invite { margin-top: 22px; padding-top: 16px; border-top: 1px dashed #D8CDB6; }
+.sheet .invite p { font-size: .84rem; }

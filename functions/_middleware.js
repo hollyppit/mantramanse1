@@ -3,6 +3,7 @@
 // 아래 "공개 읽기(GET)" 경로를 운영 주소로 대신 요청한다. 쓰기(POST/PUT/DELETE)와 관리자 경로는 건드리지 않는다.
 // 운영 호스트(mantramanse.pages.dev)와 그 외 호스트에서는 아무 일도 하지 않는다(요청을 그대로 통과).
 import { siteGate } from './_site-gate.js';
+import { communityGate } from './_community.js';
 
 const PROD = 'https://mantramanse.pages.dev';
 const PREVIEW_HOST = /^[a-z0-9][a-z0-9-]*\.mantramanse\.pages\.dev$/i;
@@ -15,6 +16,8 @@ export const proxiesToProd = (host, method, pathname) => method === 'GET' && PRE
 export async function onRequest(ctx) {
   const locked = await siteGate(ctx.request, ctx.env);
   if (locked) return locked;
+  const closed = await communityGate(ctx.request, ctx.env);   // 커뮤니티 공개 단계 잠금(사이트 비밀번호와 별개)
+  if (closed) return closed;
   const url = new URL(ctx.request.url);
   if (!proxiesToProd(url.hostname, ctx.request.method, url.pathname)) return ctx.next();
   try {

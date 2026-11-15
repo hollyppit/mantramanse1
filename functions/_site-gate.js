@@ -27,11 +27,14 @@ const HDR = { 'cache-control': 'no-store', 'x-robots-tag': 'noindex, nofollow' }
 //   열림: /report/ 페이지(관리자 /report/admin 제외), 모든 /api/*(관리자 쓰기는 각 API 가 관리자 토큰으로 따로 막는다), HTML 이 아닌 정적 파일(js·css·이미지·글꼴)
 //   잠김: 만세력 화면(루트 / · /index.html · 그 밖의 .html)과 /report/admin — 쿠키 없는 방문자가 루트로 오면 /report/ 로 보낸다
 // 변수를 지우면 다시 사이트 전체 잠금. 코드 배포 없이 Cloudflare 환경변수로만 켜고 끈다.
+const gatewayOff = env => !!(env && /^(1|true|on)$/i.test(String(env.GATEWAY_OFF || '')));
 const reportPublicOn = env => !!(env && /^(1|true|on)$/i.test(String(env.SITE_GATE_REPORT_PUBLIC || '')));
 export function publicPath(pathname) {
   const p = pathname.replace(/\/{2,}/g, '/');
   if (/^\/report\/admin(\/|$)/i.test(p)) return false;
   if (p === '/report' || p.startsWith('/report/')) return true;
+  if (p === '/gate' || p.startsWith('/gate/')) return true;            // 통합 첫 화면(심층 분석·커뮤니티 고르기, 2026-11-15)
+  if (p === '/community' || p.startsWith('/community/')) return true;  // 커뮤니티는 비밀번호 대신 functions/_community.js 의 공개 단계·입장 쿠키로 따로 잠근다
   if (p.startsWith('/api/')) return true;
   if (p === '/' || /\.html?$/i.test(p) || !/\.[a-z0-9]+$/i.test(p)) return false;   // 루트·HTML·확장자 없는 경로(만세력 화면)는 잠금
   return true;   // 확장자가 있는 정적 파일(engine.js·feature-flags.js·이미지 등)은 무빙툰이 함께 쓴다
@@ -66,8 +69,9 @@ export async function siteGate(request, env) {
 
   if (same(getCookie(request, COOKIE), token)) return null;
 
-  // 무빙툰 공개 모드에서 쿠키 없이 만세력 첫 화면으로 온 방문자는 무빙툰으로 보낸다(관리자는 /__gate 로 들어오면 그대로 잠금 화면)
-  if (reportPublic && request.method === 'GET' && (url.pathname === '/' || url.pathname === '/index.html')) return new Response(null, { status: 302, headers: { ...HDR, location: '/report/' } });
+  // 무빙툰 공개 모드에서 쿠키 없이 만세력 첫 화면으로 온 방문자는 통합 첫 화면(/gate/)으로 보낸다(관리자는 /__gate 로 들어오면 그대로 잠금 화면).
+  // 되돌리기: 환경변수 GATEWAY_OFF=1 이면 예전처럼 /report/ 로 보낸다(코드 배포 없이 다음 요청부터).
+  if (reportPublic && request.method === 'GET' && (url.pathname === '/' || url.pathname === '/index.html')) return new Response(null, { status: 302, headers: { ...HDR, location: gatewayOff(env) ? '/report/' : '/gate/' } });
 
   if (url.pathname.startsWith('/api/')) return new Response(JSON.stringify({ error: 'site locked' }), { status: 401, headers: { ...HDR, 'content-type': 'application/json' } });
   return new Response(page(url.pathname + url.search, false), { status: 401, headers: { ...HDR, 'content-type': 'text/html; charset=utf-8' } });

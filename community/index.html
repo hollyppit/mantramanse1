@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>운명의 광장</title>
+<meta name="theme-color" content="#F6F0E3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* 1단계 자리 화면: 서버 잠금(functions/_community.js)을 통과한 관리자·테스터·베타 회원에게만 보인다. 디자인 시스템·피드는 3단계에서 채운다. */
+:root { --rice: #F6F0E3; --sumi: #2B2723; --sumi-2: #5E574F; --jade-d: #3F6F62; --blush-d: #B86A78; --line: #E2D7C1; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100svh; background: var(--rice); color: var(--sumi); font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; word-break: keep-all; }
+header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+header a, header button { font: inherit; font-size: .86rem; color: var(--sumi-2); text-decoration: none; background: none; border: 0; cursor: pointer; padding: 6px 4px; }
+header b { font-family: "Noto Serif KR", serif; letter-spacing: .08em; }
+main { max-width: 560px; margin: 0 auto; padding: 48px 16px; }
+h1 { font-family: "Noto Serif KR", serif; font-size: 1.8rem; margin: 0 0 8px; }
+.stage { display: inline-block; font-size: .75rem; padding: 3px 10px; border-radius: 999px; background: rgba(63,111,98,.12); color: var(--jade-d); margin-bottom: 14px; }
+p { line-height: 1.85; color: var(--sumi-2); margin: 0 0 12px; }
+.card { margin-top: 22px; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.55); }
+.card h2 { font-size: 1rem; margin: 0 0 8px; }
+.card ul { margin: 0; padding-left: 1.2em; line-height: 1.9; color: var(--sumi-2); font-size: .92rem; }
+</style>
+</head>
+<body>
+<header><a href="/gate/">‹ 처음 화면</a><b>운명의 광장</b><button type="button" id="leave">나가기</button></header>
+<main>
+  <span class="stage" id="stage">확인 중…</span>
+  <h1>운명의 광장 테스트 공간</h1>
+  <p>이 화면은 초대받은 테스터와 관리자에게만 보입니다. 일반 방문자는 주소를 직접 입력해도 들어올 수 없습니다.</p>
+  <div class="card"><h2>앞으로 이 자리에 들어올 것</h2><ul><li>같은 일주·일간 사람들의 모임과 경험 나누기</li><li>재물·연애·직장·인간관계·일상 게시판</li><li>오늘의 운테크와 운명의 기록</li></ul></div>
+</main>
+<script>
+(function () {
+  try { localStorage.setItem('mt_last_service', 'community'); } catch (e) { }
+  fetch('/api/community/status', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) { document.getElementById('stage').textContent = d.label || d.stage; }).catch(function () { });
+  document.getElementById('leave').onclick = function () { fetch('/api/community/enter', { method: 'DELETE' }).finally(function () { location.href = '/gate/'; }); };
+})();
+</script>
+</body>
+</html>

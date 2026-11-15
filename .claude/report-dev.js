@@ -184,6 +184,15 @@ http.createServer(async (q, r) => {
     const kk = u.searchParams.get('k') || ''; if (/.(wav|mp3|ogg|m4a)$/.test(kk)) { r.setHeader('content-type', kk.endsWith('.wav') ? 'audio/wav' : 'audio/mpeg'); return r.end(f); }
     r.setHeader('content-type', /.(webp|png|jpe?g|gif)$/.test(u.searchParams.get('k')||'') ? 'image/' + (u.searchParams.get('k').split('.').pop().replace('jpg','jpeg')) : 'video/mp4'); return r.end(f);
   }
+  if (p === '/community' || p.startsWith('/community/') || p.startsWith('/api/community/')) { // 실제 커뮤니티 잠금(functions/_community.js)·API 를 메모리 KV 로 실행(Supabase 없음 → 출시 알림·권한은 503)
+    const toReq = async () => new Request('http://localhost' + q.url, { method: q.method, headers: Object.fromEntries(Object.entries(q.headers).filter(([k]) => ['authorization', 'cookie', 'content-type', 'x-member-token', 'x-reviewer'].includes(k))), body: ['POST', 'PUT', 'DELETE'].includes(q.method) ? await body(q) : undefined });
+    const pipe = async res => { r.statusCode = res.status; res.headers.forEach((v, k) => r.setHeader(k, v)); r.end(Buffer.from(await res.arrayBuffer())); };
+    const G = await import(require('url').pathToFileURL(path.join(root, 'functions/_community.js')).href), rq = await toReq(), closed = await G.communityGate(rq, ikEnv);
+    if (closed) return pipe(closed);
+    const m = p.match(/^\/api\/community\/(status|alert|enter|access)$/);
+    if (m) { const mod = await import(require('url').pathToFileURL(path.join(root, 'functions/api/community/' + m[1] + '.js')).href), fn = mod['onRequest' + q.method[0] + q.method.slice(1).toLowerCase()]; if (!fn) return send(r, 405, { error: 'method' }); return pipe(await fn({ request: rq, env: ikEnv })); }
+    if (p.startsWith('/api/')) return send(r, 404, { error: 'not found' });
+  }
   let rel = decodeURIComponent(p); if (rel.endsWith('/')) rel += 'index.html';
   const f = path.join(root, rel);
   if (!f.startsWith(root) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.statusCode = 404; return r.end('404'); }

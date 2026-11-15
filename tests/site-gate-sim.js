@@ -45,7 +45,9 @@ import(url.pathToFileURL(path.join(__dirname, '..', 'functions/_middleware.js'))
   nexted = 0; r = await run(B + '/index.html', PUB); ok(r.status === 302 && nexted === 0, '공개 모드 /index.html 도 /report/ 로');
   nexted = 0; r = await run(B + '/', PUB, { method: 'POST' }); ok(r.status === 401 && nexted === 0, '루트 POST 는 리다이렉트 없이 잠금');
   for (const p of ['/report/admin/', '/report/admin', '/something', '/x.html']) { nexted = 0; r = await run(B + p, PUB); ok(r.status === 401 && nexted === 0, '공개 모드에서도 잠금: ' + p); }
-  nexted = 0; r = await run(B + '/', PUB); ok(r.status === 302 && r.headers.get('location') === '/report/' && nexted === 0, '공개 모드 루트는 /report/ 로');
+  nexted = 0; r = await run(B + '/', PUB); ok(r.status === 302 && r.headers.get('location') === '/gate/' && nexted === 0, '공개 모드 루트는 통합 첫 화면 /gate/ 로(2026-11-15)');
+  nexted = 0; r = await run(B + '/', { ...PUB, GATEWAY_OFF: '1' }); ok(r.status === 302 && r.headers.get('location') === '/report/' && nexted === 0, 'GATEWAY_OFF=1 이면 예전처럼 /report/ 로');
+  nexted = 0; r = await run(B + '/gate/', PUB); ok(r.status === 200 && nexted === 1, '공개 모드에서 /gate/ 는 비밀번호 없이 열림');
   nexted = 0; r = await run(B + '/', PUB, { headers: { cookie } }); ok(nexted === 1, '공개 모드에서도 비밀번호 쿠키가 있으면 만세력 열림');
   nexted = 0; r = await run(B + '/report/admin/', PUB, { headers: { cookie } }); ok(nexted === 1, '공개 모드 관리자 화면은 쿠키로 열림');
   nexted = 0; r = await run(B + '//report/admin/', PUB); ok(r.status === 401 && nexted === 0, '슬래시 겹친 관리자 경로도 잠금');

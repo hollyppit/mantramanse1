@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>만트라 · 두 개의 세계</title>
+<meta name="description" content="나의 기질과 운명의 흐름을 깊이 읽는 심층 분석, 사주로 인연을 만나는 커뮤니티. 들어갈 세계를 골라 주세요.">
+<meta property="og:title" content="만트라 · 두 개의 세계">
+<meta property="og:description" content="심층 분석과 운명의 광장, 들어갈 세계를 골라 주세요.">
+<meta name="theme-color" content="#080A11">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gate.css?v=20261115">
+</head>
+<body>
+<header class="brand" aria-label="만트라">
+  <p class="mark">MANTRA</p>
+  <p class="tag">들어갈 세계를 골라 주세요</p>
+  <a class="resume" id="resume" href="/report/" hidden></a>
+</header>
+
+<main class="worlds">
+  <a class="world deep" id="goDeep" href="/report/" data-svc="deep" aria-describedby="deepDesc">
+    <div class="fog" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="halo" aria-hidden="true"></div>
+    <div class="inner">
+      <span class="last" hidden>지난번에 보던 곳</span>
+      <p class="kick">DEEP READING</p>
+      <h2>심층 분석</h2>
+      <p class="desc" id="deepDesc">타고난 기질과 운명의 흐름을<br>한 장씩 깊이 읽어 드립니다.</p>
+      <ul class="chips"><li>만세력</li><li>운명의 타임라인</li><li>무빙툰 풀이</li></ul>
+      <span class="go">기질과 흐름 읽으러 가기 →</span>
+    </div>
+  </a>
+
+  <a class="world plaza" id="goPlaza" href="/community/" data-svc="community" aria-describedby="plazaDesc">
+    <canvas class="petals" id="petals" aria-hidden="true"></canvas>
+    <div class="eave" aria-hidden="true"></div>
+    <div class="inner">
+      <span class="last" hidden>지난번에 보던 곳</span>
+      <p class="kick">PLAZA OF FATE</p>
+      <h2>운명의 광장</h2>
+      <p class="desc" id="plazaDesc">같은 일주의 사람들과 이야기를 나누고<br>사주로 이어지는 인연을 만나는 곳입니다.</p>
+      <ul class="chips"><li>같은 일주 모임</li><li>운명의 기록</li><li>인연 찾기</li></ul>
+      <span class="go" id="plazaGo">준비 중 · 출시 알림 받기 →</span>
+    </div>
+  </a>
+</main>
+
+<footer class="foot">
+  <a href="/report/legal/terms.html">이용약관</a><span aria-hidden="true">·</span><a href="/report/legal/privacy.html">개인정보처리방침</a><span aria-hidden="true">·</span><a href="/report/#/me">마이페이지</a>
+</footer>
+
+<!-- 커뮤니티 준비 중 · 출시 알림 신청 · 철회 -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle" hidden>
+  <div class="sheet-bg" data-close></div>
+  <section class="sheet-box">
+    <button class="x" type="button" data-close aria-label="닫기">×</button>
+    <div id="shBody"></div>
+  </section>
+</div>
+
+<script src="gate.js?v=20261115"></script>
+</body>
+</html>
