@@ -3,10 +3,13 @@
 //   · 쓰기(글·댓글·반응·신고·차단)는 로그인 회원 + 필수 동의 + 닉네임(프로필) + 제재 없음
 //   · 작성자 표시: 닉네임, 그리고 본인이 공개를 켠 경우에만 일간·일주. 탈퇴한 회원은 '탈퇴한 회원'
 //   · 일주·일간: 회원이 보낸 출생 입력으로 서버가 직접 계산해 값만 저장한다(출생 입력은 저장하지 않음)
+//   · 프로필 사진: 직접 올린 사진(R2 'cm-av/…', /api/community/avatar) 또는 기본 = 내 일간 포스터(관리자 '일간·일주 영상'의 일간 포스터, 10일간 × 성별)
+//     남에게는 일간·일주를 공개한 회원만 일간 포스터가 보인다(포스터가 곧 일간을 드러내므로). 공개하지 않으면 닉네임 첫 글자
 import '../engine.js';
 import { json, isAdmin } from './_lib.js';
 import { memberOf, sbRest, supabaseReady } from './_commerce.js';
 import { readConsents, requiredOk } from './_consent.js';
+import { cleanPublicBase, publicUrl } from './_media.js';
 
 export { json, isAdmin, sbRest, supabaseReady, memberOf };
 export const CATS = { wealth: '재물', love: '연애', work: '직장', people: '인간관계', daily: '일상' };
@@ -61,7 +64,7 @@ export async function overLimit(env, key, max) {
 }
 
 export async function profileOf(env, userId) {
-  const r = await sbRest(env, `member_profiles?user_id=eq.${enc(userId)}&select=user_id,nickname,ilju,ilgan,show_ilju,show_ilgan,visibility`);
+  const r = await sbRest(env, `member_profiles?user_id=eq.${enc(userId)}&select=user_id,nickname,ilju,ilgan,show_ilju,show_ilgan,visibility,avatar_path,poster_gender`);
   return Array.isArray(r) ? r[0] || null : null;
 }
 export async function activeSanction(env, userId) {
@@ -94,12 +97,29 @@ export async function blockedIds(env, userId) {
   return r.map(x => x.blocked_id);
 }
 
-// 작성자 표시용 { id: { name, ilju?, ilgan? } }
+// 일간 포스터 { '갑:M': url, … } — 관리자 화면 '일간·일주 영상'에 저장된 값(KV awakening:index 의 ilgan). 공개 도메인이 설정돼 있으면 그 주소로
+export async function posterMap(env) {
+  const out = {}; if (!env.GLOSSARY_KV) return out;
+  let d = null; try { d = await env.GLOSSARY_KV.get('awakening:index', 'json'); } catch { d = null; }
+  const base = cleanPublicBase(d && d.publicBase);
+  ((d && d.ilgan) || []).forEach(x => { if (x && x.enabled !== false && x.stem && (x.gender === 'M' || x.gender === 'F') && typeof x.posterUrl === 'string' && /^(\/api\/clipfile\?k=[\w.-]{1,120}|https:\/\/[^\s"'<>]{1,300})$/.test(x.posterUrl)) out[x.stem + ':' + x.gender] = publicUrl(base, x.posterUrl); });
+  return out;
+}
+// 회원 한 명의 사진 주소. self=true 는 본인 화면(공개 여부와 상관없이 내 포스터를 보여 준다)
+export function avatarOf(p, posters, self) {
+  if (!p) return null;
+  if (p.avatar_path && /^cm-av\/[0-9a-f]{32}\.(webp|jpg|png)$/.test(p.avatar_path)) return { kind: 'photo', url: '/api/community/avatar?k=' + encodeURIComponent(p.avatar_path) };
+  if (!p.ilgan || !(self || p.show_ilgan || p.show_ilju)) return null;
+  const g = p.poster_gender === 'F' ? 'F' : p.poster_gender === 'M' ? 'M' : null;
+  const url = (g && posters[p.ilgan + ':' + g]) || posters[p.ilgan + ':M'] || posters[p.ilgan + ':F'] || null;
+  return url ? { kind: 'poster', url } : null;
+}
+// 작성자 표시용 { id: { name, ilju?, ilgan?, avatar? } }
 export async function authorsOf(env, ids) {
   const uniq = [...new Set(ids.filter(okUuid))]; const out = {};
   if (!uniq.length) return out;
-  const r = (await sbRest(env, `member_profiles?user_id=in.(${uniq.map(enc).join(',')})&select=user_id,nickname,ilju,ilgan,show_ilju,show_ilgan`)) || [];
-  r.forEach(p => { out[p.user_id] = { name: p.nickname || '이름 없는 회원', ilju: p.show_ilju && p.ilju ? p.ilju : null, ilgan: p.show_ilgan && p.ilgan ? ilganLabel(p.ilgan) : null }; });
+  const [r, posters] = await Promise.all([sbRest(env, `member_profiles?user_id=in.(${uniq.map(enc).join(',')})&select=user_id,nickname,ilju,ilgan,show_ilju,show_ilgan,avatar_path,poster_gender`), posterMap(env)]);
+  (r || []).forEach(p => { const a = avatarOf(p, posters); out[p.user_id] = { name: p.nickname || '이름 없는 회원', ilju: p.show_ilju && p.ilju ? p.ilju : null, ilgan: p.show_ilgan && p.ilgan ? ilganLabel(p.ilgan) : null, avatar: a ? a.url : null }; });
   return out;
 }
 export const authorView = (map, id, me) => id ? { ...(map[id] || { name: '이름 없는 회원' }), mine: !!(me && me === id) } : { name: '탈퇴한 회원', gone: true, mine: false };

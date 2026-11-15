@@ -1,5 +1,5 @@
 /* 운명의 광장(3단계 MVP, 디자인 v3 "월하연(月下緣)" 2026-11-16: 달빛·벚꽃·붉은 실·한지·인장) — 한 페이지 화면. 서버: /api/community/{posts,post,comments,react,report,block,me}, /api/account/profile
-   주소(#):  #/ 홈 피드 · #/today 오늘의 운테크·기록(4단계) · #/records 회고 · #/search 검색 · #/groups 모임 · #/g/ilju/<갑자>·#/g/ilgan/<갑> 모임 피드 · #/p/<id> 글 · #/write · #/edit/<id> · #/me 나
+   주소(#):  #/ 오늘의 인연(5단계, 홈) · #/match/inbox 인연함 · #/match/edit 인연 프로필 · #/verify 성인 본인확인 · #/chat 대화 목록 · #/chat/<방> 대화 · #/plaza 광장 피드 · #/today 오늘의 운테크·기록(4단계) · #/records 회고 · #/search 검색 · #/groups 모임 · #/g/ilju/<갑자>·#/g/ilgan/<갑> 모임 피드 · #/p/<id> 글 · #/write · #/edit/<id> · #/me 나
    로그인은 심층 분석과 같은 Supabase 세션(localStorage sb-*-auth-token)을 읽어 x-member-token 으로 보낸다. 출생 정보는 저장하지 않는다(일주 확인 때 서버로 보내 계산만). */
 (function () {
   'use strict';
@@ -54,7 +54,7 @@
   }
   // 아바타: 닉네임 첫 글자 + 공개한 일주·일간의 오행 색(없으면 기본 분홍)
   function elOf(a) { var k = a && (a.ilju || a.ilgan); return k ? EL[k.charAt(0)] : ''; }
-  function ava(a, sm) { if (!a || a.gone) return '<span class="ava gone' + (sm ? ' sm' : '') + '" aria-hidden="true"><span>·</span></span>'; var e = elOf(a); return '<span class="ava' + (sm ? ' sm' : '') + (e ? ' el-' + e : '') + '" aria-hidden="true"><span>' + esc(String(a.name || '?').charAt(0)) + '</span></span>'; }
+  function ava(a, sm) { if (!a || a.gone) return '<span class="ava gone' + (sm ? ' sm' : '') + '" aria-hidden="true"><span>·</span></span>'; var e = elOf(a), img = a.avatar && /^(\/api\/|https:\/\/)/.test(a.avatar) ? '<img src="' + esc(a.avatar) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : ''; return '<span class="ava' + (sm ? ' sm' : '') + (e ? ' el-' + e : '') + '" aria-hidden="true"><span>' + esc(String(a.name || '?').charAt(0)) + img + '</span></span>'; }
   function who(a) { if (!a) return ''; if (a.gone) return '<span class="who" style="color:var(--sumi-3)">탈퇴한 회원</span>'; return '<span class="who"><b>' + esc(a.name) + '</b>' + (a.ilju ? '<span class="pill">' + esc(a.ilju) + '</span>' : '') + (a.ilgan ? '<span class="pill">' + esc(a.ilgan) + '</span>' : '') + '</span>'; }
   function me() { if (!mePromise) mePromise = api('/api/community/me').then(function (d) { ME = d; return d; }); return mePromise; }
   function refreshMe() { mePromise = null; return me(); }
@@ -95,7 +95,7 @@
     return '<div class="stories" aria-label="일간 모임">' + out + '</div>';
   }
   function feedView(q, group) {
-    var tab = q.tab === 'popular' ? 'popular' : 'latest', base = group ? '#/g/' + group.kind + '/' + encodeURIComponent(group.key) : '#/';
+    var tab = q.tab === 'popular' ? 'popular' : 'latest', base = group ? '#/g/' + group.kind + '/' + encodeURIComponent(group.key) : '#/plaza';
     var link = function (o) { return base + qs(Object.assign({ tab: tab === 'popular' ? 'popular' : '', cat: q.cat || '', tag: q.tag || '' }, o)); };
     var head;
     if (group) {
@@ -104,13 +104,13 @@
       head = '<a class="back" href="#/groups">' + ICON.back + '모임</a><div class="gh el-' + el + '"><div class="gem">' + esc(group.key) + '</div><h1>' + esc(label) + ' 모임</h1><p class="lead">' + (mine ? '나와 같은 ' + (group.kind === 'ilju' ? '일주' : '일간') + '를 타고난 사람들의 이야기' : '읽기는 누구나, 글은 ' + esc(label) + '인 분들이 올려요') + '</p>' +
         (g && mine && g.gathering ? '<p class="note pink" style="margin-top:12px">아직 모이는 중이에요 · ' + (ME.minGroup || 5) + '명이 모이면 모임이 열려요. 그동안 모임 글은 홈에서도 함께 보여요.</p>' : '') + '</div>';
     } else {
-      head = '<section class="hero"><canvas id="petals" aria-hidden="true"></canvas><svg class="thread" viewBox="0 0 400 60" preserveAspectRatio="none" aria-hidden="true"><path d="M-10 44 C 70 14, 130 58, 205 34 S 330 6, 410 26"/><circle cx="205" cy="34" r="3.5"/></svg><span class="kick">月下緣</span><h1>보이지 않는 실로<br><em>이어진 인연</em>들</h1><p>같은 일주·일간을 타고난 사람들이 달빛 아래 모여 오늘의 이야기를 나누는 곳이에요.</p></section>' + stories();
+      head = '<section class="hero"><canvas id="petals" aria-hidden="true"></canvas><svg class="thread" viewBox="0 0 400 60" preserveAspectRatio="none" aria-hidden="true"><path d="M-10 44 C 70 14, 130 58, 205 34 S 330 6, 410 26"/><circle cx="205" cy="34" r="3.5"/></svg><span class="kick">月下緣</span><h1>보이지 않는 실로<br><em>이어진 인연</em>들</h1><p>같은 일주·일간을 타고난 사람들이 달빛 아래 모여 오늘의 이야기를 나누는 곳이에요.</p><div class="cta"><a class="btn ghost sm" href="#/today">오늘의 운테크</a><a class="btn ghost sm" href="#/groups">모임 둘러보기</a></div></section>' + stories();
     }
     paint(head +
       '<div class="bar"><nav class="seg" aria-label="정렬"><a href="' + link({ tab: '' }) + '"' + (tab === 'latest' ? ' aria-current="page"' : '') + '>최신</a><a href="' + link({ tab: 'popular' }) + '"' + (tab === 'popular' ? ' aria-current="page"' : '') + '>인기</a></nav></div>' +
       '<div class="chips" role="group" aria-label="게시판"><a class="chip' + (!q.cat ? ' on' : '') + '" href="' + link({ cat: '' }) + '">전체</a>' + Object.keys(CATS).map(function (k) { return '<a class="chip' + (q.cat === k ? ' on' : '') + '" href="' + link({ cat: k }) + '"><span class="hj" aria-hidden="true">' + CAT_HJ[k] + '</span>' + CATS[k] + '</a>'; }).join('') + '</div>' +
       (q.tag ? '<p class="muted" style="margin:0 0 10px">#' + esc(q.tag) + ' 글만 보는 중 · <a href="' + link({ tag: '' }) + '">해제</a></p>' : '') +
-      '<div id="list" aria-live="polite"><div class="skel"></div><div class="skel"></div></div><div id="more"></div>', group ? 'groups' : 'home');
+      '<div id="list" aria-live="polite"><div class="skel"></div><div class="skel"></div></div><div id="more"></div>', 'plaza');
     var wl = $('.tabbar [data-tab="write"]'); if (wl) wl.href = '#/write' + (group ? qs({ group: group.kind }) : q.cat ? qs({ cat: q.cat }) : '');
     loadList({ tab: tab === 'popular' ? 'popular' : '', cat: q.cat || '', tag: q.tag || '', group: group ? group.kind + ':' + group.key : '' }, true);
     if (!group) petals();
@@ -147,10 +147,10 @@
   function postView(id) {
     paint('<div class="skel" style="height:260px"></div>', '');
     api('/api/community/post?id=' + encodeURIComponent(id)).then(function (d) {
-      if (!d._ok) { paint(empty(d.error || '글을 찾을 수 없어요', '') + '<p style="text-align:center"><a class="btn ghost sm" href="#/">홈으로</a></p>', ''); return; }
+      if (!d._ok) { paint(empty(d.error || '글을 찾을 수 없어요', '') + '<p style="text-align:center"><a class="btn ghost sm" href="#/plaza">광장으로</a></p>', ''); return; }
       var p = d.post, mine = p.author && p.author.mine;
-      paint('<a class="back" href="javascript:history.back()">' + ICON.back + '뒤로</a><article class="post"><div class="head">' + ava(p.author) + '<div style="min-width:0;flex:1">' + who(p.author) + '<div class="sub"><span>' + when(p.at) + (p.edited ? ' · 수정됨' : '') + '</span>·<a class="badge cat-' + esc(p.category) + '" href="#/' + qs({ cat: p.category }) + '">' + esc(p.catLabel) + '</a>' + (p.group ? '<a class="badge pink" href="#/g/' + p.group.kind + '/' + encodeURIComponent(p.group.key) + '">' + esc(p.group.key) + (p.group.kind === 'ilju' ? ' 일주' : ' 일간') + ' 모임</a>' : '') + '</div></div></div>' +
-        '<h1>' + esc(p.title) + '</h1><div class="body">' + esc(p.body) + '</div>' + (p.tags.length ? '<p class="tags" style="display:flex;gap:8px;flex-wrap:wrap">' + p.tags.map(function (t) { return '<a class="tag" href="#/' + qs({ tag: t }) + '">#' + esc(t) + '</a>'; }).join('') + '</p>' : '') +
+      paint('<a class="back" href="javascript:history.back()">' + ICON.back + '뒤로</a><article class="post"><div class="head">' + ava(p.author) + '<div style="min-width:0;flex:1">' + who(p.author) + '<div class="sub"><span>' + when(p.at) + (p.edited ? ' · 수정됨' : '') + '</span>·<a class="badge cat-' + esc(p.category) + '" href="#/plaza' + qs({ cat: p.category }) + '">' + esc(p.catLabel) + '</a>' + (p.group ? '<a class="badge pink" href="#/g/' + p.group.kind + '/' + encodeURIComponent(p.group.key) + '">' + esc(p.group.key) + (p.group.kind === 'ilju' ? ' 일주' : ' 일간') + ' 모임</a>' : '') + '</div></div></div>' +
+        '<h1>' + esc(p.title) + '</h1><div class="body">' + esc(p.body) + '</div>' + (p.tags.length ? '<p class="tags" style="display:flex;gap:8px;flex-wrap:wrap">' + p.tags.map(function (t) { return '<a class="tag" href="#/plaza' + qs({ tag: t }) + '">#' + esc(t) + '</a>'; }).join('') + '</p>' : '') +
         '<div class="acts">' + (mine ? '<span class="act" style="cursor:default">' + ICON.heart + '<b>' + p.likes + '</b></span>' : '<button class="act" data-like aria-pressed="' + p.liked + '" aria-label="공감">' + ICON.heart + '<b>' + p.likes + '</b></button>') + '<span class="act" style="cursor:default">' + ICON.chat + '<b id="cmtN">' + p.comments + '</b></span><button class="act icon" data-save aria-pressed="' + p.saved + '" aria-label="저장">' + ICON.save + '</button>' +
         (mine ? '<a class="act right icon" href="#/edit/' + p.id + '" aria-label="고치기">' + ICON.edit + '</a><button class="act icon" data-del aria-label="지우기">' + ICON.trash + '</button>' : '<button class="act right icon" data-report="post" aria-label="신고">' + ICON.flag + '</button>' + (p.author && !p.author.gone ? '<button class="act icon" data-block aria-label="차단">' + ICON.block + '</button>' : '')) + '</div></article>' +
         '<section class="cmts" aria-label="댓글"><div class="sec-h" style="margin-top:0"><h2>댓글</h2></div><div id="cmtList"></div>' +
@@ -158,7 +158,7 @@
       var like = $('[data-like]'), save = $('[data-save]');
       if (like) like.onclick = function () { react(p, 'like', like); };
       save.onclick = function () { react(p, 'bookmark', save); };
-      var del = $('[data-del]'); if (del) del.onclick = function () { confirmSheet('이 글을 지울까요?', '지우면 되돌릴 수 없어요.', '지우기', function () { api('/api/community/post?id=' + p.id, { method: 'DELETE' }).then(function (r) { if (r._ok) { toast('지웠어요'); location.hash = '#/'; } else toast(r.error || '지우지 못했습니다.'); }); }); };
+      var del = $('[data-del]'); if (del) del.onclick = function () { confirmSheet('이 글을 지울까요?', '지우면 되돌릴 수 없어요.', '지우기', function () { api('/api/community/post?id=' + p.id, { method: 'DELETE' }).then(function (r) { if (r._ok) { toast('지웠어요'); location.hash = '#/plaza'; } else toast(r.error || '지우지 못했습니다.'); }); }); };
       var rep = $('[data-report]'); if (rep) rep.onclick = function () { reportSheet('post', p.id); };
       var blk = $('[data-block]'); if (blk) blk.onclick = function () { blockSheet({ post: p.id }, p.author.name); };
       var f = $('#cmtForm'), ta = f.elements.body, sb = f.querySelector('.send');
@@ -236,7 +236,7 @@
   function blockSheet(target, name) {
     if (!ME || !ME.member) { toast('로그인한 회원만 차단할 수 있어요'); return; }
     confirmSheet(name + '님을 차단할까요?', '서로의 글·댓글이 보이지 않게 돼요. 나 화면에서 언제든 풀 수 있어요.', '차단하기', function () {
-      api('/api/community/block', { method: 'POST', body: target }).then(function (d) { if (d._ok) { toast('차단했어요'); track('plaza_block'); location.hash = '#/'; } else toast(d.error || '차단하지 못했습니다.'); });
+      api('/api/community/block', { method: 'POST', body: target }).then(function (d) { if (d._ok) { toast('차단했어요'); track('plaza_block'); location.hash = '#/plaza'; } else toast(d.error || '차단하지 못했습니다.'); });
     });
   }
 
@@ -249,7 +249,7 @@
       p = p || { category: q.cat || '', title: '', body: '', tags: [] };
       var pick = function (name, opts, cur) { return '<div class="picker" role="radiogroup">' + opts.map(function (o) { return '<label><input type="radio" name="' + name + '" value="' + esc(o[0]) + '"' + (cur === o[0] ? ' checked' : '') + '><span>' + o[1] + '</span></label>'; }).join('') + '</div>'; };
       var groupOpts = [['', '전체 광장']].concat(g.ilju ? [['ilju', esc(g.ilju.key) + ' 일주 모임']] : []).concat(g.ilgan ? [['ilgan', esc(g.ilgan.label) + ' 일간 모임']] : []);
-      paint('<a class="back" href="' + (editId ? '#/p/' + editId : '#/') + '">' + ICON.back + '돌아가기</a><h1 style="margin:4px 2px 16px">' + (editId ? '글 고치기' : '어떤 이야기를 나눌까요?') + '</h1>' +
+      paint('<a class="back" href="' + (editId ? '#/p/' + editId : '#/plaza') + '">' + ICON.back + '돌아가기</a><h1 style="margin:4px 2px 16px">' + (editId ? '글 고치기' : '어떤 이야기를 나눌까요?') + '</h1>' +
         '<form class="form" id="wf"><div><p class="muted" style="margin:0 0 8px;font-weight:600">게시판</p>' + pick('category', Object.keys(CATS).map(function (k) { return [k, '<span class="hj" aria-hidden="true">' + CAT_HJ[k] + '</span>' + CATS[k]]; }), p.category) + '</div>' +
         (editId ? '' : '<div><p class="muted" style="margin:0 0 8px;font-weight:600">올릴 곳 <span style="font-weight:400">(모임 글은 홈에도 보여요)</span></p>' + pick('group', groupOpts, q.group || '') + '</div>') +
         '<label>제목<input name="title" maxlength="60" required value="' + esc(p.title) + '" placeholder="한 줄로 요약해 주세요"></label>' +
@@ -280,36 +280,66 @@
     if (needSetup('#/me')) return;
     if (q.setup) { setupView('#/me'); return; }
     var p = ME.profile, tab = q.tab || '';
-    paint('<div class="prof">' + ava({ name: p.nickname, ilju: p.ilju }) + '<div><h1>' + esc(p.nickname) + '</h1><div class="stats">' + (p.ilju ? '<span><b>' + esc(p.ilju) + '</b> 일주</span><span><b>' + esc(p.ilganLabel) + '</b> 일간</span>' : '<span>아직 일주를 확인하지 않았어요</span>') + '</div></div></div>' +
+    paint('<div class="prof"><button type="button" class="ava-btn" id="avaBtn" aria-label="프로필 사진 바꾸기">' + ava({ name: p.nickname, ilju: p.ilju, avatar: p.avatar }) + '<span class="ava-cam" aria-hidden="true">✎</span></button><input type="file" id="avaFile" accept="image/jpeg,image/png,image/webp" hidden><div><h1>' + esc(p.nickname) + '</h1><div class="stats">' + (p.ilju ? '<span><b>' + esc(p.ilju) + '</b> 일주</span><span><b>' + esc(p.ilganLabel) + '</b> 일간</span>' : '<span>아직 일주를 확인하지 않았어요</span>') + '</div></div></div>' +
+      '<p class="muted" style="margin:-6px 2px 12px">' + (p.avatarKind === 'photo' ? '직접 올린 사진을 쓰는 중 · <a href="#" id="avaReset">일간 포스터로 되돌리기</a>' : p.avatarKind === 'poster' ? '내 일간 포스터를 쓰는 중이에요. 사진을 누르면 바꿀 수 있어요.' + (p.showIlgan || p.showIlju ? '' : ' (일간·일주를 공개해야 다른 사람에게도 포스터가 보여요)') : '사진을 눌러 프로필 사진을 올려 보세요.') + (p.ilgan && p.avatarKind !== 'photo' ? ' · 포스터 <a href="#" data-pg="M"' + (p.posterGender !== 'F' ? ' aria-current="true" style="font-weight:700"' : '') + '>남</a> / <a href="#" data-pg="F"' + (p.posterGender === 'F' ? ' aria-current="true" style="font-weight:700"' : '') + '>여</a>' : '') + '</p>' +
       '<div class="grid2" style="margin-bottom:6px"><a class="btn ghost sm" href="#/me?setup=1">프로필 편집</a><a class="btn ghost sm" href="#/me?ilju=1">' + (p.ilju ? '일주 다시 확인' : '내 일주 확인') + '</a></div>' +
       (q.ilju ? '<div class="panel" style="margin-top:14px" id="iljuBox"><h2>내 일주 확인</h2>' + iljuForm(!!p.ilju) + '</div>' : '') +
       '<nav class="tabs" aria-label="내 기록"><a href="#/me" ' + (!tab ? 'aria-current="page"' : '') + '>내 글</a><a href="#/me?tab=saved" ' + (tab === 'saved' ? 'aria-current="page"' : '') + '>저장</a><a href="#/me?tab=blocks" ' + (tab === 'blocks' ? 'aria-current="page"' : '') + '>차단</a></nav><div id="list"><div class="skel"></div></div><div id="more"></div>', tab === 'saved' ? 'saved' : 'me');
     if (q.ilju) bindIlju();
+    bindAvatar();
     if (tab === 'blocks') loadBlocks(); else loadList(tab === 'saved' ? { saved: '1' } : { mine: '1' }, true);
   }
-  function deviceBirth() { try { var s = JSON.parse(localStorage.getItem('mantra-manse-v1') || 'null'); if (!s || !s.year || !s.month || !s.day) return null; var b = { year: +s.year, month: +s.month, day: +s.day, calendar: s.calendar || 'solar', leap: !!s.leap }; if (!s.hourUnknown && s.hour !== '' && s.hour != null) { b.hour = +s.hour; b.minute = +s.minute || 0; } if (s.jasi) b.jasi = s.jasi; if (s.timeMode) b.timeMode = s.timeMode; return b; } catch (e) { return null; } }
+  // 프로필 사진: 256×256 으로 가운데를 잘라 WebP(안 되면 JPEG)로 다시 그려 보낸다 → 용량이 작아지고 사진 속 위치 정보 같은 메타데이터가 사라진다
+  function bindAvatar() {
+    var btn = $('#avaBtn'), file = $('#avaFile'); if (!btn || !file) return;
+    btn.onclick = function () { file.click(); };
+    file.onchange = function () {
+      var f0 = file.files && file.files[0]; file.value = ''; if (!f0) return;
+      if (!/^image\/(jpeg|png|webp)$/.test(f0.type)) { toast('JPG·PNG·WebP 사진만 올릴 수 있어요'); return; }
+      if (f0.size > 15 * 1024 * 1024) { toast('15MB 이하 사진을 골라 주세요'); return; }
+      var img = new Image(), u = URL.createObjectURL(f0);
+      img.onload = function () {
+        var S = 256, c = document.createElement('canvas'); c.width = c.height = S; var x = c.getContext('2d'), m = Math.min(img.naturalWidth, img.naturalHeight);
+        x.drawImage(img, (img.naturalWidth - m) / 2, (img.naturalHeight - m) / 2, m, m, 0, 0, S, S); URL.revokeObjectURL(u);
+        var send = function (blob) {
+          if (!blob) { toast('사진을 읽지 못했어요'); return; }
+          toast('사진을 올리는 중…');
+          var h = { 'content-type': blob.type }, t = token(); if (t) h['x-member-token'] = t;
+          fetch('/api/community/avatar', { method: 'POST', headers: h, body: blob, credentials: 'same-origin' }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
+            .then(function (d) { if (!d._ok) { toast(d.error || '올리지 못했어요'); return; } toast('프로필 사진을 바꿨어요'); track('plaza_avatar'); refreshMe().then(route); })
+            .catch(function () { toast('연결이 끊겼어요'); });
+        };
+        c.toBlob(function (b) { if (b && b.type === 'image/webp') send(b); else c.toBlob(send, 'image/jpeg', .86); }, 'image/webp', .85);
+      };
+      img.onerror = function () { URL.revokeObjectURL(u); toast('사진을 열 수 없어요'); };
+      img.src = u;
+    };
+    var rs = $('#avaReset'); if (rs) rs.onclick = function (e) { e.preventDefault(); api('/api/community/avatar', { method: 'DELETE' }).then(function (d) { if (d._ok) { toast('일간 포스터로 되돌렸어요'); refreshMe().then(route); } else toast(d.error || '되돌리지 못했어요'); }); };
+    $('[data-pg]').forEach(function (a) { a.onclick = function (e) { e.preventDefault(); api('/api/community/me', { method: 'POST', body: { action: 'gender', gender: a.dataset.pg } }).then(function (d) { if (d._ok) refreshMe().then(route); else toast(d.error || '바꾸지 못했어요'); }); }; });
+  }
+  function deviceBirth() { try { var s = JSON.parse(localStorage.getItem('mantra-manse-v1') || 'null'); if (!s || !s.year || !s.month || !s.day) return null; var b = { year: +s.year, month: +s.month, day: +s.day, calendar: s.calendar || 'solar', leap: !!s.leap }; if (!s.hourUnknown && s.hour !== '' && s.hour != null) { b.hour = +s.hour; b.minute = +s.minute || 0; } if (s.jasi) b.jasi = s.jasi; if (s.timeMode) b.timeMode = s.timeMode; b._g = s.gender === 'F' ? 'F' : s.gender === 'M' ? 'M' : null; return b; } catch (e) { return null; } }
   function iljuForm(has) {
     var dev = deviceBirth();
     return '<p class="muted" style="margin:6px 0 12px">생년월일로 일주를 계산해 <b>일주·일간 이름만</b> 저장해요. 생년월일은 서버에 남기지 않습니다.' + (has ? ' 다시 확인하면 모임이 바뀔 수 있어요.' : '') + '</p>' +
       (dev ? '<button class="btn pink block" type="button" id="useDev">이 기기에 저장된 사주로 확인</button><p class="muted" style="margin:12px 0 8px;text-align:center">또는 직접 입력</p>' : '') +
       '<form class="form" id="iljuF"><div class="grid2"><label>생년월일<input name="date" type="date" min="1900-01-01" max="2100-12-31" required></label><label>달력<select name="cal"><option value="solar">양력</option><option value="lunar">음력</option><option value="leap">음력(윤달)</option></select></label></div>' +
-      '<label>태어난 시각 <span class="muted" style="font-weight:400">모르면 비워 두세요 · 밤 11시 이후 출생은 일주가 달라질 수 있어요</span><input name="time" type="time"></label><button class="btn ghost block" type="submit">일주 확인</button><p class="msg" id="iljuMsg" role="status"></p></form>';
+      '<label>태어난 시각 <span class="muted" style="font-weight:400">모르면 비워 두세요 · 밤 11시 이후 출생은 일주가 달라질 수 있어요</span><input name="time" type="time"></label><label>일간 포스터 그림 <span class="muted" style="font-weight:400">기본 프로필 사진으로 쓰여요</span><select name="g"><option value="M">남</option><option value="F">여</option></select></label><button class="btn ghost block" type="submit">일주 확인</button><p class="msg" id="iljuMsg" role="status"></p></form>';
   }
   function bindIlju() {
-    var send = function (birth) {
+    var send = function (birth, g) {
       var m = $('#iljuMsg'); m.className = 'msg'; m.textContent = '계산하는 중입니다…';
-      api('/api/community/me', { method: 'POST', body: { action: 'ilju', birth: birth } }).then(function (d) {
+      api('/api/community/me', { method: 'POST', body: { action: 'ilju', birth: birth, gender: g || null } }).then(function (d) {
         if (!d._ok) { m.className = 'msg err'; m.textContent = d.error || '확인하지 못했습니다.'; return; }
         toast(d.ilju + ' 일주 · ' + d.ilganLabel + ' 일간이에요'); track('plaza_ilju'); refreshMe().then(function () { location.hash = '#/g/ilju/' + encodeURIComponent(d.ilju); });
       });
     };
-    var u = $('#useDev'); if (u) u.onclick = function () { var b = deviceBirth(); if (b) send(b); };
+    var u = $('#useDev'); if (u) u.onclick = function () { var b = deviceBirth(); if (b) { var g = b._g; delete b._g; send(b, g); } };
     $('#iljuF').onsubmit = function (e) {
       e.preventDefault(); var el = e.target.elements, d = (el.date.value || '').split('-'), t = (el.time.value || '').split(':');
       if (d.length !== 3) return;
       var b = { year: +d[0], month: +d[1], day: +d[2], calendar: el.cal.value === 'solar' ? 'solar' : 'lunar', leap: el.cal.value === 'leap' };
       if (t.length === 2 && t[0] !== '') { b.hour = +t[0]; b.minute = +t[1]; }
-      send(b);
+      send(b, el.g.value);
     };
     setTimeout(function () { var bx = $('#iljuBox'); if (bx) bx.scrollIntoView({ block: 'start' }); }, 50);
   }
@@ -387,10 +417,206 @@
     });
   }
 
+  /* ── 인연(5단계): 본인확인 → 인연 프로필 → 오늘의 인연 → 인연 잇기 → 대화 ── */
+  var MP = null;   // 인연 프로필 응답 캐시
+  var PORTONE_SDK = 'https://cdn.portone.io/v2/browser-sdk.js';
+  var loadScript = function (src) { return new Promise(function (ok, no) { if (document.querySelector('script[src="' + src + '"]')) return ok(); var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); };
+  function matchProfile() { return api('/api/community/match?view=profile').then(function (d) { MP = d; return d; }); }
+  function matchGate(d) {
+    if (!d._ok) { if (d.need === 'login' || d.need === 'consent') { needSetup('#/'); return true; } paint('<p class="msg err">' + esc(d.error || '불러오지 못했어요') + '</p>', 'match'); return true; }
+    if (!d.ready.nickname) { setupView('#/'); return true; }
+    if (!d.ready.ilju) { needIlju('match'); return true; }
+    if (!d.verified) { verifyView(); return true; }
+    if (!d.profile.active) {
+      paint('<div class="hero"><canvas id="petals" aria-hidden="true"></canvas><svg class="thread" viewBox="0 0 400 60" preserveAspectRatio="none" aria-hidden="true"><path d="M-10 44 C 70 14, 130 58, 205 34 S 330 6, 410 26"/><circle cx="205" cy="34" r="3.5"/></svg><span class="kick">緣</span><h1>오늘, 붉은 실 끝에<br><em>닿을 사람</em></h1><p>하루 ' + 5 + '명, 서로 원하는 조건이 맞는 사람만 조용히 이어 드려요. 두 사람이 모두 인연을 이어야 대화가 열려요.</p><div class="cta"><a class="btn pink" href="#/match/edit">인연 프로필 만들기</a></div></section>', 'match');
+      petals(); return true;
+    }
+    return false;
+  }
+  function matchView() {
+    paint('<div class="skel" style="height:220px"></div><div class="skel" style="height:320px"></div>', 'match');
+    matchProfile().then(function (d) {
+      if (matchGate(d)) return;
+      Promise.all([api('/api/community/match?view=today'), api('/api/community/match?view=inbox')]).then(function (rs) {
+        var t = rs[0], ib = rs[1];
+        if (!t._ok) { paint('<p class="msg err">' + esc(t.error || '불러오지 못했어요') + '</p>', 'match'); return; }
+        var nRecv = ib._ok ? ib.received.length : 0, nMatch = ib._ok ? ib.matches.length : 0;
+        paint('<div class="mh"><div><p class="kick-s">今日之緣</p><h1>오늘의 인연</h1><p class="muted" style="margin:2px 0 0">' + (t.cards.length ? '서로 원하는 조건이 맞는 ' + t.cards.length + '명이에요. 내일 새로운 인연이 찾아와요.' : '') + '</p></div><a class="btn ghost sm" href="#/match/edit">조건</a></div>' +
+          '<div class="grid2" style="margin:12px 0 16px"><a class="group-card" href="#/match/inbox"><span class="gem">' + nRecv + '</span><span><b>나에게 온 인연</b><small>받은 인연 잇기</small></span></a><a class="group-card" href="#/chat"><span class="gem">' + nMatch + '</span><span><b>이어진 인연</b><small>대화하기</small></span></a></div>' +
+          (t.cards.length ? '<div id="fates">' + t.cards.map(fateCard).join('') + '</div>' : empty('오늘은 아직 닿은 인연이 없어요', '조건을 조금 넓히거나 내일 다시 찾아와 주세요. 광장에 인연 프로필을 켠 사람이 늘수록 더 많이 이어져요.')) +
+          '<p class="muted" style="margin:14px 2px 0">명리 지표는 두 사람의 일주만 본 참고용이에요. 관계의 성패를 예측하지 않아요.</p>', 'match');
+        bindFates(t.cards);
+      });
+    });
+  }
+  function fateCard(c, i) {
+    var img = c.avatar ? '<img src="' + esc(c.avatar) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : '<span class="fz-letter">' + esc(String(c.name).charAt(0)) + '</span>';
+    var el = c.ilju ? EL[c.ilju.charAt(0)] : '';
+    return '<article class="fate' + (el ? ' el-' + el : '') + '" data-i="' + i + '"><div class="fz">' + img + '<div class="fz-cap"><b>' + esc(c.name) + '</b><span>' + [c.age, c.region].filter(Boolean).map(esc).join(' · ') + '</span></div>' + (c.ilju ? '<span class="fz-ilju">' + esc(c.ilju) + '<small>일주</small></span>' : '') + '</div>' +
+      '<div class="fb">' + (c.note ? '<p class="note pink" style="margin:0 0 10px">“' + esc(c.note) + '”</p>' : '') + (c.purposes.length ? '<div class="chips" style="padding:0 0 8px">' + c.purposes.map(function (p) { return '<span class="chip">' + esc(p) + '</span>'; }).join('') + '</div>' : '') +
+      (c.intro ? '<p class="fz-intro">' + esc(c.intro) + '</p>' : '') +
+      '<div class="cp"><p class="cp-h"><span class="hj">命</span>명리로 본 두 사람</p><ul class="cp-good">' + c.compat.good.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' + (c.compat.care.length ? '<ul class="cp-care">' + c.compat.care.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') + '</div>' +
+      '<div class="cp"><p class="cp-h"><span class="hj">生</span>생활로 본 두 사람</p><p class="muted" style="margin:0">' + [c.life.purposes.length ? '함께 원하는 것 · ' + c.life.purposes.map(esc).join(', ') : '', c.life.interests.length ? '겹치는 관심사 · ' + c.life.interests.map(esc).join(', ') : '겹치는 관심사는 아직 없어요', c.life.sameRegion ? '같은 지역(' + esc(c.life.region) + ')' : ''].filter(Boolean).join('<br>') + '</p></div>' +
+      '<div class="fa">' + (c.sent ? '<span class="sent">인연을 이었어요 · 상대의 답을 기다리는 중</span>' : c.passed ? '<span class="sent">넘긴 인연이에요</span>' : '<button class="btn ghost" data-pass>넘기기</button><button class="btn pink" data-like>인연 잇기</button>') + '</div></div></article>';
+  }
+  function bindFates(cards, after) {
+    $('.fate').forEach(function (el) {
+      var c = cards[+el.dataset.i], like = $('[data-like]', el), pass = $('[data-pass]', el);
+      if (pass) pass.onclick = function () { api('/api/community/match', { method: 'POST', body: { action: 'pass', handle: c.handle } }).then(function (d) { if (d._ok) { el.style.opacity = '.45'; el.querySelector('.fa').innerHTML = '<span class="sent">넘긴 인연이에요</span>'; track('match_pass'); if (after) after(); } else toast(d.error || '잠시 후 다시 시도해 주세요'); }); };
+      if (like) like.onclick = function () {
+        var s = sheet('<h2>' + esc(c.name) + '님과 인연 잇기</h2><p class="muted" style="margin:6px 0 10px">상대도 인연을 이으면 대화가 열려요. 짧은 첫 인사를 남길 수 있어요(선택).</p><form class="form" id="lkF"><textarea name="note" rows="2" maxlength="100" placeholder="예: 같은 일주라 반가워요! 이직 이야기 나눠 보고 싶어요"></textarea><div class="grid2"><button class="btn ghost" type="button" data-x>취소</button><button class="btn pink" type="submit">인연 잇기</button></div><p class="msg" role="status"></p></form>');
+        $('#lkF', s.el).onsubmit = function (e) {
+          e.preventDefault(); var f = e.target, m = f.querySelector('.msg');
+          api('/api/community/match', { method: 'POST', body: { action: 'like', handle: c.handle, note: f.elements.note.value } }).then(function (d) {
+            if (!d._ok) { m.className = 'msg err'; m.textContent = d.error || '잇지 못했어요'; return; }
+            s.close(); track('match_like', { matched: d.matched ? 1 : 0 });
+            if (d.matched) { matchedSheet(c, d.room); } else { toast('인연을 이었어요. 상대의 답을 기다려 볼게요'); el.querySelector('.fa').innerHTML = '<span class="sent">인연을 이었어요 · 상대의 답을 기다리는 중</span>'; }
+            if (after) after();
+          });
+        };
+      };
+    });
+  }
+  function matchedSheet(c, room) {
+    var s = sheet('<div style="text-align:center;padding:8px 0 4px"><div class="matched-ill" aria-hidden="true"><span></span><i></i><span></span></div><h2 style="margin-top:12px">붉은 실이 이어졌어요</h2><p class="muted" style="margin:6px 0 16px">' + esc(c.name) + '님도 인연을 이었어요. 이제 대화를 나눌 수 있어요.</p><div class="grid2"><button class="btn ghost" data-x>나중에</button><a class="btn pink" href="#/chat/' + room + '" id="goRoom">대화 시작</a></div></div>');
+    $('#goRoom', s.el).onclick = function () { s.close(); };
+  }
+  function inboxView(q) {
+    var tab = q.tab || 'recv';
+    paint('<a class="back" href="#/">' + ICON.back + '오늘의 인연</a><h1 style="margin:4px 2px 4px">인연함</h1><nav class="tabs"><a href="#/match/inbox"' + (tab === 'recv' ? ' aria-current="page"' : '') + '>나에게 온</a><a href="#/match/inbox?tab=sent"' + (tab === 'sent' ? ' aria-current="page"' : '') + '>내가 보낸</a></nav><div id="ib"><div class="skel"></div></div>', 'match');
+    api('/api/community/match?view=inbox').then(function (d) {
+      var box = $('#ib'); if (!box) return;
+      if (!d._ok) { if (d.need) { matchProfile().then(matchGate); return; } box.innerHTML = '<p class="msg err">' + esc(d.error || '불러오지 못했어요') + '</p>'; return; }
+      if (tab === 'sent') {
+        box.innerHTML = d.sent.length ? d.sent.map(function (x) { return '<div class="card" style="display:flex;align-items:center;gap:12px">' + ava({ name: x.name, avatar: x.avatar }) + '<div style="flex:1"><b>' + esc(x.name) + '</b><div class="sub">' + when(x.at) + ' 전에 이었어요 · 답을 기다리는 중</div></div><button class="btn ghost sm" data-wd="' + esc(x.handle) + '">거두기</button></div>'; }).join('') : empty('보낸 인연이 없어요', '오늘의 인연에서 마음에 닿는 분께 인연을 이어 보세요');
+        $('[data-wd]', box).forEach(function (b) { b.onclick = function () { api('/api/community/match', { method: 'POST', body: { action: 'withdraw', handle: b.dataset.wd } }).then(function () { toast('거뒀어요'); inboxView(q); }); }; });
+        return;
+      }
+      box.innerHTML = d.received.length ? '<p class="muted" style="margin:0 2px 10px">인연을 이으면 바로 대화가 열려요. 넘겨도 상대에게 알리지 않아요.</p><div>' + d.received.map(fateCard).join('') + '</div>' : empty('아직 나에게 온 인연이 없어요', '인연 프로필의 한 줄 소개를 채우면 더 잘 닿아요');
+      bindFates(d.received);
+    });
+  }
+  function matchEdit() {
+    paint('<div class="skel" style="height:420px"></div>', 'match');
+    matchProfile().then(function (d) {
+      if (!d._ok || !d.ready.nickname || !d.ready.ilju || !d.verified) { if (!matchGate(d)) paint('', 'match'); return; }
+      var p = d.profile, o = d.options;
+      var chk = function (name, map, cur, max) { return '<div class="picker">' + Object.keys(map).map(function (k) { return '<label><input type="checkbox" name="' + name + '" value="' + esc(k) + '"' + (cur.indexOf(k) >= 0 ? ' checked' : '') + '><span>' + esc(map[k]) + '</span></label>'; }).join('') + '</div>'; };
+      var ages = function (name, v) { var h = '<select name="' + name + '">'; for (var a = 19; a <= 70; a++) h += '<option value="' + a + '"' + (+v === a ? ' selected' : '') + '>' + a + '세</option>'; return h + '<option value="99"' + (+v === 99 ? ' selected' : '') + '>제한 없음</option></select>'; };
+      paint('<a class="back" href="#/">' + ICON.back + '오늘의 인연</a><h1 style="margin:4px 2px 4px">인연 프로필</h1><p class="lead" style="margin:0 2px 14px">본인확인 완료 · ' + esc(d.verification.age) + ' · ' + (d.verification.gender === 'F' ? '여성' : d.verification.gender === 'M' ? '남성' : '') + '</p>' +
+        '<form class="form" id="mpF"><div><p class="muted" style="margin:0 0 8px;font-weight:600">어떤 인연을 찾나요? (여러 개)</p>' + chk('purposes', o.purposes, p.purposes) + '</div>' +
+        '<label>활동 지역<select name="region"><option value="">골라 주세요</option>' + o.regions.map(function (r) { return '<option' + (p.region === r ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select></label>' +
+        '<label>한 줄 소개 <span class="muted" style="font-weight:400">200자까지 · 연락처·링크는 쓸 수 없어요</span><textarea name="intro" rows="3" maxlength="200" placeholder="요즘 관심 있는 것, 함께 하고 싶은 것">' + esc(p.intro) + '</textarea></label>' +
+        '<div><p class="muted" style="margin:0 0 8px;font-weight:600">관심사 (6개까지)</p>' + chk('interests', o.interests, p.interests) + '</div>' +
+        '<div class="panel" style="margin:4px 0 0;padding:16px"><h2 style="font-size:.98rem">만나고 싶은 사람</h2><div class="grid2" style="margin-top:10px"><label>최소 나이' + ages('min', p.wantAgeMin) + '</label><label>최대 나이' + ages('max', p.wantAgeMax) + '</label></div>' +
+        '<div id="wg" style="margin-top:12px"><p class="muted" style="margin:0 0 8px;font-weight:600">연애 상대로 만나고 싶은 성별</p>' + chk('wantGender', { M: '남성', F: '여성' }, p.wantGender) + '</div>' +
+        '<label class="check" style="margin-top:6px"><input type="checkbox" name="sameRegion"' + (p.wantRegion === 'same' ? ' checked' : '') + '> 같은 지역 사람만</label></div>' +
+        '<label class="check"><input type="checkbox" name="active"' + (p.active ? ' checked' : '') + '> 인연 찾기 켜기 (다른 사람의 오늘의 인연에 나타나요)</label>' +
+        '<p class="note">인연 카드에는 닉네임·프로필 사진(없으면 일간 포스터)·일주·나이대(예: 20대 후반)·지역(시·도)·소개·관심사가 보여요. 이름·생년월일·연락처는 보이지 않아요. 언제든 끌 수 있어요.</p>' +
+        '<button class="btn pink block" type="submit">저장</button><p class="msg" id="mpMsg" role="status"></p></form>', 'match');
+      var f = $('#mpF'), wg = $('#wg');
+      var sync = function () { wg.hidden = !$('input[name=purposes]:checked', f).some(function (x) { return x.value === 'love'; }); }; sync();
+      f.onchange = function (e) { sync(); if (e.target.name === 'interests' && $('input[name=interests]:checked', f).length > 6) { e.target.checked = false; toast('관심사는 6개까지 고를 수 있어요'); } };
+      f.onsubmit = function (e) {
+        e.preventDefault(); var el = f.elements, m = $('#mpMsg'), vals = function (n) { return $('input[name=' + n + ']:checked', f).map(function (x) { return x.value; }); };
+        m.className = 'msg'; m.textContent = '저장하는 중…';
+        api('/api/community/match', { method: 'POST', body: { action: 'profile', active: el.active.checked, purposes: vals('purposes'), region: el.region.value, intro: el.intro.value, interests: vals('interests'), wantGender: vals('wantGender'), wantAgeMin: +el.min.value, wantAgeMax: +el.max.value, wantRegion: el.sameRegion.checked ? 'same' : 'any' } }).then(function (r) {
+          if (!r._ok) { m.className = 'msg err'; m.textContent = r.error || '저장하지 못했어요'; return; }
+          toast(r.profile.active ? '인연 찾기를 켰어요' : '저장했어요'); track('match_profile', { active: r.profile.active ? 1 : 0 }); location.hash = '#/';
+        });
+      };
+    });
+  }
+  function verifyView() {
+    paint('<div class="hero"><svg class="thread" viewBox="0 0 400 60" preserveAspectRatio="none" aria-hidden="true"><path d="M-10 44 C 70 14, 130 58, 205 34 S 330 6, 410 26"/><circle cx="205" cy="34" r="3.5"/></svg><span class="kick">本人確認</span><h1>인연 찾기는<br><em>성인 본인확인</em> 후에</h1><p>안전한 만남을 위해 만 19세 이상 본인확인을 한 번 받아요. 이름·전화번호는 저장하지 않고, 출생 연도·성별과 중복 가입 확인값만 남겨요.</p></div>' +
+      '<div class="panel"><button class="btn pink block" id="idvBtn">휴대폰 본인인증 하기</button><p class="msg" id="idvMsg" role="status" style="margin-top:10px"></p><p class="muted" style="margin:8px 0 0">본인인증은 포트원(PortOne)을 통해 진행돼요. 한 사람은 한 계정으로만 인연 찾기를 할 수 있어요.</p></div>', 'match');
+    $('#idvBtn').onclick = function () {
+      var b = this, m = $('#idvMsg'); b.disabled = true; m.className = 'msg'; m.textContent = '본인인증 창을 여는 중…';
+      api('/api/community/verify', { method: 'POST', body: { action: 'start' } }).then(function (d) {
+        if (d.verified) { route(); return; }
+        if (!d._ok) { b.disabled = false; m.className = 'msg err'; m.textContent = d.configured === false ? '본인인증을 준비하고 있어요. 조금만 기다려 주세요.' : (d.error || '시작하지 못했어요'); return; }
+        loadScript(PORTONE_SDK).then(function () {
+          return window.PortOne.requestIdentityVerification({ storeId: d.storeId, identityVerificationId: d.identityVerificationId, channelKey: d.channelKey, redirectUrl: location.origin + '/community/?idv=' + encodeURIComponent(d.identityVerificationId) });
+        }).then(function (res) {
+          if (res && res.code) { b.disabled = false; m.className = 'msg err'; m.textContent = res.message || '본인인증을 마치지 못했어요'; return; }
+          return confirmIdv(d.identityVerificationId);
+        }).catch(function () { b.disabled = false; m.className = 'msg err'; m.textContent = '본인인증 창을 열지 못했어요. 잠시 후 다시 시도해 주세요.'; });
+      });
+    };
+  }
+  function confirmIdv(id) {
+    return api('/api/community/verify', { method: 'POST', body: { action: 'confirm', id: id } }).then(function (d) {
+      if (d._ok) { toast('본인확인을 마쳤어요'); track('match_verified'); location.hash = '#/match/edit'; route(); return; }
+      toast(d.error || '본인확인을 마치지 못했어요'); if (location.hash.indexOf('#/') !== 0) location.hash = '#/';
+    });
+  }
+
+  /* ── 대화(서버 경유, 화면이 열려 있을 때만 4초마다 새 메시지 확인) ── */
+  var POLL = null;
+  function stopPoll() { if (POLL) { clearTimeout(POLL); POLL = null; } }
+  function chatList() {
+    paint('<h1 style="margin:6px 2px 12px">대화</h1><div id="rooms"><div class="skel"></div></div>', 'chat');
+    api('/api/community/chat?view=rooms').then(function (d) {
+      var box = $('#rooms'); if (!box) return;
+      if (!d._ok) { if (d.need === 'verify') { verifyView(); return; } box.innerHTML = '<p class="msg err">' + esc(d.error || '불러오지 못했어요') + '</p>'; return; }
+      setChatBadge(d.rooms.some(function (r) { return r.unread; }));
+      box.innerHTML = d.rooms.length ? d.rooms.map(function (r) { return '<a class="card room' + (r.open ? '' : ' closed') + '" href="#/chat/' + r.id + '">' + ava({ name: r.name, avatar: r.avatar }) + '<div class="rm"><b>' + esc(r.name) + (r.open ? '' : ' <small class="muted">· 끝난 대화</small>') + '</b><p>' + esc(r.last) + '</p></div><span class="rt">' + when(r.lastAt) + (r.unread ? '<i class="dot" aria-label="새 메시지"></i>' : '') + '</span></a>'; }).join('') : empty('아직 이어진 인연이 없어요', '두 사람이 모두 인연을 이으면 여기에서 대화할 수 있어요');
+    });
+  }
+  function chatRoom(id) {
+    var last = 0, me0 = null, alive = true;
+    paint('<div class="chat-h"><a class="back" href="#/chat">' + ICON.back + '</a><span id="chWho" class="who"></span><button class="act icon" id="chMenu" aria-label="대화 메뉴">⋯</button></div><div id="msgs" class="msgs" aria-live="polite"></div><form class="composer chat-in" id="chF"><p class="reply" id="chTip" hidden></p><div class="in"><textarea name="body" rows="1" maxlength="1000" placeholder="메시지 보내기" aria-label="메시지"></textarea><button class="send" type="submit" aria-label="보내기" disabled>' + ICON.send + '</button></div></form>', 'chat');
+    var box = $('#msgs'), f = $('#chF'), ta = f.elements.body, sb = f.querySelector('.send');
+    var draw = function (ms, tips) {
+      ms.forEach(function (m) {
+        if ($('#m' + m.id)) return; last = Math.max(last, m.id);
+        box.insertAdjacentHTML('beforeend', '<div class="msg-row' + (m.mine ? ' mine' : '') + '" id="m' + m.id + '"><div class="bubble">' + esc(m.body) + '</div><span class="mt">' + new Date(m.at).toLocaleTimeString('ko-KR', { timeZone: 'Asia/Seoul', hour: 'numeric', minute: '2-digit' }) + '</span></div>' + (m.flagged && tips && tips[m.flagged] ? '<p class="sys">⚠ ' + esc(tips[m.flagged]) + '</p>' : ''));
+      });
+      if (ms.length) window.scrollTo(0, document.body.scrollHeight);
+    };
+    var tick = function () {
+      if (!alive) return;
+      api('/api/community/chat?room=' + id + '&after=' + last).then(function (d) {
+        if (!alive) return;
+        if (!d._ok) { if (d.need === 'verify') { verifyView(); return; } box.innerHTML = '<p class="msg err">' + esc(d.error || '대화를 불러오지 못했어요') + '</p>'; return; }
+        if (!me0) { me0 = d.room; $('#chWho').innerHTML = ava({ name: d.room.name, avatar: d.room.avatar }, 1) + '<b>' + esc(d.room.name) + '</b>' + (d.room.ilju ? '<span class="pill">' + esc(d.room.ilju) + '</span>' : ''); if (!d.messages.length && !last) box.innerHTML = '<p class="sys">붉은 실이 이어졌어요. 먼저 가볍게 인사해 보세요. 처음 만난 사이에서 돈·투자·외부 연락처 이야기는 조심해 주세요.</p>'; }
+        if (!d.room.open) { f.hidden = true; if (!$('#closed')) box.insertAdjacentHTML('beforeend', '<p class="sys" id="closed">대화가 끝났어요.</p>'); }
+        draw(d.messages, d.tips);
+        if (!document.hidden) POLL = setTimeout(tick, 4000); else POLL = setTimeout(tick, 15000);
+      });
+    };
+    ta.oninput = function () { sb.disabled = !ta.value.trim(); ta.style.height = 'auto'; ta.style.height = Math.min(140, ta.scrollHeight) + 'px'; };
+    ta.onkeydown = function (e) { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && window.matchMedia('(min-width: 640px)').matches) { e.preventDefault(); f.requestSubmit(); } };
+    f.onsubmit = function (e) {
+      e.preventDefault(); var body = ta.value.trim(); if (!body) return; sb.disabled = true;
+      api('/api/community/chat', { method: 'POST', body: { action: 'send', room: +id, body: body } }).then(function (d) {
+        if (!d._ok) { toast(d.error || '보내지 못했어요'); sb.disabled = false; return; }
+        ta.value = ''; ta.style.height = ''; draw([d.message], d.tip ? (function () { var o = {}; o[d.message.flagged] = d.tip; return o; })() : null); track('chat_send');
+      });
+    };
+    $('#chMenu').onclick = function () {
+      var s = sheet('<h2>대화 메뉴</h2><div style="display:grid;gap:8px;margin-top:14px"><button class="btn ghost block" data-a="report">신고하기</button><button class="btn ghost block" data-a="block">차단하고 대화 끝내기</button><button class="btn ghost block" data-a="leave">대화 끝내기</button><button class="btn block" data-x>닫기</button></div>');
+      $('[data-a]', s.el).forEach(function (b) { b.onclick = function () {
+        var a = b.dataset.a; s.close();
+        if (a === 'report') {
+          var r = sheet('<h2>신고하기</h2><p class="muted" style="margin:6px 0 8px">운영진이 최근 대화 일부를 확인해요. 상대에게 알리지 않아요.</p><form class="form" id="crF"><div>' + Object.keys(REASONS).map(function (k) { return '<label class="radio"><input type="radio" name="reason" value="' + k + '"> ' + REASONS[k] + '</label>'; }).join('') + '</div><label>자세한 내용 (선택)<textarea name="detail" rows="2" maxlength="300"></textarea></label><div class="grid2"><button class="btn ghost" type="button" data-x>취소</button><button class="btn pink" type="submit">신고하기</button></div></form>');
+          $('#crF', r.el).onsubmit = function (e) { e.preventDefault(); var fe = e.target.elements; if (!fe.reason.value) return; api('/api/community/chat', { method: 'POST', body: { action: 'report', room: +id, reason: fe.reason.value, detail: fe.detail.value } }).then(function (d) { r.close(); toast(d._ok ? '신고를 접수했어요' : (d.error || '접수하지 못했어요')); }); };
+          return;
+        }
+        confirmSheet(a === 'block' ? '차단하고 대화를 끝낼까요?' : '대화를 끝낼까요?', '끝낸 대화는 다시 열 수 없어요.', a === 'block' ? '차단하기' : '끝내기', function () { api('/api/community/chat', { method: 'POST', body: { action: a, room: +id } }).then(function () { toast(a === 'block' ? '차단했어요' : '대화를 끝냈어요'); location.hash = '#/chat'; }); });
+      }; });
+    };
+    STOP_ROOM = function () { alive = false; stopPoll(); };
+    tick();
+  }
+  var STOP_ROOM = null, BADGE_AT = 0;
+  function setChatBadge(on) { var t = $('.tabbar [data-tab="chat"]'); if (t) t.classList.toggle('has-new', !!on); }
+  function checkBadge() { if (!ME || !ME.member || Date.now() - BADGE_AT < 30000) return; BADGE_AT = Date.now(); api('/api/community/chat?view=rooms').then(function (d) { if (d._ok) setChatBadge(d.rooms.some(function (r) { return r.unread; })); }); }
+
   /* ── 라우터 ── */
   function route() {
     var h = parseHash(), p = h.parts;
-    stopPetals();
+    stopPetals(); stopPoll(); if (STOP_ROOM) { STOP_ROOM(); STOP_ROOM = null; }
     me().then(function () {
       var wl = $('.tabbar [data-tab="write"]'); if (wl) wl.href = '#/write';
       if (p[0] === 'p' && /^\d+$/.test(p[1] || '')) return postView(p[1]);
@@ -402,7 +628,14 @@
       if (p[0] === 'records') return recordsView(h.q);
       if (p[0] === 'g' && (p[1] === 'ilju' || p[1] === 'ilgan') && p[2]) return feedView(h.q, { kind: p[1], key: p[2] });
       if (p[0] === 'me') return meView(h.q);
-      return feedView(h.q);
+      checkBadge();
+      if (p[0] === 'plaza') return feedView(h.q);
+      if (p[0] === 'match' && p[1] === 'inbox') return inboxView(h.q);
+      if (p[0] === 'match' && p[1] === 'edit') return matchEdit();
+      if (p[0] === 'verify') return verifyView();
+      if (p[0] === 'chat' && /^\d+$/.test(p[1] || '')) return chatRoom(p[1]);
+      if (p[0] === 'chat') return chatList();
+      return matchView();
     });
   }
   window.addEventListener('hashchange', route);
@@ -431,5 +664,5 @@
     PET = { stop: function () { dead = true; if (raf) cancelAnimationFrame(raf); if (io) io.disconnect(); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('resize', size); } };
     go();
   }
-  route();
+  (function () { var u = new URL(location.href), id = u.searchParams.get('identityVerificationId') || u.searchParams.get('idv'); if (id) { history.replaceState(null, '', '/community/#/'); me().then(function () { confirmIdv(id); }); return; } route(); })();
 })();

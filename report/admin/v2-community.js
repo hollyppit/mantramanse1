@@ -5,7 +5,8 @@
    ④ 관리자 입장(/api/community/enter): 이 브라우저에 입장 쿠키를 받아 /community/ 를 연다.
    ⑤ 회원 동의 현황(/api/account/consent GET, 2단계): 항목별 동의 수·2년 재확인 대상·최근 변경(회원 id 없이).
    ⑥ 감사 로그(/api/community/audit): 관리자 작업 최근 50건.
-   ⑦ 광장 운영(/api/community/mod, 3단계): 신고 묶음 처리(숨김·삭제·기각·제재), 숨겨진 글, 제재 목록·해제.
+   ⑦ 성인 확인(테스트용 수동, /api/community/verify manual, 5단계): 포트원 본인인증 채널(PORTONE_IDV_CHANNEL_KEY) 연결 전 테스터 계정을 확인해 인연 매칭·대화를 시험
+   ⑧ 광장 운영(/api/community/mod, 3단계): 신고 묶음 처리(숨김·삭제·기각·제재), 숨겨진 글, 제재 목록·해제.
    모든 변경은 서버가 감사 로그(admin_audit_log)에 작업자 이름과 함께 남긴다. */
 (function () {
   'use strict';
@@ -70,24 +71,25 @@
         (d.recent.length ? '<table class="tbl"><thead><tr><th>시각</th><th>항목</th><th>처리</th><th>경로</th></tr></thead><tbody>' + d.recent.map(function (r) { return '<tr><td>' + when(r.at) + '</td><td>' + esc(KIND[r.kind] || r.kind) + '</td><td>' + (r.action === 'grant' ? '동의' : '철회') + '</td><td>' + esc(VIA[r.via] || r.via || '') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">아직 변경 기록이 없습니다.</p>');
     }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
-  var ACT = { 'community.stage': '공개 단계 변경', 'community.access.grant': '권한 주기', 'community.access.revoke': '권한 회수', 'community.mod.hide': '글 숨김', 'community.mod.restore': '글 되살림', 'community.mod.delete': '글 삭제', 'community.mod.dismiss': '신고 기각', 'community.sanction.warn': '경고', 'community.sanction.mute': '쓰기 정지', 'community.sanction.ban': '이용 정지', 'community.sanction.lift': '제재 해제' };
+  var ACT = { 'community.stage': '공개 단계 변경', 'community.access.grant': '권한 주기', 'community.access.revoke': '권한 회수', 'community.mod.hide': '글 숨김', 'community.mod.restore': '글 되살림', 'community.mod.delete': '글 삭제', 'community.mod.dismiss': '신고 기각', 'community.sanction.warn': '경고', 'community.sanction.mute': '쓰기 정지', 'community.sanction.ban': '이용 정지', 'community.sanction.lift': '제재 해제', 'community.mod.avatar': '프로필 사진 지움', 'community.verify.manual': '성인 확인(수동)' };
   var SK = { warn: '경고', mute: '쓰기 정지', ban: '이용 정지' };
   var modView = 'reports';
   function loadMod() {
     var box = $('#cmMod'); if (!box) return;
     box.innerHTML = '<p class="muted">불러오는 중…</p>';
+    $('#cmVeGo').onclick = function () { call('/api/community/verify', { method: 'POST', body: { action: 'manual', email: $('#cmVeEmail').value.trim(), birthYear: +$('#cmVeYear').value, gender: $('#cmVeG').value } }).then(function () { msg('cmVeMsg', '확인했습니다'); $('#cmVeEmail').value = ''; loadAudit(); }).catch(function (e) { msg('cmVeMsg', e.message, true); }); };
     [].forEach.call(root.querySelectorAll('[data-mv]'), function (b) { b.className = 'btn sm' + (b.getAttribute('data-mv') === modView ? '' : ' ghost'); });
     call('/api/community/mod?view=' + modView).then(function (d) {
       if (modView === 'sanctions') {
         box.innerHTML = d.items.length ? '<table class="tbl"><thead><tr><th>회원</th><th>종류</th><th>사유</th><th>기한</th><th>처리</th><th></th></tr></thead><tbody>' + d.items.map(function (x) { return '<tr' + (x.lifted ? ' style="opacity:.5"' : '') + '><td>' + esc(x.who) + '</td><td>' + esc(SK[x.kind]) + '</td><td>' + esc(x.reason) + '</td><td>' + (x.kind === 'warn' ? '—' : x.until ? when(x.until) : '무기한') + '</td><td>' + esc(x.by) + ' · ' + when(x.at) + '</td><td>' + (x.lifted || x.kind === 'warn' ? (x.lifted ? '해제 ' + when(x.lifted) : '') : '<button class="btn ghost sm" data-lift="' + x.id + '">해제</button>') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">제재 기록이 없습니다.</p>';
       } else {
         box.innerHTML = d.items.length ? d.items.map(function (x) {
-          var link = x.type === 'post' ? '/community/#/p/' + x.id : '/community/#/p/' + x.post;
+          var link = x.type === 'post' ? '/community/#/p/' + x.id : x.type === 'comment' ? '/community/#/p/' + x.post : '';
           return '<div class="card" style="margin:8px 0;padding:10px 12px"><div class="row" style="justify-content:space-between;gap:8px"><b>' + (x.type === 'post' ? '글' : '댓글') + ' #' + x.id + ' · ' + esc(x.who) + '</b><span class="muted">' + (modView === 'reports' ? '신고 ' + x.count + '건 · ' + Object.keys(x.reasons).map(function (k) { return esc(k) + ' ' + x.reasons[k]; }).join(', ') + ' · 상태 ' + esc(x.status) : '신고 ' + x.reports + '건 · ' + when(x.at)) + '</span></div>' +
-            '<p style="margin:6px 0">' + esc(x.preview) + '</p>' + (x.details && x.details.length ? '<p class="muted" style="margin:0 0 6px">신고 내용: ' + x.details.map(esc).join(' / ') + '</p>' : '') +
-            '<div class="row" style="gap:6px;flex-wrap:wrap"><a class="btn ghost sm" href="' + link + '" target="_blank" rel="noopener">열기</a>' +
-            (x.status === 'hidden' || modView === 'hidden' ? '<button class="btn ghost sm" data-mod="restore" data-t="' + x.type + '" data-i="' + x.id + '">되살리기</button>' : '<button class="btn ghost sm" data-mod="hide" data-t="' + x.type + '" data-i="' + x.id + '">숨기기</button>') +
-            '<button class="btn ghost sm" data-mod="delete" data-t="' + x.type + '" data-i="' + x.id + '">삭제</button>' + (modView === 'reports' ? '<button class="btn ghost sm" data-mod="dismiss" data-t="' + x.type + '" data-i="' + x.id + '">신고 기각</button>' : '') +
+            '<p style="margin:6px 0">' + (x.type === 'message' ? '<b>[대화]</b> ' : '') + esc(x.preview) + '</p>' + (x.context && x.context.length ? '<div class="muted" style="margin:0 0 6px;padding:6px 8px;border-left:2px solid var(--line);font-size:.8rem">' + x.context.map(function (m) { return '<div' + (m.reported ? ' style="color:#FF8A78"' : '') + '>' + esc(m.who) + ': ' + esc(m.body) + '</div>'; }).join('') + '</div>' : '') + (x.details && x.details.length ? '<p class="muted" style="margin:0 0 6px">신고 내용: ' + x.details.map(esc).join(' / ') + '</p>' : '') +
+            '<div class="row" style="gap:6px;flex-wrap:wrap">' + (link ? '<a class="btn ghost sm" href="' + link + '" target="_blank" rel="noopener">열기</a>' : '') +
+            (x.type === 'message' ? '' : x.status === 'hidden' || modView === 'hidden' ? '<button class="btn ghost sm" data-mod="restore" data-t="' + x.type + '" data-i="' + x.id + '">되살리기</button>' : '<button class="btn ghost sm" data-mod="hide" data-t="' + x.type + '" data-i="' + x.id + '">숨기기</button>') +
+            (x.type === 'message' ? '' : '<button class="btn ghost sm" data-mod="delete" data-t="' + x.type + '" data-i="' + x.id + '">삭제</button>') + (modView === 'reports' ? '<button class="btn ghost sm" data-mod="dismiss" data-t="' + x.type + '" data-i="' + x.id + '">신고 기각</button>' : '') +
             '<button class="btn ghost sm" data-sanc data-t="' + x.type + '" data-i="' + x.id + '">글쓴이 제재</button></div></div>';
         }).join('') : '<p class="muted">' + (modView === 'reports' ? '처리할 신고가 없습니다.' : '숨겨진 글이 없습니다.') + '</p>';
       }
@@ -121,6 +123,8 @@
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">④ 회원 동의 현황</h3><div id="cmConsent"><p class="muted">불러오는 중…</p></div>' +
       '<p class="muted" style="margin:8px 0 0">광고 발송 기능은 아직 없습니다. 보낼 때는 동의 중인 채널로만, 앞에 (광고)·보낸 곳·무료 수신 거부 방법을 넣고, 밤 9시~아침 8시에는 야간 수신 동의자에게만 보냅니다.</p></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑤ 광장 운영 · 신고 처리</h3><div class="row" style="gap:6px;margin-bottom:8px"><button class="btn sm" data-mv="reports">처리할 신고</button><button class="btn ghost sm" data-mv="hidden">숨겨진 글</button><button class="btn ghost sm" data-mv="sanctions">제재 목록</button></div><p class="muted" style="margin:0 0 8px">서로 다른 회원 5명이 신고하면 자동으로 숨겨집니다. 확인 후 되살리거나 삭제해 주세요. 모든 처리는 작업자 이름과 함께 기록됩니다.</p><div id="cmMod"></div></div>' +
+      '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑦ 성인 확인 · 테스트용</h3><p class="muted" style="margin:0 0 8px">포트원 본인인증 채널(환경변수 PORTONE_IDV_CHANNEL_KEY)을 연결하기 전, 테스터 계정이 인연 매칭·대화를 시험할 수 있게 수동으로 확인합니다. 실제 회원에게는 쓰지 마세요. 기록이 남습니다.</p>' +
+      '<div class="row"><input type="email" id="cmVeEmail" placeholder="회원 이메일" style="min-width:200px"><input type="number" id="cmVeYear" placeholder="출생 연도" min="1900" max="2010" style="width:110px"><select id="cmVeG"><option value="F">여성</option><option value="M">남성</option></select><button class="btn" id="cmVeGo">확인 처리</button><span class="muted" id="cmVeMsg"></span></div></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑥ 관리자 작업 기록</h3><div id="cmAudit"><p class="muted">불러오는 중…</p></div></div>';
     $('#cmGrant').onclick = function () {
       var em = $('#cmEmail').value.trim(); if (!em) { msg('cmGrantMsg', '이메일을 입력해 주세요', true); return; }

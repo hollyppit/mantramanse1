@@ -258,7 +258,43 @@ const ENV = { ADMIN_PASSWORD: 'adm-pw', SUPABASE_URL: 'https://sb.local', SUPABA
   const sql4 = read('supabase/migrations/20261116_records_stage4.sql');
   ok(/alter table public\.cm_logs enable row level security/.test(sql4) && /revoke all on public\.cm_logs from anon, authenticated/.test(sql4) && /on delete cascade/.test(sql4), '기록 표: RLS·권한 회수·탈퇴 시 삭제');
 
-  // 13) 파일 점검
+  // 13) 프로필 사진: 기본 = 일간 포스터(관리자 '일간·일주 영상'), 직접 올리기·되돌리기·관리자 지우기
+  const avatar = await imp('functions/api/community/avatar.js');
+  const r2 = new Map(); ENV.CLIPS_R2 = { put: async (k, v, o) => { r2.set(k, { v, o }); }, get: async k => r2.has(k) ? { body: r2.get(k).v, httpMetadata: r2.get(k).o.httpMetadata } : null, delete: async k => { r2.delete(k); } };
+  kvMem.set('awakening:index', JSON.stringify({ ilgan: [{ stem: '갑', gender: 'M', posterUrl: '/api/clipfile?k=gm.webp', enabled: true }, { stem: '갑', gender: 'F', posterUrl: '/api/clipfile?k=gf.webp', enabled: true }, { stem: '을', gender: 'M', posterUrl: 'javascript:alert(1)', enabled: true }], publicBase: 'https://media.example.com' }));
+  await call('posts', 'POST', 'tok-a', '', { title: '사진 확인용', body: '프로필 사진 확인용 글', category: 'daily' });
+  const pm = await P.posterMap(ENV); ok(pm['갑:M'] === 'https://media.example.com/gm.webp' && !pm['을:M'], '일간 포스터 지도(공개 주소로, 이상한 주소는 버림)');
+  x = await call('posts', 'GET', 'tok-c'); const aCard = x.d.items.find(i => i.author && i.author.name === '달빛');
+  ok(aCard && aCard.author.avatar === 'https://media.example.com/gm.webp', '일주를 공개한 회원은 남에게도 일간 포스터가 기본 사진');
+  T.member_profiles.find(p => p.user_id === U('a')).poster_gender = 'F';
+  x = await call('posts', 'GET', 'tok-c'); ok(x.d.items.find(i => i.author && i.author.name === '달빛').author.avatar.endsWith('gf.webp'), '포스터 성별 반영');
+  T.member_profiles.find(p => p.user_id === U('c')).ilgan = '갑'; T.member_profiles.find(p => p.user_id === U('c')).show_ilju = false; T.member_profiles.find(p => p.user_id === U('c')).show_ilgan = false;
+  x = await call('posts', 'GET', 'tok-a'); const cAuthor = (x.d.items.find(i => i.author && i.author.name === '꽃길') || {}).author; ok(cAuthor && cAuthor.avatar === null, '일간·일주를 숨긴 회원은 포스터 대신 첫 글자(포스터가 일간을 드러내므로)');
+  x = await call('me', 'GET', 'tok-c'); ok(x.d.profile.avatarKind === 'poster' && /gm\.webp$/.test(x.d.profile.avatar), '본인 화면에는 숨겨도 내 포스터가 보임');
+  x = await call('me', 'POST', 'tok-c', '', { action: 'gender', gender: 'X' }); ok(x.s === 400, '포스터 성별 값 검사');
+  x = await call('me', 'POST', 'tok-c', '', { action: 'gender', gender: 'F' }); ok(x.s === 200 && T.member_profiles.find(p => p.user_id === U('c')).poster_gender === 'F', '포스터 성별 바꾸기');
+  const up = async (tok, bytes, type = 'image/webp') => { const r = await avatar.onRequestPost({ request: new Request(B + '/api/community/avatar', { method: 'POST', headers: { 'content-type': type, ...(tok ? { 'x-member-token': tok } : {}) }, body: bytes }), env: ENV }); return { s: r.status, d: await r.json() }; };
+  const webp = new Uint8Array([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50, 1, 2, 3, 4]);
+  x = await up(null, webp); ok(x.s === 401, '사진 올리기: 비로그인 401');
+  x = await up('tok-c', new TextEncoder().encode('<svg onload=alert(1)>'), 'image/webp'); ok(x.s === 415, 'SVG·가짜 이미지 거절(파일 머리 글자로 확인)');
+  x = await up('tok-c', new Uint8Array(300 * 1024 + 10)); ok(x.s === 413, '300KB 넘는 사진 거절');
+  x = await up('tok-c', webp); const k1 = T.member_profiles.find(p => p.user_id === U('c')).avatar_path;
+  ok(x.s === 200 && /^cm-av\/[0-9a-f]{32}\.webp$/.test(k1) && r2.has(k1) && x.d.avatar.kind === 'photo', '사진 올리기(무작위 키·R2 저장)');
+  x = await up('tok-c', new Uint8Array([0xFF, 0xD8, 0xFF, 0xE0, 1, 2])); const k2 = T.member_profiles.find(p => p.user_id === U('c')).avatar_path;
+  ok(x.s === 200 && k2.endsWith('.jpg') && !r2.has(k1) && r2.has(k2), '사진 바꾸면 옛 사진 파일 삭제');
+  x = await call('posts', 'GET', 'tok-a'); ok((x.d.items.find(i => i.author && i.author.name === '꽃길') || {}).author.avatar === '/api/community/avatar?k=' + encodeURIComponent(k2), '직접 올린 사진은 공개 여부와 상관없이 보임');
+  let rr = await avatar.onRequestGet({ request: new Request(B + '/api/community/avatar?k=' + encodeURIComponent(k2)), env: ENV }); ok(rr.status === 200 && rr.headers.get('content-type') === 'image/jpeg' && /nosniff/.test(rr.headers.get('x-content-type-options')), '사진 내려받기(형식 고정·nosniff)');
+  rr = await avatar.onRequestGet({ request: new Request(B + '/api/community/avatar?k=' + encodeURIComponent('../secret')), env: ENV }); ok(rr.status === 404, '이상한 키는 404');
+  const rm = await mw.onRequest({ request: new Request(B + '/api/community/avatar?k=' + encodeURIComponent(k2)), env: ENV, next: () => new Response('own') }); ok(rm.status === 403, '사진도 커뮤니티 잠금 안쪽(광장 밖에서는 못 봄)');
+  x = await avatar.onRequestDelete({ request: new Request(B + '/api/community/avatar', { method: 'DELETE', headers: { 'x-member-token': 'tok-c' } }), env: ENV }).then(async r => ({ s: r.status, d: await r.json() }));
+  ok(x.s === 200 && !T.member_profiles.find(p => p.user_id === U('c')).avatar_path && !r2.has(k2) && x.d.avatar.kind === 'poster', '되돌리기 → 사진 삭제·일간 포스터');
+  await up('tok-c', webp); const k3 = T.member_profiles.find(p => p.user_id === U('c')).avatar_path;
+  const cPost = T.cm_posts.find(p => p.author_id === U('c') && p.status === 'visible');
+  x = await call('mod', 'POST', null, '', { action: 'avatar', type: 'post', id: cPost.id }, admin); ok(x.s === 200 && x.d.removed && !r2.has(k3) && T.admin_audit_log.some(l => l.action === 'community.mod.avatar'), '관리자: 부적절한 사진 지우기(감사 로그)');
+  await up('tok-c', webp); const k4 = T.member_profiles.find(p => p.user_id === U('c')).avatar_path;
+  await acc.withdraw(ENV, U('c'), { unlinkKakao: false }).catch(() => null); ok(!r2.has(k4), '탈퇴하면 사진 파일도 삭제');
+
+  // 14) 파일 점검
   const sql = read('supabase/migrations/20261116_plaza_stage3.sql');
   const tbls = ['cm_posts', 'cm_comments', 'cm_reactions', 'cm_reports', 'cm_blocks', 'cm_sanctions'];
   ok(tbls.every(t => new RegExp('alter table public\\.' + t + '\\s+enable row level security').test(sql)), '새 표 6개 RLS 켬');
