@@ -73,7 +73,8 @@ const LAYER_KO = { db: 'DB 문안', narrative: '서사 엔진', luck: '운 흐�
 
 W(`# 운명의 타임라인 챕터 전수 감사 — 장별 성적표 (${R.generated})`);
 W();
-W(`가상 사주 **${R.N}명** × 공개 **${rows.length}장**(운영 게시 목차 v${R.catalogVersion}: 종합풀이 19 · 재물운 15 · 커리어운 15 · 인연운 15) + 비공개 주제 재료 ${R.hiddenRows.length}장. 기준 시각 ${R.now.slice(0, 10)}.`);
+W(`가상 사주 **${R.N}명** × 사용자 화면 **${rows.length}장**(운영 게시 목차 v${R.catalogVersion} 계약 ${rows.filter(r => !r.derived).length}장 + 엔진 조립 장 ${rows.filter(r => r.derived).length}장: ${rows.filter(r => r.derived).map(r => r.short).join('·')}) + 비공개 주제 재료 ${R.hiddenRows.length}장. 기준 시각 ${R.now.slice(0, 10)}.`);
+W('엔진 조립 장은 계약(DB 원고) 없이 만세력 엔진 값으로 화면에서 만드는 장이에요(report/v2/derived-chapters.js). 흐름·격국·건강 장은 공개 스위치가 켜져야 사용자에게 보여요.');
 W();
 W('다시 만들기:');
 W('```bash'); W(`node tools/timeline-chapter-audit.cjs ${R.N}`); W('```');

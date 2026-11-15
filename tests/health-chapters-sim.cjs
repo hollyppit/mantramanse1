@@ -27,7 +27,7 @@ for (let i = 0; i < 200; i++) {
     const text = Object.values(c.readingCore).join('\n'), body = Object.keys(c.readingCore).filter(k => k !== 'why').map(k => c.readingCore[k]).join('\n');
     ok(!/NaN|undefined|null|\[object/.test(text), `${id} 빈 값(사주 ${i})`);
     ok(!H.BANNED.test(body), `${id} 금지 표현: ${(body.match(H.BANNED) || [])[0]}`);
-    ok(c.readingCore.risk.includes(/h[56]$/.test(id) ? H.SAFE : H.MED), `${id} 진단·예측이 아니라는 안내가 없음`);
+    ok(c.readingCore.risk.includes(id === 'timeline_self_h1' ? H.MED : id === 'timeline_self_h5' ? H.SAFE : H.NOTE[id]), `${id} 진단·예측이 아니라는 안내가 없음`);
     ok(!/(토|목|금|수|화)\([^)]*\)가라|로로|으로로|이에요이에요|'(이에요|예요)'|[의아해기]'이에요/.test(text), `${id} 조사 오류`);
   });
   // 엔진 값 일치: 올해 건강 지수·10년 사고 주의 지수 1위·삼재

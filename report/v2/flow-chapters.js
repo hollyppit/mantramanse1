@@ -64,16 +64,18 @@
   function nextWith(C, g) { return ahead(C).filter(function (r) { return !r.cur && brings(C, r.x, g); })[0] || null; }
   function curWith(C, g) { return C.flows.filter(function (r) { return r.cur && brings(C, r.x, g); })[0] || null; }
   function whenLine(C, g, what, label) {
-    var c = curWith(C, g), n = nextWith(C, g), L = label || C.gl(g);
-    if (c) return '지금 대운(' + span(c.x) + ')이 바로 ' + J.을(L) + ' 실어 오는 때라, ' + what + ' 몸으로 느끼기 쉬운 시기예요.' + (n ? ' 다음으로 이 기운이 다시 들어오는 때는 ' + J.예요(span(n.x) + '(' + age(n.x) + ')') : '');
-    if (n) return J.이(L) + ' 운에서 들어오는 다음 시기는 ' + J.예요(span(n.x) + '(' + age(n.x) + ', ' + C.M.gzName(n.x) + ' 대운)') + '. 그때 ' + what + ' 한결 수월해진다고 봐요.';
-    return '앞으로 80세 전까지의 대운에서는 ' + J.이(L) + ' 뚜렷하게 들어오는 시기가 적어요. 운을 기다리기보다 생활 습관과 사람으로 채우는 쪽이 현실적이에요.';
+    // 같은 기운의 시기가 여러 장에 나와도 문장이 같아지지 않게, 문장마다 이 장의 주제(what)를 넣는다
+    var c = curWith(C, g), n = nextWith(C, g), L = label || C.gl(g), w = String(what).replace(/[이가]$/, '');
+    if (c) return '지금 대운(' + span(c.x) + ')이 바로 ' + J.을(L) + ' 실어 오는 때라, ' + what + ' 몸으로 느끼기 쉬운 시기예요.' + (n ? ' ' + w + ' 쪽에 이 기운이 다시 들어오는 때는 ' + J.예요(span(n.x) + '(' + age(n.x) + ')') + '.' : '');
+    if (n) return w + ' 쪽이 한결 수월해지는 다음 시기는 ' + J.이(L) + ' 운에서 들어오는 ' + J.예요(span(n.x) + '(' + age(n.x) + ', ' + C.M.gzName(n.x) + ' 대운)') + '.';
+    return J.은(w + ' 쪽을 받쳐 줄 ' + L) + ' 앞으로 80세 전까지 대운에서 크게 들어오는 때가 드물어서, ' + w + ' 쪽은 운을 기다리기보다 생활 습관과 곁의 사람으로 채우는 편이 현실적이에요.';
   }
   // 화면의 존댓말 변환(polite-text.js)이 '모입니다'를 '모예요'로 바꾸는 일이 있어, 동사 '-이다'형은 미리 해요체로 넘긴다
   var VERB_YO = { 모입니다: '모여요', 트입니다: '트여요', 움직입니다: '움직여요', 쓰입니다: '쓰여요', 보입니다: '보여요' };
   function yo(t) { return String(t).replace(/(모|트|움직|쓰|보)입니다/g, function (m) { return VERB_YO[m] || m; }); }
   function rows(core) { return Object.keys(core).filter(function (k) { return core[k]; }).map(function (k) { return { role: k, text: core[k] }; }); }
   function chapter(id, core, vd, M, ch) {
+    if (core.why) { var wp = String(core.why).split('\n\n'); wp[0] = '이 사주: ' + wp[0]; core.why = wp.join('\n\n'); }   // reading-text basisGroup 이 '이 사주: ' 줄은 숫자가 있어도 남긴다
     Object.keys(core).forEach(function (k) { if (core[k]) core[k] = yo(core[k]); });
     return {
       id: id, base: id, title: TITLES[id], kind: 'life', editorialTopicId: TOPIC[id], editorialContractId: id, aiEnabled: false, readingSupplementary: true, readingDeferred: false,
@@ -170,7 +172,7 @@
       reinforce: join([majors.length ? '이 사주에서 실제로 성립한 주요 구조는 ' + g.major.length + '가지예요.' : '격국 말고 따로 성립한 큰 구조는 뚜렷하지 않아요. 그래서 위의 격국 하나를 기준으로 읽으면 충분해요.']
         .concat(majors).concat(pat.length ? ['그 밖에 원국에서 보이는 패턴: ' + pat.map(function (c) { return c.name + '(' + c.plain + ')'; }).join(', ') + '.'] : [])),
       practice: PRACTICE_STAB[rep.type === 'special' ? 'seong' : rep.type === 'hold' ? 'hold' : (rep.stability || 'plain')] || PRACTICE_STAB.plain,
-      why: join([(rep.why || []).join(' / '), rep.type === 'special' ? '특수격 우선: ' + rep.relation : '', g.special.possible ? g.special.possible.name + '은 조건이 다 갖춰지지 않아(' + g.special.possible.statusLabel + ') 특수격으로 정하지 않았어요.' : '',
+      why: join(['대표 격국 ' + rep.name + (rep.establishLabel ? '(' + rep.establishLabel + (rep.stabilityLabel ? ' · ' + rep.stabilityLabel : '') + ')' : '') + ' · 나를 돕는 힘 ' + Math.round(C.help) + '% — ' + (rep.why || []).join(' / '), rep.type === 'special' ? '특수격 우선: ' + rep.relation : '', g.special.possible ? g.special.possible.name + '은 조건이 다 갖춰지지 않아(' + g.special.possible.statusLabel + ') 특수격으로 정하지 않았어요.' : '',
         g.major.length ? '주요 구조 성립 근거: ' + g.major.map(function (o) { return o.name + ' [' + o.why.filter(function (w) { return /^충족/.test(w); }).join(', ') + ']'; }).join(' / ') : '', (g.caveats || []).join(' '), g.disclaimer]),
     };
     return chapter(IDS.selfGyeok, core, { name: C.nm, gyeok: rep.name, gyeokType: rep.type, gyeokMajor: g.major.map(function (o) { return o.name; }) }, M, ch);
@@ -251,7 +253,7 @@
       title: title, reality: join([flow, seat]),
       strength: join([F ? (on(i) ? '관계에서 받는 도움을 배움과 성장으로 바꾸는 힘이 장점이에요.' : '상대의 기준을 이해하고 맞춰 주는 배려가 장점이에요.') : (on(s) ? '마음을 말과 행동으로 보여 주는 표현력이 장점이에요.' : '쉽게 마음을 주지 않는 신중함이 장점이에요. 한번 정한 관계는 오래 지켜요.'), roleLine]),
       risk: join([compete, many, F && on(sp) && !on(i) ? '맞추는 게 익숙해지면 내 생각을 말할 타이밍을 놓치기 쉬워요.' : '', !F && on(sp) && !on(s) ? '표현하지 않은 마음은 상대가 알기 어려워요. 오해가 쌓이기 전에 짧게라도 말로 꺼내 주세요.' : '']) || '관계 흐름을 크게 막는 구조는 뚜렷하지 않아요. 다만 운에서 부담이 오는 시기에는 대화의 속도를 한 번 늦춰 보세요.',
-      reinforce: join([whenLine(C, sg, '새 인연이나 관계의 변화가', '배우자 기운(' + EK[starEl] + '·' + EH[starEl] + ')'), curLine(C)]),
+      reinforce: join([whenLine(C, sg, '새 인연이나 관계의 변화가', '배우자 기운(' + EK[starEl] + '·' + EH[starEl] + ')')]),
       practice: F ? (on(sp) && !on(i) ? '이번 주에 상대에게 맞춰 준 일 하나와 내가 원했던 것 하나를 나란히 적어 보고, 원했던 것을 한 번 말로 전해 보세요.' : '고마웠던 일 하나를 골라 상대에게 구체적으로 말해 보세요.') : (on(sp) && !on(s) ? '좋아하는 마음이나 고마움을 이번 주에 한 문장으로 직접 전해 보세요.' : '관계에서 내가 자주 하는 표현 하나를 떠올리고, 상대가 그것을 어떻게 받아들이는지 한 번 물어보세요.'),
       why: join(['배우자 기운은 전통 명리 기준으로 ' + (F ? '여성은 관성(나를 다스리는 기운)' : '남성은 재성(내가 다스리는 기운)') + '을 봤어요. 이 사주에서는 ' + EK[starEl] + '(' + EH[starEl] + ') 오행이고, 원국에서 차지하는 비율은 ' + C.gp(sg) + '예요.', '십성 묶음 비율: ' + [0, 1, 2, 3, 4].map(function (g) { return GT[g] + ' ' + C.gp(g); }).join(' · ') + '. 배우자 자리는 일지(' + M.BR[dayB] + ', 본기 오행 ' + EK[dayBEl] + ')로 봤어요.', '대운 시기는 그 대운의 천간·지지 오행에 배우자 기운 오행이 들어오는지로 골랐어요. 만남이나 결혼 시기를 정해 주는 판정이 아니에요.']),
     };
@@ -281,6 +283,7 @@
     put(function (c) { return c.editorialTopicId === 'career' && !c.flowChapter; }, [IDS.career]);
     put(function (c) { return c.editorialTopicId === 'love' && !c.flowChapter; }, [IDS.love]);
     list.forEach(function (c, j) { c.no = j + 1; });
+    if (made[IDS.selfGyeok] && list.indexOf(made[IDS.selfGyeok]) >= 0) R.FlowChapters.on = true;
     return Object.assign({}, rep, { chapters: list });
   }
 

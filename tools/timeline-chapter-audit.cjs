@@ -31,8 +31,11 @@ const TITLES = { self_02: '내 사주를 자동차로 비유하면?', self_03: '
   wealth_01: '내 재물 그릇은 얼마나 클까?', wealth_02: '나는 어떤 방식으로 돈을 벌까?', wealth_03: '돈이 들어와도 왜 남지 않을까?', wealth_04: '월급형 인간일까, 사업형 인간일까?', wealth_05: '나는 돈을 모으는 사람일까, 쓰는 사람일까?', wealth_06: '큰돈을 만날 기회는 언제일까?', wealth_07: '돈 때문에 가장 조심해야 할 선택', wealth_08: '나는 투자와 재테크에 어울리는 성향일까?', wealth_09: '사람 때문에 돈을 잃기 쉬울까?', wealth_10: '나에게 유리한 재물운의 시기', wealth_11: '최고의 재물 시나리오 vs 최악의 재물 시나리오', wealth_12: '내 재산을 키우기 위한 현실 전략', wealth_13: '재물운에서 나와 맞는 사람과 피해야 할 사람', wealth_14: '재물운 타이밍: 힘이 실리는 때', wealth_15: '재물운을 끌어올리는 개운법',
   career_01: '나는 어떤 일을 해야 잘할까?', career_02: '내가 가진 가장 돈 되는 재능', career_03: '직장인과 사업가, 어느 쪽이 맞을까?', career_04: '나는 리더일까, 전문가일까?', career_05: '나에게 잘 맞는 업종과 맞지 않는 업종', career_06: '나는 어떤 직장 환경에서 성공할까?', career_07: '조직생활에서 내가 부딪히는 문제', career_08: '이직과 독립, 언제 움직이는 게 좋을까?', career_09: '창업과 사업에서 내가 조심해야 할 것', career_10: '성공을 가로막는 나의 습관', career_11: '최고의 커리어 시나리오 vs 최악의 커리어 시나리오', career_12: '앞으로 10년, 나의 커리어 전략', career_13: '커리어운에서 나와 맞는 사람과 피해야 할 사람', career_14: '커리어운 타이밍: 힘이 실리는 때', career_15: '커리어운을 끌어올리는 개운법',
   love_01: '나는 사람들과 어떤 관계를 맺을까?', love_02: '사람들이 나를 좋아하거나 불편해하는 이유', love_03: '내 곁에 남는 사람과 멀어지는 사람', love_04: '나는 사랑할 때 어떤 사람이 될까?', love_05: '내가 끌리는 사람과 실제 잘 맞는 사람', love_06: '연애에서 반복하기 쉬운 실수', love_07: '나에게 잘 맞는 배우자의 성향', love_08: '결혼운은 언제 강해질까?', love_09: '결혼생활에서 가장 조심해야 할 갈등', love_10: '나의 가족운과 부모·형제 관계', love_11: '나의 자식운과 부모가 되었을 때의 모습', love_12: '최고의 인연 시나리오 vs 최악의 인연 시나리오', love_13: '인연운에서 나와 맞는 사람과 피해야 할 사람', love_14: '인연운 타이밍: 힘이 실리는 때', love_15: '인연운을 끌어올리는 개운법' };
-const ORDER = CATALOG.topics.flatMap(t => t.chapters.map(c => 'timeline_' + c));
-const topicOf = id => id.replace(/^timeline_/, '').replace(/_\d+$/, '');
+// 엔진 조립 장(report/v2/derived-chapters.js): 계약에는 없지만 사용자 화면에 끼워 넣는 장. 관리자 타임라인 구성과 같은 자리로 넣어 함께 잰다(2026-11-15)
+const DC = require(path.join(__dirname, '..', 'report/v2/derived-chapters.js'));
+const ORDER = DC.insert(CATALOG.topics.flatMap(t => t.chapters.map(c => 'timeline_' + c)));
+DC.LIST.forEach(d => { TITLES[d.id.replace('timeline_', '')] = d.title; });
+const topicOf = id => (/^timeline_([a-z]+)_/.exec(id) || [])[1] || '';
 // 장의 시기 그래프 종류(reading-feature rank 와 같은 점수) — 본문에 나온 해가 그래프와 맞는지 볼 때 쓴다
 // 종합풀이 중 시기 그래프와 같은 점수로 비교할 수 있는 장만(건강·전생·개운·성향 장은 비교 대상 그래프가 없어 뺀다)
 const KIND_OF = id => { const t = topicOf(id), n = id.slice(-2); if (t !== 'self') return t; return { 30: 'wealth', 31: 'wealth', 32: 'wealth', 26: 'career', 24: 'career', 27: 'love', 29: 'love', 34: 'love' }[n] || null; };
@@ -80,10 +83,10 @@ let seed = 20261115; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4
   }
 
   // ── 브라우저 층(운영 /report/v2/index.html 과 같은 순서로 필요한 것만) ──
-  const V2 = ['ilju-data', 'deep', 'deep-life', 'deep-time', 'deep-wealth', 'deep-love', 'polite-text', 'plain-copy', 'reading-media', 'everyday-reading', 'fact-once', 'age-fit', 'engine-blocks', 'luck-reading', 'signature-data', 'reading-plus', 'chapter-hooks', 'chapter-hooks-personal-data-1', 'chapter-hooks-personal-data-2', 'chapter-hooks-personal', 'reading-depth', 'reading-depth-data-1', 'reading-depth-data-2', 'reading-depth-data-3', 'reading-depth-data-4', 'reading-depth-data-5', 'reading-insight-data-1', 'reading-insight-data-2', 'reading-insight-data-3', 'reading-insight-data-4', 'reading-insight', 'reading-feature-data-1', 'reading-feature-data-2', 'reading-feature', 'topic-deep', 'fate-blocks', 'fate-blocks-2', 'fate-blocks-3', 'fate-blocks-4', 'life-narrative-data', 'life-narrative-data-self', 'life-narrative-data-self2', 'life-narrative-data-wealth', 'life-narrative-data-wealth2', 'life-narrative-data-love', 'life-narrative-data-love2', 'life-narrative-data-career', 'life-narrative-data-career2', 'life-narrative-data-self3', 'life-narrative-data-wealth3', 'life-narrative-data-extra', 'life-narrative', '../natal-table', 'reading-text', 'reading-peak'];
+  const V2 = ['ilju-data', 'deep', 'deep-life', 'deep-time', 'deep-wealth', 'deep-love', 'polite-text', 'plain-copy', 'reading-media', 'everyday-reading', 'fact-once', 'age-fit', 'engine-blocks', 'derived-chapters', 'flow-chapters', 'health-chapters', 'luck-reading', 'signature-data', 'reading-plus', 'chapter-hooks', 'chapter-hooks-personal-data-1', 'chapter-hooks-personal-data-2', 'chapter-hooks-personal', 'reading-depth', 'reading-depth-data-1', 'reading-depth-data-2', 'reading-depth-data-3', 'reading-depth-data-4', 'reading-depth-data-5', 'reading-insight-data-1', 'reading-insight-data-2', 'reading-insight-data-3', 'reading-insight-data-4', 'reading-insight', 'reading-feature-data-1', 'reading-feature-data-2', 'reading-feature', 'topic-deep', 'fate-blocks', 'fate-blocks-2', 'fate-blocks-3', 'fate-blocks-4', 'life-narrative-data', 'life-narrative-data-self', 'life-narrative-data-self2', 'life-narrative-data-wealth', 'life-narrative-data-wealth2', 'life-narrative-data-love', 'life-narrative-data-love2', 'life-narrative-data-career', 'life-narrative-data-career2', 'life-narrative-data-self3', 'life-narrative-data-wealth3', 'life-narrative-data-extra', 'life-narrative', '../natal-table', 'reading-text', 'reading-peak'];
   const loadFail = [];
   for (const f of V2) { const p = path.join(root, 'report/v2', f + '.js'); try { vm.runInThisContext(fs.readFileSync(p, 'utf8'), { filename: p }); } catch (e) { loadFail.push(f + ': ' + e.message.slice(0, 80)); } }
-  for (const f of ['luck-cycle', 'gyeok-structure']) { const p = path.join(root, f + '.js'); try { vm.runInThisContext(fs.readFileSync(p, 'utf8'), { filename: p }); } catch (e) { loadFail.push(f + ': ' + e.message.slice(0, 80)); } }   // engine-blocks 가 쓰는 루트 모듈
+  for (const f of ['luck-cycle', 'gyeok-structure', 'health-body', 'accident-hint']) { const p = path.join(root, f + '.js'); try { vm.runInThisContext(fs.readFileSync(p, 'utf8'), { filename: p }); } catch (e) { loadFail.push(f + ': ' + e.message.slice(0, 80)); } }   // engine-blocks 가 쓰는 루트 모듈
   const M = globalThis.Manse, R = globalThis.ReportV2, RT = R.ReadingText, LN = R.LifeNarrative, RF = R.ReadingFeature, TD = R.TopicDeep;
   // 타임라인 화면(/report/v2/index.html)에 실제로 로드되는 루트 모듈
   const v2html = fs.readFileSync(path.join(root, 'report/v2/index.html'), 'utf8'), v2Scripts = [...v2html.matchAll(/src="([^"]+\.js)/g)].map(m => m[1].replace(/^.*\//, ''));
@@ -117,7 +120,8 @@ let seed = 20261115; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4
     const chRaw = M.compute(b), sdRaw = R.SajuData.build(chRaw, { now: NOW }), age = nowYear - b.year;
     const vdRaw = Object.assign({}, sdRaw, { name: '' }), chP = spy(chRaw, 'ch'), sdP = spy(sdRaw, 'sd'), vdP = spy(vdRaw, 'sd');
     const H = { M, ch: chP, sd: sdP, now: NOW, name: '', interest: '', assets: {}, videos: {} };
-    R.FactOnce && R.FactOnce.reset(); R.EngineBlocks && R.EngineBlocks.set(M, chRaw);
+    R.FactOnce && R.FactOnce.reset();
+    const derivedOf = id => { try { if (id === 'timeline_self_peak') return R.PeakReading && R.PeakReading.build(sdRaw, ''); const d = DC.byId(id); if (!d) return null; if (d.module === 'flow-chapters.js') return R.FlowChapters && R.FlowChapters.buildAll(M, chRaw, '')[id] || null; if (d.module === 'health-chapters.js') return R.HealthChapters && R.HealthChapters.buildAll(M, chRaw, '', NOW)[id] || null; } catch (e) { return null; } return null; }; R.EngineBlocks && R.EngineBlocks.set(M, chRaw); if (R.FlowChapters) R.FlowChapters.on = true;   // 엔진 조립 장을 함께 재므로 흐름·격국 장이 켜진 화면과 같게
     // 이 사람의 값(근거 문장에 실제 값이 들어갔는지 볼 때)
     const P = sdRaw.pillars || {}, mineTok = [P.day && P.day.ko, P.day && P.day.hanja, sdRaw.dayMaster && (sdRaw.dayMaster.stem + sdRaw.dayMaster.el), sdRaw.currentDaewoon && sdRaw.currentDaewoon.ganzhi].filter(Boolean);
     const mineRe = new RegExp('\\d+(?:\\.\\d+)?%|(?:19|20)\\d\\d년|\\d+세|' + mineTok.map(t => t.replace(/[()]/g, '')).join('|'));
@@ -130,10 +134,12 @@ let seed = 20261115; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4
       if (pass[id]) { try { out = L.composeReviewed({ clean: { sd: sdRaw, chapter: { paragraphs: ROLES.map(role => ({ id: role, role })) } }, contract: contractOf[id], analysis: { claims: [] }, library: { version: 1, published: pass[id] } }); } catch (e) { a.err++; a.errEx = String(e.message).slice(0, 120); } }
       a.n++;
       const used = out ? [...new Set(out.blocks.map(x => (/^rb-(.+)-(?:title|why|reality|strength|risk|reinforce|practice)$/.exec(x.id) || [])[1]).filter(Boolean))] : [];
-      if (!used.length) a.dbFallback++; if (out && out.pending.length) a.dbPending++;
+      const der = !!DC.byId(id);
+      if (!used.length && !der) a.dbFallback++; if (out && out.pending.length) a.dbPending++;
       used.forEach(u => a.dbEntries[u] = (a.dbEntries[u] || 0) + 1);
       if (!visible) continue;   // 비공개 주제 장은 DB 재료 준비도만 본다
-      const c = { id, editorialContractId: id, title: TITLES[id.replace('timeline_', '')], editorialTopicId: topicOf(id), readingParagraphs: out ? out.result.paragraphs : [], readingVisualData: vdP };
+      let c = { id, editorialContractId: id, title: TITLES[id.replace('timeline_', '')], editorialTopicId: topicOf(id), readingParagraphs: out ? out.result.paragraphs : [], readingVisualData: vdP };
+      if (der) { CUR = id; const dc = derivedOf(id); c = dc ? Object.assign({}, dc, { readingVisualData: Object.assign({}, vdRaw, dc.readingVisualData || {}) }) : Object.assign(c, { readingParagraphs: [] }); }
       Object.defineProperty(c, 'readingFeature', { value: H, enumerable: false });
       CUR = id; let html = '';
       const ln = LN && LN.CHAPTERS[id] ? LN.forChapter(c) : null; if (ln) { a.narr++; a.narrRules[ln.rule || 'life'] = (a.narrRules[ln.rule || 'life'] || 0) + 1; }
@@ -150,7 +156,7 @@ let seed = 20261115; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4
       const bodyText = parts.filter(p => p.suf === 'body').map(p => p.text).join(' ');
       const evText = parts.filter(p => /^(why|basis)$/.test(p.suf)).map(p => p.text).join(' ');
       a.chars.push(readText.length); a.bodyChars.push(bodyText.length);
-      if (!used.length && !ln || bodyText.length < 400) a.thin++;
+      if (!used.length && !ln && !der || bodyText.length < 400) a.thin++;
       // 개인화: 이름 없는 본문 전체의 같음 + 문장 집합
       const ss = sents(proseText).filter(s => s.length >= 14), keySet = new Set(ss.map(norm));
       const h = [...keySet].sort().join('|'); a.hash[h] = (a.hash[h] || 0) + 1; a.sentPeople.push(keySet);
@@ -160,7 +166,7 @@ let seed = 20261115; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4
       if (rep) a.repeat++; if (repSame) a.repeatSame++; a.repeatN.push(rep);
       Object.entries(FACTS).forEach(([f, re]) => { if (re.test(readText)) { (factSeen[f] = factSeen[f] || []).push(id); } });
       // 근거 문장에 실제 값
-      const ev = sents(evText).filter(s => s.length >= 10 && !/^(명리 근거 펼쳐보기|왜 이렇게 풀이했는지|풀이 디테일)/.test(s));
+      const ev = sents(evText.replace(/명리 근거 펼쳐보기|왜 이렇게 풀이했는지 짚어 볼게요|풀이 디테일|이 사주에서 확인된 조건|명리 설명과 해석 범위/g, '. ')).filter(s => s.length >= 10);   // 근거 상자 제목만 걷고 첫 줄은 남긴다(2026-11-15)
       if (!ev.length) a.evidNone++; let hasMine = false; ev.forEach(s => { a.evid++; if (mineRe.test(s)) { a.evidMine++; hasMine = true; } }); if (hasMine) a.evidHas++;
       if (/검수 근거가 아직 충분하지 않습니다/.test(evText)) a.evidThin++;
       // 금지 표현(본문만 — 근거·안내 문장 제외)
@@ -230,7 +236,7 @@ let seed = 20261115; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4
     const layerShare = Object.fromEntries(Object.entries(a.layers).map(([k, v]) => [k, +(v / n).toFixed(3)]));
     const layerAvg = Object.fromEntries(Object.entries(a.layerChars).map(([k, v]) => [k, Math.round(avg(v))]));
     return {
-      id, short: id.replace('timeline_', ''), title: TITLES[id.replace('timeline_', '')], topic: topicOf(id), layers: layersOf(id),
+      id, short: id.replace('timeline_', ''), title: TITLES[id.replace('timeline_', '')], topic: topicOf(id), layers: layersOf(id), derived: !!DC.byId(id), flag: DC.byId(id) ? DC.byId(id).flag : null, module: DC.byId(id) ? DC.byId(id).module : null,
       dbFallback: a.dbFallback / n, dbPending: a.dbPending / n, dbEntryKinds: Object.keys(a.dbEntries).length, dbTopEntry: topEntry ? topEntry[0] : null, dbTopShare: topEntry ? topEntry[1] / n : 0,
       narrative: a.narr / n, narrRuleKinds: Object.keys(a.narrRules).length, thin: a.thin / n, avgChars: Math.round(avg(a.chars)), avgBody: Math.round(avg(a.bodyChars)), layerShare, layerAvg,
       sameText: pairSame(a), uniqueTexts: Object.keys(a.hash).length, jaccard: jacc(sp), fixedShare: fixedShare(sp),
@@ -251,7 +257,7 @@ let seed = 20261115; const rnd = () => (seed = (seed * 1664525 + 1013904223) % 4
     const why = [];
     if (r.errors) why.push(`조립 오류 ${r.errors}건`);
     if (r.thin >= 0.3) why.push(`얇은 장 ${pct(r.thin)}`);
-    if (r.dbFallback >= 0.3 && r.narrative < 0.5) why.push(`DB 문안 없음 ${pct(r.dbFallback)}(서사 대체 ${pct(r.narrative)})`);
+    if (!r.derived && r.dbFallback >= 0.3 && r.narrative < 0.5) why.push(`DB 문안 없음 ${pct(r.dbFallback)}(서사 대체 ${pct(r.narrative)})`);
     if (r.sameText >= 0.2) why.push(`두 사람이 같은 글 ${pct(r.sameText)}`);
     if (r.jaccard >= 0.45) why.push(`문장 겹침 ${pct(r.jaccard)}`);
     if (r.repeat >= 0.3) why.push(`앞 장 문장 반복 ${pct(r.repeat)}`);

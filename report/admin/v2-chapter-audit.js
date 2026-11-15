@@ -15,7 +15,7 @@
   function summary() {
     var rows = data.rows, avg = function (k) { return rows.reduce(function (s, r) { return s + r[k]; }, 0) / rows.length; };
     var cnt = {}; rows.forEach(function (r) { var v = verdictOf(r).v; cnt[v] = (cnt[v] || 0) + 1; });
-    return '<div class="card"><h3 style="margin:0 0 6px">한눈에 보기</h3><p class="muted" style="margin:0 0 8px">가상 사주 ' + data.N + '명 × 공개 ' + rows.length + '장 · 측정 ' + esc(data.generated) + ' · 운영 게시 목차 v' + data.catalogVersion + ' · 서사 엔진 켜짐, topicDeep 꺼짐 상태로 조립</p>' +
+    return '<div class="card"><h3 style="margin:0 0 6px">한눈에 보기</h3><p class="muted" style="margin:0 0 8px">가상 사주 ' + data.N + '명 × 사용자 화면 ' + rows.length + '장(계약 ' + rows.filter(function (r) { return !r.derived; }).length + ' + 엔진 조립 ' + rows.filter(function (r) { return r.derived; }).length + ') · 측정 ' + esc(data.generated) + ' · 운영 게시 목차 v' + data.catalogVersion + ' · 서사 엔진 켜짐, topicDeep 꺼짐 상태로 조립</p>' +
       '<div class="row" style="flex-wrap:wrap;gap:8px">' + [['얇은 장', avg('thin')], ['같은 글', avg('sameText')], ['문장 겹침', avg('jaccard')], ['앞 장 반복', avg('repeat')], ['근거에 내 값 줄', avg('evidHas')], ['20세↓ 어른 장면', avg('youngBad')], ['65세↑ 어색', avg('seniorBad')], ['그래프 어긋남', avg('graphBad')]].map(function (x) { return '<span class="chip">' + x[0] + ' <b>' + pct(x[1]) + '</b></span>'; }).join('') + '</div>' +
       '<p style="margin:8px 0 0">' + Object.keys(cnt).map(function (k) { return '<b style="color:' + (V_COL[k] || 'inherit') + '">' + esc(k) + ' ' + cnt[k] + '장</b>'; }).join(' · ') + '</p></div>';
   }
@@ -26,7 +26,7 @@
     var h = '<div class="card" style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:.85rem"><thead><tr>' + ['장', '제목', 'DB 없음', '서사', '얇음', '글자', '문장 겹침', '고정 문장', '앞 장 반복', '근거 값 줄', '근거 부족', '20세↓', '65세↑', '그래프', '판정'].map(function (t) { return '<th style="text-align:left;padding:4px 6px;border-bottom:1px solid #333">' + t + '</th>'; }).join('') + '</tr></thead><tbody>';
     rows.forEach(function (r) {
       var v = verdictOf(r);
-      h += '<tr data-ca="' + esc(r.short) + '" style="cursor:pointer;border-bottom:1px solid #222"><td style="padding:4px 6px">' + esc(r.short) + '</td><td>' + esc(r.title) + '</td>' + cell(r.dbFallback, .3, .6) + '<td style="text-align:right">' + pct(r.narrative) + '</td>' + cell(r.thin, .1, .3) + '<td style="text-align:right">' + r.avgChars.toLocaleString() + '</td>' + cell(r.jaccard, .25, .45) + cell(r.fixedShare, .25, .4) + cell(r.repeat, .1, .3) + cell(r.evidHas, .3, .5, true) + cell(r.evidThin, .1, .3) + (r.youngN ? cell(r.youngBad, .3, .6) : '<td>-</td>') + (r.seniorN ? cell(r.seniorBad, .1, .3) : '<td>-</td>') + (r.graphChecked ? cell(r.graphBad, .05, .15) : '<td>-</td>') + '<td><b style="color:' + (V_COL[v.v] || 'inherit') + '">' + esc(v.v) + '</b></td></tr>';
+      h += '<tr data-ca="' + esc(r.short) + '" style="cursor:pointer;border-bottom:1px solid #222"><td style="padding:4px 6px">' + esc(r.short) + '</td><td>' + esc(r.title) + (r.derived ? ' <small style="color:#9AA8FF">엔진 장' + (r.flag ? ' · <span data-ca-flag="' + esc(r.flag) + '">' + esc(r.flag) + '</span>' : ' · 늘 보임') + '</small>' : '') + '</td>' + cell(r.dbFallback, .3, .6) + '<td style="text-align:right">' + pct(r.narrative) + '</td>' + cell(r.thin, .1, .3) + '<td style="text-align:right">' + r.avgChars.toLocaleString() + '</td>' + cell(r.jaccard, .25, .45) + cell(r.fixedShare, .25, .4) + cell(r.repeat, .1, .3) + cell(r.evidHas, .3, .5, true) + cell(r.evidThin, .1, .3) + (r.youngN ? cell(r.youngBad, .3, .6) : '<td>-</td>') + (r.seniorN ? cell(r.seniorBad, .1, .3) : '<td>-</td>') + (r.graphChecked ? cell(r.graphBad, .05, .15) : '<td>-</td>') + '<td><b style="color:' + (V_COL[v.v] || 'inherit') + '">' + esc(v.v) + '</b></td></tr>';
     });
     return h + '</tbody></table><p class="muted" style="margin:8px 0 0">줄을 누르면 그 장의 층·엔진·근거·예문을 펼칩니다. 열 뜻은 docs/TIMELINE_CHAPTER_AUDIT_2026-11-15.md 3절.</p></div>';
   }
@@ -62,6 +62,8 @@
       sel('caSort', [['order', '목차 순서'], ['thin', '얇은 장 많은 순'], ['jaccard', '문장 겹침 높은 순'], ['evidHas', '근거 값 줄 적은 순'], ['youngBad', '20세↓ 문제 많은 순'], ['seniorBad', '65세↑ 문제 많은 순']], S.sort) +
       sel('caOnly', [['', '모든 판정'], ['보완(우선)', '보완(우선)'], ['보완', '보완'], ['통합 후보', '통합 후보'], ['유지', '유지']], S.only) + '</div>' +
       table() + '<div id="caDetail"></div>' + engines() + plans();
+    // 엔진 장의 공개 스위치 상태(타임라인 구성·챕터 계약 탭과 같은 /api/luck-flags)
+    if (root.querySelector('[data-ca-flag]')) fetch('/api/luck-flags', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (fl) { root.querySelectorAll('[data-ca-flag]').forEach(function (el) { var on = !!(fl && fl[el.dataset.caFlag]); el.textContent = fl ? (on ? '켜짐' : '꺼짐') : el.dataset.caFlag; el.style.color = on ? '#62C2AE' : '#E0BC74'; }); }).catch(function () { });
     ['caTopic', 'caSort', 'caOnly'].forEach(function (id) { root.querySelector('#' + id).onchange = function (e) { S[{ caTopic: 'topic', caSort: 'sort', caOnly: 'only' }[id]] = e.target.value; draw(); }; });
     root.onclick = function (e) { var tr = e.target.closest && e.target.closest('[data-ca]'); if (!tr) return; var box = root.querySelector('#caDetail'); box.innerHTML = detail(tr.getAttribute('data-ca')); box.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); };
   }

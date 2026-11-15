@@ -37,6 +37,7 @@
   function gyeok() { var GS = root.MantraGyeokStructure; if (!GS || !cur) return null; try { return GS.analyze(cur.M, cur.ch); } catch (e) { return null; } }
   // 나의 타고난 기질: 격국 요약
   function gyeokSummary(E) {
+    if (R.FlowChapters && R.FlowChapters.on) return '';   // 흐름·격국 장(timeline_self_gyeok)이 들어가 있으면 같은 내용이라 뺀다
     var g = gyeok(); if (!g) return '';
     var rep = g.rep, li = [];
     li.push('<li><b>' + E(rep.type === 'hold' ? '격국 판정 유보' : rep.name) + '</b> ' + E(rep.type === 'hold' ? '격국을 하나로 정할 근거가 부족해, 이름보다 오행 흐름과 강약으로 읽는 편이 정확해요.' : rep.easy.replace(/구조입니다\.$/, '구조예요.')) + (rep.type === 'jeong' ? '<small>' + E((rep.establishLabel || '') + ' · ' + (rep.stabilityLabel || '')) + '</small>' : '') + '</li>');
@@ -49,7 +50,7 @@
   function carPlan(E) {
     var g = gyeok(); if (!g) return '';
     var rep = g.rep, st = rep.type === 'special' ? 'seong' : rep.type === 'hold' ? 'hold' : (rep.stability || 'plain');
-    var li = '<li><b>설계도 · ' + E(rep.type === 'hold' ? '판정 유보' : rep.name) + '</b> ' + E(rep.type === 'special' ? '한 방향으로 크게 쏠린 특수한 설계라, 그 흐름을 따라 달릴 때 힘이 나요.' : rep.type === 'hold' ? '' : rep.easy.replace(/구조입니다\.$/, '구조예요.')) + '</li>' +
+    var li = '<li><b>설계도 · ' + E(rep.type === 'hold' ? '판정 유보' : rep.name) + '</b> ' + E(rep.type === 'special' ? '한 방향으로 크게 쏠린 특수한 설계라, 그 흐름을 따라 달릴 때 힘이 나요.' : rep.type === 'hold' ? '' : '이 설계도에 맞는 길(' + (rep.txt && rep.txt.good && rep.txt.good[1] ? String(rep.txt.good[1]).replace(/니다\.$/, '니다').replace(/[.。]$/, '') : '맞는 환경') + ')에서 가장 잘 달려요.') + '</li>' +
       '<li><b>차체 상태</b> ' + E(BODY[st] || BODY.plain) + '</li>' +
       (g.major.length ? '<li><b>달린 장치</b> ' + E(g.major.map(function (o) { return o.name; }).join(' · ')) + '<small>' + E(g.major.map(function (o) { return o.txt.short || ''; }).filter(Boolean).join(' / ')) + '</small></li>' : '');
     return box('命簿 · 설계도', '이 차의 설계도와 차체 상태', '같은 엔진(일간)이라도 설계도(격국)와 차체(안정성)에 따라 달리는 방식이 달라져요.', '<ul class="fx-ul">' + li + '</ul>', '격국 판정은 오행·강약 탭의 사주 격국 분석과 같은 계산이에요.', E);

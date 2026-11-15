@@ -14,10 +14,15 @@
   var TITLES = { timeline_self_h1: '내 몸의 오행 지도', timeline_self_h2: '나는 언제 쉽게 지칠까?', timeline_self_h3: '스트레스가 몸으로 오는 길', timeline_self_h4: '올해·이번 달 몸 챙길 때', timeline_self_h5: '사고수 신호 읽기 — 조심할 장면', timeline_self_h6: '앞으로 10년 안전 흐름과 삼재' };
   var BANNED = /진단합니다|발병|걸립니다|걸릴 거예요|사망|죽음|죽는|중상|큰 사고가 납니다|사고가 납니다|반드시|무조건|확정|틀림없|암에|불치/;
   var MED = '전통 오행과 장부를 맞대어 읽은 생활 참고예요. 의학적 진단이나 예측이 아니니, 몸에 이상이 느껴지면 병원 진료를 먼저 받으세요.';
+  var NOTE = { timeline_self_h2: '체질이나 질병을 가르는 판단이 아니라, 힘을 쓰는 리듬에 대한 생활 참고예요.', timeline_self_h3: '스트레스 질환을 진단하는 내용이 아니에요. 긴장이 오래가면 전문가 상담을 먼저 받으세요.', timeline_self_h4: '달별 지수는 건강 상태를 재는 값이 아니라 생활을 조절할 때 참고하는 흐름이에요.', timeline_self_h6: '해마다의 지수는 사고를 예고하는 값이 아니라, 일정을 나눌 때 참고하는 흐름이에요.' };
   var SAFE = '사고가 난다는 예측이 아니라, 전통 해석에서 조심하라고 짚는 장면을 생활 습관으로 옮긴 참고예요.';
   var PART = [
     { organ: '간·담', body: '눈, 근육·힘줄, 손발톱, 목·어깨 뻣뻣함' }, { organ: '심장·소장', body: '혈관·혈압, 얼굴 열감, 잠과 두근거림' },
     { organ: '비장·위', body: '소화기, 입, 살과 근육, 복부' }, { organ: '폐·대장', body: '코·기관지, 피부, 장' }, { organ: '신장·방광', body: '허리·무릎·뼈, 귀, 몸의 냉기' }];
+  var YEAR_HABIT = [
+    '한 해 동안 아침 스트레칭과 주 3회 걷기를 고정해 두고, 눈이 피로한 날은 화면 보는 시간을 줄이세요.', '한 해 동안 햇볕 아래 걷는 시간을 일정하게 두고, 늦은 밤의 카페인과 과로를 줄이세요.',
+    '한 해 동안 식사 시간을 고정하고, 바쁜 달에도 끼니를 거르지 않는 규칙을 지키세요.', '한 해 동안 호흡 운동과 실내 습도를 챙기고, 환절기에는 목과 피부를 먼저 보호하세요.', '한 해 동안 잠드는 시간을 고정하고, 추운 계절에는 허리와 발을 따뜻하게 지키세요.'];
+  var SIGNAL = { press: '긴장이 오래가면 어깨와 턱에 힘이 들어가고 잠이 얕아지는 것이 첫 신호로 오기 쉬워요.', pressCush: '긴장할 때 몸에 힘이 들어가 목·어깨가 뻐근해지는 것이 첫 신호로 오기 쉬워요.', drain: '목이 잠기거나 입맛이 들쭉날쭉해지는 것이 지쳤다는 첫 신호로 오기 쉬워요.', hold: '두통이나 소화가 막히는 느낌이 쌓인 긴장의 첫 신호로 오기 쉬워요.', even: '피곤이 주말까지 이어지는 것이 리듬이 흐트러졌다는 첫 신호로 오기 쉬워요.' };
   var HABIT = [
     '아침에 10분 걷거나 몸을 늘려 주는 스트레칭으로 굳은 근육을 풀어 주세요.', '햇볕을 쬐는 가벼운 산책과 짧은 유산소로 순환을 깨워 주세요. 밤늦게 자극적인 것은 줄이세요.',
     '정해진 시간에 천천히 먹고, 과식·야식을 줄여 소화기를 쉬게 해 주세요.', '깊게 숨 쉬는 시간을 하루 두 번 두고, 건조한 날에는 실내 습도와 피부를 챙겨 주세요.', '물을 자주 마시고 잠을 일정하게 지키며, 허리·발을 따뜻하게 해 주세요.'];
@@ -28,6 +33,7 @@
   function rows(core) { return Object.keys(core).filter(function (k) { return core[k]; }).map(function (k) { return { role: k, text: core[k] }; }); }
   function join(a) { return a.filter(Boolean).map(function (t) { return String(t).replace(/\s+/g, ' ').trim(); }).join('\n\n'); }
   function chapter(id, core, vd) {
+    if (core.why) { var wp = String(core.why).split('\n\n'); wp[0] = '이 사주: ' + wp[0]; core.why = wp.join('\n\n'); }
     return { id: id, base: id, title: TITLES[id], kind: 'life', editorialTopicId: 'self', editorialContractId: id, aiEnabled: false, readingSupplementary: true, readingDeferred: false,
       readingProvider: 'local-engine-luck', healthChapter: true, readingCore: core, readingParagraphs: rows(core), readingVisualData: vd, scenes: R.ReadingFlow ? R.ReadingFlow.scenes(core, id) : [] };
   }
@@ -82,7 +88,7 @@
       reality: join([help != null ? '나를 돕는 힘(비겁·인성)이 ' + pc(help) + '예요. ' + (band === 'weak' ? '일과 사람에게 기운이 쉽게 빠져나가는 구조라, 바쁜 주간이 이어지면 주말에 몰아서 쓰러지기 쉬워요.' : band === 'strong' ? '스스로 밀고 가는 힘이 커서 피곤해도 일을 끝까지 붙잡고 있는 편이에요.' : '들어오는 힘과 나가는 힘이 비슷해, 잠·식사 리듬이 무너질 때 피로가 먼저 와요.') : '',
         dst && PH_TXT[PHASE[dst]] ? '나 자신이 머무는 자리(일지)의 12운성은 ' + J.로(dst) + ', ' + PH_TXT[PHASE[dst]] + '.' : '']),
       strength: band === 'weak' ? '몸의 신호에 일찍 반응하는 편이라, 쉬는 법만 익히면 오히려 오래 건강을 지키는 쪽이에요.' : band === 'strong' ? '회복력이 좋은 편이라, 무리한 뒤에도 잠을 제대로 자면 빨리 돌아와요.' : '어느 쪽으로도 크게 치우치지 않아, 리듬을 지키는 만큼 몸이 그대로 따라와요.',
-      risk: join([band === 'strong' ? '\'아직 괜찮다\'는 느낌이 가장 큰 함정이에요. 쉬어야 할 신호(잠이 얕아짐, 입맛 변화)를 일부러 확인하세요.' : band === 'weak' ? '남의 부탁과 일정을 다 받아 주면, 몸보다 마음이 먼저 지쳐요.' : '불규칙한 잠과 식사가 이어지면 작은 피로가 쌓여 길게 갈 수 있어요.', MED]),
+      risk: join([band === 'strong' ? '\'아직 괜찮다\'는 느낌이 가장 큰 함정이에요. 쉬어야 할 신호(잠이 얕아짐, 입맛 변화)를 일부러 확인하세요.' : band === 'weak' ? '남의 부탁과 일정을 다 받아 주면, 몸보다 마음이 먼저 지쳐요.' : '불규칙한 잠과 식사가 이어지면 작은 피로가 쌓여 길게 갈 수 있어요.', NOTE.timeline_self_h2]),
       reinforce: cst && PH_TXT[PHASE[cst]] ? '지금 10년 대운(' + C.M.gzName(du) + ')의 12운성은 ' + J.로(cst) + ', ' + PH_TXT[PHASE[cst]] + '. 원국의 리듬과 지금 대운의 리듬이 ' + (PHASE[cst] === PHASE[dst] ? '같은 쪽이라 익숙한 방식으로 쉬면 돼요.' : '달라, 예전과 같은 방식으로 쉬어도 회복이 덜 될 수 있어요. 쉬는 방법을 한 번 바꿔 보세요.') : '',
       practice: band === 'weak' ? '이번 주 일정표에 \'아무것도 안 하는 2시간\'을 먼저 적어 넣고 지켜 보세요.' : band === 'strong' ? '하루 일이 끝나면 오늘 몸 상태를 1~5점으로 적어 보고, 3점 이하가 이틀 이어지면 다음 날 일정을 줄이세요.' : '일어나는 시간과 자는 시간을 일주일만 같게 맞춰 보세요.',
       why: join([help != null ? '나를 돕는 힘 ' + pc(help) + '(42% 미만 여림, 58% 초과 셈).' : '', dst ? '일지 12운성 ' + dst + (cst ? ' · 지금 대운 12운성 ' + cst : '') + '. 12운성은 기운의 생명주기 단계를 뜻하며 좋고 나쁨을 정하지 않아요.' : '', '강약과 12운성은 만세력 원국 탭·운세 흐름 탭과 같은 계산이에요.']),
@@ -104,9 +110,9 @@
     }[type];
     var core = {
       title: T[0],
-      reality: join([T[1], dayRel.length ? '나 자신이 머무는 자리(일지)에 ' + dayRel.map(function (r) { return r.name || r.type; }).join('·') + '이 걸려 있어, 가까운 생활권(집·가족)에서 부딪히는 일이 있을 때 긴장이 더 오래 남는 편이에요.' : '']),
-      strength: type === 'pressCush' || gi >= 15 ? '도움을 받아들이는 힘(인성 ' + pc(gi) + ')이 있어, 지칠 때 쉬고 배우는 쪽으로 방향을 바꾸면 회복이 빨라요.' : '스트레스가 오는 길이 비교적 분명해서, 그 길만 알면 미리 막아 두기 쉬운 편이에요.',
-      risk: join([type === 'press' ? '\'조금만 더\'가 반복되면 긴장이 풀리지 않은 채 잠자리에 들게 돼요.' : type === 'drain' ? '좋아하는 일일수록 쉬는 것을 잊기 쉬워요.' : type === 'hold' ? '괜찮다고 말하는 습관이 몸의 신호를 늦게 알아차리게 해요.' : '바쁜 시기에 잠·식사가 한꺼번에 무너지면 회복이 길어져요.', MED]),
+      reality: join([T[1], SIGNAL[type], dayRel.length ? '나 자신이 머무는 자리(일지)에 ' + dayRel.map(function (r) { return r.name || r.type; }).join('·') + '이 걸려 있어, 가까운 생활권(집·가족)에서 부딪히는 일이 있을 때 긴장이 더 오래 남는 편이에요.' : '']),
+      strength: (type === 'pressCush' || gi >= 15 ? '도움을 받아들이는 힘(인성 ' + pc(gi) + ')이 있어, 지칠 때 쉬고 배우는 쪽으로 방향을 바꾸면 회복이 빨라요.' : '스트레스가 오는 길이 비교적 분명해서, 그 길만 알면 미리 막아 두기 쉬운 편이에요.') + ' 지친 몸은 쉬는 시간의 길이보다 쉬는 방식이 바뀔 때 더 빨리 돌아와요.',
+      risk: join([type === 'press' ? '\'조금만 더\'가 반복되면 긴장이 풀리지 않은 채 잠자리에 들게 돼요.' : type === 'drain' ? '좋아하는 일일수록 쉬는 것을 잊기 쉬워요.' : type === 'hold' ? '괜찮다고 말하는 습관이 몸의 신호를 늦게 알아차리게 해요.' : '바쁜 시기에 잠·식사가 한꺼번에 무너지면 회복이 길어져요.', NOTE.timeline_self_h3]),
       reinforce: { press: '압박을 받아 줄 쿠션(배움·도움·쉼)을 일부러 만들어 두세요. 혼자 끌어안기보다 나눠 맡을 사람을 정해 두는 것만으로도 몸의 긴장이 줄어요.', pressCush: '힘들 때 찾아갈 사람과 쉬는 방법을 미리 정해 두면, 압박이 실력으로 바뀌는 쪽으로 흘러가요.', drain: '쏟아낸 만큼 채우는 시간을 따로 두세요. 하루 끝에 말·화면 없이 쉬는 30분이 소모를 막아 줘요.', hold: '참는 대신 짧게 털어놓는 통로를 하나 만드세요. 일주일에 한 번 몸과 마음 상태를 적어 두는 것도 좋아요.', even: '잠과 식사 시간을 고정하는 것이 가장 큰 스트레스 관리예요.' }[type],
       practice: { press: '이번 주 맡은 일 중 하나를 다른 사람에게 부탁하거나 기한을 늦춰 보세요.', pressCush: '이번 주에 도움을 청할 사람 한 명을 정하고 실제로 한 번 연락해 보세요.', drain: '오늘 밤 잠들기 전 30분은 휴대폰을 멀리 두고 쉬어 보세요.', hold: '오늘 힘들었던 일 하나를 한 줄로 적어 보세요.', even: '이번 주 일어나는 시간을 매일 같게 맞춰 보세요.' }[type],
       why: join(['십성 묶음: 비겁 ' + pc(gb) + ' · 식상 ' + pc(gs) + ' · 관성 ' + pc(gw) + ' · 인성 ' + pc(G[4]) + ' · 재성 ' + pc(G[2]) + '. 30% 이상을 큰 쪽, 10% 미만을 작은 쪽으로 봤어요.', '스트레스가 몸에 닿는 곳은 일간 오행(' + el(d) + ')의 장부(' + PART[d].organ + ')로 봤어요. 일간을 누르는 오행은 ' + J.예요(el(ctl)) + '.', dayRel.length ? '일지 관계: ' + dayRel.map(function (r) { return r.name; }).join(' · ') + '.' : '']),
@@ -129,8 +135,8 @@
       title: hs == null ? who(C) + '의 올해 몸 흐름을 오행으로 짚어 봤어요.' : who(C) + '의 ' + C.nowY + '년 몸 흐름은 ' + BAND_PLAIN(hs) + '이에요' + (low.length ? '. 특히 ' + mlist(low) + '에 몸을 먼저 챙기세요.' : '.'),
       reality: join([top ? C.nowY + '년(' + C.M.gzName(x) + ')에는 ' + top.organ + '(' + top.body + ') 쪽을 ' + (top.level === '주의' ? '먼저' : '함께') + ' 살펴보면 좋아요. ' + (top.reasons && top.reasons[0] ? String(top.reasons[0]).replace(/편입니다\.$/, '편이에요.').replace(/쉽습니다\.$/, '쉬워요.').replace(/커집니다\.$/, '커져요.') : '') : '', low.length ? '달마다 보면 ' + mlist(low) + '은 균형이 흐트러지기 쉬운 달이고, ' + mlist(high) + '은 비교적 여유 있는 달이에요.' : '']),
       strength: high.length ? mlist(high) + '은 몸의 균형이 비교적 좋은 달이라, 운동을 시작하거나 건강검진처럼 미뤄 둔 일을 하기 좋아요.' : '',
-      risk: join([low.length ? mlist(low) + '에는 야근·과음·무리한 일정을 줄이고 잠을 먼저 챙기세요.' : '', MED]),
-      reinforce: top ? '올해는 ' + top.organ + ' 쪽에 맞는 습관을 하나 고정해 두세요. ' + HABIT[top.el] : '올해는 특정 장부로 크게 쏠리는 신호가 뚜렷하지 않아요. ' + (C.yong != null ? '사주의 균형을 잡아 주는 ' + el(C.yong) + ' 쪽 습관을 하나 고정해 두세요. ' + HABIT[C.yong] : '잠과 식사 시간을 고정하는 것만으로 충분해요.'),
+      risk: join([low.length ? mlist(low) + '에는 야근·과음·무리한 일정을 줄이고 잠을 먼저 챙기세요.' : '', NOTE.timeline_self_h4]),
+      reinforce: top ? '올해는 ' + top.organ + ' 쪽에 맞는 습관을 하나 정해 한 해 동안 지켜 보세요. ' + YEAR_HABIT[top.el] : '올해는 특정 장부로 크게 쏠리는 신호가 뚜렷하지 않아요. ' + (C.yong != null ? '사주의 균형을 잡아 주는 ' + el(C.yong) + ' 쪽 습관을 한 해 동안 지켜 보세요. ' + YEAR_HABIT[C.yong] : '잠과 식사 시간을 고정하는 것만으로 충분해요.'),
       practice: low.length ? '달력에서 ' + low[0].m + '월에 \'몸 챙기는 주\'를 표시해 두고, 그 주에는 약속을 하나 덜 잡아 보세요.' : '이번 달에 몸 상태를 매주 한 번 적어 보세요.',
       why: join([hs != null ? C.nowY + '년 건강 균형 지수 ' + Math.round(hs) + '(높을수록 여유) — 만세력 운세 흐름 탭의 건강 지수와 같은 계산이에요.' : '', mm.length ? '월별 지수: ' + mm.map(function (r) { return r.m + '월 ' + Math.round(r.s); }).join(' · ') + '.' : '', top ? '장부 쏠림은 만세력 건강 지도(health-body.js)의 1순위 항목이에요.' : '']),
     };
@@ -148,12 +154,12 @@
     var scene = function (it) { return it.title + ' — ' + it.where + (it.position ? '(' + it.position + ')' : '') + '. ' + it.tip; };
     var core = {
       title: items.length ? who(C) + '의 ' + C.nowY + '년에 전통 해석이 짚는 조심할 장면은 \'' + items[0].title + '\'' + (items[1] ? ' 쪽이에요.' : (bat(items[0].title) ? '이에요.' : '예요.')) : who(C) + '의 ' + C.nowY + '년에는 전통 해석상 크게 짚이는 사고수 신호가 뚜렷하지 않아요.',
-      reality: join(items.length ? items.map(scene) : ['올해 운의 글자가 원국과 크게 부딪히지 않아, 평소의 안전 습관만 지켜도 충분한 해로 읽어요.']),
-      strength: dItem ? '' : '지금 10년 대운에서는 크게 짚이는 장면이 없어, 올해의 신호만 챙기면 되는 구조예요.',
+      reality: join((items.length ? items.map(scene) : ['올해 운의 글자가 원국과 크게 부딪히지 않아, 평소의 안전 습관만 지켜도 충분한 해로 읽어요.']).concat(['이런 장면은 서두르는 날, 잠이 부족한 날, 늦은 귀갓길처럼 몸과 마음의 여유가 줄어든 때에 더 쉽게 생겨요.'])),
+      strength: dItem ? (items[0] && items[0].key === dItem.key ? '올해 장면과 지금 10년의 장면이 같아서, 한 가지 습관만 꾸준히 챙기면 되는 구조예요.' : '올해 장면과 지금 10년의 장면이 달라서, 올해는 올해 장면을, 길게는 10년 장면을 나눠 챙기면 돼요.') : '지금 10년 대운에서는 크게 짚이는 장면이 없어, 올해의 신호만 챙기면 되는 구조예요.',
       risk: join([dItem ? '지금 10년(' + C.M.gzName(du) + ' 대운) 동안 길게 이어지는 신호는 \'' + dItem.title + '\' 쪽이에요. ' + dItem.tip : '', sj ? '전통 민속의 삼재로 보면 올해는 ' + sj.stage + '이에요(' + sj.group + '). 삼재는 참고 정보이며 이 앱의 점수에는 쓰지 않아요.' : '', SAFE]),
-      reinforce: items.length ? '장면이 정해져 있으니 그 장소에서만 한 박자 늦추면 돼요. 서두르는 날, 피곤한 날, 늦은 시간이 겹칠 때 특히 그래요.' : '피곤하거나 급한 날에만 이동과 도구 사용을 한 번 더 확인하는 습관이면 충분해요.',
+      reinforce: items.length ? '장면이 정해져 있으니 그 장소에서만 한 박자 늦추면 돼요. 나머지 생활은 평소처럼 지내도 충분해요.' : '운전·계단·주방처럼 매일 지나는 곳에서 한 번 더 확인하는 습관이면 충분해요.',
       practice: items.length ? '\'' + items[0].title + '\' 장면에서 쓸 나만의 확인 문장 하나를 정해, 이번 주에 세 번 소리 내어 확인해 보세요.' : '이번 주 운전·계단·주방에서 \'한 번 더 확인\'을 습관으로 붙여 보세요.',
-      why: join([(a && a.items || []).map(function (it) { return it.title + ': ' + (it.reasons || []).join(' '); }).join(' / '), '장면 7가지(오행 5 + 날카로운 도구 + 갑작스러운 충격)와 장소 대응은 만세력 사고수 참고(accident-hint.js)와 같은 기준이에요.']),
+      why: join([C.nowY + '년(' + C.M.gzName(x) + ') 세운이 원국과 만드는 관계로 본 장면: ' + ((a && a.items || []).map(function (it) { return it.title; }).join(' · ') || '뚜렷한 장면 없음'), (a && a.items || []).map(function (it) { return it.title + ': ' + (it.reasons || []).join(' '); }).join(' / '), '장면 7가지(오행 5 + 날카로운 도구 + 갑작스러운 충격)와 장소 대응은 만세력 사고수 참고(accident-hint.js)와 같은 기준이에요.']),
     };
     return chapter('timeline_self_h5', core, { name: C.nm });
   }
@@ -169,10 +175,10 @@
       title: who(C) + '의 앞으로 10년 중 안전을 한 번 더 챙길 해는 ' + yl(top.slice().sort(function (a, b) { return a.y - b.y; })) + '이에요.',
       reality: join([top.map(function (r) { return r.y + '년(' + r.gz + ')은 주의 지수 ' + Math.round(r.s) + '점으로 10년 중 높은 편이에요.'; }).join(' '), calm.length ? yl(calm) + '은 비교적 차분한 해예요.' : '']),
       strength: calm.length ? yl(calm) + '처럼 차분한 해에는 이사·여행·운동처럼 몸을 쓰는 계획을 잡기 좋아요.' : '',
-      risk: join([sjYears.length ? '전통 민속의 삼재로 보면 ' + sjYears.map(function (r) { return r.y + '년(' + r.sj.stage + ')'; }).join('·') + '이 해당해요. 삼재는 참고 정보이며 이 앱의 점수에는 쓰지 않아요.' : '앞으로 10년 안에 삼재에 해당하는 해는 없어요.', SAFE]),
+      risk: join([sjYears.length ? '전통 민속의 삼재로 보면 ' + sjYears.map(function (r) { return r.y + '년(' + r.sj.stage + ')'; }).join('·') + '이 해당해요. 삼재는 전통 민속의 참고일 뿐, 10년 주의 지수 계산에는 들어가지 않아요.' : '앞으로 10년 안에 삼재에 해당하는 해는 없어요.', NOTE.timeline_self_h6]),
       reinforce: '주의 지수가 높은 해에는 큰 이동·무리한 운동·위험한 작업을 한꺼번에 몰지 말고, 하나씩 나눠 잡으세요.',
       practice: '달력의 ' + top[0].y + '년 첫 페이지에 \'안전 점검의 해\'라고 적어 두고, 그해 시작에 보험·차량·집 안 안전을 한 번 점검해 보세요.',
-      why: join(['연도별 주의 지수: ' + rows0.map(function (r) { return r.y + ' ' + Math.round(r.s); }).join(' · ') + ' — 만세력 운세 흐름 탭의 사고수 지수와 같은 계산이에요(높을수록 조심).', '삼재는 띠(년지) 기준 전통 민속 계산(getSamjae)이에요.']),
+      why: join(['연도별 주의 지수: ' + rows0.map(function (r) { return r.y + '년 ' + Math.round(r.s) + '점'; }).join(' · ') + ' — 만세력 운세 흐름 탭의 사고수 지수와 같은 계산이에요(높을수록 조심).', '삼재는 띠(년지) 기준 전통 민속 계산(getSamjae)이에요.']),
     };
     return chapter('timeline_self_h6', core, { name: C.nm });
   }
@@ -213,6 +219,6 @@
     return Promise.race([ready(), new Promise(function (ok) { setTimeout(function () { ok(saved()); }, ms || 2500); })]);
   }
   if (root.document && root.fetch) { try { ready(); } catch (e) { } }
-  R.HealthChapters = { VERSION: VERSION, IDS: IDS, TITLES: TITLES, BANNED: BANNED, MED: MED, SAFE: SAFE, buildAll: buildAll, add: add, ready: ready, readyWithin: readyWithin, localFlag: localFlag };
+  R.HealthChapters = { VERSION: VERSION, IDS: IDS, TITLES: TITLES, BANNED: BANNED, MED: MED, SAFE: SAFE, NOTE: NOTE, buildAll: buildAll, add: add, ready: ready, readyWithin: readyWithin, localFlag: localFlag };
   if (typeof module !== 'undefined' && module.exports) module.exports = R.HealthChapters;
 })(typeof window !== 'undefined' ? window : globalThis);
