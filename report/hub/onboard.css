@@ -386,3 +386,5 @@ body.obc-on #hub .ob-compact .ob-kick,body.obc-on #hub .ob-compact h1,body.obc-o
 #hub .ob-guidepick .ob-guide:focus-visible{outline:2px solid #ef8a82;outline-offset:3px}
 @media(max-width:480px){#hub .ob-guidepick{padding:26px 16px 36px}#hub .ob-guides{gap:10px}#hub .ob-guidepick .ob-guide{height:clamp(240px,52vh,380px)}#hub .ob-guidepick .ob-guide strong{font-size:17px;left:12px;bottom:70px}#hub .ob-guidepick .ob-guide small{left:12px;right:10px;font-size:11px}}
 @media(prefers-reduced-motion:reduce){#hub .ob-guidepick .ob-guide img{transition:none;transform:none!important}}
+#hub .ob-guidepick .ob-guide.on{border-color:#db6560;box-shadow:0 0 0 1px #db6560,0 0 28px rgba(173,41,39,.35)}
+#hub .ob-guidepick .ob-guide-now{position:absolute;top:12px;left:12px;z-index:2;font-style:normal;font-size:11px;padding:4px 8px;border-radius:999px;background:#8f1d1d;color:#fff8f0;letter-spacing:.02em}

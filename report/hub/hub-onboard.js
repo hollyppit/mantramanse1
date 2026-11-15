@@ -357,10 +357,11 @@
       /* 2026-11-16 복구: 한 장짜리 입력 폼(compact) 앞에 남·여 안내자 선택. 11-02 이후 입력이 퀘스트를 건너뛰면서 사라졌던 단계.
          관리자 퀘스트 단계 'guide'(문구·켜기/끄기)와 안내자 이름·소개·이미지를 그대로 쓴다. 출생정보 수정(재방문)에서는 건너뛴다. 고른 안내자는 입력 배경 영상·타임라인 말투에 쓰인다. */
       var guidePicked=false;
-      function guideStep(){var Q=root.Quest,qc=CFG.quest;if(!Q||!qc||qc.enabled===false||!qc.guides||!qc.guides.male||!qc.guides.female)return null;if(q.edit&&P.has()&&qc.skipReturning!==false)return null;var st=(qc.steps||[]).filter(function(x){return x.id==='guide';})[0];return st&&st.enabled!==false?st:null;}
+      function guideStep(){var Q=root.Quest,qc=CFG.quest;if(!Q||!qc||qc.enabled===false||!qc.guides||!qc.guides.male||!qc.guides.female)return null;/* 2026-11-16: 출생정보 수정(재방문, ?edit=1)에서도 보여 준다(지금 안내자 표시, 바꿀 수 있음) — 타임라인에서 입력으로 가는 길이 대부분 수정 화면이라 */var st=(qc.steps||[]).filter(function(x){return x.id==='guide';})[0];return st&&st.enabled!==false?st:null;}
       function renderGuide(st){
         var Q=root.Quest,qc=CFG.quest,mob=(root.innerWidth||1024)<768;
-        var card=function(k){var o=qc.guides[k];return '<button type="button" class="ob-guide '+(k==='male'?'m':'f')+'" data-guide="'+k+'" aria-label="'+esc(o.name+' — '+o.tag)+'"><img src="'+esc(Q.guideImage(CFG,k,mob))+'" alt="" decoding="async"><strong>'+esc(o.name)+'</strong><small>'+esc(o.tag)+'</small></button>';};
+        var editing=!!(q.edit&&P.has()),cur=Q.guide?Q.guide():'male';
+        var card=function(k){var o=qc.guides[k],on=editing&&k===cur;return '<button type="button" class="ob-guide '+(k==='male'?'m':'f')+(on?' on':'')+'" data-guide="'+k+'" aria-pressed="'+on+'" aria-label="'+esc(o.name+' — '+o.tag+(on?' (지금 안내자)':''))+'">'+(on?'<em class="ob-guide-now">지금 안내자</em>':'')+'<img src="'+esc(Q.guideImage(CFG,k,mob))+'" alt="" decoding="async"><strong>'+esc(o.name)+'</strong><small>'+esc(o.tag)+'</small></button>';};
         var el=paint('<div class="ob-guidepick"><p class="ob-kick">MANTRA · 운명의 기록</p><h1>'+esc(st.head||'누가 안내해 드릴까요?').replace(/\n/g,'<br>')+'</h1><p class="note">'+esc(st.hint||'')+'</p><div class="ob-guides" role="group" aria-label="안내자 선택">'+card('male')+card('female')+'</div></div>','ob-guide-screen');
         el.querySelectorAll('[data-guide]').forEach(function(b){b.onclick=function(){var g=b.getAttribute('data-guide');lset('mt_guide',g);Ob.track('quest_guide_pick',{case:g});guidePicked=true;render();};});
       }
