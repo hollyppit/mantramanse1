@@ -2,11 +2,13 @@
 // GET    ?post=  → { items:[{ id, parent, body, at, author, deleted }] } — 지워진 댓글은 답글이 있을 때만 '삭제된 댓글입니다'로 자리만 남긴다
 // POST   { post, parent?, body } → 쓰기 조건 + 하루 60개 + 내용 검사. 답글의 답글은 같은 댓글 아래로 붙인다
 // DELETE ?id=  → 본인 댓글 지우기
+import { featureGate } from '../../_features.js';
 import { json, sbRest, supabaseReady, viewer, writer, blockedIds, authorsOf, authorView, badText, overLimit, okId, readBody } from '../../_plaza.js';
 
 const postOk = async (env, id) => { const r = await sbRest(env, `cm_posts?id=eq.${id}&status=eq.visible&select=id,author_id`); return Array.isArray(r) ? r[0] || null : null; };
 
 export async function onRequestGet({ request, env }) {
+  { const off = await featureGate(request, env, 'plaza'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
   if (!supabaseReady(env)) return json({ error: '지금은 댓글을 불러올 수 없습니다' }, 503);
   const id = new URL(request.url).searchParams.get('post'); if (!okId(id)) return json({ items: [] });
   if (!(await postOk(env, id))) return json({ error: '삭제되었거나 볼 수 없는 글입니다' }, 404);
@@ -22,6 +24,7 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestPost({ request, env }) {
+  { const off = await featureGate(request, env, 'plaza'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
   const w = await writer(request, env); if (w.res) return w.res;
   const b = await readBody(request); if (!b || !okId(b.post)) return json({ error: '잘못된 요청입니다' }, 400);
   const body = String(b.body || '').replace(/\r/g, '').trim();

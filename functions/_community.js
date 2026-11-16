@@ -98,11 +98,31 @@ export async function requesterRole(request, env) {
 const HDR = { 'cache-control': 'no-store', 'x-robots-tag': 'noindex, nofollow' };
 const closedPage = () => new Response(null, { status: 302, headers: { ...HDR, location: '/gate/?community=closed' } });
 
+// ── 9단계: 관리자 인증 대입 막기. /api/community/* 에 Authorization: Bearer 를 보냈는데 관리자 비밀번호도 유효한 운영자 열쇠도 아니면
+//    같은 IP(해시)에서 1시간에 AUTH_FAIL_MAX 번까지만 허용하고, 넘으면 그 시간 동안 Bearer 요청을 모두 429 로 막는다(맞는 비밀번호여도).
+//    회원은 Bearer 를 쓰지 않으므로(x-member-token) 영향이 없다.
+export const AUTH_FAIL_MAX = 20;
+async function failKey(request) {
+  const ip = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'local';
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('cm-authfail:' + ip));
+  return 'cm:authfail:' + [...new Uint8Array(buf)].slice(0, 12).map(b => b.toString(16).padStart(2, '0')).join('') + ':' + new Date().toISOString().slice(0, 13);
+}
+export async function authThrottle(request, env) {
+  if (!/^Bearer /.test(request.headers.get('authorization') || '') || !env || !env.GLOSSARY_KV) return null;
+  const k = await failKey(request); let n = 0;
+  try { n = +(await env.GLOSSARY_KV.get(k)) || 0; } catch { n = 0; }
+  if (n >= AUTH_FAIL_MAX) return new Response(JSON.stringify({ error: '인증 실패가 너무 많습니다. 1시간 뒤에 다시 시도해 주세요', need: 'auth-throttle' }), { status: 429, headers: { ...HDR, 'content-type': 'application/json; charset=utf-8', 'retry-after': '3600' } });
+  const good = isAdmin(request, env) || (looksStaff(request) && await staffOf(request, env));
+  if (!good) { try { await env.GLOSSARY_KV.put(k, String(n + 1), { expirationTtl: 3700 }); } catch { } }
+  return null;
+}
+
 // 미들웨어에서 부른다: 커뮤니티 경로가 아니면 null(통과), 막아야 하면 Response.
 export async function communityGate(request, env, now = Date.now()) {
   const url = new URL(request.url), p = url.pathname.replace(/\/{2,}/g, '/');
   const page = isCommunityPath(p), api = isCommunityApi(p);
   if (!page && !api) return null;
+  if (api) { const t = await authThrottle(request, env); if (t) return t; }   // 9단계: 관리자 비밀번호·운영자 열쇠 대입 막기
   if (api && PUBLIC_API.test(p)) return null;
   const { stage } = await readStage(env);
   if (stage === 'public') return null;

@@ -9,6 +9,7 @@
    ⑨ 크레딧·유료(/api/community/credits, 6단계): 유료 스위치(기본 꺼짐, 켜려면 '유료 켜기' 입력)·가격·테스트 지급·최근 원장
    ⑩ 성과 지표·⑪ 매칭·대화·매출 현황(/api/community/metrics, 7단계) · ⑫ 회원 찾기(/api/community/members) · ⑬ 운테크 문안(/api/community/today-copy) · ⑭ 운영자 열쇠(/api/community/staff, 관리자만)
    ⑮ 정식 공개 점검표(/api/community/launch, 8단계): 8항목 통과 여부·사람 확인 체크·기준값(관리자만). 미달이면 정식 공개 때 사유를 받는다
+   ⑯ 기능별 스위치(/api/community/features, 9단계): 광장·기록·인연 찾기·대화를 하나씩 끄고 켬(관리자만)
    역할별 표시: V2Community.open(열쇠, 역할) — 운영자 콘솔(report/admin/staff.html)은 역할에 맞는 카드만 그린다(서버도 같은 권한을 다시 확인)
    ⑧ 광장 운영(/api/community/mod, 3단계): 신고 묶음 처리(숨김·삭제·기각·제재), 숨겨진 글, 제재 목록·해제.
    모든 변경은 서버가 감사 로그(admin_audit_log)에 작업자 이름과 함께 남긴다. */
@@ -78,6 +79,19 @@
       }
     }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
+  /* ── 9단계: 기능별 독립 스위치(/api/community/features) — 공개 단계와 별개로 광장·기록·인연 찾기·대화를 하나씩 끄고 켠다(관리자만) ── */
+  function loadFeatures() {
+    var box = $('#cmFeat'); if (!box) return;
+    call('/api/community/features').then(function (d) {
+      box.innerHTML = Object.keys(d.labels).map(function (k) { var on = d.features[k]; return '<div class="row" style="gap:8px;align-items:center;margin:4px 0"><b style="min-width:52px;color:' + (on ? 'var(--green,#62C2AE)' : '#FF8A78') + '">' + (on ? '켜짐' : '꺼짐') + '</b><span style="flex:1;min-width:200px">' + esc(d.labels[k]) + '</span><button class="btn ghost sm" data-feat="' + k + '" data-on="' + (on ? '0' : '1') + '">' + (on ? '끄기' : '켜기') + '</button></div>'; }).join('') +
+        (d.at ? '<p class="muted" style="margin:6px 0 0">마지막 변경 ' + when(d.at) + ' · ' + esc(d.by || '') + '</p>' : '');
+      [].forEach.call(box.querySelectorAll('[data-feat]'), function (b) { b.onclick = function () {
+        var k = b.getAttribute('data-feat'), on = b.getAttribute('data-on') === '1', body = { features: {} }; body.features[k] = on;
+        if (!confirm('"' + d.labels[k] + '"을(를) ' + (on ? '켭니다' : '끕니다. 회원 화면에서 바로 숨겨지고 서버도 막습니다(이미 쓴 글·기록·대화는 지워지지 않습니다)') + '. 계속할까요?')) return;
+        call('/api/community/features', { method: 'PUT', body: body }).then(function () { loadFeatures(); loadAudit(); }).catch(function (e) { alert(e.message); });
+      }; });
+    }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
+  }
   function loadAccess() {
     var box = $('#cmAccList'); if (!box) return;
     box.innerHTML = '<p class="muted">불러오는 중…</p>';
@@ -109,7 +123,7 @@
         (d.recent.length ? '<table class="tbl"><thead><tr><th>시각</th><th>항목</th><th>처리</th><th>경로</th></tr></thead><tbody>' + d.recent.map(function (r) { return '<tr><td>' + when(r.at) + '</td><td>' + esc(KIND[r.kind] || r.kind) + '</td><td>' + (r.action === 'grant' ? '동의' : '철회') + '</td><td>' + esc(VIA[r.via] || r.via || '') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">아직 변경 기록이 없습니다.</p>');
     }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
-  var ACT = { 'community.stage': '공개 단계 변경', 'community.access.grant': '권한 주기', 'community.access.revoke': '권한 회수', 'community.mod.hide': '글 숨김', 'community.mod.restore': '글 되살림', 'community.mod.delete': '글 삭제', 'community.mod.dismiss': '신고 기각', 'community.sanction.warn': '경고', 'community.sanction.mute': '쓰기 정지', 'community.sanction.ban': '이용 정지', 'community.sanction.lift': '제재 해제', 'community.mod.avatar': '프로필 사진 지움', 'community.verify.manual': '성인 확인(수동)', 'community.chat.purge': '대화 자동 파기(90일)', 'community.premium.config': '유료 설정 변경', 'community.credit.grant': '크레딧 지급', 'community.staff.create': '운영자 열쇠 만들기', 'community.staff.revoke': '운영자 열쇠 회수', 'community.member.view': '회원 조회', 'community.daily.copy': '운테크 문안 수정', 'community.daily.copy.reset': '운테크 문안 기본으로', 'community.activity.purge': '이용 기록 자동 파기(13개월)', 'community.launch.targets': '공개 기준 변경', 'community.launch.check': '공개 점검 확인' };
+  var ACT = { 'community.stage': '공개 단계 변경', 'community.access.grant': '권한 주기', 'community.access.revoke': '권한 회수', 'community.mod.hide': '글 숨김', 'community.mod.restore': '글 되살림', 'community.mod.delete': '글 삭제', 'community.mod.dismiss': '신고 기각', 'community.sanction.warn': '경고', 'community.sanction.mute': '쓰기 정지', 'community.sanction.ban': '이용 정지', 'community.sanction.lift': '제재 해제', 'community.mod.avatar': '프로필 사진 지움', 'community.verify.manual': '성인 확인(수동)', 'community.chat.purge': '대화 자동 파기(90일)', 'community.premium.config': '유료 설정 변경', 'community.credit.grant': '크레딧 지급', 'community.staff.create': '운영자 열쇠 만들기', 'community.staff.revoke': '운영자 열쇠 회수', 'community.member.view': '회원 조회', 'community.daily.copy': '운테크 문안 수정', 'community.daily.copy.reset': '운테크 문안 기본으로', 'community.activity.purge': '이용 기록 자동 파기(13개월)', 'community.launch.targets': '공개 기준 변경', 'community.launch.check': '공개 점검 확인', 'community.features': '기능 스위치 변경' };
   var SK = { warn: '경고', mute: '쓰기 정지', ban: '이용 정지' };
   var modView = 'reports';
   function loadMod() {
@@ -296,6 +310,7 @@
     root.innerHTML = head +
       C('owner', '<div class="card"><h3 style="margin:0 0 8px">① 공개 단계</h3><div id="cmStage"><p class="muted">불러오는 중…</p></div>' +
       '<div class="row" style="margin-top:12px"><button class="btn ghost" id="cmEnter">관리자로 커뮤니티 열어 보기</button><span class="muted" id="cmEnterMsg"></span></div></div>') +
+      C('owner', '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑯ 기능별 스위치</h3><p class="muted" style="margin:0 0 8px">공개 단계와 따로, 기능 하나씩 끄고 켭니다(예: 정식 공개는 광장만, 인연 찾기는 법률 검토 뒤에). 기본은 모두 켜짐입니다.</p><div id="cmFeat"><p class="muted">불러오는 중…</p></div></div>') +
       C('metrics', '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑮ 정식 공개 점검표</h3><div id="cmLaunch"><p class="muted">불러오는 중…</p></div></div>') +
       C('metrics', '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑩ 성과 지표</h3><div class="row" style="gap:6px;margin-bottom:8px"><input type="date" id="cmMetDay" style="width:160px"><button class="btn ghost sm" id="cmMetGo">다시 계산</button></div><div id="cmMet"></div></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑪ 매칭·대화·매출 현황</h3><div id="cmOps"><p class="muted">불러오는 중…</p></div></div>') +
@@ -322,7 +337,7 @@
       };
       $('#cmEnter').onclick = function () { call('/api/community/enter', { method: 'POST' }).then(function (d) { window.open(d.to || '/community/', '_blank', 'noopener'); msg('cmEnterMsg', '새 탭에서 열었습니다(12시간 유효)'); }).catch(function (e) { msg('cmEnterMsg', e.message, true); }); };
         fetch('/api/community/status', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(drawStage).catch(function () { drawStage({ stage: 'dev' }); });
-      loadAccess(); loadAlerts(); loadConsents(); loadCredits(); loadStaff();
+      loadAccess(); loadAlerts(); loadConsents(); loadCredits(); loadStaff(); loadFeatures();
     }
     if (can('metrics')) { $('#cmMetGo').onclick = loadMetrics; loadMetrics(); loadLaunch(); }
     if (can('members')) loadMembers();

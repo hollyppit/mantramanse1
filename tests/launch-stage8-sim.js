@@ -105,7 +105,7 @@ const read = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
   ok(/⑮ 정식 공개 점검표/.test(v2) && /loadLaunch/.test(v2) && /override: true, reason: why/.test(v2) && /data-chk/.test(v2) && /lnSave/.test(v2), '관리자 화면: 점검표·사람 확인·기준·미달 공개 사유');
   ok(/role === 'owner'/.test(v2), '관리자 화면: 바꾸기는 관리자만');
   ok(/checklist/.test(gate) && /need: 'reason'/.test(gate), '공개 전환 코드에 점검');
-  ok(/v2-community\.js\?v=20261116-stage8/.test(read('report/admin/index.html')) && /v2-community\.js\?v=20261116-stage8/.test(read('report/admin/staff.html')), '캐시 버전');
+  ok(/v2-community\.js\?v=20261116-stage\d/.test(read('report/admin/index.html')) && /v2-community\.js\?v=20261116-stage\d/.test(read('report/admin/staff.html')), '캐시 버전');
 
   if (fails.length) { console.error('launch-stage8-sim 실패 ' + fails.length + '/' + n + '\n - ' + fails.join('\n - ')); process.exit(1); }
   console.log('launch-stage8-sim OK: ' + n + '항목(기준값·8항목 판정·권한·사람 확인·자료 실패는 미달·기준 변경·정식 공개 막기/사유·화면)');

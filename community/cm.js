@@ -664,11 +664,30 @@
   function checkBadge() { if (!ME || !ME.member || Date.now() - BADGE_AT < 30000) return; BADGE_AT = Date.now(); api('/api/community/chat?view=rooms').then(function (d) { if (d._ok) setChatBadge(d.rooms.some(function (r) { return r.unread; })); }); }
 
   /* ── 라우터 ── */
+  var FEAT_NAME = { plaza: '광장은', records: '운테크·기록은', match: '인연 찾기는', chat: '대화는' };
+  function featOn(k) { return !(ME && ME.features && ME.features[k] === false); }
+  function paused(k, tab) { paint(empty(FEAT_NAME[k] + ' 지금 잠시 쉬고 있어요', '조금 뒤에 다시 찾아 주세요. 내 글·기록·대화는 그대로 남아 있어요.') + '<p style="text-align:center"><a class="btn ghost sm" href="#/me">나의 화면으로</a></p>', tab); }
+  function applyFeatures() {
+    var hide = { match: !featOn('match'), chat: !featOn('chat'), write: !featOn('plaza'), plaza: !featOn('plaza') };
+    $$('.tabbar a').forEach(function (a) { a.hidden = !!hide[a.dataset.tab]; });
+  }
+  function routeFeature(p) {
+    var r = p[0] || '';
+    if (r === 'p' || r === 'write' || r === 'edit' || r === 'search' || r === 'groups' || r === 'g' || r === 'plaza') return 'plaza';
+    if (r === 'today' || r === 'records') return 'records';
+    if (r === 'chat') return 'chat';
+    if (r === 'match' || r === 'verify' || r === '') return 'match';
+    return '';
+  }
   function route() {
     var h = parseHash(), p = h.parts;
     stopPetals(); stopPoll(); if (STOP_ROOM) { STOP_ROOM(); STOP_ROOM = null; }
     me().then(function () {
       var wl = $('.tabbar [data-tab="write"]'); if (wl) wl.href = '#/write';
+      applyFeatures();
+      var fk = routeFeature(p);
+      if (fk === 'match' && !p[0] && !featOn('match')) { if (featOn('plaza')) return feedView(h.q); return meView(h.q); }   // 첫 화면: 인연 찾기가 꺼져 있으면 광장(그것도 꺼지면 나)
+      if (fk && !featOn(fk)) return paused(fk, fk === 'plaza' ? 'plaza' : fk === 'chat' ? 'chat' : fk === 'match' ? 'match' : '');
       if (p[0] === 'p' && /^\d+$/.test(p[1] || '')) return postView(p[1]);
       if (p[0] === 'write') return writeView(h.q);
       if (p[0] === 'edit' && /^\d+$/.test(p[1] || '')) return writeView(h.q, p[1]);

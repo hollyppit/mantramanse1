@@ -13,7 +13,20 @@ const PASS = ['content-type', 'content-range', 'accept-ranges', 'content-length'
 
 export const proxiesToProd = (host, method, pathname) => method === 'GET' && PREVIEW_HOST.test(host) && READ_ONLY.test(pathname);
 
-export async function onRequest(ctx) {
+// 9단계 보안 머리말: 인연의 광장·처음 화면·관리자·회원 API 응답에만 붙인다(심층 분석 /report/ 화면은 그대로 — 기존 서비스 영향 없음).
+//   다른 사이트가 틀(iframe)로 감싸 클릭을 가로채지 못하게(같은 사이트 틀은 허용 — 관리자 화면이 자기 미리보기를 틀로 띄운다), 파일 형식을 추측하지 않게, 다른 사이트로 주소 전체를 넘기지 않게, 카메라·마이크·위치 사용 막기
+export const SECURE_PATH = /^\/(community(\/|$)|gate(\/|$)|report\/admin\/|api\/(community|account)\/)/;
+export const SECURITY_HEADERS = { 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', 'x-frame-options': 'SAMEORIGIN', 'content-security-policy': "frame-ancestors 'self'", 'permissions-policy': 'camera=(), microphone=(), geolocation=()' };
+export function withSecurity(request, res) {
+  let p; try { p = new URL(request.url).pathname.replace(/\/{2,}/g, '/'); } catch { return res; }
+  if (!res || !SECURE_PATH.test(p)) return res;
+  const out = new Response(res.body, res);
+  for (const [k, v] of Object.entries(SECURITY_HEADERS)) if (!out.headers.has(k)) out.headers.set(k, v);
+  return out;
+}
+
+export async function onRequest(ctx) { return withSecurity(ctx.request, await route(ctx)); }
+async function route(ctx) {
   const locked = await siteGate(ctx.request, ctx.env);
   if (locked) return locked;
   const closed = await communityGate(ctx.request, ctx.env);   // 커뮤니티 공개 단계 잠금(사이트 비밀번호와 별개)

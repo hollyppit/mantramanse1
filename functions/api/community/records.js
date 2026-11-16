@@ -1,11 +1,13 @@
 // 운명의 기록 회고(4단계). 본인 기록만.
 // GET    ?range=week|month(기본 week) → { range, from, to, logs:[{ day, mood, tags, note, tenGod }], summary }  summary = functions/_daily.js reflect
 // DELETE ?day=YYYY-MM-DD → 그날 기록 지우기
+import { featureGate } from '../../_features.js';
 import { json, sbRest, supabaseReady, viewer } from '../../_plaza.js';
 import { kstDay, reflect } from '../../_daily.js';
 
 const enc = encodeURIComponent;
 export async function onRequestGet({ request, env }) {
+  { const off = await featureGate(request, env, 'records'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
   if (!supabaseReady(env)) return json({ error: '잠시 후 다시 시도해 주세요' }, 503);
   const me = await viewer(request, env); if (!me) return json({ error: '로그인이 필요합니다', need: 'login' }, 401);
   const range = new URL(request.url).searchParams.get('range') === 'month' ? 'month' : 'week';

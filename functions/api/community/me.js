@@ -8,11 +8,13 @@
 import { json, sbRest, supabaseReady, viewer, profileOf, activeSanction, iljuOfBirth, groupSize, ilganLabel, overLimit, readBody, MIN_GROUP, avatarOf, posterMap } from '../../_plaza.js';
 import { readConsents, requiredOk } from '../../_consent.js';
 import { touchLater } from '../../_activity.js';
+import { readFeatures, cleanFeatures } from '../../_features.js';
 
 export async function onRequestGet(ctx) {
   const { request, env } = ctx;
   if (!supabaseReady(env)) return json({ error: '잠시 후 다시 시도해 주세요' }, 503);
-  const me = await viewer(request, env); if (!me) return json({ member: false });
+  const features = cleanFeatures(await readFeatures(env));   // 9단계: 꺼진 기능은 화면에서 탭을 숨긴다
+  const me = await viewer(request, env); if (!me) return json({ member: false, features });
   const tl = touchLater(ctx, env, me.id, 'community');   // 이용 기록(날짜·영역만, 7단계 지표)
   const [consents, p, s, posters] = await Promise.all([readConsents(env, me.id), profileOf(env, me.id), activeSanction(env, me.id), posterMap(env)]);
   const av = avatarOf(p, posters, true);
@@ -21,7 +23,7 @@ export async function onRequestGet(ctx) {
   if (p && p.ilju) { const n = await groupSize(env, 'ilju', p.ilju); groups.ilju = { key: p.ilju, size: n, gathering: n < MIN_GROUP }; }
   if (p && p.ilgan) { const n = await groupSize(env, 'ilgan', p.ilgan); groups.ilgan = { key: p.ilgan, label: ilganLabel(p.ilgan), size: n, gathering: n < MIN_GROUP }; }
   return json({
-    member: true, requiredOk: requiredOk(consents),
+    member: true, requiredOk: requiredOk(consents), features,
     profile: p ? { nickname: p.nickname || '', ilju: p.ilju || null, ilgan: p.ilgan || null, ilganLabel: p.ilgan ? ilganLabel(p.ilgan) : null, showIlju: !!p.show_ilju, showIlgan: !!p.show_ilgan, visibility: p.visibility, avatar: av ? av.url : null, avatarKind: av ? av.kind : null, posterGender: p.poster_gender || null } : null,
     groups, sanction: s ? { kind: s.kind, until: s.until } : null, minGroup: MIN_GROUP,
   });

@@ -2,7 +2,7 @@
 // GET                         → { items:[{ handle, name, at }] }   handle = 차단 해제용 값(상대 회원 id 대신 만든 값)
 // POST { post|comment: id }   → 그 글·댓글을 쓴 회원 차단(회원 id 를 화면에 내보내지 않으려고 글 번호로 받는다). 최대 300명
 // DELETE ?handle=             → 차단 해제
-import { json, sbRest, supabaseReady, viewer, authorsOf, okId, readBody } from '../../_plaza.js';
+import { json, sbRest, supabaseReady, viewer, authorsOf, okId, readBody, overLimit } from '../../_plaza.js';
 
 const enc = encodeURIComponent;
 const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
@@ -19,6 +19,7 @@ export async function onRequestGet({ request, env }) {
 export async function onRequestPost({ request, env }) {
   if (!supabaseReady(env)) return json({ error: '잠시 후 다시 시도해 주세요' }, 503);
   const me = await viewer(request, env); if (!me) return json({ error: '로그인이 필요합니다', need: 'login' }, 401);
+  if (await overLimit(env, 'block:' + me.id, 50)) return json({ error: '차단은 하루 50번까지 할 수 있어요' }, 429);   // 9단계 도배·봇 방지(하루 한도)
   const b = await readBody(request); if (!b) return json({ error: '잘못된 요청입니다' }, 400);
   const [tbl, id] = okId(b.post) ? ['cm_posts', b.post] : okId(b.comment) ? ['cm_comments', b.comment] : [];
   if (!tbl) return json({ error: '잘못된 요청입니다' }, 400);

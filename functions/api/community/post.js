@@ -3,13 +3,15 @@
 //        숨김·삭제된 글, 내가 차단한 회원의 글은 404(관리자는 볼 수 있음)
 // PATCH  { id, title, body, category, tags } → 본인 글만, 모임은 바꾸지 않는다
 // DELETE ?id=  → 본인 글을 지운다(status=deleted, 댓글은 함께 보이지 않음)
-import { json, isAdmin, sbRest, supabaseReady, viewer, writer, blockedIds, authorsOf, authorView, okId, readBody, CATS } from '../../_plaza.js';
+import { featureGate } from '../../_features.js';
+import { json, isAdmin, sbRest, supabaseReady, viewer, writer, blockedIds, authorsOf, authorView, okId, readBody, CATS, overLimit } from '../../_plaza.js';
 import { checkPost } from './posts.js';
 
 const enc = encodeURIComponent;
 const one = async (env, id) => { const r = await sbRest(env, `cm_posts?id=eq.${id}&select=*`); return Array.isArray(r) ? r[0] || null : null; };
 
 export async function onRequestGet({ request, env }) {
+  { const off = await featureGate(request, env, 'plaza'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
   if (!supabaseReady(env)) return json({ error: '지금은 글을 불러올 수 없습니다' }, 503);
   const id = new URL(request.url).searchParams.get('id'); if (!okId(id)) return json({ error: '글을 찾을 수 없습니다' }, 404);
   const p = await one(env, id), admin = isAdmin(request, env);
@@ -23,11 +25,13 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestPatch({ request, env }) {
+  { const off = await featureGate(request, env, 'plaza'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
   const w = await writer(request, env); if (w.res) return w.res;
   const b = await readBody(request); if (!b || !okId(b.id)) return json({ error: '잘못된 요청입니다' }, 400);
   const p = await one(env, b.id);
   if (!p || p.status !== 'visible') return json({ error: '삭제되었거나 볼 수 없는 글입니다' }, 404);
   if (p.author_id !== w.member.id) return json({ error: '내가 쓴 글만 고칠 수 있습니다' }, 403);
+  if (await overLimit(env, 'edit:' + w.member.id, 60)) return json({ error: '글 고치기는 하루 60번까지예요' }, 429);   // 9단계 도배·봇 방지(하루 한도)
   const c = checkPost({ ...b, group: null }, w.profile); if (c.error) return json({ error: c.error }, 400);
   const { group_kind, group_key, ...row } = c.row;
   await sbRest(env, `cm_posts?id=eq.${p.id}`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ ...row, edited_at: new Date().toISOString() }) });

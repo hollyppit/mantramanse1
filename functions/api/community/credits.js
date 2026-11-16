@@ -7,6 +7,7 @@
 //   GET  ?view=admin                      → { config, recent:[…], totals }
 //   PUT  { enabled, prices:{ morePicks, extraLike }, morePicksCount, morePicksPerDay }   유료 스위치·가격(정식으로 켜려면 confirm:'유료 켜기')
 //   POST { action:'grant', email, amount, note }   테스트·보상 지급(음수면 회수). 감사 로그
+import { featureGate } from '../../_features.js';
 import { json, isAdmin, sbRest, supabaseReady, viewer, readBody } from '../../_plaza.js';
 import { readConsents, requiredOk } from '../../_consent.js';
 import { audit, reviewerOf } from '../../_community.js';
@@ -66,6 +67,7 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: true, balance: g.balance });
   }
   if (b.action === 'more-picks') {
+    { const off = await featureGate(request, env, 'match'); if (off) return off; }   // 인연 찾기 스위치
     const me = await viewer(request, env); if (!me) return json({ error: '로그인이 필요합니다', need: 'login' }, 401);
     if (!requiredOk(await readConsents(env, me.id))) return json({ error: '이용 동의가 먼저 필요합니다', need: 'consent' }, 409);
     const prem = await loadPremium(env); if (!prem.enabled) return json({ error: '지금은 이용할 수 없는 기능입니다', need: 'premium-off' }, 403);

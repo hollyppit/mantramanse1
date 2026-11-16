@@ -5,6 +5,7 @@
 // POST { title, body, category, group?:'ilju'|'ilgan', tags? } → { ok, id }
 //      쓰기 조건(functions/_plaza.js writer) + 하루 10개 + 내용 검사(전화·이메일·외부 연락처·링크·주민번호)
 //      group 은 내 프로필의 일주·일간으로만 쓸 수 있다
+import { featureGate } from '../../_features.js';
 import { json, sbRest, supabaseReady, viewer, writer, blockedIds, authorsOf, authorView, badText, cleanTags, overLimit, readBody, CATS, ILJU, ILGAN } from '../../_plaza.js';
 
 const PAGE = 20;
@@ -12,6 +13,7 @@ const enc = encodeURIComponent;
 const excerpt = s => { const t = String(s || '').replace(/\s+/g, ' ').trim(); return t.length > 140 ? t.slice(0, 140) + '…' : t; };
 
 export async function onRequestGet({ request, env }) {
+  { const off = await featureGate(request, env, 'plaza'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
   if (!supabaseReady(env)) return json({ error: '지금은 글을 불러올 수 없습니다' }, 503);
   const u = new URL(request.url), sp = u.searchParams;
   const me = await viewer(request, env), myId = me && me.id;
@@ -75,6 +77,7 @@ export function checkPost(b, profile) {
 }
 
 export async function onRequestPost({ request, env }) {
+  { const off = await featureGate(request, env, 'plaza'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
   const w = await writer(request, env); if (w.res) return w.res;
   const b = await readBody(request); if (!b) return json({ error: '잘못된 요청 형식입니다' }, 400);
   const c = checkPost(b, w.profile); if (c.error) return json({ error: c.error, need: c.need }, 400);

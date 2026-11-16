@@ -2,7 +2,8 @@
 // GET  → { day, card, log, stats:{ ilju, ilgan } }  — 회원 + 필수 동의 + 일주 확인이 필요(없으면 need)
 //        stats 는 20명 이상 기록한 날만 열리고, 10명 미만 칸은 숨기고, 비율은 5% 단위(functions/_daily.js groupStats)
 // POST { mood:1~5, tags?:[], note? } → 오늘 기록 저장(하루 한 번, 다시 보내면 고침). 기록은 본인만 본다
-import { json, sbRest, supabaseReady, viewer, profileOf, badText, readBody } from '../../_plaza.js';
+import { featureGate } from '../../_features.js';
+import { json, sbRest, supabaseReady, viewer, profileOf, badText, readBody, overLimit } from '../../_plaza.js';
 import { readConsents, requiredOk } from '../../_consent.js';
 import { todayCard, kstDay, groupStats, LOG_TAGS, loadDailyCopy } from '../../_daily.js';
 
@@ -17,6 +18,7 @@ async function who(request, env) {
 }
 
 export async function onRequestGet({ request, env }) {
+  { const off = await featureGate(request, env, 'records'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
   const w = await who(request, env); if (w.res) return w.res;
   const day = kstDay(), card = todayCard(w.p.ilju, day, await loadDailyCopy(env));
   const [mine, a, b] = await Promise.all([
@@ -29,7 +31,9 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestPost({ request, env }) {
+  { const off = await featureGate(request, env, 'records'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
   const w = await who(request, env); if (w.res) return w.res;
+  if (await overLimit(env, 'log:' + w.me.id, 30)) return json({ error: '오늘 기록은 하루 30번까지 고칠 수 있어요' }, 429);   // 9단계 도배·봇 방지(하루 한도)
   const body = await readBody(request); if (!body) return json({ error: '잘못된 요청 형식입니다' }, 400);
   const mood = +body.mood; if (!Number.isInteger(mood) || mood < 1 || mood > 5) return json({ error: '오늘 기분을 골라 주세요' }, 400);
   const tags = [...new Set((Array.isArray(body.tags) ? body.tags : []).filter(t => LOG_TAGS[t]))].slice(0, 4);

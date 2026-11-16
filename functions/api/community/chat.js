@@ -6,6 +6,7 @@
 // POST { action:'report', room, message?, reason, detail? } → 신고(운영자가 최근 대화 일부를 볼 수 있다)
 // POST { action:'block', room }            → 차단 + 대화 끝내기
 // 조건: 로그인 + 필수 동의 + 성인 본인확인 + 그 방의 두 사람 중 하나 + 이용 정지 아님
+import { featureGate } from '../../_features.js';
 import { json, sbRest, supabaseReady, viewer, profileOf, activeSanction, blockedIds, avatarOf, posterMap, overLimit, readBody, okId, REASONS } from '../../_plaza.js';
 import { readConsents, requiredOk } from '../../_consent.js';
 import { verificationOf, flagOf, FLAG_TIP, MSG_PER_DAY } from '../../_match.js';
@@ -33,6 +34,7 @@ async function names(env, ids) {
 }
 
 export async function onRequestGet({ request, env }) {
+  { const off = await featureGate(request, env, 'chat'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
   const w = await who(request, env); if (w.res) return w.res;
   const sp = new URL(request.url).searchParams, uid = w.me.id;
   if (sp.get('view') === 'rooms') {
@@ -55,6 +57,7 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestPost({ request, env }) {
+  { const off = await featureGate(request, env, 'chat'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
   const w = await who(request, env); if (w.res) return w.res;
   const b = await readBody(request); if (!b) return json({ error: '잘못된 요청 형식입니다' }, 400);
   const uid = w.me.id, room = await roomOf(env, b.room, uid); if (!room) return json({ error: '대화방을 찾을 수 없습니다' }, 404);

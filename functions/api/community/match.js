@@ -8,6 +8,7 @@
 // POST { action:'pass', handle }         넘기기(조용히, 상대에게 알리지 않음)
 // POST { action:'withdraw', handle }     보낸 관심 거두기
 // 조건: 로그인 + 필수 동의 + 닉네임 + 일주 확인 + 성인 본인확인 + 이용 제재 없음
+import { featureGate } from '../../_features.js';
 import { json, sbRest, supabaseReady, viewer, profileOf, activeSanction, blockedIds, avatarOf, posterMap, badText, overLimit, readBody, ilganLabel } from '../../_plaza.js';
 import { readConsents, requiredOk } from '../../_consent.js';
 import { kstDay } from '../../_daily.js';
@@ -56,6 +57,7 @@ async function card(env, viewerId, me, id, x, extra = {}) {
 }
 
 export async function onRequestGet({ request, env }) {
+  { const off = await featureGate(request, env, 'match'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
   const view = new URL(request.url).searchParams.get('view') || 'profile';
   if (view === 'profile') {
     const w = await who(request, env, false); if (w.res) return w.res;
@@ -98,6 +100,7 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestPost({ request, env }) {
+  { const off = await featureGate(request, env, 'match'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
   const b = await readBody(request); if (!b) return json({ error: '잘못된 요청 형식입니다' }, 400);
   if (b.action === 'profile') {
     const w = await who(request, env, false); if (w.res) return w.res;
