@@ -476,3 +476,16 @@ html.theme-mist #hub .ring[data-lv="mid"]{ --rc: #64748B; --rci: #334155; }
 html.theme-mist #hub .ring[data-lv="warn"]{ --rc: #F59E0B; --rci: #92400E; }
 html.theme-mist #hub .ring[data-lv="bad"]{ --rc: #DC2626; --rci: #991B1B; }
 html.theme-mist #hub .ring[data-lv] b{ color: var(--rci) !important; }
+
+/* 자미두수 그래프(10년 대한 흐름·해마다 흐름): 다섯 단계를 신호 색으로 — 매우 약함 빨강 · 약함 주황 · 보통 회청 · 강함 초록 · 매우 강함 진초록 (원래 '강함'이 보라라 좋고 나쁨이 안 읽혔다) */
+html.theme-mist #hub svg :is(rect, path, circle)[fill="#EB6B5B" i]{ fill: #DC2626; }
+html.theme-mist #hub svg :is(rect, path, circle)[fill="#E0915A" i]{ fill: #F59E0B; }
+html.theme-mist #hub svg :is(rect, path, circle)[fill="#8C93A3" i]{ fill: #94A3B8; }
+html.theme-mist #hub svg :is(rect, path, circle)[fill="#8E7CF0" i]{ fill: #22C55E; }
+html.theme-mist #hub svg :is(rect, path, circle)[fill="#2FBF71" i]{ fill: #15803D; }
+html.theme-mist #hub svg :is(text, tspan)[fill="#EB6B5B" i]{ fill: #B91C1C; }
+html.theme-mist #hub svg :is(text, tspan)[fill="#E0915A" i]{ fill: #B45309; }
+html.theme-mist #hub svg :is(text, tspan)[fill="#8E7CF0" i]{ fill: #15803D; }
+html.theme-mist #hub svg :is(text, tspan)[fill="#2FBF71" i]{ fill: #166534; }
+html.theme-mist #hub [style*="#8E7CF0" i]{ --zw: #22C55E; }
+html.theme-mist #hub svg :is(text, tspan)[fill="#7FD3A0" i]{ fill: #15803D; }   /* 화록(초록) 글씨 — 원래 연초록이라 밝은 바탕에서 흐렸다 */
