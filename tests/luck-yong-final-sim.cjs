@@ -15,6 +15,8 @@ const BASE = process.env.BASE || '36dcdc5~1';
 const head = f => cp.execSync(`git show ${BASE}:${f}`, { cwd: root, maxBuffer: 64 << 20 }).toString();
 const loadEngine = src => { const a = src.indexOf('var MANSE_DATA'), b = src.indexOf('})(typeof window', a); delete globalThis.Manse; vm.runInThisContext(src.slice(a, src.indexOf('\n', b))); return globalThis.Manse; };
 const MO = loadEngine(head('engine.js')), MN = loadEngine(fs.readFileSync(path.join(root, 'engine.js'), 'utf8'));
+// 이 검사는 해석 문구 변경(36dcdc5)만 본다. 그 뒤 의도적으로 바꾼 분야 지수 적합도 중복 제거(DOMAIN_COMMON.fitDedup, 2026-11-16)는 끄고 비교한다
+if (MN.DOMAIN_COMMON && 'fitDedup' in MN.DOMAIN_COMMON) MN.DOMAIN_COMMON.fitDedup = false;
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'lyf-')), oldLiPath = path.join(tmp, 'luck-interpret-head.js');
 fs.writeFileSync(oldLiPath, head('luck-interpret.js'));
 const LIO = require(oldLiPath), LIN = require(path.join(root, 'luck-interpret.js'));

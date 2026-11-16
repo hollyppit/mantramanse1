@@ -702,7 +702,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     names: { opportunity: '기회', expansion: '확장', harvest: '수확', accumulation: '축적' },
     legacy: { opportunity: '기회기', expansion: '확장기', harvest: '수확기', accumulation: '축적기' },   // 옛 6분류 문자열(색·용어 키 호환용). 변동기·방어기는 overlay로 이동
     secondary: { maxGap: 8, min: 45 },                                       // 1·2위 차이가 maxGap 이하이고 2위가 min 이상이면 동반 흐름
-    overlay: { volatility: 55, defense: 40 },                                // 이 점수 이상이면 변동·방어 overlay를 붙인다(옛 변동기 기준 55 유지. 일지·월지 충 하나가 이 근처)
+    overlay: { volatility: 65, defense: 40 },                                // 이 점수 이상이면 변동·방어 overlay. 변동 65(2026-11-16): 운명의 타임라인 6분류(report/v2/luck6.js)와 기준 하나로 통일 — 55면 운의 약 33%가 변동이라 타임라인이 이미 65로 올려 썼다(report/v2/VOLATILITY_ANALYSIS.md). 일지 충 하나(약 55)만으로는 변동이 붙지 않고, 충·형이 겹칠 때 붙는다
     defense: {
       // 방어 부담도(defenseLoad) = 100 × (fit·억부·구조·조후·관계·변동×부적합 성분의 가중합) × (1 − mix + mix × 작용 강도/100)
       // fitScore·성분 점수·변동성·작용 강도만 읽는다. 사고수·분야 지수는 읽지 않는다(분야 지수가 이 값을 읽으면 순환이 된다).
@@ -1956,6 +1956,21 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     }
     return out;
   }
+  // ───────────── 교운기(대운이 바뀌는 해) — 표시 전용, 2026-11-16 ─────────────
+  // 세운 흐름 점수는 그해 중간(입춘+180일)의 대운을 상위 운으로 쓴다(seunRange). 대운이 그해 안에서 바뀌면, 다른 쪽 대운을 상위 운으로 놓았을 때의
+  // 흐름 점수를 따로 계산해 함께 보여 준다. 점수 자체는 바꾸지 않는다. 대운이 바뀌기 전후 1년은 near 로 표시(전통적으로 교운기 전후 1~2년을 본다).
+  function gyoungi(ch, Y) {
+    if (Y < MIN_Y || Y > MAX_Y - 1) return null;
+    const from = termsOf(Y)[2], to = Y + 1 <= MAX_Y ? termsOf(Y + 1)[2] : from + 365.2422 * 86400000, L = ch.daeun.list;
+    const k = L.findIndex((d, i) => i > 0 && d.startMs >= from && d.startMs < to);
+    if (k < 0) {
+      const j = L.findIndex((d, i) => i > 0 && Math.abs(d.startMs - (from + to) / 2) < 1.5 * 365.2422 * 86400000);
+      return j < 0 ? null : { year: Y, near: true, at: L[j].startMs, prev: L[j - 1], next: L[j], before: L[j].startMs > to };
+    }
+    const mid = from + 180 * 86400000, used = daeunAt(ch, mid), other = used === L[k] ? L[k - 1] : L[k];
+    const p = yearPillarOf(Y), otherEv = evaluateLuck(ch, p, 'seun', { parent: other.ev });
+    return { year: Y, near: false, at: L[k].startMs, prev: L[k - 1], next: L[k], used, other, newShare: Math.round(100 * (to - L[k].startMs) / (to - from)), otherFit: otherEv.fitScore, otherCondition: otherEv.condition };
+  }
   // 상위 운 평가를 사주·연도별로 한 번만 계산해 둔다(대운→세운→월운→일진 연계용)
   const _seunEv = new WeakMap(), _wolunEv = new WeakMap();
   function seunEvOf(ch, Y) {
@@ -2286,7 +2301,11 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   //   evaluateDomainLuck   같은 엔진으로 대운·세운·월운·일진을 계산하고 상위 운의 배경을 DOMAIN_LEVEL_WEIGHTS로 섞는다
   // 어떤 지표도 "재성 있음 → 재물운 높음"처럼 단일 조건으로 정하지 않는다. 항상 여러 성분의 합성이며, 근거는 reasons에 남는다.
   // 모든 가중치·임계값은 아래 CONFIG 객체에서만 조절한다.
+  // fitDedup(2026-11-16): 분야 지수의 적합도에서 흐름 점수(F.fit — 통합 용신이 억부·조후를 이미 담음) 위에 억부·조후 단독 점수를 다시 더하지 않는다.
+  //   같은 가중치 합(own+eokbu+johu)을 F.fit 하나에 준다. false면 이전 계산. 근거: docs/LUCK_FLOW_FULL_AUDIT.md 6-1, 기준값 재측정 docs/LUCK_FLOW_REMAINING_2026-11-16.md
+  const fitCore = (Q, F) => DOMAIN_COMMON.fitDedup ? (Q.own + Q.eokbu + Q.johu) * F.fit : Q.own * F.fit + Q.eokbu * F.eokbu + Q.johu * F.johu;
   const DOMAIN_COMMON = {
+    fitDedup: true,
     balanceShare: 0.25, balanceFull: 0.35,               // 운 오행이 원국에 섞이는 비율 / 균형 개선폭 만점
     overload: { from: 34, to: 50 }, newSkewFrom: 34, newSkewMax: 30, lackBelow: 12, lackFill: 0.3,
     ramp: [0.1, 0.7],                                    // 십성 묶음 끌어옴(0~1)을 0~1로 바꾸는 구간
@@ -2428,7 +2447,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     let auxV = 0;
     if (F.G[aux] < Q.fit.spouseLack && F.g[aux] >= Q.fit.spouseFill) auxV = Q.fit.spouseAux; else if (F.G[aux] > Q.fit.spouseOver && F.g[aux] >= Q.fit.spouseFill) auxV = -Q.fit.spouseAux / 2;
     const pairV = F.stemHap ? Q.fit.pairHap : F.stemClash ? Q.fit.pairClash : 0;
-    const fit = lclamp(50 + Q.fit.general * 0.5 * (Q.fit.own * F.fit + Q.fit.eokbu * F.eokbu + Q.fit.johu * F.johu) + auxV + pairV, 0, 100);
+    const fit = lclamp(50 + Q.fit.general * 0.5 * fitCore(Q.fit, F) + auxV + pairV, 0, 100);
     const S = Q.stability;
     const stability = lclamp(S.base + S.hap * sp.bond - S.clash * sp.clash - S.harm * sp.harm - S.tension * tension - S.vol * Math.max(0, vol - S.volFrom) + S.protect * dRamp(F.g[4]), 0, 100);
     const V = Q.volatility, change = Math.min(1, sp.clash + V.harmWeight * sp.harm + V.completeWeight * sp.complete);
@@ -2439,7 +2458,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     pushR(why, 20 * star, `재성·관성 기운이 ${Math.round(F.g[2] * 100)}%·${Math.round(F.g[3] * 100)}% 들어와 이성·관계 활동이 활성화됩니다`);
     pushR(why, 14 * expr, `식상 기운(${Math.round(F.g[1] * 100)}%)으로 표현·매력 활동이 늘어납니다`);
     if (F.dohwa || F.sinNames.includes('홍염살')) pushR(why, 8, '도화·홍염 계열 매력 신호가 있습니다(보조 신호)');
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     if (auxV) pushR(why, 10, auxV > 0 ? '원국에서 부족한 배우자성 기운이 채워집니다(전통 해석 보조)' : '원국에 이미 많은 배우자성 기운이 더 강해집니다(전통 해석 보조)');
     if (sp.tension > 0.3) pushR(why, 25 * sp.tension, '배우자궁에 긴장 신호가 있어 안정성이 낮아집니다(변동성은 별도 성분)');
     if (vol >= 50) pushR(why, vol / 4, `변동성 ${Math.round(vol)} — 관계 환경이 움직이기 쉽습니다`);
@@ -2455,7 +2474,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     const activity = 100 * lclamp(A.scale * (A.earn * r2 + A.produce * r1 + A.link * link + A.peers * r0 + A.officer * r3 + A.monthPalace * mo.act + A.baseline), 0, 1);
     // 적합도: 재정적으로 유리한가 — 재성을 원국이 감당하는가
     const burden = F.weak * r2;
-    const fitBase = 50 + Q.fit.general * 0.5 * (Q.fit.own * F.fit + Q.fit.eokbu * F.eokbu + Q.fit.johu * F.johu);
+    const fitBase = 50 + Q.fit.general * 0.5 * fitCore(Q.fit, F);
     let adj = -Q.fit.weakBurden * burden + Q.fit.strongBonus * F.strong * Math.max(link, 0.5 * r2) + Q.fit.support * F.weak * r4 - Q.fit.overload * F.ovLevel;
     const gi = { '재다신약': 2, '군겁쟁재': 0, '식상과다(설기)': 1 };
     for (const [name, val] of Object.entries(Q.fit.pattern)) if (F.patterns.includes(name) && F.g[gi[name]] >= Q.fit.patternHit) adj += val;
@@ -2477,7 +2496,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (F.weak > 0.3 && r4 > 0.3) pushR(why, 8, '인성 기운이 약한 원국을 받쳐 재정 부담을 덜어 줍니다');
     lpW.forEach(x => pushR(why, Math.abs(x.v * Q.fit.luckPat[x.name]) * 1.6, x.v < 0 ? `${x.label} — 벌어도 나눠 가지거나 새기 쉬운 재물 구조입니다` : `${x.label} — 재물을 두고 다투던 구조가 풀립니다`));
     if (F.ovLevel > 0.3) pushR(why, 12 * F.ovLevel, `${EL_K[F.ovEl]} 오행이 원국에서 더 쏠립니다(오행 과잉)`);
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 재정 안정성 하락 요인`);
     if (vol >= 50) pushR(why, vol / 4, `변동성 ${Math.round(vol)} — 재정 변동이 커지기 쉽습니다`);
     return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { r0, r1, r2, r4, link, burden } };
@@ -2659,7 +2678,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
   Object.assign(DOMAIN_SCORE_THRESHOLDS, Object.fromEntries(SUB_DOMAIN_KEYS.map(k => [k, BAND5_LEGACY])));
   const PAT_GROUP = { '관살혼잡': 3, '관살과다': 3, '상관견관': 1, '군겁쟁재': 0, '재다신약': 2, '식상과다(설기)': 1 };
   const patAdj = (F, table, hit) => Object.entries(table).reduce((s, [n, v]) => s + (F.patterns.includes(n) && F.g[PAT_GROUP[n]] >= hit ? v : 0), 0);
-  const fitBase = (Q, F) => 50 + Q.general * 0.5 * (Q.own * F.fit + Q.eokbu * F.eokbu + Q.johu * F.johu);
+  const fitBase = (Q, F) => 50 + Q.general * 0.5 * fitCore(Q, F);
   const scoreSub = (key, c) => { const S = SUB_CONFIG[key].score; return lclamp(50 + (S.offset || 0) + S.spread * (S.activity * c.activity + S.fit * c.fit + S.stability * c.stability - 50), 0, 100); };
   // 원국 직업 적성(상위 분야) × 이 운이 그 분야를 건드리는 정도. 적성 계산은 원국만 읽고, 운 활성도는 careerLuckActivation을 그대로 쓴다
   function careerApt(F) {
@@ -2692,7 +2711,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (burden >= 0.25) pushR(why, 24 * burden, `원국이 약한 편(돕는 힘 ${Math.round(F.help)}%)인데 관성이 강하게 들어와 압박·부담이 커집니다`);
     if (F.strong > 0.3 && r3 > 0.3) pushR(why, 12, '원국이 관성을 감당할 힘이 있어 조직 안에서 소화하기 좋은 구조입니다');
     patAdj(F, Q.fit.pattern, Q.fit.patternHit) < 0 && pushR(why, 14, '원국의 관살 구조 약점(관살혼잡·상관견관 등)을 운이 자극합니다');
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 입사·적응 안정성 하락 요인`);
     return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { r0, r1, r2, r3, r4, link, burden } };
   }
@@ -2719,7 +2738,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (r2 > 0.3) pushR(why, 6 * r2, '재성 기운이 들어와 조건·보수 협상에 힘이 실립니다');
     if (burden >= 0.25) pushR(why, 22 * burden, '약한 원국에 관성 압박이 커져 떠밀리듯 옮기게 될 수 있습니다');
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 옮긴 뒤 안착 안정성 하락 요인`);
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { r0, r1, r2, r3, r4, change, burden } };
   }
   // ── 직업운
@@ -2743,7 +2762,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (burden >= 0.25) pushR(why, 22 * burden, `원국이 약한 편(돕는 힘 ${Math.round(F.help)}%)인데 책임·성과 기운이 커져 일의 부담이 늘어납니다`);
     if (F.strong > 0.3 && Math.max(r1, r3) > 0.3) pushR(why, 12, '원국의 힘이 충분해 들어오는 일·책임을 소화하기 좋습니다');
     patAdj(F, Q.fit.pattern, Q.fit.patternHit) < 0 && pushR(why, 12, '원국의 구조 약점(관살혼잡·재다신약 등)을 운이 자극합니다');
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 업무 안정성 하락 요인`);
     return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { r0, r1, r2, r3, r4, apt: apt.luck, burden } };
   }
@@ -2768,7 +2787,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (F.strong > 0.3 && link > 0.3) pushR(why, 12, '원국이 재성을 감당할 힘이 있고 식상→재성 흐름이 있어 사업을 굴리기 유리합니다');
     if (r0 > 0.4 && r2 > 0.3) pushR(why, 10, '비겁과 재성이 함께 들어와 동업·경쟁에서 몫이 갈릴 수 있어 계약·역할을 분명히 하는 편이 좋습니다');
     if (F.ovLevel > 0.3) pushR(why, 10 * F.ovLevel, `${EL_K[F.ovEl]} 오행이 원국에서 더 쏠립니다(오행 과잉)`);
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     if (vol >= 50) pushR(why, vol / 4, `변동성 ${Math.round(vol)} — 사업 환경 변동이 커지기 쉽습니다`);
     return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { r0, r1, r2, r4, link, burden, apt: apt.bizLuck } };
   }
@@ -2793,7 +2812,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (suppress < 0) pushR(why, 8, F.gender === 'F' ? '인성 기운이 식상을 누르는 흐름이 있습니다(전통 해석 보조)' : '식상 기운이 관성을 누르는 흐름이 있습니다(전통 해석 보조)');
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 안정성 하락 요인`);
     if (vol >= 50) pushR(why, vol / 4, `변동성 ${Math.round(vol)} — 생활 환경이 움직이기 쉽습니다`);
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { star, bond } };
   }
   // ── 결혼운 (연애가 아니라 배우자궁의 결속·안정과 배우자성 적합. 혼인 여부를 예측하지 않는다)
@@ -2818,7 +2837,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (natTension > 0.3) pushR(why, 16 * natTension, '원국의 일지(배우자궁)에 충·형 등 긴장 구조가 있어 바탕이 흔들리기 쉬운 편입니다');
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 안정성 하락 요인`);
     if (vol >= 50) pushR(why, vol / 4, `변동성 ${Math.round(vol)} — 관계 환경이 움직이기 쉽습니다`);
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { bond: sp.bond, shake: Math.max(sp.clash, sp.harm) } };
   }
   // ── 귀인운 (도와 주는 사람·후원의 신호. 신살은 보조로만 쓴다)
@@ -2840,7 +2859,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (F.weak > 0.3 && r4 > 0.3) pushR(why, 12, '원국이 약한 편인데 인성이 받쳐 줘 도움을 받아들이기 좋습니다');
     if (r0 > 0.4) pushR(why, 14 * r0, `비겁 기운(${Math.round(F.g[0] * 100)}%)이 들어와 경쟁자·분산 요소도 함께 늘어납니다`);
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 인연이 어긋나기 쉬운 요인`);
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { sin, r0, r4, bond: F.bond } };
   }
   // ── 학업·시험운
@@ -2864,7 +2883,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (F.weak > 0.3 && r4 > 0.3) pushR(why, 12, '약한 원국을 인성이 받쳐 배움을 소화하기 좋습니다');
     if (F.ovLevel > 0.3) pushR(why, 10 * F.ovLevel, `${EL_K[F.ovEl]} 오행이 원국에서 더 쏠립니다(오행 과잉)`);
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 집중·컨디션 안정성 하락 요인`);
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { r1, r3, r4, rob, sin } };
   }
   // ── 문서·이사운
@@ -2887,7 +2906,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (burden >= 0.25) pushR(why, 20 * burden, '약한 원국에 재성이 강하게 들어와 재정 부담이 커질 수 있어 조건을 꼼꼼히 확인할 시기입니다');
     if (r0 > 0.4) pushR(why, 8 * r0, '비겁 기운이 들어와 경쟁·분담 요소가 늘어납니다');
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 계약·이동 안정성 하락 요인`);
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { r4, r2, change, doc: r4 } };
   }
   // ── 대인·구설운 (높을수록 교류가 활발하고 마찰·구설 신호가 적다)
@@ -2910,7 +2929,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     [...mo.rels.filter(r => DOMAIN_COMMON.tension[r.type] != null).map(r => ['사회 환경', r]), ...sp.rels.filter(r => DOMAIN_COMMON.tension[r.type] != null).map(r => ['배우자궁', r])].forEach(([w, r]) => pushR(why, 16 * DOMAIN_COMMON.tension[r.type], `${w}: ${relText(r)} — 마찰·긴장 신호(사건 예측이 아님)`));
     if (r4 > 0.3) pushR(why, 8 * r4, '인성 기운이 들어와 말을 고르고 차분하게 대응하는 힘이 받쳐 줍니다');
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 관계 안정성 하락 요인`);
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { r0, r1, over, friction: Math.max(clash, harm) } };
   }
   // ── 부모·가족운 (가족 환경의 신호. 부모·가족의 일을 예측하지 않는다)
@@ -2932,7 +2951,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (rob >= 0.2) pushR(why, 20 * rob, '재성이 인성을 누르는 흐름이라 돌봄과 살림의 균형이 어긋나기 쉽습니다(전통 보조)');
     if (r0 > 0.4) pushR(why, 6 * r0, '비겁 기운이 들어와 형제·또래와의 관계가 가정에 영향을 줄 수 있습니다');
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 가정 안정성 하락 요인`);
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     return { comps: { activity, fit, stability, volatility }, reasons: finishReasons(why), aux: { r4, r2, bond: Math.max(yr.bond, mo.bond), shake: Math.max(yr.clash, yr.harm) } };
   }
   // ── 횡재운 (뜻밖의 수입·기회 신호. 편재 + 식상이 재성을 낳는 흐름 + 귀인, 겁재 분탈·재성 충은 감점)
@@ -2966,7 +2985,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     if (rob >= 0.35) pushR(why, 22 * rob, '비겁·겁재 기운이 함께 들어와 들어온 돈을 나누거나 빼앗길 수 있습니다(분탈)');
     if (mo.clash > 0.3) pushR(why, 16 * mo.clash, '재물 환경(월지)이 충을 맞아 들어온 기회가 흔들리기 쉽습니다');
     if (tension > 30) pushR(why, tension / 5, `합충형파해 긴장 ${Math.round(tension)} — 들어온 것을 지키기 어려운 요인`);
-    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 억부·조후 ${F.fit >= 0 ? '보완' : '부담'}`);
+    pushR(why, Math.abs(F.fit) / 3, `원국 적합도(흐름 점수 ${Math.round(F.fit)}) — 통합 용신 기준 ${F.fit >= 0 ? '보완' : '부담'}`);
     const wl = [];
     pushR(wl, 30 * rob, '비겁·겁재 기운이 들어와 돈을 나누거나 빼앗기기 쉽습니다(분탈) — 보증·동업·빌려주는 돈에 주의');
     pushR(wl, 26 * mo.clash, '재물 환경(월지)이 충을 맞아 계획한 돈이 갑자기 어긋나기 쉽습니다');
@@ -3694,7 +3713,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
 
   G.Manse = {
     pickDays, TAEK_PURPOSE, JIAN12, gongmangFxOf,
-    compute, elementFlow, ELEMENT_FLOW_CFG, natalFlow, NATAL_FLOW_CFG, luckStructures, integrateYongsin, unifiedLuckFit, unifiedSupport, gyeokCore, jongCore, chainLink, UNIFIED_CFG, josa, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, SUB_DOMAIN_KEYS, SUB_CONFIG, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
+    compute, elementFlow, ELEMENT_FLOW_CFG, natalFlow, NATAL_FLOW_CFG, luckStructures, integrateYongsin, unifiedLuckFit, unifiedSupport, gyeokCore, jongCore, chainLink, UNIFIED_CFG, josa, evaluateLuckFlow, composeFlowState, flowLabel, flowSummary, flowName, migrateLegacyPhase, FLOW_CONFIG, LEVEL_WEIGHTS, ROOT_RULES, ROOT_CONFIG, ROOT_LEVEL_WEIGHTS, getRootRelation, rootRuleTable, validateRootHiddenData, analyzeNatalRoot, analyzeLuckRootSupport, evaluateCurrentRootState, rootFitEffect, rootSummary, rootLevelLabel, opportunityNote, CAREER_CONFIG, CAREER_KEYS, CAREER_ENV_KEYS, WORK_STYLE_AXES, JOB_PROFILES, CAREER_AXIS_KEYS, extractNatalFeatures, careerWorkStyle, evaluateCareerCategory, evaluateCareerEnvironment, careerProfile, careerLuckActivation, careerLevelWord, careerPole, getSamjae, SAMJAE_RULES, VOLATILITY_CONFIG, calculateVolatility, volatilityNote, DOMAIN_COMMON, LOVE_CONFIG, WEALTH_CONFIG, HEALTH_CONFIG, ACCIDENT_CONFIG, DOMAIN_LEVEL_WEIGHTS, DOMAIN_SCORE_THRESHOLDS, DOMAIN_KEYS, SUB_DOMAIN_KEYS, SUB_CONFIG, domainBand, extractLuckFeatures, evaluateDomainLuck, COMPAT_CONFIG, evaluateCompatibleElement, evaluateDayPillarCompatibility, compatDayPillars, evaluateAttraction, compatAttraction, luckItem, luckRelations, evaluateLuck, LUCK_CFG, methodAdvice, conditionOf, climate, ZW_PALACE, zwBright, ziweiPeriod, hourPillarsOfDay, sonOf, seunRange, gyoungi, wolun, ilun, monthsOfYear, yearPillarOf, daeunAt,
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, mainHidden, yang, gzName, gzNameK,

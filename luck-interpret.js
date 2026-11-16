@@ -419,7 +419,7 @@
     // G. 대응 전략
     var strat = [use('tg.' + stemTG + '.act')];
     if (branchTG !== stemTG && TGD[branchTG].grp !== TGD[stemTG].grp) strat.push(use('tg.' + branchTG + '.act'));
-    if (ev.condition === '주의' || ev.condition === '부담' || ev.volatilityScore >= 55) strat.push('퇴사·투자·이주·결혼 같은 큰 결정은 운의 흐름만으로 정하지 말고 현실 조건을 먼저 확인하세요.');
+    if (ev.condition === '주의' || ev.condition === '부담' || (ev.overlays ? ev.overlays.volatility.active : ev.volatilityScore >= 65)) strat.push('퇴사·투자·이주·결혼 같은 큰 결정은 운의 흐름만으로 정하지 말고 현실 조건을 먼저 확인하세요.');
     else if (level === 'ilun') strat.push('오늘의 해석은 참고용입니다. 중요한 일정은 평소 기준대로 준비하세요.');
 
     // 환경 요약(한 문장)

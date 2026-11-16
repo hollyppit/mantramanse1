@@ -8,7 +8,7 @@
   var CONFIG = {
     defenseHard: { fit: -45, intensity: 30 },   // 흐름 점수가 매우 낮고 작용 강도도 있으면 방어기
     volatility: 65,                             // 변동성 점수가 이 이상이면 변동기. 옛 구현은 55 였다 — 55 면 운의 약 33%가 변동기라 65(약 18%)로 올렸다(report/v2/VOLATILITY_ANALYSIS.md).
-                                                // 엔진의 변동 신호 overlay 기준(FLOW_CONFIG.overlay.volatility 55)은 그대로다: "변동 신호" 칩은 55 부터, 6분류 라벨의 변동기는 65 부터.
+                                                // 2026-11-16: 엔진 overlay 기준(FLOW_CONFIG.overlay.volatility)도 65로 맞췄고, of() 는 엔진 overlay 를 그대로 읽는다(아래 규칙은 overlays 가 없는 옛 값용).
     defenseSoft: { fit: -20, intensity: 50 },   // 흐름 점수가 낮고 작용 강도가 높으면 방어기
   };
   var NAMES = ['기회기', '확장기', '수확기', '축적기', '변동기', '방어기'];
@@ -30,7 +30,16 @@
   /** ev(엔진 evaluateLuck 결과) → { label, key, meaning, rule, scores } — 결정론적. 같은 ev 는 항상 같은 값. */
   function of(ev) {
     var C = CONFIG, fit = ev.fitScore, inten = ev.intensityScore, vol = ev.volatilityScore, label, rule;
-    if (fit <= C.defenseHard.fit && inten >= C.defenseHard.intensity) { label = '방어기'; rule = '흐름 점수 ' + pct(fit) + '(기준 ' + pct(C.defenseHard.fit) + ' 이하)로 매우 낮고, 운의 세기 ' + r0(inten) + '(기준 ' + C.defenseHard.intensity + ' 이상)도 실려 있어요'; }
+    // 2026-11-16: 엔진이 정한 변동·방어 overlay(FLOW_CONFIG.overlay — 변동 65·방어 부담도 40)를 그대로 쓴다. 만세력 운세 흐름의 '변동·방어' 표시와
+    // 이 6분류가 같은 기준이 되게 하려는 것이다. 둘 다 켜지면 엔진의 topOverlay(기준을 더 많이 넘긴 쪽)를 대표로 고른다. overlays 가 없는 옛 값만 아래 옛 규칙.
+    var o = ev.overlays;
+    if (o && o.volatility && o.defense) {
+      var top = o.defense.active && o.volatility.active ? (ev.topOverlay || 'defense') : o.defense.active ? 'defense' : o.volatility.active ? 'volatility' : null;
+      if (top === 'defense') { label = '방어기'; rule = '부담도 ' + r0(o.defense.score) + '(' + (o.defense.band || '') + ')가 기준(40 이상)을 넘었어요' + (o.volatility.active ? ' — 변화 신호 ' + r0(o.volatility.score) + '도 함께 커요' : ''); }
+      else if (top === 'volatility') { label = '변동기'; rule = '변화 신호 ' + r0(o.volatility.score) + '로 기준(' + C.volatility + ' 이상)을 넘었어요' + (o.defense.active ? ' — 부담도 ' + r0(o.defense.score) + '도 함께 높아요' : ''); }
+      else { label = FLOW_NAME[ev.primaryFlow] || ev.phase || '축적기'; rule = '기회·확장·수확·축적 네 흐름 중 ‘' + (FLOW_WORD[label] || label) + '’ 쪽 힘이 가장 커요'; }
+    }
+    else if (fit <= C.defenseHard.fit && inten >= C.defenseHard.intensity) { label = '방어기'; rule = '흐름 점수 ' + pct(fit) + '(기준 ' + pct(C.defenseHard.fit) + ' 이하)로 매우 낮고, 운의 세기 ' + r0(inten) + '(기준 ' + C.defenseHard.intensity + ' 이상)도 실려 있어요'; }
     else if (vol >= C.volatility) { label = '변동기'; rule = '변화 신호 ' + r0(vol) + '로 기준(' + C.volatility + ' 이상)을 넘었어요'; }
     else if (fit <= C.defenseSoft.fit && inten >= C.defenseSoft.intensity) { label = '방어기'; rule = '흐름 점수 ' + pct(fit) + '(기준 ' + pct(C.defenseSoft.fit) + ' 이하)로 낮은데, 운의 세기 ' + r0(inten) + '(기준 ' + C.defenseSoft.intensity + ' 이상)는 강해요'; }
     else { label = FLOW_NAME[ev.primaryFlow] || ev.phase || '축적기'; rule = '기회·확장·수확·축적 네 흐름 중 ‘' + (FLOW_WORD[label] || label) + '’ 쪽 힘이 가장 커요'; } // 예전 label.replace('기','')는 기회기를 "회기"로 잘랐다

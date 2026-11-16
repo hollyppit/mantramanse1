@@ -5117,7 +5117,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const phOf = x => x.ev;
   // 비교용으로 뒤에 흐리게 겹쳐 보여줄 기준: 흐름 점수에서 덜 앞세운 쪽(억부 또는 조후)을 단독으로 본 값
   const altSchool = () => { const l = S.ch.daeun.list[0]; return l && l.ev.alt ? l.ev.alt.school : null; };
-  const showGhost = () => altSchool() != null;
+  // 종격 사주는 억부(강약) 판단을 쓰지 않으므로 억부 단독 흐린 선을 그리지 않는다(2026-11-16). 조후 흐린 선은 종격에서도 보조 기준이라 그대로 둔다
+  const showGhost = () => altSchool() != null && !(altSchool() === 'eokbu' && S.ch && S.ch.unified && S.ch.unified.mode === 'jong');
   const schoolName = k => M.SCHOOLS[k].split(' ')[0];
   const altOf = x => x.ev && x.ev.alt ? x.ev.alt.value : null;
   // 일진 주 흐름 4가지: [색 이름, 핵심 의미, 그날 할 일]. 변동·방어는 주 흐름이 아니라 상태 overlay(OVL)라 여기에 없다
@@ -5144,6 +5145,15 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   // 삼재: 참고 정보 레이어. 점수·주 흐름과 무관하며, 배지는 기존 용어 시트(.term)를 그대로 쓴다
   const samjaeOf = Y => M.getSamjae(S.ch.pillars.year.b, Y);
+  // 교운기(대운이 바뀌는 해): 엔진 M.gyoungi(표시 전용, 점수 불변). 그해 세운 흐름 점수가 어느 대운을 기준으로 했는지와, 다른 대운 기준 값을 함께 알린다(2026-11-16)
+  const gyOf = Y => { try { return M.gyoungi ? M.gyoungi(S.ch, Y) : null; } catch (e) { return null; } };
+  const gyTag = Y => { const g = gyOf(Y); return g && !g.near ? `<span class="term chip sj-chip" data-term="교운기">교운기</span>` : ''; };
+  const gyBanner = Y => {
+    const g = gyOf(Y); if (!g) return '';
+    if (g.near) return `<div class="sj-banner"><div><b>${term('교운기')} 전후</b> <span class="muted small">${M.gzName(g.prev)} → ${M.gzName(g.next)} 대운</span></div><div class="small muted">대운이 바뀌기 1년 ${g.before ? '전' : '뒤'}라 두 대운의 기운이 섞이기 쉬운 때입니다. 큰 결정은 두 흐름을 함께 보고 서두르지 않는 편이 좋아요.</div></div>`;
+    const se = M.seunRange(S.ch, Y, Y)[0];
+    return `<div class="sj-banner"><div><b>${term('교운기')}</b> <span class="muted small">${fmtKST(g.at)}부터 ${M.gzName(g.prev)} → ${M.gzName(g.next)} 대운</span></div><div class="small muted">이 해의 흐름 점수 ${se ? signed(se.combined) : ''}는 그해 중반의 ${M.gzName(g.used)} 대운을 기준으로 계산했어요. ${M.gzName(g.other)} 대운을 기준으로 보면 ${signed(g.otherFit)}(${esc(g.otherCondition)})입니다. 새 대운이 이 해의 약 ${g.newShare}%를 차지해요. 두 대운의 기운이 섞이는 해라, 큰 결정은 두 흐름을 함께 보고 서두르지 않는 편이 좋아요.</div></div>`;
+  };
   const samjaeTag = sj => sj.active ? `<span class="term chip sj-chip" data-term="${sj.stage}">${sj.stage}</span>` : '';
   const samjaeBanner = Y => {
     const sj = samjaeOf(Y), lb = S.ch.lunar ? ((S.ch.lunar.y - 4) % 12 + 12) % 12 : S.ch.pillars.year.b, alt = lb !== S.ch.pillars.year.b ? M.getSamjae(lb, Y) : null;
@@ -6761,7 +6771,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <span class="lt-tg">${x.branchTG}</span>
       <span class="lt-us">${x.unseong} · ${x.sinsal12}</span>
       <span class="lt-ev">${luckChips(x)}</span>
-      <span class="lt-sc"><span class="sgchip" style="${sgVars(tileSig(x))}">${tileSig(x).n}</span>${m6Tag(luckMode(x).mode)}${ovTags(x.ev, false)} ${pill(x.ev.condition)}</span>${x.year && x.ev.level === "seun" ? samjaeTag(samjaeOf(x.year)) : ""}
+      <span class="lt-sc"><span class="sgchip" style="${sgVars(tileSig(x))}">${tileSig(x).n}</span>${m6Tag(luckMode(x).mode)}${ovTags(x.ev, false)} ${pill(x.ev.condition)}</span>${x.year && x.ev.level === "seun" ? samjaeTag(samjaeOf(x.year)) + gyTag(x.year) : ""}
     </button>`;
   }
   // 이 시기에 들어오는 오행과 원국과의 작용(합·충·형·신살)을 풀어 쓴다
@@ -6773,58 +6783,69 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const { rels, sinsal } = M.luckRelations(ch, x);
     // 하루짜리 일진은 무겁게 읽히지 않도록 표현을 낮춘다
     const LUCK_SOFT = { '충': ['사소한 변화나 일정 변경이 생길 수 있어요', '일정에 여유를 두세요.'], '형': ['신경 쓸 일이 하나 생길 수 있어요', '서류와 말투를 한 번 더 확인하세요.'], '파': ['작은 차질이 생길 수 있어요', '약속 시간을 넉넉히 잡으세요.'], '해': ['말 한마디에 서운함이 생길 수 있어요', '표현을 부드럽게 하세요.'], '원진': ['괜히 거슬리는 일이 있을 수 있어요', '반응을 한 박자 늦추세요.'], '귀문관': ['생각이 많아질 수 있어요', '일찍 쉬고 가볍게 산책하세요.'], '천간충': ['의견이 살짝 엇갈릴 수 있어요', '결정은 미루고 말은 짧게 하세요.'] };
-    const LUCK_SPAN = { daeun: '10년 내내 배경처럼 깔려 있어요. 특정 해에 같은 글자가 오면 더 뚜렷해져요.', seun: '올해 안에 실제 일(계약·이동·관계 변화)로 드러나기 쉬워요.', wolun: '이번 달 안에 짧게 나타나요.', ilun: '오늘 하루 가볍게 스쳐 가는 정도예요.' };
-    // 운에서 들어온 글자가 원국의 어느 자리와 만나느냐에 따라 실제로 일어나는 일: [한 줄 요약, 구체적인 모습]
+    const LUCK_SPAN = { daeun: '10년 내내 배경처럼 깔려 있어요. 특정 해에 같은 글자가 오면 더 뚜렷해져요.', seun: '올해 안에 계약·이동·관계 같은 실제 일로 드러날 수 있어요.', wolun: '이번 달 안에 짧게 나타나요.', ilun: '오늘 하루 가볍게 스쳐 가는 정도예요.' };
+    // 운에서 들어온 글자가 원국의 어느 자리와 만나느냐에 따라 나타나기 쉬운 모습: [한 줄 요약, 구체적인 모습]
+    // 2026-11-16: 사건을 단정하지 않는다(이별·수술·퇴사 같은 결과를 예고하지 않고 "~일로 나타날 수 있어요"). 유불리는 relLine 이 그 자리 오행의 용신·기신 역할로 덧붙인다.
     const LUCK_EVENT = {
       good: {
-        year: ['집안·어른 쪽에서 도움이 와요', '부모 세대나 어른에게서 도움·연락이 오고, 오랜 인연이 다시 이어지거나 집안일이 순조롭게 풀립니다.'],
-        month: ['직장·사업에서 좋은 기회가 와요', '좋은 상사·거래처·협력자를 만나고, 이직 제안이나 계약·협업 기회가 생기기 쉽습니다. 부모·형제와도 사이가 좋아집니다.'],
-        day: ['연애·결혼, 가정에 좋은 움직임이 있어요', '마음 맞는 사람을 만나거나 연인·배우자와 사이가 따뜻해집니다. 내 마음도 안정됩니다.'],
-        hour: ['자녀·후배와 잘 통하고 일의 결과가 좋아요', '자녀·후배·아랫사람과 호흡이 잘 맞고, 하던 일이 좋은 결과로 맺어집니다. 노후·장기 계획이 구체화됩니다.'],
+        year: ['집안·어른 쪽과 연결이 부드러워질 수 있어요', '부모 세대나 어른과 연락이 잦아지거나, 오래된 인연이 다시 이어지는 식으로 나타날 수 있어요.'],
+        month: ['일·직장 쪽에서 손잡을 사람이 생기기 쉬워요', '함께 일할 사람·거래처와 호흡이 맞거나, 협업·계약 이야기가 오가는 식으로 나타날 수 있어요.'],
+        day: ['가까운 관계가 가까워지기 쉬워요', '연인·배우자나 가까운 사람과 마음이 잘 통하는 쪽으로 나타날 수 있어요. 내 마음도 안정되기 쉬워요.'],
+        hour: ['아랫사람·일의 마무리와 잘 맞물려요', '자녀·후배와 호흡이 맞거나, 하던 일을 매듭짓는 쪽으로 나타날 수 있어요.'],
       },
       '충': {
-        year: ['집안·어른 쪽에 변화가 생겨요', '이사·고향 문제나 부모 세대의 일로 신경 쓸 일이 생깁니다. 어린 시절부터 이어진 환경이 바뀝니다.'],
-        month: ['직장·사업에 변동이 생겨요', '부서 이동·이직·퇴사·사업 방향 전환처럼 자리가 바뀌는 일이 잦습니다. 상사·부모와 부딪치기도 합니다.'],
-        day: ['연애·부부 관계에 큰 변화가 와요', '다툼·이별·재결합, 또는 이사·거처 변경이 일어나기 쉽습니다. 내 마음도 크게 흔들립니다.'],
-        hour: ['자녀·계획에 변경이 생겨요', '자녀나 아랫사람 문제가 생기고, 일의 결과가 뒤집히거나 노후 계획을 다시 짜게 됩니다.'],
+        year: ['집안·어른 쪽 환경이 움직일 수 있어요', '집안일이나 부모 세대의 일로 신경 쓸 일이 생기는 식으로 나타날 수 있어요.'],
+        month: ['일·직장 환경이 움직일 수 있어요', '역할·부서·일하는 방식이 바뀌거나, 윗사람과 의견이 부딪치는 식으로 나타날 수 있어요.'],
+        day: ['가까운 관계나 생활 자리가 흔들릴 수 있어요', '가까운 사람과 의견 차이가 커지거나, 지내는 곳·생활 리듬이 바뀌는 식으로 나타날 수 있어요. 마음도 들썩이기 쉬워요.'],
+        hour: ['계획이나 아랫사람 일에 변경이 생길 수 있어요', '자녀·후배 일로 신경 쓰거나, 세워 둔 계획을 고쳐 짜는 식으로 나타날 수 있어요.'],
       },
       '형': {
-        year: ['집안·어른과 서류·금전 문제가 얽혀요', '상속·보증·분쟁처럼 따져야 할 일이 생기니 서류를 꼼꼼히 챙기세요.'],
-        month: ['직장에서 압박과 마찰이 커져요', '상사와의 갈등, 계약 분쟁, 업무 과부하로 몸이 지치기 쉽습니다.'],
-        day: ['부부·연인 사이 날 선 말다툼, 또는 몸 문제가 생겨요', '말이 거칠어지고 서로 지적하게 됩니다. 수술·시술 같은 몸 문제가 생길 수도 있어 건강검진을 챙기세요.'],
-        hour: ['자녀·후배 일로 속을 썩여요', '자녀·아랫사람 문제로 마음이 무겁거나, 일의 마무리 단계에서 문제가 생깁니다.'],
+        year: ['집안·어른과 따져야 할 일이 생길 수 있어요', '서류·돈 문제처럼 정리해야 할 일이 생길 수 있으니 기록을 꼼꼼히 챙기세요.'],
+        month: ['일에서 압박과 마찰이 커질 수 있어요', '책임이 몰리거나 의견이 날카로워져 몸이 지치기 쉬워요.'],
+        day: ['가까운 사이에 말이 날카로워지기 쉬워요', '서로 지적하는 말이 늘 수 있어요. 몸이 지치기 쉬우니 쉬는 시간과 건강검진을 챙기세요.'],
+        hour: ['아랫사람·마무리 단계에서 신경 쓸 일이 생길 수 있어요', '자녀·후배 일로 마음이 무겁거나, 일의 마무리에서 손볼 곳이 생길 수 있어요.'],
       },
       '파': {
-        year: ['집안 약속이나 행사가 틀어져요', '가족 행사나 어른과의 약속이 어긋나기 쉽습니다.'],
-        month: ['직장 일정·계획이 틀어져요', '거래나 일정이 깨지거나 업무 계획을 수정하게 됩니다.'],
-        day: ['연인·배우자와 약속이 어긋나요', '약속이 취소되거나 집 안 물건·기기가 고장 나는 소소한 차질이 생깁니다.'],
-        hour: ['자녀·후배와 계획이 어긋나요', '아랫사람과의 일정이나 계획이 중간에 틀어집니다.'],
+        year: ['집안 약속이나 행사가 어긋날 수 있어요', '가족 행사나 어른과의 약속이 미뤄지는 식으로 나타날 수 있어요.'],
+        month: ['일정·계획이 어긋날 수 있어요', '거래나 일정이 미뤄지거나 계획을 고쳐야 하는 일이 생길 수 있어요.'],
+        day: ['가까운 사람과 약속이 어긋날 수 있어요', '약속이 바뀌거나 집 안 물건이 말썽을 부리는 소소한 차질로 나타날 수 있어요.'],
+        hour: ['아랫사람과 계획이 어긋날 수 있어요', '함께 세운 일정이 중간에 바뀌는 식으로 나타날 수 있어요.'],
       },
       '해': {
-        year: ['집안 어른과 서운함이 쌓여요', '말하지 않은 서운함이 쌓여 어른과 거리가 벌어지기 쉽습니다.'],
-        month: ['직장에서 뒷말·오해가 생겨요', '믿었던 동료와 사이가 서서히 멀어지고, 내가 모르는 곳에서 말이 돕니다.'],
-        day: ['연인·배우자에게 서운함이 쌓여요', '말 못 한 서운함이 쌓여 마음이 멀어지기 쉽습니다. 그날 바로 말하세요.'],
-        hour: ['아랫사람에게 기대한 만큼 도움이 안 와요', '자녀·후배에게 서운하거나, 일의 결과가 기대에 못 미칩니다.'],
+        year: ['집안 어른과 서운함이 쌓일 수 있어요', '말하지 않은 서운함이 쌓여 거리가 생기기 쉬워요.'],
+        month: ['일터에서 오해가 생길 수 있어요', '말이 엇갈려 오해가 생기기 쉬우니 중요한 내용은 글로 남겨 두세요.'],
+        day: ['가까운 사람에게 서운함이 쌓일 수 있어요', '말 못 한 서운함이 쌓이기 쉬워요. 그때그때 짧게 말하세요.'],
+        hour: ['아랫사람에게 기대한 만큼 돌아오지 않을 수 있어요', '자녀·후배에게 서운하거나 결과가 기대에 못 미치는 식으로 나타날 수 있어요.'],
       },
       '원진': {
-        year: ['집안 어른과 괜히 안 맞아요', '이유 없이 어른의 말과 행동이 거슬립니다.'],
-        month: ['직장 사람이 이유 없이 거슬려요', '동료·상사와 큰 갈등은 아니어도 사소한 불편이 계속됩니다.'],
-        day: ['연인·배우자가 괜히 미워졌다 풀렸다 해요', '미운 정과 고운 정이 번갈아 커집니다. 감정 기복이 커지는 시기입니다.'],
-        hour: ['자녀·후배와 말투 때문에 자주 다퉈요', '사소한 말투와 습관 때문에 같은 다툼이 반복됩니다.'],
+        year: ['집안 어른과 괜히 안 맞을 수 있어요', '이유 없이 말과 행동이 거슬리는 식으로 나타날 수 있어요.'],
+        month: ['일터 사람이 괜히 거슬릴 수 있어요', '큰 갈등은 아니어도 사소한 불편이 이어질 수 있어요.'],
+        day: ['가까운 사람과 감정 기복이 커질 수 있어요', '미운 정과 고운 정이 번갈아 커지기 쉬워요.'],
+        hour: ['아랫사람과 말투로 부딪칠 수 있어요', '사소한 말투와 습관 때문에 같은 다툼이 반복되기 쉬워요.'],
       },
       '귀문관': {
-        year: ['집안일로 생각이 많아져요', '가족 걱정이 꼬리를 물고 불안해지기 쉽습니다.'],
-        month: ['직장 스트레스로 잠을 설쳐요', '예민해지고 생각이 많아집니다. 연구·창작처럼 집중하는 일에서는 오히려 성과가 납니다.'],
-        day: ['연인·배우자 마음을 자꾸 의심해요', '직감은 좋아지지만 집착·의심으로 번지기 쉽습니다. 추측 말고 직접 물어보세요.'],
-        hour: ['자녀·미래 걱정이 꼬리를 물어요', '앞날에 대한 걱정으로 잠이 얕아지기 쉽습니다.'],
+        year: ['집안일로 생각이 많아질 수 있어요', '가족 걱정이 꼬리를 물기 쉬워요.'],
+        month: ['일 스트레스로 예민해질 수 있어요', '생각이 많아져 잠이 얕아지기 쉬워요. 연구·창작처럼 집중하는 일에서는 오히려 장점이 돼요.'],
+        day: ['가까운 사람의 마음을 자꾸 짐작하게 될 수 있어요', '직감은 좋아지지만 의심으로 번지기 쉬워요. 짐작 말고 직접 물어보세요.'],
+        hour: ['앞날 걱정이 꼬리를 물 수 있어요', '걱정으로 잠이 얕아지기 쉬우니 일찍 쉬세요.'],
       },
       '천간충': {
-        year: ['집안·어른과 가치관이 부딪쳐요', '진로나 생각 차이로 어른과 말다툼이 납니다.'],
-        month: ['상사·조직과 방침이 달라 의견이 부딪쳐요', '업무 방식이나 방향을 두고 말다툼이 생기고 계획이 바뀝니다.'],
-        day: ['내 뜻과 연인·배우자의 뜻이 맞서요', '의견 충돌로 말다툼이 잦아집니다. 결정을 서두르지 마세요.'],
-        hour: ['자녀·후배와 생각이 달라 다퉈요', '세대 차이로 말다툼이 나기 쉽습니다. 지시보다 질문과 경청이 낫습니다.'],
+        year: ['집안·어른과 생각이 부딪칠 수 있어요', '진로나 가치관 차이로 말이 엇갈리기 쉬워요.'],
+        month: ['일의 방향을 두고 의견이 부딪칠 수 있어요', '일하는 방식이나 방향을 두고 말이 엇갈리고 계획이 바뀔 수 있어요.'],
+        day: ['내 뜻과 가까운 사람의 뜻이 맞설 수 있어요', '의견 충돌이 잦아질 수 있으니 결정을 서두르지 마세요.'],
+        hour: ['아랫사람과 생각이 엇갈릴 수 있어요', '세대 차이로 말이 엇갈리기 쉬워요. 지시보다 질문과 경청이 나아요.'],
       },
     };
+    // 이 작용이 건드리는 자리 오행(충·형·파·해·천간충) 또는 합으로 생기는 오행의 역할 — 흐름 점수(relationParts)와 같은 통합 용신 역할을 쓴다
+    const RISKY = ['충', '형', '파', '해', '천간충'], BOND = ['육합', '삼합', '반합', '방합', '천간합'];
+    const relRole = (r, prim) => {
+      if (!y || !y.roles) return null;
+      if (BOND.includes(r.type)) return r.el != null ? { el: r.el, role: y.roles[r.el] } : null;
+      if (!RISKY.includes(r.type) || !ch.pillars[prim]) return null;
+      const el = r.kind === 'stem' ? M.stemEl(ch.pillars[prim].s) : M.BR_EL[ch.pillars[prim].b];
+      return { el, role: y.roles[el] };
+    };
+    const isBad = q => q === '기신' || q === '구신', isGood = q => q === '용신' || q === '희신';
     const LUCK_WHEN = { daeun: '앞으로 10년 동안', seun: '올해', wolun: '이번 달', ilun: '오늘' };
     const evKey = t => ['육합', '삼합', '반합', '방합', '천간합'].includes(t) ? 'good' : t;
     const relLine = (r, idx) => {
@@ -6835,12 +6856,16 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const area = os.map(k => REL_AREA[k]).join(' · '), pos = os.map(k => M.POS_K[k] + (r.kind === 'stem' ? '간' : '지')).join('·');
       const when = LUCK_WHEN[kind] || '이 시기에';
       const LIGHT = { year: '집안·어른', month: '직장·업무', day: '연인·가정', hour: '자녀·후배·일 마무리' };
+      const rr = relRole(r, prim), turn = rr && (RISKY.includes(r.type) ? isBad(rr.role) : BOND.includes(r.type) && isBad(rr.role));
+      const roleNote = !rr ? '' : RISKY.includes(r.type) ? (isBad(rr.role) ? `흔들리는 자리가 부담이 되던 ${M.EL_K[rr.el]} 기운(${rr.role})이라, 막혀 있던 것이 정리되는 변화로 이어지기 쉬워요.` : isGood(rr.role) ? `흔들리는 자리가 꼭 필요한 ${M.EL_K[rr.el]} 기운(${rr.role})이라 조금 더 조심하는 편이 좋아요.` : '') : BOND.includes(r.type) ? (isBad(rr.role) ? `묶여서 생기는 ${M.EL_K[rr.el]} 기운이 ${rr.role}이라, 끌림이 부담으로 바뀌지 않게 거리를 조절하세요.` : isGood(rr.role) ? `묶여서 생기는 ${M.EL_K[rr.el]} 기운이 ${rr.role}이라 도움이 되는 쪽이에요.` : '') : '';
+      const tone = turn ? 'mid' : h[0];
       const head = kind === 'ilun' ? `오늘은 ${LIGHT[prim] || area} 쪽에서 ${LUCK_SOFT[r.type] ? LUCK_SOFT[r.type][0] : '반가운 소식이나 작은 도움이 있을 수 있어요'}` : ev ? `${when}, ${ev[0]}` : `${area} 쪽에서 ${h[1]}`;
-      return `<article class="rel-card tone-${h[0]}">
+      return `<article class="rel-card tone-${tone}">
         <div class="rel-top"><span class="rel-badge">${h[3]}<small>${term(r.type)}</small></span><b class="rel-name muted">${esc(r.name)}</b><span class="rel-str" title="작용 세기">${'●'.repeat(strong)}${'○'.repeat(3 - strong)}</span></div>
         <div class="rel-where">${kname}에서 들어온 글자가 내 사주의 <b>${pos}</b>(${area} 자리)${pos.endsWith('간') ? '을' : '를'} 만났어요</div>
         <p class="rel-head">${head}</p>
-        ${ev && kind !== 'ilun' ? `<p class="rel-place"><b>구체적으로</b> ${ev[1]}</p>` : ''}
+        ${ev && kind !== 'ilun' ? `<p class="rel-place"><b>이런 모습으로</b> ${ev[1]}</p>` : ''}
+        ${roleNote && kind !== 'ilun' ? `<p class="rel-place"><b>이 사주에서는</b> ${roleNote}</p>` : ''}
         ${idx === 0 ? `<p class="rel-place"><b>얼마나 가나요</b> ${LUCK_SPAN[kind] || ''}</p>` : ''}
         ${h[2] ? `<p class="rel-tip"><b>이렇게 해보세요</b> ${h[2]}</p>` : ''}
       </article>`;
@@ -7672,7 +7697,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     let nowDetail = '';
     if (sel.kind === 'now') {
       const map = { daeun: [du, `현재 대운 ${du ? M.gzName(du) : ''}`], seun: [se, `${curY}년 세운 ${M.gzName(se)}`], wolun: [curM, `이번 달 월운 ${M.gzName(curM)} (${curM.termName}부터)`], ilun: [il, `오늘 일운 ${M.gzName(il)}`] };
-      const [x, t] = map[sel.k]; nowDetail = detailHTML(t, x, "", sel.k, sel.k === 'seun' ? samjaeBanner(curY) : '');
+      const [x, t] = map[sel.k]; nowDetail = detailHTML(t, x, "", sel.k, sel.k === 'seun' ? samjaeBanner(curY) + gyBanner(curY) : '');
     }
     const Y = S.selYear;
     const [cy, cm] = S.selYM;
@@ -7680,7 +7705,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const firstDow = new Date(Date.UTC(cy, cm - 1, 1)).getUTCDay();
     let daeunDetail = '', seunDetail = '', wolDetail = '', ilDetail = '';
     if (sel.kind === 'daeun') { const x = ch.daeun.list[sel.i]; daeunDetail = detailHTML(`${x.startAge}세 대운 ${M.gzName(x)} (${x.startYear}~${x.startYear + 9})`, x, `<p class="note">정확한 시작: ${fmtKST(x.startMs)}${sel.i === 0 && ch.daeun.exact < 0.5 ? ` · 대운수는 최소 1로 표기하지만 실제로는 출생 후 약 ${ch.daeun.startMonths}개월에 시작합니다` : ''}</p>`, "daeun"); }
-    if (sel.kind === 'seun') { const x = M.seunRange(ch, sel.Y, sel.Y)[0]; if (x) seunDetail = detailHTML(`${sel.Y}년 세운 ${M.gzName(x)}`, x, '', "seun", samjaeBanner(sel.Y)); }   // 대운·세운 섞는 식은 근거 안 mixLine 이 실제 값으로 쓴다(2026-11-16)
+    if (sel.kind === 'seun') { const x = M.seunRange(ch, sel.Y, sel.Y)[0]; if (x) seunDetail = detailHTML(`${sel.Y}년 세운 ${M.gzName(x)}`, x, '', "seun", samjaeBanner(sel.Y) + gyBanner(sel.Y)); }   // 대운·세운 섞는 식은 근거 안 mixLine 이 실제 값으로 쓴다(2026-11-16)
     if (sel.kind === 'wolun') { const x = M.wolun(ch, Y)[sel.i]; wolDetail = detailHTML(`${Y}년 ${x.termName}부터 월운 ${M.gzName(x)}`, x, `<p class="muted">시작: ${fmtKST(x.startMs)}</p>`, "wolun"); }
     if (sel.kind === 'ilun') { const x = cal[sel.d - 1]; if (x) ilDetail = detailHTML(`${cy}.${pad(cm)}.${pad(sel.d)} 일진 ${M.gzName(x)}`, x, `<p>음력 ${x.lunar.m}${x.lunar.leap ? '(윤)' : ''}월 ${x.lunar.d}일 · ${term('손 없는 날', '손')} ${M.sonOf(x.lunar.d) === '없음' ? '<b>없음 (손 없는 날)</b>' : M.sonOf(x.lunar.d) + '쪽'}</p>`, "ilun", '', sijinTable(x, [cy, cm, sel.d])); }
     const tint = v => { const a = Math.min(100, Math.abs(v)) * 0.6; return v >= 0 ? `color-mix(in srgb, var(--good) ${a}%, var(--surface-2))` : `color-mix(in srgb, var(--bad) ${a}%, var(--surface-2))`; };
