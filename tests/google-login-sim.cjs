@@ -77,6 +77,15 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   var r = await get(cb, '/api/auth/google/callback?code=c1&state=' + 'f'.repeat(32), sc); ok(/google_login=fail/.test(r.headers.get('location')), 'state 불일치: 실패');
   r = await get(cb, '/api/auth/google/callback?error=access_denied&state=x', sc); ok(/google_login=cancel/.test(r.headers.get('location')), '동의 취소: cancel');
   r = await start.onRequestGet({ request: new Request(B + '/api/auth/google/start?next=/report/my/'), env: {} }); ok(r.headers.get('location') === B + '/report/my/', '설정 없으면 원래 화면으로');
+  // 대표 주소가 아닌 곳(pages.dev·www·미리보기)에서 시작하면 대표 주소로 옮겨 시작(redirect_uri_mismatch 방지)
+  for (const other of ['https://mantramanse.pages.dev', 'https://www.mantrafortune.com', 'https://abc123.mantramanse.pages.dev']) {
+    r = await start.onRequestGet({ request: new Request(other + '/api/auth/google/start?next=' + encodeURIComponent('/report/hub/#/me')), env });
+    ok(r.status === 302 && r.headers.get('location') === B + '/api/auth/google/start?next=' + encodeURIComponent('/report/hub/#/me') && !r.headers.get('set-cookie'), '다른 주소 → 대표 주소에서 다시 시작: ' + other);
+  }
+  r = await start.onRequestGet({ request: new Request('https://mantramanse.pages.dev/api/auth/google/start?next=' + encodeURIComponent('https://evil.test/x')), env });
+  ok(r.headers.get('location') === B + '/api/auth/google/start?next=' + encodeURIComponent(G.safeNext('https://evil.test/x')), '옮길 때도 next 는 안전한 경로만');
+  r = await start.onRequestGet({ request: new Request('http://localhost:8788/api/auth/google/start?next=/report/'), env }); ok(new URL(r.headers.get('location')).origin === 'https://accounts.google.com', '내 컴퓨터(localhost)는 옮기지 않음');
+  r = await start.onRequestGet({ request: new Request('https://mantramanse.pages.dev/api/auth/google/start?next=/report/'), env: { ...env, GOOGLE_LOGIN_ORIGIN: 'https://mantramanse.pages.dev/' } }); ok(new URL(r.headers.get('location')).origin === 'https://accounts.google.com', 'GOOGLE_LOGIN_ORIGIN 으로 대표 주소 바꾸기');
 })().catch(e => ok(false, '실행 오류: ' + (e.stack || e.message))).then(() => {
   if (fails.length) { console.log('실패 ' + fails.length + '건\n' + fails.map(f => ' ✗ ' + f).join('\n')); process.exit(1); }
   console.log('구글 로그인 검증 통과');

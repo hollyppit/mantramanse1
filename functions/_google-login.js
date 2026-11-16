@@ -13,6 +13,15 @@ import { sbRest } from './_commerce.js';
 
 export const googleReady = env => !!(env && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET && env.SUPABASE_URL && env.SUPABASE_SERVICE_KEY && env.SUPABASE_ANON_KEY);
 export const STATE_COOKIE = 'mt_google_state', CLAIM_COOKIE = 'mt_google_claim', COOKIE_PATH = '/api/auth/google';
+// 구글에 등록된 돌아올 주소는 대표 주소(mantrafortune.com) 하나뿐이다(브랜드 인증 때 승인 도메인을 하나로 맞춤).
+// 그래서 다른 주소(mantramanse.pages.dev·미리보기·www)에서 로그인을 시작하면 대표 주소로 옮겨 시작한다 — 안 그러면 redirect_uri_mismatch.
+// 바꾸려면 환경변수 GOOGLE_LOGIN_ORIGIN. 내 컴퓨터(localhost·127.0.0.1)는 개발용이라 옮기지 않는다.
+export const canonicalOrigin = env => String((env && env.GOOGLE_LOGIN_ORIGIN) || 'https://mantrafortune.com').replace(/\/+$/, '');
+export function canonicalStart(request, env, next) {
+  const u = new URL(request.url), canon = canonicalOrigin(env);
+  if (u.origin === canon || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(u.hostname)) return null;
+  return canon + '/api/auth/google/start?next=' + encodeURIComponent(next);
+}
 export const callbackUrl = request => new URL(request.url).origin + '/api/auth/google/callback';
 export const cookie = (request, name, value, maxAge) => `${name}=${value}; Path=${COOKIE_PATH}; Max-Age=${maxAge}; HttpOnly; SameSite=Lax${new URL(request.url).protocol === 'https:' ? '; Secure' : ''}`;
 export { getCookie, same, safeNext, packState, unpackState, randomHex };
