@@ -141,7 +141,8 @@ ok(fs.readFileSync(path.join(root, 'report', 'hub', 'hub-quest.js'), 'utf8').inc
 
   /* ⑦ 화면 코드 점검 */
   const src = fs.readFileSync(path.join(root, 'report', 'hub', 'hub-onboard.js'), 'utf8');
-  for (const rt of ["'welcome'", "'reveal'", "H.route('',", "'me'", "'input'"]) ok(src.includes('H.route(' + rt.replace(/^H\.route\(/, '')) || src.includes(rt), '라우트 ' + rt);
+  const srcMe = src + fs.readFileSync(path.join(root, 'report', 'hub', 'hub-me.js'), 'utf8');   // 'me' 라우트는 a63522d(2026-11-13) 마이페이지로 hub-me.js 로 옮겨졌다
+  for (const rt of ["'welcome'", "'reveal'", "H.route('',", "'me'", "'input'"]) ok(srcMe.includes('H.route(' + rt.replace(/^H\.route\(/, '')) || src.includes(rt), '라우트 ' + rt);
   ok(!/대공|소협|대협/.test(src), '화면 코드에 금지 호칭 없음');
   ok(!/(Ob\.track|H\.track)\([^)]*(birth|year|month|day|name)\s*:/.test(src.replace(/birth_input_[a-z_]+/g, '')), '분석 이벤트 속성에 출생정보·이름 없음');
   ok(/touchstart/.test(src) && /prefers-reduced-motion/.test(fs.readFileSync(path.join(root, 'report', 'hub', 'onboard.css'), 'utf8')), '스와이프·애니메이션 감소');

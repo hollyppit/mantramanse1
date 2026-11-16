@@ -29,7 +29,7 @@ function load(file, fetch) {
         if ((provider === 'openai' && mode === 'http-error') || mode === 'all-fail') return new Response('{}', { status: 503 });
         return new Response(JSON.stringify(provider === 'openai' ? { output: [{ content: [{ type: 'output_text', text }] }] } : { content: [{ type: 'text', text }] }));
       });
-      const env = { ANTHROPIC_API_KEY: 'mock', ...(mode === 'claude-only' ? {} : { OPENAI_API_KEY: 'mock' }) };
+      const env = { __READING_ADMIN_GENERATION: true, ANTHROPIC_API_KEY: 'mock', ...(mode === 'claude-only' ? {} : { OPENAI_API_KEY: 'mock' }) };
       let result, thrown;
       try {
         result = file.endsWith('_ikstore.js') ? await ctx.llm(env, 'system', 'user') : await (await ctx.onRequestPost({ env, request: new Request('https://test/api', { method: 'POST', body: JSON.stringify(file.endsWith('/compose.js') ? {payload:{chapters:[{id:'c01'}]}} : { task: 'script' }) }) })).json();

@@ -130,7 +130,7 @@ ok(O.merge(O.DEFAULTS, { sections: [{ id: 'final', type: 'final', cta: { show: t
   ok(/oldBegin/.test(qj) && /quest\.enabled === false/.test(qj), '스토리를 끄면 예전 슬라이드 툰으로 복귀');
   ok(/q\.classic \|\| q\.next/.test(ob), '빠른 진입(#/input?next=…)은 일반 입력으로 연결(스토리와 구분)');
   ok(/H\.route\('welcome'/.test(ob) && /researchSec/.test(ob) && /myeongriSec/.test(ob) && /serviceSec/.test(ob) && /finalSec/.test(ob), '기존 온보딩 섹션 코드 보존');
-  ok(/to === 'timeline' \? '#\/timeline'/.test(saju), '일주 각성 → 운명의 타임라인 연결');
+  ok(/H\.replace\('#\/timeline\?aw=1'/.test(saju), '일주 각성 → 운명의 타임라인 연결');   // 3abfadb(2026-11-12) 홈 통합 뒤 각성은 늘 #/timeline?aw=1 로
   ok(/#\/timeline/.test(ob) && /FATE TIMELINE/.test(ob) && /renderHome/.test(ob) && /<h2 class="hh-h">무료 콘텐츠/.test(ob) && /종합 무빙툰 리포트/.test(ob) && /tarot_start/.test(ob), '홈: 타임라인 진입 카드 추가 + 기존 홈 카드(무료 콘텐츠·타로·리포트) 유지');
   const html = read('index.html'); ok(html.indexOf('quest-data.js') > html.indexOf('onboard-data.js') && html.indexOf('hub-quest.js') > html.indexOf('hub-onboard.js') && html.indexOf('hub-timeline.js') > html.indexOf('hub-quest.js'), '스크립트 로드 순서');
   const story = fs.readFileSync(path.join(root, 'report/story/story.js'), 'utf8'); ok(/quest-data\.js/.test(story) && /hub-quest\.js/.test(story) && /timeline\.css/.test(story), '랜딩(/report/) 임베드에도 스토리·타임라인 로드');
@@ -145,8 +145,8 @@ ok(O.merge(O.DEFAULTS, { sections: [{ id: 'final', type: 'final', cta: { show: t
 
   /* ⑩ 인생의 주요 주제 = 운명 세계(같은 데이터·같은 이름·같은 이미지, 누르면 그 세계로) */
   vm.runInThisContext(fs.readFileSync(path.join(root, 'report/v2/explore.js'), 'utf8'), { filename: 'explore.js' });
-  const EX = globalThis.ReportV2.Explore, defW = EX.mergeWorlds(null), savedW = EX.mergeWorlds([{ id: 'w2', name: '재물운', line: '직업 · 재물 · 성공', access: 'paid' }, { id: 'w5', enabled: false }]);
-  ok(defW.length === 7 && defW.some(w => w.id === 'w7') && savedW.find(w => w.id === 'w2').name === '재물운', '세계 정의: 관리자 저장본이 기본값 위에 덮어쓴다');
+  const EX = globalThis.ReportV2.Explore, defW = EX.mergeWorlds(null), savedW = EX.mergeWorlds([{ id: 'w2', name: '나의 돈 지도', line: '직업 · 재물 · 성공', access: 'paid' }, { id: 'w5', enabled: false }]);   // '재물운'은 심화 이름으로 옮기는 예전 이름이라 임의의 새 이름으로 덮어쓰기를 본다
+  ok(defW.length === 7 && defW.some(w => w.id === 'w7') && savedW.find(w => w.id === 'w2').name === '나의 돈 지도' && EX.mergeWorlds([{ id: 'w2', name: '재물운' }]).find(w => w.id === 'w2').name === '재물운 심화', '세계 정의: 관리자 저장본이 기본값 위에 덮어쓴다(예전 이름은 새 이름으로)');
   ok(defW.every(w => /\.webp$/.test(EX.artOf(w)) && fs.existsSync(path.join(root, EX.artOf(w).replace(/^\//, '')))), '세계 기본 이미지 = 존재하는 기본 에셋');
   ok(EX.artOf({ id: 'w2', bgImage: '/api/clipfile?k=x.webp' }) === '/api/clipfile?k=x.webp', '세계에 올린 배경이 기본 이미지보다 우선');
   ok(!('topics' in O.merge(O.DEFAULTS, null).timeline) && !('topics' in Q.TIMELINE), '타임라인 주제 목록을 따로 두지 않는다(운명 세계가 단일 출처)');

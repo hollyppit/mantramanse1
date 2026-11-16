@@ -3,7 +3,7 @@ const source=fs.readFileSync('report/hub/hub-saju.js','utf8');
 const tick=()=>new Promise(r=>setImmediate(r));
 function setup(){let active=true,saves=0,moves=0,html='',resolve;const handlers={},field=(value)=>({value,focus(){this.focused=true}}),f={};
 for(const [k,v]of Object.entries({name:'검증',gender:'F',calendar:'solar',year:'2024',month:'2',day:'29',time:'12:00',city:'126.98'}))f[k]=field(v);
-f.unknown={checked:false};f.leap={checked:false,parentElement:{}};const msg={textContent:''},button={textContent:'시작',disabled:false};
+f.combinationMode=field('auto');f.climatePalaceMode=field('auto');/* 입력 양식에 이후 추가된 두 칸(기본 auto) */f.unknown={checked:false};f.leap={checked:false,parentElement:{}};const msg={textContent:''},button={textContent:'시작',disabled:false};
 Object.defineProperty(f.day,'innerHTML',{set(v){this.options=v;this.value=String(v.match(/value="(\d+)" selected/)[1])}});
 f.querySelector=s=>s==='[type=submit]'?button:f.gender;f.addEventListener=(k,fn)=>handlers[k]=fn;f.setAttribute=()=>{};f.removeAttribute=()=>{};
 const P={has:()=>false,get:()=>null,toInput:x=>x,save:()=>{saves++;return state.saveOK},awakened:()=>false};

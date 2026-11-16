@@ -209,7 +209,7 @@
 
     // 05 運 — 산 정상에서 흐르는 강, 이어지는 길로
     out.push(sc('ep_j05', 'RIVER', Object.assign({ sceneType: 'INTRO', imageMotion: 'pan-left', overlayStrength: 0.45, bgmMood: 'ambient', textPosition: 'center' }, tags(['river', 'road', 'mist', 'lake'])), [
-      T('그러나—', 1500, { min: 900 }), T('태어난 것이\n전부는 아니다.', 2300, { min: 1500 }), Hj('運', 2300, { min: 1500 }), T("시간이 흐르면\n운도 함께 흐릅니다.", 2500, { min: 1600 }),
+      T('그러나—', 1500, { min: 900 }), T('태어난 것이\n전부는 아닙니다.', 2300, { min: 1500 }), Hj('運', 2300, { min: 1500 }), T("시간이 흐르면\n운도 함께 흐릅니다.", 2500, { min: 1600 }),
       T('어떤 길은 열리고.', 1700, { min: 1000 }), T("어떤 길은 막히기도 합니다.", 1700, { min: 1000 }), T('어떤 사람은 찾아오고.', 1700, { min: 1000 }), T("어떤 사람은 떠나기도 합니다.", 1900, { min: 1100 }), T("어떤 선택은\n삶의 방향을 바꾸기도 합니다.", 2700, { min: 1600 })],
       { mediaIntent: { scenes: ['river', 'road', 'mist'], emotions: ['reflective', 'calm'] } }));
 
@@ -238,7 +238,7 @@
     out.push(sc('ep_j10', 'REALITY_CHECK', { sceneType: 'INTRO', motionIntensity: 0, imageMotion: 'none', overlayStrength: 0.7, bgmMood: 'cinematic', textPosition: 'top', textSize: 'L' }, s10, { phTone: 'map', pillars: pil, pillarsAt: 3 }));
     // 11 사주팔자의 의미 — "지도"가 핵심 은유. 미래를 확정한다는 표현은 쓰지 않는다
     out.push(sc('ep_j11', 'REALITY_CHECK', { sceneType: 'INTRO', motionIntensity: 0, imageMotion: 'none', overlayStrength: 0.7, bgmMood: 'reflective', textPosition: 'center', textSize: 'L' }, [
-      T('이것은\n정답이 아니다.', 2400, { min: 1500 }), T("길을 대신\n걸어주지는 않습니다.", 2800, { min: 1800 }), T('다만—', 1700, { min: 1100, e: 'pause' }),
+      T('이것은\n정답이 아닙니다.', 2400, { min: 1500 }), T("길을 대신\n걸어주지는 않습니다.", 2800, { min: 1800 }), T('다만—', 1700, { min: 1100, e: 'pause' }),
       T('지나온 흐름을 살피고.', 2000, { min: 1200 }), T('지금 서 있는 곳을\n확인하고.', 2200, { min: 1400 }), T('앞으로 마주할 길을\n헤아리기 위한', 2400, { min: 1500 }), Im("하나의 지도입니다.", 3000, { min: 1900 })], { phTone: 'map' }));
 
     // 12 출정 — 가장 큰 스케일: 광활한 산맥, 운해, 절벽, 끝없이 이어지는 길, 아직 완전히 뜨지 않은 태양

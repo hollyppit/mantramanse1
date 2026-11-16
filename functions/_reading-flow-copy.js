@@ -4,7 +4,7 @@ import {deriveFacts,evalConds} from './_ik.js';
 import {CONDITION_PLANS} from './_reading-conditional-copy.js';
 import {CONDITIONAL_BODIES} from './_reading-conditional-bodies.js';
 import {FLOW_SCENES} from './_reading-flow-scenes.js';
-export const FLOW_VERSION='question-body-flow-20261021-7';
+export const FLOW_VERSION='question-body-flow-20261116-8';
 const roles=['reality','strength','risk','reinforce','practice'];
 // Dependent clauses, not standalone advice paragraphs. They fill one causal scene.
 const voices={
@@ -153,13 +153,14 @@ export function flowTemplateIssue(p){
  if((p.text.match(/〔/g)||[]).length!==[...p.text.matchAll(marker)].length||(p.text.match(/〕/g)||[]).length!==[...p.text.matchAll(marker)].length||/〕[^〔]*〕/.test(p.text))return 'invalid-flow-slot';
  return null;
 }
+// 2026-11-16: 강점·보완 첫 문장에 그 장의 장면(scene[0])을 넣어, 한 책의 여러 장에 같은 문장이 반복되지 않게 한다(tests/coherent-reading-flow-sim.cjs)
 export function flowPassages(c){
  const m=c.id.match(/^timeline_(\w+)_(\d+)$/),i=m&&Number(m[2])-1,plan=m&&CONDITION_PLANS[m[1]]?.[i],scene=m&&FLOW_SCENES[m[1]]?.[i];if(!plan||!scene)return [];
  const [s,object,gain,cost]=scene;
  return ['strong','mid','weak'].flatMap((band,slot)=>{
   const focus=plan[slot+1],body=CONDITIONAL_BODIES[m[1]][i][slot],practice=body[4];
   const texts={
-   reality:'〔시작시선〕 사례를 살펴보면, '+body[0],strength:'〔실력:은〕 다음 생활 장면에서 활용해 볼 수 있습니다. '+body[1],risk:'〔포착〕 '+body[2],reinforce:'〔조정〕 생활에 맞게 조절해 보세요. '+body[3],practice:'〔조정〕 〔실행〕 '+body[4]
+   reality:'〔시작시선〕 사례를 살펴보면, '+body[0],strength:'〔실력:은〕 '+s+' 특히 활용해 볼 수 있습니다. '+body[1],risk:'〔포착〕 '+body[2],reinforce:'〔조정〕 '+s+'에는 생활에 맞게 조절해 보세요. '+body[3],practice:'〔조정〕 〔실행〕 '+body[4]
   };
   return roles.map(role=>({id:'flow-'+m[1]+'-'+(i+1)+'-'+band+'-'+role,role,kind:'guide',text:texts[role],when:{group:{[plan[0]]:band}},unless:{},ruleIds:[],adviceKey:'flow-'+m[1]+'-'+(i+1)+'-'+band+'-'+role}));
  });

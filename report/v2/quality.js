@@ -44,7 +44,9 @@
     var list = ws && ws.length ? ws : X.mergeWorlds(null), counts = {}, fallback = [], hidden = 0, off = {};
     list.forEach(function (w) { counts[w.id] = 0; if (w.enabled === false) off[w.id] = 1; });
     (chapters || []).forEach(function (c) {
-      var id = X.worldFor(c, list, 'life'), hit = list.some(function (w) { return w.id === id && ((w.chapters || []).indexOf(c.id) >= 0 || (w.match || []).some(function (r) { return new RegExp(r).test(c.id) || new RegExp(r).test(c.base || c.id); })); });
+      // 2026-11-16: 세계 판정은 편집 주제·명시 규칙·장 목록·매칭 규칙 순서이고 접힌 세계(w5·w6·w8)는 종합풀이로 간다 — 마지막 기본값(막 번호 추측)으로 정한 장만 '규칙 밖'이다
+      var tr = X.worldTrace ? X.worldTrace(c, list, 'life') : null;
+      var id = tr ? tr.id : X.worldFor(c, list, 'life'), hit = tr ? !tr.fallback : list.some(function (w) { return w.id === id && ((w.chapters || []).indexOf(c.id) >= 0 || (w.match || []).some(function (r) { return new RegExp(r).test(c.id) || new RegExp(r).test(c.base || c.id); })); });
       if (!hit) fallback.push({ id: c.id, title: c.title, world: id });
       if (counts[id] != null) counts[id]++; if (off[id]) hidden++;
     });

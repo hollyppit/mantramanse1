@@ -25,7 +25,7 @@ const as = Q.assets([{ id: 'car:a', group: 'car', title: 'A', url: '/x', video: 
 ok(as.total === 3 && as.image === 2 && as.video === 1 && as.missing.length === 1 && as.missing[0].id === 'car:b' && as.groups.car.image === 1, '에셋 현황 집계');
 const wd = Q.worlds([{ id: 'c01', base: 'c01', act: 2 }, { id: 'zzz_new', title: '새 챕터', act: 4 }, { id: 'c19', base: 'c19', act: 6 }], null);
 ok(wd.fallback.length === 1 && wd.fallback[0].id === 'zzz_new' && wd.fallback[0].world === 'w2', '규칙 밖 챕터는 대체 세계로 보고');
-ok(wd.empty.length >= 3, '챕터가 없는 세계 보고');
+ok(['w7', 'w3'].every(id => wd.empty.some(w => w.id === id)), '챕터가 없는 세계 보고');   // 켜진 세계가 4개(w5·w6·w8 꺼짐)라 이 표본에서 빈 세계는 커리어·인연
 const off = Q.worlds([{ id: 'c01', base: 'c01', act: 2 }], R.Explore.mergeWorlds([{ id: 'w1', enabled: false }]));
 ok(off.hidden === 1 && off.list.find(w => w.id === 'w1').enabled === false, '비활성 세계에 숨겨진 챕터 수');
 

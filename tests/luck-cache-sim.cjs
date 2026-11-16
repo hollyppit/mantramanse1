@@ -34,7 +34,7 @@ const M = globalThis.Manse, LI = require(path.join(root, 'luck-interpret.js'));
   ok(q('abc.mantramanse.pages.dev', '?mantraFlags=region').region === true && q('abc.mantramanse.pages.dev', '?mantraFlags=region').interpret === false, '일부만 켜기');
   for (const h of ['mantramanse.pages.dev', 'example.com', 'mantramanse.pages.dev.evil.com', 'evil-mantramanse.pages.dev']) ok(none(q(h, '?mantraFlags=interpret,timeline,region')), '운영·외부 도메인에서는 주소로 켜지지 않음: ' + h);
   ok(none(q('abc.mantramanse.pages.dev', '?mantraFlags=constructor,__proto__')), '알 수 없는 이름 무시');
-  ok(Object.keys(q('abc.mantramanse.pages.dev', '?mantraFlags=constructor,toString')).sort().join() === 'interpret,region,timeline' && typeof q('a.mantramanse.pages.dev', '?mantraFlags=constructor').constructor === 'function', '상속 속성 이름으로 스위치를 오염시키지 않음');
+  ok(Object.keys(q('abc.mantramanse.pages.dev', '?mantraFlags=constructor,toString')).sort().join() === Object.keys(q('abc.mantramanse.pages.dev', '')).sort().join() && !Object.prototype.hasOwnProperty.call(q('abc.mantramanse.pages.dev', '?mantraFlags=constructor,toString'), 'toString') && typeof q('a.mantramanse.pages.dev', '?mantraFlags=constructor').constructor === 'function', '상속 속성 이름으로 스위치를 오염시키지 않음');
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8'); ok(/MANTRA_FLAGS\.interpret === false/.test(html) && /MANTRA_FLAGS\.timeline === false/.test(html) && /MANTRA_FLAGS\.region === false/.test(html) && html.indexOf('feature-flags.js') < html.indexOf('engine.js'), '화면의 스위치 연결');
   // 관리자 헤더 방어: 잘못된 퍼센트 인코딩이어도 500이 아니라 정상 처리
   for (const f of ['region', 'luck-phrases']) {

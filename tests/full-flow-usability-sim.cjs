@@ -9,7 +9,7 @@ for(const mode of ['headers-stall','body-stall','reject','success','null']){
 }
 // A chosen chapter must be the jump target, even when an act screen precedes it.
 const chapter={previousElementSibling:{classList:{contains:()=>true}}},jumps=[];
-const c={R:{},S:{rep:{chapters:[{id:'a'}]},mv:{gotoEl:e=>jumps.push(e)}},$:()=>chapter};vm.runInNewContext(extract(viewer,'  function gotoChapter(','  function onSection(')+';gotoChapter(0,true)',c);assert.equal(jumps[0],chapter);
+const c={R:{},S:{rep:{chapters:[{id:'a'}]},mv:{gotoEl:e=>jumps.push(e)}},$:()=>chapter,pinTo(){},enterChapter(){}};/* gotoChapter 가 이후 pinTo·enterChapter 를 부른다 */vm.runInNewContext(extract(viewer,'  function gotoChapter(','  function onSection(')+';gotoChapter(0,true)',c);assert.equal(jumps[0],chapter);
 // Reload restores only the same tab route; new navigation and other report URLs stay fresh.
 const handoff=extract(viewer,'  (function handoff()','  window.addEventListener(\'mantra:guide-change');
 for(const [type,scope,expected]of [['reload','?from=hub',1],['navigate','?from=hub',0],['reload','?from=hub&world=w2',0]]){

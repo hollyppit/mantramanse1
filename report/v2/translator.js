@@ -245,7 +245,7 @@
     out.push(sc('end_1', 'SUNRISE', { pacing: 'SLOW', imageMotion: 'slow-zoom-out', visualMetaphor: '해가 떠오르는 산맥, 길게 이어진 길' }, [['태어날 때 가진 것은', "쉽게 바꿀 수 없습니다."], ['~하지만 운은', "!계속 움직입니다."]], { mediaIntent: { scenes: ['sunrise', 'mountain', 'road'], emotions: ['hopeful'], actions: ['lookingForward'] } }));
     out.push(sc('end_2', 'DAWN', { pacing: 'SLOW', visualMetaphor: "길 위로 햇빛이 들어옵니다." }, [['좋은 때에는 움직이고.'], ["막힌 때에는 준비하시면 됩니다."]], { mediaIntent: { scenes: ['road', 'sunrise'], emotions: ['hopeful'] } }));
     if (nm) out.push(sc('end_3', 'NAME_REVEAL', {}, [['#{hero}']], { bg: 'black' }));
-    out.push(sc('end_4', 'QUIET_REFLECTION', { pacing: 'PAUSE', overlayStrength: 1, motionIntensity: 0, imageMotion: 'none' }, [['중요한 것은', '남보다 빨리 가는 것이 아니다.'], ['~내게 오는 때를', "!놓치지 않는 것입니다."]], { bg: 'black' }));
+    out.push(sc('end_4', 'QUIET_REFLECTION', { pacing: 'PAUSE', overlayStrength: 1, motionIntensity: 0, imageMotion: 'none' }, [['중요한 것은', '남보다 빨리 가는 것이 아닙니다.'], ['~내게 오는 때를', "!놓치지 않는 것입니다."]], { bg: 'black' }));
     out.push(sc('end_title', 'ENDING', { textAnimation: 'cinematic-title', pacing: 'PAUSE', overlayStrength: 1, motionIntensity: 0, imageMotion: 'none', nameEmphasis: nm ? 'TITLE' : 'NONE' }, [['!運路']], { bg: 'black', kind: 'title', sub: titleSub(nm) }));
     return fill(out, vars);
   }

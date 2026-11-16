@@ -97,7 +97,8 @@ const resp = (d) => ({ ok: true, json: async () => d });
   const pos = s => idx.indexOf(s);
   assert.ok(pos('/report/last-good.js?v=') > 0 && pos('/report/last-good.js?v=') < pos('topic-deep.js?v=') && pos('/report/last-good.js?v=') < pos('life-narrative.js?v=') && pos('/report/last-good.js?v=') < pos('viewer.js?v=')); ok('v2/index.html: last-good.js 가 사용하는 파일보다 먼저');
   assert.ok(hub.indexOf('/report/last-good.js?v=') > 0 && hub.indexOf('/report/last-good.js?v=') < hub.indexOf('hub-timeline.js?v=')); ok('hub/index.html: last-good.js 가 hub-timeline.js 보다 먼저, hub-timeline 에 ?v=');
-  ['viewer.js?v=20261112-lg', 'topic-deep.js?v=20261112-lg', 'life-narrative.js?v=20261112-lg'].forEach(s => assert.ok(idx.includes(s), s)); ok('바뀐 파일의 ?v= 갱신(운영 도메인 JS 4시간 브라우저 캐시 대비)');
+  // 이후 커밋이 같은 파일을 다시 올리면 ?v= 가 더 새 날짜가 된다 — 20261112 이후 버전이면 된다
+  ['viewer.js', 'topic-deep.js', 'life-narrative.js'].forEach(f => { const at = idx.indexOf(f + '?v='), m = at < 0 ? null : [0, idx.slice(at + f.length + 3, at + f.length + 11)]; assert.ok(m && m[1] >= '20261112', f + '?v=' + (m && m[1])); }); ok('바뀐 파일의 ?v= 갱신(운영 도메인 JS 4시간 브라우저 캐시 대비)');
   ['report/hub/hub-timeline.js', 'report/v2/topic-deep.js', 'report/v2/life-narrative.js'].forEach(p => assert.match(read(p), /(MantraLastGood|LG)\.(json|load)\('\/api\/luck-flags'/, p)); ok('스위치(/api/luck-flags) 세 곳 모두 마지막 값 보관');
   console.log('PASS editorial-stable-version-sim ' + pass + '항목');
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

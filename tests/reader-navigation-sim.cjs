@@ -2,7 +2,7 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
 const source=fs.readFileSync('report/v2/viewer.js','utf8');
 function fn(name,next){return source.slice(source.indexOf('  function '+name+'('),source.indexOf('  function '+next+'('));}
 let active=1,calls=[];const chapters=[{id:'first'},{id:'second'},{id:'third'}];
-const context={S:{rep:{chapters},idx:1,cur:true,ended:{}},pinned:()=>active,enterChapter:(c,i)=>calls.push(['enter',i]),T:()=>{},checkUnlock:()=>{},EXPLORE:false};
+const context={R:{}/* onSection 이 이후 R.SealReader 를 본다 */,pinTo(){},S:{rep:{chapters},idx:1,cur:true,ended:{}},pinned:()=>active,enterChapter:(c,i)=>calls.push(['enter',i]),T:()=>{},checkUnlock:()=>{},EXPLORE:false};
 vm.createContext(context);vm.runInContext(fn('onSection','enterChapter'),context);
 const sec=i=>({dataset:{ch:String(i)},classList:{contains:()=>false}});
 context.onSection(sec(0));context.onSection(sec(2));assert.deepEqual(calls,[],'both earlier and later observer signals must respect an explicit jump');

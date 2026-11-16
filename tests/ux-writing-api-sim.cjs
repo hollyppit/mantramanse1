@@ -5,7 +5,7 @@ for(const f of ['engine.js','report/v2/saju-data.js'])vm.runInThisContext(fs.rea
   const API=await import('../functions/api/movingtoon-reading.js');
   const M=Manse,ch=M.compute({year:1990,month:5,day:15,hour:14,minute:30,calendar:'solar',gender:'M',city:'서울'}),sd=ReportV2.SajuData.build(ch,{now:Date.UTC(2026,9,17)});
   const mem=new Map(),kv={get:async(k,t)=>mem.has(k)?t==='json'?JSON.parse(mem.get(k)):mem.get(k):null,put:async(k,v)=>mem.set(k,v),list:async()=>({keys:[]})};
-  const env={GLOSSARY_KV:kv,OPENAI_API_KEY:'mock',INTERPRETATION_ENGINE_MODE:'legacy'};
+  const env={__READING_ADMIN_GENERATION:true,GLOSSARY_KV:kv,OPENAI_API_KEY:'mock',INTERPRETATION_ENGINE_MODE:'legacy'};
   const unchanged='결과가 걱정된다면 맡길 범위를 먼저 합의해보세요. 확인할 기준을 함께 정리하면 같은 일을 다시 확인하는 부담을 줄이는 데 도움이 될 수 있습니다.';
   const bad='결과를 전부 직접 확인하려 한다. 남에게 맡긴 일까지 다시 손대면 혼자 일을 떠안는 상황이 반복될 수 있다.';
   const fixed='결과를 전부 직접 확인하려는 상황을 가정해볼 수 있습니다. 맡긴 일을 다시 손댄다면 자신의 업무가 밀릴 수 있으니 확인할 범위를 먼저 합의해보세요.';

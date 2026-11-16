@@ -70,18 +70,19 @@ cases.forEach(c => {
   ok(pr.map(s => s.sceneId).join() === 'pro_1,pro_2,pro_3,pro_4,pro_5,pro_6,pro_7,pro_title,pro_born,pro_fixed,pro_myeong,pro_hero', '프롤로그 순서: ' + pr.map(s => s.sceneId));
   ok(['DAWN', 'MOUNTAIN', 'MIST', 'SILENCE', 'SUNRISE', 'NAME_REVEAL'].every((p, i) => pr[i].cinema.preset === p), '오프닝 8장면: 갈대밭·산맥·산사·암전·해·이름');
   const nameless = T.prologue(sd, '', R.Narrator.heroVars(sd, '')), ti = pr.find(s => s.sceneId === 'pro_title'), p6 = pr.find(s => s.sceneId === 'pro_6');
-  ok(ti.cinema.segments[0].text === '運路' && ti.sub === '백진우에게는,\n백진우의 때가 있다.' && nameless.find(s => s.sceneId === 'pro_title').sub === '모든 사람에게는,\n각자의 때가 있다.', '타이틀: 運路 + {이름}에게는, {이름}의 때가 있다');
+  ok(ti.cinema.segments[0].text === '運路' && ti.sub === '백진우에게는,\n백진우에게 맞는 때가 있습니다.' && nameless.find(s => s.sceneId === 'pro_title').sub === '모든 사람에게는\n각자에게 맞는 때가 있습니다.', '타이틀: 運路 + {이름}에게는, {이름}의 때가 있다');
   ok(p6.cinema.segments[0].name === true && p6.cinema.nameEmphasis === 'TITLE' && p6.cinema.segments[0].text === '백진우' && !nameless.some(s => s.sceneId === 'pro_6'), '이름 공개 장면(TITLE 강조) — 이름이 없으면 건너뜀');
   ok(K.build(p6, []).timing.total >= 2000 + 1500, '이름은 2초 이상 머문다');
   ok(/백진우가 처음부터/.test(pr.find(s => s.sceneId === 'pro_myeong').cinema.segments[1].text) && /^백진우\.$/.test(pr.find(s => s.sceneId === 'pro_born').cinema.segments[0].text), '命 · 이름 조사 처리');
   const e1 = T.ending(sd, '지수', R.Narrator.heroVars(sd, '지수')), e2 = T.ending(sd, '', R.Narrator.heroVars(sd, ''));
-  ok(e1.find(s => s.sceneId === 'end_title').sub === '지수에게는,\n지수의 때가 있다.' && e1.find(s => s.sceneId === 'end_3').cinema.segments[0].text === '지수' && !e2.some(s => s.sceneId === 'end_3'), '엔딩: 이름 → 運路 / 이름 없으면 건너뜀');
-  ok(e1.map(s => s.cinema.segments.map(g => g.text).join(' ')).join(' ').includes('운은 계속 움직인다') || e1[0].cinema.segments.some(g => /계속 움직인다/.test(g.text)), '엔딩은 운명을 확정하지 않는다');
+  ok(e1.find(s => s.sceneId === 'end_title').sub === '지수에게는,\n지수에게 맞는 때가 있습니다.' && e1.find(s => s.sceneId === 'end_3').cinema.segments[0].text === '지수' && !e2.some(s => s.sceneId === 'end_3'), '엔딩: 이름 → 運路 / 이름 없으면 건너뜀');
+  ok(e1.map(s => s.cinema.segments.map(g => g.text).join(' ')).join(' ').includes('운은 계속 움직입니다') || e1[0].cinema.segments.some(g => /계속 움직입니다/.test(g.text)), '엔딩은 운명을 확정하지 않는다');
 });
 const money = T.moneyScene(sdOf(1990, 5, 17, 14, 'M'), {}); ok(money.length === 1 && money[0].cinema.segments.length >= 4, '돈 장면');
+// 2026-11-16: 타이틀·엔딩·영화 비유 문구는 672b647(2026-10-13) 이후 존댓말로 바뀌어 기대값을 현재 문구로 맞췄다
 // (영화 비유 보조 도구 analogy 는 코드에 남아 있으나 運路 흐름에서는 쓰지 않는다)
 const anaTxt = cases.map(c => T.analogy(sdOf.apply(null, c)));
-ok(anaTxt.every(a => /영화로 비유한다면/.test(a.intro) && /구조와 비슷하다\.$/.test(a.tail) && !/입니다/.test(a.line)), '영화 비유는 단정하지 않고 "구조와 비슷하다"로 보조');
+ok(anaTxt.every(a => /영화에 비유하자면/.test(a.intro) && /구조와 비슷합니다\.$/.test(a.tail) && !/입니다/.test(a.line)), '영화 비유는 단정하지 않고 "구조와 비슷하다"로 보조');
 ok(all.filter(t => /아이언맨|닥터 스트레인지|윌리 웡카|머니볼|캡틴|헤르미온느/.test(t)).length === 0, '영화 캐릭터 비유는 運路 흐름에 나오지 않음');
 
 console.log('7. 감독: 챕터 장면 구성');

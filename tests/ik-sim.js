@@ -11,7 +11,7 @@ const fails = []; const ok = (c, m) => { if (!c) { fails.push(m); console.log(' 
   const API = await import(path.join(root, 'functions/api/ik.js').replace(/\\/g, '/').replace(/^([A-Za-z]):/, 'file:///$1:'));
   const M = globalThis.Manse, S = globalThis.ReportV2.SajuData;
   const chart = (y, m, d, h, mi, g) => M.compute({ year: y, month: m, day: d, hour: h, minute: mi, calendar: 'solar', leap: false, gender: g, city: '서울' });
-  const ch = chart(1990, 5, 15, 14, 30, 'M'), sd = S.build(ch, { now: Date.UTC(2026, 9, 6) });
+  const ch = chart(1990, 5, 15, 10, 0, 'M')/* 14:30 은 엔진 가중 조정 뒤 중화(50.7%)라 같은 날 10시(경진·신강·금 강·재성 약)로 */, sd = S.build(ch, { now: Date.UTC(2026, 9, 6) });
   const Y = sd.nowYear, ext = { future: M.seunRange(ch, Y, Y + 4).map((x, i) => ({ year: Y + i, season: S.seasonOf(x.ev) })) };
 
   console.log('1. facts · 조건 평가');

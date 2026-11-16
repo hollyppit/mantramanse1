@@ -20,7 +20,7 @@ global.fetch = async (u, o = {}) => {
 };
 const mem = new Map();
 const kv = { get: async (k, t) => { const v = mem.get(k); return v == null ? null : t === 'json' ? JSON.parse(v) : v; }, put: async (k, v) => { mem.set(k, String(v)); }, delete: async k => { mem.delete(k); }, list: async () => ({ keys: [] }) };
-const env = { INTERPRETATION_ENGINE_MODE: 'legacy', ADMIN_PASSWORD: 'pw', GLOSSARY_KV: kv, ANTHROPIC_API_KEY: 'x', IK_DEEP_AI_WAIT_MS: '2000', IK_DEEP_HOURLY_LIMIT: '999', MOVINGTOON_HOURLY_LIMIT: '999' };
+const env = { __READING_ADMIN_GENERATION: true, INTERPRETATION_ENGINE_MODE: 'legacy', ADMIN_PASSWORD: 'pw', GLOSSARY_KV: kv, ANTHROPIC_API_KEY: 'x', IK_DEEP_AI_WAIT_MS: '2000', IK_DEEP_HOURLY_LIMIT: '999', MOVINGTOON_HOURLY_LIMIT: '999' };
 const M = globalThis.Manse, SD = globalThis.ReportV2.SajuData;
 const callApi = async (file, qs, body, admin, method) => { const mod = await imp('functions/' + file); const get = method === 'GET' || body == null; const res = await (mod.onRequest || mod.onRequestPost)({ env, waitUntil: p => p, request: new Request('http://x/api/' + qs, { method: get ? 'GET' : 'POST', headers: { 'content-type': 'application/json', ...(admin ? { authorization: 'Bearer pw' } : {}), 'cf-connecting-ip': '5.5.5.5' }, ...(get ? {} : { body: JSON.stringify(body) }) }) }); return { s: res.status, d: await res.json() }; };
 const sdOf = (y, mo, d, g) => { const ch = M.compute({ year: y, month: mo, day: d, hour: 14, minute: 30, calendar: 'solar', leap: false, gender: g || 'M', city: '서울' }), sd = SD.build(ch, { now: Date.UTC(2026, 9, 6) }); delete sd.birth; const Y = sd.nowYear; return { sd, ext: { future: M.seunRange(ch, Y, Y + 4).map((x, i) => ({ year: Y + i, season: SD.seasonOf(x.ev) })) } }; };

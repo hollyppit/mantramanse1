@@ -39,7 +39,7 @@ ok(!/TODO/.test(imgHtml), '운영 화면에서 TODO 문구가 노출됨');
 
 console.log('3. 실제 엔진 연결');
 const M = globalThis.Manse, S = St.state;
-const ch = M.compute({ year: 1990, month: 5, day: 15, hour: 14, minute: 0, calendar: 'solar', gender: 'F', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' });
+const ch = M.compute({ year: 1990, month: 5, day: 15, hour: 10, minute: 0, /* 14시는 엔진 가중 조정 뒤 중화 — 신강 문구 검사를 위해 같은 날 10시 */ calendar: 'solar', gender: 'F', lon: 126.98, timeMode: 'lmt', jasi: 'jeong', sinsalBase: 'year', model: 'season', school: 'eokbu' });
 S.chart = ch; S.name = '하늘'; S.interest = 'money'; S.flowOpen = true;
 const fr = St.COMPONENTS.FreeResult.render(), fp = St.COMPONENTS.FlowPreview.render(), lk = St.COMPONENTS.LockedContent.render(), pw = St.COMPONENTS.Paywall.render({ ctaText: '구매' });
 ok(/하늘님의 기본 기질/.test(fr) && /경진/.test(fr) && /庚辰/.test(fr), '무료 결과에 이름/일주가 없음');

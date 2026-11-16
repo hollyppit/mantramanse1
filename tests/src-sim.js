@@ -10,7 +10,7 @@ const url = p => 'file:///' + path.join(root, p).replace(/\\/g, '/');
 (async () => {
   const S = await import(url('functions/_src.js')), IKAPI = await import(url('functions/api/ik.js')), SRC = await import(url('functions/api/src.js'));
   const M = globalThis.Manse, SD = globalThis.ReportV2.SajuData;
-  const ch = M.compute({ year: 1990, month: 5, day: 15, hour: 14, minute: 30, calendar: 'solar', leap: false, gender: 'M', city: '서울' }), sd = SD.build(ch, { now: Date.UTC(2026, 9, 6) }), Y = sd.nowYear;
+  const ch = M.compute({ year: 1990, month: 5, day: 15, hour: 10, minute: 0, calendar: 'solar', leap: false, gender: 'M', city: '서울' })/* 14:30 은 엔진 가중 조정 뒤 중화 — 같은 날 10시(경진·신강·재성 약) */, sd = SD.build(ch, { now: Date.UTC(2026, 9, 6) }), Y = sd.nowYear;
   const ext = { future: M.seunRange(ch, Y, Y + 4).map((x, i) => ({ year: Y + i, season: SD.seasonOf(x.ev) })) };
   const st = new Map(), r2 = new Map(), kv = { get: async (k, t) => { const v = st.get(k); return v == null ? null : t === 'json' ? JSON.parse(v) : v; }, put: async (k, v) => { st.set(k, v); } };
   const env = { GLOSSARY_KV: kv, ADMIN_PASSWORD: 'pw', ANTHROPIC_API_KEY: 'k', CLIPS_R2: { put: async (k, v) => { r2.set(k, v); }, get: async k => (r2.has(k) ? { body: r2.get(k), httpMetadata: { contentType: 'application/pdf' } } : null), delete: async k => { r2.delete(k); } } };

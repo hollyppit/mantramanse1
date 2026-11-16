@@ -12,7 +12,7 @@ const mk = (y, m, d, h, g) => M.compute({ year: y, month: m, day: d, hour: h, mi
 
 console.log('1. 모든 섹션 생성');
 const ids = Object.keys(D.SECTIONS);
-ok(ids.length === 14 && D.PLACEMENT.length === 14, '섹션 14개 · 배치 14곳: ' + ids.length);
+ok(ids.filter(id => !/^dossier_/.test(id)).length === 14 && D.PLACEMENT.length === 14, '섹션 14개 · 배치 14곳: ' + ids.length);   // 7761612(2026-11-09) 운명 기록 카드 dossier_spouse·dossier_past 는 배치 없는 카드
 births.forEach(b => {
   const ch = mk(...b), sd = R.SajuData.build(ch, { now }), H = { M, ch, sd, now, name: '홍길동', assets: { 'car:경': '/x/car.webp' } }, tag = b.join('-');
   ids.forEach(id => {

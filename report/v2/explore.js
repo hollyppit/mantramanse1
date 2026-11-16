@@ -106,8 +106,11 @@
       for (j = 0; j < (w.match || []).length; j++) { var re = new RegExp(w.match[j]); if (re.test(id) || re.test(base)) return w.id; }
     }
     if (c.readingSection) return ['w1','w1','w1','w1','w7','w2','w3','w3','w8','w1','w1','w1','w1','w6','w6'][c.readingSection-1] || 'w1';
+    if (worldForRaw.trace) worldForRaw.trace.fallback = true;   // 규칙이 아니라 막 번호로 추측한 배정(품질 점검이 '규칙 밖 장'으로 보고)
     return FALLBACK_WORLD[c.act] || 'w1';
   }
+  // 품질 점검용: 최종 세계와, 규칙 없이 막 번호로 추측했는지(2026-11-16). 판정 자체는 worldFor 와 같다
+  function worldTrace(c, worlds, flow) { var t = { fallback: false }; worldForRaw.trace = t; try { return { id: worldFor(c, worlds, flow), fallback: t.fallback }; } finally { worldForRaw.trace = null; } }
 
   /* 세계별 챕터·진행. 비활성 세계의 챕터는 가장 가까운 활성 세계로 옮기지 않고 숨긴다(관리자가 끈 것). */
   function worldsModel(chapters, worlds, ended, last) {
@@ -178,5 +181,5 @@
     return h + '</ol><p class="fine">사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></div>';
   }
 
-  R.Explore = { applyTopics: applyTopics, artOf: artOf, ACTS: ACTS, DEFAULT_WORLDS: DEFAULT_WORLDS, actOf: actOf, mergeWorlds: mergeWorlds, worldFor: worldFor, worldsModel: worldsModel, load: load, save: save, progress: progress, resumeIndex: resumeIndex, html: html };
+  R.Explore = { applyTopics: applyTopics, artOf: artOf, ACTS: ACTS, DEFAULT_WORLDS: DEFAULT_WORLDS, actOf: actOf, mergeWorlds: mergeWorlds, worldFor: worldFor, worldTrace: worldTrace, worldsModel: worldsModel, load: load, save: save, progress: progress, resumeIndex: resumeIndex, html: html };
 })(typeof window !== 'undefined' ? window : globalThis);
