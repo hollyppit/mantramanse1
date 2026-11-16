@@ -7047,100 +7047,21 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     } else if (k === 'life') drawDomainLife(el);
   }
 
-  // 운의 흐름 상세: 주 흐름 4개를 모두 보여 주고(최고점이 주 흐름), 변동·방어 overlay와 흐름 적합도는 따로 보여 준다
-  const FLOW_ROWS = [['opportunity', '기회', 'd-atk'], ['expansion', '확장', 'd-ext'], ['harvest', '수확', 'd-hrv'], ['accumulation', '축적', 'd-acc']];
-  function flowBars(e) {
-    const f = e.flow;
-    return `<div class="flowbars">${FLOW_ROWS.map(([k, n, c]) => `<div class="fb${k === f.primaryFlow ? ' main' : k === f.secondaryFlow ? ' sec' : ''}"><span class="fn">${n} 활성도${k === f.primaryFlow ? ' · 주' : k === f.secondaryFlow ? ' · 동반' : ''}</span><span class="volbar" style="--v:${f.flows[k]}"><i style="background:var(--${c})"></i></span><b class="num">${f.flows[k]}</b></div>`).join('')}</div>`;
-  }
-  function metricsBox(e) {
-    const o = e.overlays;
-    return `<div class="flowbars">
-      <div class="fb${o.volatility.active ? ' main' : ''}"><span class="fn">${term('변동성')}</span><span class="volbar" style="--v:${o.volatility.score}"><i style="background:var(--d-chg)"></i></span><b class="num">${o.volatility.score}</b></div>
-      <div class="fb${o.defense.active ? ' main' : ''}"><span class="fn">${term('방어기', '부담도')}</span><span class="volbar" style="--v:${o.defense.score}"><i style="background:var(--d-def)"></i></span><b class="num">${o.defense.score}</b></div>
-    </div>
-    <div class="small">변동성 <b class="num">${o.volatility.score}</b> · ${o.volatility.band} · 부담도 <b class="num">${o.defense.score}</b> · ${o.defense.band} · 흐름 적합도 <b class="num">${signed(e.fitScore)}</b> · ${e.condition}</div>`;
-  }
-  // 기회 활성도의 종류·근거(활성도 값 자체는 flowBars에 있다)
-  function oppBox(e) {
-    const o = e.opportunityActivation, types = e.opportunityType;
-    if (o < 40) return `<div class="small muted">${M.opportunityNote(e)}</div>`;
-    return `<div class="volbox"><div class="small muted">${M.opportunityNote(e)}</div>
-      ${types.length ? `<div class="small"><b>주요 기회</b>: ${types.map(esc).join(' · ')}</div>` : ''}
-      ${e.opportunityReasons.length ? `<ul class="pos-ul small">${e.opportunityReasons.slice(0, 4).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}</div>`;
-  }
-  function volBox(e) {
-    const v = Math.round(e.volatilityScore), sig = e.volatilitySignals.slice(0, 4);
-    return `<div class="volbox"><div class="volh"><span>${term('변동성')} <b class="num">${v}</b> / 100 · ${e.volatilityBand}</span></div>
-      <div class="small muted">${M.volatilityNote(e)}</div>
-      ${sig.length ? `<div class="small"><b>주요 변화 신호</b></div><ul class="pos-ul small">${sig.map(g => `<li>${esc(g.text)} <span class="muted">— ${g.means}</span></li>`).join('')}${e.volatilityOverlap >= 2 ? `<li>핵심 궁(일주·월주) 관계 ${e.volatilityOverlap}개 중첩</li>` : ''}</ul>` : '<div class="small muted">원국과 만드는 합·충·형·파·해가 거의 없습니다.</div>'}</div>`;
-  }
+  // 부담도 용어 시트(아래 sheet)에서 쓰는 이유 이름. 상세 패널의 그래프 지표 카드는 2026-11-16에 뺐다
   const DEF_PART = { fit: '흐름 적합도 저하', eokbu: '강약(억부) 불균형 심화', structure: '십성 균형 악화·구조 부담', johu: '조후(한난조습) 부담', relation: '합·충 관계 부담', volFit: '변화 신호와 부적합이 겹침' };
-  function defBox(e) {
-    const o = e.overlays.defense, parts = Object.entries(e.flow.defenseParts).filter(([, v]) => v >= 0.25).sort((a, b) => b[1] - a[1]).slice(0, 4);
-    return `<div class="volbox"><div class="volh"><span>${term('방어기', '부담도')} <b class="num">${o.score}</b> / 100 · ${o.band}</span></div>
-      ${parts.length ? `<div class="small"><b>부담이 커지는 이유</b></div><ul class="pos-ul small">${parts.map(([k, v]) => `<li>${DEF_PART[k]} <span class="muted">— ${Math.round(v * 100)}%</span></li>`).join('')}</ul>` : '<div class="small muted">부담을 키우는 뚜렷한 요인이 없습니다.</div>'}
-      <div class="small muted">부담도는 이 운의 전반적인 부담 관리 필요성이며, 충돌·과부하를 따로 보는 사고수와는 다른 값입니다.</div></div>`;
-  }
   const VOL_CTX = {}; let volSeq = 0;
   const volAttr = e => { if (!e) return ''; const id = 'v' + (++volSeq); VOL_CTX[id] = e; return ` data-vol="${id}"`; };
-  // 운의 단위별 overlay 풀이
-  const LEVEL_OV = {
-    daeun: { volatility: '10년 동안 직업·환경·관계의 방향이 움직이기 쉬움', defense: '10년 중 무리한 확대보다 부채·건강 등 부담 점검이 필요' },
-    seun: { volatility: '올해 조직·환경·계획의 재편 가능성에 주목', defense: '올해는 현금 보존·비용 절감·하던 일 완주가 맞음' },
-    wolun: { volatility: '이번 달 일정·거래·환경 변동에 대비', defense: '이번 달은 지출 줄이기·일정 여유 두기가 맞음' },
-    ilun: { volatility: '오늘 일정·환경 변동에 유연하게 대응, 큰 결정은 확인 후', defense: '오늘은 검토·유지·마무리 위주로, 새 일은 무리하지 않기' },
-  };
-  function ovLines(e, kind) {
-    const t = LEVEL_OV[kind]; if (!t) return '';
-    return ['volatility', 'defense'].filter(k => e.overlays[k].active).map(k => `<div class="small">${ovBtn(k, e)} <b>${t[k]}</b></div>`).join('');
-  }
-  function flowHead(p, mainBtn) {
-    return `${mainBtn}${p.secondaryFlow ? `<span class="muted small">동반 ${M.flowName(p.secondaryFlow)}</span>` : ''}${ovTags(p, true)} ${condTag(p.condition)}`;
-  }
-  function phaseBox(x, kind) {
-    const p = luckMode(x), name = p.mode, [role, texts] = LEVEL[kind], [mean, act] = texts[name];
-    const alt = showGhost() ? altOf(x) : null;
-    return `<div class="phbox dm-bg" style="--dm:${m6Col(name)}">
-      <div class="phbox-h">${flowHead(p, m6Btn(name, p))} <b>${mean}</b> <span class="muted small">${LEVEL_ROLE[kind]}</span></div>
-      <div class="small">${esc(M.flowSummary(p))}</div>
-      <div class="small">할 일: <b>${act}</b></div>
-      ${ovLines(p, kind)}
-      ${flowBars(p)}
-      ${metricsBox(p)}
-      <div class="small muted">작용 강도 ${Math.round(p.intensityScore)} (${esc(p.tendency)})</div>
-      <div class="small">이 시기에 주로 들어오는 기운은 ${term(p.group)}입니다 → <b>${GROUP_ACT[p.group]}</b>에 힘을 쓰는 성향입니다.</div>
-      ${oppBox(p)}
-      ${volBox(p)}
-      ${defBox(p)}
-      ${alt != null ? `<div class="small muted">${schoolName(altSchool())} 기준만 따로 보면 ${signed(alt)}점 (${M.conditionOf(alt)}) — 종합 흐름과 ${Math.sign(alt) === Math.sign(luckV(x)) ? '같은 방향' : '다른 방향'}입니다.</div>` : ''}
-    </div>`;
-  }
   // 일진 풀이: 주 흐름·overlay와 판정 순서(세운 → 월운 → 일진 → 목적 → 시진)
   const flowChips = x => m6Tag(luckMode(x).mode) + ovTags(x.ev, false) + ' ' + pill(x.ev.condition);
-  function dayBox(x) {
-    const ch = S.ch, dm = dayMode(x), [c, mean, act] = DAYMODE[dm.mode];
+  // 2026-11-16: 일진의 그래프 지표 카드(주 흐름·활성도·변동·부담)는 빼고, 판정 순서(세운 → 월운 → 일진 → 목적 → 시진)만 남긴다
+  function dayJudge(x) {
+    const ch = S.ch;
     const ms = Date.UTC(x.date[0], x.date[1] - 1, x.date[2], 3), Y = M.yearPillarAt(ms).sajuYear;
     const se = M.seunRange(ch, Y, Y)[0], wm = M.wolun(ch, Y).filter(m => m.startMs <= ms).pop();
     const hours = sijinRows(x, x.date), best = hours.filter(h => h.gr.g === '실행'), ok = hours.filter(h => h.gr.g === '활용');
     const hn = h => `${M.BR_K[h.hb]}시${h.tag || ""}`;
     const step = (n, label, body) => `<div class="jstep"><span class="jn">${n}</span><span class="jl">${label}</span><span class="jb">${body}</span></div>`;
-    const f = dm.flow;
-    return `<div class="phbox dm-bg" style="--dm:${dmCol(dm.mode)}">
-      <div class="small muted">오늘의 주 흐름</div>
-      <div class="phbox-h">${flowHead(dm, dmBtn(dm.mode, dm))} <b>${mean}</b></div>
-      ${f.secondaryFlow ? `<div class="small">동반 흐름: <b>${M.flowName(f.secondaryFlow)}</b> (활성도 ${f.flows[f.secondaryFlow]})</div>` : ''}
-      <div class="small">${esc(M.flowSummary(dm))}</div>
-      <div class="small">그날 할 일: <b>${act}</b></div>
-      ${ovLines(dm, 'ilun')}
-      ${flowBars(dm)}
-      ${metricsBox(dm)}
-      <div class="small muted">작용 강도 ${Math.round(dm.intensityScore)} (${esc(dm.tendency)}) · 들어오는 기운은 ${term(dm.group)} → ${GROUP_ACT[dm.group]}</div>
-      ${oppBox(dm)}
-      ${volBox(dm)}
-      ${defBox(dm)}
-    </div>
-    <div class="judge"><h4>${term('판정 순서')}</h4>
+    return `<div class="judge"><h4>${term('판정 순서')}</h4>
       ${step('①', '세운', se ? `${M.gzName(se)} ${flowChips(se)} 올해 기본 환경` : '—')}
       ${step('②', '월운', wm ? `${M.gzName(wm)} ${flowChips(wm)} 이번 달 행동 방향` : '—')}
       ${step('③', '일진', `${M.gzName(x)} ${flowChips(x)} 오늘의 흐름`)}
@@ -7418,7 +7339,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
   let phrLoaded = false;
   function phrLoad() { if (phrLoaded || !window.MantraLuckInterpret) return; phrLoaded = true; fetch('/api/luck-phrases').then(r => r.ok ? r.json() : null).then(d => { if (d && window.MantraLuckInterpret.applyPublished(d.published)) render(); }).catch(() => { }); }
-  function interpBox(x, kind) {
+  function interpBox(x, kind, basis = '') {   // basis: 흐름 점수 근거(detailHTML) — '명리학적 근거 보기' 맨 앞에 합친다(2026-11-16)
     const LI = window.MantraLuckInterpret; if (!LI || !x || !x.ev || window.MANTRA_FLAGS.interpret === false) return '';
     phrLoad();
     let r; try { r = LI.buildCached(M, S.ch, x, kind, interpCtx(x, kind)); } catch (e) { return ''; }
@@ -7436,7 +7357,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ((r.facts || []).length ? '<p class="small muted">' + r.facts.map(esc).join(' ') + '</p>' : '') +
       '<div class="ib-k">어떻게 대응할 것인가</div>' + li(r.strategy) +
       '<p class="small muted">' + r.uncertainty.map(esc).join(' ') + '</p>' +
-      '<details class="adv"><summary>명리학적 근거 보기</summary><div class="small">' +
+      '<details class="adv"><summary>명리학적 근거 보기</summary><div class="small">' + basis +
       '<p><b>원국</b> ' + esc(ev.natal.join(' · ')) + '<br><b>이 기간</b> ' + esc(ev.luck) + ' · 십성 ' + esc(ev.tenGods.join('/')) + ' · 지장간 ' + esc(ev.hiddenStems.join(' ')) + '<br><b>오행</b> 천간 ' + esc(ev.elements.stem) + '(' + esc(ev.elements.roles[0]) + ') · 지지 ' + esc(ev.elements.branch) + '(' + esc(ev.elements.roles[1]) + ')<br><b>원국 십성 비율</b> ' + esc(ev.natalGroupPct.join(' · ')) + '</p>' +
       (r.relations.length ? '<p><b>원국과의 작용</b></p>' + li(r.relations.map(q => q.text)) : '<p>이 기간의 글자가 원국과 합·충·형 등을 만들지 않습니다.</p>') +
       '<p><b>적용된 규칙 ID</b> ' + esc(ev.rules.map(q => q.id).filter((v, i, a) => a.indexOf(v) === i).join(', ')) + '<br><b>선택된 문구 ID</b> ' + esc(ev.phraseIds.join(', ')) + '</p>' +
@@ -7553,25 +7474,47 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">해마다의 좋고 나쁨은 타일·그래프 점수 그대로입니다. 이 상자는 두 해에 공통인 천간 오행만 묶어 2년 전략을 보여 줍니다. 해를 누르면 그해 근거가 열립니다.</p></div>`;
   }
   { const st = document.createElement('style'); st.textContent = '.lc-tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(112px,1fr);gap:6px;overflow-x:auto;padding:10px 2px 6px}.lc-tab{position:relative;border:0;border-top:4px solid var(--c);box-shadow:inset 0 0 0 1px var(--line);background:var(--surface);border-radius:12px;padding:8px 6px;display:grid;gap:2px;justify-items:center;cursor:pointer;font:inherit;color:var(--ink)}.lc-tab span{font-size:.76rem;color:var(--ink-2)}.lc-tab.on{box-shadow:inset 0 0 0 2px var(--ink);background:var(--surface-2)}.lc-now{position:absolute;top:-9px;right:6px;font-style:normal;font-size:.66rem;font-weight:800;background:var(--seal);color:#fff;border-radius:8px;padding:1px 6px}.lc-hook{font-size:1rem;margin:8px 0 2px;line-height:1.5}.lc-steps{margin:8px 0;padding-left:0;list-style:none;font-size:.9rem;line-height:1.7}.lc-steps li{margin:8px 0}.lc-steps b{display:block;font-size:.76rem;color:var(--ink-2)}.lc .lc-steps,.lc .lc-hook,.lc .ib-cols p,.lc .ib-ul{word-break:keep-all;overflow-wrap:anywhere}.lc-steps .lc-sum{background:var(--soft,rgba(127,127,127,.08));border-radius:10px;padding:10px 12px;line-height:1.65}.lc-steps .lc-dec{margin:6px 0 0;padding-left:16px;list-style:disc}.lc-steps .lc-dec li{margin:5px 0}.lc-steps .lc-dec b{display:inline;font-size:inherit;color:inherit}.lc-yrs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}.lc-yr{border:0;box-shadow:inset 0 0 0 1px var(--line);border-radius:12px;background:var(--surface);padding:8px 10px;display:grid;gap:4px;justify-items:start;text-align:left;cursor:pointer;font:inherit;color:var(--ink)}.lc-yr.on{box-shadow:inset 0 0 0 2px var(--ink)}.ib.lc-pair{border-left:4px solid var(--c)}.lts.lc-strip{grid-auto-columns:minmax(92px,1fr)}.lcp{display:grid;gap:4px;align-content:start;border-radius:18px;padding:4px;background:color-mix(in srgb,var(--c) 16%,transparent)}.lcp-h{font-size:.72rem;font-weight:800;color:var(--ink);text-align:center;padding-top:2px}.lcp-t{display:grid;gap:4px}.lc-basis summary{cursor:pointer;font-size:.85rem;color:var(--ink-2);margin-top:8px}'; document.head.appendChild(st); }
-  function detailHTML(title, x, extra = '', kind = '', banner = '') {
+  function detailHTML(title, x, extra = '', kind = '', banner = '', tail = '') {   // extra: 근거 안에 넣을 줄 · tail: 근거 밖, 패널 끝에 그대로 보일 것(일진 시진 표)
     if (!x || !x.ev) return '';
     const e = x.ev, w = e.weights;
     const comps = e.unifiedScore != null ? [['통합 용신', 'unified', e.unifiedScore], ['관계', 'relation', e.relationScore], ['구조', 'structure', e.structureScore]] : [['억부', 'eokbu', e.eokbuScore], ['조후', 'johu', e.johuScore], ['관계', 'relation', e.relationScore], ['구조', 'structure', e.structureScore]];
     if (e.unifiedScore == null && e.tonggwanScore != null) comps.splice(2, 0, ['통관', 'tonggwan', e.tonggwanScore]);
     const impact = (e.theoryImpact || []).map(t => `<span class="chip ${t.v >= 5 ? 'ib-g' : t.v <= -5 ? 'ib-b' : ''}">${esc(t.text)}</span>`).join(' ') + (e.theoryImpact || []).filter(t => t.note).map(t => `<span class="small muted" style="display:block">${esc(t.note)}</span>`).join('');   // 종격 칩은 유지·파격 이유 한 줄(2026-11-16)
-    const chainLine = e.chain && e.chain.links.length ? `<div class="small" style="margin-top:4px"><b>${esc(M.josa(e.chain.upName, '과/와'))}의 연결</b> ${e.chain.links.map(l => esc(l.text)).join(' · ')}</div>` : '';
+    // 2026-11-16: 그래프 지표 카드(주 흐름·활성도·변동·부담 상자, phaseBox·dayBox 윗부분)는 빼고, 따로 있던 '흐름 점수 근거'는 '명리학적 근거 보기' 안으로 합쳤다.
+    //   근거 줄은 한 번씩만: 가중치 → 상위 운 섞는 식 → 기준별 영향 칩 → 큰 흐름 한 줄 → 항목별 점수(관계·구조·기둥 사이 합충이 모두 여기 있어 예전 요약 목록·연결 줄은 뺐다)
+    const basis = `<p><b>${term('흐름 점수')} 근거</b> · 흐름 점수 <b class="num">${signed(luckV(x))}</b> (${esc(e.condition)})</p>
+      <p class="muted">${comps.map(([n, k, v]) => `${n} ${signed(v)} × ${Math.round(w[k] * 100)}%`).join(' · ')} — 가중치는 이 사주의 강약·기후 치우침에 따라 정해집니다.${e.unifiedScore != null ? ` 통합 용신은 원국의 통합 판단(${esc(S.ch.unified ? S.ch.unified.primaryName : '')} 기준)으로 천간 뿌리·글자별 조습·격국까지 함께 본 값입니다.` : ''}</p>
+      ${mixLine(x, kind)}${extra}
+      ${impact ? `<p>이 운이 각 기준에 주는 영향: ${impact}</p>` : ''}
+      ${e.chain && e.chain.note ? `<p>${esc(e.chain.note)}</p>` : ''}
+      <div class="parts">${e.parts.map(p => `<div class="part"><span>${esc(p.label)}</span><span class="pv ${p.v > 0.5 ? 'pos' : p.v < -0.5 ? 'neg' : ''}">${signed(p.v)}</span></div>`).join('')}</div>`;
+    const ib = kind ? interpBox(x, kind, basis) : '';
     return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${condTag(e.condition)} <b class="num">${signed(luckV(x))}</b></span></div>
       ${banner}
-      ${kind ? interpBox(x, kind) : ''}
+      ${ib}
       ${kind === 'daeun' || kind === 'seun' ? efBox(x, kind) : ''}
       ${S.metric === 'health' ? hbBox(x, kind) : S.metric === 'accident' ? ahBox(x, kind) : ''}
-      <div class="small" style="color:var(--ink-2)">${luckCells(x)}</div>
-      ${kind ? (kind === 'ilun' ? dayBox(x) : phaseBox(x, kind)) + domainBox(x, kind, title) + rootBox(x, kind) + luckEffects(x, kind) : ''}
-      <h4 style="margin:4px 0 0">${term('흐름 점수')} 근거</h4>
-      <div class="small muted">${comps.map(([n, k, v]) => `${n} ${signed(v)} × ${Math.round(w[k] * 100)}%`).join(' · ')} — 가중치는 이 사주의 강약·기후 치우침에 따라 정해집니다.${e.unifiedScore != null ? ` 통합 용신은 원국의 통합 판단(${esc(S.ch.unified ? S.ch.unified.primaryName : '')} 기준)으로 천간 뿌리·글자별 조습·격국까지 함께 본 값입니다.` : ''}</div>
-      ${impact ? `<div class="small" style="margin-top:4px">이 운이 각 기준에 주는 영향: ${impact}</div>` : ''}${chainLine}
-      <ul class="small" style="margin:4px 0 0;padding-left:18px">${e.reasons.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
-      <div class="parts">${e.parts.map(p => `<div class="part"><span>${esc(p.label)}</span><span class="pv ${p.v > 0.5 ? 'pos' : p.v < -0.5 ? 'neg' : ''}">${signed(p.v)}</span></div>`).join('')}</div>${extra}</div>`;
+      ${luckWords(x)}
+      ${kind ? (kind === 'ilun' ? dayJudge(x) : '') + domainBox(x, kind, title) + rootBox(x, kind) + luckEffects(x, kind) : ''}
+      ${ib ? '' : `<details class="adv"><summary>명리학적 근거 보기</summary><div class="small">${basis}</div></details>`}${tail}</div>`;
+  }
+  // 이 시기의 글자(천간·지지 십성, 12운성, 12신살)를 눌러 뜻을 보는 버튼 줄(2026-11-16, 예전 밑줄 글자 한 줄을 버튼으로)
+  const LCW_CSS = '.lc-words{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 6px}.lc-words .lc-k{font-size:.74rem;color:var(--ink-3);margin-right:2px}'
+    + '.lc-words .lc-w,.lc-words .term.lc-w{display:inline-flex;flex-direction:column;align-items:flex-start;gap:1px;margin:0;padding:6px 12px;border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--accent) 8%,var(--surface));color:var(--ink);font-size:.9rem;font-weight:700;line-height:1.2;text-decoration:none;cursor:pointer;min-height:40px;justify-content:center}'
+    + '.lc-words .lc-w small{font-size:.66rem;font-weight:500;color:var(--ink-3)}.lc-words .term.lc-w:hover{background:color-mix(in srgb,var(--accent) 16%,var(--surface));border-color:var(--accent)}'
+    + '.lc-words .term.lc-w:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.lc-words span.lc-w{cursor:default;opacity:.8}@media (max-width:520px){.lc-words .lc-k{flex-basis:100%}}';
+  { const st = document.createElement('style'); st.textContent = LCW_CSS; document.head.appendChild(st); }
+  function luckWords(x) {
+    const items = [['천간', x.stemTG], ['지지', x.branchTG], ['12운성', x.unseong], ['12신살', x.sinsal12]].filter(([, v]) => v);
+    return `<div class="lc-words"><span class="lc-k">이 시기의 글자 · 눌러서 뜻 보기</span>${items.map(([k, v]) => GL[v]
+      ? `<button type="button" class="term lc-w" data-term="${esc(v)}" aria-label="${esc(k + ' ' + v + ' 뜻 보기')}"><small>${k}</small>${esc(v)}</button>`
+      : `<span class="lc-w"><small>${k}</small>${esc(v)}</span>`).join('')}</div>`;
+  }
+  // 상위 운과 섞는 실제 식(engine evaluateLuck: (1−parent)×자체 + parent×상위 운 + 기둥 사이 합충, ±100 한도). 화면 설명이 실제 값과 같게 쓴다
+  function mixLine(x, kind) {
+    const e = x.ev, c = e.chain, L = M.LUCK_CFG.levels[kind]; if (!c || !L || !L.parent) return '';
+    const pw = Math.round(L.parent * 100), own = { seun: '세운', wolun: '월운', ilun: '일진' }[kind] || '이 운';
+    return `<p>${esc(c.upName)} 흐름 ${signed(c.upFit)} × ${pw}% + ${own} 자체 ${signed(e.ownFit)} × ${100 - pw}%${Math.abs(c.v) >= 0.5 ? ` + 두 기둥 사이 합충 ${signed(c.v)}` : ''} = 흐름 점수 <b class="num">${signed(e.fitScore)}</b></p>`;
   }
   function sijinRows(dayItem, ymd) {
     const ch = S.ch, shift = (ch.timeMode === 'lmt' || ch.timeMode === 'ast') ? Math.round(ch.lon * 4 - 540) : 0;
@@ -7723,9 +7666,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const firstDow = new Date(Date.UTC(cy, cm - 1, 1)).getUTCDay();
     let daeunDetail = '', seunDetail = '', wolDetail = '', ilDetail = '';
     if (sel.kind === 'daeun') { const x = ch.daeun.list[sel.i]; daeunDetail = detailHTML(`${x.startAge}세 대운 ${M.gzName(x)} (${x.startYear}~${x.startYear + 9})`, x, `<p class="note">정확한 시작: ${fmtKST(x.startMs)}${sel.i === 0 && ch.daeun.exact < 0.5 ? ` · 대운수는 최소 1로 표기하지만 실제로는 출생 후 약 ${ch.daeun.startMonths}개월에 시작합니다` : ''}</p>`, "daeun"); }
-    if (sel.kind === 'seun') { const x = M.seunRange(ch, sel.Y, sel.Y)[0]; if (x) seunDetail = detailHTML(`${sel.Y}년 세운 ${M.gzName(x)}`, x, x.daeun ? `<p class="small">대운 ${M.gzName(x.daeun)} ${signed(x.daeun.score.total)} × 40% + 세운 ${signed(x.score.total)} × 60% = 흐름 점수 <b class="num">${signed(x.combined)}</b></p>` : '', "seun", samjaeBanner(sel.Y)); }
-    if (sel.kind === 'wolun') { const x = M.wolun(ch, Y)[sel.i]; wolDetail = detailHTML(`${Y}년 ${x.termName}부터 월운 ${M.gzName(x)}`, x, `<p class="note">시작: ${fmtKST(x.startMs)} · 대운과 섞은 흐름 점수 ${signed(x.combined)}</p>`, "wolun"); }
-    if (sel.kind === 'ilun') { const x = cal[sel.d - 1]; if (x) ilDetail = detailHTML(`${cy}.${pad(cm)}.${pad(sel.d)} 일진 ${M.gzName(x)}`, x, `<p class="small">음력 ${x.lunar.m}${x.lunar.leap ? '(윤)' : ''}월 ${x.lunar.d}일 · ${term('손 없는 날', '손')} ${M.sonOf(x.lunar.d) === '없음' ? '<b>없음 (손 없는 날)</b>' : M.sonOf(x.lunar.d) + '쪽'}</p>` + sijinTable(x, [cy, cm, sel.d]), "ilun"); }
+    if (sel.kind === 'seun') { const x = M.seunRange(ch, sel.Y, sel.Y)[0]; if (x) seunDetail = detailHTML(`${sel.Y}년 세운 ${M.gzName(x)}`, x, '', "seun", samjaeBanner(sel.Y)); }   // 대운·세운 섞는 식은 근거 안 mixLine 이 실제 값으로 쓴다(2026-11-16)
+    if (sel.kind === 'wolun') { const x = M.wolun(ch, Y)[sel.i]; wolDetail = detailHTML(`${Y}년 ${x.termName}부터 월운 ${M.gzName(x)}`, x, `<p class="muted">시작: ${fmtKST(x.startMs)}</p>`, "wolun"); }
+    if (sel.kind === 'ilun') { const x = cal[sel.d - 1]; if (x) ilDetail = detailHTML(`${cy}.${pad(cm)}.${pad(sel.d)} 일진 ${M.gzName(x)}`, x, `<p>음력 ${x.lunar.m}${x.lunar.leap ? '(윤)' : ''}월 ${x.lunar.d}일 · ${term('손 없는 날', '손')} ${M.sonOf(x.lunar.d) === '없음' ? '<b>없음 (손 없는 날)</b>' : M.sonOf(x.lunar.d) + '쪽'}</p>`, "ilun", '', sijinTable(x, [cy, cm, sel.d])); }
     const tint = v => { const a = Math.min(100, Math.abs(v)) * 0.6; return v >= 0 ? `color-mix(in srgb, var(--good) ${a}%, var(--surface-2))` : `color-mix(in srgb, var(--bad) ${a}%, var(--surface-2))`; };
     return `
     ${carCard(ch, du, se, curM, il)}
@@ -10067,7 +10010,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const prGradeIdx = s => s >= 90 ? 0 : s >= 80 ? 1 : s >= 70 ? 2 : s >= 60 ? 3 : s >= 50 ? 4 : 5;
   function prRelCard(r, R) {
     const t = r.txt, strong = Math.max(1, Math.min(3, Math.round(t[4])));
-    const where = `${esc(R.names.a)}의 ${PairCompat.AREA[r.aPos[0]]}${r.aPos.length > 1 ? ' 외' : ''} ↔ ${esc(R.names.b)}의 ${PairCompat.AREA[r.bPos]}`;
+    const pn = (p, k) => PairCompat.posName ? PairCompat.posName(p, k) : [].concat(p).map(x => PairCompat.AREA[x]).join('·');
+    const where = `${esc(R.names.a)}의 ${pn(r.aPos, r.kind)} ↔ ${esc(R.names.b)}의 ${pn(r.bAll || r.bPos, r.kind)}`;
     return `<article class="rel-card tone-${t[0]}">
       <div class="rel-top"><span class="rel-badge">${term(r.type)}</span><b class="rel-name muted">${esc(r.name)}</b><span class="rel-str" title="영향 세기">${'●'.repeat(strong)}${'○'.repeat(3 - strong)}</span></div>
       <div class="rel-where">${where}</div>
@@ -10095,8 +10039,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const goods = R.relations.filter(x => x.tone === 'good'), bads = R.relations.filter(x => x.tone === 'bad');
     const dedup = arr => { const seen = new Set(); return arr.filter(x => { const k = x.name + x.aPos.join() + x.bPos; if (seen.has(k)) return false; seen.add(k); return true; }); };
     const rels = dedup(R.relations), shown = rels.slice(0, 6), more = rels.slice(6);
-    const strengths = [...goods.slice(0, 2).map(x => `${PairCompat.AREA[x.aPos[0]]}↔${PairCompat.AREA[x.bPos]}: ${x.txt[1]}`), ...R.parts.filter(p => p.score >= 72).slice(0, 2).map(p => `${p.label} — ${PR_PART_TXT[p.key][0]}`)].slice(0, 4);
-    const cautions = [...bads.slice(0, 2).map(x => `${PairCompat.AREA[x.aPos[0]]}↔${PairCompat.AREA[x.bPos]}: ${x.txt[1]}`), ...R.parts.filter(p => p.score < 50).slice(0, 2).map(p => `${p.label} — ${PR_PART_TXT[p.key][2]}`)].slice(0, 4);
+    const strengths = [...goods.slice(0, 2).map(x => `${a}의 ${PairCompat.posName(x.aPos, x.kind)}↔${b}의 ${PairCompat.posName(x.bAll || x.bPos, x.kind)}: ${x.txt[1]}`), ...R.parts.filter(p => p.score >= 72).slice(0, 2).map(p => `${p.label} — ${PR_PART_TXT[p.key][0]}`)].slice(0, 4);
+    const cautions = [...bads.slice(0, 2).map(x => `${a}의 ${PairCompat.posName(x.aPos, x.kind)}↔${b}의 ${PairCompat.posName(x.bAll || x.bPos, x.kind)}: ${x.txt[1]}`), ...R.parts.filter(p => p.score < 50).slice(0, 2).map(p => `${p.label} — ${PR_PART_TXT[p.key][2]}`)].slice(0, 4);
     const tips = [PR_REL_TIP[R.rel], ...R.parts.filter(p => p.score < 60).sort((x, y) => x.score - y.score).slice(0, 2).map(p => PR_PART_TIP[p.key])];
     const relSeg = `<div class="seg" role="group" aria-label="관계">${Object.entries(PairCompat.REL_TYPES).map(([k, v]) => `<button type="button" data-ps="rel:${k}" aria-pressed="${PR.rel === k}">${v.label}</button>`).join('')}</div>`;
     // 2판: 양방향 분석(상대 → 나 / 나 → 상대)과 종합평 세 칸. 1판 결과(옛 엔진)에는 없으므로 있을 때만 그린다.

@@ -1,6 +1,6 @@
 // 운세 흐름 복합 용신 해석 정합성 검증(2026-11-16) — node tests/luck-yong-final-sim.cjs
 //   기준: docs/LUCK_FLOW_FULL_AUDIT.md, docs/LUCK_FLOW_YONG_RECHECK.md. 결과 해설: docs/LUCK_FLOW_YONG_FINAL_2026-11-16.md
-// 수정 전(git HEAD)과 수정 후(작업 파일)를 같은 명식·같은 운으로 돌려 비교한다. 파일을 쓰지 않는다.
+// 수정 전(BASE 커밋)과 수정 후(작업 파일)를 같은 명식·같은 운으로 돌려 비교한다. 파일을 쓰지 않는다.
 //  (1) 점수 불변: 대운·세운·월운·일진 흐름 점수·성분·변동·부담·주 흐름·상태, 분야 지수가 한 자리도 바뀌지 않는다
 //  (2) 오류 0: 십성 비율 문장이 좋음·나쁨 칸에 들어가면 반드시 통합 역할과 같은 방향이다
 //  (3) 보존: 수정 전 정상 복합(개별 기준)·조건부(구조·합충) 해석은 하나도 빠지지 않고 '기준에 따라 달라지는 점'으로 남는다.
@@ -10,7 +10,9 @@
 //  (6) 문장 이상 없음(undefined·NaN·반말), 대운·세운·월운·일진 모두
 const fs = require('fs'), path = require('path'), vm = require('vm'), cp = require('child_process'), os = require('os');
 const root = path.join(__dirname, '..');
-const head = f => cp.execSync(`git show HEAD:${f}`, { cwd: root, maxBuffer: 64 << 20 }).toString();
+// 비교 기준: 복합 용신 수정(36dcdc5) 바로 전 커밋. HEAD로 두면 수정 뒤에는 전후가 같아져 비교가 무의미해진다
+const BASE = process.env.BASE || '36dcdc5~1';
+const head = f => cp.execSync(`git show ${BASE}:${f}`, { cwd: root, maxBuffer: 64 << 20 }).toString();
 const loadEngine = src => { const a = src.indexOf('var MANSE_DATA'), b = src.indexOf('})(typeof window', a); delete globalThis.Manse; vm.runInThisContext(src.slice(a, src.indexOf('\n', b))); return globalThis.Manse; };
 const MO = loadEngine(head('engine.js')), MN = loadEngine(fs.readFileSync(path.join(root, 'engine.js'), 'utf8'));
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'lyf-')), oldLiPath = path.join(tmp, 'luck-interpret-head.js');
