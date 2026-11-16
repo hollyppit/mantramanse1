@@ -108,7 +108,7 @@ for (let i = 0; i < charts.length; i++) for (let j = 0; j < charts.length; j += 
   const A = charts[i], B = charts[j], r = P.evaluate(M, A, B, 'lover'), s = M.unifiedSupport(A, B); cpN++;
   ok(r.element.unified && Array.isArray(r.element.aGets.reasons), '궁합이 통합 판단을 쓰지 않음');
   ok(Number.isInteger(r.score) && r.score >= 0 && r.score <= 100 && r.parts.every(p => p.score >= 0 && p.score <= 100), '궁합 점수 범위');
-  ok(s.score === r.element.aGets.score, '궁합 오행 보완 점수가 엔진 값과 다름');
+  ok(s.score === P.evaluateLegacy(M, A, B, 'lover').element.aGets.score, '궁합(1판) 오행 보완 점수가 엔진 값과 다름');   // 2판 ①은 억부·조후를 따로 본다(tests/compat-pair-v2-sim.cjs)
   ok(Math.abs(s.roleFit) <= 1 && Math.abs(s.climateFit) <= 1, '궁합 성분 범위');
   if (s.dayRole === '기신' && s.score >= 50) dayBadButOk++;
   ok(!s.reasons.some(x => BAD_JOSA.test(x) || BAN.test(x)), '궁합 문장 오류: ' + s.reasons.join(' / '));

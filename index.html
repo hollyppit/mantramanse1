@@ -269,6 +269,8 @@ button.pill { border: 0; cursor: pointer; font-family: inherit; }
 .pr-chip .pr-x { padding-left: 4px; color: var(--ink-3); }
 @media (max-width: 640px) { .pair-submit { bottom: calc(56px + env(safe-area-inset-bottom, 0px)); } }
 @media (min-width: 641px) { .pr-sum3 { grid-template-columns: repeat(3, 1fr); } }
+.pr-dir2 { display: grid; gap: 10px; } .pr-dir-h { display: flex; align-items: baseline; gap: 8px; } .pr-dir-h b { flex: 1; } .pr-dir-k { margin-top: 4px; font-size: 0.82rem; font-weight: 700; opacity: 0.75; }
+@media (min-width: 641px) { .pr-dir2 { grid-template-columns: 1fr 1fr; } }
 /* 소제목 접고 펴기 */
 .fold-h { position: relative; cursor: pointer; padding-right: 32px; -webkit-tap-highlight-color: transparent; user-select: none; }
 .fold-h:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
@@ -10028,6 +10030,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     dayBranch: ['마음 깊은 곳이 통합니다. 속마음을 편하게 터놓을 수 있어요.', '속마음은 무난하게 맞습니다.', '마음자리가 부딪칩니다. 가까울수록 서운함과 마찰이 커져요.'],
     harmony: ['두 사람의 전체 사주가 서로 잘 맞물려 있습니다.', '맞물리는 자리와 부딪치는 자리가 섞여 있습니다.', '사주 곳곳에서 부딪치는 자리가 많아 신경 쓸 일이 자주 생깁니다.'],
     balance: ['한쪽이 이끌고 한쪽이 받쳐 주는 균형이 좋습니다.', '균형은 무난합니다.', '둘 다 비슷하게 치우쳐 있어 같은 약점이 함께 드러나기 쉽습니다.'],
+    tenGod: ['서로가 가진 십성이 상대에게 꼭 필요한 역할(보호·표현·성과·책임·협력)로 작동합니다.', '서로 주고받는 역할이 도움과 부담을 함께 가지고 있습니다.', '서로가 주는 역할이 상대에게는 부담으로 다가오기 쉬워, 역할을 따로 정해 두는 편이 좋습니다.'],
+    relation: ['이 관계에서 기대하는 역할이 자연스럽게 맞물립니다.', '이 관계에서 필요한 역할은 무난하게 맞춰 갈 수 있습니다.', '이 관계에서 서로 기대하는 역할이 어긋나기 쉽습니다.'],
   };
   const PR_PART_TIP = {
     yong: '같이 있는 시간만 늘리지 말고, 각자 충전하는 시간을 따로 확보하세요.',
@@ -10035,6 +10039,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     dayBranch: '속마음은 감정이 가라앉은 뒤에, 짧게 한 가지씩 이야기하세요.',
     harmony: '부딪치는 주제(돈·가족·일정)는 미리 규칙을 정해 두세요.',
     balance: '서로 닮은 약점이 있으니, 부족한 부분은 주변의 도움이나 외부 도구로 채우세요.',
+    tenGod: '서로 잘하는 역할을 하나씩 정해 맡기고, 부담이 되는 역할은 억지로 떠넘기지 마세요.',
+    relation: '이 관계에서 서로 기대하는 것을 한 번 말로 맞춰 보세요.',
   };
   const PR_REL_TIP = {
     lover: '중요한 이야기는 감정이 가라앉은 뒤에 하고, 기념일과 돈 문제는 미리 약속을 정해 두세요.',
@@ -10064,7 +10070,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const tp = n => n === '나' ? '<b>나</b>는' : `<b>${esc(n)}</b>${jong(n) ? '은' : '는'}`;
     const elTxt = e => `${M.EL_K[e]}(${M.EL[e]})`;
     const elLine = (who, other, g) => {
-      const t = g.top, rs = (g.reasons || []).slice(t && t.pct >= 8 ? 1 : 0), why = rs.length ? `<br><span class="small muted">${rs.map(esc).join(' ')}</span>` : '';   // 첫 이유(필요한 기운 비율)는 앞 문장과 같아 뺀다
+      const t = g.top, rs = (g.reasons || []).slice(t && t.pct >= 8 ? 1 : 0);   // 첫 이유(필요한 기운 비율)는 앞 문장과 같아 뺀다
+      const hw = v => v > 0.05 ? '도움' : v < -0.05 ? '부담' : '보통';
+      if (g.eokbu != null) rs.push(g.johu == null ? `강약(억부) 기준으로 ${hw(g.eokbu)}입니다. 기후는 크게 치우치지 않아 조후는 따로 보지 않았습니다.` : `강약(억부) 기준으로는 ${hw(g.eokbu)}, 온도·습도(조후) 기준으로는 ${hw(g.johu)}입니다.${g.conflict ? ' 두 기준이 엇갈려 한쪽을 앞세우지 않고, 각 기준이 급한 정도만큼 나눠 반영했습니다.' : ''}`);
+      const why = rs.length ? `<br><span class="small muted">${rs.map(esc).join(' ')}</span>` : '';
       return `<li>${sj(other)} <b>${esc(who)}</b>에게 채워 주는 정도 <b class="num">${g.score}점</b> — ${t ? `${esc(who)}에게 필요한 ${esc(t.role)} ${elTxt(t.e)} 기운을 ${other === '나' ? '내가' : esc(other) + (jong(other) ? '이' : '가')} ${Math.round(t.pct)}% 가지고 있습니다.` : `${esc(who)}에게 필요한 기운을 ${tp(other)} 거의 가지고 있지 않습니다.`} ${esc(other)}의 일간은 ${elTxt(g.dayEl)} 기운으로, ${esc(who)}에게는 <b>${g.dayRole}</b>(${({ '용신': '가장 필요한', '희신': '도움이 되는', '한신': '돕지도 해치지도 않는', '구신': '부담이 되는', '기신': '부담이 되기 쉬운' })[g.dayRole] || ''} 기운)입니다.${why}</li>`;
     };
     const tgLine = (who, other, tg) => `<li><b>${esc(other)}</b>의 일간은 <b>${esc(who)}</b>에게 <b>${tg}</b> — ${TG_KW[tg] || ''}</li>`;
@@ -10075,6 +10084,23 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const cautions = [...bads.slice(0, 2).map(x => `${PairCompat.AREA[x.aPos[0]]}↔${PairCompat.AREA[x.bPos]}: ${x.txt[1]}`), ...R.parts.filter(p => p.score < 50).slice(0, 2).map(p => `${p.label} — ${PR_PART_TXT[p.key][2]}`)].slice(0, 4);
     const tips = [PR_REL_TIP[R.rel], ...R.parts.filter(p => p.score < 60).sort((x, y) => x.score - y.score).slice(0, 2).map(p => PR_PART_TIP[p.key])];
     const relSeg = `<div class="seg" role="group" aria-label="관계">${Object.entries(PairCompat.REL_TYPES).map(([k, v]) => `<button type="button" data-ps="rel:${k}" aria-pressed="${PR.rel === k}">${v.label}</button>`).join('')}</div>`;
+    // 2판: 양방향 분석(상대 → 나 / 나 → 상대)과 종합평 세 칸. 1판 결과(옛 엔진)에는 없으므로 있을 때만 그린다.
+    const D = R.directions, S3 = R.summary3;
+    const ul = (arr, empty) => arr && arr.length ? `<ul>${arr.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : `<p class="small muted">${empty}</p>`;
+    const dirBox = d => `<div class="pr-box"><div class="pr-dir-h"><b>${esc(d.from)} → ${esc(d.to)}</b><span class="pr-sc num">${d.score}</span></div>
+      <p class="small muted">${d.best ? `가장 크게 채워 주는 것: <b>${esc(d.best.name)}</b>(${elTxt(d.best.e)})` : '뚜렷하게 채워 주는 십성이 적습니다.'}${d.element ? ` · 오행으로는 ${elTxt(d.element.e)}(${esc(d.element.role)})` : ''}</p>
+      <div class="pr-dir-k">주는 도움</div>${ul(d.help, '뚜렷한 도움은 적습니다.')}<div class="pr-dir-k">부담·갈등</div>${ul(d.burden, '크게 부담되는 점은 없습니다.')}<div class="pr-dir-k">이렇게 해 보세요</div>${ul(d.advice, '지금처럼 지내셔도 좋습니다.')}</div>`;
+    const dirCard = D ? `
+    <section class="card">
+      <div class="card-h"><h2>양방향 분석</h2><span class="note">서로가 서로에게 주는 것은 같지 않을 수 있습니다</span></div>
+      <div class="pr-dir2">${dirBox(D.ab)}${dirBox(D.ba)}</div>
+      ${R.asym ? `<p class="small" style="margin-top:10px">${esc(R.asym.text)}</p>` : '<p class="small muted" style="margin-top:10px">두 방향의 도움이 비슷해 한쪽으로 크게 기울지 않습니다.</p>'}
+    </section>` : '';
+    const sumCard = S3 ? `<div class="pr-sum3">
+        <div class="pr-box good"><b>서로에게 주는 도움</b>${ul(S3.help, '뚜렷하게 맞는 점이 적습니다.')}</div>
+        <div class="pr-box bad"><b>갈등이 생기는 이유</b>${ul(S3.conflict, '크게 부딪치는 점이 없습니다.')}</div>
+        <div class="pr-box"><b>관계를 발전시키는 방법</b>${ul(S3.grow, '')}</div>
+      </div>` : '';
     return `
     <section class="card pr-hero tone-${R.grade.tone}">
       <div class="pr-names"><div><span class="muted small">${esc(a)}</span><b class="pr-gz">${dg(ch)}</b></div><span class="pr-vs">♡</span><div><span class="muted small">${esc(b)}</span><b class="pr-gz">${dg(P)}</b></div></div>
@@ -10087,10 +10113,11 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     <section class="card">
       <div class="card-h"><h2>항목별 점수</h2><span class="note">${R.relLabel} 기준 가중치로 합산했습니다</span></div>
       <div class="pr-parts">${rows}</div>
-    </section>
+      ${R.relWhy ? `<p class="note">${esc(R.relWhy)} (반영 비율 ${R.parts.map(p => `${p.label} ${p.weight}%`).join(' · ')})</p>` : ''}
+    </section>${dirCard}
     <section class="card">
       <div class="card-h"><h2>서로의 기운 · 성향</h2><span class="note">오행·조후 보완과 일간(나 자신)을 비교합니다</span></div>
-      <h3 class="cp-h3">오행·조후 보완</h3>
+      <h3 class="cp-h3">오행·용신 보완</h3>
       <ul class="pr-list">${elLine(a, b, R.element.aGets)}${elLine(b, a, R.element.bGets)}</ul>
       <h3 class="cp-h3">일간으로 본 서로의 자리</h3>
       <ul class="pr-list">${tgLine(a, b, R.stems.aSeesB)}${tgLine(b, a, R.stems.bSeesA)}${R.stems.hap ? '<li><b>일간끼리 천간합</b> — 마음이 쉽게 끌리는 인연입니다.</li>' : ''}${R.stems.chung ? '<li><b>일간끼리 천간충</b> — 생각이 정면으로 맞서 말다툼이 잦습니다.</li>' : ''}<li>강약: ${esc(a)} ${R.strength.a} · ${esc(b)} ${R.strength.b}</li>${(R.balanceNotes || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul>
@@ -10101,12 +10128,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     </section>
     <section class="card">
       <div class="card-h"><h2>한눈에 정리</h2></div>
-      <div class="pr-sum3">
+      ${sumCard || `<div class="pr-sum3">
         <div class="pr-box good"><b>잘 맞는 점</b>${strengths.length ? `<ul>${strengths.map(x => `<li>${x}</li>`).join('')}</ul>` : '<p class="small muted">뚜렷하게 맞는 점이 적습니다.</p>'}</div>
         <div class="pr-box bad"><b>조심할 점</b>${cautions.length ? `<ul>${cautions.map(x => `<li>${x}</li>`).join('')}</ul>` : '<p class="small muted">크게 부딪치는 점이 없습니다.</p>'}</div>
         <div class="pr-box"><b>이렇게 해보세요</b><ul>${tips.map(x => `<li>${x}</li>`).join('')}</ul></div>
-      </div>
-      <p class="note">궁합 점수는 두 사람의 오행·십성·합충을 계산한 명리 참고 지표입니다. 같은 점수라도 서로 맞춰 가는 노력에 따라 관계는 달라집니다.</p>
+      </div>`}
+      <p class="note">궁합 점수는 두 사람의 오행·용신·십성·합충을 견준 상대적인 명리 지표이며, 관계가 잘될 확률이 아닙니다. 같은 점수라도 서로 맞춰 가는 노력에 따라 관계는 달라집니다.</p>
     </section>`;
   }
   function renderPair() {
