@@ -172,3 +172,6 @@ html.theme-sakura .toast{ background: #1D2428; color: #F4F6F5; box-shadow: 0 14p
 @media (prefers-reduced-motion: reduce){ html.theme-sakura :is(a.card, a.group-card){ transition: none; } html.theme-sakura :is(a.card, a.group-card):hover{ transform: none; } }
 html.theme-sakura .seg a, html.theme-sakura .tabs a{ color: #46505A; }
 html.theme-sakura .seg a[aria-current="page"], html.theme-sakura .tabs a[aria-current="page"]{ color: #1D2428; }
+/* 바탕을 한 단계 진하게 바꾼 뒤 바탕 위 작은 글씨 대비 보정 */
+html.theme-sakura{ --sumi-3: #4F5A61; }
+html.theme-sakura :is(.story.mine small, .kick-s){ color: #8A2A1F !important; }
