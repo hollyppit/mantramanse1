@@ -5,7 +5,7 @@
      ctx = { daeun, seun, wolun, prev }  (각각 M.luckItem 형태. 해당 기간의 상위 운과 직전 기간) */
 (function (G) {
   'use strict';
-  var VERSION = 'luck-env-20261106-1', PHRASE_VERSION = 1, REV = 0;   // REV: 게시 문구가 바뀔 때마다 올라 캐시를 무효화한다
+  var VERSION = 'luck-env-20261116-1', PHRASE_VERSION = 1, REV = 0;   // REV: 게시 문구가 바뀔 때마다 올라 캐시를 무효화한다
 
   // ───────────── 사전 문구: 십성별 ─────────────
   // area: work 직업·사회 / wealth 재물·경제 / rel 인간관계·인연 / move 생활·이동 / learn 학습·재정비
@@ -197,6 +197,57 @@
   var lvlOf = function (v) { return v >= 0.55 ? '강조' : v >= 0.3 ? '보통' : '약함'; };
   var josa = function (w, a, b) { var c = w.charCodeAt(w.length - 1) - 44032; return w + (c >= 0 && c % 28 ? a : b); };
 
+  // ───────────── 십성 비율 문장의 근거 확인 (2026-11-16, docs/LUCK_FLOW_YONG_RECHECK.md) ─────────────
+  // "원국에 이 십성이 적다/많다"는 사실만으로 좋고 나쁨을 정하지 않는다. 문장이 말하려는 방향(dir: good = 채워서 도움, bad = 과해서 부담)을
+  // 판단 기준별로 확인해 네 갈래로 나눈다. 점수는 읽기만 한다.
+  //   unified  통합 용신 역할값이 같은 방향 → 기존 좋음·나쁨 칸
+  //   theory   통합과는 다르지만 이 사주에 적용되는 개별 기준(억부·조후·통관·격국·제화, 가종격 가능성)이 같은 방향 → 기준을 밝힌 복합 해석
+  //   cond     개별 기준도 아니지만 이 운의 구조(luckStructures)·합·합거·충이 그 방향을 만든다 → 이유를 밝힌 조건부 해석
+  //   neutral  어떤 근거도 없다 → 좋고 나쁨 없이 사실만
+  var THEORY_LABEL = { eokbu: '강약(억부)', johu: '온도·습도(조후)', tonggwan: '통관', gyeok: '격국', jehwa: '제화', jong: '종격 가능성' };
+  var THEORY_KEYS = ['eokbu', 'johu', 'tonggwan', 'gyeok', 'jehwa'];
+  var GRP_TGS = [['비견', '겁재'], ['식신', '상관'], ['편재', '정재'], ['편관', '정관'], ['편인', '정인']];
+  var SIGN = function (dir, v) { return dir === 'good' ? v > 1e-9 : v < -1e-9; };
+  function ratioJudge(M, ch, x, ev, rels, gi, dir) {
+    var u = ch.unified, dEl = M.stemEl(ch.pillars.day.s), e = (dEl + gi) % 5;
+    if (!u || !u.roleV) return { type: 'unified', e: e };   // 통합 판단이 없는 옛 결과: 예전 방식 그대로
+    if (SIGN(dir, u.roleV[e])) return { type: 'unified', e: e };
+    var keys = THEORY_KEYS.filter(function (k) {
+      var t = u.theories && u.theories[k]; if (!t || !t.applicable) return false;
+      if (k === 'eokbu' && u.mode === 'jong') return false;   // 종격이 성립하면 억부 판단은 쓰지 않는다
+      var list = dir === 'good' ? (t.favor || []) : (t.avoid || []).concat(k === 'gyeok' ? (t.harm || []) : []);
+      return list.indexOf(e) >= 0;
+    });
+    if (u.mode !== 'jong' && u.jong && (u.jong.status === 'ga' || u.jong.status === 'hold') && M.jongCore) {
+      var Z = M.jongCore(ch), zr = Z && Z.roles && Z.roles[e];
+      if (zr && (dir === 'good' ? (zr === '용신' || zr === '희신') : (zr === '기신' || zr === '구신'))) keys.push('jong');
+    }
+    if (keys.length) return { type: 'theory', e: e, keys: keys };
+    var reasons = [], tgs = GRP_TGS[gi];
+    (ev.luckStructures || []).forEach(function (s) {
+      if (!SIGN(dir, s.v) || !tgs.some(function (t) { return s.label.indexOf(t) >= 0; })) return;
+      var why = s.label.split(' — ')[1] || s.name; reasons.push({ kind: 'struct', name: s.name, text: why.replace(/ \(해소 글자가.*$/, '') });
+    });
+    var viaStem = tgs.indexOf(x.stemTG) >= 0, viaBr = tgs.indexOf(x.branchTG) >= 0, rv = function (el) { return u.roleV[el]; };
+    rels.forEach(function (r) {
+      var other = r.members.filter(function (m) { return m !== 'luck'; }), via = r.kind === 'stem' ? viaStem : viaBr; if (!via || !other.length) return;
+      if (/합/.test(r.type) && r.el != null && SIGN(dir, rv(r.el))) reasons.push({ kind: 'hap', name: r.name, text: r.name + '으로 ' + M.EL_K[r.el] + ' 기운(' + u.roles[r.el] + ')이 생김' });
+      else if (r.type === '천간합' && other[0] !== 'day' && ch.pillars[other[0]]) { var ne = M.stemEl(ch.pillars[other[0]].s); if (SIGN(dir, -rv(ne))) reasons.push({ kind: 'hapgeo', name: r.name, text: r.name + '으로 ' + POSN[other[0]] + ' 천간의 ' + u.roles[ne] + ' 글자를 묶음' }); }
+      else if (r.type === '충' && other.length === 1 && ch.pillars[other[0]]) { var be2 = M.BR_EL[ch.pillars[other[0]].b]; if (SIGN(dir, -rv(be2))) reasons.push({ kind: 'clash', name: r.name, text: r.name + '으로 ' + POSN[other[0]] + ' 지지의 ' + u.roles[be2] + ' 자리를 흔듦' }); }
+    });
+    if (reasons.length) return { type: 'cond', e: e, reasons: reasons };
+    return { type: 'neutral', e: e };
+  }
+  // 통합 판단이 역할값을 실제로 누그러뜨린 오행: 어느 기준이 그 오행을 원하는지(기신·구신) 또는 꺼리는지(용신·희신)
+  var ROLE_BASE_V = { '용신': 1, '희신': 0.5, '한신': 0, '구신': -0.5, '기신': -1 };
+  function softenedBy(ch, e) {
+    var u = ch.unified; if (!u || !u.roleV || !u.theories) return null;
+    var base = ROLE_BASE_V[u.roles[e]], v = u.roleV[e]; if (base == null || Math.abs(v - base) < 1e-9) return null;
+    var up = v > base, keys = THEORY_KEYS.filter(function (k) { var t = u.theories[k]; return t && t.applicable && k !== u.primary && !(k === 'eokbu' && u.mode === 'jong') && t.urgency >= 2 && (up ? (t.favor || []) : (t.avoid || [])).indexOf(e) >= 0; });
+    return keys.length ? { up: up, keys: keys } : null;
+  }
+  var tnames = function (keys) { return keys.map(function (k) { return THEORY_LABEL[k]; }).join('·'); };
+
   function areaScores(M, ch, x, g, rels, sinsal) {
     var ev = x.ev, volN = (ev.volatilityScore || 0) / 100, yeokma = sinsal.some(function (q) { return q.name.indexOf('역마') >= 0; }) ? 1 : 0;
     var bonds = rels.filter(function (r) { return /합/.test(r.type); }).length;
@@ -278,28 +329,55 @@
     if (!scenes.length) scenes.push({ area: null, name: '뚜렷한 주제 없음', level: '약함', tenGod: stemTG, phraseId: null, text: '어느 한 영역이 두드러지게 부각되는 근거는 약합니다. 평소의 생활 리듬을 유지하며 지내도 무리가 없는 기간으로 읽습니다.' });
 
     // E/F. 유리·불리 조건: 실제로 성립한 것만
-    var good = [], bad = [];
+    var good = [], bad = [], mixed = [], facts = [];
     var elems = se === be ? [[se, M.STEM[x.s] + M.BR[x.b]]] : [[se, M.STEM[x.s]], [be, M.BR[x.b]]];
     elems.forEach(function (e) {
-      var r = roles[e[0]];
-      if (r === '용신' || r === '희신') { good.push({ id: 'ROLE-GOOD-' + e[0], text: josa(M.EL_K[e[0]], '은', '는') + ' 이 사주의 ' + r + ' 오행(' + e[1] + ')이라 균형을 돕는 쪽으로 작용합니다.' }); }
-      else if (r === '기신' || r === '구신') { bad.push({ id: 'ROLE-BAD-' + e[0], text: josa(M.EL_K[e[0]], '은', '는') + ' 이 사주의 ' + r + ' 오행(' + e[1] + ')이라 기존 불균형을 키울 수 있습니다.' }); }
+      var r = roles[e[0]], sf = softenedBy(ch, e[0]);
+      // 조건부 역할(2026-11-16): 통합 판단이 다른 기준 때문에 세기를 누그러뜨린 오행은 긍정·부정 역할을 함께 적는다
+      if (r === '용신' || r === '희신') { good.push({ id: 'ROLE-GOOD-' + e[0], text: josa(M.EL_K[e[0]], '은', '는') + ' 이 사주의 ' + r + ' 오행(' + e[1] + ')이라 균형을 돕는 쪽으로 작용합니다.' + (sf && !sf.up ? ' 다만 ' + tnames(sf.keys) + ' 기준으로는 지나치게 많아지면 부담이 되는 기운이라, 넘치지 않을 때까지만 도움으로 봅니다.' : '') }); }
+      else if (r === '기신' || r === '구신') { bad.push({ id: 'ROLE-BAD-' + e[0], text: josa(M.EL_K[e[0]], '은', '는') + ' 이 사주의 ' + r + ' 오행(' + e[1] + ')이라 기존 불균형을 키울 수 있습니다.' + (sf && sf.up ? ' 다만 ' + tnames(sf.keys) + ' 기준으로는 필요한 기운이라, 나쁘게만 보지 않고 조건부로 봅니다.' : '') }); }
       else X('ROLE-' + e[0], M.EL_K[e[0]] + '은 한신이라 유불리 근거에 쓰지 않음');
+      if (sf) R('ROLE-COND-' + e[0], M.EL_K[e[0]] + ' 조건부(' + sf.keys.join('·') + ')');
     });
+    // 십성 비율(원국에 적다/많다): 비율만으로 길흉을 정하지 않고 ratioJudge 로 근거를 확인한다(2026-11-16)
     [stemTG, branchTG].filter(function (t, i, a) { return a.map(function (v) { return TGD[v].grp; }).indexOf(TGD[t].grp) === i; }).forEach(function (tg) {
-      var gi = TGD[tg].grp, pct = G[gi];
-      if (pct < 15) good.push({ id: 'NATAL-LOW-' + GN[gi], text: '원국의 ' + josa(GN[gi], '이', '가') + ' ' + pct.toFixed(0) + '%로 적은 편이라 ' + tg + ' 기운이 비어 있던 자리를 채우는 쪽입니다. ' + use('tg.' + tg + '.good') });
-      else X('NATAL-LOW-' + GN[gi], '원국 ' + GN[gi] + ' ' + pct.toFixed(0) + '% — 부족(15% 미만) 아님');
-      if (pct >= 30) bad.push({ id: 'NATAL-HIGH-' + GN[gi], text: '원국의 ' + josa(GN[gi], '이', '가') + ' 이미 ' + pct.toFixed(0) + '%로 많은 편이라 ' + tg + ' 기운이 겹치면 과해질 수 있습니다. ' + use('tg.' + tg + '.bad') });
-      else X('NATAL-HIGH-' + GN[gi], '원국 ' + GN[gi] + ' ' + pct.toFixed(0) + '% — 과다(30% 이상) 아님');
+      var gi = TGD[tg].grp, pct = G[gi], pctT = pct.toFixed(0) + '%';
+      [['low', pct < 15, 'good'], ['high', pct >= 30, 'bad']].forEach(function (c) {
+        var kind = c[0], on = c[1], dir = c[2], ID = 'NATAL-' + (kind === 'low' ? 'LOW-' : 'HIGH-') + GN[gi];
+        if (!on) { X(ID, '원국 ' + GN[gi] + ' ' + pctT + ' — ' + (kind === 'low' ? '부족(15% 미만) 아님' : '과다(30% 이상) 아님')); return; }
+        var j = ratioJudge(M, ch, x, ev, rels, gi, dir), el = M.EL_K[j.e], role = roles[j.e] || '한신';
+        var lead = kind === 'low' ? '원국의 ' + josa(GN[gi], '이', '가') + ' ' + pctT + '로 적은 편' : '원국의 ' + josa(GN[gi], '이', '가') + ' 이미 ' + pctT + '로 많은 편';
+        if (j.type === 'unified') {
+          if (kind === 'low') good.push({ id: ID, text: lead + '이라 ' + tg + ' 기운이 비어 있던 자리를 채우는 쪽입니다. ' + use('tg.' + tg + '.good') });
+          else bad.push({ id: ID, text: lead + '이라 ' + tg + ' 기운이 겹치면 과해질 수 있습니다. ' + use('tg.' + tg + '.bad') });
+          R(ID, '통합 역할(' + role + ')과 같은 방향');
+        } else if (j.type === 'theory') {
+          // 필요도가 '참고'(1)인 기준만 근거가 될 때는 그렇게 밝힌다(가종격 가능성도 참고)
+          var weakOnly = j.keys.every(function (k) { var t = ch.unified.theories[k]; return k === 'jong' || !t || t.urgency < 2; });
+          var tn = tnames(j.keys) + (weakOnly ? '(참고 수준)' : ''), rest = role === '한신' ? '통합 판단에서는 한신이라 크게 기울지 않습니다.' : '통합 판단(' + (ch.unified.primaryName || '') + ' 우선)에서는 ' + role + '이라';
+          mixed.push({ id: ID + '-THEORY', text: kind === 'low'
+            ? lead + '입니다. ' + tn + ' 기준으로 보면 ' + tg + ' 기운(' + el + ')이 부족한 자리를 채워 도움이 되는 쪽입니다. ' + rest + (role === '한신' ? '' : ', 이 기운이 들어오면 도움과 부담이 함께 옵니다.')
+            : lead + '입니다. ' + tn + ' 기준으로 보면 ' + tg + ' 기운(' + el + ')이 더해질 때 부담이 되는 쪽입니다. ' + rest + (role === '한신' ? '' : ', 쓰임과 부담이 함께 있습니다. 넘치지 않을 때까지만 도움으로 보세요.') });
+          R(ID + '-THEORY', '통합 ' + role + ' · ' + j.keys.join('·') + ' 기준은 ' + (dir === 'good' ? '도움' : '부담'));
+        } else if (j.type === 'cond') {
+          var why = j.reasons.slice(0, 2).map(function (q) { return '‘' + q.text + '’'; }).join(', ');
+          mixed.push({ id: ID + '-COND', text: kind === 'low'
+            ? lead + '이고 통합 판단에서는 ' + role + '입니다. 다만 이 기간에는 ' + why + ' 작용이 함께 있어, 그 작용이 이어지는 동안에는 쓰임이 살아나 도움이 될 수 있습니다.'
+            : lead + '이고 통합 판단에서는 ' + role + '입니다. 다만 이 기간에는 ' + why + ' 작용이 함께 있어, 그 작용이 이어지는 동안에는 과해져 부담이 될 수 있습니다.' });
+          R(ID + '-COND', j.reasons.map(function (q) { return q.kind + ':' + q.name; }).join(', '));
+        } else {
+          facts.push({ id: ID + '-FACT', text: kind === 'low' ? lead + '이라 이 기간에 ' + tg + ' 기운이 상대적으로 새롭게 느껴질 수 있습니다. 이것만으로 좋고 나쁨을 정하지는 않습니다.' : lead + '이라 ' + tg + ' 기운이 익숙한 방식으로 더해집니다. 이것만으로 좋고 나쁨을 정하지는 않습니다.' });
+          R(ID + '-FACT', '통합 ' + role + '이고 어떤 기준·구조도 ' + (dir === 'good' ? '도움' : '부담') + '으로 보지 않아 사실만 적음');
+        }
+      });
     });
     (ch.patterns.list || []).forEach(function (pt) {
       if (pt.level === '참고') return;
       var hit = (pt.name === '관살혼잡' && g[3] >= 0.4) || (pt.name === '상관견관' && g[1] >= 0.4) || (pt.name === '군겁쟁재' && g[0] >= 0.4) || (pt.name === '효신탈식(도식)' && g[4] >= 0.4);
       if (hit) bad.push({ id: 'PATTERN-' + pt.name, text: '원국에 ' + pt.name + ' 구조가 있는데 같은 계열의 기운이 들어와 그 부담이 커질 수 있습니다.' });
     });
-    if (ev.condition === '순풍') good.push({ id: 'FIT-순풍', text: '억부·조후·관계를 종합한 적합도가 양호해 같은 기운이라도 비교적 부드럽게 작용합니다.' });
-    if (ev.condition === '부담' || ev.condition === '주의') bad.push({ id: 'FIT-' + ev.condition, text: '억부·조후·관계를 종합한 적합도가 ' + ev.condition + ' 단계라, 같은 기운이라도 무리하게 밀어붙이면 부담이 커질 수 있습니다.' });
+    if (ev.condition === '순풍') good.push({ id: 'FIT-순풍', text: '통합 판단(용신·원국과의 합충·십성 구조)으로 본 적합도가 양호해 같은 기운이라도 비교적 부드럽게 작용합니다.' });
+    if (ev.condition === '부담' || ev.condition === '주의') bad.push({ id: 'FIT-' + ev.condition, text: '통합 판단(용신·원국과의 합충·십성 구조)으로 본 적합도가 ' + ev.condition + ' 단계라, 같은 기운이라도 무리하게 밀어붙이면 부담이 커질 수 있습니다.' });
     good.forEach(function (q) { R(q.id, 'good'); }); bad.forEach(function (q) { R(q.id, 'bad'); });
 
     // 원국과의 작용(성립한 것만) + 우선순위/충돌
@@ -353,6 +431,7 @@
       core: core, relation: relation, headline: headline, summary: summary,
       areas: areasAll, topAreas: top.map(function (a) { return a.key; }), scenes: scenes,
       good: good.map(function (q) { return q.text; }), bad: bad.map(function (q) { return q.text; }),
+      mixed: mixed.map(function (q) { return q.text; }), facts: facts.map(function (q) { return q.text; }),   // 기준에 따라 달라지는 점(복합·조건부) / 유불리 없는 사실(2026-11-16)
       relations: relNotes, conflict: conflict, chain: chain, change: change,
       strategy: strat, uncertainty: unc,
       evidence: {
@@ -403,7 +482,7 @@
     if (m.has(key)) { STATS.hit++; return m.get(key); }
     STATS.miss++; var r = build(M, ch, x, level, ctx); m.set(key, r); return r;
   }
-  var api = { sixCopy: sixCopy, SIX_LEVELS: SIX_LEVELS, buildCached: buildCached, cacheStats: STATS, applyPublished: applyPublished, compare: compare, VERSION: VERSION, PHRASE_VERSION: PHRASE_VERSION, build: build, PHRASES: PHRASES, AREA: AREA, AREA_KEYS: AREA_KEYS };
+  var api = { ratioJudge: ratioJudge, softenedBy: softenedBy, sixCopy: sixCopy, SIX_LEVELS: SIX_LEVELS, buildCached: buildCached, cacheStats: STATS, applyPublished: applyPublished, compare: compare, VERSION: VERSION, PHRASE_VERSION: PHRASE_VERSION, build: build, PHRASES: PHRASES, AREA: AREA, AREA_KEYS: AREA_KEYS };
   G.MantraLuckInterpret = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

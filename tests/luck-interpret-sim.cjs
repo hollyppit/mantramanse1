@@ -21,7 +21,7 @@ for (let i = 0; i < N; i++) {
     .concat(il.map((d, k) => ['ilun', d, { wolun: m, seun: se, prev: il[k - 1] }]));
   for (const [lv, x, ctx] of cases) {
     if (!x) continue; n++;
-    const r = LI.build(M, ch, x, lv, ctx), txt = [r.core.text, r.relation, r.summary, ...r.scenes.map(s => s.text), ...r.good, ...r.bad, ...r.strategy, ...r.uncertainty, ...r.chain.map(c => c.text)];
+    const r = LI.build(M, ch, x, lv, ctx), txt = [r.core.text, r.relation, r.summary, ...r.scenes.map(s => s.text), ...r.good, ...r.bad, ...(r.mixed || []), ...(r.facts || []), ...r.strategy, ...r.uncertainty, ...r.chain.map(c => c.text)];
     // 1 구조·근거
     ok(r.evidence.rules.length > 0 && r.evidence.phraseIds.length > 0, `근거/문구 ID 없음 ${lv}`);
     r.scenes.forEach(s => ok(!s.phraseId || LI.PHRASES.some(p => p.id === s.phraseId), `없는 문구 ID ${s.phraseId}`));

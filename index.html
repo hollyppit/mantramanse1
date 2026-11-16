@@ -6288,7 +6288,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return { daeun: M.daeunAt(ch, ms), seun: M.yearPillarOf(Y), wolun: M.wolun(ch, Y).filter(m => m.startMs <= ms).pop(), iljin: x };
   }
   const rtFit = v => v >= 5 ? 'pos' : v <= -5 ? 'neg' : '';
-  function rtFitLines(f) { return `<div class="rt-fit"><span>억부 적합도 <b class="${rtFit(f.eokbuFit)}">${f.eokbuLabel}</b> <i class="num">${signed(f.eokbuFit)}</i></span><span>조후 적합도 <b class="${rtFit(f.johuFit)}">${f.johuLabel}</b> <i class="num">${signed(f.johuFit)}</i></span></div><p class="small muted">${esc(f.note)}</p>`; }
+  // 종격이면(f.basis === 'jong') 강약(억부) 칸 대신 종격 배치로 읽은 칸을 보인다(2026-11-16)
+  function rtFitLines(f) { return `<div class="rt-fit">${f.basis === 'jong' ? `<span>종격(${esc(f.jongKind || '')}) 기준 <b class="${rtFit(f.jongFit)}">${f.jongLabel}</b> <i class="num">${signed(f.jongFit)}</i></span>` : `<span>억부 적합도 <b class="${rtFit(f.eokbuFit)}">${f.eokbuLabel}</b> <i class="num">${signed(f.eokbuFit)}</i></span>`}<span>조후 적합도 <b class="${rtFit(f.johuFit)}">${f.johuLabel}</b> <i class="num">${signed(f.johuFit)}</i></span></div><p class="small muted">${esc(f.note)}</p>`; }
   // ── 통근 환경별 활용 안내: 뿌리가 강해진 환경 / 약한 환경에서 어떻게 지낼지 (참고용, 점수·길흉과 무관) ──
   // 환경(운까지 합친 현재 통근) × 사주의 쏠림(나를 돕는 힘 %)으로 풀어 준다. 같은 "뿌리 강함"도 이미 힘이 센 사주와 약한 사주는 쓰임이 반대다.
   const RT_TIP = {
@@ -7430,6 +7431,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       '<div class="ib-k">어떤 상황이 나타날 수 있는가</div>' + li(r.scenes.map(s => s.name + ' — ' + s.text)) +
       (r.chain.length || r.change ? '<div class="ib-k">앞뒤 기간과의 연결</div>' + li(r.chain.map(c => c.text).concat(r.change ? [r.change] : [])) : '') +
       '<div class="ib-k">기회와 위험</div><div class="ib-cols"><div><b class="ib-g">유리하게 작용하는 조건</b>' + (r.good.length ? li(r.good) : '<p class="small muted">뚜렷하게 성립하는 유리 조건은 없습니다.</p>') + '</div><div><b class="ib-b">불리하게 작용하는 조건</b>' + (r.bad.length ? li(r.bad) : '<p class="small muted">뚜렷하게 성립하는 불리 조건은 없습니다.</p>') + '</div></div>' +
+      // 기준에 따라 달라지는 점(억부·조후 등 개별 기준이나 이 운의 구조에서만 성립하는 해석)과 좋고 나쁨 없는 사실 — 2026-11-16
+      ((r.mixed || []).length ? '<div class="ib-k">기준에 따라 달라지는 점</div>' + li(r.mixed) : '') +
+      ((r.facts || []).length ? '<p class="small muted">' + r.facts.map(esc).join(' ') + '</p>' : '') +
       '<div class="ib-k">어떻게 대응할 것인가</div>' + li(r.strategy) +
       '<p class="small muted">' + r.uncertainty.map(esc).join(' ') + '</p>' +
       '<details class="adv"><summary>명리학적 근거 보기</summary><div class="small">' +
@@ -7554,7 +7558,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const e = x.ev, w = e.weights;
     const comps = e.unifiedScore != null ? [['통합 용신', 'unified', e.unifiedScore], ['관계', 'relation', e.relationScore], ['구조', 'structure', e.structureScore]] : [['억부', 'eokbu', e.eokbuScore], ['조후', 'johu', e.johuScore], ['관계', 'relation', e.relationScore], ['구조', 'structure', e.structureScore]];
     if (e.unifiedScore == null && e.tonggwanScore != null) comps.splice(2, 0, ['통관', 'tonggwan', e.tonggwanScore]);
-    const impact = (e.theoryImpact || []).map(t => `<span class="chip ${t.v >= 5 ? 'ib-g' : t.v <= -5 ? 'ib-b' : ''}">${esc(t.text)}</span>`).join(' ');
+    const impact = (e.theoryImpact || []).map(t => `<span class="chip ${t.v >= 5 ? 'ib-g' : t.v <= -5 ? 'ib-b' : ''}">${esc(t.text)}</span>`).join(' ') + (e.theoryImpact || []).filter(t => t.note).map(t => `<span class="small muted" style="display:block">${esc(t.note)}</span>`).join('');   // 종격 칩은 유지·파격 이유 한 줄(2026-11-16)
     const chainLine = e.chain && e.chain.links.length ? `<div class="small" style="margin-top:4px"><b>${esc(M.josa(e.chain.upName, '과/와'))}의 연결</b> ${e.chain.links.map(l => esc(l.text)).join(' · ')}</div>` : '';
     return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${condTag(e.condition)} <b class="num">${signed(luckV(x))}</b></span></div>
       ${banner}
@@ -7689,6 +7693,16 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${body}</section>`;
   }
 
+  // 억부·조후가 엇갈리거나 종격·조건부 역할이 있는 사주에만, 운세 흐름 탭 위에 통합 판단의 이유를 한 번 보인다(2026-11-16).
+  // 카드마다 같은 설명을 되풀이하지 않도록 여기에서만 쓰고, 해석 상자에는 "어느 기준의 말인지"만 짧게 적는다.
+  function yongMixNote(ch) {
+    const u = ch.unified; if (!u || !u.summary) return '';
+    const softened = Object.keys(u.conditions || {}).some(k => { const b = { '용신': 1, '희신': 0.5, '한신': 0, '구신': -0.5, '기신': -1 }[u.roles[k]]; return b != null && Math.abs(u.roleV[k] - b) > 1e-9; });
+    const jongMaybe = u.jong && (u.jong.status === 'ga' || u.jong.status === 'hold') && u.mode !== 'jong';
+    if (!(['conflict', 'bridge', 'jong'].includes(u.mode) || softened || jongMaybe)) return '';
+    const tail = u.mode === 'jong' ? '그래서 이 사주는 강약(억부) 기준을 쓰지 않고, 운이 따르는 세력을 유지시키는지·깨는지로 읽습니다.' : '그래서 같은 시기에도 좋은 점과 조심할 점이 함께 보일 수 있습니다. 각 시기 해석의 "기준에 따라 달라지는 점"에 어느 기준으로 본 말인지 적어 두었습니다.';
+    return `<p class="small" style="margin:2px 0 8px"><b>${esc(u.headline || '')}</b><br>${esc(u.summary)}${jongMaybe ? ' 종격 가능성도 있어, 종격으로 확인되면 판단이 반대가 될 수 있습니다.' : ''} ${tail}</p>`;
+  }
   function renderLuck() {
     const ch = S.ch;
     const du = M.daeunAt(ch, NOW);
@@ -7719,7 +7733,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     ${renderIkd(ch)}
     ${ch.yongFallback ? `<div class="warn"><b>용신 기준</b><span>${M.SCHOOLS[ch.school]}이 이 사주에 해당하지 않아 억부 기준 용신을 표시합니다. 흐름 점수는 억부·조후를 자동 가중해 계산합니다.</span></div>` : ''}
     <section class="card">
-      <div class="card-h"><h2>지금의 운</h2><span class="note">${TODAY.join('.')} 기준 · 억부·조후 자동 가중</span></div>
+      <div class="card-h"><h2>지금의 운</h2><span class="note">${TODAY.join('.')} 기준 · 통합 용신 기준</span></div>
+      ${yongMixNote(ch)}
       <div class="now">
         ${nowCard('daeun', term('대운'), du, du ? `${du.startAge}세~` : '')}
         ${nowCard('seun', term('세운'), se, `${curY}`)}

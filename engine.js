@@ -1163,7 +1163,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     // 근거 문장: 흐름 판정 이유 + overlay 이유 + 기여가 큰 성분 2~3개
     const se = stemEl(p.s);
     const parts = [{ label: `통합 용신 부합 (${U.primaryName}${U.secondaryName ? '·' + U.secondaryName : ''} 기준 · 천간 ${STEM[p.s]}:${U.roles[se]}, 지지 ${BR[p.b]}:지장간 가중${uni.kJ ? ' · 글자별 조습' : ''}${uni.kG ? ' · 격국' : ''})`, v: yongW * uni.v, comp: 'unified' }];
-    const theoryImpact = theoryImpacts(ch, eok.v, jo.v, uni.gyeok);
+    const theoryImpact = theoryImpacts(ch, eok.v, jo.v, uni.gyeok, uni.v, p);
     if (chain) chain.links.forEach(x => parts.push({ label: x.text, v: x.v, comp: 'chain' }));
     relP.forEach(x => parts.push({ label: x.label, v: W.relation * C.relationScale * x.v, comp: 'relation' }));
     parts.push({ label: structLabel, v: W.structure * structureScore - structP.reduce((a, x) => a + x.v, 0) * W.structure, comp: 'structure' });
@@ -1849,9 +1849,27 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     return { roleFit, gyeok: gy, kJ, kG, roleW, johuDedup, notes };
   }
   const impactWord = v => v >= 15 ? '도움' : v >= 5 ? '약간 도움' : v <= -15 ? '부담' : v <= -5 ? '약간 부담' : '영향 적음';
-  function theoryImpacts(ch, eokV, johuV, gyV) {
+  // 종격에서 운 한 기둥이 세력을 유지시키는지·깨는지(표시 전용, 2026-11-16). 역할은 종격 배치(ch.unified.roles)를 그대로 쓴다.
+  //   따르는 종격(종아·종재·종살): 일간이 운에서 뿌리(같은 오행의 지장간)나 비겁·인성을 얻으면 따르던 세력에서 벗어나려 해 파격 신호
+  //   세력이 중심인 종격(종왕·종강): 넘치는 세력을 거스르는 기신·구신 글자가 오면 파격 신호
+  function jongLuckState(ch, p) {
+    const u = ch.unified; if (!u || u.mode !== 'jong') return null;
+    const Z = jongCore(ch), dEl = stemEl(ch.pillars.day.s), se = stemEl(p.s), bm = stemEl(mainHidden(p.b));
+    const bad = e => u.roles[e] === '기신' || u.roles[e] === '구신', good = e => u.roles[e] === '용신' || u.roles[e] === '희신';
+    const rooted = HIDDEN[p.b].some(([hs]) => stemEl(hs) === dEl);
+    let state, text;
+    if (Z.side === 'weak' && (rooted || bad(se) || bad(bm))) { state = 'break'; text = `${Z.kind}은 일간이 세력을 따르는 구조라, 이 운에서 일간이 ${rooted ? '뿌리' : '돕는 기운'}를 얻으면 따르던 흐름에서 벗어나려 해 격이 흔들리는 신호(파격 신호)로 봅니다.`; }
+    else if (Z.side === 'strong' && (bad(se) || bad(bm))) { state = 'break'; text = `${Z.kind}은 넘치는 세력이 중심인 구조라, 그 세력을 거스르는 ${EL_K[bad(se) ? se : bm]} 기운이 오면 격이 흔들리는 신호(파격 신호)로 봅니다.`; }
+    else if (good(se) || good(bm)) { state = 'keep'; text = `${Z.kind}의 세력을 그대로 따르는 기운이 들어와 격이 유지되는 쪽입니다.`; }
+    else { state = 'mid'; text = `${Z.kind}의 세력을 크게 돕지도 깨지도 않는 기운입니다.`; }
+    return { kind: Z.kind, side: Z.side, state, text };
+  }
+  function theoryImpacts(ch, eokV, johuV, gyV, uniV, p) {
     const u = ch.unified, out = [];
-    out.push({ key: 'eokbu', v: eokV, text: `억부(강약) — ${impactWord(eokV)}` });
+    // 종격이 성립하면 억부 판단은 쓰지 않는다(integrateYongsin: '적용 안 함(종격)'). 억부 칩 대신 종격 유지·파격 칩을 보인다. v 는 표시 색에만 쓴다
+    const js = u.mode === 'jong' && p ? jongLuckState(ch, p) : null;
+    if (js) out.push({ key: 'jong', v: js.state === 'break' ? -15 : js.state === 'keep' ? 15 : 0, state: js.state, text: `종격(${js.kind}) — ${js.state === 'break' ? '파격 신호' : js.state === 'keep' ? '세력 유지' : '영향 적음'}`, note: js.text });
+    else out.push({ key: 'eokbu', v: eokV, text: `억부(강약) — ${impactWord(eokV)}` });
     if (u.theories.johu.applicable) out.push({ key: 'johu', v: johuV, text: `조후(온도·습도) — ${impactWord(johuV)}` });
     if (u.theories.gyeok.applicable) out.push({ key: 'gyeok', v: gyV, text: `격국(${u.theories.gyeok.kind}) — ${gyV >= 5 ? '격을 돕는 기운이 들어옴' : gyV <= -5 ? '격을 흔드는 기운이 들어옴' : '영향 적음'}` });
     return out;
@@ -3551,7 +3569,20 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     else if (eokbuFit >= 8) note = '일간의 기반이 보강되어 억부상 균형에 도움이 될 수 있습니다.';
     else if (eokbuFit <= -8) note = '일간을 돕는 힘이 이미 충분한 원국이라 근 보강이 강약 균형을 한쪽으로 더 기울일 수 있습니다.';
     else note = '억부·조후 모두 뚜렷한 유불리는 없습니다.';
-    return { rootSupportChange: Math.round(change), eokbuFit, johuFit, overallFit, eokbuLabel: lab(eokbuFit), johuLabel: lab(johuFit), overallLabel: lab(overallFit), note, eokbuNeed: need, johuBase: joh };
+    const base = { rootSupportChange: Math.round(change), eokbuFit, johuFit, overallFit, eokbuLabel: lab(eokbuFit), johuLabel: lab(johuFit), overallLabel: lab(overallFit), note, eokbuNeed: need, johuBase: joh, basis: 'eokbu' };
+    // 종격(2026-11-16, 표시 전용): 종격이 성립하면 강약(억부) 판단을 쓰지 않는다. 일간의 뿌리가 더해지는 것을 종격 배치의 역할로 다시 읽는다.
+    //   따르는 종격(종아·종재·종살)에서는 일간이 뿌리를 얻으면 격이 흔들리는 신호, 세력이 중심인 종격(종왕·종강)에서는 세력이 유지되는 쪽.
+    //   eokbuFit 등 기존 값은 그대로 두고(다른 화면·테스트 호환) basis·jongFit·note 만 바꾼다.
+    const u = ch.unified;
+    if (u && u.mode === 'jong') {
+      const Z = jongCore(ch), jv = u.roleV[stemEl(ch.pillars.day.s)] || 0, jongFit = Math.round(jv * change);
+      const jNote = change < 5 ? `${Z.kind}이라 강약(억부) 대신 세력을 따르는 기준으로 봅니다. 추가되는 근이 작아 격에 주는 영향은 거의 없습니다.`
+        : Z.side === 'weak' ? `${Z.kind}은 일간이 세력을 따르는 구조라, 일간이 뿌리를 얻으면 따르던 흐름에서 벗어나려 해 격이 흔들리는 신호(파격 신호)가 됩니다. 이 시기에는 큰 방향 전환을 서두르지 않는 편이 좋습니다.`
+          : `${Z.kind}은 일간의 세력이 중심인 구조라, 뿌리가 더해지면 그 세력이 유지·강화되는 쪽입니다.`;
+      return { ...base, basis: 'jong', jongKind: Z.kind, jongSide: Z.side, jongFit, jongLabel: lab(jongFit), overallFit: Math.round((jongFit + johuFit * 0.5) / 1.5), overallLabel: lab(Math.round((jongFit + johuFit * 0.5) / 1.5)), note: jNote };
+    }
+    if (u && u.jong && (u.jong.status === 'ga' || u.jong.status === 'hold')) base.note += ' 다만 종격 가능성이 있는 사주라, 종격으로 확인되면 이 판단은 반대가 될 수 있습니다.';
+    return base;
   }
 
   // ③ 기존 근의 안정성: 원국의 근이 있는 지지가 운의 지지와 만드는 관계. 근을 지우지 않고 안정성 신호로만 쓴다
