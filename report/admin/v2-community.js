@@ -304,10 +304,26 @@
     }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
 
+  // ⓪ 통합 첫 화면(/gate/) 열기·숨기기 — 기본 숨김(사용자가 쌓이고 광장 오픈 직전에 연다). /api/community/gateway
+  function loadGateway() {
+    var box = $('#cmGw'); if (!box) return;
+    call('/api/community/gateway').then(function (d) {
+      box.innerHTML = '<p style="margin:0 0 8px">지금: <b style="color:' + (d.open ? '#FF8A78' : 'var(--gold)') + '">' + (d.open ? '열림 — 첫 방문자가 처음 화면(심층 분석·인연의 광장 고르기)을 봅니다' : '숨김 — 첫 방문자는 바로 심층 분석(/report/)으로 갑니다') + '</b>' + (d.at ? ' <span class="muted">(' + when(d.at) + (d.by ? ' · ' + esc(d.by) : '') + ')</span>' : '') + '</p>' +
+        '<div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn' + (d.open ? ' ghost' : '') + '" id="gwTog">' + (d.open ? '다시 숨기기' : '처음 화면 열기') + '</button><a class="btn ghost" href="/gate/?preview=1" target="_blank" rel="noopener">미리 보기</a><span class="muted" id="gwMsg"></span></div>';
+      $('#gwTog').onclick = function () {
+        var body = { open: !d.open };
+        if (!d.open) { var c = prompt('모든 첫 방문자에게 처음 화면(심층 분석·인연의 광장 고르기)을 보여 주고, 심층 분석 화면에 "처음 화면" 링크를 띄웁니다. 계속하려면 "처음 화면 열기"라고 입력해 주세요.'); if (c !== '처음 화면 열기') return; body.confirm = c; }
+        else if (!confirm('처음 화면을 다시 숨깁니다. 첫 방문자는 바로 심층 분석으로 갑니다. 계속할까요?')) return;
+        call('/api/community/gateway', { method: 'PUT', body: body }).then(function () { loadGateway(); loadAudit(); }).catch(function (e) { msg('gwMsg', e.message, true); });
+      };
+    }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
+  }
+
   function draw() {
     var C = function (perm, html) { return can(perm) ? html : ''; };
     var head = role === 'owner' ? '' : '<p class="muted" style="margin:0 0 10px">운영자 열쇠로 들어왔습니다 · 역할: <b>' + esc(SROLE[role] || role) + '</b>. 공개 단계·권한·유료 설정은 관리자만 바꿀 수 있습니다.</p>';
     root.innerHTML = head +
+      C('owner', '<div class="card" style="margin-bottom:12px"><h3 style="margin:0 0 8px">⓪ 처음 화면(통합 게이트웨이)</h3><p class="muted" style="margin:0 0 8px">기본은 숨김입니다. 사용자가 쌓이고 인연의 광장을 열기 직전에 엽니다. 숨겨도 출시 알림 철회 링크와 광장 준비 중 안내는 그대로 열립니다.</p><div id="cmGw"><p class="muted">불러오는 중…</p></div></div>') +
       C('owner', '<div class="card"><h3 style="margin:0 0 8px">① 공개 단계</h3><div id="cmStage"><p class="muted">불러오는 중…</p></div>' +
       '<div class="row" style="margin-top:12px;gap:6px;flex-wrap:wrap"><button class="btn" data-tester="a">테스트 회원 A로 열기</button><button class="btn" data-tester="b">테스트 회원 B로 열기</button><button class="btn ghost" id="cmEnter">로그인 없이 둘러보기</button><span class="muted" id="cmEnterMsg"></span></div>' +
       '<p class="muted" style="margin:8px 0 0;font-size:.82rem">테스트 회원 A·B 는 동의·광장 프로필·성인 확인·인연 프로필이 준비된 관리자 전용 계정이라 글쓰기·운테크·인연 잇기·대화까지 실제 회원처럼 시험할 수 있습니다(A↔B 서로 인연으로 보임). 실제 회원의 오늘의 인연에는 나오지 않습니다. 이 탭의 로그인이 테스트 회원으로 바뀝니다.</p></div>') +
@@ -339,7 +355,7 @@
       [].forEach.call(root.querySelectorAll('[data-tester]'), function (b) { b.onclick = function () { if (window.openPlazaAs) window.openPlazaAs(b.getAttribute('data-tester')); else msg('cmEnterMsg', '관리자 화면에서만 열 수 있습니다', true); }; });
       $('#cmEnter').onclick = function () { call('/api/community/enter', { method: 'POST' }).then(function (d) { window.open(d.to || '/community/', '_blank', 'noopener'); msg('cmEnterMsg', '새 탭에서 열었습니다(12시간 유효)'); }).catch(function (e) { msg('cmEnterMsg', e.message, true); }); };
         fetch('/api/community/status', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(drawStage).catch(function () { drawStage({ stage: 'dev' }); });
-      loadAccess(); loadAlerts(); loadConsents(); loadCredits(); loadStaff(); loadFeatures();
+      loadAccess(); loadAlerts(); loadConsents(); loadCredits(); loadStaff(); loadFeatures(); loadGateway();
     }
     if (can('metrics')) { $('#cmMetGo').onclick = loadMetrics; loadMetrics(); loadLaunch(); }
     if (can('members')) loadMembers();

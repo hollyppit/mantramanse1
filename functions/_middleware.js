@@ -4,6 +4,7 @@
 // 운영 호스트(mantramanse.pages.dev)와 그 외 호스트에서는 아무 일도 하지 않는다(요청을 그대로 통과).
 import { siteGate } from './_site-gate.js';
 import { communityGate } from './_community.js';
+import { gatewayRedirect } from './_gateway.js';
 
 const PROD = 'https://mantramanse.pages.dev';
 const PREVIEW_HOST = /^[a-z0-9][a-z0-9-]*\.mantramanse\.pages\.dev$/i;
@@ -27,6 +28,8 @@ export function withSecurity(request, res) {
 
 export async function onRequest(ctx) { return withSecurity(ctx.request, await route(ctx)); }
 async function route(ctx) {
+  const hidden = await gatewayRedirect(ctx.request, ctx.env);   // 통합 첫 화면 숨김(기본) — /gate/ 를 /report/ 로
+  if (hidden) return hidden;
   const locked = await siteGate(ctx.request, ctx.env);
   if (locked) return locked;
   const closed = await communityGate(ctx.request, ctx.env);   // 커뮤니티 공개 단계 잠금(사이트 비밀번호와 별개)

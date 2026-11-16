@@ -5,11 +5,12 @@
 // 저장: KV 'community:stage' = { stage, version, at, by, history:[최근 20건] }. 바꿀 때마다 감사 로그(admin_audit_log)에 남긴다.
 import { json, isAdmin, readStage, readCookie, roleAllowed, STAGES, STAGE_LABEL, STAGE_KEY, audit, reviewerOf } from '../../_community.js';
 import { checklist } from '../../_launch.js';
+import { gatewayOpen } from '../../_gateway.js';
 
 export async function onRequestGet({ request, env }) {
   const { stage } = await readStage(env);
   const c = await readCookie(request, env);
-  return json({ stage, label: STAGE_LABEL[stage], inside: stage === 'public' || !!(c && roleAllowed(c.role, stage)) });
+  return json({ stage, label: STAGE_LABEL[stage], inside: stage === 'public' || !!(c && roleAllowed(c.role, stage)), gateway: await gatewayOpen(env) });   // gateway: 통합 첫 화면이 열려 있는가(심층 분석의 '처음 화면' 링크 표시용)
 }
 
 export async function onRequestPut({ request, env }) {

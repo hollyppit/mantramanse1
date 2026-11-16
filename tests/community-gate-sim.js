@@ -51,7 +51,7 @@ const ENV = { ADMIN_PASSWORD: 'adm-pw', SUPABASE_URL: 'https://sb.local', SUPABA
   r = await run('/api/community/feed', ENV, { headers: { authorization: 'Bearer wrong' } }); ok(r.status === 403, '틀린 관리자 비밀번호 차단');
   r = await run('/api/community/feed', ENV, { headers: { authorization: 'Bearer adm-pw' } }); ok(r.status === 200 && (await r.text()) === 'own', '관리자 비밀번호는 API 통과');
   for (const p of ['/api/community/status', '/api/community/alert', '/api/community/enter']) { r = await run(p); ok(r.status === 200, '잠금 중에도 공개 API: ' + p); }
-  for (const p of ['/report/', '/report/v2/', '/gate/', '/api/commerce/access', '/communityx', '/api/communityfeed', '/']) { r = await run(p); ok((await r.text()) === 'own', '커뮤니티 밖 경로는 그대로 통과: ' + p); }
+  for (const p of ['/report/', '/report/v2/', '/gate/?preview=1', '/api/commerce/access', '/communityx', '/api/communityfeed', '/']) { r = await run(p); ok((await r.text()) === 'own', '커뮤니티 밖 경로는 그대로 통과: ' + p); }
 
   // 2) 입장 쿠키
   r = await enter.onRequestPost({ request: req('/api/community/enter', { method: 'POST' }), env: ENV }); ok(r.status === 401 && (await r.json()).need === 'login', '비로그인 입장 → 로그인 필요');
@@ -151,7 +151,7 @@ const ENV = { ADMIN_PASSWORD: 'adm-pw', SUPABASE_URL: 'https://sb.local', SUPABA
   const PUB = { ...ENV, SITE_GATE_PASSWORD: 'pw', SITE_GATE_REPORT_PUBLIC: '1' };
   r = await run('/community/', PUB); ok(r.status === 302 && r.headers.get('location') === '/gate/?community=closed', '공개 모드 + 개발 중: 준비 중으로');
   r = await run('/community/', PUB, { headers: { cookie: 'mt_cm=' + testerCookie } }); ok((await r.text()) === 'own', '공개 모드 + 테스터 쿠키: 비밀번호 없이 통과');
-  r = await run('/', PUB); ok(r.headers.get('location') === '/gate/', '첫 방문 → 통합 첫 화면');
+  r = await run('/', PUB); ok(r.headers.get('location') === '/report/', '첫 방문 → 처음 화면 숨김(기본)이라 심층 분석으로(2026-11-16)');
   r = await run('/gate/gate.js', PUB); ok((await r.text()) === 'own', '첫 화면 파일 공개');
 
   // 8) 화면 파일 점검(정적): 동의 문구 버전 일치·선택 기본 미동의·움직임 줄이기·준비 중 처리

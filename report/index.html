@@ -370,7 +370,10 @@ footer { padding: 70px 0 60px; color: var(--ink-3); font-size: .76rem; text-alig
 <canvas id="amb" aria-hidden="true"></canvas>
 <div id="prog" aria-hidden="true"></div>
 <header class="top">
-  <a class="sp" href="/gate/" aria-label="처음 화면(심층 분석·운명의 광장 고르기)" onclick="try{localStorage.setItem('mt_last_service','deep')}catch(e){}">‹ 처음 화면</a>
+  <a class="sp" id="gateLink" href="/gate/" aria-label="처음 화면(심층 분석·운명의 광장 고르기)" style="visibility:hidden" tabindex="-1" aria-hidden="true" onclick="try{localStorage.setItem('mt_last_service','deep')}catch(e){}">‹ 처음 화면</a>
+  <script>/* 통합 첫 화면은 관리자가 열 때까지 숨김(functions/_gateway.js) — 열려 있을 때만 이 링크를 보여 준다. 자리는 그대로 두어 머리줄 배치가 흔들리지 않게 */
+    (function () { try { fetch('/api/community/status', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (!d || d.gateway !== true) return; var a = document.getElementById('gateLink'); if (a) { a.style.visibility = ''; a.removeAttribute('tabindex'); a.removeAttribute('aria-hidden'); } }).catch(function () { }); } catch (e) { } })();
+  </script>
   <span class="brand" id="brandName">만트라 포춘</span>
   <span class="r"><button type="button" id="skipLink">바로 분석하기</button></span>
 </header>

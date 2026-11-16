@@ -45,9 +45,20 @@ import(url.pathToFileURL(path.join(__dirname, '..', 'functions/_middleware.js'))
   nexted = 0; r = await run(B + '/index.html', PUB); ok(r.status === 302 && nexted === 0, '공개 모드 /index.html 도 /report/ 로');
   nexted = 0; r = await run(B + '/', PUB, { method: 'POST' }); ok(r.status === 401 && nexted === 0, '루트 POST 는 리다이렉트 없이 잠금');
   for (const p of ['/report/admin/', '/report/admin', '/something', '/x.html']) { nexted = 0; r = await run(B + p, PUB); ok(r.status === 401 && nexted === 0, '공개 모드에서도 잠금: ' + p); }
-  nexted = 0; r = await run(B + '/', PUB); ok(r.status === 302 && r.headers.get('location') === '/gate/' && nexted === 0, '공개 모드 루트는 통합 첫 화면 /gate/ 로(2026-11-15)');
+  // 2026-11-16: 통합 첫 화면은 관리자 스위치(KV gateway:open)로 열 때까지 숨김
+  const kvOf = v => { const m = new Map(v === undefined ? [] : [['gateway:open', JSON.stringify(v)]]); return { get: async (k, t) => m.has(k) ? (t === 'json' ? JSON.parse(m.get(k)) : m.get(k)) : null, put: async (k, x) => { m.set(k, x); } }; };
+  const OPEN = { ...PUB, GLOSSARY_KV: kvOf({ open: true }) }, SHUT = { ...PUB, GLOSSARY_KV: kvOf({ open: false }) }, BROKEN = { ...PUB, GLOSSARY_KV: { get: async () => { throw new Error('kv down'); } } };
+  nexted = 0; r = await run(B + '/', PUB); ok(r.status === 302 && r.headers.get('location') === '/report/' && nexted === 0, '스위치 값 없음(기본 숨김): 루트는 /report/ 로');
+  nexted = 0; r = await run(B + '/', SHUT); ok(r.status === 302 && r.headers.get('location') === '/report/', '숨김: 루트는 /report/ 로');
+  nexted = 0; r = await run(B + '/', BROKEN); ok(r.status === 302 && r.headers.get('location') === '/report/', 'KV 읽기 실패도 숨김으로');
+  nexted = 0; r = await run(B + '/', OPEN); ok(r.status === 302 && r.headers.get('location') === '/gate/' && nexted === 0, '열림: 루트는 통합 첫 화면 /gate/ 로');
+  for (const p of ['/gate/', '/gate', '/gate/index.html', '//gate/']) { nexted = 0; r = await run(B + p, PUB); ok(r.status === 302 && r.headers.get('location') === '/report/' && nexted === 0, '숨김: 첫 화면 직접 열어도 /report/ 로: ' + p); }
+  for (const q of ['?alert=revoke&t=abc', '?community=closed', '?preview=1']) { nexted = 0; r = await run(B + '/gate/' + q, PUB); ok(r.status === 200 && nexted === 1, '숨김이어도 예외는 첫 화면 그대로: ' + q); }
+  nexted = 0; r = await run(B + '/gate/gate.js', PUB); ok(nexted === 1, '숨김이어도 첫 화면 파일(js·css)은 통과');
+  nexted = 0; r = await run(B + '/gate/', PUB, { method: 'POST' }); ok(r.status !== 302 || r.headers.get('location') !== '/report/', 'GET 이 아닌 요청은 숨김 처리 안 함');
+  nexted = 0; r = await run(B + '/gate/', { GLOSSARY_KV: kvOf({ open: false }) }); ok(r.status === 302 && r.headers.get('location') === '/report/', '사이트 잠금이 없어도 숨김은 적용');
   nexted = 0; r = await run(B + '/', { ...PUB, GATEWAY_OFF: '1' }); ok(r.status === 302 && r.headers.get('location') === '/report/' && nexted === 0, 'GATEWAY_OFF=1 이면 예전처럼 /report/ 로');
-  nexted = 0; r = await run(B + '/gate/', PUB); ok(r.status === 200 && nexted === 1, '공개 모드에서 /gate/ 는 비밀번호 없이 열림');
+  nexted = 0; r = await run(B + '/gate/', OPEN); ok(r.status === 200 && nexted === 1, '열림: 공개 모드에서 /gate/ 는 비밀번호 없이 열림');
   nexted = 0; r = await run(B + '/', PUB, { headers: { cookie } }); ok(nexted === 1, '공개 모드에서도 비밀번호 쿠키가 있으면 만세력 열림');
   nexted = 0; r = await run(B + '/report/admin/', PUB, { headers: { cookie } }); ok(nexted === 1, '공개 모드 관리자 화면은 쿠키로 열림');
   nexted = 0; r = await run(B + '//report/admin/', PUB); ok(r.status === 401 && nexted === 0, '슬래시 겹친 관리자 경로도 잠금');

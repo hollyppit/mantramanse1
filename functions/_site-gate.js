@@ -1,6 +1,7 @@
 // 사이트 전체 비밀번호 잠금(오픈 전용).
 // Cloudflare Pages 환경변수 SITE_GATE_PASSWORD 가 있으면 잠기고, 없거나 비어 있으면 아무 일도 하지 않는다(= 오픈).
 // 오픈할 때는 그 환경변수만 지우면 된다. 코드 변경·재배포 필요 없음(다음 요청부터 바로 적용).
+import { gatewayOpen } from './_gateway.js';
 const COOKIE = 'mantra_gate';
 const MAX_AGE = 60 * 60 * 24 * 30;
 const LOGIN_PATH = '/__gate';
@@ -71,7 +72,8 @@ export async function siteGate(request, env) {
 
   // 무빙툰 공개 모드에서 쿠키 없이 만세력 첫 화면으로 온 방문자는 통합 첫 화면(/gate/)으로 보낸다(관리자는 /__gate 로 들어오면 그대로 잠금 화면).
   // 되돌리기: 환경변수 GATEWAY_OFF=1 이면 예전처럼 /report/ 로 보낸다(코드 배포 없이 다음 요청부터).
-  if (reportPublic && request.method === 'GET' && (url.pathname === '/' || url.pathname === '/index.html')) return new Response(null, { status: 302, headers: { ...HDR, location: gatewayOff(env) ? '/report/' : '/gate/' } });
+  // 2026-11-16: 통합 첫 화면은 관리자 스위치(KV gateway:open, functions/_gateway.js)로 열 때까지 숨김 → 기본은 /report/
+  if (reportPublic && request.method === 'GET' && (url.pathname === '/' || url.pathname === '/index.html')) return new Response(null, { status: 302, headers: { ...HDR, location: gatewayOff(env) || !(await gatewayOpen(env)) ? '/report/' : '/gate/' } });
 
   if (url.pathname.startsWith('/api/')) return new Response(JSON.stringify({ error: 'site locked' }), { status: 401, headers: { ...HDR, 'content-type': 'application/json' } });
   return new Response(page(url.pathname + url.search, false), { status: 401, headers: { ...HDR, 'content-type': 'text/html; charset=utf-8' } });
