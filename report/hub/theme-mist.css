@@ -467,3 +467,12 @@ html.theme-mist #hub .ddb .gc .g ul.dl li::before{ background: #16A34A; } html.t
 html.theme-mist #hub #screen .fortune-panel .mc-day.caution em{ background: #DC2626 !important; color: #fff !important; }
 html.theme-mist #hub #screen .fortune-panel .mc-day.favorable em{ background: #15803D !important; color: #fff !important; }
 html.theme-mist #hub .dc small, html.theme-mist #hub details.dd summary small{ color: #55657A; }
+
+/* 점수 고리: 점수 등급별 색(최고 진초록·좋음 초록·무난 회청·주의 주황·부담 빨강), 숫자도 같은 계열 */
+html.theme-mist #hub .ring[data-lv]{ background: conic-gradient(var(--rc) calc(var(--p) * 1%), rgba(52,72,80,.12) 0); }
+html.theme-mist #hub .ring[data-lv="best"]{ --rc: #15803D; --rci: #14532D; }
+html.theme-mist #hub .ring[data-lv="good"]{ --rc: #22C55E; --rci: #166534; }
+html.theme-mist #hub .ring[data-lv="mid"]{ --rc: #64748B; --rci: #334155; }
+html.theme-mist #hub .ring[data-lv="warn"]{ --rc: #F59E0B; --rci: #92400E; }
+html.theme-mist #hub .ring[data-lv="bad"]{ --rc: #DC2626; --rci: #991B1B; }
+html.theme-mist #hub .ring[data-lv] b{ color: var(--rci) !important; }

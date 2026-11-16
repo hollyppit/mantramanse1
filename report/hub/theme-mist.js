@@ -54,6 +54,15 @@
       var t = (e.textContent || '').trim(); if (!t || t.length > 40) continue;
       e.classList.add(toneOf(t));
     }
+    // 점수 고리: 점수로 색을 정한다(70↑ 최고 · 55↑ 좋음 · 45↑ 무난 · 35↑ 주의 · 그 아래 부담) — 그래프 신호 색과 같은 기준
+    var rings = sc.querySelectorAll('.ring');
+    for (var q = 0; q < rings.length; q++) {
+      var rg = rings[q], p = parseFloat(rg.style.getPropertyValue('--p'));
+      if (isNaN(p)) { var bt = rg.querySelector('b'); p = bt ? parseFloat(bt.textContent) : NaN; }
+      if (isNaN(p)) continue;
+      var lv = p >= 70 ? 'best' : p >= 55 ? 'good' : p >= 45 ? 'mid' : p >= 35 ? 'warn' : 'bad';
+      if (rg.getAttribute('data-lv') !== lv) rg.setAttribute('data-lv', lv);
+    }
     // 오늘의 운 분야 카드·흐름 문구: 등급 낱말(높음·무난·낮음…)로 카드 전체 색을 정한다
     var cards = sc.querySelectorAll('.dc:not([data-lv]), .tflow:not([data-lv])');
     for (var j = 0; j < cards.length; j++) {
@@ -73,7 +82,7 @@
   window.addEventListener('hashchange', tick);
   // 다른 코드가 <html> 클래스를 통째로 바꿔 theme-mist 가 지워지면 다시 붙인다
   new MutationObserver(function () { if (de.classList.contains('theme-mist') !== (enabled() && onScreen())) tick(); }).observe(de, { attributes: true, attributeFilter: ['class'] });
-  function watch() { var t = document.getElementById('screen') || document.getElementById('hub') || document.body; if (!t) return setTimeout(watch, 50); new MutationObserver(tick).observe(t, { childList: true, subtree: true }); tick(); }
+  function watch() { var t = document.getElementById('screen') || document.getElementById('hub') || document.body; if (!t) return setTimeout(watch, 50); new MutationObserver(tick).observe(t, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] }); tick(); }   // style: 날짜를 바꾸면 점수 고리 --p 만 바뀌는 경우
   watch(); apply();
   // 관리자 스위치 값(60초 캐시). 실패하면 기억해 둔 값 그대로.
   try {
