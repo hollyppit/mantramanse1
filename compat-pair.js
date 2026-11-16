@@ -6,6 +6,9 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const POS = ['year', 'month', 'day', 'hour'];
   const AREA = { year: '조상·어린 시절', month: '부모·직장', day: '속마음·배우자', hour: '자녀·말년' };
+  // 자리 이름은 '월지'·'일간'처럼 기둥+천간/지지로 쓴다(뜻풀이 이름 대신)
+  const POS_K = { year: '년', month: '월', day: '일', hour: '시' };
+  const posName = (pos, kind) => [].concat(pos).map(k => POS_K[k] + (kind === 'stem' ? '간' : '지')).join('·');
   const ROLE_W = { '용신': 1, '희신': 0.6, '한신': 0, '구신': -0.5, '기신': -1 };
 
   // 관계 종류별 가중치(합 100): 오행 보완 / 일간 십성 / 일지(배우자궁) / 간지 전체 조화 / 강약 균형
@@ -380,11 +383,11 @@
     for (const r of natal) {
       if (r.type === '충' && r.members.length === 2) {
         const hit = oBr.find(o => r.members.some(m => pairRel(self.pillars[m].b, o.b, '육합')));
-        if (hit) out.push({ tone: 'good', v: 1, text: `${you}의 ${AREA[hit.k]} 글자가 ${M.josa(me === '나' ? '내 원국의 ' + r.name : me + ' 원국의 ' + r.name, '을/를')} 합으로 묶어 부딪침을 누그러뜨립니다.` });
+        if (hit) out.push({ tone: 'good', v: 1, text: `${you}의 ${M.josa(posName(hit.k), '이/가')} ${M.josa(me === '나' ? '내 원국의 ' + r.name : me + ' 원국의 ' + r.name, '을/를')} 합으로 묶어 부딪침을 누그러뜨립니다.` });
       }
       if (r.type === '육합' && r.members.length === 2) {
         const hit = oBr.find(o => r.members.some(m => pairRel(self.pillars[m].b, o.b, '충')));
-        if (hit) out.push({ tone: 'bad', v: 1, text: `${you}의 ${AREA[hit.k]} 글자가 ${me === '나' ? '내' : me + '의'} 원국에 있던 합(${r.name})을 충으로 흔들어, 익숙하던 균형이 깨지기 쉽습니다.` });
+        if (hit) out.push({ tone: 'bad', v: 1, text: `${you}의 ${M.josa(posName(hit.k), '이/가')} ${me === '나' ? '내' : me + '의'} 원국에 있던 합(${r.name})을 충으로 흔들어, 익숙하던 균형이 깨지기 쉽습니다.` });
       }
     }
     return out;
@@ -493,9 +496,9 @@
     // 종합평 세 칸
     const goods = items.filter(x => x.tone === 'good'), bads = items.filter(x => x.tone === 'bad');
     const helpEach = [...ab.help.slice(0, 1), ...ba.help.slice(0, 1)];
-    if (goods[0]) helpEach.push(`${who(nm.a)} ${AREA[goods[0].aPos[0]]} 자리와 ${who(nm.b)} ${AREA[goods[0].bPos]} 자리가 ${goods[0].txt[1]}입니다. ${goods[0].txt[2]}`);
+    if (goods[0]) helpEach.push(`${who(nm.a)} ${M.josa(posName(goods[0].aPos, goods[0].kind), '과/와')} ${who(nm.b)} ${M.josa(posName(goods[0].bAll || goods[0].bPos, goods[0].kind), '이/가')} ${goods[0].txt[1]}입니다. ${goods[0].txt[2]}`);
     const whyConflict = [...ab.burden.slice(0, 1), ...ba.burden.slice(0, 1)];
-    if (bads[0]) whyConflict.push(`${who(nm.a)} ${AREA[bads[0].aPos[0]]} 자리와 ${who(nm.b)} ${AREA[bads[0].bPos]} 자리가 ${bads[0].txt[1]}입니다. ${bads[0].txt[2]}`);
+    if (bads[0]) whyConflict.push(`${who(nm.a)} ${M.josa(posName(bads[0].aPos, bads[0].kind), '과/와')} ${who(nm.b)} ${M.josa(posName(bads[0].bAll || bads[0].bPos, bads[0].kind), '이/가')} ${bads[0].txt[1]}입니다. ${bads[0].txt[2]}`);
     [...hAB.interplay].filter(x => x.tone === 'bad').slice(0, 1).forEach(x => whyConflict.push(x.text));
     const grow = [REL_GROW[rel], ...ab.advice.slice(0, 1), ...ba.advice.slice(0, 1)];
     if (bads[0]) grow.push(bads[0].txt[3]);
@@ -536,6 +539,6 @@
     family: '가까울수록 말투를 조심하고, 돌봄과 간섭의 선을 함께 정해 두세요.',
   };
 
-  G.PairCompat = { evaluate, evaluateLegacy, VERSION, REL_TYPES, REL_TYPES_V1, REL_WHY, PART_LABEL, PART_LABEL_V1, PART_KEYS, REL_TXT, AREA, TG_TXT, GROUP, SPREAD, gradeOf, GRADES,
+  G.PairCompat = { evaluate, evaluateLegacy, VERSION, REL_TYPES, REL_TYPES_V1, REL_WHY, PART_LABEL, PART_LABEL_V1, PART_KEYS, REL_TXT, AREA, POS_K, posName, TG_TXT, GROUP, SPREAD, gradeOf, GRADES,
     _internal: { needView, elementDir, glyphPower, tenGodDir, relationFit, harmonyOf } };
 })(typeof window !== 'undefined' ? window : globalThis);
