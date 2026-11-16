@@ -339,7 +339,7 @@ html.theme-mist #hub .tq :is(p, li) > :is(b, strong), html.theme-mist #hub :is(.
 html.theme-mist #hub .tq-fc > span:last-child, html.theme-mist #hub .tq-today a, html.theme-mist #hub .tq :is(.tq-lnk, .tq-mypage-go), html.theme-mist #hub .tq p a, html.theme-mist #hub .tq-fc .go{ color: var(--m-link); }
 /* 원국 표 십성 이름(밝은 글씨로 박혀 있던 곳) */
 html.theme-mist #hub .tq .mt-natal .tq-nt-t{ color: #1B2226; font-weight: 700; }
-html.theme-mist #hub .tq .mt-natal .tq-nt-c.me .tq-nt-t{ color: var(--m-link); }
+html.theme-mist #hub .tq .mt-natal .tq-nt-c.me .tq-nt-t{ color: #1B2226; }   /* 일주 칸: 붉은 글씨는 튀어서 먹색, 칸 바탕으로만 표시 */
 
 /* ── 원국 표: 오행 칸을 원색으로 칠한다(목 초록·화 빨강·토 노랑·금 은회·수 파랑) ── */
 /* 2026-11-16 원국 칸은 만트라 만세력과 같은 오행 색(목 #2FA866·화 #E8402F·토 #F5B921·금 #D9DDE5·수 #2B303C). 아래쪽을 살짝 어둡게 해 작은 글씨 대비 확보 */
@@ -493,10 +493,44 @@ html.theme-mist #hub svg :is(text, tspan)[fill="#7FD3A0" i]{ fill: #15803D; }   
 
 /* 원국 표 신살 칩: 만트라 만세력과 같은 규칙 — 길신 = 연초록 바탕·초록 글씨, 참고 신살 = 연붉은 바탕·붉은 글씨, 공망 = 먹색. 좋고 나쁨 표시가 아니다(글씨만 대비 위해 한 단계 진하게) */
 html.theme-mist #hub #tq .tq-nt-ss{ font-weight: 700; border: 0; padding: 2px 7px; border-radius: 4px; box-shadow: none; }
-html.theme-mist #hub #tq .tq-nt-ss.g{ background: #E3F5EA; color: #177A42 !important; }
-html.theme-mist #hub #tq .tq-nt-ss.b{ background: #FFEAE6; color: #C23A22 !important; }
+html.theme-mist #hub #tq .tq-nt-ss.g{ background: #EEF6F1; color: #2F6B4B !important; font-weight: 600; }   /* 길신: 만세력 초록 계열, 한층 차분하게 */
+html.theme-mist #hub #tq .tq-nt-ss.b{ background: #F8EEEE; color: #8E4048 !important; font-weight: 600; }   /* 참고 신살: 만세력 붉은 계열, 튀지 않게 장미 먹색 */
 html.theme-mist #hub #tq .tq-nt-ss.gm{ background: #20272B; color: #F4F6F5 !important; }
 /* 만세력 오행 색 그대로면 작은 흰 글씨(목·화 지장간 칩, 칸 아래 작은 이름)가 약하다 → 칩만 같은 색을 조금 어둡게, 작은 이름엔 옅은 그림자 */
 html.theme-mist #hub .tq .mt-natal .tq-nt-h i.el0{ background: color-mix(in srgb, #2FA866 76%, #000); }
 html.theme-mist #hub .tq .mt-natal .tq-nt-h i.el1{ background: color-mix(in srgb, #E8402F 86%, #000); }
 html.theme-mist #hub .tq .mt-natal .tq-nt-g:is(.el0, .el1, .el4) small{ text-shadow: 0 1px 2px rgba(0,0,0,.45); }
+html.theme-mist #hub .tq .mt-natal .tq-nt-c.me{ background: linear-gradient(180deg, rgba(178,58,44,.05), rgba(178,58,44,.015)); }
+
+/* ═══ 2026-11-17 타임라인 가독성 다듬기 — 글자의 78%가 13px 이하·본문 한 줄 60자 → 본문 15.5px·줄 간격 1.8·한 줄 약 44자, 작은 글씨 최소 13px, 간격 넓게 ═══ */
+html.theme-mist #hub #tq{ font-size: 15.5px; line-height: 1.8; }
+html.theme-mist #hub #tq :is(p, li){ font-size: 15.5px; line-height: 1.8; }
+html.theme-mist #hub #tq :is(.tq-box, .tq-card, .tq-body, .tq-sec) > :is(p, ul, ol){ max-width: 44em; }
+html.theme-mist #hub #tq .tq-sub, html.theme-mist #hub #tq .tq-sub p{ font-size: 14px; line-height: 1.75; color: #46505A; }
+html.theme-mist #hub #tq :is(small, .tq-nt-s, .tq-note){ font-size: max(13px, .82rem); }
+html.theme-mist #hub #tq .tq-box{ padding: 20px 20px 18px; margin-top: 16px; }
+html.theme-mist #hub #tq .tq-box > h4, html.theme-mist #hub #tq .tq-h4{ font-size: 1.08rem; margin-bottom: 12px; }
+html.theme-mist #hub #tq .tq-sec{ padding-top: 46px; }
+html.theme-mist #hub #tq .tq-sech h2{ font-size: clamp(1.45rem, 3.6vw, 1.75rem); }
+html.theme-mist #hub #tq .tq-sech p{ font-size: 14.5px; }
+/* 원국 표 칸 글씨 */
+html.theme-mist #hub #tq .mt-natal .tq-nt-t{ font-size: 15px; }
+html.theme-mist #hub #tq .mt-natal .tq-nt-l{ font-size: 13px; }
+html.theme-mist #hub #tq .mt-natal .tq-nt-h{ font-size: 13.5px; }
+html.theme-mist #hub #tq .mt-natal .tq-nt-ss{ font-size: 12.5px; }
+/* 막대 그래프 아래 글자: 너무 작던 9~11px → 12px */
+html.theme-mist #hub #tq .tq-bar :is(em, small, span){ font-size: max(12px, 1em); }
+/* 휴대폰: 원국 표·막대는 칸이 좁아 조금 줄인다 */
+@media (max-width: 720px){
+  html.theme-mist #hub #tq :is(p, li){ font-size: 15px; }
+  html.theme-mist #hub #tq .mt-natal .tq-nt-t{ font-size: 13px; } html.theme-mist #hub #tq .mt-natal .tq-nt-l{ font-size: 11.5px; }
+  html.theme-mist #hub #tq .mt-natal .tq-nt-h{ font-size: 12px; } html.theme-mist #hub #tq .mt-natal .tq-nt-ss{ font-size: 11px; }
+  html.theme-mist #hub #tq .tq-box{ padding: 16px 14px 14px; }
+}
+/* 가독성 2: 남은 작은 글씨(신호 배지 10px·지표 이름 11px 등)와 긴 줄 */
+html.theme-mist #hub #tq p, html.theme-mist #hub #tq .tq-sub{ max-width: 46em; }
+html.theme-mist #hub #tq .tq-sech p, html.theme-mist #hub #tq .tq-hero p{ max-width: none; }
+html.theme-mist #hub #tq .tq-sgb{ font-size: 11.5px; padding: 1px 6px; }
+html.theme-mist #hub #tq :is(.tq-dc, .tq-zw-row, .tq-gr, .tq-mh, .tq-trow) > span{ font-size: 13px; }
+html.theme-mist #hub #tq .tq-bar > b{ font-size: 13px; }
+html.theme-mist #hub #tq .tq-ychip{ font-size: 13px; }
