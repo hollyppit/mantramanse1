@@ -534,3 +534,53 @@ html.theme-mist #hub #tq .tq-sgb{ font-size: 11.5px; padding: 1px 6px; }
 html.theme-mist #hub #tq :is(.tq-dc, .tq-zw-row, .tq-gr, .tq-mh, .tq-trow) > span{ font-size: 13px; }
 html.theme-mist #hub #tq .tq-bar > b{ font-size: 13px; }
 html.theme-mist #hub #tq .tq-ychip{ font-size: 13px; }
+
+/* ═══ 2026-11-17 일진 캘린더·오늘의 운·무료 타로 가독성(타임라인과 같은 기준: 본문 15~16px·줄 1.75·작은 글씨 최소 13px, 날짜 칸만 좁아 12px) ═══ */
+/* 월운 그래프·일진 캘린더 패널 */
+html.theme-mist .fortune-panel .sub{ font-size: 15.5px; line-height: 1.75; }
+html.theme-mist .fortune-panel .dsub, html.theme-mist .mc-shortlist .dsub{ font-size: 14px; line-height: 1.7; }
+html.theme-mist .fortune-panel .kick, html.theme-mist #hub .tscore .kick{ font-size: 13px; letter-spacing: .14em; }
+html.theme-mist .fc-method, html.theme-mist .fc-method p{ font-size: 14px; line-height: 1.75; }
+html.theme-mist .fc-method summary{ font-size: 14px; }
+html.theme-mist .mc-legend{ font-size: 13px; }
+html.theme-mist .mc-month-note{ font-size: 15px; line-height: 1.75; }
+html.theme-mist .fc-controls label{ font-size: 13px; } html.theme-mist .fc-controls select{ font-size: 15px; }
+html.theme-mist .mc-week{ font-size: 13px; }
+html.theme-mist #hub .fortune-panel .mc-bar b{ font-size: 13px; } html.theme-mist #hub .fortune-panel .mc-bar span{ font-size: 12.5px; } html.theme-mist #hub .fortune-panel .mc-bar small{ font-size: 11px; }
+html.theme-mist #hub .fortune-panel .mc-day b{ font-size: 15px; }
+html.theme-mist #hub .fortune-panel .mc-day small{ font-size: 12px; }
+html.theme-mist #hub .fortune-panel .mc-day .mc-metric strong{ font-size: 21px; }
+html.theme-mist #hub .fortune-panel .mc-day .mc-metric span{ font-size: 11.5px; }
+html.theme-mist #hub .fortune-panel .mc-day em{ font-size: 11px; }
+html.theme-mist .mc-key{ font-size: 12px; }
+html.theme-mist .mc-shortlist h3{ font-size: 17px; }
+html.theme-mist #hub .fortune-panel .mc-pick b{ font-size: 15px; } html.theme-mist #hub .fortune-panel .mc-pick :is(span, small){ font-size: 13.5px; }
+/* 오늘의 운 아래 */
+html.theme-mist #hub .tscore .sub{ font-size: 15.5px; } html.theme-mist #hub .tscore .dhead{ font-size: 18px; }
+html.theme-mist #hub .tscore .note{ font-size: 14px; }
+html.theme-mist #hub .dc small, html.theme-mist #hub details.dd summary small{ font-size: 12.5px; }
+html.theme-mist #hub .dc > b{ font-size: 18px; } html.theme-mist #hub .dc > span{ font-size: 14px; }
+html.theme-mist #hub .dsec h3{ font-size: 18px; } html.theme-mist #hub .dsec p{ font-size: 15.5px; line-height: 1.8; }
+html.theme-mist #hub .dsec .dsub{ font-size: 14px; }
+html.theme-mist #hub details.dd summary b{ font-size: 17px; } html.theme-mist #hub details.dd summary em{ font-size: 14.5px; }
+html.theme-mist #hub .ddb p, html.theme-mist #hub .ddb li{ font-size: 15px; line-height: 1.75; }
+html.theme-mist #hub :is(.ddb h5, .actcard h5){ font-size: 13.5px; letter-spacing: .1em; }
+html.theme-mist #hub .actcard h3{ font-size: 18px; }
+html.theme-mist #hub .actcard .chips i{ font-size: 14px; padding: 5px 12px; }
+html.theme-mist #hub .actcard .one small{ font-size: 13px; } html.theme-mist #hub .actcard .one p{ font-size: 18px; }
+html.theme-mist #hub p.dis{ font-size: 13.5px; line-height: 1.7; color: #56626A; }
+/* 무료 타로 */
+html.theme-mist #hub .hero .kick, html.theme-mist #hub .rcap .kick{ font-size: 13px; }
+html.theme-mist #hub .tm b{ font-size: 17px; } html.theme-mist #hub .tm small{ font-size: 14px; }
+html.theme-mist #hub .chipbtn{ font-size: 14px; } html.theme-mist #hub .chipbtn small{ font-size: 12.5px; }
+html.theme-mist #hub .tsp + p, html.theme-mist #hub .tsp ~ p{ font-size: 14px; }
+html.theme-mist #hub .rsec > h4{ font-size: 13.5px; }
+html.theme-mist #hub .rsec :is(p, li){ font-size: 16px; line-height: 1.8; }
+html.theme-mist #hub .rsum{ font-size: 16px; line-height: 1.8; }
+@media (max-width: 480px){
+  html.theme-mist #hub .fortune-panel .mc-day b{ font-size: 13px; } html.theme-mist #hub .fortune-panel .mc-day small{ font-size: 11px; }
+  html.theme-mist #hub .fortune-panel .mc-day .mc-metric strong{ font-size: 18px; } html.theme-mist #hub .fortune-panel .mc-day .mc-metric span{ font-size: 10.5px; }
+  html.theme-mist #hub .fortune-panel .mc-day em{ font-size: 10px; }
+}
+html.theme-mist #hub .fortune-panel .kick{ font-size: 13px; }
+html.theme-mist #hub .chips i{ font-size: 14px; }
