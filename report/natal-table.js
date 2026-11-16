@@ -22,14 +22,14 @@
     var tip = opts.tip || defTip, order = ['hour', 'day', 'month', 'year'], lab = { hour: '시주', day: '일주', month: '월주', year: '연주' };
     var cell = function (k, fn, cls) { return '<div class="tq-nt-c' + (k === 'day' ? ' me' : '') + (cls ? ' ' + cls : '') + '">' + fn(ch.pillars[k], ch.cells && ch.cells[k], k) + '</div>'; };
     var row = function (label, fn, cls) { return '<div class="tq-nt-l">' + label + '</div>' + order.map(function (k) { return ch.pillars[k] ? cell(k, fn, cls) : '<div class="tq-nt-c none' + (cls ? ' ' + cls : '') + '">' + (cls === 'gz' ? '<span class="tq-unk">시각<br>미상</span>' : '') + '</div>'; }).join(''); };
-    var glyph = function (g, el, sub) { return '<span class="tq-nt-g" style="--ec:' + EL_COL[el] + '"><b>' + g + '</b><small>' + esc(sub) + '</small></span>'; };
+    var glyph = function (g, el, sub) { return '<span class="tq-nt-g el' + el + '" style="--ec:' + EL_COL[el] + '"><b>' + g + '</b><small>' + esc(sub) + '</small></span>'; };
     return '<div class="tq-nt" role="table" aria-label="사주 원국">' +
       '<div class="tq-nt-l"></div>' + order.map(function (k) { var p = ch.pillars[k]; return '<div class="tq-nt-c hd' + (k === 'day' ? ' me' : '') + '"><b>' + lab[k] + '</b><small>' + (p ? esc(M.gzNameK(p)) : '') + '</small></div>'; }).join('') +
       row(tip('십성'), function (p, c, k) { return '<span class="tq-nt-t">' + esc(k === 'day' ? '나(일간)' : c ? c.stemTG : '') + '</span>'; }) +
       row(tip('천간'), function (p) { var e = M.stemEl(p.s); return glyph(M.STEM[p.s], e, M.STEM_K[p.s] + ' · ' + M.EL_K[e]); }, 'gz') +
       row(tip('지지'), function (p) { var e = M.BR_EL[p.b]; return glyph(M.BR[p.b], e, M.BR_K[p.b] + ' · ' + M.EL_K[e]); }, 'gz') +
       row(tip('십성'), function (p, c) { return '<span class="tq-nt-t">' + esc(c ? c.branchTG : '') + '</span>'; }) +
-      row(tip('지장간'), function (p, c) { return (c && c.hidden || []).map(function (h) { return '<span class="tq-nt-h"><i style="--ec:' + EL_COL[M.stemEl(h.s)] + '">' + M.STEM[h.s] + '</i>' + esc(h.tg || '') + '</span>'; }).join(''); }) +
+      row(tip('지장간'), function (p, c) { return (c && c.hidden || []).map(function (h) { return '<span class="tq-nt-h"><i class="el' + M.stemEl(h.s) + '" style="--ec:' + EL_COL[M.stemEl(h.s)] + '">' + M.STEM[h.s] + '</i>' + esc(h.tg || '') + '</span>'; }).join(''); }) +
       row(tip('12운성'), function (p, c) { return c ? '<span class="tq-nt-t">' + esc(c.unseong) + '</span>' + (c.unseongJwa ? '<small class="tq-nt-s">좌 ' + esc(c.unseongJwa) + '</small>' : '') : ''; }) +
       row(tip('12신살'), function (p, c) { return '<span class="tq-nt-t">' + esc(c && c.sinsal12 || '—') + '</span>'; }) +
       row(tip('신살'), function (p, c, k) { var names = [], L = ((ch.sinsal && ch.sinsal[k]) || []).map(function (x) { names.push(x.name); return '<i class="tq-nt-ss ' + (x.good ? 'g' : 'b') + '" title="' + esc(x.basis || '') + '">' + esc(x.name) + '</i>'; }); if (c && c.gongmang && names.indexOf('공망') < 0) L.unshift('<i class="tq-nt-ss gm">공망</i>'); return L.join('') || '<span class="tq-nt-s">—</span>'; }) +
