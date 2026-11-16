@@ -54,6 +54,19 @@
       var t = (e.textContent || '').trim(); if (!t || t.length > 40) continue;
       e.classList.add(toneOf(t));
     }
+    // 오늘의 운 분야 카드·흐름 문구: 등급 낱말(높음·무난·낮음…)로 카드 전체 색을 정한다
+    var cards = sc.querySelectorAll('.dc:not([data-lv]), .tflow:not([data-lv])');
+    for (var j = 0; j < cards.length; j++) {
+      var c = cards[j], s = c.classList.contains('dc') ? c.querySelector('span') : c, tt = s ? (s.textContent || '').trim() : '';
+      c.setAttribute('data-lv', /낮|주의|부담|약/.test(tt) ? 'bad' : /높|좋|순풍|최고|강/.test(tt) ? 'good' : 'mid');
+    }
+    // 타로 풀이 상자: 제목 낱말로 갈래를 정한다(그림·흐름·좋은 방향·조심·해볼 것·이야기)
+    var secs = sc.querySelectorAll('.rsec:not([data-sec])');
+    for (var k = 0; k < secs.length; k++) {
+      var r = secs[k], h = r.querySelector('h4'), ht = h ? h.textContent : '';
+      r.setAttribute('data-sec', r.classList.contains('one') ? 'story' : r.classList.contains('art') || /그림/.test(ht) ? 'art'
+        : /조심|주의|피할|경계|걸림/.test(ht) ? 'warn' : /좋은|방향|열려|길|배울/.test(ht) ? 'good' : /해볼|해 볼|실천|당기|할 일|한마디/.test(ht) ? 'todo' : 'flow');
+    }
   }
   var queued = false;
   function tick() { if (queued) return; queued = true; setTimeout(function () { queued = false; apply(); tag(); tone(); }, 0); }
