@@ -12,7 +12,7 @@
     '지장간': '지지 속에 숨어 있는 천간이에요. 겉으로는 안 보여도 때가 되면 드러나는 잠재된 기운이에요.',
     '12운성': '일간의 힘이 그 자리에서 어느 단계인지(태어남·자람·전성·쇠퇴…)를 열두 단계로 본 것이에요. "좌"는 그 기둥 천간 자신의 기준이에요.',
     '12신살': '연지(또는 일지) 기준으로 각 자리에 붙는 열두 가지 신호예요. 길흉을 단정하지 않는 참고 표시예요.',
-    '신살': '특정 글자 조합에 붙는 별칭이에요. 초록은 도움이 되는 신호, 붉은색은 주의 신호이며 참고용이에요.'
+    '신살': '특정 글자 조합에 붙는 별칭이에요. 초록은 도움이 되는 길신, 붉은색은 참고 신살이에요. 좋고 나쁨을 가르는 표시가 아니라 참고용이에요.'
   };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   // 기본 용어 풀이: 누르면(포커스) 말풍선 — 호출한 쪽이 tip 을 주면 그것을 쓴다
@@ -34,7 +34,7 @@
       row(tip('12신살'), function (p, c) { return '<span class="tq-nt-t">' + esc(c && c.sinsal12 || '—') + '</span>'; }) +
       row(tip('신살'), function (p, c, k) { var names = [], L = ((ch.sinsal && ch.sinsal[k]) || []).map(function (x) { names.push(x.name); return '<i class="tq-nt-ss ' + (x.good ? 'g' : 'b') + '" title="' + esc(x.basis || '') + '">' + esc(x.name) + '</i>'; }); if (c && c.gongmang && names.indexOf('공망') < 0) L.unshift('<i class="tq-nt-ss gm">공망</i>'); return L.join('') || '<span class="tq-nt-s">—</span>'; }) +
       '</div>' + (ch.hourKnown === false ? '<p class="tq-sub">출생 시각을 몰라 시주(時柱) 없이 계산했습니다. 일간·일주는 날짜 기준이라 그대로입니다.</p>' : '') +
-      '<p class="tq-sub">색은 오행(목·화·토·금·수)이에요. ' + tip('지장간') + '은 지지 속에 숨은 천간, ' + tip('12운성') + '은 일간의 힘이 그 자리에서 어느 단계인지(좌는 그 기둥 천간 기준), 신살은 초록이 도움·붉은색이 주의 신호예요. 용어를 누르면 뜻이 열려요.</p>';
+      '<p class="tq-sub">색은 오행(목·화·토·금·수)이에요. ' + tip('지장간') + '은 지지 속에 숨은 천간, ' + tip('12운성') + '은 일간의 힘이 그 자리에서 어느 단계인지(좌는 그 기둥 천간 기준), 신살은 초록이 도움이 되는 길신, 붉은색이 참고 신살이에요(좋고 나쁨을 가르는 표시는 아니에요). 용어를 누르면 뜻이 열려요.</p>';
   }
   var api = { html: html, TERMS: TERMS, EL_COL: EL_COL };
   G.MantraNatal = api;

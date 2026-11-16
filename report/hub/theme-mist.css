@@ -489,3 +489,9 @@ html.theme-mist #hub svg :is(text, tspan)[fill="#8E7CF0" i]{ fill: #15803D; }
 html.theme-mist #hub svg :is(text, tspan)[fill="#2FBF71" i]{ fill: #166534; }
 html.theme-mist #hub [style*="#8E7CF0" i]{ --zw: #22C55E; }
 html.theme-mist #hub svg :is(text, tspan)[fill="#7FD3A0" i]{ fill: #15803D; }   /* 화록(초록) 글씨 — 원래 연초록이라 밝은 바탕에서 흐렸다 */
+
+/* 원국 표 신살 칩: 만트라 만세력과 같은 규칙 — 길신 = 연초록 바탕·초록 글씨, 참고 신살 = 연붉은 바탕·붉은 글씨, 공망 = 먹색. 좋고 나쁨 표시가 아니다(글씨만 대비 위해 한 단계 진하게) */
+html.theme-mist #hub #tq .tq-nt-ss{ font-weight: 700; border: 0; padding: 2px 7px; border-radius: 4px; box-shadow: none; }
+html.theme-mist #hub #tq .tq-nt-ss.g{ background: #E3F5EA; color: #177A42 !important; }
+html.theme-mist #hub #tq .tq-nt-ss.b{ background: #FFEAE6; color: #C23A22 !important; }
+html.theme-mist #hub #tq .tq-nt-ss.gm{ background: #20272B; color: #F4F6F5 !important; }
