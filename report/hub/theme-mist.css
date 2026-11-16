@@ -652,3 +652,99 @@ html.theme-mist #hub #screen .rsec{ background: #FFFFFF !important; border: 1px 
 html.theme-mist #hub #screen .rsec + .rsec{ margin-top: 14px; }
 html.theme-mist #hub #screen .rsec > h4{ padding-bottom: 8px; border-bottom: 1px solid var(--mist-bd2); margin-bottom: 10px; }
 html.theme-mist #hub #screen .bridge{ border: 1px solid var(--mist-bd) !important; }
+
+/* ═══ 2026-11-17 트렌디하게 — 구조(세 단계 경계)는 그대로, 표현만: 유리 패널·장(CHAPTER) 머리말·겹 그림자 카드·알약 칩·유리 바로가기 막대 ═══ */
+html.theme-mist{
+  --tr-r-card: 18px; --tr-r-panel: 28px;
+  --tr-card: linear-gradient(180deg, #FFFFFF 0%, #FBFCFC 100%);
+  --tr-sh-card: 0 1px 0 rgba(255,255,255,.95) inset, 0 1px 2px rgba(20,35,42,.05), 0 14px 34px -20px rgba(20,35,42,.30);
+  --tr-sh-lift: 0 1px 0 rgba(255,255,255,.95) inset, 0 2px 4px rgba(20,35,42,.06), 0 22px 44px -22px rgba(20,35,42,.38);
+  --tr-ring: 0 0 0 1px rgba(197,208,213,.95);
+  --tr-accent: linear-gradient(90deg, #B23A2C 0%, #D7894A 38%, rgba(215,137,74,0) 78%);
+}
+/* 바탕: 옅은 청회에 아주 은은한 색 안개 두 점(붉은빛·푸른빛) */
+html.theme-mist body.hubpage, html.theme-mist body{
+  background: radial-gradient(60% 40% at 8% 18%, rgba(178,58,44,.06), transparent 70%), radial-gradient(55% 45% at 96% 62%, rgba(37,99,235,.06), transparent 70%), #DFE6E8;
+  background-attachment: fixed;
+}
+
+/* ── 영역 패널: 유리(반투명 + 흐림) · 위쪽 붉은→금빛 띠 · 둥근 큰 모서리 ── */
+html.theme-mist #hub #tq{ counter-reset: tqsec; }
+html.theme-mist #hub #tq .tq-sec{
+  position: relative; counter-increment: tqsec;
+  background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.52));
+  -webkit-backdrop-filter: blur(14px) saturate(1.1); backdrop-filter: blur(14px) saturate(1.1);
+  border: 1px solid rgba(255,255,255,.9); border-radius: var(--tr-r-panel);
+  box-shadow: var(--tr-ring), 0 30px 60px -40px rgba(20,35,42,.45);
+  padding: 14px 26px 30px; overflow: clip;
+}
+html.theme-mist #hub #tq .tq-sec::after{ content: ''; position: absolute; left: 26px; right: 26px; top: 0; height: 3px; border-radius: 0 0 3px 3px; background: var(--tr-accent); pointer-events: none; }
+html.theme-mist #hub #tq .tq-sec + .tq-sec{ background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.52)); }
+
+/* ── 영역 머리: CHAPTER 0n 머리말 + 둥근 사각 낙관 번호(그라데이션·은은한 빛) ── */
+html.theme-mist #hub #tq .tq-sech{ border-bottom: 1px solid rgba(197,208,213,.7); padding: 18px 0 16px; align-items: center; }
+html.theme-mist #hub #tq .tq-sech > span{ width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(145deg, #D2553F, #B23A2C 55%, #8A2A1F); box-shadow: 0 10px 22px -10px rgba(178,58,44,.7), inset 0 1px 0 rgba(255,255,255,.35); font-size: 1.15rem; }
+html.theme-mist #hub #tq .tq-sech > div::before{ content: 'CHAPTER ' counter(tqsec, decimal-leading-zero); display: block; font-family: var(--f-sans); font-size: 11.5px; font-weight: 700; letter-spacing: .28em; color: #B23A2C; margin-bottom: 2px; }
+html.theme-mist #hub #tq .tq-sech h2{ letter-spacing: -.01em; }
+
+/* ── 카드: 은은한 그라데이션 + 겹 그림자, 누르는 카드는 올리면 살짝 뜬다 ── */
+html.theme-mist #hub #tq :is(.tq-box, .tq-card, .tq-fc, .tq-today, .tq-metric, .tq-ten, .tq-mypage, .mt-natal, details.tq-car){ background: var(--tr-card) !important; border-color: rgba(197,208,213,.95) !important; border-radius: var(--tr-r-card); box-shadow: var(--tr-sh-card); }
+html.theme-mist #hub #tq :is(a.tq-fc, a.tq-today, a.tq-mypage){ transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+html.theme-mist #hub #tq :is(a.tq-fc, a.tq-today, a.tq-mypage):hover{ transform: translateY(-2px); box-shadow: var(--tr-sh-lift); border-color: rgba(178,58,44,.35) !important; }
+/* 무료 콘텐츠 카드: 머리말 앞 작은 점, 바로가기 화살표 원 */
+html.theme-mist #hub #tq .tq-fc > small::before{ content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #B23A2C; margin-right: 7px; vertical-align: 2px; }
+html.theme-mist #hub #tq .tq-fc{ padding: 18px 18px 16px; }
+
+/* 그래프 묶음 카드: 같은 둥근 모서리·그림자 */
+html.theme-mist #hub #tq .tq-body > .tq-h4{ border-color: rgba(197,208,213,.95); border-radius: var(--tr-r-card) var(--tr-r-card) 0 0; background: #FFFFFF; }
+html.theme-mist #hub #tq .tq-body > :is(.tq-h4 + :is(.tq-chart, .tq-life), .tq-h4 + .tq-sub + :is(.tq-chart, .tq-life), .tq-h4 + .tq-chart + .tq-sub){ border-color: rgba(197,208,213,.95); border-radius: 0 0 var(--tr-r-card) var(--tr-r-card); background: #FBFCFC; box-shadow: var(--tr-sh-card); }
+html.theme-mist #hub #tq .tq-body > .tq-h4 + .tq-chart:has(+ .tq-sub){ border-radius: 0; box-shadow: none; }
+html.theme-mist #hub #tq .tq-body > .tq-h4 + .tq-sub{ border-color: rgba(197,208,213,.95); }
+html.theme-mist #hub #tq .tq-body > .tq-h4::before{ width: 4px; height: 1.1em; background: linear-gradient(180deg, #D2553F, #B23A2C); }
+
+/* ── 알약 칩: 지표 칩·연도 칩·분야 칩 ── */
+html.theme-mist #hub #tq :is(.tq-fchip, .tq-mchip, .tq-ychip, .tq-chip){ border-radius: 999px !important; padding-left: 16px; padding-right: 16px; box-shadow: 0 1px 2px rgba(20,35,42,.05); }
+html.theme-mist #hub #tq :is(.tq-mchip, .tq-chip, .tq-fchip).on{ background: linear-gradient(145deg, #2E3B42, #1D2428) !important; border-color: #1D2428 !important; box-shadow: 0 8px 18px -10px rgba(20,35,42,.6); }
+
+/* ── 영역 바로가기 줄: 유리 막대 + 지금 위치 붉은 그라데이션 알약 ── */
+html.theme-mist #hub .tq-nav{ background: transparent; padding: 10px 8px; }
+html.theme-mist #hub .tq-nav::before{ content: ''; position: absolute; inset: 4px 0; z-index: -1; border-radius: 999px; background: rgba(255,255,255,.62); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: var(--tr-ring), 0 14px 30px -20px rgba(20,35,42,.4); }
+html.theme-mist #hub .tq-nav{ isolation: isolate; }
+html.theme-mist #hub .tq-nav a{ border-radius: 999px !important; background: transparent !important; border-color: transparent !important; }
+html.theme-mist #hub .tq-nav a:hover{ background: rgba(255,255,255,.85) !important; }
+html.theme-mist #hub .tq-nav a.on{ background: linear-gradient(145deg, #D2553F, #B23A2C) !important; color: #FFFFFF !important; border-color: transparent !important; box-shadow: 0 8px 18px -10px rgba(178,58,44,.7); }
+html.theme-mist #hub .tq-nav a.on i{ background: rgba(255,255,255,.22) !important; color: #FFFFFF !important; }
+html.theme-mist #hub .tq-nav a.tq-edit{ background: #FFFFFF !important; border-color: rgba(197,208,213,.95) !important; box-shadow: none; }
+
+/* ── 일진 캘린더·오늘의 운·타로도 같은 표현 ── */
+html.theme-mist .fortune-panel{ border-radius: var(--tr-r-panel); background: linear-gradient(180deg, #FFFFFF, #FBFCFC); box-shadow: var(--tr-ring), 0 30px 60px -40px rgba(20,35,42,.45); border-color: rgba(255,255,255,.9); position: relative; overflow: clip; }
+html.theme-mist .fortune-panel::after{ content: ''; position: absolute; left: 26px; right: 26px; top: 0; height: 3px; border-radius: 0 0 3px 3px; background: var(--tr-accent); }
+html.theme-mist .mc-chart{ border-radius: var(--tr-r-card); }
+html.theme-mist #hub #screen .tscore{ border-radius: var(--tr-r-panel); background: radial-gradient(70% 60% at 50% 0%, rgba(255,255,255,1), rgba(255,255,255,.85)); box-shadow: var(--tr-ring), 0 30px 60px -40px rgba(20,35,42,.45); border-color: rgba(255,255,255,.9); }
+html.theme-mist #hub #screen .dc{ border-radius: var(--tr-r-card) !important; background: var(--tr-card) !important; box-shadow: var(--tr-sh-card); }
+html.theme-mist #hub #screen .dsec{ border-radius: var(--tr-r-panel); background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.52)); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-color: rgba(255,255,255,.9); box-shadow: var(--tr-ring), 0 30px 60px -40px rgba(20,35,42,.45); }
+html.theme-mist #hub #screen .dsec > h3::before{ background: linear-gradient(180deg, #D2553F, #B23A2C); }
+html.theme-mist #hub #screen details.dd{ border-radius: var(--tr-r-card); box-shadow: var(--tr-sh-card); }
+html.theme-mist #hub #screen :is(.actcard, .nextc){ border-radius: var(--tr-r-panel); box-shadow: var(--tr-ring), 0 30px 60px -40px rgba(20,35,42,.45); border-color: rgba(255,255,255,.9); }
+html.theme-mist #hub #screen .actcard .chips i{ border-radius: 999px; }
+html.theme-mist #hub #screen .tm{ border-radius: var(--tr-r-card) !important; box-shadow: var(--tr-sh-card); transition: transform .18s ease, box-shadow .18s ease; }
+html.theme-mist #hub #screen .tm:hover{ transform: translateY(-2px); box-shadow: var(--tr-sh-lift); }
+html.theme-mist #hub #screen .tm .ic{ border-radius: 14px; background: linear-gradient(145deg, rgba(210,85,63,.14), rgba(178,58,44,.08)); }
+html.theme-mist #hub #screen .rsum{ border-radius: var(--tr-r-card); background: linear-gradient(180deg, rgba(255,255,255,.8), rgba(255,255,255,.55)); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+html.theme-mist #hub #screen .rsec{ border-radius: var(--tr-r-card); box-shadow: var(--tr-sh-card); }
+html.theme-mist #hub #screen .chipbtn{ box-shadow: 0 1px 2px rgba(20,35,42,.05); }
+html.theme-mist #hub #screen .chipbtn[aria-pressed="true"]{ background: linear-gradient(145deg, #2E3B42, #1D2428) !important; box-shadow: 0 8px 18px -10px rgba(20,35,42,.6); }
+@media (prefers-reduced-motion: reduce){ html.theme-mist #hub :is(#tq a.tq-fc, #tq a.tq-today, #screen .tm){ transition: none; } html.theme-mist #hub :is(#tq a.tq-fc, #tq a.tq-today, #screen .tm):hover{ transform: none; } }
+@media (max-width: 720px){
+  html.theme-mist #hub #tq .tq-sec{ padding: 10px 14px 22px; border-radius: 22px; }
+  html.theme-mist #hub #tq .tq-sec::after{ left: 14px; right: 14px; }
+  html.theme-mist #hub #tq .tq-sech > span{ width: 40px; height: 40px; border-radius: 12px; }
+}
+html.theme-mist #hub #tq .tq-sec{ scroll-margin-top: calc(var(--top) + 84px); }   /* 유리 바로가기 막대에 CHAPTER 머리말이 가리지 않게 */
+/* 대비 보정(트렌디 묶음): 붉은 그라데이션 한 단계 진하게(흰 글씨 4.5 이상), 머리말 진하게, 막대 그래프는 마우스를 올려도 붉게 칠하지 않음(허브 공통 단추 규칙 덮어쓰기) */
+html.theme-mist #hub #tq .tq-sech > span, html.theme-mist #hub .tq-nav a.on{ background: linear-gradient(145deg, #C2412E, #A8321F 55%, #8A2A1F) !important; }
+html.theme-mist #hub .tq-nav a.on i{ background: rgba(0,0,0,.2) !important; }
+html.theme-mist #hub .tq-hero .kick{ color: #4F5E64; }
+html.theme-mist #hub #tq .tq-bar:not(:disabled):is(:hover, :focus-visible, :active){ background: #FFFFFF !important; color: inherit !important; border-color: rgba(178,58,44,.45) !important; box-shadow: 0 10px 22px -14px rgba(20,35,42,.45); }
+html.theme-mist #hub #tq :is(.tq-ychip, .tq-mchip, .tq-fchip, .tq-chip):not(.on):not(:disabled):is(:hover, :focus-visible){ background: #FFFFFF !important; color: #1D2428 !important; border-color: rgba(178,58,44,.45) !important; }
+html.theme-mist #hub #screen .hero .kick{ color: #7C4A10; }
