@@ -107,6 +107,7 @@
   var ZW_BR_W = { '묘': 4, '왕': 3, '득': 2, '리': 1, '평': 0, '불': -1, '함': -2 };
   var ZW_STAR = { '자미': '리더·황제의 별', '천기': '머리 좋은 기획자의 별', '태양': '베푸는 열정가의 별', '무곡': '돈과 결단의 별', '천동': '편안하고 복 많은 낙천가의 별', '염정': '열정과 원칙이 함께 있는 별', '천부': '재물을 지키는 곳간지기의 별', '태음': '섬세하고 알뜰한 달의 별', '탐랑': '욕망과 재주, 매력의 별', '거문': '말솜씨와 분석의 별', '천상': '믿음직한 2인자·조율가의 별', '천량': '돌봐 주는 어른의 별', '칠살': '도전하는 장군의 별', '파군': '부수고 새로 시작하는 개척자의 별' };
   var ZW_HW = { '록': '이 영역에서는 노력한 만큼 얻고 도와주는 사람이 생겨요.', '기': '이 영역은 서두르지 말고 한 번 더 점검하세요. 걱정이 앞서기 쉬워요.' };
+  var zwTone = function (v) { return v >= 58 ? 'mt-good' : v >= 43 ? 'mt-mid' : 'mt-bad'; };   // 2026-11-16 강조 단어 좋음·나쁨 색(안개 테마)
   var zwGrade = function (v) { return v >= 70 ? [4, '매우 강함'] : v >= 58 ? [3, '강함'] : v >= 43 ? [2, '보통'] : v >= 32 ? [1, '약함'] : [0, '매우 약함']; };
   var ZW_COL = ['#EB6B5B', '#E0915A', '#8C93A3', '#8E7CF0', '#2FBF71'];
   function zwRaw(M, zw, p) {
@@ -135,16 +136,16 @@
     var hwOf = function (k) { var n = Object.keys(zw.sihwa).filter(function (x) { return zw.sihwa[x] === k; })[0]; return n != null && zw.pos && zw.pos[n] != null ? zw.palaces[zw.pos[n]] : null; };
     var rows = [];
     rows.push({ t: '나는 이런 사람이에요', b: mMain.length ? mMain.map(function (n) { return '<b>' + n + '</b> — ' + (ZW_STAR[n] || '') + '.'; }).join('<br>') : '명궁이 비어 있어 마주 보는 천이궁의 별을 빌려 봐요.', s: mMain.length ? '' : '환경과 사람에 따라 모습이 달라지는 유연한 타입이에요.' });
-    rows.push({ t: '타고나길 잘 풀리는 영역', b: best.map(function (p) { return '<b>' + dom(p) + '</b>'; }).join(' · '), s: '별이 밝고 도와주는 별이 많아서, 이 영역에서 힘을 얻고 자신감이 붙어요.' });
-    rows.push({ t: '의식해서 챙기면 좋은 영역', b: worst.map(function (p) { return '<b>' + dom(p) + '</b>'; }).join(' · '), s: '별이 약하거나 부딪치는 별이 겹쳐 있어요. 약점이 아니라 "신경 써서 가꿀 곳"으로 보세요.' });
+    rows.push({ t: '타고나길 잘 풀리는 영역', b: best.map(function (p) { return '<b class="mt-good">' + dom(p) + '</b>'; }).join(' · '), s: '별이 밝고 도와주는 별이 많아서, 이 영역에서 힘을 얻고 자신감이 붙어요.' });
+    rows.push({ t: '의식해서 챙기면 좋은 영역', b: worst.map(function (p) { return '<b class="mt-bad">' + dom(p) + '</b>'; }).join(' · '), s: '별이 약하거나 부딪치는 별이 겹쳐 있어요. 약점이 아니라 "신경 써서 가꿀 곳"으로 보세요.' });
     var lu = hwOf('록'), gi = hwOf('기'), luck = [];
-    if (lu) luck.push('<b>평생 이득이 따라오는 곳 — ' + dom(lu) + '</b><br><small>' + ZW_HW['록'] + '</small>');
-    if (gi) luck.push('<b>평생 마음이 걸리기 쉬운 곳 — ' + dom(gi) + '</b><br><small>' + ZW_HW['기'] + '</small>');
+    if (lu) luck.push('<b class="mt-good">평생 이득이 따라오는 곳 — ' + dom(lu) + '</b><br><small>' + ZW_HW['록'] + '</small>');
+    if (gi) luck.push('<b class="mt-bad">평생 마음이 걸리기 쉬운 곳 — ' + dom(gi) + '</b><br><small>' + ZW_HW['기'] + '</small>');
     if (luck.length) rows.push({ t: '타고난 행운과 걸림돌', b: luck.join('<br>'), s: '' });
     var dh = per.dh;
-    if (dh) { var v = sc[dh.b]; rows.push({ t: '지금 걷는 10년 (' + dh.daehan[0] + '~' + dh.daehan[1] + '세)', b: '인생의 무대가 <b>' + dom(dh) + '</b> 쪽으로 옮겨 와 있어요. 이 영역의 힘은 <b>' + zwGrade(v)[1] + '</b>(' + v + '점). ' + (v >= 60 ? '이 10년은 이 영역에 적극적으로 힘을 써 볼 만해요.' : v >= 45 ? '무난하게 흘러가니 꾸준함이 중요해요.' : '이 10년은 무리하지 말고 기반을 다지는 시기로 쓰세요.'), s: '' }); }
+    if (dh) { var v = sc[dh.b]; rows.push({ t: '지금 걷는 10년 (' + dh.daehan[0] + '~' + dh.daehan[1] + '세)', b: '인생의 무대가 <b>' + dom(dh) + '</b> 쪽으로 옮겨 와 있어요. 이 영역의 힘은 <b class="' + zwTone(v) + '">' + zwGrade(v)[1] + '</b>(' + v + '점). ' + (v >= 60 ? '이 10년은 이 영역에 적극적으로 힘을 써 볼 만해요.' : v >= 45 ? '무난하게 흘러가니 꾸준함이 중요해요.' : '이 10년은 무리하지 말고 기반을 다지는 시기로 쓰세요.'), s: '' }); }
     var lp = zw.palaces[per.liuB], lv = sc[lp.b];
-    rows.push({ t: Y + '년, 올해의 초점', b: '올해는 <b>' + dom(lp) + '</b>에 이슈가 몰려요. 이 영역의 힘은 <b>' + zwGrade(lv)[1] + '</b>(' + lv + '점). ' + (lv >= 60 ? '올해 이 분야는 기회로 보고 움직여도 좋아요.' : lv >= 45 ? '큰 변화보다 꾸준히 이어 가는 해예요.' : '올해 이 분야는 확장보다 점검과 정리가 어울려요.'), s: '' });
+    rows.push({ t: Y + '년, 올해의 초점', b: '올해는 <b>' + dom(lp) + '</b>에 이슈가 몰려요. 이 영역의 힘은 <b class="' + zwTone(lv) + '">' + zwGrade(lv)[1] + '</b>(' + lv + '점). ' + (lv >= 60 ? '올해 이 분야는 기회로 보고 움직여도 좋아요.' : lv >= 45 ? '큰 변화보다 꾸준히 이어 가는 해예요.' : '올해 이 분야는 확장보다 점검과 정리가 어울려요.'), s: '' });
     var daehan = zw.palaces.slice().sort(function (a, b) { return a.daehan[0] - b.daehan[0]; }).map(function (p) { return { name: p.name.replace('궁', ''), from: p.daehan[0], to: p.daehan[1], v: sc[p.b], col: ZW_COL[zwGrade(sc[p.b])[0]], cur: !!(dh && dh.b === p.b) }; });
     var start = Math.max(zw.lunar.y, Y - 2), liu = [];
     for (var i = 0; i < 10; i++) {

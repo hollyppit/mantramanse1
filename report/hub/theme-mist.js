@@ -36,8 +36,27 @@
       if (io) io.observe(s); else s.classList.add('mist-clear');
     }
   }
+  // 강조 단어 좋음·나쁨 색: 만드는 쪽에서 표시(mt-good/mt-bad/mt-mid)를 달지 않은 <b>·<strong> 은 단어 뜻으로 나눈다.
+  // 나쁨을 먼저 본다('매우 약함'이 '강함'보다 앞). 두 글자 이상 낱말만 써서 '해요'·'형제' 같은 오분류를 막는다.
+  // 흐름 이름(기회·확장·수확·축적·변동·방어)은 좋고 나쁨이 아니라서 넣지 않는다. 질문형 소제목(…얼마나·무엇이·어떻게·?)은 중립.
+  var BAD = /(약함|약해|약한|부담|주의|조심|위험|하락|손실|막힘|막혀|갈등|걸림|걸리기|걸리는|삼재|불안|나쁨|낮음|소모|충돌|과로|사고|지출|흔들|어려|부족|피로|경계|무리|정체|흉)/;
+  var GOOD = /(강함|강해|강한|좋음|좋은|좋아|최고|순풍|길한|상승|이득|도움|귀인|안정|높음|잘 풀|유리|성장|든든|풍부|회복|행운|복이)/;
+  var ASK = /([?？]\s*$|얼마나|무엇이|어떻게|왜 )/;
+  var TURN = /(풀려|풀리|나아지|좋아지|해소|벗어나|회복)/;   // '막혀 있던 흐름이 풀려 가는'처럼 나쁜 낱말이 있어도 좋아지는 말이면 좋음
+  function toneOf(t) { return ASK.test(t) ? 'mt-mid' : TURN.test(t) ? 'mt-good' : BAD.test(t) ? 'mt-bad' : GOOD.test(t) ? 'mt-good' : 'mt-mid'; }
+  function tone() {
+    if (!de.classList.contains('theme-mist')) return;
+    var sc = document.getElementById('screen'); if (!sc) return;
+    var els = sc.querySelectorAll('b:not([data-mt]), strong:not([data-mt])');
+    for (var i = 0; i < els.length; i++) {
+      var e = els[i]; e.setAttribute('data-mt', '1');
+      if (/\bmt-(good|bad|mid)\b/.test(e.className)) continue;
+      var t = (e.textContent || '').trim(); if (!t || t.length > 40) continue;
+      e.classList.add(toneOf(t));
+    }
+  }
   var queued = false;
-  function tick() { if (queued) return; queued = true; setTimeout(function () { queued = false; apply(); tag(); }, 0); }
+  function tick() { if (queued) return; queued = true; setTimeout(function () { queued = false; apply(); tag(); tone(); }, 0); }
   window.addEventListener('hashchange', tick);
   // 다른 코드가 <html> 클래스를 통째로 바꿔 theme-mist 가 지워지면 다시 붙인다
   new MutationObserver(function () { if (de.classList.contains('theme-mist') !== (enabled() && onScreen())) tick(); }).observe(de, { attributes: true, attributeFilter: ['class'] });

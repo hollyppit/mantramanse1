@@ -391,3 +391,10 @@ html.theme-mist #hub .tq .tq-bar.now ~ .tq-bar ~ .tq-bar ~ .tq-bar:not(.sel){ op
 html.theme-mist #hub .tq .tq-bar.now ~ .tq-bar ~ .tq-bar ~ .tq-bar ~ .tq-bar ~ .tq-bar:not(.sel){ opacity: .66; filter: saturate(.7); }
 html.theme-mist #hub .tq .tq-dc b{ color: #1B2226; }
 html.theme-mist #hub .tq .tq-sj b{ color: #9A3412; }
+
+/* ═══ 강조 단어 좋음·나쁨 색(2026-11-16) — 좋음 초록 · 나쁨 빨강 · 중립 청먹. 숫자 칸·제목은 그대로 ═══ */
+html.theme-mist{ --m-em: #1E4E79; --m-good: #15803D; --m-bad: #B91C1C; }
+html.theme-mist #hub :is(p, li, .tq-zw-row) :is(b, strong).mt-good{ color: var(--m-good); }
+html.theme-mist #hub :is(p, li, .tq-zw-row) :is(b, strong).mt-bad{ color: var(--m-bad); }
+html.theme-mist #hub :is(p, li, .tq-zw-row) :is(b, strong).mt-mid{ color: var(--m-em); }
+html.theme-mist #hub .rsec.one :is(h4, p){ color: #7C4A10; }
