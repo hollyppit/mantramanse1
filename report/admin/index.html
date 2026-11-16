@@ -151,7 +151,7 @@ summary { cursor:pointer; padding:4px 0; }
   <!-- 본문 -->
   <div id="app" class="hide">
     <header>
-      <div class="row" style="align-items:center;gap:14px"><h1>사주 무빙툰 · 관리자</h1><a class="navbtn" href="/" target="_blank" rel="noopener" title="만트라 만세력(사주 계산 앱)을 새 탭으로 엽니다">만트라 만세력 ↗</a><a class="navbtn" href="/report/" target="_blank" rel="noopener" title="심층 분석(/report/) 첫 화면을 새 탭으로 엽니다">심층 분석 ↗</a><a class="navbtn" id="openPlaza" href="/community/" target="_blank" rel="noopener" title="인연의 광장(/community/)을 관리자 입장으로 새 탭에서 엽니다(개발 중·베타 단계에서도 열림)">인연의 광장 ↗</a><a class="navbtn" href="/report/hub/#/welcome?replay=1" target="_blank" rel="noopener" title="사례 후킹 → 명리학 소개 → 귀인 슬라이드 툰 온보딩을 새 탭으로 엽니다">온보딩 ↗</a></div>
+      <div class="row" style="align-items:center;gap:14px"><h1>사주 무빙툰 · 관리자</h1><a class="navbtn" href="/" target="_blank" rel="noopener" title="만트라 만세력(사주 계산 앱)을 새 탭으로 엽니다">만트라 만세력 ↗</a><a class="navbtn" href="/report/" target="_blank" rel="noopener" title="심층 분석(/report/) 첫 화면을 새 탭으로 엽니다">심층 분석 ↗</a><a class="navbtn" id="openPlaza" href="/community/" target="_blank" rel="noopener" title="인연의 광장을 관리자 테스트 회원 A로 로그인해 새 탭에서 엽니다(글쓰기·인연 잇기·대화까지 실제 회원처럼 시험, 개발 중에도 열림). B 로 열기는 커뮤니티 탭 ①">인연의 광장 ↗</a><a class="navbtn" href="/report/hub/#/welcome?replay=1" target="_blank" rel="noopener" title="사례 후킹 → 명리학 소개 → 귀인 슬라이드 툰 온보딩을 새 탭으로 엽니다">온보딩 ↗</a></div>
       <div class="row">
         <button type="button" class="ghost" id="dirtyBadge" aria-label="저장하지 않은 변경 화면 보기" hidden></button><span class="muted" id="saveState"></span>
         <button class="pri" id="saveBtn" disabled>변경사항 저장</button>
@@ -587,7 +587,7 @@ summary { cursor:pointer; padding:4px 0; }
 <script src="../hub/renewal-view.js"></script>
 <script src="../hub/cinematic-data.js"></script><script src="../hub/cinematic.js"></script><link rel="stylesheet" href="../hub/cinematic.css">
 <script src="../hub/renewal-characters.js"></script>
-<script src="v2-community.js?v=20261116-stage9"></script>
+<script src="v2-community.js?v=20261116-tester"></script>
 <script src="navigation.js?v=20261116-en"></script>
 <script src="image-optimizer.js"></script>
 <script src="v2-onboard.js"></script>
@@ -663,13 +663,15 @@ summary { cursor:pointer; padding:4px 0; }
       S.pw = pw; ss('mt_pw', pw); enter();
     }).catch(function (e) { $('loginMsg').textContent = e.message; });
   }
-  // 인연의 광장: 공개 전(개발 중·베타)에도 관리자로 들어가도록 입장 쿠키를 받은 뒤 새 탭을 연다. 팝업 차단을 피하려고 탭부터 연다
-  $('openPlaza').onclick = function (e) {
-    e.preventDefault(); var w = window.open('about:blank', '_blank'); if (w) w.opener = null;
-    fetch('/api/community/enter', { method: 'POST', credentials: 'same-origin', headers: { authorization: 'Bearer ' + S.pw } }).then(function (r) { return r.json().catch(function () { return {}; }); })
-      .then(function (d) { var to = (d && d.to) || '/community/'; if (w) w.location.href = to; else location.href = to; })
-      .catch(function () { if (w) w.location.href = '/community/'; });
+  // 인연의 광장: 관리자 테스트 회원 A 로 로그인해 새 탭에서 연다(입장 쿠키 + 일회용 로그인 코드, functions/_testers.js). 팝업 차단을 피하려고 탭부터 연다
+  window.openPlazaAs = function (slot) {
+    var w = window.open('about:blank', '_blank'); if (w) w.opener = null;
+    fetch('/api/community/test-login', { method: 'POST', credentials: 'same-origin', headers: { authorization: 'Bearer ' + S.pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent((function () { try { return localStorage.getItem('iching_reviewer') || ''; } catch (e) { return ''; } })()) }, body: JSON.stringify({ as: slot || 'a' }) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(d.error || ('오류 ' + r.status)); return d; }); })
+      .then(function (d) { if (w) w.location.href = d.to; else location.href = d.to; })
+      .catch(function (err) { if (w) w.close(); alert('테스트 회원으로 열지 못했습니다: ' + err.message); });
   };
+  $('openPlaza').onclick = function (e) { e.preventDefault(); window.openPlazaAs('a'); };
   $('loginBtn').onclick = login; $('pw').onkeydown = function (e) { if (e.key === 'Enter') login(); };
   // 저장 안 된 변경: 각 화면이 window.AdminDirty[이름]=함수 로 등록하고, 여기서 한꺼번에 본다(탭을 옮겨 다녀도 놓치지 않도록 머리글에 표시)
   var DR = (window.AdminDirty = window.AdminDirty || {});

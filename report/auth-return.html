@@ -9,6 +9,7 @@
      Supabase 로그인(카카오·구글)은 돌아올 주소가 /report/** 로만 등록돼 있어서, /report/ 아래 이 페이지로 돌아와 세션을 받은 뒤 원래 화면(to)으로 보낸다.
      · 카카오(Supabase): 주소의 ?code= 를 supabase-js 가 세션으로 바꾼다(PKCE — 같은 사이트 저장소의 확인 값 사용)
      · 구글·네이버(서버 로그인): ?google_login=1 / ?naver_login=1 이면 /api/auth/<제공자>/claim 으로 서버가 맡아 둔 세션을 받는다
+     · 관리자 테스트 회원: ?admin_login=<일회용 코드> 면 /api/community/test-login 으로 세션을 받는다(functions/_testers.js)
      to 는 같은 사이트의 /community/ 또는 /report/ 경로만 받는다(다른 사이트로 보내지 않음). -->
 <style>
   :root { --bg: #0b0d16; --ink: #ece7db; --muted: #a39d8f; --gold: #e0bc74; }
@@ -35,8 +36,9 @@
   var done = function (note) { try { if (note) sessionStorage.setItem('mt_login_note', note); } catch (e) { } location.replace(to); };
   var fail = function (t) { msg.textContent = t; sub.innerHTML = '<a href="' + to.replace(/"/g, '') + '">원래 화면으로 돌아가기</a>'; };
   var load = function (src) { return new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); };
-  var provider = u.searchParams.get('google_login') ? 'google' : u.searchParams.get('naver_login') ? 'naver' : '';
-  var flag = provider ? u.searchParams.get(provider + '_login') : '';
+  var provider = u.searchParams.get('google_login') ? 'google' : u.searchParams.get('naver_login') ? 'naver' : u.searchParams.get('admin_login') ? 'admin' : '';
+  var flag = provider === 'admin' ? '1' : provider ? u.searchParams.get(provider + '_login') : '';
+  var adminCode = u.searchParams.get('admin_login') || '';   // 관리자 테스트 회원: 일회용 코드(1분)
   if (u.searchParams.get('error') || flag === 'cancel') { done('cancel'); return; }
   if (provider && flag !== '1') { fail('로그인하지 못했어요. 잠시 후 다시 시도해 주세요.'); return; }
   fetch('/api/commerce/access', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"sd":null}' })
@@ -47,8 +49,9 @@
         var sb = window.supabase.createClient(d.keys.supabaseUrl, d.keys.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } });
         if (!provider) return sb.auth.getSession();   // 카카오: 주소의 code 를 세션으로 바꾼다(detectSessionInUrl)
         var claim = function (n) {
-          return fetch('/api/auth/' + provider + '/claim', { method: 'POST', credentials: 'same-origin' }).then(function (r) {
-            if (r.ok) return r.json(); if (n < 2) return new Promise(function (ok) { setTimeout(ok, 700); }).then(function () { return claim(n + 1); }); return null;
+          var req = provider === 'admin' ? fetch('/api/community/test-login', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code: adminCode }) }) : fetch('/api/auth/' + provider + '/claim', { method: 'POST', credentials: 'same-origin' });
+          return req.then(function (r) {
+            if (r.ok) return r.json(); if (n < 2 && provider !== 'admin') return new Promise(function (ok) { setTimeout(ok, 700); }).then(function () { return claim(n + 1); }); return null;
           });
         };
         return claim(0).then(function (s) { if (!s || !s.access_token) throw new Error('claim'); return sb.auth.setSession({ access_token: s.access_token, refresh_token: s.refresh_token }); }).then(function () { return sb.auth.getSession(); });

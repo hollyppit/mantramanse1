@@ -33,7 +33,7 @@ const RATE_OK = {
   'mod.js:Post': '관리자·운영자 열쇠만', 'launch.js:Put': '관리자 비밀번호만', 'launch.js:Post': '관리자 비밀번호만', 'staff.js:Post': '관리자 비밀번호만',
   'today-copy.js:Put': '관리자·운영 매니저만', 'features.js:Put': '관리자 비밀번호만', 'credits.js:Put': '관리자 비밀번호만',
   'credits.js:Post': '지급은 관리자만, 더 보기는 하루 횟수(morePicksPerDay)·멱등 키', 'enter.js:Post': '쿠키 발급만(쓰기 없음)', 'alert.js:Post': 'IP 시간당 20회(자체 한도)',
-  'chat.js:Post': 'MSG_PER_DAY·overLimit', 'match.js:Post': 'LIKE_PER_DAY·overLimit',
+  'chat.js:Post': 'MSG_PER_DAY·overLimit', 'test-login.js:Post': '만들기는 관리자 비밀번호만, 코드 교환은 1분·한 번만 쓰는 무작위 코드', 'match.js:Post': 'LIKE_PER_DAY·overLimit',
   'records.js:Delete': '', 'post.js:Delete': '', 'comments.js:Delete': '', 'access.js:Delete': '', 'today-copy.js:Delete': '', 'avatar.js:Delete': '',
 };
 const AUTH_RE = /\b(viewer|writer|memberOf|need|isAdmin|staffOf|who|requesterRole|w\.res|me\b)\s*\(/;

@@ -4,6 +4,7 @@
 //   · 궁합은 '명리 지표'(일주끼리: 천간 합·오행 생극, 일지 합·충)와 '생활 지표'(목적·나이·지역·관심사)를 나눠 보여 준다.
 //     확률·점수로 말하지 않고 "잘 통할 만한 점 / 서로 조심할 점"으로만 말한다. 출생정보 원본은 쓰지 않는다(일주만)
 //   · 다른 회원의 id 는 화면에 내보내지 않는다 → 보는 사람마다 다른 handle(HMAC)
+import { testerIds } from './_testers.js';
 import { sbRest } from './_commerce.js';
 import { kstDay } from './_daily.js';
 
@@ -97,7 +98,9 @@ export async function candidatePool(env, uid, me, mv, exclude = []) {
     sbRest(env, `cm_blocks?blocked_id=eq.${encU(uid)}&select=blocker_id`),
   ]);
   const skip = new Set([...exclude, ...(mine || []).map(x => x.to_id), ...(theirs || []).map(x => x.from_id), ...(blocked || []).map(x => x.blocked_id), ...(blockedMe || []).map(x => x.blocker_id)]);
-  const pool = (act || []).filter(x => !skip.has(x.user_id));
+  // 관리자 테스트 회원(functions/_testers.js)은 실제 회원에게 소개하지 않는다(테스트 회원끼리는 서로 보인다)
+  const testers = new Set(Object.values((await testerIds(env)) || {}));
+  const pool = (act || []).filter(x => !skip.has(x.user_id) && (testers.has(uid) || !testers.has(x.user_id)));
   const vs = pool.length ? (await sbRest(env, `adult_verifications?user_id=in.(${pool.map(x => encU(x.user_id)).join(',')})&select=user_id,birth_year,gender`)) || [] : [];
   const V = Object.fromEntries(vs.map(x => [x.user_id, x]));
   return pool.filter(x => eligible(me, mv, x, V[x.user_id])).map(x => ({ id: x.user_id, profile: x }));

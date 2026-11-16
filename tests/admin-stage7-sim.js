@@ -181,7 +181,7 @@ const read = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
   ok(/open: function \(p, r\)/.test(v2) && /C\('owner'/.test(v2) && /C\('metrics'/.test(v2) && /C\('members'/.test(v2) && /C\('content'/.test(v2), '관리자 화면: 역할별 카드');
   ok(!/[^$]\$\('[^']+'(, [a-z.]+)?\)\.(forEach|map|length)/.test(v2), '관리자 화면: 단일 선택으로 목록을 돌리지 않음');
   ok(/staff\?view=me/.test(st) && /V2Community\.open\(key, d\.role\)/.test(st) && /sessionStorage/.test(st) && !/localStorage\.setItem\('mt_staff_key'/.test(st), '운영자 콘솔: 역할 확인·탭에만 보관');
-  ok(/v2-community\.js\?v=20261116-stage\d/.test(idx) && /v2-community\.js\?v=20261116-stage\d/.test(st), '캐시 버전');
+  ok(/v2-community\.js\?v=20261116-\w+/.test(idx) && /v2-community\.js\?v=20261116-\w+/.test(st), '캐시 버전');
   ok(/enable row level security/.test(mig) && /revoke all on public\.cm_activity, public\.admin_staff from anon, authenticated/.test(mig) && /grant execute on function public\.cm_metrics\(date\) to service_role/.test(mig) && /13 months/.test(mig) && /cm-purge-activity/.test(mig), '마이그레이션: 서버 전용·13개월 파기');
   ok(/이용 기록\(날짜·이용한 영역\): 13개월/.test(priv), '개인정보처리방침: 이용 기록');
 
