@@ -587,7 +587,7 @@ summary { cursor:pointer; padding:4px 0; }
 <script src="../hub/renewal-view.js"></script>
 <script src="../hub/cinematic-data.js"></script><script src="../hub/cinematic.js"></script><link rel="stylesheet" href="../hub/cinematic.css">
 <script src="../hub/renewal-characters.js"></script>
-<script src="v2-community.js?v=20261116-gw"></script>
+<script src="v2-community.js?v=20261116-leave"></script>
 <script src="navigation.js?v=20261116-en"></script>
 <script src="image-optimizer.js"></script>
 <script src="v2-onboard.js"></script>
@@ -664,11 +664,21 @@ summary { cursor:pointer; padding:4px 0; }
     }).catch(function (e) { $('loginMsg').textContent = e.message; });
   }
   // 인연의 광장: 관리자 테스트 회원 A 로 로그인해 새 탭에서 연다(입장 쿠키 + 일회용 로그인 코드, functions/_testers.js). 팝업 차단을 피하려고 탭부터 연다
+  // 관리자 화면에서 연 광장 탭 표시(from=admin): 광장의 '나가기'가 관리자 화면으로 돌아오게(community/cm.js)
+  //   테스트 회원 로그인은 /report/auth-return.html?to=/community/… 를 거쳐 오므로 그 안쪽 to 주소에 붙인다
+  var fromAdmin = window.plazaFromAdmin = function (to) {
+    try {
+      var mark = function (s) { var u = new URL(s || '/community/', location.origin); u.searchParams.set('from', 'admin'); return u.pathname + u.search + u.hash; };
+      var o = new URL(to || '/community/', location.origin);
+      if (/\/auth-return\.html$/.test(o.pathname)) { o.searchParams.set('to', mark(o.searchParams.get('to') || '/community/')); return o.pathname + o.search + o.hash; }
+      return mark(to);
+    } catch (e) { return to; }
+  };
   window.openPlazaAs = function (slot) {
     var w = window.open('about:blank', '_blank'); if (w) w.opener = null;
     fetch('/api/community/test-login', { method: 'POST', credentials: 'same-origin', headers: { authorization: 'Bearer ' + S.pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent((function () { try { return localStorage.getItem('iching_reviewer') || ''; } catch (e) { return ''; } })()) }, body: JSON.stringify({ as: slot || 'a' }) })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(d.error || ('오류 ' + r.status)); return d; }); })
-      .then(function (d) { if (w) w.location.href = d.to; else location.href = d.to; })
+      .then(function (d) { var to = fromAdmin(d.to); if (w) w.location.href = to; else location.href = to; })
       .catch(function (err) { if (w) w.close(); alert('테스트 회원으로 열지 못했습니다: ' + err.message); });
   };
   $('openPlaza').onclick = function (e) { e.preventDefault(); window.openPlazaAs('a'); };

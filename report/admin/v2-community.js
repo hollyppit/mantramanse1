@@ -353,7 +353,7 @@
         call('/api/community/access', { method: 'POST', body: { email: em, role: $('#cmRole').value, note: $('#cmNote').value.trim() } }).then(function () { msg('cmGrantMsg', '권한을 주었습니다'); $('#cmEmail').value = ''; $('#cmNote').value = ''; loadAccess(); loadAudit(); }).catch(function (e) { msg('cmGrantMsg', e.message, true); });
       };
       [].forEach.call(root.querySelectorAll('[data-tester]'), function (b) { b.onclick = function () { if (window.openPlazaAs) window.openPlazaAs(b.getAttribute('data-tester')); else msg('cmEnterMsg', '관리자 화면에서만 열 수 있습니다', true); }; });
-      $('#cmEnter').onclick = function () { call('/api/community/enter', { method: 'POST' }).then(function (d) { window.open(d.to || '/community/', '_blank', 'noopener'); msg('cmEnterMsg', '새 탭에서 열었습니다(12시간 유효)'); }).catch(function (e) { msg('cmEnterMsg', e.message, true); }); };
+      $('#cmEnter').onclick = function () { call('/api/community/enter', { method: 'POST' }).then(function (d) { window.open(window.plazaFromAdmin ? window.plazaFromAdmin(d.to) : (d.to || '/community/'), '_blank', 'noopener'); msg('cmEnterMsg', '새 탭에서 열었습니다(12시간 유효)'); }).catch(function (e) { msg('cmEnterMsg', e.message, true); }); };
         fetch('/api/community/status', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(drawStage).catch(function () { drawStage({ stage: 'dev' }); });
       loadAccess(); loadAlerts(); loadConsents(); loadCredits(); loadStaff(); loadFeatures(); loadGateway();
     }

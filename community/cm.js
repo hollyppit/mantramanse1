@@ -754,7 +754,10 @@
     });
   }
   window.addEventListener('hashchange', route);
-  $('#leave').onclick = function () { fetch('/api/community/enter', { method: 'DELETE', credentials: 'same-origin' }).finally(function () { location.href = '/gate/'; }); };
+  // 나가기: 관리자 화면에서 연 탭(주소에 from=admin, 이 탭 동안 기억)은 관리자 화면으로, 그 밖에는 처음 화면(숨김이면 서버가 /report/ 로 보냄)으로
+  var FROM_ADMIN = (function () { try { if (new URL(location.href).searchParams.get('from') === 'admin') sessionStorage.setItem('mt_cm_from', 'admin'); return sessionStorage.getItem('mt_cm_from') === 'admin'; } catch (e) { return /[?&]from=admin\b/.test(location.search); } })();
+  if (FROM_ADMIN && $('#leave')) { $('#leave').setAttribute('aria-label', '관리자 화면으로 돌아가기'); $('#leave').title = '관리자 화면으로 돌아가기'; }
+  $('#leave').onclick = function () { fetch('/api/community/enter', { method: 'DELETE', credentials: 'same-origin' }).finally(function () { location.href = FROM_ADMIN ? '/report/admin/' : '/gate/'; }); };
 
   /* ── 히어로 벚꽃잎(캔버스 1개, 홈에서만). 움직임 줄이기면 그리지 않고, 화면 밖·탭 숨김이면 멈춘다 ── */
   var PET = null;
