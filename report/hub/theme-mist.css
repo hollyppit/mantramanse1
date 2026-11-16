@@ -98,10 +98,6 @@ html.theme-mist #hub .ring{ background: conic-gradient(#B23A2C calc(var(--p) * 1
 html.theme-mist #hub .ring::before{ background: #F7F8F6 !important; }
 
 /* ── 글씨: 밝은 글씨로 박혀 있던 곳을 먹색으로(오행·신호 색 글씨는 제외) ── */
-html.theme-mist #hub .tq :is(h1, h2, h3, h4, h5, p, li, b, strong, em, span, a, summary, label, td, th, dt, dd, div, button):not(.tq-el > span, .tq-gzc, .tq-nt-g, .tq-nt-g *, .tq-nt-h i, .tq-sgb, .tq-nt-ss, .tq-pat, .tq-sech > span, .tq-bar s, .tq-nav a.on i, [style*="color"], [style*="color"] *){ color: var(--ink) !important; }
-html.theme-mist #hub .tq :is(small, .tip, .tq-intro, .tq-note, .tq-sub, figcaption):not(.tq-nt-g *, [style*="color"], [style*="color"] *){ color: var(--ink-3) !important; }
-html.theme-mist #hub .tq :is(.tq-box, .tq-card, .tq-fc, .tq-today) p:not([style*="color"]){ color: var(--ink-2) !important; }
-html.theme-mist #hub .tq a:not(.tq-fc, .tq-today, .tq-mypage, .tq-topic, .btn, [style*="color"]) { color: #7A2E22 !important; }
 html.theme-mist #hub .tq-sech > span, html.theme-mist #hub .tq-bar s, html.theme-mist #hub .tq-nav a.on i{ color: #fff !important; }
 html.theme-mist #hub .tq .tq-nt-ss.g{ color: #1F7A4A; background: rgba(47,160,100,.12); }
 html.theme-mist #hub .tq .tq-nt-ss.b{ color: #A8392B; background: rgba(200,70,55,.10); }
@@ -326,3 +322,72 @@ html.theme-mist #amb{ opacity: .35; }
 /* 하단 안내·사업자 정보 */
 html.theme-mist body > footer, html.theme-mist .mt-legal, html.theme-mist .mt-legal :is(p, a, b){ color: #56626A; }
 html.theme-mist .mt-legal{ border-color: rgba(52,72,80,.15); }
+
+/* ═══ 2026-11-16 색 위계 다시 잡기: "글씨가 다 검다"는 의견 → 역할마다 색을 나눈다 ═══
+   제목·본문 = 먹색 · 소제목 = 청먹(남색) · 라벨·머리말 = 호박 갈색 · 강조 단어 = 주홍 · 바로가기·버튼 글씨 = 주사
+   좋음 = 초록 · 주의 = 빨강 · 오행·흐름·신호 = 원색 */
+html.theme-mist{ --gold: #9A5B13; --gold-l: #9A5B13; --gold-d: #7C4A10; --m-head: #1E4E79; --m-em: #B4441A; --m-link: #B23A2C; --m-label: #9A5B13; }
+/* 라벨·머리말(TODAY · CALENDAR · 무료 같은 작은 글씨) */
+html.theme-mist #hub .kick, html.theme-mist #hub .tq-fc > small, html.theme-mist #hub .tq-today small:first-child, html.theme-mist #hub .tq :is(.tq-sub, .tq-car-now) > b:first-child{ color: var(--m-label); }
+html.theme-mist #hub .tq-hero .kick{ color: #5B6B71; }
+/* 소제목: 상자 제목·카드 제목은 청먹 */
+html.theme-mist #hub .tq :is(.tq-box > h4, .tq-h4, .tq-card h3, .tq-card h4), html.theme-mist #hub :is(.dsec h3, .actcard h3){ color: var(--m-head); }
+html.theme-mist #hub .tq-fc h4{ color: #1B2226; }
+/* 문장 속 강조 단어는 주홍 */
+html.theme-mist #hub .tq :is(p, li) > :is(b, strong), html.theme-mist #hub :is(.dsec, .rsec) p :is(b, strong){ color: var(--m-em); }
+/* 바로가기(→ 열기·보기)와 글자 단추는 주사 */
+html.theme-mist #hub .tq-fc > span:last-child, html.theme-mist #hub .tq-today a, html.theme-mist #hub .tq :is(.tq-lnk, .tq-mypage-go), html.theme-mist #hub .tq p a, html.theme-mist #hub .tq-fc .go{ color: var(--m-link); }
+/* 원국 표 십성 이름(밝은 글씨로 박혀 있던 곳) */
+html.theme-mist #hub .tq .mt-natal .tq-nt-t{ color: #1B2226; font-weight: 700; }
+html.theme-mist #hub .tq .mt-natal .tq-nt-c.me .tq-nt-t{ color: var(--m-link); }
+
+/* ── 원국 표: 오행 칸을 원색으로 칠한다(목 초록·화 빨강·토 노랑·금 은회·수 파랑) ── */
+html.theme-mist #hub [style*="--ec:#34C26B" i]{ --ecs: #15803D; --ect: #FFFFFF; }
+html.theme-mist #hub [style*="--ec:#F0483E" i]{ --ecs: #DC2626; --ect: #FFFFFF; }
+html.theme-mist #hub [style*="--ec:#E8B23A" i]{ --ecs: #EAB308; --ect: #3B2300; }
+html.theme-mist #hub [style*="--ec:#3B7FF0" i]{ --ecs: #2563EB; --ect: #FFFFFF; }
+html.theme-mist #hub [style*="--ec:#E6EAF0" i]{ --ecs: #CBD5E1; --ect: #1F2937; }
+html.theme-mist #hub .tq .mt-natal .tq-nt-g{ background: linear-gradient(170deg, var(--ecs, var(--ec)), color-mix(in srgb, var(--ecs, var(--ec)) 86%, #000)); border: 0; box-shadow: 0 8px 18px -10px var(--ecs, var(--ec)); }
+html.theme-mist #hub .tq .mt-natal .tq-nt-g :is(b, small){ color: var(--ect, #fff) !important; text-shadow: none; }
+html.theme-mist #hub .tq .mt-natal .tq-nt-c.me .tq-nt-g{ box-shadow: 0 0 0 3px #fff, 0 0 0 5px #B23A2C, 0 10px 22px -10px var(--ecs, var(--ec)); }
+html.theme-mist #hub .tq .mt-natal .tq-nt-h i{ background: var(--ecs, var(--ec)); color: var(--ect, #fff) !important; box-shadow: none; }
+/* 오행 비율 막대 */
+html.theme-mist #hub [style*="background:#34C26B" i]{ background: #16A34A !important; }
+html.theme-mist #hub [style*="background:#F0483E" i]{ background: #DC2626 !important; }
+html.theme-mist #hub [style*="background:#E8B23A" i]{ background: #EAB308 !important; }
+html.theme-mist #hub [style*="background:#3B7FF0" i]{ background: #2563EB !important; }
+html.theme-mist #hub [style*="background:#E6EAF0" i]{ background: #94A3B8 !important; }
+html.theme-mist #hub .tq .tq-eb i{ background-image: none !important; }
+
+/* ── 흐름 그래프(대운·세운·월운 막대): 흐름 종류 원색 ── */
+html.theme-mist #hub .tq{ --k-opportunity: #EAB308; --k-expansion: #16A34A; --k-harvest: #DB2777; --k-accumulation: #0891B2; --k-volatility: #7C3AED; --k-defense: #DC2626; }
+html.theme-mist #hub .tq .tq-bar.k-opportunity em{ color: #854D0E; } html.theme-mist #hub .tq .tq-bar.k-expansion em{ color: #166534; }
+html.theme-mist #hub .tq .tq-bar.k-harvest em{ color: #BE185D; } html.theme-mist #hub .tq .tq-bar.k-accumulation em{ color: #0E7490; }
+html.theme-mist #hub .tq .tq-bar.k-volatility em{ color: #6D28D9; } html.theme-mist #hub .tq .tq-bar.k-defense em{ color: #B91C1C; }
+html.theme-mist #hub .tq .tq-bar u i{ background-image: none; }
+/* 좋고 나쁨 신호(무난·주의·좋음·최고·부담): 막대·배지·그래프 모두 원색 */
+html.theme-mist #hub [style*="--bc:#B3BDCF" i]{ --bc: #94A3B8 !important; } html.theme-mist #hub [style*="--bc:#FFAE2E" i]{ --bc: #F59E0B !important; }
+html.theme-mist #hub [style*="--bc:#8BE6A9" i]{ --bc: #22C55E !important; } html.theme-mist #hub [style*="--bc:#1FD16A" i]{ --bc: #15803D !important; }
+html.theme-mist #hub [style*="--bc:#FF5A47" i]{ --bc: #DC2626 !important; }
+html.theme-mist #hub [style*="background:#B3BDCF" i]{ background: #94A3B8 !important; color: #0F172A !important; }
+html.theme-mist #hub [style*="background:#FFAE2E" i]{ background: #F59E0B !important; color: #3B2300 !important; }
+html.theme-mist #hub [style*="background:#8BE6A9" i]{ background: #22C55E !important; color: #052E16 !important; }
+html.theme-mist #hub [style*="background:#1FD16A" i]{ background: #15803D !important; color: #FFFFFF !important; }
+html.theme-mist #hub [style*="background:#FF5A47" i]{ background: #DC2626 !important; color: #FFFFFF !important; }
+html.theme-mist #hub svg [fill="#B3BDCF" i]{ fill: #94A3B8; } html.theme-mist #hub svg [fill="#FFAE2E" i]{ fill: #F59E0B; }
+html.theme-mist #hub svg [fill="#8BE6A9" i]{ fill: #22C55E; } html.theme-mist #hub svg [fill="#1FD16A" i]{ fill: #15803D; }
+html.theme-mist #hub svg [fill="#FF5A47" i]{ fill: #DC2626; }
+html.theme-mist #hub svg :is(rect, path, circle)[fill="#34C26B" i]{ fill: #16A34A; } html.theme-mist #hub svg :is(rect, path, circle)[fill="#F0483E" i]{ fill: #DC2626; }
+html.theme-mist #hub svg :is(rect, path, circle)[fill="#E8B23A" i]{ fill: #EAB308; } html.theme-mist #hub svg :is(rect, path, circle)[fill="#3B7FF0" i]{ fill: #2563EB; }
+/* 원국 신살 칩: 도움 초록·주의 빨강을 더 또렷하게 */
+html.theme-mist #hub .tq .tq-nt-ss.g{ background: #DCFCE7; color: #14532D !important; }
+html.theme-mist #hub .tq .tq-nt-ss.b{ background: #FEE2E2; color: #991B1B !important; }
+/* 유료 배지(주제 카드) */
+html.theme-mist #hub .tq-acc{ color: #fff; }
+html.theme-mist #hub .tq-acc.paid{ background: #6D28D9; color: #fff; }
+/* 미래 막대 옅게 하기는 원색이 죽지 않게 약하게 */
+html.theme-mist #hub .tq .tq-bar.now ~ .tq-bar:not(.sel){ opacity: .9; filter: saturate(.9); }
+html.theme-mist #hub .tq .tq-bar.now ~ .tq-bar ~ .tq-bar ~ .tq-bar:not(.sel){ opacity: .78; filter: saturate(.8); }
+html.theme-mist #hub .tq .tq-bar.now ~ .tq-bar ~ .tq-bar ~ .tq-bar ~ .tq-bar ~ .tq-bar:not(.sel){ opacity: .66; filter: saturate(.7); }
+html.theme-mist #hub .tq .tq-dc b{ color: #1B2226; }
+html.theme-mist #hub .tq .tq-sj b{ color: #9A3412; }
