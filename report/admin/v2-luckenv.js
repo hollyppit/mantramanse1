@@ -73,6 +73,10 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 오행 흐름·격국 장(5장)</b> — 현재: <b style="color:' + (fl && fl.flowChapters ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.flowChapters ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leFC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.flowChapters ? '흐름·격국 장 끄기' : '흐름·격국 장 켜기') + '</button><a class="btn" href="/report/v2/?mantraFlags=flowChapters" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 종합풀이 \'나의 타고난 기질\' 뒤에 \'내 사주의 기운은 어떻게 흐를까?\'·\'내 사주의 뼈대, 격국과 주요 구조\', 재물운·커리어운·인연운 심화 첫 장 뒤에 각 주제의 \'○○의 기운은 어떻게 흐를까?\' 장이 <b>약 1분 안에</b> 나타납니다. 만세력의 오행 흐름·격국 판정 값으로 만든 문장(AI·DB 문안 없음)이고 점수·용신은 바뀌지 않습니다. 미리보기 주소는 로컬·미리보기 배포에서만 스위치 없이 켜집니다.</p></div>';
+    // 60갑자 일주 적합도 2판(compat-day.js) 스위치 — 오행·강약 탭 '나와 잘 맞는 상대 일주'와 무빙툰 일주 궁합의 계산을 바꾼다. 설계: docs/DAY_PILLAR_COMPAT_PLAN_2026-11-16.md
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>60갑자 일주 적합도 2판</b> — 현재: <b style="color:' + (fl && fl.dayCompat ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.dayCompat ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leDC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.dayCompat ? '일주 적합도 2판 끄기' : '일주 적합도 2판 켜기') + '</button><a class="btn" href="/?mantraFlags=dayCompat" target="_blank" rel="noopener">미리보기 주소</a></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 오행·강약 탭 \'나와 잘 맞는 상대 일주\'와 무빙툰의 일주 궁합(끌림 포함)이 <b>약 1분 안에</b> 새 계산으로 바뀝니다. 통합 용신 하나로 필요한 기운을 보고, 부족한 오행을 무조건 더하지 않으며, 일지 충·형은 맞는 글자의 역할에 따라 조건부로 봅니다. 두 사람 궁합(궁합 탭) 점수와는 별개이고, 끄면 기존 계산으로 돌아갑니다.</p></div>';
     root.innerHTML = flagBox + '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 6px;color:var(--gold)">운세 환경 문구 게시</h3>' +
       '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 12px;margin:0 0 8px;line-height:1.7"><b>사용법</b><br>① 목록의 문구를 읽어 봅니다.<br>② 괜찮으면 체크하고 <b>[선택 게시]</b>, 전부 괜찮으면 <b>[목록 전체 게시]</b>를 누릅니다.<br>③ 고치려면 문구를 눌러 본문을 수정한 뒤 <b>[저장하고 게시]</b>를 누릅니다.</div>' +
       '<p class="muted" style="margin:0 0 8px">게시한 문구만 사용자 화면에 반영되고, 수정하면 게시본에서 빠집니다(사용자에게는 기본 문구). 단정·반말 표현이나 같은 문구는 저장되지 않습니다. 운세 환경 해석 기능이 꺼져 있으면 게시해도 아직 사용자에게 보이지 않습니다. <b>전체 ' + S.phrases.length + '건 · 게시됨 ' + c.published + ' · 미게시 ' + c.unpub + '</b></p>' +
@@ -132,6 +136,14 @@
       fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { healthChapters: v } }) })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
         .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '건강·사고수 장을 켰습니다(약 1분 안에 반영)' : '건강·사고수 장을 껐습니다(약 1분 안에 반영)'); });
+    };
+    $('#leDC').onclick = function () {   // 60갑자 일주 적합도 2판 스위치(따로 켜고 끈다)
+      var v = !(S.flags && S.flags.dayCompat);
+      if (v && !confirm('오행·강약 탭과 무빙툰의 일주 궁합 점수를 새 계산(일주 적합도 2판)으로 바꿉니다.\n켜시겠습니까?')) return;
+      var who = ''; try { who = localStorage.getItem('iching_reviewer') || ''; } catch (e) { }
+      fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { dayCompat: v } }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
+        .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '일주 적합도 2판을 켰습니다(약 1분 안에 반영)' : '일주 적합도 2판을 껐습니다(약 1분 안에 반영)'); });
     };
     $('#leFC').onclick = function () {   // 운명의 타임라인 오행 흐름·격국 장 스위치(따로 켜고 끈다)
       var v = !(S.flags && S.flags.flowChapters);

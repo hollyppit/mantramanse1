@@ -55,7 +55,8 @@
     return loaded[src] || (loaded[src] = new Promise(function (ok, no) { var s = DOC.createElement('script'); s.src = src; s.onload = ok; s.onerror = function () { delete loaded[src]; no(new Error('load ' + src)); }; DOC.head.appendChild(s); }));
   };
   // 사주 엔진 + 일간·일주 소개 문구(순수 데이터 파일). 둘 다 기존 파일을 그대로 쓴다.
-  H.engine = function () { return root.Manse ? Promise.resolve(root.Manse) : H.load('/engine.js').then(function () { return root.Manse; }); };
+  // 엔진 다음에 일주 적합도 2판(compat-day.js — 스위치가 꺼져 있으면 기존 계산 그대로)을 함께 불러온다
+  H.engine = function () { if (root.Manse && root.MantraDayCompat) return Promise.resolve(root.Manse); return (root.Manse ? Promise.resolve() : H.load('/engine.js')).then(function () { return root.MantraDayCompat ? null : H.load('/compat-day.js').catch(function () { }); }).then(function () { return root.Manse; }); };
   H.sajuKit = function () { return H.engine().then(function () { return root.ReportV2 && root.ReportV2.IntroText ? 1 : H.load('/report/v2/intro-text.js'); }).then(function () { return { M: root.Manse, T: root.ReportV2.IntroText }; }); };
   var chartCache = { sig: '', ch: null };
   H.chart = function () { // 저장된 정보로 계산한 사주(같은 정보면 재사용)

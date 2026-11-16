@@ -1035,6 +1035,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="feature-flags.js"></script>
 <script src="compat-pair.js"></script>
 <script src="engine.js"></script>
+<script src="compat-day.js"></script>
 <script src="unseong-cycle.js"></script>
 <script src="luck-interpret.js"></script>
 <script src="luck-cycle.js"></script>
@@ -6051,7 +6052,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const cpTone = c => c === '조화 높음' || c === '조화' ? 'good' : c === '주의 요소 있음' ? 'bad' : '';
   const cpMark = v => { const a = Math.abs(v), m = a >= 0.6 ? 3 : a >= 0.3 ? 2 : a >= 0.1 ? 1 : 0; return m ? (v > 0 ? '+' : '−').repeat(m) : '·'; };
   const cpPts = v => { const r = Math.round(v); return r > 0 ? `+${r}` : r < 0 ? `−${-r}` : '0'; };
-  const cpDisclaimer = '궁합 일주는 상대방의 일주(두 글자)만 가정한 참고 분석입니다. 실제 궁합은 두 사람의 전체 원국을 비교하면 결과가 달라질 수 있습니다.';
+  const cpDisclaimer = '궁합 일주는 상대방의 일주(두 글자)만 가정한 참고 분석입니다. 상대의 신강·신약·용신은 계산하지 않았습니다. 두 사람의 전체 사주 궁합은 궁합 탭에서 확인하세요.';
+  const dcOn = () => !!(window.MantraDayCompat && window.MantraDayCompat.isOn());   // 일주 적합도 2판(compat-day.js) 스위치
+  const cpScoreName = () => dcOn() ? '일주 적합도' : '종합 보완도';
 
   function renderCompat(ch) {
     const els = [0, 1, 2, 3, 4].map(e => M.evaluateCompatibleElement(ch, e)).sort((a, b) => b.score - a.score);
@@ -6077,23 +6080,23 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     </section>
     <section class="card">
       <div class="card-h"><h2>나와 잘 맞는 상대 일주</h2><span class="note">60일주 전체를 내 원국과 비교</span></div>
-      <h3 class="cp-h3">보완도가 높은 일주</h3>
+      <h3 class="cp-h3">${dcOn() ? '일주 적합도가 높은 일주' : '보완도가 높은 일주'}</h3>
       <div class="cp-tiles">${good.map(tile).join('')}</div>
-      <h3 class="cp-h3">충돌·마찰에 주의할 일주 <span class="muted small">일지 충·형 등 자극이 큰 순</span></h3>
+      <h3 class="cp-h3">자극이 큰 일주 <span class="muted small">일지 충·형 등 변화가 큰 순 · 속도를 맞추면 좋은 조합</span></h3>
       <div class="cp-tiles">${risky.map(tile).join('')}</div>
       <div class="cp-att">
-        <div class="cp-att-h"><h3 class="cp-h3">끌림 — 마음이 움직이는 일주</h3>
+        <div class="cp-att-h"><h3 class="cp-h3">끌림 신호 — 명리 상징으로 본 끌림</h3>
           <div class="cp-filters" role="group" aria-label="상대 기준">${[['opposite', '이성 기준(전통)'], ['any', '성별 무관']].map(([k, l]) => `<button type="button" class="opt" data-act="cp-p:${k}" aria-pressed="${partner === k}">${l}</button>`).join('')}</div></div>
-        <p class="note">궁합(보완도)과는 다른 축입니다. 배우자성 십성, 일간 천간합, 지지 합, 홍염·도화·천을귀인, 원진·충 같은 강한 자극을 봅니다. 끌림이 강해도 궁합 조건이 "주의 요소 있음"일 수 있습니다.</p>
-        <h4 class="cp-h4">내가 끌리는 일주 <span class="muted small">내 사주가 좋아하는 타입</span></h4>
+        <p class="note">${dcOn() ? '일주 적합도' : '궁합(보완도)'}와는 다른 축입니다. 배우자성 십성, 일간 천간합, 지지 합, 홍염·도화·천을귀인, 원진·충 같은 명리 상징 관계를 봅니다. 실제 감정을 예측하는 값이 아니며, 끌림이 강해도 조건이 "주의 요소 있음"일 수 있습니다.</p>
+        <h4 class="cp-h4">내 사주가 끌리기 쉬운 일주 <span class="muted small">명리 상징 기준</span></h4>
         <div class="cp-tiles">${all.slice().sort((a, b) => val(b, 'to') - val(a, 'to') || b.score - a.score).slice(0, 5).map(x => tile(x, 'to')).join('')}</div>
-        <h4 class="cp-h4">나를 좋아하는 일주 <span class="muted small">상대 일주가 나를 좋아하기 쉬운 조합</span></h4>
+        <h4 class="cp-h4">나에게 끌리기 쉬운 일주 <span class="muted small">상대 일간에게 내가 배우자 별로 보이는 상징 관계 · 감정 예측 아님</span></h4>
         <div class="cp-tiles">${all.slice().sort((a, b) => val(b, 'from') - val(a, 'from') || b.score - a.score).slice(0, 5).map(x => tile(x, 'from')).join('')}</div>
-        <h4 class="cp-h4">서로 끌리는 일주 <span class="muted small">양쪽 끌림이 모두 높은 조합</span></h4>
+        <h4 class="cp-h4">서로 끌림 신호가 큰 일주 <span class="muted small">두 방향 상징 신호가 모두 높은 조합</span></h4>
         <div class="cp-tiles">${all.slice().sort((a, b) => val(b, 'mutual') - val(a, 'mutual') || b.score - a.score).slice(0, 5).map(x => tile(x, 'mutual')).join('')}</div>
       </div>
       <div class="frow"><button class="btn" data-act="cp-all">${S.cpAll ? '전체 접기' : '60일주 전체 보기'}</button></div>
-      ${S.cpAll ? `<div class="cp-filters" role="group" aria-label="정렬">${[['compat', '궁합 점수순'], ['to', '내가 끌림순'], ['from', '나를 좋아함순'], ['mutual', '서로 끌림순']].map(([k, l]) => `<button type="button" class="opt" data-act="cp-s:${k}" aria-pressed="${sortBy === k}">${l}</button>`).join('')}</div>
+      ${S.cpAll ? `<div class="cp-filters" role="group" aria-label="정렬">${[['compat', dcOn() ? '일주 적합도순' : '궁합 점수순'], ['to', '내가 끌리기 쉬운 순'], ['from', '나에게 끌리기 쉬운 순'], ['mutual', '서로 끌림 신호순']].map(([k, l]) => `<button type="button" class="opt" data-act="cp-s:${k}" aria-pressed="${sortBy === k}">${l}</button>`).join('')}</div>
         <div class="cp-filters" role="group" aria-label="유형 필터">${CP_FILTERS.map(f => `<button type="button" class="opt" data-act="cp-f:${f}" aria-pressed="${fl === f}">${f}${f === '전체' ? ` ${all.length}` : ` ${all.filter(x => f === '주의 요소 있음' ? x.condition === f : x.type === f).length}`}</button>`).join('')}</div>
         <div class="cp-all">${list.slice().sort((a, b) => val(b, sortBy) - val(a, sortBy) || b.score - a.score).map(x => tile(x, sortBy)).join('') || '<p class="muted small">해당하는 일주가 없습니다.</p>'}</div>` : ''}
       <p class="note">${cpDisclaimer}</p>
@@ -6107,12 +6110,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
           <dt>균형 (최대 ±${cfg.element.balance})</dt><dd>부족한 오행을 채우거나 넘치는 오행을 눌러 주는 효과입니다.</dd>
           <dt>십성 작용 (최대 ±${cfg.element.tenGod})</dt><dd>관살혼잡·재다신약 같은 원국 구조의 약점을 키우는지 풀어 주는지, 배우자성(남 재성·여 관성)이 부족한지를 봅니다.</dd>
           <dt>과잉 위험 (최대 −${cfg.element.excessPenalty})</dt><dd>이미 많은 오행이나 십성을 더 키우는 위험입니다.</dd></dl></details>
-        <details><summary><b>궁합 일주는 어떻게 계산하나</b><span class="small muted" style="display:block">상대의 일간·일지와 내 원국 전체의 관계를 봅니다</span></summary>
+        <details><summary><b>궁합 일주는 어떻게 계산하나</b><span class="small muted" style="display:block">상대의 일간·일지와 내 원국 전체의 관계를 봅니다</span></summary>${dcOn() ? `<dl><dt>내게 필요한 기운 (${window.MantraDayCompat ? MantraDayCompat.CFG.w.role : 34})</dt><dd>상대 일간(55%)과 일지 지장간(45%)이 들여오는 오행을 통합 용신(억부·조후·격국·통관·제화·종격을 한 번에 판단한 역할값)으로 봅니다. 억부·조후를 따로 더하지 않고, 부족한 오행이라는 이유만으로 가산하지 않습니다.</dd><dt>기후 맞춤 (${window.MantraDayCompat ? MantraDayCompat.CFG.w.johu : 10})</dt><dd>같은 오행이라도 글자마다 다른 온도·습도(예: 丑은 차고 습함, 未는 덥고 건조함)가 원국의 기후 치우침을 푸는지 봅니다. 조후가 필요 없는 원국은 이 몫을 위 항목에 넘깁니다.</dd><dt>십성 작용 (${window.MantraDayCompat ? MantraDayCompat.CFG.w.struct : 14})</dt><dd>상대가 주는 십성이 내 원국 구조와 맞물리는지(관인상생·식신생재·식상제살 등) 또는 약점을 건드리는지(군겁쟁재·재극인·관살혼잡 등) 봅니다.</dd><dt>일간 관계 (${window.MantraDayCompat ? MantraDayCompat.CFG.w.stem : 10})·일지 관계 (${window.MantraDayCompat ? MantraDayCompat.CFG.w.branch : 20})·원국 합충 (${window.MantraDayCompat ? MantraDayCompat.CFG.w.natal : 12})</dt><dd>합은 합으로 생기는 오행이 내게 필요한지에 따라, 충·형은 맞는 내 글자가 꺼리는 기운인지 꼭 필요한 기운인지에 따라 달리 봅니다. 상대 글자가 원국의 충을 합으로 풀어 주면 더하고, 원국의 합을 충으로 흔들면 뺍니다.</dd><dt>한계</dt><dd>상대의 전체 원국은 모르므로 상대의 신강·신약·조후·용신은 계산하지 않습니다. 두 사람 전체 사주 궁합(궁합 탭) 점수와는 다른 지표입니다.</dd></dl>` : `
           <dl><dt>오행 보완 (±${cfg.elementBalance})·조후 (±${cfg.climate})·십성 (±${cfg.tenGod})</dt><dd>상대 일간(${Math.round(cfg.dayStem * 100)}%)과 일지의 지장간(${Math.round(cfg.dayBranch * 100)}%, 여기·중기·정기 일수로 가중)이 공급하는 오행을 위 오행 기준으로 평가합니다.</dd>
           <dt>일간 관계 (±${cfg.stemRelation})</dt><dd>생극·음양·천간합·천간충. 천간합이 있어도 자동으로 최고점이 되지 않습니다.</dd>
           <dt>일지 관계 (±${cfg.branchRelation})</dt><dd>육합·삼합(반합)은 결속, 충·형·원진·해·파는 변화·마찰 신호로 따로 셉니다. 충이 이미 과한 기운을 깨는 경우에는 마찰을 덜어 줍니다.</dd>
           <dt>원국 합충 (±${cfg.natalRelations})</dt><dd>내 년·월·시와 만드는 관계입니다. 일간·일지 관계보다 가볍게(월 ${cfg.posW.month}·시 ${cfg.posW.hour}·년 ${cfg.posW.year}배) 반영합니다.</dd>
-          <dt>과잉 위험 (−${cfg.excessPenalty})</dt><dd>이미 많은 오행을 더 키우는 위험입니다.</dd></dl></details>
+          <dt>과잉 위험 (−${cfg.excessPenalty})</dt><dd>이미 많은 오행을 더 키우는 위험입니다.</dd></dl>`}</details>
         <details><summary><b>끌림은 어떻게 계산하나</b><span class="small muted" style="display:block">배우자성·합·매력 신호를 두 방향으로 계산합니다</span></summary>
           <dl><dt>내가 끌리는 일주 (나 → 상대)</dt><dd>배우자성 십성(${cfg.attract.toThem.spouse}), 일간 천간합(${cfg.attract.toThem.stemHap}), 지지 합(${cfg.attract.toThem.branchBond}), 홍염·도화·천을귀인(${cfg.attract.toThem.charm}), 내게 필요한 기운(${cfg.attract.toThem.need}), 원진·충 같은 강한 자극(${cfg.attract.toThem.charge}), 음양 조화(${cfg.attract.toThem.yinyang}) 순으로 반영합니다.</dd>
           <dt>나를 좋아하는 일주 (상대 → 나)</dt><dd>상대 일간을 기준으로 내 일간·일지가 상대의 배우자성인지, 내 일지가 상대의 매력 신살 자리인지를 봅니다. 상대의 전체 사주를 모르므로 "상대 일간이 나를 어떻게 보는가"로 단순화한 것입니다.</dd>
@@ -6141,14 +6144,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     }
     const x = M.compatAttraction(ch, S.cpPartner || 'opposite').find(q => q.i === sel.i), at = x.attract;
     return `<span class="cat">궁합 일주 · 내 일주 ${x.myDay}</span><h3>${x.ganzhi} (${x.ganzhiK}) · 궁합 분석</h3>
-      <div class="cp-pills"><span class="pill">종합 보완도 <b>${x.score}</b></span><span class="pill">${x.type}</span><span class="pill ${cpTone(x.condition)}">${x.condition}</span></div>
+      <div class="cp-pills"><span class="pill">${cpScoreName()} <b>${x.score}</b></span><span class="pill">${x.type}</span><span class="pill ${cpTone(x.condition)}">${x.condition}</span></div>
       <p class="small muted">${CP_TYPE_INFO[x.type]}</p>
       <h4>${x.ganzhi} 일주의 특징</h4>
       <div class="facts">${gzFacts(x.ganzhiK)}</div>
       <p class="small" style="color:var(--ink-2)">${esc(glInline(x.ganzhiK))}</p>
       <h4>끌림 <span class="muted small">${(S.cpPartner || 'opposite') === 'any' ? '성별 무관 기준' : '이성 기준'}</span></h4>
-      <div class="cp-att-box">${[['내가 끌림', at.toThem], ['나를 좋아함', at.toMe]].map(([l, r]) => `<div><div class="cp-att-r"><b>${l}</b><span class="pill ${r.score >= 60 ? 'good' : ''}">${r.score}</span></div><ul class="pos-ul small">${r.reasons.slice(0, 3).map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>`).join('')}
-        <div class="cp-att-r"><b>서로 끌림</b><span class="pill ${at.mutual >= 60 ? 'good' : ''}">${at.mutual}</span></div></div>
+      <div class="cp-att-box">${[['내가 끌리기 쉬움', at.toThem], ['나에게 끌리기 쉬움', at.toMe]].map(([l, r]) => `<div><div class="cp-att-r"><b>${l}</b><span class="pill ${r.score >= 60 ? 'good' : ''}">${r.score}</span></div><ul class="pos-ul small">${r.reasons.slice(0, 3).map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>`).join('')}
+        <div class="cp-att-r"><b>서로 끌림 신호</b><span class="pill ${at.mutual >= 60 ? 'good' : ''}">${at.mutual}</span></div></div>
       <h4>내 원국과의 궁합</h4>
       <div class="cp-parts">${x.parts.map(p => `<div class="cp-part"><span>${p.label}</span><span class="cp-mk ${p.v > 0.05 ? 'good' : p.v < -0.05 ? 'bad' : ''}">${p.key === 'excess' ? (x.excessRisk >= 0.5 ? '높음' : x.excessRisk >= 0.25 ? '보통' : '낮음') : cpMark(p.v)}</span><em class="num">${cpPts(p.pts)}</em></div>`).join('')}</div>
       <h4>핵심 이유</h4><ul class="pos-ul small">${x.reasons.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
@@ -7397,6 +7400,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis)) return;
     try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
   })();
+  window.addEventListener('mantra:daycompat', () => { try { readForm(); render(); } catch (e) { } });   // 일주 적합도 2판(compat-day.js) 스위치가 늦게 켜지면 다시 그린다
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
   let phrLoaded = false;
   function phrLoad() { if (phrLoaded || !window.MantraLuckInterpret) return; phrLoaded = true; fetch('/api/luck-phrases').then(r => r.ok ? r.json() : null).then(d => { if (d && window.MantraLuckInterpret.applyPublished(d.published)) render(); }).catch(() => { }); }
