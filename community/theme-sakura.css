@@ -81,3 +81,94 @@ html.theme-sakura .badge .hj, html.theme-sakura .chip .hj{ color: var(--thread-d
 /* 오행 고리 글씨(목·토)가 밝은 바탕에서 조금 약해 한 단계 진하게 */
 html.theme-sakura{ --el-wood: #3E7A5A; --el-earth: #86622A; --el-metal: #5F6375; --el-fire: #A93E33; --el-water: #34507A; }
 html.theme-sakura .today .gz small{ font-size: .7rem; opacity: 1; }
+
+/* ═══ 2026-11-17 타임라인과 테마 통일 + 트렌디(위 규칙들을 덮어쓴다) ═══
+   "너무 분홍색" 의견 → 넓은 면의 분홍을 걷어내고 타임라인(안개 테마)과 같은 바탕·카드·글씨, 강조는 붉은 낙관색(홍실 빨강) #B23A2C.
+   벚꽃은 포인트로만: 옅은 꽃잎·로고 한 송이·머리 영역의 아주 옅은 분홍빛. 표현은 타임라인과 같은 유리 패널·윗 띠·겹 그림자·알약. */
+html.theme-sakura{
+  --rice: #EEF2F3; --rice-2: #E6ECEE; --paper: #FFFFFF; --line: #D5DDE1; --line-2: #C5D0D5;
+  --sumi: #1D2428; --sumi-2: #3F4A50; --sumi-3: #5E6970;
+  --thread: #B23A2C; --thread-l: #FBEDEA; --thread-d: #8A2A1F;
+  --blush: #E8B7C3; --blush-l: #FBF2F4; --blush-d: #9E3B57;
+  --tr-card: linear-gradient(180deg, #FFFFFF 0%, #FBFCFC 100%);
+  --tr-sh-card: 0 1px 0 rgba(255,255,255,.95) inset, 0 1px 2px rgba(20,35,42,.05), 0 14px 34px -20px rgba(20,35,42,.30);
+  --tr-sh-lift: 0 1px 0 rgba(255,255,255,.95) inset, 0 2px 4px rgba(20,35,42,.06), 0 22px 44px -22px rgba(20,35,42,.38);
+  --tr-ring: 0 0 0 1px rgba(197,208,213,.95);
+  --tr-accent: linear-gradient(90deg, #B23A2C 0%, #D7894A 38%, rgba(215,137,74,0) 78%);
+  --tr-red: linear-gradient(145deg, #C2412E, #A8321F 55%, #8A2A1F);
+  --tr-ink: linear-gradient(145deg, #2E3B42, #1D2428);
+  background: #DFE6E8;
+}
+/* 바탕: 타임라인과 같은 청회 + 붉은빛·푸른빛 안개, 벚꽃 포인트로 아주 옅은 분홍 한 점 */
+html.theme-sakura body{
+  background: radial-gradient(60% 40% at 8% 18%, rgba(178,58,44,.06), transparent 70%), radial-gradient(55% 45% at 96% 62%, rgba(37,99,235,.06), transparent 70%), radial-gradient(40% 30% at 85% 4%, rgba(232,183,195,.22), transparent 70%), #DFE6E8;
+  background-attachment: fixed;
+}
+html.theme-sakura .sk-petals{ opacity: .55; }
+
+/* 상단 바·아래 탭: 유리 */
+html.theme-sakura .top{ background: rgba(244,247,248,.72); -webkit-backdrop-filter: blur(16px) saturate(1.1); backdrop-filter: blur(16px) saturate(1.1); border-bottom: 1px solid rgba(197,208,213,.8); }
+html.theme-sakura .top .logo{ box-shadow: 0 0 0 1px rgba(178,58,44,.22); }
+html.theme-sakura .tabbar{ background: rgba(255,255,255,.7); -webkit-backdrop-filter: blur(18px) saturate(1.1); backdrop-filter: blur(18px) saturate(1.1); box-shadow: var(--tr-ring), 0 18px 36px -18px rgba(20,35,42,.4); border-radius: 26px; }
+html.theme-sakura .tabbar a[aria-current="page"]{ color: #B23A2C; }
+html.theme-sakura .tabbar .write{ background: var(--tr-red); box-shadow: 0 10px 20px -8px rgba(178,58,44,.65); }
+
+/* 머리 영역(홈·모임): 분홍 새벽빛 → 안개 유리 + 위쪽 붉은→금빛 띠, 벚꽃은 오른쪽 아래 옅은 분홍 한 점 */
+html.theme-sakura :is(.hero, .gh){
+  color: #1D2428; overflow: hidden;
+  background: radial-gradient(55% 70% at 100% 100%, rgba(232,183,195,.32), transparent 70%), radial-gradient(60% 80% at 88% 0%, rgba(255,255,255,.95), transparent 60%), linear-gradient(170deg, #FFFFFF, #EEF2F3 62%, #E4EAEC);
+  box-shadow: var(--tr-ring), 0 30px 60px -40px rgba(20,35,42,.5);
+}
+html.theme-sakura :is(.hero, .gh)::after{ content: ''; position: absolute; left: 22px; right: 22px; top: 0; height: 3px; border-radius: 0 0 3px 3px; background: var(--tr-accent); pointer-events: none; }
+html.theme-sakura .hero::before{ background: radial-gradient(circle at 40% 38%, #FFFFFF, #F4F6F7 55%, #DCE3E6); box-shadow: 0 0 40px 10px rgba(255,255,255,.85); }
+html.theme-sakura .hero .kick{ color: #8A2A1F; letter-spacing: .32em; }
+html.theme-sakura :is(.hero, .gh) h1{ color: #1D2428; }
+html.theme-sakura .hero h1 em{ color: #B23A2C; }
+html.theme-sakura :is(.hero, .gh) :is(p, .lead){ color: #3F4A50; }
+html.theme-sakura .hero .btn.ghost{ background: rgba(255,255,255,.85); color: #1D2428; box-shadow: var(--tr-ring); }
+html.theme-sakura .hero .thread path{ stroke: #B23A2C; opacity: .7; } html.theme-sakura .hero .thread circle{ fill: #B23A2C; }
+html.theme-sakura .gh .gem{ color: var(--c, #1D2428); background: #FFFFFF; box-shadow: inset 0 0 0 2px var(--c, #C5D0D5); }
+html.theme-sakura .gh .note.pink{ background: #FBEDEA; color: #8A2A1F; }
+
+/* 카드·패널: 타임라인과 같은 겹 그림자 카드 */
+html.theme-sakura :is(.card, .today, .fate, .panel, .group-card){ background: var(--tr-card); box-shadow: var(--tr-ring), var(--tr-sh-card); border-radius: 18px; }
+html.theme-sakura a.card, html.theme-sakura a.group-card{ transition: transform .18s ease, box-shadow .18s ease; }
+html.theme-sakura a.card:hover, html.theme-sakura a.group-card:hover{ transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(178,58,44,.3), var(--tr-sh-lift); }
+html.theme-sakura .today::before{ width: 4px; background: var(--c, #B23A2C); }
+html.theme-sakura .today .t-cell{ background: #F3F6F7; box-shadow: inset 0 0 0 1px #E1E7EA; }
+html.theme-sakura .today .kick, html.theme-sakura .badge.pink{ color: #8A2A1F; background: #FBEDEA; }
+html.theme-sakura .note{ background: #F3F6F7; box-shadow: inset 0 0 0 1px #E1E7EA; }
+html.theme-sakura .note.pink{ background: #FBEDEA; color: #8A2A1F; box-shadow: inset 0 0 0 1px #F2D3CD; }
+html.theme-sakura .empty .art{ background: radial-gradient(circle at 40% 38%, #FFFFFF, #EEF2F3 55%, #D5DDE1); box-shadow: 0 10px 24px -14px rgba(20,35,42,.4); }
+html.theme-sakura .empty .art::after{ background: #B23A2C; }
+
+/* 소제목: 붉은 막대 */
+html.theme-sakura .sec-h h2{ display: flex; align-items: center; gap: 8px; }
+html.theme-sakura .sec-h h2::before{ content: ''; width: 4px; height: 1em; border-radius: 2px; background: var(--tr-red); }
+
+/* 단추: 주 단추 붉은 그라데이션, 기본 먹색 그라데이션, 테두리 단추 흰 유리 */
+html.theme-sakura .btn{ background: var(--tr-ink); color: #FFFFFF; box-shadow: 0 8px 18px -10px rgba(20,35,42,.6); }
+html.theme-sakura .btn.pink{ background: var(--tr-red); color: #FFFFFF; box-shadow: 0 8px 18px -10px rgba(178,58,44,.7); }
+html.theme-sakura .btn.ghost{ background: #FFFFFF; color: #1D2428; box-shadow: var(--tr-ring); }
+
+/* 칩·정렬·탭: 알약, 선택은 먹색 그라데이션(타임라인과 같음) */
+html.theme-sakura .chip{ background: #FFFFFF; box-shadow: var(--tr-ring); }
+html.theme-sakura .chip.on{ background: var(--tr-ink); color: #FFFFFF; box-shadow: 0 8px 18px -10px rgba(20,35,42,.6); }
+html.theme-sakura .chip.on .hj{ color: #F2C9C2; }
+html.theme-sakura .seg a[aria-current="page"], html.theme-sakura .tabs a[aria-current="page"]{ border-color: #B23A2C; }
+html.theme-sakura .search input{ box-shadow: var(--tr-ring); }
+html.theme-sakura .search input:focus{ box-shadow: 0 0 0 1.5px #B23A2C; }
+
+/* 대화: 상대 말풍선 옅은 청회, 내 말풍선 붉은 그라데이션 */
+html.theme-sakura .bubble{ background: #EEF2F3; box-shadow: inset 0 0 0 1px #E1E7EA; }
+html.theme-sakura .msg-row.mine .bubble{ background: var(--tr-red); color: #FFFFFF; box-shadow: none; }
+html.theme-sakura .chat-h{ background: rgba(244,247,248,.85); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+html.theme-sakura .composer{ background: rgba(255,255,255,.78); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: var(--tr-ring), 0 14px 30px -18px rgba(20,35,42,.4); }
+html.theme-sakura .composer textarea{ background: #F3F6F7; }
+html.theme-sakura .composer .send{ background: var(--tr-red); }
+
+/* 알림 */
+html.theme-sakura .toast{ background: #1D2428; color: #F4F6F5; box-shadow: 0 14px 30px -14px rgba(20,35,42,.6); }
+@media (prefers-reduced-motion: reduce){ html.theme-sakura :is(a.card, a.group-card){ transition: none; } html.theme-sakura :is(a.card, a.group-card):hover{ transform: none; } }
+html.theme-sakura .seg a, html.theme-sakura .tabs a{ color: #46505A; }
+html.theme-sakura .seg a[aria-current="page"], html.theme-sakura .tabs a[aria-current="page"]{ color: #1D2428; }
