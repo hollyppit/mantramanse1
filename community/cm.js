@@ -56,7 +56,7 @@
   function elOf(a) { var k = a && (a.ilju || a.ilgan); return k ? EL[k.charAt(0)] : ''; }
   function ava(a, sm) { if (!a || a.gone) return '<span class="ava gone' + (sm ? ' sm' : '') + '" aria-hidden="true"><span>·</span></span>'; var e = elOf(a), img = a.avatar && /^(\/api\/|https:\/\/)/.test(a.avatar) ? '<img src="' + esc(a.avatar) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : ''; return '<span class="ava' + (sm ? ' sm' : '') + (e ? ' el-' + e : '') + '" aria-hidden="true"><span>' + esc(String(a.name || '?').charAt(0)) + img + '</span></span>'; }
   function who(a) { if (!a) return ''; if (a.gone) return '<span class="who" style="color:var(--sumi-3)">탈퇴한 회원</span>'; return '<span class="who"><b>' + esc(a.name) + '</b>' + (a.ilju ? '<span class="pill">' + esc(a.ilju) + '</span>' : '') + (a.ilgan ? '<span class="pill">' + esc(a.ilgan) + '</span>' : '') + '</span>'; }
-  function me() { if (!mePromise) mePromise = api('/api/community/me').then(function (d) { ME = d; return d; }); return mePromise; }
+  function me() { if (!mePromise) mePromise = refreshSession().then(function () { return api('/api/community/me'); }).then(function (d) { ME = d; var n = ''; try { n = sessionStorage.getItem('mt_login_note') || ''; sessionStorage.removeItem('mt_login_note'); } catch (e) { } if (n === 'ok' && d && d.member) toast('로그인했어요'); else if (n === 'cancel') toast('로그인을 취소했어요'); return d; }); return mePromise; }
   function refreshMe() { mePromise = null; return me(); }
   function paint(html, tab) { view.innerHTML = html; window.scrollTo(0, 0); $$('.tabbar a').forEach(function (a) { if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); }); var h = $('h1', view); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } }
   function parseHash() { var h = location.hash.replace(/^#/, '') || '/', i = h.indexOf('?'), path = i >= 0 ? h.slice(0, i) : h, q = {}; if (i >= 0) h.slice(i + 1).split('&').forEach(function (kv) { var p = kv.split('='); if (p[0]) q[decodeURIComponent(p[0])] = decodeURIComponent(p[1] || ''); }); return { parts: path.split('/').filter(Boolean).map(decodeURIComponent), q: q }; }
@@ -64,9 +64,55 @@
   var empty = function (title, sub) { return '<div class="empty"><div class="art"></div><b>' + esc(title) + '</b>' + esc(sub || '') + '</div>'; };
 
   function needSetup(why) {
-    if (!ME || !ME.member) { paint('<div class="panel"><h1>로그인이 필요해요</h1><p class="lead">인연의 광장은 심층 분석과 같은 계정으로 이용합니다. 로그인한 뒤 다시 들어와 주세요.</p><p style="margin-top:16px"><a class="btn" href="/report/#/me">로그인하러 가기</a></p></div>', 'me'); return true; }
+    if (!ME || !ME.member) { loginView(); return true; }
     if (!ME.profile || !ME.profile.nickname) { setupView(why); return true; }
     return false;
+  }
+
+  /* ── 로그인(광장 안에서 바로). 심층 분석과 같은 계정 ── */
+  var SB_SDK = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
+  var AUTH = null;   // { keys, configured } — /api/commerce/access(공개 키만)
+  function authInfo() { if (!AUTH) AUTH = fetch('/api/commerce/access', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"sd":null}', cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { AUTH = null; return {}; }); return AUTH; }
+  var sbClient = null;
+  function sb() {
+    if (!sbClient) sbClient = authInfo().then(function (d) {
+      if (!d || !d.keys || !d.keys.supabaseUrl || !d.keys.supabaseAnonKey) throw new Error('login-off');
+      return (window.supabase ? Promise.resolve() : loadScript(SB_SDK)).then(function () { return window.supabase.createClient(d.keys.supabaseUrl, d.keys.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, flowType: 'pkce' } }); });
+    });
+    sbClient.catch(function () { sbClient = null; });
+    return sbClient;
+  }
+  function loginView() {
+    paint('<div class="hero"><span class="kick">入場</span><h1>인연의 광장에<br><em>로그인</em>해 주세요</h1><p>심층 분석과 같은 계정을 써요. 로그인하면 지금 보던 화면으로 돌아와요.</p></div>' +
+      '<div class="panel" id="loginBox"><p class="muted">로그인 방법을 불러오는 중…</p></div>', 'me');
+    authInfo().then(function (d) {
+      var c = (d && d.configured) || {}, box = $('#loginBox'); if (!box) return;
+      if (!c.login) { box.innerHTML = '<p class="msg err">지금은 로그인을 준비하고 있어요. 잠시 후 다시 들어와 주세요.</p>'; return; }
+      var last = ''; try { last = localStorage.getItem('mt_last_login') || ''; } catch (e) { }
+      var P = [['kakao', '카카오로 로그인'], ['google', '구글로 로그인']].concat(c.naver ? [['naver', '네이버로 로그인']] : []);
+      box.innerHTML = P.map(function (p) { return '<button type="button" class="btn block login-' + p[0] + '" data-login="' + p[0] + '" style="margin:0 0 8px">' + esc(p[1]) + (last === p[0] ? ' <span class="pill">지난번</span>' : '') + '</button>'; }).join('') +
+        '<p class="msg" id="loginMsg" role="status"></p><p class="muted" style="margin:8px 0 0;font-size:.82rem">처음이면 로그인할 때 회원으로 가입돼요. 광장 이용 동의는 로그인 뒤에 따로 받아요. <a href="/report/legal/terms.html" target="_blank" rel="noopener">이용약관</a> · <a href="/report/legal/privacy.html" target="_blank" rel="noopener">개인정보처리방침</a></p>';
+      $$('[data-login]', box).forEach(function (b) { b.onclick = function () { startLogin(b.getAttribute('data-login'), c); }; });
+    });
+  }
+  function startLogin(provider, c) {
+    var m = $('#loginMsg'); if (m) { m.className = 'msg'; m.textContent = '로그인 화면으로 이동하는 중…'; }
+    try { localStorage.setItem('mt_last_login', provider); } catch (e) { }
+    track('cm_login_start', { provider: provider });
+    // 돌아올 곳: /report/ 아래 로그인 복귀 페이지(로그인 돌아올 주소 등록이 /report/** 라서) → 거기서 세션을 받고 지금 광장 화면으로
+    var back = '/report/auth-return.html?to=' + encodeURIComponent('/community/' + (location.hash || '#/'));
+    if (provider === 'naver' || (provider === 'google' && c.googleServer)) { location.href = '/api/auth/' + provider + '/start?next=' + encodeURIComponent(back); return; }
+    sb().then(function (client) { return client.auth.signInWithOAuth({ provider: provider, options: { redirectTo: location.origin + back } }); })
+      .catch(function () { if (m) { m.className = 'msg err'; m.textContent = '로그인을 시작하지 못했어요. 잠시 후 다시 시도해 주세요.'; } });
+  }
+  // 로그인 세션이 남아 있는데 1시간 열쇠(access token)만 지났으면 supabase-js 로 새로 받는다(다시 로그인하지 않게)
+  function staleSession() {
+    try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (!/^sb-[\w-]+-auth-token$/.test(k)) continue; var v = JSON.parse(localStorage.getItem(k) || 'null'); if (v && v.refresh_token) return true; } } catch (e) { }
+    return false;
+  }
+  function refreshSession() {
+    if (token() || !staleSession()) return Promise.resolve();
+    return sb().then(function (client) { return client.auth.getSession(); }).catch(function () { });
   }
 
   /* ── 처음 설정: 닉네임 ── */

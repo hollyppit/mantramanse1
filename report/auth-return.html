@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>로그인 중 · 만트라</title>
+<!-- 로그인 돌아오는 곳(인연의 광장 등 /report/ 밖 화면용).
+     Supabase 로그인(카카오·구글)은 돌아올 주소가 /report/** 로만 등록돼 있어서, /report/ 아래 이 페이지로 돌아와 세션을 받은 뒤 원래 화면(to)으로 보낸다.
+     · 카카오(Supabase): 주소의 ?code= 를 supabase-js 가 세션으로 바꾼다(PKCE — 같은 사이트 저장소의 확인 값 사용)
+     · 구글·네이버(서버 로그인): ?google_login=1 / ?naver_login=1 이면 /api/auth/<제공자>/claim 으로 서버가 맡아 둔 세션을 받는다
+     to 는 같은 사이트의 /community/ 또는 /report/ 경로만 받는다(다른 사이트로 보내지 않음). -->
+<style>
+  :root { --bg: #0b0d16; --ink: #ece7db; --muted: #a39d8f; --gold: #e0bc74; }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --bg: #fbfaf7; --ink: #1f1c17; --muted: #6b665c; --gold: #9b7a2f; } }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 15px/1.6 "Pretendard", "Noto Sans KR", system-ui, sans-serif; }
+  main { min-height: 100%; display: grid; place-items: center; padding: 24px 16px; box-sizing: border-box; text-align: center; }
+  .dot { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(224, 188, 116, .25); border-top-color: var(--gold); margin: 0 auto 14px; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
+  p { margin: 0; } .muted { color: var(--muted); font-size: .9rem; margin-top: 6px; } a { color: var(--gold); }
+</style>
+</head>
+<body>
+<main><div><div class="dot" aria-hidden="true"></div><p id="msg" role="status">로그인을 마무리하고 있어요…</p><p class="muted" id="sub">잠시 뒤 원래 화면으로 돌아갑니다.</p></div></main>
+<script>
+(function () {
+  'use strict';
+  var SB_SDK = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
+  var u = new URL(location.href);
+  var raw = u.searchParams.get('to') || '/community/';
+  // 같은 사이트의 /community/ 나 /report/ 경로만(//다른사이트·백슬래시·줄바꿈 막기)
+  var to = /^\/(community|report)(\/|$|[?#])/.test(raw) && !/^\/\/|[\\\r\n]/.test(raw) ? raw : '/community/';
+  var msg = document.getElementById('msg'), sub = document.getElementById('sub');
+  var done = function (note) { try { if (note) sessionStorage.setItem('mt_login_note', note); } catch (e) { } location.replace(to); };
+  var fail = function (t) { msg.textContent = t; sub.innerHTML = '<a href="' + to.replace(/"/g, '') + '">원래 화면으로 돌아가기</a>'; };
+  var load = function (src) { return new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); };
+  var provider = u.searchParams.get('google_login') ? 'google' : u.searchParams.get('naver_login') ? 'naver' : '';
+  var flag = provider ? u.searchParams.get(provider + '_login') : '';
+  if (u.searchParams.get('error') || flag === 'cancel') { done('cancel'); return; }
+  if (provider && flag !== '1') { fail('로그인하지 못했어요. 잠시 후 다시 시도해 주세요.'); return; }
+  fetch('/api/commerce/access', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"sd":null}' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d || !d.keys || !d.keys.supabaseUrl || !d.keys.supabaseAnonKey) throw new Error('login-off');
+      return (window.supabase ? Promise.resolve() : load(SB_SDK)).then(function () {
+        var sb = window.supabase.createClient(d.keys.supabaseUrl, d.keys.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } });
+        if (!provider) return sb.auth.getSession();   // 카카오: 주소의 code 를 세션으로 바꾼다(detectSessionInUrl)
+        var claim = function (n) {
+          return fetch('/api/auth/' + provider + '/claim', { method: 'POST', credentials: 'same-origin' }).then(function (r) {
+            if (r.ok) return r.json(); if (n < 2) return new Promise(function (ok) { setTimeout(ok, 700); }).then(function () { return claim(n + 1); }); return null;
+          });
+        };
+        return claim(0).then(function (s) { if (!s || !s.access_token) throw new Error('claim'); return sb.auth.setSession({ access_token: s.access_token, refresh_token: s.refresh_token }); }).then(function () { return sb.auth.getSession(); });
+      });
+    })
+    .then(function (r) { if (r && r.data && r.data.session) done('ok'); else fail('로그인 정보를 받지 못했어요. 다시 시도해 주세요.'); })
+    .catch(function () { fail('로그인을 마무리하지 못했어요. 잠시 후 다시 시도해 주세요.'); });
+})();
+</script>
+</body>
+</html>

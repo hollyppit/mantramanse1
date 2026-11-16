@@ -102,7 +102,7 @@ const read = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
 
   // ── 화면
   const cm = read('community/cm.js'), v2 = read('report/admin/v2-community.js');
-  ok(/function applyFeatures/.test(cm) && /routeFeature\(p\)/.test(cm) && /featOn\('match'\)/.test(cm) && /cm\.js\?v=20261116-stage9/.test(read('community/index.html')), '광장 화면: 꺼진 기능 탭 숨김·안내');
+  ok(/function applyFeatures/.test(cm) && /routeFeature\(p\)/.test(cm) && /featOn\('match'\)/.test(cm) && /cm\.js\?v=20261116-/.test(read('community/index.html')), '광장 화면: 꺼진 기능 탭 숨김·안내');
   ok(!/[^$]\$\('[^']+'(, [a-z.]+)?\)\.(forEach|map|length)/.test(cm), '광장 화면: 목록 선택 오류 없음');
   ok(/⑯ 기능별 스위치/.test(v2) && /loadFeatures\(\)/.test(v2) && /C\('owner', '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑯/.test(v2), '관리자 ⑯ 카드(관리자만)');
 
