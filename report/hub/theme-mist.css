@@ -342,12 +342,13 @@ html.theme-mist #hub .tq .mt-natal .tq-nt-t{ color: #1B2226; font-weight: 700; }
 html.theme-mist #hub .tq .mt-natal .tq-nt-c.me .tq-nt-t{ color: var(--m-link); }
 
 /* ── 원국 표: 오행 칸을 원색으로 칠한다(목 초록·화 빨강·토 노랑·금 은회·수 파랑) ── */
-html.theme-mist #hub [style*="--ec:#34C26B" i]{ --ecs: #15803D; --ect: #FFFFFF; }
-html.theme-mist #hub [style*="--ec:#F0483E" i]{ --ecs: #DC2626; --ect: #FFFFFF; }
-html.theme-mist #hub [style*="--ec:#E8B23A" i]{ --ecs: #EAB308; --ect: #3B2300; }
-html.theme-mist #hub [style*="--ec:#3B7FF0" i]{ --ecs: #2563EB; --ect: #FFFFFF; }
-html.theme-mist #hub [style*="--ec:#E6EAF0" i]{ --ecs: #CBD5E1; --ect: #1F2937; }
-html.theme-mist #hub .tq .mt-natal .tq-nt-g{ background: linear-gradient(170deg, var(--ecs, var(--ec)), color-mix(in srgb, var(--ecs, var(--ec)) 86%, #000)); border: 0; box-shadow: 0 8px 18px -10px var(--ecs, var(--ec)); }
+/* 2026-11-16 원국 칸은 만트라 만세력과 같은 오행 색(목 #2FA866·화 #E8402F·토 #F5B921·금 #D9DDE5·수 #2B303C). 아래쪽을 살짝 어둡게 해 작은 글씨 대비 확보 */
+html.theme-mist #hub [style*="--ec:#34C26B" i]{ --ecs: #2FA866; --ect: #FFFFFF; }
+html.theme-mist #hub [style*="--ec:#F0483E" i]{ --ecs: #E8402F; --ect: #FFFFFF; }
+html.theme-mist #hub [style*="--ec:#E8B23A" i]{ --ecs: #F5B921; --ect: #2A2100; }
+html.theme-mist #hub [style*="--ec:#3B7FF0" i]{ --ecs: #2B303C; --ect: #FFFFFF; }
+html.theme-mist #hub [style*="--ec:#E6EAF0" i]{ --ecs: #D9DDE5; --ect: #1D2230; }
+html.theme-mist #hub .tq .mt-natal .tq-nt-g{ background: linear-gradient(175deg, var(--ecs, var(--ec)) 45%, color-mix(in srgb, var(--ecs, var(--ec)) 76%, #000)); border: 0; box-shadow: 0 8px 18px -10px var(--ecs, var(--ec)); }
 html.theme-mist #hub .tq .mt-natal .tq-nt-g :is(b, small){ color: var(--ect, #fff) !important; text-shadow: none; }
 html.theme-mist #hub .tq .mt-natal .tq-nt-c.me .tq-nt-g{ box-shadow: 0 0 0 3px #fff, 0 0 0 5px #B23A2C, 0 10px 22px -10px var(--ecs, var(--ec)); }
 html.theme-mist #hub .tq .mt-natal .tq-nt-h i{ background: var(--ecs, var(--ec)); color: var(--ect, #fff) !important; box-shadow: none; }
@@ -495,3 +496,7 @@ html.theme-mist #hub #tq .tq-nt-ss{ font-weight: 700; border: 0; padding: 2px 7p
 html.theme-mist #hub #tq .tq-nt-ss.g{ background: #E3F5EA; color: #177A42 !important; }
 html.theme-mist #hub #tq .tq-nt-ss.b{ background: #FFEAE6; color: #C23A22 !important; }
 html.theme-mist #hub #tq .tq-nt-ss.gm{ background: #20272B; color: #F4F6F5 !important; }
+/* 만세력 오행 색 그대로면 작은 흰 글씨(목·화 지장간 칩, 칸 아래 작은 이름)가 약하다 → 칩만 같은 색을 조금 어둡게, 작은 이름엔 옅은 그림자 */
+html.theme-mist #hub .tq .mt-natal .tq-nt-h i.el0{ background: color-mix(in srgb, #2FA866 76%, #000); }
+html.theme-mist #hub .tq .mt-natal .tq-nt-h i.el1{ background: color-mix(in srgb, #E8402F 86%, #000); }
+html.theme-mist #hub .tq .mt-natal .tq-nt-g:is(.el0, .el1, .el4) small{ text-shadow: 0 1px 2px rgba(0,0,0,.45); }
