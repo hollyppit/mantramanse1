@@ -95,14 +95,15 @@ const gan = rows.filter(r => r.g === 3), rich = gan.filter(r => r.c.weights.grou
 console.log(`   관성 운: 원국 관성 많음 ${rich.length}건 확장 ${avgOf(rich, r => r.ev.phaseScores.expansion).toFixed(0)}/기회 ${avgOf(rich, r => r.ev.opportunityActivation).toFixed(0)} · 원국 관성 적음 ${poor.length}건 확장 ${avgOf(poor, r => r.ev.phaseScores.expansion).toFixed(0)}/기회 ${avgOf(poor, r => r.ev.opportunityActivation).toFixed(0)}`);
 ok(avgOf(rich, r => r.ev.phaseScores.expansion) > avgOf(poor, r => r.ev.phaseScores.expansion) + 8, '원국에 이미 있는 기운이 확장으로 읽히지 않음');
 ok(avgOf(poor, r => r.ev.opportunityActivation) > avgOf(rich, r => r.ev.opportunityActivation) + 5, '원국에 모자란 기운이 기회로 읽히지 않음');
-// I/J: 변동·방어는 overlay다 — 주 흐름은 사라지지 않는다
-const I = rows.filter(r => r.ev.volatilityScore >= 55), J = rows.filter(r => r.ev.fitScore <= -20 && r.ev.intensityScore >= 50 && r.ev.volatilityScore < 55);
-console.log(`   I 변동성 ≥55: ${I.length}건 모두 변동 overlay ${I.every(r => r.ev.overlays.volatility.active)} · 주 흐름 유지 ${I.every(r => r.ev.phase)} · J 부담+강도: ${J.length}건 평균 부담도 ${avgOf(J, r => r.ev.defenseLoad).toFixed(0)} (전체 ${avgOf(rows, r => r.ev.defenseLoad).toFixed(0)})`);
+// I/J: 변동·방어는 overlay다 — 주 흐름은 사라지지 않는다. 변동 기준은 엔진 값(FLOW_CONFIG.overlay.volatility, 2026-11-16 55→65)을 읽는다
+const VOL = M.FLOW_CONFIG.overlay.volatility;
+const I = rows.filter(r => r.ev.volatilityScore >= VOL), J = rows.filter(r => r.ev.fitScore <= -20 && r.ev.intensityScore >= 50 && r.ev.volatilityScore < VOL);
+console.log(`   I 변동성 ≥${VOL}: ${I.length}건 모두 변동 overlay ${I.every(r => r.ev.overlays.volatility.active)} · 주 흐름 유지 ${I.every(r => r.ev.phase)} · J 부담+강도: ${J.length}건 평균 부담도 ${avgOf(J, r => r.ev.defenseLoad).toFixed(0)} (전체 ${avgOf(rows, r => r.ev.defenseLoad).toFixed(0)})`);
 ok(I.every(r => r.ev.overlays.volatility.active && ['기회기', '확장기', '수확기', '축적기'].includes(r.ev.phase)), 'I: 변동성이 높은데 변동 overlay가 없거나 주 흐름이 사라짐');
 ok(J.length > 20 && avgOf(J, r => r.ev.defenseLoad) > avgOf(rows, r => r.ev.defenseLoad) + 15, 'J: 부담이 크고 강도가 높은데 부담도가 높지 않음');
 // K: 기회와 변동성이 모두 높을 때 정보 보존
-const K = rows.filter(r => r.ev.opportunityActivation >= 60 && r.ev.volatilityScore >= 55);
-console.log(`   K 기회≥60 & 변동성≥55: ${K.length}건, 대표 시기 ${Object.entries(K.reduce((m, r) => (m[r.ev.phase] = (m[r.ev.phase] || 0) + 1, m), {})).map(([k, v]) => k + ' ' + v).join(' ')}`);
+const K = rows.filter(r => r.ev.opportunityActivation >= 60 && r.ev.volatilityScore >= VOL);
+console.log(`   K 기회≥60 & 변동성≥${VOL}: ${K.length}건, 대표 시기 ${Object.entries(K.reduce((m, r) => (m[r.ev.phase] = (m[r.ev.phase] || 0) + 1, m), {})).map(([k, v]) => k + ' ' + v).join(' ')}`);
 ok(K.length > 10, 'K: 표본 부족');
 ok(K.every(r => r.ev.phaseScores.volatility === Math.round(r.ev.volatilityScore) && r.ev.phaseScores.opportunity === r.ev.opportunityActivation), 'K: 두 값이 함께 보존되지 않음');
 ok(K.filter(r => r.ev.phase !== '기회기').every(r => r.ev.companions.some(c => c.key === 'opportunity')), 'K: 기회 활성도가 동반 신호로 남지 않음');

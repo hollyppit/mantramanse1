@@ -10,6 +10,7 @@
   - `Luck6.of()`는 엔진이 정한 overlay(변동·방어, 둘 다면 `topOverlay`)를 그대로 읽는다. overlay 가 없는 옛 값에만 예전 규칙을 쓴다.
   - 해석 상자 대응 전략의 "큰 결정 주의" 문장도 같은 변동 기준(`ev.overlays.volatility.active`)을 쓴다.
 - 결과: 6분류 변동기·방어기 = 만세력 변동·방어 표시 **4,200/4,200 일치**(`tests/luck6-compare.js`를 이 불변식으로 갱신). 변동기 비율 17.5% 유지.
+- 무빙툰 영향(배포 후 확인, 사용자 결정 "65로 유지"): 무빙툰(`report/v2/saju-data.js seasonOf`)도 엔진 변동 판정을 그대로 읽어 '전환운'을 정한다. 기준이 65가 되면서 전환운이 약 33% → 18%로 줄고, 그 시기는 확장운·축적운 등 주 흐름 이름으로 나온다. 만세력·타임라인·무빙툰 세 화면이 같은 기준.
 
 ## 2. 관계 카드 사건 단정 완화
 - 문제: 운세 흐름 상세의 관계 카드(`LUCK_EVENT`)가 충·형을 "이별·수술·퇴사" 같은 사건으로 단정하고, 그 자리가 기신이어도 늘 나쁘게 썼다.
@@ -41,4 +42,5 @@
 - 흐름 점수 불변: 엔진 기준선에서 pillars·weights·yong·daeun·seun·wolun·ilun·root 지문 그대로, `domain`만 갱신(`node tests/engine-baseline-sim.js --update`).
 - 통과: luck-yong-final(해석 정합성, fitDedup 끄고 비교), luck-interpret, root, unified-yongsin, luck-sim, six-copy, luck-boundary, luck-cycle, luck-ten-god, timeline-graph, unseong-cycle, luck6-sim, luck6-compare(갱신), volatility, signal, timeline, glossary-cases, topic-deep, flow-chapters, gyeok-structure.
 - 수정 전부터 실패: luck-cache-sim 1건, quest-sim 2건(일주 각성 연결·세계 정의, 이번 작업과 무관한 영역).
+- 배포 후 전체 시뮬레이션 테스트: 실패 33개 중 31개는 이 세션 작업 전 커밋(c26f24b)에서도 똑같이 실패(별도 폴더에 꺼내 같은 테스트로 비교). 이번 작업 때문에 깨진 것은 `tests/opportunity-sim.js` 하나 — 변동 기준 55가 숫자로 박혀 있어서였고, 엔진 기준값(`FLOW_CONFIG.overlay.volatility`)을 읽도록 고쳐 통과. `content-db-sim`은 작업 전부터 기준선이 오래되어 실패하던 것이라 갱신하지 않음(이번 변경으로 무빙툰 'full' 두 명식의 전환운 문장이 추가로 달라짐).
 - 로컬 화면: 1992-06-23 01:45 남 — 2027 세운 교운기 배지·안내, 관계 카드 역할 줄, 모바일 375px 넘침 없음.
