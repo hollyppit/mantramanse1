@@ -1,0 +1,328 @@
+/* ═══ 2026-11-16 시안: 밝은 안개 테마 「안개 속 운명의 타임라인」 ═══
+   html.theme-mist 일 때만 켜진다(기본 꺼짐). 기존 CSS는 건드리지 않고 겉모습만 덮어쓴다.
+   은유: 지난 시간은 맑고, 지금은 또렷하고, 앞날은 안개에 잠겨 있다.
+   색: 새벽 산안개(청회색 바탕) · 흰 한지 카드 · 먹색 글씨 · 붉은 낙관 · 낮춘 청동빛. */
+
+html.theme-mist{
+  --bg: #E9EEEE; --bg-2: #DFE6E7; --panel: #F7F8F6; --panel-2: #F1F3F1;
+  --line: rgba(52, 72, 80, .16); --line-2: rgba(52, 72, 80, .10);
+  --ink: #20272B; --ink-2: #4A555B; --ink-3: #6C777C; --ink2: #4A555B; --ink3: #6C777C;
+  --gold: #8C6A35; --gold-d: #6E5228; --gold-l: #9C773C; --jade: #3E8573; --red: #B8492F;
+  --mist-1: 255, 255, 255; --mist-2: 214, 225, 228;
+  background: var(--bg);
+  color-scheme: light;
+}
+html.theme-mist body.hubpage, html.theme-mist body{ background: var(--bg); color: var(--ink); }
+html.theme-mist #hub .tq{
+  --seal: #B23A2C; --seal-l: #C9503F; --moon: 255, 255, 255;
+  --hanji: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85 .35' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .4 0 0 0 0 .42 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --paper: var(--hanji), linear-gradient(170deg, rgba(255,255,255,.86), rgba(246,248,247,.78));
+  --frame: 0 1px 0 rgba(255,255,255,.9) inset, 0 10px 30px -12px rgba(40, 62, 72, .22), 0 2px 6px -2px rgba(40, 62, 72, .08);
+}
+
+/* ── 바탕 안개: 고정된 두세 겹이 천천히 흐른다 ── */
+html.theme-mist #hub .glow{
+  background:
+    radial-gradient(70% 40% at 50% -5%, rgba(255,255,255,.95), transparent 70%),
+    radial-gradient(60% 35% at 0% 40%, rgba(var(--mist-2), .7), transparent 70%),
+    radial-gradient(55% 40% at 100% 85%, rgba(var(--mist-2), .65), transparent 70%);
+}
+html.theme-mist #hub .glow::before, html.theme-mist #hub .glow::after{
+  content: ''; position: absolute; inset: -20% -40%; pointer-events: none;
+  background:
+    radial-gradient(28% 14% at 20% 30%, rgba(255,255,255,.75), transparent 70%),
+    radial-gradient(34% 12% at 70% 55%, rgba(255,255,255,.6), transparent 70%),
+    radial-gradient(30% 16% at 40% 85%, rgba(255,255,255,.55), transparent 70%);
+  filter: blur(14px); animation: mistDrift 70s linear infinite alternate;
+}
+html.theme-mist #hub .glow::after{ opacity: .7; animation-duration: 110s; animation-direction: alternate-reverse; transform: scaleX(-1); }
+@keyframes mistDrift{ from{ translate: -8% 0; } to{ translate: 8% -2%; } }
+@media (prefers-reduced-motion: reduce){ html.theme-mist #hub .glow::before, html.theme-mist #hub .glow::after{ animation: none; } }
+
+/* ── 상단 바 ── */
+html.theme-mist #hub .top{ background: rgba(240,244,244,.78); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line-2); }
+html.theme-mist #hub .top .tb, html.theme-mist #hub .top .brand{ color: var(--ink); }
+html.theme-mist #hub .top .tb{ background: rgba(255,255,255,.7); border-color: var(--line); }
+html.theme-mist #hub .top .tb.tr{ color: var(--gold-d); }
+
+/* ── 머리: 먼 산 능선이 안개 속에 겹친다 ── */
+html.theme-mist #hub .tq-hero{ border-bottom: 0; padding-bottom: 64px; }
+html.theme-mist #hub .tq-hero::before{ filter: grayscale(.55) brightness(1.55) contrast(.7) blur(1px); opacity: .55; }
+html.theme-mist #hub .tq-hero::after{
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 300' preserveAspectRatio='none'%3E%3Cpath d='M0 170 C120 120 200 150 290 105 C380 60 450 120 540 95 C640 65 700 30 790 70 C880 110 960 80 1050 100 C1120 115 1170 95 1200 105 V300 H0Z' fill='%23B9C7CB' fill-opacity='.55'/%3E%3Cpath d='M0 215 C90 185 170 205 260 175 C360 140 430 190 520 170 C620 148 690 120 780 150 C880 182 980 150 1080 172 C1140 185 1180 175 1200 178 V300 H0Z' fill='%2397AAB0' fill-opacity='.55'/%3E%3Cpath d='M0 262 C120 240 230 255 340 238 C450 222 560 250 680 236 C800 222 900 246 1020 236 C1110 229 1170 240 1200 238 V300 H0Z' fill='%23E9EEEE'/%3E%3C/svg%3E") bottom center / 100% 46% no-repeat,
+    radial-gradient(40% 55% at 50% 0%, rgba(255,255,255,.95), rgba(255,255,255,.4) 60%, transparent 80%),
+    linear-gradient(180deg, rgba(233,238,238,.55), rgba(233,238,238,.82) 55%, var(--bg));
+}
+html.theme-mist #hub .tq-hero h1{ color: #1B2226; text-shadow: 0 0 30px rgba(255,255,255,.9), 0 1px 0 rgba(255,255,255,.8); }
+html.theme-mist #hub .tq-hero .kick{ color: #6A7A80; }
+html.theme-mist #hub .tq-hero .tq-who{ color: var(--ink); }
+html.theme-mist #hub .tq-hero .tq-intro{ color: var(--ink-2); }
+html.theme-mist #hub .tq-birth{ background: rgba(255,255,255,.72); border: 1px solid var(--line); color: var(--ink-2); backdrop-filter: blur(6px); }
+html.theme-mist #hub .tq-birth a{ color: var(--seal); background: rgba(178,58,44,.08); }
+
+/* ── 영역 바로가기 ── */
+html.theme-mist #hub .tq-nav{ background: linear-gradient(180deg, rgba(233,238,238,.96) 72%, rgba(233,238,238,0)); }
+html.theme-mist #hub .tq-nav a{ background: rgba(255,255,255,.8); border-color: var(--line); color: var(--ink-2); }
+html.theme-mist #hub .tq-nav a i{ background: rgba(52,72,80,.08); color: var(--ink-2); }
+html.theme-mist #hub .tq-nav a.on{ background: #fff; border-color: rgba(178,58,44,.45); color: var(--ink); }
+html.theme-mist #hub .tq-nav a.on i{ background: var(--seal); color: #fff; }
+html.theme-mist #hub .tq-nav a.tq-edit{ background: #F7F8F6; color: var(--gold-d); box-shadow: -10px 0 12px -4px rgba(233,238,238,.95); }
+
+/* ── 영역 머리: 붉은 낙관 번호 + 옅은 먹선 ── */
+html.theme-mist #hub .tq-sec + .tq-sec{ background: linear-gradient(90deg, transparent, rgba(52,72,80,.18) 18%, rgba(178,58,44,.35) 50%, rgba(52,72,80,.18) 82%, transparent) top center / 100% 1px no-repeat; }
+html.theme-mist #hub .tq-sech > span{ background: radial-gradient(120% 120% at 30% 25%, #CF5A48, var(--seal) 60%, #8A2A1F); color: #fff; box-shadow: 0 3px 10px -3px rgba(178,58,44,.5); }
+html.theme-mist #hub .tq-sech h2{ color: #1B2226; }
+html.theme-mist #hub .tq-sech p, html.theme-mist #hub .tq-sech small{ color: var(--ink-3); }
+html.theme-mist #hub .tq-h4{ color: var(--ink); }
+
+/* ── 상자·카드: 흰 한지, 얇은 청회색 테두리, 부드러운 그림자 ── */
+html.theme-mist #hub :is(.tq-box, .tq-metric, .tq-ten, .tq-fc, .tq-today, .tq-mypage, .tq-card),
+html.theme-mist #hub .tq .mt-natal{ background: var(--paper); border-color: var(--line); box-shadow: var(--frame); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+html.theme-mist #hub :is(.tq-fc, .tq-today, .tq-mypage):hover{ border-color: rgba(140,106,53,.45); }
+html.theme-mist #hub .tq-fc.tq-ny{ background: var(--hanji), linear-gradient(120deg, rgba(178,58,44,.10), rgba(255,255,255,.85) 70%); }
+html.theme-mist #hub :is(.tq-car, .tq-lc){ background: var(--hanji), rgba(255,255,255,.6); border-color: var(--line); }
+html.theme-mist #hub :is(.tq-dc, .tq-st, .tq-zw-row){ background: rgba(52,72,80,.045); border-color: var(--line-2); }
+html.theme-mist #hub .tq-box > h4::before{ background: var(--seal); box-shadow: none; }
+html.theme-mist #hub .tq-sj{ background: rgba(200,140,40,.10); }
+
+/* ── 단추·칩 ── */
+html.theme-mist #hub .tq :is(button, .tq-fchip, .tq-mchip, .tq-ychip, .tq-lnk, .tq-chip),
+html.theme-mist #hub .tq-yrnav button,
+html.theme-mist #hub .tq-ava small{ background: rgba(255,255,255,.78); border-color: var(--line); color: var(--ink-2); }
+html.theme-mist #hub .tq :is(.tq-mchip, .tq-chip, .tq-fchip).on{ background: #26333A; color: #F4F6F5; border-color: #26333A; }
+html.theme-mist #hub .tq .tq-ychip.on{ background: rgba(62,133,115,.16); color: #24584B; border-color: rgba(62,133,115,.5); }
+html.theme-mist #hub .btn{ background: #fff; color: var(--ink); border-color: rgba(140,106,53,.45); }
+html.theme-mist #hub .btn.pri, html.theme-mist #hub .btn.primary{ background: #26333A; color: #fff; border-color: #26333A; }
+html.theme-mist #hub .ring{ background: conic-gradient(#B23A2C calc(var(--p) * 1%), rgba(52,72,80,.12) 0); }
+html.theme-mist #hub .ring::before{ background: #F7F8F6 !important; }
+
+/* ── 글씨: 밝은 글씨로 박혀 있던 곳을 먹색으로(오행·신호 색 글씨는 제외) ── */
+html.theme-mist #hub .tq :is(h1, h2, h3, h4, h5, p, li, b, strong, em, span, a, summary, label, td, th, dt, dd, div, button):not(.tq-el > span, .tq-gzc, .tq-nt-g, .tq-nt-g *, .tq-nt-h i, .tq-sgb, .tq-nt-ss, .tq-pat, .tq-sech > span, .tq-bar s, .tq-nav a.on i, [style*="color"], [style*="color"] *){ color: var(--ink) !important; }
+html.theme-mist #hub .tq :is(small, .tip, .tq-intro, .tq-note, .tq-sub, figcaption):not(.tq-nt-g *, [style*="color"], [style*="color"] *){ color: var(--ink-3) !important; }
+html.theme-mist #hub .tq :is(.tq-box, .tq-card, .tq-fc, .tq-today) p:not([style*="color"]){ color: var(--ink-2) !important; }
+html.theme-mist #hub .tq a:not(.tq-fc, .tq-today, .tq-mypage, .tq-topic, .btn, [style*="color"]) { color: #7A2E22 !important; }
+html.theme-mist #hub .tq-sech > span, html.theme-mist #hub .tq-bar s, html.theme-mist #hub .tq-nav a.on i{ color: #fff !important; }
+html.theme-mist #hub .tq .tq-nt-ss.g{ color: #1F7A4A; background: rgba(47,160,100,.12); }
+html.theme-mist #hub .tq .tq-nt-ss.b{ color: #A8392B; background: rgba(200,70,55,.10); }
+html.theme-mist #hub .tq .tq-pat.g{ color: #1F7A4A; }
+
+/* ── 사주 원국 표: 먹선 칸 + 오행 수채 물감 ── */
+html.theme-mist #hub .tq .mt-natal .tq-nt-l{ color: var(--ink-3) !important; }
+html.theme-mist #hub .tq .mt-natal :is(.tq-nt-l, .tq-nt-c:not(.gz)){ border-bottom-color: rgba(52,72,80,.12); }
+html.theme-mist #hub .tq .mt-natal .tq-nt-c.me{ background: linear-gradient(180deg, rgba(178,58,44,.06), rgba(178,58,44,.02)); }
+html.theme-mist #hub .tq .mt-natal .tq-nt-c.hd.me b{ background: var(--seal); color: #fff !important; box-shadow: none; }
+html.theme-mist #hub .tq .mt-natal .tq-nt-g{
+  background: radial-gradient(90% 80% at 50% 10%, color-mix(in srgb, var(--ec) 16%, #fff), color-mix(in srgb, var(--ec) 7%, #fff) 70%);
+  border-color: color-mix(in srgb, var(--ec) 45%, transparent); box-shadow: 0 6px 16px -10px color-mix(in srgb, var(--ec) 60%, transparent);
+}
+html.theme-mist #hub .tq .mt-natal .tq-nt-g b{ color: color-mix(in srgb, var(--ec) 78%, #0d1316); text-shadow: none; }
+html.theme-mist #hub .tq .mt-natal .tq-nt-g small{ color: color-mix(in srgb, var(--ec) 70%, #0d1316); }
+html.theme-mist #hub .tq .mt-natal .tq-nt-c.me .tq-nt-g{ box-shadow: 0 0 0 2px var(--seal), 0 8px 20px -10px rgba(178,58,44,.45); }
+html.theme-mist #hub .tq .mt-natal .tq-nt-h i{ background: color-mix(in srgb, var(--ec) 75%, #fff); color: #fff; }
+html.theme-mist #hub .tq .tq-el > span, html.theme-mist #hub .tq .tq-gzc{ filter: brightness(.78) saturate(1.1); }
+
+/* ── 그래프 막대 ── */
+html.theme-mist #hub .tq-eb, html.theme-mist #hub .tq .tq-bar u{ background: rgba(52,72,80,.08); box-shadow: inset 0 0 0 1px rgba(52,72,80,.08); }
+html.theme-mist #hub .tq .tq-eb i, html.theme-mist #hub .tq .tq-bar u i{ box-shadow: none; }
+html.theme-mist #hub .tq .tq-bar{ background: transparent; }
+html.theme-mist #hub .tq .tq-bar.sel{ background: rgba(255,255,255,.75); box-shadow: 0 4px 14px -8px rgba(40,62,72,.35); }
+
+/* ── 일주 초상: 안개 속 달무리 ── */
+html.theme-mist #hub .tq-ava-ring{ box-shadow: 0 0 0 1px rgba(178,58,44,.5), 0 0 0 9px rgba(255,255,255,.75), 0 0 0 10px rgba(52,72,80,.18), 0 0 80px rgba(255,255,255,.9); }
+html.theme-mist #hub .tq-ava b{ color: var(--ink) !important; }
+
+/* ── 앞날의 안개: 영역 3·4(인생 흐름·지금과 앞으로)는 들어올 때 안개가 걷힌다 ── */
+html.theme-mist #hub .tq-sec{ position: relative; }
+html.theme-mist #hub .tq-sec.mist-veil::before{
+  content: ''; position: absolute; inset: -40px -6% auto; height: 220px; z-index: 2; pointer-events: none;
+  background: linear-gradient(180deg, rgba(233,238,238,0), rgba(242,245,245,.92) 40%, rgba(233,238,238,0));
+  filter: blur(6px); transition: opacity 1.6s ease, transform 2.2s ease;
+}
+html.theme-mist #hub .tq-sec.mist-veil.mist-clear::before{ opacity: 0; transform: translateX(18%); }
+
+/* ── 주제 카드(인생의 주요 주제): 그림은 살리고 아래에 안개 ── */
+html.theme-mist #hub .tq-topic{ background-color: #DCE4E6; box-shadow: var(--frame); }
+html.theme-mist #hub .tq-mypage-ic{ background: rgba(178,58,44,.1); color: var(--seal) !important; }
+
+/* ── 금(金) 색: 원래 거의 흰색(#E6EAF0)이라 밝은 바탕에서 사라진다 → 은회색 ── */
+html.theme-mist #hub [style*="--ec:#E6EAF0" i]{ --ec: #7E8C95 !important; }
+html.theme-mist #hub [style*="color:#E6EAF0" i]{ color: #66737C !important; }
+html.theme-mist #hub [style*="background:#E6EAF0" i]{ background: #8F9CA4 !important; }
+html.theme-mist #hub .tq :is(.tq-mchip, .tq-chip, .tq-fchip).on, html.theme-mist #hub .tq :is(.tq-mchip, .tq-chip, .tq-fchip).on *{ color: #F4F6F5 !important; }
+
+/* ── 시간의 안개: '지금' 막대 뒤의 시기는 멀어질수록 옅어진다(누르면 또렷하게) ── */
+html.theme-mist #hub .tq .tq-bar.now ~ .tq-bar:not(.sel){ opacity: .82; filter: saturate(.75); transition: opacity .4s, filter .4s; }
+html.theme-mist #hub .tq .tq-bar.now ~ .tq-bar ~ .tq-bar ~ .tq-bar:not(.sel){ opacity: .66; filter: saturate(.55) blur(.3px); }
+html.theme-mist #hub .tq .tq-bar.now ~ .tq-bar ~ .tq-bar ~ .tq-bar ~ .tq-bar ~ .tq-bar:not(.sel){ opacity: .5; filter: saturate(.4) blur(.5px); }
+html.theme-mist #hub .tq .tq-bar:not(.sel):hover{ opacity: 1 !important; filter: none !important; }
+html.theme-mist #hub #tq :is(.tq-mchip, .tq-chip, .tq-fchip).on, html.theme-mist #hub #tq :is(.tq-mchip, .tq-chip, .tq-fchip).on *{ color: #F4F6F5 !important; }
+
+/* ── 주제 카드: 어두운 그림을 안개 낀 수묵 사진처럼 밝히고, 아래는 흰 안개 위에 먹색 글씨 ── */
+html.theme-mist #hub .tq-topic{ background: #E4EAEB; border-color: color-mix(in srgb, var(--wa, #8C6A35) 35%, rgba(52,72,80,.18)); box-shadow: 0 14px 30px -16px rgba(40,62,72,.35), 0 1px 0 rgba(255,255,255,.9) inset; }
+html.theme-mist #hub .tq-topic img{ filter: grayscale(.7) sepia(.12) brightness(1.75) contrast(.62) saturate(.8); opacity: .9; }
+html.theme-mist #hub .tq-topic:hover img, html.theme-mist #hub .tq-topic:focus-visible img{ filter: grayscale(.35) brightness(1.55) contrast(.75); opacity: 1; }
+html.theme-mist #hub .tq-topic::before{ content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(80% 45% at 50% 0%, rgba(255,255,255,.55), transparent 70%), linear-gradient(180deg, color-mix(in srgb, var(--wa, #8FA6E8) 14%, transparent), transparent 40%), rgba(236,241,242,.22); }
+html.theme-mist #hub .tq-topic::after{ background: linear-gradient(0deg, rgba(246,248,247,.98) 0%, rgba(246,248,247,.9) 24%, rgba(240,244,244,.4) 52%, transparent 70%); }
+html.theme-mist #hub .tq-topic h3{ text-shadow: none; color: #1B2226 !important; font-family: var(--f-serif); }
+html.theme-mist #hub #tq .tq-topic .tq-ic{ display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 4px; background: var(--seal); color: #fff !important; font-size: .9rem; vertical-align: 2px; }
+html.theme-mist #hub .tq-topic p{ color: var(--ink-2) !important; }
+html.theme-mist #hub .tq-topics{ scrollbar-color: rgba(52,72,80,.35) transparent; }
+
+/* ═══ 일진 캘린더·오늘의 운·무료 타로(같은 허브 앱 화면) ═══ */
+/* 공통 단추(interaction.css 변수): 흰 바탕·먹색 글씨, 누를 때만 붉은 낙관 */
+html.theme-mist{ --action-idle: rgba(255,255,255,.85); --action-line: rgba(52,72,80,.22); --action-ink: #20272B; --action-hot: #B23A2C; --action-hot-line: #8A2A1F; }
+html.theme-mist #hub :is(button,a.btn,a.chipbtn):disabled{ background: #EEF1F1; border-color: rgba(52,72,80,.15); color: #8A949A; }
+html.theme-mist #hub .linkbtn{ background: none !important; border: 0 !important; color: var(--ink-3) !important; }
+
+/* 무료 타로 */
+html.theme-mist #hub .tm{ background: rgba(255,255,255,.82) !important; border-color: var(--line) !important; color: var(--ink) !important; box-shadow: 0 10px 26px -16px rgba(40,62,72,.35); }
+html.theme-mist #hub .tm .ic{ background: rgba(178,58,44,.09); color: #B23A2C; }
+html.theme-mist #hub .tm b{ color: var(--ink); } html.theme-mist #hub .tm small{ color: var(--ink-3); } html.theme-mist #hub .tm .ar{ color: #B23A2C; }
+html.theme-mist #hub .tm:is(:hover,:focus-visible,:active){ background: #fff !important; border-color: rgba(178,58,44,.5) !important; color: var(--ink) !important; }
+html.theme-mist #hub .chipbtn{ background: rgba(255,255,255,.8) !important; color: var(--ink-2) !important; border-color: var(--line) !important; }
+html.theme-mist #hub .chipbtn[aria-pressed="true"]{ background: #26333A !important; border-color: #26333A !important; color: #F4F6F5 !important; }
+html.theme-mist #hub .chipbtn[aria-pressed="true"] small{ color: #C9D1D4; }
+html.theme-mist #hub .chipbtn:not([aria-pressed="true"]):is(:hover,:focus-visible){ background: #fff !important; border-color: rgba(178,58,44,.5) !important; color: var(--ink) !important; }
+html.theme-mist #hub .kick{ color: #8C6A35; }
+html.theme-mist #hub .rsec.one{ background: linear-gradient(180deg, rgba(178,58,44,.06), rgba(255,255,255,.6)); border-color: var(--line); }
+html.theme-mist #hub .bridge{ background: radial-gradient(100% 90% at 50% 0%, rgba(178,58,44,.07), transparent 70%), rgba(255,255,255,.8); border-color: var(--line); }
+html.theme-mist #hub .rsec{ border-color: var(--line); }
+
+/* 월운 그래프·일진 캘린더 패널: 흰 한지 */
+html.theme-mist .fortune-panel{
+  --opportunity: #16A34A; --expansion: #F59E0B; --harvest: #9333EA; --accumulation: #2563EB;
+  background: radial-gradient(ellipse at top right, rgba(255,255,255,.9), transparent 65%), rgba(250,251,250,.86);
+  border-color: var(--line); box-shadow: 0 18px 44px -24px rgba(40,62,72,.35), 0 1px 0 rgba(255,255,255,.9) inset; color: var(--ink);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+html.theme-mist .flow-opportunity{ --flow: #16A34A; }
+html.theme-mist .flow-expansion{ --flow: #F59E0B; }
+html.theme-mist .flow-harvest{ --flow: #9333EA; }
+html.theme-mist .flow-accumulation{ --flow: #2563EB; }
+html.theme-mist .fortune-panel .flow-defense{ --flow: #DC2626; }
+html.theme-mist .fortune-panel .h1, html.theme-mist .fortune-panel h2{ color: #1B2226; }
+html.theme-mist .fortune-panel .kick{ color: #8C6A35; }
+html.theme-mist .fortune-panel :is(.sub, .dsub), html.theme-mist .fc-method{ color: var(--ink-2); }
+html.theme-mist .fc-method summary{ color: #7A2E22; }
+html.theme-mist #hub .mc-nav button, html.theme-mist #hub .fc-controls button{ background: #fff; border-color: var(--line); color: var(--ink); }
+html.theme-mist .mc-chart{ background: repeating-linear-gradient(to top, transparent 0, transparent calc(25% - 1px), rgba(52,72,80,.08) calc(25% - 1px), rgba(52,72,80,.08) 25%); background-clip: content-box; scrollbar-color: rgba(52,72,80,.3) transparent; }
+html.theme-mist #hub .fortune-panel .mc-bar{ background: transparent !important; border: 0 !important; border-bottom: 1px solid rgba(52,72,80,.18) !important; color: var(--ink-2) !important; }
+html.theme-mist #hub .fortune-panel .mc-bar i{ background: linear-gradient(to top, color-mix(in srgb, var(--flow) 82%, #fff), var(--flow)); opacity: 1; box-shadow: 0 4px 10px -6px var(--flow); }
+html.theme-mist #hub .fortune-panel .mc-bar small{ color: var(--ink-3); }
+html.theme-mist #hub .fortune-panel .mc-bar.active i{ outline-color: #B23A2C; box-shadow: 0 6px 16px -6px rgba(178,58,44,.4); }
+html.theme-mist .mc-legend{ color: var(--ink-2); }
+html.theme-mist .mc-month-note{ background: rgba(255,255,255,.75); border-left-color: #B23A2C; color: var(--ink-2); box-shadow: 0 6px 18px -14px rgba(40,62,72,.4); }
+html.theme-mist .fc-controls{ background: rgba(52,72,80,.04); border-color: var(--line-2); }
+html.theme-mist .fc-controls label{ color: var(--ink-3); }
+html.theme-mist .fc-controls select{ background: #fff; border-color: var(--line); color: var(--ink); }
+html.theme-mist .mc-week{ color: var(--ink-3); } html.theme-mist .mc-week:first-child{ color: #B8492F; } html.theme-mist .mc-week:nth-child(7){ color: #3F63B5; }
+
+/* 날짜 칸: 흐름 색을 옅게 물들인 흰 칸, 숫자는 진한 흐름 색 */
+html.theme-mist #hub .fortune-panel .mc-day{ background: linear-gradient(155deg, color-mix(in srgb, var(--flow) 12%, #fff), color-mix(in srgb, var(--flow) 4%, #fff)) !important; border: 1px solid color-mix(in srgb, var(--flow) 28%, transparent) !important; color: var(--ink) !important; box-shadow: 0 4px 12px -8px rgba(40,62,72,.35); }
+html.theme-mist #hub .fortune-panel .mc-day b{ color: var(--ink) !important; }
+html.theme-mist #hub .fortune-panel .mc-day small, html.theme-mist #hub .fortune-panel .mc-day .mc-metric span{ color: var(--ink-3) !important; }
+html.theme-mist #hub .fortune-panel .mc-day .mc-metric strong{ color: color-mix(in srgb, var(--flow) 85%, #10181c) !important; }
+html.theme-mist #hub .fortune-panel .mc-day em{ color: var(--ink-3) !important; background: rgba(52,72,80,.06); }
+html.theme-mist #hub .fortune-panel .mc-day.favorable{ border-bottom: 2px solid #2E9A6E !important; }
+html.theme-mist #hub .fortune-panel .mc-day.favorable em, html.theme-mist .mc-key{ color: #1F7A52 !important; background: rgba(46,154,110,.12) !important; }
+html.theme-mist #hub .fortune-panel .mc-day.caution, html.theme-mist #hub .fortune-panel .mc-day.caution.selected{ background: linear-gradient(145deg, #FBE7E3, #FDF3F1) !important; border: 1px solid rgba(194,72,59,.55) !important; }
+html.theme-mist #hub .fortune-panel .mc-day.caution :is(b, small, .mc-metric strong, em){ color: #A8392B !important; }
+html.theme-mist #hub .fortune-panel .mc-day.caution em, html.theme-mist .mc-key.caution{ background: rgba(194,72,59,.12) !important; color: #A8392B !important; }
+html.theme-mist #hub .fortune-panel .mc-day.selected{ outline: 2px solid rgba(178,58,44,.45) !important; outline-offset: 2px; border-color: #B23A2C !important; }
+html.theme-mist #hub .fortune-panel .mc-day.is-today:after{ background: #B23A2C; }
+html.theme-mist #hub .fortune-panel .mc-day:is(:hover,:focus-visible,:active){ background: #fff !important; color: var(--ink) !important; border-color: var(--flow) !important; }
+html.theme-mist .mc-son, html.theme-mist .mc-key.son{ background: rgba(140,106,53,.12) !important; color: #6E5228 !important; border-color: rgba(140,106,53,.4); }
+
+/* 순풍·리스크 목록 */
+html.theme-mist .mc-shortlist{ background: linear-gradient(135deg, rgba(46,154,110,.07), rgba(255,255,255,.6)); border-color: rgba(46,154,110,.25); }
+html.theme-mist .mc-shortlist.caution{ background: linear-gradient(135deg, rgba(194,72,59,.07), rgba(255,255,255,.6)); border-color: rgba(194,72,59,.25); }
+html.theme-mist .mc-shortlist h3{ color: #1F7A52; } html.theme-mist .mc-shortlist.caution h3{ color: #A8392B; }
+html.theme-mist #hub .fortune-panel .mc-pick{ background: rgba(255,255,255,.85) !important; border: 1px solid var(--line) !important; color: var(--ink) !important; }
+html.theme-mist #hub .fortune-panel .mc-pick b{ color: var(--ink); }
+html.theme-mist #hub .fortune-panel .mc-pick :is(span, small), html.theme-mist .mc-empty{ color: var(--ink-3); }
+
+/* 오늘의 운 지수 아래 카드들 */
+html.theme-mist #hub :is(.dgrid > *, .actcard, .ddb, .me-body){ background: rgba(255,255,255,.82); border-color: var(--line); box-shadow: 0 10px 26px -18px rgba(40,62,72,.35); }
+html.theme-mist #hub .nextc{ background: linear-gradient(180deg, rgba(178,58,44,.05), rgba(255,255,255,.7)); border-color: var(--line); }
+html.theme-mist #hub :is(.ddb h5, .actcard h5){ color: #8C6A35; }
+
+/* ═══ 글자 대비 보정(2026-11-16 전수 검사: 본문 4.5:1 · 큰 글씨 3:1 기준) ═══ */
+/* 보조 회색·금빛을 한 단계 진하게 */
+html.theme-mist{ --ink-2: #3F4A50; --ink-3: #56626A; --ink2: #3F4A50; --ink3: #56626A; --gold: #74561F; --gold-l: #74561F; --gold-d: #5E451A; }
+html.theme-mist #hub .kick, html.theme-mist .fortune-panel .kick{ color: #74561F; }
+/* 흐름 색: 막대·칸 물들임은 원색(--flow), 글자는 같은 색의 진한 단계(--flow-ink) */
+html.theme-mist .flow-opportunity{ --flow-ink: #15803D; }
+html.theme-mist .flow-expansion{ --flow-ink: #A04A06; }
+html.theme-mist .flow-harvest{ --flow-ink: #7E22CE; }
+html.theme-mist .flow-accumulation{ --flow-ink: #1D4ED8; }
+html.theme-mist .fortune-panel .flow-defense{ --flow-ink: #B91C1C; }
+html.theme-mist #hub .fortune-panel .mc-day .mc-metric strong{ color: var(--flow-ink, var(--ink)) !important; }
+html.theme-mist #hub .fortune-panel .mc-day.favorable em, html.theme-mist .mc-key{ color: #14532D !important; background: rgba(22,163,74,.14) !important; }
+html.theme-mist #hub .fortune-panel .mc-day.caution :is(b, small, .mc-metric strong, em){ color: #991B1B !important; }
+html.theme-mist .mc-shortlist h3{ color: #14532D; } html.theme-mist .mc-shortlist.caution h3{ color: #991B1B; }
+html.theme-mist .mc-legend{ color: var(--ink-2); }
+/* 오늘의 운 점수 고리 안쪽 숫자·흐름 문구 */
+html.theme-mist #hub .ring b{ color: #1B2226 !important; }
+html.theme-mist #hub .tscore :is(.tflow, .dhead){ color: #74561F !important; }
+html.theme-mist #hub .chips i{ color: #5E451A !important; border-color: rgba(116,86,31,.35); }
+html.theme-mist #hub .actcard .one p{ color: #5E451A !important; }
+
+/* 오행 글자: 원색 그대로는 밝은 바탕에서 흐려서 글자에만 진한 단계를 쓴다(막대·칸 물들임은 원색 유지) */
+html.theme-mist #hub [style*="color:#34C26B" i]:not([style*="background:#34C26B" i]){ color: #157A3C !important; }
+html.theme-mist #hub [style*="color:#F0483E" i]:not([style*="background:#F0483E" i]){ color: #B9261A !important; }
+html.theme-mist #hub [style*="color:#E8B23A" i]:not([style*="background:#E8B23A" i]){ color: #8A5A00 !important; }
+html.theme-mist #hub [style*="color:#3B7FF0" i]:not([style*="background:#3B7FF0" i]){ color: #1D4ED8 !important; }
+html.theme-mist #hub [style*="color:#E6EAF0" i]:not([style*="background:#E6EAF0" i]){ color: #4B5563 !important; }
+html.theme-mist #hub .tq .tq-el > span, html.theme-mist #hub .tq .tq-gzc{ filter: none; }
+/* 원국 칸: --eci = 그 오행의 글자색 */
+html.theme-mist #hub [style*="--ec:#34C26B" i]{ --eci: #157A3C; }
+html.theme-mist #hub [style*="--ec:#F0483E" i]{ --eci: #B9261A; }
+html.theme-mist #hub [style*="--ec:#E8B23A" i]{ --eci: #8A5A00; }
+html.theme-mist #hub [style*="--ec:#3B7FF0" i]{ --eci: #1D4ED8; }
+html.theme-mist #hub [style*="--ec:#E6EAF0" i]{ --eci: #4B5563; }
+html.theme-mist #hub .tq .mt-natal .tq-nt-g b{ color: var(--eci, color-mix(in srgb, var(--ec) 60%, #0d1316)) !important; }
+html.theme-mist #hub .tq .mt-natal .tq-nt-g small{ color: var(--eci, color-mix(in srgb, var(--ec) 60%, #0d1316)) !important; }
+/* 지장간 작은 칩: 흰 글씨 대신 옅은 물감 칩 + 진한 글씨 */
+html.theme-mist #hub .tq .mt-natal .tq-nt-h i{ background: color-mix(in srgb, var(--ec) 20%, #fff); color: var(--eci, #20272B) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ec) 45%, transparent); }
+/* 영역 번호 낙관: 조금 더 짙은 주사 */
+html.theme-mist #hub .tq-sech > span{ background: radial-gradient(120% 120% at 30% 25%, #B8412F, #9E2F23 60%, #7A2219); }
+html.theme-mist #hub .tq .tq-pat.g, html.theme-mist #hub .tq .tq-nt-ss.g{ color: #14532D !important; }
+html.theme-mist #hub .tq .tq-nt-ss.b{ color: #991B1B !important; }
+html.theme-mist #hub .tq-fc.tq-ny :is(small, span){ color: #5E2A20 !important; }
+html.theme-mist .flow-opportunity{ --flow-ink: #166534; }
+
+/* 용어 풀이 말풍선·알림: 어두운 바탕에 먹색 글씨가 되어 안 보이던 것 → 흰 말풍선 / 먹색 알림 */
+html.theme-mist #hub .tip::after, html.theme-mist .mt-natal.rd .tip.open::after, html.theme-mist .mt-natal.rd .tip:focus::after{
+  background: #fff; color: #20272B; border: 1px solid rgba(52,72,80,.22); box-shadow: 0 12px 28px -10px rgba(40,62,72,.35); font-weight: 400;
+}
+html.theme-mist #hub .toast{ background: #26333A; border-color: #26333A; color: #F4F6F5; box-shadow: 0 12px 28px -10px rgba(20,30,36,.45); }
+
+/* 타로 카드 앞면(남색 카드)은 카드 자체가 어두운 물건이라 원래의 밝은 글씨를 유지 */
+html.theme-mist #hub .tf{ --ink: #EFEAE0; --ink-2: #CFC9BC; --ink-3: #B5AFA2; --gold: #D9BF85; --gold-l: #EBD9AA; --gold-d: #C4A86E; }
+html.theme-mist #hub .tf .nm{ color: #F3EEE4 !important; } html.theme-mist #hub .tf .en{ color: #C2BCAF !important; } html.theme-mist #hub .tf .no{ color: #E2C98F !important; } html.theme-mist #hub .tf .su{ color: #D4B97D !important; }
+
+/* 그래프(SVG) 글씨: fill 속성으로 박힌 밝은 글씨를 진하게(인생 90년 그래프·자미두수 그래프) */
+html.theme-mist #hub svg text[fill="#E9E4D8" i]{ fill: #20272B; }
+html.theme-mist #hub svg text[fill="#C9C2B2" i]{ fill: #3F4A50; }
+html.theme-mist #hub svg text:is([fill="#8a8f9c" i], [fill="#6c7180" i]){ fill: #56626A; }
+html.theme-mist #hub svg text[fill="#cdb27a" i]{ fill: #74561F; }
+html.theme-mist #hub svg text[fill="#34C26B" i]{ fill: #157A3C; }
+html.theme-mist #hub svg text[fill="#F0483E" i]{ fill: #B9261A; }
+html.theme-mist #hub svg text[fill="#E8B23A" i]{ fill: #8A5A00; }
+html.theme-mist #hub svg text[fill="#E6EAF0" i]{ fill: #4B5563; }
+html.theme-mist #hub svg :is(rect, path)[fill="#E6EAF0" i]{ fill: #8F9CA4; }
+
+/* ═══ /report/ 페이지(허브를 끼워 넣은 곳)의 바깥 요소 ═══ */
+/* 상단 바: 밝은 안개 바 + 먹색 글씨 */
+html.theme-mist body > header.top{ background: rgba(240,244,244,.86); border-bottom: 1px solid rgba(52,72,80,.12); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+html.theme-mist body > header.top :is(a, .brand){ color: #3F4A50; }
+html.theme-mist body > header.top a:hover{ color: #B23A2C; }
+/* 맨 위 표지(cover)는 원래의 밤 연출 그대로 — 어두운 바탕을 직접 깔고 글씨 변수도 원래 값으로 */
+html.theme-mist #cover{ --ink: #EFEAE0; --ink-2: #BDB8AC; --ink-3: #A9A496; --gold: #CDB27A; --gold-l: #EBD9AA; --gold-d: #8E7849; background: linear-gradient(180deg, #080b0f 0%, #080b0f 82%, rgba(8,11,15,0) 100%); color: #EFEAE0; }
+/* 바탕 불티(파티클 캔버스)는 밝은 바탕에서 먼지처럼 보여 옅게 */
+html.theme-mist #amb{ opacity: .35; }
+/* 하단 안내·사업자 정보 */
+html.theme-mist body > footer, html.theme-mist .mt-legal, html.theme-mist .mt-legal :is(p, a, b){ color: #56626A; }
+html.theme-mist .mt-legal{ border-color: rgba(52,72,80,.15); }
