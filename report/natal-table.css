@@ -16,7 +16,7 @@
 .mt-natal .tq-nt-h{ display: inline-flex; align-items: center; gap: 4px; font-size: .74rem; color: var(--nt-ink2); line-height: 1.5; }
 .mt-natal .tq-nt-h i{ font-style: normal; font-family: var(--f-serif, "Noto Serif KR", serif); font-size: .8rem; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 5px; background: color-mix(in srgb, var(--ec) 35%, rgba(10,12,20,.9)); color: #fff; }
 .mt-natal .tq-nt-ss{ display: inline-block; font-style: normal; font-size: .66rem; padding: 2px 7px; border-radius: 999px; margin: 1px; }
-.mt-natal .tq-nt-ss.g{ background: rgba(47,191,113,.16); color: #8fe0b2; } .mt-natal .tq-nt-ss.b{ background: rgba(235,107,91,.16); color: #f3a59a; } .mt-natal .tq-nt-ss.gm{ background: #e9e4d8; color: #141109; font-weight: 700; }
+/* 신살 칩: 만트라 만세력과 같은 규칙(2026-11-16) — 길신 = 연초록 바탕·초록 글씨, 참고 신살 = 연붉은 바탕·붉은 글씨. 좋고 나쁨 표시가 아니다 */ .mt-natal .tq-nt-ss{ font-weight: 700; } .mt-natal .tq-nt-ss.g{ background: #E3F5EA; color: #177A42; } .mt-natal .tq-nt-ss.b{ background: #FFEAE6; color: #C23A22; } .mt-natal .tq-nt-ss.gm{ background: #e9e4d8; color: #141109; font-weight: 700; }
 .mt-natal .tq-nt-c.none{ opacity: .5; }
 @media (max-width: 720px){ .mt-natal .tq-nt{ grid-template-columns: 40px repeat(4, minmax(0, 1fr)); gap: 3px 3px; } .mt-natal .tq-nt-l{ font-size: .62rem; } .mt-natal .tq-nt-h{ flex-direction: column; gap: 0; font-size: .64rem; } .mt-natal .tq-nt-t{ font-size: .72rem; } .mt-natal .tq-nt-ss{ font-size: .6rem; padding: 1px 5px; } }
 .mt-natal .tq-sub{ font-size: .8rem; color: var(--nt-ink3); line-height: 1.6; margin-top: 8px; }
