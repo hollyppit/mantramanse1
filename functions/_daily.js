@@ -49,11 +49,44 @@ export const REL_COPY = {
 const pick = (arr, day) => arr[[...day].reduce((a, c) => a + c.charCodeAt(0), 0) % arr.length];
 
 // ilju: '갑자' 같은 일주 이름 → 오늘 카드
-export function todayCard(ilju, day = kstDay()) {
+export function todayCard(ilju, day = kstDay(), copy = null) {   // copy: 관리자가 고친 문안(loadDailyCopy), 없으면 기본
   const s = STEMS.indexOf(ilju && ilju[0]), b = BRANCHES.indexOf(ilju && ilju[1]);
   if (s < 0 || b < 0) return null;
-  const dp = dayPillar(day), tg = M().tenGod(s, dp.s), rel = branchRel(ilju[1], BRANCHES[dp.b]), c = TG_COPY[tg], r = REL_COPY[rel];
+  const dp = dayPillar(day), tg = M().tenGod(s, dp.s), rel = branchRel(ilju[1], BRANCHES[dp.b]), c = (copy && copy.tg && copy.tg[tg]) || TG_COPY[tg], r = (copy && copy.rel && copy.rel[rel]) || REL_COPY[rel];
   return { day, dayPillar: dp.name, dayEl: dp.el, tenGod: tg, relation: rel, key: c.key, relKey: r.key, head: pick(c.head, day), body: c.body, money: c.money, people: c.people, do: c.do, avoid: c.avoid, relLine: r.line, basis: '내 일주(' + ilju + ')와 오늘 일진(' + dp.name + ')의 만남만 본 하루 카드예요. 사주 전체를 본 풀이가 아니며, 참고용으로만 읽어 주세요.' };
+}
+
+// ── 운테크 문안 관리(7단계): 관리자가 KV 'daily:copy' 에 고친 칸만 저장하고, 화면에는 기본 문안 위에 덮어써 보여 준다.
+//    저장 형식 { tg: { 비견: { key, head:[2], body, money, people, do, avoid } … }, rel: { hap: { key, line } … }, at, by }
+export const DAILY_COPY_KEY = 'daily:copy';
+export const TG_FIELDS = { key: 30, body: 300, money: 300, people: 300, do: 60, avoid: 60 };
+export const REL_FIELDS = { key: 30, line: 300 };
+const clip = (v, n) => typeof v === 'string' && v.trim() && v.trim().length <= n ? v.trim() : null;
+// 들어온 값을 검사해 기본 문안과 다른 칸만 남긴다. 반환 { ok, copy } 또는 { ok:false, error }
+export function cleanDailyCopy(input) {
+  const out = { tg: {}, rel: {} }; input = input && typeof input === 'object' ? input : {};
+  for (const [k, v] of Object.entries(input.tg || {})) {
+    if (!TG_COPY[k] || !v || typeof v !== 'object') return { ok: false, error: '모르는 십성: ' + k };
+    const o = {};
+    for (const [f, n] of Object.entries(TG_FIELDS)) if (v[f] != null) { const c = clip(v[f], n); if (!c) return { ok: false, error: k + ' · ' + f + ' 칸은 1~' + n + '자로 적어 주세요' }; if (c !== TG_COPY[k][f]) o[f] = c; }
+    if (v.head != null) { if (!Array.isArray(v.head) || v.head.length !== 2) return { ok: false, error: k + ' · 제목은 두 가지를 적어 주세요' }; const h = v.head.map(x => clip(x, 40)); if (h.some(x => !x)) return { ok: false, error: k + ' · 제목은 1~40자로 적어 주세요' }; if (h.join('|') !== TG_COPY[k].head.join('|')) o.head = h; }
+    if (Object.keys(o).length) out.tg[k] = o;
+  }
+  for (const [k, v] of Object.entries(input.rel || {})) {
+    if (!REL_COPY[k] || !v || typeof v !== 'object') return { ok: false, error: '모르는 관계: ' + k };
+    const o = {};
+    for (const [f, n] of Object.entries(REL_FIELDS)) if (v[f] != null) { const c = k === 'none' && f === 'key' && v[f] === '' ? '' : clip(v[f], n); if (c == null) return { ok: false, error: k + ' · ' + f + ' 칸은 1~' + n + '자로 적어 주세요' }; if (c !== REL_COPY[k][f]) o[f] = c; }
+    if (Object.keys(o).length) out.rel[k] = o;
+  }
+  return { ok: true, copy: out };
+}
+// 기본 + 고친 칸 = 화면에 쓸 문안 { tg, rel }. 읽기 실패면 기본 문안
+export async function loadDailyCopy(env) {
+  let saved = null; try { saved = env && env.GLOSSARY_KV ? await env.GLOSSARY_KV.get(DAILY_COPY_KEY, 'json') : null; } catch { saved = null; }
+  const tg = {}, rel = {};
+  for (const k of Object.keys(TG_COPY)) tg[k] = { ...TG_COPY[k], ...((saved && saved.tg && saved.tg[k]) || {}) };
+  for (const k of Object.keys(REL_COPY)) rel[k] = { ...REL_COPY[k], ...((saved && saved.rel && saved.rel[k]) || {}) };
+  return { tg, rel, saved: saved || null };
 }
 
 // ── 익명 통계: 최소 표본·작은 칸 숨김·5% 반올림 ──

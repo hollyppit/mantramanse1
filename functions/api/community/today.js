@@ -4,7 +4,7 @@
 // POST { mood:1~5, tags?:[], note? } → 오늘 기록 저장(하루 한 번, 다시 보내면 고침). 기록은 본인만 본다
 import { json, sbRest, supabaseReady, viewer, profileOf, badText, readBody } from '../../_plaza.js';
 import { readConsents, requiredOk } from '../../_consent.js';
-import { todayCard, kstDay, groupStats, LOG_TAGS } from '../../_daily.js';
+import { todayCard, kstDay, groupStats, LOG_TAGS, loadDailyCopy } from '../../_daily.js';
 
 const enc = encodeURIComponent;
 async function who(request, env) {
@@ -18,7 +18,7 @@ async function who(request, env) {
 
 export async function onRequestGet({ request, env }) {
   const w = await who(request, env); if (w.res) return w.res;
-  const day = kstDay(), card = todayCard(w.p.ilju, day);
+  const day = kstDay(), card = todayCard(w.p.ilju, day, await loadDailyCopy(env));
   const [mine, a, b] = await Promise.all([
     sbRest(env, `cm_logs?user_id=eq.${enc(w.me.id)}&day=eq.${day}&select=mood,tags,note,updated_at`),
     sbRest(env, `cm_logs?day=eq.${day}&ilju=eq.${enc(w.p.ilju)}&select=mood,tags&limit=5000`),
@@ -35,7 +35,7 @@ export async function onRequestPost({ request, env }) {
   const tags = [...new Set((Array.isArray(body.tags) ? body.tags : []).filter(t => LOG_TAGS[t]))].slice(0, 4);
   const note = String(body.note || '').replace(/\r/g, '').trim().slice(0, 500) || null;
   if (note) { const bad = badText(note); if (bad && !/링크/.test(bad)) return json({ error: bad.replace('올릴 수 없습니다', '적지 말아 주세요') }, 400); }   // 나만 보는 기록이라 링크는 허용, 개인정보는 막는다
-  const day = kstDay(), card = todayCard(w.p.ilju, day), at = new Date().toISOString();
+  const day = kstDay(), card = todayCard(w.p.ilju, day, await loadDailyCopy(env)), at = new Date().toISOString();
   await sbRest(env, 'cm_logs?on_conflict=user_id,day', { method: 'POST', headers: { prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ user_id: w.me.id, day, mood, tags, note, ilju: w.p.ilju, ilgan: w.p.ilgan, ten_god: card ? card.tenGod : null, updated_at: at }) });
   return json({ ok: true, day });
 }

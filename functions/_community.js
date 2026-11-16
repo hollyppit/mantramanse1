@@ -13,6 +13,7 @@
 //   쿠키를 받은 뒤 단계가 낮아지면(예: beta → dev) 베타 회원 쿠키는 바로 무효가 된다(역할을 쿠키에 적어 두고 요청마다 지금 단계와 비교).
 import { json, isAdmin } from './_lib.js';
 import { memberOf, sbRest, supabaseReady } from './_commerce.js';
+import { looksStaff, staffOf } from './_staff.js';
 
 export const STAGES = ['dev', 'beta', 'public'];
 export const STAGE_LABEL = { dev: '개발 중', beta: '비공개 베타', public: '정식 공개' };
@@ -107,6 +108,8 @@ export async function communityGate(request, env, now = Date.now()) {
   if (stage === 'public') return null;
   // API 는 관리자 비밀번호로도 바로 들어간다(관리자 화면·테스트)
   if (api && isAdmin(request, env)) return null;
+  // 운영자 열쇠(7단계, functions/_staff.js): 유효하면 API 잠금만 통과(각 API 가 역할별 권한을 다시 확인한다). 페이지(/community/)는 열지 않는다
+  if (api && looksStaff(request) && await staffOf(request, env)) return null;
   const c = await readCookie(request, env, now);
   if (c && roleAllowed(c.role, stage)) return null;
   if (api) return new Response(JSON.stringify({ error: 'community-closed', stage }), { status: 403, headers: { ...HDR, 'content-type': 'application/json; charset=utf-8' } });

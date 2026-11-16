@@ -7,14 +7,15 @@
 //      { action:'lift', sanctionId }                                           제재 해제
 //      { action:'avatar', type, id }                                           그 글·댓글을 쓴 회원의 프로필 사진을 지운다(기본 일간 포스터로)
 import { json, isAdmin, sbRest, supabaseReady, authorsOf, okId, readBody, REASONS } from '../../_plaza.js';
-import { audit, reviewerOf } from '../../_community.js';
+import { audit } from '../../_community.js';
+import { need, actorOf } from '../../_staff.js';
 
 const TBL = { post: 'cm_posts', comment: 'cm_comments', message: 'cm_messages' };   // message: 대화 신고(5단계) — 숨김·삭제 없이 기각·제재만
 const rowOf = async (env, type, id) => { const r = await sbRest(env, type === 'message' ? `cm_messages?id=eq.${id}&select=id,author_id:sender_id,room_id` : `${TBL[type]}?id=eq.${id}&select=id,author_id,status`); return Array.isArray(r) ? r[0] || null : null; };
 const snip = s => { const t = String(s || '').replace(/\s+/g, ' ').trim(); return t.length > 120 ? t.slice(0, 120) + '…' : t; };
 
 export async function onRequestGet({ request, env }) {
-  if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
+  const g = await need(request, env, 'mod'); if (g.res) return g.res;   // 관리자 비밀번호 또는 운영자 열쇠(모더레이터·운영 매니저)
   if (!supabaseReady(env)) return json({ error: 'Supabase 설정이 없습니다' }, 503);
   const view = new URL(request.url).searchParams.get('view') || 'reports';
   if (view === 'sanctions') {
@@ -47,10 +48,10 @@ async function closeReports(env, type, id, status, by) {
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!isAdmin(request, env)) return json({ error: '관리자 인증이 필요합니다' }, 401);
+  const g = await need(request, env, 'mod'); if (g.res) return g.res;
   if (!supabaseReady(env)) return json({ error: 'Supabase 설정이 없습니다' }, 503);
   const b = await readBody(request); if (!b) return json({ error: '잘못된 요청 형식입니다' }, 400);
-  const by = reviewerOf(request) || '관리자';
+  const by = actorOf(g.staff);   // 운영자 열쇠면 열쇠 이름(헤더 값은 믿지 않음)
   if (b.action === 'lift') {
     if (!okId(b.sanctionId)) return json({ error: '잘못된 요청입니다' }, 400);
     await sbRest(env, `cm_sanctions?id=eq.${b.sanctionId}&lifted_at=is.null`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ lifted_at: new Date().toISOString() }) });

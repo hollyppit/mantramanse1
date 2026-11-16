@@ -7,11 +7,14 @@ import { json, isAdmin } from '../../_lib.js';
 import { naverReady } from '../../_naver-login.js';
 import { googleReady } from '../../_google-login.js';
 import { sajuKey, memberOf, worldAccess, freeChapters, ownedWorlds, loadProducts, productWorlds, payReady, payProvider } from '../../_commerce.js';
+import { touchLater } from '../../_activity.js';
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost(ctx) {
+  const { request, env } = ctx;
   let body; try { body = await request.json(); } catch { return json({ error: 'bad-payload' }, 400); }
   const admin = isAdmin(request, env), viewAsFree = admin && (request.headers.get('x-view-as') || '') === 'free';
   const [access, free, products, member, key] = await Promise.all([worldAccess(env), freeChapters(env), loadProducts(env), memberOf(request, env), sajuKey(body && body.sd)]);
+  if (member) { const tl = touchLater(ctx, env, member.id, 'report'); if (tl) await tl; }   // 이용 기록(날짜·영역만, 7단계 지표). 실패해도 화면은 그대로
   let owned = [];
   if (member && key) { try { owned = await ownedWorlds(env, member.id, key); } catch { owned = []; } }
   const worlds = {};

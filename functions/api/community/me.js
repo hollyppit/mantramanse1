@@ -7,12 +7,16 @@
 //        → 서버가 만세력으로 일주를 계산해 일주·일간 값만 저장한다(출생 입력은 저장하지 않는다). { ok, ilju, ilgan }
 import { json, sbRest, supabaseReady, viewer, profileOf, activeSanction, iljuOfBirth, groupSize, ilganLabel, overLimit, readBody, MIN_GROUP, avatarOf, posterMap } from '../../_plaza.js';
 import { readConsents, requiredOk } from '../../_consent.js';
+import { touchLater } from '../../_activity.js';
 
-export async function onRequestGet({ request, env }) {
+export async function onRequestGet(ctx) {
+  const { request, env } = ctx;
   if (!supabaseReady(env)) return json({ error: '잠시 후 다시 시도해 주세요' }, 503);
   const me = await viewer(request, env); if (!me) return json({ member: false });
+  const tl = touchLater(ctx, env, me.id, 'community');   // 이용 기록(날짜·영역만, 7단계 지표)
   const [consents, p, s, posters] = await Promise.all([readConsents(env, me.id), profileOf(env, me.id), activeSanction(env, me.id), posterMap(env)]);
   const av = avatarOf(p, posters, true);
+  if (tl) await tl;   // waitUntil 이 없는 환경(테스트)만 기다린다
   const groups = {};
   if (p && p.ilju) { const n = await groupSize(env, 'ilju', p.ilju); groups.ilju = { key: p.ilju, size: n, gathering: n < MIN_GROUP }; }
   if (p && p.ilgan) { const n = await groupSize(env, 'ilgan', p.ilgan); groups.ilgan = { key: p.ilgan, label: ilganLabel(p.ilgan), size: n, gathering: n < MIN_GROUP }; }
