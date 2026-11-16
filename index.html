@@ -10068,6 +10068,42 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     family: '가까운 사이일수록 말투를 조심하고, 돌봄과 간섭의 선을 정해 두세요.',
   };
   const PR_SUMMARY = ['천생연분입니다. 서로 부족한 곳을 채우고 마음자리까지 통하는, 만나기 어려운 조합입니다.', '아주 잘 맞는 사이입니다. 큰 틀에서 서로 힘이 되고, 작은 갈등은 금방 풀립니다.', '좋은 인연입니다. 맞는 부분이 확실히 많고, 몇 가지만 조심하면 오래갑니다.', '무난한 사이입니다. 크게 좋지도 나쁘지도 않아서, 노력하는 만큼 달라집니다.', '노력이 필요한 사이입니다. 끌림과 마찰이 함께 있어 서로 맞춰 가야 오래갑니다.', '상극이 강한 사이입니다. 자주 부딪치니 거리와 규칙을 정해야 관계가 유지됩니다.'];
+  // 관계 유형별 총평(등급 6단계: 90↑ / 80↑ / 70↑ / 60↑ / 50↑ / 50 미만). 점수는 확률이 아니라 상대적인 지표라 단정하지 않는다.
+  const PR_SUMMARY_REL = {
+    lover: [
+      '서로 부족한 곳을 채우고 속마음까지 잘 통하는, 만나기 어려운 짝입니다.',
+      '큰 틀에서 서로 힘이 되는 짝입니다. 다투더라도 금방 풀리는 편이에요.',
+      '잘 맞는 부분이 확실히 많은 짝입니다. 몇 가지만 조심하면 오래 편안하게 지낼 수 있어요.',
+      '크게 좋지도 나쁘지도 않은 무난한 짝입니다. 서로 맞춰 가는 만큼 관계가 깊어져요.',
+      '끌림과 마찰이 함께 있는 짝입니다. 서로의 속도와 표현 방식을 맞춰 가야 오래가요.',
+      '자주 부딪치기 쉬운 짝입니다. 감정이 오를 때의 규칙과 거리를 미리 정해 두면 관계를 지킬 수 있어요.',
+    ],
+    work: [
+      '역할이 자연스럽게 나뉘고 손발이 척척 맞는, 함께 일하기 아주 좋은 파트너입니다.',
+      '서로의 빈자리를 채워 주는 든든한 동료입니다. 의견이 갈려도 결과로 금방 맞춰져요.',
+      '함께 일하면 득이 되는 부분이 많은 사이입니다. 역할과 책임만 분명히 하면 성과가 납니다.',
+      '무난하게 협업할 수 있는 사이입니다. 일하는 방식을 처음에 맞춰 두면 훨씬 수월해져요.',
+      '일하는 방식이 자주 엇갈릴 수 있는 사이입니다. 결정 기준과 역할을 문서로 정해 두세요.',
+      '함께 일할 때 마찰이 커지기 쉬운 사이입니다. 업무 범위를 나누고 중요한 결정은 근거 자료로 하세요.',
+    ],
+    friend: [
+      '말하지 않아도 통하고 함께 있으면 편한, 오래 갈 친구입니다.',
+      '서로에게 힘이 되는 좋은 친구입니다. 서운한 일이 생겨도 금방 풀려요.',
+      '잘 맞는 구석이 많은 친구입니다. 가끔 생기는 서운함만 바로 풀면 오래갑니다.',
+      '편하게 어울릴 수 있는 무난한 친구입니다. 자주 만날수록 더 가까워져요.',
+      '취향이나 속도가 엇갈려 서운함이 생기기 쉬운 친구입니다. 서로 다른 점을 인정하는 게 먼저예요.',
+      '가까워질수록 부딪치기 쉬운 친구입니다. 적당한 거리를 두는 편이 오히려 오래갑니다.',
+    ],
+    family: [
+      '서로를 든든하게 받쳐 주는, 마음이 잘 통하는 가족입니다.',
+      '서로에게 힘이 되는 가족입니다. 다투더라도 금방 풀리는 편이에요.',
+      '대체로 잘 맞는 가족입니다. 몇 가지 생활 습관만 맞추면 편안하게 지낼 수 있어요.',
+      '무난한 가족 사이입니다. 서로의 생활 방식을 존중할수록 사이가 좋아져요.',
+      '가까운 만큼 부딪치는 일이 생기기 쉬운 가족입니다. 돌봄과 간섭의 선을 함께 정해 두세요.',
+      '말 한마디에도 마찰이 커지기 쉬운 가족입니다. 각자의 공간과 시간을 지켜 주는 것이 먼저예요.',
+    ],
+  };
+  const prSummary = (rel, gi) => ((PR_SUMMARY_REL[rel] || [])[gi]) || PR_SUMMARY[gi];
   const prGradeIdx = s => s >= 90 ? 0 : s >= 80 ? 1 : s >= 70 ? 2 : s >= 60 ? 3 : s >= 50 ? 4 : 5;
   // 궁합 간지 관계 카드: 제목은 관계 뜻만, 자리는 '일지 ↔ 월지' 표시줄에만, '어디서 나타나요' 한 문장, 같은 자리에 걸린 여러 작용은 한 카드로 묶는다
   const PR_ZONE_B = { year: '집안 배경·어린 시절 습관', month: '일하는 방식·사회생활', day: '속마음·함께하는 일상', hour: '앞날 계획·자녀관' };
@@ -10151,7 +10187,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       const relPlain = g => { const r = g[0]; return `<b>${esc(r.txt[1])}</b> — ${prScene(r, R)} ${esc(r.txt[2])}`; };
       const goodG = groups.filter(g => g[0].tone === 'good'), badG = groups.filter(g => g[0].tone === 'bad');
       // 한눈에 정리
-      const lead = `${PR_SUMMARY[gi]} ${PP[R.best.key] && PP[R.worst.key] ? `가장 힘이 되는 건 ${jo(PP[R.best.key], '이고/고')}, 가장 신경 쓸 곳은 ${jo(PP[R.worst.key], '이에요/예요')}.` : ''}`;
+      const lead = `${prSummary(R.rel, gi)} ${PP[R.best.key] && PP[R.worst.key] ? `가장 힘이 되는 건 ${jo(PP[R.best.key], '이고/고')}, 가장 신경 쓸 곳은 ${jo(PP[R.worst.key], '이에요/예요')}.` : ''}`;
       // 두 방향이 같은 역할을 주고받으면 '두 사람은 서로에게 …'로 합친다
       const helpA = D.ab.plain.help.slice(), helpB = D.ba.plain.help.slice();
       if (D.ab.best && D.ba.best && D.ab.best.g === D.ba.best.g && helpA[0] && helpB[0]) {
@@ -10243,7 +10279,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="pr-names"><div><span class="muted small">${esc(a)}</span><b class="pr-gz">${dg(ch)}</b></div><span class="pr-vs">♡</span><div><span class="muted small">${esc(b)}</span><b class="pr-gz">${dg(P)}</b></div></div>
       <div class="pr-ring" style="--p:${sc}"><div><b class="num">${sc}</b><span>점</span></div></div>
       <div class="pr-grade"><span class="pr-grade-b tone-${R.grade.tone}">${R.grade.name}</span><span class="muted small">${R.relLabel} 기준</span></div>
-      <p class="pr-sum">${PR_SUMMARY[gi]}</p>
+      <p class="pr-sum">${prSummary(R.rel, gi)}</p>
       <p class="small muted">가장 큰 힘은 <b>${R.best.label}</b>(${R.best.score}점), 가장 약한 곳은 <b>${R.worst.label}</b>(${R.worst.score}점)입니다.</p>
       <div class="pr-acts"><button type="button" class="btn" data-pact="edit">상대 바꾸기</button>${relSeg}</div>
     </section>
