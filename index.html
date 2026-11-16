@@ -6848,26 +6848,47 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const isBad = q => q === '기신' || q === '구신', isGood = q => q === '용신' || q === '희신';
     const LUCK_WHEN = { daeun: '앞으로 10년 동안', seun: '올해', wolun: '이번 달', ilun: '오늘' };
     const evKey = t => ['육합', '삼합', '반합', '방합', '천간합'].includes(t) ? 'good' : t;
-    const relLine = (r, idx) => {
+    // 운세 관계 카드: 원국·궁합 카드와 같은 구조 — 제목은 무슨 일이 생기는지만, 자리는 '대운 午 ↔ 일지' 표시줄에만,
+    // '어디서 나타나요' 한 문장, 같은 자리에 걸린 여러 작용(예: 해·원진·귀문)은 한 카드로 묶는다.
+    const LUCK_ZONE = { year: '집안·어른과의 일', month: '일·직장', day: '가까운 관계와 생활 자리', hour: '자녀·후배 일과 계획의 마무리' };
+    const relInfo = r => {
       const os = r.members.filter(m => m !== 'luck').sort((p, q) => REL_POS.indexOf(p) - REL_POS.indexOf(q));
-      const h = (kind === 'ilun' && LUCK_SOFT[r.type]) ? [REL_HEAD[r.type][0], LUCK_SOFT[r.type][0], LUCK_SOFT[r.type][1], REL_HEAD[r.type][3]] : (REL_HEAD[r.type] || ['mid', '', '', '']), strong = kind === 'ilun' ? 1 : (REL_VERB[r.type] || [0, 2])[1];
+      const h = (kind === 'ilun' && LUCK_SOFT[r.type]) ? [REL_HEAD[r.type][0], LUCK_SOFT[r.type][0], LUCK_SOFT[r.type][1], REL_HEAD[r.type][3]] : (REL_HEAD[r.type] || ['mid', '', '', '']);
       const prim = ['day', 'month', 'hour', 'year'].find(k => os.includes(k)) || os[0];
       const ev = (LUCK_EVENT[evKey(r.type)] || {})[prim];
-      const area = os.map(k => REL_AREA[k]).join(' · '), pos = os.map(k => M.POS_K[k] + (r.kind === 'stem' ? '간' : '지')).join('·');
-      const when = LUCK_WHEN[kind] || '이 시기에';
-      const LIGHT = { year: '집안·어른', month: '직장·업무', day: '연인·가정', hour: '자녀·후배·일 마무리' };
       const rr = relRole(r, prim), turn = rr && (RISKY.includes(r.type) ? isBad(rr.role) : BOND.includes(r.type) && isBad(rr.role));
       const roleNote = !rr ? '' : RISKY.includes(r.type) ? (isBad(rr.role) ? `흔들리는 자리가 부담이 되던 ${M.EL_K[rr.el]} 기운(${rr.role})이라, 막혀 있던 것이 정리되는 변화로 이어지기 쉬워요.` : isGood(rr.role) ? `흔들리는 자리가 꼭 필요한 ${M.EL_K[rr.el]} 기운(${rr.role})이라 조금 더 조심하는 편이 좋아요.` : '') : BOND.includes(r.type) ? (isBad(rr.role) ? `묶여서 생기는 ${M.EL_K[rr.el]} 기운이 ${rr.role}이라, 끌림이 부담으로 바뀌지 않게 거리를 조절하세요.` : isGood(rr.role) ? `묶여서 생기는 ${M.EL_K[rr.el]} 기운이 ${rr.role}이라 도움이 되는 쪽이에요.` : '') : '';
-      const tone = turn ? 'mid' : h[0];
-      const head = kind === 'ilun' ? `오늘은 ${LIGHT[prim] || area} 쪽에서 ${LUCK_SOFT[r.type] ? LUCK_SOFT[r.type][0] : '반가운 소식이나 작은 도움이 있을 수 있어요'}` : ev ? `${when}, ${ev[0]}` : `${area} 쪽에서 ${h[1]}`;
-      return `<article class="rel-card tone-${tone}">
-        <div class="rel-top"><span class="rel-badge">${h[3]}<small>${term(r.type)}</small></span><b class="rel-name muted">${esc(r.name)}</b><span class="rel-str" title="작용 세기">${'●'.repeat(strong)}${'○'.repeat(3 - strong)}</span></div>
-        <div class="rel-where">${kname}에서 들어온 글자가 내 사주의 <b>${pos}</b>(${area} 자리)${pos.endsWith('간') ? '을' : '를'} 만났어요</div>
+      const line = kind === 'ilun' ? (LUCK_SOFT[r.type] ? LUCK_SOFT[r.type][0] : '반가운 소식이나 작은 도움이 있을 수 있어요') : ev ? ev[0] : h[1];
+      return { r, os, h, prim, ev, roleNote, tone: turn ? 'mid' : h[0], strong: kind === 'ilun' ? 1 : (REL_VERB[r.type] || [0, 2])[1], line };
+    };
+    const luckGroups = list => {
+      const m = new Map();
+      list.forEach(r => { const k = r.kind + ':' + r.members.filter(x => x !== 'luck').sort((p, q) => REL_POS.indexOf(p) - REL_POS.indexOf(q)).join('-'); if (!m.has(k)) m.set(k, []); m.get(k).push(r); });
+      const w = r => (REL_VERB[r.type] || [0, 2])[1] * 2 + (RISKY.includes(r.type) || r.type === '원진' ? 1 : 0);
+      return [...m.values()].map(g => g.sort((a, b) => w(b) - w(a)));
+    };
+    const relLine = (g, idx) => {
+      const I = g.map(relInfo), a = I[0], r = a.r, h = a.h;
+      const strong = Math.max(...I.map(x => x.strong));
+      const glyph = r.kind === 'stem' ? M.STEM[x.s] : M.BR[x.b];
+      const pos = a.os.map(k => M.POS_K[k] + (r.kind === 'stem' ? '간' : '지')).join('·');
+      const when = LUCK_WHEN[kind] || '이 시기에';
+      const head = kind === 'ilun' ? `오늘은 ${a.line}` : `${when}, ${a.line}`;
+      const zone = a.os.map(k => LUCK_ZONE[k]).filter(Boolean).join(', ');
+      const also = I.slice(1).map(o => `<b>${term(o.r.type)}</b> ${o.line}`);
+      const notes = [...new Set(I.map(o => o.roleNote).filter(Boolean))];
+      const moreTips = I.slice(1).map(o => o.h[2] ? `${o.r.type}: ${o.h[2]}` : '').filter(Boolean);
+      return `<article class="rel-card tone-${a.tone}">
+        <div class="rel-top">${I.map(o => `<span class="rel-badge">${o.h[3]}<small>${term(o.r.type)}</small></span>`).join('')}<b class="rel-name muted">${I.map(o => esc(o.r.name)).join(' · ')}</b><span class="rel-str" title="작용 세기">${'●'.repeat(strong)}${'○'.repeat(3 - strong)}</span></div>
+        <div class="rel-where">${kname} ${glyph} ↔ 내 사주의 ${pos}</div>
         <p class="rel-head">${head}</p>
-        ${ev && kind !== 'ilun' ? `<p class="rel-place"><b>이런 모습으로</b> ${ev[1]}</p>` : ''}
-        ${roleNote && kind !== 'ilun' ? `<p class="rel-place"><b>이 사주에서는</b> ${roleNote}</p>` : ''}
+        ${zone ? `<p class="rel-place"><b>어디서 나타나요</b> ${zone}에서 드러납니다.</p>` : ''}
+        ${also.length ? `<p class="rel-place"><b>같은 자리에 함께</b> ${also.join(' · ')}</p>` : ''}
+        ${a.ev && kind !== 'ilun' ? `<p class="rel-place"><b>이런 모습으로</b> ${a.ev[1]}</p>` : ''}
+        ${notes.length && kind !== 'ilun' ? `<p class="rel-place"><b>이 사주에서는</b> ${notes.join(' ')}</p>` : ''}
         ${idx === 0 ? `<p class="rel-place"><b>얼마나 가나요</b> ${LUCK_SPAN[kind] || ''}</p>` : ''}
         ${h[2] ? `<p class="rel-tip"><b>이렇게 해보세요</b> ${h[2]}</p>` : ''}
+        ${moreTips.length ? `<details class="rel-more"><summary>더 자세히 보기</summary>${moreTips.map(l => `<p>${l}</p>`).join('')}</details>` : ''}
       </article>`;
     };
     return `<div class="fx">
@@ -6879,7 +6900,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <span class="small">지지 <b class="eltxt ${ECLS[be]}">${elLabel(be)}</b>${role(be)} · ${term(x.branchTG)} · 속 글자 ${hid}<br><span class="muted">${TG_KW[x.branchTG] || ''}</span></span>
       </div>
       <h4>원국과 만나 생기는 작용</h4>
-      ${rels.length ? `<div class="rel-list">${rels.map((r, i) => relLine(r, i)).join('')}</div>` : `<p class="small muted">${kname} 글자가 원국과 합·충·형을 만들지 않습니다.</p>`}
+      ${rels.length ? `<div class="rel-list">${luckGroups(rels).map((g, i) => relLine(g, i)).join('')}</div>` : `<p class="small muted">${kname} 글자가 원국과 합·충·형을 만들지 않습니다.</p>`}
       <h4>함께 오는 신살</h4>
       <div>${[`<span class="chip">${term(x.sinsal12)}</span>`, ...sinsal.map(q => `<span class="chip ${q.good ? 'good' : 'bad'}">${term(q.name)} <span class="muted">${esc(q.basis)}</span></span>`)].join('')}</div>
       <p class="small muted">간지 ${gzBtn(x, kind)}를 누르면 이 간지의 성질과 ${kname}으로 들어올 때의 뜻을 볼 수 있습니다.</p>
