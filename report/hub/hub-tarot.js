@@ -21,10 +21,10 @@
   function fresh(m, sp) { return { m: m, spread: spreadFor(m, sp || curSpread()), cards: Tarot.draw(Tarot.cards.length), pick: null, picks: [], step: 'ask', seed: Math.random().toString(36).slice(2, 10) }; } // seed: 같은 결과를 다시 열어도 문장이 바뀌지 않게 한다(FreeCore.composeTarot)
 
   // 카드 앞면: 자리표시를 바닥에 깔고 그 위에 이미지를 얹는다. 이미지가 없거나 실패하면 이미지 요소를 지워 자리표시가 그대로 보인다(깨진 아이콘 없음).
-  function framed(card) { // 프레임 + 그림 창 + 카드 이름(창 아래 띠에 얹는다). 프레임이 있어도 그림이 올라가 있지 않은 카드는 기존 자리표시를 쓴다
+  function framed(card) { // 프레임 + 그림 창 + 카드 이름(창 아래 한지 띠 안쪽에 얹는다 — 기본 프레임은 띠가 창 끝 +3.5%~+18%). 프레임이 있어도 그림이 올라가 있지 않은 카드는 기존 자리표시를 쓴다
     var w = FRAME.win, pc = function (v) { return (v * 100).toFixed(2) + '%'; }, by = w[1] + w[3];
     return '<div class="fx"><div class="tf"></div><div class="fa" style="left:' + pc(w[0]) + ';top:' + pc(w[1]) + ';width:' + pc(w[2]) + ';height:' + pc(w[3]) + '"><img class="tcimg" src="' + esc(IMGS[card.id]) + '" alt="' + esc(card.nameKo) + '" loading="lazy" decoding="async"></div>' +
-      '<img class="ffr" src="' + esc(FRAME.url) + '" alt="" decoding="async"><div class="fnm" style="left:' + pc(w[0]) + ';top:' + pc(by) + ';width:' + pc(w[2]) + ';height:' + pc(Math.max(0.04, 1 - by - 0.02)) + '"><span>' + esc(card.nameKo) + '</span></div></div>';
+      '<img class="ffr" src="' + esc(FRAME.url) + '" alt="" decoding="async"><div class="fnm" style="left:' + pc(w[0]) + ';top:' + pc(by + 0.035) + ';width:' + pc(w[2]) + ';height:' + pc(Math.max(0.04, Math.min(0.15, 1 - by - 0.08))) + '"><span>' + esc(card.nameKo) + '</span></div></div>';
   }
   function face(card, rev) {
     if (FRAME && IMGS[card.id]) return framed(card);
@@ -113,7 +113,8 @@
       '<div class="rcap' + rv + '"' + d(0.9) + '><div class="en">' + esc(card.nameEn).toUpperCase() + '</div><div class="ko">' + esc(card.nameKo) + ' · ' + (c.rev ? '역방향' : '정방향') + '</div></div>' +
       (r.verdict ? '<div class="verdict ' + r.verdict + rv + '"' + d(1.2) + '>' + r.verdict + '</div><p class="vlabel' + rv + '"' + d(1.4) + '>' + esc(r.verdictLabel.split(' · ')[1]) + '</p>' : '') +
       '<p class="rhead' + rv + '"' + d(1.4) + '>“' + esc(r.headline) + '”</p><p class="rsum' + rv + '"' + d(1.6) + '>' + esc(r.summary) + '</p>';
-    h += sec('상세 해석', r.detail.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join(''));
+    if (r.art) h += sec('카드 그림으로 읽기', '<p>' + esc(r.art.scene) + '</p><p>' + esc(r.art.marks) + '</p><p>' + esc(r.art.orient) + '</p><p class="tbr">' + esc(r.art.bridge) + '</p>', 'art'); // 그림 속 인물·소품·배경을 짚고 방향·질문 주제로 잇는다
+    h += sec(r.art ? '흐름으로 보면' : '상세 해석', r.detail.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join(''));
     h += sec('지금의 흐름', '<p>' + esc(r.currentFlow) + '</p>');
     h += sec('좋은 방향', '<p>' + esc(r.opportunity) + '</p>', 'good');
     h += sec('조심할 것', '<p>' + esc(r.caution) + '</p>', 'warn');

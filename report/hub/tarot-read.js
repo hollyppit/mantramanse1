@@ -43,9 +43,10 @@
       var res = { row: r, lens: P.lens, lead: lead, headline: fx ? tw(fx.headline) : '', blocks: [] };
       if (!fx) return res;
       var cells = [], flush = function () { if (cells.length) { res.blocks.push({ t: 'cells', items: cells }); cells = []; } };
+      if (fx.art && !P.parts.some(function (pt) { return pt[0] === 'sum'; })) [fx.art.scene, fx.art.marks, fx.art.orient, fx.art.bridge].forEach(function (x) { res.blocks.push({ t: 'p', text: tw(x) }); }); // 카드 그림으로 읽기(sum 이 없는 자리)
       P.parts.forEach(function (pt) {
         var kind = pt[0], label = pt[1];
-        if (kind === 'sum') res.blocks.push({ t: 'p', text: tw(fx.summary) });
+        if (kind === 'sum') { res.blocks.push({ t: 'p', text: tw(fx.summary) }); if (fx.art) [fx.art.scene, fx.art.marks, fx.art.orient, fx.art.bridge].forEach(function (x) { res.blocks.push({ t: 'p', text: tw(x) }); }); }
         else if (kind === 'det') fx.detail.forEach(function (x) { res.blocks.push({ t: 'p', text: tw(x) }); });
         else if (kind === 'flow') cells.push({ label: label, text: tw(fx.currentFlow) });
         else if (kind === 'opp') cells.push({ label: label, text: tw(fx.opportunity) });

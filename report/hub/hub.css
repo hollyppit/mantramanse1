@@ -110,13 +110,16 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 #hub .tc .tcimg{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 10px; opacity: 0; transition: opacity .4s; }
 #hub .tcimg.on{ opacity: 1; }
 #hub .rev .tf, #hub .rev .tcimg{ transform: rotate(180deg); }
-/* 공통 프레임: 그림(.fa)을 창 위치에 깔고 프레임(.ffr)을 덮는다. 역방향은 카드 전체(.fx)를 돌린다 */
+/* 공통 프레임: 그림(.fa)을 창 위치에 깔고 프레임(.ffr)을 덮는다. 역방향은 그림 창(.fa)만 돌린다 */
 #hub .fx{ position: absolute; inset: 0; border-radius: 10px; overflow: hidden; }
 #hub .fx .tf{ border: 0; }
 #hub .fx .fa{ position: absolute; overflow: hidden; background: #0c0f20; }
 #hub .fx .ffr{ position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-#hub .fx .fnm{ position: absolute; display: grid; place-items: center; text-align: center; overflow: hidden; padding: 0 4%; font-family: var(--f-serif); color: #f3e7c6; font-size: .8rem; line-height: 1.25; letter-spacing: .04em; text-shadow: 0 1px 3px #000; }
-#hub .rev .fx{ transform: rotate(180deg); }
+/* 이름 띠: 프레임 아래쪽 한지색 띠 위에 얹는 글씨라 먹색 + 밝은 테두리로 대비를 준다(2026-11-16: 연금색 글씨가 한지 바탕에 묻혔다) */
+#hub .face .fx{ container-type: inline-size; } /* #screen 도 .fx 클래스를 잠깐 받으니 카드 앞면 안에서만 */
+#hub .fx .fnm{ position: absolute; display: grid; place-items: center; text-align: center; overflow: hidden; padding: 0 5%; font-family: var(--f-serif); color: #2a1a08; font-weight: 700; font-size: .8rem; font-size: clamp(.72rem, 7cqw, 1.05rem); line-height: 1.2; letter-spacing: .06em; text-shadow: 0 0 2px rgba(255, 246, 225, .95), 0 0 6px rgba(255, 240, 205, .75); word-break: keep-all; }
+/* 역방향: 그림 창(.fa)만 뒤집는다. 프레임과 이름 띠는 바로 선 채로 둬서 이름이 읽힌다 */
+#hub .rev .fx .fa{ transform: rotate(180deg); }
 #hub .rev .fx .tf, #hub .rev .fx .tcimg{ transform: none; }
 #hub .result-card{ width: min(56vw, 210px); margin: 4px auto 6px; }
 #hub .result-card .tc{ width: 100%; animation: none; cursor: default; }
@@ -282,6 +285,8 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 #hub .nextc{ margin-top: 24px; padding: 20px 16px; border-radius: 16px; text-align: center; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(205, 178, 122, .08), rgba(205, 178, 122, .02)); display: grid; gap: 10px; justify-items: center; } #hub .nextc .q{ font-family: var(--f-serif); font-size: 1.1rem; line-height: 1.6; }
 #hub .rsum{ text-align: center; color: var(--ink-2); font-size: .95rem; line-height: 1.7; margin: 8px 6px 0; }
 #hub .rsec p + p{ margin-top: 8px; } #hub .rsec.good{ border-color: rgba(98, 194, 174, .35); } #hub .rsec.warn{ border-color: rgba(255, 138, 120, .3); }
+/* 카드 그림으로 읽기: 장면·상징·방향 → 질문 주제로 잇는 마지막 문장을 강조 */
+#hub .rsec.art{ border-color: rgba(205, 178, 122, .35); } #hub .rsec.art .tbr{ color: var(--gold-l); border-left: 2px solid rgba(205, 178, 122, .55); padding-left: 10px; }
 #hub .others{ margin-top: 22px; text-align: center; } #hub .others .chips{ justify-content: center; margin-top: 8px; }
 #hub .chipbtn{ font: inherit; font-size: .84rem; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: none; color: var(--ink); cursor: pointer; } #hub .chipbtn:hover{ border-color: var(--gold); }
 

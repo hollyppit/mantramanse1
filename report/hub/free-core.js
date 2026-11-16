@@ -94,6 +94,7 @@
     var out = { card: card, rev: !!rev, mode: mode, category: CATS[mode] || 'TODAY', tone: tone, score: base.score, band: base.band, keyword: kw, seed: seed,
       headline: one('headline'), summary: one('summary'), detail: det, currentFlow: one('currentFlow'), opportunity: one('opportunity'), caution: one('caution'),
       actions: pickN(P('action'), 3, sd + 'action').map(function (t) { return fill(t, vars); }), closing: one('closingMessage'), source: src };
+    var TS = root.TarotSymbols; out.art = TS && TS.read ? TS.read(id, rev, mode, tone) : null; // 카드 그림 상징(장면·상징·방향·주제 연결) — /report/hub/tarot-symbols.js, 없으면 null
     if (mode === 'yesno') { var yn = arr([au.yesNoResult]); out.verdict = base.verdict; out.verdictLabel = base.verdictLabel; out.yes = T_YN[tone]; void yn; }
     return out;
   };
