@@ -225,6 +225,15 @@
     host.innerHTML = '<div class="fb" id="awFb" hidden></div><video class="vid" data-k="ilgan" muted playsinline loop preload="auto" hidden></video><video class="vid" data-k="iju" muted playsinline loop preload="auto" hidden></video><div class="shade"></div><div class="stage" id="awStage" aria-live="polite"></div><button type="button" class="skip" id="awSkip">건너뛰기 ›</button><div class="tap" aria-hidden="true">TAP</div><p class="fbn" id="awFbn" hidden>이 일주의 각성 영상은 아직 준비되지 않았습니다.</p>';
     document.body.appendChild(host);
     var stage = $('#awStage', host), vids = { ilgan: $('.vid[data-k="ilgan"]', host), iju: $('.vid[data-k="iju"]', host) }, cur = null, want = '', timer = 0, i = -1, done = false, clips = null;
+    // 영상이 늦게 오면 기다린다(2026-11-16): 장면 글은 그 장면 영상이 실제로 재생되기 시작한 뒤에 띄우고, 그때부터 장면 시간을 잰다.
+    // 기다리지 않는 경우: 영상 정보가 없음·불러오기 실패·재생 거부(저전력 모드 등)·데이터 절약 모드 → 지금처럼 글만 진행. 기다리는 동안에도 건너뛰기는 된다.
+    var clipState = navigator.connection && navigator.connection.saveData ? 'none' : 'loading', bad = {}, waiting = null;
+    var load = document.createElement('div'); load.className = 'aw-load'; load.setAttribute('role', 'status'); load.hidden = true; load.innerHTML = '<span class="aw-spin" aria-hidden="true"></span><p>영상을 불러오는 중이에요</p>'; host.appendChild(load);
+    function wait(s) { waiting = s; stage.innerHTML = ''; load.hidden = false; host.classList.add('aw-wait'); }
+    function ready(kind) { return clipState !== 'loading' && (clipState === 'none' || bad[kind] || !urlOf(kind) || cur === vids[kind]); }
+    function render(s) { waiting = null; load.hidden = true; host.classList.remove('aw-wait'); stage.innerHTML = s.html; clearTimeout(timer); timer = setTimeout(show, s.ms); }
+    function kick() { if (!done && waiting && ready(waiting.vid)) render(waiting); }
+    function giveUp(kind) { bad[kind] = true; kick(); }
     // 영상이 없을 때(등록 전·불러오기 실패): 기록의 문 풍경 이미지와 안내를 보여 준다. 이미지 주소는 인터랙티브 스토리 설정(portal 에셋)을 따른다.
     function showFallback() {
       var fb = $('#awFb', host), n = $('#awFbn', host), Qt = root.Quest, url = Qt && Qt.assetUrl && H.Onboard && H.Onboard.cfg ? Qt.assetUrl(H.Onboard.cfg(), 'portal', (root.innerWidth || 1024) < 768) : '/report/hub/quest/portal.webp';
@@ -236,24 +245,26 @@
     var urlOf = function (kind) { var c = clipOf(kind); return c && (c.videoUrl || c.videoWebm); };
     function prepare(kind) {
       var v = vids[kind], u = urlOf(kind); if (!u || v.getAttribute('src') === u) return;
-      v.onerror = function () { v.classList.remove('on'); v.hidden = true; if (cur === v) cur = null; if (!cur) showFallback(); };
+      v.onerror = function () { v.classList.remove('on'); v.hidden = true; if (cur === v) cur = null; if (!cur) showFallback(); giveUp(kind); };
       v.hidden = false; v.src = u; v.load(); // 투명(.on 전)한 채로 미리 받아 둔다
     }
     function reveal(v) {
       var prev = cur; cur = v; v.classList.add('on');
       if (prev && prev !== v) setTimeout(function () { if (cur !== prev) { prev.classList.remove('on'); prev.pause(); } }, 1300);
+      kick();
     }
     function setVideo(kind) {
       want = kind; var v = vids[kind]; if (!urlOf(kind)) return; // 이 단계 영상이 없으면 지금 영상을 그대로 둔다
       prepare(kind); if (cur === v) return;
       var c = clipOf(kind); if (!cur && c.posterUrl && !v.poster) v.poster = c.posterUrl;
       var go = function () { if (done || want !== kind || cur === v) return; reveal(v); };
-      v.onplaying = go; var p = v.play(); if (p && p.catch) p.catch(function () { });
+      v.onplaying = go; var p = v.play(); if (p && p.catch) p.catch(function (e) { if (e && e.name === 'NotAllowedError') giveUp(kind); });   // 자동 재생이 막히면 영상을 기다리지 않는다
       if (!v.paused && v.readyState >= 3) go();
     }
     function show() {
       clearTimeout(timer); i++; if (i >= steps.length) return finish(false);
-      var s = steps[i]; stage.innerHTML = s.html; setVideo(s.vid); timer = setTimeout(show, s.ms);
+      var s = steps[i]; setVideo(s.vid);
+      if (ready(s.vid)) render(s); else wait(s);   // 영상이 재생되면 reveal → kick 이 이 장면을 띄운다
     }
     function finish(skipped) {
       if (done) return; done = true; clearTimeout(timer); host.remove(); H.cleanup = null;
@@ -261,9 +272,9 @@
       var aq = (H.ctx && H.ctx.q) || {}; try { sessionStorage.setItem('mt_tl_awk', P.sig()); } catch (e) { } H.replace('#/timeline?aw=1' + (aq.z ? '&z=' + encodeURIComponent(aq.z) : '')); // 2026-11-12: 홈·MY 홈을 타임라인으로 모아, 각성 뒤에는 항상 타임라인으로 간다(이번 탭에서 각성을 다시 틀지 않게 표시) // 새 홈에서 온 경우 홈으로, 인터랙티브 스토리에서 온 경우 운명의 타임라인으로
     }
     H.cleanup = function () { done = true; clearTimeout(timer); };
-    host.onclick = function (e) { if (e.target.id === 'awSkip') finish(true); else show(); };
+    host.onclick = function (e) { if (e.target.id === 'awSkip') finish(true); else if (!waiting) show(); };   // 불러오는 동안 화면 탭은 무시(건너뛰기만)
     H.track('ilju_awakening_start', { replay: replay ? 1 : 0 }); show();
-    if (!(navigator.connection && navigator.connection.saveData)) fetch('/api/awakening?pillar=' + encodeURIComponent(ju) + '&gender=' + g).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (d && !done) { clips = d; if (steps[i]) setVideo(steps[i].vid); prepare('ilgan'); prepare('iju'); var has = function (c) { return c && (c.videoUrl || c.videoWebm); }; if (!has(d.video) && !has(d.fallback) && !has(d.ilgan)) showFallback(); } else if (!d && !done) showFallback(); }).catch(function () { if (!done) showFallback(); });
+    if (!(navigator.connection && navigator.connection.saveData)) fetch('/api/awakening?pillar=' + encodeURIComponent(ju) + '&gender=' + g).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (d && !done) { clips = d; var has = function (c) { return c && (c.videoUrl || c.videoWebm); }; clipState = has(d.video) || has(d.fallback) || has(d.ilgan) ? 'ok' : 'none'; if (steps[i]) setVideo(steps[i].vid); prepare('ilgan'); prepare('iju'); if (clipState === 'none') showFallback(); kick(); } else if (!d && !done) { clipState = 'none'; showFallback(); kick(); } }).catch(function () { if (!done) { clipState = 'none'; showFallback(); kick(); } });
   }
 
   /* ───────── MY 운명 홈 ───────── */

@@ -170,6 +170,15 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 #awk .film{ font-family: var(--f-serif); font-size: clamp(1.15rem, 4.8vw, 1.5rem); line-height: 1.8; color: var(--ink); margin: 6px 0; }
 #awk .ttl{ color: var(--gold); letter-spacing: .12em; margin-top: 10px; font-size: .95rem; }
 #awk .trait{ color: var(--ink-2); font-size: .95rem; line-height: 1.8; margin-top: 12px; }
+/* 영상이 늦게 오면 장면을 멈추고 기다린다(hub-saju.js play) */
+#awk .aw-load[hidden]{ display: none; }
+#awk .aw-load{ position: absolute; z-index: 2; left: 50%; top: 50%; transform: translate(-50%, -50%); width: max-content; max-width: 90vw; display: grid; justify-items: center; gap: 14px; color: rgba(251, 246, 234, .78); font-size: .88rem; letter-spacing: .04em; animation: awLoadIn .6s ease .4s both; }
+#awk .aw-load p{ margin: 0; }
+#awk .aw-spin{ width: 30px; height: 30px; border-radius: 50%; border: 2px solid rgba(251, 246, 234, .18); border-top-color: rgba(232, 199, 128, .9); animation: awSpin 1s linear infinite; }
+@keyframes awSpin{ to{ transform: rotate(360deg); } }
+@keyframes awLoadIn{ from{ opacity: 0; } to{ opacity: 1; } }
+@media (prefers-reduced-motion: reduce){ #awk .aw-spin{ animation-duration: 3s; } }
+#awk.aw-wait .tap{ visibility: hidden; }
 #awk .skip{ position: absolute; z-index: 3; top: max(14px, env(safe-area-inset-top)); right: 14px; min-height: 44px; padding: 0 16px; border-radius: 999px; background: rgba(0, 0, 0, .5); border: 1px solid rgba(255, 255, 255, .3); color: #fff; cursor: pointer; font-size: .85rem; }
 #awk .tap{ position: absolute; z-index: 3; left: 0; right: 0; bottom: max(22px, env(safe-area-inset-bottom)); text-align: center; color: var(--ink-3); font-size: .78rem; letter-spacing: .2em; }
 #hub .aw-in{ animation: awin 1s ease both; } @keyframes awin{ from { opacity: 0; transform: scale(.96); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
