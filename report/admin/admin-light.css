@@ -128,3 +128,8 @@ html.admin-light :is(.hit, .ik-st.published, .ik-ok, .ik-steps button.done, .st-
 html.admin-light :is(.v2warn, .pill.w, .ik-st.review, .sr-st.warn, .sr-ck .WARNING, .fc-st.mid){ color: #8A4F12 !important; }
 /* 썸네일 위 '대기' 표시는 어두운 썸네일 위라 밝은 글씨 유지 */
 html.admin-light .v2card .bd .pend{ color: #FFE6A8; }
+
+/* ── 운영 실제 데이터 점검(3차): rgb 표기 초록 '켜짐', 주역 진행 막대 바탕, AI 초안 연보라 ── */
+html.admin-light #app [style*="rgb(98, 194, 174)"], html.admin-light #app [style*="rgb(98,194,174)"]{ color: #17784F !important; }
+html.admin-light #app [style*="background:#262C42" i], html.admin-light #app [style*="background: #262C42" i]{ background: #E4E8EB !important; }
+html.admin-light .ik-st.ik-ai{ color: #5B3FC4 !important; }
