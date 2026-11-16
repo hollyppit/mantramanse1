@@ -619,3 +619,36 @@ html.theme-mist #hub #tq .tq-car-stack > li + li{ border-top: 1px dashed var(--m
   html.theme-mist #hub #tq .tq-sec{ padding: 6px 12px 20px; border-radius: 16px; margin-top: 20px; }
   html.theme-mist #hub #tq .tq-body > .tq-h4{ padding: 14px 14px 6px; } html.theme-mist #hub #tq .tq-body > .tq-h4 + .tq-sub{ padding: 0 14px 8px; }
 }
+
+/* ═══ 2026-11-17 경계 구분 — 일진 캘린더·오늘의 운·무료 타로(타임라인과 같은 세 단계: 바탕 < 영역 패널 < 흰 카드, 또렷한 청회 테두리) ═══ */
+/* 캘린더 패널: 흰 카드 + 또렷한 테두리, 안쪽 그래프·보기 선택은 옅은 회색 칸으로 한 번 더 나눈다 */
+html.theme-mist .fortune-panel{ background: #FFFFFF; border: 1px solid var(--mist-bd); box-shadow: 0 18px 40px -30px rgba(30,45,52,.45); }
+html.theme-mist .fortune-panel .mc-nav{ padding-bottom: 14px; border-bottom: 1px solid var(--mist-bd2); }
+html.theme-mist .mc-chart{ border: 1px solid var(--mist-bd2); border-radius: 14px; background-color: #F7F9FA; padding: 22px 10px 36px; }
+html.theme-mist .fc-controls{ background: #F5F8F9; border-color: var(--mist-bd2); }
+html.theme-mist .fc-method{ border-top: 1px dashed var(--mist-bd2); padding-top: 12px; }
+html.theme-mist .mc-month-note{ background: #FFFFFF; border: 1px solid var(--mist-bd); border-left: 4px solid #2563EB; border-radius: 12px; }
+html.theme-mist #hub .fortune-panel .mc-pick{ border-color: var(--mist-bd) !important; }
+/* 오늘의 운 지수: 흰 카드로 감싼다 */
+html.theme-mist #hub #screen .tscore{ background: #FFFFFF; border: 1px solid var(--mist-bd); border-radius: 22px; padding: 22px 18px 20px; margin-top: 24px; box-shadow: 0 18px 40px -30px rgba(30,45,52,.45); }
+html.theme-mist #hub #screen .dgrid .dc{ border: 1px solid var(--mist-bd) !important; }
+/* 이날의 핵심·분야별 자세히 보기·왜 이런 결과가: 영역 패널 + 제목 붉은 막대 */
+html.theme-mist #hub #screen .dsec{ background: rgba(255,255,255,.5); border: 1px solid var(--mist-bd); border-radius: 20px; padding: 18px 18px 20px; margin-top: 20px; }
+html.theme-mist #hub #screen .dsec > h3{ display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--mist-bd2); margin-bottom: 12px; }
+html.theme-mist #hub #screen .dsec > h3::before{ content: ''; width: 4px; height: 1.05em; border-radius: 2px; background: #B23A2C; flex: none; }
+html.theme-mist #hub #screen details.dd{ background: #FFFFFF !important; border-top: 1px solid var(--mist-bd); border-right: 1px solid var(--mist-bd); border-bottom: 1px solid var(--mist-bd); }
+html.theme-mist #hub #screen details.dd + details.dd{ margin-top: 10px; }
+html.theme-mist #hub #screen details.dd[open] .ddb{ border-top: 1px dashed var(--mist-bd2); }
+html.theme-mist #hub #screen :is(.actcard, .nextc){ border: 1px solid var(--mist-bd); background: #FFFFFF; box-shadow: 0 18px 40px -30px rgba(30,45,52,.45); }
+html.theme-mist #hub #screen .actcard h3{ padding-bottom: 10px; border-bottom: 1px solid var(--mist-bd2); }
+html.theme-mist #hub #screen .actcard .one{ border-top: 1px dashed var(--mist-bd2); }
+
+/* 무료 타로: 질문 카드·배열 칩 또렷하게, 결과는 요약 패널 + 풀이 상자 흰 카드 */
+html.theme-mist #hub #screen .tm{ border: 1px solid var(--mist-bd) !important; background: #FFFFFF !important; }
+html.theme-mist #hub #screen .tm + .tm{ margin-top: 10px; }
+html.theme-mist #hub #screen .chipbtn:not([aria-pressed="true"]){ border-color: var(--mist-bd) !important; background: #FFFFFF !important; }
+html.theme-mist #hub #screen .rsum{ background: rgba(255,255,255,.65); border: 1px solid var(--mist-bd); border-radius: 16px; padding: 14px 18px; max-width: none; }
+html.theme-mist #hub #screen .rsec{ background: #FFFFFF !important; border: 1px solid var(--mist-bd) !important; border-left-width: 4px !important; border-left-color: var(--sc, var(--mist-bd)) !important; border-radius: 14px; padding: 16px 18px; box-shadow: 0 14px 28px -24px rgba(30,45,52,.45); }
+html.theme-mist #hub #screen .rsec + .rsec{ margin-top: 14px; }
+html.theme-mist #hub #screen .rsec > h4{ padding-bottom: 8px; border-bottom: 1px solid var(--mist-bd2); margin-bottom: 10px; }
+html.theme-mist #hub #screen .bridge{ border: 1px solid var(--mist-bd) !important; }
