@@ -151,7 +151,7 @@ summary { cursor:pointer; padding:4px 0; }
   <!-- 본문 -->
   <div id="app" class="hide">
     <header>
-      <div class="row" style="align-items:center;gap:14px"><h1>사주 무빙툰 · 관리자</h1><a class="navbtn" href="/" target="_blank" rel="noopener" title="만트라 만세력(사주 계산 앱)을 새 탭으로 엽니다">만트라 만세력 ↗</a><a class="navbtn" href="/report/" target="_blank" rel="noopener" title="방문자가 처음 보는 랜딩 페이지(/report/)를 새 탭으로 엽니다">랜딩 페이지 ↗</a><a class="navbtn" href="/report/hub/#/welcome?replay=1" target="_blank" rel="noopener" title="사례 후킹 → 명리학 소개 → 귀인 슬라이드 툰 온보딩을 새 탭으로 엽니다">온보딩 ↗</a></div>
+      <div class="row" style="align-items:center;gap:14px"><h1>사주 무빙툰 · 관리자</h1><a class="navbtn" href="/" target="_blank" rel="noopener" title="만트라 만세력(사주 계산 앱)을 새 탭으로 엽니다">만트라 만세력 ↗</a><a class="navbtn" href="/report/" target="_blank" rel="noopener" title="심층 분석(/report/) 첫 화면을 새 탭으로 엽니다">심층 분석 ↗</a><a class="navbtn" id="openPlaza" href="/community/" target="_blank" rel="noopener" title="인연의 광장(/community/)을 관리자 입장으로 새 탭에서 엽니다(개발 중·베타 단계에서도 열림)">인연의 광장 ↗</a><a class="navbtn" href="/report/hub/#/welcome?replay=1" target="_blank" rel="noopener" title="사례 후킹 → 명리학 소개 → 귀인 슬라이드 툰 온보딩을 새 탭으로 엽니다">온보딩 ↗</a></div>
       <div class="row">
         <button type="button" class="ghost" id="dirtyBadge" aria-label="저장하지 않은 변경 화면 보기" hidden></button><span class="muted" id="saveState"></span>
         <button class="pri" id="saveBtn" disabled>변경사항 저장</button>
@@ -663,6 +663,13 @@ summary { cursor:pointer; padding:4px 0; }
       S.pw = pw; ss('mt_pw', pw); enter();
     }).catch(function (e) { $('loginMsg').textContent = e.message; });
   }
+  // 인연의 광장: 공개 전(개발 중·베타)에도 관리자로 들어가도록 입장 쿠키를 받은 뒤 새 탭을 연다. 팝업 차단을 피하려고 탭부터 연다
+  $('openPlaza').onclick = function (e) {
+    e.preventDefault(); var w = window.open('about:blank', '_blank'); if (w) w.opener = null;
+    fetch('/api/community/enter', { method: 'POST', credentials: 'same-origin', headers: { authorization: 'Bearer ' + S.pw } }).then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (d) { var to = (d && d.to) || '/community/'; if (w) w.location.href = to; else location.href = to; })
+      .catch(function () { if (w) w.location.href = '/community/'; });
+  };
   $('loginBtn').onclick = login; $('pw').onkeydown = function (e) { if (e.key === 'Enter') login(); };
   // 저장 안 된 변경: 각 화면이 window.AdminDirty[이름]=함수 로 등록하고, 여기서 한꺼번에 본다(탭을 옮겨 다녀도 놓치지 않도록 머리글에 표시)
   var DR = (window.AdminDirty = window.AdminDirty || {});
