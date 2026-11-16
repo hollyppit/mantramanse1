@@ -276,7 +276,7 @@
     const s = clamp((50 - help) / 20, -1, 1), uv = gg => nv.uniV[mod5(dA + gg)], out = [];
     const add = (v, code, txt) => { if (v) out.push({ v, code, txt }); };
     if (g === 4) {
-      add(0.6 * s, s >= 0 ? '방신' : '인성과잉', s >= 0 ? '힘이 모자란 일간을 받쳐 주는 보호막이 됩니다.' : '이미 힘이 넘치는데 더 받쳐 주어 게을러지거나 기대기 쉽습니다.');
+      add(0.6 * s, s >= 0 ? '방신' : '인성과잉', s >= 0 ? '힘이 모자란 쪽을 받쳐 주는 보호막이 됩니다.' : '이미 힘이 넘치는데 더 받쳐 주어 게을러지거나 기대기 쉽습니다.');
       if (nat[3] >= 0.25) add(0.4, '관인상생', '원래 지고 있던 책임감·압박을 상대의 배려가 버틸 힘으로 바꿔 줍니다(관인상생).');
       if (nat[1] >= 0.2 && uv(1) > 0) add(-0.4, '편인도식', '표현·활동 기운을 눌러 하고 싶은 말을 삼키게 만들 수 있습니다(인성이 식상을 누름).');
       if (nat[4] >= 0.3) add(-0.4, '인성태과', '원국에 이미 많은 기운이라 보살핌이 간섭이나 잔소리로 느껴지기 쉽습니다.');
@@ -424,11 +424,35 @@
     if (el.conflict) burden.push(`억부(강약)로는 ${el.eok > 0 ? '도움' : '부담'}이지만 조후(온도·습도)로는 ${el.jo > 0 ? '도움' : '부담'}이라, 함께 있을 때 편한 면과 지치는 면이 같이 나타납니다.`);
     else if (el.worst && el.worst.pct >= 25 && el.f < 0) burden.push(`${you}에게 많은 ${EL(el.worst.e)} 기운(${el.worst.pct.toFixed(0)}%)은 ${meTo} ${el.worst.role}이라 오래 붙어 있으면 기운이 새기 쉽습니다.`);
     if (best && !advice.length) advice.push(`${you}의 ${TG_TXT[best.g].good}을 믿고 맡기는 영역을 정해 두면 도움이 더 커집니다.`);
-    else if (best) advice.push(`${you}에게 ${best.name === '인성' ? '조언과 지지' : best.name === '식상' ? '아이디어와 표현' : best.name === '재성' ? '현실 계획과 살림' : best.name === '관성' ? '기준과 마감' : '함께 버티는 일'}을 부탁하면 관계가 편해집니다.`);
+    else if (best) advice.push(`${you}에게 ${M.josa(best.name === '인성' ? '조언과 지지' : best.name === '식상' ? '아이디어와 표현' : best.name === '재성' ? '현실 계획과 살림' : best.name === '관성' ? '기준과 마감' : '함께 버티는 일', '을/를')} 부탁하면 관계가 편해집니다.`);
     const score = Math.round(clamp(52 + 70 * (0.5 * el.f + 0.5 * tg.f), 8, 98));
+    // 생활 언어 풀이(plain): 전문 용어·비율 없이 같은 판단을 다시 쓴다. help/burden/advice 는 근거(전문) 문장으로 그대로 둔다.
+    const strip = t => String(t).replace(/\s*\([^)]*\)/g, '').trim();
+    const tp = n => n === '나' ? '나는' : M.josa(n, '은/는'), wa = n => n === '나' ? '나와' : M.josa(n, '과/와');
+    const plain = { help: [], burden: [], advice: [] };
+    if (best) {
+      const eff = best.effs.filter(x => x.v > 0).sort((a, b) => b.v - a.v)[0];
+      plain.help.push(`${tp(you)} ${meTo} ${P_GOOD[best.g]}이에요. ${TG_TXT[best.g].rel[rel]}${eff ? ' ' + strip(eff.txt) : ''}`);
+      const side = best.effs.find(x => x.v < 0);
+      if (side) plain.burden.push(`다만 같은 이유로 ${strip(side.txt)}`);
+    }
+    if (worst) {
+      const eff = worst.effs.filter(x => x.v < 0).sort((a, b) => a.v - b.v)[0];
+      plain.burden.push(`가끔은 ${you}의 ${P_BAD[worst.g]}이 ${meTo} 부담으로 느껴질 수 있어요.${eff ? ' ' + strip(eff.txt) : ''}`);
+    }
+    // 억부·조후가 엇갈리는 정상 복합 판단: 지우지 않고 두 이유를 한 문장으로 잇는다
+    if (el.conflict) plain.burden.push(el.eok > 0
+      ? `${wa(you)} 함께 있으면 힘은 나는데, 몸과 마음의 리듬은 한쪽으로 더 치우쳐 쉽게 지칠 수 있어요. 기운의 세기로는 도움이 되지만 기운의 온도로는 부담이 되기 때문이에요.`
+      : `${wa(you)} 함께 있으면 마음은 편안해지는데, ${me === '나' ? '내' : me + '의'} 힘은 조금씩 빠질 수 있어요. 기운의 온도는 맞춰 주지만 기운의 세기로는 힘을 덜어 가기 때문이에요.`);
+    else if (el.worst && el.worst.pct >= 25 && el.f < 0) plain.burden.push(`${wa(you)} 오래 붙어 있으면 기운이 새기 쉬워, 각자 충전하는 시간이 필요해요.`);
+    advice.forEach(x => plain.advice.push(x));
     return { from: you, to: me, score, best: best && { name: best.name, g: best.g, e: best.e, share: best.share }, worst: worst && { name: worst.name, g: worst.g, e: worst.e, share: worst.share },
-      element: el.top ? { e: el.top.e, role: el.top.role, pct: el.top.pct } : null, help, burden, advice };
+      element: el.top ? { e: el.top.e, role: el.top.role, pct: el.top.pct } : null, help, burden, advice, plain };
   }
+  const P_GOOD = { 0: '어려울 때 함께 버티고 협력해 주는 사람', 1: '마음을 표현하고 움직이게 해 주는 사람', 2: '현실 감각과 살림을 챙겨 주는 사람', 3: '중심을 잡아 주고 책임감을 일깨우는 사람', 4: '마음을 받쳐 주고 배우게 해 주는 사람' };
+  const P_BAD = { 0: '경쟁하거나 고집을 부리는 모습', 1: '말이 앞서거나 기운을 빼는 모습', 2: '돈·일 욕심이나 계산적인 모습', 3: '압박하거나 잔소리하는 모습', 4: '지나치게 간섭하거나 기대게 만드는 모습' };
+  // 항목을 생활 언어로 부를 때
+  const PART_PLAIN = { yong: '서로 부족한 기운을 채워 주는 점', dayStem: '타고난 성향', dayBranch: '속마음과 생활 리듬', harmony: '두 사람 사주 전체의 어울림', tenGod: '서로 맡아 주는 역할', relation: '이 관계에서 기대하는 역할' };
 
   function evaluate(M, A, B, rel, names) {
     if (!A || !B || !A.unified || !B.unified || !A.weights || !A.weights.groups || !B.weights.groups || !M.HIDDEN) return evaluateLegacy(M, A, B, rel, names);   // 옛 엔진
@@ -483,7 +507,10 @@
     if (rel === 'lover') {
       const sp = (n, d, gender, who, other) => { const g = SPOUSE_G[gender]; if (g == null || n.v == null) return;
         const s = d.groups[g].share; const line = s >= 0.4 ? `${other}에게 ${who}의 배우자 기운(${GROUP[g]})이 아주 많아, 끌림이 강한 만큼 집착·간섭으로 번지기 쉽습니다.` : s >= 0.12 ? `${other}에게는 ${who}의 배우자 기운(${GROUP[g]})이 ${Math.round(s * 100)}% 있어, 짝으로서 자연스럽게 끌립니다.` : `${other}에게는 ${who}의 배우자 기운(${GROUP[g]})이 적어, 설렘보다 편안함으로 이어지는 사이입니다.`;
-        (s >= 0.4 ? d === tAB ? ab.burden : ba.burden : d === tAB ? ab.help : ba.help).push(line); };
+        (s >= 0.4 ? d === tAB ? ab.burden : ba.burden : d === tAB ? ab.help : ba.help).push(line);
+        const ga = n => n === '나' ? '내가' : M.josa(n, '이/가'), D = d === tAB ? ab : ba;
+        const pl = s >= 0.4 ? `${other}에게는 ${ga(who)} 배우자로 끌리는 기운이 아주 많아, 끌림이 강한 만큼 집착이나 간섭으로 번지기 쉬워요.` : s >= 0.12 ? `${other}에게는 ${ga(who)} 배우자로 끌리는 기운이 있어, 짝으로서 자연스럽게 끌려요.` : `${other}에게는 ${ga(who)} 배우자로 끌리는 기운이 적어, 설렘보다 편안함으로 이어지는 사이예요.`;
+        (s >= 0.4 ? D.plain.burden : D.plain.help).push(pl); };
       sp(R6.notes[0], tAB, A.gender, nm.a, nm.b); sp(R6.notes[1], tBA, B.gender, nm.b, nm.a);
     }
     const gap = ab.score - ba.score;
@@ -491,6 +518,8 @@
     if (Math.abs(gap) >= 15) {   // 무작위 쌍의 방향 점수 차 상위 약 30%
       const more = gap > 0 ? ab : ba, less = gap > 0 ? ba : ab;
       asym = { gap, text: `${more.to === '나' ? '내가' : more.to + (jongOf(more.to) ? '이' : '가')} 받는 도움(${more.score}점)이 ${less.to === '나' ? '내가' : less.to + (jongOf(less.to) ? '이' : '가')} 받는 도움(${less.score}점)보다 큽니다. ${more.best ? `${more.from}의 ${more.best.name} 기운이 ${more.to === '나' ? '나에게' : more.to + '에게'} 꼭 맞는 반면, ` : ''}${less.to === '나' ? '나에게' : less.to + '에게'} 필요한 기운은 상대 쪽에 상대적으로 적습니다. 도움이 한쪽으로 기울기 쉬우니, 덜 받는 쪽의 필요를 일부러 챙겨 주세요.` };
+      const ga = n => n === '나' ? '내가' : M.josa(n, '이/가');
+      asym.plain = `${ga(more.to)} 받는 도움이 ${less.to === '나' ? '나보다' : less.to + '보다'} 조금 더 큰 사이예요. 도움이 한쪽으로 기울기 쉬우니, ${ga(less.to)} 무엇을 필요로 하는지 일부러 물어보고 챙겨 주세요.`;
     }
 
     // 종합평 세 칸
@@ -539,6 +568,6 @@
     family: '가까울수록 말투를 조심하고, 돌봄과 간섭의 선을 함께 정해 두세요.',
   };
 
-  G.PairCompat = { evaluate, evaluateLegacy, VERSION, REL_TYPES, REL_TYPES_V1, REL_WHY, PART_LABEL, PART_LABEL_V1, PART_KEYS, REL_TXT, AREA, POS_K, posName, TG_TXT, GROUP, SPREAD, gradeOf, GRADES,
+  G.PairCompat = { evaluate, evaluateLegacy, VERSION, REL_TYPES, REL_TYPES_V1, REL_WHY, PART_LABEL, PART_LABEL_V1, PART_KEYS, REL_TXT, AREA, POS_K, posName, TG_TXT, GROUP, SPREAD, PART_PLAIN, gradeOf, GRADES,
     _internal: { needView, elementDir, glyphPower, tenGodDir, relationFit, harmonyOf } };
 })(typeof window !== 'undefined' ? window : globalThis);

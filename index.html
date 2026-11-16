@@ -271,6 +271,7 @@ button.pill { border: 0; cursor: pointer; font-family: inherit; }
 @media (min-width: 641px) { .pr-sum3 { grid-template-columns: repeat(3, 1fr); } }
 .pr-dir2 { display: grid; gap: 10px; } .pr-dir-h { display: flex; align-items: baseline; gap: 8px; } .pr-dir-h b { flex: 1; } .pr-dir-k { margin-top: 4px; font-size: 0.82rem; font-weight: 700; opacity: 0.75; }
 @media (min-width: 641px) { .pr-dir2 { grid-template-columns: 1fr 1fr; } }
+.pr-detail > summary { cursor: pointer; list-style: revert; } .pr-detail[open] > summary { margin-bottom: 10px; } .pr-detail .cp-h3 { margin: 16px 0 8px; }
 /* 소제목 접고 펴기 */
 .fold-h { position: relative; cursor: pointer; padding-right: 32px; -webkit-tap-highlight-color: transparent; user-select: none; }
 .fold-h:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
@@ -10140,6 +10141,103 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <div class="pr-box bad"><b>갈등이 생기는 이유</b>${ul(S3.conflict, '크게 부딪치는 점이 없습니다.')}</div>
         <div class="pr-box"><b>관계를 발전시키는 방법</b>${ul(S3.grow, '')}</div>
       </div>` : '';
+    // ── 2판 화면(2026-11-16 가독성 개편): 점수 → 한눈에 정리 → 서로에게 주는 것 → 간지 관계 종합 → (접힘) 명리학적 근거
+    //   기본 풀이는 생활 언어(plain)만, 용어·수치·개별 합충 카드는 근거 영역으로. 같은 문장은 한 번만(once).
+    if (D && D.ab.plain) {
+      const used = new Set(), key = t => String(t).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+      // 문장 단위로 한 번만: 줄 안의 문장 중 이미 나온 문장은 빼고, 남는 게 없으면 줄째 뺀다(태그가 든 줄은 줄 단위로)
+      const once = arr => arr.filter(Boolean).map(t => { if (/<b>/.test(t)) { const k = key(t); if (!k || used.has(k)) return ''; used.add(k); return t; } const ss = String(t).split(/(?<=[.!?])\s+/).filter(x => { const k = key(x); if (!k || used.has(k)) return false; used.add(k); return true; }); return ss.join(' '); }).filter(Boolean);
+      const PP = PairCompat.PART_PLAIN || {}, jo = (w, p) => M.josa(w, p);
+      const relPlain = g => { const r = g[0]; return `<b>${esc(r.txt[1])}</b> — ${prScene(r, R)} ${esc(r.txt[2])}`; };
+      const goodG = groups.filter(g => g[0].tone === 'good'), badG = groups.filter(g => g[0].tone === 'bad');
+      // 한눈에 정리
+      const lead = `${PR_SUMMARY[gi]} ${PP[R.best.key] && PP[R.worst.key] ? `가장 힘이 되는 건 ${jo(PP[R.best.key], '이고/고')}, 가장 신경 쓸 곳은 ${jo(PP[R.worst.key], '이에요/예요')}.` : ''}`;
+      // 두 방향이 같은 역할을 주고받으면 '두 사람은 서로에게 …'로 합친다
+      const helpA = D.ab.plain.help.slice(), helpB = D.ba.plain.help.slice();
+      if (D.ab.best && D.ba.best && D.ab.best.g === D.ba.best.g && helpA[0] && helpB[0]) {
+        const pre = d => `${d.from === '나' ? '나는' : M.josa(d.from, '은/는')} ${d.to === '나' ? '나에게' : d.to + '에게'} `;
+        if (helpA[0].startsWith(pre(D.ab))) helpA[0] = '두 사람은 서로에게 ' + helpA[0].slice(pre(D.ab).length);
+        if (helpB[0].startsWith(pre(D.ba))) helpB[0] = helpB[0].replace(/^[^.]*\.\s*/, '');
+      }
+      // 연인: 두 방향 모두 배우자로 끌리는 기운이 적으면 한 문장으로
+      { const LOW = '배우자로 끌리는 기운이 적어', ia = helpA.findIndex(x => x.includes(LOW)), ib = helpB.findIndex(x => x.includes(LOW));
+        if (ia >= 0 && ib >= 0) { helpA[ia] = '두 사람 모두 서로에게 배우자로 끌리는 기운이 적어, 설렘보다 편안함으로 이어지는 사이예요.'; helpB.splice(ib, 1); } }
+      const sHelp = once([helpA[0], helpB[0]]);
+      const sBad = once([D.ab.plain.burden[0], D.ba.plain.burden[0]]);
+      if (badG[0] && sBad.length < 3) { const t = relPlain(badG[0]); if (once([t]).length) sBad.push(t); }
+      // 두 방향이 같은 역할(같은 십성 묶음)을 주고받으면 '…에게 부탁하면' 조언을 '서로에게' 한 문장으로 합친다
+      const advA = D.ab.plain.advice.slice(), advB = D.ba.plain.advice.slice();
+      if (D.ab.best && D.ba.best && D.ab.best.g === D.ba.best.g && advA[1] && advB[1]) { advA[1] = advA[1].replace(/^.+?에게 /, '서로에게 '); advB.splice(1, 1); }
+      const sTip = once([S3 && S3.grow[0], advA[0], advB[0], badG[0] && badG[0][0].txt[3]]).slice(0, 4);
+      const asymLine = R.asym && R.asym.plain ? once([R.asym.plain])[0] : '';
+      const glance = `
+    <section class="card">
+      <div class="card-h"><h2>한눈에 정리</h2><span class="note">${R.relLabel} 기준</span></div>
+      <p class="pr-sum">${esc(lead)}</p>
+      ${asymLine ? `<p class="small">${esc(asymLine)}</p>` : ''}
+      <div class="pr-sum3">
+        <div class="pr-box good"><b>서로에게 도움 되는 점</b>${sHelp.length ? `<ul>${sHelp.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '<p class="small muted">뚜렷하게 맞는 점이 적습니다.</p>'}</div>
+        <div class="pr-box bad"><b>갈등이 생기는 이유</b>${sBad.length ? `<ul>${sBad.map(x => `<li>${/<b>/.test(x) ? x : esc(x)}</li>`).join('')}</ul>` : '<p class="small muted">크게 부딪치는 점이 없습니다.</p>'}</div>
+        <div class="pr-box"><b>이렇게 해 보세요</b><ul>${sTip.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+      </div>
+    </section>`;
+      // 서로에게 주는 것(양방향) — 한눈에 정리에 이미 나온 문장은 빼고 새 정보만
+      const dirPlain = (d, adv) => {
+        const h = once(d === D.ab ? helpA : helpB), bd = once(d.plain.burden), ad = once(adv);
+        if (!h.length && !bd.length && !ad.length) return '';
+        return `<div class="pr-box"><div class="pr-dir-h"><b>${esc(d.from)} → ${esc(d.to)}</b></div>
+          ${h.length ? `<div class="pr-dir-k">더 주는 도움</div><ul>${h.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+          ${bd.length ? `<div class="pr-dir-k">조심할 점</div><ul>${bd.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+          ${ad.length ? `<div class="pr-dir-k">이렇게 해 보세요</div><ul>${ad.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}</div>`;
+      };
+      const dAB = dirPlain(D.ab, advA), dBA = dirPlain(D.ba, advB);
+      const dirs = dAB || dBA ? `
+    <section class="card">
+      <div class="card-h"><h2>서로에게 주는 것</h2><span class="note">한쪽이 받는 것과 다른 쪽이 받는 것은 다를 수 있어요</span></div>
+      <div class="pr-dir2">${dAB}${dBA}</div>
+    </section>` : '';
+      // 간지 관계 — 종합 해석 먼저, 개별 합충 카드는 접어서
+      const relOver = [];
+      if (groups.length) {
+        relOver.push(`두 사람의 사주가 맞닿는 자리가 ${groups.length}곳 있어요. ${goodG.length && badG.length ? `그중 ${goodG.length}곳은 서로 끌어당기고 ${badG.length}곳은 부딪쳐, ${goodG.length > badG.length ? '끌림이 조금 더 큰 사이예요' : goodG.length < badG.length ? '부딪침이 조금 더 많은 사이예요' : '끌림과 부딪침이 비슷하게 섞인 사이예요'}.` : goodG.length ? '대부분 서로 끌어당기는 자리라 큰 틀에서 잘 맞물려요.' : badG.length ? '대부분 부딪치는 자리라, 가까울수록 규칙과 거리를 정해 두는 편이 좋아요.' : '대부분 예민하게 얽히는 자리예요.'}`);
+        const top = once([goodG[0] && relPlain(goodG[0]), badG[0] && relPlain(badG[0])]);
+        top.forEach(x => relOver.push(x));
+      }
+      const relSec = `
+    <section class="card">
+      <div class="card-h"><h2>두 사람의 간지 관계</h2><span class="note">종합 해석 · 개별 근거는 펼쳐서</span></div>
+      ${groups.length ? `<ul class="pr-list">${relOver.map(x => `<li>${x}</li>`).join('')}</ul>
+      <details class="rel-more"><summary>개별 관계 근거 ${groups.length}개 보기</summary><div class="rel-list" style="margin-top:8px">${groups.map(g => prRelCard(g, R)).join('')}</div></details>` : '<p class="muted small">두 사람 사이에 뚜렷한 합·충이 없습니다. 서로에게 크게 끌리지도 부딪치지도 않는 담백한 사이입니다.</p>'}
+    </section>`;
+      // 명리학적 근거(접힘) — 항목 점수·가중치·양방향 근거·오행/일간·억부·조후·원국 상호작용을 모두 남긴다
+      const evDir = d => `<div class="pr-box"><div class="pr-dir-h"><b>${esc(d.from)} → ${esc(d.to)}</b><span class="pr-sc num">${d.score}</span></div>
+        <p class="small muted">${d.best ? `가장 크게 채워 주는 십성: <b>${esc(d.best.name)}</b>(${elTxt(d.best.e)})` : '뚜렷하게 채워 주는 십성이 적습니다.'}${d.element ? ` · 오행으로는 ${elTxt(d.element.e)}(${esc(d.element.role)})` : ''}</p>
+        <div class="pr-dir-k">근거 — 도움</div>${ul(d.help, '뚜렷한 도움은 적습니다.')}<div class="pr-dir-k">근거 — 부담</div>${ul(d.burden, '크게 부담되는 점은 없습니다.')}</div>`;
+      const ip = (R.interplay || []);
+      const evidence = `
+    <details class="card pr-detail">
+      <summary><b>명리학적 근거 모두 보기</b><span class="muted small"> 항목별 점수 · 십성·오행 · 억부·조후 · 일간 · 원국 상호작용</span></summary>
+      <h3 class="cp-h3">항목별 점수</h3>
+      <div class="pr-parts">${rows}</div>
+      ${R.relWhy ? `<p class="note">${esc(R.relWhy)} (반영 비율 ${R.parts.map(p => `${p.label} ${p.weight}%`).join(' · ')})</p>` : ''}
+      <h3 class="cp-h3">양방향 근거(십성·오행)</h3>
+      <div class="pr-dir2">${evDir(D.ab)}${evDir(D.ba)}</div>
+      ${R.asym ? `<p class="small" style="margin-top:8px">${esc(R.asym.text)}</p>` : '<p class="small muted" style="margin-top:8px">두 방향의 도움이 비슷해 한쪽으로 크게 기울지 않습니다.</p>'}
+      <h3 class="cp-h3">오행·용신 보완(억부·조후)</h3>
+      <ul class="pr-list">${elLine(a, b, R.element.aGets)}${elLine(b, a, R.element.bGets)}</ul>
+      <h3 class="cp-h3">일간으로 본 서로의 자리 · 강약</h3>
+      <ul class="pr-list">${tgLine(a, b, R.stems.aSeesB)}${tgLine(b, a, R.stems.bSeesA)}${R.stems.hap ? '<li><b>일간끼리 천간합</b> — 마음이 쉽게 끌리는 인연입니다.</li>' : ''}${R.stems.chung ? '<li><b>일간끼리 천간충</b> — 생각이 정면으로 맞서 말다툼이 잦습니다.</li>' : ''}<li>강약: ${esc(a)} ${R.strength.a} · ${esc(b)} ${R.strength.b}</li>${(R.balanceNotes || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul>
+      ${ip.length ? `<h3 class="cp-h3">원국 상호작용</h3><ul class="pr-list">${ip.map(x => `<li>${esc(x.text)}</li>`).join('')}</ul>` : ''}
+    </details>`;
+      return `
+    <section class="card pr-hero tone-${R.grade.tone}">
+      <div class="pr-names"><div><span class="muted small">${esc(a)}</span><b class="pr-gz">${dg(ch)}</b></div><span class="pr-vs">♡</span><div><span class="muted small">${esc(b)}</span><b class="pr-gz">${dg(P)}</b></div></div>
+      <div class="pr-ring" style="--p:${sc}"><div><b class="num">${sc}</b><span>점</span></div></div>
+      <div class="pr-grade"><span class="pr-grade-b tone-${R.grade.tone}">${R.grade.name}</span><span class="muted small">${R.relLabel} 기준</span></div>
+      <div class="pr-acts"><button type="button" class="btn" data-pact="edit">상대 바꾸기</button>${relSeg}</div>
+    </section>${glance}${dirs}${relSec}${evidence}
+    <p class="note">궁합 점수는 두 사람의 사주를 견준 상대적인 참고 지표이며, 관계가 잘될 확률이 아닙니다. 같은 점수라도 서로 맞춰 가는 노력에 따라 관계는 달라집니다.</p>`;
+    }
     return `
     <section class="card pr-hero tone-${R.grade.tone}">
       <div class="pr-names"><div><span class="muted small">${esc(a)}</span><b class="pr-gz">${dg(ch)}</b></div><span class="pr-vs">♡</span><div><span class="muted small">${esc(b)}</span><b class="pr-gz">${dg(P)}</b></div></div>
