@@ -1,0 +1,80 @@
+/* ═══ 2026-11-17 인연의 광장 「벚꽃」 테마 ═══
+   운명의 타임라인(안개 테마)과 같은 결 — 밝은 안개 바탕 · 흰 한지 카드 · 먹색 글씨 — 에 포인트만 벚꽃.
+   html.theme-sakura 일 때만 적용(기본 꺼짐, 관리자 스위치 sakuraTheme · ?sakura=1 미리보기). 토큰을 바꿔 겉모습만 바꾼다.
+   운명의 사진 카드(.fz)는 사진 위 글씨라 그대로 둔다. */
+html.theme-sakura{
+  /* 바탕·선: 벚꽃 안개 */
+  --rice: #FBF4F6; --rice-2: #F6E8EC; --paper: #FFFFFF; --line: #F0DCE2; --line-2: #E5C4CE;
+  /* 글씨: 먹색(타임라인과 같은 단계) */
+  --sumi: #20272B; --sumi-2: #46505A; --sumi-3: #6B7480;
+  /* 포인트: 홍실 빨강 → 벚꽃 진분홍(흰 글씨 대비 4.5 이상) */
+  --thread: #C2366B; --thread-l: #FCE7EF; --thread-d: #9A2552;
+  --blush: #F4B8CB; --blush-l: #FDF1F5; --blush-d: #A8325E;
+  --sakura: #F6C1D2; --sakura-2: #EE9DB8;
+  background: #FBF4F6; color-scheme: light;
+}
+html.theme-sakura body{
+  background:
+    radial-gradient(70% 38% at 50% -6%, rgba(255,255,255,.95), transparent 70%),
+    radial-gradient(55% 32% at 0% 30%, rgba(246,193,210,.30), transparent 70%),
+    radial-gradient(50% 36% at 100% 78%, rgba(246,193,210,.26), transparent 70%),
+    #FBF4F6;
+  background-attachment: fixed;
+}
+
+/* 상단 바: 흰 안개 + 벚꽃 한 송이 로고 */
+html.theme-sakura .top{ background: rgba(255,250,252,.88); border-bottom-color: var(--line); }
+html.theme-sakura .top .logo{ background: radial-gradient(circle at 50% 50%, #FFF 0 18%, transparent 19%), conic-gradient(from 0deg, #F6C1D2, #EE9DB8, #F6C1D2, #EE9DB8, #F6C1D2); box-shadow: 0 0 0 1px rgba(194,54,107,.25); clip-path: polygon(50% 0, 61% 30%, 95% 31%, 68% 52%, 79% 86%, 50% 66%, 21% 86%, 32% 52%, 5% 31%, 39% 30%); }
+html.theme-sakura .top .logo::after{ display: none; }
+html.theme-sakura .top .home b{ color: #20272B; }
+
+/* 홈 머리: 밤하늘 → 벚꽃 새벽빛(분홍 안개 + 흰 달무리), 글씨는 먹색 */
+html.theme-sakura .hero{ color: #20272B; background: radial-gradient(60% 80% at 88% 8%, rgba(255,255,255,.95), transparent 60%), radial-gradient(80% 70% at 10% 110%, rgba(238,157,184,.55), transparent 70%), linear-gradient(170deg, #FFF7FA, #F9D7E2 72%, #F3C0D1); box-shadow: 0 18px 40px -24px rgba(194,54,107,.45), inset 0 0 0 1px rgba(229,196,206,.8); }
+html.theme-sakura .hero::before{ background: radial-gradient(circle at 40% 38%, #FFFFFF, #FFF3F7 55%, #F6C1D2); box-shadow: 0 0 40px 10px rgba(255,255,255,.8); }
+html.theme-sakura .hero .kick{ color: #9A2552; opacity: 1; }
+html.theme-sakura .hero h1{ color: #20272B; }
+html.theme-sakura .hero h1 em{ color: #C2366B; }
+html.theme-sakura .hero p{ color: #46505A; }
+html.theme-sakura .hero .btn.ghost{ background: rgba(255,255,255,.8); color: #9A2552; box-shadow: inset 0 0 0 1px rgba(194,54,107,.35); }
+html.theme-sakura .hero .thread path{ stroke: #C2366B; opacity: .75; }
+html.theme-sakura .hero .thread circle{ fill: #C2366B; }
+
+/* 카드·패널: 흰 한지 + 옅은 벚꽃 테두리 */
+html.theme-sakura .card, html.theme-sakura .today, html.theme-sakura .fate, html.theme-sakura .panel{ box-shadow: 0 1px 0 rgba(255,255,255,.9) inset, 0 10px 26px -18px rgba(154,37,82,.30), inset 0 0 0 1px var(--line); }
+html.theme-sakura a.card:hover{ box-shadow: 0 14px 30px -18px rgba(154,37,82,.38), inset 0 0 0 1px var(--line-2); }
+
+/* 단추: 기본은 먹색, 강조(pink)는 벚꽃 진분홍 */
+html.theme-sakura .btn{ background: #26333A; color: #FFFFFF; }
+html.theme-sakura .btn.pink{ background: var(--thread); color: #FFFFFF; box-shadow: 0 8px 18px -10px rgba(194,54,107,.7); }
+html.theme-sakura .btn.ghost{ background: #FFFFFF; color: #20272B; box-shadow: inset 0 0 0 1px var(--line-2); }
+html.theme-sakura .chip.on{ background: var(--thread); color: #FFFFFF; } html.theme-sakura .chip.on .hj{ color: #FFE4EE; }
+
+/* 아래 탭: 흰 안개 + 지금 탭 벚꽃, 글쓰기 버튼은 벚꽃 꽃봉오리 */
+html.theme-sakura .tabbar{ background: rgba(255,251,253,.94); box-shadow: 0 12px 30px -16px rgba(154,37,82,.35), inset 0 0 0 1px var(--line); }
+html.theme-sakura .tabbar .write{ background: radial-gradient(circle at 35% 30%, #E25A8C, #C2366B 60%, #9A2552); box-shadow: 0 8px 16px -8px rgba(194,54,107,.75); }
+html.theme-sakura .tabbar a.has-new::after{ background: #C2366B; }
+
+/* 대화: 상대 말풍선 옅은 벚꽃, 내 말풍선 진분홍 */
+html.theme-sakura .bubble{ background: #FDF1F5; }
+html.theme-sakura .msg-row.mine .bubble{ background: var(--thread); color: #FFFFFF; }
+
+/* 알림: 먹색 바탕(밤하늘 남색 대신) */
+html.theme-sakura .toast{ background: #26333A; color: #F4F6F5; }
+
+/* 오늘의 흐름 카드 머리말 */
+html.theme-sakura .today .kick{ color: #9A2552; background: #FCE7EF; }
+html.theme-sakura .badge.pink{ background: #FCE7EF; color: #9A2552; }
+
+/* ── 흩날리는 꽃잎(theme-sakura.js 가 화면 뒤에 12장 깐다). 글자 위로 오지 않게 맨 뒤, 움직임 줄이기면 멈춤 ── */
+.sk-petals{ position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+html:not(.theme-sakura) .sk-petals{ display: none; }
+.sk-petals i{ position: absolute; top: -40px; width: var(--s, 12px); height: calc(var(--s, 12px) * .78); border-radius: 80% 0 80% 0; background: radial-gradient(circle at 30% 30%, #FFF 0 12%, #F9CFDC 40%, #EE9DB8 100%); opacity: var(--o, .7); animation: skFall var(--d, 16s) linear var(--w, 0s) infinite; }
+@keyframes skFall{
+  0%{ transform: translate3d(0, -40px, 0) rotate(0deg); }
+  50%{ transform: translate3d(var(--dx, 60px), 50vh, 0) rotate(200deg); }
+  100%{ transform: translate3d(calc(var(--dx, 60px) * -.4), 105vh, 0) rotate(420deg); }
+}
+@media (prefers-reduced-motion: reduce){ .sk-petals{ display: none; } }
+html.theme-sakura main, html.theme-sakura .top, html.theme-sakura .tabbar{ position: relative; z-index: 1; }
+html.theme-sakura .top{ position: sticky; z-index: 20; } html.theme-sakura .tabbar{ position: fixed; z-index: 25; }
+html.theme-sakura .badge .hj, html.theme-sakura .chip .hj{ color: var(--thread-d); }

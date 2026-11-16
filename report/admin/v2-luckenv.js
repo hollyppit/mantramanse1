@@ -69,6 +69,10 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 건강·사고수 장(6장)</b> — 현재: <b style="color:' + (fl && fl.healthChapters ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.healthChapters ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leHC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.healthChapters ? '건강·사고수 장 끄기' : '건강·사고수 장 켜기') + '</button><a class="btn" href="/report/v2/?mantraFlags=healthChapters" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 종합풀이 \'건강 및 사고수\' 장 바로 뒤에 \'내 몸의 오행 지도\'·\'나는 언제 쉽게 지칠까?\'·\'스트레스가 몸으로 오는 길\'·\'올해·이번 달 몸 챙길 때\'·\'사고수 신호 읽기\'·\'앞으로 10년 안전 흐름과 삼재\' 6장이 <b>약 1분 안에</b> 나타납니다. 건강 지도·사고수 참고·건강/사고 지수·삼재 계산으로 만든 문장(AI·DB 문안 없음)이고, 장마다 의학적 진단·사고 예측이 아니라는 안내가 붙습니다. 점수는 바뀌지 않습니다.</p></div>';
+    // 인연의 광장 벚꽃 테마(community/theme-sakura.css·theme-sakura.js) 스위치 — 광장 겉모습만 바꾼다(2026-11-17)
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>인연의 광장 벚꽃 테마</b> — 현재: <b style="color:' + (fl && fl.sakuraTheme ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.sakuraTheme ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leSK"' + (fl ? '' : ' disabled') + '>' + (fl && fl.sakuraTheme ? '벚꽃 테마 끄기' : '벚꽃 테마 켜기') + '</button></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 인연의 광장이 타임라인 안개 테마와 같은 결(밝은 바탕·흰 카드·먹색 글씨)에 <b>벚꽃 포인트</b>(진분홍 강조·새벽빛 머리·흩날리는 꽃잎)로 <b>약 1분 안에</b> 바뀝니다. 기능·글은 그대로이고 겉모습만 바뀝니다. 이 기기에서만 미리 보려면 광장 주소 뒤에 <code>?sakura=1</code>, 되돌리려면 <code>?sakura=auto</code>.</p></div>';
     // 밝은 안개 테마(report/hub/theme-mist.css·theme-mist.js) 스위치 — 운명의 타임라인·일진 캘린더·무료 타로의 겉모습만 바꾼다(2026-11-16)
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>밝은 안개 테마(타임라인·일진 캘린더·무료 타로)</b> — 현재: <b style="color:' + (fl && fl.mistTheme ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.mistTheme ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leMT"' + (fl ? '' : ' disabled') + '>' + (fl && fl.mistTheme ? '안개 테마 끄기' : '안개 테마 켜기') + '</button><a class="btn" href="/report/?mist=1#/timeline" target="_blank" rel="noopener">이 기기에서만 미리보기</a><a class="btn" href="/report/?mist=auto#/timeline" target="_blank" rel="noopener">미리보기 해제</a></div>' +
@@ -148,6 +152,14 @@
       fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { dayCompat: v } }) })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
         .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '일주 적합도 2판을 켰습니다(약 1분 안에 반영)' : '일주 적합도 2판을 껐습니다(약 1분 안에 반영)'); });
+    };
+    $('#leSK').onclick = function () {   // 인연의 광장 벚꽃 테마 스위치
+      var v = !(S.flags && S.flags.sakuraTheme);
+      if (v && !confirm('인연의 광장을 모든 사용자에게 벚꽃 테마로 보여 줍니다.\n켜시겠습니까?')) return;
+      var who = ''; try { who = localStorage.getItem('iching_reviewer') || ''; } catch (e) { }
+      fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { sakuraTheme: v } }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
+        .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '벚꽃 테마를 켰습니다(약 1분 안에 반영)' : '벚꽃 테마를 껐습니다(약 1분 안에 반영)'); });
     };
     $('#leMT').onclick = function () {   // 밝은 안개 테마 스위치(따로 켜고 끈다)
       var v = !(S.flags && S.flags.mistTheme);
