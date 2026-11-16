@@ -5552,21 +5552,6 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     '천간충': ['bad', '생각·방침이 부딪쳐 말다툼이 생기기 쉬워요', '결정을 서두르지 말고 합의는 문서로 남기세요.', '충돌'],
   };
   const REL_AREA = { year: '조상·어린 시절', month: '부모·직장', day: '나·배우자', hour: '자녀·말년' };
-  // 두 자리 사이에서 실제로 무슨 일이 생기는지를 한 문장으로: 관계 종류별 문장에 자리 이름을 끼운다
-  const REL_HEAD_C = {
-    '충': w => `${w} 사이에서 정면으로 부딪쳐, 이사·이직·이별처럼 자리가 바뀌는 일이 생겨요`,
-    '형': w => `${w} 사이에서 서로 눌러, 소송·수술·마찰처럼 꼭 처리해야 할 문제가 생겨요`,
-    '파': w => `${w} 사이의 약속·계획이 자꾸 어긋나요`,
-    '해': w => `${w} 사이에 말 안 한 서운함과 오해가 쌓여요`,
-    '원진': w => `${w} 사이가 이유 없이 거슬리고 미운 정이 들어요`,
-    '귀문관': w => `${w} 때문에 예민해지고 생각이 꼬리를 물어요`,
-    '육합': w => `${w} 사이가 자연스럽게 잘 맞물려 서로 도와요`,
-    '삼합': w => `${w} 쪽이 한 방향으로 힘을 모아 크게 시너지가 나요`,
-    '반합': w => `${w} 쪽이 같은 방향으로 움직여 손발이 맞아요`,
-    '방합': w => `${w} 쪽이 같은 결로 쏠려 장점이 뚜렷해요`,
-    '천간충': w => `${w}에 대한 생각이 맞서서 말다툼이 생겨요`,
-    '천간합': w => `${w}에 대한 생각이 통해서 뜻이 잘 맞아요`,
-  };
   // 이 관계가 언제 실제 일로 드러나는지: 같은 글자가 대운·세운으로 들어오는 가까운 해를 알려 준다
   function relWhen(ch, r) {
     const ids = r.members.filter(m => m !== 'luck'), isStem = r.kind === 'stem';
@@ -5577,13 +5562,36 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     for (let Y = y0; Y < y0 + 12 && ys.length < 4; Y++) { const p = M.yearPillarOf(Y); if (vals.includes(isStem ? p.s : p.b)) ys.push(`${Y}년 ${M.gzName(p)}`); }
     return `평소에는 성격·분위기로만 느껴지다가, 대운·세운에 <b>${chars}</b> 글자가 들어오는 해에 실제 일로 드러납니다.${ys.length ? ` 가까운 해: ${ys.join(' · ')}` : ''}`;
   }
-  const relCard = (ch, r, p, dup) => {
+  // 원국 관계 카드: 제목은 '무슨 일이 생기는지'(관계 종류의 뜻)만, 자리는 위 표시줄(일지 ↔ 시지)에만, 생활 장면은 '어디서 나타나요' 한 문장으로.
+  // 같은 두 자리에 걸린 여러 작용(예: 午丑 해·원진·귀문)은 카드 하나로 묶는다.
+  const REL_SCENE = {
+    'year-month': '집안 어른과 진로·첫 사회생활을 두고 드러납니다.',
+    'year-day': '본가와 내 가정, 고향과 지금 사는 곳 사이에서 드러납니다.',
+    'year-hour': '어릴 때 살던 터전과 노후 거처를 두고 드러납니다.',
+    'month-day': '직장 일과 배우자·가정 사이에서 드러납니다.',
+    'month-hour': '지금 하는 일과 자녀·노후 계획 사이에서 드러납니다.',
+    'day-hour': '배우자와의 일상, 자녀 문제, 노후 계획을 두고 드러납니다.',
+  };
+  const REL_SCENE_S = {
+    'year-month': '집안의 기대와 내가 사회에서 택한 길 사이에서 드러납니다.',
+    'year-day': '집안의 기대와 내 생각 사이에서 드러납니다.',
+    'year-hour': '어릴 때 가치관과 자녀·노후 계획 사이에서 드러납니다.',
+    'month-day': '직장·윗사람의 요구와 내 생각 사이에서 드러납니다.',
+    'month-hour': '지금의 직업 방향과 중년 이후 계획 사이에서 드러납니다.',
+    'day-hour': '내 생각과 자녀·후배의 생각 사이에서 드러납니다.',
+  };
+  const REL_ZONE = { year: '집안', month: '직장', day: '가정', hour: '노후' }, REL_NUM = ['', '', '두', '세', '네'];
+  const relScene = (ids, kind) => (ids.length === 2 && (kind === 'stem' ? REL_SCENE_S : REL_SCENE)[ids.join('-')]) || `${ids.map(k => REL_ZONE[k]).join('·')} ${REL_NUM[ids.length] || ids.length} 영역에 함께 걸쳐 드러납니다.`;
+  const relCard = (ch, rs, ps) => {
+    rs = [].concat(rs); ps = [].concat(ps);
+    const r = rs[0], p = ps[0];   // 첫 번째가 가장 센 작용
     const ids = r.members.slice().sort((a, b) => REL_POS.indexOf(a) - REL_POS.indexOf(b));
-    const h = REL_HEAD[r.type] || ['mid', '', '', ''], strong = (REL_VERB[r.type] || [0, 2])[1];
-    const names = ids.map(k => REL_AREA[k] || '운'), wa = t => { const c = t.charCodeAt(t.length - 1); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 ? '과' : '와'; };
-    const where = names.length === 2 ? `${names[0]}${wa(names[0])} ${names[1]}` : names.join(', ');
+    const h = REL_HEAD[r.type] || ['mid', '', '', ''], strong = Math.max(...rs.map(x => (REL_VERB[x.type] || [0, 2])[1]));
     const sub = ids.map(m => memberName(m, r.kind)).join(' ↔ ');
-    let head = REL_HEAD_C[r.type] ? REL_HEAD_C[r.type](where) : h[1], tip = h[2], more = p.lines.slice(), trait = '';
+    let head = h[1], tip = h[2], more = ps.flatMap(x => x.lines), trait = '';
+    const notes = [...new Set(ps.flatMap(x => x.notes))];
+    const also = rs.slice(1).map(x => `<b>${term(x.type)}</b> ${(REL_HEAD[x.type] || [])[1] || ''}`);
+    rs.slice(1).forEach(x => { const t = (REL_HEAD[x.type] || [])[2]; if (t) more.push(`${x.type}: ${t}`); });
     if (p.flavor) {   // 천간: "갑기합(중정지합) — 성격 설명. 부연. 대처." 를 성격·부연·대처로 나눈다
       const [fname, ...rest] = p.flavor.split(' — '), sents = rest.join(' — ').split(/(?<=\.)\s+/);
       trait = `${fname} — ${sents[0]}`;
@@ -5592,22 +5600,28 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     }
     const when = relWhen(ch, r);
     return `<article class="rel-card tone-${h[0]}">
-      <div class="rel-top"><span class="rel-badge">${h[3]}<small>${term(r.type)}</small></span><b class="rel-name muted">${esc(r.name)}</b><span class="rel-str" title="작용 세기">${'●'.repeat(strong)}${'○'.repeat(3 - strong)}</span></div>
-      <div class="rel-where">${sub}<span class="muted"> (원국 안에서 맞닿은 두 자리)</span></div>
+      <div class="rel-top">${rs.map(x => `<span class="rel-badge">${(REL_HEAD[x.type] || [])[3] || ''}<small>${term(x.type)}</small></span>`).join('')}<b class="rel-name muted">${rs.map(x => esc(x.name)).join(' · ')}</b><span class="rel-str" title="작용 세기">${'●'.repeat(strong)}${'○'.repeat(3 - strong)}</span></div>
+      <div class="rel-where">${sub}</div>
       <p class="rel-head">${head}</p>
+      <p class="rel-place"><b>어디서 나타나요</b> ${relScene(ids, r.kind)}</p>
+      ${also.length ? `<p class="rel-place"><b>같은 자리에 함께</b> ${also.join(' · ')}</p>` : ''}
       ${trait ? `<p class="rel-place"><b>성향으로는</b> ${trait}</p>` : ''}
-      ${p.place && !dup ? `<p class="rel-place"><b>구체적으로</b> ${p.place}</p>` : ''}
+      ${p.place ? `<p class="rel-place"><b>구체적으로</b> ${p.place}</p>` : ''}
       ${when ? `<p class="rel-place"><b>언제 드러나요</b> ${when}</p>` : ''}
       ${tip ? `<p class="rel-tip"><b>이렇게 해보세요</b> ${tip}</p>` : ''}
-      ${more.length || p.notes.length ? `<details class="rel-more"><summary>더 자세히 보기</summary>${more.map(l => `<p>${l}</p>`).join('')}${p.notes.map(n => `<p class="muted">· ${n}</p>`).join('')}</details>` : ''}
+      ${more.length || notes.length ? `<details class="rel-more"><summary>더 자세히 보기</summary>${more.map(l => `<p>${l}</p>`).join('')}${notes.map(n => `<p class="muted">· ${n}</p>`).join('')}</details>` : ''}
     </article>`;
   };
+  // 같은 자리(같은 글자 묶음)에 걸린 작용끼리 묶고, 묶음 안에서는 센 작용·부딪치는 작용을 앞에 둔다
+  function relGroups(rels) {
+    const key = r => r.members.slice().sort((a, b) => REL_POS.indexOf(a) - REL_POS.indexOf(b)).join('-'), m = new Map();
+    rels.forEach(r => { const k = key(r); if (!m.has(k)) m.set(k, []); m.get(k).push(r); });
+    const w = r => (REL_VERB[r.type] || [0, 2])[1] * 2 + (REL_BAD.includes(r.type) ? 1 : 0);
+    return [...m.values()].map(g => g.sort((a, b) => w(b) - w(a)));
+  }
   function relListBranch(ch, rels) {
     if (!rels.length) return '<p class="muted small">원국 안에 해당 관계가 없습니다.</p>';
-    // 같은 두 자리에 같은 성격(충돌 계열/합)의 작용이 겹치면 자리 설명은 처음 한 번만 보여 준다
-    const seen = new Set();
-    const placeKey = r => r.members.slice().sort((a, b) => REL_POS.indexOf(a) - REL_POS.indexOf(b)).join('-') + (REL_BAD.includes(r.type) ? ':bad' : REL_GOOD.includes(r.type) ? ':good' : ':etc');
-    return relSummary(ch, rels) + `<div class="rel-list">${rels.map(r => { const pk = placeKey(r), dup = seen.has(pk); seen.add(pk); return relCard(ch, r, relNote(ch, r, rels), dup); }).join('')}</div>`;
+    return relSummary(ch, rels) + `<div class="rel-list">${relGroups(rels).map(g => relCard(ch, g, g.map(r => relNote(ch, r, rels)))).join('')}</div>`;
   }
   // ── 천간 관계 해석: 천간은 겉으로 드러나는 생각·의지·사회적 모습 ──
   const REL_PAIR_S = {
@@ -5661,7 +5675,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   function relListStem(ch, rels) {
     if (!rels.length) return '<p class="muted small">원국 안에 해당 관계가 없습니다.</p>';
-    return relSummary(ch, rels, '간') + `<div class="rel-list">${rels.map(r => relCard(ch, r, relNoteStem(ch, r, rels), false)).join('')}</div>`;
+    return relSummary(ch, rels, '간') + `<div class="rel-list">${relGroups(rels).map(g => relCard(ch, g, g.map(r => relNoteStem(ch, r, rels)))).join('')}</div>`;
   }
   function relList(rels) {
     if (!rels.length) return '<p class="muted small">원국 안에 해당 관계가 없습니다.</p>';
