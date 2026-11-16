@@ -136,6 +136,8 @@ summary { cursor:pointer; padding:4px 0; }
 .cov td:first-child, .cov th:first-child { text-align:left; position:sticky; left:0; background:var(--bg2); }
 </style>
 <link rel="stylesheet" href="../hub/renewal.css">
+<link rel="stylesheet" href="admin-light.css?v=20261117-light4">
+<script>/* 2026-11-17 관리자 밝은 테마: 기본 켜짐, 상단 단추로 기기마다 끄고 켠다(localStorage adm.theme) */(function(){var d="";try{d=localStorage.getItem("adm.theme")||""}catch(e){}if(d!=="dark")document.documentElement.classList.add("admin-light")})();</script>
 </head>
 <body>
 <div class="wrap">
@@ -155,7 +157,7 @@ summary { cursor:pointer; padding:4px 0; }
       <div class="row">
         <button type="button" class="ghost" id="dirtyBadge" aria-label="저장하지 않은 변경 화면 보기" hidden></button><span class="muted" id="saveState"></span>
         <button class="pri" id="saveBtn" disabled>변경사항 저장</button>
-        <button id="logoutBtn">로그아웃</button>
+        <button type="button" id="admTheme" title="관리자 화면 밝게·어둡게 바꾸기(이 기기에만 기억)"></button><button id="logoutBtn">로그아웃</button>
       </div>
     </header>
     <div class="tabs" id="grpBar" role="tablist" aria-label="관리 영역"></div>
@@ -2156,5 +2158,6 @@ summary { cursor:pointer; padding:4px 0; }
   if (saved) { S.pw = saved; fetch('/api/admin', { method: 'POST', headers: { authorization: 'Bearer ' + saved } }).then(function (r) { if (r.ok) enter(); else ss('mt_pw'); }).catch(function () {}); }
 })();
 </script>
+<script>(function(){var b=document.getElementById("admTheme");if(!b)return;var de=document.documentElement;function lab(){b.textContent=de.classList.contains("admin-light")?"어둡게":"밝게"}lab();b.onclick=function(){var on=!de.classList.contains("admin-light");de.classList.toggle("admin-light",on);try{localStorage.setItem("adm.theme",on?"light":"dark")}catch(e){}lab()}})();</script>
 </body>
 </html>

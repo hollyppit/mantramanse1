@@ -1,0 +1,130 @@
+/* ═══ 2026-11-17 관리자 화면 밝은 테마 ═══
+   html.admin-light 일 때만 적용(기본 켜짐 — 상단 '어둡게' 단추로 기기마다 끌 수 있다, localStorage adm.theme).
+   1) CSS 변수(바탕·선·글씨·금색) 2) index.html 안의 고정 색 3) 각 탭 모듈이 박아 넣은 색(인라인·자체 스타일)을 밝은 바탕에 맞게 바꾼다.
+   방침: 바탕 = 옅은 청회 · 카드 = 흰색 · 글씨 = 먹색 · 강조 = 진한 호박(금색 자리) · 경고 = 진한 빨강 · 정상 = 진한 초록. 영상·미리보기 창(검은 바탕)은 그대로 둔다. */
+html.admin-light{
+  --bg: #F1F4F5; --bg2: #FFFFFF; --panel: #FFFFFF; --line: #D9DFE3;
+  --ink: #1D2428; --ink2: #3F4A50; --ink3: #5E6970;
+  --gold: #8A5A12; --gold-d: #B58A45; --red: #B42318; --green: #17784F;
+  color-scheme: light;
+}
+html.admin-light body{ background: var(--bg); color: var(--ink); }
+
+/* 머리·탭 */
+html.admin-light header h1{ color: #1D2428; }
+html.admin-light header{ border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+html.admin-light .tabs button{ color: var(--ink2); }
+html.admin-light .tabs button:hover{ color: var(--ink); }
+html.admin-light .tabs button.on{ color: #8A5A12; border-color: #B07A2A; font-weight: 700; }
+html.admin-light #grpBar{ background: #FFFFFF; border: 1px solid var(--line); border-radius: 10px; padding: 0 6px; }
+html.admin-light .tabs .tg{ color: var(--ink3); }
+
+/* 단추·입력 */
+html.admin-light button, html.admin-light a.navbtn{ background: #FFFFFF; border-color: #C9D1D6; color: var(--ink); }
+html.admin-light button:hover, html.admin-light a.navbtn:hover{ border-color: #B07A2A; color: #8A5A12; background: #FFFCF6; }
+html.admin-light button.pri{ background: linear-gradient(180deg, #E9B45A, #C98F2E); color: #1A1206; border-color: #B57C22; }
+html.admin-light button.pri:hover{ color: #1A1206; background: linear-gradient(180deg, #F0C06A, #D29A38); }
+html.admin-light button.danger{ color: #B42318; border-color: #E8B4AE; }
+html.admin-light button:disabled{ opacity: .45; }
+html.admin-light :is(input[type=text], input[type=password], input[type=number], input[type=url], input:not([type]), input[type=search], input[type=email], input[type=date], input[type=time], select, textarea){ background: #FFFFFF; border-color: #C9D1D6; color: var(--ink); }
+html.admin-light :is(input, select, textarea):focus{ border-color: #B07A2A; }
+html.admin-light ::placeholder{ color: #8A949A; }
+html.admin-light :focus-visible{ outline-color: #B07A2A; }
+
+/* 카드·표·접힘 상자·대화상자 */
+html.admin-light .card{ background: #FFFFFF; border-color: var(--line); box-shadow: 0 1px 2px rgba(20,30,36,.04), 0 8px 22px -16px rgba(20,30,36,.25); }
+html.admin-light details{ background: #FFFFFF; border-color: var(--line); }
+html.admin-light th{ color: var(--ink3); background: #F7F9FA; }
+html.admin-light th, html.admin-light td{ border-bottom-color: #E4E8EB; }
+html.admin-light tbody tr:hover td{ background: #FAFBFC; }
+html.admin-light dialog{ background: #FFFFFF; color: var(--ink); border-color: #C9D1D6; box-shadow: 0 30px 70px -20px rgba(20,30,36,.45); }
+html.admin-light dialog::backdrop{ background: rgba(30,40,46,.45); }
+html.admin-light .muted{ color: var(--ink3); }
+html.admin-light .err{ color: #B42318; } html.admin-light .ok{ color: #17784F; }
+
+/* index.html 에 고정된 색 */
+html.admin-light .chip{ background: #FBF1E0; color: #7A4E0E; }
+html.admin-light .chip.gray{ background: #EEF1F3; color: var(--ink3); }
+html.admin-light .flist li:hover{ background: #F4F6F7; }
+html.admin-light .flist li.on{ background: #FBF1E0; color: #7A4E0E; }
+html.admin-light .flist li.over, html.admin-light .flist li.dz-in{ background: #FFF6E3; }
+html.admin-light .hmitem{ background: #F7F9FA; }
+html.admin-light .seq li{ background: #FFFFFF; }
+html.admin-light .seq li.cur{ border-color: #B07A2A; background: #FFFCF6; }
+html.admin-light .cap{ background: #FFFFFF; border-left-color: #B07A2A; }
+html.admin-light .cov td.z{ color: #A3ABB0; }
+html.admin-light .cov td.hit{ background: #E5F4EC; color: #17784F; }
+html.admin-light .cov td.gen{ background: #FBF1E0; color: #7A4E0E; }
+html.admin-light .cov :is(td, th):first-child{ background: #F7F9FA; }
+html.admin-light .pbar{ background: #E4E8EB; } html.admin-light .pbar i{ background: #C98F2E; }
+html.admin-light .hmsec{ color: #8A5A12; }
+
+/* ── 탭 모듈이 박아 넣은 색(인라인 style): 밝은 글씨 → 진한 같은 계열, 어두운 바탕 → 옅은 같은 계열 ── */
+/* 경고·빨강 계열 글씨 */
+html.admin-light [style*="color:#FF8A78" i], html.admin-light [style*="color: #FF8A78" i], html.admin-light [style*="color:#FF9C8C" i], html.admin-light [style*="color:#FFB4A0" i], html.admin-light [style*="color:#FFB4A8" i], html.admin-light [style*="color:#F0B8A8" i], html.admin-light [style*="color:#E58FA0" i]{ color: #B42318 !important; }
+/* 정상·초록 계열 글씨 */
+html.admin-light [style*="color:#62C2AE" i], html.admin-light [style*="color: #62C2AE" i], html.admin-light [style*="color:#7FE0BC" i], html.admin-light [style*="color:#7FD8A8" i], html.admin-light [style*="color:#9FE8CF" i], html.admin-light [style*="color:#9BE0B0" i], html.admin-light [style*="color:#7FD1A8" i]{ color: #17784F !important; }
+/* 금·주황 계열 글씨 */
+html.admin-light [style*="color:#E0BC74" i], html.admin-light [style*="color: #E0BC74" i], html.admin-light [style*="color:#FFC080" i], html.admin-light [style*="color:#E8B04B" i], html.admin-light [style*="color:#E8B64A" i], html.admin-light [style*="color:#E0B36A" i], html.admin-light [style*="color:#FFB070" i], html.admin-light [style*="color:#FFE6A8" i], html.admin-light [style*="color:#FF9A3C" i], html.admin-light [style*="color:#F0D08A" i], html.admin-light [style*="color:#F0B36A" i], html.admin-light [style*="color:#E8DC8A" i], html.admin-light [style*="color:#E2B25A" i], html.admin-light [style*="color:#E0B04A" i], html.admin-light [style*="color:#D5B97F" i]{ color: #8A5A12 !important; }
+html.admin-light [style*="color:#B8742A" i]{ color: #8A4F12 !important; }
+/* 보라·파랑 계열 글씨 */
+html.admin-light [style*="color:#9B7BFF" i], html.admin-light [style*="color:#C9B8FF" i], html.admin-light [style*="color:#9AA8FF" i]{ color: #5B3FC4 !important; }
+/* 아주 밝은 글씨(흰·미색) — 어두운 바탕을 전제로 한 것. 아래에서 바탕도 밝게 바꾸므로 먹색으로 */
+html.admin-light [style*="color:#FFF;" i], html.admin-light [style*="color:#FFF\"" i], html.admin-light [style*="color:#fff " i], html.admin-light [style*="color:#F4EEDE" i], html.admin-light [style*="color:#EEE5D5" i], html.admin-light [style*="color:#FBE9E3" i]{ color: #1D2428 !important; }
+html.admin-light [style*="color:#8A8D98" i], html.admin-light [style*="color:#AAA" i], html.admin-light [style*="color:#888" i], html.admin-light [style*="color:#5A5C6A" i]{ color: #5E6970 !important; }
+/* 어두운 바탕 → 옅은 바탕 */
+html.admin-light [style*="background:#1C1A12" i], html.admin-light [style*="background: #1C1A12" i]{ background: #FFF8EA !important; }
+html.admin-light [style*="background:#1B1F30" i], html.admin-light [style*="background:#12162A" i], html.admin-light [style*="background:#1E2440" i], html.admin-light [style*="background:#10131E" i], html.admin-light [style*="background:#0E1120" i], html.admin-light [style*="background:#0C0F1A" i], html.admin-light [style*="background:#05060B" i], html.admin-light [style*="background:#080A11" i]{ background: #F4F6F7 !important; }
+html.admin-light [style*="background:#16301F" i]{ background: #E5F4EC !important; }
+html.admin-light [style*="background:#2A2A1E" i]{ background: #FFF6E3 !important; }
+html.admin-light [style*="border:1px solid #444" i], html.admin-light [style*="border: 1px solid #444" i]{ border-color: #C9D1D6 !important; }
+/* 바탕을 밝게 바꾼 상자 안의 밝은 글씨는 먹색으로 */
+html.admin-light :is([style*="background:#1C1A12" i], [style*="background:#1B1F30" i], [style*="background:#12162A" i], [style*="background:#10131E" i], [style*="background:#0E1120" i], [style*="background:#0C0F1A" i]) :not([style*="color"]){ color: inherit; }
+
+/* 영상·이미지 미리보기 창은 검은 바탕 그대로(사진·영상이 제 색으로 보이게) */
+html.admin-light :is(.player, #hmBox, .hmthumb, video){ background: #000; }
+
+/* 상단 밝게/어둡게 단추 */
+#admTheme{ white-space: nowrap; }
+html.admin-light .tabs button{ background: none; border-color: transparent; border-radius: 0; }
+html.admin-light .tabs button.on{ border-color: #B07A2A; }
+
+/* ── 전수 점검 1차 보정(2026-11-17, 하위 탭 38개 중 16개) ── */
+/* 선택된 칩·단추(.on): 모듈이 어두운 바탕(#1C1A12)을 박아 둠 → 옅은 호박 바탕·진한 글씨 */
+html.admin-light #app :is(button, label, a).on:not(.tabs button){ background: #FBF1E0 !important; color: #6E450C !important; border-color: #C79A4E !important; }
+html.admin-light #app :is(button, label, a).on:not(.tabs button) :is(b, small, span){ color: inherit; }
+/* 금색 바탕 단추(배경 = 금색 변수)는 밝은 호박으로 — 금색 변수를 글씨용으로 진하게 바꿨기 때문 */
+html.admin-light #app [style*="background:var(--gold)" i], html.admin-light #app [style*="background: var(--gold)" i], html.admin-light #app .sr-go{ background: linear-gradient(180deg, #E9B45A, #C98F2E) !important; color: #1A1206 !important; border-color: #B57C22 !important; }
+/* 금빛 링크 단추·경고 글씨(모듈 CSS) */
+html.admin-light #app a.btn{ color: #8A5A12; }
+html.admin-light #app .oa-warn{ color: #8A4F12 !important; }
+/* rgb 표기로 박힌 금빛 글씨(꺼짐 표시 등)·회보라 글씨·밝은 노랑 숫자 */
+html.admin-light #app [style*="rgb(224, 188, 116)"], html.admin-light #app [style*="rgb(224,188,116)"], html.admin-light #app [style*="color:#ffd27a" i]{ color: #8A5A12 !important; }
+html.admin-light #app [style*="color:#8A8FA8" i]{ color: #5E6970 !important; }
+/* 패널 이미지 탭: 검은 그림 칸 위 이름표는 밝은 글씨 그대로 */
+html.admin-light #app :is(.pa-c, .ta-c, .as-c) :is(b, small, span){ color: #EDEAE2; }
+/* 풀이 지식 낮은 신뢰 상자(모듈 CSS 어두운 바탕) */
+html.admin-light #app .ik-cb.low{ background: #FFF6E3 !important; border-color: #E8C98A; color: #5C3A08; }
+
+/* ── 전수 점검 2차: 모듈 스타일 규칙 전체 훑기(숨은 상태·마우스 올림·대화상자 포함) ── */
+/* 어두운 바탕 → 밝게(미리보기·썸네일·무대·토스트는 제외) */
+html.admin-light :is(.ik-cb, .ik-nl, .ik-mod, .sr-prog, .why span, .dbgbox){ background: #F4F6F7 !important; color: var(--ink); border-color: var(--line); }
+html.admin-light :is(.ik-chip){ background: #FBF1E0 !important; color: #6E450C; }
+html.admin-light :is(.ik-cr, .ik-row, .sr-row, .sr-cand, .fc-row):hover{ background: #F4F6F7 !important; }
+html.admin-light :is(.ik-chipbtn, .ik-steps button, .ik-dc button, .ik-opts button, .st-opt, .sr-chip, .sr-cand, .fc-chip, .cvpick button, .sub2 button, .ri).on{ background: #FBF1E0 !important; color: #6E450C !important; border-color: #C79A4E !important; }
+html.admin-light .v2drop.over{ background: #FFF6E3 !important; border-color: #C79A4E; }
+html.admin-light :is(.tg, .cg) input:checked + span{ background: #FBF1E0 !important; color: #6E450C !important; border-color: #C79A4E !important; }
+html.admin-light .timeline-admin :is(input:not([type="checkbox"]), select){ background: #FFFFFF !important; color: var(--ink) !important; border-color: #C9D1D6 !important; }
+html.admin-light .sr-src mark{ background: #FDE68A; color: #1D2428; }
+/* 영상 칸 상태 단추(일간·일주 영상 표) */
+html.admin-light .cellx button{ background: #F4F6F7 !important; color: var(--ink2) !important; border-color: var(--line) !important; }
+html.admin-light .cellx button.ok{ background: #E5F4EC !important; color: #17784F !important; border-color: #A8D8BF !important; }
+html.admin-light .cellx button.missing{ background: #FDECEA !important; color: #B42318 !important; border-color: #F1B8B1 !important; }
+html.admin-light .cellx button.disabled{ background: #EEF1F3 !important; color: #8A949A !important; }
+html.admin-light .cellx button.error{ background: #FFF1E0 !important; color: #8A4F12 !important; border-color: #E8C98A !important; }
+html.admin-light .cellx button.poster-only{ background: #FFF8DA !important; color: #6E5A0C !important; border-color: #E5D58A !important; }
+/* 밝은 민트(정상·통과·게시) 글씨 → 진한 초록, 밝은 주황(주의·검토) 글씨 → 진한 갈색 */
+html.admin-light :is(.hit, .ik-st.published, .ik-ok, .ik-steps button.done, .st-badge.PASS, .sr-st.good, .sr-ck .PASS, .fc-st.ok, .ob-st.ok){ color: #17784F !important; }
+html.admin-light :is(.v2warn, .pill.w, .ik-st.review, .sr-st.warn, .sr-ck .WARNING, .fc-st.mid){ color: #8A4F12 !important; }
+/* 썸네일 위 '대기' 표시는 어두운 썸네일 위라 밝은 글씨 유지 */
+html.admin-light .v2card .bd .pend{ color: #FFE6A8; }
