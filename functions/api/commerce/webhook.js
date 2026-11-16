@@ -4,7 +4,7 @@
 // PORTONE_WEBHOOK_SECRET 이 있으면 서명도 확인한다(없으면 조회 방식만으로도 위조 결제는 통과하지 못한다).
 import { json } from '../../_lib.js';
 import { mailRefund, mailAdmin } from '../../_mail.js';
-import { sbRest, supabaseReady, portoneReady, settlePortone, verifyPortoneWebhook, portoneCall, noteSignal } from '../../_commerce.js';
+import { sbRest, supabaseReady, portoneReady, settlePortone, verifyPortoneWebhook, portoneCall, noteSignal, revokeOrder } from '../../_commerce.js';
 
 export async function onRequestPost({ request, env }) {
   if (!supabaseReady(env) || !portoneReady(env)) return json({ error: 'not-configured' }, 503);
@@ -30,7 +30,7 @@ export async function onRequestPost({ request, env }) {
     try {
       const changed = await sbRest(env, `commerce_orders?order_id=eq.${encodeURIComponent(paymentId)}&status=eq.paid`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify({ status: 'canceled', canceled_at: at, cancel_reason: '포트원 취소 알림' }) });
       if (Array.isArray(changed) && changed.length) { await mailRefund(env, order, at); await mailAdmin(env, 'refund', order, { reason: '포트원 취소 알림(콘솔 등 관리자 화면 밖에서 취소)' }); }
-      await sbRest(env, `commerce_entitlements?order_id=eq.${encodeURIComponent(paymentId)}&revoked_at=is.null`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ revoked_at: at }) });
+      await revokeOrder(env, order, at);   // 세계 권한 회수 · 크레딧 주문이면 크레딧 회수
     } catch { return json({ error: 'commerce-unavailable' }, 503); }
     return json({ ok: true, canceled: true });
   }

@@ -36,6 +36,11 @@ global.fetch = async (u, o = {}) => {
   if (u.startsWith('https://api.portone.io/identity-verifications/')) { const id = decodeURIComponent(u.split('/').pop().split('?')[0]); return portone[id] ? res(portone[id]) : res({ type: 'NOT_FOUND' }, 404); }
   if (u.startsWith('https://api.resend.com/')) return res({ id: 'm' });
   if (u.includes('/rest/v1/rpc/community_user_by_email')) { const x = Object.values(USERS).find(z => z.email === body.p_email); return res(x ? x.id : null); }
+  // 크레딧 함수 흉내(supabase/migrations/20261116_credits_stage6.sql 와 같은 규칙)
+  const bal = uid => T.cm_credit_ledger.filter(r => r.user_id === uid).reduce((a, r) => a + r.delta, 0);
+  if (u.includes('/rest/v1/rpc/cm_credit_balance')) return res(bal(body.p_user));
+  if (u.includes('/rest/v1/rpc/cm_credit_spend')) { const b = body; if (!(b.p_amount > 0 && b.p_amount <= 1000)) return res({ ok: false, error: 'bad-amount' }); if (!['more_picks', 'extra_like', 'adjust'].includes(b.p_reason)) return res({ ok: false, error: 'bad-reason' }); if (T.cm_credit_ledger.some(r => r.idem_key === b.p_idem)) return res({ ok: true, dup: true, balance: bal(b.p_user) }); const cur = bal(b.p_user); if (cur < b.p_amount) return res({ ok: false, error: 'insufficient', balance: cur }); T.cm_credit_ledger.push({ id: seq++, user_id: b.p_user, delta: -b.p_amount, reason: b.p_reason, ref: b.p_ref, idem_key: b.p_idem, created_at: new Date().toISOString() }); return res({ ok: true, dup: false, balance: cur - b.p_amount }); }
+  if (u.includes('/rest/v1/rpc/cm_credit_grant')) { const b = body; if (!T.cm_credit_ledger.some(r => r.idem_key === b.p_idem)) T.cm_credit_ledger.push({ id: seq++, user_id: b.p_user, delta: b.p_amount, reason: b.p_reason, ref: b.p_ref, idem_key: b.p_idem, by_actor: b.p_by, created_at: new Date().toISOString() }); return res({ ok: true, balance: bal(b.p_user) }); }
   const mm = u.match(/\/rest\/v1\/(\w+)(?:\?(.*))?$/); if (!mm) throw Error('unexpected fetch ' + u);
   const name = mm[1], tbl = T[name]; if (!tbl) return res({ message: 'no table ' + name }, 404);
   const qs = [...new URLSearchParams(mm[2] || '')], sel = (qs.find(q => q[0] === 'select') || [])[1];
@@ -172,7 +177,44 @@ const ENV = { ADMIN_PASSWORD: 'adm-pw', COMMUNITY_SECRET: 'secret-0123456789', S
   ok(!T.cm_match_profiles.some(p => p.user_id === U('a')) && !T.adult_verifications.some(v => v.user_id === U('a')) && T.cm_messages.every(m => m.sender_id !== U('a')), '탈퇴: 인연 프로필·본인확인 삭제, 메시지는 보낸 사람 비움');
   x = await call(chat, 'GET', 'tok-b', '?view=rooms'); ok(x.d.rooms[0].name === '떠난 회원' && !x.d.rooms[0].open, '상대가 떠나면 "떠난 회원"');
 
-  // 9) 파일
+  // 9) 크레딧(6단계): 유료 스위치 기본 꺼짐 · 원자적 차감 · 멱등 · 더 볼 사람 없으면 차감 안 함
+  T.cm_credit_ledger = [];
+  const credits = await imp('functions/api/community/credits.js');
+  for (const [k, c2, nick, ilju] of [['tok-g', '7', '하늘', '정해'], ['tok-h', '8', '구름', '무진'], ['tok-i', '9', '이슬', '신유']]) { USERS[k] = { id: U(c2), email: k.slice(4) + '@example.com' }; T.member_profiles.push(prof(U(c2), nick, ilju)); T.member_consents.push(...consent(U(c2))); }
+  for (const [e, y, g2] of [['g@example.com', Y - 25, 'F'], ['h@example.com', Y - 27, 'M'], ['i@example.com', Y - 24, 'F']]) await call(verify, 'POST', null, '', { action: 'manual', email: e, birthYear: y, gender: g2 }, admin);
+  await call(match, 'POST', 'tok-g', '', { action: 'profile', active: true, purposes: ['chat'], region: '서울', wantAgeMax: 30 });
+  await call(match, 'POST', 'tok-h', '', { action: 'profile', active: true, purposes: ['chat'], region: '서울' });
+  x = await call(credits, 'GET', 'tok-g'); ok(x.s === 200 && x.d.enabled === false && !('balance' in x.d), '유료 스위치 기본 꺼짐(잔액도 안 보임)');
+  x = await call(credits, 'POST', 'tok-g', '', { action: 'more-picks', req: 'r'.repeat(16) }); ok(x.s === 403 && x.d.need === 'premium-off', '꺼져 있으면 더 보기 거절');
+  x = await call(credits, 'PUT', null, '', { enabled: true }, admin); ok(x.s === 400, '켜려면 확인 문구 필요');
+  x = await call(credits, 'PUT', 'tok-g', '', { enabled: true, confirm: '유료 켜기' }); ok(x.s === 401, '유료 설정은 관리자만');
+  x = await call(credits, 'PUT', null, '', { enabled: true, confirm: '유료 켜기', prices: { morePicks: 3, extraLike: 999 } }, admin);
+  ok(x.s === 200 && x.d.config.enabled && x.d.config.prices.extraLike === 1 && T.admin_audit_log.some(l => l.action === 'community.premium.config'), '유료 켜기(이상한 가격은 기본값)·감사 로그');
+  x = await call(match, 'GET', 'tok-g', '?view=today'); const gToday = x.d.cards.map(c2 => c2.name).sort(); ok(JSON.stringify(gToday) === '["구름","꽃길"]', 'G 의 오늘의 인연(H·C)');
+  x = await call(credits, 'POST', 'tok-g', '', { action: 'more-picks', req: 'a'.repeat(16) }); ok(x.s === 409 && x.d.added === 0 && T.cm_credit_ledger.length === 0, '더 볼 사람이 없으면 크레딧을 쓰지 않음');
+  await call(match, 'POST', 'tok-i', '', { action: 'profile', active: true, purposes: ['chat'], region: '서울' });
+  x = await call(credits, 'POST', 'tok-g', '', { action: 'more-picks', req: 'b'.repeat(16) }); ok(x.s === 402 && x.d.need === 'credit-buy' && x.d.balance === 0, '잔액 부족 → 402');
+  x = await call(credits, 'POST', 'tok-g', '', { action: 'grant', email: 'g@example.com', amount: 5 }); ok(x.s === 401, '지급은 관리자만');
+  x = await call(credits, 'POST', null, '', { action: 'grant', email: 'g@example.com', amount: 5, note: '테스트' }, admin); ok(x.s === 200 && x.d.balance === 5 && T.admin_audit_log.some(l => l.action === 'community.credit.grant'), '관리자 지급(감사 로그)');
+  x = await call(credits, 'POST', 'tok-g', '', { action: 'more-picks', req: 'c'.repeat(16) }); ok(x.s === 200 && x.d.added === 1 && x.d.balance === 2, '더 보기: 새 인연 1명·크레딧 3 차감');
+  x = await call(credits, 'POST', 'tok-g', '', { action: 'more-picks', req: 'c'.repeat(16) }); ok(x.d.balance === 2 && T.cm_credit_ledger.filter(r => r.reason === 'more_picks').length === 1, '같은 요청을 다시 보내도 한 번만 차감');
+  x = await call(match, 'GET', 'tok-g', '?view=today'); ok(x.d.cards.some(c2 => c2.name === '이슬'), '더 본 인연이 오늘의 인연에 붙음');
+  x = await call(credits, 'GET', 'tok-g'); ok(x.d.enabled && x.d.balance === 2 && x.d.history.length === 2 && x.d.history[0].label === '오늘의 인연 더 보기', '내 잔액·이력');
+  // 하루 잇기 한도 → 크레딧으로 잇기
+  kv.set('cm:rate:like:' + U('7') + ':' + new Date().toISOString().slice(0, 10), '10');   // 하루 한도 카운터(서버 overLimit 은 UTC 날짜 키)
+  const hCard = (await call(match, 'GET', 'tok-g', '?view=today')).d.cards.find(c2 => c2.name === '구름');
+  x = await call(match, 'POST', 'tok-g', '', { action: 'like', handle: hCard.handle }); ok(x.s === 429 && x.d.need === 'credit' && x.d.price === 1, '한도를 넘으면 크레딧 잇기 안내');
+  x = await call(match, 'POST', 'tok-g', '', { action: 'like', handle: hCard.handle, useCredit: true, req: 'd'.repeat(16) }); ok(x.s === 200 && T.cm_credit_ledger.some(r => r.reason === 'extra_like') && (await call(credits, 'GET', 'tok-g')).d.balance === 1, '크레딧 1로 잇기');
+  T.cm_credit_ledger.push({ id: seq++, user_id: U('7'), delta: -1, reason: 'adjust', idem_key: 'x', created_at: '' });
+  const iCard = (await call(match, 'GET', 'tok-g', '?view=today')).d.cards.find(c2 => c2.name === '이슬');
+  x = await call(match, 'POST', 'tok-g', '', { action: 'like', handle: iCard.handle, useCredit: true, req: 'e'.repeat(16) }); ok(x.s === 402 && !T.cm_likes.some(l => l.from_id === U('7') && l.to_id === U('9')), '잔액 0 이면 잇지 않음');
+  await call(credits, 'PUT', null, '', { enabled: false }, admin);
+  x = await call(match, 'POST', 'tok-g', '', { action: 'like', handle: iCard.handle, useCredit: true, req: 'f'.repeat(16) }); ok(x.s === 429 && !x.d.need, '유료를 끄면 크레딧 잇기 안내도 사라짐');
+  const sql6 = read('supabase/migrations/20261116_credits_stage6.sql');
+  ok(/pg_advisory_xact_lock/.test(sql6) && /idem_key   text not null unique/.test(sql6) && /if bal < p_amount then/.test(sql6), '원장: 회원별 잠금·멱등 키·잔액 확인');
+  ok(/revoke all on public\.cm_credit_ledger from anon, authenticated/.test(sql6) && /grant execute on function public\.cm_credit_balance\(uuid\), public\.cm_credit_spend/.test(sql6) && !/commerce_/.test(sql6.replace(/--.*$/gm, '')), '원장: 브라우저 권한 회수·심층 분석 결제 표 안 건드림');
+
+  // 10) 파일
   const sql = read('supabase/migrations/20261116_match_stage5.sql');
   const tbls = ['adult_verifications', 'cm_match_profiles', 'cm_daily_picks', 'cm_likes', 'cm_rooms', 'cm_messages'];
   ok(tbls.every(t => new RegExp('alter table public\\.' + t + '\\s+enable row level security').test(sql)) && /revoke all on public\.adult_verifications, public\.cm_match_profiles, public\.cm_daily_picks, public\.cm_likes, public\.cm_rooms, public\.cm_messages from anon, authenticated/.test(sql), '새 표 6개 RLS·권한 회수');

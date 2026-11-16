@@ -6,6 +6,7 @@
    ⑤ 회원 동의 현황(/api/account/consent GET, 2단계): 항목별 동의 수·2년 재확인 대상·최근 변경(회원 id 없이).
    ⑥ 감사 로그(/api/community/audit): 관리자 작업 최근 50건.
    ⑦ 성인 확인(테스트용 수동, /api/community/verify manual, 5단계): 포트원 본인인증 채널(PORTONE_IDV_CHANNEL_KEY) 연결 전 테스터 계정을 확인해 인연 매칭·대화를 시험
+   ⑨ 크레딧·유료(/api/community/credits, 6단계): 유료 스위치(기본 꺼짐, 켜려면 '유료 켜기' 입력)·가격·테스트 지급·최근 원장
    ⑧ 광장 운영(/api/community/mod, 3단계): 신고 묶음 처리(숨김·삭제·기각·제재), 숨겨진 글, 제재 목록·해제.
    모든 변경은 서버가 감사 로그(admin_audit_log)에 작업자 이름과 함께 남긴다. */
 (function () {
@@ -71,7 +72,7 @@
         (d.recent.length ? '<table class="tbl"><thead><tr><th>시각</th><th>항목</th><th>처리</th><th>경로</th></tr></thead><tbody>' + d.recent.map(function (r) { return '<tr><td>' + when(r.at) + '</td><td>' + esc(KIND[r.kind] || r.kind) + '</td><td>' + (r.action === 'grant' ? '동의' : '철회') + '</td><td>' + esc(VIA[r.via] || r.via || '') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">아직 변경 기록이 없습니다.</p>');
     }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
-  var ACT = { 'community.stage': '공개 단계 변경', 'community.access.grant': '권한 주기', 'community.access.revoke': '권한 회수', 'community.mod.hide': '글 숨김', 'community.mod.restore': '글 되살림', 'community.mod.delete': '글 삭제', 'community.mod.dismiss': '신고 기각', 'community.sanction.warn': '경고', 'community.sanction.mute': '쓰기 정지', 'community.sanction.ban': '이용 정지', 'community.sanction.lift': '제재 해제', 'community.mod.avatar': '프로필 사진 지움', 'community.verify.manual': '성인 확인(수동)', 'community.chat.purge': '대화 자동 파기(90일)' };
+  var ACT = { 'community.stage': '공개 단계 변경', 'community.access.grant': '권한 주기', 'community.access.revoke': '권한 회수', 'community.mod.hide': '글 숨김', 'community.mod.restore': '글 되살림', 'community.mod.delete': '글 삭제', 'community.mod.dismiss': '신고 기각', 'community.sanction.warn': '경고', 'community.sanction.mute': '쓰기 정지', 'community.sanction.ban': '이용 정지', 'community.sanction.lift': '제재 해제', 'community.mod.avatar': '프로필 사진 지움', 'community.verify.manual': '성인 확인(수동)', 'community.chat.purge': '대화 자동 파기(90일)', 'community.premium.config': '유료 설정 변경', 'community.credit.grant': '크레딧 지급' };
   var SK = { warn: '경고', mute: '쓰기 정지', ban: '이용 정지' };
   var modView = 'reports';
   function loadMod() {
@@ -110,6 +111,26 @@
     }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
 
+  function loadCredits() {
+    var box = $('#cmCr'); if (!box) return;
+    call('/api/community/credits?view=admin').then(function (d) {
+      var c = d.config;
+      box.innerHTML = '<p style="margin:0 0 8px">유료 기능: <b style="color:' + (c.enabled ? '#FF8A78' : 'var(--gold)') + '">' + (c.enabled ? '켜짐' : '꺼짐') + '</b> <button class="btn ghost sm" id="crTog">' + (c.enabled ? '끄기' : '켜기') + '</button></p>' +
+        '<div class="row" style="gap:8px;flex-wrap:wrap"><label class="muted">더 보기 가격 <input type="number" id="crMp" min="1" max="100" value="' + c.prices.morePicks + '" style="width:64px"></label><label class="muted">추가 잇기 가격 <input type="number" id="crXl" min="1" max="100" value="' + c.prices.extraLike + '" style="width:64px"></label><label class="muted">더 보기 인원 <input type="number" id="crMc" min="1" max="10" value="' + c.morePicksCount + '" style="width:56px"></label><label class="muted">하루 더 보기 <input type="number" id="crMd" min="0" max="10" value="' + c.morePicksPerDay + '" style="width:56px">번</label><button class="btn ghost sm" id="crSave">가격 저장</button><span class="muted" id="crMsg"></span></div>' +
+        '<div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap"><input type="email" id="crEmail" placeholder="회원 이메일" style="min-width:200px"><input type="number" id="crAmt" placeholder="크레딧(회수는 -)" style="width:130px"><input type="text" id="crNote" placeholder="메모(선택)" maxlength="60"><button class="btn sm" id="crGrant">지급</button><span class="muted" id="crGMsg"></span></div>' +
+        '<p class="muted" style="margin:10px 0 4px">누적: ' + Object.keys(d.totals).map(function (k) { return esc(k) + ' ' + d.totals[k]; }).join(' · ') + '</p>' +
+        (d.recent.length ? '<table class="tbl"><thead><tr><th>시각</th><th>회원</th><th>내용</th><th>크레딧</th><th>메모·작업자</th></tr></thead><tbody>' + d.recent.map(function (r) { return '<tr><td>' + when(r.at) + '</td><td>' + esc(r.who) + '</td><td>' + esc(r.label) + '</td><td>' + (r.delta > 0 ? '+' : '') + r.delta + '</td><td class="muted">' + esc([r.ref, r.by].filter(Boolean).join(' · ')) + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">아직 원장 기록이 없습니다.</p>');
+      $('#crTog').onclick = function () {
+        var body = { enabled: !c.enabled };
+        if (!c.enabled) { var p = prompt('회원에게 크레딧 기능(더 보기·추가 잇기)을 보여 줍니다. 결제 연결 전에는 관리자가 지급한 크레딧만 쓸 수 있습니다. 계속하려면 "유료 켜기"라고 입력해 주세요.'); if (p !== '유료 켜기') return; body.confirm = p; }
+        else if (!confirm('크레딧 기능을 끕니다. 회원 잔액은 그대로 남습니다. 계속할까요?')) return;
+        call('/api/community/credits', { method: 'PUT', body: body }).then(function () { loadCredits(); loadAudit(); }).catch(function (e) { alert(e.message); });
+      };
+      $('#crSave').onclick = function () { call('/api/community/credits', { method: 'PUT', body: { prices: { morePicks: +$('#crMp').value, extraLike: +$('#crXl').value }, morePicksCount: +$('#crMc').value, morePicksPerDay: +$('#crMd').value } }).then(function () { msg('crMsg', '저장했습니다'); loadAudit(); }).catch(function (e) { msg('crMsg', e.message, true); }); };
+      $('#crGrant').onclick = function () { call('/api/community/credits', { method: 'POST', body: { action: 'grant', email: $('#crEmail').value.trim(), amount: +$('#crAmt').value, note: $('#crNote').value.trim() } }).then(function (r) { msg('crGMsg', '지급했습니다(잔액 ' + r.balance + ')'); $('#crAmt').value = ''; loadCredits(); loadAudit(); }).catch(function (e) { msg('crGMsg', e.message, true); }); };
+    }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
+  }
+
   function draw() {
     root.innerHTML =
       '<div class="card"><h3 style="margin:0 0 8px">① 공개 단계</h3><div id="cmStage"><p class="muted">불러오는 중…</p></div>' +
@@ -125,6 +146,7 @@
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑤ 광장 운영 · 신고 처리</h3><div class="row" style="gap:6px;margin-bottom:8px"><button class="btn sm" data-mv="reports">처리할 신고</button><button class="btn ghost sm" data-mv="hidden">숨겨진 글</button><button class="btn ghost sm" data-mv="sanctions">제재 목록</button></div><p class="muted" style="margin:0 0 8px">서로 다른 회원 5명이 신고하면 자동으로 숨겨집니다. 확인 후 되살리거나 삭제해 주세요. 모든 처리는 작업자 이름과 함께 기록됩니다.</p><div id="cmMod"></div></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑦ 성인 확인 · 테스트용</h3><p class="muted" style="margin:0 0 8px">포트원 본인인증 채널(환경변수 PORTONE_IDV_CHANNEL_KEY)을 연결하기 전, 테스터 계정이 인연 매칭·대화를 시험할 수 있게 수동으로 확인합니다. 실제 회원에게는 쓰지 마세요. 기록이 남습니다.</p>' +
       '<div class="row"><input type="email" id="cmVeEmail" placeholder="회원 이메일" style="min-width:200px"><input type="number" id="cmVeYear" placeholder="출생 연도" min="1900" max="2010" style="width:110px"><select id="cmVeG"><option value="F">여성</option><option value="M">남성</option></select><button class="btn" id="cmVeGo">확인 처리</button><span class="muted" id="cmVeMsg"></span></div></div>' +
+      '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑨ 크레딧 · 유료 기능</h3><p class="muted" style="margin:0 0 8px">기본은 꺼짐입니다. 결제로 크레딧을 사는 기능은 아직 연결하지 않았습니다(승인 후). 지금은 테스트·보상용 지급만 됩니다.</p><div id="cmCr"><p class="muted">불러오는 중…</p></div></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑥ 관리자 작업 기록</h3><div id="cmAudit"><p class="muted">불러오는 중…</p></div></div>';
     $('#cmGrant').onclick = function () {
       var em = $('#cmEmail').value.trim(); if (!em) { msg('cmGrantMsg', '이메일을 입력해 주세요', true); return; }
@@ -133,7 +155,7 @@
     $('#cmEnter').onclick = function () { call('/api/community/enter', { method: 'POST' }).then(function (d) { window.open(d.to || '/community/', '_blank', 'noopener'); msg('cmEnterMsg', '새 탭에서 열었습니다(12시간 유효)'); }).catch(function (e) { msg('cmEnterMsg', e.message, true); }); };
     fetch('/api/community/status', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(drawStage).catch(function () { drawStage({ stage: 'dev' }); });
     [].forEach.call(root.querySelectorAll('[data-mv]'), function (b) { b.onclick = function () { modView = b.getAttribute('data-mv'); loadMod(); }; });
-    loadAccess(); loadAlerts(); loadConsents(); loadAudit(); loadMod();
+    loadAccess(); loadAlerts(); loadConsents(); loadAudit(); loadMod(); loadCredits();
   }
   window.V2Community = { open: function (p) { pw = p || ''; root = document.getElementById('t-community'); if (root) draw(); } };
 })();

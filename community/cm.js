@@ -315,7 +315,7 @@
       img.src = u;
     };
     var rs = $('#avaReset'); if (rs) rs.onclick = function (e) { e.preventDefault(); api('/api/community/avatar', { method: 'DELETE' }).then(function (d) { if (d._ok) { toast('일간 포스터로 되돌렸어요'); refreshMe().then(route); } else toast(d.error || '되돌리지 못했어요'); }); };
-    $('[data-pg]').forEach(function (a) { a.onclick = function (e) { e.preventDefault(); api('/api/community/me', { method: 'POST', body: { action: 'gender', gender: a.dataset.pg } }).then(function (d) { if (d._ok) refreshMe().then(route); else toast(d.error || '바꾸지 못했어요'); }); }; });
+    $$('[data-pg]').forEach(function (a) { a.onclick = function (e) { e.preventDefault(); api('/api/community/me', { method: 'POST', body: { action: 'gender', gender: a.dataset.pg } }).then(function (d) { if (d._ok) refreshMe().then(route); else toast(d.error || '바꾸지 못했어요'); }); }; });
   }
   function deviceBirth() { try { var s = JSON.parse(localStorage.getItem('mantra-manse-v1') || 'null'); if (!s || !s.year || !s.month || !s.day) return null; var b = { year: +s.year, month: +s.month, day: +s.day, calendar: s.calendar || 'solar', leap: !!s.leap }; if (!s.hourUnknown && s.hour !== '' && s.hour != null) { b.hour = +s.hour; b.minute = +s.minute || 0; } if (s.jasi) b.jasi = s.jasi; if (s.timeMode) b.timeMode = s.timeMode; b._g = s.gender === 'F' ? 'F' : s.gender === 'M' ? 'M' : null; return b; } catch (e) { return null; } }
   function iljuForm(has) {
@@ -389,7 +389,7 @@
       f.onchange = function () { btn.disabled = !f.querySelector('input[name=mood]:checked'); };
       f.onsubmit = function (e) {
         e.preventDefault(); var m = $('#logMsg'), mood = f.querySelector('input[name=mood]:checked'); if (!mood) return;
-        var tags = $('input[name=tags]:checked', f).map(function (x) { return x.value; });
+        var tags = $$('input[name=tags]:checked', f).map(function (x) { return x.value; });
         if (tags.length > 4) { m.className = 'msg err'; m.textContent = '키워드는 4개까지 고를 수 있어요'; return; }
         btn.disabled = true; m.className = 'msg'; m.textContent = '저장하는 중입니다…';
         api('/api/community/today', { method: 'POST', body: { mood: +mood.value, tags: tags, note: f.elements.note.value } }).then(function (r) {
@@ -413,12 +413,13 @@
         '<p class="note pink" style="margin-top:12px">' + esc(s.insight) + '</p>' +
         (s.byTenGod.length ? '<div class="bars" style="margin-top:14px">' + s.byTenGod.map(function (t) { return '<div class="barrow"><span style="width:44px">' + esc(t.tenGod) + '</span><i style="--w:' + Math.round(t.avg / 5 * 100) + '%"></i><small>' + t.avg + '</small></div>'; }).join('') + '</div><p class="muted" style="margin:6px 0 0">십성별 평균 기분(두 번 이상 기록된 날만)</p>' : '') + '</section>' +
         d.logs.map(function (l) { return '<div class="card logrow"><span class="lm" aria-hidden="true">' + MOOD[l.mood][0] + '</span><div style="flex:1;min-width:0"><b>' + esc(new Date(l.day + 'T00:00:00+09:00').toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', weekday: 'short' })) + ' · ' + esc(MOOD[l.mood][1]) + '</b><div class="sub">' + (l.tenGod ? esc(l.tenGod) + ' 날' : '') + (l.tags.length ? ' · ' + l.tags.map(function (t) { return esc(({ work: '일', money: '돈', love: '연애', people: '사람', health: '몸', rest: '쉼', study: '배움', family: '가족' })[t] || t); }).join(', ') : '') + '</div>' + (l.note ? '<p class="ex" style="margin-top:4px">' + esc(l.note) + '</p>' : '') + '</div><button class="act icon" data-ldel="' + esc(l.day) + '" aria-label="기록 지우기">' + ICON.trash + '</button></div>'; }).join('');
-      $('[data-ldel]', box).forEach(function (b) { b.onclick = function () { confirmSheet('이 날의 기록을 지울까요?', '지우면 되돌릴 수 없어요.', '지우기', function () { api('/api/community/records?day=' + encodeURIComponent(b.dataset.ldel), { method: 'DELETE' }).then(function () { recordsView(q); }); }); }; });
+      $$('[data-ldel]', box).forEach(function (b) { b.onclick = function () { confirmSheet('이 날의 기록을 지울까요?', '지우면 되돌릴 수 없어요.', '지우기', function () { api('/api/community/records?day=' + encodeURIComponent(b.dataset.ldel), { method: 'DELETE' }).then(function () { recordsView(q); }); }); }; });
     });
   }
 
   /* ── 인연(5단계): 본인확인 → 인연 프로필 → 오늘의 인연 → 인연 잇기 → 대화 ── */
-  var MP = null;   // 인연 프로필 응답 캐시
+  var MP = null, CR = null;   // 인연 프로필·크레딧 응답 캐시
+  var reqId = function () { try { return crypto.randomUUID().replace(/-/g, ''); } catch (e) { return (Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).slice(0, 32); } };
   var PORTONE_SDK = 'https://cdn.portone.io/v2/browser-sdk.js';
   var loadScript = function (src) { return new Promise(function (ok, no) { if (document.querySelector('script[src="' + src + '"]')) return ok(); var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); };
   function matchProfile() { return api('/api/community/match?view=profile').then(function (d) { MP = d; return d; }); }
@@ -437,15 +438,20 @@
     paint('<div class="skel" style="height:220px"></div><div class="skel" style="height:320px"></div>', 'match');
     matchProfile().then(function (d) {
       if (matchGate(d)) return;
-      Promise.all([api('/api/community/match?view=today'), api('/api/community/match?view=inbox')]).then(function (rs) {
-        var t = rs[0], ib = rs[1];
+      Promise.all([api('/api/community/match?view=today'), api('/api/community/match?view=inbox'), api('/api/community/credits')]).then(function (rs) {
+        var t = rs[0], ib = rs[1]; CR = rs[2] && rs[2]._ok && rs[2].enabled ? rs[2] : null;
         if (!t._ok) { paint('<p class="msg err">' + esc(t.error || '불러오지 못했어요') + '</p>', 'match'); return; }
         var nRecv = ib._ok ? ib.received.length : 0, nMatch = ib._ok ? ib.matches.length : 0;
-        paint('<div class="mh"><div><p class="kick-s">今日之緣</p><h1>오늘의 인연</h1><p class="muted" style="margin:2px 0 0">' + (t.cards.length ? '서로 원하는 조건이 맞는 ' + t.cards.length + '명이에요. 내일 새로운 인연이 찾아와요.' : '') + '</p></div><a class="btn ghost sm" href="#/match/edit">조건</a></div>' +
+        paint('<div class="mh"><div><p class="kick-s">今日之緣</p><h1>오늘의 인연</h1><p class="muted" style="margin:2px 0 0">' + (t.cards.length ? '서로 원하는 조건이 맞는 ' + t.cards.length + '명이에요. 내일 새로운 인연이 찾아와요.' : '') + '</p></div><div style="display:flex;gap:6px;align-items:center">' + (CR ? '<button type="button" class="credit" id="crChip" title="크레딧 충전·내역"><span class="hj">緣</span>' + CR.balance + '</button>' : '') + '<a class="btn ghost sm" href="#/match/edit">조건</a></div></div>' +
           '<div class="grid2" style="margin:12px 0 16px"><a class="group-card" href="#/match/inbox"><span class="gem">' + nRecv + '</span><span><b>나에게 온 인연</b><small>받은 인연 잇기</small></span></a><a class="group-card" href="#/chat"><span class="gem">' + nMatch + '</span><span><b>이어진 인연</b><small>대화하기</small></span></a></div>' +
           (t.cards.length ? '<div id="fates">' + t.cards.map(fateCard).join('') + '</div>' : empty('오늘은 아직 닿은 인연이 없어요', '조건을 조금 넓히거나 내일 다시 찾아와 주세요. 광장에 인연 프로필을 켠 사람이 늘수록 더 많이 이어져요.')) +
+          (CR ? '<button class="btn ghost block" id="morePicks" style="margin-top:4px">오늘의 인연 ' + CR.morePicksCount + '명 더 보기 · 크레딧 ' + CR.prices.morePicks + '</button>' : '') +
           '<p class="muted" style="margin:14px 2px 0">명리 지표는 두 사람의 일주만 본 참고용이에요. 관계의 성패를 예측하지 않아요.</p>', 'match');
         bindFates(t.cards);
+        var chip = $('#crChip'); if (chip) chip.onclick = creditSheet;
+        var mp = $('#morePicks'); if (mp) mp.onclick = function () { confirmSheet('오늘의 인연 ' + CR.morePicksCount + '명을 더 볼까요?', '크레딧 ' + CR.prices.morePicks + '개를 써요(지금 ' + CR.balance + '개). 조건이 맞는 새 인연이 없으면 쓰지 않아요.', '더 보기', function () { mp.disabled = true; api('/api/community/credits', { method: 'POST', body: { action: 'more-picks', req: reqId() } }).then(function (d) { mp.disabled = false; if (!d._ok) { toast(d.error || '더 보지 못했어요'); return; } toast(d.added + '명의 인연이 더 찾아왔어요'); track('credit_more_picks'); matchView(); }); }); };
+        // 크레딧이 모자라면 바로 충전 창
+        if (mp && CR.balance < CR.prices.morePicks && CR.packs && CR.packs.length) { mp.onclick = function () { toast('크레딧이 부족해요. 충전하고 이어서 볼 수 있어요'); creditSheet(); }; }
       });
     });
   }
@@ -460,14 +466,15 @@
       '<div class="fa">' + (c.sent ? '<span class="sent">인연을 이었어요 · 상대의 답을 기다리는 중</span>' : c.passed ? '<span class="sent">넘긴 인연이에요</span>' : '<button class="btn ghost" data-pass>넘기기</button><button class="btn pink" data-like>인연 잇기</button>') + '</div></div></article>';
   }
   function bindFates(cards, after) {
-    $('.fate').forEach(function (el) {
+    $$('.fate').forEach(function (el) {
       var c = cards[+el.dataset.i], like = $('[data-like]', el), pass = $('[data-pass]', el);
       if (pass) pass.onclick = function () { api('/api/community/match', { method: 'POST', body: { action: 'pass', handle: c.handle } }).then(function (d) { if (d._ok) { el.style.opacity = '.45'; el.querySelector('.fa').innerHTML = '<span class="sent">넘긴 인연이에요</span>'; track('match_pass'); if (after) after(); } else toast(d.error || '잠시 후 다시 시도해 주세요'); }); };
       if (like) like.onclick = function () {
         var s = sheet('<h2>' + esc(c.name) + '님과 인연 잇기</h2><p class="muted" style="margin:6px 0 10px">상대도 인연을 이으면 대화가 열려요. 짧은 첫 인사를 남길 수 있어요(선택).</p><form class="form" id="lkF"><textarea name="note" rows="2" maxlength="100" placeholder="예: 같은 일주라 반가워요! 이직 이야기 나눠 보고 싶어요"></textarea><div class="grid2"><button class="btn ghost" type="button" data-x>취소</button><button class="btn pink" type="submit">인연 잇기</button></div><p class="msg" role="status"></p></form>');
         $('#lkF', s.el).onsubmit = function (e) {
           e.preventDefault(); var f = e.target, m = f.querySelector('.msg');
-          api('/api/community/match', { method: 'POST', body: { action: 'like', handle: c.handle, note: f.elements.note.value } }).then(function (d) {
+          var send = function (useCredit) { return api('/api/community/match', { method: 'POST', body: { action: 'like', handle: c.handle, note: f.elements.note.value, useCredit: !!useCredit, req: useCredit ? reqId() : undefined } }); };
+          send(false).then(function (d) { if (d.need === 'credit') { m.className = 'msg'; m.innerHTML = esc(d.error) + ' <button type="button" class="btn pink sm" id="useCr">크레딧 ' + d.price + '개로 잇기</button>'; return new Promise(function (ok) { $('#useCr', s.el).onclick = function () { send(true).then(function (r) { if (r.need === 'credit-buy' && CR && CR.packs && CR.packs.length) { s.close(); toast('크레딧이 부족해요'); creditSheet(); return; } ok(r); }); }; }); } return d; }).then(function (d) { if (!d) return;
             if (!d._ok) { m.className = 'msg err'; m.textContent = d.error || '잇지 못했어요'; return; }
             s.close(); track('match_like', { matched: d.matched ? 1 : 0 });
             if (d.matched) { matchedSheet(c, d.room); } else { toast('인연을 이었어요. 상대의 답을 기다려 볼게요'); el.querySelector('.fa').innerHTML = '<span class="sent">인연을 이었어요 · 상대의 답을 기다리는 중</span>'; }
@@ -489,7 +496,7 @@
       if (!d._ok) { if (d.need) { matchProfile().then(matchGate); return; } box.innerHTML = '<p class="msg err">' + esc(d.error || '불러오지 못했어요') + '</p>'; return; }
       if (tab === 'sent') {
         box.innerHTML = d.sent.length ? d.sent.map(function (x) { return '<div class="card" style="display:flex;align-items:center;gap:12px">' + ava({ name: x.name, avatar: x.avatar }) + '<div style="flex:1"><b>' + esc(x.name) + '</b><div class="sub">' + when(x.at) + ' 전에 이었어요 · 답을 기다리는 중</div></div><button class="btn ghost sm" data-wd="' + esc(x.handle) + '">거두기</button></div>'; }).join('') : empty('보낸 인연이 없어요', '오늘의 인연에서 마음에 닿는 분께 인연을 이어 보세요');
-        $('[data-wd]', box).forEach(function (b) { b.onclick = function () { api('/api/community/match', { method: 'POST', body: { action: 'withdraw', handle: b.dataset.wd } }).then(function () { toast('거뒀어요'); inboxView(q); }); }; });
+        $$('[data-wd]', box).forEach(function (b) { b.onclick = function () { api('/api/community/match', { method: 'POST', body: { action: 'withdraw', handle: b.dataset.wd } }).then(function () { toast('거뒀어요'); inboxView(q); }); }; });
         return;
       }
       box.innerHTML = d.received.length ? '<p class="muted" style="margin:0 2px 10px">인연을 이으면 바로 대화가 열려요. 넘겨도 상대에게 알리지 않아요.</p><div>' + d.received.map(fateCard).join('') + '</div>' : empty('아직 나에게 온 인연이 없어요', '인연 프로필의 한 줄 소개를 채우면 더 잘 닿아요');
@@ -516,7 +523,7 @@
         '<button class="btn pink block" type="submit">저장</button><p class="msg" id="mpMsg" role="status"></p></form>', 'match');
       var f = $('#mpF'), wg = $('#wg');
       var sync = function () { wg.hidden = !$('input[name=purposes]:checked', f).some(function (x) { return x.value === 'love'; }); }; sync();
-      f.onchange = function (e) { sync(); if (e.target.name === 'interests' && $('input[name=interests]:checked', f).length > 6) { e.target.checked = false; toast('관심사는 6개까지 고를 수 있어요'); } };
+      f.onchange = function (e) { sync(); if (e.target.name === 'interests' && $$('input[name=interests]:checked', f).length > 6) { e.target.checked = false; toast('관심사는 6개까지 고를 수 있어요'); } };
       f.onsubmit = function (e) {
         e.preventDefault(); var el = f.elements, m = $('#mpMsg'), vals = function (n) { return $('input[name=' + n + ']:checked', f).map(function (x) { return x.value; }); };
         m.className = 'msg'; m.textContent = '저장하는 중…';
@@ -543,6 +550,49 @@
         }).catch(function () { b.disabled = false; m.className = 'msg err'; m.textContent = '본인인증 창을 열지 못했어요. 잠시 후 다시 시도해 주세요.'; });
       });
     };
+  }
+  /* ── 크레딧: 충전(포트원 결제, 심층 분석과 같은 결제 모듈)·내역 ── */
+  function won(n) { return Number(n).toLocaleString('ko-KR') + '원'; }
+  function creditSheet() {
+    if (!CR) return;
+    var packs = CR.packs || [];
+    var s = sheet('<h2><span class="hj" style="font-family:var(--f-serif)">緣</span> 인연 크레딧 <b>' + CR.balance + '</b>개</h2>' +
+      '<p class="muted" style="margin:6px 0 12px">오늘의 인연 더 보기(' + CR.prices.morePicks + '개), 하루 한도를 넘긴 인연 잇기(' + CR.prices.extraLike + '개)에 써요.</p>' +
+      (packs.length ? '<div class="packs">' + packs.map(function (p) { return '<button type="button" class="pack" data-pack="' + esc(p.id) + '"><b>' + p.credits + '개</b><span>' + won(p.price) + '</span></button>'; }).join('') + '</div>' +
+        '<p class="muted" style="margin:10px 0 0;font-size:.8rem">결제 후 7일 이내이고 받은 크레딧을 하나도 쓰지 않았다면 <a href="/report/my/">내 구매 내역</a>에서 바로 전액 환불돼요. 쓰기 시작한 뒤에는 환불이 제한돼요. <a href="/report/legal/refund.html">환불정책</a> · <a href="/report/legal/terms.html">이용약관</a></p>'
+        : '<p class="muted">지금은 크레딧 충전을 준비하고 있어요.</p>') +
+      '<p class="msg" id="crBuyMsg" role="status" style="margin-top:8px"></p>' +
+      (CR.history && CR.history.length ? '<h3 style="margin:16px 0 6px;font-size:.95rem">최근 내역</h3><ul class="cr-hist">' + CR.history.slice(0, 10).map(function (h) { return '<li><span>' + esc(h.label) + '</span><span class="muted">' + when(h.at) + '</span><b class="' + (h.delta > 0 ? 'up' : 'down') + '">' + (h.delta > 0 ? '+' : '') + h.delta + '</b></li>'; }).join('') + '</ul>' : '') +
+      '<button class="btn ghost block" data-x style="margin-top:14px">닫기</button>');
+    s.el.querySelectorAll('[data-pack]').forEach(function (b) { b.onclick = function () { buyCredits(b.dataset.pack, s); }; });
+  }
+  function buyCredits(id, s) {
+    var m = $('#crBuyMsg', s.el), bs = s.el.querySelectorAll('[data-pack]'), done = function (t, err) { bs.forEach(function (b) { b.disabled = false; }); m.className = 'msg' + (err ? ' err' : ''); m.textContent = t || ''; };
+    if (!CR.pay || CR.pay.provider !== 'portone') { done('지금은 결제를 준비하고 있어요', true); return; }
+    bs.forEach(function (b) { b.disabled = true; }); m.className = 'msg'; m.textContent = '결제창을 여는 중…';
+    api('/api/commerce/order', { method: 'POST', body: { productId: id } }).then(function (o) {
+      if (!o._ok) { done(o.error === 'verify-required' ? '성인 본인확인을 먼저 해 주세요' : o.error === 'consent-required' ? '이용 동의가 먼저 필요해요' : o.error === 'premium-off' ? '지금은 충전할 수 없어요' : '주문을 만들지 못했어요. 잠시 후 다시 시도해 주세요', true); return; }
+      track('credit_buy_start', { pack: id });
+      return loadScript(PORTONE_SDK).then(function () {
+        var cust = { customerId: o.customerKey }; if (ME && ME.member && ME.member.email) cust.email = ME.member.email;
+        return window.PortOne.requestPayment({ storeId: CR.pay.storeId, channelKey: CR.pay.channelKey, paymentId: o.orderId, orderName: o.orderName, totalAmount: o.amount, currency: 'KRW', payMethod: 'CARD', redirectUrl: location.origin + '/community/?pay=portone', customer: cust });
+      }).then(function (res) {
+        if (!res) return;   // 모바일: 결제 페이지로 이동 중(돌아오면 아래 복귀 처리)
+        if (res.code != null) { done(/취소/.test(res.message || '') ? '' : '결제가 완료되지 않았어요: ' + (res.message || res.code), true); return; }
+        m.textContent = '결제를 확인하는 중…';
+        return confirmPay(o.orderId).then(function (ok) { if (ok) { s.close(); matchView(); } else done('', true); });
+      });
+    }).catch(function () { done('결제창을 열지 못했어요. 잠시 후 다시 시도해 주세요', true); });
+  }
+  // 서버가 포트원에 결제를 다시 조회해 금액이 맞을 때만 크레딧을 준다. '처리 중'이면 잠깐 기다렸다 두 번 더 묻는다
+  function confirmPay(pid, tries) {
+    tries = tries || 0;
+    return api('/api/commerce/confirm', { method: 'POST', body: { paymentId: pid } }).then(function (d) {
+      if ((d._s === 202 || d._s === 502) && tries < 2) return new Promise(function (ok) { setTimeout(ok, 2000); }).then(function () { return confirmPay(pid, tries + 1); });
+      if (d._ok && d.ok) { toast('크레딧을 충전했어요'); track('credit_buy_done'); return true; }
+      toast(d.error === 'grant-failed' ? '결제는 되었지만 크레딧 지급에 실패했어요. 문의해 주시면 바로 넣어 드려요(주문번호 ' + pid + ')' : d._s === 202 ? '결제를 확인하고 있어요. 잠시 후 다시 열어 주세요' : '결제를 확인하지 못했어요');
+      return false;
+    });
   }
   function confirmIdv(id) {
     return api('/api/community/verify', { method: 'POST', body: { action: 'confirm', id: id } }).then(function (d) {
@@ -596,7 +646,7 @@
     };
     $('#chMenu').onclick = function () {
       var s = sheet('<h2>대화 메뉴</h2><div style="display:grid;gap:8px;margin-top:14px"><button class="btn ghost block" data-a="report">신고하기</button><button class="btn ghost block" data-a="block">차단하고 대화 끝내기</button><button class="btn ghost block" data-a="leave">대화 끝내기</button><button class="btn block" data-x>닫기</button></div>');
-      $('[data-a]', s.el).forEach(function (b) { b.onclick = function () {
+      $$('[data-a]', s.el).forEach(function (b) { b.onclick = function () {
         var a = b.dataset.a; s.close();
         if (a === 'report') {
           var r = sheet('<h2>신고하기</h2><p class="muted" style="margin:6px 0 8px">운영진이 최근 대화 일부를 확인해요. 상대에게 알리지 않아요.</p><form class="form" id="crF"><div>' + Object.keys(REASONS).map(function (k) { return '<label class="radio"><input type="radio" name="reason" value="' + k + '"> ' + REASONS[k] + '</label>'; }).join('') + '</div><label>자세한 내용 (선택)<textarea name="detail" rows="2" maxlength="300"></textarea></label><div class="grid2"><button class="btn ghost" type="button" data-x>취소</button><button class="btn pink" type="submit">신고하기</button></div></form>');
@@ -664,5 +714,7 @@
     PET = { stop: function () { dead = true; if (raf) cancelAnimationFrame(raf); if (io) io.disconnect(); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('resize', size); } };
     go();
   }
-  (function () { var u = new URL(location.href), id = u.searchParams.get('identityVerificationId') || u.searchParams.get('idv'); if (id) { history.replaceState(null, '', '/community/#/'); me().then(function () { confirmIdv(id); }); return; } route(); })();
+  (function () { var u = new URL(location.href), id = u.searchParams.get('identityVerificationId') || u.searchParams.get('idv');
+    if (u.searchParams.get('pay') === 'portone') { var pid = u.searchParams.get('paymentId'), code = u.searchParams.get('code'), pm = u.searchParams.get('message'); history.replaceState(null, '', '/community/#/'); if (pid && !code) me().then(function () { confirmPay(pid).then(function () { route(); }); }); else { if (code && !/취소/.test(pm || '')) toast('결제가 완료되지 않았어요: ' + (pm || code)); route(); } return; }
+    if (id) { history.replaceState(null, '', '/community/#/'); me().then(function () { confirmIdv(id); }); return; } route(); })();
 })();

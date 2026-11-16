@@ -86,6 +86,23 @@ export function pickToday(meId, me, cands, day) {
     .sort((a, b) => b.s - a.s || a.r - b.r).slice(0, PICKS).map(x => x.id);
 }
 
+// 오늘의 인연 후보(서로 조건이 맞고, 이미 잇거나 넘긴 사람·차단 관계·exclude 제외). 고르는 순서는 pickToday
+const encU = encodeURIComponent;
+export async function candidatePool(env, uid, me, mv, exclude = []) {
+  const [act, mine, theirs, blocked, blockedMe] = await Promise.all([
+    sbRest(env, `cm_match_profiles?active=is.true&user_id=neq.${encU(uid)}&select=*&order=updated_at.desc&limit=500`),
+    sbRest(env, `cm_likes?from_id=eq.${encU(uid)}&select=to_id`),
+    sbRest(env, `cm_likes?to_id=eq.${encU(uid)}&status=in.(matched,passed)&select=from_id`),
+    sbRest(env, `cm_blocks?blocker_id=eq.${encU(uid)}&select=blocked_id`),
+    sbRest(env, `cm_blocks?blocked_id=eq.${encU(uid)}&select=blocker_id`),
+  ]);
+  const skip = new Set([...exclude, ...(mine || []).map(x => x.to_id), ...(theirs || []).map(x => x.from_id), ...(blocked || []).map(x => x.blocked_id), ...(blockedMe || []).map(x => x.blocker_id)]);
+  const pool = (act || []).filter(x => !skip.has(x.user_id));
+  const vs = pool.length ? (await sbRest(env, `adult_verifications?user_id=in.(${pool.map(x => encU(x.user_id)).join(',')})&select=user_id,birth_year,gender`)) || [] : [];
+  const V = Object.fromEntries(vs.map(x => [x.user_id, x]));
+  return pool.filter(x => eligible(me, mv, x, V[x.user_id])).map(x => ({ id: x.user_id, profile: x }));
+}
+
 // 대화 내용 경고(막지는 않는다): 연락처·외부 메신저·송금 유도
 export function flagOf(s) {
   if (/(01[016789][\s.-]?\d{3,4}[\s.-]?\d{4}|카톡\s*아이디|오픈\s*채팅|open\.kakao|텔레그램|t\.me\/|라인\s*아이디|인스타\s*(아이디|디엠|dm))/i.test(s)) return 'contact';
