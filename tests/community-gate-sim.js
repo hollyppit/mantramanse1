@@ -100,7 +100,10 @@ const ENV = { ADMIN_PASSWORD: 'adm-pw', SUPABASE_URL: 'https://sb.local', SUPABA
   r = await put({ stage: 'beta' }); d = await r.json(); ok(r.status === 200 && d.stage === 'beta' && d.audited && d.history[0].from === 'dev', '베타 전환·이력·감사 로그');
   r = await status.onRequestGet({ request: req('/api/community/status'), env: ENV }); d = await r.json(); ok(d.stage === 'beta' && d.label === '비공개 베타' && d.inside === false, '공개 상태 확인(쿠키 없음 → inside false)');
   r = await status.onRequestGet({ request: req('/api/community/status', { headers: { cookie: 'mt_cm=' + betaCookie } }), env: ENV }); ok((await r.json()).inside === true, '베타 쿠키 → inside true');
-  r = await put({ stage: 'public', confirm: '정식 공개' }); ok(r.status === 200, '확인 문구와 함께 정식 공개');
+  // 8단계: 점검표 미달이면(이 가짜 DB 에는 지표가 없다) 사유 없이 못 연다
+  r = await put({ stage: 'public', confirm: '정식 공개' }); d = await r.json(); ok(r.status === 409 && d.need === 'checklist' && d.failing.length > 0, '점검표 미달: 정식 공개 막힘');
+  r = await put({ stage: 'public', confirm: '정식 공개', override: true, reason: '짧' }); ok(r.status === 400, '기준 미달 공개는 사유 필요');
+  r = await put({ stage: 'public', confirm: '정식 공개', override: true, reason: '대표 승인 — 소규모 시범 공개' }); d = await r.json(); ok(r.status === 200 && d.checklist && d.checklist.override && T.admin_audit_log.some(x => x.action === 'community.stage' && x.detail && x.detail.checklist && x.detail.checklist.reason), '사유와 함께 정식 공개·감사 로그에 점검 결과');
   r = await run('/community/'); ok((await r.text()) === 'own', '정식 공개면 누구나 통과');
   r = await put({ stage: 'dev' }); ok(r.status === 200, '다시 개발 중으로 되돌리기');
   r = await run('/community/'); ok(r.status === 302, '되돌리면 즉시 닫힘');

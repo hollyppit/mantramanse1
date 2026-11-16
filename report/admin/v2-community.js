@@ -8,6 +8,7 @@
    ⑦ 성인 확인(테스트용 수동, /api/community/verify manual, 5단계): 포트원 본인인증 채널(PORTONE_IDV_CHANNEL_KEY) 연결 전 테스터 계정을 확인해 인연 매칭·대화를 시험
    ⑨ 크레딧·유료(/api/community/credits, 6단계): 유료 스위치(기본 꺼짐, 켜려면 '유료 켜기' 입력)·가격·테스트 지급·최근 원장
    ⑩ 성과 지표·⑪ 매칭·대화·매출 현황(/api/community/metrics, 7단계) · ⑫ 회원 찾기(/api/community/members) · ⑬ 운테크 문안(/api/community/today-copy) · ⑭ 운영자 열쇠(/api/community/staff, 관리자만)
+   ⑮ 정식 공개 점검표(/api/community/launch, 8단계): 8항목 통과 여부·사람 확인 체크·기준값(관리자만). 미달이면 정식 공개 때 사유를 받는다
    역할별 표시: V2Community.open(열쇠, 역할) — 운영자 콘솔(report/admin/staff.html)은 역할에 맞는 카드만 그린다(서버도 같은 권한을 다시 확인)
    ⑧ 광장 운영(/api/community/mod, 3단계): 신고 묶음 처리(숨김·삭제·기각·제재), 숨겨진 글, 제재 목록·해제.
    모든 변경은 서버가 감사 로그(admin_audit_log)에 작업자 이름과 함께 남긴다. */
@@ -39,9 +40,43 @@
         var to = b.getAttribute('data-stage'), body = { stage: to };
         if (to === 'public') { var c = prompt('인연의 광장을 모든 방문자에게 공개합니다. 계속하려면 "정식 공개"라고 입력해 주세요.'); if (c !== '정식 공개') return; body.confirm = c; }
         else if (!confirm('공개 단계를 "' + LABEL[to] + '"(으)로 바꿉니다. 계속할까요?')) return;
-        call('/api/community/status', { method: 'PUT', body: body }).then(function (d) { drawStage(d); msg('cmStageMsg', '바뀌었습니다' + (d.audited ? '(감사 로그 기록됨)' : '(감사 로그 기록 실패 — Supabase 표 확인)')); }).catch(function (e) { msg('cmStageMsg', e.message, true); });
+        putStage(body).then(function (d) { drawStage(d); if (typeof loadLaunch === 'function') loadLaunch(); msg('cmStageMsg', '바뀌었습니다' + (d.audited ? '(감사 로그 기록됨)' : '(감사 로그 기록 실패 — Supabase 표 확인)')); }).catch(function (e) { msg('cmStageMsg', e.message, true); });
       };
     });
+  }
+  function putStage(body) {
+    return fetch('/api/community/status', { method: 'PUT', cache: 'no-store', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who()) }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) {
+        if (r.ok) return d;
+        if (r.status === 409 && d.need === 'checklist' && !body.override) {
+          var why = prompt('정식 공개 조건을 아직 다 채우지 못했습니다.\n\n미달: ' + (d.failing || []).join(', ') + '\n\n그래도 공개하려면 사유를 적어 주세요(5자 이상, 작업 기록에 남습니다). 취소하면 공개하지 않습니다.');
+          if (!why) throw new Error('공개하지 않았습니다(점검표 미달)');
+          return putStage(Object.assign({}, body, { override: true, reason: why }));
+        }
+        throw new Error(d.error || ('오류 ' + r.status));
+      }); });
+  }
+  /* ── 8단계: 정식 공개 조건 점검표(/api/community/launch). 보기: 지표 권한, 기준값·사람 확인 체크: 관리자 비밀번호만 ── */
+  function loadLaunch() {
+    var box = $('#cmLaunch'); if (!box) return;
+    box.innerHTML = '<p class="muted">점검하는 중…</p>';
+    call('/api/community/launch').then(function (d) {
+      var own = role === 'owner', T = d.cfg.targets, M = d.cfg.manual, L = d.manualLabels || {};
+      var mark = function (p) { return p ? '<b style="color:var(--green,#62C2AE)">통과</b>' : '<b style="color:#FF8A78">미달</b>'; };
+      var v = function (x) { return x.value == null ? '<span class="muted">계산 못 함</span>' : esc(typeof x.value === 'number' ? Number(x.value).toLocaleString('ko-KR') : x.value) + esc(typeof x.value !== 'number' || !x.unit ? '' : x.unit === '시간 이내' ? '시간' : x.unit); };
+      box.innerHTML = '<p style="margin:0 0 8px">' + (d.ready ? '<b style="color:var(--green,#62C2AE)">모든 조건 통과</b> — 정식 공개를 검토할 수 있습니다.' : '<b style="color:#FF8A78">미달 ' + d.failing.length + '항목</b> — ' + esc(d.failing.join(', '))) + ' <span class="muted">(기준일 ' + esc(d.day) + (d.metricsOk === false ? ' · 지표 함수를 읽지 못함' : '') + ')</span></p>' +
+        '<table class="tbl"><thead><tr><th>항목</th><th>지금</th><th>기준</th><th>결과</th></tr></thead><tbody>' +
+        d.items.map(function (it) { return it.rows.map(function (x, i) { return '<tr>' + (i === 0 ? '<td rowspan="' + it.rows.length + '"><b>' + it.no + '. ' + esc(it.title) + '</b><br>' + mark(it.pass) + '</td>' : '') + '<td>' + esc(x.label) + ': ' + v(x) + '</td><td class="muted">' + (typeof x.target === 'number' ? (x.unit === '시간 이내' ? x.target + '시간 이내' : '≥ ' + Number(x.target).toLocaleString('ko-KR') + (x.unit && x.unit.charAt(0) !== '/' ? x.unit : '')) : esc(x.target)) + '</td><td>' + (x.pass ? '✓' : '✗') + '</td></tr>'; }).join(''); }).join('') + '</tbody></table>' +
+        '<h4 style="margin:12px 0 6px">사람이 확인하는 항목</h4>' + Object.keys(L).map(function (k) { var m = M[k] || {}; return '<div class="row" style="gap:8px;align-items:center;margin:4px 0"><span style="min-width:16px">' + (m.done ? '✓' : '·') + '</span><span style="flex:1;min-width:200px">' + esc(L[k]) + (m.at ? ' <span class="muted">— ' + (m.done ? '확인 ' : '해제 ') + esc(m.by || '') + ' · ' + when(m.at) + (m.note ? ' · ' + esc(m.note) : '') + '</span>' : '') + '</span>' + (own ? '<button class="btn ghost sm" data-chk="' + k + '" data-done="' + (m.done ? '0' : '1') + '">' + (m.done ? '확인 해제' : '확인 완료') + '</button>' : '') + '</div>'; }).join('') +
+        (own ? '<details style="margin-top:10px"><summary class="muted">기준값 바꾸기(운영 데이터에 맞게)</summary><div class="row" style="gap:8px;flex-wrap:wrap;margin-top:8px">' +
+          [['members', '전체 가입자'], ['mau', '30일 활성'], ['alerts', '출시 알림'], ['betaMin', '베타 인원'], ['betaRate', '베타 참여율 %'], ['posts30', '30일 글'], ['comments30', '30일 댓글'], ['reactions30', '30일 공감'], ['ret7', '7일 재방문 %'], ['ret30', '30일 재방문 %'], ['seedPosts', '보이는 글'], ['seedPerCat', '주제별 글'], ['reportHours', '신고 처리 시간']].map(function (x) { return '<label class="muted">' + x[1] + ' <input type="number" data-tg="' + x[0] + '" value="' + T[x[0]] + '" min="0" style="width:90px"></label>'; }).join('') +
+          '<button class="btn ghost sm" id="lnSave">기준 저장</button><span class="muted" id="lnMsg"></span></div></details>' : '') +
+        '<p class="muted" style="margin:8px 0 0;font-size:.8rem">정식 공개는 ① 공개 단계에서 관리자 비밀번호로만 바꿉니다. 미달 상태에서 열면 사유를 따로 적어야 하고, 점검 결과와 함께 작업 기록에 남습니다.</p>';
+      if (own) {
+        [].forEach.call(box.querySelectorAll('[data-chk]'), function (b) { b.onclick = function () { var done = b.getAttribute('data-done') === '1', note = done ? prompt('무엇을 어떻게 확인했나요? (작업 기록에 남습니다)') : (prompt('해제 사유(선택)') || ''); if (done && !note) return; call('/api/community/launch', { method: 'POST', body: { action: 'check', item: b.getAttribute('data-chk'), done: done, note: note } }).then(function () { loadLaunch(); loadAudit(); }).catch(function (e) { alert(e.message); }); }; });
+        $('#lnSave').onclick = function () { var t = {}; [].forEach.call(box.querySelectorAll('[data-tg]'), function (el) { t[el.getAttribute('data-tg')] = +el.value; }); call('/api/community/launch', { method: 'PUT', body: { targets: t } }).then(function (r) { msg('lnMsg', r.changed.length ? '저장했습니다(' + r.changed.length + '개 바뀜)' : '바뀐 값이 없습니다'); loadLaunch(); loadAudit(); }).catch(function (e) { msg('lnMsg', e.message, true); }); };
+      }
+    }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
   function loadAccess() {
     var box = $('#cmAccList'); if (!box) return;
@@ -74,7 +109,7 @@
         (d.recent.length ? '<table class="tbl"><thead><tr><th>시각</th><th>항목</th><th>처리</th><th>경로</th></tr></thead><tbody>' + d.recent.map(function (r) { return '<tr><td>' + when(r.at) + '</td><td>' + esc(KIND[r.kind] || r.kind) + '</td><td>' + (r.action === 'grant' ? '동의' : '철회') + '</td><td>' + esc(VIA[r.via] || r.via || '') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">아직 변경 기록이 없습니다.</p>');
     }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
-  var ACT = { 'community.stage': '공개 단계 변경', 'community.access.grant': '권한 주기', 'community.access.revoke': '권한 회수', 'community.mod.hide': '글 숨김', 'community.mod.restore': '글 되살림', 'community.mod.delete': '글 삭제', 'community.mod.dismiss': '신고 기각', 'community.sanction.warn': '경고', 'community.sanction.mute': '쓰기 정지', 'community.sanction.ban': '이용 정지', 'community.sanction.lift': '제재 해제', 'community.mod.avatar': '프로필 사진 지움', 'community.verify.manual': '성인 확인(수동)', 'community.chat.purge': '대화 자동 파기(90일)', 'community.premium.config': '유료 설정 변경', 'community.credit.grant': '크레딧 지급', 'community.staff.create': '운영자 열쇠 만들기', 'community.staff.revoke': '운영자 열쇠 회수', 'community.member.view': '회원 조회', 'community.daily.copy': '운테크 문안 수정', 'community.daily.copy.reset': '운테크 문안 기본으로', 'community.activity.purge': '이용 기록 자동 파기(13개월)' };
+  var ACT = { 'community.stage': '공개 단계 변경', 'community.access.grant': '권한 주기', 'community.access.revoke': '권한 회수', 'community.mod.hide': '글 숨김', 'community.mod.restore': '글 되살림', 'community.mod.delete': '글 삭제', 'community.mod.dismiss': '신고 기각', 'community.sanction.warn': '경고', 'community.sanction.mute': '쓰기 정지', 'community.sanction.ban': '이용 정지', 'community.sanction.lift': '제재 해제', 'community.mod.avatar': '프로필 사진 지움', 'community.verify.manual': '성인 확인(수동)', 'community.chat.purge': '대화 자동 파기(90일)', 'community.premium.config': '유료 설정 변경', 'community.credit.grant': '크레딧 지급', 'community.staff.create': '운영자 열쇠 만들기', 'community.staff.revoke': '운영자 열쇠 회수', 'community.member.view': '회원 조회', 'community.daily.copy': '운테크 문안 수정', 'community.daily.copy.reset': '운테크 문안 기본으로', 'community.activity.purge': '이용 기록 자동 파기(13개월)', 'community.launch.targets': '공개 기준 변경', 'community.launch.check': '공개 점검 확인' };
   var SK = { warn: '경고', mute: '쓰기 정지', ban: '이용 정지' };
   var modView = 'reports';
   function loadMod() {
@@ -261,6 +296,7 @@
     root.innerHTML = head +
       C('owner', '<div class="card"><h3 style="margin:0 0 8px">① 공개 단계</h3><div id="cmStage"><p class="muted">불러오는 중…</p></div>' +
       '<div class="row" style="margin-top:12px"><button class="btn ghost" id="cmEnter">관리자로 커뮤니티 열어 보기</button><span class="muted" id="cmEnterMsg"></span></div></div>') +
+      C('metrics', '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑮ 정식 공개 점검표</h3><div id="cmLaunch"><p class="muted">불러오는 중…</p></div></div>') +
       C('metrics', '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑩ 성과 지표</h3><div class="row" style="gap:6px;margin-bottom:8px"><input type="date" id="cmMetDay" style="width:160px"><button class="btn ghost sm" id="cmMetGo">다시 계산</button></div><div id="cmMet"></div></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑪ 매칭·대화·매출 현황</h3><div id="cmOps"><p class="muted">불러오는 중…</p></div></div>') +
       C('members', '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑫ 회원 찾기</h3><p class="muted" style="margin:0 0 8px">닉네임 일부(2자 이상) 또는 가입 이메일 전체로 찾습니다. 이메일은 가려서 보이고 전화번호·생년월일·출생 정보는 보이지 않습니다.</p><div class="row" style="gap:6px"><input type="text" id="cmMemQ" placeholder="닉네임 또는 이메일" style="min-width:220px"><button class="btn sm" id="cmMemGo">찾기</button></div><div id="cmMem" style="margin-top:8px"></div></div>') +
@@ -288,7 +324,7 @@
         fetch('/api/community/status', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(drawStage).catch(function () { drawStage({ stage: 'dev' }); });
       loadAccess(); loadAlerts(); loadConsents(); loadCredits(); loadStaff();
     }
-    if (can('metrics')) { $('#cmMetGo').onclick = loadMetrics; loadMetrics(); }
+    if (can('metrics')) { $('#cmMetGo').onclick = loadMetrics; loadMetrics(); loadLaunch(); }
     if (can('members')) loadMembers();
     if (can('mod')) { [].forEach.call(root.querySelectorAll('[data-mv]'), function (b) { b.onclick = function () { modView = b.getAttribute('data-mv'); loadMod(); }; }); loadMod(); }
     if (can('content')) loadCopy();
