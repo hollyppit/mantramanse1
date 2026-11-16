@@ -271,7 +271,8 @@ a.card:hover { box-shadow: 0 10px 24px -14px rgba(34,31,28,.3), inset 0 0 0 1px 
 /* 프로필 사진(직접 올린 사진·일간 포스터) */
 .ava span { position: relative; overflow: hidden; }
 .ava img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 22%; border-radius: 50%; background: var(--paper); }
-.ava-btn { position: relative; border: 0; padding: 0; background: none; cursor: pointer; border-radius: 50%; }
+.ava-btn { position: relative; border: 0; padding: 0; background: none; cursor: pointer; border-radius: 50%; display: inline-block; flex: none; }
+.ava-btn .ava { display: block; }   /* 2026-11-17: 단추 안 span 이라 크기(66px)가 무시돼 사진이 23×91로 찌그러지던 문제 */
 .ava-cam { position: absolute; right: -2px; bottom: -2px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: .72rem; color: #fff; background: var(--thread); box-shadow: 0 0 0 2px #fff; }
 /* ── 인연(5단계): 오늘의 인연 카드 ── */
 .mh { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 6px 2px 0; }

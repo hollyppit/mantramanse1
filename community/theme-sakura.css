@@ -78,3 +78,6 @@ html:not(.theme-sakura) .sk-petals{ display: none; }
 html.theme-sakura main, html.theme-sakura .top, html.theme-sakura .tabbar{ position: relative; z-index: 1; }
 html.theme-sakura .top{ position: sticky; z-index: 20; } html.theme-sakura .tabbar{ position: fixed; z-index: 25; }
 html.theme-sakura .badge .hj, html.theme-sakura .chip .hj{ color: var(--thread-d); }
+/* 오행 고리 글씨(목·토)가 밝은 바탕에서 조금 약해 한 단계 진하게 */
+html.theme-sakura{ --el-wood: #3E7A5A; --el-earth: #86622A; --el-metal: #5F6375; --el-fire: #A93E33; --el-water: #34507A; }
+html.theme-sakura .today .gz small{ font-size: .7rem; opacity: 1; }
