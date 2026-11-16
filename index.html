@@ -10047,16 +10047,36 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   };
   const PR_SUMMARY = ['천생연분입니다. 서로 부족한 곳을 채우고 마음자리까지 통하는, 만나기 어려운 조합입니다.', '아주 잘 맞는 사이입니다. 큰 틀에서 서로 힘이 되고, 작은 갈등은 금방 풀립니다.', '좋은 인연입니다. 맞는 부분이 확실히 많고, 몇 가지만 조심하면 오래갑니다.', '무난한 사이입니다. 크게 좋지도 나쁘지도 않아서, 노력하는 만큼 달라집니다.', '노력이 필요한 사이입니다. 끌림과 마찰이 함께 있어 서로 맞춰 가야 오래갑니다.', '상극이 강한 사이입니다. 자주 부딪치니 거리와 규칙을 정해야 관계가 유지됩니다.'];
   const prGradeIdx = s => s >= 90 ? 0 : s >= 80 ? 1 : s >= 70 ? 2 : s >= 60 ? 3 : s >= 50 ? 4 : 5;
-  function prRelCard(r, R) {
-    const t = r.txt, strong = Math.max(1, Math.min(3, Math.round(t[4])));
+  // 궁합 간지 관계 카드: 제목은 관계 뜻만, 자리는 '일지 ↔ 월지' 표시줄에만, '어디서 나타나요' 한 문장, 같은 자리에 걸린 여러 작용은 한 카드로 묶는다
+  const PR_ZONE_B = { year: '집안 배경·어린 시절 습관', month: '일하는 방식·사회생활', day: '속마음·함께하는 일상', hour: '앞날 계획·자녀관' };
+  const PR_ZONE_S = { year: '집안에서 배운 가치관', month: '사회에서 보이는 모습', day: '생각과 성격', hour: '앞날에 대한 생각' };
+  function prScene(r, R) {
+    const Z = r.kind === 'stem' ? PR_ZONE_S : PR_ZONE_B, aP = [].concat(r.aPos), bP = [].concat(r.bAll || r.bPos);
+    const za = aP.map(k => Z[k]).join(', '), zb = bP.map(k => Z[k]).join(', ');
+    if (za === zb) return `두 사람의 ${za}에서 드러납니다.`;
+    return `${esc(R.names.a)}의 ${M.josa(za, '과/와')} ${esc(R.names.b)}의 ${zb} 사이에서 드러납니다.`;
+  }
+  function prRelGroups(rels) {
+    const key = r => r.kind + ':' + [].concat(r.aPos).join('-') + '|' + [].concat(r.bAll || r.bPos).join('-'), m = new Map();
+    rels.forEach(r => { const k = key(r); if (!m.has(k)) m.set(k, []); m.get(k).push(r); });
+    const w = r => r.txt[4] * 2 + (r.txt[0] === 'bad' ? 1 : 0);
+    return [...m.values()].map(g => g.sort((a, b) => w(b) - w(a)));
+  }
+  function prRelCard(rs, R) {
+    rs = [].concat(rs);
+    const r = rs[0], t = r.txt, strong = Math.max(1, Math.min(3, Math.round(Math.max(...rs.map(x => x.txt[4])))));
     const pn = (p, k) => PairCompat.posName ? PairCompat.posName(p, k) : [].concat(p).map(x => PairCompat.AREA[x]).join('·');
     const where = `${esc(R.names.a)}의 ${pn(r.aPos, r.kind)} ↔ ${esc(R.names.b)}의 ${pn(r.bAll || r.bPos, r.kind)}`;
+    const also = rs.slice(1).map(x => `<b>${term(x.type)}</b> ${x.txt[1]}`), moreTips = rs.slice(1).map(x => `${x.type}: ${x.txt[3]}`);
     return `<article class="rel-card tone-${t[0]}">
-      <div class="rel-top"><span class="rel-badge">${term(r.type)}</span><b class="rel-name muted">${esc(r.name)}</b><span class="rel-str" title="영향 세기">${'●'.repeat(strong)}${'○'.repeat(3 - strong)}</span></div>
+      <div class="rel-top">${rs.map(x => `<span class="rel-badge">${term(x.type)}</span>`).join('')}<b class="rel-name muted">${rs.map(x => esc(x.name)).join(' · ')}</b><span class="rel-str" title="영향 세기">${'●'.repeat(strong)}${'○'.repeat(3 - strong)}</span></div>
       <div class="rel-where">${where}</div>
       <p class="rel-head">${t[1]}</p>
+      <p class="rel-place"><b>어디서 나타나요</b> ${prScene(r, R)}</p>
+      ${also.length ? `<p class="rel-place"><b>같은 자리에 함께</b> ${also.join(' · ')}</p>` : ''}
       <p class="rel-place">${t[2]}</p>
       <p class="rel-tip"><b>이렇게 해보세요</b> ${t[3]}</p>
+      ${moreTips.length ? `<details class="rel-more"><summary>더 자세히 보기</summary>${moreTips.map(l => `<p>${l}</p>`).join('')}</details>` : ''}
     </article>`;
   }
   function prResult() {
@@ -10077,7 +10097,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const tgLine = (who, other, tg) => `<li><b>${esc(other)}</b>의 일간은 <b>${esc(who)}</b>에게 <b>${tg}</b> — ${TG_KW[tg] || ''}</li>`;
     const goods = R.relations.filter(x => x.tone === 'good'), bads = R.relations.filter(x => x.tone === 'bad');
     const dedup = arr => { const seen = new Set(); return arr.filter(x => { const k = x.name + x.aPos.join() + x.bPos; if (seen.has(k)) return false; seen.add(k); return true; }); };
-    const rels = dedup(R.relations), shown = rels.slice(0, 6), more = rels.slice(6);
+    const rels = dedup(R.relations), groups = prRelGroups(rels), shown = groups.slice(0, 6), more = groups.slice(6);
     const strengths = [...goods.slice(0, 2).map(x => `${a}의 ${PairCompat.posName(x.aPos, x.kind)}↔${b}의 ${PairCompat.posName(x.bAll || x.bPos, x.kind)}: ${x.txt[1]}`), ...R.parts.filter(p => p.score >= 72).slice(0, 2).map(p => `${p.label} — ${PR_PART_TXT[p.key][0]}`)].slice(0, 4);
     const cautions = [...bads.slice(0, 2).map(x => `${a}의 ${PairCompat.posName(x.aPos, x.kind)}↔${b}의 ${PairCompat.posName(x.bAll || x.bPos, x.kind)}: ${x.txt[1]}`), ...R.parts.filter(p => p.score < 50).slice(0, 2).map(p => `${p.label} — ${PR_PART_TXT[p.key][2]}`)].slice(0, 4);
     const tips = [PR_REL_TIP[R.rel], ...R.parts.filter(p => p.score < 60).sort((x, y) => x.score - y.score).slice(0, 2).map(p => PR_PART_TIP[p.key])];
@@ -10122,7 +10142,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     </section>
     <section class="card">
       <div class="card-h"><h2>두 사람의 간지 관계</h2><span class="note">영향이 큰 순서 · 위쪽이 더 중요합니다</span></div>
-      ${rels.length ? `<div class="rel-list">${shown.map(r => prRelCard(r, R)).join('')}</div>${more.length ? `<details class="rel-more"><summary>나머지 ${more.length}개 보기</summary><div class="rel-list" style="margin-top:8px">${more.map(r => prRelCard(r, R)).join('')}</div></details>` : ''}` : '<p class="muted small">두 사람 사이에 뚜렷한 합·충이 없습니다. 서로에게 크게 끌리지도 부딪치지도 않는 담백한 사이입니다.</p>'}
+      ${rels.length ? `<div class="rel-list">${shown.map(g => prRelCard(g, R)).join('')}</div>${more.length ? `<details class="rel-more"><summary>나머지 ${more.length}개 보기</summary><div class="rel-list" style="margin-top:8px">${more.map(g => prRelCard(g, R)).join('')}</div></details>` : ''}` : '<p class="muted small">두 사람 사이에 뚜렷한 합·충이 없습니다. 서로에게 크게 끌리지도 부딪치지도 않는 담백한 사이입니다.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>한눈에 정리</h2></div>
