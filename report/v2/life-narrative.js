@@ -30,7 +30,7 @@
     timeline_career_01: 'career', timeline_career_02: 'career', timeline_career_03: 'career', timeline_career_04: 'career', timeline_career_05: 'career', timeline_career_06: 'career', timeline_career_08: 'career',
     timeline_career_09: 'career', timeline_career_10: 'career', timeline_career_11: 'career', timeline_career_12: 'career', timeline_career_13: 'career', timeline_career_14: 'career', timeline_career_15: 'career' };
   var LENS_WORD = { life: '삶', wealth: '돈', love: '관계', career: '일' };
-  var STAGE = { core: '핵심 성향', life: '실제 생활에서는', conflict: '갈등과 약점', luck: '운이 바꾸는 것', advice: '현실적인 조언' };
+  var STAGE = { core: '핵심 성향', life: '실제 생활에서는', conflict: '갈등과 약점', luck: '운이 바꾸는 것', advice: '현실적인 조언', inner: '내면의 구조', twist: '양면성과 반전', combo: '함께 보는 조건', key: '내게 맞는 한 가지' };
   var norm = function (t) { return String(t || '').replace(/[\s.,!?·—'"‘’“”()]/g, ''); };
   var sentences = function (t) { return String(t || '').split(/(?<=[.!?])\s+/).map(function (x) { return x.trim(); }).filter(Boolean); };
   var mod5 = function (x) { return ((x % 5) + 5) % 5; };
@@ -363,6 +363,11 @@
         if (P.has('age:young') && pick.all.indexOf('age:young') < 0) rows = youngView(rows, chapterId, D0);
         var evd = evidenceRows(P, pick, D0, [pick.conf === 'moderate' ? '근거 강도: 보통 — 구조 하나가 아니라 기운의 비율로 읽은 해석이라, 맞지 않는 부분은 걸러 읽어 주세요.' : '근거 강도: 높음 — 원국의 구조(격국·강약·십성 배치)에서 직접 나온 해석이에요.', TIME_NOTE]);
         res = { chapterId: chapterId, lens: lens, rule: pick.id, hook: youngHook(P, pick, chapterId, D0), rows: rows.map(function (r) { return { stage: r.stage, label: STAGE[r.stage], text: r.text }; }), evidence: evd, trace: trace, version: VERSION };
+      }
+      // 프리미엄 심화 시범 층(premium-depth.js, 스위치 premiumDepth — 기본 꺼짐): 주 규칙 위에 내면의 구조·수식 문단·개인화 결론을 더한다
+      var PD = R.PremiumDepth;
+      if (PD && PD.on() && PD.covers(chapterId)) {
+        try { res = PD.apply({ M: M, ch: ch, now: now, chapterId: chapterId, lens: lens, res: res, pick: pick, P: P, st: st, dedupe: dedupe, label: STAGE, version: VERSION, luck: function () { var keep = Object.assign({}, st.variant), t = luckStage(M, ch, now, lens, st, chapterId); st.variant = keep; return t; }, /* 문형 돌림 순번은 그대로 둬 다른 장 문장이 바뀌지 않게 */ evidence: function (P0, rule, extra) { return evidenceRows(P0, rule, D0, (extra || []).concat([TIME_NOTE])); } }); } catch (e) { }
       }
     }
     if (res && !res.trace.length) res.trace = trace;

@@ -150,3 +150,20 @@ html.ny-pro-on, html.ny-pro-on body { overflow: hidden; }
 @media (max-width: 560px) { .ny-panel { aspect-ratio: 4 / 5; margin: 14px -4px 18px; border-radius: 10px; } }
 @media (prefers-reduced-motion: reduce) { .ny-pro-media img, .ny-pro-media video, .ny-panel img { transition: none; animation: none !important; transform: none !important; } }
 @media print { .ny-panel, .ny-pro { display: none !important; } }
+
+/* 심화 월 카드·한 해의 흐름(시범 2026-11-17, compose monthStyle 'premium' 일 때만 데이터가 온다) */
+.ny-p.symbol { color: var(--ink2, var(--ink)); }
+.ny-p.domain { padding-left: 10px; border-left: 2px solid var(--line); }
+.ny-p.do::before { content: ''; } .ny-p.do { color: var(--gold-l); }
+.ny-p.avoid { color: var(--ink2, var(--ink)); opacity: .92; }
+.ny-p.next { font-size: .86rem; color: var(--ink3); border-top: 1px dashed var(--line); padding-top: 10px; margin-top: 12px; }
+.ny-saju { margin-top: 14px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: rgba(0, 0, 0, .18); }
+.ny-saju summary { cursor: pointer; font-size: .86rem; color: var(--ink3); list-style-position: inside; }
+.ny-saju[open] summary { margin-bottom: 8px; }
+.ny-tones { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; list-style: none; padding: 0; margin: 4px 0 12px; }
+.ny-tones li { border-radius: 8px; padding: 5px 2px; text-align: center; font-size: .72rem; border: 1px solid var(--line); }
+.ny-tones li b { display: block; font-weight: 600; }
+.ny-tones li.t-good { background: rgba(212, 175, 95, .18); }
+.ny-tones li.t-caution { background: rgba(160, 60, 60, .18); }
+.ny-tones li.t-burden { background: rgba(160, 60, 60, .32); }
+@media (min-width: 560px) { .ny-tones { grid-template-columns: repeat(12, minmax(0, 1fr)); } }

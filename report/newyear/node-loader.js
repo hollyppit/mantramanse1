@@ -8,7 +8,7 @@ if (!globalThis.Manse) {
 }
 const req = f => require(path.join(here, f));
 req('engine.js'); req('saju-link.js'); req('compose.js');
-req('texts/tojeong-kyu1077.js'); req('texts/tojeong-nl-supplement.js');
+req('texts/tojeong-kyu1077.js'); req('texts/tojeong-nl-supplement.js'); req('texts/tojeong-month-deep.js');   // 월별 심화 해설(시범, 서버 runtime 에는 아직 넣지 않음)
 const textsDir = path.join(here, 'texts');
 // 문구 파일은 있는 것만 읽는다(작성 중인 묶음이 빠져도 나머지로 동작)
 globalThis.NewyearBlocks = [];

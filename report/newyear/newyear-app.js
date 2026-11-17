@@ -127,13 +127,17 @@
     return '<div class="ny-gua"><div class="num">' + esc(t.gua) + '</div><div class="zy">' + esc(t.zhouyi || '보충본 괘') + (t.source === 'nl-supplement' ? ' · 국립중앙도서관 필사본 보충' : ' · 규장각본') + '</div>' +
       (t.guaxiang ? '<div class="gx">' + esc(t.guaxiang.join(' ')) + '</div>' : '') + '</div>' + (S.data.intro ? '<p class="ny-p note">' + esc(S.data.intro) + '</p>' : '') + paras(ch.paras);
   }
+  // 사주 월운 별도 상자(심화 월 카드 시범) — 토정 본문과 섞지 않고 아래 접는 상자로 보여 준다
+  function sajuBox(x) { return x && x.paras && x.paras.length ? '<details class="ny-saju"><summary>' + esc(x.title) + '</summary>' + paras(x.paras) + '</details>' : ''; }
+  // 한 해의 흐름(시범): 음력 열두 달 원문 결을 한 줄 띠로
+  function toneStrip(tl) { return tl && tl.length ? '<ol class="ny-tones">' + tl.map(function (t) { return '<li class="t-' + esc(t.tone || 'none') + '" title="' + esc(t.theme || '') + '"><b>' + t.m + '월</b><span>' + esc(DIR[t.tone] || '-') + '</span></li>'; }).join('') + '</ol>' : ''; }
   function renderMonths(ch) {
     var ms = ch.months || [], m = ms[S.month] || ms[0];
     var chips = '<div class="ny-mchips" role="tablist">' + ms.map(function (x, i) { return '<button type="button" role="tab" data-m="' + i + '" aria-current="' + (i === S.month) + '">' + x.lunarMonth + '월' + (x.direction ? '<i class="d-' + x.direction + '"></i>' : '') + '</button>'; }).join('') + '</div>';
     var card = !m ? '' : m.locked ? '<div class="ny-month"><h3>' + esc(m.label) + '</h3><p class="when">' + esc(m.solar) + '</p></div>' + lockCard(ch) :
       '<div class="ny-month"><h3>' + esc(m.label) + (m.compare && CMP[m.compare] ? '<span class="ny-cmp ' + m.compare + '">' + CMP[m.compare] + '</span>' : '') + '</h3>' +
       '<p class="when">양력 ' + esc(m.solar) + ' · 사주 ' + esc(m.sajuMonth) + '월 흐름 ' + esc(DIR[m.direction] || '') + (m.tojeongTone ? ' · 토정 ' + esc(DIR[m.tojeongTone]) : '') + '</p>' +
-      (m.hook ? '<p class="ny-p hook">' + esc(m.hook) + '</p>' : '') + paras(m.paras) + '</div>';
+      (m.hook ? '<p class="ny-p hook">' + esc(m.hook) + '</p>' : '') + paras(m.paras) + sajuBox(m.saju) + '</div>';
     return (ch.note ? '<p class="ny-p note">' + esc(ch.note) + '</p>' : '') + chips + card;
   }
   function panel(ch, slot) { return root.NewyearLook ? root.NewyearLook.panelHtml(ch.id, slot) : ''; }   // 관리자 패널 이미지에서 고른 삽화(없으면 빈 문자열)
@@ -147,7 +151,7 @@
     html += paras(ch.paras);
     (ch.sections || []).forEach(function (s, si, all) {
       if (si === 2 && all.length >= 3) html += panel(ch, 1);
-      html += '<section class="ny-sec"><h3 class="ny-sec-t">' + esc(s.title) + (s.compare && CMP[s.compare.kind] ? '<span class="ny-cmp ' + s.compare.kind + '">' + CMP[s.compare.kind] + '</span>' : '') + '</h3>' + paras(s.paras) + '</section>';
+      html += '<section class="ny-sec"><h3 class="ny-sec-t">' + esc(s.title) + (s.compare && CMP[s.compare.kind] ? '<span class="ny-cmp ' + s.compare.kind + '">' + CMP[s.compare.kind] + '</span>' : '') + '</h3>' + toneStrip(s.timeline) + paras(s.paras) + '</section>';
     });
     if (ch.locked) html += lockCard(ch);
     if (ch.note) html += '<p class="ny-p note">' + esc(ch.note) + '</p>';
