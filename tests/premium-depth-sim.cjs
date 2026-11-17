@@ -64,6 +64,8 @@ console.log(`사주 ${n}명 · 시범 밖 장 동일 ${offSame}/${offTotal}(나�
 rows.forEach(r => { ok(r.nullOn <= r.nullOff, r.id + ' 빈 장 늘어남'); ok(r.charsOn > r.charsOff, r.id + ' 본문이 늘지 않음'); ok(r.uniqOn >= r.uniqOff, r.id + ' 서로 다른 글 수 줄어듦'); ok(r.valOn > r.valOff, r.id + ' 실제 값 문장 수가 늘지 않음'); });
 // 스위치 꺼짐 = 시범 전과 같음
 ok(ON.MantraPremiumDepth.on() === true && OFF.MantraPremiumDepth.on() === false, '스위치 판정');
+// 운영 공개 스위치(setRemote): 꺼진 쪽에 켜면 켜지고, 다시 끄면 꺼짐
+ok(OFF.MantraPremiumDepth.setRemote(true) === true && OFF.MantraPremiumDepth.on() === true && OFF.MantraPremiumDepth.setRemote(false) === true && OFF.MantraPremiumDepth.on() === false, '운영 스위치 판정');
 if (REPORT) {
   const md = ['# 프리미엄 심화 시범 — 개선 전후 비교 (' + n + '명, 2026-11-17)', '', '`node tests/premium-depth-sim.cjs ' + N + ' --report ' + REPORT + '` 로 다시 만듭니다. 전 = 지금 운영과 같은 서사 엔진, 후 = 시범 층(premiumDepth) 켬.', '',
     '| 장 | 빈 장(전→후) | 본문 글자(전→후) | 글 구성 종류(전→후) | 실제 값 문장 수/장(전→후) | 값 문장 비율(전→후) | 수식 문단 종류 |', '|---|---|---|---|---|---|---|',

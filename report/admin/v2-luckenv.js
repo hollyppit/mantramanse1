@@ -69,6 +69,10 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 건강·사고수 장(6장)</b> — 현재: <b style="color:' + (fl && fl.healthChapters ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.healthChapters ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leHC"' + (fl ? '' : ' disabled') + '>' + (fl && fl.healthChapters ? '건강·사고수 장 끄기' : '건강·사고수 장 켜기') + '</button><a class="btn" href="/report/v2/?mantraFlags=healthChapters" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 종합풀이 \'건강 및 사고수\' 장 바로 뒤에 \'내 몸의 오행 지도\'·\'나는 언제 쉽게 지칠까?\'·\'스트레스가 몸으로 오는 길\'·\'올해·이번 달 몸 챙길 때\'·\'사고수 신호 읽기\'·\'앞으로 10년 안전 흐름과 삼재\' 6장이 <b>약 1분 안에</b> 나타납니다. 건강 지도·사고수 참고·건강/사고 지수·삼재 계산으로 만든 문장(AI·DB 문안 없음)이고, 장마다 의학적 진단·사고 예측이 아니라는 안내가 붙습니다. 점수는 바뀌지 않습니다.</p></div>';
+    // 프리미엄 심화 층(2026-11-17, report/v2/premium-depth.js): 서사 59장에 내면의 구조·양면성과 반전·알아보는 장면·내게 맞는 한 가지를 더한다
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 프리미엄 심화 층(59장)</b> — 현재: <b style="color:' + (fl && fl.premiumDepth ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.premiumDepth ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="lePD"' + (fl ? '' : ' disabled') + '>' + (fl && fl.premiumDepth ? '심화 층 끄기' : '심화 층 켜기') + '</button><a class="btn" href="/report/v2/?mantraFlags=premiumDepth" target="_blank" rel="noopener">미리보기 주소</a></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 서사 59장(종합·재물·커리어·인연)마다 <b>내면의 구조</b>(그 사주의 실제 기운 비율·필요한 기운), <b>양면성과 반전·함께 보는 조건</b>(겹친 조건별 문단 + 알아보는 생활 장면 한 줄), <b>내게 맞는 한 가지</b>(필요한 기운별 결론 + 다음 장 연결)가 <b>약 1분 안에</b> 붙습니다. 규칙 기반 사전 문안(AI 호출 없음)이고 점수·계산은 바뀌지 않습니다. 장마다 맞는 조건이 없으면 붙지 않습니다. 문안은 초안이라 켜기 전에 미리보기 주소로 확인해 주세요.</p></div>';
     // 인연의 광장 벚꽃 테마(community/theme-sakura.css·theme-sakura.js) 스위치 — 광장 겉모습만 바꾼다(2026-11-17)
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>인연의 광장 벚꽃 테마</b> — 현재: <b style="color:' + (fl && fl.sakuraTheme ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.sakuraTheme ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leSK"' + (fl ? '' : ' disabled') + '>' + (fl && fl.sakuraTheme ? '벚꽃 테마 끄기' : '벚꽃 테마 켜기') + '</button></div>' +
@@ -144,6 +148,14 @@
       fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { healthChapters: v } }) })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
         .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '건강·사고수 장을 켰습니다(약 1분 안에 반영)' : '건강·사고수 장을 껐습니다(약 1분 안에 반영)'); });
+    };
+    $('#lePD').onclick = function () {   // 운명의 타임라인 프리미엄 심화 층 스위치(따로 켜고 끈다)
+      var v = !(S.flags && S.flags.premiumDepth);
+      if (v && !confirm('운명의 타임라인 서사 59장에 프리미엄 심화 층(내면의 구조·양면성과 반전·알아보는 장면·내게 맞는 한 가지)을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
+      var who = ''; try { who = localStorage.getItem('iching_reviewer') || ''; } catch (e) { }
+      fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify({ flags: { premiumDepth: v } }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
+        .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '프리미엄 심화 층을 켰습니다(약 1분 안에 반영)' : '프리미엄 심화 층을 껐습니다(약 1분 안에 반영)'); });
     };
     $('#leDC').onclick = function () {   // 60갑자 일주 적합도 2판 스위치(따로 켜고 끈다)
       var v = !(S.flags && S.flags.dayCompat);

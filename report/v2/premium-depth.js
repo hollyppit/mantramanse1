@@ -137,7 +137,11 @@
     return out;
   }
 
+  // 운영 공개 스위치(/api/luck-flags premiumDepth) — life-narrative.js 가 스위치를 받을 때 setRemote 로 넘겨 준다
+  var remoteOn = false;
+  function setRemote(v) { var b = v === true, changed = b !== remoteOn; remoteOn = b; return changed; }
   function on() {
+    if (remoteOn) return true;
     try {
       var f = root.MANTRA_FLAGS; if (f && f.premiumDepth === true) return true;
       var h = root.location && root.location.hostname || '';
@@ -196,7 +200,7 @@
     return out;
   }
 
-  var api = { version: VERSION, on: on, covers: covers, apply: apply, profile: profile, pickMods: pickMods, TENSIONS: Object.keys(T) };
+  var api = { version: VERSION, on: on, setRemote: setRemote, covers: covers, apply: apply, profile: profile, pickMods: pickMods, TENSIONS: Object.keys(T) };
   R.PremiumDepth = api; root.MantraPremiumDepth = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
