@@ -78,6 +78,7 @@
       TEASER.map(function (t) { return '<label style="margin-right:12px"><input type="checkbox" name="nyTeaser" value="' + t[0] + '"' + (c.teaser.indexOf(t[0]) >= 0 ? ' checked' : '') + '> ' + t[1] + '</label>'; }).join('') +
       '<p class="muted" style="margin:10px 0 4px">화면 첫머리 소개(비우면 기본 소개)</p><textarea id="nyIntro" rows="3" style="width:100%" maxlength="600">' + esc(c.intro || '') + '</textarea>' +
       '<label style="display:block;margin:8px 0"><input type="checkbox" id="nyPreviewMode"' + (c.contentMode === 'preview' ? ' checked' : '') + '> 관리자 화면에서 검수 전 문구까지 보기(사용자에게는 영향 없음)</label>' +
+      '<label style="display:block;margin:8px 0"><input type="checkbox" id="nyMonthDeep"' + (c.monthStyle === 'premium' ? ' checked' : '') + '> <b>월별 심화 해설</b> 보여 주기 — 원문 중심 월 카드(원문 뜻·생활 장면·원문이 말한 분야·해 볼 것·조심할 것·다음 달 연결), 사주 월운은 아래 접는 상자, 총운에 상·하반기 흐름. <span class="muted">켜면 검수 전 해설(손 3괘 + 핵심어 조합)도 사용자에게 보여요.</span></label>' +
       entryHtml(c, d) +
       '<button class="btn main" id="nySaveCfg">공개 설정 저장</button></div>';
     h += mediaHtml(c);
@@ -177,7 +178,7 @@
       var vis = (root.querySelector('input[name=nyVis]:checked') || {}).value, teaser = [].map.call(root.querySelectorAll('input[name=nyTeaser]:checked'), function (x) { return x.value; });
       if (vis === 'paid' && !(S.data.product && S.data.product.price > 0) && !confirm('가격이 0원이라 유료로 바꾸면 아무도 구매할 수 없어요. 그래도 저장할까요?')) return;
       if (vis !== 'closed' && S.data.summary.modern.reviewedInYear === 0 && !confirm('승인한 토정 현대어가 아직 없어요. 공개 화면에는 원문만 나가요. 그래도 공개할까요?')) return;
-      return post({ action: 'config', year: S.year, visibility: vis, teaser: teaser, intro: root.querySelector('#nyIntro').value, contentMode: root.querySelector('#nyPreviewMode').checked ? 'preview' : 'public',
+      return post({ action: 'config', year: S.year, visibility: vis, teaser: teaser, intro: root.querySelector('#nyIntro').value, contentMode: root.querySelector('#nyPreviewMode').checked ? 'preview' : 'public', monthStyle: root.querySelector('#nyMonthDeep') && root.querySelector('#nyMonthDeep').checked ? 'premium' : 'classic',
         entry: { show: root.querySelector('#nyEntryShow').checked, kick: root.querySelector('#nyEntryKick').value, title: root.querySelector('#nyEntryTitle').value, line: root.querySelector('#nyEntryLine').value, go: root.querySelector('#nyEntryGo').value } }, '공개 설정을 저장했어요.');
     }
     if (q('[data-nyrm]')) { var rk = q('[data-nyrm]').dataset.nyrm, rm = curMedia(); if (!confirm('이 파일 연결을 뺄까요? (파일 자체는 지우지 않아요)')) return; rm[rk] = ''; return saveMedia(rm, '파일 연결을 뺐어요.'); }

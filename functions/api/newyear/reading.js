@@ -24,7 +24,7 @@ export async function onRequestPost({ request, env }) {
   const mode = gate.admin && (request.headers.get('x-content-mode') || '') === 'preview' ? 'preview' : cfg.contentMode === 'preview' && gate.admin ? 'preview' : 'public';
   let reading;
   const live = applyContent(deps, await loadContent(env), mode);   // 관리자 검수·수정 반영(공개 모드는 승인한 문구만)
-  try { reading = deps.NewyearCompose.compose({ birth, targetYear: year, mode }, live); }
+  try { reading = deps.NewyearCompose.compose({ birth, targetYear: year, mode, monthStyle: cfg.monthStyle === 'premium' ? 'premium' : undefined, deepApproved: cfg.monthStyle === 'premium' }, live); }
   catch (e) { return json({ ok: false, error: 'compose-failed', message: String((e && e.message) || e).slice(0, 160) }, 400); }
   if (gate.state === 'teaser') reading = teaserOf(reading, gate.teaser);
   return json({ ok: true, year, access, product: gate.product, intro: cfg.intro || '', reading, admin: isAdmin(request, env) ? { mode } : undefined }, 200);

@@ -80,7 +80,7 @@
     // 월별 심화 해설(시범, texts/tojeong-month-deep.js): input.monthStyle === 'premium' 일 때만. 서버 API 는 이 값을 넘기지 않으므로 운영 화면은 그대로다.
     // 공개 모드에서는 검수 전(draft) 해설을 쓰지 않는다(현대어 풀이와 같은 검수 게이트)
     var DEEPSET = (deps && deps.TojeongMonthDeep) || root.TojeongMonthDeep || null;
-    var deep = input.monthStyle === 'premium' && modOk && DEEPSET && DEEPSET.DEEP[g] && (mode === 'preview' || DEEPSET.DEEP[g].status !== 'draft') ? DEEPSET.DEEP[g] : null;
+    var deep = input.monthStyle === 'premium' && modOk && DEEPSET && DEEPSET.DEEP[g] && (mode === 'preview' || DEEPSET.DEEP[g].status !== 'draft' || input.deepApproved === true) ? DEEPSET.DEEP[g] : null;
 
     var seed = [sj.natal.pillars.year, sj.natal.pillars.month, sj.natal.pillars.day, sj.natal.pillars.hour || '-', g].join('|');
     var tgGroup = TG_GROUP[sj.year.stemTG];
@@ -210,9 +210,9 @@
       var c = LINK.compare(mm ? mm.tone : null, sm.direction);
       var ps = [];
       if (tjm) ps.push({ role: 'tojeong', text: '토정비결 ' + lm.lunarMonth + '월 원문: ' + tjm.map(function (p) { return p.join(' '); }).join(' / ') });
-      ps.push({ role: 'symbol', text: dmn.symbol });
+      ps.push({ role: 'symbol', text: dmn.symbolLead && mm && mm.gist ? dmn.symbolLead + ' ' + mm.gist : dmn.symbol });   // 조합 해설은 지금 현대어(관리자 수정 반영)
       if (dmn.life) ps.push({ role: 'life', text: dmn.life });
-      [['money', '돈'], ['work', '일'], ['people', '사람']].forEach(function (d) { if (dmn[d[0]]) ps.push({ role: 'domain', label: d[1], text: d[1] + ' — ' + dmn[d[0]] }); });
+      [['money', '돈'], ['work', '일'], ['people', '사람'], ['home', '집'], ['body', '몸'], ['move', '이동'], ['dir', '방향']].forEach(function (d) { if (dmn[d[0]]) ps.push({ role: 'domain', label: d[1], text: d[1] + ' — ' + dmn[d[0]] }); });
       if (dmn.do) ps.push({ role: 'do', text: '해 볼 것: ' + dmn.do });
       if (dmn.avoid) ps.push({ role: 'avoid', text: '조심할 것: ' + dmn.avoid });
       ps.push({ role: 'next', text: dmn.next || nextLine(lm, li, mm) });

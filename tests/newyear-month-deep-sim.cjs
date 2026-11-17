@@ -6,19 +6,24 @@
 const assert = require('assert/strict'), fs = require('fs'), path = require('path');
 require('../report/newyear/node-loader.js');
 const C = globalThis.NewyearCompose, Q = require('../report/newyear/quality.js'), DEEP = globalThis.TojeongMonthDeep.DEEP, MOD = globalThis.TojeongModern;
-const PILOT = Object.keys(DEEP);
 const repIdx = process.argv.indexOf('--report'), REPORT = repIdx > 0 ? process.argv[repIdx + 1] : null;
 const BAN = /반드시|무조건|100%|틀림없이|대박|망한다|파산|이혼한다(?!면)|죽는|사망/;
+const E = globalThis.TojeongEngine, HAND = ['413', '661', '561'];   // 손으로 쓴 시범 3괘(나머지는 핵심어 조합 tojeong-month-motif.js)
 
-// 시범 괘가 나오는 생일 찾기(2027)
+// 2027년에 나올 수 있는 괘(엔진 표) 가운데 심화 해설이 있는 괘 = 검사 대상, 없는 괘(원문 달 구절 없는 보충본) = 기본 경로 보존 대상
+const YT = E.yearTable(2027, globalThis.Manse), ALL27 = new Set();
+for (let m = 1; m <= 12; m++) for (const lo of new Set(YT.lower[m])) for (const u of new Set(Object.values(YT.upper))) ALL27.add('' + u + YT.middle[m].value + lo);
+const PILOT = [...ALL27].filter(g => DEEP[g]).sort(), NODEEP = [...ALL27].filter(g => !DEEP[g]);
+// 괘마다 그 괘가 나오는 음력 생일 하나(가벼운 엔진 계산으로 찾고 compose 는 괘당 한 번만)
 const found = {}, others = [];
-for (let i = 0; i < 3000 && (PILOT.some(g => !found[g] || found[g].length < 3) || others.length < 5); i++) {
-  const b = { year: 1950 + (i * 7) % 60, month: 1 + (i * 5) % 12, day: 1 + (i * 11) % 28, hour: (i * 3) % 24, minute: 0, gender: i % 2 ? 'F' : 'M', calendar: 'solar' };
-  let r; try { r = C.compose({ birth: b, targetYear: 2027, mode: 'preview' }); } catch (e) { continue; }
-  const g = String(r.tojeong.gua);
-  if (PILOT.includes(g)) { (found[g] = found[g] || []).push(b); } else if (others.length < 5) others.push(b);
+for (let y = 1935; y <= 2020 && PILOT.concat(NODEEP).some(g => !found[g]); y += 1) for (let m = 1; m <= 12; m++) for (let d = 1; d <= 29; d += 2) {
+  const b = { year: y, month: m, day: d, hour: 12, minute: 0, gender: (y + d) % 2 ? 'F' : 'M', calendar: 'lunar' };
+  let r; try { r = E.compute({ birth: b, targetYear: 2027 }, globalThis.Manse); } catch (e) { continue; }
+  const g = String(r.gua); if (!found[g]) found[g] = [b];
 }
+NODEEP.forEach(g => { if (found[g]) others.push(found[g][0]); });
 PILOT.forEach(g => assert.ok(found[g] && found[g].length, g + '괘가 나오는 생일을 못 찾음'));
+console.log('2027 가능 괘 ' + ALL27.size + ' · 심화 해설 ' + PILOT.length + '(손 ' + HAND.filter(g => PILOT.includes(g)).length + ' · 핵심어 조합 ' + PILOT.filter(g => !HAND.includes(g)).length + ') · 해설 없음 ' + NODEEP.length + '(' + NODEEP.join('·') + ')');
 
 // 1) 기본 경로 보존
 for (const b of others) {
@@ -52,18 +57,22 @@ for (const g of PILOT) for (const b of found[g]) {
   });
   const total = after.chapters.find(c => c.id === 'total'), hv = total.sections.find(s => s.id === 'halves');
   assert.ok(hv && hv.timeline.length === 12 && hv.paras.length >= 3, '한 해의 흐름 섹션');
-  rows.push({ gua: g, birth: `${b.year}-${b.month}-${b.day} ${b.hour}시 ${b.gender === 'F' ? '여' : '남'}`, monthBefore: chars(mb), monthAfter: chars(ma), sajuBox: sajuChars(ma), tojeongShareBefore: tojeongShare(mb), tojeongShareAfter: tojeongShare(ma) });
-  if (b === found[g][0]) {
+  const filled = k => ma.filter(m => m.paras.some(x => x.role === k)).length, themes = new Set(ma.map(m => m.hook)).size;
+  rows.push({ src: HAND.includes(g) ? '손' : '조합', doN: filled('do'), avoidN: filled('avoid'), domainN: Math.round(ma.reduce((a, m) => a + m.paras.filter(x => x.role === 'domain').length, 0) / ma.length * 10) / 10, themes, gua: g, birth: `${b.year}-${b.month}-${b.day} ${b.hour}시 ${b.gender === 'F' ? '여' : '남'}`, monthBefore: chars(mb), monthAfter: chars(ma), sajuBox: sajuChars(ma), tojeongShareBefore: tojeongShare(mb), tojeongShareAfter: tojeongShare(ma) });
+  if (b === found[g][0] && (HAND.includes(g) || PILOT.filter(x => !HAND.includes(x)).slice(0, 4).includes(g))) {
     const m0 = mb[3], m1 = ma[3];
     md.push(`### ${g}괘 — ${rows[rows.length - 1].birth} · ${m1.label}`, '', '**전(지금 운영)**', '', `- 후킹: ${m0.hook}`, ...m0.paras.map(p => `- (${p.role}) ${p.text}`), '', '**후(시범)**', '', `- 후킹(원문 주제): ${m1.hook}`, ...m1.paras.map(p => `- (${p.role}) ${p.text}`), '', `- **${m1.saju.title}**`, ...m1.saju.paras.map(p => `  - (${p.role}) ${p.text}`), '', '**한 해의 흐름(총운에 새로 붙는 칸)**', '', ...hv.paras.map(p => `- (${p.role}) ${p.text}`), '- 월별 결: ' + hv.timeline.map(t => t.m + '월 ' + ({ good: '밝음', neutral: '보통', caution: '조심', burden: '버팀' }[t.tone] || '-')).join(' · '), '');
   }
 }
-console.table(rows);
+const avgOf = (k, f) => { const a = rows.filter(f); return a.length ? Math.round(a.reduce((x, r) => x + r[k], 0) / a.length * 10) / 10 : 0; };
+const SUM = ['손', '조합'].map(src => { const f = r => r.src === src; return { src, n: rows.filter(f).length, before: avgOf('monthBefore', f), after: avgOf('monthAfter', f), share: avgOf('tojeongShareAfter', f), doN: avgOf('doN', f), avoidN: avgOf('avoidN', f), domainN: avgOf('domainN', f), themes: avgOf('themes', f) }; });
+console.table(SUM);
+rows.forEach(r => { assert.ok(r.doN >= 8 && r.avoidN >= 8, r.gua + ' 해 볼 것·조심할 것이 빈 달이 많음 ' + r.doN + '/' + r.avoidN); assert.ok(r.themes >= 7, r.gua + ' 달 주제가 너무 겹침 ' + r.themes); });
 if (REPORT) {
-  const head = ['# 토정비결 월별 심화 시범 — 전후 비교 (2026-11-17)', '', '`node tests/newyear-month-deep-sim.cjs --report ' + REPORT + '` 로 다시 만듭니다. 시범 3괘(2027년에 가장 자주 나오는 413·661·561), 해설은 draft(사람 검수 전).', '',
-    '| 괘 | 생일 | 월 본문 글자(전→후) | 사주 별도 상자 글자 | 본문 중 토정 몫(전→후) |', '|---|---|---|---|---|', ...rows.map(r => `| ${r.gua} | ${r.birth} | ${r.monthBefore} → ${r.monthAfter} | ${r.sajuBox} | ${r.tojeongShareBefore}% → ${r.tojeongShareAfter}% |`), '',
-    '바뀐 점: 월 본문은 원문 구절 → 옛 그림의 뜻 → 생활 장면 → 원문이 말한 분야(돈·일·사람)만 → 해 볼 것·조심할 것 → 다음 달로 잇는 줄. 사주 월운은 아래 별도 상자로 옮기고, 모두에게 같던 계절 달력 문장은 뺐습니다. 두 풀이가 같은 쪽을 가리켜도 "더 잘 맞는다"고 쓰지 않습니다.', '', '## 비교 샘플 (음력 4월)', ''];
+  const head = ['# 토정비결 월별 심화 시범 — 전후 비교 (2026-11-17)', '', '`node tests/newyear-month-deep-sim.cjs --report ' + REPORT + '` 로 다시 만듭니다. 2027년에 나올 수 있는 괘 ' + ALL27.size + '개 중 ' + PILOT.length + '괘(손 해설 3 + 핵심어 조합 ' + (PILOT.length - 3) + '), 해설은 모두 draft(사람 검수 전). 원문에 달 구절이 없는 보충본 ' + NODEEP.length + '괘(' + NODEEP.join('·') + ')는 기존 월 카드 그대로.', '', '| 방식 | 괘 | 월 본문 글자(전→후) | 본문 중 토정 몫(후) | 해 볼 것 있는 달 | 조심할 것 있는 달 | 달마다 분야 칸 | 12달 주제 종류 |', '|---|---|---|---|---|---|---|---|', ...SUM.map(x => '| ' + x.src + ' | ' + x.n + ' | ' + x.before + ' → ' + x.after + ' | ' + x.share + '% | ' + x.doN + ' | ' + x.avoidN + ' | ' + x.domainN + ' | ' + x.themes + ' |'), '', '## 괘별', '',
+    '| 괘 | 방식 | 생일 | 월 본문 글자(전→후) | 사주 별도 상자 글자 | 본문 중 토정 몫(전→후) | 주제 종류 |', '|---|---|---|---|---|---|---|', ...rows.map(r => `| ${r.gua} | ${r.src} | ${r.birth} | ${r.monthBefore} → ${r.monthAfter} | ${r.sajuBox} | ${r.tojeongShareBefore}% → ${r.tojeongShareAfter}% | ${r.themes} |`), '',
+    '바뀐 점: 월 본문은 원문 구절 → 옛 그림의 뜻 → 생활 장면 → 원문이 말한 분야(돈·일·사람)만 → 해 볼 것·조심할 것 → 다음 달로 잇는 줄. 사주 월운은 아래 별도 상자로 옮기고, 모두에게 같던 계절 달력 문장은 뺐습니다. 두 풀이가 같은 쪽을 가리켜도 "더 잘 맞는다"고 쓰지 않습니다.', '', '## 비교 샘플 (음력 4월, 손 해설 3괘 + 조합 4괘)', ''];
   fs.writeFileSync(path.join(__dirname, '..', REPORT), head.concat(md).join('\n'));
   console.log('비교 문서 ' + REPORT);
 }
-console.log('newyear-month-deep-sim ok: 시범 괘 ' + PILOT.join('·') + ', 생일 ' + rows.length + '명, 기본 경로 보존 ' + others.length + '명');
+console.log('newyear-month-deep-sim ok: 심화 괘 ' + PILOT.length + ', 생일 ' + rows.length + '명, 기본 경로 보존 ' + others.length + '명');

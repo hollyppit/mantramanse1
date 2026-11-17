@@ -8,12 +8,14 @@ import '../report/newyear/compose.js';
 import '../report/newyear/quality.js';
 import '../report/newyear/texts/tojeong-kyu1077.js';
 import '../report/newyear/texts/tojeong-nl-supplement.js';
+import '../report/newyear/texts/tojeong-month-deep.js';   // 월별 심화 해설(손 해설 3괘)
 import '../report/newyear/texts/tojeong-modern-1.js';
 import '../report/newyear/texts/tojeong-modern-2.js';
 import '../report/newyear/texts/tojeong-modern-3.js';
 import '../report/newyear/texts/tojeong-modern-4.js';
 import '../report/newyear/texts/tojeong-modern-5.js';
 import '../report/newyear/texts/tojeong-modern-6.js';
+import '../report/newyear/texts/tojeong-month-motif.js';   // 손 해설 없는 괘를 핵심어로 채움 — 현대어 풀이 뒤에 불러야 함
 import '../report/newyear/texts/saju-blocks-domain.js';
 import '../report/newyear/texts/saju-blocks-misc.js';
 import '../report/newyear/texts/saju-blocks-month.js';
@@ -27,6 +29,6 @@ export const RUNTIME_FILES = [
 export const NY = () => ({
   Manse: globalThis.Manse, TojeongEngine: globalThis.TojeongEngine, TojeongText: globalThis.TojeongText, TojeongSupplement: globalThis.TojeongSupplement,
   TojeongModern: globalThis.TojeongModern, NewyearSajuLink: globalThis.NewyearSajuLink, NewyearBlocks: globalThis.NewyearBlocks, NewyearPacks: globalThis.NewyearPacks,
-  NewyearCompose: globalThis.NewyearCompose,
+  NewyearCompose: globalThis.NewyearCompose, TojeongMonthDeep: globalThis.TojeongMonthDeep,
 });
 export const YEARS = () => Object.keys(globalThis.NewyearPacks || {}).map(Number).sort();

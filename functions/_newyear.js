@@ -14,7 +14,7 @@ export function cleanMedia(m) {
   m = m && typeof m === 'object' ? m : {}; const u = v => (typeof v === 'string' && MEDIA_URL.test(v.trim()) ? v.trim() : ''), sec = Math.round(+m.proSec);
   return { bg: u(m.bg), bgMobile: u(m.bgMobile), proOn: m.proOn !== false, proVideo: u(m.proVideo), proVideoMobile: u(m.proVideoMobile), proImage: u(m.proImage), proImageMobile: u(m.proImageMobile), proSec: sec >= 2 && sec <= 30 ? sec : 6, panels: m.panels !== false };
 }
-export const DEFAULT_YEAR_CONFIG = { visibility: 'closed', teaser: ['open', 'total.core'], intro: '', contentMode: 'public', entry: { ...DEFAULT_ENTRY }, media: { ...DEFAULT_MEDIA } };
+export const DEFAULT_YEAR_CONFIG = { visibility: 'closed', teaser: ['open', 'total.core'], intro: '', contentMode: 'public', monthStyle: 'classic', entry: { ...DEFAULT_ENTRY }, media: { ...DEFAULT_MEDIA } };
 
 export async function loadNewyearConfig(env) {
   let saved = null; try { const kv = kvOf(env); saved = kv ? await kv.get(NEWYEAR_KEY, 'json') : null; } catch { saved = null; }
@@ -29,7 +29,8 @@ export function cleanNewyearConfig(raw) {
     if (VISIBILITY.includes(v.visibility)) c.visibility = v.visibility;
     if (Array.isArray(v.teaser)) c.teaser = v.teaser.filter(t => typeof t === 'string' && /^[a-z]+(\.[a-z]+)?$/.test(t)).slice(0, 6);
     if (typeof v.intro === 'string') c.intro = v.intro.slice(0, 600);
-    if (v.contentMode === 'public' || v.contentMode === 'preview') c.contentMode = v.contentMode;   // preview = 검수 전 문구도 보여 줌(운영에서는 쓰지 않는다)
+    if (v.contentMode === 'public' || v.contentMode === 'preview') c.contentMode = v.contentMode;
+    if (v.monthStyle === 'premium' || v.monthStyle === 'classic') c.monthStyle = v.monthStyle;   // premium = 원문 중심 월별 심화 해설(2026-11-17, 관리자가 켜면 검수 전 해설도 공개)   // preview = 검수 전 문구도 보여 줌(운영에서는 쓰지 않는다)
     const e = v.entry && typeof v.entry === 'object' ? v.entry : {}, one = (x, n) => (typeof x === 'string' ? x.replace(/\s+/g, ' ').trim().slice(0, n) : '');
     c.entry = { show: e.show !== false, kick: one(e.kick, 40), title: one(e.title, 40), line: one(e.line, 120), go: one(e.go, 20) };
     c.media = cleanMedia(v.media);

@@ -16,5 +16,6 @@ for (const f of fs.readdirSync(textsDir).sort()) {
   if (/^tojeong-modern-\d+\.js$/.test(f)) req('texts/' + f);
   if (/^saju-blocks-[\w-]+\.js$/.test(f)) req('texts/' + f);
 }
+req('texts/tojeong-month-motif.js');   // 손 해설 없는 괘를 핵심어로 채운다(현대어 풀이 뒤에 읽어야 함)
 for (const y of fs.readdirSync(path.join(here, 'years'))) if (/^\d{4}$/.test(y)) req(`years/${y}/pack.js`);
 module.exports = globalThis;

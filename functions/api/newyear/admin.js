@@ -59,7 +59,7 @@ export async function onRequestPost({ request, env }) {
     if (!YEARS().includes(+year)) return json({ error: 'unknown-year' }, 404);
     const kv = kvOf(env); if (!kv) return json({ error: 'kv-unavailable' }, 503);
     const cur = await loadNewyearConfig(env);
-    const next = cleanNewyearConfig({ years: { ...cur.years, [year]: { ...yearConfig(cur, year), ...pick(body, ['visibility', 'teaser', 'intro', 'contentMode', 'entry', 'media']) } } });
+    const next = cleanNewyearConfig({ years: { ...cur.years, [year]: { ...yearConfig(cur, year), ...pick(body, ['visibility', 'teaser', 'intro', 'contentMode', 'monthStyle', 'entry', 'media']) } } });
     await kv.put(NEWYEAR_KEY, JSON.stringify(next));
     return json({ ok: true, config: next.years[year] });
   }
