@@ -223,8 +223,11 @@ const TOPIC_SCENE = {
   newyear: '토정비결 신년운세 — 새해 패러디: 해돋이 앞에서 세배하는 크루, 복주머니·떡국·연날리기·한지 등불을 힙합 뮤비 소품처럼 과장한 장면.'
 };
 const EL_MOTIF = { 목: '초록 네온과 대나무·나뭇잎', 화: '붉은 네온과 불꽃 조명·노을', 토: '황금빛 조명과 흙빛 질감', 금: '은빛·흰빛 금속 광택과 차가운 조명', 수: '푸른 네온과 빗물·강물 반사' };
+// 주인공 성별(칸 이름 끝 -f / -m): 여자 사주 곡은 여성 래퍼, 남자 사주 곡은 남성 래퍼가 주인공
+const LEAD_KO = { F: '주인공은 가상의 성인 한국 여성 래퍼. 크루도 여성 래퍼 중심으로, 걸크러시 느낌의 당당한 스타일링.', M: '주인공은 가상의 성인 한국 남성 래퍼. 크루도 남성 래퍼 중심으로, 여유 있고 당당한 스타일링.' };
+const LEAD_EN = { F: 'The main character is a confident adult Korean female rapper with her female crew.', M: 'The main character is a confident adult Korean male rapper with his male crew.' };
 function panelPrompt(slot, extra) {
-  return MV_LOOK + '\n주제: ' + (TOPIC_SCENE[slot.topic] || TOPIC_SCENE.self) + '\n장면: ' + SECTION_SCENE[slot.section] +
+  return MV_LOOK + '\n주인공: ' + (LEAD_KO[slot.gender] || LEAD_KO.M) + '\n주제: ' + (TOPIC_SCENE[slot.topic] || TOPIC_SCENE.self) + '\n장면: ' + SECTION_SCENE[slot.section] +
     '\n색과 상징(' + slot.el + ' 기운): ' + EL_MOTIF[slot.el] + '이 화면의 주 조명색과 소품에 드러난다.' + (extra ? '\n추가 요청: ' + String(extra).slice(0, 400) : '');
 }
 /* 영상(Kling 이미지 → 영상): 칸 이미지를 첫 장면으로 5초 내외 반복 재생용 컷을 만든다. 영어 지시가 더 잘 듣는다 */
@@ -237,7 +240,7 @@ const SECTION_MOTION = {
   outro: 'camera slowly pulls back as the crew walks away into the sunrise, one last smile, calm ending'
 };
 function videoPrompt(slot, extra) {
-  return 'Playful, family-friendly parody of a swaggering hip-hop music video with Korean flavor. Keep the starting frame characters, outfits and setting. ' + SECTION_MOTION[slot.section] +
+  return 'Playful, family-friendly parody of a swaggering hip-hop music video with Korean flavor. ' + (LEAD_EN[slot.gender] || LEAD_EN.M) + ' Keep the starting frame characters, outfits and setting. ' + SECTION_MOTION[slot.section] +
     '. Upbeat music-video energy, smooth cinematic motion, seamless loop feeling.' + (extra ? ' Additional direction: ' + String(extra).slice(0, 400) : '');
 }
 const VIDEO_NEG = 'text, captions, logos, watermark, distorted faces, extra limbs, blurry, flicker';   // 위험 단어는 넣지 않는다(안전 필터가 요청 자체를 거절할 수 있음) — 밝은 코믹 분위기는 지시문에서 긍정형으로

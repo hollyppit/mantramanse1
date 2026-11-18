@@ -20,7 +20,7 @@ for (let n = 0; n < 400; n++) {
   assert(s.sections[5].lines.length >= 4);
   for (const sec of s.sections) {
     for (const l of sec.lines) { assert(l && l.trim() && !/undefined|null|NaN|\{|\}/.test(l), '빈 값/자리표시 남음: ' + l); assert.deepEqual(L.bannedIn(l), []); }
-    assert(/^mv-(intro|verse1|hook|verse2|bridge|outro)-(wood|fire|earth|metal|water)$/.test(sec.panel), sec.panel);
+    assert(/^mv-(intro|verse1|hook|verse2|bridge|outro)-(wood|fire|earth|metal|water)-[fm]$/.test(sec.panel), sec.panel);
     assert(sec.durationMs >= 3000 && sec.durationMs <= 120000);
   }
   assert.deepEqual(s.sections[2].lines, s.sections[4].lines, '훅 반복');
@@ -47,13 +47,13 @@ const v1 = new Set(songs.map(s => s.sections[1].lines.join('|'))).size, v2 = new
 assert(v1 >= 250 && v2 >= 250 && br >= 150, '구간 다양성 ' + v1 + '/' + v2 + '/' + br);
 const usedLines = new Set(songs.flatMap(s => s.sections.flatMap(x => x.lines.map(L.stripAdlibs))));   // 추임새(괄호)를 뺀 원래 조각으로 비교
 // 영어 힙합 추임새: 곡마다 10개 안팎, 괄호로만, 오행별 묶음 안의 말만, 욕설·약물 없음, 훅 두 번이 똑같다
-{ const all = Object.values(L.ADLIB).flatMap(a => a.items.concat(a.hype)).concat(['uh', 'yeah, yeah', 'hold up', 'yeah, peace out']);
+{ const all = Object.values(L.ADLIB).flatMap(a => a.items.concat(a.hype)).concat(['yeah, girl', 'yeah, boy', 'yeah, yeah', 'hold up', 'queen, peace out', 'king, peace out']);
   for (const s of songs.slice(0, 60)) {
     const tags = s.sections.flatMap(x => x.lines.flatMap(l => (l.match(/\(([^)]*)\)/g) || []).map(t => t.slice(1, -1))));
     assert(tags.length >= 8 && tags.length <= 16, '추임새 수 ' + tags.length);
     for (const t of tags) { assert(all.includes(t), '묶음 밖 추임새 ' + t); assert(!/fuck|shit|bitch|drug|gun|weed/i.test(t)); }
     assert(s.sections[2].lines.some(l => /\(yeah, yeah\)$/.test(l))); assert.deepEqual(s.sections[2].lines, s.sections[4].lines);
-    assert(/\(yeah, peace out\)$/.test(s.sections[6].lines[3]));
+    assert(/\((queen|king), peace out\)$/.test(s.sections[6].lines[3]));
     for (const x of s.sections) for (const l of x.lines) assert.equal((l.match(/\(/g) || []).length <= 1, true);
   } }
 const fragUse = frags.filter(t => usedLines.has(t) || /^\{year\}/.test(t)).length;
@@ -96,9 +96,9 @@ for (let n = 0; n < 200; n++) {
 }
 for (const t of L.TOPICS) assert(new Set(byTopic[t]).size >= 199, t + ' 사람마다 다름 ' + new Set(byTopic[t]).size);
 assert.equal(L.compose({ dayMaster: { stem: '갑', el: '목' } }, 'newyear', null), null, '괘 없으면 신년운세 곡 없음');
-assert.equal(L.PANEL_SLOTS.length, 150);
+assert.equal(L.PANEL_SLOTS.length, 300);
 const unused = frags.filter(t => !usedLines.has(t) && !/{(year|m)}/.test(t)); assert(unused.length / frags.length <= 0.08, '쓰이지 않는 조각 ' + unused.length + '/' + frags.length + ': ' + unused.slice(0, 8).join(' / '));
-console.log('주제별 ok: 5주제 × 사주 200개, 주제마다 서로 다른 곡, 토정 144괘 반영, 패널 칸 150개, 전체 조각 ' + frags.length + '줄 중 쓰이지 않은 줄 ' + unused.length + '개');
+console.log('주제별 ok: 5주제 × 사주 200개, 주제마다 서로 다른 곡, 토정 144괘 반영, 패널 칸 300개(주제×성별×구간×오행), 전체 조각 ' + frags.length + '줄 중 쓰이지 않은 줄 ' + unused.length + '개');
 if (process.argv.includes('--show')) for (const t of ['love', 'newyear']) { const sd = ReportV2.SajuData.build(Manse.compute({ year: 1992, month: 3, day: 9, hour: 14, minute: 0, gender: 'F', calendar: 'solar', city: '서울' }), { now }); const s = L.compose(sd, t, { year: 2027, gua: 111 }); console.log('\n[' + s.topicKo + '] ' + s.title + '\n' + s.lyrics); }
 
 // 7) 자막 맞추기(음성 인식 단어 시각 → 줄 시각): 받아쓰기 오타·빠진 단어·전주가 있어도 줄 순서대로 실제 시각을 찾는다
@@ -130,4 +130,27 @@ if (process.argv.includes('--show')) for (const t of ['love', 'newyear']) { cons
   assert(good / checked >= 0.9, '0.7초 안에 맞은 줄 ' + good + '/' + checked);
   assert.equal(L.alignToTranscript(L.compose(ReportV2.SajuData.build(Manse.compute({ year: 1990, month: 1, day: 1, hour: 1, minute: 0, gender: 'F', calendar: 'solar', city: '서울' }), { now }), 'self'), [{ text: '전혀 상관없는 영어 가사 hello world baby', start: 1, end: 2, type: 'word' }]), null, '안 맞으면 null');
   console.log('자막 맞추기 ok: 사주 60곡, 오타 8%·빠진 단어 10%에서 0.7초 안에 맞은 줄 ' + Math.round(good / checked * 1000) / 10 + '%');
+}
+
+// 8) 성별: 같은 사주라도 여자·남자면 보컬 지시·추임새·패널 칸·곡(캐시 열쇠가 되는 가사·스타일)이 달라진다
+{
+  let n = 0;
+  for (let i = 0; i < 40; i++) {
+    const inp = { year: 1975 + i, month: 1 + i % 12, day: 1 + (i * 5) % 27, hour: (i * 7) % 24, minute: 0, calendar: 'solar', city: '서울' };
+    const f = ReportV2.SajuData.build(Manse.compute(Object.assign({ gender: 'F' }, inp)), { now }), m = ReportV2.SajuData.build(Manse.compute(Object.assign({ gender: 'M' }, inp)), { now });
+    for (const t of ['self', 'love', 'wealth', 'career']) {
+      const sf = L.compose(f, t), sm = L.compose(m, t); n++;
+      assert.equal(sf.gender, 'F'); assert.equal(sm.gender, 'M');
+      assert(sf.style.includes('female rapper') && sf.negativeStyle.includes('male vocals') && !sf.style.includes('male rapper'), '여자 보컬');
+      assert(sm.style.includes('male rapper') && sm.negativeStyle.includes('female vocals') && !sm.style.includes('female rapper'), '남자 보컬');
+      assert(sf.sections.every(x => /-f$/.test(x.panel) && /-f$/.test(x.panelFallback)) && sm.sections.every(x => /-m$/.test(x.panel)), '패널 칸 성별');
+      assert(/yeah, girl/.test(sf.lyrics) && /queen, peace out/.test(sf.lyrics) && /yeah, boy/.test(sm.lyrics) && /king, peace out/.test(sm.lyrics), '성별 추임새');
+      assert.notEqual(sf.lyrics + sf.style, sm.lyrics + sm.style, '다른 곡');
+      for (const x of L.toElevenPlan(sf).chunks) assert(x.positive_styles.includes('female rapper'));
+      assert(L.toElevenV1Plan(sm).positive_global_styles.includes('male rapper'));
+    }
+  }
+  assert.equal(L.compose({ dayMaster: { stem: '갑', el: '목' } }, 'self').gender, 'M', '성별 값이 없으면 남자로');
+  const slots = L.PANEL_SLOTS; assert.equal(slots.filter(x => x.gender === 'F').length, 150); assert.equal(new Set(slots.map(x => x.id)).size, 300);
+  console.log('성별 ok: ' + n + '쌍(같은 사주 여·남)에서 보컬·추임새·패널 칸·곡이 모두 갈림');
 }

@@ -62,36 +62,40 @@ r = await call('GET', '/api/music-video?a=' + key, null, { range: 'bytes=100-199
 r = await call('GET', '/api/music-video?a=../x'); assert.equal(r.status, 404);
 // 10) 관리자 화면 정보·패널: 권한 없으면 401, 만들기·비우기·주제 칸
 r = await call('GET', '/api/music-video?admin=1'); assert.equal(r.status, 401);
-r = await call('GET', '/api/music-video?admin=1', null, admin); assert.equal(r.status, 200); assert.equal(r.j.slots.length, 150); assert.equal(r.j.configured.music, true); assert.equal(r.j.flag, true);
-r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-fire', generate: true } }); assert.equal(r.status, 401);
-r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-fire', generate: true } }, admin); assert.equal(r.status, 200, JSON.stringify(r.j)); assert(/^\/api\/clipfile\?k=mvpanel-mv-love-hook-fire-/.test(r.j.panels['mv-love-hook-fire'].url));
+r = await call('GET', '/api/music-video?admin=1', null, admin); assert.equal(r.status, 200); assert.equal(r.j.slots.length, 300); assert.equal(r.j.configured.music, true); assert.equal(r.j.flag, true);
+r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-fire-f', generate: true } }); assert.equal(r.status, 401);
+r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-fire-f', generate: true } }, admin); assert.equal(r.status, 200, JSON.stringify(r.j)); assert(/^\/api\/clipfile\?k=mvpanel-mv-love-hook-fire-f-/.test(r.j.panels['mv-love-hook-fire-f'].url));
 r = await call('POST', '/api/music-video', { panel: { slot: 'nope', generate: true } }, admin); assert.equal(r.status, 400);
-r = await call('GET', '/api/music-video?panels=1'); assert(r.j.panels['mv-love-hook-fire']);
-r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-fire', clear: true } }, admin); assert.equal(r.status, 200); assert(!r.j.panels['mv-love-hook-fire']);
+r = await call('GET', '/api/music-video?panels=1'); assert(r.j.panels['mv-love-hook-fire-f']);
+r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-fire-f', clear: true } }, admin); assert.equal(r.status, 200); assert(!r.j.panels['mv-love-hook-fire-f']);
 // 10-2) 패널 그림 지시문: 갱스터 힙합 뮤비 패러디 + 한국 요소, 무기·마약·폭력·글자 금지, 주제별 장면
 { let seen = ''; const f0 = globalThis.fetch; globalThis.fetch = async (u, o) => { if (String(u).includes('api.openai.com')) seen = String(o && o.body || ''); return f0(u, o); };
-  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', generate: true } }, admin); assert.equal(r.status, 200);
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal-m', generate: true } }, admin); assert.equal(r.status, 200);
   assert(/스웩 연출을 유쾌하게 패러디/.test(seen) && /갓에 선글라스/.test(seen) && /엽전/.test(seen), '패러디·한국 요소');
+  assert(/남성 래퍼/.test(seen) && !/여성 래퍼/.test(seen), '남자 칸(-m)은 남성 래퍼가 주인공');
   assert(!/갱스터|총|칼|마약|담배|폭력|술병|지폐|그리지 않는다|금지/.test(JSON.parse(seen).prompt), '안전 필터에 걸릴 단어 없음(긍정형 지시문)'); assert(/재물운/.test(seen) && /글자·간판 문구·로고·자막 없이/.test(seen), '주제 장면·글자 없음');
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-intro-water-f', generate: true } }, admin); assert.equal(r.status, 200); assert(/여성 래퍼/.test(seen) && !/남성 래퍼/.test(seen), '여자 칸(-f)은 여성 래퍼');
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', generate: true } }, admin); assert.equal(r.status, 400, '성별 없는 옛 칸 이름은 받지 않음');
   globalThis.fetch = f0; }
 // 10-3) 패널 영상(Kling): 키 없으면 501, 시작 프레임 → 작업 → 확인(완료 시 R2 저장·칸 연결), 이미지 바꾸면 영상도 지움
-r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', video: { startKey: 'mvstart-x.jpg' } } }, admin); assert.equal(r.status, 501);
+r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal-m', video: { startKey: 'mvstart-x.jpg' } } }, admin); assert.equal(r.status, 501);
 env.KLING_API_KEY = 'kling-test'; let kling = 0, klingBody = '';
 { const f0 = globalThis.fetch; globalThis.fetch = async (u, o) => { u = String(u);
     if (u.includes('kling')) { kling++; if (o && o.method === 'POST') { klingBody = String(o.body); return new Response(JSON.stringify({ code: 0, data: { id: 'task1' } }), { status: 200, headers: { 'content-type': 'application/json' } }); } return new Response(JSON.stringify({ code: 0, data: [{ status: 'succeeded', outputs: [{ type: 'video', url: 'https://mock.kling.local/v.mp4' }] }] }), { status: 200, headers: { 'content-type': 'application/json' } }); }
     if (u.startsWith('https://mock.kling.local/')) return new Response(Buffer.alloc(5000, 1), { status: 200, headers: { 'content-type': 'video/mp4' } });
     return f0(u, o); };
   r2.set('a1b2c3d4.jpg', Buffer.alloc(3000, 2)); const put0 = R2.put, head0 = R2.head; R2.head = async k => r2.has(k) ? { size: r2.get(k).length, httpMetadata: { contentType: k.endsWith('.jpg') ? 'image/jpeg' : 'image/png' } } : null;
-  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-fire', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 400, '이미지 없는 칸');
-  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', video: { startKey: '../x.jpg' } } }, admin); assert.equal(r.status, 400);
-  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 200, JSON.stringify(r.j)); assert.equal(r.j.pending, true);
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-fire-f', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 400, '이미지 없는 칸');
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal-m', video: { startKey: '../x.jpg' } } }, admin); assert.equal(r.status, 400);
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal-m', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 200, JSON.stringify(r.j)); assert.equal(r.j.pending, true);
   assert(/hip-hop music video/.test(klingBody) && !/gangster|gun|drug|weapon|violence|smok/i.test(klingBody), 'Kling 지시문(위험 단어 없음)');
-  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 409, '중복 작업');
-  r = await call('GET', '/api/music-video?vt=mv-wealth-hook-metal'); assert.equal(r.status, 401);
-  r = await call('GET', '/api/music-video?vt=mv-wealth-hook-metal', null, admin); assert.equal(r.j.state, 'done'); const vurl = r.j.panels['mv-wealth-hook-metal'].video; assert(/^\/api\/clipfile\?k=mvvid-mv-wealth-hook-metal-/.test(vurl));
+  assert(/Korean male rapper/.test(klingBody) && !/female rapper/.test(klingBody), 'Kling 영상도 칸 성별대로');
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal-m', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 409, '중복 작업');
+  r = await call('GET', '/api/music-video?vt=mv-wealth-hook-metal-m'); assert.equal(r.status, 401);
+  r = await call('GET', '/api/music-video?vt=mv-wealth-hook-metal-m', null, admin); assert.equal(r.j.state, 'done'); const vurl = r.j.panels['mv-wealth-hook-metal-m'].video; assert(/^\/api\/clipfile\?k=mvvid-mv-wealth-hook-metal-m-/.test(vurl));
   assert(r2.has(vurl.split('k=')[1]) && !r2.has('a1b2c3d4.jpg'), '영상 저장·시작 프레임 정리');
-  r = await call('GET', '/api/music-video?panels=1'); assert.equal(r.j.panels['mv-wealth-hook-metal'].video, vurl);
-  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', generate: true } }, admin); assert(!r.j.panels['mv-wealth-hook-metal'].video && !r2.has(vurl.split('k=')[1]), '이미지 바꾸면 옛 영상 지움');
+  r = await call('GET', '/api/music-video?panels=1'); assert.equal(r.j.panels['mv-wealth-hook-metal-m'].video, vurl);
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal-m', generate: true } }, admin); assert(!r.j.panels['mv-wealth-hook-metal-m'].video && !r2.has(vurl.split('k=')[1]), '이미지 바꾸면 옛 영상 지움');
   R2.head = head0; globalThis.fetch = f0; delete env.KLING_API_KEY; }
 // 10-4) music_v2_5 가 4xx 로 거절되면 music_v1(sections 형식)으로 한 번 더 — 성공하면 그 곡을 쓴다
 { const f0 = globalThis.fetch, models = []; globalThis.fetch = async (u, o) => { if (String(u).startsWith('https://api.elevenlabs.io/')) { const b = JSON.parse(o.body); models.push(b.model_id);
@@ -119,6 +123,15 @@ env.KLING_API_KEY = 'kling-test'; let kling = 0, klingBody = '';
   old.syncVersion = 0; kv.set(k, JSON.stringify(old)); r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(r.status, 200); assert.equal(r.j.song.timing, null); assert.equal(r.j.song.sync, 'error');
   assert(/speech_to_text/.test(JSON.parse(kv.get('mv:lastError')).message));
   kv.delete(k); globalThis.fetch = f0; }
+// 10-6) 성별: 같은 생년월일시라도 여자·남자면 다른 곡(캐시 열쇠)·보컬 지시·패널 칸
+{ const f0 = globalThis.fetch, bodies = []; globalThis.fetch = async (u, o) => { u = String(u); if (u.startsWith('https://api.elevenlabs.io/v1/music')) { bodies.push(JSON.parse(o.body)); return new Response(Buffer.alloc(4000, 9), { status: 200, headers: { 'content-type': 'audio/mpeg' } }); } if (u.endsWith('/speech-to-text')) return new Response('{}', { status: 500 }); return f0(u, o); };
+  const inp = { year: 1988, month: 3, day: 3, hour: 9, minute: 0, calendar: 'solar', city: '서울' };
+  const sF = ReportV2.SajuData.build(Manse.compute(Object.assign({ gender: 'F' }, inp)), { now: Date.UTC(2026, 10, 18) }), sM = ReportV2.SajuData.build(Manse.compute(Object.assign({ gender: 'M' }, inp)), { now: Date.UTC(2026, 10, 18) });
+  const rf = await call('POST', '/api/music-video', { sd: sF, topic: 'self' }, admin), rm = await call('POST', '/api/music-video', { sd: sM, topic: 'self' }, admin);
+  assert.equal(rf.status, 200); assert.equal(rm.status, 200); assert.notEqual(rf.j.key, rm.j.key, '성별마다 다른 곡');
+  assert(rf.j.song.sections.every(x => /-f$/.test(x.panel)) && rm.j.song.sections.every(x => /-m$/.test(x.panel)), '패널 칸 성별');
+  assert(bodies[0].composition_plan.chunks[0].positive_styles.includes('female rapper') && bodies[1].composition_plan.chunks[0].positive_styles.includes('male rapper'), '보컬 성별 지시');
+  globalThis.fetch = f0; }
 // 11) 일레븐랩스 오류 → 502, 진행 중 기록 지움(다음에 다시 시도 가능)
 globalThis.fetch = async () => new Response(JSON.stringify({ detail: 'bad' }), { status: 422, headers: { 'content-type': 'application/json' } });
 r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(r.status, 502); assert(![...kv.keys()].some(k => k.startsWith('mv:song:') && JSON.parse(kv.get(k)).status === 'pending'));
@@ -127,4 +140,4 @@ assert(/HTTP 422/.test(r.j.detail) && /music_v1 재시도도/.test(r.j.detail), 
 kv.set('luckenv:flags', JSON.stringify({ version: 2, musicVideo: true })); kv.set('worlds:config', JSON.stringify({ worlds: [{ id: 'w7', access: 'paid' }] }));
 // 12) 키가 없으면 501
 delete env.ELEVENLABS_API_KEY; r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(r.status, 501);
-console.log('music-video-api-sim ok: 스위치·로그인·무료 주제 차단, 생성 3곡(종합·재물·신년운세), 캐시 재사용, 재생 Range, 패널 150칸 만들기·비우기, 갱스터 힙합 패러디+한국 요소 지시문, Kling 패널 영상(작업·확인·저장·정리), 오류 처리, 키 노출 없음');
+console.log('music-video-api-sim ok: 스위치·로그인·무료 주제 차단, 생성 3곡(종합·재물·신년운세), 캐시 재사용, 재생 Range, 패널 300칸(주제×성별) 만들기·비우기, 여·남 다른 곡, 갱스터 힙합 패러디+한국 요소 지시문, Kling 패널 영상(작업·확인·저장·정리), 오류 처리, 키 노출 없음');

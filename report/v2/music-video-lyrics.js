@@ -26,15 +26,22 @@
     금: { items: ['uh!', 'come on', 'yeah', 'hey'], hype: 'turn it up' },
     수: { items: ['ooh', 'yeah, yeah', 'uh-huh', 'ayy'], hype: 'let it flow' }
   };
-  function addAdlibs(lines, sec, el, seed) {
+  /* 성별(사용자 요청 2026-11-19): 여자 사주는 여성 래퍼, 남자 사주는 남성 래퍼 — 보컬 지시·추임새·패널 칸(주인공 성별)·캐시가 모두 갈린다 */
+  var GENDERS = ['F', 'M'], GENDER_KO = { F: '여자', M: '남자' }, GR = { F: 'f', M: 'm' };
+  var VOCAL = { F: ['female rapper', 'confident female rap vocals', 'female sung chorus'], M: ['male rapper', 'confident male rap vocals', 'male sung chorus'] };
+  var NEG_VOCAL = { F: ['male vocals'], M: ['female vocals'] };
+  var ADLIB_G = { F: { intro: 'yeah, girl', outro: 'queen, peace out' }, M: { intro: 'yeah, boy', outro: 'king, peace out' } };
+  function genderOf(sd) { var g = sd && sd.gender; return g === 'F' || g === 'female' || g === '여' ? 'F' : 'M'; }
+  function addAdlibs(lines, sec, el, seed, g) {
+    var ag = ADLIB_G[g] || ADLIB_G.M;
     var a = ADLIB[el] || ADLIB.토, last = lines.length - 1, k = 0, pick = function () { return a.items[(seed + sec.length + k++) % a.items.length]; };   // 한 벌스 안에서 차례로 돌려 같은 말이 이어지지 않게
     return lines.map(function (line, i) {
       var tag = null;
-      if (sec === 'intro') tag = i === 1 ? 'uh' : i === last ? a.hype : null;
+      if (sec === 'intro') tag = i === 1 ? ag.intro : i === last ? a.hype : null;
       else if (sec === 'verse1' || sec === 'verse2') tag = (i === 1 || i % 4 === 3) ? pick() : null;
       else if (sec === 'hook') tag = i === 0 ? 'yeah, yeah' : i === last ? a.hype : null;
       else if (sec === 'bridge') tag = i === 0 ? 'hold up' : null;
-      else if (sec === 'outro') tag = i === last ? 'yeah, peace out' : null;
+      else if (sec === 'outro') tag = i === last ? ag.outro : null;
       return tag ? line + ' (' + tag + ')' : line;
     });
   }
@@ -355,7 +362,7 @@
       dw: seasonOk(dw.season), dwTG: V2_DW_TG[dw.stemTG] ? dw.stemTG : null, dwCond: V2_DW_COND[dw.condition] ? dw.condition : '보통',
       sw: seasonOk(sw.season), swTG: BR_TG[sw.stemTG] ? sw.stemTG : null, year: Number.isInteger(sw.year) ? sw.year : (Number.isInteger(sd.nowYear) ? sd.nowYear : null),
       star: firstIn(STAR_ORDER, (sd.specialStars || []).map(function (s) { return s && s.name; })),
-      climate: temp >= 0.5 ? 'hot' : temp <= -0.5 ? 'cold' : 'mild', rel: relOf(sd)
+      climate: temp >= 0.5 ? 'hot' : temp <= -0.5 ? 'cold' : 'mild', rel: relOf(sd), g: genderOf(sd)
     };
   }
 
@@ -397,17 +404,17 @@
       { id: 'bridge', lines: br, el: x.hee },
       { id: 'outro', lines: [OUT_CLIMATE[x.climate], OUT_REL[x.rel]].concat(OUT_EL[x.el]), el: x.el }
     ];
-    parts.forEach(function (p) { p.lines = p.repeatOf ? parts[2].lines.slice() : addAdlibs(p.lines, p.id, x.el, seed); });   // 훅 반복은 첫 훅과 똑같이
+    parts.forEach(function (p) { p.lines = p.repeatOf ? parts[2].lines.slice() : addAdlibs(p.lines, p.id, x.el, seed, x.g); });   // 훅 반복은 첫 훅과 똑같이
     var sections = parts.map(function (p) {
       var base = p.repeatOf || p.id;
-      return { id: p.id, name: SECTION_KO[base] + (p.repeatOf ? ' (반복)' : ''), tag: '[' + TAG[base] + ']', lines: p.lines, durationMs: DUR[p.id], panel: panelId(base, p.el, topic), panelFallback: panelId(base, p.el, 'self'), el: p.el };
+      return { id: p.id, name: SECTION_KO[base] + (p.repeatOf ? ' (반복)' : ''), tag: '[' + TAG[base] + ']', lines: p.lines, durationMs: DUR[p.id], panel: panelId(base, p.el, topic, x.g), panelFallback: panelId(base, p.el, 'self', x.g), el: p.el };
     });
     var t = 0; sections.forEach(function (s) { s.startMs = t; t += s.durationMs; });
     var word = tp ? tp.titleWord : '';
     return {
       version: VERSION, topic: topic, topicKo: TOPIC_KO[topic], inputs: x,
       title: (topic === 'newyear' ? x.ny.year + ' ' : '') + x.day + ' 일주, ' + (word ? word + '에 부는 ' : '') + COLOR[x.yong] + ' 바람',
-      style: STYLE[x.el].slice(), negativeStyle: NEG_STYLE.slice(),
+      gender: x.g, style: STYLE[x.el].concat(VOCAL[x.g] || VOCAL.M), negativeStyle: NEG_STYLE.concat(NEG_VOCAL[x.g] || NEG_VOCAL.M),
       sections: sections, totalMs: t,
       lyrics: sections.map(function (s) { return s.tag + '\n' + s.lines.join('\n'); }).join('\n\n')
     };
@@ -472,10 +479,10 @@
     return lines.map(function (x, j) { var nx = lines[j + 1]; return { s: x.s, l: x.l, t: x.t, e: x.e != null ? x.e : (nx ? nx.t : x.t + 3500) }; });
   }
 
-  /* 패널 이미지 칸: 주제 5개 × 구간 6개 × 오행 5개 = 150칸. 관리자 '뮤직비디오 패널'이 이 칸을 채운다.
+  /* 패널 이미지 칸: 주제 5개 × 성별 2개 × 구간 6개 × 오행 5개 = 300칸(칸 이름 끝 -f 여자 · -m 남자). 관리자 '뮤직비디오 패널'이 이 칸을 채운다.
      종합풀이 칸은 mv-<구간>-<오행>, 다른 주제는 mv-<주제>-<구간>-<오행>. 주제 칸이 비면 화면은 종합풀이 칸(panelFallback)을 쓴다 */
-  function panelId(section, el, topic) { return 'mv-' + (topic && topic !== 'self' ? topic + '-' : '') + section + '-' + (ELR[el] || 'earth'); }
-  var PANEL_SLOTS = []; TOPICS.forEach(function (t) { SECTIONS.forEach(function (s) { ELK.forEach(function (e) { PANEL_SLOTS.push({ id: panelId(s, e, t), topic: t, topicKo: TOPIC_KO[t], section: s, sectionKo: SECTION_KO[s], el: e }); }); }); });
+  function panelId(section, el, topic, g) { return 'mv-' + (topic && topic !== 'self' ? topic + '-' : '') + section + '-' + (ELR[el] || 'earth') + '-' + (GR[g] || 'm'); }
+  var PANEL_SLOTS = []; TOPICS.forEach(function (t) { GENDERS.forEach(function (g) { SECTIONS.forEach(function (s) { ELK.forEach(function (e) { PANEL_SLOTS.push({ id: panelId(s, e, t, g), topic: t, topicKo: TOPIC_KO[t], gender: g, genderKo: GENDER_KO[g], section: s, sectionKo: SECTION_KO[s], el: e }); }); }); }); });
 
   function bannedIn(text) { return BANNED.filter(function (w) { return String(text).indexOf(w) >= 0; }); }
   function allFragments() {
@@ -503,7 +510,7 @@
     return { section: s, line: s.lines[k], lineIndex: k };
   }
 
-  R.MusicVideoLyrics = { VERSION: VERSION, BANNED: BANNED, SECTIONS: SECTIONS, SECTION_KO: SECTION_KO, ELK: ELK, ELR: ELR, PANEL_SLOTS: PANEL_SLOTS, DUR: DUR, TOPICS: TOPICS, TOPIC_KO: TOPIC_KO, TOPIC_WORLD: TOPIC_WORLD,
+  R.MusicVideoLyrics = { VERSION: VERSION, BANNED: BANNED, SECTIONS: SECTIONS, SECTION_KO: SECTION_KO, ELK: ELK, ELR: ELR, PANEL_SLOTS: PANEL_SLOTS, GENDERS: GENDERS, GENDER_KO: GENDER_KO, DUR: DUR, TOPICS: TOPICS, TOPIC_KO: TOPIC_KO, TOPIC_WORLD: TOPIC_WORLD,
     inputsOf: inputsOf, fromInputs: fromInputs, compose: compose, toElevenPlan: toElevenPlan, toElevenV1Plan: toElevenV1Plan, alignToTranscript: alignToTranscript, stripAdlibs: stripAdlibs, ADLIB: ADLIB, panelId: panelId, bannedIn: bannedIn, allFragments: allFragments, cueAt: cueAt, hash: hash };
   if (typeof module !== 'undefined' && module.exports) module.exports = R.MusicVideoLyrics;
 })(typeof window !== 'undefined' ? window : globalThis);

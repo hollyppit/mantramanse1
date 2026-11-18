@@ -8,7 +8,7 @@
 (function () {
   'use strict';
   var pw = '', root = null, D = null, busy = false, stop = false, ERR = {};   // ERR: 칸별 마지막 그림 생성 실패 이유(이 화면에서만)
-  var S = { topic: 'self', sim: { year: 1992, month: 6, day: 23, hour: 14, minute: 0, gender: 'F' }, simTopic: 'self' };
+  var S = { topic: 'self', gender: 'F', sim: { year: 1992, month: 6, day: 23, hour: 14, minute: 0, gender: 'F' }, simTopic: 'self' };
   var L = function () { return window.ReportV2 && window.ReportV2.MusicVideoLyrics; };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var $ = function (s) { return root.querySelector(s); };
@@ -38,12 +38,14 @@
 
     // 패널 칸
     var slots = (D && D.slots) || lib.PANEL_SLOTS, panels = (D && D.panels) || {};
-    var tabs = lib.TOPICS.map(function (t) { var n = slots.filter(function (s) { return s.topic === t && panels[s.id]; }).length; return '<button class="btn' + (S.topic === t ? ' on' : '') + '" data-mvtopic="' + t + '"' + (S.topic === t ? ' style="outline:2px solid #C9A25C"' : '') + '>' + esc(lib.TOPIC_KO[t]) + ' <small>' + n + '/30</small></button>'; }).join(' ');
-    var mine = slots.filter(function (s) { return s.topic === S.topic; });
+    // 성별 탭(여자 사주 = 여성 래퍼 칸 -f, 남자 사주 = 남성 래퍼 칸 -m) — 주제 탭의 숫자는 지금 고른 성별 기준
+    var gtabs = lib.GENDERS.map(function (g) { var n = slots.filter(function (s) { return s.gender === g && panels[s.id]; }).length; return '<button class="btn" data-mvgender="' + g + '"' + (S.gender === g ? ' style="outline:2px solid #C9A25C"' : '') + '>' + esc(lib.GENDER_KO[g]) + ' 사주 · ' + (g === 'F' ? '여성' : '남성') + ' 래퍼 <small>' + n + '/150</small></button>'; }).join(' ');
+    var tabs = lib.TOPICS.map(function (t) { var n = slots.filter(function (s) { return s.topic === t && s.gender === S.gender && panels[s.id]; }).length; return '<button class="btn' + (S.topic === t ? ' on' : '') + '" data-mvtopic="' + t + '"' + (S.topic === t ? ' style="outline:2px solid #C9A25C"' : '') + '>' + esc(lib.TOPIC_KO[t]) + ' <small>' + n + '/30</small></button>'; }).join(' ');
+    var mine = slots.filter(function (s) { return s.topic === S.topic && s.gender === S.gender; });
     var grid = '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><tr><th style="width:84px"></th>' + lib.ELK.map(function (e) { return '<th style="font-weight:600;padding:4px">' + esc(EL_KO[e]) + '</th>'; }).join('') + '</tr>' +
       lib.SECTIONS.map(function (sec) {
         return '<tr><th style="text-align:left;font-weight:600;padding:4px">' + esc(lib.SECTION_KO[sec]) + '</th>' + lib.ELK.map(function (e) {
-          var s = mine.filter(function (x) { return x.section === sec && x.el === e; })[0], p = s && panels[s.id], fb = S.topic !== 'self' && s && panels[lib.panelId(sec, e, 'self')];
+          var s = mine.filter(function (x) { return x.section === sec && x.el === e; })[0], p = s && panels[s.id], fb = S.topic !== 'self' && s && panels[lib.panelId(sec, e, 'self', S.gender)];
           var vt = s && (D && D.vtasks || []).indexOf(s.id) >= 0;
           var img = p && p.video ? '<video src="' + esc(p.video) + '" poster="' + esc(p.url) + '" muted loop playsinline autoplay preload="metadata" style="width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;display:block;outline:2px solid #C9A25C"></video>' :
             p ? '<img src="' + esc(p.url) + '" alt="" style="width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;display:block">' :
@@ -58,8 +60,8 @@
             (p && p.video ? '<button class="btn" style="padding:3px 8px;font-size:12px" data-mvvclr="' + s.id + '">영상 빼기</button>' : '') + '</div></td>';
         }).join('') + '</tr>';
       }).join('') + '</table>';
-    h += '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">패널 이미지 (주제 × 구간 × 오행)</h3><p class="muted" style="margin:0 0 8px">연출: 갱스터 힙합 뮤직비디오를 유쾌하게 패러디하고 한국적 요소(갓·선글라스, 한복 트레이닝복, 엽전 목걸이, 한옥 골목, 포장마차, 한강 야경, 노래방 네온 등)를 섞습니다. 총·마약·폭력·담배·실존 인물·글자는 넣지 않습니다. “영상 만들기”는 그 칸의 그림을 첫 장면으로 Kling 이 5초 영상을 만들고(보통 1~5분), 노래의 그 구간 동안 소리 없이 반복 재생됩니다. 노래의 구간마다 한 장이 화면 전체(세로 9:16)에 깔립니다. 오행은 구간마다 다릅니다 — 인트로·아웃트로는 일간 오행, 벌스1은 가장 센 오행, 훅은 용신, 벌스2는 빈(약한) 오행, 브리지는 희신. 아래쪽 1/3에 자막이 올라가니 글자 없는 그림이 좋습니다.</p>' +
-      '<div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:10px">' + tabs + '</div>' +
+    h += '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">패널 이미지 (성별 × 주제 × 구간 × 오행)</h3><p class="muted" style="margin:0 0 8px">연출: 갱스터 힙합 뮤직비디오를 유쾌하게 패러디하고 한국적 요소(갓·선글라스, 한복 트레이닝복, 엽전 목걸이, 한옥 골목, 포장마차, 한강 야경, 노래방 네온 등)를 섞습니다. 총·마약·폭력·담배·실존 인물·글자는 넣지 않습니다. “영상 만들기”는 그 칸의 그림을 첫 장면으로 Kling 이 5초 영상을 만들고(보통 1~5분), 노래의 그 구간 동안 소리 없이 반복 재생됩니다. 노래의 구간마다 한 장이 화면 전체(세로 9:16)에 깔립니다. 오행은 구간마다 다릅니다 — 인트로·아웃트로는 일간 오행, 벌스1은 가장 센 오행, 훅은 용신, 벌스2는 빈(약한) 오행, 브리지는 희신. 아래쪽 1/3에 자막이 올라가니 글자 없는 그림이 좋습니다.</p>' +
+      '<div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:8px">' + gtabs + '</div><div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:10px">' + tabs + '</div>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center"><button class="btn" id="mvpFill"' + (busy ? ' disabled' : '') + '>이 주제 빈 칸 모두 만들기</button><button class="btn" id="mvpStop"' + (busy ? '' : ' disabled') + '>멈추기</button>' +
       '<input id="mvpExtra" placeholder="추가 요청(선택) — 예: 비 오는 밤 분위기" style="flex:1;min-width:200px"></div>' + grid + '</div>';
 
@@ -93,6 +95,7 @@
 
   function wire() {
     root.querySelectorAll('[data-mvtopic]').forEach(function (b) { b.onclick = function () { S.topic = b.dataset.mvtopic; draw(); }; });
+    root.querySelectorAll('[data-mvgender]').forEach(function (b) { b.onclick = function () { S.gender = b.dataset.mvgender; draw(); }; });
     root.querySelectorAll('[data-mvgen]').forEach(function (b) { b.onclick = function () { gen(b.dataset.mvgen).then(draw); }; });
     root.querySelectorAll('[data-mvclr]').forEach(function (b) { b.onclick = function () { if (!confirm('이 칸의 이미지를 비울까요?')) return; call('POST', '', { panel: { slot: b.dataset.mvclr, clear: true } }).then(function (d) { if (d.panels) D.panels = d.panels; draw(); }); }; });
     root.querySelectorAll('[data-mvup]').forEach(function (inp) { inp.onchange = function () { upload(inp.dataset.mvup, inp.files && inp.files[0]); }; });
@@ -145,9 +148,9 @@
     });
   }
   function fillAll() {
-    var lib = L(), panels = (D && D.panels) || {}, todo = lib.PANEL_SLOTS.filter(function (s) { return s.topic === S.topic && !panels[s.id]; }).map(function (s) { return s.id; });
+    var lib = L(), panels = (D && D.panels) || {}, todo = lib.PANEL_SLOTS.filter(function (s) { return s.topic === S.topic && s.gender === S.gender && !panels[s.id]; }).map(function (s) { return s.id; });
     if (!todo.length) return toast('빈 칸이 없습니다');
-    if (!confirm(lib.TOPIC_KO[S.topic] + ' 빈 칸 ' + todo.length + '장을 차례로 만듭니다(이미지 생성 비용). 진행할까요?')) return;
+    if (!confirm(lib.GENDER_KO[S.gender] + ' 사주 · ' + lib.TOPIC_KO[S.topic] + ' 빈 칸 ' + todo.length + '장을 차례로 만듭니다(이미지 생성 비용). 진행할까요?')) return;
     busy = true; stop = false; draw(); var done = 0;
     (function next() {
       if (stop || !todo.length) { busy = false; draw(); var failed = Object.keys(ERR).length; toast((stop ? '멈춤 — ' : '끝 — ') + done + '장 만들었습니다' + (failed ? ' · 실패 ' + failed + '장(칸 아래 빨간 글씨에 이유)' : ''), failed > 0); return; }
