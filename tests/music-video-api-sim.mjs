@@ -71,8 +71,8 @@ r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-fire',
 // 10-2) 패널 그림 지시문: 갱스터 힙합 뮤비 패러디 + 한국 요소, 무기·마약·폭력·글자 금지, 주제별 장면
 { let seen = ''; const f0 = globalThis.fetch; globalThis.fetch = async (u, o) => { if (String(u).includes('api.openai.com')) seen = String(o && o.body || ''); return f0(u, o); };
   r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', generate: true } }, admin); assert.equal(r.status, 200);
-  assert(/갱스터 힙합 뮤직비디오를 유쾌하게 패러디/.test(seen) && /갓에 선글라스/.test(seen) && /엽전/.test(seen), '패러디·한국 요소');
-  assert(/총·칼·마약·담배/.test(seen) && /글자·한글 간판/.test(seen), '금지 요소'); assert(/재물운/.test(seen) && /실제 지폐는 그리지 않는다/.test(seen), '주제 장면');
+  assert(/스웩 연출을 유쾌하게 패러디/.test(seen) && /갓에 선글라스/.test(seen) && /엽전/.test(seen), '패러디·한국 요소');
+  assert(!/갱스터|총|칼|마약|담배|폭력|술병|지폐|그리지 않는다|금지/.test(JSON.parse(seen).prompt), '안전 필터에 걸릴 단어 없음(긍정형 지시문)'); assert(/재물운/.test(seen) && /글자·간판 문구·로고·자막 없이/.test(seen), '주제 장면·글자 없음');
   globalThis.fetch = f0; }
 // 10-3) 패널 영상(Kling): 키 없으면 501, 시작 프레임 → 작업 → 확인(완료 시 R2 저장·칸 연결), 이미지 바꾸면 영상도 지움
 r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', video: { startKey: 'mvstart-x.jpg' } } }, admin); assert.equal(r.status, 501);
@@ -85,7 +85,7 @@ env.KLING_API_KEY = 'kling-test'; let kling = 0, klingBody = '';
   r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-fire', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 400, '이미지 없는 칸');
   r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', video: { startKey: '../x.jpg' } } }, admin); assert.equal(r.status, 400);
   r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 200, JSON.stringify(r.j)); assert.equal(r.j.pending, true);
-  assert(/gangster hip-hop music video/.test(klingBody) && /guns/.test(klingBody), 'Kling 지시문·금지어');
+  assert(/hip-hop music video/.test(klingBody) && !/gangster|gun|drug|weapon|violence|smok/i.test(klingBody), 'Kling 지시문(위험 단어 없음)');
   r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 409, '중복 작업');
   r = await call('GET', '/api/music-video?vt=mv-wealth-hook-metal'); assert.equal(r.status, 401);
   r = await call('GET', '/api/music-video?vt=mv-wealth-hook-metal', null, admin); assert.equal(r.j.state, 'done'); const vurl = r.j.panels['mv-wealth-hook-metal'].video; assert(/^\/api\/clipfile\?k=mvvid-mv-wealth-hook-metal-/.test(vurl));

@@ -179,7 +179,7 @@ export async function onRequestGet({ request, env }) {
     const vl = typeof env.GLOSSARY_KV.list === 'function' ? await env.GLOSSARY_KV.list({ prefix: 'mv:vt:' }) : null, vtasks = ((vl && vl.keys) || []).map(k => k.name.slice(6));
     const used = parseInt(await env.GLOSSARY_KV.get(COUNT(today())), 10) || 0;
     return json({ slots: L.PANEL_SLOTS, panels: await panelsOf(env), version: L.VERSION, flag: await flagOn(env), today: used, limit: limitOf(env), model: modelOf(env),
-      vtasks, lastError: await env.GLOSSARY_KV.get('mv:lastError', 'json'), configured: { music: !!env.ELEVENLABS_API_KEY, image: !!(env.OPENAI_API_KEY || env.GEMINI_API_KEY), video: klingEnabled(env), r2: !!env.CLIPS_R2 } });
+      vtasks, lastError: await env.GLOSSARY_KV.get('mv:lastError', 'json'), lastPanelError: await env.GLOSSARY_KV.get('mv:lastPanelError', 'json'), configured: { music: !!env.ELEVENLABS_API_KEY, image: !!(env.OPENAI_API_KEY || env.GEMINI_API_KEY), video: klingEnabled(env), r2: !!env.CLIPS_R2 } });
   }
   return json({ error: 'not-found' }, 404);
 }
@@ -203,9 +203,10 @@ async function audio(request, env, k) {
    연출 방향(사용자 요청 2026-11-18): 갱스터 힙합 뮤직비디오를 유쾌하게 패러디하되 한국적인 요소를 섞는다.
    과장된 스웩 포즈·로우앵글 어안 렌즈·플래시 조명·슬로모션 같은 힙합 뮤비 문법을 빌리고, 소품·공간은 한국 것으로 바꿔 웃음 포인트를 만든다.
    총·칼·마약·담배·술병 과시·폭력·갱 손동작·실존 인물·유명인·글자·로고는 넣지 않는다(공감형 운세 콘텐츠라 위협적인 느낌 없이). */
-const MV_LOOK = '세로 9:16 랩 뮤직비디오 한 장면. 갱스터 힙합 뮤직비디오를 유쾌하게 패러디한 한국풍 장면 — 과장된 스웩 포즈, 로우앵글 어안 렌즈, 강한 플래시와 네온 조명, 슬로모션 같은 순간 포착, 고급스럽고 선명한 시네마틱 일러스트(뮤직비디오 스틸컷 느낌).' +
+// 이미지 모델 안전 필터: 금지할 것을 단어로 적어도(예: '총은 그리지 않는다') 요청이 거절될 수 있어 지시문은 긍정형으로만 쓴다(2026-11-18 패널 502 원인)
+const MV_LOOK = '세로 9:16 랩 뮤직비디오 한 장면. 힙합 뮤직비디오 특유의 과장된 스웩 연출을 유쾌하게 패러디한 한국풍 장면 — 자신감 넘치는 포즈, 로우앵글 어안 렌즈, 강한 플래시와 네온 조명, 슬로모션 같은 순간 포착, 고급스럽고 선명한 시네마틱 일러스트(뮤직비디오 스틸컷 느낌). 누구나 웃으며 볼 수 있는 밝고 코믹한 분위기.' +
   ' 한국적 요소를 섞는다: 갓에 선글라스, 한복 소매를 단 트레이닝복이나 퍼 코트, 금 체인 대신 엽전 꾸러미·노리개 목걸이, 부채, 단청 무늬, 한옥 골목, 포장마차, 편의점 앞 파라솔, 한강 다리 야경, 노래방 네온, 배달 스쿠터·마을버스·경운기를 튜닝한 차 같은 것 중 장면에 맞는 두세 가지.' +
-  ' 인물은 가상의 한국 젊은 래퍼와 크루(실존 인물·유명인 얼굴 금지). 총·칼·마약·담배·술병 과시·폭력·위협적인 손동작은 그리지 않는다. 글자·한글 간판 문구·로고·자막·워터마크도 그리지 않는다. 화면 아래쪽 1/3 은 자막이 올라가니 너무 복잡하지 않게.';
+  ' 인물은 가상의 성인 한국 래퍼와 크루로, 손에는 마이크·부채·엽전 꾸러미 같은 소품을 든다. 실존 인물을 닮지 않은 새 얼굴. 화면에는 글자·간판 문구·로고·자막 없이 그림만. 화면 아래쪽 1/3 은 자막이 올라가니 단순하게 비워 둔다.';
 const SECTION_SCENE = {
   intro: '뮤직비디오 오프닝. 밤 골목이나 한옥 담장 앞, 튜닝한 마을버스·스쿠터 헤드라이트가 비추는 가운데 주인공이 선글라스를 천천히 내리며 카메라를 보는 등장 장면.',
   verse1: '주인공의 기질을 자랑하는 랩 벌스. 편의점 앞 파라솔·포장마차·옥상 같은 동네 공간을 자기 무대처럼 쓰며 크루와 함께 과장된 스웩 포즈를 취하는 장면.',
@@ -217,8 +218,8 @@ const SECTION_SCENE = {
 const TOPIC_SCENE = {
   self: '종합 — 주인공 한 사람의 개성과 인생 흐름이 드러나는 장면.',
   love: '연애운 — 커플 래퍼 듀엣처럼 두 사람이 등장. 한강 피크닉 돗자리·포장마차 데이트·노래방 듀엣 같은 설레는 장면을 힙합 뮤비 문법으로 과장.',
-  wealth: '재물운 — 돈을 과시하는 힙합 뮤비 클리셰를 한국식으로 패러디: 돈다발 대신 엽전 꾸러미·복주머니·금두꺼비, 가계부와 적금 통장을 트로피처럼 들고 있는 장면(실제 지폐는 그리지 않는다).',
-  career: '커리어운 — 사무실·작업실·출근길 지하철을 무대로 한 오피스 갱스터 패러디: 정장 위에 한복 조끼, 사원증 목걸이를 체인처럼, 서류 가방을 붐박스처럼 든 장면.',
+  wealth: '재물운 — 부자 자랑하는 힙합 뮤비 장면을 한국식으로 패러디: 엽전 꾸러미·복주머니·금두꺼비·가계부와 적금 통장을 트로피처럼 들고 뽐내는 장면.',
+  career: '커리어운 — 사무실·작업실·출근길 지하철을 무대로 한 오피스 힙합 크루 패러디: 정장 위에 한복 조끼, 사원증 목걸이를 체인처럼, 서류 가방을 붐박스처럼 든 장면.',
   newyear: '토정비결 신년운세 — 새해 패러디: 해돋이 앞에서 세배하는 크루, 복주머니·떡국·연날리기·한지 등불을 힙합 뮤비 소품처럼 과장한 장면.'
 };
 const EL_MOTIF = { 목: '초록 네온과 대나무·나뭇잎', 화: '붉은 네온과 불꽃 조명·노을', 토: '황금빛 조명과 흙빛 질감', 금: '은빛·흰빛 금속 광택과 차가운 조명', 수: '푸른 네온과 빗물·강물 반사' };
@@ -236,10 +237,10 @@ const SECTION_MOTION = {
   outro: 'camera slowly pulls back as the crew walks away into the sunrise, one last smile, calm ending'
 };
 function videoPrompt(slot, extra) {
-  return 'Playful parody of a gangster hip-hop music video with Korean flavor. Keep the starting frame characters, outfits and setting. ' + SECTION_MOTION[slot.section] +
+  return 'Playful, family-friendly parody of a swaggering hip-hop music video with Korean flavor. Keep the starting frame characters, outfits and setting. ' + SECTION_MOTION[slot.section] +
     '. Upbeat music-video energy, smooth cinematic motion, seamless loop feeling.' + (extra ? ' Additional direction: ' + String(extra).slice(0, 400) : '');
 }
-const VIDEO_NEG = 'guns, knives, weapons, drugs, smoking, alcohol bottles, violence, blood, threatening gestures, gang signs, real celebrities, text, captions, logos, watermark, distorted faces, extra limbs';
+const VIDEO_NEG = 'text, captions, logos, watermark, distorted faces, extra limbs, blurry, flicker';   // 위험 단어는 넣지 않는다(안전 필터가 요청 자체를 거절할 수 있음) — 밝은 코믹 분위기는 지시문에서 긍정형으로
 const VT = id => 'mv:vt:' + id, VT_AGE = 3 * 3600 * 1000;
 const fileOf = u => { const m = /^\/api\/clipfile\?k=([\w.-]{1,120})$/.exec(u || ''); return m ? m[1] : ''; };
 const ownFile = k => /^mv(panel|vid|start)-/.test(k || '');
@@ -261,7 +262,8 @@ async function panelPost(request, env, p) {
   }
   if (p.generate) {
     if (!env.CLIPS_R2) return json({ error: 'R2 바인딩(CLIPS_R2)이 없습니다' }, 501);
-    let g; try { g = await generate(env, panelPrompt(slot, p.extra), p.provider === 'openai' || p.provider === 'gemini' ? p.provider : '', null); } catch (e) { return json({ error: e.message }, 502); }
+    let g; try { g = await generate(env, panelPrompt(slot, p.extra), p.provider === 'openai' || p.provider === 'gemini' ? p.provider : '', null); }
+    catch (e) { await env.GLOSSARY_KV.put('mv:lastPanelError', JSON.stringify({ at: Date.now(), slot: slot.id, message: String(e.message).slice(0, 1200) }), { expirationTtl: 7 * 86400 }); return json({ error: e.message, slot: slot.id }, 502); }
     const k = 'mvpanel-' + slot.id + '-' + rid() + '.' + g.ext;
     await putDerivedFile(env, k, g.bytes, { httpMetadata: { contentType: g.mime } });
     await dropOld(); map[slot.id] = { url: '/api/clipfile?k=' + k, by: g.provider + ':' + g.model, at: Date.now() }; return save();

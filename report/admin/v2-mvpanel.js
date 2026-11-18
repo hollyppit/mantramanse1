@@ -7,7 +7,7 @@
    API: /api/music-video (?admin=1 · panel), /api/clipfile(직접 올리기), /api/luck-flags(스위치). index.html 의 showTab 이 V2MvPanel.open(비밀번호) 를 부른다. */
 (function () {
   'use strict';
-  var pw = '', root = null, D = null, busy = false, stop = false;
+  var pw = '', root = null, D = null, busy = false, stop = false, ERR = {};   // ERR: 칸별 마지막 그림 생성 실패 이유(이 화면에서만)
   var S = { topic: 'self', sim: { year: 1992, month: 6, day: 23, hour: 14, minute: 0, gender: 'F' }, simTopic: 'self' };
   var L = function () { return window.ReportV2 && window.ReportV2.MusicVideoLyrics; };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
@@ -32,6 +32,7 @@
       '<span>음악 키(ELEVENLABS_API_KEY): ' + ok(c.music) + '</span><span>이미지 키: ' + ok(c.image) + '</span><span>영상 키(Kling): ' + ok(c.video) + '</span><span>파일 저장소(R2): ' + ok(c.r2) + '</span>' +
       '<span>오늘 만든 곡: <b>' + (D ? D.today : '-') + '</b> / 하루 상한 ' + (D ? D.limit : '-') + '곡(MV_DAILY_LIMIT)</span><span>모델: ' + esc(D ? D.model : '-') + '</span></div>' +
       '<p class="muted" style="margin:10px 0 0">상업 이용: 일레븐랩스 음악 약관상 사업자는 Scale(직원 10명 미만) 이상 요금제 계정의 키를 써야 합니다. 곡당 약 3분 = 약 $0.45(종량 기준). 노래 키는 Cloudflare Pages 설정 › 환경 변수(비밀)에 직접 넣으세요 — 이 화면에서는 입력하지 않습니다. 키 권한은 <b>뮤직(음악 생성)</b>과 <b>음성 텍스트 변환(Speech to Text)</b> 둘 다 켜 주세요 — 노래를 만든 뒤 음성 인식으로 줄마다 실제로 부르는 시각을 찾아 자막을 맞춥니다(실패하면 구간 비율로 표시, 원인은 아래 “마지막 오류”).</p>' +
+      (D && D.lastPanelError ? '<details style="margin:8px 0 0"><summary style="color:#E07A6E;cursor:pointer">마지막 패널 그림 생성 오류 · ' + esc(D.lastPanelError.slot) + ' · ' + esc(new Date(D.lastPanelError.at).toLocaleString('ko-KR')) + '</summary><pre style="white-space:pre-wrap;word-break:break-all;font-size:12px;margin:6px 0 0">' + esc(D.lastPanelError.message) + '</pre></details>' : '') +
       (D && D.lastError ? '<details style="margin:8px 0 0"><summary style="color:#E07A6E;cursor:pointer">마지막 노래 생성 오류 · ' + esc(new Date(D.lastError.at).toLocaleString('ko-KR')) + '</summary><pre style="white-space:pre-wrap;word-break:break-all;font-size:12px;margin:6px 0 0">' + esc(D.lastError.message) + '</pre></details>' : '') +
       '<p id="mvpMsg" class="muted" style="margin:8px 0 0"></p></div>';
 
@@ -47,6 +48,7 @@
           var img = p && p.video ? '<video src="' + esc(p.video) + '" poster="' + esc(p.url) + '" muted loop playsinline autoplay preload="metadata" style="width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;display:block;outline:2px solid #C9A25C"></video>' :
             p ? '<img src="' + esc(p.url) + '" alt="" style="width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;display:block">' :
             '<div style="width:100%;aspect-ratio:9/16;border:1px dashed rgba(128,128,128,.5);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;text-align:center;padding:4px;opacity:.75">' + (fb ? '비어 있음<br>(종합풀이 칸으로 대신)' : '비어 있음') + '</div>';
+          if (s && ERR[s.id]) img += '<div style="color:#E07A6E;font-size:11px;line-height:1.4;margin-top:4px;word-break:break-all;max-height:6em;overflow:auto">실패: ' + esc(ERR[s.id]) + '</div>';
           return '<td style="padding:4px;vertical-align:top">' + img + '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">' +
             '<button class="btn" style="padding:3px 8px;font-size:12px" data-mvgen="' + s.id + '">' + (p ? '다시' : '만들기') + '</button>' +
             '<label class="btn" style="padding:3px 8px;font-size:12px;cursor:pointer">올리기<input type="file" accept="image/png,image/jpeg,image/webp" data-mvup="' + s.id + '" hidden></label>' +
@@ -138,7 +140,8 @@
     toast(slot + ' 만드는 중… (한 장에 20~60초)');
     var extra = ($('#mvpExtra') && $('#mvpExtra').value || '').trim();
     return call('POST', '', { panel: { slot: slot, generate: true, extra: extra || undefined } }).then(function (d) {
-      if (d.panels) { D.panels = d.panels; toast(slot + ' 완료'); return true; } toast(slot + ' 실패: ' + (d.error || d._s), true); return false;
+      if (d.panels) { D.panels = d.panels; delete ERR[slot]; toast(slot + ' 완료'); return true; }
+      ERR[slot] = String(d.error || ('HTTP ' + d._s)); toast(slot + ' 실패: ' + ERR[slot], true); return false;   // 실패 이유는 그 칸 아래에 남는다
     });
   }
   function fillAll() {
@@ -147,7 +150,7 @@
     if (!confirm(lib.TOPIC_KO[S.topic] + ' 빈 칸 ' + todo.length + '장을 차례로 만듭니다(이미지 생성 비용). 진행할까요?')) return;
     busy = true; stop = false; draw(); var done = 0;
     (function next() {
-      if (stop || !todo.length) { busy = false; draw(); toast((stop ? '멈춤 — ' : '끝 — ') + done + '장 만들었습니다'); return; }
+      if (stop || !todo.length) { busy = false; draw(); var failed = Object.keys(ERR).length; toast((stop ? '멈춤 — ' : '끝 — ') + done + '장 만들었습니다' + (failed ? ' · 실패 ' + failed + '장(칸 아래 빨간 글씨에 이유)' : ''), failed > 0); return; }
       gen(todo.shift()).then(function (ok) { if (ok) done++; next(); });
     })();
   }
