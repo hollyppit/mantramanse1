@@ -190,7 +190,7 @@
   if((c.editorialContractId||c.id)==='timeline_self_28'&&!out.creative&&!out.education&&!(feat&&feat.rest)){var cph=compatHtml(c);if(cph)h+=section(c,ci,'compat',cph,'text-reading-compat');}
   if(R.ReadingDepth&&!out.creative&&!out.education){var depth=R.ReadingDepth.html(c,esc);if(depth)h+=section(c,ci,'depth',depth,'text-reading-depth');}
   // 안 쓰던 엔진 블록(engine-blocks.js): 전체 인생 흐름 ← 30년 대운 구간, 기질·자동차 비유 ← 격국
-  if(R.EngineBlocks&&!out.creative&&!out.education){var eb=R.EngineBlocks.html(c,esc);if(eb)h+=section(c,ci,'engine',eb,'text-reading-engine');}
+  if(R.EngineBlocks&&!out.creative&&!out.education){var eb=R.EngineBlocks.html(c,esc);if(eb)h+=section(c,ci,'engine',eb,'text-reading-engine');}if(R.LuckLayerBlocks&&!out.creative&&!out.education){var lb=R.LuckLayerBlocks.html(c,esc);if(lb)h+=section(c,ci,'luck',lb,'text-reading-luck');}   /* 운 분석 층 블록(2026-11-18) */
   if(R.ReadingInsight&&!out.creative&&!out.education){var insight=R.ReadingInsight.html(c,esc);if(insight)h+=section(c,ci,'insight',insight,'text-reading-insight');}
   // 장 사이 사실 소개 반복(fact-once.js trimIntro): 근거 상자를 붙이기 전에, 이 장이 처음 소개하는 장이 아니면 소개 구절을 걷는다
   if(R.FactOnce&&R.FactOnce.trimIntro&&!out.creative&&!out.education)h=R.FactOnce.trimIntro(c.readingVisualData,h,c.editorialContractId||c.id);

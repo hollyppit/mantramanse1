@@ -204,7 +204,9 @@
     var P = ch.pillars, natal = [{ id: 'day', b: P.day.b }, { id: 'month', b: P.month.b }], NK = { day: '일지', month: '월지' };
     var relN = function (it) { return (M.relationsAmong(natal.concat([{ id: 'luck', b: it.b }])) || []).filter(function (r) { return r.members.indexOf('luck') >= 0 && /^(충|육합|형)$/.test(r.type); }).map(function (r) { var who = r.members.filter(function (m) { return m !== 'luck'; })[0]; return { key: r.type + who, text: NK[who] + ' ' + r.name }; }); };
     var n0 = relN(prevX).map(function (r) { return r.key; }), n1 = relN(x), fresh = n1.filter(function (r) { return n0.indexOf(r.key) < 0; });
-    fresh.slice(0, 2).forEach(function (r) { add(/일지/.test(r.text) && kind !== 'ilun' ? 2 : 1, '원국 ' + r.text.replace(/^(일지|월지) /, '$1와 ') + ' 관계가 새로 생겨 생활 기반이 움직이는 신호예요.', 'natal'); });
+    // 일지·월지가 같은 글자면 같은 관계가 두 번 잡혀서 이름별로 묶는다
+    var byName = {}; fresh.forEach(function (r) { var nm = r.text.replace(/^(일지|월지) /, ''), who = r.text.slice(0, 2); (byName[nm] = byName[nm] || []).push(who); });
+    Object.keys(byName).slice(0, 2).forEach(function (nm) { var w = byName[nm]; add(w.indexOf('일지') >= 0 && kind !== 'ilun' ? 2 : 1, '원국 ' + w.join('·') + '와 ' + nm + ' 관계가 새로 생겨 생활 기반이 움직이는 신호예요.', 'natal'); });
     // 십성 구조(ten-god-roles) 변화
     var TG = root.MantraTenGodRoles;
     if (TG && opt.prevLayers && opt.curLayers) {
