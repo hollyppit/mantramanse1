@@ -544,6 +544,12 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .lt-g b { font-family: var(--f-display); font-weight: 900; font-size: 1.6rem; line-height: 1.05; color: var(--on); }
 .lt-g i { font-style: normal; font-size: 0.66rem; color: var(--on); opacity: .85; }
 .lt-us { font-size: 0.68rem; color: var(--ink-3); white-space: nowrap; }
+/* 운 지지 지장간 한 줄: 정기 굵게·여기 중기 흐리게, 원국 천간과 같은 글자 점, 합 밑줄 */
+.lt-hid { display: inline-flex; gap: 2px; align-items: center; justify-content: center; margin-top: -1px; }
+.lt-hid i { font-style: normal; font-size: 0.7rem; line-height: 1.35; padding: 0 0.22em; font-weight: 600; opacity: .62; position: relative; }
+.lt-hid i.m { font-weight: 900; opacity: 1; }
+.lt-hid i.eq::after { content: ''; position: absolute; top: -2px; right: -2px; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 1px var(--bg, #fff); }
+.lt-hid i.hp { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; }
 .lt-ev { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; min-height: 20px; }
 .lt-ev .chip { font-size: 0.64rem; padding: 1px 5px; }
 /* 운의 시기 */
@@ -6766,6 +6772,21 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const shown = chips.slice(0, max).map(([t, c]) => `<span class="chip ${c}">${esc(t)}</span>`).join('');
     return shown + (chips.length > max ? `<span class="chip">+${chips.length - max}</span>` : '');
   }
+  // 운 지지의 지장간 한 줄(2026-11-18): 여기·중기·정기 순, 오행 색, 정기 굵게.
+  // 원국 천간과 같은 글자는 점(•), 원국 천간과 합이 되는 글자는 밑줄 — 숨은 글자가 원국을 건드리는 자리를 바로 보이게 한다. 일수는 툴팁.
+  function luckHidden(b) {
+    const ch = S.ch, P = ch && ch.pillars || {}, nat = ['year', 'month', 'day', 'hour'].map(k => P[k] && P[k].s).filter(s => s != null);
+    const H = M.HIDDEN[b], lab = H.length === 2 ? ['여기', '정기'] : ['여기', '중기', '정기'];
+    const tips = [], eqs = [], haps = [];
+    const cells = H.map(([hs, d], k) => {
+      const main = k === H.length - 1, eq = nat.includes(hs), hp = nat.includes((hs + 5) % 10);
+      tips.push(`${lab[k]} ${M.STEM[hs]}(${M.STEM_K[hs]}${M.EL_K[M.stemEl(hs)]}) ${d}일`);
+      if (eq) eqs.push(M.STEM[hs]); if (hp) haps.push(`${M.STEM[hs]}${M.STEM[(hs + 5) % 10]}`);
+      return `<i class="eltxt ${ECLS[M.stemEl(hs)]}${main ? ' m' : ''}${eq ? ' eq' : ''}${hp ? ' hp' : ''}">${M.STEM[hs]}</i>`;
+    });
+    const tip = `지장간 — ${tips.join(' · ')}${eqs.length ? ` · 원국 천간과 같은 글자: ${eqs.join('·')}` : ''}${haps.length ? ` · 원국 천간과 합: ${haps.join('·')}합` : ''}`;
+    return `<span class="lt-hid" title="${esc(tip)}" aria-label="${esc(tip)}">${cells.join('')}</span>`;
+  }
   function luckTile(x, top, pick, on, cur) {
     const se = M.stemEl(x.s), be = M.BR_EL[x.b];
     return `<button type="button" class="lt${on ? ' sel' : ''}${cur ? ' cur' : ''}" data-pick="${pick}" style="${sgVars(tileSig(x))}">
@@ -6773,6 +6794,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <span class="lt-tg">${x.stemTG}</span>
       <span class="lt-g ${ECLS[se]}"><b>${M.STEM[x.s]}</b><i>${M.STEM_K[x.s]}${M.EL_K[se]}</i></span>
       <span class="lt-g ${ECLS[be]}"><b>${M.BR[x.b]}</b><i>${M.BR_K[x.b]}${M.EL_K[be]}</i></span>
+      ${luckHidden(x.b)}
       <span class="lt-tg">${x.branchTG}</span>
       <span class="lt-us">${x.unseong} · ${x.sinsal12}</span>
       <span class="lt-ev">${luckChips(x)}</span>
@@ -7042,7 +7064,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${m === 'wealth' ? wealthLossLine() : ''}
     </section>`;
   }
-  const chartLegendInner = () => !isDomain() ? modeLegend() : `${sigLegend(metricRule(S.metric))}<div class="legend"><span>막대 높이 = ${DOM_INFO[S.metric].full} 점수(0~100) · 막대 위 글자 = 신호등 단계</span></div>${S.metric === 'wealth' ? '<div class="legend"><span>아래 "횡재"(초록 계열) = 뜻밖의 수입 신호가 좋음 이상, "손재"(주황·빨강) = 뜻밖의 재물손실 위험이 주의 이상인 시기에만 표시됩니다</span></div>' : ''}${S.metric === 'windfall' ? '<div class="legend"><span><i class="sw" style="background:var(--sg-bad)"></i>아래 막대 = 뜻밖의 재물손실 위험(길수록·빨강일수록 조심, 횡재 점수와 따로 봅니다)</span></div>' : ''}`;
+  const chartLegendInner = () => !isDomain() ? modeLegend() : `${sigLegend(metricRule(S.metric))}<div class="legend"><span>막대 높이 = ${DOM_INFO[S.metric].full} 점수(0~100) · 막대 위 글자 = 신호등 단계</span></div>${S.metric === 'wealth' ? '<div class="legend"><span>아래 "횡재"(초록 계열) = 뜻밖의 수입 신호가 좋음 이상, "손재"(주황·빨강) = 뜻밖의 재물손실 위험이 주의 이상인 시기에만 표시됩니다</span></div>' : ''}${S.metric === 'windfall' ? '<div class="legend"><span><i class="sw" style="background:var(--sg-bad)"></i>아래 막대 = 뜻밖의 재물손실 위험(길수록·빨강일수록 조심, 횡재 점수와 따로 봅니다)</span></div>' : ''}<div class="legend"><span><b>지지 아래 작은 글자</b> = 지장간(여기·중기·정기, 굵은 글자가 정기) · 점(•) = 원국 천간과 같은 글자 · 밑줄 = 원국 천간과 합. 글자에 손을 올리면 일수가 보여요</span></div>`;
   const chartLegend = () => `<details class="lg-fold"${(S.lgOpen === undefined ? window.innerWidth > 640 : S.lgOpen) ? ' open' : ''}><summary>그래프 보는 법 <span class="muted small">색·막대·글자 뜻</span></summary>${chartLegendInner()}</details>`;
   document.addEventListener('toggle', ev => { if (ev.target && ev.target.classList && ev.target.classList.contains('lg-fold')) S.lgOpen = ev.target.open; }, true);
   function domTip(title, res) { const k = S.metric, r = res[k]; return `<b>${esc(title)}</b><br>${DOM_INFO[k].full} <b>${r.score}</b> · ${sigMetric(k, r.score).n}${r.tags.length ? `<br>${r.tags.join(' · ')}` : ''}${k === 'wealth' && res.windfall && res.windfall.score >= WF_ON() ? `<br>뜻밖의 횡재 신호 <b>${res.windfall.score}</b> · ${sigMetric('windfall', res.windfall.score).n}` : ''}${k === 'wealth' && res.windfall && res.windfall.loss && res.windfall.loss.score >= LOSS_ON() ? `<br>뜻밖의 손재 주의 <b>${res.windfall.loss.score}</b> · ${sigMetric('windfallLoss', res.windfall.loss.score).n}` : ''}${k === 'windfall' && r.loss ? `<br>뜻밖의 재물손실 위험 <b>${r.loss.score}</b> · ${sigMetric('windfallLoss', r.loss.score).n}${r.loss.tags.length ? ' · ' + r.loss.tags.join(' · ') : ''}` : ''}<br>${r.summary}${r.reasons.slice(0, 2).map(t => `<br>· ${esc(t)}`).join('')}`; }
