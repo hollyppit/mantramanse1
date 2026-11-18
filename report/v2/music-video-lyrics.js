@@ -407,14 +407,14 @@
     parts.forEach(function (p) { p.lines = p.repeatOf ? parts[2].lines.slice() : addAdlibs(p.lines, p.id, x.el, seed, x.g); });   // 훅 반복은 첫 훅과 똑같이
     var sections = parts.map(function (p) {
       var base = p.repeatOf || p.id;
-      return { id: p.id, name: SECTION_KO[base] + (p.repeatOf ? ' (반복)' : ''), tag: '[' + TAG[base] + ']', lines: p.lines, durationMs: DUR[p.id], panel: panelId(base, p.el, topic, x.g), panelFallback: panelId(base, p.el, 'self', x.g), el: p.el };
+      return { id: p.id, name: SECTION_KO[base] + (p.repeatOf ? ' (반복)' : ''), tag: '[' + TAG[base] + ']', lines: p.lines, durationMs: DUR[p.id], panel: panelId(base, topic, x.g, x.day), panelFallback: panelId(base, 'self', x.g, x.day), el: p.el };
     });
     var t = 0; sections.forEach(function (s) { s.startMs = t; t += s.durationMs; });
     var word = tp ? tp.titleWord : '';
     return {
       version: VERSION, topic: topic, topicKo: TOPIC_KO[topic], inputs: x,
       title: (topic === 'newyear' ? x.ny.year + ' ' : '') + x.day + ' 일주, ' + (word ? word + '에 부는 ' : '') + COLOR[x.yong] + ' 바람',
-      gender: x.g, style: STYLE[x.el].concat(VOCAL[x.g] || VOCAL.M), negativeStyle: NEG_STYLE.concat(NEG_VOCAL[x.g] || NEG_VOCAL.M),
+      gender: x.g, hero: heroOf(x.day, x.g), style: STYLE[x.el].concat(VOCAL[x.g] || VOCAL.M), negativeStyle: NEG_STYLE.concat(NEG_VOCAL[x.g] || NEG_VOCAL.M),
       sections: sections, totalMs: t,
       lyrics: sections.map(function (s) { return s.tag + '\n' + s.lines.join('\n'); }).join('\n\n')
     };
@@ -479,10 +479,37 @@
     return lines.map(function (x, j) { var nx = lines[j + 1]; return { s: x.s, l: x.l, t: x.t, e: x.e != null ? x.e : (nx ? nx.t : x.t + 3500) }; });
   }
 
-  /* 패널 이미지 칸: 주제 5개 × 성별 2개 × 구간 6개 × 오행 5개 = 300칸(칸 이름 끝 -f 여자 · -m 남자). 관리자 '뮤직비디오 패널'이 이 칸을 채운다.
-     종합풀이 칸은 mv-<구간>-<오행>, 다른 주제는 mv-<주제>-<구간>-<오행>. 주제 칸이 비면 화면은 종합풀이 칸(panelFallback)을 쓴다 */
-  function panelId(section, el, topic, g) { return 'mv-' + (topic && topic !== 'self' ? topic + '-' : '') + section + '-' + (ELR[el] || 'earth') + '-' + (GR[g] || 'm'); }
-  var PANEL_SLOTS = []; TOPICS.forEach(function (t) { GENDERS.forEach(function (g) { SECTIONS.forEach(function (s) { ELK.forEach(function (e) { PANEL_SLOTS.push({ id: panelId(s, e, t, g), topic: t, topicKo: TOPIC_KO[t], gender: g, genderKo: GENDER_KO[g], section: s, sectionKo: SECTION_KO[s], el: e }); }); }); }); });
+  /* 주인공(사용자 요청 2026-11-19): 사주의 일주 — 일간 오행 색 + 일지 동물을 한 의인화 래퍼. 성별은 사주 성별(여성/남성 래퍼).
+     크루는 일지의 삼합 동물 둘, 연애운의 짝은 일지의 육합 동물. 예) 경오 일주 여자 → 흰 말 여성 래퍼, 크루 호랑이·개, 짝 양.
+     패널 칸 = 주제 × 성별 × 일주(60) × 구간(6) → 칸 이름 mv-[주제-]<구간>-<일간>-<일지>-<f|m> (예: mv-love-hook-gyeong-o-f).
+     조합이 3,600가지라 미리 다 만들지 않고, 사용자가 뮤직비디오를 열 때 빈 칸을 서버가 한 장씩 만들어 채운다(같은 칸은 모두가 같이 쓴다). */
+  var STEMS = '갑을병정무기경신임계', BRANCHES = '자축인묘진사오미신유술해';
+  var STEM_RO = ['gap', 'eul', 'byeong', 'jeong', 'mu', 'gi', 'gyeong', 'sin', 'im', 'gye'];
+  var BRANCH_RO = ['ja', 'chuk', 'in', 'myo', 'jin', 'sa', 'o', 'mi', 'sin', 'yu', 'sul', 'hae'];
+  var ANIMAL_KO = ['쥐', '소', '호랑이', '토끼', '용', '뱀', '말', '양', '원숭이', '닭', '개', '돼지'];
+  var ANIMAL_EN = ['rat', 'ox', 'tiger', 'rabbit', 'dragon', 'snake', 'horse', 'sheep', 'monkey', 'rooster', 'dog', 'pig'];
+  var STEM_EL = ['목', '목', '화', '화', '토', '토', '금', '금', '수', '수'];
+  var COLOR_KO = { 목: '푸른', 화: '붉은', 토: '황금빛', 금: '흰', 수: '검은' }, COLOR_EN = { 목: 'blue-green', 화: 'red', 토: 'golden', 금: 'white', 수: 'black' };
+  var SAMHAP = [[8, 0, 4], [2, 6, 10], [5, 9, 1], [11, 3, 7]];   // 신자진·인오술·사유축·해묘미
+  var YUKHAP = { 0: 1, 1: 0, 2: 11, 11: 2, 3: 10, 10: 3, 4: 9, 9: 4, 5: 8, 8: 5, 6: 7, 7: 6 };   // 자축·인해·묘술·진유·사신·오미
+  function heroOf(day, g) {
+    var si = STEMS.indexOf(String(day || '').charAt(0)), bi = BRANCHES.indexOf(String(day || '').charAt(1)); if (si < 0 || bi < 0) return null;
+    var el = STEM_EL[si], grp = SAMHAP.filter(function (x) { return x.indexOf(bi) >= 0; })[0] || [], crew = grp.filter(function (x) { return x !== bi; }), pt = YUKHAP[bi];
+    g = g === 'F' ? 'F' : 'M';
+    return { day: day, id: STEM_RO[si] + '-' + BRANCH_RO[bi], el: el, gender: g, colorKo: COLOR_KO[el], animalKo: ANIMAL_KO[bi], colorEn: COLOR_EN[el], animalEn: ANIMAL_EN[bi],
+      nameKo: COLOR_KO[el] + ' ' + ANIMAL_KO[bi], crewKo: crew.map(function (x) { return ANIMAL_KO[x]; }), crewEn: crew.map(function (x) { return ANIMAL_EN[x]; }), partnerKo: ANIMAL_KO[pt], partnerEn: ANIMAL_EN[pt] };
+  }
+  function panelId(section, topic, g, day) { var h = heroOf(day, g); return 'mv-' + (topic && topic !== 'self' ? topic + '-' : '') + section + '-' + (h ? h.id : 'gap-ja') + '-' + (GR[g] || 'm'); }
+  /* 칸 이름 → { id, topic, section, gender, day, hero } (형식이 틀리면 null) — 서버가 요청을 검사할 때 쓴다 */
+  function parsePanelId(id) {
+    var m = /^mv-(?:(love|wealth|career|newyear)-)?(intro|verse1|hook|verse2|bridge|outro)-([a-z]+)-([a-z]+)-([fm])$/.exec(String(id || ''));
+    if (!m) return null; var si = STEM_RO.indexOf(m[3]), bi = BRANCH_RO.indexOf(m[4]); if (si < 0 || bi < 0 || si % 2 !== bi % 2) return null;   // 60갑자가 아닌 조합(예: 갑축)은 거른다(양간은 양지, 음간은 음지)
+    var g = m[5] === 'f' ? 'F' : 'M', day = STEMS.charAt(si) + BRANCHES.charAt(bi), topic = m[1] || 'self';
+    return { id: id, topic: topic, topicKo: TOPIC_KO[topic], section: m[2], sectionKo: SECTION_KO[m[2]], gender: g, genderKo: GENDER_KO[g], day: day, hero: heroOf(day, g) };
+  }
+  /* 60갑자 일주 목록(관리자 화면 선택용) */
+  var DAYS = []; for (var di = 0; di < 60; di++) DAYS.push(STEMS.charAt(di % 10) + BRANCHES.charAt(di % 12));
+  function panelSlots(topic, g, day) { return SECTIONS.map(function (s) { return parsePanelId(panelId(s, topic, g, day)); }); }
 
   function bannedIn(text) { return BANNED.filter(function (w) { return String(text).indexOf(w) >= 0; }); }
   function allFragments() {
@@ -510,7 +537,7 @@
     return { section: s, line: s.lines[k], lineIndex: k };
   }
 
-  R.MusicVideoLyrics = { VERSION: VERSION, BANNED: BANNED, SECTIONS: SECTIONS, SECTION_KO: SECTION_KO, ELK: ELK, ELR: ELR, PANEL_SLOTS: PANEL_SLOTS, GENDERS: GENDERS, GENDER_KO: GENDER_KO, DUR: DUR, TOPICS: TOPICS, TOPIC_KO: TOPIC_KO, TOPIC_WORLD: TOPIC_WORLD,
-    inputsOf: inputsOf, fromInputs: fromInputs, compose: compose, toElevenPlan: toElevenPlan, toElevenV1Plan: toElevenV1Plan, alignToTranscript: alignToTranscript, stripAdlibs: stripAdlibs, ADLIB: ADLIB, panelId: panelId, bannedIn: bannedIn, allFragments: allFragments, cueAt: cueAt, hash: hash };
+  R.MusicVideoLyrics = { VERSION: VERSION, BANNED: BANNED, SECTIONS: SECTIONS, SECTION_KO: SECTION_KO, ELK: ELK, ELR: ELR, DAYS: DAYS, GENDERS: GENDERS, GENDER_KO: GENDER_KO, DUR: DUR, TOPICS: TOPICS, TOPIC_KO: TOPIC_KO, TOPIC_WORLD: TOPIC_WORLD,
+    inputsOf: inputsOf, fromInputs: fromInputs, compose: compose, toElevenPlan: toElevenPlan, toElevenV1Plan: toElevenV1Plan, alignToTranscript: alignToTranscript, stripAdlibs: stripAdlibs, ADLIB: ADLIB, panelId: panelId, parsePanelId: parsePanelId, panelSlots: panelSlots, heroOf: heroOf, bannedIn: bannedIn, allFragments: allFragments, cueAt: cueAt, hash: hash };
   if (typeof module !== 'undefined' && module.exports) module.exports = R.MusicVideoLyrics;
 })(typeof window !== 'undefined' ? window : globalThis);

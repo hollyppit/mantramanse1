@@ -60,7 +60,7 @@
     if (root.document) injectCss();
     var esc = o.esc || function (s) { return String(s); };
     return '<div class="cs-card mv-card"><div><p class="cs-ct">내 사주 뮤직비디오 · ' + esc(song.topicKo) + '</p><h4>' + esc(song.title) + '</h4>' +
-      '<p class="cs-sum">3분 랩 한 곡 · 내 사주 값으로 고른 가사에 맞춰 장면이 넘어가고 자막이 흘러요.' + (o.locked ? ' 이 주제를 구매하면 들을 수 있어요.' : '') + '</p>' +
+      '<p class="cs-sum">' + (song.hero ? '주인공은 내 일주 ' + esc(song.hero.day) + '의 ' + esc(song.hero.nameKo) + ' ' + (song.hero.gender === 'F' ? '여성' : '남성') + ' 래퍼, 크루는 ' + esc(song.hero.crewKo.join('·')) + '. ' : '') + '3분 랩 한 곡 · 내 사주 값으로 고른 가사에 맞춰 장면이 넘어가고 자막이 흘러요.' + (o.locked ? ' 이 주제를 구매하면 들을 수 있어요.' : '') + '</p>' +
       '<button type="button" class="chipbtn" data-mvopen="' + esc(song.topic) + '">' + (o.locked ? '🔒 ' : '▶ ') + '뮤직비디오 보기</button></div></div>';
   }
 
@@ -113,7 +113,7 @@
         .then(function (d) {
           if (!alive) return;
           if (d._s === 202 && d.pending && tries++ < 30) { setTimeout(req, 8000); return; }   // 같은 곡을 다른 기기에서 만드는 중
-          if (d.ok && d.audio && d.song) { play(el, d, track); return; }
+          if (d.ok && d.audio && d.song) { play(el, d, track); if (d.fill) fillPanels(el, d, body, o.headers); return; }
           if (d._s === 401 || d._s === 402) { close(); if (o.onLocked) o.onLocked(d.error === 'login' ? 'login' : 'purchase'); return; }
           fail(el, d._s === 429 ? '오늘 만들 수 있는 노래가 모두 찼어요. 내일 다시 열어 주세요.' : d._s === 403 ? '이 주제에서는 뮤직비디오를 열 수 없어요.' : d._s === 409 ? '이 괘의 풀이를 다듬는 중이에요. 준비되면 바로 들을 수 있어요.' + (d.detail ? '\n(' + d.detail + ')' : '') : '노래를 만들지 못했어요. 잠시 뒤 다시 열어 주세요.' + (d.detail ? '\n\n[관리자에게만 보임] ' + d.detail : ''), d._s >= 500);   // detail 은 서버가 관리자 요청에만 담는다
           track('mv_error', { topic: preview.topic, status: d._s });
@@ -125,6 +125,30 @@
     var w = el.querySelector('.mv-wait'); if (w) w.remove();
     var e = document.createElement('div'); e.className = 'mv-err'; e.innerHTML = '<p style="white-space:pre-line;word-break:break-all">' + escH(msg) + '</p><button type="button">닫기</button>';
     e.querySelector('button').onclick = close; el.appendChild(e);
+  }
+  /* 빈 패널 채우기: 주인공(일주 동물 래퍼)·성별·주제마다 칸이 달라 미리 다 만들 수 없으니, 곡이 재생되는 동안 이 곡의 빈 칸을
+     서버에 하나씩 만들어 달라고 한다(한 장 20~60초). 만들어지는 대로 화면에 바로 붙고, 같은 칸은 다음 사람부터 바로 보인다. */
+  function fillPanels(el, d, body, headers) {
+    var song = d.song, panels = d.panels || (d.panels = {}), want = [];
+    song.sections.forEach(function (s) { if (!panels[s.panel] && want.indexOf(s.panel) < 0) want.push(s.panel); });
+    var base = {}; try { base = JSON.parse(body); } catch (e) { return; }
+    (function next() {
+      if (!want.length || !document.body.contains(el)) return;
+      var id = want.shift();
+      root.fetch('/api/music-video', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, (headers && headers()) || {}), body: JSON.stringify(Object.assign({}, base, { fillPanel: id })) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (x) { x._s = r.status; return x; }); })
+        .then(function (x) {
+          if (x.ok && x.panel && x.panel.url) {
+            panels[id] = x.panel;
+            song.sections.forEach(function (s, i) { if (s.panel === id || (s.panelFallback === id && !panels[s.panel])) { var n = el.querySelector('.mv-stage i[data-i="' + i + '"]'); if (n) n.style.backgroundImage = bgFor(s, panels); } });
+            next(); return;
+          }
+          if (x._s === 202) { want.push(id); setTimeout(next, 8000); return; }   // 다른 사람이 같은 칸을 만드는 중
+          if (x._s === 429 || x._s === 501 || x._s === 401 || x._s === 402 || x._s === 403) return;   // 오늘 상한·키 없음·권한 없음이면 그만(오행 색으로 계속)
+          next();
+        })
+        .catch(function () { next(); });
+    })();
   }
   function play(el, d, track) {
     var song = d.song, panels = d.panels || {}, lib = L();

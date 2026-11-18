@@ -20,7 +20,7 @@ for (let n = 0; n < 400; n++) {
   assert(s.sections[5].lines.length >= 4);
   for (const sec of s.sections) {
     for (const l of sec.lines) { assert(l && l.trim() && !/undefined|null|NaN|\{|\}/.test(l), '빈 값/자리표시 남음: ' + l); assert.deepEqual(L.bannedIn(l), []); }
-    assert(/^mv-(intro|verse1|hook|verse2|bridge|outro)-(wood|fire|earth|metal|water)-[fm]$/.test(sec.panel), sec.panel);
+    assert(/^mv-(intro|verse1|hook|verse2|bridge|outro)-[a-z]+-[a-z]+-[fm]$/.test(sec.panel) && L.parsePanelId(sec.panel), sec.panel);
     assert(sec.durationMs >= 3000 && sec.durationMs <= 120000);
   }
   assert.deepEqual(s.sections[2].lines, s.sections[4].lines, '훅 반복');
@@ -60,8 +60,8 @@ const fragUse = frags.filter(t => usedLines.has(t) || /^\{year\}/.test(t)).lengt
 
 
 // 4) 패널 칸 30개, 모든 곡의 패널이 칸 목록 안에 있다
-const ids = new Set(L.PANEL_SLOTS.map(p => p.id));
-for (const s of songs) for (const sec of s.sections) assert(ids.has(sec.panel));
+const ids = { has: id => !!L.parsePanelId(id) };   // 칸 이름이 일주·성별·주제·구간 규칙에 맞는지
+for (const s of songs) for (const sec of s.sections) { assert(ids.has(sec.panel)); const pp = L.parsePanelId(sec.panel); assert.equal(pp.day, s.inputs.day, '주인공 = 사주 일주'); assert.equal(pp.gender, s.gender); }
 
 // 5) 값이 모자란 사주는 곡을 만들지 않는다
 assert.equal(L.compose(null), null); assert.equal(L.compose({}), null);
@@ -96,9 +96,9 @@ for (let n = 0; n < 200; n++) {
 }
 for (const t of L.TOPICS) assert(new Set(byTopic[t]).size >= 199, t + ' 사람마다 다름 ' + new Set(byTopic[t]).size);
 assert.equal(L.compose({ dayMaster: { stem: '갑', el: '목' } }, 'newyear', null), null, '괘 없으면 신년운세 곡 없음');
-assert.equal(L.PANEL_SLOTS.length, 300);
+{ let n = 0; for (const d of L.DAYS) for (const g of L.GENDERS) for (const t of L.TOPICS) for (const sl of L.panelSlots(t, g, d)) { assert(sl && L.parsePanelId(sl.id)); n++; } assert.equal(n, 3600); assert.equal(L.DAYS.length, 60); assert.equal(L.parsePanelId('mv-hook-gap-chuk-f'), null, '60갑자 아님'); }
 const unused = frags.filter(t => !usedLines.has(t) && !/{(year|m)}/.test(t)); assert(unused.length / frags.length <= 0.08, '쓰이지 않는 조각 ' + unused.length + '/' + frags.length + ': ' + unused.slice(0, 8).join(' / '));
-console.log('주제별 ok: 5주제 × 사주 200개, 주제마다 서로 다른 곡, 토정 144괘 반영, 패널 칸 300개(주제×성별×구간×오행), 전체 조각 ' + frags.length + '줄 중 쓰이지 않은 줄 ' + unused.length + '개');
+console.log('주제별 ok: 5주제 × 사주 200개, 주제마다 서로 다른 곡, 토정 144괘 반영, 패널 칸 3,600개(일주×성별×주제×구간), 전체 조각 ' + frags.length + '줄 중 쓰이지 않은 줄 ' + unused.length + '개');
 if (process.argv.includes('--show')) for (const t of ['love', 'newyear']) { const sd = ReportV2.SajuData.build(Manse.compute({ year: 1992, month: 3, day: 9, hour: 14, minute: 0, gender: 'F', calendar: 'solar', city: '서울' }), { now }); const s = L.compose(sd, t, { year: 2027, gua: 111 }); console.log('\n[' + s.topicKo + '] ' + s.title + '\n' + s.lyrics); }
 
 // 7) 자막 맞추기(음성 인식 단어 시각 → 줄 시각): 받아쓰기 오타·빠진 단어·전주가 있어도 줄 순서대로 실제 시각을 찾는다
@@ -151,6 +151,6 @@ if (process.argv.includes('--show')) for (const t of ['love', 'newyear']) { cons
     }
   }
   assert.equal(L.compose({ dayMaster: { stem: '갑', el: '목' } }, 'self').gender, 'M', '성별 값이 없으면 남자로');
-  const slots = L.PANEL_SLOTS; assert.equal(slots.filter(x => x.gender === 'F').length, 150); assert.equal(new Set(slots.map(x => x.id)).size, 300);
+  { const h = L.heroOf('경오', 'F'); assert.equal(h.nameKo, '흰 말'); assert.deepEqual(h.crewKo, ['호랑이', '개']); assert.equal(h.partnerKo, '양'); const h2 = L.heroOf('병인', 'M'); assert.equal(h2.nameKo, '붉은 호랑이'); assert.deepEqual(h2.crewKo, ['말', '개']); assert.equal(h2.partnerKo, '돼지'); assert.equal(L.heroOf('임자', 'F').nameKo, '검은 쥐'); }
   console.log('성별 ok: ' + n + '쌍(같은 사주 여·남)에서 보컬·추임새·패널 칸·곡이 모두 갈림');
 }
