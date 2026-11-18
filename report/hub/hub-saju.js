@@ -105,12 +105,39 @@
       return { score: clamp((fit + 100) / 2), fit: fit, burden: burden, cautious: cautious, key: cautious ? 'defense' : f.primaryFlow };
     }
   };
+  // 운 분석 층(2026-11-18): 만세력 일진 달력처럼 선택한 달(월운)·날(일진)에 한눈에 보기 + 오행 겹쳐 보기 — luck-layers-view.js
+  var LVP = null, LVF = null;
+  function lvReady() {
+    if (LVP) return LVP;
+    var LG = root.MantraLastGood, F = root.MANTRA_FLAGS || {};
+    var fl = LG ? LG.load('/api/luck-flags', { timeout: 4000 }).catch(function () { return null; }) : Promise.resolve(null);
+    LVP = Promise.resolve(fl).then(function (r) {
+      var f = (r && (r.data || r.d || r)) || {}, on = function (k) { return F[k] === true || f[k] === true; };
+      LVF = { flags: { luckEnv: on('luckEnv'), luckOverlay: on('luckOverlay'), tenGodRoles: on('tenGodRoles') }, ow: f.overlayWeights || null };
+      if (!LVF.flags.luckEnv && !LVF.flags.luckOverlay) return null;
+      var V = '?v=20261118-lv11', need = [].concat(LVF.flags.luckOverlay ? ['/luck-overlay.js'] : [], ['/ten-god-roles.js'], LVF.flags.luckEnv ? ['/luck-env.js'] : [], ['/luck-layers-view.js']);
+      return need.reduce(function (pr, u) { return pr.then(function () { if (document.querySelector('script[src^="' + u + '"]')) return; return H.load(u + V).catch(function () { }); }); }, Promise.resolve()).then(function () {
+        if (root.MantraLuckView && !document.getElementById('lv-css')) { var st = document.createElement('style'); st.id = 'lv-css'; st.textContent = root.MantraLuckView.CSS; document.head.appendChild(st); }
+        return root.MantraLuckView || null;
+      });
+    }).catch(function () { return null; }).then(function (V) { if (!V) LVP = null; return V; });   /* 스위치가 꺼져 있었으면 다음에 다시 확인 */
+    return LVP;
+  }
+  function lvBlock(ch, x, kind, title, todo, id) {
+    var LV = root.MantraLuckView; if (!LV || !LVF || !x) return '';
+    var q = '', fig = '';
+    try { q = LV.quick(root.Manse, ch, x, kind, { flags: LVF.flags, esc: esc, weights: LVF.ow || undefined, todo: todo || '' }); } catch (e) { q = ''; }
+    try { fig = LV.overlayFigure(root.Manse, ch, x, kind, { flags: LVF.flags, esc: esc, weights: LVF.ow || undefined }); } catch (e) { fig = ''; }
+    if (!q && !fig) return '';
+    return '<section class="fortune-panel lv-cal"' + (id ? ' id="' + id + '"' : '') + '><p class="kick">' + (kind === 'wolun' ? 'MONTH · 월운' : 'DAY · 일진') + '</p><h2 class="lv-cal-h">' + esc(title) + '</h2>' + q + fig + '</section>';
+  }
   function calendar(ch, ctx) {
     var M = root.Manse, today = Saju.todayData(ch), y = today.y, m = today.mo, d = today.d, purpose = '', range = 30, weekday = 'all', generation = 0, searchY = y, searchM = m;
-    var C = { draws: 0 }, names = { opportunity: '기회', expansion: '확장', harvest: '수확', accumulation: '축적', defense: '방어운' };
+    var picked = null, C = { draws: 0 }, names = { opportunity: '기회', expansion: '확장', harvest: '수확', accumulation: '축적', defense: '방어운' };
     var key = function (yy,mm,dd) { return yy + '-' + ('0'+mm).slice(-2) + '-' + ('0'+dd).slice(-2); };
     var assess = function (x) { return CalendarPolicy.assess(x.ev); };
     var score = function (x) { return assess(x).score; };
+    C.dayBlock = function (todo) { var days = M.ilun(ch, y, m), x = days[d - 1]; return x ? lvBlock(ch, x, 'ilun', m + '월 ' + d + '일 일진 ' + M.gzName(x), todo) : ''; };
     C.title = function () { return key(y,m,d) === key(today.y,today.mo,today.d) ? '오늘의 운 지수' : '선택한 날의 운 지수'; };
     C.refresh = function () {
       var gen = ++generation, td = FC.todayData(M,ch,Date.UTC(y,m-1,d,3),DAYMODE);
@@ -142,6 +169,8 @@
       h += '</div><div class="mc-legend">'+Object.keys(names).map(function (k) { return '<span><i class="flow-'+k+'"></i>'+names[k]+'</span>'; }).join('')+'</div><p class="dsub">높이: 내 사주와의 적합도(0~100). 붉은 막대는 방어운입니다. 월을 누르면 캘린더가 바뀝니다.<br>월운은 절기 기준이며 양력 한 달 안에서도 절기 전후로 흐름이 바뀝니다. 1월 막대는 다음 해 소한입니다.</p><details class="fc-method"><summary>월운·일진 계산 기준</summary><p>적합도 = (엔진 적합 점수 + 100) ÷ 2를 반올림한 값입니다. 원국의 오행 균형·조후·십성 구조·합충 관계·통관을 개인별 필요에 따라 가중 합산합니다. 월운은 해당 절기의 작용 60%와 대운 40%를 반영하고, 일진은 해당 날짜의 작용을 계산합니다.</p><p>방어 부담도는 적합도·오행 균형·구조·조후·관계의 부담과 변동성에 작용 강도를 반영한 별도 지수입니다. 부담도 40 이상 또는 엔진 적합 점수 −12 이하이면 방어운을 우선 표시합니다. 그 외에는 기회·확장·수확·축적 활성도 중 가장 높은 흐름을 표시합니다.</p><p>주의 날짜는 위 방어 기준에 해당하는 모든 날입니다. 택일에서는 목적별 점수 48 미만인 날도 주의 표시합니다. 변동성만 높다는 이유로 주의 날짜로 정하지 않습니다.</p></details></section>';
       var activeMonths = M.wolun(ch,y-1).concat(months).filter(function (x) { return x.startMs <= Date.UTC(y,m-1,d,3); }), activeMonth = activeMonths[activeMonths.length-1];
       if (activeMonth) h += '<p class="mc-month-note">선택한 날의 월운: ' + esc(activeMonth.termName) + ' · ' + names[assess(activeMonth).key] + ' · ' + esc(activeMonth.ev.flow.condition.name) + ' · 적합도 ' + score(activeMonth) + ' · 방어 부담도 ' + assess(activeMonth).burden + '<br>' + esc({opportunity:'새로운 연락과 작은 시도를 시작해 보세요.',expansion:'하던 일을 넓히되 감당할 수 있는 범위를 정하세요.',harvest:'결과를 정리하고 마무리할 일을 챙겨 보세요.',accumulation:'배우고 준비하면서 다음 단계의 기반을 다져 보세요.',defense:'새로운 확장보다 일정의 여유, 지출과 약속의 재확인을 우선하세요.'}[assess(activeMonth).key]) + '</p>';
+      var pm = picked ? M.wolun(ch,y-1).concat(months, M.wolun(ch,y+1)).filter(function (x) { var dt = new Date(x.startMs+9*3600e3); return dt.getUTCFullYear()+'-'+(dt.getUTCMonth()+1) === picked; })[0] : null, lm = pm || activeMonth;
+      if (lm) h += lvBlock(ch, lm, 'wolun', (pm ? '' : '선택한 날의 ') + '월운 ' + M.gzName(lm) + ' · ' + lm.termName + ' 이후', '', 'mc-lv-month');
       h += '<section class="fortune-panel"><div class="mc-nav"><button type="button" data-nav="-1" aria-label="이전 달">‹</button><h2>'+y+'년 '+m+'월 일진 캘린더</h2><button type="button" data-nav="1" aria-label="다음 달">›</button></div><div class="fc-controls"><label>보기<select id="mc-purpose"><option value="">일상 흐름</option>'+['move','wedding','contract','trip','exam'].map(function (k) { return '<option value="'+k+'"'+(purpose===k?' selected':'')+'>'+esc(M.TAEK_PURPOSE[k].label)+' 택일</option>'; }).join('')+'</select></label>';
       if (purpose) h += '<label>검색 기간<select id="mc-range">'+[30,60,90].map(function (n) { return '<option value="'+n+'"'+(range===n?' selected':'')+'>'+n+'일</option>'; }).join('')+'</select></label><label>요일<select id="mc-weekday">'+[['all','전체'],['weekday','평일'],['weekend','주말']].map(function (x) { return '<option value="'+x[0]+'"'+(weekday===x[0]?' selected':'')+'>'+x[1]+'</option>'; }).join('')+'</select></label>';
       h += '<button type="button" id="mc-today">오늘로</button></div><div class="mc-grid" role="group" aria-label="날짜 선택">'+DOW.map(function (x) { return '<span class="mc-week">'+x+'</span>'; }).join('');
@@ -160,10 +189,10 @@
       return h+'</section>';
     };
     C.bind = function (el) {
-      H.$$('[data-date]',el).forEach(function (b) { b.onclick=function () { var a=b.dataset.date.split('-').map(Number); y=a[0];m=a[1];d=a[2];C.refresh(); }; });
-      H.$$('[data-month]',el).forEach(function (b) { b.onclick=function () { var a=b.dataset.month.split('-').map(Number); if(a[0]>2098)return;y=a[0];m=a[1];searchY=y;searchM=m;d=1;C.refresh(); }; });
-      H.$$('[data-nav],[data-year]',el).forEach(function (b) { b.onclick=function () { var dt=new Date(Date.UTC(y+(+b.dataset.year||0),m-1+(+b.dataset.nav||0),1));if(dt.getUTCFullYear()<1901||dt.getUTCFullYear()>2098)return;y=dt.getUTCFullYear();m=dt.getUTCMonth()+1;searchY=y;searchM=m;d=1;C.refresh(); }; });
-      $('#mc-today',el).onclick=function () { y=today.y;m=today.mo;searchY=y;searchM=m;d=today.d;C.refresh(); };
+      H.$$('[data-date]',el).forEach(function (b) { b.onclick=function () { var a=b.dataset.date.split('-').map(Number); y=a[0];m=a[1];d=a[2];picked=null;C.refresh(); }; });
+      H.$$('[data-month]',el).forEach(function (b) { b.onclick=function () { var a=b.dataset.month.split('-').map(Number); if(a[0]>2098)return;y=a[0];m=a[1];searchY=y;searchM=m;d=1;picked=b.dataset.month;C.pickScroll=true;C.refresh(); }; });
+      H.$$('[data-nav],[data-year]',el).forEach(function (b) { b.onclick=function () { var dt=new Date(Date.UTC(y+(+b.dataset.year||0),m-1+(+b.dataset.nav||0),1));if(dt.getUTCFullYear()<1901||dt.getUTCFullYear()>2098)return;y=dt.getUTCFullYear();m=dt.getUTCMonth()+1;searchY=y;searchM=m;d=1;picked=null;C.refresh(); }; });
+      $('#mc-today',el).onclick=function () { picked=null;y=today.y;m=today.mo;searchY=y;searchM=m;d=today.d;C.refresh(); };
       $('#mc-purpose',el).onchange=function () { purpose=this.value;C.refresh(); };
       if(purpose) { $('#mc-range',el).onchange=function () { range=+this.value;C.refresh(); };$('#mc-weekday',el).onchange=function () { weekday=this.value;C.refresh(); }; }
     };
@@ -188,7 +217,7 @@
           '<details class="pro"><summary>전문 해석 보기</summary>' + lis(ev.pro) + '</details></div></details>';
         var el = H.view(cal.html() + '<section class="tscore" id="selected-fortune"><h2>' + cal.title() + '</h2><p class="kick">' + +d.date.slice(5, 7) + '월 ' + +d.date.slice(8) + '일 ' + d.dow + '요일 · ' + esc(d.gz) + '日</p><div class="ring" style="--p:' + d.overallScore + '"><b>' + d.overallScore + '</b></div><div class="tflow">' + esc(cal.selectedState && cal.selectedState.key === 'defense' ? '방어운' : String(d.phase).replace(/기$/, '운')) + ' · ' + esc(d.cond) + '</div><p class="sub" style="margin-top:6px">' + (nm ? esc(nm) + '님, ' : '') + esc(d.line) + '</p>' +
           '<p class="dhead">“' + esc(d.headline) + '”</p>' + (d.notes.length ? '<p class="note">' + esc(d.notes.join(' ')) + '</p>' : '') + '</section>' +
-          '<div class="dgrid">' + cards + '</div>' +
+          cal.dayBlock('') + '<div class="dgrid">' + cards + '</div>' +
           '<section class="dsec"><h3>이날의 핵심</h3><p>' + esc(d.summary) + '</p><p>' + esc(d.summary2) + '</p></section>' +
           '<section class="dsec"><h3>분야별로 자세히 보기</h3><p class="dsub">궁금한 분야를 눌러 펼쳐 보세요.</p>' + detail + '</section>' +
           '<section class="actcard" id="d-action"><h3>이날의 행동 처방</h3><h5>하면 좋은 것</h5><div class="chips tg">' + tags(d.todayActions) + '</div><h5>미루면 좋은 것</h5><div class="chips tg avoid">' + tags(d.avoidActions) + '</div><div class="one"><small>이날의 한 문장</small><p>“' + esc(d.closingMessage) + '”</p></div></section>' +
@@ -196,12 +225,14 @@
           '<p class="dis">점수는 선택한 날의 일진이 내 사주에 필요한 기운인지를 따진 값입니다. 사건을 확정하지 않는 참고용 흐름이며, 컨디션은 의학적 진단이 아닌 생활 리듬의 참고입니다.</p>' +
           '<section class="nextc"><p class="q">' + esc(d.next.q) + '</p><a class="btn" href="' + esc(d.next.to) + '" data-track="today_cta_click" data-p="' + esc(d.next.track) + '">' + esc(d.next.btn) + '</a><a class="btn ghost sm" href="#/my" data-track="fortune_content_click" data-p="from_today_my">MY 운명으로</a></section>', { keepScroll: cal.draws++ > 0 });
         cal.bind(el);
+        if (cal.pickScroll) { cal.pickScroll = false; var mb = $('#mc-lv-month', el); if (mb && mb.scrollIntoView) setTimeout(function () { mb.scrollIntoView({ block: 'start', behavior: H.reduce ? 'auto' : 'smooth' }); }, 60); }
         H.track('fortune_content_view', { content: 'today', flow: d.flowKey }); H.track('today_open', { flow: d.flowKey, cta: d.next.key }, true);
         H.$$('details.dd', el).forEach(function (x) { x.addEventListener('toggle', function () { if (x.open) H.track(x.id === 'd-why' ? 'today_evidence_expand' : 'today_detail_expand', { field: x.dataset.f || 'why' }); }); });
         H.$$('[data-jump]', el).forEach(function (a) { a.onclick = function (e) { e.preventDefault(); var t = H.$('#dd-' + a.dataset.jump, el); if (t) { t.open = true; t.scrollIntoView({ block: 'center', behavior: H.reduce ? 'auto' : 'smooth' }); } }; });
         if (q.f && cal.draws === 1) { var tg = $('#dd-' + q.f, el) || $('#d-' + q.f, el); if (tg && tg.scrollIntoView) setTimeout(function () { tg.scrollIntoView({ block: 'center', behavior: H.reduce ? 'auto' : 'smooth' }); }, 120); }
       };
       cal.refresh();
+      lvReady().then(function (V) { if (V && H.alive(ctx)) cal.refresh(); });   // 운 분석 층 모듈이 늦게 오면 다시 그린다
     });
   });
 

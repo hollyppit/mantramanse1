@@ -71,3 +71,12 @@ console.log(`luck-layer-blocks-sim ok · 사주 ${n}명 · 시기 카드 ${cards
   const q = strip(V.quick(M, ch0, se, 'seun', { flags: ALL, todo: '할 일', after: [['조심할 것', '주의']] }));
   assert.ok(/한눈에 보기/.test(q) && /핵심/.test(q) && /큰 운과/.test(q) && /바뀌는 점/.test(q) && q.indexOf('해 볼 것') < q.indexOf('조심할 것') && !/undefined|NaN/.test(q), '한눈에 보기 줄: ' + q);
   console.log('한눈에 보기 ok'); }
+// 2026-11-18 일진 캘린더(hub-saju.js): 선택한 달(월운 막대를 누르면 그 월운)·선택한 날에 한눈에 보기 + 겹쳐 보기
+{ const sj = rd('report/hub/hub-saju.js');
+  assert.ok(/function lvBlock\(ch, x, kind, title, todo, id\)/.test(sj) && /LV\.quick\(/.test(sj) && /LV\.overlayFigure\(/.test(sj), '캘린더 블록');
+  assert.ok(/picked=b\.dataset\.month/.test(sj) && /mc-lv-month/.test(sj) && /cal\.dayBlock\(/.test(sj), '월운 막대 선택·선택한 날 블록');
+  assert.ok(/'\/luck-layers-view\.js'/.test(sj) && /if \(!V\) LVP = null/.test(sj), '캘린더 모듈 불러오기');
+  // 월운 막대(그 달 절기 시작일의 해-달)로 찾은 월운이 1일이 든 월운과 다를 수 있음 → 막대 기준으로 찾는다
+  const ch0 = M.compute({ year: 1990, month: 3, day: 15, hour: 14, minute: 30, gender: 'F' }), wl = M.wolun(ch0, 2026), sep = wl.filter(x => { const dt = new Date(x.startMs + 9 * 3600e3); return dt.getUTCFullYear() + '-' + (dt.getUTCMonth() + 1) === '2026-9'; })[0];
+  assert.ok(sep && M.gzName(sep) === '丁酉', '9월 막대 = 丁酉 월운(백로)');
+  console.log('캘린더 ok'); }
