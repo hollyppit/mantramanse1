@@ -110,6 +110,32 @@
     return '<div class="lv-nf"><div class="lv-nf-fig">' + svg + '<p class="lv-leg"><span><i style="background:#8a90a0"></i>실선 화살표: 생(도와줌)</span><span><i style="background:#d9694f"></i>점선 화살표: 극(누름)</span><span>원 크기 = 비율</span></p></div><div class="lv-nf-txt">' + txt + '</div></div>';
   }
 
+
+  // ── 한눈에 보기(만세력 운세 흐름 상세 맨 위와 같은 네 줄): 핵심(쉬운 말) · 큰 운과 · 바뀌는 점 · 해 볼 것 ──
+  var TGP = { 비견: '나와 같은 힘·동료', 겁재: '경쟁·나눠 갖는 힘', 식신: '재능·꾸준한 표현', 상관: '말·재주·틀을 깨는 힘', 편재: '큰돈·활동 무대', 정재: '꾸준한 돈·살림', 편관: '압박·도전·책임', 정관: '직장·규칙·평판', 편인: '직감·특별한 공부', 정인: '배움·문서·도움' };
+  var RP = { 용신: '이 사주에 가장 필요한 기운', 희신: '필요한 기운을 돕는 기운', 한신: '크게 돕지도 막지도 않는 기운', 기신: '넘치면 부담이 되는 기운', 구신: '부담을 거드는 기운' };
+  var STEM_K = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계'];
+  // opt: { flags, esc, weights, todo: '해 볼 것' 문장, extra: [[이름, html], …] }
+  function quick(M, ch, x, kind, opt) {
+    opt = opt || {}; var E = opt.esc || esc0, F = opt.flags || {}, LE = root.MantraLuckEnv, OV = root.MantraLuckOverlay, rows = [];
+    if (!x || x.s == null) return '';
+    var el = stemEl(x.s), role = String((ch.unified && ch.unified.roles && ch.unified.roles[el]) || '').replace(/^조건부 /, ''), tg = x.stemTG || '';
+    rows.push(['핵심', '<b>' + E(STEM_K[x.s] + EL_S[el]) + '(' + E(M.STEM[x.s]) + ')' + (tg ? ' · ' + E(tg) : '') + '</b>' + (TGP[tg] ? ' — ' + E(TGP[tg]) + '의 기운이 들어와요.' : '') + (RP[role] ? ' ' + E(RP[role]) + '(' + E(role) + ')이에요.' : '')]);
+    var L = layersOf(M, ch, x, kind);
+    if (LE && F.luckEnv && kind !== 'daeun') {
+      try { var tones = null; if (OV && F.luckOverlay) { tones = {}; OV.explain(OV.compute(M, ch, L, { weights: opt.weights }), L.length).forEach(function (l) { tones[l.level] = l.tone; }); }
+        var h = LE.hierarchy(M, ch, L, { tones: tones }); if (h) rows.push(['큰 운과', E(h.text)]); } catch (e) { }
+    }
+    if (LE && F.luckEnv) {
+      try { var nb = LE.neighbors(M, ch, x, kind); if (nb.prev) { var t = LE.transition(M, ch, nb.prev, x, kind, { prevLayers: layersOf(M, ch, nb.prev, kind), curLayers: L });
+        if (t) rows.push(['바뀌는 점', '<span class="lv-chip ' + (t.level === 'high' ? 'bad' : '') + '">' + E(t.levelK) + '</span> ' + E(t.level === 'low' ? { daeun: '직전 대운과', seun: '작년과', wolun: '지난달과', ilun: '어제와' }[kind] + ' 비교해 구조가 크게 바뀌지는 않아요.' : (t.signals[0] ? t.signals[0].text : t.text))]); } } catch (e) { }
+    }
+    (opt.extra || []).forEach(function (r) { if (r && r[1]) rows.push(r); });
+    if (opt.todo) rows.push(['해 볼 것', E(opt.todo)]);
+    (opt.after || []).forEach(function (r) { if (r && r[1]) rows.push(r); });
+    return '<div class="lv-q"><p class="lv-qk">한눈에 보기</p>' + rows.map(function (r) { return '<p class="lv-qr"><span class="lv-qt">' + r[0] + '</span><span>' + r[1] + '</span></p>'; }).join('') + '</div>';
+  }
+
   // 한 시기의 분석 칸들(① 외부 환경 ② 내 사주 반응 ③ 상위·하위 운 ④ 영역) — 칸마다 모듈·스위치가 있을 때만
   function parts(M, ch, x, kind, opt) {
     opt = opt || {}; var F = opt.flags || {}, E = opt.esc || esc0, LE = root.MantraLuckEnv, OV = root.MantraLuckOverlay, TG = root.MantraTenGodRoles;
@@ -208,9 +234,9 @@
     + '.lv-eras{display:flex;gap:5px}.lv-era{flex:1 1 0;min-width:0;text-align:center;border-radius:9px;padding:5px 2px;opacity:.55;color:#222;font-size:.76rem;display:grid}.lv-era.on{opacity:1;outline:2px solid currentColor}.lv-era small{font-size:.6rem}.lv-more>summary{cursor:pointer;font-size:.84rem;opacity:.85;padding:4px 0}'
     + '.lv-olv{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:8px 0}.lv-pent{flex:none;max-width:100%;height:auto}.lv-bars{flex:1 1 220px;min-width:0;display:grid;gap:6px}.lv-brow{display:grid;grid-template-columns:62px 1fr auto;gap:6px;align-items:center;margin:0;font-size:.8rem}.lv-bk{display:flex;gap:4px;align-items:center}.lv-r{font-size:.68rem;opacity:.8}.lv-r.good,.lv-d.good,.lv-up{color:#1f7a5c}.lv-r.bad,.lv-d.bad,.lv-down{color:#b23a2b}.lv-bar{display:flex;height:11px;border-radius:6px;overflow:hidden;background:rgba(127,127,127,.18)}.lv-bar i{display:block;height:100%}.lv-bv{white-space:nowrap;font-size:.76rem;opacity:.9}.lv-leg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.72rem;opacity:.8;margin:2px 0 0}.lv-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}'
     + '.lv-fig{margin:10px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(127,127,127,.28)}.lv-fig-h{margin:0 0 4px;font-size:.9rem}.lv-fig-h span{font-size:.74rem;opacity:.7}.lv-fig-y{margin:2px 0 4px;font-size:.86rem}'
-    + '.lv-nf{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 18px;align-items:start;margin:12px 0}.lv-nf-fig svg{width:100%;height:auto;max-width:400px;display:block;margin:0 auto}.lv-nf-h{font-size:1.02rem;margin:4px 0}.lv-nf-txt{font-size:.9rem;line-height:1.65}@media (max-width:720px){.lv-nf{grid-template-columns:1fr}}';
+    + '.lv-nf{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 18px;align-items:start;margin:12px 0}.lv-nf-fig svg{width:100%;height:auto;max-width:400px;display:block;margin:0 auto}.lv-nf-h{font-size:1.02rem;margin:4px 0}.lv-nf-txt{font-size:.9rem;line-height:1.65}.lv-q{border-radius:14px;padding:12px 14px;margin:10px 0;border:1px solid rgba(127,127,200,.35);background:rgba(110,120,230,.07)}.lv-qk{font-size:.74rem;font-weight:700;margin:0 0 6px;letter-spacing:.04em;opacity:.85}.lv-qr{display:flex;gap:10px;margin:6px 0;line-height:1.6;font-size:.9rem}.lv-qt{flex:0 0 4.6em;font-size:.78rem;font-weight:700;opacity:.8;padding-top:2px}@media (max-width:720px){.lv-nf{grid-template-columns:1fr}}';
 
-  var api = { version: VERSION, layersOf: layersOf, hidden: hidden, parts: parts, card: card, era: era, olVisual: olVisual, overlayFigure: overlayFigure, natalFlowFigure: natalFlowFigure, CSS: CSS, LEVEL_K: LEVEL_K };
+  var api = { version: VERSION, layersOf: layersOf, hidden: hidden, parts: parts, card: card, era: era, olVisual: olVisual, overlayFigure: overlayFigure, natalFlowFigure: natalFlowFigure, quick: quick, CSS: CSS, LEVEL_K: LEVEL_K };
   root.MantraLuckView = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

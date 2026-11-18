@@ -45,7 +45,7 @@ const rd = f => fs.readFileSync(path.join(root, f), 'utf8');
 const hub = rd('report/hub/hub-timeline.js');
 assert.ok(/'\/luck-layers-view\.js'/.test(hub) && /lvHtml\(it, lvl, /.test(hub) && /graph \+ spanHtml\(\) \+ body \+ eraHtml\(\)/.test(hub), '타임라인 연결');
 // 2026-11-18 읽기 쉽게: 시기 카드의 구조·①~④는 '더 깊이 보기' 하나로, 자미두수 막대·2년 전략은 접는 상자로, 시대 흐름은 짧게(compact)
-assert.ok(/tq-fold tq-lvf/.test(hub) && /10년·해마다 자미두수 흐름 보기/.test(hub) && /한눈에 보기 · 천간 오행 구간/.test(hub) && /compact: true/.test(hub), '타임라인 접는 상자');
+assert.ok(/tq-fold tq-lvf/.test(hub) && /10년·해마다 자미두수 흐름 보기/.test(hub) && hub.includes('qkHtml(it, lvl, cp)') && /'2년 흐름'/.test(hub) && /compact: true/.test(hub), '타임라인 접는 상자');
 { const ch0 = M.compute({ year: 1990, month: 3, day: 15, hour: 14, minute: 30, gender: 'F' }), eh = V.era(M, ch0, Date.now(), { flags: ALL, compact: true }); assert.ok(/lv-more/.test(eh) && /나의 위치|용신|기운/.test(strip(eh)), '시대 흐름 짧게 보기'); }
 assert.ok(/luck-layer-blocks\.js/.test(rd('report/v2/index.html')), '상세풀이 스크립트');
 assert.ok(/R\.LuckLayerBlocks\.set\(window\.Manse, ch\)/.test(rd('report/v2/viewer.js')), 'viewer 가 사주를 넘김');
@@ -66,3 +66,8 @@ console.log(`luck-layer-blocks-sim ok · 사주 ${n}명 · 시기 카드 ${cards
   assert.equal(nf, n2, '원국 오행 흐름 그림'); assert.equal(fig, n2, '겹쳐 보기 그림');
   const hub2 = rd('report/hub/hub-timeline.js'); assert.ok(/ovFig\(it, lvl\) \+ lvHtml/.test(hub2) && /natalFlowFigure/.test(hub2) && /noFigure: true/.test(hub2), '타임라인 그림 연결');
   console.log('그림 ok · 원국 오행 흐름 ' + nf + ' · 겹쳐 보기 ' + fig); }
+// 2026-11-18 한눈에 보기(세운·대운·월운 카드 맨 위, 만세력 상세와 같은 줄)
+{ const ch0 = M.compute({ year: 1990, month: 3, day: 15, hour: 14, minute: 30, gender: 'F' }), se = M.seunRange(ch0, 2026, 2026)[0];
+  const q = strip(V.quick(M, ch0, se, 'seun', { flags: ALL, todo: '할 일', after: [['조심할 것', '주의']] }));
+  assert.ok(/한눈에 보기/.test(q) && /핵심/.test(q) && /큰 운과/.test(q) && /바뀌는 점/.test(q) && q.indexOf('해 볼 것') < q.indexOf('조심할 것') && !/undefined|NaN/.test(q), '한눈에 보기 줄: ' + q);
+  console.log('한눈에 보기 ok'); }
