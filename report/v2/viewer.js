@@ -18,6 +18,9 @@
   var WORLD = (/[?&]world=([\w-]{1,30})(&|$)/.exec(location.search) || [])[1] || '';
   var S = { bg: [], cur: false, sd: null, rep: null, pack: null, awk: null, idx: 0, visited: {}, ended: {}, scroll: {}, name: '', pdfUnlocked: false, started: false, media: [] };
   var view = function (v) { var steps0 = document.getElementById('wsteps'); if (steps0 && v !== 'reader') steps0.hidden = true; var ws0 = document.getElementById('wstrip'); if (ws0 && v !== 'reader' && v !== 'home') { ws0.hidden = true; document.documentElement.style.removeProperty('--bar-h'); } if(v!=='reader'&&R.FullReading&&R.FullReading.cancelMany)R.FullReading.cancelMany();if (v !== 'reader' && R.ReadingMedia)R.ReadingMedia.unmount($('#chapter')); if (v !== 'reader' && S.mv) { S.mv.destroy(); S.mv = null; } $('#app').dataset.view = v; $$('.view').forEach(function (e) { e.hidden = e.id !== 'v-' + v; }); window.scrollTo(0, 0); };
+  // 좋은 신호(초록)·주의할 신호(빨강) 글자 색(2026-11-18, /signal-colors.js) — 장이 그려지거나 봉인이 열려 새 문단이 생기면 다시 칠한다(이미 칠한 곳은 건너뜀)
+  var swObs = null, swT = 0;
+  function swWatch() { var el = document.getElementById('chapter'); if (!el || !window.MantraSignalColors) return; var run = function () { try { window.MantraSignalColors.paint(el); } catch (e) { } }; run(); if (!swObs && window.MutationObserver) { swObs = new MutationObserver(function () { clearTimeout(swT); swT = setTimeout(run, 150); }); swObs.observe(el, { childList: true, subtree: true }); } if (!document.getElementById('sw-css')) { var st = document.createElement('style'); st.id = 'sw-css'; st.textContent = '#chapter .sw-g{color:#5fd68d;font-weight:700}#chapter .sw-b{color:#ff7a66;font-weight:700}html.theme-mist #chapter .sw-g,.light #chapter .sw-g{color:#178a4a}html.theme-mist #chapter .sw-b,.light #chapter .sw-b{color:#c9412d}'; document.head.appendChild(st); } }
   function toast(msg, ms) { var t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { t.hidden = true; }, ms || 3200); }
   var sg = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, ss = function (k, v) { try { sessionStorage.setItem(k, v); } catch (e) { } };
 
@@ -966,7 +969,7 @@
       h += '<article class="chap" id="ch-' + esc(c.id) + '" data-ch="' + ci + '" aria-label="' + esc(c.title) + '">' + main + '</article>';
     });
     // 2026-11-09 장 위 '원국 계산 기준'(합·조후 보정) 안내 상자는 읽는 흐름을 끊어 보이지 않게 한다. 계산값(S.sd.elementAdjustments)은 그대로 쓴다.
-    if(R.SealReader)R.SealReader.unmountBook($('#chapter'));if(R.SealReader)$('#chapter').querySelectorAll('.chap').forEach(function(a){R.SealReader.unmount(a);});if(R.ReadingMedia)R.ReadingMedia.unmount($('#chapter'));$('#chapter').innerHTML = h; if(R.SealReader)S.rep.chapters.forEach(function(c,ci){var a=document.getElementById('ch-'+c.id);if(a)mountSeal(a,c,ci);}); if(R.SealReader)mountSealBook(); chapterTags(); linkBasisReferences($('#chapter')); try { emphasize($('#chapter')); } catch (e) { /* 강조가 실패해도 본문은 그대로 */ }
+    if(R.SealReader)R.SealReader.unmountBook($('#chapter'));if(R.SealReader)$('#chapter').querySelectorAll('.chap').forEach(function(a){R.SealReader.unmount(a);});if(R.ReadingMedia)R.ReadingMedia.unmount($('#chapter'));$('#chapter').innerHTML = h; swWatch(); if(R.SealReader)S.rep.chapters.forEach(function(c,ci){var a=document.getElementById('ch-'+c.id);if(a)mountSeal(a,c,ci);}); if(R.SealReader)mountSealBook(); chapterTags(); linkBasisReferences($('#chapter')); try { emphasize($('#chapter')); } catch (e) { /* 강조가 실패해도 본문은 그대로 */ }
     rep.chapters.forEach(function (c) { if (c.kind === 'monthly') { var cur = (c.items || []).findIndex(function (x) { return x.isNow; }); moDetail(c, Math.max(0, cur)); } });
   }
   function openDoc(start, o) {

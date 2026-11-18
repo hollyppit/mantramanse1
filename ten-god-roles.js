@@ -471,5 +471,19 @@
     return lines.filter(t => !BANNED.test(t));
   }
 
-  G.MantraTenGodRoles = { VERSION, CFG, GN, EASY_IX, ROLE_EASY, STATUS_K, TONE_K, CHG_K, AGREE_K, BANNED, analyze, luck, buildState, interactions, rolesOf, pillarVec };
+  // ── 엔진 패턴 목록과 십성 작용 판정 맞추기(2026-11-18) ──
+  //   사전 풀이 문안·'이 사주에서 보이는 패턴'은 엔진 ch.patterns 를 보고 구조 이름을 말한다. 같은 구조를 이 판정이 '성립 안 함'(off)으로 보면
+  //   화면 한쪽은 '있음', 다른 쪽은 '없음'이 되므로, 표시·문안 선택에서는 그 패턴만 뺀다. 약하게 성립(weak)·이 판정이 다루지 않는 패턴은 그대로.
+  //   엔진 결과(ch.patterns·점수)는 바꾸지 않는다. 반환: 걸러진 패턴 배열(엔진 항목 그대로) — dropped 는 뺀 이름
+  const PAT_MAP = { '살인상생': '살인상생', '식신제살': '식신제살', '상관견관': '상관견관', '상관패인': '상관패인', '관살혼잡': '관살혼잡', '효신탈식(도식)': '도식(효신탈식)', '군겁쟁재': '비겁쟁재', '식상생재': '식상생재', '재생관': '재생관', '관인상생': '관인상생', '재극인': '재극인' };
+  const AGREE_CACHE = typeof WeakMap === 'function' ? new WeakMap() : null;
+  function agreePatterns(M, ch) {
+    M = M || G.Manse; const list = (ch && ch.patterns && ch.patterns.list) || [];
+    if (!M || !ch || !list.length) { const o = list.slice(); o.dropped = []; return o; }
+    const hit = AGREE_CACHE && AGREE_CACHE.get(ch); if (hit) return hit;
+    let st = {}; try { (analyze(M, ch).interactions || []).forEach(it => { st[it.name] = it.status; }); } catch (e) { st = null; }
+    const dropped = [], out = !st ? list.slice() : list.filter(p => { const k = PAT_MAP[p.name]; if (k && st[k] === 'off') { dropped.push(p.name); return false; } return true; });
+    out.dropped = dropped; if (AGREE_CACHE) AGREE_CACHE.set(ch, out); return out;
+  }
+  G.MantraTenGodRoles = { VERSION, CFG, GN, EASY_IX, ROLE_EASY, STATUS_K, TONE_K, CHG_K, AGREE_K, BANNED, analyze, luck, buildState, interactions, rolesOf, pillarVec, agreePatterns, PAT_MAP };
 })(typeof window !== 'undefined' ? window : globalThis);

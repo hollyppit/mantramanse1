@@ -57,7 +57,7 @@
       if (v >= 30) add('g:' + n + ':heavy', k); if (v >= 10) add('g:' + n + ':some', k); if (v < 10) add('g:' + n + ':light', k); if (v < 3) add('g:' + n + ':none', k);
     });
     add('dom:' + GN[dom], '가장 큰 묶음 ' + GK[dom] + ' ' + pc(G[dom]));
-    (ch.patterns && ch.patterns.list || []).forEach(function (p) { if (p.level !== '참고') add('pat:' + p.name, p.name + ' — ' + p.basis); });
+    (root.MantraTenGodRoles && root.MantraTenGodRoles.agreePatterns ? root.MantraTenGodRoles.agreePatterns(root.Manse, ch) : (ch.patterns && ch.patterns.list || [])).forEach(function (p) { if (p.level !== '참고') add('pat:' + p.name,   /* 십성 작용 판정과 어긋나는 패턴은 뺀다(2026-11-18) */ p.name + ' — ' + p.basis); });
     try {
       var gc = M.gyeokCore(ch), GKEY = { 정관: 'gwan', 편관: 'gwan', 정재: 'jae', 편재: 'jae', 식신: 'sik', 상관: 'sik', 정인: 'in', 편인: 'in', wolgeop: 'bi' };
       add('gk:' + GKEY[gc.key], gc.kind); if (gc.status === 'seong' || gc.status === 'part' || gc.status === 'pa') add('gk:' + gc.status, gc.kind + ' ' + ({ seong: '성격', part: '부분 성격', pa: '파격' })[gc.status]);

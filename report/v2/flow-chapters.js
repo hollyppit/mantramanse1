@@ -204,7 +204,7 @@
 
   // ───────── 4. 커리어운 심화 · 일의 기운 흐름 ─────────
   function careerFlow(M, ch, name) {
-    var C = ctx(M, ch, name), me = who(C), s = C.G[1], w = C.G[2], o = C.G[3], i = C.G[4], b = C.G[0], on = function (v) { return v >= 8; }, pats = (ch.patterns && ch.patterns.list || []).map(function (x) { return x.name; });
+    var C = ctx(M, ch, name), me = who(C), s = C.G[1], w = C.G[2], o = C.G[3], i = C.G[4], b = C.G[0], on = function (v) { return v >= 8; }, pats = (root.MantraTenGodRoles && root.MantraTenGodRoles.agreePatterns ? root.MantraTenGodRoles.agreePatterns(root.Manse, ch) : (ch.patterns && ch.patterns.list || [])).map(function (x) { return x.name; });   /* 십성 작용 판정과 맞춤 */
     var type, title, scene;
     if (on(o) && on(i)) { type = 'org'; title = me + '은 맡은 책임이 배움을 거쳐 실력이 되는 흐름이에요.'; scene = '일·책임(' + C.ep(3) + ')이 배움·도움(' + C.ep(4) + ')을 거쳐 나에게 들어오는 관인상생(官印相生) 흐름이 있어요. 조직·제도·자격처럼 틀이 있는 곳에서 책임을 맡을수록 그 경험이 실력과 경력으로 쌓이기 쉬워요.'; }
     else if (on(s) && on(w) && s + w >= o + i) { type = 'make'; title = me + '은 내 손으로 만든 것이 일의 결과가 되는 흐름이에요.'; scene = '재능·표현(' + C.ep(1) + ')이 돈·성과(' + C.ep(2) + ')로 이어지는 흐름이 일의 중심이에요. 정해진 자리보다 내가 만든 결과물로 평가받는 방식(전문직·프리랜서·사업·성과제)에서 힘이 잘 붙어요.'; }

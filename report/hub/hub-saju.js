@@ -115,7 +115,7 @@
       var f = (r && (r.data || r.d || r)) || {}, on = function (k) { return F[k] === true || f[k] === true; };
       LVF = { flags: { luckEnv: on('luckEnv'), luckOverlay: on('luckOverlay'), tenGodRoles: on('tenGodRoles') }, ow: f.overlayWeights || null };
       if (!LVF.flags.luckEnv && !LVF.flags.luckOverlay) return null;
-      var V = '?v=20261118-hwa', need = [].concat(LVF.flags.luckOverlay ? ['/luck-overlay.js'] : [], ['/ten-god-roles.js'], LVF.flags.luckEnv ? ['/luck-env.js'] : [], ['/luck-layers-view.js']);
+      var V = '?v=20261118-agree', need = [].concat(LVF.flags.luckOverlay ? ['/luck-overlay.js'] : [], ['/ten-god-roles.js'], LVF.flags.luckEnv ? ['/luck-env.js'] : [], ['/luck-layers-view.js']);
       return need.reduce(function (pr, u) { return pr.then(function () { if (document.querySelector('script[src^="' + u + '"]')) return; return H.load(u + V).catch(function () { }); }); }, Promise.resolve()).then(function () {
         if (root.MantraLuckView && !document.getElementById('lv-css')) { var st = document.createElement('style'); st.id = 'lv-css'; st.textContent = root.MantraLuckView.CSS; document.head.appendChild(st); }
         return root.MantraLuckView || null;

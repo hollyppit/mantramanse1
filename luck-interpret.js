@@ -371,7 +371,7 @@
         }
       });
     });
-    (ch.patterns.list || []).forEach(function (pt) {
+    (G.MantraTenGodRoles && G.MantraTenGodRoles.agreePatterns ? G.MantraTenGodRoles.agreePatterns(G.Manse, ch) : (ch.patterns && ch.patterns.list || [])).forEach(function (pt) {   // 십성 작용 판정과 맞춤(2026-11-18)
       if (pt.level === '참고') return;
       var hit = (pt.name === '관살혼잡' && g[3] >= 0.4) || (pt.name === '상관견관' && g[1] >= 0.4) || (pt.name === '군겁쟁재' && g[0] >= 0.4) || (pt.name === '효신탈식(도식)' && g[4] >= 0.4);
       if (hit) bad.push({ id: 'PATTERN-' + pt.name, text: '원국에 ' + pt.name + ' 구조가 있는데 같은 계열의 기운이 들어와 그 부담이 커질 수 있습니다.' });

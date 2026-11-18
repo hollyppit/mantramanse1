@@ -88,7 +88,7 @@
     sd.specialStars = Object.keys(stars).map(function (k) { return stars[k]; });
     // 12신살(역마살·연살=도화·화개살 …)은 기둥(궁)별로 따로 전한다 — 현실 장면(reality.js)이 "어느 시기의 일인지" 읽는 데 쓴다.
     sd.sinsal12 = {}; ['year', 'month', 'day', 'hour'].forEach(function (k) { var c = ch.cells && ch.cells[k]; if (c && P[k] && c.sinsal12) sd.sinsal12[k] = c.sinsal12; });
-    sd.patterns = ((ch.patterns && ch.patterns.list) || []).map(function (p) { return { name: p.name, level: p.level }; });
+    sd.patterns = (root.MantraTenGodRoles && root.MantraTenGodRoles.agreePatterns ? root.MantraTenGodRoles.agreePatterns(root.Manse, ch) : (ch.patterns && ch.patterns.list || [])).map(function (p) { return { name: p.name, level: p.level }; });   // 십성 작용 판정과 어긋나는 패턴은 뺀다(2026-11-18)
 
     // 운 흐름: 대운 10개 + 현재 대운 + 올해 세운 + 앞으로 12개월
     sd.daewoon = ch.daeun.list.map(function (x,i) {

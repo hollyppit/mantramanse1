@@ -103,6 +103,7 @@
   function natalFlowFigure(M, ch, opt) {
     opt = opt || {}; var E = opt.esc || esc0, f = null;
     try { f = M.natalFlow && M.natalFlow(ch); } catch (e) { f = null; }
+    try { var TGr = root.MantraTenGodRoles, dropP = TGr && TGr.agreePatterns ? (TGr.agreePatterns(M, ch).dropped || []) : []; if (f && dropP.length) f = Object.assign({}, f, { chips: (f.chips || []).filter(function (c) { return dropP.indexOf(c.name) < 0; }) }); } catch (e) { }   // 십성 작용 판정과 어긋나는 패턴은 뺀다
     var svg = ''; try { svg = natalPentagon(M, ch); } catch (e) { svg = ''; }
     if (!svg) return '';
     var tc = function (t) { return t === 'good' ? 'lv-up' : t === 'bad' ? 'lv-down' : ''; };
