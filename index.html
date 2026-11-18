@@ -1110,6 +1110,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="gyeokguk.js"></script>
 <script src="gyeok-structure.js"></script>
 <script src="ten-god-roles.js"></script>
+<script src="luck-env.js"></script>
 <script src="glossary-cases.js"></script>
 <script src="glossary-overlap.js"></script>
 <script src="compass.js"></script>
@@ -7504,8 +7505,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     // elementFlow(오행 흐름 상자)는 [모두 켜기]와 따로 관리자 스위치로 켠다(functions/api/luck-flags.js)
     // luckCycle(오행 사이클: 대운 30년·세운 2년 묶음)도 따로 켠다
     // gyeokAnalysis(오행·강약 탭 '사주 격국 분석' 카드, gyeok-structure.js)도 따로 켠다
-    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && F.tenGodRoles && F.macroEra && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
-    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay', 'tenGodRoles', 'macroEra'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
+    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && F.tenGodRoles && F.macroEra && F.luckEnv && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
+    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay', 'tenGodRoles', 'macroEra', 'luckEnv'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
   })();
   window.addEventListener('mantra:daycompat', () => { try { readForm(); render(); } catch (e) { } });   // 일주 적합도 2판(compat-day.js) 스위치가 늦게 켜지면 다시 그린다
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
@@ -7714,6 +7715,45 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         ${me.engineStructures.length ? `<p class="note">흐름 점수에 이미 반영된 운 구조(엔진): ${me.engineStructures.map(e => esc(e.name)).join(' · ')}</p>` : ''}
         <p class="note">셈법: ${esc(r.rule)}. 설명용이라 그래프 막대·흐름 점수는 바뀌지 않아요.</p></details></div>`;
   }
+  // ── 운 공통 분석 층(스위치 MANTRA_FLAGS.luckEnv, 2026-11-18, luck-env.js): ① 외부 환경(원국 없이 간지·계절만) ② 개인 영향 ③ 상위·하위 운 ④ 영역 — 표시 전용
+  const leOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.luckEnv === true && window.MantraLuckEnv);
+  const LE_ST = { '왕': 'ib-g', '상': 'ib-g', '휴': '', '수': '', '사': 'ib-b' };
+  function envBox(x, kind) {
+    if (!leOn() || !x || x.s == null) return '';
+    const LE = window.MantraLuckEnv, L = olLayers(x, kind); let r;
+    try { const nb = LE.neighbors(M, S.ch, x, kind), wo = L.filter(l => l.level === 'wolun')[0]; r = LE.env(M, L, { prev: nb.prev, next: nb.next, seasonB: wo ? wo.b : null }); } catch (e) { return ''; }
+    const mix = r.mix.map((v, e) => v ? `<span class="le-mx" style="--c:var(--${OL_ELK[e]})"><i style="width:${v}%"></i>${'木火土金水'[e]} ${v}%</span>` : '').join('');
+    const up = r.upper.map(u => `<li><b>${esc(u.levelK)} ${esc(u.gz)}</b> — 천간: ${esc(u.stemFlow)}${u.rels.length ? ' · ' + u.rels.map(q => `<b>${esc(q.name)}</b> ${esc(q.text)}`).join(' · ') : ''}</li>`).join('') + (r.upperGroup ? r.upperGroup.map(q => `<li><b>${esc(q.name)}</b> ${esc(q.text)}</li>`).join('') : '');
+    const ss = r.season;
+    return `<div class="le-env"><p class="le-sum">${esc(r.summary)}</p>
+      <ul class="ib-ul"><li>${esc(r.stem.text)}</li><li>${esc(r.branch.text)}</li><li>간지 안의 관계: <b>${esc(r.pillar.name)}</b> — ${esc(r.pillar.text)}</li></ul>
+      <div class="le-mxs" title="천간 1 + 지지 지장간 비율 1로 센 이 간지의 오행 구성">${mix}</div>
+      ${ss ? `<p><b>월령·계절</b> · ${esc(ss.text)} <span class="chip ${LE_ST[ss.stemState.name] || ''}">천간 ${esc(ss.stemState.name)}</span>${r.branch.el !== r.stem.el ? ` <span class="chip ${LE_ST[ss.branchState.name] || ''}">지지 ${esc(ss.branchState.name)}</span>` : ''}</p>` : ''}
+      ${up ? `<div class="ib-k">상위 운과의 간지 관계</div><ul class="ib-ul">${up}</ul>` : ''}
+      ${r.prev || r.next ? `<div class="ib-k">앞뒤 시기와의 변화</div><ul class="ib-ul">${r.prev ? `<li>${esc(r.prev.text)}</li>` : ''}${r.next ? `<li>${esc(r.next.text)}</li>` : ''}</ul>` : ''}
+      <p class="note">${esc(r.note)} ${esc(r.noTenGod)}</p></div>`;
+  }
+  function trBox(x, kind) {
+    if (!leOn() || !x || x.s == null) return '';
+    const LE = window.MantraLuckEnv; let t;
+    try { const nb = LE.neighbors(M, S.ch, x, kind); if (!nb.prev) return ''; t = LE.transition(M, S.ch, nb.prev, x, kind, { prevLayers: olLayers(nb.prev, kind), curLayers: olLayers(x, kind) }); } catch (e) { return ''; }
+    if (!t) return '';
+    const cls = { high: 'ib-b', mid: '', low: 'muted' }[t.level], list = `<ul class="ib-ul small">${t.signals.map(q => `<li>${esc(q.text)}</li>`).join('')}</ul>`;
+    return `<div class="le-tr le-${t.level}"><p><b>전환 점검</b> <span class="chip ${cls}">${esc(t.levelK)}</span> ${esc(t.text)}</p>${!t.signals.length ? '' : t.level !== 'low' ? list : `<details class="adv"><summary>바뀐 점 ${t.signals.length}가지 보기</summary>${list}</details>`}</div>`;
+  }
+  function hierBox(x, kind) {
+    if (!leOn() || !x || x.s == null || kind === 'daeun') return '';
+    let h; try { h = window.MantraLuckEnv.hierarchy(M, S.ch, olLayers(x, kind)); } catch (e) { return ''; }
+    if (!h) return '';
+    const SC = { good: 'ib-g', 'lean-good': 'ib-g', bad: 'ib-b', 'lean-bad': 'ib-b', mid: '' };
+    return `<div class="le-hi"><div class="le-rows">${h.rows.map(q => `<span style="--olc:${OL_COL[q.level]}"><b>${esc(q.levelK)} ${esc(q.gz)}</b> <span class="chip ${SC[q.side]}">${esc(q.sideK)}</span></span>`).join('<i>→</i>')}</div><p>${esc(h.text)}</p><p class="note">${esc(h.note)}</p></div>`;
+  }
+  const LE_CSS = '.le-sec{border-radius:14px;padding:10px 12px 4px;margin:12px 0}.le-sec>.le-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:0 0 6px}.le-sec>.le-h b{font-size:.95rem}.le-sec>.le-h span{font-size:.74rem;color:var(--ink-3)}'
+    + '.le-s1{border:1.5px dashed color-mix(in srgb,var(--ink-3) 45%,transparent);background:color-mix(in srgb,var(--ink-3) 5%,transparent)}.le-s2{border:1.5px solid color-mix(in srgb,var(--accent) 35%,var(--line))}.le-s3,.le-s4{border:1px solid var(--line)}'
+    + '.le-sum{font-weight:600;margin:4px 0 6px}.le-mxs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.le-mx{position:relative;overflow:hidden;z-index:0;font-size:.76rem;padding:3px 9px;border-radius:999px;border:1px solid var(--line);min-width:64px}.le-mx i{position:absolute;inset:0 auto 0 0;background:color-mix(in srgb,var(--c) 35%,transparent);z-index:-1}'
+    + '.le-tr{border-left:3px solid var(--line);padding:2px 0 2px 10px;margin:6px 0}.le-tr.le-high{border-left-color:#c0392b}.le-tr.le-mid{border-left-color:var(--accent)}.le-rows{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0}.le-rows>span{border-left:3px solid var(--olc);padding-left:6px}.le-rows i{color:var(--ink-3);font-style:normal}';
+  { const st = document.createElement('style'); st.textContent = LE_CSS; document.head.appendChild(st); }
+  const leSec = (n, title, sub, body) => body && body.trim() ? `<section class="le-sec le-s${n}"><div class="le-h"><b>${title}</b><span>${sub}</span></div>${body}</section>` : '';
   document.addEventListener('click', ev => { const b = ev.target && ev.target.closest && ev.target.closest('[data-ol]'); if (!b) return; const [k, n] = b.dataset.ol.split(':'); S.olUpTo = Object.assign({}, S.olUpTo, { [k]: +n }); render(); });
   // ── 오행 사이클 (스위치 MANTRA_FLAGS.luckCycle, 기본 꺼짐): 대운 3개 = 장기 분석 구간(30년), 천간 오행이 같은 세운 2년 = 천간 오행 구간.
   //    계산·문장은 luck-cycle.js(사전 문구 조합, AI 없음). 표시 전용이라 흐름 점수·그래프 막대는 그대로다. 월운·일진은 묶지 않는다.
@@ -7819,6 +7859,18 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${e.chain && e.chain.note ? `<p>${esc(e.chain.note)}</p>` : ''}
       <div class="parts">${e.parts.map(p => `<div class="part"><span>${esc(p.label)}</span><span class="pv ${p.v > 0.5 ? 'pos' : p.v < -0.5 ? 'neg' : ''}">${signed(p.v)}</span></div>`).join('')}</div>`;
     const ib = kind ? interpBox(x, kind, basis) : '';
+    if ((kind === 'daeun' || kind === 'seun' || kind === 'wolun' || kind === 'ilun') && leOn()) {   // 운 공통 분석 층: 외부 환경과 개인 해석을 칸으로 나눈다(기존 상자는 그대로 옮겨 담음)
+      const s1 = envBox(x, kind);
+      const s2 = trBox(x, kind) + ib + (kind === 'daeun' || kind === 'seun' ? efBox(x, kind) : '') + tgrBox(x, kind) + (S.metric === 'health' ? hbBox(x, kind) : S.metric === 'accident' ? ahBox(x, kind) : '') + luckWords(x) + (kind === 'ilun' ? dayJudge(x) : '') + rootBox(x, kind) + luckEffects(x, kind) + (ib ? '' : `<details class="adv"><summary>명리학적 근거 보기</summary><div class="small">${basis}</div></details>`);
+      const s3 = hierBox(x, kind) + olBox(x, kind);
+      const s4 = domainBox(x, kind, title);
+      return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${condTag(e.condition)} <b class="num">${signed(luckV(x))}</b></span></div>
+      ${banner}
+      ${leSec(1, '① 외부 환경의 오행 흐름', '모두에게 같은 시간의 기운 · 원국·용신을 쓰지 않음 · 좋고 나쁨 판단 없음', s1)}
+      ${leSec(2, '② 내 사주에 미치는 영향', '원국과 이 운이 만나 생기는 작용 · 사람마다 달라요', s2)}
+      ${leSec(3, '③ 상위 운과 하위 운의 상호작용', kind === 'daeun' ? '대운은 가장 큰 층이라 원국 위에 쌓이는 모습만 봐요' : '큰 운이 배경, 작은 운이 구체화 · 위가 아래를 정하지는 않아요', s3)}
+      ${leSec(4, '④ 영역별 영향', '재물·커리어·인연 등', s4)}${tail}</div>`;
+    }
     return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${condTag(e.condition)} <b class="num">${signed(luckV(x))}</b></span></div>
       ${banner}
       ${ib}

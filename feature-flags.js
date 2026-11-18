@@ -14,7 +14,7 @@
      · timelineCopy: 운명의 타임라인 카드 첫머리 문안(report/hub/hub-timeline.js). 관리자 화면 스위치(/api/luck-flags timelineCopy)로도 켠다
    끄는 방법: 값을 false로 되돌려 배포. 기존 만세력·결제·무빙툰·관리자에는 영향이 없다. 절차: docs/LUCK_ENV_ROLLBACK_2026-11-02.md */
 (function (w) {
-  var f = Object.assign({ macroEra: false, tenGodRoles: false, luckOverlay: false, interpret: false, timeline: false, region: false, wealth: false, regionRead: false, wishSpots: false, space: false, timelineCopy: false, topicDeep: false, lifeNarrative: false, healthBody: true, accidentHint: true, elementFlow: false, luckCycle: false, gyeokAnalysis: false, dayCompat: false }, w.MANTRA_FLAGS || {});   // dayCompat(2026-11-16): 60갑자 일주 적합도 2판(compat-day.js). 관리자 화면 스위치(/api/luck-flags dayCompat)로도 켠다   // wealth: 직업·활동 적성 고도화(나의 돈 버는 방식·업무 환경·직업·약점). 관리자 화면 스위치로도 켠다(/api/wealth-career)
+  var f = Object.assign({ luckEnv: false, macroEra: false, tenGodRoles: false, luckOverlay: false, interpret: false, timeline: false, region: false, wealth: false, regionRead: false, wishSpots: false, space: false, timelineCopy: false, topicDeep: false, lifeNarrative: false, healthBody: true, accidentHint: true, elementFlow: false, luckCycle: false, gyeokAnalysis: false, dayCompat: false }, w.MANTRA_FLAGS || {});   // dayCompat(2026-11-16): 60갑자 일주 적합도 2판(compat-day.js). 관리자 화면 스위치(/api/luck-flags dayCompat)로도 켠다   // wealth: 직업·활동 적성 고도화(나의 돈 버는 방식·업무 환경·직업·약점). 관리자 화면 스위치로도 켠다(/api/wealth-career)
   try {
     var loc = w.location, host = loc && loc.hostname || '';
     // 운영 도메인(mantramanse.pages.dev 및 그 외 사용자 도메인)에서는 주소로 켤 수 없다. localhost와 *.mantramanse.pages.dev 미리보기만 허용.

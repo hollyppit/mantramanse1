@@ -83,6 +83,10 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>십성 작용 분석</b> — 현재: <b style="color:' + (fl && fl.tenGodRoles ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.tenGodRoles ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leTG"' + (fl ? '' : ' disabled') + '>' + (fl && fl.tenGodRoles ? '십성 작용 분석 끄기' : '십성 작용 분석 켜기') + '</button><a class="btn" href="/?mantraFlags=tenGodRoles" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 만세력 <b>오행·강약 탭</b>에 “십성 작용 분석” 카드(비겁·식상·재성·관성·인성 5종을 세력·역할·실제 작용으로 한눈에 비교, 누르면 상세)와 상호작용 구조 11종(식상생재·재생관·관인상생·살인상생·식신제살·상관견관·상관패인·재극인·도식·관살혼잡·비겁쟁재)의 성립/유불리가, <b>운세 흐름</b> 대운·세운·월운·일진 상세에 “원국과 운의 상호작용”(들어온 십성의 억부·조후·통합 역할, 구조의 신규 형성·강화·약화·해소, 감당 능력, 재물·커리어·인연)이 <b>약 1분 안에</b> 나타납니다. 설명용이라 강약·용신·흐름 점수·그래프는 바뀌지 않습니다.</p></div>';
+    // 운 공통 분석 층(2026-11-18, luck-env.js): 운세 상세를 ① 외부 환경 ② 개인 영향 ③ 상위·하위 운 ④ 영역으로 나눔 — 표시 전용
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운 공통 분석(외부 환경·개인 반응 분리)</b> — 현재: <b style="color:' + (fl && fl.luckEnv ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.luckEnv ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leEV"' + (fl ? '' : ' disabled') + '>' + (fl && fl.luckEnv ? '운 공통 분석 끄기' : '운 공통 분석 켜기') + '</button><a class="btn" href="/?mantraFlags=luckEnv" target="_blank" rel="noopener">미리보기 주소</a></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 만세력 운세 흐름에서 대운·세운·월운·일진을 눌렀을 때 상세 화면이 네 칸으로 나뉩니다: <b>① 외부 환경의 오행 흐름</b>(원국·용신 없이 간지·지장간·간지 안 관계·월령 왕상휴수사·상위 운과의 합충·앞뒤 시기 변화, 모두에게 같음), <b>② 내 사주에 미치는 영향</b>(전환 점검 + 기존 해석·십성·근거 상자), <b>③ 상위 운과 하위 운</b>(층별 도움/부담 방향 비교 + 오행 겹쳐 보기), <b>④ 영역별 영향</b>. 전환 점검은 원국 역할이 뒤집히거나 일지·월지와 새 충·합, 십성 구조 변화가 있을 때만 큰 전환으로 올립니다. 점수·그래프는 바뀌지 않습니다.</p></div>';
     // 시대 흐름(2026-11-18, macro-era.js·macro-era-bridge.js): 만세력 운세 흐름 맨 위 삼원구운 20년 시대 카드 + 대운 카드의 장기 운세 요약 — 표시 전용
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>시대 흐름(삼원구운)</b> — 현재: <b style="color:' + (fl && fl.macroEra ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.macroEra ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leME"' + (fl ? '' : ' disabled') + '>' + (fl && fl.macroEra ? '시대 흐름 끄기' : '시대 흐름 켜기') + '</button><a class="btn" href="/?mantraFlags=macroEra" target="_blank" rel="noopener">미리보기 주소</a></div>' +
@@ -168,6 +172,11 @@
       fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify(body) })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
         .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(okMsg); });
+    };
+    $('#leEV').onclick = function () {   // 운 공통 분석 층 스위치(luck-env.js)
+      var v = !(S.flags && S.flags.luckEnv);
+      if (v && !confirm('만세력 운세 상세를 외부 환경·개인 영향·상위 하위 운·영역 네 칸으로 나눈 화면을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
+      putFlags({ flags: { luckEnv: v } }, v ? '운 공통 분석을 켰습니다(약 1분 안에 반영)' : '운 공통 분석을 껐습니다(약 1분 안에 반영)');
     };
     $('#leME').onclick = function () {   // 시대 흐름 스위치(macro-era.js)
       var v = !(S.flags && S.flags.macroEra);
