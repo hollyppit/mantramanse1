@@ -70,7 +70,7 @@
   var graphP = null;
   function loadGraph() {
     if (graphP) return graphP;
-    graphP = Promise.all([root.MantraTLGraph ? Promise.resolve() : H.load('/report/hub/timeline-graph.js?v=20261116-mistem').catch(function () { }), flagsJson(), root.MantraNatal ? Promise.resolve() : H.load('/report/natal-table.js?v=20261116-natal2').catch(function () { })]).then(function (r) {
+    graphP = Promise.all([root.MantraTLGraph ? Promise.resolve() : H.load('/report/hub/timeline-graph.js?v=20261118-zw').catch(function () { }), flagsJson(), root.MantraNatal ? Promise.resolve() : H.load('/report/natal-table.js?v=20261116-natal2').catch(function () { })]).then(function (r) {
       var F = root.MANTRA_FLAGS || {}, f = r[1] || {}, lc = F.luckCycle === true || f.luckCycle === true, ef = F.elementFlow === true || f.elementFlow === true;
       // 운 분석 층(2026-11-18, 만세력 운세 흐름과 같은 계산): 외부 환경·전환·상하위(luckEnv) · 오행 겹쳐 보기(luckOverlay) · 십성 작용(tenGodRoles) · 시대 흐름(macroEra)
       var on = function (k) { return F[k] === true || f[k] === true; }, lv = { luckEnv: on('luckEnv'), luckOverlay: on('luckOverlay'), tenGodRoles: on('tenGodRoles'), macroEra: on('macroEra'), luckAlerts: on('luckAlerts') }, LV_V = '?v=20261118-lv13';
@@ -329,7 +329,7 @@
       };
       var dh = bars(z.daehan, { step: 50, h: 190, b: 50, label: '10년 대한 흐름', label2: function (it, cx, base) { return '<text x="' + cx + '" y="' + (base + 14) + '" text-anchor="middle" font-size="11" font-weight="800" fill="#E9E4D8">' + esc(it.name) + '</text><text x="' + cx + '" y="' + (base + 27) + '" text-anchor="middle" font-size="9.5" fill="#8a8f9c">' + it.from + '~' + it.to + '세</text>' + (it.cur ? '<text x="' + cx + '" y="' + (base + 40) + '" text-anchor="middle" font-size="9.5" font-weight="800" fill="#cdb27a">▲ 지금</text>' : ''); } });
       var lv = bars(z.liu, { step: 56, h: 180, b: 48, label: '유년 흐름', label2: function (it, cx, base) { return '<text x="' + cx + '" y="' + (base + 14) + '" text-anchor="middle" font-size="11" font-weight="800" fill="#E9E4D8">' + it.Y + '</text><text x="' + cx + '" y="' + (base + 27) + '" text-anchor="middle" font-size="9.5" fill="#8a8f9c">' + esc(it.name) + ' · ' + it.age + '세</text><text x="' + cx + '" y="' + (base + 40) + '" text-anchor="middle" font-size="9"><tspan fill="#7FD3A0">록' + esc(it.lu) + '</tspan> <tspan fill="#EB6B5B">기' + esc(it.gi) + '</tspan></text>'; } });
-      return '<div class="tq-box tq-zw"><h4>자미두수 쉽게 보기 <small>별 이름·궁 이름 없이 먼저 요약해 드려요</small></h4><div class="tq-zw-rows">' + z.rows.map(function (r) { return '<div class="tq-zw-row"><span>' + esc(r.t) + '</span><p>' + r.b + (r.s ? '<br><small>' + esc(r.s) + '</small>' : '') + '</p></div>'; }).join('') + '</div>' +
+      return '<div class="tq-box tq-zw"><h4>자미두수 쉽게 보기 <small>자미두수 용어 옆 괄호에 쉬운 풀이를 붙였어요</small></h4><div class="tq-zw-rows">' + z.rows.map(function (r) { return '<div class="tq-zw-row"><span>' + esc(r.t) + '</span><p>' + r.b + (r.s ? '<br><small>' + esc(r.s) + '</small>' : '') + '</p></div>'; }).join('') + '</div>' +
         '<details class="tq-fold"><summary>10년·해마다 자미두수 흐름 보기</summary>' +
         '<h4 class="tq-h4">10년 대한 흐름 <small>막대 = 그 10년 동안 명궁 역할을 하는 칸의 강도</small></h4>' + dh + '<p class="tq-sub">막대 하나가 10년이에요. 금색 배경이 지금 걷는 대한이며, 막대가 높을수록 그 10년은 해당 영역을 중심으로 힘이 실린다고 읽어요.</p>' +
         '<h4 class="tq-h4">유년 흐름 <small>앞으로 10년</small></h4>' + lv + '<p class="tq-sub">막대는 그해 명궁 역할을 하는 칸의 강도, 아래 글자는 그해 화록(초록)·화기(빨강)가 떨어지는 영역이에요. 점수는 좋고 나쁨의 판정이 아니라 내 명반 안에서 비교한 상대 지표예요. 삼합파 기준이며 태어난 시각이 정확할수록 잘 맞아요.</p></details></div>';

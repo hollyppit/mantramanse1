@@ -8170,6 +8170,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 궁 강도 점수: 주성 밝기·길성·살성·사화를 합산해 0~100(50 = 보통)으로 만들고, 삼방사정을 섞어 최종 점수를 낸다.
   const ZW_SHORT = { '명궁': '나', '형제궁': '형제·친구', '부처궁': '연애·결혼', '자녀궁': '자녀', '재백궁': '돈', '질액궁': '건강', '천이궁': '바깥 활동', '노복궁': '인맥', '관록궁': '일', '전택궁': '집', '복덕궁': '마음', '부모궁': '부모·문서' };
   const ZW_DOM = { '명궁': '나 자신·성격', '형제궁': '형제·친구', '부처궁': '연애·결혼', '자녀궁': '자녀·후배', '재백궁': '돈·재물', '질액궁': '건강', '천이궁': '밖에서의 활동', '노복궁': '사람 인연', '관록궁': '직업·성취', '전택궁': '집·부동산', '복덕궁': '마음의 여유', '부모궁': '부모·윗사람·문서' };
+  const zwName = n => ZW_DOM[n] ? `${n}(${ZW_DOM[n]})` : n;   // 자미두수 용어(쉬운 풀이)
   const ZW_HW_PLAIN = { '록': '잘 풀리고 이득이 생김', '권': '내가 주도하고 힘이 실림', '과': '인정받고 도움을 받음', '기': '막히기 쉽고 신경 쓸 일이 많음' };
   const ZW_BR_W = { '묘': 4, '왕': 3, '득': 2, '리': 1, '평': 0, '불': -1, '함': -2 };
   const zwGrade = v => v >= 70 ? [4, '매우 강함'] : v >= 58 ? [3, '강함'] : v >= 43 ? [2, '보통'] : v >= 32 ? [1, '약함'] : [0, '매우 약함'];
@@ -8255,7 +8256,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     if (gl.length || bl.length) rows.push(['도와주는 별 · 조심할 별', (gl.length ? `<p>🟢 도와주는 별: ${gl.join(', ')}</p>` : '') + (bl.length ? `<p>🔴 조심할 별: ${bl.join(', ')} — 이 영역은 한 번 더 점검하면 좋아요.</p>` : '')]);
     const hws = [...p.main, ...p.good, ...p.bad].filter(n => zw.sihwa[n]);
     if (hws.length) rows.push(['타고난 사화(스위치)', hws.map(n => `<p><b>${term(n)}에 화${zw.sihwa[n]}</b> — ${ZW_HW_PLAIN[zw.sihwa[n]]}.</p>`).join('')]);
-    const near = [opp, ...tri].map(q => `${ZW_DOM[q.name]}(${zwGrade(sc[q.b])[1]})`).join(' · ');
+    const near = [opp, ...tri].map(q => `${q.name}(${ZW_DOM[q.name]}) ${zwGrade(sc[q.b])[1]}`).join(' · ');
     rows.push(['같이 영향을 주는 영역', `<p>이 영역은 혼자 읽지 않고 마주 보는 곳과 삼합 자리의 영향을 함께 받아요: ${near}.</p>`]);
     const tip = PALACE_TIP[p.name] || ['', ''];
     rows.push(['한 줄 조언', `<p>${g[0] >= 3 ? '힘이 실린 영역이에요. ' + tip[0] : g[0] >= 2 ? '무난한 영역이에요. ' + tip[0] + ' ' + tip[1] : '의식해서 가꿀 영역이에요. ' + tip[1]}</p>`]);
@@ -8372,23 +8373,24 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const tone = (v, hi, mid, lo) => v >= 60 ? hi : v >= 45 ? mid : lo;
 
     // ── 1. 쉽게 보기: 나는 이런 사람 → 지금 10년·올해 → 강한·약한 영역 → 평생 네 가지 흐름 (누르면 그 영역 풀이로) ──
-    const domBtn = p => `<button type="button" class="zq-dom" data-zw="${p.b}"><b>${ZW_DOM[p.name]}</b>${pill(sc[p.b])}</button>`;
+    const zwN = p => `${p.name}(${ZW_DOM[p.name]})`;   // 2026-11-18: 자미두수 용어(쉬운 풀이) — 쉬운 말만 쓰면 오히려 헷갈려서 궁 이름을 앞에 둔다
+    const domBtn = p => `<button type="button" class="zq-dom" data-zw="${p.b}"><b>${zwN(p)}</b>${pill(sc[p.b])}</button>`;
     const HW_EASY = { '록': ['이득이 따라오는 곳', '노력한 만큼 얻고, 도와주는 사람이 생겨요.'], '권': ['내가 주도하면 풀리는 곳', '남에게 맡기기보다 내가 이끌고 결정할 때 힘이 실려요.'], '과': ['인정받기 쉬운 곳', '실력과 이미지로 평판이 차곡차곡 쌓여요.'], '기': ['마음이 자주 걸리는 곳', '걱정이 앞서기 쉬워요. 서두르지 말고 한 번 더 점검하세요.'] };
     const hwEasy = ['록', '권', '과', '기'].map(k => {
       const e = Object.entries(zw.sihwa).find(([, h]) => h === k); if (!e) return '';
       const p = zw.palaces[zw.pos[e[0]]];
-      return `<button type="button" class="zq-hw" data-zw="${p.b}"><span class="hw ${HWA[k][1]}">${k}</span><span><b>${HW_EASY[k][0]} — ${ZW_DOM[p.name]}</b><small>${HW_EASY[k][1]}</small></span></button>`;
+      return `<button type="button" class="zq-hw" data-zw="${p.b}"><span class="hw ${HWA[k][1]}">${k}</span><span><b>화${k}(${HW_EASY[k][0]}) — ${zwN(p)}</b><small>${HW_EASY[k][1]}</small></span></button>`;
     }).join('');
     const dhP = per.dh;
     const nowTiles = `<div class="zq-now">
-      ${dhP ? `<button type="button" class="zq-tile" data-zw="${dhP.b}"><small>지금 걷는 10년 · ${dhP.daehan[0]}~${dhP.daehan[1]}세</small><b>${ZW_DOM[dhP.name]}</b>${pill(sc[dhP.b])}<span class="zq-say">${tone(sc[dhP.b], '이 영역에 적극적으로 힘을 써 볼 만한 10년이에요.', '크게 출렁이지 않아요. 꾸준함이 이기는 10년이에요.', '판을 키우기보다 기반을 다지는 10년으로 쓰세요.')}</span></button>`
+      ${dhP ? `<button type="button" class="zq-tile" data-zw="${dhP.b}"><small>지금 걷는 10년 · ${dhP.daehan[0]}~${dhP.daehan[1]}세</small><b>${zwN(dhP)}</b>${pill(sc[dhP.b])}<span class="zq-say">${tone(sc[dhP.b], '이 영역에 적극적으로 힘을 써 볼 만한 10년이에요.', '크게 출렁이지 않아요. 꾸준함이 이기는 10년이에요.', '판을 키우기보다 기반을 다지는 10년으로 쓰세요.')}</span></button>`
         : `<div class="zq-tile"><small>지금 걷는 10년</small><b>첫 10년 흐름 전</b><span class="zq-say">아직 첫 대한이 시작되기 전이에요.</span></div>`}
-      <button type="button" class="zq-tile yr" data-zw="${liuP.b}"><small>${Y}년 올해의 초점 · ${per.age}세</small><b>${ZW_DOM[liuP.name]}</b>${pill(sc[liuP.b])}<span class="zq-say">${tone(sc[liuP.b], '올해 이 분야는 기회로 보고 움직여도 좋아요.', '큰 변화보다 하던 걸 꾸준히 이어 가는 해예요.', '확장보다 점검과 정리가 어울리는 해예요.')}</span></button>
+      <button type="button" class="zq-tile yr" data-zw="${liuP.b}"><small>${Y}년 올해의 초점 · ${per.age}세</small><b>${zwN(liuP)}</b>${pill(sc[liuP.b])}<span class="zq-say">${tone(sc[liuP.b], '올해 이 분야는 기회로 보고 움직여도 좋아요.', '큰 변화보다 하던 걸 꾸준히 이어 가는 해예요.', '확장보다 점검과 정리가 어울리는 해예요.')}</span></button>
     </div>`;
     const easyCard = `<section class="card easy">
-      <div class="card-h"><h2>자미두수 쉽게 보기</h2><span class="note">어려운 별 이름은 빼고, 내 인생 지도를 먼저 요약해 드려요</span></div>
+      <div class="card-h"><h2>자미두수 쉽게 보기</h2><span class="note">자미두수 용어 옆 괄호에 쉬운 풀이를 붙였어요</span></div>
       <div class="zq">
-        <div class="zq-hero"><small class="muted">나는 이런 사람이에요</small><b>${mMain.length ? mMain.map(n => term(n)).join(' · ') + ' 타입' : '환경 따라 달라지는 유연한 타입'}</b>
+        <div class="zq-hero"><small class="muted">나는 이런 사람이에요</small><b>${mMain.length ? '명궁 주성 ' + mMain.map(n => term(n)).join(' · ') + ' 타입' : '명궁 빈 궁(환경 따라 달라지는 유연한 타입)'}</b>
           <span class="small" style="color:var(--ink-2)">${mMain.length ? mMain.map(starGist).join(' ') : '명궁이 비어 있어 마주 보는 자리의 별을 빌려 봐요. 만나는 사람과 환경에 따라 모습이 크게 달라져요.'}</span></div>
         ${nowTiles}
         <div class="zq-grid">
@@ -8419,7 +8421,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
 
     // ── 3. 고른 영역 풀이: 쉬운 풀이 먼저, 전문 정보는 접기 ──
     const detail = `<section class="card" id="zw-detail">
-      <div class="card-h"><h2>${term(sel.name)} · ${ZW_DOM[sel.name]} <span class="muted small">${sel.daehan[0]}~${sel.daehan[1]}세의 10년</span></h2>${sel.shen ? `<span class="pill" style="background:var(--accent);color:#fff">${term('신궁')}</span>` : ''}</div>
+      <div class="card-h"><h2>${term(sel.name)}(${ZW_DOM[sel.name]}) <span class="muted small">${sel.daehan[0]}~${sel.daehan[1]}세의 10년</span></h2>${sel.shen ? `<span class="pill" style="background:var(--accent);color:#fff">${term('신궁')}</span>` : ''}</div>
       <div class="zq-hero"><span>${pill(sc[sel.b])} <span class="small muted">이 영역의 힘</span></span><span class="small">${zwPlain(zw, sel, sc)}</span></div>
       ${zwReading(zw, sel, sc)}
       <details class="adv" id="zw-pro"${zwOpen('zw-pro')}><summary>전문가용 자세히 (별 목록·12신·비성 사화·삼방사정)</summary>
@@ -8441,9 +8443,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const yrCard = `<section class="card">
       <div class="card-h"><h2>${Y}년 운 <span class="muted small">세는나이 ${per.age}세</span></h2></div>
       <div class="easy-list">
-        ${dhP ? `<div class="easy-row"><b>이 10년(${dhP.daehan[0]}~${dhP.daehan[1]}세)의 무대</b><p><b>${ZW_DOM[dhP.name]}</b> — ${PALACE_MEAN[dhP.name]}</p></div>` : ''}
-        <div class="easy-row"><b>${Y}년 올해의 무대</b><p><b>${ZW_DOM[liuP.name]}</b> — ${PALACE_MEAN[liuP.name]} ${dhP && dhP.b === liuP.b ? '10년의 무대와 올해의 무대가 겹쳐서, 이 영역의 일이 유난히 크게 느껴질 수 있어요.' : dhP ? `그래서 올해는 <b>${ZW_DOM[dhP.name]}</b>와 <b>${ZW_DOM[liuP.name]}</b>, 이 두 영역의 일이 특히 크게 느껴져요.` : ''}</p></div>
-        ${lLu || lGi ? `<div class="easy-row"><b>올해 들어오는 것과 걸리는 것</b><p>${lLu ? `🟢 이득이 들어오는 곳: <b>${ZW_DOM[lLu.name]}</b>` : ''}${lLu && lGi ? '<br>' : ''}${lGi ? `🔴 마음이 걸리는 곳: <b>${ZW_DOM[lGi.name]}</b> <span class="muted small">— 이 분야는 결정 전에 한 번 더 확인하세요.</span>` : ''}</p></div>` : ''}
+        ${dhP ? `<div class="easy-row"><b>이 10년(${dhP.daehan[0]}~${dhP.daehan[1]}세)의 무대</b><p><b>${zwName(dhP.name)}</b> — ${PALACE_MEAN[dhP.name]}</p></div>` : ''}
+        <div class="easy-row"><b>${Y}년 올해의 무대</b><p><b>${zwName(liuP.name)}</b> — ${PALACE_MEAN[liuP.name]} ${dhP && dhP.b === liuP.b ? '10년의 무대와 올해의 무대가 겹쳐서, 이 영역의 일이 유난히 크게 느껴질 수 있어요.' : dhP ? `그래서 올해는 <b>${zwName(dhP.name)}</b>, <b>${zwName(liuP.name)}</b> 이 두 영역의 일이 특히 크게 느껴져요.` : ''}</p></div>
+        ${lLu || lGi ? `<div class="easy-row"><b>올해 들어오는 것과 걸리는 것</b><p>${lLu ? `🟢 화록(이득이 들어오는 곳): <b>${zwName(lLu.name)}</b>` : ''}${lLu && lGi ? '<br>' : ''}${lGi ? `🔴 화기(마음이 걸리는 곳): <b>${zwName(lGi.name)}</b> <span class="muted small">— 이 분야는 결정 전에 한 번 더 확인하세요.</span>` : ''}</p></div>` : ''}
       </div>
       <details class="adv" id="zw-yrpro"${zwOpen('zw-yrpro')}><summary>전문가용 자세히 (대한·유년 사화)</summary>
         <div class="list">

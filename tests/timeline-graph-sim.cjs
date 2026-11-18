@@ -15,7 +15,8 @@ assert.deepEqual(T.METRICS.map(x => x[0]), ['flow', 'love', 'wealth', 'career', 
   assert.equal(z.daehan.map(d => d.name + d.v).join(' '), '명60 부모39 복덕71 전택37 관록66 노복19 천이66 질액48 재백64 자녀18 부처80 형제32');
   assert.equal(z.daehan.find(d => d.cur).name, '전택');
   assert.equal(z.liu.map(d => d.Y + ':' + d.v).join(' '), '2024:66 2025:48 2026:64 2027:18 2028:80 2029:32 2030:60 2031:39 2032:71 2033:37');
-  assert.match(z.rows[0].b, /탐랑<\/b> — 욕망과 재주, 매력의 별/);
+  assert.match(z.rows[0].b, /탐랑<\/b>\(욕망과 재주, 매력의 별\)/);   // 2026-11-18: 자미두수 용어(쉬운 풀이)
+  assert.ok(z.rows.some(r => /(명궁|형제궁|부처궁|자녀궁|재백궁|질액궁|천이궁|노복궁|관록궁|전택궁|복덕궁|부모궁)\([^)]+\)/.test(r.b)), '궁 이름(쉬운 풀이)');
   const noHour = M.compute({ year: 1990, month: 5, day: 5, hour: null, minute: 0, calendar: 'solar', gender: 'M', city: '서울' });
   assert.doesNotThrow(() => T.ziwei(M, noHour, Date.now()));
 }

@@ -130,18 +130,18 @@
   function ziwei(M, ch, now) {
     var zw = ch && ch.ziwei; if (!zw || !M.ziweiPeriod || !M.zwBright) return null;
     var kst = new Date(now + 9 * 3600e3), Y; try { Y = M.solarToLunar(kst.getUTCFullYear(), kst.getUTCMonth() + 1, kst.getUTCDate()).y; } catch (e) { Y = kst.getUTCFullYear(); }
-    var per = M.ziweiPeriod(zw, Y), sc = zwScores(M, zw), dom = function (p) { return ZW_DOM[p.name] || p.name; };
+    var per = M.ziweiPeriod(zw, Y), sc = zwScores(M, zw), dom = function (p) { return ZW_DOM[p.name] ? p.name + '(' + ZW_DOM[p.name] + ')' : p.name; };   // 자미두수 용어(쉬운 풀이)
     var order = zw.palaces.slice().sort(function (a, b) { return sc[b.b] - sc[a.b]; }), best = order.slice(0, 3), worst = order.slice(-3).reverse();
     var mp = zw.palaces[zw.ming], mMain = mp.main.length ? mp.main : zw.palaces[(zw.ming + 6) % 12].main;
     var hwOf = function (k) { var n = Object.keys(zw.sihwa).filter(function (x) { return zw.sihwa[x] === k; })[0]; return n != null && zw.pos && zw.pos[n] != null ? zw.palaces[zw.pos[n]] : null; };
     var rows = [];
-    rows.push({ t: '나는 이런 사람이에요', b: mMain.length ? mMain.map(function (n) { return '<b>' + n + '</b> — ' + (ZW_STAR[n] || '') + '.'; }).join('<br>') : '명궁이 비어 있어 마주 보는 천이궁의 별을 빌려 봐요.', s: mMain.length ? '' : '환경과 사람에 따라 모습이 달라지는 유연한 타입이에요.' });
-    rows.push({ t: '타고나길 잘 풀리는 영역', b: best.map(function (p) { return '<b class="mt-good">' + dom(p) + '</b>'; }).join(' · '), s: '별이 밝고 도와주는 별이 많아서, 이 영역에서 힘을 얻고 자신감이 붙어요.' });
-    rows.push({ t: '의식해서 챙기면 좋은 영역', b: worst.map(function (p) { return '<b class="mt-bad">' + dom(p) + '</b>'; }).join(' · '), s: '별이 약하거나 부딪치는 별이 겹쳐 있어요. 약점이 아니라 "신경 써서 가꿀 곳"으로 보세요.' });
+    rows.push({ t: '나는 이런 사람이에요 · 명궁 주성', b: mMain.length ? mMain.map(function (n) { return '<b>' + n + '</b>(' + (ZW_STAR[n] || '').replace(/\.$/, '') + ')'; }).join('<br>') : '명궁이 비어 있어 마주 보는 천이궁의 별을 빌려 봐요.', s: mMain.length ? '' : '환경과 사람에 따라 모습이 달라지는 유연한 타입이에요.' });
+    rows.push({ t: '타고나길 잘 풀리는 영역 · 강한 궁', b: best.map(function (p) { return '<b class="mt-good">' + dom(p) + '</b>'; }).join(' · '), s: '별이 밝고 도와주는 별이 많아서, 이 영역에서 힘을 얻고 자신감이 붙어요.' });
+    rows.push({ t: '의식해서 챙기면 좋은 영역 · 약한 궁', b: worst.map(function (p) { return '<b class="mt-bad">' + dom(p) + '</b>'; }).join(' · '), s: '별이 약하거나 부딪치는 별이 겹쳐 있어요. 약점이 아니라 "신경 써서 가꿀 곳"으로 보세요.' });
     var lu = hwOf('록'), gi = hwOf('기'), luck = [];
-    if (lu) luck.push('<b class="mt-good">평생 이득이 따라오는 곳 — ' + dom(lu) + '</b><br><small>' + ZW_HW['록'] + '</small>');
-    if (gi) luck.push('<b class="mt-bad">평생 마음이 걸리기 쉬운 곳 — ' + dom(gi) + '</b><br><small>' + ZW_HW['기'] + '</small>');
-    if (luck.length) rows.push({ t: '타고난 행운과 걸림돌', b: luck.join('<br>'), s: '' });
+    if (lu) luck.push('<b class="mt-good">화록(평생 이득이 따라오는 곳) — ' + dom(lu) + '</b><br><small>' + ZW_HW['록'] + '</small>');
+    if (gi) luck.push('<b class="mt-bad">화기(평생 마음이 걸리기 쉬운 곳) — ' + dom(gi) + '</b><br><small>' + ZW_HW['기'] + '</small>');
+    if (luck.length) rows.push({ t: '타고난 행운과 걸림돌 · 사화(화록·화기)', b: luck.join('<br>'), s: '' });
     var dh = per.dh;
     if (dh) { var v = sc[dh.b]; rows.push({ t: '지금 걷는 10년 (' + dh.daehan[0] + '~' + dh.daehan[1] + '세)', b: '인생의 무대가 <b>' + dom(dh) + '</b> 쪽으로 옮겨 와 있어요. 이 영역의 힘은 <b class="' + zwTone(v) + '">' + zwGrade(v)[1] + '</b>(' + v + '점). ' + (v >= 60 ? '이 10년은 이 영역에 적극적으로 힘을 써 볼 만해요.' : v >= 45 ? '무난하게 흘러가니 꾸준함이 중요해요.' : '이 10년은 무리하지 말고 기반을 다지는 시기로 쓰세요.'), s: '' }); }
     var lp = zw.palaces[per.liuB], lv = sc[lp.b];
