@@ -64,3 +64,14 @@ const rr = O.compute(M, ch0, [{ level: 'seun', s: 0, b: 0 }, { level: 'wolun', s
 const names = rr.layers[1].withLuck.map(x => x.type);
 assert.ok(names.includes('천간합') && names.includes('충'), '운 기둥끼리 합·충 ' + names.join(','));
 console.log(`luck-overlay-sim ok · 사주 ${n}명 · 층 ${layerCount}개 · 풀이 서로 다른 문장 ${allTexts.size} · 결 ${JSON.stringify(tones)} · 운끼리 관계 있는 층 ${relLuck} · 원국과 관계 있는 층 ${relNatal} · 엔진 결과 불변`);
+// 2026-11-18 운의 합화: 조건(월령 지원·충 없음 등)이 맞을 때만 옮김, 전체 합 보존, 일간은 옮기지 않음, noHwa 는 예전과 같음
+{ const fs2 = require('fs'), vm2 = require('vm'), c2 = { console }; c2.window = c2; vm2.createContext(c2);
+  for (const f of ['engine.js', 'luck-overlay.js']) vm2.runInContext(fs2.readFileSync(require('path').join(__dirname, '..', f), 'utf8'), c2);
+  const M2 = c2.Manse, O2 = c2.MantraLuckOverlay, A2 = require('assert/strict'); let ok2 = 0, cand2 = 0, n2 = 0;
+  for (let i = 0; i < 150; i++) { let ch; try { ch = M2.compute({ year: 1950 + (i * 7) % 60, month: 1 + (i * 5) % 12, day: 1 + (i * 11) % 28, hour: (i * 3) % 24, minute: 0, gender: i % 2 ? 'M' : 'F' }); } catch (e) { continue; } n2++;
+    const L = O2.layersAt(M2, ch, Date.UTC(2026, 10, 18, 3)), r = O2.compute(M2, ch, L), r0 = O2.compute(M2, ch, L, { noHwa: true });
+    A2.ok(Math.abs(r.final.pct.reduce((a, b) => a + b, 0) - 100) < 0.6, '합화 뒤에도 전체 100%');
+    r.layers.forEach((l, k) => { cand2 += l.hwa.length; l.hwa.forEach(h => { A2.ok(h.type !== '반합', '반합은 합화로 치지 않음'); if (h.ok) { ok2++; A2.ok(Math.abs(h.moved.reduce((a, b) => a + b, 0)) < 0.006, '옮긴 양 보존(반올림 오차 안)'); A2.ok(!(h.kind === 'stem' && h.parts.includes('day')), '일간은 옮기지 않음'); } else A2.ok(h.moved.every(x => x === 0), '조건이 안 되면 옮기지 않음'); }); A2.equal(r0.layers[k].hwa.length, 0, 'noHwa'); });
+    if (!r.layers.some(l => l.hwa.some(h => h.ok))) A2.equal(JSON.stringify(r.final.pct), JSON.stringify(r0.final.pct), '합화가 없으면 예전과 같은 비율'); }
+  A2.ok(ok2 > 0 && ok2 < cand2 * 0.5, '합화는 조건이 맞는 일부만 ' + ok2 + '/' + cand2);
+  console.log(`합화 ok · 사주 ${n2}명 · 합 후보 ${cand2} · 합화 성립 ${ok2}`); }

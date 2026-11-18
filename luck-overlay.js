@@ -11,7 +11,7 @@
    · 브라우저·Node 공용. 사용: MantraLuckOverlay.compute(Manse, ch, [{ level:'daeun', s, b }, { level:'seun', s, b }, { level:'wolun', s, b }, { level:'ilun', s, b }]) */
 (function (G) {
   'use strict';
-  var VERSION = 'luck-overlay-20261118-1';
+  var VERSION = 'luck-overlay-20261118-2';
   var LEVELS = ['daeun', 'seun', 'wolun', 'ilun'], LEVEL_K = { daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
   var DEFAULT_W = { daeun: 1, seun: 0.7, wolun: 0.4, ilun: 0.2 };   // 일진(하루)은 가장 가볍게(2026-11-18 추가)
   var mod5 = function (x) { return ((x % 5) + 5) % 5; };
@@ -35,6 +35,43 @@
   }
   var REL_K = { same: '같은 오행', gives: '생해 줌', gets: '생을 받음', hits: '누름', hit: '눌림' };
 
+  // ── 운의 합화(2026-11-18): 엔진 원국 합화 규칙(combinationEffects)을 운에 맞춰 옮겼다 ──
+  //   후보: 이번 층이 끼는 천간합·육합·삼합·방합(반합은 엔진처럼 합화로 치지 않음)
+  //   조건: 월령 지원(결과 오행 = 원국 월지 본기이거나 월지가 생함, 월운이 쌓였으면 그 월운 지지도 인정) · 육합은 결과 오행이 천간(원국·운)에 드러남
+  //         · 참여 글자에 충 없음 · 같은 글자를 두고 다른 오행 합과 겹치지 않음 · 더 큰 같은 오행 합에 포함되지 않음
+  //   옮기는 양: 두 글자 합 25% · 세 글자 합 50% × 그 운의 층 무게(운 쪽 글자) / 원국 쪽 글자는 같은 몫 × 이번 층 무게. 일간(원국 일주 천간)은 옮기지 않는다(엔진과 같음)
+  //   운이 운을 만나 생긴 합도 같은 규칙. 같은 글자는 한 번만 옮긴다. 엔진 점수·원국 비중은 바꾸지 않고 겹친 뒤 비율에만 쓴다.
+  var HWA_TYPES = { '천간합': 1, '육합': 1, '삼합': 1, '방합': 1 };
+  function hwaOf(M, ch, natalItems, luckItems, me, wMap, done) {
+    var all = natalItems.concat(luckItems), rels = M.relationsAmong ? M.relationsAmong(all) : [];
+    var cands = rels.filter(function (r) { return HWA_TYPES[r.type] && r.el != null && r.members.indexOf(me.id) >= 0; });
+    if (!cands.length) return [];
+    var byId = {}; all.forEach(function (it) { byId[it.id] = it; });
+    var monthEl = M.stemEl(M.mainHidden(ch.pillars.month.b)), wol = luckItems.filter(function (x) { return x.id === 'wolun'; })[0], wolEl = wol ? M.stemEl(M.mainHidden(wol.b)) : null;
+    var stemsEl = all.map(function (it) { return M.stemEl(it.s); });
+    var allC = rels.filter(function (r) { return HWA_TYPES[r.type] && r.el != null; });
+    return cands.map(function (r) {
+      var why = [];
+      var sup = function (e) { return e != null && (e === r.el || mod5(e + 1) === r.el); };
+      if (!sup(monthEl) && !sup(wolEl)) why.push('월령의 같은 오행·상생 지원 없음');
+      if (r.type === '육합' && stemsEl.indexOf(r.el) < 0) why.push('결과 오행이 천간에 드러나지 않음');
+      if (rels.some(function (x) { return x.kind === r.kind && /충/.test(x.type) && x.members.some(function (k) { return r.members.indexOf(k) >= 0; }); })) why.push('참여 글자에 충이 함께 있음');
+      if (allC.some(function (x) { return x !== r && x.kind === r.kind && x.el !== r.el && x.members.some(function (k) { return r.members.indexOf(k) >= 0; }); })) why.push('다른 오행의 합과 겹침');
+      if (allC.some(function (x) { return x !== r && x.kind === r.kind && x.el === r.el && x.members.length > r.members.length && r.members.every(function (k) { return x.members.indexOf(k) >= 0; }); })) why.push('더 큰 같은 오행 합에 포함');
+      var share = r.members.length >= 3 ? 0.5 : 0.25, moved = zero(), parts = [];
+      if (!why.length) r.members.forEach(function (id) {
+        var it = byId[id]; if (!it) return;
+        var natal = !wMap[id], key = r.kind + ':' + id; if (done[key]) return;
+        if (natal && r.kind === 'stem' && id === 'day') return;   // 일간은 옮기지 않는다
+        var w = natal ? wMap[me.id] : wMap[id], amt = share * w * (natal && r.kind === 'branch' && id === 'month' ? 2 : 1);
+        if (r.kind === 'stem') { var e = M.stemEl(it.s); if (e !== r.el) { moved[e] -= amt; moved[r.el] += amt; } }
+        else { var H = M.HIDDEN[it.b], days = H.reduce(function (a, h) { return a + h[1]; }, 0); H.forEach(function (h) { var e2 = M.stemEl(h[0]), a2 = amt * h[1] / days; if (e2 !== r.el) { moved[e2] -= a2; moved[r.el] += a2; } }); }
+        done[key] = 1; parts.push(id);
+      });
+      return { type: r.type, name: r.name, kind: r.kind, el: r.el, members: r.members.slice(), ok: !why.length, why: why.length ? why : ['월령 지원·충 없음·겹침 없음 조건 성립'], share: share, moved: moved.map(function (x) { return Math.round(x * 1000) / 1000; }), parts: parts };
+    });
+  }
+
   function pctOf(pts) { var t = pts.reduce(function (a, x) { return a + x; }, 0) || 1; return pts.map(function (x) { return x / t * 100; }); }
 
   function compute(M, ch, layers, opts) {
@@ -47,10 +84,14 @@
     var P = ch.pillars, natalItems = ['year', 'month', 'day', 'hour'].filter(function (k) { return P[k]; }).map(function (k) { return { id: k, s: P[k].s, b: P[k].b }; });
     var list = (layers || []).filter(function (L) { return L && LEVELS.indexOf(L.level) >= 0 && L.s != null && L.b != null; })
       .sort(function (a, b) { return LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level); });
-    var acc = natalPts.slice(), steps = [], out = [];
+    var acc = natalPts.slice(), steps = [], out = [], hwaDone = {}, wMap = {};
     list.forEach(function (L, i) {
       var w = W[L.level], vec = pillarVec(M, L.s, L.b), add = vec.map(function (x) { return x * w; });
       add.forEach(function (x, e) { acc[e] += x; });
+      wMap[L.level] = w;
+      var hwa = opts.noHwa ? [] : hwaOf(M, ch, natalItems, out.map(function (o) { return { id: o.level, s: o.s, b: o.b }; }).concat([{ id: L.level, s: L.s, b: L.b }]), { id: L.level }, wMap, hwaDone);
+      var hwaNet = zero(); hwa.forEach(function (h) { if (h.ok) h.moved.forEach(function (x, e) { hwaNet[e] += x; }); });
+      hwaNet.forEach(function (x, e) { acc[e] = Math.max(0, acc[e] + x); });
       var pct = pctOf(acc), prev = steps.length ? steps[steps.length - 1].pct : natalPct;
       var se = M.stemEl(L.s), be = M.stemEl(M.mainHidden(L.b));
       // 아래층과의 오행 관계(바로 아래 운 층, 없으면 원국 일간)
@@ -65,14 +106,15 @@
         vec: vec.map(round1), add: add.map(function (x) { return Math.round(x * 100) / 100; }),
         pct: pct.map(round1), delta: pct.map(function (p, e) { return round1(p - prev[e]); }),
         relBelow: relBelow, relBelowK: { stem: REL_K[relBelow.stem], branch: REL_K[relBelow.branch] },
-        withLuck: withLuck, withNatal: withNatal
+        withLuck: withLuck, withNatal: withNatal,
+        hwa: hwa, hwaNet: hwaNet.map(function (x) { return Math.round(x * 100) / 100; })
       };
       out.push(L2); steps.push({ upTo: L.level, pct: pct });
     });
     var finalPct = steps.length ? steps[steps.length - 1].pct : natalPct;
     var byRole = function (name) { var e = roles.indexOf(name); return e < 0 ? null : { el: e, natal: round1(natalPct[e]), now: round1(finalPct[e]), delta: round1(finalPct[e] - natalPct[e]) }; };
     return {
-      version: VERSION, weights: W, rule: '원국=엔진 비중, 운 한 기둥=천간 1+지지 1(지장간 일수 비율), 층 무게 대운 ' + W.daeun + '·세운 ' + W.seun + '·월운 ' + W.wolun,
+      version: VERSION, weights: W, rule: '원국=엔진 비중, 운 한 기둥=천간 1+지지 1(지장간 일수 비율), 층 무게 대운 ' + W.daeun + '·세운 ' + W.seun + '·월운 ' + W.wolun + (opts.noHwa ? '' : ', 합화(월령 지원·충 없음일 때 두 글자 합 25%·세 글자 합 50% × 층 무게만큼 결과 오행으로 옮김)'),
       natal: { pct: natalPct.map(round1), pts: natalPts.map(function (x) { return Math.round(x * 100) / 100; }) },
       layers: out, final: { pct: finalPct.map(round1), delta: finalPct.map(function (p, e) { return round1(p - natalPct[e]); }) },
       roles: roles, dayEl: dEl, yong: byRole('용신'), hee: byRole('희신'), gi: byRole('기신'), gu: byRole('구신')
@@ -141,6 +183,9 @@
       var lk = l.withLuck, chung = lk.filter(function (q) { return q.type === '충' || q.type === '천간충'; })[0], hap = lk.filter(function (q) { return /합/.test(q.type); })[0];
       if (chung) { parts.push('운끼리 충(' + chung.name + ')이 걸려, ' + (l.level === 'ilun' ? '오늘은 일정이 바뀌거나 약속이 어긋나기 쉬워요. 여유를 두세요.' : sc.when + ' 계획이 흔들리거나 방향이 바뀌는 일이 생기기 쉬워요.')); ids.push('chung'); }
       else if (hap) { parts.push('운끼리 합(' + hap.name + ')으로 묶여, ' + (hap.el != null ? EL_NM[hap.el] + ' 쪽 힘이 덤으로 붙어요.' : '두 운이 한 방향으로 움직여요.')); ids.push('hap'); }
+      // ⓒ-2 합화(2026-11-18): 조건이 맞아 오행이 실제로 옮겨 간 합만 말한다(옮긴 몫은 막대·비율에 반영)
+      var hw = (l.hwa || []).filter(function (h) { return h.ok; });
+      if (hw.length) { parts.push(hw.map(function (h) { return h.name; }).join('·') + ((hw[hw.length - 1].el === 0 || hw[hw.length - 1].el === 3) ? '이' : '가') + ' 합화 조건(월령 지원·충 없음)을 갖춰, 묶인 글자 기운 일부가 ' + hw.map(function (h) { return EL_NM[h.el]; }).filter(function (x, i, a) { return a.indexOf(x) === i; }).join('·') + ' 쪽으로 옮겨 가요.'); ids.push('hwa'); }
       // ⓓ 필요한 기운이 채워지는지(이 층이 만든 변화)
       var gd = 0, bd = 0; [0, 1, 2, 3, 4].forEach(function (e) { if (good(e)) gd += l.delta[e]; if (bad(e)) bd += l.delta[e]; });
       var T1 = l.level === 'ilun' ? 0.3 : 0.8, T2 = l.level === 'ilun' ? 0.15 : 0.4;   // 일진은 무게가 작아 변화 폭도 작다

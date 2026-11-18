@@ -67,12 +67,14 @@
     var tot = oc.natal.pts.reduce(function (a, b) { return a + b; }, 0) + L.reduce(function (a, l) { return a + l.add.reduce(function (x, y) { return x + y; }, 0); }, 0) || 1;
     var order = [0, 1, 2, 3, 4].sort(function (a, b) { return (roles[a] === '용신' ? -1 : 0) - (roles[b] === '용신' ? -1 : 0); });
     var bars = order.map(function (e) {
-      var segs = '<i style="width:' + (oc.natal.pts[e] / tot * 100).toFixed(2) + '%;background:' + EL_COL[e] + ';opacity:.55"></i>' + L.map(function (l) { return l.add[e] > 0.005 ? '<i style="width:' + (l.add[e] / tot * 100).toFixed(2) + '%;background:' + LV_COL[l.level] + '"></i>' : ''; }).join('');
+      var hwE = L.reduce(function (a2, l) { return a2 + ((l.hwaNet || [])[e] || 0); }, 0), hwP = Math.max(0, hwE), P0 = oc.natal.pts[e] + L.reduce(function (a2, l) { return a2 + l.add[e]; }, 0) + hwP, hwF = P0 > 0 ? Math.max(0, P0 + Math.min(0, hwE)) / P0 : 1;   // 합화: 옮겨 온 몫은 빗금, 옮겨 간 몫만큼 줄임
+      var segs = '<i style="width:' + (oc.natal.pts[e] * hwF / tot * 100).toFixed(2) + '%;background:' + EL_COL[e] + ';opacity:.55"></i>' + (hwP > 0.005 ? '<i title="합화로 옮겨 온 몫" style="width:' + (hwP * hwF / tot * 100).toFixed(2) + '%;background:repeating-linear-gradient(135deg,' + EL_COL[e] + ' 0 3px,transparent 3px 6px);outline:1px solid ' + EL_COL[e] + '"></i>' : '') + L.map(function (l) { return l.add[e] > 0.005 ? '<i style="width:' + (l.add[e] * hwF / tot * 100).toFixed(2) + '%;background:' + LV_COL[l.level] + '"></i>' : ''; }).join('');
       var d = Math.round((fin[e] - oc.natal.pct[e]) * 10) / 10, role = roles[e] || (e === oc.dayEl ? '나' : ''), rc = GOOD(roles[e]) ? 'good' : BAD(roles[e]) ? 'bad' : '';
       var dc = d > 0.4 ? (GOOD(roles[e]) ? 'good' : BAD(roles[e]) ? 'bad' : '') : d < -0.4 ? (BAD(roles[e]) ? 'good' : GOOD(roles[e]) ? 'bad' : '') : '';
       return '<p class="lv-brow"><span class="lv-bk"><b class="lv-el e' + e + ' m">' + EL_S[e] + '</b>' + (role ? '<small class="lv-r ' + rc + '">' + E(role) + '</small>' : '') + '</span><span class="lv-bar">' + segs + '</span><span class="lv-bv">' + Math.round(oc.natal.pct[e]) + '→<b>' + Math.round(fin[e]) + '</b>%' + (L.length && Math.abs(d) >= 0.5 ? ' <small class="lv-d ' + dc + '">' + (d > 0 ? '+' : '') + d + '</small>' : '') + '</span></p>';
     }).join('');
-    var legend = '<p class="lv-leg">' + L.map(function (l) { return '<span><i style="background:' + LV_COL[l.level] + '"></i>' + E(l.levelK + ' ' + (l.label || '')) + '</span>'; }).join('') + '<span><i style="background:#999;opacity:.55"></i>원국</span></p>';
+    var hwList = []; L.forEach(function (l) { (l.hwa || []).forEach(function (h) { if (h.ok) hwList.push(l.levelK + ' ' + h.name); }); });
+    var legend = '<p class="lv-leg">' + L.map(function (l) { return '<span><i style="background:' + LV_COL[l.level] + '"></i>' + E(l.levelK + ' ' + (l.label || '')) + '</span>'; }).join('') + '<span><i style="background:#999;opacity:.55"></i>원국</span>' + (hwList.length ? '<span><i style="background:repeating-linear-gradient(135deg,#999 0 3px,transparent 3px 6px);outline:1px solid #999"></i>합화로 옮겨 온 몫(' + E(hwList.join(' · ')) + ')</span>' : '') + '</p>';
     return '<div class="lv-olv">' + svg + '<div class="lv-bars">' + bars + legend + '</div></div>';
   }
 

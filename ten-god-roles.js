@@ -69,6 +69,16 @@
       const H = M.HIDDEN[L.b], days = H.reduce((a, h) => a + h[1], 0);
       H.forEach(h => { tgPts[M.tenGod(d, h[0])] += L.w * h[1] / days; });
     });
+    // 운의 합화(2026-11-18): 오행 겹쳐 보기와 같은 규칙으로 옮긴 몫을 더한다(겹쳐 보기와 비율을 맞춤). 십성 몫은 일간 기준 그 오행의 음양 반반으로 옮긴다
+    if (lk.length && G.MantraLuckOverlay && G.MantraLuckOverlay.compute) {
+      try {
+        const oc = G.MantraLuckOverlay.compute(M, ch, (lucks || []).map(L => ({ level: L.level, s: L.s, b: L.b })), { weights: W });
+        oc.layers.forEach(l => (l.hwaNet || []).forEach((x, e) => {
+          if (!x) return; pts[e] = Math.max(0, pts[e] + x);
+          [e * 2, e * 2 + 1].forEach(s2 => { const t = M.tenGod(d, s2); tgPts[t] = Math.max(0, tgPts[t] + x / 2); });
+        }));
+      } catch (e) { }
+    }
     const sum = pts.reduce((a, x) => a + x, 0) || 1, tsum = Object.keys(tgPts).reduce((a, t) => a + tgPts[t], 0) || 1;
     const pct = pts.map(x => x / sum * 100), tg = {}; Object.keys(tgPts).forEach(t => { tg[t] = tgPts[t] / tsum * 100; });
     const grp = [0, 1, 2, 3, 4].map(g => pct[mod5(dEl + g)]);

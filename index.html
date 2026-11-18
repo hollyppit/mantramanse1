@@ -7644,11 +7644,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const fin = shown.length ? shown[shown.length - 1].pct : r.natal.pct;
     const order = [0, 1, 2, 3, 4].sort((a, b) => (r.roles[a] === '용신' ? -1 : 0) - (r.roles[b] === '용신' ? -1 : 0));
     return `<div class="ol-bars">${order.map(e => {
-      const segs = [`<i style="width:${(r.natal.pts[e] / tot * 100).toFixed(2)}%;background:var(--${OL_ELK[e]});opacity:.55" title="원국 ${r.natal.pct[e]}%"></i>`]
-        .concat(shown.map(l => l.add[e] > 0.005 ? `<i style="width:${(l.add[e] / tot * 100).toFixed(2)}%;background:${OL_COL[l.level]}" title="${l.levelK} ${esc(l.label || '')} +${l.add[e].toFixed(2)}점"></i>` : ''));
+      /* 합화(2026-11-18): 운의 합화로 옮겨 온 몫은 빗금 칸, 옮겨 간 몫만큼 다른 칸을 줄인다(전체 합은 그대로) */
+      const hwE = shown.reduce((a2, l) => a2 + ((l.hwaNet || [])[e] || 0), 0), hwP = Math.max(0, hwE), hwF = (() => { const P = r.natal.pts[e] + shown.reduce((a2, l) => a2 + l.add[e], 0) + hwP; return P > 0 ? Math.max(0, P + Math.min(0, hwE)) / P : 1; })();
+      const segs = [`<i style="width:${(r.natal.pts[e] * hwF / tot * 100).toFixed(2)}%;background:var(--${OL_ELK[e]});opacity:.55" title="원국 ${r.natal.pct[e]}%"></i>`]
+        .concat(hwP > 0.005 ? [`<i style="width:${(hwP * hwF / tot * 100).toFixed(2)}%;background:repeating-linear-gradient(135deg,var(--${OL_ELK[e]}) 0 3px,transparent 3px 6px);outline:1px solid var(--${OL_ELK[e]})" title="합화로 옮겨 온 몫 +${hwP.toFixed(2)}"></i>`] : [])
+        .concat(shown.map(l => l.add[e] > 0.005 ? `<i style="width:${(l.add[e] * hwF / tot * 100).toFixed(2)}%;background:${OL_COL[l.level]}" title="${l.levelK} ${esc(l.label || '')} +${l.add[e].toFixed(2)}점"></i>` : ''));
       const d = Math.round((fin[e] - r.natal.pct[e]) * 10) / 10, role = r.roles[e] || (e === r.dayEl ? '나' : '');
       return `<div class="ol-row"><span class="ol-k"><b class="eltxt ${ECLS[e]}">${M.EL_K[e]}</b>${role ? `<small class="${role === '용신' || role === '희신' ? 'ib-g' : role === '기신' || role === '구신' ? 'ib-b' : 'muted'}">${role}</small>` : ''}</span><span class="ol-bar">${segs.join('')}</span><span class="ol-v num">${Math.round(r.natal.pct[e])}→<b>${Math.round(fin[e])}</b>%${shown.length ? ` <small class="${d > 0.4 ? (r.roles[e] === '용신' || r.roles[e] === '희신' ? 'ib-g' : r.roles[e] === '기신' || r.roles[e] === '구신' ? 'ib-b' : '') : d < -0.4 ? (r.roles[e] === '기신' || r.roles[e] === '구신' ? 'ib-g' : r.roles[e] === '용신' || r.roles[e] === '희신' ? 'ib-b' : '') : 'muted'}">${d > 0 ? '+' : ''}${d}</small>` : ''}</span></div>`;
-    }).join('')}</div>`;
+    }).join('')}${shown.some(l => (l.hwa || []).some(h => h.ok)) ? `<p class="small muted" style="margin:4px 0 0">빗금 칸 = 합화로 옮겨 온 몫(${shown.flatMap(l => (l.hwa || []).filter(h => h.ok).map(h => esc(l.levelK + ' ' + h.name))).join(' · ')}). 합화 조건(월령 지원·충 없음)이 맞을 때만 두 글자 합 25%·세 글자 합 50%를 층 무게만큼 옮겨요.</p>` : ''}</div>`;
   }
   // 그래프 비교 줄(5단계, 2026-11-18): 겹쳐 보기(오행 비율, 쌓은 층 전부)와 그래프 막대(흐름 점수 = 이 시기 점수 + 위 운 점수 섞음)의 방향을 비교하고,
   //   반대면 그래프를 움직인 가장 큰 근거(점수 항목·위 운과의 연결)를 한 줄로 밝힌다. 둘 다 표시용이며 점수는 바꾸지 않는다.
