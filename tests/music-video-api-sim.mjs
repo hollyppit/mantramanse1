@@ -10,7 +10,7 @@ const L = globalThis.ReportV2.MusicVideoLyrics;
 
 const kv = new Map(), r2 = new Map();
 const KV = { get: async (k, t) => { const v = kv.get(k); return v == null ? null : t === 'json' ? JSON.parse(v) : v; }, put: async (k, v) => { kv.set(k, String(v)); }, delete: async k => { kv.delete(k); } };
-const R2 = { put: async (k, b) => { r2.set(k, Buffer.from(b)); }, head: async k => r2.has(k) ? { size: r2.get(k).length } : null, get: async (k, o) => { const b = r2.get(k); if (!b) return null; const s = o && o.range ? b.subarray(o.range.offset, o.range.offset + o.range.length) : b; return { body: s }; }, delete: async k => { r2.delete(k); } };
+const R2 = { put: async (k, b) => { r2.set(k, Buffer.from(b)); }, head: async k => r2.has(k) ? { size: r2.get(k).length } : null, get: async (k, o) => { const b = r2.get(k); if (!b) return null; const s = o && o.range ? b.subarray(o.range.offset, o.range.offset + o.range.length) : b; return { body: s, arrayBuffer: async () => s.buffer.slice(s.byteOffset, s.byteOffset + s.length) }; }, delete: async k => { r2.delete(k); } };
 const SECRET = 'xi-test-secret-key-123';
 const env = { GLOSSARY_KV: KV, CLIPS_R2: R2, ADMIN_PASSWORD: 'pw', ELEVENLABS_API_KEY: SECRET, OPENAI_API_KEY: 'sk-test', MV_DAILY_LIMIT: '2' };
 let eleven = 0, lastBody = null;
@@ -68,9 +68,44 @@ r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-fire',
 r = await call('POST', '/api/music-video', { panel: { slot: 'nope', generate: true } }, admin); assert.equal(r.status, 400);
 r = await call('GET', '/api/music-video?panels=1'); assert(r.j.panels['mv-love-hook-fire']);
 r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-fire', clear: true } }, admin); assert.equal(r.status, 200); assert(!r.j.panels['mv-love-hook-fire']);
+// 10-2) 패널 그림 지시문: 갱스터 힙합 뮤비 패러디 + 한국 요소, 무기·마약·폭력·글자 금지, 주제별 장면
+{ let seen = ''; const f0 = globalThis.fetch; globalThis.fetch = async (u, o) => { if (String(u).includes('api.openai.com')) seen = String(o && o.body || ''); return f0(u, o); };
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', generate: true } }, admin); assert.equal(r.status, 200);
+  assert(/갱스터 힙합 뮤직비디오를 유쾌하게 패러디/.test(seen) && /갓에 선글라스/.test(seen) && /엽전/.test(seen), '패러디·한국 요소');
+  assert(/총·칼·마약·담배/.test(seen) && /글자·한글 간판/.test(seen), '금지 요소'); assert(/재물운/.test(seen) && /실제 지폐는 그리지 않는다/.test(seen), '주제 장면');
+  globalThis.fetch = f0; }
+// 10-3) 패널 영상(Kling): 키 없으면 501, 시작 프레임 → 작업 → 확인(완료 시 R2 저장·칸 연결), 이미지 바꾸면 영상도 지움
+r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', video: { startKey: 'mvstart-x.jpg' } } }, admin); assert.equal(r.status, 501);
+env.KLING_API_KEY = 'kling-test'; let kling = 0, klingBody = '';
+{ const f0 = globalThis.fetch; globalThis.fetch = async (u, o) => { u = String(u);
+    if (u.includes('kling')) { kling++; if (o && o.method === 'POST') { klingBody = String(o.body); return new Response(JSON.stringify({ code: 0, data: { id: 'task1' } }), { status: 200, headers: { 'content-type': 'application/json' } }); } return new Response(JSON.stringify({ code: 0, data: [{ status: 'succeeded', outputs: [{ type: 'video', url: 'https://mock.kling.local/v.mp4' }] }] }), { status: 200, headers: { 'content-type': 'application/json' } }); }
+    if (u.startsWith('https://mock.kling.local/')) return new Response(Buffer.alloc(5000, 1), { status: 200, headers: { 'content-type': 'video/mp4' } });
+    return f0(u, o); };
+  r2.set('a1b2c3d4.jpg', Buffer.alloc(3000, 2)); const put0 = R2.put, head0 = R2.head; R2.head = async k => r2.has(k) ? { size: r2.get(k).length, httpMetadata: { contentType: k.endsWith('.jpg') ? 'image/jpeg' : 'image/png' } } : null;
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-fire', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 400, '이미지 없는 칸');
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', video: { startKey: '../x.jpg' } } }, admin); assert.equal(r.status, 400);
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 200, JSON.stringify(r.j)); assert.equal(r.j.pending, true);
+  assert(/gangster hip-hop music video/.test(klingBody) && /guns/.test(klingBody), 'Kling 지시문·금지어');
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 409, '중복 작업');
+  r = await call('GET', '/api/music-video?vt=mv-wealth-hook-metal'); assert.equal(r.status, 401);
+  r = await call('GET', '/api/music-video?vt=mv-wealth-hook-metal', null, admin); assert.equal(r.j.state, 'done'); const vurl = r.j.panels['mv-wealth-hook-metal'].video; assert(/^\/api\/clipfile\?k=mvvid-mv-wealth-hook-metal-/.test(vurl));
+  assert(r2.has(vurl.split('k=')[1]) && !r2.has('a1b2c3d4.jpg'), '영상 저장·시작 프레임 정리');
+  r = await call('GET', '/api/music-video?panels=1'); assert.equal(r.j.panels['mv-wealth-hook-metal'].video, vurl);
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', generate: true } }, admin); assert(!r.j.panels['mv-wealth-hook-metal'].video && !r2.has(vurl.split('k=')[1]), '이미지 바꾸면 옛 영상 지움');
+  R2.head = head0; globalThis.fetch = f0; delete env.KLING_API_KEY; }
+// 10-4) music_v2_5 가 4xx 로 거절되면 music_v1(sections 형식)으로 한 번 더 — 성공하면 그 곡을 쓴다
+{ const f0 = globalThis.fetch, models = []; globalThis.fetch = async (u, o) => { if (String(u).startsWith('https://api.elevenlabs.io/')) { const b = JSON.parse(o.body); models.push(b.model_id);
+    if (b.model_id === 'music_v2_5') return new Response(JSON.stringify({ detail: { status: 'model_not_available', message: 'plan does not include music_v2_5' } }), { status: 403, headers: { 'content-type': 'application/json' } });
+    assert(Array.isArray(b.composition_plan.sections) && b.composition_plan.positive_global_styles.length && b.composition_plan.sections[0].lines.length, 'v1 형식');
+    return new Response(Buffer.alloc(4000, 3), { status: 200, headers: { 'content-type': 'audio/mpeg' } }); } return f0(u, o); };
+  r = await call('POST', '/api/music-video', { sd, topic: 'love' }, admin); assert.equal(r.status, 200, JSON.stringify(r.j)); assert.deepEqual(models, ['music_v2_5', 'music_v1']);
+  globalThis.fetch = f0; }
 // 11) 일레븐랩스 오류 → 502, 진행 중 기록 지움(다음에 다시 시도 가능)
 globalThis.fetch = async () => new Response(JSON.stringify({ detail: 'bad' }), { status: 422, headers: { 'content-type': 'application/json' } });
 r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(r.status, 502); assert(![...kv.keys()].some(k => k.startsWith('mv:song:') && JSON.parse(kv.get(k)).status === 'pending'));
+assert(/HTTP 422/.test(r.j.detail) && /music_v1 재시도도/.test(r.j.detail), '관리자에게 실제 오류 문구');
+{ const le = JSON.parse(kv.get('mv:lastError')); assert(/HTTP 422/.test(le.message) && !le.message.includes(SECRET)); const ad = await call('GET', '/api/music-video?admin=1', null, admin); assert(/HTTP 422/.test(ad.j.lastError.message)); }
+kv.set('luckenv:flags', JSON.stringify({ version: 2, musicVideo: true })); kv.set('worlds:config', JSON.stringify({ worlds: [{ id: 'w7', access: 'paid' }] }));
 // 12) 키가 없으면 501
 delete env.ELEVENLABS_API_KEY; r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(r.status, 501);
-console.log('music-video-api-sim ok: 스위치·로그인·무료 주제 차단, 생성 3곡(종합·재물·신년운세), 캐시 재사용, 재생 Range, 패널 150칸 만들기·비우기, 오류 처리, 키 노출 없음');
+console.log('music-video-api-sim ok: 스위치·로그인·무료 주제 차단, 생성 3곡(종합·재물·신년운세), 캐시 재사용, 재생 Range, 패널 150칸 만들기·비우기, 갱스터 힙합 패러디+한국 요소 지시문, Kling 패널 영상(작업·확인·저장·정리), 오류 처리, 키 노출 없음');

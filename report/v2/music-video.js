@@ -67,7 +67,7 @@
   /* ── 플레이어 */
   var CSS = '.mv-sheet{position:fixed;inset:0;z-index:9999;background:#07080b;color:#fff;display:flex;flex-direction:column;font-family:inherit}' +
     '.mv-stage{position:absolute;inset:0;overflow:hidden}.mv-stage i{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease;transform:scale(1.04)}' +
-    '.mv-stage i.on{opacity:1;animation:mvkb 22s linear forwards}@keyframes mvkb{from{transform:scale(1.04)}to{transform:scale(1.14)}}@media (prefers-reduced-motion:reduce){.mv-stage i.on{animation:none}}' +
+    '.mv-stage i video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.mv-stage i.on{opacity:1;animation:mvkb 22s linear forwards}@keyframes mvkb{from{transform:scale(1.04)}to{transform:scale(1.14)}}@media (prefers-reduced-motion:reduce){.mv-stage i.on{animation:none}}' +
     '.mv-stage:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55) 0,rgba(0,0,0,0) 22%,rgba(0,0,0,0) 52%,rgba(0,0,0,.82) 100%)}' +
     '.mv-top{position:relative;display:flex;align-items:center;gap:10px;padding:14px 16px}.mv-top b{flex:1;font-size:15px;line-height:1.35}.mv-top small{display:block;font-weight:400;opacity:.75;font-size:12px}' +
     '.mv-x{background:rgba(255,255,255,.14);border:0;color:#fff;border-radius:999px;width:36px;height:36px;font-size:18px;cursor:pointer}' +
@@ -115,7 +115,7 @@
           if (d._s === 202 && d.pending && tries++ < 30) { setTimeout(req, 8000); return; }   // 같은 곡을 다른 기기에서 만드는 중
           if (d.ok && d.audio && d.song) { play(el, d, track); return; }
           if (d._s === 401 || d._s === 402) { close(); if (o.onLocked) o.onLocked(d.error === 'login' ? 'login' : 'purchase'); return; }
-          fail(el, d._s === 429 ? '오늘 만들 수 있는 노래가 모두 찼어요. 내일 다시 열어 주세요.' : d._s === 403 ? '이 주제에서는 뮤직비디오를 열 수 없어요.' : d._s === 409 ? '이 괘의 풀이를 다듬는 중이에요. 준비되면 바로 들을 수 있어요.' + (d.detail ? '\n(' + d.detail + ')' : '') : '노래를 만들지 못했어요. 잠시 뒤 다시 열어 주세요.', d._s >= 500);
+          fail(el, d._s === 429 ? '오늘 만들 수 있는 노래가 모두 찼어요. 내일 다시 열어 주세요.' : d._s === 403 ? '이 주제에서는 뮤직비디오를 열 수 없어요.' : d._s === 409 ? '이 괘의 풀이를 다듬는 중이에요. 준비되면 바로 들을 수 있어요.' + (d.detail ? '\n(' + d.detail + ')' : '') : '노래를 만들지 못했어요. 잠시 뒤 다시 열어 주세요.' + (d.detail ? '\n\n[관리자에게만 보임] ' + d.detail : ''), d._s >= 500);   // detail 은 서버가 관리자 요청에만 담는다
           track('mv_error', { topic: preview.topic, status: d._s });
         })
         .catch(function () { if (alive) fail(el, '연결이 끊겼어요. 잠시 뒤 다시 열어 주세요.', true); });
@@ -123,7 +123,7 @@
   }
   function fail(el, msg, retry) {
     var w = el.querySelector('.mv-wait'); if (w) w.remove();
-    var e = document.createElement('div'); e.className = 'mv-err'; e.innerHTML = '<p>' + escH(msg) + '</p><button type="button">닫기</button>';
+    var e = document.createElement('div'); e.className = 'mv-err'; e.innerHTML = '<p style="white-space:pre-line;word-break:break-all">' + escH(msg) + '</p><button type="button">닫기</button>';
     e.querySelector('button').onclick = close; el.appendChild(e);
   }
   function play(el, d, track) {
@@ -131,7 +131,13 @@
     var w = el.querySelector('.mv-wait'); if (w) w.remove();
     var tb = el.querySelector('.mv-top b'); if (tb && tb.firstChild) tb.firstChild.textContent = song.title;   // 신년운세는 서버가 정한 제목으로
     var stage = el.querySelector('.mv-stage');
-    stage.innerHTML = song.sections.map(function (s, i) { return '<i data-i="' + i + '" style="background-image:' + bgFor(s, panels).replace(/"/g, '&quot;') + '"' + (i === 0 ? ' class="on"' : '') + '></i>'; }).join('');
+    // 패널에 영상(Kling)이 있으면 그 구간 동안 소리 없이 반복 재생한다. 데이터 절약·움직임 줄이기 설정이면 이미지만
+    var still = false; try { still = !!((root.navigator.connection && root.navigator.connection.saveData) || root.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { }
+    stage.innerHTML = song.sections.map(function (s, i) {
+      var p = panels[s.panel] || panels[s.panelFallback], vid = !still && p && p.video ? '<video data-v muted loop playsinline preload="' + (i === 0 ? 'auto' : 'none') + '" src="' + escH(p.video) + '"></video>' : '';
+      return '<i data-i="' + i + '" style="background-image:' + bgFor(s, panels).replace(/"/g, '&quot;') + '"' + (i === 0 ? ' class="on"' : '') + '>' + vid + '</i>';
+    }).join('');
+    var showVid = function (si) { stage.querySelectorAll('video[data-v]').forEach(function (v) { var on = +v.parentNode.dataset.i === si; if (on) { v.preload = 'auto'; var pr = v.play(); if (pr && pr.catch) pr.catch(function () { }); } else if (!v.paused) v.pause(); }); };
     var ui = document.createElement('div'); ui.style.cssText = 'position:relative;display:flex;flex-direction:column;flex:1';
     ui.innerHTML = '<div class="mv-sub"><span class="mv-sec"></span><div class="mv-line" aria-live="polite"></div><div class="mv-next"></div></div>' +
       '<div class="mv-ctl"><button type="button" class="mv-pp" aria-label="재생">▶</button><div class="mv-bar" role="slider" aria-label="재생 위치" tabindex="0"><span></span></div><span class="mv-t">0:00 / ' + fmt(song.totalMs) + '</span></div>';
@@ -142,7 +148,7 @@
     function songMs() { var dur = audio.duration; return isFinite(dur) && dur > 0 ? (audio.currentTime / dur) * song.totalMs : audio.currentTime * 1000; }
     function tick() {
       var ms = songMs(), cue = lib.cueAt(song, ms), si = song.sections.indexOf(cue.section);
-      if (si !== lastSec) { lastSec = si; stage.querySelectorAll('i').forEach(function (n) { n.classList.toggle('on', +n.dataset.i === si); }); secEl.textContent = cue.section.name; }
+      if (si !== lastSec) { lastSec = si; stage.querySelectorAll('i').forEach(function (n) { n.classList.toggle('on', +n.dataset.i === si); }); secEl.textContent = cue.section.name; showVid(si); }
       if (cue.line !== lastLine) { lastLine = cue.line; lineEl.textContent = cue.line; var nx = cue.section.lines[cue.lineIndex + 1] || ((song.sections[si + 1] || {}).lines || [])[0] || ''; nextEl.textContent = nx; }
       var dur = isFinite(audio.duration) && audio.duration > 0 ? audio.duration * 1000 : song.totalMs;
       fill.style.width = Math.min(100, audio.currentTime * 1000 / dur * 100) + '%'; tEl.textContent = fmt(audio.currentTime * 1000) + ' / ' + fmt(dur);
@@ -151,7 +157,8 @@
     function setPP() { pp.textContent = audio.paused ? '▶' : '❚❚'; pp.setAttribute('aria-label', audio.paused ? '재생' : '일시정지'); }
     pp.onclick = function () { if (audio.paused) audio.play().catch(function () { }); else audio.pause(); };
     audio.addEventListener('play', function () { setPP(); root.cancelAnimationFrame(raf); raf = root.requestAnimationFrame(tick); });
-    audio.addEventListener('pause', function () { setPP(); tick(); });
+    audio.addEventListener('pause', function () { setPP(); tick(); stage.querySelectorAll('video[data-v]').forEach(function (v) { v.pause(); }); });
+    audio.addEventListener('playing', function () { if (lastSec >= 0) showVid(lastSec); });
     audio.addEventListener('timeupdate', tick); audio.addEventListener('seeked', tick);   // 탭이 뒤로 가 rAF 가 멈춰도 자막·패널이 따라온다
     audio.addEventListener('ended', function () { setPP(); if (!done) { done = true; track('mv_done', { topic: song.topic }); } });
     audio.addEventListener('error', function () { fail(el, '노래 파일을 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.'); });

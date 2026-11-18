@@ -399,6 +399,12 @@
     }) };
   }
 
+  /* 일레븐랩스 music_v1 composition_plan(MusicPrompt) 모양 — v2_5 가 막힐 때(요금제·형식 오류) 다시 시도하는 예비 형식 */
+  function toElevenV1Plan(song) {
+    return { positive_global_styles: song.style.slice(), negative_global_styles: song.negativeStyle.slice(),
+      sections: song.sections.map(function (s) { return { section_name: s.name, positive_local_styles: (LOCAL[s.id] || []).slice(), negative_local_styles: [], duration_ms: s.durationMs, lines: s.lines.slice() }; }) };
+  }
+
   /* 패널 이미지 칸: 주제 5개 × 구간 6개 × 오행 5개 = 150칸. 관리자 '뮤직비디오 패널'이 이 칸을 채운다.
      종합풀이 칸은 mv-<구간>-<오행>, 다른 주제는 mv-<주제>-<구간>-<오행>. 주제 칸이 비면 화면은 종합풀이 칸(panelFallback)을 쓴다 */
   function panelId(section, el, topic) { return 'mv-' + (topic && topic !== 'self' ? topic + '-' : '') + section + '-' + (ELR[el] || 'earth'); }
@@ -422,6 +428,6 @@
   }
 
   R.MusicVideoLyrics = { VERSION: VERSION, BANNED: BANNED, SECTIONS: SECTIONS, SECTION_KO: SECTION_KO, ELK: ELK, ELR: ELR, PANEL_SLOTS: PANEL_SLOTS, DUR: DUR, TOPICS: TOPICS, TOPIC_KO: TOPIC_KO, TOPIC_WORLD: TOPIC_WORLD,
-    inputsOf: inputsOf, fromInputs: fromInputs, compose: compose, toElevenPlan: toElevenPlan, panelId: panelId, bannedIn: bannedIn, allFragments: allFragments, cueAt: cueAt, hash: hash };
+    inputsOf: inputsOf, fromInputs: fromInputs, compose: compose, toElevenPlan: toElevenPlan, toElevenV1Plan: toElevenV1Plan, panelId: panelId, bannedIn: bannedIn, allFragments: allFragments, cueAt: cueAt, hash: hash };
   if (typeof module !== 'undefined' && module.exports) module.exports = R.MusicVideoLyrics;
 })(typeof window !== 'undefined' ? window : globalThis);

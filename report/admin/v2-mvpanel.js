@@ -29,9 +29,10 @@
       '<div class="row" style="gap:16px;flex-wrap:wrap;align-items:center">' +
       '<span>공개 스위치: <b style="color:' + (D && D.flag ? '#62C2AE' : '#E0BC74') + '">' + (!D ? '알 수 없음' : D.flag ? '● 켜짐' : '○ 꺼짐') + '</b></span>' +
       '<button class="btn" id="mvpFlag"' + (D ? '' : ' disabled') + '>' + (D && D.flag ? '뮤직비디오 끄기' : '뮤직비디오 켜기') + '</button>' +
-      '<span>음악 키(ELEVENLABS_API_KEY): ' + ok(c.music) + '</span><span>이미지 키: ' + ok(c.image) + '</span><span>파일 저장소(R2): ' + ok(c.r2) + '</span>' +
+      '<span>음악 키(ELEVENLABS_API_KEY): ' + ok(c.music) + '</span><span>이미지 키: ' + ok(c.image) + '</span><span>영상 키(Kling): ' + ok(c.video) + '</span><span>파일 저장소(R2): ' + ok(c.r2) + '</span>' +
       '<span>오늘 만든 곡: <b>' + (D ? D.today : '-') + '</b> / 하루 상한 ' + (D ? D.limit : '-') + '곡(MV_DAILY_LIMIT)</span><span>모델: ' + esc(D ? D.model : '-') + '</span></div>' +
       '<p class="muted" style="margin:10px 0 0">상업 이용: 일레븐랩스 음악 약관상 사업자는 Scale(직원 10명 미만) 이상 요금제 계정의 키를 써야 합니다. 곡당 약 3분 = 약 $0.45(종량 기준). 노래 키는 Cloudflare Pages 설정 › 환경 변수(비밀)에 직접 넣으세요 — 이 화면에서는 입력하지 않습니다.</p>' +
+      (D && D.lastError ? '<details style="margin:8px 0 0"><summary style="color:#E07A6E;cursor:pointer">마지막 노래 생성 오류 · ' + esc(new Date(D.lastError.at).toLocaleString('ko-KR')) + '</summary><pre style="white-space:pre-wrap;word-break:break-all;font-size:12px;margin:6px 0 0">' + esc(D.lastError.message) + '</pre></details>' : '') +
       '<p id="mvpMsg" class="muted" style="margin:8px 0 0"></p></div>';
 
     // 패널 칸
@@ -42,15 +43,20 @@
       lib.SECTIONS.map(function (sec) {
         return '<tr><th style="text-align:left;font-weight:600;padding:4px">' + esc(lib.SECTION_KO[sec]) + '</th>' + lib.ELK.map(function (e) {
           var s = mine.filter(function (x) { return x.section === sec && x.el === e; })[0], p = s && panels[s.id], fb = S.topic !== 'self' && s && panels[lib.panelId(sec, e, 'self')];
-          var img = p ? '<img src="' + esc(p.url) + '" alt="" style="width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;display:block">' :
+          var vt = s && (D && D.vtasks || []).indexOf(s.id) >= 0;
+          var img = p && p.video ? '<video src="' + esc(p.video) + '" poster="' + esc(p.url) + '" muted loop playsinline autoplay preload="metadata" style="width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;display:block;outline:2px solid #C9A25C"></video>' :
+            p ? '<img src="' + esc(p.url) + '" alt="" style="width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;display:block">' :
             '<div style="width:100%;aspect-ratio:9/16;border:1px dashed rgba(128,128,128,.5);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;text-align:center;padding:4px;opacity:.75">' + (fb ? '비어 있음<br>(종합풀이 칸으로 대신)' : '비어 있음') + '</div>';
           return '<td style="padding:4px;vertical-align:top">' + img + '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">' +
             '<button class="btn" style="padding:3px 8px;font-size:12px" data-mvgen="' + s.id + '">' + (p ? '다시' : '만들기') + '</button>' +
             '<label class="btn" style="padding:3px 8px;font-size:12px;cursor:pointer">올리기<input type="file" accept="image/png,image/jpeg,image/webp" data-mvup="' + s.id + '" hidden></label>' +
-            (p ? '<button class="btn" style="padding:3px 8px;font-size:12px" data-mvclr="' + s.id + '">비우기</button>' : '') + '</div></td>';
+            (p ? '<button class="btn" style="padding:3px 8px;font-size:12px" data-mvclr="' + s.id + '">비우기</button>' : '') +
+            (p && vt ? '<button class="btn" style="padding:3px 8px;font-size:12px" data-mvvchk="' + s.id + '">영상 만드는 중 · 확인</button>' :
+              p ? '<button class="btn" style="padding:3px 8px;font-size:12px" data-mvvid="' + s.id + '"' + (c.video ? '' : ' disabled title="Kling 키(KLING_API_KEY)가 없습니다"') + '>' + (p.video ? '영상 다시' : '영상 만들기') + '</button>' : '') +
+            (p && p.video ? '<button class="btn" style="padding:3px 8px;font-size:12px" data-mvvclr="' + s.id + '">영상 빼기</button>' : '') + '</div></td>';
         }).join('') + '</tr>';
       }).join('') + '</table>';
-    h += '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">패널 이미지 (주제 × 구간 × 오행)</h3><p class="muted" style="margin:0 0 8px">노래의 구간마다 한 장이 화면 전체(세로 9:16)에 깔립니다. 오행은 구간마다 다릅니다 — 인트로·아웃트로는 일간 오행, 벌스1은 가장 센 오행, 훅은 용신, 벌스2는 빈(약한) 오행, 브리지는 희신. 아래쪽 1/3에 자막이 올라가니 글자 없는 그림이 좋습니다.</p>' +
+    h += '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">패널 이미지 (주제 × 구간 × 오행)</h3><p class="muted" style="margin:0 0 8px">연출: 갱스터 힙합 뮤직비디오를 유쾌하게 패러디하고 한국적 요소(갓·선글라스, 한복 트레이닝복, 엽전 목걸이, 한옥 골목, 포장마차, 한강 야경, 노래방 네온 등)를 섞습니다. 총·마약·폭력·담배·실존 인물·글자는 넣지 않습니다. “영상 만들기”는 그 칸의 그림을 첫 장면으로 Kling 이 5초 영상을 만들고(보통 1~5분), 노래의 그 구간 동안 소리 없이 반복 재생됩니다. 노래의 구간마다 한 장이 화면 전체(세로 9:16)에 깔립니다. 오행은 구간마다 다릅니다 — 인트로·아웃트로는 일간 오행, 벌스1은 가장 센 오행, 훅은 용신, 벌스2는 빈(약한) 오행, 브리지는 희신. 아래쪽 1/3에 자막이 올라가니 글자 없는 그림이 좋습니다.</p>' +
       '<div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:10px">' + tabs + '</div>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center"><button class="btn" id="mvpFill"' + (busy ? ' disabled' : '') + '>이 주제 빈 칸 모두 만들기</button><button class="btn" id="mvpStop"' + (busy ? '' : ' disabled') + '>멈추기</button>' +
       '<input id="mvpExtra" placeholder="추가 요청(선택) — 예: 비 오는 밤 분위기" style="flex:1;min-width:200px"></div>' + grid + '</div>';
@@ -88,6 +94,9 @@
     root.querySelectorAll('[data-mvgen]').forEach(function (b) { b.onclick = function () { gen(b.dataset.mvgen).then(draw); }; });
     root.querySelectorAll('[data-mvclr]').forEach(function (b) { b.onclick = function () { if (!confirm('이 칸의 이미지를 비울까요?')) return; call('POST', '', { panel: { slot: b.dataset.mvclr, clear: true } }).then(function (d) { if (d.panels) D.panels = d.panels; draw(); }); }; });
     root.querySelectorAll('[data-mvup]').forEach(function (inp) { inp.onchange = function () { upload(inp.dataset.mvup, inp.files && inp.files[0]); }; });
+    root.querySelectorAll('[data-mvvid]').forEach(function (b) { b.onclick = function () { makeVideo(b.dataset.mvvid); }; });
+    root.querySelectorAll('[data-mvvchk]').forEach(function (b) { b.onclick = function () { checkVideo(b.dataset.mvvchk, false); }; });
+    root.querySelectorAll('[data-mvvclr]').forEach(function (b) { b.onclick = function () { if (!confirm('이 칸의 영상을 빼고 그림만 쓸까요?')) return; call('POST', '', { panel: { slot: b.dataset.mvvclr, clearVideo: true } }).then(function (d) { if (d.panels) D.panels = d.panels; draw(); }); }; });
     root.querySelectorAll('[data-mvsim]').forEach(function (inp) { inp.onchange = function () { S.sim[inp.dataset.mvsim] = inp.value; preview(); }; });
     $('#mvpSimTopic').onchange = function () { S.simTopic = this.value; preview(); };
     $('#mvpFlag').onclick = function () {
@@ -104,6 +113,26 @@
       if (S.simTopic === 'newyear') { var s = S.sim, b = { year: +s.year, month: +s.month, day: +s.day, gender: s.gender, calendar: 'solar' }; if (s.hour !== '' && !isNaN(+s.hour)) { b.hour = +s.hour; b.minute = 0; } MV.open({ topic: 'newyear', birth: b, year: 2027, headers: h, onLocked: function () { toast('잠김 응답 — 관리자 비밀번호를 확인하세요', true); } }); }
       else MV.open({ sd: simSd(), topic: S.simTopic, headers: h, onLocked: function () { toast('잠김 응답 — 관리자 비밀번호를 확인하세요', true); } });
     };
+  }
+  /* 패널 영상: 칸 그림을 JPEG 로 바꿔 시작 프레임으로 올리고(Kling 은 JPG·PNG 만) 작업을 맡긴 뒤 15초마다 확인한다 */
+  function makeVideo(slot) {
+    var p = D && D.panels && D.panels[slot]; if (!p) return;
+    if (!confirm('이 칸의 그림으로 5초 영상을 만듭니다(Kling 크레딧 사용, 보통 1~5분). 진행할까요?')) return;
+    toast(slot + ' 영상 준비 중…');
+    var extra = ($('#mvpExtra') && $('#mvpExtra').value || '').trim();
+    fetch(p.url).then(function (r) { if (!r.ok) throw new Error('그림을 불러오지 못했습니다'); return r.blob(); })
+      .then(function (blob) { return new Promise(function (ok, no) { var im = new Image(), u = URL.createObjectURL(blob); im.onload = function () { var cv = document.createElement('canvas'), w = im.naturalWidth, h = im.naturalHeight, sc = Math.min(1, 1536 / Math.max(w, h)); cv.width = Math.round(w * sc); cv.height = Math.round(h * sc); cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height); URL.revokeObjectURL(u); cv.toBlob(function (b) { b ? ok(b) : no(new Error('JPEG 변환 실패')); }, 'image/jpeg', 0.9); }; im.onerror = function () { no(new Error('그림을 읽지 못했습니다')); }; im.src = u; }); })
+      .then(function (jpg) { return fetch('/api/clipfile?name=' + encodeURIComponent('mvstart-' + slot + '.jpg'), { method: 'POST', headers: { authorization: 'Bearer ' + pw }, body: jpg }).then(function (r) { return r.json(); }); })
+      .then(function (d) { if (!d || !d.key) throw new Error((d && d.error) || '시작 프레임을 올리지 못했습니다'); return call('POST', '', { panel: { slot: slot, video: { startKey: d.key, extra: extra || undefined } } }); })
+      .then(function (d) { if (!d.ok) throw new Error(d.error || '영상 작업을 맡기지 못했습니다'); D.vtasks = (D.vtasks || []).concat(slot); draw(); toast(slot + ' 영상 만드는 중… 끝나면 자동으로 붙습니다'); checkVideo(slot, true); })
+      .catch(function (e) { toast(e.message, true); });
+  }
+  function checkVideo(slot, keep) {
+    return call('GET', '?vt=' + encodeURIComponent(slot)).then(function (d) {
+      if (d.state === 'done') { D.panels = d.panels; D.vtasks = (D.vtasks || []).filter(function (x) { return x !== slot; }); draw(); toast(slot + ' 영상 완성'); return; }
+      if (d.state === 'failed' || d.state === 'none') { D.vtasks = (D.vtasks || []).filter(function (x) { return x !== slot; }); draw(); if (d.state === 'failed') toast(slot + ' 영상 실패: ' + (d.error || ''), true); return; }
+      toast(slot + ' 영상 만드는 중…'); if (keep && root && document.body.contains(root)) setTimeout(function () { checkVideo(slot, true); }, 15000);
+    });
   }
   function gen(slot) {
     toast(slot + ' 만드는 중… (한 장에 20~60초)');

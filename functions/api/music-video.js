@@ -9,7 +9,9 @@
 // GET  /api/music-video?a=<열쇠>                 — 만든 노래(mp3) 재생, Range 지원. 열쇠는 사주 조합의 sha256
 // GET  /api/music-video?panels=1                 — 패널 칸 → 이미지 주소(공개)
 // GET  /api/music-video?admin=1                  — 관리자: 칸 목록·키 설정 여부·오늘 생성 수·상한
-// POST /api/music-video { panel:{ slot, generate|uploadKey|clear, extra? } } — 관리자: 패널 이미지 만들기·직접 올린 이미지 연결·비우기
+// POST /api/music-video { panel:{ slot, generate|uploadKey|clear|clearVideo|video:{startKey,extra?}, extra? } } — 관리자: 패널 이미지 만들기·올리기·비우기, Kling 영상 만들기
+// GET  /api/music-video?vt=<칸>                  — 관리자: 그 칸의 영상 작업 확인(끝났으면 R2 저장 후 칸에 연결)
+// 패널 연출: 갱스터 힙합 뮤직비디오를 유쾌하게 패러디 + 한국적 요소(아래 MV_LOOK). 영상은 KLING_API_KEY(또는 KLING_ACCESS_KEY·KLING_SECRET_KEY)
 //
 // 필요: GLOSSARY_KV · CLIPS_R2 · ELEVENLABS_API_KEY(서버 비밀값, 브라우저로 내려 보내지 않는다)
 // 선택: ELEVENLABS_MUSIC_MODEL(기본 music_v2_5) · MV_DAILY_LIMIT(하루 새 곡 상한, 기본 30)
@@ -18,6 +20,7 @@
 import { json, isAdmin } from '../_lib.js';
 import { sajuKey, memberOf, worldAccess, ownedWorlds, cleanBirth } from '../_commerce.js';
 import { generate } from '../_panelart.js';
+import { klingEnabled, KLING_ENV_HELP, klingSubmit, klingQuery, toB64 } from '../_kling.js';
 import { putDerivedFile, deleteDerivedFile } from '../_original-assets.js';
 import { NY, YEARS } from '../_newyear-runtime.js';   // 만세력 엔진·토정 엔진·토정 현대어 풀이(신년운세와 같은 파일)
 import { newyearGate } from '../_newyear.js';
@@ -74,13 +77,23 @@ async function newyearInputs(request, env, b) {
   return { x, g: { ok: true, admin } };
 }
 
-async function callEleven(env, song) {
+async function elevenOnce(env, model, plan) {
   const r = await fetch(ELEVEN, { method: 'POST', headers: { 'xi-api-key': env.ELEVENLABS_API_KEY, 'content-type': 'application/json', accept: 'audio/mpeg' },
-    body: JSON.stringify({ composition_plan: L.toElevenPlan(song), model_id: modelOf(env) }) });
+    body: JSON.stringify({ composition_plan: plan, model_id: model }) });
   const ct = r.headers.get('content-type') || '';
-  if (!r.ok || /json|text/.test(ct)) { let msg = ''; try { msg = (await r.text()).slice(0, 300); } catch { } throw new Error('음악 생성 실패(' + r.status + ') ' + msg); }
-  const bytes = new Uint8Array(await r.arrayBuffer()); if (bytes.length < 1000) throw new Error('음악 파일이 비어 있습니다');
+  if (!r.ok || /json|text/.test(ct)) { let msg = ''; try { msg = (await r.text()).slice(0, 600); } catch { } const e = new Error(model + ' 실패(HTTP ' + r.status + '): ' + msg); e.status = r.status; throw e; }
+  const bytes = new Uint8Array(await r.arrayBuffer()); if (bytes.length < 1000) throw new Error(model + ': 음악 파일이 비어 있습니다');
   return bytes;
+}
+// 최신 모델(music_v2_5 chunks 형식)로 먼저 만들고, 요금제·형식 문제로 거절되면(4xx, 401·429 제외) music_v1(sections 형식)으로 한 번 더 시도한다
+async function callEleven(env, song) {
+  const model = modelOf(env);
+  try { return { bytes: await elevenOnce(env, model, L.toElevenPlan(song)), model }; }
+  catch (e) {
+    if (!(e.status >= 400 && e.status < 500) || e.status === 401 || e.status === 429) throw e;
+    try { return { bytes: await elevenOnce(env, 'music_v1', L.toElevenV1Plan(song)), model: 'music_v1' }; }
+    catch (e2) { throw new Error(e.message + '\n→ music_v1 재시도도 ' + e2.message); }
+  }
 }
 
 export async function onRequestPost({ request, env }) {
@@ -113,10 +126,15 @@ export async function onRequestPost({ request, env }) {
   await env.GLOSSARY_KV.put(SONG(key), JSON.stringify({ status: 'pending', at: Date.now() }), { expirationTtl: 600 });
   await env.GLOSSARY_KV.put(COUNT(day), String(used + 1), { expirationTtl: 3 * 86400 });
   let bytes;
-  try { bytes = await callEleven(env, song); }
-  catch (e) { await env.GLOSSARY_KV.delete(SONG(key)); return json({ ok: false, error: 'generate-failed', detail: g.admin ? e.message : undefined }, 502); }
+  let usedModel = modelOf(env);
+  try { const out = await callEleven(env, song); bytes = out.bytes; usedModel = out.model; }
+  catch (e) {
+    await env.GLOSSARY_KV.delete(SONG(key));
+    await env.GLOSSARY_KV.put('mv:lastError', JSON.stringify({ at: Date.now(), topic: song.topic, message: String(e.message).slice(0, 1200) }), { expirationTtl: 7 * 86400 });   // 관리자 화면에 보여 준다(키·개인정보 없음)
+    return json({ ok: false, error: 'generate-failed', detail: g.admin ? e.message : undefined }, 502);
+  }
   await putDerivedFile(env, 'mv-' + key + '.mp3', bytes, { httpMetadata: { contentType: 'audio/mpeg' } });
-  await env.GLOSSARY_KV.put(SONG(key), JSON.stringify({ status: 'done', at: Date.now(), bytes: bytes.length, model: modelOf(env), title: song.title, topic: song.topic, version: song.version }));
+  await env.GLOSSARY_KV.put(SONG(key), JSON.stringify({ status: 'done', at: Date.now(), bytes: bytes.length, model: usedModel, title: song.title, topic: song.topic, version: song.version }));
   return reply(done());
 }
 
@@ -125,11 +143,13 @@ export async function onRequestGet({ request, env }) {
   const a = u.searchParams.get('a');
   if (a !== null) return audio(request, env, a);
   if (u.searchParams.get('panels')) return new Response(JSON.stringify({ panels: env.GLOSSARY_KV ? await panelsOf(env) : {} }), { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=60' } });
+  if (u.searchParams.get('vt')) { if (!isAdmin(request, env)) return json({ error: 'unauthorized' }, 401); if (!L.PANEL_SLOTS.some(s => s.id === u.searchParams.get('vt'))) return json({ error: 'bad-slot' }, 400); return videoCheck(env, u.searchParams.get('vt')); }
   if (u.searchParams.get('admin')) {
     if (!isAdmin(request, env)) return json({ error: 'unauthorized' }, 401);
+    const vl = typeof env.GLOSSARY_KV.list === 'function' ? await env.GLOSSARY_KV.list({ prefix: 'mv:vt:' }) : null, vtasks = ((vl && vl.keys) || []).map(k => k.name.slice(6));
     const used = parseInt(await env.GLOSSARY_KV.get(COUNT(today())), 10) || 0;
     return json({ slots: L.PANEL_SLOTS, panels: await panelsOf(env), version: L.VERSION, flag: await flagOn(env), today: used, limit: limitOf(env), model: modelOf(env),
-      configured: { music: !!env.ELEVENLABS_API_KEY, image: !!(env.OPENAI_API_KEY || env.GEMINI_API_KEY), r2: !!env.CLIPS_R2 } });
+      vtasks, lastError: await env.GLOSSARY_KV.get('mv:lastError', 'json'), configured: { music: !!env.ELEVENLABS_API_KEY, image: !!(env.OPENAI_API_KEY || env.GEMINI_API_KEY), video: klingEnabled(env), r2: !!env.CLIPS_R2 } });
   }
   return json({ error: 'not-found' }, 404);
 }
@@ -149,45 +169,103 @@ async function audio(request, env, k) {
   return new Response(o.body, { status: 200, headers: { ...h, 'content-length': String(size) } });
 }
 
-/* ── 관리자: 패널 이미지 */
+/* ── 관리자: 패널 이미지·영상
+   연출 방향(사용자 요청 2026-11-18): 갱스터 힙합 뮤직비디오를 유쾌하게 패러디하되 한국적인 요소를 섞는다.
+   과장된 스웩 포즈·로우앵글 어안 렌즈·플래시 조명·슬로모션 같은 힙합 뮤비 문법을 빌리고, 소품·공간은 한국 것으로 바꿔 웃음 포인트를 만든다.
+   총·칼·마약·담배·술병 과시·폭력·갱 손동작·실존 인물·유명인·글자·로고는 넣지 않는다(공감형 운세 콘텐츠라 위협적인 느낌 없이). */
+const MV_LOOK = '세로 9:16 랩 뮤직비디오 한 장면. 갱스터 힙합 뮤직비디오를 유쾌하게 패러디한 한국풍 장면 — 과장된 스웩 포즈, 로우앵글 어안 렌즈, 강한 플래시와 네온 조명, 슬로모션 같은 순간 포착, 고급스럽고 선명한 시네마틱 일러스트(뮤직비디오 스틸컷 느낌).' +
+  ' 한국적 요소를 섞는다: 갓에 선글라스, 한복 소매를 단 트레이닝복이나 퍼 코트, 금 체인 대신 엽전 꾸러미·노리개 목걸이, 부채, 단청 무늬, 한옥 골목, 포장마차, 편의점 앞 파라솔, 한강 다리 야경, 노래방 네온, 배달 스쿠터·마을버스·경운기를 튜닝한 차 같은 것 중 장면에 맞는 두세 가지.' +
+  ' 인물은 가상의 한국 젊은 래퍼와 크루(실존 인물·유명인 얼굴 금지). 총·칼·마약·담배·술병 과시·폭력·위협적인 손동작은 그리지 않는다. 글자·한글 간판 문구·로고·자막·워터마크도 그리지 않는다. 화면 아래쪽 1/3 은 자막이 올라가니 너무 복잡하지 않게.';
 const SECTION_SCENE = {
-  intro: '뮤직비디오 첫 장면. 새벽 도시의 창가나 골목, 막 하루가 시작되려는 고요한 순간. 화면 아래쪽 1/3은 자막이 올라가도록 어둡고 단순하게 비워 둔다.',
-  verse1: '주인공의 일상과 기질이 드러나는 장면. 출근길·작업실·카페 같은 현대 한국 생활 공간에서 자기 방식대로 움직이는 뒷모습이나 옆모습.',
-  hook: '노래의 후렴. 바람이 주인공 쪽으로 불어오며 빛이 번지는 가장 시원하고 상징적인 장면. 넓은 하늘·옥상·강변처럼 탁 트인 곳.',
-  verse2: '조금 지치고 흔들린 밤, 그래도 다시 숨을 고르는 장면. 버스 창가·방 안 스탠드 불빛처럼 차분하고 따뜻한 분위기.',
-  bridge: '계절과 해가 바뀌는 전환 장면. 달력이 넘어가듯 하늘빛이 바뀌고 길이 갈라지는 교차로나 다리 위.',
-  outro: '마지막 장면. 해 질 녘이나 새벽빛 속에서 앞으로 걸어가는 주인공의 멀어지는 뒷모습. 여운이 남는 넓은 구도.'
+  intro: '뮤직비디오 오프닝. 밤 골목이나 한옥 담장 앞, 튜닝한 마을버스·스쿠터 헤드라이트가 비추는 가운데 주인공이 선글라스를 천천히 내리며 카메라를 보는 등장 장면.',
+  verse1: '주인공의 기질을 자랑하는 랩 벌스. 편의점 앞 파라솔·포장마차·옥상 같은 동네 공간을 자기 무대처럼 쓰며 크루와 함께 과장된 스웩 포즈를 취하는 장면.',
+  hook: '후렴. 가장 화려한 장면 — 한강 다리 야경이나 단청 지붕 위에서 바람이 휘몰아치고 한복 소매·부채·엽전 꾸러미가 날리며 크루 전체가 같은 동작으로 춤추는 클라이맥스.',
+  verse2: '힘들었던 이야기를 하는 벌스. 비 오는 밤 노래방 네온 아래나 막차 버스 안에서 혼자 랩하다가 다시 고개를 드는, 살짝 쓸쓸하지만 멋있는 장면.',
+  bridge: '비트가 바뀌는 브리지. 하늘빛이 바뀌는 순간, 교차로나 다리 위에서 슬로모션으로 돌아서는 주인공과 흩날리는 소품.',
+  outro: '엔딩. 동이 트는 골목이나 강변에서 크루와 함께 카메라를 등지고 걸어가거나, 마지막으로 선글라스를 고쳐 쓰며 웃는 장면.'
 };
 const TOPIC_SCENE = {
-  self: '한 사람의 일상과 인생 전체의 흐름이 느껴지는 장면.',
-  love: '연애·인연 이야기. 두 사람 사이의 거리와 설렘이 느껴지는 데이트 장면(카페·골목·버스 정류장 등), 인물은 실루엣이나 뒷모습.',
-  wealth: '돈과 생활 이야기. 지갑·통장·가계부·시장·도시 야경처럼 돈의 흐름이 느껴지는 현대 생활 소품과 공간.',
-  career: '일과 커리어 이야기. 사무실·작업실·회의실·출근길 지하철처럼 일하는 공간과 소품.',
-  newyear: '새해 신년운세 이야기. 새 달력 첫 장·해돋이·복주머니·한지 등불처럼 새해를 여는 소품과 풍경.'
+  self: '종합 — 주인공 한 사람의 개성과 인생 흐름이 드러나는 장면.',
+  love: '연애운 — 커플 래퍼 듀엣처럼 두 사람이 등장. 한강 피크닉 돗자리·포장마차 데이트·노래방 듀엣 같은 설레는 장면을 힙합 뮤비 문법으로 과장.',
+  wealth: '재물운 — 돈을 과시하는 힙합 뮤비 클리셰를 한국식으로 패러디: 돈다발 대신 엽전 꾸러미·복주머니·금두꺼비, 가계부와 적금 통장을 트로피처럼 들고 있는 장면(실제 지폐는 그리지 않는다).',
+  career: '커리어운 — 사무실·작업실·출근길 지하철을 무대로 한 오피스 갱스터 패러디: 정장 위에 한복 조끼, 사원증 목걸이를 체인처럼, 서류 가방을 붐박스처럼 든 장면.',
+  newyear: '토정비결 신년운세 — 새해 패러디: 해돋이 앞에서 세배하는 크루, 복주머니·떡국·연날리기·한지 등불을 힙합 뮤비 소품처럼 과장한 장면.'
 };
-const EL_MOTIF = { 목: '초록 잎과 나무, 새싹, 봄바람', 화: '붉은 노을과 햇빛, 등불, 따뜻한 불빛', 토: '노란 흙빛 들판과 산, 단단한 땅', 금: '하얀 금속광, 맑은 겨울 하늘, 반짝이는 결정', 수: '푸른 물결과 비, 강물, 밤바다' };
+const EL_MOTIF = { 목: '초록 네온과 대나무·나뭇잎', 화: '붉은 네온과 불꽃 조명·노을', 토: '황금빛 조명과 흙빛 질감', 금: '은빛·흰빛 금속 광택과 차가운 조명', 수: '푸른 네온과 빗물·강물 반사' };
 function panelPrompt(slot, extra) {
-  return '세로 9:16 뮤직비디오 한 장면(랩 뮤직비디오). 한국 웹툰 같은 시네마틱 일러스트, 영화 같은 조명. 글자·로고·자막·워터마크는 그리지 않는다. 실존 인물·유명인 얼굴은 그리지 않는다.\n주제: ' + (TOPIC_SCENE[slot.topic] || TOPIC_SCENE.self) + '\n장면: ' + SECTION_SCENE[slot.section] +
-    '\n색과 상징(' + slot.el + ' 기운): ' + EL_MOTIF[slot.el] + '이 화면 전체 색감과 소품에 은은하게 녹아든다.' + (extra ? '\n추가 요청: ' + String(extra).slice(0, 400) : '');
+  return MV_LOOK + '\n주제: ' + (TOPIC_SCENE[slot.topic] || TOPIC_SCENE.self) + '\n장면: ' + SECTION_SCENE[slot.section] +
+    '\n색과 상징(' + slot.el + ' 기운): ' + EL_MOTIF[slot.el] + '이 화면의 주 조명색과 소품에 드러난다.' + (extra ? '\n추가 요청: ' + String(extra).slice(0, 400) : '');
 }
+/* 영상(Kling 이미지 → 영상): 칸 이미지를 첫 장면으로 5초 내외 반복 재생용 컷을 만든다. 영어 지시가 더 잘 듣는다 */
+const SECTION_MOTION = {
+  intro: 'slow push-in from a low angle, the character slowly lowers sunglasses and looks into the camera, headlights flare',
+  verse1: 'handheld camera bouncing to the beat, the crew nods and does exaggerated swagger poses, neon flickers',
+  hook: 'camera orbits around the crew dancing in sync, hanbok sleeves and fans fluttering in strong wind, energetic slow-motion burst',
+  verse2: 'rain falling in neon light, the character raps alone then lifts the head, gentle dolly-in',
+  bridge: 'slow-motion turn of the character, props floating in the air, sky color shifting, beat-switch feeling',
+  outro: 'camera slowly pulls back as the crew walks away into the sunrise, one last smile, calm ending'
+};
+function videoPrompt(slot, extra) {
+  return 'Playful parody of a gangster hip-hop music video with Korean flavor. Keep the starting frame characters, outfits and setting. ' + SECTION_MOTION[slot.section] +
+    '. Upbeat music-video energy, smooth cinematic motion, seamless loop feeling.' + (extra ? ' Additional direction: ' + String(extra).slice(0, 400) : '');
+}
+const VIDEO_NEG = 'guns, knives, weapons, drugs, smoking, alcohol bottles, violence, blood, threatening gestures, gang signs, real celebrities, text, captions, logos, watermark, distorted faces, extra limbs';
+const VT = id => 'mv:vt:' + id, VT_AGE = 3 * 3600 * 1000;
+const fileOf = u => { const m = /^\/api\/clipfile\?k=([\w.-]{1,120})$/.exec(u || ''); return m ? m[1] : ''; };
+const ownFile = k => /^mv(panel|vid|start)-/.test(k || '');
+async function dropFile(env, k) { if (ownFile(k)) { try { await deleteDerivedFile(env, k); } catch { } } }
+async function dropStart(env, k) { if (k) { try { await deleteDerivedFile(env, k); } catch { } } }   // 영상 시작 프레임 임시 파일(보존 원본은 deleteDerivedFile 이 거른다)
+const rid = () => Array.from(crypto.getRandomValues(new Uint8Array(4)), x => x.toString(16).padStart(2, '0')).join('');
+
 async function panelPost(request, env, p) {
   if (!isAdmin(request, env)) return json({ error: 'unauthorized' }, 401);
   const slot = L.PANEL_SLOTS.find(s => s.id === (p && p.slot)); if (!slot) return json({ error: '패널 칸 이름이 올바르지 않습니다' }, 400);
   const map = await panelsOf(env), old = map[slot.id];
-  const dropOld = async () => { const m = old && /^\/api\/clipfile\?k=(mvpanel-[\w.-]+)$/.exec(old.url || ''); if (m) { try { await deleteDerivedFile(env, m[1]); } catch { } } };
-  if (p.clear) { delete map[slot.id]; await env.GLOSSARY_KV.put(PANELS, JSON.stringify(map)); await dropOld(); return json({ ok: true, panels: map }); }
+  const save = async () => { await env.GLOSSARY_KV.put(PANELS, JSON.stringify(map)); return json({ ok: true, panels: map }); };
+  const dropOld = async () => { if (old) { await dropFile(env, fileOf(old.url)); await dropFile(env, fileOf(old.video)); } };   // 이미지가 바뀌면 그 이미지로 만든 영상도 지운다
+  if (p.clear) { delete map[slot.id]; await env.GLOSSARY_KV.delete(VT(slot.id)); await dropOld(); return save(); }
+  if (p.clearVideo) { if (old && old.video) { await dropFile(env, fileOf(old.video)); delete old.video; delete old.videoBy; } return save(); }
   if (p.uploadKey) {
     if (!/^[\w.-]{1,120}$/.test(p.uploadKey) || !env.CLIPS_R2 || !(await env.CLIPS_R2.head(p.uploadKey))) return json({ error: '올린 이미지를 찾을 수 없습니다' }, 400);
-    map[slot.id] = { url: '/api/clipfile?k=' + p.uploadKey, by: 'upload', at: Date.now() }; await env.GLOSSARY_KV.put(PANELS, JSON.stringify(map));
-    return json({ ok: true, panels: map });
+    await dropOld(); map[slot.id] = { url: '/api/clipfile?k=' + p.uploadKey, by: 'upload', at: Date.now() }; return save();
   }
   if (p.generate) {
     if (!env.CLIPS_R2) return json({ error: 'R2 바인딩(CLIPS_R2)이 없습니다' }, 501);
     let g; try { g = await generate(env, panelPrompt(slot, p.extra), p.provider === 'openai' || p.provider === 'gemini' ? p.provider : '', null); } catch (e) { return json({ error: e.message }, 502); }
-    const k = 'mvpanel-' + slot.id + '-' + Array.from(crypto.getRandomValues(new Uint8Array(4)), x => x.toString(16).padStart(2, '0')).join('') + '.' + g.ext;
+    const k = 'mvpanel-' + slot.id + '-' + rid() + '.' + g.ext;
     await putDerivedFile(env, k, g.bytes, { httpMetadata: { contentType: g.mime } });
-    map[slot.id] = { url: '/api/clipfile?k=' + k, by: g.provider + ':' + g.model, at: Date.now() }; await env.GLOSSARY_KV.put(PANELS, JSON.stringify(map)); await dropOld();
-    return json({ ok: true, panels: map });
+    await dropOld(); map[slot.id] = { url: '/api/clipfile?k=' + k, by: g.provider + ':' + g.model, at: Date.now() }; return save();
   }
-  return json({ error: 'generate·uploadKey·clear 중 하나가 필요합니다' }, 400);
+  if (p.video) {
+    // 시작 프레임: 관리자 화면이 칸 이미지를 JPEG 로 바꿔 /api/clipfile 로 올린 임시 파일 키(작업이 끝나거나 실패하면 지운다)
+    if (!klingEnabled(env)) return json({ error: KLING_ENV_HELP }, 501);
+    if (!old || !old.url) return json({ error: '이 칸에 이미지가 없습니다. 먼저 이미지를 만들거나 올려 주세요' }, 400);
+    const sk = p.video.startKey; if (!/^[\w-][\w.-]{0,119}$/.test(sk || '')) return json({ error: '시작 프레임 키가 올바르지 않습니다' }, 400);
+    const prev = await env.GLOSSARY_KV.get(VT(slot.id), 'json'); if (prev && Date.now() - prev.at < VT_AGE) return json({ error: '이 칸은 이미 영상을 만드는 중입니다' }, 409);
+    const h = await env.CLIPS_R2.head(sk); if (!h) return json({ error: '시작 프레임 파일을 찾을 수 없습니다' }, 410);
+    const up = h.uploaded ? new Date(h.uploaded).getTime() : 0;   // 로컬 가짜 저장소는 0(1970)을 돌려준다 — 그때는 건너뛴다
+    if (up > 946684800000 && Date.now() - up > 30 * 60 * 1000) return json({ error: '시작 프레임은 방금 올린 임시 파일이어야 합니다(다른 파일을 지우지 않도록)' }, 400);
+    if (!/^image\/(jpeg|png)$/.test((h.httpMetadata && h.httpMetadata.contentType) || '')) return json({ error: '시작 프레임은 JPG 또는 PNG 여야 합니다' }, 400);
+    const obj = await env.CLIPS_R2.get(sk), here = new URL(request.url), imageUrl = here.protocol === 'https:' ? here.origin + '/api/clipfile?k=' + encodeURIComponent(sk) : '';
+    let taskId; try { taskId = await klingSubmit(env, { imageUrl, b64: async () => toB64(new Uint8Array(await obj.arrayBuffer())), prompt: videoPrompt(slot, p.video.extra), negative: VIDEO_NEG, mode: p.video.mode, duration: p.video.duration || 5 }); }
+    catch (e) { await dropStart(env, sk); return json({ error: e.message }, 502); }
+    await env.GLOSSARY_KV.put(VT(slot.id), JSON.stringify({ taskId, startKey: sk, at: Date.now() }), { expirationTtl: 86400 });
+    return json({ ok: true, pending: true, panels: map });
+  }
+  return json({ error: 'generate·uploadKey·clear·video 중 하나가 필요합니다' }, 400);
+}
+// 영상 작업 확인(관리자): 끝났으면 R2 로 옮겨 칸에 연결한다
+async function videoCheck(env, slotId) {
+  const t = await env.GLOSSARY_KV.get(VT(slotId), 'json'); if (!t) return json({ ok: true, state: 'none', panels: await panelsOf(env) });
+  if (Date.now() - t.at > VT_AGE) { await env.GLOSSARY_KV.delete(VT(slotId)); return json({ ok: false, state: 'failed', error: '3시간 안에 끝나지 않아 기록을 지웠습니다' }); }
+  let q; try { q = await klingQuery(env, t.taskId); } catch (e) { return json({ ok: false, state: 'processing', error: e.message }); }
+  if (q.status === 'processing') return json({ ok: true, state: 'processing' });
+  if (q.status === 'failed') { await env.GLOSSARY_KV.delete(VT(slotId)); await dropStart(env, t.startKey); return json({ ok: false, state: 'failed', error: q.msg || '영상 생성에 실패했습니다' }); }
+  const r = await fetch(q.url); if (!r.ok) return json({ ok: false, state: 'processing', error: '영상 파일을 받지 못했습니다(' + r.status + ')' });
+  const bytes = new Uint8Array(await r.arrayBuffer()); if (bytes.length > 80 * 1024 * 1024) return json({ ok: false, state: 'failed', error: '영상이 80MB 를 넘습니다' });
+  const k = 'mvvid-' + slotId + '-' + rid() + '.mp4'; await putDerivedFile(env, k, bytes, { httpMetadata: { contentType: 'video/mp4' } });
+  const map = await panelsOf(env), cell = map[slotId];
+  if (!cell) { await dropFile(env, k); } else { await dropFile(env, fileOf(cell.video)); cell.video = '/api/clipfile?k=' + k; cell.videoBy = 'kling'; await env.GLOSSARY_KV.put(PANELS, JSON.stringify(map)); }
+  await env.GLOSSARY_KV.delete(VT(slotId)); await dropStart(env, t.startKey);
+  return json({ ok: true, state: 'done', panels: map });
 }
