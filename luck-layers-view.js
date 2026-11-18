@@ -44,10 +44,76 @@
     return '<details class="lv-sec lv-s' + n + '"' + (open ? ' open' : '') + '><summary><b>' + title + '</b><span>' + sub + '</span></summary><div class="lv-b">' + body + '</div></details>';
   }
 
+
+  // ── 오행 겹쳐 보기 그림(만세력 운세 흐름과 같은 그림): 오각형 고리 + 층 색 막대 ──
+  var EL_COL = ['#5fae6e', '#e0705a', '#d9b25c', '#b9bec7', '#5a7fbf'], EL_INK = ['#2f6b3b', '#9b3422', '#8a6a1c', '#5d636e', '#2d4f8f'];
+  var LV_COL = { daeun: '#3D7BD9', seun: '#E0832F', wolun: '#8E5BD6', ilun: '#2E9E8F' };
+  var GOOD = function (r) { return r === '용신' || r === '희신'; }, BAD = function (r) { return r === '기신' || r === '구신'; };
+  function olVisual(oc, E) {
+    E = E || esc0;
+    var L = oc.layers || [], fin = L.length ? L[L.length - 1].pct : oc.natal.pct, roles = oc.roles || {};
+    // 오각형: 바깥 실선 = 생, 안쪽 점선 = 극. 원 크기 = 겹친 뒤 비율, 층 색 고리 = 그 층이 그 오행을 눈에 띄게 더함
+    var cx = 120, cy = 104, R = 72, pos = [0, 1, 2, 3, 4].map(function (e) { var a = (-90 + e * 72) * Math.PI / 180; return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; });
+    var ring = [0, 1, 2, 3, 4].map(function (e) { var a = pos[e], b = pos[(e + 1) % 5], c = pos[(e + 2) % 5]; return '<line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '" stroke="rgba(127,127,127,.35)" stroke-width="1.5"/><line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + c[0] + '" y2="' + c[1] + '" stroke="rgba(127,127,127,.25)" stroke-dasharray="3 4"/>'; }).join('');
+    var nodes = [0, 1, 2, 3, 4].map(function (e) {
+      var x = pos[e][0], y = pos[e][1], rr = 12 + Math.min(11, fin[e] / 5), k = 0;
+      var rings = L.map(function (l) { return l.add[e] >= 0.15 * Math.max(l.w, 0.4) ? '<circle cx="' + x + '" cy="' + y + '" r="' + (rr + 3 + (k++) * 4) + '" fill="none" stroke="' + LV_COL[l.level] + '" stroke-width="2.6"><title>' + E(l.levelK + ' ' + (l.label || '')) + '이(가) ' + EL_S[e] + '을(를) 더함</title></circle>' : ''; }).join('');
+      var d = Math.round(fin[e] - oc.natal.pct[e]), tag = e === oc.dayEl ? ' · 나' : roles[e] ? ' · ' + roles[e] : '';
+      return '<g>' + rings + '<circle cx="' + x + '" cy="' + y + '" r="' + rr + '" fill="' + EL_COL[e] + '" stroke="' + EL_INK[e] + '"/><text x="' + x + '" y="' + (y + 5) + '" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">' + EL_HJ[e] + '</text>' +
+        '<text x="' + x + '" y="' + (y + rr + 12 + k * 4) + '" text-anchor="middle" font-size="10" fill="currentColor" opacity=".8">' + Math.round(fin[e]) + '%' + (L.length && d ? (d > 0 ? ' ▲' : ' ▼') + Math.abs(d) : '') + E(tag) + '</text></g>';
+    }).join('');
+    var svg = '<svg class="lv-pent" viewBox="0 0 240 218" width="220" height="200" role="img" aria-label="원국 위에 운을 겹친 오행 그림">' + ring + nodes + '</svg>';
+    // 막대: 원국 몫(흐린 오행 색) + 층마다 더한 몫(층 색). 용신을 맨 위로
+    var tot = oc.natal.pts.reduce(function (a, b) { return a + b; }, 0) + L.reduce(function (a, l) { return a + l.add.reduce(function (x, y) { return x + y; }, 0); }, 0) || 1;
+    var order = [0, 1, 2, 3, 4].sort(function (a, b) { return (roles[a] === '용신' ? -1 : 0) - (roles[b] === '용신' ? -1 : 0); });
+    var bars = order.map(function (e) {
+      var segs = '<i style="width:' + (oc.natal.pts[e] / tot * 100).toFixed(2) + '%;background:' + EL_COL[e] + ';opacity:.55"></i>' + L.map(function (l) { return l.add[e] > 0.005 ? '<i style="width:' + (l.add[e] / tot * 100).toFixed(2) + '%;background:' + LV_COL[l.level] + '"></i>' : ''; }).join('');
+      var d = Math.round((fin[e] - oc.natal.pct[e]) * 10) / 10, role = roles[e] || (e === oc.dayEl ? '나' : ''), rc = GOOD(roles[e]) ? 'good' : BAD(roles[e]) ? 'bad' : '';
+      var dc = d > 0.4 ? (GOOD(roles[e]) ? 'good' : BAD(roles[e]) ? 'bad' : '') : d < -0.4 ? (BAD(roles[e]) ? 'good' : GOOD(roles[e]) ? 'bad' : '') : '';
+      return '<p class="lv-brow"><span class="lv-bk"><b class="lv-el e' + e + ' m">' + EL_S[e] + '</b>' + (role ? '<small class="lv-r ' + rc + '">' + E(role) + '</small>' : '') + '</span><span class="lv-bar">' + segs + '</span><span class="lv-bv">' + Math.round(oc.natal.pct[e]) + '→<b>' + Math.round(fin[e]) + '</b>%' + (L.length && Math.abs(d) >= 0.5 ? ' <small class="lv-d ' + dc + '">' + (d > 0 ? '+' : '') + d + '</small>' : '') + '</span></p>';
+    }).join('');
+    var legend = '<p class="lv-leg">' + L.map(function (l) { return '<span><i style="background:' + LV_COL[l.level] + '"></i>' + E(l.levelK + ' ' + (l.label || '')) + '</span>'; }).join('') + '<span><i style="background:#999;opacity:.55"></i>원국</span></p>';
+    return '<div class="lv-olv">' + svg + '<div class="lv-bars">' + bars + legend + '</div></div>';
+  }
+
+
+  // ── 원국 오행 흐름(만세력 오행·강약 탭과 같은 그림·판정): 바깥 실선 화살표 = 생, 안쪽 점선 = 극, 원 크기 = 비율 + M.natalFlow 쉬운 말 ──
+  var TG_GROUP = ['비겁', '식상', '재성', '관성', '인성'];
+  function natalPentagon(M, ch) {
+    var pct = ch.weights.pct, dEl = stemEl(ch.pillars.day.s), W = 440, H = 356, cx = 220, cy = 180, R = 112;
+    var pt = function (i) { var a = (-90 + i * 72) * Math.PI / 180; return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; };
+    var rad = function (i) { return 22 + Math.min(20, pct[i] * 0.4); };
+    var line = function (i, j, geuk) { var a0 = pt(i), b0 = pt(j), L = Math.hypot(b0[0] - a0[0], b0[1] - a0[1]), ux = (b0[0] - a0[0]) / L, uy = (b0[1] - a0[1]) / L, a = rad(i) + 4, b = rad(j) + 9;
+      return '<line x1="' + (a0[0] + ux * a).toFixed(1) + '" y1="' + (a0[1] + uy * a).toFixed(1) + '" x2="' + (b0[0] - ux * b).toFixed(1) + '" y2="' + (b0[1] - uy * b).toFixed(1) + '" stroke="' + (geuk ? '#d9694f' : '#8a90a0') + '" stroke-width="' + (geuk ? 1.4 : 2) + '"' + (geuk ? ' stroke-dasharray="5 4"' : '') + ' marker-end="url(#lvah-' + (geuk ? 'g' : 's') + ')"/>'; };
+    var s = '<svg class="lv-npent" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="원국 오행 생극 관계도"><defs><marker id="lvah-s" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a90a0"/></marker><marker id="lvah-g" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#d9694f"/></marker></defs>';
+    for (var i = 0; i < 5; i++) s += line(i, (i + 1) % 5, false);
+    for (i = 0; i < 5; i++) s += line(i, (i + 2) % 5, true);
+    for (i = 0; i < 5; i++) {
+      var q = pt(i), r = rad(i), g = (i - dEl + 5) % 5, ly = q[1] + r + (i === dEl ? 20 : 15);
+      s += (i === dEl ? '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="' + (r + 5) + '" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 3" opacity=".7"/>' : '') +
+        '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="' + r + '" fill="' + EL_COL[i] + '" fill-opacity=".22" stroke="' + EL_COL[i] + '" stroke-width="2"/>' +
+        '<text class="lv-et' + i + '" x="' + q[0] + '" y="' + (q[1] + 1) + '" text-anchor="middle" font-size="20" font-weight="800" fill="' + EL_INK[i] + '">' + EL_HJ[i] + '</text>' +
+        '<text class="lv-et' + i + '" x="' + q[0] + '" y="' + (q[1] + 17) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + EL_INK[i] + '">' + pct[i].toFixed(0) + '%</text>' +
+        '<text x="' + q[0].toFixed(1) + '" y="' + (ly + 4).toFixed(1) + '" text-anchor="middle" font-size="13" fill="currentColor" opacity=".85">' + (i === dEl ? '나 · ' : '') + EL_S[i] + ' · ' + TG_GROUP[g] + '</text>';
+    }
+    return s + '</svg>';
+  }
+  function natalFlowFigure(M, ch, opt) {
+    opt = opt || {}; var E = opt.esc || esc0, f = null;
+    try { f = M.natalFlow && M.natalFlow(ch); } catch (e) { f = null; }
+    var svg = ''; try { svg = natalPentagon(M, ch); } catch (e) { svg = ''; }
+    if (!svg) return '';
+    var tc = function (t) { return t === 'good' ? 'lv-up' : t === 'bad' ? 'lv-down' : ''; };
+    var txt = f ? '<p class="lv-nf-h"><b class="' + tc(f.tone) + '">' + E(f.headline || f.verdict) + '</b></p><ul class="lv-ul">' + f.items.map(function (i) { return '<li>' + E(i.plain || i.text) + '</li>'; }).join('') + '</ul>' +
+      ((f.chips || []).filter(function (c) { return c.plain; }).length ? '<p class="lv-sm"><b>이 사주에서 보이는 패턴</b></p><ul class="lv-ul">' + f.chips.filter(function (c) { return c.plain; }).map(function (c) { return '<li><b class="' + (c.good ? 'lv-up' : '') + '">' + E(c.name) + '</b> — ' + E(c.plain) + '</li>'; }).join('') + '</ul>' : '') +
+      '<details class="lv-more"><summary>명리 용어로 보기</summary><p class="lv-sm"><b>' + E(f.verdict) + '</b></p><ul class="lv-ul lv-sm">' + f.items.map(function (i) { return '<li>' + E(i.text) + '</li>'; }).join('') + '</ul></details>' : '';
+    return '<div class="lv-nf"><div class="lv-nf-fig">' + svg + '<p class="lv-leg"><span><i style="background:#8a90a0"></i>실선 화살표: 생(도와줌)</span><span><i style="background:#d9694f"></i>점선 화살표: 극(누름)</span><span>원 크기 = 비율</span></p></div><div class="lv-nf-txt">' + txt + '</div></div>';
+  }
+
   // 한 시기의 분석 칸들(① 외부 환경 ② 내 사주 반응 ③ 상위·하위 운 ④ 영역) — 칸마다 모듈·스위치가 있을 때만
   function parts(M, ch, x, kind, opt) {
     opt = opt || {}; var F = opt.flags || {}, E = opt.esc || esc0, LE = root.MantraLuckEnv, OV = root.MantraLuckOverlay, TG = root.MantraTenGodRoles;
-    var L = layersOf(M, ch, x, kind), out = { env: '', tr: '', hier: '', ol: '', tgr: '', dom: '', hid: '' };
+    var L = layersOf(M, ch, x, kind), out = { env: '', tr: '', hier: '', ol: '', olv: '', tgr: '', dom: '', hid: '', oc: null, tones: null };
     try { out.hid = hidden(M, ch, x.b, E); } catch (e) { }
     var nb = null, tones = null, oc = null, ex = null;
     if (F.luckOverlay && OV) { try { oc = OV.compute(M, ch, L, { weights: opt.weights }); ex = OV.explain(oc, L.length); tones = {}; ex.forEach(function (l) { tones[l.level] = l.tone; }); } catch (e) { oc = null; ex = null; tones = null; } }
@@ -75,10 +141,12 @@
         if (h) out.hier = '<p class="lv-rows">' + h.rows.map(function (q) { return '<span class="lv-lvl ' + q.level + '"><b>' + E(q.levelK + ' ' + q.gz) + '</b> <i class="lv-chip ' + (/good/.test(q.side) ? 'good' : /bad/.test(q.side) ? 'bad' : '') + '">' + E(q.sideK) + '</i></span>'; }).join('<em>→</em>') + '</p><p>' + E(h.text) + '</p>';
       } catch (e) { }
     }
+    out.oc = oc; out.tones = tones;
     if (oc && ex) {
       try {
         var yg = oc.yong;
-        out.ol = '<ol class="lv-ol">' + ex.map(function (l) { return '<li class="lv-' + l.tone + '"><b>' + E(l.title) + '</b> ' + E(l.text) + '</li>'; }).join('') + '</ol>' +
+        try { out.olv = olVisual(oc, E); } catch (e2) { out.olv = ''; }
+        out.ol = (opt.noFigure ? '' : out.olv || '') + '<ol class="lv-ol">' + ex.map(function (l) { return '<li class="lv-' + l.tone + '"><b>' + E(l.title) + '</b> ' + E(l.text) + '</li>'; }).join('') + '</ol>' +
           (yg && yg.el != null ? '<p class="lv-sm">필요한 기운(용신) ' + E(EL_S[yg.el] + '(' + EL_HJ[yg.el] + ')') + ': 원국 ' + Math.round(yg.natal) + '% → 운을 겹친 뒤 ' + Math.round(yg.now) + '%</p>' : '');
       } catch (e) { out.ol = ''; }
     }
@@ -94,6 +162,14 @@
     return out;
   }
 
+  // 겹쳐 보기 그림 한 덩어리(제목·용신 한 줄·그림) — 타임라인 시기 카드에 접지 않고 바로 보이게
+  function overlayFigure(M, ch, x, kind, opt) {
+    opt = opt || {}; var E = opt.esc || esc0, OV = root.MantraLuckOverlay; if (!OV || !(opt.flags || {}).luckOverlay) return '';
+    var L = layersOf(M, ch, x, kind), oc; try { oc = OV.compute(M, ch, L, { weights: opt.weights }); } catch (e) { return ''; }
+    var y = oc.yong, ex = []; try { ex = OV.explain(oc, L.length); } catch (e) { }
+    var me = ex[ex.length - 1], yl = y && y.el != null ? '필요한 기운(용신) <b>' + E(EL_S[y.el] + '(' + EL_HJ[y.el] + ')') + '</b>' + (y.el === 0 || y.el === 3 ? '이' : '가') + ' 원국 ' + Math.round(y.natal) + '% → 겹친 뒤 <b class="' + (y.now - y.natal > 0.4 ? 'lv-up' : y.now - y.natal < -0.4 ? 'lv-down' : '') + '">' + Math.round(y.now) + '%</b>' + (y.now - y.natal > 0.4 ? ' — 이 시기에 채워져요' : y.now - y.natal < -0.4 ? ' — 이 시기에 오히려 줄어요' : ' — 거의 그대로예요') : '';
+    return '<div class="lv-fig"><p class="lv-fig-h"><b>오행 겹쳐 보기</b> <span>원국 위에 ' + L.map(function (l) { return LEVEL_K[l.level]; }).join(' → ') + '</span></p>' + (yl ? '<p class="lv-fig-y">' + yl + '</p>' : '') + olVisual(oc, E) + (me ? '<p class="lv-sm">' + E(me.text) + '</p>' : '') + '</div>';
+  }
   // 상세 카드 한 장 분량(타임라인 시기 카드 아래에 붙인다)
   function card(M, ch, x, kind, opt) {
     var p = parts(M, ch, x, kind, opt), lv = LEVEL_K[kind] || '';
@@ -117,7 +193,9 @@
     if (r.daeun) li.push('<li><b>지금 대운(' + E(r.daeun.gz) + ')과 시대</b> ' + E(r.daeun.text) + '</li>');
     if (r.seun) li.push('<li><b>올해 세운(' + E(r.seun.gz) + ')과 시대</b> ' + E(r.seun.text) + '</li>');
     if (r.action) li.push('<li><b>대응 방향</b> ' + E(r.action) + '</li>');
-    return '<div class="lv-erabox"><p class="lv-eras">' + strip + '</p><p class="lv-lead">지금은 ' + E(e.yuan + ' ' + e.period + '운 · ' + e.star) + ' — ' + E(e.elK) + '의 시대 ' + e.start + '~' + e.end + '년 · ' + r.era.yearsIn + '년째</p><p class="lv-sm">' + E(e.reading) + '</p><ol class="lv-ul">' + li.join('') + '</ol><p class="lv-note">' + E(r.note || '시대 흐름은 모두에게 공통인 바깥 환경이고 개인의 용신·운을 대신하지 않아요.') + '</p></div>';
+    var lead = '<p class="lv-eras">' + strip + '</p><p class="lv-lead">지금은 ' + E(e.yuan + ' ' + e.period + '운 · ' + e.star) + ' — ' + E(e.elK) + '의 시대 ' + e.start + '~' + e.end + '년 · ' + r.era.yearsIn + '년째</p>', note = '<p class="lv-note">' + E(r.note || '시대 흐름은 모두에게 공통인 바깥 환경이고 개인의 용신·운을 대신하지 않아요.') + '</p>';
+    if (opt.compact) return '<div class="lv-erabox">' + lead + '<p>' + E(r.natal.text) + '</p><details class="lv-more"><summary>지금 대운·올해와 시대, 대응 방향 보기</summary><p class="lv-sm">' + E(e.reading) + '</p><ol class="lv-ul">' + li.slice(1).join('') + '</ol>' + note + '</details></div>';
+    return '<div class="lv-erabox">' + lead + '<p class="lv-sm">' + E(e.reading) + '</p><ol class="lv-ul">' + li.join('') + '</ol>' + note + '</div>';
   }
 
   var CSS = '.lv{margin:10px 0 4px;display:grid;gap:6px}.lv-sec{border:1px solid var(--lv-line,rgba(127,127,127,.28));border-radius:12px;padding:0 12px;background:var(--lv-bg,transparent)}.lv-sec>summary{cursor:pointer;list-style:none;display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;padding:9px 0}.lv-sec>summary::-webkit-details-marker{display:none}.lv-sec>summary b{font-size:.92rem}.lv-sec>summary span{font-size:.74rem;opacity:.65}'
@@ -127,9 +205,12 @@
     + '.lv-rows{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.lv-rows em{opacity:.5;font-style:normal}.lv-mxs{display:flex;flex-wrap:wrap;gap:5px}.lv-mx{position:relative;overflow:hidden;z-index:0;font-size:.74rem;padding:2px 8px;border-radius:999px;border:1px solid rgba(127,127,127,.3)}.lv-mx i{position:absolute;inset:0 auto 0 0;z-index:-1;opacity:.35}'
     + '.lv-mx.e0 i,.lv-el.e0,.lv-era.e0{background:#5fae6e}.lv-mx.e1 i,.lv-el.e1,.lv-era.e1{background:#e0705a}.lv-mx.e2 i,.lv-el.e2,.lv-era.e2{background:#d9b25c}.lv-mx.e3 i,.lv-el.e3,.lv-era.e3{background:#b9bec7}.lv-mx.e4 i,.lv-el.e4,.lv-era.e4{background:#5a7fbf}'
     + '.lv-hid{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:.84rem}.lv-hid span{font-size:.76rem;opacity:.7}.lv-el{display:inline-flex;flex-direction:column;align-items:center;font-style:normal;color:#fff;border-radius:8px;padding:2px 7px;line-height:1.15;opacity:.75}.lv-el.m{opacity:1;font-weight:700}.lv-el small{font-size:.6rem}'
-    + '.lv-eras{display:flex;gap:5px}.lv-era{flex:1 1 0;min-width:0;text-align:center;border-radius:9px;padding:5px 2px;opacity:.55;color:#222;font-size:.76rem;display:grid}.lv-era.on{opacity:1;outline:2px solid currentColor}.lv-era small{font-size:.6rem}';
+    + '.lv-eras{display:flex;gap:5px}.lv-era{flex:1 1 0;min-width:0;text-align:center;border-radius:9px;padding:5px 2px;opacity:.55;color:#222;font-size:.76rem;display:grid}.lv-era.on{opacity:1;outline:2px solid currentColor}.lv-era small{font-size:.6rem}.lv-more>summary{cursor:pointer;font-size:.84rem;opacity:.85;padding:4px 0}'
+    + '.lv-olv{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:8px 0}.lv-pent{flex:none;max-width:100%;height:auto}.lv-bars{flex:1 1 220px;min-width:0;display:grid;gap:6px}.lv-brow{display:grid;grid-template-columns:62px 1fr auto;gap:6px;align-items:center;margin:0;font-size:.8rem}.lv-bk{display:flex;gap:4px;align-items:center}.lv-r{font-size:.68rem;opacity:.8}.lv-r.good,.lv-d.good,.lv-up{color:#1f7a5c}.lv-r.bad,.lv-d.bad,.lv-down{color:#b23a2b}.lv-bar{display:flex;height:11px;border-radius:6px;overflow:hidden;background:rgba(127,127,127,.18)}.lv-bar i{display:block;height:100%}.lv-bv{white-space:nowrap;font-size:.76rem;opacity:.9}.lv-leg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.72rem;opacity:.8;margin:2px 0 0}.lv-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}'
+    + '.lv-fig{margin:10px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(127,127,127,.28)}.lv-fig-h{margin:0 0 4px;font-size:.9rem}.lv-fig-h span{font-size:.74rem;opacity:.7}.lv-fig-y{margin:2px 0 4px;font-size:.86rem}'
+    + '.lv-nf{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 18px;align-items:start;margin:12px 0}.lv-nf-fig svg{width:100%;height:auto;max-width:400px;display:block;margin:0 auto}.lv-nf-h{font-size:1.02rem;margin:4px 0}.lv-nf-txt{font-size:.9rem;line-height:1.65}@media (max-width:720px){.lv-nf{grid-template-columns:1fr}}';
 
-  var api = { version: VERSION, layersOf: layersOf, hidden: hidden, parts: parts, card: card, era: era, CSS: CSS, LEVEL_K: LEVEL_K };
+  var api = { version: VERSION, layersOf: layersOf, hidden: hidden, parts: parts, card: card, era: era, olVisual: olVisual, overlayFigure: overlayFigure, natalFlowFigure: natalFlowFigure, CSS: CSS, LEVEL_K: LEVEL_K };
   root.MantraLuckView = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -335,3 +335,7 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 #hub .tq .tq-bar.now u{ box-shadow: inset 0 0 0 1px rgba(224,87,74,.6); }
 #hub .tq-bar s{ border-radius: 3px; background: var(--seal); color: #FBEDE2; }
 #hub .tq-bar small .tq-gzc{ font-style: normal; font-family: var(--f-serif); font-weight: 700; font-size: .82rem; }
+
+/* 접는 상자(2026-11-18 읽기 쉽게): 요약은 펼쳐 두고 자세한 근거·그래프는 눌러서 */
+#hub .tq-fold{ margin: 10px 0 4px; border-top: 1px dashed rgba(205,178,122,.28); padding-top: 6px; } #hub .tq-fold > summary{ cursor: pointer; list-style: none; font-size: .86rem; font-weight: 600; color: var(--gold-l, #e2c98f); padding: 6px 0; } #hub .tq-fold > summary::-webkit-details-marker{ display: none; } #hub .tq-fold > summary::before{ content: "＋ "; } #hub .tq-fold[open] > summary::before{ content: "－ "; }
+#hub .tq-q-yrs{ display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 4px; } #hub .tq-q-yr{ font-size: .76rem; padding: 2px 9px; border-radius: 999px; border: 1px solid rgba(205,178,122,.35); color: var(--ink-2); } #hub .tq-q-yr.on{ background: rgba(205,178,122,.22); color: var(--ink); font-weight: 700; } #hub .tq-q-r{ display: flex; gap: 10px; margin: 7px 0; font-size: .9rem; line-height: 1.6; color: var(--ink); } #hub .tq-q-k{ flex: 0 0 4.4em; font-size: .78rem; font-weight: 700; color: var(--gold); padding-top: 2px; }

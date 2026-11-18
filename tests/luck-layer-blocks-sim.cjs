@@ -43,7 +43,10 @@ IDS.forEach(id => assert.ok(has[id] >= n * (id === 'timeline_self_24' ? 0.8 : 0.
 // 화면 연결
 const rd = f => fs.readFileSync(path.join(root, f), 'utf8');
 const hub = rd('report/hub/hub-timeline.js');
-assert.ok(/'\/luck-layers-view\.js'/.test(hub) && /lvHtml\(it, lvl\)/.test(hub) && /eraHtml\(\) \+ lifeHtml\(\)/.test(hub) && /graph \+ spanHtml\(\) \+ body/.test(hub), '타임라인 연결');
+assert.ok(/'\/luck-layers-view\.js'/.test(hub) && /lvHtml\(it, lvl, /.test(hub) && /graph \+ spanHtml\(\) \+ body \+ eraHtml\(\)/.test(hub), '타임라인 연결');
+// 2026-11-18 읽기 쉽게: 시기 카드의 구조·①~④는 '더 깊이 보기' 하나로, 자미두수 막대·2년 전략은 접는 상자로, 시대 흐름은 짧게(compact)
+assert.ok(/tq-fold tq-lvf/.test(hub) && /10년·해마다 자미두수 흐름 보기/.test(hub) && /한눈에 보기 · 천간 오행 구간/.test(hub) && /compact: true/.test(hub), '타임라인 접는 상자');
+{ const ch0 = M.compute({ year: 1990, month: 3, day: 15, hour: 14, minute: 30, gender: 'F' }), eh = V.era(M, ch0, Date.now(), { flags: ALL, compact: true }); assert.ok(/lv-more/.test(eh) && /나의 위치|용신|기운/.test(strip(eh)), '시대 흐름 짧게 보기'); }
 assert.ok(/luck-layer-blocks\.js/.test(rd('report/v2/index.html')), '상세풀이 스크립트');
 assert.ok(/R\.LuckLayerBlocks\.set\(window\.Manse, ch\)/.test(rd('report/v2/viewer.js')), 'viewer 가 사주를 넘김');
 assert.ok(/R\.LuckLayerBlocks\.html\(c,esc\)/.test(rd('report/v2/reading-text.js')), '본문 연결');
@@ -55,3 +58,11 @@ for (const f of ['luck-layers-view.js', 'report/v2/luck-layer-blocks.js']) asser
   assert.equal(mis, 0, '상하위 방향과 겹쳐 보기 판정이 엇갈림 ' + mis + '/' + rows);
   assert.ok(/tones: tones/.test(rd('luck-layers-view.js')) && rd('index.html').includes('hierarchy(M, S.ch, L, { tones })'), '두 화면이 겹쳐 보기 판정을 넘김'); }
 console.log(`luck-layer-blocks-sim ok · 사주 ${n}명 · 시기 카드 ${cards}장 · 장별 블록 ${J(has)} · 스위치 꺼짐 빈 값 · 엔진 불변 · 연결`);
+// 2026-11-18 그림: 타임라인 시기 카드의 오행 겹쳐 보기 그림(접지 않고 바로) · 원국 아래 오행 흐름 그림
+{ let nf = 0, fig = 0, n2 = 0; for (let i = 0; i < 80; i++) { let ch; try { ch = M.compute({ year: 1955 + (i * 7) % 55, month: 1 + (i * 5) % 12, day: 1 + (i * 11) % 28, hour: (i * 3) % 24, minute: 0, gender: i % 2 ? 'M' : 'F' }); } catch (e) { continue; } n2++;
+  const h = V.natalFlowFigure(M, ch, {}); if (/lv-npent/.test(h) && /생\(도와줌\)/.test(h) && !/undefined|NaN/.test(h)) nf++;
+  const se = M.seunRange(ch, 2026, 2026)[0], f = V.overlayFigure(M, ch, se, 'seun', { flags: { luckOverlay: true } }); if (/lv-pent/.test(f) && /lv-brow/.test(f) && !/undefined|NaN|화\(火\)이 |토\(土\)이 |수\(水\)이 /.test(strip(f))) fig++;
+  assert.equal(V.overlayFigure(M, ch, se, 'seun', { flags: {} }), '', '겹쳐 보기 스위치 꺼지면 그림 없음'); }
+  assert.equal(nf, n2, '원국 오행 흐름 그림'); assert.equal(fig, n2, '겹쳐 보기 그림');
+  const hub2 = rd('report/hub/hub-timeline.js'); assert.ok(/ovFig\(it, lvl\) \+ lvHtml/.test(hub2) && /natalFlowFigure/.test(hub2) && /noFigure: true/.test(hub2), '타임라인 그림 연결');
+  console.log('그림 ok · 원국 오행 흐름 ' + nf + ' · 겹쳐 보기 ' + fig); }
