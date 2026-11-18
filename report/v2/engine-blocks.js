@@ -18,21 +18,15 @@
   function rolePlain(r) { var cond = /^조건부 /.test(r), k = String(r).replace(/^조건부 /, ''); return (ROLE_PLAIN[k] || k) + '(' + k + (cond ? ', 조건부' : '') + ')'; }
   function first(t) { var m = String(t || '').match(/^.*?[.!?](?=\s|$)/); return m ? m[0] : String(t || ''); }
 
-  // 전체 인생 흐름: 30년 구간
+  // 전체 인생 흐름: 장기 운세 요약(2026-11-18) — 대운 3개를 한 오행·한 길흉으로 묶지 않고 대운마다의 흐름과 사이 변화를 순서대로(luck-cycle.js longSummary)
   function cycle30(E) {
-    var L = root.MantraLuckCycle; if (!L || !cur) return '';
-    var spans; try { spans = L.daeunSpans(cur.M, cur.ch); } catch (e) { return ''; }
-    spans = (spans || []).filter(function (s) { return s && s.startAge < 90 && s.years >= 20; }).slice(0, 3);
-    if (spans.length < 2) return '';
-    var nowY = new Date().getFullYear();
-    var li = spans.map(function (s) {
-      var now = s.startYear <= nowY && nowY <= s.endYear;
-      var head = s.startAge + '~' + s.endAge + '세 · ' + s.elLabel + ' 중심 · ' + (s.trendWord || '') + (now ? ' · 지금 이 구간' : '');
-      var body = [s.steps && s.steps.summary ? first(s.steps.summary) : '', s.opp ? first(s.opp) : '', s.tone === 'bad' || s.tone === 'mixed' ? first(s.risk) : ''].filter(Boolean).join(' ');
-      return '<li><b>' + E(head) + '</b> ' + E(body) + '<small>' + E(s.startYear + '~' + s.endYear + '년 · 흐름 ' + (TONE[s.tone] || '보통') + (s.roleLabel ? ' · 이 구간에 많은 기운은 ' + rolePlain(s.roleLabel) : '')) + '</small></li>';
-    }).join('');
-    return box('運路 · 30년의 계절', '30년씩 묶어 본 인생의 큰 계절', '대운 10년 세 개를 한 계절로 묶으면, 해마다의 오르내림보다 큰 흐름이 보여요.', '<ul class="fx-ul">' + li + '</ul>',
-      '운세 흐름 탭의 대운 30년 구간과 같은 계산이에요. 사건을 정해 주는 판정이 아니라 큰 흐름의 참고예요.', E);
+    var L = root.MantraLuckCycle; if (!L || !L.longSummary || !cur) return '';
+    var r; try { r = L.longSummary(cur.M, cur.ch, { ms: cur.now }); } catch (e) { return ''; }
+    if (!r || r.rows.length < 2) return '';
+    var li = r.rows.map(function (x) { return '<li><b>' + E((x.tense === 'now' ? '지금 · ' : x.tense === 'past' ? '지난 · ' : '다음 · ') + x.startAge + '세 ' + x.gz + ' 대운') + '</b> ' + E(x.text) + '</li>'; }).join('');
+    var sh = r.shifts.map(function (t) { return '<li>' + E(t.text) + '</li>'; }).join('');
+    return box('運路 · 앞으로의 대운', '대운 세 개를 순서대로 놓고 보면', '대운 10년씩의 흐름과 그 사이에서 무엇이 바뀌는지를 차례로 짚어요.', '<ul class="fx-ul">' + li + '</ul>' + (sh ? '<p><b>대운이 바뀔 때</b></p><ul class="fx-ul">' + sh + '</ul>' : ''),
+      '세 대운을 하나의 오행이나 하나의 점수로 묶지 않았어요. 대운마다의 흐름 상태는 운세 흐름 탭의 대운 막대와 같은 계산이에요.', E);
   }
   function gyeok() { var GS = root.MantraGyeokStructure; if (!GS || !cur) return null; try { return GS.analyze(cur.M, cur.ch); } catch (e) { return null; } }
   // 나의 타고난 기질: 격국 요약

@@ -448,7 +448,37 @@
     Object.keys(map).forEach(function (id) { if (PH[id] && typeof map[id] === 'string' && map[id].trim()) { PH[id].text = map[id].trim(); PH[id].review = 'published'; n++; } });
     return n;
   }
-  var api = { VERSION: VERSION, PHRASE_VERSION: PHRASE_VERSION, PHRASES: PHRASES, EL_TRAIT: EL_TRAIT, daeunSpans: daeunSpans, spanIndexOf: spanIndexOf, seunPair: seunPair, pairStart: pairStart, pairGroups: pairGroups, relSplit: relSplit, applyPublished: applyPublished };
+  // ───────────── 장기 운세 요약(2026-11-18) — 30년 구간을 하나의 오행·하나의 길흉으로 묶지 않는다 ─────────────
+  //   지금 대운과 다음 두 대운(끝 무렵이면 마지막 셋)을 시간 순서대로 나란히 두고, 대운마다 엔진 값(간지·십성·흐름 상태·들어오는 오행의 역할)과
+  //   이웃한 대운 사이의 변화(천간 오행이 어떻게 바뀌는지, 흐름이 오르는지 내려가는지)만 보여 준다. 새 점수·가중치 없음(읽기만).
+  //   기존 daeunSpans(장기 분석 구간)는 감사·검사 도구가 쓰고 있어 남겨 두되, 화면은 이 요약을 쓴다.
+  var ELK5 = ['목(木)', '화(火)', '토(土)', '금(金)', '수(水)'];
+  var md5 = function (x) { return ((x % 5) + 5) % 5; };
+  var SHIFT = function (a, b) { return a === b ? '같은 오행이 이어짐' : md5(a + 1) === b ? '앞 대운이 다음 대운을 생함' : md5(b + 1) === a ? '다음 대운이 앞 대운을 생함' : md5(a + 2) === b ? '앞 대운이 다음 대운을 누름' : '다음 대운이 앞 대운을 누름'; };
+  var elR = function (e, r) { return ELK5[e] + (r ? '·' + r : ''); };
+  function longSummary(M, ch, opts) {
+    var L = (ch && ch.daeun && ch.daeun.list) || [], u = ch && ch.unified, roles = (u && u.roles) || [];
+    if (!L.length) return null;
+    var now = opts && opts.ms != null ? opts.ms : Date.now(), ci = 0;
+    L.forEach(function (x, i) { if (x.startMs <= now) ci = i; });
+    var a = Math.max(0, Math.min(ci, L.length - 3)), items = L.slice(a, a + 3);
+    var rows = items.map(function (x, k) {
+      var i = a + k, se = M.stemEl(x.s), be = M.stemEl(M.mainHidden(x.b)), fit = x.ev ? Math.round(x.ev.fitScore) : null;
+      return { i: i, gz: M.STEM[x.s] + M.BR[x.b], startAge: x.startAge, startYear: x.startYear, endYear: x.startYear + 9, tense: i < ci ? 'past' : i === ci ? 'now' : 'next',
+        stemTG: x.stemTG, branchTG: x.branchTG, condition: x.ev ? x.ev.condition : '', fit: fit,
+        stemEl: se, branchEl: be, stemRole: roles[se] || '', branchRole: roles[be] || '',
+        text: x.startAge + '세(' + x.startYear + '~' + (x.startYear + 9) + ') ' + M.STEM[x.s] + M.BR[x.b] + ' 대운 — ' + x.stemTG + '·' + x.branchTG + ', 흐름 ' + (x.ev ? x.ev.condition : '') + '. 들어오는 기운: 천간 ' + elR(se, roles[se]) + ', 지지 ' + elR(be, roles[be]) + '.' };
+    });
+    var shifts = [];
+    for (var k = 1; k < rows.length; k++) {
+      var p = rows[k - 1], q = rows[k], d = (q.fit != null && p.fit != null) ? q.fit - p.fit : 0;
+      var dir = d >= 8 ? 'up' : d <= -8 ? 'down' : 'flat';
+      shifts.push({ from: p.i, to: q.i, el: SHIFT(p.stemEl, q.stemEl), dir: dir,
+        text: p.gz + ' → ' + q.gz + ': 천간 오행 ' + ELK5[p.stemEl] + ' → ' + ELK5[q.stemEl] + '(' + SHIFT(p.stemEl, q.stemEl) + '), 흐름 ' + p.condition + ' → ' + q.condition + (dir === 'up' ? ' — 흐름 점수가 올라가요.' : dir === 'down' ? ' — 흐름 점수가 내려가요.' : ' — 비슷하게 이어져요.') });
+    }
+    return { version: VERSION + '/long-summary-1', now: ci, rows: rows, shifts: shifts, note: '세 대운을 하나의 오행이나 하나의 점수로 묶지 않고, 대운마다의 흐름과 그 사이의 변화를 순서대로 보여 줘요.' };
+  }
+  var api = { VERSION: VERSION, PHRASE_VERSION: PHRASE_VERSION, PHRASES: PHRASES, EL_TRAIT: EL_TRAIT, daeunSpans: daeunSpans, spanIndexOf: spanIndexOf, longSummary: longSummary, seunPair: seunPair, pairStart: pairStart, pairGroups: pairGroups, relSplit: relSplit, applyPublished: applyPublished };
   G.MantraLuckCycle = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

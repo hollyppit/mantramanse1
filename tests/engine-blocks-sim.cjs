@@ -20,10 +20,11 @@ for (let i = 0; i < 150; i++) {
   const h20 = E.html({ id: 'timeline_self_20' }), h03 = E.html({ editorialContractId: 'timeline_self_03' }), h02 = E.html({ id: 'timeline_self_02' });
   [h20, h03, h02].forEach((h, k) => { ok(!/undefined|NaN|null|\[object/.test(h), `블록 ${k} 빈 값(사주 ${i})`); ok(!BAN.test(strip(h)), `블록 ${k} 금지 표현`); });
   if (h20) {
-    has20++; const spans = L.daeunSpans(M, ch).filter(s => s.startAge < 90 && s.years >= 20).slice(0, 3);
-    ok((h20.match(/<li>/g) || []).length === spans.length, '30년 구간 수가 엔진과 다름');
-    spans.forEach(s => ok(h20.includes(s.startAge + '~' + s.endAge + '세') && h20.includes(s.elLabel), `구간 ${s.startAge}세 표시 누락`));
-    ok(!/이 구간에 많은 기운은 (용신|희신|한신|기신|구신)( |<)/.test(h20), '역할 이름이 쉬운 말 없이 나옴');
+    // 2026-11-18: 30년 구간 판정(한 오행·한 길흉)을 걷고 장기 운세 요약(대운 3개를 순서대로 + 사이 변화)으로 바꿨다
+    has20++; const ls = L.longSummary(M, ch);
+    ok((h20.match(/<li>/g) || []).length === ls.rows.length + ls.shifts.length, '장기 요약 줄 수가 엔진과 다름');
+    ls.rows.forEach(x => ok(h20.includes(x.startAge + '세 ' + x.gz + ' 대운') && h20.includes(x.condition), `대운 ${x.startAge}세 ${x.gz} 표시 누락`));
+    ok(!/중심 · |30년의 계절|흐름 (순풍|맞바람|도움과 부담이 섞임)<\/small>/.test(h20), '30년을 한 오행·한 길흉으로 묶은 표현이 남음');
   }
   const g = GS.analyze(M, ch);
   ok(h03.includes(g.rep.type === 'hold' ? '격국 판정 유보' : g.rep.name), '기질 장 격국 이름이 판정과 다름');
@@ -32,7 +33,7 @@ for (let i = 0; i < 150; i++) {
   ok(E.html({ id: 'timeline_self_18' }) === '', '다른 장에 블록이 붙음');
   ok(JSON.stringify(ch.daeun.list.map(x => [x.ev.fitScore, x.score.total])) === snap, '블록을 만든 뒤 점수가 바뀜');
 }
-ok(n >= 140 && has20 >= n * 0.9, `검증 사주 부족 또는 30년 블록이 너무 적음(${has20}/${n})`);
+ok(n >= 140 && has20 >= n * 0.9, `검증 사주 부족 또는 장기 요약 블록이 너무 적음(${has20}/${n})`);
 // 엔진 모듈이 없으면 블록 없음
 const keep = globalThis.MantraGyeokStructure; globalThis.MantraGyeokStructure = undefined; ok(E.html({ id: 'timeline_self_03' }) === '', '격국 모듈이 없을 때 블록이 붙음'); globalThis.MantraGyeokStructure = keep;
 
@@ -46,4 +47,4 @@ for (const [file, pat, msg] of [
 ok(!/fitScore|LUCK_CFG|evaluateLuck|integrateYongsin/.test(read('report/v2/engine-blocks.js').replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, '')), '엔진 블록이 점수를 읽음');
 
 if (fails.length) { console.log('실패 ' + fails.length + '건\n - ' + [...new Set(fails)].slice(0, 20).join('\n - ')); process.exit(1); }
-console.log(`모두 통과 · 사주 ${n}명(30년 블록 ${has20}) · 구간·격국·주요 구조 일치 · 빈 값·금지 표현 없음 · 점수 불변 · 연결`);
+console.log(`모두 통과 · 사주 ${n}명(장기 요약 블록 ${has20}) · 구간·격국·주요 구조 일치 · 빈 값·금지 표현 없음 · 점수 불변 · 연결`);

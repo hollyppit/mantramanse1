@@ -211,10 +211,11 @@
     // 30년 장기 구간(대운 3개 묶음)·2년 천간 오행 구간 — luck-cycle.js(사전 문구 조합, 스위치 luckCycle)
     var LCm = function () { return GF && GF.lc && root.MantraLuckCycle ? root.MantraLuckCycle : null; }, lcSpans = null;
     function lcSteps(r) { return '<ol class="tq-lc-steps"><li><b>오행의 특징</b>' + esc(r.steps.trait) + '</li><li><b>나에게 미치는 영향</b>' + esc(r.steps.impact) + '</li><li><b>추천 전략</b>' + esc(r.steps.strategy) + '</li></ol>' + (r.basis && r.basis.length ? '<details class="tq-how"><summary>판단 근거 보기</summary><ul class="tq-lc-basis">' + r.basis.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul><p class="tq-sub">미리 써 둔 문구를 이 사주의 계산값으로 골라 조합했어요(AI 미사용). 흐름 점수는 바꾸지 않아요.</p></details>' : ''); }
+    // 장기 운세 요약(2026-11-18): 대운 3개를 하나의 오행·하나의 길흉으로 묶던 30년 구간 판정을 걷고, 대운마다의 흐름과 그 사이 변화를 순서대로 보여 준다(luck-cycle.js longSummary)
     function spanHtml() {
-      var LC = LCm(); if (!LC || st.d == null) return '';
-      try { lcSpans = lcSpans || LC.daeunSpans(M, ch); var k = LC.spanIndexOf(lcSpans, st.d), sp = lcSpans[k]; if (!sp) return '';
-        return '<div class="tq-lc"><p class="tq-lc-k">30년 장기 구간 · ' + esc(sp.startAge + '~' + sp.endAge + '세 (' + sp.startYear + '~' + sp.endYear + ')') + '</p><div class="tq-lc-bar">' + lcSpans.map(function (x, i) { return '<span class="' + (i === k ? 'on' : '') + '">' + esc(x.startAge + '~' + x.endAge + '세') + '</span>'; }).join('') + '</div><h4>' + esc(sp.hook) + '</h4>' + lcSteps(sp) + '</div>';
+      var LC = LCm(); if (!LC || !LC.longSummary) return '';
+      try { var r = LC.longSummary(M, ch); if (!r || !r.rows.length) return '';
+        return '<div class="tq-lc"><p class="tq-lc-k">장기 운세 요약 · 대운 ' + r.rows.length + '개를 순서대로</p><ol class="tq-lc-steps">' + r.rows.map(function (x) { return '<li' + (x.tense === 'now' ? ' style="font-weight:700"' : '') + '><b>' + (x.tense === 'now' ? '지금 · ' : x.tense === 'past' ? '지난 · ' : '다음 · ') + esc(x.gz) + '</b>' + esc(x.text) + '</li>'; }).join('') + '</ol>' + (r.shifts.length ? '<p class="tq-sub">' + r.shifts.map(function (t) { return esc(t.text); }).join('<br>') + '</p>' : '') + '<p class="tq-sub">' + esc(r.note) + '</p></div>';
       } catch (e) { return ''; }
     }
     function pairHtml() {
