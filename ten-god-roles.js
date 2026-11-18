@@ -28,8 +28,12 @@
     layerW: { daeun: 1, seun: 0.7, wolun: 0.4, ilun: 0.2 },        // 오행 겹쳐 보기(luck-overlay.js)와 같은 층 무게
     hiddenW: { main: 1, mid: 0.55, res: 0.35 },                     // 지장간 뿌리 무게(격국 카드 gyeok-structure.js 와 같은 값)
     force: [[3, '없음'], [10, '약함'], [20, '보통'], [32, '강함'], [101, '과다']],   // 십성 묶음 비율(%) → 세력 이름
-    present: 6, clear: 15,                                          // 있음·뚜렷함 기준(%) — 투출+통근이면 비율이 낮아도 뚜렷함
-    carry: { weak: 30, base: 35 },                                  // 감당 능력: 돕는 힘(비겁+인성 %)
+    present: 8, clear: 15,                                          // 있음(엔진 오행 흐름 present 8)·뚜렷함(다섯 묶음 평균 20%의 3/4) — 투출+통근이면 비율이 낮아도 뚜렷함
+    carry: { weak: 30, base: 35, sinyak: 42 },                      // 감당 능력(비겁+인성 %): 30 태약 경계(엔진 STRENGTH_ZONES) · 35 재관 감당(격국 카드 jaegwanHelp) · 42 신약 경계
+    // 문턱값 근거(2026-11-18 명리 검수, docs/TEN_GOD_ROLES_THRESHOLD_REVIEW_2026-11-18.md)
+    //   엔진 원국 패턴(engine.js): 군겁쟁재 비겁 35 · 재다신약 재 30+신약 · 관살과다 관 30+신약 · 식상과다 식상 30+신약 · 인성과다 인성 35
+    //   격국 카드(gyeok-structure.js CFG.sip): 군겁 35·쟁재 25 · 재파인 15 · 관인 70 · 살인 60 · 상관패인 65·식상 15 · 생재 30 · 재관 35 · 모왕 일간 15
+    th: { jaeng: { bigeop: 35, jae: 25 }, jaeda: 30, gwanda: 30, seolgi: 30, inda: 35, mowangSelf: 15, geugin: 15, gwanin: 70, salin: 60, paein: { help: 65, sik: 15 }, jesal: { carry: 0.5, over: 2.5 }, gyeon: 0.7, dosik: 1 },
     changeEps: 2,                                                   // 같은 상태일 때 '강화/약화'로 볼 관련 십성 비율 변화(%p)
     hapRoot: 0.5                                                    // 충 받은 지지의 뿌리 무게 배율
   };
@@ -155,52 +159,52 @@
       toneFn: () => !okSelf ? ['bad', '돈과 책임이 한꺼번에 나를 누르는 쪽이라, 자리는 커져도 버겁게 느끼기 쉬워요.'] : (inF(2) || inF(3)) ? ['good', '번 것이 자리·신용으로 이어지는 흐름이에요. 성과가 직함이 되기 쉬워요.'] : ['mixed', '번 것이 자리로 이어지긴 하지만, 이 사주엔 자리 욕심이 오히려 짐이 되기도 해요.'] });
     // 3 관인상생(정관 주도)
     const salDom = S.tg['편관'] > S.tg['정관'];
-    const jaePain = jaeClear && S.grp[2] >= S.grp[4] + 10 && has(S, 4);
+    const TH = CFG.th, jaePain = jaeClear && S.grp[2] >= S.grp[4] + TH.geugin && has(S, 4) && !clear(S, 0);
     mk({ key: 'gwanin', name: '관인상생', from: 3, to: 4,
       conds: [c('관성이 있음', has(S, 3), lv(3)), c('인성이 있음', has(S, 4), lv(4)), c('정관이 편관보다 주도', !salDom, lt('정관') + ' · ' + lt('편관')), c('관성·인성 모두 뚜렷함', clear(S, 3) && clear(S, 4), '', false)],
       blocks: [b('재성이 인성을 깸(재극인)', jaePain, lv(2))],
-      toneFn: () => carry >= 70 ? ['mixed', '인정받는 흐름은 좋지만 이미 힘이 넉넉한 편이라, 편한 자리에 눌러앉고 싶어질 수 있어요.'] : inB(4) && carry >= 58 ? ['mixed', '조직과 윗사람의 도움이 이어지지만, 기대는 마음이 커지면 내 판단이 흐려질 수 있어요.'] : ['good', '책임(관성)이 공부·인정(인성)을 거쳐 나를 키우는 흐름이에요. 조직·자격과 잘 맞아요.'] });
+      toneFn: () => carry >= TH.gwanin ? ['mixed', '인정받는 흐름은 좋지만 이미 힘이 넉넉한 편이라, 편한 자리에 눌러앉고 싶어질 수 있어요.'] : inB(4) && carry >= 58 ? ['mixed', '조직과 윗사람의 도움이 이어지지만, 기대는 마음이 커지면 내 판단이 흐려질 수 있어요.'] : ['good', '책임(관성)이 공부·인정(인성)을 거쳐 나를 키우는 흐름이에요. 조직·자격과 잘 맞아요.'] });
     // 4 살인상생(편관 주도)
     mk({ key: 'salin', name: '살인상생', from: 3, to: 4, sal: true,
-      conds: [c('편관이 있음', tgHas(S, '편관'), lt('편관')), c('인성이 있음', has(S, 4), lv(4)), c('편관이 정관보다 주도', salDom, lt('편관') + ' · ' + lt('정관')), c('일간이 지나치게 강하지 않음(돕는 힘 60% 미만)', carry < 60, '돕는 힘 ' + r1(carry) + '%', false), c('편관·인성 모두 뚜렷함', tgClear(S, '편관') && clear(S, 4), '', false)],
+      conds: [c('편관이 있음', tgHas(S, '편관'), lt('편관')), c('인성이 있음', has(S, 4), lv(4)), c('편관이 정관보다 주도', salDom, lt('편관') + ' · ' + lt('정관')), c('일간이 지나치게 강하지 않음(돕는 힘 ' + TH.salin + '% 미만)', carry < TH.salin, '돕는 힘 ' + r1(carry) + '%', false), c('편관·인성 모두 뚜렷함', tgClear(S, '편관') && clear(S, 4), '', false)],
       blocks: [b('재성이 살을 키우며 인성을 깸', jaePain, lv(2))],
-      toneFn: () => carry >= 60 ? ['mixed', '압박을 공부·자격으로 바꾸는 길은 있지만, 이미 버틸 힘이 있는 편이라 굳이 기댈 흐름은 아니에요.'] : ['good', '센 압박(편관)을 인성이 받아 내 실력으로 바꿔 주는 흐름이에요. 위기에서 크는 타입이에요.'] });
+      toneFn: () => carry >= TH.salin ? ['mixed', '압박을 공부·자격으로 바꾸는 길은 있지만, 이미 버틸 힘이 있는 편이라 굳이 기댈 흐름은 아니에요.'] : ['good', '센 압박(편관)을 인성이 받아 내 실력으로 바꿔 주는 흐름이에요. 위기에서 크는 타입이에요.'] });
     // 5 식신제살
     const sikV = S.tg['식신'], salV = S.tg['편관'];
     const jesal = mk({ key: 'sikjesal', name: '식신제살', from: 1, to: 3,
-      conds: [c('식신이 있음', tgHas(S, '식신'), lt('식신')), c('편관이 있음', tgHas(S, '편관'), lt('편관')), c('식신이 편관을 감당할 만함', sikV >= salV * 0.5, lt('식신') + ' · ' + lt('편관'), false)],
+      conds: [c('식신이 있음', tgHas(S, '식신'), lt('식신')), c('편관이 있음', tgHas(S, '편관'), lt('편관')), c('식신·편관 모두 뚜렷함', tgClear(S, '식신') && tgClear(S, '편관'), '', false), c('식신이 편관을 감당할 만함', sikV >= salV * TH.jesal.carry, lt('식신') + ' · ' + lt('편관'), false), c('일간이 식신을 쓸 힘이 있음(돕는 힘 ' + CFG.carry.weak + '% 이상)', !weakSelf, '돕는 힘 ' + r1(carry) + '%', false)],
       blocks: [b('편인이 식신을 막음(도식)', dosikRaw && !jaeClear, lt('편인'))],
-      toneFn: () => sikV > salV * 2.5 && inF(3) ? ['bad', '내 방식이 너무 앞서 필요한 규칙·조직까지 밀어내기 쉬워요(제살태과). 맞출 땐 맞춰 주는 게 이득이에요.'] : (S.grp[3] >= 20 || inB(3)) ? ['good', '센 압박(편관)을 실력·결과물(식신)로 눌러 다루는 흐름이에요. 위기 대응에 강해요.'] : ['mixed', '압박을 실력으로 다룰 힘은 있지만, 막상 그럴 만큼 센 압박은 많지 않은 편이에요.'] });
+      toneFn: () => sikV > salV * TH.jesal.over && inF(3) ? ['bad', '내 방식이 너무 앞서 필요한 규칙·조직까지 밀어내기 쉬워요(제살태과). 맞출 땐 맞춰 주는 게 이득이에요.'] : (S.grp[3] >= 20 || inB(3)) ? ['good', '센 압박(편관)을 실력·결과물(식신)로 눌러 다루는 흐름이에요. 위기 대응에 강해요.'] : ['mixed', '압박을 실력으로 다룰 힘은 있지만, 막상 그럴 만큼 센 압박은 많지 않은 편이에요.'] });
     // 6 상관견관
     const paeinBlock = clear(S, 4) && (tgHas(S, '정인') || S.grp[4] >= CFG.clear);
     mk({ key: 'gyeongwan', name: '상관견관', from: 1, to: 3,
-      conds: [c('상관이 있음', tgHas(S, '상관'), lt('상관')), c('정관이 있음', tgHas(S, '정관'), lt('정관')), c('상관·정관 중 하나는 천간에 드러남', !!(S.tgExposed['상관'] || S.tgExposed['정관']), '')],
+      conds: [c('상관이 있음', tgHas(S, '상관'), lt('상관')), c('정관이 있음', tgHas(S, '정관'), lt('정관')), c('상관·정관 중 하나는 천간에 드러남', !!(S.tgExposed['상관'] || S.tgExposed['정관']), ''), c('상관이 정관을 누를 만큼 셈', S.tg['상관'] >= S.tg['정관'] * TH.gyeon, lt('상관') + ' · ' + lt('정관'), false)],
       blocks: [b('인성이 상관을 눌러 줌(상관패인)', paeinBlock, lv(4)), b('재성이 상관을 관으로 이어 줌(통관)', jaeClear, lv(2))],
       toneFn: () => inB(3) ? ['mixed', '윗사람·규칙과 부딪히긴 해도, 이 사주엔 답답한 틀을 깨는 게 오히려 숨통이 되기도 해요.'] : ['bad', '말·자기주장(상관)이 규칙·윗사람(정관)과 부딪히기 쉬운 구조예요. 말의 수위가 관건이에요.'] });
     // 7 상관패인
     mk({ key: 'paein', name: '상관패인', from: 4, to: 1,
-      conds: [c('상관이 있음', tgHas(S, '상관'), lt('상관')), c('인성이 있음', has(S, 4), lv(4)), c('인성이 뚜렷함', clear(S, 4), '', false), c('일간이 지나치게 강하지 않음(돕는 힘 65% 이하)', carry <= 65, '돕는 힘 ' + r1(carry) + '%', false)],
+      conds: [c('상관이 뚜렷함', tgClear(S, '상관'), lt('상관')), c('인성이 있음', has(S, 4), lv(4)), c('인성이 뚜렷함', clear(S, 4), '', false), c('식상이 ' + TH.paein.sik + '% 이상', S.grp[1] >= TH.paein.sik, lv(1), false), c('일간이 지나치게 강하지 않음(돕는 힘 ' + TH.paein.help + '% 이하)', carry <= TH.paein.help, '돕는 힘 ' + r1(carry) + '%', false)],
       blocks: [b('재성이 인성을 깸(재극인)', jaePain, lv(2))],
       toneFn: () => inF(1) && !inB(4) && S.grp[1] < 15 ? ['mixed', '말과 재주가 다듬어지긴 하지만, 이 사주엔 표현력이 무기라 너무 참으면 손해예요.'] : ['good', '거친 말·재주(상관)를 공부·원칙(인성)이 다듬어 주는 흐름이에요. 실력이 품격이 돼요.'] });
     // 8 재극인
     mk({ key: 'jaegeugin', name: '재극인', from: 2, to: 4,
-      conds: [c('재성이 뚜렷함', jaeClear, lv(2)), c('인성이 있음', has(S, 4), lv(4)), c('재성이 인성보다 10%p 이상 많음', S.grp[2] >= S.grp[4] + 10, lv(2) + ' · ' + lv(4))],
-      blocks: [b('관성이 재와 인을 이어 줌(재생관→관생인)', clear(S, 3), lv(3))],
+      conds: [c('재성이 뚜렷함', jaeClear, lv(2)), c('인성이 있음', has(S, 4), lv(4)), c('재성이 인성보다 ' + TH.geugin + '%p 이상 많음', S.grp[2] >= S.grp[4] + TH.geugin, lv(2) + ' · ' + lv(4))],
+      blocks: [b('관성이 재와 인을 이어 줌(재생관→관생인)', clear(S, 3), lv(3)), b('비겁이 재성을 눌러 인성을 지킴', clear(S, 0), lv(0))],
       toneFn: () => inB(4) ? ['good', '생각만 많던 일을 현실이 정리해 주는 쪽이라, 머리로 고민하기보다 움직일수록 풀려요.'] : inF(4) ? ['bad', '이 사주에 필요한 인성(공부·문서·도움)을 돈·현실 문제가 깎는 구조예요. 공부와 돈 사이 줄다리기가 생겨요.'] : ['mixed', '현실 감각이 생각을 앞서는 구조예요. 공부보다 실전으로 배우는 편이에요.'] });
     // 9 도식(효신탈식)
     mk({ key: 'dosik', name: '도식(효신탈식)', from: 4, to: 1,
-      conds: [c('편인이 천간에 드러남', !!S.tgExposed['편인'], lt('편인')), c('편인이 뚜렷함', tgClear(S, '편인'), lt('편인')), c('식신이 있음', tgHas(S, '식신'), lt('식신'))],
+      conds: [c('편인이 천간에 드러남', !!S.tgExposed['편인'], lt('편인')), c('편인이 뚜렷함', tgClear(S, '편인'), lt('편인')), c('식신이 있음', tgHas(S, '식신'), lt('식신')), c('편인이 식신보다 셈', S.tg['편인'] >= S.tg['식신'] * TH.dosik, lt('편인') + ' · ' + lt('식신'), false)],
       blocks: [b('재성이 편인을 눌러 줌(재제효)', jaeClear, lv(2))],
       toneFn: () => inF(1) ? ['bad', '필요한 식신(꾸준한 결과물)을 편인(걱정·딴생각)이 가로막아, 시작은 많고 마무리가 약해지기 쉬워요.'] : ['mixed', '걱정이 손을 잡아끌 때가 있지만, 이 사주에선 그 손해가 크지 않아요.'] });
     // 10 관살혼잡
     const hapSal = (S.tgExposed['편관'] || []).length === 0 && S.exposedBound[3].length > 0;
     mk({ key: 'honjap', name: '관살혼잡', from: 3, to: 3,
-      conds: [c('정관이 있음', tgHas(S, '정관'), lt('정관')), c('편관이 있음', tgHas(S, '편관'), lt('편관')), c('정관·편관 중 하나는 천간에 드러남', !!(S.tgExposed['정관'] || S.tgExposed['편관']), '', false), c('둘 다 힘이 있음', tgClear(S, '정관') && tgClear(S, '편관'), '', false)],
+      conds: [c('정관이 있음', tgHas(S, '정관'), lt('정관')), c('편관이 있음', tgHas(S, '편관'), lt('편관')), c('정관·편관 중 하나는 천간에 드러남', !!(S.tgExposed['정관'] || S.tgExposed['편관']), ''), c('정관·편관 모두 천간에 드러남(지지에만 섞이면 약하게)', !!(S.tgExposed['정관'] && S.tgExposed['편관']), '', false), c('둘 다 힘이 있음', tgClear(S, '정관') && tgClear(S, '편관'), '', false)],
       blocks: [b('식신제살로 정리됨', jesal.status === 'on', ''), b('편관이 합으로 묶임(합살)', hapSal, '')],
       toneFn: () => carry >= 55 ? ['mixed', '규칙과 압박이 섞여 있지만 내 힘이 받쳐 줘서, 여러 책임을 동시에 쥐는 쪽으로 쓰여요.'] : ['bad', '기준이 여러 개 겹쳐(정관+편관) 무엇을 따라야 할지 흔들리기 쉬워요. 책임이 몰릴 땐 우선순위부터 정해 두세요.'] });
     // 11 비겁쟁재
     mk({ key: 'bigeopjaeng', name: '비겁쟁재', from: 0, to: 2,
-      conds: [c('비겁이 많음(30% 이상)', S.grp[0] >= 30, lv(0)), c('재성이 조금이라도 있음', S.grp[2] >= 2 || S.root[2] > 0 || S.exposed[2].length > 0, lv(2)), c('재성이 비겁보다 적음(25% 이하)', S.grp[2] <= 25, lv(2))],
+      conds: [c('비겁이 많음(' + TH.jaeng.bigeop + '% 이상)', S.grp[0] >= TH.jaeng.bigeop, lv(0)), c('재성이 조금이라도 있음', S.grp[2] >= 2 || S.root[2] > 0 || S.exposed[2].length > 0, lv(2)), c('재성이 비겁보다 적음(' + TH.jaeng.jae + '% 이하)', S.grp[2] <= TH.jaeng.jae, lv(2))],
       blocks: [b('관성이 비겁을 눌러 재를 지킴(관제비겁)', clear(S, 3), lv(3)), b('식상이 비겁 기운을 재로 이어 줌(통관)', clear(S, 1), lv(1))],
       toneFn: () => inB(2) ? ['mixed', '돈을 두고 나눔·경쟁이 생기지만, 이 사주엔 혼자 다 쥐기보다 나누는 게 오히려 편할 때도 있어요.'] : ['bad', '같이 하는 사람·경쟁자와 돈·몫을 나누게 되기 쉬운 구조예요. 동업·보증·공동 지출은 선을 그어 두세요.'] });
     out.forEach(o => { o.easy = EASY_IX[o.key] || ''; o.fromK = GN[o.from]; o.toK = GN[o.to]; o.statusK = STATUS_K[o.status]; o.toneK = TONE_K[o.tone] || ''; o.roleFrom = roleName(o.from); o.roleTo = roleName(o.to); });
@@ -220,16 +224,16 @@
       add('jaegwan', '재생관형', on('jaesaenggwan'), on('jaesaenggwan') && on('jaesaenggwan').tone, '재성이 관성을 키움');
       add('honjap', '관살혼잡형', on('honjap'), on('honjap') && on('honjap').tone, '정관과 편관이 섞임');
       add('gyeon', '상관견관형', on('gyeongwan'), on('gyeongwan') && on('gyeongwan').tone, '관이 상관에게 다침');
-      add('taegwa', '관살태과형', S.grp[3] >= 30 && carry < 40 && !clear(S, 4), 'bad', '관이 많은데 받아 줄 인성이 약함');
+      add('taegwa', '관살태과형', S.grp[3] >= CFG.th.gwanda && carry < CFG.carry.sinyak && !clear(S, 4), 'bad', '관이 많은데 받아 줄 인성이 약함');
       add('muryeok', '관성 무력형', !pres, v > 0 ? 'bad' : 'mixed', '관성이 거의 없어 규칙·틀이 약함');
       if (!T.length) add('base', '관성 기본형', true, v > 0 ? 'good' : v < 0 ? 'bad' : 'mixed', '특별한 구조 없이 자리를 지킴');
     } else if (g === 0) {
       add('jaeng', '비겁쟁재형', on('bigeopjaeng'), on('bigeopjaeng') && on('bigeopjaeng').tone, '비겁이 재를 나눠 가짐');
       add('saeng', '비겁생식형', S.grp[0] >= 25 && clear(S, 1), 'good', '넘치는 힘을 식상으로 내보냄');
       add('je', '관제비겁형', S.grp[0] >= 25 && clear(S, 3) && !clear(S, 1), 'good', '관성이 비겁을 다스림');
-      add('help', '신약 보조형', carry < 42 && pres, 'good', '약한 나를 받쳐 줌');
-      add('excess', '비겁 과다형', S.grp[0] >= 40 && !clear(S, 1) && !clear(S, 3), 'bad', '고집·독립심이 넘치는데 빠질 길이 적음');
-      add('none', '비겁 부족형', S.grp[0] < 6, v > 0 ? 'bad' : 'mixed', '나와 같은 편이 적어 혼자 버팀');
+      add('help', '신약 보조형', carry < CFG.carry.sinyak && pres, 'good', '약한 나를 받쳐 줌');
+      add('excess', '비겁 과다형', S.grp[0] >= CFG.th.jaeng.bigeop && !clear(S, 1) && !clear(S, 3), 'bad', '고집·독립심이 넘치는데 빠질 길이 적음');
+      add('none', '비겁 부족형', S.grp[0] < CFG.present, v > 0 ? 'bad' : 'mixed', '나와 같은 편이 적어 혼자 버팀');
       if (!T.length) add('base', '비겁 기본형', true, v > 0 ? 'good' : v < 0 ? 'bad' : 'mixed', '자기 몫을 지키는 정도');
     } else if (g === 1) {
       add('saengjae', '식상생재형', on('siksaengjae'), on('siksaengjae') && on('siksaengjae').tone, '결과물이 돈으로 이어짐');
@@ -237,14 +241,14 @@
       add('gyeon', '상관견관형', on('gyeongwan'), on('gyeongwan') && on('gyeongwan').tone, '말·주장이 규칙과 부딪힘');
       add('paein', '상관패인형', on('paein'), on('paein') && on('paein').tone, '인성이 상관을 다듬음');
       add('dosik', '도식 피해형', on('dosik'), on('dosik') && on('dosik').tone, '편인에 막힘');
-      add('seolgi', '설기 과다형', S.grp[1] >= 25 && carry < 35, 'bad', '내보내는 힘이 커서 기운이 빠짐');
+      add('seolgi', '설기 과다형', S.grp[1] >= CFG.th.seolgi && carry < CFG.carry.sinyak, 'bad', '내보내는 힘이 커서 기운이 빠짐');
       add('none', '표현 부족형', !pres, v > 0 ? 'bad' : 'mixed', '내보낼 통로가 적어 속으로 쌓음');
       if (!T.length) add('base', '식상 기본형', true, v > 0 ? 'good' : v < 0 ? 'bad' : 'mixed', '필요한 만큼 표현함');
     } else if (g === 2) {
       add('saenggwan', '재생관형', on('jaesaenggwan'), on('jaesaenggwan') && on('jaesaenggwan').tone, '돈이 자리로 이어짐');
       add('result', '생재 결과형', on('siksaengjae'), on('siksaengjae') && on('siksaengjae').tone, '식상의 결과로 들어오는 돈');
       add('geugin', '재극인형', on('jaegeugin'), on('jaegeugin') && on('jaegeugin').tone, '현실이 생각·공부를 누름');
-      add('jaeda', '재다신약형', S.grp[2] >= 35 && carry < 35, 'bad', '돈·일이 많아 감당이 버거움');
+      add('jaeda', '재다신약형', S.grp[2] >= CFG.th.jaeda && carry < CFG.carry.sinyak, 'bad', '돈·일이 많아 감당이 버거움');
       add('jaeng', '쟁재 피해형', on('bigeopjaeng'), on('bigeopjaeng') && on('bigeopjaeng').tone, '비겁에게 몫을 빼앗김');
       add('none', '재성 부족형', !pres, v > 0 ? 'bad' : 'mixed', '돈을 다루는 감각이 약하게 드러남');
       if (!T.length) add('base', '재성 기본형', true, v > 0 ? 'good' : v < 0 ? 'bad' : 'mixed', '번 만큼 쓰는 무난한 흐름');
@@ -253,14 +257,16 @@
       add('paein', '상관패인형', on('paein'), on('paein') && on('paein').tone, '상관을 다듬음');
       add('dosik', '도식형', on('dosik'), on('dosik') && on('dosik').tone, '식신을 가로막음');
       add('geug', '재극인 피해형', on('jaegeugin'), on('jaegeugin') && on('jaegeugin').tone === 'bad' ? 'bad' : 'mixed', '재성에게 깎임');
-      add('mowang', '인성 과다형', S.grp[4] >= 35 && S.grp[0] <= 20, 'bad', '도움이 넘쳐 내가 묻힘(모왕자쇠)');
-      add('help', '신약 보조형', carry < 42 && pres, 'good', '약한 나를 받쳐 줌');
+      add('mowang', '인성 과다형', S.grp[4] >= CFG.th.inda, 'bad', S.grp[0] <= CFG.th.mowangSelf ? '도움이 넘쳐 내가 묻힘(모왕자쇠)' : '생각·기댈 곳이 많아 움직임이 느려짐');
+      add('help', '신약 보조형', carry < CFG.carry.sinyak && pres, 'good', '약한 나를 받쳐 줌');
       add('none', '인성 부족형', !pres, v > 0 ? 'bad' : 'mixed', '기댈 곳이 적어 스스로 배움');
       if (!T.length) add('base', '인성 기본형', true, v > 0 ? 'good' : v < 0 ? 'bad' : 'mixed', '필요한 만큼 받쳐 줌');
     }
     T.forEach(t => { if (!t.tone) t.tone = 'mixed'; });
-    return T;
+    const rank = t => { const x = IX.filter(o => o.key === TYPE_IX[t.key])[0]; return x ? (x.status === 'on' ? 0 : 2) : 1; };   // 온전히 성립 → 비율·강약 유형 → 약하게 성립
+    return T.map((t, i) => [t, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(x => x[0]);
   }
+  const TYPE_IX = { gwanin: 'gwanin', jesal: 'sikjesal', jaegwan: 'jaesaenggwan', honjap: 'honjap', gyeon: 'gyeongwan', jaeng: 'bigeopjaeng', saengjae: 'siksaengjae', paein: 'paein', dosik: 'dosik', saenggwan: 'jaesaenggwan', result: 'siksaengjae', geugin: 'jaegeugin', geug: 'jaegeugin' };
   function forceName(p) { for (const [lim, nm] of CFG.force) if (p < lim) return nm; return '과다'; }
 
   function groupsOf(M, ch, S, IX, R) {

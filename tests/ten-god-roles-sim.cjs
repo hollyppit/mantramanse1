@@ -86,7 +86,23 @@ for (let i = 0; i < N; i++) {
   if (A.salin.status !== 'off' && A.salin.tone === 'good' && h < 40) found('신약 살인상생 유리', inp);
   if (A.sikjesal.status !== 'off' && A.sikjesal.tone === 'bad') found('제살태과(식신제살 불리)', inp);
   if (A.jaegeugin.status !== 'off' && A.jaegeugin.tone === 'good') found('재극인 유리(넘치는 인성 정리)', inp);
+  // 문턱값 명리 검수(2026-11-18): 비율·강약 유형은 용신 탭 패턴(engine.js patterns)과 같은 기준이라 엇갈리지 않는다
+  const pn = new Set(ch.patterns.list.map(x => x.name));
+  assert.equal(has(2, 'jaeda'), pn.has('재다신약'), '재다신약형 = 엔진 재다신약');
+  assert.equal(has(1, 'seolgi'), pn.has('식상과다(설기)'), '설기 과다형 = 엔진 식상과다');
+  assert.equal(has(4, 'mowang'), pn.has('인성과다'), '인성 과다형 = 엔진 인성과다');
+  if (has(3, 'taegwa')) assert.ok(pn.has('관살과다'), '관살태과형이면 엔진 관살과다');
+  if (A.bigeopjaeng.status !== 'off') assert.ok(pn.has('군겁쟁재'), '비겁쟁재 성립이면 엔진 군겁쟁재');
+  // 대표 작용: 온전히 성립한 구조가 있으면 약하게 성립한 구조보다 앞
+  r.groups.forEach(g => { const st = t => { const k = { gwanin: 'gwanin', jesal: 'sikjesal', jaegwan: 'jaesaenggwan', honjap: 'honjap', gyeon: 'gyeongwan', jaeng: 'bigeopjaeng', saengjae: 'siksaengjae', paein: 'paein', dosik: 'dosik', saenggwan: 'jaesaenggwan', result: 'siksaengjae', geugin: 'jaegeugin', geug: 'jaegeugin' }[t.key]; return k ? A[k].status : null; };
+    if (g.types.some(t => st(t) === 'on')) assert.notEqual(st(g.main), 'weak', '대표 작용은 온전히 성립한 쪽 ' + g.name); });
 }
+// 문턱값이 격국 카드(gyeok-structure.js CFG.sip)와 같은 값인지 — 한쪽만 바뀌어 판정이 갈라지지 않게
+{ const th = T.CFG.th, sip = ctx.MantraGyeokStructure.CFG.sip;
+  assert.equal(th.jaeng.bigeop, sip.gunGeop); assert.equal(th.jaeng.jae, sip.gunJae); assert.equal(th.geugin, sip.jaepain);
+  assert.equal(th.gwanin, sip.gwaninHelp); assert.equal(th.salin, sip.salinHelp); assert.equal(th.paein.help, sip.paeinHelp); assert.equal(th.paein.sik, sip.paeinSik);
+  assert.equal(T.CFG.carry.weak, sip.saengjaeHelp); assert.equal(T.CFG.carry.base, sip.jaegwanHelp);
+  assert.equal(th.mowangSelf, ctx.MantraGyeokStructure.CFG.mowang.self); }
 // 시간 모름
 { const ch = M.compute({ year: 1990, month: 5, day: 15, hour: null, minute: 0, gender: 'F' }); const r = T.analyze(M, ch); assert.equal(r.groups.length, 5); assert.ok(!ch.pillars.hour || !ch.hourKnown); found('시간 모름', { hour: null }); }
 const need = ['신강', '신약', '중화', '종격', '억부·조후 불일치', '억부·조후 용신 같음', '조후 해당 없음', '시간 모름', ...['식상생재', '재생관', '관인상생', '살인상생', '식신제살', '상관견관', '상관패인', '재극인', '도식(효신탈식)', '관살혼잡', '비겁쟁재'].map(x => '구조:' + x), '관성 무력형', '관살태과형', '재다신약형', '인성 과다형', '비겁 과다형', '설기 과다형'];
@@ -146,7 +162,7 @@ Object.entries(cmp).forEach(([k, v]) => console.log(' · ' + k + ': ' + (typeof 
 {
   const rd = f => fs.readFileSync(path.join(root, f), 'utf8'), html = rd('index.html');
   assert.ok(/tenGodRoles: false/.test(rd('feature-flags.js')), 'feature-flags.js tenGodRoles 기본 꺼짐');
-  assert.ok(/'tenGodRoles'\]\);/.test(rd('functions/api/luck-flags.js')), 'luck-flags NAMES 에 tenGodRoles');
+  assert.ok(/'tenGodRoles'(, '[a-zA-Z]+')*\]\);/.test(rd('functions/api/luck-flags.js')), 'luck-flags NAMES 에 tenGodRoles');
   assert.ok(/'tenGodRoles'(, '[a-zA-Z]+')*\]\.forEach/.test(html), '사용자 화면이 관리자 스위치 tenGodRoles 를 읽음');
   assert.ok(/<script src="ten-god-roles\.js"><\/script>/.test(html), 'index.html 이 모듈을 읽음');
   assert.ok(/const tgrOn = \(\) => !!\(window\.MANTRA_FLAGS && window\.MANTRA_FLAGS\.tenGodRoles === true/.test(html), '화면은 스위치 뒤에');
