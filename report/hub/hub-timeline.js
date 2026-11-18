@@ -73,8 +73,8 @@
     graphP = Promise.all([root.MantraTLGraph ? Promise.resolve() : H.load('/report/hub/timeline-graph.js?v=20261116-mistem').catch(function () { }), flagsJson(), root.MantraNatal ? Promise.resolve() : H.load('/report/natal-table.js?v=20261116-natal2').catch(function () { })]).then(function (r) {
       var F = root.MANTRA_FLAGS || {}, f = r[1] || {}, lc = F.luckCycle === true || f.luckCycle === true, ef = F.elementFlow === true || f.elementFlow === true;
       // 운 분석 층(2026-11-18, 만세력 운세 흐름과 같은 계산): 외부 환경·전환·상하위(luckEnv) · 오행 겹쳐 보기(luckOverlay) · 십성 작용(tenGodRoles) · 시대 흐름(macroEra)
-      var on = function (k) { return F[k] === true || f[k] === true; }, lv = { luckEnv: on('luckEnv'), luckOverlay: on('luckOverlay'), tenGodRoles: on('tenGodRoles'), macroEra: on('macroEra') }, LV_V = '?v=20261118-lv11';
-      var need = [].concat(lv.luckOverlay ? ['/luck-overlay.js'] : [], lv.tenGodRoles || lv.luckEnv ? ['/ten-god-roles.js'] : [], lv.luckEnv ? ['/luck-env.js'] : [], lv.macroEra ? ['/fengshui-data.js', '/fengshui-engine.js', '/macro-era.js', '/macro-era-bridge.js'] : [], ['/luck-layers-view.js']);
+      var on = function (k) { return F[k] === true || f[k] === true; }, lv = { luckEnv: on('luckEnv'), luckOverlay: on('luckOverlay'), tenGodRoles: on('tenGodRoles'), macroEra: on('macroEra'), luckAlerts: on('luckAlerts') }, LV_V = '?v=20261118-lv13';
+      var need = [].concat(lv.luckOverlay ? ['/luck-overlay.js'] : [], lv.tenGodRoles || lv.luckEnv ? ['/ten-god-roles.js'] : [], lv.luckEnv ? ['/luck-env.js'] : [], lv.macroEra ? ['/fengshui-data.js', '/fengshui-engine.js', '/macro-era.js', '/macro-era-bridge.js'] : [], lv.luckAlerts ? ['/luck-alerts.js'] : [], ['/luck-layers-view.js']);
       var seq = function (list) { return list.reduce(function (pr, u) { return pr.then(function () { return H.load(u + LV_V).catch(function () { }); }); }, Promise.resolve()); };
       return Promise.all([lc && !root.MantraLuckCycle ? H.load('/luck-cycle.js?v=20261118-ls').catch(function () { }) : Promise.resolve(), root.MantraLuckView ? Promise.resolve() : seq(need)]).then(function () { return { lc: lc && !!root.MantraLuckCycle, ef: ef, lv: root.MantraLuckView ? lv : null, ow: f.overlayWeights || null }; });
     }).catch(function () { return { lc: false, ef: false }; });
@@ -217,18 +217,31 @@
     var LCm = function () { return GF && GF.lc && root.MantraLuckCycle ? root.MantraLuckCycle : null; }, lcSpans = null;
     // 운 분석 층(luck-layers-view.js): 시기 카드 아래 ①외부 환경 ②내 사주 반응 ③상위·하위 운 ④영역 + 지장간, 대운 그래프 위 시대 흐름
     var LV = GF && GF.lv && root.MantraLuckView ? root.MantraLuckView : null;
-    if (LV && !DOC.getElementById('lv-css')) { var lvs = DOC.createElement('style'); lvs.id = 'lv-css'; lvs.textContent = LV.CSS + '#hub .lv-sec{--lv-line:rgba(205,178,122,.3)}#hub .lv-era{color:#1b1b1b}#hub .lv-nf{--lv-halo:#e9eef0}html:not(.theme-mist) #hub .lv-nf{--lv-halo:#17161d}html:not(.theme-mist) #hub .lv-et0{fill:#8fd19c}html:not(.theme-mist) #hub .lv-et1{fill:#f39a86}html:not(.theme-mist) #hub .lv-et2{fill:#ecc970}html:not(.theme-mist) #hub .lv-et3{fill:#dfe3ea}html:not(.theme-mist) #hub .lv-et4{fill:#8fb0ec}'; DOC.head.appendChild(lvs); }
+    if (LV && !DOC.getElementById('lv-css')) { var lvs = DOC.createElement('style'); lvs.id = 'lv-css'; lvs.textContent = LV.CSS + '#hub .lv-sec{--lv-line:rgba(205,178,122,.3)}#hub .lv-era{color:#1b1b1b}#hub .lv-nf{--lv-halo:#e9eef0}#hub .lv-qr.good .lv-qt,#hub .lv-qr.good b,#hub .lv-qr.good .lv-qm,html:not(.theme-mist) #hub .lv-qr.good .lv-qt,html:not(.theme-mist) #hub .lv-qr.good b,html:not(.theme-mist) #hub .lv-qr.good .lv-qm{color:#178a4a!important}#hub .lv-qr.bad .lv-qt,#hub .lv-qr.bad b,#hub .lv-qr.bad .lv-qm,html:not(.theme-mist) #hub .lv-qr.bad .lv-qt,html:not(.theme-mist) #hub .lv-qr.bad b,html:not(.theme-mist) #hub .lv-qr.bad .lv-qm{color:#c9412d!important}html:not(.theme-mist) #hub .lv-qr.good .lv-qt,html:not(.theme-mist) #hub .lv-qr.good b,html:not(.theme-mist) #hub .lv-qr.good .lv-qm{color:#5fd68d!important}html:not(.theme-mist) #hub .lv-qr.bad .lv-qt,html:not(.theme-mist) #hub .lv-qr.bad b,html:not(.theme-mist) #hub .lv-qr.bad .lv-qm{color:#ff7a66!important}#hub .lv-up,#hub b.lv-up,#hub .lv-r.good,#hub .lv-d.good{color:#178a4a!important}#hub .lv-down,#hub b.lv-down,#hub .lv-r.bad,#hub .lv-d.bad{color:#c9412d!important}html:not(.theme-mist) #hub .lv-up,html:not(.theme-mist) #hub b.lv-up,html:not(.theme-mist) #hub .lv-r.good,html:not(.theme-mist) #hub .lv-d.good{color:#5fd68d!important}html:not(.theme-mist) #hub .lv-down,html:not(.theme-mist) #hub b.lv-down,html:not(.theme-mist) #hub .lv-r.bad,html:not(.theme-mist) #hub .lv-d.bad{color:#ff7a66!important}html:not(.theme-mist) #hub .lv-nf{--lv-halo:#17161d}html:not(.theme-mist) #hub .lv-et0{fill:#8fd19c}html:not(.theme-mist) #hub .lv-et1{fill:#f39a86}html:not(.theme-mist) #hub .lv-et2{fill:#ecc970}html:not(.theme-mist) #hub .lv-et3{fill:#dfe3ea}html:not(.theme-mist) #hub .lv-et4{fill:#8fb0ec}'; DOC.head.appendChild(lvs); }
     function lvHtml(it, lvl, extra) { extra = extra || ''; var h = ''; if (LV && it && it._ref && it._ref.p) { try { h = LV.card(M, ch, it._ref.p, lvl, { flags: GF.lv, esc: esc, weights: GF.ow || undefined, noFigure: true }); } catch (e) { h = ''; } } if (!h) return extra; return '<details class="tq-fold tq-lvf"><summary>더 깊이 보기 · 운과 원국의 구조 · 오행·십성으로 본 이 시기</summary>' + extra + h + '</details>'; }   /* 구조·오행 흐름(structHtml)도 함께 접는다 */
     function pairOf(y) { var LC = LCm(); if (!LC) return null; try { return LC.seunPair(M, ch, y); } catch (e) { return null; } }
     function qkHtml(it, lvl, cp) {
       if (!LV || !LV.quick || !it || !it._ref || !it._ref.p) return '';
       var extra = [], pr = lvl === 'seun' ? pairOf(it.year) : null;
-      if (pr) extra.push(['2년 흐름', esc(pr.hook) + ' <small class="tq-q-sm">' + pr.start + '~' + pr.end + '년 천간 ' + esc(M.EL_K[pr.el]) + '</small>']);
+      if (pr) extra.push(['2년 흐름', esc(pr.hook) + ' <small class="tq-q-sm">' + pr.start + '~' + pr.end + '년 천간 ' + esc(M.EL_K[pr.el]) + '</small>', pr.tone === 'good' ? 'good' : pr.tone === 'bad' ? 'bad' : '']);
       var after = cp && cp.trap ? [['조심할 것', esc(cp.trap)]] : [];
       try { return LV.quick(M, ch, it._ref.p, lvl, { flags: GF.lv, esc: esc, weights: GF.ow || undefined, extra: extra, todo: cp && cp.do, after: after }); } catch (e) { return ''; }
     }
     // 오행 겹쳐 보기 그림(만세력과 같은 그림): 시기 카드 안에 접지 않고 바로 보인다
     function ovFig(it, lvl) { if (!LV || !GF.lv.luckOverlay || !it || !it._ref || !it._ref.p) return ''; try { return LV.overlayFigure(M, ch, it._ref.p, lvl, { flags: GF.lv, esc: esc, weights: GF.ow || undefined }); } catch (e) { return ''; } }
+    // 뚜렷한 신호 자동 알림(2026-11-18, luck-alerts.js · 스위치 luckAlerts): 인연·재물·커리어·건강 중 이 사주 평소보다 특별히 좋거나 안 좋은 날(7일)·이번 달
+    var AL_OFF = 'mt_alert_off_tl', todayKey = (function () { var d = new Date(now + 9 * 3600e3); return d.getUTCFullYear() + '-' + (d.getUTCMonth() + 1) + '-' + d.getUTCDate(); })();
+    function alertsHtml() {
+      if (PREVIEW || !GF || !GF.lv || !GF.lv.luckAlerts || !root.MantraLuckAlerts) return '';
+      try { if (localStorage.getItem(AL_OFF) === todayKey) return ''; } catch (e) { }
+      var r = []; try { r = root.MantraLuckAlerts.scan(M, ch, { set: 'timeline', now: now, max: 3 }); } catch (e) { r = []; }
+      if (!r.length) return '';
+      var NM = { career: '커리어' };
+      return '<aside class="tq-alerts" id="tqAlerts" role="status" aria-live="polite"><div class="tq-al-h"><b>🔔 눈여겨볼 신호</b><span>내 사주 평소보다 뚜렷한 날만 골랐어요</span><button type="button" class="tq-al-x" data-al-off aria-label="오늘은 알림 닫기">오늘 닫기</button></div>' +
+        r.map(function (a) { return '<div class="tq-al ' + a.side + '"><p><span class="tq-al-t">' + (a.side === 'good' ? '좋은 신호' : '주의 신호') + '</span><b>' + esc(a.when + ' · ' + (NM[a.key] || a.name)) + '</b></p><p>' + esc(a.line) + ' <span class="tq-al-do">' + esc(a.todo) + '</span></p>' + (a.why ? '<p class="tq-al-why">근거: ' + esc(a.why) + '</p>' : '') + '</div>'; }).join('') +
+        '<p class="tq-al-n">명리 지표로 본 참고 신호예요. 일어날 일을 정하지 않아요.</p></aside>';
+    }
+    if (!root.__tqAlBound) { root.__tqAlBound = true; DOC.addEventListener('click', function (e) { var b = e.target && e.target.closest && e.target.closest('[data-al-off]'); if (!b) return; var d = new Date(Date.now() + 9 * 3600e3); try { localStorage.setItem('mt_alert_off_tl', d.getUTCFullYear() + '-' + (d.getUTCMonth() + 1) + '-' + d.getUTCDate()); } catch (x) { } var el = DOC.getElementById('tqAlerts'); if (el) el.remove(); if (H.track) H.track('alert_dismiss', { where: 'timeline' }); }); }   /* 한 번만 건다 */
     function eraHtml() { if (!LV || !GF.lv.macroEra) return ''; var h = ''; try { h = LV.era(M, ch, now, { flags: GF.lv, esc: esc, compact: true }); } catch (e) { } return h ? '<h4 class="tq-h4">시대의 바람 · 20년</h4><div class="tq-lc"><p class="tq-lc-k">삼원구운 · 모두에게 공통인 큰 날씨</p>' + h + '</div>' : ''; }
     function lcSteps(r) { return '<ol class="tq-lc-steps"><li><b>오행의 특징</b>' + esc(r.steps.trait) + '</li><li><b>나에게 미치는 영향</b>' + esc(r.steps.impact) + '</li><li><b>추천 전략</b>' + esc(r.steps.strategy) + '</li></ol>' + (r.basis && r.basis.length ? '<details class="tq-how"><summary>판단 근거 보기</summary><ul class="tq-lc-basis">' + r.basis.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul><p class="tq-sub">미리 써 둔 문구를 이 사주의 계산값으로 골라 조합했어요(AI 미사용). 흐름 점수는 바꾸지 않아요.</p></details>' : ''); }
     // 장기 운세 요약(2026-11-18): 대운 3개를 하나의 오행·하나의 길흉으로 묶던 30년 구간 판정을 걷고, 대운마다의 흐름과 그 사이 변화를 순서대로 보여 준다(luck-cycle.js longSummary)
@@ -294,9 +307,10 @@
       }
       // 원국 바로 아래 오행 흐름(2026-11-18, 만세력 오행·강약 탭과 같은 그림·판정 — luck-layers-view.js natalFlowFigure)
       var nf = ''; try { nf = LV ? LV.natalFlowFigure(M, ch, { esc: esc }) : ''; } catch (e) { nf = ''; }
-      return cols + (nf ? '<div class="tq-box tq-nf"><h4>내 사주의 기운 흐름 <small>오행이 서로 돕고(생) 누르는(극) 모습</small></h4>' + nf + '</div>' : '') + (ch.hourKnown ? '' : '<p class="tq-sub">출생 시각을 몰라 시주(時柱) 없이 계산했습니다. 일간·일주는 날짜 기준이라 그대로입니다.</p>') +
+      var nfBox = nf ? '<div class="tq-box tq-nf"><h4>내 사주의 기운 흐름 <small>오행이 서로 돕고(생) 누르는(극) 모습</small></h4>' + nf + '</div>' : '';   // 일간·일주와 오행·십성 아래에 둔다(2026-11-18)
+      return cols + (ch.hourKnown ? '' : '<p class="tq-sub">출생 시각을 몰라 시주(時柱) 없이 계산했습니다. 일간·일주는 날짜 기준이라 그대로입니다.</p>') +
         '<div class="tq-two"><div class="tq-box tq-me"><h4>' + tip('일간') + ' · ' + tip('일주') + '</h4><p class="tq-ju"><b>' + esc(M.STEM[day.s] + M.BR[day.b]) + '</b><span>' + esc(ju) + '일주</span></p>' + (ig ? '<p class="tq-line">' + esc(String(ig.line).replace(/\n/g, ' ')) + '</p>' : '') + (jc ? '<p class="tq-trait">' + esc(jc.trait) + '</p>' : S5.strength ? '<p class="tq-trait">' + esc(S5.strength) + '</p>' : '') +
-        '<a class="tq-lnk" href="#/awaken?replay=1&to=timeline" data-track="fortune_content_click" data-p="ilju_replay">일주 각성 영상 다시 보기 →</a></div>' + els + '</div>' + (G.ziwei && TG && TG.ziwei ? zwHtml() : zw);
+        '<a class="tq-lnk" href="#/awaken?replay=1&to=timeline" data-track="fortune_content_click" data-p="ilju_replay">일주 각성 영상 다시 보기 →</a></div>' + els + '</div>' + nfBox + (G.ziwei && TG && TG.ziwei ? zwHtml() : zw);
     }
     // 2026-11-13: 자미두수 — 만세력 자미두수 탭의 "쉽게 보기"와 10년 대한·유년 그래프(같은 계산: timeline-graph.js ziwei)
     function zwHtml() {
@@ -391,17 +405,19 @@
     var secs = [{ id: 'free', title: '오늘 · 무료 콘텐츠', sub: '오늘의 일진과 바로 볼 수 있는 무료 풀이' }].concat(TC.sections.filter(function (s) { return s.enabled !== false && s.id !== 'free' && s.id !== 'mine'; })).concat([{ id: 'mine', title: '내 정보', sub: '마이페이지 · 출생정보 관리' }]);
     var builders = { free: freeHtml, birth: birthHtml, flow: flowHtml, now: nowHtml, themes: themesHtml, mine: mineHtml };
     var heroBg = asset('archive'), pos = Q.assetFocus(cfg, 'archive', mobile);
-    var html = '<div class="tq" id="tq"><header class="tq-hero" style="--hero:url(\'' + esc(heroBg) + '\');--pos:' + esc(pos) + '"><p class="kick">MANTRA · FATE TIMELINE</p><h1>운명의 타임라인</h1>' + (nm ? '<p class="tq-who">' + esc(A()) + '</p>' : '') + birthLine() + '<p class="tq-intro">' + esc(O.fill(TC.texts.intro, nm, cfg)) + '</p></header>' +
+    var html = '<div class="tq" id="tq"><header class="tq-hero" style="--hero:url(\'' + esc(heroBg) + '\');--pos:' + esc(pos) + '"><p class="kick">MANTRA · FATE TIMELINE</p><h1>운명의 타임라인</h1>' + (nm ? '<p class="tq-who">' + esc(A()) + '</p>' : '') + birthLine() + '<p class="tq-intro">' + esc(O.fill(TC.texts.intro, nm, cfg)) + '</p></header>' + alertsHtml() +
       '<nav class="tq-nav" id="tqNav" aria-label="타임라인 영역">' + secs.map(function (s, i) { return '<a href="#tq-' + s.id + '" data-z="' + s.id + '"><i>' + (i + 1) + '</i>' + esc(s.title) + '</a>'; }).join('') + (PREVIEW ? '' : '<a class="tq-edit" href="#/me" data-track="mypage_open" data-p="timeline_nav" aria-label="마이페이지">' + ME_ICON + ' 마이페이지</a>') + '</nav>' +
       secs.map(function (s, i) { return '<section class="tq-sec" id="tq-' + s.id + '" data-z="' + s.id + '">' + (s.id === 'birth' && !PREVIEW ? avatarHtml() : '') + '<div class="tq-sech"><span>' + (i + 1) + '</span><div><h2>' + esc(s.title) + '</h2>' + (s.sub ? '<p>' + esc(s.sub) + '</p>' : '') + '</div></div><div class="tq-body" id="tqb-' + s.id + '">' + builders[s.id]() + '</div></section>'; }).join('') +
       '<footer class="tq-foot"><p class="dis">' + esc(TC.texts.notice) + '</p></footer></div>';
     var el = H.view(html);
+    var swPaint = function (x) { if (root.MantraSignalColors && x) { try { root.MantraSignalColors.paint(x); } catch (e) { } } };   // 좋은 신호·주의할 신호 글자 색(signal-colors.js)
+    swPaint(el);
     DOC.body.classList.add('tq-wide'); var prevClean = H.cleanup; H.cleanup = function () { DOC.body.classList.remove('tq-wide'); if (io) io.disconnect(); if (prevClean) prevClean(); };
     var root0 = $('#tq', el);
     if (!PREVIEW && H.Auth && H.Auth.badge) H.Auth.badge(root0);   // 1:1 문의 새 답변 표시(hub-me.js)
     if (!PREVIEW) loadNyEntry().then(function () { var s = $('#tqNy', root0); if (s && H.alive(ctx)) s.innerHTML = nyEntryHtml(); });   // 신년운세 입구 카드(관리자 설정)
 
-    function redraw(id) { var b = $('#tqb-' + id, root0); if (b) { var y = root.scrollY; b.innerHTML = builders[id](); root.scrollTo(0, y); } }
+    function redraw(id) { var b = $('#tqb-' + id, root0); if (b) { var y = root.scrollY; b.innerHTML = builders[id](); swPaint(b); root.scrollTo(0, y); } }
     root0.addEventListener('click', function (e) {
       var t = e.target, b;
       if ((b = t.closest('[data-ny-go]'))) {   // 신년운세로 지금 사주 넘기기(report/newyear/newyear-app.js 가 mt_ny_input 을 읽는다)

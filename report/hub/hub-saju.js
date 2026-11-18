@@ -115,7 +115,7 @@
       var f = (r && (r.data || r.d || r)) || {}, on = function (k) { return F[k] === true || f[k] === true; };
       LVF = { flags: { luckEnv: on('luckEnv'), luckOverlay: on('luckOverlay'), tenGodRoles: on('tenGodRoles') }, ow: f.overlayWeights || null };
       if (!LVF.flags.luckEnv && !LVF.flags.luckOverlay) return null;
-      var V = '?v=20261118-lv11', need = [].concat(LVF.flags.luckOverlay ? ['/luck-overlay.js'] : [], ['/ten-god-roles.js'], LVF.flags.luckEnv ? ['/luck-env.js'] : [], ['/luck-layers-view.js']);
+      var V = '?v=20261118-lv13', need = [].concat(LVF.flags.luckOverlay ? ['/luck-overlay.js'] : [], ['/ten-god-roles.js'], LVF.flags.luckEnv ? ['/luck-env.js'] : [], ['/luck-layers-view.js']);
       return need.reduce(function (pr, u) { return pr.then(function () { if (document.querySelector('script[src^="' + u + '"]')) return; return H.load(u + V).catch(function () { }); }); }, Promise.resolve()).then(function () {
         if (root.MantraLuckView && !document.getElementById('lv-css')) { var st = document.createElement('style'); st.id = 'lv-css'; st.textContent = root.MantraLuckView.CSS; document.head.appendChild(st); }
         return root.MantraLuckView || null;
@@ -225,6 +225,7 @@
           '<p class="dis">점수는 선택한 날의 일진이 내 사주에 필요한 기운인지를 따진 값입니다. 사건을 확정하지 않는 참고용 흐름이며, 컨디션은 의학적 진단이 아닌 생활 리듬의 참고입니다.</p>' +
           '<section class="nextc"><p class="q">' + esc(d.next.q) + '</p><a class="btn" href="' + esc(d.next.to) + '" data-track="today_cta_click" data-p="' + esc(d.next.track) + '">' + esc(d.next.btn) + '</a><a class="btn ghost sm" href="#/my" data-track="fortune_content_click" data-p="from_today_my">MY 운명으로</a></section>', { keepScroll: cal.draws++ > 0 });
         cal.bind(el);
+        if (root.MantraSignalColors) { try { root.MantraSignalColors.paint(el); } catch (e) { } }   // 좋은 신호·주의할 신호 글자 색
         if (cal.pickScroll) { cal.pickScroll = false; var mb = $('#mc-lv-month', el); if (mb && mb.scrollIntoView) setTimeout(function () { mb.scrollIntoView({ block: 'start', behavior: H.reduce ? 'auto' : 'smooth' }); }, 60); }
         H.track('fortune_content_view', { content: 'today', flow: d.flowKey }); H.track('today_open', { flow: d.flowKey, cta: d.next.key }, true);
         H.$$('details.dd', el).forEach(function (x) { x.addEventListener('toggle', function () { if (x.open) H.track(x.id === 'd-why' ? 'today_evidence_expand' : 'today_detail_expand', { field: x.dataset.f || 'why' }); }); });

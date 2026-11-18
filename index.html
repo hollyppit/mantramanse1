@@ -1111,6 +1111,8 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="gyeok-structure.js"></script>
 <script src="ten-god-roles.js"></script>
 <script src="luck-env.js"></script>
+<script src="luck-alerts.js"></script>
+<script src="signal-colors.js"></script>
 <script src="glossary-cases.js"></script>
 <script src="glossary-overlap.js"></script>
 <script src="compass.js"></script>
@@ -5978,7 +5980,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const tc = t => t === 'good' ? 'ib-g' : t === 'bad' ? 'ib-b' : '';
     // 쉬운 말이 먼저(해요체·생활 장면), 명리 용어 문장은 '명리 용어로 보기'에 접어 둔다
     const pats = f.chips.filter(c => c.plain);
-    const patList = pats.length ? `<div class="ib-k" style="margin-top:10px">이 사주에서 보이는 패턴</div><ul class="ib-ul">${pats.map(c => `<li><b class="${c.good ? 'ib-g' : ''}">${esc(c.name)}</b> — ${esc(c.plain)}</li>`).join('')}</ul>` : '';
+    const patList = pats.length ? `<div class="ib-k" style="margin-top:10px">이 사주에서 보이는 패턴</div><ul class="ib-ul">${pats.map(c => `<li><b class="${c.good ? 'ib-g' : 'ib-b'}">${esc(c.name)}</b> — ${esc(c.plain)}</li>`).join('')}</ul>` : '';
     let now = '';
     if (efOn()) { try { const du = M.daeunAt(ch, NOW); if (du) { const g = M.elementFlow(ch, du, 'daeun'); now = `<div class="small" style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span>지금 10년(${M.gzName(du)} 대운): <b class="${g.tone === 'mixed' ? '' : tc(g.tone)}">${esc(({ 순생: '기운이 잘 이어지는 시기예요', 통관: '막혔던 곳이 풀리는 시기예요', 제압: '넘치던 기운이 눌려 균형이 잡히는 시기예요', 보통: '큰 변화 없이 무난한 시기예요', 설기: '힘이 빠져나가기 쉬운 시기예요', 막힘: '흐름이 고이기 쉬운 시기예요', 극: '필요한 기운이 눌리는 시기예요', 엇갈림: '도움과 부담이 함께 오는 시기예요' })[g.verdict] || g.verdict)}</b></span><button type="button" class="btn" data-tab="luck">운세 흐름에서 보기 ›</button></div>`; } } catch (e) { } }
     const terms = `<details class="lg-fold" style="margin-top:10px"><summary>명리 용어로 보기</summary><p class="small" style="margin:4px 0"><b>${esc(f.verdict)}</b></p><ul class="ib-ul small">${f.items.map(i => `<li>${esc(i.text)}</li>`).join('')}</ul>${f.chips.length ? `<p class="small muted" style="margin:6px 0 0">원국 구조: ${f.chips.map(c => esc(c.name) + (c.basis ? ` (${esc(c.basis)})` : '')).join(' · ')}</p>` : ''}</details>`;
@@ -7505,8 +7507,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     // elementFlow(오행 흐름 상자)는 [모두 켜기]와 따로 관리자 스위치로 켠다(functions/api/luck-flags.js)
     // luckCycle(오행 사이클: 대운 30년·세운 2년 묶음)도 따로 켠다
     // gyeokAnalysis(오행·강약 탭 '사주 격국 분석' 카드, gyeok-structure.js)도 따로 켠다
-    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && F.tenGodRoles && F.macroEra && F.luckEnv && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
-    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay', 'tenGodRoles', 'macroEra', 'luckEnv'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
+    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && F.tenGodRoles && F.macroEra && F.luckEnv && F.luckAlerts && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
+    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay', 'tenGodRoles', 'macroEra', 'luckEnv', 'luckAlerts'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
   })();
   window.addEventListener('mantra:daycompat', () => { try { readForm(); render(); } catch (e) { } });   // 일주 적합도 2판(compat-day.js) 스위치가 늦게 켜지면 다시 그린다
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
@@ -7758,6 +7760,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   const LE_CSS = '.le-sec{border-radius:14px;padding:10px 12px 4px;margin:10px 0}.le-sec>.le-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:0 0 6px;cursor:pointer;list-style:none;padding-right:22px;position:relative}.le-sec>.le-h::-webkit-details-marker{display:none}.le-sec>.le-h::after{content:"▾";position:absolute;right:2px;top:0;color:var(--ink-3);transition:transform .2s}.le-sec:not([open])>.le-h::after{transform:rotate(-90deg)}.le-sec:not([open]){padding-bottom:6px}.le-sec>.le-h b{font-size:.95rem}.le-sec>.le-h span{font-size:.74rem;color:var(--ink-3)}'
     + '.le-q{border-radius:14px;padding:12px 14px;margin:10px 0;background:color-mix(in srgb,var(--accent) 8%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line))}.le-qk{font-size:.74rem;font-weight:700;color:var(--accent);margin:0 0 6px;letter-spacing:.04em}.le-q p{display:flex;gap:10px;margin:6px 0;line-height:1.55}.le-qt{flex:0 0 4.6em;font-size:.78rem;font-weight:700;color:var(--ink-2);padding-top:1px}.le-q .note{display:block;margin-top:8px}'
+    + '.le-q p{border-left:3px solid transparent;padding-left:8px;border-radius:2px}.le-q p.q-good{border-left-color:var(--good,#1FA85A)}.le-q p.q-bad{border-left-color:var(--bad,#E2553F)}.le-q p.q-good .le-qt,.le-q p.q-good b,.le-q p.q-good .le-qm{color:var(--good,#178a4a)}.le-q p.q-bad .le-qt,.le-q p.q-bad b,.le-q p.q-bad .le-qm{color:var(--bad,#c9412d)}.sg-leg{font-weight:400;font-size:.7rem;color:var(--ink-3);margin-left:8px;letter-spacing:0}.sg-leg i{display:inline-block;width:8px;height:8px;border-radius:2px;margin:0 3px 0 6px}.sg-leg i.g{background:var(--good,#1FA85A)}.sg-leg i.b{background:var(--bad,#E2553F)}'
     + '.ib-more{margin:8px 0}.ib-more>summary{cursor:pointer;font-size:.86rem;color:var(--accent);font-weight:600;padding:6px 0}'
     + '.le-s1{border:1.5px dashed color-mix(in srgb,var(--ink-3) 45%,transparent);background:color-mix(in srgb,var(--ink-3) 5%,transparent)}.le-s2{border:1.5px solid color-mix(in srgb,var(--accent) 35%,var(--line))}.le-s3,.le-s4{border:1px solid var(--line)}'
     + '.le-sum{font-weight:600;margin:4px 0 6px}.le-mxs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.le-mx{position:relative;overflow:hidden;z-index:0;font-size:.76rem;padding:3px 9px;border-radius:999px;border:1px solid var(--line);min-width:64px}.le-mx i{position:absolute;inset:0 auto 0 0;background:color-mix(in srgb,var(--c) 35%,transparent);z-index:-1}'
@@ -7773,12 +7776,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     { const TGP = { 비견: '나와 같은 힘·동료', 겁재: '경쟁·나눠 갖는 힘', 식신: '재능·꾸준한 표현', 상관: '말·재주·틀을 깨는 힘', 편재: '큰돈·활동 무대', 정재: '꾸준한 돈·살림', 편관: '압박·도전·책임', 정관: '직장·규칙·평판', 편인: '직감·특별한 공부', 정인: '배움·문서·도움' },
         RP = { 용신: '이 사주에 가장 필요한 기운', 희신: '필요한 기운을 돕는 기운', 한신: '크게 돕지도 막지도 않는 기운', 기신: '넘치면 부담이 되는 기운', 구신: '부담을 거드는 기운' },
         el = M.stemEl(x.s), role = String((S.ch.unified && S.ch.unified.roles && S.ch.unified.roles[el]) || '').replace(/^조건부 /, '');
-      if (x.stemTG) rows.push(['핵심', `<b>${esc(M.STEM_K[x.s] + M.EL_K[el])}(${esc(M.STEM[x.s])}) · ${esc(x.stemTG)}</b> — ${esc(TGP[x.stemTG] || '')}의 기운이 들어와요.${RP[role] ? ` ${esc(RP[role])}(${esc(role)})이에요.` : ''}`]); }
-    const h = leHier(x, kind); if (h) rows.push(['큰 운과', esc(h.text)]);
-    try { const LE = window.MantraLuckEnv, nb = LE.neighbors(M, S.ch, x, kind); if (nb.prev) { const t = LE.transition(M, S.ch, nb.prev, x, kind, { prevLayers: olLayers(nb.prev, kind), curLayers: olLayers(x, kind) }); if (t) rows.push(['바뀌는 점', `<span class="chip ${t.level === 'high' ? 'ib-b' : ''}">${esc(t.levelK)}</span> ${esc(t.level === 'low' ? ({ daeun: '직전 대운과', seun: '작년과', wolun: '지난달과', ilun: '어제와' }[kind]) + ' 비교해 구조가 크게 바뀌지는 않아요.' : (t.signals[0] ? t.signals[0].text : t.text))}`]); } } catch (e) { }
-    if (r && r.strategy && r.strategy[0]) rows.push(['해 볼 것', esc(r.strategy[0])]);
+      if (x.stemTG) rows.push(['핵심', `<b>${esc(M.STEM_K[x.s] + M.EL_K[el])}(${esc(M.STEM[x.s])}) · ${esc(x.stemTG)}</b> — ${esc(TGP[x.stemTG] || '')}의 기운이 들어와요.${RP[role] ? ` <span class="le-qm">${esc(RP[role])}(${esc(role)})이에요.</span>` : ''}`, role === '용신' || role === '희신' ? 'good' : role === '기신' || role === '구신' ? 'bad' : '']); }
+    const h = leHier(x, kind); if (h) { const me = h.rows[h.rows.length - 1]; rows.push(['큰 운과', esc(h.text), /good/.test(me.side) ? 'good' : /bad/.test(me.side) ? 'bad' : '']); }
+    try { const LE = window.MantraLuckEnv, nb = LE.neighbors(M, S.ch, x, kind); if (nb.prev) { const t = LE.transition(M, S.ch, nb.prev, x, kind, { prevLayers: olLayers(nb.prev, kind), curLayers: olLayers(x, kind) }); if (t) { const dv = (x.ev && nb.prev.ev) ? x.ev.fitScore - nb.prev.ev.fitScore : 0, tt = t.level === 'low' ? '' : dv >= 8 ? 'good' : dv <= -8 ? 'bad' : ''; rows.push(['바뀌는 점', `<span class="chip ${tt === 'good' ? 'ib-g' : tt === 'bad' || t.level === 'high' ? 'ib-b' : ''}">${esc(t.levelK)}</span> ${esc(t.level === 'low' ? ({ daeun: '직전 대운과', seun: '작년과', wolun: '지난달과', ilun: '어제와' }[kind]) + ' 비교해 구조가 크게 바뀌지는 않아요.' : (t.signals[0] ? t.signals[0].text : t.text))}`, tt]); } } } catch (e) { }
+    if (r && r.strategy && r.strategy[0]) rows.push(['해 볼 것', esc(r.strategy[0]), 'good']);
     if (!rows.length) return '';
-    return `<div class="le-q"><p class="le-qk">한눈에 보기</p>${rows.map(([k, v]) => `<p><span class="le-qt">${k}</span><span>${v}</span></p>`).join('')}<p class="note">아래 칸을 누르면 근거가 펼쳐져요.</p></div>`;
+    return `<div class="le-q"><p class="le-qk">한눈에 보기 <span class="sg-leg"><i class="g"></i>좋은 신호 <i class="b"></i>주의할 신호</span></p>${rows.map(([k, v, t]) => `<p class="${t ? 'q-' + t : ''}"><span class="le-qt">${k}</span><span>${v}</span></p>`).join('')}<p class="note">아래 칸을 누르면 근거가 펼쳐져요.</p></div>`;
   }
   document.addEventListener('click', ev => { const b = ev.target && ev.target.closest && ev.target.closest('[data-ol]'); if (!b) return; const [k, n] = b.dataset.ol.split(':'); S.olUpTo = Object.assign({}, S.olUpTo, { [k]: +n }); render(); });
   // ── 오행 사이클 (스위치 MANTRA_FLAGS.luckCycle, 기본 꺼짐): 대운 3개 = 장기 분석 구간(30년), 천간 오행이 같은 세운 2년 = 천간 오행 구간.
@@ -10681,6 +10684,26 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
 
   // ───────────── 렌더 ─────────────
   const root = document.getElementById('app');
+  // ── 뚜렷한 신호 자동 알림(2026-11-18, luck-alerts.js · 스위치 luckAlerts): 인연·재물·직업·사업·취업·가족·자녀·횡재수·손재수 중
+  //    이 사주 평소 분포의 상위·하위 1%(월운 5%)이면서 신호등 최고·부담인 날(7일)·이번 달만. 하루 단위로 닫을 수 있다 ──
+  const alOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.luckAlerts === true && window.MantraLuckAlerts);
+  let AL_CACHE = { key: '', list: [] };
+  function alertList() {
+    const d = new Date(NOW + 9 * 3600e3), day = d.getUTCFullYear() + '-' + (d.getUTCMonth() + 1) + '-' + d.getUTCDate(), key = day + '|' + JSON.stringify(S.ch.pillars) + S.ch.gender;
+    if (AL_CACHE.key !== key) { let r = []; try { r = window.MantraLuckAlerts.scan(M, S.ch, { set: 'manse', now: NOW, max: 4, sigMetric }); } catch (e) { r = []; } AL_CACHE = { key, day, list: r }; }
+    return AL_CACHE;
+  }
+  function alertBar() {
+    if (!alOn() || !S.ch) return '';
+    const A = alertList(); let off = ''; try { off = localStorage.getItem('mt_alert_off_manse') || ''; } catch (e) { }
+    if (!A.list.length || off === A.day) return '';
+    return '<section class="card al-bar" role="status" aria-live="polite"><div class="al-h"><b>🔔 눈여겨볼 신호</b><span class="small muted">내 사주 평소보다 뚜렷하게 좋거나 조심할 날만 골랐어요</span><button type="button" class="al-x" data-al-off>오늘 닫기</button></div>' +
+      A.list.map(a => '<div class="al ' + a.side + '"><p><span class="al-t">' + (a.side === 'good' ? '좋은 신호' : '주의 신호') + '</span><b>' + esc(a.when + ' · ' + a.name) + '</b> <span class="small muted">' + esc(a.gz + (a.level === 'wolun' ? ' 월운' : ' 일진')) + '</span></p><p>' + esc(a.line) + ' <span class="al-do">' + esc(a.todo) + '</span></p>' + (a.why ? '<p class="al-why">근거: ' + esc(a.why) + '</p>' : '') + '</div>').join('') +
+      '<div class="al-f"><span class="small muted">명리 지표로 본 참고 신호예요. 일어날 일을 정하지 않아요.</span>' + (S.tab !== 'luck' ? '<button type="button" class="btn ghost sm" data-tab="luck">운세 흐름에서 보기 ›</button>' : '') + '</div></section>';
+  }
+  document.addEventListener('click', ev => { const b = ev.target && ev.target.closest && ev.target.closest('[data-al-off]'); if (!b) return; try { localStorage.setItem('mt_alert_off_manse', AL_CACHE.day || ''); } catch (e) { } const el = document.querySelector('.al-bar'); if (el) el.remove(); });
+  { const st = document.createElement('style'); st.textContent = '.sw-g{color:var(--good);font-weight:700}.sw-b{color:var(--bad);font-weight:700}'; document.head.appendChild(st); }
+  { const st = document.createElement('style'); st.textContent = '.al-bar{border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));background:color-mix(in srgb,var(--accent) 6%,var(--surface));padding:14px 16px}.al-h{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}.al-h b{font-size:1rem}.al-h .small{flex:1 1 auto}.al-x{font-size:.74rem;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer}.al{margin:8px 0 0;padding:8px 12px;border-radius:12px;border-left:4px solid var(--line);background:var(--surface)}.al.good{border-left-color:#1FA85A}.al.bad{border-left-color:#E2553F}.al p{margin:2px 0;line-height:1.55}.al-t{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;margin-right:6px}.al.good .al-t{background:#1FA85A1f;color:#178a4a}.al.bad .al-t{background:#E2553F1f;color:#c24431}.al-do{color:var(--ink-2)}.al-why{font-size:.76rem;color:var(--ink-3)}.al-f{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between;margin-top:8px}'; document.head.appendChild(st); }
   function render() {
     let body = '';
     // 관상·풍수·타로는 사주 계산 없이도 볼 수 있다 (풍수의 용신 연결만 사주가 있을 때)
@@ -10698,10 +10721,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     else if (S.tab === 'tk') body = renderTk();
     else if (S.tab === 'zw') body = S.ch.ziwei ? renderZiwei() : renderWonguk();
     else body = renderGl();
-    root.innerHTML = renderTop() + `<main class="wrap" style="padding-top:16px">${renderAdminLogin()}${renderForm()}${body}${adminPw ? '' : '<div class="admin-link-row"><a class="admin-link" href="#admin" onclick="setTimeout(()=>scrollTo(0,0),0)">관리자</a></div>'}</main>`;
+    root.innerHTML = renderTop() + `<main class="wrap" style="padding-top:16px">${renderAdminLogin()}${renderForm()}${S.ch && !['face', 'fs', 'space', 'tarot', 'iching'].includes(S.tab) ? alertBar() : ''}${body}${adminPw ? '' : '<div class="admin-link-row"><a class="admin-link" href="#admin" onclick="setTimeout(()=>scrollTo(0,0),0)">관리자</a></div>'}</main>`;
     enhanceFold();
     drawCharts();
     renderSheet();
+    // 좋은 신호(초록)·주의할 신호(빨강) 글자 색 — 용어 사전 탭은 뺀다(signal-colors.js, 2026-11-18)
+    if (window.MantraSignalColors && S.tab !== 'gl') { try { window.MantraSignalColors.paint(root.querySelector('main')); } catch (e) { } }
   }
   // ── 소제목 접고 펴기: 카드 제목(h2·.card-h)과 그 안의 소제목(h3·h4)을 눌러 아래 내용을 접는다. 상태는 탭·제목별로 기억한다 ──
   const FOLD = new Set(), FOLD_SEEN = new Set();

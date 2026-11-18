@@ -83,6 +83,10 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>십성 작용 분석</b> — 현재: <b style="color:' + (fl && fl.tenGodRoles ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.tenGodRoles ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leTG"' + (fl ? '' : ' disabled') + '>' + (fl && fl.tenGodRoles ? '십성 작용 분석 끄기' : '십성 작용 분석 켜기') + '</button><a class="btn" href="/?mantraFlags=tenGodRoles" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 만세력 <b>오행·강약 탭</b>에 “십성 작용 분석” 카드(비겁·식상·재성·관성·인성 5종을 세력·역할·실제 작용으로 한눈에 비교, 누르면 상세)와 상호작용 구조 11종(식상생재·재생관·관인상생·살인상생·식신제살·상관견관·상관패인·재극인·도식·관살혼잡·비겁쟁재)의 성립/유불리가, <b>운세 흐름</b> 대운·세운·월운·일진 상세에 “원국과 운의 상호작용”(들어온 십성의 억부·조후·통합 역할, 구조의 신규 형성·강화·약화·해소, 감당 능력, 재물·커리어·인연)이 <b>약 1분 안에</b> 나타납니다. 설명용이라 강약·용신·흐름 점수·그래프는 바뀌지 않습니다.</p></div>';
+    // 뚜렷한 신호 자동 알림(2026-11-18, luck-alerts.js): 만세력 상단(9분야)·운명의 타임라인 상단(4분야)
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>뚜렷한 신호 자동 알림</b> — 현재: <b style="color:' + (fl && fl.luckAlerts ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.luckAlerts ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leAL"' + (fl ? '' : ' disabled') + '>' + (fl && fl.luckAlerts ? '자동 알림 끄기' : '자동 알림 켜기') + '</button><a class="btn" href="/?mantraFlags=luckAlerts" target="_blank" rel="noopener">미리보기 주소</a></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 오늘부터 7일과 이번 달 중 <b>이 사주의 평소 분포에서 상위·하위 1%(월운 5%)이면서 신호등이 최고·부담</b>인 분야만 상단 알림으로 띄웁니다. 만세력은 인연·재물·직업·사업·취업·가족·자녀·횡재수·손재수(최대 4개), 운명의 타임라인은 인연·재물·커리어·건강(최대 3개). 사용자가 \'오늘 닫기\'를 누르면 그날은 다시 뜨지 않습니다. 점수는 엔진 분야 지수 그대로이며 새 점수를 만들지 않습니다.</p></div>';
     // 운 공통 분석 층(2026-11-18, luck-env.js): 운세 상세를 ① 외부 환경 ② 개인 영향 ③ 상위·하위 운 ④ 영역으로 나눔 — 표시 전용
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운 공통 분석(외부 환경·개인 반응 분리)</b> — 현재: <b style="color:' + (fl && fl.luckEnv ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.luckEnv ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leEV"' + (fl ? '' : ' disabled') + '>' + (fl && fl.luckEnv ? '운 공통 분석 끄기' : '운 공통 분석 켜기') + '</button><a class="btn" href="/?mantraFlags=luckEnv" target="_blank" rel="noopener">미리보기 주소</a></div>' +
@@ -172,6 +176,11 @@
       fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify(body) })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
         .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(okMsg); });
+    };
+    $('#leAL').onclick = function () {   // 뚜렷한 신호 자동 알림 스위치(luck-alerts.js)
+      var v = !(S.flags && S.flags.luckAlerts);
+      if (v && !confirm('만세력·운명의 타임라인 상단에 뚜렷한 신호 자동 알림을 모든 사용자에게 띄웁니다.\n켜시겠습니까?')) return;
+      putFlags({ flags: { luckAlerts: v } }, v ? '자동 알림을 켰습니다(약 1분 안에 반영)' : '자동 알림을 껐습니다(약 1분 안에 반영)');
     };
     $('#leEV').onclick = function () {   // 운 공통 분석 층 스위치(luck-env.js)
       var v = !(S.flags && S.flags.luckEnv);

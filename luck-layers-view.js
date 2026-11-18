@@ -105,7 +105,7 @@
     if (!svg) return '';
     var tc = function (t) { return t === 'good' ? 'lv-up' : t === 'bad' ? 'lv-down' : ''; };
     var txt = f ? '<p class="lv-nf-h"><b class="' + tc(f.tone) + '">' + E(f.headline || f.verdict) + '</b></p><ul class="lv-ul">' + f.items.map(function (i) { return '<li>' + E(i.plain || i.text) + '</li>'; }).join('') + '</ul>' +
-      ((f.chips || []).filter(function (c) { return c.plain; }).length ? '<p class="lv-sm"><b>이 사주에서 보이는 패턴</b></p><ul class="lv-ul">' + f.chips.filter(function (c) { return c.plain; }).map(function (c) { return '<li><b class="' + (c.good ? 'lv-up' : '') + '">' + E(c.name) + '</b> — ' + E(c.plain) + '</li>'; }).join('') + '</ul>' : '') +
+      ((f.chips || []).filter(function (c) { return c.plain; }).length ? '<p class="lv-sm"><b>이 사주에서 보이는 패턴</b></p><ul class="lv-ul">' + f.chips.filter(function (c) { return c.plain; }).map(function (c) { return '<li><b class="' + (c.good ? 'lv-up' : 'lv-down') + '">' + E(c.name) + '</b> — ' + E(c.plain) + '</li>'; }).join('') + '</ul>' : '') +
       '<details class="lv-more"><summary>명리 용어로 보기</summary><p class="lv-sm"><b>' + E(f.verdict) + '</b></p><ul class="lv-ul lv-sm">' + f.items.map(function (i) { return '<li>' + E(i.text) + '</li>'; }).join('') + '</ul></details>' : '';
     return '<div class="lv-nf"><div class="lv-nf-fig">' + svg + '<p class="lv-leg"><span><i style="background:#8a90a0"></i>실선 화살표: 생(도와줌)</span><span><i style="background:#d9694f"></i>점선 화살표: 극(누름)</span><span>원 크기 = 비율</span></p></div><div class="lv-nf-txt">' + txt + '</div></div>';
   }
@@ -116,24 +116,27 @@
   var RP = { 용신: '이 사주에 가장 필요한 기운', 희신: '필요한 기운을 돕는 기운', 한신: '크게 돕지도 막지도 않는 기운', 기신: '넘치면 부담이 되는 기운', 구신: '부담을 거드는 기운' };
   var STEM_K = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계'];
   // opt: { flags, esc, weights, todo: '해 볼 것' 문장, extra: [[이름, html], …] }
+  // 줄마다 좋은 신호(초록)·주의 신호(빨강)를 구분한다: rows = [이름, html, tone('good'|'bad'|'')]
   function quick(M, ch, x, kind, opt) {
     opt = opt || {}; var E = opt.esc || esc0, F = opt.flags || {}, LE = root.MantraLuckEnv, OV = root.MantraLuckOverlay, rows = [];
     if (!x || x.s == null) return '';
     var el = stemEl(x.s), role = String((ch.unified && ch.unified.roles && ch.unified.roles[el]) || '').replace(/^조건부 /, ''), tg = x.stemTG || '';
-    rows.push(['핵심', '<b>' + E(STEM_K[x.s] + EL_S[el]) + '(' + E(M.STEM[x.s]) + ')' + (tg ? ' · ' + E(tg) : '') + '</b>' + (TGP[tg] ? ' — ' + E(TGP[tg]) + '의 기운이 들어와요.' : '') + (RP[role] ? ' ' + E(RP[role]) + '(' + E(role) + ')이에요.' : '')]);
+    var rt = role === '용신' || role === '희신' ? 'good' : role === '기신' || role === '구신' ? 'bad' : '';
+    rows.push(['핵심', '<b>' + E(STEM_K[x.s] + EL_S[el]) + '(' + E(M.STEM[x.s]) + ')' + (tg ? ' · ' + E(tg) : '') + '</b>' + (TGP[tg] ? ' — ' + E(TGP[tg]) + '의 기운이 들어와요.' : '') + (RP[role] ? ' <span class="lv-qm">' + E(RP[role]) + '(' + E(role) + ')이에요.</span>' : ''), rt]);
     var L = layersOf(M, ch, x, kind);
     if (LE && F.luckEnv && kind !== 'daeun') {
       try { var tones = null; if (OV && F.luckOverlay) { tones = {}; OV.explain(OV.compute(M, ch, L, { weights: opt.weights }), L.length).forEach(function (l) { tones[l.level] = l.tone; }); }
-        var h = LE.hierarchy(M, ch, L, { tones: tones }); if (h) rows.push(['큰 운과', E(h.text)]); } catch (e) { }
+        var h = LE.hierarchy(M, ch, L, { tones: tones }); if (h) { var me = h.rows[h.rows.length - 1]; rows.push(['큰 운과', E(h.text), /good/.test(me.side) ? 'good' : /bad/.test(me.side) ? 'bad' : '']); } } catch (e) { }
     }
     if (LE && F.luckEnv) {
       try { var nb = LE.neighbors(M, ch, x, kind); if (nb.prev) { var t = LE.transition(M, ch, nb.prev, x, kind, { prevLayers: layersOf(M, ch, nb.prev, kind), curLayers: L });
-        if (t) rows.push(['바뀌는 점', '<span class="lv-chip ' + (t.level === 'high' ? 'bad' : '') + '">' + E(t.levelK) + '</span> ' + E(t.level === 'low' ? { daeun: '직전 대운과', seun: '작년과', wolun: '지난달과', ilun: '어제와' }[kind] + ' 비교해 구조가 크게 바뀌지는 않아요.' : (t.signals[0] ? t.signals[0].text : t.text))]); } } catch (e) { }
+        if (t) { var dv = (x.ev && nb.prev.ev) ? x.ev.fitScore - nb.prev.ev.fitScore : 0, tt = t.level === 'low' ? '' : dv >= 8 ? 'good' : dv <= -8 ? 'bad' : '';
+          rows.push(['바뀌는 점', '<span class="lv-chip ' + (tt || (t.level === 'high' ? 'bad' : '')) + '">' + E(t.levelK) + '</span> ' + E(t.level === 'low' ? { daeun: '직전 대운과', seun: '작년과', wolun: '지난달과', ilun: '어제와' }[kind] + ' 비교해 구조가 크게 바뀌지는 않아요.' : (t.signals[0] ? t.signals[0].text : t.text)), tt]); } } } catch (e) { }
     }
     (opt.extra || []).forEach(function (r) { if (r && r[1]) rows.push(r); });
-    if (opt.todo) rows.push(['해 볼 것', E(opt.todo)]);
-    (opt.after || []).forEach(function (r) { if (r && r[1]) rows.push(r); });
-    return '<div class="lv-q"><p class="lv-qk">한눈에 보기</p>' + rows.map(function (r) { return '<p class="lv-qr"><span class="lv-qt">' + r[0] + '</span><span>' + r[1] + '</span></p>'; }).join('') + '</div>';
+    if (opt.todo) rows.push(['해 볼 것', E(opt.todo), 'good']);
+    (opt.after || []).forEach(function (r) { if (r && r[1]) rows.push([r[0], r[1], r[2] || (r[0] === '조심할 것' ? 'bad' : '')]); });
+    return '<div class="lv-q"><p class="lv-qk">한눈에 보기 <span class="lv-qleg"><i class="good"></i>좋은 신호 <i class="bad"></i>주의할 신호</span></p>' + rows.map(function (r) { return '<p class="lv-qr' + (r[2] ? ' ' + r[2] : '') + '"><span class="lv-qt">' + r[0] + '</span><span>' + r[1] + '</span></p>'; }).join('') + '</div>';
   }
 
   // 한 시기의 분석 칸들(① 외부 환경 ② 내 사주 반응 ③ 상위·하위 운 ④ 영역) — 칸마다 모듈·스위치가 있을 때만
@@ -234,7 +237,7 @@
     + '.lv-eras{display:flex;gap:5px}.lv-era{flex:1 1 0;min-width:0;text-align:center;border-radius:9px;padding:5px 2px;opacity:.55;color:#222;font-size:.76rem;display:grid}.lv-era.on{opacity:1;outline:2px solid currentColor}.lv-era small{font-size:.6rem}.lv-more>summary{cursor:pointer;font-size:.84rem;opacity:.85;padding:4px 0}'
     + '.lv-olv{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin:8px 0}.lv-pent{flex:none;max-width:100%;height:auto}.lv-bars{flex:1 1 220px;min-width:0;display:grid;gap:6px}.lv-brow{display:grid;grid-template-columns:62px 1fr auto;gap:6px;align-items:center;margin:0;font-size:.8rem}.lv-bk{display:flex;gap:4px;align-items:center}.lv-r{font-size:.68rem;opacity:.8}.lv-r.good,.lv-d.good,.lv-up{color:#1f7a5c}.lv-r.bad,.lv-d.bad,.lv-down{color:#b23a2b}.lv-bar{display:flex;height:11px;border-radius:6px;overflow:hidden;background:rgba(127,127,127,.18)}.lv-bar i{display:block;height:100%}.lv-bv{white-space:nowrap;font-size:.76rem;opacity:.9}.lv-leg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.72rem;opacity:.8;margin:2px 0 0}.lv-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}'
     + '.lv-fig{margin:10px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(127,127,127,.28)}.lv-fig-h{margin:0 0 4px;font-size:.9rem}.lv-fig-h span{font-size:.74rem;opacity:.7}.lv-fig-y{margin:2px 0 4px;font-size:.86rem}'
-    + '.lv-nf{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 18px;align-items:start;margin:12px 0}.lv-nf-fig svg{width:100%;height:auto;max-width:400px;display:block;margin:0 auto}.lv-nf-h{font-size:1.02rem;margin:4px 0}.lv-nf-txt{font-size:.9rem;line-height:1.65}.lv-npl{paint-order:stroke;stroke:var(--lv-halo,#fff);stroke-width:5px;stroke-linejoin:round;opacity:.9}.lv-q{border-radius:14px;padding:12px 14px;margin:10px 0;border:1px solid rgba(127,127,200,.35);background:rgba(110,120,230,.07)}.lv-qk{font-size:.74rem;font-weight:700;margin:0 0 6px;letter-spacing:.04em;opacity:.85}.lv-qr{display:flex;gap:10px;margin:6px 0;line-height:1.6;font-size:.9rem}.lv-qt{flex:0 0 4.6em;font-size:.78rem;font-weight:700;opacity:.8;padding-top:2px}@media (max-width:720px){.lv-nf{grid-template-columns:1fr}}';
+    + '.lv-nf{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 18px;align-items:start;margin:12px 0}.lv-nf-fig svg{width:100%;height:auto;max-width:400px;display:block;margin:0 auto}.lv-nf-h{font-size:1.02rem;margin:4px 0}.lv-nf-txt{font-size:.9rem;line-height:1.65}.lv-npl{paint-order:stroke;stroke:var(--lv-halo,#fff);stroke-width:5px;stroke-linejoin:round;opacity:.9}.lv-q{border-radius:14px;padding:12px 14px;margin:10px 0;border:1px solid rgba(127,127,200,.35);background:rgba(110,120,230,.07)}.lv-qk{font-size:.74rem;font-weight:700;margin:0 0 6px;letter-spacing:.04em;opacity:.85}.lv-qr{display:flex;gap:10px;margin:6px 0;line-height:1.6;font-size:.9rem}.lv-qt{flex:0 0 4.6em;font-size:.78rem;font-weight:700;opacity:.8;padding-top:2px}.lv-qr{padding-left:8px;border-left:3px solid transparent;border-radius:2px}.lv-qr.good{border-left-color:#1FA85A}.lv-qr.bad{border-left-color:#E2553F}.lv-qr.good .lv-qt,.lv-qr.good b,.lv-qr.good .lv-qm{color:#178a4a}.lv-qr.bad .lv-qt,.lv-qr.bad b,.lv-qr.bad .lv-qm{color:#c9412d}.lv-qr.good .lv-qt,.lv-qr.bad .lv-qt{opacity:1}.lv-qleg{font-weight:400;font-size:.7rem;opacity:.75;margin-left:8px;letter-spacing:0}.lv-qleg i{display:inline-block;width:8px;height:8px;border-radius:2px;margin:0 3px 0 6px}.lv-qleg i.good{background:#1FA85A}.lv-qleg i.bad{background:#E2553F}@media (max-width:720px){.lv-nf{grid-template-columns:1fr}}';
 
   var api = { version: VERSION, layersOf: layersOf, hidden: hidden, parts: parts, card: card, era: era, olVisual: olVisual, overlayFigure: overlayFigure, natalFlowFigure: natalFlowFigure, quick: quick, CSS: CSS, LEVEL_K: LEVEL_K };
   root.MantraLuckView = api;

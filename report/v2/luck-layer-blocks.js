@@ -132,7 +132,7 @@
     Promise.resolve(getFlags).catch(function () { return null; }).then(function (d) {
       d = d || {}; NAMES.forEach(function (k) { F[k] = lf[k] === true || d[k] === true; });
       if (!NAMES.some(function (k) { return F[k]; })) return;
-      var V_ = '?v=20261118-lv11', need = [].concat(F.luckOverlay ? ['/luck-overlay.js'] : [], F.tenGodRoles || F.luckEnv ? ['/ten-god-roles.js'] : [], F.luckEnv ? ['/luck-env.js'] : [], F.macroEra ? ['/fengshui-data.js', '/fengshui-engine.js', '/macro-era.js', '/macro-era-bridge.js'] : [], ['/luck-layers-view.js']);
+      var V_ = '?v=20261118-lv13', need = [].concat(F.luckOverlay ? ['/luck-overlay.js'] : [], F.tenGodRoles || F.luckEnv ? ['/ten-god-roles.js'] : [], F.luckEnv ? ['/luck-env.js'] : [], F.macroEra ? ['/fengshui-data.js', '/fengshui-engine.js', '/macro-era.js', '/macro-era-bridge.js'] : [], ['/luck-layers-view.js']);
       return need.reduce(function (p, u) { return p.then(function () { if (DOC.querySelector('script[src^="' + u + '"]')) return; return load(u + V_); }); }, Promise.resolve())   /* 다른 모듈(topic-deep)이 같은 파일을 먼저 넣었으면 건너뛴다 — 차례마다 다시 확인 */.then(function () {
         if (root.MantraLuckView && !DOC.getElementById('lv-css')) { var st = DOC.createElement('style'); st.id = 'lv-css'; st.textContent = root.MantraLuckView.CSS + '.lb-blk .lv-ol{padding-left:0}.lb-blk details.lb-more{margin:8px 0}.lb-blk details.lb-more>summary{cursor:pointer;font-size:.86rem;opacity:.8}'; DOC.head.appendChild(st); }
         ready = !!root.MantraLuckView; rev++;
