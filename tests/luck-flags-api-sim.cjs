@@ -48,7 +48,8 @@ const root = path.join(__dirname, '..');
   r = await put({ on: false }); ok(r.j.luckCycle === true, '모두 끄기는 luckCycle 를 건드리지 않음');
   r = await put({ flags: { luckCycle: false } }); ok(r.j.luckCycle === false, 'luckCycle 따로 끄기');
   ok(/luckCycle: false/.test(fs.readFileSync(path.join(root, 'feature-flags.js'), 'utf8')), 'feature-flags.js luckCycle 기본 꺼짐');
-  ok(/'luckCycle'\].forEach/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')), '사용자 화면이 관리자 스위치 luckCycle 를 읽음');
+  ok(/'luckCycle'(, '[a-zA-Z]+')*\].forEach/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')), '사용자 화면이 관리자 스위치 luckCycle 를 읽음');
+  ok(/'luckOverlay'(, '[a-zA-Z]+')*\].forEach/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')), '사용자 화면이 관리자 스위치 luckOverlay 를 읽음');
   // gyeokAnalysis(오행·강약 탭 사주 격국 분석 카드): 같은 규칙 — 기본 꺼짐, 모두 켜기에 묶이지 않음, flags 로만
   ok((await get()).j.gyeokAnalysis === false, 'gyeokAnalysis 기본 꺼짐');
   r = await put({ on: true }); ok(r.j.gyeokAnalysis === false, '모두 켜기는 gyeokAnalysis 를 켜지 않음');
@@ -64,9 +65,19 @@ const root = path.join(__dirname, '..');
   kv.m.set('luckenv:flags', '{깨진 json'); g = await get(); ok(none(g.j), '깨진 값은 꺼짐');
   // 화면 반영 코드: 켜진 것만 반영하고 실패는 무시, 스위치 파일 기본값은 그대로 꺼짐
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-  ok(/remoteFlags/.test(html) && /api\/luck-flags/.test(html) && /d\[k\] === true && !F\[k\]/.test(html) && /\.catch\(\(\) => \{ \}\)/.test(html.slice(html.indexOf('remoteFlags'), html.indexOf('remoteFlags') + 800)), '화면의 원격 스위치 반영 코드');
+  ok(/remoteFlags/.test(html) && /api\/luck-flags/.test(html) && /d\[k\] === true && !F\[k\]/.test(html) && /\.catch\(\(\) => \{ \}\)/.test(html.slice(html.indexOf('remoteFlags'), html.indexOf('remoteFlags') + 1400)), '화면의 원격 스위치 반영 코드');
   const flagsSrc = fs.readFileSync(path.join(root, 'feature-flags.js'), 'utf8'); ok(/interpret: false, timeline: false, region: false/.test(flagsSrc), '코드 기본값은 꺼짐 유지');
   const adm = fs.readFileSync(path.join(root, 'report/admin/v2-luckenv.js'), 'utf8'); ok(/leFOn/.test(adm) && /leFOff/.test(adm) && /모두 켜기/.test(adm) && /모두 끄기/.test(adm), '관리자 버튼');
+  // 오행 겹쳐 보기 층 무게(overlayWeights, 2026-11-18): 기본값, 보낸 칸만 바뀜, 0~2 밖·모르는 칸 거부, 스위치를 바꿔도 무게 보존, 관리자 화면·사용자 화면 연결
+  {
+    const A = mod.applyFlags, D0 = mod.OVERLAY_W_DEFAULT;
+    ok(D0 && D0.daeun === 1 && D0.seun === 0.7 && D0.wolun === 0.4 && D0.ilun === 0.2, '층 무게 기본값');
+    const w1 = A({ version: 1 }, { overlayWeights: { seun: 0.5 } }, 't', 'b'); ok(w1.doc && w1.doc.overlayWeights.seun === 0.5 && w1.doc.overlayWeights.daeun === 1 && w1.doc.version === 2, '보낸 칸만 바뀜');
+    ok(A({}, { overlayWeights: { seun: 2.5 } }, 't', 'b').error, '2 넘는 무게 거부'); ok(A({}, { overlayWeights: { seun: -1 } }, 't', 'b').error, '음수 거부'); ok(A({}, { overlayWeights: { foo: 1 } }, 't', 'b').error, '모르는 칸 거부'); ok(A({}, { overlayWeights: [1] }, 't', 'b').error, '배열 거부');
+    const w2 = A({ overlayWeights: { seun: 0.5 } }, { flags: { luckOverlay: true } }, 't', 'b'); ok(w2.doc.luckOverlay === true && w2.doc.overlayWeights.seun === 0.5, '스위치를 바꿔도 무게 보존');
+    const adm2 = fs.readFileSync(path.join(root, 'report/admin/v2-luckenv.js'), 'utf8'); ok(/luckOverlay/.test(adm2) && /overlayWeights/.test(adm2), '관리자 화면에 겹쳐 보기 스위치·층 무게');
+    ok(/MANTRA_OVERLAY_W/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')), '사용자 화면이 운영 층 무게를 읽음');
+  }
   if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log('  ' + f)); process.exit(1); }
   console.log('모든 검증 통과 · 기본 꺼짐 · 관리자만 변경 · 모두 켜기/끄기 · 일부 켜기 · 잘못된 입력 거부 · 저장소 오류 시 꺼짐');
 })();

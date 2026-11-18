@@ -73,6 +73,12 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운명의 타임라인 프리미엄 심화 층(59장)</b> — 현재: <b style="color:' + (fl && fl.premiumDepth ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.premiumDepth ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="lePD"' + (fl ? '' : ' disabled') + '>' + (fl && fl.premiumDepth ? '심화 층 끄기' : '심화 층 켜기') + '</button><a class="btn" href="/report/v2/?mantraFlags=premiumDepth" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 서사 59장(종합·재물·커리어·인연)마다 <b>내면의 구조</b>(그 사주의 실제 기운 비율·필요한 기운), <b>양면성과 반전·함께 보는 조건</b>(겹친 조건별 문단 + 알아보는 생활 장면 한 줄), <b>내게 맞는 한 가지</b>(필요한 기운별 결론 + 다음 장 연결)가 <b>약 1분 안에</b> 붙습니다. 규칙 기반 사전 문안(AI 호출 없음)이고 점수·계산은 바뀌지 않습니다. 장마다 맞는 조건이 없으면 붙지 않습니다. 문안은 초안이라 켜기 전에 미리보기 주소로 확인해 주세요.</p></div>';
+    // 오행 겹쳐 보기(2026-11-18, luck-overlay.js): 운세 흐름 대운·세운·월운·일진 상세에 원국 위로 층을 쌓은 오행 비율·층별 풀이·그래프 비교 — 스위치 + 층 무게
+    var ow = (fl && fl.overlayWeights) || { daeun: 1, seun: 0.7, wolun: 0.4, ilun: 0.2 }, owIn = function (k, nm) { return '<label class="small" style="display:inline-flex;gap:4px;align-items:center;margin-right:10px">' + nm + ' <input type="number" id="leOW_' + k + '" min="0" max="2" step="0.05" value="' + ow[k] + '" style="width:64px"' + (fl ? '' : ' disabled') + '></label>'; };
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운세 흐름 오행 겹쳐 보기</b> — 현재: <b style="color:' + (fl && fl.luckOverlay ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.luckOverlay ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leOL"' + (fl ? '' : ' disabled') + '>' + (fl && fl.luckOverlay ? '겹쳐 보기 끄기' : '겹쳐 보기 켜기') + '</button><a class="btn" href="/?mantraFlags=luckOverlay" target="_blank" rel="noopener">미리보기 주소</a></div>' +
+      '<div style="margin-top:10px">' + owIn('daeun', '대운') + owIn('seun', '세운') + owIn('wolun', '월운') + owIn('ilun', '일진') + '<button class="btn" id="leOLW"' + (fl ? '' : ' disabled') + '>층 무게 저장</button> <button class="btn" id="leOLR"' + (fl ? '' : ' disabled') + '>기본값</button></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 만세력 운세 흐름에서 대운·세운·월운·일진을 누를 때 <b>오행 겹쳐 보기</b> 상자가 나옵니다: 원국 위에 대운 → 세운 → 월운 → 일진을 차례로 쌓은 오행 비율(층 단추·오각형 고리·막대), 층별 한 줄 풀이, 그래프 막대와 같은/다른 방향인지와 그 이유. 설명용이라 흐름 점수·그래프는 바뀌지 않습니다. 층 무게(0~2)는 운 한 기둥(천간 1 + 지장간 비율 1 = 2점)을 원국에 얼마나 크게 더할지 정합니다 — 기본 대운 1 · 세운 0.7 · 월운 0.4 · 일진 0.2.</p></div>';
     // 인연의 광장 벚꽃 테마(community/theme-sakura.css·theme-sakura.js) 스위치 — 광장 겉모습만 바꾼다(2026-11-17)
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>인연의 광장 벚꽃 테마</b> — 현재: <b style="color:' + (fl && fl.sakuraTheme ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.sakuraTheme ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leSK"' + (fl ? '' : ' disabled') + '>' + (fl && fl.sakuraTheme ? '벚꽃 테마 끄기' : '벚꽃 테마 켜기') + '</button></div>' +
@@ -149,6 +155,24 @@
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
         .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(v ? '건강·사고수 장을 켰습니다(약 1분 안에 반영)' : '건강·사고수 장을 껐습니다(약 1분 안에 반영)'); });
     };
+    var putFlags = function (body, okMsg) {
+      var who = ''; try { who = localStorage.getItem('iching_reviewer') || ''; } catch (e) { }
+      fetch('/api/luck-flags', { method: 'PUT', headers: { authorization: 'Bearer ' + pw, 'content-type': 'application/json', 'x-reviewer': encodeURIComponent(who) }, body: JSON.stringify(body) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { d._ok = r.ok; return d; }); })
+        .then(function (d) { if (!d._ok) return msg(d.error || '변경하지 못했습니다', true); S.flags = d; draw(); msg(okMsg); });
+    };
+    $('#leOL').onclick = function () {   // 운세 흐름 오행 겹쳐 보기 스위치
+      var v = !(S.flags && S.flags.luckOverlay);
+      if (v && !confirm('만세력 운세 흐름의 대운·세운·월운·일진 상세에 오행 겹쳐 보기 상자를 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;
+      putFlags({ flags: { luckOverlay: v } }, v ? '오행 겹쳐 보기를 켰습니다(약 1분 안에 반영)' : '오행 겹쳐 보기를 껐습니다(약 1분 안에 반영)');
+    };
+    $('#leOLW').onclick = function () {   // 층 무게 저장(0~2)
+      var w = {}, bad = '';
+      ['daeun', 'seun', 'wolun', 'ilun'].forEach(function (k) { var v = parseFloat($('#leOW_' + k).value); if (!(v >= 0 && v <= 2)) bad = k; w[k] = v; });
+      if (bad) return msg('층 무게는 0~2 사이 숫자로 넣어 주세요', true);
+      putFlags({ overlayWeights: w }, '층 무게를 저장했습니다(약 1분 안에 반영)');
+    };
+    $('#leOLR').onclick = function () { if (confirm('층 무게를 기본값(대운 1 · 세운 0.7 · 월운 0.4 · 일진 0.2)으로 되돌릴까요?')) putFlags({ overlayWeights: { daeun: 1, seun: 0.7, wolun: 0.4, ilun: 0.2 } }, '층 무게를 기본값으로 되돌렸습니다'); };
     $('#lePD').onclick = function () {   // 운명의 타임라인 프리미엄 심화 층 스위치(따로 켜고 끈다)
       var v = !(S.flags && S.flags.premiumDepth);
       if (v && !confirm('운명의 타임라인 서사 59장에 프리미엄 심화 층(내면의 구조·양면성과 반전·알아보는 장면·내게 맞는 한 가지)을 모든 사용자에게 공개합니다.\n켜시겠습니까?')) return;

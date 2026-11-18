@@ -544,6 +544,24 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .lt-g b { font-family: var(--f-display); font-weight: 900; font-size: 1.6rem; line-height: 1.05; color: var(--on); }
 .lt-g i { font-style: normal; font-size: 0.66rem; color: var(--on); opacity: .85; }
 .lt-us { font-size: 0.68rem; color: var(--ink-3); white-space: nowrap; }
+/* 오행 겹쳐 보기(olBox): 층 단추·오행 막대 */
+.ol-btns { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+.ol-b { font: inherit; font-size: 0.8rem; padding: 4px 10px; border-radius: 999px; border: 1.5px solid var(--olc); background: transparent; color: var(--ink); cursor: pointer; }
+.ol-b.in { background: color-mix(in srgb, var(--olc) 14%, transparent); }
+.ol-b.on { background: var(--olc); color: #fff; font-weight: 700; }
+.ol-bars { display: grid; gap: 6px; }
+.ol-graph { margin: 4px 0 6px; font-size: 0.86rem; line-height: 1.55; }
+.ol-graph .chip { margin-right: 4px; }
+.ol-ex { list-style: none; margin: 8px 0 10px; padding: 0; display: grid; gap: 8px; }
+.ol-ex li { border-left: 4px solid var(--olc); padding: 4px 0 4px 10px; font-size: 0.86rem; line-height: 1.55; }
+.ol-ex li b { color: var(--olc); }
+.ol-row { display: grid; grid-template-columns: 64px 1fr auto; gap: 8px; align-items: center; font-size: 0.82rem; }
+.ol-k { display: flex; gap: 4px; align-items: center; }
+.ol-k small { font-size: 0.68rem; font-weight: 700; }
+.ol-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: color-mix(in srgb, var(--line) 50%, transparent); }
+.ol-bar i { display: block; height: 100%; }
+.ol-v { white-space: nowrap; font-size: 0.78rem; color: var(--ink-2); }
+@media (max-width: 420px) { .ol-row { grid-template-columns: 56px 1fr auto; gap: 6px; } }
 /* 운 지지 지장간 한 줄: 정기 굵게·여기 중기 흐리게, 원국 천간과 같은 글자 점, 합 밑줄 */
 .lt-hid { display: inline-flex; gap: 2px; align-items: center; justify-content: center; margin-top: -1px; }
 .lt-hid i { font-style: normal; font-size: 0.7rem; line-height: 1.35; padding: 0 0.22em; font-weight: 600; opacity: .62; position: relative; }
@@ -1045,6 +1063,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="unseong-cycle.js"></script>
 <script src="luck-interpret.js"></script>
 <script src="luck-cycle.js"></script>
+<script src="luck-overlay.js"></script>
 <script src="wealth-career-data.js"></script>
 <script src="wealth-career-data-2.js"></script>
 <script src="wealth-career-data-3.js"></script>
@@ -7420,8 +7439,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     // elementFlow(오행 흐름 상자)는 [모두 켜기]와 따로 관리자 스위치로 켠다(functions/api/luck-flags.js)
     // luckCycle(오행 사이클: 대운 30년·세운 2년 묶음)도 따로 켠다
     // gyeokAnalysis(오행·강약 탭 '사주 격국 분석' 카드, gyeok-structure.js)도 따로 켠다
-    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis)) return;
-    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
+    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
+    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
   })();
   window.addEventListener('mantra:daycompat', () => { try { readForm(); render(); } catch (e) { } });   // 일주 적합도 2판(compat-day.js) 스위치가 늦게 켜지면 다시 그린다
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
@@ -7514,6 +7533,103 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
           <p class="note" style="margin-top:6px">파란 테두리 = 이 운에 들어온 오행 · 실선 화살표 = 생, 점선 화살표 = 극(오행 비율 그림과 같은 규칙) · 초록은 이 사주에 도움, 빨강은 부담, 회색은 영향이 작은 연결입니다. 이 판정은 설명용이며 흐름 점수는 바꾸지 않습니다.</p>
         </div></div></div>`;
   }
+  // ── 오행 겹쳐 보기 (스위치 MANTRA_FLAGS.luckOverlay, 기본 꺼짐, 2026-11-18): 원국 위에 대운 → 세운 → 월운을 차례로 쌓아 오행 비율이 어떻게 바뀌는지 보여 준다.
+  //    계산은 luck-overlay.js(설명용, 흐름 점수 불변). 단추로 층을 하나씩 켜고, 오각형 고리 색 = 그 오행을 더한 층, 막대 = 원국 몫 + 층마다 더한 몫.
+  const olOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.luckOverlay === true && window.MantraLuckOverlay);
+  const OL_COL = { natal: 'var(--ink-3)', daeun: '#3D7BD9', seun: '#E0832F', wolun: '#8E5BD6', ilun: '#2E9E8F' }, OL_ELK = ['wood', 'fire', 'earth', 'metal', 'water'];
+  function olLayers(x, kind) {   // 고른 시기까지의 운 기둥(대운 → 세운 → 월운)
+    const ch = S.ch, out = [];
+    if (kind === 'daeun') return [{ level: 'daeun', s: x.s, b: x.b, label: M.gzName(x) }];
+    const ms = kind === 'seun' ? Date.UTC(x.year, 6, 1) : kind === 'ilun' ? Date.UTC(x.date[0], x.date[1] - 1, x.date[2], 3) : x.startMs, du = M.daeunAt(ch, ms);
+    if (du) out.push({ level: 'daeun', s: du.s, b: du.b, label: M.gzName(du) });
+    if (kind === 'seun') { out.push({ level: 'seun', s: x.s, b: x.b, label: M.gzName(x) }); return out; }
+    let sy = null; try { sy = M.yearPillarAt(ms).sajuYear; const se = M.seunRange(ch, sy, sy)[0]; if (se) out.push({ level: 'seun', s: se.s, b: se.b, label: M.gzName(se) }); } catch (e) { }
+    if (kind === 'wolun') { out.push({ level: 'wolun', s: x.s, b: x.b, label: M.gzName(x) }); return out; }
+    // 일진: 그날이 든 월운(절기 기준)을 찾아 넣고 맨 위에 일진
+    try { let mo = null; M.wolun(ch, sy).concat(M.wolun(ch, sy + 1)).forEach(m => { if (m.startMs <= ms) mo = m; }); if (mo) out.push({ level: 'wolun', s: mo.s, b: mo.b, label: M.gzName(mo) }); } catch (e) { }
+    out.push({ level: 'ilun', s: x.s, b: x.b, label: M.gzName(x) });
+    return out;
+  }
+  function olPentagon(r, shown) {
+    const cx = 120, cy = 106, R = 74, pos = [0, 1, 2, 3, 4].map(e => { const a = (-90 + e * 72) * Math.PI / 180; return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; });
+    const pct = shown.length ? shown[shown.length - 1].pct : r.natal.pct, rad = e => 12 + Math.min(11, pct[e] / 5);
+    // 생 순환(바깥 실선)·극(안쪽 점선)은 배경으로 옅게 — 오행 사이 관계 자체를 읽는 길잡이
+    const ring = [0, 1, 2, 3, 4].map(e => { const [x1, y1] = pos[e], [x2, y2] = pos[(e + 1) % 5]; return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--line)" stroke-width="1.5"/>`; }).join('')
+      + [0, 1, 2, 3, 4].map(e => { const [x1, y1] = pos[e], [x2, y2] = pos[(e + 2) % 5]; return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--line)" stroke-width="1" stroke-dasharray="3 4"/>`; }).join('');
+    const nodes = [0, 1, 2, 3, 4].map(e => {
+      const [x, y] = pos[e], rr = rad(e), col = OL_ELK[e];
+      // 층마다 이 오행을 (0.15 × 층 무게, 최소 0.06)점 이상 더했으면 그 층 색 고리를 한 겹씩 두른다(안쪽부터 대운·세운·월운)
+      let k = 0; const rings = shown.map(l => l.add[e] >= 0.15 * Math.max(l.w, 0.4) ? `<circle cx="${x}" cy="${y}" r="${rr + 3 + (k++) * 4}" fill="none" stroke="${OL_COL[l.level]}" stroke-width="2.6"><title>${l.levelK} ${esc(l.label || '')}이(가) ${M.EL_K[e]}(${M.EL[e]})을 더함 · +${l.add[e].toFixed(2)}점</title></circle>` : '').join('');
+      const d = Math.round(pct[e] - r.natal.pct[e]), tag = r.roles[e] ? ' · ' + r.roles[e] : '';
+      return `<g>${rings}<circle cx="${x}" cy="${y}" r="${rr}" fill="var(--${col})" stroke="var(--${col}-ink)" stroke-width="1"/>
+        <text x="${x}" y="${y + 5}" text-anchor="middle" font-size="14" font-weight="800" fill="var(--${col}-on)">${'木火土金水'[e]}</text>
+        <text x="${x}" y="${y + rr + 12 + k * 4}" text-anchor="middle" font-size="10" fill="var(--ink-2)">${Math.round(pct[e])}%${shown.length && d ? (d > 0 ? ' ▲' : ' ▼') + Math.abs(d) : ''}${e === r.dayEl ? ' · 나' : tag}</text></g>`;
+    }).join('');
+    return `<svg viewBox="0 0 240 222" width="240" height="222" role="img" aria-label="원국 위에 운을 겹친 오행 그림" style="max-width:100%;flex:none">${ring}${nodes}</svg>`;
+  }
+  function olBars(r, shown) {
+    // 막대 = 지금까지 켠 층을 모두 더한 합계에 대한 몫: 원국(회색) + 대운 + 세운 + 월운(층 색). 원국 비율 → 겹친 뒤 비율, 용신·기신 표시
+    const tot = r.natal.pts.reduce((a, b) => a + b, 0) + shown.reduce((a, l) => a + l.add.reduce((x, y) => x + y, 0), 0) || 1;
+    const fin = shown.length ? shown[shown.length - 1].pct : r.natal.pct;
+    const order = [0, 1, 2, 3, 4].sort((a, b) => (r.roles[a] === '용신' ? -1 : 0) - (r.roles[b] === '용신' ? -1 : 0));
+    return `<div class="ol-bars">${order.map(e => {
+      const segs = [`<i style="width:${(r.natal.pts[e] / tot * 100).toFixed(2)}%;background:var(--${OL_ELK[e]});opacity:.55" title="원국 ${r.natal.pct[e]}%"></i>`]
+        .concat(shown.map(l => l.add[e] > 0.005 ? `<i style="width:${(l.add[e] / tot * 100).toFixed(2)}%;background:${OL_COL[l.level]}" title="${l.levelK} ${esc(l.label || '')} +${l.add[e].toFixed(2)}점"></i>` : ''));
+      const d = Math.round((fin[e] - r.natal.pct[e]) * 10) / 10, role = r.roles[e] || (e === r.dayEl ? '나' : '');
+      return `<div class="ol-row"><span class="ol-k"><b class="eltxt ${ECLS[e]}">${M.EL_K[e]}</b>${role ? `<small class="${role === '용신' || role === '희신' ? 'ib-g' : role === '기신' || role === '구신' ? 'ib-b' : 'muted'}">${role}</small>` : ''}</span><span class="ol-bar">${segs.join('')}</span><span class="ol-v num">${Math.round(r.natal.pct[e])}→<b>${Math.round(fin[e])}</b>%${shown.length ? ` <small class="${d > 0.4 ? (r.roles[e] === '용신' || r.roles[e] === '희신' ? 'ib-g' : r.roles[e] === '기신' || r.roles[e] === '구신' ? 'ib-b' : '') : d < -0.4 ? (r.roles[e] === '기신' || r.roles[e] === '구신' ? 'ib-g' : r.roles[e] === '용신' || r.roles[e] === '희신' ? 'ib-b' : '') : 'muted'}">${d > 0 ? '+' : ''}${d}</small>` : ''}</span></div>`;
+    }).join('')}</div>`;
+  }
+  // 그래프 비교 줄(5단계, 2026-11-18): 겹쳐 보기(오행 비율, 쌓은 층 전부)와 그래프 막대(흐름 점수 = 이 시기 점수 + 위 운 점수 섞음)의 방향을 비교하고,
+  //   반대면 그래프를 움직인 가장 큰 근거(점수 항목·위 운과의 연결)를 한 줄로 밝힌다. 둘 다 표시용이며 점수는 바꾸지 않는다.
+  const OL_MIX = { daeun: '대운 자체 점수', seun: '세운 60% + 대운 40%', wolun: '월운 60% + 세운 40%(세운에 대운이 들어 있음)', ilun: '일진 75% + 월운 25%' };
+  function olPartName(p) { const t = String(p.label || '').split(' → ')[0]; if (p.comp === 'relation') return t.split(' — ')[0]; if (p.comp === 'johu' || /^조후/.test(t)) return '조후(온도·습도)'; if (p.comp === 'unified' || /용신 부합/.test(t)) return '필요한 기운과 맞는 정도'; if (p.comp === 'structure') return t.split(' — ')[0]; return t.split(' (')[0]; }
+  function olGraphLine(x, kind, r) {
+    const ev = x.ev || {}, fs = ev.fitScore; if (fs == null) return '';
+    let g = 0, b = 0; r.roles.forEach((ro, e) => { if (ro === '용신' || ro === '희신') g += r.final.delta[e]; if (ro === '기신' || ro === '구신') b += r.final.delta[e]; });
+    const ov = g - b, od = Math.abs(ov) < 1.5 ? 0 : Math.sign(ov), gd = Math.abs(fs) < 8 ? 0 : Math.sign(fs);
+    const sc = `<b class="num ${fs >= 8 ? 'ib-g' : fs <= -8 ? 'ib-b' : ''}">${signed(Math.round(fs))}</b>(${esc(ev.condition || '')})`;
+    // 조사는 상태 낱말(순풍·보통·주의·부담) 받침에 맞춘다
+    const cw = String(ev.condition || ''), lc = cw.charCodeAt(cw.length - 1) - 0xAC00, bat = lc >= 0 && lc <= 11171 && lc % 28 > 0, J = (a, b) => bat ? a : b;
+    // 그래프를 그 방향으로 움직인 가장 큰 근거: 점수 항목 중 같은 부호로 가장 큰 것 + 위 운과의 연결(chain)
+    const why = dir => { const ps = (ev.parts || []).filter(p => Math.sign(p.v) === dir).sort((a, b) => Math.abs(b.v) - Math.abs(a.v)); const out = ps.slice(0, 2).map(olPartName); if (ev.chain && ev.chain.v && Math.sign(ev.chain.v) === dir && ev.chain.upName) out.push(ev.chain.upName + '와의 연결'); if (ev.chain && ev.chain.upCondition && kind !== 'daeun') out.push(`위 운(${ev.chain.upName}) ${ev.chain.upCondition}`); return out.filter((t, i, a) => t && a.indexOf(t) === i).slice(0, 2).join(' · '); };
+    let t;
+    if (od === 0 && gd === 0) t = `그래프 점수 ${sc} — 오행 비율도 그래프도 한쪽으로 크게 쏠리지 않아요.`;
+    else if (od === 0) t = `오행 비율 변화는 작지만, 그래프는 ${sc}${J('이에요', '예요')}. 그래프를 움직인 것: ${why(gd) || '합충·조후 같은 다른 요소'}.`;
+    else if (gd === 0) t = `오행 비율로는 ${od > 0 ? '도와주는 기운이 늘지만' : '부담 기운이 늘지만'}, 그래프는 ${sc}${J('으로', '로')} 잔잔해요. 그래프에서는 ${why(-od) || '다른 요소'} 쪽이 상쇄했어요.`;
+    else if (od === gd) t = `그래프 점수 ${sc}${J('과', '와')} 같은 방향이에요.`;
+    else t = `오행 비율로는 ${od > 0 ? '도와주는 기운이 늘지만' : '부담 기운이 늘지만'}, 그래프는 ${sc}${J('이에요', '예요')}. 그래프를 ${gd > 0 ? '올린' : '깎은'} 가장 큰 이유: ${why(gd) || '합충·조후 같은 다른 요소'}.`;
+    return `<p class="ol-graph"><span class="chip">그래프와 비교</span> ${t} <span class="small muted">그래프 막대 = ${OL_MIX[kind] || '흐름 점수'}(억부·조후·합충·구조 반영), 이 상자 = 오행 비율만.</span></p>`;
+  }
+  function olBox(x, kind) {
+    if (!olOn() || !x || x.s == null) return '';
+    const L = olLayers(x, kind), key = kind; let r;
+    try { r = window.MantraLuckOverlay.compute(M, S.ch, L, { weights: window.MANTRA_OVERLAY_W || undefined }); } catch (e) { return ''; }
+    const upTo = Math.min(S.olUpTo && S.olUpTo[key] != null ? S.olUpTo[key] : r.layers.length, r.layers.length), shown = r.layers.slice(0, upTo);
+    const btns = [`<button type="button" class="ol-b${upTo === 0 ? ' on' : ''}" data-ol="${key}:0" style="--olc:${OL_COL.natal}">원국</button>`]
+      .concat(r.layers.map((l, i) => `<button type="button" class="ol-b${upTo === i + 1 ? ' on' : ''}${upTo > i ? ' in' : ''}" data-ol="${key}:${i + 1}" style="--olc:${OL_COL[l.level]}">+${l.levelK} ${esc(l.label || '')}</button>`)).join('');
+    // 층마다 한 줄: 아래층과의 오행 관계 + 운끼리·원국과의 합충
+    const rels = shown.map((l, i) => {
+      const to = l.relBelow.to === 'natal' ? '나(일간)' : (r.layers[i - 1] ? r.layers[i - 1].levelK : '');
+      const luckRel = l.withLuck.map(q => q.name), natRel = l.withNatal.map(q => q.name).filter((n, j, a) => a.indexOf(n) === j).slice(0, 4);
+      return `<li><b style="color:${OL_COL[l.level]}">${l.levelK} ${esc(l.label || '')}</b> → ${to}: 천간 ${esc(l.relBelowK.stem)} · 지지 ${esc(l.relBelowK.branch)}${luckRel.length ? ` · <span class="ib-b">운끼리 ${esc(luckRel.join('·'))}</span>` : ''}${natRel.length ? ` · <span class="muted">원국과 ${esc(natRel.join('·'))}</span>` : ''}</li>`;
+    }).join('');
+    // 4단계: 켠 층마다 한 줄 풀이(luck-overlay.js explain — 사전 문구 조합)
+    let ex = []; try { ex = window.MantraLuckOverlay.explain ? window.MantraLuckOverlay.explain(r, upTo) : []; } catch (e) { ex = []; }
+    const OL_TONE = { good: ['ib-g', '도움'], bad: ['ib-b', '부담'], mixed: ['', '엇갈림'], flat: ['muted', '잔잔'] };
+    const exHtml = ex.length ? `<ol class="ol-ex">${ex.map(x => `<li style="--olc:${OL_COL[x.level]}"><b>${esc(x.title)}</b> <span class="chip ${OL_TONE[x.tone][0]}">${OL_TONE[x.tone][1]}</span><br>${esc(x.text)}</li>`).join('')}</ol>` : '';
+    const y = r.yong, yShown = y && shown.length ? { now: Math.round(shown[shown.length - 1].pct[y.el] * 10) / 10 } : null;
+    const head = y && yShown ? `필요한 기운(용신) ${M.EL_K[y.el]}(${M.EL[y.el]})${'이가가이가'[y.el]} 원국 ${y.natal}% → 겹친 뒤 <b class="${yShown.now - y.natal > 0.4 ? 'ib-g' : yShown.now - y.natal < -0.4 ? 'ib-b' : ''}">${yShown.now}%</b>${yShown.now - y.natal > 0.4 ? ' — 이 시기에 채워져요' : yShown.now - y.natal < -0.4 ? ' — 이 시기에 오히려 줄어요' : ' — 크게 달라지지 않아요'}` : '단추로 층을 하나씩 켜 보세요.';
+    return `<div class="ib ol"><div class="ib-k">오행 겹쳐 보기 <span class="small muted">원국 위에 ${r.layers.map(l => l.levelK).join(' → ')}</span></div>
+      <div class="ol-btns" role="group" aria-label="겹칠 층 고르기">${btns}</div>
+      <p style="margin:6px 0 2px">${head}</p>
+      ${olGraphLine(x, kind, r)}
+      ${exHtml}
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start">${olPentagon(r, shown)}
+        <div style="flex:1;min-width:220px">${olBars(r, shown)}
+          ${rels ? `<ul class="ib-ul small" style="margin-top:8px">${rels}</ul>` : ''}</div></div>
+      <p class="note" style="margin-top:6px">고리 색 = 그 오행을 더한 층(<b style="color:${OL_COL.daeun}">대운</b>·<b style="color:${OL_COL.seun}">세운</b>·<b style="color:${OL_COL.wolun}">월운</b>·<b style="color:${OL_COL.ilun}">일진</b>), 막대 = 원국 몫(흐린 오행 색) + 층마다 더한 몫. 셈법: 원국은 엔진 비중 그대로, 운 한 기둥은 천간 1 + 지지 1(지장간 일수 비율), 층 무게 대운 ${r.weights.daeun} · 세운 ${r.weights.seun} · 월운 ${r.weights.wolun} · 일진 ${r.weights.ilun}. 설명용이며 흐름 점수는 바꾸지 않습니다.</p></div>`;
+  }
+  document.addEventListener('click', ev => { const b = ev.target && ev.target.closest && ev.target.closest('[data-ol]'); if (!b) return; const [k, n] = b.dataset.ol.split(':'); S.olUpTo = Object.assign({}, S.olUpTo, { [k]: +n }); render(); });
   // ── 오행 사이클 (스위치 MANTRA_FLAGS.luckCycle, 기본 꺼짐): 대운 3개 = 장기 분석 구간(30년), 천간 오행이 같은 세운 2년 = 천간 오행 구간.
   //    계산·문장은 luck-cycle.js(사전 문구 조합, AI 없음). 표시 전용이라 흐름 점수·그래프 막대는 그대로다. 월운·일진은 묶지 않는다.
   const lcOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.luckCycle === true && window.MantraLuckCycle);
@@ -7581,6 +7697,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${banner}
       ${ib}
       ${kind === 'daeun' || kind === 'seun' ? efBox(x, kind) : ''}
+      ${kind === 'daeun' || kind === 'seun' || kind === 'wolun' || kind === 'ilun' ? olBox(x, kind) : ''}
       ${S.metric === 'health' ? hbBox(x, kind) : S.metric === 'accident' ? ahBox(x, kind) : ''}
       ${luckWords(x)}
       ${kind ? (kind === 'ilun' ? dayJudge(x) : '') + domainBox(x, kind, title) + rootBox(x, kind) + luckEffects(x, kind) : ''}
