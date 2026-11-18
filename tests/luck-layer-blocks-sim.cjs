@@ -48,4 +48,10 @@ assert.ok(/luck-layer-blocks\.js/.test(rd('report/v2/index.html')), '상세풀�
 assert.ok(/R\.LuckLayerBlocks\.set\(window\.Manse, ch\)/.test(rd('report/v2/viewer.js')), 'viewer 가 사주를 넘김');
 assert.ok(/R\.LuckLayerBlocks\.html\(c,esc\)/.test(rd('report/v2/reading-text.js')), '본문 연결');
 for (const f of ['luck-layers-view.js', 'report/v2/luck-layer-blocks.js']) assert.ok(!/fitScore\s*=|LUCK_CFG|evaluateLuck\(/.test(rd(f).replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, '')), f + ' 가 점수를 바꿈');
+// 상하위 방향 칩은 겹쳐 보기 층 판정과 엇갈리지 않아야 함(2026-11-18 운영 확인에서 발견: 대운 庚辰 "조금 부담 쪽" vs 겹쳐 보기 "도움")
+{ let mis = 0, rows = 0; for (let i = 0; i < 120; i++) { let ch; try { ch = M.compute({ year: 1950 + (i * 7) % 60, month: 1 + (i * 5) % 12, day: 1 + (i * 11) % 28, hour: (i * 3) % 24, minute: 0, gender: i % 2 ? 'M' : 'F' }); } catch (e) { continue; }
+  const wo = M.wolun(ch, 2026)[9], L = V.layersOf(M, ch, wo, 'wolun'), ex = ctx.MantraLuckOverlay.explain(ctx.MantraLuckOverlay.compute(M, ch, L), L.length), tones = {}; ex.forEach(l => tones[l.level] = l.tone);
+  ctx.MantraLuckEnv.hierarchy(M, ch, L, { tones }).rows.forEach(r => { rows++; const t = tones[r.level]; if (!(t === 'good' ? /good/.test(r.side) : t === 'bad' ? /bad/.test(r.side) : t === 'mixed' ? r.side === 'mixed' : r.side === 'mid')) mis++; }); }
+  assert.equal(mis, 0, '상하위 방향과 겹쳐 보기 판정이 엇갈림 ' + mis + '/' + rows);
+  assert.ok(/tones: tones/.test(rd('luck-layers-view.js')) && rd('index.html').includes('hierarchy(M, S.ch, L, { tones })'), '두 화면이 겹쳐 보기 판정을 넘김'); }
 console.log(`luck-layer-blocks-sim ok · 사주 ${n}명 · 시기 카드 ${cards}장 · 장별 블록 ${J(has)} · 스위치 꺼짐 빈 값 · 엔진 불변 · 연결`);

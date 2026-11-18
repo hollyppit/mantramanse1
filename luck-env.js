@@ -144,20 +144,28 @@
   // ── 원국 역할(통합 용신) → 방향 ──
   var ROLE_V = { '용신': 2, '희신': 1, '한신': 0, '중립': 0, '구신': -1, '기신': -2 };
   function roleOf(ch, el) { return (ch.unified && ch.unified.roles && ch.unified.roles[el]) || '중립'; }
-  function sideOf(ch, s, b, M) { var v = (ROLE_V[roleOf(ch, stemEl(s))] || 0) + (ROLE_V[roleOf(ch, M.BR_EL[b])] || 0); return { v: v, side: v >= 2 ? 'good' : v <= -2 ? 'bad' : v > 0 ? 'lean-good' : v < 0 ? 'lean-bad' : 'mid' }; }
-  var SIDE_K = { good: '도움 쪽', 'lean-good': '조금 도움 쪽', mid: '중간', 'lean-bad': '조금 부담 쪽', bad: '부담 쪽' };
+  // 운 기둥 하나의 방향: 천간 1 + 지지 지장간 일수 비율 1로 오행을 나눠 각 오행의 통합 용신 역할 값을 더한다(지장간 속 용신·기신까지 반영 — 겹쳐 보기와 같은 셈)
+  function sideOf(ch, s, b, M) {
+    var vec = [0, 0, 0, 0, 0]; vec[stemEl(s)] += 1; var H = M.HIDDEN[b], tot = H.reduce(function (a, h) { return a + h[1]; }, 0); H.forEach(function (h) { vec[stemEl(h[0])] += h[1] / tot; });
+    var v = vec.reduce(function (a, w, e) { return a + w * (ROLE_V[roleOf(ch, e)] || 0); }, 0); v = Math.round(v * 100) / 100;
+    return { v: v, side: v >= 1.5 ? 'good' : v <= -1.5 ? 'bad' : v >= 0.5 ? 'lean-good' : v <= -0.5 ? 'lean-bad' : 'mid' };
+  }
+  var SIDE_K = { good: '도움 쪽', 'lean-good': '조금 도움 쪽', mid: '중간', 'lean-bad': '조금 부담 쪽', bad: '부담 쪽', mixed: '도움·부담 섞임' };
+  var TONE_SIDE = { good: 'good', bad: 'bad', mixed: 'mixed', flat: 'mid' };   // 겹쳐 보기(luck-overlay explain) 층 판정 → 방향
   var sgn = function (s) { return /good/.test(s) ? 1 : /bad/.test(s) ? -1 : 0; };
 
   // 상위 운과 하위 운의 방향 비교(원국 역할 기준) — 위가 아래를 정하지 않는다
-  function hierarchy(M, ch, layers) {
+  // opt.tones: { daeun:'good'|'bad'|'mixed'|'flat', … } — 겹쳐 보기 층 판정이 있으면 그 값을 써서 두 상자가 엇갈리지 않게 한다
+  function hierarchy(M, ch, layers, opt) {
+    var tones = opt && opt.tones || null;
     if (!layers || layers.length < 2) return null;
-    var rows = layers.map(function (l) { var sd = sideOf(ch, l.s, l.b, M); return { level: l.level, levelK: LEVEL_K[l.level], gz: M.STEM[l.s] + M.BR[l.b], side: sd.side, sideK: SIDE_K[sd.side], v: sd.v, stemRole: roleOf(ch, stemEl(l.s)), branchRole: roleOf(ch, M.BR_EL[l.b]) }; });
+    var rows = layers.map(function (l) { var sd = sideOf(ch, l.s, l.b, M); if (tones && TONE_SIDE[tones[l.level]]) sd = { v: sd.v, side: TONE_SIDE[tones[l.level]] }; return { level: l.level, levelK: LEVEL_K[l.level], gz: M.STEM[l.s] + M.BR[l.b], side: sd.side, sideK: SIDE_K[sd.side], v: sd.v, stemRole: roleOf(ch, stemEl(l.s)), branchRole: roleOf(ch, M.BR_EL[l.b]) }; });
     var me = rows[rows.length - 1], up = rows[rows.length - 2], a = sgn(up.side), b = sgn(me.side), text;
-    var unit = { seun: '올해', wolun: '이달', ilun: '오늘' }[me.level] || '이번 시기', unitT = { seun: '올해는', wolun: '이달은', ilun: '오늘은' }[me.level] || '이번 시기는';
+    var unit = { seun: '올해', wolun: '이달', ilun: '오늘' }[me.level] || '이번 시기', unitT = { seun: '올해는', wolun: '이달은', ilun: '오늘은' }[me.level] || '이번 시기는', unitS = { seun: '올해가', wolun: '이달이', ilun: '오늘이' }[me.level] || '이번 시기가';
     if (a === b && a !== 0) text = up.levelK + '와 ' + me.levelK + '가 같은 ' + (a > 0 ? '도움' : '부담') + ' 방향이라 흐름이 겹쳐서 더 또렷하게 느껴져요.';
     else if (a > 0 && b < 0) text = '큰 배경(' + up.levelK + ')은 받쳐 주는데 ' + unitT + ' 부담 쪽이에요. 배경이 버팀목이 돼 주니 ' + unit + '의 부담은 넘길 여지가 있어요.';
     else if (a < 0 && b > 0) text = '큰 배경(' + up.levelK + ')은 무거운데 ' + unitT + ' 도움 쪽이에요. 반짝 열리는 틈이라 크게 벌이기보다 필요한 것부터 챙기는 데 쓰기 좋아요.';
-    else if (a === 0 && b !== 0) text = '큰 배경(' + up.levelK + ')은 중간이고 ' + unit + '이 ' + (b > 0 ? '도움' : '부담') + ' 쪽이라, 이번 변화는 ' + me.levelK + '의 몫이 커요.';
+    else if (a === 0 && b !== 0) text = '큰 배경(' + up.levelK + ')은 중간이고 ' + unitS + ' ' + (b > 0 ? '도움' : '부담') + ' 쪽이라, 이번 변화는 ' + me.levelK + '의 몫이 커요.';
     else if (a !== 0 && b === 0) text = unitT + ' 중간이라 큰 배경(' + up.levelK + ')의 ' + (a > 0 ? '도움' : '부담') + ' 방향이 그대로 이어져요.';
     else text = '두 층 모두 중간이라 뚜렷하게 기우는 쪽이 없어요.';
     text = text.replace(/대운와/g, '대운과').replace(/세운와/g, '세운과').replace(/월운와/g, '월운과').replace(/일진와/g, '일진과').replace(/일진가/g, '일진이').replace(/대운가/g, '대운이').replace(/세운가/g, '세운이').replace(/월운가/g, '월운이');

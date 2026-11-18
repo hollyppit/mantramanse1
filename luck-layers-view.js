@@ -49,7 +49,8 @@
     opt = opt || {}; var F = opt.flags || {}, E = opt.esc || esc0, LE = root.MantraLuckEnv, OV = root.MantraLuckOverlay, TG = root.MantraTenGodRoles;
     var L = layersOf(M, ch, x, kind), out = { env: '', tr: '', hier: '', ol: '', tgr: '', dom: '', hid: '' };
     try { out.hid = hidden(M, ch, x.b, E); } catch (e) { }
-    var nb = null;
+    var nb = null, tones = null, oc = null, ex = null;
+    if (F.luckOverlay && OV) { try { oc = OV.compute(M, ch, L, { weights: opt.weights }); ex = OV.explain(oc, L.length); tones = {}; ex.forEach(function (l) { tones[l.level] = l.tone; }); } catch (e) { oc = null; ex = null; tones = null; } }
     if (F.luckEnv && LE) {
       try {
         nb = LE.neighbors(M, ch, x, kind);
@@ -70,13 +71,12 @@
         }
       } catch (e) { }
       try {
-        var h = kind === 'daeun' ? null : LE.hierarchy(M, ch, L);
+        var h = kind === 'daeun' ? null : LE.hierarchy(M, ch, L, { tones: tones });
         if (h) out.hier = '<p class="lv-rows">' + h.rows.map(function (q) { return '<span class="lv-lvl ' + q.level + '"><b>' + E(q.levelK + ' ' + q.gz) + '</b> <i class="lv-chip ' + (/good/.test(q.side) ? 'good' : /bad/.test(q.side) ? 'bad' : '') + '">' + E(q.sideK) + '</i></span>'; }).join('<em>→</em>') + '</p><p>' + E(h.text) + '</p>';
       } catch (e) { }
     }
-    if (F.luckOverlay && OV) {
+    if (oc && ex) {
       try {
-        var oc = OV.compute(M, ch, L, { weights: opt.weights }), ex = OV.explain(oc, L.length), fin = oc.final || oc.layers[oc.layers.length - 1];
         var yg = oc.yong;
         out.ol = '<ol class="lv-ol">' + ex.map(function (l) { return '<li class="lv-' + l.tone + '"><b>' + E(l.title) + '</b> ' + E(l.text) + '</li>'; }).join('') + '</ol>' +
           (yg && yg.el != null ? '<p class="lv-sm">필요한 기운(용신) ' + E(EL_S[yg.el] + '(' + EL_HJ[yg.el] + ')') + ': 원국 ' + Math.round(yg.natal) + '% → 운을 겹친 뒤 ' + Math.round(yg.now) + '%</p>' : '');

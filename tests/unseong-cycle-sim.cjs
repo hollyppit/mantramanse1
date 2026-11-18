@@ -111,7 +111,7 @@ for (const [pat, msg] of [
   [/<script src="engine\.js"><\/script>\n<script src="unseong-cycle\.js"><\/script>/, '공통 모듈 스크립트가 엔진 바로 뒤에 없음'],
   [/<h2>내 사주의 12운성<\/h2>[\s\S]{0,200}\$\{unNatalHTML\(ch\)\}/, '원국 탭에 내 사주의 12운성 카드가 없음'],
   [/\$\{renderEasy\(\)\}[\s\S]*<h2>사주 원국<\/h2>[\s\S]*\$\{table\}\s*<\/section>\s*<section class="card">\s*<div class="card-h"><h2>내 사주의 12운성/, '내 사주의 12운성이 원국 표 바로 아래가 아님'],
-  [/\$\{unDaeunHTML\(ch, du\)\}/, '대운 카드에 12운성 변화가 없음'],
+  [/unDaeunHTML\(ch, du\)/, '대운 카드에 12운성 변화가 없음'],   // 2026-11-18: 접는 상자(foldBox) 안으로 옮김
   [/a\.startsWith\('us-p:'\)[^\n]*usSwap\('natal'/, '원국 카드 선택 처리 없음'], [/a\.startsWith\('us-du:'\)[^\n]*usSwap\('daeun'/, '대운 선택 처리 없음'], [/a\.startsWith\('un:'\)[^\n]*usSwap\('natal'/, '봉법·좌법 전환이 카드 전체를 다시 그리지 않음'],
   [/unSheetHTML\(key\) : ''\}\s*\n\s*\$\{body\}/, '용어 팝업 연결 없음'], [/\.us-tl \{/, '타임라인 CSS 없음'], [/@media \(max-width: 560px\) \{\s*\n\s*\.us-cards \{ grid-template-columns: repeat\(2/, '모바일 2열 CSS 없음'],
   [/:root\[data-theme="dark"\] \{\s*\n\s*--us-c0/, '어두운 테마 색 토큰 없음']]) ok(pat.test(html), msg);
