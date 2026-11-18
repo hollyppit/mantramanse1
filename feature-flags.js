@@ -9,10 +9,11 @@
      · luckCycle: 운세 흐름의 오행 사이클 — 대운 3개(30년)를 묶은 장기 분석 구간, 천간 오행이 같은 세운 2년을 묶은 천간 오행 구간(luck-cycle.js). 표시 전용, 점수 불변. 관리자 화면 스위치(/api/luck-flags luckCycle)로도 켠다
      · gyeokAnalysis: 오행·강약 탭 '사주 격국 분석' 카드(gyeok-structure.js) — 정격·특수격·오행 구조·십성 작용. 표시 전용, 용신·점수 불변. 관리자 화면 스위치(/api/luck-flags gyeokAnalysis)로도 켠다
      · luckOverlay: 운세 흐름 대운·세운·월운 상세의 '오행 겹쳐 보기'(luck-overlay.js) — 원국 위에 대운→세운→월운을 쌓은 오행 비율·고리·막대. 표시 전용, 점수 불변. 관리자 스위치(/api/luck-flags luckOverlay)
+     · tenGodRoles: 오행·강약 탭 '십성 작용 분석'(5종 비교·상호작용 구조)과 운세 흐름 상세 '원국과 운의 상호작용'(ten-god-roles.js). 표시 전용, 점수 불변. 관리자 스위치(/api/luck-flags tenGodRoles)
      · timelineCopy: 운명의 타임라인 카드 첫머리 문안(report/hub/hub-timeline.js). 관리자 화면 스위치(/api/luck-flags timelineCopy)로도 켠다
    끄는 방법: 값을 false로 되돌려 배포. 기존 만세력·결제·무빙툰·관리자에는 영향이 없다. 절차: docs/LUCK_ENV_ROLLBACK_2026-11-02.md */
 (function (w) {
-  var f = Object.assign({ luckOverlay: false, interpret: false, timeline: false, region: false, wealth: false, regionRead: false, wishSpots: false, space: false, timelineCopy: false, topicDeep: false, lifeNarrative: false, healthBody: true, accidentHint: true, elementFlow: false, luckCycle: false, gyeokAnalysis: false, dayCompat: false }, w.MANTRA_FLAGS || {});   // dayCompat(2026-11-16): 60갑자 일주 적합도 2판(compat-day.js). 관리자 화면 스위치(/api/luck-flags dayCompat)로도 켠다   // wealth: 직업·활동 적성 고도화(나의 돈 버는 방식·업무 환경·직업·약점). 관리자 화면 스위치로도 켠다(/api/wealth-career)
+  var f = Object.assign({ tenGodRoles: false, luckOverlay: false, interpret: false, timeline: false, region: false, wealth: false, regionRead: false, wishSpots: false, space: false, timelineCopy: false, topicDeep: false, lifeNarrative: false, healthBody: true, accidentHint: true, elementFlow: false, luckCycle: false, gyeokAnalysis: false, dayCompat: false }, w.MANTRA_FLAGS || {});   // dayCompat(2026-11-16): 60갑자 일주 적합도 2판(compat-day.js). 관리자 화면 스위치(/api/luck-flags dayCompat)로도 켠다   // wealth: 직업·활동 적성 고도화(나의 돈 버는 방식·업무 환경·직업·약점). 관리자 화면 스위치로도 켠다(/api/wealth-career)
   try {
     var loc = w.location, host = loc && loc.hostname || '';
     // 운영 도메인(mantramanse.pages.dev 및 그 외 사용자 도메인)에서는 주소로 켤 수 없다. localhost와 *.mantramanse.pages.dev 미리보기만 허용.

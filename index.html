@@ -544,6 +544,22 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .lt-g b { font-family: var(--f-display); font-weight: 900; font-size: 1.6rem; line-height: 1.05; color: var(--on); }
 .lt-g i { font-style: normal; font-size: 0.66rem; color: var(--on); opacity: .85; }
 .lt-us { font-size: 0.68rem; color: var(--ink-3); white-space: nowrap; }
+/* 십성 작용 분석(tenGodRoles, ten-god-roles.js) */
+.tgr details > summary { list-style: none; cursor: pointer; } .tgr details > summary::-webkit-details-marker { display: none; }
+.tgr-sum p { margin: 0 0 4px; line-height: 1.6; }
+.tgr-y { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 6px 0 10px; color: var(--ink-2); }
+.tgr-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.tgr-g { border: 1px solid var(--line); border-top: 4px solid var(--tgc); border-radius: 12px; padding: 8px 10px; background: var(--surface); min-width: 0; }
+.tgr-g[open] { grid-column: 1 / -1; }
+.tgr-g > summary { display: grid; gap: 5px; }
+.tgr-n { font-weight: 800; font-size: 1rem; } .tgr-n small { font-weight: 600; color: var(--ink-3); font-size: .74rem; }
+.tgr-bar { height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; } .tgr-bar i { display: block; height: 100%; background: var(--tgc); }
+.tgr-chips { display: flex; flex-wrap: wrap; gap: 4px; } .tgr-sub { font-size: .74rem; color: var(--ink-2); line-height: 1.4; }
+.tgr-main .wc-chip { white-space: normal; }
+.tgr-body { margin-top: 8px; font-size: .88rem; line-height: 1.6; } .tgr-body ul { margin: 4px 0; padding-left: 18px; }
+.tgr-ix { border-left: 3px solid var(--line); padding: 6px 0 6px 10px; margin: 6px 0; font-size: .9rem; } .tgr-ix p { margin: 4px 0; } .tgr-ix ul { margin: 2px 0; padding-left: 18px; }
+.tgr-off { margin-top: 8px; } .tgr-off > summary { color: var(--ink-3); }
+@media (max-width: 720px) { .tgr-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 /* 오행 겹쳐 보기(olBox): 층 단추·오행 막대 */
 .ol-btns { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
 .ol-b { font: inherit; font-size: 0.8rem; padding: 4px 10px; border-radius: 999px; border: 1.5px solid var(--olc); background: transparent; color: var(--ink); cursor: pointer; }
@@ -1082,6 +1098,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="jonggyeok.js"></script>
 <script src="gyeokguk.js"></script>
 <script src="gyeok-structure.js"></script>
+<script src="ten-god-roles.js"></script>
 <script src="glossary-cases.js"></script>
 <script src="glossary-overlap.js"></script>
 <script src="compass.js"></script>
@@ -6567,6 +6584,42 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">${esc(r.disclaimer)}</p>
     </section>`;
   }
+  // ───────────── 십성 작용 분석: ten-god-roles.js (표시 전용 — 강약·용신·흐름 점수·그래프에 더해지지 않음, 2026-11-18) ─────────────
+  // 스위치 MANTRA_FLAGS.tenGodRoles(기본 꺼짐). 5종 한눈 비교(세력·통합 역할·억부/조후 역할·실제 작용) → 누르면 상세, 아래에 상호작용 구조 11종(성립과 유불리 분리)
+  const tgrOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.tenGodRoles === true && window.MantraTenGodRoles);
+  const TGR_FAV = { good: 'good', bad: 'bad', neutral: '' }, TGR_TONE = { good: 'good', bad: 'bad', mixed: 'hold' }, TGR_ST = { on: 'good', weak: 'mid', off: '' }, TGR_ELK = ['wood', 'fire', 'earth', 'metal', 'water'];
+  const tgrRole = r => r === '용신' || r === '희신' ? 'good' : r === '기신' || r === '구신' ? 'bad' : '';
+  function renderTenGodRoles(ch) {
+    if (!tgrOn()) return '';
+    let r; try { r = window.MantraTenGodRoles.analyze(M, ch); } catch (e) { return ''; }
+    const y = r.yongsin, elN = e => e == null ? '—' : M.EL_K[e] + '(' + M.EL[e] + ')';
+    const cols = r.groups.map(g => `<details class="tgr-g" style="--tgc:var(--${TGR_ELK[g.el]})"><summary>
+      <span class="tgr-n">${esc(g.name)} <small>${esc(g.elK)}·${g.pct}%</small></span>
+      <span class="tgr-bar"><i style="width:${Math.min(100, g.pct * 2)}%"></i></span>
+      <span class="tgr-chips"><span class="wc-chip">세력 ${esc(g.force)}</span><span class="wc-chip ${TGR_FAV[g.favor]}">${esc(g.role.unified)}</span></span>
+      <span class="tgr-sub">억부 ${esc(g.role.eokbu)} · 조후 ${esc(g.role.johu)}${g.role.agree === 'conflict' ? ' <b class="ib-b">불일치</b>' : g.role.agree === 'agree' ? ' <span class="ib-g">일치</span>' : ''}</span>
+      <span class="tgr-main"><span class="wc-chip ${TGR_TONE[g.main.tone] || ''}">${esc(g.main.name)}</span></span></summary>
+      <div class="tgr-body"><p>${esc(g.line)}</p>
+        <ul class="small"><li>${g.members.map(m => esc(m.tg) + ' ' + m.pct + '%' + (m.exposed.length ? ' (투출 ' + esc(m.exposed.join('·')) + ')' : '')).join(' · ')}</li>
+          <li>투출 ${g.exposed.length ? esc(g.exposed.join('·')) : '없음'}${g.bound.length ? ' · 합으로 묶임 ' + esc(g.bound.join('·')) : ''} · 뿌리 ${g.root}${g.rootAt.length ? ' (' + esc(g.rootAt.join('·')) + ')' : ''}${g.month ? ' · ' + esc(g.month) : ''}</li>
+          <li>${esc(g.role.agreeK)} — 통합 판단 ${esc(g.role.unified)}</li></ul>
+        ${g.types.length > 1 ? `<p class="small">함께 보이는 작용: ${g.types.slice(1).map(t => `<span class="wc-chip ${TGR_TONE[t.tone] || ''}">${esc(t.name)}</span>`).join(' ')}</p>` : ''}</div></details>`).join('');
+    const act = r.interactions.filter(o => o.status !== 'off'), off = r.interactions.filter(o => o.status === 'off');
+    const ixRow = o => `<details class="tgr-ix"><summary><b>${esc(o.name)}</b> <span class="small muted">${esc(o.easy || '')} · ${esc(o.fromK)}${o.from === o.to ? '' : ' → ' + esc(o.toK)}</span> <span class="wc-chip ${TGR_ST[o.status]}">${esc(o.statusK)}</span>${o.toneK ? ` <span class="wc-chip ${TGR_TONE[o.tone]}">${esc(o.toneK)}</span>` : ''}</summary>
+      ${o.toneWhy ? `<p>${esc(o.toneWhy)}</p>` : ''}<ul class="small">${o.conds.map(c => `<li>${c.ok ? '충족' : '미충족'} · ${esc(c.label)}${c.detail ? ' (' + esc(c.detail) + ')' : ''}${c.core ? '' : ' <span class="muted">— 강도 조건</span>'}</li>`).join('')}${o.blocks.filter(b => b.hit).map(b => `<li>약화 요인 · ${esc(b.label)}${b.detail ? ' (' + esc(b.detail) + ')' : ''}</li>`).join('')}</ul>
+      ${o.ref && (o.ref.gyeok || o.ref.engine) ? `<p class="note">${o.ref.gyeok ? '격국 카드 판정: ' + esc(o.ref.gyeok) : ''}${o.ref.gyeok && o.ref.engine ? ' · ' : ''}${o.ref.engine ? '용신 탭 패턴: ' + esc(o.ref.engine) : ''} (기준이 조금씩 달라 결과가 다를 수 있어요)</p>` : ''}</details>`;
+    return `<section class="card tgr" id="tenGodRoles">
+      <div class="card-h"><h2>십성 작용 분석</h2><span class="note">많고 적음(세력)과 도움·부담(유불리)을 따로 봐요</span></div>
+      <div class="tgr-sum">${r.summary.map(t => `<p>${esc(t)}</p>`).join('')}</div>
+      <div class="tgr-y small"><span>억부 용신 <b>${y.eokbu && y.eokbu.applicable ? elN(y.eokbu.yong) : '해당 없음'}</b></span><span>조후 용신 <b>${y.johu && y.johu.applicable ? elN(y.johu.yong) : '해당 없음'}</b></span><span>통합 용신 <b>${elN(y.unified.yong)}</b></span><span class="${y.same ? 'ib-g' : ''}">${esc(y.agreeK)}</span></div>
+      <div class="tgr-grid">${cols}</div>
+      <div class="gx-k">상호작용 구조</div>
+      ${act.length ? act.map(ixRow).join('') : '<p class="muted small">원국에 뚜렷하게 선 구조는 없어요. 운에서 들어오는 기운으로 구조가 새로 만들어져요.</p>'}
+      ${off.length ? `<details class="tgr-off"><summary class="small">성립하지 않은 구조 ${off.length}개 — 왜 아닌지 보기</summary>${off.map(ixRow).join('')}</details>` : ''}
+      <p class="note">${esc(r.note)} ‘성립’은 구조가 서 있는지, ‘유리·불리’는 이 사주에 도움이 되는지를 따로 판정한 결과예요.</p>
+    </section>`;
+  }
+
   function renderOhaeng() {
     const ch = S.ch, w = ch.weights, st = ch.strength, dEl = M.stemEl(ch.pillars.day.s);
     const models = Object.entries(M.MODELS);
@@ -6607,6 +6660,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     </section>
     </div>
     ${renderGyeokAnalysis(ch)}
+    ${renderTenGodRoles(ch)}
     ${renderCompat(ch)}
     ${renderCareer(ch)}`;
   }
@@ -7439,8 +7493,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     // elementFlow(오행 흐름 상자)는 [모두 켜기]와 따로 관리자 스위치로 켠다(functions/api/luck-flags.js)
     // luckCycle(오행 사이클: 대운 30년·세운 2년 묶음)도 따로 켠다
     // gyeokAnalysis(오행·강약 탭 '사주 격국 분석' 카드, gyeok-structure.js)도 따로 켠다
-    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
-    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
+    const F = window.MANTRA_FLAGS; if (!F || (F.interpret && F.timeline && F.region && F.elementFlow && F.luckCycle && F.gyeokAnalysis && F.luckOverlay && F.tenGodRoles && window.MANTRA_OVERLAY_W)) return;   // 오행 겹쳐 보기 층 무게(overlayWeights)도 여기서 받는다
+    try { fetch('/api/luck-flags').then(r => r.ok ? r.json() : null).then(d => { if (!d) return; let ch = false; ['interpret', 'timeline', 'region', 'elementFlow', 'gyeokAnalysis', 'luckCycle', 'luckOverlay', 'tenGodRoles'].forEach(k => { if (d[k] === true && !F[k]) { F[k] = true; ch = true; } }); if (d.overlayWeights && typeof d.overlayWeights === 'object') { window.MANTRA_OVERLAY_W = d.overlayWeights; if (F.luckOverlay) ch = true; } if (ch) { readForm(); render(); } }).catch(() => { }); } catch (e) { }
   })();
   window.addEventListener('mantra:daycompat', () => { try { readForm(); render(); } catch (e) { } });   // 일주 적합도 2판(compat-day.js) 스위치가 늦게 켜지면 다시 그린다
   // 관리자가 승인·게시한 문구를 한 번 받아 반영한다(실패하면 기본 문구).
@@ -7629,6 +7683,26 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
           ${rels ? `<ul class="ib-ul small" style="margin-top:8px">${rels}</ul>` : ''}</div></div>
       <p class="note" style="margin-top:6px">고리 색 = 그 오행을 더한 층(<b style="color:${OL_COL.daeun}">대운</b>·<b style="color:${OL_COL.seun}">세운</b>·<b style="color:${OL_COL.wolun}">월운</b>·<b style="color:${OL_COL.ilun}">일진</b>), 막대 = 원국 몫(흐린 오행 색) + 층마다 더한 몫. 셈법: 원국은 엔진 비중 그대로, 운 한 기둥은 천간 1 + 지지 1(지장간 일수 비율), 층 무게 대운 ${r.weights.daeun} · 세운 ${r.weights.seun} · 월운 ${r.weights.wolun} · 일진 ${r.weights.ilun}. 설명용이며 흐름 점수는 바꾸지 않습니다.</p></div>`;
   }
+  // ── 원국과 운의 상호작용(스위치 MANTRA_FLAGS.tenGodRoles, 기본 꺼짐, 2026-11-18): ten-god-roles.js luck — 대운 → 세운 → 월운 → 일진을 아래층부터 쌓아
+  //    A. 들어온 기운의 유불리(통합·억부·조후 역할) / B. 현실적 작용(구조 신규 형성·강화·약화·해소, 감당 능력, 재물·커리어·인연). 흐름 점수·그래프 불변.
+  function tgrBox(x, kind) {
+    if (!tgrOn() || !x || x.s == null) return '';
+    let r; try { r = window.MantraTenGodRoles.luck(M, S.ch, olLayers(x, kind), { weights: window.MANTRA_OVERLAY_W || undefined }); } catch (e) { return ''; }
+    const L = r.layers; if (!L.length) return '';
+    const me = L[L.length - 1], A_CLS = { good: 'ib-g', bad: 'ib-b', mixed: '', flat: 'muted' };
+    const chg = c => `<span class="wc-chip ${c.kind === 'gone' ? '' : TGR_TONE[c.tone] || ''}">${esc(c.name)} ${esc(c.kindK)}</span>`;
+    const rows = L.map(l => `<li style="--olc:${OL_COL[l.level]}"><b>${esc(l.levelK)} ${esc(l.gz)}</b> <span class="chip ${A_CLS[l.A.tone]}">기운 ${esc(l.A.toneK)}</span> ${l.B.changes.map(chg).join(' ')}<br>${l.lines.map(esc).join(' ')}</li>`).join('');
+    const inc = me.incoming.map(a => `<tr><td>${esc(a.at)}</td><td>${esc(a.tg)} · ${esc(a.group)}</td><td class="${tgrRole(a.unified) === 'good' ? 'ib-g' : tgrRole(a.unified) === 'bad' ? 'ib-b' : ''}">${esc(a.unified)}</td><td>${esc(a.eokbu)}</td><td>${esc(a.johu)}</td><td class="small">${esc(a.agreeK)}</td></tr>`).join('');
+    const dom = me.B.domains.map(d => `<li><b>${esc(d.name)}</b> <span class="wc-chip ${TGR_TONE[d.tone] || ''}">${esc(d.toneK)}</span> <span class="small">${esc(d.basis)}</span>${d.note ? `<br><span class="note">${esc(d.note)}</span>` : ''}</li>`).join('');
+    return `<div class="ib tgr-l"><div class="ib-k">원국과 운의 상호작용 <span class="small muted">십성 구조가 ${L.map(l => l.levelK).join(' → ')} 순서로 어떻게 바뀌는지</span></div>
+      <ol class="ol-ex">${rows}</ol>
+      <details class="adv"><summary>A. 들어온 기운의 유불리 · B. 현실적 작용 자세히</summary>
+        <div class="tbl-wrap"><table class="dt"><thead><tr><th>자리</th><th>십성</th><th>통합</th><th>억부</th><th>조후</th><th>두 기준</th></tr></thead><tbody>${inc}</tbody></table></div>
+        <p class="small">감당하는 힘(비겁+인성): ${me.B.carry.before}% → ${me.B.carry.after}%${me.B.touched.length ? ' · ' + me.B.touched.map(t => esc(t.text)).join(' · ') : ''}</p>
+        ${dom ? `<ul class="ib-ul small">${dom}</ul>` : ''}
+        ${me.engineStructures.length ? `<p class="note">흐름 점수에 이미 반영된 운 구조(엔진): ${me.engineStructures.map(e => esc(e.name)).join(' · ')}</p>` : ''}
+        <p class="note">셈법: ${esc(r.rule)}. 설명용이라 그래프 막대·흐름 점수는 바뀌지 않아요.</p></details></div>`;
+  }
   document.addEventListener('click', ev => { const b = ev.target && ev.target.closest && ev.target.closest('[data-ol]'); if (!b) return; const [k, n] = b.dataset.ol.split(':'); S.olUpTo = Object.assign({}, S.olUpTo, { [k]: +n }); render(); });
   // ── 오행 사이클 (스위치 MANTRA_FLAGS.luckCycle, 기본 꺼짐): 대운 3개 = 장기 분석 구간(30년), 천간 오행이 같은 세운 2년 = 천간 오행 구간.
   //    계산·문장은 luck-cycle.js(사전 문구 조합, AI 없음). 표시 전용이라 흐름 점수·그래프 막대는 그대로다. 월운·일진은 묶지 않는다.
@@ -7698,6 +7772,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${ib}
       ${kind === 'daeun' || kind === 'seun' ? efBox(x, kind) : ''}
       ${kind === 'daeun' || kind === 'seun' || kind === 'wolun' || kind === 'ilun' ? olBox(x, kind) : ''}
+      ${kind === 'daeun' || kind === 'seun' || kind === 'wolun' || kind === 'ilun' ? tgrBox(x, kind) : ''}
       ${S.metric === 'health' ? hbBox(x, kind) : S.metric === 'accident' ? ahBox(x, kind) : ''}
       ${luckWords(x)}
       ${kind ? (kind === 'ilun' ? dayJudge(x) : '') + domainBox(x, kind, title) + rootBox(x, kind) + luckEffects(x, kind) : ''}
