@@ -145,11 +145,13 @@
     var audio = new Audio(); audio.preload = 'auto'; audio.src = d.audio; el._audio = audio;
     var pp = ui.querySelector('.mv-pp'), bar = ui.querySelector('.mv-bar'), fill = bar.querySelector('span'), tEl = ui.querySelector('.mv-t'), secEl = ui.querySelector('.mv-sec'), lineEl = ui.querySelector('.mv-line'), nextEl = ui.querySelector('.mv-next');
     var lastSec = -1, lastLine = '', raf = 0, done = false;
-    function songMs() { var dur = audio.duration; return isFinite(dur) && dur > 0 ? (audio.currentTime / dur) * song.totalMs : audio.currentTime * 1000; }
+    // 자막 시각(song.timing, 서버가 음성 인식으로 맞춘 실제 부르는 시각)이 있으면 재생 시각 그대로, 없으면 구간 길이를 실제 곡 길이에 비율로 맞춘다
+    function songMs() { if (song.timing && song.timing.length) return audio.currentTime * 1000; var dur = audio.duration; return isFinite(dur) && dur > 0 ? (audio.currentTime / dur) * song.totalMs : audio.currentTime * 1000; }
     function tick() {
       var ms = songMs(), cue = lib.cueAt(song, ms), si = song.sections.indexOf(cue.section);
       if (si !== lastSec) { lastSec = si; stage.querySelectorAll('i').forEach(function (n) { n.classList.toggle('on', +n.dataset.i === si); }); secEl.textContent = cue.section.name; showVid(si); }
-      if (cue.line !== lastLine) { lastLine = cue.line; lineEl.textContent = cue.line; var nx = cue.section.lines[cue.lineIndex + 1] || ((song.sections[si + 1] || {}).lines || [])[0] || ''; nextEl.textContent = nx; }
+      var key = cue.line + '|' + cue.lineIndex + '|' + si;
+      if (key !== lastLine) { lastLine = key; lineEl.textContent = cue.line; var nx = cue.next != null ? cue.next : (cue.section.lines[cue.lineIndex + 1] || ((song.sections[si + 1] || {}).lines || [])[0] || ''); nextEl.textContent = nx; }   // 쉬는 구간(전주·간주)에는 줄을 비우고 다음 줄만 미리 보여 준다
       var dur = isFinite(audio.duration) && audio.duration > 0 ? audio.duration * 1000 : song.totalMs;
       fill.style.width = Math.min(100, audio.currentTime * 1000 / dur * 100) + '%'; tEl.textContent = fmt(audio.currentTime * 1000) + ' / ' + fmt(dur);
       root.cancelAnimationFrame(raf); if (!audio.paused) raf = root.requestAnimationFrame(tick);

@@ -45,7 +45,17 @@ const uniq = new Set(songs.map(s => s.lyrics)).size;
 assert(uniq >= 398, '서로 다른 곡 ' + uniq + '/400');
 const v1 = new Set(songs.map(s => s.sections[1].lines.join('|'))).size, v2 = new Set(songs.map(s => s.sections[3].lines.join('|'))).size, br = new Set(songs.map(s => s.sections[5].lines.join('|'))).size;
 assert(v1 >= 250 && v2 >= 250 && br >= 150, '구간 다양성 ' + v1 + '/' + v2 + '/' + br);
-const usedLines = new Set(songs.flatMap(s => s.sections.flatMap(x => x.lines)));
+const usedLines = new Set(songs.flatMap(s => s.sections.flatMap(x => x.lines.map(L.stripAdlibs))));   // 추임새(괄호)를 뺀 원래 조각으로 비교
+// 영어 힙합 추임새: 곡마다 10개 안팎, 괄호로만, 오행별 묶음 안의 말만, 욕설·약물 없음, 훅 두 번이 똑같다
+{ const all = Object.values(L.ADLIB).flatMap(a => a.items.concat(a.hype)).concat(['uh', 'yeah, yeah', 'hold up', 'yeah, peace out']);
+  for (const s of songs.slice(0, 60)) {
+    const tags = s.sections.flatMap(x => x.lines.flatMap(l => (l.match(/\(([^)]*)\)/g) || []).map(t => t.slice(1, -1))));
+    assert(tags.length >= 8 && tags.length <= 16, '추임새 수 ' + tags.length);
+    for (const t of tags) { assert(all.includes(t), '묶음 밖 추임새 ' + t); assert(!/fuck|shit|bitch|drug|gun|weed/i.test(t)); }
+    assert(s.sections[2].lines.some(l => /\(yeah, yeah\)$/.test(l))); assert.deepEqual(s.sections[2].lines, s.sections[4].lines);
+    assert(/\(yeah, peace out\)$/.test(s.sections[6].lines[3]));
+    for (const x of s.sections) for (const l of x.lines) assert.equal((l.match(/\(/g) || []).length <= 1, true);
+  } }
 const fragUse = frags.filter(t => usedLines.has(t) || /^\{year\}/.test(t)).length;
 
 
@@ -74,7 +84,7 @@ for (let n = 0; n < 200; n++) {
     const once = s.sections.filter(x => x.id !== 'hook2').flatMap(x => x.lines); assert.equal(new Set(once).size, once.length, t + ' 같은 줄 반복');
     for (const sec of s.sections) { assert(ids.has(sec.panel), sec.panel); assert(ids.has(sec.panelFallback)); }
     assert.equal(L.fromInputs(L.inputsOf(sd, t, extra)).lyrics, s.lyrics);
-    songs5[t] = s; byTopic[t].push(s.lyrics); for (const sec of s.sections) for (const l of sec.lines) usedLines.add(l);
+    songs5[t] = s; byTopic[t].push(s.lyrics); for (const sec of s.sections) for (const l of sec.lines) usedLines.add(L.stripAdlibs(l));
   }
   assert.equal(new Set(Object.values(songs5).map(s => s.lyrics)).size, 5, '주제마다 다른 곡');
   assert(songs5.love.sections[2].lines[0].includes('우리 쪽으로'), '연애 훅');
@@ -90,3 +100,34 @@ assert.equal(L.PANEL_SLOTS.length, 150);
 const unused = frags.filter(t => !usedLines.has(t) && !/{(year|m)}/.test(t)); assert(unused.length / frags.length <= 0.08, '쓰이지 않는 조각 ' + unused.length + '/' + frags.length + ': ' + unused.slice(0, 8).join(' / '));
 console.log('주제별 ok: 5주제 × 사주 200개, 주제마다 서로 다른 곡, 토정 144괘 반영, 패널 칸 150개, 전체 조각 ' + frags.length + '줄 중 쓰이지 않은 줄 ' + unused.length + '개');
 if (process.argv.includes('--show')) for (const t of ['love', 'newyear']) { const sd = ReportV2.SajuData.build(Manse.compute({ year: 1992, month: 3, day: 9, hour: 14, minute: 0, gender: 'F', calendar: 'solar', city: '서울' }), { now }); const s = L.compose(sd, t, { year: 2027, gua: 111 }); console.log('\n[' + s.topicKo + '] ' + s.title + '\n' + s.lyrics); }
+
+// 7) 자막 맞추기(음성 인식 단어 시각 → 줄 시각): 받아쓰기 오타·빠진 단어·전주가 있어도 줄 순서대로 실제 시각을 찾는다
+{
+  let rnd = 7; const rand = () => (rnd = (rnd * 16807) % 2147483647) / 2147483647;
+  let checked = 0, good = 0;
+  for (let n = 0; n < 60; n++) {
+    const sd = ReportV2.SajuData.build(Manse.compute({ year: 1970 + n % 40, month: 1 + n % 12, day: 1 + (n * 3) % 27, hour: n % 24, minute: 0, gender: n % 2 ? 'F' : 'M', calendar: 'solar', city: '서울' }), { now });
+    const s = L.compose(sd, ['self', 'love', 'wealth', 'career'][n % 4]);
+    // 가짜 받아쓰기: 전주 6~10초, 줄마다 실제 시각(구간 안에서 고르지 않게), 글자 8% 틀림, 단어 10% 빠짐, 띄어쓰기·문장부호 섞임
+    let t = 6 + rand() * 4; const words = [], truth = [];
+    s.sections.forEach((sec, si) => sec.lines.forEach((line, li) => {
+      truth.push({ s: si, l: li, t: Math.round(t * 1000) });
+      for (const w of line.split(' ')) {
+        if (rand() < 0.10) { t += 0.3; continue; }
+        const txt = [...w].map(c => rand() < 0.08 && /[가-힣]/.test(c) ? '가' : c).join('');
+        words.push({ text: txt, start: t, end: t + 0.25, type: 'word' }, { text: ' ', start: t + 0.25, end: t + 0.3, type: 'spacing' }); t += 0.32;
+      }
+      t += 0.4 + rand() * 2.5;
+    }));
+    const tm = L.alignToTranscript(s, words); assert(tm, '맞추기 실패 #' + n);
+    assert.equal(tm.length, truth.length); for (let i = 1; i < tm.length; i++) assert(tm[i].t >= tm[i - 1].t, '순서');
+    tm.forEach((x, i) => { checked++; if (Math.abs(x.t - truth[i].t) <= 700) good++; });
+    // 화면: 전주에는 자막 없음, 줄 시각에 그 줄
+    const song2 = Object.assign({}, s, { timing: tm });
+    assert.equal(L.cueAt(song2, 1000).line, ''); assert.equal(L.cueAt(song2, 1000).sung, false);
+    const mid = tm[10]; assert.equal(L.cueAt(song2, mid.t + 50).line, s.sections[mid.s].lines[mid.l]);
+  }
+  assert(good / checked >= 0.9, '0.7초 안에 맞은 줄 ' + good + '/' + checked);
+  assert.equal(L.alignToTranscript(L.compose(ReportV2.SajuData.build(Manse.compute({ year: 1990, month: 1, day: 1, hour: 1, minute: 0, gender: 'F', calendar: 'solar', city: '서울' }), { now }), 'self'), [{ text: '전혀 상관없는 영어 가사 hello world baby', start: 1, end: 2, type: 'word' }]), null, '안 맞으면 null');
+  console.log('자막 맞추기 ok: 사주 60곡, 오타 8%·빠진 단어 10%에서 0.7초 안에 맞은 줄 ' + Math.round(good / checked * 1000) / 10 + '%');
+}

@@ -40,7 +40,7 @@ const today = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10)
 async function sha256(s) { const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, '0')).join(''); }
 async function flagOn(env) { try { const d = await env.GLOSSARY_KV.get('luckenv:flags', 'json'); return !!(d && d.musicVideo === true); } catch { return false; } }
 async function panelsOf(env) { try { const m = await env.GLOSSARY_KV.get(PANELS, 'json'); return m && typeof m === 'object' ? m : {}; } catch { return {}; } }
-const publicSong = s => ({ title: s.title, topic: s.topic, topicKo: s.topicKo, totalMs: s.totalMs, sections: s.sections.map(x => ({ id: x.id, name: x.name, lines: x.lines, startMs: x.startMs, durationMs: x.durationMs, panel: x.panel, panelFallback: x.panelFallback, el: x.el })) });
+const publicSong = (s, rec) => ({ title: s.title, topic: s.topic, topicKo: s.topicKo, totalMs: s.totalMs, timing: (rec && rec.timing) || null, sync: (rec && rec.sync) || null, sections: s.sections.map(x => ({ id: x.id, name: x.name, lines: x.lines, startMs: x.startMs, durationMs: x.durationMs, panel: x.panel, panelFallback: x.panelFallback, el: x.el })) });
 
 // 유료 주제를 산 회원인가(관리자는 통과, 관리자 '무료 사용자로 보기'는 일반 회원과 같게)
 async function gate(request, env, world, sd) {
@@ -114,10 +114,9 @@ export async function onRequestPost({ request, env }) {
   if (!env.CLIPS_R2) return json({ ok: false, error: 'R2 바인딩(CLIPS_R2)이 없습니다' }, 501);
 
   const song = L.fromInputs(x), key = await sha256(JSON.stringify({ v: song.version, m: modelOf(env), lyrics: song.lyrics, style: song.style, d: song.sections.map(s => s.durationMs) }));
-  const done = () => json({ ok: true, key, song: publicSong(song), audio: '/api/music-video?a=' + key });
-  const reply = async r => { const o = await r.json(); o.panels = await panelsOf(env); return json(o, r.status); };
+  const reply = async r => json({ ok: true, key, song: publicSong(song, r), audio: '/api/music-video?a=' + key, panels: await panelsOf(env) });
   const rec = await env.GLOSSARY_KV.get(SONG(key), 'json');
-  if (rec && rec.status === 'done') return reply(done());
+  if (rec && rec.status === 'done') return reply(needSync(rec) ? await syncTiming(env, key, song, rec, null) : rec);   // 예전에 만든 곡도 처음 열 때 한 번 자막 시각을 맞춘다
   if (rec && rec.status === 'pending' && Date.now() - rec.at < PENDING_MS) return json({ ok: false, pending: true, key }, 202);
   if (!env.ELEVENLABS_API_KEY) return json({ ok: false, error: '음악 생성 키(ELEVENLABS_API_KEY)가 설정되지 않았습니다' }, 501);
 
@@ -134,8 +133,39 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: false, error: 'generate-failed', detail: g.admin ? e.message : undefined }, 502);
   }
   await putDerivedFile(env, 'mv-' + key + '.mp3', bytes, { httpMetadata: { contentType: 'audio/mpeg' } });
-  await env.GLOSSARY_KV.put(SONG(key), JSON.stringify({ status: 'done', at: Date.now(), bytes: bytes.length, model: usedModel, title: song.title, topic: song.topic, version: song.version }));
-  return reply(done());
+  const fresh = { status: 'done', at: Date.now(), bytes: bytes.length, model: usedModel, title: song.title, topic: song.topic, version: song.version };
+  await env.GLOSSARY_KV.put(SONG(key), JSON.stringify(fresh));
+  return reply(await syncTiming(env, key, song, fresh, bytes));
+}
+
+// ── 자막 시각 맞추기: 만든 노래를 일레븐랩스 음성 인식(Scribe)으로 단어별 시각을 받아 가사 줄마다 실제 부르는 시각을 찾는다.
+//    실패하면 timing 없이(화면은 구간 비율) 내보내고, 오류는 관리자 화면 '마지막 오류'에 남긴다. 실패한 곡은 6시간 뒤 다시 시도.
+//    키에 음성 인식(speech_to_text) 권한이 있어야 한다. 3분 곡 한 번 = 음성 인식 3분 분량 크레딧.
+const STT = 'https://api.elevenlabs.io/v1/speech-to-text', SYNC_V = 1;
+const sttModel = env => /^scribe_[\w]{1,30}$/.test(env.ELEVENLABS_STT_MODEL || '') ? env.ELEVENLABS_STT_MODEL : 'scribe_v2';
+const needSync = rec => rec.syncVersion !== SYNC_V || (rec.sync === 'error' && Date.now() - (rec.syncAt || 0) > 6 * 3600 * 1000);
+async function transcribe(env, bytes) {
+  const fd = new FormData();
+  fd.append('model_id', sttModel(env)); fd.append('language_code', 'ko'); fd.append('timestamps_granularity', 'word'); fd.append('tag_audio_events', 'false');
+  fd.append('file', new Blob([bytes], { type: 'audio/mpeg' }), 'song.mp3');
+  const r = await fetch(STT, { method: 'POST', headers: { 'xi-api-key': env.ELEVENLABS_API_KEY }, body: fd });
+  let d = null; try { d = await r.json(); } catch { d = null; }
+  if (!r.ok || !d || !Array.isArray(d.words)) throw new Error('자막 맞추기(음성 인식 ' + sttModel(env) + ') 실패(HTTP ' + r.status + '): ' + JSON.stringify(d).slice(0, 500));
+  return d.words;
+}
+async function syncTiming(env, key, song, rec, bytes) {
+  try {
+    if (!env.ELEVENLABS_API_KEY) throw new Error('ELEVENLABS_API_KEY 가 없어 자막 시각을 맞추지 못했습니다');
+    if (!bytes) { const o = await env.CLIPS_R2.get('mv-' + key + '.mp3'); if (!o) throw new Error('노래 파일이 없습니다'); bytes = new Uint8Array(await o.arrayBuffer()); }
+    const timing = L.alignToTranscript(song, await transcribe(env, bytes));
+    rec.timing = timing; rec.sync = timing ? 'ok' : 'nomatch';
+  } catch (e) {
+    rec.timing = null; rec.sync = 'error';
+    await env.GLOSSARY_KV.put('mv:lastError', JSON.stringify({ at: Date.now(), topic: song.topic, message: String(e.message).slice(0, 1200) }), { expirationTtl: 7 * 86400 });
+  }
+  rec.syncAt = Date.now(); rec.syncVersion = SYNC_V;
+  await env.GLOSSARY_KV.put(SONG(key), JSON.stringify(rec));
+  return rec;
 }
 
 export async function onRequestGet({ request, env }) {

@@ -31,7 +31,7 @@
       '<button class="btn" id="mvpFlag"' + (D ? '' : ' disabled') + '>' + (D && D.flag ? '뮤직비디오 끄기' : '뮤직비디오 켜기') + '</button>' +
       '<span>음악 키(ELEVENLABS_API_KEY): ' + ok(c.music) + '</span><span>이미지 키: ' + ok(c.image) + '</span><span>영상 키(Kling): ' + ok(c.video) + '</span><span>파일 저장소(R2): ' + ok(c.r2) + '</span>' +
       '<span>오늘 만든 곡: <b>' + (D ? D.today : '-') + '</b> / 하루 상한 ' + (D ? D.limit : '-') + '곡(MV_DAILY_LIMIT)</span><span>모델: ' + esc(D ? D.model : '-') + '</span></div>' +
-      '<p class="muted" style="margin:10px 0 0">상업 이용: 일레븐랩스 음악 약관상 사업자는 Scale(직원 10명 미만) 이상 요금제 계정의 키를 써야 합니다. 곡당 약 3분 = 약 $0.45(종량 기준). 노래 키는 Cloudflare Pages 설정 › 환경 변수(비밀)에 직접 넣으세요 — 이 화면에서는 입력하지 않습니다.</p>' +
+      '<p class="muted" style="margin:10px 0 0">상업 이용: 일레븐랩스 음악 약관상 사업자는 Scale(직원 10명 미만) 이상 요금제 계정의 키를 써야 합니다. 곡당 약 3분 = 약 $0.45(종량 기준). 노래 키는 Cloudflare Pages 설정 › 환경 변수(비밀)에 직접 넣으세요 — 이 화면에서는 입력하지 않습니다. 키 권한은 <b>뮤직(음악 생성)</b>과 <b>음성 텍스트 변환(Speech to Text)</b> 둘 다 켜 주세요 — 노래를 만든 뒤 음성 인식으로 줄마다 실제로 부르는 시각을 찾아 자막을 맞춥니다(실패하면 구간 비율로 표시, 원인은 아래 “마지막 오류”).</p>' +
       (D && D.lastError ? '<details style="margin:8px 0 0"><summary style="color:#E07A6E;cursor:pointer">마지막 노래 생성 오류 · ' + esc(new Date(D.lastError.at).toLocaleString('ko-KR')) + '</summary><pre style="white-space:pre-wrap;word-break:break-all;font-size:12px;margin:6px 0 0">' + esc(D.lastError.message) + '</pre></details>' : '') +
       '<p id="mvpMsg" class="muted" style="margin:8px 0 0"></p></div>';
 

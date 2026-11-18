@@ -49,7 +49,7 @@ r = await call('POST', '/api/music-video', { topic: 'newyear' }, admin); assert.
 r = await call('POST', '/api/music-video', { topic: 'newyear', birth, year: 2027 }, admin); assert.equal(r.status, 409, '검수 전 괘는 노래를 만들지 않는다'); assert(/161괘/.test(r.j.detail)); assert.equal(eleven, 2);
 kv.set('newyear:content', JSON.stringify({ rev: 1, modern: { 161: { status: 'reviewed', edits: { theme: '관리자가 고친 괘 제목' } } }, blocks: {}, history: [] }));
 r = await call('POST', '/api/music-video', { topic: 'newyear', birth, year: 2027, sd: { dayMaster: { stem: '갑', el: '목' } } }, admin); assert.equal(r.status, 200, JSON.stringify(r.j)); assert.equal(eleven, 3);
-assert.equal(r.j.song.sections[0].lines[3], '“관리자가 고친 괘 제목”', '승인·수정된 문구를 쓴다'); assert(r.j.song.title.startsWith('2027 ')); assert(r.j.song.sections[0].lines[0] === L.compose(sd, 'self').sections[0].lines[0], '사주는 서버가 출생 정보로 계산(브라우저 sd 무시)');
+assert.equal(L.stripAdlibs(r.j.song.sections[0].lines[3]), '“관리자가 고친 괘 제목”', '승인·수정된 문구를 쓴다'); assert(r.j.song.title.startsWith('2027 ')); assert(r.j.song.sections[0].lines[0] === L.compose(sd, 'self').sections[0].lines[0], '사주는 서버가 출생 정보로 계산(브라우저 sd 무시)');
 r = await call('POST', '/api/music-video', { topic: 'newyear', birth, year: 2027 }); assert.equal(r.status, 403, '신년운세 무료 공개·미설정이면 일반 사용자는 못 연다');
 // 7) 하루 상한(일반 사용자 기준 2곡): 관리자는 상한 무시. 오늘 수는 4
 assert.equal(kv.get('mv:count:' + new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10)), '3');
@@ -100,6 +100,25 @@ env.KLING_API_KEY = 'kling-test'; let kling = 0, klingBody = '';
     return new Response(Buffer.alloc(4000, 3), { status: 200, headers: { 'content-type': 'audio/mpeg' } }); } return f0(u, o); };
   r = await call('POST', '/api/music-video', { sd, topic: 'love' }, admin); assert.equal(r.status, 200, JSON.stringify(r.j)); assert.deepEqual(models, ['music_v2_5', 'music_v1']);
   globalThis.fetch = f0; }
+// 10-5) 자막 시각: 노래를 만든 뒤 음성 인식(Scribe)으로 줄 시각을 붙이고, 다시 열 때는 부르지 않는다. 예전 곡(sync 기록 없음)은 처음 열 때 한 번 맞춘다
+{ const f0 = globalThis.fetch; let stt = 0, sttForm = null;
+  const song = L.compose(sd, 'career');
+  globalThis.fetch = async (u, o) => { u = String(u);
+    if (u === 'https://api.elevenlabs.io/v1/speech-to-text') { stt++; sttForm = o.body; let t = 5; const words = []; for (const sec of song.sections) for (const line of sec.lines) { for (const w of line.split(' ')) { words.push({ text: w, start: t, end: t + 0.3, type: 'word' }); t += 0.35; } t += 1.2; }
+      return new Response(JSON.stringify({ language_code: 'kor', text: '', words }), { status: 200, headers: { 'content-type': 'application/json' } }); }
+    if (u.startsWith('https://api.elevenlabs.io/v1/music')) return new Response(Buffer.alloc(4000, 5), { status: 200, headers: { 'content-type': 'audio/mpeg' } });
+    return f0(u, o); };
+  r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(r.status, 200, JSON.stringify(r.j)); assert.equal(stt, 1); assert.equal(r.j.song.sync, 'ok');
+  assert(sttForm instanceof FormData && sttForm.get('model_id') === 'scribe_v2' && sttForm.get('timestamps_granularity') === 'word' && sttForm.get('language_code') === 'ko');
+  assert(Array.isArray(r.j.song.timing) && r.j.song.timing.length === song.sections.reduce((a, x) => a + x.lines.length, 0) && r.j.song.timing[0].t === 5000);
+  r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(stt, 1, '다시 열 때 음성 인식 안 부름'); assert.equal(r.j.song.timing[0].t, 5000);
+  const k = 'mv:song:' + r.j.key, old = JSON.parse(kv.get(k)); delete old.syncVersion; delete old.timing; delete old.sync; kv.set(k, JSON.stringify(old));
+  r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(stt, 2, '예전 곡은 한 번 맞춤'); assert.equal(r.j.song.sync, 'ok');
+  // 음성 인식 권한 없음(401) → 노래는 그대로 열리고(timing 없음) 관리자 화면에 오류가 남는다
+  globalThis.fetch = async (u, o) => String(u).endsWith('/speech-to-text') ? new Response(JSON.stringify({ detail: { status: 'missing_permissions', message: 'missing the permission speech_to_text' } }), { status: 401, headers: { 'content-type': 'application/json' } }) : f0(u, o);
+  old.syncVersion = 0; kv.set(k, JSON.stringify(old)); r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(r.status, 200); assert.equal(r.j.song.timing, null); assert.equal(r.j.song.sync, 'error');
+  assert(/speech_to_text/.test(JSON.parse(kv.get('mv:lastError')).message));
+  kv.delete(k); globalThis.fetch = f0; }
 // 11) 일레븐랩스 오류 → 502, 진행 중 기록 지움(다음에 다시 시도 가능)
 globalThis.fetch = async () => new Response(JSON.stringify({ detail: 'bad' }), { status: 422, headers: { 'content-type': 'application/json' } });
 r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(r.status, 502); assert(![...kv.keys()].some(k => k.startsWith('mv:song:') && JSON.parse(kv.get(k)).status === 'pending'));

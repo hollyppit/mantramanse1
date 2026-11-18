@@ -14,7 +14,31 @@
 (function (root) {
   'use strict';
   var R = root.ReportV2 = root.ReportV2 || {};
-  var VERSION = 'mv-lyrics-2';
+  var VERSION = 'mv-lyrics-3';
+
+  /* 영어 힙합 추임새(ad-lib, 사용자 요청 2026-11-18): 줄 끝에 괄호로 붙인다 — 일레븐랩스는 괄호 안을 뒤에서 받쳐 주는 추임새로 부른다.
+     일간 오행의 비트 색깔에 맞춘 묶음(목 저지 클럽·화 레이지·토 아프로비츠·금 록 랩·수 멜로딕 랩). 욕설·약물·폭력 표현은 쓰지 않는다.
+     자막 시각을 맞출 때는 stripAdlibs 로 빼고 가사만 비교한다. */
+  var ADLIB = {
+    목: { items: ['ayy', 'bounce', 'yeah', 'uh'], hype: "let's go" },
+    화: { items: ['skrrt', 'woo', 'yeah', 'uh'], hype: "let's go!" },
+    토: { items: ['oh-oh', 'yeah', 'uh-huh', 'ayy'], hype: 'feel good' },
+    금: { items: ['uh!', 'come on', 'yeah', 'hey'], hype: 'turn it up' },
+    수: { items: ['ooh', 'yeah, yeah', 'uh-huh', 'ayy'], hype: 'let it flow' }
+  };
+  function addAdlibs(lines, sec, el, seed) {
+    var a = ADLIB[el] || ADLIB.토, last = lines.length - 1, k = 0, pick = function () { return a.items[(seed + sec.length + k++) % a.items.length]; };   // 한 벌스 안에서 차례로 돌려 같은 말이 이어지지 않게
+    return lines.map(function (line, i) {
+      var tag = null;
+      if (sec === 'intro') tag = i === 1 ? 'uh' : i === last ? a.hype : null;
+      else if (sec === 'verse1' || sec === 'verse2') tag = (i === 1 || i % 4 === 3) ? pick() : null;
+      else if (sec === 'hook') tag = i === 0 ? 'yeah, yeah' : i === last ? a.hype : null;
+      else if (sec === 'bridge') tag = i === 0 ? 'hold up' : null;
+      else if (sec === 'outro') tag = i === last ? 'yeah, peace out' : null;
+      return tag ? line + ' (' + tag + ')' : line;
+    });
+  }
+  function stripAdlibs(t) { return String(t || '').replace(/\s*\([^)]*\)/g, ''); }
   var BANNED = ['반드시', '무조건', '확정', '대박', '100%', '틀림없', '절대', '저주', '파멸', '재앙', '망한다', '망해', '죽는다', '죽어', '불행해진다', '액운', '흉하다'];
   var ELK = ['목', '화', '토', '금', '수'], ELR = { 목: 'wood', 화: 'fire', 토: 'earth', 금: 'metal', 수: 'water' };
   var MAKES = { 수: '목', 목: '화', 화: '토', 토: '금', 금: '수' };   // 생해 주는 쪽 → 받는 쪽
@@ -373,6 +397,7 @@
       { id: 'bridge', lines: br, el: x.hee },
       { id: 'outro', lines: [OUT_CLIMATE[x.climate], OUT_REL[x.rel]].concat(OUT_EL[x.el]), el: x.el }
     ];
+    parts.forEach(function (p) { p.lines = p.repeatOf ? parts[2].lines.slice() : addAdlibs(p.lines, p.id, x.el, seed); });   // 훅 반복은 첫 훅과 똑같이
     var sections = parts.map(function (p) {
       var base = p.repeatOf || p.id;
       return { id: p.id, name: SECTION_KO[base] + (p.repeatOf ? ' (반복)' : ''), tag: '[' + TAG[base] + ']', lines: p.lines, durationMs: DUR[p.id], panel: panelId(base, p.el, topic), panelFallback: panelId(base, p.el, 'self'), el: p.el };
@@ -405,6 +430,48 @@
       sections: song.sections.map(function (s) { return { section_name: s.name, positive_local_styles: (LOCAL[s.id] || []).slice(), negative_local_styles: [], duration_ms: s.durationMs, lines: s.lines.slice() }; }) };
   }
 
+  /* 자막 시각 맞추기: 만든 노래를 음성 인식(일레븐랩스 Scribe)으로 받아 쓴 단어별 시각 [{text, start, end, type}] 으로
+     가사 줄마다 실제로 부르는 시작 시각을 찾는다. 랩·노래는 받아쓰기가 조금씩 틀리므로 글자 두 개씩 묶은 조각(바이그램)이 얼마나 겹치는지로 찾고,
+     못 찾은 줄은 앞뒤로 찾은 줄 사이를 고르게 나눈다. 찾은 줄이 40% 미만이면 null(화면은 구간 길이 비율로 나눈다).
+     결과: [{ s: 구간 번호, l: 줄 번호, t: 시작 ms, e: 끝 ms }] — 부르는 순서대로. 계산량이 작아 서버(Workers)에서 바로 돌린다. */
+  function normT(t) { return String(t || '').replace(/[^0-9A-Za-zㄱ-ㆎ가-힣]/g, ''); }
+  function bigrams(s) { var o = {}; for (var i = 0; i < s.length - 1; i++) o[s.substr(i, 2)] = 1; return o; }
+  function alignToTranscript(song, words) {
+    if (!song || !Array.isArray(words)) return null;
+    var T = '', at = [], endAt = [];
+    words.forEach(function (w) {
+      if (!w || (w.type && w.type !== 'word')) return;
+      var n = normT(w.text), s = +w.start, e = +w.end; if (!n || !isFinite(s)) return; if (!isFinite(e) || e < s) e = s;
+      for (var i = 0; i < n.length; i++) { T += n.charAt(i); at.push(Math.round((s + (e - s) * i / n.length) * 1000)); endAt.push(Math.round(e * 1000)); }
+    });
+    if (T.length < 20) return null;
+    var lines = []; song.sections.forEach(function (s, si) { s.lines.forEach(function (line, li) { lines.push({ s: si, l: li, key: normT(stripAdlibs(line)) }); }); });   // 추임새(괄호)는 빼고 가사만 비교
+    var cur = 0, found = 0;
+    lines.forEach(function (x) {
+      var k = x.key; if (k.length < 3) return;
+      var kb = bigrams(k), kn = Object.keys(kb).length, best = -1, bestScore = 0, win = Math.min(T.length, cur + Math.max(160, k.length * 6));
+      for (var p = cur; p < win; p++) {
+        var seg = T.substr(p, k.length), hit = 0, seen = {};
+        for (var q = 0; q < seg.length - 1; q++) { var b = seg.substr(q, 2); if (kb[b] && !seen[b]) { seen[b] = 1; hit++; } }
+        // 줄의 첫 글자·첫 두 글자·셋째 글자가 맞으면 가산(조금 앞에서 시작해도 겹침이 비슷하게 나오는 것을 막는다), 가까운 쪽을 조금 더 믿는다
+        var sc = hit / kn + (T.charAt(p) === k.charAt(0) ? 0.12 : 0) + (T.substr(p, 2) === k.substr(0, 2) ? 0.12 : 0) + (T.charAt(p + 2) === k.charAt(2) ? 0.06 : 0) - (p - cur) * 0.0004;
+        if (sc > bestScore) { bestScore = sc; best = p; }
+      }
+      if (best >= 0 && bestScore >= 0.34) { x.t = at[best]; x.e = endAt[Math.min(T.length - 1, best + k.length - 1)]; cur = best + Math.max(2, Math.floor(k.length * 0.7)); found++; }
+    });
+    if (found < lines.length * 0.4) return null;
+    // 못 찾은 줄: 앞뒤로 찾은 줄 사이를 고르게 나눈다(처음·끝은 구간 길이 비율로 추정)
+    for (var i = 0; i < lines.length; i++) {
+      if (lines[i].t != null) continue;
+      var a = i - 1; while (a >= 0 && lines[a].t == null) a--;
+      var b = i + 1; while (b < lines.length && lines[b].t == null) b++;
+      var ta = a >= 0 ? lines[a].t : 0, tb = b < lines.length ? lines[b].t : (ta + 4000 * (b - a));
+      lines[i].t = Math.round(ta + (tb - ta) * (i - a) / (b - a));
+    }
+    for (var j = 1; j < lines.length; j++) if (lines[j].t < lines[j - 1].t) lines[j].t = lines[j - 1].t;   // 순서 뒤집힘 방지
+    return lines.map(function (x, j) { var nx = lines[j + 1]; return { s: x.s, l: x.l, t: x.t, e: x.e != null ? x.e : (nx ? nx.t : x.t + 3500) }; });
+  }
+
   /* 패널 이미지 칸: 주제 5개 × 구간 6개 × 오행 5개 = 150칸. 관리자 '뮤직비디오 패널'이 이 칸을 채운다.
      종합풀이 칸은 mv-<구간>-<오행>, 다른 주제는 mv-<주제>-<구간>-<오행>. 주제 칸이 비면 화면은 종합풀이 칸(panelFallback)을 쓴다 */
   function panelId(section, el, topic) { return 'mv-' + (topic && topic !== 'self' ? topic + '-' : '') + section + '-' + (ELR[el] || 'earth'); }
@@ -419,15 +486,24 @@
     return out;
   }
 
-  /* 재생 시각(ms) → 지금 구간·줄. 구간 안에서는 줄 수로 고르게 나눈다(일레븐랩스 v2 는 구간 길이를 지킨다) */
+  /* 재생 시각(ms) → 지금 구간·줄. song.timing(음성 인식으로 맞춘 줄 시각)이 있으면 그것을 쓰고, 없으면 구간 안에서 줄 수로 고르게 나눈다.
+     timing 이 있을 때: 첫 줄 전(전주)·줄 사이 긴 쉼에서는 line 을 빈 문자열로 돌려 자막을 숨긴다(sung=false) */
   function cueAt(song, ms) {
     var secs = song.sections, s = secs[secs.length - 1];
+    if (song.timing && song.timing.length) {
+      var tm = song.timing, hit = null;
+      for (var j = 0; j < tm.length; j++) { if (tm[j].t <= ms) hit = tm[j]; else break; }
+      if (!hit) { var f = secs[tm[0].s] || secs[0]; return { section: f, line: '', lineIndex: -1, next: f.lines[tm[0].l] || '', sung: false }; }
+      var sec = secs[hit.s] || s, idx = tm.indexOf(hit), nx = tm[idx + 1], nsec = nx && (secs[nx.s] || s);
+      var sung = ms <= hit.e + 1200 || (nx && nx.t - hit.e < 2500);
+      return { section: sec, line: sung ? sec.lines[hit.l] : '', lineIndex: hit.l, next: nx ? nsec.lines[nx.l] : '', sung: sung };
+    }
     for (var i = 0; i < secs.length; i++) if (ms < secs[i].startMs + secs[i].durationMs) { s = secs[i]; break; }
     var n = s.lines.length, k = Math.max(0, Math.min(n - 1, Math.floor((ms - s.startMs) / (s.durationMs / n))));
     return { section: s, line: s.lines[k], lineIndex: k };
   }
 
   R.MusicVideoLyrics = { VERSION: VERSION, BANNED: BANNED, SECTIONS: SECTIONS, SECTION_KO: SECTION_KO, ELK: ELK, ELR: ELR, PANEL_SLOTS: PANEL_SLOTS, DUR: DUR, TOPICS: TOPICS, TOPIC_KO: TOPIC_KO, TOPIC_WORLD: TOPIC_WORLD,
-    inputsOf: inputsOf, fromInputs: fromInputs, compose: compose, toElevenPlan: toElevenPlan, toElevenV1Plan: toElevenV1Plan, panelId: panelId, bannedIn: bannedIn, allFragments: allFragments, cueAt: cueAt, hash: hash };
+    inputsOf: inputsOf, fromInputs: fromInputs, compose: compose, toElevenPlan: toElevenPlan, toElevenV1Plan: toElevenV1Plan, alignToTranscript: alignToTranscript, stripAdlibs: stripAdlibs, ADLIB: ADLIB, panelId: panelId, bannedIn: bannedIn, allFragments: allFragments, cueAt: cueAt, hash: hash };
   if (typeof module !== 'undefined' && module.exports) module.exports = R.MusicVideoLyrics;
 })(typeof window !== 'undefined' ? window : globalThis);
