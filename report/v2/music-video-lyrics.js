@@ -250,14 +250,18 @@
   };
 
   /* ── 음악 스타일(영어 권장): 일간 오행별 */
+  /* 기본은 요즘 유행하는 신나는 K-힙합 비트(사용자 요청 2026-11-18). 오행은 장르 색깔만 바꾼다 — 모두 빠르고 통통 튀는 쪽.
+     가수·곡 이름은 넣지 않는다(일레븐랩스 음악 약관: 실제 아티스트·곡 이름 금지) */
+  var STYLE_BASE = ['trendy modern k-hip hop', 'upbeat', 'energetic', 'catchy', 'danceable', 'punchy 808 bass', 'crisp modern mix'];
+  /* 2026 유행 조사(레이지·저지 드릴·멜로딕 랩/플러그·아프로비츠/아마피아노·록 랩 크로스오버) 반영 — 어둡고 공격적인 폰크·트랩 메탈은 쓰지 않는다 */
   var STYLE = {
-    목: ['korean hip hop', 'warm boom bap', 'acoustic guitar loop', 'hopeful', '90 bpm'],
-    화: ['korean hip hop', 'energetic trap', 'bright synth leads', 'confident', '140 bpm half-time'],
-    토: ['korean hip hop', 'lo-fi boom bap', 'steady groove', 'warm bass', '86 bpm'],
-    금: ['korean hip hop', 'crisp modern rap', 'clean piano', 'sharp hi-hats', '95 bpm'],
-    수: ['korean hip hop', 'moody r&b rap', 'rain ambience', 'deep sub bass', '80 bpm']
+    목: STYLE_BASE.concat(['jersey club', 'jersey drill bounce', 'sliding 808s', 'tiktok dance vibe', 'bright plucked synths', '140 bpm']),
+    화: STYLE_BASE.concat(['rage rap', 'distorted lead synths', 'hard-hitting 808s', 'mosh-pit festival energy', '150 bpm']),
+    토: STYLE_BASE.concat(['afrobeats', 'amapiano log drums', 'groovy bassline', 'sunny feel-good vibe', '112 bpm']),
+    금: STYLE_BASE.concat(['rock rap crossover', 'electric guitar riffs', 'live band energy', 'big drums', '128 bpm']),
+    수: STYLE_BASE.concat(['melodic rap', 'pluggnb', 'dreamy synth pads', 'bouncy rolling hi-hats', '140 bpm'])
   };
-  var NEG_STYLE = ['explicit lyrics', 'screaming', 'heavy distortion'];
+  var NEG_STYLE = ['explicit lyrics', 'screaming', 'harsh noise', 'phonk', 'trap metal', 'slow ballad', 'sad mood', 'lo-fi', 'boom bap', 'acoustic ballad', 'dark gloomy'];
   var COLOR = { 목: '초록빛', 화: '붉은빛', 토: '노란빛', 금: '하얀빛', 수: '푸른빛' };
 
   function hash(s) { var h = 5381; s = String(s); for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return h; }
@@ -386,8 +390,9 @@
   function compose(sd, topic, extra) { var x = inputsOf(sd, topic, extra); return x ? fromInputs(x) : null; }
 
   /* 일레븐랩스 음악 API(music_v2 / music_v2_5) composition_plan(chunks) 모양 — 구간마다 길이(duration_ms)를 지정해 패널·자막 시점이 정확히 맞는다 */
-  var LOCAL = { intro: ['soft spoken rap intro', 'sparse beat'], verse1: ['rap verse', 'clear korean rap vocals', 'tight flow'], hook: ['catchy melodic hook', 'sung chorus', 'full beat'],
-    verse2: ['rap verse', 'clear korean rap vocals', 'emotional build'], hook2: ['catchy melodic hook', 'sung chorus', 'full beat'], bridge: ['half-time bridge', 'stripped down beat', 'melodic rap'], outro: ['soft outro', 'fading beat'] };
+  var LOCAL = { intro: ['short hype intro', 'riser build-up into the drop', 'ad-libs'], verse1: ['confident rap verse', 'clear korean rap vocals', 'bouncy flow', 'full drums'],
+    hook: ['big catchy chorus', 'sing-along hook', 'full energetic beat', 'layered vocals'], verse2: ['driving rap verse', 'clear korean rap vocals', 'faster flow', 'energy rising'],
+    hook2: ['big catchy chorus', 'sing-along hook', 'full energetic beat', 'layered vocals', 'extra energy'], bridge: ['beat switch', 'melodic rap', 'build-up back into the beat'], outro: ['energetic outro', 'beat ride-out', 'ad-libs', 'clean ending'] };
   function toElevenPlan(song) {
     return { chunks: song.sections.map(function (s) {
       return { text: s.tag + '\n' + s.lines.join('\n'), duration_ms: s.durationMs, positive_styles: song.style.concat(LOCAL[s.id] || []), negative_styles: song.negativeStyle.slice() };
