@@ -87,6 +87,10 @@
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>뚜렷한 신호 자동 알림</b> — 현재: <b style="color:' + (fl && fl.luckAlerts ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.luckAlerts ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leAL"' + (fl ? '' : ' disabled') + '>' + (fl && fl.luckAlerts ? '자동 알림 끄기' : '자동 알림 켜기') + '</button><a class="btn" href="/?mantraFlags=luckAlerts" target="_blank" rel="noopener">미리보기 주소</a></div>' +
       '<p class="muted" style="margin:8px 0 0">켜면 오늘부터 7일과 이번 달 중 <b>이 사주의 평소 분포에서 상위·하위 1%(월운 5%)이면서 신호등이 최고·부담</b>인 분야만 상단 알림으로 띄웁니다. 만세력은 인연·재물·직업·사업·취업·가족·자녀·횡재수·손재수(최대 4개), 운명의 타임라인은 인연·재물·커리어·건강(최대 3개). 사용자가 \'오늘 닫기\'를 누르면 그날은 다시 뜨지 않습니다. 점수는 엔진 분야 지수 그대로이며 새 점수를 만들지 않습니다.</p></div>';
+    // 내 사주 뮤직비디오(2026-11-18, report/v2/music-video.js · /api/music-video): 유료 주제 화면의 진입 카드 — 패널 이미지는 '뮤직비디오 패널' 메뉴
+    flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>내 사주 뮤직비디오</b> — 현재: <b style="color:' + (fl && fl.musicVideo ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.musicVideo ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
+      '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leMV"' + (fl ? '' : ' disabled') + '>' + (fl && fl.musicVideo ? '뮤직비디오 끄기' : '뮤직비디오 켜기') + '</button></div>' +
+      '<p class="muted" style="margin:8px 0 0">켜면 <b>유료 주제</b> 풀이 화면 위쪽에 “내 사주 뮤직비디오” 카드가 나오고, 그 주제를 산 회원이 누르면 사주 조합 랩 가사로 일레븐랩스가 3분 노래를 만듭니다(곡마다 비용, 같은 사주는 다시 만들지 않음). 노래 키(ELEVENLABS_API_KEY)와 패널 이미지(점검·운영 › 뮤직비디오 패널)를 먼저 준비하세요.</p></div>';
     // 운 공통 분석 층(2026-11-18, luck-env.js): 운세 상세를 ① 외부 환경 ② 개인 영향 ③ 상위·하위 운 ④ 영역으로 나눔 — 표시 전용
     flagBox += '<div class="card" style="margin-top:12px"><p style="margin:0 0 8px"><b>운 공통 분석(외부 환경·개인 반응 분리)</b> — 현재: <b style="color:' + (fl && fl.luckEnv ? '#62C2AE' : '#E0BC74') + '">' + (!fl ? '알 수 없음' : fl.luckEnv ? '● 켜짐' : '○ 꺼짐') + '</b></p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" id="leEV"' + (fl ? '' : ' disabled') + '>' + (fl && fl.luckEnv ? '운 공통 분석 끄기' : '운 공통 분석 켜기') + '</button><a class="btn" href="/?mantraFlags=luckEnv" target="_blank" rel="noopener">미리보기 주소</a></div>' +
@@ -181,6 +185,11 @@
       var v = !(S.flags && S.flags.luckAlerts);
       if (v && !confirm('만세력·운명의 타임라인 상단에 뚜렷한 신호 자동 알림을 모든 사용자에게 띄웁니다.\n켜시겠습니까?')) return;
       putFlags({ flags: { luckAlerts: v } }, v ? '자동 알림을 켰습니다(약 1분 안에 반영)' : '자동 알림을 껐습니다(약 1분 안에 반영)');
+    };
+    $('#leMV').onclick = function () {   // 내 사주 뮤직비디오 스위치(music-video.js)
+      var v = !(S.flags && S.flags.musicVideo);
+      if (v && !confirm('유료 주제 화면에 내 사주 뮤직비디오 카드를 띄웁니다. 구매 회원이 누를 때마다 노래 생성 비용이 듭니다.\n켜시겠습니까?')) return;
+      putFlags({ flags: { musicVideo: v } }, v ? '뮤직비디오를 켰습니다(약 1분 안에 반영)' : '뮤직비디오를 껐습니다(약 1분 안에 반영)');
     };
     $('#leEV').onclick = function () {   // 운 공통 분석 층 스위치(luck-env.js)
       var v = !(S.flags && S.flags.luckEnv);

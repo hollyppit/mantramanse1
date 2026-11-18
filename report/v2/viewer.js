@@ -389,7 +389,7 @@
     });
     n.addEventListener('click', function (e) {
       var b = e.target.closest('[data-ws]'); if (!b) return; var k = b.dataset.ws, vw = $('#app').dataset.view, wid = S.wmap && (vw === 'reader' ? S.wmap.idx[pinned() != null ? pinned() : S.idx] : S.xpWorld);
-      if (k === 'toon') { openWorldToon(wid); } else if (k === 'resume') { resumeReader(); } else if (k === 'map') { if (S.mv) S.mv.pause(); showHome(); } else if (k === 'tool') { if (S.mv) S.mv.pause(); showHome(wid); }
+      if (k === 'mv') { openMv(wid); } else if (k === 'resume') { resumeReader(); } else if (k === 'map') { if (S.mv) S.mv.pause(); showHome(); } else if (k === 'tool') { if (S.mv) S.mv.pause(); showHome(wid); }
       else if (k === 'go') { var i = +b.dataset.i; var lc = S.rep && S.rep.chapters[i]; if (R.Paywall && !PREVIEW && lc && R.Paywall.lockOf(lc)) { R.Paywall.show(lc, { worldName: paywallWorldName(i), who: S.name }); return; } if (vw === 'reader') { pinTo(i); renderStrip(); gotoChapter(i, false, !!(S.mv && S.mv.state() === 'PLAYING')); T('strip_go', { index: i }); } else enterFromHome(i); }
     });
   }
@@ -407,7 +407,7 @@
     if (!wid) { n.hidden = true; document.documentElement.style.removeProperty('--bar-h'); return; }
     var w = (S.wmap.list || []).filter(function (x) { return x.id === wid; })[0] || {}, idxs = S.wmap.by[wid] || [], h = '';
     h += '<button type="button" class="ws-m" data-ws="map">주제 목록</button><button type="button" class="ws-t' + (vw === 'home' ? ' on' : '') + '" data-ws="tool">' + esc(w.icon || '') + ' ' + esc(TOOL_LABEL[wid] || '살펴보기') + '</button>';
-    h += '<button type="button" class="ws-m" data-ws="toon">내 사주 웹소설 감상하기</button>';
+    if (mvState(wid)) h += '<button type="button" class="ws-m" data-ws="mv">내 사주 뮤직비디오</button>';   // 옛 '내 사주 웹소설 감상하기'(창작 단편) 자리
     if (vw === 'home' && S.cur && S.readerWorld === wid) h += '<button type="button" class="ws-m" data-ws="resume">읽던 곳으로 돌아가기</button>';
     idxs.forEach(function (i) { var c = S.rep.chapters[i]; h += '<button type="button" class="ws-c' + (vw === 'reader' && i === cur ? ' on' : '') + (S.ended[c.id] ? ' dn' : '') + '" data-ws="go" data-i="' + i + '">' + esc(c.title) + '</button>'; });
     n.innerHTML = h; n.className = vw === 'reader' ? 'ws-r' : 'ws-h'; n.style.setProperty('--wa', w.accent || '#D5B97F'); n.hidden = false;
@@ -428,8 +428,24 @@
   function worldToonCard(w) {
     var story=worldToonModel(w);return story?'<div class="cs-card"><div><p class="cs-ct">내 이름으로 읽는 창작 단편</p><h4>'+esc(story.title)+'</h4><p class="cs-sum">'+story.frames.length+'개 장면 · 사주 유형에 맞춰 고른 완성된 이야기입니다.</p><button type="button" class="chipbtn" data-wtoon="'+esc(w.id)+'">단편 읽기</button></div></div>':'';
   }
+  /* 내 사주 뮤직비디오(2026-11-18, music-video.js): 창작 단편 자리를 대신한다. 유료 주제(w1 종합·w2 재물·w3 연애·w7 커리어)에서만, 스위치 musicVideo 켜졌을 때만 */
+  function mvState(wid) {
+    var MV = R.MusicVideo, topic = MV && MV.topicOfWorld(wid); if (!topic || !S.mvOn || !S.sd) return null;
+    if (PREVIEW) return { topic: topic, locked: false };
+    var info = R.Paywall && R.Paywall.info && R.Paywall.info(), w = info && info.worlds && info.worlds[wid];
+    if (!w || !w.paid) return null;
+    return { topic: topic, locked: !w.owned };
+  }
+  function mvCard(wid) { var st = mvState(wid); return st ? R.MusicVideo.cardHtml({ topic: st.topic, sd: S.sd, locked: st.locked, esc: esc }) : ''; }
+  function openMv(wid) {
+    var st = mvState(wid); if (!st) return; if (S.mv) S.mv.pause();
+    var lockShow = function () { var idxs = (S.wmap && S.wmap.by[wid]) || [], i = idxs.filter(function (k) { return R.Paywall.lockOf(S.rep.chapters[k]); })[0]; if (i != null) R.Paywall.show(S.rep.chapters[i], { worldName: paywallWorldName(i), who: S.name }); else toast('이 주제를 구매하면 뮤직비디오를 볼 수 있어요.'); };
+    if (st.locked) { lockShow(); return; }
+    R.MusicVideo.open({ sd: S.sd, topic: st.topic, headers: function () { return R.Paywall && R.Paywall.headers ? R.Paywall.headers() : {}; }, onLocked: lockShow, track: T });
+  }
+  if (R.MusicVideo) R.MusicVideo.ready().then(function (on) { S.mvOn = !!on; if (on && S.view === 'home' && S.rep && S.xp) showHome(S.xpWorld || undefined); });
   $('#v-home').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-wtoon]'); if (b) openWorldToon(b.dataset.wtoon);
+    var m = e.target.closest('[data-mvopen]'); if (m) { openMv(S.xpWorld); return; }
   });
   async function openWorldToon(wid) {
     var w = ((S.wmap && S.wmap.list) || []).filter(function (x) { return x.id === wid; })[0]; if (!w || !R.Samsara) return;
@@ -472,7 +488,7 @@
     S.xpWorld = cur ? cur.world.id : null;
     var widget = cur && cur.world.id === 'w4' ? worldTimelineHtml() : cur && cur.world.id === 'w1' ? worldLibraryHtml()+'<details class="xp-time-details"><summary>대운·세운·월운 타임라인</summary>'+worldTimelineHtml()+'</details>' : cur && cur.world.id === 'w7' ? worldCastleHtml() : cur && cur.world.id === 'w3' ? worldGardenHtml() : cur && cur.world.id === 'w6' ? worldSanctuaryHtml() : cur && cur.world.id === 'w5' ? worldSamsaraHtml() : '';
     if(R.ReadingText && cur && ['w1','w3','w4','w7'].indexOf(cur.world.id)>=0 && widget)widget='<details class="text-world-basis"><summary>계산값과 명리 근거 살펴보기</summary>'+widget+'</details>';
-    if (cur && cur.world.id !== 'w5') widget = worldToonCard(cur.world) + widget;
+    if (cur) widget = mvCard(cur.world.id) + widget;   // 창작 단편 카드는 뺐다(2026-11-18) — 그 자리에 내 사주 뮤직비디오
     var m = { mode: cur ? 'world' : 'map', widget: widget, name: S.name, progress: R.Explore.progress(rep.chapters, S.ended), resume: R.Explore.resumeIndex(rep.chapters, { ended: S.ended, last: S.cur ? S.idx : st.last }), auto: st.auto, rate: playbackRate(),
       worlds: worlds, current: cur, ended: S.ended, last: S.cur ? S.idx : st.last };
     $('#v-home').innerHTML = R.ReadingText?R.ReadingText.stripVisuals(R.Explore.html(m,esc)):R.Explore.html(m, esc); view('home'); S.view = 'home'; renderStrip(); T('explore_home_viewed', { done: m.progress.done, world: S.xpWorld || '' });
@@ -480,7 +496,7 @@
   /* 윤회의 문 인터랙션: 개인화된 전생 서사를 컷 단위 무빙툰으로 감상(R.Samsara). 이미 만들어진 전생 챕터의 문장을 그대로 쓰고, 에셋이 없으면 색 바탕으로 대신한다. */
   function worldSamsaraHtml() {
     if(!R.Samsara||!S.rep)return '';
-    try{var w=S.wmap.list.find(function(w){return w.id==='w5';});if(!w)return '';return R.ReadingText?worldToonCard(w):R.Samsara.card(worldToonModel(w),S.assets||{},esc);}catch(e){return '';}
+    try{return '';/* 전생 창작 단편(윤회의 문) 카드는 뺐다(2026-11-18) */}catch(e){return '';}
   }
   $('#v-home').addEventListener('click', function (e) {
     if (e.target.closest('[data-smopen]')) openWorldToon('w5');

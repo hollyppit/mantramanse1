@@ -125,8 +125,23 @@
   function renderOpen(ch) {
     var t = S.data.reading.tojeong;
     return '<div class="ny-gua"><div class="num">' + esc(t.gua) + '</div><div class="zy">' + esc(t.zhouyi || '보충본 괘') + (t.source === 'nl-supplement' ? ' · 국립중앙도서관 필사본 보충' : ' · 규장각본') + '</div>' +
-      (t.guaxiang ? '<div class="gx">' + esc(t.guaxiang.join(' ')) + '</div>' : '') + '</div>' + (S.data.intro ? '<p class="ny-p note">' + esc(S.data.intro) + '</p>' : '') + paras(ch.paras);
+      (t.guaxiang ? '<div class="gx">' + esc(t.guaxiang.join(' ')) + '</div>' : '') + '</div>' + (S.data.intro ? '<p class="ny-p note">' + esc(S.data.intro) + '</p>' : '') + paras(ch.paras) + mvCard();
   }
+  // 내 사주 뮤직비디오(2026-11-18, /report/v2/music-video.js): 유료로 판매하는 해에만, 산 사람(또는 관리자)에게 열린다. 스위치 musicVideo
+  function mvState() {
+    var MV = root.ReportV2 && root.ReportV2.MusicVideo, a = S.data && S.data.access; if (!MV || !S.mvOn || !a) return null;
+    if (a.reason === 'owned' || a.reason === 'admin') return { locked: false };
+    if (a.reason === 'login' || a.reason === 'purchase') return { locked: true };
+    return null;   // 무료 공개(free)·비공개 해에는 보이지 않는다
+  }
+  function mvCard() { var st = mvState(); return st ? '<div class="ny-mv">' + root.ReportV2.MusicVideo.cardHtml({ topic: 'newyear', year: YEAR, locked: st.locked, esc: esc }) + '</div>' : ''; }
+  if (root.ReportV2 && root.ReportV2.MusicVideo) root.ReportV2.MusicVideo.ready().then(function (on) { S.mvOn = !!on; if (on && S.data && !$('#v-read').hidden) render(); });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('[data-mvopen]')) return; var st = mvState(); if (!st) return;
+    var toLock = function () { var i = chapters().findIndex(function (c) { return c.locked; }); if (i >= 0) go(i); };
+    if (st.locked) return toLock();
+    root.ReportV2.MusicVideo.open({ topic: 'newyear', birth: S.birth, year: YEAR, headers: headers, onLocked: toLock });
+  });
   // 사주 월운 별도 상자(심화 월 카드 시범) — 토정 본문과 섞지 않고 아래 접는 상자로 보여 준다
   function sajuBox(x) { return x && x.paras && x.paras.length ? '<details class="ny-saju"><summary>' + esc(x.title) + '</summary>' + paras(x.paras) + '</details>' : ''; }
   // 한 해의 흐름(시범): 음력 열두 달 원문 결을 한 줄 띠로

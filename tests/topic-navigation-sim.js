@@ -11,7 +11,7 @@ const nav = { style: { setProperty() {} }, querySelector: () => null }, steps = 
 const app = { dataset: { view: 'reader' } }, props = {};
 const ctx = {
   document: { getElementById: id => id === 'wsteps' ? steps : nav, documentElement: { style: { setProperty(k, v) { props[k] = v; }, removeProperty() {} } } },
-  $: () => app, pinned: () => null, esc: s => s, barLabel() {}, TOOL_LABEL: {},
+  $: () => app, pinned: () => null, esc: s => s, barLabel() {}, TOOL_LABEL: {}, mvState: wid => wid === 'w2' && ctx.mvOn ? { topic: 'wealth', locked: false } : null,
   S: { idx: 1, cur: true, readerWorld: 'w2', ended: {}, rep: { chapters: [{ title: 'Other' }, { title: 'First' }, { title: 'Middle' }, { title: 'Last' }] }, wmap: { idx: ['w1', 'w2', 'w2', 'w2'], by: { w2: [1, 2, 3] }, list: [{ id: 'w2' }] } }
 };
 vm.runInNewContext(src.slice(src.indexOf('  function renderStrip()'), src.indexOf('  /* 세계 무빙툰:')), ctx);
@@ -28,4 +28,8 @@ app.dataset.view = 'home'; ctx.S.xpWorld = 'w2'; ctx.renderStrip();
 assert(steps.hidden);
 assert(nav.innerHTML.includes('읽던 곳으로 돌아가기'));
 assert.equal(props['--bar-h'], '62px');
+// 창작 단편(웹소설) 버튼은 없고, 뮤직비디오는 스위치·유료 주제일 때만(2026-11-18)
+assert(!nav.innerHTML.includes('웹소설') && !nav.innerHTML.includes('data-ws="toon"'));
+assert(!nav.innerHTML.includes('data-ws="mv"'));
+ctx.mvOn = true; ctx.renderStrip(); assert(nav.innerHTML.includes('data-ws="mv">내 사주 뮤직비디오'));
 console.log('Topic navigation: timeline return, scoped previous/next, boundaries, header spacing and resume passed');
