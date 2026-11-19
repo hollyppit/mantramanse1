@@ -32,9 +32,12 @@ export async function onRequestPost(ctx) {
     if (!ws.length || ws.every(w => !worlds[w] || !worlds[w].paid)) continue;   // 잠긴 세계가 없는 상품은 팔지 않는다
     forSale.push({ id: p.id, name: p.name, kind: p.kind, price: p.price, worlds: ws, owned: ws.every(w => worlds[w] && worlds[w].owned) });
   }
+  // 관리자 시험 결제: 관리자 비밀번호로 들어온 요청에만 시험용 채널을 준다(손님 결제창은 그대로).
+  // 환경변수 PORTONE_TEST_CHANNEL_KEY(포트원 테스트 채널 키, 공개 값)·PORTONE_TEST_PG(기본 'inicis'). 결제 확인·환불은 결제 id 로 조회해 채널과 상관없이 같다(테스트 채널 결제는 매출에서 빠짐)
+  const testPay = admin && env.PORTONE_TEST_CHANNEL_KEY ? { channelKey: env.PORTONE_TEST_CHANNEL_KEY, pg: String(env.PORTONE_TEST_PG || 'inicis').trim().toLowerCase(), buyer: buyerFields({ PORTONE_PG: env.PORTONE_TEST_PG || 'inicis' }) } : null;
   return json({
     configured: { login: !!(env.SUPABASE_URL && env.SUPABASE_ANON_KEY), naver: naverReady(env), googleServer: googleReady(env), pay: payReady(env) },
-    keys: { supabaseUrl: env.SUPABASE_URL || '', supabaseAnonKey: env.SUPABASE_ANON_KEY || '', provider: payProvider(env), tossClientKey: payProvider(env) === 'toss' ? env.TOSS_CLIENT_KEY : '', portone: payProvider(env) === 'portone' ? { storeId: env.PORTONE_STORE_ID, channelKey: env.PORTONE_CHANNEL_KEY, buyer: buyerFields(env) } : null },
+    keys: { supabaseUrl: env.SUPABASE_URL || '', supabaseAnonKey: env.SUPABASE_ANON_KEY || '', provider: payProvider(env), tossClientKey: payProvider(env) === 'toss' ? env.TOSS_CLIENT_KEY : '', portone: payProvider(env) === 'portone' ? (testPay ? { storeId: env.PORTONE_STORE_ID, channelKey: testPay.channelKey, buyer: testPay.buyer, testChannel: testPay.pg } : { storeId: env.PORTONE_STORE_ID, channelKey: env.PORTONE_CHANNEL_KEY, buyer: buyerFields(env) }) : null },
     member: member ? { id: member.id, email: member.email, provider: member.provider } : null,
     sajuKey: key, worlds, products: forSale, annual, admin: admin ? { viewAsFree } : null,
   });

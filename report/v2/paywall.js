@@ -116,7 +116,7 @@
     else if (!logged) body = list(false) + '<p class="pw-note">구매하려면 먼저 로그인해 주세요. 구매한 내용은 계정에 저장되어 다른 기기에서도 다시 볼 수 있어요.</p>' +
       (canLogin ? '<div class="pw-login">' + loginBtn('kakao') + loginBtn('google') + (d.configured.naver ? loginBtn('naver') : '<button type="button" class="pw-btn" disabled title="준비 중">네이버(준비 중)</button>') + '</div>' +
         (lastLogin() ? '<p class="pw-fine">구매한 계정과 <b>같은 방법</b>으로 로그인해야 구매한 주제가 열려요. 이 기기에서는 지난번에 <b>' + LN[lastLogin()] + '</b>로 로그인했어요.</p>' : '') : '<p class="pw-note">로그인을 준비하고 있습니다.</p>') + fine;
-    else body = list(true) + fine +
+    else body = list(true) + (d.keys && d.keys.portone && d.keys.portone.testChannel ? '<p class="pw-hint">🧪 관리자 시험 결제: <b>' + esc(d.keys.portone.testChannel) + ' 테스트 채널</b>로 결제돼요. 실제로 청구되지 않고 매입 전에 자동 취소돼요(손님 화면은 그대로).</p>' : '') + fine +
       '<label class="pw-save"><input type="checkbox" id="pw-save"> <span>이 사주의 출생 정보(생년월일·시각·성별)를 내 계정에 저장해 <b>다른 기기에서도 바로 열기</b> <small>(선택 · 내 구매 내역에서 언제든 삭제)</small></span></label>' +
       '<p class="pw-buyer">' + (LN[lastLogin()] ? '<b>' + LN[lastLogin()] + ' 계정</b>' : '<b>지금 로그인한 계정</b>') + '(' + esc(d.member.email || '') + ')으로 구매됩니다.</p><div id="pw-hint"></div>' +
       '<p class="pw-fine"><a href="/report/my/" target="_blank" rel="noopener">내 구매 내역</a> · <button type="button" class="pw-link" data-pw-logout>로그아웃</button></p>';

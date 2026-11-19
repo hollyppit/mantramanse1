@@ -47,6 +47,12 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   const aenv = { ...env, PORTONE_STORE_ID: 'store-1', PORTONE_CHANNEL_KEY: 'ch-1', PORTONE_API_SECRET: 'sec', PORTONE_PG: 'inicis' };
   const ar = await (await access.onRequestPost({ request: new Request('https://x.test/api/commerce/access', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"sd":null}' }), env: aenv })).json();
   ok(ar.keys.portone.buyer.join() === 'fullName,phoneNumber,email' && !JSON.stringify(ar).includes('sec'), '구매 창 키에 구매자 필수 항목(비밀 값 없음)');
+  // 관리자 시험 결제: 관리자 요청에만 시험 채널(이니시스)·구매자 필수 항목, 손님은 운영 채널 그대로
+  const tenv = { ...env, PORTONE_STORE_ID: 'store-1', PORTONE_CHANNEL_KEY: 'ch-kpn', PORTONE_API_SECRET: 'sec', PORTONE_TEST_CHANNEL_KEY: 'ch-inicis-test', ADMIN_PASSWORD: 'adminpw-long-enough' };
+  const acc = async h => (await (await access.onRequestPost({ request: new Request('https://x.test/api/commerce/access', { method: 'POST', headers: { 'content-type': 'application/json', ...h }, body: '{"sd":null}' }), env: tenv })).json()).keys.portone;
+  const guest = await acc({}), adm = await acc({ authorization: 'Bearer adminpw-long-enough' });
+  ok(guest.channelKey === 'ch-kpn' && guest.buyer.length === 0 && !guest.testChannel, '손님: 운영 채널(KPN) 그대로');
+  ok(adm.channelKey === 'ch-inicis-test' && adm.testChannel === 'inicis' && adm.buyer.join() === 'fullName,phoneNumber,email', '관리자: 이니시스 테스트 채널·구매자 정보');
   const pwsrc = require('fs').readFileSync(path.join(__dirname, '..', 'report/v2/paywall.js'), 'utf8');
   ok(/function askBuyer/.test(pwsrc) && /cust\.fullName = buyer\.fullName/.test(pwsrc) && !/buyer[^\n]*\/api\/commerce\/order/.test(pwsrc.replace(/askBuyer\(need\)[^\n]*fetch\('\/api\/commerce\/order'/, '')), '구매 창: 결제 직전 구매자 정보 → 결제창에만 전달');
 
