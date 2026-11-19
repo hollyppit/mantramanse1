@@ -350,6 +350,7 @@ const rid = () => Array.from(crypto.getRandomValues(new Uint8Array(4)), x => x.t
 async function makePanel(env, slot, extra, provider, seed) {
   let g; try { g = await generate(env, panelPrompt(slot, extra, seed), provider === 'openai' || provider === 'gemini' ? provider : '', null, { format: 'jpeg', size: '1024x1536', aspect: '9:16', quality: /^(low|medium|high)$/.test(env.MV_PANEL_QUALITY || '') ? env.MV_PANEL_QUALITY : 'high' }); }
   catch (e) { await env.GLOSSARY_KV.put('mv:lastPanelError', JSON.stringify({ at: Date.now(), slot: slot.id, message: String(e.message).slice(0, 1200) }), { expirationTtl: 7 * 86400 }); throw e; }
+  if (g.fellBack && g.fellBack.length) await env.GLOSSARY_KV.put('mv:lastPanelError', JSON.stringify({ at: Date.now(), slot: slot.id, message: ('그림은 ' + g.provider + ' 로 대신 만들었습니다. 먼저 시도한 모델 실패: ' + g.fellBack.join(' / ')).slice(0, 1200) }), { expirationTtl: 7 * 86400 });
   const k = 'mvpanel-' + slot.id + '-' + rid() + '.' + g.ext;
   await putDerivedFile(env, k, g.bytes, { httpMetadata: { contentType: g.mime } });
   const rec = { url: '/api/clipfile?k=' + k, by: g.provider + ':' + g.model, at: Date.now(), pv: PANEL_PROMPT_V, seed: seed || '' };

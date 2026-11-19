@@ -268,6 +268,6 @@ export async function generate(env, prompt, only, ref, opts) {
   if (env.OPENAI_API_KEY && (!only || only === 'openai')) tries.push(viaOpenAI);
   if (env.GEMINI_API_KEY && (!only || only === 'gemini')) tries.push(viaGemini);
   if (!tries.length) throw new Error('이미지 생성 키가 없습니다(OPENAI_API_KEY 또는 GEMINI_API_KEY)');
-  for (const f of tries) { try { return await f(env, prompt, ref, opts); } catch (e) { errs.push((e && e.message) || String(e)); } }
+  for (const f of tries) { try { const g = await f(env, prompt, ref, opts); if (errs.length) g.fellBack = errs.slice(); return g; } catch (e) { errs.push((e && e.message) || String(e)); } }   // fellBack: 앞 모델이 실패해 다음 모델로 넘어간 이유
   throw new Error(errs.join(' / '));
 }
