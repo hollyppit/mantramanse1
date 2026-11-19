@@ -53,6 +53,11 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   const guest = await acc({}), adm = await acc({ authorization: 'Bearer adminpw-long-enough' });
   ok(guest.channelKey === 'ch-kpn' && guest.buyer.length === 0 && !guest.testChannel, '손님: 운영 채널(KPN) 그대로');
   ok(adm.channelKey === 'ch-inicis-test' && adm.testChannel === 'inicis' && adm.buyer.join() === 'fullName,phoneNumber,email', '관리자: 이니시스 테스트 채널·구매자 정보');
+  tenv.PORTONE_TEST_FOR_ALL = '1';
+  const guestAll = await acc({});
+  ok(guestAll.channelKey === 'ch-inicis-test' && guestAll.testChannel === 'inicis' && guestAll.buyer.length === 3, 'PORTONE_TEST_FOR_ALL=1: 손님도 이니시스 테스트 채널');
+  delete tenv.PORTONE_TEST_CHANNEL_KEY;
+  ok((await acc({})).channelKey === 'ch-kpn', '시험 채널 키가 없으면 스위치가 켜져 있어도 운영 채널');
   const pwsrc = require('fs').readFileSync(path.join(__dirname, '..', 'report/v2/paywall.js'), 'utf8');
   ok(/function askBuyer/.test(pwsrc) && /cust\.fullName = buyer\.fullName/.test(pwsrc) && !/buyer[^\n]*\/api\/commerce\/order/.test(pwsrc.replace(/askBuyer\(need\)[^\n]*fetch\('\/api\/commerce\/order'/, '')), '구매 창: 결제 직전 구매자 정보 → 결제창에만 전달');
 
