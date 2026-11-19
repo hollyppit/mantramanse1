@@ -72,11 +72,14 @@
     if (graphP) return graphP;
     graphP = Promise.all([root.MantraTLGraph ? Promise.resolve() : H.load('/report/hub/timeline-graph.js?v=20261118-zw').catch(function () { }), flagsJson(), root.MantraNatal ? Promise.resolve() : H.load('/report/natal-table.js?v=20261116-natal2').catch(function () { })]).then(function (r) {
       var F = root.MANTRA_FLAGS || {}, f = r[1] || {}, lc = F.luckCycle === true || f.luckCycle === true, ef = F.elementFlow === true || f.elementFlow === true;
-      // 운 분석 층(2026-11-18, 만세력 운세 흐름과 같은 계산): 외부 환경·전환·상하위(luckEnv) · 오행 겹쳐 보기(luckOverlay) · 십성 작용(tenGodRoles) · 시대 흐름(macroEra)
-      var on = function (k) { return F[k] === true || f[k] === true; }, lv = { luckEnv: on('luckEnv'), luckOverlay: on('luckOverlay'), tenGodRoles: on('tenGodRoles'), macroEra: on('macroEra'), luckAlerts: on('luckAlerts') }, LV_V = '?v=20261118-agree';
-      var need = [].concat(lv.luckOverlay ? ['/luck-overlay.js'] : [], lv.tenGodRoles || lv.luckEnv ? ['/ten-god-roles.js'] : [], lv.luckEnv ? ['/luck-env.js'] : [], lv.macroEra ? ['/fengshui-data.js', '/fengshui-engine.js', '/macro-era.js', '/macro-era-bridge.js'] : [], lv.luckAlerts ? ['/luck-alerts.js'] : [], ['/luck-layers-view.js']);
+      // 운 분석 층(2026-11-18, 만세력 운세 흐름과 같은 계산): 외부 환경·전환·상하위(luckEnv) · 오행 겹쳐 보기(luckOverlay) · 십성 작용(tenGodRoles)
+      // 시대 흐름(삼원구운·원회운세·오운육기)은 2026-11-20부터 타임라인에서 빼고 만세력 운세 흐름의 시대 흐름 카드에만 둔다(개인 인생 흐름에 집중)
+      var on = function (k) { return F[k] === true || f[k] === true; }, lv = { luckEnv: on('luckEnv'), luckOverlay: on('luckOverlay'), tenGodRoles: on('tenGodRoles'), luckAlerts: on('luckAlerts') }, LV_V = '?v=20261118-agree';
+      var need = [].concat(lv.luckOverlay ? ['/luck-overlay.js'] : [], lv.tenGodRoles || lv.luckEnv ? ['/ten-god-roles.js'] : [], lv.luckEnv ? ['/luck-env.js'] : [], lv.luckAlerts ? ['/luck-alerts.js'] : [], ['/luck-layers-view.js']);
       var seq = function (list) { return list.reduce(function (pr, u) { return pr.then(function () { return H.load(u + LV_V).catch(function () { }); }); }, Promise.resolve()); };
-      return Promise.all([lc && !root.MantraLuckCycle ? H.load('/luck-cycle.js?v=20261118-ls').catch(function () { }) : Promise.resolve(), root.MantraLuckView ? Promise.resolve() : seq(need)]).then(function () { return { lc: lc && !!root.MantraLuckCycle, ef: ef, lv: root.MantraLuckView ? lv : null, ow: f.overlayWeights || null }; });
+      // 원국 한눈에 보기(2026-11-20, 만세력 원국 탭과 같은 natal-overview.js): 격국 판정(gyeok-structure.js)을 함께 읽는다. 스위치 없이 늘 보인다
+      var ovNeed = [].concat(root.MantraGyeokStructure ? [] : ['/gyeok-structure.js'], root.MantraNatalOverview ? [] : ['/natal-overview.js']);
+      return Promise.all([lc && !root.MantraLuckCycle ? H.load('/luck-cycle.js?v=20261118-ls').catch(function () { }) : Promise.resolve(), root.MantraLuckView ? Promise.resolve() : seq(need), seq(ovNeed)]).then(function () { return { lc: lc && !!root.MantraLuckCycle, ef: ef, lv: root.MantraLuckView ? lv : null, ow: f.overlayWeights || null }; });
     }).catch(function () { return { lc: false, ef: false }; });
     return graphP;
   }
@@ -242,7 +245,6 @@
         '<p class="tq-al-n">명리 지표로 본 참고 신호예요. 일어날 일을 정하지 않아요.</p></aside>';
     }
     if (!root.__tqAlBound) { root.__tqAlBound = true; DOC.addEventListener('click', function (e) { var b = e.target && e.target.closest && e.target.closest('[data-al-off]'); if (!b) return; var d = new Date(Date.now() + 9 * 3600e3); try { localStorage.setItem('mt_alert_off_tl', d.getUTCFullYear() + '-' + (d.getUTCMonth() + 1) + '-' + d.getUTCDate()); } catch (x) { } var el = DOC.getElementById('tqAlerts'); if (el) el.remove(); if (H.track) H.track('alert_dismiss', { where: 'timeline' }); }); }   /* 한 번만 건다 */
-    function eraHtml() { if (!LV || !GF.lv.macroEra) return ''; var h = ''; try { h = LV.era(M, ch, now, { flags: GF.lv, esc: esc, compact: true }); } catch (e) { } return h ? '<h4 class="tq-h4">시대의 바람 · 20년</h4><div class="tq-lc"><p class="tq-lc-k">삼원구운 · 모두에게 공통인 큰 날씨</p>' + h + '</div>' : ''; }
     function lcSteps(r) { return '<ol class="tq-lc-steps"><li><b>오행의 특징</b>' + esc(r.steps.trait) + '</li><li><b>나에게 미치는 영향</b>' + esc(r.steps.impact) + '</li><li><b>추천 전략</b>' + esc(r.steps.strategy) + '</li></ol>' + (r.basis && r.basis.length ? '<details class="tq-how"><summary>판단 근거 보기</summary><ul class="tq-lc-basis">' + r.basis.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul><p class="tq-sub">미리 써 둔 문구를 이 사주의 계산값으로 골라 조합했어요(AI 미사용). 흐름 점수는 바꾸지 않아요.</p></details>' : ''); }
     // 장기 운세 요약(2026-11-18): 대운 3개를 하나의 오행·하나의 길흉으로 묶던 30년 구간 판정을 걷고, 대운마다의 흐름과 그 사이 변화를 순서대로 보여 준다(luck-cycle.js longSummary)
     function spanHtml() {
@@ -297,6 +299,9 @@
       var order = ['hour', 'day', 'month', 'year'], lab = { hour: '시주', day: '일주', month: '월주', year: '연주' };
       // 2026-11-13: 원국을 만세력처럼 자세히 — 주제별 풀이(/report/v2/)와 같은 공용 표(report/natal-table.js)
       var cols = root.MantraNatal ? '<div class="mt-natal">' + root.MantraNatal.html(M, Object.assign({}, ch, { hourKnown: true }), { tip: tip }) + '</div>' : '';
+      // 원국 한눈에 보기(2026-11-20): 신강신약·통근·용신/기신·격국 — 만세력 원국 탭과 같은 natal-overview.js
+      var ovw = ''; try { var NO = root.MantraNatalOverview; if (NO) { NO.injectCss(DOC); ovw = NO.html(M, ch, { esc: esc, term: function (k) { return tip(k); } }); } } catch (e) { ovw = ''; }
+      if (ovw) cols += '<div class="tq-box tq-ov" style="display:block"><h4>원국 한눈에 보기 <small style="font-weight:400;opacity:.65">강약·뿌리·필요한 기운·격을 한 장에</small></h4>' + ovw + '</div>';
       var pc = (ch.weights && ch.weights.pct) || [], gr = (ch.weights && ch.weights.groups) || [], mi = 0; for (var i = 1; i < gr.length; i++) if (gr[i] > gr[mi]) mi = i;
       var els = G.elements ? '<div class="tq-box"><h4>오행 · 십성</h4><div class="tq-els">' + M.EL_K.map(function (e, i) { var v = Math.round(pc[i] || 0); return '<div class="tq-el"><span style="color:' + EL_COL[i] + '">' + EL_HJ[i] + ' ' + e + '</span><div class="tq-eb"><i style="width:' + Math.max(2, Math.min(100, v * 2)) + '%;background:' + EL_COL[i] + '"></i></div><b>' + v + '%</b></div>'; }).join('') + '</div>' +
         '<div class="tq-gr">' + GROUPS5.map(function (n, i) { var v = Math.round(gr[i] || 0); return '<span class="' + (i === mi ? 'big' : '') + '">' + esc(n) + ' <b>' + v + '%</b></span>'; }).join('') + '</div><p class="tq-sub">가장 큰 비중은 <b>' + GROUPS5[mi] + '</b>이에요(' + GROUP_MEAN[GROUPS5[mi]] + '). ' + tip('십성') + '은 나(일간)와 다른 글자의 관계를 다섯 묶음으로 나눈 것이에요: ' + GROUPS5.map(function (n) { return n + ' ' + GROUP_MEAN[n]; }).join(' · ') + '.</p></div>' : '';
@@ -347,8 +352,8 @@
           body += '<h4 class="tq-h4">이 10년 안의 해</h4><p class="tq-sub">해를 누르면 아래 “지금과 앞으로”에서 그 해의 세운과 월운이 열립니다.</p>' + barChart(ys, { label: sel.ganzhi + ' 대운 안의 해별 흐름', cls: 'seun', attr: function (it) { return 'data-y="' + it.year + '"'; }, sel: function (it) { return st.y === it.year; }, now: function (it) { return !!it.isNow; }, name: function (it) { return it.year + '년 ' + it.ganzhi + ' 세운'; }, top: function (it) { return String(it.year).slice(2) + '년'; }, sub: function (it) { return it.age + '세'; } });
         }
       }
-      if (TG) return carHtml() + metricBar() + lifeHtml() + '<h4 class="tq-h4">대운 10년 · ' + esc(mName()) + '</h4><p class="tq-sub">막대가 높을수록 ' + (metric() === 'accident' ? '주의 신호가 많은 시기예요(사고수는 낮을수록 좋음)' : '나에게 유리한 시기예요') + '. 막대 위 글자는 좋고 나쁨 단계, 아래 작은 글자는 그 시기의 성격이에요. 막대를 누르면 자세한 풀이가 열려요.</p>' + graph + spanHtml() + body + eraHtml();
-      return '<p class="tq-sub">막대가 높을수록 내 사주에 잘 맞는 시기예요(흐름 점수 0~100, 50이 보통). 색과 이름은 그 시기의 성격 6가지 중 하나예요. 막대를 누르면 자세한 풀이가 열려요.</p>' + graph + legend + spanHtml() + body + eraHtml();
+      if (TG) return carHtml() + metricBar() + lifeHtml() + '<h4 class="tq-h4">대운 10년 · ' + esc(mName()) + '</h4><p class="tq-sub">막대가 높을수록 ' + (metric() === 'accident' ? '주의 신호가 많은 시기예요(사고수는 낮을수록 좋음)' : '나에게 유리한 시기예요') + '. 막대 위 글자는 좋고 나쁨 단계, 아래 작은 글자는 그 시기의 성격이에요. 막대를 누르면 자세한 풀이가 열려요.</p>' + graph + spanHtml() + body;
+      return '<p class="tq-sub">막대가 높을수록 내 사주에 잘 맞는 시기예요(흐름 점수 0~100, 50이 보통). 색과 이름은 그 시기의 성격 6가지 중 하나예요. 막대를 누르면 자세한 풀이가 열려요.</p>' + graph + legend + spanHtml() + body;
     }
 
     /* ── 영역 3: 지금과 앞으로 ── */

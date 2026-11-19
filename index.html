@@ -572,6 +572,21 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .era-c.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 45%, transparent); font-weight: 700; }
 .era-c small { font-size: 0.68rem; color: var(--ink-3); } @media (max-width: 480px) { .era-c { flex: 1 1 0; min-width: 0; padding: 6px 3px; text-align: center; word-break: keep-all; } .era-c small { font-size: 0.6rem; } }
 .era-steps > li { margin-bottom: 6px; line-height: 1.55; }
+.era-top { display: grid; gap: 4px; margin: 4px 0 10px; } .era-top p { margin: 0; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; font-size: .92rem; }
+.era-tag { flex: none; display: inline-block; min-width: 52px; text-align: center; font-size: .68rem; font-weight: 800; padding: 2px 6px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); }
+.era-secs { display: grid; gap: 8px; }
+.era-sec { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.era-sec > summary { list-style: none; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; } .era-sec > summary::-webkit-details-marker { display: none; }
+.era-sec > summary::after { content: '펼치기'; margin-left: auto; flex: none; font-size: .72rem; font-weight: 700; color: var(--accent); } .era-sec[open] > summary::after { content: '접기'; }
+.era-st { display: grid; gap: 2px; min-width: 0; } .era-st > b { font-size: .92rem; } .era-st > span { font-size: .8rem; color: var(--ink-2); line-height: 1.5; }
+.era-body { padding: 0 12px 12px; border-top: 1px dashed var(--line); }
+.era-nine { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: start; margin-top: 8px; }
+.era-lsg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; } .era-lsg span { display: grid; justify-items: center; padding: 4px 2px; border-radius: 8px; background: color-mix(in srgb, var(--c) 22%, transparent); border: 1.5px solid transparent; font-size: .62rem; line-height: 1.25; } .era-lsg span.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 45%, transparent); } .era-lsg b { font-size: .9rem; } .era-lsg em { font-style: normal; color: var(--ink-3); }
+.era-nt td, .era-nt th { font-size: .78rem; padding: 4px 6px; }
+.wh-ladder { display: grid; gap: 6px; margin: 10px 0; } .wh-row { display: grid; grid-template-columns: 130px 64px 1fr; gap: 4px 8px; align-items: center; font-size: .82rem; } .wh-row .wh-y { grid-column: 1 / -1; padding-left: 2px; margin-top: -2px; } .wh-n small { font-size: .7rem; color: var(--ink-2); } .wh-l { color: var(--ink-2); font-size: .76rem; }
+.wh-hoes { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; align-items: end; margin: 8px 0 4px; } .wh-hoes span { display: grid; justify-items: center; gap: 1px; padding: 4px 0; border-radius: 8px; font-size: .74rem; } .wh-hoes span.on { background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent); } .wh-hoes i { display: block; width: 60%; border-radius: 3px 3px 0 0; background: var(--accent); opacity: .55; } .wh-hoes span.on i { opacity: 1; } .wh-hoes small { font-size: .58rem; color: var(--ink-3); }
+.era-mix { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 6px 0 4px; } .era-mix span { position: relative; overflow: hidden; display: grid; justify-items: center; gap: 1px; padding: 6px 2px; border-radius: 10px; border: 1.5px solid var(--line); font-size: .74rem; z-index: 0; } .era-mix span i { position: absolute; left: 0; bottom: 0; height: 5px; background: var(--c); z-index: -1; } .era-mix span.era-on { border-color: var(--c); border-width: 2.5px; } .era-mix em { font-style: normal; font-size: .7rem; color: var(--ink-2); } .era-mix small { font-size: .66rem; font-weight: 700; }
+@media (max-width: 560px) { .era-nine { grid-template-columns: 1fr; } .era-lsg { max-width: 200px; } .wh-row { grid-template-columns: 1fr auto; } .wh-n { white-space: nowrap; } .wh-row .cr-bar { grid-column: 1 / -1; } .wh-hoes small { display: none; } }
 /* 장기 운세 요약 */
 .ls-rows > li { margin-bottom: 6px; }
 .ls-rows > li.ls-now { font-weight: 600; }
@@ -1103,12 +1118,15 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="fengshui-engine.js"></script>
 <script src="macro-era.js"></script>
 <script src="macro-era-bridge.js"></script>
+<script src="wonhoe.js"></script>
+<script src="woon-gi.js"></script>
 <script src="health-body.js"></script>
 <script src="accident-hint.js"></script>
 <script src="byeongyak.js"></script>
 <script src="jonggyeok.js"></script>
 <script src="gyeokguk.js"></script>
 <script src="gyeok-structure.js"></script>
+<script src="natal-overview.js"></script>
 <script src="ten-god-roles.js"></script>
 <script src="luck-env.js"></script>
 <script src="luck-alerts.js"></script>
@@ -5491,6 +5509,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="note">근거는 아래 사주 원국 표와 오행·강약, 용신 탭에서 볼 수 있어요.</p>
     </section>`;
   }
+  // ───────────── 원국 한눈에 보기: 신강신약·통근·용신/기신·격국을 원국표 바로 아래에서 요약 (natal-overview.js 공용 — 운명의 타임라인과 같은 계산·같은 그림) ─────────────
+  function renderOverview(ch) {
+    const O = window.MantraNatalOverview; if (!O) return '';
+    O.injectCss();
+    let h = ''; try { h = O.html(M, ch, { esc, term: (k, l) => term(k, l), link: (tab, label) => `<button type="button" class="btn-link" data-tab="${tab}">${label}</button>`, gyeokLink: gxOn() }); } catch (e) { h = ''; }
+    return h ? `<section class="card ov-card" id="wonguk-overview"><div class="card-h"><h2>원국 한눈에 보기</h2><span class="note">강약·뿌리·필요한 기운·격을 한 장에</span></div>${h}</section>` : '';
+  }
   function renderWonguk() {
     const ch = S.ch, cols = ['hour', 'day', 'month', 'year'];
     const C = k => ch.cells[k];
@@ -5533,6 +5558,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       </div>
       ${table}
     </section>
+    ${renderOverview(ch)}
     <section class="card">
       <div class="card-h"><h2>내 사주의 12운성</h2><span class="note">네 지지에서 기운이 생명주기의 어디쯤 있는지</span></div>
       ${unNatalHTML(ch)}
@@ -7802,30 +7828,105 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const lcSteps = r => `<ol class="lc-steps">${r.steps.summary ? `<li class="lc-sum"><b>핵심 결론</b>${esc(r.steps.summary)}</li>` : ''}<li><b>① 오행의 특징</b>${esc(r.steps.trait)}</li><li><b>② 나에게 미치는 영향</b>${esc(r.steps.impact)}</li><li><b>③ ${r.steps.summary ? '대응 전략' : '추천 전략'}</b>${esc(r.steps.strategyLead || r.steps.strategy)}${r.decades ? `<ul class="ib-ul small lc-dec">${r.decades.map(d => `<li><b>${esc(d.head)}</b> (${esc(d.meta)}) ${esc(d.text)}</li>`).join('')}</ul>` : ''}</li></ol>`;
   const lcBasis = r => `<details class="adv lc-basis"><summary>판단 근거 보기 (억부·조후·십성·합충형해)</summary><ul class="ib-ul small">${r.basis.map(b => `<li>${esc(b)}</li>`).join('')}</ul><p class="note">미리 써 둔 풀이 문구를 이 사주의 계산값으로 골라 조합했습니다(AI 미사용). 흐름 점수는 기존 계산 그대로이며, 묶음 해석은 점수를 바꾸지 않습니다.</p></details>`;
   // ── 시대 흐름(스위치 MANTRA_FLAGS.macroEra, 기본 꺼짐, 2026-11-18): 삼원구운 20년 — 모두에게 공통인 바깥 환경(macro-era.js) + 이 사주가 그 기운을 받아들이는 방식(macro-era-bridge.js).
+  //    2026-11-20 확장: 원회운세(wonhoe.js, 소옹 장기 순환·오행 없음)·오운육기(woon-gi.js, 한 해 기후)를 같은 카드 안 독립 영역으로 + 세 체계 겹쳐 읽기 + 나와 시대 흐름. 검사: tests/macro-era3-sim.cjs
   //    개인 용신·운·흐름 점수를 바꾸지 않는다. 오자원 등 근거 미확인 이론은 '연구 대기'로 이름만 밝힌다. 근거: docs/MACRO_ERA_RESEARCH_2026-11-18.md
   const eraOn = () => !!(window.MANTRA_FLAGS && window.MANTRA_FLAGS.macroEra === true && window.MantraMacroEra && window.MantraMacroBridge && window.MantraFengshui);
   function eraCardHTML(ch) {
     if (!eraOn()) return '';
     let b; try { b = window.MantraMacroBridge.analyze(M, ch, NOW); } catch (e) { return ''; }
     if (!b || !b.supported) return '';
-    const E = b.era, cur = E.era, y0 = cur.start - 40, tl = window.MantraMacroEra.timeline(y0, cur.end + 40);
-    const strip = tl.map(e => `<span class="era-c ${ECLS[e.el]}${e.period === cur.period && e.start === cur.start ? ' on' : ''}" title="${esc(e.yuan + ' ' + e.period + '운 ' + e.star + ' · ' + e.elK)}"><b>${e.period}운 ${esc(e.elK)}</b><small>${e.start}~${e.end}</small></span>`).join('');
-    const nr = b.natal, dv = b.daeun, sv = b.seun;
+    // 세 체계: A 삼원구운(macro-era.js, 기존 계산 그대로) · B 원회운세(wonhoe.js) · C 오운육기(woon-gi.js). 하나의 점수·오행으로 합치지 않는다(2026-11-20)
+    const E = b.era, cur = E.era, ME = window.MantraMacroEra, WH = window.MantraWonhoe, WG = window.MantraWoonGi;
+    let wh = null; try { wh = WH ? WH.at(E.year) : null; if (wh && !wh.supported) wh = null; } catch (e) { wh = null; }
+    let wg = null; try { wg = WG ? WG.analyze(M, ch, NOW) : null; if (wg && !wg.supported) wg = null; } catch (e) { wg = null; }
+    if (WG) WG.injectCss();
+    const fy = y => WH ? WH.fmtYear(y) : y + '년', nr = b.natal, dv = b.daeun, sv = b.seun, QI = WG ? WG.QI : [];
     const sideCls = x => x === 'good' ? 'ib-g' : x === 'bad' ? 'ib-b' : '';
-    return `<section class="card era"><div class="card-h"><h2>시대 흐름 <span class="lvl">삼원구운 · 20년 · 모두에게 공통</span></h2><span class="note">입춘 기준 · ${E.year}년</span></div>
-      <div class="era-strip" role="list" aria-label="시대 흐름 시간축">${strip}</div>
+    const roleChip = (role, side) => `<b class="${sideCls(side)}">${esc(role)}</b>`;
+    const sec = (key, tag, title, line, body) => `<details class="era-sec" data-era="${key}"><summary><span class="era-tag">${tag}</span><span class="era-st"><b>${title}</b><span>${line}</span></span></summary><div class="era-body">${body}</div></details>`;
+    // ── A. 삼원구운 ──
+    const tl = ME.timeline(cur.start - 40, cur.end + 40);
+    const strip = tl.map(e => `<span class="era-c ${ECLS[e.el]}${e.period === cur.period && e.start === cur.start ? ' on' : ''}" title="${esc(e.yuan + ' ' + e.period + '운 ' + e.star + ' · ' + e.elK)}"><b>${e.period}운 ${esc(e.elK)}</b><small>${e.start}~${e.end}</small></span>`).join('');
+    let cyc = null; try { cyc = ME.cycle ? ME.cycle(E.year) : null; } catch (e) { cyc = null; }
+    const grid = cyc ? `<div class="era-lsg" aria-label="낙서 구궁(위가 남쪽)">${cyc.grid.map(n => { const p = cyc.periods[n - 1]; return `<span class="${ECLS[p.el]}${p.now ? ' on' : ''}"><b>${n}</b><small>${esc(p.star.replace(/\(.*$/, ''))}</small><em>${esc(p.pos)}</em></span>`; }).join('')}</div>` : '';
+    const nine = cyc ? `<div class="era-nine">${grid}<div class="tbl-wrap"><table class="dt era-nt"><thead><tr><th>운</th><th>해</th><th>구성</th><th>괘</th><th>오행</th></tr></thead><tbody>${cyc.periods.map(p => `<tr class="${p.now ? 'cur' : ''}"><td>${esc(p.yuan)} ${p.period}운</td><td class="num">${p.start}~${p.end}</td><td>${esc(p.star)}</td><td>${esc(p.gua)}</td><td><b class="eltxt ${ECLS[p.el]}">${esc(p.elK)}</b></td></tr>`).join('')}</tbody></table></div></div>
+      <p class="small muted">낙서(洛書)의 아홉 칸이 운 번호예요. 1운은 북쪽 坎(물), 9운은 남쪽 離(불)처럼 칸마다 구성·괘·오행이 정해져 있고, 20년마다 다음 칸으로 옮겨 가며 180년(${cyc.from}~${cyc.to})에 한 바퀴를 돌아요.</p>` : '';
+    const aBody = `<div class="era-strip" role="list" aria-label="시대 흐름 시간축">${strip}</div>
       <p style="margin:8px 0 2px"><b>지금은 ${esc(cur.yuan)} ${cur.period}운 · ${esc(cur.star)} · ${esc(cur.gua)} — ${esc(cur.elK)}의 시대</b> <span class="small muted">${cur.start}~${cur.end}년 · ${E.yearsIn}년째 · ${E.yearsLeft}년 남음</span></p>
-      <div class="ib era-me"><div class="ib-k">이 사주가 시대를 받아들이는 방식</div>
+      <div class="ib-cols"><div><div class="ib-k">전통 상징</div><p class="small">${esc(cur.tradition)}</p></div><div><div class="ib-k">시대 환경 해석 <span class="muted">(상징 읽기)</span></div><p class="small">${esc(cur.reading)}</p></div></div>
+      ${E.fromPrev ? `<p class="small muted">전환점 · 앞 시대(${E.prev.period}운 ${esc(E.prev.elK)}, ${E.prev.start}~${E.prev.end})에서: ${esc(E.fromPrev.text)}${E.next ? ` · 다음 시대(${E.next.period}운 ${esc(E.next.elK)}, ${E.next.start}년~)로: ${esc(E.toNext.text)}` : ''}</p>` : ''}
+      ${foldBox('아홉 운 · 낙서 구궁 · 팔괘 · 오행 보기', nine)}
+      ${foldBox('계산 근거·이견·연구 대기 이론', `<div class="small"><p>${esc(E.basis)}</p><ul class="ib-ul">${E.caveats.map(t => `<li>${esc(t)}</li>`).join('')}</ul><p><b>연구 대기(화면에 결과를 내지 않음)</b></p><ul class="ib-ul">${E.research.map(r => `<li>${esc(r.name)}: ${esc(r.note)}</li>`).join('')}</ul></div>`)}`;
+    const secA = sec('sanyuan', '20년', 'A. 삼원구운 · 시대의 오행', `${esc(cur.yuan)} ${cur.period}운 ${esc(cur.star)} · ${esc(cur.gua)} — <b class="eltxt ${ECLS[cur.el]}">${esc(cur.elK)}</b> ${cur.start}~${cur.end}`, aBody);
+    // ── B. 원회운세 ──
+    let secB = '';
+    if (wh) {
+      const bar = (lab, n, of, from, to, pct, note) => `<div class="wh-row"><span class="wh-l">${lab}</span><span class="wh-n"><b>${n}</b>${of ? ` / ${of}` : ''}</span><span class="cr-bar"><i style="width:${pct}%"></i></span><span class="wh-y small muted">${fy(from)} ~ ${fy(to)}${note ? ' · ' + note : ''}</span></div>`;
+      const hoes = `<div class="wh-hoes" role="list" aria-label="한 원의 12회">${wh.hoes.map(h => `<span role="listitem" class="${h.now ? 'on' : ''}" title="${esc(h.brK + '회 ' + h.gua + '괘')}"><i style="height:${4 + h.yang * 5}px"></i><b>${h.br}</b><small>${esc(h.gua)}</small></span>`).join('')}</div><p class="small muted">막대 높이는 그 회를 맡은 괘(12벽괘)의 양효 수예요. 子회에서 양이 자라 巳회(乾)에서 가득 차고, 午회(姤)부터 음이 자라 亥회(坤)에서 가득 차요.</p>`;
+      const bBody = `<div class="wh-ladder">
+          ${bar('원(元) · 12만 9,600년', 1, 0, wh.won.from, wh.won.to, wh.won.pct, '지금 ' + wh.won.pct + '% 지점')}
+          ${bar('회(會) · 1만 800년', wh.hoe.n + `<small> ${wh.hoe.br}회</small>`, 12, wh.hoe.from, wh.hoe.to, wh.hoe.pct, wh.hoe.gua + '괘')}
+          ${bar('운(運) · 360년', wh.un.n, 30, wh.un.from, wh.un.to, wh.un.pct, '')}
+          ${bar('세(世) · 30년', wh.se.n, 12, wh.se.from, wh.se.to, Math.round((E.year - wh.se.from + 1) / 30 * 100), wh.se.left + '년 남음')}
+        </div>
+        <p><b>${wh.hoe.br}회(${esc(wh.hoe.brK)}회) · ${esc(wh.hoe.gua)}괘</b> — ${esc(wh.hoe.text)}</p>
+        ${hoes}
+        ${foldBox('계산 근거·주의', `<div class="small"><p>${esc(wh.basis)}</p><ul class="ib-ul">${wh.caveats.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>`)}`;
+      secB = sec('wonhoe', '천 년 단위', 'B. 원회운세 · 장기 역사 순환', `${wh.hoe.br}회(${esc(wh.hoe.brK)}회·${esc(wh.hoe.gua)}괘) 제${wh.un.n}운(${wh.un.from}~${wh.un.to}) · 제${wh.se.n}세(${wh.se.from}~${wh.se.to})`, bBody);
+    }
+    // ── C. 오운육기 ──
+    let secC = '';
+    if (wg) {
+      let h = ''; try { h = WG.html(M, ch, NOW, { esc, fold: (t, x) => foldBox(esc(t), x) }); } catch (e) { h = ''; }
+      const y = wg.year;
+      if (h) secC = sec('woongi', '1년', 'C. 오운육기 · 올해의 자연 기운', `${y.Y} ${esc(y.gz)}년 · ${esc(y.unK)} · 사천 ${esc(QI[y.sitian].k)} · 재천 ${esc(QI[y.zaiquan].k)} · 지금 ${esc(QI[wg.cur.guest].w)}`, h);
+    }
+    // ── 세 체계 종합(합산하지 않고 나란히) ──
+    const phaseSan = cur.period === 9 ? '180년 한 바퀴(정원)의 마지막 운' : cur.period === 1 ? '새 정원의 첫 운' : `180년 한 바퀴의 ${cur.period}번째 운`;
+    const phaseWh = wh ? (wh.hoe.n <= 6 ? '양이 자라는 반쪽' : '양이 정점을 지나 음이 자라는 반쪽') : '';
+    const late = cur.period >= 7 && wh && wh.hoe.n >= 7;
+    let wgRel = '';
+    if (wg) { const ue = wg.year.excess ? wg.year.un : wg.year.ctrl, se = QI[wg.year.sitian].el, rel = ME.relEl(cur.el, ue);
+      wgRel = ue === cur.el ? `올해 한 해 바탕(${esc(wg.year.unK)})에도 시대와 같은 ${M.EL_K[cur.el]} 기운이 두드러져, 시대의 색이 한 해 동안 더 진하게 느껴질 수 있어요.`
+        : se === cur.el ? `올해 상반기를 이끄는 사천(${esc(QI[wg.year.sitian].k)})이 시대와 같은 ${M.EL_K[cur.el]} 기운이라, 상반기에는 시대의 색이 더 진하게 겹쳐요. 한 해 바탕은 ${esc(wg.year.unK)}로 결이 달라요.`
+        : rel === 'ctl' ? `시대 오행(${M.EL_K[cur.el]})이 올해 두드러지는 기운(${M.EL_K[ue]})을 누르는 관계라, 한 해의 기후가 시대 흐름에 눌려 덜 드러나는 쪽으로 읽어요.`
+          : rel === 'ctlBy' ? `올해 두드러지는 기운(${M.EL_K[ue]})이 시대 오행(${M.EL_K[cur.el]})을 누르는 관계라, 이 한 해는 시대의 기세가 잠시 누그러지는 쪽으로 읽어요.`
+            : rel === 'gen' ? `시대 오행(${M.EL_K[cur.el]})이 올해 두드러지는 기운(${M.EL_K[ue]})을 생해 주는 관계라, 시대 흐름이 올해 기후로 자연스럽게 이어져요.`
+              : `올해 두드러지는 기운(${M.EL_K[ue]})이 시대 오행(${M.EL_K[cur.el]})을 생해 주는 관계라, 올해 기후가 시대 흐름을 받쳐 주는 쪽으로 읽어요.`; }
+    const synth = `<div class="ib era-syn"><div class="ib-k">세 체계를 겹쳐 읽기 <span class="muted">(점수·오행으로 합치지 않아요)</span></div>
+      <ol class="ib-ul era-steps">
+        <li><b>시대의 중심 오행 · 삼원구운</b> — ${esc(cur.elK)}의 시대(${esc(cur.keys.join('·'))}). 지금은 ${phaseSan}이에요.</li>
+        ${wh ? `<li><b>긴 순환 속 위치 · 원회운세</b> — 한 원의 ${wh.hoe.n}번째 회(${wh.hoe.br}會·${esc(wh.hoe.gua)}), ${phaseWh}에 있어요. 그 안의 제${wh.un.n}운은 ${wh.un.to + 1}년에 바뀌어요.</li>` : ''}
+        ${wg ? `<li><b>올해의 자연 기운 · 오운육기</b> — ${esc(wg.year.unText)} 상반기는 ${esc(QI[wg.year.sitian].mood)}, 하반기는 ${esc(QI[wg.year.zaiquan].mood)}이 주도해요.</li>` : ''}
+        <li><b>공통으로 보이는 상징</b> — ${late ? '삼원구운은 한 바퀴의 끝자락, 원회운세는 양이 정점을 지난 뒤의 국면이라, 두 체계 모두 "크게 드러난 뒤 거두고 정리해 가는 큰 순환의 후반부"를 가리켜요. ' : ''}${esc(wgRel)}</li>
+        <li><b>서로 다른 점 · 보완해 읽기</b> — 원회운세는 수천 년 단위의 음양 소장(오행 없음), 삼원구운은 20년 단위의 시대 오행, 오운육기는 1년 안의 기후예요. 원회운세는 큰 배경, 삼원구운은 시대의 색, 오운육기는 올해의 날씨로 겹쳐 읽고, 서로 엇갈려 보이면 짧은 단위일수록 체감에 가깝다고 봐요.</li>
+      </ol></div>`;
+    // ── 나와 시대 흐름(개인 명식 연계) ──
+    const roles = (ch.unified && ch.unified.roles) || [], rl = e => String(roles[e] || '').replace(/^조건부 /, '') || '중립';
+    const rside = r => /용신|희신/.test(r) ? 'good' : /기신|구신/.test(r) ? 'bad' : '';
+    const mix = `<div class="era-mix">${[0, 1, 2, 3, 4].map(e => `<span class="${ECLS[e]}${e === cur.el ? ' era-on' : ''}"><i style="width:${Math.min(100, ch.weights.pct[e] * 2)}%"></i><b>${M.EL_K[e]}</b><em class="num">${ch.weights.pct[e].toFixed(0)}%</em><small class="${sideCls(rside(rl(e)))}">${esc(rl(e))}</small></span>`).join('')}</div><p class="small muted">내 원국의 오행 비율과 통합 용신 판단의 역할이에요. 굵은 테두리가 지금 시대 오행이에요. 시대 오행은 내 용신을 바꾸지 않아요.</p>`;
+    const me = `<div class="ib era-me"><div class="ib-k">나와 시대 흐름 <span class="muted">(시대 = 모두에게 같은 바깥 환경 · 대운·세운 = 내 운)</span></div>${mix}
         <ol class="ib-ul era-steps">
-          <li><b>나의 위치</b> — 시대의 ${esc(nr.elK)}${'은는는은는'[nr.el]} 이 사주에 <b class="${sideCls(nr.side)}">${esc(nr.role)}</b>, 십성으로는 ${esc(nr.groupK)}(${esc(nr.groupPlain)}) · 원국 안 ${nr.natalPct}%. ${esc(nr.text)}</li>
+          <li><b>시대 오행과 내 명식</b> — 시대의 ${esc(nr.elK)}${'은는는은는'[nr.el]} 이 사주에 ${roleChip(nr.role, nr.side)}, 십성으로는 ${esc(nr.groupK)}(${esc(nr.groupPlain)}) · 원국 안 ${nr.natalPct}%. ${esc(nr.text)}</li>
+          ${wg ? `<li><b>올해 오운육기와 나</b> — 한 해 바탕: <span class="${sideCls(wg.un.tone)}">${esc(wg.un.text)}</span> 지금 구간(${esc(QI[wg.cur.guest].k)}): <span class="${sideCls(wg.cur.read.tone)}">${esc(wg.cur.read.text)}</span></li>` : ''}
+          ${wh ? '<li><b>원회운세와 나</b> — 오행을 붙이지 않는 체계라 내 용신과 직접 견주지 않아요. 지금이 긴 순환의 어디쯤인지 아는 배경으로만 봐요.</li>' : ''}
           ${dv ? `<li><b>지금 대운(${esc(dv.gz)})과 시대</b> — <span class="${sideCls(dv.side)}">${esc(dv.text)}</span></li>` : ''}
           ${sv ? `<li><b>올해 세운(${esc(sv.gz)})과 시대</b> — <span class="${sideCls(sv.side)}">${esc(sv.text)}</span></li>` : ''}
           <li><b>영역</b><ul class="ib-ul small">${b.domains.map(t => `<li>${esc(t)}</li>`).join('')}</ul></li>
           <li><b>대응 방향</b> — ${esc(b.action)}</li>
-        </ol></div>
-      ${foldBox('시대 상징·앞뒤 시대와의 전환 보기', `${E.fromPrev ? `<p class="small muted">앞 시대(${E.prev.period}운 ${esc(E.prev.elK)})에서: ${esc(E.fromPrev.text)} · 다음 시대(${E.next ? E.next.period + '운 ' + esc(E.next.elK) + ', ' + E.next.start + '년~' : ''})로: ${E.toNext ? esc(E.toNext.text) : ''}</p>` : ''}<div class="ib-cols"><div><div class="ib-k">전통 상징</div><p class="small">${esc(cur.tradition)}</p></div><div><div class="ib-k">시대 환경 해석 <span class="muted">(상징 읽기)</span></div><p class="small">${esc(cur.reading)}</p></div></div>`)}
-      <details class="adv"><summary>계산 근거·이견·연구 대기 이론</summary><div class="small"><p>${esc(E.basis)}</p><ul class="ib-ul">${E.caveats.map(t => `<li>${esc(t)}</li>`).join('')}</ul><p><b>연구 대기(화면에 결과를 내지 않음)</b></p><ul class="ib-ul">${E.research.map(r => `<li>${esc(r.name)}: ${esc(r.note)}</li>`).join('')}</ul></div></details>
-      <p class="note">${esc(b.note)} 아래 '대운 흐름'부터가 개인 운이에요.</p></section>`;
+        </ol>
+        <p class="small muted">대운·세운의 흐름 점수와 판정은 아래 '대운 흐름'부터의 계산 그대로예요. 여기서는 그 운이 시대·올해 기후와 어떤 관계인지만 덧붙여요.</p></div>`;
+    const top = `<div class="era-top">
+        ${wh ? `<p><span class="era-tag">긴 순환</span><span>${wh.hoe.br}회(${esc(wh.hoe.brK)}회) · 제${wh.un.n}운 · 제${wh.se.n}세 <span class="small muted">원회운세</span></span></p>` : ''}
+        <p><span class="era-tag">20년</span><span>${cur.period}운 <b class="eltxt ${ECLS[cur.el]}">${esc(cur.elK)}</b>의 시대 · ${E.yearsIn}년째 <span class="small muted">삼원구운</span></span></p>
+        ${wg ? `<p><span class="era-tag">올해</span><span>${esc(wg.year.gz)}년 ${esc(wg.year.unK)} · 지금 ${esc(QI[wg.cur.guest].w)} <span class="small muted">오운육기</span></span></p>` : ''}
+      </div>`;
+    return `<section class="card era"><div class="card-h"><h2>시대 흐름 <span class="lvl">삼원구운 · 원회운세 · 오운육기 · 모두에게 공통</span></h2><span class="note">입춘 기준 · ${E.year}년</span></div>
+      ${top}
+      <div class="era-secs">${secA}${secB}${secC}</div>
+      ${synth}
+      ${me}
+      <p class="note">${esc(b.note)} 원회운세·오운육기도 상징·기후 이론이며 사회·경제를 예측하지 않아요. 아래 '대운 흐름'부터가 개인 운이에요.</p></section>`;
   }
   // 장기 운세 요약(2026-11-18): 30년 구간(대운 3개를 한 오행·한 길흉으로 묶은 판정)을 걷고, 지금 대운과 다음 두 대운을 순서대로 놓고 사이 변화를 보여 준다(luck-cycle.js longSummary, 엔진 값만 읽음)
   function lcDaeunHTML(ch) {

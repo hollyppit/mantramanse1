@@ -72,7 +72,16 @@
     return out;
   }
 
-  var api = { version: VERSION, THEORIES: THEORIES, EL_TEXT: EL_TEXT, RANGE: RANGE, relEl: relEl, eraAt: eraAt, timeline: timeline };
+  // 한 정원(180년) 아홉 운 표 — 낙서 구궁의 자리(방위)와 함께(2026-11-20, 표시용. 계산은 periodInfo 그대로)
+  //   낙서 구궁: 4 9 2 / 3 5 7 / 8 1 6 (위가 남쪽). 운 번호 = 낙서 수 = 구성 번호
+  var LUOSHU_POS = { 1: '북', 2: '남서', 3: '동', 4: '남동', 5: '가운데', 6: '북서', 7: '서', 8: '북동', 9: '남' }, LUOSHU_GRID = [4, 9, 2, 3, 5, 7, 8, 1, 6];
+  function cycle(Y) {
+    var y0 = 1864 + Math.floor((Y - 1864) / 180) * 180, out = [];
+    for (var p = 1; p <= 9; p++) { var e = periodInfo(p, y0); e.pos = LUOSHU_POS[p]; e.now = Y >= e.start && Y <= e.end; out.push(e); }
+    return { from: y0, to: y0 + 179, periods: out, grid: LUOSHU_GRID.slice() };
+  }
+
+  var api = { version: VERSION, THEORIES: THEORIES, EL_TEXT: EL_TEXT, RANGE: RANGE, relEl: relEl, eraAt: eraAt, timeline: timeline, cycle: cycle, LUOSHU_POS: LUOSHU_POS };
   G.MantraMacroEra = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

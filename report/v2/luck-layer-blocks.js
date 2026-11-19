@@ -1,5 +1,5 @@
 /* 주제별 상세풀이에 붙는 운 분석 층 블록(2026-11-18) — 만세력 운세 흐름의 분석을 맞는 장에 같은 계산으로
-   · timeline_self_20 '전체 인생 흐름'              ← 시대 흐름(삼원구운 20년)과 이 사주가 받아들이는 방식(macroEra)
+   · (timeline_self_20 시대 흐름 상자는 2026-11-20 뺌 — 시대 흐름은 만세력 운세 흐름의 시대 흐름 카드에만 있다)
    · timeline_self_24 '움직여야 될 때와 기다려야 할 때' ← 앞으로의 운 교체 중 구조가 바뀌는 전환기(luckEnv) + 지금 상위·하위 운 방향
    · *_flow 네 장 '…기운은 어떻게 흐를까?'          ← 지금 대운→세운→월운 오행 겹쳐 보기(luckOverlay) + 외부 환경과 개인 반응 나눠 보기(luckEnv)
    · 타이밍 장(재물 06·10·14, 커리어 08·14, 인연 08·14) ← 올해부터 3년, 세운마다 그 주제 십성 구조·영역 판정(tenGodRoles)
@@ -111,7 +111,7 @@
       '<ul class="fx-ul">' + a.summary.map(function (t) { return '<li>' + E(t) + '</li>'; }).join('') + '</ul>', '만세력 오행·강약 탭의 십성 작용 분석과 같은 판정이에요.', E);
   }
 
-  var MAP = { timeline_self_20: era, timeline_self_24: turns, timeline_self_25: natalTg };
+  var MAP = { timeline_self_24: turns, timeline_self_25: natalTg };   // timeline_self_20 시대 흐름 상자는 2026-11-20 뺌(시대 흐름은 만세력 운세 흐름 카드에만)
   Object.keys(TOPIC).forEach(function (id) { MAP[id] = flowNow(id); });
   Object.keys(TIMING).forEach(function (id) { MAP[id] = timing(id); });
 
@@ -132,7 +132,7 @@
     Promise.resolve(getFlags).catch(function () { return null; }).then(function (d) {
       d = d || {}; NAMES.forEach(function (k) { F[k] = lf[k] === true || d[k] === true; });
       if (!NAMES.some(function (k) { return F[k]; })) return;
-      var V_ = '?v=20261118-agree', need = [].concat(F.luckOverlay ? ['/luck-overlay.js'] : [], F.tenGodRoles || F.luckEnv ? ['/ten-god-roles.js'] : [], F.luckEnv ? ['/luck-env.js'] : [], F.macroEra ? ['/fengshui-data.js', '/fengshui-engine.js', '/macro-era.js', '/macro-era-bridge.js'] : [], ['/luck-layers-view.js']);
+      var V_ = '?v=20261118-agree', need = [].concat(F.luckOverlay ? ['/luck-overlay.js'] : [], F.tenGodRoles || F.luckEnv ? ['/ten-god-roles.js'] : [], F.luckEnv ? ['/luck-env.js'] : [], ['/luck-layers-view.js']);
       return need.reduce(function (p, u) { return p.then(function () { if (DOC.querySelector('script[src^="' + u + '"]')) return; return load(u + V_); }); }, Promise.resolve())   /* 다른 모듈(topic-deep)이 같은 파일을 먼저 넣었으면 건너뛴다 — 차례마다 다시 확인 */.then(function () {
         if (root.MantraLuckView && !DOC.getElementById('lv-css')) { var st = DOC.createElement('style'); st.id = 'lv-css'; st.textContent = root.MantraLuckView.CSS + '.lb-blk .lv-ol{padding-left:0}.lb-blk details.lb-more{margin:8px 0}.lb-blk details.lb-more>summary{cursor:pointer;font-size:.86rem;opacity:.8}'; DOC.head.appendChild(st); }
         ready = !!root.MantraLuckView; rev++;
