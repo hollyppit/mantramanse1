@@ -42,7 +42,7 @@
 </head>
 <body data-legal-footer>
 <div class="wrap">
-  <div class="top"><a href="/report/">← 무빙툰으로 돌아가기</a>
+  <div class="top"><a href="/report/#/timeline">← 운명의 타임라인으로 돌아가기</a>
     <nav class="tabs" aria-label="안내"><a href="/report/legal/products.html">상품 안내</a><a href="/report/legal/refund.html">환불정책</a></nav></div>
   <article>
     <h1>내 구매 내역</h1>
@@ -202,7 +202,7 @@
         .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
         .then(function (x) {
           if (!x.ok || !x.j.ok) { wdGo.disabled = false; wdMsg.textContent = '탈퇴하지 못했습니다. 잠시 후 다시 시도하거나 ' + (B.phone || '') + '로 알려 주세요.'; return; }
-          return sb.auth.signOut().catch(function () { }).then(function () { show('<p><b>탈퇴가 완료되었습니다.</b> 그동안 이용해 주셔서 감사합니다.</p><p class="muted">로그인 정보는 삭제되었고, 결제 기록은 법정 기간 동안 회원 정보와 분리해 보관한 뒤 파기합니다.</p><p><a class="btn" href="/report/">무빙툰으로 돌아가기</a></p>'); });
+          return sb.auth.signOut().catch(function () { }).then(function () { show('<p><b>탈퇴가 완료되었습니다.</b> 그동안 이용해 주셔서 감사합니다.</p><p class="muted">로그인 정보는 삭제되었고, 결제 기록은 법정 기간 동안 회원 정보와 분리해 보관한 뒤 파기합니다.</p><p><a class="btn" href="/report/#/timeline">운명의 타임라인으로 돌아가기</a></p>'); });
         })
         .catch(function () { wdGo.disabled = false; wdMsg.textContent = '연결이 끊겼습니다. 잠시 후 다시 시도해 주세요.'; });
     };
