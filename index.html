@@ -7857,7 +7857,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${E.fromPrev ? `<p class="small muted">전환점 · 앞 시대(${E.prev.period}운 ${esc(E.prev.elK)}, ${E.prev.start}~${E.prev.end})에서: ${esc(E.fromPrev.text)}${E.next ? ` · 다음 시대(${E.next.period}운 ${esc(E.next.elK)}, ${E.next.start}년~)로: ${esc(E.toNext.text)}` : ''}</p>` : ''}
       ${foldBox('아홉 운 · 낙서 구궁 · 팔괘 · 오행 보기', nine)}
       ${foldBox('계산 근거·이견·연구 대기 이론', `<div class="small"><p>${esc(E.basis)}</p><ul class="ib-ul">${E.caveats.map(t => `<li>${esc(t)}</li>`).join('')}</ul><p><b>연구 대기(화면에 결과를 내지 않음)</b></p><ul class="ib-ul">${E.research.map(r => `<li>${esc(r.name)}: ${esc(r.note)}</li>`).join('')}</ul></div>`)}`;
-    const secA = sec('sanyuan', '20년', 'A. 삼원구운 · 시대의 오행', `${esc(cur.yuan)} ${cur.period}운 ${esc(cur.star)} · ${esc(cur.gua)} — <b class="eltxt ${ECLS[cur.el]}">${esc(cur.elK)}</b> ${cur.start}~${cur.end}`, aBody);
+    const secA = sec('sanyuan', '20년', 'B. 삼원구운 · 시대의 오행', `${esc(cur.yuan)} ${cur.period}운 ${esc(cur.star)} · ${esc(cur.gua)} — <b class="eltxt ${ECLS[cur.el]}">${esc(cur.elK)}</b> ${cur.start}~${cur.end}`, aBody);
     // ── B. 원회운세 ──
     let secB = '';
     if (wh) {
@@ -7872,7 +7872,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         <p><b>${wh.hoe.br}회(${esc(wh.hoe.brK)}회) · ${esc(wh.hoe.gua)}괘</b> — ${esc(wh.hoe.text)}</p>
         ${hoes}
         ${foldBox('계산 근거·주의', `<div class="small"><p>${esc(wh.basis)}</p><ul class="ib-ul">${wh.caveats.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>`)}`;
-      secB = sec('wonhoe', '천 년 단위', 'B. 원회운세 · 장기 역사 순환', `${wh.hoe.br}회(${esc(wh.hoe.brK)}회·${esc(wh.hoe.gua)}괘) 제${wh.un.n}운(${wh.un.from}~${wh.un.to}) · 제${wh.se.n}세(${wh.se.from}~${wh.se.to})`, bBody);
+      secB = sec('wonhoe', '천 년 단위', 'A. 원회운세 · 장기 역사 순환', `${wh.hoe.br}회(${esc(wh.hoe.brK)}회·${esc(wh.hoe.gua)}괘) 제${wh.un.n}운(${wh.un.from}~${wh.un.to}) · 제${wh.se.n}세(${wh.se.from}~${wh.se.to})`, bBody);
     }
     // ── C. 오운육기 ──
     let secC = '';
@@ -7895,10 +7895,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
               : `올해 두드러지는 기운(${M.EL_K[ue]})이 시대 오행(${M.EL_K[cur.el]})을 생해 주는 관계라, 올해 기후가 시대 흐름을 받쳐 주는 쪽으로 읽어요.`; }
     const synth = `<div class="ib era-syn"><div class="ib-k">세 체계를 겹쳐 읽기 <span class="muted">(점수·오행으로 합치지 않아요)</span></div>
       <ol class="ib-ul era-steps">
-        <li><b>시대의 중심 오행 · 삼원구운</b> — ${esc(cur.elK)}의 시대(${esc(cur.keys.join('·'))}). 지금은 ${phaseSan}이에요.</li>
         ${wh ? `<li><b>긴 순환 속 위치 · 원회운세</b> — 한 원의 ${wh.hoe.n}번째 회(${wh.hoe.br}會·${esc(wh.hoe.gua)}), ${phaseWh}에 있어요. 그 안의 제${wh.un.n}운은 ${wh.un.to + 1}년에 바뀌어요.</li>` : ''}
+        <li><b>시대의 중심 오행 · 삼원구운</b> — ${esc(cur.elK)}의 시대(${esc(cur.keys.join('·'))}). 지금은 ${phaseSan}이에요.</li>
         ${wg ? `<li><b>올해의 자연 기운 · 오운육기</b> — ${esc(wg.year.unText)} 상반기는 ${esc(QI[wg.year.sitian].mood)}, 하반기는 ${esc(QI[wg.year.zaiquan].mood)}이 주도해요.</li>` : ''}
-        <li><b>공통으로 보이는 상징</b> — ${late ? '삼원구운은 한 바퀴의 끝자락, 원회운세는 양이 정점을 지난 뒤의 국면이라, 두 체계 모두 "크게 드러난 뒤 거두고 정리해 가는 큰 순환의 후반부"를 가리켜요. ' : ''}${esc(wgRel)}</li>
+        <li><b>공통으로 보이는 상징</b> — ${late ? '원회운세는 양이 정점을 지난 뒤의 국면, 삼원구운은 한 바퀴의 끝자락이라, 두 체계 모두 "크게 드러난 뒤 거두고 정리해 가는 큰 순환의 후반부"를 가리켜요. ' : ''}${esc(wgRel)}</li>
         <li><b>서로 다른 점 · 보완해 읽기</b> — 원회운세는 수천 년 단위의 음양 소장(오행 없음), 삼원구운은 20년 단위의 시대 오행, 오운육기는 1년 안의 기후예요. 원회운세는 큰 배경, 삼원구운은 시대의 색, 오운육기는 올해의 날씨로 겹쳐 읽고, 서로 엇갈려 보이면 짧은 단위일수록 체감에 가깝다고 봐요.</li>
       </ol></div>`;
     // ── 나와 시대 흐름(개인 명식 연계) ──
@@ -7923,7 +7923,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       </div>`;
     return `<section class="card era"><div class="card-h"><h2>시대 흐름 <span class="lvl">삼원구운 · 원회운세 · 오운육기 · 모두에게 공통</span></h2><span class="note">입춘 기준 · ${E.year}년</span></div>
       ${top}
-      <div class="era-secs">${secA}${secB}${secC}</div>
+      <div class="era-secs">${secB}${secA}${secC}</div>
       ${synth}
       ${me}
       <p class="note">${esc(b.note)} 원회운세·오운육기도 상징·기후 이론이며 사회·경제를 예측하지 않아요. 아래 '대운 흐름'부터가 개인 운이에요.</p></section>`;
