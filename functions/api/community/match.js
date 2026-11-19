@@ -3,8 +3,8 @@
 // GET  ?view=today   → { day, cards:[{ handle, name, avatar, ilju, age, region, intro, purposes, interests, compat:{good,care}, life, sent }] }
 // GET  ?view=inbox   → { received:[카드], sent:[{ handle, name, avatar, at }], matches:[{ room, handle, name, avatar }] }
 // POST { action:'profile', active, purposes, intro, region, interests, wantGender, wantAgeMin, wantAgeMax, wantRegion }
-// POST { action:'like', handle, note?, useCredit?, req? }  인연 잇기(오늘의 인연 또는 나에게 온 관심만). 서로 이으면 대화방이 열린다 → { ok, matched, room }
-//        하루 한도를 넘으면 429 { need:'credit', price } — 유료 스위치가 켜져 있고 useCredit:true 면 크레딧으로 잇는다(6단계)
+// POST { action:'like', handle, note? }  인연 잇기(오늘의 인연 또는 나에게 온 관심만). 서로 이으면 대화방이 열린다 → { ok, matched, room }
+//        하루 한도(LIKE_PER_DAY)를 넘으면 429
 // POST { action:'pass', handle }         넘기기(조용히, 상대에게 알리지 않음)
 // POST { action:'withdraw', handle }     보낸 관심 거두기
 // 조건: 로그인 + 필수 동의 + 닉네임 + 일주 확인 + 성인 본인확인 + 이용 제재 없음
@@ -13,7 +13,6 @@ import { json, sbRest, supabaseReady, viewer, profileOf, activeSanction, blocked
 import { readConsents, requiredOk } from '../../_consent.js';
 import { kstDay } from '../../_daily.js';
 import { PURPOSES, REGIONS, INTERESTS, LIKE_PER_DAY, verificationOf, handleOf, resolveHandle, compat, life, pickToday, ageOf, ageBand, candidatePool } from '../../_match.js';
-import { loadPremium, spend, okReq } from '../../_credits.js';
 
 const enc = encodeURIComponent;
 const pick = (a, allowed, max) => [...new Set((Array.isArray(a) ? a : []).filter(x => allowed.includes(x)))].slice(0, max);
@@ -153,13 +152,7 @@ export async function onRequestPost({ request, env }) {
     if (mine && (mine.status === 'pending' || mine.status === 'matched')) return json({ ok: true, matched: mine.status === 'matched' });
     const note = String(b.note || '').replace(/\s+/g, ' ').trim().slice(0, 100) || null;
     if (note) { const bad = badText(note); if (bad) return json({ error: bad }, 400); }
-    if (await overLimit(env, 'like:' + w.me.id, LIKE_PER_DAY)) {
-      const prem = await loadPremium(env);
-      if (!prem.enabled) return json({ error: '인연 잇기는 하루 ' + LIKE_PER_DAY + '번까지 할 수 있어요' }, 429);
-      if (b.useCredit !== true || !okReq(b.req)) return json({ error: '오늘 인연 잇기를 모두 썼어요. 크레딧 ' + prem.prices.extraLike + '개로 더 이을 수 있어요', need: 'credit', price: prem.prices.extraLike }, 429);
-      const sp = await spend(env, w.me.id, prem.prices.extraLike, 'extra_like', day, 'xl:' + w.me.id + ':' + b.req);
-      if (!sp.ok) return json({ error: sp.error === 'insufficient' ? '크레딧이 부족해요' : '잠시 후 다시 시도해 주세요', need: sp.error === 'insufficient' ? 'credit-buy' : undefined, balance: sp.balance }, 402);
-    }
+    if (await overLimit(env, 'like:' + w.me.id, LIKE_PER_DAY)) return json({ error: '인연 잇기는 하루 ' + LIKE_PER_DAY + '번까지 할 수 있어요' }, 429);
     const theirs = (recv || []).some(x => x.from_id === other);
     const st = theirs ? 'matched' : 'pending';
     await sbRest(env, 'cm_likes?on_conflict=from_id,to_id', { method: 'POST', headers: { prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ from_id: w.me.id, to_id: other, note, status: st, updated_at: now }) });

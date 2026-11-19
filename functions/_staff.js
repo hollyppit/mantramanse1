@@ -3,7 +3,7 @@
 // 표: supabase/migrations/20261116_admin_stage7.sql · 열쇠 만들기·회수: /api/community/staff(관리자 비밀번호만)
 //
 // 역할과 권한
-//   owner     — 전부(공개 단계·접근 권한·출시 알림·유료/크레딧·수동 본인확인·운영자 열쇠는 owner 만)
+//   owner     — 전부(공개 단계·접근 권한·출시 알림·수동 본인확인·운영자 열쇠는 owner 만)
 //   operator  — metrics(성과 지표) · members(회원 찾기) · mod(신고·제재) · audit(작업 기록) · content(운테크 문안)
 //   moderator — mod · members · audit
 //   analyst   — metrics

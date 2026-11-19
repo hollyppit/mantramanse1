@@ -9,7 +9,7 @@ export const FEATURES_KEY = 'community:features';
 export const FEATURES = {
   plaza: '광장(글·댓글·공감)',
   records: '오늘의 운테크·운명의 기록',
-  match: '인연 찾기(오늘의 인연·인연 잇기·본인확인·크레딧 사용)',
+  match: '인연 찾기(오늘의 인연·인연 잇기·본인확인)',
   chat: '1:1 대화',
 };
 export const DEFAULT_FEATURES = Object.fromEntries(Object.keys(FEATURES).map(k => [k, true]));

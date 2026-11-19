@@ -30,7 +30,7 @@ export async function onRequestPost({ request, env }) {
     try {
       const changed = await sbRest(env, `commerce_orders?order_id=eq.${encodeURIComponent(paymentId)}&status=eq.paid`, { method: 'PATCH', headers: { prefer: 'return=representation' }, body: JSON.stringify({ status: 'canceled', canceled_at: at, cancel_reason: '포트원 취소 알림' }) });
       if (Array.isArray(changed) && changed.length) { await mailRefund(env, order, at); await mailAdmin(env, 'refund', order, { reason: '포트원 취소 알림(콘솔 등 관리자 화면 밖에서 취소)' }); }
-      await revokeOrder(env, order, at);   // 세계 권한 회수 · 크레딧 주문이면 크레딧 회수
+      await revokeOrder(env, order, at);   // 세계 권한 회수
     } catch { return json({ error: 'commerce-unavailable' }, 503); }
     return json({ ok: true, canceled: true });
   }

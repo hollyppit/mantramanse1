@@ -27,7 +27,6 @@ export async function onRequestPost(ctx) {
   const annual = [];   // 연도 상품(신년운세): 무빙툰 세계 구매 창에는 넣지 않고 따로 알린다(상품 안내 페이지·신년운세 화면용)
   for (const p of products) {
     if (!p.active || !(p.price > 0)) continue;
-    if (p.kind === 'credits') continue;   // 인연의 광장 크레딧 묶음은 광장에서만 판다(functions/api/community/credits.js)
     if (p.kind === 'annual') { annual.push({ id: p.id, name: p.name, kind: p.kind, year: p.year || null, price: p.price, owned: !!(owned && owned.includes(p.worlds[0])) }); continue; }
     const ws = await productWorlds(env, p);
     if (!ws.length || ws.every(w => !worlds[w] || !worlds[w].paid)) continue;   // 잠긴 세계가 없는 상품은 팔지 않는다

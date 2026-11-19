@@ -28,17 +28,7 @@ export const DEFAULT_PRODUCTS = [
   { id: 'bundle', name: '전체 열기', kind: 'bundle', worlds: [], price: 0, active: true, order: 0 },   // worlds 는 구매 시점의 유료 세계로 채운다
   // 연도 상품(신년운세): 무빙툰 세계와 따로 판다. 권한 이름(world 칸)은 'tj' + 연도. 묶음(전체 열기)에는 들어가지 않는다(productWorlds 는 세계 설정의 유료 세계만 모음).
   { id: 'tj2027', name: '2027 정미년 토정비결 신년운세', kind: 'annual', year: 2027, worlds: ['tj2027'], price: 0, active: true, order: 10 },
-  // 인연의 광장 크레딧 묶음(6단계): 사주와 상관없는 회원 상품. 크레딧 수는 코드가 정하고(CREDIT_PACKS), 가격을 넣어야 판매된다.
-  // 광장 유료 스위치(KV plaza:premium)가 꺼져 있으면 가격이 있어도 주문을 만들지 않는다(functions/api/commerce/order.js)
-  { id: 'cr10', name: '인연 크레딧 10개', kind: 'credits', credits: 10, worlds: [], price: 0, active: true, order: 20 },
-  { id: 'cr30', name: '인연 크레딧 30개', kind: 'credits', credits: 30, worlds: [], price: 0, active: true, order: 21 },
-  { id: 'cr100', name: '인연 크레딧 100개', kind: 'credits', credits: 100, worlds: [], price: 0, active: true, order: 22 },
 ];
-export const CREDIT_PACKS = Object.fromEntries(DEFAULT_PRODUCTS.filter(p => p.kind === 'credits').map(p => [p.id, p.credits]));
-// 크레딧 주문: saju_key 자리에 'credits' 를 넣는다(주문 표의 칸은 그대로). 지급 크레딧 수는 상품 id 로 코드에서 정한다
-export const CREDIT_SAJU = 'credits';
-export const isCreditOrder = o => !!o && o.saju_key === CREDIT_SAJU && !!CREDIT_PACKS[o.product_id];
-export const creditsOfOrder = o => (isCreditOrder(o) ? CREDIT_PACKS[o.product_id] : 0);
 export const ANNUAL_WORLD = y => 'tj' + y;
 export const isAnnualWorld = w => /^tj\d{4}$/.test(String(w || ''));
 const MAX_PRICE = 1000000;
@@ -97,9 +87,14 @@ export async function freeChapters(env) {
   return Object.fromEntries(Object.entries(first).map(([w, v]) => [w, v.id]));
 }
 
-export async function ownedWorlds(env, userId, key) {
+// ── 이용 기간: 구매 권한은 받은 날(granted_at, 결제 확인 시각)부터 12개월(이용약관 제6조). 지나면 잠기고 다시 살 수 있다
+export const ACCESS_MONTHS = 12;
+const shiftMonths = (t, m) => { const d = new Date(t); d.setUTCMonth(d.getUTCMonth() + m); return d.toISOString(); };
+export const accessUntil = t => shiftMonths(t, ACCESS_MONTHS);                 // 이 시각까지 볼 수 있다
+export const accessSince = (now = Date.now()) => shiftMonths(now, -ACCESS_MONTHS);   // 이 시각 이후에 받은 권한만 유효
+export async function ownedWorlds(env, userId, key, now = Date.now()) {
   if (!userId || !key || !supabaseReady(env)) return [];
-  const rows = await sbRest(env, `commerce_entitlements?select=world&user_id=eq.${encodeURIComponent(userId)}&saju_key=eq.${encodeURIComponent(key)}&revoked_at=is.null`);
+  const rows = await sbRest(env, `commerce_entitlements?select=world&user_id=eq.${encodeURIComponent(userId)}&saju_key=eq.${encodeURIComponent(key)}&revoked_at=is.null&granted_at=gt.${encodeURIComponent(accessSince(now))}`);
   return [...new Set((rows || []).map(r => r.world))];
 }
 
@@ -154,7 +149,6 @@ export async function loadProducts(env) {
 }
 // 구매 시점에 이 상품이 여는 세계: 세계 상품은 자기 세계, 묶음은 지금 켜져 있고 유료인 세계 전부
 export async function productWorlds(env, product) {
-  if (product.kind === 'credits') return [];
   if (product.kind === 'world' || product.kind === 'annual') return product.worlds.slice();
   const access = await worldAccess(env);
   return Object.keys(access).filter(id => access[id].enabled && access[id].paid).sort();
@@ -162,11 +156,6 @@ export async function productWorlds(env, product) {
 
 // 주문 하나의 세계별 구매 권한을 넣는다(같은 주문·세계는 중복으로 넣지 않는다)
 export async function grantOrder(env, order, by) {
-  if (isCreditOrder(order)) {   // 크레딧 주문: 원장에 '구매'로 넣는다. 같은 주문은 멱등 키('order:'+주문번호)로 한 번만(복귀 확인·웹훅·관리자 다시 주기가 겹쳐도)
-    const r = await sbRest(env, 'rpc/cm_credit_grant', { method: 'POST', body: JSON.stringify({ p_user: order.user_id, p_amount: creditsOfOrder(order), p_reason: 'purchase', p_ref: order.order_id, p_idem: 'order:' + order.order_id, p_by: String(by || 'payment').slice(0, 60) }) });
-    if (!r || r.ok !== true) throw new Error('credit-grant-failed');
-    return;
-  }
   const rows = order.worlds.map(w => ({ user_id: order.user_id, saju_key: order.saju_key, world: w, order_id: order.order_id, granted_by: by }));
   await sbRest(env, 'commerce_entitlements?on_conflict=user_id,saju_key,world,order_id', { method: 'POST', headers: { prefer: 'resolution=ignore-duplicates,return=minimal' }, body: JSON.stringify(rows) });
   // 구매한 사주를 회원 계정에 저장(다른 기기에서 '이 사주로 바로 읽기'). 저장 실패는 구매를 막지 않는다
@@ -332,20 +321,9 @@ export async function cancelOrder(env, order, reason) {
   if (Array.isArray(changed) && changed.length) { await mailRefund(env, order, at); await mailAdmin(env, 'refund', order, { reason }); }   // 환불 완료·관리자 알림 메일(이번 요청이 취소로 바꿨을 때만)
   return { ok: true, at };
 }
-// 취소된 주문이 준 것을 거둔다: 세계 구매 권한 회수, 크레딧 주문이면 그 크레딧을 원장에서 뺀다('환불', 멱등 키 'refund:'+주문번호 → 한 번만).
-// 이미 일부를 써서 잔액이 모자라면 남은 만큼만 뺀다(잔액을 마이너스로 만들지 않는다 · 고객 바로 환불은 다 남아 있을 때만 된다)
+// 취소된 주문의 세계 구매 권한을 회수한다(행은 지우지 않고 회수 시각만 남긴다)
 export async function revokeOrder(env, order, at) {
-  const id = encodeURIComponent(order.order_id);
-  if (!isCreditOrder(order)) { await sbRest(env, `commerce_entitlements?order_id=eq.${id}&revoked_at=is.null`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ revoked_at: at }) }); return; }
-  const bal = +(await sbRest(env, 'rpc/cm_credit_balance', { method: 'POST', body: JSON.stringify({ p_user: order.user_id }) })) || 0;
-  const take = Math.min(creditsOfOrder(order), Math.max(0, bal));
-  if (take > 0) await sbRest(env, 'rpc/cm_credit_grant', { method: 'POST', body: JSON.stringify({ p_user: order.user_id, p_amount: -take, p_reason: 'refund', p_ref: order.order_id, p_idem: 'refund:' + order.order_id, p_by: 'refund' }) });
-}
-// 크레딧 주문의 바로 환불 조건: 결제 완료 · 7일 이내 · 이 주문으로 받은 크레딧 수만큼 잔액이 남아 있음(하나도 쓰지 않음)
-export async function creditRefundCheck(env, order, now = Date.now()) {
-  const base = refundCheck(order, null, now); if (!base.ok) return base;
-  const bal = +(await sbRest(env, 'rpc/cm_credit_balance', { method: 'POST', body: JSON.stringify({ p_user: order.user_id }) })) || 0;
-  return bal >= creditsOfOrder(order) ? { ok: true } : { ok: false, reason: 'credits-used' };
+  await sbRest(env, `commerce_entitlements?order_id=eq.${encodeURIComponent(order.order_id)}&revoked_at=is.null`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ revoked_at: at }) });
 }
 // 고객 바로 환불 조건(환불정책): 결제 완료 · 결제 후 7일 이내 · 유료 장 미열람
 export const REFUND_DAYS = 7;

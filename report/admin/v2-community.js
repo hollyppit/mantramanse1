@@ -6,7 +6,6 @@
    ⑤ 회원 동의 현황(/api/account/consent GET, 2단계): 항목별 동의 수·2년 재확인 대상·최근 변경(회원 id 없이).
    ⑥ 감사 로그(/api/community/audit): 관리자 작업 최근 50건.
    ⑦ 성인 확인(테스트용 수동, /api/community/verify manual, 5단계): 포트원 본인인증 채널(PORTONE_IDV_CHANNEL_KEY) 연결 전 테스터 계정을 확인해 인연 매칭·대화를 시험
-   ⑨ 크레딧·유료(/api/community/credits, 6단계): 유료 스위치(기본 꺼짐, 켜려면 '유료 켜기' 입력)·가격·테스트 지급·최근 원장
    ⑩ 성과 지표·⑪ 매칭·대화·매출 현황(/api/community/metrics, 7단계) · ⑫ 회원 찾기(/api/community/members) · ⑬ 운테크 문안(/api/community/today-copy) · ⑭ 운영자 열쇠(/api/community/staff, 관리자만)
    ⑮ 정식 공개 점검표(/api/community/launch, 8단계): 8항목 통과 여부·사람 확인 체크·기준값(관리자만). 미달이면 정식 공개 때 사유를 받는다
    ⑯ 기능별 스위치(/api/community/features, 9단계): 광장·기록·인연 찾기·대화를 하나씩 끄고 켬(관리자만)
@@ -123,7 +122,7 @@
         (d.recent.length ? '<table class="tbl"><thead><tr><th>시각</th><th>항목</th><th>처리</th><th>경로</th></tr></thead><tbody>' + d.recent.map(function (r) { return '<tr><td>' + when(r.at) + '</td><td>' + esc(KIND[r.kind] || r.kind) + '</td><td>' + (r.action === 'grant' ? '동의' : '철회') + '</td><td>' + esc(VIA[r.via] || r.via || '') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">아직 변경 기록이 없습니다.</p>');
     }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
-  var ACT = { 'community.stage': '공개 단계 변경', 'community.access.grant': '권한 주기', 'community.access.revoke': '권한 회수', 'community.mod.hide': '글 숨김', 'community.mod.restore': '글 되살림', 'community.mod.delete': '글 삭제', 'community.mod.dismiss': '신고 기각', 'community.sanction.warn': '경고', 'community.sanction.mute': '쓰기 정지', 'community.sanction.ban': '이용 정지', 'community.sanction.lift': '제재 해제', 'community.mod.avatar': '프로필 사진 지움', 'community.verify.manual': '성인 확인(수동)', 'community.chat.purge': '대화 자동 파기(90일)', 'community.premium.config': '유료 설정 변경', 'community.credit.grant': '크레딧 지급', 'community.staff.create': '운영자 열쇠 만들기', 'community.staff.revoke': '운영자 열쇠 회수', 'community.member.view': '회원 조회', 'community.daily.copy': '운테크 문안 수정', 'community.daily.copy.reset': '운테크 문안 기본으로', 'community.activity.purge': '이용 기록 자동 파기(13개월)', 'community.launch.targets': '공개 기준 변경', 'community.launch.check': '공개 점검 확인', 'community.features': '기능 스위치 변경', 'community.tester.login': '테스트 회원으로 열기' };
+  var ACT = { 'community.stage': '공개 단계 변경', 'community.access.grant': '권한 주기', 'community.access.revoke': '권한 회수', 'community.mod.hide': '글 숨김', 'community.mod.restore': '글 되살림', 'community.mod.delete': '글 삭제', 'community.mod.dismiss': '신고 기각', 'community.sanction.warn': '경고', 'community.sanction.mute': '쓰기 정지', 'community.sanction.ban': '이용 정지', 'community.sanction.lift': '제재 해제', 'community.mod.avatar': '프로필 사진 지움', 'community.verify.manual': '성인 확인(수동)', 'community.chat.purge': '대화 자동 파기(90일)', 'community.staff.create': '운영자 열쇠 만들기', 'community.staff.revoke': '운영자 열쇠 회수', 'community.member.view': '회원 조회', 'community.daily.copy': '운테크 문안 수정', 'community.daily.copy.reset': '운테크 문안 기본으로', 'community.activity.purge': '이용 기록 자동 파기(13개월)', 'community.launch.targets': '공개 기준 변경', 'community.launch.check': '공개 점검 확인', 'community.features': '기능 스위치 변경', 'community.tester.login': '테스트 회원으로 열기' };
   var SK = { warn: '경고', mute: '쓰기 정지', ban: '이용 정지' };
   var modView = 'reports';
   function loadMod() {
@@ -161,26 +160,6 @@
     }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
   }
 
-  function loadCredits() {
-    var box = $('#cmCr'); if (!box) return;
-    call('/api/community/credits?view=admin').then(function (d) {
-      var c = d.config;
-      box.innerHTML = '<p style="margin:0 0 8px">유료 기능: <b style="color:' + (c.enabled ? '#FF8A78' : 'var(--gold)') + '">' + (c.enabled ? '켜짐' : '꺼짐') + '</b> <button class="btn ghost sm" id="crTog">' + (c.enabled ? '끄기' : '켜기') + '</button></p>' +
-        '<div class="row" style="gap:8px;flex-wrap:wrap"><label class="muted">더 보기 가격 <input type="number" id="crMp" min="1" max="100" value="' + c.prices.morePicks + '" style="width:64px"></label><label class="muted">추가 잇기 가격 <input type="number" id="crXl" min="1" max="100" value="' + c.prices.extraLike + '" style="width:64px"></label><label class="muted">더 보기 인원 <input type="number" id="crMc" min="1" max="10" value="' + c.morePicksCount + '" style="width:56px"></label><label class="muted">하루 더 보기 <input type="number" id="crMd" min="0" max="10" value="' + c.morePicksPerDay + '" style="width:56px">번</label><button class="btn ghost sm" id="crSave">가격 저장</button><span class="muted" id="crMsg"></span></div>' +
-        '<div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap"><input type="email" id="crEmail" placeholder="회원 이메일" style="min-width:200px"><input type="number" id="crAmt" placeholder="크레딧(회수는 -)" style="width:130px"><input type="text" id="crNote" placeholder="메모(선택)" maxlength="60"><button class="btn sm" id="crGrant">지급</button><span class="muted" id="crGMsg"></span></div>' +
-        '<p class="muted" style="margin:10px 0 4px">누적: ' + Object.keys(d.totals).map(function (k) { return esc(k) + ' ' + d.totals[k]; }).join(' · ') + '</p>' +
-        (d.recent.length ? '<table class="tbl"><thead><tr><th>시각</th><th>회원</th><th>내용</th><th>크레딧</th><th>메모·작업자</th></tr></thead><tbody>' + d.recent.map(function (r) { return '<tr><td>' + when(r.at) + '</td><td>' + esc(r.who) + '</td><td>' + esc(r.label) + '</td><td>' + (r.delta > 0 ? '+' : '') + r.delta + '</td><td class="muted">' + esc([r.ref, r.by].filter(Boolean).join(' · ')) + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="muted">아직 원장 기록이 없습니다.</p>');
-      $('#crTog').onclick = function () {
-        var body = { enabled: !c.enabled };
-        if (!c.enabled) { var p = prompt('회원에게 크레딧 기능(더 보기·추가 잇기)을 보여 줍니다. 결제 연결 전에는 관리자가 지급한 크레딧만 쓸 수 있습니다. 계속하려면 "유료 켜기"라고 입력해 주세요.'); if (p !== '유료 켜기') return; body.confirm = p; }
-        else if (!confirm('크레딧 기능을 끕니다. 회원 잔액은 그대로 남습니다. 계속할까요?')) return;
-        call('/api/community/credits', { method: 'PUT', body: body }).then(function () { loadCredits(); loadAudit(); }).catch(function (e) { alert(e.message); });
-      };
-      $('#crSave').onclick = function () { call('/api/community/credits', { method: 'PUT', body: { prices: { morePicks: +$('#crMp').value, extraLike: +$('#crXl').value }, morePicksCount: +$('#crMc').value, morePicksPerDay: +$('#crMd').value } }).then(function () { msg('crMsg', '저장했습니다'); loadAudit(); }).catch(function (e) { msg('crMsg', e.message, true); }); };
-      $('#crGrant').onclick = function () { call('/api/community/credits', { method: 'POST', body: { action: 'grant', email: $('#crEmail').value.trim(), amount: +$('#crAmt').value, note: $('#crNote').value.trim() } }).then(function (r) { msg('crGMsg', '지급했습니다(잔액 ' + r.balance + ')'); $('#crAmt').value = ''; loadCredits(); loadAudit(); }).catch(function (e) { msg('crGMsg', e.message, true); }); };
-    }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
-  }
-
   /* ── 7단계: 성과 지표 · 운영 현황 · 회원 찾기 · 운테크 문안 · 운영자 열쇠 ── */
   var role = 'owner';
   var PERM = { owner: ['metrics', 'members', 'mod', 'audit', 'content', 'staff', 'owner'], operator: ['metrics', 'members', 'mod', 'audit', 'content'], moderator: ['mod', 'members', 'audit'], analyst: ['metrics'] };
@@ -208,19 +187,17 @@
           tile('광장 → 심층 분석 이동(30일)', rate(r.communityToReport), '광장 ' + num(c.communityUsers) + '명 중 ' + num(c.communityAlsoReport) + '명') +
           tile('심층 분석 → 광장 이동(30일)', rate(r.reportToCommunity), '심층 분석 ' + num(c.reportUsers) + '명 중 ' + num(c.reportAlsoCommunity) + '명') +
           tile('광장 이용 뒤 심층 분석 구매', rate(r.communityThenPaid), '광장 이용자 ' + num(c.communityEver) + '명 중 ' + num(c.communityThenPaid) + '명') + '</div>' +
-          '<details style="margin-top:8px"><summary class="muted">지표 정의</summary><ul class="muted" style="margin:6px 0 0;padding-left:1.2em;line-height:1.7;font-size:.82rem"><li>활성 사용자: 로그인한 회원이 그 영역을 연 날 기준(DAU 그날 · WAU 최근 7일 · MAU 최근 30일). 비로그인 방문은 세지 않습니다.</li><li>7일 재방문: 기준일 13~7일 전에 쓴 회원 중 최근 7일에도 쓴 비율 · 30일 재방문: 59~30일 전에 쓴 회원 중 최근 30일에도 쓴 비율</li><li>참여율: 최근 30일 광장 이용 회원 중 글·댓글·운명의 기록·인연 잇기·대화를 하나라도 남긴 비율</li><li>유료 전환: 결제 완료 주문만(테스트 결제·크레딧 주문·취소 제외)</li><li>이용 기록은 7단계 배포일부터 쌓입니다. 그 전 기간의 재방문·이동 비율은 낮게 나옵니다.</li></ul></details>';
+          '<details style="margin-top:8px"><summary class="muted">지표 정의</summary><ul class="muted" style="margin:6px 0 0;padding-left:1.2em;line-height:1.7;font-size:.82rem"><li>활성 사용자: 로그인한 회원이 그 영역을 연 날 기준(DAU 그날 · WAU 최근 7일 · MAU 최근 30일). 비로그인 방문은 세지 않습니다.</li><li>7일 재방문: 기준일 13~7일 전에 쓴 회원 중 최근 7일에도 쓴 비율 · 30일 재방문: 59~30일 전에 쓴 회원 중 최근 30일에도 쓴 비율</li><li>참여율: 최근 30일 광장 이용 회원 중 글·댓글·운명의 기록·인연 잇기·대화를 하나라도 남긴 비율</li><li>유료 전환: 결제 완료 주문만(테스트 결제·취소 제외)</li><li>이용 기록은 7단계 배포일부터 쌓입니다. 그 전 기간의 재방문·이동 비율은 낮게 나옵니다.</li></ul></details>';
       }
       if (box2) {
         var mt = m.match || {}, sl = m.sales || {}, mb = m.members || {}, ro = mt.reportsOpen || {};
-        var led = sl.ledger || {}, LED = { grant: '지급', purchase: '구매', refund: '환불 회수', more_picks: '더 보기', extra_like: '추가 잇기', adjust: '조정' };
         box2.innerHTML = '<div class="row" style="gap:8px;flex-wrap:wrap">' +
           tile('회원', num(mb.total), '최근 7일 +' + num(mb.new7) + ' · 30일 +' + num(mb.new30)) + tile('광장 프로필', num(mb.profiles), '출시 알림 신청 ' + num(mb.alerts)) +
           tile('켜진 인연 프로필', num(mt.profilesOn), '성인 확인 ' + num(mt.adults) + '명') + tile('최근 7일 잇기·매칭', num(mt.likes7) + ' · ' + num(mt.matches7), '열린 대화방 ' + num(mt.roomsOpen)) +
           tile('최근 7일 메시지', num(mt.messages7), '경고 표시 ' + num(mt.flagged7)) +
           tile('처리 안 된 신고', num((ro.post || 0) + (ro.comment || 0) + (ro.message || 0) + (ro.user || 0)), '글 ' + num(ro.post || 0) + ' · 댓글 ' + num(ro.comment || 0) + ' · 대화 ' + num(ro.message || 0) + ' · 진행 중 제재 ' + num(mt.sanctionsActive)) +
-          tile('심층 분석 매출(30일)', won((sl.report30 || {}).won), num((sl.report30 || {}).n) + '건') + tile('크레딧 매출(30일)', won((sl.credits30 || {}).won), num((sl.credits30 || {}).n) + '건 · 환불 누적 ' + num((sl.creditsRefunded || {}).n) + '건') +
-          tile('남은 크레딧 합계', num(sl.outstanding), Object.keys(led).map(function (k) { return esc(LED[k] || k) + ' ' + num(led[k]); }).join(' · ') || '원장 기록 없음') + '</div>' +
-          '<p class="muted" style="margin:8px 0 0;font-size:.8rem">매출은 결제 완료·테스트 제외 금액입니다. 회원별 내역은 결제·상품 화면과 ⑨ 크레딧에서 봅니다.</p>';
+          tile('심층 분석 매출(30일)', won((sl.report30 || {}).won), num((sl.report30 || {}).n) + '건') + '</div>' +
+          '<p class="muted" style="margin:8px 0 0;font-size:.8rem">매출은 결제 완료·테스트 제외 금액입니다. 회원별 내역은 결제·상품 화면에서 봅니다.</p>';
       }
     }).catch(function (e2) { if (box) box.innerHTML = '<p class="err">' + esc(e2.message) + '</p>'; if (box2) box2.innerHTML = '<p class="err">' + esc(e2.message) + '</p>'; });
   }
@@ -255,7 +232,7 @@
         row('동의', (m.consents.required ? '필수 동의 완료' : '<b style="color:#FF8A78">필수 동의 없음</b>') + ' · 광고: ' + (m.consents.marketing.length ? esc(m.consents.marketing.join(', ')) : '없음') + (m.consents.night ? ' · 야간 수신' : '')) +
         row('성인 확인', m.adult ? esc(m.adult.ageBand + ' · ' + m.adult.provider) + ' · ' + when(m.adult.at) : '안 함') + row('광장 접근 권한', esc(m.access ? (ROLE[m.access] || m.access) : '없음')) +
         row('활동', '글 ' + num(m.counts.posts) + ' · 댓글 ' + num(m.counts.comments) + ' · 기록 ' + num(m.counts.logs) + ' · 받은 신고 ' + num(m.counts.reportsAgainst)) +
-        row('인연', (m.match.on ? '프로필 켜짐' : '꺼짐') + ' · 보낸 잇기 ' + num(m.match.likesSent) + ' · 대화방 ' + num(m.match.rooms)) + row('크레딧 잔액', num(m.credits)) +
+        row('인연', (m.match.on ? '프로필 켜짐' : '꺼짐') + ' · 보낸 잇기 ' + num(m.match.likesSent) + ' · 대화방 ' + num(m.match.rooms)) +
         row('제재', m.sanctions.length ? m.sanctions.map(function (s) { return esc(SK[s.kind] + ' · ' + s.reason) + ' <span class="muted">' + (s.active ? '진행 중' : s.lifted ? '해제됨' : s.kind === 'warn' ? '기록' : '끝남') + ' · ' + esc(s.by) + ' · ' + when(s.at) + '</span>'; }).join('<br>') : '없음') +
         '</tbody></table><p class="muted" style="margin:6px 0 0;font-size:.8rem">조회 기록이 작업 기록(⑥)에 남습니다. 제재·사진 지우기는 ⑤ 광장 운영에서 그 회원의 글·댓글로 처리합니다.</p></div>';
     }).catch(function (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; });
@@ -344,7 +321,6 @@
       C('content', '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑬ 운테크 문안</h3><div id="cmCopy"><p class="muted">불러오는 중…</p></div></div>') +
       C('owner', '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑦ 성인 확인 · 테스트용</h3><p class="muted" style="margin:0 0 8px">포트원 본인인증 채널(환경변수 PORTONE_IDV_CHANNEL_KEY)을 연결하기 전, 테스터 계정이 인연 매칭·대화를 시험할 수 있게 수동으로 확인합니다. 실제 회원에게는 쓰지 마세요. 기록이 남습니다.</p>' +
       '<div class="row"><input type="email" id="cmVeEmail" placeholder="회원 이메일" style="min-width:200px"><input type="number" id="cmVeYear" placeholder="출생 연도" min="1900" max="2010" style="width:110px"><select id="cmVeG"><option value="F">여성</option><option value="M">남성</option></select><button class="btn" id="cmVeGo">확인 처리</button><span class="muted" id="cmVeMsg"></span></div></div>' +
-      '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑨ 크레딧 · 유료 기능</h3><p class="muted" style="margin:0 0 8px">기본은 꺼짐입니다. 크레딧 묶음 판매는 결제·상품 화면에서 가격을 넣고 여기서 유료 기능을 켜야 시작됩니다. 아래 지급은 테스트·보상용입니다.</p><div id="cmCr"><p class="muted">불러오는 중…</p></div></div>' +
       '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑭ 운영자 열쇠 · 권한 분리</h3><p class="muted" style="margin:0 0 8px">관리자 비밀번호를 나누지 않고, 사람마다 역할이 정해진 열쇠를 줍니다. 열쇠로는 운영자 콘솔(/report/admin/staff.html)에서 역할에 맞는 화면만 열리고, 작업 기록에 그 이름이 남습니다.</p><div id="stKeyOut"></div><div id="cmStaff"><p class="muted">불러오는 중…</p></div></div>') +
       C('audit', '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">⑥ 관리자 작업 기록</h3><div id="cmAudit"><p class="muted">불러오는 중…</p></div></div>');
     if (can('owner')) {
@@ -355,7 +331,7 @@
       [].forEach.call(root.querySelectorAll('[data-tester]'), function (b) { b.onclick = function () { if (window.openPlazaAs) window.openPlazaAs(b.getAttribute('data-tester')); else msg('cmEnterMsg', '관리자 화면에서만 열 수 있습니다', true); }; });
       $('#cmEnter').onclick = function () { call('/api/community/enter', { method: 'POST' }).then(function (d) { window.open(window.plazaFromAdmin ? window.plazaFromAdmin(d.to) : (d.to || '/community/'), '_blank', 'noopener'); msg('cmEnterMsg', '새 탭에서 열었습니다(12시간 유효)'); }).catch(function (e) { msg('cmEnterMsg', e.message, true); }); };
         fetch('/api/community/status', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(drawStage).catch(function () { drawStage({ stage: 'dev' }); });
-      loadAccess(); loadAlerts(); loadConsents(); loadCredits(); loadStaff(); loadFeatures(); loadGateway();
+      loadAccess(); loadAlerts(); loadConsents(); loadStaff(); loadFeatures(); loadGateway();
     }
     if (can('metrics')) { $('#cmMetGo').onclick = loadMetrics; loadMetrics(); loadLaunch(); }
     if (can('members')) loadMembers();

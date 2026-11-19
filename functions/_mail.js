@@ -39,17 +39,9 @@ function layout(title, rows, note) {
 }
 
 export function purchaseMail(order) {
-  if (order.saju_key === 'credits') {   // 인연의 광장 크레딧 묶음
-    const rows = [['상품', esc(order.product_name)], ['결제 금액', '<b>' + won(order.amount) + '</b>'], ['결제 일시', esc(kst(order.paid_at))], ['결제 수단', esc(order.method || '-')], ['이용 기간', '결제 즉시 지급 · 서비스 운영 기간 동안 유효'], ['주문번호', esc(order.order_id)]];
-    const receipt = safeHttps(order.receipt_url);
-    if (receipt) rows.push(['영수증', `<a href="${esc(receipt)}" style="color:#9b3b2a">카드 매출전표 보기</a>`]);
-    const note = `<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a"><b>환불 안내</b><br>구매 후 7일 이내이고 받은 크레딧을 하나도 쓰지 않았다면, <a href="${SITE}/report/my/" style="color:#9b3b2a">내 구매 내역</a>의 <b>바로 환불</b>로 즉시 전액 환불됩니다. 크레딧을 쓰기 시작한 뒤에는 환불이 제한되며(전자상거래법 제17조 제2항 제5호), 회사 잘못으로 쓰지 못한 크레딧은 기간과 관계없이 돌려 드립니다. 자세한 기준: <a href="${SITE}/report/legal/refund.html" style="color:#9b3b2a">환불정책</a> · <a href="${SITE}/report/legal/terms.html" style="color:#9b3b2a">이용약관</a></p>`;
-    const text = `[${BIZ.service}] 구매가 완료되었습니다\n상품: ${order.product_name}\n결제 금액: ${won(order.amount)}\n결제 일시: ${kst(order.paid_at)}\n주문번호: ${order.order_id}\n${receipt ? '영수증: ' + receipt + '\n' : ''}\n구매 후 7일 이내·크레딧 미사용이면 내 구매 내역(${SITE}/report/my/)에서 바로 환불할 수 있습니다. 환불정책: ${SITE}/report/legal/refund.html\n\n${BIZ.name} · 사업자등록번호 ${BIZ.bizNo} · ${BIZ.phone} · ${BIZ.email}`;
-    return { subject: `[${BIZ.service}] 구매가 완료되었습니다 · ${order.product_name}`, html: layout('구매가 완료되었습니다', rows, note), text };
-  }
   const worlds = (order.worlds || []).map(w => WORLD[w] || w).join(' · ');
   const rows = [['상품', esc(order.product_name)], ['결제 금액', '<b>' + won(order.amount) + '</b>'], ['결제 일시', esc(kst(order.paid_at))], ['결제 수단', esc(order.method || '-')],
-    ['사주', esc(order.saju_label || '-')], ['열리는 주제', esc(worlds)], ['이용 기간', '결제 즉시 · 서비스 운영 기간 동안 제한 없이 다시 보기'], ['주문번호', esc(order.order_id)]];
+    ['사주', esc(order.saju_label || '-')], ['열리는 주제', esc(worlds)], ['이용 기간', '결제 즉시 · 결제일로부터 12개월 동안 다시 보기'], ['주문번호', esc(order.order_id)]];
   const receipt = safeHttps(order.receipt_url);
   if (receipt) rows.push(['영수증', `<a href="${esc(receipt)}" style="color:#9b3b2a">카드 매출전표 보기</a> <span style="color:#8a8577">(내 구매 내역에서도 볼 수 있습니다)</span>`]);
   const note = `<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a"><b>환불 안내</b><br>구매 후 7일 이내이고 산 주제의 유료 장을 열지 않았다면, <a href="${SITE}/report/my/" style="color:#9b3b2a">내 구매 내역</a>의 <b>바로 환불</b>로 즉시 전액 환불됩니다. 유료 장을 열어 디지털 콘텐츠 제공이 시작된 뒤에는 환불이 제한되며(전자상거래법 제17조 제2항 제5호), 콘텐츠가 열리지 않는 등 회사 잘못이 있으면 기간·열람과 관계없이 전액 환불합니다. 자세한 기준: <a href="${SITE}/report/legal/refund.html" style="color:#9b3b2a">환불정책</a> · <a href="${SITE}/report/legal/terms.html" style="color:#9b3b2a">이용약관</a></p>`;
@@ -58,7 +50,7 @@ export function purchaseMail(order) {
 }
 export function refundMail(order, canceledAt) {
   const rows = [['상품', esc(order.product_name)], ['환불 금액', '<b>' + won(order.amount) + '</b>'], ['환불 일시', esc(kst(canceledAt || order.canceled_at))], ['결제 수단', esc(order.method || '-')], ['주문번호', esc(order.order_id)]];
-  const note = `<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a">결제 취소를 요청했습니다. 카드사·결제 수단에 따라 실제 반영까지 영업일 기준 3~7일이 걸릴 수 있습니다. ${order.saju_key === 'credits' ? '이 주문으로 받은 크레딧은 잔액에서 빠집니다.' : '이 주문으로 열렸던 주제는 다시 잠깁니다.'}</p>`;
+  const note = `<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a">결제 취소를 요청했습니다. 카드사·결제 수단에 따라 실제 반영까지 영업일 기준 3~7일이 걸릴 수 있습니다. 이 주문으로 열렸던 주제는 다시 잠깁니다.</p>`;
   const text = `[${BIZ.service}] 환불이 완료되었습니다\n상품: ${order.product_name}\n환불 금액: ${won(order.amount)}\n주문번호: ${order.order_id}\n카드사·결제 수단에 따라 반영까지 영업일 기준 3~7일이 걸릴 수 있습니다.\n\n${BIZ.name} · ${BIZ.phone} · ${BIZ.email}`;
   return { subject: `[${BIZ.service}] 환불이 완료되었습니다 · ${order.product_name}`, html: layout('환불이 완료되었습니다', rows, note), text };
 }

@@ -8,7 +8,7 @@ const read = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
 (async () => {
   const F = await imp('functions/_features.js'), CM = await imp('functions/_community.js'), MW = await imp('functions/_middleware.js'), S = await imp('functions/_staff.js');
   const featuresApi = await imp('functions/api/community/features.js'), staffApi = await imp('functions/api/community/staff.js'), meApi = await imp('functions/api/community/me.js');
-  const api = {}; for (const f of ['posts', 'post', 'comments', 'react', 'today', 'records', 'match', 'verify', 'chat', 'credits']) api[f] = await imp('functions/api/community/' + f + '.js');
+  const api = {}; for (const f of ['posts', 'post', 'comments', 'react', 'today', 'records', 'match', 'verify', 'chat']) api[f] = await imp('functions/api/community/' + f + '.js');
 
   const store = new Map();
   const KV = { async get(k, t) { const v = store.has(k) ? store.get(k) : null; return v == null ? null : t === 'json' ? JSON.parse(v) : v; }, async put(k, v) { store.set(k, v); }, async delete(k) { store.delete(k); }, async list() { return { keys: [] }; } };
@@ -47,7 +47,6 @@ const read = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
     r = await call(api[f], fn, '/api/community/' + f, { tok: 'tok-1', method: fn === 'onRequestGet' ? 'GET' : 'POST', body: fn === 'onRequestGet' ? undefined : {} });
     ok(r.s === 403 && r.d.need === 'feature-off', '꺼짐: ' + f + ' ' + fn);
   }
-  r = await call(api.credits, 'onRequestPost', '/api/community/credits', { tok: 'tok-1', method: 'POST', body: { action: 'more-picks', req: 'abcdefgh1' } }); ok(r.d.need === 'feature-off', '꺼짐: 크레딧 더 보기(인연 찾기)');
   r = await call(api.posts, 'onRequestPost', '/api/community/posts', { tok: 'tok-1', method: 'POST', body: {} }); ok(r.d.need !== 'feature-off', '켜짐: 광장 글쓰기는 그대로');
   r = await call(api.match, 'onRequestGet', '/api/community/match', { key: 'adm' }); ok(r.d.need !== 'feature-off', '관리자 비밀번호는 꺼져도 점검 가능');
   r = await call(api.match, 'onRequestGet', '/api/community/match', { key: OPR }); ok(r.d.need !== 'feature-off', '유효한 운영자 열쇠도 점검 가능');

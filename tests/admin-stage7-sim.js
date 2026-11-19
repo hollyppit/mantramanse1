@@ -37,7 +37,6 @@ const read = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
     if (u.includes('/rest/v1/cm_activity')) { if (method === 'POST') { for (const r of [].concat(body)) if (!db.activity.some(a => a.user_id === r.user_id && a.day === r.day && a.surface === r.surface)) db.activity.push(r); return res(null, 201); } return res(db.activity); }
     if (u.includes('/rest/v1/rpc/cm_metrics')) { metricsCalls.push(body); return res({ day: body.p_day, active: { all: { dau: 3, wau: 8, mau: 20, ret7: { base: 10, back: 4 }, ret30: { base: 3, back: 1 } }, report: { dau: 2, wau: 6, mau: 15, ret7: { base: 6, back: 3 }, ret30: { base: 0, back: 0 } }, community: { dau: 1, wau: 3, mau: 8, ret7: { base: 4, back: 1 }, ret30: { base: 0, back: 0 } } }, series: [{ day: body.p_day, report: 2, community: 1 }], engage: { base: 8, engaged: 2, posts: 3, comments: 4, logs: 5 }, convert: { reportUsers: 15, reportBuyers: 3, buyersEver: 4, members: 40, communityUsers: 8, communityAlsoReport: 6, reportAlsoCommunity: 6, communityEver: 9, communityThenPaid: 1, since: '2026-11-16' }, match: { profilesOn: 2, adults: 3, likes7: 4, matches7: 1, roomsOpen: 1, messages7: 9, flagged7: 1, reportsOpen: { post: 1 }, sanctionsActive: 1 }, sales: { report30: { n: 3, won: 29700 }, credits30: { n: 0, won: 0 }, creditsRefunded: { n: 0, won: 0 }, ledger: {}, outstanding: 0 }, members: { total: 40, new7: 2, new30: 10, profiles: 12, alerts: 5 } }); }
     if (u.includes('/rest/v1/rpc/community_user_by_email')) { const uu = Object.values(USERS).find(x => x.email === body.p_email); return res(uu ? uu.id : null); }
-    if (u.includes('/rest/v1/rpc/cm_credit_balance')) return res(body.p_user === U1 ? 7 : 0);
     if (u.includes('/rest/v1/admin_audit_log')) { if (method === 'POST') { db.audit.push(body); return res(null, 201); } return res(db.audit.slice().reverse().map((a, i) => ({ id: i + 1, at: new Date().toISOString(), ...a }))); }
     if (u.includes('/rest/v1/member_profiles')) {
       const nick = q(u, 'nickname'), uid = q(u, 'user_id');
@@ -124,7 +123,7 @@ const read = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
   r = await call(members, 'onRequestGet', '/api/community/members?id=' + U1, { key: MOD }); const m1 = r.d, js = JSON.stringify(m1);
   ok(r.s === 200 && m1.email === 'al*******@x.test'.replace('*******', '*'.repeat(6)) && !js.includes('alice.kim') && !js.includes('01012345678') && m1.hasPhone === true, '자세히: 이메일 가림·전화번호 없음');
   ok(m1.consents.required && m1.consents.marketing.length === 1 && m1.adult && /대/.test(m1.adult.ageBand) && !js.includes('1994'), '동의 요약·성인 확인은 나이대만');
-  ok(m1.counts.posts === 2 && m1.counts.comments === 1 && m1.match.on && m1.match.likesSent === 1 && m1.credits === 7 && m1.sanctions.length === 1, '활동·인연·크레딧·제재');
+  ok(m1.counts.posts === 2 && m1.counts.comments === 1 && m1.match.on && m1.match.likesSent === 1 && !('credits' in m1) && m1.sanctions.length === 1, '활동·인연·제재(크레딧 없음)');
   ok(db.audit.some(a => a.action === 'community.member.view' && a.target === U1 && a.actor === '민지(모더레이터)'), '회원 조회 감사 로그');
   r = await call(members, 'onRequestGet', '/api/community/members?id=' + U1, { key: ANA }); ok(r.s === 403, '분석 담당: 회원 찾기 불가');
   r = await call(members, 'onRequestGet', '/api/community/members?id=nope', { key: MOD }); ok(r.s === 400, '잘못된 회원 id 거절');

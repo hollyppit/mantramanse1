@@ -1,0 +1,255 @@
+diff --git a/community/cm.js b/community/cm.js
+index b6334ac..678041b 100644
+--- a/community/cm.js
++++ b/community/cm.js
+@@ -464,7 +464,7 @@
+   }
+ 
+   /* ── 인연(5단계): 본인확인 → 인연 프로필 → 오늘의 인연 → 인연 잇기 → 대화 ── */
+-  var MP = null, CR = null;   // 인연 프로필·크레딧 응답 캐시
++  var MP = null, CR = null, OPEN_CREDITS = false;   // 인연 프로필·크레딧 응답 캐시 · 크레딧 창 바로 열기
+   var reqId = function () { try { return crypto.randomUUID().replace(/-/g, ''); } catch (e) { return (Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).slice(0, 32); } };
+   var PORTONE_SDK = 'https://cdn.portone.io/v2/browser-sdk.js';
+   var loadScript = function (src) { return new Promise(function (ok, no) { if (document.querySelector('script[src="' + src + '"]')) return ok(); var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); };
+@@ -486,6 +486,7 @@
+       if (matchGate(d)) return;
+       Promise.all([api('/api/community/match?view=today'), api('/api/community/match?view=inbox'), api('/api/community/credits')]).then(function (rs) {
+         var t = rs[0], ib = rs[1]; CR = rs[2] && rs[2]._ok && rs[2].enabled ? rs[2] : null;
++        var openCr = OPEN_CREDITS; OPEN_CREDITS = false; if (openCr && CR) setTimeout(creditSheet, 0);   // #/credits(메일 링크): 인연 화면 위에 크레딧 창
+         if (!t._ok) { paint('<p class="msg err">' + esc(t.error || '불러오지 못했어요') + '</p>', 'match'); return; }
+         var nRecv = ib._ok ? ib.received.length : 0, nMatch = ib._ok ? ib.matches.length : 0;
+         paint('<div class="mh"><div><p class="kick-s">今日之緣</p><h1>오늘의 인연</h1><p class="muted" style="margin:2px 0 0">' + (t.cards.length ? '서로 원하는 조건이 맞는 ' + t.cards.length + '명이에요. 내일 새로운 인연이 찾아와요.' : '') + '</p></div><div style="display:flex;gap:6px;align-items:center">' + (CR ? '<button type="button" class="credit" id="crChip" title="크레딧 충전·내역"><span class="hj">緣</span>' + CR.balance + '</button>' : '') + '<a class="btn ghost sm" href="#/match/edit">조건</a></div></div>' +
+@@ -605,13 +606,85 @@
+     var s = sheet('<h2><span class="hj" style="font-family:var(--f-serif)">緣</span> 인연 크레딧 <b>' + CR.balance + '</b>개</h2>' +
+       '<p class="muted" style="margin:6px 0 12px">오늘의 인연 더 보기(' + CR.prices.morePicks + '개), 하루 한도를 넘긴 인연 잇기(' + CR.prices.extraLike + '개)에 써요.</p>' +
+       (packs.length ? '<div class="packs">' + packs.map(function (p) { return '<button type="button" class="pack" data-pack="' + esc(p.id) + '"><b>' + p.credits + '개</b><span>' + won(p.price) + '</span></button>'; }).join('') + '</div>' +
+-        '<p class="muted" style="margin:10px 0 0;font-size:.8rem">결제 후 7일 이내이고 받은 크레딧을 하나도 쓰지 않았다면 <a href="/report/my/">내 구매 내역</a>에서 바로 전액 환불돼요. 쓰기 시작한 뒤에는 환불이 제한돼요. <a href="/report/legal/refund.html">환불정책</a> · <a href="/report/legal/terms.html">이용약관</a></p>'
++        '<p class="muted" style="margin:10px 0 0;font-size:.8rem">크레딧은 구매일로부터 12개월 동안 쓸 수 있어요. 결제 후 7일 이내이고 받은 크레딧을 하나도 쓰지 않았다면 <a href="/report/my/">내 구매 내역</a>에서 바로 전액 환불돼요. 쓰기 시작한 뒤에는 환불이 제한돼요. <a href="/report/legal/refund.html">환불정책</a> · <a href="/report/legal/terms.html">이용약관</a></p>'
+         : '<p class="muted">지금은 크레딧 충전을 준비하고 있어요.</p>') +
+       '<p class="msg" id="crBuyMsg" role="status" style="margin-top:8px"></p>' +
++      '<div id="autoBox"></div>' +
+       (CR.history && CR.history.length ? '<h3 style="margin:16px 0 6px;font-size:.95rem">최근 내역</h3><ul class="cr-hist">' + CR.history.slice(0, 10).map(function (h) { return '<li><span>' + esc(h.label) + '</span><span class="muted">' + when(h.at) + '</span><b class="' + (h.delta > 0 ? 'up' : 'down') + '">' + (h.delta > 0 ? '+' : '') + h.delta + '</b></li>'; }).join('') + '</ul>' : '') +
+       '<button class="btn ghost block" data-x style="margin-top:14px">닫기</button>');
+     s.el.querySelectorAll('[data-pack]').forEach(function (b) { b.onclick = function () { buyCredits(b.dataset.pack, s); }; });
++    autoBox(s);
++  }
++  /* ── 크레딧 자동 충전(정기결제): 잔액이 기준 미만이 되면 등록한 카드로 고른 묶음을 자동 결제. 서버: /api/community/autotopup ── */
++  var AUTO_STORE = 'mt_cm_auto';
++  function autoText(a, packs) {
++    var p = packs.filter(function (x) { return x.id === a.packId; })[0];
++    return '잔액이 <b>' + a.threshold + '개 미만</b>이 되면 ' + (p ? esc(p.name) + '(' + won(p.price) + ')' : '고른 묶음') + ' 1회 결제 · 한 달 최대 ' + a.monthlyLimit + '회' + (p ? '(최대 ' + won(p.price * a.monthlyLimit) + ')' : '');
++  }
++  function autoBox(s) {
++    var box = $('#autoBox', s.el); if (!box) return;
++    api('/api/community/autotopup').then(function (d) {
++      if (!d._ok || !d.available) return;
++      var a = d.setting;
++      if (a && a.registered) {
++        box.innerHTML = '<div class="panel" style="margin-top:14px"><h3 style="margin:0 0 6px;font-size:.95rem">자동 충전 ' + (a.active ? '<span class="chip">켜짐</span>' : '<span class="chip">' + (a.stopped ? '결제 실패로 멈춤' : '꺼짐') + '</span>') + '</h3>' +
++          '<p class="muted" style="margin:0 0 4px">' + esc(a.card) + '</p><p style="margin:0 0 6px;font-size:.88rem">' + autoText(a, d.packs) + '</p>' +
++          '<p class="muted" style="margin:0 0 10px;font-size:.8rem">이번 달 자동 결제 ' + a.usedThisMonth + '/' + a.monthlyLimit + '회' + (a.lastError && !a.active ? ' · 마지막 실패: ' + esc(a.lastError) : '') + '</p>' +
++          '<div class="grid2"><button class="btn ghost sm" type="button" id="auEdit">조건 바꾸기</button><button class="btn ghost sm" type="button" id="auToggle">' + (a.active ? '잠시 끄기' : '다시 켜기') + '</button></div>' +
++          '<button class="btn ghost sm block" type="button" id="auCancel" style="margin-top:6px">자동 충전 해지(카드 정보 삭제)</button><p class="msg" id="auMsg" role="status"></p></div>';
++        var msg = $('#auMsg', box);
++        $('#auEdit', box).onclick = function () { autoForm(s, d, a); };
++        $('#auToggle', box).onclick = function () { this.disabled = true; api('/api/community/autotopup', { method: 'POST', body: { action: 'update', packId: a.packId, threshold: a.threshold, monthlyLimit: a.monthlyLimit, active: !a.active } }).then(function (r) { if (!r._ok) { msg.className = 'msg err'; msg.textContent = r.error || '바꾸지 못했어요'; return; } toast(r.setting.active ? (r.charged ? '자동 충전을 켰고 바로 한 번 충전했어요' : '자동 충전을 다시 켰어요') : '자동 충전을 잠시 껐어요'); autoBox(s); }); };
++        $('#auCancel', box).onclick = function () { confirmSheet('자동 충전을 해지할까요?', '등록한 카드 정보를 지우고 더 이상 자동 결제하지 않아요. 이미 산 크레딧은 그대로예요.', '해지', function () { api('/api/community/autotopup', { method: 'POST', body: { action: 'cancel' } }).then(function (r) { if (!r._ok) { toast(r.error || '해지하지 못했어요'); return; } toast('자동 충전을 해지했어요'); track('credit_auto_cancel'); autoBox(s); }); }); };
++        return;
++      }
++      box.innerHTML = '<div class="panel" style="margin-top:14px"><h3 style="margin:0 0 6px;font-size:.95rem">자동 충전</h3><p class="muted" style="margin:0 0 10px;font-size:.85rem">크레딧이 떨어질 때마다 충전하기 번거롭다면, 카드를 한 번 등록해 두고 잔액이 정한 개수 아래로 내려가면 자동으로 채울 수 있어요. 언제든 해지할 수 있어요.</p><button class="btn pink sm block" type="button" id="auStart">자동 충전 설정하기</button></div>';
++      $('#auStart', box).onclick = function () { autoForm(s, d, null); };
++    });
++  }
++  function autoForm(s, d, cur) {
++    var box = $('#autoBox', s.el), df = cur || d.defaults || { packId: 'cr10', threshold: 3, monthlyLimit: 2 };
++    var opt = function (vals, sel, fmt) { return vals.map(function (v) { return '<option value="' + esc(v) + '"' + (String(v) === String(sel) ? ' selected' : '') + '>' + fmt(v) + '</option>'; }).join(''); };
++    box.innerHTML = '<form class="panel form" id="auF" style="margin-top:14px"><h3 style="margin:0 0 8px;font-size:.95rem">자동 충전 ' + (cur ? '조건 바꾸기' : '설정') + '</h3>' +
++      '<label>충전할 묶음<select name="packId">' + d.packs.map(function (p) { return '<option value="' + esc(p.id) + '"' + (p.id === df.packId ? ' selected' : '') + '>' + p.credits + '개 · ' + won(p.price) + '</option>'; }).join('') + '</select></label>' +
++      '<label>잔액이 이 개수 미만이 되면<select name="threshold">' + opt([1, 3, 5, 10], df.threshold, function (v) { return v + '개'; }) + '</select></label>' +
++      '<label>한 달 최대 결제 횟수<select name="monthlyLimit">' + opt([1, 2, 3, 5], df.monthlyLimit, function (v) { return v + '회'; }) + '</select></label>' +
++      '<p class="note" id="auSum" style="font-size:.85rem"></p>' +
++      '<label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;line-height:1.5"><input type="checkbox" name="agree" style="margin-top:3px"' + (cur ? ' checked' : '') + '> 위 조건이 되면 <b>별도 확인 없이 등록한 카드로 결제</b>되는 것에 동의해요. 결제할 때마다 메일로 알려 드리고, 언제든 해지할 수 있어요.</label>' +
++      '<p class="muted" style="font-size:.78rem;margin:4px 0 8px">지금 잔액이 기준보다 적으면 설정하자마자 한 번 충전돼요. 자동 충전으로 산 크레딧도 7일 이내·미사용이면 <a href="/report/my/">내 구매 내역</a>에서 바로 환불돼요. <a href="/report/legal/terms.html">이용약관</a> · <a href="/report/legal/refund.html">환불정책</a></p>' +
++      '<div class="grid2"><button class="btn ghost" type="button" id="auBack">취소</button><button class="btn pink" type="submit">' + (cur ? '저장' : '카드 등록하고 시작') + '</button></div><p class="msg" id="auFMsg" role="status"></p></form>';
++    var f = $('#auF', box), m = $('#auFMsg', box);
++    var val = function () { return { packId: f.elements.packId.value, threshold: +f.elements.threshold.value, monthlyLimit: +f.elements.monthlyLimit.value }; };
++    var sum = function () { $('#auSum', box).innerHTML = autoText(val(), d.packs); }; sum();
++    ['packId', 'threshold', 'monthlyLimit'].forEach(function (k) { f.elements[k].onchange = sum; });
++    $('#auBack', box).onclick = function () { autoBox(s); };
++    f.onsubmit = function (e) {
++      e.preventDefault(); var v = val(), btn = f.querySelector('[type=submit]');
++      if (!f.elements.agree.checked) { m.className = 'msg err'; m.textContent = '자동 결제 동의에 체크해 주세요'; return; }
++      btn.disabled = true; m.className = 'msg'; m.textContent = cur ? '저장하는 중…' : '카드 등록 창을 여는 중…';
++      if (cur) { api('/api/community/autotopup', { method: 'POST', body: { action: 'update', packId: v.packId, threshold: v.threshold, monthlyLimit: v.monthlyLimit, active: true } }).then(function (r) { btn.disabled = false; if (!r._ok) { m.className = 'msg err'; m.textContent = r.error || '저장하지 못했어요'; return; } toast(r.charged ? '저장했고 바로 한 번 충전했어요' : '자동 충전 조건을 저장했어요'); autoBox(s); }); return; }
++      try { sessionStorage.setItem(AUTO_STORE, JSON.stringify(v)); } catch (x) { }
++      loadScript(PORTONE_SDK).then(function () {
++        var cust = { customerId: d.customerId }; if (ME && ME.member && ME.member.email) cust.email = ME.member.email;
++        return window.PortOne.requestIssueBillingKey({ storeId: d.pay.storeId, channelKey: d.pay.channelKey, billingKeyMethod: 'CARD', issueName: '인연 크레딧 자동 충전', customer: cust, redirectUrl: location.origin + '/community/?bk=portone' });
++      }).then(function (res) {
++        if (!res) return;   // 모바일: 카드 등록 페이지로 이동 중(돌아오면 아래 복귀 처리)
++        if (res.code != null || !res.billingKey) { btn.disabled = false; m.className = 'msg err'; m.textContent = /취소/.test(res.message || '') ? '' : '카드를 등록하지 못했어요: ' + (res.message || res.code || ''); return; }
++        m.textContent = '카드를 확인하는 중…';
++        return autoRegister(res.billingKey).then(function (ok) { btn.disabled = false; if (ok) { if (CR) creditSheetRefresh(s); } });
++      }).catch(function () { btn.disabled = false; m.className = 'msg err'; m.textContent = '카드 등록 창을 열지 못했어요. 잠시 후 다시 시도해 주세요'; });
++    };
++  }
++  // 발급받은 빌링키를 서버에 등록(서버가 포트원에 다시 조회해 내 카드인지 확인). 설정값은 창을 떠나기 전에 sessionStorage 에 둔 것
++  function autoRegister(billingKey) {
++    var v = null; try { v = JSON.parse(sessionStorage.getItem(AUTO_STORE) || 'null'); sessionStorage.removeItem(AUTO_STORE); } catch (x) { v = null; }
++    v = v || { packId: 'cr10', threshold: 3, monthlyLimit: 2 };
++    return api('/api/community/autotopup', { method: 'POST', body: { action: 'register', billingKey: billingKey, packId: v.packId, threshold: v.threshold, monthlyLimit: v.monthlyLimit, agree: true } }).then(function (r) {
++      if (!r._ok) { toast(r.error || '자동 충전을 설정하지 못했어요'); return false; }
++      track('credit_auto_on'); toast(r.charged ? '자동 충전을 설정했고 바로 한 번 충전했어요' : r.failed ? '자동 충전을 설정했지만 첫 결제가 실패했어요' : '자동 충전을 설정했어요'); return true;
++    });
+   }
++  function creditSheetRefresh(s) { api('/api/community/credits').then(function (c) { if (c._ok && c.enabled) CR = c; s.close(); creditSheet(); }); }
+   function buyCredits(id, s) {
+     var m = $('#crBuyMsg', s.el), bs = s.el.querySelectorAll('[data-pack]'), done = function (t, err) { bs.forEach(function (b) { b.disabled = false; }); m.className = 'msg' + (err ? ' err' : ''); m.textContent = t || ''; };
+     if (!CR.pay || CR.pay.provider !== 'portone') { done('지금은 결제를 준비하고 있어요', true); return; }
+@@ -750,6 +823,7 @@
+       if (p[0] === 'verify') return verifyView();
+       if (p[0] === 'chat' && /^\d+$/.test(p[1] || '')) return chatRoom(p[1]);
+       if (p[0] === 'chat') return chatList();
++      if (p[0] === 'credits') OPEN_CREDITS = true;
+       return matchView();
+     });
+   }
+@@ -784,5 +858,7 @@
+   }
+   (function () { var u = new URL(location.href), id = u.searchParams.get('identityVerificationId') || u.searchParams.get('idv');
+     if (u.searchParams.get('pay') === 'portone') { var pid = u.searchParams.get('paymentId'), code = u.searchParams.get('code'), pm = u.searchParams.get('message'); history.replaceState(null, '', '/community/#/'); if (pid && !code) me().then(function () { confirmPay(pid).then(function () { route(); }); }); else { if (code && !/취소/.test(pm || '')) toast('결제가 완료되지 않았어요: ' + (pm || code)); route(); } return; }
++    // 모바일 카드 등록(빌링키 발급) 복귀: billingKey 가 있으면 서버에 등록(서버가 포트원에 다시 조회해 확인)
++    if (u.searchParams.get('bk') === 'portone') { var bk = u.searchParams.get('billingKey'), bc = u.searchParams.get('code'), bm = u.searchParams.get('message'); history.replaceState(null, '', '/community/#/credits'); if (bk && !bc) me().then(function () { autoRegister(bk).then(function () { route(); }); }); else { try { sessionStorage.removeItem(AUTO_STORE); } catch (x) { } if (bc && !/취소/.test(bm || '')) toast('카드를 등록하지 못했어요: ' + (bm || bc)); route(); } return; }
+     if (id) { history.replaceState(null, '', '/community/#/'); me().then(function () { confirmIdv(id); }); return; } route(); })();
+ })();
+diff --git a/functions/_account.js b/functions/_account.js
+index 143a4dc..a033617 100644
+--- a/functions/_account.js
++++ b/functions/_account.js
+@@ -4,7 +4,8 @@
+ //   2) Supabase 회원을 지운다 → 구매 권한·저장한 사주는 함께 지워진다(on delete cascade), 소셜 로그인 연결 정보도 지워진다
+ //   3) 카카오로 가입한 회원이면 카카오 쪽 연결도 끊는다(KAKAO_ADMIN_KEY 가 있을 때, 실패해도 탈퇴는 끝난 것으로 본다)
+ // 환경변수: SUPABASE_URL·SUPABASE_SERVICE_KEY, 선택 KAKAO_ADMIN_KEY(카카오 앱 '어드민 키')
+-import { sbRest, supabaseReady } from './_commerce.js';
++import { sbRest, supabaseReady, portoneReady } from './_commerce.js';
++import { deleteBillingKey } from './_autotopup.js';
+ 
+ const base = env => String(env.SUPABASE_URL).replace(/\/+$/, '');
+ export async function identitiesOf(env, userId) {
+@@ -37,6 +38,8 @@ export async function withdraw(env, userId, { unlinkKakao = true } = {}) {
+   try { const pr = await sbRest(env, `member_profiles?user_id=eq.${enc}&select=avatar_path`); const k = Array.isArray(pr) && pr[0] && pr[0].avatar_path; if (k && /^cm-av\/[0-9a-f]{32}\.(webp|jpg|png)$/.test(k) && env.CLIPS_R2) await env.CLIPS_R2.delete(k); } catch { }
+   // 1-4) 인연 대화방은 지금 끝난 것으로 표시 → 90일 뒤 자동 파기(supabase/migrations/20261116_chat_purge.sql, 매일 새벽 pg_cron)
+   try { await sbRest(env, `cm_rooms?or=(a_id.eq.${enc},b_id.eq.${enc})&status=eq.open`, { method: 'PATCH', headers: { prefer: 'return=minimal' }, body: JSON.stringify({ status: 'closed', closed_by: userId, closed_at: at }) }); } catch { }
++  // 1-5) 크레딧 자동 충전 카드(포트원 빌링키) 지우기 — 설정 행은 회원 삭제 때 cascade, 포트원 쪽 빌링키는 따로 지운다
++  try { const at2 = await sbRest(env, `cm_autotopup?user_id=eq.${enc}&select=billing_key`); const bk = Array.isArray(at2) && at2[0] && at2[0].billing_key; if (bk && portoneReady(env)) await deleteBillingKey(env, bk); } catch { }
+   // 2) 회원 삭제(구매 권한·저장한 사주는 cascade 로 함께 삭제)
+   const d = await fetch(base(env) + '/auth/v1/admin/users/' + enc, { method: 'DELETE', headers: { apikey: env.SUPABASE_SERVICE_KEY, authorization: 'Bearer ' + env.SUPABASE_SERVICE_KEY }, signal: AbortSignal.timeout(10000) });
+   if (!d.ok && d.status !== 404) return { ok: false, error: 'delete-failed:' + d.status };
+diff --git a/functions/_mail.js b/functions/_mail.js
+index 40a8072..7ba9618 100644
+--- a/functions/_mail.js
++++ b/functions/_mail.js
+@@ -40,7 +40,8 @@ function layout(title, rows, note) {
+ 
+ export function purchaseMail(order) {
+   if (order.saju_key === 'credits') {   // 인연의 광장 크레딧 묶음
+-    const rows = [['상품', esc(order.product_name)], ['결제 금액', '<b>' + won(order.amount) + '</b>'], ['결제 일시', esc(kst(order.paid_at))], ['결제 수단', esc(order.method || '-')], ['이용 기간', '결제 즉시 지급 · 서비스 운영 기간 동안 유효'], ['주문번호', esc(order.order_id)]];
++    const rows = [['상품', esc(order.product_name)], ['결제 금액', '<b>' + won(order.amount) + '</b>'], ['결제 일시', esc(kst(order.paid_at))], ['결제 수단', esc(order.method || '-')], ['이용 기간', '결제 즉시 지급 · 구매일로부터 12개월 동안 사용'], ['주문번호', esc(order.order_id)]];
++    if (order.auto_topup) rows.splice(3, 0, ['결제 방식', `자동 충전(등록한 카드) · 해지·변경: <a href="${SITE}/community/#/credits" style="color:#9b3b2a">인연의 광장 → 크레딧</a>`]);
+     const receipt = safeHttps(order.receipt_url);
+     if (receipt) rows.push(['영수증', `<a href="${esc(receipt)}" style="color:#9b3b2a">카드 매출전표 보기</a>`]);
+     const note = `<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a"><b>환불 안내</b><br>구매 후 7일 이내이고 받은 크레딧을 하나도 쓰지 않았다면, <a href="${SITE}/report/my/" style="color:#9b3b2a">내 구매 내역</a>의 <b>바로 환불</b>로 즉시 전액 환불됩니다. 크레딧을 쓰기 시작한 뒤에는 환불이 제한되며(전자상거래법 제17조 제2항 제5호), 회사 잘못으로 쓰지 못한 크레딧은 기간과 관계없이 돌려 드립니다. 자세한 기준: <a href="${SITE}/report/legal/refund.html" style="color:#9b3b2a">환불정책</a> · <a href="${SITE}/report/legal/terms.html" style="color:#9b3b2a">이용약관</a></p>`;
+@@ -49,7 +50,7 @@ export function purchaseMail(order) {
+   }
+   const worlds = (order.worlds || []).map(w => WORLD[w] || w).join(' · ');
+   const rows = [['상품', esc(order.product_name)], ['결제 금액', '<b>' + won(order.amount) + '</b>'], ['결제 일시', esc(kst(order.paid_at))], ['결제 수단', esc(order.method || '-')],
+-    ['사주', esc(order.saju_label || '-')], ['열리는 주제', esc(worlds)], ['이용 기간', '결제 즉시 · 서비스 운영 기간 동안 제한 없이 다시 보기'], ['주문번호', esc(order.order_id)]];
++    ['사주', esc(order.saju_label || '-')], ['열리는 주제', esc(worlds)], ['이용 기간', '결제 즉시 · 결제일로부터 12개월 동안 다시 보기'], ['주문번호', esc(order.order_id)]];
+   const receipt = safeHttps(order.receipt_url);
+   if (receipt) rows.push(['영수증', `<a href="${esc(receipt)}" style="color:#9b3b2a">카드 매출전표 보기</a> <span style="color:#8a8577">(내 구매 내역에서도 볼 수 있습니다)</span>`]);
+   const note = `<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a"><b>환불 안내</b><br>구매 후 7일 이내이고 산 주제의 유료 장을 열지 않았다면, <a href="${SITE}/report/my/" style="color:#9b3b2a">내 구매 내역</a>의 <b>바로 환불</b>로 즉시 전액 환불됩니다. 유료 장을 열어 디지털 콘텐츠 제공이 시작된 뒤에는 환불이 제한되며(전자상거래법 제17조 제2항 제5호), 콘텐츠가 열리지 않는 등 회사 잘못이 있으면 기간·열람과 관계없이 전액 환불합니다. 자세한 기준: <a href="${SITE}/report/legal/refund.html" style="color:#9b3b2a">환불정책</a> · <a href="${SITE}/report/legal/terms.html" style="color:#9b3b2a">이용약관</a></p>`;
+@@ -85,6 +86,26 @@ export async function mailRefund(env, order, canceledAt) {
+   const to = await recipientOf(env, order.user_id); if (!to) return false;
+   return send(env, to, refundMail(order, canceledAt), 'refund');
+ }
++// 크레딧 자동 충전(정기결제) 안내: on(등록·변경 확인) · off(해지) · stopped(연속 결제 실패로 멈춤)
++// s: { card_label, packName, price, threshold, monthly_limit, last_error }
++export function autoTopupMail(kind, s) {
++  const how = `<a href="${SITE}/community/#/credits" style="color:#9b3b2a">인연의 광장 → 크레딧 → 자동 충전</a>`;
++  const T = { on: '크레딧 자동 충전이 설정되었습니다', off: '크레딧 자동 충전이 해지되었습니다', stopped: '크레딧 자동 충전이 멈췄습니다' }[kind] || '크레딧 자동 충전 안내';
++  const rows = [['카드', esc(s.card_label || '등록한 카드')]];
++  if (kind !== 'off') rows.push(['충전 묶음', esc(s.packName || '-') + ' · <b>' + won(s.price) + '</b>'], ['충전 조건', '크레딧 잔액이 ' + esc(s.threshold) + '개 미만이 되면 1회 결제'], ['한 달 최대', esc(s.monthly_limit) + '회(최대 ' + won((+s.price || 0) * (+s.monthly_limit || 0)) + ')']);
++  if (kind === 'stopped' && s.last_error) rows.push(['실패 사유', esc(s.last_error)]);
++  const body = kind === 'on' ? `위 조건이 되면 별도 확인 없이 등록한 카드로 결제되고, 결제할 때마다 구매 완료 메일을 보내 드립니다. 해지·변경은 언제든 ${how}에서 할 수 있으며 해지 즉시 더 이상 결제되지 않습니다. 자동 충전으로 산 크레딧도 7일 이내·미사용이면 <a href="${SITE}/report/my/" style="color:#9b3b2a">내 구매 내역</a>에서 바로 환불됩니다.`
++    : kind === 'off' ? `등록한 카드 정보(빌링키)를 삭제했고 앞으로 자동 결제되지 않습니다. 이미 결제된 주문은 그대로이며, 환불 조건은 <a href="${SITE}/report/legal/refund.html" style="color:#9b3b2a">환불정책</a>을 따릅니다.`
++      : `결제가 연속으로 실패해 자동 충전을 멈췄습니다. 카드 상태를 확인한 뒤 ${how}에서 다시 켜거나 다른 카드를 등록해 주세요. 실패한 결제는 청구되지 않았습니다.`;
++  const note = `<p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#57524a">${body}</p>`;
++  const text = `[${BIZ.service}] ${T}\n카드: ${s.card_label || '등록한 카드'}${kind !== 'off' ? `\n충전 묶음: ${s.packName || '-'} ${won(s.price)}\n충전 조건: 잔액 ${s.threshold}개 미만이면 1회 결제\n한 달 최대: ${s.monthly_limit}회` : ''}\n해지·변경: ${SITE}/community/#/credits\n\n${BIZ.name} · ${BIZ.phone} · ${BIZ.email}`;
++  return { subject: `[${BIZ.service}] ${T}`, html: layout(T, rows, note), text };
++}
++export async function mailAutoTopup(env, userId, kind, s) {
++  if (!mailReady(env)) return false;
++  const to = await recipientOf(env, userId); if (!to) return false;
++  return send(env, to, autoTopupMail(kind, s), 'autotopup-' + kind);
++}
+ 
+ // ── 관리자 알림 메일: 결제·환불이 생길 때, 그리고 사람이 손봐야 하는 실패(결제됐는데 권한 기록 실패·환불 취소 실패)
+ // 받는 주소: 환경변수 ADMIN_ALERT_EMAIL(쉼표로 여러 개). 없으면 보내지 않는다. 고객 이메일·출생 정보는 넣지 않는다.
+diff --git a/functions/api/community/credits.js b/functions/api/community/credits.js
+index ccb3fb7..8032c01 100644
+--- a/functions/api/community/credits.js
++++ b/functions/api/community/credits.js
+@@ -15,6 +15,7 @@ import { kstDay } from '../../_daily.js';
+ import { verificationOf, candidatePool, pickToday } from '../../_match.js';
+ import { loadPremium, savePremium, balanceOf, spend, grant, REASON_LABEL, okReq } from '../../_credits.js';
+ import { loadProducts, payReady, payProvider } from '../../_commerce.js';
++import { afterSpend } from '../../_autotopup.js';
+ 
+ const enc = encodeURIComponent;
+ 
+@@ -52,7 +53,7 @@ export async function onRequestPut({ request, env }) {
+   return json({ ok: true, config });
+ }
+ 
+-export async function onRequestPost({ request, env }) {
++export async function onRequestPost({ request, env, waitUntil }) {
+   if (!supabaseReady(env)) return json({ error: '잠시 후 다시 시도해 주세요' }, 503);
+   const b = await readBody(request); if (!b) return json({ error: '잘못된 요청 형식입니다' }, 400);
+   if (b.action === 'grant') {
+@@ -86,6 +87,7 @@ export async function onRequestPost({ request, env }) {
+     if (!extra.length) return json({ error: '지금은 조건이 맞는 새 인연이 없어요. 크레딧은 쓰지 않았어요', added: 0 }, 409);
+     const sp = await spend(env, me.id, prem.prices.morePicks, 'more_picks', day, idem);
+     if (!sp.ok) return json({ error: sp.error === 'insufficient' ? '크레딧이 부족해요' : '잠시 후 다시 시도해 주세요', need: sp.error === 'insufficient' ? 'credit-buy' : undefined, balance: sp.balance }, 402);
++    if (!sp.dup) afterSpend(env, me.id, waitUntil);   // 자동 충전: 잔액이 기준 아래면 등록 카드로 결제(응답과 따로)
+     if (!sp.dup) await sbRest(env, 'cm_daily_picks?on_conflict=user_id,day', { method: 'POST', headers: { prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ user_id: me.id, day, picks: [...cur, ...extra] }) });
+     return json({ ok: true, added: sp.dup ? 0 : extra.length, balance: sp.balance });
+   }
+diff --git a/functions/api/community/match.js b/functions/api/community/match.js
+index 3ad6d8a..f85160f 100644
+--- a/functions/api/community/match.js
++++ b/functions/api/community/match.js
+@@ -14,6 +14,7 @@ import { readConsents, requiredOk } from '../../_consent.js';
+ import { kstDay } from '../../_daily.js';
+ import { PURPOSES, REGIONS, INTERESTS, LIKE_PER_DAY, verificationOf, handleOf, resolveHandle, compat, life, pickToday, ageOf, ageBand, candidatePool } from '../../_match.js';
+ import { loadPremium, spend, okReq } from '../../_credits.js';
++import { afterSpend } from '../../_autotopup.js';
+ 
+ const enc = encodeURIComponent;
+ const pick = (a, allowed, max) => [...new Set((Array.isArray(a) ? a : []).filter(x => allowed.includes(x)))].slice(0, max);
+@@ -99,7 +100,7 @@ export async function onRequestGet({ request, env }) {
+   return json({ error: '잘못된 요청입니다' }, 400);
+ }
+ 
+-export async function onRequestPost({ request, env }) {
++export async function onRequestPost({ request, env, waitUntil }) {
+   { const off = await featureGate(request, env, 'match'); if (off) return off; }   // 9단계 기능별 스위치(functions/_features.js)
+   const b = await readBody(request); if (!b) return json({ error: '잘못된 요청 형식입니다' }, 400);
+   if (b.action === 'profile') {
+@@ -159,6 +160,7 @@ export async function onRequestPost({ request, env }) {
+       if (b.useCredit !== true || !okReq(b.req)) return json({ error: '오늘 인연 잇기를 모두 썼어요. 크레딧 ' + prem.prices.extraLike + '개로 더 이을 수 있어요', need: 'credit', price: prem.prices.extraLike }, 429);
+       const sp = await spend(env, w.me.id, prem.prices.extraLike, 'extra_like', day, 'xl:' + w.me.id + ':' + b.req);
+       if (!sp.ok) return json({ error: sp.error === 'insufficient' ? '크레딧이 부족해요' : '잠시 후 다시 시도해 주세요', need: sp.error === 'insufficient' ? 'credit-buy' : undefined, balance: sp.balance }, 402);
++      if (!sp.dup) afterSpend(env, w.me.id, waitUntil);   // 자동 충전: 잔액이 기준 아래면 등록 카드로 결제(응답과 따로)
+     }
+     const theirs = (recv || []).some(x => x.from_id === other);
+     const st = theirs ? 'matched' : 'pending';

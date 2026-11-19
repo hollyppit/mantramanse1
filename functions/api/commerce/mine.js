@@ -5,7 +5,7 @@
 // sajus: 구매한 사주의 출생 입력(회원 본인이 구매할 때 입력한 값) — '이 사주로 바로 읽기'에 쓴다. 본인 토큰으로만 받는다.
 // 주문마다 viewed_at(첫 유료 장 열람 시각)을 붙인다: 환불정책 '7일 이내·미열람' 판단.
 import { json } from '../../_lib.js';
-import { memberOf, sbRest, supabaseReady, worldAccess, viewedByOrder, cancelOrder, refundCheck, portoneCall, portoneReady, PORTONE_PREFIX, isCreditOrder, creditsOfOrder, creditRefundCheck } from '../../_commerce.js';
+import { memberOf, sbRest, supabaseReady, worldAccess, viewedByOrder, cancelOrder, refundCheck, portoneCall, portoneReady, PORTONE_PREFIX, accessUntil, accessSince } from '../../_commerce.js';
 import { safeHttps } from '../../_mail.js';
 
 const SHOWN = ['paid', 'canceled', 'partial_canceled'];
@@ -20,9 +20,9 @@ export async function onRequestPost({ request, env }) {
     try {
       const order = ((await sbRest(env, `commerce_orders?select=*&order_id=eq.${encodeURIComponent(orderId)}&user_id=eq.${encodeURIComponent(member.id)}`)) || [])[0];
       if (!order) return json({ error: 'not-found' }, 404);
-      const chk = isCreditOrder(order) ? await creditRefundCheck(env, order) : refundCheck(order, (await viewedByOrder(env, [orderId]))[orderId] || null);
+      const chk = refundCheck(order, (await viewedByOrder(env, [orderId]))[orderId] || null);
       if (!chk.ok) return json({ error: 'not-refundable', reason: chk.reason }, 409);
-      const c = await cancelOrder(env, order, isCreditOrder(order) ? '고객 바로 환불(7일 이내·크레딧 미사용)' : '고객 바로 환불(7일 이내·미열람)');
+      const c = await cancelOrder(env, order, '고객 바로 환불(7일 이내·미열람)');
       if (!c.ok) return json({ error: c.error === 'not-configured' ? 'not-configured' : 'refund-failed' }, 502);
       return json({ ok: true, canceled_at: c.at });
     } catch { return json({ error: 'commerce-unavailable' }, 503); }
@@ -58,20 +58,17 @@ export async function onRequestPost({ request, env }) {
   } catch { return json({ error: 'commerce-unavailable' }, 503); }
   const fresh = Date.now() - 30 * 60000;
   // 고객 화면에 필요한 칸만 골라 담는다(조회식이 바뀌어도 사주 식별값·회원 id 가 새지 않게)
-  const pick = o => ({ order_id: o.order_id, product_name: o.product_name, saju_label: o.saju_label, worlds: o.worlds, amount: o.amount, status: o.status, method: o.method, created_at: o.created_at, paid_at: o.paid_at, canceled_at: o.canceled_at, receipt: String(o.payment_key || '').startsWith(PORTONE_PREFIX), credits: creditsOfOrder(o) || undefined });   // credits: 크레딧 묶음 주문이면 지급 크레딧 수(사주 식별값은 내려 보내지 않는다)   // receipt: 영수증 버튼 표시(결제 키 자체는 내려 보내지 않는다). viewed_at 은 아래에서 붙인다
+  const pick = o => ({ order_id: o.order_id, product_name: o.product_name, saju_label: o.saju_label, worlds: o.worlds, amount: o.amount, status: o.status, method: o.method, created_at: o.created_at, paid_at: o.paid_at, canceled_at: o.canceled_at, receipt: String(o.payment_key || '').startsWith(PORTONE_PREFIX), access_until: o.status === 'paid' && o.paid_at ? accessUntil(o.paid_at) : null });   // access_until: 이용 기간 끝(결제일부터 12개월, 이용약관 제6조)   // receipt: 영수증 버튼 표시(결제 키 자체는 내려 보내지 않는다). viewed_at 은 아래에서 붙인다
   const orders = (rows || []).filter(o => SHOWN.includes(o.status) || (o.status === 'pending' && Date.parse(o.created_at) > fresh)).slice(0, 50).map(pick);
   // 주문별 첫 유료 장 열람 시각(환불 가능 여부 판단)
   let viewed = {}; try { viewed = await viewedByOrder(env, orders.map(o => o.order_id)); } catch { viewed = {}; }
   orders.forEach(o => { o.viewed_at = viewed[o.order_id] || null; });
-  // 크레딧 주문: '열람' 대신 '크레딧 사용' — 잔액이 이 주문의 크레딧 수보다 적으면 사용 시작(환불 제한)
-  const cr = orders.filter(o => o.credits && o.status === 'paid');
-  if (cr.length) { let bal = null; try { bal = +(await sbRest(env, 'rpc/cm_credit_balance', { method: 'POST', body: JSON.stringify({ p_user: member.id }) })) || 0; } catch { bal = null; } cr.forEach(o => { o.credits_used = bal === null ? null : bal < o.credits; }); }
   // 구매한 사주(저장된 출생 입력) + 그 사주로 열려 있는 주제: '이 사주로 바로 읽기'
   let sajus = [];
   try {
     const [saved, ents] = await Promise.all([
       sbRest(env, `member_sajus?select=saju_key,label,birth&user_id=eq.${encodeURIComponent(member.id)}`),
-      sbRest(env, `commerce_entitlements?select=saju_key,world&user_id=eq.${encodeURIComponent(member.id)}&revoked_at=is.null`),
+      sbRest(env, `commerce_entitlements?select=saju_key,world&user_id=eq.${encodeURIComponent(member.id)}&revoked_at=is.null&granted_at=gt.${encodeURIComponent(accessSince())}`),
     ]);
     const worldsBy = {}; for (const e of ents || []) (worldsBy[e.saju_key] = worldsBy[e.saju_key] || new Set()).add(e.world);
     sajus = (saved || []).filter(s => worldsBy[s.saju_key] && s.birth).map(s => ({ ref: s.saju_key.slice(3, 11), label: s.label || null, birth: s.birth, worlds: [...worldsBy[s.saju_key]].sort() }));
