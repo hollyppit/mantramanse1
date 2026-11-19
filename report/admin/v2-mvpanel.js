@@ -49,6 +49,7 @@
         var img = p && p.video ? '<video src="' + esc(p.video) + '" poster="' + esc(p.url) + '" muted loop playsinline autoplay preload="metadata" style="width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;display:block;outline:2px solid #C9A25C"></video>' :
           p ? '<img src="' + esc(p.url) + '" alt="" style="width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;display:block">' :
           '<div style="width:100%;aspect-ratio:9/16;border:1px dashed rgba(128,128,128,.5);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;text-align:center;padding:4px;opacity:.75">' + (fb ? '비어 있음<br>(종합풀이 칸으로 대신)' : '비어 있음<br>(사용자가 열면 자동으로 만들어짐)') + '</div>';
+        if (p && p.by !== 'upload' && !(p.pv >= 2)) img += '<div style="font-size:11px;opacity:.7;margin-top:3px" title="지시문 2판(공통 화풍·구간별 촬영) 전에 만든 그림입니다. 다시 누르면 새 지시문으로 만듭니다">옛 지시문 그림</div>';
         if (ERR[s.id]) img += '<div style="color:#E07A6E;font-size:11px;line-height:1.4;margin-top:4px;word-break:break-all;max-height:6em;overflow:auto">실패: ' + esc(ERR[s.id]) + '</div>';
         return '<td style="padding:4px;vertical-align:top">' + img + '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">' +
           '<button class="btn" style="padding:3px 8px;font-size:12px" data-mvgen="' + s.id + '">' + (p ? '다시' : '만들기') + '</button>' +

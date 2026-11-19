@@ -75,6 +75,14 @@ r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-gyeong
   assert(/남성 래퍼/.test(seen) && !/여성 래퍼/.test(seen), '남자 칸(-m)은 남성 래퍼가 주인공');
   assert(/붉은 호랑이 얼굴을 한 의인화 남성 래퍼/.test(seen) && /크루: 말·개/.test(seen) && /일주 병인/.test(seen), '주인공 = 일주(일간 색 + 일지 동물), 크루 = 삼합');
   assert(!/갱스터|총|칼|마약|담배|폭력|술병|지폐|그리지 않는다|금지/.test(JSON.parse(seen).prompt), '안전 필터에 걸릴 단어 없음(긍정형 지시문)'); assert(/재물운/.test(seen) && /글자·간판 문구·로고·자막 없이/.test(seen), '주제 장면·글자 없음');
+  { const pj = JSON.parse(seen); assert(/공통 화풍/.test(pj.prompt) && /\n촬영: .+mm/.test(pj.prompt) && /오늘의 의상\(주인공\): /.test(pj.prompt) && /색 팔레트\(일간 화\)/.test(pj.prompt), '지시문 2판: 공통 화풍·구간별 촬영·일간 색');
+    assert(/풀 블리드/.test(pj.prompt) && !/어안|비워 둔다/.test(pj.prompt), '전체 화면 채움(원형 프레임·아래 여백 문구 없음)'); assert.equal(pj.size, '1024x1536'); assert.equal(r.j.panels['mv-wealth-hook-byeong-in-m'].pv, 2, '새 그림에 지시문 판 기록'); }
+  { const shots = new Set(), shotOf = () => /\n촬영: ([^\n]+)/.exec(JSON.parse(seen).prompt)[1];
+    for (const d of ['gap-ja', 'eul-chuk', 'byeong-in', 'jeong-myo', 'mu-jin', 'gi-sa', 'gyeong-o', 'sin-mi']) { r = await call('POST', '/api/music-video', { panel: { slot: 'mv-hook-' + d + '-f', generate: true } }, admin); assert.equal(r.status, 200); shots.add(shotOf()); }
+    assert(shots.size >= 3, '일주가 다르면 훅 연출도 여러 가지 ' + shots.size);
+    const once = []; for (let i = 0; i < 6; i++) { r = await call('POST', '/api/music-video', { panel: { slot: 'mv-hook-gap-ja-f', generate: true } }, admin); once.push(shotOf()); assert(r.j.panels['mv-hook-gap-ja-f'].seed, '다시 만들면 새 변형 씨앗'); }
+    assert(new Set(once).size >= 2, '다시 누르면 다른 연출이 나올 수 있음');
+    for (const d of ['gap-ja', 'eul-chuk', 'byeong-in', 'jeong-myo', 'mu-jin', 'gi-sa', 'gyeong-o', 'sin-mi']) await call('POST', '/api/music-video', { panel: { slot: 'mv-hook-' + d + '-f', clear: true } }, admin); }
   r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-intro-im-ja-f', generate: true } }, admin); assert.equal(r.status, 200); assert(/여성 래퍼/.test(seen) && !/남성 래퍼/.test(seen), '여자 칸(-f)은 여성 래퍼'); assert(/검은 쥐/.test(seen) && /짝: 소 얼굴/.test(seen), '연애운 짝 = 육합');
   r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', generate: true } }, admin); assert.equal(r.status, 400, '성별 없는 옛 칸 이름은 받지 않음');
   globalThis.fetch = f0; }
