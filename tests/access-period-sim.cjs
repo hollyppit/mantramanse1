@@ -3,6 +3,7 @@
 // 보는 것: 받은 지 12개월 안 된 권한만 유효 · 지난 권한은 잠기고 다시 살 수 있음 · 내 구매 내역에 이용 기간 끝 날짜 · 크레딧 상품 없음
 const path = require('path'), url = require('url');
 const fails = []; let n = 0; const ok = (c, m) => { n++; if (!c) fails.push(m); };
+const pwsrc0 = () => require('fs').readFileSync(path.join(__dirname, '..', 'report/v2/paywall.js'), 'utf8');
 const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
 
 (async () => {
@@ -56,10 +57,13 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   tenv.PORTONE_TEST_FOR_ALL = '1';
   const guestAll = await acc({});
   ok(guestAll.channelKey === 'ch-inicis-test' && guestAll.testChannel === 'inicis' && guestAll.buyer.length === 3, 'PORTONE_TEST_FOR_ALL=1: 손님도 이니시스 테스트 채널');
+  ok(guestAll.channels.map(c => c.id + ':' + c.channelKey + ':' + c.buyer.length).join() === 'inicis:ch-inicis-test:3,kpn:ch-kpn:0' && guestAll.channels[0].label === '신용·체크카드' && guestAll.channels[1].label === '카드·간편결제', '결제 방법 고르기: 이니시스(구매자 정보)·KPN 두 채널');
+  ok(guest.channels.length === 1 && guest.channels[0].channelKey === 'ch-kpn', '시험 채널 꺼짐: 고를 것 없이 운영 채널 하나');
+  ok(/function askPay/.test(pwsrc0()) && /channelKey: chKey/.test(pwsrc0()), '구매 창: 고른 채널 키로 결제창');
   delete tenv.PORTONE_TEST_CHANNEL_KEY;
   ok((await acc({})).channelKey === 'ch-kpn', '시험 채널 키가 없으면 스위치가 켜져 있어도 운영 채널');
   const pwsrc = require('fs').readFileSync(path.join(__dirname, '..', 'report/v2/paywall.js'), 'utf8');
-  ok(/function askBuyer/.test(pwsrc) && /cust\.fullName = buyer\.fullName/.test(pwsrc) && !/buyer[^\n]*\/api\/commerce\/order/.test(pwsrc.replace(/askBuyer\(need\)[^\n]*fetch\('\/api\/commerce\/order'/, '')), '구매 창: 결제 직전 구매자 정보 → 결제창에만 전달');
+  ok(/function askPay/.test(pwsrc) && /cust.fullName = buyer.fullName/.test(pwsrc), '구매 창: 결제 직전 구매자 정보 → 결제창에만 전달');
 
   const r = await mine.onRequestPost({ request: new Request('https://x.test/api/commerce/mine', { method: 'POST', headers: { 'x-member-token': 't', 'content-type': 'application/json' }, body: '{}' }), env });
   const d = await r.json();

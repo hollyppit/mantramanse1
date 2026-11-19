@@ -9,6 +9,18 @@ import { googleReady } from '../../_google-login.js';
 import { sajuKey, memberOf, worldAccess, freeChapters, ownedWorlds, loadProducts, productWorlds, payReady, payProvider, buyerFields } from '../../_commerce.js';
 import { touchLater } from '../../_activity.js';
 
+// 결제창 키(공개 값만). 시험 채널이 켜져 있으면 손님이 결제 방법을 고를 수 있게 channels 를 두 개 준다:
+//   ① 시험 채널(이니시스): '신용·체크카드' — 구매자 이름·휴대폰·이메일 필요   ② 운영 채널(KPN): '카드·간편결제'
+//   channelKey·buyer·testChannel 은 첫 번째(기본 선택) 채널 값으로 그대로 둔다(예전 화면 호환)
+const PG_LABEL = { inicis: { label: '신용·체크카드', sub: 'KG이니시스' }, kpn: { label: '카드·간편결제', sub: 'KPN · 카카오페이 등' } };
+export function portoneKeys(env, testPay) {
+  const mainPg = String(env.PORTONE_PG || 'kpn').trim().toLowerCase();
+  const main = { id: mainPg, ...(PG_LABEL[mainPg] || { label: '카드 결제', sub: '' }), channelKey: env.PORTONE_CHANNEL_KEY, buyer: buyerFields(env) };
+  if (!testPay || testPay.channelKey === env.PORTONE_CHANNEL_KEY) return { storeId: env.PORTONE_STORE_ID, channelKey: main.channelKey, buyer: main.buyer, channels: [main] };
+  const test = { id: testPay.pg, ...(PG_LABEL[testPay.pg] || { label: '카드 결제(시험)', sub: '' }), channelKey: testPay.channelKey, buyer: testPay.buyer, test: true };
+  const channels = testPay.pg === mainPg ? [test] : [test, main];
+  return { storeId: env.PORTONE_STORE_ID, channelKey: test.channelKey, buyer: test.buyer, testChannel: testPay.pg, channels };
+}
 export async function onRequestPost(ctx) {
   const { request, env } = ctx;
   let body; try { body = await request.json(); } catch { return json({ error: 'bad-payload' }, 400); }
@@ -39,7 +51,7 @@ export async function onRequestPost(ctx) {
   const testPay = (admin || testAll) && env.PORTONE_TEST_CHANNEL_KEY ? { channelKey: env.PORTONE_TEST_CHANNEL_KEY, pg: String(env.PORTONE_TEST_PG || 'inicis').trim().toLowerCase(), buyer: buyerFields({ PORTONE_PG: env.PORTONE_TEST_PG || 'inicis' }) } : null;
   return json({
     configured: { login: !!(env.SUPABASE_URL && env.SUPABASE_ANON_KEY), naver: naverReady(env), googleServer: googleReady(env), pay: payReady(env) },
-    keys: { supabaseUrl: env.SUPABASE_URL || '', supabaseAnonKey: env.SUPABASE_ANON_KEY || '', provider: payProvider(env), tossClientKey: payProvider(env) === 'toss' ? env.TOSS_CLIENT_KEY : '', portone: payProvider(env) === 'portone' ? (testPay ? { storeId: env.PORTONE_STORE_ID, channelKey: testPay.channelKey, buyer: testPay.buyer, testChannel: testPay.pg } : { storeId: env.PORTONE_STORE_ID, channelKey: env.PORTONE_CHANNEL_KEY, buyer: buyerFields(env) }) : null },
+    keys: { supabaseUrl: env.SUPABASE_URL || '', supabaseAnonKey: env.SUPABASE_ANON_KEY || '', provider: payProvider(env), tossClientKey: payProvider(env) === 'toss' ? env.TOSS_CLIENT_KEY : '', portone: payProvider(env) === 'portone' ? portoneKeys(env, testPay) : null },
     member: member ? { id: member.id, email: member.email, provider: member.provider } : null,
     sajuKey: key, worlds, products: forSale, annual, admin: admin ? { viewAsFree } : null,
   });
