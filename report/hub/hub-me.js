@@ -332,7 +332,7 @@
     var opt = docs.filter(function (x) { return !x.required && !x.night; }), night = docs.filter(function (x) { return x.night; })[0];
     var reqLine = d.requiredOk
       ? '이용약관·개인정보 수집·이용: 동의함' + (st.terms && st.terms.at ? '(' + esc(day(st.terms.at)) + ')' : '')
-      : '이용약관·개인정보 수집·이용 동의는 인연의 광장에 처음 들어가실 때 받습니다.';
+      : '';   // 이용약관 동의는 아직 공개 전인 서비스(인연의 광장)에 처음 들어갈 때 받는다 — 공개 전에는 안내하지 않는다
     var row = function (x, cls) { var on = st[x.kind] && st[x.kind].agreed; return '<label class="me-opt' + (cls || '') + '"><input type="checkbox" name="' + esc(x.kind) + '"' + (on ? ' checked' : '') + '><span><b>' + esc(x.title) + '</b><small>' + (on && st[x.kind].at ? esc(day(st[x.kind].at)) + ' 동의' : '받지 않음') + '</small></span></label>'; };
     var anyPhone = opt.some(function (x) { return x.phone && st[x.kind] && st[x.kind].agreed; });
     return '<h2>혜택·소식 받기 설정</h2>' +
@@ -342,7 +342,7 @@
       (night ? row(night, ' me-night') : '') +
       '<div class="me-acts"><button class="btn sm" type="submit" disabled>설정 저장</button></div><p class="me-msg" role="status"></p></form>' +
       (d.kakaoChannel ? '<div class="me-acts"><a class="btn ghost sm" href="' + esc(d.kakaoChannel) + '" target="_blank" rel="noopener" data-track="kakao_channel">카카오톡 채널 추가하기</a></div><p class="me-note">채널을 추가해도 광고 수신에 동의한 것으로 보지 않습니다. 카카오톡으로 소식을 받으시려면 위에서 따로 골라 주세요.</p>' : '') +
-      '<p class="me-note">설정을 바꾸면 처리 결과를 계정 이메일로 알려 드립니다. 동의하신 뒤에도 2년마다 계속 받으실지 다시 여쭙니다. 밤 9시~아침 8시에는 따로 동의하신 경우에만 보냅니다. ' + reqLine + ' · <a href="/report/legal/privacy.html" target="_blank" rel="noopener">개인정보처리방침</a></p>';
+      '<p class="me-note">설정을 바꾸면 처리 결과를 계정 이메일로 알려 드립니다. 동의하신 뒤에도 2년마다 계속 받으실지 다시 여쭙니다. 밤 9시~아침 8시에는 따로 동의하신 경우에만 보냅니다. ' + (reqLine ? reqLine + ' · ' : '') + '<a href="/report/legal/privacy.html" target="_blank" rel="noopener">개인정보처리방침</a></p>';
   }
   function profileHtml(p) {
     var x = p.profile || {};
