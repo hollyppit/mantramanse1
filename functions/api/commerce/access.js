@@ -6,7 +6,7 @@
 import { json, isAdmin } from '../../_lib.js';
 import { naverReady } from '../../_naver-login.js';
 import { googleReady } from '../../_google-login.js';
-import { sajuKey, memberOf, worldAccess, freeChapters, ownedWorlds, loadProducts, productWorlds, payReady, payProvider } from '../../_commerce.js';
+import { sajuKey, memberOf, worldAccess, freeChapters, ownedWorlds, loadProducts, productWorlds, payReady, payProvider, buyerFields } from '../../_commerce.js';
 import { touchLater } from '../../_activity.js';
 
 export async function onRequestPost(ctx) {
@@ -34,7 +34,7 @@ export async function onRequestPost(ctx) {
   }
   return json({
     configured: { login: !!(env.SUPABASE_URL && env.SUPABASE_ANON_KEY), naver: naverReady(env), googleServer: googleReady(env), pay: payReady(env) },
-    keys: { supabaseUrl: env.SUPABASE_URL || '', supabaseAnonKey: env.SUPABASE_ANON_KEY || '', provider: payProvider(env), tossClientKey: payProvider(env) === 'toss' ? env.TOSS_CLIENT_KEY : '', portone: payProvider(env) === 'portone' ? { storeId: env.PORTONE_STORE_ID, channelKey: env.PORTONE_CHANNEL_KEY } : null },
+    keys: { supabaseUrl: env.SUPABASE_URL || '', supabaseAnonKey: env.SUPABASE_ANON_KEY || '', provider: payProvider(env), tossClientKey: payProvider(env) === 'toss' ? env.TOSS_CLIENT_KEY : '', portone: payProvider(env) === 'portone' ? { storeId: env.PORTONE_STORE_ID, channelKey: env.PORTONE_CHANNEL_KEY, buyer: buyerFields(env) } : null },
     member: member ? { id: member.id, email: member.email, provider: member.provider } : null,
     sajuKey: key, worlds, products: forSale, annual, admin: admin ? { viewAsFree } : null,
   });

@@ -215,6 +215,11 @@ export function payProvider(env) {
   return portoneReady(env) ? 'portone' : tossReady(env) && env.TOSS_CLIENT_KEY ? 'toss' : null;
 }
 export const payReady = env => !!payProvider(env) && supabaseReady(env);
+// 결제사별 구매자 필수 정보: 포트원 KG이니시스 V2 는 구매자 이름(fullName)이 늘 필수, PC 에서는 휴대폰 번호·이메일도 필수(모바일은 선택).
+// 환경변수 PORTONE_PG(공개 값) 로 지금 채널의 결제사를 알린다: 'inicis' 면 구매 창이 결제 직전에 이름·휴대폰·이메일을 받는다. 비었거나 'kpn' 이면 받지 않는다.
+// 받은 값은 결제창(포트원 → 결제사)으로만 넘기고 서버에 저장하지 않는다.
+export const BUYER_FIELDS = { inicis: ['fullName', 'phoneNumber', 'email'] };
+export const buyerFields = env => BUYER_FIELDS[String((env && env.PORTONE_PG) || '').trim().toLowerCase()] || [];
 export async function portoneCall(env, path, init = {}) {
   const r = await fetch('https://api.portone.io/' + path, { ...init, headers: { authorization: 'PortOne ' + env.PORTONE_API_SECRET, 'content-type': 'application/json' }, signal: AbortSignal.timeout(20000) });
   let d = null; try { d = await r.json(); } catch { d = null; }

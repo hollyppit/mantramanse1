@@ -160,13 +160,55 @@
   }
   function logout() { sbClient().then(function (sb) { return sb.auth.signOut(); }).then(function () { P.token = ''; close(); refresh(); }).catch(function () { }); }
 
+  // ── 구매자 정보: 결제사가 요구할 때만(포트원 KG이니시스 — 서버 /api/commerce/access 의 keys.portone.buyer).
+  //    결제 직전에 이름·휴대폰·이메일을 받아 결제창(포트원 → 결제사)에만 넘긴다. 우리 서버에는 보내지 않는다.
+  //    '이 기기에 기억'을 고르면 이 브라우저(localStorage mt_buyer)에만 남겨 다음 구매 때 채운다.
+  var BUYER_KEY = 'mt_buyer';
+  function needBuyer() { var k = P.info && P.info.keys && P.info.keys.portone; return k && k.buyer && k.buyer.length ? k.buyer : null; }
+  function cleanPhone(v) { var x = String(v || '').replace(/[^0-9]/g, ''); return /^01[016789]\d{7,8}$/.test(x) ? x.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3') : ''; }
+  function cleanMail(v) { v = String(v || '').trim(); return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length <= 120 && !/@users\.mantrafortune\.com$/i.test(v) ? v : ''; }
+  function askBuyer(fields) {
+    return new Promise(function (resolve, reject) {
+      var saved = {}; try { saved = JSON.parse(ls(BUYER_KEY) || '{}') || {}; } catch (e) { saved = {}; }
+      var mail = saved.email || cleanMail(P.info.member && P.info.member.email);
+      var want = function (f) { return fields.indexOf(f) >= 0; };
+      var el = document.createElement('div'); el.id = 'pw-buyer-sheet'; el.className = 'pw-sheet pw-top'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '구매자 정보');
+      el.innerHTML = '<form class="pw-card pw-bform" novalidate><button type="button" class="pw-x" data-pw-bx aria-label="닫기">×</button><p class="pw-k">구매자 정보</p><h3>결제에 필요한 정보를 적어 주세요</h3>' +
+        '<p class="pw-sub">카드 결제사(KG이니시스)가 결제 확인·영수증·결제 문의에 씁니다. 우리 서버에는 저장하지 않아요.</p>' +
+        '<label>이름<input name="fullName" autocomplete="name" maxlength="30" value="' + esc(saved.fullName || '') + '" required></label>' +
+        (want('phoneNumber') ? '<label>휴대폰 번호<input name="phoneNumber" type="tel" inputmode="numeric" autocomplete="tel" maxlength="13" placeholder="010-0000-0000" value="' + esc(saved.phoneNumber || '') + '" required></label>' : '') +
+        (want('email') ? '<label>이메일<input name="email" type="email" autocomplete="email" maxlength="120" value="' + esc(mail) + '" required></label>' : '') +
+        '<label class="pw-save"><input type="checkbox" name="remember"' + (saved.fullName ? ' checked' : '') + '> <span>이 기기에 기억하기 <small>(이 브라우저에만 남아요)</small></span></label>' +
+        '<p class="pw-berr" role="alert"></p><button type="submit" class="pw-btn pw-buy pw-bgo">결제 계속</button>' +
+        '<p class="pw-fine">입력한 정보는 결제대행사(포트원·KG이니시스)로 전달됩니다. <a href="/report/legal/privacy.html" target="_blank" rel="noopener">개인정보처리방침</a></p></form>';
+      var f = el.querySelector('form'), err = el.querySelector('.pw-berr');
+      var done = function () { if (el.parentNode) el.parentNode.removeChild(el); };
+      var cancel = function () { done(); reject(new Error('user-cancel')); };
+      el.addEventListener('click', function (e) { if (e.target === el || e.target.closest('[data-pw-bx]')) cancel(); });
+      el.addEventListener('keydown', function (e) { if (e.key === 'Escape') cancel(); });
+      f.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var name = String(f.elements.fullName.value || '').replace(/\s+/g, ' ').trim();
+        var tel = want('phoneNumber') ? cleanPhone(f.elements.phoneNumber.value) : '', em = want('email') ? cleanMail(f.elements.email.value) : '';
+        var bad = name.length < 2 ? ['fullName', '이름을 2글자 이상 적어 주세요'] : want('phoneNumber') && !tel ? ['phoneNumber', '휴대폰 번호를 확인해 주세요(예: 010-1234-5678)'] : want('email') && !em ? ['email', '이메일 주소를 확인해 주세요'] : null;
+        if (bad) { err.textContent = bad[1]; f.elements[bad[0]].focus(); return; }
+        var b = { fullName: name }; if (tel) b.phoneNumber = tel; if (em) b.email = em;
+        try { if (f.elements.remember.checked) root.localStorage.setItem(BUYER_KEY, JSON.stringify(b)); else root.localStorage.removeItem(BUYER_KEY); } catch (x) { }
+        done(); resolve(b);
+      });
+      document.body.appendChild(el);
+      var first = Array.prototype.filter.call(f.querySelectorAll('input[required]'), function (i) { return !i.value; })[0] || f.querySelector('.pw-bgo'); if (first) first.focus();
+    });
+  }
+
   function buy(productId, who, btn) {
     if (btn) { btn.disabled = true; btn.textContent = '결제 준비 중…'; }
     var d = P.info; track('purchase_start', { product: productId });
-    fetch('/api/commerce/order', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, headers()), body: JSON.stringify({ productId: productId, sd: safeSd(P.sd), label: who || null, birth: (function () { try { var box = document.getElementById('pw-save'); if (!box || !box.checked) return null; var v = P.resume && P.resume(); return v && v.inp || null; } catch (e) { return null; } })() }) })
+    var need = d && d.keys && d.keys.provider === 'portone' ? needBuyer() : null, buyer = null;
+    (need ? askBuyer(need).then(function (b) { buyer = b; }) : Promise.resolve()).then(function () { return fetch('/api/commerce/order', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, headers()), body: JSON.stringify({ productId: productId, sd: safeSd(P.sd), label: who || null, birth: (function () { try { var box = document.getElementById('pw-save'); if (!box || !box.checked) return null; var v = P.resume && P.resume(); return v && v.inp || null; } catch (e) { return null; } })() }) }); })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'order'); return j; }); })
       .then(function (o) {
-        if (o.provider === 'portone' || (!o.provider && d.keys.provider === 'portone')) return payPortone(o);
+        if (o.provider === 'portone' || (!o.provider && d.keys.provider === 'portone')) return payPortone(o, buyer);
         return (root.TossPayments ? Promise.resolve() : script(TOSS_SDK)).then(function () {
           var back = root.location.origin + root.location.pathname;
           var keep = new URLSearchParams(root.location.search); PAY_KEYS.forEach(function (k) { keep.delete(k); });
@@ -191,11 +233,12 @@
 
   // 포트원 결제창: PC 는 같은 페이지에서 창이 떴다가 결과를 돌려주고, 모바일은 redirectUrl 로 페이지를 옮겼다가 돌아온다(handleReturn).
   // 결제 id 는 서버 주문번호를 그대로 쓴다. 서버가 포트원에 결제를 다시 조회해 금액을 확인한 뒤에만 권한을 준다.
-  function payPortone(o) {
+  function payPortone(o, buyer) {
     var k = P.info.keys.portone || {};
     return (root.PortOne ? Promise.resolve() : script(PORTONE_SDK)).then(function () {
       var u = new URL(root.location.href); PAY_KEYS.forEach(function (x) { u.searchParams.delete(x); }); u.searchParams.set('pay', 'portone');
       var cust = { customerId: o.customerKey }; if (P.info.member && P.info.member.email) cust.email = P.info.member.email;
+      if (buyer) { cust.fullName = buyer.fullName; if (buyer.phoneNumber) cust.phoneNumber = buyer.phoneNumber; if (buyer.email) cust.email = buyer.email; }   // 결제사 필수 구매자 정보(이니시스)
       saveResume();
       return root.PortOne.requestPayment({ storeId: k.storeId, channelKey: k.channelKey, paymentId: o.orderId, orderName: o.orderName, totalAmount: o.amount, currency: 'KRW', payMethod: 'CARD', redirectUrl: u.toString(), customer: cust });
     }).then(function (res) {
@@ -271,7 +314,10 @@
       '.pw-last{display:block;font-size:.72rem;font-weight:500;opacity:.8;margin-top:2px}.pw-buyer{margin:10px 0 0;color:#DCD5C4;font-size:.84rem}.pw-hint{margin:8px 0 0;padding:8px 10px;border:1px solid rgba(213,185,127,.4);border-radius:10px;color:#DCD5C4;font-size:.8rem;line-height:1.5}.pw-hint a{color:#D5B97F}' +
       '.pw-own{color:#7FD1A8;font-weight:700;font-size:.86rem}.pw-price{color:#F3EEDF;font-weight:700;white-space:nowrap}.pw-fine{margin:10px 0 0;color:#8F8A7E;font-size:.74rem;line-height:1.5}.pw-fine a,.pw-link{color:#D5B97F;background:none;border:0;padding:0;font:inherit;cursor:pointer;text-decoration:underline}' +
       '.pw-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:10000;background:#141826;color:#F3EEDF;border-radius:12px;padding:12px 16px;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:90vw;font-size:.9rem}' +
-      '.xp-lock{margin-left:6px;font-size:.8em;opacity:.8}';
+      '.xp-lock{margin-left:6px;font-size:.8em;opacity:.8}' +
+      '.pw-sheet.pw-top{z-index:10001}.pw-bform label:not(.pw-save){display:grid;gap:5px;margin:10px 0 0;color:#DCD5C4;font-size:.84rem;font-weight:600}' +
+      '.pw-bform input:not([type=checkbox]){width:100%;box-sizing:border-box;border:1px solid rgba(213,185,127,.35);border-radius:10px;padding:11px 12px;background:#0E1220;color:#F3EEDF;font:inherit;font-size:16px}' +
+      '.pw-bform input:focus{outline:2px solid #D5B97F;outline-offset:1px}.pw-berr{min-height:1.2em;margin:8px 0 0;color:#FF8A78;font-size:.82rem}.pw-bgo{width:100%;margin-top:4px}';
     document.head.appendChild(s);
   })();
 

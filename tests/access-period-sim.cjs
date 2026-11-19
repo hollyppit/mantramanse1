@@ -40,6 +40,15 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   ok(/granted_at=gt\./.test(lastEntUrl), '권한 조회에 기간 조건');
   ok(!C.DEFAULT_PRODUCTS.some(p => p.kind === 'credits') && !('CREDIT_PACKS' in C) && !('isCreditOrder' in C), '크레딧 상품·주문 처리 없음');
   ok(C.cleanProducts([{ id: 'cr10', price: 5000 }]).every(p => p.id !== 'cr10'), '관리자가 크레딧 상품을 되살릴 수 없음');
+  // 결제사별 구매자 필수 정보(PORTONE_PG): 이니시스면 이름·휴대폰·이메일, 그 밖에는 없음 — 구매 창(paywall.js askBuyer)이 결제 직전에 받는다
+  ok(C.buyerFields({ PORTONE_PG: 'inicis' }).join() === 'fullName,phoneNumber,email' && C.buyerFields({ PORTONE_PG: ' INICIS ' }).length === 3, '이니시스: 구매자 이름·휴대폰·이메일');
+  ok(C.buyerFields({ PORTONE_PG: 'kpn' }).length === 0 && C.buyerFields({}).length === 0, 'KPN·미설정: 구매자 정보 안 받음');
+  const access = await imp('functions/api/commerce/access.js');
+  const aenv = { ...env, PORTONE_STORE_ID: 'store-1', PORTONE_CHANNEL_KEY: 'ch-1', PORTONE_API_SECRET: 'sec', PORTONE_PG: 'inicis' };
+  const ar = await (await access.onRequestPost({ request: new Request('https://x.test/api/commerce/access', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"sd":null}' }), env: aenv })).json();
+  ok(ar.keys.portone.buyer.join() === 'fullName,phoneNumber,email' && !JSON.stringify(ar).includes('sec'), '구매 창 키에 구매자 필수 항목(비밀 값 없음)');
+  const pwsrc = require('fs').readFileSync(path.join(__dirname, '..', 'report/v2/paywall.js'), 'utf8');
+  ok(/function askBuyer/.test(pwsrc) && /cust\.fullName = buyer\.fullName/.test(pwsrc) && !/buyer[^\n]*\/api\/commerce\/order/.test(pwsrc.replace(/askBuyer\(need\)[^\n]*fetch\('\/api\/commerce\/order'/, '')), '구매 창: 결제 직전 구매자 정보 → 결제창에만 전달');
 
   const r = await mine.onRequestPost({ request: new Request('https://x.test/api/commerce/mine', { method: 'POST', headers: { 'x-member-token': 't', 'content-type': 'application/json' }, body: '{}' }), env });
   const d = await r.json();
