@@ -348,7 +348,7 @@ const rid = () => Array.from(crypto.getRandomValues(new Uint8Array(4)), x => x.t
 
 // 칸 그림 한 장 만들기(관리자·사용자 자동 채우기 공통). 실패하면 관리자 화면 '마지막 패널 오류'에 남기고 throw
 async function makePanel(env, slot, extra, provider, seed) {
-  let g; try { g = await generate(env, panelPrompt(slot, extra, seed), provider === 'openai' || provider === 'gemini' ? provider : '', null, { format: 'jpeg', size: '1024x1536', aspect: '9:16' }); }
+  let g; try { g = await generate(env, panelPrompt(slot, extra, seed), provider === 'openai' || provider === 'gemini' ? provider : '', null, { format: 'jpeg', size: '1024x1536', aspect: '9:16', quality: /^(low|medium|high)$/.test(env.MV_PANEL_QUALITY || '') ? env.MV_PANEL_QUALITY : 'high' }); }
   catch (e) { await env.GLOSSARY_KV.put('mv:lastPanelError', JSON.stringify({ at: Date.now(), slot: slot.id, message: String(e.message).slice(0, 1200) }), { expirationTtl: 7 * 86400 }); throw e; }
   const k = 'mvpanel-' + slot.id + '-' + rid() + '.' + g.ext;
   await putDerivedFile(env, k, g.bytes, { httpMetadata: { contentType: g.mime } });

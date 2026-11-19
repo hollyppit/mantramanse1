@@ -237,7 +237,7 @@ async function errDetail(r) { try { return ' ' + (await r.text()).slice(0, 200);
 
 async function viaOpenAI(env, prompt, ref, opts) {
   const refs = ref ? [].concat(ref) : [];
-  const model = env.PANEL_IMAGE_MODEL || 'gpt-image-2', size = (opts && opts.size) || env.PANEL_IMAGE_SIZE || '1024x1536', quality = env.PANEL_IMAGE_QUALITY || 'medium';
+  const model = env.PANEL_IMAGE_MODEL || 'gpt-image-2', size = (opts && opts.size) || env.PANEL_IMAGE_SIZE || '1024x1536', quality = (opts && opts.quality) || env.PANEL_IMAGE_QUALITY || 'medium';   // 뮤직비디오 패널은 opts.quality='high'
   const fmt = opts && opts.format === 'jpeg' ? 'jpeg' : 'webp';   // 기본 webp. 뮤직비디오 패널은 Kling 시작 프레임으로 바로 쓰려고 jpeg(Kling 은 JPG·PNG 만 받는다)
   let r;
   if (refs.length) { // 참고·바탕 이미지가 있으면 images/edits (multipart, 여러 장 가능)
