@@ -154,3 +154,18 @@ if (process.argv.includes('--show')) for (const t of ['love', 'newyear']) { cons
   { const h = L.heroOf('경오', 'F'); assert.equal(h.nameKo, '흰 말'); assert.deepEqual(h.crewKo, ['호랑이', '개']); assert.equal(h.partnerKo, '양'); const h2 = L.heroOf('병인', 'M'); assert.equal(h2.nameKo, '붉은 호랑이'); assert.deepEqual(h2.crewKo, ['말', '개']); assert.equal(h2.partnerKo, '돼지'); assert.equal(L.heroOf('임자', 'F').nameKo, '검은 쥐'); }
   console.log('성별 ok: ' + n + '쌍(같은 사주 여·남)에서 보컬·추임새·패널 칸·곡이 모두 갈림');
 }
+
+// 9) 60갑자 일주: 아웃트로 끝 2줄이 그 일주 전용 대목(60개 모두 서로 다름), 주인공 정보에 일주 상징 풍경
+{
+  assert.equal(Object.keys(L.DAY_OUTRO).length, 60); assert.deepEqual(L.DAYS.filter(d => !L.DAY_OUTRO[d]), []);
+  const dl = Object.values(L.DAY_OUTRO).flat(); assert.equal(new Set(dl).size, 120);
+  for (const l of dl) { assert.deepEqual(L.bannedIn(l), []); assert(l.length <= 40); }
+  const seenDays = new Set();
+  for (const s of songs) {
+    const d = s.inputs.day, o = s.sections[6].lines; seenDays.add(d);
+    assert.equal(L.stripAdlibs(o[2]), L.DAY_OUTRO[d][0], '아웃트로 3줄째 = 일주 대목'); assert.equal(L.stripAdlibs(o[3]), L.DAY_OUTRO[d][1]);
+  }
+  assert(seenDays.size >= 50, '검사한 곡의 일주 종류 ' + seenDays.size);
+  assert.equal(L.heroOf('경오', 'F').motifKo, '달리는 말 위에 빛나는 쇠의 결');
+  console.log('일주 ok: 60갑자 마무리 대목 120줄, 곡 ' + songs.length + '개에서 일주 ' + seenDays.size + '종 확인');
+}

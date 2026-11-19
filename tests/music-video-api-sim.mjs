@@ -144,6 +144,25 @@ env.KLING_API_KEY = 'kling-test'; let kling = 0, klingBody = '';
   r = await call('POST', '/api/music-video', { sd, topic: 'love' }, admin); assert(r.j.panels[id], '곡을 다시 열면 채운 칸이 함께 온다');
   fr = await call('POST', '/api/music-video', { sd, topic: 'love', fillPanel: id2 }); assert([401, 402, 403].includes(fr.status), '권한 없으면 못 채움 ' + fr.status);
   globalThis.fetch = f0; }
+// 10-8) 일주 풍경 + 영상 자동 생성: 빈 칸 그림(jpeg) → Kling 자동 → 곡 단위 확인(checkVideos)으로 완성 영상이 칸에 붙는다
+{ const f0 = globalThis.fetch; let imgBody = '', kSubmit = 0, kBody = ''; env.KLING_API_KEY = 'kling-test';
+  globalThis.fetch = async (u, o) => { u = String(u);
+    if (u.includes('api.openai.com')) imgBody = String(o.body || '');
+    if (u.includes('kling')) { if (o && o.method === 'POST') { kSubmit++; kBody = String(o.body); return new Response(JSON.stringify({ code: 0, data: { id: 'auto1' } }), { status: 200, headers: { 'content-type': 'application/json' } }); } return new Response(JSON.stringify({ code: 0, data: [{ status: 'succeeded', outputs: [{ type: 'video', url: 'https://mock.kling.local/auto.mp4' }] }] }), { status: 200, headers: { 'content-type': 'application/json' } }); }
+    if (u.startsWith('https://mock.kling.local/')) return new Response(Buffer.alloc(6000, 4), { status: 200, headers: { 'content-type': 'video/mp4' } });
+    if (u.startsWith('https://api.elevenlabs.io/v1/music')) return new Response(Buffer.alloc(4000, 8), { status: 200, headers: { 'content-type': 'audio/mpeg' } });
+    if (u.endsWith('/speech-to-text')) return new Response('{}', { status: 500 });
+    return f0(u, o); };
+  r = await call('POST', '/api/music-video', { sd, topic: 'wealth' }, admin); assert.equal(r.status, 200); assert.equal(r.j.videosPending, 0);
+  const id = r.j.song.sections[1].panel;
+  let fr = await call('POST', '/api/music-video', { sd, topic: 'wealth', fillPanel: id }, admin); assert.equal(fr.status, 200, JSON.stringify(fr.j));
+  assert(/output_format.*jpeg/.test(imgBody), '패널은 jpeg 로(시작 프레임용)'); assert(/일주 상징 풍경/.test(imgBody) && imgBody.includes(L.DAY_OUTRO[sd.dayPillar.ko][0]), '일주 상징 풍경이 그림 지시문에');
+  assert.equal(fr.j.videoPending, true); assert.equal(kSubmit, 1, '영상 자동 맡김'); assert(/Symbolic backdrop/.test(kBody));
+  r = await call('POST', '/api/music-video', { sd, topic: 'wealth' }, admin); assert.equal(r.j.videosPending, 1);
+  const cv = await call('POST', '/api/music-video', { sd, topic: 'wealth', checkVideos: true }, admin); assert.equal(cv.status, 200); assert.equal(cv.j.pending, 0); assert(/^\/api\/clipfile\?k=mvvid-/.test(cv.j.panels[id].video), '완성 영상이 칸에 붙음');
+  fr = await call('POST', '/api/music-video', { sd, topic: 'wealth', fillPanel: id }, admin); assert.equal(kSubmit, 1, '있는 칸은 다시 안 맡김');
+  const cv2 = await call('POST', '/api/music-video', { sd, topic: 'wealth', checkVideos: true }); assert([401, 402, 403].includes(cv2.status), '권한 없으면 확인 못 함');
+  delete env.KLING_API_KEY; globalThis.fetch = f0; }
 // 11) 일레븐랩스 오류 → 502, 진행 중 기록 지움(다음에 다시 시도 가능)
 globalThis.fetch = async () => new Response(JSON.stringify({ detail: 'bad' }), { status: 422, headers: { 'content-type': 'application/json' } });
 r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(r.status, 502); assert(![...kv.keys()].some(k => k.startsWith('mv:song:') && JSON.parse(kv.get(k)).status === 'pending'));
@@ -152,4 +171,4 @@ assert(/HTTP 422/.test(r.j.detail) && /music_v1 재시도도/.test(r.j.detail), 
 kv.set('luckenv:flags', JSON.stringify({ version: 2, musicVideo: true })); kv.set('worlds:config', JSON.stringify({ worlds: [{ id: 'w7', access: 'paid' }] }));
 // 12) 키가 없으면 501
 delete env.ELEVENLABS_API_KEY; r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(r.status, 501);
-console.log('music-video-api-sim ok: 스위치·로그인·무료 주제 차단, 생성 3곡(종합·재물·신년운세), 캐시 재사용, 재생 Range, 패널 300칸(주제×성별) 만들기·비우기, 여·남 다른 곡, 갱스터 힙합 패러디+한국 요소 지시문, Kling 패널 영상(작업·확인·저장·정리), 오류 처리, 키 노출 없음');
+console.log('music-video-api-sim ok: 스위치·로그인·무료 주제 차단, 생성 3곡(종합·재물·신년운세), 캐시 재사용, 재생 Range, 패널 3,600칸(일주×성별×주제×구간) 만들기·비우기·자동 채우기, 여·남 다른 곡, 일주 풍경·영상 자동 생성, 갱스터 힙합 패러디+한국 요소 지시문, Kling 패널 영상(작업·확인·저장·정리), 오류 처리, 키 노출 없음');

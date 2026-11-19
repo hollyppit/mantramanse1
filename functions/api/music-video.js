@@ -123,12 +123,13 @@ export async function onRequestPost({ request, env }) {
 
   const sf = await songFor(request, env, b); if (sf.res) return sf.res;
   const x = sf.x, g = sf.g;
-  if (b && b.fillPanel) return fillPanel(env, b.fillPanel, L.fromInputs(x), g);
+  if (b && b.fillPanel) return fillPanel(env, request, b.fillPanel, L.fromInputs(x), g);
+  if (b && b.checkVideos) return checkVideos(env, L.fromInputs(x));
   if (!env.CLIPS_R2) return json({ ok: false, error: 'R2 바인딩(CLIPS_R2)이 없습니다' }, 501);
 
   const song = L.fromInputs(x), key = await sha256(JSON.stringify({ v: song.version, m: modelOf(env), lyrics: song.lyrics, style: song.style, d: song.sections.map(s => s.durationMs) }));
   // panels: 이 곡의 칸만(주인공 일주·성별·주제), fill: 빈 칸을 화면이 하나씩 채워 달라고 할 수 있는지
-  const reply = async r => json({ ok: true, key, song: publicSong(song, r), audio: '/api/music-video?a=' + key, panels: await getPanels(env, songPanelIds(song)), fill: imageReady(env) });
+  const reply = async r => json({ ok: true, key, song: publicSong(song, r), audio: '/api/music-video?a=' + key, panels: await getPanels(env, songPanelIds(song)), fill: imageReady(env), videosPending: await pendingVideos(env, songPanelIds(song)) });
   const rec = await env.GLOSSARY_KV.get(SONG(key), 'json');
   if (rec && rec.status === 'done') return reply(needSync(rec) ? await syncTiming(env, key, song, rec, null) : rec);   // 예전에 만든 곡도 처음 열 때 한 번 자막 시각을 맞춘다
   if (rec && rec.status === 'pending' && Date.now() - rec.at < PENDING_MS) return json({ ok: false, pending: true, key }, 202);
@@ -194,7 +195,7 @@ export async function onRequestGet({ request, env }) {
     const ids = L.TOPICS.flatMap(t => L.panelSlots(t, gd, day).map(s => s.id));
     const vl = typeof env.GLOSSARY_KV.list === 'function' ? await env.GLOSSARY_KV.list({ prefix: 'mv:vt:' }) : null, vtasks = ((vl && vl.keys) || []).map(k => k.name.slice(6));
     const used = parseInt(await env.GLOSSARY_KV.get(COUNT(today())), 10) || 0, pused = parseInt(await env.GLOSSARY_KV.get(PCOUNT(today())), 10) || 0;
-    return json({ day, gender: gd, hero: L.heroOf(day, gd), panels: await getPanels(env, ids), version: L.VERSION, flag: await flagOn(env), today: used, limit: limitOf(env), panelToday: pused, panelLimit: panelLimitOf(env), model: modelOf(env),
+    return json({ day, gender: gd, hero: L.heroOf(day, gd), panels: await getPanels(env, ids), version: L.VERSION, flag: await flagOn(env), today: used, limit: limitOf(env), panelToday: pused, panelLimit: panelLimitOf(env), videoToday: parseInt(await env.GLOSSARY_KV.get(VCOUNT(today())), 10) || 0, videoLimit: videoLimitOf(env), model: modelOf(env),
       vtasks, lastError: await env.GLOSSARY_KV.get('mv:lastError', 'json'), lastPanelError: await env.GLOSSARY_KV.get('mv:lastPanelError', 'json'), configured: { music: !!env.ELEVENLABS_API_KEY, image: !!(env.OPENAI_API_KEY || env.GEMINI_API_KEY), video: klingEnabled(env), r2: !!env.CLIPS_R2 } });
   }
   return json({ error: 'not-found' }, 404);
@@ -241,11 +242,12 @@ const EL_MOTIF = { 목: '초록 네온과 대나무·나뭇잎', 화: '붉은 �
 function heroKo(slot) {
   const h = slot.hero, fem = slot.gender === 'F';
   return h.nameKo + ' 얼굴을 한 의인화 ' + (fem ? '여성' : '남성') + ' 래퍼(사람 몸에 ' + h.colorKo + ' ' + h.animalKo + ' 머리, ' + (fem ? '걸크러시 느낌의 당당한' : '여유 있고 당당한') + ' 스트리트 패션). 모든 장면에서 같은 모습으로 알아볼 수 있게.' +
-    ' 크루: ' + h.crewKo.join('·') + ' 얼굴의 의인화 래퍼들.' + (slot.topic === 'love' ? ' 짝: ' + h.partnerKo + ' 얼굴의 의인화 캐릭터.' : '');
+    ' 크루: ' + h.crewKo.join('·') + ' 얼굴의 의인화 래퍼들.' + (slot.topic === 'love' ? ' 짝: ' + h.partnerKo + ' 얼굴의 의인화 캐릭터.' : '') +
+    (h.motifKo ? ' 일주 상징 풍경: “' + h.motifKo + '” 의 이미지가 배경·조명·소품에 은은하게 녹아든다.' : '');
 }
 function heroEn(slot) {
   const h = slot.hero, fem = slot.gender === 'F';
-  return 'The main character is an anthropomorphic ' + h.colorEn + ' ' + h.animalEn + ' ' + (fem ? 'female' : 'male') + ' rapper (human body, ' + h.animalEn + ' head, stylish streetwear), with a crew of ' + h.crewEn.join(' and ') + ' characters' + (slot.topic === 'love' ? ' and a ' + h.partnerEn + ' partner' : '') + '.';
+  return 'The main character is an anthropomorphic ' + h.colorEn + ' ' + h.animalEn + ' ' + (fem ? 'female' : 'male') + ' rapper (human body, ' + h.animalEn + ' head, stylish streetwear), with a crew of ' + h.crewEn.join(' and ') + ' characters' + (slot.topic === 'love' ? ' and a ' + h.partnerEn + ' partner' : '') + '.' + (h.motifKo ? ' Symbolic backdrop of this birth pillar (Korean): ' + h.motifKo + '.' : '');
 }
 function panelPrompt(slot, extra) {
   return MV_LOOK + '\n주인공(사주 일주 ' + slot.day + '): ' + heroKo(slot) + '\n주제: ' + (TOPIC_SCENE[slot.topic] || TOPIC_SCENE.self) + '\n장면: ' + SECTION_SCENE[slot.section] +
@@ -274,7 +276,7 @@ const rid = () => Array.from(crypto.getRandomValues(new Uint8Array(4)), x => x.t
 
 // 칸 그림 한 장 만들기(관리자·사용자 자동 채우기 공통). 실패하면 관리자 화면 '마지막 패널 오류'에 남기고 throw
 async function makePanel(env, slot, extra, provider) {
-  let g; try { g = await generate(env, panelPrompt(slot, extra), provider === 'openai' || provider === 'gemini' ? provider : '', null); }
+  let g; try { g = await generate(env, panelPrompt(slot, extra), provider === 'openai' || provider === 'gemini' ? provider : '', null, { format: 'jpeg' }); }
   catch (e) { await env.GLOSSARY_KV.put('mv:lastPanelError', JSON.stringify({ at: Date.now(), slot: slot.id, message: String(e.message).slice(0, 1200) }), { expirationTtl: 7 * 86400 }); throw e; }
   const k = 'mvpanel-' + slot.id + '-' + rid() + '.' + g.ext;
   await putDerivedFile(env, k, g.bytes, { httpMetadata: { contentType: g.mime } });
@@ -284,7 +286,7 @@ async function makePanel(env, slot, extra, provider) {
 }
 
 // 사용자 화면: 이 곡의 빈 칸 하나를 채운다(곡을 열 권한이 있는 사람만, 이 곡의 칸만). 같은 칸을 동시에 만들지 않도록 잠근다
-async function fillPanel(env, id, song, g) {
+async function fillPanel(env, request, id, song, g) {
   if (!songPanelIds(song).includes(id)) return json({ ok: false, error: 'not-in-song' }, 400);
   const slot = L.parsePanelId(id); if (!slot) return json({ ok: false, error: 'bad-slot' }, 400);
   const have = (await getPanels(env, [id]))[id]; if (have) return json({ ok: true, id, panel: have });
@@ -294,7 +296,7 @@ async function fillPanel(env, id, song, g) {
   if (!g.admin && used >= panelLimitOf(env)) return json({ ok: false, error: 'panel-daily-limit' }, 429);
   await env.GLOSSARY_KV.put(PLOCK(id), '1', { expirationTtl: 300 });
   await env.GLOSSARY_KV.put(PCOUNT(day), String(used + 1), { expirationTtl: 3 * 86400 });
-  try { return json({ ok: true, id, panel: await makePanel(env, slot, '', '') }); }
+  try { const rec = await makePanel(env, slot, '', ''); const video = await autoVideo(env, new URL(request.url).origin, slot, rec); return json({ ok: true, id, panel: rec, videoPending: video }); }
   catch (e) { return json({ ok: false, error: 'panel-failed', detail: g.admin ? e.message : undefined }, 502); }
   finally { await env.GLOSSARY_KV.delete(PLOCK(id)); }
 }
@@ -335,18 +337,44 @@ async function panelPost(request, env, p) {
   }
   return json({ error: 'generate·uploadKey·clear·video 중 하나가 필요합니다' }, 400);
 }
+// ── 영상 자동 생성(사용자 요청 2026-11-19): 사용자 화면이 빈 칸 그림을 만들면 이어서 Kling 영상(5초)을 맡긴다.
+//    칸 그림(jpeg)을 시작 프레임으로 그대로 쓴다. 하루 상한 MV_VIDEO_DAILY_LIMIT(기본 40편), 이미 맡긴 칸은 다시 맡기지 않는다.
+//    완성은 화면이 곡 단위로 확인해 달라고 할 때(checkVideos) 또는 관리자 확인(vt)에서 R2 로 옮겨 칸에 붙는다.
+const VCOUNT = d => 'mv:vcount:' + d;
+const videoLimitOf = env => { const n = parseInt(env.MV_VIDEO_DAILY_LIMIT, 10); return Number.isFinite(n) && n >= 0 ? n : 40; };
+async function autoVideo(env, origin, slot, rec) {
+  const k = fileOf(rec && rec.url);
+  if (!klingEnabled(env) || !k || !/.(jpe?g|png)$/i.test(k)) return false;
+  if (await env.GLOSSARY_KV.get(VT(slot.id))) return true;
+  const day = today(), used = parseInt(await env.GLOSSARY_KV.get(VCOUNT(day)), 10) || 0; if (used >= videoLimitOf(env)) return false;
+  await env.GLOSSARY_KV.put(VCOUNT(day), String(used + 1), { expirationTtl: 3 * 86400 });
+  const obj = await env.CLIPS_R2.get(k), imageUrl = /^https:/.test(origin) ? origin + '/api/clipfile?k=' + encodeURIComponent(k) : '';
+  try {
+    const taskId = await klingSubmit(env, { imageUrl, b64: async () => toB64(new Uint8Array(await obj.arrayBuffer())), prompt: videoPrompt(slot, ''), negative: VIDEO_NEG, duration: 5 });
+    await env.GLOSSARY_KV.put(VT(slot.id), JSON.stringify({ taskId, startKey: null, at: Date.now(), auto: true }), { expirationTtl: 86400 });
+    return true;
+  } catch (e) { await env.GLOSSARY_KV.put('mv:lastPanelError', JSON.stringify({ at: Date.now(), slot: slot.id, message: '자동 영상: ' + String(e.message).slice(0, 1100) }), { expirationTtl: 7 * 86400 }); return false; }
+}
+async function pendingVideos(env, ids) { let n = 0; await Promise.all(ids.map(async id => { if (await env.GLOSSARY_KV.get(VT(id))) n++; })); return n; }
+// 곡 단위 영상 확인(그 곡을 열 권한이 있는 사람): 진행 중인 칸만 Kling 에 물어보고, 끝난 것은 붙인다
+async function checkVideos(env, song) {
+  const ids = songPanelIds(song); let pending = 0;
+  for (const id of ids) { if (!(await env.GLOSSARY_KV.get(VT(id)))) continue; const r = await videoTask(env, id); if (r.state === 'processing') pending++; }
+  return json({ ok: true, panels: await getPanels(env, ids), pending });
+}
 // 영상 작업 확인(관리자): 끝났으면 R2 로 옮겨 칸에 연결한다
-async function videoCheck(env, slotId) {
-  const t = await env.GLOSSARY_KV.get(VT(slotId), 'json'); if (!t) return json({ ok: true, state: 'none', panels: await getPanels(env, [slotId]) });
-  if (Date.now() - t.at > VT_AGE) { await env.GLOSSARY_KV.delete(VT(slotId)); return json({ ok: false, state: 'failed', error: '3시간 안에 끝나지 않아 기록을 지웠습니다' }); }
-  let q; try { q = await klingQuery(env, t.taskId); } catch (e) { return json({ ok: false, state: 'processing', error: e.message }); }
-  if (q.status === 'processing') return json({ ok: true, state: 'processing' });
-  if (q.status === 'failed') { await env.GLOSSARY_KV.delete(VT(slotId)); await dropStart(env, t.startKey); return json({ ok: false, state: 'failed', error: q.msg || '영상 생성에 실패했습니다' }); }
-  const r = await fetch(q.url); if (!r.ok) return json({ ok: false, state: 'processing', error: '영상 파일을 받지 못했습니다(' + r.status + ')' });
-  const bytes = new Uint8Array(await r.arrayBuffer()); if (bytes.length > 80 * 1024 * 1024) return json({ ok: false, state: 'failed', error: '영상이 80MB 를 넘습니다' });
+async function videoCheck(env, slotId) { const r = await videoTask(env, slotId); return json(Object.assign({ ok: r.state !== 'failed' }, r)); }
+async function videoTask(env, slotId) {
+  const t = await env.GLOSSARY_KV.get(VT(slotId), 'json'); if (!t) return { state: 'none', panels: await getPanels(env, [slotId]) };
+  if (Date.now() - t.at > VT_AGE) { await env.GLOSSARY_KV.delete(VT(slotId)); return ({ ok: false, state: 'failed', error: '3시간 안에 끝나지 않아 기록을 지웠습니다' }); }
+  let q; try { q = await klingQuery(env, t.taskId); } catch (e) { return ({ ok: false, state: 'processing', error: e.message }); }
+  if (q.status === 'processing') return ({ ok: true, state: 'processing' });
+  if (q.status === 'failed') { await env.GLOSSARY_KV.delete(VT(slotId)); await dropStart(env, t.startKey); return ({ ok: false, state: 'failed', error: q.msg || '영상 생성에 실패했습니다' }); }
+  const r = await fetch(q.url); if (!r.ok) return ({ ok: false, state: 'processing', error: '영상 파일을 받지 못했습니다(' + r.status + ')' });
+  const bytes = new Uint8Array(await r.arrayBuffer()); if (bytes.length > 80 * 1024 * 1024) return ({ ok: false, state: 'failed', error: '영상이 80MB 를 넘습니다' });
   const k = 'mvvid-' + slotId + '-' + rid() + '.mp4'; await putDerivedFile(env, k, bytes, { httpMetadata: { contentType: 'video/mp4' } });
   const cell = (await getPanels(env, [slotId]))[slotId];
   if (!cell) { await dropFile(env, k); } else { await dropFile(env, fileOf(cell.video)); cell.video = '/api/clipfile?k=' + k; cell.videoBy = 'kling'; await putPanel(env, slotId, cell); }
   await env.GLOSSARY_KV.delete(VT(slotId)); await dropStart(env, t.startKey);
-  return json({ ok: true, state: 'done', panels: { [slotId]: cell || null } });
+  return ({ ok: true, state: 'done', panels: { [slotId]: cell || null } });
 }

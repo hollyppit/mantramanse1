@@ -238,16 +238,17 @@ async function errDetail(r) { try { return ' ' + (await r.text()).slice(0, 200);
 async function viaOpenAI(env, prompt, ref, opts) {
   const refs = ref ? [].concat(ref) : [];
   const model = env.PANEL_IMAGE_MODEL || 'gpt-image-2', size = (opts && opts.size) || env.PANEL_IMAGE_SIZE || '1024x1536', quality = env.PANEL_IMAGE_QUALITY || 'medium';
+  const fmt = opts && opts.format === 'jpeg' ? 'jpeg' : 'webp';   // 기본 webp. 뮤직비디오 패널은 Kling 시작 프레임으로 바로 쓰려고 jpeg(Kling 은 JPG·PNG 만 받는다)
   let r;
   if (refs.length) { // 참고·바탕 이미지가 있으면 images/edits (multipart, 여러 장 가능)
-    const f = new FormData(); f.append('model', model); f.append('prompt', prompt); f.append('size', size); f.append('quality', quality); f.append('output_format', 'webp');
+    const f = new FormData(); f.append('model', model); f.append('prompt', prompt); f.append('size', size); f.append('quality', quality); f.append('output_format', fmt);
     refs.forEach((x, i) => f.append('image[]', new Blob([x.bytes], { type: x.mime }), 'ref' + i + '.' + (/webp/.test(x.mime) ? 'webp' : /jpe?g/.test(x.mime) ? 'jpg' : 'png')));
     r = await aiFetch(env, 'panelart', 'https://api.openai.com/v1/images/edits', { method: 'POST', signal: AbortSignal.timeout(110000), headers: { authorization: 'Bearer ' + env.OPENAI_API_KEY }, body: f });
   } else r = await aiFetch(env, 'panelart', 'https://api.openai.com/v1/images/generations', { method: 'POST', signal: AbortSignal.timeout(110000), headers: { 'content-type': 'application/json', authorization: 'Bearer ' + env.OPENAI_API_KEY },
-    body: JSON.stringify({ model, prompt, size, quality, output_format: 'webp', output_compression: 82, n: 1 }) });
+    body: JSON.stringify({ model, prompt, size, quality, output_format: fmt, output_compression: 82, n: 1 }) });
   if (!r.ok) throw new Error(`openai(${model}) ${r.status}` + await errDetail(r));
   const d = await r.json(), x = d.data && d.data[0]; if (!x || !x.b64_json) throw new Error('openai 응답에 이미지가 없습니다');
-  return { bytes: b64(x.b64_json), mime: 'image/webp', ext: 'webp', provider: 'openai', model };
+  return { bytes: b64(x.b64_json), mime: 'image/' + fmt, ext: fmt === 'jpeg' ? 'jpg' : 'webp', provider: 'openai', model };
 }
 const toB64 = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
 async function viaGemini(env, prompt, ref, opts) {

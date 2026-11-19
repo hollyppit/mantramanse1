@@ -7,14 +7,14 @@
        벌스 2 12줄  "근데 힘들었던 것, 그래도 지금"  약한 십성(5) · 빈 오행(5)/약한 십성 해법 · 구조 패턴(15) · 지금 대운 계절(6)·천간 십성(10)·상태(4) · 다시 일어서는 두 줄(일간 오행 5)
        훅      4줄  (반복)
        브리지  6줄  "올해"                           세운 계절(6) · 세운 천간 십성(10) · 대표 신살·귀인(17)
-       아웃트로 4줄 "앞으로"                         조후(3) · 합충(4) · 일간 오행(5)
+       아웃트로 4줄 "앞으로"                         조후(3) · 합충(4) · 일주 60갑자 마무리 2줄(DAY_OUTRO)
    · 브라우저(window.ReportV2.MusicVideoLyrics)와 서버(functions/api/music-video.js 가 import)가 같은 파일을 쓴다.
    · 이름·생일은 가사에 넣지 않는다(외부 음악 API 로 개인정보를 보내지 않는다). 연도는 올해 숫자만 쓴다.
    · 검사: node tests/music-video-lyrics-sim.cjs */
 (function (root) {
   'use strict';
   var R = root.ReportV2 = root.ReportV2 || {};
-  var VERSION = 'mv-lyrics-3';
+  var VERSION = 'mv-lyrics-4';
 
   /* 영어 힙합 추임새(ad-lib, 사용자 요청 2026-11-18): 줄 끝에 괄호로 붙인다 — 일레븐랩스는 괄호 안을 뒤에서 받쳐 주는 추임새로 부른다.
      일간 오행의 비트 색깔에 맞춘 묶음(목 저지 클럽·화 레이지·토 아프로비츠·금 록 랩·수 멜로딕 랩). 욕설·약물·폭력 표현은 쓰지 않는다.
@@ -272,6 +272,69 @@
   /* ── 아웃트로: 조후 1줄 + 합충 1줄 + 일간 오행 2줄 */
   var OUT_CLIMATE = { hot: '뜨거운 내 사주에 한 줄기 물 같은 쉼을 줘', cold: '차가운 내 사주에 햇볕 한 줌 같은 온기를 줘', mild: '춥지도 덥지도 않은 내 계절을 지나' };
   var OUT_REL = { clash: '부딪힌 자리마다 나를 깨우는 소리가 나', combo: '이어진 인연들이 내 노래를 같이 불러', both: '당기고 부딪히며 균형을 찾아가', none: '큰 소리 없이 잔잔하게 흘러가' };
+  /* ── 아웃트로 끝 2줄: 60갑자 일주마다 그 일주의 기질을 담은 마무리(사용자 요청 2026-11-19). 표에 없으면 일간 오행(OUT_EL)으로 */
+  var DAY_OUTRO = {
+    갑자: ['겨울 물가에 선 큰 나무처럼 생각이 깊어', '곧게 뻗는 내 고집이 결국 길이 돼'],
+    을축: ['언 땅에서도 꽃 피우는 덩굴의 끈기', '조용히 버틴 시간이 내 뿌리가 돼'],
+    병인: ['숲 위로 떠오르는 아침 해 같은 나', '시작하는 자리마다 불을 켜고 가'],
+    정묘: ['풀숲 사이 등불처럼 은은한 다정함', '작은 빛으로 누군가의 밤을 지켜'],
+    무진: ['큰 산 속에 숨은 용이 깨어나는 중', '묵직하게 쌓은 꿈이 이제 움직여'],
+    기사: ['따뜻한 밭에 햇살 드는 오후 같은 나', '부지런한 손이 결국 열매를 맺어'],
+    경오: ['달리는 말 위에 빛나는 쇠의 결', '뜨거워도 내 기준은 흔들리지 않아'],
+    신미: ['여름 들판에 반짝이는 보석 하나', '섬세하게 고른 길이 나를 빛내'],
+    임신: ['큰 강 같은 머리로 판을 읽어', '빠른 손과 넓은 생각이 내 무기'],
+    계유: ['새벽 이슬처럼 맑고 예리한 감각', '조용히 다듬은 말이 정확히 꽂혀'],
+    갑술: ['메마른 언덕에 홀로 선 큰 나무', '흔들려도 끝까지 자리를 지켜 내'],
+    을해: ['물 위에 떠도 꽃은 피워 내는 사람', '부드럽게 흘러가도 꺾이지 않아'],
+    병자: ['겨울 바다 위로 뜨는 한낮의 해', '차가운 데서 더 환하게 빛나'],
+    정축: ['언 땅 속 화롯불처럼 따뜻한 뚝심', '오래 품은 열정이 식지 않아'],
+    무인: ['호랑이 품은 큰 산 같은 기세', '한번 정하면 산처럼 밀고 가'],
+    기묘: ['봄 밭에 새싹 돋는 부드러운 힘', '사람을 키우는 손길이 내 재능'],
+    경진: ['용의 비늘처럼 단단한 쇠의 기세', '큰 판에서 더 크게 울리는 소리'],
+    신사: ['불에 달궈져 더 빛나는 보석', '뜨거운 순간에 진짜 내가 나와'],
+    임오: ['뜨거운 여름 위를 흐르는 큰 물', '열정과 냉정 사이를 자유롭게 오가'],
+    계미: ['여름 소나기처럼 반가운 사람', '메마른 마음에 촉촉이 스며들어'],
+    갑신: ['바위 위에 뿌리내린 큰 나무', '거친 자리에서 더 단단해져'],
+    을유: ['가을 바람에도 꼿꼿한 들꽃', '여린 듯 날카로운 내 감각'],
+    병술: ['노을 진 언덕을 붉게 물들이는 해', '끝까지 뜨거운 의리가 내 색'],
+    정해: ['밤바다 위 등대 불빛 같은 나', '멀리서도 길을 비춰 주는 사람'],
+    무자: ['겨울 호수를 품은 큰 산', '겉은 무던해도 속은 깊게 출렁여'],
+    기축: ['겨울 밭처럼 조용히 힘을 모아', '봄이 오면 누구보다 먼저 피워'],
+    경인: ['호랑이처럼 앞장서는 쇠의 결단', '망설임 없이 길을 내고 달려'],
+    신묘: ['봄꽃 사이 반짝이는 은빛 장신구', '예민한 눈썰미가 판을 바꿔'],
+    임진: ['큰 물 속에 잠든 용이 몸을 틀어', '스케일 큰 꿈이 파도처럼 밀려와'],
+    계사: ['뜨거운 돌 위에 내리는 단비', '차분한 머리로 불을 다룰 줄 알아'],
+    갑오: ['한여름 들판을 달리는 큰 나무 바람', '말보다 빠르게 마음이 먼저 가'],
+    을미: ['여름 언덕에 핀 질긴 꽃 한 송이', '메마른 날에도 웃음을 잃지 않아'],
+    병신: ['쇠를 비추는 눈부신 햇살', '재치 있는 말로 분위기를 바꿔'],
+    정유: ['보석을 비추는 촛불의 섬세함', '작은 디테일로 큰 감동을 만들어'],
+    무술: ['든든한 산을 지키는 충직한 개', '내 사람은 끝까지 책임지는 의리'],
+    기해: ['물 머금은 밭처럼 넉넉한 마음', '함께 있으면 누구든 편안해져'],
+    경자: ['차가운 물에 씻긴 맑은 칼날', '똑 부러진 말이 길을 깨끗이 해'],
+    신축: ['흙 속에서 빛을 기다린 보석', '참은 만큼 더 단단하게 빛나'],
+    임인: ['숲을 키우는 큰 강물의 기운', '사람과 일을 함께 키워 가'],
+    계묘: ['봄비에 피어나는 새싹 같은 사람', '부드러운 말로 마음을 열어'],
+    갑진: ['큰 산 위로 솟은 푸른 용의 나무', '포부만큼 크게 가지를 뻗어'],
+    을사: ['햇살 아래 피어난 화사한 꽃', '센스 있는 표현이 나를 빛내'],
+    병오: ['한낮의 태양 위 또 하나의 태양', '숨길 수 없는 열기가 무대를 채워'],
+    정미: ['여름밤 모닥불처럼 정 많은 사람', '곁에 있으면 누구든 데워져'],
+    무신: ['바위산처럼 듬직한 실행력', '말보다 결과로 증명해 보여'],
+    기유: ['가을 들녘에 반짝이는 수확', '꼼꼼하게 챙긴 게 다 열매가 돼'],
+    경술: ['단단한 성벽 같은 쇠의 의지', '한번 지킨 약속은 끝까지 가'],
+    신해: ['맑은 물에 씻긴 보석의 투명함', '솔직한 감성이 사람을 끌어'],
+    임자: ['밤바다처럼 깊고 넓은 속', '흐름을 읽는 눈이 누구보다 빨라'],
+    계축: ['언 땅 아래 흐르는 지하수', '티 안 나게 오래 버티는 힘'],
+    갑인: ['숲의 왕 호랑이 같은 큰 나무', '앞장서서 길을 여는 게 내 역할'],
+    을묘: ['봄 들판 가득 번지는 풀꽃', '어디서든 자연스럽게 어울려'],
+    병진: ['구름 위로 떠오르는 용의 해', '큰 꿈을 밝게 비추며 올라가'],
+    정사: ['타오르는 불꽃 속 또 하나의 불꽃', '집중하면 누구도 못 말리는 열정'],
+    무오: ['불을 품은 화산 같은 큰 산', '조용하다가도 한 번에 터뜨려'],
+    기미: ['여름 밭에 뿌리 깊은 고집', '내 페이스로 끝까지 일궈 내'],
+    경신: ['쇠 위에 쇠, 날 선 결단력', '정확하고 빠르게 판을 정리해'],
+    신유: ['다듬고 또 다듬은 보석의 완벽함', '디테일 하나도 그냥 넘기지 않아'],
+    임술: ['메마른 땅을 적시는 큰 물', '거친 곳에서 더 큰 그림을 그려'],
+    계해: ['바다로 이어지는 맑은 빗물', '깊은 감성이 끝없이 흘러']
+  };
   var OUT_EL = {
     목: ['다 자란 나무도 처음엔 씨앗이었지', '내 이야기는 아직 자라는 중이야'],
     화: ['꺼질 듯 흔들려도 다시 타오르지', '내 불빛은 아직 켜져 있어'],
@@ -402,7 +465,7 @@
       { id: 'verse2', lines: v2, el: x.lack || x.weakEl },
       { id: 'hook2', lines: hook.slice(), el: x.yong, repeatOf: 'hook' },
       { id: 'bridge', lines: br, el: x.hee },
-      { id: 'outro', lines: [OUT_CLIMATE[x.climate], OUT_REL[x.rel]].concat(OUT_EL[x.el]), el: x.el }
+      { id: 'outro', lines: [OUT_CLIMATE[x.climate], OUT_REL[x.rel]].concat(DAY_OUTRO[x.day] || OUT_EL[x.el]), el: x.el }
     ];
     parts.forEach(function (p) { p.lines = p.repeatOf ? parts[2].lines.slice() : addAdlibs(p.lines, p.id, x.el, seed, x.g); });   // 훅 반복은 첫 훅과 똑같이
     var sections = parts.map(function (p) {
@@ -497,7 +560,7 @@
     var el = STEM_EL[si], grp = SAMHAP.filter(function (x) { return x.indexOf(bi) >= 0; })[0] || [], crew = grp.filter(function (x) { return x !== bi; }), pt = YUKHAP[bi];
     g = g === 'F' ? 'F' : 'M';
     return { day: day, id: STEM_RO[si] + '-' + BRANCH_RO[bi], el: el, gender: g, colorKo: COLOR_KO[el], animalKo: ANIMAL_KO[bi], colorEn: COLOR_EN[el], animalEn: ANIMAL_EN[bi],
-      nameKo: COLOR_KO[el] + ' ' + ANIMAL_KO[bi], crewKo: crew.map(function (x) { return ANIMAL_KO[x]; }), crewEn: crew.map(function (x) { return ANIMAL_EN[x]; }), partnerKo: ANIMAL_KO[pt], partnerEn: ANIMAL_EN[pt] };
+      nameKo: COLOR_KO[el] + ' ' + ANIMAL_KO[bi], motifKo: (DAY_OUTRO[day] || [])[0] || '', crewKo: crew.map(function (x) { return ANIMAL_KO[x]; }), crewEn: crew.map(function (x) { return ANIMAL_EN[x]; }), partnerKo: ANIMAL_KO[pt], partnerEn: ANIMAL_EN[pt] };
   }
   function panelId(section, topic, g, day) { var h = heroOf(day, g); return 'mv-' + (topic && topic !== 'self' ? topic + '-' : '') + section + '-' + (h ? h.id : 'gap-ja') + '-' + (GR[g] || 'm'); }
   /* 칸 이름 → { id, topic, section, gender, day, hero } (형식이 틀리면 null) — 서버가 요청을 검사할 때 쓴다 */
@@ -515,7 +578,7 @@
   function allFragments() {
     var out = [];
     function add(v) { if (Array.isArray(v)) v.forEach(add); else if (v && typeof v === 'object') Object.keys(v).forEach(function (k) { add(v[k]); }); else if (typeof v === 'string') out.push(v); }
-    [INTRO_STEM, INTRO_BRANCH, V1_TG, V1_STAGE, V1_ZONE, V1_DOMEL, V1_PRE, HOOK_YONG, HOOK_HEE, V2_WEAK, V2_LACK, V2_PATTERN, V2_DW, V2_DW_TG, V2_DW_COND, V2_PRE, BR_YEAR, BR_TG, BR_STAR, OUT_CLIMATE, OUT_REL, OUT_EL].forEach(add);
+    [INTRO_STEM, INTRO_BRANCH, V1_TG, V1_STAGE, V1_ZONE, V1_DOMEL, V1_PRE, HOOK_YONG, HOOK_HEE, V2_WEAK, V2_LACK, V2_PATTERN, V2_DW, V2_DW_TG, V2_DW_COND, V2_PRE, BR_YEAR, BR_TG, BR_STAR, OUT_CLIMATE, OUT_REL, OUT_EL, DAY_OUTRO].forEach(add);
     ['love', 'wealth', 'career', 'newyear'].forEach(function (t) { var tp = TP(t); if (tp) Object.keys(tp).forEach(function (k) { if (k !== 'label' && k !== 'world' && k !== 'titleWord') add(tp[k]); }); });
     return out;
   }
@@ -538,6 +601,6 @@
   }
 
   R.MusicVideoLyrics = { VERSION: VERSION, BANNED: BANNED, SECTIONS: SECTIONS, SECTION_KO: SECTION_KO, ELK: ELK, ELR: ELR, DAYS: DAYS, GENDERS: GENDERS, GENDER_KO: GENDER_KO, DUR: DUR, TOPICS: TOPICS, TOPIC_KO: TOPIC_KO, TOPIC_WORLD: TOPIC_WORLD,
-    inputsOf: inputsOf, fromInputs: fromInputs, compose: compose, toElevenPlan: toElevenPlan, toElevenV1Plan: toElevenV1Plan, alignToTranscript: alignToTranscript, stripAdlibs: stripAdlibs, ADLIB: ADLIB, panelId: panelId, parsePanelId: parsePanelId, panelSlots: panelSlots, heroOf: heroOf, bannedIn: bannedIn, allFragments: allFragments, cueAt: cueAt, hash: hash };
+    inputsOf: inputsOf, fromInputs: fromInputs, compose: compose, toElevenPlan: toElevenPlan, toElevenV1Plan: toElevenV1Plan, alignToTranscript: alignToTranscript, stripAdlibs: stripAdlibs, ADLIB: ADLIB, panelId: panelId, parsePanelId: parsePanelId, panelSlots: panelSlots, heroOf: heroOf, bannedIn: bannedIn, allFragments: allFragments, DAY_OUTRO: DAY_OUTRO, cueAt: cueAt, hash: hash };
   if (typeof module !== 'undefined' && module.exports) module.exports = R.MusicVideoLyrics;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -113,7 +113,7 @@
         .then(function (d) {
           if (!alive) return;
           if (d._s === 202 && d.pending && tries++ < 30) { setTimeout(req, 8000); return; }   // 같은 곡을 다른 기기에서 만드는 중
-          if (d.ok && d.audio && d.song) { play(el, d, track); if (d.fill) fillPanels(el, d, body, o.headers); return; }
+          if (d.ok && d.audio && d.song) { play(el, d, track); if (d.fill) fillPanels(el, d, body, o.headers); else if (d.videosPending) pollVideos(el, d, body, o.headers); return; }
           if (d._s === 401 || d._s === 402) { close(); if (o.onLocked) o.onLocked(d.error === 'login' ? 'login' : 'purchase'); return; }
           fail(el, d._s === 429 ? '오늘 만들 수 있는 노래가 모두 찼어요. 내일 다시 열어 주세요.' : d._s === 403 ? '이 주제에서는 뮤직비디오를 열 수 없어요.' : d._s === 409 ? '이 괘의 풀이를 다듬는 중이에요. 준비되면 바로 들을 수 있어요.' + (d.detail ? '\n(' + d.detail + ')' : '') : '노래를 만들지 못했어요. 잠시 뒤 다시 열어 주세요.' + (d.detail ? '\n\n[관리자에게만 보임] ' + d.detail : ''), d._s >= 500);   // detail 은 서버가 관리자 요청에만 담는다
           track('mv_error', { topic: preview.topic, status: d._s });
@@ -129,17 +129,18 @@
   /* 빈 패널 채우기: 주인공(일주 동물 래퍼)·성별·주제마다 칸이 달라 미리 다 만들 수 없으니, 곡이 재생되는 동안 이 곡의 빈 칸을
      서버에 하나씩 만들어 달라고 한다(한 장 20~60초). 만들어지는 대로 화면에 바로 붙고, 같은 칸은 다음 사람부터 바로 보인다. */
   function fillPanels(el, d, body, headers) {
-    var song = d.song, panels = d.panels || (d.panels = {}), want = [];
+    var song = d.song, panels = d.panels || (d.panels = {}), want = [], videoAsked = false;
     song.sections.forEach(function (s) { if (!panels[s.panel] && want.indexOf(s.panel) < 0) want.push(s.panel); });
     var base = {}; try { base = JSON.parse(body); } catch (e) { return; }
     (function next() {
-      if (!want.length || !document.body.contains(el)) return;
+      if (!document.body.contains(el)) return;
+      if (!want.length) { if (videoAsked || d.videosPending) pollVideos(el, d, body, headers); return; }
       var id = want.shift();
       root.fetch('/api/music-video', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, (headers && headers()) || {}), body: JSON.stringify(Object.assign({}, base, { fillPanel: id })) })
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (x) { x._s = r.status; return x; }); })
         .then(function (x) {
           if (x.ok && x.panel && x.panel.url) {
-            panels[id] = x.panel;
+            panels[id] = x.panel; if (x.videoPending) videoAsked = true;
             song.sections.forEach(function (s, i) { if (s.panel === id || (s.panelFallback === id && !panels[s.panel])) { var n = el.querySelector('.mv-stage i[data-i="' + i + '"]'); if (n) n.style.backgroundImage = bgFor(s, panels); } });
             next(); return;
           }
@@ -148,6 +149,33 @@
           next();
         })
         .catch(function () { next(); });
+    })();
+  }
+  /* 패널 영상: 그림을 만든 뒤 서버가 Kling 영상을 자동으로 맡긴다(1~5분). 30초마다 곡 단위로 확인해, 끝난 칸은 그 구간 배경을 영상으로 바꾼다 */
+  function stillMode() { try { return !!((root.navigator.connection && root.navigator.connection.saveData) || root.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; } }
+  function attachVideos(el, song, panels) {
+    if (stillMode()) return;
+    song.sections.forEach(function (s, i) {
+      var p = panels[s.panel] || panels[s.panelFallback], n = el.querySelector('.mv-stage i[data-i="' + i + '"]');
+      if (!n || !p || !p.video || n.querySelector('video')) return;
+      var v = document.createElement('video'); v.setAttribute('data-v', ''); v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = el._sec === i ? 'auto' : 'none'; v.src = p.video;
+      n.appendChild(v);
+      if (el._sec === i && el._audio && !el._audio.paused) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () { }); }
+    });
+  }
+  function pollVideos(el, d, body, headers) {
+    if (el._polling) return; el._polling = true;
+    var base = {}; try { base = JSON.parse(body); } catch (e) { return; }
+    var tries = 0;
+    (function tick() {
+      if (!document.body.contains(el) || tries++ > 16) return;
+      setTimeout(function () {
+        if (!document.body.contains(el)) return;
+        root.fetch('/api/music-video', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json' }, (headers && headers()) || {}), body: JSON.stringify(Object.assign({}, base, { checkVideos: true })) })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (x) { if (!x || !x.ok) return; Object.keys(x.panels || {}).forEach(function (k) { d.panels[k] = x.panels[k]; }); attachVideos(el, d.song, d.panels); if (x.pending > 0) tick(); })
+          .catch(function () { tick(); });
+      }, 30000);
     })();
   }
   function play(el, d, track) {
@@ -173,7 +201,7 @@
     function songMs() { if (song.timing && song.timing.length) return audio.currentTime * 1000; var dur = audio.duration; return isFinite(dur) && dur > 0 ? (audio.currentTime / dur) * song.totalMs : audio.currentTime * 1000; }
     function tick() {
       var ms = songMs(), cue = lib.cueAt(song, ms), si = song.sections.indexOf(cue.section);
-      if (si !== lastSec) { lastSec = si; stage.querySelectorAll('i').forEach(function (n) { n.classList.toggle('on', +n.dataset.i === si); }); secEl.textContent = cue.section.name; showVid(si); }
+      if (si !== lastSec) { lastSec = si; stage.querySelectorAll('i').forEach(function (n) { n.classList.toggle('on', +n.dataset.i === si); }); secEl.textContent = cue.section.name; el._sec = si; showVid(si); }
       var key = cue.line + '|' + cue.lineIndex + '|' + si;
       if (key !== lastLine) { lastLine = key; lineEl.textContent = cue.line; var nx = cue.next != null ? cue.next : (cue.section.lines[cue.lineIndex + 1] || ((song.sections[si + 1] || {}).lines || [])[0] || ''); nextEl.textContent = nx; }   // 쉬는 구간(전주·간주)에는 줄을 비우고 다음 줄만 미리 보여 준다
       var dur = isFinite(audio.duration) && audio.duration > 0 ? audio.duration * 1000 : song.totalMs;
