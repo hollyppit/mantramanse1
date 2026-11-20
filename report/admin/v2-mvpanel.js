@@ -95,10 +95,10 @@
   }
   function optRow() {
     var lib = L(), cur = optCur(), O = lib.OPTIONS;
-    return '<div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">' + [['genre', '장르'], ['mood', '분위기'], ['vocal', '보컬']].map(function (g) {
+    return '<div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">' + [['genre', '장르'], ['mood', '분위기'], ['vocal', '보컬'], ['tone', '목소리 톤']].map(function (g) {
       return '<div class="row" style="gap:6px;flex-wrap:wrap;align-items:center"><span class="muted" style="min-width:44px">' + g[1] + '</span>' + O[g[0]].map(function (x) {
         return '<button class="btn" style="padding:4px 10px;font-size:13px' + (cur[g[0]] === x.id ? ';outline:2px solid #C9A25C;font-weight:700' : '') + '" data-mvopt="' + g[0] + '" data-v="' + x.id + '">' + esc(optLabel(g[0], x)) + '</button>'; }).join('') + '</div>';
-    }).join('') + '<p class="muted" style="margin:2px 0 0;font-size:12px">사용자가 뮤직비디오를 열면 보는 것과 같은 옵션입니다. 모두 기본(내 사주 추천·기본·사주대로)이면 예전과 같은 곡(캐시), 다른 조합은 새 곡을 만듭니다(관리자는 하루 상한 없음).</p></div>';
+    }).join('') + '<p class="muted" style="margin:2px 0 0;font-size:12px">사용자가 뮤직비디오를 열면 보는 것과 같은 옵션입니다. 모두 기본(내 사주 추천·기본·사주대로·기본 톤)이면 예전과 같은 곡(캐시), 다른 조합은 새 곡을 만듭니다(관리자는 하루 상한 없음).</p></div>';
   }
   function simSd() {
     var s = S.sim, inp = { year: +s.year, month: +s.month, day: +s.day, minute: 0, gender: s.gender, calendar: 'solar', city: '서울' };

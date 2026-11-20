@@ -148,7 +148,7 @@
     };
     var box = document.createElement('div'); box.className = 'mv-pick';
     var group = function (k, title) { return '<p class="mv-pl">' + title + '</p><div class="mv-chips" data-k="' + k + '">' + O[k].map(function (x) { return '<button type="button" data-v="' + x.id + '" aria-pressed="' + (cur[k] === x.id) + '">' + escH(label(k, x)) + '</button>'; }).join('') + '</div>'; };
-    box.innerHTML = '<h5>어떤 느낌으로 만들까요?</h5>' + group('genre', '장르') + group('mood', '분위기') + group('vocal', '보컬') +
+    box.innerHTML = '<h5>어떤 느낌으로 만들까요?</h5>' + group('genre', '장르') + group('mood', '분위기') + group('vocal', '보컬') + group('tone', '목소리 톤') +
       '<button type="button" class="mv-go">이 느낌으로 뮤직비디오 만들기</button><p class="mv-note">가사는 내 사주 그대로예요. 같은 조합은 다음부터 바로 열리고,<br>새 조합은 하루에 몇 곡까지만 만들 수 있어요.</p>';
     box.querySelectorAll('.mv-chips').forEach(function (g) { g.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; cur[g.dataset.k] = b.dataset.v; g.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); }); }); });
     box.querySelector('.mv-go').onclick = function () { try { root.localStorage.setItem(OPT_KEY, JSON.stringify(cur)); } catch (e) { } box.remove(); go(lib.optsOf(cur)); };

@@ -381,23 +381,57 @@
   var GENRE = {
     funk: { ko: '펑키 바운스', base: STYLE.목 }, westcoast: { ko: '웨스트코스트', base: STYLE.화 }, afro: { ko: '아프로스윙', base: STYLE.토 },
     jazzy: { ko: '재지 힙합', base: STYLE.금 }, rnb: { ko: 'R&B·소울', base: STYLE.수 },
+    boombap: { ko: '붐뱁', base: ['classic korean hip hop', 'boom bap', 'dusty sampled drums', 'hard snare on two and four', 'jazzy vinyl sample chops', 'turntable scratches', 'head-nodding groove', '90 bpm'], unNeg: ['boom bap', 'dated 2000s sound'] },
     trap: { ko: '멜로딕 트랩', base: ['trendy modern k-hip hop', 'upbeat', 'catchy', 'melodic trap', 'pluggnb', 'dreamy bell synths', 'rolling hi-hats', 'hard-hitting 808 bass', 'polished radio-ready mix', '140 bpm'] },
-    party: { ko: '신나는 파티', base: ['trendy modern k-hip hop', 'upbeat', 'catchy', 'jersey club bounce', 'sliding 808s', 'bright plucked synths', 'chopped vocal samples', 'festival party energy', 'polished radio-ready mix', '140 bpm'] }
+    hardtrap: { ko: '하드 트랩', base: ['trendy modern k-hip hop', 'hard trap', 'booming distorted 808s', 'rapid hi-hat rolls', 'menacing synth bells', 'stadium energy', 'polished radio-ready mix', '145 bpm'] },
+    gangsta: { ko: '갱스터 힙합', base: ['west coast gangsta rap groove', 'g-funk', 'whiny g-funk synth lead', 'lowrider bounce', 'deep funk bassline', 'laid-back cool swagger', '92 bpm'], unNeg: ['dated 2000s sound'] },
+    drill: { ko: '드릴', base: ['trendy modern k-hip hop', 'drill', 'sliding 808 glides', 'syncopated drill hi-hats', 'tense piano riff', 'cold confident delivery', '142 bpm'] },
+    oldschool: { ko: '올드스쿨', base: ['old school hip hop', 'classic breakbeat drums', 'turntable scratching', 'funky horn stabs', 'party block energy', '98 bpm'], unNeg: ['dated 2000s sound'] },
+    party: { ko: '신나는 파티', base: ['trendy modern k-hip hop', 'upbeat', 'catchy', 'jersey club bounce', 'sliding 808s', 'bright plucked synths', 'chopped vocal samples', 'festival party energy', 'polished radio-ready mix', '140 bpm'] },
+    kpop: { ko: '케이팝 힙합', base: ['k-pop hip hop', 'idol group hip hop energy', 'punchy synth bass', 'big chant chorus', 'dance break', 'glossy pop production', '120 bpm'] },
+    lofi: { ko: '로파이 칠합', base: ['lo-fi chill hop', 'dusty rhodes keys', 'soft vinyl crackle', 'lazy swung drums', 'warm tape saturation', '85 bpm'], unNeg: ['lo-fi'] },
+    rockrap: { ko: '록 랩', base: ['rock rap crossover', 'distorted electric guitar riffs', 'live band drums', 'arena energy', 'polished mix', '128 bpm'] },
+    emo: { ko: '이모 랩', base: ['emo rap', 'melancholic acoustic guitar loop', 'melodic sung rap', 'heavy 808 bass', 'heartfelt emotional delivery', '140 bpm'], unNeg: ['sad mood'] }
   };
-  var MOOD = { auto: { ko: '기본', styles: [] }, hype: { ko: '신나게', styles: ['high energy', 'hype crowd ad-libs', 'bigger punchier drums'] }, chill: { ko: '감성 있게', styles: ['mellow late-night vibe', 'warm atmospheric pads', 'emotional melodic hook'] } };
+  var MOOD = {
+    auto: { ko: '기본', styles: [] },
+    hype: { ko: '신나게', styles: ['high energy', 'hype crowd ad-libs', 'bigger punchier drums'] },
+    chill: { ko: '감성 있게', styles: ['mellow late-night vibe', 'warm atmospheric pads', 'emotional melodic hook'] },
+    swag: { ko: '자신만만 스웩', styles: ['cocky confident swagger', 'boastful flex energy', 'punchy ad-libs'] },
+    sad: { ko: '아련하고 슬프게', styles: ['melancholic bittersweet', 'nostalgic emotional chords', 'heartfelt delivery'], unNeg: ['sad mood'] },
+    dark: { ko: '어둡고 묵직하게', styles: ['dark moody atmosphere', 'heavy brooding bass', 'cinematic tension'], unNeg: ['dark gloomy'] },
+    romantic: { ko: '설레고 로맨틱하게', styles: ['romantic warm vibe', 'sweet tender melody', 'smooth seductive groove'] },
+    dreamy: { ko: '몽환적으로', styles: ['dreamy ethereal atmosphere', 'lush reverb pads', 'floating vocal layers'] },
+    epic: { ko: '웅장하게', styles: ['epic cinematic build', 'orchestral hits', 'triumphant anthem energy'] },
+    playful: { ko: '유쾌하고 장난스럽게', styles: ['playful fun bounce', 'quirky catchy melody', 'light cheerful energy'] },
+    fierce: { ko: '불타오르게', styles: ['fierce determined energy', 'intense driving drums', 'fired-up delivery'] }
+  };
   var VOCAL_KO = { auto: '사주대로', F: '여성 보컬', M: '남성 보컬' };
+  /* 목소리 톤(성별과 따로 고른다) */
+  var TONE = {
+    auto: { ko: '기본', styles: [] },
+    deep: { ko: '묵직한 중저음', styles: ['deep low-pitched voice', 'rich baritone rap tone'] },
+    husky: { ko: '허스키', styles: ['husky raspy voice', 'gritty textured tone'] },
+    smooth: { ko: '부드러운 미성', styles: ['smooth silky voice', 'soft gentle tone'] },
+    high: { ko: '하이톤', styles: ['high-pitched bright voice', 'crisp clear tone'] },
+    cute: { ko: '아이톤', styles: ['cute youthful bright tone', 'playful sweet high voice'] },
+    breathy: { ko: '속삭이듯', styles: ['breathy whisper-like delivery', 'intimate close-mic tone'] },
+    power: { ko: '파워풀', styles: ['powerful strong voice', 'belting energetic chorus'] }
+  };
   var OPTIONS = {
     genre: ['auto'].concat(Object.keys(GENRE)).map(function (k) { return { id: k, ko: k === 'auto' ? '내 사주 추천' : GENRE[k].ko }; }),
     mood: Object.keys(MOOD).map(function (k) { return { id: k, ko: MOOD[k].ko }; }),
-    vocal: Object.keys(VOCAL_KO).map(function (k) { return { id: k, ko: VOCAL_KO[k] }; })
+    vocal: Object.keys(VOCAL_KO).map(function (k) { return { id: k, ko: VOCAL_KO[k] }; }),
+    tone: Object.keys(TONE).map(function (k) { return { id: k, ko: TONE[k].ko }; })
   };
   function optsOf(o) {
     o = o && typeof o === 'object' ? o : {};
-    return { genre: GENRE[o.genre] ? o.genre : 'auto', mood: MOOD[o.mood] ? o.mood : 'auto', vocal: o.vocal === 'F' || o.vocal === 'M' ? o.vocal : 'auto' };
+    return { genre: GENRE[o.genre] ? o.genre : 'auto', mood: MOOD[o.mood] ? o.mood : 'auto', vocal: o.vocal === 'F' || o.vocal === 'M' ? o.vocal : 'auto', tone: TONE[o.tone] ? o.tone : 'auto' };
   }
+  function negOf(op) { var un = ((op.genre !== 'auto' && GENRE[op.genre].unNeg) || []).concat(MOOD[op.mood].unNeg || []); return NEG_STYLE.filter(function (w) { return un.indexOf(w) < 0; }); }
   function optsKo(op, el) {
     var g = op.genre === 'auto' ? '내 사주 추천(' + GENRE[EL_GENRE[el] || 'afro'].ko + ')' : GENRE[op.genre].ko;
-    return [g, MOOD[op.mood].ko, VOCAL_KO[op.vocal]].join(' · ');
+    return [g, MOOD[op.mood].ko, VOCAL_KO[op.vocal]].concat(op.tone && op.tone !== 'auto' ? [TONE[op.tone].ko] : []).join(' · ');
   }
 
   function hash(s) { var h = 5381; s = String(s); for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return h; }
@@ -521,7 +555,7 @@
       version: VERSION, topic: topic, topicKo: TOPIC_KO[topic], inputs: x,
       title: (topic === 'newyear' ? x.ny.year + ' ' : '') + x.day + ' 일주, ' + (word ? word + '에 부는 ' : '') + COLOR[x.yong] + ' 바람',
       gender: x.g, hero: heroOf(x.day, x.g), opt: op, optKo: optsKo(op, x.el),
-      style: (op.genre === 'auto' ? STYLE[x.el] : GENRE[op.genre].base).concat(MOOD[op.mood].styles, VOCAL[vg] || VOCAL.M), negativeStyle: NEG_STYLE.concat(NEG_VOCAL[vg] || NEG_VOCAL.M),
+      style: (op.genre === 'auto' ? STYLE[x.el] : GENRE[op.genre].base).concat(MOOD[op.mood].styles, VOCAL[vg] || VOCAL.M, TONE[op.tone].styles), negativeStyle: negOf(op).concat(NEG_VOCAL[vg] || NEG_VOCAL.M),
       sections: sections, totalMs: t,
       lyrics: sections.map(function (s) { return s.tag + '\n' + s.lines.join('\n'); }).join('\n\n')
     };

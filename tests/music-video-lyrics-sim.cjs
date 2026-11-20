@@ -179,7 +179,10 @@ if (process.argv.includes('--show')) for (const t of ['love', 'newyear']) { cons
     assert(s2.optKo && !/undefined/.test(s2.optKo)); assert.deepEqual(L.bannedIn(s2.lyrics), []);
   }
   assert.equal(styles.size, (L.OPTIONS.genre.length - 1) * L.OPTIONS.mood.length * (L.OPTIONS.vocal.length - 1), '장르 auto = 오행 추천 장르, 보컬 auto = 사주 성별과 같은 곡 — 나머지 조합은 모두 다름');
+  { const tones = new Set(L.OPTIONS.tone.map(t => JSON.stringify(L.fromInputs(Object.assign({}, x0, { opt: { tone: t.id } })).style))); assert.equal(tones.size, L.OPTIONS.tone.length, '목소리 톤마다 스타일이 다름');
+    const bb = L.fromInputs(Object.assign({}, x0, { opt: { genre: 'boombap', mood: 'sad', tone: 'deep' } })); assert(bb.style.includes('boom bap') && !bb.negativeStyle.includes('boom bap') && !bb.negativeStyle.includes('sad mood') && bb.negativeStyle.includes('screaming') && bb.style.includes('deep low-pitched voice'), '장르·분위기가 고른 스타일은 빼는 스타일에서 풀린다');
+    assert(L.OPTIONS.genre.length >= 16 && L.OPTIONS.mood.length >= 11 && L.OPTIONS.tone.length >= 8); assert.equal(bb.optKo, '붐뱁 · 아련하고 슬프게 · 사주대로 · 묵직한 중저음'); }
   const m = L.fromInputs(Object.assign({}, x0, { opt: { vocal: 'M' } })); assert(/\(king, peace out\)$/.test(m.sections[6].lines[3]), '남성 보컬이면 추임새도 king');
-  console.log('옵션 ok: 장르 ' + L.OPTIONS.genre.length + ' × 분위기 ' + L.OPTIONS.mood.length + ' × 보컬 ' + L.OPTIONS.vocal.length + ', 서로 다른 스타일 ' + styles.size + '가지'); }
+  console.log('옵션 ok: 장르 ' + L.OPTIONS.genre.length + ' × 분위기 ' + L.OPTIONS.mood.length + ' × 보컬 ' + L.OPTIONS.vocal.length + ' × 톤 ' + L.OPTIONS.tone.length + ', 서로 다른 스타일 ' + styles.size + '가지'); }
 console.log('일주 ok: 60갑자 마무리 대목 120줄, 곡 ' + songs.length + '개에서 일주 ' + seenDays.size + '종 확인');
 }
