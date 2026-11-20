@@ -1,4 +1,4 @@
-/* 2027 정미년 신년운세 화면. 풀이는 서버(/api/newyear/reading)가 조합하고, 이 파일은 입력·장 넘김·잠금/구매·이어보기·PDF만 맡는다.
+/* 2027 정미년 신년운세 화면. 풀이는 서버(/api/newyear/reading)가 조합하고, 이 파일은 입력·장 넘김·잠금/구매·이어보기만 맡는다.
    로그인·결제는 무빙툰과 같은 흐름(report/v2/paywall.js: Supabase 로그인, 포트원 KPN 결제, 복귀 확인)을 그대로 쓴다. */
 (function (root) {
   'use strict';
@@ -12,7 +12,6 @@
   var ssSet = function (k, v) { try { root.sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
   var PW = function () { return root.ReportV2 && root.ReportV2.Paywall; };
   var S = { birth: null, data: null, idx: 0, month: 0, remember: true, pwReady: null };
-  var ROLE_LABEL = { good: '좋은 점', caution: '조심할 점' };
   var DIR = { good: '좋음', neutral: '보통', caution: '조심', burden: '버팀' };
   var CMP = { same: '두 풀이 같은 방향', near: '결이 조금 다름', different: '두 풀이 다르게 봄', unknown: '' };
 
@@ -192,7 +191,6 @@
   $('#ny-back').onclick = function () { writeForm(S.birth); view('input'); };
   $('#ny-retry').onclick = function () { load(); };
   $('#ny-toc-btn').onclick = function () { $('#ny-toc').hidden = !$('#ny-toc').hidden; };
-  $('#ny-pdf').onclick = function () { printAll(); };
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-go],[data-m],[data-login],[data-buy],[data-reload]'); if (!t) return;
     if (t.dataset.go) return go(+t.dataset.go);
@@ -214,26 +212,6 @@
     if (Math.abs(dx) < 70 || e.target.closest('.ny-mchips')) return;
     if (dx < 0) go(S.idx + 1); else if (S.idx > 0) go(S.idx - 1);
   }, { passive: true });
-
-  // ── PDF: 펼친 모든 장(잠긴 장은 제목만)을 인쇄용으로 만들고 브라우저 인쇄 창(PDF로 저장)을 연다
-  function printAll() {
-    if (!S.data) return;
-    var r = S.data.reading, t = r.tojeong, out = [];
-    var line = function (x) { return '<p>' + (x.role === 'basis' ? '<span class="k">근거 </span>' : x.role === 'advice' ? '<span class="k">조언 </span>' : ROLE_LABEL[x.role] ? '<span class="k">' + ROLE_LABEL[x.role] + ' </span>' : '') + esc(x.text) + '</p>'; };
-    out.push('<h1>2027 정미년 토정비결 신년운세</h1><p class="meta">토정비결 ' + esc(t.gua) + '괘 ' + esc(t.zhouyi || '') + ' · ' + esc((t.guaxiang || []).join(' ')) + '</p>');
-    r.chapters.forEach(function (c) {
-      out.push('<div class="chap"><h2>' + esc(c.title) + '</h2>');
-      if (c.locked && !(c.sections && c.sections.length) && c.id !== 'months') out.push('<p class="meta">구매 후 열리는 장입니다.</p>');
-      (c.paras || []).forEach(function (x) { out.push(line(x)); });
-      (c.sections || []).forEach(function (s) { out.push('<h3>' + esc(s.title) + '</h3>'); (s.paras || []).forEach(function (x) { out.push(line(x)); }); });
-      (c.months || []).forEach(function (m) { out.push('<h3>' + esc(m.label) + ' (양력 ' + esc(m.solar) + ')</h3>'); if (m.locked) out.push('<p class="meta">구매 후 열립니다.</p>'); if (m.hook) out.push('<p><b>' + esc(m.hook) + '</b></p>'); (m.paras || []).forEach(function (x) { out.push(line(x)); }); });
-      if (c.note) out.push('<p class="meta">' + esc(c.note) + '</p>');
-      out.push('</div>');
-    });
-    out.push('<p class="meta">만트라 · 토정비결 원문 저본: 규장각 奎古 1077(보충: 국립중앙도서관 필사본). 이 풀이는 참고용이며 건강·법률·재정 결정은 전문가와 상의하세요.</p>');
-    $('#ny-print').innerHTML = out.join('');
-    root.print();
-  }
 
   // ── 시작: 넘겨받기(내 구매 내역·로그인/결제 복귀) → 이 기기 이어보기 → 입력
   (function boot() {

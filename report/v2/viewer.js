@@ -514,11 +514,7 @@
     } catch (e) { return ''; }
   }
   $('#v-home').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-snt],[data-snk],[data-snpdf],[data-snshare]'); if (!b) return; var N0 = S.sn = S.sn || { tab: 'remedy', type: '' };
-    if (b.dataset.snpdf != null) {
-      var P = R.Pdf; if (P && P.generate) { toast('PDF를 만들고 있습니다…', 60000); P.generate(S.repPdf || S.rep, S.sd, { name: S.name, onProgress: function (i, n) { toast('PDF를 만들고 있습니다 (' + i + ' / ' + n + '쪽)', 60000); } }).then(function () { T('pdf_downloaded', { from: 'sanctuary' }); toast('PDF가 준비되었습니다.'); }).catch(function (err) { toast(err.message || 'PDF를 만들지 못했습니다.'); }); } else toast('PDF 생성은 곧 제공됩니다.');
-      return;
-    }
+    var b = e.target.closest('[data-snt],[data-snk],[data-snshare]'); if (!b) return; var N0 = S.sn = S.sn || { tab: 'remedy', type: '' };
     if (b.dataset.snshare != null) { var C = R.ShareCard; if (C && C.create) { T('share_clicked', { from: 'sanctuary' }); C.create(S.repPdf || S.rep, S.sd, S.awk).then(function () { T('share_card_created', {}); }).catch(function (err) { toast(err.message || '카드를 만들지 못했습니다.'); }); } else toast('공유 카드는 곧 제공됩니다.'); return; }
     if (b.dataset.snt) N0.tab = b.dataset.snt; else N0.type = b.dataset.snk;
     var y = window.scrollY; showHome('w6'); window.scrollTo(0, y); T('sanctuary_select', { tab: N0.tab });
@@ -1007,7 +1003,7 @@
     var rep = S.rep, n = rep.chapters.length, prev = S.cur ? rep.chapters[S.idx] : null, act = rep.acts.filter(function (a) { return a.id === c.act; })[0] || {}; S.idx = ci; S.cur = true; if(R.FullReading && R.FullReading.prioritize)R.FullReading.prioritize(c.id);
     if(S.wmap){S.sealTopicLast=S.sealTopicLast||{};S.sealTopicLast[S.wmap.idx[ci]]=ci;}barLabel(ci); saveReadingSession(c.id);if(R.SealReader)mountSealBook();
     if(R.SealReader&&R.SealReader.focus&&prev!==c){R.SealReader.focus($('#chapter'),ci);if(S.mv&&S.mv.measure)S.mv.measure();}   // 한 번에 한 장만 보이게(2026-11-06 읽기 흐름 정리)
-    if (prev && prev.act !== c.act && !S.visited[c.id]) { T('act_completed', { act: prev.act }); var a = rep.acts.filter(function (x) { return x.id === prev.act; })[0]; if (a && a.pdfDone) toast(a.pdfDone, 3800); }
+    if (prev && prev.act !== c.act && !S.visited[c.id]) { T('act_completed', { act: prev.act }); var a = rep.acts.filter(function (x) { return x.id === prev.act; })[0]; }
     if (!S.visited[c.id]) { S.visited[c.id] = 1; T('chapter_viewed', { chapter: c.id, act: c.act, no: c.no }); if ((c.base || c.id) === 'c19') T('remedy_viewed', {}); if (c.kind === 'summary') T('action_plan_viewed', {}); }
     if (R.Bgm && R.Bgm.has()) { var mo = c.scenes.filter(function (s) { return s.sceneType === 'insight' || s.sceneType === 'chapterIntro'; })[0]; R.Bgm.play(mo ? R.Cinema.resolve(mo, layersOf(mo)).bgmMood : 'minimal'); } // 챕터 분위기에 맞는 BGM
     checkUnlock(); ss('mt_v2_idx', String(ci)); if (EXPLORE) { xpSave(); renderStrip(); }
@@ -1045,11 +1041,10 @@
     var rep = S.rep, a4 = rep.acts[rep.acts.length - 1], steps = rep.plan.strategy;
     $('#v-final').innerHTML = '<div class="fin"><p class="kicker">運路</p><h2>' + (S.name ? esc(S.name) + '에게는,<br>' + esc(S.name) + "때가 있습니다." : "모든 사람에게는,<br>자신에게 맞는 때가 있습니다.") + '</h2><p>' + rep.chapters.length + "개의 챕터를 살펴봤습니다.<br>타고난 특징부터 운의 흐름,<br>일상에서 시도할 행동까지 정리했습니다.</p>" +
       '<div class="cap" style="margin-top:28px">다음 장면의 전략</div><div class="strategy">' + steps.map(function (x, i) { return (i ? '<i aria-hidden="true">→</i>' : '') + '<b>' + esc(x.label) + '</b>'; }).join('') + '</div>' +
-      '<div class="btns"><button type="button" class="btn gold big" id="fPdf"' + (S.pdfUnlocked ? '' : ' disabled') + '>나의 종합 리포트 PDF 받기</button><button type="button" class="btn big" id="fShare">공유 카드 만들기</button><button type="button" class="btn" id="fCompat">궁합 볼 사람 추가하기</button><button type="button" class="btn" id="fBack">리포트 다시 보기</button></div>' + (S.pdfUnlocked ? '' : '<p class="lock">더 많은 챕터를 읽으면 PDF가 열립니다.</p>') + '<p class="fine">사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></div>';
+      '<div class="btns"><button type="button" class="btn gold big" id="fShare">공유 카드 만들기</button><button type="button" class="btn" id="fCompat">궁합 볼 사람 추가하기</button><button type="button" class="btn" id="fBack">리포트 다시 보기</button></div>' + '<p class="fine">사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></div>';
     if (EXPLORE) { var bk = $('#fBack'), mp = document.createElement('button'); mp.type = 'button'; mp.className = 'btn big'; mp.id = 'fMap'; mp.textContent = '운명 세계 지도로 가기'; bk.parentNode.insertBefore(mp, bk); mp.onclick = function () { showHome(); }; }
     $('#fBack').onclick = function () { resumeReader(); };
     $('#fCompat').onclick = function () { T('compatibility_cta_clicked', { chapter: 'final' }); toast('두 사람의 궁합은 곧 열립니다.'); };
-    $('#fPdf').onclick = function () { var P = R.Pdf; if (P && P.generate) (toast('PDF를 만들고 있습니다…', 60000), P.generate(S.repPdf || S.rep, S.sd, { name: S.name, onProgress: function (i, n) { toast('PDF를 만들고 있습니다 (' + i + ' / ' + n + '쪽)', 60000); } }).then(function () { T('pdf_downloaded', {}); toast('PDF가 준비되었습니다.'); })).catch(function (e) { toast(e.message || 'PDF를 만들지 못했습니다.'); }); else toast('PDF 생성은 곧 제공됩니다.'); };
     $('#fShare').onclick = function () { var C = R.ShareCard; if (C && C.create) { T('share_clicked', {}); C.create(S.repPdf || S.rep, S.sd, S.awk).then(function () { T('share_card_created', {}); }).catch(function (e) { toast(e.message || '카드를 만들지 못했습니다.'); }); } else toast('공유 카드는 곧 제공됩니다.'); };
   }
 

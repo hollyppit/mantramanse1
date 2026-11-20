@@ -212,7 +212,7 @@ ok(fs.readFileSync(path.join(root, 'report', 'hub', 'hub-quest.js'), 'utf8').inc
   const m4 = O4.merge(O4.DEFAULTS, { sections: [{ id: 'final', type: 'final' }, { id: 'research', type: 'research', enabled: false }, { id: 'evil', type: 'script' }] });
   if (m4.sections[0].type !== 'final' || m4.sections.some(s => s.type === 'script') || m4.sections.filter(s => s.type === 'myeongri').length !== 1) bad('섹션 순서 반영·알 수 없는 type 제거·빠진 섹션 보충');
   if (m4.sections.find(s => s.type === 'research').enabled !== false) bad('섹션 비활성화');
-  if (c4.services.length !== 8 || !c4.services.every(s => s.status === 'live' || s.status === 'soon')) bad('서비스 소개 8종');
+  if (c4.services.length !== 7 || c4.services.some(s => s.id === 'pdf') || !c4.services.every(s => s.status === 'live' || s.status === 'soon')) bad('서비스 소개 7종(PDF 카드 제거)');
   if (c4.topics.filter(t => t.enabled).length < 5) bad('명리학 주제 5개 이상 기본 노출');
   if (!c4.topics.some(t => t.nature === 'limit')) bad('명리학의 활용과 한계 주제');
   const tt = JSON.stringify(c4.topics) + JSON.stringify(c4.sections);

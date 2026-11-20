@@ -2,7 +2,7 @@
    ① 개운법: 행동·성장·사람·공간·환경·타이밍 6유형(운동 포함)을 유형별로 보고, "왜 지금 이 시기에 맞는지" 근거 태그를 확인
    ② 명소: 용신·희신 오행에 맞춘 명산대천·풍수 명당 순위(R.Deep.placeList — 챕터 본문과 같은 점수)
    ③ 실천 계획: 4단계 전략·이번 주 체크리스트(체크는 기기에만 저장)·피할 행동
-   ④ 종합 리포트: 핵심 요약 카드와 PDF·공유 카드 생성(기존 해금 규칙을 그대로 따른다)
+   ④ 종합 리포트: 핵심 요약 카드와 공유 카드 생성(PDF 내보내기는 2026-11-21 제거)
    추천·계획의 값은 추천 엔진(R.Remedy)이 정한 것이며 AI 가 만들지 않는다. 운동·장소는 건강 처방이나 보장이 아니라 현재 흐름에 맞는 활동·유형 추천이다.
    R.Sanctuary.model(rep, sd) → {...}   R.Sanctuary.html(model, sel, state, esc) → HTML                  검증: node tests/sanctuary-sim.js */
 (function (root) {
@@ -64,8 +64,8 @@
         return '<div><span>' + r[1] + '</span><p>' + E(m.summary[r[0]]) + '</p></div>'; }).join('') + '</div>';
       var pct = st.readTotal ? Math.round(st.readDone / st.readTotal * 100) : 0;
       h += '<div class="cs-card"><p class="cs-ct">종합 리포트</p><h4>읽은 챕터 ' + (st.readDone || 0) + ' / ' + (st.readTotal || 0) + ' <small>' + pct + '%</small></h4>' +
-        '<p class="cs-sum">' + (st.unlocked ? 'PDF 리포트와 공유 카드를 만들 수 있습니다.' : 'PDF 리포트는 챕터를 더 읽으면 열립니다(기존 해금 규칙과 같습니다).') + '</p>' +
-        '<div class="sn-btns"><button type="button" class="btn gold big" data-snpdf' + (st.unlocked ? '' : ' disabled') + '>종합 리포트 PDF 받기</button><button type="button" class="btn big" data-snshare>공유 카드 만들기</button></div></div>';
+        '<p class="cs-sum">' + '공유 카드로 내 풀이를 한 장에 담아 보낼 수 있습니다.' + '</p>' +
+        '<div class="sn-btns"><button type="button" class="btn gold big" data-snshare>공유 카드 만들기</button></div></div>';
     }
     return h + '<p class="lb-f">운세 해석과 실제 의사결정은 구분해서 보세요. 이 내용은 참고용 콘텐츠이며 의학·법률·투자 조언이 아닙니다.</p></section>';
   }

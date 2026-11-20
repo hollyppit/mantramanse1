@@ -11,7 +11,7 @@ for (const m of html.matchAll(/(?:src|href)="([^"]+?)(?:\?[^"]*)?"/g)) {
   assert.ok(fs.existsSync(path.join(root, p)), '없는 파일: ' + u);
 }
 assert.ok(fs.existsSync(path.join(root, 'report/legal/refund.html')) && fs.existsSync(path.join(root, 'report/legal/products.html')));
-assert.match(html, /viewport-fit=cover/); assert.match(html, /id="ny-pdf"/); assert.match(html, /id="ny-prev"/);
+assert.match(html, /viewport-fit=cover/); assert.doesNotMatch(html, /ny-pdf|ny-print|PDF/, 'PDF 내보내기 제거(2026-11-21)'); assert.match(html, /id="ny-prev"/);
 
 // 2) 화면 스크립트 문법·구매 창 공개 함수
 new vm.Script(rd('report/newyear/newyear-app.js'));
@@ -30,9 +30,9 @@ assert.match(my, /data-newyear=/); assert.match(my, /mt_ny_input/); assert.match
 const ny = rd('functions/_newyear.js');
 assert.match(ny, /locked: true/); assert.match(app, /c\.locked/);
 
-// 5) 인쇄(PDF) 스타일: 모든 장 펼침·밝은 종이
+// 5) PDF 내보내기 제거(2026-11-21): 인쇄 함수·인쇄용 펼침 스타일 없음
 const css = rd('report/newyear/newyear.css');
-assert.match(css, /@media print/); assert.match(css, /\.ny-print \.chap \{ page-break-before: always; \}/);
+assert.doesNotMatch(css, /\.ny-print/); assert.doesNotMatch(app, /printAll|root\.print\(|ny-pdf/);
 assert.match(css, /prefers-reduced-motion/);
 
-console.log('newyear-ui-sim ok: 파일 연결·구매 창 연동·내 구매 내역 연결·맛보기·인쇄 스타일');
+console.log('newyear-ui-sim ok: 파일 연결·구매 창 연동·내 구매 내역 연결·맛보기·PDF 없음');

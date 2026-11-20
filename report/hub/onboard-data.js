@@ -201,7 +201,6 @@
     { id: 'love', title: '연애·결혼과 인간관계', desc: '관계를 맺는 방식과 인연의 흐름을 해석합니다.', glyph: '緣', status: 'live', visible: true, image: '', video: '', link: '' },
     { id: 'flow', title: '대운·세운·월운 흐름', desc: '10년·1년·한 달 단위의 운의 흐름을 그래프로 봅니다. 기회기·축적기·전환기·방어기 같은 국면도 함께 확인합니다.', glyph: '運', status: 'live', visible: true, image: '', video: '', link: '' },
     { id: 'toon', title: '개인별 종합 무빙툰 리포트', desc: '내 사주를 한 편의 동양 판타지 무빙툰으로 이어 보는 종합 리포트.', glyph: '卷', status: 'live', visible: true, image: '', video: '', link: '' },
-    { id: 'pdf', title: '종합 풀이 PDF', desc: '리포트를 문서로 보관하는 종합 풀이 PDF.', glyph: '書', status: 'live', visible: true, image: '', video: '', link: '' },
   ];
 
   /* ── 명리학 주제(SECTION 03 상세) ─ nature: history(역사적 사실) · tradition(전통 해석) · science(천문·과학적 사실) · limit(한계 안내) ── */
@@ -266,7 +265,7 @@
     }
     if (typeof ov.progressLabel === 'string' && ov.progressLabel.trim()) out.progressLabel = ov.progressLabel.trim().slice(0, 60);
     if (ov.afterDone === 'home' || ov.afterDone === 'reveal') out.afterDone = ov.afterDone;
-    if (Array.isArray(ov.services)) out.services = ov.services.filter(function (x) { return x && x.id && x.title; }).map(function (x) { return Object.assign({ desc: '', glyph: '', status: 'live', visible: true, image: '', video: '', link: '' }, x); });
+    if (Array.isArray(ov.services)) out.services = ov.services.filter(function (x) { return x && x.id && x.title && x.id !== 'pdf'; }).map(function (x) { return Object.assign({ desc: '', glyph: '', status: 'live', visible: true, image: '', video: '', link: '' }, x); });   // 2026-11-21: PDF 내보내기 제거 — 저장된 설정에 남은 PDF 카드도 숨김
     if (Array.isArray(ov.topics)) out.topics = ov.topics.filter(function (x) { return x && x.id && x.title; }).map(function (x) { return Object.assign({ enabled: true, nature: 'tradition', sub: '', summary: '', detail: '', analogy: '', term: '', termEasy: '', image: '', video: '', image2: '', anim: 'fade', refs: '' }, x); });
     if (Array.isArray(ov.intro)) out.intro = out.intro.map(function (d) { var o = ov.intro.filter(function (x) { return x && x.id === d.id; })[0]; return o ? Object.assign({}, d, pick(o, ['title', 'body', 'sub', 'image', 'video', 'enabled', 'glyph']), { sty: cleanStyleMap(o.sty, STY_ROLES.intro) }) : d; });
     if (Array.isArray(ov.scenes)) out.scenes = out.scenes.map(function (d) { var o = ov.scenes.filter(function (x) { return x && x.id === d.id; })[0]; return o ? Object.assign({}, d, pick(o, ['title', 'lines', 'hint', 'unknownLines', 'button', 'face', 'image', 'bg', 'bubble', 'enabled']), { field: d.field }) : d; });
