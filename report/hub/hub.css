@@ -398,9 +398,9 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 
 /* Defense and caution remain visible even when selected or marked as today. */
 .fortune-panel .flow-defense{--flow:#f08080}
-#hub .fortune-panel .mc-day.caution,#hub .fortune-panel .mc-day.caution.selected{--flow:#f08080;border:1px solid #e07171;background:linear-gradient(145deg,#50232b,#291a25);color:#ffe3e3}
-#hub .fortune-panel .mc-day.caution b,#hub .fortune-panel .mc-day.caution small,#hub .fortune-panel .mc-day.caution .mc-metric strong,#hub .fortune-panel .mc-day.caution em{color:#ffaaaa}
-#hub .fortune-panel .mc-day.caution em,.mc-key.caution{background:#e55d5d22;color:#ffaaaa}
+#hub .fortune-panel .mc-day.caution,#hub .fortune-panel .mc-day.caution.selected{--flow:#FF8A4C;border:1px solid #e0763f;background:linear-gradient(145deg,#4f2a1a,#2a1a17);color:#ffe8db}
+#hub .fortune-panel .mc-day.caution b,#hub .fortune-panel .mc-day.caution small,#hub .fortune-panel .mc-day.caution .mc-metric strong,#hub .fortune-panel .mc-day.caution em{color:#ffb88f}
+#hub .fortune-panel .mc-day.caution em,.mc-key.caution{background:#ff8a4c22;color:#ffb88f}
 #hub .fortune-panel .mc-day.caution.selected{outline:2px solid #e2c991;outline-offset:2px}
 .fc-controls{position:static;inset:auto;min-width:0}
 .fc-controls label{min-width:0;flex:1 1 130px}

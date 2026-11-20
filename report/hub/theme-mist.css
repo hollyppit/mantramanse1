@@ -226,9 +226,9 @@ html.theme-mist #hub .fortune-panel .mc-day .mc-metric strong{ color: color-mix(
 html.theme-mist #hub .fortune-panel .mc-day em{ color: var(--ink-3) !important; background: rgba(52,72,80,.06); }
 html.theme-mist #hub .fortune-panel .mc-day.favorable{ border-bottom: 2px solid #2E9A6E !important; }
 html.theme-mist #hub .fortune-panel .mc-day.favorable em, html.theme-mist .mc-key{ color: #1F7A52 !important; background: rgba(46,154,110,.12) !important; }
-html.theme-mist #hub .fortune-panel .mc-day.caution, html.theme-mist #hub .fortune-panel .mc-day.caution.selected{ background: linear-gradient(145deg, #FBE7E3, #FDF3F1) !important; border: 1px solid rgba(194,72,59,.55) !important; }
-html.theme-mist #hub .fortune-panel .mc-day.caution :is(b, small, .mc-metric strong, em){ color: #A8392B !important; }
-html.theme-mist #hub .fortune-panel .mc-day.caution em, html.theme-mist .mc-key.caution{ background: rgba(194,72,59,.12) !important; color: #A8392B !important; }
+html.theme-mist #hub .fortune-panel .mc-day.caution, html.theme-mist #hub .fortune-panel .mc-day.caution.selected{ background: linear-gradient(145deg, #FDE9DC, #FFF5EE) !important; border: 1px solid rgba(234,88,12,.5) !important; }
+html.theme-mist #hub .fortune-panel .mc-day.caution :is(b, small, .mc-metric strong, em){ color: #9A3412 !important; }
+html.theme-mist #hub .fortune-panel .mc-day.caution em, html.theme-mist .mc-key.caution{ background: rgba(234,88,12,.12) !important; color: #9A3412 !important; }
 html.theme-mist #hub .fortune-panel .mc-day.selected{ outline: 2px solid rgba(178,58,44,.45) !important; outline-offset: 2px; border-color: #B23A2C !important; }
 html.theme-mist #hub .fortune-panel .mc-day.is-today:after{ background: #B23A2C; }
 html.theme-mist #hub .fortune-panel .mc-day:is(:hover,:focus-visible,:active){ background: #fff !important; color: var(--ink) !important; border-color: var(--flow) !important; }
@@ -260,7 +260,7 @@ html.theme-mist .flow-accumulation{ --flow-ink: #1D4ED8; }
 html.theme-mist .fortune-panel .flow-defense{ --flow-ink: #B91C1C; }
 html.theme-mist #hub .fortune-panel .mc-day .mc-metric strong{ color: var(--flow-ink, var(--ink)) !important; }
 html.theme-mist #hub .fortune-panel .mc-day.favorable em, html.theme-mist .mc-key{ color: #14532D !important; background: rgba(22,163,74,.14) !important; }
-html.theme-mist #hub .fortune-panel .mc-day.caution :is(b, small, .mc-metric strong, em){ color: #991B1B !important; }
+html.theme-mist #hub .fortune-panel .mc-day.caution :is(b, small, .mc-metric strong, em){ color: #9A3412 !important; }
 html.theme-mist .mc-shortlist h3{ color: #14532D; } html.theme-mist .mc-shortlist.caution h3{ color: #991B1B; }
 html.theme-mist .mc-legend{ color: var(--ink-2); }
 /* 오늘의 운 점수 고리 안쪽 숫자·흐름 문구 */
@@ -411,10 +411,10 @@ html.theme-mist #hub .fortune-panel .mc-day{ background: linear-gradient(180deg,
 html.theme-mist #hub .fortune-panel .mc-day .mc-metric span{ color: var(--flow-ink, var(--ink-2)) !important; font-weight: 700; }
 html.theme-mist #hub .fortune-panel .mc-day em{ background: #E2E8F0 !important; color: #334155 !important; font-weight: 600; }
 html.theme-mist #hub .fortune-panel .mc-day.favorable em{ background: #15803D !important; color: #fff !important; }
-html.theme-mist #hub .fortune-panel .mc-day.caution em{ background: #DC2626 !important; color: #fff !important; }
+html.theme-mist #hub .fortune-panel .mc-day.caution em{ background: #EA580C !important; color: #fff !important; }
 html.theme-mist #hub .fortune-panel .mc-day.favorable{ border-bottom: 3px solid #15803D !important; }
-html.theme-mist #hub .fortune-panel .mc-day.caution, html.theme-mist #hub .fortune-panel .mc-day.caution.selected{ background: linear-gradient(180deg, #FECACA, #FEF2F2) !important; box-shadow: inset 0 4px 0 #DC2626, 0 4px 12px -8px rgba(185,28,28,.4); }
-html.theme-mist #hub .fortune-panel .mc-day.caution .mc-metric span{ color: #991B1B !important; }
+html.theme-mist #hub .fortune-panel .mc-day.caution, html.theme-mist #hub .fortune-panel .mc-day.caution.selected{ background: linear-gradient(180deg, #FED7AA, #FFF7ED) !important; box-shadow: inset 0 4px 0 #EA580C, 0 4px 12px -8px rgba(194,65,12,.4); }
+html.theme-mist #hub .fortune-panel .mc-day.caution .mc-metric span{ color: #9A3412 !important; }
 html.theme-mist .mc-legend span{ font-weight: 600; }
 html.theme-mist .mc-legend .flow-opportunity, html.theme-mist .mc-legend i.flow-opportunity + *{ color: #15803D; }
 /* 순풍이 강한 날·리스크 관리일 목록 */
@@ -470,7 +470,7 @@ html.theme-mist #hub .bridge :is(h4, small, .kick){ color: #9A2F23; }
 html.theme-mist #hub .bridge p{ color: #1E4E79; }
 html.theme-mist #hub .rsec[data-sec] ul.dl li::before{ background: var(--sc); width: 6px; height: 6px; }
 html.theme-mist #hub .ddb .gc .g ul.dl li::before{ background: #16A34A; } html.theme-mist #hub .ddb .gc .c ul.dl li::before{ background: #DC2626; }
-html.theme-mist #hub #screen .fortune-panel .mc-day.caution em{ background: #DC2626 !important; color: #fff !important; }
+html.theme-mist #hub #screen .fortune-panel .mc-day.caution em{ background: #EA580C !important; color: #fff !important; }
 html.theme-mist #hub #screen .fortune-panel .mc-day.favorable em{ background: #15803D !important; color: #fff !important; }
 html.theme-mist #hub .dc small, html.theme-mist #hub details.dd summary small{ color: #55657A; }
 
