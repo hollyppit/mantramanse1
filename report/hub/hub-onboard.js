@@ -320,7 +320,7 @@
             '<label class="chk ob-leap" id="fLeapW"' + (d.calendar === 'lunar' ? '' : ' hidden') + '><input type="checkbox" id="fLeap"' + (d.leap ? ' checked' : '') + '><i>윤달에 태어났어요</i></label>' +
             '<label class="f"><span>빠른 입력 (예: 19900315)</span><input type="text" id="fQuick" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="숫자 8자리"></label>';
         }
-        if (s.field === 'time') return '<div class="f row2"><span>태어난 시각</span><select id="fH" aria-label="시"' + (d.hourUnknown ? ' disabled' : '') + '>' + opt(0, 23, d.hour, '시', '시') + '</select><input type="number" id="fMin" min="0" max="59" inputmode="numeric" placeholder="분" aria-label="분" value="' + esc(d.minute) + '"' + (d.hourUnknown ? ' disabled' : '') + '></div>' +
+        if (s.field === 'time') return '<div class="f row2"><span>태어난 시각</span><select id="fH" aria-label="시"' + (d.hourUnknown ? ' disabled' : '') + '>' + opt(0, 23, d.hour, '시', '시') + '</select><span class="ob-min"><input type="number" id="fMin" min="0" max="59" inputmode="numeric" placeholder="분" aria-label="분" value="' + esc(d.minute) + '"' + (d.hourUnknown ? ' disabled' : '') + '><em aria-hidden="true">분</em></span></div>' +
           '<label class="chk"><input type="checkbox" id="fUnk"' + (d.hourUnknown ? ' checked' : '') + '><i>시각을 몰라요</i></label>';
         if (s.field === 'place') return '<div class="f seg" role="radiogroup" aria-label="출생 국가"><span>국가</span><label><input type="radio" name="cty" value="KR"' + (d.country === 'KR' ? ' checked' : '') + '><i>대한민국</i></label><label><input type="radio" name="cty" value="OT"' + (d.country === 'KR' ? '' : ' checked') + '><i>해외·기타</i></label></div>' +
           '<div id="fPlaceKR"' + (d.country === 'KR' ? '' : ' hidden') + '><label class="f"><span>지역 검색</span><input type="text" id="fPS" autocomplete="off" placeholder="예: 부산"></label><div class="ob-places" id="fPL" role="listbox" aria-label="지역">' + placeChips('') + '</div></div>' +
@@ -362,16 +362,20 @@
         var Q=root.Quest,qc=CFG.quest,mob=(root.innerWidth||1024)<768;
         var editing=!!(q.edit&&P.has()),cur=Q.guide?Q.guide():'male';
         var card=function(k){var o=qc.guides[k],on=editing&&k===cur;return '<button type="button" class="ob-guide '+(k==='male'?'m':'f')+(on?' on':'')+'" data-guide="'+k+'" aria-pressed="'+on+'" aria-label="'+esc(o.name+' — '+o.tag+(on?' (지금 안내자)':''))+'">'+(on?'<em class="ob-guide-now">지금 안내자</em>':'')+'<img src="'+esc(Q.guideImage(CFG,k,mob))+'" alt="" decoding="async"><strong>'+esc(o.name)+'</strong><small>'+esc(o.tag)+'</small></button>';};
-        var el=paint('<div class="ob-guidepick"><p class="ob-kick">MANTRA · 운명의 기록</p><h1>'+esc(st.head||'누가 안내해 드릴까요?').replace(/\n/g,'<br>')+'</h1><p class="note">'+esc(st.hint||'')+'</p><div class="ob-guides" role="group" aria-label="안내자 선택">'+card('male')+card('female')+'</div></div>','ob-guide-screen');
+        var el=paint('<div class="ob-guidepick"><img class="ob-logo" src="/report/brand/logo-320.webp" alt="만트라 포춘 MANTRA FORTUNE" width="320" height="293" decoding="async"><p class="ob-kick">MANTRA · 운명의 기록</p><h1>'+esc(st.head||'누가 안내해 드릴까요?').replace(/\n/g,'<br>')+'</h1><p class="note">'+esc(st.hint||'')+'</p><div class="ob-guides" role="group" aria-label="안내자 선택">'+card('male')+card('female')+'</div></div>','ob-guide-screen');
         el.querySelectorAll('[data-guide]').forEach(function(b){b.onclick=function(){var g=b.getAttribute('data-guide');lset('mt_guide',g);Ob.track('quest_guide_pick',{case:g});guidePicked=true;render();};});
       }
       function renderCompact() {
         // 저장된 정보가 있는 사람(재방문·출생정보 수정)은 폼을 다시 제출하지 않고 바로 결과로 갈 수 있게 한다.
         var editing=!!(q.edit&&P.has()),head=editing?'<h1>저장된 출생정보예요</h1><p class="note">바뀐 것이 없다면 바로 결과로 가세요. 고칠 곳이 있으면 아래에서 수정한 뒤 "수정한 정보로 보기"를 누르세요.</p><a class="btn ob-saved-go" href="'+esc(root.Quest?root.Quest.completionRoute(CFG,true):'#/timeline')+'" data-track="saved_profile_go">저장된 정보로 바로 보기</a>':'<h1>출생정보를 알려 주세요</h1><p class="note">한 번 입력하면 바로 사주를 볼 수 있어요.</p>';
-        var el=paint('<div class="ob-compact"><p class="ob-kick">MANTRA · 운명의 기록</p>'+head+'<div id="obForm" class="ob-form"><p>성별</p>'+fieldHtml({field:'gender'})+fieldHtml({field:'date'})+fieldHtml({field:'time'})+'<details open><summary>이름 · 출생지역 · 추가 설정</summary>'+fieldHtml({field:'name'})+fieldHtml({field:'place'})+O.adjustmentFields(d)+'</details></div><p id="obMsg" class="msg err" role="alert"></p><button id="obBack" hidden></button><button type="button" class="btn'+(editing?' ghost':'')+'" id="obOk">'+(editing?'수정한 정보로 보기':'내 사주 보기')+'</button><p class="note ob-priv">출생정보는 이 기기에만 저장돼요. 기본 출생지역은 서울이며, 추가 설정에서 변경할 수 있어요.</p></div>','ob-compact-page');
+        var sec=function(n,t,h){return '<section class="obx-sec"><h2 class="obx-h"><b>'+n+'</b>'+t+'</h2>'+h+'</section>';};
+        var el=paint('<div class="ob-compact"><img class="ob-logo" src="/report/brand/logo-320.webp" alt="만트라 포춘 MANTRA FORTUNE" width="320" height="293" decoding="async"><p class="ob-kick">MANTRA · 운명의 기록</p>'+head+'<div id="obForm" class="ob-form obx">'+sec('01','성별',fieldHtml({field:'gender'}))+sec('02','생년월일',fieldHtml({field:'date'}))+sec('03','태어난 시각',fieldHtml({field:'time'}))+'<details class="obx-more" open><summary>이름 · 출생지역 · 추가 설정</summary>'+fieldHtml({field:'name'})+fieldHtml({field:'place'})+O.adjustmentFields(d)+'</details></div><p class="obx-pv" id="obxPv" aria-live="polite"></p><p id="obMsg" class="msg err" role="alert"></p><button id="obBack" hidden></button><button type="button" class="btn obx-go'+(editing?' ghost':'')+'" id="obOk">'+(editing?'수정한 정보로 보기':'내 사주 보기')+'</button><p class="note ob-priv">출생정보는 이 기기에만 저장돼요. 기본 출생지역은 서울이며, 추가 설정에서 변경할 수 있어요.</p></div>','ob-compact-page');
         compactVideo();
+        // 입력 요약 줄: 고른 값이 바로 한 줄로 보인다(남 · 1992년 6월 23일 양력 · 01:45)
+        var pv=function(){var p=el.querySelector('#obxPv');if(!p)return;var g=d.gender==='M'?'남':d.gender==='F'?'여':'',dt=d.year&&d.month&&d.day?d.year+'년 '+d.month+'월 '+d.day+'일 '+(d.calendar==='lunar'?'음력'+(d.leap?'(윤달)':''):'양력'):'',tm=d.hourUnknown?'시각 모름':d.hour!==''&&d.hour!=null?('0'+d.hour).slice(-2)+':'+('0'+(+d.minute||0)).slice(-2):'';var parts=[g,dt,tm].filter(Boolean);p.innerHTML=parts.length?'<span>입력한 정보</span>'+parts.map(function(x){return '<b>'+esc(x)+'</b>';}).join('<i>·</i>'):'';p.hidden=!parts.length;};
+        ['click','change','input'].forEach(function(ev){el.addEventListener(ev,function(){setTimeout(pv,0);});});
         var quick=el.querySelector('#fQuick');if(quick)quick.closest('label').hidden=true;
-        ['name','gender','date','time','place'].forEach(function(f){bind(el,{field:f,lines:[]},false);});O.bindAdjustments(el,d,save);
+        ['name','gender','date','time','place'].forEach(function(f){bind(el,{field:f,lines:[]},false);});O.bindAdjustments(el,d,save);pv();
         function submitCompact(){msg('');H.engine().then(function(M){var r=O.validateDate(M,d),t=O.validateTime(d);if(!d.gender)return msg('성별을 선택해 주세요.');if(!r.ok)return msg(r.msg);if(!t.ok)return msg(t.msg);calc();}).catch(function(){msg('계산 엔진을 불러오지 못했습니다. 다시 시도해 주세요.');});}
         $('#obOk',el).onclick=submitCompact;el.querySelectorAll('input').forEach(function(i){i.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();submitCompact();}};});save();
       }
@@ -497,7 +501,7 @@
   }
   function renderHome(q, ctx) {
     var nm = P.name();
-    H.view('<section class="hhome"><p class="kick">MANTRA FORTUNE</p><h1 class="h1">' + (nm ? esc(A(nm)) + ',<br>' : '') + '오늘의 흐름을 펼칩니다</h1><p class="pend">명식을 불러오는 중…</p></section>');
+    H.view('<section class="hhome"><p class="kick kick-logo"><img src="/report/brand/logo-320.webp" alt="MANTRA FORTUNE" width="320" height="293" decoding="async"></p><h1 class="h1">' + (nm ? esc(A(nm)) + ',<br>' : '') + '오늘의 흐름을 펼칩니다</h1><p class="pend">명식을 불러오는 중…</p></section>');
     Ob.config().then(function () { return H.sajuKit(); }).then(function (kit) { return H.chart().then(function (ch) { return { kit: kit, ch: ch }; }); }).then(function (o) {
       if (!H.alive(ctx)) return;
       var M = o.kit.M, T = o.kit.T, ch = o.ch, t = H.Saju.todayData(ch), day = ch.pillars.day, ju = M.gzNameK(day), now = Date.now();
@@ -508,7 +512,7 @@
       var trait = (jc && jc.trait) || '', flowSub = t.flowLabel && String(t.flowLabel).indexOf(String(t.phase || '').replace(/기$/, '')) < 0 ? t.flowLabel : ''; // 같은 말이 겹치면(축적운 · 축적) 한 번만
       var flowLine = cur ? '지금은 <b>' + esc(M.gzNameK(cur)) + ' 대운</b>(' + cur.startYear + '년~) 안에 있고, 오늘의 흐름은 <b>' + esc(flow || t.cond) + '</b>' + (flowSub ? ' · ' + esc(flowSub) : '') + '입니다.' : '대운이 시작되기 전의 시기입니다. 오늘의 흐름은 <b>' + esc(flow || t.cond) + '</b>입니다.';
       var el = H.view(
-        '<section class="hhome"><div class="hh-top"><p class="kick">MANTRA FORTUNE</p><a class="hh-me" href="#/me" data-track="profile_open">' + esc(nm ? A(nm) : '내 정보') + ' ›</a></div>' +
+        '<section class="hhome"><div class="hh-top"><p class="kick kick-logo"><img src="/report/brand/logo-320.webp" alt="MANTRA FORTUNE" width="320" height="293" decoding="async"></p><a class="hh-me" href="#/me" data-track="profile_open">' + esc(nm ? A(nm) : '내 정보') + ' ›</a></div>' +
         '<div class="hh-guide"><div class="gav">' + avatar('greet', (CFG.scenes[0] || {}).image) + '</div><p>' + esc(F('{이름귀인}, 오늘의 흐름을 함께 살펴보겠습니다.', nm)) + '</p></div>' +
         // 1·2. 타고난 기질 한 문장 / 지금의 운 흐름 — 용어를 몰라도 읽히도록 쉬운 말을 먼저, 용어는 눌러서 설명
         '<section class="hh-core" aria-label="나의 기질과 지금의 흐름">' +

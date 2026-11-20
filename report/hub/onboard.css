@@ -388,3 +388,57 @@ body.obc-on #hub .ob-compact .ob-kick,body.obc-on #hub .ob-compact h1,body.obc-o
 @media(prefers-reduced-motion:reduce){#hub .ob-guidepick .ob-guide img{transition:none;transform:none!important}}
 #hub .ob-guidepick .ob-guide.on{border-color:#db6560;box-shadow:0 0 0 1px #db6560,0 0 28px rgba(173,41,39,.35)}
 #hub .ob-guidepick .ob-guide-now{position:absolute;top:12px;left:12px;z-index:2;font-style:normal;font-size:11px;padding:4px 8px;border-radius:999px;background:#8f1d1d;color:#fff8f0;letter-spacing:.02em}
+/* 2026-11-20 출생정보 입력 디자인 다듬기 + 로고 — 한 장 입력 폼(.ob-compact .obx)에만 적용 */
+#hub .ob-logo{display:block;width:auto;height:76px;margin:0 0 14px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.55))}
+#hub .ob-guidepick .ob-logo{margin:0 auto 14px;height:88px}
+#hub .ob-compact .obx{display:grid;gap:12px}
+#hub .obx .obx-sec{position:relative;padding:16px 16px 14px;border-radius:20px;border:1px solid rgba(205,178,122,.16);background:linear-gradient(160deg,rgba(255,255,255,.055),rgba(255,255,255,.012) 60%);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 10px 30px rgba(0,0,0,.25);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+#hub .obx .obx-h{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-family:var(--f-sans);font-size:.92rem;font-weight:600;letter-spacing:.02em;color:#E9E4D8}
+#hub .obx .obx-h b{display:inline-grid;place-items:center;min-width:30px;height:22px;padding:0 6px;border-radius:999px;font:700 .68rem/1 var(--f-sans);letter-spacing:.08em;color:#1a140a;background:linear-gradient(135deg,#EBD9AA,#CDB27A)}
+#hub .obx .f{margin:0 0 10px !important}#hub .obx .obx-sec>.f:last-child,#hub .obx .obx-sec>.chk:last-child{margin-bottom:0 !important}
+#hub .obx .row3>span:first-child,#hub .obx .row2>span:first-child,#hub .obx .seg>span:first-child{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* 성별: 큰 카드 + 女·男 글자 */
+#hub .obx .ob-gender{display:grid !important;grid-template-columns:1fr 1fr;gap:10px;margin:0 !important}
+#hub .obx .ob-gender button{position:relative;overflow:hidden;min-height:64px !important;border-radius:16px;border:1px solid rgba(236,231,219,.12);background:rgba(8,10,17,.55);color:#B1ACA0;font:600 1.05rem var(--f-sans);letter-spacing:.06em;transition:border-color .25s,background .25s,color .25s,transform .15s}
+#hub .obx .ob-gender button::before{content:'';position:absolute;right:10px;bottom:-14px;font:400 3.4rem/1 var(--f-serif);color:rgba(205,178,122,.12);transition:color .25s}
+#hub .obx .ob-gender button[data-g=F]::before{content:'女'}#hub .obx .ob-gender button[data-g=M]::before{content:'男'}
+#hub .obx .ob-gender button:active{transform:scale(.98)}
+#hub .obx .ob-gender button.on{border-color:#CDB27A;color:#F3E7C4;background:linear-gradient(150deg,rgba(205,178,122,.22),rgba(205,178,122,.06));box-shadow:0 0 0 3px rgba(205,178,122,.12),0 8px 24px rgba(205,178,122,.12)}
+#hub .obx .ob-gender button.on::before{color:rgba(235,217,170,.3)}
+/* 양력/음력: 하나로 붙은 알약 스위치 */
+#hub .obx .seg{display:grid !important;grid-template-columns:1fr 1fr !important;gap:4px;padding:4px;border-radius:14px;background:rgba(8,10,17,.6);border:1px solid rgba(236,231,219,.08)}
+#hub .obx .seg i{min-height:42px !important;padding:8px 6px !important;border:0 !important;border-radius:11px !important;background:transparent !important;color:#9F9A8E !important;font-weight:600;transition:background .25s,color .25s}
+#hub .obx .seg input:checked+i{background:linear-gradient(135deg,#EBD9AA,#CDB27A) !important;color:#1a140a !important;box-shadow:0 4px 14px rgba(205,178,122,.25)}
+/* 날짜·시각 고르기 */
+#hub .obx .row3{display:grid !important;grid-template-columns:1.25fr 1fr 1fr;gap:8px}
+#hub .obx .row2{display:grid !important;grid-template-columns:1fr 1fr;gap:8px}
+#hub .obx select,#hub .obx input[type=number]{appearance:none;-webkit-appearance:none;width:100%;min-height:54px !important;padding:10px 34px 10px 14px !important;border-radius:14px;border:1px solid rgba(236,231,219,.12);background:rgba(8,10,17,.6) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23CDB27A' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 13px center;color:#F1ECE0;font:600 1.05rem var(--f-sans);font-variant-numeric:tabular-nums;letter-spacing:.02em;transition:border-color .2s,box-shadow .2s}
+#hub .obx input[type=number]{background-image:none;padding-right:38px !important;-moz-appearance:textfield}
+#hub .obx input[type=number]::-webkit-inner-spin-button,#hub .obx input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+#hub .obx select:focus,#hub .obx input[type=number]:focus{border-color:#CDB27A;box-shadow:0 0 0 3px rgba(205,178,122,.18);outline:none}
+#hub .obx select:disabled,#hub .obx input:disabled{opacity:.38}
+#hub .obx select option{background:#0E111B;color:#E9E4D8}
+#hub .obx .ob-min{position:relative;display:block;grid-column:auto !important}#hub .obx .ob-min em{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-style:normal;font-size:.86rem;color:#7C786C;pointer-events:none}
+/* 시각을 몰라요·윤달: 토글 스위치 */
+#hub .obx .chk{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;margin-top:6px;padding:4px 2px;flex-direction:row-reverse}
+#hub .obx .chk i{font-style:normal;color:#B1ACA0;font-size:.92rem;margin-right:auto}
+#hub .obx .chk input{appearance:none;-webkit-appearance:none;position:relative;flex:none;width:46px !important;height:26px !important;min-height:0 !important;padding:0 !important;margin:0;border-radius:999px;background:rgba(236,231,219,.14);border:1px solid rgba(236,231,219,.12);cursor:pointer;transition:background .25s}
+#hub .obx .chk input::before{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#E9E4D8;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:transform .25s}
+#hub .obx .chk input:checked{background:linear-gradient(135deg,#EBD9AA,#CDB27A);border-color:transparent}
+#hub .obx .chk input:checked::before{transform:translateX(20px);background:#1a140a}
+#hub .obx .chk input:focus-visible{outline:2px solid #CDB27A;outline-offset:2px}
+/* 추가 설정 묶음 */
+#hub .obx .obx-more{border-radius:20px;border:1px dashed rgba(205,178,122,.2);padding:4px 16px}
+#hub .obx .obx-more>summary{cursor:pointer;padding:12px 0;color:#CDB27A;font-size:.9rem;font-weight:600}
+/* 입력 요약 줄 + 제출 단추 */
+#hub .ob-compact .obx-pv{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:16px 0 4px;padding:10px 14px;border-radius:14px;background:rgba(205,178,122,.08);border:1px solid rgba(205,178,122,.18);font-size:.88rem;color:#E9E4D8}
+#hub .ob-compact .obx-pv[hidden]{display:none}
+#hub .ob-compact .obx-pv span{font-size:.72rem;letter-spacing:.08em;color:#CDB27A;margin-right:4px}
+#hub .ob-compact .obx-pv i{font-style:normal;color:#7C786C}
+#hub .ob-compact .obx-go{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:58px;margin-top:10px;border:0;border-radius:16px;background:linear-gradient(135deg,#F0E0B4 0%,#CDB27A 55%,#B08F52 100%);color:#17110a;font:700 1.08rem var(--f-sans);letter-spacing:.04em;box-shadow:0 10px 30px rgba(205,178,122,.28),inset 0 1px 0 rgba(255,255,255,.5);cursor:pointer;transition:transform .15s,box-shadow .25s}
+#hub .ob-compact .obx-go::after{content:'→';font-weight:400;transition:transform .25s}
+#hub .ob-compact .obx-go:hover{box-shadow:0 14px 36px rgba(205,178,122,.38),inset 0 1px 0 rgba(255,255,255,.5)}#hub .ob-compact .obx-go:hover::after{transform:translateX(4px)}
+#hub .ob-compact .obx-go:active{transform:scale(.985)}
+#hub .ob-compact .obx-go.ghost{background:rgba(205,178,122,.1);color:#EBD9AA;border:1px solid rgba(205,178,122,.45);box-shadow:none}
+@media (max-width:420px){#hub .obx .obx-sec{padding:14px 12px 12px;border-radius:18px}#hub .obx .row3{grid-template-columns:1.35fr 1fr 1fr;gap:6px}#hub .obx select,#hub .obx input[type=number]{font-size:.98rem;padding-left:11px !important;padding-right:24px !important;background-position:right 9px center}#hub .obx input[type=number]{padding-right:30px !important}#hub .obx .ob-gender button::before{font-size:2.4rem;right:6px;bottom:-8px}#hub .ob-logo{height:64px}}
+@media (prefers-reduced-motion:reduce){#hub .obx *,#hub .ob-compact .obx-go{transition:none}}

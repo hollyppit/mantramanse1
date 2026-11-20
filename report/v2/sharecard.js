@@ -23,13 +23,14 @@
   }
   function loadImg(u) { return new Promise(function (res) { if (!u) return res(null); var i = new Image(); i.crossOrigin = 'anonymous'; i.onload = function () { res(i); }; i.onerror = function () { res(null); }; i.src = u; }); }
 
-  function draw(cv, d, img) {
+  var LOGO = '/report/brand/logo-320.webp';   // 2026-11-20 로고(못 불러오면 예전 글자)
+  function draw(cv, d, img, logo) {
     cv.width = W; cv.height = H; var x = cv.getContext('2d'), p = PAL[d.el] || PAL['수'];
     var g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#070913'); g.addColorStop(.45, p[0]); g.addColorStop(1, '#05060d'); x.fillStyle = g; x.fillRect(0, 0, W, H);
     var r = x.createRadialGradient(W / 2, 760, 20, W / 2, 760, 700); r.addColorStop(0, p[1] + 'AA'); r.addColorStop(1, 'transparent'); x.fillStyle = r; x.fillRect(0, 0, W, H);
     if (img) { var s = Math.min(760 / img.width, 760 / img.height), w = img.width * s, h = img.height * s; x.save(); x.globalAlpha = .95; x.drawImage(img, (W - w) / 2, 400 - 0 + (760 - h) / 2, w, h); x.restore(); }
     else { x.save(); x.strokeStyle = '#D5B97F88'; x.lineWidth = 3; x.beginPath(); x.arc(W / 2, 780, 250, 0, Math.PI * 2); x.stroke(); x.beginPath(); x.arc(W / 2, 780, 290, 0, Math.PI * 2); x.globalAlpha = .4; x.stroke(); x.restore(); x.fillStyle = '#F0DFB2'; x.font = '500 300px "Noto Serif KR", serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(d.hanja.charAt(0), W / 2 - 0, 790); }
-    x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.fillStyle = '#D5B97F'; x.font = '500 34px "Noto Sans KR", sans-serif'; if (x.letterSpacing !== undefined) x.letterSpacing = '12px'; x.fillText('MANTRA FORTUNE', W / 2, 150); if (x.letterSpacing !== undefined) x.letterSpacing = '0px';
+    x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.fillStyle = '#D5B97F'; x.font = '500 34px "Noto Sans KR", sans-serif'; if (x.letterSpacing !== undefined) x.letterSpacing = '12px'; if (logo) { var lh = 210, lw = logo.width * lh / logo.height; x.drawImage(logo, (W - lw) / 2, 40, lw, lh); } else x.fillText('MANTRA FORTUNE', W / 2, 150); if (x.letterSpacing !== undefined) x.letterSpacing = '0px';
     x.fillStyle = '#F4EFE2'; x.font = '600 120px "Noto Serif KR", serif'; x.fillText(d.pillar, W / 2, 1330);
     x.fillStyle = '#BDB8AB'; x.font = '400 40px "Noto Serif KR", serif'; x.fillText(d.hanja, W / 2, 1390);
     x.fillStyle = '#F0DFB2'; x.font = '400 50px "Noto Serif KR", serif'; var lines = wrap(x, d.line, W - 220).slice(0, 3); lines.forEach(function (l, i) { x.fillText(l, W / 2, 1480 + i * 70); });
@@ -44,8 +45,8 @@
   // 브라우저: 미리보기 대화상자(저장·공유). 반환 Promise 는 카드가 만들어지면 resolve.
   function create(rep, sd, awk) {
     var d = content(rep, sd, awk), fonts = document.fonts && document.fonts.load ? Promise.all(['600 100px "Noto Serif KR"', '500 30px "Noto Sans KR"'].map(function (f) { return document.fonts.load(f, '가나다 MANTRA'); })).catch(function () { }) : Promise.resolve();
-    return Promise.all([loadImg(d.poster), fonts]).then(function (a) {
-      var cv = document.createElement('canvas'); draw(cv, d, a[0]);
+    return Promise.all([loadImg(d.poster), fonts, loadImg(LOGO)]).then(function (a) {
+      var cv = document.createElement('canvas'); draw(cv, d, a[0], a[2]);
       return new Promise(function (res, rej) {
         cv.toBlob(function (b) {
           if (!b) return rej(new Error('카드를 만들지 못했습니다.'));

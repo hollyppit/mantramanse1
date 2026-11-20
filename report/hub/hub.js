@@ -124,7 +124,7 @@
   H.route('', function (q, ctx) {
     var has = P.has(), nm = P.name(), need = function (next, to) { return has ? to : '#/input?next=' + next; };
     var el = H.view(
-      '<section class="hero"><p class="kick">MANTRA FORTUNE</p><h1 class="h1">잠시, 운명의 이야기를<br>들여다볼까요?</h1><p class="sub">가볍게 오늘의 운세를 확인하거나,<br>당신이 타고난 이야기를 시작해보세요.</p></section>' +
+      '<section class="hero"><p class="kick kick-logo"><img src="/report/brand/logo-320.webp" alt="MANTRA FORTUNE" width="320" height="293" decoding="async"></p><h1 class="h1">잠시, 운명의 이야기를<br>들여다볼까요?</h1><p class="sub">가볍게 오늘의 운세를 확인하거나,<br>당신이 타고난 이야기를 시작해보세요.</p></section>' +
       (has ? '<a class="todaybar" id="tbar" href="#/today" data-track="fortune_content_click" data-p="today_bar"><b>·</b><div><span>' + (nm ? esc(nm) + '님의 ' : '') + '오늘의 흐름</span><p id="tbarT">불러오는 중…</p><em class="why" id="tbarW"></em></div></a>' : '') +
       '<div class="cards">' +
       '<a class="cc main" href="#/tarot" data-track="fortune_content_click" data-p="tarot"><i class="glyph" aria-hidden="true">運</i><small>FREE TAROT</small><h3>무료 타로</h3><p>마음속 질문 하나를 떠올려보세요.</p><div class="chips"><i>오늘의 카드</i><i>연애운</i><i>재물운</i><i>일·사업운</i><i>YES / NO</i></div><span class="go">카드 한 장 뽑기 →</span></a>' +

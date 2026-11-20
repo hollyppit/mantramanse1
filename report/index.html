@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>내 이야기의 시작 · 만트라 사주 무빙툰</title>
+<link rel="icon" type="image/png" sizes="64x64" href="/report/brand/favicon-64.png">
+<link rel="apple-touch-icon" href="/report/brand/apple-touch-icon.png">
+<meta property="og:image" content="https://mantrafortune.com/report/brand/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="만트라 포춘 MANTRA FORTUNE 로고">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://mantrafortune.com/report/brand/og-image.jpg">
 <meta name="description" content="내 사주를 읽고 보는 이야기로. 기질과 관계, 일과 돈, 인생의 흐름을 무빙툰으로 체험하세요.">
 <meta property="og:title" content="내 이야기의 시작 · 만트라 사주 무빙툰">
 <meta property="og:description" content="사람마다 잘되는 시기가 다릅니다. 나의 기질과 올해의 흐름을 확인해 보세요.">
@@ -41,7 +49,8 @@ html.hub-on #story { display: none; }
 .top { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: linear-gradient(180deg, rgba(8, 10, 17, .9), transparent); font-size: .78rem; }
 .top a, .top button { color: var(--ink-3); text-decoration: none; background: none; border: 0; font: inherit; letter-spacing: .06em; cursor: pointer; padding: 6px 4px; }
 .top a:hover, .top button:hover { color: var(--gold); }
-.top .brand { font-family: var(--f-serif); letter-spacing: .14em; color: var(--ink-2); }
+.top .brand { font-family: var(--f-serif); letter-spacing: .14em; color: var(--ink-2); display: inline-flex; align-items: center; gap: 9px; }
+.top .brand-mark { display: block; height: 30px; width: auto; flex: none; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .5)); }
 /* 허브 화면(입력·결과)에서는 글 위로 막대가 겹쳐 지나가므로 반투명 바탕을 깐다 */
 html.hub-on .top { background: rgba(8, 10, 17, .82); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line-2); }
 
@@ -293,6 +302,9 @@ html.hub-on .top { background: rgba(8, 10, 17, .82); -webkit-backdrop-filter: bl
 .cv-img { display:block; margin:auto; max-width: 100%; max-height: 100%; object-fit: contain; -webkit-mask-image: radial-gradient(closest-side, #000 62%, transparent 100%); mask-image: radial-gradient(closest-side, #000 62%, transparent 100%); }
 .cv-img, .cv-glow { animation: cvFloat 7s ease-in-out infinite; will-change: transform; }
 @keyframes cvFloat { 0%, 100% { transform: translateY(8px) rotate(-.6deg); } 50% { transform: translateY(-10px) rotate(.6deg); } }
+.cv-lamp > .cv-glow, .cv-lamp > .cv-logo { grid-area: 1 / 1; }
+.cv-logo { position: relative; z-index: 1; width: min(62%, 290px); height: auto; animation: cvFloat 7s ease-in-out infinite; filter: drop-shadow(0 18px 36px rgba(0, 0, 0, .65)) drop-shadow(0 0 28px rgba(232, 120, 60, .28)); }
+.cv-logo.cv-logo-sm { width: min(44vw, 190px); margin-top: 6px; animation: none; }
 .cv-glow { width: 70%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgba(232, 178, 106, .32), rgba(232, 178, 106, .08) 55%, transparent 100%); }
 .cv-t, .cv-s, .cv-bw { position: relative; }
 .cv-t { left: var(--cv-tx); top: var(--cv-ty); align-self: var(--cv-ta); text-align: var(--cv-ttx); }
@@ -350,6 +362,7 @@ html.hub-on .top { background: rgba(8, 10, 17, .82); -webkit-backdrop-filter: bl
 .preview .blk.sel { outline: 1px dashed var(--gold); outline-offset: -2px; }
 .blk.is-hidden { opacity: .3 !important; }
 
+.ft-logo { display: block; width: 92px; height: auto; margin: 0 auto 14px; opacity: .92; }
 footer { padding: 70px 0 60px; color: var(--ink-3); font-size: .76rem; text-align: center; }
 
 @keyframes drop { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
@@ -374,7 +387,7 @@ footer { padding: 70px 0 60px; color: var(--ink-3); font-size: .76rem; text-alig
   <script>/* 통합 첫 화면은 관리자가 열 때까지 숨김(functions/_gateway.js) — 열려 있을 때만 이 링크를 보여 준다. 자리는 그대로 두어 머리줄 배치가 흔들리지 않게 */
     (function () { try { fetch('/api/community/status', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (!d || d.gateway !== true) return; var a = document.getElementById('gateLink'); if (a) { a.style.visibility = ''; a.removeAttribute('tabindex'); a.removeAttribute('aria-hidden'); } }).catch(function () { }); } catch (e) { } })();
   </script>
-  <span class="brand" id="brandName">만트라 포춘</span>
+  <span class="brand" id="brandName"><img class="brand-mark" src="/report/brand/logo-320.webp" alt="" width="320" height="293" decoding="async"><span>만트라 포춘</span></span>
   <span class="r"><button type="button" id="skipLink">바로 분석하기</button></span>
 </header>
 <button type="button" id="autoBtn" hidden>⏸ 멈추기</button>
@@ -384,14 +397,14 @@ footer { padding: 70px 0 60px; color: var(--ink-3); font-size: .76rem; text-alig
 <section id="hub" data-embed hidden aria-label="무료 운세 콘텐츠"><main id="screen" tabindex="-1" aria-live="polite"></main><div id="toast" class="toast" role="status" hidden></div></section>
 <section id="productGuide" aria-label="사주 무빙툰 안내" hidden></section>
 <main id="story" aria-live="polite"><noscript><p class="body" style="padding:30vh 0">이 페이지는 자바스크립트가 필요합니다.</p></noscript></main>
-<footer><p>© 만트라 포춘 · 사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></footer>
+<footer><img class="ft-logo" src="/report/brand/logo-320.webp" alt="만트라 포춘 MANTRA FORTUNE" width="320" height="293" loading="lazy" decoding="async"><p>© 만트라 포춘 · 사주는 참고용 콘텐츠이며 미래를 단정하지 않습니다.</p></footer>
 <script src="/engine.js"></script>
 <script src="/feature-flags.js"></script>
 <script src="/compat-day.js"></script>
 <script src="assemble.js"></script>
 <script src="story/fonts.js"></script>
 <script src="story/content.js"></script>
-<script src="story/story.js?v=20261117-trend"></script>
+<script src="story/story.js?v=20261120-logo"></script>
 <script src="story/ambient.js"></script>
 <script src="story/intro.js"></script>
 <script src="story/product-guide.js"></script>
