@@ -678,7 +678,7 @@
   function hubScroll() { var el = document.getElementById('hub'); if (el) el.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'start' }); }
   function hubMount() {
     var el = document.getElementById('hub'); if (!el || !hubUrl() || PREVIEW) return;
-    var base = hubUrl(), HV = '?v=20261120-g3'; /* 허브 파일이 바뀌면 HV 를 올린다(운영 도메인 JS 4시간 브라우저 캐시) */ document.documentElement.classList.add('hub-on'); el.hidden = false; (function () { var ms = document.createElement('script'); ms.src = base + 'theme-mist.js' + HV; document.head.appendChild(ms); })(); /* 밝은 안개 테마(관리자 스위치 mistTheme, 2026-11-16) */
+    var base = hubUrl(), HV = '?v=20261120-cv'; /* 허브 파일이 바뀌면 HV 를 올린다(운영 도메인 JS 4시간 브라우저 캐시) */ document.documentElement.classList.add('hub-on'); el.hidden = false; (function () { var ms = document.createElement('script'); ms.src = base + 'theme-mist.js' + HV; document.head.appendChild(ms); })(); /* 밝은 안개 테마(관리자 스위치 mistTheme, 2026-11-16) */
     var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = base + 'hub.css' + HV; l.onerror = function () { cssRetry(l, 1); }; document.head.appendChild(l);
     var l2 = document.createElement('link'); l2.rel = 'stylesheet'; l2.href = base + 'onboard.css' + HV; l2.onerror = function () { cssRetry(l2, 1); }; document.head.appendChild(l2); ['cinematic.css', 'renewal.css', 'quest.css', 'timeline.css', '../occult-theme.css', 'interaction.css', '../natal-table.css', 'theme-mist.css'].forEach(function (f) { var lk = document.createElement('link'); lk.rel = 'stylesheet'; lk.href = base + f + (f === '../natal-table.css' ? HV : f.indexOf('../') === 0 ? '' : HV); lk.onerror = function () { cssRetry(lk, 1); }; document.head.appendChild(lk); }); // 인터랙티브 스토리·운명의 타임라인 // 첫 화면 아래에서 이어지는 온보딩(사례 → 명리학 소개 → 입력)
     [['/shared-core.js'], ['/luck-grade.js' + HV], ['/report/last-good.js?v=20261112-lg'], [base + 'tarot-symbols.js' + HV], [base + 'free-core.js' + HV], [base + 'tarot-read.js' + HV], [base + 'hub.js' + HV], [base + 'hub-tarot.js' + HV], [base + 'hub-saju.js' + HV], [base + 'onboard-data.js' + HV], [base + 'onboard-style.js' + HV], [base + 'quest-data.js' + HV], [base + 'renewal-data.js' + HV], [base + 'renewal-view.js' + HV], [base + 'cinematic-data.js' + HV], [base + 'cinematic.js' + HV + '-pre'], [base + 'renewal-characters.js' + HV], [base + 'onboard-art.js' + HV], [base + 'hub-onboard.js' + HV], [base + 'hub-quest.js' + HV], [base + 'hub-timeline.js' + HV], [base + 'hub-me.js' + HV]].reduce(function (p, s, i, all) { if (!i) all.forEach(function (x) { var pl = document.createElement('link'); pl.rel = 'preload'; pl.as = 'script'; pl.href = x[0]; document.head.appendChild(pl); }); return p.then(function () { return loadHubScript(s[0], 0); }); }, Promise.resolve()).then(function () { root.Hub.start(); }).catch(function () { hubFailed(el); });
@@ -694,7 +694,7 @@
     coverFx(cv);
     if (!cv || cv.show === false) { el.hidden = true; el.innerHTML = ''; return; }
     var url = media(cv.src), alt = pick(cv.alt) || '';
-    // 2026-11-20 로고(MANTRA FORTUNE): 커버 이미지가 없으면 빛무리 가운데, 있으면 제목 위. cover.logo:false 로 끈다
+    // 2026-11-20 로고(MANTRA FORTUNE): 커버 이미지가 없을 때만 빛무리 가운데(cover.logo:false 로 끈다). 이미지가 있으면 로고 없음
     var logoOn = cv.logo !== false, logo = function (cls) { return '<img class="' + cls + '" src="/report/brand/logo-640.webp?v=20261120-fire" alt="만트라 포춘 MANTRA FORTUNE" width="640" height="640" decoding="async" fetchpriority="high">'; };
     var img = url ? '<img class="cv-img" src="' + esc(url) + '" alt="' + esc(alt) + '" decoding="async" fetchpriority="high">' : '<div class="cv-glow" role="img" aria-label="' + esc(alt) + '"></div>' + (logoOn ? logo('cv-logo') : '');
     function an(v) { return /^(float|glow|both|pulse|sway|shimmer)$/.test(v) ? ' an-' + v : ''; }
@@ -706,7 +706,7 @@
     }
     el.setAttribute('style', coverStyle(cv));
     el.hidden = false;
-    el.innerHTML = '<div class="cv-in"><div class="cv-lamp">' + img + '</div>' + (url && logoOn ? logo('cv-logo cv-logo-sm') : '') +
+    el.innerHTML = '<div class="cv-in"><div class="cv-lamp">' + img + '</div>' +   /* 2026-11-20 사용자 요청: 커버 이미지가 있을 때 그 아래 로고는 뺀다(문구와 겹침) */
       (cv.title ? '<h1 class="cv-t' + an(cv.titleAnim) + '">' + inner('title', fmt(pick(cv.title))) + '</h1>' : '') + (cv.sub ? '<p class="cv-s' + an(cv.subAnim) + '">' + inner('sub', fmt(pick(cv.sub))) + '</p>' : '') +
       (hubUrl() || cv.button ? '<div class="cv-bw"><button type="button" class="cv-btn" data-cover="go">' + inner('button', esc(hubUrl() ? '내 운명 확인하기' : pick(cv.button))) + '</button><span class="cv-arr"' + (cv.hint ? '' : ' aria-hidden="true"') + '>' + (cv.hint ? esc(pick(cv.hint)) + '<br>' : '') + '↓</span></div>' : '') + '</div>';
     el.querySelectorAll('.cv-ti.in-letters').forEach(splitLetters);
