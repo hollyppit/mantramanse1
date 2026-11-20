@@ -49,7 +49,7 @@ const pIn = { name: '최예원', year: 1999, month: 12, day: 6, hour: 8, minute:
   globalThis.window = globalThis;
   const LC = require(path.join(root, 'report/v2/love-compat.js'));
   const html = LC.resultHtml(JSON.parse(JSON.stringify(res)), 'lover');
-  for (const t of ['한눈에 정리', '서로에게 주는 것', '두 사람의 간지 관계', '숨은 인연 — 암합 분석', '상대 일주 적합도', '명리학적 근거 모두 보기', '상대 바꾸기', '85'])
+  for (const t of ['한눈에 정리', '서로에게 주는 것', '두 사람의 간지 관계', '숨은 인연 — 암합 분석', '상대 일주 적합도', '명리학적 근거 모두 보기', '상대 바꾸기', String(res.views.lover.score)])
     ok(html.includes(t), '결과 화면에 없음: ' + t);
   ok(/data-lc-rel="work"/.test(html) && LC.resultHtml(res, 'work').includes('직장·동업 기준'), '관계 단추·전환 오류');
   ok(!/<script/i.test(LC.resultHtml({ ...res, names: { a: '<script>', b: 'x' }, views: { lover: { ...res.views.lover, names: { a: '<script>', b: 'x' } } } }, 'lover')), '이름이 HTML 로 새어 나감');

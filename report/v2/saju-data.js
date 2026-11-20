@@ -65,8 +65,10 @@
     });
 
     if (ch.yong && ch.yong.applicable !== false && ch.yong.yong != null) {
-      var roles = {}; ELK.forEach(function (e, i) { roles[e] = ch.yong.roles && ch.yong.roles[i] || null; });
-      sd.usefulElements = { yong: ELK[ch.yong.yong], hee: ch.yong.hee != null ? ELK[ch.yong.hee] : null, roles: roles, school: ch.yong.school, fallback: !!ch.yongFallback };
+      // 2026-11-20: 역할(용·희·기·구·한)은 엔진 통합 용신(ch.unified)을 우선 — 서사·심화·오행 전략·만세력과 같은 출처. 학파 자동이면 ch.yong 과 같다
+      var U = ch.unified && ch.unified.roles ? ch.unified : null, roles = {};
+      ELK.forEach(function (e, i) { var r = U ? U.roles[i] : (ch.yong.roles && ch.yong.roles[i]); roles[e] = r ? String(r).replace(/^조건부 /, '') : null; });
+      sd.usefulElements = { yong: ELK[U && U.yong != null ? U.yong : ch.yong.yong], hee: U ? (U.hee != null ? ELK[U.hee] : null) : (ch.yong.hee != null ? ELK[ch.yong.hee] : null), roles: roles, school: ch.yong.school, fallback: !!ch.yongFallback };
     } else { sd.usefulElements = null; un.push('usefulElements'); }
 
     // AI가 선택된 학파 하나뿐 아니라 서로 다른 기준과 충돌 이유를 함께 검토한다.

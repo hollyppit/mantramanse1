@@ -51,7 +51,7 @@
   function box(cap, lead, body) { return '<section class="dp-embed dp td-blk"><div class="cap">' + esc(cap) + '</div>' + (lead ? '<p class="lead">' + lead + '</p>' : '') + body + '</section>'; }
   function chip(s) { return '<span class="td-chip" style="background:' + s.c + '">' + esc(s.n) + '</span>'; }
   function who(H) { return H.name ? esc(H.name) + '님' : '당신'; }
-  function rolesOf(ch) { return (ch.yong && ch.yong.roles) || (ch.yongAll && ch.yongAll.eokbu && ch.yongAll.eokbu.roles) || {}; }
+  function rolesOf(ch) { var u = ch.unified && ch.unified.roles; if (u) { var o = {}; Object.keys(u).forEach(function (k) { o[k] = u[k] ? String(u[k]).replace(/^조건부 /, '') : u[k]; }); return o; } return (ch.yong && ch.yong.roles) || (ch.yongAll && ch.yongAll.eokbu && ch.yongAll.eokbu.roles) || {}; }   // 2026-11-20: 통합 용신 우선(만세력·서사와 같은 출처)
 
   /* ① 그래프 지표: 앞으로 10년(세운) 또는 12개월(월운) — 등급 · TOP 3 · 엔진 요약·근거 */
   function subTiming(H, key, scope) {

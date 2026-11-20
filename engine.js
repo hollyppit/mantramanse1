@@ -1634,6 +1634,8 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     res = { kind, key, group: g, el: elOfGroup(dEl, g), status, statusRaw, hasHour, wolgeopUse,
       sang: sang.map(s => ({ text: s[0], on: !!s[1], group: s[2], el: elOfGroup(dEl, s[2]) })),
       pa: pa.map(p => ({ text: p[0], on: !!p[1], group: p[2], el: p[2] == null ? null : elOfGroup(dEl, p[2]), rescue: p[3] ? { text: p[3][0], on: !!p[3][1], group: p[3][2], el: elOfGroup(dEl, p[3][2]) } : null })) };
+    // 2026-11-20: 십성별 투출·통근(per)과 재료 단계(lvl)를 다른 모듈(wealth-career.js scan)이 같은 값으로 쓰게 내보낸다. 숨은 속성이라 결과 JSON은 그대로
+    Object.defineProperty(res, 'lvl', { value: lvl, enumerable: false }); Object.defineProperty(res, 'per', { value: per, enumerable: false });
     _gyeokCore.set(ch, res); return res;
   }
 

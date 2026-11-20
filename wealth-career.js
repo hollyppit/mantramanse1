@@ -88,10 +88,15 @@
       h.forEach(function (x, i) { var role = i === h.length - 1 ? 'main' : (i === 0 && h.length === 3 ? 'res' : 'mid'), t = M.tenGod(d, x[0]); per[t].hid += PAL[k] * HW[role]; per[t].hidAt.push(k + ':' + role); });
     });
     var monthMain = M.tenGod(d, M.mainHidden(ch.pillars.month.b)), lvl = {}, info = [];
+    // 2026-11-20: 재료 단계·투출·통근은 엔진 격국 판정(gyeokCore)의 값을 그대로 쓴다(같은 식을 따로 두지 않음). 엔진이 내보내지 않는 옛 버전이면 아래 같은 셈법으로
+    var core = null; try { core = M.gyeokCore ? M.gyeokCore(ch) : null; } catch (e) { core = null; }
     TG.forEach(function (t) {
       var p = per[t], touched = p.vis > 0, rooted = p.hid >= 0.5, v;
+      if (core && core.lvl && core.per && core.per[t]) { v = core.lvl[t]; touched = !!core.per[t].touched; rooted = core.per[t].hid >= 0.5; }
+      else {
       if (touched && rooted) v = 3; else if (!touched && monthMain === t) v = 3; else if (touched || p.hid >= 0.9) v = 2; else if (p.hid > 0) v = 1; else v = 0;
       if (v > 1 && ch.weights.tgPct[t] < 3) v = 1;   // 비율 3% 미만의 흔적은 구조를 이루는 재료로 세지 않는다
+      }
       lvl[t] = v; p.touched = touched; p.rooted = rooted;
       var loc = p.visAt.map(function (k) { return POSK[k] + '간'; }).concat(p.hidAt.slice(0, 4).map(function (h) { var a = h.split(':'); return POSK[a[0]] + '지 ' + ROLEK[a[1]]; }));
       p.loc = loc.join('·') || '없음';

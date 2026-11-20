@@ -258,6 +258,14 @@
 
   // ⑤에서 쓰는 상대 글자의 실제 세력(상대 일간 제외): 자리 · 통근(뿌리 없는 천간 0.6배) · 월령(월지 정기 1.5배) · 투간(천간에 드러난 지장간 1.3배) · 지장간 일수
   function glyphPower(M, ch) {
+    // 2026-11-20: 엔진 최종 세력(계절·월령 왕상휴수사·뿌리·충형파해·합화 반영)에서 상대 일간 몫만 뺀 비율. 엔진 계절 모델이 없으면 아래 옛 셈법
+    const sea = ch.weights && ch.weights.seasonal;
+    if (sea && sea.trace && ch.weights.total) {
+      const pts = ch.weights.pct.map(p => p / 100 * ch.weights.total), dt = sea.trace.find(t => t.pos === 'day' && t.part === 'stem');
+      if (dt) { const e = dt.el; pts[e] = Math.max(0, pts[e] - dt.base * dt.wsF * dt.rootF); }
+      const sum = pts.reduce((a, b) => a + b, 0) || 1;
+      return pts.map(x => x / sum);
+    }
     const out = [0, 0, 0, 0, 0], ks = POS.filter(k => ch.pillars[k]);
     const stemEls = ks.filter(k => k !== 'day').map(k => M.stemEl(ch.pillars[k].s));
     const rootEls = new Set(); ks.forEach(k => M.HIDDEN[ch.pillars[k].b].forEach(([hs]) => rootEls.add(M.stemEl(hs))));

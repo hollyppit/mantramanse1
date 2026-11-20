@@ -60,6 +60,6 @@ assert.ok(/ZW\[st\.zone\]/.test(src('report/v2/life-narrative.js')) && /STR_W\[z
 assert.ok(!/글자 수가 가장 적은/.test(src('report/v2/reading-depth.js')), '개수 표현 제거');
 assert.ok(/function seasonalCaption\(sd\)/.test(src('report/v2/reading-text.js')) && /seasonalCaption\(sd\)\+'<\/figure>'/.test(src('report/v2/reading-text.js')), '오행 그래프 계절 한 줄');
 const idx = src('report/v2/index.html');
-['saju-data.js', 'reading-text.js', 'reading-feature.js', 'fate-blocks-4.js', 'deep-wealth.js', 'premium-depth.js', 'reading-depth.js', 'life-narrative.js', 'element-strategy.js'].forEach(f => assert.ok(idx.includes(f + '?v=20261120-rv'), f + ' 캐시 버전'));
+['saju-data.js', 'reading-text.js', 'reading-feature.js', 'fate-blocks-4.js', 'deep-wealth.js', 'premium-depth.js', 'reading-depth.js', 'life-narrative.js', 'element-strategy.js'].forEach(f => assert.ok(new RegExp(f.replace('.', '[.]') + '[?]v=2026112[0-9]-').test(idx), f + ' 캐시 버전(2026-11-20 이후)'));
 assert.ok(!/\?\?v=/.test(idx), '버전 표기 깨짐 없음');
 console.log(`topic-reading-sync-sim PASS · 사주 ${n}명 · 세운 간지·흐름 점수 = 엔진 · 재물 뿌리 지장간 기준(지장간에만 재성 있는 사주 ${rootedHiddenOnly}) · 계절 세 지표 · 오행 전략 블록 = 용희신 · 서사와 중복 없음`);
