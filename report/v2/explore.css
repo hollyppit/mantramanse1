@@ -304,3 +304,5 @@
 #wstrip button, #wsteps button { min-height: 44px; touch-action: manipulation; }
 #wstrip { padding-left:max(10px,env(safe-area-inset-left)); padding-right:max(10px,env(safe-area-inset-right)); }
 @media(max-width:560px) { #wsteps { gap:8px; }#wsteps button { padding:4px 12px; } }
+/* 세계 화면(ws-h): 탭 줄 위 52px(뒤로 단추 자리)도 같은 색 띠로 채워 본문이 비쳐 보이지 않게 */
+#wstrip.ws-h { box-shadow: 0 calc(-52px - env(safe-area-inset-top, 0px)) 0 4px #080b14; }

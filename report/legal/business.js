@@ -33,7 +33,7 @@
     if (document.getElementById('mt-legal-css')) return;
     var s = document.createElement('style'); s.id = 'mt-legal-css';
     s.textContent = '.mt-legal{max-width:960px;margin:32px auto 0;padding:20px 16px calc(28px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(128,128,128,.25);font-size:12px;line-height:1.7;color:#8a8577;text-align:center}' +
-      '.mt-legal p{margin:2px 0}.mt-legal a{color:inherit;text-decoration:underline;text-underline-offset:2px}.mt-legal-links{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;font-size:13px}.mt-legal-links a{text-decoration:none}.mt-legal-note{margin-top:8px!important;opacity:.8}';
+      '.mt-legal p{margin:2px 0}.mt-legal a{color:inherit;text-decoration:underline;text-underline-offset:2px}.mt-legal-links{display:flex;gap:0 2px;justify-content:center;flex-wrap:wrap;margin-bottom:4px;font-size:13px}.mt-legal-links a{text-decoration:none;display:inline-flex;align-items:center;min-height:40px;padding:0 7px}.mt-legal-note{margin-top:8px!important;opacity:.8}';
     document.head.appendChild(s);
   }
   function mountFooter(target) {

@@ -547,7 +547,7 @@ html.theme-mist .fc-method, html.theme-mist .fc-method p{ font-size: 14px; line-
 html.theme-mist .fc-method summary{ font-size: 14px; }
 html.theme-mist .mc-legend{ font-size: 13px; }
 html.theme-mist .mc-month-note{ font-size: 15px; line-height: 1.75; }
-html.theme-mist .fc-controls label{ font-size: 13px; } html.theme-mist .fc-controls select{ font-size: 15px; }
+html.theme-mist .fc-controls label{ font-size: 13px; } html.theme-mist .fc-controls select{ font-size: 16px; }
 html.theme-mist .mc-week{ font-size: 13px; }
 html.theme-mist #hub .fortune-panel .mc-bar b{ font-size: 13px; } html.theme-mist #hub .fortune-panel .mc-bar span{ font-size: 12.5px; } html.theme-mist #hub .fortune-panel .mc-bar small{ font-size: 11px; }
 html.theme-mist #hub .fortune-panel .mc-day b{ font-size: 15px; }
@@ -627,7 +627,7 @@ html.theme-mist #hub #tq .tq-car-stack > li + li{ border-top: 1px dashed var(--m
 /* 캘린더 패널: 흰 카드 + 또렷한 테두리, 안쪽 그래프·보기 선택은 옅은 회색 칸으로 한 번 더 나눈다 */
 html.theme-mist .fortune-panel{ background: #FFFFFF; border: 1px solid var(--mist-bd); box-shadow: 0 18px 40px -30px rgba(30,45,52,.45); }
 html.theme-mist .fortune-panel .mc-nav{ padding-bottom: 14px; border-bottom: 1px solid var(--mist-bd2); }
-html.theme-mist .mc-chart{ border: 1px solid var(--mist-bd2); border-radius: 14px; background-color: #F7F9FA; padding: 22px 10px 36px; }
+html.theme-mist .mc-chart{ border: 1px solid var(--mist-bd2); border-radius: 14px; background-color: #F7F9FA; padding: 22px 10px 46px; }
 html.theme-mist .fc-controls{ background: #F5F8F9; border-color: var(--mist-bd2); }
 html.theme-mist .fc-method{ border-top: 1px dashed var(--mist-bd2); padding-top: 12px; }
 html.theme-mist .mc-month-note{ background: #FFFFFF; border: 1px solid var(--mist-bd); border-left: 4px solid #2563EB; border-radius: 12px; }
@@ -710,8 +710,8 @@ html.theme-mist #hub #tq :is(.tq-fchip, .tq-mchip, .tq-ychip, .tq-chip){ border-
 html.theme-mist #hub #tq :is(.tq-mchip, .tq-chip, .tq-fchip).on{ background: linear-gradient(145deg, #2E3B42, #1D2428) !important; border-color: #1D2428 !important; box-shadow: 0 8px 18px -10px rgba(20,35,42,.6); }
 
 /* ── 영역 바로가기 줄: 유리 막대 + 지금 위치 붉은 그라데이션 알약 ── */
-html.theme-mist #hub .tq-nav{ background: transparent; padding: 10px 8px; }
-html.theme-mist #hub .tq-nav::before{ content: ''; position: absolute; inset: 4px 0; z-index: -1; border-radius: 999px; background: rgba(255,255,255,.62); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: var(--tr-ring), 0 14px 30px -20px rgba(20,35,42,.4); }
+html.theme-mist #hub .tq-nav{ padding: 6px 8px; margin-top: 4px; top: calc(var(--top) + 6px); margin-bottom: 10px; border-radius: 999px; background: rgba(255,255,255,.62); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: var(--tr-ring), 0 14px 30px -20px rgba(20,35,42,.4); }
+/* 유리판 배경은 칩 줄 자체에(가로로 넘겨도 배경이 따라 밀리지 않게) */
 html.theme-mist #hub .tq-nav{ isolation: isolate; }
 html.theme-mist #hub .tq-nav a{ border-radius: 999px !important; background: transparent !important; border-color: transparent !important; }
 html.theme-mist #hub .tq-nav a:hover{ background: rgba(255,255,255,.85) !important; }

@@ -343,3 +343,5 @@ body.tq-wide #hub #screen{ overflow: clip; max-width: 980px; padding-left: clamp
 /* 뚜렷한 신호 알림(2026-11-18) */
 /* 좋은 신호·주의할 신호 글자 색(signal-colors.js) */
 #hub .sw-g{ color: #178a4a !important; font-weight: 700; } #hub .sw-b{ color: #c9412d !important; font-weight: 700; } html:not(.theme-mist) #hub .sw-g{ color: #5fd68d !important; } html:not(.theme-mist) #hub .sw-b{ color: #ff7a66 !important; }
+/* 모바일: 바로가기 칩 줄 — 마이페이지는 아이콘만(칩을 덜 가리게), 칩 높이 44px */
+@media (max-width: 480px){ #hub .tq-nav a{ min-height: 44px; } #hub .tq-nav a.tq-edit{ font-size: 0; gap: 0; min-width: 44px; padding: 8px 12px; justify-content: center; } #hub .tq-nav a.tq-edit svg{ width: 18px; height: 18px; } }

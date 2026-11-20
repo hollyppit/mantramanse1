@@ -17,7 +17,7 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 #hub :focus-visible{ outline: 2px solid var(--gold); outline-offset: 3px; }
 #hub .glow{ position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(60% 40% at 50% 0%, rgba(205, 178, 122, .13), transparent 70%), radial-gradient(50% 35% at 100% 100%, rgba(92, 82, 156, .14), transparent 70%); }
 
-#hub .top{ position: fixed; inset: 0 0 auto 0; z-index: 30; height: var(--top); display: grid; grid-template-columns: 76px 1fr 76px; align-items: center; padding: 0 8px; background: linear-gradient(180deg, rgba(8, 10, 17, .95), rgba(8, 10, 17, 0)); }
+#hub .top{ position: fixed; inset: 0 0 auto 0; z-index: 30; height: var(--top); display: grid; grid-template-columns: 76px 1fr 76px; align-items: center; padding: 0 8px; background: linear-gradient(180deg, rgba(8, 10, 17, .96), rgba(8, 10, 17, .86)); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 #hub .top .brand{ text-align: center; font-family: var(--f-serif); letter-spacing: .16em; color: var(--ink-2); text-decoration: none; font-size: .86rem; }
 #hub .tb{ background: none; border: 0; color: var(--ink-3); font-size: .78rem; text-decoration: none; min-height: 44px; min-width: 44px; display: grid; place-items: center; cursor: pointer; }
 #hub .tb:first-child{ font-size: 1.7rem; justify-self: start; }
@@ -341,7 +341,7 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 .fortune-panel h2,.tscore h2 { font-size: 19px; font-weight: 650; letter-spacing: -.5px; }
 .mc-nav { display:flex;align-items:center;justify-content:space-between;gap:12px;margin:24px 0; }
 .mc-nav button,.fc-controls button { border:1px solid #ffffff15;background:#ffffff07;color:#e4d3a5;border-radius:12px;padding:9px 14px;cursor:pointer;min-height:40px; }
-.mc-chart { display:flex;gap:9px;height:215px;overflow-x:auto;padding:22px 0 36px;align-items:stretch;background:repeating-linear-gradient(to top,transparent 0,transparent calc(25% - 1px),#ffffff08 calc(25% - 1px),#ffffff08 25%);background-clip:content-box;scrollbar-width:thin;scrollbar-color:#434957 transparent; }
+.mc-chart { display:flex;gap:9px;height:225px;overflow-x:auto;overflow-y:hidden;padding:22px 0 46px;align-items:stretch;background:repeating-linear-gradient(to top,transparent 0,transparent calc(25% - 1px),#ffffff08 calc(25% - 1px),#ffffff08 25%);background-clip:content-box;scrollbar-width:thin;scrollbar-color:#434957 transparent; }
 #hub .fortune-panel .mc-bar { position:relative;flex:1;min-width:34px;background:transparent;border:0;border-bottom:1px solid #ffffff20;color:#c4ccdc;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0;cursor:pointer; }
 #hub .fortune-panel .mc-bar i { width:76%;max-width:34px;min-height:2px;border-radius:8px 8px 3px 3px;flex-shrink:0;background:linear-gradient(to top,color-mix(in srgb,var(--flow) 40%,#152131),var(--flow));opacity:.85; }
 #hub .fortune-panel .mc-bar b { font-size:11px;font-weight:600;margin-bottom:6px;font-variant-numeric:tabular-nums; }
@@ -385,7 +385,7 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 @media(max-width:480px) {
   .fortune-panel { padding:22px 12px;border-radius:20px; }.fortune-panel .h1 { font-size:23px; }
   .mc-nav { gap:8px;margin:18px 0; }.mc-nav h2 { font-size:17px; }.mc-nav button { padding:8px 12px; }
-  .mc-chart { gap:7px;height:195px; }.fc-controls { padding:10px;gap:8px; }.fc-controls select { font-size:12px; }
+  .mc-chart { gap:7px;height:205px; }.fc-controls { padding:10px;gap:8px; }.fc-controls select { font-size:16px; }
   .mc-grid { gap:4px; }#hub .fortune-panel .mc-day { min-height:110px;border-radius:10px;padding:7px 2px; }#hub .fortune-panel .mc-day b { font-size:12px;margin-left:3px; }#hub .fortune-panel .mc-day small { font-size:10px;padding-right:7px; }#hub .fortune-panel .mc-day .mc-metric strong { font-size:17px; }#hub .fortune-panel .mc-day em { padding:2px 3px;font-size:9px; }
   .mc-son { right:1px;top:27px;width:13px;height:13px;line-height:11px;font-size:8px; }
   .mc-lists { grid-template-columns:1fr;gap:12px; }.mc-shortlist { padding:15px; }

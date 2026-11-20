@@ -441,7 +441,7 @@
     });
     // 현재 보고 있는 영역을 상단 바로가기에 표시
     var io = null;
-    if ('IntersectionObserver' in root) { io = new IntersectionObserver(function (es) { es.forEach(function (x) { if (x.isIntersecting) { $$('#tqNav a', root0).forEach(function (a) { a.classList.toggle('on', a.getAttribute('data-z') === x.target.getAttribute('data-z')); }); } }); }, { rootMargin: '-35% 0px -55% 0px' }); $$('.tq-sec', root0).forEach(function (s) { io.observe(s); }); }
+    if ('IntersectionObserver' in root) { io = new IntersectionObserver(function (es) { es.forEach(function (x) { if (x.isIntersecting) { var nv = $('#tqNav', root0); $$('#tqNav a', root0).forEach(function (a) { var on = a.getAttribute('data-z') === x.target.getAttribute('data-z'); a.classList.toggle('on', on); if (on && nv && nv.scrollWidth > nv.clientWidth + 4) { try { nv.scrollTo({ left: Math.max(0, a.offsetLeft - 8), behavior: 'smooth' }); } catch (_) { nv.scrollLeft = Math.max(0, a.offsetLeft - 8); } } }); } }); }, { rootMargin: '-35% 0px -55% 0px' }); $$('.tq-sec', root0).forEach(function (s) { io.observe(s); }); }
     if (q.z) { var zt = $('#tq-' + q.z, root0); if (zt) setTimeout(function () { zt.scrollIntoView({ block: 'start' }); }, 60); }
     // 일주 포스터를 프로필 사진처럼(태어난 순간 위 가운데, 둥둥 뜨는 애니메이션). 포스터는 일주 각성 영상 설정(/api/awakening)의 posterUrl.
     (function () {

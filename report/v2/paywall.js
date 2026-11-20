@@ -322,10 +322,10 @@
 
   (function css() {
     var s = document.createElement('style');
-    s.textContent = '.pw-sheet{position:fixed;inset:0;z-index:9999;background:rgba(6,8,16,.62);display:flex;align-items:flex-end;justify-content:center;padding:16px}@media(min-width:640px){.pw-sheet{align-items:center}}' +
-      '.pw-card{position:relative;width:min(440px,100%);max-height:88vh;overflow:auto;background:#141826;color:#F3EEDF;border:1px solid rgba(213,185,127,.35);border-radius:18px;padding:22px 20px 18px;box-shadow:0 20px 60px rgba(0,0,0,.5);font-family:inherit}' +
+    s.textContent = '.pw-sheet{position:fixed;inset:0;z-index:9999;background:rgba(6,8,16,.62);display:flex;align-items:flex-end;justify-content:center;padding:16px 16px max(16px,env(safe-area-inset-bottom))}@media(min-width:640px){.pw-sheet{align-items:center}}' +
+      '.pw-card{position:relative;width:min(440px,100%);max-height:88vh;max-height:88dvh;overflow:auto;overscroll-behavior:contain;background:#141826;color:#F3EEDF;border:1px solid rgba(213,185,127,.35);border-radius:18px;padding:22px 20px 18px;box-shadow:0 20px 60px rgba(0,0,0,.5);font-family:inherit}' +
       '.pw-card h3{margin:4px 0 6px;font-size:1.12rem;line-height:1.45}.pw-k{margin:0;color:#D5B97F;font-size:.8rem;font-weight:700;letter-spacing:.04em}.pw-sub{margin:0 0 12px;color:#B9B3A4;font-size:.86rem}' +
-      '.pw-x{position:absolute;top:8px;right:10px;border:0;background:none;color:#B9B3A4;font-size:1.6rem;cursor:pointer;line-height:1}.pw-note{color:#DCD5C4;font-size:.9rem;line-height:1.6}' +
+      '.pw-x{position:absolute;top:4px;right:4px;width:44px;height:44px;display:grid;place-items:center;padding:0;border:0;background:none;color:#B9B3A4;font-size:1.6rem;cursor:pointer;line-height:1}.pw-note{color:#DCD5C4;font-size:.9rem;line-height:1.6}' +
       '.pw-login{display:grid;gap:8px;margin-top:10px}.pw-btn{border:0;border-radius:12px;padding:12px 14px;font:inherit;font-weight:700;cursor:pointer;background:#2A3047;color:#F3EEDF}.pw-btn[disabled]{opacity:.45;cursor:default}' +
       '.pw-kakao{background:#FEE500;color:#191600}.pw-naver{background:#03C75A;color:#fff}.pw-google{background:#fff;color:#1f1f1f}.pw-buy{background:#C8442F;color:#fff;white-space:nowrap}' +
       '.pw-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}.pw-list li{display:flex;gap:10px;align-items:center;justify-content:space-between;background:rgba(255,255,255,.05);border-radius:12px;padding:10px 12px}.pw-list small{display:block;color:#B9B3A4;font-size:.76rem}' +
