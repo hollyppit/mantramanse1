@@ -29,7 +29,6 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 
 #hub .kick{ font-family: var(--f-serif); color: var(--gold); letter-spacing: .3em; font-size: .72rem; margin-bottom: 14px; }
 .top .brand{ display: inline-flex; align-items: center; gap: 9px; } .top .brand-mark{ display: block; height: 30px; width: auto; flex: none; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .5)); }
-#hub .kick.kick-logo{ letter-spacing: 0; line-height: 0; margin-bottom: 12px; } #hub .kick-logo img{ display: block; height: 64px; width: auto; filter: drop-shadow(0 6px 16px rgba(0, 0, 0, .45)); }
 #hub .h1{ font-size: clamp(1.6rem, 6.4vw, 2.1rem); margin-bottom: 10px; }
 #hub .h2{ font-size: clamp(1.3rem, 5.2vw, 1.6rem); }
 #hub .sub{ color: var(--ink-2); font-size: 1rem; }
