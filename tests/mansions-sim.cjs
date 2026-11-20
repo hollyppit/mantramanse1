@@ -130,6 +130,7 @@ ok(html.indexOf('body += an ? spResult(kind, i, an)') < html.indexOf('body += sp
 ok(/\$\{tkMansionCard\(list\)\}/.test(html) && /tkMansionCell\(r\.jdn\)/.test(html), '택일 28수 연결');
 ok(/return F\.analyze\(\{ ch: S\.ch, facingDeg: \+c\.facing,/.test(html), '현공 호출(spRun)은 기존 그대로');
 ok(!/Mansion|28수|宿/.test(fs.readFileSync(path.join(root, 'engine.js'), 'utf8')), '택일 점수(engine.js pickDays)에 28수를 더하지 않음');
+ok((html.match(/\$\{MS_SRC_WARN\}/g) || []).length === 2 && /원본 판본\(영인본\)과는 아직 대조하지 않았습니다/.test(html), '28수·택일 카드에 출처 경고(전산 텍스트 기준·판본 미확인) 표시');
 ok(net === 0, '네트워크 호출 없음');
 
 if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log(' - ' + f)); process.exit(1); }
