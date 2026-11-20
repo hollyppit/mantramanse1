@@ -26,7 +26,8 @@ for (let i = 0; i < N; i++) {
   const L = O.layersAt(M, ch, t);
   assert.equal(JSON.stringify(L.map(x => x.level)), JSON.stringify(['daeun', 'seun', 'wolun', 'ilun'].slice(0, L.length)), '층 순서');
   assert.ok(L.length === 4, '지금 시점 대운·세운·월운·일진 넷 다 찾음 ' + JSON.stringify(inp));
-  const r = O.compute(M, ch, L), r2 = O.compute(M, ch, L);
+  // 이전 셈법(더해 쌓기) 계약은 mode:'additive' 로 그대로 검사한다(2026-11-20 기본값은 계절 재분석)
+  const AD = { mode: 'additive' }, r = O.compute(M, ch, L, AD), r2 = O.compute(M, ch, L, AD);
   assert.equal(JSON.stringify(r), JSON.stringify(r2), '같은 입력 같은 결과');
   assert.equal(JSON.stringify({ w: ch.weights.pct, d: ch.daeun.list.map(x => x.ev && x.ev.fitScore), u: ch.unified && ch.unified.roles }), before, '엔진 결과 변경');
   assert.ok(near(sum(r.final.pct), 100, 0.3), '비율 합 100');
@@ -40,8 +41,20 @@ for (let i = 0; i < N; i++) {
     l.withLuck.concat(l.withNatal).forEach(x => assert.ok(x.members.includes(l.level), '관계에 이 층이 들어감'));
   });
   // 층 없음·무게 0 → 원국 그대로
-  const e0 = O.compute(M, ch, []); assert.equal(JSON.stringify(e0.final.pct), JSON.stringify(e0.natal.pct), '층 없음 = 원국');
-  const z = O.compute(M, ch, L, { weights: { daeun: 0, seun: 0, wolun: 0, ilun: 0 } }); z.final.pct.forEach((p, e) => assert.ok(near(p, r.natal.pct[e], 0.11), '무게 0'));
+  const e0 = O.compute(M, ch, [], AD); assert.equal(JSON.stringify(e0.final.pct), JSON.stringify(e0.natal.pct), '층 없음 = 원국');
+  const z = O.compute(M, ch, L, { mode: 'additive', weights: { daeun: 0, seun: 0, wolun: 0, ilun: 0 } }); z.final.pct.forEach((p, e) => assert.ok(near(p, r.natal.pct[e], 0.11), '무게 0'));
+  // 계절 재분석(기본): 원국 = 엔진 최종 세력, 단계 비율 = 원국 + 계절 몫 + 원국 변화 + 운 몫 + 합화 를 다시 나눈 값, 대운·세운은 원국 월령
+  { const S1 = O.compute(M, ch, L), S2 = O.compute(M, ch, L); assert.equal(JSON.stringify(S1), JSON.stringify(S2), '계절 방식 결정성'); assert.equal(S1.mode, 'seasonal');
+    S1.natal.pct.forEach((p, e) => assert.ok(near(p, ch.weights.pct[e], 0.051), '원국 = 엔진 최종 세력'));
+    const cum = [0, 0, 0, 0, 0].map(() => 0);
+    S1.layers.forEach(l => { assert.ok(near(sum(l.pct), 100, 0.3), '계절 단계 합 100'); l.add.forEach((v, e) => cum[e] += v);
+      cum.forEach((v, e) => assert.ok(near(v, l.parts.luck[e], 0.03), '층별 증가분 합 = 누적 운 몫'));
+      const pts = S1.natal.pts.map((v, e) => Math.max(0, v + l.parts.seasonShift[e] + l.parts.natalShift[e] + l.parts.luck[e] + l.parts.hwa[e])), t = sum(pts);
+      pts.forEach((v, e) => assert.ok(near(v / t * 100, l.pct[e], 0.25), '구성 몫으로 비율 재현'));
+      if (l.level === 'daeun' || l.level === 'seun') assert.equal(l.season.el, ch.weights.seasonal.command.el, '대운·세운은 원국 월령');
+      assert.ok(l.season.states.length === 5 && l.season.states.includes('왕')); });
+    const S0 = O.compute(M, ch, []); assert.equal(JSON.stringify(S0.final.pct), JSON.stringify(S0.natal.pct), '계절 방식 층 없음 = 원국');
+    const SZ = O.compute(M, ch, L, { weights: { daeun: 0, seun: 0, wolun: 0, ilun: 0 }, noHwa: true }); SZ.final.pct.forEach((p, e) => assert.ok(near(p, S1.natal.pct[e], 0.11), '계절 방식 무게 0 = 원국')); }
   // 4단계 세 줄 풀이: 층마다 한 줄, 빈 줄·금지 표현·막연한 '아래층' 없음, 결이 숫자와 맞음, 용신을 채운다는 말은 용신이 실제로 늘 때만
   const ex = O.explain(r);
   assert.equal(ex.length, r.layers.length, '층마다 한 줄');

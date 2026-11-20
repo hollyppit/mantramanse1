@@ -6,7 +6,7 @@ function test(ok){assert(ok);checks++;}
 for(let i=0;i<480;i++){
  const birth={year:1940+i%85,month:1+i%12,day:1+(i*7)%27,hour:i%8===0?null:i%24,minute:0,gender:i%2?'M':'F',calendar:'solar',city:'서울'},ch=Manse.compute(birth);
  for(const [kind,idx]of [['male',2],['female',3]]){
- const models=['season','hidden','simple8'].map(model=>{const w=ch.weightsAll[model],g=w.groups[idx],h=w.groups[0]+w.groups[4];return {model,groupPct:g,helpPct:h,groupPass:g>=30,helpPass:h<42,screen:screen(g,h),groupMargin:g-30,helpMargin:42-h};});
+ const models=/* 2026-11-20: 기본 season 이 계절·월령 세력 모델로 바뀌어, 이 연구 표본은 당시 모델(season1 = 이전 season)로 고정 */['season1','hidden','simple8'].map(model=>{const w=ch.weightsAll[model],g=w.groups[idx],h=w.groups[0]+w.groups[4];return {model,groupPct:g,helpPct:h,groupPass:g>=30,helpPass:h<42,screen:screen(g,h),groupMargin:g-30,helpMargin:42-h};});
  const applicable=ch.hourKnown&&birth.gender===(kind==='male'?'M':'F'),base=models[0];
  const input={precision:'raw-engine',ruleId:RULES[kind],gender:birth.gender,hourKnown:ch.hourKnown,groupPct:base.groupPct,helpPct:base.helpPct,context:ctx,alternatives:models.slice(1)};
  const result=evaluateDraft(input);test(!result.publishable);test(evaluateDraft({...input,alternatives:input.alternatives.slice().reverse()}).screen===result.screen);

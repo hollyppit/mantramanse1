@@ -46,7 +46,8 @@ const CASES = [
   ['성립한 주요 구조가 없으면 출력하지 않음', [1996, 7, 5, 6, 45, 'F'], '丙子 甲午 癸卯 乙卯', a => a.major.length === 0],
   ['목화통명 성립', [1963, 5, 12, 7, 0], '癸卯 丁巳 乙卯 己卯', a => item(a, 'mokhwa').on],
   ['화염토조(시간 모름이면 안정성 유보)', [1997, 7, 17, '', 45, 'F'], '丁丑 丁未 庚申 --', a => item(a, 'yeomjo').on && a.jeong.stability.status === 'hold' && a.jeong.stability.statusRaw !== 'hold'],
-  ['모왕자쇠(토다금매)', [1988, 4, 5, 5, 45, 'F'], '戊辰 丙辰 庚寅 己卯', a => item(a, 'mowang').on && item(a, 'mowang').name === '토다금매'],
+  // 2026-11-20 계절·월령 세력: 옛 사례(戊辰 丙辰 庚寅 己卯)는 辰월 절입 직후 乙木 사령이라 土가 사(死) — 토다금매가 아니게 됨. 여름 午월(火가 土를 생함) 명식으로 교체
+  ['모왕자쇠(토다금매)', [1978, 6, 8, 13, 45, 'F'], '戊午 戊午 辛丑 乙未', a => item(a, 'mowang').on && item(a, 'mowang').name === '토다금매'],
 ];
 CASES.forEach(([name, inp, want, chk]) => {
   const ch = C(...inp), a = GS.analyze(M, ch);

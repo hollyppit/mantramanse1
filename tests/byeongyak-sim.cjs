@@ -50,7 +50,7 @@ rs.forEach((r, i) => {
   if (r.status === 'none') { ok(r.table === null, '병 없음인데 표 값이 있음'); return; }
   cnt[r.byeong.kind]++;
   if (r.byeong.kind === '태과') { ok(r.byeong.pct >= 30, '태과인데 30% 미만 ' + r.byeong.pct); ok(r.table.gi === r.byeong.elIdx, '표의 기신이 병과 다름'); ok(r.table.gu === (r.byeong.elIdx + 4) % 5, '표의 구신이 병을 낳는 오행이 아님'); r.yak.forEach(y => ok(y.elIdx !== r.byeong.elIdx, '약이 병 오행과 같음')); }
-  else { ok(r.byeong.pct < 25, '불급인데 25% 이상'); ok(r.table.gi === null && r.table.gu === null, '불급인데 기신·구신 표시'); }
+  else { ok(r.byeong.pct <= 25, '불급인데 25% 초과 ' + r.byeong.pct);   /* 판정은 25% 미만, 표시값은 소수 한 자리 반올림이라 24.96→25.0 허용 */ ok(r.table.gi === null && r.table.gu === null, '불급인데 기신·구신 표시'); }
   ok(new Set(r.yak.map(y => y.el)).size === r.yak.length, '약 중복');
   r.yak.forEach(y => { cnt[y.method]++; ok(y.present === (y.pct >= 10) || Math.abs(y.pct - 10) < 0.06, '약 존재 여부 불일치' /* pct 는 소수 첫째 자리 반올림값 */); if (!y.present) cnt.absent++; });
   if (r.yak[0] && (r.yak[0].eokRole === '용신' || r.yak[0].eokRole === '희신')) cnt.same++;

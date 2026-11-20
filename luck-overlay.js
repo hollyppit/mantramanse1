@@ -11,7 +11,7 @@
    · 브라우저·Node 공용. 사용: MantraLuckOverlay.compute(Manse, ch, [{ level:'daeun', s, b }, { level:'seun', s, b }, { level:'wolun', s, b }, { level:'ilun', s, b }]) */
 (function (G) {
   'use strict';
-  var VERSION = 'luck-overlay-20261118-2';
+  var VERSION = 'luck-overlay-20261120-1';   // 20261120: 계절 재분석 방식(기본) 추가, 이전 셈법은 opts.mode='additive'
   var LEVELS = ['daeun', 'seun', 'wolun', 'ilun'], LEVEL_K = { daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
   var DEFAULT_W = { daeun: 1, seun: 0.7, wolun: 0.4, ilun: 0.2 };   // 일진(하루)은 가장 가볍게(2026-11-18 추가)
   var mod5 = function (x) { return ((x % 5) + 5) % 5; };
@@ -74,8 +74,37 @@
 
   function pctOf(pts) { var t = pts.reduce(function (a, x) { return a + x; }, 0) || 1; return pts.map(function (x) { return x / t * 100; }); }
 
+  // ── 계절 재분석 단계(2026-11-20): 그 시점의 원국+운 기둥 전체로 뿌리·충형파해·월령 왕상휴수사를 다시 매긴다 ──
+  // items: [{ id, s, b, sw(천간 무게), bw(지지 무게), luck }] · cmdEl: 그 단계의 월령 오행
+  function stageScore(M, items, cmdEl) {
+    var CFG = M.SEASONAL_CFG, pts = zero(), natal = zero(), luck = zero(), why = [];
+    var rels = M.relationsAmong(items.map(function (x) { return { id: x.id, s: x.s, b: x.b }; }));
+    var relF = {}, byId = {}; items.forEach(function (x) { relF[x.id] = { f: 1, why: [] }; byId[x.id] = x; });
+    rels.forEach(function (r) {
+      if (r.kind !== 'branch') return; var t = /^(충|형|파|해)$/.test(r.type) ? r.type : null; if (!t) return;
+      // 운이 끼면 그 운의 층 무게만큼만(무게 0이면 작용 없음): 1 − (1 − 계수) × 무게
+      var lw = r.members.reduce(function (m, id) { var x = byId[id]; return x && x.luck ? Math.min(m, x.bw) : m; }, 1), f = 1 - (1 - CFG.rel[t]) * Math.min(1, lw);
+      r.members.forEach(function (id) { if (relF[id] && f !== 1) { relF[id].f *= f; relF[id].why.push(r.name); } });
+    });
+    var roots = {}; items.forEach(function (x) { if (x.luck && !(x.bw > 0)) return; M.HIDDEN[x.b].forEach(function (h) { roots[M.stemEl(h[0])] = 1; }); });   // 무게 0인 운 지지는 뿌리로 치지 않음
+    var ws = function (e) { return CFG.ws[M.wangsangOf(e, cmdEl)]; };
+    items.forEach(function (x) {
+      var se = M.stemEl(x.s), sv = x.sw * (roots[se] ? 1 : CFG.rootless) * ws(se), tgt = x.luck ? luck : natal;
+      pts[se] += sv; tgt[se] += sv;
+      M.HIDDEN[x.b].forEach(function (h) { var e = M.stemEl(h[0]), v = x.bw * relF[x.id].f * h[1] / 30 * ws(e); pts[e] += v; tgt[e] += v; });
+    });
+    return { pts: pts, natal: natal, luck: luck, rels: rels, relF: relF, roots: roots };
+  }
+  // 월운·일진 단계의 월령: 고른 시각(at)이 있으면 그 시각의 절입 기준(사계월 토왕용사 포함), 없으면 그 달 지지의 계절 오행
+  function cmdOfMonth(M, b, at) {
+    if (at != null && M.surroundingJie && M.monthCommand) { var j = M.surroundingJie(at).prev; if (j) return M.monthCommand({ pillars: { month: { b: b, jie: j } }, utc: at }); }
+    return { el: M.SEASON_EL[b], why: M.BR[b] + '월 계절 오행' };
+  }
+
   function compute(M, ch, layers, opts) {
     opts = opts || {};
+    var seasonal = opts.mode !== 'additive' && !!(M.SEASONAL_CFG && ch.weights && ch.weights.seasonal);
+    if (seasonal) return computeSeasonal(M, ch, layers, opts);
     var W = Object.assign({}, DEFAULT_W, opts.weights || {});
     var natalPct = ch.weights.pct.slice(), total = ch.weights.total || 9;
     var natalPts = natalPct.map(function (p) { return p / 100 * total; });
@@ -121,6 +150,69 @@
     };
   }
 
+  // 계절 재분석 방식: 원국은 엔진 최종 세력 그대로, 단계마다 (원국+그때까지 운) 전체 점수 − 원국만의 점수를 원국에 더한다.
+  //  → 운이 더한 몫(luck)과, 운 때문에 원국 글자의 뿌리·충형·계절이 바뀐 몫(natalShift)을 따로 보여 준다. 합화 이동은 기존 규칙 그대로 더한다.
+  function computeSeasonal(M, ch, layers, opts) {
+    var W = Object.assign({}, DEFAULT_W, opts.weights || {});
+    var sea = ch.weights.seasonal, natalPct = ch.weights.pct.slice(), total = ch.weights.total || 9;
+    var natalPts = natalPct.map(function (p) { return p / 100 * total; });
+    var u = ch.unified || {}, roles = [0, 1, 2, 3, 4].map(function (e) { return (u.roles && u.roles[e]) || ''; });
+    var dEl = M.stemEl(ch.pillars.day.s), P = ch.pillars, opt = ch.weights.adjustments && ch.weights.adjustments.options || {};
+    var PW = { year: 0.9, month: 1.1, day: 1.1, hour: 0.9 }, monthW = 2;
+    var natalItems = ['year', 'month', 'day', 'hour'].filter(function (k) { return P[k]; }).map(function (k) {
+      var pw = opt.climatePalaceMode === 'off' ? 1 : PW[k]; return { id: k, s: P[k].s, b: P[k].b, sw: pw, bw: pw * (k === 'month' ? monthW : 1) };
+    });
+    var list = (layers || []).filter(function (L) { return L && LEVELS.indexOf(L.level) >= 0 && L.s != null && L.b != null; })
+      .sort(function (a, b) { return LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level); });
+    var natalCmd = sea.command, steps = [], out = [], hwaDone = {}, wMap = {}, hwaAcc = zero(), luckItems = [], prevLuck = zero(), prevHwa = zero();
+    var plain = function (x) { return { id: x.id, s: x.s, b: x.b }; };
+    list.forEach(function (L) {
+      var w = W[L.level]; wMap[L.level] = w;
+      luckItems.push({ id: L.level, s: L.s, b: L.b, sw: w, bw: w, luck: true });
+      var wol = luckItems.filter(function (x) { return x.id === 'wolun'; })[0];
+      var cmd = (L.level === 'wolun' || L.level === 'ilun') && wol ? cmdOfMonth(M, wol.b, L.at != null ? L.at : opts.at) : { el: natalCmd.el, why: '대운·세운은 원국 월령(' + natalCmd.elK + ') 그대로' };
+      var base = stageScore(M, natalItems, cmd.el), now = stageScore(M, natalItems.concat(luckItems), cmd.el);
+      var natalAlone = stageScore(M, natalItems, natalCmd.el);   // 원국 월령 기준 원국 점수(계절 변화 몫을 따로 보기 위해)
+      // 그달 월령으로 바뀐 몫은 월운 층 무게만큼 반영(태어난 계절을 통째로 바꾸지 않는다, 무게 0이면 원국 월령 그대로)
+      var cw = cmd.el === natalCmd.el ? 0 : Math.min(1, W.wolun);
+      var seasonShift = base.natal.map(function (v, e) { return (v - natalAlone.natal[e]) * cw; });
+      var natalShift = now.natal.map(function (v, e) { return v - base.natal[e]; });   // 운 때문에 원국 글자의 뿌리·충형이 바뀐 몫
+      var hwa = opts.noHwa ? [] : hwaOf(M, ch, natalItems.map(plain), out.map(function (o) { return { id: o.level, s: o.s, b: o.b }; }).concat([{ id: L.level, s: L.s, b: L.b }]), { id: L.level }, wMap, hwaDone);
+      hwa.forEach(function (h) { if (h.ok) h.moved.forEach(function (x, e) { hwaAcc[e] += x; }); });
+      var acc = natalPts.map(function (v, e) { return Math.max(0, v + seasonShift[e] + natalShift[e] + now.luck[e] + hwaAcc[e]); });
+      var pct = pctOf(acc), prev = steps.length ? steps[steps.length - 1].pct : natalPct;
+      var se = M.stemEl(L.s), be = M.stemEl(M.mainHidden(L.b)), below = out.length ? out[out.length - 1] : null;
+      var relBelow = below ? { to: below.level, stem: elRel(se, below.stemEl), branch: elRel(be, below.branchEl) } : { to: 'natal', stem: elRel(se, dEl), branch: elRel(be, dEl) };
+      var me = { id: L.level, s: L.s, b: L.b };
+      var withLuck = M.relationsAmong(out.map(function (o) { return { id: o.level, s: o.s, b: o.b }; }).concat([me])).filter(function (r) { return r.members.indexOf(L.level) >= 0; });
+      var withNatal = M.relationsAmong(natalItems.map(plain).concat([me])).filter(function (r) { return r.members.indexOf(L.level) >= 0; });
+      // 뿌리 변화: 원국 천간 중 운 지지로 새로 뿌리가 생긴 글자
+      var newRoot = natalItems.filter(function (x) { var e = M.stemEl(x.s); return !base.roots[e] && now.roots[e]; }).map(function (x) { return M.STEM[x.s]; });
+      var vec = pillarVec(M, L.s, L.b), r2 = function (x) { return Math.round(x * 100) / 100; };
+      out.push({
+        level: L.level, levelK: LEVEL_K[L.level], label: L.label || '', gz: M.STEM[L.s] + M.BR[L.b], s: L.s, b: L.b, w: w, stemEl: se, branchEl: be,
+        vec: vec.map(round1), add: now.luck.map(function (v, e) { return r2(v - prevLuck[e]); }),   // 이 층에서 늘어난 운 몫(계절·뿌리·충형 반영, 층별 증가분 — 화면 막대가 층마다 더함)
+        pct: pct.map(round1), delta: pct.map(function (p, e) { return round1(p - prev[e]); }), vsNatal: pct.map(function (p, e) { return round1(p - natalPct[e]); }),
+        parts: { luck: now.luck.map(r2), natalShift: natalShift.map(r2), seasonShift: seasonShift.map(r2), hwa: hwaAcc.map(r2) },
+        season: { el: cmd.el, elK: M.EL_K[cmd.el], why: cmd.why, states: [0, 1, 2, 3, 4].map(function (e) { return M.wangsangOf(e, cmd.el); }) },
+        rootGain: newRoot, relHits: Object.keys(now.relF).filter(function (k) { return now.relF[k].f !== 1; }).map(function (k) { return { id: k, f: Math.round(now.relF[k].f * 1000) / 1000, why: now.relF[k].why }; }),
+        relBelow: relBelow, relBelowK: { stem: REL_K[relBelow.stem], branch: REL_K[relBelow.branch] }, withLuck: withLuck, withNatal: withNatal,
+        hwa: hwa, hwaNet: hwaAcc.map(function (v, e) { return r2(v - prevHwa[e]); })
+      });
+      prevLuck = now.luck.slice(); prevHwa = hwaAcc.slice();
+      steps.push({ upTo: L.level, pct: pct });
+    });
+    var finalPct = steps.length ? steps[steps.length - 1].pct : natalPct;
+    var byRole = function (name) { var e = roles.indexOf(name); return e < 0 ? null : { el: e, natal: round1(natalPct[e]), now: round1(finalPct[e]), delta: round1(finalPct[e] - natalPct[e]) }; };
+    return {
+      version: VERSION + '+seasonal', mode: 'seasonal', weights: W,
+      rule: '원국=엔진 최종 세력(월령·왕상휴수사·뿌리·충형파해), 단계마다 원국+운 전체로 뿌리·충형파해·월령(월운·일진은 그달 월령)을 다시 매김, 운 한 기둥=천간 1+지지 1 × 층 무게 대운 ' + W.daeun + '·세운 ' + W.seun + '·월운 ' + W.wolun + '·일진 ' + W.ilun + (opts.noHwa ? '' : ', 합화는 기존 규칙'),
+      natal: { pct: natalPct.map(round1), pts: natalPts.map(function (x) { return Math.round(x * 100) / 100; }), season: { el: natalCmd.el, elK: natalCmd.elK, why: natalCmd.why } },
+      layers: out, final: { pct: finalPct.map(round1), delta: finalPct.map(function (p, e) { return round1(p - natalPct[e]); }) },
+      roles: roles, dayEl: dEl, yong: byRole('용신'), hee: byRole('희신'), gi: byRole('기신'), gu: byRole('구신')
+    };
+  }
+
   // 지금(또는 고른 시각) 시점의 대운·세운·월운 기둥을 찾아 준다 — 화면이 바로 compute 에 넘길 수 있게
   function layersAt(M, ch, ms) {
     var t = ms || Date.now(), out = [];
@@ -131,9 +223,9 @@
       var yp = M.yearPillarAt ? M.yearPillarAt(t) : null, sy = yp ? yp.sajuYear : Y;
       var se = M.seunRange(ch, sy, sy)[0]; if (se) out.push({ level: 'seun', s: se.s, b: se.b, label: sy + '년' });
       var ms = M.wolun(ch, sy).concat(M.wolun(ch, sy + 1)), mo = null; ms.forEach(function (m) { if (m.startMs <= t) mo = m; });
-      if (mo) out.push({ level: 'wolun', s: mo.s, b: mo.b, label: mo.termName || '' });
+      if (mo) out.push({ level: 'wolun', s: mo.s, b: mo.b, label: mo.termName || '', at: t });
       var kd = new Date(t + 9 * 3600e3), dy = M.ilun ? M.ilun(ch, kd.getUTCFullYear(), kd.getUTCMonth() + 1)[kd.getUTCDate() - 1] : null;
-      if (dy) out.push({ level: 'ilun', s: dy.s, b: dy.b, label: dy.date ? dy.date.join('.') : '' });
+      if (dy) out.push({ level: 'ilun', s: dy.s, b: dy.b, label: dy.date ? dy.date.join('.') : '', at: t });
     } catch (e) { }
     return out;
   }

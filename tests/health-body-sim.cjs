@@ -26,7 +26,7 @@ for (let n = 0; n < N; n++) {
     if (r.items.length) { withItems++; tops.add(r.items[0].el); topKinds[r.items[0].el] = (topKinds[r.items[0].el] || 0) + 1; }
     if (r.relief.length) reliefN++;
     // 독립 재계산 ①: 원국에 많은 오행(≥32%)과 같은 천간 오행이면 그 장부는 반드시 항목에 포함(원국 쏠림 1.0 + 더함 1.2 ≥ 2.2 + 천간 외 가산 없이도 ≥1.5)
-    const le = M.stemEl(x.s), pct = ch.weights.pct; if (pct[le] >= 32) ok(r.items.some(it => it.el === le), '많은 오행을 더하는 운이 누락');
+    const le = M.stemEl(x.s), pct = ch.weights.pct; if (pct[le] >= 32) ok(r.items.some(it => it.el === le) || (r.items.length === 3 && r.items[2].score >= 2.2), '많은 오행을 더하는 운이 누락');   /* 항목은 최대 3개 — 점수 2.2 이상 항목이 셋이면 밀릴 수 있음(2026-11-20, 土50·火37% 같은 극단 명식) */
     ok(JSON.stringify(HB.read(M, ch, x, kind)) === JSON.stringify(r), '같은 입력 다른 결과');
   });
   if (tops.size >= 2) perChartTops++;

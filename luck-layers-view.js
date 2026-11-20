@@ -52,6 +52,9 @@
   function olVisual(oc, E) {
     E = E || esc0;
     var L = oc.layers || [], fin = L.length ? L[L.length - 1].pct : oc.natal.pct, roles = oc.roles || {};
+    // 계절 재분석 방식(2026-11-20): 운 때문에 원국 글자의 뿌리·충형파해·월령이 바뀐 몫을 원국 막대에 반영
+    var lastP = oc.mode === 'seasonal' && L.length ? L[L.length - 1].parts : null;
+    var NP = [0, 1, 2, 3, 4].map(function (e) { return Math.max(0, oc.natal.pts[e] + (lastP ? lastP.natalShift[e] + lastP.seasonShift[e] : 0)); });
     // 오각형: 바깥 실선 = 생, 안쪽 점선 = 극. 원 크기 = 겹친 뒤 비율, 층 색 고리 = 그 층이 그 오행을 눈에 띄게 더함
     var cx = 120, cy = 104, R = 72, pos = [0, 1, 2, 3, 4].map(function (e) { var a = (-90 + e * 72) * Math.PI / 180; return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; });
     var ring = [0, 1, 2, 3, 4].map(function (e) { var a = pos[e], b = pos[(e + 1) % 5], c = pos[(e + 2) % 5]; return '<line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '" stroke="rgba(127,127,127,.35)" stroke-width="1.5"/><line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + c[0] + '" y2="' + c[1] + '" stroke="rgba(127,127,127,.25)" stroke-dasharray="3 4"/>'; }).join('');
@@ -64,18 +67,26 @@
     }).join('');
     var svg = '<svg class="lv-pent" viewBox="0 0 240 218" width="220" height="200" role="img" aria-label="원국 위에 운을 겹친 오행 그림">' + ring + nodes + '</svg>';
     // 막대: 원국 몫(흐린 오행 색) + 층마다 더한 몫(층 색). 용신을 맨 위로
-    var tot = oc.natal.pts.reduce(function (a, b) { return a + b; }, 0) + L.reduce(function (a, l) { return a + l.add.reduce(function (x, y) { return x + y; }, 0); }, 0) || 1;
+    var tot = NP.reduce(function (a, b) { return a + b; }, 0) + L.reduce(function (a, l) { return a + l.add.reduce(function (x, y) { return x + Math.max(0, y); }, 0); }, 0) || 1;
     var order = [0, 1, 2, 3, 4].sort(function (a, b) { return (roles[a] === '용신' ? -1 : 0) - (roles[b] === '용신' ? -1 : 0); });
     var bars = order.map(function (e) {
-      var hwE = L.reduce(function (a2, l) { return a2 + ((l.hwaNet || [])[e] || 0); }, 0), hwP = Math.max(0, hwE), P0 = oc.natal.pts[e] + L.reduce(function (a2, l) { return a2 + l.add[e]; }, 0) + hwP, hwF = P0 > 0 ? Math.max(0, P0 + Math.min(0, hwE)) / P0 : 1;   // 합화: 옮겨 온 몫은 빗금, 옮겨 간 몫만큼 줄임
-      var segs = '<i style="width:' + (oc.natal.pts[e] * hwF / tot * 100).toFixed(2) + '%;background:' + EL_COL[e] + ';opacity:.55"></i>' + (hwP > 0.005 ? '<i title="합화로 옮겨 온 몫" style="width:' + (hwP * hwF / tot * 100).toFixed(2) + '%;background:repeating-linear-gradient(135deg,' + EL_COL[e] + ' 0 3px,transparent 3px 6px);outline:1px solid ' + EL_COL[e] + '"></i>' : '') + L.map(function (l) { return l.add[e] > 0.005 ? '<i style="width:' + (l.add[e] * hwF / tot * 100).toFixed(2) + '%;background:' + LV_COL[l.level] + '"></i>' : ''; }).join('');
+      var hwE = L.reduce(function (a2, l) { return a2 + ((l.hwaNet || [])[e] || 0); }, 0), hwP = Math.max(0, hwE), P0 = NP[e] + L.reduce(function (a2, l) { return a2 + Math.max(0, l.add[e]); }, 0) + hwP, hwF = P0 > 0 ? Math.max(0, P0 + Math.min(0, hwE)) / P0 : 1;   // 합화: 옮겨 온 몫은 빗금, 옮겨 간 몫만큼 줄임
+      var segs = '<i style="width:' + (NP[e] * hwF / tot * 100).toFixed(2) + '%;background:' + EL_COL[e] + ';opacity:.55"></i>' + (hwP > 0.005 ? '<i title="합화로 옮겨 온 몫" style="width:' + (hwP * hwF / tot * 100).toFixed(2) + '%;background:repeating-linear-gradient(135deg,' + EL_COL[e] + ' 0 3px,transparent 3px 6px);outline:1px solid ' + EL_COL[e] + '"></i>' : '') + L.map(function (l) { return l.add[e] > 0.005 ? '<i style="width:' + (l.add[e] * hwF / tot * 100).toFixed(2) + '%;background:' + LV_COL[l.level] + '"></i>' : ''; }).join('');
       var d = Math.round((fin[e] - oc.natal.pct[e]) * 10) / 10, role = roles[e] || (e === oc.dayEl ? '나' : ''), rc = GOOD(roles[e]) ? 'good' : BAD(roles[e]) ? 'bad' : '';
       var dc = d > 0.4 ? (GOOD(roles[e]) ? 'good' : BAD(roles[e]) ? 'bad' : '') : d < -0.4 ? (BAD(roles[e]) ? 'good' : GOOD(roles[e]) ? 'bad' : '') : '';
       return '<p class="lv-brow"><span class="lv-bk"><b class="lv-el e' + e + ' m">' + EL_S[e] + '</b>' + (role ? '<small class="lv-r ' + rc + '">' + E(role) + '</small>' : '') + '</span><span class="lv-bar">' + segs + '</span><span class="lv-bv">' + Math.round(oc.natal.pct[e]) + '→<b>' + Math.round(fin[e]) + '</b>%' + (L.length && Math.abs(d) >= 0.5 ? ' <small class="lv-d ' + dc + '">' + (d > 0 ? '+' : '') + d + '</small>' : '') + '</span></p>';
     }).join('');
     var hwList = []; L.forEach(function (l) { (l.hwa || []).forEach(function (h) { if (h.ok) hwList.push(l.levelK + ' ' + h.name); }); });
     var legend = '<p class="lv-leg">' + L.map(function (l) { return '<span><i style="background:' + LV_COL[l.level] + '"></i>' + E(l.levelK + ' ' + (l.label || '')) + '</span>'; }).join('') + '<span><i style="background:#999;opacity:.55"></i>원국</span>' + (hwList.length ? '<span><i style="background:repeating-linear-gradient(135deg,#999 0 3px,transparent 3px 6px);outline:1px solid #999"></i>합화로 옮겨 온 몫(' + E(hwList.join(' · ')) + ')</span>' : '') + '</p>';
-    return '<div class="lv-olv">' + svg + '<div class="lv-bars">' + bars + legend + '</div></div>';
+    // 계절 재분석 근거: 층마다 월령(왕 오행)·새로 생긴 뿌리·충형파해에 걸린 자리
+    var PK = { year: '년주', month: '월주', day: '일주', hour: '시주', daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
+    var why = oc.mode === 'seasonal' ? '<ul class="lv-why">' + L.map(function (l) {
+      var s = l.season || {}, bits = ['월령 ' + (s.elK || '') + (s.why ? '(' + s.why + ')' : '')];
+      if (l.rootGain && l.rootGain.length) bits.push('원국 ' + l.rootGain.join('·') + '에 뿌리가 생김');
+      var hits = (l.relHits || []).filter(function (h) { return h.id === l.level; }); if (hits.length) bits.push(hits[0].why.join('·') + ' → ' + PK[l.level] + ' 몫 ×' + hits[0].f);
+      return '<li><b>' + E(l.levelK) + '</b> ' + E(bits.join(' · ')) + '</li>';
+    }).join('') + '</ul><p class="lv-sm">' + E('세력 계산: ' + (oc.rule || '')) + '</p>' : '';
+    return '<div class="lv-olv">' + svg + '<div class="lv-bars">' + bars + legend + why + '</div></div>';
   }
 
 

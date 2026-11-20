@@ -72,8 +72,16 @@
     // 운의 합화(2026-11-18): 오행 겹쳐 보기와 같은 규칙으로 옮긴 몫을 더한다(겹쳐 보기와 비율을 맞춤). 십성 몫은 일간 기준 그 오행의 음양 반반으로 옮긴다
     if (lk.length && G.MantraLuckOverlay && G.MantraLuckOverlay.compute) {
       try {
-        const oc = G.MantraLuckOverlay.compute(M, ch, (lucks || []).map(L => ({ level: L.level, s: L.s, b: L.b })), { weights: W });
-        oc.layers.forEach(l => (l.hwaNet || []).forEach((x, e) => {
+        const oc = G.MantraLuckOverlay.compute(M, ch, (lucks || []).map(L => ({ level: L.level, s: L.s, b: L.b, at: L.at })), { weights: W });
+        if (oc.mode === 'seasonal') {
+          // 계절 재분석(2026-11-20): 오행 비율은 겹쳐 보기 최종값 그대로. 오행 안의 두 십성(음·양)은 더해 쌓은 몫의 비율대로 나눈다
+          const fin = oc.layers.length ? oc.layers[oc.layers.length - 1].pct : oc.natal.pct, tot = pts.reduce((a, x) => a + x, 0) || 1;
+          [0, 1, 2, 3, 4].forEach(e => {
+            const nv = fin[e] / 100 * tot, ts = [e * 2, e * 2 + 1].map(s2 => M.tenGod(d, s2)), old = tgPts[ts[0]] + tgPts[ts[1]];
+            ts.forEach(t => { tgPts[t] = old > 0 ? tgPts[t] / old * nv : nv / 2; });
+            pts[e] = nv;
+          });
+        } else oc.layers.forEach(l => (l.hwaNet || []).forEach((x, e) => {
           if (!x) return; pts[e] = Math.max(0, pts[e] + x);
           [e * 2, e * 2 + 1].forEach(s2 => { const t = M.tenGod(d, s2); tgPts[t] = Math.max(0, tgPts[t] + x / 2); });
         }));

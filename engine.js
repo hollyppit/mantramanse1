@@ -389,7 +389,8 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
 
   // ───────────── L3: 오행·강약 모델 ─────────────
   const MODELS = {
-    season: { name: '월령 가중 (기본)', desc: '천간 1점, 지지는 지장간 일수 비율로 나눠 1점, 월지만 2배(월령). 시주 미상이면 제외.', monthW: 2, split: true },
+    season: { name: '월령·왕상휴수사 (기본)', desc: '천간 1점, 지지는 지장간 비율로 1점, 월지 2배(월령). 여기에 월령 기준 왕상휴수사 계수·뿌리 없는 천간·충형파해를 반영. 조후는 따로 판정. 시주 미상이면 제외.', monthW: 2, split: true, ws: true },
+    season1: { name: '월령 가중 (이전 방식)', desc: '천간 1점, 지지는 지장간 일수 비율로 나눠 1점, 월지만 2배(월령), 자동 보정 시 조후 계수. 2026-11-20 이전 기본값.', monthW: 2, split: true },
     hidden: { name: '지장간 비율', desc: '천간 1점, 지지는 지장간 일수 비율로 1점. 월지 가중 없음.', monthW: 1, split: true },
     simple8: { name: '단순 8글자', desc: '여덟 글자 각 1점. 지지는 본래 오행으로만 계산.', monthW: 1, split: false },
   };
@@ -426,6 +427,45 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       return { type:r.type, name:r.name, kind:r.kind, members:r.members.slice(), element:EL_K[r.el], el:r.el, eligible:!reasons.length, share:r.members.length === 3 ? 0.5 : 0.25, reasons:reasons.length ? reasons : ['인접·월령 지원·충 및 중복 조건 확인'] };
     });
   }
+  // ── 계절·월령 세력(2026-11-20) — 학파마다 다른 값은 모두 여기 설정값. 계수는 고전 원문에 수치가 없어 '앱 참고 모델'로 밝힌다 ──
+  const SEASONAL_CFG = {
+    version: 'seasonal-strength-20261120-1',
+    // 월령 오행: 寅卯·巳午·申酉·亥子는 계절 오행. 辰未戌丑(사계월)은
+    //  'tuwang18' = 월률분야 표에서 여기·중기(12일)가 지난 뒤 정기 18일은 토왕용사(土), 그 전은 계절 오행(기본)
+    //  'season'   = 계절 오행만(辰 봄·未 여름·戌 가을·丑 겨울),  'earth' = 늘 土
+    seasonMode: 'tuwang18',
+    // 왕상휴수사 → 세력 계수(앱 참고 모델). 왕>상>휴>수>사 순서만 고전 근거, 0.1 간격과 휴=1.0 기준은 앱 설정. 이전 조후 계수(0.85~1.15)와 같은 크기 범위
+    ws: { 왕: 1.2, 상: 1.1, 휴: 1.0, 수: 0.9, 사: 0.8 },
+    rootless: 0.8,                            // 지지 지장간에 같은 오행이 하나도 없는 천간(뿌리 없음·허부)
+    rel: { 충: 0.85, 형: 0.95, 파: 0.95, 해: 0.95 },   // 원국 지지가 이 관계에 걸리면 그 지지 몫에 곱함(여러 개면 곱셈)
+    johuInWeights: false,                     // 조후(한난조습)는 세력 비율에 섞지 않고 조후 판정에서 따로 본다
+  };
+  const SEASON_EL = [4, 4, 0, 0, 0, 1, 1, 1, 3, 3, 3, 4];   // 子丑寅卯辰巳午未申酉戌亥의 계절 오행
+  const WS_NAMES = ['왕', '상', '휴', '수', '사'];
+  // 월령 오행: 절입 후 경과 일수로 사계월의 토왕용사를 가린다(월률분야 일수와 같은 표)
+  function monthCommand(ch, mode) {
+    const mb = ch.pillars.month.b, jie = ch.pillars.month.jie, m = mode || SEASONAL_CFG.seasonMode;
+    const day = jie && ch.utc != null ? Math.max(0, Math.floor((ch.utc - jie.t) / 86400000)) : null;
+    const four = [1, 4, 7, 10].includes(mb), lead = WOLRYUL[mb].slice(0, -1).reduce((a, x) => a + x[1], 0);
+    let el = SEASON_EL[mb], why = `${BR[mb]}월은 ${['봄', '여름', '', '가을', '겨울'][el]} — 계절 오행 ${EL_K[el]}`;
+    if (four && (m === 'earth' || (m === 'tuwang18' && day != null && day >= lead))) { el = 2; why = m === 'earth' ? `${BR[mb]}월은 사계월이라 토(土)를 월령으로 봄(설정 earth)` : `${BR[mb]}월 절입 후 ${day + 1}일째 — 여기·중기 ${lead}일이 지난 정기 기간이라 토왕용사, 월령 토(土)`; }
+    else if (four && m === 'tuwang18') why += ` (절입 후 ${day == null ? '?' : day + 1}일째, 토왕용사 ${lead + 1}일째부터)`;
+    return { el, day, mode: m, why };
+  }
+  // 오행 e의 왕상휴수사(월령 오행 c 기준): 같음 왕 · 월령이 생함 상 · 내가 월령을 생함 휴 · 내가 월령을 극함 수 · 월령이 나를 극함 사
+  const wangsangOf = (e, c) => ({ 0: '왕', 1: '상', 4: '휴', 3: '수', 2: '사' })[mod(e - c, 5)];
+  // 원국 지지별 충형파해 계수와 근거
+  function branchRelFactor(ch) {
+    const out = {};
+    for (const k of POS) out[k] = { f: 1, why: [] };
+    for (const r of ch.relations) {
+      if (r.kind !== 'branch') continue;
+      const t = r.type === '충' ? '충' : r.type === '형' ? '형' : r.type === '파' ? '파' : r.type === '해' ? '해' : null;
+      if (!t) continue;
+      for (const k of r.members) if (out[k]) { out[k].f *= SEASONAL_CFG.rel[t]; out[k].why.push(`${r.name} ×${SEASONAL_CFG.rel[t]}`); }
+    }
+    return out;
+  }
   function elementWeights(ch, modelKey, raw) {
     const M = MODELS[modelKey], options = raw ? {combinationMode:'off',climatePalaceMode:'off'} : ch.adjustmentOptions || adjustmentOptions(ch.input || {});
     const effects = combinationEffects(ch), shifts = new Map(), c = climate(ch);
@@ -433,23 +473,53 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
       const id = r.kind + ':' + k;
       if (!(r.kind === 'stem' && k === 'day') && !shifts.has(id)) shifts.set(id,r);
     }
-    const climateFactors = [0.35,1,0,-0.35,-1].map((heat,e) => options.climatePalaceMode === 'auto' ? Math.max(0.85,Math.min(1.15,1 + 0.08 * heat * c.temp + 0.03 * [0,-1,0,0,1][e] * c.hum)) : 1);
+    const SC = SEASONAL_CFG, useJohu = !M.ws || SC.johuInWeights;
+    const climateFactors = [0.35,1,0,-0.35,-1].map((heat,e) => options.climatePalaceMode === 'auto' && useJohu ? Math.max(0.85,Math.min(1.15,1 + 0.08 * heat * c.temp + 0.03 * [0,-1,0,0,1][e] * c.hum)) : 1);
+    // 계절 왕쇠(ws 모델): 월령 오행 기준 왕상휴수사 계수 — 합화로 옮겨 간 몫은 옮겨 간 오행의 등급을 따른다
+    const cmd = M.ws ? monthCommand(ch) : null, wsState = cmd ? [0, 1, 2, 3, 4].map(e => wangsangOf(e, cmd.el)) : null;
+    const wsF = [0, 1, 2, 3, 4].map(e => wsState ? SC.ws[wsState[e]] : 1);
+    const relF = M.ws ? branchRelFactor(ch) : null;
+    const rootEls = new Set(); if (M.ws) POS.forEach(k => { const p = ch.pillars[k]; if (p) HIDDEN[p.b].forEach(([hs]) => rootEls.add(stemEl(hs))); });
+    const trace = [], raw0 = [0,0,0,0,0], seas = [0,0,0,0,0];   // 근거 로그, 출현량(계수 전), 계절 세력(왕상휴수사만)
     const els = [0,0,0,0,0], tg = {}; TG.forEach(t => tg[t] = 0);
     const d = ch.pillars.day.s; let total = 0;
-    const add = (s,w,isDay,e) => { const weight=w*climateFactors[e];els[e]+=weight;total+=weight;if(!isDay)tg[tenGod(d,e*2+(s%2))]+=weight; };
+    const add = (s,w,isDay,e) => { const weight=w*climateFactors[e]*wsF[e];els[e]+=weight;total+=weight;if(!isDay)tg[tenGod(d,e*2+(s%2))]+=weight; };
     const addStem = (s,w,isDay,k,kind) => { const r=shifts.get(kind+':'+k),e=stemEl(s);if(r){add(s,w*(1-r.share),isDay,e);add(s,w*r.share,isDay,r.el);}else add(s,w,isDay,e); };
     for (const k of POS) {
       const p=ch.pillars[k];if(!p)continue;
       const pw=options.climatePalaceMode==='auto'?POSITION_WEIGHT[k]:1;
-      addStem(p.s,pw,k==='day',k,'stem');
-      const bw=(k==='month'?M.monthW:1)*pw;
+      let sw = pw;
+      if (M.ws) {
+        const se = stemEl(p.s), rooted = rootEls.has(se);
+        if (!rooted) sw *= SC.rootless;
+        raw0[se] += 1; seas[se] += wsF[se] * pw;
+        trace.push({ pos: k, part: 'stem', ch: STEM[p.s], el: se, base: pw, ws: wsState[se], wsF: wsF[se], rootF: rooted ? 1 : SC.rootless, why: `${POS_K[k]}간 ${STEM[p.s]}(${EL_K[se]}) ${wsState[se]} ×${wsF[se]}` + (rooted ? ', 지장간에 같은 오행 뿌리 있음' : `, 지장간에 뿌리 없음 ×${SC.rootless}`) });
+      }
+      addStem(p.s,sw,k==='day',k,'stem');
+      let bw=(k==='month'?M.monthW:1)*pw;
+      if (M.ws) {
+        const rf = relF[k];
+        HIDDEN[p.b].forEach(([hs, dd]) => { const he = stemEl(hs); raw0[he] += dd / 30; seas[he] += bw * dd / 30 * wsF[he]; });
+        trace.push({ pos: k, part: 'branch', ch: BR[p.b], base: bw, relF: rf.f, hidden: HIDDEN[p.b].map(([hs, dd]) => ({ ch: STEM[hs], el: stemEl(hs), share: dd / 30, ws: wsState[stemEl(hs)] })), why: `${POS_K[k]}지 ${BR[p.b]}` + (k === 'month' ? ` 월령 ×${M.monthW}` : '') + ' — ' + HIDDEN[p.b].map(([hs, dd]) => `${STEM[hs]} ${Math.round(dd / 30 * 100)}% ${wsState[stemEl(hs)]}`).join(' · ') + (rf.why.length ? ' · ' + rf.why.join(' · ') : '') });
+        bw *= rf.f;
+      }
       if(M.split)for(const [hs,days] of HIDDEN[p.b])addStem(hs,bw*days/30,false,k,'branch');
       else addStem(mainHidden(p.b),bw,false,k,'branch');
     }
     const pct=els.map(v=>v/total*100),groups=[0,0,0,0,0],dEl=stemEl(d);
     els.forEach((v,e)=>groups[groupOfEl(dEl,e)]+=v/total*100);
     const tgTotal=Object.values(tg).reduce((a,b)=>a+b,0),tgPct={};for(const t of TG)tgPct[t]=tg[t]/tgTotal*100;
-    return {pct,groups,tgPct,total,adjustments:{version:ADJUSTMENT_VERSION,options:{...options},combinations:effects.map(r=>({...r,applied:options.combinationMode==='auto'&&r.eligible})),positionWeights:options.climatePalaceMode==='auto'?{...POSITION_WEIGHT}:null,climateFactors,notes:['합의 결과는 완전한 합화 확정이 아닌 비중의 부분 반영입니다.','조후·궁성 계수는 앱의 참고 모델이며 고전의 확정 공식이 아닙니다.','원국 글자·일간·지장간·합충 관계는 바꾸지 않습니다.']}};
+    const toPct = v => { const t = v.reduce((a, b) => a + b, 0) || 1; return v.map(x => x / t * 100); };
+    const seasonal = M.ws ? {
+      version: SC.version, command: { el: cmd.el, elK: EL_K[cmd.el], day: cmd.day, mode: cmd.mode, why: cmd.why },
+      states: wsState.map((n, e) => ({ el: e, elK: EL_K[e], state: n, factor: wsF[e] })),
+      appearance: toPct(raw0), seasonalPct: toPct(seas), finalPct: pct,   // ① 출현량(글자·지장간 비율, 계수 없음) ② 계절 세력(월령 2배·왕상휴수사만) ③ 최종 세력(뿌리·충형파해·합화·궁성까지)
+      rootless: POS.filter(k => ch.pillars[k] && !rootEls.has(stemEl(ch.pillars[k].s))).map(k => ({ pos: k, ch: STEM[ch.pillars[k].s] })),
+      relations: Object.entries(relF).filter(([, v]) => v.f !== 1).map(([k, v]) => ({ pos: k, factor: v.f, why: v.why })),
+      cfg: { seasonMode: SC.seasonMode, ws: { ...SC.ws }, rootless: SC.rootless, rel: { ...SC.rel }, johuInWeights: SC.johuInWeights },
+      trace, note: '왕상휴수사 순서는 고전 기준, 계수 크기는 앱 참고 모델(설정값)입니다. 조후(한난조습)는 세력에 섞지 않고 조후 판정에서 따로 봅니다.',
+    } : null;
+    return {pct,groups,tgPct,total,seasonal,adjustments:{version:ADJUSTMENT_VERSION,options:{...options},combinations:effects.map(r=>({...r,applied:options.combinationMode==='auto'&&r.eligible})),positionWeights:options.climatePalaceMode==='auto'?{...POSITION_WEIGHT}:null,climateFactors,notes:['합의 결과는 완전한 합화 확정이 아닌 비중의 부분 반영입니다.','조후·궁성 계수는 앱의 참고 모델이며 고전의 확정 공식이 아닙니다.','원국 글자·일간·지장간·합충 관계는 바꾸지 않습니다.']}};
   }
   const STRENGTH_ZONES = [[0, 20, '극약'], [20, 30, '태약'], [30, 42, '신약'], [42, 58, '중화'], [58, 70, '신강'], [70, 80, '태강'], [80, 101, '극왕']];
   function strength(ch, w) {
@@ -3734,6 +3804,7 @@ var MANSE_DATA={"y0":1899,"terms":"-b4jj,-ao6m,-a7rt,-9rag,-9aoy,-8tz2,-8d3r,-7w
     solarToLunar, lunarToSolar, lunarLeapMonth, wallToUtc, tzOffset, currentTerm, termsOf, surroundingJie,
     yearPillarAt, monthPillarAt, dayPillarOfJdn, jdnFromYMD, pillarsFor, relationsAmong, tenGod, unseong, sinsal12, gongmangOf,
     STEM, STEM_K, BR, BR_K, EL, EL_K, TG, TG_GROUP, stemEl, BR_EL, HIDDEN, JIJANGGAN, WOLRYUL, hiddenLabels, mainHidden, yang, gzName, gzNameK,
+    SEASONAL_CFG, SEASON_EL, monthCommand, wangsangOf, elementWeights,
     MODELS, SCHOOLS, TIME_MODES, TERM_NAMES, POS, POS_K, MIN_Y, MAX_Y, bandOf,
   };
 })(typeof window !== 'undefined' ? window : globalThis);

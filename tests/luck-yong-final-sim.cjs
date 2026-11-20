@@ -17,6 +17,7 @@ const loadEngine = src => { const a = src.indexOf('var MANSE_DATA'), b = src.ind
 // 2026-11-20 지장간 정정(子·卯·酉 정기 하나)은 이 검사 대상이 아니므로 옛 엔진에도 지금 지장간 데이터를 넣고 비교한다
 const { withCurrentJijanggan } = require('./helpers/jijanggan-patch.cjs'), CUR = fs.readFileSync(path.join(root, 'engine.js'), 'utf8');
 const MO = loadEngine(withCurrentJijanggan(head('engine.js'), CUR)), MN = loadEngine(CUR);
+// 2026-11-20 계절·월령 세력(새 season 모델)도 이 검사 대상이 아니므로 새 엔진은 이전 방식(season1 = 옛 season)으로 비교한다
 // 이 검사는 해석 문구 변경(36dcdc5)만 본다. 그 뒤 의도적으로 바꾼 분야 지수 적합도 중복 제거(DOMAIN_COMMON.fitDedup, 2026-11-16)는 끄고 비교한다
 if (MN.DOMAIN_COMMON && 'fitDedup' in MN.DOMAIN_COMMON) MN.DOMAIN_COMMON.fitDedup = false;
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'lyf-')), oldLiPath = path.join(tmp, 'luck-interpret-head.js');
@@ -34,7 +35,7 @@ const samples = [];
 const sig = ev => JSON.stringify([ev.fitScore, ev.ownFit, ev.unifiedScore, ev.eokbuScore, ev.johuScore, ev.relationScore, ev.structureScore, ev.volatilityScore, ev.defenseLoad, ev.intensityScore, ev.primaryFlow, ev.secondaryFlow, ev.condition, ev.flow.flows, ev.alt && ev.alt.value]);
 const badText = t => /undefined|NaN|null|\[object/.test(t) || /(한다|이다|된다|있다|없다)\.(\s|$)/.test(t);
 for (let ci = 0; ci < N; ci++) {
-  let co, cn; try { co = MO.compute(inps[ci]); cn = MN.compute(inps[ci]); } catch (e) { continue; }
+  let co, cn; try { co = MO.compute(inps[ci]); cn = MN.compute(Object.assign({}, inps[ci], { model: 'season1' })); } catch (e) { continue; }
   const items = (ch, M) => {
     const out = [];
     ch.daeun.list.forEach(d => out.push(['daeun', d, {}]));
