@@ -60,7 +60,7 @@
     if (root.document) injectCss();
     var esc = o.esc || function (s) { return String(s); };
     return '<div class="cs-card mv-card"><div><p class="cs-ct">내 사주 뮤직비디오 · ' + esc(song.topicKo) + '</p><h4>' + esc(song.title) + '</h4>' +
-      '<p class="cs-sum">' + (song.hero ? '주인공은 내 일주 ' + esc(song.hero.day) + '의 ' + esc(song.hero.nameKo) + ' ' + (song.hero.gender === 'F' ? '여성' : '남성') + ' 래퍼, 크루는 ' + esc(song.hero.crewKo.join('·')) + '. ' : '') + '3분 랩 한 곡 · 내 사주 값으로 고른 가사에 맞춰 장면이 넘어가고 자막이 흘러요.' + (o.locked ? ' 이 주제를 구매하면 들을 수 있어요.' : '') + '</p>' +
+      '<p class="cs-sum">' + (song.hero ? '주인공은 내 일주 ' + esc(song.hero.day) + '의 기질을 닮은 ' + (song.hero.gender === 'F' ? '여성' : '남성') + ' 래퍼, 곁을 지키는 수호 동물은 ' + esc(song.hero.nameKo) + '. ' : '') + '3분 랩 한 곡 · 내 사주 값으로 고른 가사에 맞춰 장면이 넘어가고 자막이 흘러요.' + (o.locked ? ' 이 주제를 구매하면 들을 수 있어요.' : '') + '</p>' +
       '<button type="button" class="chipbtn" data-mvopen="' + esc(song.topic) + '">' + (o.locked ? '🔒 ' : '▶ ') + '뮤직비디오 보기</button></div></div>';
   }
 
@@ -126,7 +126,7 @@
     var e = document.createElement('div'); e.className = 'mv-err'; e.innerHTML = '<p style="white-space:pre-line;word-break:break-all">' + escH(msg) + '</p><button type="button">닫기</button>';
     e.querySelector('button').onclick = close; el.appendChild(e);
   }
-  /* 빈 패널 채우기: 주인공(일주 동물 래퍼)·성별·주제마다 칸이 달라 미리 다 만들 수 없으니, 곡이 재생되는 동안 이 곡의 빈 칸을
+  /* 빈 패널 채우기: 주인공(일주 래퍼 + 수호 동물)·성별·주제마다 칸이 달라 미리 다 만들 수 없으니, 곡이 재생되는 동안 이 곡의 빈 칸을
      서버에 하나씩 만들어 달라고 한다(한 장 20~60초). 만들어지는 대로 화면에 바로 붙고, 같은 칸은 다음 사람부터 바로 보인다. */
   function fillPanels(el, d, body, headers) {
     var song = d.song, panels = d.panels || (d.panels = {}), want = [], videoAsked = false;

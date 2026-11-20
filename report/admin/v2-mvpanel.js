@@ -1,6 +1,6 @@
 /* 관리자 "뮤직비디오 패널" — 내 사주 뮤직비디오(report/v2/music-video.js)에 쓰는 패널 이미지와 공개 상태를 관리한다.
    ① 상태: 공개 스위치(musicVideo)·음악 키(ELEVENLABS_API_KEY)·이미지 키·오늘 만든 곡 수/하루 상한
-   ② 패널: 일주(주인공 = 일간 색 + 일지 동물 의인화 래퍼, 60) × 성별 2 × 주제 5 × 구간 6 = 3,600칸 — 화면은 일주·성별·주제 하나씩 6칸. 사용자가 열면 빈 칸은 서버가 자동으로 채운다.
+   ② 패널: 일주(주인공 = 일간 기질의 사람 래퍼 + 일지 상징 동물, 60) × 성별 2 × 주제 5 × 구간 6 = 3,600칸 — 화면은 일주·성별·주제 하나씩 6칸. 사용자가 열면 빈 칸은 서버가 자동으로 채운다.
       AI 로 만들기(기존 패널 이미지와 같은 모델 — OpenAI gpt-image-2 → Gemini), 직접 만든 이미지 올리기, 비우기. 주제 칸이 비면 화면은 종합풀이 칸을 쓴다.
    ③ 가사 미리보기: 테스트 사주로 주제별 3분 가사(구간·시간)를 본다 — 서버 호출 없음.
    ④ 테스트 재생: 관리자 권한으로 실제 노래를 만들어 본다(곡마다 일레븐랩스 비용, 같은 사주·주제는 캐시).
@@ -40,7 +40,7 @@
     // 패널 칸: 일주(주인공 동물) × 성별 × 주제 → 구간 6칸. 화면은 한 번에 일주·성별 하나(서버가 그 30칸만 준다)
     var panels = (D && D.panels) || {}, hero = lib.heroOf(S.day, S.gender);
     var daySel = '<label>일주(주인공) <select id="mvpDay">' + lib.DAYS.map(function (d) { var hh = lib.heroOf(d, S.gender); return '<option value="' + d + '"' + (d === S.day ? ' selected' : '') + '>' + d + ' · ' + esc(hh.nameKo) + '</option>'; }).join('') + '</select></label>';
-    var gtabs = lib.GENDERS.map(function (g) { return '<button class="btn" data-mvgender="' + g + '"' + (S.gender === g ? ' style="outline:2px solid #C9A25C"' : '') + '>' + esc(lib.GENDER_KO[g]) + ' 사주 · ' + (g === 'F' ? '여성' : '남성') + ' 래퍼</button>'; }).join(' ');
+    var gtabs = lib.GENDERS.map(function (g) { return '<button class="btn" data-mvgender="' + g + '"' + (S.gender === g ? ' style="outline:2px solid #C9A25C"' : '') + '>' + esc(lib.GENDER_KO[g]) + ' 사주 · ' + (g === 'F' ? '여성' : '남성') + ' 주인공</button>'; }).join(' ');
     var tabs = lib.TOPICS.map(function (t) { var n = lib.panelSlots(t, S.gender, S.day).filter(function (s) { return panels[s.id]; }).length; return '<button class="btn" data-mvtopic="' + t + '"' + (S.topic === t ? ' style="outline:2px solid #C9A25C"' : '') + '>' + esc(lib.TOPIC_KO[t]) + ' <small>' + n + '/6</small></button>'; }).join(' ');
     var mine = lib.panelSlots(S.topic, S.gender, S.day);
     var grid = '<table style="width:100%;border-collapse:collapse;table-layout:fixed"><tr>' + mine.map(function (s) { return '<th style="font-weight:600;padding:4px">' + esc(s.sectionKo) + '</th>'; }).join('') + '</tr><tr>' +
@@ -49,7 +49,7 @@
         var img = p && p.video ? '<video src="' + esc(p.video) + '" poster="' + esc(p.url) + '" muted loop playsinline autoplay preload="metadata" style="width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;display:block;outline:2px solid #C9A25C"></video>' :
           p ? '<img src="' + esc(p.url) + '" alt="" style="width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:8px;display:block">' :
           '<div style="width:100%;aspect-ratio:9/16;border:1px dashed rgba(128,128,128,.5);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;text-align:center;padding:4px;opacity:.75">' + (fb ? '비어 있음<br>(종합풀이 칸으로 대신)' : '비어 있음<br>(사용자가 열면 자동으로 만들어짐)') + '</div>';
-        if (p && p.by !== 'upload' && !(p.pv >= 2)) img += '<div style="font-size:11px;opacity:.7;margin-top:3px" title="지시문 2판(공통 화풍·구간별 촬영) 전에 만든 그림입니다. 다시 누르면 새 지시문으로 만듭니다">옛 지시문 그림</div>';
+        if (p && p.by !== 'upload' && !(p.pv >= ((D && D.promptV) || 3))) img += '<div style="font-size:11px;opacity:.7;margin-top:3px" title="지금 지시문(사람 주인공 + 수호 동물) 전에 만든 그림입니다. 다시 누르면 새 지시문으로 만듭니다">옛 지시문 그림</div>';
         if (ERR[s.id]) img += '<div style="color:#E07A6E;font-size:11px;line-height:1.4;margin-top:4px;word-break:break-all;max-height:6em;overflow:auto">실패: ' + esc(ERR[s.id]) + '</div>';
         return '<td style="padding:4px;vertical-align:top">' + img + '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">' +
           '<button class="btn" style="padding:3px 8px;font-size:12px" data-mvgen="' + s.id + '">' + (p ? '다시' : '만들기') + '</button>' +
@@ -59,9 +59,9 @@
             p ? '<button class="btn" style="padding:3px 8px;font-size:12px" data-mvvid="' + s.id + '"' + (c.video ? '' : ' disabled title="Kling 키(KLING_API_KEY)가 없습니다"') + '>' + (p.video ? '영상 다시' : '영상 만들기') + '</button>' : '') +
           (p && p.video ? '<button class="btn" style="padding:3px 8px;font-size:12px" data-mvvclr="' + s.id + '">영상 빼기</button>' : '') + '</div></td>';
       }).join('') + '</tr></table>';
-    h += '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">패널 이미지 (일주 주인공 × 성별 × 주제 × 구간)</h3><p class="muted" style="margin:0 0 8px">주인공은 사용자 사주의 <b>일주</b> — 일간 오행 색 + 일지 동물을 한 의인화 래퍼(여자 사주는 여성, 남자 사주는 남성 래퍼)입니다. 크루는 일지의 삼합 동물, 연애운의 짝은 육합 동물. 연출은 힙합 뮤직비디오의 스웩을 유쾌하게 패러디한 한국풍(갓·선글라스, 한복 트레이닝복, 엽전 목걸이, 한옥 골목, 포장마차, 한강 야경, 노래방 네온). 칸 조합이 3,600가지라 미리 다 만들 필요는 없습니다 — 사용자가 뮤직비디오를 열면 빈 칸을 서버가 한 장씩 만들어 채우고(하루 상한 ' + (D ? D.panelLimit : '-') + '장, 오늘 ' + (D ? D.panelToday : '-') + '장), 같은 칸은 다음 사람부터 바로 보입니다. 여기서는 미리 만들거나 마음에 안 드는 그림을 다시 만들 수 있습니다. 사용자가 빈 칸을 채우면 그 그림으로 Kling 영상(5초)도 자동으로 맡겨져 그 구간에 반복 재생됩니다(하루 상한 ' + (D ? D.videoLimit : '-') + '편, 오늘 ' + (D ? D.videoToday : '-') + '편). 여기서 “영상 만들기”로 직접 다시 만들 수도 있습니다(보통 1~5분). 주인공 배경에는 그 일주의 상징 풍경(일주 마무리 가사 첫 줄)이 은은하게 들어갑니다.</p>' +
+    h += '<div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">패널 이미지 (일주 주인공 × 성별 × 주제 × 구간)</h3><p class="muted" style="margin:0 0 8px">주인공은 사용자 사주의 <b>일주</b>에 어울리는 <b>사람 래퍼</b>(여자 사주는 여성, 남자 사주는 남성)입니다. 일간이 기질·옷차림·헤어를, 일간 오행이 주 조명색을 정합니다. 곁에는 <b>일지의 상징 동물</b>이 실제 동물 모습 그대로 수호 영물처럼 함께 나옵니다(쥐·원숭이는 어깨 위, 호랑이·개는 곁, 소·말은 뒤, 용은 연기 속 영물). 크루는 사람 둘(뒤쪽·초점 밖, 삼합 동물은 옷의 자수·펜던트로만), 연애운의 짝은 사람 한 명(육합 동물은 뒤쪽 빛 속 실루엣으로만). 연출은 고급 K-힙합 뮤직비디오의 촬영감·조명·패션에 현대적으로 재해석한 한국 요소(갓·한복 디테일 아우터, 노리개 펜던트, 한옥 골목, 을지로, 한강 야경). 칸 조합이 3,600가지라 미리 다 만들 필요는 없습니다 — 사용자가 뮤직비디오를 열면 빈 칸을 서버가 한 장씩 만들어 채우고(하루 상한 ' + (D ? D.panelLimit : '-') + '장, 오늘 ' + (D ? D.panelToday : '-') + '장), 같은 칸은 다음 사람부터 바로 보입니다. 여기서는 미리 만들거나 마음에 안 드는 그림을 다시 만들 수 있습니다. 사용자가 빈 칸을 채우면 그 그림으로 Kling 영상(5초)도 자동으로 맡겨져 그 구간에 반복 재생됩니다(하루 상한 ' + (D ? D.videoLimit : '-') + '편, 오늘 ' + (D ? D.videoToday : '-') + '편). 여기서 “영상 만들기”로 직접 다시 만들 수도 있습니다(보통 1~5분). 주인공 배경에는 그 일주의 상징 풍경(일주 마무리 가사 첫 줄)이 은은하게 들어갑니다.</p>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">' + daySel + gtabs + '</div>' +
-      (hero ? '<p style="margin:0 0 8px">주인공: <b>' + esc(hero.nameKo) + ' ' + (S.gender === 'F' ? '여성' : '남성') + ' 래퍼</b> · 크루 ' + esc(hero.crewKo.join('·')) + ' · 연애운 짝 ' + esc(hero.partnerKo) + '</p>' : '') +
+      (hero ? '<p style="margin:0 0 8px">주인공: <b>' + (S.gender === 'F' ? '여성' : '남성') + ' 래퍼 + 수호 동물 ' + esc(hero.animalKo) + '</b>(' + esc(hero.colorKo) + ' 빛) · 크루 상징 ' + esc(hero.crewKo.join('·')) + ' · 연애운 짝 상징 ' + esc(hero.partnerKo) + '</p>' : '') +
       '<div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:10px">' + tabs + '</div>' +
       '<div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center"><button class="btn" id="mvpFill"' + (busy ? ' disabled' : '') + '>이 주제 빈 칸 모두 만들기</button><button class="btn" id="mvpStop"' + (busy ? '' : ' disabled') + '>멈추기</button>' +
       '<input id="mvpExtra" placeholder="추가 요청(선택) — 예: 비 오는 밤 분위기" style="flex:1;min-width:200px"></div>' + grid + '</div>';

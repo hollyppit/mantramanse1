@@ -11,7 +11,7 @@
 // GET  /api/music-video?admin=1&day=<일주>&g=<F|M> — 관리자: 그 일주·성별의 30칸(주제5×구간6)·키 설정 여부·오늘 생성 수·상한
 // POST /api/music-video { panel:{ slot, generate|uploadKey|clear|clearVideo|video:{startKey,extra?}, extra? } } — 관리자: 패널 이미지 만들기·올리기·비우기, Kling 영상 만들기
 // GET  /api/music-video?vt=<칸>                  — 관리자: 그 칸의 영상 작업 확인(끝났으면 R2 저장 후 칸에 연결)
-// 패널 연출: 갱스터 힙합 뮤직비디오를 유쾌하게 패러디 + 한국적 요소(아래 MV_LOOK). 영상은 KLING_API_KEY(또는 KLING_ACCESS_KEY·KLING_SECRET_KEY)
+// 패널 연출: 고급 K-힙합 뮤직비디오 — 사람 주인공 + 일지 상징 동물(수호 영물) + 현대적으로 재해석한 한국 요소(아래 MV_LOOK). 영상은 KLING_API_KEY(또는 KLING_ACCESS_KEY·KLING_SECRET_KEY)
 //
 // 필요: GLOSSARY_KV · CLIPS_R2 · ELEVENLABS_API_KEY(서버 비밀값, 브라우저로 내려 보내지 않는다)
 // 선택: ELEVENLABS_MUSIC_MODEL(기본 music_v2_5) · MV_DAILY_LIMIT(하루 새 곡 상한, 기본 30)
@@ -195,7 +195,7 @@ export async function onRequestGet({ request, env }) {
     const ids = L.TOPICS.flatMap(t => L.panelSlots(t, gd, day).map(s => s.id));
     const vl = typeof env.GLOSSARY_KV.list === 'function' ? await env.GLOSSARY_KV.list({ prefix: 'mv:vt:' }) : null, vtasks = ((vl && vl.keys) || []).map(k => k.name.slice(6));
     const used = parseInt(await env.GLOSSARY_KV.get(COUNT(today())), 10) || 0, pused = parseInt(await env.GLOSSARY_KV.get(PCOUNT(today())), 10) || 0;
-    return json({ day, gender: gd, hero: L.heroOf(day, gd), panels: await getPanels(env, ids), version: L.VERSION, flag: await flagOn(env), today: used, limit: limitOf(env), panelToday: pused, panelLimit: panelLimitOf(env), videoToday: parseInt(await env.GLOSSARY_KV.get(VCOUNT(today())), 10) || 0, videoLimit: videoLimitOf(env), model: modelOf(env),
+    return json({ day, gender: gd, hero: L.heroOf(day, gd), promptV: PANEL_PROMPT_V, panels: await getPanels(env, ids), version: L.VERSION, flag: await flagOn(env), today: used, limit: limitOf(env), panelToday: pused, panelLimit: panelLimitOf(env), videoToday: parseInt(await env.GLOSSARY_KV.get(VCOUNT(today())), 10) || 0, videoLimit: videoLimitOf(env), model: modelOf(env),
       vtasks, lastError: await env.GLOSSARY_KV.get('mv:lastError', 'json'), lastPanelError: await env.GLOSSARY_KV.get('mv:lastPanelError', 'json'), configured: { music: !!env.ELEVENLABS_API_KEY, image: !!(env.OPENAI_API_KEY || env.GEMINI_API_KEY), video: klingEnabled(env), r2: !!env.CLIPS_R2 } });
   }
   return json({ error: 'not-found' }, 404);
@@ -217,75 +217,78 @@ async function audio(request, env, k) {
 }
 
 /* ── 패널 이미지·영상
-   연출 방향(사용자 요청 2026-11-18): 힙합 뮤직비디오의 과장된 스웩 연출을 유쾌하게 패러디하되 한국적인 요소를 섞는다.
-   주인공(2026-11-19): 사주의 일주 — 일간 오행 색 + 일지 동물을 한 의인화 래퍼(사주 성별). 크루는 일지 삼합 동물, 연애운 짝은 육합 동물.
+   연출 방향 3판(사용자 요청 2026-11-20 "좀 멋있게"): 우스꽝스러운 패러디를 걷고 고급 K-힙합 뮤직비디오의 촬영감·조명·패션으로.
+   주인공(2026-11-20): 사주에 어울리는 '사람' 래퍼(여자 사주는 여성, 남자 사주는 남성). 일간이 기질·스타일(STEM_LOOK)·헤어(HAIR)를, 일간 오행이 주 조명색을 정한다.
+     곁에는 일지의 상징 동물이 실제 동물 모습 그대로 수호 영물처럼 함께 나온다(GUARD — 동물 크기에 맞는 자리). 의인화하지 않는다.
+   크루는 사람 둘(뒤쪽·초점 밖), 삼합 동물은 옷의 자수·펜던트로만. 연애운 짝은 사람 한 명, 육합 동물은 뒤쪽 빛 속 반투명 실루엣으로만 — 화면이 복잡해지지 않게.
+   (1·2판 2026-11-18~19: 일주를 의인화한 동물 래퍼 + 유쾌한 패러디)
    이미지 모델 안전 필터: 금지할 것을 단어로 적어도 요청이 거절될 수 있어 지시문은 긍정형으로만 쓴다(2026-11-18 패널 502 원인). */
 /* 패널 지시문 2판(2026-11-19): 밋밋한 회색 톤·들쭉날쭉한 화풍·원형 프레임·아래 흰 여백을 고친다.
    - 원형 프레임은 '어안 렌즈'에서, 아래 흰 여백은 '아래 1/3 을 비워 둔다'에서 나왔다 → 직선 초광각 렌즈·전체 화면 채움·아래는 어두운 바닥으로.
    - 모든 칸이 같은 화풍이 되도록 공통 스타일 블록(MV_STYLE)을 맨 앞에 두고, 구간별로 카메라·렌즈·조명·포즈(SECTION_SHOT)를 정한다.
    - 지시문을 바꾸면 PANEL_PROMPT_V 를 올린다. 칸 KV 키(mv:panel:<칸>)는 그대로라 이미 만든 그림은 남고, 새로 만들거나 '다시' 누른 칸만 새 지시문을 쓴다(기록에 pv 로 남는다). */
-const PANEL_PROMPT_V = 2;
+const PANEL_PROMPT_V = 3;
 const MV_STYLE = '[공통 화풍 — 모든 칸 동일] 세로 9:16 전체 화면을 가장자리까지 꽉 채운 직사각형 시네마틱 필름 스틸 한 장(풀 블리드, 테두리 없는 한 장면). ' +
-  '고예산 힙합 뮤직비디오의 한 프레임처럼: 하이엔드 3D 애니메이션 영화 수준의 시네마틱 캐릭터 렌더, 털 한 올·가죽·새틴·금속 질감이 살아 있는 초정밀 디테일, 얕은 심도와 부드러운 보케, 아나모픽 렌즈 플레어, 은은한 필름 그레인. ' +
-  '조명: 강한 역광 림라이트로 캐릭터 윤곽이 빛나고, 볼류메트릭 스모크와 빛줄기, 젖은 바닥에 비친 네온 반사. 색: 깊고 짙은 검정 위에 채도 높은 네온 색이 터지는 강한 명암 대비의 컬러 그레이딩, 선명하고 쨍한 색감. ' +
+  '고예산 K-힙합 뮤직비디오의 한 프레임: 실사 영화 촬영 같은 포토리얼 이미지, 하이패션 화보 수준의 스타일링, 원단·가죽·금속·피부·동물 털 질감이 살아 있는 초정밀 디테일, 얕은 심도와 크리미한 보케, 아나모픽 렌즈 플레어, 은은한 35mm 필름 그레인. ' +
+  '조명: 강한 역광 림라이트로 인물과 동물의 윤곽이 빛나고, 얼굴에는 부드러운 키라이트, 볼류메트릭 스모크와 빛줄기, 젖은 바닥에 비친 네온 반사. 색: 깊고 짙은 검정 위에 일간 색이 주도하는 시네마틱 컬러 그레이딩, 강한 명암 대비. ' +
   '주인공은 화면 중앙 2/3 안에 크고 또렷하게, 얼굴과 의상이 가장 밝게. 화면 아래쪽은 어두운 바닥·젖은 아스팔트·물결이 화면 끝까지 이어져 자막이 잘 읽히게.';
-const MV_LOOK = '힙합 뮤직비디오 특유의 과장된 스웩 연출을 유쾌하게 패러디한 한국풍 장면 — 자신감 넘치는 포즈, 슬로모션 같은 순간 포착. 누구나 웃으며 볼 수 있는 유쾌한 분위기.' +
-  ' 한국적 요소를 섞는다: 갓에 선글라스, 한복 소매를 단 트레이닝복이나 퍼 코트, 금 체인 대신 엽전 꾸러미·노리개 목걸이, 부채, 단청 무늬, 한옥 골목, 포장마차, 편의점 앞 파라솔, 한강 다리 야경, 노래방 네온, 배달 스쿠터·마을버스·경운기를 튜닝한 차 같은 것 중 장면에 맞는 두세 가지.' +
-  ' 인물은 모두 동물 얼굴을 한 의인화 캐릭터(사람 몸, 성인 체형)로, 손에는 마이크·부채·엽전 꾸러미 같은 소품을 든다. 화면에는 글자·간판 문구·로고·자막 없이 그림만(간판은 빛나는 색면과 무늬로).';
+const MV_LOOK = '분위기: 고급 K-힙합 뮤직비디오 — 절제된 자신감과 카리스마, 패션 필름 같은 세련됨, 슬로모션 같은 결정적 순간 포착.' +
+  ' 한국적 요소는 현대적으로 재해석해 장면에 맞는 한두 가지만: 모던하게 재해석한 갓, 한복 깃·고름 디테일의 하이패션 아우터, 노리개·매듭 펜던트, 단청 색감의 조명, 한옥 골목, 을지로 뒷골목, 한강 다리 야경, 서울 스카이라인.' +
+  ' 사람은 모두 성인이고, 동물은 실제 동물 그대로의 모습(자연스러운 자세, 사실적인 털과 눈빛)으로 수호 영물처럼 위엄 있게 등장한다. 화면에는 글자·간판 문구·로고·자막 없이 그림만(간판은 빛나는 색면과 무늬로).';
 /* 구간별 연출 변형(2026-11-19 "단조롭다"): 구간마다 장소·카메라·렌즈·조명·포즈가 다른 변형 5개. 렌즈는 모두 직선(렉티리니어) 렌즈.
    칸 이름으로 고르므로 같은 칸은 늘 같은 변형, 일주·주제·성별이 다르면 다른 변형이 나온다. 관리자가 '다시' 누르면 새 변형을 고른다. */
 const SECTION_SHOT = {
   intro: [
-    '밤 한옥 골목. 로우앵글 풀샷, 24mm 직선 광각 렌즈. 주인공 뒤에서 튜닝한 마을버스 헤드라이트가 강한 역광으로 쏟아지고 스모크 속에 빛줄기가 갈라진다. 주인공은 선글라스를 내리며 렌즈를 똑바로 본다.',
-    '노래방 건물 옥상. 위에서 비스듬히 내려다보는 하이앵글 와이드샷, 28mm. 옥상 난간에 걸터앉아 도시 불빛을 보던 주인공이 고개를 들어 카메라를 본다. 보라·분홍 네온이 위에서 쏟아지고 뒤로 도시 야경이 보케로 번진다.',
-    '긴 콘크리트 지하 터널. 정면 대칭 구도, 35mm. 양쪽 천장 조명 줄이 소실점으로 이어지고, 튜닝한 경운기 보닛 위에 선 주인공이 등장한다. 바닥 물웅덩이에 조명이 길게 비친다.',
-    '한옥 대문이 열리는 순간. 문틈 사이로 보는 프레임 속 프레임 구도, 35mm. 대문 너머로 강한 백라이트와 스모크, 윤곽만 빛나는 실루엣으로 걸어 나오는 주인공과 크루.',
-    '안개 낀 새벽 전통시장 골목. 얼굴과 상반신을 크게 잡은 클로즈업, 50mm. 선글라스 렌즈에 네온 색면이 비치고 엽전 목걸이가 반짝인다. 측면에서 강한 림라이트.'
+    '밤 한옥 골목. 로우앵글 풀샷, 24mm 직선 광각 렌즈. 주인공 뒤에서 자동차 헤드라이트가 강한 역광으로 쏟아지고 스모크 속에 빛줄기가 갈라진다. 주인공은 천천히 렌즈를 똑바로 본다.',
+    '고층 건물 옥상 난간. 비스듬히 내려다보는 하이앵글 와이드샷, 28mm. 난간에 기대 있던 주인공이 고개를 들어 카메라를 본다. 뒤로 도시 야경이 보케로 번지고 위에서 일간 색 빛이 쏟아진다.',
+    '긴 콘크리트 지하 터널. 정면 대칭 구도, 35mm. 천장 조명 줄이 소실점으로 이어지고, 주인공이 터널 끝 빛 속에서 걸어 나온다. 바닥 물웅덩이에 조명이 길게 비친다.',
+    '한옥 대문이 열리는 순간. 문틈 사이로 보는 프레임 속 프레임 구도, 35mm. 대문 너머로 강한 백라이트와 스모크, 윤곽만 빛나는 실루엣으로 걸어 나오는 주인공.',
+    '안개 낀 새벽 골목. 얼굴과 상반신을 크게 잡은 클로즈업, 50mm. 측면에서 강한 림라이트, 눈동자에 네온 색이 비친다.'
   ],
   verse1: [
-    '편의점 앞 파라솔. 눈높이 미디엄 와이드샷, 35mm. 주인공이 앞에, 크루가 V자 대형으로 뒤에 서서 각자 과장된 스웩 포즈. 형광 간판 빛과 가장자리 네온 림라이트.',
-    '포장마차 안. 어깨 너머로 잡은 오버숄더 샷, 40mm. 주황 전구와 김이 오르는 냄비, 주인공이 의자에 한 발 올리고 랩하고 크루는 국자를 마이크처럼 든다.',
-    '동네 놀이터 정글짐. 로우앵글 단체 샷, 28mm. 크루가 정글짐 칸칸이 매달리거나 걸터앉아 포즈, 주인공은 꼭대기에. 가로등 스포트라이트와 보랏빛 밤하늘.',
-    '세탁소·철물점이 늘어선 골목 벽화 앞. 옆에서 따라가며 찍는 측면 트래킹샷, 50mm. 주인공이 걸으며 손짓으로 랩하고 크루가 뒤따라 걷는다. 배경은 움직임에 살짝 흐려진다.',
-    '빨랫줄 전구가 걸린 옥상 평상. 바로 위에서 내려다보는 버드아이 샷, 24mm. 크루가 평상 둘레에 원을 그리며 앉고 주인공이 가운데 서서 부채를 활짝 편다.'
+    '네온이 번지는 을지로 뒷골목. 눈높이 미디엄 와이드샷, 35mm. 주인공이 앞에, 크루 두 명이 뒤쪽 초점 밖에서 리듬을 탄다. 형광 간판 빛과 가장자리 네온 림라이트.',
+    '주황 전구가 걸린 포장마차 거리. 어깨 너머로 잡은 오버숄더 샷, 40mm. 김이 오르는 불빛 사이로 주인공이 마이크를 쥐고 랩하고, 크루가 뒤에서 고개를 끄덕인다.',
+    '빈 주차 빌딩 꼭대기 층. 로우앵글 단체 샷, 28mm. 자동차 헤드라이트가 무대 조명처럼 주인공을 비추고 크루가 양옆 뒤에 선다. 보랏빛 밤하늘.',
+    '골목 벽화 앞. 옆에서 따라가며 찍는 측면 트래킹샷, 50mm. 주인공이 걸으며 손짓으로 랩하고 크루가 뒤따른다. 배경은 움직임에 살짝 흐려진다.',
+    '빨랫줄 전구가 걸린 옥상. 바로 위에서 내려다보는 버드아이 샷, 24mm. 크루가 둘레에 서고 주인공이 가운데에서 카메라를 올려다본다.'
   ],
   hook: [
-    '한강 다리 야경. 극단적 로우앵글 히어로 샷, 16mm 직선 초광각 렌즈. 주인공이 한 발 내딛고 마이크를 높이 든 정점의 순간, 크루가 뒤에서 같은 동작으로 춤춘다. 강한 백라이트와 볼류메트릭 스모크, 공중에 흩날리는 엽전·꽃잎.',
-    '단청 기와지붕 위. 높은 곳에서 비스듬히 잡은 와이드 샷, 24mm. 크루가 기와지붕 위에서 대형을 맞춰 춤추고, 뒤로 커다란 보름달과 도시 불빛. 바람에 한복 소매가 크게 펄럭인다.',
-    '거대한 노래방 무대. 정면 대칭 구도, 35mm. 뒤 화면 벽이 일간 색으로 폭발하듯 빛나고 스포트라이트 빔이 교차한다. 가운데 주인공이 점프한 순간이 공중에 멈춘 듯하다.',
-    '비 그친 사거리 한복판. 회전하는 카메라 느낌의 28mm, 배경은 원을 그리며 흐려진다. 주인공이 부채를 활짝 펴고 회전하고, 바닥 물웅덩이에 네온이 번진다.',
-    '한지 등불 수백 개가 걸린 전통시장 아케이드. 로우앵글, 20mm. 크루가 양옆으로 늘어서 같은 동작을 하고, 금빛 종이 꽃가루가 천장에서 쏟아진다.'
+    '한강 다리 야경. 극단적 로우앵글 히어로 샷, 16mm 직선 초광각 렌즈. 주인공이 한 발 내딛고 마이크를 든 정점의 순간, 크루가 뒤에서 같은 동작. 강한 백라이트와 볼류메트릭 스모크, 공중에 흩날리는 빛 입자.',
+    '단청 기와지붕 위. 높은 곳에서 비스듬히 잡은 와이드 샷, 24mm. 뒤로 커다란 보름달과 도시 불빛, 바람에 코트 자락이 크게 펄럭인다.',
+    '거대한 공연 무대. 정면 대칭 구도, 35mm. 뒤 LED 벽이 일간 색으로 폭발하듯 빛나고 스포트라이트 빔이 교차한다. 가운데 주인공이 점프한 순간이 공중에 멈춘 듯하다.',
+    '비 그친 사거리 한복판. 회전하는 카메라 느낌의 28mm, 배경은 원을 그리며 흐려진다. 주인공이 회전하고 바닥 물웅덩이에 네온이 번진다.',
+    '한지 등불 수백 개가 걸린 전통시장 아케이드. 로우앵글, 20mm. 크루가 양옆으로 늘어서 같은 동작을 하고, 금빛 빛 입자가 천장에서 쏟아진다.'
   ],
   verse2: [
-    '비 오는 밤 노래방 네온 아래. 클로즈업에 가까운 미디엄샷, 85mm 망원 렌즈, 얕은 심도. 빗방울이 네온에 반짝이고 젖은 털에 색이 비친다. 고개를 숙였다가 렌즈를 올려다보는 단단한 눈빛.',
+    '비 오는 밤 네온 아래. 클로즈업에 가까운 미디엄샷, 85mm 망원 렌즈, 얕은 심도. 빗방울이 네온에 반짝이고, 고개를 숙였다가 렌즈를 올려다보는 단단한 눈빛.',
     '막차 버스 창가. 창밖에서 유리창 너머로 들여다보는 구도, 50mm. 빗물 맺힌 유리 위로 도시 불빛이 보케로 흐르고, 창에 기대 조용히 랩하는 주인공.',
-    '텅 빈 지하철 승강장. 멀리서 잡은 와이드샷, 35mm. 넓은 공간에 주인공 혼자 서 있고, 차가운 형광등 사이로 따뜻한 스포트라이트 한 줄기가 주인공만 비춘다.',
-    '골목 끝 자판기 불빛만 있는 밤. 옆얼굴 클로즈업, 70mm. 자판기 빛이 얼굴 반쪽만 비추는 강한 명암 대비, 차가운 공기에 하얀 입김.',
+    '텅 빈 지하철 승강장. 멀리서 잡은 와이드샷, 35mm. 넓은 공간에 주인공 혼자, 차가운 형광등 사이로 따뜻한 스포트라이트 한 줄기가 주인공만 비춘다.',
+    '골목 끝 자판기 불빛만 있는 밤. 옆얼굴 클로즈업, 70mm. 빛이 얼굴 반쪽만 비추는 강한 명암 대비, 차가운 공기에 하얀 입김.',
     '비 오는 한옥 처마 아래. 물웅덩이에 위아래로 비친 대칭 구도, 35mm. 처마 끝 빗줄기가 네온 빛을 받아 빛나는 커튼처럼 드리운다.'
   ],
   bridge: [
-    '다리 위, 하늘이 남색에서 노을빛으로 바뀌는 순간. 살짝 기울인 더치 앵글 미디엄 풀샷, 50mm. 주인공이 슬로모션으로 돌아서고 부채·엽전 꾸러미가 공중에 멈춘 듯 떠 있다.',
+    '다리 위, 하늘이 남색에서 노을빛으로 바뀌는 순간. 살짝 기울인 더치 앵글 미디엄 풀샷, 50mm. 주인공이 슬로모션으로 돌아서고 빗방울이 공중에 멈춘 듯 떠 있다.',
     '육교 위. 하늘 절반은 남색, 절반은 주황빛. 역광 실루엣 샷, 35mm. 바람에 코트 자락이 날리고 아래로 지나가는 차 불빛이 긴 빛줄기로 그어진다.',
-    '거울로 둘러싸인 노래방 복도. 반사가 끝없이 이어지는 구도, 35mm. 거울마다 다른 포즈의 주인공이 비치고 일간 색 네온 튜브가 길게 이어진다.',
-    '갈대가 흔들리는 강변. 하늘을 크게 담은 로우앵글, 24mm. 구름이 빠르게 흐르고, 바람에 흩날린 엽전이 노을빛을 반사한다.',
-    '시간이 멈춘 순간. 공중에 멈춘 빗방울과 부채 사이로 주인공만 움직이는 미디엄 풀샷, 50mm. 측면에서 들어오는 강한 키라이트.'
+    '거울로 둘러싸인 복도. 반사가 끝없이 이어지는 구도, 35mm. 거울마다 다른 각도의 주인공이 비치고 일간 색 네온 튜브가 길게 이어진다.',
+    '갈대가 흔들리는 강변. 하늘을 크게 담은 로우앵글, 24mm. 구름이 빠르게 흐르고 노을빛이 주인공 윤곽을 감싼다.',
+    '시간이 멈춘 순간. 공중에 멈춘 빗방울 사이로 주인공만 움직이는 미디엄 풀샷, 50mm. 측면에서 들어오는 강한 키라이트.'
   ],
   outro: [
-    '동이 트는 강변. 뒤에서 본 와이드샷, 35mm. 금빛 해가 정면 역광으로 비치고 크루와 주인공의 긴 그림자가 카메라 쪽으로 뻗는다. 주인공만 어깨 너머로 돌아보며 웃는다.',
-    '첫차가 다니는 새벽 골목. 하이앵글 와이드샷, 24mm. 크루가 서로 하이파이브를 하고, 가로등이 하나둘 꺼지며 하늘이 분홍빛으로 밝아온다.',
-    '도시가 내려다보이는 언덕 계단 꼭대기. 로우앵글, 28mm. 떠오르는 해 앞에 크루가 나란히 앉아 여유롭게 쉬고, 주인공은 엽전 목걸이를 고쳐 맨다.',
-    '장사를 마친 포장마차의 아침. 따뜻한 미디엄샷, 50mm. 주인공이 선글라스를 벗어 옷깃에 걸고 활짝 웃는다. 김 사이로 아침 햇살 빛줄기.',
-    '한강 다리 위로 멀어지는 튜닝 스쿠터 행렬. 뒤에서 잡은 와이드샷, 35mm. 미등 빛줄기가 길게 이어지고 그 끝에 해가 떠오른다.'
+    '동이 트는 강변. 뒤에서 본 와이드샷, 35mm. 금빛 해가 정면 역광으로 비치고 주인공과 크루의 긴 그림자가 카메라 쪽으로 뻗는다. 주인공만 어깨 너머로 돌아본다.',
+    '첫차가 다니는 새벽 골목. 하이앵글 와이드샷, 24mm. 크루가 서로 주먹을 맞대고, 가로등이 하나둘 꺼지며 하늘이 분홍빛으로 밝아온다.',
+    '도시가 내려다보이는 언덕 계단 꼭대기. 로우앵글, 28mm. 떠오르는 해 앞에 주인공이 앉아 여유롭게 도시를 내려다본다.',
+    '새벽 한강 공원. 따뜻한 미디엄샷, 50mm. 주인공이 선글라스를 벗으며 옅게 웃는다. 물안개 사이로 아침 햇살 빛줄기.',
+    '한강 다리 위로 멀어지는 자동차 행렬. 뒤에서 잡은 와이드샷, 35mm. 미등 빛줄기가 길게 이어지고 그 끝에 해가 떠오른다.'
   ]
 };
-/* 주인공 의상 변형: 칸마다 하나(구간 변형과 따로 골라 조합이 늘어난다) */
+/* 주인공 의상 변형: 칸마다 하나(구간 변형과 따로 골라 조합이 늘어난다). 한국적 디테일을 하이패션으로 재해석 */
 const OUTFIT = [
-  '한복 소매를 단 오버사이즈 트랙수트, 갓에 둥근 선글라스',
-  '단청 무늬 자수를 놓은 퍼 코트와 엽전 꾸러미 목걸이',
-  '비단 두루마기를 롱 트렌치코트처럼 걸치고 하이탑 운동화',
-  '한복 저고리 모양의 크롭 재킷과 와이드 카고 팬츠, 노리개 체인',
-  '민화 호랑이·까치 무늬 봄버 재킷과 버킷햇',
-  '광택 나는 새틴 한복 셋업과 금빛 부채'
+  '한복 깃과 고름 디테일을 살린 오버사이즈 가죽 롱코트, 모던하게 재해석한 갓',
+  '단청 색 자수가 은은하게 들어간 퀼팅 봄버 재킷과 실버 체인, 노리개 펜던트',
+  '두루마기 실루엣의 테일러드 롱 트렌치코트와 하이탑 스니커즈',
+  '저고리 모양의 크롭 재킷과 와이드 카고 팬츠, 매듭 장식 체인',
+  '일간 색 벨벳 트랙수트 셋업과 슬림한 선글라스, 레이어드 주얼리',
+  '광택 있는 새틴 셔츠에 구조적인 숄더 재킷, 반지와 이어커프'
 ];
 const pick = (arr, key) => arr[L.hash(key) % arr.length];
 // 이 칸의 연출 변형. seed 가 있으면(관리자 '다시') 다른 변형이 나올 수 있다
@@ -294,49 +297,99 @@ function variantOf(slot, seed) {
   return { shot: pick(SECTION_SHOT[slot.section], 'shot|' + k), outfit: pick(OUTFIT, 'outfit|' + k) };
 }
 const SECTION_SCENE = {
-  intro: '뮤직비디오 오프닝 — 주인공이 처음 등장하는 강렬한 첫 장면.',
-  verse1: '주인공의 기질을 자랑하는 랩 벌스 — 동네 공간을 자기 무대처럼 쓰며 크루와 함께 과장된 스웩.',
+  intro: '뮤직비디오 오프닝 — 주인공과 수호 동물이 처음 등장하는 강렬한 첫 장면.',
+  verse1: '주인공의 기질을 보여 주는 랩 벌스 — 도시를 자기 무대처럼 쓰는 자신감, 크루와 함께.',
   hook: '후렴 — 가장 화려한 클라이맥스, 크루 전체가 하나로 움직이는 장면.',
   verse2: '힘들었던 이야기를 하는 벌스 — 혼자 있는, 살짝 쓸쓸하지만 멋있는 장면.',
   bridge: '비트가 바뀌는 브리지 — 분위기가 뒤집히는 전환의 순간.',
   outro: '엔딩 — 여운이 남는 마지막 장면, 밝아오는 빛.'
 };
+/* 수호 동물의 구간별 연출 */
+const GUARD_MOOD = {
+  intro: '수호 동물이 주인공 곁에서 렌즈를 똑바로 본다. 동물의 윤곽에도 일간 색 림라이트.',
+  verse1: '수호 동물이 주인공과 같은 방향을 보며 곁에서 존재감을 더한다.',
+  hook: '수호 동물 뒤로 일간 색 빛의 기운이 크게 퍼져 영물처럼 빛난다.',
+  verse2: '수호 동물이 조용히 곁을 지킨다. 같은 빛 안에 둘만.',
+  bridge: '수호 동물이 빛 입자에 감싸여 반쯤 투명하게 빛나는 영물처럼 보인다.',
+  outro: '주인공과 수호 동물이 함께 떠오르는 빛 쪽을 바라본다.'
+};
 const TOPIC_SCENE = {
   self: '종합 — 주인공 한 사람의 개성과 인생 흐름이 드러나는 장면.',
-  love: '연애운 — 주인공과 짝이 커플 래퍼 듀엣처럼 등장. 한강 피크닉 돗자리·포장마차 데이트·노래방 듀엣 같은 설레는 장면을 힙합 뮤비 문법으로 과장.',
-  wealth: '재물운 — 부자 자랑하는 힙합 뮤비 장면을 한국식으로 패러디: 엽전 꾸러미·복주머니·금두꺼비·가계부와 적금 통장을 트로피처럼 들고 뽐내는 장면.',
-  career: '커리어운 — 사무실·작업실·출근길 지하철을 무대로 한 오피스 힙합 크루 패러디: 정장 위에 한복 조끼, 사원증 목걸이를 체인처럼, 서류 가방을 붐박스처럼 든 장면.',
-  newyear: '토정비결 신년운세 — 새해 패러디: 해돋이 앞에서 세배하는 크루, 복주머니·떡국·연날리기·한지 등불을 힙합 뮤비 소품처럼 과장한 장면.'
+  love: '연애운 — 주인공과 짝이 함께 나오는 로맨틱한 듀엣 장면: 한강 야경 드라이브, 비 오는 골목의 우산 하나, 루프톱 네온 아래처럼 설레는 순간을 영화처럼.',
+  wealth: '재물운 — 성공과 풍요를 세련되게 보여 주는 장면: 고급 차, 펜트하우스 창 너머 야경, 금빛 조명, 복주머니나 금빛 매듭 장식 같은 소품 한 가지.',
+  career: '커리어운 — 야망과 성취의 장면: 새벽 오피스 빌딩 로비, 모니터 불빛이 가득한 작업실, 도시를 내려다보는 고층 창가. 테일러드 수트와 스트리트웨어를 섞은 스타일.',
+  newyear: '토정비결 신년운세 — 새해의 시작을 웅장하게: 해돋이 앞 실루엣, 한지 등불과 하늘을 나는 연, 정초의 차가운 공기 속 금빛 빛.'
 };
 const EL_MOTIF = { 목: '에메랄드 초록 네온과 대나무·나뭇잎 그림자, 포인트로 금빛', 화: '진홍·주홍 네온과 불꽃 같은 조명·노을, 포인트로 호박색', 토: '황금·호박빛 조명과 흙빛·구릿빛 질감, 포인트로 짙은 청록', 금: '진주처럼 빛나는 흰색과 크롬 은빛 광택, 그 뒤로 짙은 남색 밤과 자홍·청록 네온의 강한 대비', 수: '사파이어 블루·청록 네온과 빗물·강물 반사, 포인트로 은빛' };
+/* 일간 → 주인공의 기질과 스타일 */
+const STEM_LOOK = {
+  갑: '큰 나무처럼 곧고 당당한 리더의 기질 — 키가 커 보이는 롱 실루엣, 구조적인 어깨선, 정면을 똑바로 보는 시선',
+  을: '덩굴처럼 유연하고 감각적인 기질 — 흐르듯 겹쳐 입은 레이어드 룩, 부드러운 곡선 실루엣, 여유로운 옅은 미소',
+  병: '한낮의 태양처럼 화려하고 존재감 강한 기질 — 과감한 스테이트먼트 아우터, 금빛 액세서리, 무대를 장악하는 큰 제스처',
+  정: '밤의 촛불처럼 따뜻하고 섬세한 기질 — 정제된 실루엣, 은은하게 빛나는 소재, 깊고 집중된 눈빛',
+  무: '큰 산처럼 묵직하고 흔들림 없는 기질 — 오버사이즈 워크웨어 실루엣, 단단한 체격감, 낮게 깔린 침착한 자세',
+  기: '비옥한 밭처럼 포근하고 단단한 기질 — 니트·스웨이드처럼 촉감 좋은 소재, 편안하지만 정돈된 핏, 다정한 표정',
+  경: '단련된 강철처럼 날카롭고 결단력 있는 기질 — 샤프한 테일러링과 테크웨어, 크롬 액세서리, 단호한 시선',
+  신: '세공한 보석처럼 정교하고 세련된 기질 — 꾸튀르 디테일, 레이어드 주얼리, 완벽하게 다듬은 스타일링',
+  임: '큰 바다처럼 넓고 자유로운 기질 — 바람에 흐르는 롱 코트와 실크, 여유로운 자세, 먼 곳을 보는 시선',
+  계: '조용히 스며드는 빗물처럼 신비로운 기질 — 후드와 반투명 소재, 차분한 톤, 그늘 속에서 빛나는 눈빛'
+};
+/* 일간 오행 × 성별 → 헤어(모든 칸에서 같은 사람으로 알아보게) */
+const HAIR = {
+  목: { F: '어깨까지 오는 내추럴 웨이브 흑발', M: '자연스럽게 넘긴 미디엄 길이 흑발' },
+  화: { F: '붉은 브라운 컬러의 볼륨 웨이브', M: '짧게 올린 투블록에 붉은 브라운 컬러' },
+  토: { F: '높게 묶은 번 헤어에 금빛 헤어 커프', M: '아주 짧은 버즈컷' },
+  금: { F: '실버 블론드 슬릭 단발', M: '실버로 탈색한 짧은 크롭컷' },
+  수: { F: '허리까지 오는 스트레이트 흑발', M: '눈썹을 살짝 덮는 젖은 듯한 흑발' }
+};
+/* 일지 동물 → 수호 동물의 자리(동물 크기에 맞게). 실제 동물 그대로 */
+const GUARD = {
+  rat: ['주인공의 어깨 위에 앉은 작은 쥐', 'a small rat perched on the shoulder'],
+  ox: ['주인공 뒤에 묵직하게 서 있는 커다란 황소', 'a massive ox standing behind'],
+  tiger: ['주인공 곁을 나란히 걷는 호랑이', 'a tiger walking side by side'],
+  rabbit: ['주인공 발치에 앉아 귀를 세운 토끼', 'a rabbit sitting alert at the feet'],
+  dragon: ['주인공 뒤 연기와 빛 속에 몸을 감고 떠 있는 동양의 용(신령한 영물)', 'an East Asian dragon spirit coiling in the smoke and light behind'],
+  snake: ['주인공의 팔과 어깨를 느슨하게 감은 뱀', 'a snake loosely coiled around the arm and shoulder'],
+  horse: ['주인공 뒤에 서 있는 늠름한 말', 'a majestic horse standing behind'],
+  sheep: ['주인공 곁에 선, 둥글게 말린 뿔이 멋진 산양', 'a mountain ram with curled horns standing beside'],
+  monkey: ['주인공 어깨 위에 앉아 앞을 보는 원숭이', 'a monkey sitting on the shoulder looking ahead'],
+  rooster: ['주인공 곁에 선 화려한 깃털의 수탉', 'a rooster with brilliant plumage standing beside'],
+  dog: ['주인공 곁을 지키는 늠름한 개', 'a noble dog guarding the side'],
+  pig: ['주인공 곁에 선 듬직한 멧돼지', 'a sturdy wild boar standing beside']
+};
+const guardOf = h => GUARD[h.animalEn] || [h.animalKo, 'a ' + h.animalEn];
 function heroKo(slot) {
-  const h = slot.hero, fem = slot.gender === 'F';
-  return h.nameKo + ' 얼굴을 한 의인화 ' + (fem ? '여성' : '남성') + ' 래퍼(사람 몸에 ' + h.colorKo + ' ' + h.animalKo + ' 머리, ' + (fem ? '걸크러시 느낌의 당당한' : '여유 있고 당당한') + ' 스트리트 패션). 모든 장면에서 같은 모습으로 알아볼 수 있게.' +
-    ' 크루: ' + h.crewKo.join('·') + ' 얼굴의 의인화 래퍼들.' + (slot.topic === 'love' ? ' 짝: ' + h.partnerKo + ' 얼굴의 의인화 캐릭터.' : '') +
-    (h.motifKo ? ' 일주 상징 풍경: “' + h.motifKo + '” 의 이미지가 배경·조명·소품에 은은하게 녹아든다.' : '');
+  const h = slot.hero, fem = slot.gender === 'F', stem = String(slot.day).charAt(0);
+  return '한국인 ' + (fem ? '여성' : '남성') + ' 래퍼(성인, 실제 사람). ' + (STEM_LOOK[stem] || '') + '. 헤어: ' + HAIR[h.el][fem ? 'F' : 'M'] + '. 모든 장면에서 같은 사람으로 알아볼 수 있게.' +
+    '\n수호 동물(일지 ' + h.animalKo + '): ' + guardOf(h)[0] + ' — 실제 동물 그대로의 사실적인 모습과 자연스러운 자세, 몸 윤곽에 ' + h.colorKo + ' 빛(일간 색)의 기운이 은은하게 감돈다.' +
+    (slot.topic === 'love' ? '\n크루: 이 주제는 두 사람과 수호 동물이 중심 — 촬영 설명에 크루가 있으면 먼 뒤쪽에 흐릿한 실루엣으로만(상징 ' + h.crewKo.join('·') + '은 옷의 자수로만).'
+      : '\n크루: 사람 두 명(성인)이 주인공보다 뒤쪽, 초점 밖에. 크루의 상징 동물(' + h.crewKo.join('·') + ')은 옷의 자수·펜던트로만 표현해 화면을 단순하게.') +
+    (slot.topic === 'love' ? '\n짝: 사람 한 명(성인)이 주인공 곁에. 짝의 상징 동물 ' + h.partnerKo + '는 두 사람 뒤 빛 속에 반투명한 실루엣으로만 은은하게.' : '') +
+    (h.motifKo ? '\n일주 상징 풍경: “' + h.motifKo + '” 의 이미지가 배경·조명·소품에 은은하게 녹아든다.' : '');
 }
 function heroEn(slot) {
   const h = slot.hero, fem = slot.gender === 'F';
-  return 'The main character is an anthropomorphic ' + h.colorEn + ' ' + h.animalEn + ' ' + (fem ? 'female' : 'male') + ' rapper (human body, ' + h.animalEn + ' head, stylish streetwear), with a crew of ' + h.crewEn.join(' and ') + ' characters' + (slot.topic === 'love' ? ' and a ' + h.partnerEn + ' partner' : '') + '.' + (h.motifKo ? ' Symbolic backdrop of this birth pillar (Korean): ' + h.motifKo + '.' : '');
+  return 'The main character is a stylish Korean ' + (fem ? 'female' : 'male') + ' rapper (adult, real person, high-fashion streetwear with ' + h.colorEn + ' accents), with a real ' + h.animalEn + ' as a majestic guardian animal: ' + guardOf(h)[1] +
+    ' (realistic, natural animal behavior). Two crew members stay in the soft-focus background' + (slot.topic === 'love' ? ', and a romantic partner stands close to the main character' : '') + '.' + (h.motifKo ? ' Symbolic backdrop of this birth pillar (Korean): ' + h.motifKo + '.' : '');
 }
 function panelPrompt(slot, extra, seed) {
   const v = variantOf(slot, seed);
-  return MV_STYLE + '\n' + MV_LOOK + '\n주인공(사주 일주 ' + slot.day + '): ' + heroKo(slot) + '\n주제: ' + (TOPIC_SCENE[slot.topic] || TOPIC_SCENE.self) + '\n장면: ' + SECTION_SCENE[slot.section] +
+  return MV_STYLE + '\n' + MV_LOOK + '\n주인공(사주 일주 ' + slot.day + '): ' + heroKo(slot) + '\n주제: ' + (TOPIC_SCENE[slot.topic] || TOPIC_SCENE.self) + '\n장면: ' + SECTION_SCENE[slot.section] + ' ' + GUARD_MOOD[slot.section] +
     '\n오늘의 의상(주인공): ' + v.outfit + '\n촬영: ' + v.shot +
-    '\n색 팔레트(일간 ' + slot.hero.el + '): ' + EL_MOTIF[slot.hero.el] + '이 주 조명색이 되어 캐릭터 림라이트·의상 포인트·소품에 강하게 드러난다.' + (extra ? '\n추가 요청: ' + String(extra).slice(0, 400) : '');
+    '\n색 팔레트(일간 ' + slot.hero.el + '): ' + EL_MOTIF[slot.hero.el] + '이 주 조명색이 되어 인물 림라이트·의상 포인트·수호 동물의 기운에 강하게 드러난다.' + (extra ? '\n추가 요청: ' + String(extra).slice(0, 400) : '');
 }
 /* 영상(Kling 이미지 → 영상): 칸 이미지를 첫 장면으로 5초 내외 반복 재생용 컷을 만든다. 영어 지시가 더 잘 듣는다 */
 const SECTION_MOTION = {
-  intro: 'slow push-in from a low angle, the character slowly lowers sunglasses and looks into the camera, headlights flare',
-  verse1: 'handheld camera bouncing to the beat, the crew nods and does exaggerated swagger poses, neon flickers',
-  hook: 'camera orbits around the crew dancing in sync, hanbok sleeves and fans fluttering in strong wind, energetic slow-motion burst',
-  verse2: 'rain falling in neon light, the character raps alone then lifts the head, gentle dolly-in',
-  bridge: 'slow-motion turn of the character, props floating in the air, sky color shifting, beat-switch feeling',
-  outro: 'camera slowly pulls back as the crew walks away into the sunrise, one last smile, calm ending'
+  intro: 'slow push-in from a low angle, the character lifts the head and looks into the camera, the guardian animal turns its gaze to the lens, headlights flare',
+  verse1: 'handheld camera moving to the beat, the character raps with confident hand gestures, the crew nods in the background, neon flickers',
+  hook: 'camera orbits around the character at the peak moment, coats fluttering in strong wind, the guardian animal glows with an aura of light, energetic slow-motion burst',
+  verse2: 'rain falling in neon light, the character raps alone then lifts the head, the guardian animal stays calmly close, gentle dolly-in',
+  bridge: 'slow-motion turn of the character, raindrops frozen in the air, light particles drifting around the guardian animal, beat-switch feeling',
+  outro: 'camera slowly pulls back as the character and the guardian animal face the sunrise, one last glance back, calm ending'
 };
 function videoPrompt(slot, extra) {
-  return 'Playful, family-friendly parody of a swaggering hip-hop music video with Korean flavor. ' + heroEn(slot) + ' Keep the starting frame characters, outfits and setting. ' + SECTION_MOTION[slot.section] +
-    '. Upbeat music-video energy, smooth cinematic motion, seamless loop feeling.' + (extra ? ' Additional direction: ' + String(extra).slice(0, 400) : '');
+  return 'Cinematic, photorealistic shot from a high-end Korean hip-hop music video. ' + heroEn(slot) + ' Keep the starting frame people, guardian animal, outfits and setting. ' + SECTION_MOTION[slot.section] +
+    '. Stylish music-video energy, smooth cinematic camera motion, natural animal movement, seamless loop feeling.' + (extra ? ' Additional direction: ' + String(extra).slice(0, 400) : '');
 }
 const VIDEO_NEG = 'text, captions, logos, watermark, distorted faces, extra limbs, blurry, flicker';   // 위험 단어는 넣지 않는다(안전 필터가 요청 자체를 거절할 수 있음)
 const VT = id => 'mv:vt:' + id, VT_AGE = 3 * 3600 * 1000, PLOCK = id => 'mv:pgen:' + id;

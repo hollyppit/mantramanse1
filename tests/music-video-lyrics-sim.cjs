@@ -47,7 +47,7 @@ const v1 = new Set(songs.map(s => s.sections[1].lines.join('|'))).size, v2 = new
 assert(v1 >= 250 && v2 >= 250 && br >= 150, '구간 다양성 ' + v1 + '/' + v2 + '/' + br);
 const usedLines = new Set(songs.flatMap(s => s.sections.flatMap(x => x.lines.map(L.stripAdlibs))));   // 추임새(괄호)를 뺀 원래 조각으로 비교
 // 영어 힙합 추임새: 곡마다 10개 안팎, 괄호로만, 오행별 묶음 안의 말만, 욕설·약물 없음, 훅 두 번이 똑같다
-{ const all = Object.values(L.ADLIB).flatMap(a => a.items.concat(a.hype)).concat(['yeah, girl', 'yeah, boy', 'yeah, yeah', 'hold up', 'queen, peace out', 'king, peace out']);
+{ const all = Object.values(L.ADLIB).flatMap(a => a.items.concat(a.hype)).concat(Object.values(L.HOOK_TAG)).concat(['yeah, girl', 'yeah, boy', 'yeah, yeah', 'hold up', 'queen, peace out', 'king, peace out']);
   for (const s of songs.slice(0, 60)) {
     const tags = s.sections.flatMap(x => x.lines.flatMap(l => (l.match(/\(([^)]*)\)/g) || []).map(t => t.slice(1, -1))));
     assert(tags.length >= 8 && tags.length <= 16, '추임새 수 ' + tags.length);

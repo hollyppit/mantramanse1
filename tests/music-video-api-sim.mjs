@@ -68,22 +68,22 @@ r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-gyeong
 r = await call('POST', '/api/music-video', { panel: { slot: 'nope', generate: true } }, admin); assert.equal(r.status, 400);
 r = await call('GET', '/api/music-video?admin=1&day=' + encodeURIComponent('경오') + '&g=F', null, admin); assert(r.j.panels['mv-love-hook-gyeong-o-f'] && r.j.hero.nameKo === '흰 말'); assert.equal(Object.keys(r.j.panels).length, 1);
 r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-hook-gyeong-o-f', clear: true } }, admin); assert.equal(r.status, 200); assert(!r.j.panels['mv-love-hook-gyeong-o-f']);
-// 10-2) 패널 그림 지시문: 갱스터 힙합 뮤비 패러디 + 한국 요소, 무기·마약·폭력·글자 금지, 주제별 장면
+// 10-2) 패널 그림 지시문(3판): 고급 K-힙합 뮤비 + 사람 주인공 + 일지 수호 동물(실제 동물) + 현대적 한국 요소, 무기·마약·폭력·글자 금지, 주제별 장면
 { let seen = ''; const f0 = globalThis.fetch; globalThis.fetch = async (u, o) => { if (String(u).includes('api.openai.com')) seen = String(o && o.body || ''); return f0(u, o); };
   r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-byeong-in-m', generate: true } }, admin); assert.equal(r.status, 200);
-  assert(/스웩 연출을 유쾌하게 패러디/.test(seen) && /갓에 선글라스/.test(seen) && /엽전/.test(seen), '패러디·한국 요소');
+  assert(/고급 K-힙합 뮤직비디오/.test(seen) && /포토리얼/.test(seen) && /재해석한 갓/.test(seen) && !/패러디|의인화|동물 얼굴/.test(JSON.parse(seen).prompt), '고급 뮤비 톤·한국 요소, 패러디·의인화 없음');
   assert(/남성 래퍼/.test(seen) && !/여성 래퍼/.test(seen), '남자 칸(-m)은 남성 래퍼가 주인공');
-  assert(/붉은 호랑이 얼굴을 한 의인화 남성 래퍼/.test(seen) && /크루: 말·개/.test(seen) && /일주 병인/.test(seen), '주인공 = 일주(일간 색 + 일지 동물), 크루 = 삼합');
+  { const p = JSON.parse(seen).prompt; assert(/한국인 남성 래퍼\(성인, 실제 사람\)/.test(p) && /한낮의 태양처럼/.test(p) && /수호 동물\(일지 호랑이\): 주인공 곁을 나란히 걷는 호랑이/.test(p) && /실제 동물 그대로/.test(p) && /붉은 빛\(일간 색\)/.test(p) && /크루의 상징 동물\(말·개\)은 옷의 자수·펜던트로만/.test(p) && /일주 병인/.test(p) && !/짝:/.test(p), '주인공 = 사람(일간 기질) + 일지 수호 동물, 크루 = 사람(삼합은 자수)'); }
   assert(!/갱스터|총|칼|마약|담배|폭력|술병|지폐|그리지 않는다|금지/.test(JSON.parse(seen).prompt), '안전 필터에 걸릴 단어 없음(긍정형 지시문)'); assert(/재물운/.test(seen) && /글자·간판 문구·로고·자막 없이/.test(seen), '주제 장면·글자 없음');
   { const pj = JSON.parse(seen); assert(/공통 화풍/.test(pj.prompt) && /\n촬영: .+mm/.test(pj.prompt) && /오늘의 의상\(주인공\): /.test(pj.prompt) && /색 팔레트\(일간 화\)/.test(pj.prompt), '지시문 2판: 공통 화풍·구간별 촬영·일간 색');
-    assert(/풀 블리드/.test(pj.prompt) && !/어안|비워 둔다/.test(pj.prompt), '전체 화면 채움(원형 프레임·아래 여백 문구 없음)'); assert.equal(pj.size, '1024x1536'); assert.equal(pj.quality, 'high', '뮤직비디오 패널 화질 high'); assert.equal(r.j.panels['mv-wealth-hook-byeong-in-m'].pv, 2, '새 그림에 지시문 판 기록'); }
+    assert(/풀 블리드/.test(pj.prompt) && !/어안|비워 둔다/.test(pj.prompt), '전체 화면 채움(원형 프레임·아래 여백 문구 없음)'); assert.equal(pj.size, '1024x1536'); assert.equal(pj.quality, 'high', '뮤직비디오 패널 화질 high'); assert.equal(r.j.panels['mv-wealth-hook-byeong-in-m'].pv, 3, '새 그림에 지시문 판 기록'); }
   { const shots = new Set(), shotOf = () => /\n촬영: ([^\n]+)/.exec(JSON.parse(seen).prompt)[1];
     for (const d of ['gap-ja', 'eul-chuk', 'byeong-in', 'jeong-myo', 'mu-jin', 'gi-sa', 'gyeong-o', 'sin-mi']) { r = await call('POST', '/api/music-video', { panel: { slot: 'mv-hook-' + d + '-f', generate: true } }, admin); assert.equal(r.status, 200); shots.add(shotOf()); }
     assert(shots.size >= 3, '일주가 다르면 훅 연출도 여러 가지 ' + shots.size);
     const once = []; for (let i = 0; i < 6; i++) { r = await call('POST', '/api/music-video', { panel: { slot: 'mv-hook-gap-ja-f', generate: true } }, admin); once.push(shotOf()); assert(r.j.panels['mv-hook-gap-ja-f'].seed, '다시 만들면 새 변형 씨앗'); }
     assert(new Set(once).size >= 2, '다시 누르면 다른 연출이 나올 수 있음');
     for (const d of ['gap-ja', 'eul-chuk', 'byeong-in', 'jeong-myo', 'mu-jin', 'gi-sa', 'gyeong-o', 'sin-mi']) await call('POST', '/api/music-video', { panel: { slot: 'mv-hook-' + d + '-f', clear: true } }, admin); }
-  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-intro-im-ja-f', generate: true } }, admin); assert.equal(r.status, 200); assert(/여성 래퍼/.test(seen) && !/남성 래퍼/.test(seen), '여자 칸(-f)은 여성 래퍼'); assert(/검은 쥐/.test(seen) && /짝: 소 얼굴/.test(seen), '연애운 짝 = 육합');
+  r = await call('POST', '/api/music-video', { panel: { slot: 'mv-love-intro-im-ja-f', generate: true } }, admin); assert.equal(r.status, 200); assert(/여성 래퍼/.test(seen) && !/남성 래퍼/.test(seen), '여자 칸(-f)은 여성 래퍼'); assert(/어깨 위에 앉은 작은 쥐/.test(seen) && /검은 빛/.test(seen) && /짝: 사람 한 명/.test(seen) && /짝의 상징 동물 소는/.test(seen), '연애운 짝 = 사람 + 육합 실루엣');
   r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-metal', generate: true } }, admin); assert.equal(r.status, 400, '성별 없는 옛 칸 이름은 받지 않음');
   globalThis.fetch = f0; }
 // 10-3) 패널 영상(Kling): 키 없으면 501, 시작 프레임 → 작업 → 확인(완료 시 R2 저장·칸 연결), 이미지 바꾸면 영상도 지움
@@ -98,7 +98,7 @@ env.KLING_API_KEY = 'kling-test'; let kling = 0, klingBody = '';
   r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-byeong-in-m', video: { startKey: '../x.jpg' } } }, admin); assert.equal(r.status, 400);
   r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-byeong-in-m', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 200, JSON.stringify(r.j)); assert.equal(r.j.pending, true);
   assert(/hip-hop music video/.test(klingBody) && !/gangster|gun|drug|weapon|violence|smok/i.test(klingBody), 'Kling 지시문(위험 단어 없음)');
-  assert(/red tiger male rapper/.test(klingBody) && !/female/.test(klingBody), 'Kling 영상도 칸 성별대로');
+  assert(/Korean male rapper/.test(klingBody) && /real tiger as a majestic guardian animal/.test(klingBody) && !/female|anthropomorphic/.test(klingBody), 'Kling 영상도 칸 성별대로, 사람 + 수호 동물');
   r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-byeong-in-m', video: { startKey: 'a1b2c3d4.jpg' } } }, admin); assert.equal(r.status, 409, '중복 작업');
   r = await call('GET', '/api/music-video?vt=mv-wealth-hook-byeong-in-m'); assert.equal(r.status, 401);
   r = await call('GET', '/api/music-video?vt=mv-wealth-hook-byeong-in-m', null, admin); assert.equal(r.j.state, 'done'); const vurl = r.j.panels['mv-wealth-hook-byeong-in-m'].video; assert(/^\/api\/clipfile\?k=mvvid-mv-wealth-hook-byeong-in-m-/.test(vurl));
@@ -179,4 +179,4 @@ assert(/HTTP 422/.test(r.j.detail) && /music_v1 재시도도/.test(r.j.detail), 
 kv.set('luckenv:flags', JSON.stringify({ version: 2, musicVideo: true })); kv.set('worlds:config', JSON.stringify({ worlds: [{ id: 'w7', access: 'paid' }] }));
 // 12) 키가 없으면 501
 delete env.ELEVENLABS_API_KEY; r = await call('POST', '/api/music-video', { sd, topic: 'career' }, admin); assert.equal(r.status, 501);
-console.log('music-video-api-sim ok: 스위치·로그인·무료 주제 차단, 생성 3곡(종합·재물·신년운세), 캐시 재사용, 재생 Range, 패널 3,600칸(일주×성별×주제×구간) 만들기·비우기·자동 채우기, 여·남 다른 곡, 일주 풍경·영상 자동 생성, 갱스터 힙합 패러디+한국 요소 지시문, Kling 패널 영상(작업·확인·저장·정리), 오류 처리, 키 노출 없음');
+console.log('music-video-api-sim ok: 스위치·로그인·무료 주제 차단, 생성 3곡(종합·재물·신년운세), 캐시 재사용, 재생 Range, 패널 3,600칸(일주×성별×주제×구간) 만들기·비우기·자동 채우기, 여·남 다른 곡, 일주 풍경·영상 자동 생성, 고급 K-힙합 사람 주인공+수호 동물 지시문, Kling 패널 영상(작업·확인·저장·정리), 오류 처리, 키 노출 없음');

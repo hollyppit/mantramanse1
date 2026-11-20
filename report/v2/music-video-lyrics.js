@@ -14,32 +14,34 @@
 (function (root) {
   'use strict';
   var R = root.ReportV2 = root.ReportV2 || {};
-  var VERSION = 'mv-lyrics-4';
+  var VERSION = 'mv-lyrics-5';
 
   /* 영어 힙합 추임새(ad-lib, 사용자 요청 2026-11-18): 줄 끝에 괄호로 붙인다 — 일레븐랩스는 괄호 안을 뒤에서 받쳐 주는 추임새로 부른다.
      일간 오행의 비트 색깔에 맞춘 묶음(목 저지 클럽·화 레이지·토 아프로비츠·금 록 랩·수 멜로딕 랩). 욕설·약물·폭력 표현은 쓰지 않는다.
      자막 시각을 맞출 때는 stripAdlibs 로 빼고 가사만 비교한다. */
   var ADLIB = {
-    목: { items: ['ayy', 'bounce', 'yeah', 'uh'], hype: "let's go" },
-    화: { items: ['skrrt', 'woo', 'yeah', 'uh'], hype: "let's go!" },
-    토: { items: ['oh-oh', 'yeah', 'uh-huh', 'ayy'], hype: 'feel good' },
-    금: { items: ['uh!', 'come on', 'yeah', 'hey'], hype: 'turn it up' },
-    수: { items: ['ooh', 'yeah, yeah', 'uh-huh', 'ayy'], hype: 'let it flow' }
+    목: { items: ['ayy', 'bounce', 'on my way', 'uh'], hype: "let's go" },
+    화: { items: ['skrrt', 'woo', 'too hot', 'uh'], hype: "let's go!" },
+    토: { items: ['oh-oh', 'steady', 'uh-huh', 'ayy'], hype: 'feel good' },
+    금: { items: ['uh!', 'come on', 'cut clean', 'hey'], hype: 'turn it up' },
+    수: { items: ['ooh', 'yeah, yeah', 'smooth', 'ayy'], hype: 'let it flow' }
   };
+  /* 훅 마지막 줄의 영어 태그(2026-11-20 "더 트렌디하게"): 용신 오행의 한 줄 영어 구호 — 후렴이 귀에 박히게 한국어 가사 끝에 영어로 받친다 */
+  var HOOK_TAG = { 목: 'new leaf, new me', 화: 'light it up', 토: 'stand my ground', 금: 'sharp and clean', 수: 'go with the flow' };
   /* 성별(사용자 요청 2026-11-19): 여자 사주는 여성 래퍼, 남자 사주는 남성 래퍼 — 보컬 지시·추임새·패널 칸(주인공 성별)·캐시가 모두 갈린다 */
   var GENDERS = ['F', 'M'], GENDER_KO = { F: '여자', M: '남자' }, GR = { F: 'f', M: 'm' };
-  var VOCAL = { F: ['female rapper', 'confident female rap vocals', 'female sung chorus'], M: ['male rapper', 'confident male rap vocals', 'male sung chorus'] };
+  var VOCAL = { F: ['female rapper', 'confident female rap vocals', 'catchy female sung hook', 'korean rap with natural english phrases'], M: ['male rapper', 'confident male rap vocals', 'catchy male sung hook', 'korean rap with natural english phrases'] };
   var NEG_VOCAL = { F: ['male vocals'], M: ['female vocals'] };
   var ADLIB_G = { F: { intro: 'yeah, girl', outro: 'queen, peace out' }, M: { intro: 'yeah, boy', outro: 'king, peace out' } };
   function genderOf(sd) { var g = sd && sd.gender; return g === 'F' || g === 'female' || g === '여' ? 'F' : 'M'; }
-  function addAdlibs(lines, sec, el, seed, g) {
+  function addAdlibs(lines, sec, el, seed, g, yong) {
     var ag = ADLIB_G[g] || ADLIB_G.M;
     var a = ADLIB[el] || ADLIB.토, last = lines.length - 1, k = 0, pick = function () { return a.items[(seed + sec.length + k++) % a.items.length]; };   // 한 벌스 안에서 차례로 돌려 같은 말이 이어지지 않게
     return lines.map(function (line, i) {
       var tag = null;
       if (sec === 'intro') tag = i === 1 ? ag.intro : i === last ? a.hype : null;
       else if (sec === 'verse1' || sec === 'verse2') tag = (i === 1 || i % 4 === 3) ? pick() : null;
-      else if (sec === 'hook') tag = i === 0 ? 'yeah, yeah' : i === last ? a.hype : null;
+      else if (sec === 'hook') tag = i === 0 ? 'yeah, yeah' : i === last ? (HOOK_TAG[yong] || a.hype) : null;
       else if (sec === 'bridge') tag = i === 0 ? 'hold up' : null;
       else if (sec === 'outro') tag = i === last ? ag.outro : null;
       return tag ? line + ' (' + tag + ')' : line;
@@ -345,17 +347,19 @@
 
   /* ── 음악 스타일(영어 권장): 일간 오행별 */
   /* 기본은 요즘 유행하는 신나는 K-힙합 비트(사용자 요청 2026-11-18). 오행은 장르 색깔만 바꾼다 — 모두 빠르고 통통 튀는 쪽.
+     2026-11-20 "더 트렌디하고 힙하게": 라디오에 바로 걸 수 있는 깔끔한 믹스, 808·트랩 하이햇, 리듬감 있는 플로우(트리플렛·카덴스 바꾸기), 귀에 박히는 구호형 훅,
+     한국어 랩에 영어 구절을 자연스럽게 섞는다. 금은 록 랩 → 멜로딕 드릴(금속성 신스), 화는 레이지, 목은 저지 클럽, 토는 아프로스윙·아마피아노, 수는 멜로딕 트랩·플러그앤비.
      가수·곡 이름은 넣지 않는다(일레븐랩스 음악 약관: 실제 아티스트·곡 이름 금지) */
-  var STYLE_BASE = ['trendy modern k-hip hop', 'upbeat', 'energetic', 'catchy', 'danceable', 'punchy 808 bass', 'crisp modern mix'];
-  /* 2026 유행 조사(레이지·저지 드릴·멜로딕 랩/플러그·아프로비츠/아마피아노·록 랩 크로스오버) 반영 — 어둡고 공격적인 폰크·트랩 메탈은 쓰지 않는다 */
+  var STYLE_BASE = ['trendy modern k-hip hop', 'upbeat', 'catchy', 'hard-hitting 808 bass', 'crisp trap hi-hats', 'polished radio-ready mix', 'confident swagger'];
+  /* 2026 유행(레이지·저지 클럽·멜로딕 드릴·플러그앤비·아프로스윙/아마피아노) — 어둡고 공격적인 폰크·트랩 메탈은 쓰지 않는다 */
   var STYLE = {
-    목: STYLE_BASE.concat(['jersey club', 'jersey drill bounce', 'sliding 808s', 'tiktok dance vibe', 'bright plucked synths', '140 bpm']),
-    화: STYLE_BASE.concat(['rage rap', 'distorted lead synths', 'hard-hitting 808s', 'mosh-pit festival energy', '150 bpm']),
-    토: STYLE_BASE.concat(['afrobeats', 'amapiano log drums', 'groovy bassline', 'sunny feel-good vibe', '112 bpm']),
-    금: STYLE_BASE.concat(['rock rap crossover', 'electric guitar riffs', 'live band energy', 'big drums', '128 bpm']),
-    수: STYLE_BASE.concat(['melodic rap', 'pluggnb', 'dreamy synth pads', 'bouncy rolling hi-hats', '140 bpm'])
+    목: STYLE_BASE.concat(['jersey club bounce', 'sliding 808s', 'bright plucked synths', 'chopped vocal samples', '145 bpm']),
+    화: STYLE_BASE.concat(['rage trap', 'supersaw lead synths', 'distorted 808s', 'festival hype energy', '150 bpm']),
+    토: STYLE_BASE.concat(['afroswing', 'amapiano log drums', 'smooth groovy bassline', 'sunny summer vibe', '110 bpm']),
+    금: STYLE_BASE.concat(['melodic drill', 'sliding 808 glides', 'metallic synth stabs', 'syncopated drill hi-hats', '142 bpm']),
+    수: STYLE_BASE.concat(['melodic trap', 'pluggnb', 'dreamy bell synths', 'rolling hi-hats', '140 bpm'])
   };
-  var NEG_STYLE = ['explicit lyrics', 'screaming', 'harsh noise', 'phonk', 'trap metal', 'slow ballad', 'sad mood', 'lo-fi', 'boom bap', 'acoustic ballad', 'dark gloomy'];
+  var NEG_STYLE = ['explicit lyrics', 'screaming', 'harsh noise', 'phonk', 'trap metal', 'slow ballad', 'sad mood', 'lo-fi', 'boom bap', 'acoustic ballad', 'dark gloomy', 'comedic novelty song', 'dated 2000s sound'];
   var COLOR = { 목: '초록빛', 화: '붉은빛', 토: '노란빛', 금: '하얀빛', 수: '푸른빛' };
 
   function hash(s) { var h = 5381; s = String(s); for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return h; }
@@ -467,7 +471,7 @@
       { id: 'bridge', lines: br, el: x.hee },
       { id: 'outro', lines: [OUT_CLIMATE[x.climate], OUT_REL[x.rel]].concat(DAY_OUTRO[x.day] || OUT_EL[x.el]), el: x.el }
     ];
-    parts.forEach(function (p) { p.lines = p.repeatOf ? parts[2].lines.slice() : addAdlibs(p.lines, p.id, x.el, seed, x.g); });   // 훅 반복은 첫 훅과 똑같이
+    parts.forEach(function (p) { p.lines = p.repeatOf ? parts[2].lines.slice() : addAdlibs(p.lines, p.id, x.el, seed, x.g, x.yong); });   // 훅 반복은 첫 훅과 똑같이
     var sections = parts.map(function (p) {
       var base = p.repeatOf || p.id;
       return { id: p.id, name: SECTION_KO[base] + (p.repeatOf ? ' (반복)' : ''), tag: '[' + TAG[base] + ']', lines: p.lines, durationMs: DUR[p.id], panel: panelId(base, topic, x.g, x.day), panelFallback: panelId(base, 'self', x.g, x.day), el: p.el };
@@ -485,9 +489,9 @@
   function compose(sd, topic, extra) { var x = inputsOf(sd, topic, extra); return x ? fromInputs(x) : null; }
 
   /* 일레븐랩스 음악 API(music_v2 / music_v2_5) composition_plan(chunks) 모양 — 구간마다 길이(duration_ms)를 지정해 패널·자막 시점이 정확히 맞는다 */
-  var LOCAL = { intro: ['short hype intro', 'riser build-up into the drop', 'ad-libs'], verse1: ['confident rap verse', 'clear korean rap vocals', 'bouncy flow', 'full drums'],
-    hook: ['big catchy chorus', 'sing-along hook', 'full energetic beat', 'layered vocals'], verse2: ['driving rap verse', 'clear korean rap vocals', 'faster flow', 'energy rising'],
-    hook2: ['big catchy chorus', 'sing-along hook', 'full energetic beat', 'layered vocals', 'extra energy'], bridge: ['beat switch', 'melodic rap', 'build-up back into the beat'], outro: ['energetic outro', 'beat ride-out', 'ad-libs', 'clean ending'] };
+  var LOCAL = { intro: ['atmospheric hype intro', 'chopped vocal sample', 'riser build-up into the drop', 'ad-libs'], verse1: ['confident rap verse', 'clear korean rap vocals', 'rhythmic triplet flow', 'tight in-the-pocket delivery', 'full drums'],
+    hook: ['big catchy chorus', 'earworm chant hook', 'stacked vocal harmonies', 'english tag line', 'full energetic beat'], verse2: ['driving rap verse', 'clear korean rap vocals', 'cadence switch-ups', 'double-time flow', 'energy rising'],
+    hook2: ['big catchy chorus', 'earworm chant hook', 'stacked vocal harmonies', 'english tag line', 'full energetic beat', 'extra energy'], bridge: ['beat switch', 'half-time drums', 'melodic auto-tuned rap', 'build-up back into the beat'], outro: ['energetic outro', 'beat ride-out', 'ad-libs', 'clean ending'] };
   function toElevenPlan(song) {
     return { chunks: song.sections.map(function (s) {
       return { text: s.tag + '\n' + s.lines.join('\n'), duration_ms: s.durationMs, positive_styles: song.style.concat(LOCAL[s.id] || []), negative_styles: song.negativeStyle.slice() };
@@ -542,8 +546,8 @@
     return lines.map(function (x, j) { var nx = lines[j + 1]; return { s: x.s, l: x.l, t: x.t, e: x.e != null ? x.e : (nx ? nx.t : x.t + 3500) }; });
   }
 
-  /* 주인공(사용자 요청 2026-11-19): 사주의 일주 — 일간 오행 색 + 일지 동물을 한 의인화 래퍼. 성별은 사주 성별(여성/남성 래퍼).
-     크루는 일지의 삼합 동물 둘, 연애운의 짝은 일지의 육합 동물. 예) 경오 일주 여자 → 흰 말 여성 래퍼, 크루 호랑이·개, 짝 양.
+  /* 주인공(2026-11-20 개편): 사주에 어울리는 사람 래퍼(사주 성별) + 일지의 상징 동물(수호 동물, 일간 오행 색 빛) — 그림 지시문은 functions/api/music-video.js. (2026-11-19 1판은 일주 의인화 동물 래퍼)
+     크루는 일지의 삼합 동물 둘, 연애운의 짝은 일지의 육합 동물. 예) 경오 일주 여자 → 여성 래퍼 + 흰 빛의 말, 크루 상징 호랑이·개, 짝 상징 양.
      패널 칸 = 주제 × 성별 × 일주(60) × 구간(6) → 칸 이름 mv-[주제-]<구간>-<일간>-<일지>-<f|m> (예: mv-love-hook-gyeong-o-f).
      조합이 3,600가지라 미리 다 만들지 않고, 사용자가 뮤직비디오를 열 때 빈 칸을 서버가 한 장씩 만들어 채운다(같은 칸은 모두가 같이 쓴다). */
   var STEMS = '갑을병정무기경신임계', BRANCHES = '자축인묘진사오미신유술해';
@@ -601,6 +605,6 @@
   }
 
   R.MusicVideoLyrics = { VERSION: VERSION, BANNED: BANNED, SECTIONS: SECTIONS, SECTION_KO: SECTION_KO, ELK: ELK, ELR: ELR, DAYS: DAYS, GENDERS: GENDERS, GENDER_KO: GENDER_KO, DUR: DUR, TOPICS: TOPICS, TOPIC_KO: TOPIC_KO, TOPIC_WORLD: TOPIC_WORLD,
-    inputsOf: inputsOf, fromInputs: fromInputs, compose: compose, toElevenPlan: toElevenPlan, toElevenV1Plan: toElevenV1Plan, alignToTranscript: alignToTranscript, stripAdlibs: stripAdlibs, ADLIB: ADLIB, panelId: panelId, parsePanelId: parsePanelId, panelSlots: panelSlots, heroOf: heroOf, bannedIn: bannedIn, allFragments: allFragments, DAY_OUTRO: DAY_OUTRO, cueAt: cueAt, hash: hash };
+    inputsOf: inputsOf, fromInputs: fromInputs, compose: compose, toElevenPlan: toElevenPlan, toElevenV1Plan: toElevenV1Plan, alignToTranscript: alignToTranscript, stripAdlibs: stripAdlibs, ADLIB: ADLIB, HOOK_TAG: HOOK_TAG, panelId: panelId, parsePanelId: parsePanelId, panelSlots: panelSlots, heroOf: heroOf, bannedIn: bannedIn, allFragments: allFragments, DAY_OUTRO: DAY_OUTRO, cueAt: cueAt, hash: hash };
   if (typeof module !== 'undefined' && module.exports) module.exports = R.MusicVideoLyrics;
 })(typeof window !== 'undefined' ? window : globalThis);
