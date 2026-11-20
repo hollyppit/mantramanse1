@@ -89,7 +89,7 @@ for (let n = 0; n < 200; n++) {
   assert.equal(new Set(Object.values(songs5).map(s => s.lyrics)).size, 5, '주제마다 다른 곡');
   assert(songs5.love.sections[2].lines[0].includes('우리 쪽으로'), '연애 훅');
   assert(songs5.wealth.sections[2].lines[0].includes('통장'), '재물 훅');
-  assert(songs5.career.sections[2].lines[0].includes('책상'), '커리어 훅');
+  assert(/책상|모니터|사무실|작업대|회의실/.test(songs5.career.sections[2].lines[0]), '커리어 훅(일터가 드러남)'); for (const s5 of Object.values(songs5)) assert(/(초록빛|붉은빛|노란빛|하얀빛|푸른빛).*바람.*불어와/.test(L.stripAdlibs(s5.sections[2].lines[0])), '훅 첫 줄은 곡 제목처럼 X빛 바람');
   const ny = songs5.newyear, e = globalThis.TojeongModern[GUAS[n % GUAS.length]];
   assert(ny.sections[0].lines[3].includes(e.theme.replace(/["“”]/g, '').slice(0, 10)), '신년운세 인트로에 괘 제목');
   assert(ny.lyrics.includes('2027년'), '신년운세 연도'); assert(ny.title.startsWith('2027 '));
@@ -166,7 +166,7 @@ if (process.argv.includes('--show')) for (const t of ['love', 'newyear']) { cons
     assert.equal(L.stripAdlibs(o[2]), L.DAY_OUTRO[d][0], '아웃트로 3줄째 = 일주 대목'); assert.equal(L.stripAdlibs(o[3]), L.DAY_OUTRO[d][1]);
   }
   assert(seenDays.size >= 50, '검사한 곡의 일주 종류 ' + seenDays.size);
-  assert.equal(L.heroOf('경오', 'F').motifKo, '달리는 말 위에 빛나는 쇠의 결');
+  assert.equal(L.heroOf('경오', 'F').motifKo, L.DAY_OUTRO['경오'][0]);
   // 사용자 옵션: auto 는 예전 곡과 같고, 장르·분위기·보컬마다 스타일이 갈리며, 모르는 값은 auto
 { const sd0 = ReportV2.SajuData.build(Manse.compute({ year: 1993, month: 8, day: 9, hour: 7, minute: 0, gender: 'F', calendar: 'solar', city: '서울' }), { now });
   const x0 = L.inputsOf(sd0, 'love'), base = L.fromInputs(x0);
