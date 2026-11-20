@@ -137,6 +137,8 @@ Date.now = realNow;
   const c = out.chapters[3];
   ok(c.title === '그 사람과 나의 궁합' && c.placeLast && c.aiEnabled === false && !c.readingSupplementary && c.editorialTopicId === 'love' && c.no === 4, '장 속성 오류');
   ok(c.scenes.some(s => /data-lc-root/.test(s.html)) && c.scenes.every(s => s.sceneType === 'life'), '입력 장면 없음');
+  const form = c.scenes.map(s => s.html).join('');
+  ok(/어떤 사이인가요?/.test(form) && ['lover', 'work', 'friend', 'family'].every(k => form.includes('data-lc-set="rel:' + k + '"')) && /data-lc-set="rel:lover" aria-pressed="true"/.test(form), '입력 폼에서 관계(연인·직장·친구·가족)를 먼저 고를 수 없음');
   ok(LC.add(out, {}, '', M, ch).chapters.length === out.chapters.length, '두 번 넣으면 중복됨');
   ok(LC.add({ chapters: [mk('timeline_self_01', 'self')] }, {}, '', M, ch).chapters.length === 1, '인연운 장이 없는 문서에 끼워짐');
   ok(LC.meOf(ch).hour === 1 && LC.meOf(ch).gender === 'M', '내 입력 꺼내기 오류');

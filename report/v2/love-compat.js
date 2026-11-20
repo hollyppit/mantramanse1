@@ -71,7 +71,7 @@
   }
 
   // ───────── 입력 ─────────
-  function defaults() { return { name: '', gender: S.gender === 'M' ? 'F' : 'M', calendar: 'solar', leap: false, year: 1990, month: 1, day: 1, hour: 12, minute: 0, hourUnknown: false, city: '서울', lon: 126.98 }; }
+  function defaults() { return { rel: 'lover', name: '', gender: S.gender === 'M' ? 'F' : 'M', calendar: 'solar', leap: false, year: 1990, month: 1, day: 1, hour: 12, minute: 0, hourUnknown: false, city: '서울', lon: 126.98 }; }
   function loadList() { try { var l = JSON.parse(store.get(LIST_KEY) || '[]'); return Array.isArray(l) ? l.slice(0, 8) : []; } catch (e) { return []; } }
   function saveList(l) { store.set(LIST_KEY, JSON.stringify(l.slice(0, 8))); }
   var keyOf = function (x) { return [x.name, x.year, x.month, x.day, x.hourUnknown ? '-' : x.hour, x.minute, x.gender, x.calendar].join('|'); };
@@ -93,6 +93,7 @@
     var recent = S.list.length ? '<div class="lc-recent"><span>최근 본 사람</span>' + S.list.map(function (x, k) { return '<span class="lc-chip"><button type="button" data-lc-pick="' + k + '">' + esc(x.name || (x.year + '.' + x.month + '.' + x.day)) + '</button><button type="button" class="lc-x" data-lc-del="' + k + '" aria-label="지우기">×</button></span>'; }).join('') + '</div>' : '';
     var q = S.status && S.status.quota, out = q && !q.unlimited && q.left <= 0;
     return '<form class="lc-form" data-lc-form novalidate>' + recent +
+      '<div class="lc-f"><span>어떤 사이인가요?</span>' + seg('rel', Object.keys(REL).map(function (k) { return [k, REL[k]]; }), REL[i.rel] ? i.rel : 'lover') + '</div>' +
       '<label class="lc-f lc-wide"><span>상대 이름 (선택)</span><input data-f="name" maxlength="12" value="' + esc(i.name) + '" placeholder="이름 또는 별명"></label>' +
       '<div class="lc-row"><div class="lc-f"><span>성별</span>' + seg('gender', [['M', '남'], ['F', '여']], i.gender) + '</div><div class="lc-f"><span>달력</span>' + seg('calendar', [['solar', '양력'], ['lunar', '음력']], i.calendar) + '</div>' + (i.calendar === 'lunar' ? '<label class="lc-ck"><input type="checkbox" data-f="leap"' + (i.leap ? ' checked' : '') + '> 윤달</label>' : '') + '</div>' +
       '<div class="lc-row"><div class="lc-f"><span>생년월일</span><div class="lc-sel">' + sel('year', minY, y, i.year, '년') + sel('month', 1, 12, i.month, '월') + sel('day', 1, 31, i.day, '일') + '</div></div></div>' +
@@ -115,7 +116,7 @@
       S.busy = false;
       if (d && d.quota && S.status) S.status.quota = d.quota;
       if (d && d.ok) {
-        S.res = d.result; S.rel = 'lover'; S.editing = false;
+        S.res = d.result; S.rel = REL[i.rel] ? i.rel : 'lover'; S.editing = false;   // 폼에서 고른 관계로 결과를 연다(결과 화면 단추로 바꿔도 횟수는 그대로)
         var rec = Object.assign({}, i); S.list = [rec].concat(S.list.filter(function (x) { return keyOf(x) !== keyOf(rec); })).slice(0, 8); saveList(S.list);
         track('love_compat_view');
       } else if (d && (d.status === 401 || d.status === 402)) { S.locked = d.locked && d.locked.reason || 'purchase'; }
@@ -286,7 +287,7 @@
     e.preventDefault(); e.stopPropagation();
     var f = t.closest('[data-lc-root]').querySelector('[data-lc-form]'); if (f) readForm(f);
     if (t.hasAttribute('data-lc-set')) { var kv = t.getAttribute('data-lc-set').split(':'); S.inp[kv[0]] = kv[1]; if (kv[0] === 'calendar' && kv[1] !== 'lunar') S.inp.leap = false; paint(); return; }
-    if (t.hasAttribute('data-lc-rel')) { S.rel = t.getAttribute('data-lc-rel'); paint(); return; }
+    if (t.hasAttribute('data-lc-rel')) { S.rel = t.getAttribute('data-lc-rel'); if (S.inp) S.inp.rel = S.rel; paint(); return; }
     if (t.hasAttribute('data-lc-pick')) { var p = S.list[+t.getAttribute('data-lc-pick')]; if (p) { S.inp = Object.assign(defaults(), p); S.err = ''; } paint(); return; }
     if (t.hasAttribute('data-lc-del')) { S.list.splice(+t.getAttribute('data-lc-del'), 1); saveList(S.list); paint(); return; }
     var a = t.getAttribute('data-lc');
