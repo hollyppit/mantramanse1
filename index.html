@@ -612,7 +612,7 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .lt-hid i.hp { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; }
 .lt-htg { display: inline-flex; gap: 3px; align-items: center; justify-content: center; flex-wrap: nowrap; font-size: 0.68rem; color: var(--ink-2); }
 .lt-htg i { font-style: normal; white-space: nowrap; opacity: .7; } .lt-htg i.m { opacity: 1; } .lt-htg b { font-weight: 600; } .lt-htg i.m b { font-weight: 800; }
-@media (max-width: 640px) { .lt-htg .r { display: none; } .lt-htg { gap: 5px; font-size: 0.72rem; } }
+@media (max-width: 640px) { .lt-htg { gap: 1px 3px; font-size: 0.68rem; letter-spacing: -0.03em; flex-wrap: wrap; max-width: 100%; } } /* 2026-11-21: 모바일도 십신 이름 전체, 칸을 넘으면 줄바꿈 */
 .lt-ev { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; min-height: 20px; }
 .lt-ev .chip { font-size: 0.64rem; padding: 1px 5px; }
 /* 운의 시기 */
@@ -6969,7 +6969,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   // 운 지지의 지장간 한 줄(2026-11-18): 여기·중기·정기 순, 오행 색, 정기 굵게.
   // 원국 천간과 같은 글자는 점(•), 원국 천간과 합이 되는 글자는 밑줄 — 숨은 글자가 원국을 건드리는 자리를 바로 보이게 한다. 일수는 툴팁.
-  // 지장간 아래 십신(2026-11-21): 지장간 글자마다 그 십신을 같은 순서·같은 굵기(정기 굵게)로. 모바일은 첫 글자만(.f), 나머지(.r)는 숨김
+  // 지장간 아래 십신(2026-11-21): 지장간 글자마다 그 십신을 같은 순서·같은 굵기(정기 굵게)로. 모바일도 이름 전체(작은 글씨, 넘치면 줄바꿈)
   function luckHiddenTG(b) {
     const d = S.ch && S.ch.pillars && S.ch.pillars.day ? S.ch.pillars.day.s : null; if (d == null) return '';
     const H = M.HIDDEN[b], lab = M.hiddenLabels(b);
@@ -9792,7 +9792,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const elOf = r => +Object.keys(y.roles).find(e => y.roles[e] === r), ye = elOf('용신'), he = elOf('희신');
     const dirsOf = e => P.filter(p => p.el === e).map(p => p.dir + '쪽').join('·');
     const h = spHomeAn('home');
-    let cmp = '<p class="small muted">‘공간·명당’ 탭에서 집의 향·건축연도를 입력하면, 내게 필요한 방향이 이 집에서는 어떤 별을 만나는지 이어서 비교해 드립니다.</p>';
+    if (!(h && h.an)) return ''; // 2026-11-21: 집 향·건축연도를 입력하지 않은 사람(대부분)에게는 이 카드를 보이지 않는다
+    let cmp ='<p class="small muted">‘공간·명당’ 탭에서 집의 향·건축연도를 입력하면, 내게 필요한 방향이 이 집에서는 어떤 별을 만나는지 이어서 비교해 드립니다.</p>';
     if (h && h.an) {
       const xk = h.an.xuankong, bz = h.an.bazhai, rows = P.filter(p => p.el === ye || p.el === he).map(pp => { const pal = xk.palaces[P.indexOf(pp)], b = bz.personStars ? bz.personStars[P.indexOf(pp)] : null; const bad = pal.shanTone <= -1 || pal.xiangTone <= -1 || (b && !b.good); return `<li><b>${pp.dir}쪽(${['목', '화', '토', '금', '수'][pp.el]}${pp.el === ye ? ' · 용신' : ' · 희신'})</b>: 이 집에서는 산 ${pal.shan}(${spState(pal.shanState)})·향 ${pal.xiang}(${spState(pal.xiangState)})${b ? ' · 팔택 ' + esc(b.name) : ''}. ${bad ? '<span class="sp-b">사주에는 맞는 방향이지만 이 집의 조건은 조심할 쪽입니다. 오래 머무는 방보다 짧게 쓰는 용도나 보완을 권합니다.</span>' : '<span class="sp-g">사주와 이 집의 조건이 크게 어긋나지 않습니다.</span>'}</li>`; });
       cmp = `<h3>${esc(h.c.name)}에서 비교</h3><ul class="pos-ul small">${rows.join('')}</ul>`;
@@ -10536,6 +10537,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     document.body.appendChild(bg);
   }
   // 내용이 든 카드들을 A4 폭(714px) 스테이지에 복제한다. SVG는 CSS 변수가 풀리지 않으므로 계산된 값을 인라인으로 박아 둔다.
+  const XP_DROP = /근거|명리 용어|용어가 어려|그래프 보는 법|계산|전문가|출전|봉법과 좌법|설정|입력|방위 기준|도수 프로필|이견|성립하지 않은|바뀐 점|작동하나요|암합|명암합|곳 더 보기|나머지|기존 세부 분석|아홉 운|왜 이 순위|왜 이런 결과/;
+  const XP_OPEN = /자세한 풀이|더 자세히 보기|더 보기$|경향 보기|조심할 방위 표|방위별 해석|방향별로 보기|대응 방향|전략 보기|타임라인 보기|12운성 변화|유불리|더 깊이 보기|괘사 원문|자세히$/;
   function xpStage(tabLabel, cards) {
     const stage = document.createElement('div'); stage.className = 'wrap xs';
     const tmp = document.createElement('div'); tmp.innerHTML = whoLine();
@@ -10561,8 +10564,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     });
     stage.querySelectorAll('.tip').forEach(e => e.remove());
     // 2026-11-21: html2canvas 는 <details> 의 접힘을 모른다 — 접힌 상자의 숨은 내용을 높이 0 자리에 겹쳐 그리고 summary 앞에 번호(1. 2.)를 붙인다.
-    // 2026-11-21 사용자 요청: 내담자가 PDF 한 부로 모두 읽을 수 있도록 접힌 상자까지 모두 펼쳐 일반 블록(div)으로 바꿔 그린다. 안쪽부터 처리해야 겹친 상자도 맞게 풀린다.
+    // 2026-11-21 사용자 요청: PDF는 내담자가 읽을 문서 — 접는 상자를 골라서 펼친다(안쪽부터 처리해야 겹친 상자도 맞게 풀린다).
+    //  · XP_DROP(전문가용·계산 근거·용어 설명·입력 칸·긴 목록): 화면에서 펼쳐 두었어도 PDF에서는 뺀다
+    //  · XP_OPEN(풀이·전략·해석·시기별 내용): 화면에서 접혀 있어도 PDF에서는 펼친다
+    //  · 그 밖: 화면 그대로(펼친 것만 넣고 접힌 것은 뺀다)
     [...stage.querySelectorAll('details')].reverse().forEach(d => {
+      const sm = d.querySelector(':scope > summary'), title = sm ? sm.textContent.replace(/\s+/g, ' ').trim() : '';
+      if (XP_DROP.test(title) || (!d.open && !XP_OPEN.test(title))) { d.remove(); return; }
       const box = document.createElement('div'); box.className = d.className; box.classList.add('xs-det');
       [...d.childNodes].forEach(n => {
         if (n.nodeType === 1 && n.tagName === 'SUMMARY') { const s = document.createElement('div'); s.className = (n.className ? n.className + ' ' : '') + 'xs-sum'; s.innerHTML = n.innerHTML; box.appendChild(s); }
