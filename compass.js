@@ -90,7 +90,7 @@
     };
     $('mc-tn').addEventListener('change', refresh);
     $('mc-x').addEventListener('click', close);
-    $('mc-ok').addEventListener('click', function () { if (s.deg == null) return; var d = Math.round(s.deg) % 360; close(); if (typeof onPick === 'function') onPick(d); });
+    $('mc-ok').addEventListener('click', function () { if (s.deg == null) return; var d = Math.round(s.deg) % 360, tn = $('mc-tn').checked; close(); if (typeof onPick === 'function') onPick(d, { trueNorth: tn, declination: DECL, source: 'sensor' }); });
 
     if (!root.isSecureContext) return fail('insecure');
     var D = root.DeviceOrientationEvent;

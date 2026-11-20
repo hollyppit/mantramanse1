@@ -1123,6 +1123,10 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="wish-spots.js"></script>
 <script src="fengshui-data.js"></script>
 <script src="fengshui-engine.js"></script>
+<script src="bearing.js"></script>
+<script src="mansions-data.js"></script>
+<script src="mansions-engine.js"></script>
+<script src="space-integrate.js"></script>
 <script src="macro-era.js"></script>
 <script src="macro-era-bridge.js"></script>
 <script src="wonhoe.js"></script>
@@ -5989,9 +5993,10 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     <section class="card"><div class="card-h"><h2>추천 날짜</h2><span class="note">${PU[T.purpose].label} · 점수 높은 순</span></div>${best.length ? `<div class="list">${best.map(row).join('')}</div>` : '<p class="muted small">이 기간에는 길일 등급인 날이 없습니다. 기간을 늘려 보세요.</p>'}</section>
     <section class="card"><div class="card-h"><h2>피하면 좋은 날</h2><span class="note">충·형 등 내 사주와 부딪치는 날</span></div>${worst.length ? `<div class="list">${worst.map(row).join('')}</div>` : '<p class="muted small">뚜렷하게 피할 날이 없습니다.</p>'}</section>
     ${spTkCard(T, sd)}
+    ${tkMansionCard(list)}
     <section class="card">
       <details><summary><b>${T.days}일 전체 보기</b></summary>
-      <div class="tbl-wrap"><table class="dt"><thead><tr><th>날짜</th><th>일진</th><th>건제</th><th>등급</th><th>근거</th></tr></thead><tbody>${list.map(r => `<tr><td class="num">${fmt(r)}</td><td class="gz">${M.gzName(r.pillar)}</td><td>${r.jian}</td><td><span class="chip ${r.grade === '길일' ? 'good' : r.grade === '피할 날' ? 'bad' : ''}">${r.grade} ${r.score}</span></td><td class="small">${rs(r, 3)}</td></tr>`).join('')}</tbody></table></div></details>
+      <div class="tbl-wrap"><table class="dt"><thead><tr><th>날짜</th><th>일진</th><th>건제</th>${spOn() && window.MantraMansions ? "<th>28수</th>" : ""}<th>등급</th><th>근거</th></tr></thead><tbody>${list.map(r => `<tr><td class="num">${fmt(r)}</td><td class="gz">${M.gzName(r.pillar)}</td><td>${r.jian}</td>${spOn() && window.MantraMansions ? "<td>" + tkMansionCell(r.jdn) + "</td>" : ""}<td><span class="chip ${r.grade === '길일' ? 'good' : r.grade === '피할 날' ? 'bad' : ''}">${r.grade} ${r.score}</span></td><td class="small">${rs(r, 3)}</td></tr>`).join('')}</tbody></table></div></details>
       <p class="note">점수는 ${term('12건제')}(그날의 성격), 날의 간지와 내 원국 기둥의 충·형·합, 천을귀인·천덕·월덕, 내 용신 오행과의 맞음, 내 공망 지지${PU[T.purpose].son ? ', ' + term('손 없는 날') : ''}을 더한 것입니다. 목적마다 건제 가중치가 다릅니다. 이 앱의 흐름 점수와는 별개의 참고 정보이며, 절기가 바뀌는 날의 월지는 그날 정오 기준으로 계산합니다. 중요한 일정은 날짜 하나에 의존하지 말고 현실 조건을 먼저 보세요.</p>
     </section>`;
   }
@@ -9613,6 +9618,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${window.MantraCompass && window.MantraCompass.supported() ? `<div class="field"><span class="small">휴대폰 센서로 재기</span><button type="button" class="btn" data-compass="${kind}:${i}">나침반으로 재기</button></div>` : ''}
       ${spField(kind, i, 'built', '준공(입주) 연도', 'number', 'min="1864" max="2103" inputmode="numeric"')}${spField(kind, i, 'reno', '전면 개축·대수리 연도(선택)', 'number', 'min="1864" max="2103" inputmode="numeric"')}</div>
       <p class="small muted">향은 현관이 아니라 <b>거실(또는 매장) 큰 창이 바라보는 쪽</b>을 나침반 앱으로 재세요. 모르면 비워 두면 해당 분석을 건너뜁니다.</p>`;
+    h += spBearingInputs(kind, i);
     h += '<details class="adv"><summary>주변 형세 입력(선택)</summary><div class="frow">' + Object.entries(FD.FORM).map(([k, f]) => spSelect(kind, i, 'form.' + k, f.label, Object.entries(f.opts).map(([v, o]) => [v, o[1].split('.')[0].slice(0, 30)]))).join('') + spSelect(kind, i, 'openDir', '물·큰길·트인 공간 방위', SP_DIRS.map(([k, n]) => [k, n + '쪽'])) + spSelect(kind, i, 'highDir', '산·높은 건물 방위', SP_DIRS.map(([k, n]) => [k, n + '쪽'])) + '</div>'
       + '<div class="small">' + Object.entries(FD.HAZARD).map(([k, d]) => `<label class="spchk"><input type="checkbox" data-sp-hz="${kind}:${i}:${k}"${c.hazards.includes(k) ? ' checked' : ''}> ${esc(d[0])}</label>`).join('') + '</div></details>';
     h += '<details class="adv"><summary>실내 배치 입력(선택)</summary><div class="frow">' + (isHome ? SP_HOME_ROOMS : SP_BIZ_ROOMS).map(r => spSelect(kind, i, 'rooms.' + r, FD.ROOM_LABEL[r] + ' 위치', dirOpts)).join('') + '</div></details>';
@@ -9794,6 +9800,115 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   document.addEventListener('change', ev => { const t = ev.target; if (!t || !t.dataset || t.dataset.spMv === undefined) return; SP.mv = t.value; spSave(); render(); });
 
+  // ───────────── 공통 방위 기록 · 28수 천문방위(C) · 통합 공간 해석(D) ─────────────
+  // bearing.js / mansions-engine.js / space-integrate.js. 현공비성 계산(spRun → F.analyze)은 그대로 두고, 같은 향 각도를 읽기만 한다.
+  // 후보의 방위 기준은 c.br = { ref: 'magnetic'|'true'|'', decl: 편각 문자열, src: 'manual'|'select'|'sensor', at: ISO 시각 } (없으면 '기준 모름'·미보정)
+  function spBrSet(c, patch) { c.br = Object.assign({}, c.br || {}, patch); }
+  function spBearing(c) {
+    const B = window.MantraBearing; if (!B) return null;
+    const b = c.br || {};
+    return B.record({ azimuth: c.facing, referenceNorth: b.ref || 'unknown', magneticDeclination: b.decl, measurementSource: b.src || (c.facing === '' ? 'unknown' : 'manual'), measuredAt: b.at || null });
+  }
+  function spBearingInputs(kind, i) {
+    if (!window.MantraBearing) return '';
+    const c = SP[kind][i], b = c.br || {}, rec = spBearing(c);
+    return `<details class="adv"${b.ref || b.decl ? " open" : ""}><summary>방위 기준(자북·진북) 확인(선택)</summary><div class="frow">
+      <label class="field"><span class="small">이 각도의 북쪽 기준</span><select data-sp-br="${kind}:${i}:ref"><option value="">모름</option><option value="magnetic"${b.ref === 'magnetic' ? ' selected' : ''}>자북(나침반·나경)</option><option value="true"${b.ref === 'true' ? ' selected' : ''}>진북(지도·위성)</option></select></label>
+      <label class="field"><span class="small">자기편각(°, 서편각은 −)</span><input type="number" step="0.1" min="-30" max="30" data-sp-br="${kind}:${i}:decl" value="${esc(b.decl == null ? '' : b.decl)}" placeholder="모르면 비워 두세요"></label></div>
+      <p class="small">${rec ? esc(window.MantraBearing.northText(rec)) : ''}</p>
+      <p class="small muted">입력 방법: ${rec ? esc(rec.sourceLabel) : '-'}${rec && rec.measuredAt ? ' · ' + esc(new Date(rec.measuredAt).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })) : ''}. ${rec && rec.azimuth != null ? '좌(뒤쪽) 각도는 ' + rec.sittingAzimuth + '°입니다. ' : ''}편각을 모르면 보정하지 않고(미보정) 입력한 각도를 그대로 씁니다. 풍수(현공) 계산은 보정과 관계없이 입력한 각도를 씁니다.</p>
+      ${rec && rec.notes.length ? '<ul class="pos-ul small muted">' + rec.notes.map(n => `<li>${esc(n)}</li>`).join('') + '</ul>' : ''}</details>`;
+  }
+  // 원형 방위도: 중앙 나침반(건물 향 바늘) + 바깥 28수 고리. 승인된 도수가 없으면 사신별 7수를 묶은 '분류형' 배치(도수 아님).
+  function spMansionSvg(ms, az) {
+    const MD = window.MantraMansionsData, cx = 170, cy = 170, R1 = 158, R0 = 118, RT = 138;
+    const pt = (r, deg) => [cx + r * Math.sin(deg * Math.PI / 180), cy - r * Math.cos(deg * Math.PI / 180)];
+    const arc = (r0, r1, a0, a1) => { const [x0, y0] = pt(r1, a0), [x1, y1] = pt(r1, a1), [x2, y2] = pt(r0, a1), [x3, y3] = pt(r0, a0), lg = Math.abs(a1 - a0) > 180 ? 1 : 0; return `M${x0.toFixed(1)} ${y0.toFixed(1)}A${r1} ${r1} 0 ${lg} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}A${r0} ${r0} 0 ${lg} 0 ${x3.toFixed(1)} ${y3.toFixed(1)}Z`; };
+    const CENTER = { east: 90, north: 0, west: 270, south: 180 }, GAP = 4;
+    let ring = '';
+    ms.groups.forEach(g => {
+      const c0 = CENTER[g.group], col = MD.GUARD[g.group].color;
+      ring += `<path d="${arc(R0, R1, c0 - 45 + GAP, c0 + 45 - GAP)}" fill="${col}" fill-opacity=".10" stroke="${col}" stroke-opacity=".55"/>`;
+      const [lx, ly] = pt(R1 + 9, c0);
+      ring += `<text x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="middle" class="ms-gd" fill="${col}">${esc(MD.GUARD[g.group].ko)}</text>`;
+      g.mansions.forEach((m, k) => {
+        const deg = c0 + 45 - GAP - (k + 0.5) * (90 - 2 * GAP) / 7, [x, y] = pt(RT, deg), on = SP.msSel === m.id;
+        ring += `<g class="ms-it${on ? ' on' : ''}" data-ms="${m.id}" role="button" tabindex="0" aria-label="${esc(m.label + ' · ' + m.guardian)}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="15" fill="${on ? col : 'var(--surface,#fff)'}" fill-opacity="${on ? '.22' : '1'}" stroke="${col}"/><text x="${x.toFixed(1)}" y="${(y + 1).toFixed(1)}" text-anchor="middle" class="ms-hj">${m.hanja}</text><text x="${x.toFixed(1)}" y="${(y + 10).toFixed(1)}" text-anchor="middle" class="ms-ko">${m.name}</text></g>`;
+      });
+    });
+    let comp = `<circle cx="${cx}" cy="${cy}" r="78" fill="var(--surface,#fff)" stroke="var(--line,#ccc)"/><circle cx="${cx}" cy="${cy}" r="60" fill="none" stroke="var(--line,#ccc)" stroke-dasharray="2 3"/>`;
+    for (let d = 0; d < 360; d += 15) { const [a, b] = pt(78, d), [c2, e] = pt(d % 45 === 0 ? 68 : 73, d); comp += `<line x1="${a.toFixed(1)}" y1="${b.toFixed(1)}" x2="${c2.toFixed(1)}" y2="${e.toFixed(1)}" stroke="var(--ink-2,#888)" stroke-width="${d % 90 === 0 ? 1.6 : .8}"/>`; }
+    [['북', 0], ['동', 90], ['남', 180], ['서', 270]].forEach(([n, d]) => { const [x, y] = pt(50, d); comp += `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle" class="ms-cd">${n}</text>`; });
+    if (az != null) { const [x, y] = pt(64, az), [sx, sy] = pt(30, az + 180); comp += `<line x1="${sx.toFixed(1)}" y1="${sy.toFixed(1)}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#b3402f" stroke-width="3" stroke-linecap="round"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="#b3402f"/><text x="${cx}" y="${cy + 30}" text-anchor="middle" class="ms-az">향 ${az}°</text>`; }
+    comp += `<circle cx="${cx}" cy="${cy}" r="5" fill="var(--ink,#222)"/>`;
+    return `<svg class="ms-svg" viewBox="-16 -16 372 372" role="img" aria-label="28수 원형 방위도(분류형)">${ring}${comp}</svg>`;
+  }
+  function spMansionDetail(ms, rec) {
+    const MD = window.MantraMansionsData, m = MD.MANSIONS.find(x => x.id === SP.msSel);
+    if (!m) return '<p class="small muted">고리의 수를 누르면 이름·사신·상징·출전을 보여 드립니다.</p>';
+    const r = ms.results.find(x => x.mansion.id === m.id), sysTxt = ms.status === 'determined' ? ms.results.map(x => x.sourceVersion + ' · ' + x.source).join(' / ') : '데이터 미확정 — 승인된 도수 체계 없음';
+    return `<div class="ms-det"><b>${esc(m.label)}</b> · ${esc(m.guardian)} ${esc(m.groupDir)} 7수 중 ${((m.order - 1) % 7) + 1}번째
+      <dl class="small"><dt>상징</dt><dd>${esc(m.traditionalSymbolism)}</dd><dt>칠요·금수</dt><dd>${esc(m.dayLuminary)} · ${esc(m.animal)}</dd>
+      <dt>도수 체계·출전</dt><dd>${esc(sysTxt)}</dd><dt>도수(시작~끝)</dt><dd>${r ? esc(r.mansion.mansionStart + '~' + r.mansion.mansionEnd) : '미확정'}</dd>
+      <dt>건물 방위</dt><dd>${rec && rec.azimuth != null ? rec.azimuth + '° (' + esc(rec.referenceLabel) + ')' + (r ? '' : ' — 이 수에 해당하는지는 판정하지 않음') : '향 미입력'}</dd>
+      <dt>기준점</dt><dd>${r ? esc(r.referencePoint) : '미확정'}</dd><dt>이름·배속 출전</dt><dd>${esc(m.source)}</dd><dt>데이터 버전</dt><dd>${esc(MD.VERSION)} · ${esc(m.sourceVersion)}</dd></dl></div>`;
+  }
+  function spMansionSection(kind, i, an) {
+    const MS = window.MantraMansions, SI = window.MantraSpaceIntegrate; if (!MS || !SI) return '';
+    const c = SP[kind][i], rec = spBearing(c); let ms;
+    try { ms = MS.analyze({ bearing: rec }); } catch (e) { return `<section class="card"><p class="err small">28수 계산 오류: ${esc(e.message)}</p></section>`; }
+    const det = ms.status === 'determined', az = rec ? rec.azimuth : null;
+    let h = `<section class="card"><div class="card-h"><h2>28수 천문방위 분석</h2><span class="note">${det ? '도수 체계 적용' : '데이터 미확정 · 분류형'}</span></div>
+      <div class="sumbox"><b>결과</b> — ${det ? esc(ms.results.map(r => r.mansion.label + '(' + r.sourceVersion + ')').join(' · ')) : '28수를 사신별 7수로 나눠 보여 드립니다. 이 건물 방위가 어느 수에 해당하는지는 판정하지 않습니다.'}</div>
+      <p class="small"><b>쉬운 설명</b> — 28수는 달이 하늘을 한 바퀴 도는 길을 28칸으로 나눈 옛 별자리입니다. 동쪽 청룡·북쪽 현무·서쪽 백호·남쪽 주작에 7수씩 묶입니다. 안쪽 나침반의 빨간 바늘이 이 건물의 향입니다.</p>
+      ${spMansionSvg(ms, az)}
+      <p class="small muted" style="text-align:center">바깥 고리는 <b>분류형 배치</b>입니다. 수마다 실제 폭(도수)이 달라 같은 간격으로 그린 위치는 실제 하늘 위치가 아닙니다. 건물 방위는 안쪽 나침반에만 표시하며, 바깥 고리와 맞대어 읽지 않습니다.</p>
+      ${spMansionDetail(ms, rec)}
+      <p class="small"><b>근거</b> — 사신 배속과 순서: 《사기·천관서》 이래 전통 천문 분류. 도수 자료: ${det ? '승인된 체계 출전 참고' : '문헌마다 수치·기준이 달라(예: 《회남자·천문훈》과 《한서·율력지》의 정수 도수 차이) 아직 한 체계로 확정하지 않았습니다.'}</p>
+      <p class="small"><b>적용 전통</b> — 동양 전통 천문(사신·28수). 24산과의 연계: ${esc(ms.links.text)}</p>
+      <p class="small muted"><b>한계</b> — ${ms.limits.map(esc).join(' ')}</p>
+      ${ms.undetermined.length ? '<ul class="pos-ul small muted">' + ms.undetermined.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>' : ''}</section>`;
+    const it = SI.integrate({ xuankong: an ? an.xuankong : null, mansions: ms, bearing: rec });
+    const row = (t, o) => o ? `<div class="li"><span class="k">${t}</span><span class="v small"><b>${esc(o.result)}</b><br>${esc(o.easy)}<br><span class="muted">근거: ${esc(o.basis)} · 전통: ${esc(o.school)}<br>한계: ${esc(o.limit)}</span></span><span></span></div>` : '';
+    h += `<section class="card"><div class="card-h"><h2>통합 공간 해석</h2><span class="note">합산하지 않음</span></div>
+      <div class="list">${row('현공풍수', it.xuankong)}${row('28수', it.mansions)}</div>
+      ${it.common.length ? '<h3>공통점</h3><ul class="pos-ul small">' + it.common.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>' : ''}
+      ${it.differ.length ? '<h3>서로 다른 점</h3><ul class="pos-ul small">' + it.differ.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>' : ''}
+      <h3>근거·적용 체계</h3><ul class="pos-ul small">${it.basis.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
+      ${it.undetermined.length ? '<h3>판단할 수 없는 항목</h3><ul class="pos-ul small muted">' + it.undetermined.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>' : ''}
+      <p class="note">전통적 상징을 풀이한 참고 정보입니다. 집값·건강·사업 결과를 보장하지 않으며, 건물 안전·계약은 현장과 전문가 확인이 우선입니다.</p></section>`;
+    return h;
+  }
+  document.addEventListener('click', ev => {
+    const g = ev.target.closest && ev.target.closest('[data-ms]'); if (!g) return;
+    SP.msSel = SP.msSel === g.dataset.ms ? '' : g.dataset.ms; render();
+  });
+  document.addEventListener('keydown', ev => {
+    const g = ev.target.closest && ev.target.closest('[data-ms]'); if (!g || (ev.key !== 'Enter' && ev.key !== ' ')) return;
+    ev.preventDefault(); SP.msSel = SP.msSel === g.dataset.ms ? '' : g.dataset.ms; render();
+  });
+  { const st = document.createElement('style'); st.textContent = '.ms-svg{display:block;width:100%;max-width:360px;margin:8px auto}.ms-svg .ms-it{cursor:pointer}.ms-svg .ms-it:focus{outline:none}.ms-svg .ms-it:focus circle{stroke-width:2.5}.ms-hj{font-size:12px;font-weight:700;fill:var(--ink,#222)}.ms-ko{font-size:7.5px;fill:var(--ink-2,#666)}.ms-gd{font-size:10px;font-weight:700}.ms-cd{font-size:11px;fill:var(--ink-2,#666);font-weight:700}.ms-az{font-size:10px;fill:#b3402f;font-weight:700}.ms-det{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}.ms-det dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:6px 0 0}.ms-det dt{color:var(--ink-2);white-space:nowrap}.ms-det dd{margin:0}'; document.head.appendChild(st); }
+  // 택일: 날의 28수(값일수)를 독립 항목으로. 길일 점수에는 더하거나 빼지 않는다.
+  function tkMansion(jdn) {
+    const MS = window.MantraMansions; if (!MS) return null;
+    return MS.dayMansion(jdn);
+  }
+  function tkMansionCell(jdn) { if (!spOn()) return ''; const r = tkMansion(jdn); return r && r.status === 'ok' ? esc(r.mansion.label) : '<span class="muted">보류</span>'; }
+  function tkMansionCard(list) {
+    if (!spOn() || !window.MantraMansions || !list.length) return '';
+    const r0 = tkMansion(list[0].jdn); if (!r0) return '';
+    const MD = window.MantraMansionsData, ok = r0.status === 'ok';
+    const ev = ok ? r0.events : MD.EVENTS.map(e => ({ label: e[1], text: '판단 보류' }));
+    const next = ok ? list.slice(0, 7).map(r => { const x = tkMansion(r.jdn); return `<span class="chip">${r.m}.${r.d} ${esc(x.mansion.label)}</span>`; }).join(' ') : '';
+    return `<section class="card"><div class="card-h"><h2>날의 28수(값일수)</h2><span class="note">점수에 반영하지 않는 참고 항목</span></div>
+      ${ok ? `<div class="sumbox"><b>결과</b> — ${list[0].m}.${list[0].d}은 <b>${esc(r0.mansion.label)}</b>수(${esc(r0.guardian)} · ${esc(r0.mansion.dayLuminary)} · ${esc(r0.mansion.animal)})입니다.</div><div class="sp-chips small">${next}</div>` : `<div class="sumbox">${esc(r0.text)}</div>`}
+      <p class="small"><b>쉬운 설명</b> — 날마다 28수가 하나씩 돌아가며 그날을 맡는다고 보는 전통 달력 표기입니다. 28일마다 같은 수가 다시 돌아오고, 각 수는 요일이 정해져 있습니다(각수=목요일 등).</p>
+      <h3>행사별 전통 길흉</h3><div class="sp-chips small">${ev.map(e => `<span class="chip">${esc(e.label)} · ${esc(e.text)}</span>`).join('')}</div>
+      <p class="small"><b>근거</b> — ${ok ? esc(r0.source) + ` · 기준일 ${esc(r0.anchor.ymd)} = ${esc(MD.MANSIONS.find(m => m.id === r0.anchor.mansionId).label)}수` : '기준일 미확정'}</p>
+      <p class="small"><b>적용 전통</b> — 통서(通書) 계열 값일수. 방위 도수(공간·명당의 28수)와는 별개의 날짜 순환 계산입니다.</p>
+      <p class="small muted"><b>한계</b> — 이사·개업·혼례·계약·건축·장례별 길흉은 문헌마다 다르고 아직 원전 대조를 마치지 않아 모두 '판단 보류'입니다. 위 추천 날짜의 점수(건제·충합·귀인·용신)는 28수와 무관하게 그대로입니다.</p></section>`;
+  }
+
   function renderSpace(force) {
     if (force) SP.sec = force;
     const secs = [['home', '내 사주에 맞는 거주지'], ['biz', '내 사주에 맞는 사업장'], ['wish', '나의 소원성취 명당'], ['fs', '우리 집·사업장 풍수']];
@@ -9805,6 +9920,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       body = (kind === 'home' ? spRegion() : spBizHead()) + spCandidates(kind);
       let an = null; try { an = spRun(kind, i); } catch (e) { body += `<section class="card"><p class="err small">${esc(e.message)}</p></section>`; }
       body += an ? spResult(kind, i, an) : '<section class="card"><p class="muted small">향(방향)을 입력하면 현공비성·팔택·형세 분석이 나타납니다.</p></section>';
+      body += spMansionSection(kind, i, an);
       body += spCompare(kind);
     }
     return `<section class="card"><nav class="seg sp-nav" role="tablist" aria-label="공간·명당 메뉴">${secs.map(([k, l]) => `<button type="button" class="${SP.sec === k ? 'on' : ''}" data-sp-sec="${k}">${l}</button>`).join('')}</nav></section>${body}`;
@@ -9819,8 +9935,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   });
   document.addEventListener('change', ev => {
     const t = ev.target; if (!t || !t.dataset) return;
-    if (t.dataset.sp) { const [k, i, key] = t.dataset.sp.split(':'), c = SP[k][+i], p = key.split('.'); if (p.length === 2) { c[p[0]] = c[p[0]] || {}; if (t.value === '') delete c[p[0]][p[1]]; else c[p[0]][p[1]] = t.value; } else c[key] = t.value; spSave(); render(); }
-    else if (t.dataset.spDir !== undefined) { const [k, i] = t.dataset.spDir.split(':'); if (t.value !== '') SP[k][+i].facing = t.value; spSave(); render(); }
+    if (t.dataset.sp) { const [k, i, key] = t.dataset.sp.split(':'), c = SP[k][+i], p = key.split('.'); if (key === 'facing') spBrSet(c, { src: 'manual', at: new Date().toISOString() }); if (p.length === 2) { c[p[0]] = c[p[0]] || {}; if (t.value === '') delete c[p[0]][p[1]]; else c[p[0]][p[1]] = t.value; } else c[key] = t.value; spSave(); render(); }
+    else if (t.dataset.spDir !== undefined) { const [k, i] = t.dataset.spDir.split(':'); if (t.value !== '') { SP[k][+i].facing = t.value; spBrSet(SP[k][+i], { src: 'select', at: new Date().toISOString() }); } spSave(); render(); }
+    else if (t.dataset.spBr) { const [k, i, key] = t.dataset.spBr.split(':'); spBrSet(SP[k][+i], { [key]: t.value }); spSave(); render(); }
     else if (t.dataset.spHz) { const [k, i, h] = t.dataset.spHz.split(':'), c = SP[k][+i]; c.hazards = c.hazards.filter(x => x !== h); if (t.checked) c.hazards.push(h); spSave(); render(); }
     else if (t.dataset.spInd) { SP.ind = t.value; spSave(); render(); }
   });
@@ -9828,7 +9945,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   document.addEventListener('click', ev => {
     const b = ev.target.closest && ev.target.closest('[data-compass]'); if (!b || !window.MantraCompass) return;
     const [k, i] = b.dataset.compass.split(':');
-    window.MantraCompass.open(deg => { if (SP[k] && SP[k][+i]) { SP[k][+i].facing = String(deg); spSave(); render(); } });
+    window.MantraCompass.open((deg, meta) => { if (SP[k] && SP[k][+i]) { SP[k][+i].facing = String(deg); spBrSet(SP[k][+i], { src: 'sensor', at: new Date().toISOString(), ref: meta && meta.trueNorth ? 'true' : 'magnetic', decl: meta && meta.trueNorth ? String(meta.declination) : (SP[k][+i].br || {}).decl || '' }); spSave(); render(); } });
   });
   { const st = document.createElement('style'); st.textContent = '.sp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}.sp-c{border:1px solid var(--line);border-radius:10px;padding:6px;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;min-height:92px;font-size:.78rem}.sp-c b{width:100%;font-size:.8rem}.sp-ctr{background:var(--accent-soft)}.sp-s{padding:1px 6px;border-radius:8px;border:1px solid var(--line)}.sp-c em{width:100%;font-style:normal;color:#b3402f;font-size:.72rem}.sp-g{color:#2e7d4f;font-weight:600}.sp-b{color:#b3402f;font-weight:600}.sp-n{color:var(--ink-2)}.sp-s.sp-g{border-color:#2e7d4f}.sp-s.sp-b{border-color:#b3402f}.sp-chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.sp-gc{border-color:#2e7d4f}.sp-bc{border-color:#b3402f}.spw{stroke:#fff;stroke-width:1.5}.spw.natural{fill:#2e7d4f}.spw.prayer{fill:#7a4fc0}.spw.trad{fill:#c27a1e}.spw.me{fill:none;stroke:var(--ink);stroke-width:2.5}.sp-nav{flex-wrap:wrap}.spchk{display:inline-block;margin:4px 10px 4px 0}.sp-tb{border-collapse:collapse;width:100%;font-size:.85rem}.sp-tb th,.sp-tb td{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}@media(max-width:480px){.sp-c{font-size:.72rem;padding:4px}}'; document.head.appendChild(st); }
 
