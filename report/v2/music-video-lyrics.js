@@ -14,7 +14,7 @@
 (function (root) {
   'use strict';
   var R = root.ReportV2 = root.ReportV2 || {};
-  var VERSION = 'mv-lyrics-5';
+  var VERSION = 'mv-lyrics-6';
 
   /* 영어 힙합 추임새(ad-lib, 사용자 요청 2026-11-18): 줄 끝에 괄호로 붙인다 — 일레븐랩스는 괄호 안을 뒤에서 받쳐 주는 추임새로 부른다.
      일간 오행의 비트 색깔에 맞춘 묶음(목 저지 클럽·화 레이지·토 아프로비츠·금 록 랩·수 멜로딕 랩). 욕설·약물·폭력 표현은 쓰지 않는다.
@@ -30,7 +30,7 @@
   var HOOK_TAG = { 목: 'new leaf, new me', 화: 'light it up', 토: 'stand my ground', 금: 'sharp and clean', 수: 'go with the flow' };
   /* 성별(사용자 요청 2026-11-19): 여자 사주는 여성 래퍼, 남자 사주는 남성 래퍼 — 보컬 지시·추임새·패널 칸(주인공 성별)·캐시가 모두 갈린다 */
   var GENDERS = ['F', 'M'], GENDER_KO = { F: '여자', M: '남자' }, GR = { F: 'f', M: 'm' };
-  var VOCAL = { F: ['female rapper', 'confident female rap vocals', 'catchy female sung hook', 'korean rap with natural english phrases'], M: ['male rapper', 'confident male rap vocals', 'catchy male sung hook', 'korean rap with natural english phrases'] };
+  var VOCAL = { F: ['female rapper', 'confident female rap vocals', 'smooth laid-back flow', 'soulful female sung hook', 'korean rap with natural english phrases'], M: ['male rapper', 'confident male rap vocals', 'smooth laid-back flow', 'soulful male sung hook', 'korean rap with natural english phrases'] };
   var NEG_VOCAL = { F: ['male vocals'], M: ['female vocals'] };
   var ADLIB_G = { F: { intro: 'yeah, girl', outro: 'queen, peace out' }, M: { intro: 'yeah, boy', outro: 'king, peace out' } };
   function genderOf(sd) { var g = sd && sd.gender; return g === 'F' || g === 'female' || g === '여' ? 'F' : 'M'; }
@@ -350,16 +350,18 @@
      2026-11-20 "더 트렌디하고 힙하게": 라디오에 바로 걸 수 있는 깔끔한 믹스, 808·트랩 하이햇, 리듬감 있는 플로우(트리플렛·카덴스 바꾸기), 귀에 박히는 구호형 훅,
      한국어 랩에 영어 구절을 자연스럽게 섞는다. 금은 록 랩 → 멜로딕 드릴(금속성 신스), 화는 레이지, 목은 저지 클럽, 토는 아프로스윙·아마피아노, 수는 멜로딕 트랩·플러그앤비.
      가수·곡 이름은 넣지 않는다(일레븐랩스 음악 약관: 실제 아티스트·곡 이름 금지) */
-  var STYLE_BASE = ['trendy modern k-hip hop', 'upbeat', 'catchy', 'hard-hitting 808 bass', 'crisp trap hi-hats', 'polished radio-ready mix', 'confident swagger'];
-  /* 2026 유행(레이지·저지 클럽·멜로딕 드릴·플러그앤비·아프로스윙/아마피아노) — 어둡고 공격적인 폰크·트랩 메탈은 쓰지 않는다 */
+  /* 2026-11-20 2차 "더 그루비하고 느낌 있게": 빠르고 몰아붙이는 비트(레이지 150·저지 클럽 145)를 걷고, 몸이 저절로 까딱이는 그루브 쪽으로.
+     템포는 94~108bpm 의 여유 있는 바운스, 스윙 걸린 하이햇, 따뜻한 베이스 라인, 펑크·소울·R&B 화성. 보컬은 박자 뒤에 살짝 기대는 레이드백 플로우. */
+  var STYLE_BASE = ['trendy modern k-hip hop', 'upbeat', 'groovy', 'catchy', 'head-nodding bounce', 'swung hi-hats', 'deep warm bass groove', 'polished radio-ready mix'];
+  /* 오행별 그루브 색깔 — 목 펑키 바운스, 화 웨스트코스트 그루브, 토 아프로스윙·아마피아노, 금 재지 슬랩 베이스, 수 R&B·네오소울. 어둡고 공격적인 폰크·트랩 메탈은 쓰지 않는다 */
   var STYLE = {
-    목: STYLE_BASE.concat(['jersey club bounce', 'sliding 808s', 'bright plucked synths', 'chopped vocal samples', '145 bpm']),
-    화: STYLE_BASE.concat(['rage trap', 'supersaw lead synths', 'distorted 808s', 'festival hype energy', '150 bpm']),
-    토: STYLE_BASE.concat(['afroswing', 'amapiano log drums', 'smooth groovy bassline', 'sunny summer vibe', '110 bpm']),
-    금: STYLE_BASE.concat(['melodic drill', 'sliding 808 glides', 'metallic synth stabs', 'syncopated drill hi-hats', '142 bpm']),
-    수: STYLE_BASE.concat(['melodic trap', 'pluggnb', 'dreamy bell synths', 'rolling hi-hats', '140 bpm'])
+    목: STYLE_BASE.concat(['funky bounce', 'rubbery synth bass', 'talkbox-style synth lead', 'crisp handclaps', '100 bpm']),
+    화: STYLE_BASE.concat(['west coast groove', 'bouncy funk bassline', 'warm analog synth stabs', 'punchy claps', '102 bpm']),
+    토: STYLE_BASE.concat(['afroswing', 'amapiano log drums', 'smooth rolling bassline', 'sunny summer vibe', '108 bpm']),
+    금: STYLE_BASE.concat(['jazzy hip hop groove', 'live slap bass', 'smooth rhodes chords', 'tight swung snares', '96 bpm']),
+    수: STYLE_BASE.concat(['r&b-infused melodic rap', 'neo-soul chords', 'silky layered vocals', 'smooth bass groove', '94 bpm'])
   };
-  var NEG_STYLE = ['explicit lyrics', 'screaming', 'harsh noise', 'phonk', 'trap metal', 'slow ballad', 'sad mood', 'lo-fi', 'boom bap', 'acoustic ballad', 'dark gloomy', 'comedic novelty song', 'dated 2000s sound'];
+  var NEG_STYLE = ['explicit lyrics', 'screaming', 'harsh noise', 'phonk', 'trap metal', 'rage', 'slow ballad', 'sad mood', 'lo-fi', 'acoustic ballad', 'dark gloomy', 'comedic novelty song', 'dated 2000s sound', 'stiff robotic rhythm'];
   var COLOR = { 목: '초록빛', 화: '붉은빛', 토: '노란빛', 금: '하얀빛', 수: '푸른빛' };
 
   function hash(s) { var h = 5381; s = String(s); for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return h; }
@@ -489,9 +491,9 @@
   function compose(sd, topic, extra) { var x = inputsOf(sd, topic, extra); return x ? fromInputs(x) : null; }
 
   /* 일레븐랩스 음악 API(music_v2 / music_v2_5) composition_plan(chunks) 모양 — 구간마다 길이(duration_ms)를 지정해 패널·자막 시점이 정확히 맞는다 */
-  var LOCAL = { intro: ['atmospheric hype intro', 'chopped vocal sample', 'riser build-up into the drop', 'ad-libs'], verse1: ['confident rap verse', 'clear korean rap vocals', 'rhythmic triplet flow', 'tight in-the-pocket delivery', 'full drums'],
-    hook: ['big catchy chorus', 'earworm chant hook', 'stacked vocal harmonies', 'english tag line', 'full energetic beat'], verse2: ['driving rap verse', 'clear korean rap vocals', 'cadence switch-ups', 'double-time flow', 'energy rising'],
-    hook2: ['big catchy chorus', 'earworm chant hook', 'stacked vocal harmonies', 'english tag line', 'full energetic beat', 'extra energy'], bridge: ['beat switch', 'half-time drums', 'melodic auto-tuned rap', 'build-up back into the beat'], outro: ['energetic outro', 'beat ride-out', 'ad-libs', 'clean ending'] };
+  var LOCAL = { intro: ['groovy intro with bass and keys', 'filtered groove opening up', 'ad-libs'], verse1: ['confident rap verse', 'clear korean rap vocals', 'riding the groove', 'syncopated in-the-pocket flow', 'full groove'],
+    hook: ['big catchy chorus', 'groovy sing-along hook', 'soulful vocal harmonies', 'english tag line', 'full groove with bass'], verse2: ['rap verse with rising energy', 'clear korean rap vocals', 'bouncy flow', 'cadence switch-ups', 'groove building'],
+    hook2: ['big catchy chorus', 'groovy sing-along hook', 'soulful vocal harmonies', 'english tag line', 'full groove with bass', 'extra energy'], bridge: ['stripped-down groove', 'bass and keys breakdown', 'soulful melodic rap', 'drums back in'], outro: ['groove ride-out', 'smooth fade of the band', 'ad-libs', 'clean ending'] };
   function toElevenPlan(song) {
     return { chunks: song.sections.map(function (s) {
       return { text: s.tag + '\n' + s.lines.join('\n'), duration_ms: s.durationMs, positive_styles: song.style.concat(LOCAL[s.id] || []), negative_styles: song.negativeStyle.slice() };

@@ -8,7 +8,7 @@
 (function () {
   'use strict';
   var pw = '', root = null, D = null, busy = false, stop = false, ERR = {};   // ERR: 칸별 마지막 그림 생성 실패 이유(이 화면에서만)
-  var S = { topic: 'self', gender: 'F', day: '', sim: { year: 1992, month: 6, day: 23, hour: 14, minute: 0, gender: 'F' }, simTopic: 'self' };
+  var S = { topic: 'self', gender: 'F', day: '', sim: { year: 1992, month: 6, day: 23, hour: 14, minute: 0, gender: 'F' }, simTopic: 'self', rScope: 'topic', rVid: true, rMax: 30 };
   var L = function () { return window.ReportV2 && window.ReportV2.MusicVideoLyrics; };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var $ = function (s) { return root.querySelector(s); };
@@ -63,8 +63,15 @@
       '<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">' + daySel + gtabs + '</div>' +
       (hero ? '<p style="margin:0 0 8px">주인공: <b>' + (S.gender === 'F' ? '여성' : '남성') + ' 래퍼 + 수호 동물 ' + esc(hero.animalKo) + '</b>(' + esc(hero.colorKo) + ' 빛) · 크루 상징 ' + esc(hero.crewKo.join('·')) + ' · 연애운 짝 상징 ' + esc(hero.partnerKo) + '</p>' : '') +
       '<div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:10px">' + tabs + '</div>' +
-      '<div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center"><button class="btn" id="mvpFill"' + (busy ? ' disabled' : '') + '>이 주제 빈 칸 모두 만들기</button><button class="btn" id="mvpStop"' + (busy ? '' : ' disabled') + '>멈추기</button>' +
-      '<input id="mvpExtra" placeholder="추가 요청(선택) — 예: 비 오는 밤 분위기" style="flex:1;min-width:200px"></div>' + grid + '</div>';
+      '<div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center"><button class="btn" id="mvpEvery" style="outline:2px solid #E07A6E;font-weight:600"' + (busy ? ' disabled' : '') + '>전체 일주·남녀·전 주제 일괄 만들기(빈 칸 + 옛 그림)</button><button class="btn" id="mvpAll30" style="outline:2px solid #C9A25C;font-weight:600"' + (busy ? ' disabled' : '') + '>종합풀이~신년운세 30칸 한 번에 만들기</button><button class="btn" id="mvpFill"' + (busy ? ' disabled' : '') + '>이 주제 빈 칸 모두 만들기</button><button class="btn" id="mvpStop"' + (busy ? '' : ' disabled') + '>멈추기</button>' +
+      '<input id="mvpExtra" placeholder="추가 요청(선택) — 예: 비 오는 밤 분위기" style="flex:1;min-width:200px"></div>' +
+      // 일괄 다시 만들기(2026-11-20): 지금 지시문 판보다 옛 그림(직접 올린 그림 제외)만 골라 새로 만든다
+      '<div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;padding:8px;border:1px solid rgba(201,162,92,.45);border-radius:8px"><b>옛 그림 일괄 다시 만들기</b>' +
+      '<select id="mvpRScope">' + [['topic', '이 주제 6칸'], ['day', '이 일주·성별 30칸'], ['all', '전체(만들어진 칸 모두)']].map(function (o) { return '<option value="' + o[0] + '"' + (S.rScope === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' +
+      '<label><input type="checkbox" id="mvpRVid"' + (S.rVid ? ' checked' : '') + (c.video ? '' : ' disabled') + '> 영상이 있던 칸은 영상도 새로</label>' +
+      '<label>한 번에 최대 <input type="number" id="mvpRMax" min="1" max="3600" value="' + esc(S.rMax) + '" style="width:64px">장</label>' +
+      '<button class="btn" id="mvpRegen"' + (busy ? ' disabled' : '') + '>옛 그림 다시 만들기</button>' +
+      '<span class="muted" style="font-size:12px">“한 번에 최대” 수는 이 줄의 버튼과 위의 전체 일괄 버튼에 함께 쓰입니다. 직접 올린 그림은 건드리지 않습니다. 멈추기로 중간에 멈출 수 있고, 다시 누르면 남은 칸부터 이어서 합니다.</span></div>' + grid + '</div>';
 
     // 가사 미리보기·테스트 재생
     var sm = S.sim;
@@ -113,6 +120,12 @@
         .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) return toast(d.error || '바꾸지 못했습니다', true); load().then(function () { toast(v ? '뮤직비디오를 켰습니다(약 1분 안에 반영)' : '뮤직비디오를 껐습니다'); }); }); });
     };
     $('#mvpFill').onclick = fillAll; $('#mvpStop').onclick = function () { stop = true; };
+    $('#mvpRScope').onchange = function () { S.rScope = this.value; };
+    $('#mvpRVid').onchange = function () { S.rVid = this.checked; };
+    $('#mvpRMax').onchange = function () { S.rMax = Math.max(1, Math.min(3600, parseInt(this.value, 10) || 30)); this.value = S.rMax; };
+    $('#mvpRegen').onclick = function () { regenAll(S.rScope, false); };
+    $('#mvpAll30').onclick = function () { regenAll('day', true); };
+    $('#mvpEvery').onclick = function () { regenAll('all', true); };
     $('#mvpPlay').onclick = function () {
       var MV = window.ReportV2.MusicVideo; if (!MV) return toast('플레이어(music-video.js)를 불러오지 못했습니다', true);
       if (!confirm('관리자 권한으로 실제 노래를 만듭니다(처음이면 일레븐랩스 비용 1곡, 같은 사주·주제는 캐시). 진행할까요?')) return;
@@ -141,11 +154,11 @@
       toast(slot + ' 영상 만드는 중…'); if (keep && root && document.body.contains(root)) setTimeout(function () { checkVideo(slot, true); }, 15000);
     });
   }
-  function gen(slot) {
+  function gen(slot, regenVideo) {
     toast(slot + ' 만드는 중… (한 장에 20~60초)');
     var extra = ($('#mvpExtra') && $('#mvpExtra').value || '').trim();
-    return call('POST', '', { panel: { slot: slot, generate: true, extra: extra || undefined } }).then(function (d) {
-      if (d.panels) { mergeP(d.panels); delete ERR[slot]; toast(slot + ' 완료'); return true; }
+    return call('POST', '', { panel: { slot: slot, generate: true, extra: extra || undefined, regenVideo: regenVideo || undefined } }).then(function (d) {
+      if (d.panels) { mergeP(d.panels); delete ERR[slot]; toast(slot + ' 완료'); return d.videoPending ? 'video' : true; }
       ERR[slot] = String(d.error || ('HTTP ' + d._s)); toast(slot + ' 실패: ' + ERR[slot], true); return false;   // 실패 이유는 그 칸 아래에 남는다
     });
   }
@@ -158,6 +171,64 @@
       if (stop || !todo.length) { busy = false; draw(); var failed = Object.keys(ERR).length; toast((stop ? '멈춤 — ' : '끝 — ') + done + '장 만들었습니다' + (failed ? ' · 실패 ' + failed + '장(칸 아래 빨간 글씨에 이유)' : ''), failed > 0); return; }
       gen(todo.shift()).then(function (ok) { if (ok) done++; next(); });
     })();
+  }
+  /* 옛 그림 일괄 다시 만들기: 범위(이 주제·이 일주·성별·전체)에서 지금 지시문 판(promptV)보다 옛 그림만 골라 두 장씩 동시에 새로 만든다.
+     영상이 붙어 있던 칸은(선택 시) 서버가 새 그림으로 Kling 영상도 다시 맡긴다(영상 하루 상한 안에서). 끝나면 맡긴 영상을 15초마다 확인해 붙인다 */
+  function curV() { return (D && D.promptV) || 3; }
+  function collectOld(scope, withEmpty) {
+    var lib = L(), panels = (D && D.panels) || {};
+    if (scope !== 'all') {
+      var topics = scope === 'topic' ? [S.topic] : lib.TOPICS, out = [];
+      topics.forEach(function (t) { lib.panelSlots(t, S.gender, S.day).forEach(function (s) { var p = panels[s.id]; if (!p ? withEmpty : (p.by !== 'upload' && !(p.pv >= curV()))) out.push({ id: s.id, video: !!(p && p.video), empty: !p }); }); });
+      return Promise.resolve(out);
+    }
+    var all = [], seen = {};
+    return (function page(cursor) {
+      return call('GET', '?admin=1&scan=old' + (cursor ? '&cursor=' + encodeURIComponent(cursor) : '')).then(function (d) {
+        if (d._s !== 200) throw new Error(d.error || ('목록을 불러오지 못했습니다(HTTP ' + d._s + ')'));
+        (d.items || []).forEach(function (it) { seen[it.id] = 1; if (!it.upload && !(it.pv >= (d.promptV || curV()))) all.push({ id: it.id, video: !!it.video }); });
+        toast('만들어진 칸 훑는 중… 옛 그림 ' + all.length + '장');
+        if (d.cursor && !stop) return page(d.cursor);
+        if (!withEmpty) return all;
+        // 빈 칸: 일주 순서대로(갑자 여·남, 을축 여·남 …), 주제는 종합풀이 → 신년운세. 옛 그림은 맨 앞에(이미 보이는 칸부터 새로)
+        var empty = [];
+        lib.DAYS.forEach(function (day) { lib.GENDERS.forEach(function (g) { lib.TOPICS.forEach(function (t) { lib.panelSlots(t, g, day).forEach(function (sl) { if (!seen[sl.id]) empty.push({ id: sl.id, video: false, empty: true }); }); }); }); });
+        return all.concat(empty);
+      });
+    })('');
+  }
+  function regenAll(scope, withEmpty) {
+    if (busy) return;
+    var lib = L(), max = withEmpty && scope === 'day' ? 30 : S.rMax, withVid = S.rVid && !!(D && D.configured && D.configured.video);
+    var label = scope === 'topic' ? lib.GENDER_KO[S.gender] + ' 사주 · ' + S.day + ' · ' + lib.TOPIC_KO[S.topic] : scope === 'day' ? lib.GENDER_KO[S.gender] + ' 사주 · ' + S.day + ' 종합풀이~신년운세 30칸' : withEmpty ? '전체 일주(60)·남녀·전 주제 3,600칸' : '전체 칸';
+    busy = true; stop = false; draw();
+    collectOld(scope, withEmpty).then(function (list) {
+      busy = false; draw();
+      if (!list.length) return toast(label + (withEmpty ? ': 빈 칸도 옛 그림도 없습니다 — 모두 새 지시문 그림입니다' : ': 옛 그림이 없습니다'));
+      var todo = list.slice(0, max), vids = todo.filter(function (x) { return x.video; }).length, empties = todo.filter(function (x) { return x.empty; }).length;
+      var vLeft = D ? Math.max(0, D.videoLimit - D.videoToday) : 0;
+      if (!confirm(label + '에서 ' + (withEmpty ? '빈 칸 ' + list.filter(function (x) { return x.empty; }).length + '장 · 옛 그림 ' + list.filter(function (x) { return !x.empty; }).length + '장을 찾았습니다.' : '옛 그림 ' + list.length + '장을 찾았습니다.') + '\n이번에 ' + todo.length + '장을 새 지시문(사람 주인공 + 수호 동물)으로 차례로 만듭니다(이미지 생성 비용, 한 장 20~60초, 두 장씩 동시에 — 약 ' + Math.max(1, Math.round(todo.length * 20 / 60)) + '분).' +
+        (list.length > todo.length ? '\n남은 ' + (list.length - todo.length) + '장은 “한 번에 최대” 수를 늘리거나 버튼을 다시 누르면 이어서 만듭니다(이미 새로 만든 칸은 건너뜀).' : '') +
+        (scope === 'all' ? '\n이 창을 열어 둔 동안만 진행됩니다.' : '') +
+        (withVid && vids ? '\n그중 영상이 있던 ' + vids + '칸은 Kling 영상도 새로 맡깁니다(영상 비용, 오늘 남은 영상 ' + vLeft + '편 — 넘으면 그림만 바뀌고 옛 영상은 빠집니다).' : vids ? '\n영상이 있던 ' + vids + '칸은 옛 영상이 빠지고 그림만 남습니다.' : '') +
+        '\n진행할까요?')) return;
+      busy = true; stop = false; ERR = {}; draw();
+      var done = 0, queued = [], left = todo.length, running = 0;
+      function finish() {
+        busy = false; var failed = Object.keys(ERR).length;
+        load().then(function () {
+          toast((stop ? '멈춤 — ' : '끝 — ') + done + '장 만들었습니다' + (queued.length ? ' · 영상 ' + queued.length + '편 만드는 중(끝나면 자동으로 붙음)' : '') + (failed ? ' · 실패 ' + failed + '장: ' + Object.keys(ERR).slice(0, 3).map(function (k) { return k + ' ' + ERR[k]; }).join(' / ') : ''), failed > 0);
+          D.vtasks = (D.vtasks || []).concat(queued);
+          queued.forEach(function (id, i) { setTimeout(function () { checkVideo(id, true); }, 20000 + i * 3000); });
+        });
+      }
+      function next() {
+        if (stop || !todo.length) { if (!running) finish(); return; }
+        var it = todo.shift(); running++;
+        gen(it.id, withVid && it.video).then(function (r) { running--; left--; if (r) done++; if (r === 'video') queued.push(it.id); toast('만드는 중… ' + done + '장 완료 · 남은 ' + left + '장'); next(); });
+      }
+      next(); next();   // 두 장씩 동시에
+    }).catch(function (e) { busy = false; draw(); toast(e.message, true); });
   }
   function upload(slot, file) {
     if (!file) return; if (file.size > 15 * 1024 * 1024) return toast('15MB 이하 이미지만 올릴 수 있습니다', true);

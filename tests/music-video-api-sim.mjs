@@ -105,6 +105,19 @@ env.KLING_API_KEY = 'kling-test'; let kling = 0, klingBody = '';
   assert(r2.has(vurl.split('k=')[1]) && !r2.has('a1b2c3d4.jpg'), '영상 저장·시작 프레임 정리');
   r = await call('GET', '/api/music-video?admin=1&day=' + encodeURIComponent('병인') + '&g=M', null, admin); assert.equal(r.j.panels['mv-wealth-hook-byeong-in-m'].video, vurl);
   r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-byeong-in-m', generate: true } }, admin); assert(!r.j.panels['mv-wealth-hook-byeong-in-m'].video && !r2.has(vurl.split('k=')[1]), '이미지 바꾸면 옛 영상 지움');
+  // 10-3b) 일괄 다시 만들기: 만들어진 칸 훑기(옛 판·올린 그림·영상 여부, 50개씩) + 영상 있던 옛 칸은 새 그림으로 영상도 다시 맡김
+  { KV.list = async ({ prefix, cursor, limit }) => { const ks = [...kv.keys()].filter(k => k.startsWith(prefix)).sort(), st = cursor ? +cursor : 0, page = ks.slice(st, st + limit); return { keys: page.map(name => ({ name })), list_complete: st + limit >= ks.length, cursor: String(st + limit) }; };
+    kv.set('mv:panel:mv-hook-gap-ja-m', JSON.stringify({ url: '/api/clipfile?k=mvpanel-old-a.png', by: 'gemini:x', pv: 2, video: '/api/clipfile?k=mvvid-old-a.mp4' }));
+    kv.set('mv:panel:mv-career-outro-gap-ja-m', JSON.stringify({ url: '/api/clipfile?k=mvpanel-up.png', by: 'upload' }));
+    kv.set('mv:panel:mv-bad-slot', JSON.stringify({ url: '/api/clipfile?k=x.png' }));
+    r = await call('GET', '/api/music-video?admin=1&scan=old'); assert.equal(r.status, 401);
+    r = await call('GET', '/api/music-video?admin=1&scan=old', null, admin); assert.equal(r.status, 200); assert.equal(r.j.promptV, 3);
+    { const by = Object.fromEntries(r.j.items.map(x => [x.id, x])); assert.deepEqual(by['mv-hook-gap-ja-m'], { id: 'mv-hook-gap-ja-m', pv: 2, upload: false, video: true }); assert.equal(by['mv-career-outro-gap-ja-m'].upload, true); assert(!by['mv-bad-slot'], '칸 이름이 틀린 키는 뺌'); assert.equal(by['mv-wealth-hook-byeong-in-m'].pv, 3); }
+    const k0 = kling; r = await call('POST', '/api/music-video', { panel: { slot: 'mv-hook-gap-ja-m', generate: true, regenVideo: true } }, admin); assert.equal(r.status, 200, JSON.stringify(r.j));
+    assert.equal(r.j.videoPending, true, '영상 있던 옛 칸은 영상도 다시 맡김'); assert(kling > k0 && /Korean male rapper/.test(klingBody)); assert.equal(r.j.panels['mv-hook-gap-ja-m'].pv, 3); assert(!r.j.panels['mv-hook-gap-ja-m'].video, '옛 영상은 빠짐');
+    assert(kv.get('mv:vt:mv-hook-gap-ja-m'), '영상 작업 기록');
+    const k1 = kling; r = await call('POST', '/api/music-video', { panel: { slot: 'mv-wealth-hook-byeong-in-m', generate: true, regenVideo: true } }, admin); assert.equal(r.status, 200); assert.equal(kling, k1, '영상 없던 칸은 영상 안 맡김'); assert(!('videoPending' in r.j));
+    for (const k of ['mv:panel:mv-hook-gap-ja-m', 'mv:panel:mv-career-outro-gap-ja-m', 'mv:panel:mv-bad-slot', 'mv:vt:mv-hook-gap-ja-m']) kv.delete(k); delete KV.list; }
   R2.head = head0; globalThis.fetch = f0; delete env.KLING_API_KEY; }
 // 10-4) music_v2_5 가 4xx 로 거절되면 music_v1(sections 형식)으로 한 번 더 — 성공하면 그 곡을 쓴다
 { const f0 = globalThis.fetch, models = []; globalThis.fetch = async (u, o) => { if (String(u).startsWith('https://api.elevenlabs.io/')) { const b = JSON.parse(o.body); models.push(b.model_id);

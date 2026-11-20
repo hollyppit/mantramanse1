@@ -30,8 +30,8 @@ for (let n = 0; n < 400; n++) {
   assert.equal(L.bannedIn(s.lyrics).length, 0);
   assert.equal(L.fromInputs(L.inputsOf(sd)).lyrics, s.lyrics, '같은 입력이면 같은 곡');
   assert(!s.lyrics.includes(sd.birth.solarY + '년') || sd.birth.solarY === s.inputs.year, '생년이 가사에 들어감');
-  // 기본 비트: 신나는 최신 K-힙합(느린 발라드·로파이·우울한 분위기는 빼기), 오행마다 장르 색깔이 다름
-  assert(s.style.includes('upbeat') && s.style.includes('trendy modern k-hip hop') && /\d{3} bpm/.test(s.style.join(' ')) && +s.style.join(' ').match(/(\d{3}) bpm/)[1] >= 105);
+  // 기본 비트: 그루비한 최신 K-힙합(94~108bpm 바운스, 느린 발라드·로파이·우울한 분위기는 빼기), 오행마다 그루브 색깔이 다름
+  assert(s.style.includes('upbeat') && s.style.includes('trendy modern k-hip hop') && /\d{2,3} bpm/.test(s.style.join(' ')) && +s.style.join(' ').match(/(\d{2,3}) bpm/)[1] >= 90 && s.style.includes('groovy'));
   for (const neg of ['slow ballad', 'lo-fi', 'sad mood']) assert(s.negativeStyle.includes(neg));
   const plan = L.toElevenPlan(s); assert.equal(plan.chunks.length, 7); assert.equal(plan.chunks.reduce((a, c) => a + c.duration_ms, 0), 180000);
   for (const c of plan.chunks) { assert(c.text.split('\n').length <= 31); for (const l of c.text.split('\n')) assert(l.length <= 200); assert(c.positive_styles.length > 0); assert(c.duration_ms >= 3000 && c.duration_ms <= 120000); }

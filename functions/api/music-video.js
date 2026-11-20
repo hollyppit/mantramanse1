@@ -190,6 +190,17 @@ export async function onRequestGet({ request, env }) {
   if (u.searchParams.get('vt')) { if (!isAdmin(request, env)) return json({ error: 'unauthorized' }, 401); if (!L.parsePanelId(u.searchParams.get('vt'))) return json({ error: 'bad-slot' }, 400); return videoCheck(env, u.searchParams.get('vt')); }
   if (u.searchParams.get('admin')) {
     if (!isAdmin(request, env)) return json({ error: 'unauthorized' }, 401);
+    // 일괄 다시 만들기(2026-11-20): 만들어진 칸 전체를 50개씩 훑어 지시문 판(pv)·올린 그림·영상 여부를 준다 → 관리자 화면이 옛 판 그림만 골라 다시 만든다
+    if (u.searchParams.get('scan') === 'old') {
+      if (typeof env.GLOSSARY_KV.list !== 'function') return json({ error: 'KV 목록 조회를 쓸 수 없습니다' }, 501);
+      const l = await env.GLOSSARY_KV.list({ prefix: 'mv:panel:', cursor: u.searchParams.get('cursor') || undefined, limit: 50 });
+      const items = (await Promise.all((l.keys || []).map(async k => {
+        const id = k.name.slice(9); if (!L.parsePanelId(id)) return null;
+        let v = null; try { v = await env.GLOSSARY_KV.get(k.name, 'json'); } catch { }
+        return v && v.url ? { id, pv: v.pv || 0, upload: v.by === 'upload', video: !!v.video } : null;
+      }))).filter(Boolean);
+      return json({ items, cursor: l.list_complete ? null : l.cursor, promptV: PANEL_PROMPT_V });
+    }
     // 관리자 화면은 일주·성별 하나씩 본다: 그 일주·성별의 주제 5 × 구간 6 = 30칸
     const day = L.DAYS.includes(u.searchParams.get('day')) ? u.searchParams.get('day') : L.DAYS[0], gd = u.searchParams.get('g') === 'M' ? 'M' : 'F';
     const ids = L.TOPICS.flatMap(t => L.panelSlots(t, gd, day).map(s => s.id));
@@ -443,7 +454,10 @@ async function panelPost(request, env, p) {
   if (p.generate) {
     if (!env.CLIPS_R2) return json({ error: 'R2 바인딩(CLIPS_R2)이 없습니다' }, 501);
     let rec; try { rec = await makePanel(env, slot, p.extra, p.provider, old ? rid() : ''); } catch (e) { return json({ error: e.message, slot: slot.id }, 502); }
-    await dropOld(); return done(rec);
+    await dropOld();
+    // 일괄 다시 만들기: 옛 그림에 영상이 붙어 있던 칸은 새 그림으로 Kling 영상도 다시 맡긴다(영상 하루 상한 안에서)
+    if (p.regenVideo && old && old.video) { const videoPending = await autoVideo(env, new URL(request.url).origin, slot, rec); return json({ ok: true, panels: { [slot.id]: rec }, videoPending }); }
+    return done(rec);
   }
   if (p.video) {
     // 시작 프레임: 관리자 화면이 칸 이미지를 JPEG 로 바꿔 /api/clipfile 로 올린 임시 파일 키(작업이 끝나거나 실패하면 지운다)
