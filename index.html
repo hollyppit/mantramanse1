@@ -10398,13 +10398,13 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     document.body.appendChild(bg);
   }
   // 내용이 든 카드들을 A4 폭(714px) 스테이지에 복제한다. SVG는 CSS 변수가 풀리지 않으므로 계산된 값을 인라인으로 박아 둔다.
-  function xpStage(tabLabel) {
+  function xpStage(tabLabel, cards) {
     const stage = document.createElement('div'); stage.className = 'wrap xs';
     const tmp = document.createElement('div'); tmp.innerHTML = whoLine();
     const head = document.createElement('div'); head.className = 'xs-head';
     head.innerHTML = `<b>만트라 만세력 · ${esc(tabLabel)}</b><span>${esc(tmp.textContent)}</span><span>${new Date().toLocaleDateString('ko-KR')} 출력</span>`;
     stage.appendChild(head);
-    document.querySelectorAll('main.wrap > section.card, main.wrap > p.note').forEach(el => { if (!el.classList.contains('form')) stage.appendChild(el.cloneNode(true)); });
+    (cards || xpCards()).forEach(el => stage.appendChild(el.cloneNode(true)));
     document.body.appendChild(stage);
     stage.querySelectorAll('svg').forEach(svg => {
       if (+svg.getAttribute('width') > 660) { svg.style.width = '100%'; svg.style.height = 'auto'; }
@@ -10423,9 +10423,8 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     });
     stage.querySelectorAll('.tip').forEach(e => e.remove());
     // 2026-11-21: html2canvas 는 <details> 의 접힘을 모른다 — 접힌 상자의 숨은 내용을 높이 0 자리에 겹쳐 그리고 summary 앞에 번호(1. 2.)를 붙인다.
-    // 그래서 화면 그대로: 접힌 상자는 빼고, 펼친 상자는 일반 블록(div)으로 바꿔 그린다. 안쪽부터 처리해야 겹친 상자도 맞게 풀린다.
+    // 2026-11-21 사용자 요청: 내담자가 PDF 한 부로 모두 읽을 수 있도록 접힌 상자까지 모두 펼쳐 일반 블록(div)으로 바꿔 그린다. 안쪽부터 처리해야 겹친 상자도 맞게 풀린다.
     [...stage.querySelectorAll('details')].reverse().forEach(d => {
-      if (!d.open) { d.remove(); return; }
       const box = document.createElement('div'); box.className = d.className; box.classList.add('xs-det');
       [...d.childNodes].forEach(n => {
         if (n.nodeType === 1 && n.tagName === 'SUMMARY') { const s = document.createElement('div'); s.className = (n.className ? n.className + ' ' : '') + 'xs-sum'; s.innerHTML = n.innerHTML; box.appendChild(s); }
@@ -10445,7 +10444,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return stage;
   }
   // 쪽 나눔에서 자르면 안 되는 세로 구간(카드 위 기준 CSS px).
-  //  hard: 글줄 하나하나, 그림(svg·img·canvas), 표 행, 좁은 상자(카드 폭 60% 미만: 타일·칩·묶음, 높이 600px 이하), 제목과 바로 뒤 첫 줄
+  //  hard: 글줄 하나하나, 그림(svg·img·canvas), 표 행, 좁은 상자(카드 폭 60% 미만: 타일·칩·묶음, 높이 380px 이하), 700px 이하 표(table)와 세 칸 이상 격자 표, 제목과 바로 뒤 첫 줄
   //  soft: 넓은 강조 상자(배경·테두리, 높이 360px 이하) — 될 수 있으면 통째로 두되, 그러면 쪽이 너무 비면 줄 사이에서 나눈다
   function xpKeepOut(el) {
     const box = el.getBoundingClientRect(), top = box.top, hard = [], soft = [];
@@ -10454,12 +10453,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     for (let n = tw.nextNode(); n; n = tw.nextNode()) { rg.selectNodeContents(n); [...rg.getClientRects()].forEach(r => add(hard, r)); }
     el.querySelectorAll('*').forEach(e => {
       const r = e.getBoundingClientRect(); if (!r.height) return;
-      if (/^(svg|img|canvas|tr)$/i.test(e.tagName)) return add(hard, r);
+      if (/^(svg|img|canvas|tr)$/i.test(e.tagName) || (e.tagName === 'TABLE' && r.height <= 700)) return add(hard, r);
       if (/^H[2-5]$/.test(e.tagName) || e.classList.contains('card-h') || e.classList.contains('xs-sum')) return add(hard, r, 44);
       const cs = getComputedStyle(e), bg = cs.backgroundColor;
+      // 세 칸 이상인 격자 표(원국 표·달력 등)는 머리줄과 떨어지지 않게 통째로(700px 이하)
+      if (cs.display === 'grid' && r.height <= 700 && cs.gridTemplateColumns.split(' ').filter(Boolean).length >= 3 && e.children.length >= 6 && r.width >= box.width * 0.6) return add(hard, r);
       const visual = (bg && bg !== 'transparent' && !/rgba\(\d+, \d+, \d+, 0\)/.test(bg)) || parseFloat(cs.borderTopWidth) > 0 || parseFloat(cs.borderLeftWidth) > 0 || cs.backgroundImage !== 'none';
       if (!visual) return;
-      if (r.width < box.width * 0.6) { if (r.height <= 600) add(hard, r); }
+      if (r.width < box.width * 0.6) { if (r.height <= 380) add(hard, r); }
       else if (r.height <= 360) add(soft, r);
     });
     const by = (x, y) => x[0] - y[0];
@@ -10471,9 +10472,29 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     while (moved && y > lo) { moved = false; for (const [a, b] of iv) if (a < y && y < b) { y = a; moved = true; } }
     return y > lo ? y : lo;
   }
+  const xpCards = () => [...document.querySelectorAll('main.wrap > section.card, main.wrap > p.note')].filter(el => !el.classList.contains('form'));
+  // 운세 흐름 탭: 화면에서는 대운·세운·월운·일진 중 하나를 눌러야 상세가 열린다. PDF에는 지금 시점의 현재 대운 → 현재 세운 → 현재 월운 → 오늘 일진
+  // 상세를 모두 넣는다. 한 번에 하나씩 골라 다시 그린 뒤 카드마다 내용이 가장 많은 판을 쓰고, 끝나면 원래 선택으로 되돌린다.
+  function xpLuckCards() {
+    const ch = S.ch; if (!ch || S.tab !== 'luck') return null;
+    const keep = { sel: S.sel, selYear: S.selYear, selYM: S.selYM }, sx = window.scrollX, sy = window.scrollY;
+    try {
+      const du = M.daeunAt(ch, NOW), di = du ? ch.daeun.list.findIndex(x => x.startYear === du.startYear) : -1;
+      const curY = M.yearPillarAt(NOW).sajuYear, wm = M.wolun(ch, curY); let mi = 0; wm.forEach((m, i) => { if (m.startMs <= NOW) mi = i; });
+      const passes = [null, di >= 0 ? { kind: 'daeun', i: di } : null, { kind: 'seun', Y: curY }, { kind: 'wolun', i: mi }, { kind: 'ilun', d: TODAY[2] }].filter((p, i) => i === 0 || p);
+      let best = null;
+      passes.forEach(p => {
+        S.sel = p; S.selYear = curY; S.selYM = [TODAY[0], TODAY[1]]; render();
+        const cs = xpCards().map(el => el.cloneNode(true));
+        if (!best) best = cs; else if (cs.length === best.length) cs.forEach((c, i) => { if (c.textContent.length > best[i].textContent.length) best[i] = c; });
+      });
+      return best;
+    } catch (e) { return null; }
+    finally { S.sel = keep.sel; S.selYear = keep.selYear; S.selYM = keep.selYM; render(); window.scrollTo(sx, sy); }
+  }
   async function xpRender(tabLabel) {
     const PW = 794, PH = 1123, MX = 40, MT = 36, MB = 44, GAP = 12, SC = XP_MOBILE ? 1.5 : 2, UH = PH - MT - MB;
-    const stage = xpStage(tabLabel);
+    const stage = xpStage(tabLabel, xpLuckCards());
     try {
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
       // 2026-11-21: 자연스럽게 이어 읽히도록 — 카드를 통째로 다음 쪽으로 넘겨 빈 쪽을 만들지 않고, 남은 자리까지 채운 뒤
@@ -10492,8 +10513,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         while (sy < H - 0.5) {
           const rest = H - sy, room = UH - y;
           if (rest <= room) { cv.getContext('2d').drawImage(c, 0, sy * SC, c.width, rest * SC, MX * SC, (MT + y) * SC, c.width, rest * SC); y += rest + GAP; break; }
-          let cut = room >= MIN_ROOM ? xpSafeCut(keep.all, sy, sy + room) : sy;
-          if (room >= MIN_ROOM && cut - sy < room * 0.75) { const c2 = xpSafeCut(keep.hard, sy, sy + room); if (c2 > cut) cut = c2; } // 쪽이 많이 비면 넓은 상자는 줄 사이에서 나눈다
+          const lim = Math.min(sy + room, H - MIN_PIECE); // 다음 쪽에 아주 짧은 꼬리만 남지 않게, 꼬리를 최소 길이 이상 남기는 자리까지만 본다
+          let cut = room >= MIN_ROOM && lim > sy ? xpSafeCut(keep.all, sy, lim) : sy;
+          if (room >= MIN_ROOM && lim > sy && cut - sy < room * 0.75) { const c2 = xpSafeCut(keep.hard, sy, lim); if (c2 > cut) cut = c2; } // 쪽이 많이 비면 넓은 상자는 줄 사이에서 나눈다
           if (cut - sy < MIN_PIECE || H - cut < MIN_PIECE) cut = sy; // 너무 작은 조각은 만들지 않는다
           if (cut <= sy) { if (y > 0) { newPage(); continue; } cut = xpSafeCut(keep.hard, sy, sy + UH); if (cut - sy < UH * 0.5) cut = sy + UH; } // 빈 쪽인데도 안전한 자리가 없으면 그대로 자른다
           cv.getContext('2d').drawImage(c, 0, sy * SC, c.width, (cut - sy) * SC, MX * SC, (MT + y) * SC, c.width, (cut - sy) * SC);
