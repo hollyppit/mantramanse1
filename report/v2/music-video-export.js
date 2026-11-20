@@ -1,5 +1,5 @@
 /* 내 사주 뮤직비디오 → SNS 업로드용 MP4(세로 9:16, 1080×1920, 30fps, H.264 + AAC) — 브라우저 안에서 만든다(서버 비용 없음)
-   · 화면: 플레이어와 같은 패널(그림 또는 Kling 영상) + 천천히 확대(켄 번스) + 구간 바뀔 때 1초 겹쳐 넘기기 + 위아래 어둡게 + 제목 + 가사 자막 + 만트라 포춘 표시.
+   · 화면: 플레이어와 같은 패널(그림 또는 Kling 영상) + 천천히 확대(켄 번스) + 구간 바뀔 때 1초 겹쳐 넘기기 + SNS 안전 영역 배치(위쪽 띠에 색 상자 제목, 아래쪽 안전 경계 위에 글자 상자 가사, 오른쪽 버튼 자리 비움) + 만트라 포춘 표시.
    · 방법 ①(빠름): WebCodecs(VideoEncoder·AudioEncoder) + mp4-muxer — 실제 재생보다 빠르게 프레임을 하나씩 그려 인코딩한다.
      방법 ②(대신): ①이 안 되는 브라우저(일부 사파리 등)는 MediaRecorder 로 MP4 를 실시간 녹화한다(곡 길이만큼 걸림, 화면을 켜 둬야 함).
      둘 다 안 되면 지원하지 않는다고 알린다(웹엠 등 다른 형식은 만들지 않는다 — SNS 업로드용 MP4 로 통일).
@@ -10,7 +10,10 @@
   var R = root.ReportV2 = root.ReportV2 || {};
   var W = 1080, H = 1920, FPS = 30;
   var EL_BG = { 목: ['#17352a', '#3f7a52'], 화: ['#3a1416', '#a4462f'], 토: ['#33280f', '#9a7a3a'], 금: ['#25272c', '#8c929c'], 수: ['#0d1a2e', '#2f5d8c'] };
-  var BRAND = '만트라 포춘 · mantrafortune.com';
+  var BRAND = '만트라 포춘';
+  /* SNS 안전 영역(2026-11-21, 쇼츠·릴스·틱톡 공통): 위 260px 은 앱 머리줄, 아래 480px 은 설명·이름·음악 표시, 오른쪽 130px 은 좋아요·댓글 버튼이 덮는다.
+     글자는 모두 이 안쪽에 둔다 — 제목은 위쪽 안전 띠에 색 상자, 가사는 아래쪽 안전 경계 위에 글자 상자(쇼츠 자막 스타일). 그림은 화면 전체를 채운다. */
+  var SAFE = { top: 260, bottom: 1440, left: 90, right: 950 }, ACCENT = { 목: '#2f9e5f', 화: '#d64535', 토: '#c9922a', 금: '#5e6d82', 수: '#2f6fd6' };
 
   function fastOk() { return !!(root.VideoEncoder && root.AudioEncoder && root.VideoFrame && root.AudioData && root.Mp4Muxer); }
   function recMime() {
@@ -82,27 +85,34 @@
       var since = tMs - st.at, fade = Math.min(1, since / 1000);
       if (st.prev >= 0 && fade < 1) bg(st.prev, tMs - st.at + secs[st.prev].durationMs, 1, vidReady);
       bg(si, since, st.prev >= 0 ? fade : 1, vidReady);
-      // 위아래 어둡게(제목·자막이 잘 읽히게)
-      var g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, 'rgba(0,0,0,.6)'); g.addColorStop(0.2, 'rgba(0,0,0,0)'); g.addColorStop(0.5, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.85)');
+      /* 위쪽(제목 띠)과 아래쪽(가사 띠) 어둡게 — 글자 상자 뒤 그림이 너무 밝아도 읽히게 */
+      var g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, 'rgba(0,0,0,.72)'); g.addColorStop(0.3, 'rgba(0,0,0,.25)'); g.addColorStop(0.45, 'rgba(0,0,0,0)'); g.addColorStop(0.58, 'rgba(0,0,0,.15)'); g.addColorStop(0.76, 'rgba(0,0,0,.55)'); g.addColorStop(1, 'rgba(0,0,0,.35)');
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-      ctx.textBaseline = 'alphabetic'; ctx.shadowColor = 'rgba(0,0,0,.75)'; ctx.shadowBlur = 18;
-      // 제목
-      ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.font = '700 46px ' + ff;
-      wrap(ctx, song.title, W - 128).slice(0, 2).forEach(function (l, i) { ctx.fillText(l, 64, 132 + i * 58); });
-      ctx.globalAlpha = 0.78; ctx.font = '400 30px ' + ff; ctx.fillText('내 사주 뮤직비디오 · ' + (song.topicKo || '') + (song.optKo ? ' · ' + song.optKo : ''), 64, 132 + Math.min(2, wrap(ctx, song.title, W - 128).length) * 58 + 4); ctx.globalAlpha = 1;
-      // 구간 이름
-      ctx.textAlign = 'center'; ctx.font = '600 28px ' + ff;
-      var name = cue.section.name || '', nw = ctx.measureText(name).width + 48, cy = H - 600;
-      ctx.shadowBlur = 0; ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 2; ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(W / 2 - nw / 2, cy - 36, nw, 50, 25); else ctx.rect(W / 2 - nw / 2, cy - 36, nw, 50);
-      ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fillText(name, W / 2, cy); ctx.shadowBlur = 18;
-      // 가사(부르는 줄) + 다음 줄
-      ctx.fillStyle = '#fff'; ctx.font = '700 66px ' + ff;
-      var lines = wrap(ctx, cue.line || '', W - 140); lines.forEach(function (l, i) { ctx.fillText(l, W / 2, H - 470 + i * 86); });
-      var nx = cue.next != null ? cue.next : (cue.section.lines[cue.lineIndex + 1] || '');
-      if (nx) { ctx.globalAlpha = 0.6; ctx.font = '400 36px ' + ff; ctx.fillText(wrap(ctx, nx, W - 160)[0] || '', W / 2, H - 470 + Math.max(1, lines.length) * 86 + 20); ctx.globalAlpha = 1; }
-      // 만트라 포춘 표시
-      ctx.globalAlpha = 0.7; ctx.font = '500 28px ' + ff; ctx.fillText(BRAND, W / 2, H - 96); ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+      ctx.textBaseline = 'middle'; ctx.shadowBlur = 0;
+      var accent = ACCENT[(secs[0] && secs[0].el) || '토'] || ACCENT.토, cx = (SAFE.left + SAFE.right) / 2, maxW = SAFE.right - SAFE.left;
+      /* 글자 상자 하나(쇼츠 자막처럼 줄마다 꼭 맞는 상자) */
+      function box(text, x, y, font, fg, bg, padX, h, align) {
+        ctx.font = font; var w = ctx.measureText(text).width, left = align === 'left' ? x : x - w / 2 - padX;
+        ctx.fillStyle = bg; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(left, y - h / 2, w + padX * 2, h, 10); else ctx.rect(left, y - h / 2, w + padX * 2, h); ctx.fill();
+        ctx.fillStyle = fg; ctx.textAlign = 'left'; ctx.fillText(text, left + padX, y + 2);
+      }
+      /* 제목: 위쪽 안전 띠 시작점부터, 색 상자 위 흰 굵은 글씨(최대 2줄) + 작은 설명 줄 */
+      ctx.font = '800 64px ' + ff;
+      var tl = wrap(ctx, song.title, maxW - 44).slice(0, 2), ty = SAFE.top + 46;
+      tl.forEach(function (l, i) { box(l, SAFE.left, ty + i * 92, '800 64px ' + ff, '#fff', accent, 22, 84, 'left'); });
+      ctx.font = '600 30px ' + ff; ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.textAlign = 'left'; ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 10;
+      ctx.fillText(BRAND + ' · 내 사주 뮤직비디오 · ' + (song.topicKo || ''), SAFE.left + 4, ty + tl.length * 92 + 8);
+      if (song.optKo) { ctx.font = '500 26px ' + ff; ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.fillText(song.optKo, SAFE.left + 4, ty + tl.length * 92 + 50); }
+      ctx.shadowBlur = 0;
+      /* 가사: 아래쪽 안전 경계 위에 쌓는다(맨 아래 다음 줄 → 그 위 부르는 줄 → 그 위 구간 이름). 오른쪽 버튼 자리는 비운다 */
+      var size = 62; ctx.font = '800 ' + size + 'px ' + ff; var lines = wrap(ctx, cue.line || '', maxW - 40);
+      if (lines.length > 2) { size = 52; ctx.font = '800 ' + size + 'px ' + ff; lines = wrap(ctx, cue.line || '', maxW - 40); }
+      var lh = Math.round(size * 1.42), nx = cue.next != null ? cue.next : (cue.section.lines[cue.lineIndex + 1] || ''), y = SAFE.bottom - 30;
+      if (nx) { ctx.font = '500 34px ' + ff; ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(255,255,255,.72)'; ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 12; ctx.fillText(wrap(ctx, nx, maxW)[0] || '', cx, y); ctx.shadowBlur = 0; y -= 70; }
+      for (var li = lines.length - 1; li >= 0; li--) { box(lines[li], cx, y, '800 ' + size + 'px ' + ff, '#fff', 'rgba(0,0,0,.66)', 20, lh - 10, 'center'); y -= lh; }
+      var name = cue.section.name || '';
+      if (name) { box(name, cx, y - 6, '700 28px ' + ff, '#fff', accent, 18, 46, 'center'); }
       return si;
     };
   }
