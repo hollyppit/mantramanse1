@@ -10545,7 +10545,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const head = document.createElement('div'); head.className = 'xs-head';
     head.innerHTML = `<b>만트라 만세력 · ${esc(tabLabel)}</b><span>${esc(tmp.textContent)}</span><span>${new Date().toLocaleDateString('ko-KR')} 출력</span>`;
     stage.appendChild(head);
-    (cards || xpCards()).forEach(el => stage.appendChild(el.cloneNode(true)));
+    // PDF에서 통째로 빼는 카드(2026-11-21): 용신 탭 '용신 방향과 건물 풍수는 다릅니다'
+    const XP_DROP_CARD = /건물 풍수는 다릅니다/;
+    (cards || xpCards()).forEach(el => { const h = el.querySelector('h2'); if (h && XP_DROP_CARD.test(h.textContent)) return; stage.appendChild(el.cloneNode(true)); });
     document.body.appendChild(stage);
     stage.querySelectorAll('svg').forEach(svg => {
       if (+svg.getAttribute('width') > 660) { svg.style.width = '100%'; svg.style.height = 'auto'; }
