@@ -70,8 +70,8 @@ const MODES = Object.keys(T.modes);
   ok(ev.plain[1].body.includes(tdE.ev.stemTG) && !/기회|확장|수확|축적|방어운/.test(ev.plain[1].body) && ev.plain[0].body.includes(tdE.gz), '근거에 실제 일진·십신이 들어감(2026-11-20 — 6분류 이름 대신 십신)');
   ok(ev.pro.some(x => x.includes('일진')) && (tdE.ev.reasons.length === 0 || ev.pro.some(x => tdE.ev.reasons.includes(x))), '전문 해석은 엔진 reasons 그대로');
   // 관리자 override(일일)
-  const td0 = FC.todayData(M, chE, Date.UTC(2026, 9, 6, 3), Core.DAYMODE), o2 = FC.buildDaily(td0, { seed: 's', overrides: { daily: { act: { 축적기: ['커스텀 행동 하나', '커스텀 둘', '커스텀 셋'] }, cta: { life: { q: '질문?', btn: '버튼', to: '#/go?to=life' } } } } });
-  if (td0.phase === '축적기') ok(o2.todayActions.every(x => x.startsWith('커스텀')), '행동 override');
+  const td0 = FC.todayData(M, chE, Date.UTC(2026, 9, 6, 3), Core.DAYMODE), o2 = FC.buildDaily(td0, { seed: 's', overrides: { daily: { act: { [td0.tg]: ['커스텀 행동 하나', '커스텀 둘', '커스텀 셋'] }, cta: { life: { q: '질문?', btn: '버튼', to: '#/go?to=life' } } } } });
+  ok(td0.tg && o2.todayActions.every(x => x.startsWith('커스텀')), '행동 override(키 = 일진 천간 십신)');
   ok(o2.fields.money.detail.length >= 1, 'override 가 없는 경로는 기본 문구');
 
   console.log('3. /api/free-content 정리 규칙');

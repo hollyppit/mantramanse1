@@ -8,7 +8,7 @@
   var G = { ov: null, W: { tarot: { cards: {} }, daily: {} }, sub: 'tarot', sel: null, ori: 'up', cat: 'today', filter: 'all', q: '', dg: 'head', version: '' };
   var CATS = { today: '오늘', love: '연애', money: '재물', work: '일·사업', yesno: 'YES/NO' };
   var ARC = { all: '전체', M: '메이저', W: '완드', C: '컵', S: '소드', P: '펜타클' };
-  var PH = ['기회기', '확장기', '수확기', '축적기'], TONE = { go: '순풍', steady: '보통', care: '주의·부담' }, LVK = { high: '높음', mid: '무난', low: '낮음' };
+  var PH = ['비견', '겁재', '식신', '상관', '편재', '정재', '편관', '정관', '편인', '정인'], TONE = { go: '순풍', steady: '보통', care: '주의·부담' }, LVK = { high: '높음', mid: '무난', low: '낮음' };
   var clone = function (o) { return JSON.parse(JSON.stringify(o)); };
 
   var css = document.createElement('style');
@@ -117,7 +117,7 @@
   function setP(o, p, v) { for (var i = 0; i < p.length - 1; i++) o = o[p[i]] = o[p[i]] || {}; if (v) o[p[p.length - 1]] = v; else delete o[p[p.length - 1]]; }
   function dailyView() {
     var body = $('#fcBody'), g = G.dg, D = FC.DAILY_DEFAULTS;
-    var h = '<div class="card"><p class="muted" style="margin:0 0 6px">오늘의 운세의 문장 조각입니다. <b>점수·단계·등급은 엔진이 계산한 값</b>이고, 여기서는 그 등급(높음/무난/낮음)과 흐름(기회기·확장기·수확기·축적기)에 맞춰 보여 줄 문장만 관리합니다. 같은 칸에 여러 줄을 쓰면 날짜·사용자에 따라 고정으로 골라 쓰이고(같은 날 같은 사람은 같은 문장), 비워 두면 기본 문구입니다.</p>' +
+    var h = '<div class="card"><p class="muted" style="margin:0 0 6px">오늘의 운세의 문장 조각입니다. <b>점수·단계·등급은 엔진이 계산한 값</b>이고, 여기서는 그 등급(높음/무난/낮음)과 그날 일진 천간의 십신(비견~정인 10개)에 맞춰 보여 줄 문장만 관리합니다. 같은 칸에 여러 줄을 쓰면 날짜·사용자에 따라 고정으로 골라 쓰이고(같은 날 같은 사람은 같은 문장), 비워 두면 기본 문구입니다.</p>' +
       '<div class="fc-bar">' + Object.keys(GROUPS).map(function (k) { return '<button class="fc-chip' + (g === k ? ' on' : '') + '" data-g="' + k + '">' + GROUPS[k] + '</button>'; }).join('') + '</div>';
     if (g === 'cta') {
       h += '<p class="muted" style="font-size:.8rem">오늘 가장 두드러진 분야에 따라 하단에서 이어 줄 무료 콘텐츠입니다. 결제 화면으로 바로 보내지 않습니다.</p>' + ['work', 'money', 'love', 'life'].map(function (k) {
