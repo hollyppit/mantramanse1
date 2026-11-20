@@ -348,6 +348,7 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 #hub .fortune-panel .mc-bar span,#hub .fortune-panel .mc-bar small { position:absolute;top:calc(100% + 8px);font-size:11px;white-space:nowrap; }
 #hub .fortune-panel .mc-bar small { top:calc(100% + 24px);font-size:9px;color:#7f899e; }
 #hub .fortune-panel .mc-bar.active i { outline:2px solid #e5cea0;outline-offset:4px;opacity:1;box-shadow:0 0 22px #e5cea01a; }
+.flow-tg-bg { --flow:#78cddb; }.flow-tg-ss { --flow:#73d8ae; }.flow-tg-jc { --flow:#e7c46a; }.flow-tg-gw { --flow:#8da8f3; }.flow-tg-is { --flow:#b09aef; }
 .flow-opportunity { --flow:#73d8ae; }.flow-expansion { --flow:#78cddb; }.flow-harvest { --flow:#b09aef; }.flow-accumulation { --flow:#8da8f3; }
 .mc-legend { display:flex;gap:16px;flex-wrap:wrap;font-size:11px;margin:16px 0;color:#b7c1d2; }
 .mc-legend i { display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;background:var(--flow); }

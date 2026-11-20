@@ -101,6 +101,7 @@
 .tl-legend ul { list-style: none; padding: 0; margin: 6px 0; display: grid; gap: 4px; }
 .tl-legend li i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; background: var(--kc, var(--gold)); }
 .tl-legend p { margin-top: 6px; color: var(--ink3); }
+.k-tg-bg { --kc: #78CDDB; } .k-tg-ss { --kc: #7ED69A; } .k-tg-jc { --kc: #E3B341; } .k-tg-gw { --kc: #8DA8F3; } .k-tg-is { --kc: #B58CF0; } .k-tg-na { --kc: #9AA3AD; }
 .k-opportunity { --kc: #E3B341; } .k-expansion { --kc: #7ED69A; } .k-harvest { --kc: #E58AA8; } .k-accumulation { --kc: #6FD0D8; } .k-volatility { --kc: #B58CF0; } .k-defense { --kc: #D9694F; }
 .tl-c[class*="k-"] { border-bottom: 3px solid var(--kc, transparent); }
 

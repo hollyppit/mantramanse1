@@ -94,8 +94,8 @@ ok(G.every(x => ['기회기', '확장기', '수확기', '축적기'].includes(x.
 // 분포와 문구 점검
 const bandCnt = {}; evs.forEach(x => bandCnt[x.ev.volatilityBand] = (bandCnt[x.ev.volatilityBand] || 0) + 1);
 console.log('\n변동성 단계 분포:', V.bands.map(x => `${x[1]} ${((bandCnt[x[1]] || 0) / evs.length * 100).toFixed(0)}%`).join(' · '), `· 변동기 ${(chg.length / evs.length * 100).toFixed(0)}%`);
-const gl = html.split('\n').find(l => l.startsWith("  '변동기': ['운의 흐름'")) || '';
-ok(gl.includes('길흉을 의미하지 않으며'), '용어 사전: 변동기 정의에 "길흉을 의미하지 않으며"가 없음');
+const gl = html.split('\n').find(l => l.startsWith("  '변화 신호': ['운의 흐름'")) || '';
+ok(gl.includes('길흉을 의미하지 않으며'), '용어 사전: 변화 신호 정의에 "길흉을 의미하지 않으며"가 없음');
 for (const bad of ['흉운', '나쁜 일이 생기는', '손실이 발생', '반드시 이직', '반드시 이사', '반드시 이별']) ok(!gl.includes(bad), `용어 사전에 금지 표현 "${bad}"`);
 // 옛 단계 이름('전환기'·'전환일')이 값·라벨로 남았는지만 본다. 용어 설명의 일반 낱말("큰 전환기")은 단계 이름이 아니다
 ok(!/['"`]전환[기일]['"`]/.test(html), '단계 이름 "전환기"/"전환일"이 남아 있음');

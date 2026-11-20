@@ -67,7 +67,7 @@ const MODES = Object.keys(T.modes);
   ok(Object.keys(ctas).length >= 3, 'CTA 가 결과에 따라 달라진다');
   // 근거는 실제 엔진 값(관계 문장 번역 · 임의 창작 없음)
   const chE = mk(1990, 5, 15, 14, 'M'), tdE = FC.todayData(M, chE, Date.UTC(2026, 9, 6, 3), Core.DAYMODE), ev = FC.dailyEvidence(tdE);
-  ok(ev.plain[1].body.includes(String(tdE.phase).replace(/기$/, '운')) && ev.plain[0].body.includes(tdE.gz), '근거에 실제 일진·단계가 들어감(흐름 이름은 ~운으로 표시 — ac2dd8e)');
+  ok(ev.plain[1].body.includes(tdE.ev.stemTG) && !/기회|확장|수확|축적|방어운/.test(ev.plain[1].body) && ev.plain[0].body.includes(tdE.gz), '근거에 실제 일진·십신이 들어감(2026-11-20 — 6분류 이름 대신 십신)');
   ok(ev.pro.some(x => x.includes('일진')) && (tdE.ev.reasons.length === 0 || ev.pro.some(x => tdE.ev.reasons.includes(x))), '전문 해석은 엔진 reasons 그대로');
   // 관리자 override(일일)
   const td0 = FC.todayData(M, chE, Date.UTC(2026, 9, 6, 3), Core.DAYMODE), o2 = FC.buildDaily(td0, { seed: 's', overrides: { daily: { act: { 축적기: ['커스텀 행동 하나', '커스텀 둘', '커스텀 셋'] }, cta: { life: { q: '질문?', btn: '버튼', to: '#/go?to=life' } } } } });

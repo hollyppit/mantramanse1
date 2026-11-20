@@ -193,6 +193,7 @@ html.theme-mist .fortune-panel{
   border-color: var(--line); box-shadow: 0 18px 44px -24px rgba(40,62,72,.35), 0 1px 0 rgba(255,255,255,.9) inset; color: var(--ink);
   backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
 }
+html.theme-mist .flow-tg-bg{ --flow: #0E8F9A; } html.theme-mist .flow-tg-ss{ --flow: #16A34A; } html.theme-mist .flow-tg-jc{ --flow: #CA8A04; } html.theme-mist .flow-tg-gw{ --flow: #2563EB; } html.theme-mist .flow-tg-is{ --flow: #9333EA; }
 html.theme-mist .flow-opportunity{ --flow: #16A34A; }
 html.theme-mist .flow-expansion{ --flow: #F59E0B; }
 html.theme-mist .flow-harvest{ --flow: #9333EA; }
@@ -249,6 +250,7 @@ html.theme-mist #hub :is(.ddb h5, .actcard h5){ color: #8C6A35; }
 html.theme-mist{ --ink-2: #3F4A50; --ink-3: #56626A; --ink2: #3F4A50; --ink3: #56626A; --gold: #74561F; --gold-l: #74561F; --gold-d: #5E451A; }
 html.theme-mist #hub .kick, html.theme-mist .fortune-panel .kick{ color: #74561F; }
 /* 흐름 색: 막대·칸 물들임은 원색(--flow), 글자는 같은 색의 진한 단계(--flow-ink) */
+html.theme-mist .flow-tg-bg{ --flow-ink: #0F766E; } html.theme-mist .flow-tg-ss{ --flow-ink: #15803D; } html.theme-mist .flow-tg-jc{ --flow-ink: #A16207; } html.theme-mist .flow-tg-gw{ --flow-ink: #1D4ED8; } html.theme-mist .flow-tg-is{ --flow-ink: #7E22CE; }
 html.theme-mist .flow-opportunity{ --flow-ink: #15803D; }
 html.theme-mist .flow-expansion{ --flow-ink: #A04A06; }
 html.theme-mist .flow-harvest{ --flow-ink: #7E22CE; }
@@ -361,6 +363,7 @@ html.theme-mist #hub [style*="background:#E6EAF0" i]{ background: #94A3B8 !impor
 html.theme-mist #hub .tq .tq-eb i{ background-image: none !important; }
 
 /* ── 흐름 그래프(대운·세운·월운 막대): 흐름 종류 원색 ── */
+html.theme-mist #hub .tq .k-tg-bg{ --kc: #0E8F9A; } html.theme-mist #hub .tq .k-tg-ss{ --kc: #16A34A; } html.theme-mist #hub .tq .k-tg-jc{ --kc: #CA8A04; } html.theme-mist #hub .tq .k-tg-gw{ --kc: #2563EB; } html.theme-mist #hub .tq .k-tg-is{ --kc: #9333EA; } html.theme-mist #hub .tq .k-tg-na{ --kc: #64748B; }
 html.theme-mist #hub .tq{ --k-opportunity: #EAB308; --k-expansion: #16A34A; --k-harvest: #DB2777; --k-accumulation: #0891B2; --k-volatility: #7C3AED; --k-defense: #DC2626; }
 html.theme-mist #hub .tq .tq-bar.k-opportunity em{ color: #854D0E; } html.theme-mist #hub .tq .tq-bar.k-expansion em{ color: #166534; }
 html.theme-mist #hub .tq .tq-bar.k-harvest em{ color: #BE185D; } html.theme-mist #hub .tq .tq-bar.k-accumulation em{ color: #0E7490; }

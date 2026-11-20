@@ -82,14 +82,15 @@
     try { du = M.daeunAt(ch, now); } catch (e) { }
     try { var sy = M.yearPillarAt(now).sajuYear; se = M.seunRange(ch, sy, sy)[0]; var ws = M.wolun(ch, sy); wm = ws[0]; ws.forEach(function (m) { if (m.startMs <= now) wm = m; }); } catch (e) { }
     try { il = M.ilun(ch, Y, Mo)[D - 1]; } catch (e) { }
-    var lab = function (x, o) { try { return x ? M.flowLabel(x.ev, o) : ''; } catch (e) { return ''; } };
+    // 2026-11-20: 6분류 이름 대신 십신(천간 기준) + 변화·부담 신호 + 상태
+    var lab = function (x) { try { if (!x) return ''; var o = x.ev.overlays || {}; return (x.stemTG || '') + (o.volatility && o.volatility.active ? ' + 변화' : '') + (o.defense && o.defense.active ? ' + 부담' : '') + ' · ' + x.ev.condition; } catch (e) { return ''; } };
     var vol = function (x) { return !!(x && x.ev && x.ev.overlays && x.ev.overlays.volatility && x.ev.overlays.volatility.active); };
     var def = function (x) { return !!(x && x.ev && x.ev.overlays && x.ev.overlays.defense && x.ev.overlays.defense.active); };
     var line;
     if (du) {
       line = '당신이라는 자동차가 지금 ' + M.gzName(du) + ' 대운이라는 도로(' + lab(du) + ')를 달리고 있어요.';
       if (se) line += ' 올해는 ' + M.gzName(se) + ' 세운의 날씨(' + lab(se) + ')가 겹쳐 있' + (vol(se) || def(se) ? '고' + (vol(se) ? ', 날씨 변화가 큰 편이며' : '') + (def(se) ? ' 보수적으로 운전할 필요가 있어요.' : '요.') : '어요.');
-      if (wm && il) line += ' 이번 달은 ' + M.gzName(wm) + ' 월운, 오늘은 ' + M.gzName(il) + ' 일진(' + lab(il, { overlay: 'all' }) + ')의 조건이에요.';
+      if (wm && il) line += ' 이번 달은 ' + M.gzName(wm) + ' 월운, 오늘은 ' + M.gzName(il) + ' 일진(' + lab(il) + ')의 조건이에요.';
     } else line = '아직 대운이 시작되기 전이라, 원국이라는 자동차만 놓여 있는 시기예요.';
     var st = ch.strength || {}, dm = ch.pillars.day;
     return {
@@ -99,7 +100,7 @@
         { k: 'road', name: '대운', role: '오래 달리는 도로', desc: '약 10년 동안 이어지는 큰 환경과 방향', now: du ? M.gzName(du) + ' — ' + lab(du) : '대운 시작 전' },
         { k: 'weather', name: '세운', role: '그해의 날씨', desc: '같은 도로에서도 해마다 달라지는 1년의 환경', now: se ? M.gzName(se) + ' — ' + lab(se) : '' },
         { k: 'signal', name: '월운', role: '이번 구간의 노면', desc: '이번 달 체감되는 구체적인 환경 변화', now: wm ? M.gzName(wm) + ' — ' + lab(wm) : '' },
-        { k: 'pin', name: '일진', role: '오늘의 주행 조건', desc: '오늘 직접 마주치는 짧은 흐름', now: il ? M.gzName(il) + ' — ' + lab(il, { overlay: 'all' }) : '' }]
+        { k: 'pin', name: '일진', role: '오늘의 주행 조건', desc: '오늘 직접 마주치는 짧은 흐름', now: il ? M.gzName(il) + ' — ' + lab(il) : '' }]
     };
   }
   // ───────── 자미두수 쉽게 보기 · 대한 · 유년(2026-11-13) — 만세력 자미두수 탭(index.html zwRaw·zwScores·쉽게 보기)과 같은 계산 ─────────

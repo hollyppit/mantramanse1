@@ -111,6 +111,7 @@
   var FLOW_LINE = { opportunity: '오늘은 기회를 발견하고 움직일 수 있는 날입니다.', expansion: '이미 하고 있는 일을 키우기 좋은 날입니다.', harvest: '쌓아 온 결과를 거두기 좋은 날입니다.', accumulation: '밖으로 나서기보다 안을 채우기 좋은 날입니다.' };
 
   // 엔진 값 읽기(기존 hub-saju.js todayData 와 같은 계산을 옮겨 왔다 — 점수·단계 산식은 그대로, ev 는 근거 표시용 추가 값). M: Manse
+  // 2026-11-20: 오늘 한 줄(line)은 십신 한 줄(ten-god-luck.js DAY)을 쓰고, 모듈이 없으면 옛 문장(FLOW_LINE)
   FC.todayData = function (M, ch, nowMs, DAYMODE) {
     var now = nowMs || Date.now(), k = new Date(now + 9 * 3600e3), y = k.getUTCFullYear(), mo = k.getUTCMonth() + 1, d = k.getUTCDate();
     var il = M.ilun(ch, y, mo)[d - 1], ev = il.ev, f = ev.flow, key = f.primaryFlow, cond = f.condition.name;
@@ -118,12 +119,12 @@
     try { var top = (M.careerProfile(ch).top || []).slice(0, 3).map(function (c) { return c.category; }), a = M.careerLuckActivation(ch, il); if (top.length) career = clamp(top.reduce(function (s, c) { return s + (a[c] || 0); }, 0) / top.length); } catch (e) { }
     var note = [];
     if (cond === '주의' || cond === '부담') note.push('다만 무리한 확장은 피하세요.');
-    if (f.overlays.volatility.active) note.push('변동 신호가 있어 일정에 여유를 두세요.');
+    if (f.overlays.volatility.active) note.push('변화 신호가 있어 일정에 여유를 두세요.');
     if (f.overlays.defense.active) note.push('부담이 커질 수 있어 컨디션을 먼저 챙기세요.');
     var mode = (DAYMODE || {})[ev.phase] || [];
     return {
-      y: y, mo: mo, d: d, dow: DOW[k.getUTCDay()], gz: M.gzName(il), score: clamp((ev.fitScore + 100) / 2), flowKey: key, phase: ev.phase, flowLabel: M.flowLabel(ev, { overlay: 'top' }), cond: cond,
-      line: FLOW_LINE[key] || '', notes: note, todo: mode[2] || '', meaning: mode[1] || '',
+      y: y, mo: mo, d: d, dow: DOW[k.getUTCDay()], gz: M.gzName(il), score: clamp((ev.fitScore + 100) / 2), flowKey: key, phase: ev.phase, flowLabel: M.flowLabel(ev, { overlay: 'top' }), tg: il.stemTG || '', tgBranch: il.branchTG || '', cond: cond,
+      line: (root.MantraTenGodLuck && root.MantraTenGodLuck.DAY[il.stemTG] ? '오늘은 ' + root.MantraTenGodLuck.DAY[il.stemTG] + '이에요.' : FLOW_LINE[key] || ''), notes: note, todo: mode[2] || '', meaning: mode[1] || '',
       fields: { money: { s: dm.wealth.score, b: dm.wealth.band }, work: career == null ? null : { s: career, b: M.domainBand('careerActivation', career) }, love: { s: dm.love.score, b: dm.love.band }, health: { s: dm.health.score, b: dm.health.band } },
       // 근거 표시용(엔진이 이미 계산한 값을 옮겨 담기만 함)
       ev: { gz: M.gzNameK ? M.gzNameK(il) : '', stemTG: il.stemTG, branchTG: il.branchTG, flows: f.flows || {}, secondary: f.secondaryFlow, reasons: (f.reasons || []).slice(0, 6), relations: (ev.relations || []).slice(0, 8),
@@ -201,7 +202,7 @@
   FC.buildDaily = function (td, o) {
     o = o || {}; var ov = o.overrides || null, seed = (o.seed || '') + '|' + td.y + '-' + td.mo + '-' + td.d, tone = dTone(td.cond), ph = PH.indexOf(td.phase) >= 0 ? td.phase : '축적기';
     var S = function (path, n) { return n ? pickN(frag(ov, path), n, seed + path.join('.')) : pick(frag(ov, path), seed + path.join('.')); };
-    var res = { date: td.y + '-' + ('0' + td.mo).slice(-2) + '-' + ('0' + td.d).slice(-2), dow: td.dow, gz: td.gz, overallScore: td.score, phase: td.phase, cond: td.cond, flow: td.flowLabel, flowKey: td.flowKey, tone: tone,
+    var res = { date: td.y + '-' + ('0' + td.mo).slice(-2) + '-' + ('0' + td.d).slice(-2), dow: td.dow, gz: td.gz, overallScore: td.score, phase: td.phase, tg: td.tg || '', cond: td.cond, flow: td.flowLabel, flowKey: td.flowKey, tone: tone,
       headline: S(['head', ph, tone]), summary: S(['core', ph, tone]), summary2: S(['summary2', tone]), notes: td.notes, name: o.name || '', fields: {} };
     var order = [];
     BAND_FIELDS.forEach(function (f) {
@@ -220,7 +221,7 @@
     var e = td.ev || {}, f = e.flows || {}, parts = [], plain = [], pro = [];
     var flowTxt = Object.keys(PHASE_KO).filter(function (k) { return f[k] != null; }).sort(function (a, b) { return f[b] - f[a]; }).map(function (k) { return PHASE_KO[k] + ' ' + Math.round(f[k]); }).join(' · ');
     var main = { title: '오늘의 주요 작용', body: td.gz + '日의 기운이 ' + (TG_PLAIN[e.stemTG] ? '내 사주의 "' + TG_PLAIN[e.stemTG] + '"' : '내 사주') + (TG_PLAIN[e.branchTG] ? '과(와) "' + TG_PLAIN[e.branchTG] + '"' : '') + '을(를) 건드리는 날입니다.' };
-    var flow = { title: '현재 흐름', body: '오늘은 ' + String(td.phase).replace(/기$/, '운') + ' 쪽의 신호가 가장 강하고 (' + flowTxt + '), 나에게 필요한 기운과의 조화는 "' + td.cond + '" 상태입니다.' + (e.volatile ? ' 변동 신호가 켜져 있습니다.' : '') + (e.defense ? ' 부담을 살피라는 신호가 있습니다.' : '') };
+    var flow = { title: '현재 흐름', body: '오늘 일진의 천간은 나에게 ' + (e.stemTG || '-') + ', 지지는 ' + (e.branchTG || '-') + '이고, 나에게 필요한 기운과의 조화는 "' + td.cond + '" 상태입니다.' + (e.volatile ? ' 변화 신호가 켜져 있습니다.' : '') + (e.defense ? ' 부담을 살피라는 신호가 있습니다.' : '') };
     var rels = relGroups(e.relations), relat = { title: '원국과의 관계', body: rels.length ? rels.slice(0, 3).join(' ') : '오늘의 일진과 내 원국 사이에 두드러진 충돌·합 신호는 확인되지 않았습니다.' };
     plain.push(main, flow, relat);
     pro.push('일진 ' + td.gz + ' · 천간 십성 ' + (e.stemTG || '-') + ' · 지지 십성 ' + (e.branchTG || '-')); (e.reasons || []).forEach(function (r) { pro.push(r); }); (e.relations || []).forEach(function (r) { pro.push(r); });

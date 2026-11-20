@@ -44,7 +44,7 @@ assert.ok(sides.good > 0 && sides.bad > 0, '좋은·주의 신호 모두 나옴'
 // 화면·스위치 연결
 const rd = f => fs.readFileSync(path.join(root, f), 'utf8'), html = rd('index.html'), hub = rd('report/hub/hub-timeline.js');
 assert.ok(/<script src="luck-alerts\.js"><\/script>/.test(html) && /const alOn = \(\) => !!\(window\.MANTRA_FLAGS && window\.MANTRA_FLAGS\.luckAlerts === true/.test(html) && /alertBar\(\)/.test(html) && /set: 'manse'/.test(html), '만세력 연결');
-assert.ok(/luckAlerts: on\('luckAlerts'\)/.test(hub) && /'\/luck-alerts\.js'/.test(hub) && /alertsHtml\(\)/.test(hub) && /set: 'timeline'/.test(hub), '타임라인 연결');
+assert.ok(!/alertsHtml|luckAlerts|\/luck-alerts\.js|set: 'timeline'/.test(hub.replace(/\/\/[^\n]*/g, '')), '타임라인에는 알림 없음(2026-11-20 — 만세력에서만)');
 assert.ok(/luckAlerts: false/.test(rd('feature-flags.js')) && /'luckAlerts'/.test(rd('functions/api/luck-flags.js')) && /F\.luckAlerts/.test(html) && /id=\\?"leAL/.test(rd('report/admin/v2-luckenv.js')), '스위치·관리자');
 assert.ok(!/fitScore\s*=|LUCK_CFG\.|evaluateLuck\(/.test(rd('luck-alerts.js').replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, '')), '점수를 바꾸지 않음');
 // 좋은 신호·주의할 신호 글자 색(signal-colors.js): 낱말 분류와 화면 연결

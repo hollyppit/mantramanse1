@@ -64,7 +64,7 @@ for (const [key, k] of [['one', 1], ['three', 3], ['four', 4]]) {
 const hub = rd('report/hub/hub-tarot.js'), css = rd('report/hub/hub.css'), story = rd('report/story/story.js');
 ok(hub.includes("sec('카드 그림으로 읽기'"), '단일 카드 화면에 그림 읽기 섹션');
 ok(/tarot-symbols\.js' \+ HV\], \[base \+ 'free-core\.js'/.test(story), '허브 로드 목록: tarot-symbols → free-core');
-ok(/<script src="tarot-symbols\.js"><\/script>\s*<script src="free-core\.js">/.test(rd('report/hub/index.html')), '허브 단독 페이지 로드');
+ok(/<script src="tarot-symbols\.js"><\/script>\s*<script src="free-core\.js(\?v=[^"]*)?">/.test(rd('report/hub/index.html')), '허브 단독 페이지 로드');
 ok(/<script src="\/report\/hub\/tarot-symbols\.js"><\/script>\s*<script src="\/report\/hub\/free-core\.js">/.test(rd('index.html')), '만세력 앱 로드');
 const hv = /HV = '(\?v=[^']+)'/.exec(story)[1];
 ok(rd('report/index.html').includes('story/story.js' + hv), 'story.js 버전과 허브 HV 일치');

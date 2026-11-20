@@ -122,7 +122,7 @@ const src = M.evaluateLuck.toString();
 ok(!/evaluateDomainLuck|extractLuckFeatures|accident|사고수/.test(src.replace(/\/\/.*$/gm, '')), 'evaluateLuck가 분야 지수·사고수를 읽음(순환 위험)');
 ok(M.migrateLegacyPhase('기회기').primary === 'opportunity' && M.migrateLegacyPhase('변동기').overlay === 'volatility' && M.migrateLegacyPhase('방어기').overlay === 'defense' && M.migrateLegacyPhase('방어일').overlay === 'defense' && M.migrateLegacyPhase('없음') === null, '옛 6분류 문자열 변환');
 const gl = html.split('\n').filter(l => /^  '[^']+': \['운의 흐름'/.test(l)).join('\n');
-ok(gl.includes('기회 + 변동 · 순풍') && gl.includes('무엇이 활성화되는가') && gl.includes('나에게 얼마나 잘 맞는가'), '용어 사전: 4+2+1 구조 설명 누락');
+ok(gl.includes('정관 + 변화 · 순풍') && gl.includes('어떤 기운이 들어오는가') && gl.includes('나에게 얼마나 잘 맞는가'), '용어 사전: 십신+변화·부담+상태 구조 설명 누락'); // 2026-11-20 화면 표시는 6분류 대신 십신(ten-god-luck.js)
 ok(html.includes('운은 어떻게 작동하나요?') && html.includes('비가 온다고 반드시 사고가 나는 것이 아니듯'), '자동차 비유 카드 문구 누락');
 
 console.log(fails.length ? `\n실패 ${fails.length}건\n - ` + fails.join('\n - ') : '\n모든 검증 통과');

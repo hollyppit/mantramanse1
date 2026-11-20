@@ -43,7 +43,7 @@ const names = new Set(L.NAMES), sig = [];
   ok(!/undefined|NaN/.test(T.evidenceHtml(e1)) && (e1.relations.length === 0 || /점수에 반영된 관계|변동 신호에만 쓰인 관계|참고로만 보는 관계/.test(T.evidenceHtml(e1))), tag + ' 관계 묶음 문구');
   ok(/원국/.test(eh) && /대운/.test(eh) && /세운/.test(eh) && /월운/.test(eh) && /보장하지 않습니다/.test(eh) && !/undefined|NaN/.test(eh), tag + ' 근거 화면: 층 구분·면책·깨진 값 없음');
   const html = T.html({ daeun: dl, years: ys, months: ms, d: cur.idx, y: y0.year, m: ms[0].month });
-  ok(/실제 사건이 일어날 확률이 아닙니다/.test(html) && /읽는 법/.test(html) && /이렇게 판정했어요/.test(html) && /근거 보기/.test(html), tag + ' 화면: 면책·기준·근거 표시');
+  ok(/실제 사건이 일어날 확률이 아닙니다/.test(html) && /읽는 법/.test(html) && /<b>십신<\/b>/.test(html) && /근거 보기/.test(html), tag + ' 화면: 면책·기준·근거 표시');
   ok(!/undefined|NaN|\[object/.test(html), tag + ' 화면: 깨진 값 없음');
   sig.push(real.map(x => x.six).join());
 });

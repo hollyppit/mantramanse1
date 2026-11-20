@@ -1,17 +1,21 @@
 /* 운명 타임라인(시간의 회랑) — 대운 10개 → 10년(세운) → 12개월(월운)을 직접 골라 탐색한다.
    모든 값은 엔진 계산 결과(StoryDirector 의 lifeMap/yearsOf/monthsOf + Luck6 표시 계층)에서 오며, AI 는 점수를 만들지 않는다.
+   2026-11-20: 화면에 보이는 시기 이름은 6분류 대신 십신(/ten-god-luck.js, 항목의 tg). six·key 는 옛 내부 값으로만 남는다.
    R.Timeline.daeun(M,ch,now) / years(M,ch,startYear,now) / months(M,ch,Y,now) → 항목 배열(순수 데이터)
    R.Timeline.html(state, esc) → 화면 HTML                        검증: node tests/timeline-sim.js */
 (function (root) {
   var R = root.ReportV2 = root.ReportV2 || {};
   var D = function () { return R.StoryDirector; }, L = function () { return R.Luck6; };
+  var TGL = function () { return root.MantraTenGodLuck; };
+  // 운 간지의 십신(엔진 luckItem 의 stemTG·branchTG). 모듈이 없을 때도 이름은 나온다.
+  function tgOf(p) { var t = p && TGL() && TGL().of(p); if (t) return t; var st = (p && p.stemTG) || ''; return { label: st, stem: st, branch: (p && p.branchTG) || '', gkey: 'na', meaning: '', line: '천간 ' + st + (p && p.branchTG ? ' · 지지 ' + p.branchTG : ''), rule: '' }; }
   var BASIS = '대운·세운·월운은 서로 다른 시간 단위의 영향이며, 원국(타고난 구조)은 세 단위 모두의 바탕입니다.';
   var FIELD_NAME = { money: '재물', career: '직업', love: '애정·인연' };
 
-  function detail(ev, extra) {
+  function detail(ev, extra, p) {
     var s = L().of(ev), reasons = (ev.reasons || []).slice(0, 5), triggers = (ev.triggers || []).slice(0, 4);
     return Object.assign({ six: s.label, key: s.key, meaning: s.meaning, rule: s.rule, scores: s.scores, condition: s.condition, reasons: reasons, signals: triggers,
-      overlays: ev.flow && ev.flow.overlays ? { volatility: ev.flow.overlays.volatility.active, defense: ev.flow.overlays.defense.active } : null }, extra);
+      tg: tgOf(p), overlays: ev.flow && ev.flow.overlays ? { volatility: ev.flow.overlays.volatility.active, defense: ev.flow.overlays.defense.active } : null }, extra);
   }
   var ref = function (o, p, level, ctx) { Object.defineProperty(o, '_ref', { value: { p: p, level: level, ctx: ctx || {} }, enumerable: false }); return o; };
   function daeun(M, ch, now) {
@@ -19,16 +23,16 @@
     return map.map(function (m) {
       if (m.pre) return { pre: true, startYear: m.startYear, endYear: m.endYear, startAge: m.startAge, endAge: m.endAge, label: m.tag, isCurrent: m.isCurrent };
       var ev = ch.daeun.list[m.idx].ev;
-      return ref(detail(ev, { pre: false, idx: m.idx, ganzhi: m.ganzhi, startYear: m.startYear, endYear: m.endYear, startAge: m.startAge, endAge: m.endAge, fields: m.fields, isCurrent: m.isCurrent }), ch.daeun.list[m.idx], 'daeun', {});
+      return ref(detail(ev, { pre: false, idx: m.idx, ganzhi: m.ganzhi, startYear: m.startYear, endYear: m.endYear, startAge: m.startAge, endAge: m.endAge, fields: m.fields, isCurrent: m.isCurrent }, ch.daeun.list[m.idx]), ch.daeun.list[m.idx], 'daeun', {});
     });
   }
   function years(M, ch, startYear, now) {
     var to = startYear + 9, evs = M.seunRange(ch, startYear, to), ys = D().yearsOf(M, ch, startYear, to, now);
-    return ys.map(function (y, i) { return ref(detail(evs[i].ev, { year: y.year, age: y.age, ganzhi: y.ganzhi, fields: y.fields, isNow: y.isNow }), evs[i], 'seun', { ms: evs[i].midMs }); });
+    return ys.map(function (y, i) { return ref(detail(evs[i].ev, { year: y.year, age: y.age, ganzhi: y.ganzhi, fields: y.fields, isNow: y.isNow }, evs[i]), evs[i], 'seun', { ms: evs[i].midMs }); });
   }
   function months(M, ch, Y, now) {
     var evs = M.wolun(ch, Y), ms = D().monthsOf(M, ch, Y, now);
-    return ms.map(function (m, i) { return ref(detail(evs[i].ev, { month: m.month, term: m.term, ganzhi: m.ganzhi, fields: m.fields, isNow: m.isNow }), evs[i], 'wolun', { ms: evs[i].startMs }); });
+    return ms.map(function (m, i) { return ref(detail(evs[i].ev, { month: m.month, term: m.term, ganzhi: m.ganzhi, fields: m.fields, isNow: m.isNow }, evs[i]), evs[i], 'wolun', { ms: evs[i].startMs }); });
   }
 
   /* ── 근거: 원국(바탕) · 대운 · 세운 · 월운의 영향을 나눠서 보여 준다. 값은 모두 엔진(evaluateLuck·evaluateDomainLuck)에서 읽는다. ── */
@@ -57,12 +61,13 @@
       yong: y.applicable && y.yong != null ? EL[y.yong] : '', hee: y.applicable && y.hee != null ? EL[y.hee] : '', school: y.school, log: (y.log || []).slice(0, 2),
     };
     return { title: item.ganzhi + ' ' + (LEVEL_KO[r.level] || ''), natal: natal, chain: chain, note: note, own: Math.round(ev.ownFit), fit: Math.round(ev.fitScore), comps: comps, parts: (ev.parts || []).slice(0, 6).map(function (p) { return { label: p.label, v: Math.round(p.v * 10) / 10 }; }),
-      relInfo: relInfo(ev).slice(0, 8), relations: (ev.relations || []).slice(0, 8), triggers: (ev.triggers || []).slice(0, 5), six: item.six, rule: item.rule, meaning: item.meaning, scores: item.scores };
+      relInfo: relInfo(ev).slice(0, 8), relations: (ev.relations || []).slice(0, 8), triggers: (ev.triggers || []).slice(0, 5), tg: item.tg, scores: item.scores, overlays: item.overlays };
   }
   function evidenceHtml(e) {
     if (!e) return '';
-    var C = L().CONFIG, h = '<div class="ev"><h3>' + E(e.title) + ' · 근거</h3>';
-    h += '<section><h4>① 분류는 이렇게 나왔어요</h4><p><b>' + E(e.six) + '</b> — ' + E(e.meaning) + '</p><p class="ev-s">' + E(e.rule) + '.</p><p class="ev-s">판정 순서: ① 흐름 점수 ' + P(C.defenseHard.fit) + ' 이하이면서 운의 세기 ' + C.defenseHard.intensity + ' 이상 → 방어기 ② 변화 신호 ' + C.volatility + ' 이상 → 변동기 ③ 흐름 점수 ' + P(C.defenseSoft.fit) + ' 이하이면서 운의 세기 ' + C.defenseSoft.intensity + ' 이상 → 방어기 ④ 그 밖에는 기회·확장·수확·축적 중 힘이 가장 큰 쪽.</p></section>';
+    var h = '<div class="ev"><h3>' + E(e.title) + ' · 근거</h3>', t = e.tg || {};
+    h += '<section><h4>① 십신은 이렇게 나왔어요</h4><p><b>' + E(t.label) + '</b>' + (t.meaning ? ' — ' + E(t.meaning) : '') + '</p><p class="ev-s">' + E(t.line) + '. 운 간지의 천간·지지(본기)가 일간(나)과 어떤 관계인지로 정해요. 좋고 나쁨은 아래 흐름 점수와 신호등 색이 따로 알려 줘요.</p>' +
+      (e.overlays && (e.overlays.volatility || e.overlays.defense) ? '<p class="ev-s">' + (e.overlays.volatility ? '변화 신호(변동성 ' + e.scores.volatility + ')가 기준을 넘었어요. ' : '') + (e.overlays.defense ? '부담 신호(부담도)가 기준을 넘었어요.' : '') + '</p>' : '') + '</section>';
     h += '<section><h4>② 어느 운이 얼마나 영향을 줬나</h4><ul class="ev-l"><li><b>원국</b> 모든 운의 바탕 · 일주 ' + E(e.natal.day) + (e.natal.zone ? ' · ' + E(e.natal.zone) + '(돕는 힘 ' + e.natal.help + '%)' : '') + (e.natal.yong ? ' · 용신 ' + E(e.natal.yong) + (e.natal.hee ? '·희신 ' + E(e.natal.hee) : '') : '') + '</li>';
     e.chain.forEach(function (c) { h += '<li><b>' + E(c.name) + '</b> ' + E(c.ganzhi) + ' · 영향 비중 ' + c.weight + '%</li>'; });
     h += '</ul><p class="ev-s">' + (e.chain.length > 1 ? '이 시기만 보면 ' + P(e.own) + '점이고, 위의 큰 운과 합치면 최종 흐름 점수는 ' + P(e.fit) + '점이에요.' : '이 시기만 본 점수가 곧 흐름 점수(' + P(e.fit) + '점)예요.') + (e.note ? ' ' + E(e.note) : '') + '</p></section>';
@@ -74,8 +79,8 @@
       var ul = function (a) { return '<ul class="ev-l">' + a.map(function (x) { return '<li>' + E(x) + '</li>'; }).join('') + '</ul>'; };
       h += '<section><h4>④ 합·충 등 관계</h4>';
       if (G.score.length) h += '<p class="ev-s"><b>점수에 반영된 관계</b> — ③의 "합충·관계" 성분을 이루는 것들이에요.</p>' + ul(G.score);
-      if (G.volat.length) h += '<p class="ev-s"><b>변동 신호에만 쓰인 관계</b> — 점수에는 직접 들어가지 않고, 변화가 생기기 쉬운지를 보는 데 쓰였어요.</p>' + ul(G.volat);
-      if (G.ref.length) h += '<p class="ev-s"><b>참고로만 보는 관계</b> — 이 계산에서는 점수·변동 신호에 쓰이지 않았어요. 그래서 "합충·관계" 점수가 0이어도 이런 관계는 나올 수 있어요.</p>' + ul(G.ref);
+      if (G.volat.length) h += '<p class="ev-s"><b>변화 신호에만 쓰인 관계</b> — 점수에는 직접 들어가지 않고, 변화가 생기기 쉬운지를 보는 데 쓰였어요.</p>' + ul(G.volat);
+      if (G.ref.length) h += '<p class="ev-s"><b>참고로만 보는 관계</b> — 이 계산에서는 점수·변화 신호에 쓰이지 않았어요. 그래서 "합충·관계" 점수가 0이어도 이런 관계는 나올 수 있어요.</p>' + ul(G.ref);
       if (e.triggers.length) h += '<p class="ev-s"><b>변화 신호</b></p>' + ul(e.triggers);
       h += '</section>';
     }
@@ -91,9 +96,9 @@
     return '<div class="tl-f"><span>' + E(name) + '</span><div class="tl-b" role="img" aria-label="' + E(name + ' ' + f.score + '점, ' + f.band) + '"><i style="width:' + Math.max(2, Math.min(100, f.score)) + '%"></i><u></u></div><b>' + f.score + '<small>' + E(f.band) + '</small></b></div>';
   }
   function card(it, title) {
-    var h = '<div class="tl-card k-' + E(it.key) + '"><p class="tl-ct">' + E(title) + '</p><h3>' + E(it.six) + '<small>' + E(it.meaning) + '</small></h3>';
-    h += '<p class="tl-rule"><b>이렇게 판정했어요</b> ' + E(it.rule) + '</p>';
-    if (it.overlays && (it.overlays.volatility || it.overlays.defense)) h += '<p class="tl-ov">' + (it.overlays.volatility ? '<i>변동 신호</i>' : '') + (it.overlays.defense ? '<i>방어 신호</i>' : '') + '</p>';
+    var t = it.tg || {}, h = '<div class="tl-card k-tg-' + E(t.gkey || 'na') + '"><p class="tl-ct">' + E(title) + '</p><h3>' + E(t.label) + '<small>' + E(t.meaning) + '</small></h3>';
+    h += '<p class="tl-rule"><b>십신</b> ' + E(t.line) + '</p>';
+    if (it.overlays && (it.overlays.volatility || it.overlays.defense)) h += '<p class="tl-ov">' + (it.overlays.volatility ? '<i>변화 신호</i>' : '') + (it.overlays.defense ? '<i>부담 신호</i>' : '') + '</p>';
     h += '<div class="tl-fs">' + bar(FIELD_NAME.money, it.fields && it.fields.money) + bar(FIELD_NAME.career, it.fields && it.fields.career) + bar(FIELD_NAME.love, it.fields && it.fields.love) + '</div>';
     h += '<p class="tl-sc">흐름 점수 ' + P(it.scores.fit) + ' · 운의 세기 ' + it.scores.intensity + ' · 변화 신호 ' + it.scores.volatility + (it.condition ? ' · 상태 ' + E(it.condition) : '') + '</p>';
     if (it._ref) h += '<button type="button" class="tl-ev" data-tle="' + it._ref.level + '">자세한 근거 · 원국/대운/세운 구분</button>';
@@ -101,11 +106,11 @@
     return h + '</div>';
   }
   function chip(it, attr, top, sub, sel) {
-    return '<button type="button" class="tl-c k-' + E(it.key || 'pre') + (sel ? ' sel' : '') + (it.isCurrent || it.isNow ? ' now' : '') + '" ' + attr + ' aria-pressed="' + (sel ? 'true' : 'false') + '"><b>' + E(top) + '</b><span>' + E(sub) + '</span><i>' + E(it.six || '') + '</i></button>';
+    return '<button type="button" class="tl-c k-' + E(it.tg ? 'tg-' + (it.tg.gkey || 'na') : 'pre') + (sel ? ' sel' : '') + (it.isCurrent || it.isNow ? ' now' : '') + '" ' + attr + ' aria-pressed="' + (sel ? 'true' : 'false') + '"><b>' + E(top) + '</b><span>' + E(sub) + '</span><i>' + E(it.tg ? it.tg.label : '') + '</i></button>';
   }
   /** state: { daeun:[...], years:[...]|null, months:[...]|null, d: idx|null, y: year|null } */
   function html(st, esc) {
-    var h = '<section class="tl" aria-label="운명 타임라인"><h3 class="tl-h">운명 타임라인</h3><p class="tl-intro">10년 단위 대운에서 시작해 연도, 월로 들어가며 봅니다. 분류는 계산 결과로 나온 시기의 성격이며, 실제 사건이 일어날 확률이 아닙니다.</p>';
+    var h = '<section class="tl" aria-label="운명 타임라인"><h3 class="tl-h">운명 타임라인</h3><p class="tl-intro">10년 단위 대운에서 시작해 연도, 월로 들어가며 봅니다. 십신은 그 시기에 들어오는 기운의 성격이며, 실제 사건이 일어날 확률이 아닙니다.</p>';
     h += '<div class="tl-row" role="list" aria-label="대운">' + st.daeun.map(function (d, i) {
       if (d.pre) return '<span class="tl-pre">' + E(d.startAge + '~' + d.endAge + '세 · 대운 전') + '</span>';
       return chip(d, 'data-tld="' + d.idx + '"', d.startAge + '~' + d.endAge + '세', d.ganzhi, st.d === d.idx);
@@ -124,7 +129,8 @@
     }
     var cm = st.m != null && st.months ? st.months.filter(function (m) { return m.month === st.m; })[0] : null;
     if (cm) h += card(cm, '월운 ' + cm.ganzhi + ' · ' + st.y + '년 ' + cm.month + '월(' + cm.term + ' 이후)');
-    h += '<div class="tl-legend"><b>읽는 법</b><ul>' + L().NAMES.map(function (n) { return '<li><i class="k-' + L().KEY[n] + '"></i><b>' + n + '</b> ' + E(L().MEANING[n]) + '</li>'; }).join('') + '</ul>' +
+    var TG = TGL();
+    h += '<div class="tl-legend"><b>읽는 법</b><ul>' + (TG ? TG.TG.map(function (n) { return '<li><i class="k-tg-' + TG.GKEY[TG.groupOf(n)] + '"></i><b>' + n + '</b> ' + E(TG.MEAN[n]) + '</li>'; }).join('') : '') + '</ul>' +
       '<p>분야 막대 옆 글자(낮음·다소 낮음·무난·높음·매우 높음)는 분야마다 기준을 따로 맞춘 등급이에요. 그래서 숫자보다 등급 글자로 비교하세요. 점수는 명리 모델 안의 상대적 지표입니다. ' + E(BASIS) + '</p></div></section>';
     return h;
   }
