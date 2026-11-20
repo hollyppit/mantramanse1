@@ -23,7 +23,7 @@
   }
   function loadImg(u) { return new Promise(function (res) { if (!u) return res(null); var i = new Image(); i.crossOrigin = 'anonymous'; i.onload = function () { res(i); }; i.onerror = function () { res(null); }; i.src = u; }); }
 
-  var LOGO = '/report/brand/logo-320.webp?v=20261120-fire';   // 2026-11-20 로고(못 불러오면 예전 글자)
+  var LOGO = '/report/brand/logo-320.webp?v=20261120-sq';   // 2026-11-20 로고(못 불러오면 예전 글자)
   function draw(cv, d, img, logo) {
     cv.width = W; cv.height = H; var x = cv.getContext('2d'), p = PAL[d.el] || PAL['수'];
     var g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#070913'); g.addColorStop(.45, p[0]); g.addColorStop(1, '#05060d'); x.fillStyle = g; x.fillRect(0, 0, W, H);
