@@ -348,6 +348,7 @@ body.hubpage{ margin: 0; background: var(--bg); color: var(--ink); font-family: 
 #hub .fortune-panel .mc-bar span,#hub .fortune-panel .mc-bar small { position:absolute;top:calc(100% + 8px);font-size:11px;white-space:nowrap; }
 #hub .fortune-panel .mc-bar small { top:calc(100% + 24px);font-size:9px;color:#7f899e; }
 #hub .fortune-panel .mc-bar.active i { outline:2px solid #e5cea0;outline-offset:4px;opacity:1;box-shadow:0 0 22px #e5cea01a; }
+/* 2026-11-20 월운 막대 = 신호 등급 3단계 색, 십신은 막대 위 글자(.mc-tg) */ .mg-good { --flow:#5FDC8F; }.mg-ok { --flow:#B3BDCF; }.mg-care { --flow:#FF8A4C; } #hub .fortune-panel .mc-bar em.mc-tg { font-style:normal;font-size:10px;font-weight:700;color:var(--flow);margin-bottom:2px;white-space:nowrap; }
 .flow-tg-bg { --flow:#78cddb; }.flow-tg-ss { --flow:#73d8ae; }.flow-tg-jc { --flow:#e7c46a; }.flow-tg-gw { --flow:#8da8f3; }.flow-tg-is { --flow:#b09aef; }
 .flow-opportunity { --flow:#73d8ae; }.flow-expansion { --flow:#78cddb; }.flow-harvest { --flow:#b09aef; }.flow-accumulation { --flow:#8da8f3; }
 .mc-legend { display:flex;gap:16px;flex-wrap:wrap;font-size:11px;margin:16px 0;color:#b7c1d2; }

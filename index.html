@@ -608,6 +608,9 @@ ol.log { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 0.9
 .lt-hid i.m { font-weight: 900; opacity: 1; }
 .lt-hid i.eq::after { content: ''; position: absolute; top: -2px; right: -2px; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 1px var(--bg, #fff); }
 .lt-hid i.hp { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; }
+.lt-htg { display: inline-flex; gap: 3px; align-items: center; justify-content: center; flex-wrap: nowrap; font-size: 0.68rem; color: var(--ink-2); }
+.lt-htg i { font-style: normal; white-space: nowrap; opacity: .7; } .lt-htg i.m { opacity: 1; } .lt-htg b { font-weight: 600; } .lt-htg i.m b { font-weight: 800; }
+@media (max-width: 640px) { .lt-htg .r { display: none; } .lt-htg { gap: 5px; font-size: 0.72rem; } }
 .lt-ev { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; min-height: 20px; }
 .lt-ev .chip { font-size: 0.64rem; padding: 1px 5px; }
 /* 운의 시기 */
@@ -6957,6 +6960,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   }
   // 운 지지의 지장간 한 줄(2026-11-18): 여기·중기·정기 순, 오행 색, 정기 굵게.
   // 원국 천간과 같은 글자는 점(•), 원국 천간과 합이 되는 글자는 밑줄 — 숨은 글자가 원국을 건드리는 자리를 바로 보이게 한다. 일수는 툴팁.
+  // 지장간 아래 십신(2026-11-21): 지장간 글자마다 그 십신을 같은 순서·같은 굵기(정기 굵게)로. 모바일은 첫 글자만(.f), 나머지(.r)는 숨김
+  function luckHiddenTG(b) {
+    const d = S.ch && S.ch.pillars && S.ch.pillars.day ? S.ch.pillars.day.s : null; if (d == null) return '';
+    const H = M.HIDDEN[b], lab = M.hiddenLabels(b);
+    return `<span class="lt-htg">${H.map(([hs], k) => { const t = M.tenGod(d, hs) || ''; return `<i class="${k === H.length - 1 ? 'm' : ''}" title="${esc(lab[k] + ' ' + M.STEM[hs] + ' · ' + t)}"><b class="f">${esc(t.charAt(0))}</b><b class="r">${esc(t.slice(1))}</b></i>`; }).join('')}</span>`;
+  }
   function luckHidden(b) {
     const ch = S.ch, P = ch && ch.pillars || {}, nat = ['year', 'month', 'day', 'hour'].map(k => P[k] && P[k].s).filter(s => s != null);
     const H = M.HIDDEN[b], lab = M.hiddenLabels(b);   // 子·卯·酉는 정기 하나 — 이름표는 엔진 것을 쓴다
@@ -6974,14 +6983,14 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const se = M.stemEl(x.s), be = M.BR_EL[x.b];
     return `<button type="button" class="lt${on ? ' sel' : ''}${cur ? ' cur' : ''}" data-pick="${pick}" style="${sgVars(tileSig(x))}">
       <span class="lt-top num">${top}</span>
-      <span class="lt-tg">${x.stemTG}</span>
+      <span class="lt-tg" title="${esc((t => t.line + (t.meaning ? ' — ' + t.meaning : ''))(tgOf(x)))}">${x.stemTG}</span>
       <span class="lt-g ${ECLS[se]}"><b>${M.STEM[x.s]}</b><i>${M.STEM_K[x.s]}${M.EL_K[se]}</i></span>
       <span class="lt-g ${ECLS[be]}"><b>${M.BR[x.b]}</b><i>${M.BR_K[x.b]}${M.EL_K[be]}</i></span>
       ${luckHidden(x.b)}
-      <span class="lt-tg">${x.branchTG}</span>
+      ${luckHiddenTG(x.b)}
       <span class="lt-us">${x.unseong} · ${x.sinsal12}</span>
       <span class="lt-ev">${luckChips(x)}</span>
-      <span class="lt-sc"><span class="sgchip" style="${sgVars(tileSig(x))}">${tileSig(x).n}</span>${tgTag(x)}${ovTags(x.ev, false)}</span>${x.year && x.ev.level === "seun" ? samjaeTag(samjaeOf(x.year)) + gyTag(x.year) : ""}
+      <span class="lt-sc"><span class="sgchip" style="${sgVars(tileSig(x))}">${tileSig(x).n}</span>${ovTags(x.ev, false)}</span>${x.year && x.ev.level === "seun" ? samjaeTag(samjaeOf(x.year)) + gyTag(x.year) : ""}
     </button>`;
   }
   // 이 시기에 들어오는 오행과 원국과의 작용(합·충·형·신살)을 풀어 쓴다

@@ -199,6 +199,8 @@ html.theme-mist .flow-expansion{ --flow: #F59E0B; }
 html.theme-mist .flow-harvest{ --flow: #9333EA; }
 html.theme-mist .flow-accumulation{ --flow: #2563EB; }
 html.theme-mist .fortune-panel .flow-defense{ --flow: #DC2626; }
+html.theme-mist .mg-good{ --flow: #16A34A; } html.theme-mist .mg-ok{ --flow: #94A3B8; } html.theme-mist .mg-care{ --flow: #EA580C; }
+html.theme-mist #hub .fortune-panel .mc-bar em.mc-tg{ color: var(--flow-ink, var(--flow)); font-size: 11.5px; }
 html.theme-mist .fortune-panel .h1, html.theme-mist .fortune-panel h2{ color: #1B2226; }
 html.theme-mist .fortune-panel .kick{ color: #8C6A35; }
 html.theme-mist .fortune-panel :is(.sub, .dsub), html.theme-mist .fc-method{ color: var(--ink-2); }
