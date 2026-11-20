@@ -1,14 +1,13 @@
-/* 28수(二十八宿) 공통 데이터: 공간·명당(천문방위)과 택일(값일수)이 함께 쓴다. 계산은 mansions-engine.js.
-   원칙(2026-11-21)
+/* 28수(二十八宿) 공통 데이터: 공간·명당(천문방위 엔진 mansions-engine.js)과 택일(날짜 모듈 mansions-day.js)이 함께 쓰는 기본 자료.
+   원칙(2026-11-21 사용자 기준)
    · 360°를 28등분한 값, 근거 없는 24산↔28수 일대일 대응, 출전 없는 도수는 넣지 않는다.
-   · 천문 좌표(적경·적도 도수)와 풍수 방위각(지평 방위)은 다른 값이다. 같은 숫자로 취급하지 않는다.
-   · 도수 자료는 DEGREE_SYSTEMS 에, 24산 연계는 LINK_SYSTEMS 에 체계별로 따로 넣는다. 문헌마다 다르면 sourceVersion 으로 나눈다.
-     지금은 검토·승인된 체계가 없어 둘 다 비어 있다(→ 정확한 방위 판정은 하지 않고 '데이터 미확정'으로 표시).
-   · 행사별 길흉 규칙(EVENT_RULES)도 검증된 문헌 대조 전이라 비어 있다(→ '판단 보류').
-   mansionStart·mansionEnd·angularExtent 는 체계마다 다르므로 각 수에는 null 로 두고, 승인된 체계가 생기면 엔진이 그 체계에서 채운다. */
+   · 천문 도수(적도·황도, 古度)와 풍수 나침반 방위각(지평 360°)은 같은 값으로 보지 않는다.
+   · 도수는 DEGREE_PROFILES(문헌·시대별), 나경 28수환↔24산은 LUOPAN_PROFILES(유파·문헌별)에 따로 둔다. 기본 기준은 적도 365¼도 체계.
+   · 날짜별 28수 배속과 행사별 길흉은 별도 파일(mansions-day-data.js)에 둔다.
+   mansionStart·mansionEnd·angularExtent 는 프로필마다 다르므로 각 수에는 null 로 두고, 엔진이 고른 프로필에서 계산한다. */
 (function (G) {
   'use strict';
-  var VERSION = 'mansions-data-20261121-1';
+  var VERSION = 'mansions-data-20261121-2';
   // 이름·사신 배속 출전: 사신(四神)과 동·북·서·남 4방 7수씩의 배속은 《史記·天官書》 이래 전통 천문 분류.
   // 순서는 각(角)에서 시작해 동→북→서→남 방(적경이 커지는 방향).
   var BASE_SOURCE = '사신 배속·순서: 《사기(史記)·천관서(天官書)》 이래 동양 전통 천문 분류';
@@ -58,30 +57,63 @@
       source: BASE_SOURCE + ' · 이름 뜻풀이: 일반 전통 해설(문헌별 표현 차이 있음) · 칠요·금수: 통서(通書) 전통', sourceVersion: 'base-names-1' };
   });
 
-  // 도수 체계 등록부. 항목 형식(모두 필수, 하나라도 없으면 엔진이 계산을 막는다):
-  // { id, sourceVersion, title, tradition(시대·전통), source(출전), sourceUrl, coordinateSystem('equatorial'|'ecliptic'|'luopan-ring'),
-  //   circumference(예: 365.25 古度 또는 360), referencePoint(기준점: 예 '각수 거성'), unit, extents: {id: 도수}(28개),
-  //   conversionRule(지평 방위각으로 바꾸는 규칙 — 없으면 null: 원형 배치에는 쓰되 건물 방위 판정에는 쓰지 않는다), approved(검토 승인 여부), reviewedBy, reviewedAt }
-  // 후보(미승인)는 docs/MANSIONS_28_2026-11-21.md 에만 적어 두었다. 사용자 확인 후 여기에 넣는다.
-  var DEGREE_SYSTEMS = [];
-  // 24산↔28수 연계 체계(나경 고리 등). 항목 형식: { id, sourceVersion, title, source, sourceUrl, luopanSchool, rule, table: [{ mountain:'子', mansions:['虛'] ...}], approved }
-  var LINK_SYSTEMS = [];
+  // ───────────── 도수 프로필 (2026-11-21 사용자 기준) ─────────────
+  // 기준: 고전 적도 28수 도수, 주천 365¼도, 균등 분할 금지, ¼도 위치는 선택 판본 원문으로 확인, 시대·문헌별로 프로필을 따로 둔다.
+  // status: 'verified'(계산에 사용 가능) · 'unconfirmed'(원문은 있으나 기준 미충족) · 'incomplete'(원문에 필요한 값이 없음)
+  // 엔진은 status 'verified' 이고 검증 규칙을 통과한 프로필만 쓴다. 나머지는 출전 보존용이다.
+  // 도수 순서는 MANSIONS(角→軫) 순. 원문 나열 순서(대개 斗부터)와 다를 수 있다.
+  var ORDER = ['jiao', 'kang', 'di', 'fang', 'xin', 'wei_tail', 'ji', 'dou', 'niu', 'nu', 'xu', 'wei_roof', 'shi', 'bi_wall', 'kui', 'lou', 'wei_stomach', 'mao', 'bi_net', 'zi', 'shen', 'jing', 'gui', 'liu', 'xing', 'zhang', 'yi', 'zhen'];
+  function ext(arr) { var o = {}; ORDER.forEach(function (id, i) { o[id] = arr[i]; }); return o; }
+  var HHS_URL = 'https://zh.wikisource.org/wiki/%E5%BE%8C%E6%BC%A2%E6%9B%B8/%E5%8D%B793';
+  var DEGREE_PROFILES = [
+    { id: 'hhs-sifen-equatorial', isDefault: true, status: 'verified',
+      title: '《후한서·율력지 하》(續漢志) 적도도 — 동한 사분력(四分曆)', work: '後漢書 志第三 律曆下', era: '동한(東漢)', tradition: '사분력 적도 거도(距度)',
+      edition: '중화서국 점교본 전사(위키문헌) + 교감기 3074쪽(《후한서집해》 인용 이예(李銳)설)', sourceUrl: HHS_URL, retrievedAt: '2026-11-21',
+      quote: '斗二十六四分[一]…北方九十八度四分一…西方八十度…南方百一十二度…東方七十五度 右赤道度周天三百六十五度四分一',
+      coordinateSystem: 'equatorial', circumference: 365.25, unit: '고도(古度)', referencePoint: '각 수의 거성(距星)에서 다음 수 거성까지의 적도 거도. 원문 나열은 두(斗)수부터',
+      fractionAt: 'dou', fractionValue: 0.25,
+      extents: ext([12, 9, 15, 5, 5, 18, 11, 26.25, 8, 12, 10, 17, 16, 9, 16, 12, 14, 11, 16, 2, 9, 33, 4, 15, 7, 18, 18, 17]),
+      notes: ['위키문헌 본문은 危十六·壁十으로 전사되어 있으나, 같은 쪽 교감기가 이예설에 따라 危十(六)[七]·壁(十)[九]로 바로잡습니다(본문 黃道度와 섞인 오기). 이 프로필은 교감기 값(危17·壁9)을 씁니다.',
+        '斗의 ¼(四分一)은 교감기 "斗二十六四分[一]退二 據集解引李銳說補"로 보충된 것이며, 북방 합계 "九十八度四分一"과 맞습니다.'],
+      attestations: ['《한서·율력지》(삼통력): 같은 정수 도수(井33·危17·壁9), 분수 표기 없음', '《진서·율력지 하》·《송서·율력지 중》(경초력): 같은 정수 도수, 斗에 455/1843'] },
+    { id: 'hhs-sifen-ecliptic', isDefault: false, status: 'verified',
+      title: '《후한서·율력지 하》 황도도 — 동한 사분력', work: '後漢書 志第三 律曆下', era: '동한(東漢)', tradition: '사분력 황도도',
+      edition: '중화서국 점교본 전사(위키문헌) — 斗二十四(進一)[四分一] 교감 반영', sourceUrl: HHS_URL, retrievedAt: '2026-11-21',
+      quote: '斗二十四[四分一]牛七女十一虛十危十六室十八壁十 北方九十六度四分一 … 右黃道度三百六十五四分一',
+      coordinateSystem: 'ecliptic', circumference: 365.25, unit: '고도(古度)', referencePoint: '황도상 거도. 참고용(기본 기준은 적도도)',
+      fractionAt: 'dou', fractionValue: 0.25,
+      extents: ext([13, 10, 16, 5, 5, 18, 10, 24.25, 7, 11, 10, 16, 18, 10, 17, 12, 15, 12, 16, 3, 8, 30, 4, 14, 7, 17, 19, 18]),
+      notes: ['기본 기준은 적도도라서 화면 기본값으로 쓰지 않습니다. 황도도가 적도도와 다름을 보여 주는 비교용입니다.'], attestations: [] },
+    { id: 'jinshu-jingchu', isDefault: false, status: 'unconfirmed',
+      title: '《진서·율력지 하》 경초력(景初曆) 수도', work: '晉書 卷18 律曆下', era: '위(魏)~진(晉)', tradition: '경초력',
+      edition: '위키문헌 전사', sourceUrl: 'https://zh.wikisource.org/wiki/%E6%99%89%E6%9B%B8/%E5%8D%B7018', retrievedAt: '2026-11-21',
+      quote: '斗二十六分四百五十五…北方九十八度分四百五十五…南方百十二度…東方七十五度',
+      coordinateSystem: null, circumference: 365 + 455 / 1843, unit: '고도(古度)', referencePoint: null,
+      fractionAt: 'dou', fractionValue: 455 / 1843,
+      extents: ext([12, 9, 15, 5, 5, 18, 11, 26 + 455 / 1843, 8, 12, 10, 17, 16, 9, 16, 12, 14, 11, 16, 2, 9, 33, 4, 15, 7, 18, 18, 17]),
+      statusReason: '해당 문단에 적도·황도 표기가 없고, 끝수가 ¼이 아니라 斗分 455/1843이라 365¼ 기준에 맞지 않습니다. 《송서·율력지 중》에도 같은 표가 있습니다.', notes: [], attestations: ['《송서·율력지 중》 권12 같은 표'] },
+    { id: 'hanshu-santong', isDefault: false, status: 'incomplete',
+      title: '《한서·율력지》 삼통력(三統曆) 수도', work: '漢書 卷21 律曆志', era: '서한(西漢)', tradition: '삼통력(태초력 성거)',
+      edition: '위키문헌 전사', sourceUrl: 'https://zh.wikisource.org/wiki/%E6%BC%A2%E6%9B%B8/%E5%8D%B7021', retrievedAt: '2026-11-21',
+      quote: '角十二…箕十一。東七十五度。斗二十六…壁九。北九十八度。…井三十三…軫十七。南百一十二度。',
+      coordinateSystem: null, circumference: 365, unit: '고도(古度)', referencePoint: null, fractionAt: null, fractionValue: null,
+      extents: ext([12, 9, 15, 5, 5, 18, 11, 26, 8, 12, 10, 17, 16, 9, 16, 12, 14, 11, 16, 2, 9, 33, 4, 15, 7, 18, 18, 17]),
+      statusReason: '28수 정수 도수만 있고(합 365) ¼도의 위치가 표에 없습니다.', notes: [], attestations: [] },
+    { id: 'huainanzi-tianwen', isDefault: false, status: 'unconfirmed',
+      title: '《회남자·천문훈》 수도', work: '淮南子 天文訓', era: '서한(西漢)', tradition: '회남자',
+      edition: '위키문헌 전사(판본 미대조)', sourceUrl: 'https://zh.wikisource.org/wiki/%E6%B7%AE%E5%8D%97%E5%AD%90/%E5%A4%A9%E6%96%87%E8%A8%93', retrievedAt: '2026-11-21',
+      quote: '角十二，亢九，氐十五，房五，心五，尾十八，箕十一四分一…東井三十…凡二十八宿也',
+      coordinateSystem: null, circumference: 365.25, unit: '고도(古度)', referencePoint: null, fractionAt: 'ji', fractionValue: 0.25,
+      extents: ext([12, 9, 15, 5, 5, 18, 11.25, 26, 8, 12, 10, 17, 16, 9, 16, 12, 14, 11, 16, 2, 9, 30, 4, 15, 7, 18, 18, 17]),
+      statusReason: '전사본의 井 30으로는 합이 362¼이라 365¼과 맞지 않습니다(다른 문헌은 井 33). 판본 대조 전에는 쓰지 않습니다.', notes: [], attestations: [] },
+  ];
 
-  // 값일수(날마다 돌아가는 28수). 28일 주기이며 각 수는 요일(칠요)이 고정되어 있다(각=목요일 …).
-  // anchor 는 '이 날짜가 이 수'라는 기준일이다. 확인된 기준일과 출전이 있어야만 계산한다.
-  // 2026-11-21 확인: 2026년 11월 21일(토, 己亥일) = 女(녀)수. 두 출처가 같고, 女수의 칠요(토)와 요일(토요일)도 맞는다.
-  //   ① 만세력 공개 라이브러리 lunar-javascript getXiu()(일지+요일 표) ② 중국 노황력 wannianli.tianqi.com 2026-11-21 '北方女土蝠 值日星宿'.
-  //   교차 확인: 2000-01-01(戊午일, 토) → 胃(위)수, 2026-11-22 → 虛(허)수 — 같은 28일 주기에서 나오는 값과 일치.
-  //   통서(通書) 전통의 값일수이며, 문헌 원전(예: 《협기변방서》) 대조는 아직 하지 않았다.
-  var DAY_CYCLE = { anchor: { ymd: '2026-11-21', jdn: 2461366, mansionId: 'nu' }, verified: true,
-    source: '통서 전통 값일수(28일 주기·칠요 고정) — 기준일은 lunar-javascript(6tail) getXiu 표와 중국 노황력(wannianli.tianqi.com)으로 교차 확인',
-    sourceUrl: 'https://wannianli.tianqi.com/laohuangli/2026-11-21.html', note: '원전 문헌 대조 전 · 행사별 길흉은 판단 보류' };
-
-  // 행사별 전통 길흉: { mansionId: { move:'길'|'흉'|null, open, wedding, contract, build, funeral, source, sourceVersion } }
-  // 문헌 대조 전이라 비어 있다. 비어 있으면 화면은 '판단 보류'를 보여 준다.
-  var EVENTS = [['move', '이사'], ['open', '개업'], ['wedding', '혼례'], ['contract', '계약'], ['build', '건축'], ['funeral', '장례']];
-  var EVENT_RULES = {};
-
-  G.MantraMansionsData = { VERSION: VERSION, GUARD: GUARD, MANSIONS: MANSIONS, SEVEN: SEVEN, DEGREE_SYSTEMS: DEGREE_SYSTEMS, LINK_SYSTEMS: LINK_SYSTEMS, DAY_CYCLE: DAY_CYCLE, EVENTS: EVENTS, EVENT_RULES: EVENT_RULES, BASE_SOURCE: BASE_SOURCE };
+  // ───────────── 나경 28수환 ↔ 24산 대응 프로필 ─────────────
+  // 출전이 확인된 대응표만 넣는다. 유파·문헌별로 따로 두고 하나를 정답으로 보지 않는다.
+  // 형식: { id, school, title, edition, sourceUrl, quote, status:'verified', table: { 子:['虛',…], … }(24산 한자 → 걸치는 수 한자들) }
+  // 2026-11-21 조사: 열람 가능한 원문에서 24산 단위 대응표를 찾지 못했다(《나경투해》·《나경정문침》 원문 미확보).
+  //   참고로 《유문숭리절충감여완효록》 '星辰定位之圖'에 12지 경계(예: 卯는 氐 3도에서 시작)를 노래한 구절이 있으나 24산 표가 아니고 전사가 불완전해 넣지 않았다.
+  var LUOPAN_PROFILES = [];
+  G.MantraMansionsData = { VERSION: VERSION, GUARD: GUARD, MANSIONS: MANSIONS, SEVEN: SEVEN, BASE_SOURCE: BASE_SOURCE, DEGREE_PROFILES: DEGREE_PROFILES, LUOPAN_PROFILES: LUOPAN_PROFILES };
   if (typeof module !== 'undefined' && module.exports) module.exports = G.MantraMansionsData;
 })(typeof window !== 'undefined' ? window : globalThis);

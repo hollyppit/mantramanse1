@@ -54,7 +54,10 @@
     return '입력 ' + rec.azimuth + '°(' + (rec.referenceNorth === 'magnetic' ? '자북' : '진북') + ') = ' + rec.correctedAzimuth + '°(' + (rec.correctedReference === 'true' ? '진북' : '자북') + '), 자기편각 ' + rec.magneticDeclination + '° 적용. 풍수 계산은 입력 각도를 그대로 씁니다.';
   }
 
-  var api = { VERSION: VERSION, normalize: normalize, sitting: sitting, record: record, forFengshui: forFengshui, northText: northText, REF: REF, SRC: SRC };
+  // 24산: 子(0°)를 중심으로 15°씩. 현공 엔진(fengshui-engine.js mountainAt)과 같은 경계를 쓰되, 그 엔진을 부르지 않고 공통 나침반 층에서 따로 계산한다.
+  var MT24 = ['子', '癸', '丑', '艮', '寅', '甲', '卯', '乙', '辰', '巽', '巳', '丙', '午', '丁', '未', '坤', '申', '庚', '酉', '辛', '戌', '乾', '亥', '壬'];
+  function mountain24(az) { if (az === '' || az == null || !isFinite(+az)) return null; var i = Math.floor(norm(+az + 7.5) / 15) % 24; return { index: i, hanja: MT24[i], center: i * 15 }; }
+  var api = { VERSION: VERSION, normalize: normalize, sitting: sitting, record: record, forFengshui: forFengshui, northText: northText, mountain24: mountain24, MT24: MT24, REF: REF, SRC: SRC };
   G.MantraBearing = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

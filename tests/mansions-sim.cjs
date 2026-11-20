@@ -1,10 +1,10 @@
-// 공통 방위·28수 엔진·통합 해석·택일 값일수 검증 (2026-11-21)
+// 공통 방위·28수 도수 프로필·나경 대응·통합 해석·날짜별 28수 검증 (2026-11-21)
 //   node tests/mansions-sim.cjs
 const fs = require('fs'), path = require('path'), vm = require('vm'), cp = require('child_process');
 const root = path.join(__dirname, '..');
 let net = 0; globalThis.fetch = () => { net++; throw new Error('network'); };
-for (const f of ['fengshui-data.js', 'fengshui-engine.js', 'bearing.js', 'mansions-data.js', 'mansions-engine.js', 'space-integrate.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
-const F = globalThis.MantraFengshui, B = globalThis.MantraBearing, MD = globalThis.MantraMansionsData, MS = globalThis.MantraMansions, SI = globalThis.MantraSpaceIntegrate;
+for (const f of ['fengshui-data.js', 'fengshui-engine.js', 'bearing.js', 'mansions-data.js', 'mansions-engine.js', 'space-integrate.js', 'mansions-day-data.js', 'mansions-day.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
+const F = globalThis.MantraFengshui, B = globalThis.MantraBearing, MD = globalThis.MantraMansionsData, MS = globalThis.MantraMansions, SI = globalThis.MantraSpaceIntegrate, DD = globalThis.MantraMansionDayData, X = globalThis.MantraMansionDay;
 const fails = []; const ok = (c, m) => { if (!c) fails.push(m); };
 const eq = (a, b, m) => ok(JSON.stringify(a) === JSON.stringify(b), `${m}: ${JSON.stringify(a)} != ${JSON.stringify(b)}`);
 const jdn = (y, m, d) => Math.floor(Date.UTC(y, m - 1, d) / 864e5) + 2440588;
@@ -42,55 +42,88 @@ ok(MD.MANSIONS.every(m => ['id', 'name', 'hanja', 'group', 'guardian', 'traditio
 ok(MD.MANSIONS.every(m => m.mansionStart === null && m.angularExtent === null), '체계 없이 도수를 사실처럼 넣지 않음');
 const bad = MS.checkBase(MD.MANSIONS.slice(0, 27)); ok(bad.length >= 2, '누락 감지');
 ok(MS.checkBase(MD.MANSIONS.concat([MD.MANSIONS[0]])).some(e => /중복/.test(e)), '중복 감지');
-eq(MD.DEGREE_SYSTEMS.length + MD.LINK_SYSTEMS.length, 0, '승인된 도수·연계 체계 없음(미확정)');
+eq(MD.LUOPAN_PROFILES.length, 0, '출전 확인된 나경 대응표 없음(미확정)');
 
-// 출전 없는 데이터 / 균등 분할 / 미승인 → 계산 차단
-const ext = {}; const H = [12, 9, 15, 5, 5, 18, 11.25, 26, 8, 12, 10, 17, 16, 9, 16, 12, 14, 11, 16, 2, 9, 33, 4, 15, 7, 18, 18, 17]; MD.MANSIONS.forEach((m, i) => ext[m.id] = H[i]);
-const sysT = { id: 'test-only', sourceVersion: 'TEST-FIXTURE', title: '시험용 체계(실제 자료 아님)', tradition: '시험', source: '테스트 고정값 — 화면에 쓰지 않음', coordinateSystem: 'equatorial', circumference: 365.25, referencePoint: '각수 시작', unit: '古度', extents: ext, conversionRule: { offsetDeg: 0, direction: 'cw', source: '시험 규칙' }, approved: true };
-ok(MS.validateSystem(sysT).ok, '시험 체계 검증 통과: ' + MS.validateSystem(sysT).errors.join(','));
-ok(!MS.validateSystem(Object.assign({}, sysT, { source: '' })).ok, '출전 없으면 거부');
-ok(!MS.validateSystem(Object.assign({}, sysT, { approved: false })).ok, '미승인 거부');
-ok(!MS.validateSystem(Object.assign({}, sysT, { referencePoint: null })).ok, '기준점 없으면 거부');
-const eqExt = {}; MD.MANSIONS.forEach(m => eqExt[m.id] = 360 / 28);
-ok(MS.validateSystem(Object.assign({}, sysT, { extents: eqExt, circumference: 360 })).errors.some(e => /균등/.test(e)), '360/28 균등 분할 거부');
-ok(!MS.validateSystem(Object.assign({}, sysT, { extents: Object.assign({}, ext, { jing: 30 }) })).ok, '도수 합이 한 바퀴와 다르면 거부');
-let threw = false; try { MS.layout(Object.assign({}, sysT, { source: null })); } catch (e) { threw = true; } ok(threw, '출전 없는 체계로 layout 계산 차단');
-// 경계·순환
-eq([0, 11.99, 12, 20.99, 21, 365.24, 365.25, -0.01, 730.5].map(d => MS.mansionAtDegree(sysT, d).id), ['jiao', 'jiao', 'kang', 'kang', 'di', 'zhen', 'jiao', 'zhen', 'jiao'], '도수 경계·순환');
-ok(MS.layout(sysT)[27].mansionEnd === 365.25, '마지막 수 끝 = 한 바퀴');
-ok(!MS.azimuthToMansion(Object.assign({}, sysT, { conversionRule: null }), 90).ok, '변환 규칙 없으면 방위 판정 안 함(천문 좌표 ≠ 방위각)');
-// 체계별 구분: 두 체계를 넣으면 결과가 체계별로 따로 나온다
-const sysT2 = Object.assign({}, sysT, { id: 'test-2', sourceVersion: 'TEST-2', conversionRule: { offsetDeg: 180, direction: 'cw', source: '시험 규칙2' } });
-MD.DEGREE_SYSTEMS.push(sysT, sysT2);
-const an2 = MS.analyze({ bearing: B.record({ azimuth: 10 }) });
-ok(an2.status === 'determined' && an2.results.length === 2 && an2.results[0].sourceVersion !== an2.results[1].sourceVersion, '체계별 결과 분리');
-MD.DEGREE_SYSTEMS.length = 0;
-// 지금 상태: 미확정 안내
+// 도수 프로필: 원문별 분리·상태
+const P = id => MD.DEGREE_PROFILES.find(p => p.id === id);
+eq(MD.DEGREE_PROFILES.map(p => p.id + ':' + p.status), ['hhs-sifen-equatorial:verified', 'hhs-sifen-ecliptic:verified', 'jinshu-jingchu:unconfirmed', 'hanshu-santong:incomplete', 'huainanzi-tianwen:unconfirmed'], '도수 프로필 5개·상태');
+const EQ = P('hhs-sifen-equatorial');
+ok(MS.isBaseStandard(EQ) && MS.defaultProfile() === EQ, '기본 = 후한서 적도도(365¼, 적도, ¼ 위치 확인)');
+eq([EQ.extents.dou, EQ.extents.wei_roof, EQ.extents.bi_wall, EQ.extents.jing, EQ.extents.zi], [26.25, 17, 9, 33, 2], '교감기 반영 값(斗26¼·危17·壁9·井33·觜2)');
+eq(['east', 'north', 'west', 'south'].map(g => MD.MANSIONS.filter(m => m.group === g).reduce((s, m) => s + EQ.extents[m.id], 0)), [75, 98.25, 80, 112], '방위별 합(원문 東75·北98¼·西80·南112)');
+ok(!MS.isBaseStandard(P('hhs-sifen-ecliptic')) && MS.validateProfile(P('hhs-sifen-ecliptic')).ok, '황도도는 검증되지만 기본 기준(적도) 아님');
+['jinshu-jingchu', 'hanshu-santong', 'huainanzi-tianwen'].forEach(id => ok(!MS.validateProfile(P(id)).ok, id + ' 은 계산에 쓰면 안 됨'));
+ok(MS.validateProfile(P('huainanzi-tianwen')).errors.some(e => /합/.test(e)), '회남자 합 불일치 감지');
+ok(MS.validateProfile(P('hanshu-santong')).errors.some(e => /끝수/.test(e)), '한서 ¼ 위치 없음 감지');
+ok(MD.DEGREE_PROFILES.every(p => p.sourceUrl && p.quote && p.edition && p.work), '모든 프로필에 출전·인용·판본');
+// 차단 규칙
+const T = Object.assign({}, EQ, { id: 'test' });
+ok(!MS.validateProfile(Object.assign({}, T, { sourceUrl: '' })).ok, '출전 없으면 거부');
+ok(!MS.validateProfile(Object.assign({}, T, { quote: null })).ok, '원문 인용 없으면 거부');
+ok(!MS.validateProfile(Object.assign({}, T, { status: 'unconfirmed' })).ok, '미검증 거부');
+ok(!MS.validateProfile(Object.assign({}, T, { referencePoint: null })).ok, '기준점 없으면 거부');
+const eqExt = {}; MD.MANSIONS.forEach(m => eqExt[m.id] = 365.25 / 28);
+ok(MS.validateProfile(Object.assign({}, T, { extents: eqExt })).errors.some(e => /균등/.test(e)), '균등 분할 거부');
+ok(!MS.validateProfile(Object.assign({}, T, { extents: Object.assign({}, EQ.extents, { jing: 30 }) })).ok, '井30 일괄 적용 시 합 불일치로 거부');
+ok(!MS.validateProfile(Object.assign({}, T, { fractionAt: 'ji' })).ok, '¼ 위치가 원문과 다르면 거부');
+let threw = false; try { MS.layout(P('huainanzi-tianwen')); } catch (e) { threw = true; } ok(threw, '미확정 프로필로 layout 계산 차단');
+// 경계·순환(古度)
+eq([0, 11.99, 12, 20.99, 21, 365.24, 365.25, -0.01, 730.5].map(d => MS.mansionAtDegree(EQ, d).id), ['jiao', 'jiao', 'kang', 'kang', 'di', 'zhen', 'jiao', 'zhen', 'jiao'], '도수 경계·순환');
+eq([75, 74.99, 75 + 26.25, 75 + 26.24].map(d => MS.mansionAtDegree(EQ, d).id), ['dou', 'ji', 'niu', 'dou'], '斗 ¼ 경계');
+ok(Math.abs(MS.layout(EQ)[27].mansionEnd - 365.25) < 1e-9, '마지막 수 끝 = 주천');
+ok(Math.abs(MS.guToRingDeg(EQ, 365.25 / 2) - 180) < 1e-9 && MS.guToRingDeg(EQ, 365.25) === 0, '그림용 비례 환산(古度→360 눈금) 별도');
+ok(Math.abs(MS.ringLayout(EQ).reduce((s, l) => s + l.ringSpan, 0) - 360) < 1e-9, '원형도 합 360');
+// 나경 대응: 출전 없는 표 거부, 유파별 분리
+ok(!MS.azimuthToMansions(90).ok, '대응표 없으면 방위 판정 안 함');
+const tbl = {}; B.MT24.forEach((h, i) => tbl[h] = [MD.MANSIONS[i % 28].hanja]);
+const L1 = { id: 'test-a', school: '시험 유파 A', title: '시험(실제 자료 아님)', edition: '테스트', sourceUrl: 'test://a', quote: 'test', status: 'verified', table: tbl };
+ok(MS.validateLuopan(L1).ok, '시험 대응표 형식 통과: ' + MS.validateLuopan(L1).errors.join(','));
+ok(!MS.validateLuopan(Object.assign({}, L1, { sourceUrl: '' })).ok && !MS.validateLuopan(Object.assign({}, L1, { status: 'draft' })).ok, '출전·검증 없는 대응표 거부');
+const t23 = Object.assign({}, tbl); delete t23['壬']; ok(!MS.validateLuopan(Object.assign({}, L1, { table: t23 })).ok, '24산 일부만 있는 표 거부');
+MD.LUOPAN_PROFILES.push(L1, Object.assign({}, L1, { id: 'test-b', school: '시험 유파 B', table: Object.assign({}, tbl, { '子': ['虛', '危'] }) }));
+const an2 = MS.analyze({ bearing: B.record({ azimuth: 2 }) });
+ok(an2.status === 'determined' && an2.results.length === 2 && an2.results[0].school !== an2.results[1].school && an2.results[1].mansions.length === 2, '유파별 결과 분리(합치지 않음)');
+MD.LUOPAN_PROFILES.length = 0;
+// 24산 공통 계산 = 현공 엔진과 같은 경계
+for (let d = -720; d <= 720; d += 0.25) if (B.mountain24(d).hanja !== F.mountainAt(d).mt.hj) { fails.push('24산 불일치 ' + d); break; }
+// 지금 상태
 const an = MS.analyze({ bearing: B.record({ azimuth: 187 }) });
-ok(an.status === 'unconfirmed' && an.results.length === 0 && an.undetermined.some(t => /데이터 미확정/.test(t)), '승인 체계 없으면 미확정·판정 안 함');
-ok(!an.links.available && /따로/.test(an.links.text), '24산 연계 없음 → 따로 표시');
-ok(an.limits.some(t => /현공비성 결과를 바꾸거나/.test(t)), '현공 불간섭 안내');
+ok(an.status === 'unconfirmed' && an.results.length === 0 && an.ring && an.ring.length === 28 && an.mountain.hanja === '午', '도수 원형도 있음·방위 판정 없음');
+ok(!an.links.available && /독립/.test(an.links.text), '24산 연계 없음 → 독립 표시');
+ok(an.limits.some(t => /현공비성 결과를 바꾸거나/.test(t)) && an.limits.some(t => /방위각과 같은 값이 아닙/.test(t)), '현공 불간섭·좌표 구분 안내');
 
 // ── 4. 통합: 입력을 바꾸지 않는다
 const it = SI.integrate({ xuankong: xk, mansions: an, bearing: B.record({ azimuth: 187 }) });
 ok(JSON.stringify(xk) === xkJson, '통합 해석이 현공 결과를 바꿈');
 ok(it.xuankong && it.mansions && it.common.length && it.differ.length && it.undetermined.length && it.personal === null, '통합 해석 구성');
-ok(/미확정/.test(it.mansions.result), '28수 미확정 표시');
+ok(/판정하지 않음/.test(it.mansions.result) && it.common.some(t => /午/.test(t)), '28수 방위 판정 없음·공통 24산 표시');
 const BAN = /보장|반드시|집값이 오|사업이 성공|건강해집니다/;
-ok(![JSON.stringify(it), JSON.stringify(an), JSON.stringify(MD.MANSIONS)].some(t => BAN.test(t.replace(/보장하지 않/g, ''))), '보장·단정 표현 금지');
+ok(![JSON.stringify(it), JSON.stringify(an), JSON.stringify(MD.MANSIONS), JSON.stringify(Object.values(DD.OMEN_PROFILES[0].entries).map(e => e.plain))].some(t => BAN.test(t.replace(/보장하지 않/g, ''))), '보장·단정 표현 금지');
 
-// ── 5. 값일수
-const d1 = MS.dayMansion(jdn(2026, 11, 21)), d2 = MS.dayMansion(jdn(2000, 1, 1)), d3 = MS.dayMansion(jdn(2026, 11, 22));
+// ── 5. 날짜별 28수(별도 모듈)
+const d1 = X.day(jdn(2026, 11, 21)), d2 = X.day(jdn(2000, 1, 1)), d3 = X.day(jdn(2026, 11, 22));
 eq([d1.mansion.hanja, d2.mansion.hanja, d3.mansion.hanja], ['女', '胃', '虛'], '값일수 기준일·교차 확인일');
-for (let j = jdn(1990, 1, 1); j < jdn(2040, 1, 1); j += 37) { const r = MS.dayMansion(j); if (!MS.weekdayConsistent(j, r.mansion)) { fails.push('요일·칠요 불일치 ' + j); break; } }
-ok(MS.dayMansion(jdn(2026, 11, 21) + 28).mansion.id === 'nu', '28일 주기');
-ok(d1.events.length === 6 && d1.events.every(e => e.text === '판단 보류' && e.verdict === null), '행사별 길흉은 판단 보류');
-ok(MS.dayMansion(1, { anchor: null, verified: false }).status === 'pending', '기준일 없으면 보류');
-ok(MS.dayMansion(1, { anchor: { jdn: 1, mansionId: 'nu' }, verified: true, source: '' }).status === 'pending', '출전 없는 기준일이면 보류');
+ok(X.checkAssign(X.assignProfile()).ok, '기준일이 원전 伏斷 조합 11개·칠요와 맞음');
+ok(X.branchOfJdn(jdn(2026, 11, 22)) === 0 && X.branchOfJdn(jdn(2000, 1, 1)) === 6, '일지 계산(2026-11-22 子, 2000-01-01 午)');
+for (let j = jdn(1990, 1, 1); j < jdn(2040, 1, 1); j += 37) { const r = X.mansionOf(j); if (!X.weekdayOk(j, r.mansion)) { fails.push('요일·칠요 불일치 ' + j); break; } }
+ok(X.mansionOf(jdn(2026, 11, 21) + 28).mansion.id === 'nu', '28일 주기');
+const badAnchor = Object.assign({}, X.assignProfile(), { anchor: { ymd: 'x', jdn: jdn(2026, 11, 21), mansionId: 'xu' } });
+ok(!X.checkAssign(badAnchor).ok, '틀린 기준일은 원전 대조에서 걸림');
+DD.ASSIGN_PROFILES[0].status = 'draft'; ok(X.mansionOf(jdn(2026, 11, 21)).status === 'pending', '검증 안 된 배속 → 미확정'); DD.ASSIGN_PROFILES[0].status = 'verified';
+// 길흉: 원문·해설 분리, 판본 미확인 → 판정 미확정
+const E = DD.OMEN_PROFILES[0];
+eq(Object.keys(E.entries).length, 28, '28수 원문 모두');
+ok(Object.values(E.entries).every(e => e.original.length === 2 && e.original.every(l => /[一-鿿]/.test(l)) && e.plain && !/[一-鿿]{4}/.test(e.plain.replace(/\(.*?\)/g, ''))), '원문(한문)과 해설(한국어) 분리');
+ok(Object.values(E.entries).every(e => Object.values(e.readings).every(r => e.original.join('').includes(r.evidence) && ['길', '흉'].includes(r.verdict))), '행사 근거 구절이 모두 원문 안에 있음');
+ok(d1.omens.status === 'edition-unconfirmed' && d1.omens.events.every(e => e.verdict === null), '판본 미확인 → 모든 행사 판정 미확정');
+eq(d1.omens.events.filter(e => ['move', 'open', 'contract'].includes(e.id)).map(e => e.text), ['미확정 — 원문에 이 행사 언급 없음', '미확정 — 원문에 이 행사 언급 없음', '미확정 — 원문에 이 행사 언급 없음'], '이사·개업·계약은 원문 언급 없음');
+ok(d1.omens.events.find(e => e.id === 'build').reference === '흉' && /원문 참고/.test(d1.omens.events.find(e => e.id === 'build').text), '女수 건축: 원문 참고 흉(판정은 미확정)');
+E.status = 'verified'; ok(X.omens('jiao').events.find(e => e.id === 'wedding').verdict === '길' && X.omens('jiao').events.find(e => e.id === 'funeral').verdict === '흉', '검증 프로필이면 원문 읽기대로 판정'); E.status = 'edition-unconfirmed';
+ok(!/dayMansion|DAY_CYCLE|EVENT_RULES/.test(fs.readFileSync(path.join(root, 'mansions-engine.js'), 'utf8')), '천문방위 엔진과 날짜 모듈 분리');
 
 // ── 6. 화면 연결
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const order = ['fengshui-engine.js', 'bearing.js', 'mansions-data.js', 'mansions-engine.js', 'space-integrate.js'].map(f => html.indexOf('<script src="' + f + '"></script>'));
+const order = ['fengshui-engine.js', 'bearing.js', 'mansions-data.js', 'mansions-engine.js', 'space-integrate.js', 'mansions-day-data.js', 'mansions-day.js'].map(f => html.indexOf('<script src="' + f + '"></script>'));
 ok(order.every(i => i > 0) && order.every((v, i) => !i || v > order[i - 1]), '스크립트 순서');
 ok(/body \+= spMansionSection\(kind, i, an\);/.test(html) && /28수 천문방위 분석/.test(html) && /통합 공간 해석/.test(html), '28수·통합 카드 연결');
 ok(html.indexOf('body += an ? spResult(kind, i, an)') < html.indexOf('body += spMansionSection(kind, i, an)'), 'B(현공) 다음 C·D 순서');
@@ -100,4 +133,4 @@ ok(!/Mansion|28수|宿/.test(fs.readFileSync(path.join(root, 'engine.js'), 'utf8
 ok(net === 0, '네트워크 호출 없음');
 
 if (fails.length) { console.log('실패 ' + fails.length + '건'); fails.forEach(f => console.log(' - ' + f)); process.exit(1); }
-console.log('OK mansions: 방위 정규화·편각·현공 기준선·28수 데이터·도수 검증 차단·경계 순환·통합·값일수·화면 연결');
+console.log('OK mansions: 방위 정규화·편각·현공 기준선·도수 프로필·나경 대응 차단·경계 순환·통합·날짜 28수·원문 길흉·화면 연결');

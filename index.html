@@ -1127,6 +1127,8 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="mansions-data.js"></script>
 <script src="mansions-engine.js"></script>
 <script src="space-integrate.js"></script>
+<script src="mansions-day-data.js"></script>
+<script src="mansions-day.js"></script>
 <script src="macro-era.js"></script>
 <script src="macro-era-bridge.js"></script>
 <script src="wonhoe.js"></script>
@@ -9819,55 +9821,74 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <p class="small muted">입력 방법: ${rec ? esc(rec.sourceLabel) : '-'}${rec && rec.measuredAt ? ' · ' + esc(new Date(rec.measuredAt).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' })) : ''}. ${rec && rec.azimuth != null ? '좌(뒤쪽) 각도는 ' + rec.sittingAzimuth + '°입니다. ' : ''}편각을 모르면 보정하지 않고(미보정) 입력한 각도를 그대로 씁니다. 풍수(현공) 계산은 보정과 관계없이 입력한 각도를 씁니다.</p>
       ${rec && rec.notes.length ? '<ul class="pos-ul small muted">' + rec.notes.map(n => `<li>${esc(n)}</li>`).join('') + '</ul>' : ''}</details>`;
   }
-  // 원형 방위도: 중앙 나침반(건물 향 바늘) + 바깥 28수 고리. 승인된 도수가 없으면 사신별 7수를 묶은 '분류형' 배치(도수 아님).
+  // 원형 방위도: 중앙 나침반(건물 향 바늘, 360°) + 바깥 28수 고리.
+  // 검증된 적도 도수 프로필이 있으면 고리를 도수 비례로 그린다(古度 → 그림 눈금 환산, 방위각 아님). 없으면 사신별 7수 분류형.
+  // 고리 방향(동방 7수를 오른쪽에, 角→軫 시계 반대 방향)은 보기용이다. 바깥 고리와 안쪽 나침반을 맞대어 읽지 않는다.
   function spMansionSvg(ms, az) {
     const MD = window.MantraMansionsData, cx = 170, cy = 170, R1 = 158, R0 = 118, RT = 138;
     const pt = (r, deg) => [cx + r * Math.sin(deg * Math.PI / 180), cy - r * Math.cos(deg * Math.PI / 180)];
     const arc = (r0, r1, a0, a1) => { const [x0, y0] = pt(r1, a0), [x1, y1] = pt(r1, a1), [x2, y2] = pt(r0, a1), [x3, y3] = pt(r0, a0), lg = Math.abs(a1 - a0) > 180 ? 1 : 0; return `M${x0.toFixed(1)} ${y0.toFixed(1)}A${r1} ${r1} 0 ${lg} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}A${r0} ${r0} 0 ${lg} 0 ${x3.toFixed(1)} ${y3.toFixed(1)}Z`; };
-    const CENTER = { east: 90, north: 0, west: 270, south: 180 }, GAP = 4;
+    const CENTER = { east: 90, north: 0, west: 270, south: 180 };
     let ring = '';
-    ms.groups.forEach(g => {
-      const c0 = CENTER[g.group], col = MD.GUARD[g.group].color;
-      ring += `<path d="${arc(R0, R1, c0 - 45 + GAP, c0 + 45 - GAP)}" fill="${col}" fill-opacity=".10" stroke="${col}" stroke-opacity=".55"/>`;
-      const [lx, ly] = pt(R1 + 9, c0);
-      ring += `<text x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="middle" class="ms-gd" fill="${col}">${esc(MD.GUARD[g.group].ko)}</text>`;
-      g.mansions.forEach((m, k) => {
-        const deg = c0 + 45 - GAP - (k + 0.5) * (90 - 2 * GAP) / 7, [x, y] = pt(RT, deg), on = SP.msSel === m.id;
-        ring += `<g class="ms-it${on ? ' on' : ''}" data-ms="${m.id}" role="button" tabindex="0" aria-label="${esc(m.label + ' · ' + m.guardian)}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="15" fill="${on ? col : 'var(--surface,#fff)'}" fill-opacity="${on ? '.22' : '1'}" stroke="${col}"/><text x="${x.toFixed(1)}" y="${(y + 1).toFixed(1)}" text-anchor="middle" class="ms-hj">${m.hanja}</text><text x="${x.toFixed(1)}" y="${(y + 10).toFixed(1)}" text-anchor="middle" class="ms-ko">${m.name}</text></g>`;
+    if (ms.ring) {
+      const east = ms.ring.filter(l => l.group === 'east'), eMid = (east[0].ringStart + east[6].ringStart + east[6].ringSpan) / 2, th = d => 90 + eMid - d;
+      ms.groups.forEach(g => { const col = MD.GUARD[g.group].color, L = ms.ring.filter(l => l.group === g.group), a = th(L[6].ringStart + L[6].ringSpan), b = th(L[0].ringStart), [lx, ly] = pt(R1 + 9, (a + b) / 2); ring += `<text x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="middle" class="ms-gd" fill="${col}">${esc(MD.GUARD[g.group].ko)}</text>`; });
+      ms.ring.forEach((l, k) => {
+        const m = MD.MANSIONS.find(x => x.id === l.id), col = MD.GUARD[l.group].color, on = SP.msSel === l.id, a0 = th(l.ringStart + l.ringSpan), a1 = th(l.ringStart), mid = (a0 + a1) / 2;
+        const small = l.angularExtent < 6, r = small ? (k % 2 ? RT - 9 : RT + 9) : RT, [x, y] = pt(r, mid);
+        ring += `<g class="ms-it${on ? ' on' : ''}" data-ms="${l.id}" role="button" tabindex="0" aria-label="${esc(m.label + ' · ' + m.guardian + ' · 적도 ' + l.angularExtent + '도')}"><path d="${arc(R0, R1, a0, a1)}" fill="${col}" fill-opacity="${on ? '.32' : '.10'}" stroke="${col}" stroke-opacity=".6"/><text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle" class="ms-hj${small ? ' sm' : ''}">${m.hanja}</text></g>`;
       });
-    });
+    } else {
+      const GAP = 4;
+      ms.groups.forEach(g => {
+        const c0 = CENTER[g.group], col = MD.GUARD[g.group].color;
+        ring += `<path d="${arc(R0, R1, c0 - 45 + GAP, c0 + 45 - GAP)}" fill="${col}" fill-opacity=".10" stroke="${col}" stroke-opacity=".55"/>`;
+        const [lx, ly] = pt(R1 + 9, c0);
+        ring += `<text x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="middle" class="ms-gd" fill="${col}">${esc(MD.GUARD[g.group].ko)}</text>`;
+        g.mansions.forEach((m, k) => {
+          const deg = c0 + 45 - GAP - (k + 0.5) * (90 - 2 * GAP) / 7, [x, y] = pt(RT, deg), on = SP.msSel === m.id;
+          ring += `<g class="ms-it${on ? ' on' : ''}" data-ms="${m.id}" role="button" tabindex="0" aria-label="${esc(m.label + ' · ' + m.guardian)}"><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="15" fill="${on ? col : 'var(--surface,#fff)'}" fill-opacity="${on ? '.22' : '1'}" stroke="${col}"/><text x="${x.toFixed(1)}" y="${(y + 1).toFixed(1)}" text-anchor="middle" class="ms-hj">${m.hanja}</text><text x="${x.toFixed(1)}" y="${(y + 10).toFixed(1)}" text-anchor="middle" class="ms-ko">${m.name}</text></g>`;
+        });
+      });
+    }
     let comp = `<circle cx="${cx}" cy="${cy}" r="78" fill="var(--surface,#fff)" stroke="var(--line,#ccc)"/><circle cx="${cx}" cy="${cy}" r="60" fill="none" stroke="var(--line,#ccc)" stroke-dasharray="2 3"/>`;
     for (let d = 0; d < 360; d += 15) { const [a, b] = pt(78, d), [c2, e] = pt(d % 45 === 0 ? 68 : 73, d); comp += `<line x1="${a.toFixed(1)}" y1="${b.toFixed(1)}" x2="${c2.toFixed(1)}" y2="${e.toFixed(1)}" stroke="var(--ink-2,#888)" stroke-width="${d % 90 === 0 ? 1.6 : .8}"/>`; }
     [['북', 0], ['동', 90], ['남', 180], ['서', 270]].forEach(([n, d]) => { const [x, y] = pt(50, d); comp += `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle" class="ms-cd">${n}</text>`; });
-    if (az != null) { const [x, y] = pt(64, az), [sx, sy] = pt(30, az + 180); comp += `<line x1="${sx.toFixed(1)}" y1="${sy.toFixed(1)}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#b3402f" stroke-width="3" stroke-linecap="round"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="#b3402f"/><text x="${cx}" y="${cy + 30}" text-anchor="middle" class="ms-az">향 ${az}°</text>`; }
+    if (az != null) { const [x, y] = pt(64, az), [sx, sy] = pt(30, az + 180); comp += `<line x1="${sx.toFixed(1)}" y1="${sy.toFixed(1)}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#b3402f" stroke-width="3" stroke-linecap="round"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="#b3402f"/><text x="${cx}" y="${cy + 30}" text-anchor="middle" class="ms-az">향 ${az}°${ms.mountain ? ' · ' + ms.mountain.hanja : ''}</text>`; }
     comp += `<circle cx="${cx}" cy="${cy}" r="5" fill="var(--ink,#222)"/>`;
-    return `<svg class="ms-svg" viewBox="-16 -16 372 372" role="img" aria-label="28수 원형 방위도(분류형)">${ring}${comp}</svg>`;
+    return `<svg class="ms-svg" viewBox="-16 -16 372 372" role="img" aria-label="${ms.ring ? '28수 원형도(고전 적도 도수 비례)' : '28수 원형도(분류형)'}">${ring}${comp}</svg>`;
   }
   function spMansionDetail(ms, rec) {
     const MD = window.MantraMansionsData, m = MD.MANSIONS.find(x => x.id === SP.msSel);
-    if (!m) return '<p class="small muted">고리의 수를 누르면 이름·사신·상징·출전을 보여 드립니다.</p>';
-    const r = ms.results.find(x => x.mansion.id === m.id), sysTxt = ms.status === 'determined' ? ms.results.map(x => x.sourceVersion + ' · ' + x.source).join(' / ') : '데이터 미확정 — 승인된 도수 체계 없음';
+    if (!m) return '<p class="small muted">고리의 수를 누르면 이름·사신·상징·도수·출전을 보여 드립니다.</p>';
+    const l = ms.ring ? ms.ring.find(x => x.id === m.id) : null, p = ms.degreeProfile, fx = v => (Math.round(v * 100) / 100).toString();
     return `<div class="ms-det"><b>${esc(m.label)}</b> · ${esc(m.guardian)} ${esc(m.groupDir)} 7수 중 ${((m.order - 1) % 7) + 1}번째
       <dl class="small"><dt>상징</dt><dd>${esc(m.traditionalSymbolism)}</dd><dt>칠요·금수</dt><dd>${esc(m.dayLuminary)} · ${esc(m.animal)}</dd>
-      <dt>도수 체계·출전</dt><dd>${esc(sysTxt)}</dd><dt>도수(시작~끝)</dt><dd>${r ? esc(r.mansion.mansionStart + '~' + r.mansion.mansionEnd) : '미확정'}</dd>
-      <dt>건물 방위</dt><dd>${rec && rec.azimuth != null ? rec.azimuth + '° (' + esc(rec.referenceLabel) + ')' + (r ? '' : ' — 이 수에 해당하는지는 판정하지 않음') : '향 미입력'}</dd>
-      <dt>기준점</dt><dd>${r ? esc(r.referencePoint) : '미확정'}</dd><dt>이름·배속 출전</dt><dd>${esc(m.source)}</dd><dt>데이터 버전</dt><dd>${esc(MD.VERSION)} · ${esc(m.sourceVersion)}</dd></dl></div>`;
+      <dt>적도 도수</dt><dd>${l ? fx(l.angularExtent) + '도(古度) · 각수 시작에서 ' + fx(l.mansionStart) + '~' + fx(l.mansionEnd) + '도' + (p.fractionAt === m.id ? ' · 주천 끝수 ¼도가 이 수에 붙음' : '') : '미확정'}</dd>
+      <dt>도수 출전</dt><dd>${p ? esc(p.title) + '<br><span class="muted">' + esc(p.edition) + '</span>' : '미확정'}</dd><dt>기준점</dt><dd>${p ? esc(p.referencePoint) : '미확정'}</dd>
+      <dt>건물 방위</dt><dd>${rec && rec.azimuth != null ? rec.azimuth + '° (' + esc(rec.referenceLabel) + ')' + (ms.mountain ? ' · 24산 ' + esc(ms.mountain.hanja) : '') + ' — 이 수에 해당하는지는 판정하지 않음(나경 대응표 미확정)' : '향 미입력'}</dd>
+      <dt>이름·배속 출전</dt><dd>${esc(m.source)}</dd><dt>데이터 버전</dt><dd>${esc(MD.VERSION)}${p ? ' · ' + esc(p.id) : ''}</dd></dl></div>`;
+  }
+  function spMansionProfiles(ms) {
+    const lab = s => s === 'verified' ? '<span class="sp-g">사용</span>' : s === 'incomplete' ? '<span class="sp-n">값 부족</span>' : '<span class="sp-n">미확정</span>';
+    return `<details class="adv"><summary>도수 프로필 ${ms.profiles.length}개 · 나경 대응 프로필 ${ms.links.profiles.length}개</summary><div class="list">${ms.profiles.map(x => `<div class="li"><span class="k">${lab(x.status)}</span><span class="v small"><b>${esc(x.title)}</b>${x.isDefault ? ' · 기본' : ''}${x.profile.coordinateSystem === 'ecliptic' ? ' · 황도(비교용)' : ''}<br><span class="muted">${esc(x.profile.edition)}</span>${x.usable ? '' : '<br><span class="muted">계산에 쓰지 않는 이유: ' + esc(x.profile.statusReason || x.errors.join(', ')) + '</span>'}${(x.profile.notes || []).map(n => '<br><span class="muted">' + esc(n) + '</span>').join('')}<br><a href="${esc(x.profile.sourceUrl)}" target="_blank" rel="noopener">원문 보기</a></span><span></span></div>`).join('')}</div>
+      <p class="small muted">${esc(ms.links.text)}</p></details>`;
   }
   function spMansionSection(kind, i, an) {
     const MS = window.MantraMansions, SI = window.MantraSpaceIntegrate; if (!MS || !SI) return '';
     const c = SP[kind][i], rec = spBearing(c); let ms;
     try { ms = MS.analyze({ bearing: rec }); } catch (e) { return `<section class="card"><p class="err small">28수 계산 오류: ${esc(e.message)}</p></section>`; }
-    const det = ms.status === 'determined', az = rec ? rec.azimuth : null;
-    let h = `<section class="card"><div class="card-h"><h2>28수 천문방위 분석</h2><span class="note">${det ? '도수 체계 적용' : '데이터 미확정 · 분류형'}</span></div>
-      <div class="sumbox"><b>결과</b> — ${det ? esc(ms.results.map(r => r.mansion.label + '(' + r.sourceVersion + ')').join(' · ')) : '28수를 사신별 7수로 나눠 보여 드립니다. 이 건물 방위가 어느 수에 해당하는지는 판정하지 않습니다.'}</div>
-      <p class="small"><b>쉬운 설명</b> — 28수는 달이 하늘을 한 바퀴 도는 길을 28칸으로 나눈 옛 별자리입니다. 동쪽 청룡·북쪽 현무·서쪽 백호·남쪽 주작에 7수씩 묶입니다. 안쪽 나침반의 빨간 바늘이 이 건물의 향입니다.</p>
+    const det = ms.status === 'determined', az = rec ? rec.azimuth : null, dp = ms.degreeProfile;
+    let h = `<section class="card"><div class="card-h"><h2>28수 천문방위 분석</h2><span class="note">${det ? '나경 대응표 적용' : dp ? '고전 적도 도수 · 방위 판정 없음' : '데이터 미확정 · 분류형'}</span></div>
+      <div class="sumbox"><b>결과</b> — ${det ? esc(ms.results.map(r => r.mansions.map(m => m.label).join('·') + '(' + r.school + ')').join(' / ')) : '28수를 ' + (dp ? '고전 적도 도수 비율대로' : '사신별 7수로') + ' 보여 드립니다. 이 건물 방위가 어느 수에 해당하는지는 판정하지 않습니다' + (ms.mountain ? '(공통 나침반 24산: ' + esc(ms.mountain.hanja) + ')' : '') + '.'}</div>
+      <p class="small"><b>쉬운 설명</b> — 28수는 달이 하늘을 한 바퀴 도는 길을 28칸으로 나눈 옛 별자리입니다. 칸마다 폭이 달라 넓은 정(井)수는 33도, 좁은 자(觜)수는 2도입니다. 안쪽 나침반의 빨간 바늘이 이 건물의 향입니다.</p>
       ${spMansionSvg(ms, az)}
-      <p class="small muted" style="text-align:center">바깥 고리는 <b>분류형 배치</b>입니다. 수마다 실제 폭(도수)이 달라 같은 간격으로 그린 위치는 실제 하늘 위치가 아닙니다. 건물 방위는 안쪽 나침반에만 표시하며, 바깥 고리와 맞대어 읽지 않습니다.</p>
+      <p class="small muted" style="text-align:center">${dp ? '바깥 고리는 <b>' + esc(dp.title) + '</b>의 적도 도수(주천 365¼도)를 원 둘레에 비례로 옮긴 그림입니다.' : '바깥 고리는 <b>분류형 배치</b>로, 실제 폭(도수)을 반영하지 않았습니다.'} 고리 방향은 보기 편하게 정한 것이며, 건물 방위는 안쪽 나침반에만 표시합니다. 바깥 고리와 맞대어 읽지 않습니다.</p>
       ${spMansionDetail(ms, rec)}
-      <p class="small"><b>근거</b> — 사신 배속과 순서: 《사기·천관서》 이래 전통 천문 분류. 도수 자료: ${det ? '승인된 체계 출전 참고' : '문헌마다 수치·기준이 달라(예: 《회남자·천문훈》과 《한서·율력지》의 정수 도수 차이) 아직 한 체계로 확정하지 않았습니다.'}</p>
-      <p class="small"><b>적용 전통</b> — 동양 전통 천문(사신·28수). 24산과의 연계: ${esc(ms.links.text)}</p>
+      <p class="small"><b>근거</b> — 사신 배속과 순서: 《사기·천관서》 이래 전통 천문 분류. 도수: ${dp ? esc(dp.title) + '(' + esc(dp.edition) + ')' : '검증된 프로필 없음'}. 문헌마다 수치가 달라(《회남자》 井 30, 《진서》 경초력 斗 455/1843 등) 프로필을 따로 보존합니다.</p>
+      <p class="small"><b>적용 전통</b> — 동양 전통 천문(사신·적도 28수). 24산과의 연계: ${esc(ms.links.text)}</p>
       <p class="small muted"><b>한계</b> — ${ms.limits.map(esc).join(' ')}</p>
-      ${ms.undetermined.length ? '<ul class="pos-ul small muted">' + ms.undetermined.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>' : ''}</section>`;
+      ${ms.undetermined.length ? '<ul class="pos-ul small muted">' + ms.undetermined.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>' : ''}${spMansionProfiles(ms)}</section>`;
     const it = SI.integrate({ xuankong: an ? an.xuankong : null, mansions: ms, bearing: rec });
     const row = (t, o) => o ? `<div class="li"><span class="k">${t}</span><span class="v small"><b>${esc(o.result)}</b><br>${esc(o.easy)}<br><span class="muted">근거: ${esc(o.basis)} · 전통: ${esc(o.school)}<br>한계: ${esc(o.limit)}</span></span><span></span></div>` : '';
     h += `<section class="card"><div class="card-h"><h2>통합 공간 해석</h2><span class="note">합산하지 않음</span></div>
@@ -9887,26 +9908,26 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const g = ev.target.closest && ev.target.closest('[data-ms]'); if (!g || (ev.key !== 'Enter' && ev.key !== ' ')) return;
     ev.preventDefault(); SP.msSel = SP.msSel === g.dataset.ms ? '' : g.dataset.ms; render();
   });
-  { const st = document.createElement('style'); st.textContent = '.ms-svg{display:block;width:100%;max-width:360px;margin:8px auto}.ms-svg .ms-it{cursor:pointer}.ms-svg .ms-it:focus{outline:none}.ms-svg .ms-it:focus circle{stroke-width:2.5}.ms-hj{font-size:12px;font-weight:700;fill:var(--ink,#222)}.ms-ko{font-size:7.5px;fill:var(--ink-2,#666)}.ms-gd{font-size:10px;font-weight:700}.ms-cd{font-size:11px;fill:var(--ink-2,#666);font-weight:700}.ms-az{font-size:10px;fill:#b3402f;font-weight:700}.ms-det{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}.ms-det dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:6px 0 0}.ms-det dt{color:var(--ink-2);white-space:nowrap}.ms-det dd{margin:0}'; document.head.appendChild(st); }
-  // 택일: 날의 28수(값일수)를 독립 항목으로. 길일 점수에는 더하거나 빼지 않는다.
-  function tkMansion(jdn) {
-    const MS = window.MantraMansions; if (!MS) return null;
-    return MS.dayMansion(jdn);
-  }
-  function tkMansionCell(jdn) { if (!spOn()) return ''; const r = tkMansion(jdn); return r && r.status === 'ok' ? esc(r.mansion.label) : '<span class="muted">보류</span>'; }
+  { const st = document.createElement('style'); st.textContent = '.ms-svg{display:block;width:100%;max-width:360px;margin:8px auto}.ms-svg .ms-it{cursor:pointer}.ms-svg .ms-it:focus{outline:none}.ms-svg .ms-it:focus circle{stroke-width:2.5}.ms-hj{font-size:12px;font-weight:700;fill:var(--ink,#222)}.ms-ko{font-size:7.5px;fill:var(--ink-2,#666)}.ms-hj.sm{font-size:10px}.ms-svg .ms-it.on path{stroke-width:2}.ms-orig{font-size:.95rem;line-height:1.7}.ms-gd{font-size:10px;font-weight:700}.ms-cd{font-size:11px;fill:var(--ink-2,#666);font-weight:700}.ms-az{font-size:10px;fill:#b3402f;font-weight:700}.ms-det{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}.ms-det dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:6px 0 0}.ms-det dt{color:var(--ink-2);white-space:nowrap}.ms-det dd{margin:0}'; document.head.appendChild(st); }
+  // 택일: 날의 28수(값일수)와 행사별 길흉 원문을 독립 항목으로(mansions-day.js). 길일 점수에는 더하거나 빼지 않는다.
+  function tkMansion(jdn) { const X = window.MantraMansionDay; if (!X) return null; try { return X.day(jdn); } catch (e) { return { status: 'pending', text: '미확정 — ' + e.message }; } }
+  function tkMansionCell(jdn) { if (!spOn()) return ''; const r = tkMansion(jdn); return r && r.status === 'ok' ? esc(r.mansion.label) : '<span class="muted">미확정</span>'; }
   function tkMansionCard(list) {
-    if (!spOn() || !window.MantraMansions || !list.length) return '';
+    if (!spOn() || !window.MantraMansionDay || !list.length) return '';
     const r0 = tkMansion(list[0].jdn); if (!r0) return '';
-    const MD = window.MantraMansionsData, ok = r0.status === 'ok';
-    const ev = ok ? r0.events : MD.EVENTS.map(e => ({ label: e[1], text: '판단 보류' }));
-    const next = ok ? list.slice(0, 7).map(r => { const x = tkMansion(r.jdn); return `<span class="chip">${r.m}.${r.d} ${esc(x.mansion.label)}</span>`; }).join(' ') : '';
+    const MD = window.MantraMansionsData, DD = window.MantraMansionDayData, ok = r0.status === 'ok', om = ok ? r0.omens : null;
+    const ev = ok ? om.events : DD.EVENTS.map(e => ({ label: e[1], text: '미확정', evidence: null }));
+    const next = ok ? list.slice(0, 7).map(r => { const x = tkMansion(r.jdn); return x && x.status === 'ok' ? `<span class="chip">${r.m}.${r.d} ${esc(x.mansion.label)}</span>` : ''; }).join(' ') : '';
+    const anc = ok ? MD.MANSIONS.find(m => m.id === r0.profile.anchor.mansionId) : null;
     return `<section class="card"><div class="card-h"><h2>날의 28수(값일수)</h2><span class="note">점수에 반영하지 않는 참고 항목</span></div>
       ${ok ? `<div class="sumbox"><b>결과</b> — ${list[0].m}.${list[0].d}은 <b>${esc(r0.mansion.label)}</b>수(${esc(r0.guardian)} · ${esc(r0.mansion.dayLuminary)} · ${esc(r0.mansion.animal)})입니다.</div><div class="sp-chips small">${next}</div>` : `<div class="sumbox">${esc(r0.text)}</div>`}
       <p class="small"><b>쉬운 설명</b> — 날마다 28수가 하나씩 돌아가며 그날을 맡는다고 보는 전통 달력 표기입니다. 28일마다 같은 수가 다시 돌아오고, 각 수는 요일이 정해져 있습니다(각수=목요일 등).</p>
-      <h3>행사별 전통 길흉</h3><div class="sp-chips small">${ev.map(e => `<span class="chip">${esc(e.label)} · ${esc(e.text)}</span>`).join('')}</div>
-      <p class="small"><b>근거</b> — ${ok ? esc(r0.source) + ` · 기준일 ${esc(r0.anchor.ymd)} = ${esc(MD.MANSIONS.find(m => m.id === r0.anchor.mansionId).label)}수` : '기준일 미확정'}</p>
+      ${ok && om.original.length ? `<h3>원문</h3><p class="small ms-orig" lang="zh-Hant">${om.original.map(esc).join('<br>')}</p><p class="small muted">${esc(om.head || '')}</p><h3>쉬운 해설</h3><p class="small">${esc(om.plain || '')}</p>` : ''}
+      <h3>행사별 전통 길흉</h3><div class="list">${ev.map(e => `<div class="li"><span class="k">${esc(e.label)}</span><span class="v small">${esc(e.text)}${e.evidence ? '<br><span class="muted" lang="zh-Hant">원문 근거: ' + esc(e.evidence) + '</span>' : ''}</span><span></span></div>`).join('')}</div>
+      <p class="small"><b>근거</b> — 배속: ${ok ? esc(r0.profile.statusText) + ` 기준일 ${esc(r0.profile.anchor.ymd)} = ${esc(anc.label)}수.` : '미확정'}${ok && om.profile ? ` 길흉 원문: ${esc(om.profile.title)} — ${esc(om.profile.edition)}.` : ''}</p>
+      ${ok ? `<details class="adv"><summary>출전 자세히</summary><ul class="pos-ul small">${r0.profile.sources.map(s => `<li><b>${esc(s.role)}</b>: ${esc(s.title)} — <a href="${esc(s.url)}" target="_blank" rel="noopener">원문 보기</a></li>`).join('')}${om.profile ? `<li><b>길흉 원문</b>: <a href="${esc(om.profile.sourceUrl)}" target="_blank" rel="noopener">${esc(om.profile.title)}</a></li>` + om.profile.transcriptionNotes.map(n => `<li class="muted">${esc(n)}</li>`).join('') : ''}</ul></details>` : ''}
       <p class="small"><b>적용 전통</b> — 통서(通書) 계열 값일수. 방위 도수(공간·명당의 28수)와는 별개의 날짜 순환 계산입니다.</p>
-      <p class="small muted"><b>한계</b> — 이사·개업·혼례·계약·건축·장례별 길흉은 문헌마다 다르고 아직 원전 대조를 마치지 않아 모두 '판단 보류'입니다. 위 추천 날짜의 점수(건제·충합·귀인·용신)는 28수와 무관하게 그대로입니다.</p></section>`;
+      <p class="small muted"><b>한계</b> — ${ok && om.profile ? esc(om.profile.statusText) + ' ' + esc(om.profile.readingStatus) + ' ' : ''}이사·개업·계약은 원문에 언급이 없어 미확정입니다. 위 추천 날짜의 점수(건제·충합·귀인·용신)는 28수와 무관하게 그대로입니다.</p></section>`;
   }
 
   function renderSpace(force) {
