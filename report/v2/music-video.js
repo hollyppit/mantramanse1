@@ -259,7 +259,7 @@
   function loadScript(src) { return new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = function () { no(new Error('스크립트를 불러오지 못했습니다')); }; document.head.appendChild(s); }); }
   var exportLibs = null;
   function loadExport() {
-    if (!exportLibs) exportLibs = Promise.all([root.Mp4Muxer ? 0 : loadScript(BASE + 'vendor/mp4-muxer-5.1.5.js'), R.MusicVideoExport ? 0 : loadScript(BASE + 'music-video-export.js?v=20261121d-mv')]).catch(function (e) { exportLibs = null; throw e; });
+    if (!exportLibs) exportLibs = Promise.all([root.Mp4Muxer ? 0 : loadScript(BASE + 'vendor/mp4-muxer-5.1.5.js'), R.MusicVideoExport ? 0 : loadScript(BASE + 'music-video-export.js?v=20261121g-mv')]).catch(function (e) { exportLibs = null; throw e; });
     return exportLibs;
   }
   function endScreen(el, d, track, replay) {
