@@ -619,6 +619,8 @@
     }
   });
   $('#v-home').addEventListener('change', function (e) { if (e.target.id === 'xAuto' && S.xp) { S.xp.auto = e.target.checked; xpSave(); } });
+  var loveCompatP=null;
+  function loveCompatScript(){if(R.LoveCompat)return Promise.resolve();return loveCompatP||(loveCompatP=new Promise(function(ok){var s=document.createElement('script');s.src='love-compat.js?v=20261120-lc';s.onload=ok;s.onerror=ok;setTimeout(ok,4000);document.head.appendChild(s);}));}
   async function beginReader() {
     if(!PREVIEW && R.Editorial && !S.editorialLoaded){
       S.editorialLoaded=true;
@@ -640,6 +642,8 @@
     if(!PREVIEW&&R.FlowChapters){try{if(await R.FlowChapters.readyWithin(2500))S.rep=R.FlowChapters.add(S.rep,S.sd,S.name,window.Manse,S.ch);}catch(e){elog('caught','flow.chapters');}}
     // 건강·사고수 상세 장 6개(health-chapters.js, 스위치 healthChapters): 종합풀이 '건강 및 사고수' 장 바로 뒤
     if(!PREVIEW&&R.HealthChapters){try{if(await R.HealthChapters.readyWithin(2500))S.rep=R.HealthChapters.add(S.rep,S.sd,S.name,window.Manse,S.ch);}catch(e){elog('caught','health.chapters');}}
+    // 인연운 심화 마지막 장 '그 사람과 나의 궁합'(love-compat.js, /api/love-compat): 보유 기간 동안 하루 10회 궁합. 스크립트는 여기서만 불러 index.html 은 그대로 둔다
+    if(!PREVIEW){try{await loveCompatScript();if(R.LoveCompat)S.rep=R.LoveCompat.add(S.rep,S.sd,S.name,window.Manse,S.ch);}catch(e){elog('caught','love.compat');}}
     if (!PREVIEW) S.rep.readingPrefetch = true;
     // 서사 엔진(life-narrative.js) 스위치·게시 규칙이 본문보다 늦게 도착하면, 이미 그려진 시범 장만 다시 그린다
     if(!PREVIEW&&R.LifeNarrative&&window.addEventListener)window.addEventListener('mantra:life-narrative',function(){(S.rep&&S.rep.chapters||[]).forEach(function(c,ci){var id=c.editorialContractId||c.id,article=document.getElementById('ch-'+c.id);if(!R.LifeNarrative.CHAPTERS[id]||!article||!c.readingCore||!c.readingFeature||!R.ReadingText)return;try{var f=R.SealReader&&R.SealReader.capture(article);if(R.SealReader)R.SealReader.unmount(article);if(R.ReadingMedia)R.ReadingMedia.unmount(article);R.ReadingText.update(article,c,ci);mountSeal(article,c,ci);if(R.SealReader)R.SealReader.restoreFocus(article,f);if(R.ReadingMedia)R.ReadingMedia.mount(article,{reduce:reduce,saveData:saveData});linkBasisReferences(article);}catch(e){elog('caught','life-narrative.rerender');}});});

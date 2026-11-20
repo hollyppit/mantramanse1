@@ -85,12 +85,15 @@
     return out;
   }
   // 엔진으로 만든 장(flow-chapters.js 등)은 관리자 순서 설정이 없으니, c.placeAfter 에 적힌 장 바로 뒤로 옮긴다(그 장이 같은 세계에 있을 때만)
+  // placeLast(love-compat.js '그 사람과 나의 궁합'): 관리자 순서와 상관없이 그 세계의 마지막 장
   function placeAfter(arr) {
+    var last = arr.filter(function (c) { return c.placeLast; });
+    if (last.length) arr = arr.filter(function (c) { return !c.placeLast; });
     var moved = arr.filter(function (c) { return c.placeAfter && arr.some(function (o) { return o.id === c.placeAfter; }); });
-    if (!moved.length) return arr;
+    if (!moved.length) return arr.concat(last);
     var rest = arr.filter(function (c) { return moved.indexOf(c) < 0; });
     moved.forEach(function (c) { var k = rest.findIndex(function (o) { return o.id === c.placeAfter; }); rest.splice(k + 1, 0, c); });
-    return rest;
+    return rest.concat(last);
   }
 
   // 합쳐진 세계(건강·전생·개운법)로 가던 예전 문서의 챕터는 종합풀이로 보낸다.
