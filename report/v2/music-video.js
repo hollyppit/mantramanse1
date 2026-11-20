@@ -140,7 +140,7 @@
   var OPT_KEY = 'mv:opts';
   function pick(el, preview, o, go) {
     var lib = L(), O = lib.OPTIONS, saved = {}; try { saved = JSON.parse(root.localStorage.getItem(OPT_KEY) || '{}') || {}; } catch (e) { saved = {}; }
-    var cur = lib.optsOf(saved), el0 = preview.inputs && preview.inputs.el, g0 = preview.gender || (o.birth && o.birth.gender);
+    var cur = lib.optsOf(o.opts || saved), el0 = preview.inputs && preview.inputs.el, g0 = preview.gender || (o.birth && o.birth.gender);
     var label = function (k, x) {
       if (k === 'genre' && x.id === 'auto' && el0) return '내 사주 추천 · ' + (O.genre.filter(function (y) { return y.id === lib.EL_GENRE[el0]; })[0] || {}).ko;
       if (k === 'vocal' && x.id === 'auto' && (g0 === 'F' || g0 === 'M')) return '사주대로 · ' + (g0 === 'F' ? '여성' : '남성');

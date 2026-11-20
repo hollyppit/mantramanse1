@@ -8,7 +8,7 @@
 (function () {
   'use strict';
   var pw = '', root = null, D = null, busy = false, stop = false, ERR = {};   // ERR: 칸별 마지막 그림 생성 실패 이유(이 화면에서만)
-  var S = { topic: 'self', gender: 'F', day: '', sim: { year: 1992, month: 6, day: 23, hour: 14, minute: 0, gender: 'F' }, simTopic: 'self', rScope: 'topic', rVid: true, rMax: 30 };
+  var S = { topic: 'self', gender: 'F', day: '', sim: { year: 1992, month: 6, day: 23, hour: 14, minute: 0, gender: 'F' }, simTopic: 'self', rScope: 'topic', rVid: true, rMax: 30, opt: null };
   var L = function () { return window.ReportV2 && window.ReportV2.MusicVideoLyrics; };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var $ = function (s) { return root.querySelector(s); };
@@ -80,11 +80,26 @@
       ['year', 'month', 'day', 'hour'].map(function (k) { return '<label>' + { year: '년', month: '월', day: '일', hour: '시' }[k] + ' <input type="number" data-mvsim="' + k + '" value="' + esc(sm[k]) + '" style="width:' + (k === 'year' ? 74 : 54) + 'px"></label>'; }).join('') +
       '<label>성별 <select data-mvsim="gender"><option value="F"' + (sm.gender === 'F' ? ' selected' : '') + '>여</option><option value="M"' + (sm.gender === 'M' ? ' selected' : '') + '>남</option></select></label>' +
       '<label>주제 <select id="mvpSimTopic">' + lib.TOPICS.map(function (t) { return '<option value="' + t + '"' + (S.simTopic === t ? ' selected' : '') + '>' + esc(lib.TOPIC_KO[t]) + '</option>'; }).join('') + '</select></label>' +
-      '<button class="btn" id="mvpPlay">테스트 노래 만들기·재생</button></div><div id="mvpLyrics" style="margin-top:10px"></div></div>';
+      '<button class="btn" id="mvpPlay">테스트 노래 만들기·재생</button></div>' + optRow() + '<div id="mvpLyrics" style="margin-top:10px"></div></div>';
     root.innerHTML = h;
     wire(); preview();
   }
 
+  /* 사용자와 같은 옵션 고르기(장르·분위기·보컬, 2026-11-21): 고른 값으로 가사·스타일 미리보기, 테스트 재생도 이 값으로 시작한다(재생 화면의 옵션 고르기에 미리 골라 둠) */
+  function optCur() { var lib = L(); if (!S.opt) { var saved = {}; try { saved = JSON.parse(localStorage.getItem('mv:opts') || '{}') || {}; } catch (e) { } S.opt = lib.optsOf(saved); } return S.opt; }
+  function optLabel(k, x) {
+    var lib = L();
+    if (k === 'genre' && x.id === 'auto') { var el = null; try { el = simSd().dayMaster.el; } catch (e) { } var g = el && lib.OPTIONS.genre.filter(function (y) { return y.id === lib.EL_GENRE[el]; })[0]; return '내 사주 추천' + (g ? ' · ' + g.ko : ''); }
+    if (k === 'vocal' && x.id === 'auto') return '사주대로 · ' + (S.sim.gender === 'M' ? '남성' : '여성');
+    return x.ko;
+  }
+  function optRow() {
+    var lib = L(), cur = optCur(), O = lib.OPTIONS;
+    return '<div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">' + [['genre', '장르'], ['mood', '분위기'], ['vocal', '보컬']].map(function (g) {
+      return '<div class="row" style="gap:6px;flex-wrap:wrap;align-items:center"><span class="muted" style="min-width:44px">' + g[1] + '</span>' + O[g[0]].map(function (x) {
+        return '<button class="btn" style="padding:4px 10px;font-size:13px' + (cur[g[0]] === x.id ? ';outline:2px solid #C9A25C;font-weight:700' : '') + '" data-mvopt="' + g[0] + '" data-v="' + x.id + '">' + esc(optLabel(g[0], x)) + '</button>'; }).join('') + '</div>';
+    }).join('') + '<p class="muted" style="margin:2px 0 0;font-size:12px">사용자가 뮤직비디오를 열면 보는 것과 같은 옵션입니다. 모두 기본(내 사주 추천·기본·사주대로)이면 예전과 같은 곡(캐시), 다른 조합은 새 곡을 만듭니다(관리자는 하루 상한 없음).</p></div>';
+  }
   function simSd() {
     var s = S.sim, inp = { year: +s.year, month: +s.month, day: +s.day, minute: 0, gender: s.gender, calendar: 'solar', city: '서울' };
     if (s.hour !== '' && s.hour != null && !isNaN(+s.hour)) inp.hour = +s.hour;
@@ -94,10 +109,10 @@
     var box = $('#mvpLyrics'); if (!box) return;
     var lib = L(), t = S.simTopic;
     if (t === 'newyear') { box.innerHTML = '<p class="muted">신년운세 가사는 서버가 승인된 토정 현대어 풀이(괘 제목·한 해 어조·월별 어조)로 조합합니다. 테스트 재생으로 확인하세요. 검수 전 괘는 노래를 만들지 않습니다.</p>'; return; }
-    var song; try { song = lib.compose(simSd(), t); } catch (e) { song = null; }
+    var song; try { var x = lib.inputsOf(simSd(), t); song = x ? lib.fromInputs(Object.assign(x, { opt: optCur() })) : null; } catch (e) { song = null; }
     if (!song) { box.innerHTML = '<p class="muted">이 입력으로는 가사를 만들 수 없습니다.</p>'; return; }
     var fmt = function (ms) { var s = Math.round(ms / 1000); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); };
-    box.innerHTML = '<p style="margin:0 0 6px"><b>' + esc(song.title) + '</b> · ' + fmt(song.totalMs) + ' · 스타일 ' + esc(song.style.join(', ')) + '</p>' +
+    box.innerHTML = '<p style="margin:0 0 6px"><b>' + esc(song.title) + '</b> · ' + fmt(song.totalMs) + ' · 옵션 ' + esc(song.optKo || '') + ' · 스타일 ' + esc(song.style.join(', ')) + '</p>' +
       song.sections.map(function (s) { return '<div style="margin:8px 0"><b>' + esc(s.name) + '</b> <span class="muted">' + fmt(s.startMs) + '~' + fmt(s.startMs + s.durationMs) + ' · 패널 ' + esc(s.panel) + '</span><div style="white-space:pre-line;line-height:1.6">' + esc(s.lines.join('\n')) + '</div></div>'; }).join('');
   }
 
@@ -111,8 +126,9 @@
     root.querySelectorAll('[data-mvvid]').forEach(function (b) { b.onclick = function () { makeVideo(b.dataset.mvvid); }; });
     root.querySelectorAll('[data-mvvchk]').forEach(function (b) { b.onclick = function () { checkVideo(b.dataset.mvvchk, false); }; });
     root.querySelectorAll('[data-mvvclr]').forEach(function (b) { b.onclick = function () { if (!confirm('이 칸의 영상을 빼고 그림만 쓸까요?')) return; call('POST', '', { panel: { slot: b.dataset.mvvclr, clearVideo: true } }).then(function (d) { if (d.panels) mergeP(d.panels); draw(); }); }; });
-    root.querySelectorAll('[data-mvsim]').forEach(function (inp) { inp.onchange = function () { S.sim[inp.dataset.mvsim] = inp.value; preview(); }; });
+    root.querySelectorAll('[data-mvsim]').forEach(function (inp) { inp.onchange = function () { S.sim[inp.dataset.mvsim] = inp.value; draw(); };   /* 사주가 바뀌면 옵션 이름(내 사주 추천 장르·사주대로 보컬)도 바뀐다 */ });
     $('#mvpSimTopic').onchange = function () { S.simTopic = this.value; preview(); };
+    root.querySelectorAll('[data-mvopt]').forEach(function (b) { b.onclick = function () { optCur()[b.dataset.mvopt] = b.dataset.v; try { localStorage.setItem('mv:opts', JSON.stringify(S.opt)); } catch (e) { } draw(); }; });
     $('#mvpFlag').onclick = function () {
       var v = !(D && D.flag);
       if (v && !confirm('유료 주제 화면에 내 사주 뮤직비디오 카드를 띄웁니다. 구매 회원이 누를 때마다 노래 생성 비용이 듭니다.\n켜시겠습니까?')) return;
@@ -130,8 +146,8 @@
       var MV = window.ReportV2.MusicVideo; if (!MV) return toast('플레이어(music-video.js)를 불러오지 못했습니다', true);
       if (!confirm('관리자 권한으로 실제 노래를 만듭니다(처음이면 일레븐랩스 비용 1곡, 같은 사주·주제는 캐시). 진행할까요?')) return;
       var h = function () { return { authorization: 'Bearer ' + pw }; };
-      if (S.simTopic === 'newyear') { var s = S.sim, b = { year: +s.year, month: +s.month, day: +s.day, gender: s.gender, calendar: 'solar' }; if (s.hour !== '' && !isNaN(+s.hour)) { b.hour = +s.hour; b.minute = 0; } MV.open({ topic: 'newyear', birth: b, year: 2027, headers: h, onLocked: function () { toast('잠김 응답 — 관리자 비밀번호를 확인하세요', true); } }); }
-      else MV.open({ sd: simSd(), topic: S.simTopic, headers: h, onLocked: function () { toast('잠김 응답 — 관리자 비밀번호를 확인하세요', true); } });
+      if (S.simTopic === 'newyear') { var s = S.sim, b = { year: +s.year, month: +s.month, day: +s.day, gender: s.gender, calendar: 'solar' }; if (s.hour !== '' && !isNaN(+s.hour)) { b.hour = +s.hour; b.minute = 0; } MV.open({ topic: 'newyear', birth: b, year: 2027, opts: optCur(), headers: h, onLocked: function () { toast('잠김 응답 — 관리자 비밀번호를 확인하세요', true); } }); }
+      else MV.open({ sd: simSd(), topic: S.simTopic, opts: optCur(), headers: h, onLocked: function () { toast('잠김 응답 — 관리자 비밀번호를 확인하세요', true); } });
     };
   }
   /* 패널 영상: 칸 그림을 JPEG 로 바꿔 시작 프레임으로 올리고(Kling 은 JPG·PNG 만) 작업을 맡긴 뒤 15초마다 확인한다 */

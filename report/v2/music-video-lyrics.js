@@ -14,7 +14,7 @@
 (function (root) {
   'use strict';
   var R = root.ReportV2 = root.ReportV2 || {};
-  var VERSION = 'mv-lyrics-7';
+  var VERSION = 'mv-lyrics-8';
 
   /* 영어 힙합 추임새(ad-lib, 사용자 요청 2026-11-18): 줄 끝에 괄호로 붙인다 — 일레븐랩스는 괄호 안을 뒤에서 받쳐 주는 추임새로 부른다.
      일간 오행의 비트 색깔에 맞춘 묶음(목 저지 클럽·화 레이지·토 아프로비츠·금 록 랩·수 멜로딕 랩). 욕설·약물·폭력 표현은 쓰지 않는다.
@@ -143,18 +143,18 @@
 
   /* ── 훅 앞 2줄: 용신 / 뒤 2줄: 희신 */
   var HOOK_YONG = {
-    목: ['초록빛 바람이 내 창가로 불어와', '닫힌 첫 장을 넘길 손이 돋아나'],
-    화: ['붉은빛 바람이 내 뺨으로 불어와', '숨겨 둔 내 색이 무대 조명을 켜'],
-    토: ['노란빛 바람이 내 발끝으로 불어와', '한 삽씩 쌓은 흙이 내 언덕이 돼'],
-    금: ['하얀빛 바람이 내 책상으로 불어와', '무딘 하루를 갈아 거울처럼 맑아'],
-    수: ['푸른빛 바람이 내 이마로 불어와', '쉬어 간 웅덩이에 하늘이 담겨']
+    목: ['초록빛 바람이 내 쪽으로 불어와', '피어나, 피어나, 닫힌 문도 피어나'],
+    화: ['붉은빛 바람이 내 쪽으로 불어와', '타올라, 타올라, 숨긴 나도 타올라'],
+    토: ['노란빛 바람이 내 쪽으로 불어와', '쌓여 가, 쌓여 가, 내 하루가 쌓여 가'],
+    금: ['하얀빛 바람이 내 쪽으로 불어와', '빛나, 빛나, 다듬은 만큼 빛나'],
+    수: ['푸른빛 바람이 내 쪽으로 불어와', '흘러가, 흘러가, 막혀도 흘러가']
   };
   var HOOK_HEE = {
-    목: ['뿌리는 사람 곁으로 뻗어 가', '천천히 가도 나이테는 늘어 가'],
-    화: ['햇볕 쪽으로 웅크린 어깨를 펴', '켜 둔 등불이 나를 데려가'],
-    토: ['서두르지 않아도 땅은 굳어 가', '발 딛은 여기가 내 무대가 돼'],
-    금: ['군더더기 덜어 내고 선을 그어', '날 세운 하루가 은빛으로 반짝여'],
-    수: ['돌아가는 강물도 길은 안 잃어', '결국 바다에 닿는 물처럼 나는 가']
+    목: ['뿌리는 깊게, 가지는 높게', '천천히 자라도 나는 안 멈춰'],
+    화: ['어깨는 펴고, 고개는 들고', '햇볕 쪽으로 한 걸음 더'],
+    토: ['서두르지 마, 땅은 안 무너져', '발 딛은 여기가 내 무대야'],
+    금: ['덜어 낼수록 선명해져', '날 세운 하루가 은빛으로 반짝'],
+    수: ['돌아가도 돼, 물은 길을 알아', '끝내 바다로, 나는 흘러가']
   };
 
   /* ── 벌스 2 ①: 약한 십성 무리 (앞 2줄: 힘들었던 것 / 뒤 2줄: 해법 — 빈 오행이 있으면 뒤 2줄은 빈 오행 문구) */
@@ -530,8 +530,8 @@
 
   /* 일레븐랩스 음악 API(music_v2 / music_v2_5) composition_plan(chunks) 모양 — 구간마다 길이(duration_ms)를 지정해 패널·자막 시점이 정확히 맞는다 */
   var LOCAL = { intro: ['groovy intro with bass and keys', 'filtered groove opening up', 'ad-libs'], verse1: ['confident rap verse', 'clear korean rap vocals', 'riding the groove', 'syncopated in-the-pocket flow', 'full groove'],
-    hook: ['big catchy chorus', 'groovy sing-along hook', 'soulful vocal harmonies', 'english tag line', 'full groove with bass'], verse2: ['rap verse with rising energy', 'clear korean rap vocals', 'bouncy flow', 'cadence switch-ups', 'groove building'],
-    hook2: ['big catchy chorus', 'groovy sing-along hook', 'soulful vocal harmonies', 'english tag line', 'full groove with bass', 'extra energy'], bridge: ['stripped-down groove', 'bass and keys breakdown', 'soulful melodic rap', 'drums back in'], outro: ['groove ride-out', 'smooth fade of the band', 'ad-libs', 'clean ending'] };
+    hook: ['big catchy chorus', 'groovy sing-along hook', 'repeated chant phrase', 'call-and-response backing vocals', 'soulful vocal harmonies', 'english tag line', 'full groove with bass'], verse2: ['rap verse with rising energy', 'clear korean rap vocals', 'bouncy flow', 'cadence switch-ups', 'groove building'],
+    hook2: ['big catchy chorus', 'groovy sing-along hook', 'repeated chant phrase', 'call-and-response backing vocals', 'soulful vocal harmonies', 'english tag line', 'full groove with bass', 'extra energy'], bridge: ['stripped-down groove', 'bass and keys breakdown', 'soulful melodic rap', 'drums back in'], outro: ['groove ride-out', 'smooth fade of the band', 'ad-libs', 'clean ending'] };
   function toElevenPlan(song) {
     return { chunks: song.sections.map(function (s) {
       return { text: s.tag + '\n' + s.lines.join('\n'), duration_ms: s.durationMs, positive_styles: song.style.concat(LOCAL[s.id] || []), negative_styles: song.negativeStyle.slice() };
