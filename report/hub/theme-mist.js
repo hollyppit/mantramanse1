@@ -54,13 +54,13 @@
       var t = (e.textContent || '').trim(); if (!t || t.length > 40) continue;
       e.classList.add(toneOf(t));
     }
-    // 점수 고리: 점수로 색을 정한다(70↑ 최고 · 55↑ 좋음 · 45↑ 무난 · 35↑ 주의 · 그 아래 부담) — 그래프 신호 색과 같은 기준
+    // 점수 고리: 점수로 색을 정한다(2026-11-20 3단계: 59↑ 좋음 · 44 이하 조심 · 그 사이 무난) — 흐름 점수 +18·−12 를 0~100 눈금((흐름+100)÷2)으로 옮긴 값, 그래프 신호 등급과 같은 기준
     var rings = sc.querySelectorAll('.ring');
     for (var q = 0; q < rings.length; q++) {
       var rg = rings[q], p = parseFloat(rg.style.getPropertyValue('--p'));
       if (isNaN(p)) { var bt = rg.querySelector('b'); p = bt ? parseFloat(bt.textContent) : NaN; }
       if (isNaN(p)) continue;
-      var lv = p >= 70 ? 'best' : p >= 55 ? 'good' : p >= 45 ? 'mid' : p >= 35 ? 'warn' : 'bad';
+      var lv = p >= 59 ? 'good' : p > 44 ? 'mid' : 'bad';
       if (rg.getAttribute('data-lv') !== lv) rg.setAttribute('data-lv', lv);
     }
     // 오늘의 운 분야 카드·흐름 문구: 등급 낱말(높음·무난·낮음…)로 카드 전체 색을 정한다

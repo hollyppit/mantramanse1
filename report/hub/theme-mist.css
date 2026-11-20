@@ -474,11 +474,9 @@ html.theme-mist #hub .dc small, html.theme-mist #hub details.dd summary small{ c
 
 /* 점수 고리: 점수 등급별 색(최고 진초록·좋음 초록·무난 회청·주의 주황·부담 빨강), 숫자도 같은 계열 */
 html.theme-mist #hub .ring[data-lv]{ background: conic-gradient(var(--rc) calc(var(--p) * 1%), rgba(52,72,80,.12) 0); }
-html.theme-mist #hub .ring[data-lv="best"]{ --rc: #15803D; --rci: #14532D; }
 html.theme-mist #hub .ring[data-lv="good"]{ --rc: #22C55E; --rci: #166534; }
 html.theme-mist #hub .ring[data-lv="mid"]{ --rc: #64748B; --rci: #334155; }
-html.theme-mist #hub .ring[data-lv="warn"]{ --rc: #F59E0B; --rci: #92400E; }
-html.theme-mist #hub .ring[data-lv="bad"]{ --rc: #DC2626; --rci: #991B1B; }
+html.theme-mist #hub .ring[data-lv="bad"]{ --rc: #EA580C; --rci: #9A3412; }
 html.theme-mist #hub .ring[data-lv] b{ color: var(--rci) !important; }
 
 /* 자미두수 그래프(10년 대한 흐름·해마다 흐름): 다섯 단계를 신호 색으로 — 매우 약함 빨강 · 약함 주황 · 보통 회청 · 강함 초록 · 매우 강함 진초록 (원래 '강함'이 보라라 좋고 나쁨이 안 읽혔다) */

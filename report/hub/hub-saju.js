@@ -95,14 +95,15 @@
   var FLD = [['money', '재물운', 'MONEY'], ['work', '일·사업운', 'WORK'], ['love', '연애운', 'LOVE'], ['health', '컨디션', 'BODY']];
   var tags = function (a) { return a.map(function (x) { return '<i>' + esc(String(x).trim()) + '</i>'; }).join(''); }; // 띄어쓰기를 지운 해시태그(#협력할사람에게연락하기)는 읽기 어려워 문장 그대로 칩으로 보여 준다
   var lis = function (a) { return '<ul class="dl">' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
-  // Calendar presentation policy: suitability sets height; burden takes priority in classification.
-  // Read thresholds from the engine so monthly and daily caution cannot drift apart.
+  // Calendar presentation policy: suitability sets height.
+  // 2026-11-20: 조심 = 만세력과 같은 신호 등급(/luck-grade.js: 흐름 점수 −12 이하). 부담 신호(defense)는 등급과 따로 '부담 점검'으로만 보인다.
   var CalendarPolicy = H.CalendarPolicy = {
     assess: function (ev) {
       var M = root.Manse, f = ev.flow, fit = ev.fitScore;
       var burden = f.overlays.defense.score;
-      var cautious = fit <= M.LUCK_CFG.condition.caution || burden >= M.FLOW_CONFIG.overlay.defense;
-      return { score: clamp((fit + 100) / 2), fit: fit, burden: burden, cautious: cautious, key: cautious ? 'defense' : f.primaryFlow };
+      var LG = root.MantraLuckGrade, grade = LG ? LG.flow(fit, M) : { k: fit <= M.LUCK_CFG.condition.caution ? 'care' : fit >= M.LUCK_CFG.condition.tailwind ? 'good' : 'ok', n: fit <= M.LUCK_CFG.condition.caution ? '조심' : fit >= M.LUCK_CFG.condition.tailwind ? '좋음' : '무난' };
+      var cautious = grade.k === 'care';
+      return { score: clamp((fit + 100) / 2), fit: fit, burden: burden, cautious: cautious, grade: grade, key: cautious ? 'defense' : f.primaryFlow };
     }
   };
   // 운 분석 층(2026-11-18): 만세력 일진 달력처럼 선택한 달(월운)·날(일진)에 한눈에 보기 + 오행 겹쳐 보기 — luck-layers-view.js
@@ -134,9 +135,9 @@
   }
   function calendar(ch, ctx) {
     var M = root.Manse, today = Saju.todayData(ch), y = today.y, m = today.mo, d = today.d, purpose = '', range = 30, weekday = 'all', generation = 0, searchY = y, searchM = m;
-    // 2026-11-20: 월 막대·날짜 칸의 이름은 옛 6분류 대신 십신(엔진 stemTG). 색은 십성 묶음 색, 주의 기준(cautious)에 걸리면 붉은색 그대로.
-    var picked = null, C = { draws: 0 }, TGK = { 비견: 'bg', 겁재: 'bg', 식신: 'ss', 상관: 'ss', 편재: 'jc', 정재: 'jc', 편관: 'gw', 정관: 'gw', 편인: 'is', 정인: 'is' }, names = { 'tg-bg': '비겁', 'tg-ss': '식상', 'tg-jc': '재성', 'tg-gw': '관성', 'tg-is': '인성', defense: '주의' };
-    var fk = function (x) { return assess(x).cautious ? 'defense' : 'tg-' + (TGK[x.stemTG] || 'bg'); }, tgn = function (x) { return (x.stemTG || '') + (assess(x).cautious ? ' · 주의' : ''); };
+    // 2026-11-20: 월 막대·날짜 칸의 이름은 옛 6분류 대신 십신(엔진 stemTG). 색은 십성 묶음 색, 조심 등급(cautious)이면 붉은색.
+    var picked = null, C = { draws: 0 }, TGK = { 비견: 'bg', 겁재: 'bg', 식신: 'ss', 상관: 'ss', 편재: 'jc', 정재: 'jc', 편관: 'gw', 정관: 'gw', 편인: 'is', 정인: 'is' }, names = { 'tg-bg': '비겁', 'tg-ss': '식상', 'tg-jc': '재성', 'tg-gw': '관성', 'tg-is': '인성', defense: '조심' };
+    var fk = function (x) { return assess(x).cautious ? 'defense' : 'tg-' + (TGK[x.stemTG] || 'bg'); }, tgn = function (x) { return (x.stemTG || '') + (assess(x).cautious ? ' · 조심' : ''); };
     var key = function (yy,mm,dd) { return yy + '-' + ('0'+mm).slice(-2) + '-' + ('0'+dd).slice(-2); };
     var assess = function (x) { return CalendarPolicy.assess(x.ev); };
     var score = function (x) { return assess(x).score; };
@@ -156,22 +157,22 @@
       choices.forEach(function (x) { lookup[key(x.y,x.m,x.d)] = x; });
       var top = choices.filter(function (x) { return x.score >= 62; }).slice(0,3);
       var avoid = choices.filter(function (x) { return x.score < 48; }).sort(function (a,b) { return a.score-b.score || a.jdn-b.jdn; }).slice(0,3);
-      var tailwind = days.filter(function (x) { return x.ev.flow.condition.name === '순풍' && !assess(x).cautious; }).sort(function (a,b) { return b.ev.fitScore-a.ev.fitScore || a.date[2]-b.date[2]; }).slice(0,3);
+      var tailwind = days.filter(function (x) { return assess(x).grade.k === 'good'; }).sort(function (a,b) { return b.ev.fitScore-a.ev.fitScore || a.date[2]-b.date[2]; }).slice(0,3);
       var risk = days.filter(function (x) { return assess(x).cautious; }).sort(function (a,b) { return a.ev.fitScore-b.ev.fitScore || a.date[2]-b.date[2]; }).slice(0,3);
       function hasDate(list,k) { return list.some(function (x) { return (x.date ? key(x.date[0],x.date[1],x.date[2]) : key(x.y,x.m,x.d)) === k; }); }
       function dateList(list,title,tone,election) {
         return '<section class="mc-shortlist '+tone+'"><h3>'+title+'</h3><p class="dsub">'+(election ? tone==='good'?'목적에 맞는 일정 후보':'중요한 일정은 다른 날짜와 비교해 보세요' : tone==='good'?'우선순위를 정해 움직이기 좋은 흐름':'일정에 여유를 두고 확인을 늘리세요')+'</p>'+(list.length ? list.map(function (x) {
           var a=x.date || [x.y,x.m,x.d], k=key(a[0],a[1],a[2]), detail;
           if(election) detail=x.reasons.filter(function (r) { return tone==='good'?r.pts>0:r.pts<0; }).slice(0,2).map(function (r) { return r.text; }).join(' · ');
-          else detail=tone==='good'?(x.stemTG||'')+' · '+x.ev.flow.condition.name:(x.ev.flow.overlays.defense.active?'부담 점검 · ':'')+(x.ev.flow.overlays.volatility.active?'변화 · ':'')+(x.stemTG?x.stemTG+' · ':'')+x.ev.flow.condition.name;
+          else detail=tone==='good'?(x.stemTG||'')+' · '+assess(x).grade.n:(x.ev.flow.overlays.defense.active?'부담 점검 · ':'')+(x.ev.flow.overlays.volatility.active?'변화 · ':'')+(x.stemTG?x.stemTG+' · ':'')+assess(x).grade.n;
           return '<button type="button" class="mc-pick" data-date="'+k+'"><b>'+a[1]+'/'+a[2]+' · '+(election?'택일 '+x.score:'흐름 '+score(x))+'</b><span>'+esc(detail)+'</span></button>';
-        }).join('') : '<p class="mc-empty">'+(tone==='good'?'이 조건에 해당하는 날짜가 없습니다.':'이 조건에서 뚜렷한 주의 날짜는 없습니다.')+'</p>')+'</section>';
+        }).join('') : '<p class="mc-empty">'+(tone==='good'?'이 조건에 해당하는 날짜가 없습니다.':'이 조건에서 뚜렷하게 조심할 날짜는 없습니다.')+'</p>')+'</section>';
       }
       var h = '<section class="fortune-panel"><p class="kick">FORTUNE CALENDAR</p><h1 class="h1">월운 그래프 · 일진 캘린더</h1><p class="sub">달의 흐름을 보고, 내 일정에 맞는 날을 골라보세요.</p><div class="mc-nav"><button type="button" data-year="-1" aria-label="이전 연도">‹</button><h2>'+y+'년 월운 그래프</h2><button type="button" data-year="1" aria-label="다음 연도">›</button></div><div class="mc-chart">';
       months.forEach(function (x) { var dt = new Date(x.startMs+9*3600e3), yy=dt.getUTCFullYear(), mm=dt.getUTCMonth()+1, state=assess(x), sc=state.score; h += '<button type="button" class="mc-bar'+(yy===y && mm===m?' active':'')+'" data-month="'+yy+'-'+mm+'" aria-label="'+yy+'년 '+mm+'월 '+esc(x.termName)+', '+esc(tgn(x))+', 적합도 '+sc+', 부담도 '+state.burden+'"><b>'+sc+'</b><i class="flow-'+fk(x)+'" style="height:'+sc+'%"></i><span>'+mm+'월</span><small>'+esc(x.termName)+'</small></button>'; });
-      h += '</div><div class="mc-legend">'+Object.keys(names).map(function (k) { return '<span><i class="flow-'+k+'"></i>'+names[k]+'</span>'; }).join('')+'</div><p class="dsub">높이: 내 사주와의 적합도(0~100). 색: 그 달 천간 십신의 묶음(비겁·식상·재성·관성·인성), 붉은 막대는 주의가 필요한 달입니다. 월을 누르면 캘린더가 바뀝니다.<br>월운은 절기 기준이며 양력 한 달 안에서도 절기 전후로 흐름이 바뀝니다. 1월 막대는 다음 해 소한입니다.</p><details class="fc-method"><summary>월운·일진 계산 기준</summary><p>적합도 = (엔진 적합 점수 + 100) ÷ 2를 반올림한 값입니다. 원국의 오행 균형·조후·십성 구조·합충 관계·통관을 개인별 필요에 따라 가중 합산합니다. 월운은 해당 절기의 작용 60%와 대운 40%를 반영하고, 일진은 해당 날짜의 작용을 계산합니다.</p><p>부담도는 적합도·오행 균형·구조·조후·관계의 부담과 변동성에 작용 강도를 반영한 별도 지수입니다. 부담도 40 이상 또는 엔진 적합 점수 −12 이하이면 붉은색(주의)으로 표시합니다. 그 외에는 그 달·그날 천간의 십신을 글자로, 십성 묶음(비겁·식상·재성·관성·인성)을 색으로 표시합니다.</p><p>주의 날짜는 위 주의 기준에 해당하는 모든 날입니다. 택일에서는 목적별 점수 48 미만인 날도 주의 표시합니다. 변동성만 높다는 이유로 주의 날짜로 정하지 않습니다.</p></details></section>';
+      h += '</div><div class="mc-legend">'+Object.keys(names).map(function (k) { return '<span><i class="flow-'+k+'"></i>'+names[k]+'</span>'; }).join('')+'</div><p class="dsub">높이: 내 사주와의 적합도(0~100). 색: 그 달 천간 십신의 묶음(비겁·식상·재성·관성·인성), 붉은 막대는 조심 등급인 달입니다. 월을 누르면 캘린더가 바뀝니다.<br>월운은 절기 기준이며 양력 한 달 안에서도 절기 전후로 흐름이 바뀝니다. 1월 막대는 다음 해 소한입니다.</p><details class="fc-method"><summary>월운·일진 계산 기준</summary><p>적합도 = (엔진 적합 점수 + 100) ÷ 2를 반올림한 값입니다. 원국의 오행 균형·조후·십성 구조·합충 관계·통관을 개인별 필요에 따라 가중 합산합니다. 월운은 해당 절기의 작용 60%와 대운 40%를 반영하고, 일진은 해당 날짜의 작용을 계산합니다.</p><p>부담도는 적합도·오행 균형·구조·조후·관계의 부담과 변동성에 작용 강도를 반영한 별도 지수입니다. 신호 등급은 만세력과 같은 좋음·무난·조심 3단계이며, 엔진 적합 점수 −12 이하(조심)이면 붉은색으로 표시합니다. 부담도 40 이상은 등급과 따로 &quot;부담 점검&quot;으로 알려 줍니다. 그 외에는 그 달·그날 천간의 십신을 글자로, 십성 묶음(비겁·식상·재성·관성·인성)을 색으로 표시합니다.</p><p>조심 날짜는 위 조심 기준에 해당하는 모든 날입니다. 택일에서는 목적별 점수 48 미만인 날도 조심 표시합니다. 변동성만 높다는 이유로 조심 날짜로 정하지 않습니다.</p></details></section>';
       var activeMonths = M.wolun(ch,y-1).concat(months).filter(function (x) { return x.startMs <= Date.UTC(y,m-1,d,3); }), activeMonth = activeMonths[activeMonths.length-1];
-      if (activeMonth) h += '<p class="mc-month-note">선택한 날의 월운: ' + esc(activeMonth.termName) + ' · ' + esc(tgn(activeMonth)) + ' · ' + esc(activeMonth.ev.flow.condition.name) + ' · 적합도 ' + score(activeMonth) + ' · 부담도 ' + assess(activeMonth).burden + '<br>' + esc((!assess(activeMonth).cautious && root.MantraTenGodLuck && root.MantraTenGodLuck.copy(activeMonth.stemTG, 'wolun') ? root.MantraTenGodLuck.copy(activeMonth.stemTG, 'wolun').do : '') || {opportunity:'새로운 연락과 작은 시도를 시작해 보세요.',expansion:'하던 일을 넓히되 감당할 수 있는 범위를 정하세요.',harvest:'결과를 정리하고 마무리할 일을 챙겨 보세요.',accumulation:'배우고 준비하면서 다음 단계의 기반을 다져 보세요.',defense:'새로운 확장보다 일정의 여유, 지출과 약속의 재확인을 우선하세요.'}[assess(activeMonth).key]) + '</p>';
+      if (activeMonth) h += '<p class="mc-month-note">선택한 날의 월운: ' + esc(activeMonth.termName) + ' · ' + esc(tgn(activeMonth)) + ' · ' + esc(assess(activeMonth).grade.n) + ' · 적합도 ' + score(activeMonth) + ' · 부담도 ' + assess(activeMonth).burden + '<br>' + esc((!assess(activeMonth).cautious && root.MantraTenGodLuck && root.MantraTenGodLuck.copy(activeMonth.stemTG, 'wolun') ? root.MantraTenGodLuck.copy(activeMonth.stemTG, 'wolun').do : '') || {opportunity:'새로운 연락과 작은 시도를 시작해 보세요.',expansion:'하던 일을 넓히되 감당할 수 있는 범위를 정하세요.',harvest:'결과를 정리하고 마무리할 일을 챙겨 보세요.',accumulation:'배우고 준비하면서 다음 단계의 기반을 다져 보세요.',defense:'새로운 확장보다 일정의 여유, 지출과 약속의 재확인을 우선하세요.'}[assess(activeMonth).key]) + '</p>';
       var pm = picked ? M.wolun(ch,y-1).concat(months, M.wolun(ch,y+1)).filter(function (x) { var dt = new Date(x.startMs+9*3600e3); return dt.getUTCFullYear()+'-'+(dt.getUTCMonth()+1) === picked; })[0] : null, lm = pm || activeMonth;
       if (lm) h += lvBlock(ch, lm, 'wolun', (pm ? '' : '선택한 날의 ') + '월운 ' + M.gzName(lm) + ' · ' + lm.termName + ' 이후', '', 'mc-lv-month');
       h += '<section class="fortune-panel"><div class="mc-nav"><button type="button" data-nav="-1" aria-label="이전 달">‹</button><h2>'+y+'년 '+m+'월 일진 캘린더</h2><button type="button" data-nav="1" aria-label="다음 달">›</button></div><div class="fc-controls"><label>보기<select id="mc-purpose"><option value="">일상 흐름</option>'+['move','wedding','contract','trip','exam'].map(function (k) { return '<option value="'+k+'"'+(purpose===k?' selected':'')+'>'+esc(M.TAEK_PURPOSE[k].label)+' 택일</option>'; }).join('')+'</select></label>';
@@ -179,16 +180,16 @@
       h += '<button type="button" id="mc-today">오늘로</button></div><div class="mc-grid" role="group" aria-label="날짜 선택">'+DOW.map(function (x) { return '<span class="mc-week">'+x+'</span>'; }).join('');
       for(var i=0;i<new Date(Date.UTC(y,m-1,1)).getUTCDay();i++) h += '<span></span>';
       days.forEach(function (x,idx) { var dd=idx+1, f=x.ev.flow, k=key(y,m,dd), pick=lookup[k], cautious=assess(x).cautious || !!(pick && pick.score < 48), recommended=!cautious && hasDate(purpose?top:tailwind,k), son=x.lunar && [9,10,19,20,29,30].indexOf(x.lunar.d)>=0;
-        h += '<button type="button" class="mc-day flow-'+fk(x)+(recommended?' favorable':'')+(cautious?' caution':'')+(dd===d?' selected':'')+(k===key(today.y,today.mo,today.d)?' is-today':'')+'" data-date="'+k+'" aria-pressed="'+(dd===d)+'" aria-label="'+m+'월 '+dd+'일 '+esc(M.gzNameK(x))+', '+esc(x.stemTG||'')+', 흐름 '+score(x)+', '+esc(f.condition.name)+(cautious?', 주의':'')+(son?', 손 없는 날':'')+'"><b>'+dd+'</b><small>'+esc(M.gzNameK(x))+'</small><span class="mc-metric"><strong>'+(pick?pick.score:score(x))+'</strong><span>'+(pick?'택일':esc(x.stemTG||''))+'</span></span><em>'+(recommended?'추천':cautious?'주의':f.overlays.defense.active?'부담 점검':f.overlays.volatility.active?'변화':esc(f.condition.name))+'</em>'+(son?'<i class="mc-son" title="손 없는 날 · 음력 '+x.lunar.d+'일" aria-label="손 없는 날">손</i>':'')+'</button>';
+        h += '<button type="button" class="mc-day flow-'+fk(x)+(recommended?' favorable':'')+(cautious?' caution':'')+(dd===d?' selected':'')+(k===key(today.y,today.mo,today.d)?' is-today':'')+'" data-date="'+k+'" aria-pressed="'+(dd===d)+'" aria-label="'+m+'월 '+dd+'일 '+esc(M.gzNameK(x))+', '+esc(x.stemTG||'')+', 흐름 '+score(x)+', '+esc(assess(x).grade.n)+(cautious&&!assess(x).cautious?', 조심':'')+(son?', 손 없는 날':'')+'"><b>'+dd+'</b><small>'+esc(M.gzNameK(x))+'</small><span class="mc-metric"><strong>'+(pick?pick.score:score(x))+'</strong><span>'+(pick?'택일':esc(x.stemTG||''))+'</span></span><em>'+(recommended?'추천':cautious?'조심':f.overlays.defense.active?'부담 점검':f.overlays.volatility.active?'변화':esc(assess(x).grade.n))+'</em>'+(son?'<i class="mc-son" title="손 없는 날 · 음력 '+x.lunar.d+'일" aria-label="손 없는 날">손</i>':'')+'</button>';
       });
-      h += '</div><p class="dsub"><span class="mc-key good">추천</span> 움직이기 좋은 날 · <span class="mc-key caution">주의</span> 확인이 필요한 날<br><span class="mc-key son">손</span> 손 없는 날(음력 9·10·19·20·29·30일) · 점: 오늘<br>붉은 날짜: 주의 기준에 해당하는 모든 날<br>테두리: 선택한 날 / 그 외 배경색: 그날 천간 십신의 묶음(비겁·식상·재성·관성·인성)<br>날짜를 누르면 아래 운 지수와 행동 안내가 함께 바뀝니다.</p>';
+      h += '</div><p class="dsub"><span class="mc-key good">추천</span> 움직이기 좋은 날 · <span class="mc-key caution">조심</span> 확인이 필요한 날<br><span class="mc-key son">손</span> 손 없는 날(음력 9·10·19·20·29·30일) · 점: 오늘<br>붉은 날짜: 조심 등급(흐름 점수 −12 이하)인 모든 날<br>테두리: 선택한 날 / 그 외 배경색: 그날 천간 십신의 묶음(비겁·식상·재성·관성·인성)<br>날짜를 누르면 아래 운 지수와 행동 안내가 함께 바뀝니다.</p>';
       if(purpose) {
         h += '<p class="dsub">'+searchY+'년 '+searchM+'월 '+(searchY===today.y && searchM===today.mo?today.d:1)+'일부터 '+range+'일간 · '+esc(M.TAEK_PURPOSE[purpose].label)+'</p>';
         h += '<div class="mc-lists">'+dateList(top,'추천 날짜','good',true)+dateList(avoid,'피하면 좋은 날','caution',true)+'</div>';
         var selected=lookup[key(y,m,d)]; if(selected) h += '<p>선택한 날의 '+esc(M.TAEK_PURPOSE[purpose].label)+' 택일 적합도: '+selected.score+' · '+esc(selected.grade)+'</p>';
         h += '<p class="dsub">택일은 목적별 적합도를 따로 계산합니다. 운 흐름 지수와 다른 점수이며 성공 확률이 아닙니다.</p>';
       }
-      else h += '<div class="mc-lists">'+dateList(tailwind,'순풍이 강한 날','good',false)+dateList(risk,'리스크 관리일','caution',false)+'</div>';
+      else h += '<div class="mc-lists">'+dateList(tailwind,'좋은 날','good',false)+dateList(risk,'조심할 날','caution',false)+'</div>';
       return h+'</section>';
     };
     C.bind = function (el) {
@@ -218,7 +219,7 @@
         var ev = d.evidence, why = '<details class="dd why" id="d-why"><summary><span><b>왜 이런 결과가 나왔나요?</b></span><i class="chev" aria-hidden="true"></i></summary><div class="ddb"><p>' + esc(ev.intro) + '</p>' +
           ev.plain.map(function (x) { return '<div class="ev"><h5>' + esc(x.title) + '</h5><p>' + esc(x.body) + '</p></div>'; }).join('') +
           '<details class="pro"><summary>전문 해석 보기</summary>' + lis(ev.pro) + '</details></div></details>';
-        var el = H.view(cal.html() + '<section class="tscore" id="selected-fortune"><h2>' + cal.title() + '</h2><p class="kick">' + +d.date.slice(5, 7) + '월 ' + +d.date.slice(8) + '일 ' + d.dow + '요일 · ' + esc(d.gz) + '日</p><div class="ring" style="--p:' + d.overallScore + '"><b>' + d.overallScore + '</b></div><div class="tflow">' + esc((d.tg || '') + (cal.selectedState && cal.selectedState.key === 'defense' ? ' · 주의' : '')) + ' · ' + esc(d.cond) + '</div><p class="sub" style="margin-top:6px">' + (nm ? esc(nm) + '님, ' : '') + esc(d.line) + '</p>' +
+        var el = H.view(cal.html() + '<section class="tscore" id="selected-fortune"><h2>' + cal.title() + '</h2><p class="kick">' + +d.date.slice(5, 7) + '월 ' + +d.date.slice(8) + '일 ' + d.dow + '요일 · ' + esc(d.gz) + '日</p><div class="ring" style="--p:' + d.overallScore + '"><b>' + d.overallScore + '</b></div><div class="tflow">' + esc((d.tg || '') + '') + ' · ' + esc(d.grade || d.cond) + '</div><p class="sub" style="margin-top:6px">' + (nm ? esc(nm) + '님, ' : '') + esc(d.line) + '</p>' +
           '<p class="dhead">“' + esc(d.headline) + '”</p>' + (d.notes.length ? '<p class="note">' + esc(d.notes.join(' ')) + '</p>' : '') + '</section>' +
           cal.dayBlock('') + '<div class="dgrid">' + cards + '</div>' +
           '<section class="dsec"><h3>이날의 핵심</h3><p>' + esc(d.summary) + '</p><p>' + esc(d.summary2) + '</p></section>' +
@@ -328,7 +329,7 @@
         '<div class="sw">' + (S.strength ? '<div><small>나의 강점</small>' + esc(S.strength) + '</div>' : '') + (jc ? '<div><small>주의할 성향</small>' + esc(jc.trait.split(', ').slice(-1)[0] || '') + '</div>' : '') + (S.tip ? '<div><small>이렇게 다뤄 보세요</small>' + esc(S.tip) + '</div>' : '') + '</div></div>';
       var el = H.view(
         '<section class="myhead"><p class="kick">MY 運命</p><h1 class="who">' + (nm ? esc(nm) + '님의 운명' : '나의 운명') + '</h1><div class="ilju"><b>' + esc(M.gzName(day)) + '</b><span>' + esc(M.gzNameK(day)) + '일주</span></div></section>' +
-        '<a class="todaycard" href="#/today" data-track="fortune_content_click" data-p="today_card"><div class="ring" style="--p:' + t.score + '"><b>' + t.score + '</b></div><div><p class="lb">오늘의 흐름 · ' + esc(t.tg || '') + '</p><h3>' + esc(t.cond) + '의 날</h3><p>' + esc(t.line) + '</p></div></a>' +
+        '<a class="todaycard" href="#/today" data-track="fortune_content_click" data-p="today_card"><div class="ring" style="--p:' + t.score + '"><b>' + t.score + '</b></div><div><p class="lb">오늘의 흐름 · ' + esc(t.tg || '') + '</p><h3>' + esc(t.gradeDay || t.cond + '의 날') + '</h3><p>' + esc(t.line) + '</p></div></a>' +
         '<section class="grp"><h2>오늘의 나</h2><div class="tiles">' +
         tile('월운 · 일진 캘린더', '흐름을 보고 날짜 고르기', '#/today', 'today') + tile('재물운', '오늘의 돈 흐름', '#/today?f=money', 'today_money') + tile('일·사업운', '오늘의 일 흐름', '#/today?f=work', 'today_work') + tile('연애운', '오늘의 인연 흐름', '#/today?f=love', 'today_love') + tile('컨디션', '몸과 마음의 균형', '#/today?f=health', 'today_health') + tile('오늘의 행동 가이드', '오늘 하면 좋은 일', '#/today?f=action', 'today_action') + '</div></section>' +
         '<section class="grp"><h2>나라는 사람</h2><div class="tiles">' +

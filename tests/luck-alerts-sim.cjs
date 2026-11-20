@@ -1,11 +1,11 @@
 // 뚜렷한 신호 자동 알림(luck-alerts.js) 검증 — node tests/luck-alerts-sim.cjs [사주 수=80]
-//  · 드물게: 그 사람 일진 분포 상위·하위 2%이면서 신호등 최고·부담일 때만 → 분야별로 날짜의 5% 이하만 신호
+//  · 드물게: 그 사람 일진 분포 상위·하위 2%이면서 지표가 분포 끝(상위·하위 10%, luck-grade.js extreme)일 때만 → 분야별로 날짜의 5% 이하만 신호
 //  · 점수는 엔진 evaluateDomainLuck 그대로 · 횡재수는 좋은 신호만, 손재수는 주의 신호만 · 최대 개수 지킴 · 같은 분야 한 번
 //  · 같은 날이라도 사람마다 다름 · 금지 표현 없음 · 엔진 결과 불변 · 화면·스위치 연결
 const fs = require('fs'), path = require('path'), vm = require('vm'), assert = require('assert/strict');
 const root = path.join(__dirname, '..'), N = +process.argv[2] || 80, J = JSON.stringify;
 const ctx = { console }; ctx.window = ctx; vm.createContext(ctx);
-for (const f of ['engine.js', 'report/hub/timeline-graph.js', 'luck-alerts.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
+for (const f of ['engine.js', 'luck-grade.js', 'report/hub/timeline-graph.js', 'luck-alerts.js']) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
 const M = ctx.Manse, A = ctx.MantraLuckAlerts, TG = ctx.MantraTLGraph;
 const BAN = /반드시|무조건|100% (확실|보장)|틀림없|확정|대박|대흉|망한다|undefined|NaN/;
 const T = Date.UTC(2026, 10, 18, 3);
@@ -27,7 +27,9 @@ for (let i = 0; i < N; i++) {
     // 점수는 엔진 값 그대로
     if (a.level === 'ilun') { const d = new Date(a.ms + 9 * 3600e3), x = M.ilun(ch, d.getUTCFullYear(), d.getUTCMonth() + 1).filter(q => q.date[2] === d.getUTCDate())[0], r = M.evaluateDomainLuck(ch, x, 'ilun', {}); assert.equal(a.score, a.key === 'windfallLoss' ? r.windfall.loss.score : r[a.key].score, '엔진 점수 그대로'); }
     // 신호등 단계도 맞아야 함
-    const k = TG.sigMetric(a.key, a.score).k; assert.ok(a.side === 'good' ? k === 'best' : k === 'bad', '신호등 최고·부담일 때만 ' + a.key + ' ' + a.score + ' ' + k);
+    // 분포 끝(상위·하위 10%)일 때만, 등급은 3단계의 양 끝(좋음·조심)
+    const LG = ctx.MantraLuckGrade, e = LG.extreme(a.key, a.score), k = TG.sigMetric(a.key, a.score).k, good = a.key === 'windfallLoss' ? false : a.side === 'good';
+    assert.ok(good ? e === 'top' && k === 'good' : e === 'bottom' && k === 'care', '분포 끝·등급 양 끝일 때만 ' + a.key + ' ' + a.score + ' ' + e + ' ' + k);
   }
   for (const s of [tl, ms]) assert.equal(new Set(s.map(a => a.key)).size, s.length, '같은 분야 한 번');
   // 드물기: 그 사람 1년치 일진 중 신호로 판정되는 비율

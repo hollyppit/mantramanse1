@@ -1,6 +1,6 @@
 /* 운명의 타임라인 그래프 계산(2026-11-12) — 만세력 "운세 흐름" 탭의 그래프 지표·신호등 단계·인생 90년·올해 요약을 타임라인에 옮긴 것.
    · 표시 전용: 점수는 모두 엔진(engine.js)의 값(ev.fitScore, evaluateDomainLuck, elementFlow, luckStructures, getSamjae)을 그대로 읽는다.
-   · 신호등 단계 기준(SIG_CUTS)은 만세력 index.html 의 SIG_CUTS 와 같아야 한다(tests/timeline-graph-sim.cjs 가 같은지 검사).
+   · 신호 등급(좋음·무난·조심)과 구간(SIG_CUTS)은 /luck-grade.js 공용 기준을 쓴다(만세력 index.html 과 같은 모듈).
    · 브라우저·Node 공용: window.MantraTLGraph / module.exports */
 (function (G) {
   'use strict';
@@ -19,24 +19,14 @@
     accident: '사고수는 변화·충돌·부담 신호를 수치화한 참고 지표예요. 실제 사고 확률이 아니며, 낮을수록 좋아요.',
     sub: '세부 지수는 명리 모델로 계산한 참고 지표이며 합격·결혼·수익 같은 결과를 예측하지 않아요.'
   };
-  // 신호등 단계(어두운 화면용 색). 색만으로 뜻을 전하지 않도록 단계 글자를 항상 같이 쓴다.
-  var SIG = [ // 2026-11-16: 신호등 색을 더 선명하게(원색 계열)
-    { k: 'best', n: '최고', c: '#1FD16A', t: '#06210f' },
-    { k: 'good', n: '좋음', c: '#8BE6A9', t: '#06210f' },
-    { k: 'ok', n: '무난', c: '#B3BDCF', t: '#10131a' },
-    { k: 'warn', n: '주의', c: '#FFAE2E', t: '#2b1a00' },
-    { k: 'bad', n: '부담', c: '#FF5A47', t: '#2a0905' }];
-  var SIG_CUTS = {"love":[45,49,58,66],"wealth":[39,44,51,56],"health":[56,63,73,78],"accident":[16,23,37,50],"job":[45,50,57,63],"move":[47,51,59,67],"career":[41,49,60,66],"business":[44,50,58,64],"child":[42,46,58,67],"marriage":[39,47,62,72],"noble":[40,49,60,68],"study":[43,49,58,65],"windfall":[35,41,52,64],"windfallLoss":[17,24,39,54],"estate":[45,51,60,66],"social":[45,51,58,63],"family":[44,49,59,66]};
-  var COND = { tailwind: 18, caution: -12, burden: -35 };
-  function cond(M) { return (M && M.LUCK_CFG && M.LUCK_CFG.condition) || COND; }
-  // 전체 흐름(엔진 흐름 점수 −100~100): 엔진 상태 기준 그대로, +30 이상만 "최고"
-  function sigFlow(M, fit) { var C = cond(M); return fit >= 30 ? SIG[0] : fit >= C.tailwind ? SIG[1] : fit > C.caution ? SIG[2] : fit > C.burden ? SIG[3] : SIG[4]; }
-  // 분야 지표(0~100): 이 사주의 평소 수준 대비(하위 10·30%, 상위 70·90% 지점). 사고수·손실은 낮을수록 좋아 거꾸로 읽는다.
-  function sigMetric(key, v) {
-    var c = SIG_CUTS[key]; if (!c) return SIG[2];
-    var inv = key === 'accident' || key === 'windfallLoss', x = inv ? -v : v, q = inv ? c.slice().reverse().map(function (z) { return -z; }) : c;
-    return x >= q[3] ? SIG[0] : x >= q[2] ? SIG[1] : x > q[1] ? SIG[2] : x > q[0] ? SIG[3] : SIG[4];
-  }
+  // 신호 등급(2026-11-20 3단계: 좋음·무난·조심) — 판정·구간은 /luck-grade.js(MantraLuckGrade) 한 곳에서 온다. 여기서는 어두운 화면 색만 입힌다.
+  var LG = G.MantraLuckGrade || (typeof require === 'function' ? require('../../luck-grade.js') : null);
+  var SIG = LG.GRADES.map(function (g) { return { i: g.i, k: g.k, n: g.n, c: LG.COLORS[g.k].dark, t: LG.COLORS[g.k].td }; });
+  var SIG_CUTS = LG.SIG_CUTS;
+  // 전체 흐름(엔진 흐름 점수 −100~100): 엔진 상태 기준 그대로(+18 이상 좋음 · −12 이하 조심)
+  function sigFlow(M, fit) { return SIG[LG.flow(fit, M).i]; }
+  // 분야 지표(0~100): 이 사주의 평소 수준 대비(상위 30% 좋음 · 하위 30% 조심). 사고수·손실은 낮을수록 좋아 거꾸로 읽는다.
+  function sigMetric(key, v) { return SIG[LG.metric(key, v).i]; }
   var pct = function (fit) { return Math.max(0, Math.min(100, Math.round((fit + 100) / 2))); };
   // 엔진 컨텍스트(만세력과 같은 기준 시각): 세운 = 그 해 가운데, 월운 = 그 달 시작 + 12일
   function ctxOf(x, level) { return level === 'seun' ? { ms: x.midMs } : level === 'wolun' ? { ms: x.startMs + 12 * 864e5 } : {}; }
@@ -56,13 +46,13 @@
   // 인생 90년(태어난 해부터) 연도별 값
   function life(M, ch, metric, years) {
     var y0 = ch.solar.y, y1 = Math.min(y0 + (years || 90), (M.MAX_Y || 2100) - 1);
-    return M.seunRange(ch, y0, y1).map(function (x) { var val = value(M, ch, x, 'seun', metric); return { year: x.year, age: x.age, gz: M.gzName(x), v: val ? val.v : 50, sig: val ? val.sig : SIG[2] }; });
+    return M.seunRange(ch, y0, y1).map(function (x) { var val = value(M, ch, x, 'seun', metric); return { year: x.year, age: x.age, gz: M.gzName(x), v: val ? val.v : 50, sig: val ? val.sig : SIG[1] }; });
   }
   // 앞으로 10년: 고른 지표에서 좋은 해·조심할 해(각 최대 3개)
   function tenYears(M, ch, Y, metric) {
-    var ys = M.seunRange(ch, Y, Y + 9).map(function (x) { var val = value(M, ch, x, 'seun', metric); return { year: x.year, gz: M.gzName(x), v: val ? val.v : 50, sig: val ? val.sig : SIG[2] }; });
-    var good = ys.filter(function (q) { return q.sig.k === 'best' || q.sig.k === 'good'; }).sort(function (a, b) { return metric === 'accident' ? a.v - b.v : b.v - a.v; }).slice(0, 3);
-    var bad = ys.filter(function (q) { return q.sig.k === 'warn' || q.sig.k === 'bad'; }).sort(function (a, b) { return metric === 'accident' ? b.v - a.v : a.v - b.v; }).slice(0, 3);
+    var ys = M.seunRange(ch, Y, Y + 9).map(function (x) { var val = value(M, ch, x, 'seun', metric); return { year: x.year, gz: M.gzName(x), v: val ? val.v : 50, sig: val ? val.sig : SIG[1] }; });
+    var good = ys.filter(function (q) { return q.sig.k === 'good'; }).sort(function (a, b) { return metric === 'accident' ? a.v - b.v : b.v - a.v; }).slice(0, 3);
+    var bad = ys.filter(function (q) { return q.sig.k === 'care'; }).sort(function (a, b) { return metric === 'accident' ? b.v - a.v : a.v - b.v; }).slice(0, 3);
     return { years: ys, good: good, bad: bad };
   }
   // 삼재(입춘 기준 연지). 흐름 점수에는 넣지 않는 민속 참고 신호
@@ -83,7 +73,7 @@
     try { var sy = M.yearPillarAt(now).sajuYear; se = M.seunRange(ch, sy, sy)[0]; var ws = M.wolun(ch, sy); wm = ws[0]; ws.forEach(function (m) { if (m.startMs <= now) wm = m; }); } catch (e) { }
     try { il = M.ilun(ch, Y, Mo)[D - 1]; } catch (e) { }
     // 2026-11-20: 6분류 이름 대신 십신(천간 기준) + 변화·부담 신호 + 상태
-    var lab = function (x) { try { if (!x) return ''; var o = x.ev.overlays || {}; return (x.stemTG || '') + (o.volatility && o.volatility.active ? ' + 변화' : '') + (o.defense && o.defense.active ? ' + 부담' : '') + ' · ' + x.ev.condition; } catch (e) { return ''; } };
+    var lab = function (x) { try { if (!x) return ''; var o = x.ev.overlays || {}; return (x.stemTG || '') + (o.volatility && o.volatility.active ? ' + 변화' : '') + (o.defense && o.defense.active ? ' + 부담' : '') + ' · ' + sigFlow(M, x.ev.fitScore).n; } catch (e) { return ''; } };   // 등급은 3단계(좋음·무난·조심), 엔진 상태 글자 대신
     var vol = function (x) { return !!(x && x.ev && x.ev.overlays && x.ev.overlays.volatility && x.ev.overlays.volatility.active); };
     var def = function (x) { return !!(x && x.ev && x.ev.overlays && x.ev.overlays.defense && x.ev.overlays.defense.active); };
     var line;
@@ -109,8 +99,9 @@
   var ZW_STAR = { '자미': '리더·황제의 별', '천기': '머리 좋은 기획자의 별', '태양': '베푸는 열정가의 별', '무곡': '돈과 결단의 별', '천동': '편안하고 복 많은 낙천가의 별', '염정': '열정과 원칙이 함께 있는 별', '천부': '재물을 지키는 곳간지기의 별', '태음': '섬세하고 알뜰한 달의 별', '탐랑': '욕망과 재주, 매력의 별', '거문': '말솜씨와 분석의 별', '천상': '믿음직한 2인자·조율가의 별', '천량': '돌봐 주는 어른의 별', '칠살': '도전하는 장군의 별', '파군': '부수고 새로 시작하는 개척자의 별' };
   var ZW_HW = { '록': '이 영역에서는 노력한 만큼 얻고 도와주는 사람이 생겨요.', '기': '이 영역은 서두르지 말고 한 번 더 점검하세요. 걱정이 앞서기 쉬워요.' };
   var zwTone = function (v) { return v >= 58 ? 'mt-good' : v >= 43 ? 'mt-mid' : 'mt-bad'; };   // 2026-11-16 강조 단어 좋음·나쁨 색(안개 테마)
-  var zwGrade = function (v) { return v >= 70 ? [4, '매우 강함'] : v >= 58 ? [3, '강함'] : v >= 43 ? [2, '보통'] : v >= 32 ? [1, '약함'] : [0, '매우 약함']; };
-  var ZW_COL = ['#EB6B5B', '#E0915A', '#8C93A3', '#8E7CF0', '#2FBF71'];
+  // 2026-11-20: 자미두수 그래프도 운 신호 등급처럼 3단계(강함·보통·약함 = 좋음·무난·조심 색). 기준은 강조 글자색(zwTone)과 같은 58·43점
+  var zwGrade = function (v) { return v >= 58 ? [2, '강함'] : v >= 43 ? [1, '보통'] : [0, '약함']; };
+  var ZW_COL = [LG.COLORS.care.dark, LG.COLORS.ok.dark, LG.COLORS.good.dark];
   function zwRaw(M, zw, p) {
     var mains = p.main.length ? p.main : zw.palaces[(p.b + 6) % 12].main, v = 0;
     mains.forEach(function (n) { var w = ZW_BR_W[M.zwBright(n, p.b)]; v += 2 * (w == null ? 0 : w) + 1; });

@@ -71,7 +71,7 @@
   var graphP = null;
   function loadGraph() {
     if (graphP) return graphP;
-    graphP = Promise.all([root.MantraTLGraph ? Promise.resolve() : H.load('/report/hub/timeline-graph.js?v=20261120-tg').catch(function () { }), flagsJson(), root.MantraNatal ? Promise.resolve() : H.load('/report/natal-table.js?v=20261116-natal2').catch(function () { })]).then(function (r) {
+    graphP = Promise.all([root.MantraTLGraph ? Promise.resolve() : H.load('/report/hub/timeline-graph.js?v=20261120-g3').catch(function () { }), flagsJson(), root.MantraNatal ? Promise.resolve() : H.load('/report/natal-table.js?v=20261116-natal2').catch(function () { })]).then(function (r) {
       var F = root.MANTRA_FLAGS || {}, f = r[1] || {}, lc = F.luckCycle === true || f.luckCycle === true, ef = F.elementFlow === true || f.elementFlow === true;
       // 운 분석 층(2026-11-18, 만세력 운세 흐름과 같은 계산): 외부 환경·전환·상하위(luckEnv) · 오행 겹쳐 보기(luckOverlay) · 십성 작용(tenGodRoles)
       // 시대 흐름(삼원구운·원회운세·오운육기)은 2026-11-20부터 타임라인에서 빼고 만세력 운세 흐름의 시대 흐름 카드에만 둔다(개인 인생 흐름에 집중)
@@ -154,12 +154,12 @@
         ? '<h3>' + esc(cp.hook) + '<small>' + esc(tg.label) + ' · ' + esc(tg.meaning) + '</small></h3>' + qk + '<p class="tq-copy">' + esc(cp.body) + '</p>' + (qk ? '' : '<ul class="tq-copy-l"><li><b>해 볼 것</b>' + esc(cp.do) + '</li><li><b>조심할 것</b>' + esc(cp.trap) + '</li></ul>')
         : '<h3>' + esc(tg.label) + '<small>' + esc(tg.meaning || '') + '</small></h3>' + qk;
       return '<article class="tq-card ' + KEYC(it) + (cp ? ' has-copy' : '') + '"><p class="tq-ct">' + esc(title) + '</p>' + head + '<p class="tq-rule"><b>십신</b> ' + esc(tg.line || '') + '</p>' + ov + (TG && it._ref ? domHtml(it, lvl) : fieldBars(it)) +
-        '<p class="tq-sc">흐름 점수 ' + pct(it.scores.fit) + ' · 운의 세기 ' + it.scores.intensity + ' · 변화 신호 ' + it.scores.volatility + (it.condition ? ' · 상태 ' + esc(it.condition) : '') + '</p>' + ovFig(it, lvl) + lvHtml(it, lvl, (TG && it._ref ? structHtml(it, lvl) : '') + (lvl === 'seun' && LV ? pairHtml(it.year) : '')) +
+        '<p class="tq-sc">흐름 점수 ' + pct(it.scores.fit) + ' · 운의 세기 ' + it.scores.intensity + ' · 변화 신호 ' + it.scores.volatility + (root.MantraLuckGrade && it.scores.fit != null ? ' · 등급 ' + root.MantraLuckGrade.flow(it.scores.fit).n : it.condition ? ' · 상태 ' + esc(it.condition) : '') + '</p>' + ovFig(it, lvl) + lvHtml(it, lvl, (TG && it._ref ? structHtml(it, lvl) : '') + (lvl === 'seun' && LV ? pairHtml(it.year) : '')) +
         '<div class="tq-card-acts"><button type="button" class="tq-lnk" data-ev="' + lvl + '" aria-expanded="' + open + '">' + (open ? '근거 닫기' : '자세한 근거 보기') + '</button><a class="tq-lnk" href="#/go?to=future" data-track="timeline_topic_click" data-p="detail_' + lvl + '">이 시기 상세 풀이 →</a></div>' +
         (open ? '<div class="tq-evbox">' + TL.evidenceHtml(TL.evidence(M, ch, it)) + '</div>' : '') + '</article>';
     }
     /* ── 그래프 지표(2026-11-12, 만세력 운세 흐름 탭과 같은 기준): 전체 흐름 · 연애 · 재물 · 건강 · 사고수 · 직업·가족 세부.
-          막대 높이 = 고른 지표 점수(0~100), 막대 색·위 글자 = 신호등 단계(최고·좋음·무난·주의·부담), 아래 작은 글자 = 그 시기의 성격(6분류).
+          막대 높이 = 고른 지표 점수(0~100), 막대 색·위 글자 = 신호 등급(좋음·무난·조심), 아래 작은 글자 = 그 시기의 성격(6분류).
           계산은 timeline-graph.js(엔진 값 그대로). 모듈을 못 불러오면 예전처럼 흐름 점수·십성 묶음 색으로 그린다. ── */
     var TG = root.MantraTLGraph || null;
     var metric = function () { return TG ? st.metric : 'flow'; };
@@ -196,7 +196,7 @@
         '<div class="tq-car-keys"><p><b>그래프 글자는 세 가지를 함께 보여 줘요</b></p><ul>' +
         '<li><b>어떤 기운이 들어오나</b> 십신(비견·겁재·식신·상관·편재·정재·편관·정관·편인·정인) <span>— 막대 아래 작은 글자, 그 운 천간 기준</span></li>' +
         '<li><b>변화와 부담은 얼마나</b> 변화 신호 · 부담 신호 <span>— 날씨 변화가 크거나, 조심해서 운전할 때</span></li>' +
-        '<li><b>나에게 얼마나 잘 맞나</b> 최고 · 좋음 · 무난 · 주의 · 부담 <span>— 막대 위 색 이름표</span></li></ul>' +
+        '<li><b>나에게 얼마나 잘 맞나</b> 좋음 · 무난 · 조심 <span>— 막대 위 색 이름표</span></li></ul>' +
         '<p><b>점수는 이렇게 읽어요</b></p><ul><li><b>흐름 점수</b> 지금의 자동차와 주행 환경이 얼마나 잘 맞는지(50이 보통, 높을수록 잘 맞음)</li><li><b>인연·재물·직업 점수</b> 그 분야가 이 사주의 평소 수준보다 얼마나 좋은지 — 사건이나 결과를 예측하지 않는 참고 지표예요</li></ul></div></details>';
     }
     // 인생 전체(태어난 해부터 90년) 연도별 막대 — 대운 구간은 배경 띠, 해를 누르면 그 해의 세운·월운이 열린다
@@ -371,7 +371,7 @@
     /* ── 맨 위: 오늘 · 무료 콘텐츠 (2026-11-12, 예전 홈·MY 운명 홈의 무료 콘텐츠를 여기로 모음) ── */
     function freeHtml() {
       var today = '';
-      if (!PREVIEW && H.Saju && H.Saju.todayData) { try { var t = H.Saju.todayData(ch), ph = t.tg || ''; today = '<a class="tq-today" href="#/today" data-track="fortune_content_click" data-p="today_card"><div class="ring" style="--p:' + t.score + '"><b>' + t.score + '</b></div><div><small>TODAY · 오늘의 일진 ' + esc(t.gz) + '日' + (ph ? ' · ' + esc(ph) : '') + '</small><h4>' + esc(t.cond) + '의 날</h4><p>' + esc(t.line || '') + '</p><span>일진 캘린더 열기 →</span></div></a>'; } catch (e) { } }
+      if (!PREVIEW && H.Saju && H.Saju.todayData) { try { var t = H.Saju.todayData(ch), ph = t.tg || ''; today = '<a class="tq-today" href="#/today" data-track="fortune_content_click" data-p="today_card"><div class="ring" style="--p:' + t.score + '"><b>' + t.score + '</b></div><div><small>TODAY · 오늘의 일진 ' + esc(t.gz) + '日' + (ph ? ' · ' + esc(ph) : '') + '</small><h4>' + esc(t.gradeDay || t.cond + '의 날') + '</h4><p>' + esc(t.line || '') + '</p><span>일진 캘린더 열기 →</span></div></a>'; } catch (e) { } }
       var card = function (href, p, kick, title, line, go) { return '<a class="tq-fc" href="' + href + '" data-track="fortune_content_click" data-p="' + p + '"><small>' + kick + '</small><h4>' + title + '</h4><p>' + line + '</p><span>' + go + ' →</span></a>'; };
       var chip = function (f, label, p) { return '<a class="tq-fchip" href="#/today?f=' + f + '" data-track="fortune_content_click" data-p="' + p + '">' + label + '</a>'; };
       return today +

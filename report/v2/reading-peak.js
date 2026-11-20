@@ -23,7 +23,7 @@ function reason(p,sd){
 }
 // 그래프(reading-text.js rankedTiming, '인생' 흐름)와 같은 점수·같은 '지금' 기준으로 고른다. 그래프 순위와 풀이가 어긋나지 않게.
 function scoreOf(p){var T=R.ReadingText;return T&&T.timingScore?T.timingScore(p,'life'):Math.round(Math.max(5,Math.min(99,50+Math.max(-30,Math.min(40,fit(p)))*0.9)));}
-function tierName(n){var T=R.ReadingText;return T&&T.tierOf?T.tierOf(n).n:(n>=80?'최고':n>=65?'좋음':n>=45?'무난':n>=35?'주의':'부담');}
+function tierName(n){var T=R.ReadingText;return T&&T.tierOf?T.tierOf(n).n:(n>=65?'좋음':n>=45?'무난':'조심');}
 function curIndex(rows,sd){var T=R.ReadingText,cd=sd.currentDaewoon;if(cd){var k=rows.indexOf(cd);if(k<0)k=rows.findIndex(function(p){return p.startDate&&p.startDate===cd.startDate;});if(k>=0)return k;}return T&&T.currentIndex?T.currentIndex(rows,sd.nowYear||new Date().getFullYear()):-1;}
 function ageOf(p){var a=Math.floor(p.startAge);return a+'~'+(a+10)+'세';}
 var ORD=['첫째','둘째','셋째'];

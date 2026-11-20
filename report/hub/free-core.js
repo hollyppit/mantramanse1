@@ -122,8 +122,10 @@
     if (f.overlays.volatility.active) note.push('변화 신호가 있어 일정에 여유를 두세요.');
     if (f.overlays.defense.active) note.push('부담이 커질 수 있어 컨디션을 먼저 챙기세요.');
     var mode = (DAYMODE || {})[ev.phase] || [];
+    // 화면에 보이는 등급(2026-11-20): 만세력과 같은 좋음·무난·조심(/luck-grade.js). cond(엔진 상태 순풍·보통·주의·부담)는 문장 고르기용으로만 남긴다.
+    var LG = root.MantraLuckGrade, gr = LG ? LG.flow(ev.fitScore, M) : null;
     return {
-      y: y, mo: mo, d: d, dow: DOW[k.getUTCDay()], gz: M.gzName(il), score: clamp((ev.fitScore + 100) / 2), flowKey: key, phase: ev.phase, flowLabel: M.flowLabel(ev, { overlay: 'top' }), tg: il.stemTG || '', tgBranch: il.branchTG || '', cond: cond,
+      y: y, mo: mo, d: d, dow: DOW[k.getUTCDay()], gz: M.gzName(il), score: clamp((ev.fitScore + 100) / 2), flowKey: key, phase: ev.phase, flowLabel: M.flowLabel(ev, { overlay: 'top' }), tg: il.stemTG || '', tgBranch: il.branchTG || '', cond: cond, grade: gr ? gr.n : cond, gradeDay: gr ? { good: '좋은 날', ok: '무난한 날', care: '조심할 날' }[gr.k] : cond + '의 날',
       line: (root.MantraTenGodLuck && root.MantraTenGodLuck.DAY[il.stemTG] ? '오늘은 ' + root.MantraTenGodLuck.DAY[il.stemTG] + '이에요.' : FLOW_LINE[key] || ''), notes: note, todo: mode[2] || '', meaning: mode[1] || '',
       fields: { money: { s: dm.wealth.score, b: dm.wealth.band }, work: career == null ? null : { s: career, b: M.domainBand('careerActivation', career) }, love: { s: dm.love.score, b: dm.love.band }, health: { s: dm.health.score, b: dm.health.band } },
       // 근거 표시용(엔진이 이미 계산한 값을 옮겨 담기만 함)
@@ -193,7 +195,7 @@
   FC.buildDaily = function (td, o) {
     o = o || {}; var ov = o.overrides || null, seed = (o.seed || '') + '|' + td.y + '-' + td.mo + '-' + td.d, tone = dTone(td.cond), ph = PH.indexOf(td.tg) >= 0 ? td.tg : '비견';
     var S = function (path, n) { return n ? pickN(frag(ov, path), n, seed + path.join('.')) : pick(frag(ov, path), seed + path.join('.')); };
-    var res = { date: td.y + '-' + ('0' + td.mo).slice(-2) + '-' + ('0' + td.d).slice(-2), dow: td.dow, gz: td.gz, overallScore: td.score, phase: td.phase, tg: td.tg || '', cond: td.cond, flow: td.flowLabel, flowKey: td.flowKey, tone: tone,
+    var res = { date: td.y + '-' + ('0' + td.mo).slice(-2) + '-' + ('0' + td.d).slice(-2), dow: td.dow, gz: td.gz, overallScore: td.score, phase: td.phase, tg: td.tg || '', cond: td.cond, grade: td.grade || td.cond, flow: td.flowLabel, flowKey: td.flowKey, tone: tone,
       headline: S(['head', ph, tone]), summary: S(['core', ph, tone]), summary2: S(['summary2', tone]), notes: td.notes, name: o.name || '', fields: {} };
     var order = [];
     BAND_FIELDS.forEach(function (f) {

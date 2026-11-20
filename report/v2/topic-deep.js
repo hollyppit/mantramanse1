@@ -2,7 +2,7 @@
    · 계산은 하지 않는다. 이미 있는 엔진만 읽는다:
        engine.js evaluateDomainLuck(+확장 지표 12종) · wealth-career.js(수익 유형·업무 환경·직업·약점) · compat-pair.js(두 사람 궁합)
        fengshui-engine.js(현공비성·팔택) · fengshui-data.js(업종 오행) · region-reading.js(방위오행 해석) · wish-spots.js(소원성취 명당)
-   · 등급(최고·좋음·무난·주의·부담)은 만세력 ‘운세 흐름 → 그래프 지표’와 같은 구간(SIG_CUTS, index.html)을 쓴다. 구간이 바뀌면 함께 바꾼다.
+   · 등급(좋음·무난·조심, 2026-11-20 3단계)은 /luck-grade.js 공용 기준을 그대로 쓴다(만세력 ‘운세 흐름 → 그래프 지표’와 같은 모듈).
    · 스위치 topicDeep(기본 꺼짐): 관리자 운세 환경 탭 또는 로컬·미리보기 주소 ?mantraFlags=topicDeep. 꺼져 있으면 아무것도 붙이지 않는다.
    · 사건을 예측하지 않는다. 점수는 이 앱 해석 모델의 상대 비교이며, 문장은 엔진이 만든 요약·근거를 그대로 옮긴다.
    연결: reading-feature.js 가 SPEC 의 custom:'td:*' 조각을 이 모듈의 render 로 넘긴다. 검증: node tests/topic-deep-sim.cjs */
@@ -14,14 +14,9 @@
   var EL = ['목', '화', '토', '금', '수'], EL_HJ = ['木', '火', '土', '金', '水'];
   var ROLE_RANK = { '용신': 4, '희신': 3, '한신': 2, '구신': 1, '기신': 0 };
 
-  // ── 등급: 만세력 그래프 지표와 같은 구간 ──
-  var SIG_CUTS = { love: [45, 49, 58, 66], wealth: [39, 44, 51, 56], health: [56, 63, 73, 78], accident: [16, 23, 37, 50], job: [45, 50, 57, 63], move: [47, 51, 59, 67], career: [41, 49, 60, 66], business: [44, 50, 58, 64], child: [42, 46, 58, 67], marriage: [39, 47, 62, 72], noble: [40, 49, 60, 68], study: [43, 49, 58, 65], windfall: [35, 41, 52, 64], windfallLoss: [17, 24, 39, 54], estate: [45, 51, 60, 66], social: [45, 51, 58, 63], family: [44, 49, 59, 66] };
-  var SIG = [{ k: 'best', n: '최고', c: '#2E7D4F' }, { k: 'good', n: '좋음', c: '#5BAA6F' }, { k: 'ok', n: '무난', c: '#9AA3B2' }, { k: 'warn', n: '주의', c: '#D9A035' }, { k: 'bad', n: '부담', c: '#C9503C' }];
-  function sig(key, v) {
-    var c = SIG_CUTS[key]; if (!c) return SIG[2];
-    var inv = key === 'accident' || key === 'windfallLoss', x = inv ? -v : v, q = inv ? c.slice().reverse().map(function (z) { return -z; }) : c;
-    return x >= q[3] ? SIG[0] : x >= q[2] ? SIG[1] : x > q[1] ? SIG[2] : x > q[0] ? SIG[3] : SIG[4];
-  }
+  // ── 등급: 공용 기준(/luck-grade.js MantraLuckGrade) — 밝은 화면 색 ──
+  function LG() { return root.MantraLuckGrade || (typeof require === 'function' ? require('../../luck-grade.js') : null); }
+  function sig(key, v) { var G = LG(), g = G.metric(key, v); return { k: g.k, n: g.n, c: G.color(g, 'light') }; }
   var SUB = {
     windfall: { name: '횡재운', what: '뜻밖의 수입·기회 신호와 들어온 것을 지키는 힘' }, business: { name: '사업운', what: '내 일을 벌이고 굴리는 힘' },
     job: { name: '취업운', what: '조직과 닿는 기회와 받쳐 주는 구조' }, move: { name: '이직운', what: '자리를 옮기는 신호와 옮겨도 유리한 구조' },
@@ -35,7 +30,7 @@
   // ── 스위치 ──
   var on = false, ready = false, rev = 0, waiters = [];
   function flagLocal() { try { var f = root.MANTRA_FLAGS; if (f && f.topicDeep === true) return true; var h = root.location && root.location.hostname || ''; if (/^(localhost|127\.0\.0\.1)$/.test(h) || /^[a-z0-9][a-z0-9-]*\.mantramanse\.pages\.dev$/i.test(h)) return /[?&]mantraFlags=[A-Za-z,]*\btopicDeep\b/.test(root.location.search || ''); } catch (e) { } return false; }
-  var DEPS = ['/compat-pair.js', '/fengshui-data.js', '/fengshui-engine.js', '/wealth-career-data.js', '/wealth-career-data-2.js', '/wealth-career-data-3.js', '/wealth-career-jobs.js', '/wealth-career.js', '/region-data.js', '/region-reading-data.js', '/region-reading.js', '/wish-spots.js'];
+  var DEPS = ['/luck-grade.js?v=20261120-g3', '/compat-pair.js', '/fengshui-data.js', '/fengshui-engine.js', '/wealth-career-data.js', '/wealth-career-data-2.js', '/wealth-career-data-3.js', '/wealth-career-jobs.js', '/wealth-career.js', '/region-data.js', '/region-reading-data.js', '/region-reading.js', '/wish-spots.js'];
   var spots = null;
   function loadScripts() {
     return DEPS.reduce(function (p, src) { return p.then(function () { return new Promise(function (ok) { var s = DOC.createElement('script'); s.src = src; s.async = false; s.onload = ok; s.onerror = ok; DOC.head.appendChild(s); }); }); }, Promise.resolve());
@@ -288,7 +283,7 @@
     DOC.head.appendChild(st);
   }
 
-  R.TopicDeep = { render: render, has: has, attach: attach, init: init, PLAN: PLAN, SIG_CUTS: SIG_CUTS, sig: sig, get rev() { return rev; }, get ready() { return on && ready; },
+  R.TopicDeep = { render: render, has: has, attach: attach, init: init, PLAN: PLAN, get SIG_CUTS() { return LG().SIG_CUTS; }, sig: sig, get rev() { return rev; }, get ready() { return on && ready; },
     // 테스트용: 스위치·의존 모듈을 직접 주입한다(브라우저에서는 init 이 한다)
     _force: function (v, wishSpots) { on = !!v; ready = !!v; spots = wishSpots || spots; rev++; } };
   attach();

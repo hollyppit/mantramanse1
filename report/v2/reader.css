@@ -284,7 +284,7 @@ body #wstrip button{max-width:none;text-overflow:clip}
 /* 타이밍 장: 흐름 그래프 + 순위 */
 /* 타이밍 그래프(운명의 타임라인 대운·세운·월운): 가운데 선 50점 기준 위·아래 막대, 색 = 점수 단계, 오행은 간지 옆 점 */
 .reading-timing-rank{--rt-h:190px;--rt-max:.34;--rt-ink:#e9e4d8;--rt-gold:#d5b97f}
-.reading-timing-rank .t-best{--t:#7cc497}.reading-timing-rank .t-good{--t:#4f8d6b}.reading-timing-rank .t-ok{--t:#7f8696}.reading-timing-rank .t-warn{--t:#c99447}.reading-timing-rank .t-bad{--t:#b9605a}
+.reading-timing-rank .t-good{--t:#6fbf8c}.reading-timing-rank .t-ok{--t:#7f8696}.reading-timing-rank .t-care{--t:#d27a4c}
 .reading-timing-rank .rt-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:4px 0 2px;font-size:12px;color:#cfc9bb}
 .reading-timing-rank .rt-legend span{display:inline-flex;align-items:center;gap:5px}
 .reading-timing-rank .rt-legend span i{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--t)}
@@ -304,7 +304,7 @@ body #wstrip button{max-width:none;text-overflow:clip}
 .reading-timing-rank .is-down .rt-tag{top:calc(50% + var(--v) * var(--rt-max) * 100% + 4px);flex-direction:column-reverse}
 .reading-timing-rank .rt-tag b{font-size:11px;line-height:1;font-weight:700;color:var(--rt-ink);opacity:.85}
 .reading-timing-rank .rt-tag em{font-size:10px;line-height:1.2;font-weight:700;font-style:normal;padding:2px 5px;border-radius:999px;color:var(--t);background:color-mix(in srgb,var(--t) 16%,#0b0d14);border:1px solid color-mix(in srgb,var(--t) 50%,transparent)}
-.reading-timing-rank .t-best .rt-tag em{color:#0b1a12;background:var(--t);border-color:var(--t)}
+.reading-timing-rank .t-good .rt-tag em{color:#0b1a12;background:var(--t);border-color:var(--t)}
 .reading-timing-rank .rt-lab{display:grid;justify-items:center;gap:2px;margin-top:6px;text-align:center;line-height:1.15;font-size:10px;color:#cfc9bb}
 .reading-timing-rank .rt-dw{display:inline-flex;align-items:center;gap:3px;font:800 14px/1.1 "Noto Serif KR",serif;color:var(--rt-ink);white-space:nowrap}
 .reading-timing-rank .rt-dw.rt-mo{font-size:13px}

@@ -73,10 +73,10 @@
   if(hasClash(p))out+=' 원래 사주와 부딪히는 글자가 있어 변동이 섞여요.';
   return out;}
  // 타이밍 장 그래프: 대운(10년)·세운(해마다)·월운(달마다) 세 층. 만세력 운세 흐름 그래프처럼 가운데 선(50점=보통)에서 위(힘이 실림)·아래(조심)로 막대를 그린다.
- // 막대 색 = 점수 단계(최고·좋음·무난·주의·부담), 오행은 간지 옆 작은 점으로만 보여 준다. 점수는 읽기용 지표예요(확률 아님).
+ // 막대 색 = 점수 단계(좋음·무난·조심, 2026-11-20 3단계 — 만세력 신호 등급 /luck-grade.js 와 같은 이름·색 키), 오행은 간지 옆 작은 점으로만 보여 준다. 점수는 읽기용 지표예요(확률 아님).
  var STEM_EL={갑:'목',을:'목',병:'화',정:'화',무:'토',기:'토',경:'금',신:'금',임:'수',계:'수'},TIMING_COLOR={목:'#6fae7f',화:'#c8705f',토:'#c4a65e',금:'#cfcabd',수:'#6f8fc4'};
- var TIERS=[{k:'best',n:'최고',min:80},{k:'good',n:'좋음',min:65},{k:'ok',n:'무난',min:45},{k:'warn',n:'주의',min:35},{k:'bad',n:'부담',min:-1}],SEASON_KW={opportunity:'기회',expansion:'확장',harvest:'수확',accumulation:'축적',transition:'전환',defense:'방어'};
- function tierOf(n){for(var i=0;i<TIERS.length;i++)if(n>=TIERS[i].min)return TIERS[i];return TIERS[4];}
+ var TIERS=[{k:'good',n:'좋음',min:65},{k:'ok',n:'무난',min:45},{k:'care',n:'조심',min:-1}],SEASON_KW={opportunity:'기회',expansion:'확장',harvest:'수확',accumulation:'축적',transition:'전환',defense:'방어'};
+ function tierOf(n){for(var i=0;i<TIERS.length;i++)if(n>=TIERS[i].min)return TIERS[i];return TIERS[TIERS.length-1];}
  function stemEl(gz){return STEM_EL[String(gz||'').charAt(0)]||'';}
  function colorOf(gz){return TIMING_COLOR[stemEl(gz)]||'#d5b97f';}
  function legendHtml(){return '<div class="rt-legend" aria-label="막대 색은 그 시기에 힘이 실리는 정도예요">'+TIERS.map(function(t){return '<span class="t-'+t.k+'"><i></i>'+t.n+'</span>';}).join('')+'<small>가운데 선 = 보통(50점) · 위로 길수록 힘이 실리고, 아래로 길수록 조심할 때예요 · 글자 옆 점 = 그 시기의 오행</small></div>';}

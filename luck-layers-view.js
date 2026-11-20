@@ -150,7 +150,7 @@
     (opt.extra || []).forEach(function (r) { if (r && r[1]) rows.push(r); });
     if (opt.todo) rows.push(['해 볼 것', E(opt.todo), 'good']);
     (opt.after || []).forEach(function (r) { if (r && r[1]) rows.push([r[0], r[1], r[2] || (r[0] === '조심할 것' ? 'bad' : '')]); });
-    return '<div class="lv-q"><p class="lv-qk">한눈에 보기 <span class="lv-qleg"><i class="good"></i>좋은 신호 <i class="bad"></i>주의할 신호</span></p>' + rows.map(function (r) { return '<p class="lv-qr' + (r[2] ? ' ' + r[2] : '') + '"><span class="lv-qt">' + r[0] + '</span><span>' + r[1] + '</span></p>'; }).join('') + '</div>';
+    return '<div class="lv-q"><p class="lv-qk">한눈에 보기 <span class="lv-qleg"><i class="good"></i>좋은 신호 <i class="bad"></i>조심할 신호</span></p>' + rows.map(function (r) { return '<p class="lv-qr' + (r[2] ? ' ' + r[2] : '') + '"><span class="lv-qt">' + r[0] + '</span><span>' + r[1] + '</span></p>'; }).join('') + '</div>';
   }
 
   // 한 시기의 분석 칸들(① 외부 환경 ② 내 사주 반응 ③ 상위·하위 운 ④ 영역) — 칸마다 모듈·스위치가 있을 때만

@@ -7,16 +7,17 @@ const root = path.join(__dirname, '..');
 const store = {}; globalThis.localStorage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); }, removeItem: k => { delete store[k]; } };
 globalThis.window = globalThis;
 const load = f => vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
-load('engine.js');
+load('engine.js'); load('luck-grade.js');
 ['compat-pair.js', 'fengshui-data.js', 'fengshui-engine.js', 'wealth-career-data.js', 'wealth-career-data-2.js', 'wealth-career-data-3.js', 'wealth-career-jobs.js', 'wealth-career.js', 'region-data.js', 'region-reading-data.js', 'region-reading.js', 'wish-spots.js'].forEach(load);
 ['report/v2/saju-data.js', 'report/v2/reading-feature-data-1.js', 'report/v2/reading-feature-data-2.js', 'report/v2/reading-feature.js', 'report/v2/topic-deep.js'].forEach(load);
 const M = globalThis.Manse, R = globalThis.ReportV2, TD = R.TopicDeep, RF = R.ReadingFeature;
 const fails = []; const ok = (c, m) => { if (!c && fails.length < 30) fails.push(m); };
 const BAD = /undefined|NaN|\[object|null점|function \(/;
 
-// 1 등급 구간 = 만세력 index.html SIG_CUTS
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8'), m = /const SIG_CUTS = (\{[^;]+\});/.exec(html);
-ok(m && JSON.stringify(JSON.parse(m[1])) === JSON.stringify(TD.SIG_CUTS), '등급 구간이 만세력 SIG_CUTS 와 다름');
+// 1 등급 구간·이름 = 공용 기준 luck-grade.js(만세력 index.html 도 같은 모듈을 쓴다)
+const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8'), LG = globalThis.MantraLuckGrade;
+ok(/const SIG_CUTS = LG\.SIG_CUTS;/.test(html) && JSON.stringify(TD.SIG_CUTS) === JSON.stringify(LG.SIG_CUTS), '등급 구간이 만세력·공용 기준과 다름');
+ok(['좋음', '무난', '조심'].every((n, i) => TD.sig('love', [90, 55, 10][i]).n === n), '등급 이름이 3단계(좋음·무난·조심)가 아님');
 // 2 계획한 장이 reading-feature SPEC 에 붙었고, 기존 조각은 남아 있음
 Object.keys(TD.PLAN).forEach(id => ok(RF.SPEC[id] && RF.SPEC[id].parts.some(p => /^td:/.test(p.custom || '')), 'SPEC 연결 없음 ' + id));
 ok(RF.SPEC.timeline_wealth_06.parts[0].custom === 'timing', '기존 조각(재물 큰돈 TOP3)이 앞에 그대로 있어야 함');

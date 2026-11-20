@@ -1,10 +1,11 @@
 /* 뚜렷한 신호 자동 알림(2026-11-18) — 분야별로 '이 사람 기준' 특별히 좋은 날·안 좋은 날을 찾아 상단에 띄운다. 표시 전용
  *  · 점수: 엔진 M.evaluateDomainLuck(일진·월운) 그대로. 새 점수를 만들지 않는다.
  *  · 기준선: 그 사람의 일진 점수 2년치(오늘 ±1년)·월운 10년치 분포. 사람마다 평소 수준이 달라서 같은 점수라도 뜻이 다르다.
- *  · 뚜렷한 신호 = 그 사람 분포에서 상위·하위 1%(월운은 5%) **이면서** 신호등 단계가 최고·부담(MantraTLGraph SIG_CUTS)일 때만.
+ *  · 뚜렷한 신호 = 그 사람 분포에서 상위·하위 1%(월운은 5%) **이면서** 지표가 분포 끝(상위·하위 10%, luck-grade.js extreme)일 때만.
+ *    (2026-11-20 신호 등급이 좋음·무난·조심 3단계로 바뀌어, 옛 '최고·부담' 단계 대신 같은 구간의 extreme 을 쓴다)
  *    매일 바뀌는 작은 오르내림은 알리지 않는다. 같은 분야는 가장 뚜렷한 하루만, 전체는 최대 opt.max 개.
  *  · 말투: 사건을 정하지 않는다("~할 수 있는 날", "신호가 뚜렷해요"). 금지: 반드시·무조건·확정 등.
- *  브라우저: window.MantraLuckAlerts · Node: module.exports  (먼저 engine.js, report/hub/timeline-graph.js 가 있어야 한다)
+ *  브라우저: window.MantraLuckAlerts · Node: module.exports  (먼저 engine.js, luck-grade.js 가 있어야 한다)
  */
 (function (root) {
   'use strict';
@@ -19,11 +20,11 @@
   var BAD_DO = { love: '감정이 오른 말은 하루 미뤄 보세요.', wealth: '큰 결제·투자·보증은 날을 바꿔 보세요.', career: '중요한 보고·결정은 한 번 더 확인하세요.', health: '무리한 일정은 줄이고 쉬는 시간을 먼저 넣으세요.', job: '서두른 결정보다 조건 확인을 먼저 하세요.', business: '계약서·조건을 한 번 더 확인하세요.', family: '서운한 말은 바로 하기보다 정리해서 전하세요.', child: '아이 일정·안전을 한 번 더 챙겨 보세요.', marriage: '중요한 약속은 날을 바꿔 보세요.', windfallLoss: '빌려주기·보증·충동 결제는 피하세요.' };
   var DOW = ['일', '월', '화', '수', '목', '금', '토'];
 
-  function TGm() { return root.MantraTLGraph; }
+  function LGm() { return root.MantraLuckGrade || (typeof require === 'function' ? require('./luck-grade.js') : null); }
   function scoreOf(r, key) { if (!r) return null; if (key === 'windfallLoss') return r.windfall && r.windfall.loss ? r.windfall.loss.score : null; return r[key] ? r[key].score : null; }
   function pieceOf(r, key) { return key === 'windfallLoss' ? (r.windfall && r.windfall.loss) : r[key]; }
-  var SIGFN = null;   // 만세력은 자체 sigMetric 을 넘긴다(opt.sigMetric) — 같은 SIG_CUTS
-  function sigOf(key, v) { if (SIGFN) return SIGFN(key, v).k; var T = TGm(); return T && T.sigMetric ? T.sigMetric(key, v).k : null; }
+  // 분포 끝: 'top'(상위 10%) | 'bottom'(하위 10%) | null — 손재수처럼 낮을수록 좋은 지표도 '높은 값 = top'으로 맞춘다
+  function edgeOf(key, v) { var G = LGm(), e = G ? G.extreme(key, v) : null; if (!e) return null; return G.INVERSE[key] ? (e === 'top' ? 'bottom' : 'top') : e; }
   function quant(a, f) { if (!a.length) return null; var s = a.slice().sort(function (x, y) { return x - y; }); return s[Math.max(0, Math.min(s.length - 1, Math.round(f * (s.length - 1))))]; }
   function kst(ms) { var d = new Date(ms + 9 * 3600e3); return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate(), dow: d.getUTCDay() }; }
 
@@ -50,10 +51,10 @@
   // 한 시기의 판정: good/bad/null + 강도(분포 끝을 얼마나 넘었나)
   function judge(key, v, b) {
     if (v == null || !b || b.hi == null) return null;
-    var inv = key === 'windfallLoss', sig = sigOf(key, v), side = null, over = 0;
+    var inv = key === 'windfallLoss', edge = edgeOf(key, v), side = null, over = 0;
     var top = v >= b.hi && b.hi > b.mid, bottom = v <= b.lo && b.lo < b.mid;
-    if (!inv) { if (top && sig === 'best') { side = 'good'; over = v - b.hi; } else if (bottom && sig === 'bad') { side = 'bad'; over = b.lo - v; } }
-    else if (top && sig === 'bad') { side = 'bad'; over = v - b.hi; }   // 손재수: 높을수록 나쁨
+    if (!inv) { if (top && edge === 'top') { side = 'good'; over = v - b.hi; } else if (bottom && edge === 'bottom') { side = 'bad'; over = b.lo - v; } }
+    else if (top && edge === 'top') { side = 'bad'; over = v - b.hi; }   // 손재수: 높을수록 나쁨
     if (!side || (ONE_SIDED[key] && ONE_SIDED[key] !== side)) return null;
     return { side: side, strength: Math.round((over + 1 + Math.abs(v - b.mid) / 10) * 10) / 10 };
   }
@@ -66,8 +67,7 @@
   // scan: { set:'timeline'|'manse', keys, now, days:7, max:3 } → [{ key, name, side, level, ms, when, gz, score, line, todo, why, strength }]
   function scan(M, ch, opt) {
     opt = opt || {};
-    SIGFN = opt.sigMetric || null;
-    if (!M || !ch || !M.evaluateDomainLuck || (!SIGFN && !TGm())) return [];
+    if (!M || !ch || !M.evaluateDomainLuck || !LGm()) return [];
     var now = opt.now || Date.now(), keys = opt.keys || SETS[opt.set || 'timeline'], span = opt.days || 7, max = opt.max || 3;
     var B = baseline(M, ch, now, keys), found = {};
     var put = function (a) { var cur = found[a.key]; if (!cur || a.strength > cur.strength) found[a.key] = a; };

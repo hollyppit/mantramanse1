@@ -524,7 +524,7 @@
         // 3. 일주
         '<a class="cc feat" href="#/awaken?replay=1&to=home" data-ob-ev="ilju_video_play free_content_click" data-case="s-home-ilju" data-track="fortune_content_click" data-p="ilju"><small>ILJU · 무료</small><h3>나의 일주 확인하기</h3><p>' + esc(ju) + '일주 · 타고난 기질과 강점, 주의할 점을 영상으로 만납니다.</p><span class="go">일주 보기 →</span></a>' +
         // 4. 오늘의 운세
-        '<a class="cc today" href="#/today" data-ob-ev="calendar_open free_content_click" data-case="s-home-today" data-track="fortune_content_click" data-p="today_card"><div class="ring" style="--p:' + t.score + '"><b>' + t.score + '</b></div><div><small>TODAY · 오늘의 일진</small><h3>' + esc(t.cond) + '의 날</h3><p>' + esc(t.line || '') + '</p></div></a>' +
+        '<a class="cc today" href="#/today" data-ob-ev="calendar_open free_content_click" data-case="s-home-today" data-track="fortune_content_click" data-p="today_card"><div class="ring" style="--p:' + t.score + '"><b>' + t.score + '</b></div><div><small>TODAY · 오늘의 일진</small><h3>' + esc(t.gradeDay || t.cond + '의 날') + '</h3><p>' + esc(t.line || '') + '</p></div></a>' +
         // 5. 무료 타로 (+ 일진 캘린더)
         '<a class="cc" href="#/tarot" data-ob-ev="tarot_start free_content_click" data-case="s-home-tarot" data-track="fortune_content_click" data-p="tarot"><small>FREE TAROT · 무료</small><h3>무료 타로</h3><p>마음속 질문 하나, 카드 한 장으로 가볍게 확인합니다.</p><span class="go">카드 뽑기 →</span></a>' +
         '<a class="cc" href="#/today" data-ob-ev="calendar_open free_content_click" data-case="s-home-calendar" data-track="fortune_content_click" data-p="calendar"><small>CALENDAR · 무료</small><h3>일진 캘린더</h3><p>월운 그래프와 날짜별 일진, 내 일정에 맞는 날 고르기.</p><span class="go">캘린더 열기 →</span></a>' +
@@ -536,7 +536,7 @@
         '<section class="hh-sum" aria-label="나의 명식 요약"><h2>나의 명식 요약</h2><div class="gr">' +
         '<div><small>' + tip('일간') + ' · ' + tip('일주') + '</small><b>' + esc(M.STEM_K[day.s]) + '일간 · ' + esc(ju) + '일주</b></div>' +
         '<div><small>현재 ' + tip('대운') + '</small><b>' + daeunTxt + '</b></div>' +
-        '<div><small>오늘의 ' + tip('일진') + '</small><b>' + esc(t.gz) + '日 <small>' + esc(t.cond) + '</small></b></div>' +
+        '<div><small>오늘의 ' + tip('일진') + '</small><b>' + esc(t.gz) + '日 <small>' + esc(t.grade || t.cond) + '</small></b></div>' +
         '<div><small>현재 운의 흐름</small><b>' + esc(flow) + (t.flowLabel ? ' <small>' + esc(t.flowLabel) + '</small>' : '') + '</b></div></div>' +
         '<p class="hh-line">' + (nm ? esc(nm) + '님, ' : '') + esc(t.line || '') + (jc ? '<br><span>' + esc(jc.trait) + '</span>' : '') + '</p></section>' +
         '<details class="hh-more"><summary>내 정보 · 더 보기</summary><div class="hh-acts">' +

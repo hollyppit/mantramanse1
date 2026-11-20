@@ -17,7 +17,7 @@
   --wood-on: #fff; --fire-on: #fff; --earth-on: #2A2100; --metal-on: #1D2230; --water-on: #fff;
   --d-atk: #1E9E57; --d-ext: #0E9AA7; --d-hrv: #8A5CF6; --d-acc: #2F6BFF; --d-chg: #E08A00; --d-def: #E5533D;
   --good: #1E9E57; --bad: #F0563F; --mid: #BAC1CE; --good-soft: #E3F5EA; --bad-soft: #FFEAE6;
-  --sg-best: #0B7A3A; --sg-good: #2DB36B; --sg-ok: #B5BDCB; --sg-warn: #F2A516; --sg-bad: #E5483A;   /* 운 신호등: 최고·좋음·무난·주의·부담 */
+  --sg-good: #2DB36B; --sg-ok: #B5BDCB; --sg-care: #E8622C;   /* 운 신호 등급: 좋음·무난·조심(luck-grade.js COLORS 와 같은 색) */
   --shadow: 0 1px 2px rgba(18, 21, 31, .04), 0 10px 30px -12px rgba(30, 40, 90, .12);
   --f-display: "Noto Serif KR", "Nanum Myeongjo", "Apple SD Gothic Neo", serif;
   --f-head: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
@@ -1133,6 +1133,7 @@ table.dt td.gz, table.dt td.num { white-space: nowrap; }
 <script src="ten-god-roles.js"></script>
 <script src="luck-env.js"></script>
 <script src="ten-god-luck.js"></script>
+<script src="luck-grade.js"></script>
 <script src="luck-alerts.js"></script>
 <script src="signal-colors.js"></script>
 <script src="glossary-cases.js"></script>
@@ -5211,7 +5212,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const ovStroke = o => o.defense.active ? 'stroke:var(--d-def);stroke-width:2.2' : o.volatility.active ? 'stroke:var(--d-chg);stroke-width:2.2;stroke-dasharray:4 2' : '';
   function luckTip(title, x) {
     const e = x.ev, w = e.weights, c = (k, sc) => signed(w[k] * sc), f = e.flow, o = e.overlays;
-    return `<b>${esc(title)}</b><br>십신 <b>${esc(tgLine(x))}</b>${ovWords(e)} · 흐름 적합도 <b>${signed(luckV(x))}</b> · ${esc(e.condition)}`
+    return `<b>${esc(title)}</b><br>십신 <b>${esc(tgLine(x))}</b>${ovWords(e)} · 흐름 적합도 <b>${signed(luckV(x))}</b> · ${esc(flowGrade(x).n)}`
       + `<br>주도 십성 ${e.dominantTenGodGroup} (${e.tendency})`
       + (e.unifiedScore != null ? `<br>통합 용신 ${c('unified', e.unifiedScore)} · 관계 ${c('relation', e.relationScore)} · 구조 ${c('structure', e.structureScore)} <span style="opacity:.7">(단독 비교: 억부 ${signed(e.eokbuScore)} · 조후 ${signed(e.johuScore)})</span>` : `<br>억부 영향 ${c('eokbu', e.eokbuScore)} · 조후 영향 ${c('johu', e.johuScore)} · 관계 ${c('relation', e.relationScore)} · 구조 ${c('structure', e.structureScore)}`)
       + `<br>변동성 ${o.volatility.score}(${o.volatility.band}) · 부담도 ${o.defense.score}(${o.defense.band}) · 작용 강도 ${Math.round(e.intensityScore)}`
@@ -5260,7 +5261,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const ovTag = k => `<span class="ovb ov-${k}">${OVL[k][0]}</span>`;
   const ovBtn = (k, e) => `<button type="button" class="term ovb ov-${k}" data-term="${OVL[k][2]}"${volAttr(e)}>${OVL[k][0]}</button>`;
   const ovTags = (e, btn) => ['volatility', 'defense'].filter(k => e.overlays[k].active).map(k => btn ? ovBtn(k, e) : ovTag(k)).join('');
-  const modeLegend = () => `${sigLegend(flowRule())}<div class="legend"><span>막대 높이 = 흐름 적합도 · 막대 아래 글자 = 그 운의 ${term('십성', '십신')}(천간 기준 · 누르면 지지 십신도)</span><span>${ovTag('volatility')}${ovTag('defense')} ${term('변화 신호')}·${term('부담 신호')} = 막대 테두리와 아래 글자(변·부)</span><span>배지 ${Object.keys(CONDS).map(c => `<span class="pill b-${c}">${c}</span>`).join(' ')}</span>${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))}만 따로 본 값</span>` : ''}</div>`;
+  const modeLegend = () => `${sigLegend(flowRule())}<div class="legend"><span>막대 높이 = 흐름 적합도 · 막대 아래 글자 = 그 운의 ${term('십성', '십신')}(천간 기준 · 누르면 지지 십신도)</span><span>${ovTag('volatility')}${ovTag('defense')} ${term('변화 신호')}·${term('부담 신호')} = 막대 테두리와 아래 글자(변·부)</span>${showGhost() ? `<span><i class="sw ghost"></i>흐린 막대·선 = ${term(schoolName(altSchool()))}만 따로 본 값</span>` : ''}</div>`;
   // 시진 4단계 실행 등급. 목적마다 맞는 기운(십성 묶음 번호: 0 비겁 1 식상 2 재성 3 관성 4 인성)
   const PURPOSE = { gen: ['일반', null], deal: ['계약', [3, 4]], money: ['돈', [2, 1]], create: ['창작', [1, 4]] };
   const GRADE = { '실행': ['◎', 'g-go'], '활용': ['○', 'g-use'], '주의': ['△', 'g-warn'], '회피': ['×', 'g-avoid'] };
@@ -6980,7 +6981,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <span class="lt-tg">${x.branchTG}</span>
       <span class="lt-us">${x.unseong} · ${x.sinsal12}</span>
       <span class="lt-ev">${luckChips(x)}</span>
-      <span class="lt-sc"><span class="sgchip" style="${sgVars(tileSig(x))}">${tileSig(x).n}</span>${tgTag(x)}${ovTags(x.ev, false)} ${pill(x.ev.condition)}</span>${x.year && x.ev.level === "seun" ? samjaeTag(samjaeOf(x.year)) + gyTag(x.year) : ""}
+      <span class="lt-sc"><span class="sgchip" style="${sgVars(tileSig(x))}">${tileSig(x).n}</span>${tgTag(x)}${ovTags(x.ev, false)}</span>${x.year && x.ev.level === "seun" ? samjaeTag(samjaeOf(x.year)) + gyTag(x.year) : ""}
     </button>`;
   }
   // 이 시기에 들어오는 오행과 원국과의 작용(합·충·형·신살)을 풀어 쓴다
@@ -7147,41 +7148,38 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   };
   { const T = { daeun: '10년 동안의', seun: '해당 연도의', wolun: '해당 달의', ilun: '해당 날짜의 단기적인' }; ['study', 'estate', 'social', 'family', 'windfall'].forEach(k => Object.keys(T).forEach(lv => { DOM_SCOPE[lv][k] = `${T[lv]} ${DOM_INFO[k].name} 영역 흐름`; })); }
   const DOM_LEVEL_NAME = { daeun: '대운', seun: '세운', wolun: '월운', ilun: '일진' };
-  // ───────────── 운 신호등 ─────────────
-  // 색 = 이 시기가 나에게 얼마나 유리한가: 최고(진한 초록) · 좋음(초록) · 무난(회색) · 주의(주황) · 부담(빨강).
-  // 글자 = 어떤 일이 활성화되는가(기회·확장·수확·축적). 색만으로 뜻을 전하지 않도록 단계 글자를 항상 같이 쓴다.
-  //  · 전체 흐름: 엔진의 상태 기준(순풍 ≥ +18, 주의 ≤ −12, 부담 ≤ −35)을 그대로 쓰고, +30 이상만 "최고"로 한 단계 더 나눈다
-  //  · 분야별 지표(0~100): 점수가 한쪽으로 몰려 있어 절대 점수 대신 "이 사주의 평소 수준 대비"로 나눈다(하위 10%·30%, 상위 70%·90% 지점).
-  //    기준값은 사주 수백 개 × 대운·세운·월운·일진 점수 분포에서 뽑았다. 사고수는 낮을수록 좋은 쪽이라 거꾸로 읽는다.
-  const SIG = [
-    { i: 0, k: 'best', n: '최고', c: 'var(--sg-best)', t: '#fff', soft: 34 },
-    { i: 1, k: 'good', n: '좋음', c: 'var(--sg-good)', t: '#fff', soft: 24 },
-    { i: 2, k: 'ok', n: '무난', c: 'var(--sg-ok)', t: 'var(--ink)', soft: 15 },
-    { i: 3, k: 'warn', n: '주의', c: 'var(--sg-warn)', t: '#3A2700', soft: 30 },
-    { i: 4, k: 'bad', n: '부담', c: 'var(--sg-bad)', t: '#fff', soft: 34 }];
-  const SIG_CUTS = {"love":[45,49,58,66],"wealth":[39,44,51,56],"health":[56,63,73,78],"accident":[16,23,37,50],"job":[45,50,57,63],"move":[47,51,59,67],"career":[41,49,60,66],"business":[44,50,58,64],"child":[42,46,58,67],"marriage":[39,47,62,72],"noble":[40,49,60,68],"study":[43,49,58,65],"windfall":[35,41,52,64],"windfallLoss":[17,24,39,54],"estate":[45,51,60,66],"social":[45,51,58,63],"family":[44,49,59,66]};   // 지표별 [하위10%, 하위30%, 상위30%, 상위10%] 점수
+  // ───────────── 운 신호 등급 ─────────────
+  // 색 = 이 시기가 나에게 얼마나 유리한가: 좋음(초록) · 무난(회색) · 조심(주황). 2026-11-20 사용자 결정으로 5단계 → 3단계.
+  // 글자 = 그 운의 십신. 색만으로 뜻을 전하지 않도록 등급 글자를 항상 같이 쓴다.
+  //  · 판정·구간은 luck-grade.js(MantraLuckGrade) 한 곳 — 타임라인(report/hub/timeline-graph.js)·상세풀이(topic-deep.js)와 같은 기준.
+  //  · 전체 흐름: 엔진 상태 기준(+18 이상 좋음 · −12 이하 조심) 그대로.
+  //  · 분야별 지표(0~100): "이 사주의 평소 수준 대비" 상위 30% 좋음 · 하위 30% 조심. 사고수·손실은 낮을수록 좋은 쪽이라 거꾸로 읽는다.
+  const LG = window.MantraLuckGrade;
+  const SIG = LG.GRADES.map(g => ({ i: g.i, k: g.k, n: g.n, c: `var(--sg-${g.k})`, t: g.k === 'ok' ? 'var(--ink)' : '#fff', soft: g.k === 'ok' ? 15 : g.k === 'good' ? 26 : 30 }));
+  const SIG_CUTS = LG.SIG_CUTS;   // 지표별 [하위10%, 하위30%, 상위30%, 상위10%] 점수
   const WF_ON = () => SIG_CUTS.windfall[2], LOSS_ON = () => SIG_CUTS.windfallLoss[2];   // 재물 그래프에 뜻밖의 횡재·손재를 표시하는 기준(해당 시기에만)
   const sgVars = g => `--c:${g.c};--on:${g.t}`;
   const sgSoft = g => `color-mix(in srgb, ${g.c} ${g.soft}%, var(--surface))`;
-  const sigFlow = v => { const C = M.LUCK_CFG.condition; return v >= 30 ? SIG[0] : v >= C.tailwind ? SIG[1] : v > C.caution ? SIG[2] : v > C.burden ? SIG[3] : SIG[4]; };
-  function sigMetric(key, v) {
-    const c = SIG_CUTS[key]; if (!c) return SIG[2];
-    const inv = key === 'accident' || key === 'windfallLoss', x = inv ? -v : v, q = inv ? c.slice().reverse().map(z => -z) : c;
-    return x >= q[3] ? SIG[0] : x >= q[2] ? SIG[1] : x > q[1] ? SIG[2] : x > q[0] ? SIG[3] : SIG[4];
-  }
+  const sigFlow = v => SIG[LG.flow(v, M).i];
+  const sigMetric = (key, v) => SIG[LG.metric(key, v).i];
   function domCol(key, v) { return sigMetric(key, v).c; }
   // 막대 하나·타일 하나의 신호등(현재 선택한 지표 기준)
   const tileSig = x => { if (isDomain()) { try { return sigMetric(S.metric, domOf(x, x.ev.level)[S.metric].score); } catch (e) { } } return sigFlow(x.ev && x.ev.level === 'seun' && x.combined != null ? x.combined : luckV(x)); };
-  // 그래프 배경 띠: 좋음 구간(초록)·주의 구간(주황)·부담 구간(빨강)을 옅게 깔아 어느 높이가 좋은지 바로 보이게 한다
+  // 분포 끝(흐름 +30 이상·−35 이하, 지표 상위·하위 10%)인지 — 등급 이름은 3단계 그대로, 점수 글씨만 굵게
+  // 흐름 등급(지표와 상관없이 전체 흐름 기준) — 엔진의 4단계 상태 글자(순풍·보통·주의·부담) 대신 화면에 쓰는 3단계 이름
+  const flowGrade = x => sigFlow(x.ev && x.ev.level === 'seun' && x.combined != null ? x.combined : luckV(x));
+  const gradeChip = g => `<span class="sgchip" style="${sgVars(g)}">${g.n}</span>`;
+  const sigStrong = (v, key) => !!(key ? LG.extreme(key, v) : LG.flowExtreme(v, M));
+  // 그래프 배경 띠: 좋음 구간(초록)·조심 구간(주황)을 옅게 깔아 어느 높이가 좋은지 바로 보이게 한다
   const sgZone = (x0, x1, yA, yB, g) => `<rect x="${x0}" y="${Math.min(yA, yB)}" width="${x1 - x0}" height="${Math.abs(yB - yA)}" style="fill:${g.c};opacity:.1"/>`;
-  const flowZones = (y, x0, x1, RG = 100) => { const C = M.LUCK_CFG.condition; return sgZone(x0, x1, y(RG), y(C.tailwind), SIG[1]) + sgZone(x0, x1, y(C.caution), y(C.burden), SIG[3]) + sgZone(x0, x1, y(C.burden), y(-RG), SIG[4]); };
+  const flowZones = (y, x0, x1, RG = 100) => { const C = M.LUCK_CFG.condition; return sgZone(x0, x1, y(RG), y(C.tailwind), SIG[0]) + sgZone(x0, x1, y(C.caution), y(-RG), SIG[2]); };
   function metricZones(key, y, x0, x1) {
     const c = SIG_CUTS[key]; if (!c) return '';
-    return key === 'accident' ? sgZone(x0, x1, y(0), y(c[1]), SIG[1]) + sgZone(x0, x1, y(c[2]), y(c[3]), SIG[3]) + sgZone(x0, x1, y(c[3]), y(100), SIG[4])
-      : sgZone(x0, x1, y(100), y(c[2]), SIG[1]) + sgZone(x0, x1, y(c[1]), y(c[0]), SIG[3]) + sgZone(x0, x1, y(c[0]), y(0), SIG[4]);
+    return key === 'accident' ? sgZone(x0, x1, y(0), y(c[1]), SIG[0]) + sgZone(x0, x1, y(c[2]), y(100), SIG[2])
+      : sgZone(x0, x1, y(100), y(c[2]), SIG[0]) + sgZone(x0, x1, y(c[1]), y(0), SIG[2]);
   }
   const sigLegend = rule => `<div class="sgleg">${SIG.map(g => `<span class="sgchip" style="${sgVars(g)}">${g.n}</span>`).join('')}<span>${rule}</span></div>`;
-  const flowRule = () => { const C = M.LUCK_CFG.condition; return `색 = 이 시기가 나에게 얼마나 유리한가 (흐름 점수 +${C.tailwind} 이상 좋음 · ${C.caution} 이하 주의 · ${C.burden} 이하 부담)`; };
+  const flowRule = () => `색 = 이 시기가 나에게 얼마나 유리한가 (${LG.flowRule(M)})`;
   const metricRule = k => `색 = 이 사주의 평소 수준보다 얼마나 좋은가${k === 'accident' ? ' (사고수는 낮을수록 좋음)' : ''}`;
   const domLabel = (key, r) => key === 'health' ? `건강 균형 ${r.score}` : `${DOM_INFO[key].name} ${r.score}`;
   const domCtx = (x, kind) => kind === 'seun' ? { ms: x.midMs } : kind === 'wolun' ? { ms: x.startMs + 12 * 864e5 } : kind === 'ilun' ? { ms: Date.UTC(x.date[0], x.date[1] - 1, x.date[2], 3) } : {};
@@ -7242,12 +7240,12 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     return `<section class="card"><div class="card-h"><h2>그래프 지표</h2><span class="note">아래 대운·연도·월운 그래프와 일진 달력에 적용됩니다</span></div>
       <div class="cp-filters" role="group" aria-label="그래프 지표">${METRICS.map(([k, l]) => `<button type="button" class="opt" data-act="metric:${k}" aria-pressed="${m === k}">${l}</button>`).join('')}</div>
       <div class="cp-filters" role="group" aria-label="직업·가족 세부 지표" style="margin-top:6px">${METRICS_SUB.map(([k, l]) => `<button type="button" class="opt" data-act="metric:${k}" aria-pressed="${m === k}">${l}운</button>`).join('')}</div>
-      <p class="small" style="color:var(--ink-2)">${m === 'flow' ? '전체 흐름: 원국의 불균형을 들어오는 운이 보완하는지 심화하는지를 나타내는 −100~+100의 상대 지표입니다. 막대 색은 좋고 나쁨(최고·좋음·무난·주의·부담)이고, 막대 아래 글자는 활성화되는 일입니다.' : `<b>${info.full}</b> — ${info.sub}. 0~100 눈금이며 ${m === 'accident' ? '높을수록 주의 신호가 많이 겹쳤다는 뜻입니다.' : '높을수록 그 지표의 값이 큽니다.'}`}</p>
+      <p class="small" style="color:var(--ink-2)">${m === 'flow' ? '전체 흐름: 원국의 불균형을 들어오는 운이 보완하는지 심화하는지를 나타내는 −100~+100의 상대 지표입니다. 막대 색은 좋고 나쁨(좋음·무난·조심)이고, 막대 아래 글자는 활성화되는 일입니다.' : `<b>${info.full}</b> — ${info.sub}. 0~100 눈금이며 ${m === 'accident' ? '높을수록 주의 신호가 많이 겹쳤다는 뜻입니다.' : '높을수록 그 지표의 값이 큽니다.'}`}</p>
       ${m === 'health' || m === 'accident' ? `<p class="cp-disc">${info.note}</p>` : m !== 'flow' ? `<p class="small muted">${info.note}</p>` : ''}
       ${m === 'wealth' ? wealthLossLine() : ''}
     </section>`;
   }
-  const chartLegendInner = () => !isDomain() ? modeLegend() : `${sigLegend(metricRule(S.metric))}<div class="legend"><span>막대 높이 = ${DOM_INFO[S.metric].full} 점수(0~100) · 막대 위 글자 = 신호등 단계</span></div>${S.metric === 'wealth' ? '<div class="legend"><span>아래 "횡재"(초록 계열) = 뜻밖의 수입 신호가 좋음 이상, "손재"(주황·빨강) = 뜻밖의 재물손실 위험이 주의 이상인 시기에만 표시됩니다</span></div>' : ''}${S.metric === 'windfall' ? '<div class="legend"><span><i class="sw" style="background:var(--sg-bad)"></i>아래 막대 = 뜻밖의 재물손실 위험(길수록·빨강일수록 조심, 횡재 점수와 따로 봅니다)</span></div>' : ''}<div class="legend"><span><b>지지 아래 작은 글자</b> = 지장간(여기·중기·정기, 굵은 글자가 정기) · 점(•) = 원국 천간과 같은 글자 · 밑줄 = 원국 천간과 합. 글자에 손을 올리면 일수가 보여요</span></div>`;
+  const chartLegendInner = () => !isDomain() ? modeLegend() : `${sigLegend(metricRule(S.metric))}<div class="legend"><span>막대 높이 = ${DOM_INFO[S.metric].full} 점수(0~100) · 막대 위 글자 = 신호 등급(좋음·무난·조심)</span></div>${S.metric === 'wealth' ? '<div class="legend"><span>아래 "횡재"(초록) = 뜻밖의 수입 신호가 좋음인 시기, "손재"(주황) = 뜻밖의 재물손실 위험이 조심인 시기에만 표시됩니다</span></div>' : ''}${S.metric === 'windfall' ? '<div class="legend"><span><i class="sw" style="background:var(--sg-care)"></i>아래 막대 = 뜻밖의 재물손실 위험(길수록·주황일수록 조심, 횡재 점수와 따로 봅니다)</span></div>' : ''}<div class="legend"><span><b>지지 아래 작은 글자</b> = 지장간(여기·중기·정기, 굵은 글자가 정기) · 점(•) = 원국 천간과 같은 글자 · 밑줄 = 원국 천간과 합. 글자에 손을 올리면 일수가 보여요</span></div>`;
   const chartLegend = () => `<details class="lg-fold"${(S.lgOpen === undefined ? window.innerWidth > 640 : S.lgOpen) ? ' open' : ''}><summary>그래프 보는 법 <span class="muted small">색·막대·글자 뜻</span></summary>${chartLegendInner()}</details>`;
   document.addEventListener('toggle', ev => { if (ev.target && ev.target.classList && ev.target.classList.contains('lg-fold')) S.lgOpen = ev.target.open; }, true);
   function domTip(title, res) { const k = S.metric, r = res[k]; return `<b>${esc(title)}</b><br>${DOM_INFO[k].full} <b>${r.score}</b> · ${sigMetric(k, r.score).n}${r.tags.length ? `<br>${r.tags.join(' · ')}` : ''}${k === 'wealth' && res.windfall && res.windfall.score >= WF_ON() ? `<br>뜻밖의 횡재 신호 <b>${res.windfall.score}</b> · ${sigMetric('windfall', res.windfall.score).n}` : ''}${k === 'wealth' && res.windfall && res.windfall.loss && res.windfall.loss.score >= LOSS_ON() ? `<br>뜻밖의 손재 주의 <b>${res.windfall.loss.score}</b> · ${sigMetric('windfallLoss', res.windfall.loss.score).n}` : ''}${k === 'windfall' && r.loss ? `<br>뜻밖의 재물손실 위험 <b>${r.loss.score}</b> · ${sigMetric('windfallLoss', r.loss.score).n}${r.loss.tags.length ? ' · ' + r.loss.tags.join(' · ') : ''}` : ''}<br>${r.summary}${r.reasons.slice(0, 2).map(t => `<br>· ${esc(t)}`).join('')}`; }
@@ -7322,7 +7320,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   const VOL_CTX = {}; let volSeq = 0;
   const volAttr = e => { if (!e) return ''; const id = 'v' + (++volSeq); VOL_CTX[id] = e; return ` data-vol="${id}"`; };
   // 일진 풀이: 주 흐름·overlay와 판정 순서(세운 → 월운 → 일진 → 목적 → 시진)
-  const flowChips = x => tgTag(x) + ovTags(x.ev, false) + ' ' + pill(x.ev.condition);
+  const flowChips = x => gradeChip(flowGrade(x)) + ' ' + tgTag(x) + ovTags(x.ev, false);
   // 2026-11-16: 일진의 그래프 지표 카드(주 흐름·활성도·변동·부담)는 빼고, 판정 순서(세운 → 월운 → 일진 → 목적 → 시진)만 남긴다
   function dayJudge(x) {
     const ch = S.ch;
@@ -7353,7 +7351,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   function carCard(ch, du, se, wm, il) {
     const dm = ch.pillars.day, st = ch.strength;
     let root = ''; try { const r = M.analyzeNatalRoot(ch); root = ` · 원국 ${r.natalRootLevel}`; } catch (e) { }
-    const fl = x => x ? `${M.gzName(x)} — ${esc(tgOf(x).label + ovWords(x.ev) + ' · ' + x.ev.condition)}` : '—';
+    const fl = x => x ? `${M.gzName(x)} — ${esc(tgOf(x).label + ovWords(x.ev) + ' · ' + flowGrade(x).n)}` : '—';
     const now = (x, tail) => x ? `<span class="small cs-now">지금: <b>${fl(x)}</b>${tail || ''}</span>` : '<span class="small muted">지금: 해당 없음</span>';
     const item = (ic, name, role, desc, nowHtml) => `<div class="cs-item">${carIcon(ic)}<div><b>${name}</b> <span class="muted small">= ${role}</span><span class="small muted">${desc}</span>${nowHtml || ''}</div></div>`;
     const ar = '<div class="cs-arrow" aria-hidden="true">↓</div>';
@@ -7369,9 +7367,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const f = x => x ? x.ev.flow : null, vol = x => x && x.ev.overlays.volatility.active, def = x => x && x.ev.overlays.defense.active;
     let dyn = '';
     if (du) {
-      dyn = `당신이라는 자동차가 지금 ${M.gzName(du)} 대운이라는 도로(${esc(tgOf(du).label + ovWords(du.ev) + ' · ' + du.ev.condition)})를 달리고 있습니다.`;
-      if (se) dyn += ` 올해는 ${M.gzName(se)} 세운의 날씨(${esc(tgOf(se).label + ovWords(se.ev) + ' · ' + se.ev.condition)})가 겹쳐 있고${vol(se) ? ', 변화 신호가 있어 날씨 변화가 큰 편이며' : ''}${def(se) ? `${vol(se) ? '' : ','} 부담도가 높아 보수적으로 운전할 필요가 있고` : ''}`;
-      if (wm && il) dyn += ` 이번 달은 ${M.gzName(wm)} 월운, 오늘은 ${M.gzName(il)} 일진(${esc(tgOf(il).label + ovWords(il.ev) + ' · ' + il.ev.condition)})의 조건입니다.`;
+      dyn = `당신이라는 자동차가 지금 ${M.gzName(du)} 대운이라는 도로(${esc(tgOf(du).label + ovWords(du.ev) + ' · ' + flowGrade(du).n)})를 달리고 있습니다.`;
+      if (se) dyn += ` 올해는 ${M.gzName(se)} 세운의 날씨(${esc(tgOf(se).label + ovWords(se.ev) + ' · ' + flowGrade(se).n)})가 겹쳐 있고${vol(se) ? ', 변화 신호가 있어 날씨 변화가 큰 편이며' : ''}${def(se) ? `${vol(se) ? '' : ','} 부담도가 높아 보수적으로 운전할 필요가 있고` : ''}`;
+      if (wm && il) dyn += ` 이번 달은 ${M.gzName(wm)} 월운, 오늘은 ${M.gzName(il)} 일진(${esc(tgOf(il).label + ovWords(il.ev) + ' · ' + flowGrade(il).n)})의 조건입니다.`;
       else dyn += '.';
     } else dyn = '아직 대운이 시작되기 전이라 원국이라는 자동차만 놓여 있는 상태입니다.';
     return `<details class="card carc"${S.carOpen ? ' open' : ''}><summary>운은 어떻게 작동하나요? <span class="muted small">사주와 운의 관계</span></summary>
@@ -7757,9 +7755,9 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const ev = x.ev || {}, fs = ev.fitScore; if (fs == null) return '';
     let g = 0, b = 0; r.roles.forEach((ro, e) => { if (ro === '용신' || ro === '희신') g += r.final.delta[e]; if (ro === '기신' || ro === '구신') b += r.final.delta[e]; });
     const ov = g - b, od = Math.abs(ov) < 1.5 ? 0 : Math.sign(ov), gd = Math.abs(fs) < 8 ? 0 : Math.sign(fs);
-    const sc = `<b class="num ${fs >= 8 ? 'ib-g' : fs <= -8 ? 'ib-b' : ''}">${signed(Math.round(fs))}</b>(${esc(ev.condition || '')})`;
-    // 조사는 상태 낱말(순풍·보통·주의·부담) 받침에 맞춘다
-    const cw = String(ev.condition || ''), lc = cw.charCodeAt(cw.length - 1) - 0xAC00, bat = lc >= 0 && lc <= 11171 && lc % 28 > 0, J = (a, b) => bat ? a : b;
+    const sc = `<b class="num ${fs >= 8 ? 'ib-g' : fs <= -8 ? 'ib-b' : ''}">${signed(Math.round(fs))}</b>(${esc(sigFlow(fs).n)})`;
+    // 조사는 등급 낱말(좋음·무난·조심) 받침에 맞춘다
+    const cw = sigFlow(fs).n, lc = cw.charCodeAt(cw.length - 1) - 0xAC00, bat = lc >= 0 && lc <= 11171 && lc % 28 > 0, J = (a, b) => bat ? a : b;
     // 그래프를 그 방향으로 움직인 가장 큰 근거: 점수 항목 중 같은 부호로 가장 큰 것 + 위 운과의 연결(chain)
     const why = dir => { const ps = (ev.parts || []).filter(p => Math.sign(p.v) === dir).sort((a, b) => Math.abs(b.v) - Math.abs(a.v)); const out = ps.slice(0, 2).map(olPartName); if (ev.chain && ev.chain.v && Math.sign(ev.chain.v) === dir && ev.chain.upName) out.push(ev.chain.upName + '와의 연결'); if (ev.chain && ev.chain.upCondition && kind !== 'daeun') out.push(`위 운(${ev.chain.upName}) ${ev.chain.upCondition}`); return out.filter((t, i, a) => t && a.indexOf(t) === i).slice(0, 2).join(' · '); };
     let t;
@@ -7880,7 +7878,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     try { const LE = window.MantraLuckEnv, nb = LE.neighbors(M, S.ch, x, kind); if (nb.prev) { const t = LE.transition(M, S.ch, nb.prev, x, kind, { prevLayers: olLayers(nb.prev, kind), curLayers: olLayers(x, kind) }); if (t) { const dv = (x.ev && nb.prev.ev) ? x.ev.fitScore - nb.prev.ev.fitScore : 0, tt = t.level === 'low' ? '' : dv >= 8 ? 'good' : dv <= -8 ? 'bad' : ''; rows.push(['바뀌는 점', `<span class="chip ${tt === 'good' ? 'ib-g' : tt === 'bad' || t.level === 'high' ? 'ib-b' : ''}">${esc(t.levelK)}</span> ${esc(t.level === 'low' ? ({ daeun: '직전 대운과', seun: '작년과', wolun: '지난달과', ilun: '어제와' }[kind]) + ' 비교해 구조가 크게 바뀌지는 않아요.' : (t.signals[0] ? t.signals[0].text : t.text))}`, tt]); } } } catch (e) { }
     if (r && r.strategy && r.strategy[0]) rows.push(['해 볼 것', esc(r.strategy[0]), 'good']);
     if (!rows.length) return '';
-    return `<div class="le-q"><p class="le-qk">한눈에 보기 <span class="sg-leg"><i class="g"></i>좋은 신호 <i class="b"></i>주의할 신호</span></p>${rows.map(([k, v, t]) => `<p class="${t ? 'q-' + t : ''}"><span class="le-qt">${k}</span><span>${v}</span></p>`).join('')}<p class="note">아래 칸을 누르면 근거가 펼쳐져요.</p></div>`;
+    return `<div class="le-q"><p class="le-qk">한눈에 보기 <span class="sg-leg"><i class="g"></i>좋은 신호 <i class="b"></i>조심할 신호</span></p>${rows.map(([k, v, t]) => `<p class="${t ? 'q-' + t : ''}"><span class="le-qt">${k}</span><span>${v}</span></p>`).join('')}<p class="note">아래 칸을 누르면 근거가 펼쳐져요.</p></div>`;
   }
   document.addEventListener('click', ev => { const b = ev.target && ev.target.closest && ev.target.closest('[data-ol]'); if (!b) return; const [k, n] = b.dataset.ol.split(':'); S.olUpTo = Object.assign({}, S.olUpTo, { [k]: +n }); render(); });
   // ── 오행 사이클 (스위치 MANTRA_FLAGS.luckCycle, 기본 꺼짐): 대운 3개 = 장기 분석 구간(30년), 천간 오행이 같은 세운 2년 = 천간 오행 구간.
@@ -8003,7 +8001,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     let r; try { r = window.MantraLuckCycle.longSummary(M, ch, { ms: NOW }); } catch (e) { return ''; }
     if (!r || !r.rows.length) return '';
     const TN = { now: '지금', next: '다음', past: '지난' };
-    const rows = r.rows.map(x => `<li class="${x.tense === 'now' ? 'ls-now' : ''}"><b>${TN[x.tense]} · ${x.startAge}세 ${esc(x.gz)} 대운</b> <span class="small muted">${x.startYear}~${x.endYear}</span> ${condTag(x.condition)} <b class="num">${signed(x.fit)}</b><br><span class="small">${esc(x.stemTG)}·${esc(x.branchTG)} · 들어오는 기운: 천간 ${esc(M.EL_K[x.stemEl])}${x.stemRole ? '·' + esc(x.stemRole) : ''}, 지지 ${esc(M.EL_K[x.branchEl])}${x.branchRole ? '·' + esc(x.branchRole) : ''}</span></li>`).join('');
+    const rows = r.rows.map(x => `<li class="${x.tense === 'now' ? 'ls-now' : ''}"><b>${TN[x.tense]} · ${x.startAge}세 ${esc(x.gz)} 대운</b> <span class="small muted">${x.startYear}~${x.endYear}</span> ${gradeChip(sigFlow(x.fit))} <b class="num">${signed(x.fit)}</b><br><span class="small">${esc(x.stemTG)}·${esc(x.branchTG)} · 들어오는 기운: 천간 ${esc(M.EL_K[x.stemEl])}${x.stemRole ? '·' + esc(x.stemRole) : ''}, 지지 ${esc(M.EL_K[x.branchEl])}${x.branchRole ? '·' + esc(x.branchRole) : ''}</span></li>`).join('');
     const sh = r.shifts.map(t => `<li class="${t.dir === 'up' ? 'ib-g' : t.dir === 'down' ? 'ib-b' : ''}">${esc(t.text)}</li>`).join('');
     return `<div class="ib lc"><div class="ib-k">장기 운세 요약 · 대운 ${r.rows.length}개를 순서대로</div>
       <ol class="ib-ul ls-rows">${rows}</ol>
@@ -8054,7 +8052,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const impact = (e.theoryImpact || []).map(t => `<span class="chip ${t.v >= 5 ? 'ib-g' : t.v <= -5 ? 'ib-b' : ''}">${esc(t.text)}</span>`).join(' ') + (e.theoryImpact || []).filter(t => t.note).map(t => `<span class="small muted" style="display:block">${esc(t.note)}</span>`).join('');   // 종격 칩은 유지·파격 이유 한 줄(2026-11-16)
     // 2026-11-16: 그래프 지표 카드(주 흐름·활성도·변동·부담 상자, phaseBox·dayBox 윗부분)는 빼고, 따로 있던 '흐름 점수 근거'는 '명리학적 근거 보기' 안으로 합쳤다.
     //   근거 줄은 한 번씩만: 가중치 → 상위 운 섞는 식 → 기준별 영향 칩 → 큰 흐름 한 줄 → 항목별 점수(관계·구조·기둥 사이 합충이 모두 여기 있어 예전 요약 목록·연결 줄은 뺐다)
-    const basis = `<p><b>${term('흐름 점수')} 근거</b> · 흐름 점수 <b class="num">${signed(luckV(x))}</b> (${esc(e.condition)})</p>
+    const basis = `<p><b>${term('흐름 점수')} 근거</b> · 흐름 점수 <b class="num">${signed(luckV(x))}</b> (${esc(flowGrade(x).n)})</p>
       <p class="muted">${comps.map(([n, k, v]) => `${n} ${signed(v)} × ${Math.round(w[k] * 100)}%`).join(' · ')} — 가중치는 이 사주의 강약·기후 치우침에 따라 정해집니다.${e.unifiedScore != null ? ` 통합 용신은 원국의 통합 판단(${esc(S.ch.unified ? S.ch.unified.primaryName : '')} 기준)으로 천간 뿌리·글자별 조습·격국까지 함께 본 값입니다.` : ''}</p>
       ${mixLine(x, kind)}${extra}
       ${impact ? `<p>이 운이 각 기준에 주는 영향: ${impact}</p>` : ''}
@@ -8068,7 +8066,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
         (deep.trim() ? `<details class="ib-more le-deep"><summary>더 깊이 보기 · 오행 흐름 · 십성 구조 · 뿌리 · 들어오는 오행</summary>${deep}</details>` : '');
       const s3 = hierBox(x, kind) + olBox(x, kind);
       const s4 = domainBox(x, kind, title);
-      return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${condTag(e.condition)} <b class="num">${signed(luckV(x))}</b></span></div>
+      return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${gradeChip(flowGrade(x))} <b class="num">${signed(luckV(x))}</b></span></div>
       ${banner}
       ${quickBox(x, kind)}
       ${leSec(1, '① 외부 환경의 오행 흐름', '모두에게 같은 시간의 기운 · 좋고 나쁨 판단 없음', s1)}
@@ -8076,7 +8074,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${leSec(3, '③ 상위 운과 하위 운의 상호작용', kind === 'daeun' ? '대운은 가장 큰 층이라 원국 위에 쌓이는 모습만 봐요' : '큰 운이 배경, 작은 운이 구체화 · 위가 아래를 정하지는 않아요', s3)}
       ${leSec(4, '④ 영역별 영향', '재물·커리어·인연 등', s4)}${tail}</div>`;
     }
-    return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${condTag(e.condition)} <b class="num">${signed(luckV(x))}</b></span></div>
+    return `<div class="detail"><div class="card-h"><h3>${title}</h3><span>${gradeChip(flowGrade(x))} <b class="num">${signed(luckV(x))}</b></span></div>
       ${banner}
       ${ib}
       ${kind === 'daeun' || kind === 'seun' ? efBox(x, kind) : ''}
@@ -8135,15 +8133,15 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       return { d: i + 1, v, x, mv, sg, rank: mv ? (metric === 'accident' ? -mv.score : mv.score) : v };
     });
     const counts = SIG.map(g => scored.filter(q => q.sg === g).length);
-    const good = [...scored].sort((a, b) => b.rank - a.rank).filter(q => q.sg.i <= 1).slice(0, 3);
-    const caution = [...scored].sort((a, b) => a.rank - b.rank).filter(q => q.sg.i >= 3).slice(0, 3);
+    const good = [...scored].sort((a, b) => b.rank - a.rank).filter(q => q.sg.k === 'good').slice(0, 3);
+    const caution = [...scored].sort((a, b) => a.rank - b.rank).filter(q => q.sg.k === 'care').slice(0, 3);
     const dayBtn = q => `<button type="button" class="sgchip" style="${sgVars(q.sg)};border:0;cursor:pointer" data-pick="ilun:${q.d}">${cm}/${q.d} ${M.gzName(q.x)} ${q.sg.n} ${q.mv ? q.mv.score : signed(q.v)}</button>`;
     const cells = scored.map(({ d, v, x, mv, sg }) => {
       const tg = tgOf(x), top = x.ev.topOverlay;
       const isT = cy === TODAY[0] && cm === TODAY[1] && d === TODAY[2];
       const son = M.sonOf(x.lunar.d) === '없음';
-      const strong = sg.i === 0 || sg.i === 4;
-      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}" style="background:${sgSoft(sg)}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''} · ${sg.n} · ${tg.line}${ovWords(x.ev)} · ${x.ev.condition} · 흐름 ${signed(v)}${mv ? ' · ' + DOM_INFO[S.metric].full + ' ' + mv.score : ''}">
+      const strong = mv ? sigStrong(mv.score, metric) : sigStrong(v);
+      return `<button data-pick="ilun:${d}" class="${isT ? 'today' : ''}${sel.kind === 'ilun' && sel.d === d ? ' sel' : ''}" style="background:${sgSoft(sg)}" data-tip="${cy}.${pad(cm)}.${pad(d)} ${M.gzName(x)} · 음 ${x.lunar.m}.${x.lunar.d}${son ? ' · 손 없는 날' : ''} · ${sg.n} · ${tg.line}${ovWords(x.ev)} · 흐름 ${signed(v)}${mv ? ' · ' + DOM_INFO[S.metric].full + ' ' + mv.score : ''}">
         <span class="ctop"><span class="dn">${d}</span>${son ? '<span class="son" title="손 없는 날">손</span>' : ''}</span>
         <span class="dg">${M.gzName(x)}</span>
         <span class="sgw" style="${sgVars(sg)}">${sg.n}</span>
@@ -8242,7 +8240,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
     const se = M.seunRange(ch, curY, curY)[0];
     const wm = M.wolun(ch, curY); let curM = wm[0]; wm.forEach(m => { if (m.startMs <= NOW) curM = m; });
     const il = M.ilun(ch, TODAY[0], TODAY[1])[TODAY[2] - 1];
-    const nowCard = (k, lbl, x, sub) => `<div class="nowc" role="button" tabindex="0" data-pick="now:${k}"><span class="lbl">${lbl}</span><span class="gzb">${x ? M.gzName(x) : '—'}</span><span class="tgs">${x ? `${x.stemTG} · ${x.branchTG}` : '대운 전'}</span><span>${x && x.score ? ovTags(x.ev, false) + ' ' + pill(x.ev.condition) : ''} <span class="muted small">${sub}</span></span></div>`;
+    const nowCard = (k, lbl, x, sub) => `<div class="nowc" role="button" tabindex="0" data-pick="now:${k}"><span class="lbl">${lbl}</span><span class="gzb">${x ? M.gzName(x) : '—'}</span><span class="tgs">${x ? `${x.stemTG} · ${x.branchTG}` : '대운 전'}</span><span>${x && x.score ? gradeChip(flowGrade(x)) + ' ' + ovTags(x.ev, false) : ''} <span class="muted small">${sub}</span></span></div>`;
     const sel = S.sel || {};
     let nowDetail = '';
     if (sel.kind === 'now') {
@@ -8283,7 +8281,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       <div class="lts">${ch.daeun.list.map((x, i) => luckTile(x, `${x.startAge}세 · ${x.startYear}`, 'daeun:' + i, sel.kind === 'daeun' && sel.i === i, du === x)).join('')}</div>
       ${lcDaeunHTML(ch)}
       ${foldBox('대운의 12운성 변화 보기 · 기운이 자라고 쉬는 순서', unDaeunHTML(ch, du))}
-      ${daeunDetail || '<p class="note">막대 높이는 흐름 적합도, 색은 좋고 나쁨(최고·좋음·무난·주의·부담), 막대 아래 글자는 그 대운 천간의 십신, 변화·부담 신호는 테두리와 아래 글자(변·부)입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
+      ${daeunDetail || '<p class="note">막대 높이는 흐름 적합도, 색은 좋고 나쁨(좋음·무난·조심), 막대 아래 글자는 그 대운 천간의 십신, 변화·부담 신호는 테두리와 아래 글자(변·부)입니다. 막대나 타일을 누르면 그 10년 동안 들어오는 오행, 원국과 부딪치거나 합치는 자리, 함께 오는 신살과 점수 근거가 열립니다. 칩 색: 초록 = 합·길성, 빨강 = 충·형·흉살.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>연도별 흐름 · ${term('세운')} <span class="lvl">${LEVEL_ROLE.seun}</span></h2></div>
@@ -8292,7 +8290,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
       ${yearSummary(curY)}
       ${lcSeunHTML(sel.kind === 'seun' ? sel.Y : curY)}
       ${foldBox('환경 변화 타임라인 보기 · 직업·재물·인연·이동·학습이 부각되는 해', envTimeline('seun'))}
-      ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 좋고 나쁨(최고·좋음·무난·주의·부담), 테두리·아래 글자는 변화·부담 신호입니다. 순풍·보통·주의·부담 같은 상태는 툴팁과 타일 배지로 따로 보입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
+      ${seunDetail || '<p class="note">막대 하나가 한 해이며, 높이는 대운 40% + 세운 60%를 섞은 흐름 점수, 색은 좋고 나쁨(좋음·무난·조심), 테두리·아래 글자는 변화·부담 신호입니다. 배경 띠는 대운입니다. 해를 누르면 근거가 열리고 아래 월운이 그해로 바뀝니다.</p>'}
     </section>
     <section class="card">
       <div class="card-h"><h2>${Y}년 ${term('월운')} <span class="lvl">${LEVEL_ROLE.wolun}</span></h2><span class="seg"><button data-act="year:-1" aria-label="이전 해">‹</button><button data-act="year:1" aria-label="다음 해">›</button></span></div>
@@ -10219,7 +10217,7 @@ var GLOSSARY_DEFAULT = Object.fromEntries(Object.entries(GLOSSARY).map(([k, v]) 
   // 원국 탭: 봉법(일간 기준)·좌법(각 기둥 천간 기준)을 바꿔 가며 네 지지 카드와 자리별 해석을 본다
   function unNatalHTML(ch, mode = S.unMode || 'bong') { return US.natalHTML(M, ch, usOpt({ mode, pick: S.usPick || 'day', diff: unDiffHTML(ch) })); }
   // 운세 흐름 탭: 10개 대운의 12운성 아이콘 타임라인. 운세 판정(신호등)은 엔진 값 그대로 따로 보여 준다
-  function unDaeunHTML(ch, du) { return US.daeunHTML(M, ch, du, usOpt({ pick: S.usDu, flowLabel: x => { try { return tileSig(x).n + (x.ev && x.ev.condition ? ' · ' + x.ev.condition : ''); } catch (e) { return ''; } } })); }
+  function unDaeunHTML(ch, du) { return US.daeunHTML(M, ch, du, usOpt({ pick: S.usDu, flowLabel: x => { try { return tileSig(x).n; } catch (e) { return ''; } } })); }
   // 용어 팝업: 단계 이름이면 그 단계 설명, 봉법·좌법이면 내 사주 네 자리
   function unSheetHTML(key) {
     const ch = S.ch;
