@@ -695,7 +695,7 @@
     if (!cv || cv.show === false) { el.hidden = true; el.innerHTML = ''; return; }
     var url = media(cv.src), alt = pick(cv.alt) || '';
     // 2026-11-20 로고(MANTRA FORTUNE): 커버 이미지가 없으면 빛무리 가운데, 있으면 제목 위. cover.logo:false 로 끈다
-    var logoOn = cv.logo !== false, logo = function (cls) { return '<img class="' + cls + '" src="/report/brand/logo-640.webp" alt="만트라 포춘 MANTRA FORTUNE" width="640" height="586" decoding="async" fetchpriority="high">'; };
+    var logoOn = cv.logo !== false, logo = function (cls) { return '<img class="' + cls + '" src="/report/brand/logo-640.webp?v=20261120-fire" alt="만트라 포춘 MANTRA FORTUNE" width="640" height="640" decoding="async" fetchpriority="high">'; };
     var img = url ? '<img class="cv-img" src="' + esc(url) + '" alt="' + esc(alt) + '" decoding="async" fetchpriority="high">' : '<div class="cv-glow" role="img" aria-label="' + esc(alt) + '"></div>' + (logoOn ? logo('cv-logo') : '');
     function an(v) { return /^(float|glow|both|pulse|sway|shimmer)$/.test(v) ? ' an-' + v : ''; }
     // 등장 효과: 안쪽 span(.cv-ti)에 걸어 바깥의 지속 효과(float·glow 등)와 겹치지 않게 한다
@@ -728,7 +728,7 @@
   function meta() { // 이름·탭 제목·공유 설명
     var S1 = C.settings || {}, skip = document.getElementById('skipLink'), bn = document.getElementById('brandName');
     cover();
-    if (bn) bn.innerHTML = '<img class="brand-mark" src="/report/brand/logo-320.webp" alt="" width="320" height="293" decoding="async"><span>' + esc(S1.brandName || '').split(String.fromCharCode(10)).join('<br>') + '</span>';   // 2026-11-20 로고 표시
+    if (bn) bn.innerHTML = '<img class="brand-mark" src="/report/brand/logo-320.webp?v=20261120-fire" alt="" width="320" height="320" decoding="async"><span>' + esc(S1.brandName || '').split(String.fromCharCode(10)).join('<br>') + '</span>';   // 2026-11-20 로고 표시
     if (root.Ambient) root.Ambient.apply(S1.ambient);
     if (skip) {
       var sl = S1.skipLink || {};
