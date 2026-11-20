@@ -31,6 +31,8 @@
   var READ = { 甲: '갑', 乙: '을', 丙: '병', 丁: '정', 戊: '무', 己: '기', 庚: '경', 辛: '신', 壬: '임', 癸: '계', 子: '자', 丑: '축', 寅: '인', 卯: '묘', 辰: '진', 巳: '사', 午: '오', 未: '미', 申: '신', 酉: '유', 戌: '술', 亥: '해' };
   var jong = function (w) { var t = String(w).replace(/[)\s]+$/, ''), last = t.charAt(t.length - 1), c = (READ[last] || last).charCodeAt(0); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 !== 0; };
   var J = function (w, a, b) { return w + (jong(w) ? a : b); };
+  // 으로/로: 받침 없거나 ㄹ 받침이면 로
+  var RO = function (w) { var t = String(w).replace(/[)s]+$/, ''), last = t.charAt(t.length - 1), c = (READ[last] || last).charCodeAt(0); var j = c >= 0xAC00 && c <= 0xD7A3 ? (c - 0xAC00) % 28 : 0; return w + (j && j !== 8 ? '으로' : '로'); };
 
   function hidden(M, b) { var Jg = M.JIJANGGAN[b], L = M.hiddenLabels(b); return Jg.map(function (s, i) { return { s: s, depth: L[i] }; }); }
   function hasHidden(M, b, s) { return M.JIJANGGAN[b].indexOf(s) >= 0; }
@@ -132,7 +134,7 @@
     var lead = {
       natal: r.type === 'stem-hidden-stem'
         ? J(gzA + '(' + tA.tenGod + ')', '이', '가') + ' ' + (r.samePillar ? '바로 아래 ' : '') + J(gzB + '(' + tB.tenGod + ')', '과', '와') + ' 조용히 묶여 있어요(' + (r.samePillar ? '간지 암합' : '명암합') + '). 겉으로 드러난 마음이 속에 숨은 기운과 이어져 있는 모양이에요.'
-        : '원국 안에서 ' + pair + ' 지장간 ' + tgs + '로 조용히 묶여 있어요. 겉으로 드러나는 관계와 별개로 안쪽에서 이어지는 끈으로 볼 수 있어요.',
+        : '원국 안에서 ' + pair + ' 지장간 ' + RO(tgs) + ' 조용히 묶여 있어요. 겉으로 드러나는 관계와 별개로 안쪽에서 이어지는 끈으로 볼 수 있어요.',
       daeun: '이 대운 동안 ' + pair + ' 암합을 이뤄요(' + tgs + '). 오랜 기간에 걸쳐 기존 관계나 환경 안에서 드러나지 않던 연결이 다시 짜일 수 있는 흐름이에요.',
       seun: '이번 세운에서는 원국의 지지와 새로운 암합 관계가 형성됩니다(' + gzA + '·' + gzB + ', ' + tgs + '). 이는 기존 관계나 환경에서 외부에 드러나지 않았던 연결이 부각되는 흐름으로 해석할 수 있습니다.',
       wolun: '이번 달은 ' + pair + ' 암합을 이뤄요(' + tgs + '). 업무 관계나 개인적인 교류에서 드러나지 않는 연결이 짧게 생기기 쉬운 달이에요.',
@@ -186,10 +188,52 @@
     var rel = M.relationsAmong(A.map(function (x) { return { id: 'A:' + x.id, s: x.s, b: x.b }; }).concat(B.map(function (x) { return { id: 'B:' + x.id, s: x.s, b: x.b }; })));
     return annotate(M, recs, { chA: chA, chB: chB, rel: rel, nameA: o.nameA, nameB: o.nameB });
   }
+  // ── 운명의 타임라인용 보조 문장(2026-11-20 예외 정책) ──
+  //  · 별도 장·점수 없음. 기존 장의 '운 단계' 문단 끝에, 조건이 모두 맞을 때만 한 문장.
+  //  · lens: life(종합) = 원국 일지·월지 암합만 · wealth = 재성 연결 · career = 월지·관성 연결 · love = 일지·배우자 별 연결. 그 밖(건강·사고 등)은 없음.
+  //  · 시간 범위: 지금 대운과 올해 세운만(월운·일진은 타임라인 장에 쓰지 않음, 원국 암합은 종합만).
+  //  · said(Set): 리포트 안에서 이미 말한 암합은 다시 말하지 않는다.
+  var WEALTH_TG = ['정재', '편재'];
+  function timelineNote(M, ch, o) {
+    o = o || {};
+    var lens = o.lens, said = o.said || null, now = o.now || Date.now();
+    if (!M || !ch || !ch.pillars || ['life', 'wealth', 'career', 'love'].indexOf(lens) < 0) return null;
+    var POSW = { year: '연지', month: '월지', day: '일지', hour: '시지' };
+    var link = function (r) {
+      if (lens === 'wealth') return (r.relatedTenGods || []).some(function (t) { return WEALTH_TG.indexOf(t.tenGod) >= 0; });
+      if (lens === 'career') return !!r.careerLink;
+      if (lens === 'love') return !!r.loveLink;
+      return false;
+    };
+    var pick = null;
+    if (lens === 'life') {
+      pick = natal(M, ch).filter(function (r) { return r.isValid && r.type === 'branch-hidden-stem' && r.positions.some(function (pp) { return pp.indexOf('day') >= 0 || pp.indexOf('month') >= 0; }); })[0] || null;
+    } else {
+      var layers = [];
+      try { var du = M.daeunAt ? M.daeunAt(ch, now) : null; if (du) layers.push({ level: 'daeun', s: du.s, b: du.b, label: M.gzName(du) + ' 대운' }); } catch (e) { }
+      try { var sy = M.yearPillarAt ? M.yearPillarAt(now).sajuYear : new Date(now).getUTCFullYear(), se = M.seunRange(ch, sy, sy)[0]; if (se) layers.push({ level: 'seun', s: se.s, b: se.b, label: sy + '년 세운' }); } catch (e) { }
+      pick = luck(M, ch, layers).filter(function (r) { return r.isValid && r.type === 'branch-hidden-stem' && (r.source === 'daeun' || r.source === 'seun') && link(r); })[0] || null;
+    }
+    if (!pick) return null;
+    var key = pick.source + '|' + pick.branchA + pick.branchB + '|' + pick.combination;
+    if (said && said.has(key)) return null;
+    // 타임라인 본문은 전문 용어(재성·관성·일지·월지·십성 등)를 쓰지 않는다 — 자리 이름은 쉬운 말로
+    var PLAIN = { year: '집안 자리', month: '일터 자리', day: '배우자 자리', hour: '자녀·앞날 자리', daeun: '지금 대운에 들어온 글자', seun: '올해 들어온 글자' };
+    var pp = pick.positions[0], a = PLAIN[pp[0]] + '(' + pick.branchA + ')', b = PLAIN[pp[1]] + '(' + pick.branchB + ')';
+    var pair = J(a, '과', '와') + ' ' + b;
+    var body = {
+      life: J(pair, '이', '가') + ' 속으로 조용히 묶인 숨은 합(암합)이 있어, 겉으로 드러나는 관계와 별개로 안쪽에서 이어지는 끈이 깔려 있는 사주예요.',
+      wealth: J(pair, '이', '가') + ' 속으로 묶이는 숨은 합(암합)이 돈을 뜻하는 기운과 이어지는 때라, 겉에 잘 보이지 않는 돈의 연결(드러나지 않는 거래나 숨은 수입 경로 같은)이 생길 수 있어요. 돈 흐름의 좋고 나쁨은 앞의 판단을 따르고, 이건 보조로만 봐요.',
+      career: J(pair, '이', '가') + ' 속으로 묶이는 숨은 합(암합)이 일터 자리나 일·책임을 뜻하는 기운과 이어지는 때라, 조직 안의 드러나지 않는 역할이나 별도 협업 같은 모습으로 나타날 수 있어요. 이것만으로 이직이나 퇴사를 판단하지는 않아요.',
+      love: J(pair, '이', '가') + ' 속으로 묶이는 숨은 합(암합)이 배우자 자리나 배우자를 뜻하는 기운과 이어지는 때라, 표현되지 않은 호감이나 사적인 교감 같은 내면의 접점이 생길 수 있어요. 관계의 실제 모습은 앞의 흐름과 함께 봐요.'
+    }[lens];
+    if (said) said.add(key);
+    return { key: key, text: body, record: pick };
+  }
   function analyze(M, ch, opt) { var n = natal(M, ch), l = opt && opt.luck ? luck(M, ch, opt.luck.map(function (x) { return { level: x.level || x.id, s: x.s, b: x.b, label: x.label }; })) : []; return { version: VERSION, items: n.concat(l), cfg: CFG }; }
 
   var NOTE = '암합은 학파마다 인정 범위가 다른 보조 해석입니다. 기본값은 대표 지지 암합 5조합(子戌·丑寅·寅未·卯申·午亥)과 같은 기둥의 간지 암합이며, 이 앱의 일반 지장간 기준(午=己·丁, 亥=甲·壬)으로만 판정하고 월률분야 사령 천간은 지장간에 더하지 않습니다. 합화·길흉·점수에는 반영하지 않습니다.';
-  var api = { version: VERSION, CFG: CFG, LEVEL_K: LEVEL_K, POS_K: POS_K, NOTE: NOTE, combos: combos, natal: natal, luck: luck, compat: compat, interpret: interpret, analyze: analyze };
+  var api = { version: VERSION, CFG: CFG, LEVEL_K: LEVEL_K, POS_K: POS_K, NOTE: NOTE, combos: combos, natal: natal, luck: luck, compat: compat, interpret: interpret, timelineNote: timelineNote, analyze: analyze };
   G.MantraAmhap = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

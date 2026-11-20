@@ -190,6 +190,7 @@
   var LH = function (b) { return ((1 - b) % 12 + 12) % 12; };   // 지지 육합 짝(자축·인해·묘술·진유·사신·오미)
   function pullOf(M, ch, p) {   // 운 글자가 끌어오는 십성 묶음(천간 0.4 + 지장간 0.6)
     var d = ch.pillars.day.s, g = [0, 0, 0, 0, 0];
+    if (M.groupPull) return M.groupPull(M.stemEl(d), p).slice();   // 공통 엔진 산식(2026-11-20)
     g[grpOf(M.TG.indexOf(M.tenGod(d, p.s)))] += 0.4;
     M.HIDDEN[p.b].forEach(function (h) { g[grpOf(M.TG.indexOf(M.tenGod(d, h[0])))] += 0.6 * h[1] / 30; });
     return g;

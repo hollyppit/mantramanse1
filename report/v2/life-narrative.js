@@ -98,7 +98,8 @@
   // ───────── 대운 서사 ─────────
   function pullOf(M, ch, p) {
     var dEl = M.stemEl(ch.pillars.day.s), g = [0, 0, 0, 0, 0];
-    g[mod5(M.stemEl(p.s) - dEl)] += 0.4; M.HIDDEN[p.b].forEach(function (h) { g[mod5(M.stemEl(h[0]) - dEl)] += 0.6 * h[1] / 30; });
+    if (M.groupPull) g = M.groupPull(dEl, p).slice();   // 공통 엔진 산식(2026-11-20, 만세력과 같은 함수)
+    else { g[mod5(M.stemEl(p.s) - dEl)] += 0.4; M.HIDDEN[p.b].forEach(function (h) { g[mod5(M.stemEl(h[0]) - dEl)] += 0.6 * h[1] / 30; }); }
     var top = 0; g.forEach(function (v, i) { if (v > g[top]) top = i; }); return { g: g, top: top };
   }
   var toneOf = function (fit) { return fit >= 18 ? 'good' : fit > -12 ? 'mixed' : 'hard'; };
@@ -277,7 +278,15 @@
     }
     return out.join('\n\n');
   }
+  // 암합 예외 정책(2026-11-20): 장·점수는 그대로, '운 단계' 문단 끝에 관련성이 확인될 때만 한 문장(amhap.js timelineNote)
+  //  종합=원국 일지·월지 암합 · 재물=재성 · 커리어=월지·관성 · 인연=일지·배우자 별, 지금 대운·올해 세운만, 리포트 안에서 같은 암합은 한 번
   function luckStage(M, ch, now, lens, st, chapterId) {
+    var base = luckStage0(M, ch, now, lens, st, chapterId), A = root.MantraAmhap;
+    if (!base || !A || !A.timelineNote) return base;
+    try { st.amhapSaid = st.amhapSaid || new Set(); var n = A.timelineNote(M, ch, { lens: lens, now: now, said: st.amhapSaid }), t = n && dedupe(st, n.text); if (t) return base + '\n\n' + t; } catch (e) { }
+    return base;
+  }
+  function luckStage0(M, ch, now, lens, st, chapterId) {
     // 은퇴 이후(만 65세 이상)는 커리어 장의 운 단계를 일의 형태·역할·생활 리듬으로 읽는 문장으로 바꾼다
     var sspec = D().CH_LUCK_SENIOR && D().CH_LUCK_SENIOR[chapterId]; if (sspec && profile(M, ch, now).has('age:senior')) return chapterLuck(M, ch, now, Object.assign({ senior: true }, sspec), st);
     // 만 20세 미만은 결혼생활·자식·조직·이직·사업 장의 운 단계를 가족·학교·진로의 흐름으로 읽는다
