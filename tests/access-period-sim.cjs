@@ -62,6 +62,20 @@ const imp = p => import(url.pathToFileURL(path.join(__dirname, '..', p)).href);
   ok(/function askPay/.test(pwsrc0()) && /channelKey: chKey/.test(pwsrc0()), '구매 창: 고른 채널 키로 결제창');
   delete tenv.PORTONE_TEST_CHANNEL_KEY;
   ok((await acc({})).channelKey === 'ch-kpn', '시험 채널 키가 없으면 스위치가 켜져 있어도 운영 채널');
+  // 운영 채널 두 개(이니시스 실채널 + KPN 실채널): 손님이 고른다, 시험 채널과 같은 결제사 운영 채널은 관리자에게 숨김
+  const lenv = { ...env, PORTONE_STORE_ID: 'store-1', PORTONE_CHANNEL_KEY: 'ch-inicis-live', PORTONE_PG: 'inicis', PORTONE_API_SECRET: 'sec', ADMIN_PASSWORD: 'adminpw-long-enough' };
+  const lacc = async h => (await (await access.onRequestPost({ request: new Request('https://x.test/api/commerce/access', { method: 'POST', headers: { 'content-type': 'application/json', ...h }, body: '{"sd":null}' }), env: lenv })).json()).keys.portone;
+  ok((await lacc({})).channels.map(c => c.id).join() === 'inicis', '둘째 채널 없음: 이니시스 하나');
+  lenv.PORTONE_CHANNEL_KEY_2 = 'ch-kpn-live';
+  const two = await lacc({});
+  ok(two.channels.map(c => c.id + ':' + c.channelKey + ':' + c.buyer.length).join() === 'inicis:ch-inicis-live:3,kpn:ch-kpn-live:0' && two.channelKey === 'ch-inicis-live' && !two.testChannel, '둘째 채널(KPN 기본): 손님이 이니시스·KPN 중 고름');
+  lenv.PORTONE_TEST_CHANNEL_KEY = 'ch-inicis-test';
+  const ladm = await lacc({ authorization: 'Bearer adminpw-long-enough' });
+  ok(ladm.channels.map(c => c.channelKey).join() === 'ch-inicis-test,ch-kpn-live', '관리자: 이니시스 시험 채널 + KPN 운영 채널(이니시스 운영은 숨김)');
+  ok((await lacc({})).channels.length === 2 && !(await lacc({})).testChannel, '손님: 시험 채널 없이 운영 두 개');
+  lenv.PORTONE_PG_2 = 'inicis';
+  delete lenv.PORTONE_TEST_CHANNEL_KEY;
+  ok((await lacc({})).channels.length === 1, '둘째 채널이 첫째와 같은 결제사면 무시');
   const pwsrc = require('fs').readFileSync(path.join(__dirname, '..', 'report/v2/paywall.js'), 'utf8');
   ok(/function askPay/.test(pwsrc) && /cust.fullName = buyer.fullName/.test(pwsrc), '구매 창: 결제 직전 구매자 정보 → 결제창에만 전달');
 

@@ -84,7 +84,8 @@
       cfRow(cf.anon, '로그인(Supabase 공개 키)', '환경변수 SUPABASE_ANON_KEY') +
       '<li><b>지금 쓰는 결제사: ' + (cf.provider === 'portone' ? '포트원' : cf.provider === 'toss' ? '토스페이먼츠' : '없음(결제 준비 중)') + '</b> <span class="muted">— 포트원 값 3개가 다 있으면 포트원, 아니면 토스. 환경변수 PAY_PROVIDER=portone|toss 로 고정 가능</span></li>' +
       cfRow(cf.portoneStore, '포트원 상점 ID', '환경변수 PORTONE_STORE_ID') +
-      cfRow(cf.portoneChannel, '포트원 채널 키(결제대행사)', '환경변수 PORTONE_CHANNEL_KEY') +
+      cfRow(cf.portoneChannel, '포트원 채널 키(결제대행사)', '환경변수 PORTONE_CHANNEL_KEY + PORTONE_PG') +
+      cfRow(cf.portoneChannel2, '두 번째 결제사 채널(선택, 손님이 고름)', '환경변수 PORTONE_CHANNEL_KEY_2 + PORTONE_PG_2(기본 kpn)') +
       cfRow(cf.portoneSecret, '포트원 API 시크릿(서버 전용)', '환경변수 PORTONE_API_SECRET') +
       cfRow(cf.portoneWebhook, '포트원 웹훅 서명 확인(선택)', '환경변수 PORTONE_WEBHOOK_SECRET') +
       cfRow(cf.toss, '토스 시크릿 키(이전 결제 취소용)', '환경변수 TOSS_SECRET_KEY') +

@@ -66,7 +66,7 @@ export async function onRequestGet({ request, env }) {
   let funnel = null; if (supabaseReady(env)) { try { funnel = await funnelReport(env, 14); await purgeFunnel(env).catch(() => { }); } catch { funnel = null; } }
   // 1:1 문의(support_inquiries, 최근 50건). 답변 완료 버튼은 상태만 바꾼다(회원 마이페이지 '내 문의 내역'에 그대로 보인다)
   let inquiries = null; if (supabaseReady(env)) { try { inquiries = await sbRest(env, 'support_inquiries?select=*&order=created_at.desc&limit=50'); } catch { inquiries = null; } }
-  return json({ products, worlds, orders, ordersError, sweep, readiness, sales, funnel, inquiries, configured: { supabase: supabaseReady(env), toss: tossReady(env), tossClient: !!env.TOSS_CLIENT_KEY, anon: !!env.SUPABASE_ANON_KEY, portone: portoneReady(env), portoneStore: !!env.PORTONE_STORE_ID, portoneChannel: !!env.PORTONE_CHANNEL_KEY, portoneSecret: !!env.PORTONE_API_SECRET, portoneWebhook: !!env.PORTONE_WEBHOOK_SECRET, provider: payProvider(env) } });
+  return json({ products, worlds, orders, ordersError, sweep, readiness, sales, funnel, inquiries, configured: { supabase: supabaseReady(env), toss: tossReady(env), tossClient: !!env.TOSS_CLIENT_KEY, anon: !!env.SUPABASE_ANON_KEY, portone: portoneReady(env), portoneStore: !!env.PORTONE_STORE_ID, portoneChannel: !!env.PORTONE_CHANNEL_KEY, portoneChannel2: !!env.PORTONE_CHANNEL_KEY_2,portoneSecret: !!env.PORTONE_API_SECRET, portoneWebhook: !!env.PORTONE_WEBHOOK_SECRET, provider: payProvider(env) } });
 }
 
 export async function onRequestPut({ request, env }) {

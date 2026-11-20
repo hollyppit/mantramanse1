@@ -9,16 +9,21 @@ import { googleReady } from '../../_google-login.js';
 import { sajuKey, memberOf, worldAccess, freeChapters, ownedWorlds, loadProducts, productWorlds, payReady, payProvider, buyerFields } from '../../_commerce.js';
 import { touchLater } from '../../_activity.js';
 
-// 결제창 키(공개 값만). 시험 채널이 켜져 있으면 손님이 결제 방법을 고를 수 있게 channels 를 두 개 준다:
-//   ① 시험 채널(이니시스): '신용·체크카드' — 구매자 이름·휴대폰·이메일 필요   ② 운영 채널(KPN): '카드·간편결제'
+// 결제창 키(공개 값만). 채널이 둘 이상이면 손님이 결제 방법을 고를 수 있게 channels 를 여러 개 준다:
+//   이니시스: '신용·체크카드' — 구매자 이름·휴대폰·이메일 필요   KPN: '카드·간편결제'
 //   channelKey·buyer·testChannel 은 첫 번째(기본 선택) 채널 값으로 그대로 둔다(예전 화면 호환)
 const PG_LABEL = { inicis: { label: '신용·체크카드', sub: 'KG이니시스' }, kpn: { label: '카드·간편결제', sub: 'KPN · 카카오페이 등' } };
+// 운영 채널 두 번째(선택): PORTONE_CHANNEL_KEY_2(공개 값)·PORTONE_PG_2(기본 'kpn') — 둘째 결제사 실연동 채널이 생기면 넣는다.
+//   넣으면 손님 구매 창에서 [첫째, 둘째] 중 고른다. 첫째와 키나 결제사가 같으면 무시. 결제 확인·환불은 결제 id 로 조회라 채널과 상관없다
+const pgChannel = (pg, channelKey) => ({ id: pg, ...(PG_LABEL[pg] || { label: '카드 결제', sub: '' }), channelKey, buyer: buyerFields({ PORTONE_PG: pg }) });
 export function portoneKeys(env, testPay) {
   const mainPg = String(env.PORTONE_PG || 'kpn').trim().toLowerCase();
-  const main = { id: mainPg, ...(PG_LABEL[mainPg] || { label: '카드 결제', sub: '' }), channelKey: env.PORTONE_CHANNEL_KEY, buyer: buyerFields(env) };
-  if (!testPay || testPay.channelKey === env.PORTONE_CHANNEL_KEY) return { storeId: env.PORTONE_STORE_ID, channelKey: main.channelKey, buyer: main.buyer, channels: [main] };
+  const mains = [pgChannel(mainPg, env.PORTONE_CHANNEL_KEY)];
+  const key2 = String(env.PORTONE_CHANNEL_KEY_2 || '').trim(), pg2 = String(env.PORTONE_PG_2 || 'kpn').trim().toLowerCase();
+  if (key2 && key2 !== env.PORTONE_CHANNEL_KEY && pg2 !== mainPg) mains.push(pgChannel(pg2, key2));
+  if (!testPay || mains.some(m => m.channelKey === testPay.channelKey)) return { storeId: env.PORTONE_STORE_ID, channelKey: mains[0].channelKey, buyer: mains[0].buyer, channels: mains };
   const test = { id: testPay.pg, ...(PG_LABEL[testPay.pg] || { label: '카드 결제(시험)', sub: '' }), channelKey: testPay.channelKey, buyer: testPay.buyer, test: true };
-  const channels = testPay.pg === mainPg ? [test] : [test, main];
+  const channels = [test, ...mains.filter(m => m.id !== testPay.pg)];   // 시험 채널과 같은 결제사의 운영 채널은 숨긴다(관리자가 실결제로 착각하지 않게)
   return { storeId: env.PORTONE_STORE_ID, channelKey: test.channelKey, buyer: test.buyer, testChannel: testPay.pg, channels };
 }
 export async function onRequestPost(ctx) {
